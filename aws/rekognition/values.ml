@@ -80,7 +80,52 @@ module S3ObjectVersion =
     let of_json j = string_of_json ~kind:"S3ObjectVersion" j
     let to_json = simple_to_json to_value
   end
-module Float =
+module Percent =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:100.) >>=
+             (fun () -> check_float_min i ~min:0.));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
+module UInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for UInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Float_ =
   struct
     type nonrec t = float
     let make i = i
@@ -104,24 +149,6 @@ module Boolean =
     let of_xml xml_arg0 =
       Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
     let of_json = bool_of_json
-    let to_json = simple_to_json to_value
-  end
-module Percent =
-  struct
-    type nonrec t = float
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_float_min i ~min:100.) >>=
-             (fun () -> check_float_min i ~min:0.));
-        i
-    let of_string = Float.of_string
-    let to_value x = `Float x
-    let to_query v = to_query to_value v
-    let to_header x = Stdlib.Float.to_string x
-    let of_xml xml_arg0 =
-      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
-    let of_json j = float_of_json ~kind:"a float" j
     let to_json = simple_to_json to_value
   end
 module S3Object =
@@ -150,14 +177,14 @@ module S3Object =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "Bucket") in
       make ?version ?name ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" S3ObjectVersion.of_json in
-      let name = field_map json "Name" S3ObjectName.of_json in
-      let bucket = field_map json "Bucket" S3Bucket.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" S3ObjectVersion.of_json in
+      let name = field_map json__ "Name" S3ObjectName.of_json in
+      let bucket = field_map json__ "Bucket" S3Bucket.of_json in
       make ?version ?name ?bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides the S3 bucket name and object name. The region for the S3 bucket containing the S3 object must match the region you use for Amazon Rekognition operations. For Amazon Rekognition to process an S3 object, the user must have permission to access the S3 object. For more information, see Resource-Based Policies in the Amazon Rekognition Developer Guide."]
+       "Provides the S3 bucket name and object name. The region for the S3 bucket containing the S3 object must match the region you use for Amazon Rekognition operations. For Amazon Rekognition to process an S3 object, the user must have permission to access the S3 object. For more information, see How Amazon Rekognition works with IAM in the Amazon Rekognition Developer Guide."]
 module EmotionName =
   struct
     type nonrec t =
@@ -313,20 +340,98 @@ module LandmarkType =
     let of_json j = of_string (string_of_json ~kind:"LandmarkType" j)
     let to_json = simple_to_json to_value
   end
+module DominantColor =
+  struct
+    type nonrec t =
+      {
+      red: UInteger.t option
+        [@ocaml.doc "The Red RGB value for a dominant color."];
+      blue: UInteger.t option
+        [@ocaml.doc "The Blue RGB value for a dominant color."];
+      green: UInteger.t option
+        [@ocaml.doc "The Green RGB value for a dominant color."];
+      hexCode: String_.t option
+        [@ocaml.doc
+          "The Hex code equivalent of the RGB values for a dominant color."];
+      cSSColor: String_.t option
+        [@ocaml.doc "The CSS color name of a dominant color."];
+      simplifiedColor: String_.t option
+        [@ocaml.doc
+          "One of 12 simplified color names applied to a dominant color."];
+      pixelPercent: Percent.t option
+        [@ocaml.doc
+          "The percentage of image pixels that have a given dominant color."]}
+    let make ?red =
+      fun ?blue ->
+        fun ?green ->
+          fun ?hexCode ->
+            fun ?cSSColor ->
+              fun ?simplifiedColor ->
+                fun ?pixelPercent ->
+                  fun () ->
+                    {
+                      red;
+                      blue;
+                      green;
+                      hexCode;
+                      cSSColor;
+                      simplifiedColor;
+                      pixelPercent
+                    }
+    let to_value x =
+      structure_to_value
+        [("Red", (Option.map x.red ~f:UInteger.to_value));
+        ("Blue", (Option.map x.blue ~f:UInteger.to_value));
+        ("Green", (Option.map x.green ~f:UInteger.to_value));
+        ("HexCode", (Option.map x.hexCode ~f:String_.to_value));
+        ("CSSColor", (Option.map x.cSSColor ~f:String_.to_value));
+        ("SimplifiedColor",
+          (Option.map x.simplifiedColor ~f:String_.to_value));
+        ("PixelPercent", (Option.map x.pixelPercent ~f:Percent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pixelPercent =
+        (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "PixelPercent") in
+      let simplifiedColor =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SimplifiedColor") in
+      let cSSColor =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CSSColor") in
+      let hexCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "HexCode") in
+      let green =
+        (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "Green") in
+      let blue = (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "Blue") in
+      let red = (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "Red") in
+      make ?pixelPercent ?simplifiedColor ?cSSColor ?hexCode ?green ?blue
+        ?red ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pixelPercent = field_map json__ "PixelPercent" Percent.of_json in
+      let simplifiedColor =
+        field_map json__ "SimplifiedColor" String_.of_json in
+      let cSSColor = field_map json__ "CSSColor" String_.of_json in
+      let hexCode = field_map json__ "HexCode" String_.of_json in
+      let green = field_map json__ "Green" UInteger.of_json in
+      let blue = field_map json__ "Blue" UInteger.of_json in
+      let red = field_map json__ "Red" UInteger.of_json in
+      make ?pixelPercent ?simplifiedColor ?cSSColor ?hexCode ?green ?blue
+        ?red ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A description of the dominant colors in an image."]
 module BoundingBox =
   struct
     type nonrec t =
       {
-      width: Float.t option
+      width: Float_.t option
         [@ocaml.doc
           "Width of the bounding box as a ratio of the overall image width."];
-      height: Float.t option
+      height: Float_.t option
         [@ocaml.doc
           "Height of the bounding box as a ratio of the overall image height."];
-      left: Float.t option
+      left: Float_.t option
         [@ocaml.doc
           "Left coordinate of the bounding box as a ratio of overall image width."];
-      top: Float.t option
+      top: Float_.t option
         [@ocaml.doc
           "Top coordinate of the bounding box as a ratio of overall image height."]}
     let make ?width =
@@ -334,27 +439,28 @@ module BoundingBox =
         fun ?left -> fun ?top -> fun () -> { width; height; left; top }
     let to_value x =
       structure_to_value
-        [("Width", (Option.map x.width ~f:Float.to_value));
-        ("Height", (Option.map x.height ~f:Float.to_value));
-        ("Left", (Option.map x.left ~f:Float.to_value));
-        ("Top", (Option.map x.top ~f:Float.to_value))]
+        [("Width", (Option.map x.width ~f:Float_.to_value));
+        ("Height", (Option.map x.height ~f:Float_.to_value));
+        ("Left", (Option.map x.left ~f:Float_.to_value));
+        ("Top", (Option.map x.top ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let top = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Top") in
-      let left = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Left") in
-      let height = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Height") in
-      let width = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Width") in
+      let top = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Top") in
+      let left = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Left") in
+      let height =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Height") in
+      let width = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Width") in
       make ?top ?left ?height ?width ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let top = field_map json "Top" Float.of_json in
-      let left = field_map json "Left" Float.of_json in
-      let height = field_map json "Height" Float.of_json in
-      let width = field_map json "Width" Float.of_json in
+    let of_json json__ =
+      let top = field_map json__ "Top" Float_.of_json in
+      let left = field_map json__ "Left" Float_.of_json in
+      let height = field_map json__ "Height" Float_.of_json in
+      let width = field_map json__ "Width" Float_.of_json in
       make ?top ?left ?height ?width ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Identifies the bounding box around the label, face, text or personal protective equipment. The left (x-coordinate) and top (y-coordinate) are coordinates representing the top and left sides of the bounding box. Note that the upper-left corner of the image is the origin (0,0). The top and left values returned are ratios of the overall image size. For example, if the input image is 700x200 pixels, and the top-left coordinate of the bounding box is 350x50 pixels, the API returns a left value of 0.5 (350/700) and a top value of 0.25 (50/200). The width and height values represent the dimensions of the bounding box as a ratio of the overall image dimension. For example, if the input image is 700x200 pixels, and the bounding box width is 70 pixels, the width returned is 0.1. The bounding box coordinates can have negative values. For example, if Amazon Rekognition is able to detect a face that is at the image edge and is only partially visible, the service can return coordinates that are outside the image bounds and, depending on the image edge, you might get negative values or values greater than 1 for the left or top values."]
+       "Identifies the bounding box around the label, face, text, object of interest, or personal protective equipment. The left (x-coordinate) and top (y-coordinate) are coordinates representing the top and left sides of the bounding box. Note that the upper-left corner of the image is the origin (0,0). The top and left values returned are ratios of the overall image size. For example, if the input image is 700x200 pixels, and the top-left coordinate of the bounding box is 350x50 pixels, the API returns a left value of 0.5 (350/700) and a top value of 0.25 (50/200). The width and height values represent the dimensions of the bounding box as a ratio of the overall image dimension. For example, if the input image is 700x200 pixels, and the bounding box width is 70 pixels, the width returned is 0.1. The bounding box coordinates can have negative values. For example, if Amazon Rekognition is able to detect a face that is at the image edge and is only partially visible, the service can return coordinates that are outside the image bounds and, depending on the image edge, you might get negative values or values greater than 1 for the left or top values."]
 module CoversBodyPart =
   struct
     type nonrec t =
@@ -377,9 +483,9 @@ module CoversBodyPart =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
       make ?value ?confidence ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" Boolean.of_json in
-      let confidence = field_map json "Confidence" Percent.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" Boolean.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
       make ?value ?confidence ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -428,8 +534,8 @@ module GroundTruthManifest =
         (Option.map ~f:S3Object.of_xml) (Xml.child xml_arg0 "S3Object") in
       make ?s3Object ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Object = field_map json "S3Object" S3Object.of_json in
+    let of_json json__ =
+      let s3Object = field_map json__ "S3Object" S3Object.of_json in
       make ?s3Object ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -438,43 +544,29 @@ module Point =
   struct
     type nonrec t =
       {
-      x: Float.t option
+      x: Float_.t option
         [@ocaml.doc
           "The value of the X coordinate for a point on a Polygon."];
-      y: Float.t option
+      y: Float_.t option
         [@ocaml.doc
           "The value of the Y coordinate for a point on a Polygon."]}
     let make ?x = fun ?y -> fun () -> { x; y }
     let to_value x =
       structure_to_value
-        [("X", (Option.map x.x ~f:Float.to_value));
-        ("Y", (Option.map x.y ~f:Float.to_value))]
+        [("X", (Option.map x.x ~f:Float_.to_value));
+        ("Y", (Option.map x.y ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let y = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Y") in
-      let x = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "X") in
+      let y = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Y") in
+      let x = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "X") in
       make ?y ?x ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let y = field_map json "Y" Float.of_json in
-      let x = field_map json "X" Float.of_json in make ?y ?x ()
+    let of_json json__ =
+      let y = field_map json__ "Y" Float_.of_json in
+      let x = field_map json__ "X" Float_.of_json in make ?y ?x ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The X and Y coordinates of a point on an image. The X and Y values returned are ratios of the overall image size. For example, if the input image is 700x200 and the operation returns X=0.5 and Y=0.25, then the point is at the (350,50) pixel coordinate on the image. An array of Point objects, Polygon, is returned by DetectText and by DetectCustomLabels. Polygon represents a fine-grained polygon around a detected item. For more information, see Geometry in the Amazon Rekognition Developer Guide."]
-module UInteger =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in ok_or_failwith (check_int_min i ~min:0); i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for UInteger" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
+       "The X and Y coordinates of a point on an image or video frame. The X and Y values are ratios of the overall image size or video resolution. For example, if an input image is 700x200 and the values are X=0.5 and Y=0.25, then the point is at the (350,50) pixel coordinate on the image. An array of Point objects makes up a Polygon. A Polygon is returned by DetectText and by DetectCustomLabels Polygon represents a fine-grained polygon around a detected item. For more information, see Geometry in the Amazon Rekognition Developer Guide."]
 module Emotion =
   struct
     type nonrec t =
@@ -495,13 +587,31 @@ module Emotion =
         (Option.map ~f:EmotionName.of_xml) (Xml.child xml_arg0 "Type") in
       make ?confidence ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let type_ = field_map json "Type" EmotionName.of_json in
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let type_ = field_map json__ "Type" EmotionName.of_json in
       make ?confidence ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The emotions that appear to be expressed on the face, and the confidence level in the determination. The API is only making a determination of the physical appearance of a person's face. It is not a determination of the person\226\128\153s internal emotional state and should not be used in such a way. For example, a person pretending to have a sad face might not be sad emotionally."]
+       "The API returns a prediction of an emotion based on a person's facial expressions, along with the confidence level for the predicted emotion. It is not a determination of the person\226\128\153s internal emotional state and should not be used in such a way. For example, a person pretending to have a sad face might not be sad emotionally. The API is not intended to be used, and you may not use it, in a manner that violates the EU Artificial Intelligence Act or any other applicable law."]
+module Degree =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:180.) >>=
+             (fun () -> check_float_min i ~min:(-180.)));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
 module GenderType =
   struct
     type nonrec t =
@@ -526,63 +636,59 @@ module Landmark =
     type nonrec t =
       {
       type_: LandmarkType.t option [@ocaml.doc "Type of landmark."];
-      x: Float.t option
+      x: Float_.t option
         [@ocaml.doc
           "The x-coordinate of the landmark expressed as a ratio of the width of the image. The x-coordinate is measured from the left-side of the image. For example, if the image is 700 pixels wide and the x-coordinate of the landmark is at 350 pixels, this value is 0.5."];
-      y: Float.t option
+      y: Float_.t option
         [@ocaml.doc
           "The y-coordinate of the landmark expressed as a ratio of the height of the image. The y-coordinate is measured from the top of the image. For example, if the image height is 200 pixels and the y-coordinate of the landmark is at 50 pixels, this value is 0.25."]}
     let make ?type_ = fun ?x -> fun ?y -> fun () -> { type_; x; y }
     let to_value x =
       structure_to_value
         [("Type", (Option.map x.type_ ~f:LandmarkType.to_value));
-        ("X", (Option.map x.x ~f:Float.to_value));
-        ("Y", (Option.map x.y ~f:Float.to_value))]
+        ("X", (Option.map x.x ~f:Float_.to_value));
+        ("Y", (Option.map x.y ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let y = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Y") in
-      let x = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "X") in
+      let y = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Y") in
+      let x = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "X") in
       let type_ =
         (Option.map ~f:LandmarkType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?y ?x ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let y = field_map json "Y" Float.of_json in
-      let x = field_map json "X" Float.of_json in
-      let type_ = field_map json "Type" LandmarkType.of_json in
+    let of_json json__ =
+      let y = field_map json__ "Y" Float_.of_json in
+      let x = field_map json__ "X" Float_.of_json in
+      let type_ = field_map json__ "Type" LandmarkType.of_json in
       make ?y ?x ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Indicates the location of the landmark on the face."]
-module Degree =
+module DominantColors =
   struct
-    type nonrec t = float
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_float_min i ~min:180.) >>=
-             (fun () -> check_float_min i ~min:(-180.)));
-        i
-    let of_string = Float.of_string
-    let to_value x = `Float x
-    let to_query v = to_query to_value v
-    let to_header x = Stdlib.Float.to_string x
-    let of_xml xml_arg0 =
-      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
-    let of_json j = float_of_json ~kind:"a float" j
-    let to_json = simple_to_json to_value
-  end
-module String_ =
-  struct
-    type nonrec t = string
-    let context_ = "String"
+    type nonrec t = DominantColor.t list
     let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DominantColor.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DominantColor.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DominantColors" ~of_json:DominantColor.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module ExternalImageId =
   struct
@@ -655,6 +761,26 @@ module IndexFacesModelVersion =
     let of_json j = string_of_json ~kind:"IndexFacesModelVersion" j
     let to_json = simple_to_json to_value
   end
+module UserId =
+  struct
+    type nonrec t = string
+    let context_ = "UserId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9_.\\-:]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UserId" j
+    let to_json = simple_to_json to_value
+  end
 module EquipmentDetection =
   struct
     type nonrec t =
@@ -695,12 +821,12 @@ module EquipmentDetection =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
       make ?coversBodyPart ?type_ ?confidence ?boundingBox ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coversBodyPart =
-        field_map json "CoversBodyPart" CoversBodyPart.of_json in
-      let type_ = field_map json "Type" ProtectiveEquipmentType.of_json in
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
+        field_map json__ "CoversBodyPart" CoversBodyPart.of_json in
+      let type_ = field_map json__ "Type" ProtectiveEquipmentType.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let boundingBox = field_map json__ "BoundingBox" BoundingBox.of_json in
       make ?coversBodyPart ?type_ ?confidence ?boundingBox ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -721,17 +847,42 @@ module Asset =
           (Xml.child xml_arg0 "GroundTruthManifest") in
       make ?groundTruthManifest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let groundTruthManifest =
-        field_map json "GroundTruthManifest" GroundTruthManifest.of_json in
+        field_map json__ "GroundTruthManifest" GroundTruthManifest.of_json in
       make ?groundTruthManifest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Assets are the images that you use to train and evaluate a model version. Assets can also contain validation information that you use to debug a failed model training."]
+module ProjectVersionId =
+  struct
+    type nonrec t = string
+    let context_ = "ProjectVersionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(^arn:[a-z\\d-]+:rekognition:[a-z\\d-]+:\\d{12}:project\\/[a-zA-Z0-9_.\\-]{1,255}\\/version\\/[a-zA-Z0-9_.\\-]{1,255}\\/[0-9]+$)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProjectVersionId" j
+    let to_json = simple_to_json to_value
+  end
 module Polygon =
   struct
     type nonrec t = Point.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Point.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -768,9 +919,9 @@ module AgeRange =
       let low = (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "Low") in
       make ?high ?low ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let high = field_map json "High" UInteger.of_json in
-      let low = field_map json "Low" UInteger.of_json in make ?high ?low ()
+    let of_json json__ =
+      let high = field_map json__ "High" UInteger.of_json in
+      let low = field_map json__ "Low" UInteger.of_json in make ?high ?low ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Structure containing the estimated age range, in years, for a face. Amazon Rekognition estimates an age range for faces detected in the input image. Estimated age ranges can overlap. A face of a 5-year-old might have an estimated range of 4-6, while the face of a 6-year-old might have an estimated range of 4-8."]
@@ -795,9 +946,9 @@ module Beard =
       let value = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Value") in
       make ?confidence ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let value = field_map json "Value" Boolean.of_json in
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let value = field_map json__ "Value" Boolean.of_json in
       make ?confidence ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -806,6 +957,9 @@ module Emotions =
   struct
     type nonrec t = Emotion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Emotion.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -825,6 +979,40 @@ module Emotions =
     let of_json j = list_of_json ~kind:"Emotions" ~of_json:Emotion.of_json j
     let to_json v = composed_to_json to_value v
   end
+module EyeDirection =
+  struct
+    type nonrec t =
+      {
+      yaw: Degree.t option
+        [@ocaml.doc "Value representing eye direction on the yaw axis."];
+      pitch: Degree.t option
+        [@ocaml.doc "Value representing eye direction on the pitch axis."];
+      confidence: Percent.t option
+        [@ocaml.doc
+          "The confidence that the service has in its predicted eye direction."]}
+    let make ?yaw =
+      fun ?pitch -> fun ?confidence -> fun () -> { yaw; pitch; confidence }
+    let to_value x =
+      structure_to_value
+        [("Yaw", (Option.map x.yaw ~f:Degree.to_value));
+        ("Pitch", (Option.map x.pitch ~f:Degree.to_value));
+        ("Confidence", (Option.map x.confidence ~f:Percent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let confidence =
+        (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
+      let pitch = (Option.map ~f:Degree.of_xml) (Xml.child xml_arg0 "Pitch") in
+      let yaw = (Option.map ~f:Degree.of_xml) (Xml.child xml_arg0 "Yaw") in
+      make ?confidence ?pitch ?yaw ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let pitch = field_map json__ "Pitch" Degree.of_json in
+      let yaw = field_map json__ "Yaw" Degree.of_json in
+      make ?confidence ?pitch ?yaw ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the direction the eyes are gazing in (independent of the head pose) as determined by its pitch and yaw."]
 module EyeOpen =
   struct
     type nonrec t =
@@ -846,9 +1034,9 @@ module EyeOpen =
       let value = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Value") in
       make ?confidence ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let value = field_map json "Value" Boolean.of_json in
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let value = field_map json__ "Value" Boolean.of_json in
       make ?confidence ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -874,13 +1062,42 @@ module Eyeglasses =
       let value = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Value") in
       make ?confidence ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let value = field_map json "Value" Boolean.of_json in
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let value = field_map json__ "Value" Boolean.of_json in
       make ?confidence ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Indicates whether or not the face is wearing eye glasses, and the confidence level in the determination."]
+module FaceOccluded =
+  struct
+    type nonrec t =
+      {
+      value: Boolean.t option
+        [@ocaml.doc
+          "True if a detected face\226\128\153s eyes, nose, and mouth are partially captured or if they are covered by masks, dark sunglasses, cell phones, hands, or other objects. False if common occurrences that do not impact face verification are detected, such as eye glasses, lightly tinted sunglasses, strands of hair, and others."];
+      confidence: Percent.t option
+        [@ocaml.doc
+          "The confidence that the service has detected the presence of a face occlusion."]}
+    let make ?value = fun ?confidence -> fun () -> { value; confidence }
+    let to_value x =
+      structure_to_value
+        [("Value", (Option.map x.value ~f:Boolean.to_value));
+        ("Confidence", (Option.map x.confidence ~f:Percent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let confidence =
+        (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
+      let value = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Value") in
+      make ?confidence ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let value = field_map json__ "Value" Boolean.of_json in
+      make ?confidence ?value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "FaceOccluded should return \"true\" with a high confidence score if a detected face\226\128\153s eyes, nose, and mouth are partially captured or if they are covered by masks, dark sunglasses, cell phones, hands, or other objects. FaceOccluded should return \"false\" with a high confidence score if common occurrences that do not impact face verification are detected, such as eye glasses, lightly tinted sunglasses, strands of hair, and others. You can use FaceOccluded to determine if an obstruction on a face negatively impacts using the image for face matching."]
 module Gender =
   struct
     type nonrec t =
@@ -902,40 +1119,40 @@ module Gender =
         (Option.map ~f:GenderType.of_xml) (Xml.child xml_arg0 "Value") in
       make ?confidence ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let value = field_map json "Value" GenderType.of_json in
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let value = field_map json__ "Value" GenderType.of_json in
       make ?confidence ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The predicted gender of a detected face. Amazon Rekognition makes gender binary (male/female) predictions based on the physical appearance of a face in a particular image. This kind of prediction is not designed to categorize a person\226\128\153s gender identity, and you shouldn't use Amazon Rekognition to make such a determination. For example, a male actor wearing a long-haired wig and earrings for a role might be predicted as female. Using Amazon Rekognition to make gender binary predictions is best suited for use cases where aggregate gender distribution statistics need to be analyzed without identifying specific users. For example, the percentage of female users compared to male users on a social media platform. We don't recommend using gender binary predictions to make decisions that impact&#x2028; an individual's rights, privacy, or access to services."]
+       "The predicted gender of a detected face. Amazon Rekognition makes gender binary (male/female) predictions based on the physical appearance of a face in a particular image. This kind of prediction is not designed to categorize a person\226\128\153s gender identity, and you shouldn't use Amazon Rekognition to make such a determination. For example, a male actor wearing a long-haired wig and earrings for a role might be predicted as female. Using Amazon Rekognition to make gender binary predictions is best suited for use cases where aggregate gender distribution statistics need to be analyzed without identifying specific users. For example, the percentage of female users compared to male users on a social media platform. We don't recommend using gender binary predictions to make decisions that impact an individual's rights, privacy, or access to services."]
 module ImageQuality =
   struct
     type nonrec t =
       {
-      brightness: Float.t option
+      brightness: Float_.t option
         [@ocaml.doc
           "Value representing brightness of the face. The service returns a value between 0 and 100 (inclusive). A higher value indicates a brighter face image."];
-      sharpness: Float.t option
+      sharpness: Float_.t option
         [@ocaml.doc
           "Value representing sharpness of the face. The service returns a value between 0 and 100 (inclusive). A higher value indicates a sharper face image."]}
     let make ?brightness =
       fun ?sharpness -> fun () -> { brightness; sharpness }
     let to_value x =
       structure_to_value
-        [("Brightness", (Option.map x.brightness ~f:Float.to_value));
-        ("Sharpness", (Option.map x.sharpness ~f:Float.to_value))]
+        [("Brightness", (Option.map x.brightness ~f:Float_.to_value));
+        ("Sharpness", (Option.map x.sharpness ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let sharpness =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Sharpness") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Sharpness") in
       let brightness =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Brightness") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Brightness") in
       make ?sharpness ?brightness ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sharpness = field_map json "Sharpness" Float.of_json in
-      let brightness = field_map json "Brightness" Float.of_json in
+    let of_json json__ =
+      let sharpness = field_map json__ "Sharpness" Float_.of_json in
+      let brightness = field_map json__ "Brightness" Float_.of_json in
       make ?sharpness ?brightness ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Identifies face image brightness and sharpness."]
@@ -943,6 +1160,9 @@ module Landmarks =
   struct
     type nonrec t = Landmark.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Landmark.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -984,9 +1204,9 @@ module MouthOpen =
       let value = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Value") in
       make ?confidence ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let value = field_map json "Value" Boolean.of_json in
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let value = field_map json__ "Value" Boolean.of_json in
       make ?confidence ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1012,9 +1232,9 @@ module Mustache =
       let value = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Value") in
       make ?confidence ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let value = field_map json "Value" Boolean.of_json in
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let value = field_map json__ "Value" Boolean.of_json in
       make ?confidence ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1043,10 +1263,10 @@ module Pose =
       let roll = (Option.map ~f:Degree.of_xml) (Xml.child xml_arg0 "Roll") in
       make ?pitch ?yaw ?roll ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pitch = field_map json "Pitch" Degree.of_json in
-      let yaw = field_map json "Yaw" Degree.of_json in
-      let roll = field_map json "Roll" Degree.of_json in
+    let of_json json__ =
+      let pitch = field_map json__ "Pitch" Degree.of_json in
+      let yaw = field_map json__ "Yaw" Degree.of_json in
+      let roll = field_map json__ "Roll" Degree.of_json in
       make ?pitch ?yaw ?roll ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1072,9 +1292,9 @@ module Smile =
       let value = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Value") in
       make ?confidence ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let value = field_map json "Value" Boolean.of_json in
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let value = field_map json__ "Value" Boolean.of_json in
       make ?confidence ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1100,9 +1320,9 @@ module Sunglasses =
       let value = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Value") in
       make ?confidence ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let value = field_map json "Value" Boolean.of_json in
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let value = field_map json__ "Value" Boolean.of_json in
       make ?confidence ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1115,28 +1335,76 @@ module Instance =
         [@ocaml.doc "The position of the label instance on the image."];
       confidence: Percent.t option
         [@ocaml.doc
-          "The confidence that Amazon Rekognition has in the accuracy of the bounding box."]}
+          "The confidence that Amazon Rekognition has in the accuracy of the bounding box."];
+      dominantColors: DominantColors.t option
+        [@ocaml.doc
+          "The dominant colors found in an individual instance of a label."]}
     let make ?boundingBox =
-      fun ?confidence -> fun () -> { boundingBox; confidence }
+      fun ?confidence ->
+        fun ?dominantColors ->
+          fun () -> { boundingBox; confidence; dominantColors }
     let to_value x =
       structure_to_value
         [("BoundingBox", (Option.map x.boundingBox ~f:BoundingBox.to_value));
-        ("Confidence", (Option.map x.confidence ~f:Percent.to_value))]
+        ("Confidence", (Option.map x.confidence ~f:Percent.to_value));
+        ("DominantColors",
+          (Option.map x.dominantColors ~f:DominantColors.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dominantColors =
+        (Option.map ~f:DominantColors.of_xml)
+          (Xml.child xml_arg0 "DominantColors") in
       let confidence =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
       let boundingBox =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
-      make ?confidence ?boundingBox ()
+      make ?dominantColors ?confidence ?boundingBox ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
-      make ?confidence ?boundingBox ()
+    let of_json json__ =
+      let dominantColors =
+        field_map json__ "DominantColors" DominantColors.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let boundingBox = field_map json__ "BoundingBox" BoundingBox.of_json in
+      make ?dominantColors ?confidence ?boundingBox ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An instance of a label returned by Amazon Rekognition Image (DetectLabels) or by Amazon Rekognition Video (GetLabelDetection)."]
+module LabelAlias =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option
+        [@ocaml.doc "The name of an alias for a given label."]}
+    let make ?name = fun () -> { name }
+    let to_value x =
+      structure_to_value [("Name", (Option.map x.name ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "Name" String_.of_json in make ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A potential alias of for a given label."]
+module LabelCategory =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option
+        [@ocaml.doc "The name of a category that applies to a given label."]}
+    let make ?name = fun () -> { name }
+    let to_value x =
+      structure_to_value [("Name", (Option.map x.name ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "Name" String_.of_json in make ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The category that applies to a given label."]
 module Parent =
   struct
     type nonrec t =
@@ -1150,8 +1418,8 @@ module Parent =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" String_.of_json in make ?name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" String_.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A parent label for a label. A label can have 0, 1, or more parents."]
@@ -1175,22 +1443,26 @@ module Face =
           "Confidence level that the bounding box contains a face (and not a different object such as a tree)."];
       indexFacesModelVersion: IndexFacesModelVersion.t option
         [@ocaml.doc
-          "The version of the face detect and storage model that was used when indexing the face vector."]}
+          "The version of the face detect and storage model that was used when indexing the face vector."];
+      userId: UserId.t option
+        [@ocaml.doc "Unique identifier assigned to the user."]}
     let make ?faceId =
       fun ?boundingBox ->
         fun ?imageId ->
           fun ?externalImageId ->
             fun ?confidence ->
               fun ?indexFacesModelVersion ->
-                fun () ->
-                  {
-                    faceId;
-                    boundingBox;
-                    imageId;
-                    externalImageId;
-                    confidence;
-                    indexFacesModelVersion
-                  }
+                fun ?userId ->
+                  fun () ->
+                    {
+                      faceId;
+                      boundingBox;
+                      imageId;
+                      externalImageId;
+                      confidence;
+                      indexFacesModelVersion;
+                      userId
+                    }
     let to_value x =
       structure_to_value
         [("FaceId", (Option.map x.faceId ~f:FaceId.to_value));
@@ -1201,9 +1473,12 @@ module Face =
         ("Confidence", (Option.map x.confidence ~f:Percent.to_value));
         ("IndexFacesModelVersion",
           (Option.map x.indexFacesModelVersion
-             ~f:IndexFacesModelVersion.to_value))]
+             ~f:IndexFacesModelVersion.to_value));
+        ("UserId", (Option.map x.userId ~f:UserId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let userId =
+        (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "UserId") in
       let indexFacesModelVersion =
         (Option.map ~f:IndexFacesModelVersion.of_xml)
           (Xml.child xml_arg0 "IndexFacesModelVersion") in
@@ -1218,21 +1493,22 @@ module Face =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
       let faceId =
         (Option.map ~f:FaceId.of_xml) (Xml.child xml_arg0 "FaceId") in
-      make ?indexFacesModelVersion ?confidence ?externalImageId ?imageId
-        ?boundingBox ?faceId ()
+      make ?userId ?indexFacesModelVersion ?confidence ?externalImageId
+        ?imageId ?boundingBox ?faceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let userId = field_map json__ "UserId" UserId.of_json in
       let indexFacesModelVersion =
-        field_map json "IndexFacesModelVersion"
+        field_map json__ "IndexFacesModelVersion"
           IndexFacesModelVersion.of_json in
-      let confidence = field_map json "Confidence" Percent.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
       let externalImageId =
-        field_map json "ExternalImageId" ExternalImageId.of_json in
-      let imageId = field_map json "ImageId" ImageId.of_json in
-      let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
-      let faceId = field_map json "FaceId" FaceId.of_json in
-      make ?indexFacesModelVersion ?confidence ?externalImageId ?imageId
-        ?boundingBox ?faceId ()
+        field_map json__ "ExternalImageId" ExternalImageId.of_json in
+      let imageId = field_map json__ "ImageId" ImageId.of_json in
+      let boundingBox = field_map json__ "BoundingBox" BoundingBox.of_json in
+      let faceId = field_map json__ "FaceId" FaceId.of_json in
+      make ?userId ?indexFacesModelVersion ?confidence ?externalImageId
+        ?imageId ?boundingBox ?faceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the face properties such as the bounding box, face ID, image ID of the input image, and external image ID that you assigned."]
@@ -1315,6 +1591,9 @@ module EquipmentDetections =
   struct
     type nonrec t = EquipmentDetection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EquipmentDetection.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1476,6 +1755,9 @@ module Assets =
   struct
     type nonrec t = Asset.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Asset.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1494,6 +1776,41 @@ module Assets =
                      | _ -> true))) ~f:Asset.of_xml)
     let of_json j = list_of_json ~kind:"Assets" ~of_json:Asset.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module Version =
+  struct
+    type nonrec t = string
+    let context_ = "Version"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:5) >>=
+             (fun () ->
+                (check_string_max i ~max:11) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(0|[1-9]\\d{0,2})\\.(0|[1-9]\\d{0,2})\\.(0|[1-9]\\d{0,2})$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Version" j
+    let to_json = simple_to_json to_value
+  end
+module ConnectedHomeLabel =
+  struct
+    type nonrec t = string
+    let context_ = "ConnectedHomeLabel"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ConnectedHomeLabel" j
+    let to_json = simple_to_json to_value
   end
 module MaxPixelThreshold =
   struct
@@ -1531,6 +1848,225 @@ module MinCoveragePercentage =
     let of_json j = float_of_json ~kind:"a float" j
     let to_json = simple_to_json to_value
   end
+module GeneralLabelsFilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "GeneralLabelsFilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[A-Za-z0-9\195\160\195\162\195\168\195\167\195\177\195\179'-_(). ]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GeneralLabelsFilterValue" j
+    let to_json = simple_to_json to_value
+  end
+module UserStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | UPDATING 
+      | CREATING 
+      | CREATED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | UPDATING -> "UPDATING"
+      | CREATING -> "CREATING"
+      | CREATED -> "CREATED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "UPDATING" -> UPDATING
+      | "CREATING" -> CREATING
+      | "CREATED" -> CREATED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration UserStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"UserStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module UnsearchedFaceReason =
+  struct
+    type nonrec t =
+      | FACE_NOT_LARGEST 
+      | EXCEEDS_MAX_FACES 
+      | EXTREME_POSE 
+      | LOW_BRIGHTNESS 
+      | LOW_SHARPNESS 
+      | LOW_CONFIDENCE 
+      | SMALL_BOUNDING_BOX 
+      | LOW_FACE_QUALITY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FACE_NOT_LARGEST -> "FACE_NOT_LARGEST"
+      | EXCEEDS_MAX_FACES -> "EXCEEDS_MAX_FACES"
+      | EXTREME_POSE -> "EXTREME_POSE"
+      | LOW_BRIGHTNESS -> "LOW_BRIGHTNESS"
+      | LOW_SHARPNESS -> "LOW_SHARPNESS"
+      | LOW_CONFIDENCE -> "LOW_CONFIDENCE"
+      | SMALL_BOUNDING_BOX -> "SMALL_BOUNDING_BOX"
+      | LOW_FACE_QUALITY -> "LOW_FACE_QUALITY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FACE_NOT_LARGEST" -> FACE_NOT_LARGEST
+      | "EXCEEDS_MAX_FACES" -> EXCEEDS_MAX_FACES
+      | "EXTREME_POSE" -> EXTREME_POSE
+      | "LOW_BRIGHTNESS" -> LOW_BRIGHTNESS
+      | "LOW_SHARPNESS" -> LOW_SHARPNESS
+      | "LOW_CONFIDENCE" -> LOW_CONFIDENCE
+      | "SMALL_BOUNDING_BOX" -> SMALL_BOUNDING_BOX
+      | "LOW_FACE_QUALITY" -> LOW_FACE_QUALITY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration UnsearchedFaceReason" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"UnsearchedFaceReason" j)
+    let to_json = simple_to_json to_value
+  end
+module MediaAnalysisJobFailureCode =
+  struct
+    type nonrec t =
+      | INTERNAL_ERROR 
+      | INVALID_S3_OBJECT 
+      | INVALID_MANIFEST 
+      | INVALID_OUTPUT_CONFIG 
+      | INVALID_KMS_KEY 
+      | ACCESS_DENIED 
+      | RESOURCE_NOT_FOUND 
+      | RESOURCE_NOT_READY 
+      | THROTTLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INTERNAL_ERROR -> "INTERNAL_ERROR"
+      | INVALID_S3_OBJECT -> "INVALID_S3_OBJECT"
+      | INVALID_MANIFEST -> "INVALID_MANIFEST"
+      | INVALID_OUTPUT_CONFIG -> "INVALID_OUTPUT_CONFIG"
+      | INVALID_KMS_KEY -> "INVALID_KMS_KEY"
+      | ACCESS_DENIED -> "ACCESS_DENIED"
+      | RESOURCE_NOT_FOUND -> "RESOURCE_NOT_FOUND"
+      | RESOURCE_NOT_READY -> "RESOURCE_NOT_READY"
+      | THROTTLED -> "THROTTLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INTERNAL_ERROR" -> INTERNAL_ERROR
+      | "INVALID_S3_OBJECT" -> INVALID_S3_OBJECT
+      | "INVALID_MANIFEST" -> INVALID_MANIFEST
+      | "INVALID_OUTPUT_CONFIG" -> INVALID_OUTPUT_CONFIG
+      | "INVALID_KMS_KEY" -> INVALID_KMS_KEY
+      | "ACCESS_DENIED" -> ACCESS_DENIED
+      | "RESOURCE_NOT_FOUND" -> RESOURCE_NOT_FOUND
+      | "RESOURCE_NOT_READY" -> RESOURCE_NOT_READY
+      | "THROTTLED" -> THROTTLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MediaAnalysisJobFailureCode"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MediaAnalysisJobFailureCode" j)
+    let to_json = simple_to_json to_value
+  end
+module MediaAnalysisDetectModerationLabelsConfig =
+  struct
+    type nonrec t =
+      {
+      minConfidence: Percent.t option
+        [@ocaml.doc
+          "Specifies the minimum confidence level for the moderation labels to return. Amazon Rekognition doesn't return any labels with a confidence level lower than this specified value."];
+      projectVersion: ProjectVersionId.t option
+        [@ocaml.doc
+          "Specifies the custom moderation model to be used during the label detection job. If not provided the pre-trained model is used."]}
+    let make ?minConfidence =
+      fun ?projectVersion -> fun () -> { minConfidence; projectVersion }
+    let to_value x =
+      structure_to_value
+        [("MinConfidence", (Option.map x.minConfidence ~f:Percent.to_value));
+        ("ProjectVersion",
+          (Option.map x.projectVersion ~f:ProjectVersionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let projectVersion =
+        (Option.map ~f:ProjectVersionId.of_xml)
+          (Xml.child xml_arg0 "ProjectVersion") in
+      let minConfidence =
+        (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "MinConfidence") in
+      make ?projectVersion ?minConfidence ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let projectVersion =
+        field_map json__ "ProjectVersion" ProjectVersionId.of_json in
+      let minConfidence = field_map json__ "MinConfidence" Percent.of_json in
+      make ?projectVersion ?minConfidence ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Configuration for Moderation Labels Detection."]
+module MediaAnalysisS3KeyPrefix =
+  struct
+    type nonrec t = string
+    let context_ = "MediaAnalysisS3KeyPrefix"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:800) >>=
+             (fun () -> check_pattern i ~pattern:"\\S*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MediaAnalysisS3KeyPrefix" j
+    let to_json = simple_to_json to_value
+  end
+module MediaAnalysisModelVersions =
+  struct
+    type nonrec t =
+      {
+      moderation: String_.t option
+        [@ocaml.doc "The Moderation base model version."]}
+    let make ?moderation = fun () -> { moderation }
+    let to_value x =
+      structure_to_value
+        [("Moderation", (Option.map x.moderation ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let moderation =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Moderation") in
+      make ?moderation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let moderation = field_map json__ "Moderation" String_.of_json in
+      make ?moderation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object containing information about the model versions of selected features in a given job."]
 module Reason =
   struct
     type nonrec t =
@@ -1595,9 +2131,9 @@ module Geometry =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
       make ?polygon ?boundingBox ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let polygon = field_map json "Polygon" Polygon.of_json in
-      let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
+    let of_json json__ =
+      let polygon = field_map json__ "Polygon" Polygon.of_json in
+      let boundingBox = field_map json__ "BoundingBox" BoundingBox.of_json in
       make ?polygon ?boundingBox ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1739,7 +2275,13 @@ module FaceDetail =
           "Identifies image brightness and sharpness. Default attribute."];
       confidence: Percent.t option
         [@ocaml.doc
-          "Confidence level that the bounding box contains a face (and not a different object such as a tree). Default attribute."]}
+          "Confidence level that the bounding box contains a face (and not a different object such as a tree). Default attribute."];
+      faceOccluded: FaceOccluded.t option
+        [@ocaml.doc
+          "FaceOccluded should return \"true\" with a high confidence score if a detected face\226\128\153s eyes, nose, and mouth are partially captured or if they are covered by masks, dark sunglasses, cell phones, hands, or other objects. FaceOccluded should return \"false\" with a high confidence score if common occurrences that do not impact face verification are detected, such as eye glasses, lightly tinted sunglasses, strands of hair, and others."];
+      eyeDirection: EyeDirection.t option
+        [@ocaml.doc
+          "Indicates the direction the eyes are gazing in, as defined by pitch and yaw."]}
     let make ?boundingBox =
       fun ?ageRange ->
         fun ?smile ->
@@ -1755,24 +2297,28 @@ module FaceDetail =
                             fun ?pose ->
                               fun ?quality ->
                                 fun ?confidence ->
-                                  fun () ->
-                                    {
-                                      boundingBox;
-                                      ageRange;
-                                      smile;
-                                      eyeglasses;
-                                      sunglasses;
-                                      gender;
-                                      beard;
-                                      mustache;
-                                      eyesOpen;
-                                      mouthOpen;
-                                      emotions;
-                                      landmarks;
-                                      pose;
-                                      quality;
-                                      confidence
-                                    }
+                                  fun ?faceOccluded ->
+                                    fun ?eyeDirection ->
+                                      fun () ->
+                                        {
+                                          boundingBox;
+                                          ageRange;
+                                          smile;
+                                          eyeglasses;
+                                          sunglasses;
+                                          gender;
+                                          beard;
+                                          mustache;
+                                          eyesOpen;
+                                          mouthOpen;
+                                          emotions;
+                                          landmarks;
+                                          pose;
+                                          quality;
+                                          confidence;
+                                          faceOccluded;
+                                          eyeDirection
+                                        }
     let to_value x =
       structure_to_value
         [("BoundingBox", (Option.map x.boundingBox ~f:BoundingBox.to_value));
@@ -1789,9 +2335,19 @@ module FaceDetail =
         ("Landmarks", (Option.map x.landmarks ~f:Landmarks.to_value));
         ("Pose", (Option.map x.pose ~f:Pose.to_value));
         ("Quality", (Option.map x.quality ~f:ImageQuality.to_value));
-        ("Confidence", (Option.map x.confidence ~f:Percent.to_value))]
+        ("Confidence", (Option.map x.confidence ~f:Percent.to_value));
+        ("FaceOccluded",
+          (Option.map x.faceOccluded ~f:FaceOccluded.to_value));
+        ("EyeDirection",
+          (Option.map x.eyeDirection ~f:EyeDirection.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let eyeDirection =
+        (Option.map ~f:EyeDirection.of_xml)
+          (Xml.child xml_arg0 "EyeDirection") in
+      let faceOccluded =
+        (Option.map ~f:FaceOccluded.of_xml)
+          (Xml.child xml_arg0 "FaceOccluded") in
       let confidence =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
       let quality =
@@ -1819,32 +2375,34 @@ module FaceDetail =
         (Option.map ~f:AgeRange.of_xml) (Xml.child xml_arg0 "AgeRange") in
       let boundingBox =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
-      make ?confidence ?quality ?pose ?landmarks ?emotions ?mouthOpen
-        ?eyesOpen ?mustache ?beard ?gender ?sunglasses ?eyeglasses ?smile
-        ?ageRange ?boundingBox ()
+      make ?eyeDirection ?faceOccluded ?confidence ?quality ?pose ?landmarks
+        ?emotions ?mouthOpen ?eyesOpen ?mustache ?beard ?gender ?sunglasses
+        ?eyeglasses ?smile ?ageRange ?boundingBox ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let quality = field_map json "Quality" ImageQuality.of_json in
-      let pose = field_map json "Pose" Pose.of_json in
-      let landmarks = field_map json "Landmarks" Landmarks.of_json in
-      let emotions = field_map json "Emotions" Emotions.of_json in
-      let mouthOpen = field_map json "MouthOpen" MouthOpen.of_json in
-      let eyesOpen = field_map json "EyesOpen" EyeOpen.of_json in
-      let mustache = field_map json "Mustache" Mustache.of_json in
-      let beard = field_map json "Beard" Beard.of_json in
-      let gender = field_map json "Gender" Gender.of_json in
-      let sunglasses = field_map json "Sunglasses" Sunglasses.of_json in
-      let eyeglasses = field_map json "Eyeglasses" Eyeglasses.of_json in
-      let smile = field_map json "Smile" Smile.of_json in
-      let ageRange = field_map json "AgeRange" AgeRange.of_json in
-      let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
-      make ?confidence ?quality ?pose ?landmarks ?emotions ?mouthOpen
-        ?eyesOpen ?mustache ?beard ?gender ?sunglasses ?eyeglasses ?smile
-        ?ageRange ?boundingBox ()
+    let of_json json__ =
+      let eyeDirection = field_map json__ "EyeDirection" EyeDirection.of_json in
+      let faceOccluded = field_map json__ "FaceOccluded" FaceOccluded.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let quality = field_map json__ "Quality" ImageQuality.of_json in
+      let pose = field_map json__ "Pose" Pose.of_json in
+      let landmarks = field_map json__ "Landmarks" Landmarks.of_json in
+      let emotions = field_map json__ "Emotions" Emotions.of_json in
+      let mouthOpen = field_map json__ "MouthOpen" MouthOpen.of_json in
+      let eyesOpen = field_map json__ "EyesOpen" EyeOpen.of_json in
+      let mustache = field_map json__ "Mustache" Mustache.of_json in
+      let beard = field_map json__ "Beard" Beard.of_json in
+      let gender = field_map json__ "Gender" Gender.of_json in
+      let sunglasses = field_map json__ "Sunglasses" Sunglasses.of_json in
+      let eyeglasses = field_map json__ "Eyeglasses" Eyeglasses.of_json in
+      let smile = field_map json__ "Smile" Smile.of_json in
+      let ageRange = field_map json__ "AgeRange" AgeRange.of_json in
+      let boundingBox = field_map json__ "BoundingBox" BoundingBox.of_json in
+      make ?eyeDirection ?faceOccluded ?confidence ?quality ?pose ?landmarks
+        ?emotions ?mouthOpen ?eyesOpen ?mustache ?beard ?gender ?sunglasses
+        ?eyeglasses ?smile ?ageRange ?boundingBox ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Structure containing attributes of the face that the algorithm detected. A FaceDetail object contains either the default facial attributes or all facial attributes. The default attributes are BoundingBox, Confidence, Landmarks, Pose, and Quality. GetFaceDetection is the only Amazon Rekognition Video stored video operation that can return a FaceDetail object with all attributes. To specify which attributes to return, use the FaceAttributes input parameter for StartFaceDetection. The following Amazon Rekognition Video operations return only the default attributes. The corresponding Start operations don't have a FaceAttributes input parameter. GetCelebrityRecognition GetPersonTracking GetFaceSearch The Amazon Rekognition Image DetectFaces and IndexFaces operations can return all facial attributes. To specify which attributes to return, use the Attributes input parameter for DetectFaces. For IndexFaces, use the DetectAttributes input parameter."]
+       "Structure containing attributes of the face that the algorithm detected. A FaceDetail object contains either the default facial attributes or all facial attributes. The default attributes are BoundingBox, Confidence, Landmarks, Pose, and Quality. GetFaceDetection is the only Amazon Rekognition Video stored video operation that can return a FaceDetail object with all attributes. To specify which attributes to return, use the FaceAttributes input parameter for StartFaceDetection. The following Amazon Rekognition Video operations return only the default attributes. The corresponding Start operations don't have a FaceAttributes input parameter: GetCelebrityRecognition GetPersonTracking GetFaceSearch The Amazon Rekognition Image DetectFaces and IndexFaces operations can return all facial attributes. To specify which attributes to return, use the Attributes input parameter for DetectFaces. For IndexFaces, use the DetectAttributes input parameter."]
 module PersonIndex =
   struct
     type nonrec t = Int64.t
@@ -1862,6 +2420,9 @@ module Instances =
   struct
     type nonrec t = Instance.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Instance.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1882,10 +2443,67 @@ module Instances =
       list_of_json ~kind:"Instances" ~of_json:Instance.of_json j
     let to_json v = composed_to_json to_value v
   end
+module LabelAliases =
+  struct
+    type nonrec t = LabelAlias.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LabelAlias.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LabelAlias.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LabelAliases" ~of_json:LabelAlias.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LabelCategories =
+  struct
+    type nonrec t = LabelCategory.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LabelCategory.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LabelCategory.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LabelCategories" ~of_json:LabelCategory.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Parents =
   struct
     type nonrec t = Parent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Parent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1927,13 +2545,39 @@ module FaceMatch =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Similarity") in
       make ?face ?similarity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let face = field_map json "Face" Face.of_json in
-      let similarity = field_map json "Similarity" Percent.of_json in
+    let of_json json__ =
+      let face = field_map json__ "Face" Face.of_json in
+      let similarity = field_map json__ "Similarity" Percent.of_json in
       make ?face ?similarity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides face metadata. In addition, it also provides the confidence in the match of this face with the input face."]
+module ContentType =
+  struct
+    type nonrec t =
+      {
+      confidence: Percent.t option
+        [@ocaml.doc "The confidence level of the label given"];
+      name: String_.t option [@ocaml.doc "The name of the label"]}
+    let make ?confidence = fun ?name -> fun () -> { confidence; name }
+    let to_value x =
+      structure_to_value
+        [("Confidence", (Option.map x.confidence ~f:Percent.to_value));
+        ("Name", (Option.map x.name ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      let confidence =
+        (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
+      make ?name ?confidence ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "Name" String_.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      make ?name ?confidence ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information regarding the confidence and name of a detected content type."]
 module KnownGender =
   struct
     type nonrec t =
@@ -1951,8 +2595,8 @@ module KnownGender =
         (Option.map ~f:KnownGenderType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" KnownGenderType.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" KnownGenderType.of_json in
       make ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1981,6 +2625,9 @@ module Urls =
           ((check_list_max i ~max:255) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Url.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1999,6 +2646,35 @@ module Urls =
                      | _ -> true))) ~f:Url.of_xml)
     let of_json j = list_of_json ~kind:"Urls" ~of_json:Url.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module UnsuccessfulFaceDisassociationReason =
+  struct
+    type nonrec t =
+      | FACE_NOT_FOUND 
+      | ASSOCIATED_TO_A_DIFFERENT_USER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FACE_NOT_FOUND -> "FACE_NOT_FOUND"
+      | ASSOCIATED_TO_A_DIFFERENT_USER -> "ASSOCIATED_TO_A_DIFFERENT_USER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FACE_NOT_FOUND" -> FACE_NOT_FOUND
+      | "ASSOCIATED_TO_A_DIFFERENT_USER" -> ASSOCIATED_TO_A_DIFFERENT_USER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration UnsuccessfulFaceDisassociationReason" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"UnsuccessfulFaceDisassociationReason" j)
+    let to_json = simple_to_json to_value
   end
 module ProtectiveEquipmentBodyPart =
   struct
@@ -2031,11 +2707,11 @@ module ProtectiveEquipmentBodyPart =
       let name = (Option.map ~f:BodyPart.of_xml) (Xml.child xml_arg0 "Name") in
       make ?equipmentDetections ?confidence ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let equipmentDetections =
-        field_map json "EquipmentDetections" EquipmentDetections.of_json in
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let name = field_map json "Name" BodyPart.of_json in
+        field_map json__ "EquipmentDetections" EquipmentDetections.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let name = field_map json__ "Name" BodyPart.of_json in
       make ?equipmentDetections ?confidence ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2133,21 +2809,46 @@ module DatasetMetadata =
       make ?statusMessageCode ?statusMessage ?status ?datasetArn ?datasetType
         ?creationTimestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusMessageCode =
-        field_map json "StatusMessageCode" DatasetStatusMessageCode.of_json in
+        field_map json__ "StatusMessageCode" DatasetStatusMessageCode.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let status = field_map json "Status" DatasetStatus.of_json in
-      let datasetArn = field_map json "DatasetArn" DatasetArn.of_json in
-      let datasetType = field_map json "DatasetType" DatasetType.of_json in
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let status = field_map json__ "Status" DatasetStatus.of_json in
+      let datasetArn = field_map json__ "DatasetArn" DatasetArn.of_json in
+      let datasetType = field_map json__ "DatasetType" DatasetType.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" DateTime.of_json in
+        field_map json__ "CreationTimestamp" DateTime.of_json in
       make ?statusMessageCode ?statusMessage ?status ?datasetArn ?datasetType
         ?creationTimestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Summary information for an Amazon Rekognition Custom Labels dataset. For more information, see ProjectDescription."]
+module CustomizationFeatureContentModerationConfig =
+  struct
+    type nonrec t =
+      {
+      confidenceThreshold: Percent.t option
+        [@ocaml.doc
+          "The confidence level you plan to use to identify if unsafe content is present during inference."]}
+    let make ?confidenceThreshold = fun () -> { confidenceThreshold }
+    let to_value x =
+      structure_to_value
+        [("ConfidenceThreshold",
+           (Option.map x.confidenceThreshold ~f:Percent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let confidenceThreshold =
+        (Option.map ~f:Percent.of_xml)
+          (Xml.child xml_arg0 "ConfidenceThreshold") in
+      make ?confidenceThreshold ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let confidenceThreshold =
+        field_map json__ "ConfidenceThreshold" Percent.of_json in
+      make ?confidenceThreshold ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Configuration options for Content Moderation training."]
 module Summary =
   struct
     type nonrec t = {
@@ -2162,8 +2863,8 @@ module Summary =
         (Option.map ~f:S3Object.of_xml) (Xml.child xml_arg0 "S3Object") in
       make ?s3Object ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Object = field_map json "S3Object" S3Object.of_json in
+    let of_json json__ =
+      let s3Object = field_map json__ "S3Object" S3Object.of_json in
       make ?s3Object ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2189,7 +2890,7 @@ module TestingData =
       assets: Assets.t option [@ocaml.doc "The assets used for testing."];
       autoCreate: Boolean.t option
         [@ocaml.doc
-          "If specified, Amazon Rekognition Custom Labels temporarily splits the training dataset (80%) to create a test dataset (20%) for the training job. After training completes, the test dataset is not stored and the training dataset reverts to its previous size."]}
+          "If specified, Rekognition splits training dataset to create a test dataset for the training job."]}
     let make ?assets = fun ?autoCreate -> fun () -> { assets; autoCreate }
     let to_value x =
       structure_to_value
@@ -2203,13 +2904,13 @@ module TestingData =
         (Option.map ~f:Assets.of_xml) (Xml.child xml_arg0 "Assets") in
       make ?autoCreate ?assets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let autoCreate = field_map json "AutoCreate" Boolean.of_json in
-      let assets = field_map json "Assets" Assets.of_json in
+    let of_json json__ =
+      let autoCreate = field_map json__ "AutoCreate" Boolean.of_json in
+      let assets = field_map json__ "Assets" Assets.of_json in
       make ?autoCreate ?assets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The dataset used for testing. Optionally, if AutoCreate is set, Amazon Rekognition Custom Labels uses the training dataset to create a test dataset with a temporary split of the training dataset."]
+       "The dataset used for testing. Optionally, if AutoCreate is set, Amazon Rekognition uses the training dataset to create a test dataset with a temporary split of the training dataset."]
 module ValidationData =
   struct
     type nonrec t =
@@ -2226,8 +2927,9 @@ module ValidationData =
         (Option.map ~f:Assets.of_xml) (Xml.child xml_arg0 "Assets") in
       make ?assets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assets = field_map json "Assets" Assets.of_json in make ?assets ()
+    let of_json json__ =
+      let assets = field_map json__ "Assets" Assets.of_json in
+      make ?assets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the Amazon S3 bucket location of the validation data for a model training job. The validation data includes error information for individual JSON Lines in the dataset. For more information, see Debugging a Failed Model Training in the Amazon Rekognition Custom Labels Developer Guide. You get the ValidationData object for the training dataset (TrainingDataResult) and the test dataset (TestingDataResult) by calling DescribeProjectVersions. The assets array contains a single Asset object. The GroundTruthManifest field of the Asset object contains the S3 bucket location of the validation data."]
@@ -2237,7 +2939,7 @@ module TrainingData =
       {
       assets: Assets.t option
         [@ocaml.doc
-          "A Sagemaker GroundTruth manifest file that contains the training images (assets)."]}
+          "A manifest file that contains references to the training images and ground-truth annotations."]}
     let make ?assets = fun () -> { assets }
     let to_value x =
       structure_to_value
@@ -2248,10 +2950,156 @@ module TrainingData =
         (Option.map ~f:Assets.of_xml) (Xml.child xml_arg0 "Assets") in
       make ?assets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assets = field_map json "Assets" Assets.of_json in make ?assets ()
+    let of_json json__ =
+      let assets = field_map json__ "Assets" Assets.of_json in
+      make ?assets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The dataset used for training."]
+module UnsuccessfulFaceDeletionReason =
+  struct
+    type nonrec t =
+      | ASSOCIATED_TO_AN_EXISTING_USER 
+      | FACE_NOT_FOUND 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ASSOCIATED_TO_AN_EXISTING_USER -> "ASSOCIATED_TO_AN_EXISTING_USER"
+      | FACE_NOT_FOUND -> "FACE_NOT_FOUND"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ASSOCIATED_TO_AN_EXISTING_USER" -> ASSOCIATED_TO_AN_EXISTING_USER
+      | "FACE_NOT_FOUND" -> FACE_NOT_FOUND
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration UnsuccessfulFaceDeletionReason"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"UnsuccessfulFaceDeletionReason" j)
+    let to_json = simple_to_json to_value
+  end
+module ChallengeType =
+  struct
+    type nonrec t =
+      | FaceMovementAndLightChallenge 
+      | FaceMovementChallenge 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FaceMovementAndLightChallenge -> "FaceMovementAndLightChallenge"
+      | FaceMovementChallenge -> "FaceMovementChallenge"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FaceMovementAndLightChallenge" -> FaceMovementAndLightChallenge
+      | "FaceMovementChallenge" -> FaceMovementChallenge
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ChallengeType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ChallengeType" j)
+    let to_json = simple_to_json to_value
+  end
+module Versions =
+  struct
+    type nonrec t =
+      {
+      minimum: Version.t option
+        [@ocaml.doc "The desired minimum version for the challenge."];
+      maximum: Version.t option
+        [@ocaml.doc "The desired maximum version for the challenge."]}
+    let make ?minimum = fun ?maximum -> fun () -> { minimum; maximum }
+    let to_value x =
+      structure_to_value
+        [("Minimum", (Option.map x.minimum ~f:Version.to_value));
+        ("Maximum", (Option.map x.maximum ~f:Version.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maximum =
+        (Option.map ~f:Version.of_xml) (Xml.child xml_arg0 "Maximum") in
+      let minimum =
+        (Option.map ~f:Version.of_xml) (Xml.child xml_arg0 "Minimum") in
+      make ?maximum ?minimum ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maximum = field_map json__ "Maximum" Version.of_json in
+      let minimum = field_map json__ "Minimum" Version.of_json in
+      make ?maximum ?minimum ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object specifying the acceptable range of challenge versions."]
+module UnsuccessfulFaceAssociationReason =
+  struct
+    type nonrec t =
+      | FACE_NOT_FOUND 
+      | ASSOCIATED_TO_A_DIFFERENT_USER 
+      | LOW_MATCH_CONFIDENCE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FACE_NOT_FOUND -> "FACE_NOT_FOUND"
+      | ASSOCIATED_TO_A_DIFFERENT_USER -> "ASSOCIATED_TO_A_DIFFERENT_USER"
+      | LOW_MATCH_CONFIDENCE -> "LOW_MATCH_CONFIDENCE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FACE_NOT_FOUND" -> FACE_NOT_FOUND
+      | "ASSOCIATED_TO_A_DIFFERENT_USER" -> ASSOCIATED_TO_A_DIFFERENT_USER
+      | "LOW_MATCH_CONFIDENCE" -> LOW_MATCH_CONFIDENCE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration UnsuccessfulFaceAssociationReason"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"UnsuccessfulFaceAssociationReason" j)
+    let to_json = simple_to_json to_value
+  end
+module ConnectedHomeLabels =
+  struct
+    type nonrec t = ConnectedHomeLabel.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:128) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConnectedHomeLabel.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConnectedHomeLabel.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConnectedHomeLabels"
+        ~of_json:ConnectedHomeLabel.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module BoundingBoxHeight =
   struct
     type nonrec t = float
@@ -2293,23 +3141,51 @@ module RegionOfInterest =
     type nonrec t =
       {
       boundingBox: BoundingBox.t option
-        [@ocaml.doc "The box representing a region of interest on screen."]}
-    let make ?boundingBox = fun () -> { boundingBox }
+        [@ocaml.doc "The box representing a region of interest on screen."];
+      polygon: Polygon.t option
+        [@ocaml.doc
+          "Specifies a shape made up of up to 10 Point objects to define a region of interest."]}
+    let make ?boundingBox =
+      fun ?polygon -> fun () -> { boundingBox; polygon }
     let to_value x =
       structure_to_value
-        [("BoundingBox", (Option.map x.boundingBox ~f:BoundingBox.to_value))]
+        [("BoundingBox", (Option.map x.boundingBox ~f:BoundingBox.to_value));
+        ("Polygon", (Option.map x.polygon ~f:Polygon.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let polygon =
+        (Option.map ~f:Polygon.of_xml) (Xml.child xml_arg0 "Polygon") in
       let boundingBox =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
-      make ?boundingBox ()
+      make ?polygon ?boundingBox ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
-      make ?boundingBox ()
+    let of_json json__ =
+      let polygon = field_map json__ "Polygon" Polygon.of_json in
+      let boundingBox = field_map json__ "BoundingBox" BoundingBox.of_json in
+      make ?polygon ?boundingBox ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies a location within the frame that Rekognition checks for text. Uses a BoundingBox object to set a region of the screen. A word is included in the region if the word is more than half in that region. If there is more than one region, the word will be compared with all regions of the screen. Any word more than half in a region is kept in the results."]
+       "Specifies a location within the frame that Rekognition checks for objects of interest such as text, labels, or faces. It uses a BoundingBox or Polygon to set a region of the screen. A word, face, or label is included in the region if it is more than half in that region. If there is more than one region, the word, face, or label is compared with all regions of the screen. Any object of interest that is more than half in a region is kept in the results."]
+module KinesisVideoStreamFragmentNumber =
+  struct
+    type nonrec t = string
+    let context_ = "KinesisVideoStreamFragmentNumber"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"^[0-9]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KinesisVideoStreamFragmentNumber" j
+    let to_json = simple_to_json to_value
+  end
 module BlackFrame =
   struct
     type nonrec t =
@@ -2340,15 +3216,108 @@ module BlackFrame =
           (Xml.child xml_arg0 "MaxPixelThreshold") in
       make ?minCoveragePercentage ?maxPixelThreshold ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let minCoveragePercentage =
-        field_map json "MinCoveragePercentage" MinCoveragePercentage.of_json in
+        field_map json__ "MinCoveragePercentage"
+          MinCoveragePercentage.of_json in
       let maxPixelThreshold =
-        field_map json "MaxPixelThreshold" MaxPixelThreshold.of_json in
+        field_map json__ "MaxPixelThreshold" MaxPixelThreshold.of_json in
       make ?minCoveragePercentage ?maxPixelThreshold ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A filter that allows you to control the black frame detection by specifying the black levels and pixel coverage of black pixels in a frame. As videos can come from multiple sources, formats, and time periods, they may contain different standards and varying noise levels for black frames that need to be accounted for. For more information, see StartSegmentDetection."]
+module GeneralLabelsFilterList =
+  struct
+    type nonrec t = GeneralLabelsFilterValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GeneralLabelsFilterValue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GeneralLabelsFilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GeneralLabelsFilterList"
+        ~of_json:GeneralLabelsFilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MatchedUser =
+  struct
+    type nonrec t =
+      {
+      userId: UserId.t option
+        [@ocaml.doc
+          "A provided ID for the UserID. Unique within the collection."];
+      userStatus: UserStatus.t option
+        [@ocaml.doc "The status of the user matched to a provided FaceID."]}
+    let make ?userId = fun ?userStatus -> fun () -> { userId; userStatus }
+    let to_value x =
+      structure_to_value
+        [("UserId", (Option.map x.userId ~f:UserId.to_value));
+        ("UserStatus", (Option.map x.userStatus ~f:UserStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userStatus =
+        (Option.map ~f:UserStatus.of_xml) (Xml.child xml_arg0 "UserStatus") in
+      let userId =
+        (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "UserId") in
+      make ?userStatus ?userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userStatus = field_map json__ "UserStatus" UserStatus.of_json in
+      let userId = field_map json__ "UserId" UserId.of_json in
+      make ?userStatus ?userId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains metadata for a UserID matched with a given face."]
+module UnsearchedFaceReasons =
+  struct
+    type nonrec t = UnsearchedFaceReason.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UnsearchedFaceReason.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UnsearchedFaceReason.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UnsearchedFaceReasons"
+        ~of_json:UnsearchedFaceReason.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ComparedFace =
   struct
     type nonrec t =
@@ -2414,14 +3383,14 @@ module ComparedFace =
       make ?smile ?emotions ?quality ?pose ?landmarks ?confidence
         ?boundingBox ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let smile = field_map json "Smile" Smile.of_json in
-      let emotions = field_map json "Emotions" Emotions.of_json in
-      let quality = field_map json "Quality" ImageQuality.of_json in
-      let pose = field_map json "Pose" Pose.of_json in
-      let landmarks = field_map json "Landmarks" Landmarks.of_json in
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
+    let of_json json__ =
+      let smile = field_map json__ "Smile" Smile.of_json in
+      let emotions = field_map json__ "Emotions" Emotions.of_json in
+      let quality = field_map json__ "Quality" ImageQuality.of_json in
+      let pose = field_map json__ "Pose" Pose.of_json in
+      let landmarks = field_map json__ "Landmarks" Landmarks.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let boundingBox = field_map json__ "BoundingBox" BoundingBox.of_json in
       make ?smile ?emotions ?quality ?pose ?landmarks ?confidence
         ?boundingBox ()
     let to_json v = composed_to_json to_value v
@@ -2455,6 +3424,7 @@ module StreamProcessorStatus =
       | RUNNING 
       | FAILED 
       | STOPPING 
+      | UPDATING 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2464,6 +3434,7 @@ module StreamProcessorStatus =
       | RUNNING -> "RUNNING"
       | FAILED -> "FAILED"
       | STOPPING -> "STOPPING"
+      | UPDATING -> "UPDATING"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2472,6 +3443,7 @@ module StreamProcessorStatus =
       | "RUNNING" -> RUNNING
       | "FAILED" -> FAILED
       | "STOPPING" -> STOPPING
+      | "UPDATING" -> UPDATING
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2483,6 +3455,351 @@ module StreamProcessorStatus =
       of_string (string_of_json ~kind:"StreamProcessorStatus" j)
     let to_json = simple_to_json to_value
   end
+module ProjectArn =
+  struct
+    type nonrec t = string
+    let context_ = "ProjectArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(^arn:[a-z\\d-]+:rekognition:[a-z\\d-]+:\\d{12}:project\\/[a-zA-Z0-9_.\\-]{1,255}\\/[0-9]+$)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProjectArn" j
+    let to_json = simple_to_json to_value
+  end
+module ProjectPolicyDocument =
+  struct
+    type nonrec t = string
+    let context_ = "ProjectPolicyDocument"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2000) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0009\\u000A\\u000D\\u0020-\\u00FF]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProjectPolicyDocument" j
+    let to_json = simple_to_json to_value
+  end
+module ProjectPolicyName =
+  struct
+    type nonrec t = string
+    let context_ = "ProjectPolicyName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9_.\\-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProjectPolicyName" j
+    let to_json = simple_to_json to_value
+  end
+module ProjectPolicyRevisionId =
+  struct
+    type nonrec t = string
+    let context_ = "ProjectPolicyRevisionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_pattern i ~pattern:"[0-9A-Fa-f]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProjectPolicyRevisionId" j
+    let to_json = simple_to_json to_value
+  end
+module KmsKeyId =
+  struct
+    type nonrec t = string
+    let context_ = "KmsKeyId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[A-Za-z0-9][A-Za-z0-9:_/+=,@.-]{0,2048}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KmsKeyId" j
+    let to_json = simple_to_json to_value
+  end
+module MediaAnalysisInput =
+  struct
+    type nonrec t = {
+      s3Object: S3Object.t }
+    let context_ = "MediaAnalysisInput"
+    let make ~s3Object = fun () -> { s3Object }
+    let to_value x =
+      structure_to_value
+        [("S3Object", (Some (S3Object.to_value x.s3Object)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Object =
+        S3Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Object") in
+      make ~s3Object ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Object = field_map_exn json__ "S3Object" S3Object.of_json in
+      make ~s3Object ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains input information for a media analysis job."]
+module MediaAnalysisJobFailureDetails =
+  struct
+    type nonrec t =
+      {
+      code: MediaAnalysisJobFailureCode.t option
+        [@ocaml.doc "Error code for the failed job."];
+      message: String_.t option [@ocaml.doc "Human readable error message."]}
+    let make ?code = fun ?message -> fun () -> { code; message }
+    let to_value x =
+      structure_to_value
+        [("Code",
+           (Option.map x.code ~f:MediaAnalysisJobFailureCode.to_value));
+        ("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      let code =
+        (Option.map ~f:MediaAnalysisJobFailureCode.of_xml)
+          (Xml.child xml_arg0 "Code") in
+      make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" MediaAnalysisJobFailureCode.of_json in
+      make ?message ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details about the error that resulted in failure of the job."]
+module MediaAnalysisJobId =
+  struct
+    type nonrec t = string
+    let context_ = "MediaAnalysisJobId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9-_]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MediaAnalysisJobId" j
+    let to_json = simple_to_json to_value
+  end
+module MediaAnalysisJobName =
+  struct
+    type nonrec t = string
+    let context_ = "MediaAnalysisJobName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9_.\\-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MediaAnalysisJobName" j
+    let to_json = simple_to_json to_value
+  end
+module MediaAnalysisJobStatus =
+  struct
+    type nonrec t =
+      | CREATED 
+      | QUEUED 
+      | IN_PROGRESS 
+      | SUCCEEDED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATED -> "CREATED"
+      | QUEUED -> "QUEUED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | SUCCEEDED -> "SUCCEEDED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATED" -> CREATED
+      | "QUEUED" -> QUEUED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "SUCCEEDED" -> SUCCEEDED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MediaAnalysisJobStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MediaAnalysisJobStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module MediaAnalysisManifestSummary =
+  struct
+    type nonrec t = {
+      s3Object: S3Object.t option }
+    let make ?s3Object = fun () -> { s3Object }
+    let to_value x =
+      structure_to_value
+        [("S3Object", (Option.map x.s3Object ~f:S3Object.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Object =
+        (Option.map ~f:S3Object.of_xml) (Xml.child xml_arg0 "S3Object") in
+      make ?s3Object ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Object = field_map json__ "S3Object" S3Object.of_json in
+      make ?s3Object ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Summary that provides statistics on input manifest and errors identified in the input manifest."]
+module MediaAnalysisOperationsConfig =
+  struct
+    type nonrec t =
+      {
+      detectModerationLabels:
+        MediaAnalysisDetectModerationLabelsConfig.t option
+        [@ocaml.doc
+          "Contains configuration options for a DetectModerationLabels job."]}
+    let make ?detectModerationLabels = fun () -> { detectModerationLabels }
+    let to_value x =
+      structure_to_value
+        [("DetectModerationLabels",
+           (Option.map x.detectModerationLabels
+              ~f:MediaAnalysisDetectModerationLabelsConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let detectModerationLabels =
+        (Option.map ~f:MediaAnalysisDetectModerationLabelsConfig.of_xml)
+          (Xml.child xml_arg0 "DetectModerationLabels") in
+      make ?detectModerationLabels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let detectModerationLabels =
+        field_map json__ "DetectModerationLabels"
+          MediaAnalysisDetectModerationLabelsConfig.of_json in
+      make ?detectModerationLabels ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration options for a media analysis job. Configuration is operation-specific."]
+module MediaAnalysisOutputConfig =
+  struct
+    type nonrec t =
+      {
+      s3Bucket: S3Bucket.t
+        [@ocaml.doc
+          "Specifies the Amazon S3 bucket to contain the output of the media analysis job."];
+      s3KeyPrefix: MediaAnalysisS3KeyPrefix.t option
+        [@ocaml.doc
+          "Specifies the Amazon S3 key prefix that comes after the name of the bucket you have designated for storage."]}
+    let context_ = "MediaAnalysisOutputConfig"
+    let make ?s3KeyPrefix =
+      fun ~s3Bucket -> fun () -> { s3KeyPrefix; s3Bucket }
+    let to_value x =
+      structure_to_value
+        [("S3Bucket", (Some (S3Bucket.to_value x.s3Bucket)));
+        ("S3KeyPrefix",
+          (Option.map x.s3KeyPrefix ~f:MediaAnalysisS3KeyPrefix.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3KeyPrefix =
+        (Option.map ~f:MediaAnalysisS3KeyPrefix.of_xml)
+          (Xml.child xml_arg0 "S3KeyPrefix") in
+      let s3Bucket =
+        S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Bucket") in
+      make ?s3KeyPrefix ~s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3KeyPrefix =
+        field_map json__ "S3KeyPrefix" MediaAnalysisS3KeyPrefix.of_json in
+      let s3Bucket = field_map_exn json__ "S3Bucket" S3Bucket.of_json in
+      make ?s3KeyPrefix ~s3Bucket ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Output configuration provided in the job creation request."]
+module MediaAnalysisResults =
+  struct
+    type nonrec t =
+      {
+      s3Object: S3Object.t option ;
+      modelVersions: MediaAnalysisModelVersions.t option
+        [@ocaml.doc
+          "Information about the model versions for the features selected in a given job."]}
+    let make ?s3Object =
+      fun ?modelVersions -> fun () -> { s3Object; modelVersions }
+    let to_value x =
+      structure_to_value
+        [("S3Object", (Option.map x.s3Object ~f:S3Object.to_value));
+        ("ModelVersions",
+          (Option.map x.modelVersions ~f:MediaAnalysisModelVersions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modelVersions =
+        (Option.map ~f:MediaAnalysisModelVersions.of_xml)
+          (Xml.child xml_arg0 "ModelVersions") in
+      let s3Object =
+        (Option.map ~f:S3Object.of_xml) (Xml.child xml_arg0 "S3Object") in
+      make ?modelVersions ?s3Object ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modelVersions =
+        field_map json__ "ModelVersions" MediaAnalysisModelVersions.of_json in
+      let s3Object = field_map json__ "S3Object" S3Object.of_json in
+      make ?modelVersions ?s3Object ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the results for a media analysis job created with StartMediaAnalysisJob."]
 module DatasetLabel =
   struct
     type nonrec t = string
@@ -2528,10 +3845,10 @@ module DatasetLabelStats =
         (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "EntryCount") in
       make ?boundingBoxCount ?entryCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let boundingBoxCount =
-        field_map json "BoundingBoxCount" UInteger.of_json in
-      let entryCount = field_map json "EntryCount" UInteger.of_json in
+        field_map json__ "BoundingBoxCount" UInteger.of_json in
+      let entryCount = field_map json__ "EntryCount" UInteger.of_json in
       make ?boundingBoxCount ?entryCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2540,6 +3857,9 @@ module Reasons =
   struct
     type nonrec t = Reason.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Reason.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2611,17 +3931,17 @@ module TextDetection =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DetectedText") in
       make ?geometry ?confidence ?parentId ?id ?type_ ?detectedText ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let geometry = field_map json "Geometry" Geometry.of_json in
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let parentId = field_map json "ParentId" UInteger.of_json in
-      let id = field_map json "Id" UInteger.of_json in
-      let type_ = field_map json "Type" TextTypes.of_json in
-      let detectedText = field_map json "DetectedText" String_.of_json in
+    let of_json json__ =
+      let geometry = field_map json__ "Geometry" Geometry.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let parentId = field_map json__ "ParentId" UInteger.of_json in
+      let id = field_map json__ "Id" UInteger.of_json in
+      let type_ = field_map json__ "Type" TextTypes.of_json in
+      let detectedText = field_map json__ "DetectedText" String_.of_json in
       make ?geometry ?confidence ?parentId ?id ?type_ ?detectedText ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about a word or line of text detected by DetectText. The DetectedText field contains the text that Amazon Rekognition detected in the image. Every word and line has an identifier (Id). Each word belongs to a line and has a parent identifier (ParentId) that identifies the line of text in which the word appears. The word Id is also an index for the word within a line of words. For more information, see Detecting Text in the Amazon Rekognition Developer Guide."]
+       "Information about a word or line of text detected by DetectText. The DetectedText field contains the text that Amazon Rekognition detected in the image. Every word and line has an identifier (Id). Each word belongs to a line and has a parent identifier (ParentId) that identifies the line of text in which the word appears. The word Id is also an index for the word within a line of words. For more information, see Detecting text in the Amazon Rekognition Developer Guide."]
 module Timestamp =
   struct
     type nonrec t = Int64.t
@@ -2684,9 +4004,10 @@ module ShotSegment =
       let index = (Option.map ~f:ULong.of_xml) (Xml.child xml_arg0 "Index") in
       make ?confidence ?index ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let confidence = field_map json "Confidence" SegmentConfidence.of_json in
-      let index = field_map json "Index" ULong.of_json in
+    let of_json json__ =
+      let confidence =
+        field_map json__ "Confidence" SegmentConfidence.of_json in
+      let index = field_map json__ "Index" ULong.of_json in
       make ?confidence ?index ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2715,9 +4036,10 @@ module TechnicalCueSegment =
         (Option.map ~f:TechnicalCueType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?confidence ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let confidence = field_map json "Confidence" SegmentConfidence.of_json in
-      let type_ = field_map json "Type" TechnicalCueType.of_json in
+    let of_json json__ =
+      let confidence =
+        field_map json__ "Confidence" SegmentConfidence.of_json in
+      let type_ = field_map json__ "Type" TechnicalCueType.of_json in
       make ?confidence ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2782,10 +4104,10 @@ module PersonDetail =
         (Option.map ~f:PersonIndex.of_xml) (Xml.child xml_arg0 "Index") in
       make ?face ?boundingBox ?index ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let face = field_map json "Face" FaceDetail.of_json in
-      let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
-      let index = field_map json "Index" PersonIndex.of_json in
+    let of_json json__ =
+      let face = field_map json__ "Face" FaceDetail.of_json in
+      let boundingBox = field_map json__ "BoundingBox" BoundingBox.of_json in
+      let index = field_map json__ "Index" PersonIndex.of_json in
       make ?face ?boundingBox ?index ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2802,19 +4124,36 @@ module Label =
           "If Label represents an object, Instances contains the bounding boxes for each instance of the detected object. Bounding boxes are returned for common object labels such as people, cars, furniture, apparel or pets."];
       parents: Parents.t option
         [@ocaml.doc
-          "The parent labels for a label. The response includes all ancestor labels."]}
+          "The parent labels for a label. The response includes all ancestor labels."];
+      aliases: LabelAliases.t option
+        [@ocaml.doc "A list of potential aliases for a given label."];
+      categories: LabelCategories.t option
+        [@ocaml.doc
+          "A list of the categories associated with a given label."]}
     let make ?name =
       fun ?confidence ->
         fun ?instances ->
-          fun ?parents -> fun () -> { name; confidence; instances; parents }
+          fun ?parents ->
+            fun ?aliases ->
+              fun ?categories ->
+                fun () ->
+                  { name; confidence; instances; parents; aliases; categories
+                  }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:String_.to_value));
         ("Confidence", (Option.map x.confidence ~f:Percent.to_value));
         ("Instances", (Option.map x.instances ~f:Instances.to_value));
-        ("Parents", (Option.map x.parents ~f:Parents.to_value))]
+        ("Parents", (Option.map x.parents ~f:Parents.to_value));
+        ("Aliases", (Option.map x.aliases ~f:LabelAliases.to_value));
+        ("Categories", (Option.map x.categories ~f:LabelCategories.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let categories =
+        (Option.map ~f:LabelCategories.of_xml)
+          (Xml.child xml_arg0 "Categories") in
+      let aliases =
+        (Option.map ~f:LabelAliases.of_xml) (Xml.child xml_arg0 "Aliases") in
       let parents =
         (Option.map ~f:Parents.of_xml) (Xml.child xml_arg0 "Parents") in
       let instances =
@@ -2822,14 +4161,16 @@ module Label =
       let confidence =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?parents ?instances ?confidence ?name ()
+      make ?categories ?aliases ?parents ?instances ?confidence ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parents = field_map json "Parents" Parents.of_json in
-      let instances = field_map json "Instances" Instances.of_json in
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let name = field_map json "Name" String_.of_json in
-      make ?parents ?instances ?confidence ?name ()
+    let of_json json__ =
+      let categories = field_map json__ "Categories" LabelCategories.of_json in
+      let aliases = field_map json__ "Aliases" LabelAliases.of_json in
+      let parents = field_map json__ "Parents" Parents.of_json in
+      let instances = field_map json__ "Instances" Instances.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?categories ?aliases ?parents ?instances ?confidence ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Structure containing details about the detected label, including the name, detected instances, parent labels, and level of confidence."]
@@ -2837,6 +4178,9 @@ module FaceMatchList =
   struct
     type nonrec t = FaceMatch.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FaceMatch.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2857,6 +4201,49 @@ module FaceMatchList =
       list_of_json ~kind:"FaceMatchList" ~of_json:FaceMatch.of_json j
     let to_json v = composed_to_json to_value v
   end
+module LivenessImageBlob =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module ContentTypes =
+  struct
+    type nonrec t = ContentType.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ContentType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ContentType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ContentTypes" ~of_json:ContentType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ModerationLabel =
   struct
     type nonrec t =
@@ -2869,29 +4256,38 @@ module ModerationLabel =
           "The label name for the type of unsafe content detected in the image."];
       parentName: String_.t option
         [@ocaml.doc
-          "The name for the parent label. Labels at the top level of the hierarchy have the parent label \"\"."]}
+          "The name for the parent label. Labels at the top level of the hierarchy have the parent label \"\"."];
+      taxonomyLevel: UInteger.t option
+        [@ocaml.doc
+          "The level of the moderation label with regard to its taxonomy, from 1 to 3."]}
     let make ?confidence =
       fun ?name ->
-        fun ?parentName -> fun () -> { confidence; name; parentName }
+        fun ?parentName ->
+          fun ?taxonomyLevel ->
+            fun () -> { confidence; name; parentName; taxonomyLevel }
     let to_value x =
       structure_to_value
         [("Confidence", (Option.map x.confidence ~f:Percent.to_value));
         ("Name", (Option.map x.name ~f:String_.to_value));
-        ("ParentName", (Option.map x.parentName ~f:String_.to_value))]
+        ("ParentName", (Option.map x.parentName ~f:String_.to_value));
+        ("TaxonomyLevel", (Option.map x.taxonomyLevel ~f:UInteger.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let taxonomyLevel =
+        (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "TaxonomyLevel") in
       let parentName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ParentName") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       let confidence =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
-      make ?parentName ?name ?confidence ()
+      make ?taxonomyLevel ?parentName ?name ?confidence ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parentName = field_map json "ParentName" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let confidence = field_map json "Confidence" Percent.of_json in
-      make ?parentName ?name ?confidence ()
+    let of_json json__ =
+      let taxonomyLevel = field_map json__ "TaxonomyLevel" UInteger.of_json in
+      let parentName = field_map json__ "ParentName" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      make ?taxonomyLevel ?parentName ?name ?confidence ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about a single type of inappropriate, unwanted, or offensive content found in an image or video. Each type of moderated content has a label within a hierarchical taxonomy. For more information, see Content moderation in the Amazon Rekognition Developer Guide."]
@@ -2956,21 +4352,54 @@ module CelebrityDetail =
       let urls = (Option.map ~f:Urls.of_xml) (Xml.child xml_arg0 "Urls") in
       make ?knownGender ?face ?boundingBox ?confidence ?id ?name ?urls ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let knownGender = field_map json "KnownGender" KnownGender.of_json in
-      let face = field_map json "Face" FaceDetail.of_json in
-      let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let id = field_map json "Id" RekognitionUniqueId.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let urls = field_map json "Urls" Urls.of_json in
+    let of_json json__ =
+      let knownGender = field_map json__ "KnownGender" KnownGender.of_json in
+      let face = field_map json__ "Face" FaceDetail.of_json in
+      let boundingBox = field_map json__ "BoundingBox" BoundingBox.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let id = field_map json__ "Id" RekognitionUniqueId.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let urls = field_map json__ "Urls" Urls.of_json in
       make ?knownGender ?face ?boundingBox ?confidence ?id ?name ?urls ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a recognized celebrity."]
+module UnsuccessfulFaceDisassociationReasons =
+  struct
+    type nonrec t = UnsuccessfulFaceDisassociationReason.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UnsuccessfulFaceDisassociationReason.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:UnsuccessfulFaceDisassociationReason.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UnsuccessfulFaceDisassociationReasons"
+        ~of_json:UnsuccessfulFaceDisassociationReason.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module BodyParts =
   struct
     type nonrec t = ProtectiveEquipmentBodyPart.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProtectiveEquipmentBodyPart.to_value)) |>
         (fun x -> `List x)
@@ -3011,6 +4440,9 @@ module ContentClassifiers =
     type nonrec t = ContentClassifier.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:256); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ContentClassifier.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3031,6 +4463,63 @@ module ContentClassifiers =
       list_of_json ~kind:"ContentClassifiers"
         ~of_json:ContentClassifier.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module DetectLabelsImageQuality =
+  struct
+    type nonrec t =
+      {
+      brightness: Float_.t option
+        [@ocaml.doc
+          "The brightness of an image provided for label detection."];
+      sharpness: Float_.t option
+        [@ocaml.doc
+          "The sharpness of an image provided for label detection."];
+      contrast: Float_.t option
+        [@ocaml.doc "The contrast of an image provided for label detection."]}
+    let make ?brightness =
+      fun ?sharpness ->
+        fun ?contrast -> fun () -> { brightness; sharpness; contrast }
+    let to_value x =
+      structure_to_value
+        [("Brightness", (Option.map x.brightness ~f:Float_.to_value));
+        ("Sharpness", (Option.map x.sharpness ~f:Float_.to_value));
+        ("Contrast", (Option.map x.contrast ~f:Float_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let contrast =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Contrast") in
+      let sharpness =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Sharpness") in
+      let brightness =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Brightness") in
+      make ?contrast ?sharpness ?brightness ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let contrast = field_map json__ "Contrast" Float_.of_json in
+      let sharpness = field_map json__ "Sharpness" Float_.of_json in
+      let brightness = field_map json__ "Brightness" Float_.of_json in
+      make ?contrast ?sharpness ?brightness ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The quality of an image provided for label detection, with regard to brightness, sharpness, and contrast."]
+module DetectLabelsMaxDominantColors =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:20) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for DetectLabelsMaxDominantColors"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
   end
 module KinesisVideoArn =
   struct
@@ -3088,10 +4577,39 @@ module CollectionId =
     let of_json j = string_of_json ~kind:"CollectionId" j
     let to_json = simple_to_json to_value
   end
+module CustomizationFeature =
+  struct
+    type nonrec t =
+      | CONTENT_MODERATION 
+      | CUSTOM_LABELS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CONTENT_MODERATION -> "CONTENT_MODERATION"
+      | CUSTOM_LABELS -> "CUSTOM_LABELS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CONTENT_MODERATION" -> CONTENT_MODERATION
+      | "CUSTOM_LABELS" -> CUSTOM_LABELS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CustomizationFeature" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CustomizationFeature" j)
+    let to_json = simple_to_json to_value
+  end
 module DatasetMetadataList =
   struct
     type nonrec t = DatasetMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DatasetMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3113,26 +4631,30 @@ module DatasetMetadataList =
         ~of_json:DatasetMetadata.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ProjectArn =
+module ProjectAutoUpdate =
   struct
-    type nonrec t = string
-    let context_ = "ProjectArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:20) >>=
-             (fun () ->
-                (check_string_max i ~max:2048) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"(^arn:[a-z\\d-]+:rekognition:[a-z\\d-]+:\\d{12}:project\\/[a-zA-Z0-9_.\\-]{1,255}\\/[0-9]+$)")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ProjectArn" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ProjectAutoUpdate" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ProjectAutoUpdate" j)
     let to_json = simple_to_json to_value
   end
 module ProjectStatus =
@@ -3163,11 +4685,38 @@ module ProjectStatus =
     let of_json j = of_string (string_of_json ~kind:"ProjectStatus" j)
     let to_json = simple_to_json to_value
   end
+module CustomizationFeatureConfig =
+  struct
+    type nonrec t =
+      {
+      contentModeration: CustomizationFeatureContentModerationConfig.t option
+        [@ocaml.doc "Configuration options for Custom Moderation training."]}
+    let make ?contentModeration = fun () -> { contentModeration }
+    let to_value x =
+      structure_to_value
+        [("ContentModeration",
+           (Option.map x.contentModeration
+              ~f:CustomizationFeatureContentModerationConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let contentModeration =
+        (Option.map ~f:CustomizationFeatureContentModerationConfig.of_xml)
+          (Xml.child xml_arg0 "ContentModeration") in
+      make ?contentModeration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let contentModeration =
+        field_map json__ "ContentModeration"
+          CustomizationFeatureContentModerationConfig.of_json in
+      make ?contentModeration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Feature specific configuration for the training job. Configuration provided for the job must match the feature type parameter associated with project. If configuration and feature type do not match an InvalidParameterException is returned."]
 module EvaluationResult =
   struct
     type nonrec t =
       {
-      f1Score: Float.t option
+      f1Score: Float_.t option
         [@ocaml.doc
           "The F1 score for the evaluation of all labels. The F1 score metric evaluates the overall precision and recall performance of the model as a single value. A higher value indicates better precision and recall performance. A lower score indicates that precision, recall, or both are performing poorly."];
       summary: Summary.t option
@@ -3175,19 +4724,19 @@ module EvaluationResult =
     let make ?f1Score = fun ?summary -> fun () -> { f1Score; summary }
     let to_value x =
       structure_to_value
-        [("F1Score", (Option.map x.f1Score ~f:Float.to_value));
+        [("F1Score", (Option.map x.f1Score ~f:Float_.to_value));
         ("Summary", (Option.map x.summary ~f:Summary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let summary =
         (Option.map ~f:Summary.of_xml) (Xml.child xml_arg0 "Summary") in
       let f1Score =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "F1Score") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "F1Score") in
       make ?summary ?f1Score ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let summary = field_map json "Summary" Summary.of_json in
-      let f1Score = field_map json "F1Score" Float.of_json in
+    let of_json json__ =
+      let summary = field_map json__ "Summary" Summary.of_json in
+      let f1Score = field_map json__ "F1Score" Float_.of_json in
       make ?summary ?f1Score ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The evaluation results for the training of a model."]
@@ -3204,28 +4753,6 @@ module InferenceUnits =
       Int.of_string
         (string_of_xml ~kind:"an integer for InferenceUnits" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module KmsKeyId =
-  struct
-    type nonrec t = string
-    let context_ = "KmsKeyId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:2048) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^[A-Za-z0-9][A-Za-z0-9:_/+=,@.-]{0,2048}$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"KmsKeyId" j
     let to_json = simple_to_json to_value
   end
 module OutputConfig =
@@ -3250,9 +4777,9 @@ module OutputConfig =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "S3Bucket") in
       make ?s3KeyPrefix ?s3Bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3KeyPrefix = field_map json "S3KeyPrefix" S3KeyPrefix.of_json in
-      let s3Bucket = field_map json "S3Bucket" S3Bucket.of_json in
+    let of_json json__ =
+      let s3KeyPrefix = field_map json__ "S3KeyPrefix" S3KeyPrefix.of_json in
+      let s3Bucket = field_map json__ "S3Bucket" S3Bucket.of_json in
       make ?s3KeyPrefix ?s3Bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3291,6 +4818,11 @@ module ProjectVersionStatus =
       | STOPPING 
       | STOPPED 
       | DELETING 
+      | COPYING_IN_PROGRESS 
+      | COPYING_COMPLETED 
+      | COPYING_FAILED 
+      | DEPRECATED 
+      | EXPIRED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -3304,6 +4836,11 @@ module ProjectVersionStatus =
       | STOPPING -> "STOPPING"
       | STOPPED -> "STOPPED"
       | DELETING -> "DELETING"
+      | COPYING_IN_PROGRESS -> "COPYING_IN_PROGRESS"
+      | COPYING_COMPLETED -> "COPYING_COMPLETED"
+      | COPYING_FAILED -> "COPYING_FAILED"
+      | DEPRECATED -> "DEPRECATED"
+      | EXPIRED -> "EXPIRED"
       | Non_static_id s -> s
     let of_string =
       function
@@ -3316,6 +4853,11 @@ module ProjectVersionStatus =
       | "STOPPING" -> STOPPING
       | "STOPPED" -> STOPPED
       | "DELETING" -> DELETING
+      | "COPYING_IN_PROGRESS" -> COPYING_IN_PROGRESS
+      | "COPYING_COMPLETED" -> COPYING_COMPLETED
+      | "COPYING_FAILED" -> COPYING_FAILED
+      | "DEPRECATED" -> DEPRECATED
+      | "EXPIRED" -> EXPIRED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3357,10 +4899,10 @@ module TestingDataResult =
         (Option.map ~f:TestingData.of_xml) (Xml.child xml_arg0 "Input") in
       make ?validation ?output ?input ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let validation = field_map json "Validation" ValidationData.of_json in
-      let output = field_map json "Output" TestingData.of_json in
-      let input = field_map json "Input" TestingData.of_json in
+    let of_json json__ =
+      let validation = field_map json__ "Validation" ValidationData.of_json in
+      let output = field_map json__ "Output" TestingData.of_json in
+      let input = field_map json__ "Input" TestingData.of_json in
       make ?validation ?output ?input ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3370,13 +4912,13 @@ module TrainingDataResult =
     type nonrec t =
       {
       input: TrainingData.t option
-        [@ocaml.doc "The training assets that you supplied for training."];
+        [@ocaml.doc "The training data that you supplied."];
       output: TrainingData.t option
         [@ocaml.doc
-          "The images (assets) that were actually trained by Amazon Rekognition Custom Labels."];
+          "Reference to images (assets) that were actually used during training with trained model predictions."];
       validation: ValidationData.t option
         [@ocaml.doc
-          "The location of the data validation manifest. The data validation manifest is created for the training dataset during model training."]}
+          "A manifest that you supplied for training, with validation results for each line."]}
     let make ?input =
       fun ?output ->
         fun ?validation -> fun () -> { input; output; validation }
@@ -3396,14 +4938,204 @@ module TrainingDataResult =
         (Option.map ~f:TrainingData.of_xml) (Xml.child xml_arg0 "Input") in
       make ?validation ?output ?input ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let validation = field_map json "Validation" ValidationData.of_json in
-      let output = field_map json "Output" TrainingData.of_json in
-      let input = field_map json "Input" TrainingData.of_json in
+    let of_json json__ =
+      let validation = field_map json__ "Validation" ValidationData.of_json in
+      let output = field_map json__ "Output" TrainingData.of_json in
+      let input = field_map json__ "Input" TrainingData.of_json in
       make ?validation ?output ?input ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sagemaker Groundtruth format manifest files for the input, output and validation datasets that are used and created during testing."]
+       "The data validation manifest created for the training dataset during model training."]
+module VersionDescription =
+  struct
+    type nonrec t = string
+    let context_ = "VersionDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[a-zA-Z0-9-_. ()':,;?]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VersionDescription" j
+    let to_json = simple_to_json to_value
+  end
+module UnsuccessfulFaceDeletionReasons =
+  struct
+    type nonrec t = UnsuccessfulFaceDeletionReason.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UnsuccessfulFaceDeletionReason.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UnsuccessfulFaceDeletionReason.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UnsuccessfulFaceDeletionReasons"
+        ~of_json:UnsuccessfulFaceDeletionReason.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ChallengePreference =
+  struct
+    type nonrec t =
+      {
+      type_: ChallengeType.t
+        [@ocaml.doc
+          "The types of challenges that have been selected for the Face Liveness session."];
+      versions: Versions.t option
+        [@ocaml.doc
+          "The version of the challenges that have been selected for the Face Liveness session."]}
+    let context_ = "ChallengePreference"
+    let make ?versions = fun ~type_ -> fun () -> { versions; type_ }
+    let to_value x =
+      structure_to_value
+        [("Type", (Some (ChallengeType.to_value x.type_)));
+        ("Versions", (Option.map x.versions ~f:Versions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let versions =
+        (Option.map ~f:Versions.of_xml) (Xml.child xml_arg0 "Versions") in
+      let type_ =
+        ChallengeType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      make ?versions ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let versions = field_map json__ "Versions" Versions.of_json in
+      let type_ = field_map_exn json__ "Type" ChallengeType.of_json in
+      make ?versions ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An ordered list of preferred challenge type and versions."]
+module LivenessS3KeyPrefix =
+  struct
+    type nonrec t = string
+    let context_ = "LivenessS3KeyPrefix"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:950) >>=
+             (fun () -> check_pattern i ~pattern:"\\S*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LivenessS3KeyPrefix" j
+    let to_json = simple_to_json to_value
+  end
+module UnsuccessfulFaceAssociationReasons =
+  struct
+    type nonrec t = UnsuccessfulFaceAssociationReason.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UnsuccessfulFaceAssociationReason.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:UnsuccessfulFaceAssociationReason.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UnsuccessfulFaceAssociationReasons"
+        ~of_json:UnsuccessfulFaceAssociationReason.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module StreamProcessorParameterToDelete =
+  struct
+    type nonrec t =
+      | ConnectedHomeMinConfidence 
+      | RegionsOfInterest 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ConnectedHomeMinConfidence -> "ConnectedHomeMinConfidence"
+      | RegionsOfInterest -> "RegionsOfInterest"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ConnectedHomeMinConfidence" -> ConnectedHomeMinConfidence
+      | "RegionsOfInterest" -> RegionsOfInterest
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration StreamProcessorParameterToDelete"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"StreamProcessorParameterToDelete" j)
+    let to_json = simple_to_json to_value
+  end
+module ConnectedHomeSettingsForUpdate =
+  struct
+    type nonrec t =
+      {
+      labels: ConnectedHomeLabels.t option
+        [@ocaml.doc
+          "Specifies what you want to detect in the video, such as people, packages, or pets. The current valid labels you can include in this list are: \"PERSON\", \"PET\", \"PACKAGE\", and \"ALL\"."];
+      minConfidence: Percent.t option
+        [@ocaml.doc
+          "The minimum confidence required to label an object in the video."]}
+    let make ?labels =
+      fun ?minConfidence -> fun () -> { labels; minConfidence }
+    let to_value x =
+      structure_to_value
+        [("Labels", (Option.map x.labels ~f:ConnectedHomeLabels.to_value));
+        ("MinConfidence", (Option.map x.minConfidence ~f:Percent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let minConfidence =
+        (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "MinConfidence") in
+      let labels =
+        (Option.map ~f:ConnectedHomeLabels.of_xml)
+          (Xml.child xml_arg0 "Labels") in
+      make ?minConfidence ?labels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let minConfidence = field_map json__ "MinConfidence" Percent.of_json in
+      let labels = field_map json__ "Labels" ConnectedHomeLabels.of_json in
+      make ?minConfidence ?labels ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The label detection settings you want to use in your stream processor. This includes the labels you want the stream processor to detect and the minimum confidence level allowed to label objects."]
 module GroundTruthBlob =
   struct
     type nonrec t = string
@@ -3501,7 +5233,7 @@ module DetectionFilter =
       {
       minConfidence: Percent.t option
         [@ocaml.doc
-          "Sets the confidence of word detection. Words with detection confidence below this will be excluded from the result. Values should be between 50 and 100 as Text in Video will not return any result below 50."];
+          "Sets the confidence of word detection. Words with detection confidence below this will be excluded from the result. Values should be between 0 and 100. The default MinConfidence is 80."];
       minBoundingBoxHeight: BoundingBoxHeight.t option
         [@ocaml.doc
           "Sets the minimum height of the word bounding box. Words with bounding box heights lesser than this value will be excluded from the result. Value is relative to the video frame height."];
@@ -3532,12 +5264,12 @@ module DetectionFilter =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "MinConfidence") in
       make ?minBoundingBoxWidth ?minBoundingBoxHeight ?minConfidence ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let minBoundingBoxWidth =
-        field_map json "MinBoundingBoxWidth" BoundingBoxWidth.of_json in
+        field_map json__ "MinBoundingBoxWidth" BoundingBoxWidth.of_json in
       let minBoundingBoxHeight =
-        field_map json "MinBoundingBoxHeight" BoundingBoxHeight.of_json in
-      let minConfidence = field_map json "MinConfidence" Percent.of_json in
+        field_map json__ "MinBoundingBoxHeight" BoundingBoxHeight.of_json in
+      let minConfidence = field_map json__ "MinConfidence" Percent.of_json in
       make ?minBoundingBoxWidth ?minBoundingBoxHeight ?minConfidence ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3550,6 +5282,9 @@ module RegionsOfInterest =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RegionOfInterest.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3571,6 +5306,62 @@ module RegionsOfInterest =
         ~of_json:RegionOfInterest.of_json j
     let to_json v = composed_to_json to_value v
   end
+module KinesisVideoStreamStartSelector =
+  struct
+    type nonrec t =
+      {
+      producerTimestamp: ULong.t option
+        [@ocaml.doc
+          "The timestamp from the producer corresponding to the fragment, in milliseconds, expressed in unix time format."];
+      fragmentNumber: KinesisVideoStreamFragmentNumber.t option
+        [@ocaml.doc
+          "The unique identifier of the fragment. This value monotonically increases based on the ingestion order."]}
+    let make ?producerTimestamp =
+      fun ?fragmentNumber -> fun () -> { producerTimestamp; fragmentNumber }
+    let to_value x =
+      structure_to_value
+        [("ProducerTimestamp",
+           (Option.map x.producerTimestamp ~f:ULong.to_value));
+        ("FragmentNumber",
+          (Option.map x.fragmentNumber
+             ~f:KinesisVideoStreamFragmentNumber.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fragmentNumber =
+        (Option.map ~f:KinesisVideoStreamFragmentNumber.of_xml)
+          (Xml.child xml_arg0 "FragmentNumber") in
+      let producerTimestamp =
+        (Option.map ~f:ULong.of_xml) (Xml.child xml_arg0 "ProducerTimestamp") in
+      make ?fragmentNumber ?producerTimestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fragmentNumber =
+        field_map json__ "FragmentNumber"
+          KinesisVideoStreamFragmentNumber.of_json in
+      let producerTimestamp =
+        field_map json__ "ProducerTimestamp" ULong.of_json in
+      make ?fragmentNumber ?producerTimestamp ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the starting point in a Kinesis stream to start processing. You can use the producer timestamp or the fragment number. One of either producer timestamp or fragment number is required. If you use the producer timestamp, you must put the time in milliseconds. For more information about fragment numbers, see Fragment."]
+module MaxDurationInSecondsULong =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int64_max i ~max:120L) >>=
+             (fun () -> check_int64_min i ~min:1L));
+        i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module StartShotDetectionFilter =
   struct
     type nonrec t =
@@ -3590,9 +5381,9 @@ module StartShotDetectionFilter =
           (Xml.child xml_arg0 "MinSegmentConfidence") in
       make ?minSegmentConfidence ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let minSegmentConfidence =
-        field_map json "MinSegmentConfidence" SegmentConfidence.of_json in
+        field_map json__ "MinSegmentConfidence" SegmentConfidence.of_json in
       make ?minSegmentConfidence ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3623,14 +5414,168 @@ module StartTechnicalCueDetectionFilter =
           (Xml.child xml_arg0 "MinSegmentConfidence") in
       make ?blackFrame ?minSegmentConfidence ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let blackFrame = field_map json "BlackFrame" BlackFrame.of_json in
+    let of_json json__ =
+      let blackFrame = field_map json__ "BlackFrame" BlackFrame.of_json in
       let minSegmentConfidence =
-        field_map json "MinSegmentConfidence" SegmentConfidence.of_json in
+        field_map json__ "MinSegmentConfidence" SegmentConfidence.of_json in
       make ?blackFrame ?minSegmentConfidence ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Filters for the technical segments returned by GetSegmentDetection. For more information, see StartSegmentDetectionFilters."]
+module LabelDetectionFeatureName =
+  struct
+    type nonrec t =
+      | GENERAL_LABELS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | GENERAL_LABELS -> "GENERAL_LABELS" | Non_static_id s -> s
+    let of_string =
+      function | "GENERAL_LABELS" -> GENERAL_LABELS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LabelDetectionFeatureName" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LabelDetectionFeatureName" j)
+    let to_json = simple_to_json to_value
+  end
+module GeneralLabelsSettings =
+  struct
+    type nonrec t =
+      {
+      labelInclusionFilters: GeneralLabelsFilterList.t option
+        [@ocaml.doc
+          "The labels that should be included in the return from DetectLabels."];
+      labelExclusionFilters: GeneralLabelsFilterList.t option
+        [@ocaml.doc
+          "The labels that should be excluded from the return from DetectLabels."];
+      labelCategoryInclusionFilters: GeneralLabelsFilterList.t option
+        [@ocaml.doc
+          "The label categories that should be included in the return from DetectLabels."];
+      labelCategoryExclusionFilters: GeneralLabelsFilterList.t option
+        [@ocaml.doc
+          "The label categories that should be excluded from the return from DetectLabels."]}
+    let make ?labelInclusionFilters =
+      fun ?labelExclusionFilters ->
+        fun ?labelCategoryInclusionFilters ->
+          fun ?labelCategoryExclusionFilters ->
+            fun () ->
+              {
+                labelInclusionFilters;
+                labelExclusionFilters;
+                labelCategoryInclusionFilters;
+                labelCategoryExclusionFilters
+              }
+    let to_value x =
+      structure_to_value
+        [("LabelInclusionFilters",
+           (Option.map x.labelInclusionFilters
+              ~f:GeneralLabelsFilterList.to_value));
+        ("LabelExclusionFilters",
+          (Option.map x.labelExclusionFilters
+             ~f:GeneralLabelsFilterList.to_value));
+        ("LabelCategoryInclusionFilters",
+          (Option.map x.labelCategoryInclusionFilters
+             ~f:GeneralLabelsFilterList.to_value));
+        ("LabelCategoryExclusionFilters",
+          (Option.map x.labelCategoryExclusionFilters
+             ~f:GeneralLabelsFilterList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let labelCategoryExclusionFilters =
+        (Option.map ~f:GeneralLabelsFilterList.of_xml)
+          (Xml.child xml_arg0 "LabelCategoryExclusionFilters") in
+      let labelCategoryInclusionFilters =
+        (Option.map ~f:GeneralLabelsFilterList.of_xml)
+          (Xml.child xml_arg0 "LabelCategoryInclusionFilters") in
+      let labelExclusionFilters =
+        (Option.map ~f:GeneralLabelsFilterList.of_xml)
+          (Xml.child xml_arg0 "LabelExclusionFilters") in
+      let labelInclusionFilters =
+        (Option.map ~f:GeneralLabelsFilterList.of_xml)
+          (Xml.child xml_arg0 "LabelInclusionFilters") in
+      make ?labelCategoryExclusionFilters ?labelCategoryInclusionFilters
+        ?labelExclusionFilters ?labelInclusionFilters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let labelCategoryExclusionFilters =
+        field_map json__ "LabelCategoryExclusionFilters"
+          GeneralLabelsFilterList.of_json in
+      let labelCategoryInclusionFilters =
+        field_map json__ "LabelCategoryInclusionFilters"
+          GeneralLabelsFilterList.of_json in
+      let labelExclusionFilters =
+        field_map json__ "LabelExclusionFilters"
+          GeneralLabelsFilterList.of_json in
+      let labelInclusionFilters =
+        field_map json__ "LabelInclusionFilters"
+          GeneralLabelsFilterList.of_json in
+      make ?labelCategoryExclusionFilters ?labelCategoryInclusionFilters
+        ?labelExclusionFilters ?labelInclusionFilters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains filters for the object labels returned by DetectLabels. Filters can be inclusive, exclusive, or a combination of both and can be applied to individual labels or entire label categories. To see a list of label categories, see Detecting Labels."]
+module UserMatch =
+  struct
+    type nonrec t =
+      {
+      similarity: Percent.t option
+        [@ocaml.doc "Describes the UserID metadata."];
+      user: MatchedUser.t option
+        [@ocaml.doc
+          "Confidence in the match of this UserID with the input face."]}
+    let make ?similarity = fun ?user -> fun () -> { similarity; user }
+    let to_value x =
+      structure_to_value
+        [("Similarity", (Option.map x.similarity ~f:Percent.to_value));
+        ("User", (Option.map x.user ~f:MatchedUser.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let user =
+        (Option.map ~f:MatchedUser.of_xml) (Xml.child xml_arg0 "User") in
+      let similarity =
+        (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Similarity") in
+      make ?user ?similarity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let user = field_map json__ "User" MatchedUser.of_json in
+      let similarity = field_map json__ "Similarity" Percent.of_json in
+      make ?user ?similarity ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides UserID metadata along with the confidence in the match of this UserID with the input face."]
+module UnsearchedFace =
+  struct
+    type nonrec t =
+      {
+      faceDetails: FaceDetail.t option ;
+      reasons: UnsearchedFaceReasons.t option
+        [@ocaml.doc "Reasons why a face wasn't used for Search."]}
+    let make ?faceDetails =
+      fun ?reasons -> fun () -> { faceDetails; reasons }
+    let to_value x =
+      structure_to_value
+        [("FaceDetails", (Option.map x.faceDetails ~f:FaceDetail.to_value));
+        ("Reasons", (Option.map x.reasons ~f:UnsearchedFaceReasons.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reasons =
+        (Option.map ~f:UnsearchedFaceReasons.of_xml)
+          (Xml.child xml_arg0 "Reasons") in
+      let faceDetails =
+        (Option.map ~f:FaceDetail.of_xml) (Xml.child xml_arg0 "FaceDetails") in
+      make ?reasons ?faceDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reasons = field_map json__ "Reasons" UnsearchedFaceReasons.of_json in
+      let faceDetails = field_map json__ "FaceDetails" FaceDetail.of_json in
+      make ?reasons ?faceDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Face details inferred from the image but not used for search. The response attribute contains reasons for why a face wasn't used for Search."]
 module ImageBlob =
   struct
     type nonrec t = string
@@ -3691,17 +5636,47 @@ module Celebrity =
       let urls = (Option.map ~f:Urls.of_xml) (Xml.child xml_arg0 "Urls") in
       make ?knownGender ?matchConfidence ?face ?id ?name ?urls ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let knownGender = field_map json "KnownGender" KnownGender.of_json in
-      let matchConfidence = field_map json "MatchConfidence" Percent.of_json in
-      let face = field_map json "Face" ComparedFace.of_json in
-      let id = field_map json "Id" RekognitionUniqueId.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let urls = field_map json "Urls" Urls.of_json in
+    let of_json json__ =
+      let knownGender = field_map json__ "KnownGender" KnownGender.of_json in
+      let matchConfidence =
+        field_map json__ "MatchConfidence" Percent.of_json in
+      let face = field_map json__ "Face" ComparedFace.of_json in
+      let id = field_map json__ "Id" RekognitionUniqueId.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let urls = field_map json__ "Urls" Urls.of_json in
       make ?knownGender ?matchConfidence ?face ?id ?name ?urls ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about a celebrity recognized by the RecognizeCelebrities operation."]
+module User =
+  struct
+    type nonrec t =
+      {
+      userId: UserId.t option
+        [@ocaml.doc
+          "A provided ID for the User. Unique within the collection."];
+      userStatus: UserStatus.t option
+        [@ocaml.doc
+          "Communicates if the UserID has been updated with latest set of faces to be associated with the UserID."]}
+    let make ?userId = fun ?userStatus -> fun () -> { userId; userStatus }
+    let to_value x =
+      structure_to_value
+        [("UserId", (Option.map x.userId ~f:UserId.to_value));
+        ("UserStatus", (Option.map x.userStatus ~f:UserStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userStatus =
+        (Option.map ~f:UserStatus.of_xml) (Xml.child xml_arg0 "UserStatus") in
+      let userId =
+        (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "UserId") in
+      make ?userStatus ?userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userStatus = field_map json__ "UserStatus" UserStatus.of_json in
+      let userId = field_map json__ "UserId" UserId.of_json in
+      make ?userStatus ?userId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Metadata of the user stored in a collection."]
 module StreamProcessor =
   struct
     type nonrec t =
@@ -3726,13 +5701,250 @@ module StreamProcessor =
           (Xml.child xml_arg0 "Name") in
       make ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" StreamProcessorStatus.of_json in
-      let name = field_map json "Name" StreamProcessorName.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" StreamProcessorStatus.of_json in
+      let name = field_map json__ "Name" StreamProcessorName.of_json in
       make ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that recognizes faces in a streaming video. An Amazon Rekognition stream processor is created by a call to CreateStreamProcessor. The request parameters for CreateStreamProcessor describe the Kinesis video stream source for the streaming video, face recognition parameters, and where to stream the analysis resullts."]
+       "An object that recognizes faces or labels in a streaming video. An Amazon Rekognition stream processor is created by a call to CreateStreamProcessor. The request parameters for CreateStreamProcessor describe the Kinesis video stream source for the streaming video, face recognition parameters, and where to stream the analysis resullts."]
+module ProjectPolicy =
+  struct
+    type nonrec t =
+      {
+      projectArn: ProjectArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the project to which the project policy is attached."];
+      policyName: ProjectPolicyName.t option
+        [@ocaml.doc "The name of the project policy."];
+      policyRevisionId: ProjectPolicyRevisionId.t option
+        [@ocaml.doc "The revision ID of the project policy."];
+      policyDocument: ProjectPolicyDocument.t option
+        [@ocaml.doc "The JSON document for the project policy."];
+      creationTimestamp: DateTime.t option
+        [@ocaml.doc
+          "The Unix datetime for the creation of the project policy."];
+      lastUpdatedTimestamp: DateTime.t option
+        [@ocaml.doc
+          "The Unix datetime for when the project policy was last updated."]}
+    let make ?projectArn =
+      fun ?policyName ->
+        fun ?policyRevisionId ->
+          fun ?policyDocument ->
+            fun ?creationTimestamp ->
+              fun ?lastUpdatedTimestamp ->
+                fun () ->
+                  {
+                    projectArn;
+                    policyName;
+                    policyRevisionId;
+                    policyDocument;
+                    creationTimestamp;
+                    lastUpdatedTimestamp
+                  }
+    let to_value x =
+      structure_to_value
+        [("ProjectArn", (Option.map x.projectArn ~f:ProjectArn.to_value));
+        ("PolicyName",
+          (Option.map x.policyName ~f:ProjectPolicyName.to_value));
+        ("PolicyRevisionId",
+          (Option.map x.policyRevisionId ~f:ProjectPolicyRevisionId.to_value));
+        ("PolicyDocument",
+          (Option.map x.policyDocument ~f:ProjectPolicyDocument.to_value));
+        ("CreationTimestamp",
+          (Option.map x.creationTimestamp ~f:DateTime.to_value));
+        ("LastUpdatedTimestamp",
+          (Option.map x.lastUpdatedTimestamp ~f:DateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdatedTimestamp =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTimestamp") in
+      let creationTimestamp =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "CreationTimestamp") in
+      let policyDocument =
+        (Option.map ~f:ProjectPolicyDocument.of_xml)
+          (Xml.child xml_arg0 "PolicyDocument") in
+      let policyRevisionId =
+        (Option.map ~f:ProjectPolicyRevisionId.of_xml)
+          (Xml.child xml_arg0 "PolicyRevisionId") in
+      let policyName =
+        (Option.map ~f:ProjectPolicyName.of_xml)
+          (Xml.child xml_arg0 "PolicyName") in
+      let projectArn =
+        (Option.map ~f:ProjectArn.of_xml) (Xml.child xml_arg0 "ProjectArn") in
+      make ?lastUpdatedTimestamp ?creationTimestamp ?policyDocument
+        ?policyRevisionId ?policyName ?projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdatedTimestamp =
+        field_map json__ "LastUpdatedTimestamp" DateTime.of_json in
+      let creationTimestamp =
+        field_map json__ "CreationTimestamp" DateTime.of_json in
+      let policyDocument =
+        field_map json__ "PolicyDocument" ProjectPolicyDocument.of_json in
+      let policyRevisionId =
+        field_map json__ "PolicyRevisionId" ProjectPolicyRevisionId.of_json in
+      let policyName =
+        field_map json__ "PolicyName" ProjectPolicyName.of_json in
+      let projectArn = field_map json__ "ProjectArn" ProjectArn.of_json in
+      make ?lastUpdatedTimestamp ?creationTimestamp ?policyDocument
+        ?policyRevisionId ?policyName ?projectArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a project policy in the response from ListProjectPolicies."]
+module MediaAnalysisJobDescription =
+  struct
+    type nonrec t =
+      {
+      jobId: MediaAnalysisJobId.t option
+        [@ocaml.doc "The identifier for a media analysis job."];
+      jobName: MediaAnalysisJobName.t option
+        [@ocaml.doc "The name of a media analysis job."];
+      operationsConfig: MediaAnalysisOperationsConfig.t option
+        [@ocaml.doc
+          "Operation configurations that were provided during job creation."];
+      status: MediaAnalysisJobStatus.t option
+        [@ocaml.doc "The status of the media analysis job being retrieved."];
+      failureDetails: MediaAnalysisJobFailureDetails.t option
+        [@ocaml.doc
+          "Details about the error that resulted in failure of the job."];
+      creationTimestamp: DateTime.t option
+        [@ocaml.doc "The Unix date and time when the job was started."];
+      completionTimestamp: DateTime.t option
+        [@ocaml.doc "The Unix date and time when the job finished."];
+      input: MediaAnalysisInput.t option
+        [@ocaml.doc
+          "Reference to the input manifest that was provided in the job creation request."];
+      outputConfig: MediaAnalysisOutputConfig.t option
+        [@ocaml.doc
+          "Output configuration that was provided in the creation request."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc "KMS Key that was provided in the creation request."];
+      results: MediaAnalysisResults.t option
+        [@ocaml.doc "Output manifest that contains prediction results."];
+      manifestSummary: MediaAnalysisManifestSummary.t option
+        [@ocaml.doc
+          "Provides statistics on input manifest and errors identified in the input manifest."]}
+    let make ?jobId =
+      fun ?jobName ->
+        fun ?operationsConfig ->
+          fun ?status ->
+            fun ?failureDetails ->
+              fun ?creationTimestamp ->
+                fun ?completionTimestamp ->
+                  fun ?input ->
+                    fun ?outputConfig ->
+                      fun ?kmsKeyId ->
+                        fun ?results ->
+                          fun ?manifestSummary ->
+                            fun () ->
+                              {
+                                jobId;
+                                jobName;
+                                operationsConfig;
+                                status;
+                                failureDetails;
+                                creationTimestamp;
+                                completionTimestamp;
+                                input;
+                                outputConfig;
+                                kmsKeyId;
+                                results;
+                                manifestSummary
+                              }
+    let to_value x =
+      structure_to_value
+        [("JobId", (Option.map x.jobId ~f:MediaAnalysisJobId.to_value));
+        ("JobName", (Option.map x.jobName ~f:MediaAnalysisJobName.to_value));
+        ("OperationsConfig",
+          (Option.map x.operationsConfig
+             ~f:MediaAnalysisOperationsConfig.to_value));
+        ("Status", (Option.map x.status ~f:MediaAnalysisJobStatus.to_value));
+        ("FailureDetails",
+          (Option.map x.failureDetails
+             ~f:MediaAnalysisJobFailureDetails.to_value));
+        ("CreationTimestamp",
+          (Option.map x.creationTimestamp ~f:DateTime.to_value));
+        ("CompletionTimestamp",
+          (Option.map x.completionTimestamp ~f:DateTime.to_value));
+        ("Input", (Option.map x.input ~f:MediaAnalysisInput.to_value));
+        ("OutputConfig",
+          (Option.map x.outputConfig ~f:MediaAnalysisOutputConfig.to_value));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("Results", (Option.map x.results ~f:MediaAnalysisResults.to_value));
+        ("ManifestSummary",
+          (Option.map x.manifestSummary
+             ~f:MediaAnalysisManifestSummary.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let manifestSummary =
+        (Option.map ~f:MediaAnalysisManifestSummary.of_xml)
+          (Xml.child xml_arg0 "ManifestSummary") in
+      let results =
+        (Option.map ~f:MediaAnalysisResults.of_xml)
+          (Xml.child xml_arg0 "Results") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let outputConfig =
+        (Option.map ~f:MediaAnalysisOutputConfig.of_xml)
+          (Xml.child xml_arg0 "OutputConfig") in
+      let input =
+        (Option.map ~f:MediaAnalysisInput.of_xml)
+          (Xml.child xml_arg0 "Input") in
+      let completionTimestamp =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "CompletionTimestamp") in
+      let creationTimestamp =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "CreationTimestamp") in
+      let failureDetails =
+        (Option.map ~f:MediaAnalysisJobFailureDetails.of_xml)
+          (Xml.child xml_arg0 "FailureDetails") in
+      let status =
+        (Option.map ~f:MediaAnalysisJobStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let operationsConfig =
+        (Option.map ~f:MediaAnalysisOperationsConfig.of_xml)
+          (Xml.child xml_arg0 "OperationsConfig") in
+      let jobName =
+        (Option.map ~f:MediaAnalysisJobName.of_xml)
+          (Xml.child xml_arg0 "JobName") in
+      let jobId =
+        (Option.map ~f:MediaAnalysisJobId.of_xml)
+          (Xml.child xml_arg0 "JobId") in
+      make ?manifestSummary ?results ?kmsKeyId ?outputConfig ?input
+        ?completionTimestamp ?creationTimestamp ?failureDetails ?status
+        ?operationsConfig ?jobName ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let manifestSummary =
+        field_map json__ "ManifestSummary"
+          MediaAnalysisManifestSummary.of_json in
+      let results = field_map json__ "Results" MediaAnalysisResults.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let outputConfig =
+        field_map json__ "OutputConfig" MediaAnalysisOutputConfig.of_json in
+      let input = field_map json__ "Input" MediaAnalysisInput.of_json in
+      let completionTimestamp =
+        field_map json__ "CompletionTimestamp" DateTime.of_json in
+      let creationTimestamp =
+        field_map json__ "CreationTimestamp" DateTime.of_json in
+      let failureDetails =
+        field_map json__ "FailureDetails"
+          MediaAnalysisJobFailureDetails.of_json in
+      let status = field_map json__ "Status" MediaAnalysisJobStatus.of_json in
+      let operationsConfig =
+        field_map json__ "OperationsConfig"
+          MediaAnalysisOperationsConfig.of_json in
+      let jobName = field_map json__ "JobName" MediaAnalysisJobName.of_json in
+      let jobId = field_map json__ "JobId" MediaAnalysisJobId.of_json in
+      make ?manifestSummary ?results ?kmsKeyId ?outputConfig ?input
+        ?completionTimestamp ?creationTimestamp ?failureDetails ?status
+        ?operationsConfig ?jobName ?jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Description for a media analysis job."]
 module DatasetLabelDescription =
   struct
     type nonrec t =
@@ -3756,9 +5968,10 @@ module DatasetLabelDescription =
         (Option.map ~f:DatasetLabel.of_xml) (Xml.child xml_arg0 "LabelName") in
       make ?labelStats ?labelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let labelStats = field_map json "LabelStats" DatasetLabelStats.of_json in
-      let labelName = field_map json "LabelName" DatasetLabel.of_json in
+    let of_json json__ =
+      let labelStats =
+        field_map json__ "LabelStats" DatasetLabelStats.of_json in
+      let labelName = field_map json__ "LabelName" DatasetLabel.of_json in
       make ?labelStats ?labelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3805,9 +6018,9 @@ module FaceRecord =
       let face = (Option.map ~f:Face.of_xml) (Xml.child xml_arg0 "Face") in
       make ?faceDetail ?face ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let faceDetail = field_map json "FaceDetail" FaceDetail.of_json in
-      let face = field_map json "Face" Face.of_json in
+    let of_json json__ =
+      let faceDetail = field_map json__ "FaceDetail" FaceDetail.of_json in
+      let face = field_map json__ "Face" Face.of_json in
       make ?faceDetail ?face ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3835,9 +6048,9 @@ module UnindexedFace =
         (Option.map ~f:Reasons.of_xml) (Xml.child xml_arg0 "Reasons") in
       make ?faceDetail ?reasons ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let faceDetail = field_map json "FaceDetail" FaceDetail.of_json in
-      let reasons = field_map json "Reasons" Reasons.of_json in
+    let of_json json__ =
+      let faceDetail = field_map json__ "FaceDetail" FaceDetail.of_json in
+      let reasons = field_map json__ "Reasons" Reasons.of_json in
       make ?faceDetail ?reasons ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3847,12 +6060,54 @@ module Attribute =
     type nonrec t =
       | DEFAULT 
       | ALL 
+      | AGE_RANGE 
+      | BEARD 
+      | EMOTIONS 
+      | EYE_DIRECTION 
+      | EYEGLASSES 
+      | EYES_OPEN 
+      | GENDER 
+      | MOUTH_OPEN 
+      | MUSTACHE 
+      | FACE_OCCLUDED 
+      | SMILE 
+      | SUNGLASSES 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | DEFAULT -> "DEFAULT" | ALL -> "ALL" | Non_static_id s -> s
+      function
+      | DEFAULT -> "DEFAULT"
+      | ALL -> "ALL"
+      | AGE_RANGE -> "AGE_RANGE"
+      | BEARD -> "BEARD"
+      | EMOTIONS -> "EMOTIONS"
+      | EYE_DIRECTION -> "EYE_DIRECTION"
+      | EYEGLASSES -> "EYEGLASSES"
+      | EYES_OPEN -> "EYES_OPEN"
+      | GENDER -> "GENDER"
+      | MOUTH_OPEN -> "MOUTH_OPEN"
+      | MUSTACHE -> "MUSTACHE"
+      | FACE_OCCLUDED -> "FACE_OCCLUDED"
+      | SMILE -> "SMILE"
+      | SUNGLASSES -> "SUNGLASSES"
+      | Non_static_id s -> s
     let of_string =
-      function | "DEFAULT" -> DEFAULT | "ALL" -> ALL | x -> Non_static_id x
+      function
+      | "DEFAULT" -> DEFAULT
+      | "ALL" -> ALL
+      | "AGE_RANGE" -> AGE_RANGE
+      | "BEARD" -> BEARD
+      | "EMOTIONS" -> EMOTIONS
+      | "EYE_DIRECTION" -> EYE_DIRECTION
+      | "EYEGLASSES" -> EYEGLASSES
+      | "EYES_OPEN" -> EYES_OPEN
+      | "GENDER" -> GENDER
+      | "MOUTH_OPEN" -> MOUTH_OPEN
+      | "MUSTACHE" -> MUSTACHE
+      | "FACE_OCCLUDED" -> FACE_OCCLUDED
+      | "SMILE" -> SMILE
+      | "SUNGLASSES" -> SUNGLASSES
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -3867,7 +6122,7 @@ module TextDetectionResult =
       {
       timestamp: Timestamp.t option
         [@ocaml.doc
-          "The time, in milliseconds from the start of the video, that the text was detected."];
+          "The time, in milliseconds from the start of the video, that the text was detected. Note that Timestamp is not guaranteed to be accurate to the individual frame where the text first appears."];
       textDetection: TextDetection.t option
         [@ocaml.doc "Details about text detected in a video."]}
     let make ?timestamp =
@@ -3886,10 +6141,10 @@ module TextDetectionResult =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?textDetection ?timestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let textDetection =
-        field_map json "TextDetection" TextDetection.of_json in
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
+        field_map json__ "TextDetection" TextDetection.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
       make ?textDetection ?timestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3930,11 +6185,12 @@ module AudioMetadata =
       let codec = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Codec") in
       make ?numberOfChannels ?sampleRate ?durationMillis ?codec ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let numberOfChannels = field_map json "NumberOfChannels" ULong.of_json in
-      let sampleRate = field_map json "SampleRate" ULong.of_json in
-      let durationMillis = field_map json "DurationMillis" ULong.of_json in
-      let codec = field_map json "Codec" String_.of_json in
+    let of_json json__ =
+      let numberOfChannels =
+        field_map json__ "NumberOfChannels" ULong.of_json in
+      let sampleRate = field_map json__ "SampleRate" ULong.of_json in
+      let durationMillis = field_map json__ "DurationMillis" ULong.of_json in
+      let codec = field_map json__ "Codec" String_.of_json in
       make ?numberOfChannels ?sampleRate ?durationMillis ?codec ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4060,24 +6316,25 @@ module SegmentDetection =
         ?startTimecodeSMPTE ?durationMillis ?endTimestampMillis
         ?startTimestampMillis ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let durationFrames = field_map json "DurationFrames" ULong.of_json in
-      let endFrameNumber = field_map json "EndFrameNumber" ULong.of_json in
-      let startFrameNumber = field_map json "StartFrameNumber" ULong.of_json in
-      let shotSegment = field_map json "ShotSegment" ShotSegment.of_json in
+    let of_json json__ =
+      let durationFrames = field_map json__ "DurationFrames" ULong.of_json in
+      let endFrameNumber = field_map json__ "EndFrameNumber" ULong.of_json in
+      let startFrameNumber =
+        field_map json__ "StartFrameNumber" ULong.of_json in
+      let shotSegment = field_map json__ "ShotSegment" ShotSegment.of_json in
       let technicalCueSegment =
-        field_map json "TechnicalCueSegment" TechnicalCueSegment.of_json in
-      let durationSMPTE = field_map json "DurationSMPTE" Timecode.of_json in
+        field_map json__ "TechnicalCueSegment" TechnicalCueSegment.of_json in
+      let durationSMPTE = field_map json__ "DurationSMPTE" Timecode.of_json in
       let endTimecodeSMPTE =
-        field_map json "EndTimecodeSMPTE" Timecode.of_json in
+        field_map json__ "EndTimecodeSMPTE" Timecode.of_json in
       let startTimecodeSMPTE =
-        field_map json "StartTimecodeSMPTE" Timecode.of_json in
-      let durationMillis = field_map json "DurationMillis" ULong.of_json in
+        field_map json__ "StartTimecodeSMPTE" Timecode.of_json in
+      let durationMillis = field_map json__ "DurationMillis" ULong.of_json in
       let endTimestampMillis =
-        field_map json "EndTimestampMillis" Timestamp.of_json in
+        field_map json__ "EndTimestampMillis" Timestamp.of_json in
       let startTimestampMillis =
-        field_map json "StartTimestampMillis" Timestamp.of_json in
-      let type_ = field_map json "Type" SegmentType.of_json in
+        field_map json__ "StartTimestampMillis" Timestamp.of_json in
+      let type_ = field_map json__ "Type" SegmentType.of_json in
       make ?durationFrames ?endFrameNumber ?startFrameNumber ?shotSegment
         ?technicalCueSegment ?durationSMPTE ?endTimecodeSMPTE
         ?startTimecodeSMPTE ?durationMillis ?endTimestampMillis
@@ -4107,9 +6364,9 @@ module SegmentTypeInfo =
         (Option.map ~f:SegmentType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?modelVersion ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelVersion = field_map json "ModelVersion" String_.of_json in
-      let type_ = field_map json "Type" SegmentType.of_json in
+    let of_json json__ =
+      let modelVersion = field_map json__ "ModelVersion" String_.of_json in
+      let type_ = field_map json__ "Type" SegmentType.of_json in
       make ?modelVersion ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4125,7 +6382,7 @@ module VideoMetadata =
       format: String_.t option
         [@ocaml.doc
           "Format of the analyzed video. Possible values are MP4, MOV and AVI."];
-      frameRate: Float.t option
+      frameRate: Float_.t option
         [@ocaml.doc "Number of frames per second in the video."];
       frameHeight: ULong.t option
         [@ocaml.doc "Vertical pixel dimension of the video."];
@@ -4156,7 +6413,7 @@ module VideoMetadata =
         [("Codec", (Option.map x.codec ~f:String_.to_value));
         ("DurationMillis", (Option.map x.durationMillis ~f:ULong.to_value));
         ("Format", (Option.map x.format ~f:String_.to_value));
-        ("FrameRate", (Option.map x.frameRate ~f:Float.to_value));
+        ("FrameRate", (Option.map x.frameRate ~f:Float_.to_value));
         ("FrameHeight", (Option.map x.frameHeight ~f:ULong.to_value));
         ("FrameWidth", (Option.map x.frameWidth ~f:ULong.to_value));
         ("ColorRange", (Option.map x.colorRange ~f:VideoColorRange.to_value))]
@@ -4170,7 +6427,7 @@ module VideoMetadata =
       let frameHeight =
         (Option.map ~f:ULong.of_xml) (Xml.child xml_arg0 "FrameHeight") in
       let frameRate =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "FrameRate") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "FrameRate") in
       let format =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Format") in
       let durationMillis =
@@ -4179,14 +6436,14 @@ module VideoMetadata =
       make ?colorRange ?frameWidth ?frameHeight ?frameRate ?format
         ?durationMillis ?codec ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let colorRange = field_map json "ColorRange" VideoColorRange.of_json in
-      let frameWidth = field_map json "FrameWidth" ULong.of_json in
-      let frameHeight = field_map json "FrameHeight" ULong.of_json in
-      let frameRate = field_map json "FrameRate" Float.of_json in
-      let format = field_map json "Format" String_.of_json in
-      let durationMillis = field_map json "DurationMillis" ULong.of_json in
-      let codec = field_map json "Codec" String_.of_json in
+    let of_json json__ =
+      let colorRange = field_map json__ "ColorRange" VideoColorRange.of_json in
+      let frameWidth = field_map json__ "FrameWidth" ULong.of_json in
+      let frameHeight = field_map json__ "FrameHeight" ULong.of_json in
+      let frameRate = field_map json__ "FrameRate" Float_.of_json in
+      let format = field_map json__ "Format" String_.of_json in
+      let durationMillis = field_map json__ "DurationMillis" ULong.of_json in
+      let codec = field_map json__ "Codec" String_.of_json in
       make ?colorRange ?frameWidth ?frameHeight ?frameRate ?format
         ?durationMillis ?codec ()
     let to_json v = composed_to_json to_value v
@@ -4198,7 +6455,7 @@ module PersonDetection =
       {
       timestamp: Timestamp.t option
         [@ocaml.doc
-          "The time, in milliseconds from the start of the video, that the person's path was tracked."];
+          "The time, in milliseconds from the start of the video, that the person's path was tracked. Note that Timestamp is not guaranteed to be accurate to the individual frame where the person's path first appears."];
       person: PersonDetail.t option
         [@ocaml.doc
           "Details about a person whose path was tracked in a video."]}
@@ -4215,37 +6472,131 @@ module PersonDetection =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?person ?timestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let person = field_map json "Person" PersonDetail.of_json in
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
+    let of_json json__ =
+      let person = field_map json__ "Person" PersonDetail.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
       make ?person ?timestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Details and path tracking information for a single time a person's path is tracked in a video. Amazon Rekognition operations that track people's paths return an array of PersonDetection objects with elements for each time a person's path is tracked in a video. For more information, see GetPersonTracking in the Amazon Rekognition Developer Guide."]
+module LabelDetectionAggregateBy =
+  struct
+    type nonrec t =
+      | TIMESTAMPS 
+      | SEGMENTS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TIMESTAMPS -> "TIMESTAMPS"
+      | SEGMENTS -> "SEGMENTS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TIMESTAMPS" -> TIMESTAMPS
+      | "SEGMENTS" -> SEGMENTS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LabelDetectionAggregateBy" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LabelDetectionAggregateBy" j)
+    let to_json = simple_to_json to_value
+  end
+module LabelDetectionSortBy =
+  struct
+    type nonrec t =
+      | NAME 
+      | TIMESTAMP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NAME -> "NAME"
+      | TIMESTAMP -> "TIMESTAMP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NAME" -> NAME
+      | "TIMESTAMP" -> TIMESTAMP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LabelDetectionSortBy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LabelDetectionSortBy" j)
+    let to_json = simple_to_json to_value
+  end
 module LabelDetection =
   struct
     type nonrec t =
       {
       timestamp: Timestamp.t option
         [@ocaml.doc
-          "Time, in milliseconds from the start of the video, that the label was detected."];
-      label: Label.t option [@ocaml.doc "Details about the detected label."]}
-    let make ?timestamp = fun ?label -> fun () -> { timestamp; label }
+          "Time, in milliseconds from the start of the video, that the label was detected. Note that Timestamp is not guaranteed to be accurate to the individual frame where the label first appears."];
+      label: Label.t option [@ocaml.doc "Details about the detected label."];
+      startTimestampMillis: ULong.t option
+        [@ocaml.doc
+          "The time in milliseconds defining the start of the timeline segment containing a continuously detected label."];
+      endTimestampMillis: ULong.t option
+        [@ocaml.doc
+          "The time in milliseconds defining the end of the timeline segment containing a continuously detected label."];
+      durationMillis: ULong.t option
+        [@ocaml.doc
+          "The time duration of a segment in milliseconds, I.e. time elapsed from StartTimestampMillis to EndTimestampMillis."]}
+    let make ?timestamp =
+      fun ?label ->
+        fun ?startTimestampMillis ->
+          fun ?endTimestampMillis ->
+            fun ?durationMillis ->
+              fun () ->
+                {
+                  timestamp;
+                  label;
+                  startTimestampMillis;
+                  endTimestampMillis;
+                  durationMillis
+                }
     let to_value x =
       structure_to_value
         [("Timestamp", (Option.map x.timestamp ~f:Timestamp.to_value));
-        ("Label", (Option.map x.label ~f:Label.to_value))]
+        ("Label", (Option.map x.label ~f:Label.to_value));
+        ("StartTimestampMillis",
+          (Option.map x.startTimestampMillis ~f:ULong.to_value));
+        ("EndTimestampMillis",
+          (Option.map x.endTimestampMillis ~f:ULong.to_value));
+        ("DurationMillis", (Option.map x.durationMillis ~f:ULong.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let durationMillis =
+        (Option.map ~f:ULong.of_xml) (Xml.child xml_arg0 "DurationMillis") in
+      let endTimestampMillis =
+        (Option.map ~f:ULong.of_xml)
+          (Xml.child xml_arg0 "EndTimestampMillis") in
+      let startTimestampMillis =
+        (Option.map ~f:ULong.of_xml)
+          (Xml.child xml_arg0 "StartTimestampMillis") in
       let label = (Option.map ~f:Label.of_xml) (Xml.child xml_arg0 "Label") in
       let timestamp =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
-      make ?label ?timestamp ()
+      make ?durationMillis ?endTimestampMillis ?startTimestampMillis ?label
+        ?timestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let label = field_map json "Label" Label.of_json in
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
-      make ?label ?timestamp ()
+    let of_json json__ =
+      let durationMillis = field_map json__ "DurationMillis" ULong.of_json in
+      let endTimestampMillis =
+        field_map json__ "EndTimestampMillis" ULong.of_json in
+      let startTimestampMillis =
+        field_map json__ "StartTimestampMillis" ULong.of_json in
+      let label = field_map json__ "Label" Label.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
+      make ?durationMillis ?endTimestampMillis ?startTimestampMillis ?label
+        ?timestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a label detected in a video analysis request and the time the label was detected in the video."]
@@ -4280,21 +6631,56 @@ module PersonMatch =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?faceMatches ?person ?timestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let faceMatches = field_map json "FaceMatches" FaceMatchList.of_json in
-      let person = field_map json "Person" PersonDetail.of_json in
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
+    let of_json json__ =
+      let faceMatches = field_map json__ "FaceMatches" FaceMatchList.of_json in
+      let person = field_map json__ "Person" PersonDetail.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
       make ?faceMatches ?person ?timestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a person whose face matches a face(s) in an Amazon Rekognition collection. Includes information about the faces in the Amazon Rekognition collection (FaceMatch), information about the person (PersonDetail), and the time stamp for when the person was detected in a video. An array of PersonMatch objects is returned by GetFaceSearch."]
+module AuditImage =
+  struct
+    type nonrec t =
+      {
+      bytes: LivenessImageBlob.t option
+        [@ocaml.doc
+          "The Base64-encoded bytes representing an image selected from the Face Liveness video and returned for audit purposes."];
+      s3Object: S3Object.t option ;
+      boundingBox: BoundingBox.t option }
+    let make ?bytes =
+      fun ?s3Object ->
+        fun ?boundingBox -> fun () -> { bytes; s3Object; boundingBox }
+    let to_value x =
+      structure_to_value
+        [("Bytes", (Option.map x.bytes ~f:LivenessImageBlob.to_value));
+        ("S3Object", (Option.map x.s3Object ~f:S3Object.to_value));
+        ("BoundingBox", (Option.map x.boundingBox ~f:BoundingBox.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let boundingBox =
+        (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
+      let s3Object =
+        (Option.map ~f:S3Object.of_xml) (Xml.child xml_arg0 "S3Object") in
+      let bytes =
+        (Option.map ~f:LivenessImageBlob.of_xml) (Xml.child xml_arg0 "Bytes") in
+      make ?boundingBox ?s3Object ?bytes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let boundingBox = field_map json__ "BoundingBox" BoundingBox.of_json in
+      let s3Object = field_map json__ "S3Object" S3Object.of_json in
+      let bytes = field_map json__ "Bytes" LivenessImageBlob.of_json in
+      make ?boundingBox ?s3Object ?bytes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An image that is picked from the Face Liveness video and returned for audit trail purposes, returned as Base64-encoded bytes."]
 module FaceDetection =
   struct
     type nonrec t =
       {
       timestamp: Timestamp.t option
         [@ocaml.doc
-          "Time, in milliseconds from the start of the video, that the face was detected."];
+          "Time, in milliseconds from the start of the video, that the face was detected. Note that Timestamp is not guaranteed to be accurate to the individual frame where the face first appears."];
       face: FaceDetail.t option
         [@ocaml.doc "The face properties for the detected face."]}
     let make ?timestamp = fun ?face -> fun () -> { timestamp; face }
@@ -4310,9 +6696,9 @@ module FaceDetection =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?face ?timestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let face = field_map json "Face" FaceDetail.of_json in
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
+    let of_json json__ =
+      let face = field_map json__ "Face" FaceDetail.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
       make ?face ?timestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4323,41 +6709,147 @@ module ContentModerationDetection =
       {
       timestamp: Timestamp.t option
         [@ocaml.doc
-          "Time, in milliseconds from the beginning of the video, that the content moderation label was detected."];
+          "Time, in milliseconds from the beginning of the video, that the content moderation label was detected. Note that Timestamp is not guaranteed to be accurate to the individual frame where the moderated content first appears."];
       moderationLabel: ModerationLabel.t option
         [@ocaml.doc
-          "The content moderation label detected by in the stored video."]}
+          "The content moderation label detected by in the stored video."];
+      startTimestampMillis: ULong.t option
+        [@ocaml.doc
+          "The time in milliseconds defining the start of the timeline segment containing a continuously detected moderation label."];
+      endTimestampMillis: ULong.t option
+        [@ocaml.doc
+          "The time in milliseconds defining the end of the timeline segment containing a continuously detected moderation label."];
+      durationMillis: ULong.t option
+        [@ocaml.doc
+          "The time duration of a segment in milliseconds, I.e. time elapsed from StartTimestampMillis to EndTimestampMillis."];
+      contentTypes: ContentTypes.t option
+        [@ocaml.doc
+          "A list of predicted results for the type of content an image contains. For example, the image content might be from animation, sports, or a video game."]}
     let make ?timestamp =
-      fun ?moderationLabel -> fun () -> { timestamp; moderationLabel }
+      fun ?moderationLabel ->
+        fun ?startTimestampMillis ->
+          fun ?endTimestampMillis ->
+            fun ?durationMillis ->
+              fun ?contentTypes ->
+                fun () ->
+                  {
+                    timestamp;
+                    moderationLabel;
+                    startTimestampMillis;
+                    endTimestampMillis;
+                    durationMillis;
+                    contentTypes
+                  }
     let to_value x =
       structure_to_value
         [("Timestamp", (Option.map x.timestamp ~f:Timestamp.to_value));
         ("ModerationLabel",
-          (Option.map x.moderationLabel ~f:ModerationLabel.to_value))]
+          (Option.map x.moderationLabel ~f:ModerationLabel.to_value));
+        ("StartTimestampMillis",
+          (Option.map x.startTimestampMillis ~f:ULong.to_value));
+        ("EndTimestampMillis",
+          (Option.map x.endTimestampMillis ~f:ULong.to_value));
+        ("DurationMillis", (Option.map x.durationMillis ~f:ULong.to_value));
+        ("ContentTypes",
+          (Option.map x.contentTypes ~f:ContentTypes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let contentTypes =
+        (Option.map ~f:ContentTypes.of_xml)
+          (Xml.child xml_arg0 "ContentTypes") in
+      let durationMillis =
+        (Option.map ~f:ULong.of_xml) (Xml.child xml_arg0 "DurationMillis") in
+      let endTimestampMillis =
+        (Option.map ~f:ULong.of_xml)
+          (Xml.child xml_arg0 "EndTimestampMillis") in
+      let startTimestampMillis =
+        (Option.map ~f:ULong.of_xml)
+          (Xml.child xml_arg0 "StartTimestampMillis") in
       let moderationLabel =
         (Option.map ~f:ModerationLabel.of_xml)
           (Xml.child xml_arg0 "ModerationLabel") in
       let timestamp =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
-      make ?moderationLabel ?timestamp ()
+      make ?contentTypes ?durationMillis ?endTimestampMillis
+        ?startTimestampMillis ?moderationLabel ?timestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let contentTypes = field_map json__ "ContentTypes" ContentTypes.of_json in
+      let durationMillis = field_map json__ "DurationMillis" ULong.of_json in
+      let endTimestampMillis =
+        field_map json__ "EndTimestampMillis" ULong.of_json in
+      let startTimestampMillis =
+        field_map json__ "StartTimestampMillis" ULong.of_json in
       let moderationLabel =
-        field_map json "ModerationLabel" ModerationLabel.of_json in
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
-      make ?moderationLabel ?timestamp ()
+        field_map json__ "ModerationLabel" ModerationLabel.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
+      make ?contentTypes ?durationMillis ?endTimestampMillis
+        ?startTimestampMillis ?moderationLabel ?timestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about an inappropriate, unwanted, or offensive content label detection in a stored video."]
+module ContentModerationAggregateBy =
+  struct
+    type nonrec t =
+      | TIMESTAMPS 
+      | SEGMENTS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TIMESTAMPS -> "TIMESTAMPS"
+      | SEGMENTS -> "SEGMENTS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TIMESTAMPS" -> TIMESTAMPS
+      | "SEGMENTS" -> SEGMENTS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ContentModerationAggregateBy"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ContentModerationAggregateBy" j)
+    let to_json = simple_to_json to_value
+  end
+module ContentModerationSortBy =
+  struct
+    type nonrec t =
+      | NAME 
+      | TIMESTAMP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NAME -> "NAME"
+      | TIMESTAMP -> "TIMESTAMP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NAME" -> NAME
+      | "TIMESTAMP" -> TIMESTAMP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ContentModerationSortBy" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ContentModerationSortBy" j)
+    let to_json = simple_to_json to_value
+  end
 module CelebrityRecognition =
   struct
     type nonrec t =
       {
       timestamp: Timestamp.t option
         [@ocaml.doc
-          "The time, in milliseconds from the start of the video, that the celebrity was recognized."];
+          "The time, in milliseconds from the start of the video, that the celebrity was recognized. Note that Timestamp is not guaranteed to be accurate to the individual frame where the celebrity first appears."];
       celebrity: CelebrityDetail.t option
         [@ocaml.doc "Information about a recognized celebrity."]}
     let make ?timestamp =
@@ -4375,9 +6867,9 @@ module CelebrityRecognition =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?celebrity ?timestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let celebrity = field_map json "Celebrity" CelebrityDetail.of_json in
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
+    let of_json json__ =
+      let celebrity = field_map json__ "Celebrity" CelebrityDetail.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
       make ?celebrity ?timestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4399,11 +6891,74 @@ module DistributeDataset =
         DatasetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "Arn" DatasetArn.of_json in make ~arn ()
+    let of_json json__ =
+      let arn = field_map_exn json__ "Arn" DatasetArn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A training dataset or a test dataset used in a dataset distribution operation. For more information, see DistributeDatasetEntries."]
+module DisassociatedFace =
+  struct
+    type nonrec t =
+      {
+      faceId: FaceId.t option
+        [@ocaml.doc "Unique identifier assigned to the face."]}
+    let make ?faceId = fun () -> { faceId }
+    let to_value x =
+      structure_to_value
+        [("FaceId", (Option.map x.faceId ~f:FaceId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let faceId =
+        (Option.map ~f:FaceId.of_xml) (Xml.child xml_arg0 "FaceId") in
+      make ?faceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let faceId = field_map json__ "FaceId" FaceId.of_json in
+      make ?faceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides face metadata for the faces that are disassociated from a specific UserID."]
+module UnsuccessfulFaceDisassociation =
+  struct
+    type nonrec t =
+      {
+      faceId: FaceId.t option
+        [@ocaml.doc "A unique identifier assigned to the face."];
+      userId: UserId.t option
+        [@ocaml.doc
+          "A provided ID for the UserID. Unique within the collection."];
+      reasons: UnsuccessfulFaceDisassociationReasons.t option
+        [@ocaml.doc "The reason why the deletion was unsuccessful."]}
+    let make ?faceId =
+      fun ?userId -> fun ?reasons -> fun () -> { faceId; userId; reasons }
+    let to_value x =
+      structure_to_value
+        [("FaceId", (Option.map x.faceId ~f:FaceId.to_value));
+        ("UserId", (Option.map x.userId ~f:UserId.to_value));
+        ("Reasons",
+          (Option.map x.reasons
+             ~f:UnsuccessfulFaceDisassociationReasons.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reasons =
+        (Option.map ~f:UnsuccessfulFaceDisassociationReasons.of_xml)
+          (Xml.child xml_arg0 "Reasons") in
+      let userId =
+        (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "UserId") in
+      let faceId =
+        (Option.map ~f:FaceId.of_xml) (Xml.child xml_arg0 "FaceId") in
+      make ?reasons ?userId ?faceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reasons =
+        field_map json__ "Reasons"
+          UnsuccessfulFaceDisassociationReasons.of_json in
+      let userId = field_map json__ "UserId" UserId.of_json in
+      let faceId = field_map json__ "FaceId" FaceId.of_json in
+      make ?reasons ?userId ?faceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains metadata like FaceId, UserID, and Reasons, for a face that was unsuccessfully disassociated."]
 module ProtectiveEquipmentPerson =
   struct
     type nonrec t =
@@ -4440,11 +6995,11 @@ module ProtectiveEquipmentPerson =
         (Option.map ~f:BodyParts.of_xml) (Xml.child xml_arg0 "BodyParts") in
       make ?id ?confidence ?boundingBox ?bodyParts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "Id" UInteger.of_json in
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
-      let bodyParts = field_map json "BodyParts" BodyParts.of_json in
+    let of_json json__ =
+      let id = field_map json__ "Id" UInteger.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let boundingBox = field_map json__ "BoundingBox" BoundingBox.of_json in
+      let bodyParts = field_map json__ "BodyParts" BodyParts.of_json in
       make ?id ?confidence ?boundingBox ?bodyParts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4453,6 +7008,9 @@ module ProtectiveEquipmentPersonIds =
   struct
     type nonrec t = UInteger.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UInteger.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4478,6 +7036,9 @@ module ProtectiveEquipmentTypes =
   struct
     type nonrec t = ProtectiveEquipmentType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProtectiveEquipmentType.to_value)) |>
         (fun x -> `List x)
@@ -4520,6 +7081,9 @@ module HumanLoopActivationReasons =
     type nonrec t = HumanLoopActivationReason.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HumanLoopActivationReason.to_value)) |>
         (fun x -> `List x)
@@ -4589,9 +7153,9 @@ module HumanLoopDataAttributes =
           (Xml.child xml_arg0 "ContentClassifiers") in
       make ?contentClassifiers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let contentClassifiers =
-        field_map json "ContentClassifiers" ContentClassifiers.of_json in
+        field_map json__ "ContentClassifiers" ContentClassifiers.of_json in
       make ?contentClassifiers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4617,6 +7181,134 @@ module HumanLoopName =
     let of_json j = string_of_json ~kind:"HumanLoopName" j
     let to_json = simple_to_json to_value
   end
+module DetectLabelsImageBackground =
+  struct
+    type nonrec t =
+      {
+      quality: DetectLabelsImageQuality.t option
+        [@ocaml.doc
+          "The quality of the image background as defined by brightness and sharpness."];
+      dominantColors: DominantColors.t option
+        [@ocaml.doc
+          "The dominant colors found in the background of an image, defined with RGB values, CSS color name, simplified color name, and PixelPercentage (the percentage of image pixels that have a particular color)."]}
+    let make ?quality =
+      fun ?dominantColors -> fun () -> { quality; dominantColors }
+    let to_value x =
+      structure_to_value
+        [("Quality",
+           (Option.map x.quality ~f:DetectLabelsImageQuality.to_value));
+        ("DominantColors",
+          (Option.map x.dominantColors ~f:DominantColors.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dominantColors =
+        (Option.map ~f:DominantColors.of_xml)
+          (Xml.child xml_arg0 "DominantColors") in
+      let quality =
+        (Option.map ~f:DetectLabelsImageQuality.of_xml)
+          (Xml.child xml_arg0 "Quality") in
+      make ?dominantColors ?quality ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dominantColors =
+        field_map json__ "DominantColors" DominantColors.of_json in
+      let quality =
+        field_map json__ "Quality" DetectLabelsImageQuality.of_json in
+      make ?dominantColors ?quality ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The background of the image with regard to image quality and dominant colors."]
+module DetectLabelsImageForeground =
+  struct
+    type nonrec t =
+      {
+      quality: DetectLabelsImageQuality.t option
+        [@ocaml.doc
+          "The quality of the image foreground as defined by brightness and sharpness."];
+      dominantColors: DominantColors.t option
+        [@ocaml.doc
+          "The dominant colors found in the foreground of an image, defined with RGB values, CSS color name, simplified color name, and PixelPercentage (the percentage of image pixels that have a particular color)."]}
+    let make ?quality =
+      fun ?dominantColors -> fun () -> { quality; dominantColors }
+    let to_value x =
+      structure_to_value
+        [("Quality",
+           (Option.map x.quality ~f:DetectLabelsImageQuality.to_value));
+        ("DominantColors",
+          (Option.map x.dominantColors ~f:DominantColors.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dominantColors =
+        (Option.map ~f:DominantColors.of_xml)
+          (Xml.child xml_arg0 "DominantColors") in
+      let quality =
+        (Option.map ~f:DetectLabelsImageQuality.of_xml)
+          (Xml.child xml_arg0 "Quality") in
+      make ?dominantColors ?quality ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dominantColors =
+        field_map json__ "DominantColors" DominantColors.of_json in
+      let quality =
+        field_map json__ "Quality" DetectLabelsImageQuality.of_json in
+      make ?dominantColors ?quality ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The foreground of the image with regard to image quality and dominant colors."]
+module DetectLabelsFeatureName =
+  struct
+    type nonrec t =
+      | GENERAL_LABELS 
+      | IMAGE_PROPERTIES 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | GENERAL_LABELS -> "GENERAL_LABELS"
+      | IMAGE_PROPERTIES -> "IMAGE_PROPERTIES"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "GENERAL_LABELS" -> GENERAL_LABELS
+      | "IMAGE_PROPERTIES" -> IMAGE_PROPERTIES
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DetectLabelsFeatureName" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DetectLabelsFeatureName" j)
+    let to_json = simple_to_json to_value
+  end
+module DetectLabelsImagePropertiesSettings =
+  struct
+    type nonrec t =
+      {
+      maxDominantColors: DetectLabelsMaxDominantColors.t option
+        [@ocaml.doc
+          "The maximum number of dominant colors to return when detecting labels in an image. The default value is 10."]}
+    let make ?maxDominantColors = fun () -> { maxDominantColors }
+    let to_value x =
+      structure_to_value
+        [("MaxDominantColors",
+           (Option.map x.maxDominantColors
+              ~f:DetectLabelsMaxDominantColors.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxDominantColors =
+        (Option.map ~f:DetectLabelsMaxDominantColors.of_xml)
+          (Xml.child xml_arg0 "MaxDominantColors") in
+      make ?maxDominantColors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxDominantColors =
+        field_map json__ "MaxDominantColors"
+          DetectLabelsMaxDominantColors.of_json in
+      make ?maxDominantColors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Settings for the IMAGE_PROPERTIES feature type."]
 module CustomLabel =
   struct
     type nonrec t =
@@ -4645,10 +7337,10 @@ module CustomLabel =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?geometry ?confidence ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let geometry = field_map json "Geometry" Geometry.of_json in
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let name = field_map json "Name" String_.of_json in
+    let of_json json__ =
+      let geometry = field_map json__ "Geometry" Geometry.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?geometry ?confidence ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4670,8 +7362,9 @@ module KinesisVideoStream =
         (Option.map ~f:KinesisVideoArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" KinesisVideoArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" KinesisVideoArn.of_json in
+      make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Kinesis video stream stream that provides the source streaming video for a Amazon Rekognition Video stream processor. For more information, see CreateStreamProcessor in the Amazon Rekognition Developer Guide."]
@@ -4691,11 +7384,74 @@ module KinesisDataStream =
         (Option.map ~f:KinesisDataArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" KinesisDataArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" KinesisDataArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Kinesis data stream Amazon Rekognition to which the analysis results of a Amazon Rekognition stream processor are streamed. For more information, see CreateStreamProcessor in the Amazon Rekognition Developer Guide."]
+module S3Destination =
+  struct
+    type nonrec t =
+      {
+      bucket: S3Bucket.t option
+        [@ocaml.doc
+          "The name of the Amazon S3 bucket you want to associate with the streaming video project. You must be the owner of the Amazon S3 bucket."];
+      keyPrefix: S3KeyPrefix.t option
+        [@ocaml.doc
+          "The prefix value of the location within the bucket that you want the information to be published to. For more information, see Using prefixes."]}
+    let make ?bucket = fun ?keyPrefix -> fun () -> { bucket; keyPrefix }
+    let to_value x =
+      structure_to_value
+        [("Bucket", (Option.map x.bucket ~f:S3Bucket.to_value));
+        ("KeyPrefix", (Option.map x.keyPrefix ~f:S3KeyPrefix.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let keyPrefix =
+        (Option.map ~f:S3KeyPrefix.of_xml) (Xml.child xml_arg0 "KeyPrefix") in
+      let bucket =
+        (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "Bucket") in
+      make ?keyPrefix ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let keyPrefix = field_map json__ "KeyPrefix" S3KeyPrefix.of_json in
+      let bucket = field_map json__ "Bucket" S3Bucket.of_json in
+      make ?keyPrefix ?bucket ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon S3 bucket location to which Amazon Rekognition publishes the detailed inference results of a video analysis operation. These results include the name of the stream processor resource, the session ID of the stream processing session, and labeled timestamps and bounding boxes for detected labels."]
+module ConnectedHomeSettings =
+  struct
+    type nonrec t =
+      {
+      labels: ConnectedHomeLabels.t
+        [@ocaml.doc
+          "Specifies what you want to detect in the video, such as people, packages, or pets. The current valid labels you can include in this list are: \"PERSON\", \"PET\", \"PACKAGE\", and \"ALL\"."];
+      minConfidence: Percent.t option
+        [@ocaml.doc
+          "The minimum confidence required to label an object in the video."]}
+    let context_ = "ConnectedHomeSettings"
+    let make ?minConfidence =
+      fun ~labels -> fun () -> { minConfidence; labels }
+    let to_value x =
+      structure_to_value
+        [("Labels", (Some (ConnectedHomeLabels.to_value x.labels)));
+        ("MinConfidence", (Option.map x.minConfidence ~f:Percent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let minConfidence =
+        (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "MinConfidence") in
+      let labels =
+        ConnectedHomeLabels.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Labels") in
+      make ?minConfidence ~labels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let minConfidence = field_map json__ "MinConfidence" Percent.of_json in
+      let labels = field_map_exn json__ "Labels" ConnectedHomeLabels.of_json in
+      make ?minConfidence ~labels ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Label detection settings to use on a streaming video. Defining the settings is required in the request parameter for CreateStreamProcessor. Including this setting in the CreateStreamProcessor request enables you to use the stream processor for label detection. You can then select what you want the stream processor to detect, such as people or pets. When the stream processor has started, one notification is sent for each object class specified. For example, if packages and pets are selected, one SNS notification is published the first time a package is detected and one SNS notification is published the first time a pet is detected, as well as an end-of-session summary."]
 module FaceSearchSettings =
   struct
     type nonrec t =
@@ -4725,14 +7481,14 @@ module FaceSearchSettings =
           (Xml.child xml_arg0 "CollectionId") in
       make ?faceMatchThreshold ?collectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let faceMatchThreshold =
-        field_map json "FaceMatchThreshold" Percent.of_json in
-      let collectionId = field_map json "CollectionId" CollectionId.of_json in
+        field_map json__ "FaceMatchThreshold" Percent.of_json in
+      let collectionId = field_map json__ "CollectionId" CollectionId.of_json in
       make ?faceMatchThreshold ?collectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Input face recognition parameters for an Amazon Rekognition stream processor. FaceRecognitionSettings is a request parameter for CreateStreamProcessor."]
+       "Input face recognition parameters for an Amazon Rekognition stream processor. Includes the collection to use for face recognition and the face attributes to detect. Defining the settings is required in the request parameter for CreateStreamProcessor."]
 module ProjectDescription =
   struct
     type nonrec t =
@@ -4746,21 +7502,45 @@ module ProjectDescription =
         [@ocaml.doc "The current status of the project."];
       datasets: DatasetMetadataList.t option
         [@ocaml.doc
-          "Information about the training and test datasets in the project."]}
+          "Information about the training and test datasets in the project."];
+      feature: CustomizationFeature.t option
+        [@ocaml.doc "Specifies the project that is being customized."];
+      autoUpdate: ProjectAutoUpdate.t option
+        [@ocaml.doc
+          "Indicates whether automatic retraining will be attempted for the versions of the project. Applies only to adapters."]}
     let make ?projectArn =
       fun ?creationTimestamp ->
         fun ?status ->
           fun ?datasets ->
-            fun () -> { projectArn; creationTimestamp; status; datasets }
+            fun ?feature ->
+              fun ?autoUpdate ->
+                fun () ->
+                  {
+                    projectArn;
+                    creationTimestamp;
+                    status;
+                    datasets;
+                    feature;
+                    autoUpdate
+                  }
     let to_value x =
       structure_to_value
         [("ProjectArn", (Option.map x.projectArn ~f:ProjectArn.to_value));
         ("CreationTimestamp",
           (Option.map x.creationTimestamp ~f:DateTime.to_value));
         ("Status", (Option.map x.status ~f:ProjectStatus.to_value));
-        ("Datasets", (Option.map x.datasets ~f:DatasetMetadataList.to_value))]
+        ("Datasets", (Option.map x.datasets ~f:DatasetMetadataList.to_value));
+        ("Feature", (Option.map x.feature ~f:CustomizationFeature.to_value));
+        ("AutoUpdate",
+          (Option.map x.autoUpdate ~f:ProjectAutoUpdate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let autoUpdate =
+        (Option.map ~f:ProjectAutoUpdate.of_xml)
+          (Xml.child xml_arg0 "AutoUpdate") in
+      let feature =
+        (Option.map ~f:CustomizationFeature.of_xml)
+          (Xml.child xml_arg0 "Feature") in
       let datasets =
         (Option.map ~f:DatasetMetadataList.of_xml)
           (Xml.child xml_arg0 "Datasets") in
@@ -4771,15 +7551,20 @@ module ProjectDescription =
           (Xml.child xml_arg0 "CreationTimestamp") in
       let projectArn =
         (Option.map ~f:ProjectArn.of_xml) (Xml.child xml_arg0 "ProjectArn") in
-      make ?datasets ?status ?creationTimestamp ?projectArn ()
+      make ?autoUpdate ?feature ?datasets ?status ?creationTimestamp
+        ?projectArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasets = field_map json "Datasets" DatasetMetadataList.of_json in
-      let status = field_map json "Status" ProjectStatus.of_json in
+    let of_json json__ =
+      let autoUpdate =
+        field_map json__ "AutoUpdate" ProjectAutoUpdate.of_json in
+      let feature = field_map json__ "Feature" CustomizationFeature.of_json in
+      let datasets = field_map json__ "Datasets" DatasetMetadataList.of_json in
+      let status = field_map json__ "Status" ProjectStatus.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" DateTime.of_json in
-      let projectArn = field_map json "ProjectArn" ProjectArn.of_json in
-      make ?datasets ?status ?creationTimestamp ?projectArn ()
+        field_map json__ "CreationTimestamp" DateTime.of_json in
+      let projectArn = field_map json__ "ProjectArn" ProjectArn.of_json in
+      make ?autoUpdate ?feature ?datasets ?status ?creationTimestamp
+        ?projectArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A description of an Amazon Rekognition Custom Labels project. For more information, see DescribeProjects."]
@@ -4808,13 +7593,13 @@ module ProjectVersionDescription =
     type nonrec t =
       {
       projectVersionArn: ProjectVersionArn.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the model version."];
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the project version."];
       creationTimestamp: DateTime.t option
         [@ocaml.doc
           "The Unix datetime for the date and time that training started."];
       minInferenceUnits: InferenceUnits.t option
         [@ocaml.doc
-          "The minimum number of inference units used by the model. For more information, see StartProjectVersion."];
+          "The minimum number of inference units used by the model. Applies only to Custom Labels projects. For more information, see StartProjectVersion."];
       status: ProjectVersionStatus.t option
         [@ocaml.doc "The current status of the model version."];
       statusMessage: StatusMessage.t option
@@ -4840,7 +7625,23 @@ module ProjectVersionDescription =
           "The location of the summary manifest. The summary manifest provides aggregate data validation results for the training and test datasets."];
       kmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "The identifer for the AWS Key Management Service key (AWS KMS key) that was used to encrypt the model during training."]}
+          "The identifer for the AWS Key Management Service key (AWS KMS key) that was used to encrypt the model during training."];
+      maxInferenceUnits: InferenceUnits.t option
+        [@ocaml.doc
+          "The maximum number of inference units Amazon Rekognition uses to auto-scale the model. Applies only to Custom Labels projects. For more information, see StartProjectVersion."];
+      sourceProjectVersionArn: ProjectVersionArn.t option
+        [@ocaml.doc
+          "If the model version was copied from a different project, SourceProjectVersionArn contains the ARN of the source model version."];
+      versionDescription: VersionDescription.t option
+        [@ocaml.doc "A user-provided description of the project version."];
+      feature: CustomizationFeature.t option
+        [@ocaml.doc "The feature that was customized."];
+      baseModelVersion: String_.t option
+        [@ocaml.doc
+          "The base detection model version used to create the project version."];
+      featureConfig: CustomizationFeatureConfig.t option
+        [@ocaml.doc
+          "Feature specific configuration that was applied during training."]}
     let make ?projectVersionArn =
       fun ?creationTimestamp ->
         fun ?minInferenceUnits ->
@@ -4854,22 +7655,34 @@ module ProjectVersionDescription =
                         fun ?evaluationResult ->
                           fun ?manifestSummary ->
                             fun ?kmsKeyId ->
-                              fun () ->
-                                {
-                                  projectVersionArn;
-                                  creationTimestamp;
-                                  minInferenceUnits;
-                                  status;
-                                  statusMessage;
-                                  billableTrainingTimeInSeconds;
-                                  trainingEndTimestamp;
-                                  outputConfig;
-                                  trainingDataResult;
-                                  testingDataResult;
-                                  evaluationResult;
-                                  manifestSummary;
-                                  kmsKeyId
-                                }
+                              fun ?maxInferenceUnits ->
+                                fun ?sourceProjectVersionArn ->
+                                  fun ?versionDescription ->
+                                    fun ?feature ->
+                                      fun ?baseModelVersion ->
+                                        fun ?featureConfig ->
+                                          fun () ->
+                                            {
+                                              projectVersionArn;
+                                              creationTimestamp;
+                                              minInferenceUnits;
+                                              status;
+                                              statusMessage;
+                                              billableTrainingTimeInSeconds;
+                                              trainingEndTimestamp;
+                                              outputConfig;
+                                              trainingDataResult;
+                                              testingDataResult;
+                                              evaluationResult;
+                                              manifestSummary;
+                                              kmsKeyId;
+                                              maxInferenceUnits;
+                                              sourceProjectVersionArn;
+                                              versionDescription;
+                                              feature;
+                                              baseModelVersion;
+                                              featureConfig
+                                            }
     let to_value x =
       structure_to_value
         [("ProjectVersionArn",
@@ -4895,9 +7708,38 @@ module ProjectVersionDescription =
           (Option.map x.evaluationResult ~f:EvaluationResult.to_value));
         ("ManifestSummary",
           (Option.map x.manifestSummary ~f:GroundTruthManifest.to_value));
-        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value))]
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("MaxInferenceUnits",
+          (Option.map x.maxInferenceUnits ~f:InferenceUnits.to_value));
+        ("SourceProjectVersionArn",
+          (Option.map x.sourceProjectVersionArn ~f:ProjectVersionArn.to_value));
+        ("VersionDescription",
+          (Option.map x.versionDescription ~f:VersionDescription.to_value));
+        ("Feature", (Option.map x.feature ~f:CustomizationFeature.to_value));
+        ("BaseModelVersion",
+          (Option.map x.baseModelVersion ~f:String_.to_value));
+        ("FeatureConfig",
+          (Option.map x.featureConfig ~f:CustomizationFeatureConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let featureConfig =
+        (Option.map ~f:CustomizationFeatureConfig.of_xml)
+          (Xml.child xml_arg0 "FeatureConfig") in
+      let baseModelVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "BaseModelVersion") in
+      let feature =
+        (Option.map ~f:CustomizationFeature.of_xml)
+          (Xml.child xml_arg0 "Feature") in
+      let versionDescription =
+        (Option.map ~f:VersionDescription.of_xml)
+          (Xml.child xml_arg0 "VersionDescription") in
+      let sourceProjectVersionArn =
+        (Option.map ~f:ProjectVersionArn.of_xml)
+          (Xml.child xml_arg0 "SourceProjectVersionArn") in
+      let maxInferenceUnits =
+        (Option.map ~f:InferenceUnits.of_xml)
+          (Xml.child xml_arg0 "MaxInferenceUnits") in
       let kmsKeyId =
         (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
       let manifestSummary =
@@ -4936,42 +7778,57 @@ module ProjectVersionDescription =
       let projectVersionArn =
         (Option.map ~f:ProjectVersionArn.of_xml)
           (Xml.child xml_arg0 "ProjectVersionArn") in
-      make ?kmsKeyId ?manifestSummary ?evaluationResult ?testingDataResult
+      make ?featureConfig ?baseModelVersion ?feature ?versionDescription
+        ?sourceProjectVersionArn ?maxInferenceUnits ?kmsKeyId
+        ?manifestSummary ?evaluationResult ?testingDataResult
         ?trainingDataResult ?outputConfig ?trainingEndTimestamp
         ?billableTrainingTimeInSeconds ?statusMessage ?status
         ?minInferenceUnits ?creationTimestamp ?projectVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let featureConfig =
+        field_map json__ "FeatureConfig" CustomizationFeatureConfig.of_json in
+      let baseModelVersion =
+        field_map json__ "BaseModelVersion" String_.of_json in
+      let feature = field_map json__ "Feature" CustomizationFeature.of_json in
+      let versionDescription =
+        field_map json__ "VersionDescription" VersionDescription.of_json in
+      let sourceProjectVersionArn =
+        field_map json__ "SourceProjectVersionArn" ProjectVersionArn.of_json in
+      let maxInferenceUnits =
+        field_map json__ "MaxInferenceUnits" InferenceUnits.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
       let manifestSummary =
-        field_map json "ManifestSummary" GroundTruthManifest.of_json in
+        field_map json__ "ManifestSummary" GroundTruthManifest.of_json in
       let evaluationResult =
-        field_map json "EvaluationResult" EvaluationResult.of_json in
+        field_map json__ "EvaluationResult" EvaluationResult.of_json in
       let testingDataResult =
-        field_map json "TestingDataResult" TestingDataResult.of_json in
+        field_map json__ "TestingDataResult" TestingDataResult.of_json in
       let trainingDataResult =
-        field_map json "TrainingDataResult" TrainingDataResult.of_json in
-      let outputConfig = field_map json "OutputConfig" OutputConfig.of_json in
+        field_map json__ "TrainingDataResult" TrainingDataResult.of_json in
+      let outputConfig = field_map json__ "OutputConfig" OutputConfig.of_json in
       let trainingEndTimestamp =
-        field_map json "TrainingEndTimestamp" DateTime.of_json in
+        field_map json__ "TrainingEndTimestamp" DateTime.of_json in
       let billableTrainingTimeInSeconds =
-        field_map json "BillableTrainingTimeInSeconds" ULong.of_json in
+        field_map json__ "BillableTrainingTimeInSeconds" ULong.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let status = field_map json "Status" ProjectVersionStatus.of_json in
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let status = field_map json__ "Status" ProjectVersionStatus.of_json in
       let minInferenceUnits =
-        field_map json "MinInferenceUnits" InferenceUnits.of_json in
+        field_map json__ "MinInferenceUnits" InferenceUnits.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" DateTime.of_json in
+        field_map json__ "CreationTimestamp" DateTime.of_json in
       let projectVersionArn =
-        field_map json "ProjectVersionArn" ProjectVersionArn.of_json in
-      make ?kmsKeyId ?manifestSummary ?evaluationResult ?testingDataResult
+        field_map json__ "ProjectVersionArn" ProjectVersionArn.of_json in
+      make ?featureConfig ?baseModelVersion ?feature ?versionDescription
+        ?sourceProjectVersionArn ?maxInferenceUnits ?kmsKeyId
+        ?manifestSummary ?evaluationResult ?testingDataResult
         ?trainingDataResult ?outputConfig ?trainingEndTimestamp
         ?billableTrainingTimeInSeconds ?statusMessage ?status
         ?minInferenceUnits ?creationTimestamp ?projectVersionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A description of a version of an Amazon Rekognition Custom Labels model."]
+       "A description of a version of a Amazon Rekognition project version."]
 module VersionName =
   struct
     type nonrec t = string
@@ -5031,15 +7888,136 @@ module DatasetStats =
         (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "LabeledEntries") in
       make ?errorEntries ?totalLabels ?totalEntries ?labeledEntries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorEntries = field_map json "ErrorEntries" UInteger.of_json in
-      let totalLabels = field_map json "TotalLabels" UInteger.of_json in
-      let totalEntries = field_map json "TotalEntries" UInteger.of_json in
-      let labeledEntries = field_map json "LabeledEntries" UInteger.of_json in
+    let of_json json__ =
+      let errorEntries = field_map json__ "ErrorEntries" UInteger.of_json in
+      let totalLabels = field_map json__ "TotalLabels" UInteger.of_json in
+      let totalEntries = field_map json__ "TotalEntries" UInteger.of_json in
+      let labeledEntries = field_map json__ "LabeledEntries" UInteger.of_json in
       make ?errorEntries ?totalLabels ?totalEntries ?labeledEntries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides statistics about a dataset. For more information, see DescribeDataset."]
+module UnsuccessfulFaceDeletion =
+  struct
+    type nonrec t =
+      {
+      faceId: FaceId.t option
+        [@ocaml.doc "A unique identifier assigned to the face."];
+      userId: UserId.t option
+        [@ocaml.doc
+          "A provided ID for the UserID. Unique within the collection."];
+      reasons: UnsuccessfulFaceDeletionReasons.t option
+        [@ocaml.doc "The reason why the deletion was unsuccessful."]}
+    let make ?faceId =
+      fun ?userId -> fun ?reasons -> fun () -> { faceId; userId; reasons }
+    let to_value x =
+      structure_to_value
+        [("FaceId", (Option.map x.faceId ~f:FaceId.to_value));
+        ("UserId", (Option.map x.userId ~f:UserId.to_value));
+        ("Reasons",
+          (Option.map x.reasons ~f:UnsuccessfulFaceDeletionReasons.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reasons =
+        (Option.map ~f:UnsuccessfulFaceDeletionReasons.of_xml)
+          (Xml.child xml_arg0 "Reasons") in
+      let userId =
+        (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "UserId") in
+      let faceId =
+        (Option.map ~f:FaceId.of_xml) (Xml.child xml_arg0 "FaceId") in
+      make ?reasons ?userId ?faceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reasons =
+        field_map json__ "Reasons" UnsuccessfulFaceDeletionReasons.of_json in
+      let userId = field_map json__ "UserId" UserId.of_json in
+      let faceId = field_map json__ "FaceId" FaceId.of_json in
+      make ?reasons ?userId ?faceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains metadata like FaceId, UserID, and Reasons, for a face that was unsuccessfully deleted."]
+module AuditImagesLimit =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:4) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for AuditImagesLimit" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ChallengePreferences =
+  struct
+    type nonrec t = ChallengePreference.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ChallengePreference.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ChallengePreference.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ChallengePreferences"
+        ~of_json:ChallengePreference.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LivenessOutputConfig =
+  struct
+    type nonrec t =
+      {
+      s3Bucket: S3Bucket.t
+        [@ocaml.doc
+          "The path to an AWS Amazon S3 bucket used to store Face Liveness session results."];
+      s3KeyPrefix: LivenessS3KeyPrefix.t option
+        [@ocaml.doc
+          "The prefix prepended to the output files for the Face Liveness session results."]}
+    let context_ = "LivenessOutputConfig"
+    let make ?s3KeyPrefix =
+      fun ~s3Bucket -> fun () -> { s3KeyPrefix; s3Bucket }
+    let to_value x =
+      structure_to_value
+        [("S3Bucket", (Some (S3Bucket.to_value x.s3Bucket)));
+        ("S3KeyPrefix",
+          (Option.map x.s3KeyPrefix ~f:LivenessS3KeyPrefix.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3KeyPrefix =
+        (Option.map ~f:LivenessS3KeyPrefix.of_xml)
+          (Xml.child xml_arg0 "S3KeyPrefix") in
+      let s3Bucket =
+        S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Bucket") in
+      make ?s3KeyPrefix ~s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3KeyPrefix =
+        field_map json__ "S3KeyPrefix" LivenessS3KeyPrefix.of_json in
+      let s3Bucket = field_map_exn json__ "S3Bucket" S3Bucket.of_json in
+      make ?s3KeyPrefix ~s3Bucket ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains settings that specify the location of an Amazon S3 bucket used to store the output of a Face Liveness session. Note that the S3 bucket must be located in the caller's AWS account and in the same region as the Face Liveness end-point. Additionally, the Amazon S3 object keys are auto-generated by the Face Liveness system."]
 module CompareFacesMatch =
   struct
     type nonrec t =
@@ -5062,13 +8040,84 @@ module CompareFacesMatch =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Similarity") in
       make ?face ?similarity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let face = field_map json "Face" ComparedFace.of_json in
-      let similarity = field_map json "Similarity" Percent.of_json in
+    let of_json json__ =
+      let face = field_map json__ "Face" ComparedFace.of_json in
+      let similarity = field_map json__ "Similarity" Percent.of_json in
       make ?face ?similarity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about a face in a target image that matches the source image face analyzed by CompareFaces. The Face property contains the bounding box of the face in the target image. The Similarity property is the confidence that the source image face matches the face in the bounding box."]
+module AssociatedFace =
+  struct
+    type nonrec t =
+      {
+      faceId: FaceId.t option
+        [@ocaml.doc "Unique identifier assigned to the face."]}
+    let make ?faceId = fun () -> { faceId }
+    let to_value x =
+      structure_to_value
+        [("FaceId", (Option.map x.faceId ~f:FaceId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let faceId =
+        (Option.map ~f:FaceId.of_xml) (Xml.child xml_arg0 "FaceId") in
+      make ?faceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let faceId = field_map json__ "FaceId" FaceId.of_json in
+      make ?faceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides face metadata for the faces that are associated to a specific UserID."]
+module UnsuccessfulFaceAssociation =
+  struct
+    type nonrec t =
+      {
+      faceId: FaceId.t option
+        [@ocaml.doc "A unique identifier assigned to the face."];
+      userId: UserId.t option
+        [@ocaml.doc
+          "A provided ID for the UserID. Unique within the collection."];
+      confidence: Percent.t option
+        [@ocaml.doc
+          "Match confidence with the UserID, provides information regarding if a face association was unsuccessful because it didn't meet UserMatchThreshold."];
+      reasons: UnsuccessfulFaceAssociationReasons.t option
+        [@ocaml.doc "The reason why the association was unsuccessful."]}
+    let make ?faceId =
+      fun ?userId ->
+        fun ?confidence ->
+          fun ?reasons -> fun () -> { faceId; userId; confidence; reasons }
+    let to_value x =
+      structure_to_value
+        [("FaceId", (Option.map x.faceId ~f:FaceId.to_value));
+        ("UserId", (Option.map x.userId ~f:UserId.to_value));
+        ("Confidence", (Option.map x.confidence ~f:Percent.to_value));
+        ("Reasons",
+          (Option.map x.reasons
+             ~f:UnsuccessfulFaceAssociationReasons.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reasons =
+        (Option.map ~f:UnsuccessfulFaceAssociationReasons.of_xml)
+          (Xml.child xml_arg0 "Reasons") in
+      let confidence =
+        (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
+      let userId =
+        (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "UserId") in
+      let faceId =
+        (Option.map ~f:FaceId.of_xml) (Xml.child xml_arg0 "FaceId") in
+      make ?reasons ?confidence ?userId ?faceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reasons =
+        field_map json__ "Reasons" UnsuccessfulFaceAssociationReasons.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let userId = field_map json__ "UserId" UserId.of_json in
+      let faceId = field_map json__ "FaceId" FaceId.of_json in
+      make ?reasons ?confidence ?userId ?faceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains metadata like FaceId, UserID, and Reasons, for a face that was unsuccessfully associated."]
 module AccessDeniedException =
   struct
     type nonrec t = unit
@@ -5107,19 +8156,6 @@ module InvalidParameterException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Input parameter violated a constraint. Validate your parameter before calling the API operation again."]
-module LimitExceededException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An Amazon Rekognition service limit was exceeded. For example, if you start too many Amazon Rekognition Video jobs concurrently, calls to start operations (StartLabelDetection, for example) will raise a LimitExceededException exception (HTTP status code: 400) until the number of concurrently running jobs is below the Amazon Rekognition service limit."]
 module ProvisionedThroughputExceededException =
   struct
     type nonrec t = unit
@@ -5170,6 +8206,100 @@ module ThrottlingException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Amazon Rekognition is temporarily unable to process the request. Try your call again."]
+module StreamProcessorDataSharingPreference =
+  struct
+    type nonrec t =
+      {
+      optIn: Boolean.t
+        [@ocaml.doc
+          "If this option is set to true, you choose to share data with Rekognition to improve model performance."]}
+    let context_ = "StreamProcessorDataSharingPreference"
+    let make ~optIn = fun () -> { optIn }
+    let to_value x =
+      structure_to_value [("OptIn", (Some (Boolean.to_value x.optIn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let optIn =
+        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "OptIn") in
+      make ~optIn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let optIn = field_map_exn json__ "OptIn" Boolean.of_json in
+      make ~optIn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows you to opt in or opt out to share data with Rekognition to improve model performance. You can choose this option at the account level or on a per-stream basis. Note that if you opt out at the account level this setting is ignored on individual streams."]
+module StreamProcessorParametersToDelete =
+  struct
+    type nonrec t = StreamProcessorParameterToDelete.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:StreamProcessorParameterToDelete.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:StreamProcessorParameterToDelete.of_xml)
+    let of_json j =
+      list_of_json ~kind:"StreamProcessorParametersToDelete"
+        ~of_json:StreamProcessorParameterToDelete.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module StreamProcessorSettingsForUpdate =
+  struct
+    type nonrec t =
+      {
+      connectedHomeForUpdate: ConnectedHomeSettingsForUpdate.t option
+        [@ocaml.doc
+          "The label detection settings you want to use for your stream processor."]}
+    let make ?connectedHomeForUpdate = fun () -> { connectedHomeForUpdate }
+    let to_value x =
+      structure_to_value
+        [("ConnectedHomeForUpdate",
+           (Option.map x.connectedHomeForUpdate
+              ~f:ConnectedHomeSettingsForUpdate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connectedHomeForUpdate =
+        (Option.map ~f:ConnectedHomeSettingsForUpdate.of_xml)
+          (Xml.child xml_arg0 "ConnectedHomeForUpdate") in
+      make ?connectedHomeForUpdate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connectedHomeForUpdate =
+        field_map json__ "ConnectedHomeForUpdate"
+          ConnectedHomeSettingsForUpdate.of_json in
+      make ?connectedHomeForUpdate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The stream processor settings that you want to update. ConnectedHome settings can be updated to detect different labels with a different minimum confidence."]
+module LimitExceededException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An Amazon Rekognition service limit was exceeded. For example, if you start too many jobs concurrently, subsequent calls to start operations (ex: StartLabelDetection) will raise a LimitExceededException exception (HTTP status code: 400) until the number of concurrently running jobs is below the Amazon Rekognition service limit."]
 module DatasetChanges =
   struct
     type nonrec t =
@@ -5191,9 +8321,9 @@ module DatasetChanges =
           (Xml.child_exn ~context:context_ xml_arg0 "GroundTruth") in
       make ~groundTruth ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let groundTruth =
-        field_map_exn json "GroundTruth" GroundTruthBlob.of_json in
+        field_map_exn json__ "GroundTruth" GroundTruthBlob.of_json in
       make ~groundTruth ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5225,6 +8355,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5256,7 +8389,7 @@ module ServiceQuotaExceededException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The size of the collection exceeds the allowed limit. For more information, see Limits in Amazon Rekognition in the Amazon Rekognition Developer Guide."]
+       "The size of the collection exceeds the allowed limit. For more information, see Guidelines and quotas in Amazon Rekognition in the Amazon Rekognition Developer Guide."]
 module TagMap =
   struct
     type nonrec t = (TagKey.t * TagValue.t) list
@@ -5283,6 +8416,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -5378,8 +8513,9 @@ module JobTag =
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9_.\\-:]+")));
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[a-zA-Z0-9_.\\-:+=\\/]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -5395,7 +8531,7 @@ module NotificationChannel =
       {
       sNSTopicArn: SNSTopicArn.t
         [@ocaml.doc
-          "The Amazon SNS topic to which Amazon Rekognition to posts the completion status."];
+          "The Amazon SNS topic to which Amazon Rekognition posts the completion status."];
       roleArn: RoleArn.t
         [@ocaml.doc
           "The ARN of an IAM role that gives Amazon Rekognition publishing permissions to the Amazon SNS topic."]}
@@ -5415,13 +8551,14 @@ module NotificationChannel =
           (Xml.child_exn ~context:context_ xml_arg0 "SNSTopicArn") in
       make ~roleArn ~sNSTopicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map_exn json "RoleArn" RoleArn.of_json in
-      let sNSTopicArn = field_map_exn json "SNSTopicArn" SNSTopicArn.of_json in
+    let of_json json__ =
+      let roleArn = field_map_exn json__ "RoleArn" RoleArn.of_json in
+      let sNSTopicArn =
+        field_map_exn json__ "SNSTopicArn" SNSTopicArn.of_json in
       make ~roleArn ~sNSTopicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The Amazon Simple Notification Service topic to which Amazon Rekognition publishes the completion status of a video analysis operation. For more information, see api-video. Note that the Amazon SNS topic must have a topic name that begins with AmazonRekognition if you are using the AmazonRekognitionServiceRole permissions policy to access the topic. For more information, see Giving access to multiple Amazon SNS topics."]
+       "The Amazon Simple Notification Service topic to which Amazon Rekognition publishes the completion status of a video analysis operation. For more information, see Calling Amazon Rekognition Video operations. Note that the Amazon SNS topic must have a topic name that begins with AmazonRekognition if you are using the AmazonRekognitionServiceRole permissions policy to access the topic. For more information, see Giving access to multiple Amazon SNS topics."]
 module StartTextDetectionFilters =
   struct
     type nonrec t =
@@ -5450,10 +8587,10 @@ module StartTextDetectionFilters =
           (Xml.child xml_arg0 "WordFilter") in
       make ?regionsOfInterest ?wordFilter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let regionsOfInterest =
-        field_map json "RegionsOfInterest" RegionsOfInterest.of_json in
-      let wordFilter = field_map json "WordFilter" DetectionFilter.of_json in
+        field_map json__ "RegionsOfInterest" RegionsOfInterest.of_json in
+      let wordFilter = field_map json__ "WordFilter" DetectionFilter.of_json in
       make ?regionsOfInterest ?wordFilter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5474,17 +8611,89 @@ module Video =
         (Option.map ~f:S3Object.of_xml) (Xml.child xml_arg0 "S3Object") in
       make ?s3Object ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Object = field_map json "S3Object" S3Object.of_json in
+    let of_json json__ =
+      let s3Object = field_map json__ "S3Object" S3Object.of_json in
       make ?s3Object ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Video file stored in an Amazon S3 bucket. Amazon Rekognition video start operations such as StartLabelDetection use Video to specify a video for analysis. The supported file formats are .mp4, .mov and .avi."]
+module StartStreamProcessorSessionId =
+  struct
+    type nonrec t = string
+    let context_ = "StartStreamProcessorSessionId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StartStreamProcessorSessionId" j
+    let to_json = simple_to_json to_value
+  end
+module StreamProcessingStartSelector =
+  struct
+    type nonrec t =
+      {
+      kVSStreamStartSelector: KinesisVideoStreamStartSelector.t option
+        [@ocaml.doc
+          "Specifies the starting point in the stream to start processing. This can be done with a producer timestamp or a fragment number in a Kinesis stream."]}
+    let make ?kVSStreamStartSelector = fun () -> { kVSStreamStartSelector }
+    let to_value x =
+      structure_to_value
+        [("KVSStreamStartSelector",
+           (Option.map x.kVSStreamStartSelector
+              ~f:KinesisVideoStreamStartSelector.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kVSStreamStartSelector =
+        (Option.map ~f:KinesisVideoStreamStartSelector.of_xml)
+          (Xml.child xml_arg0 "KVSStreamStartSelector") in
+      make ?kVSStreamStartSelector ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kVSStreamStartSelector =
+        field_map json__ "KVSStreamStartSelector"
+          KinesisVideoStreamStartSelector.of_json in
+      make ?kVSStreamStartSelector ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This is a required parameter for label detection stream processors and should not be used to start a face search stream processor."]
+module StreamProcessingStopSelector =
+  struct
+    type nonrec t =
+      {
+      maxDurationInSeconds: MaxDurationInSecondsULong.t option
+        [@ocaml.doc
+          "Specifies the maximum amount of time in seconds that you want the stream to be processed. The largest amount of time is 2 minutes. The default is 10 seconds."]}
+    let make ?maxDurationInSeconds = fun () -> { maxDurationInSeconds }
+    let to_value x =
+      structure_to_value
+        [("MaxDurationInSeconds",
+           (Option.map x.maxDurationInSeconds
+              ~f:MaxDurationInSecondsULong.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxDurationInSeconds =
+        (Option.map ~f:MaxDurationInSecondsULong.of_xml)
+          (Xml.child xml_arg0 "MaxDurationInSeconds") in
+      make ?maxDurationInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxDurationInSeconds =
+        field_map json__ "MaxDurationInSeconds"
+          MaxDurationInSecondsULong.of_json in
+      make ?maxDurationInSeconds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies when to stop processing the stream. You can specify a maximum amount of time to process the video."]
 module SegmentTypes =
   struct
     type nonrec t = SegmentType.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SegmentType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5532,16 +8741,98 @@ module StartSegmentDetectionFilters =
           (Xml.child xml_arg0 "TechnicalCueFilter") in
       make ?shotFilter ?technicalCueFilter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let shotFilter =
-        field_map json "ShotFilter" StartShotDetectionFilter.of_json in
+        field_map json__ "ShotFilter" StartShotDetectionFilter.of_json in
       let technicalCueFilter =
-        field_map json "TechnicalCueFilter"
+        field_map json__ "TechnicalCueFilter"
           StartTechnicalCueDetectionFilter.of_json in
       make ?shotFilter ?technicalCueFilter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Filters applied to the technical cue or shot detection segments. For more information, see StartSegmentDetection."]
+module InvalidManifestException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates that a provided manifest file is empty or larger than the allowed limit."]
+module ResourceNotReadyException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The requested resource isn't ready. For example, this exception occurs when you call DetectCustomLabels with a model version that isn't deployed."]
+module LabelDetectionFeatureList =
+  struct
+    type nonrec t = LabelDetectionFeatureName.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LabelDetectionFeatureName.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LabelDetectionFeatureName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LabelDetectionFeatureList"
+        ~of_json:LabelDetectionFeatureName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LabelDetectionSettings =
+  struct
+    type nonrec t = {
+      generalLabels: GeneralLabelsSettings.t option }
+    let make ?generalLabels = fun () -> { generalLabels }
+    let to_value x =
+      structure_to_value
+        [("GeneralLabels",
+           (Option.map x.generalLabels ~f:GeneralLabelsSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let generalLabels =
+        (Option.map ~f:GeneralLabelsSettings.of_xml)
+          (Xml.child xml_arg0 "GeneralLabels") in
+      make ?generalLabels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let generalLabels =
+        field_map json__ "GeneralLabels" GeneralLabelsSettings.of_json in
+      make ?generalLabels ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the specified filters that should be applied to a list of returned GENERAL_LABELS."]
 module FaceAttributes =
   struct
     type nonrec t =
@@ -5561,20 +8852,94 @@ module FaceAttributes =
     let of_json j = of_string (string_of_json ~kind:"FaceAttributes" j)
     let to_json = simple_to_json to_value
   end
-module MaxFaces =
+module SearchedFace =
+  struct
+    type nonrec t =
+      {
+      faceId: FaceId.t option
+        [@ocaml.doc "Unique identifier assigned to the face."]}
+    let make ?faceId = fun () -> { faceId }
+    let to_value x =
+      structure_to_value
+        [("FaceId", (Option.map x.faceId ~f:FaceId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let faceId =
+        (Option.map ~f:FaceId.of_xml) (Xml.child xml_arg0 "FaceId") in
+      make ?faceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let faceId = field_map json__ "FaceId" FaceId.of_json in
+      make ?faceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides face metadata such as FaceId, BoundingBox, Confidence of the input face used for search."]
+module SearchedUser =
+  struct
+    type nonrec t =
+      {
+      userId: UserId.t option
+        [@ocaml.doc
+          "A provided ID for the UserID. Unique within the collection."]}
+    let make ?userId = fun () -> { userId }
+    let to_value x =
+      structure_to_value
+        [("UserId", (Option.map x.userId ~f:UserId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userId =
+        (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "UserId") in
+      make ?userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userId = field_map json__ "UserId" UserId.of_json in
+      make ?userId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains metadata about a User searched for within a collection."]
+module UserMatchList =
+  struct
+    type nonrec t = UserMatch.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:500); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UserMatch.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UserMatch.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UserMatchList" ~of_json:UserMatch.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxUserResults =
   struct
     type nonrec t = int
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:4096) >>= (fun () -> check_int_min i ~min:1));
+          ((check_int_max i ~max:500) >>= (fun () -> check_int_min i ~min:1));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
     let to_query v = to_query to_value v
     let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for MaxFaces" xml_arg0)
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxUserResults" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
@@ -5590,7 +8955,7 @@ module ImageTooLargeException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The input image size exceeds the allowed limit. If you are calling DetectProtectiveEquipment, the image size or resolution exceeds the allowed limit. For more information, see Limits in Amazon Rekognition in the Amazon Rekognition Developer Guide."]
+       "The input image size exceeds the allowed limit. If you are calling DetectProtectiveEquipment, the image size or resolution exceeds the allowed limit. For more information, see Guidelines and quotas in Amazon Rekognition in the Amazon Rekognition Developer Guide."]
 module InvalidImageFormatException =
   struct
     type nonrec t = unit
@@ -5603,12 +8968,61 @@ module InvalidImageFormatException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The provided image format is not supported."]
+module SearchedFaceDetails =
+  struct
+    type nonrec t = {
+      faceDetail: FaceDetail.t option }
+    let make ?faceDetail = fun () -> { faceDetail }
+    let to_value x =
+      structure_to_value
+        [("FaceDetail", (Option.map x.faceDetail ~f:FaceDetail.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let faceDetail =
+        (Option.map ~f:FaceDetail.of_xml) (Xml.child xml_arg0 "FaceDetail") in
+      make ?faceDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let faceDetail = field_map json__ "FaceDetail" FaceDetail.of_json in
+      make ?faceDetail ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains data regarding the input face used for a search."]
+module UnsearchedFacesList =
+  struct
+    type nonrec t = UnsearchedFace.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UnsearchedFace.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UnsearchedFace.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UnsearchedFacesList"
+        ~of_json:UnsearchedFace.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Image =
   struct
     type nonrec t =
       {
       bytes: ImageBlob.t option
-        [@ocaml.doc "Blob of image bytes up to 5 MBs."];
+        [@ocaml.doc
+          "Blob of image bytes up to 5 MBs. Note that the maximum image size you can pass to DetectCustomLabels is 4MB."];
       s3Object: S3Object.t option
         [@ocaml.doc "Identifies an S3 object as the image source."]}
     let make ?bytes = fun ?s3Object -> fun () -> { bytes; s3Object }
@@ -5624,13 +9038,13 @@ module Image =
         (Option.map ~f:ImageBlob.of_xml) (Xml.child xml_arg0 "Bytes") in
       make ?s3Object ?bytes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Object = field_map json "S3Object" S3Object.of_json in
-      let bytes = field_map json "Bytes" ImageBlob.of_json in
+    let of_json json__ =
+      let s3Object = field_map json__ "S3Object" S3Object.of_json in
+      let bytes = field_map json__ "Bytes" ImageBlob.of_json in
       make ?s3Object ?bytes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides the input image either as bytes or an S3 object. You pass image bytes to an Amazon Rekognition API operation by using the Bytes property. For example, you would use the Bytes property to pass an image loaded from a local file system. Image bytes passed by using the Bytes property must be base64-encoded. Your code may not need to encode image bytes if you are using an AWS SDK to call Amazon Rekognition API operations. For more information, see Analyzing an Image Loaded from a Local File System in the Amazon Rekognition Developer Guide. You pass images stored in an S3 bucket to an Amazon Rekognition API operation by using the S3Object property. Images stored in an S3 bucket do not need to be base64-encoded. The region for the S3 bucket containing the S3 object must match the region you use for Amazon Rekognition operations. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes using the Bytes property is not supported. You must first upload the image to an Amazon S3 bucket and then call the operation using the S3Object property. For Amazon Rekognition to process an S3 object, the user must have permission to access the S3 object. For more information, see Resource Based Policies in the Amazon Rekognition Developer Guide."]
+       "Provides the input image either as bytes or an S3 object. You pass image bytes to an Amazon Rekognition API operation by using the Bytes property. For example, you would use the Bytes property to pass an image loaded from a local file system. Image bytes passed by using the Bytes property must be base64-encoded. Your code may not need to encode image bytes if you are using an AWS SDK to call Amazon Rekognition API operations. For more information, see Analyzing an Image Loaded from a Local File System in the Amazon Rekognition Developer Guide. You pass images stored in an S3 bucket to an Amazon Rekognition API operation by using the S3Object property. Images stored in an S3 bucket do not need to be base64-encoded. The region for the S3 bucket containing the S3 object must match the region you use for Amazon Rekognition operations. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes using the Bytes property is not supported. You must first upload the image to an Amazon S3 bucket and then call the operation using the S3Object property. For Amazon Rekognition to process an S3 object, the user must have permission to access the S3 object. For more information, see How Amazon Rekognition works with IAM in the Amazon Rekognition Developer Guide."]
 module QualityFilter =
   struct
     type nonrec t =
@@ -5665,10 +9079,30 @@ module QualityFilter =
     let of_json j = of_string (string_of_json ~kind:"QualityFilter" j)
     let to_json = simple_to_json to_value
   end
+module MaxFaces =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:4096) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for MaxFaces" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module CelebrityList =
   struct
     type nonrec t = Celebrity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Celebrity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5693,6 +9127,9 @@ module ComparedFaceList =
   struct
     type nonrec t = ComparedFace.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComparedFace.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5746,6 +9183,44 @@ module OrientationCorrection =
       of_string (string_of_json ~kind:"OrientationCorrection" j)
     let to_json = simple_to_json to_value
   end
+module InvalidPolicyRevisionIdException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The supplied revision id for the project policy is invalid."]
+module MalformedPolicyDocumentException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The format of the project policy document that you supplied to PutProjectPolicy is incorrect."]
+module ResourceAlreadyExistsException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A resource with the specified ID already exists."]
 module InvalidPaginationTokenException =
   struct
     type nonrec t = unit
@@ -5772,10 +9247,40 @@ module PaginationToken =
     let of_json j = string_of_json ~kind:"PaginationToken" j
     let to_json = simple_to_json to_value
   end
+module UserList =
+  struct
+    type nonrec t = User.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:500); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:User.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:User.of_xml)
+    let of_json j = list_of_json ~kind:"UserList" ~of_json:User.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module StreamProcessorList =
   struct
     type nonrec t = StreamProcessor.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StreamProcessor.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5812,10 +9317,121 @@ module MaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ExtendedPaginationToken =
+  struct
+    type nonrec t = string
+    let context_ = "ExtendedPaginationToken"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:1024); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExtendedPaginationToken" j
+    let to_json = simple_to_json to_value
+  end
+module ProjectPolicies =
+  struct
+    type nonrec t = ProjectPolicy.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProjectPolicy.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProjectPolicy.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProjectPolicies" ~of_json:ProjectPolicy.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListProjectPoliciesPageSize =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:5) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ListProjectPoliciesPageSize"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MediaAnalysisJobDescriptions =
+  struct
+    type nonrec t = MediaAnalysisJobDescription.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MediaAnalysisJobDescription.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MediaAnalysisJobDescription.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MediaAnalysisJobDescriptions"
+        ~of_json:MediaAnalysisJobDescription.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListMediaAnalysisJobsPageSize =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ListMediaAnalysisJobsPageSize"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module FaceList =
   struct
     type nonrec t = Face.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Face.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5833,6 +9449,37 @@ module FaceList =
                           | _ -> true)
                      | _ -> true))) ~f:Face.of_xml)
     let of_json j = list_of_json ~kind:"FaceList" ~of_json:Face.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FaceIdList =
+  struct
+    type nonrec t = FaceId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:4096) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FaceId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FaceId.of_xml)
+    let of_json j = list_of_json ~kind:"FaceIdList" ~of_json:FaceId.of_json j
     let to_json v = composed_to_json to_value v
   end
 module PageSize =
@@ -5856,6 +9503,9 @@ module DatasetLabelDescriptions =
   struct
     type nonrec t = DatasetLabelDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DatasetLabelDescription.to_value)) |>
         (fun x -> `List x)
@@ -5878,33 +9528,6 @@ module DatasetLabelDescriptions =
         ~of_json:DatasetLabelDescription.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ExtendedPaginationToken =
-  struct
-    type nonrec t = string
-    let context_ = "ExtendedPaginationToken"
-    let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:1024); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ExtendedPaginationToken" j
-    let to_json = simple_to_json to_value
-  end
-module ResourceNotReadyException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The requested resource isn't ready. For example, this exception occurs when you call DetectCustomLabels with a model version that isn't deployed."]
 module ListDatasetLabelsPageSize =
   struct
     type nonrec t = int
@@ -5928,6 +9551,9 @@ module DatasetEntries =
   struct
     type nonrec t = DatasetEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DatasetEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5956,6 +9582,9 @@ module DatasetLabels =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DatasetLabel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6045,6 +9674,9 @@ module CollectionIdList =
   struct
     type nonrec t = CollectionId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CollectionId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6069,6 +9701,9 @@ module FaceModelVersionList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6093,6 +9728,9 @@ module FaceRecordList =
   struct
     type nonrec t = FaceRecord.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FaceRecord.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6117,6 +9755,9 @@ module UnindexedFaces =
   struct
     type nonrec t = UnindexedFace.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UnindexedFace.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6141,6 +9782,9 @@ module Attributes =
   struct
     type nonrec t = Attribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Attribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6180,6 +9824,9 @@ module TextDetectionResults =
   struct
     type nonrec t = TextDetectionResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TextDetectionResult.to_value)) |>
         (fun x -> `List x)
@@ -6234,6 +9881,9 @@ module AudioMetadataList =
   struct
     type nonrec t = AudioMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AudioMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6258,6 +9908,9 @@ module SegmentDetections =
   struct
     type nonrec t = SegmentDetection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SegmentDetection.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6283,6 +9936,9 @@ module SegmentTypesInfo =
   struct
     type nonrec t = SegmentTypeInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SegmentTypeInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6308,6 +9964,9 @@ module VideoMetadataList =
   struct
     type nonrec t = VideoMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VideoMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6332,6 +9991,9 @@ module PersonDetections =
   struct
     type nonrec t = PersonDetection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PersonDetection.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6379,10 +10041,47 @@ module PersonTrackingSortBy =
     let of_json j = of_string (string_of_json ~kind:"PersonTrackingSortBy" j)
     let to_json = simple_to_json to_value
   end
+module GetLabelDetectionRequestMetadata =
+  struct
+    type nonrec t =
+      {
+      sortBy: LabelDetectionSortBy.t option
+        [@ocaml.doc
+          "The sorting method chosen for a GetLabelDetection request."];
+      aggregateBy: LabelDetectionAggregateBy.t option
+        [@ocaml.doc
+          "The aggregation method chosen for a GetLabelDetection request."]}
+    let make ?sortBy = fun ?aggregateBy -> fun () -> { sortBy; aggregateBy }
+    let to_value x =
+      structure_to_value
+        [("SortBy", (Option.map x.sortBy ~f:LabelDetectionSortBy.to_value));
+        ("AggregateBy",
+          (Option.map x.aggregateBy ~f:LabelDetectionAggregateBy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aggregateBy =
+        (Option.map ~f:LabelDetectionAggregateBy.of_xml)
+          (Xml.child xml_arg0 "AggregateBy") in
+      let sortBy =
+        (Option.map ~f:LabelDetectionSortBy.of_xml)
+          (Xml.child xml_arg0 "SortBy") in
+      make ?aggregateBy ?sortBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aggregateBy =
+        field_map json__ "AggregateBy" LabelDetectionAggregateBy.of_json in
+      let sortBy = field_map json__ "SortBy" LabelDetectionSortBy.of_json in
+      make ?aggregateBy ?sortBy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains metadata about a label detection request, including the SortBy and AggregateBy options."]
 module LabelDetections =
   struct
     type nonrec t = LabelDetection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LabelDetection.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6403,36 +10102,13 @@ module LabelDetections =
       list_of_json ~kind:"LabelDetections" ~of_json:LabelDetection.of_json j
     let to_json v = composed_to_json to_value v
   end
-module LabelDetectionSortBy =
-  struct
-    type nonrec t =
-      | NAME 
-      | TIMESTAMP 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | NAME -> "NAME"
-      | TIMESTAMP -> "TIMESTAMP"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "NAME" -> NAME
-      | "TIMESTAMP" -> TIMESTAMP
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration LabelDetectionSortBy" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"LabelDetectionSortBy" j)
-    let to_json = simple_to_json to_value
-  end
 module PersonMatches =
   struct
     type nonrec t = PersonMatch.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PersonMatch.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6478,10 +10154,140 @@ module FaceSearchSortBy =
     let of_json j = of_string (string_of_json ~kind:"FaceSearchSortBy" j)
     let to_json = simple_to_json to_value
   end
+module AuditImages =
+  struct
+    type nonrec t = AuditImage.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AuditImage.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AuditImage.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AuditImages" ~of_json:AuditImage.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Challenge =
+  struct
+    type nonrec t =
+      {
+      type_: ChallengeType.t option
+        [@ocaml.doc
+          "The type of the challenge being used for the Face Liveness session."];
+      version: Version.t option
+        [@ocaml.doc
+          "The version of the challenge being used for the Face Liveness session."]}
+    let make ?type_ = fun ?version -> fun () -> { type_; version }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:ChallengeType.to_value));
+        ("Version", (Option.map x.version ~f:Version.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let version =
+        (Option.map ~f:Version.of_xml) (Xml.child xml_arg0 "Version") in
+      let type_ =
+        (Option.map ~f:ChallengeType.of_xml) (Xml.child xml_arg0 "Type") in
+      make ?version ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let version = field_map json__ "Version" Version.of_json in
+      let type_ = field_map json__ "Type" ChallengeType.of_json in
+      make ?version ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the type and version of the challenge being used for the Face Liveness session."]
+module LivenessSessionId =
+  struct
+    type nonrec t = string
+    let context_ = "LivenessSessionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LivenessSessionId" j
+    let to_json = simple_to_json to_value
+  end
+module LivenessSessionStatus =
+  struct
+    type nonrec t =
+      | CREATED 
+      | IN_PROGRESS 
+      | SUCCEEDED 
+      | FAILED 
+      | EXPIRED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATED -> "CREATED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | SUCCEEDED -> "SUCCEEDED"
+      | FAILED -> "FAILED"
+      | EXPIRED -> "EXPIRED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATED" -> CREATED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "SUCCEEDED" -> SUCCEEDED
+      | "FAILED" -> FAILED
+      | "EXPIRED" -> EXPIRED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LivenessSessionStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LivenessSessionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module SessionNotFoundException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Occurs when a given sessionId is not found."]
 module FaceDetections =
   struct
     type nonrec t = FaceDetection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FaceDetection.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6506,6 +10312,9 @@ module ContentModerationDetections =
   struct
     type nonrec t = ContentModerationDetection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ContentModerationDetection.to_value)) |>
         (fun x -> `List x)
@@ -6528,37 +10337,48 @@ module ContentModerationDetections =
         ~of_json:ContentModerationDetection.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ContentModerationSortBy =
+module GetContentModerationRequestMetadata =
   struct
     type nonrec t =
-      | NAME 
-      | TIMESTAMP 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | NAME -> "NAME"
-      | TIMESTAMP -> "TIMESTAMP"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "NAME" -> NAME
-      | "TIMESTAMP" -> TIMESTAMP
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+      {
+      sortBy: ContentModerationSortBy.t option
+        [@ocaml.doc
+          "The sorting method chosen for a GetContentModeration request."];
+      aggregateBy: ContentModerationAggregateBy.t option
+        [@ocaml.doc
+          "The aggregation method chosen for a GetContentModeration request."]}
+    let make ?sortBy = fun ?aggregateBy -> fun () -> { sortBy; aggregateBy }
+    let to_value x =
+      structure_to_value
+        [("SortBy",
+           (Option.map x.sortBy ~f:ContentModerationSortBy.to_value));
+        ("AggregateBy",
+          (Option.map x.aggregateBy ~f:ContentModerationAggregateBy.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration ContentModerationSortBy" xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"ContentModerationSortBy" j)
-    let to_json = simple_to_json to_value
-  end
+      let aggregateBy =
+        (Option.map ~f:ContentModerationAggregateBy.of_xml)
+          (Xml.child xml_arg0 "AggregateBy") in
+      let sortBy =
+        (Option.map ~f:ContentModerationSortBy.of_xml)
+          (Xml.child xml_arg0 "SortBy") in
+      make ?aggregateBy ?sortBy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aggregateBy =
+        field_map json__ "AggregateBy" ContentModerationAggregateBy.of_json in
+      let sortBy = field_map json__ "SortBy" ContentModerationSortBy.of_json in
+      make ?aggregateBy ?sortBy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains metadata about a content moderation request, including the SortBy and AggregateBy options."]
 module CelebrityRecognitions =
   struct
     type nonrec t = CelebrityRecognition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CelebrityRecognition.to_value)) |>
         (fun x -> `List x)
@@ -6611,6 +10431,9 @@ module DistributeDatasetMetadataList =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:2));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DistributeDataset.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6632,10 +10455,125 @@ module DistributeDatasetMetadataList =
         ~of_json:DistributeDataset.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ConflictException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A User with the same Id already exists within the collection, or the update or deletion of the User caused an inconsistent state. **"]
+module DisassociatedFacesList =
+  struct
+    type nonrec t = DisassociatedFace.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DisassociatedFace.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DisassociatedFace.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DisassociatedFacesList"
+        ~of_json:DisassociatedFace.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UnsuccessfulFaceDisassociationList =
+  struct
+    type nonrec t = UnsuccessfulFaceDisassociation.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:500) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UnsuccessfulFaceDisassociation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UnsuccessfulFaceDisassociation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UnsuccessfulFaceDisassociationList"
+        ~of_json:UnsuccessfulFaceDisassociation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UserFaceIdList =
+  struct
+    type nonrec t = FaceId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FaceId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FaceId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UserFaceIdList" ~of_json:FaceId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TextDetectionList =
   struct
     type nonrec t = TextDetection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TextDetection.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6682,10 +10620,10 @@ module DetectTextFilters =
           (Xml.child xml_arg0 "WordFilter") in
       make ?regionsOfInterest ?wordFilter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let regionsOfInterest =
-        field_map json "RegionsOfInterest" RegionsOfInterest.of_json in
-      let wordFilter = field_map json "WordFilter" DetectionFilter.of_json in
+        field_map json__ "RegionsOfInterest" RegionsOfInterest.of_json in
+      let wordFilter = field_map json__ "WordFilter" DetectionFilter.of_json in
       make ?regionsOfInterest ?wordFilter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6694,6 +10632,9 @@ module ProtectiveEquipmentPersons =
   struct
     type nonrec t = ProtectiveEquipmentPerson.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProtectiveEquipmentPerson.to_value)) |>
         (fun x -> `List x)
@@ -6763,15 +10704,15 @@ module ProtectiveEquipmentSummary =
       make ?personsIndeterminate ?personsWithoutRequiredEquipment
         ?personsWithRequiredEquipment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let personsIndeterminate =
-        field_map json "PersonsIndeterminate"
+        field_map json__ "PersonsIndeterminate"
           ProtectiveEquipmentPersonIds.of_json in
       let personsWithoutRequiredEquipment =
-        field_map json "PersonsWithoutRequiredEquipment"
+        field_map json__ "PersonsWithoutRequiredEquipment"
           ProtectiveEquipmentPersonIds.of_json in
       let personsWithRequiredEquipment =
-        field_map json "PersonsWithRequiredEquipment"
+        field_map json__ "PersonsWithRequiredEquipment"
           ProtectiveEquipmentPersonIds.of_json in
       make ?personsIndeterminate ?personsWithoutRequiredEquipment
         ?personsWithRequiredEquipment ()
@@ -6807,11 +10748,12 @@ module ProtectiveEquipmentSummarizationAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "MinConfidence") in
       make ~requiredEquipmentTypes ~minConfidence ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requiredEquipmentTypes =
-        field_map_exn json "RequiredEquipmentTypes"
+        field_map_exn json__ "RequiredEquipmentTypes"
           ProtectiveEquipmentTypes.of_json in
-      let minConfidence = field_map_exn json "MinConfidence" Percent.of_json in
+      let minConfidence =
+        field_map_exn json__ "MinConfidence" Percent.of_json in
       make ~requiredEquipmentTypes ~minConfidence ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6863,14 +10805,14 @@ module HumanLoopActivationOutput =
       make ?humanLoopActivationConditionsEvaluationResults
         ?humanLoopActivationReasons ?humanLoopArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let humanLoopActivationConditionsEvaluationResults =
-        field_map json "HumanLoopActivationConditionsEvaluationResults"
+        field_map json__ "HumanLoopActivationConditionsEvaluationResults"
           HumanLoopActivationConditionsEvaluationResults.of_json in
       let humanLoopActivationReasons =
-        field_map json "HumanLoopActivationReasons"
+        field_map json__ "HumanLoopActivationReasons"
           HumanLoopActivationReasons.of_json in
-      let humanLoopArn = field_map json "HumanLoopArn" HumanLoopArn.of_json in
+      let humanLoopArn = field_map json__ "HumanLoopArn" HumanLoopArn.of_json in
       make ?humanLoopActivationConditionsEvaluationResults
         ?humanLoopActivationReasons ?humanLoopArn ()
     let to_json v = composed_to_json to_value v
@@ -6902,10 +10844,10 @@ module HumanLoopQuotaExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceType") in
       make ?serviceCode ?quotaCode ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceCode = field_map json "ServiceCode" String_.of_json in
-      let quotaCode = field_map json "QuotaCode" String_.of_json in
-      let resourceType = field_map json "ResourceType" String_.of_json in
+    let of_json json__ =
+      let serviceCode = field_map json__ "ServiceCode" String_.of_json in
+      let quotaCode = field_map json__ "QuotaCode" String_.of_json in
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
       make ?serviceCode ?quotaCode ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6914,6 +10856,9 @@ module ModerationLabels =
   struct
     type nonrec t = ModerationLabel.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ModerationLabel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6972,21 +10917,84 @@ module HumanLoopConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "HumanLoopName") in
       make ?dataAttributes ~flowDefinitionArn ~humanLoopName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataAttributes =
-        field_map json "DataAttributes" HumanLoopDataAttributes.of_json in
+        field_map json__ "DataAttributes" HumanLoopDataAttributes.of_json in
       let flowDefinitionArn =
-        field_map_exn json "FlowDefinitionArn" FlowDefinitionArn.of_json in
+        field_map_exn json__ "FlowDefinitionArn" FlowDefinitionArn.of_json in
       let humanLoopName =
-        field_map_exn json "HumanLoopName" HumanLoopName.of_json in
+        field_map_exn json__ "HumanLoopName" HumanLoopName.of_json in
       make ?dataAttributes ~flowDefinitionArn ~humanLoopName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Sets up the flow definition the image will be sent to if one of the conditions is met. You can also set certain attributes of the image before review."]
+module DetectLabelsImageProperties =
+  struct
+    type nonrec t =
+      {
+      quality: DetectLabelsImageQuality.t option
+        [@ocaml.doc
+          "Information about the quality of the image foreground as defined by brightness, sharpness, and contrast. The higher the value the greater the brightness, sharpness, and contrast respectively."];
+      dominantColors: DominantColors.t option
+        [@ocaml.doc
+          "Information about the dominant colors found in an image, described with RGB values, CSS color name, simplified color name, and PixelPercentage (the percentage of image pixels that have a particular color)."];
+      foreground: DetectLabelsImageForeground.t option
+        [@ocaml.doc
+          "Information about the properties of an image\226\128\153s foreground, including the foreground\226\128\153s quality and dominant colors, including the quality and dominant colors of the image."];
+      background: DetectLabelsImageBackground.t option
+        [@ocaml.doc
+          "Information about the properties of an image\226\128\153s background, including the background\226\128\153s quality and dominant colors, including the quality and dominant colors of the image."]}
+    let make ?quality =
+      fun ?dominantColors ->
+        fun ?foreground ->
+          fun ?background ->
+            fun () -> { quality; dominantColors; foreground; background }
+    let to_value x =
+      structure_to_value
+        [("Quality",
+           (Option.map x.quality ~f:DetectLabelsImageQuality.to_value));
+        ("DominantColors",
+          (Option.map x.dominantColors ~f:DominantColors.to_value));
+        ("Foreground",
+          (Option.map x.foreground ~f:DetectLabelsImageForeground.to_value));
+        ("Background",
+          (Option.map x.background ~f:DetectLabelsImageBackground.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let background =
+        (Option.map ~f:DetectLabelsImageBackground.of_xml)
+          (Xml.child xml_arg0 "Background") in
+      let foreground =
+        (Option.map ~f:DetectLabelsImageForeground.of_xml)
+          (Xml.child xml_arg0 "Foreground") in
+      let dominantColors =
+        (Option.map ~f:DominantColors.of_xml)
+          (Xml.child xml_arg0 "DominantColors") in
+      let quality =
+        (Option.map ~f:DetectLabelsImageQuality.of_xml)
+          (Xml.child xml_arg0 "Quality") in
+      make ?background ?foreground ?dominantColors ?quality ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let background =
+        field_map json__ "Background" DetectLabelsImageBackground.of_json in
+      let foreground =
+        field_map json__ "Foreground" DetectLabelsImageForeground.of_json in
+      let dominantColors =
+        field_map json__ "DominantColors" DominantColors.of_json in
+      let quality =
+        field_map json__ "Quality" DetectLabelsImageQuality.of_json in
+      make ?background ?foreground ?dominantColors ?quality ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the quality and dominant colors of an input image. Quality and color information is returned for the entire image, foreground, and background."]
 module Labels =
   struct
     type nonrec t = Label.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Label.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7006,10 +11014,84 @@ module Labels =
     let of_json j = list_of_json ~kind:"Labels" ~of_json:Label.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DetectLabelsFeatureList =
+  struct
+    type nonrec t = DetectLabelsFeatureName.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DetectLabelsFeatureName.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DetectLabelsFeatureName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DetectLabelsFeatureList"
+        ~of_json:DetectLabelsFeatureName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DetectLabelsSettings =
+  struct
+    type nonrec t =
+      {
+      generalLabels: GeneralLabelsSettings.t option
+        [@ocaml.doc "Contains the specified filters for GENERAL_LABELS."];
+      imageProperties: DetectLabelsImagePropertiesSettings.t option
+        [@ocaml.doc
+          "Contains the chosen number of maximum dominant colors in an image."]}
+    let make ?generalLabels =
+      fun ?imageProperties -> fun () -> { generalLabels; imageProperties }
+    let to_value x =
+      structure_to_value
+        [("GeneralLabels",
+           (Option.map x.generalLabels ~f:GeneralLabelsSettings.to_value));
+        ("ImageProperties",
+          (Option.map x.imageProperties
+             ~f:DetectLabelsImagePropertiesSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let imageProperties =
+        (Option.map ~f:DetectLabelsImagePropertiesSettings.of_xml)
+          (Xml.child xml_arg0 "ImageProperties") in
+      let generalLabels =
+        (Option.map ~f:GeneralLabelsSettings.of_xml)
+          (Xml.child xml_arg0 "GeneralLabels") in
+      make ?imageProperties ?generalLabels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let imageProperties =
+        field_map json__ "ImageProperties"
+          DetectLabelsImagePropertiesSettings.of_json in
+      let generalLabels =
+        field_map json__ "GeneralLabels" GeneralLabelsSettings.of_json in
+      make ?imageProperties ?generalLabels ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Settings for the DetectLabels request. Settings can include filters for both GENERAL_LABELS and IMAGE_PROPERTIES. GENERAL_LABELS filters can be inclusive or exclusive and applied to individual labels or label categories. IMAGE_PROPERTIES filters allow specification of a maximum number of dominant colors."]
 module FaceDetailList =
   struct
     type nonrec t = FaceDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FaceDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7034,6 +11116,9 @@ module CustomLabels =
   struct
     type nonrec t = CustomLabel.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomLabel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7091,35 +11176,72 @@ module StreamProcessorInput =
           (Xml.child xml_arg0 "KinesisVideoStream") in
       make ?kinesisVideoStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let kinesisVideoStream =
-        field_map json "KinesisVideoStream" KinesisVideoStream.of_json in
+        field_map json__ "KinesisVideoStream" KinesisVideoStream.of_json in
       make ?kinesisVideoStream ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the source streaming video."]
+module StreamProcessorNotificationChannel =
+  struct
+    type nonrec t =
+      {
+      sNSTopicArn: SNSTopicArn.t
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the Amazon Amazon Simple Notification Service topic to which Amazon Rekognition posts the completion status."]}
+    let context_ = "StreamProcessorNotificationChannel"
+    let make ~sNSTopicArn = fun () -> { sNSTopicArn }
+    let to_value x =
+      structure_to_value
+        [("SNSTopicArn", (Some (SNSTopicArn.to_value x.sNSTopicArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sNSTopicArn =
+        SNSTopicArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SNSTopicArn") in
+      make ~sNSTopicArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sNSTopicArn =
+        field_map_exn json__ "SNSTopicArn" SNSTopicArn.of_json in
+      make ~sNSTopicArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon Simple Notification Service topic to which Amazon Rekognition publishes the object detection results and completion status of a video analysis operation. Amazon Rekognition publishes a notification the first time an object of interest or a person is detected in the video stream. For example, if Amazon Rekognition detects a person at second 2, a pet at second 4, and a person again at second 5, Amazon Rekognition sends 2 object class detected notifications, one for a person at second 2 and one for a pet at second 4. Amazon Rekognition also publishes an an end-of-session notification with a summary when the stream processing session is complete."]
 module StreamProcessorOutput =
   struct
     type nonrec t =
       {
       kinesisDataStream: KinesisDataStream.t option
         [@ocaml.doc
-          "The Amazon Kinesis Data Streams stream to which the Amazon Rekognition stream processor streams the analysis results."]}
-    let make ?kinesisDataStream = fun () -> { kinesisDataStream }
+          "The Amazon Kinesis Data Streams stream to which the Amazon Rekognition stream processor streams the analysis results."];
+      s3Destination: S3Destination.t option
+        [@ocaml.doc
+          "The Amazon S3 bucket location to which Amazon Rekognition publishes the detailed inference results of a video analysis operation."]}
+    let make ?kinesisDataStream =
+      fun ?s3Destination -> fun () -> { kinesisDataStream; s3Destination }
     let to_value x =
       structure_to_value
         [("KinesisDataStream",
-           (Option.map x.kinesisDataStream ~f:KinesisDataStream.to_value))]
+           (Option.map x.kinesisDataStream ~f:KinesisDataStream.to_value));
+        ("S3Destination",
+          (Option.map x.s3Destination ~f:S3Destination.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let s3Destination =
+        (Option.map ~f:S3Destination.of_xml)
+          (Xml.child xml_arg0 "S3Destination") in
       let kinesisDataStream =
         (Option.map ~f:KinesisDataStream.of_xml)
           (Xml.child xml_arg0 "KinesisDataStream") in
-      make ?kinesisDataStream ()
+      make ?s3Destination ?kinesisDataStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let s3Destination =
+        field_map json__ "S3Destination" S3Destination.of_json in
       let kinesisDataStream =
-        field_map json "KinesisDataStream" KinesisDataStream.of_json in
-      make ?kinesisDataStream ()
+        field_map json__ "KinesisDataStream" KinesisDataStream.of_json in
+      make ?s3Destination ?kinesisDataStream ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the Amazon Kinesis Data Streams stream to which a Amazon Rekognition Video stream processor streams the results of a video analysis. For more information, see CreateStreamProcessor in the Amazon Rekognition Developer Guide."]
@@ -7128,29 +11250,42 @@ module StreamProcessorSettings =
     type nonrec t =
       {
       faceSearch: FaceSearchSettings.t option
-        [@ocaml.doc "Face search settings to use on a streaming video."]}
-    let make ?faceSearch = fun () -> { faceSearch }
+        [@ocaml.doc "Face search settings to use on a streaming video."];
+      connectedHome: ConnectedHomeSettings.t option }
+    let make ?faceSearch =
+      fun ?connectedHome -> fun () -> { faceSearch; connectedHome }
     let to_value x =
       structure_to_value
         [("FaceSearch",
-           (Option.map x.faceSearch ~f:FaceSearchSettings.to_value))]
+           (Option.map x.faceSearch ~f:FaceSearchSettings.to_value));
+        ("ConnectedHome",
+          (Option.map x.connectedHome ~f:ConnectedHomeSettings.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let connectedHome =
+        (Option.map ~f:ConnectedHomeSettings.of_xml)
+          (Xml.child xml_arg0 "ConnectedHome") in
       let faceSearch =
         (Option.map ~f:FaceSearchSettings.of_xml)
           (Xml.child xml_arg0 "FaceSearch") in
-      make ?faceSearch ()
+      make ?connectedHome ?faceSearch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let faceSearch = field_map json "FaceSearch" FaceSearchSettings.of_json in
-      make ?faceSearch ()
+    let of_json json__ =
+      let connectedHome =
+        field_map json__ "ConnectedHome" ConnectedHomeSettings.of_json in
+      let faceSearch =
+        field_map json__ "FaceSearch" FaceSearchSettings.of_json in
+      make ?connectedHome ?faceSearch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Input parameters used to recognize faces in a streaming video analyzed by a Amazon Rekognition stream processor."]
+       "Input parameters used in a streaming video analyzed by a Amazon Rekognition stream processor. You can use FaceSearch to recognize faces in a streaming video, or you can use ConnectedHome to detect labels."]
 module ProjectDescriptions =
   struct
     type nonrec t = ProjectDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProjectDescription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7172,6 +11307,39 @@ module ProjectDescriptions =
         ~of_json:ProjectDescription.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CustomizationFeatures =
+  struct
+    type nonrec t = CustomizationFeature.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CustomizationFeature.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CustomizationFeature.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CustomizationFeatures"
+        ~of_json:CustomizationFeature.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ProjectNames =
   struct
     type nonrec t = ProjectName.t list
@@ -7180,6 +11348,9 @@ module ProjectNames =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProjectName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7222,6 +11393,9 @@ module ProjectVersionDescriptions =
   struct
     type nonrec t = ProjectVersionDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProjectVersionDescription.to_value)) |>
         (fun x -> `List x)
@@ -7271,6 +11445,9 @@ module VersionNames =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VersionName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7361,33 +11538,37 @@ module DatasetDescription =
       make ?datasetStats ?statusMessageCode ?statusMessage ?status
         ?lastUpdatedTimestamp ?creationTimestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetStats = field_map json "DatasetStats" DatasetStats.of_json in
+    let of_json json__ =
+      let datasetStats = field_map json__ "DatasetStats" DatasetStats.of_json in
       let statusMessageCode =
-        field_map json "StatusMessageCode" DatasetStatusMessageCode.of_json in
+        field_map json__ "StatusMessageCode" DatasetStatusMessageCode.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let status = field_map json "Status" DatasetStatus.of_json in
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let status = field_map json__ "Status" DatasetStatus.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" DateTime.of_json in
+        field_map json__ "LastUpdatedTimestamp" DateTime.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" DateTime.of_json in
+        field_map json__ "CreationTimestamp" DateTime.of_json in
       make ?datasetStats ?statusMessageCode ?statusMessage ?status
         ?lastUpdatedTimestamp ?creationTimestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A description for a dataset. For more information, see DescribeDataset. The status fields Status, StatusMessage, and StatusMessageCode reflect the last operation on the dataset."]
-module FaceIdList =
+module UnsuccessfulFaceDeletionsList =
   struct
-    type nonrec t = FaceId.t list
+    type nonrec t = UnsuccessfulFaceDeletion.t list
     let make i =
       let open Result in
         ok_or_failwith
           ((check_list_max i ~max:4096) >>=
-             (fun () -> check_list_min i ~min:1));
+             (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:FaceId.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:UnsuccessfulFaceDeletion.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -7401,22 +11582,61 @@ module FaceIdList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:FaceId.of_xml)
-    let of_json j = list_of_json ~kind:"FaceIdList" ~of_json:FaceId.of_json j
+                     | _ -> true))) ~f:UnsuccessfulFaceDeletion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UnsuccessfulFaceDeletionsList"
+        ~of_json:UnsuccessfulFaceDeletion.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ResourceAlreadyExistsException =
+module CreateFaceLivenessSessionRequestSettings =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t =
+      {
+      outputConfig: LivenessOutputConfig.t option
+        [@ocaml.doc
+          "Can specify the location of an Amazon S3 bucket, where reference and audit images will be stored. Note that the Amazon S3 bucket must be located in the caller's AWS account and in the same region as the Face Liveness end-point. Additionally, the Amazon S3 object keys are auto-generated by the Face Liveness system. Requires that the caller has the s3:PutObject permission on the Amazon S3 bucket."];
+      auditImagesLimit: AuditImagesLimit.t option
+        [@ocaml.doc
+          "Number of audit images to be returned back. Takes an integer between 0-4. Any integer less than 0 will return 0, any integer above 4 will return 4 images in the response. By default, it is set to 0. The limit is best effort and is based on the actual duration of the selfie-video."];
+      challengePreferences: ChallengePreferences.t option
+        [@ocaml.doc
+          "Indicates preferred challenge types and versions for the Face Liveness session to be created."]}
+    let make ?outputConfig =
+      fun ?auditImagesLimit ->
+        fun ?challengePreferences ->
+          fun () -> { outputConfig; auditImagesLimit; challengePreferences }
+    let to_value x =
+      structure_to_value
+        [("OutputConfig",
+           (Option.map x.outputConfig ~f:LivenessOutputConfig.to_value));
+        ("AuditImagesLimit",
+          (Option.map x.auditImagesLimit ~f:AuditImagesLimit.to_value));
+        ("ChallengePreferences",
+          (Option.map x.challengePreferences ~f:ChallengePreferences.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let challengePreferences =
+        (Option.map ~f:ChallengePreferences.of_xml)
+          (Xml.child xml_arg0 "ChallengePreferences") in
+      let auditImagesLimit =
+        (Option.map ~f:AuditImagesLimit.of_xml)
+          (Xml.child xml_arg0 "AuditImagesLimit") in
+      let outputConfig =
+        (Option.map ~f:LivenessOutputConfig.of_xml)
+          (Xml.child xml_arg0 "OutputConfig") in
+      make ?challengePreferences ?auditImagesLimit ?outputConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let challengePreferences =
+        field_map json__ "ChallengePreferences" ChallengePreferences.of_json in
+      let auditImagesLimit =
+        field_map json__ "AuditImagesLimit" AuditImagesLimit.of_json in
+      let outputConfig =
+        field_map json__ "OutputConfig" LivenessOutputConfig.of_json in
+      make ?challengePreferences ?auditImagesLimit ?outputConfig ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A resource with the specified ID already exists."]
+  end[@@ocaml.doc
+       "A session settings object. It contains settings for the operation to be performed. It accepts arguments for OutputConfig and AuditImagesLimit."]
 module DatasetSource =
   struct
     type nonrec t =
@@ -7441,10 +11661,10 @@ module DatasetSource =
           (Xml.child xml_arg0 "GroundTruthManifest") in
       make ?datasetArn ?groundTruthManifest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetArn = field_map json "DatasetArn" DatasetArn.of_json in
+    let of_json json__ =
+      let datasetArn = field_map json__ "DatasetArn" DatasetArn.of_json in
       let groundTruthManifest =
-        field_map json "GroundTruthManifest" GroundTruthManifest.of_json in
+        field_map json__ "GroundTruthManifest" GroundTruthManifest.of_json in
       make ?datasetArn ?groundTruthManifest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7453,6 +11673,9 @@ module CompareFacesMatchList =
   struct
     type nonrec t = CompareFacesMatch.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CompareFacesMatch.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7478,6 +11701,9 @@ module CompareFacesUnmatchList =
   struct
     type nonrec t = ComparedFace.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComparedFace.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7522,13 +11748,264 @@ module ComparedSourceImageFace =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
       make ?confidence ?boundingBox ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let boundingBox = field_map json__ "BoundingBox" BoundingBox.of_json in
       make ?confidence ?boundingBox ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Type that describes the face Amazon Rekognition chose to compare with the faces in the target. This contains a bounding box for the selected face and confidence level that the bounding box contains a face. Note that Amazon Rekognition selects the largest face in the source image for this comparison."]
+module AssociatedFacesList =
+  struct
+    type nonrec t = AssociatedFace.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssociatedFace.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssociatedFace.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssociatedFacesList"
+        ~of_json:AssociatedFace.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UnsuccessfulFaceAssociationList =
+  struct
+    type nonrec t = UnsuccessfulFaceAssociation.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:500) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UnsuccessfulFaceAssociation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UnsuccessfulFaceAssociation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UnsuccessfulFaceAssociationList"
+        ~of_json:UnsuccessfulFaceAssociation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UpdateStreamProcessorResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows you to update a stream processor. You can change some settings and regions of interest and delete certain parameters."]
+module UpdateStreamProcessorRequest =
+  struct
+    type nonrec t =
+      {
+      name: StreamProcessorName.t
+        [@ocaml.doc "Name of the stream processor that you want to update."];
+      settingsForUpdate: StreamProcessorSettingsForUpdate.t option
+        [@ocaml.doc
+          "The stream processor settings that you want to update. Label detection settings can be updated to detect different labels with a different minimum confidence."];
+      regionsOfInterestForUpdate: RegionsOfInterest.t option
+        [@ocaml.doc
+          "Specifies locations in the frames where Amazon Rekognition checks for objects or people. This is an optional parameter for label detection stream processors."];
+      dataSharingPreferenceForUpdate:
+        StreamProcessorDataSharingPreference.t option
+        [@ocaml.doc
+          "Shows whether you are sharing data with Rekognition to improve model performance. You can choose this option at the account level or on a per-stream basis. Note that if you opt out at the account level this setting is ignored on individual streams."];
+      parametersToDelete: StreamProcessorParametersToDelete.t option
+        [@ocaml.doc
+          "A list of parameters you want to delete from the stream processor."]}
+    let context_ = "UpdateStreamProcessorRequest"
+    let make ?settingsForUpdate =
+      fun ?regionsOfInterestForUpdate ->
+        fun ?dataSharingPreferenceForUpdate ->
+          fun ?parametersToDelete ->
+            fun ~name ->
+              fun () ->
+                {
+                  settingsForUpdate;
+                  regionsOfInterestForUpdate;
+                  dataSharingPreferenceForUpdate;
+                  parametersToDelete;
+                  name
+                }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (StreamProcessorName.to_value x.name)));
+        ("SettingsForUpdate",
+          (Option.map x.settingsForUpdate
+             ~f:StreamProcessorSettingsForUpdate.to_value));
+        ("RegionsOfInterestForUpdate",
+          (Option.map x.regionsOfInterestForUpdate
+             ~f:RegionsOfInterest.to_value));
+        ("DataSharingPreferenceForUpdate",
+          (Option.map x.dataSharingPreferenceForUpdate
+             ~f:StreamProcessorDataSharingPreference.to_value));
+        ("ParametersToDelete",
+          (Option.map x.parametersToDelete
+             ~f:StreamProcessorParametersToDelete.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let parametersToDelete =
+        (Option.map ~f:StreamProcessorParametersToDelete.of_xml)
+          (Xml.child xml_arg0 "ParametersToDelete") in
+      let dataSharingPreferenceForUpdate =
+        (Option.map ~f:StreamProcessorDataSharingPreference.of_xml)
+          (Xml.child xml_arg0 "DataSharingPreferenceForUpdate") in
+      let regionsOfInterestForUpdate =
+        (Option.map ~f:RegionsOfInterest.of_xml)
+          (Xml.child xml_arg0 "RegionsOfInterestForUpdate") in
+      let settingsForUpdate =
+        (Option.map ~f:StreamProcessorSettingsForUpdate.of_xml)
+          (Xml.child xml_arg0 "SettingsForUpdate") in
+      let name =
+        StreamProcessorName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?parametersToDelete ?dataSharingPreferenceForUpdate
+        ?regionsOfInterestForUpdate ?settingsForUpdate ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let parametersToDelete =
+        field_map json__ "ParametersToDelete"
+          StreamProcessorParametersToDelete.of_json in
+      let dataSharingPreferenceForUpdate =
+        field_map json__ "DataSharingPreferenceForUpdate"
+          StreamProcessorDataSharingPreference.of_json in
+      let regionsOfInterestForUpdate =
+        field_map json__ "RegionsOfInterestForUpdate"
+          RegionsOfInterest.of_json in
+      let settingsForUpdate =
+        field_map json__ "SettingsForUpdate"
+          StreamProcessorSettingsForUpdate.of_json in
+      let name = field_map_exn json__ "Name" StreamProcessorName.of_json in
+      make ?parametersToDelete ?dataSharingPreferenceForUpdate
+        ?regionsOfInterestForUpdate ?settingsForUpdate ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows you to update a stream processor. You can change some settings and regions of interest and delete certain parameters."]
 module UpdateDatasetEntriesResponse =
   struct
     type nonrec t = unit
@@ -7634,7 +12111,7 @@ module UpdateDatasetEntriesResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates one or more entries (images) in a dataset. An entry is a JSON Line which contains the information for a single image, including the image location, assigned labels, and object location bounding boxes. For more information, see Image-Level labels in manifest files and Object localization in manifest files in the Amazon Rekognition Custom Labels Developer Guide. If the source-ref field in the JSON line references an existing image, the existing image in the dataset is updated. If source-ref field doesn't reference an existing image, the image is added as a new image to the dataset. You specify the changes that you want to make in the Changes input parameter. There isn't a limit to the number JSON Lines that you can change, but the size of Changes must be less than 5MB. UpdateDatasetEntries returns immediatly, but the dataset update might take a while to complete. Use DescribeDataset to check the current status. The dataset updated successfully if the value of Status is UPDATE_COMPLETE. To check if any non-terminal errors occured, call ListDatasetEntries and check for the presence of errors lists in the JSON Lines. Dataset update fails if a terminal error occurs (Status = UPDATE_FAILED). Currently, you can't access the terminal error information from the Amazon Rekognition Custom Labels SDK. This operation requires permissions to perform the rekognition:UpdateDatasetEntries action."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Adds or updates one or more entries (images) in a dataset. An entry is a JSON Line which contains the information for a single image, including the image location, assigned labels, and object location bounding boxes. For more information, see Image-Level labels in manifest files and Object localization in manifest files in the Amazon Rekognition Custom Labels Developer Guide. If the source-ref field in the JSON line references an existing image, the existing image in the dataset is updated. If source-ref field doesn't reference an existing image, the image is added as a new image to the dataset. You specify the changes that you want to make in the Changes input parameter. There isn't a limit to the number JSON Lines that you can change, but the size of Changes must be less than 5MB. UpdateDatasetEntries returns immediatly, but the dataset update might take a while to complete. Use DescribeDataset to check the current status. The dataset updated successfully if the value of Status is UPDATE_COMPLETE. To check if any non-terminal errors occured, call ListDatasetEntries and check for the presence of errors lists in the JSON Lines. Dataset update fails if a terminal error occurs (Status = UPDATE_FAILED). Currently, you can't access the terminal error information from the Amazon Rekognition Custom Labels SDK. This operation requires permissions to perform the rekognition:UpdateDatasetEntries action."]
 module UpdateDatasetEntriesRequest =
   struct
     type nonrec t =
@@ -7660,13 +12137,13 @@ module UpdateDatasetEntriesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetArn") in
       make ~changes ~datasetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changes = field_map_exn json "Changes" DatasetChanges.of_json in
-      let datasetArn = field_map_exn json "DatasetArn" DatasetArn.of_json in
+    let of_json json__ =
+      let changes = field_map_exn json__ "Changes" DatasetChanges.of_json in
+      let datasetArn = field_map_exn json__ "DatasetArn" DatasetArn.of_json in
       make ~changes ~datasetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates one or more entries (images) in a dataset. An entry is a JSON Line which contains the information for a single image, including the image location, assigned labels, and object location bounding boxes. For more information, see Image-Level labels in manifest files and Object localization in manifest files in the Amazon Rekognition Custom Labels Developer Guide. If the source-ref field in the JSON line references an existing image, the existing image in the dataset is updated. If source-ref field doesn't reference an existing image, the image is added as a new image to the dataset. You specify the changes that you want to make in the Changes input parameter. There isn't a limit to the number JSON Lines that you can change, but the size of Changes must be less than 5MB. UpdateDatasetEntries returns immediatly, but the dataset update might take a while to complete. Use DescribeDataset to check the current status. The dataset updated successfully if the value of Status is UPDATE_COMPLETE. To check if any non-terminal errors occured, call ListDatasetEntries and check for the presence of errors lists in the JSON Lines. Dataset update fails if a terminal error occurs (Status = UPDATE_FAILED). Currently, you can't access the terminal error information from the Amazon Rekognition Custom Labels SDK. This operation requires permissions to perform the rekognition:UpdateDatasetEntries action."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Adds or updates one or more entries (images) in a dataset. An entry is a JSON Line which contains the information for a single image, including the image location, assigned labels, and object location bounding boxes. For more information, see Image-Level labels in manifest files and Object localization in manifest files in the Amazon Rekognition Custom Labels Developer Guide. If the source-ref field in the JSON line references an existing image, the existing image in the dataset is updated. If source-ref field doesn't reference an existing image, the image is added as a new image to the dataset. You specify the changes that you want to make in the Changes input parameter. There isn't a limit to the number JSON Lines that you can change, but the size of Changes must be less than 5MB. UpdateDatasetEntries returns immediatly, but the dataset update might take a while to complete. Use DescribeDataset to check the current status. The dataset updated successfully if the value of Status is UPDATE_COMPLETE. To check if any non-terminal errors occured, call ListDatasetEntries and check for the presence of errors lists in the JSON Lines. Dataset update fails if a terminal error occurs (Status = UPDATE_FAILED). Currently, you can't access the terminal error information from the Amazon Rekognition Custom Labels SDK. This operation requires permissions to perform the rekognition:UpdateDatasetEntries action."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -7781,9 +12258,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7911,9 +12389,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8034,8 +12513,8 @@ module StopStreamProcessorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" StreamProcessorName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" StreamProcessorName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8141,19 +12620,19 @@ module StopProjectVersionResponse =
           (Xml.child xml_arg0 "Status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ProjectVersionStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" ProjectVersionStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Stops a running model. The operation might take a while to complete. To check the current status, call DescribeProjectVersions."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Stops a running model. The operation might take a while to complete. To check the current status, call DescribeProjectVersions. Only applies to Custom Labels projects. This operation requires permissions to perform the rekognition:StopProjectVersion action."]
 module StopProjectVersionRequest =
   struct
     type nonrec t =
       {
       projectVersionArn: ProjectVersionArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the model version that you want to delete. This operation requires permissions to perform the rekognition:StopProjectVersion action."]}
+          "The Amazon Resource Name (ARN) of the model version that you want to stop. This operation requires permissions to perform the rekognition:StopProjectVersion action."]}
     let context_ = "StopProjectVersionRequest"
     let make ~projectVersionArn = fun () -> { projectVersionArn }
     let to_value x =
@@ -8167,13 +12646,13 @@ module StopProjectVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProjectVersionArn") in
       make ~projectVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let projectVersionArn =
-        field_map_exn json "ProjectVersionArn" ProjectVersionArn.of_json in
+        field_map_exn json__ "ProjectVersionArn" ProjectVersionArn.of_json in
       make ~projectVersionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Stops a running model. The operation might take a while to complete. To check the current status, call DescribeProjectVersions."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Stops a running model. The operation might take a while to complete. To check the current status, call DescribeProjectVersions. Only applies to Custom Labels projects. This operation requires permissions to perform the rekognition:StopProjectVersion action."]
 module StartTextDetectionResponse =
   struct
     type nonrec t =
@@ -8294,8 +12773,8 @@ module StartTextDetectionResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts asynchronous detection of text in a stored video. Amazon Rekognition Video can detect text in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartTextDetection returns a job identifier (JobId) which you use to get the results of the operation. When text detection is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the text detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. if so, call GetTextDetection and pass the job identifier (JobId) from the initial call to StartTextDetection."]
@@ -8356,15 +12835,15 @@ module StartTextDetectionRequest =
       make ?filters ?jobTag ?notificationChannel ?clientRequestToken ~video
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let filters =
-        field_map json "Filters" StartTextDetectionFilters.of_json in
-      let jobTag = field_map json "JobTag" JobTag.of_json in
+        field_map json__ "Filters" StartTextDetectionFilters.of_json in
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
       let notificationChannel =
-        field_map json "NotificationChannel" NotificationChannel.of_json in
+        field_map json__ "NotificationChannel" NotificationChannel.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let video = field_map_exn json "Video" Video.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let video = field_map_exn json__ "Video" Video.of_json in
       make ?filters ?jobTag ?notificationChannel ?clientRequestToken ~video
         ()
     let to_json v = composed_to_json to_value v
@@ -8372,7 +12851,10 @@ module StartTextDetectionRequest =
        "Starts asynchronous detection of text in a stored video. Amazon Rekognition Video can detect text in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartTextDetection returns a job identifier (JobId) which you use to get the results of the operation. When text detection is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the text detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. if so, call GetTextDetection and pass the job identifier (JobId) from the initial call to StartTextDetection."]
 module StartStreamProcessorResponse =
   struct
-    type nonrec t = unit
+    type nonrec t =
+      {
+      sessionId: StartStreamProcessorSessionId.t option
+        [@ocaml.doc "A unique identifier for the stream processing session."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -8383,7 +12865,7 @@ module StartStreamProcessorResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
+    let make ?sessionId = fun () -> { sessionId }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8458,39 +12940,72 @@ module StartStreamProcessorResponse =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    let to_value x =
+      structure_to_value
+        [("SessionId",
+           (Option.map x.sessionId ~f:StartStreamProcessorSessionId.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let sessionId =
+        (Option.map ~f:StartStreamProcessorSessionId.of_xml)
+          (Xml.child xml_arg0 "SessionId") in
+      make ?sessionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let sessionId =
+        field_map json__ "SessionId" StartStreamProcessorSessionId.of_json in
+      make ?sessionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts processing a stream processor. You create a stream processor by calling CreateStreamProcessor. To tell StartStreamProcessor which stream processor to start, use the value of the Name field specified in the call to CreateStreamProcessor."]
+       "Starts processing a stream processor. You create a stream processor by calling CreateStreamProcessor. To tell StartStreamProcessor which stream processor to start, use the value of the Name field specified in the call to CreateStreamProcessor. If you are using a label detection stream processor to detect labels, you need to provide a Start selector and a Stop selector to determine the length of the stream processing time."]
 module StartStreamProcessorRequest =
   struct
     type nonrec t =
       {
       name: StreamProcessorName.t
-        [@ocaml.doc "The name of the stream processor to start processing."]}
+        [@ocaml.doc "The name of the stream processor to start processing."];
+      startSelector: StreamProcessingStartSelector.t option
+        [@ocaml.doc
+          "Specifies the starting point in the Kinesis stream to start processing. You can use the producer timestamp or the fragment number. If you use the producer timestamp, you must put the time in milliseconds. For more information about fragment numbers, see Fragment. This is a required parameter for label detection stream processors and should not be used to start a face search stream processor."];
+      stopSelector: StreamProcessingStopSelector.t option
+        [@ocaml.doc
+          "Specifies when to stop processing the stream. You can specify a maximum amount of time to process the video. This is a required parameter for label detection stream processors and should not be used to start a face search stream processor."]}
     let context_ = "StartStreamProcessorRequest"
-    let make ~name = fun () -> { name }
+    let make ?startSelector =
+      fun ?stopSelector ->
+        fun ~name -> fun () -> { startSelector; stopSelector; name }
     let to_value x =
       structure_to_value
-        [("Name", (Some (StreamProcessorName.to_value x.name)))]
+        [("Name", (Some (StreamProcessorName.to_value x.name)));
+        ("StartSelector",
+          (Option.map x.startSelector
+             ~f:StreamProcessingStartSelector.to_value));
+        ("StopSelector",
+          (Option.map x.stopSelector ~f:StreamProcessingStopSelector.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let stopSelector =
+        (Option.map ~f:StreamProcessingStopSelector.of_xml)
+          (Xml.child xml_arg0 "StopSelector") in
+      let startSelector =
+        (Option.map ~f:StreamProcessingStartSelector.of_xml)
+          (Xml.child xml_arg0 "StartSelector") in
       let name =
         StreamProcessorName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
+      make ?stopSelector ?startSelector ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" StreamProcessorName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let stopSelector =
+        field_map json__ "StopSelector" StreamProcessingStopSelector.of_json in
+      let startSelector =
+        field_map json__ "StartSelector"
+          StreamProcessingStartSelector.of_json in
+      let name = field_map_exn json__ "Name" StreamProcessorName.of_json in
+      make ?stopSelector ?startSelector ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts processing a stream processor. You create a stream processor by calling CreateStreamProcessor. To tell StartStreamProcessor which stream processor to start, use the value of the Name field specified in the call to CreateStreamProcessor."]
+       "Starts processing a stream processor. You create a stream processor by calling CreateStreamProcessor. To tell StartStreamProcessor which stream processor to start, use the value of the Name field specified in the call to CreateStreamProcessor. If you are using a label detection stream processor to detect labels, you need to provide a Start selector and a Stop selector to determine the length of the stream processing time."]
 module StartSegmentDetectionResponse =
   struct
     type nonrec t =
@@ -8611,11 +13126,11 @@ module StartSegmentDetectionResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts asynchronous detection of segment detection in a stored video. Amazon Rekognition Video can detect segments in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartSegmentDetection returns a job identifier (JobId) which you use to get the results of the operation. When segment detection is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. You can use the Filters (StartSegmentDetectionFilters) input parameter to specify the minimum detection confidence returned in the response. Within Filters, use ShotFilter (StartShotDetectionFilter) to filter detected shots. Use TechnicalCueFilter (StartTechnicalCueDetectionFilter) to filter technical cues. To get the results of the segment detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. if so, call GetSegmentDetection and pass the job identifier (JobId) from the initial call to StartSegmentDetection. For more information, see Detecting Video Segments in Stored Video in the Amazon Rekognition Developer Guide."]
+       "Starts asynchronous detection of segment detection in a stored video. Amazon Rekognition Video can detect segments in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartSegmentDetection returns a job identifier (JobId) which you use to get the results of the operation. When segment detection is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. You can use the Filters (StartSegmentDetectionFilters) input parameter to specify the minimum detection confidence returned in the response. Within Filters, use ShotFilter (StartShotDetectionFilter) to filter detected shots. Use TechnicalCueFilter (StartTechnicalCueDetectionFilter) to filter technical cues. To get the results of the segment detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. if so, call GetSegmentDetection and pass the job identifier (JobId) from the initial call to StartSegmentDetection. For more information, see Detecting video segments in stored video in the Amazon Rekognition Developer Guide."]
 module StartSegmentDetectionRequest =
   struct
     type nonrec t =
@@ -8683,22 +13198,22 @@ module StartSegmentDetectionRequest =
       make ~segmentTypes ?filters ?jobTag ?notificationChannel
         ?clientRequestToken ~video ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let segmentTypes =
-        field_map_exn json "SegmentTypes" SegmentTypes.of_json in
+        field_map_exn json__ "SegmentTypes" SegmentTypes.of_json in
       let filters =
-        field_map json "Filters" StartSegmentDetectionFilters.of_json in
-      let jobTag = field_map json "JobTag" JobTag.of_json in
+        field_map json__ "Filters" StartSegmentDetectionFilters.of_json in
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
       let notificationChannel =
-        field_map json "NotificationChannel" NotificationChannel.of_json in
+        field_map json__ "NotificationChannel" NotificationChannel.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let video = field_map_exn json "Video" Video.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let video = field_map_exn json__ "Video" Video.of_json in
       make ~segmentTypes ?filters ?jobTag ?notificationChannel
         ?clientRequestToken ~video ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts asynchronous detection of segment detection in a stored video. Amazon Rekognition Video can detect segments in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartSegmentDetection returns a job identifier (JobId) which you use to get the results of the operation. When segment detection is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. You can use the Filters (StartSegmentDetectionFilters) input parameter to specify the minimum detection confidence returned in the response. Within Filters, use ShotFilter (StartShotDetectionFilter) to filter detected shots. Use TechnicalCueFilter (StartTechnicalCueDetectionFilter) to filter technical cues. To get the results of the segment detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. if so, call GetSegmentDetection and pass the job identifier (JobId) from the initial call to StartSegmentDetection. For more information, see Detecting Video Segments in Stored Video in the Amazon Rekognition Developer Guide."]
+       "Starts asynchronous detection of segment detection in a stored video. Amazon Rekognition Video can detect segments in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartSegmentDetection returns a job identifier (JobId) which you use to get the results of the operation. When segment detection is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. You can use the Filters (StartSegmentDetectionFilters) input parameter to specify the minimum detection confidence returned in the response. Within Filters, use ShotFilter (StartShotDetectionFilter) to filter detected shots. Use TechnicalCueFilter (StartTechnicalCueDetectionFilter) to filter technical cues. To get the results of the segment detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. if so, call GetSegmentDetection and pass the job identifier (JobId) from the initial call to StartSegmentDetection. For more information, see Detecting video segments in stored video in the Amazon Rekognition Developer Guide."]
 module StartProjectVersionResponse =
   struct
     type nonrec t =
@@ -8809,12 +13324,12 @@ module StartProjectVersionResponse =
           (Xml.child xml_arg0 "Status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ProjectVersionStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" ProjectVersionStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts the running of the version of a model. Starting a model takes a while to complete. To check the current state of the model, use DescribeProjectVersions. Once the model is running, you can detect custom labels in new images by calling DetectCustomLabels. You are charged for the amount of time that the model is running. To stop a running model, call StopProjectVersion. This operation requires permissions to perform the rekognition:StartProjectVersion action."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Starts the running of the version of a model. Starting a model takes a while to complete. To check the current state of the model, use DescribeProjectVersions. Once the model is running, you can detect custom labels in new images by calling DetectCustomLabels. You are charged for the amount of time that the model is running. To stop a running model, call StopProjectVersion. This operation requires permissions to perform the rekognition:StartProjectVersion action."]
 module StartProjectVersionRequest =
   struct
     type nonrec t =
@@ -8824,36 +13339,48 @@ module StartProjectVersionRequest =
           "The Amazon Resource Name(ARN) of the model version that you want to start."];
       minInferenceUnits: InferenceUnits.t
         [@ocaml.doc
-          "The minimum number of inference units to use. A single inference unit represents 1 hour of processing and can support up to 5 Transaction Pers Second (TPS). Use a higher number to increase the TPS throughput of your model. You are charged for the number of inference units that you use."]}
+          "The minimum number of inference units to use. A single inference unit represents 1 hour of processing. Use a higher number to increase the TPS throughput of your model. You are charged for the number of inference units that you use."];
+      maxInferenceUnits: InferenceUnits.t option
+        [@ocaml.doc
+          "The maximum number of inference units to use for auto-scaling the model. If you don't specify a value, Amazon Rekognition Custom Labels doesn't auto-scale the model."]}
     let context_ = "StartProjectVersionRequest"
-    let make ~projectVersionArn =
-      fun ~minInferenceUnits ->
-        fun () -> { projectVersionArn; minInferenceUnits }
+    let make ?maxInferenceUnits =
+      fun ~projectVersionArn ->
+        fun ~minInferenceUnits ->
+          fun () ->
+            { maxInferenceUnits; projectVersionArn; minInferenceUnits }
     let to_value x =
       structure_to_value
         [("ProjectVersionArn",
            (Some (ProjectVersionArn.to_value x.projectVersionArn)));
         ("MinInferenceUnits",
-          (Some (InferenceUnits.to_value x.minInferenceUnits)))]
+          (Some (InferenceUnits.to_value x.minInferenceUnits)));
+        ("MaxInferenceUnits",
+          (Option.map x.maxInferenceUnits ~f:InferenceUnits.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxInferenceUnits =
+        (Option.map ~f:InferenceUnits.of_xml)
+          (Xml.child xml_arg0 "MaxInferenceUnits") in
       let minInferenceUnits =
         InferenceUnits.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MinInferenceUnits") in
       let projectVersionArn =
         ProjectVersionArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProjectVersionArn") in
-      make ~minInferenceUnits ~projectVersionArn ()
+      make ?maxInferenceUnits ~minInferenceUnits ~projectVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let maxInferenceUnits =
+        field_map json__ "MaxInferenceUnits" InferenceUnits.of_json in
       let minInferenceUnits =
-        field_map_exn json "MinInferenceUnits" InferenceUnits.of_json in
+        field_map_exn json__ "MinInferenceUnits" InferenceUnits.of_json in
       let projectVersionArn =
-        field_map_exn json "ProjectVersionArn" ProjectVersionArn.of_json in
-      make ~minInferenceUnits ~projectVersionArn ()
+        field_map_exn json__ "ProjectVersionArn" ProjectVersionArn.of_json in
+      make ?maxInferenceUnits ~minInferenceUnits ~projectVersionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts the running of the version of a model. Starting a model takes a while to complete. To check the current state of the model, use DescribeProjectVersions. Once the model is running, you can detect custom labels in new images by calling DetectCustomLabels. You are charged for the amount of time that the model is running. To stop a running model, call StopProjectVersion. This operation requires permissions to perform the rekognition:StartProjectVersion action."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Starts the running of the version of a model. Starting a model takes a while to complete. To check the current state of the model, use DescribeProjectVersions. Once the model is running, you can detect custom labels in new images by calling DetectCustomLabels. You are charged for the amount of time that the model is running. To stop a running model, call StopProjectVersion. This operation requires permissions to perform the rekognition:StartProjectVersion action."]
 module StartPersonTrackingResponse =
   struct
     type nonrec t =
@@ -8974,11 +13501,11 @@ module StartPersonTrackingResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts the asynchronous tracking of a person's path in a stored video. Amazon Rekognition Video can track the path of people in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartPersonTracking returns a job identifier (JobId) which you use to get the results of the operation. When label detection is finished, Amazon Rekognition publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the person detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetPersonTracking and pass the job identifier (JobId) from the initial call to StartPersonTracking."]
+       "End of support notice: On October 31, 2025, AWS will discontinue support for Amazon Rekognition People Pathing. After October 31, 2025, you will no longer be able to use the Rekognition People Pathing capability. For more information, visit this blog post. Starts the asynchronous tracking of a person's path in a stored video. Amazon Rekognition Video can track the path of people in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartPersonTracking returns a job identifier (JobId) which you use to get the results of the operation. When label detection is finished, Amazon Rekognition publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the person detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetPersonTracking and pass the job identifier (JobId) from the initial call to StartPersonTracking."]
 module StartPersonTrackingRequest =
   struct
     type nonrec t =
@@ -9024,17 +13551,247 @@ module StartPersonTrackingRequest =
         Video.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Video") in
       make ?jobTag ?notificationChannel ?clientRequestToken ~video ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobTag = field_map json "JobTag" JobTag.of_json in
+    let of_json json__ =
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
       let notificationChannel =
-        field_map json "NotificationChannel" NotificationChannel.of_json in
+        field_map json__ "NotificationChannel" NotificationChannel.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let video = field_map_exn json "Video" Video.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let video = field_map_exn json__ "Video" Video.of_json in
       make ?jobTag ?notificationChannel ?clientRequestToken ~video ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts the asynchronous tracking of a person's path in a stored video. Amazon Rekognition Video can track the path of people in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartPersonTracking returns a job identifier (JobId) which you use to get the results of the operation. When label detection is finished, Amazon Rekognition publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the person detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetPersonTracking and pass the job identifier (JobId) from the initial call to StartPersonTracking."]
+       "End of support notice: On October 31, 2025, AWS will discontinue support for Amazon Rekognition People Pathing. After October 31, 2025, you will no longer be able to use the Rekognition People Pathing capability. For more information, visit this blog post. Starts the asynchronous tracking of a person's path in a stored video. Amazon Rekognition Video can track the path of people in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartPersonTracking returns a job identifier (JobId) which you use to get the results of the operation. When label detection is finished, Amazon Rekognition publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the person detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetPersonTracking and pass the job identifier (JobId) from the initial call to StartPersonTracking."]
+module StartMediaAnalysisJobResponse =
+  struct
+    type nonrec t =
+      {
+      jobId: MediaAnalysisJobId.t option
+        [@ocaml.doc "Identifier for the created job."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidManifestException of InvalidManifestException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidS3ObjectException of InvalidS3ObjectException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ResourceNotReadyException of ResourceNotReadyException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?jobId = fun () -> { jobId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidManifestException" ->
+          `InvalidManifestException (InvalidManifestException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidS3ObjectException" ->
+          `InvalidS3ObjectException (InvalidS3ObjectException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ResourceNotReadyException" ->
+          `ResourceNotReadyException (ResourceNotReadyException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidManifestException" ->
+          `InvalidManifestException (InvalidManifestException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidS3ObjectException" ->
+          `InvalidS3ObjectException (InvalidS3ObjectException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ResourceNotReadyException" ->
+          `ResourceNotReadyException (ResourceNotReadyException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidManifestException e ->
+          `Assoc
+            [("error", (`String "InvalidManifestException"));
+            ("details", (InvalidManifestException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidS3ObjectException e ->
+          `Assoc
+            [("error", (`String "InvalidS3ObjectException"));
+            ("details", (InvalidS3ObjectException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ResourceNotReadyException e ->
+          `Assoc
+            [("error", (`String "ResourceNotReadyException"));
+            ("details", (ResourceNotReadyException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("JobId", (Option.map x.jobId ~f:MediaAnalysisJobId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobId =
+        (Option.map ~f:MediaAnalysisJobId.of_xml)
+          (Xml.child xml_arg0 "JobId") in
+      make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" MediaAnalysisJobId.of_json in
+      make ?jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Initiates a new media analysis job. Accepts a manifest file in an Amazon S3 bucket. The output is a manifest file and a summary of the manifest stored in the Amazon S3 bucket."]
+module StartMediaAnalysisJobRequest =
+  struct
+    type nonrec t =
+      {
+      clientRequestToken: ClientRequestToken.t option
+        [@ocaml.doc
+          "Idempotency token used to prevent the accidental creation of duplicate versions. If you use the same token with multiple StartMediaAnalysisJobRequest requests, the same response is returned. Use ClientRequestToken to prevent the same request from being processed more than once."];
+      jobName: MediaAnalysisJobName.t option
+        [@ocaml.doc "The name of the job. Does not have to be unique."];
+      operationsConfig: MediaAnalysisOperationsConfig.t
+        [@ocaml.doc
+          "Configuration options for the media analysis job to be created."];
+      input: MediaAnalysisInput.t
+        [@ocaml.doc "Input data to be analyzed by the job."];
+      outputConfig: MediaAnalysisOutputConfig.t
+        [@ocaml.doc "The Amazon S3 bucket location to store the results."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "The identifier of customer managed AWS KMS key (name or ARN). The key is used to encrypt images copied into the service. The key is also used to encrypt results and manifest files written to the output Amazon S3 bucket."]}
+    let context_ = "StartMediaAnalysisJobRequest"
+    let make ?clientRequestToken =
+      fun ?jobName ->
+        fun ?kmsKeyId ->
+          fun ~operationsConfig ->
+            fun ~input ->
+              fun ~outputConfig ->
+                fun () ->
+                  {
+                    clientRequestToken;
+                    jobName;
+                    kmsKeyId;
+                    operationsConfig;
+                    input;
+                    outputConfig
+                  }
+    let to_value x =
+      structure_to_value
+        [("ClientRequestToken",
+           (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("JobName", (Option.map x.jobName ~f:MediaAnalysisJobName.to_value));
+        ("OperationsConfig",
+          (Some (MediaAnalysisOperationsConfig.to_value x.operationsConfig)));
+        ("Input", (Some (MediaAnalysisInput.to_value x.input)));
+        ("OutputConfig",
+          (Some (MediaAnalysisOutputConfig.to_value x.outputConfig)));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let outputConfig =
+        MediaAnalysisOutputConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutputConfig") in
+      let input =
+        MediaAnalysisInput.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Input") in
+      let operationsConfig =
+        MediaAnalysisOperationsConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OperationsConfig") in
+      let jobName =
+        (Option.map ~f:MediaAnalysisJobName.of_xml)
+          (Xml.child xml_arg0 "JobName") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      make ?kmsKeyId ~outputConfig ~input ~operationsConfig ?jobName
+        ?clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let outputConfig =
+        field_map_exn json__ "OutputConfig" MediaAnalysisOutputConfig.of_json in
+      let input = field_map_exn json__ "Input" MediaAnalysisInput.of_json in
+      let operationsConfig =
+        field_map_exn json__ "OperationsConfig"
+          MediaAnalysisOperationsConfig.of_json in
+      let jobName = field_map json__ "JobName" MediaAnalysisJobName.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      make ?kmsKeyId ~outputConfig ~input ~operationsConfig ?jobName
+        ?clientRequestToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Initiates a new media analysis job. Accepts a manifest file in an Amazon S3 bucket. The output is a manifest file and a summary of the manifest stored in the Amazon S3 bucket."]
 module StartLabelDetectionResponse =
   struct
     type nonrec t =
@@ -9155,11 +13912,11 @@ module StartLabelDetectionResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts asynchronous detection of labels in a stored video. Amazon Rekognition Video can detect labels in a video. Labels are instances of real-world entities. This includes objects like flower, tree, and table; events like wedding, graduation, and birthday party; concepts like landscape, evening, and nature; and activities like a person getting out of a car or a person skiing. The video must be stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartLabelDetection returns a job identifier (JobId) which you use to get the results of the operation. When label detection is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the label detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetLabelDetection and pass the job identifier (JobId) from the initial call to StartLabelDetection."]
+       "Starts asynchronous detection of labels in a stored video. Amazon Rekognition Video can detect labels in a video. Labels are instances of real-world entities. This includes objects like flower, tree, and table; events like wedding, graduation, and birthday party; concepts like landscape, evening, and nature; and activities like a person getting out of a car or a person skiing. The video must be stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartLabelDetection returns a job identifier (JobId) which you use to get the results of the operation. When label detection is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the label detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetLabelDetection and pass the job identifier (JobId) from the initial call to StartLabelDetection. Optional Parameters StartLabelDetection has the GENERAL_LABELS Feature applied by default. This feature allows you to provide filtering criteria to the Settings parameter. You can filter with sets of individual labels or with label categories. You can specify inclusive filters, exclusive filters, or a combination of inclusive and exclusive filters. For more information on filtering, see Detecting labels in a video. You can specify MinConfidence to control the confidence threshold for the labels returned. The default is 50."]
 module StartLabelDetectionRequest =
   struct
     type nonrec t =
@@ -9172,27 +13929,37 @@ module StartLabelDetectionRequest =
           "Idempotent token used to identify the start request. If you use the same token with multiple StartLabelDetection requests, the same JobId is returned. Use ClientRequestToken to prevent the same job from being accidently started more than once."];
       minConfidence: Percent.t option
         [@ocaml.doc
-          "Specifies the minimum confidence that Amazon Rekognition Video must have in order to return a detected label. Confidence represents how certain Amazon Rekognition is that a label is correctly identified.0 is the lowest confidence. 100 is the highest confidence. Amazon Rekognition Video doesn't return any labels with a confidence level lower than this specified value. If you don't specify MinConfidence, the operation returns labels with confidence values greater than or equal to 50 percent."];
+          "Specifies the minimum confidence that Amazon Rekognition Video must have in order to return a detected label. Confidence represents how certain Amazon Rekognition is that a label is correctly identified.0 is the lowest confidence. 100 is the highest confidence. Amazon Rekognition Video doesn't return any labels with a confidence level lower than this specified value. If you don't specify MinConfidence, the operation returns labels and bounding boxes (if detected) with confidence values greater than or equal to 50 percent."];
       notificationChannel: NotificationChannel.t option
         [@ocaml.doc
           "The Amazon SNS topic ARN you want Amazon Rekognition Video to publish the completion status of the label detection operation to. The Amazon SNS topic must have a topic name that begins with AmazonRekognition if you are using the AmazonRekognitionServiceRole permissions policy."];
       jobTag: JobTag.t option
         [@ocaml.doc
-          "An identifier you specify that's returned in the completion notification that's published to your Amazon Simple Notification Service topic. For example, you can use JobTag to group related jobs and identify them in the completion notification."]}
+          "An identifier you specify that's returned in the completion notification that's published to your Amazon Simple Notification Service topic. For example, you can use JobTag to group related jobs and identify them in the completion notification."];
+      features: LabelDetectionFeatureList.t option
+        [@ocaml.doc
+          "The features to return after video analysis. You can specify that GENERAL_LABELS are returned."];
+      settings: LabelDetectionSettings.t option
+        [@ocaml.doc
+          "The settings for a StartLabelDetection request.Contains the specified parameters for the label detection request of an asynchronous label analysis operation. Settings can include filters for GENERAL_LABELS."]}
     let context_ = "StartLabelDetectionRequest"
     let make ?clientRequestToken =
       fun ?minConfidence ->
         fun ?notificationChannel ->
           fun ?jobTag ->
-            fun ~video ->
-              fun () ->
-                {
-                  clientRequestToken;
-                  minConfidence;
-                  notificationChannel;
-                  jobTag;
-                  video
-                }
+            fun ?features ->
+              fun ?settings ->
+                fun ~video ->
+                  fun () ->
+                    {
+                      clientRequestToken;
+                      minConfidence;
+                      notificationChannel;
+                      jobTag;
+                      features;
+                      settings;
+                      video
+                    }
     let to_value x =
       structure_to_value
         [("Video", (Some (Video.to_value x.video)));
@@ -9201,9 +13968,19 @@ module StartLabelDetectionRequest =
         ("MinConfidence", (Option.map x.minConfidence ~f:Percent.to_value));
         ("NotificationChannel",
           (Option.map x.notificationChannel ~f:NotificationChannel.to_value));
-        ("JobTag", (Option.map x.jobTag ~f:JobTag.to_value))]
+        ("JobTag", (Option.map x.jobTag ~f:JobTag.to_value));
+        ("Features",
+          (Option.map x.features ~f:LabelDetectionFeatureList.to_value));
+        ("Settings",
+          (Option.map x.settings ~f:LabelDetectionSettings.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let settings =
+        (Option.map ~f:LabelDetectionSettings.of_xml)
+          (Xml.child xml_arg0 "Settings") in
+      let features =
+        (Option.map ~f:LabelDetectionFeatureList.of_xml)
+          (Xml.child xml_arg0 "Features") in
       let jobTag =
         (Option.map ~f:JobTag.of_xml) (Xml.child xml_arg0 "JobTag") in
       let notificationChannel =
@@ -9216,22 +13993,26 @@ module StartLabelDetectionRequest =
           (Xml.child xml_arg0 "ClientRequestToken") in
       let video =
         Video.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Video") in
-      make ?jobTag ?notificationChannel ?minConfidence ?clientRequestToken
-        ~video ()
+      make ?settings ?features ?jobTag ?notificationChannel ?minConfidence
+        ?clientRequestToken ~video ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobTag = field_map json "JobTag" JobTag.of_json in
+    let of_json json__ =
+      let settings =
+        field_map json__ "Settings" LabelDetectionSettings.of_json in
+      let features =
+        field_map json__ "Features" LabelDetectionFeatureList.of_json in
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
       let notificationChannel =
-        field_map json "NotificationChannel" NotificationChannel.of_json in
-      let minConfidence = field_map json "MinConfidence" Percent.of_json in
+        field_map json__ "NotificationChannel" NotificationChannel.of_json in
+      let minConfidence = field_map json__ "MinConfidence" Percent.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let video = field_map_exn json "Video" Video.of_json in
-      make ?jobTag ?notificationChannel ?minConfidence ?clientRequestToken
-        ~video ()
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let video = field_map_exn json__ "Video" Video.of_json in
+      make ?settings ?features ?jobTag ?notificationChannel ?minConfidence
+        ?clientRequestToken ~video ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts asynchronous detection of labels in a stored video. Amazon Rekognition Video can detect labels in a video. Labels are instances of real-world entities. This includes objects like flower, tree, and table; events like wedding, graduation, and birthday party; concepts like landscape, evening, and nature; and activities like a person getting out of a car or a person skiing. The video must be stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartLabelDetection returns a job identifier (JobId) which you use to get the results of the operation. When label detection is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the label detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetLabelDetection and pass the job identifier (JobId) from the initial call to StartLabelDetection."]
+       "Starts asynchronous detection of labels in a stored video. Amazon Rekognition Video can detect labels in a video. Labels are instances of real-world entities. This includes objects like flower, tree, and table; events like wedding, graduation, and birthday party; concepts like landscape, evening, and nature; and activities like a person getting out of a car or a person skiing. The video must be stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartLabelDetection returns a job identifier (JobId) which you use to get the results of the operation. When label detection is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the label detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetLabelDetection and pass the job identifier (JobId) from the initial call to StartLabelDetection. Optional Parameters StartLabelDetection has the GENERAL_LABELS Feature applied by default. This feature allows you to provide filtering criteria to the Settings parameter. You can filter with sets of individual labels or with label categories. You can specify inclusive filters, exclusive filters, or a combination of inclusive and exclusive filters. For more information on filtering, see Detecting labels in a video. You can specify MinConfidence to control the confidence threshold for the labels returned. The default is 50."]
 module StartFaceSearchResponse =
   struct
     type nonrec t =
@@ -9361,11 +14142,11 @@ module StartFaceSearchResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts the asynchronous search for faces in a collection that match the faces of persons detected in a stored video. The video must be stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartFaceSearch returns a job identifier (JobId) which you use to get the search results once the search has completed. When searching is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the search results, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetFaceSearch and pass the job identifier (JobId) from the initial call to StartFaceSearch. For more information, see procedure-person-search-videos."]
+       "Starts the asynchronous search for faces in a collection that match the faces of persons detected in a stored video. The video must be stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartFaceSearch returns a job identifier (JobId) which you use to get the search results once the search has completed. When searching is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the search results, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetFaceSearch and pass the job identifier (JobId) from the initial call to StartFaceSearch. For more information, see Searching stored videos for faces."]
 module StartFaceSearchRequest =
   struct
     type nonrec t =
@@ -9436,22 +14217,22 @@ module StartFaceSearchRequest =
       make ?jobTag ?notificationChannel ~collectionId ?faceMatchThreshold
         ?clientRequestToken ~video ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobTag = field_map json "JobTag" JobTag.of_json in
+    let of_json json__ =
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
       let notificationChannel =
-        field_map json "NotificationChannel" NotificationChannel.of_json in
+        field_map json__ "NotificationChannel" NotificationChannel.of_json in
       let collectionId =
-        field_map_exn json "CollectionId" CollectionId.of_json in
+        field_map_exn json__ "CollectionId" CollectionId.of_json in
       let faceMatchThreshold =
-        field_map json "FaceMatchThreshold" Percent.of_json in
+        field_map json__ "FaceMatchThreshold" Percent.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let video = field_map_exn json "Video" Video.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let video = field_map_exn json__ "Video" Video.of_json in
       make ?jobTag ?notificationChannel ~collectionId ?faceMatchThreshold
         ?clientRequestToken ~video ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts the asynchronous search for faces in a collection that match the faces of persons detected in a stored video. The video must be stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartFaceSearch returns a job identifier (JobId) which you use to get the search results once the search has completed. When searching is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the search results, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetFaceSearch and pass the job identifier (JobId) from the initial call to StartFaceSearch. For more information, see procedure-person-search-videos."]
+       "Starts the asynchronous search for faces in a collection that match the faces of persons detected in a stored video. The video must be stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartFaceSearch returns a job identifier (JobId) which you use to get the search results once the search has completed. When searching is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the search results, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetFaceSearch and pass the job identifier (JobId) from the initial call to StartFaceSearch. For more information, see Searching stored videos for faces."]
 module StartFaceDetectionResponse =
   struct
     type nonrec t =
@@ -9572,11 +14353,11 @@ module StartFaceDetectionResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts asynchronous detection of faces in a stored video. Amazon Rekognition Video can detect faces in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartFaceDetection returns a job identifier (JobId) that you use to get the results of the operation. When face detection is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the face detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetFaceDetection and pass the job identifier (JobId) from the initial call to StartFaceDetection. For more information, see Detecting Faces in a Stored Video in the Amazon Rekognition Developer Guide."]
+       "Starts asynchronous detection of faces in a stored video. Amazon Rekognition Video can detect faces in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartFaceDetection returns a job identifier (JobId) that you use to get the results of the operation. When face detection is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the face detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetFaceDetection and pass the job identifier (JobId) from the initial call to StartFaceDetection. For more information, see Detecting faces in a stored video in the Amazon Rekognition Developer Guide."]
 module StartFaceDetectionRequest =
   struct
     type nonrec t =
@@ -9638,20 +14419,20 @@ module StartFaceDetectionRequest =
       make ?jobTag ?faceAttributes ?notificationChannel ?clientRequestToken
         ~video ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobTag = field_map json "JobTag" JobTag.of_json in
+    let of_json json__ =
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
       let faceAttributes =
-        field_map json "FaceAttributes" FaceAttributes.of_json in
+        field_map json__ "FaceAttributes" FaceAttributes.of_json in
       let notificationChannel =
-        field_map json "NotificationChannel" NotificationChannel.of_json in
+        field_map json__ "NotificationChannel" NotificationChannel.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let video = field_map_exn json "Video" Video.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let video = field_map_exn json__ "Video" Video.of_json in
       make ?jobTag ?faceAttributes ?notificationChannel ?clientRequestToken
         ~video ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts asynchronous detection of faces in a stored video. Amazon Rekognition Video can detect faces in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartFaceDetection returns a job identifier (JobId) that you use to get the results of the operation. When face detection is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the face detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetFaceDetection and pass the job identifier (JobId) from the initial call to StartFaceDetection. For more information, see Detecting Faces in a Stored Video in the Amazon Rekognition Developer Guide."]
+       "Starts asynchronous detection of faces in a stored video. Amazon Rekognition Video can detect faces in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartFaceDetection returns a job identifier (JobId) that you use to get the results of the operation. When face detection is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the face detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetFaceDetection and pass the job identifier (JobId) from the initial call to StartFaceDetection. For more information, see Detecting faces in a stored video in the Amazon Rekognition Developer Guide."]
 module StartContentModerationResponse =
   struct
     type nonrec t =
@@ -9772,11 +14553,11 @@ module StartContentModerationResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts asynchronous detection of inappropriate, unwanted, or offensive content in a stored video. For a list of moderation labels in Amazon Rekognition, see Using the image and video moderation APIs. Amazon Rekognition Video can moderate content in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartContentModeration returns a job identifier (JobId) which you use to get the results of the analysis. When content analysis is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the content analysis, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetContentModeration and pass the job identifier (JobId) from the initial call to StartContentModeration. For more information, see Content moderation in the Amazon Rekognition Developer Guide."]
+       "Starts asynchronous detection of inappropriate, unwanted, or offensive content in a stored video. For a list of moderation labels in Amazon Rekognition, see Using the image and video moderation APIs. Amazon Rekognition Video can moderate content in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartContentModeration returns a job identifier (JobId) which you use to get the results of the analysis. When content analysis is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the content analysis, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetContentModeration and pass the job identifier (JobId) from the initial call to StartContentModeration. For more information, see Moderating content in the Amazon Rekognition Developer Guide."]
 module StartContentModerationRequest =
   struct
     type nonrec t =
@@ -9836,19 +14617,19 @@ module StartContentModerationRequest =
       make ?jobTag ?notificationChannel ?clientRequestToken ?minConfidence
         ~video ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobTag = field_map json "JobTag" JobTag.of_json in
+    let of_json json__ =
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
       let notificationChannel =
-        field_map json "NotificationChannel" NotificationChannel.of_json in
+        field_map json__ "NotificationChannel" NotificationChannel.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let minConfidence = field_map json "MinConfidence" Percent.of_json in
-      let video = field_map_exn json "Video" Video.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let minConfidence = field_map json__ "MinConfidence" Percent.of_json in
+      let video = field_map_exn json__ "Video" Video.of_json in
       make ?jobTag ?notificationChannel ?clientRequestToken ?minConfidence
         ~video ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts asynchronous detection of inappropriate, unwanted, or offensive content in a stored video. For a list of moderation labels in Amazon Rekognition, see Using the image and video moderation APIs. Amazon Rekognition Video can moderate content in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartContentModeration returns a job identifier (JobId) which you use to get the results of the analysis. When content analysis is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the content analysis, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetContentModeration and pass the job identifier (JobId) from the initial call to StartContentModeration. For more information, see Content moderation in the Amazon Rekognition Developer Guide."]
+       "Starts asynchronous detection of inappropriate, unwanted, or offensive content in a stored video. For a list of moderation labels in Amazon Rekognition, see Using the image and video moderation APIs. Amazon Rekognition Video can moderate content in a video stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartContentModeration returns a job identifier (JobId) which you use to get the results of the analysis. When content analysis is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the content analysis, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetContentModeration and pass the job identifier (JobId) from the initial call to StartContentModeration. For more information, see Moderating content in the Amazon Rekognition Developer Guide."]
 module StartCelebrityRecognitionResponse =
   struct
     type nonrec t =
@@ -9969,11 +14750,11 @@ module StartCelebrityRecognitionResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts asynchronous recognition of celebrities in a stored video. Amazon Rekognition Video can detect celebrities in a video must be stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartCelebrityRecognition returns a job identifier (JobId) which you use to get the results of the analysis. When celebrity recognition analysis is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the celebrity recognition analysis, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetCelebrityRecognition and pass the job identifier (JobId) from the initial call to StartCelebrityRecognition. For more information, see Recognizing Celebrities in the Amazon Rekognition Developer Guide."]
+       "Starts asynchronous recognition of celebrities in a stored video. Amazon Rekognition Video can detect celebrities in a video must be stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartCelebrityRecognition returns a job identifier (JobId) which you use to get the results of the analysis. When celebrity recognition analysis is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the celebrity recognition analysis, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetCelebrityRecognition and pass the job identifier (JobId) from the initial call to StartCelebrityRecognition. For more information, see Recognizing celebrities in the Amazon Rekognition Developer Guide."]
 module StartCelebrityRecognitionRequest =
   struct
     type nonrec t =
@@ -10019,17 +14800,445 @@ module StartCelebrityRecognitionRequest =
         Video.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Video") in
       make ?jobTag ?notificationChannel ?clientRequestToken ~video ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobTag = field_map json "JobTag" JobTag.of_json in
+    let of_json json__ =
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
       let notificationChannel =
-        field_map json "NotificationChannel" NotificationChannel.of_json in
+        field_map json__ "NotificationChannel" NotificationChannel.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let video = field_map_exn json "Video" Video.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let video = field_map_exn json__ "Video" Video.of_json in
       make ?jobTag ?notificationChannel ?clientRequestToken ~video ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts asynchronous recognition of celebrities in a stored video. Amazon Rekognition Video can detect celebrities in a video must be stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartCelebrityRecognition returns a job identifier (JobId) which you use to get the results of the analysis. When celebrity recognition analysis is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the celebrity recognition analysis, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetCelebrityRecognition and pass the job identifier (JobId) from the initial call to StartCelebrityRecognition. For more information, see Recognizing Celebrities in the Amazon Rekognition Developer Guide."]
+       "Starts asynchronous recognition of celebrities in a stored video. Amazon Rekognition Video can detect celebrities in a video must be stored in an Amazon S3 bucket. Use Video to specify the bucket name and the filename of the video. StartCelebrityRecognition returns a job identifier (JobId) which you use to get the results of the analysis. When celebrity recognition analysis is finished, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic that you specify in NotificationChannel. To get the results of the celebrity recognition analysis, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetCelebrityRecognition and pass the job identifier (JobId) from the initial call to StartCelebrityRecognition. For more information, see Recognizing celebrities in the Amazon Rekognition Developer Guide."]
+module SearchUsersResponse =
+  struct
+    type nonrec t =
+      {
+      userMatches: UserMatchList.t option
+        [@ocaml.doc
+          "An array of UserMatch objects that matched the input face along with the confidence in the match. Array will be empty if there are no matches."];
+      faceModelVersion: String_.t option
+        [@ocaml.doc
+          "Version number of the face detection model associated with the input CollectionId."];
+      searchedFace: SearchedFace.t option
+        [@ocaml.doc
+          "Contains the ID of a face that was used to search for matches in a collection."];
+      searchedUser: SearchedUser.t option
+        [@ocaml.doc
+          "Contains the ID of the UserID that was used to search for matches in a collection."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?userMatches =
+      fun ?faceModelVersion ->
+        fun ?searchedFace ->
+          fun ?searchedUser ->
+            fun () ->
+              { userMatches; faceModelVersion; searchedFace; searchedUser }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("UserMatches",
+           (Option.map x.userMatches ~f:UserMatchList.to_value));
+        ("FaceModelVersion",
+          (Option.map x.faceModelVersion ~f:String_.to_value));
+        ("SearchedFace",
+          (Option.map x.searchedFace ~f:SearchedFace.to_value));
+        ("SearchedUser",
+          (Option.map x.searchedUser ~f:SearchedUser.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let searchedUser =
+        (Option.map ~f:SearchedUser.of_xml)
+          (Xml.child xml_arg0 "SearchedUser") in
+      let searchedFace =
+        (Option.map ~f:SearchedFace.of_xml)
+          (Xml.child xml_arg0 "SearchedFace") in
+      let faceModelVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "FaceModelVersion") in
+      let userMatches =
+        (Option.map ~f:UserMatchList.of_xml)
+          (Xml.child xml_arg0 "UserMatches") in
+      make ?searchedUser ?searchedFace ?faceModelVersion ?userMatches ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let searchedUser = field_map json__ "SearchedUser" SearchedUser.of_json in
+      let searchedFace = field_map json__ "SearchedFace" SearchedFace.of_json in
+      let faceModelVersion =
+        field_map json__ "FaceModelVersion" String_.of_json in
+      let userMatches = field_map json__ "UserMatches" UserMatchList.of_json in
+      make ?searchedUser ?searchedFace ?faceModelVersion ?userMatches ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Searches for UserIDs within a collection based on a FaceId or UserId. This API can be used to find the closest UserID (with a highest similarity) to associate a face. The request must be provided with either FaceId or UserId. The operation returns an array of UserID that match the FaceId or UserId, ordered by similarity score with the highest similarity first."]
+module SearchUsersRequest =
+  struct
+    type nonrec t =
+      {
+      collectionId: CollectionId.t
+        [@ocaml.doc
+          "The ID of an existing collection containing the UserID, used with a UserId or FaceId. If a FaceId is provided, UserId isn\226\128\153t required to be present in the Collection."];
+      userId: UserId.t option [@ocaml.doc "ID for the existing User."];
+      faceId: FaceId.t option [@ocaml.doc "ID for the existing face."];
+      userMatchThreshold: Percent.t option
+        [@ocaml.doc
+          "Optional value that specifies the minimum confidence in the matched UserID to return. Default value of 80."];
+      maxUsers: MaxUserResults.t option
+        [@ocaml.doc "Maximum number of identities to return."]}
+    let context_ = "SearchUsersRequest"
+    let make ?userId =
+      fun ?faceId ->
+        fun ?userMatchThreshold ->
+          fun ?maxUsers ->
+            fun ~collectionId ->
+              fun () ->
+                { userId; faceId; userMatchThreshold; maxUsers; collectionId
+                }
+    let to_value x =
+      structure_to_value
+        [("CollectionId", (Some (CollectionId.to_value x.collectionId)));
+        ("UserId", (Option.map x.userId ~f:UserId.to_value));
+        ("FaceId", (Option.map x.faceId ~f:FaceId.to_value));
+        ("UserMatchThreshold",
+          (Option.map x.userMatchThreshold ~f:Percent.to_value));
+        ("MaxUsers", (Option.map x.maxUsers ~f:MaxUserResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxUsers =
+        (Option.map ~f:MaxUserResults.of_xml) (Xml.child xml_arg0 "MaxUsers") in
+      let userMatchThreshold =
+        (Option.map ~f:Percent.of_xml)
+          (Xml.child xml_arg0 "UserMatchThreshold") in
+      let faceId =
+        (Option.map ~f:FaceId.of_xml) (Xml.child xml_arg0 "FaceId") in
+      let userId =
+        (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "UserId") in
+      let collectionId =
+        CollectionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
+      make ?maxUsers ?userMatchThreshold ?faceId ?userId ~collectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxUsers = field_map json__ "MaxUsers" MaxUserResults.of_json in
+      let userMatchThreshold =
+        field_map json__ "UserMatchThreshold" Percent.of_json in
+      let faceId = field_map json__ "FaceId" FaceId.of_json in
+      let userId = field_map json__ "UserId" UserId.of_json in
+      let collectionId =
+        field_map_exn json__ "CollectionId" CollectionId.of_json in
+      make ?maxUsers ?userMatchThreshold ?faceId ?userId ~collectionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Searches for UserIDs within a collection based on a FaceId or UserId. This API can be used to find the closest UserID (with a highest similarity) to associate a face. The request must be provided with either FaceId or UserId. The operation returns an array of UserID that match the FaceId or UserId, ordered by similarity score with the highest similarity first."]
+module SearchUsersByImageResponse =
+  struct
+    type nonrec t =
+      {
+      userMatches: UserMatchList.t option
+        [@ocaml.doc
+          "An array of UserID objects that matched the input face, along with the confidence in the match. The returned structure will be empty if there are no matches. Returned if the SearchUsersByImageResponse action is successful."];
+      faceModelVersion: String_.t option
+        [@ocaml.doc
+          "Version number of the face detection model associated with the input collection CollectionId."];
+      searchedFace: SearchedFaceDetails.t option
+        [@ocaml.doc
+          "A list of FaceDetail objects containing the BoundingBox for the largest face in image, as well as the confidence in the bounding box, that was searched for matches. If no valid face is detected in the image the response will contain no SearchedFace object."];
+      unsearchedFaces: UnsearchedFacesList.t option
+        [@ocaml.doc
+          "List of UnsearchedFace objects. Contains the face details infered from the specified image but not used for search. Contains reasons that describe why a face wasn't used for Search."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ImageTooLargeException of ImageTooLargeException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidImageFormatException of InvalidImageFormatException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidS3ObjectException of InvalidS3ObjectException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?userMatches =
+      fun ?faceModelVersion ->
+        fun ?searchedFace ->
+          fun ?unsearchedFaces ->
+            fun () ->
+              { userMatches; faceModelVersion; searchedFace; unsearchedFaces
+              }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ImageTooLargeException" ->
+          `ImageTooLargeException (ImageTooLargeException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidImageFormatException" ->
+          `InvalidImageFormatException
+            (InvalidImageFormatException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidS3ObjectException" ->
+          `InvalidS3ObjectException (InvalidS3ObjectException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ImageTooLargeException" ->
+          `ImageTooLargeException (ImageTooLargeException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidImageFormatException" ->
+          `InvalidImageFormatException
+            (InvalidImageFormatException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidS3ObjectException" ->
+          `InvalidS3ObjectException (InvalidS3ObjectException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ImageTooLargeException e ->
+          `Assoc
+            [("error", (`String "ImageTooLargeException"));
+            ("details", (ImageTooLargeException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidImageFormatException e ->
+          `Assoc
+            [("error", (`String "InvalidImageFormatException"));
+            ("details", (InvalidImageFormatException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidS3ObjectException e ->
+          `Assoc
+            [("error", (`String "InvalidS3ObjectException"));
+            ("details", (InvalidS3ObjectException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("UserMatches",
+           (Option.map x.userMatches ~f:UserMatchList.to_value));
+        ("FaceModelVersion",
+          (Option.map x.faceModelVersion ~f:String_.to_value));
+        ("SearchedFace",
+          (Option.map x.searchedFace ~f:SearchedFaceDetails.to_value));
+        ("UnsearchedFaces",
+          (Option.map x.unsearchedFaces ~f:UnsearchedFacesList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unsearchedFaces =
+        (Option.map ~f:UnsearchedFacesList.of_xml)
+          (Xml.child xml_arg0 "UnsearchedFaces") in
+      let searchedFace =
+        (Option.map ~f:SearchedFaceDetails.of_xml)
+          (Xml.child xml_arg0 "SearchedFace") in
+      let faceModelVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "FaceModelVersion") in
+      let userMatches =
+        (Option.map ~f:UserMatchList.of_xml)
+          (Xml.child xml_arg0 "UserMatches") in
+      make ?unsearchedFaces ?searchedFace ?faceModelVersion ?userMatches ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unsearchedFaces =
+        field_map json__ "UnsearchedFaces" UnsearchedFacesList.of_json in
+      let searchedFace =
+        field_map json__ "SearchedFace" SearchedFaceDetails.of_json in
+      let faceModelVersion =
+        field_map json__ "FaceModelVersion" String_.of_json in
+      let userMatches = field_map json__ "UserMatches" UserMatchList.of_json in
+      make ?unsearchedFaces ?searchedFace ?faceModelVersion ?userMatches ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Searches for UserIDs using a supplied image. It first detects the largest face in the image, and then searches a specified collection for matching UserIDs. The operation returns an array of UserIDs that match the face in the supplied image, ordered by similarity score with the highest similarity first. It also returns a bounding box for the face found in the input image. Information about faces detected in the supplied image, but not used for the search, is returned in an array of UnsearchedFace objects. If no valid face is detected in the image, the response will contain an empty UserMatches list and no SearchedFace object."]
+module SearchUsersByImageRequest =
+  struct
+    type nonrec t =
+      {
+      collectionId: CollectionId.t
+        [@ocaml.doc
+          "The ID of an existing collection containing the UserID."];
+      image: Image.t ;
+      userMatchThreshold: Percent.t option
+        [@ocaml.doc
+          "Specifies the minimum confidence in the UserID match to return. Default value is 80."];
+      maxUsers: MaxUserResults.t option
+        [@ocaml.doc "Maximum number of UserIDs to return."];
+      qualityFilter: QualityFilter.t option
+        [@ocaml.doc
+          "A filter that specifies a quality bar for how much filtering is done to identify faces. Filtered faces aren't searched for in the collection. The default value is NONE."]}
+    let context_ = "SearchUsersByImageRequest"
+    let make ?userMatchThreshold =
+      fun ?maxUsers ->
+        fun ?qualityFilter ->
+          fun ~collectionId ->
+            fun ~image ->
+              fun () ->
+                {
+                  userMatchThreshold;
+                  maxUsers;
+                  qualityFilter;
+                  collectionId;
+                  image
+                }
+    let to_value x =
+      structure_to_value
+        [("CollectionId", (Some (CollectionId.to_value x.collectionId)));
+        ("Image", (Some (Image.to_value x.image)));
+        ("UserMatchThreshold",
+          (Option.map x.userMatchThreshold ~f:Percent.to_value));
+        ("MaxUsers", (Option.map x.maxUsers ~f:MaxUserResults.to_value));
+        ("QualityFilter",
+          (Option.map x.qualityFilter ~f:QualityFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let qualityFilter =
+        (Option.map ~f:QualityFilter.of_xml)
+          (Xml.child xml_arg0 "QualityFilter") in
+      let maxUsers =
+        (Option.map ~f:MaxUserResults.of_xml) (Xml.child xml_arg0 "MaxUsers") in
+      let userMatchThreshold =
+        (Option.map ~f:Percent.of_xml)
+          (Xml.child xml_arg0 "UserMatchThreshold") in
+      let image =
+        Image.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Image") in
+      let collectionId =
+        CollectionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
+      make ?qualityFilter ?maxUsers ?userMatchThreshold ~image ~collectionId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let qualityFilter =
+        field_map json__ "QualityFilter" QualityFilter.of_json in
+      let maxUsers = field_map json__ "MaxUsers" MaxUserResults.of_json in
+      let userMatchThreshold =
+        field_map json__ "UserMatchThreshold" Percent.of_json in
+      let image = field_map_exn json__ "Image" Image.of_json in
+      let collectionId =
+        field_map_exn json__ "CollectionId" CollectionId.of_json in
+      make ?qualityFilter ?maxUsers ?userMatchThreshold ~image ~collectionId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Searches for UserIDs using a supplied image. It first detects the largest face in the image, and then searches a specified collection for matching UserIDs. The operation returns an array of UserIDs that match the face in the supplied image, ordered by similarity score with the highest similarity first. It also returns a bounding box for the face found in the input image. Information about faces detected in the supplied image, but not used for the search, is returned in an array of UnsearchedFace objects. If no valid face is detected in the image, the response will contain an empty UserMatches list and no SearchedFace object."]
 module SearchFacesResponse =
   struct
     type nonrec t =
@@ -10042,7 +15251,7 @@ module SearchFacesResponse =
           "An array of faces that matched the input face, along with the confidence in the match."];
       faceModelVersion: String_.t option
         [@ocaml.doc
-          "Latest face model being used with the collection. For more information, see Model versioning."]}
+          "Version number of the face detection model associated with the input collection (CollectionId)."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -10140,15 +15349,15 @@ module SearchFacesResponse =
         (Option.map ~f:FaceId.of_xml) (Xml.child xml_arg0 "SearchedFaceId") in
       make ?faceModelVersion ?faceMatches ?searchedFaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let faceModelVersion =
-        field_map json "FaceModelVersion" String_.of_json in
-      let faceMatches = field_map json "FaceMatches" FaceMatchList.of_json in
-      let searchedFaceId = field_map json "SearchedFaceId" FaceId.of_json in
+        field_map json__ "FaceModelVersion" String_.of_json in
+      let faceMatches = field_map json__ "FaceMatches" FaceMatchList.of_json in
+      let searchedFaceId = field_map json__ "SearchedFaceId" FaceId.of_json in
       make ?faceModelVersion ?faceMatches ?searchedFaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "For a given input face ID, searches for matching faces in the collection the face belongs to. You get a face ID when you add a face to the collection using the IndexFaces operation. The operation compares the features of the input face with faces in the specified collection. You can also search faces without indexing faces by using the SearchFacesByImage operation. The operation response returns an array of faces that match, ordered by similarity score with the highest similarity first. More specifically, it is an array of metadata for each face match that is found. Along with the metadata, the response also includes a confidence value for each face match, indicating the confidence that the specific face matches the input face. For an example, see Searching for a Face Using Its Face ID in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:SearchFaces action."]
+       "For a given input face ID, searches for matching faces in the collection the face belongs to. You get a face ID when you add a face to the collection using the IndexFaces operation. The operation compares the features of the input face with faces in the specified collection. You can also search faces without indexing faces by using the SearchFacesByImage operation. The operation response returns an array of faces that match, ordered by similarity score with the highest similarity first. More specifically, it is an array of metadata for each face match that is found. Along with the metadata, the response also includes a confidence value for each face match, indicating the confidence that the specific face matches the input face. For an example, see Searching for a face using its face ID in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:SearchFaces action."]
 module SearchFacesRequest =
   struct
     type nonrec t =
@@ -10190,17 +15399,17 @@ module SearchFacesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
       make ?faceMatchThreshold ?maxFaces ~faceId ~collectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let faceMatchThreshold =
-        field_map json "FaceMatchThreshold" Percent.of_json in
-      let maxFaces = field_map json "MaxFaces" MaxFaces.of_json in
-      let faceId = field_map_exn json "FaceId" FaceId.of_json in
+        field_map json__ "FaceMatchThreshold" Percent.of_json in
+      let maxFaces = field_map json__ "MaxFaces" MaxFaces.of_json in
+      let faceId = field_map_exn json__ "FaceId" FaceId.of_json in
       let collectionId =
-        field_map_exn json "CollectionId" CollectionId.of_json in
+        field_map_exn json__ "CollectionId" CollectionId.of_json in
       make ?faceMatchThreshold ?maxFaces ~faceId ~collectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "For a given input face ID, searches for matching faces in the collection the face belongs to. You get a face ID when you add a face to the collection using the IndexFaces operation. The operation compares the features of the input face with faces in the specified collection. You can also search faces without indexing faces by using the SearchFacesByImage operation. The operation response returns an array of faces that match, ordered by similarity score with the highest similarity first. More specifically, it is an array of metadata for each face match that is found. Along with the metadata, the response also includes a confidence value for each face match, indicating the confidence that the specific face matches the input face. For an example, see Searching for a Face Using Its Face ID in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:SearchFaces action."]
+       "For a given input face ID, searches for matching faces in the collection the face belongs to. You get a face ID when you add a face to the collection using the IndexFaces operation. The operation compares the features of the input face with faces in the specified collection. You can also search faces without indexing faces by using the SearchFacesByImage operation. The operation response returns an array of faces that match, ordered by similarity score with the highest similarity first. More specifically, it is an array of metadata for each face match that is found. Along with the metadata, the response also includes a confidence value for each face match, indicating the confidence that the specific face matches the input face. For an example, see Searching for a face using its face ID in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:SearchFaces action."]
 module SearchFacesByImageResponse =
   struct
     type nonrec t =
@@ -10216,7 +15425,7 @@ module SearchFacesByImageResponse =
           "An array of faces that match the input face, along with the confidence in the match."];
       faceModelVersion: String_.t option
         [@ocaml.doc
-          "Latest face model being used with the collection. For more information, see Model versioning."]}
+          "Version number of the face detection model associated with the input collection (CollectionId)."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ImageTooLargeException of ImageTooLargeException.t 
@@ -10358,14 +15567,14 @@ module SearchFacesByImageResponse =
       make ?faceModelVersion ?faceMatches ?searchedFaceConfidence
         ?searchedFaceBoundingBox ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let faceModelVersion =
-        field_map json "FaceModelVersion" String_.of_json in
-      let faceMatches = field_map json "FaceMatches" FaceMatchList.of_json in
+        field_map json__ "FaceModelVersion" String_.of_json in
+      let faceMatches = field_map json__ "FaceMatches" FaceMatchList.of_json in
       let searchedFaceConfidence =
-        field_map json "SearchedFaceConfidence" Percent.of_json in
+        field_map json__ "SearchedFaceConfidence" Percent.of_json in
       let searchedFaceBoundingBox =
-        field_map json "SearchedFaceBoundingBox" BoundingBox.of_json in
+        field_map json__ "SearchedFaceBoundingBox" BoundingBox.of_json in
       make ?faceModelVersion ?faceMatches ?searchedFaceConfidence
         ?searchedFaceBoundingBox ()
     let to_json v = composed_to_json to_value v
@@ -10430,15 +15639,15 @@ module SearchFacesByImageRequest =
       make ?qualityFilter ?faceMatchThreshold ?maxFaces ~image ~collectionId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let qualityFilter =
-        field_map json "QualityFilter" QualityFilter.of_json in
+        field_map json__ "QualityFilter" QualityFilter.of_json in
       let faceMatchThreshold =
-        field_map json "FaceMatchThreshold" Percent.of_json in
-      let maxFaces = field_map json "MaxFaces" MaxFaces.of_json in
-      let image = field_map_exn json "Image" Image.of_json in
+        field_map json__ "FaceMatchThreshold" Percent.of_json in
+      let maxFaces = field_map json__ "MaxFaces" MaxFaces.of_json in
+      let image = field_map_exn json__ "Image" Image.of_json in
       let collectionId =
-        field_map_exn json "CollectionId" CollectionId.of_json in
+        field_map_exn json__ "CollectionId" CollectionId.of_json in
       make ?qualityFilter ?faceMatchThreshold ?maxFaces ~image ~collectionId
         ()
     let to_json v = composed_to_json to_value v
@@ -10578,17 +15787,18 @@ module RecognizeCelebritiesResponse =
           (Xml.child xml_arg0 "CelebrityFaces") in
       make ?orientationCorrection ?unrecognizedFaces ?celebrityFaces ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let orientationCorrection =
-        field_map json "OrientationCorrection" OrientationCorrection.of_json in
+        field_map json__ "OrientationCorrection"
+          OrientationCorrection.of_json in
       let unrecognizedFaces =
-        field_map json "UnrecognizedFaces" ComparedFaceList.of_json in
+        field_map json__ "UnrecognizedFaces" ComparedFaceList.of_json in
       let celebrityFaces =
-        field_map json "CelebrityFaces" CelebrityList.of_json in
+        field_map json__ "CelebrityFaces" CelebrityList.of_json in
       make ?orientationCorrection ?unrecognizedFaces ?celebrityFaces ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns an array of celebrities recognized in the input image. For more information, see Recognizing Celebrities in the Amazon Rekognition Developer Guide. RecognizeCelebrities returns the 64 largest faces in the image. It lists the recognized celebrities in the CelebrityFaces array and any unrecognized faces in the UnrecognizedFaces array. RecognizeCelebrities doesn't return celebrities whose faces aren't among the largest 64 faces in the image. For each celebrity recognized, RecognizeCelebrities returns a Celebrity object. The Celebrity object contains the celebrity name, ID, URL links to additional information, match confidence, and a ComparedFace object that you can use to locate the celebrity's face on the image. Amazon Rekognition doesn't retain information about which images a celebrity has been recognized in. Your application must store this information and use the Celebrity ID property as a unique identifier for the celebrity. If you don't store the celebrity name or additional information URLs returned by RecognizeCelebrities, you will need the ID to identify the celebrity in a call to the GetCelebrityInfo operation. You pass the input image either as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. For an example, see Recognizing Celebrities in an Image in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:RecognizeCelebrities operation."]
+       "Returns an array of celebrities recognized in the input image. For more information, see Recognizing celebrities in the Amazon Rekognition Developer Guide. RecognizeCelebrities returns the 64 largest faces in the image. It lists the recognized celebrities in the CelebrityFaces array and any unrecognized faces in the UnrecognizedFaces array. RecognizeCelebrities doesn't return celebrities whose faces aren't among the largest 64 faces in the image. For each celebrity recognized, RecognizeCelebrities returns a Celebrity object. The Celebrity object contains the celebrity name, ID, URL links to additional information, match confidence, and a ComparedFace object that you can use to locate the celebrity's face on the image. Amazon Rekognition doesn't retain information about which images a celebrity has been recognized in. Your application must store this information and use the Celebrity ID property as a unique identifier for the celebrity. If you don't store the celebrity name or additional information URLs returned by RecognizeCelebrities, you will need the ID to identify the celebrity in a call to the GetCelebrityInfo operation. You pass the input image either as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. For an example, see Recognizing celebrities in an image in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:RecognizeCelebrities operation."]
 module RecognizeCelebritiesRequest =
   struct
     type nonrec t =
@@ -10606,11 +15816,383 @@ module RecognizeCelebritiesRequest =
         Image.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Image") in
       make ~image ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let image = field_map_exn json "Image" Image.of_json in make ~image ()
+    let of_json json__ =
+      let image = field_map_exn json__ "Image" Image.of_json in
+      make ~image ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns an array of celebrities recognized in the input image. For more information, see Recognizing Celebrities in the Amazon Rekognition Developer Guide. RecognizeCelebrities returns the 64 largest faces in the image. It lists the recognized celebrities in the CelebrityFaces array and any unrecognized faces in the UnrecognizedFaces array. RecognizeCelebrities doesn't return celebrities whose faces aren't among the largest 64 faces in the image. For each celebrity recognized, RecognizeCelebrities returns a Celebrity object. The Celebrity object contains the celebrity name, ID, URL links to additional information, match confidence, and a ComparedFace object that you can use to locate the celebrity's face on the image. Amazon Rekognition doesn't retain information about which images a celebrity has been recognized in. Your application must store this information and use the Celebrity ID property as a unique identifier for the celebrity. If you don't store the celebrity name or additional information URLs returned by RecognizeCelebrities, you will need the ID to identify the celebrity in a call to the GetCelebrityInfo operation. You pass the input image either as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. For an example, see Recognizing Celebrities in an Image in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:RecognizeCelebrities operation."]
+       "Returns an array of celebrities recognized in the input image. For more information, see Recognizing celebrities in the Amazon Rekognition Developer Guide. RecognizeCelebrities returns the 64 largest faces in the image. It lists the recognized celebrities in the CelebrityFaces array and any unrecognized faces in the UnrecognizedFaces array. RecognizeCelebrities doesn't return celebrities whose faces aren't among the largest 64 faces in the image. For each celebrity recognized, RecognizeCelebrities returns a Celebrity object. The Celebrity object contains the celebrity name, ID, URL links to additional information, match confidence, and a ComparedFace object that you can use to locate the celebrity's face on the image. Amazon Rekognition doesn't retain information about which images a celebrity has been recognized in. Your application must store this information and use the Celebrity ID property as a unique identifier for the celebrity. If you don't store the celebrity name or additional information URLs returned by RecognizeCelebrities, you will need the ID to identify the celebrity in a call to the GetCelebrityInfo operation. You pass the input image either as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. For an example, see Recognizing celebrities in an image in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:RecognizeCelebrities operation."]
+module PutProjectPolicyResponse =
+  struct
+    type nonrec t =
+      {
+      policyRevisionId: ProjectPolicyRevisionId.t option
+        [@ocaml.doc "The ID of the project policy."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidPolicyRevisionIdException of
+          InvalidPolicyRevisionIdException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `MalformedPolicyDocumentException of
+          MalformedPolicyDocumentException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?policyRevisionId = fun () -> { policyRevisionId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidPolicyRevisionIdException" ->
+          `InvalidPolicyRevisionIdException
+            (InvalidPolicyRevisionIdException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "MalformedPolicyDocumentException" ->
+          `MalformedPolicyDocumentException
+            (MalformedPolicyDocumentException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidPolicyRevisionIdException" ->
+          `InvalidPolicyRevisionIdException
+            (InvalidPolicyRevisionIdException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "MalformedPolicyDocumentException" ->
+          `MalformedPolicyDocumentException
+            (MalformedPolicyDocumentException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidPolicyRevisionIdException e ->
+          `Assoc
+            [("error", (`String "InvalidPolicyRevisionIdException"));
+            ("details", (InvalidPolicyRevisionIdException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `MalformedPolicyDocumentException e ->
+          `Assoc
+            [("error", (`String "MalformedPolicyDocumentException"));
+            ("details", (MalformedPolicyDocumentException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PolicyRevisionId",
+           (Option.map x.policyRevisionId ~f:ProjectPolicyRevisionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policyRevisionId =
+        (Option.map ~f:ProjectPolicyRevisionId.of_xml)
+          (Xml.child xml_arg0 "PolicyRevisionId") in
+      make ?policyRevisionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policyRevisionId =
+        field_map json__ "PolicyRevisionId" ProjectPolicyRevisionId.of_json in
+      make ?policyRevisionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation applies only to Amazon Rekognition Custom Labels. Attaches a project policy to a Amazon Rekognition Custom Labels project in a trusting AWS account. A project policy specifies that a trusted AWS account can copy a model version from a trusting AWS account to a project in the trusted AWS account. To copy a model version you use the CopyProjectVersion operation. Only applies to Custom Labels projects. For more information about the format of a project policy document, see Attaching a project policy (SDK) in the Amazon Rekognition Custom Labels Developer Guide. The response from PutProjectPolicy is a revision ID for the project policy. You can attach multiple project policies to a project. You can also update an existing project policy by specifying the policy revision ID of the existing policy. To remove a project policy from a project, call DeleteProjectPolicy. To get a list of project policies attached to a project, call ListProjectPolicies. You copy a model version by calling CopyProjectVersion. This operation requires permissions to perform the rekognition:PutProjectPolicy action."]
+module PutProjectPolicyRequest =
+  struct
+    type nonrec t =
+      {
+      projectArn: ProjectArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the project that the project policy is attached to."];
+      policyName: ProjectPolicyName.t [@ocaml.doc "A name for the policy."];
+      policyRevisionId: ProjectPolicyRevisionId.t option
+        [@ocaml.doc
+          "The revision ID for the Project Policy. Each time you modify a policy, Amazon Rekognition Custom Labels generates and assigns a new PolicyRevisionId and then deletes the previous version of the policy."];
+      policyDocument: ProjectPolicyDocument.t
+        [@ocaml.doc
+          "A resource policy to add to the model. The policy is a JSON structure that contains one or more statements that define the policy. The policy must follow the IAM syntax. For more information about the contents of a JSON policy document, see IAM JSON policy reference."]}
+    let context_ = "PutProjectPolicyRequest"
+    let make ?policyRevisionId =
+      fun ~projectArn ->
+        fun ~policyName ->
+          fun ~policyDocument ->
+            fun () ->
+              { policyRevisionId; projectArn; policyName; policyDocument }
+    let to_value x =
+      structure_to_value
+        [("ProjectArn", (Some (ProjectArn.to_value x.projectArn)));
+        ("PolicyName", (Some (ProjectPolicyName.to_value x.policyName)));
+        ("PolicyRevisionId",
+          (Option.map x.policyRevisionId ~f:ProjectPolicyRevisionId.to_value));
+        ("PolicyDocument",
+          (Some (ProjectPolicyDocument.to_value x.policyDocument)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policyDocument =
+        ProjectPolicyDocument.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PolicyDocument") in
+      let policyRevisionId =
+        (Option.map ~f:ProjectPolicyRevisionId.of_xml)
+          (Xml.child xml_arg0 "PolicyRevisionId") in
+      let policyName =
+        ProjectPolicyName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
+      let projectArn =
+        ProjectArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProjectArn") in
+      make ~policyDocument ?policyRevisionId ~policyName ~projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policyDocument =
+        field_map_exn json__ "PolicyDocument" ProjectPolicyDocument.of_json in
+      let policyRevisionId =
+        field_map json__ "PolicyRevisionId" ProjectPolicyRevisionId.of_json in
+      let policyName =
+        field_map_exn json__ "PolicyName" ProjectPolicyName.of_json in
+      let projectArn = field_map_exn json__ "ProjectArn" ProjectArn.of_json in
+      make ~policyDocument ?policyRevisionId ~policyName ~projectArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation applies only to Amazon Rekognition Custom Labels. Attaches a project policy to a Amazon Rekognition Custom Labels project in a trusting AWS account. A project policy specifies that a trusted AWS account can copy a model version from a trusting AWS account to a project in the trusted AWS account. To copy a model version you use the CopyProjectVersion operation. Only applies to Custom Labels projects. For more information about the format of a project policy document, see Attaching a project policy (SDK) in the Amazon Rekognition Custom Labels Developer Guide. The response from PutProjectPolicy is a revision ID for the project policy. You can attach multiple project policies to a project. You can also update an existing project policy by specifying the policy revision ID of the existing policy. To remove a project policy from a project, call DeleteProjectPolicy. To get a list of project policies attached to a project, call ListProjectPolicies. You copy a model version by calling CopyProjectVersion. This operation requires permissions to perform the rekognition:PutProjectPolicy action."]
+module ListUsersResponse =
+  struct
+    type nonrec t =
+      {
+      users: UserList.t option
+        [@ocaml.doc
+          "List of UsersID associated with the specified collection."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A pagination token to be used with the subsequent request if the response is truncated."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidPaginationTokenException of InvalidPaginationTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?users = fun ?nextToken -> fun () -> { users; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidPaginationTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidPaginationTokenException"));
+            ("details", (InvalidPaginationTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Users", (Option.map x.users ~f:UserList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let users =
+        (Option.map ~f:UserList.of_xml) (Xml.child xml_arg0 "Users") in
+      make ?nextToken ?users ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let users = field_map json__ "Users" UserList.of_json in
+      make ?nextToken ?users ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns metadata of the User such as UserID in the specified collection. Anonymous User (to reserve faces without any identity) is not returned as part of this request. The results are sorted by system generated primary key ID. If the response is truncated, NextToken is returned in the response that can be used in the subsequent request to retrieve the next set of identities."]
+module ListUsersRequest =
+  struct
+    type nonrec t =
+      {
+      collectionId: CollectionId.t
+        [@ocaml.doc "The ID of an existing collection."];
+      maxResults: MaxUserResults.t option
+        [@ocaml.doc "Maximum number of UsersID to return."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc "Pagingation token to receive the next set of UsersID."]}
+    let context_ = "ListUsersRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~collectionId ->
+          fun () -> { maxResults; nextToken; collectionId }
+    let to_value x =
+      structure_to_value
+        [("CollectionId", (Some (CollectionId.to_value x.collectionId)));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxUserResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxUserResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let collectionId =
+        CollectionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
+      make ?nextToken ?maxResults ~collectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxUserResults.of_json in
+      let collectionId =
+        field_map_exn json__ "CollectionId" CollectionId.of_json in
+      make ?nextToken ?maxResults ~collectionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns metadata of the User such as UserID in the specified collection. Anonymous User (to reserve faces without any identity) is not returned as part of this request. The results are sorted by system generated primary key ID. If the response is truncated, NextToken is returned in the response that can be used in the subsequent request to retrieve the next set of identities."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -10700,8 +16282,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of tags in an Amazon Rekognition collection, stream processor, or Custom Labels model. This operation requires permissions to perform the rekognition:ListTagsForResource action."]
@@ -10724,8 +16306,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10833,10 +16416,10 @@ module ListStreamProcessorsResponse =
           (Xml.child xml_arg0 "NextToken") in
       make ?streamProcessors ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let streamProcessors =
-        field_map json "StreamProcessors" StreamProcessorList.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+        field_map json__ "StreamProcessors" StreamProcessorList.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?streamProcessors ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10866,13 +16449,334 @@ module ListStreamProcessorsRequest =
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets a list of stream processors that you have created with CreateStreamProcessor."]
+module ListProjectPoliciesResponse =
+  struct
+    type nonrec t =
+      {
+      projectPolicies: ProjectPolicies.t option
+        [@ocaml.doc "A list of project policies attached to the project."];
+      nextToken: ExtendedPaginationToken.t option
+        [@ocaml.doc
+          "If the response is truncated, Amazon Rekognition returns this token that you can use in the subsequent request to retrieve the next set of project policies."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidPaginationTokenException of InvalidPaginationTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?projectPolicies =
+      fun ?nextToken -> fun () -> { projectPolicies; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidPaginationTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidPaginationTokenException"));
+            ("details", (InvalidPaginationTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ProjectPolicies",
+           (Option.map x.projectPolicies ~f:ProjectPolicies.to_value));
+        ("NextToken",
+          (Option.map x.nextToken ~f:ExtendedPaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:ExtendedPaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let projectPolicies =
+        (Option.map ~f:ProjectPolicies.of_xml)
+          (Xml.child xml_arg0 "ProjectPolicies") in
+      make ?nextToken ?projectPolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken =
+        field_map json__ "NextToken" ExtendedPaginationToken.of_json in
+      let projectPolicies =
+        field_map json__ "ProjectPolicies" ProjectPolicies.of_json in
+      make ?nextToken ?projectPolicies ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation applies only to Amazon Rekognition Custom Labels. Gets a list of the project policies attached to a project. To attach a project policy to a project, call PutProjectPolicy. To remove a project policy from a project, call DeleteProjectPolicy. This operation requires permissions to perform the rekognition:ListProjectPolicies action."]
+module ListProjectPoliciesRequest =
+  struct
+    type nonrec t =
+      {
+      projectArn: ProjectArn.t
+        [@ocaml.doc
+          "The ARN of the project for which you want to list the project policies."];
+      nextToken: ExtendedPaginationToken.t option
+        [@ocaml.doc
+          "If the previous response was incomplete (because there is more results to retrieve), Amazon Rekognition Custom Labels returns a pagination token in the response. You can use this pagination token to retrieve the next set of results."];
+      maxResults: ListProjectPoliciesPageSize.t option
+        [@ocaml.doc
+          "The maximum number of results to return per paginated call. The largest value you can specify is 5. If you specify a value greater than 5, a ValidationException error occurs. The default value is 5."]}
+    let context_ = "ListProjectPoliciesRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~projectArn -> fun () -> { nextToken; maxResults; projectArn }
+    let to_value x =
+      structure_to_value
+        [("ProjectArn", (Some (ProjectArn.to_value x.projectArn)));
+        ("NextToken",
+          (Option.map x.nextToken ~f:ExtendedPaginationToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:ListProjectPoliciesPageSize.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:ListProjectPoliciesPageSize.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:ExtendedPaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let projectArn =
+        ProjectArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProjectArn") in
+      make ?maxResults ?nextToken ~projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" ListProjectPoliciesPageSize.of_json in
+      let nextToken =
+        field_map json__ "NextToken" ExtendedPaginationToken.of_json in
+      let projectArn = field_map_exn json__ "ProjectArn" ProjectArn.of_json in
+      make ?maxResults ?nextToken ~projectArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation applies only to Amazon Rekognition Custom Labels. Gets a list of the project policies attached to a project. To attach a project policy to a project, call PutProjectPolicy. To remove a project policy from a project, call DeleteProjectPolicy. This operation requires permissions to perform the rekognition:ListProjectPolicies action."]
+module ListMediaAnalysisJobsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: ExtendedPaginationToken.t option
+        [@ocaml.doc
+          "Pagination token, if the previous response was incomplete."];
+      mediaAnalysisJobs: MediaAnalysisJobDescriptions.t option
+        [@ocaml.doc "Contains a list of all media analysis jobs."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidPaginationTokenException of InvalidPaginationTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?mediaAnalysisJobs -> fun () -> { nextToken; mediaAnalysisJobs }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidPaginationTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidPaginationTokenException"));
+            ("details", (InvalidPaginationTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken",
+           (Option.map x.nextToken ~f:ExtendedPaginationToken.to_value));
+        ("MediaAnalysisJobs",
+          (Option.map x.mediaAnalysisJobs
+             ~f:MediaAnalysisJobDescriptions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mediaAnalysisJobs =
+        (Option.map ~f:MediaAnalysisJobDescriptions.of_xml)
+          (Xml.child xml_arg0 "MediaAnalysisJobs") in
+      let nextToken =
+        (Option.map ~f:ExtendedPaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      make ?mediaAnalysisJobs ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mediaAnalysisJobs =
+        field_map json__ "MediaAnalysisJobs"
+          MediaAnalysisJobDescriptions.of_json in
+      let nextToken =
+        field_map json__ "NextToken" ExtendedPaginationToken.of_json in
+      make ?mediaAnalysisJobs ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of media analysis jobs. Results are sorted by CreationTimestamp in descending order."]
+module ListMediaAnalysisJobsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: ExtendedPaginationToken.t option
+        [@ocaml.doc
+          "Pagination token, if the previous response was incomplete."];
+      maxResults: ListMediaAnalysisJobsPageSize.t option
+        [@ocaml.doc
+          "The maximum number of results to return per paginated call. The largest value user can specify is 100. If user specifies a value greater than 100, an InvalidParameterException error occurs. The default value is 100."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("NextToken",
+           (Option.map x.nextToken ~f:ExtendedPaginationToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:ListMediaAnalysisJobsPageSize.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:ListMediaAnalysisJobsPageSize.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:ExtendedPaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" ListMediaAnalysisJobsPageSize.of_json in
+      let nextToken =
+        field_map json__ "NextToken" ExtendedPaginationToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of media analysis jobs. Results are sorted by CreationTimestamp in descending order."]
 module ListFacesResponse =
   struct
     type nonrec t =
@@ -10883,7 +16787,7 @@ module ListFacesResponse =
           "If the response is truncated, Amazon Rekognition returns this token that you can use in the subsequent request to retrieve the next set of faces."];
       faceModelVersion: String_.t option
         [@ocaml.doc
-          "Latest face model being used with the collection. For more information, see Model versioning."]}
+          "Version number of the face detection model associated with the input collection (CollectionId)."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -10991,11 +16895,11 @@ module ListFacesResponse =
         (Option.map ~f:FaceList.of_xml) (Xml.child xml_arg0 "Faces") in
       make ?faceModelVersion ?nextToken ?faces ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let faceModelVersion =
-        field_map json "FaceModelVersion" String_.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let faces = field_map json "Faces" FaceList.of_json in
+        field_map json__ "FaceModelVersion" String_.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let faces = field_map json__ "Faces" FaceList.of_json in
       make ?faceModelVersion ?nextToken ?faces ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11010,19 +16914,34 @@ module ListFacesRequest =
         [@ocaml.doc
           "If the previous response was incomplete (because there is more data to retrieve), Amazon Rekognition returns a pagination token in the response. You can use this pagination token to retrieve the next set of faces."];
       maxResults: PageSize.t option
-        [@ocaml.doc "Maximum number of faces to return."]}
+        [@ocaml.doc "Maximum number of faces to return."];
+      userId: UserId.t option
+        [@ocaml.doc
+          "An array of user IDs to filter results with when listing faces in a collection."];
+      faceIds: FaceIdList.t option
+        [@ocaml.doc
+          "An array of face IDs to filter results with when listing faces in a collection."]}
     let context_ = "ListFacesRequest"
     let make ?nextToken =
       fun ?maxResults ->
-        fun ~collectionId ->
-          fun () -> { nextToken; maxResults; collectionId }
+        fun ?userId ->
+          fun ?faceIds ->
+            fun ~collectionId ->
+              fun () ->
+                { nextToken; maxResults; userId; faceIds; collectionId }
     let to_value x =
       structure_to_value
         [("CollectionId", (Some (CollectionId.to_value x.collectionId)));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:PageSize.to_value))]
+        ("MaxResults", (Option.map x.maxResults ~f:PageSize.to_value));
+        ("UserId", (Option.map x.userId ~f:UserId.to_value));
+        ("FaceIds", (Option.map x.faceIds ~f:FaceIdList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let faceIds =
+        (Option.map ~f:FaceIdList.of_xml) (Xml.child xml_arg0 "FaceIds") in
+      let userId =
+        (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "UserId") in
       let maxResults =
         (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
@@ -11031,14 +16950,16 @@ module ListFacesRequest =
       let collectionId =
         CollectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
-      make ?maxResults ?nextToken ~collectionId ()
+      make ?faceIds ?userId ?maxResults ?nextToken ~collectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let faceIds = field_map json__ "FaceIds" FaceIdList.of_json in
+      let userId = field_map json__ "UserId" UserId.of_json in
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let collectionId =
-        field_map_exn json "CollectionId" CollectionId.of_json in
-      make ?maxResults ?nextToken ~collectionId ()
+        field_map_exn json__ "CollectionId" CollectionId.of_json in
+      make ?faceIds ?userId ?maxResults ?nextToken ~collectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns metadata for faces in the specified collection. This metadata includes information such as the bounding box coordinates, the confidence (that the bounding box contains a face), and face ID. For an example, see Listing Faces in a Collection in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:ListFaces action."]
@@ -11174,16 +17095,16 @@ module ListDatasetLabelsResponse =
           (Xml.child xml_arg0 "DatasetLabelDescriptions") in
       make ?nextToken ?datasetLabelDescriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextToken =
-        field_map json "NextToken" ExtendedPaginationToken.of_json in
+        field_map json__ "NextToken" ExtendedPaginationToken.of_json in
       let datasetLabelDescriptions =
-        field_map json "DatasetLabelDescriptions"
+        field_map json__ "DatasetLabelDescriptions"
           DatasetLabelDescriptions.of_json in
       make ?nextToken ?datasetLabelDescriptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the labels in a dataset. Amazon Rekognition Custom Labels uses labels to describe images. For more information, see Labeling images. Lists the labels in a dataset. Amazon Rekognition Custom Labels uses labels to describe images. For more information, see Labeling images in the Amazon Rekognition Custom Labels Developer Guide."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Lists the labels in a dataset. Amazon Rekognition Custom Labels uses labels to describe images. For more information, see Labeling images. Lists the labels in a dataset. Amazon Rekognition Custom Labels uses labels to describe images. For more information, see Labeling images in the Amazon Rekognition Custom Labels Developer Guide."]
 module ListDatasetLabelsRequest =
   struct
     type nonrec t =
@@ -11221,16 +17142,16 @@ module ListDatasetLabelsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetArn") in
       make ?maxResults ?nextToken ~datasetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" ListDatasetLabelsPageSize.of_json in
+        field_map json__ "MaxResults" ListDatasetLabelsPageSize.of_json in
       let nextToken =
-        field_map json "NextToken" ExtendedPaginationToken.of_json in
-      let datasetArn = field_map_exn json "DatasetArn" DatasetArn.of_json in
+        field_map json__ "NextToken" ExtendedPaginationToken.of_json in
+      let datasetArn = field_map_exn json__ "DatasetArn" DatasetArn.of_json in
       make ?maxResults ?nextToken ~datasetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the labels in a dataset. Amazon Rekognition Custom Labels uses labels to describe images. For more information, see Labeling images. Lists the labels in a dataset. Amazon Rekognition Custom Labels uses labels to describe images. For more information, see Labeling images in the Amazon Rekognition Custom Labels Developer Guide."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Lists the labels in a dataset. Amazon Rekognition Custom Labels uses labels to describe images. For more information, see Labeling images. Lists the labels in a dataset. Amazon Rekognition Custom Labels uses labels to describe images. For more information, see Labeling images in the Amazon Rekognition Custom Labels Developer Guide."]
 module ListDatasetEntriesResponse =
   struct
     type nonrec t =
@@ -11362,15 +17283,15 @@ module ListDatasetEntriesResponse =
           (Xml.child xml_arg0 "DatasetEntries") in
       make ?nextToken ?datasetEntries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextToken =
-        field_map json "NextToken" ExtendedPaginationToken.of_json in
+        field_map json__ "NextToken" ExtendedPaginationToken.of_json in
       let datasetEntries =
-        field_map json "DatasetEntries" DatasetEntries.of_json in
+        field_map json__ "DatasetEntries" DatasetEntries.of_json in
       make ?nextToken ?datasetEntries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the entries (images) within a dataset. An entry is a JSON Line that contains the information for a single image, including the image location, assigned labels, and object location bounding boxes. For more information, see Creating a manifest file. JSON Lines in the response include information about non-terminal errors found in the dataset. Non terminal errors are reported in errors lists within each JSON Line. The same information is reported in the training and testing validation result manifests that Amazon Rekognition Custom Labels creates during model training. You can filter the response in variety of ways, such as choosing which labels to return and returning JSON Lines created after a specific date. This operation requires permissions to perform the rekognition:ListDatasetEntries action."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Lists the entries (images) within a dataset. An entry is a JSON Line that contains the information for a single image, including the image location, assigned labels, and object location bounding boxes. For more information, see Creating a manifest file. JSON Lines in the response include information about non-terminal errors found in the dataset. Non terminal errors are reported in errors lists within each JSON Line. The same information is reported in the training and testing validation result manifests that Amazon Rekognition Custom Labels creates during model training. You can filter the response in variety of ways, such as choosing which labels to return and returning JSON Lines created after a specific date. This operation requires permissions to perform the rekognition:ListDatasetEntries action."]
 module ListDatasetEntriesRequest =
   struct
     type nonrec t =
@@ -11451,23 +17372,23 @@ module ListDatasetEntriesRequest =
       make ?maxResults ?nextToken ?hasErrors ?sourceRefContains ?labeled
         ?containsLabels ~datasetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" ListDatasetEntriesPageSize.of_json in
+        field_map json__ "MaxResults" ListDatasetEntriesPageSize.of_json in
       let nextToken =
-        field_map json "NextToken" ExtendedPaginationToken.of_json in
-      let hasErrors = field_map json "HasErrors" HasErrors.of_json in
+        field_map json__ "NextToken" ExtendedPaginationToken.of_json in
+      let hasErrors = field_map json__ "HasErrors" HasErrors.of_json in
       let sourceRefContains =
-        field_map json "SourceRefContains" QueryString.of_json in
-      let labeled = field_map json "Labeled" IsLabeled.of_json in
+        field_map json__ "SourceRefContains" QueryString.of_json in
+      let labeled = field_map json__ "Labeled" IsLabeled.of_json in
       let containsLabels =
-        field_map json "ContainsLabels" DatasetLabels.of_json in
-      let datasetArn = field_map_exn json "DatasetArn" DatasetArn.of_json in
+        field_map json__ "ContainsLabels" DatasetLabels.of_json in
+      let datasetArn = field_map_exn json__ "DatasetArn" DatasetArn.of_json in
       make ?maxResults ?nextToken ?hasErrors ?sourceRefContains ?labeled
         ?containsLabels ~datasetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the entries (images) within a dataset. An entry is a JSON Line that contains the information for a single image, including the image location, assigned labels, and object location bounding boxes. For more information, see Creating a manifest file. JSON Lines in the response include information about non-terminal errors found in the dataset. Non terminal errors are reported in errors lists within each JSON Line. The same information is reported in the training and testing validation result manifests that Amazon Rekognition Custom Labels creates during model training. You can filter the response in variety of ways, such as choosing which labels to return and returning JSON Lines created after a specific date. This operation requires permissions to perform the rekognition:ListDatasetEntries action."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Lists the entries (images) within a dataset. An entry is a JSON Line that contains the information for a single image, including the image location, assigned labels, and object location bounding boxes. For more information, see Creating a manifest file. JSON Lines in the response include information about non-terminal errors found in the dataset. Non terminal errors are reported in errors lists within each JSON Line. The same information is reported in the training and testing validation result manifests that Amazon Rekognition Custom Labels creates during model training. You can filter the response in variety of ways, such as choosing which labels to return and returning JSON Lines created after a specific date. This operation requires permissions to perform the rekognition:ListDatasetEntries action."]
 module ListCollectionsResponse =
   struct
     type nonrec t =
@@ -11479,7 +17400,7 @@ module ListCollectionsResponse =
           "If the result is truncated, the response provides a NextToken that you can use in the subsequent request to fetch the next set of collection IDs."];
       faceModelVersions: FaceModelVersionList.t option
         [@ocaml.doc
-          "Latest face models being used with the corresponding collections in the array. For more information, see Model versioning. For example, the value of FaceModelVersions\\[2\\] is the version number for the face detection model used by the collection in CollectionId\\[2\\]."]}
+          "Version numbers of the face detection models associated with the collections in the array CollectionIds. For example, the value of FaceModelVersions\\[2\\] is the version number for the face detection model used by the collection in CollectionId\\[2\\]."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -11590,16 +17511,16 @@ module ListCollectionsResponse =
           (Xml.child xml_arg0 "CollectionIds") in
       make ?faceModelVersions ?nextToken ?collectionIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let faceModelVersions =
-        field_map json "FaceModelVersions" FaceModelVersionList.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+        field_map json__ "FaceModelVersions" FaceModelVersionList.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let collectionIds =
-        field_map json "CollectionIds" CollectionIdList.of_json in
+        field_map json__ "CollectionIds" CollectionIdList.of_json in
       make ?faceModelVersions ?nextToken ?collectionIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns list of collection IDs in your account. If the result is truncated, the response also provides a NextToken that you can use in the subsequent request to fetch the next set of collection IDs. For an example, see Listing Collections in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:ListCollections action."]
+       "Returns list of collection IDs in your account. If the result is truncated, the response also provides a NextToken that you can use in the subsequent request to fetch the next set of collection IDs. For an example, see Listing collections in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:ListCollections action."]
 module ListCollectionsRequest =
   struct
     type nonrec t =
@@ -11623,13 +17544,13 @@ module ListCollectionsRequest =
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns list of collection IDs in your account. If the result is truncated, the response also provides a NextToken that you can use in the subsequent request to fetch the next set of collection IDs. For an example, see Listing Collections in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:ListCollections action."]
+       "Returns list of collection IDs in your account. If the result is truncated, the response also provides a NextToken that you can use in the subsequent request to fetch the next set of collection IDs. For an example, see Listing collections in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:ListCollections action."]
 module IndexFacesResponse =
   struct
     type nonrec t =
@@ -11642,7 +17563,7 @@ module IndexFacesResponse =
           "If your collection is associated with a face detection model that's later than version 3.0, the value of OrientationCorrection is always null and no orientation information is returned. If your collection is associated with a face detection model that's version 3.0 or earlier, the following applies: If the input image is in .jpeg format, it might contain exchangeable image file format (Exif) metadata that includes the image's orientation. Amazon Rekognition uses this orientation information to perform image correction - the bounding box coordinates are translated to represent object locations after the orientation information in the Exif metadata is used to correct the image orientation. Images in .png format don't contain Exif metadata. The value of OrientationCorrection is null. If the image doesn't contain orientation information in its Exif metadata, Amazon Rekognition returns an estimated orientation (ROTATE_0, ROTATE_90, ROTATE_180, ROTATE_270). Amazon Rekognition doesn\226\128\153t perform image correction for images. The bounding box coordinates aren't translated and represent the object locations before the image is rotated. Bounding box information is returned in the FaceRecords array. You can get the version of the face detection model by calling DescribeCollection."];
       faceModelVersion: String_.t option
         [@ocaml.doc
-          "Latest face model being used with the collection. For more information, see Model versioning."];
+          "The version number of the face detection model that's associated with the input collection (CollectionId)."];
       unindexedFaces: UnindexedFaces.t option
         [@ocaml.doc
           "An array of faces that were detected in the image but weren't indexed. They weren't indexed because the quality filter identified them as low quality, or the MaxFaces request parameter filtered them out. To use the quality filter, you specify the QualityFilter request parameter."]}
@@ -11800,19 +17721,20 @@ module IndexFacesResponse =
       make ?unindexedFaces ?faceModelVersion ?orientationCorrection
         ?faceRecords ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unindexedFaces =
-        field_map json "UnindexedFaces" UnindexedFaces.of_json in
+        field_map json__ "UnindexedFaces" UnindexedFaces.of_json in
       let faceModelVersion =
-        field_map json "FaceModelVersion" String_.of_json in
+        field_map json__ "FaceModelVersion" String_.of_json in
       let orientationCorrection =
-        field_map json "OrientationCorrection" OrientationCorrection.of_json in
-      let faceRecords = field_map json "FaceRecords" FaceRecordList.of_json in
+        field_map json__ "OrientationCorrection"
+          OrientationCorrection.of_json in
+      let faceRecords = field_map json__ "FaceRecords" FaceRecordList.of_json in
       make ?unindexedFaces ?faceModelVersion ?orientationCorrection
         ?faceRecords ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detects faces in the input image and adds them to the specified collection. Amazon Rekognition doesn't save the actual faces that are detected. Instead, the underlying detection algorithm first detects the faces in the input image. For each face, the algorithm extracts facial features into a feature vector, and stores it in the backend database. Amazon Rekognition uses feature vectors when it performs face match and search operations using the SearchFaces and SearchFacesByImage operations. For more information, see Adding Faces to a Collection in the Amazon Rekognition Developer Guide. To get the number of faces in a collection, call DescribeCollection. If you're using version 1.0 of the face detection model, IndexFaces indexes the 15 largest faces in the input image. Later versions of the face detection model index the 100 largest faces in the input image. If you're using version 4 or later of the face model, image orientation information is not returned in the OrientationCorrection field. To determine which version of the model you're using, call DescribeCollection and supply the collection ID. You can also get the model version from the value of FaceModelVersion in the response from IndexFaces For more information, see Model Versioning in the Amazon Rekognition Developer Guide. If you provide the optional ExternalImageId for the input image you provided, Amazon Rekognition associates this ID with all faces that it detects. When you call the ListFaces operation, the response returns the external ID. You can use this external image ID to create a client-side index to associate the faces with each image. You can then use the index to find all faces in an image. You can specify the maximum number of faces to index with the MaxFaces input parameter. This is useful when you want to index the largest faces in an image and don't want to index smaller faces, such as those belonging to people standing in the background. The QualityFilter input parameter allows you to filter out detected faces that don\226\128\153t meet a required quality bar. The quality bar is based on a variety of common use cases. By default, IndexFaces chooses the quality bar that's used to filter faces. You can also explicitly choose the quality bar. Use QualityFilter, to set the quality bar by specifying LOW, MEDIUM, or HIGH. If you do not want to filter detected faces, specify NONE. To use quality filtering, you need a collection associated with version 3 of the face model or higher. To get the version of the face model associated with a collection, call DescribeCollection. Information about faces detected in an image, but not indexed, is returned in an array of UnindexedFace objects, UnindexedFaces. Faces aren't indexed for reasons such as: The number of faces detected exceeds the value of the MaxFaces request parameter. The face is too small compared to the image dimensions. The face is too blurry. The image is too dark. The face has an extreme pose. The face doesn\226\128\153t have enough detail to be suitable for face search. In response, the IndexFaces operation returns an array of metadata for all detected faces, FaceRecords. This includes: The bounding box, BoundingBox, of the detected face. A confidence value, Confidence, which indicates the confidence that the bounding box contains a face. A face ID, FaceId, assigned by the service for each face that's detected and stored. An image ID, ImageId, assigned by the service for the input image. If you request all facial attributes (by using the detectionAttributes parameter), Amazon Rekognition returns detailed facial attributes, such as facial landmarks (for example, location of eye and mouth) and other facial attributes. If you provide the same image, specify the same collection, use the same external ID, and use the same model version in the IndexFaces operation, Amazon Rekognition doesn't save duplicate face metadata. The input image is passed either as base64-encoded image bytes, or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes isn't supported. The image must be formatted as a PNG or JPEG file. This operation requires permissions to perform the rekognition:IndexFaces action."]
+       "Detects faces in the input image and adds them to the specified collection. Amazon Rekognition doesn't save the actual faces that are detected. Instead, the underlying detection algorithm first detects the faces in the input image. For each face, the algorithm extracts facial features into a feature vector, and stores it in the backend database. Amazon Rekognition uses feature vectors when it performs face match and search operations using the SearchFaces and SearchFacesByImage operations. For more information, see Adding faces to a collection in the Amazon Rekognition Developer Guide. To get the number of faces in a collection, call DescribeCollection. If you're using version 1.0 of the face detection model, IndexFaces indexes the 15 largest faces in the input image. Later versions of the face detection model index the 100 largest faces in the input image. If you're using version 4 or later of the face model, image orientation information is not returned in the OrientationCorrection field. To determine which version of the model you're using, call DescribeCollection and supply the collection ID. You can also get the model version from the value of FaceModelVersion in the response from IndexFaces For more information, see Model Versioning in the Amazon Rekognition Developer Guide. If you provide the optional ExternalImageId for the input image you provided, Amazon Rekognition associates this ID with all faces that it detects. When you call the ListFaces operation, the response returns the external ID. You can use this external image ID to create a client-side index to associate the faces with each image. You can then use the index to find all faces in an image. You can specify the maximum number of faces to index with the MaxFaces input parameter. This is useful when you want to index the largest faces in an image and don't want to index smaller faces, such as those belonging to people standing in the background. The QualityFilter input parameter allows you to filter out detected faces that don\226\128\153t meet a required quality bar. The quality bar is based on a variety of common use cases. By default, IndexFaces chooses the quality bar that's used to filter faces. You can also explicitly choose the quality bar. Use QualityFilter, to set the quality bar by specifying LOW, MEDIUM, or HIGH. If you do not want to filter detected faces, specify NONE. To use quality filtering, you need a collection associated with version 3 of the face model or higher. To get the version of the face model associated with a collection, call DescribeCollection. Information about faces detected in an image, but not indexed, is returned in an array of UnindexedFace objects, UnindexedFaces. Faces aren't indexed for reasons such as: The number of faces detected exceeds the value of the MaxFaces request parameter. The face is too small compared to the image dimensions. The face is too blurry. The image is too dark. The face has an extreme pose. The face doesn\226\128\153t have enough detail to be suitable for face search. In response, the IndexFaces operation returns an array of metadata for all detected faces, FaceRecords. This includes: The bounding box, BoundingBox, of the detected face. A confidence value, Confidence, which indicates the confidence that the bounding box contains a face. A face ID, FaceId, assigned by the service for each face that's detected and stored. An image ID, ImageId, assigned by the service for the input image. If you request ALL or specific facial attributes (e.g., FACE_OCCLUDED) by using the detectionAttributes parameter, Amazon Rekognition returns detailed facial attributes, such as facial landmarks (for example, location of eye and mouth), facial occlusion, and other facial attributes. If you provide the same image, specify the same collection, and use the same external ID in the IndexFaces operation, Amazon Rekognition doesn't save duplicate face metadata. The input image is passed either as base64-encoded image bytes, or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes isn't supported. The image must be formatted as a PNG or JPEG file. This operation requires permissions to perform the rekognition:IndexFaces action."]
 module IndexFacesRequest =
   struct
     type nonrec t =
@@ -11828,7 +17750,7 @@ module IndexFacesRequest =
           "The ID you want to assign to all the faces detected in the image."];
       detectionAttributes: Attributes.t option
         [@ocaml.doc
-          "An array of facial attributes that you want to be returned. This can be the default list of attributes or all attributes. If you don't specify a value for Attributes or if you specify \\[\"DEFAULT\"\\], the API returns the following subset of facial attributes: BoundingBox, Confidence, Pose, Quality, and Landmarks. If you provide \\[\"ALL\"\\], all facial attributes are returned, but the operation takes longer to complete. If you provide both, \\[\"ALL\", \"DEFAULT\"\\], the service uses a logical AND operator to determine which attributes to return (in this case, all attributes)."];
+          "An array of facial attributes you want to be returned. A DEFAULT subset of facial attributes - BoundingBox, Confidence, Pose, Quality, and Landmarks - will always be returned. You can request for specific facial attributes (in addition to the default list) - by using \\[\"DEFAULT\", \"FACE_OCCLUDED\"\\] or just \\[\"FACE_OCCLUDED\"\\]. You can request for all facial attributes by using \\[\"ALL\"\\]. Requesting more attributes may increase response time. If you provide both, \\[\"ALL\", \"DEFAULT\"\\], the service uses a logical AND operator to determine which attributes to return (in this case, all attributes)."];
       maxFaces: MaxFacesToIndex.t option
         [@ocaml.doc
           "The maximum number of faces to index. The value of MaxFaces must be greater than or equal to 1. IndexFaces returns no more than 100 detected faces in an image, even if you specify a larger value for MaxFaces. If IndexFaces detects more faces than the value of MaxFaces, the faces with the lowest quality are filtered out first. If there are still more faces than the value of MaxFaces, the faces with the smallest bounding boxes are filtered out (up to the number that's needed to satisfy the value of MaxFaces). Information about the unindexed faces is available in the UnindexedFaces array. The faces that are returned by IndexFaces are sorted by the largest face bounding box size to the smallest size, in descending order. MaxFaces can be used with a collection associated with any version of the face model."];
@@ -11884,22 +17806,22 @@ module IndexFacesRequest =
       make ?qualityFilter ?maxFaces ?detectionAttributes ?externalImageId
         ~image ~collectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let qualityFilter =
-        field_map json "QualityFilter" QualityFilter.of_json in
-      let maxFaces = field_map json "MaxFaces" MaxFacesToIndex.of_json in
+        field_map json__ "QualityFilter" QualityFilter.of_json in
+      let maxFaces = field_map json__ "MaxFaces" MaxFacesToIndex.of_json in
       let detectionAttributes =
-        field_map json "DetectionAttributes" Attributes.of_json in
+        field_map json__ "DetectionAttributes" Attributes.of_json in
       let externalImageId =
-        field_map json "ExternalImageId" ExternalImageId.of_json in
-      let image = field_map_exn json "Image" Image.of_json in
+        field_map json__ "ExternalImageId" ExternalImageId.of_json in
+      let image = field_map_exn json__ "Image" Image.of_json in
       let collectionId =
-        field_map_exn json "CollectionId" CollectionId.of_json in
+        field_map_exn json__ "CollectionId" CollectionId.of_json in
       make ?qualityFilter ?maxFaces ?detectionAttributes ?externalImageId
         ~image ~collectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detects faces in the input image and adds them to the specified collection. Amazon Rekognition doesn't save the actual faces that are detected. Instead, the underlying detection algorithm first detects the faces in the input image. For each face, the algorithm extracts facial features into a feature vector, and stores it in the backend database. Amazon Rekognition uses feature vectors when it performs face match and search operations using the SearchFaces and SearchFacesByImage operations. For more information, see Adding Faces to a Collection in the Amazon Rekognition Developer Guide. To get the number of faces in a collection, call DescribeCollection. If you're using version 1.0 of the face detection model, IndexFaces indexes the 15 largest faces in the input image. Later versions of the face detection model index the 100 largest faces in the input image. If you're using version 4 or later of the face model, image orientation information is not returned in the OrientationCorrection field. To determine which version of the model you're using, call DescribeCollection and supply the collection ID. You can also get the model version from the value of FaceModelVersion in the response from IndexFaces For more information, see Model Versioning in the Amazon Rekognition Developer Guide. If you provide the optional ExternalImageId for the input image you provided, Amazon Rekognition associates this ID with all faces that it detects. When you call the ListFaces operation, the response returns the external ID. You can use this external image ID to create a client-side index to associate the faces with each image. You can then use the index to find all faces in an image. You can specify the maximum number of faces to index with the MaxFaces input parameter. This is useful when you want to index the largest faces in an image and don't want to index smaller faces, such as those belonging to people standing in the background. The QualityFilter input parameter allows you to filter out detected faces that don\226\128\153t meet a required quality bar. The quality bar is based on a variety of common use cases. By default, IndexFaces chooses the quality bar that's used to filter faces. You can also explicitly choose the quality bar. Use QualityFilter, to set the quality bar by specifying LOW, MEDIUM, or HIGH. If you do not want to filter detected faces, specify NONE. To use quality filtering, you need a collection associated with version 3 of the face model or higher. To get the version of the face model associated with a collection, call DescribeCollection. Information about faces detected in an image, but not indexed, is returned in an array of UnindexedFace objects, UnindexedFaces. Faces aren't indexed for reasons such as: The number of faces detected exceeds the value of the MaxFaces request parameter. The face is too small compared to the image dimensions. The face is too blurry. The image is too dark. The face has an extreme pose. The face doesn\226\128\153t have enough detail to be suitable for face search. In response, the IndexFaces operation returns an array of metadata for all detected faces, FaceRecords. This includes: The bounding box, BoundingBox, of the detected face. A confidence value, Confidence, which indicates the confidence that the bounding box contains a face. A face ID, FaceId, assigned by the service for each face that's detected and stored. An image ID, ImageId, assigned by the service for the input image. If you request all facial attributes (by using the detectionAttributes parameter), Amazon Rekognition returns detailed facial attributes, such as facial landmarks (for example, location of eye and mouth) and other facial attributes. If you provide the same image, specify the same collection, use the same external ID, and use the same model version in the IndexFaces operation, Amazon Rekognition doesn't save duplicate face metadata. The input image is passed either as base64-encoded image bytes, or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes isn't supported. The image must be formatted as a PNG or JPEG file. This operation requires permissions to perform the rekognition:IndexFaces action."]
+       "Detects faces in the input image and adds them to the specified collection. Amazon Rekognition doesn't save the actual faces that are detected. Instead, the underlying detection algorithm first detects the faces in the input image. For each face, the algorithm extracts facial features into a feature vector, and stores it in the backend database. Amazon Rekognition uses feature vectors when it performs face match and search operations using the SearchFaces and SearchFacesByImage operations. For more information, see Adding faces to a collection in the Amazon Rekognition Developer Guide. To get the number of faces in a collection, call DescribeCollection. If you're using version 1.0 of the face detection model, IndexFaces indexes the 15 largest faces in the input image. Later versions of the face detection model index the 100 largest faces in the input image. If you're using version 4 or later of the face model, image orientation information is not returned in the OrientationCorrection field. To determine which version of the model you're using, call DescribeCollection and supply the collection ID. You can also get the model version from the value of FaceModelVersion in the response from IndexFaces For more information, see Model Versioning in the Amazon Rekognition Developer Guide. If you provide the optional ExternalImageId for the input image you provided, Amazon Rekognition associates this ID with all faces that it detects. When you call the ListFaces operation, the response returns the external ID. You can use this external image ID to create a client-side index to associate the faces with each image. You can then use the index to find all faces in an image. You can specify the maximum number of faces to index with the MaxFaces input parameter. This is useful when you want to index the largest faces in an image and don't want to index smaller faces, such as those belonging to people standing in the background. The QualityFilter input parameter allows you to filter out detected faces that don\226\128\153t meet a required quality bar. The quality bar is based on a variety of common use cases. By default, IndexFaces chooses the quality bar that's used to filter faces. You can also explicitly choose the quality bar. Use QualityFilter, to set the quality bar by specifying LOW, MEDIUM, or HIGH. If you do not want to filter detected faces, specify NONE. To use quality filtering, you need a collection associated with version 3 of the face model or higher. To get the version of the face model associated with a collection, call DescribeCollection. Information about faces detected in an image, but not indexed, is returned in an array of UnindexedFace objects, UnindexedFaces. Faces aren't indexed for reasons such as: The number of faces detected exceeds the value of the MaxFaces request parameter. The face is too small compared to the image dimensions. The face is too blurry. The image is too dark. The face has an extreme pose. The face doesn\226\128\153t have enough detail to be suitable for face search. In response, the IndexFaces operation returns an array of metadata for all detected faces, FaceRecords. This includes: The bounding box, BoundingBox, of the detected face. A confidence value, Confidence, which indicates the confidence that the bounding box contains a face. A face ID, FaceId, assigned by the service for each face that's detected and stored. An image ID, ImageId, assigned by the service for the input image. If you request ALL or specific facial attributes (e.g., FACE_OCCLUDED) by using the detectionAttributes parameter, Amazon Rekognition returns detailed facial attributes, such as facial landmarks (for example, location of eye and mouth), facial occlusion, and other facial attributes. If you provide the same image, specify the same collection, and use the same external ID in the IndexFaces operation, Amazon Rekognition doesn't save duplicate face metadata. The input image is passed either as base64-encoded image bytes, or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes isn't supported. The image must be formatted as a PNG or JPEG file. This operation requires permissions to perform the rekognition:IndexFaces action."]
 module GetTextDetectionResponse =
   struct
     type nonrec t =
@@ -11918,7 +17840,14 @@ module GetTextDetectionResponse =
           "If the response is truncated, Amazon Rekognition Video returns this token that you can use in the subsequent request to retrieve the next set of text."];
       textModelVersion: String_.t option
         [@ocaml.doc
-          "Version number of the text detection model that was used to detect text."]}
+          "Version number of the text detection model that was used to detect text."];
+      jobId: JobId.t option
+        [@ocaml.doc
+          "Job identifier for the text detection operation for which you want to obtain results. The job identifer is returned by an initial call to StartTextDetection."];
+      video: Video.t option ;
+      jobTag: JobTag.t option
+        [@ocaml.doc
+          "A job identifier specified in the call to StartTextDetection and returned in the job completion notification sent to your Amazon Simple Notification Service topic."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -11935,15 +17864,21 @@ module GetTextDetectionResponse =
           fun ?textDetections ->
             fun ?nextToken ->
               fun ?textModelVersion ->
-                fun () ->
-                  {
-                    jobStatus;
-                    statusMessage;
-                    videoMetadata;
-                    textDetections;
-                    nextToken;
-                    textModelVersion
-                  }
+                fun ?jobId ->
+                  fun ?video ->
+                    fun ?jobTag ->
+                      fun () ->
+                        {
+                          jobStatus;
+                          statusMessage;
+                          videoMetadata;
+                          textDetections;
+                          nextToken;
+                          textModelVersion;
+                          jobId;
+                          video;
+                          jobTag
+                        }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -12031,9 +17966,16 @@ module GetTextDetectionResponse =
           (Option.map x.textDetections ~f:TextDetectionResults.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
         ("TextModelVersion",
-          (Option.map x.textModelVersion ~f:String_.to_value))]
+          (Option.map x.textModelVersion ~f:String_.to_value));
+        ("JobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("Video", (Option.map x.video ~f:Video.to_value));
+        ("JobTag", (Option.map x.jobTag ~f:JobTag.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let jobTag =
+        (Option.map ~f:JobTag.of_xml) (Xml.child xml_arg0 "JobTag") in
+      let video = (Option.map ~f:Video.of_xml) (Xml.child xml_arg0 "Video") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       let textModelVersion =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "TextModelVersion") in
@@ -12052,25 +17994,28 @@ module GetTextDetectionResponse =
       let jobStatus =
         (Option.map ~f:VideoJobStatus.of_xml)
           (Xml.child xml_arg0 "JobStatus") in
-      make ?textModelVersion ?nextToken ?textDetections ?videoMetadata
-        ?statusMessage ?jobStatus ()
+      make ?jobTag ?video ?jobId ?textModelVersion ?nextToken ?textDetections
+        ?videoMetadata ?statusMessage ?jobStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
+      let video = field_map json__ "Video" Video.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       let textModelVersion =
-        field_map json "TextModelVersion" String_.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+        field_map json__ "TextModelVersion" String_.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let textDetections =
-        field_map json "TextDetections" TextDetectionResults.of_json in
+        field_map json__ "TextDetections" TextDetectionResults.of_json in
       let videoMetadata =
-        field_map json "VideoMetadata" VideoMetadata.of_json in
+        field_map json__ "VideoMetadata" VideoMetadata.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let jobStatus = field_map json "JobStatus" VideoJobStatus.of_json in
-      make ?textModelVersion ?nextToken ?textDetections ?videoMetadata
-        ?statusMessage ?jobStatus ()
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let jobStatus = field_map json__ "JobStatus" VideoJobStatus.of_json in
+      make ?jobTag ?video ?jobId ?textModelVersion ?nextToken ?textDetections
+        ?videoMetadata ?statusMessage ?jobStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the text detection results of a Amazon Rekognition Video analysis started by StartTextDetection. Text detection with Amazon Rekognition Video is an asynchronous operation. You start text detection by calling StartTextDetection which returns a job identifier (JobId) When the text detection operation finishes, Amazon Rekognition publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartTextDetection. To get the results of the text detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. if so, call GetTextDetection and pass the job identifier (JobId) from the initial call of StartLabelDetection. GetTextDetection returns an array of detected text (TextDetections) sorted by the time the text was detected, up to 50 words per frame of video. Each element of the array includes the detected text, the precentage confidence in the acuracy of the detected text, the time the text was detected, bounding box information for where the text was located, and unique identifiers for words and their lines. Use MaxResults parameter to limit the number of text detections returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetTextDetection and populate the NextToken request parameter with the token value returned from the previous call to GetTextDetection."]
+       "Gets the text detection results of a Amazon Rekognition Video analysis started by StartTextDetection. Text detection with Amazon Rekognition Video is an asynchronous operation. You start text detection by calling StartTextDetection which returns a job identifier (JobId) When the text detection operation finishes, Amazon Rekognition publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartTextDetection. To get the results of the text detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. if so, call GetTextDetection and pass the job identifier (JobId) from the initial call of StartLabelDetection. GetTextDetection returns an array of detected text (TextDetections) sorted by the time the text was detected, up to 100 words per frame of video. Each element of the array includes the detected text, the precentage confidence in the acuracy of the detected text, the time the text was detected, bounding box information for where the text was located, and unique identifiers for words and their lines. Use MaxResults parameter to limit the number of text detections returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetTextDetection and populate the NextToken request parameter with the token value returned from the previous call to GetTextDetection."]
 module GetTextDetectionRequest =
   struct
     type nonrec t =
@@ -12104,14 +18049,14 @@ module GetTextDetectionRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?nextToken ?maxResults ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
       make ?nextToken ?maxResults ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the text detection results of a Amazon Rekognition Video analysis started by StartTextDetection. Text detection with Amazon Rekognition Video is an asynchronous operation. You start text detection by calling StartTextDetection which returns a job identifier (JobId) When the text detection operation finishes, Amazon Rekognition publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartTextDetection. To get the results of the text detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. if so, call GetTextDetection and pass the job identifier (JobId) from the initial call of StartLabelDetection. GetTextDetection returns an array of detected text (TextDetections) sorted by the time the text was detected, up to 50 words per frame of video. Each element of the array includes the detected text, the precentage confidence in the acuracy of the detected text, the time the text was detected, bounding box information for where the text was located, and unique identifiers for words and their lines. Use MaxResults parameter to limit the number of text detections returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetTextDetection and populate the NextToken request parameter with the token value returned from the previous call to GetTextDetection."]
+       "Gets the text detection results of a Amazon Rekognition Video analysis started by StartTextDetection. Text detection with Amazon Rekognition Video is an asynchronous operation. You start text detection by calling StartTextDetection which returns a job identifier (JobId) When the text detection operation finishes, Amazon Rekognition publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartTextDetection. To get the results of the text detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. if so, call GetTextDetection and pass the job identifier (JobId) from the initial call of StartLabelDetection. GetTextDetection returns an array of detected text (TextDetections) sorted by the time the text was detected, up to 100 words per frame of video. Each element of the array includes the detected text, the precentage confidence in the acuracy of the detected text, the time the text was detected, bounding box information for where the text was located, and unique identifiers for words and their lines. Use MaxResults parameter to limit the number of text detections returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetTextDetection and populate the NextToken request parameter with the token value returned from the previous call to GetTextDetection."]
 module GetSegmentDetectionResponse =
   struct
     type nonrec t =
@@ -12135,7 +18080,14 @@ module GetSegmentDetectionResponse =
           "An array of segments detected in a video. The array is sorted by the segment types (TECHNICAL_CUE or SHOT) specified in the SegmentTypes input parameter of StartSegmentDetection. Within each segment type the array is sorted by timestamp values."];
       selectedSegmentTypes: SegmentTypesInfo.t option
         [@ocaml.doc
-          "An array containing the segment types requested in the call to StartSegmentDetection."]}
+          "An array containing the segment types requested in the call to StartSegmentDetection."];
+      jobId: JobId.t option
+        [@ocaml.doc
+          "Job identifier for the segment detection operation for which you want to obtain results. The job identifer is returned by an initial call to StartSegmentDetection."];
+      video: Video.t option ;
+      jobTag: JobTag.t option
+        [@ocaml.doc
+          "A job identifier specified in the call to StartSegmentDetection and returned in the job completion notification sent to your Amazon Simple Notification Service topic."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -12153,16 +18105,22 @@ module GetSegmentDetectionResponse =
             fun ?nextToken ->
               fun ?segments ->
                 fun ?selectedSegmentTypes ->
-                  fun () ->
-                    {
-                      jobStatus;
-                      statusMessage;
-                      videoMetadata;
-                      audioMetadata;
-                      nextToken;
-                      segments;
-                      selectedSegmentTypes
-                    }
+                  fun ?jobId ->
+                    fun ?video ->
+                      fun ?jobTag ->
+                        fun () ->
+                          {
+                            jobStatus;
+                            statusMessage;
+                            videoMetadata;
+                            audioMetadata;
+                            nextToken;
+                            segments;
+                            selectedSegmentTypes;
+                            jobId;
+                            video;
+                            jobTag
+                          }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -12251,9 +18209,16 @@ module GetSegmentDetectionResponse =
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
         ("Segments", (Option.map x.segments ~f:SegmentDetections.to_value));
         ("SelectedSegmentTypes",
-          (Option.map x.selectedSegmentTypes ~f:SegmentTypesInfo.to_value))]
+          (Option.map x.selectedSegmentTypes ~f:SegmentTypesInfo.to_value));
+        ("JobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("Video", (Option.map x.video ~f:Video.to_value));
+        ("JobTag", (Option.map x.jobTag ~f:JobTag.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let jobTag =
+        (Option.map ~f:JobTag.of_xml) (Xml.child xml_arg0 "JobTag") in
+      let video = (Option.map ~f:Video.of_xml) (Xml.child xml_arg0 "Video") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       let selectedSegmentTypes =
         (Option.map ~f:SegmentTypesInfo.of_xml)
           (Xml.child xml_arg0 "SelectedSegmentTypes") in
@@ -12275,26 +18240,29 @@ module GetSegmentDetectionResponse =
       let jobStatus =
         (Option.map ~f:VideoJobStatus.of_xml)
           (Xml.child xml_arg0 "JobStatus") in
-      make ?selectedSegmentTypes ?segments ?nextToken ?audioMetadata
-        ?videoMetadata ?statusMessage ?jobStatus ()
+      make ?jobTag ?video ?jobId ?selectedSegmentTypes ?segments ?nextToken
+        ?audioMetadata ?videoMetadata ?statusMessage ?jobStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
+      let video = field_map json__ "Video" Video.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       let selectedSegmentTypes =
-        field_map json "SelectedSegmentTypes" SegmentTypesInfo.of_json in
-      let segments = field_map json "Segments" SegmentDetections.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+        field_map json__ "SelectedSegmentTypes" SegmentTypesInfo.of_json in
+      let segments = field_map json__ "Segments" SegmentDetections.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let audioMetadata =
-        field_map json "AudioMetadata" AudioMetadataList.of_json in
+        field_map json__ "AudioMetadata" AudioMetadataList.of_json in
       let videoMetadata =
-        field_map json "VideoMetadata" VideoMetadataList.of_json in
+        field_map json__ "VideoMetadata" VideoMetadataList.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let jobStatus = field_map json "JobStatus" VideoJobStatus.of_json in
-      make ?selectedSegmentTypes ?segments ?nextToken ?audioMetadata
-        ?videoMetadata ?statusMessage ?jobStatus ()
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let jobStatus = field_map json__ "JobStatus" VideoJobStatus.of_json in
+      make ?jobTag ?video ?jobId ?selectedSegmentTypes ?segments ?nextToken
+        ?audioMetadata ?videoMetadata ?statusMessage ?jobStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the segment detection results of a Amazon Rekognition Video analysis started by StartSegmentDetection. Segment detection with Amazon Rekognition Video is an asynchronous operation. You start segment detection by calling StartSegmentDetection which returns a job identifier (JobId). When the segment detection operation finishes, Amazon Rekognition publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartSegmentDetection. To get the results of the segment detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. if so, call GetSegmentDetection and pass the job identifier (JobId) from the initial call of StartSegmentDetection. GetSegmentDetection returns detected segments in an array (Segments) of SegmentDetection objects. Segments is sorted by the segment types specified in the SegmentTypes input parameter of StartSegmentDetection. Each element of the array includes the detected segment, the precentage confidence in the acuracy of the detected segment, the type of the segment, and the frame in which the segment was detected. Use SelectedSegmentTypes to find out the type of segment detection requested in the call to StartSegmentDetection. Use the MaxResults parameter to limit the number of segment detections returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetSegmentDetection and populate the NextToken request parameter with the token value returned from the previous call to GetSegmentDetection. For more information, see Detecting Video Segments in Stored Video in the Amazon Rekognition Developer Guide."]
+       "Gets the segment detection results of a Amazon Rekognition Video analysis started by StartSegmentDetection. Segment detection with Amazon Rekognition Video is an asynchronous operation. You start segment detection by calling StartSegmentDetection which returns a job identifier (JobId). When the segment detection operation finishes, Amazon Rekognition publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartSegmentDetection. To get the results of the segment detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. if so, call GetSegmentDetection and pass the job identifier (JobId) from the initial call of StartSegmentDetection. GetSegmentDetection returns detected segments in an array (Segments) of SegmentDetection objects. Segments is sorted by the segment types specified in the SegmentTypes input parameter of StartSegmentDetection. Each element of the array includes the detected segment, the precentage confidence in the acuracy of the detected segment, the type of the segment, and the frame in which the segment was detected. Use SelectedSegmentTypes to find out the type of segment detection requested in the call to StartSegmentDetection. Use the MaxResults parameter to limit the number of segment detections returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetSegmentDetection and populate the NextToken request parameter with the token value returned from the previous call to GetSegmentDetection. For more information, see Detecting video segments in stored video in the Amazon Rekognition Developer Guide."]
 module GetSegmentDetectionRequest =
   struct
     type nonrec t =
@@ -12328,14 +18296,14 @@ module GetSegmentDetectionRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?nextToken ?maxResults ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
       make ?nextToken ?maxResults ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the segment detection results of a Amazon Rekognition Video analysis started by StartSegmentDetection. Segment detection with Amazon Rekognition Video is an asynchronous operation. You start segment detection by calling StartSegmentDetection which returns a job identifier (JobId). When the segment detection operation finishes, Amazon Rekognition publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartSegmentDetection. To get the results of the segment detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. if so, call GetSegmentDetection and pass the job identifier (JobId) from the initial call of StartSegmentDetection. GetSegmentDetection returns detected segments in an array (Segments) of SegmentDetection objects. Segments is sorted by the segment types specified in the SegmentTypes input parameter of StartSegmentDetection. Each element of the array includes the detected segment, the precentage confidence in the acuracy of the detected segment, the type of the segment, and the frame in which the segment was detected. Use SelectedSegmentTypes to find out the type of segment detection requested in the call to StartSegmentDetection. Use the MaxResults parameter to limit the number of segment detections returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetSegmentDetection and populate the NextToken request parameter with the token value returned from the previous call to GetSegmentDetection. For more information, see Detecting Video Segments in Stored Video in the Amazon Rekognition Developer Guide."]
+       "Gets the segment detection results of a Amazon Rekognition Video analysis started by StartSegmentDetection. Segment detection with Amazon Rekognition Video is an asynchronous operation. You start segment detection by calling StartSegmentDetection which returns a job identifier (JobId). When the segment detection operation finishes, Amazon Rekognition publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartSegmentDetection. To get the results of the segment detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. if so, call GetSegmentDetection and pass the job identifier (JobId) from the initial call of StartSegmentDetection. GetSegmentDetection returns detected segments in an array (Segments) of SegmentDetection objects. Segments is sorted by the segment types specified in the SegmentTypes input parameter of StartSegmentDetection. Each element of the array includes the detected segment, the precentage confidence in the acuracy of the detected segment, the type of the segment, and the frame in which the segment was detected. Use SelectedSegmentTypes to find out the type of segment detection requested in the call to StartSegmentDetection. Use the MaxResults parameter to limit the number of segment detections returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetSegmentDetection and populate the NextToken request parameter with the token value returned from the previous call to GetSegmentDetection. For more information, see Detecting video segments in stored video in the Amazon Rekognition Developer Guide."]
 module GetPersonTrackingResponse =
   struct
     type nonrec t =
@@ -12353,7 +18321,14 @@ module GetPersonTrackingResponse =
           "If the response is truncated, Amazon Rekognition Video returns this token that you can use in the subsequent request to retrieve the next set of persons."];
       persons: PersonDetections.t option
         [@ocaml.doc
-          "An array of the persons detected in the video and the time(s) their path was tracked throughout the video. An array element will exist for each time a person's path is tracked."]}
+          "An array of the persons detected in the video and the time(s) their path was tracked throughout the video. An array element will exist for each time a person's path is tracked."];
+      jobId: JobId.t option
+        [@ocaml.doc
+          "Job identifier for the person tracking operation for which you want to obtain results. The job identifer is returned by an initial call to StartPersonTracking."];
+      video: Video.t option ;
+      jobTag: JobTag.t option
+        [@ocaml.doc
+          "A job identifier specified in the call to StartCelebrityRecognition and returned in the job completion notification sent to your Amazon Simple Notification Service topic."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -12369,9 +18344,20 @@ module GetPersonTrackingResponse =
         fun ?videoMetadata ->
           fun ?nextToken ->
             fun ?persons ->
-              fun () ->
-                { jobStatus; statusMessage; videoMetadata; nextToken; persons
-                }
+              fun ?jobId ->
+                fun ?video ->
+                  fun ?jobTag ->
+                    fun () ->
+                      {
+                        jobStatus;
+                        statusMessage;
+                        videoMetadata;
+                        nextToken;
+                        persons;
+                        jobId;
+                        video;
+                        jobTag
+                      }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -12456,9 +18442,16 @@ module GetPersonTrackingResponse =
         ("VideoMetadata",
           (Option.map x.videoMetadata ~f:VideoMetadata.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("Persons", (Option.map x.persons ~f:PersonDetections.to_value))]
+        ("Persons", (Option.map x.persons ~f:PersonDetections.to_value));
+        ("JobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("Video", (Option.map x.video ~f:Video.to_value));
+        ("JobTag", (Option.map x.jobTag ~f:JobTag.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let jobTag =
+        (Option.map ~f:JobTag.of_xml) (Xml.child xml_arg0 "JobTag") in
+      let video = (Option.map ~f:Video.of_xml) (Xml.child xml_arg0 "Video") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       let persons =
         (Option.map ~f:PersonDetections.of_xml)
           (Xml.child xml_arg0 "Persons") in
@@ -12474,20 +18467,25 @@ module GetPersonTrackingResponse =
       let jobStatus =
         (Option.map ~f:VideoJobStatus.of_xml)
           (Xml.child xml_arg0 "JobStatus") in
-      make ?persons ?nextToken ?videoMetadata ?statusMessage ?jobStatus ()
+      make ?jobTag ?video ?jobId ?persons ?nextToken ?videoMetadata
+        ?statusMessage ?jobStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let persons = field_map json "Persons" PersonDetections.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
+      let video = field_map json__ "Video" Video.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      let persons = field_map json__ "Persons" PersonDetections.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let videoMetadata =
-        field_map json "VideoMetadata" VideoMetadata.of_json in
+        field_map json__ "VideoMetadata" VideoMetadata.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let jobStatus = field_map json "JobStatus" VideoJobStatus.of_json in
-      make ?persons ?nextToken ?videoMetadata ?statusMessage ?jobStatus ()
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let jobStatus = field_map json__ "JobStatus" VideoJobStatus.of_json in
+      make ?jobTag ?video ?jobId ?persons ?nextToken ?videoMetadata
+        ?statusMessage ?jobStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the path tracking results of a Amazon Rekognition Video analysis started by StartPersonTracking. The person path tracking operation is started by a call to StartPersonTracking which returns a job identifier (JobId). When the operation finishes, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartPersonTracking. To get the results of the person path tracking operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetPersonTracking and pass the job identifier (JobId) from the initial call to StartPersonTracking. GetPersonTracking returns an array, Persons, of tracked persons and the time(s) their paths were tracked in the video. GetPersonTracking only returns the default facial attributes (BoundingBox, Confidence, Landmarks, Pose, and Quality). The other facial attributes listed in the Face object of the following response syntax are not returned. For more information, see FaceDetail in the Amazon Rekognition Developer Guide. By default, the array is sorted by the time(s) a person's path is tracked in the video. You can sort by tracked persons by specifying INDEX for the SortBy input parameter. Use the MaxResults parameter to limit the number of items returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetPersonTracking and populate the NextToken request parameter with the token value returned from the previous call to GetPersonTracking."]
+       "End of support notice: On October 31, 2025, AWS will discontinue support for Amazon Rekognition People Pathing. After October 31, 2025, you will no longer be able to use the Rekognition People Pathing capability. For more information, visit this blog post. Gets the path tracking results of a Amazon Rekognition Video analysis started by StartPersonTracking. The person path tracking operation is started by a call to StartPersonTracking which returns a job identifier (JobId). When the operation finishes, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartPersonTracking. To get the results of the person path tracking operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetPersonTracking and pass the job identifier (JobId) from the initial call to StartPersonTracking. GetPersonTracking returns an array, Persons, of tracked persons and the time(s) their paths were tracked in the video. GetPersonTracking only returns the default facial attributes (BoundingBox, Confidence, Landmarks, Pose, and Quality). The other facial attributes listed in the Face object of the following response syntax are not returned. For more information, see FaceDetail in the Amazon Rekognition Developer Guide. By default, the array is sorted by the time(s) a person's path is tracked in the video. You can sort by tracked persons by specifying INDEX for the SortBy input parameter. Use the MaxResults parameter to limit the number of items returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetPersonTracking and populate the NextToken request parameter with the token value returned from the previous call to GetPersonTracking."]
 module GetPersonTrackingRequest =
   struct
     type nonrec t =
@@ -12529,15 +18527,267 @@ module GetPersonTrackingRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?sortBy ?nextToken ?maxResults ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortBy = field_map json "SortBy" PersonTrackingSortBy.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
+    let of_json json__ =
+      let sortBy = field_map json__ "SortBy" PersonTrackingSortBy.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
       make ?sortBy ?nextToken ?maxResults ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the path tracking results of a Amazon Rekognition Video analysis started by StartPersonTracking. The person path tracking operation is started by a call to StartPersonTracking which returns a job identifier (JobId). When the operation finishes, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartPersonTracking. To get the results of the person path tracking operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetPersonTracking and pass the job identifier (JobId) from the initial call to StartPersonTracking. GetPersonTracking returns an array, Persons, of tracked persons and the time(s) their paths were tracked in the video. GetPersonTracking only returns the default facial attributes (BoundingBox, Confidence, Landmarks, Pose, and Quality). The other facial attributes listed in the Face object of the following response syntax are not returned. For more information, see FaceDetail in the Amazon Rekognition Developer Guide. By default, the array is sorted by the time(s) a person's path is tracked in the video. You can sort by tracked persons by specifying INDEX for the SortBy input parameter. Use the MaxResults parameter to limit the number of items returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetPersonTracking and populate the NextToken request parameter with the token value returned from the previous call to GetPersonTracking."]
+       "End of support notice: On October 31, 2025, AWS will discontinue support for Amazon Rekognition People Pathing. After October 31, 2025, you will no longer be able to use the Rekognition People Pathing capability. For more information, visit this blog post. Gets the path tracking results of a Amazon Rekognition Video analysis started by StartPersonTracking. The person path tracking operation is started by a call to StartPersonTracking which returns a job identifier (JobId). When the operation finishes, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartPersonTracking. To get the results of the person path tracking operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetPersonTracking and pass the job identifier (JobId) from the initial call to StartPersonTracking. GetPersonTracking returns an array, Persons, of tracked persons and the time(s) their paths were tracked in the video. GetPersonTracking only returns the default facial attributes (BoundingBox, Confidence, Landmarks, Pose, and Quality). The other facial attributes listed in the Face object of the following response syntax are not returned. For more information, see FaceDetail in the Amazon Rekognition Developer Guide. By default, the array is sorted by the time(s) a person's path is tracked in the video. You can sort by tracked persons by specifying INDEX for the SortBy input parameter. Use the MaxResults parameter to limit the number of items returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetPersonTracking and populate the NextToken request parameter with the token value returned from the previous call to GetPersonTracking."]
+module GetMediaAnalysisJobResponse =
+  struct
+    type nonrec t =
+      {
+      jobId: MediaAnalysisJobId.t option
+        [@ocaml.doc "The identifier for the media analysis job."];
+      jobName: MediaAnalysisJobName.t option
+        [@ocaml.doc "The name of the media analysis job."];
+      operationsConfig: MediaAnalysisOperationsConfig.t option
+        [@ocaml.doc
+          "Operation configurations that were provided during job creation."];
+      status: MediaAnalysisJobStatus.t option
+        [@ocaml.doc "The current status of the media analysis job."];
+      failureDetails: MediaAnalysisJobFailureDetails.t option
+        [@ocaml.doc
+          "Details about the error that resulted in failure of the job."];
+      creationTimestamp: DateTime.t option
+        [@ocaml.doc "The Unix date and time when the job was started."];
+      completionTimestamp: DateTime.t option
+        [@ocaml.doc "The Unix date and time when the job finished."];
+      input: MediaAnalysisInput.t option
+        [@ocaml.doc
+          "Reference to the input manifest that was provided in the job creation request."];
+      outputConfig: MediaAnalysisOutputConfig.t option
+        [@ocaml.doc
+          "Output configuration that was provided in the creation request."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc "KMS Key that was provided in the creation request."];
+      results: MediaAnalysisResults.t option
+        [@ocaml.doc "Output manifest that contains prediction results."];
+      manifestSummary: MediaAnalysisManifestSummary.t option
+        [@ocaml.doc
+          "The summary manifest provides statistics on input manifest and errors identified in the input manifest."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?jobId =
+      fun ?jobName ->
+        fun ?operationsConfig ->
+          fun ?status ->
+            fun ?failureDetails ->
+              fun ?creationTimestamp ->
+                fun ?completionTimestamp ->
+                  fun ?input ->
+                    fun ?outputConfig ->
+                      fun ?kmsKeyId ->
+                        fun ?results ->
+                          fun ?manifestSummary ->
+                            fun () ->
+                              {
+                                jobId;
+                                jobName;
+                                operationsConfig;
+                                status;
+                                failureDetails;
+                                creationTimestamp;
+                                completionTimestamp;
+                                input;
+                                outputConfig;
+                                kmsKeyId;
+                                results;
+                                manifestSummary
+                              }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("JobId", (Option.map x.jobId ~f:MediaAnalysisJobId.to_value));
+        ("JobName", (Option.map x.jobName ~f:MediaAnalysisJobName.to_value));
+        ("OperationsConfig",
+          (Option.map x.operationsConfig
+             ~f:MediaAnalysisOperationsConfig.to_value));
+        ("Status", (Option.map x.status ~f:MediaAnalysisJobStatus.to_value));
+        ("FailureDetails",
+          (Option.map x.failureDetails
+             ~f:MediaAnalysisJobFailureDetails.to_value));
+        ("CreationTimestamp",
+          (Option.map x.creationTimestamp ~f:DateTime.to_value));
+        ("CompletionTimestamp",
+          (Option.map x.completionTimestamp ~f:DateTime.to_value));
+        ("Input", (Option.map x.input ~f:MediaAnalysisInput.to_value));
+        ("OutputConfig",
+          (Option.map x.outputConfig ~f:MediaAnalysisOutputConfig.to_value));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("Results", (Option.map x.results ~f:MediaAnalysisResults.to_value));
+        ("ManifestSummary",
+          (Option.map x.manifestSummary
+             ~f:MediaAnalysisManifestSummary.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let manifestSummary =
+        (Option.map ~f:MediaAnalysisManifestSummary.of_xml)
+          (Xml.child xml_arg0 "ManifestSummary") in
+      let results =
+        (Option.map ~f:MediaAnalysisResults.of_xml)
+          (Xml.child xml_arg0 "Results") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let outputConfig =
+        (Option.map ~f:MediaAnalysisOutputConfig.of_xml)
+          (Xml.child xml_arg0 "OutputConfig") in
+      let input =
+        (Option.map ~f:MediaAnalysisInput.of_xml)
+          (Xml.child xml_arg0 "Input") in
+      let completionTimestamp =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "CompletionTimestamp") in
+      let creationTimestamp =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "CreationTimestamp") in
+      let failureDetails =
+        (Option.map ~f:MediaAnalysisJobFailureDetails.of_xml)
+          (Xml.child xml_arg0 "FailureDetails") in
+      let status =
+        (Option.map ~f:MediaAnalysisJobStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let operationsConfig =
+        (Option.map ~f:MediaAnalysisOperationsConfig.of_xml)
+          (Xml.child xml_arg0 "OperationsConfig") in
+      let jobName =
+        (Option.map ~f:MediaAnalysisJobName.of_xml)
+          (Xml.child xml_arg0 "JobName") in
+      let jobId =
+        (Option.map ~f:MediaAnalysisJobId.of_xml)
+          (Xml.child xml_arg0 "JobId") in
+      make ?manifestSummary ?results ?kmsKeyId ?outputConfig ?input
+        ?completionTimestamp ?creationTimestamp ?failureDetails ?status
+        ?operationsConfig ?jobName ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let manifestSummary =
+        field_map json__ "ManifestSummary"
+          MediaAnalysisManifestSummary.of_json in
+      let results = field_map json__ "Results" MediaAnalysisResults.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let outputConfig =
+        field_map json__ "OutputConfig" MediaAnalysisOutputConfig.of_json in
+      let input = field_map json__ "Input" MediaAnalysisInput.of_json in
+      let completionTimestamp =
+        field_map json__ "CompletionTimestamp" DateTime.of_json in
+      let creationTimestamp =
+        field_map json__ "CreationTimestamp" DateTime.of_json in
+      let failureDetails =
+        field_map json__ "FailureDetails"
+          MediaAnalysisJobFailureDetails.of_json in
+      let status = field_map json__ "Status" MediaAnalysisJobStatus.of_json in
+      let operationsConfig =
+        field_map json__ "OperationsConfig"
+          MediaAnalysisOperationsConfig.of_json in
+      let jobName = field_map json__ "JobName" MediaAnalysisJobName.of_json in
+      let jobId = field_map json__ "JobId" MediaAnalysisJobId.of_json in
+      make ?manifestSummary ?results ?kmsKeyId ?outputConfig ?input
+        ?completionTimestamp ?creationTimestamp ?failureDetails ?status
+        ?operationsConfig ?jobName ?jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the results for a given media analysis job. Takes a JobId returned by StartMediaAnalysisJob."]
+module GetMediaAnalysisJobRequest =
+  struct
+    type nonrec t =
+      {
+      jobId: MediaAnalysisJobId.t
+        [@ocaml.doc
+          "Unique identifier for the media analysis job for which you want to retrieve results."]}
+    let context_ = "GetMediaAnalysisJobRequest"
+    let make ~jobId = fun () -> { jobId }
+    let to_value x =
+      structure_to_value
+        [("JobId", (Some (MediaAnalysisJobId.to_value x.jobId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobId =
+        MediaAnalysisJobId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
+      make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" MediaAnalysisJobId.of_json in
+      make ~jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the results for a given media analysis job. Takes a JobId returned by StartMediaAnalysisJob."]
 module GetLabelDetectionResponse =
   struct
     type nonrec t =
@@ -12558,7 +18808,17 @@ module GetLabelDetectionResponse =
           "An array of labels detected in the video. Each element contains the detected label and the time, in milliseconds from the start of the video, that the label was detected."];
       labelModelVersion: String_.t option
         [@ocaml.doc
-          "Version number of the label detection model that was used to detect labels."]}
+          "Version number of the label detection model that was used to detect labels."];
+      jobId: JobId.t option
+        [@ocaml.doc
+          "Job identifier for the label detection operation for which you want to obtain results. The job identifer is returned by an initial call to StartLabelDetection."];
+      video: Video.t option ;
+      jobTag: JobTag.t option
+        [@ocaml.doc
+          "A job identifier specified in the call to StartLabelDetection and returned in the job completion notification sent to your Amazon Simple Notification Service topic."];
+      getRequestMetadata: GetLabelDetectionRequestMetadata.t option
+        [@ocaml.doc
+          "Information about the paramters used when getting a response. Includes information on aggregation and sorting methods."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -12575,15 +18835,23 @@ module GetLabelDetectionResponse =
           fun ?nextToken ->
             fun ?labels ->
               fun ?labelModelVersion ->
-                fun () ->
-                  {
-                    jobStatus;
-                    statusMessage;
-                    videoMetadata;
-                    nextToken;
-                    labels;
-                    labelModelVersion
-                  }
+                fun ?jobId ->
+                  fun ?video ->
+                    fun ?jobTag ->
+                      fun ?getRequestMetadata ->
+                        fun () ->
+                          {
+                            jobStatus;
+                            statusMessage;
+                            videoMetadata;
+                            nextToken;
+                            labels;
+                            labelModelVersion;
+                            jobId;
+                            video;
+                            jobTag;
+                            getRequestMetadata
+                          }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -12670,9 +18938,22 @@ module GetLabelDetectionResponse =
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
         ("Labels", (Option.map x.labels ~f:LabelDetections.to_value));
         ("LabelModelVersion",
-          (Option.map x.labelModelVersion ~f:String_.to_value))]
+          (Option.map x.labelModelVersion ~f:String_.to_value));
+        ("JobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("Video", (Option.map x.video ~f:Video.to_value));
+        ("JobTag", (Option.map x.jobTag ~f:JobTag.to_value));
+        ("GetRequestMetadata",
+          (Option.map x.getRequestMetadata
+             ~f:GetLabelDetectionRequestMetadata.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let getRequestMetadata =
+        (Option.map ~f:GetLabelDetectionRequestMetadata.of_xml)
+          (Xml.child xml_arg0 "GetRequestMetadata") in
+      let jobTag =
+        (Option.map ~f:JobTag.of_xml) (Xml.child xml_arg0 "JobTag") in
+      let video = (Option.map ~f:Video.of_xml) (Xml.child xml_arg0 "Video") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       let labelModelVersion =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "LabelModelVersion") in
@@ -12690,24 +18971,30 @@ module GetLabelDetectionResponse =
       let jobStatus =
         (Option.map ~f:VideoJobStatus.of_xml)
           (Xml.child xml_arg0 "JobStatus") in
-      make ?labelModelVersion ?labels ?nextToken ?videoMetadata
-        ?statusMessage ?jobStatus ()
+      make ?getRequestMetadata ?jobTag ?video ?jobId ?labelModelVersion
+        ?labels ?nextToken ?videoMetadata ?statusMessage ?jobStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let getRequestMetadata =
+        field_map json__ "GetRequestMetadata"
+          GetLabelDetectionRequestMetadata.of_json in
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
+      let video = field_map json__ "Video" Video.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       let labelModelVersion =
-        field_map json "LabelModelVersion" String_.of_json in
-      let labels = field_map json "Labels" LabelDetections.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+        field_map json__ "LabelModelVersion" String_.of_json in
+      let labels = field_map json__ "Labels" LabelDetections.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let videoMetadata =
-        field_map json "VideoMetadata" VideoMetadata.of_json in
+        field_map json__ "VideoMetadata" VideoMetadata.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let jobStatus = field_map json "JobStatus" VideoJobStatus.of_json in
-      make ?labelModelVersion ?labels ?nextToken ?videoMetadata
-        ?statusMessage ?jobStatus ()
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let jobStatus = field_map json__ "JobStatus" VideoJobStatus.of_json in
+      make ?getRequestMetadata ?jobTag ?video ?jobId ?labelModelVersion
+        ?labels ?nextToken ?videoMetadata ?statusMessage ?jobStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the label detection results of a Amazon Rekognition Video analysis started by StartLabelDetection. The label detection operation is started by a call to StartLabelDetection which returns a job identifier (JobId). When the label detection operation finishes, Amazon Rekognition publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartlabelDetection. To get the results of the label detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetLabelDetection and pass the job identifier (JobId) from the initial call to StartLabelDetection. GetLabelDetection returns an array of detected labels (Labels) sorted by the time the labels were detected. You can also sort by the label name by specifying NAME for the SortBy input parameter. The labels returned include the label name, the percentage confidence in the accuracy of the detected label, and the time the label was detected in the video. The returned labels also include bounding box information for common objects, a hierarchical taxonomy of detected labels, and the version of the label model used for detection. Use MaxResults parameter to limit the number of labels returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetlabelDetection and populate the NextToken request parameter with the token value returned from the previous call to GetLabelDetection."]
+       "Gets the label detection results of a Amazon Rekognition Video analysis started by StartLabelDetection. The label detection operation is started by a call to StartLabelDetection which returns a job identifier (JobId). When the label detection operation finishes, Amazon Rekognition publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartlabelDetection. To get the results of the label detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetLabelDetection and pass the job identifier (JobId) from the initial call to StartLabelDetection. GetLabelDetection returns an array of detected labels (Labels) sorted by the time the labels were detected. You can also sort by the label name by specifying NAME for the SortBy input parameter. If there is no NAME specified, the default sort is by timestamp. You can select how results are aggregated by using the AggregateBy input parameter. The default aggregation method is TIMESTAMPS. You can also aggregate by SEGMENTS, which aggregates all instances of labels detected in a given segment. The returned Labels array may include the following attributes: Name - The name of the detected label. Confidence - The level of confidence in the label assigned to a detected object. Parents - The ancestor labels for a detected label. GetLabelDetection returns a hierarchical taxonomy of detected labels. For example, a detected car might be assigned the label car. The label car has two parent labels: Vehicle (its parent) and Transportation (its grandparent). The response includes the all ancestors for a label, where every ancestor is a unique label. In the previous example, Car, Vehicle, and Transportation are returned as unique labels in the response. Aliases - Possible Aliases for the label. Categories - The label categories that the detected label belongs to. BoundingBox \226\128\148 Bounding boxes are described for all instances of detected common object labels, returned in an array of Instance objects. An Instance object contains a BoundingBox object, describing the location of the label on the input image. It also includes the confidence for the accuracy of the detected bounding box. Timestamp - Time, in milliseconds from the start of the video, that the label was detected. For aggregation by SEGMENTS, the StartTimestampMillis, EndTimestampMillis, and DurationMillis structures are what define a segment. Although the \226\128\156Timestamp\226\128\157 structure is still returned with each label, its value is set to be the same as StartTimestampMillis. Timestamp and Bounding box information are returned for detected Instances, only if aggregation is done by TIMESTAMPS. If aggregating by SEGMENTS, information about detected instances isn\226\128\153t returned. The version of the label model used for the detection is also returned. Note DominantColors isn't returned for Instances, although it is shown as part of the response in the sample seen below. Use MaxResults parameter to limit the number of labels returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetlabelDetection and populate the NextToken request parameter with the token value returned from the previous call to GetLabelDetection. If you are retrieving results while using the Amazon Simple Notification Service, note that you will receive an \"ERROR\" notification if the job encounters an issue."]
 module GetLabelDetectionRequest =
   struct
     type nonrec t =
@@ -12723,20 +19010,30 @@ module GetLabelDetectionRequest =
           "If the previous response was incomplete (because there are more labels to retrieve), Amazon Rekognition Video returns a pagination token in the response. You can use this pagination token to retrieve the next set of labels."];
       sortBy: LabelDetectionSortBy.t option
         [@ocaml.doc
-          "Sort to use for elements in the Labels array. Use TIMESTAMP to sort array elements by the time labels are detected. Use NAME to alphabetically group elements for a label together. Within each label group, the array element are sorted by detection confidence. The default sort is by TIMESTAMP."]}
+          "Sort to use for elements in the Labels array. Use TIMESTAMP to sort array elements by the time labels are detected. Use NAME to alphabetically group elements for a label together. Within each label group, the array element are sorted by detection confidence. The default sort is by TIMESTAMP."];
+      aggregateBy: LabelDetectionAggregateBy.t option
+        [@ocaml.doc
+          "Defines how to aggregate the returned results. Results can be aggregated by timestamps or segments."]}
     let context_ = "GetLabelDetectionRequest"
     let make ?maxResults =
       fun ?nextToken ->
         fun ?sortBy ->
-          fun ~jobId -> fun () -> { maxResults; nextToken; sortBy; jobId }
+          fun ?aggregateBy ->
+            fun ~jobId ->
+              fun () -> { maxResults; nextToken; sortBy; aggregateBy; jobId }
     let to_value x =
       structure_to_value
         [("JobId", (Some (JobId.to_value x.jobId)));
         ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("SortBy", (Option.map x.sortBy ~f:LabelDetectionSortBy.to_value))]
+        ("SortBy", (Option.map x.sortBy ~f:LabelDetectionSortBy.to_value));
+        ("AggregateBy",
+          (Option.map x.aggregateBy ~f:LabelDetectionAggregateBy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let aggregateBy =
+        (Option.map ~f:LabelDetectionAggregateBy.of_xml)
+          (Xml.child xml_arg0 "AggregateBy") in
       let sortBy =
         (Option.map ~f:LabelDetectionSortBy.of_xml)
           (Xml.child xml_arg0 "SortBy") in
@@ -12747,17 +19044,19 @@ module GetLabelDetectionRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
-      make ?sortBy ?nextToken ?maxResults ~jobId ()
+      make ?aggregateBy ?sortBy ?nextToken ?maxResults ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortBy = field_map json "SortBy" LabelDetectionSortBy.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
-      make ?sortBy ?nextToken ?maxResults ~jobId ()
+    let of_json json__ =
+      let aggregateBy =
+        field_map json__ "AggregateBy" LabelDetectionAggregateBy.of_json in
+      let sortBy = field_map json__ "SortBy" LabelDetectionSortBy.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ?aggregateBy ?sortBy ?nextToken ?maxResults ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the label detection results of a Amazon Rekognition Video analysis started by StartLabelDetection. The label detection operation is started by a call to StartLabelDetection which returns a job identifier (JobId). When the label detection operation finishes, Amazon Rekognition publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartlabelDetection. To get the results of the label detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetLabelDetection and pass the job identifier (JobId) from the initial call to StartLabelDetection. GetLabelDetection returns an array of detected labels (Labels) sorted by the time the labels were detected. You can also sort by the label name by specifying NAME for the SortBy input parameter. The labels returned include the label name, the percentage confidence in the accuracy of the detected label, and the time the label was detected in the video. The returned labels also include bounding box information for common objects, a hierarchical taxonomy of detected labels, and the version of the label model used for detection. Use MaxResults parameter to limit the number of labels returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetlabelDetection and populate the NextToken request parameter with the token value returned from the previous call to GetLabelDetection."]
+       "Gets the label detection results of a Amazon Rekognition Video analysis started by StartLabelDetection. The label detection operation is started by a call to StartLabelDetection which returns a job identifier (JobId). When the label detection operation finishes, Amazon Rekognition publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartlabelDetection. To get the results of the label detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetLabelDetection and pass the job identifier (JobId) from the initial call to StartLabelDetection. GetLabelDetection returns an array of detected labels (Labels) sorted by the time the labels were detected. You can also sort by the label name by specifying NAME for the SortBy input parameter. If there is no NAME specified, the default sort is by timestamp. You can select how results are aggregated by using the AggregateBy input parameter. The default aggregation method is TIMESTAMPS. You can also aggregate by SEGMENTS, which aggregates all instances of labels detected in a given segment. The returned Labels array may include the following attributes: Name - The name of the detected label. Confidence - The level of confidence in the label assigned to a detected object. Parents - The ancestor labels for a detected label. GetLabelDetection returns a hierarchical taxonomy of detected labels. For example, a detected car might be assigned the label car. The label car has two parent labels: Vehicle (its parent) and Transportation (its grandparent). The response includes the all ancestors for a label, where every ancestor is a unique label. In the previous example, Car, Vehicle, and Transportation are returned as unique labels in the response. Aliases - Possible Aliases for the label. Categories - The label categories that the detected label belongs to. BoundingBox \226\128\148 Bounding boxes are described for all instances of detected common object labels, returned in an array of Instance objects. An Instance object contains a BoundingBox object, describing the location of the label on the input image. It also includes the confidence for the accuracy of the detected bounding box. Timestamp - Time, in milliseconds from the start of the video, that the label was detected. For aggregation by SEGMENTS, the StartTimestampMillis, EndTimestampMillis, and DurationMillis structures are what define a segment. Although the \226\128\156Timestamp\226\128\157 structure is still returned with each label, its value is set to be the same as StartTimestampMillis. Timestamp and Bounding box information are returned for detected Instances, only if aggregation is done by TIMESTAMPS. If aggregating by SEGMENTS, information about detected instances isn\226\128\153t returned. The version of the label model used for the detection is also returned. Note DominantColors isn't returned for Instances, although it is shown as part of the response in the sample seen below. Use MaxResults parameter to limit the number of labels returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetlabelDetection and populate the NextToken request parameter with the token value returned from the previous call to GetLabelDetection. If you are retrieving results while using the Amazon Simple Notification Service, note that you will receive an \"ERROR\" notification if the job encounters an issue."]
 module GetFaceSearchResponse =
   struct
     type nonrec t =
@@ -12775,7 +19074,14 @@ module GetFaceSearchResponse =
           "Information about a video that Amazon Rekognition analyzed. Videometadata is returned in every page of paginated responses from a Amazon Rekognition Video operation."];
       persons: PersonMatches.t option
         [@ocaml.doc
-          "An array of persons, PersonMatch, in the video whose face(s) match the face(s) in an Amazon Rekognition collection. It also includes time information for when persons are matched in the video. You specify the input collection in an initial call to StartFaceSearch. Each Persons element includes a time the person was matched, face match details (FaceMatches) for matching faces in the collection, and person information (Person) for the matched person."]}
+          "An array of persons, PersonMatch, in the video whose face(s) match the face(s) in an Amazon Rekognition collection. It also includes time information for when persons are matched in the video. You specify the input collection in an initial call to StartFaceSearch. Each Persons element includes a time the person was matched, face match details (FaceMatches) for matching faces in the collection, and person information (Person) for the matched person."];
+      jobId: JobId.t option
+        [@ocaml.doc
+          "Job identifier for the face search operation for which you want to obtain results. The job identifer is returned by an initial call to StartFaceSearch."];
+      video: Video.t option ;
+      jobTag: JobTag.t option
+        [@ocaml.doc
+          "A job identifier specified in the call to StartFaceSearch and returned in the job completion notification sent to your Amazon Simple Notification Service topic."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -12791,9 +19097,20 @@ module GetFaceSearchResponse =
         fun ?nextToken ->
           fun ?videoMetadata ->
             fun ?persons ->
-              fun () ->
-                { jobStatus; statusMessage; nextToken; videoMetadata; persons
-                }
+              fun ?jobId ->
+                fun ?video ->
+                  fun ?jobTag ->
+                    fun () ->
+                      {
+                        jobStatus;
+                        statusMessage;
+                        nextToken;
+                        videoMetadata;
+                        persons;
+                        jobId;
+                        video;
+                        jobTag
+                      }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -12878,9 +19195,16 @@ module GetFaceSearchResponse =
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
         ("VideoMetadata",
           (Option.map x.videoMetadata ~f:VideoMetadata.to_value));
-        ("Persons", (Option.map x.persons ~f:PersonMatches.to_value))]
+        ("Persons", (Option.map x.persons ~f:PersonMatches.to_value));
+        ("JobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("Video", (Option.map x.video ~f:Video.to_value));
+        ("JobTag", (Option.map x.jobTag ~f:JobTag.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let jobTag =
+        (Option.map ~f:JobTag.of_xml) (Xml.child xml_arg0 "JobTag") in
+      let video = (Option.map ~f:Video.of_xml) (Xml.child xml_arg0 "Video") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       let persons =
         (Option.map ~f:PersonMatches.of_xml) (Xml.child xml_arg0 "Persons") in
       let videoMetadata =
@@ -12895,17 +19219,22 @@ module GetFaceSearchResponse =
       let jobStatus =
         (Option.map ~f:VideoJobStatus.of_xml)
           (Xml.child xml_arg0 "JobStatus") in
-      make ?persons ?videoMetadata ?nextToken ?statusMessage ?jobStatus ()
+      make ?jobTag ?video ?jobId ?persons ?videoMetadata ?nextToken
+        ?statusMessage ?jobStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let persons = field_map json "Persons" PersonMatches.of_json in
+    let of_json json__ =
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
+      let video = field_map json__ "Video" Video.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      let persons = field_map json__ "Persons" PersonMatches.of_json in
       let videoMetadata =
-        field_map json "VideoMetadata" VideoMetadata.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+        field_map json__ "VideoMetadata" VideoMetadata.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let jobStatus = field_map json "JobStatus" VideoJobStatus.of_json in
-      make ?persons ?videoMetadata ?nextToken ?statusMessage ?jobStatus ()
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let jobStatus = field_map json__ "JobStatus" VideoJobStatus.of_json in
+      make ?jobTag ?video ?jobId ?persons ?videoMetadata ?nextToken
+        ?statusMessage ?jobStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the face search results for Amazon Rekognition Video face search started by StartFaceSearch. The search returns faces in a collection that match the faces of persons detected in a video. It also includes the time(s) that faces are matched in the video. Face search in a video is an asynchronous operation. You start face search by calling to StartFaceSearch which returns a job identifier (JobId). When the search operation finishes, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartFaceSearch. To get the search results, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetFaceSearch and pass the job identifier (JobId) from the initial call to StartFaceSearch. For more information, see Searching Faces in a Collection in the Amazon Rekognition Developer Guide. The search results are retured in an array, Persons, of PersonMatch objects. EachPersonMatch element contains details about the matching faces in the input collection, person information (facial attributes, bounding boxes, and person identifer) for the matched person, and the time the person was matched in the video. GetFaceSearch only returns the default facial attributes (BoundingBox, Confidence, Landmarks, Pose, and Quality). The other facial attributes listed in the Face object of the following response syntax are not returned. For more information, see FaceDetail in the Amazon Rekognition Developer Guide. By default, the Persons array is sorted by the time, in milliseconds from the start of the video, persons are matched. You can also sort by persons by specifying INDEX for the SORTBY input parameter."]
@@ -12949,15 +19278,195 @@ module GetFaceSearchRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?sortBy ?nextToken ?maxResults ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortBy = field_map json "SortBy" FaceSearchSortBy.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
+    let of_json json__ =
+      let sortBy = field_map json__ "SortBy" FaceSearchSortBy.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
       make ?sortBy ?nextToken ?maxResults ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the face search results for Amazon Rekognition Video face search started by StartFaceSearch. The search returns faces in a collection that match the faces of persons detected in a video. It also includes the time(s) that faces are matched in the video. Face search in a video is an asynchronous operation. You start face search by calling to StartFaceSearch which returns a job identifier (JobId). When the search operation finishes, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartFaceSearch. To get the search results, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetFaceSearch and pass the job identifier (JobId) from the initial call to StartFaceSearch. For more information, see Searching Faces in a Collection in the Amazon Rekognition Developer Guide. The search results are retured in an array, Persons, of PersonMatch objects. EachPersonMatch element contains details about the matching faces in the input collection, person information (facial attributes, bounding boxes, and person identifer) for the matched person, and the time the person was matched in the video. GetFaceSearch only returns the default facial attributes (BoundingBox, Confidence, Landmarks, Pose, and Quality). The other facial attributes listed in the Face object of the following response syntax are not returned. For more information, see FaceDetail in the Amazon Rekognition Developer Guide. By default, the Persons array is sorted by the time, in milliseconds from the start of the video, persons are matched. You can also sort by persons by specifying INDEX for the SORTBY input parameter."]
+module GetFaceLivenessSessionResultsResponse =
+  struct
+    type nonrec t =
+      {
+      sessionId: LivenessSessionId.t option
+        [@ocaml.doc "The sessionId for which this request was called."];
+      status: LivenessSessionStatus.t option
+        [@ocaml.doc
+          "Represents a status corresponding to the state of the session. Possible statuses are: CREATED, IN_PROGRESS, SUCCEEDED, FAILED, EXPIRED."];
+      confidence: Percent.t option
+        [@ocaml.doc
+          "Probabalistic confidence score for if the person in the given video was live, represented as a float value between 0 to 100."];
+      referenceImage: AuditImage.t option
+        [@ocaml.doc
+          "A high-quality image from the Face Liveness video that can be used for face comparison or search. It includes a bounding box of the face and the Base64-encoded bytes that return an image. If the CreateFaceLivenessSession request included an OutputConfig argument, the image will be uploaded to an S3Object specified in the output configuration. In case the reference image is not returned, it's recommended to retry the Liveness check."];
+      auditImages: AuditImages.t option
+        [@ocaml.doc
+          "A set of images from the Face Liveness video that can be used for audit purposes. It includes a bounding box of the face and the Base64-encoded bytes that return an image. If the CreateFaceLivenessSession request included an OutputConfig argument, the image will be uploaded to an S3Object specified in the output configuration. If no Amazon S3 bucket is defined, raw bytes are sent instead."];
+      challenge: Challenge.t option
+        [@ocaml.doc
+          "Contains information regarding the challenge type used for the Face Liveness check."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `SessionNotFoundException of SessionNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sessionId =
+      fun ?status ->
+        fun ?confidence ->
+          fun ?referenceImage ->
+            fun ?auditImages ->
+              fun ?challenge ->
+                fun () ->
+                  {
+                    sessionId;
+                    status;
+                    confidence;
+                    referenceImage;
+                    auditImages;
+                    challenge
+                  }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "SessionNotFoundException" ->
+          `SessionNotFoundException (SessionNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "SessionNotFoundException" ->
+          `SessionNotFoundException (SessionNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `SessionNotFoundException e ->
+          `Assoc
+            [("error", (`String "SessionNotFoundException"));
+            ("details", (SessionNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("SessionId",
+           (Option.map x.sessionId ~f:LivenessSessionId.to_value));
+        ("Status", (Option.map x.status ~f:LivenessSessionStatus.to_value));
+        ("Confidence", (Option.map x.confidence ~f:Percent.to_value));
+        ("ReferenceImage",
+          (Option.map x.referenceImage ~f:AuditImage.to_value));
+        ("AuditImages", (Option.map x.auditImages ~f:AuditImages.to_value));
+        ("Challenge", (Option.map x.challenge ~f:Challenge.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let challenge =
+        (Option.map ~f:Challenge.of_xml) (Xml.child xml_arg0 "Challenge") in
+      let auditImages =
+        (Option.map ~f:AuditImages.of_xml) (Xml.child xml_arg0 "AuditImages") in
+      let referenceImage =
+        (Option.map ~f:AuditImage.of_xml)
+          (Xml.child xml_arg0 "ReferenceImage") in
+      let confidence =
+        (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
+      let status =
+        (Option.map ~f:LivenessSessionStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let sessionId =
+        (Option.map ~f:LivenessSessionId.of_xml)
+          (Xml.child xml_arg0 "SessionId") in
+      make ?challenge ?auditImages ?referenceImage ?confidence ?status
+        ?sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let challenge = field_map json__ "Challenge" Challenge.of_json in
+      let auditImages = field_map json__ "AuditImages" AuditImages.of_json in
+      let referenceImage =
+        field_map json__ "ReferenceImage" AuditImage.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let status = field_map json__ "Status" LivenessSessionStatus.of_json in
+      let sessionId = field_map json__ "SessionId" LivenessSessionId.of_json in
+      make ?challenge ?auditImages ?referenceImage ?confidence ?status
+        ?sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the results of a specific Face Liveness session. It requires the sessionId as input, which was created using CreateFaceLivenessSession. Returns the corresponding Face Liveness confidence score, a reference image that includes a face bounding box, and audit images that also contain face bounding boxes. The Face Liveness confidence score ranges from 0 to 100. The number of audit images returned by GetFaceLivenessSessionResults is defined by the AuditImagesLimit paramater when calling CreateFaceLivenessSession. Reference images are always returned when possible."]
+module GetFaceLivenessSessionResultsRequest =
+  struct
+    type nonrec t =
+      {
+      sessionId: LivenessSessionId.t
+        [@ocaml.doc
+          "A unique 128-bit UUID. This is used to uniquely identify the session and also acts as an idempotency token for all operations associated with the session."]}
+    let context_ = "GetFaceLivenessSessionResultsRequest"
+    let make ~sessionId = fun () -> { sessionId }
+    let to_value x =
+      structure_to_value
+        [("SessionId", (Some (LivenessSessionId.to_value x.sessionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sessionId =
+        LivenessSessionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SessionId") in
+      make ~sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sessionId =
+        field_map_exn json__ "SessionId" LivenessSessionId.of_json in
+      make ~sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the results of a specific Face Liveness session. It requires the sessionId as input, which was created using CreateFaceLivenessSession. Returns the corresponding Face Liveness confidence score, a reference image that includes a face bounding box, and audit images that also contain face bounding boxes. The Face Liveness confidence score ranges from 0 to 100. The number of audit images returned by GetFaceLivenessSessionResults is defined by the AuditImagesLimit paramater when calling CreateFaceLivenessSession. Reference images are always returned when possible."]
 module GetFaceDetectionResponse =
   struct
     type nonrec t =
@@ -12975,7 +19484,14 @@ module GetFaceDetectionResponse =
           "If the response is truncated, Amazon Rekognition returns this token that you can use in the subsequent request to retrieve the next set of faces."];
       faces: FaceDetections.t option
         [@ocaml.doc
-          "An array of faces detected in the video. Each element contains a detected face's details and the time, in milliseconds from the start of the video, the face was detected."]}
+          "An array of faces detected in the video. Each element contains a detected face's details and the time, in milliseconds from the start of the video, the face was detected."];
+      jobId: JobId.t option
+        [@ocaml.doc
+          "Job identifier for the face detection operation for which you want to obtain results. The job identifer is returned by an initial call to StartFaceDetection."];
+      video: Video.t option ;
+      jobTag: JobTag.t option
+        [@ocaml.doc
+          "A job identifier specified in the call to StartFaceDetection and returned in the job completion notification sent to your Amazon Simple Notification Service topic."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -12991,8 +19507,20 @@ module GetFaceDetectionResponse =
         fun ?videoMetadata ->
           fun ?nextToken ->
             fun ?faces ->
-              fun () ->
-                { jobStatus; statusMessage; videoMetadata; nextToken; faces }
+              fun ?jobId ->
+                fun ?video ->
+                  fun ?jobTag ->
+                    fun () ->
+                      {
+                        jobStatus;
+                        statusMessage;
+                        videoMetadata;
+                        nextToken;
+                        faces;
+                        jobId;
+                        video;
+                        jobTag
+                      }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -13077,9 +19605,16 @@ module GetFaceDetectionResponse =
         ("VideoMetadata",
           (Option.map x.videoMetadata ~f:VideoMetadata.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("Faces", (Option.map x.faces ~f:FaceDetections.to_value))]
+        ("Faces", (Option.map x.faces ~f:FaceDetections.to_value));
+        ("JobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("Video", (Option.map x.video ~f:Video.to_value));
+        ("JobTag", (Option.map x.jobTag ~f:JobTag.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let jobTag =
+        (Option.map ~f:JobTag.of_xml) (Xml.child xml_arg0 "JobTag") in
+      let video = (Option.map ~f:Video.of_xml) (Xml.child xml_arg0 "Video") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       let faces =
         (Option.map ~f:FaceDetections.of_xml) (Xml.child xml_arg0 "Faces") in
       let nextToken =
@@ -13094,20 +19629,25 @@ module GetFaceDetectionResponse =
       let jobStatus =
         (Option.map ~f:VideoJobStatus.of_xml)
           (Xml.child xml_arg0 "JobStatus") in
-      make ?faces ?nextToken ?videoMetadata ?statusMessage ?jobStatus ()
+      make ?jobTag ?video ?jobId ?faces ?nextToken ?videoMetadata
+        ?statusMessage ?jobStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let faces = field_map json "Faces" FaceDetections.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
+      let video = field_map json__ "Video" Video.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      let faces = field_map json__ "Faces" FaceDetections.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let videoMetadata =
-        field_map json "VideoMetadata" VideoMetadata.of_json in
+        field_map json__ "VideoMetadata" VideoMetadata.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let jobStatus = field_map json "JobStatus" VideoJobStatus.of_json in
-      make ?faces ?nextToken ?videoMetadata ?statusMessage ?jobStatus ()
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let jobStatus = field_map json__ "JobStatus" VideoJobStatus.of_json in
+      make ?jobTag ?video ?jobId ?faces ?nextToken ?videoMetadata
+        ?statusMessage ?jobStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets face detection results for a Amazon Rekognition Video analysis started by StartFaceDetection. Face detection with Amazon Rekognition Video is an asynchronous operation. You start face detection by calling StartFaceDetection which returns a job identifier (JobId). When the face detection operation finishes, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartFaceDetection. To get the results of the face detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetFaceDetection and pass the job identifier (JobId) from the initial call to StartFaceDetection. GetFaceDetection returns an array of detected faces (Faces) sorted by the time the faces were detected. Use MaxResults parameter to limit the number of labels returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetFaceDetection and populate the NextToken request parameter with the token value returned from the previous call to GetFaceDetection."]
+       "Gets face detection results for a Amazon Rekognition Video analysis started by StartFaceDetection. Face detection with Amazon Rekognition Video is an asynchronous operation. You start face detection by calling StartFaceDetection which returns a job identifier (JobId). When the face detection operation finishes, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartFaceDetection. To get the results of the face detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetFaceDetection and pass the job identifier (JobId) from the initial call to StartFaceDetection. GetFaceDetection returns an array of detected faces (Faces) sorted by the time the faces were detected. Use MaxResults parameter to limit the number of labels returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetFaceDetection and populate the NextToken request parameter with the token value returned from the previous call to GetFaceDetection. Note that for the GetFaceDetection operation, the returned values for FaceOccluded and EyeDirection will always be \"null\"."]
 module GetFaceDetectionRequest =
   struct
     type nonrec t =
@@ -13141,14 +19681,14 @@ module GetFaceDetectionRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?nextToken ?maxResults ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
       make ?nextToken ?maxResults ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets face detection results for a Amazon Rekognition Video analysis started by StartFaceDetection. Face detection with Amazon Rekognition Video is an asynchronous operation. You start face detection by calling StartFaceDetection which returns a job identifier (JobId). When the face detection operation finishes, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartFaceDetection. To get the results of the face detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetFaceDetection and pass the job identifier (JobId) from the initial call to StartFaceDetection. GetFaceDetection returns an array of detected faces (Faces) sorted by the time the faces were detected. Use MaxResults parameter to limit the number of labels returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetFaceDetection and populate the NextToken request parameter with the token value returned from the previous call to GetFaceDetection."]
+       "Gets face detection results for a Amazon Rekognition Video analysis started by StartFaceDetection. Face detection with Amazon Rekognition Video is an asynchronous operation. You start face detection by calling StartFaceDetection which returns a job identifier (JobId). When the face detection operation finishes, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartFaceDetection. To get the results of the face detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetFaceDetection and pass the job identifier (JobId) from the initial call to StartFaceDetection. GetFaceDetection returns an array of detected faces (Faces) sorted by the time the faces were detected. Use MaxResults parameter to limit the number of labels returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetFaceDetection and populate the NextToken request parameter with the token value returned from the previous call to GetFaceDetection. Note that for the GetFaceDetection operation, the returned values for FaceOccluded and EyeDirection will always be \"null\"."]
 module GetContentModerationResponse =
   struct
     type nonrec t =
@@ -13170,7 +19710,17 @@ module GetContentModerationResponse =
           "If the response is truncated, Amazon Rekognition Video returns this token that you can use in the subsequent request to retrieve the next set of content moderation labels."];
       moderationModelVersion: String_.t option
         [@ocaml.doc
-          "Version number of the moderation detection model that was used to detect inappropriate, unwanted, or offensive content."]}
+          "Version number of the moderation detection model that was used to detect inappropriate, unwanted, or offensive content."];
+      jobId: JobId.t option
+        [@ocaml.doc
+          "Job identifier for the content moderation operation for which you want to obtain results. The job identifer is returned by an initial call to StartContentModeration."];
+      video: Video.t option ;
+      jobTag: JobTag.t option
+        [@ocaml.doc
+          "A job identifier specified in the call to StartContentModeration and returned in the job completion notification sent to your Amazon Simple Notification Service topic."];
+      getRequestMetadata: GetContentModerationRequestMetadata.t option
+        [@ocaml.doc
+          "Information about the paramters used when getting a response. Includes information on aggregation and sorting methods."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -13187,15 +19737,23 @@ module GetContentModerationResponse =
           fun ?moderationLabels ->
             fun ?nextToken ->
               fun ?moderationModelVersion ->
-                fun () ->
-                  {
-                    jobStatus;
-                    statusMessage;
-                    videoMetadata;
-                    moderationLabels;
-                    nextToken;
-                    moderationModelVersion
-                  }
+                fun ?jobId ->
+                  fun ?video ->
+                    fun ?jobTag ->
+                      fun ?getRequestMetadata ->
+                        fun () ->
+                          {
+                            jobStatus;
+                            statusMessage;
+                            videoMetadata;
+                            moderationLabels;
+                            nextToken;
+                            moderationModelVersion;
+                            jobId;
+                            video;
+                            jobTag;
+                            getRequestMetadata
+                          }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -13284,9 +19842,22 @@ module GetContentModerationResponse =
              ~f:ContentModerationDetections.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
         ("ModerationModelVersion",
-          (Option.map x.moderationModelVersion ~f:String_.to_value))]
+          (Option.map x.moderationModelVersion ~f:String_.to_value));
+        ("JobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("Video", (Option.map x.video ~f:Video.to_value));
+        ("JobTag", (Option.map x.jobTag ~f:JobTag.to_value));
+        ("GetRequestMetadata",
+          (Option.map x.getRequestMetadata
+             ~f:GetContentModerationRequestMetadata.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let getRequestMetadata =
+        (Option.map ~f:GetContentModerationRequestMetadata.of_xml)
+          (Xml.child xml_arg0 "GetRequestMetadata") in
+      let jobTag =
+        (Option.map ~f:JobTag.of_xml) (Xml.child xml_arg0 "JobTag") in
+      let video = (Option.map ~f:Video.of_xml) (Xml.child xml_arg0 "Video") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       let moderationModelVersion =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ModerationModelVersion") in
@@ -13305,25 +19876,34 @@ module GetContentModerationResponse =
       let jobStatus =
         (Option.map ~f:VideoJobStatus.of_xml)
           (Xml.child xml_arg0 "JobStatus") in
-      make ?moderationModelVersion ?nextToken ?moderationLabels
-        ?videoMetadata ?statusMessage ?jobStatus ()
+      make ?getRequestMetadata ?jobTag ?video ?jobId ?moderationModelVersion
+        ?nextToken ?moderationLabels ?videoMetadata ?statusMessage ?jobStatus
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let getRequestMetadata =
+        field_map json__ "GetRequestMetadata"
+          GetContentModerationRequestMetadata.of_json in
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
+      let video = field_map json__ "Video" Video.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       let moderationModelVersion =
-        field_map json "ModerationModelVersion" String_.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+        field_map json__ "ModerationModelVersion" String_.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let moderationLabels =
-        field_map json "ModerationLabels" ContentModerationDetections.of_json in
+        field_map json__ "ModerationLabels"
+          ContentModerationDetections.of_json in
       let videoMetadata =
-        field_map json "VideoMetadata" VideoMetadata.of_json in
+        field_map json__ "VideoMetadata" VideoMetadata.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let jobStatus = field_map json "JobStatus" VideoJobStatus.of_json in
-      make ?moderationModelVersion ?nextToken ?moderationLabels
-        ?videoMetadata ?statusMessage ?jobStatus ()
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let jobStatus = field_map json__ "JobStatus" VideoJobStatus.of_json in
+      make ?getRequestMetadata ?jobTag ?video ?jobId ?moderationModelVersion
+        ?nextToken ?moderationLabels ?videoMetadata ?statusMessage ?jobStatus
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the inappropriate, unwanted, or offensive content analysis results for a Amazon Rekognition Video analysis started by StartContentModeration. For a list of moderation labels in Amazon Rekognition, see Using the image and video moderation APIs. Amazon Rekognition Video inappropriate or offensive content detection in a stored video is an asynchronous operation. You start analysis by calling StartContentModeration which returns a job identifier (JobId). When analysis finishes, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartContentModeration. To get the results of the content analysis, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetContentModeration and pass the job identifier (JobId) from the initial call to StartContentModeration. For more information, see Working with Stored Videos in the Amazon Rekognition Devlopers Guide. GetContentModeration returns detected inappropriate, unwanted, or offensive content moderation labels, and the time they are detected, in an array, ModerationLabels, of ContentModerationDetection objects. By default, the moderated labels are returned sorted by time, in milliseconds from the start of the video. You can also sort them by moderated label by specifying NAME for the SortBy input parameter. Since video analysis can return a large number of results, use the MaxResults parameter to limit the number of labels returned in a single call to GetContentModeration. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetContentModeration and populate the NextToken request parameter with the value of NextToken returned from the previous call to GetContentModeration. For more information, see Content moderation in the Amazon Rekognition Developer Guide."]
+       "Gets the inappropriate, unwanted, or offensive content analysis results for a Amazon Rekognition Video analysis started by StartContentModeration. For a list of moderation labels in Amazon Rekognition, see Using the image and video moderation APIs. Amazon Rekognition Video inappropriate or offensive content detection in a stored video is an asynchronous operation. You start analysis by calling StartContentModeration which returns a job identifier (JobId). When analysis finishes, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartContentModeration. To get the results of the content analysis, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetContentModeration and pass the job identifier (JobId) from the initial call to StartContentModeration. For more information, see Working with Stored Videos in the Amazon Rekognition Devlopers Guide. GetContentModeration returns detected inappropriate, unwanted, or offensive content moderation labels, and the time they are detected, in an array, ModerationLabels, of ContentModerationDetection objects. By default, the moderated labels are returned sorted by time, in milliseconds from the start of the video. You can also sort them by moderated label by specifying NAME for the SortBy input parameter. Since video analysis can return a large number of results, use the MaxResults parameter to limit the number of labels returned in a single call to GetContentModeration. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetContentModeration and populate the NextToken request parameter with the value of NextToken returned from the previous call to GetContentModeration. For more information, see moderating content in the Amazon Rekognition Developer Guide."]
 module GetContentModerationRequest =
   struct
     type nonrec t =
@@ -13339,20 +19919,30 @@ module GetContentModerationRequest =
           "If the previous response was incomplete (because there is more data to retrieve), Amazon Rekognition returns a pagination token in the response. You can use this pagination token to retrieve the next set of content moderation labels."];
       sortBy: ContentModerationSortBy.t option
         [@ocaml.doc
-          "Sort to use for elements in the ModerationLabelDetections array. Use TIMESTAMP to sort array elements by the time labels are detected. Use NAME to alphabetically group elements for a label together. Within each label group, the array element are sorted by detection confidence. The default sort is by TIMESTAMP."]}
+          "Sort to use for elements in the ModerationLabelDetections array. Use TIMESTAMP to sort array elements by the time labels are detected. Use NAME to alphabetically group elements for a label together. Within each label group, the array element are sorted by detection confidence. The default sort is by TIMESTAMP."];
+      aggregateBy: ContentModerationAggregateBy.t option
+        [@ocaml.doc
+          "Defines how to aggregate results of the StartContentModeration request. Default aggregation option is TIMESTAMPS. SEGMENTS mode aggregates moderation labels over time."]}
     let context_ = "GetContentModerationRequest"
     let make ?maxResults =
       fun ?nextToken ->
         fun ?sortBy ->
-          fun ~jobId -> fun () -> { maxResults; nextToken; sortBy; jobId }
+          fun ?aggregateBy ->
+            fun ~jobId ->
+              fun () -> { maxResults; nextToken; sortBy; aggregateBy; jobId }
     let to_value x =
       structure_to_value
         [("JobId", (Some (JobId.to_value x.jobId)));
         ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("SortBy", (Option.map x.sortBy ~f:ContentModerationSortBy.to_value))]
+        ("SortBy", (Option.map x.sortBy ~f:ContentModerationSortBy.to_value));
+        ("AggregateBy",
+          (Option.map x.aggregateBy ~f:ContentModerationAggregateBy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let aggregateBy =
+        (Option.map ~f:ContentModerationAggregateBy.of_xml)
+          (Xml.child xml_arg0 "AggregateBy") in
       let sortBy =
         (Option.map ~f:ContentModerationSortBy.of_xml)
           (Xml.child xml_arg0 "SortBy") in
@@ -13363,17 +19953,19 @@ module GetContentModerationRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
-      make ?sortBy ?nextToken ?maxResults ~jobId ()
+      make ?aggregateBy ?sortBy ?nextToken ?maxResults ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortBy = field_map json "SortBy" ContentModerationSortBy.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
-      make ?sortBy ?nextToken ?maxResults ~jobId ()
+    let of_json json__ =
+      let aggregateBy =
+        field_map json__ "AggregateBy" ContentModerationAggregateBy.of_json in
+      let sortBy = field_map json__ "SortBy" ContentModerationSortBy.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ?aggregateBy ?sortBy ?nextToken ?maxResults ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the inappropriate, unwanted, or offensive content analysis results for a Amazon Rekognition Video analysis started by StartContentModeration. For a list of moderation labels in Amazon Rekognition, see Using the image and video moderation APIs. Amazon Rekognition Video inappropriate or offensive content detection in a stored video is an asynchronous operation. You start analysis by calling StartContentModeration which returns a job identifier (JobId). When analysis finishes, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartContentModeration. To get the results of the content analysis, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetContentModeration and pass the job identifier (JobId) from the initial call to StartContentModeration. For more information, see Working with Stored Videos in the Amazon Rekognition Devlopers Guide. GetContentModeration returns detected inappropriate, unwanted, or offensive content moderation labels, and the time they are detected, in an array, ModerationLabels, of ContentModerationDetection objects. By default, the moderated labels are returned sorted by time, in milliseconds from the start of the video. You can also sort them by moderated label by specifying NAME for the SortBy input parameter. Since video analysis can return a large number of results, use the MaxResults parameter to limit the number of labels returned in a single call to GetContentModeration. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetContentModeration and populate the NextToken request parameter with the value of NextToken returned from the previous call to GetContentModeration. For more information, see Content moderation in the Amazon Rekognition Developer Guide."]
+       "Gets the inappropriate, unwanted, or offensive content analysis results for a Amazon Rekognition Video analysis started by StartContentModeration. For a list of moderation labels in Amazon Rekognition, see Using the image and video moderation APIs. Amazon Rekognition Video inappropriate or offensive content detection in a stored video is an asynchronous operation. You start analysis by calling StartContentModeration which returns a job identifier (JobId). When analysis finishes, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartContentModeration. To get the results of the content analysis, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetContentModeration and pass the job identifier (JobId) from the initial call to StartContentModeration. For more information, see Working with Stored Videos in the Amazon Rekognition Devlopers Guide. GetContentModeration returns detected inappropriate, unwanted, or offensive content moderation labels, and the time they are detected, in an array, ModerationLabels, of ContentModerationDetection objects. By default, the moderated labels are returned sorted by time, in milliseconds from the start of the video. You can also sort them by moderated label by specifying NAME for the SortBy input parameter. Since video analysis can return a large number of results, use the MaxResults parameter to limit the number of labels returned in a single call to GetContentModeration. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetContentModeration and populate the NextToken request parameter with the value of NextToken returned from the previous call to GetContentModeration. For more information, see moderating content in the Amazon Rekognition Developer Guide."]
 module GetCelebrityRecognitionResponse =
   struct
     type nonrec t =
@@ -13390,7 +19982,14 @@ module GetCelebrityRecognitionResponse =
         [@ocaml.doc
           "If the response is truncated, Amazon Rekognition Video returns this token that you can use in the subsequent request to retrieve the next set of celebrities."];
       celebrities: CelebrityRecognitions.t option
-        [@ocaml.doc "Array of celebrities recognized in the video."]}
+        [@ocaml.doc "Array of celebrities recognized in the video."];
+      jobId: JobId.t option
+        [@ocaml.doc
+          "Job identifier for the celebrity recognition operation for which you want to obtain results. The job identifer is returned by an initial call to StartCelebrityRecognition."];
+      video: Video.t option ;
+      jobTag: JobTag.t option
+        [@ocaml.doc
+          "A job identifier specified in the call to StartCelebrityRecognition and returned in the job completion notification sent to your Amazon Simple Notification Service topic."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -13406,14 +20005,20 @@ module GetCelebrityRecognitionResponse =
         fun ?videoMetadata ->
           fun ?nextToken ->
             fun ?celebrities ->
-              fun () ->
-                {
-                  jobStatus;
-                  statusMessage;
-                  videoMetadata;
-                  nextToken;
-                  celebrities
-                }
+              fun ?jobId ->
+                fun ?video ->
+                  fun ?jobTag ->
+                    fun () ->
+                      {
+                        jobStatus;
+                        statusMessage;
+                        videoMetadata;
+                        nextToken;
+                        celebrities;
+                        jobId;
+                        video;
+                        jobTag
+                      }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -13499,9 +20104,16 @@ module GetCelebrityRecognitionResponse =
           (Option.map x.videoMetadata ~f:VideoMetadata.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
         ("Celebrities",
-          (Option.map x.celebrities ~f:CelebrityRecognitions.to_value))]
+          (Option.map x.celebrities ~f:CelebrityRecognitions.to_value));
+        ("JobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("Video", (Option.map x.video ~f:Video.to_value));
+        ("JobTag", (Option.map x.jobTag ~f:JobTag.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let jobTag =
+        (Option.map ~f:JobTag.of_xml) (Xml.child xml_arg0 "JobTag") in
+      let video = (Option.map ~f:Video.of_xml) (Xml.child xml_arg0 "Video") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       let celebrities =
         (Option.map ~f:CelebrityRecognitions.of_xml)
           (Xml.child xml_arg0 "Celebrities") in
@@ -13517,20 +20129,23 @@ module GetCelebrityRecognitionResponse =
       let jobStatus =
         (Option.map ~f:VideoJobStatus.of_xml)
           (Xml.child xml_arg0 "JobStatus") in
-      make ?celebrities ?nextToken ?videoMetadata ?statusMessage ?jobStatus
-        ()
+      make ?jobTag ?video ?jobId ?celebrities ?nextToken ?videoMetadata
+        ?statusMessage ?jobStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
+      let video = field_map json__ "Video" Video.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       let celebrities =
-        field_map json "Celebrities" CelebrityRecognitions.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+        field_map json__ "Celebrities" CelebrityRecognitions.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let videoMetadata =
-        field_map json "VideoMetadata" VideoMetadata.of_json in
+        field_map json__ "VideoMetadata" VideoMetadata.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let jobStatus = field_map json "JobStatus" VideoJobStatus.of_json in
-      make ?celebrities ?nextToken ?videoMetadata ?statusMessage ?jobStatus
-        ()
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let jobStatus = field_map json__ "JobStatus" VideoJobStatus.of_json in
+      make ?jobTag ?video ?jobId ?celebrities ?nextToken ?videoMetadata
+        ?statusMessage ?jobStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the celebrity recognition results for a Amazon Rekognition Video analysis started by StartCelebrityRecognition. Celebrity recognition in a video is an asynchronous operation. Analysis is started by a call to StartCelebrityRecognition which returns a job identifier (JobId). When the celebrity recognition operation finishes, Amazon Rekognition Video publishes a completion status to the Amazon Simple Notification Service topic registered in the initial call to StartCelebrityRecognition. To get the results of the celebrity recognition analysis, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetCelebrityDetection and pass the job identifier (JobId) from the initial call to StartCelebrityDetection. For more information, see Working With Stored Videos in the Amazon Rekognition Developer Guide. GetCelebrityRecognition returns detected celebrities and the time(s) they are detected in an array (Celebrities) of CelebrityRecognition objects. Each CelebrityRecognition contains information about the celebrity in a CelebrityDetail object and the time, Timestamp, the celebrity was detected. This CelebrityDetail object stores information about the detected celebrity's face attributes, a face bounding box, known gender, the celebrity's name, and a confidence estimate. GetCelebrityRecognition only returns the default facial attributes (BoundingBox, Confidence, Landmarks, Pose, and Quality). The BoundingBox field only applies to the detected face instance. The other facial attributes listed in the Face object of the following response syntax are not returned. For more information, see FaceDetail in the Amazon Rekognition Developer Guide. By default, the Celebrities array is sorted by time (milliseconds from the start of the video). You can also sort the array by celebrity by specifying the value ID in the SortBy input parameter. The CelebrityDetail object includes the celebrity identifer and additional information urls. If you don't store the additional information urls, you can get them later by calling GetCelebrityInfo with the celebrity identifer. No information is returned for faces not recognized as celebrities. Use MaxResults parameter to limit the number of labels returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetCelebrityDetection and populate the NextToken request parameter with the token value returned from the previous call to GetCelebrityRecognition."]
@@ -13576,11 +20191,12 @@ module GetCelebrityRecognitionRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?sortBy ?nextToken ?maxResults ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortBy = field_map json "SortBy" CelebrityRecognitionSortBy.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
+    let of_json json__ =
+      let sortBy =
+        field_map json__ "SortBy" CelebrityRecognitionSortBy.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
       make ?sortBy ?nextToken ?maxResults ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13685,14 +20301,14 @@ module GetCelebrityInfoResponse =
       let urls = (Option.map ~f:Urls.of_xml) (Xml.child xml_arg0 "Urls") in
       make ?knownGender ?name ?urls ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let knownGender = field_map json "KnownGender" KnownGender.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let urls = field_map json "Urls" Urls.of_json in
+    let of_json json__ =
+      let knownGender = field_map json__ "KnownGender" KnownGender.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let urls = field_map json__ "Urls" Urls.of_json in
       make ?knownGender ?name ?urls ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the name and additional information about a celebrity based on their Amazon Rekognition ID. The additional information is returned as an array of URLs. If there is no additional information about the celebrity, this list is empty. For more information, see Recognizing Celebrities in an Image in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:GetCelebrityInfo action."]
+       "Gets the name and additional information about a celebrity based on their Amazon Rekognition ID. The additional information is returned as an array of URLs. If there is no additional information about the celebrity, this list is empty. For more information, see Getting information about a celebrity in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:GetCelebrityInfo action."]
 module GetCelebrityInfoRequest =
   struct
     type nonrec t =
@@ -13711,12 +20327,12 @@ module GetCelebrityInfoRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" RekognitionUniqueId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" RekognitionUniqueId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the name and additional information about a celebrity based on their Amazon Rekognition ID. The additional information is returned as an array of URLs. If there is no additional information about the celebrity, this list is empty. For more information, see Recognizing Celebrities in an Image in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:GetCelebrityInfo action."]
+       "Gets the name and additional information about a celebrity based on their Amazon Rekognition ID. The additional information is returned as an array of URLs. If there is no additional information about the celebrity, this list is empty. For more information, see Getting information about a celebrity in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:GetCelebrityInfo action."]
 module DistributeDatasetEntriesResponse =
   struct
     type nonrec t = unit
@@ -13813,7 +20429,7 @@ module DistributeDatasetEntriesResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Distributes the entries (images) in a training dataset across the training dataset and the test dataset for a project. DistributeDatasetEntries moves 20% of the training dataset images to the test dataset. An entry is a JSON Line that describes an image. You supply the Amazon Resource Names (ARN) of a project's training dataset and test dataset. The training dataset must contain the images that you want to split. The test dataset must be empty. The datasets must belong to the same project. To create training and test datasets for a project, call CreateDataset. Distributing a dataset takes a while to complete. To check the status call DescribeDataset. The operation is complete when the Status field for the training dataset and the test dataset is UPDATE_COMPLETE. If the dataset split fails, the value of Status is UPDATE_FAILED. This operation requires permissions to perform the rekognition:DistributeDatasetEntries action."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Distributes the entries (images) in a training dataset across the training dataset and the test dataset for a project. DistributeDatasetEntries moves 20% of the training dataset images to the test dataset. An entry is a JSON Line that describes an image. You supply the Amazon Resource Names (ARN) of a project's training dataset and test dataset. The training dataset must contain the images that you want to split. The test dataset must be empty. The datasets must belong to the same project. To create training and test datasets for a project, call CreateDataset. Distributing a dataset takes a while to complete. To check the status call DescribeDataset. The operation is complete when the Status field for the training dataset and the test dataset is UPDATE_COMPLETE. If the dataset split fails, the value of Status is UPDATE_FAILED. This operation requires permissions to perform the rekognition:DistributeDatasetEntries action."]
 module DistributeDatasetEntriesRequest =
   struct
     type nonrec t =
@@ -13834,13 +20450,215 @@ module DistributeDatasetEntriesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Datasets") in
       make ~datasets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasets =
-        field_map_exn json "Datasets" DistributeDatasetMetadataList.of_json in
+        field_map_exn json__ "Datasets" DistributeDatasetMetadataList.of_json in
       make ~datasets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Distributes the entries (images) in a training dataset across the training dataset and the test dataset for a project. DistributeDatasetEntries moves 20% of the training dataset images to the test dataset. An entry is a JSON Line that describes an image. You supply the Amazon Resource Names (ARN) of a project's training dataset and test dataset. The training dataset must contain the images that you want to split. The test dataset must be empty. The datasets must belong to the same project. To create training and test datasets for a project, call CreateDataset. Distributing a dataset takes a while to complete. To check the status call DescribeDataset. The operation is complete when the Status field for the training dataset and the test dataset is UPDATE_COMPLETE. If the dataset split fails, the value of Status is UPDATE_FAILED. This operation requires permissions to perform the rekognition:DistributeDatasetEntries action."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Distributes the entries (images) in a training dataset across the training dataset and the test dataset for a project. DistributeDatasetEntries moves 20% of the training dataset images to the test dataset. An entry is a JSON Line that describes an image. You supply the Amazon Resource Names (ARN) of a project's training dataset and test dataset. The training dataset must contain the images that you want to split. The test dataset must be empty. The datasets must belong to the same project. To create training and test datasets for a project, call CreateDataset. Distributing a dataset takes a while to complete. To check the status call DescribeDataset. The operation is complete when the Status field for the training dataset and the test dataset is UPDATE_COMPLETE. If the dataset split fails, the value of Status is UPDATE_FAILED. This operation requires permissions to perform the rekognition:DistributeDatasetEntries action."]
+module DisassociateFacesResponse =
+  struct
+    type nonrec t =
+      {
+      disassociatedFaces: DisassociatedFacesList.t option
+        [@ocaml.doc
+          "An array of DissociatedFace objects containing FaceIds that are successfully disassociated with the UserID is returned. Returned if the DisassociatedFaces action is successful."];
+      unsuccessfulFaceDisassociations:
+        UnsuccessfulFaceDisassociationList.t option
+        [@ocaml.doc
+          "An array of UnsuccessfulDisassociation objects containing FaceIds that are not successfully associated, along with the reasons for the failure to associate. Returned if the DisassociateFaces action is successful."];
+      userStatus: UserStatus.t option
+        [@ocaml.doc
+          "The status of an update made to a User. Reflects if the User has been updated for every requested change."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?disassociatedFaces =
+      fun ?unsuccessfulFaceDisassociations ->
+        fun ?userStatus ->
+          fun () ->
+            { disassociatedFaces; unsuccessfulFaceDisassociations; userStatus
+            }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DisassociatedFaces",
+           (Option.map x.disassociatedFaces
+              ~f:DisassociatedFacesList.to_value));
+        ("UnsuccessfulFaceDisassociations",
+          (Option.map x.unsuccessfulFaceDisassociations
+             ~f:UnsuccessfulFaceDisassociationList.to_value));
+        ("UserStatus", (Option.map x.userStatus ~f:UserStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userStatus =
+        (Option.map ~f:UserStatus.of_xml) (Xml.child xml_arg0 "UserStatus") in
+      let unsuccessfulFaceDisassociations =
+        (Option.map ~f:UnsuccessfulFaceDisassociationList.of_xml)
+          (Xml.child xml_arg0 "UnsuccessfulFaceDisassociations") in
+      let disassociatedFaces =
+        (Option.map ~f:DisassociatedFacesList.of_xml)
+          (Xml.child xml_arg0 "DisassociatedFaces") in
+      make ?userStatus ?unsuccessfulFaceDisassociations ?disassociatedFaces
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userStatus = field_map json__ "UserStatus" UserStatus.of_json in
+      let unsuccessfulFaceDisassociations =
+        field_map json__ "UnsuccessfulFaceDisassociations"
+          UnsuccessfulFaceDisassociationList.of_json in
+      let disassociatedFaces =
+        field_map json__ "DisassociatedFaces" DisassociatedFacesList.of_json in
+      make ?userStatus ?unsuccessfulFaceDisassociations ?disassociatedFaces
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes the association between a Face supplied in an array of FaceIds and the User. If the User is not present already, then a ResourceNotFound exception is thrown. If successful, an array of faces that are disassociated from the User is returned. If a given face is already disassociated from the given UserID, it will be ignored and not be returned in the response. If a given face is already associated with a different User or not found in the collection it will be returned as part of UnsuccessfulDisassociations. You can remove 1 - 100 face IDs from a user at one time."]
+module DisassociateFacesRequest =
+  struct
+    type nonrec t =
+      {
+      collectionId: CollectionId.t
+        [@ocaml.doc
+          "The ID of an existing collection containing the UserID."];
+      userId: UserId.t [@ocaml.doc "ID for the existing UserID."];
+      clientRequestToken: ClientRequestToken.t option
+        [@ocaml.doc
+          "Idempotent token used to identify the request to DisassociateFaces. If you use the same token with multiple DisassociateFaces requests, the same response is returned. Use ClientRequestToken to prevent the same request from being processed more than once."];
+      faceIds: UserFaceIdList.t
+        [@ocaml.doc "An array of face IDs to disassociate from the UserID."]}
+    let context_ = "DisassociateFacesRequest"
+    let make ?clientRequestToken =
+      fun ~collectionId ->
+        fun ~userId ->
+          fun ~faceIds ->
+            fun () -> { clientRequestToken; collectionId; userId; faceIds }
+    let to_value x =
+      structure_to_value
+        [("CollectionId", (Some (CollectionId.to_value x.collectionId)));
+        ("UserId", (Some (UserId.to_value x.userId)));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("FaceIds", (Some (UserFaceIdList.to_value x.faceIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let faceIds =
+        UserFaceIdList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FaceIds") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let userId =
+        UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
+      let collectionId =
+        CollectionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
+      make ~faceIds ?clientRequestToken ~userId ~collectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let faceIds = field_map_exn json__ "FaceIds" UserFaceIdList.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let userId = field_map_exn json__ "UserId" UserId.of_json in
+      let collectionId =
+        field_map_exn json__ "CollectionId" CollectionId.of_json in
+      make ~faceIds ?clientRequestToken ~userId ~collectionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes the association between a Face supplied in an array of FaceIds and the User. If the User is not present already, then a ResourceNotFound exception is thrown. If successful, an array of faces that are disassociated from the User is returned. If a given face is already disassociated from the given UserID, it will be ignored and not be returned in the response. If a given face is already associated with a different User or not found in the collection it will be returned as part of UnsuccessfulDisassociations. You can remove 1 - 100 face IDs from a user at one time."]
 module DetectTextResponse =
   struct
     type nonrec t =
@@ -13962,15 +20780,15 @@ module DetectTextResponse =
           (Xml.child xml_arg0 "TextDetections") in
       make ?textModelVersion ?textDetections ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let textModelVersion =
-        field_map json "TextModelVersion" String_.of_json in
+        field_map json__ "TextModelVersion" String_.of_json in
       let textDetections =
-        field_map json "TextDetections" TextDetectionList.of_json in
+        field_map json__ "TextDetections" TextDetectionList.of_json in
       make ?textModelVersion ?textDetections ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detects text in the input image and converts it into machine-readable text. Pass the input image as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, you must pass it as a reference to an image in an Amazon S3 bucket. For the AWS CLI, passing image bytes is not supported. The image must be either a .png or .jpeg formatted file. The DetectText operation returns text in an array of TextDetection elements, TextDetections. Each TextDetection element provides information about a single word or line of text that was detected in the image. A word is one or more script characters that are not separated by spaces. DetectText can detect up to 100 words in an image. A line is a string of equally spaced words. A line isn't necessarily a complete sentence. For example, a driver's license number is detected as a line. A line ends when there is no aligned text after it. Also, a line ends when there is a large gap between words, relative to the length of the words. This means, depending on the gap between words, Amazon Rekognition may detect multiple lines in text aligned in the same direction. Periods don't represent the end of a line. If a sentence spans multiple lines, the DetectText operation returns multiple lines. To determine whether a TextDetection element is a line of text or a word, use the TextDetection object Type field. To be detected, text must be within +/- 90 degrees orientation of the horizontal axis. For more information, see DetectText in the Amazon Rekognition Developer Guide."]
+       "Detects text in the input image and converts it into machine-readable text. Pass the input image as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, you must pass it as a reference to an image in an Amazon S3 bucket. For the AWS CLI, passing image bytes is not supported. The image must be either a .png or .jpeg formatted file. The DetectText operation returns text in an array of TextDetection elements, TextDetections. Each TextDetection element provides information about a single word or line of text that was detected in the image. A word is one or more script characters that are not separated by spaces. DetectText can detect up to 100 words in an image. A line is a string of equally spaced words. A line isn't necessarily a complete sentence. For example, a driver's license number is detected as a line. A line ends when there is no aligned text after it. Also, a line ends when there is a large gap between words, relative to the length of the words. This means, depending on the gap between words, Amazon Rekognition may detect multiple lines in text aligned in the same direction. Periods don't represent the end of a line. If a sentence spans multiple lines, the DetectText operation returns multiple lines. To determine whether a TextDetection element is a line of text or a word, use the TextDetection object Type field. To be detected, text must be within +/- 90 degrees orientation of the horizontal axis. For more information, see Detecting text in the Amazon Rekognition Developer Guide."]
 module DetectTextRequest =
   struct
     type nonrec t =
@@ -13996,13 +20814,13 @@ module DetectTextRequest =
         Image.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Image") in
       make ?filters ~image ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" DetectTextFilters.of_json in
-      let image = field_map_exn json "Image" Image.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" DetectTextFilters.of_json in
+      let image = field_map_exn json__ "Image" Image.of_json in
       make ?filters ~image ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detects text in the input image and converts it into machine-readable text. Pass the input image as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, you must pass it as a reference to an image in an Amazon S3 bucket. For the AWS CLI, passing image bytes is not supported. The image must be either a .png or .jpeg formatted file. The DetectText operation returns text in an array of TextDetection elements, TextDetections. Each TextDetection element provides information about a single word or line of text that was detected in the image. A word is one or more script characters that are not separated by spaces. DetectText can detect up to 100 words in an image. A line is a string of equally spaced words. A line isn't necessarily a complete sentence. For example, a driver's license number is detected as a line. A line ends when there is no aligned text after it. Also, a line ends when there is a large gap between words, relative to the length of the words. This means, depending on the gap between words, Amazon Rekognition may detect multiple lines in text aligned in the same direction. Periods don't represent the end of a line. If a sentence spans multiple lines, the DetectText operation returns multiple lines. To determine whether a TextDetection element is a line of text or a word, use the TextDetection object Type field. To be detected, text must be within +/- 90 degrees orientation of the horizontal axis. For more information, see DetectText in the Amazon Rekognition Developer Guide."]
+       "Detects text in the input image and converts it into machine-readable text. Pass the input image as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, you must pass it as a reference to an image in an Amazon S3 bucket. For the AWS CLI, passing image bytes is not supported. The image must be either a .png or .jpeg formatted file. The DetectText operation returns text in an array of TextDetection elements, TextDetections. Each TextDetection element provides information about a single word or line of text that was detected in the image. A word is one or more script characters that are not separated by spaces. DetectText can detect up to 100 words in an image. A line is a string of equally spaced words. A line isn't necessarily a complete sentence. For example, a driver's license number is detected as a line. A line ends when there is no aligned text after it. Also, a line ends when there is a large gap between words, relative to the length of the words. This means, depending on the gap between words, Amazon Rekognition may detect multiple lines in text aligned in the same direction. Periods don't represent the end of a line. If a sentence spans multiple lines, the DetectText operation returns multiple lines. To determine whether a TextDetection element is a line of text or a word, use the TextDetection object Type field. To be detected, text must be within +/- 90 degrees orientation of the horizontal axis. For more information, see Detecting text in the Amazon Rekognition Developer Guide."]
 module DetectProtectiveEquipmentResponse =
   struct
     type nonrec t =
@@ -14136,13 +20954,13 @@ module DetectProtectiveEquipmentResponse =
           (Xml.child xml_arg0 "ProtectiveEquipmentModelVersion") in
       make ?summary ?persons ?protectiveEquipmentModelVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let summary =
-        field_map json "Summary" ProtectiveEquipmentSummary.of_json in
+        field_map json__ "Summary" ProtectiveEquipmentSummary.of_json in
       let persons =
-        field_map json "Persons" ProtectiveEquipmentPersons.of_json in
+        field_map json__ "Persons" ProtectiveEquipmentPersons.of_json in
       let protectiveEquipmentModelVersion =
-        field_map json "ProtectiveEquipmentModelVersion" String_.of_json in
+        field_map json__ "ProtectiveEquipmentModelVersion" String_.of_json in
       make ?summary ?persons ?protectiveEquipmentModelVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14175,11 +20993,11 @@ module DetectProtectiveEquipmentRequest =
         Image.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Image") in
       make ?summarizationAttributes ~image ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let summarizationAttributes =
-        field_map json "SummarizationAttributes"
+        field_map json__ "SummarizationAttributes"
           ProtectiveEquipmentSummarizationAttributes.of_json in
-      let image = field_map_exn json "Image" Image.of_json in
+      let image = field_map_exn json__ "Image" Image.of_json in
       make ?summarizationAttributes ~image ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14190,12 +21008,18 @@ module DetectModerationLabelsResponse =
       {
       moderationLabels: ModerationLabels.t option
         [@ocaml.doc
-          "Array of detected Moderation labels and the time, in milliseconds from the start of the video, they were detected."];
+          "Array of detected Moderation labels. For video operations, this includes the time, in milliseconds from the start of the video, they were detected."];
       moderationModelVersion: String_.t option
         [@ocaml.doc
-          "Version number of the moderation detection model that was used to detect unsafe content."];
+          "Version number of the base moderation detection model that was used to detect unsafe content."];
       humanLoopActivationOutput: HumanLoopActivationOutput.t option
-        [@ocaml.doc "Shows the results of the human in the loop evaluation."]}
+        [@ocaml.doc "Shows the results of the human in the loop evaluation."];
+      projectVersion: ProjectVersionId.t option
+        [@ocaml.doc
+          "Identifier of the custom adapter that was used during inference. If during inference the adapter was EXPIRED, then the parameter will not be returned, indicating that a base moderation detection project version was used."];
+      contentTypes: ContentTypes.t option
+        [@ocaml.doc
+          "A list of predicted results for the type of content an image contains. For example, the image content might be from animation, sports, or a video game."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `HumanLoopQuotaExceededException of HumanLoopQuotaExceededException.t 
@@ -14206,17 +21030,23 @@ module DetectModerationLabelsResponse =
       | `InvalidS3ObjectException of InvalidS3ObjectException.t 
       | `ProvisionedThroughputExceededException of
           ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ResourceNotReadyException of ResourceNotReadyException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?moderationLabels =
       fun ?moderationModelVersion ->
         fun ?humanLoopActivationOutput ->
-          fun () ->
-            {
-              moderationLabels;
-              moderationModelVersion;
-              humanLoopActivationOutput
-            }
+          fun ?projectVersion ->
+            fun ?contentTypes ->
+              fun () ->
+                {
+                  moderationLabels;
+                  moderationModelVersion;
+                  humanLoopActivationOutput;
+                  projectVersion;
+                  contentTypes
+                }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -14238,6 +21068,10 @@ module DetectModerationLabelsResponse =
       | "ProvisionedThroughputExceededException" ->
           `ProvisionedThroughputExceededException
             (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ResourceNotReadyException" ->
+          `ResourceNotReadyException (ResourceNotReadyException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
       | name ->
@@ -14264,6 +21098,10 @@ module DetectModerationLabelsResponse =
       | "ProvisionedThroughputExceededException" ->
           `ProvisionedThroughputExceededException
             (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ResourceNotReadyException" ->
+          `ResourceNotReadyException (ResourceNotReadyException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
@@ -14302,6 +21140,14 @@ module DetectModerationLabelsResponse =
           `Assoc
             [("error", (`String "ProvisionedThroughputExceededException"));
             ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ResourceNotReadyException e ->
+          `Assoc
+            [("error", (`String "ResourceNotReadyException"));
+            ("details", (ResourceNotReadyException.to_json e))]
       | `ThrottlingException e ->
           `Assoc
             [("error", (`String "ThrottlingException"));
@@ -14319,9 +21165,19 @@ module DetectModerationLabelsResponse =
           (Option.map x.moderationModelVersion ~f:String_.to_value));
         ("HumanLoopActivationOutput",
           (Option.map x.humanLoopActivationOutput
-             ~f:HumanLoopActivationOutput.to_value))]
+             ~f:HumanLoopActivationOutput.to_value));
+        ("ProjectVersion",
+          (Option.map x.projectVersion ~f:ProjectVersionId.to_value));
+        ("ContentTypes",
+          (Option.map x.contentTypes ~f:ContentTypes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let contentTypes =
+        (Option.map ~f:ContentTypes.of_xml)
+          (Xml.child xml_arg0 "ContentTypes") in
+      let projectVersion =
+        (Option.map ~f:ProjectVersionId.of_xml)
+          (Xml.child xml_arg0 "ProjectVersion") in
       let humanLoopActivationOutput =
         (Option.map ~f:HumanLoopActivationOutput.of_xml)
           (Xml.child xml_arg0 "HumanLoopActivationOutput") in
@@ -14331,22 +21187,25 @@ module DetectModerationLabelsResponse =
       let moderationLabels =
         (Option.map ~f:ModerationLabels.of_xml)
           (Xml.child xml_arg0 "ModerationLabels") in
-      make ?humanLoopActivationOutput ?moderationModelVersion
-        ?moderationLabels ()
+      make ?contentTypes ?projectVersion ?humanLoopActivationOutput
+        ?moderationModelVersion ?moderationLabels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let contentTypes = field_map json__ "ContentTypes" ContentTypes.of_json in
+      let projectVersion =
+        field_map json__ "ProjectVersion" ProjectVersionId.of_json in
       let humanLoopActivationOutput =
-        field_map json "HumanLoopActivationOutput"
+        field_map json__ "HumanLoopActivationOutput"
           HumanLoopActivationOutput.of_json in
       let moderationModelVersion =
-        field_map json "ModerationModelVersion" String_.of_json in
+        field_map json__ "ModerationModelVersion" String_.of_json in
       let moderationLabels =
-        field_map json "ModerationLabels" ModerationLabels.of_json in
-      make ?humanLoopActivationOutput ?moderationModelVersion
-        ?moderationLabels ()
+        field_map json__ "ModerationLabels" ModerationLabels.of_json in
+      make ?contentTypes ?projectVersion ?humanLoopActivationOutput
+        ?moderationModelVersion ?moderationLabels ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detects unsafe content in a specified JPEG or PNG format image. Use DetectModerationLabels to moderate images depending on your requirements. For example, you might want to filter images that contain nudity, but not images containing suggestive content. To filter images, use the labels returned by DetectModerationLabels to determine which types of content are appropriate. For information about moderation labels, see Detecting Unsafe Content in the Amazon Rekognition Developer Guide. You pass the input image either as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file."]
+       "Detects unsafe content in a specified JPEG or PNG format image. Use DetectModerationLabels to moderate images depending on your requirements. For example, you might want to filter images that contain nudity, but not images containing suggestive content. To filter images, use the labels returned by DetectModerationLabels to determine which types of content are appropriate. For information about moderation labels, see Detecting Unsafe Content in the Amazon Rekognition Developer Guide. You pass the input image either as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. You can specify an adapter to use when retrieving label predictions by providing a ProjectVersionArn to the ProjectVersion argument."]
 module DetectModerationLabelsRequest =
   struct
     type nonrec t =
@@ -14359,19 +21218,30 @@ module DetectModerationLabelsRequest =
           "Specifies the minimum confidence level for the labels to return. Amazon Rekognition doesn't return any labels with a confidence level lower than this specified value. If you don't specify MinConfidence, the operation returns labels with confidence values greater than or equal to 50 percent."];
       humanLoopConfig: HumanLoopConfig.t option
         [@ocaml.doc
-          "Sets up the configuration for human evaluation, including the FlowDefinition the image will be sent to."]}
+          "Sets up the configuration for human evaluation, including the FlowDefinition the image will be sent to."];
+      projectVersion: ProjectVersionId.t option
+        [@ocaml.doc
+          "Identifier for the custom adapter. Expects the ProjectVersionArn as a value. Use the CreateProject or CreateProjectVersion APIs to create a custom adapter."]}
     let context_ = "DetectModerationLabelsRequest"
     let make ?minConfidence =
       fun ?humanLoopConfig ->
-        fun ~image -> fun () -> { minConfidence; humanLoopConfig; image }
+        fun ?projectVersion ->
+          fun ~image ->
+            fun () ->
+              { minConfidence; humanLoopConfig; projectVersion; image }
     let to_value x =
       structure_to_value
         [("Image", (Some (Image.to_value x.image)));
         ("MinConfidence", (Option.map x.minConfidence ~f:Percent.to_value));
         ("HumanLoopConfig",
-          (Option.map x.humanLoopConfig ~f:HumanLoopConfig.to_value))]
+          (Option.map x.humanLoopConfig ~f:HumanLoopConfig.to_value));
+        ("ProjectVersion",
+          (Option.map x.projectVersion ~f:ProjectVersionId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let projectVersion =
+        (Option.map ~f:ProjectVersionId.of_xml)
+          (Xml.child xml_arg0 "ProjectVersion") in
       let humanLoopConfig =
         (Option.map ~f:HumanLoopConfig.of_xml)
           (Xml.child xml_arg0 "HumanLoopConfig") in
@@ -14379,17 +21249,19 @@ module DetectModerationLabelsRequest =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "MinConfidence") in
       let image =
         Image.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Image") in
-      make ?humanLoopConfig ?minConfidence ~image ()
+      make ?projectVersion ?humanLoopConfig ?minConfidence ~image ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let projectVersion =
+        field_map json__ "ProjectVersion" ProjectVersionId.of_json in
       let humanLoopConfig =
-        field_map json "HumanLoopConfig" HumanLoopConfig.of_json in
-      let minConfidence = field_map json "MinConfidence" Percent.of_json in
-      let image = field_map_exn json "Image" Image.of_json in
-      make ?humanLoopConfig ?minConfidence ~image ()
+        field_map json__ "HumanLoopConfig" HumanLoopConfig.of_json in
+      let minConfidence = field_map json__ "MinConfidence" Percent.of_json in
+      let image = field_map_exn json__ "Image" Image.of_json in
+      make ?projectVersion ?humanLoopConfig ?minConfidence ~image ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detects unsafe content in a specified JPEG or PNG format image. Use DetectModerationLabels to moderate images depending on your requirements. For example, you might want to filter images that contain nudity, but not images containing suggestive content. To filter images, use the labels returned by DetectModerationLabels to determine which types of content are appropriate. For information about moderation labels, see Detecting Unsafe Content in the Amazon Rekognition Developer Guide. You pass the input image either as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file."]
+       "Detects unsafe content in a specified JPEG or PNG format image. Use DetectModerationLabels to moderate images depending on your requirements. For example, you might want to filter images that contain nudity, but not images containing suggestive content. To filter images, use the labels returned by DetectModerationLabels to determine which types of content are appropriate. For information about moderation labels, see Detecting Unsafe Content in the Amazon Rekognition Developer Guide. You pass the input image either as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. You can specify an adapter to use when retrieving label predictions by providing a ProjectVersionArn to the ProjectVersion argument."]
 module DetectLabelsResponse =
   struct
     type nonrec t =
@@ -14402,7 +21274,10 @@ module DetectLabelsResponse =
           "The value of OrientationCorrection is always null. If the input image is in .jpeg format, it might contain exchangeable image file format (Exif) metadata that includes the image's orientation. Amazon Rekognition uses this orientation information to perform image correction. The bounding box coordinates are translated to represent object locations after the orientation information in the Exif metadata is used to correct the image orientation. Images in .png format don't contain Exif metadata. Amazon Rekognition doesn\226\128\153t perform image correction for images in .png format and .jpeg images without orientation information in the image Exif metadata. The bounding box coordinates aren't translated and represent the object locations before the image is rotated."];
       labelModelVersion: String_.t option
         [@ocaml.doc
-          "Version number of the label detection model that was used to detect labels."]}
+          "Version number of the label detection model that was used to detect labels."];
+      imageProperties: DetectLabelsImageProperties.t option
+        [@ocaml.doc
+          "Information about the properties of the input image, such as brightness, sharpness, contrast, and dominant colors."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ImageTooLargeException of ImageTooLargeException.t 
@@ -14417,7 +21292,14 @@ module DetectLabelsResponse =
     let make ?labels =
       fun ?orientationCorrection ->
         fun ?labelModelVersion ->
-          fun () -> { labels; orientationCorrection; labelModelVersion }
+          fun ?imageProperties ->
+            fun () ->
+              {
+                labels;
+                orientationCorrection;
+                labelModelVersion;
+                imageProperties
+              }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -14509,9 +21391,15 @@ module DetectLabelsResponse =
           (Option.map x.orientationCorrection
              ~f:OrientationCorrection.to_value));
         ("LabelModelVersion",
-          (Option.map x.labelModelVersion ~f:String_.to_value))]
+          (Option.map x.labelModelVersion ~f:String_.to_value));
+        ("ImageProperties",
+          (Option.map x.imageProperties
+             ~f:DetectLabelsImageProperties.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let imageProperties =
+        (Option.map ~f:DetectLabelsImageProperties.of_xml)
+          (Xml.child xml_arg0 "ImageProperties") in
       let labelModelVersion =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "LabelModelVersion") in
@@ -14520,18 +21408,24 @@ module DetectLabelsResponse =
           (Xml.child xml_arg0 "OrientationCorrection") in
       let labels =
         (Option.map ~f:Labels.of_xml) (Xml.child xml_arg0 "Labels") in
-      make ?labelModelVersion ?orientationCorrection ?labels ()
+      make ?imageProperties ?labelModelVersion ?orientationCorrection ?labels
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let imageProperties =
+        field_map json__ "ImageProperties"
+          DetectLabelsImageProperties.of_json in
       let labelModelVersion =
-        field_map json "LabelModelVersion" String_.of_json in
+        field_map json__ "LabelModelVersion" String_.of_json in
       let orientationCorrection =
-        field_map json "OrientationCorrection" OrientationCorrection.of_json in
-      let labels = field_map json "Labels" Labels.of_json in
-      make ?labelModelVersion ?orientationCorrection ?labels ()
+        field_map json__ "OrientationCorrection"
+          OrientationCorrection.of_json in
+      let labels = field_map json__ "Labels" Labels.of_json in
+      make ?imageProperties ?labelModelVersion ?orientationCorrection ?labels
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detects instances of real-world entities within an image (JPEG or PNG) provided as input. This includes objects like flower, tree, and table; events like wedding, graduation, and birthday party; and concepts like landscape, evening, and nature. For an example, see Analyzing Images Stored in an Amazon S3 Bucket in the Amazon Rekognition Developer Guide. DetectLabels does not support the detection of activities. However, activity detection is supported for label detection in videos. For more information, see StartLabelDetection in the Amazon Rekognition Developer Guide. You pass the input image as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. For each object, scene, and concept the API returns one or more labels. Each label provides the object name, and the level of confidence that the image contains the object. For example, suppose the input image has a lighthouse, the sea, and a rock. The response includes all three labels, one for each object. \\{Name: lighthouse, Confidence: 98.4629\\} \\{Name: rock,Confidence: 79.2097\\} \\{Name: sea,Confidence: 75.061\\} In the preceding example, the operation returns one label for each of the three objects. The operation can also return multiple labels for the same object in the image. For example, if the input image shows a flower (for example, a tulip), the operation might return the following three labels. \\{Name: flower,Confidence: 99.0562\\} \\{Name: plant,Confidence: 99.0562\\} \\{Name: tulip,Confidence: 99.0562\\} In this example, the detection algorithm more precisely identifies the flower as a tulip. In response, the API returns an array of labels. In addition, the response also includes the orientation correction. Optionally, you can specify MinConfidence to control the confidence threshold for the labels returned. The default is 55%. You can also add the MaxLabels parameter to limit the number of labels returned. If the object detected is a person, the operation doesn't provide the same facial details that the DetectFaces operation provides. DetectLabels returns bounding boxes for instances of common object labels in an array of Instance objects. An Instance object contains a BoundingBox object, for the location of the label on the image. It also includes the confidence by which the bounding box was detected. DetectLabels also returns a hierarchical taxonomy of detected labels. For example, a detected car might be assigned the label car. The label car has two parent labels: Vehicle (its parent) and Transportation (its grandparent). The response returns the entire list of ancestors for a label. Each ancestor is a unique label in the response. In the previous example, Car, Vehicle, and Transportation are returned as unique labels in the response. This is a stateless API operation. That is, the operation does not persist any data. This operation requires permissions to perform the rekognition:DetectLabels action."]
+       "Detects instances of real-world entities within an image (JPEG or PNG) provided as input. This includes objects like flower, tree, and table; events like wedding, graduation, and birthday party; and concepts like landscape, evening, and nature. For an example, see Analyzing images stored in an Amazon S3 bucket in the Amazon Rekognition Developer Guide. You pass the input image as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. Optional Parameters You can specify one or both of the GENERAL_LABELS and IMAGE_PROPERTIES feature types when calling the DetectLabels API. Including GENERAL_LABELS will ensure the response includes the labels detected in the input image, while including IMAGE_PROPERTIES will ensure the response includes information about the image quality and color. When using GENERAL_LABELS and/or IMAGE_PROPERTIES you can provide filtering criteria to the Settings parameter. You can filter with sets of individual labels or with label categories. You can specify inclusive filters, exclusive filters, or a combination of inclusive and exclusive filters. For more information on filtering see Detecting Labels in an Image. When getting labels, you can specify MinConfidence to control the confidence threshold for the labels returned. The default is 55%. You can also add the MaxLabels parameter to limit the number of labels returned. The default and upper limit is 1000 labels. These arguments are only valid when supplying GENERAL_LABELS as a feature type. Response Elements For each object, scene, and concept the API returns one or more labels. The API returns the following types of information about labels: Name - The name of the detected label. Confidence - The level of confidence in the label assigned to a detected object. Parents - The ancestor labels for a detected label. DetectLabels returns a hierarchical taxonomy of detected labels. For example, a detected car might be assigned the label car. The label car has two parent labels: Vehicle (its parent) and Transportation (its grandparent). The response includes the all ancestors for a label, where every ancestor is a unique label. In the previous example, Car, Vehicle, and Transportation are returned as unique labels in the response. Aliases - Possible Aliases for the label. Categories - The label categories that the detected label belongs to. BoundingBox \226\128\148 Bounding boxes are described for all instances of detected common object labels, returned in an array of Instance objects. An Instance object contains a BoundingBox object, describing the location of the label on the input image. It also includes the confidence for the accuracy of the detected bounding box. The API returns the following information regarding the image, as part of the ImageProperties structure: Quality - Information about the Sharpness, Brightness, and Contrast of the input image, scored between 0 to 100. Image quality is returned for the entire image, as well as the background and the foreground. Dominant Color - An array of the dominant colors in the image. Foreground - Information about the sharpness, brightness, and dominant colors of the input image\226\128\153s foreground. Background - Information about the sharpness, brightness, and dominant colors of the input image\226\128\153s background. The list of returned labels will include at least one label for every detected object, along with information about that label. In the following example, suppose the input image has a lighthouse, the sea, and a rock. The response includes all three labels, one for each object, as well as the confidence in the label: \\{Name: lighthouse, Confidence: 98.4629\\} \\{Name: rock,Confidence: 79.2097\\} \\{Name: sea,Confidence: 75.061\\} The list of labels can include multiple labels for the same object. For example, if the input image shows a flower (for example, a tulip), the operation might return the following three labels. \\{Name: flower,Confidence: 99.0562\\} \\{Name: plant,Confidence: 99.0562\\} \\{Name: tulip,Confidence: 99.0562\\} In this example, the detection algorithm more precisely identifies the flower as a tulip. If the object detected is a person, the operation doesn't provide the same facial details that the DetectFaces operation provides. This is a stateless API operation that doesn't return any data. This operation requires permissions to perform the rekognition:DetectLabels action."]
 module DetectLabelsRequest =
   struct
     type nonrec t =
@@ -14541,37 +21435,60 @@ module DetectLabelsRequest =
           "The input image as base64-encoded bytes or an S3 object. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. Images stored in an S3 Bucket do not need to be base64-encoded. If you are using an AWS SDK to call Amazon Rekognition, you might not need to base64-encode image bytes passed using the Bytes field. For more information, see Images in the Amazon Rekognition developer guide."];
       maxLabels: UInteger.t option
         [@ocaml.doc
-          "Maximum number of labels you want the service to return in the response. The service returns the specified number of highest confidence labels."];
+          "Maximum number of labels you want the service to return in the response. The service returns the specified number of highest confidence labels. Only valid when GENERAL_LABELS is specified as a feature type in the Feature input parameter."];
       minConfidence: Percent.t option
         [@ocaml.doc
-          "Specifies the minimum confidence level for the labels to return. Amazon Rekognition doesn't return any labels with confidence lower than this specified value. If MinConfidence is not specified, the operation returns labels with a confidence values greater than or equal to 55 percent."]}
+          "Specifies the minimum confidence level for the labels to return. Amazon Rekognition doesn't return any labels with confidence lower than this specified value. If MinConfidence is not specified, the operation returns labels with a confidence values greater than or equal to 55 percent. Only valid when GENERAL_LABELS is specified as a feature type in the Feature input parameter."];
+      features: DetectLabelsFeatureList.t option
+        [@ocaml.doc
+          "A list of the types of analysis to perform. Specifying GENERAL_LABELS uses the label detection feature, while specifying IMAGE_PROPERTIES returns information regarding image color and quality. If no option is specified GENERAL_LABELS is used by default."];
+      settings: DetectLabelsSettings.t option
+        [@ocaml.doc
+          "A list of the filters to be applied to returned detected labels and image properties. Specified filters can be inclusive, exclusive, or a combination of both. Filters can be used for individual labels or label categories. The exact label names or label categories must be supplied. For a full list of labels and label categories, see Detecting labels."]}
     let context_ = "DetectLabelsRequest"
     let make ?maxLabels =
       fun ?minConfidence ->
-        fun ~image -> fun () -> { maxLabels; minConfidence; image }
+        fun ?features ->
+          fun ?settings ->
+            fun ~image ->
+              fun () ->
+                { maxLabels; minConfidence; features; settings; image }
     let to_value x =
       structure_to_value
         [("Image", (Some (Image.to_value x.image)));
         ("MaxLabels", (Option.map x.maxLabels ~f:UInteger.to_value));
-        ("MinConfidence", (Option.map x.minConfidence ~f:Percent.to_value))]
+        ("MinConfidence", (Option.map x.minConfidence ~f:Percent.to_value));
+        ("Features",
+          (Option.map x.features ~f:DetectLabelsFeatureList.to_value));
+        ("Settings",
+          (Option.map x.settings ~f:DetectLabelsSettings.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let settings =
+        (Option.map ~f:DetectLabelsSettings.of_xml)
+          (Xml.child xml_arg0 "Settings") in
+      let features =
+        (Option.map ~f:DetectLabelsFeatureList.of_xml)
+          (Xml.child xml_arg0 "Features") in
       let minConfidence =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "MinConfidence") in
       let maxLabels =
         (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "MaxLabels") in
       let image =
         Image.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Image") in
-      make ?minConfidence ?maxLabels ~image ()
+      make ?settings ?features ?minConfidence ?maxLabels ~image ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let minConfidence = field_map json "MinConfidence" Percent.of_json in
-      let maxLabels = field_map json "MaxLabels" UInteger.of_json in
-      let image = field_map_exn json "Image" Image.of_json in
-      make ?minConfidence ?maxLabels ~image ()
+    let of_json json__ =
+      let settings = field_map json__ "Settings" DetectLabelsSettings.of_json in
+      let features =
+        field_map json__ "Features" DetectLabelsFeatureList.of_json in
+      let minConfidence = field_map json__ "MinConfidence" Percent.of_json in
+      let maxLabels = field_map json__ "MaxLabels" UInteger.of_json in
+      let image = field_map_exn json__ "Image" Image.of_json in
+      make ?settings ?features ?minConfidence ?maxLabels ~image ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detects instances of real-world entities within an image (JPEG or PNG) provided as input. This includes objects like flower, tree, and table; events like wedding, graduation, and birthday party; and concepts like landscape, evening, and nature. For an example, see Analyzing Images Stored in an Amazon S3 Bucket in the Amazon Rekognition Developer Guide. DetectLabels does not support the detection of activities. However, activity detection is supported for label detection in videos. For more information, see StartLabelDetection in the Amazon Rekognition Developer Guide. You pass the input image as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. For each object, scene, and concept the API returns one or more labels. Each label provides the object name, and the level of confidence that the image contains the object. For example, suppose the input image has a lighthouse, the sea, and a rock. The response includes all three labels, one for each object. \\{Name: lighthouse, Confidence: 98.4629\\} \\{Name: rock,Confidence: 79.2097\\} \\{Name: sea,Confidence: 75.061\\} In the preceding example, the operation returns one label for each of the three objects. The operation can also return multiple labels for the same object in the image. For example, if the input image shows a flower (for example, a tulip), the operation might return the following three labels. \\{Name: flower,Confidence: 99.0562\\} \\{Name: plant,Confidence: 99.0562\\} \\{Name: tulip,Confidence: 99.0562\\} In this example, the detection algorithm more precisely identifies the flower as a tulip. In response, the API returns an array of labels. In addition, the response also includes the orientation correction. Optionally, you can specify MinConfidence to control the confidence threshold for the labels returned. The default is 55%. You can also add the MaxLabels parameter to limit the number of labels returned. If the object detected is a person, the operation doesn't provide the same facial details that the DetectFaces operation provides. DetectLabels returns bounding boxes for instances of common object labels in an array of Instance objects. An Instance object contains a BoundingBox object, for the location of the label on the image. It also includes the confidence by which the bounding box was detected. DetectLabels also returns a hierarchical taxonomy of detected labels. For example, a detected car might be assigned the label car. The label car has two parent labels: Vehicle (its parent) and Transportation (its grandparent). The response returns the entire list of ancestors for a label. Each ancestor is a unique label in the response. In the previous example, Car, Vehicle, and Transportation are returned as unique labels in the response. This is a stateless API operation. That is, the operation does not persist any data. This operation requires permissions to perform the rekognition:DetectLabels action."]
+       "Detects instances of real-world entities within an image (JPEG or PNG) provided as input. This includes objects like flower, tree, and table; events like wedding, graduation, and birthday party; and concepts like landscape, evening, and nature. For an example, see Analyzing images stored in an Amazon S3 bucket in the Amazon Rekognition Developer Guide. You pass the input image as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. Optional Parameters You can specify one or both of the GENERAL_LABELS and IMAGE_PROPERTIES feature types when calling the DetectLabels API. Including GENERAL_LABELS will ensure the response includes the labels detected in the input image, while including IMAGE_PROPERTIES will ensure the response includes information about the image quality and color. When using GENERAL_LABELS and/or IMAGE_PROPERTIES you can provide filtering criteria to the Settings parameter. You can filter with sets of individual labels or with label categories. You can specify inclusive filters, exclusive filters, or a combination of inclusive and exclusive filters. For more information on filtering see Detecting Labels in an Image. When getting labels, you can specify MinConfidence to control the confidence threshold for the labels returned. The default is 55%. You can also add the MaxLabels parameter to limit the number of labels returned. The default and upper limit is 1000 labels. These arguments are only valid when supplying GENERAL_LABELS as a feature type. Response Elements For each object, scene, and concept the API returns one or more labels. The API returns the following types of information about labels: Name - The name of the detected label. Confidence - The level of confidence in the label assigned to a detected object. Parents - The ancestor labels for a detected label. DetectLabels returns a hierarchical taxonomy of detected labels. For example, a detected car might be assigned the label car. The label car has two parent labels: Vehicle (its parent) and Transportation (its grandparent). The response includes the all ancestors for a label, where every ancestor is a unique label. In the previous example, Car, Vehicle, and Transportation are returned as unique labels in the response. Aliases - Possible Aliases for the label. Categories - The label categories that the detected label belongs to. BoundingBox \226\128\148 Bounding boxes are described for all instances of detected common object labels, returned in an array of Instance objects. An Instance object contains a BoundingBox object, describing the location of the label on the input image. It also includes the confidence for the accuracy of the detected bounding box. The API returns the following information regarding the image, as part of the ImageProperties structure: Quality - Information about the Sharpness, Brightness, and Contrast of the input image, scored between 0 to 100. Image quality is returned for the entire image, as well as the background and the foreground. Dominant Color - An array of the dominant colors in the image. Foreground - Information about the sharpness, brightness, and dominant colors of the input image\226\128\153s foreground. Background - Information about the sharpness, brightness, and dominant colors of the input image\226\128\153s background. The list of returned labels will include at least one label for every detected object, along with information about that label. In the following example, suppose the input image has a lighthouse, the sea, and a rock. The response includes all three labels, one for each object, as well as the confidence in the label: \\{Name: lighthouse, Confidence: 98.4629\\} \\{Name: rock,Confidence: 79.2097\\} \\{Name: sea,Confidence: 75.061\\} The list of labels can include multiple labels for the same object. For example, if the input image shows a flower (for example, a tulip), the operation might return the following three labels. \\{Name: flower,Confidence: 99.0562\\} \\{Name: plant,Confidence: 99.0562\\} \\{Name: tulip,Confidence: 99.0562\\} In this example, the detection algorithm more precisely identifies the flower as a tulip. If the object detected is a person, the operation doesn't provide the same facial details that the DetectFaces operation provides. This is a stateless API operation that doesn't return any data. This operation requires permissions to perform the rekognition:DetectLabels action."]
 module DetectFacesResponse =
   struct
     type nonrec t =
@@ -14696,14 +21613,15 @@ module DetectFacesResponse =
           (Xml.child xml_arg0 "FaceDetails") in
       make ?orientationCorrection ?faceDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let orientationCorrection =
-        field_map json "OrientationCorrection" OrientationCorrection.of_json in
-      let faceDetails = field_map json "FaceDetails" FaceDetailList.of_json in
+        field_map json__ "OrientationCorrection"
+          OrientationCorrection.of_json in
+      let faceDetails = field_map json__ "FaceDetails" FaceDetailList.of_json in
       make ?orientationCorrection ?faceDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detects faces within an image that is provided as input. DetectFaces detects the 100 largest faces in the image. For each face detected, the operation returns face details. These details include a bounding box of the face, a confidence value (that the bounding box contains a face), and a fixed set of attributes such as facial landmarks (for example, coordinates of eye and mouth), presence of beard, sunglasses, and so on. The face-detection algorithm is most effective on frontal faces. For non-frontal or obscured faces, the algorithm might not detect the faces or might detect faces with lower confidence. You pass the input image either as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. This is a stateless API operation. That is, the operation does not persist any data. This operation requires permissions to perform the rekognition:DetectFaces action."]
+       "Detects faces within an image that is provided as input. DetectFaces detects the 100 largest faces in the image. For each face detected, the operation returns face details. These details include a bounding box of the face, a confidence value (that the bounding box contains a face), and a fixed set of attributes such as facial landmarks (for example, coordinates of eye and mouth), pose, presence of facial occlusion, and so on. The face-detection algorithm is most effective on frontal faces. For non-frontal or obscured faces, the algorithm might not detect the faces or might detect faces with lower confidence. You pass the input image either as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. This is a stateless API operation. That is, the operation does not persist any data. This operation requires permissions to perform the rekognition:DetectFaces action."]
 module DetectFacesRequest =
   struct
     type nonrec t =
@@ -14713,7 +21631,7 @@ module DetectFacesRequest =
           "The input image as base64-encoded bytes or an S3 object. If you use the AWS CLI to call Amazon Rekognition operations, passing base64-encoded image bytes is not supported. If you are using an AWS SDK to call Amazon Rekognition, you might not need to base64-encode image bytes passed using the Bytes field. For more information, see Images in the Amazon Rekognition developer guide."];
       attributes: Attributes.t option
         [@ocaml.doc
-          "An array of facial attributes you want to be returned. This can be the default list of attributes or all attributes. If you don't specify a value for Attributes or if you specify \\[\"DEFAULT\"\\], the API returns the following subset of facial attributes: BoundingBox, Confidence, Pose, Quality, and Landmarks. If you provide \\[\"ALL\"\\], all facial attributes are returned, but the operation takes longer to complete. If you provide both, \\[\"ALL\", \"DEFAULT\"\\], the service uses a logical AND operator to determine which attributes to return (in this case, all attributes)."]}
+          "An array of facial attributes you want to be returned. A DEFAULT subset of facial attributes - BoundingBox, Confidence, Pose, Quality, and Landmarks - will always be returned. You can request for specific facial attributes (in addition to the default list) - by using \\[\"DEFAULT\", \"FACE_OCCLUDED\"\\] or just \\[\"FACE_OCCLUDED\"\\]. You can request for all facial attributes by using \\[\"ALL\"\\]. Requesting more attributes may increase response time. If you provide both, \\[\"ALL\", \"DEFAULT\"\\], the service uses a logical \"AND\" operator to determine which attributes to return (in this case, all attributes). Note that while the FaceOccluded and EyeDirection attributes are supported when using DetectFaces, they aren't supported when analyzing videos with StartFaceDetection and GetFaceDetection."]}
     let context_ = "DetectFacesRequest"
     let make ?attributes = fun ~image -> fun () -> { attributes; image }
     let to_value x =
@@ -14728,13 +21646,13 @@ module DetectFacesRequest =
         Image.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Image") in
       make ?attributes ~image ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "Attributes" Attributes.of_json in
-      let image = field_map_exn json "Image" Image.of_json in
+    let of_json json__ =
+      let attributes = field_map json__ "Attributes" Attributes.of_json in
+      let image = field_map_exn json__ "Image" Image.of_json in
       make ?attributes ~image ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detects faces within an image that is provided as input. DetectFaces detects the 100 largest faces in the image. For each face detected, the operation returns face details. These details include a bounding box of the face, a confidence value (that the bounding box contains a face), and a fixed set of attributes such as facial landmarks (for example, coordinates of eye and mouth), presence of beard, sunglasses, and so on. The face-detection algorithm is most effective on frontal faces. For non-frontal or obscured faces, the algorithm might not detect the faces or might detect faces with lower confidence. You pass the input image either as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. This is a stateless API operation. That is, the operation does not persist any data. This operation requires permissions to perform the rekognition:DetectFaces action."]
+       "Detects faces within an image that is provided as input. DetectFaces detects the 100 largest faces in the image. For each face detected, the operation returns face details. These details include a bounding box of the face, a confidence value (that the bounding box contains a face), and a fixed set of attributes such as facial landmarks (for example, coordinates of eye and mouth), pose, presence of facial occlusion, and so on. The face-detection algorithm is most effective on frontal faces. For non-frontal or obscured faces, the algorithm might not detect the faces or might detect faces with lower confidence. You pass the input image either as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. This is a stateless API operation. That is, the operation does not persist any data. This operation requires permissions to perform the rekognition:DetectFaces action."]
 module DetectCustomLabelsResponse =
   struct
     type nonrec t =
@@ -14875,18 +21793,19 @@ module DetectCustomLabelsResponse =
           (Xml.child xml_arg0 "CustomLabels") in
       make ?customLabels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let customLabels = field_map json "CustomLabels" CustomLabels.of_json in
+    let of_json json__ =
+      let customLabels = field_map json__ "CustomLabels" CustomLabels.of_json in
       make ?customLabels ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detects custom labels in a supplied image by using an Amazon Rekognition Custom Labels model. You specify which version of a model version to use by using the ProjectVersionArn input parameter. You pass the input image as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. For each object that the model version detects on an image, the API returns a (CustomLabel) object in an array (CustomLabels). Each CustomLabel object provides the label name (Name), the level of confidence that the image contains the object (Confidence), and object location information, if it exists, for the label on the image (Geometry). To filter labels that are returned, specify a value for MinConfidence. DetectCustomLabelsLabels only returns labels with a confidence that's higher than the specified value. The value of MinConfidence maps to the assumed threshold values created during training. For more information, see Assumed threshold in the Amazon Rekognition Custom Labels Developer Guide. Amazon Rekognition Custom Labels metrics expresses an assumed threshold as a floating point value between 0-1. The range of MinConfidence normalizes the threshold value to a percentage value (0-100). Confidence responses from DetectCustomLabels are also returned as a percentage. You can use MinConfidence to change the precision and recall or your model. For more information, see Analyzing an image in the Amazon Rekognition Custom Labels Developer Guide. If you don't specify a value for MinConfidence, DetectCustomLabels returns labels based on the assumed threshold of each label. This is a stateless API operation. That is, the operation does not persist any data. This operation requires permissions to perform the rekognition:DetectCustomLabels action. For more information, see Analyzing an image in the Amazon Rekognition Custom Labels Developer Guide."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Detects custom labels in a supplied image by using an Amazon Rekognition Custom Labels model. You specify which version of a model version to use by using the ProjectVersionArn input parameter. You pass the input image as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. For each object that the model version detects on an image, the API returns a (CustomLabel) object in an array (CustomLabels). Each CustomLabel object provides the label name (Name), the level of confidence that the image contains the object (Confidence), and object location information, if it exists, for the label on the image (Geometry). To filter labels that are returned, specify a value for MinConfidence. DetectCustomLabelsLabels only returns labels with a confidence that's higher than the specified value. The value of MinConfidence maps to the assumed threshold values created during training. For more information, see Assumed threshold in the Amazon Rekognition Custom Labels Developer Guide. Amazon Rekognition Custom Labels metrics expresses an assumed threshold as a floating point value between 0-1. The range of MinConfidence normalizes the threshold value to a percentage value (0-100). Confidence responses from DetectCustomLabels are also returned as a percentage. You can use MinConfidence to change the precision and recall or your model. For more information, see Analyzing an image in the Amazon Rekognition Custom Labels Developer Guide. If you don't specify a value for MinConfidence, DetectCustomLabels returns labels based on the assumed threshold of each label. This is a stateless API operation. That is, the operation does not persist any data. This operation requires permissions to perform the rekognition:DetectCustomLabels action. For more information, see Analyzing an image in the Amazon Rekognition Custom Labels Developer Guide."]
 module DetectCustomLabelsRequest =
   struct
     type nonrec t =
       {
       projectVersionArn: ProjectVersionArn.t
-        [@ocaml.doc "The ARN of the model version that you want to use."];
+        [@ocaml.doc
+          "The ARN of the model version that you want to use. Only models associated with Custom Labels projects accepted by the operation. If a provided ARN refers to a model version associated with a project for a different feature type, then an InvalidParameterException is returned."];
       image: Image.t ;
       maxResults: UInteger.t option
         [@ocaml.doc
@@ -14920,16 +21839,16 @@ module DetectCustomLabelsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProjectVersionArn") in
       make ?minConfidence ?maxResults ~image ~projectVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let minConfidence = field_map json "MinConfidence" Percent.of_json in
-      let maxResults = field_map json "MaxResults" UInteger.of_json in
-      let image = field_map_exn json "Image" Image.of_json in
+    let of_json json__ =
+      let minConfidence = field_map json__ "MinConfidence" Percent.of_json in
+      let maxResults = field_map json__ "MaxResults" UInteger.of_json in
+      let image = field_map_exn json__ "Image" Image.of_json in
       let projectVersionArn =
-        field_map_exn json "ProjectVersionArn" ProjectVersionArn.of_json in
+        field_map_exn json__ "ProjectVersionArn" ProjectVersionArn.of_json in
       make ?minConfidence ?maxResults ~image ~projectVersionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detects custom labels in a supplied image by using an Amazon Rekognition Custom Labels model. You specify which version of a model version to use by using the ProjectVersionArn input parameter. You pass the input image as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. For each object that the model version detects on an image, the API returns a (CustomLabel) object in an array (CustomLabels). Each CustomLabel object provides the label name (Name), the level of confidence that the image contains the object (Confidence), and object location information, if it exists, for the label on the image (Geometry). To filter labels that are returned, specify a value for MinConfidence. DetectCustomLabelsLabels only returns labels with a confidence that's higher than the specified value. The value of MinConfidence maps to the assumed threshold values created during training. For more information, see Assumed threshold in the Amazon Rekognition Custom Labels Developer Guide. Amazon Rekognition Custom Labels metrics expresses an assumed threshold as a floating point value between 0-1. The range of MinConfidence normalizes the threshold value to a percentage value (0-100). Confidence responses from DetectCustomLabels are also returned as a percentage. You can use MinConfidence to change the precision and recall or your model. For more information, see Analyzing an image in the Amazon Rekognition Custom Labels Developer Guide. If you don't specify a value for MinConfidence, DetectCustomLabels returns labels based on the assumed threshold of each label. This is a stateless API operation. That is, the operation does not persist any data. This operation requires permissions to perform the rekognition:DetectCustomLabels action. For more information, see Analyzing an image in the Amazon Rekognition Custom Labels Developer Guide."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Detects custom labels in a supplied image by using an Amazon Rekognition Custom Labels model. You specify which version of a model version to use by using the ProjectVersionArn input parameter. You pass the input image as base64-encoded image bytes or as a reference to an image in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes is not supported. The image must be either a PNG or JPEG formatted file. For each object that the model version detects on an image, the API returns a (CustomLabel) object in an array (CustomLabels). Each CustomLabel object provides the label name (Name), the level of confidence that the image contains the object (Confidence), and object location information, if it exists, for the label on the image (Geometry). To filter labels that are returned, specify a value for MinConfidence. DetectCustomLabelsLabels only returns labels with a confidence that's higher than the specified value. The value of MinConfidence maps to the assumed threshold values created during training. For more information, see Assumed threshold in the Amazon Rekognition Custom Labels Developer Guide. Amazon Rekognition Custom Labels metrics expresses an assumed threshold as a floating point value between 0-1. The range of MinConfidence normalizes the threshold value to a percentage value (0-100). Confidence responses from DetectCustomLabels are also returned as a percentage. You can use MinConfidence to change the precision and recall or your model. For more information, see Analyzing an image in the Amazon Rekognition Custom Labels Developer Guide. If you don't specify a value for MinConfidence, DetectCustomLabels returns labels based on the assumed threshold of each label. This is a stateless API operation. That is, the operation does not persist any data. This operation requires permissions to perform the rekognition:DetectCustomLabels action. For more information, see Analyzing an image in the Amazon Rekognition Custom Labels Developer Guide."]
 module DescribeStreamProcessorResponse =
   struct
     type nonrec t =
@@ -14958,7 +21877,17 @@ module DescribeStreamProcessorResponse =
           "ARN of the IAM role that allows access to the stream processor."];
       settings: StreamProcessorSettings.t option
         [@ocaml.doc
-          "Face recognition input parameters that are being used by the stream processor. Includes the collection to use for face recognition and the face attributes to detect."]}
+          "Input parameters used in a streaming video analyzed by a stream processor. You can use FaceSearch to recognize faces in a streaming video, or you can use ConnectedHome to detect labels."];
+      notificationChannel: StreamProcessorNotificationChannel.t option ;
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "The identifier for your AWS Key Management Service key (AWS KMS key). This is an optional parameter for label detection stream processors."];
+      regionsOfInterest: RegionsOfInterest.t option
+        [@ocaml.doc
+          "Specifies locations in the frames where Amazon Rekognition checks for objects or people. This is an optional parameter for label detection stream processors."];
+      dataSharingPreference: StreamProcessorDataSharingPreference.t option
+        [@ocaml.doc
+          "Shows whether you are sharing data with Rekognition to improve model performance. You can choose this option at the account level or on a per-stream basis. Note that if you opt out at the account level this setting is ignored on individual streams."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -14978,19 +21907,27 @@ module DescribeStreamProcessorResponse =
                   fun ?output ->
                     fun ?roleArn ->
                       fun ?settings ->
-                        fun () ->
-                          {
-                            name;
-                            streamProcessorArn;
-                            status;
-                            statusMessage;
-                            creationTimestamp;
-                            lastUpdateTimestamp;
-                            input;
-                            output;
-                            roleArn;
-                            settings
-                          }
+                        fun ?notificationChannel ->
+                          fun ?kmsKeyId ->
+                            fun ?regionsOfInterest ->
+                              fun ?dataSharingPreference ->
+                                fun () ->
+                                  {
+                                    name;
+                                    streamProcessorArn;
+                                    status;
+                                    statusMessage;
+                                    creationTimestamp;
+                                    lastUpdateTimestamp;
+                                    input;
+                                    output;
+                                    roleArn;
+                                    settings;
+                                    notificationChannel;
+                                    kmsKeyId;
+                                    regionsOfInterest;
+                                    dataSharingPreference
+                                  }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -15072,9 +22009,29 @@ module DescribeStreamProcessorResponse =
         ("Output", (Option.map x.output ~f:StreamProcessorOutput.to_value));
         ("RoleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
         ("Settings",
-          (Option.map x.settings ~f:StreamProcessorSettings.to_value))]
+          (Option.map x.settings ~f:StreamProcessorSettings.to_value));
+        ("NotificationChannel",
+          (Option.map x.notificationChannel
+             ~f:StreamProcessorNotificationChannel.to_value));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("RegionsOfInterest",
+          (Option.map x.regionsOfInterest ~f:RegionsOfInterest.to_value));
+        ("DataSharingPreference",
+          (Option.map x.dataSharingPreference
+             ~f:StreamProcessorDataSharingPreference.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dataSharingPreference =
+        (Option.map ~f:StreamProcessorDataSharingPreference.of_xml)
+          (Xml.child xml_arg0 "DataSharingPreference") in
+      let regionsOfInterest =
+        (Option.map ~f:RegionsOfInterest.of_xml)
+          (Xml.child xml_arg0 "RegionsOfInterest") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let notificationChannel =
+        (Option.map ~f:StreamProcessorNotificationChannel.of_xml)
+          (Xml.child xml_arg0 "NotificationChannel") in
       let settings =
         (Option.map ~f:StreamProcessorSettings.of_xml)
           (Xml.child xml_arg0 "Settings") in
@@ -15103,28 +22060,39 @@ module DescribeStreamProcessorResponse =
       let name =
         (Option.map ~f:StreamProcessorName.of_xml)
           (Xml.child xml_arg0 "Name") in
-      make ?settings ?roleArn ?output ?input ?lastUpdateTimestamp
-        ?creationTimestamp ?statusMessage ?status ?streamProcessorArn ?name
-        ()
+      make ?dataSharingPreference ?regionsOfInterest ?kmsKeyId
+        ?notificationChannel ?settings ?roleArn ?output ?input
+        ?lastUpdateTimestamp ?creationTimestamp ?statusMessage ?status
+        ?streamProcessorArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let dataSharingPreference =
+        field_map json__ "DataSharingPreference"
+          StreamProcessorDataSharingPreference.of_json in
+      let regionsOfInterest =
+        field_map json__ "RegionsOfInterest" RegionsOfInterest.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let notificationChannel =
+        field_map json__ "NotificationChannel"
+          StreamProcessorNotificationChannel.of_json in
       let settings =
-        field_map json "Settings" StreamProcessorSettings.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let output = field_map json "Output" StreamProcessorOutput.of_json in
-      let input = field_map json "Input" StreamProcessorInput.of_json in
+        field_map json__ "Settings" StreamProcessorSettings.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let output = field_map json__ "Output" StreamProcessorOutput.of_json in
+      let input = field_map json__ "Input" StreamProcessorInput.of_json in
       let lastUpdateTimestamp =
-        field_map json "LastUpdateTimestamp" DateTime.of_json in
+        field_map json__ "LastUpdateTimestamp" DateTime.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" DateTime.of_json in
-      let statusMessage = field_map json "StatusMessage" String_.of_json in
-      let status = field_map json "Status" StreamProcessorStatus.of_json in
+        field_map json__ "CreationTimestamp" DateTime.of_json in
+      let statusMessage = field_map json__ "StatusMessage" String_.of_json in
+      let status = field_map json__ "Status" StreamProcessorStatus.of_json in
       let streamProcessorArn =
-        field_map json "StreamProcessorArn" StreamProcessorArn.of_json in
-      let name = field_map json "Name" StreamProcessorName.of_json in
-      make ?settings ?roleArn ?output ?input ?lastUpdateTimestamp
-        ?creationTimestamp ?statusMessage ?status ?streamProcessorArn ?name
-        ()
+        field_map json__ "StreamProcessorArn" StreamProcessorArn.of_json in
+      let name = field_map json__ "Name" StreamProcessorName.of_json in
+      make ?dataSharingPreference ?regionsOfInterest ?kmsKeyId
+        ?notificationChannel ?settings ?roleArn ?output ?input
+        ?lastUpdateTimestamp ?creationTimestamp ?statusMessage ?status
+        ?streamProcessorArn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about a stream processor created by CreateStreamProcessor. You can get information about the input and output streams, the input parameters for the face recognition being performed, and the current status of the stream processor."]
@@ -15147,8 +22115,8 @@ module DescribeStreamProcessorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" StreamProcessorName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" StreamProcessorName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15162,7 +22130,7 @@ module DescribeProjectsResponse =
           "A list of project descriptions. The list is sorted by the date and time the projects are created."];
       nextToken: ExtendedPaginationToken.t option
         [@ocaml.doc
-          "If the previous response was incomplete (because there is more results to retrieve), Amazon Rekognition Custom Labels returns a pagination token in the response. You can use this pagination token to retrieve the next set of results."]}
+          "If the previous response was incomplete (because there is more results to retrieve), Amazon Rekognition returns a pagination token in the response. You can use this pagination token to retrieve the next set of results."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -15258,32 +22226,36 @@ module DescribeProjectsResponse =
           (Xml.child xml_arg0 "ProjectDescriptions") in
       make ?nextToken ?projectDescriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextToken =
-        field_map json "NextToken" ExtendedPaginationToken.of_json in
+        field_map json__ "NextToken" ExtendedPaginationToken.of_json in
       let projectDescriptions =
-        field_map json "ProjectDescriptions" ProjectDescriptions.of_json in
+        field_map json__ "ProjectDescriptions" ProjectDescriptions.of_json in
       make ?nextToken ?projectDescriptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about your Amazon Rekognition Custom Labels projects. This operation requires permissions to perform the rekognition:DescribeProjects action."]
+       "Gets information about your Rekognition projects. This operation requires permissions to perform the rekognition:DescribeProjects action."]
 module DescribeProjectsRequest =
   struct
     type nonrec t =
       {
       nextToken: ExtendedPaginationToken.t option
         [@ocaml.doc
-          "If the previous response was incomplete (because there is more results to retrieve), Amazon Rekognition Custom Labels returns a pagination token in the response. You can use this pagination token to retrieve the next set of results."];
+          "If the previous response was incomplete (because there is more results to retrieve), Rekognition returns a pagination token in the response. You can use this pagination token to retrieve the next set of results."];
       maxResults: ProjectsPageSize.t option
         [@ocaml.doc
           "The maximum number of results to return per paginated call. The largest value you can specify is 100. If you specify a value greater than 100, a ValidationException error occurs. The default value is 100."];
       projectNames: ProjectNames.t option
         [@ocaml.doc
-          "A list of the projects that you want Amazon Rekognition Custom Labels to describe. If you don't specify a value, the response includes descriptions for all the projects in your AWS account."]}
+          "A list of the projects that you want Rekognition to describe. If you don't specify a value, the response includes descriptions for all the projects in your AWS account."];
+      features: CustomizationFeatures.t option
+        [@ocaml.doc
+          "Specifies the type of customization to filter projects by. If no value is specified, CUSTOM_LABELS is used as a default."]}
     let make ?nextToken =
       fun ?maxResults ->
         fun ?projectNames ->
-          fun () -> { nextToken; maxResults; projectNames }
+          fun ?features ->
+            fun () -> { nextToken; maxResults; projectNames; features }
     let to_value x =
       structure_to_value
         [("NextToken",
@@ -15291,9 +22263,14 @@ module DescribeProjectsRequest =
         ("MaxResults",
           (Option.map x.maxResults ~f:ProjectsPageSize.to_value));
         ("ProjectNames",
-          (Option.map x.projectNames ~f:ProjectNames.to_value))]
+          (Option.map x.projectNames ~f:ProjectNames.to_value));
+        ("Features",
+          (Option.map x.features ~f:CustomizationFeatures.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let features =
+        (Option.map ~f:CustomizationFeatures.of_xml)
+          (Xml.child xml_arg0 "Features") in
       let projectNames =
         (Option.map ~f:ProjectNames.of_xml)
           (Xml.child xml_arg0 "ProjectNames") in
@@ -15303,27 +22280,29 @@ module DescribeProjectsRequest =
       let nextToken =
         (Option.map ~f:ExtendedPaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
-      make ?projectNames ?maxResults ?nextToken ()
+      make ?features ?projectNames ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let projectNames = field_map json "ProjectNames" ProjectNames.of_json in
-      let maxResults = field_map json "MaxResults" ProjectsPageSize.of_json in
+    let of_json json__ =
+      let features =
+        field_map json__ "Features" CustomizationFeatures.of_json in
+      let projectNames = field_map json__ "ProjectNames" ProjectNames.of_json in
+      let maxResults = field_map json__ "MaxResults" ProjectsPageSize.of_json in
       let nextToken =
-        field_map json "NextToken" ExtendedPaginationToken.of_json in
-      make ?projectNames ?maxResults ?nextToken ()
+        field_map json__ "NextToken" ExtendedPaginationToken.of_json in
+      make ?features ?projectNames ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about your Amazon Rekognition Custom Labels projects. This operation requires permissions to perform the rekognition:DescribeProjects action."]
+       "Gets information about your Rekognition projects. This operation requires permissions to perform the rekognition:DescribeProjects action."]
 module DescribeProjectVersionsResponse =
   struct
     type nonrec t =
       {
       projectVersionDescriptions: ProjectVersionDescriptions.t option
         [@ocaml.doc
-          "A list of model descriptions. The list is sorted by the creation date and time of the model versions, latest to earliest."];
+          "A list of project version descriptions. The list is sorted by the creation date and time of the project versions, latest to earliest."];
       nextToken: ExtendedPaginationToken.t option
         [@ocaml.doc
-          "If the previous response was incomplete (because there is more results to retrieve), Amazon Rekognition Custom Labels returns a pagination token in the response. You can use this pagination token to retrieve the next set of results."]}
+          "If the previous response was incomplete (because there is more results to retrieve), Amazon Rekognition returns a pagination token in the response. You can use this pagination token to retrieve the next set of results."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -15429,29 +22408,29 @@ module DescribeProjectVersionsResponse =
           (Xml.child xml_arg0 "ProjectVersionDescriptions") in
       make ?nextToken ?projectVersionDescriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextToken =
-        field_map json "NextToken" ExtendedPaginationToken.of_json in
+        field_map json__ "NextToken" ExtendedPaginationToken.of_json in
       let projectVersionDescriptions =
-        field_map json "ProjectVersionDescriptions"
+        field_map json__ "ProjectVersionDescriptions"
           ProjectVersionDescriptions.of_json in
       make ?nextToken ?projectVersionDescriptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists and describes the versions of a model in an Amazon Rekognition Custom Labels project. You can specify up to 10 model versions in ProjectVersionArns. If you don't specify a value, descriptions for all model versions in the project are returned. This operation requires permissions to perform the rekognition:DescribeProjectVersions action."]
+       "Lists and describes the versions of an Amazon Rekognition project. You can specify up to 10 model or adapter versions in ProjectVersionArns. If you don't specify a value, descriptions for all model/adapter versions in the project are returned. This operation requires permissions to perform the rekognition:DescribeProjectVersions action."]
 module DescribeProjectVersionsRequest =
   struct
     type nonrec t =
       {
       projectArn: ProjectArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the project that contains the models you want to describe."];
+          "The Amazon Resource Name (ARN) of the project that contains the model/adapter you want to describe."];
       versionNames: VersionNames.t option
         [@ocaml.doc
-          "A list of model version names that you want to describe. You can add up to 10 model version names to the list. If you don't specify a value, all model descriptions are returned. A version name is part of a model (ProjectVersion) ARN. For example, my-model.2020-01-21T09.10.15 is the version name in the following ARN. arn:aws:rekognition:us-east-1:123456789012:project/getting-started/version/my-model.2020-01-21T09.10.15/1234567890123."];
+          "A list of model or project version names that you want to describe. You can add up to 10 model or project version names to the list. If you don't specify a value, all project version descriptions are returned. A version name is part of a project version ARN. For example, my-model.2020-01-21T09.10.15 is the version name in the following ARN. arn:aws:rekognition:us-east-1:123456789012:project/getting-started/version/my-model.2020-01-21T09.10.15/1234567890123."];
       nextToken: ExtendedPaginationToken.t option
         [@ocaml.doc
-          "If the previous response was incomplete (because there is more results to retrieve), Amazon Rekognition Custom Labels returns a pagination token in the response. You can use this pagination token to retrieve the next set of results."];
+          "If the previous response was incomplete (because there is more results to retrieve), Amazon Rekognition returns a pagination token in the response. You can use this pagination token to retrieve the next set of results."];
       maxResults: ProjectVersionsPageSize.t option
         [@ocaml.doc
           "The maximum number of results to return per paginated call. The largest value you can specify is 100. If you specify a value greater than 100, a ValidationException error occurs. The default value is 100."]}
@@ -15486,17 +22465,17 @@ module DescribeProjectVersionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProjectArn") in
       make ?maxResults ?nextToken ?versionNames ~projectArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" ProjectVersionsPageSize.of_json in
+        field_map json__ "MaxResults" ProjectVersionsPageSize.of_json in
       let nextToken =
-        field_map json "NextToken" ExtendedPaginationToken.of_json in
-      let versionNames = field_map json "VersionNames" VersionNames.of_json in
-      let projectArn = field_map_exn json "ProjectArn" ProjectArn.of_json in
+        field_map json__ "NextToken" ExtendedPaginationToken.of_json in
+      let versionNames = field_map json__ "VersionNames" VersionNames.of_json in
+      let projectArn = field_map_exn json__ "ProjectArn" ProjectArn.of_json in
       make ?maxResults ?nextToken ?versionNames ~projectArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists and describes the versions of a model in an Amazon Rekognition Custom Labels project. You can specify up to 10 model versions in ProjectVersionArns. If you don't specify a value, descriptions for all model versions in the project are returned. This operation requires permissions to perform the rekognition:DescribeProjectVersions action."]
+       "Lists and describes the versions of an Amazon Rekognition project. You can specify up to 10 model or adapter versions in ProjectVersionArns. If you don't specify a value, descriptions for all model/adapter versions in the project are returned. This operation requires permissions to perform the rekognition:DescribeProjectVersions action."]
 module DescribeDatasetResponse =
   struct
     type nonrec t =
@@ -15590,13 +22569,13 @@ module DescribeDatasetResponse =
           (Xml.child xml_arg0 "DatasetDescription") in
       make ?datasetDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasetDescription =
-        field_map json "DatasetDescription" DatasetDescription.of_json in
+        field_map json__ "DatasetDescription" DatasetDescription.of_json in
       make ?datasetDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes an Amazon Rekognition Custom Labels dataset. You can get information such as the current status of a dataset and statistics about the images and labels in a dataset. This operation requires permissions to perform the rekognition:DescribeDataset action."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Describes an Amazon Rekognition Custom Labels dataset. You can get information such as the current status of a dataset and statistics about the images and labels in a dataset. This operation requires permissions to perform the rekognition:DescribeDataset action."]
 module DescribeDatasetRequest =
   struct
     type nonrec t =
@@ -15616,12 +22595,12 @@ module DescribeDatasetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetArn") in
       make ~datasetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetArn = field_map_exn json "DatasetArn" DatasetArn.of_json in
+    let of_json json__ =
+      let datasetArn = field_map_exn json__ "DatasetArn" DatasetArn.of_json in
       make ~datasetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes an Amazon Rekognition Custom Labels dataset. You can get information such as the current status of a dataset and statistics about the images and labels in a dataset. This operation requires permissions to perform the rekognition:DescribeDataset action."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Describes an Amazon Rekognition Custom Labels dataset. You can get information such as the current status of a dataset and statistics about the images and labels in a dataset. This operation requires permissions to perform the rekognition:DescribeDataset action."]
 module DescribeCollectionResponse =
   struct
     type nonrec t =
@@ -15631,12 +22610,15 @@ module DescribeCollectionResponse =
           "The number of faces that are indexed into the collection. To index faces into a collection, use IndexFaces."];
       faceModelVersion: String_.t option
         [@ocaml.doc
-          "The version of the face model that's used by the collection for face detection. For more information, see Model Versioning in the Amazon Rekognition Developer Guide."];
+          "The version of the face model that's used by the collection for face detection. For more information, see Model versioning in the Amazon Rekognition Developer Guide."];
       collectionARN: String_.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the collection."];
       creationTimestamp: DateTime.t option
         [@ocaml.doc
-          "The number of milliseconds since the Unix epoch time until the creation of the collection. The Unix epoch time is 00:00:00 Coordinated Universal Time (UTC), Thursday, 1 January 1970."]}
+          "The number of milliseconds since the Unix epoch time until the creation of the collection. The Unix epoch time is 00:00:00 Coordinated Universal Time (UTC), Thursday, 1 January 1970."];
+      userCount: ULong.t option
+        [@ocaml.doc
+          "The number of UserIDs assigned to the specified colleciton."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -15650,9 +22632,15 @@ module DescribeCollectionResponse =
       fun ?faceModelVersion ->
         fun ?collectionARN ->
           fun ?creationTimestamp ->
-            fun () ->
-              { faceCount; faceModelVersion; collectionARN; creationTimestamp
-              }
+            fun ?userCount ->
+              fun () ->
+                {
+                  faceCount;
+                  faceModelVersion;
+                  collectionARN;
+                  creationTimestamp;
+                  userCount
+                }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -15726,9 +22714,12 @@ module DescribeCollectionResponse =
           (Option.map x.faceModelVersion ~f:String_.to_value));
         ("CollectionARN", (Option.map x.collectionARN ~f:String_.to_value));
         ("CreationTimestamp",
-          (Option.map x.creationTimestamp ~f:DateTime.to_value))]
+          (Option.map x.creationTimestamp ~f:DateTime.to_value));
+        ("UserCount", (Option.map x.userCount ~f:ULong.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let userCount =
+        (Option.map ~f:ULong.of_xml) (Xml.child xml_arg0 "UserCount") in
       let creationTimestamp =
         (Option.map ~f:DateTime.of_xml)
           (Xml.child xml_arg0 "CreationTimestamp") in
@@ -15739,16 +22730,19 @@ module DescribeCollectionResponse =
           (Xml.child xml_arg0 "FaceModelVersion") in
       let faceCount =
         (Option.map ~f:ULong.of_xml) (Xml.child xml_arg0 "FaceCount") in
-      make ?creationTimestamp ?collectionARN ?faceModelVersion ?faceCount ()
+      make ?userCount ?creationTimestamp ?collectionARN ?faceModelVersion
+        ?faceCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let userCount = field_map json__ "UserCount" ULong.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" DateTime.of_json in
-      let collectionARN = field_map json "CollectionARN" String_.of_json in
+        field_map json__ "CreationTimestamp" DateTime.of_json in
+      let collectionARN = field_map json__ "CollectionARN" String_.of_json in
       let faceModelVersion =
-        field_map json "FaceModelVersion" String_.of_json in
-      let faceCount = field_map json "FaceCount" ULong.of_json in
-      make ?creationTimestamp ?collectionARN ?faceModelVersion ?faceCount ()
+        field_map json__ "FaceModelVersion" String_.of_json in
+      let faceCount = field_map json__ "FaceCount" ULong.of_json in
+      make ?userCount ?creationTimestamp ?collectionARN ?faceModelVersion
+        ?faceCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the specified collection. You can use DescribeCollection to get information, such as the number of faces indexed into a collection and the version of the model used by the collection for face detection. For more information, see Describing a Collection in the Amazon Rekognition Developer Guide."]
@@ -15770,13 +22764,165 @@ module DescribeCollectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
       make ~collectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let collectionId =
-        field_map_exn json "CollectionId" CollectionId.of_json in
+        field_map_exn json__ "CollectionId" CollectionId.of_json in
       make ~collectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the specified collection. You can use DescribeCollection to get information, such as the number of faces indexed into a collection and the version of the model used by the collection for face detection. For more information, see Describing a Collection in the Amazon Rekognition Developer Guide."]
+module DeleteUserResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified UserID within the collection. Faces that are associated with the UserID are disassociated from the UserID before deleting the specified UserID. If the specified Collection or UserID is already deleted or not found, a ResourceNotFoundException will be thrown. If the action is successful with a 200 response, an empty HTTP body is returned."]
+module DeleteUserRequest =
+  struct
+    type nonrec t =
+      {
+      collectionId: CollectionId.t
+        [@ocaml.doc
+          "The ID of an existing collection from which the UserID needs to be deleted."];
+      userId: UserId.t [@ocaml.doc "ID for the UserID to be deleted."];
+      clientRequestToken: ClientRequestToken.t option
+        [@ocaml.doc
+          "Idempotent token used to identify the request to DeleteUser. If you use the same token with multiple DeleteUser requests, the same response is returned. Use ClientRequestToken to prevent the same request from being processed more than once."]}
+    let context_ = "DeleteUserRequest"
+    let make ?clientRequestToken =
+      fun ~collectionId ->
+        fun ~userId -> fun () -> { clientRequestToken; collectionId; userId }
+    let to_value x =
+      structure_to_value
+        [("CollectionId", (Some (CollectionId.to_value x.collectionId)));
+        ("UserId", (Some (UserId.to_value x.userId)));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let userId =
+        UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
+      let collectionId =
+        CollectionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
+      make ?clientRequestToken ~userId ~collectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let userId = field_map_exn json__ "UserId" UserId.of_json in
+      let collectionId =
+        field_map_exn json__ "CollectionId" CollectionId.of_json in
+      make ?clientRequestToken ~userId ~collectionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified UserID within the collection. Faces that are associated with the UserID are disassociated from the UserID before deleting the specified UserID. If the specified Collection or UserID is already deleted or not found, a ResourceNotFoundException will be thrown. If the action is successful with a 200 response, an empty HTTP body is returned."]
 module DeleteStreamProcessorResponse =
   struct
     type nonrec t = unit
@@ -15892,8 +23038,8 @@ module DeleteStreamProcessorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" StreamProcessorName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" StreamProcessorName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15999,19 +23145,19 @@ module DeleteProjectVersionResponse =
           (Xml.child xml_arg0 "Status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ProjectVersionStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" ProjectVersionStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an Amazon Rekognition Custom Labels model. You can't delete a model if it is running or if it is training. To check the status of a model, use the Status field returned from DescribeProjectVersions. To stop a running model call StopProjectVersion. If the model is training, wait until it finishes. This operation requires permissions to perform the rekognition:DeleteProjectVersion action."]
+       "Deletes a Rekognition project model or project version, like a Amazon Rekognition Custom Labels model or a custom adapter. You can't delete a project version if it is running or if it is training. To check the status of a project version, use the Status field returned from DescribeProjectVersions. To stop a project version call StopProjectVersion. If the project version is training, wait until it finishes. This operation requires permissions to perform the rekognition:DeleteProjectVersion action."]
 module DeleteProjectVersionRequest =
   struct
     type nonrec t =
       {
       projectVersionArn: ProjectVersionArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the model version that you want to delete."]}
+          "The Amazon Resource Name (ARN) of the project version that you want to delete."]}
     let context_ = "DeleteProjectVersionRequest"
     let make ~projectVersionArn = fun () -> { projectVersionArn }
     let to_value x =
@@ -16025,13 +23171,13 @@ module DeleteProjectVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProjectVersionArn") in
       make ~projectVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let projectVersionArn =
-        field_map_exn json "ProjectVersionArn" ProjectVersionArn.of_json in
+        field_map_exn json__ "ProjectVersionArn" ProjectVersionArn.of_json in
       make ~projectVersionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an Amazon Rekognition Custom Labels model. You can't delete a model if it is running or if it is training. To check the status of a model, use the Status field returned from DescribeProjectVersions. To stop a running model call StopProjectVersion. If the model is training, wait until it finishes. This operation requires permissions to perform the rekognition:DeleteProjectVersion action."]
+       "Deletes a Rekognition project model or project version, like a Amazon Rekognition Custom Labels model or a custom adapter. You can't delete a project version if it is running or if it is training. To check the status of a project version, use the Status field returned from DescribeProjectVersions. To stop a project version call StopProjectVersion. If the project version is training, wait until it finishes. This operation requires permissions to perform the rekognition:DeleteProjectVersion action."]
 module DeleteProjectResponse =
   struct
     type nonrec t =
@@ -16132,12 +23278,12 @@ module DeleteProjectResponse =
         (Option.map ~f:ProjectStatus.of_xml) (Xml.child xml_arg0 "Status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ProjectStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" ProjectStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an Amazon Rekognition Custom Labels project. To delete a project you must first delete all models associated with the project. To delete a model, see DeleteProjectVersion. DeleteProject is an asynchronous operation. To check if the project is deleted, call DescribeProjects. The project is deleted when the project no longer appears in the response. This operation requires permissions to perform the rekognition:DeleteProject action."]
+       "Deletes a Amazon Rekognition project. To delete a project you must first delete all models or adapters associated with the project. To delete a model or adapter, see DeleteProjectVersion. DeleteProject is an asynchronous operation. To check if the project is deleted, call DescribeProjects. The project is deleted when the project no longer appears in the response. Be aware that deleting a given project will also delete any ProjectPolicies associated with that project. This operation requires permissions to perform the rekognition:DeleteProject action."]
 module DeleteProjectRequest =
   struct
     type nonrec t =
@@ -16157,19 +23303,167 @@ module DeleteProjectRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProjectArn") in
       make ~projectArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let projectArn = field_map_exn json "ProjectArn" ProjectArn.of_json in
+    let of_json json__ =
+      let projectArn = field_map_exn json__ "ProjectArn" ProjectArn.of_json in
       make ~projectArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an Amazon Rekognition Custom Labels project. To delete a project you must first delete all models associated with the project. To delete a model, see DeleteProjectVersion. DeleteProject is an asynchronous operation. To check if the project is deleted, call DescribeProjects. The project is deleted when the project no longer appears in the response. This operation requires permissions to perform the rekognition:DeleteProject action."]
+       "Deletes a Amazon Rekognition project. To delete a project you must first delete all models or adapters associated with the project. To delete a model or adapter, see DeleteProjectVersion. DeleteProject is an asynchronous operation. To check if the project is deleted, call DescribeProjects. The project is deleted when the project no longer appears in the response. Be aware that deleting a given project will also delete any ProjectPolicies associated with that project. This operation requires permissions to perform the rekognition:DeleteProject action."]
+module DeleteProjectPolicyResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidPolicyRevisionIdException of
+          InvalidPolicyRevisionIdException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidPolicyRevisionIdException" ->
+          `InvalidPolicyRevisionIdException
+            (InvalidPolicyRevisionIdException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidPolicyRevisionIdException" ->
+          `InvalidPolicyRevisionIdException
+            (InvalidPolicyRevisionIdException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidPolicyRevisionIdException e ->
+          `Assoc
+            [("error", (`String "InvalidPolicyRevisionIdException"));
+            ("details", (InvalidPolicyRevisionIdException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation applies only to Amazon Rekognition Custom Labels. Deletes an existing project policy. To get a list of project policies attached to a project, call ListProjectPolicies. To attach a project policy to a project, call PutProjectPolicy. This operation requires permissions to perform the rekognition:DeleteProjectPolicy action."]
+module DeleteProjectPolicyRequest =
+  struct
+    type nonrec t =
+      {
+      projectArn: ProjectArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the project that the project policy you want to delete is attached to."];
+      policyName: ProjectPolicyName.t
+        [@ocaml.doc "The name of the policy that you want to delete."];
+      policyRevisionId: ProjectPolicyRevisionId.t option
+        [@ocaml.doc
+          "The ID of the project policy revision that you want to delete."]}
+    let context_ = "DeleteProjectPolicyRequest"
+    let make ?policyRevisionId =
+      fun ~projectArn ->
+        fun ~policyName ->
+          fun () -> { policyRevisionId; projectArn; policyName }
+    let to_value x =
+      structure_to_value
+        [("ProjectArn", (Some (ProjectArn.to_value x.projectArn)));
+        ("PolicyName", (Some (ProjectPolicyName.to_value x.policyName)));
+        ("PolicyRevisionId",
+          (Option.map x.policyRevisionId ~f:ProjectPolicyRevisionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policyRevisionId =
+        (Option.map ~f:ProjectPolicyRevisionId.of_xml)
+          (Xml.child xml_arg0 "PolicyRevisionId") in
+      let policyName =
+        ProjectPolicyName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
+      let projectArn =
+        ProjectArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProjectArn") in
+      make ?policyRevisionId ~policyName ~projectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policyRevisionId =
+        field_map json__ "PolicyRevisionId" ProjectPolicyRevisionId.of_json in
+      let policyName =
+        field_map_exn json__ "PolicyName" ProjectPolicyName.of_json in
+      let projectArn = field_map_exn json__ "ProjectArn" ProjectArn.of_json in
+      make ?policyRevisionId ~policyName ~projectArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation applies only to Amazon Rekognition Custom Labels. Deletes an existing project policy. To get a list of project policies attached to a project, call ListProjectPolicies. To attach a project policy to a project, call PutProjectPolicy. This operation requires permissions to perform the rekognition:DeleteProjectPolicy action."]
 module DeleteFacesResponse =
   struct
     type nonrec t =
       {
       deletedFaces: FaceIdList.t option
         [@ocaml.doc
-          "An array of strings (face IDs) of the faces that were deleted."]}
+          "An array of strings (face IDs) of the faces that were deleted."];
+      unsuccessfulFaceDeletions: UnsuccessfulFaceDeletionsList.t option
+        [@ocaml.doc "An array of any faces that weren't deleted."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -16179,7 +23473,9 @@ module DeleteFacesResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?deletedFaces = fun () -> { deletedFaces }
+    let make ?deletedFaces =
+      fun ?unsuccessfulFaceDeletions ->
+        fun () -> { deletedFaces; unsuccessfulFaceDeletions }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -16248,16 +23544,25 @@ module DeleteFacesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("DeletedFaces", (Option.map x.deletedFaces ~f:FaceIdList.to_value))]
+        [("DeletedFaces", (Option.map x.deletedFaces ~f:FaceIdList.to_value));
+        ("UnsuccessfulFaceDeletions",
+          (Option.map x.unsuccessfulFaceDeletions
+             ~f:UnsuccessfulFaceDeletionsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let unsuccessfulFaceDeletions =
+        (Option.map ~f:UnsuccessfulFaceDeletionsList.of_xml)
+          (Xml.child xml_arg0 "UnsuccessfulFaceDeletions") in
       let deletedFaces =
         (Option.map ~f:FaceIdList.of_xml) (Xml.child xml_arg0 "DeletedFaces") in
-      make ?deletedFaces ()
+      make ?unsuccessfulFaceDeletions ?deletedFaces ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deletedFaces = field_map json "DeletedFaces" FaceIdList.of_json in
-      make ?deletedFaces ()
+    let of_json json__ =
+      let unsuccessfulFaceDeletions =
+        field_map json__ "UnsuccessfulFaceDeletions"
+          UnsuccessfulFaceDeletionsList.of_json in
+      let deletedFaces = field_map json__ "DeletedFaces" FaceIdList.of_json in
+      make ?unsuccessfulFaceDeletions ?deletedFaces ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes faces from a collection. You specify a collection ID and an array of face IDs to remove from the collection. This operation requires permissions to perform the rekognition:DeleteFaces action."]
@@ -16285,10 +23590,10 @@ module DeleteFacesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
       make ~faceIds ~collectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let faceIds = field_map_exn json "FaceIds" FaceIdList.of_json in
+    let of_json json__ =
+      let faceIds = field_map_exn json__ "FaceIds" FaceIdList.of_json in
       let collectionId =
-        field_map_exn json "CollectionId" CollectionId.of_json in
+        field_map_exn json__ "CollectionId" CollectionId.of_json in
       make ~faceIds ~collectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16398,7 +23703,7 @@ module DeleteDatasetResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an existing Amazon Rekognition Custom Labels dataset. Deleting a dataset might take while. Use DescribeDataset to check the current status. The dataset is still deleting if the value of Status is DELETE_IN_PROGRESS. If you try to access the dataset after it is deleted, you get a ResourceNotFoundException exception. You can't delete a dataset while it is creating (Status = CREATE_IN_PROGRESS) or if the dataset is updating (Status = UPDATE_IN_PROGRESS). This operation requires permissions to perform the rekognition:DeleteDataset action."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Deletes an existing Amazon Rekognition Custom Labels dataset. Deleting a dataset might take while. Use DescribeDataset to check the current status. The dataset is still deleting if the value of Status is DELETE_IN_PROGRESS. If you try to access the dataset after it is deleted, you get a ResourceNotFoundException exception. You can't delete a dataset while it is creating (Status = CREATE_IN_PROGRESS) or if the dataset is updating (Status = UPDATE_IN_PROGRESS). This operation requires permissions to perform the rekognition:DeleteDataset action."]
 module DeleteDatasetRequest =
   struct
     type nonrec t =
@@ -16418,12 +23723,12 @@ module DeleteDatasetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetArn") in
       make ~datasetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetArn = field_map_exn json "DatasetArn" DatasetArn.of_json in
+    let of_json json__ =
+      let datasetArn = field_map_exn json__ "DatasetArn" DatasetArn.of_json in
       make ~datasetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an existing Amazon Rekognition Custom Labels dataset. Deleting a dataset might take while. Use DescribeDataset to check the current status. The dataset is still deleting if the value of Status is DELETE_IN_PROGRESS. If you try to access the dataset after it is deleted, you get a ResourceNotFoundException exception. You can't delete a dataset while it is creating (Status = CREATE_IN_PROGRESS) or if the dataset is updating (Status = UPDATE_IN_PROGRESS). This operation requires permissions to perform the rekognition:DeleteDataset action."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Deletes an existing Amazon Rekognition Custom Labels dataset. Deleting a dataset might take while. Use DescribeDataset to check the current status. The dataset is still deleting if the value of Status is DELETE_IN_PROGRESS. If you try to access the dataset after it is deleted, you get a ResourceNotFoundException exception. You can't delete a dataset while it is creating (Status = CREATE_IN_PROGRESS) or if the dataset is updating (Status = UPDATE_IN_PROGRESS). This operation requires permissions to perform the rekognition:DeleteDataset action."]
 module DeleteCollectionResponse =
   struct
     type nonrec t =
@@ -16516,12 +23821,12 @@ module DeleteCollectionResponse =
         (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "StatusCode") in
       make ?statusCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statusCode = field_map json "StatusCode" UInteger.of_json in
+    let of_json json__ =
+      let statusCode = field_map json__ "StatusCode" UInteger.of_json in
       make ?statusCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified collection. Note that this operation removes all faces in the collection. For an example, see delete-collection-procedure. This operation requires permissions to perform the rekognition:DeleteCollection action."]
+       "Deletes the specified collection. Note that this operation removes all faces in the collection. For an example, see Deleting a collection. This operation requires permissions to perform the rekognition:DeleteCollection action."]
 module DeleteCollectionRequest =
   struct
     type nonrec t =
@@ -16540,19 +23845,185 @@ module DeleteCollectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
       make ~collectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let collectionId =
-        field_map_exn json "CollectionId" CollectionId.of_json in
+        field_map_exn json__ "CollectionId" CollectionId.of_json in
       make ~collectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified collection. Note that this operation removes all faces in the collection. For an example, see delete-collection-procedure. This operation requires permissions to perform the rekognition:DeleteCollection action."]
+       "Deletes the specified collection. Note that this operation removes all faces in the collection. For an example, see Deleting a collection. This operation requires permissions to perform the rekognition:DeleteCollection action."]
+module CreateUserResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new User within a collection specified by CollectionId. Takes UserId as a parameter, which is a user provided ID which should be unique within the collection. The provided UserId will alias the system generated UUID to make the UserId more user friendly. Uses a ClientToken, an idempotency token that ensures a call to CreateUser completes only once. If the value is not supplied, the AWS SDK generates an idempotency token for the requests. This prevents retries after a network error results from making multiple CreateUser calls."]
+module CreateUserRequest =
+  struct
+    type nonrec t =
+      {
+      collectionId: CollectionId.t
+        [@ocaml.doc
+          "The ID of an existing collection to which the new UserID needs to be created."];
+      userId: UserId.t
+        [@ocaml.doc
+          "ID for the UserID to be created. This ID needs to be unique within the collection."];
+      clientRequestToken: ClientRequestToken.t option
+        [@ocaml.doc
+          "Idempotent token used to identify the request to CreateUser. If you use the same token with multiple CreateUser requests, the same response is returned. Use ClientRequestToken to prevent the same request from being processed more than once."]}
+    let context_ = "CreateUserRequest"
+    let make ?clientRequestToken =
+      fun ~collectionId ->
+        fun ~userId -> fun () -> { clientRequestToken; collectionId; userId }
+    let to_value x =
+      structure_to_value
+        [("CollectionId", (Some (CollectionId.to_value x.collectionId)));
+        ("UserId", (Some (UserId.to_value x.userId)));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let userId =
+        UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
+      let collectionId =
+        CollectionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
+      make ?clientRequestToken ~userId ~collectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let userId = field_map_exn json__ "UserId" UserId.of_json in
+      let collectionId =
+        field_map_exn json__ "CollectionId" CollectionId.of_json in
+      make ?clientRequestToken ~userId ~collectionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new User within a collection specified by CollectionId. Takes UserId as a parameter, which is a user provided ID which should be unique within the collection. The provided UserId will alias the system generated UUID to make the UserId more user friendly. Uses a ClientToken, an idempotency token that ensures a call to CreateUser completes only once. If the value is not supplied, the AWS SDK generates an idempotency token for the requests. This prevents retries after a network error results from making multiple CreateUser calls."]
 module CreateStreamProcessorResponse =
   struct
     type nonrec t =
       {
       streamProcessorArn: StreamProcessorArn.t option
-        [@ocaml.doc "ARN for the newly create stream processor."]}
+        [@ocaml.doc
+          "Amazon Resource Number for the newly created stream processor."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -16660,43 +24131,69 @@ module CreateStreamProcessorResponse =
           (Xml.child xml_arg0 "StreamProcessorArn") in
       make ?streamProcessorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let streamProcessorArn =
-        field_map json "StreamProcessorArn" StreamProcessorArn.of_json in
+        field_map json__ "StreamProcessorArn" StreamProcessorArn.of_json in
       make ?streamProcessorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Rekognition stream processor that you can use to detect and recognize faces in a streaming video. Amazon Rekognition Video is a consumer of live video from Amazon Kinesis Video Streams. Amazon Rekognition Video sends analysis results to Amazon Kinesis Data Streams. You provide as input a Kinesis video stream (Input) and a Kinesis data stream (Output) stream. You also specify the face recognition criteria in Settings. For example, the collection containing faces that you want to recognize. Use Name to assign an identifier for the stream processor. You use Name to manage the stream processor. For example, you can start processing the source video by calling StartStreamProcessor with the Name field. After you have finished analyzing a streaming video, use StopStreamProcessor to stop processing. You can delete the stream processor by calling DeleteStreamProcessor. This operation requires permissions to perform the rekognition:CreateStreamProcessor action. If you want to tag your stream processor, you also require permission to perform the rekognition:TagResource operation."]
+       "Creates an Amazon Rekognition stream processor that you can use to detect and recognize faces or to detect labels in a streaming video. Amazon Rekognition Video is a consumer of live video from Amazon Kinesis Video Streams. There are two different settings for stream processors in Amazon Rekognition: detecting faces and detecting labels. If you are creating a stream processor for detecting faces, you provide as input a Kinesis video stream (Input) and a Kinesis data stream (Output) stream for receiving the output. You must use the FaceSearch option in Settings, specifying the collection that contains the faces you want to recognize. After you have finished analyzing a streaming video, use StopStreamProcessor to stop processing. If you are creating a stream processor to detect labels, you provide as input a Kinesis video stream (Input), Amazon S3 bucket information (Output), and an Amazon SNS topic ARN (NotificationChannel). You can also provide a KMS key ID to encrypt the data sent to your Amazon S3 bucket. You specify what you want to detect by using the ConnectedHome option in settings, and selecting one of the following: PERSON, PET, PACKAGE, ALL You can also specify where in the frame you want Amazon Rekognition to monitor with RegionsOfInterest. When you run the StartStreamProcessor operation on a label detection stream processor, you input start and stop information to determine the length of the processing time. Use Name to assign an identifier for the stream processor. You use Name to manage the stream processor. For example, you can start processing the source video by calling StartStreamProcessor with the Name field. This operation requires permissions to perform the rekognition:CreateStreamProcessor action. If you want to tag your stream processor, you also require permission to perform the rekognition:TagResource operation."]
 module CreateStreamProcessorRequest =
   struct
     type nonrec t =
       {
       input: StreamProcessorInput.t
         [@ocaml.doc
-          "Kinesis video stream stream that provides the source streaming video. If you are using the AWS CLI, the parameter name is StreamProcessorInput."];
+          "Kinesis video stream stream that provides the source streaming video. If you are using the AWS CLI, the parameter name is StreamProcessorInput. This is required for both face search and label detection stream processors."];
       output: StreamProcessorOutput.t
         [@ocaml.doc
-          "Kinesis data stream stream to which Amazon Rekognition Video puts the analysis results. If you are using the AWS CLI, the parameter name is StreamProcessorOutput."];
+          "Kinesis data stream stream or Amazon S3 bucket location to which Amazon Rekognition Video puts the analysis results. If you are using the AWS CLI, the parameter name is StreamProcessorOutput. This must be a S3Destination of an Amazon S3 bucket that you own for a label detection stream processor or a Kinesis data stream ARN for a face search stream processor."];
       name: StreamProcessorName.t
         [@ocaml.doc
-          "An identifier you assign to the stream processor. You can use Name to manage the stream processor. For example, you can get the current status of the stream processor by calling DescribeStreamProcessor. Name is idempotent."];
+          "An identifier you assign to the stream processor. You can use Name to manage the stream processor. For example, you can get the current status of the stream processor by calling DescribeStreamProcessor. Name is idempotent. This is required for both face search and label detection stream processors."];
       settings: StreamProcessorSettings.t
         [@ocaml.doc
-          "Face recognition input parameters to be used by the stream processor. Includes the collection to use for face recognition and the face attributes to detect."];
+          "Input parameters used in a streaming video analyzed by a stream processor. You can use FaceSearch to recognize faces in a streaming video, or you can use ConnectedHome to detect labels."];
       roleArn: RoleArn.t
         [@ocaml.doc
-          "ARN of the IAM role that allows access to the stream processor."];
+          "The Amazon Resource Number (ARN) of the IAM role that allows access to the stream processor. The IAM role provides Rekognition read permissions for a Kinesis stream. It also provides write permissions to an Amazon S3 bucket and Amazon Simple Notification Service topic for a label detection stream processor. This is required for both face search and label detection stream processors."];
       tags: TagMap.t option
         [@ocaml.doc
-          "A set of tags (key-value pairs) that you want to attach to the stream processor."]}
+          "A set of tags (key-value pairs) that you want to attach to the stream processor."];
+      notificationChannel: StreamProcessorNotificationChannel.t option ;
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "The identifier for your AWS Key Management Service key (AWS KMS key). This is an optional parameter for label detection stream processors and should not be used to create a face search stream processor. You can supply the Amazon Resource Name (ARN) of your KMS key, the ID of your KMS key, an alias for your KMS key, or an alias ARN. The key is used to encrypt results and data published to your Amazon S3 bucket, which includes image frames and hero images. Your source images are unaffected."];
+      regionsOfInterest: RegionsOfInterest.t option
+        [@ocaml.doc
+          "Specifies locations in the frames where Amazon Rekognition checks for objects or people. You can specify up to 10 regions of interest, and each region has either a polygon or a bounding box. This is an optional parameter for label detection stream processors and should not be used to create a face search stream processor."];
+      dataSharingPreference: StreamProcessorDataSharingPreference.t option
+        [@ocaml.doc
+          "Shows whether you are sharing data with Rekognition to improve model performance. You can choose this option at the account level or on a per-stream basis. Note that if you opt out at the account level this setting is ignored on individual streams."]}
     let context_ = "CreateStreamProcessorRequest"
     let make ?tags =
-      fun ~input ->
-        fun ~output ->
-          fun ~name ->
-            fun ~settings ->
-              fun ~roleArn ->
-                fun () -> { tags; input; output; name; settings; roleArn }
+      fun ?notificationChannel ->
+        fun ?kmsKeyId ->
+          fun ?regionsOfInterest ->
+            fun ?dataSharingPreference ->
+              fun ~input ->
+                fun ~output ->
+                  fun ~name ->
+                    fun ~settings ->
+                      fun ~roleArn ->
+                        fun () ->
+                          {
+                            tags;
+                            notificationChannel;
+                            kmsKeyId;
+                            regionsOfInterest;
+                            dataSharingPreference;
+                            input;
+                            output;
+                            name;
+                            settings;
+                            roleArn
+                          }
     let to_value x =
       structure_to_value
         [("Input", (Some (StreamProcessorInput.to_value x.input)));
@@ -16704,9 +24201,29 @@ module CreateStreamProcessorRequest =
         ("Name", (Some (StreamProcessorName.to_value x.name)));
         ("Settings", (Some (StreamProcessorSettings.to_value x.settings)));
         ("RoleArn", (Some (RoleArn.to_value x.roleArn)));
-        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("NotificationChannel",
+          (Option.map x.notificationChannel
+             ~f:StreamProcessorNotificationChannel.to_value));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("RegionsOfInterest",
+          (Option.map x.regionsOfInterest ~f:RegionsOfInterest.to_value));
+        ("DataSharingPreference",
+          (Option.map x.dataSharingPreference
+             ~f:StreamProcessorDataSharingPreference.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dataSharingPreference =
+        (Option.map ~f:StreamProcessorDataSharingPreference.of_xml)
+          (Xml.child xml_arg0 "DataSharingPreference") in
+      let regionsOfInterest =
+        (Option.map ~f:RegionsOfInterest.of_xml)
+          (Xml.child xml_arg0 "RegionsOfInterest") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let notificationChannel =
+        (Option.map ~f:StreamProcessorNotificationChannel.of_xml)
+          (Xml.child xml_arg0 "NotificationChannel") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       let roleArn =
         RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
@@ -16722,27 +24239,39 @@ module CreateStreamProcessorRequest =
       let input =
         StreamProcessorInput.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Input") in
-      make ?tags ~roleArn ~settings ~name ~output ~input ()
+      make ?dataSharingPreference ?regionsOfInterest ?kmsKeyId
+        ?notificationChannel ?tags ~roleArn ~settings ~name ~output ~input ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let roleArn = field_map_exn json "RoleArn" RoleArn.of_json in
+    let of_json json__ =
+      let dataSharingPreference =
+        field_map json__ "DataSharingPreference"
+          StreamProcessorDataSharingPreference.of_json in
+      let regionsOfInterest =
+        field_map json__ "RegionsOfInterest" RegionsOfInterest.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let notificationChannel =
+        field_map json__ "NotificationChannel"
+          StreamProcessorNotificationChannel.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" RoleArn.of_json in
       let settings =
-        field_map_exn json "Settings" StreamProcessorSettings.of_json in
-      let name = field_map_exn json "Name" StreamProcessorName.of_json in
-      let output = field_map_exn json "Output" StreamProcessorOutput.of_json in
-      let input = field_map_exn json "Input" StreamProcessorInput.of_json in
-      make ?tags ~roleArn ~settings ~name ~output ~input ()
+        field_map_exn json__ "Settings" StreamProcessorSettings.of_json in
+      let name = field_map_exn json__ "Name" StreamProcessorName.of_json in
+      let output =
+        field_map_exn json__ "Output" StreamProcessorOutput.of_json in
+      let input = field_map_exn json__ "Input" StreamProcessorInput.of_json in
+      make ?dataSharingPreference ?regionsOfInterest ?kmsKeyId
+        ?notificationChannel ?tags ~roleArn ~settings ~name ~output ~input ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Rekognition stream processor that you can use to detect and recognize faces in a streaming video. Amazon Rekognition Video is a consumer of live video from Amazon Kinesis Video Streams. Amazon Rekognition Video sends analysis results to Amazon Kinesis Data Streams. You provide as input a Kinesis video stream (Input) and a Kinesis data stream (Output) stream. You also specify the face recognition criteria in Settings. For example, the collection containing faces that you want to recognize. Use Name to assign an identifier for the stream processor. You use Name to manage the stream processor. For example, you can start processing the source video by calling StartStreamProcessor with the Name field. After you have finished analyzing a streaming video, use StopStreamProcessor to stop processing. You can delete the stream processor by calling DeleteStreamProcessor. This operation requires permissions to perform the rekognition:CreateStreamProcessor action. If you want to tag your stream processor, you also require permission to perform the rekognition:TagResource operation."]
+       "Creates an Amazon Rekognition stream processor that you can use to detect and recognize faces or to detect labels in a streaming video. Amazon Rekognition Video is a consumer of live video from Amazon Kinesis Video Streams. There are two different settings for stream processors in Amazon Rekognition: detecting faces and detecting labels. If you are creating a stream processor for detecting faces, you provide as input a Kinesis video stream (Input) and a Kinesis data stream (Output) stream for receiving the output. You must use the FaceSearch option in Settings, specifying the collection that contains the faces you want to recognize. After you have finished analyzing a streaming video, use StopStreamProcessor to stop processing. If you are creating a stream processor to detect labels, you provide as input a Kinesis video stream (Input), Amazon S3 bucket information (Output), and an Amazon SNS topic ARN (NotificationChannel). You can also provide a KMS key ID to encrypt the data sent to your Amazon S3 bucket. You specify what you want to detect by using the ConnectedHome option in settings, and selecting one of the following: PERSON, PET, PACKAGE, ALL You can also specify where in the frame you want Amazon Rekognition to monitor with RegionsOfInterest. When you run the StartStreamProcessor operation on a label detection stream processor, you input start and stop information to determine the length of the processing time. Use Name to assign an identifier for the stream processor. You use Name to manage the stream processor. For example, you can start processing the source video by calling StartStreamProcessor with the Name field. This operation requires permissions to perform the rekognition:CreateStreamProcessor action. If you want to tag your stream processor, you also require permission to perform the rekognition:TagResource operation."]
 module CreateProjectVersionResponse =
   struct
     type nonrec t =
       {
       projectVersionArn: ProjectVersionArn.t option
         [@ocaml.doc
-          "The ARN of the model version that was created. Use DescribeProjectVersion to get the current status of the training operation."]}
+          "The ARN of the model or the project version that was created. Use DescribeProjectVersion to get the current status of the training operation."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -16859,56 +24388,66 @@ module CreateProjectVersionResponse =
           (Xml.child xml_arg0 "ProjectVersionArn") in
       make ?projectVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let projectVersionArn =
-        field_map json "ProjectVersionArn" ProjectVersionArn.of_json in
+        field_map json__ "ProjectVersionArn" ProjectVersionArn.of_json in
       make ?projectVersionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new version of a model and begins training. Models are managed as part of an Amazon Rekognition Custom Labels project. The response from CreateProjectVersion is an Amazon Resource Name (ARN) for the version of the model. Training uses the training and test datasets associated with the project. For more information, see Creating training and test dataset in the Amazon Rekognition Custom Labels Developer Guide. You can train a modelin a project that doesn't have associated datasets by specifying manifest files in the TrainingData and TestingData fields. If you open the console after training a model with manifest files, Amazon Rekognition Custom Labels creates the datasets for you using the most recent manifest files. You can no longer train a model version for the project by specifying manifest files. Instead of training with a project without associated datasets, we recommend that you use the manifest files to create training and test datasets for the project. Training takes a while to complete. You can get the current status by calling DescribeProjectVersions. Training completed successfully if the value of the Status field is TRAINING_COMPLETED. If training fails, see Debugging a failed model training in the Amazon Rekognition Custom Labels developer guide. Once training has successfully completed, call DescribeProjectVersions to get the training results and evaluate the model. For more information, see Improving a trained Amazon Rekognition Custom Labels model in the Amazon Rekognition Custom Labels developers guide. After evaluating the model, you start the model by calling StartProjectVersion. This operation requires permissions to perform the rekognition:CreateProjectVersion action."]
+       "Creates a new version of Amazon Rekognition project (like a Custom Labels model or a custom adapter) and begins training. Models and adapters are managed as part of a Rekognition project. The response from CreateProjectVersion is an Amazon Resource Name (ARN) for the project version. The FeatureConfig operation argument allows you to configure specific model or adapter settings. You can provide a description to the project version by using the VersionDescription argment. Training can take a while to complete. You can get the current status by calling DescribeProjectVersions. Training completed successfully if the value of the Status field is TRAINING_COMPLETED. Once training has successfully completed, call DescribeProjectVersions to get the training results and evaluate the model. This operation requires permissions to perform the rekognition:CreateProjectVersion action. The following applies only to projects with Amazon Rekognition Custom Labels as the chosen feature: You can train a model in a project that doesn't have associated datasets by specifying manifest files in the TrainingData and TestingData fields. If you open the console after training a model with manifest files, Amazon Rekognition Custom Labels creates the datasets for you using the most recent manifest files. You can no longer train a model version for the project by specifying manifest files. Instead of training with a project without associated datasets, we recommend that you use the manifest files to create training and test datasets for the project."]
 module CreateProjectVersionRequest =
   struct
     type nonrec t =
       {
       projectArn: ProjectArn.t
         [@ocaml.doc
-          "The ARN of the Amazon Rekognition Custom Labels project that manages the model that you want to train."];
+          "The ARN of the Amazon Rekognition project that will manage the project version you want to train."];
       versionName: VersionName.t
         [@ocaml.doc
-          "A name for the version of the model. This value must be unique."];
+          "A name for the version of the project version. This value must be unique."];
       outputConfig: OutputConfig.t
         [@ocaml.doc
-          "The Amazon S3 bucket location to store the results of training. The S3 bucket can be in any AWS account as long as the caller has s3:PutObject permissions on the S3 bucket."];
+          "The Amazon S3 bucket location to store the results of training. The bucket can be any S3 bucket in your AWS account. You need s3:PutObject permission on the bucket."];
       trainingData: TrainingData.t option
         [@ocaml.doc
-          "Specifies an external manifest that the services uses to train the model. If you specify TrainingData you must also specify TestingData. The project must not have any associated datasets."];
+          "Specifies an external manifest that the services uses to train the project version. If you specify TrainingData you must also specify TestingData. The project must not have any associated datasets."];
       testingData: TestingData.t option
         [@ocaml.doc
-          "Specifies an external manifest that the service uses to test the model. If you specify TestingData you must also specify TrainingData. The project must not have any associated datasets."];
+          "Specifies an external manifest that the service uses to test the project version. If you specify TestingData you must also specify TrainingData. The project must not have any associated datasets."];
       tags: TagMap.t option
         [@ocaml.doc
-          "A set of tags (key-value pairs) that you want to attach to the model."];
+          "A set of tags (key-value pairs) that you want to attach to the project version."];
       kmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "The identifier for your AWS Key Management Service key (AWS KMS key). You can supply the Amazon Resource Name (ARN) of your KMS key, the ID of your KMS key, an alias for your KMS key, or an alias ARN. The key is used to encrypt training and test images copied into the service for model training. Your source images are unaffected. The key is also used to encrypt training results and manifest files written to the output Amazon S3 bucket (OutputConfig). If you choose to use your own KMS key, you need the following permissions on the KMS key. kms:CreateGrant kms:DescribeKey kms:GenerateDataKey kms:Decrypt If you don't specify a value for KmsKeyId, images copied into the service are encrypted using a key that AWS owns and manages."]}
+          "The identifier for your AWS Key Management Service key (AWS KMS key). You can supply the Amazon Resource Name (ARN) of your KMS key, the ID of your KMS key, an alias for your KMS key, or an alias ARN. The key is used to encrypt training images, test images, and manifest files copied into the service for the project version. Your source images are unaffected. The key is also used to encrypt training results and manifest files written to the output Amazon S3 bucket (OutputConfig). If you choose to use your own KMS key, you need the following permissions on the KMS key. kms:CreateGrant kms:DescribeKey kms:GenerateDataKey kms:Decrypt If you don't specify a value for KmsKeyId, images copied into the service are encrypted using a key that AWS owns and manages."];
+      versionDescription: VersionDescription.t option
+        [@ocaml.doc
+          "A description applied to the project version being created."];
+      featureConfig: CustomizationFeatureConfig.t option
+        [@ocaml.doc
+          "Feature-specific configuration of the training job. If the job configuration does not match the feature type associated with the project, an InvalidParameterException is returned."]}
     let context_ = "CreateProjectVersionRequest"
     let make ?trainingData =
       fun ?testingData ->
         fun ?tags ->
           fun ?kmsKeyId ->
-            fun ~projectArn ->
-              fun ~versionName ->
-                fun ~outputConfig ->
-                  fun () ->
-                    {
-                      trainingData;
-                      testingData;
-                      tags;
-                      kmsKeyId;
-                      projectArn;
-                      versionName;
-                      outputConfig
-                    }
+            fun ?versionDescription ->
+              fun ?featureConfig ->
+                fun ~projectArn ->
+                  fun ~versionName ->
+                    fun ~outputConfig ->
+                      fun () ->
+                        {
+                          trainingData;
+                          testingData;
+                          tags;
+                          kmsKeyId;
+                          versionDescription;
+                          featureConfig;
+                          projectArn;
+                          versionName;
+                          outputConfig
+                        }
     let to_value x =
       structure_to_value
         [("ProjectArn", (Some (ProjectArn.to_value x.projectArn)));
@@ -16918,9 +24457,19 @@ module CreateProjectVersionRequest =
           (Option.map x.trainingData ~f:TrainingData.to_value));
         ("TestingData", (Option.map x.testingData ~f:TestingData.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value))]
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("VersionDescription",
+          (Option.map x.versionDescription ~f:VersionDescription.to_value));
+        ("FeatureConfig",
+          (Option.map x.featureConfig ~f:CustomizationFeatureConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let featureConfig =
+        (Option.map ~f:CustomizationFeatureConfig.of_xml)
+          (Xml.child xml_arg0 "FeatureConfig") in
+      let versionDescription =
+        (Option.map ~f:VersionDescription.of_xml)
+          (Xml.child xml_arg0 "VersionDescription") in
       let kmsKeyId =
         (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
@@ -16938,23 +24487,28 @@ module CreateProjectVersionRequest =
       let projectArn =
         ProjectArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProjectArn") in
-      make ?kmsKeyId ?tags ?testingData ?trainingData ~outputConfig
-        ~versionName ~projectArn ()
+      make ?featureConfig ?versionDescription ?kmsKeyId ?tags ?testingData
+        ?trainingData ~outputConfig ~versionName ~projectArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let testingData = field_map json "TestingData" TestingData.of_json in
-      let trainingData = field_map json "TrainingData" TrainingData.of_json in
+    let of_json json__ =
+      let featureConfig =
+        field_map json__ "FeatureConfig" CustomizationFeatureConfig.of_json in
+      let versionDescription =
+        field_map json__ "VersionDescription" VersionDescription.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let testingData = field_map json__ "TestingData" TestingData.of_json in
+      let trainingData = field_map json__ "TrainingData" TrainingData.of_json in
       let outputConfig =
-        field_map_exn json "OutputConfig" OutputConfig.of_json in
-      let versionName = field_map_exn json "VersionName" VersionName.of_json in
-      let projectArn = field_map_exn json "ProjectArn" ProjectArn.of_json in
-      make ?kmsKeyId ?tags ?testingData ?trainingData ~outputConfig
-        ~versionName ~projectArn ()
+        field_map_exn json__ "OutputConfig" OutputConfig.of_json in
+      let versionName =
+        field_map_exn json__ "VersionName" VersionName.of_json in
+      let projectArn = field_map_exn json__ "ProjectArn" ProjectArn.of_json in
+      make ?featureConfig ?versionDescription ?kmsKeyId ?tags ?testingData
+        ?trainingData ~outputConfig ~versionName ~projectArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new version of a model and begins training. Models are managed as part of an Amazon Rekognition Custom Labels project. The response from CreateProjectVersion is an Amazon Resource Name (ARN) for the version of the model. Training uses the training and test datasets associated with the project. For more information, see Creating training and test dataset in the Amazon Rekognition Custom Labels Developer Guide. You can train a modelin a project that doesn't have associated datasets by specifying manifest files in the TrainingData and TestingData fields. If you open the console after training a model with manifest files, Amazon Rekognition Custom Labels creates the datasets for you using the most recent manifest files. You can no longer train a model version for the project by specifying manifest files. Instead of training with a project without associated datasets, we recommend that you use the manifest files to create training and test datasets for the project. Training takes a while to complete. You can get the current status by calling DescribeProjectVersions. Training completed successfully if the value of the Status field is TRAINING_COMPLETED. If training fails, see Debugging a failed model training in the Amazon Rekognition Custom Labels developer guide. Once training has successfully completed, call DescribeProjectVersions to get the training results and evaluate the model. For more information, see Improving a trained Amazon Rekognition Custom Labels model in the Amazon Rekognition Custom Labels developers guide. After evaluating the model, you start the model by calling StartProjectVersion. This operation requires permissions to perform the rekognition:CreateProjectVersion action."]
+       "Creates a new version of Amazon Rekognition project (like a Custom Labels model or a custom adapter) and begins training. Models and adapters are managed as part of a Rekognition project. The response from CreateProjectVersion is an Amazon Resource Name (ARN) for the project version. The FeatureConfig operation argument allows you to configure specific model or adapter settings. You can provide a description to the project version by using the VersionDescription argment. Training can take a while to complete. You can get the current status by calling DescribeProjectVersions. Training completed successfully if the value of the Status field is TRAINING_COMPLETED. Once training has successfully completed, call DescribeProjectVersions to get the training results and evaluate the model. This operation requires permissions to perform the rekognition:CreateProjectVersion action. The following applies only to projects with Amazon Rekognition Custom Labels as the chosen feature: You can train a model in a project that doesn't have associated datasets by specifying manifest files in the TrainingData and TestingData fields. If you open the console after training a model with manifest files, Amazon Rekognition Custom Labels creates the datasets for you using the most recent manifest files. You can no longer train a model version for the project by specifying manifest files. Instead of training with a project without associated datasets, we recommend that you use the manifest files to create training and test datasets for the project."]
 module CreateProjectResponse =
   struct
     type nonrec t =
@@ -17056,36 +24610,204 @@ module CreateProjectResponse =
         (Option.map ~f:ProjectArn.of_xml) (Xml.child xml_arg0 "ProjectArn") in
       make ?projectArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let projectArn = field_map json "ProjectArn" ProjectArn.of_json in
+    let of_json json__ =
+      let projectArn = field_map json__ "ProjectArn" ProjectArn.of_json in
       make ?projectArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Amazon Rekognition Custom Labels project. A project is a group of resources (datasets, model versions) that you use to create and manage Amazon Rekognition Custom Labels models. This operation requires permissions to perform the rekognition:CreateProject action."]
+       "Creates a new Amazon Rekognition project. A project is a group of resources (datasets, model versions) that you use to create and manage a Amazon Rekognition Custom Labels Model or custom adapter. You can specify a feature to create the project with, if no feature is specified then Custom Labels is used by default. For adapters, you can also choose whether or not to have the project auto update by using the AutoUpdate argument. This operation requires permissions to perform the rekognition:CreateProject action."]
 module CreateProjectRequest =
   struct
     type nonrec t =
       {
       projectName: ProjectName.t
-        [@ocaml.doc "The name of the project to create."]}
+        [@ocaml.doc "The name of the project to create."];
+      feature: CustomizationFeature.t option
+        [@ocaml.doc
+          "Specifies feature that is being customized. If no value is provided CUSTOM_LABELS is used as a default."];
+      autoUpdate: ProjectAutoUpdate.t option
+        [@ocaml.doc
+          "Specifies whether automatic retraining should be attempted for the versions of the project. Automatic retraining is done as a best effort. Required argument for Content Moderation. Applicable only to adapters."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A set of tags (key-value pairs) that you want to attach to the project."]}
     let context_ = "CreateProjectRequest"
-    let make ~projectName = fun () -> { projectName }
+    let make ?feature =
+      fun ?autoUpdate ->
+        fun ?tags ->
+          fun ~projectName ->
+            fun () -> { feature; autoUpdate; tags; projectName }
     let to_value x =
       structure_to_value
-        [("ProjectName", (Some (ProjectName.to_value x.projectName)))]
+        [("ProjectName", (Some (ProjectName.to_value x.projectName)));
+        ("Feature", (Option.map x.feature ~f:CustomizationFeature.to_value));
+        ("AutoUpdate",
+          (Option.map x.autoUpdate ~f:ProjectAutoUpdate.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let autoUpdate =
+        (Option.map ~f:ProjectAutoUpdate.of_xml)
+          (Xml.child xml_arg0 "AutoUpdate") in
+      let feature =
+        (Option.map ~f:CustomizationFeature.of_xml)
+          (Xml.child xml_arg0 "Feature") in
       let projectName =
         ProjectName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProjectName") in
-      make ~projectName ()
+      make ?tags ?autoUpdate ?feature ~projectName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let projectName = field_map_exn json "ProjectName" ProjectName.of_json in
-      make ~projectName ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let autoUpdate =
+        field_map json__ "AutoUpdate" ProjectAutoUpdate.of_json in
+      let feature = field_map json__ "Feature" CustomizationFeature.of_json in
+      let projectName =
+        field_map_exn json__ "ProjectName" ProjectName.of_json in
+      make ?tags ?autoUpdate ?feature ~projectName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Amazon Rekognition Custom Labels project. A project is a group of resources (datasets, model versions) that you use to create and manage Amazon Rekognition Custom Labels models. This operation requires permissions to perform the rekognition:CreateProject action."]
+       "Creates a new Amazon Rekognition project. A project is a group of resources (datasets, model versions) that you use to create and manage a Amazon Rekognition Custom Labels Model or custom adapter. You can specify a feature to create the project with, if no feature is specified then Custom Labels is used by default. For adapters, you can also choose whether or not to have the project auto update by using the AutoUpdate argument. This operation requires permissions to perform the rekognition:CreateProject action."]
+module CreateFaceLivenessSessionResponse =
+  struct
+    type nonrec t =
+      {
+      sessionId: LivenessSessionId.t option
+        [@ocaml.doc
+          "A unique 128-bit UUID identifying a Face Liveness session. A new sessionID must be used for every Face Liveness check. If a given sessionID is used for subsequent Face Liveness checks, the checks will fail. Additionally, a SessionId expires 3 minutes after it's sent, making all Liveness data associated with the session (e.g., sessionID, reference image, audit images, etc.) unavailable."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sessionId = fun () -> { sessionId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("SessionId",
+           (Option.map x.sessionId ~f:LivenessSessionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sessionId =
+        (Option.map ~f:LivenessSessionId.of_xml)
+          (Xml.child xml_arg0 "SessionId") in
+      make ?sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sessionId = field_map json__ "SessionId" LivenessSessionId.of_json in
+      make ?sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This API operation initiates a Face Liveness session. It returns a SessionId, which you can use to start streaming Face Liveness video and get the results for a Face Liveness session. You can use the OutputConfig option in the Settings parameter to provide an Amazon S3 bucket location. The Amazon S3 bucket stores reference images and audit images. If no Amazon S3 bucket is defined, raw bytes are sent instead. You can use AuditImagesLimit to limit the number of audit images returned when GetFaceLivenessSessionResults is called. This number is between 0 and 4. By default, it is set to 0. The limit is best effort and based on the duration of the selfie-video."]
+module CreateFaceLivenessSessionRequest =
+  struct
+    type nonrec t =
+      {
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "The identifier for your AWS Key Management Service key (AWS KMS key). Used to encrypt audit images and reference images."];
+      settings: CreateFaceLivenessSessionRequestSettings.t option
+        [@ocaml.doc
+          "A session settings object. It contains settings for the operation to be performed. For Face Liveness, it accepts OutputConfig and AuditImagesLimit."];
+      clientRequestToken: ClientRequestToken.t option
+        [@ocaml.doc
+          "Idempotent token is used to recognize the Face Liveness request. If the same token is used with multiple CreateFaceLivenessSession requests, the same session is returned. This token is employed to avoid unintentionally creating the same session multiple times."]}
+    let make ?kmsKeyId =
+      fun ?settings ->
+        fun ?clientRequestToken ->
+          fun () -> { kmsKeyId; settings; clientRequestToken }
+    let to_value x =
+      structure_to_value
+        [("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("Settings",
+          (Option.map x.settings
+             ~f:CreateFaceLivenessSessionRequestSettings.to_value));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let settings =
+        (Option.map ~f:CreateFaceLivenessSessionRequestSettings.of_xml)
+          (Xml.child xml_arg0 "Settings") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      make ?clientRequestToken ?settings ?kmsKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let settings =
+        field_map json__ "Settings"
+          CreateFaceLivenessSessionRequestSettings.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      make ?clientRequestToken ?settings ?kmsKeyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This API operation initiates a Face Liveness session. It returns a SessionId, which you can use to start streaming Face Liveness video and get the results for a Face Liveness session. You can use the OutputConfig option in the Settings parameter to provide an Amazon S3 bucket location. The Amazon S3 bucket stores reference images and audit images. If no Amazon S3 bucket is defined, raw bytes are sent instead. You can use AuditImagesLimit to limit the number of audit images returned when GetFaceLivenessSessionResults is called. This number is between 0 and 4. By default, it is set to 0. The limit is best effort and based on the duration of the selfie-video."]
 module CreateDatasetResponse =
   struct
     type nonrec t =
@@ -17207,12 +24929,12 @@ module CreateDatasetResponse =
         (Option.map ~f:DatasetArn.of_xml) (Xml.child xml_arg0 "DatasetArn") in
       make ?datasetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetArn = field_map json "DatasetArn" DatasetArn.of_json in
+    let of_json json__ =
+      let datasetArn = field_map json__ "DatasetArn" DatasetArn.of_json in
       make ?datasetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Amazon Rekognition Custom Labels dataset. You can create a dataset by using an Amazon Sagemaker format manifest file or by copying an existing Amazon Rekognition Custom Labels dataset. To create a training dataset for a project, specify train for the value of DatasetType. To create the test dataset for a project, specify test for the value of DatasetType. The response from CreateDataset is the Amazon Resource Name (ARN) for the dataset. Creating a dataset takes a while to complete. Use DescribeDataset to check the current status. The dataset created successfully if the value of Status is CREATE_COMPLETE. To check if any non-terminal errors occurred, call ListDatasetEntries and check for the presence of errors lists in the JSON Lines. Dataset creation fails if a terminal error occurs (Status = CREATE_FAILED). Currently, you can't access the terminal error information. For more information, see Creating dataset in the Amazon Rekognition Custom Labels Developer Guide. This operation requires permissions to perform the rekognition:CreateDataset action. If you want to copy an existing dataset, you also require permission to perform the rekognition:ListDatasetEntries action."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Creates a new Amazon Rekognition Custom Labels dataset. You can create a dataset by using an Amazon Sagemaker format manifest file or by copying an existing Amazon Rekognition Custom Labels dataset. To create a training dataset for a project, specify TRAIN for the value of DatasetType. To create the test dataset for a project, specify TEST for the value of DatasetType. The response from CreateDataset is the Amazon Resource Name (ARN) for the dataset. Creating a dataset takes a while to complete. Use DescribeDataset to check the current status. The dataset created successfully if the value of Status is CREATE_COMPLETE. To check if any non-terminal errors occurred, call ListDatasetEntries and check for the presence of errors lists in the JSON Lines. Dataset creation fails if a terminal error occurs (Status = CREATE_FAILED). Currently, you can't access the terminal error information. For more information, see Creating dataset in the Amazon Rekognition Custom Labels Developer Guide. This operation requires permissions to perform the rekognition:CreateDataset action. If you want to copy an existing dataset, you also require permission to perform the rekognition:ListDatasetEntries action."]
 module CreateDatasetRequest =
   struct
     type nonrec t =
@@ -17222,23 +24944,29 @@ module CreateDatasetRequest =
           "The source files for the dataset. You can specify the ARN of an existing dataset or specify the Amazon S3 bucket location of an Amazon Sagemaker format manifest file. If you don't specify datasetSource, an empty dataset is created. To add labeled images to the dataset, You can use the console or call UpdateDatasetEntries."];
       datasetType: DatasetType.t
         [@ocaml.doc
-          "The type of the dataset. Specify train to create a training dataset. Specify test to create a test dataset."];
+          "The type of the dataset. Specify TRAIN to create a training dataset. Specify TEST to create a test dataset."];
       projectArn: ProjectArn.t
         [@ocaml.doc
-          "The ARN of the Amazon Rekognition Custom Labels project to which you want to asssign the dataset."]}
+          "The ARN of the Amazon Rekognition Custom Labels project to which you want to asssign the dataset."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A set of tags (key-value pairs) that you want to attach to the dataset."]}
     let context_ = "CreateDatasetRequest"
     let make ?datasetSource =
-      fun ~datasetType ->
-        fun ~projectArn ->
-          fun () -> { datasetSource; datasetType; projectArn }
+      fun ?tags ->
+        fun ~datasetType ->
+          fun ~projectArn ->
+            fun () -> { datasetSource; tags; datasetType; projectArn }
     let to_value x =
       structure_to_value
         [("DatasetSource",
            (Option.map x.datasetSource ~f:DatasetSource.to_value));
         ("DatasetType", (Some (DatasetType.to_value x.datasetType)));
-        ("ProjectArn", (Some (ProjectArn.to_value x.projectArn)))]
+        ("ProjectArn", (Some (ProjectArn.to_value x.projectArn)));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       let projectArn =
         ProjectArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProjectArn") in
@@ -17248,17 +24976,19 @@ module CreateDatasetRequest =
       let datasetSource =
         (Option.map ~f:DatasetSource.of_xml)
           (Xml.child xml_arg0 "DatasetSource") in
-      make ~projectArn ~datasetType ?datasetSource ()
+      make ?tags ~projectArn ~datasetType ?datasetSource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let projectArn = field_map_exn json "ProjectArn" ProjectArn.of_json in
-      let datasetType = field_map_exn json "DatasetType" DatasetType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let projectArn = field_map_exn json__ "ProjectArn" ProjectArn.of_json in
+      let datasetType =
+        field_map_exn json__ "DatasetType" DatasetType.of_json in
       let datasetSource =
-        field_map json "DatasetSource" DatasetSource.of_json in
-      make ~projectArn ~datasetType ?datasetSource ()
+        field_map json__ "DatasetSource" DatasetSource.of_json in
+      make ?tags ~projectArn ~datasetType ?datasetSource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Amazon Rekognition Custom Labels dataset. You can create a dataset by using an Amazon Sagemaker format manifest file or by copying an existing Amazon Rekognition Custom Labels dataset. To create a training dataset for a project, specify train for the value of DatasetType. To create the test dataset for a project, specify test for the value of DatasetType. The response from CreateDataset is the Amazon Resource Name (ARN) for the dataset. Creating a dataset takes a while to complete. Use DescribeDataset to check the current status. The dataset created successfully if the value of Status is CREATE_COMPLETE. To check if any non-terminal errors occurred, call ListDatasetEntries and check for the presence of errors lists in the JSON Lines. Dataset creation fails if a terminal error occurs (Status = CREATE_FAILED). Currently, you can't access the terminal error information. For more information, see Creating dataset in the Amazon Rekognition Custom Labels Developer Guide. This operation requires permissions to perform the rekognition:CreateDataset action. If you want to copy an existing dataset, you also require permission to perform the rekognition:ListDatasetEntries action."]
+       "This operation applies only to Amazon Rekognition Custom Labels. Creates a new Amazon Rekognition Custom Labels dataset. You can create a dataset by using an Amazon Sagemaker format manifest file or by copying an existing Amazon Rekognition Custom Labels dataset. To create a training dataset for a project, specify TRAIN for the value of DatasetType. To create the test dataset for a project, specify TEST for the value of DatasetType. The response from CreateDataset is the Amazon Resource Name (ARN) for the dataset. Creating a dataset takes a while to complete. Use DescribeDataset to check the current status. The dataset created successfully if the value of Status is CREATE_COMPLETE. To check if any non-terminal errors occurred, call ListDatasetEntries and check for the presence of errors lists in the JSON Lines. Dataset creation fails if a terminal error occurs (Status = CREATE_FAILED). Currently, you can't access the terminal error information. For more information, see Creating dataset in the Amazon Rekognition Custom Labels Developer Guide. This operation requires permissions to perform the rekognition:CreateDataset action. If you want to copy an existing dataset, you also require permission to perform the rekognition:ListDatasetEntries action."]
 module CreateCollectionResponse =
   struct
     type nonrec t =
@@ -17271,7 +25001,7 @@ module CreateCollectionResponse =
           "Amazon Resource Name (ARN) of the collection. You can use this to manage permissions on your resources."];
       faceModelVersion: String_.t option
         [@ocaml.doc
-          "Latest face model being used with the collection. For more information, see Model versioning."]}
+          "Version number of the face detection model associated with the collection you are creating."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerError of InternalServerError.t 
@@ -17381,11 +25111,11 @@ module CreateCollectionResponse =
         (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "StatusCode") in
       make ?faceModelVersion ?collectionArn ?statusCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let faceModelVersion =
-        field_map json "FaceModelVersion" String_.of_json in
-      let collectionArn = field_map json "CollectionArn" String_.of_json in
-      let statusCode = field_map json "StatusCode" UInteger.of_json in
+        field_map json__ "FaceModelVersion" String_.of_json in
+      let collectionArn = field_map json__ "CollectionArn" String_.of_json in
+      let statusCode = field_map json__ "StatusCode" UInteger.of_json in
       make ?faceModelVersion ?collectionArn ?statusCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17413,14 +25143,240 @@ module CreateCollectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
       make ?tags ~collectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let collectionId =
-        field_map_exn json "CollectionId" CollectionId.of_json in
+        field_map_exn json__ "CollectionId" CollectionId.of_json in
       make ?tags ~collectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a collection in an AWS Region. You can add faces to the collection using the IndexFaces operation. For example, you might create collections, one for each of your application users. A user can then index faces using the IndexFaces operation and persist results in a specific collection. Then, a user can search the collection for faces in the user-specific container. When you create a collection, it is associated with the latest version of the face model version. Collection names are case-sensitive. This operation requires permissions to perform the rekognition:CreateCollection action. If you want to tag your collection, you also require permission to perform the rekognition:TagResource operation."]
+module CopyProjectVersionResponse =
+  struct
+    type nonrec t =
+      {
+      projectVersionArn: ProjectVersionArn.t option
+        [@ocaml.doc
+          "The ARN of the copied model version in the destination project."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?projectVersionArn = fun () -> { projectVersionArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ProjectVersionArn",
+           (Option.map x.projectVersionArn ~f:ProjectVersionArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let projectVersionArn =
+        (Option.map ~f:ProjectVersionArn.of_xml)
+          (Xml.child xml_arg0 "ProjectVersionArn") in
+      make ?projectVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let projectVersionArn =
+        field_map json__ "ProjectVersionArn" ProjectVersionArn.of_json in
+      make ?projectVersionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation applies only to Amazon Rekognition Custom Labels. Copies a version of an Amazon Rekognition Custom Labels model from a source project to a destination project. The source and destination projects can be in different AWS accounts but must be in the same AWS Region. You can't copy a model to another AWS service. To copy a model version to a different AWS account, you need to create a resource-based policy known as a project policy. You attach the project policy to the source project by calling PutProjectPolicy. The project policy gives permission to copy the model version from a trusting AWS account to a trusted account. For more information creating and attaching a project policy, see Attaching a project policy (SDK) in the Amazon Rekognition Custom Labels Developer Guide. If you are copying a model version to a project in the same AWS account, you don't need to create a project policy. Copying project versions is supported only for Custom Labels models. To copy a model, the destination project, source project, and source model version must already exist. Copying a model version takes a while to complete. To get the current status, call DescribeProjectVersions and check the value of Status in the ProjectVersionDescription object. The copy operation has finished when the value of Status is COPYING_COMPLETED. This operation requires permissions to perform the rekognition:CopyProjectVersion action."]
+module CopyProjectVersionRequest =
+  struct
+    type nonrec t =
+      {
+      sourceProjectArn: ProjectArn.t
+        [@ocaml.doc
+          "The ARN of the source project in the trusting AWS account."];
+      sourceProjectVersionArn: ProjectVersionArn.t
+        [@ocaml.doc
+          "The ARN of the model version in the source project that you want to copy to a destination project."];
+      destinationProjectArn: ProjectArn.t
+        [@ocaml.doc
+          "The ARN of the project in the trusted AWS account that you want to copy the model version to."];
+      versionName: VersionName.t
+        [@ocaml.doc
+          "A name for the version of the model that's copied to the destination project."];
+      outputConfig: OutputConfig.t
+        [@ocaml.doc
+          "The S3 bucket and folder location where the training output for the source model version is placed."];
+      tags: TagMap.t option
+        [@ocaml.doc "The key-value tags to assign to the model version."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "The identifier for your AWS Key Management Service key (AWS KMS key). You can supply the Amazon Resource Name (ARN) of your KMS key, the ID of your KMS key, an alias for your KMS key, or an alias ARN. The key is used to encrypt training results and manifest files written to the output Amazon S3 bucket (OutputConfig). If you choose to use your own KMS key, you need the following permissions on the KMS key. kms:CreateGrant kms:DescribeKey kms:GenerateDataKey kms:Decrypt If you don't specify a value for KmsKeyId, images copied into the service are encrypted using a key that AWS owns and manages."]}
+    let context_ = "CopyProjectVersionRequest"
+    let make ?tags =
+      fun ?kmsKeyId ->
+        fun ~sourceProjectArn ->
+          fun ~sourceProjectVersionArn ->
+            fun ~destinationProjectArn ->
+              fun ~versionName ->
+                fun ~outputConfig ->
+                  fun () ->
+                    {
+                      tags;
+                      kmsKeyId;
+                      sourceProjectArn;
+                      sourceProjectVersionArn;
+                      destinationProjectArn;
+                      versionName;
+                      outputConfig
+                    }
+    let to_value x =
+      structure_to_value
+        [("SourceProjectArn",
+           (Some (ProjectArn.to_value x.sourceProjectArn)));
+        ("SourceProjectVersionArn",
+          (Some (ProjectVersionArn.to_value x.sourceProjectVersionArn)));
+        ("DestinationProjectArn",
+          (Some (ProjectArn.to_value x.destinationProjectArn)));
+        ("VersionName", (Some (VersionName.to_value x.versionName)));
+        ("OutputConfig", (Some (OutputConfig.to_value x.outputConfig)));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let outputConfig =
+        OutputConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutputConfig") in
+      let versionName =
+        VersionName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VersionName") in
+      let destinationProjectArn =
+        ProjectArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DestinationProjectArn") in
+      let sourceProjectVersionArn =
+        ProjectVersionArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceProjectVersionArn") in
+      let sourceProjectArn =
+        ProjectArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceProjectArn") in
+      make ?kmsKeyId ?tags ~outputConfig ~versionName ~destinationProjectArn
+        ~sourceProjectVersionArn ~sourceProjectArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let outputConfig =
+        field_map_exn json__ "OutputConfig" OutputConfig.of_json in
+      let versionName =
+        field_map_exn json__ "VersionName" VersionName.of_json in
+      let destinationProjectArn =
+        field_map_exn json__ "DestinationProjectArn" ProjectArn.of_json in
+      let sourceProjectVersionArn =
+        field_map_exn json__ "SourceProjectVersionArn"
+          ProjectVersionArn.of_json in
+      let sourceProjectArn =
+        field_map_exn json__ "SourceProjectArn" ProjectArn.of_json in
+      make ?kmsKeyId ?tags ~outputConfig ~versionName ~destinationProjectArn
+        ~sourceProjectVersionArn ~sourceProjectArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation applies only to Amazon Rekognition Custom Labels. Copies a version of an Amazon Rekognition Custom Labels model from a source project to a destination project. The source and destination projects can be in different AWS accounts but must be in the same AWS Region. You can't copy a model to another AWS service. To copy a model version to a different AWS account, you need to create a resource-based policy known as a project policy. You attach the project policy to the source project by calling PutProjectPolicy. The project policy gives permission to copy the model version from a trusting AWS account to a trusted account. For more information creating and attaching a project policy, see Attaching a project policy (SDK) in the Amazon Rekognition Custom Labels Developer Guide. If you are copying a model version to a project in the same AWS account, you don't need to create a project policy. Copying project versions is supported only for Custom Labels models. To copy a model, the destination project, source project, and source model version must already exist. Copying a model version takes a while to complete. To get the current status, call DescribeProjectVersions and check the value of Status in the ProjectVersionDescription object. The copy operation has finished when the value of Status is COPYING_COMPLETED. This operation requires permissions to perform the rekognition:CopyProjectVersion action."]
 module CompareFacesResponse =
   struct
     type nonrec t =
@@ -17583,19 +25539,19 @@ module CompareFacesResponse =
         ?sourceImageOrientationCorrection ?unmatchedFaces ?faceMatches
         ?sourceImageFace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetImageOrientationCorrection =
-        field_map json "TargetImageOrientationCorrection"
+        field_map json__ "TargetImageOrientationCorrection"
           OrientationCorrection.of_json in
       let sourceImageOrientationCorrection =
-        field_map json "SourceImageOrientationCorrection"
+        field_map json__ "SourceImageOrientationCorrection"
           OrientationCorrection.of_json in
       let unmatchedFaces =
-        field_map json "UnmatchedFaces" CompareFacesUnmatchList.of_json in
+        field_map json__ "UnmatchedFaces" CompareFacesUnmatchList.of_json in
       let faceMatches =
-        field_map json "FaceMatches" CompareFacesMatchList.of_json in
+        field_map json__ "FaceMatches" CompareFacesMatchList.of_json in
       let sourceImageFace =
-        field_map json "SourceImageFace" ComparedSourceImageFace.of_json in
+        field_map json__ "SourceImageFace" ComparedSourceImageFace.of_json in
       make ?targetImageOrientationCorrection
         ?sourceImageOrientationCorrection ?unmatchedFaces ?faceMatches
         ?sourceImageFace ()
@@ -17648,14 +25604,242 @@ module CompareFacesRequest =
         Image.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SourceImage") in
       make ?qualityFilter ?similarityThreshold ~targetImage ~sourceImage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let qualityFilter =
-        field_map json "QualityFilter" QualityFilter.of_json in
+        field_map json__ "QualityFilter" QualityFilter.of_json in
       let similarityThreshold =
-        field_map json "SimilarityThreshold" Percent.of_json in
-      let targetImage = field_map_exn json "TargetImage" Image.of_json in
-      let sourceImage = field_map_exn json "SourceImage" Image.of_json in
+        field_map json__ "SimilarityThreshold" Percent.of_json in
+      let targetImage = field_map_exn json__ "TargetImage" Image.of_json in
+      let sourceImage = field_map_exn json__ "SourceImage" Image.of_json in
       make ?qualityFilter ?similarityThreshold ~targetImage ~sourceImage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Compares a face in the source input image with each of the 100 largest faces detected in the target input image. If the source image contains multiple faces, the service detects the largest face and compares it with each face detected in the target image. CompareFaces uses machine learning algorithms, which are probabilistic. A false negative is an incorrect prediction that a face in the target image has a low similarity confidence score when compared to the face in the source image. To reduce the probability of false negatives, we recommend that you compare the target image against multiple source images. If you plan to use CompareFaces to make a decision that impacts an individual's rights, privacy, or access to services, we recommend that you pass the result to a human for review and further validation before taking action. You pass the input and target images either as base64-encoded image bytes or as references to images in an Amazon S3 bucket. If you use the AWS CLI to call Amazon Rekognition operations, passing image bytes isn't supported. The image must be formatted as a PNG or JPEG file. In response, the operation returns an array of face matches ordered by similarity score in descending order. For each face match, the response provides a bounding box of the face, facial landmarks, pose details (pitch, roll, and yaw), quality (brightness and sharpness), and confidence value (indicating the level of confidence that the bounding box contains a face). The response also provides a similarity score, which indicates how closely the faces match. By default, only faces with a similarity score of greater than or equal to 80% are returned in the response. You can change this value by specifying the SimilarityThreshold parameter. CompareFaces also returns an array of faces that don't match the source image. For each face, it returns a bounding box, confidence value, landmarks, pose details, and quality. The response also returns information about the face in the source image, including the bounding box of the face and confidence value. The QualityFilter input parameter allows you to filter out detected faces that don\226\128\153t meet a required quality bar. The quality bar is based on a variety of common use cases. Use QualityFilter to set the quality bar by specifying LOW, MEDIUM, or HIGH. If you do not want to filter detected faces, specify NONE. The default value is NONE. If the image doesn't contain Exif metadata, CompareFaces returns orientation information for the source and target images. Use these values to display the images with the correct image orientation. If no faces are detected in the source or target images, CompareFaces returns an InvalidParameterException error. This is a stateless API operation. That is, data returned by this operation doesn't persist. For an example, see Comparing Faces in Images in the Amazon Rekognition Developer Guide. This operation requires permissions to perform the rekognition:CompareFaces action."]
+module AssociateFacesResponse =
+  struct
+    type nonrec t =
+      {
+      associatedFaces: AssociatedFacesList.t option
+        [@ocaml.doc
+          "An array of AssociatedFace objects containing FaceIDs that have been successfully associated with the UserID. Returned if the AssociateFaces action is successful."];
+      unsuccessfulFaceAssociations: UnsuccessfulFaceAssociationList.t option
+        [@ocaml.doc
+          "An array of UnsuccessfulAssociation objects containing FaceIDs that are not successfully associated along with the reasons. Returned if the AssociateFaces action is successful."];
+      userStatus: UserStatus.t option
+        [@ocaml.doc
+          "The status of an update made to a UserID. Reflects if the UserID has been updated for every requested change."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?associatedFaces =
+      fun ?unsuccessfulFaceAssociations ->
+        fun ?userStatus ->
+          fun () ->
+            { associatedFaces; unsuccessfulFaceAssociations; userStatus }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AssociatedFaces",
+           (Option.map x.associatedFaces ~f:AssociatedFacesList.to_value));
+        ("UnsuccessfulFaceAssociations",
+          (Option.map x.unsuccessfulFaceAssociations
+             ~f:UnsuccessfulFaceAssociationList.to_value));
+        ("UserStatus", (Option.map x.userStatus ~f:UserStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userStatus =
+        (Option.map ~f:UserStatus.of_xml) (Xml.child xml_arg0 "UserStatus") in
+      let unsuccessfulFaceAssociations =
+        (Option.map ~f:UnsuccessfulFaceAssociationList.of_xml)
+          (Xml.child xml_arg0 "UnsuccessfulFaceAssociations") in
+      let associatedFaces =
+        (Option.map ~f:AssociatedFacesList.of_xml)
+          (Xml.child xml_arg0 "AssociatedFaces") in
+      make ?userStatus ?unsuccessfulFaceAssociations ?associatedFaces ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userStatus = field_map json__ "UserStatus" UserStatus.of_json in
+      let unsuccessfulFaceAssociations =
+        field_map json__ "UnsuccessfulFaceAssociations"
+          UnsuccessfulFaceAssociationList.of_json in
+      let associatedFaces =
+        field_map json__ "AssociatedFaces" AssociatedFacesList.of_json in
+      make ?userStatus ?unsuccessfulFaceAssociations ?associatedFaces ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates one or more faces with an existing UserID. Takes an array of FaceIds. Each FaceId that are present in the FaceIds list is associated with the provided UserID. The number of FaceIds that can be used as input in a single request is limited to 100. Note that the total number of faces that can be associated with a single UserID is also limited to 100. Once a UserID has 100 faces associated with it, no additional faces can be added. If more API calls are made after the limit is reached, a ServiceQuotaExceededException will result. The UserMatchThreshold parameter specifies the minimum user match confidence required for the face to be associated with a UserID that has at least one FaceID already associated. This ensures that the FaceIds are associated with the right UserID. The value ranges from 0-100 and default value is 75. If successful, an array of AssociatedFace objects containing the associated FaceIds is returned. If a given face is already associated with the given UserID, it will be ignored and will not be returned in the response. If a given face is already associated to a different UserID, isn't found in the collection, doesn\226\128\153t meet the UserMatchThreshold, or there are already 100 faces associated with the UserID, it will be returned as part of an array of UnsuccessfulFaceAssociations. The UserStatus reflects the status of an operation which updates a UserID representation with a list of given faces. The UserStatus can be: ACTIVE - All associations or disassociations of FaceID(s) for a UserID are complete. CREATED - A UserID has been created, but has no FaceID(s) associated with it. UPDATING - A UserID is being updated and there are current associations or disassociations of FaceID(s) taking place."]
+module AssociateFacesRequest =
+  struct
+    type nonrec t =
+      {
+      collectionId: CollectionId.t
+        [@ocaml.doc
+          "The ID of an existing collection containing the UserID."];
+      userId: UserId.t [@ocaml.doc "The ID for the existing UserID."];
+      faceIds: UserFaceIdList.t
+        [@ocaml.doc "An array of FaceIDs to associate with the UserID."];
+      userMatchThreshold: Percent.t option
+        [@ocaml.doc
+          "An optional value specifying the minimum confidence in the UserID match to return. The default value is 75."];
+      clientRequestToken: ClientRequestToken.t option
+        [@ocaml.doc
+          "Idempotent token used to identify the request to AssociateFaces. If you use the same token with multiple AssociateFaces requests, the same response is returned. Use ClientRequestToken to prevent the same request from being processed more than once."]}
+    let context_ = "AssociateFacesRequest"
+    let make ?userMatchThreshold =
+      fun ?clientRequestToken ->
+        fun ~collectionId ->
+          fun ~userId ->
+            fun ~faceIds ->
+              fun () ->
+                {
+                  userMatchThreshold;
+                  clientRequestToken;
+                  collectionId;
+                  userId;
+                  faceIds
+                }
+    let to_value x =
+      structure_to_value
+        [("CollectionId", (Some (CollectionId.to_value x.collectionId)));
+        ("UserId", (Some (UserId.to_value x.userId)));
+        ("FaceIds", (Some (UserFaceIdList.to_value x.faceIds)));
+        ("UserMatchThreshold",
+          (Option.map x.userMatchThreshold ~f:Percent.to_value));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let userMatchThreshold =
+        (Option.map ~f:Percent.of_xml)
+          (Xml.child xml_arg0 "UserMatchThreshold") in
+      let faceIds =
+        UserFaceIdList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FaceIds") in
+      let userId =
+        UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
+      let collectionId =
+        CollectionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
+      make ?clientRequestToken ?userMatchThreshold ~faceIds ~userId
+        ~collectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let userMatchThreshold =
+        field_map json__ "UserMatchThreshold" Percent.of_json in
+      let faceIds = field_map_exn json__ "FaceIds" UserFaceIdList.of_json in
+      let userId = field_map_exn json__ "UserId" UserId.of_json in
+      let collectionId =
+        field_map_exn json__ "CollectionId" CollectionId.of_json in
+      make ?clientRequestToken ?userMatchThreshold ~faceIds ~userId
+        ~collectionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates one or more faces with an existing UserID. Takes an array of FaceIds. Each FaceId that are present in the FaceIds list is associated with the provided UserID. The number of FaceIds that can be used as input in a single request is limited to 100. Note that the total number of faces that can be associated with a single UserID is also limited to 100. Once a UserID has 100 faces associated with it, no additional faces can be added. If more API calls are made after the limit is reached, a ServiceQuotaExceededException will result. The UserMatchThreshold parameter specifies the minimum user match confidence required for the face to be associated with a UserID that has at least one FaceID already associated. This ensures that the FaceIds are associated with the right UserID. The value ranges from 0-100 and default value is 75. If successful, an array of AssociatedFace objects containing the associated FaceIds is returned. If a given face is already associated with the given UserID, it will be ignored and will not be returned in the response. If a given face is already associated to a different UserID, isn't found in the collection, doesn\226\128\153t meet the UserMatchThreshold, or there are already 100 faces associated with the UserID, it will be returned as part of an array of UnsuccessfulFaceAssociations. The UserStatus reflects the status of an operation which updates a UserID representation with a list of given faces. The UserStatus can be: ACTIVE - All associations or disassociations of FaceID(s) for a UserID are complete. CREATED - A UserID has been created, but has no FaceID(s) associated with it. UPDATING - A UserID is being updated and there are current associations or disassociations of FaceID(s) taking place."]

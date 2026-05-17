@@ -13,6 +13,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let add_l_f_tags_to_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AddLFTagsToResource input
+let assume_decorated_role_with_s_a_m_l ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssumeDecoratedRoleWithSAML input
 let batch_grant_permissions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGrantPermissions input
 let batch_revoke_permissions ?endpoint_url ?cfg input =
@@ -25,26 +27,52 @@ let create_data_cells_filter ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDataCellsFilter input
 let create_l_f_tag ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateLFTag input
+let create_l_f_tag_expression ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLFTagExpression input
+let create_lake_formation_identity_center_configuration ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.CreateLakeFormationIdentityCenterConfiguration input
+let create_lake_formation_opt_in ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLakeFormationOptIn input
 let delete_data_cells_filter ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDataCellsFilter input
 let delete_l_f_tag ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteLFTag input
+let delete_l_f_tag_expression ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteLFTagExpression input
+let delete_lake_formation_identity_center_configuration ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.DeleteLakeFormationIdentityCenterConfiguration input
+let delete_lake_formation_opt_in ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteLakeFormationOptIn input
 let delete_objects_on_cancel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteObjectsOnCancel input
 let deregister_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeregisterResource input
+let describe_lake_formation_identity_center_configuration ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.DescribeLakeFormationIdentityCenterConfiguration input
 let describe_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeResource input
 let describe_transaction ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTransaction input
 let extend_transaction ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ExtendTransaction input
+let get_data_cells_filter ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDataCellsFilter input
+let get_data_lake_principal ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDataLakePrincipal input
 let get_data_lake_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDataLakeSettings input
 let get_effective_permissions_for_path ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEffectivePermissionsForPath input
 let get_l_f_tag ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLFTag input
+let get_l_f_tag_expression ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetLFTagExpression input
 let get_query_state ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetQueryState input
 let get_query_statistics ?endpoint_url ?cfg input =
@@ -53,6 +81,8 @@ let get_resource_l_f_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetResourceLFTags input
 let get_table_objects ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTableObjects input
+let get_temporary_data_location_credentials ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTemporaryDataLocationCredentials input
 let get_temporary_glue_partition_credentials ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTemporaryGluePartitionCredentials
     input
@@ -66,8 +96,12 @@ let grant_permissions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GrantPermissions input
 let list_data_cells_filter ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDataCellsFilter input
+let list_l_f_tag_expressions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListLFTagExpressions input
 let list_l_f_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListLFTags input
+let list_lake_formation_opt_ins ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListLakeFormationOptIns input
 let list_permissions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPermissions input
 let list_resources ?endpoint_url ?cfg input =
@@ -92,8 +126,16 @@ let start_query_planning ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartQueryPlanning input
 let start_transaction ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartTransaction input
+let update_data_cells_filter ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateDataCellsFilter input
 let update_l_f_tag ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateLFTag input
+let update_l_f_tag_expression ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateLFTagExpression input
+let update_lake_formation_identity_center_configuration ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.UpdateLakeFormationIdentityCenterConfiguration input
 let update_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateResource input
 let update_table_objects ?endpoint_url ?cfg input =

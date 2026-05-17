@@ -15,12 +15,20 @@ let associate_delegate_to_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateDelegateToResource input
 let associate_member_to_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateMemberToGroup input
+let assume_impersonation_role ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssumeImpersonationRole input
 let cancel_mailbox_export_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelMailboxExportJob input
 let create_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAlias input
+let create_availability_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAvailabilityConfiguration input
 let create_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateGroup input
+let create_identity_center_application ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateIdentityCenterApplication input
+let create_impersonation_role ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateImpersonationRole input
 let create_mobile_device_access_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateMobileDeviceAccessRule input
 let create_organization ?endpoint_url ?cfg input =
@@ -33,10 +41,18 @@ let delete_access_control_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAccessControlRule input
 let delete_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAlias input
+let delete_availability_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAvailabilityConfiguration input
 let delete_email_monitoring_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteEmailMonitoringConfiguration input
 let delete_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteGroup input
+let delete_identity_center_application ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteIdentityCenterApplication input
+let delete_identity_provider_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteIdentityProviderConfiguration input
+let delete_impersonation_role ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteImpersonationRole input
 let delete_mailbox_permissions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteMailboxPermissions input
 let delete_mobile_device_access_override ?endpoint_url ?cfg input =
@@ -45,6 +61,8 @@ let delete_mobile_device_access_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteMobileDeviceAccessRule input
 let delete_organization ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteOrganization input
+let delete_personal_access_token ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeletePersonalAccessToken input
 let delete_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteResource input
 let delete_retention_policy ?endpoint_url ?cfg input =
@@ -58,8 +76,13 @@ let deregister_mail_domain ?endpoint_url ?cfg input =
 let describe_email_monitoring_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeEmailMonitoringConfiguration
     input
+let describe_entity ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeEntity input
 let describe_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeGroup input
+let describe_identity_provider_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeIdentityProviderConfiguration
+    input
 let describe_inbound_dmarc_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeInboundDmarcSettings input
 let describe_mailbox_export_job ?endpoint_url ?cfg input =
@@ -78,6 +101,10 @@ let get_access_control_effect ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAccessControlEffect input
 let get_default_retention_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDefaultRetentionPolicy input
+let get_impersonation_role ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetImpersonationRole input
+let get_impersonation_role_effect ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetImpersonationRoleEffect input
 let get_mail_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMailDomain input
 let get_mailbox_details ?endpoint_url ?cfg input =
@@ -86,14 +113,22 @@ let get_mobile_device_access_effect ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMobileDeviceAccessEffect input
 let get_mobile_device_access_override ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMobileDeviceAccessOverride input
+let get_personal_access_token_metadata ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetPersonalAccessTokenMetadata input
 let list_access_control_rules ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAccessControlRules input
 let list_aliases ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAliases input
+let list_availability_configurations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAvailabilityConfigurations input
 let list_group_members ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListGroupMembers input
 let list_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListGroups input
+let list_groups_for_entity ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListGroupsForEntity input
+let list_impersonation_roles ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListImpersonationRoles input
 let list_mail_domains ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListMailDomains input
 let list_mailbox_export_jobs ?endpoint_url ?cfg input =
@@ -106,6 +141,8 @@ let list_mobile_device_access_rules ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListMobileDeviceAccessRules input
 let list_organizations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListOrganizations input
+let list_personal_access_tokens ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPersonalAccessTokens input
 let list_resource_delegates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListResourceDelegates input
 let list_resources ?endpoint_url ?cfg input =
@@ -118,6 +155,8 @@ let put_access_control_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutAccessControlRule input
 let put_email_monitoring_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutEmailMonitoringConfiguration input
+let put_identity_provider_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutIdentityProviderConfiguration input
 let put_inbound_dmarc_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutInboundDmarcSettings input
 let put_mailbox_permissions ?endpoint_url ?cfg input =
@@ -136,10 +175,18 @@ let start_mailbox_export_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartMailboxExportJob input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
+let test_availability_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TestAvailabilityConfiguration input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_availability_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAvailabilityConfiguration input
 let update_default_mail_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDefaultMailDomain input
+let update_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateGroup input
+let update_impersonation_role ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateImpersonationRole input
 let update_mailbox_quota ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateMailboxQuota input
 let update_mobile_device_access_rule ?endpoint_url ?cfg input =
@@ -148,3 +195,5 @@ let update_primary_email_address ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdatePrimaryEmailAddress input
 let update_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateResource input
+let update_user ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateUser input

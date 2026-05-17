@@ -6,6 +6,10 @@ val batch_create_attendee :
       BatchCreateAttendeeRequest.t ->
         (BatchCreateAttendeeResponse.t, BatchCreateAttendeeResponse.error)
           Result.t
+val batch_update_attendee_capabilities_except :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchUpdateAttendeeCapabilitiesExceptRequest.t -> (unit, unit) Result.t
 val create_attendee :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -43,6 +47,12 @@ val list_attendees :
     ?cfg:Awso.Cfg.t ->
       ListAttendeesRequest.t ->
         (ListAttendeesResponse.t, ListAttendeesResponse.error) Result.t
+val list_tags_for_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTagsForResourceRequest.t ->
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t
 val start_meeting_transcription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -51,3 +61,19 @@ val stop_meeting_transcription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopMeetingTranscriptionRequest.t -> (unit, unit) Result.t
+val tag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TagResourceRequest.t ->
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
+val untag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UntagResourceRequest.t ->
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
+val update_attendee_capabilities :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAttendeeCapabilitiesRequest.t ->
+        (UpdateAttendeeCapabilitiesResponse.t,
+          UpdateAttendeeCapabilitiesResponse.error) Result.t

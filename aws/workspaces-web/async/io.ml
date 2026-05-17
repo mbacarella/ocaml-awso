@@ -13,74 +13,129 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let associate_browser_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateBrowserSettings input
+let associate_data_protection_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateDataProtectionSettings input
+let associate_ip_access_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateIpAccessSettings input
 let associate_network_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateNetworkSettings input
+let associate_session_logger ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateSessionLogger input
 let associate_trust_store ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateTrustStore input
+let associate_user_access_logging_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateUserAccessLoggingSettings input
 let associate_user_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateUserSettings input
 let create_browser_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateBrowserSettings input
+let create_data_protection_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateDataProtectionSettings input
 let create_identity_provider ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateIdentityProvider input
+let create_ip_access_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateIpAccessSettings input
 let create_network_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateNetworkSettings input
 let create_portal ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreatePortal input
+let create_session_logger ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateSessionLogger input
 let create_trust_store ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTrustStore input
+let create_user_access_logging_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateUserAccessLoggingSettings input
 let create_user_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateUserSettings input
 let delete_browser_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteBrowserSettings input
+let delete_data_protection_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDataProtectionSettings input
 let delete_identity_provider ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteIdentityProvider input
+let delete_ip_access_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteIpAccessSettings input
 let delete_network_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteNetworkSettings input
 let delete_portal ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeletePortal input
+let delete_session_logger ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteSessionLogger input
 let delete_trust_store ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTrustStore input
+let delete_user_access_logging_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteUserAccessLoggingSettings input
 let delete_user_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteUserSettings input
 let disassociate_browser_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateBrowserSettings input
+let disassociate_data_protection_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateDataProtectionSettings input
+let disassociate_ip_access_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateIpAccessSettings input
 let disassociate_network_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateNetworkSettings input
+let disassociate_session_logger ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateSessionLogger input
 let disassociate_trust_store ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateTrustStore input
+let disassociate_user_access_logging_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateUserAccessLoggingSettings
+    input
 let disassociate_user_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateUserSettings input
+let expire_session ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ExpireSession input
 let get_browser_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetBrowserSettings input
+let get_data_protection_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDataProtectionSettings input
 let get_identity_provider ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetIdentityProvider input
+let get_ip_access_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetIpAccessSettings input
 let get_network_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetNetworkSettings input
 let get_portal ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPortal input
 let get_portal_service_provider_metadata ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPortalServiceProviderMetadata input
+let get_session ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSession input
+let get_session_logger ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSessionLogger input
 let get_trust_store ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTrustStore input
 let get_trust_store_certificate ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTrustStoreCertificate input
+let get_user_access_logging_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetUserAccessLoggingSettings input
 let get_user_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetUserSettings input
 let list_browser_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBrowserSettings input
+let list_data_protection_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDataProtectionSettings input
 let list_identity_providers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListIdentityProviders input
+let list_ip_access_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListIpAccessSettings input
 let list_network_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListNetworkSettings input
 let list_portals ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPortals input
+let list_session_loggers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSessionLoggers input
+let list_sessions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSessions input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let list_trust_store_certificates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTrustStoreCertificates input
 let list_trust_stores ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTrustStores input
+let list_user_access_logging_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListUserAccessLoggingSettings input
 let list_user_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListUserSettings input
 let tag_resource ?endpoint_url ?cfg input =
@@ -89,13 +144,21 @@ let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_browser_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateBrowserSettings input
+let update_data_protection_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateDataProtectionSettings input
 let update_identity_provider ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateIdentityProvider input
+let update_ip_access_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateIpAccessSettings input
 let update_network_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateNetworkSettings input
 let update_portal ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdatePortal input
+let update_session_logger ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateSessionLogger input
 let update_trust_store ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateTrustStore input
+let update_user_access_logging_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateUserAccessLoggingSettings input
 let update_user_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateUserSettings input

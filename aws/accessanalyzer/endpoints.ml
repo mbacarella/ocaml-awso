@@ -5,6 +5,12 @@ type ('i, 'o, 'e) t =
   | ApplyArchiveRule: (ApplyArchiveRuleRequest.t, unit, unit) t 
   | CancelPolicyGeneration: (CancelPolicyGenerationRequest.t,
   CancelPolicyGenerationResponse.t, CancelPolicyGenerationResponse.error) t 
+  | CheckAccessNotGranted: (CheckAccessNotGrantedRequest.t,
+  CheckAccessNotGrantedResponse.t, CheckAccessNotGrantedResponse.error) t 
+  | CheckNoNewAccess: (CheckNoNewAccessRequest.t, CheckNoNewAccessResponse.t,
+  CheckNoNewAccessResponse.error) t 
+  | CheckNoPublicAccess: (CheckNoPublicAccessRequest.t,
+  CheckNoPublicAccessResponse.t, CheckNoPublicAccessResponse.error) t 
   | CreateAccessPreview: (CreateAccessPreviewRequest.t,
   CreateAccessPreviewResponse.t, CreateAccessPreviewResponse.error) t 
   | CreateAnalyzer: (CreateAnalyzerRequest.t, CreateAnalyzerResponse.t,
@@ -12,6 +18,8 @@ type ('i, 'o, 'e) t =
   | CreateArchiveRule: (CreateArchiveRuleRequest.t, unit, unit) t 
   | DeleteAnalyzer: (DeleteAnalyzerRequest.t, unit, unit) t 
   | DeleteArchiveRule: (DeleteArchiveRuleRequest.t, unit, unit) t 
+  | GenerateFindingRecommendation: (GenerateFindingRecommendationRequest.t,
+  unit, unit) t 
   | GetAccessPreview: (GetAccessPreviewRequest.t, GetAccessPreviewResponse.t,
   GetAccessPreviewResponse.error) t 
   | GetAnalyzedResource: (GetAnalyzedResourceRequest.t,
@@ -22,6 +30,13 @@ type ('i, 'o, 'e) t =
   GetArchiveRuleResponse.error) t 
   | GetFinding: (GetFindingRequest.t, GetFindingResponse.t,
   GetFindingResponse.error) t 
+  | GetFindingRecommendation: (GetFindingRecommendationRequest.t,
+  GetFindingRecommendationResponse.t, GetFindingRecommendationResponse.error)
+  t 
+  | GetFindingV2: (GetFindingV2Request.t, GetFindingV2Response.t,
+  GetFindingV2Response.error) t 
+  | GetFindingsStatistics: (GetFindingsStatisticsRequest.t,
+  GetFindingsStatisticsResponse.t, GetFindingsStatisticsResponse.error) t 
   | GetGeneratedPolicy: (GetGeneratedPolicyRequest.t,
   GetGeneratedPolicyResponse.t, GetGeneratedPolicyResponse.error) t 
   | ListAccessPreviewFindings: (ListAccessPreviewFindingsRequest.t,
@@ -37,6 +52,8 @@ type ('i, 'o, 'e) t =
   ListArchiveRulesResponse.error) t 
   | ListFindings: (ListFindingsRequest.t, ListFindingsResponse.t,
   ListFindingsResponse.error) t 
+  | ListFindingsV2: (ListFindingsV2Request.t, ListFindingsV2Response.t,
+  ListFindingsV2Response.error) t 
   | ListPolicyGenerations: (ListPolicyGenerationsRequest.t,
   ListPolicyGenerationsResponse.t, ListPolicyGenerationsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
@@ -48,6 +65,8 @@ type ('i, 'o, 'e) t =
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateAnalyzer: (UpdateAnalyzerRequest.t, UpdateAnalyzerResponse.t,
+  UpdateAnalyzerResponse.error) t 
   | UpdateArchiveRule: (UpdateArchiveRuleRequest.t, unit, unit) t 
   | UpdateFindings: (UpdateFindingsRequest.t, unit, unit) t 
   | ValidatePolicy: (ValidatePolicyRequest.t, ValidatePolicyResponse.t,
@@ -56,16 +75,23 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | ApplyArchiveRule -> `PUT
   | CancelPolicyGeneration -> `PUT
+  | CheckAccessNotGranted -> `POST
+  | CheckNoNewAccess -> `POST
+  | CheckNoPublicAccess -> `POST
   | CreateAccessPreview -> `PUT
   | CreateAnalyzer -> `PUT
   | CreateArchiveRule -> `PUT
   | DeleteAnalyzer -> `DELETE
   | DeleteArchiveRule -> `DELETE
+  | GenerateFindingRecommendation -> `POST
   | GetAccessPreview -> `GET
   | GetAnalyzedResource -> `GET
   | GetAnalyzer -> `GET
   | GetArchiveRule -> `GET
   | GetFinding -> `GET
+  | GetFindingRecommendation -> `GET
+  | GetFindingV2 -> `GET
+  | GetFindingsStatistics -> `POST
   | GetGeneratedPolicy -> `GET
   | ListAccessPreviewFindings -> `POST
   | ListAccessPreviews -> `GET
@@ -73,12 +99,14 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListAnalyzers -> `GET
   | ListArchiveRules -> `GET
   | ListFindings -> `POST
+  | ListFindingsV2 -> `POST
   | ListPolicyGenerations -> `GET
   | ListTagsForResource -> `GET
   | StartPolicyGeneration -> `PUT
   | StartResourceScan -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
+  | UpdateAnalyzer -> `PUT
   | UpdateArchiveRule -> `PUT
   | UpdateFindings -> `PUT
   | ValidatePolicy -> `POST
@@ -89,6 +117,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CancelPolicyGeneration ->
           (Format.kasprintf Uri.of_string) "/policy/generation/%s"
             (JobId.to_header x.CancelPolicyGenerationRequest.jobId)
+      | CheckAccessNotGranted ->
+          (Format.kasprintf Uri.of_string) "/policy/check-access-not-granted"
+      | CheckNoNewAccess ->
+          (Format.kasprintf Uri.of_string) "/policy/check-no-new-access"
+      | CheckNoPublicAccess ->
+          (Format.kasprintf Uri.of_string) "/policy/check-no-public-access"
       | CreateAccessPreview ->
           (Format.kasprintf Uri.of_string) "/access-preview"
       | CreateAnalyzer -> (Format.kasprintf Uri.of_string) "/analyzer"
@@ -112,6 +146,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("clientToken", (String_.to_header v)))
                   x.clientToken])
+      | GenerateFindingRecommendation ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/recommendation/%s"
+               (GenerateFindingRecommendationRequestIdString.to_header
+                  x.GenerateFindingRecommendationRequest.id))
+            (List.filter_opt
+               [Some ("analyzerArn", (AnalyzerArn.to_header x.analyzerArn))])
       | GetAccessPreview ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/access-preview/%s"
@@ -138,6 +179,32 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (FindingId.to_header x.GetFindingRequest.id))
             (List.filter_opt
                [Some ("analyzerArn", (AnalyzerArn.to_header x.analyzerArn))])
+      | GetFindingRecommendation ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/recommendation/%s"
+               (GetFindingRecommendationRequestIdString.to_header
+                  x.GetFindingRecommendationRequest.id))
+            (List.filter_opt
+               [Some ("analyzerArn", (AnalyzerArn.to_header x.analyzerArn));
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults",
+                         (GetFindingRecommendationRequestMaxResultsInteger.to_header
+                            v))) x.maxResults;
+               Option.map ~f:(fun v -> ("nextToken", (Token.to_header v)))
+                 x.nextToken])
+      | GetFindingV2 ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/findingv2/%s"
+               (FindingId.to_header x.GetFindingV2Request.id))
+            (List.filter_opt
+               [Some ("analyzerArn", (AnalyzerArn.to_header x.analyzerArn));
+               Option.map ~f:(fun v -> ("maxResults", (Integer.to_header v)))
+                 x.maxResults;
+               Option.map ~f:(fun v -> ("nextToken", (Token.to_header v)))
+                 x.nextToken])
+      | GetFindingsStatistics ->
+          (Format.kasprintf Uri.of_string) "/analyzer/findings/statistics"
       | GetGeneratedPolicy ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/policy/generation/%s"
@@ -161,47 +228,46 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             ((Format.kasprintf Uri.of_string) "/access-preview")
             (List.filter_opt
                [Some ("analyzerArn", (AnalyzerArn.to_header x.analyzerArn));
-               Option.map ~f:(fun v -> ("maxResults", (Integer.to_header v)))
-                 x.maxResults;
                Option.map ~f:(fun v -> ("nextToken", (Token.to_header v)))
-                 x.nextToken])
+                 x.nextToken;
+               Option.map ~f:(fun v -> ("maxResults", (Integer.to_header v)))
+                 x.maxResults])
       | ListAnalyzedResources ->
           (Format.kasprintf Uri.of_string) "/analyzed-resource"
       | ListAnalyzers ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/analyzer")
             (List.filter_opt
-               [Option.map
-                  ~f:(fun v -> ("maxResults", (Integer.to_header v)))
-                  x.maxResults;
-               Option.map ~f:(fun v -> ("nextToken", (Token.to_header v)))
-                 x.nextToken;
+               [Option.map ~f:(fun v -> ("nextToken", (Token.to_header v)))
+                  x.nextToken;
+               Option.map ~f:(fun v -> ("maxResults", (Integer.to_header v)))
+                 x.maxResults;
                Option.map ~f:(fun v -> ("type", (Type.to_header v))) x.type_])
       | ListArchiveRules ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/analyzer/%s/archive-rule"
                (Name.to_header x.ListArchiveRulesRequest.analyzerName))
             (List.filter_opt
-               [Option.map
-                  ~f:(fun v -> ("maxResults", (Integer.to_header v)))
-                  x.maxResults;
-               Option.map ~f:(fun v -> ("nextToken", (Token.to_header v)))
-                 x.nextToken])
+               [Option.map ~f:(fun v -> ("nextToken", (Token.to_header v)))
+                  x.nextToken;
+               Option.map ~f:(fun v -> ("maxResults", (Integer.to_header v)))
+                 x.maxResults])
       | ListFindings -> (Format.kasprintf Uri.of_string) "/finding"
+      | ListFindingsV2 -> (Format.kasprintf Uri.of_string) "/findingv2"
       | ListPolicyGenerations ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/policy/generation")
             (List.filter_opt
                [Option.map
-                  ~f:(fun v ->
-                        ("maxResults",
-                          (ListPolicyGenerationsRequestMaxResultsInteger.to_header
-                             v))) x.maxResults;
-               Option.map ~f:(fun v -> ("nextToken", (Token.to_header v)))
-                 x.nextToken;
+                  ~f:(fun v -> ("principalArn", (PrincipalArn.to_header v)))
+                  x.principalArn;
                Option.map
-                 ~f:(fun v -> ("principalArn", (PrincipalArn.to_header v)))
-                 x.principalArn])
+                 ~f:(fun v ->
+                       ("maxResults",
+                         (ListPolicyGenerationsRequestMaxResultsInteger.to_header
+                            v))) x.maxResults;
+               Option.map ~f:(fun v -> ("nextToken", (Token.to_header v)))
+                 x.nextToken])
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (String_.to_header x.ListTagsForResourceRequest.resourceArn)
@@ -218,6 +284,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (String_.to_header x.UntagResourceRequest.resourceArn))
             (List.filter_opt
                [Some ("tagKeys", (TagKeys.to_header x.tagKeys))])
+      | UpdateAnalyzer ->
+          (Format.kasprintf Uri.of_string) "/analyzer/%s"
+            (Name.to_header x.UpdateAnalyzerRequest.analyzerName)
       | UpdateArchiveRule ->
           (Format.kasprintf Uri.of_string) "/analyzer/%s/archive-rule/%s"
             (Name.to_header x.UpdateArchiveRuleRequest.analyzerName)
@@ -239,11 +308,94 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ApplyArchiveRule -> Awso.Http.Request.make (method_of_endpoint endp)
   | CancelPolicyGeneration ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | CheckAccessNotGranted ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("policyDocument",
+                           (AccessCheckPolicyDocument.to_value
+                              req.CheckAccessNotGrantedRequest.policyDocument));
+                      Some
+                        ("access",
+                          (CheckAccessNotGrantedRequestAccessList.to_value
+                             req.CheckAccessNotGrantedRequest.access));
+                      Some
+                        ("policyType",
+                          (AccessCheckPolicyType.to_value
+                             req.CheckAccessNotGrantedRequest.policyType))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CheckNoNewAccess ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("newPolicyDocument",
+                           (AccessCheckPolicyDocument.to_value
+                              req.CheckNoNewAccessRequest.newPolicyDocument));
+                      Some
+                        ("existingPolicyDocument",
+                          (AccessCheckPolicyDocument.to_value
+                             req.CheckNoNewAccessRequest.existingPolicyDocument));
+                      Some
+                        ("policyType",
+                          (AccessCheckPolicyType.to_value
+                             req.CheckNoNewAccessRequest.policyType))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CheckNoPublicAccess ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("policyDocument",
+                           (AccessCheckPolicyDocument.to_value
+                              req.CheckNoPublicAccessRequest.policyDocument));
+                      Some
+                        ("resourceType",
+                          (AccessCheckResourceType.to_value
+                             req.CheckNoPublicAccessRequest.resourceType))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateAccessPreview -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateAnalyzer -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateArchiveRule -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteAnalyzer -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteArchiveRule -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GenerateFindingRecommendation ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetAccessPreview ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -258,6 +410,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetFinding ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetFindingRecommendation ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetFindingV2 ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetFindingsStatistics ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("analyzerArn",
+                           (AnalyzerArn.to_value
+                              req.GetFindingsStatisticsRequest.analyzerArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetGeneratedPolicy ->
       let (headers, body) = (None, None) in
@@ -279,11 +457,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("filter", (FilterCriteriaMap.to_value x)));
                       Option.map
-                        req.ListAccessPreviewFindingsRequest.maxResults
-                        ~f:(fun x -> ("maxResults", (Integer.to_value x)));
-                      Option.map
                         req.ListAccessPreviewFindingsRequest.nextToken
-                        ~f:(fun x -> ("nextToken", (Token.to_value x)))])
+                        ~f:(fun x -> ("nextToken", (Token.to_value x)));
+                      Option.map
+                        req.ListAccessPreviewFindingsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (Integer.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -307,14 +485,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("analyzerArn",
                            (AnalyzerArn.to_value
                               req.ListAnalyzedResourcesRequest.analyzerArn));
-                      Option.map req.ListAnalyzedResourcesRequest.maxResults
-                        ~f:(fun x -> ("maxResults", (Integer.to_value x)));
-                      Option.map req.ListAnalyzedResourcesRequest.nextToken
-                        ~f:(fun x -> ("nextToken", (Token.to_value x)));
                       Option.map
                         req.ListAnalyzedResourcesRequest.resourceType
                         ~f:(fun x ->
-                              ("resourceType", (ResourceType.to_value x)))])
+                              ("resourceType", (ResourceType.to_value x)));
+                      Option.map req.ListAnalyzedResourcesRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (Token.to_value x)));
+                      Option.map req.ListAnalyzedResourcesRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (Integer.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -344,11 +522,40 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.ListFindingsRequest.filter
                         ~f:(fun x ->
                               ("filter", (FilterCriteriaMap.to_value x)));
-                      Option.map req.ListFindingsRequest.maxResults
-                        ~f:(fun x -> ("maxResults", (Integer.to_value x)));
+                      Option.map req.ListFindingsRequest.sort
+                        ~f:(fun x -> ("sort", (SortCriteria.to_value x)));
                       Option.map req.ListFindingsRequest.nextToken
                         ~f:(fun x -> ("nextToken", (Token.to_value x)));
-                      Option.map req.ListFindingsRequest.sort
+                      Option.map req.ListFindingsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (Integer.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListFindingsV2 ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("analyzerArn",
+                           (AnalyzerArn.to_value
+                              req.ListFindingsV2Request.analyzerArn));
+                      Option.map req.ListFindingsV2Request.filter
+                        ~f:(fun x ->
+                              ("filter", (FilterCriteriaMap.to_value x)));
+                      Option.map req.ListFindingsV2Request.maxResults
+                        ~f:(fun x -> ("maxResults", (Integer.to_value x)));
+                      Option.map req.ListFindingsV2Request.nextToken
+                        ~f:(fun x -> ("nextToken", (Token.to_value x)));
+                      Option.map req.ListFindingsV2Request.sort
                         ~f:(fun x -> ("sort", (SortCriteria.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -380,7 +587,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("resourceArn",
                           (ResourceArn.to_value
-                             req.StartResourceScanRequest.resourceArn))])
+                             req.StartResourceScanRequest.resourceArn));
+                      Option.map
+                        req.StartResourceScanRequest.resourceOwnerAccount
+                        ~f:(fun x ->
+                              ("resourceOwnerAccount", (String_.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -408,6 +619,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateAnalyzer -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateArchiveRule -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateFindings -> Awso.Http.Request.make (method_of_endpoint endp)
   | ValidatePolicy ->
@@ -501,6 +713,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CancelPolicyGenerationResponse.error_of_json))
+  | CheckAccessNotGranted ->
+      if is_success
+      then Ok (CheckAccessNotGrantedResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CheckAccessNotGrantedResponse.error_of_json))
+  | CheckNoNewAccess ->
+      if is_success
+      then Ok (CheckNoNewAccessResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CheckNoNewAccessResponse.error_of_json))
+  | CheckNoPublicAccess ->
+      if is_success
+      then Ok (CheckNoPublicAccessResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CheckNoPublicAccessResponse.error_of_json))
   | CreateAccessPreview ->
       if is_success
       then Ok (CreateAccessPreviewResponse.of_json (response_to_json resp))
@@ -517,6 +746,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DeleteAnalyzer ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteArchiveRule ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | GenerateFindingRecommendation ->
       if is_success then Ok () else Error (parse_aws_error None)
   | GetAccessPreview ->
       if is_success
@@ -542,6 +773,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetFindingResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetFindingResponse.error_of_json))
+  | GetFindingRecommendation ->
+      if is_success
+      then
+        Ok (GetFindingRecommendationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetFindingRecommendationResponse.error_of_json))
+  | GetFindingV2 ->
+      if is_success
+      then Ok (GetFindingV2Response.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetFindingV2Response.error_of_json))
+  | GetFindingsStatistics ->
+      if is_success
+      then Ok (GetFindingsStatisticsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetFindingsStatisticsResponse.error_of_json))
   | GetGeneratedPolicy ->
       if is_success
       then Ok (GetGeneratedPolicyResponse.of_json (response_to_json resp))
@@ -582,6 +831,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListFindingsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListFindingsResponse.error_of_json))
+  | ListFindingsV2 ->
+      if is_success
+      then Ok (ListFindingsV2Response.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListFindingsV2Response.error_of_json))
   | ListPolicyGenerations ->
       if is_success
       then Ok (ListPolicyGenerationsResponse.of_json (response_to_json resp))
@@ -616,6 +870,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UntagResourceResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateAnalyzer ->
+      if is_success
+      then Ok (UpdateAnalyzerResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateAnalyzerResponse.error_of_json))
   | UpdateArchiveRule ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateFindings ->

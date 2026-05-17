@@ -19,6 +19,8 @@ let get_assessment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAssessment input
 let get_import_file_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetImportFileTask input
+let get_latest_assessment_id ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetLatestAssessmentId input
 let get_portfolio_preferences ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPortfolioPreferences input
 let get_portfolio_summary ?endpoint_url ?cfg input =
@@ -29,6 +31,8 @@ let get_server_details ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetServerDetails input
 let get_server_strategies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetServerStrategies input
+let list_analyzable_servers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAnalyzableServers input
 let list_application_components ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListApplicationComponents input
 let list_collectors ?endpoint_url ?cfg input =

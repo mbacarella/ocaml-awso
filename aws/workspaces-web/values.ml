@@ -23,6 +23,936 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module DescriptionSafe =
+  struct
+    type nonrec t = string
+    let context_ = "DescriptionSafe"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"[ _\\-\\d\\w]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DescriptionSafe" j
+    let to_json = simple_to_json to_value
+  end
+module PatternName =
+  struct
+    type nonrec t = string
+    let context_ = "PatternName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:20) >>=
+                  (fun () -> check_pattern i ~pattern:"[_\\-\\d\\w]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PatternName" j
+    let to_json = simple_to_json to_value
+  end
+module Regex =
+  struct
+    type nonrec t = string
+    let context_ = "Regex"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:300) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"\\/((?:[^\\n])+)\\/([gimsuyvd]{0,8})")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Regex" j
+    let to_json = simple_to_json to_value
+  end
+module InlineRedactionUrl =
+  struct
+    type nonrec t = string
+    let context_ = "InlineRedactionUrl"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"((([a-zA-Z][a-zA-Z0-9+.-]*):\\/\\/(\\*|[\\w%._\\-\\+~#=@]+)?(\\/[^@\\s]*)?(?:\\?([^*\\s]+(?:\\*?)))?)|(\\*|[\\w%._\\-\\+~#=@]+\\.[\\w%._\\-\\+~#=@]+)(?::(\\d{1,5}))?(\\/[^@\\s]*)?(?:\\?([^*\\s]+(?:\\*?)))?|(([a-zA-Z][a-zA-Z0-9+.-]*):(\\/\\/)?\\*))");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InlineRedactionUrl" j
+    let to_json = simple_to_json to_value
+  end
+module RedactionPlaceHolderText =
+  struct
+    type nonrec t = string
+    let context_ = "RedactionPlaceHolderText"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:20) >>=
+                  (fun () -> check_pattern i ~pattern:"[*_\\-\\d\\w]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RedactionPlaceHolderText" j
+    let to_json = simple_to_json to_value
+  end
+module RedactionPlaceHolderType =
+  struct
+    type nonrec t =
+      | CustomText 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | CustomText -> "CustomText" | Non_static_id s -> s
+    let of_string =
+      function | "CustomText" -> CustomText | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RedactionPlaceHolderType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RedactionPlaceHolderType" j)
+    let to_json = simple_to_json to_value
+  end
+module ContactLinkUrl =
+  struct
+    type nonrec t = string
+    let context_ = "ContactLinkUrl"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"(https://|mailto:).*"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ContactLinkUrl" j
+    let to_json = simple_to_json to_value
+  end
+module LocalizedBrandingStringsBrowserTabTitleString =
+  struct
+    type nonrec t = string
+    let context_ = "LocalizedBrandingStringsBrowserTabTitleString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:25) >>=
+                  (fun () -> check_pattern i ~pattern:"[^<>&'`~\\\\]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"LocalizedBrandingStringsBrowserTabTitleString" j
+    let to_json = simple_to_json to_value
+  end
+module LocalizedBrandingStringsContactButtonTextString =
+  struct
+    type nonrec t = string
+    let context_ = "LocalizedBrandingStringsContactButtonTextString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:30) >>=
+                  (fun () -> check_pattern i ~pattern:"[^<>&'`~\\\\]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"LocalizedBrandingStringsContactButtonTextString"
+        j
+    let to_json = simple_to_json to_value
+  end
+module LocalizedBrandingStringsLoadingTextString =
+  struct
+    type nonrec t = string
+    let context_ = "LocalizedBrandingStringsLoadingTextString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:300) >>=
+                  (fun () -> check_pattern i ~pattern:"[^<>&'`~\\\\]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"LocalizedBrandingStringsLoadingTextString" j
+    let to_json = simple_to_json to_value
+  end
+module LocalizedBrandingStringsLoginButtonTextString =
+  struct
+    type nonrec t = string
+    let context_ = "LocalizedBrandingStringsLoginButtonTextString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:30) >>=
+                  (fun () -> check_pattern i ~pattern:"[^<>&'`~\\\\]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"LocalizedBrandingStringsLoginButtonTextString" j
+    let to_json = simple_to_json to_value
+  end
+module LocalizedBrandingStringsLoginDescriptionString =
+  struct
+    type nonrec t = string
+    let context_ = "LocalizedBrandingStringsLoginDescriptionString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:250) >>=
+                  (fun () -> check_pattern i ~pattern:"[^<>&'`~\\\\]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"LocalizedBrandingStringsLoginDescriptionString" j
+    let to_json = simple_to_json to_value
+  end
+module LocalizedBrandingStringsLoginTitleString =
+  struct
+    type nonrec t = string
+    let context_ = "LocalizedBrandingStringsLoginTitleString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () -> check_pattern i ~pattern:"[^<>&'`~\\\\]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"LocalizedBrandingStringsLoginTitleString" j
+    let to_json = simple_to_json to_value
+  end
+module LocalizedBrandingStringsWelcomeTextString =
+  struct
+    type nonrec t = string
+    let context_ = "LocalizedBrandingStringsWelcomeTextString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:150) >>=
+                  (fun () -> check_pattern i ~pattern:"[^<>&'`~\\\\]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"LocalizedBrandingStringsWelcomeTextString" j
+    let to_json = simple_to_json to_value
+  end
+module CookieDomain =
+  struct
+    type nonrec t = string
+    let context_ = "CookieDomain"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:253) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(\\.?)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)*[a-z0-9][a-z0-9-]{0,61}[a-z0-9]")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CookieDomain" j
+    let to_json = simple_to_json to_value
+  end
+module CookieName =
+  struct
+    type nonrec t = string
+    let context_ = "CookieName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:4096) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CookieName" j
+    let to_json = simple_to_json to_value
+  end
+module CookiePath =
+  struct
+    type nonrec t = string
+    let context_ = "CookiePath"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:2000) >>=
+                  (fun () -> check_pattern i ~pattern:"/(\\S)*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CookiePath" j
+    let to_json = simple_to_json to_value
+  end
+module BuiltInPatternId =
+  struct
+    type nonrec t = string
+    let context_ = "BuiltInPatternId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () -> check_pattern i ~pattern:"[_\\-\\d\\w]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"BuiltInPatternId" j
+    let to_json = simple_to_json to_value
+  end
+module ConfidenceLevel =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:3) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ConfidenceLevel" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module CustomPattern =
+  struct
+    type nonrec t =
+      {
+      patternName: PatternName.t
+        [@ocaml.doc "The pattern name for the custom pattern."];
+      patternRegex: Regex.t
+        [@ocaml.doc
+          "The pattern regex for the customer pattern. The format must follow JavaScript regex format. The pattern must be enclosed between slashes, and can have flags behind the second slash. For example: \226\128\156/ab+c/gi\226\128\157."];
+      patternDescription: DescriptionSafe.t option
+        [@ocaml.doc "The pattern description for the customer pattern."];
+      keywordRegex: Regex.t option
+        [@ocaml.doc
+          "The keyword regex for the customer pattern. After there is a match to the pattern regex, the keyword regex is used to search within the proximity of the match. If there is a keyword match, then the match is confirmed. If no keyword regex is provided, the pattern regex match will automatically be confirmed. The format must follow JavaScript regex format. The pattern must be enclosed between slashes, and can have flags behind the second slash. For example, \226\128\156/ab+c/gi\226\128\157"]}
+    let context_ = "CustomPattern"
+    let make ?patternDescription =
+      fun ?keywordRegex ->
+        fun ~patternName ->
+          fun ~patternRegex ->
+            fun () ->
+              { patternDescription; keywordRegex; patternName; patternRegex }
+    let to_value x =
+      structure_to_value
+        [("patternName", (Some (PatternName.to_value x.patternName)));
+        ("patternRegex", (Some (Regex.to_value x.patternRegex)));
+        ("patternDescription",
+          (Option.map x.patternDescription ~f:DescriptionSafe.to_value));
+        ("keywordRegex", (Option.map x.keywordRegex ~f:Regex.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let keywordRegex =
+        (Option.map ~f:Regex.of_xml) (Xml.child xml_arg0 "keywordRegex") in
+      let patternDescription =
+        (Option.map ~f:DescriptionSafe.of_xml)
+          (Xml.child xml_arg0 "patternDescription") in
+      let patternRegex =
+        Regex.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "patternRegex") in
+      let patternName =
+        PatternName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "patternName") in
+      make ?keywordRegex ?patternDescription ~patternRegex ~patternName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let keywordRegex = field_map json__ "keywordRegex" Regex.of_json in
+      let patternDescription =
+        field_map json__ "patternDescription" DescriptionSafe.of_json in
+      let patternRegex = field_map_exn json__ "patternRegex" Regex.of_json in
+      let patternName =
+        field_map_exn json__ "patternName" PatternName.of_json in
+      make ?keywordRegex ?patternDescription ~patternRegex ~patternName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The pattern configuration for redacting custom data types in session."]
+module InlineRedactionUrls =
+  struct
+    type nonrec t = InlineRedactionUrl.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InlineRedactionUrl.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InlineRedactionUrl.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InlineRedactionUrls"
+        ~of_json:InlineRedactionUrl.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RedactionPlaceHolder =
+  struct
+    type nonrec t =
+      {
+      redactionPlaceHolderType: RedactionPlaceHolderType.t
+        [@ocaml.doc
+          "The redaction placeholder type that will replace the redacted text in session."];
+      redactionPlaceHolderText: RedactionPlaceHolderText.t option
+        [@ocaml.doc
+          "The redaction placeholder text that will replace the redacted text in session for the custom text redaction placeholder type."]}
+    let context_ = "RedactionPlaceHolder"
+    let make ?redactionPlaceHolderText =
+      fun ~redactionPlaceHolderType ->
+        fun () -> { redactionPlaceHolderText; redactionPlaceHolderType }
+    let to_value x =
+      structure_to_value
+        [("redactionPlaceHolderType",
+           (Some
+              (RedactionPlaceHolderType.to_value x.redactionPlaceHolderType)));
+        ("redactionPlaceHolderText",
+          (Option.map x.redactionPlaceHolderText
+             ~f:RedactionPlaceHolderText.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let redactionPlaceHolderText =
+        (Option.map ~f:RedactionPlaceHolderText.of_xml)
+          (Xml.child xml_arg0 "redactionPlaceHolderText") in
+      let redactionPlaceHolderType =
+        RedactionPlaceHolderType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "redactionPlaceHolderType") in
+      make ?redactionPlaceHolderText ~redactionPlaceHolderType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let redactionPlaceHolderText =
+        field_map json__ "redactionPlaceHolderText"
+          RedactionPlaceHolderText.of_json in
+      let redactionPlaceHolderType =
+        field_map_exn json__ "redactionPlaceHolderType"
+          RedactionPlaceHolderType.of_json in
+      make ?redactionPlaceHolderText ~redactionPlaceHolderType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The redaction placeholder that will replace the redacted text in session."]
+module MimeType =
+  struct
+    type nonrec t =
+      | Image_png 
+      | Image_jpeg 
+      | Image_x_icon 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Image_png -> "image/png"
+      | Image_jpeg -> "image/jpeg"
+      | Image_x_icon -> "image/x-icon"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "image/png" -> Image_png
+      | "image/jpeg" -> Image_jpeg
+      | "image/x-icon" -> Image_x_icon
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration MimeType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MimeType" j)
+    let to_json = simple_to_json to_value
+  end
+module StringType =
+  struct
+    type nonrec t = string
+    let context_ = "StringType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:131072) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StringType" j
+    let to_json = simple_to_json to_value
+  end
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module Locale =
+  struct
+    type nonrec t =
+      | De_DE 
+      | En_US 
+      | Es_ES 
+      | Fr_FR 
+      | Id_ID 
+      | It_IT 
+      | Ja_JP 
+      | Ko_KR 
+      | Pt_BR 
+      | Zh_CN 
+      | Zh_TW 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | De_DE -> "de-DE"
+      | En_US -> "en-US"
+      | Es_ES -> "es-ES"
+      | Fr_FR -> "fr-FR"
+      | Id_ID -> "id-ID"
+      | It_IT -> "it-IT"
+      | Ja_JP -> "ja-JP"
+      | Ko_KR -> "ko-KR"
+      | Pt_BR -> "pt-BR"
+      | Zh_CN -> "zh-CN"
+      | Zh_TW -> "zh-TW"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "de-DE" -> De_DE
+      | "en-US" -> En_US
+      | "es-ES" -> Es_ES
+      | "fr-FR" -> Fr_FR
+      | "id-ID" -> Id_ID
+      | "it-IT" -> It_IT
+      | "ja-JP" -> Ja_JP
+      | "ko-KR" -> Ko_KR
+      | "pt-BR" -> Pt_BR
+      | "zh-CN" -> Zh_CN
+      | "zh-TW" -> Zh_TW
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Locale" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Locale" j)
+    let to_json = simple_to_json to_value
+  end
+module LocalizedBrandingStrings =
+  struct
+    type nonrec t =
+      {
+      browserTabTitle: LocalizedBrandingStringsBrowserTabTitleString.t
+        [@ocaml.doc "The text displayed in the browser tab title."];
+      welcomeText: LocalizedBrandingStringsWelcomeTextString.t
+        [@ocaml.doc "The welcome text displayed on the sign-in page."];
+      loginTitle: LocalizedBrandingStringsLoginTitleString.t option
+        [@ocaml.doc
+          "The title text for the login section. This field is optional and defaults to \"Sign In\"."];
+      loginDescription:
+        LocalizedBrandingStringsLoginDescriptionString.t option
+        [@ocaml.doc
+          "The description text for the login section. This field is optional and defaults to \"Sign in to your session\"."];
+      loginButtonText: LocalizedBrandingStringsLoginButtonTextString.t option
+        [@ocaml.doc
+          "The text displayed on the login button. This field is optional and defaults to \"Sign In\"."];
+      contactLink: ContactLinkUrl.t option
+        [@ocaml.doc
+          "A contact link URL. The URL must start with https:// or mailto:. If not provided, the contact button will be hidden from the web portal screen."];
+      contactButtonText:
+        LocalizedBrandingStringsContactButtonTextString.t option
+        [@ocaml.doc
+          "The text displayed on the contact button. This field is optional and defaults to \"Contact us\"."];
+      loadingText: LocalizedBrandingStringsLoadingTextString.t option
+        [@ocaml.doc
+          "The text displayed during session loading. This field is optional and defaults to \"Loading your session\"."]}
+    let context_ = "LocalizedBrandingStrings"
+    let make ?loginTitle =
+      fun ?loginDescription ->
+        fun ?loginButtonText ->
+          fun ?contactLink ->
+            fun ?contactButtonText ->
+              fun ?loadingText ->
+                fun ~browserTabTitle ->
+                  fun ~welcomeText ->
+                    fun () ->
+                      {
+                        loginTitle;
+                        loginDescription;
+                        loginButtonText;
+                        contactLink;
+                        contactButtonText;
+                        loadingText;
+                        browserTabTitle;
+                        welcomeText
+                      }
+    let to_value x =
+      structure_to_value
+        [("browserTabTitle",
+           (Some
+              (LocalizedBrandingStringsBrowserTabTitleString.to_value
+                 x.browserTabTitle)));
+        ("welcomeText",
+          (Some
+             (LocalizedBrandingStringsWelcomeTextString.to_value
+                x.welcomeText)));
+        ("loginTitle",
+          (Option.map x.loginTitle
+             ~f:LocalizedBrandingStringsLoginTitleString.to_value));
+        ("loginDescription",
+          (Option.map x.loginDescription
+             ~f:LocalizedBrandingStringsLoginDescriptionString.to_value));
+        ("loginButtonText",
+          (Option.map x.loginButtonText
+             ~f:LocalizedBrandingStringsLoginButtonTextString.to_value));
+        ("contactLink",
+          (Option.map x.contactLink ~f:ContactLinkUrl.to_value));
+        ("contactButtonText",
+          (Option.map x.contactButtonText
+             ~f:LocalizedBrandingStringsContactButtonTextString.to_value));
+        ("loadingText",
+          (Option.map x.loadingText
+             ~f:LocalizedBrandingStringsLoadingTextString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let loadingText =
+        (Option.map ~f:LocalizedBrandingStringsLoadingTextString.of_xml)
+          (Xml.child xml_arg0 "loadingText") in
+      let contactButtonText =
+        (Option.map ~f:LocalizedBrandingStringsContactButtonTextString.of_xml)
+          (Xml.child xml_arg0 "contactButtonText") in
+      let contactLink =
+        (Option.map ~f:ContactLinkUrl.of_xml)
+          (Xml.child xml_arg0 "contactLink") in
+      let loginButtonText =
+        (Option.map ~f:LocalizedBrandingStringsLoginButtonTextString.of_xml)
+          (Xml.child xml_arg0 "loginButtonText") in
+      let loginDescription =
+        (Option.map ~f:LocalizedBrandingStringsLoginDescriptionString.of_xml)
+          (Xml.child xml_arg0 "loginDescription") in
+      let loginTitle =
+        (Option.map ~f:LocalizedBrandingStringsLoginTitleString.of_xml)
+          (Xml.child xml_arg0 "loginTitle") in
+      let welcomeText =
+        LocalizedBrandingStringsWelcomeTextString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "welcomeText") in
+      let browserTabTitle =
+        LocalizedBrandingStringsBrowserTabTitleString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "browserTabTitle") in
+      make ?loadingText ?contactButtonText ?contactLink ?loginButtonText
+        ?loginDescription ?loginTitle ~welcomeText ~browserTabTitle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let loadingText =
+        field_map json__ "loadingText"
+          LocalizedBrandingStringsLoadingTextString.of_json in
+      let contactButtonText =
+        field_map json__ "contactButtonText"
+          LocalizedBrandingStringsContactButtonTextString.of_json in
+      let contactLink = field_map json__ "contactLink" ContactLinkUrl.of_json in
+      let loginButtonText =
+        field_map json__ "loginButtonText"
+          LocalizedBrandingStringsLoginButtonTextString.of_json in
+      let loginDescription =
+        field_map json__ "loginDescription"
+          LocalizedBrandingStringsLoginDescriptionString.of_json in
+      let loginTitle =
+        field_map json__ "loginTitle"
+          LocalizedBrandingStringsLoginTitleString.of_json in
+      let welcomeText =
+        field_map_exn json__ "welcomeText"
+          LocalizedBrandingStringsWelcomeTextString.of_json in
+      let browserTabTitle =
+        field_map_exn json__ "browserTabTitle"
+          LocalizedBrandingStringsBrowserTabTitleString.of_json in
+      make ?loadingText ?contactButtonText ?contactLink ?loginButtonText
+        ?loginDescription ?loginTitle ~welcomeText ~browserTabTitle ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Localized text strings for a specific language that customize the web portal."]
+module CookieSpecification =
+  struct
+    type nonrec t =
+      {
+      domain: CookieDomain.t [@ocaml.doc "The domain of the cookie."];
+      name: CookieName.t option [@ocaml.doc "The name of the cookie."];
+      path: CookiePath.t option [@ocaml.doc "The path of the cookie."]}
+    let context_ = "CookieSpecification"
+    let make ?name =
+      fun ?path -> fun ~domain -> fun () -> { name; path; domain }
+    let to_value x =
+      structure_to_value
+        [("domain", (Some (CookieDomain.to_value x.domain)));
+        ("name", (Option.map x.name ~f:CookieName.to_value));
+        ("path", (Option.map x.path ~f:CookiePath.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let path =
+        (Option.map ~f:CookiePath.of_xml) (Xml.child xml_arg0 "path") in
+      let name =
+        (Option.map ~f:CookieName.of_xml) (Xml.child xml_arg0 "name") in
+      let domain =
+        CookieDomain.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "domain") in
+      make ?path ?name ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let path = field_map json__ "path" CookiePath.of_json in
+      let name = field_map json__ "name" CookieName.of_json in
+      let domain = field_map_exn json__ "domain" CookieDomain.of_json in
+      make ?path ?name ~domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies a single cookie or set of cookies in an end user's browser."]
+module ToolbarItem =
+  struct
+    type nonrec t =
+      | Windows 
+      | DualMonitor 
+      | FullScreen 
+      | Webcam 
+      | Microphone 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Windows -> "Windows"
+      | DualMonitor -> "DualMonitor"
+      | FullScreen -> "FullScreen"
+      | Webcam -> "Webcam"
+      | Microphone -> "Microphone"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Windows" -> Windows
+      | "DualMonitor" -> DualMonitor
+      | "FullScreen" -> FullScreen
+      | "Webcam" -> Webcam
+      | "Microphone" -> Microphone
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ToolbarItem" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ToolbarItem" j)
+    let to_json = simple_to_json to_value
+  end
+module FolderStructure =
+  struct
+    type nonrec t =
+      | Flat 
+      | NestedByDate 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Flat -> "Flat"
+      | NestedByDate -> "NestedByDate"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Flat" -> Flat
+      | "NestedByDate" -> NestedByDate
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FolderStructure" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FolderStructure" j)
+    let to_json = simple_to_json to_value
+  end
+module LogFileFormat =
+  struct
+    type nonrec t =
+      | JSONLines 
+      | Json 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | JSONLines -> "JSONLines"
+      | Json -> "Json"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "JSONLines" -> JSONLines
+      | "Json" -> Json
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LogFileFormat" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LogFileFormat" j)
+    let to_json = simple_to_json to_value
+  end
+module S3Bucket =
+  struct
+    type nonrec t = string
+    let context_ = "S3Bucket"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-z0-9][\\.\\-a-z0-9]{1,61}[a-z0-9]")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3Bucket" j
+    let to_json = simple_to_json to_value
+  end
+module S3BucketOwner =
+  struct
+    type nonrec t = string
+    let context_ = "S3BucketOwner"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"[0-9]{12}"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3BucketOwner" j
+    let to_json = simple_to_json to_value
+  end
+module S3KeyPrefix =
+  struct
+    type nonrec t = string
+    let context_ = "S3KeyPrefix"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\d\\w\\-_/!().*']+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3KeyPrefix" j
+    let to_json = simple_to_json to_value
+  end
 module ExceptionMessage =
   struct
     type nonrec t = string
@@ -49,6 +979,660 @@ module FieldName =
     let of_json j = string_of_json ~kind:"FieldName" j
     let to_json = simple_to_json to_value
   end
+module Event =
+  struct
+    type nonrec t =
+      | WebsiteInteract 
+      | FileDownloadFromSecureBrowserToRemoteDisk 
+      | FileTransferFromRemoteToLocalDisk 
+      | FileTransferFromLocalToRemoteDisk 
+      | FileUploadFromRemoteDiskToSecureBrowser 
+      | ContentPasteToWebsite 
+      | ContentTransferFromLocalToRemoteClipboard 
+      | ContentCopyFromWebsite 
+      | UrlLoad 
+      | TabOpen 
+      | TabClose 
+      | PrintJobSubmit 
+      | SessionConnect 
+      | SessionStart 
+      | SessionDisconnect 
+      | SessionEnd 
+      | UrlBlockByContentFilter 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | WebsiteInteract -> "WebsiteInteract"
+      | FileDownloadFromSecureBrowserToRemoteDisk ->
+          "FileDownloadFromSecureBrowserToRemoteDisk"
+      | FileTransferFromRemoteToLocalDisk ->
+          "FileTransferFromRemoteToLocalDisk"
+      | FileTransferFromLocalToRemoteDisk ->
+          "FileTransferFromLocalToRemoteDisk"
+      | FileUploadFromRemoteDiskToSecureBrowser ->
+          "FileUploadFromRemoteDiskToSecureBrowser"
+      | ContentPasteToWebsite -> "ContentPasteToWebsite"
+      | ContentTransferFromLocalToRemoteClipboard ->
+          "ContentTransferFromLocalToRemoteClipboard"
+      | ContentCopyFromWebsite -> "ContentCopyFromWebsite"
+      | UrlLoad -> "UrlLoad"
+      | TabOpen -> "TabOpen"
+      | TabClose -> "TabClose"
+      | PrintJobSubmit -> "PrintJobSubmit"
+      | SessionConnect -> "SessionConnect"
+      | SessionStart -> "SessionStart"
+      | SessionDisconnect -> "SessionDisconnect"
+      | SessionEnd -> "SessionEnd"
+      | UrlBlockByContentFilter -> "UrlBlockByContentFilter"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "WebsiteInteract" -> WebsiteInteract
+      | "FileDownloadFromSecureBrowserToRemoteDisk" ->
+          FileDownloadFromSecureBrowserToRemoteDisk
+      | "FileTransferFromRemoteToLocalDisk" ->
+          FileTransferFromRemoteToLocalDisk
+      | "FileTransferFromLocalToRemoteDisk" ->
+          FileTransferFromLocalToRemoteDisk
+      | "FileUploadFromRemoteDiskToSecureBrowser" ->
+          FileUploadFromRemoteDiskToSecureBrowser
+      | "ContentPasteToWebsite" -> ContentPasteToWebsite
+      | "ContentTransferFromLocalToRemoteClipboard" ->
+          ContentTransferFromLocalToRemoteClipboard
+      | "ContentCopyFromWebsite" -> ContentCopyFromWebsite
+      | "UrlLoad" -> UrlLoad
+      | "TabOpen" -> TabOpen
+      | "TabClose" -> TabClose
+      | "PrintJobSubmit" -> PrintJobSubmit
+      | "SessionConnect" -> SessionConnect
+      | "SessionStart" -> SessionStart
+      | "SessionDisconnect" -> SessionDisconnect
+      | "SessionEnd" -> SessionEnd
+      | "UrlBlockByContentFilter" -> UrlBlockByContentFilter
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Event" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Event" j)
+    let to_json = simple_to_json to_value
+  end
+module Description =
+  struct
+    type nonrec t = string
+    let context_ = "Description"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:".+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Description" j
+    let to_json = simple_to_json to_value
+  end
+module IpRange =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "A single IP address or an IP address range in CIDR notation"]
+    let context_ = "IpRange"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IpRange" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "A single IP address or an IP address range in CIDR notation"]
+module InlineRedactionPattern =
+  struct
+    type nonrec t =
+      {
+      builtInPatternId: BuiltInPatternId.t option
+        [@ocaml.doc
+          "The built-in pattern from the list of preconfigured patterns. Either a customPattern or builtInPatternId is required."];
+      customPattern: CustomPattern.t option
+        [@ocaml.doc
+          ">The configuration for a custom pattern. Either a customPattern or builtInPatternId is required."];
+      redactionPlaceHolder: RedactionPlaceHolder.t
+        [@ocaml.doc
+          "The redaction placeholder that will replace the redacted text in session for the inline redaction pattern."];
+      enforcedUrls: InlineRedactionUrls.t option
+        [@ocaml.doc
+          "The enforced URL configuration for the inline redaction pattern. This will override the global enforced URL configuration."];
+      exemptUrls: InlineRedactionUrls.t option
+        [@ocaml.doc
+          "The exempt URL configuration for the inline redaction pattern. This will override the global exempt URL configuration for the inline redaction pattern."];
+      confidenceLevel: ConfidenceLevel.t option
+        [@ocaml.doc
+          "The confidence level for inline redaction pattern. This indicates the certainty of data type matches in the redaction process. Confidence level 3 means high confidence, and requires a formatted text pattern match in order for content to be redacted. Confidence level 2 means medium confidence, and redaction considers both formatted and unformatted text, and adds keyword associate to the logic. Confidence level 1 means low confidence, and redaction is enforced for both formatted pattern + unformatted pattern without keyword. This overrides the global confidence level."]}
+    let context_ = "InlineRedactionPattern"
+    let make ?builtInPatternId =
+      fun ?customPattern ->
+        fun ?enforcedUrls ->
+          fun ?exemptUrls ->
+            fun ?confidenceLevel ->
+              fun ~redactionPlaceHolder ->
+                fun () ->
+                  {
+                    builtInPatternId;
+                    customPattern;
+                    enforcedUrls;
+                    exemptUrls;
+                    confidenceLevel;
+                    redactionPlaceHolder
+                  }
+    let to_value x =
+      structure_to_value
+        [("builtInPatternId",
+           (Option.map x.builtInPatternId ~f:BuiltInPatternId.to_value));
+        ("customPattern",
+          (Option.map x.customPattern ~f:CustomPattern.to_value));
+        ("redactionPlaceHolder",
+          (Some (RedactionPlaceHolder.to_value x.redactionPlaceHolder)));
+        ("enforcedUrls",
+          (Option.map x.enforcedUrls ~f:InlineRedactionUrls.to_value));
+        ("exemptUrls",
+          (Option.map x.exemptUrls ~f:InlineRedactionUrls.to_value));
+        ("confidenceLevel",
+          (Option.map x.confidenceLevel ~f:ConfidenceLevel.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let confidenceLevel =
+        (Option.map ~f:ConfidenceLevel.of_xml)
+          (Xml.child xml_arg0 "confidenceLevel") in
+      let exemptUrls =
+        (Option.map ~f:InlineRedactionUrls.of_xml)
+          (Xml.child xml_arg0 "exemptUrls") in
+      let enforcedUrls =
+        (Option.map ~f:InlineRedactionUrls.of_xml)
+          (Xml.child xml_arg0 "enforcedUrls") in
+      let redactionPlaceHolder =
+        RedactionPlaceHolder.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "redactionPlaceHolder") in
+      let customPattern =
+        (Option.map ~f:CustomPattern.of_xml)
+          (Xml.child xml_arg0 "customPattern") in
+      let builtInPatternId =
+        (Option.map ~f:BuiltInPatternId.of_xml)
+          (Xml.child xml_arg0 "builtInPatternId") in
+      make ?confidenceLevel ?exemptUrls ?enforcedUrls ~redactionPlaceHolder
+        ?customPattern ?builtInPatternId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let confidenceLevel =
+        field_map json__ "confidenceLevel" ConfidenceLevel.of_json in
+      let exemptUrls =
+        field_map json__ "exemptUrls" InlineRedactionUrls.of_json in
+      let enforcedUrls =
+        field_map json__ "enforcedUrls" InlineRedactionUrls.of_json in
+      let redactionPlaceHolder =
+        field_map_exn json__ "redactionPlaceHolder"
+          RedactionPlaceHolder.of_json in
+      let customPattern =
+        field_map json__ "customPattern" CustomPattern.of_json in
+      let builtInPatternId =
+        field_map json__ "builtInPatternId" BuiltInPatternId.of_json in
+      make ?confidenceLevel ?exemptUrls ?enforcedUrls ~redactionPlaceHolder
+        ?customPattern ?builtInPatternId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The set of patterns that determine the data types redacted in session."]
+module Category =
+  struct
+    type nonrec t =
+      | Cults 
+      | Gambling 
+      | Nudity 
+      | Pornography 
+      | SexEducation 
+      | Tasteless 
+      | Violence 
+      | DownloadSites 
+      | ImageSharing 
+      | PeerToPeer 
+      | StreamingMediaAndDownloads 
+      | GenerativeAI 
+      | CriminalActivity 
+      | Hacking 
+      | HateAndIntolerance 
+      | IllegalDrug 
+      | IllegalSoftware 
+      | SchoolCheating 
+      | SelfHarm 
+      | Weapons 
+      | Chat 
+      | Games 
+      | InstantMessaging 
+      | ProfessionalNetwork 
+      | SocialNetworking 
+      | WebBasedEmail 
+      | ParkedDomains 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Cults -> "Cults"
+      | Gambling -> "Gambling"
+      | Nudity -> "Nudity"
+      | Pornography -> "Pornography"
+      | SexEducation -> "SexEducation"
+      | Tasteless -> "Tasteless"
+      | Violence -> "Violence"
+      | DownloadSites -> "DownloadSites"
+      | ImageSharing -> "ImageSharing"
+      | PeerToPeer -> "PeerToPeer"
+      | StreamingMediaAndDownloads -> "StreamingMediaAndDownloads"
+      | GenerativeAI -> "GenerativeAI"
+      | CriminalActivity -> "CriminalActivity"
+      | Hacking -> "Hacking"
+      | HateAndIntolerance -> "HateAndIntolerance"
+      | IllegalDrug -> "IllegalDrug"
+      | IllegalSoftware -> "IllegalSoftware"
+      | SchoolCheating -> "SchoolCheating"
+      | SelfHarm -> "SelfHarm"
+      | Weapons -> "Weapons"
+      | Chat -> "Chat"
+      | Games -> "Games"
+      | InstantMessaging -> "InstantMessaging"
+      | ProfessionalNetwork -> "ProfessionalNetwork"
+      | SocialNetworking -> "SocialNetworking"
+      | WebBasedEmail -> "WebBasedEmail"
+      | ParkedDomains -> "ParkedDomains"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Cults" -> Cults
+      | "Gambling" -> Gambling
+      | "Nudity" -> Nudity
+      | "Pornography" -> Pornography
+      | "SexEducation" -> SexEducation
+      | "Tasteless" -> Tasteless
+      | "Violence" -> Violence
+      | "DownloadSites" -> DownloadSites
+      | "ImageSharing" -> ImageSharing
+      | "PeerToPeer" -> PeerToPeer
+      | "StreamingMediaAndDownloads" -> StreamingMediaAndDownloads
+      | "GenerativeAI" -> GenerativeAI
+      | "CriminalActivity" -> CriminalActivity
+      | "Hacking" -> Hacking
+      | "HateAndIntolerance" -> HateAndIntolerance
+      | "IllegalDrug" -> IllegalDrug
+      | "IllegalSoftware" -> IllegalSoftware
+      | "SchoolCheating" -> SchoolCheating
+      | "SelfHarm" -> SelfHarm
+      | "Weapons" -> Weapons
+      | "Chat" -> Chat
+      | "Games" -> Games
+      | "InstantMessaging" -> InstantMessaging
+      | "ProfessionalNetwork" -> ProfessionalNetwork
+      | "SocialNetworking" -> SocialNetworking
+      | "WebBasedEmail" -> WebBasedEmail
+      | "ParkedDomains" -> ParkedDomains
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Category" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Category" j)
+    let to_json = simple_to_json to_value
+  end
+module UrlPattern =
+  struct
+    type nonrec t = string
+    let context_ = "UrlPattern"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"((([a-zA-Z][a-zA-Z0-9+.-]*):\\/\\/(\\*|[\\w%._\\-\\+~#=@]+)?(\\/[^@\\s]*)?(?:\\?([^*\\s]+(?:\\*?)))?)|(\\*|[\\w%._\\-\\+~#=@]+\\.[\\w%._\\-\\+~#=@]+)(?::(\\d{1,5}))?(\\/[^@\\s]*)?(?:\\?([^*\\s]+(?:\\*?)))?|(([a-zA-Z][a-zA-Z0-9+.-]*):(\\/\\/)?\\*))");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UrlPattern" j
+    let to_json = simple_to_json to_value
+  end
+module ColorTheme =
+  struct
+    type nonrec t =
+      | Light 
+      | Dark 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Light -> "Light" | Dark -> "Dark" | Non_static_id s -> s
+    let of_string =
+      function | "Light" -> Light | "Dark" -> Dark | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ColorTheme" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ColorTheme" j)
+    let to_json = simple_to_json to_value
+  end
+module ImageMetadata =
+  struct
+    type nonrec t =
+      {
+      mimeType: MimeType.t option [@ocaml.doc "The MIME type of the image."];
+      fileExtension: StringType.t option
+        [@ocaml.doc "The file extension of the image."];
+      lastUploadTimestamp: Timestamp.t option
+        [@ocaml.doc "The timestamp when the image was last uploaded."]}
+    let make ?mimeType =
+      fun ?fileExtension ->
+        fun ?lastUploadTimestamp ->
+          fun () -> { mimeType; fileExtension; lastUploadTimestamp }
+    let to_value x =
+      structure_to_value
+        [("mimeType", (Option.map x.mimeType ~f:MimeType.to_value));
+        ("fileExtension",
+          (Option.map x.fileExtension ~f:StringType.to_value));
+        ("lastUploadTimestamp",
+          (Option.map x.lastUploadTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUploadTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastUploadTimestamp") in
+      let fileExtension =
+        (Option.map ~f:StringType.of_xml)
+          (Xml.child xml_arg0 "fileExtension") in
+      let mimeType =
+        (Option.map ~f:MimeType.of_xml) (Xml.child xml_arg0 "mimeType") in
+      make ?lastUploadTimestamp ?fileExtension ?mimeType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUploadTimestamp =
+        field_map json__ "lastUploadTimestamp" Timestamp.of_json in
+      let fileExtension = field_map json__ "fileExtension" StringType.of_json in
+      let mimeType = field_map json__ "mimeType" MimeType.of_json in
+      make ?lastUploadTimestamp ?fileExtension ?mimeType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Metadata information about an uploaded image file."]
+module LocalizedBrandingStringMap =
+  struct
+    type nonrec t = (Locale.t * LocalizedBrandingStrings.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types Locale LocalizedBrandingStrings"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (Locale.to_value x) |>
+                    (fun x ->
+                       (LocalizedBrandingStrings.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:Locale.of_string
+        ~of_json:LocalizedBrandingStrings.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Markdown =
+  struct
+    type nonrec t = string
+    let context_ = "Markdown"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:153600) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Markdown" j
+    let to_json = simple_to_json to_value
+  end
+module CookieSpecifications =
+  struct
+    type nonrec t = CookieSpecification.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CookieSpecification.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CookieSpecification.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CookieSpecifications"
+        ~of_json:CookieSpecification.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module HiddenToolbarItemList =
+  struct
+    type nonrec t = ToolbarItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ToolbarItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ToolbarItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"HiddenToolbarItemList" ~of_json:ToolbarItem.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxDisplayResolution =
+  struct
+    type nonrec t =
+      | Size4096X2160 
+      | Size3840X2160 
+      | Size3440X1440 
+      | Size2560X1440 
+      | Size1920X1080 
+      | Size1280X720 
+      | Size1024X768 
+      | Size800X600 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Size4096X2160 -> "size4096X2160"
+      | Size3840X2160 -> "size3840X2160"
+      | Size3440X1440 -> "size3440X1440"
+      | Size2560X1440 -> "size2560X1440"
+      | Size1920X1080 -> "size1920X1080"
+      | Size1280X720 -> "size1280X720"
+      | Size1024X768 -> "size1024X768"
+      | Size800X600 -> "size800X600"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "size4096X2160" -> Size4096X2160
+      | "size3840X2160" -> Size3840X2160
+      | "size3440X1440" -> Size3440X1440
+      | "size2560X1440" -> Size2560X1440
+      | "size1920X1080" -> Size1920X1080
+      | "size1280X720" -> Size1280X720
+      | "size1024X768" -> Size1024X768
+      | "size800X600" -> Size800X600
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MaxDisplayResolution" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MaxDisplayResolution" j)
+    let to_json = simple_to_json to_value
+  end
+module ToolbarType =
+  struct
+    type nonrec t =
+      | Floating 
+      | Docked 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Floating -> "Floating"
+      | Docked -> "Docked"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Floating" -> Floating
+      | "Docked" -> Docked
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ToolbarType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ToolbarType" j)
+    let to_json = simple_to_json to_value
+  end
+module VisualMode =
+  struct
+    type nonrec t =
+      | Dark 
+      | Light 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Dark -> "Dark" | Light -> "Light" | Non_static_id s -> s
+    let of_string =
+      function | "Dark" -> Dark | "Light" -> Light | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration VisualMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"VisualMode" j)
+    let to_json = simple_to_json to_value
+  end
+module S3LogConfiguration =
+  struct
+    type nonrec t =
+      {
+      bucket: S3Bucket.t
+        [@ocaml.doc "The S3 bucket name where logs are delivered."];
+      keyPrefix: S3KeyPrefix.t option
+        [@ocaml.doc
+          "The S3 path prefix that determines where log files are stored."];
+      bucketOwner: S3BucketOwner.t option
+        [@ocaml.doc
+          "The expected bucket owner of the target S3 bucket. The caller must have permissions to write to the target bucket."];
+      logFileFormat: LogFileFormat.t
+        [@ocaml.doc "The format of the LogFile that is written to S3."];
+      folderStructure: FolderStructure.t
+        [@ocaml.doc
+          "The folder structure that defines the organizational structure for log files in S3."]}
+    let context_ = "S3LogConfiguration"
+    let make ?keyPrefix =
+      fun ?bucketOwner ->
+        fun ~bucket ->
+          fun ~logFileFormat ->
+            fun ~folderStructure ->
+              fun () ->
+                {
+                  keyPrefix;
+                  bucketOwner;
+                  bucket;
+                  logFileFormat;
+                  folderStructure
+                }
+    let to_value x =
+      structure_to_value
+        [("bucket", (Some (S3Bucket.to_value x.bucket)));
+        ("keyPrefix", (Option.map x.keyPrefix ~f:S3KeyPrefix.to_value));
+        ("bucketOwner", (Option.map x.bucketOwner ~f:S3BucketOwner.to_value));
+        ("logFileFormat", (Some (LogFileFormat.to_value x.logFileFormat)));
+        ("folderStructure",
+          (Some (FolderStructure.to_value x.folderStructure)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let folderStructure =
+        FolderStructure.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "folderStructure") in
+      let logFileFormat =
+        LogFileFormat.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "logFileFormat") in
+      let bucketOwner =
+        (Option.map ~f:S3BucketOwner.of_xml)
+          (Xml.child xml_arg0 "bucketOwner") in
+      let keyPrefix =
+        (Option.map ~f:S3KeyPrefix.of_xml) (Xml.child xml_arg0 "keyPrefix") in
+      let bucket =
+        S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "bucket") in
+      make ~folderStructure ~logFileFormat ?bucketOwner ?keyPrefix ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let folderStructure =
+        field_map_exn json__ "folderStructure" FolderStructure.of_json in
+      let logFileFormat =
+        field_map_exn json__ "logFileFormat" LogFileFormat.of_json in
+      let bucketOwner = field_map json__ "bucketOwner" S3BucketOwner.of_json in
+      let keyPrefix = field_map json__ "keyPrefix" S3KeyPrefix.of_json in
+      let bucket = field_map_exn json__ "bucket" S3Bucket.of_json in
+      make ~folderStructure ~logFileFormat ?bucketOwner ?keyPrefix ~bucket ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The S3 log configuration."]
 module ARN =
   struct
     type nonrec t = string
@@ -61,7 +1645,7 @@ module ARN =
                 (check_string_max i ~max:2048) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn:[\\w+=\\/,.@-]+:[a-zA-Z0-9\\-]+:[a-zA-Z0-9\\-]*:[a-zA-Z0-9]{1,12}:[a-zA-Z]+(\\/[a-fA-F0-9\\-]{36})+$")));
+                       ~pattern:"arn:[\\w+=\\/,.@-]+:[a-zA-Z0-9\\-]+:[a-zA-Z0-9\\-]*:[a-zA-Z0-9]{1,12}:[a-zA-Z]+(\\/[a-fA-F0-9\\-]{36})+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -75,33 +1659,116 @@ module ValidationExceptionField =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t
+      name: FieldName.t option
+        [@ocaml.doc "The name of the field that failed validation."];
+      message: ExceptionMessage.t option
         [@ocaml.doc
-          "The message describing why the field failed validation."];
-      name: FieldName.t
-        [@ocaml.doc "The name of the field that failed validation."]}
-    let context_ = "ValidationExceptionField"
-    let make ~message = fun ~name -> fun () -> { message; name }
+          "The message describing why the field failed validation."]}
+    let make ?name = fun ?message -> fun () -> { name; message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ExceptionMessage.to_value x.message)));
-        ("name", (Some (FieldName.to_value x.name)))]
+        [("name", (Option.map x.name ~f:FieldName.to_value));
+        ("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let name =
-        FieldName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~name ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      let name = (Option.map ~f:FieldName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?message ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" FieldName.of_json in
-      let message = field_map_exn json "message" ExceptionMessage.of_json in
-      make ~name ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      let name = field_map json__ "name" FieldName.of_json in
+      make ?message ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a field passed inside a request that resulted in an exception."]
+module IconImage =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module S3Uri =
+  struct
+    type nonrec t = string
+    let context_ = "S3Uri"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"s3://[a-z0-9][a-z0-9\\.\\-]{1,61}[a-z0-9]/.+");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3Uri" j
+    let to_json = simple_to_json to_value
+  end
+module WallpaperImage =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module Events =
+  struct
+    type nonrec t = Event.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Event.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Event.of_xml)
+    let of_json j = list_of_json ~kind:"Events" ~of_json:Event.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Unit =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end
 module SecurityGroupId =
   struct
     type nonrec t = string
@@ -112,7 +1779,7 @@ module SecurityGroupId =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:128) >>=
-                  (fun () -> check_pattern i ~pattern:"^[\\w+\\-]+$")));
+                  (fun () -> check_pattern i ~pattern:"[\\w+\\-]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -134,7 +1801,7 @@ module SubnetId =
                 (check_string_max i ~max:32) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^subnet-([0-9a-f]{8}|[0-9a-f]{17})$")));
+                       ~pattern:"subnet-([0-9a-f]{8}|[0-9a-f]{17})")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -144,25 +1811,164 @@ module SubnetId =
     let of_json j = string_of_json ~kind:"SubnetId" j
     let to_json = simple_to_json to_value
   end
-module StringType =
+module IpRule =
   struct
-    type nonrec t = string
-    let context_ = "StringType"
+    type nonrec t =
+      {
+      ipRange: IpRange.t [@ocaml.doc "The IP range of the IP rule."];
+      description: Description.t option
+        [@ocaml.doc "The description of the IP rule."]}
+    let context_ = "IpRule"
+    let make ?description =
+      fun ~ipRange -> fun () -> { description; ipRange }
+    let to_value x =
+      structure_to_value
+        [("ipRange", (Some (IpRange.to_value x.ipRange)));
+        ("description", (Option.map x.description ~f:Description.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let ipRange =
+        IpRange.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ipRange") in
+      make ?description ~ipRange ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description = field_map json__ "description" Description.of_json in
+      let ipRange = field_map_exn json__ "ipRange" IpRange.of_json in
+      make ?description ~ipRange ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The IP rules of the IP access settings."]
+module GlobalInlineRedactionUrls =
+  struct
+    type nonrec t = InlineRedactionUrl.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:131072) >>=
-                  (fun () -> check_pattern i ~pattern:"^[\\s\\S]*$")));
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
         i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InlineRedactionUrl.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"StringType" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InlineRedactionUrl.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GlobalInlineRedactionUrls"
+        ~of_json:InlineRedactionUrl.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InlineRedactionPatterns =
+  struct
+    type nonrec t = InlineRedactionPattern.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:150) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InlineRedactionPattern.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InlineRedactionPattern.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InlineRedactionPatterns"
+        ~of_json:InlineRedactionPattern.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BlockedCategories =
+  struct
+    type nonrec t = Category.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Category.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Category.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BlockedCategories" ~of_json:Category.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UrlPatternList =
+  struct
+    type nonrec t = UrlPattern.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1000) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UrlPattern.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UrlPattern.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UrlPatternList" ~of_json:UrlPattern.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module TagKey =
   struct
@@ -176,7 +1982,7 @@ module TagKey =
                 (check_string_max i ~max:128) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+                       ~pattern:"([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -198,7 +2004,7 @@ module TagValue =
                 (check_string_max i ~max:256) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+                       ~pattern:"([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -206,6 +2012,141 @@ module TagValue =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
+module BrandingConfiguration =
+  struct
+    type nonrec t =
+      {
+      logo: ImageMetadata.t option
+        [@ocaml.doc
+          "Metadata for the logo image file, including the MIME type, file extension, and upload timestamp."];
+      wallpaper: ImageMetadata.t option
+        [@ocaml.doc
+          "Metadata for the wallpaper image file, including the MIME type, file extension, and upload timestamp."];
+      favicon: ImageMetadata.t option
+        [@ocaml.doc
+          "Metadata for the favicon image file, including the MIME type, file extension, and upload timestamp."];
+      localizedStrings: LocalizedBrandingStringMap.t option
+        [@ocaml.doc
+          "A map of localized text strings for different languages, allowing the portal to display content in the user's preferred language."];
+      colorTheme: ColorTheme.t option
+        [@ocaml.doc "The color theme for components on the web portal."];
+      termsOfService: Markdown.t option
+        [@ocaml.doc
+          "The terms of service text in Markdown format that users must accept before accessing the portal."]}
+    let make ?logo =
+      fun ?wallpaper ->
+        fun ?favicon ->
+          fun ?localizedStrings ->
+            fun ?colorTheme ->
+              fun ?termsOfService ->
+                fun () ->
+                  {
+                    logo;
+                    wallpaper;
+                    favicon;
+                    localizedStrings;
+                    colorTheme;
+                    termsOfService
+                  }
+    let to_value x =
+      structure_to_value
+        [("logo", (Option.map x.logo ~f:ImageMetadata.to_value));
+        ("wallpaper", (Option.map x.wallpaper ~f:ImageMetadata.to_value));
+        ("favicon", (Option.map x.favicon ~f:ImageMetadata.to_value));
+        ("localizedStrings",
+          (Option.map x.localizedStrings
+             ~f:LocalizedBrandingStringMap.to_value));
+        ("colorTheme", (Option.map x.colorTheme ~f:ColorTheme.to_value));
+        ("termsOfService",
+          (Option.map x.termsOfService ~f:Markdown.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let termsOfService =
+        (Option.map ~f:Markdown.of_xml) (Xml.child xml_arg0 "termsOfService") in
+      let colorTheme =
+        (Option.map ~f:ColorTheme.of_xml) (Xml.child xml_arg0 "colorTheme") in
+      let localizedStrings =
+        (Option.map ~f:LocalizedBrandingStringMap.of_xml)
+          (Xml.child xml_arg0 "localizedStrings") in
+      let favicon =
+        (Option.map ~f:ImageMetadata.of_xml) (Xml.child xml_arg0 "favicon") in
+      let wallpaper =
+        (Option.map ~f:ImageMetadata.of_xml) (Xml.child xml_arg0 "wallpaper") in
+      let logo =
+        (Option.map ~f:ImageMetadata.of_xml) (Xml.child xml_arg0 "logo") in
+      make ?termsOfService ?colorTheme ?localizedStrings ?favicon ?wallpaper
+        ?logo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let termsOfService = field_map json__ "termsOfService" Markdown.of_json in
+      let colorTheme = field_map json__ "colorTheme" ColorTheme.of_json in
+      let localizedStrings =
+        field_map json__ "localizedStrings"
+          LocalizedBrandingStringMap.of_json in
+      let favicon = field_map json__ "favicon" ImageMetadata.of_json in
+      let wallpaper = field_map json__ "wallpaper" ImageMetadata.of_json in
+      let logo = field_map json__ "logo" ImageMetadata.of_json in
+      make ?termsOfService ?colorTheme ?localizedStrings ?favicon ?wallpaper
+        ?logo ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The branding configuration output including custom images metadata, localized strings, color theme, and terms of service."]
+module CookieSynchronizationConfiguration =
+  struct
+    type nonrec t =
+      {
+      allowlist: CookieSpecifications.t
+        [@ocaml.doc
+          "The list of cookie specifications that are allowed to be synchronized to the remote browser."];
+      blocklist: CookieSpecifications.t option
+        [@ocaml.doc
+          "The list of cookie specifications that are blocked from being synchronized to the remote browser."]}
+    let context_ = "CookieSynchronizationConfiguration"
+    let make ?blocklist =
+      fun ~allowlist -> fun () -> { blocklist; allowlist }
+    let to_value x =
+      structure_to_value
+        [("allowlist", (Some (CookieSpecifications.to_value x.allowlist)));
+        ("blocklist",
+          (Option.map x.blocklist ~f:CookieSpecifications.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let blocklist =
+        (Option.map ~f:CookieSpecifications.of_xml)
+          (Xml.child xml_arg0 "blocklist") in
+      let allowlist =
+        CookieSpecifications.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "allowlist") in
+      make ?blocklist ~allowlist ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let blocklist =
+        field_map json__ "blocklist" CookieSpecifications.of_json in
+      let allowlist =
+        field_map_exn json__ "allowlist" CookieSpecifications.of_json in
+      make ?blocklist ~allowlist ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration that specifies which cookies should be synchronized from the end user's local browser to the remote browser."]
+module DisconnectTimeoutInMinutes =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:600) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for DisconnectTimeoutInMinutes"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module EnabledType =
@@ -233,6 +2174,107 @@ module EnabledType =
     let of_json j = of_string (string_of_json ~kind:"EnabledType" j)
     let to_json = simple_to_json to_value
   end
+module IdleDisconnectTimeoutInMinutes =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:60) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for IdleDisconnectTimeoutInMinutes"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ToolbarConfiguration =
+  struct
+    type nonrec t =
+      {
+      toolbarType: ToolbarType.t option
+        [@ocaml.doc "The type of toolbar displayed during the session."];
+      visualMode: VisualMode.t option
+        [@ocaml.doc "The visual mode of the toolbar."];
+      hiddenToolbarItems: HiddenToolbarItemList.t option
+        [@ocaml.doc "The list of toolbar items to be hidden."];
+      maxDisplayResolution: MaxDisplayResolution.t option
+        [@ocaml.doc
+          "The maximum display resolution that is allowed for the session."]}
+    let make ?toolbarType =
+      fun ?visualMode ->
+        fun ?hiddenToolbarItems ->
+          fun ?maxDisplayResolution ->
+            fun () ->
+              {
+                toolbarType;
+                visualMode;
+                hiddenToolbarItems;
+                maxDisplayResolution
+              }
+    let to_value x =
+      structure_to_value
+        [("toolbarType", (Option.map x.toolbarType ~f:ToolbarType.to_value));
+        ("visualMode", (Option.map x.visualMode ~f:VisualMode.to_value));
+        ("hiddenToolbarItems",
+          (Option.map x.hiddenToolbarItems ~f:HiddenToolbarItemList.to_value));
+        ("maxDisplayResolution",
+          (Option.map x.maxDisplayResolution ~f:MaxDisplayResolution.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxDisplayResolution =
+        (Option.map ~f:MaxDisplayResolution.of_xml)
+          (Xml.child xml_arg0 "maxDisplayResolution") in
+      let hiddenToolbarItems =
+        (Option.map ~f:HiddenToolbarItemList.of_xml)
+          (Xml.child xml_arg0 "hiddenToolbarItems") in
+      let visualMode =
+        (Option.map ~f:VisualMode.of_xml) (Xml.child xml_arg0 "visualMode") in
+      let toolbarType =
+        (Option.map ~f:ToolbarType.of_xml) (Xml.child xml_arg0 "toolbarType") in
+      make ?maxDisplayResolution ?hiddenToolbarItems ?visualMode ?toolbarType
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxDisplayResolution =
+        field_map json__ "maxDisplayResolution" MaxDisplayResolution.of_json in
+      let hiddenToolbarItems =
+        field_map json__ "hiddenToolbarItems" HiddenToolbarItemList.of_json in
+      let visualMode = field_map json__ "visualMode" VisualMode.of_json in
+      let toolbarType = field_map json__ "toolbarType" ToolbarType.of_json in
+      make ?maxDisplayResolution ?hiddenToolbarItems ?visualMode ?toolbarType
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration of the toolbar. This allows administrators to select the toolbar type and visual mode, set maximum display resolution for sessions, and choose which items are visible to end users during their sessions. If administrators do not modify these settings, end users retain control over their toolbar preferences."]
+module KinesisStreamArn =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "Kinesis stream ARN to which log events are published."]
+    let context_ = "KinesisStreamArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[\\w+=/,.@-]+:kinesis:[a-zA-Z0-9\\-]*:[a-zA-Z0-9]{1,12}:stream/.+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KinesisStreamArn" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "Kinesis stream ARN to which log events are published."]
 module CertificatePrincipal =
   struct
     type nonrec t = string
@@ -243,7 +2285,7 @@ module CertificatePrincipal =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:"^\\S+$")));
+                  (fun () -> check_pattern i ~pattern:"\\S+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -263,7 +2305,7 @@ module CertificateThumbprint =
           ((check_string_min i ~min:64) >>=
              (fun () ->
                 (check_string_max i ~max:64) >>=
-                  (fun () -> check_pattern i ~pattern:"^[A-Fa-f0-9]{64}$")));
+                  (fun () -> check_pattern i ~pattern:"[A-Fa-f0-9]{64}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -273,16 +2315,116 @@ module CertificateThumbprint =
     let of_json j = string_of_json ~kind:"CertificateThumbprint" j
     let to_json = simple_to_json to_value
   end
-module Timestamp =
+module SessionStatus =
+  struct
+    type nonrec t =
+      | Active 
+      | Terminated 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Active -> "Active"
+      | Terminated -> "Terminated"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Active" -> Active
+      | "Terminated" -> Terminated
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SessionStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SessionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module Username =
   struct
     type nonrec t = string
-    let make i = i
+    let context_ = "Username"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+        i
     let of_string x = x
-    let to_value x = `Timestamp x
+    let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Username" j
+    let to_json = simple_to_json to_value
+  end
+module DisplayNameSafe =
+  struct
+    type nonrec t = string
+    let context_ = "DisplayNameSafe"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[ _\\-\\d\\w]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DisplayNameSafe" j
+    let to_json = simple_to_json to_value
+  end
+module LogConfiguration =
+  struct
+    type nonrec t =
+      {
+      s3: S3LogConfiguration.t option
+        [@ocaml.doc "The configuration for delivering the logs to S3."]}
+    let make ?s3 = fun () -> { s3 }
+    let to_value x =
+      structure_to_value
+        [("s3", (Option.map x.s3 ~f:S3LogConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3 =
+        (Option.map ~f:S3LogConfiguration.of_xml) (Xml.child xml_arg0 "s3") in
+      make ?s3 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3 = field_map json__ "s3" S3LogConfiguration.of_json in
+      make ?s3 ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration of the log."]
+module AuthenticationType =
+  struct
+    type nonrec t =
+      | Standard 
+      | IAM_Identity_Center 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Standard -> "Standard"
+      | IAM_Identity_Center -> "IAM_Identity_Center"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Standard" -> Standard
+      | "IAM_Identity_Center" -> IAM_Identity_Center
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AuthenticationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AuthenticationType" j)
     let to_json = simple_to_json to_value
   end
 module BrowserType =
@@ -311,7 +2453,7 @@ module DisplayName =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:64) >>=
-                  (fun () -> check_pattern i ~pattern:"^.+$")));
+                  (fun () -> check_pattern i ~pattern:".+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -319,6 +2461,74 @@ module DisplayName =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"DisplayName" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceType =
+  struct
+    type nonrec t =
+      | Standard_regular 
+      | Standard_large 
+      | Standard_xlarge 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Standard_regular -> "standard.regular"
+      | Standard_large -> "standard.large"
+      | Standard_xlarge -> "standard.xlarge"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "standard.regular" -> Standard_regular
+      | "standard.large" -> Standard_large
+      | "standard.xlarge" -> Standard_xlarge
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration InstanceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"InstanceType" j)
+    let to_json = simple_to_json to_value
+  end
+module MaxConcurrentSessions =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:5000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxConcurrentSessions" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PortalCustomDomain =
+  struct
+    type nonrec t = string
+    let context_ = "PortalCustomDomain"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(|[a-zA-Z0-9]?((?!-)([A-Za-z0-9-]*[A-Za-z0-9])\\.)+[a-zA-Z0-9]+)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PortalCustomDomain" j
     let to_json = simple_to_json to_value
   end
 module PortalEndpoint =
@@ -333,7 +2543,7 @@ module PortalEndpoint =
                 (check_string_max i ~max:253) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^[a-zA-Z0-9]?((?!-)([A-Za-z0-9-]*[A-Za-z0-9])\\.)+[a-zA-Z0-9]+$")));
+                       ~pattern:"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -399,7 +2609,7 @@ module VpcId =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:255) >>=
-                  (fun () -> check_pattern i ~pattern:"^vpc-[0-9a-z]*$")));
+                  (fun () -> check_pattern i ~pattern:"vpc-[0-9a-z]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -421,7 +2631,7 @@ module IdentityProviderName =
                 (check_string_max i ~max:32) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^[^_][\\p{L}\\p{M}\\p{S}\\p{N}\\p{P}][^_]+$")));
+                       ~pattern:"[^_][\\p{L}\\p{M}\\p{S}\\p{N}\\p{P}][^_]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -467,6 +2677,50 @@ module IdentityProviderType =
       of_string
         (string_of_xml ~kind:"enumeration IdentityProviderType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"IdentityProviderType" j)
+    let to_json = simple_to_json to_value
+  end
+module SubresourceARN =
+  struct
+    type nonrec t = string
+    let context_ = "SubresourceARN"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[\\w+=\\/,.@-]+:[a-zA-Z0-9\\-]+:[a-zA-Z0-9\\-]*:[a-zA-Z0-9]{1,12}:[a-zA-Z]+(\\/[a-fA-F0-9\\-]{36}){2,}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SubresourceARN" j
+    let to_json = simple_to_json to_value
+  end
+module IpAddress =
+  struct
+    type nonrec t = string
+    let context_ = "IpAddress"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:15) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))$|^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IpAddress" j
     let to_json = simple_to_json to_value
   end
 module RetryAfterSeconds =
@@ -539,6 +2793,9 @@ module ArnList =
   struct
     type nonrec t = ARN.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ARN.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -558,10 +2815,65 @@ module ArnList =
     let of_json j = list_of_json ~kind:"ArnList" ~of_json:ARN.of_json j
     let to_json v = composed_to_json to_value v
   end
+module EncryptionContextMap =
+  struct
+    type nonrec t = (StringType.t * StringType.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((StringType.of_string chopped),
+                              (StringType.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (StringType.to_value x) |>
+                    (fun x -> (StringType.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:StringType.of_string
+        ~of_json:StringType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module KeyArn =
+  struct
+    type nonrec t = string
+    let context_ = "keyArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[\\w+=\\/,.@-]+:kms:[a-zA-Z0-9\\-]*:[a-zA-Z0-9]{1,12}:key\\/[a-zA-Z0-9-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"keyArn" j
+    let to_json = simple_to_json to_value
+  end
 module ValidationExceptionFieldList =
   struct
     type nonrec t = ValidationExceptionField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationExceptionField.to_value)) |>
         (fun x -> `List x)
@@ -617,6 +2929,61 @@ module ValidationExceptionReason =
       of_string (string_of_json ~kind:"ValidationExceptionReason" j)
     let to_json = simple_to_json to_value
   end
+module IconImageInput =
+  struct
+    type nonrec t =
+      {
+      blob: IconImage.t option
+        [@ocaml.doc "The image provided as a binary image file."];
+      s3Uri: S3Uri.t option
+        [@ocaml.doc
+          "The S3 URI pointing to the image file. The URI must use the format s3://bucket-name/key-name. You must have read access to the S3 object."]}
+    let make ?blob = fun ?s3Uri -> fun () -> { blob; s3Uri }
+    let to_value x =
+      structure_to_value
+        [("blob", (Option.map x.blob ~f:IconImage.to_value));
+        ("s3Uri", (Option.map x.s3Uri ~f:S3Uri.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Uri = (Option.map ~f:S3Uri.of_xml) (Xml.child xml_arg0 "s3Uri") in
+      let blob = (Option.map ~f:IconImage.of_xml) (Xml.child xml_arg0 "blob") in
+      make ?s3Uri ?blob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Uri = field_map json__ "s3Uri" S3Uri.of_json in
+      let blob = field_map json__ "blob" IconImage.of_json in
+      make ?s3Uri ?blob ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The input for an icon image (logo or favicon). Provide either a binary image file or an S3 URI pointing to the image file. Maximum 100 KB in JPEG, PNG, or ICO format."]
+module WallpaperImageInput =
+  struct
+    type nonrec t =
+      {
+      blob: WallpaperImage.t option
+        [@ocaml.doc "The image provided as a binary image file."];
+      s3Uri: S3Uri.t option
+        [@ocaml.doc
+          "The S3 URI pointing to the image file. The URI must use the format s3://bucket-name/key-name. You must have read access to the S3 object."]}
+    let make ?blob = fun ?s3Uri -> fun () -> { blob; s3Uri }
+    let to_value x =
+      structure_to_value
+        [("blob", (Option.map x.blob ~f:WallpaperImage.to_value));
+        ("s3Uri", (Option.map x.s3Uri ~f:S3Uri.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Uri = (Option.map ~f:S3Uri.of_xml) (Xml.child xml_arg0 "s3Uri") in
+      let blob =
+        (Option.map ~f:WallpaperImage.of_xml) (Xml.child xml_arg0 "blob") in
+      make ?s3Uri ?blob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Uri = field_map json__ "s3Uri" S3Uri.of_json in
+      let blob = field_map json__ "blob" WallpaperImage.of_json in
+      make ?s3Uri ?blob ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The input for a wallpaper image. Provide the image as either a binary image file or an S3 URI. Maximum 5 MB in JPEG or PNG format."]
 module CertificateAuthorityBody =
   struct
     type nonrec t = string
@@ -629,6 +2996,33 @@ module CertificateAuthorityBody =
     let of_json j = string_of_json ~kind:"a blob" j
     let to_json = simple_to_json to_value
   end
+module EventFilter =
+  struct
+    type nonrec t =
+      {
+      all: Unit.t option
+        [@ocaml.doc
+          "The filter that monitors all of the available events, including any new events emitted in the future."];
+      include_: Events.t option
+        [@ocaml.doc
+          "The filter that monitors only the listed set of events. New events are not auto-monitored."]}
+    let make ?all = fun ?include_ -> fun () -> { all; include_ }
+    let to_value x =
+      structure_to_value
+        [("all", (Option.map x.all ~f:Unit.to_value));
+        ("include", (Option.map x.include_ ~f:Events.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let include_ =
+        (Option.map ~f:Events.of_xml) (Xml.child xml_arg0 "include") in
+      let all = (Option.map ~f:Unit.of_xml) (Xml.child xml_arg0 "all") in
+      make ?include_ ?all ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let include_ = field_map json__ "include" Events.of_json in
+      let all = field_map json__ "all" Unit.of_json in make ?include_ ?all ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The filter that specifies the events to monitor."]
 module StatusReason =
   struct
     type nonrec t = string
@@ -657,6 +3051,9 @@ module SecurityGroupIdList =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -684,8 +3081,11 @@ module SubnetIdList =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:2));
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:2));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -704,6 +3104,37 @@ module SubnetIdList =
                      | _ -> true))) ~f:SubnetId.of_xml)
     let of_json j =
       list_of_json ~kind:"SubnetIdList" ~of_json:SubnetId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IpRuleList =
+  struct
+    type nonrec t = IpRule.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IpRule.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IpRule.of_xml)
+    let of_json j = list_of_json ~kind:"IpRuleList" ~of_json:IpRule.of_json j
     let to_json v = composed_to_json to_value v
   end
 module IdentityProviderDetails =
@@ -727,6 +3158,8 @@ module IdentityProviderDetails =
                     (fun x -> (StringType.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -734,6 +3167,78 @@ module IdentityProviderDetails =
         ~of_json:StringType.of_json j
     let to_json v = composed_to_json to_value v
   end
+module InlineRedactionConfiguration =
+  struct
+    type nonrec t =
+      {
+      inlineRedactionPatterns: InlineRedactionPatterns.t
+        [@ocaml.doc
+          "The inline redaction patterns to be enabled for the inline redaction configuration."];
+      globalEnforcedUrls: GlobalInlineRedactionUrls.t option
+        [@ocaml.doc
+          "The global enforced URL configuration for the inline redaction configuration. This is applied to patterns that do not have a pattern-level enforced URL list."];
+      globalExemptUrls: GlobalInlineRedactionUrls.t option
+        [@ocaml.doc
+          "The global exempt URL configuration for the inline redaction configuration. This is applied to patterns that do not have a pattern-level exempt URL list."];
+      globalConfidenceLevel: ConfidenceLevel.t option
+        [@ocaml.doc
+          "The global confidence level for the inline redaction configuration. This indicates the certainty of data type matches in the redaction process. Confidence level 3 means high confidence, and requires a formatted text pattern match in order for content to be redacted. Confidence level 2 means medium confidence, and redaction considers both formatted and unformatted text, and adds keyword associate to the logic. Confidence level 1 means low confidence, and redaction is enforced for both formatted pattern + unformatted pattern without keyword. This is applied to patterns that do not have a pattern-level confidence level. Defaults to confidence level 2."]}
+    let context_ = "InlineRedactionConfiguration"
+    let make ?globalEnforcedUrls =
+      fun ?globalExemptUrls ->
+        fun ?globalConfidenceLevel ->
+          fun ~inlineRedactionPatterns ->
+            fun () ->
+              {
+                globalEnforcedUrls;
+                globalExemptUrls;
+                globalConfidenceLevel;
+                inlineRedactionPatterns
+              }
+    let to_value x =
+      structure_to_value
+        [("inlineRedactionPatterns",
+           (Some (InlineRedactionPatterns.to_value x.inlineRedactionPatterns)));
+        ("globalEnforcedUrls",
+          (Option.map x.globalEnforcedUrls
+             ~f:GlobalInlineRedactionUrls.to_value));
+        ("globalExemptUrls",
+          (Option.map x.globalExemptUrls
+             ~f:GlobalInlineRedactionUrls.to_value));
+        ("globalConfidenceLevel",
+          (Option.map x.globalConfidenceLevel ~f:ConfidenceLevel.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let globalConfidenceLevel =
+        (Option.map ~f:ConfidenceLevel.of_xml)
+          (Xml.child xml_arg0 "globalConfidenceLevel") in
+      let globalExemptUrls =
+        (Option.map ~f:GlobalInlineRedactionUrls.of_xml)
+          (Xml.child xml_arg0 "globalExemptUrls") in
+      let globalEnforcedUrls =
+        (Option.map ~f:GlobalInlineRedactionUrls.of_xml)
+          (Xml.child xml_arg0 "globalEnforcedUrls") in
+      let inlineRedactionPatterns =
+        InlineRedactionPatterns.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "inlineRedactionPatterns") in
+      make ?globalConfidenceLevel ?globalExemptUrls ?globalEnforcedUrls
+        ~inlineRedactionPatterns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let globalConfidenceLevel =
+        field_map json__ "globalConfidenceLevel" ConfidenceLevel.of_json in
+      let globalExemptUrls =
+        field_map json__ "globalExemptUrls" GlobalInlineRedactionUrls.of_json in
+      let globalEnforcedUrls =
+        field_map json__ "globalEnforcedUrls"
+          GlobalInlineRedactionUrls.of_json in
+      let inlineRedactionPatterns =
+        field_map_exn json__ "inlineRedactionPatterns"
+          InlineRedactionPatterns.of_json in
+      make ?globalConfidenceLevel ?globalExemptUrls ?globalEnforcedUrls
+        ~inlineRedactionPatterns ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration for in-session inline redaction."]
 module BrowserPolicy =
   struct
     type nonrec t = string
@@ -754,6 +3259,52 @@ module BrowserPolicy =
     let of_json j = string_of_json ~kind:"BrowserPolicy" j
     let to_json = simple_to_json to_value
   end
+module WebContentFilteringPolicy =
+  struct
+    type nonrec t =
+      {
+      blockedCategories: BlockedCategories.t option
+        [@ocaml.doc
+          "Categories of websites that are blocked on the end user\226\128\153s browsers."];
+      allowedUrls: UrlPatternList.t option
+        [@ocaml.doc
+          "URLs and domains that are always accessible to end users."];
+      blockedUrls: UrlPatternList.t option
+        [@ocaml.doc "URLs and domains that end users cannot access."]}
+    let make ?blockedCategories =
+      fun ?allowedUrls ->
+        fun ?blockedUrls ->
+          fun () -> { blockedCategories; allowedUrls; blockedUrls }
+    let to_value x =
+      structure_to_value
+        [("blockedCategories",
+           (Option.map x.blockedCategories ~f:BlockedCategories.to_value));
+        ("allowedUrls",
+          (Option.map x.allowedUrls ~f:UrlPatternList.to_value));
+        ("blockedUrls",
+          (Option.map x.blockedUrls ~f:UrlPatternList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let blockedUrls =
+        (Option.map ~f:UrlPatternList.of_xml)
+          (Xml.child xml_arg0 "blockedUrls") in
+      let allowedUrls =
+        (Option.map ~f:UrlPatternList.of_xml)
+          (Xml.child xml_arg0 "allowedUrls") in
+      let blockedCategories =
+        (Option.map ~f:BlockedCategories.of_xml)
+          (Xml.child xml_arg0 "blockedCategories") in
+      make ?blockedUrls ?allowedUrls ?blockedCategories ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let blockedUrls = field_map json__ "blockedUrls" UrlPatternList.of_json in
+      let allowedUrls = field_map json__ "allowedUrls" UrlPatternList.of_json in
+      let blockedCategories =
+        field_map json__ "blockedCategories" BlockedCategories.of_json in
+      make ?blockedUrls ?allowedUrls ?blockedCategories ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The policy that specifies which URLs end users are allowed to access or which URLs or domain categories they are restricted from accessing for enhanced security."]
 module TagExceptionMessage =
   struct
     type nonrec t = string
@@ -787,9 +3338,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The tag."]
@@ -797,81 +3348,216 @@ module UserSettingsSummary =
   struct
     type nonrec t =
       {
+      userSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the user settings."];
       copyAllowed: EnabledType.t option
         [@ocaml.doc
           "Specifies whether the user can copy text from the streaming session to the local device."];
-      downloadAllowed: EnabledType.t option
-        [@ocaml.doc
-          "Specifies whether the user can download files from the streaming session to the local device."];
       pasteAllowed: EnabledType.t option
         [@ocaml.doc
           "Specifies whether the user can paste text from the local device to the streaming session."];
-      printAllowed: EnabledType.t option
+      downloadAllowed: EnabledType.t option
         [@ocaml.doc
-          "Specifies whether the user can print to the local device."];
+          "Specifies whether the user can download files from the streaming session to the local device."];
       uploadAllowed: EnabledType.t option
         [@ocaml.doc
           "Specifies whether the user can upload files from the local device to the streaming session."];
-      userSettingsArn: ARN.t option
-        [@ocaml.doc "The ARN of the user settings."]}
-    let make ?copyAllowed =
-      fun ?downloadAllowed ->
+      printAllowed: EnabledType.t option
+        [@ocaml.doc
+          "Specifies whether the user can print to the local device."];
+      disconnectTimeoutInMinutes: DisconnectTimeoutInMinutes.t option
+        [@ocaml.doc
+          "The amount of time that a streaming session remains active after users disconnect."];
+      idleDisconnectTimeoutInMinutes: IdleDisconnectTimeoutInMinutes.t option
+        [@ocaml.doc
+          "The amount of time that users can be idle (inactive) before they are disconnected from their streaming session and the disconnect timeout interval begins."];
+      cookieSynchronizationConfiguration:
+        CookieSynchronizationConfiguration.t option
+        [@ocaml.doc
+          "The configuration that specifies which cookies should be synchronized from the end user's local browser to the remote browser."];
+      deepLinkAllowed: EnabledType.t option
+        [@ocaml.doc
+          "Specifies whether the user can use deep links that open automatically when connecting to a session."];
+      toolbarConfiguration: ToolbarConfiguration.t option
+        [@ocaml.doc
+          "The configuration of the toolbar. This allows administrators to select the toolbar type and visual mode, set maximum display resolution for sessions, and choose which items are visible to end users during their sessions. If administrators do not modify these settings, end users retain control over their toolbar preferences."];
+      brandingConfiguration: BrandingConfiguration.t option
+        [@ocaml.doc
+          "The branding configuration output that customizes the appearance of the web portal for end users."];
+      webAuthnAllowed: EnabledType.t option
+        [@ocaml.doc
+          "Specifies whether the user can use WebAuthn redirection for passwordless login to websites within the streaming session."]}
+    let make ?userSettingsArn =
+      fun ?copyAllowed ->
         fun ?pasteAllowed ->
-          fun ?printAllowed ->
+          fun ?downloadAllowed ->
             fun ?uploadAllowed ->
-              fun ?userSettingsArn ->
-                fun () ->
-                  {
-                    copyAllowed;
-                    downloadAllowed;
-                    pasteAllowed;
-                    printAllowed;
-                    uploadAllowed;
-                    userSettingsArn
-                  }
+              fun ?printAllowed ->
+                fun ?disconnectTimeoutInMinutes ->
+                  fun ?idleDisconnectTimeoutInMinutes ->
+                    fun ?cookieSynchronizationConfiguration ->
+                      fun ?deepLinkAllowed ->
+                        fun ?toolbarConfiguration ->
+                          fun ?brandingConfiguration ->
+                            fun ?webAuthnAllowed ->
+                              fun () ->
+                                {
+                                  userSettingsArn;
+                                  copyAllowed;
+                                  pasteAllowed;
+                                  downloadAllowed;
+                                  uploadAllowed;
+                                  printAllowed;
+                                  disconnectTimeoutInMinutes;
+                                  idleDisconnectTimeoutInMinutes;
+                                  cookieSynchronizationConfiguration;
+                                  deepLinkAllowed;
+                                  toolbarConfiguration;
+                                  brandingConfiguration;
+                                  webAuthnAllowed
+                                }
     let to_value x =
       structure_to_value
-        [("copyAllowed", (Option.map x.copyAllowed ~f:EnabledType.to_value));
+        [("userSettingsArn", (Option.map x.userSettingsArn ~f:ARN.to_value));
+        ("copyAllowed", (Option.map x.copyAllowed ~f:EnabledType.to_value));
+        ("pasteAllowed", (Option.map x.pasteAllowed ~f:EnabledType.to_value));
         ("downloadAllowed",
           (Option.map x.downloadAllowed ~f:EnabledType.to_value));
-        ("pasteAllowed", (Option.map x.pasteAllowed ~f:EnabledType.to_value));
-        ("printAllowed", (Option.map x.printAllowed ~f:EnabledType.to_value));
         ("uploadAllowed",
           (Option.map x.uploadAllowed ~f:EnabledType.to_value));
-        ("userSettingsArn", (Option.map x.userSettingsArn ~f:ARN.to_value))]
+        ("printAllowed", (Option.map x.printAllowed ~f:EnabledType.to_value));
+        ("disconnectTimeoutInMinutes",
+          (Option.map x.disconnectTimeoutInMinutes
+             ~f:DisconnectTimeoutInMinutes.to_value));
+        ("idleDisconnectTimeoutInMinutes",
+          (Option.map x.idleDisconnectTimeoutInMinutes
+             ~f:IdleDisconnectTimeoutInMinutes.to_value));
+        ("cookieSynchronizationConfiguration",
+          (Option.map x.cookieSynchronizationConfiguration
+             ~f:CookieSynchronizationConfiguration.to_value));
+        ("deepLinkAllowed",
+          (Option.map x.deepLinkAllowed ~f:EnabledType.to_value));
+        ("toolbarConfiguration",
+          (Option.map x.toolbarConfiguration ~f:ToolbarConfiguration.to_value));
+        ("brandingConfiguration",
+          (Option.map x.brandingConfiguration
+             ~f:BrandingConfiguration.to_value));
+        ("webAuthnAllowed",
+          (Option.map x.webAuthnAllowed ~f:EnabledType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let userSettingsArn =
-        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "userSettingsArn") in
-      let uploadAllowed =
+      let webAuthnAllowed =
         (Option.map ~f:EnabledType.of_xml)
-          (Xml.child xml_arg0 "uploadAllowed") in
+          (Xml.child xml_arg0 "webAuthnAllowed") in
+      let brandingConfiguration =
+        (Option.map ~f:BrandingConfiguration.of_xml)
+          (Xml.child xml_arg0 "brandingConfiguration") in
+      let toolbarConfiguration =
+        (Option.map ~f:ToolbarConfiguration.of_xml)
+          (Xml.child xml_arg0 "toolbarConfiguration") in
+      let deepLinkAllowed =
+        (Option.map ~f:EnabledType.of_xml)
+          (Xml.child xml_arg0 "deepLinkAllowed") in
+      let cookieSynchronizationConfiguration =
+        (Option.map ~f:CookieSynchronizationConfiguration.of_xml)
+          (Xml.child xml_arg0 "cookieSynchronizationConfiguration") in
+      let idleDisconnectTimeoutInMinutes =
+        (Option.map ~f:IdleDisconnectTimeoutInMinutes.of_xml)
+          (Xml.child xml_arg0 "idleDisconnectTimeoutInMinutes") in
+      let disconnectTimeoutInMinutes =
+        (Option.map ~f:DisconnectTimeoutInMinutes.of_xml)
+          (Xml.child xml_arg0 "disconnectTimeoutInMinutes") in
       let printAllowed =
         (Option.map ~f:EnabledType.of_xml)
           (Xml.child xml_arg0 "printAllowed") in
-      let pasteAllowed =
+      let uploadAllowed =
         (Option.map ~f:EnabledType.of_xml)
-          (Xml.child xml_arg0 "pasteAllowed") in
+          (Xml.child xml_arg0 "uploadAllowed") in
       let downloadAllowed =
         (Option.map ~f:EnabledType.of_xml)
           (Xml.child xml_arg0 "downloadAllowed") in
+      let pasteAllowed =
+        (Option.map ~f:EnabledType.of_xml)
+          (Xml.child xml_arg0 "pasteAllowed") in
       let copyAllowed =
         (Option.map ~f:EnabledType.of_xml) (Xml.child xml_arg0 "copyAllowed") in
-      make ?userSettingsArn ?uploadAllowed ?printAllowed ?pasteAllowed
-        ?downloadAllowed ?copyAllowed ()
+      let userSettingsArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "userSettingsArn") in
+      make ?webAuthnAllowed ?brandingConfiguration ?toolbarConfiguration
+        ?deepLinkAllowed ?cookieSynchronizationConfiguration
+        ?idleDisconnectTimeoutInMinutes ?disconnectTimeoutInMinutes
+        ?printAllowed ?uploadAllowed ?downloadAllowed ?pasteAllowed
+        ?copyAllowed ?userSettingsArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userSettingsArn = field_map json "userSettingsArn" ARN.of_json in
-      let uploadAllowed = field_map json "uploadAllowed" EnabledType.of_json in
-      let printAllowed = field_map json "printAllowed" EnabledType.of_json in
-      let pasteAllowed = field_map json "pasteAllowed" EnabledType.of_json in
+    let of_json json__ =
+      let webAuthnAllowed =
+        field_map json__ "webAuthnAllowed" EnabledType.of_json in
+      let brandingConfiguration =
+        field_map json__ "brandingConfiguration"
+          BrandingConfiguration.of_json in
+      let toolbarConfiguration =
+        field_map json__ "toolbarConfiguration" ToolbarConfiguration.of_json in
+      let deepLinkAllowed =
+        field_map json__ "deepLinkAllowed" EnabledType.of_json in
+      let cookieSynchronizationConfiguration =
+        field_map json__ "cookieSynchronizationConfiguration"
+          CookieSynchronizationConfiguration.of_json in
+      let idleDisconnectTimeoutInMinutes =
+        field_map json__ "idleDisconnectTimeoutInMinutes"
+          IdleDisconnectTimeoutInMinutes.of_json in
+      let disconnectTimeoutInMinutes =
+        field_map json__ "disconnectTimeoutInMinutes"
+          DisconnectTimeoutInMinutes.of_json in
+      let printAllowed = field_map json__ "printAllowed" EnabledType.of_json in
+      let uploadAllowed =
+        field_map json__ "uploadAllowed" EnabledType.of_json in
       let downloadAllowed =
-        field_map json "downloadAllowed" EnabledType.of_json in
-      let copyAllowed = field_map json "copyAllowed" EnabledType.of_json in
-      make ?userSettingsArn ?uploadAllowed ?printAllowed ?pasteAllowed
-        ?downloadAllowed ?copyAllowed ()
+        field_map json__ "downloadAllowed" EnabledType.of_json in
+      let pasteAllowed = field_map json__ "pasteAllowed" EnabledType.of_json in
+      let copyAllowed = field_map json__ "copyAllowed" EnabledType.of_json in
+      let userSettingsArn = field_map json__ "userSettingsArn" ARN.of_json in
+      make ?webAuthnAllowed ?brandingConfiguration ?toolbarConfiguration
+        ?deepLinkAllowed ?cookieSynchronizationConfiguration
+        ?idleDisconnectTimeoutInMinutes ?disconnectTimeoutInMinutes
+        ?printAllowed ?uploadAllowed ?downloadAllowed ?pasteAllowed
+        ?copyAllowed ?userSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The summary of user settings."]
+module UserAccessLoggingSettingsSummary =
+  struct
+    type nonrec t =
+      {
+      userAccessLoggingSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the user access logging settings."];
+      kinesisStreamArn: KinesisStreamArn.t option
+        [@ocaml.doc "The ARN of the Kinesis stream."]}
+    let make ?userAccessLoggingSettingsArn =
+      fun ?kinesisStreamArn ->
+        fun () -> { userAccessLoggingSettingsArn; kinesisStreamArn }
+    let to_value x =
+      structure_to_value
+        [("userAccessLoggingSettingsArn",
+           (Option.map x.userAccessLoggingSettingsArn ~f:ARN.to_value));
+        ("kinesisStreamArn",
+          (Option.map x.kinesisStreamArn ~f:KinesisStreamArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kinesisStreamArn =
+        (Option.map ~f:KinesisStreamArn.of_xml)
+          (Xml.child xml_arg0 "kinesisStreamArn") in
+      let userAccessLoggingSettingsArn =
+        (Option.map ~f:ARN.of_xml)
+          (Xml.child xml_arg0 "userAccessLoggingSettingsArn") in
+      make ?kinesisStreamArn ?userAccessLoggingSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kinesisStreamArn =
+        field_map json__ "kinesisStreamArn" KinesisStreamArn.of_json in
+      let userAccessLoggingSettingsArn =
+        field_map json__ "userAccessLoggingSettingsArn" ARN.of_json in
+      make ?kinesisStreamArn ?userAccessLoggingSettingsArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The summary of user access logging settings."]
 module TrustStoreSummary =
   struct
     type nonrec t =
@@ -887,8 +3573,8 @@ module TrustStoreSummary =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "trustStoreArn") in
       make ?trustStoreArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustStoreArn = field_map json "trustStoreArn" ARN.of_json in
+    let of_json json__ =
+      let trustStoreArn = field_map json__ "trustStoreArn" ARN.of_json in
       make ?trustStoreArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The summary of the trust store."]
@@ -896,183 +3582,394 @@ module CertificateSummary =
   struct
     type nonrec t =
       {
-      issuer: CertificatePrincipal.t option
-        [@ocaml.doc "The entity that issued the certificate."];
-      notValidAfter: Timestamp.t option
-        [@ocaml.doc "The certificate is not valid after this date."];
-      notValidBefore: Timestamp.t option
-        [@ocaml.doc "The certificate is not valid before this date."];
+      thumbprint: CertificateThumbprint.t option
+        [@ocaml.doc "A hexadecimal identifier for the certificate."];
       subject: CertificatePrincipal.t option
         [@ocaml.doc "The entity the certificate belongs to."];
-      thumbprint: CertificateThumbprint.t option
-        [@ocaml.doc "A hexadecimal identifier for the certificate."]}
-    let make ?issuer =
-      fun ?notValidAfter ->
-        fun ?notValidBefore ->
-          fun ?subject ->
-            fun ?thumbprint ->
+      issuer: CertificatePrincipal.t option
+        [@ocaml.doc "The entity that issued the certificate."];
+      notValidBefore: Timestamp.t option
+        [@ocaml.doc "The certificate is not valid before this date."];
+      notValidAfter: Timestamp.t option
+        [@ocaml.doc "The certificate is not valid after this date."]}
+    let make ?thumbprint =
+      fun ?subject ->
+        fun ?issuer ->
+          fun ?notValidBefore ->
+            fun ?notValidAfter ->
               fun () ->
-                { issuer; notValidAfter; notValidBefore; subject; thumbprint
+                { thumbprint; subject; issuer; notValidBefore; notValidAfter
                 }
     let to_value x =
       structure_to_value
-        [("issuer", (Option.map x.issuer ~f:CertificatePrincipal.to_value));
-        ("notValidAfter", (Option.map x.notValidAfter ~f:Timestamp.to_value));
+        [("thumbprint",
+           (Option.map x.thumbprint ~f:CertificateThumbprint.to_value));
+        ("subject", (Option.map x.subject ~f:CertificatePrincipal.to_value));
+        ("issuer", (Option.map x.issuer ~f:CertificatePrincipal.to_value));
         ("notValidBefore",
           (Option.map x.notValidBefore ~f:Timestamp.to_value));
-        ("subject", (Option.map x.subject ~f:CertificatePrincipal.to_value));
-        ("thumbprint",
-          (Option.map x.thumbprint ~f:CertificateThumbprint.to_value))]
+        ("notValidAfter", (Option.map x.notValidAfter ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let thumbprint =
-        (Option.map ~f:CertificateThumbprint.of_xml)
-          (Xml.child xml_arg0 "thumbprint") in
-      let subject =
-        (Option.map ~f:CertificatePrincipal.of_xml)
-          (Xml.child xml_arg0 "subject") in
+      let notValidAfter =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "notValidAfter") in
       let notValidBefore =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "notValidBefore") in
-      let notValidAfter =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "notValidAfter") in
       let issuer =
         (Option.map ~f:CertificatePrincipal.of_xml)
           (Xml.child xml_arg0 "issuer") in
-      make ?thumbprint ?subject ?notValidBefore ?notValidAfter ?issuer ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+      let subject =
+        (Option.map ~f:CertificatePrincipal.of_xml)
+          (Xml.child xml_arg0 "subject") in
       let thumbprint =
-        field_map json "thumbprint" CertificateThumbprint.of_json in
-      let subject = field_map json "subject" CertificatePrincipal.of_json in
-      let notValidBefore = field_map json "notValidBefore" Timestamp.of_json in
-      let notValidAfter = field_map json "notValidAfter" Timestamp.of_json in
-      let issuer = field_map json "issuer" CertificatePrincipal.of_json in
-      make ?thumbprint ?subject ?notValidBefore ?notValidAfter ?issuer ()
+        (Option.map ~f:CertificateThumbprint.of_xml)
+          (Xml.child xml_arg0 "thumbprint") in
+      make ?notValidAfter ?notValidBefore ?issuer ?subject ?thumbprint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notValidAfter = field_map json__ "notValidAfter" Timestamp.of_json in
+      let notValidBefore =
+        field_map json__ "notValidBefore" Timestamp.of_json in
+      let issuer = field_map json__ "issuer" CertificatePrincipal.of_json in
+      let subject = field_map json__ "subject" CertificatePrincipal.of_json in
+      let thumbprint =
+        field_map json__ "thumbprint" CertificateThumbprint.of_json in
+      make ?notValidAfter ?notValidBefore ?issuer ?subject ?thumbprint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The summary of the certificate."]
+module SessionSummary =
+  struct
+    type nonrec t =
+      {
+      portalArn: ARN.t option [@ocaml.doc "The ARN of the web portal."];
+      sessionId: StringType.t option [@ocaml.doc "The ID of the session."];
+      username: Username.t option [@ocaml.doc "The username of the session."];
+      status: SessionStatus.t option
+        [@ocaml.doc "The status of the session."];
+      startTime: Timestamp.t option
+        [@ocaml.doc "The start time of the session."];
+      endTime: Timestamp.t option [@ocaml.doc "The end time of the session."]}
+    let make ?portalArn =
+      fun ?sessionId ->
+        fun ?username ->
+          fun ?status ->
+            fun ?startTime ->
+              fun ?endTime ->
+                fun () ->
+                  {
+                    portalArn;
+                    sessionId;
+                    username;
+                    status;
+                    startTime;
+                    endTime
+                  }
+    let to_value x =
+      structure_to_value
+        [("portalArn", (Option.map x.portalArn ~f:ARN.to_value));
+        ("sessionId", (Option.map x.sessionId ~f:StringType.to_value));
+        ("username", (Option.map x.username ~f:Username.to_value));
+        ("status", (Option.map x.status ~f:SessionStatus.to_value));
+        ("startTime", (Option.map x.startTime ~f:Timestamp.to_value));
+        ("endTime", (Option.map x.endTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startTime") in
+      let status =
+        (Option.map ~f:SessionStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let username =
+        (Option.map ~f:Username.of_xml) (Xml.child xml_arg0 "username") in
+      let sessionId =
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "sessionId") in
+      let portalArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "portalArn") in
+      make ?endTime ?startTime ?status ?username ?sessionId ?portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let status = field_map json__ "status" SessionStatus.of_json in
+      let username = field_map json__ "username" Username.of_json in
+      let sessionId = field_map json__ "sessionId" StringType.of_json in
+      let portalArn = field_map json__ "portalArn" ARN.of_json in
+      make ?endTime ?startTime ?status ?username ?sessionId ?portalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary information about a secure browser session."]
+module SessionLoggerSummary =
+  struct
+    type nonrec t =
+      {
+      sessionLoggerArn: ARN.t option
+        [@ocaml.doc "The ARN of the session logger resource."];
+      logConfiguration: LogConfiguration.t option
+        [@ocaml.doc
+          "The configuration that specifies where the logs are fowarded."];
+      displayName: DisplayNameSafe.t option
+        [@ocaml.doc "The human-readable display name."];
+      creationDate: Timestamp.t option
+        [@ocaml.doc "The date the session logger resource was created."]}
+    let make ?sessionLoggerArn =
+      fun ?logConfiguration ->
+        fun ?displayName ->
+          fun ?creationDate ->
+            fun () ->
+              { sessionLoggerArn; logConfiguration; displayName; creationDate
+              }
+    let to_value x =
+      structure_to_value
+        [("sessionLoggerArn",
+           (Option.map x.sessionLoggerArn ~f:ARN.to_value));
+        ("logConfiguration",
+          (Option.map x.logConfiguration ~f:LogConfiguration.to_value));
+        ("displayName",
+          (Option.map x.displayName ~f:DisplayNameSafe.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
+      let displayName =
+        (Option.map ~f:DisplayNameSafe.of_xml)
+          (Xml.child xml_arg0 "displayName") in
+      let logConfiguration =
+        (Option.map ~f:LogConfiguration.of_xml)
+          (Xml.child xml_arg0 "logConfiguration") in
+      let sessionLoggerArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "sessionLoggerArn") in
+      make ?creationDate ?displayName ?logConfiguration ?sessionLoggerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let displayName =
+        field_map json__ "displayName" DisplayNameSafe.of_json in
+      let logConfiguration =
+        field_map json__ "logConfiguration" LogConfiguration.of_json in
+      let sessionLoggerArn = field_map json__ "sessionLoggerArn" ARN.of_json in
+      make ?creationDate ?displayName ?logConfiguration ?sessionLoggerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The summary of the session logger resource."]
 module PortalSummary =
   struct
     type nonrec t =
       {
-      browserSettingsArn: ARN.t option
-        [@ocaml.doc
-          "The ARN of the browser settings that is associated with the web portal."];
+      portalArn: ARN.t option [@ocaml.doc "The ARN of the web portal."];
+      rendererType: RendererType.t option
+        [@ocaml.doc "The renderer that is used in streaming sessions."];
       browserType: BrowserType.t option
         [@ocaml.doc "The browser type of the web portal."];
-      creationDate: Timestamp.t option
-        [@ocaml.doc "The creation date of the web portal."];
-      displayName: DisplayName.t option
-        [@ocaml.doc "The name of the web portal."];
-      networkSettingsArn: ARN.t option
-        [@ocaml.doc
-          "The ARN of the network settings that is associated with the web portal."];
-      portalArn: ARN.t option [@ocaml.doc "The ARN of the web portal."];
+      portalStatus: PortalStatus.t option
+        [@ocaml.doc "The status of the web portal."];
       portalEndpoint: PortalEndpoint.t option
         [@ocaml.doc
           "The endpoint URL of the web portal that users access in order to start streaming sessions."];
-      portalStatus: PortalStatus.t option
-        [@ocaml.doc "The status of the web portal."];
-      rendererType: RendererType.t option
-        [@ocaml.doc "The renderer that is used in streaming sessions."];
+      displayName: DisplayName.t option
+        [@ocaml.doc "The name of the web portal."];
+      creationDate: Timestamp.t option
+        [@ocaml.doc "The creation date of the web portal."];
+      browserSettingsArn: ARN.t option
+        [@ocaml.doc
+          "The ARN of the browser settings that is associated with the web portal."];
+      dataProtectionSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the data protection settings."];
+      userSettingsArn: ARN.t option
+        [@ocaml.doc
+          "The ARN of the user settings that is associated with the web portal."];
+      networkSettingsArn: ARN.t option
+        [@ocaml.doc
+          "The ARN of the network settings that is associated with the web portal."];
+      sessionLoggerArn: ARN.t option
+        [@ocaml.doc
+          "The ARN of the session logger that is assocaited with the portal."];
       trustStoreArn: ARN.t option
         [@ocaml.doc
           "The ARN of the trust that is associated with this web portal."];
-      userSettingsArn: ARN.t option
+      userAccessLoggingSettingsArn: ARN.t option
         [@ocaml.doc
-          "The ARN of the user settings that is associated with the web portal."]}
-    let make ?browserSettingsArn =
-      fun ?browserType ->
-        fun ?creationDate ->
-          fun ?displayName ->
-            fun ?networkSettingsArn ->
-              fun ?portalArn ->
-                fun ?portalEndpoint ->
-                  fun ?portalStatus ->
-                    fun ?rendererType ->
-                      fun ?trustStoreArn ->
-                        fun ?userSettingsArn ->
-                          fun () ->
-                            {
-                              browserSettingsArn;
-                              browserType;
-                              creationDate;
-                              displayName;
-                              networkSettingsArn;
-                              portalArn;
-                              portalEndpoint;
-                              portalStatus;
-                              rendererType;
-                              trustStoreArn;
-                              userSettingsArn
-                            }
+          "The ARN of the user access logging settings that is associated with the web portal."];
+      authenticationType: AuthenticationType.t option
+        [@ocaml.doc
+          "The type of authentication integration points used when signing into the web portal. Defaults to Standard. Standard web portals are authenticated directly through your identity provider. You need to call CreateIdentityProvider to integrate your identity provider with your web portal. User and group access to your web portal is controlled through your identity provider. IAM Identity Center web portals are authenticated through IAM Identity Center. Identity sources (including external identity provider integration), plus user and group access to your web portal, can be configured in the IAM Identity Center."];
+      ipAccessSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the IP access settings."];
+      instanceType: InstanceType.t option
+        [@ocaml.doc "The type and resources of the underlying instance."];
+      maxConcurrentSessions: MaxConcurrentSessions.t option
+        [@ocaml.doc
+          "The maximum number of concurrent sessions for the portal."];
+      portalCustomDomain: PortalCustomDomain.t option
+        [@ocaml.doc
+          "The custom domain of the web portal that users access in order to start streaming sessions."]}
+    let make ?portalArn =
+      fun ?rendererType ->
+        fun ?browserType ->
+          fun ?portalStatus ->
+            fun ?portalEndpoint ->
+              fun ?displayName ->
+                fun ?creationDate ->
+                  fun ?browserSettingsArn ->
+                    fun ?dataProtectionSettingsArn ->
+                      fun ?userSettingsArn ->
+                        fun ?networkSettingsArn ->
+                          fun ?sessionLoggerArn ->
+                            fun ?trustStoreArn ->
+                              fun ?userAccessLoggingSettingsArn ->
+                                fun ?authenticationType ->
+                                  fun ?ipAccessSettingsArn ->
+                                    fun ?instanceType ->
+                                      fun ?maxConcurrentSessions ->
+                                        fun ?portalCustomDomain ->
+                                          fun () ->
+                                            {
+                                              portalArn;
+                                              rendererType;
+                                              browserType;
+                                              portalStatus;
+                                              portalEndpoint;
+                                              displayName;
+                                              creationDate;
+                                              browserSettingsArn;
+                                              dataProtectionSettingsArn;
+                                              userSettingsArn;
+                                              networkSettingsArn;
+                                              sessionLoggerArn;
+                                              trustStoreArn;
+                                              userAccessLoggingSettingsArn;
+                                              authenticationType;
+                                              ipAccessSettingsArn;
+                                              instanceType;
+                                              maxConcurrentSessions;
+                                              portalCustomDomain
+                                            }
     let to_value x =
       structure_to_value
-        [("browserSettingsArn",
-           (Option.map x.browserSettingsArn ~f:ARN.to_value));
-        ("browserType", (Option.map x.browserType ~f:BrowserType.to_value));
-        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value));
-        ("displayName", (Option.map x.displayName ~f:DisplayName.to_value));
-        ("networkSettingsArn",
-          (Option.map x.networkSettingsArn ~f:ARN.to_value));
-        ("portalArn", (Option.map x.portalArn ~f:ARN.to_value));
-        ("portalEndpoint",
-          (Option.map x.portalEndpoint ~f:PortalEndpoint.to_value));
-        ("portalStatus",
-          (Option.map x.portalStatus ~f:PortalStatus.to_value));
+        [("portalArn", (Option.map x.portalArn ~f:ARN.to_value));
         ("rendererType",
           (Option.map x.rendererType ~f:RendererType.to_value));
+        ("browserType", (Option.map x.browserType ~f:BrowserType.to_value));
+        ("portalStatus",
+          (Option.map x.portalStatus ~f:PortalStatus.to_value));
+        ("portalEndpoint",
+          (Option.map x.portalEndpoint ~f:PortalEndpoint.to_value));
+        ("displayName", (Option.map x.displayName ~f:DisplayName.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value));
+        ("browserSettingsArn",
+          (Option.map x.browserSettingsArn ~f:ARN.to_value));
+        ("dataProtectionSettingsArn",
+          (Option.map x.dataProtectionSettingsArn ~f:ARN.to_value));
+        ("userSettingsArn", (Option.map x.userSettingsArn ~f:ARN.to_value));
+        ("networkSettingsArn",
+          (Option.map x.networkSettingsArn ~f:ARN.to_value));
+        ("sessionLoggerArn", (Option.map x.sessionLoggerArn ~f:ARN.to_value));
         ("trustStoreArn", (Option.map x.trustStoreArn ~f:ARN.to_value));
-        ("userSettingsArn", (Option.map x.userSettingsArn ~f:ARN.to_value))]
+        ("userAccessLoggingSettingsArn",
+          (Option.map x.userAccessLoggingSettingsArn ~f:ARN.to_value));
+        ("authenticationType",
+          (Option.map x.authenticationType ~f:AuthenticationType.to_value));
+        ("ipAccessSettingsArn",
+          (Option.map x.ipAccessSettingsArn ~f:ARN.to_value));
+        ("instanceType",
+          (Option.map x.instanceType ~f:InstanceType.to_value));
+        ("maxConcurrentSessions",
+          (Option.map x.maxConcurrentSessions
+             ~f:MaxConcurrentSessions.to_value));
+        ("portalCustomDomain",
+          (Option.map x.portalCustomDomain ~f:PortalCustomDomain.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let userSettingsArn =
-        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "userSettingsArn") in
+      let portalCustomDomain =
+        (Option.map ~f:PortalCustomDomain.of_xml)
+          (Xml.child xml_arg0 "portalCustomDomain") in
+      let maxConcurrentSessions =
+        (Option.map ~f:MaxConcurrentSessions.of_xml)
+          (Xml.child xml_arg0 "maxConcurrentSessions") in
+      let instanceType =
+        (Option.map ~f:InstanceType.of_xml)
+          (Xml.child xml_arg0 "instanceType") in
+      let ipAccessSettingsArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "ipAccessSettingsArn") in
+      let authenticationType =
+        (Option.map ~f:AuthenticationType.of_xml)
+          (Xml.child xml_arg0 "authenticationType") in
+      let userAccessLoggingSettingsArn =
+        (Option.map ~f:ARN.of_xml)
+          (Xml.child xml_arg0 "userAccessLoggingSettingsArn") in
       let trustStoreArn =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "trustStoreArn") in
-      let rendererType =
-        (Option.map ~f:RendererType.of_xml)
-          (Xml.child xml_arg0 "rendererType") in
-      let portalStatus =
-        (Option.map ~f:PortalStatus.of_xml)
-          (Xml.child xml_arg0 "portalStatus") in
+      let sessionLoggerArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "sessionLoggerArn") in
+      let networkSettingsArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "networkSettingsArn") in
+      let userSettingsArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "userSettingsArn") in
+      let dataProtectionSettingsArn =
+        (Option.map ~f:ARN.of_xml)
+          (Xml.child xml_arg0 "dataProtectionSettingsArn") in
+      let browserSettingsArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "browserSettingsArn") in
+      let creationDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
+      let displayName =
+        (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "displayName") in
       let portalEndpoint =
         (Option.map ~f:PortalEndpoint.of_xml)
           (Xml.child xml_arg0 "portalEndpoint") in
-      let portalArn =
-        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "portalArn") in
-      let networkSettingsArn =
-        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "networkSettingsArn") in
-      let displayName =
-        (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "displayName") in
-      let creationDate =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
+      let portalStatus =
+        (Option.map ~f:PortalStatus.of_xml)
+          (Xml.child xml_arg0 "portalStatus") in
       let browserType =
         (Option.map ~f:BrowserType.of_xml) (Xml.child xml_arg0 "browserType") in
-      let browserSettingsArn =
-        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "browserSettingsArn") in
-      make ?userSettingsArn ?trustStoreArn ?rendererType ?portalStatus
-        ?portalEndpoint ?portalArn ?networkSettingsArn ?displayName
-        ?creationDate ?browserType ?browserSettingsArn ()
+      let rendererType =
+        (Option.map ~f:RendererType.of_xml)
+          (Xml.child xml_arg0 "rendererType") in
+      let portalArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "portalArn") in
+      make ?portalCustomDomain ?maxConcurrentSessions ?instanceType
+        ?ipAccessSettingsArn ?authenticationType
+        ?userAccessLoggingSettingsArn ?trustStoreArn ?sessionLoggerArn
+        ?networkSettingsArn ?userSettingsArn ?dataProtectionSettingsArn
+        ?browserSettingsArn ?creationDate ?displayName ?portalEndpoint
+        ?portalStatus ?browserType ?rendererType ?portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userSettingsArn = field_map json "userSettingsArn" ARN.of_json in
-      let trustStoreArn = field_map json "trustStoreArn" ARN.of_json in
-      let rendererType = field_map json "rendererType" RendererType.of_json in
-      let portalStatus = field_map json "portalStatus" PortalStatus.of_json in
-      let portalEndpoint =
-        field_map json "portalEndpoint" PortalEndpoint.of_json in
-      let portalArn = field_map json "portalArn" ARN.of_json in
+    let of_json json__ =
+      let portalCustomDomain =
+        field_map json__ "portalCustomDomain" PortalCustomDomain.of_json in
+      let maxConcurrentSessions =
+        field_map json__ "maxConcurrentSessions"
+          MaxConcurrentSessions.of_json in
+      let instanceType = field_map json__ "instanceType" InstanceType.of_json in
+      let ipAccessSettingsArn =
+        field_map json__ "ipAccessSettingsArn" ARN.of_json in
+      let authenticationType =
+        field_map json__ "authenticationType" AuthenticationType.of_json in
+      let userAccessLoggingSettingsArn =
+        field_map json__ "userAccessLoggingSettingsArn" ARN.of_json in
+      let trustStoreArn = field_map json__ "trustStoreArn" ARN.of_json in
+      let sessionLoggerArn = field_map json__ "sessionLoggerArn" ARN.of_json in
       let networkSettingsArn =
-        field_map json "networkSettingsArn" ARN.of_json in
-      let displayName = field_map json "displayName" DisplayName.of_json in
-      let creationDate = field_map json "creationDate" Timestamp.of_json in
-      let browserType = field_map json "browserType" BrowserType.of_json in
+        field_map json__ "networkSettingsArn" ARN.of_json in
+      let userSettingsArn = field_map json__ "userSettingsArn" ARN.of_json in
+      let dataProtectionSettingsArn =
+        field_map json__ "dataProtectionSettingsArn" ARN.of_json in
       let browserSettingsArn =
-        field_map json "browserSettingsArn" ARN.of_json in
-      make ?userSettingsArn ?trustStoreArn ?rendererType ?portalStatus
-        ?portalEndpoint ?portalArn ?networkSettingsArn ?displayName
-        ?creationDate ?browserType ?browserSettingsArn ()
+        field_map json__ "browserSettingsArn" ARN.of_json in
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let portalEndpoint =
+        field_map json__ "portalEndpoint" PortalEndpoint.of_json in
+      let portalStatus = field_map json__ "portalStatus" PortalStatus.of_json in
+      let browserType = field_map json__ "browserType" BrowserType.of_json in
+      let rendererType = field_map json__ "rendererType" RendererType.of_json in
+      let portalArn = field_map json__ "portalArn" ARN.of_json in
+      make ?portalCustomDomain ?maxConcurrentSessions ?instanceType
+        ?ipAccessSettingsArn ?authenticationType
+        ?userAccessLoggingSettingsArn ?trustStoreArn ?sessionLoggerArn
+        ?networkSettingsArn ?userSettingsArn ?dataProtectionSettingsArn
+        ?browserSettingsArn ?creationDate ?displayName ?portalEndpoint
+        ?portalStatus ?browserType ?rendererType ?portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The summary of the portal."]
 module NetworkSettingsSummary =
@@ -1097,18 +3994,64 @@ module NetworkSettingsSummary =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "networkSettingsArn") in
       make ?vpcId ?networkSettingsArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "vpcId" VpcId.of_json in
+    let of_json json__ =
+      let vpcId = field_map json__ "vpcId" VpcId.of_json in
       let networkSettingsArn =
-        field_map json "networkSettingsArn" ARN.of_json in
+        field_map json__ "networkSettingsArn" ARN.of_json in
       make ?vpcId ?networkSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The summary of network settings."]
+module IpAccessSettingsSummary =
+  struct
+    type nonrec t =
+      {
+      ipAccessSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of IP access settings."];
+      displayName: DisplayName.t option
+        [@ocaml.doc "The display name of the IP access settings."];
+      description: Description.t option
+        [@ocaml.doc "The description of the IP access settings."];
+      creationDate: Timestamp.t option
+        [@ocaml.doc "The creation date timestamp of the IP access settings."]}
+    let make ?ipAccessSettingsArn =
+      fun ?displayName ->
+        fun ?description ->
+          fun ?creationDate ->
+            fun () ->
+              { ipAccessSettingsArn; displayName; description; creationDate }
+    let to_value x =
+      structure_to_value
+        [("ipAccessSettingsArn",
+           (Option.map x.ipAccessSettingsArn ~f:ARN.to_value));
+        ("displayName", (Option.map x.displayName ~f:DisplayName.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let displayName =
+        (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "displayName") in
+      let ipAccessSettingsArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "ipAccessSettingsArn") in
+      make ?creationDate ?description ?displayName ?ipAccessSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let ipAccessSettingsArn =
+        field_map json__ "ipAccessSettingsArn" ARN.of_json in
+      make ?creationDate ?description ?displayName ?ipAccessSettingsArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The summary of IP access settings."]
 module IdentityProviderSummary =
   struct
     type nonrec t =
       {
-      identityProviderArn: ARN.t option
+      identityProviderArn: SubresourceARN.t option
         [@ocaml.doc "The ARN of the identity provider."];
       identityProviderName: IdentityProviderName.t option
         [@ocaml.doc "The identity provider name."];
@@ -1123,7 +4066,7 @@ module IdentityProviderSummary =
     let to_value x =
       structure_to_value
         [("identityProviderArn",
-           (Option.map x.identityProviderArn ~f:ARN.to_value));
+           (Option.map x.identityProviderArn ~f:SubresourceARN.to_value));
         ("identityProviderName",
           (Option.map x.identityProviderName ~f:IdentityProviderName.to_value));
         ("identityProviderType",
@@ -1137,21 +4080,83 @@ module IdentityProviderSummary =
         (Option.map ~f:IdentityProviderName.of_xml)
           (Xml.child xml_arg0 "identityProviderName") in
       let identityProviderArn =
-        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "identityProviderArn") in
+        (Option.map ~f:SubresourceARN.of_xml)
+          (Xml.child xml_arg0 "identityProviderArn") in
       make ?identityProviderType ?identityProviderName ?identityProviderArn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityProviderType =
-        field_map json "identityProviderType" IdentityProviderType.of_json in
+        field_map json__ "identityProviderType" IdentityProviderType.of_json in
       let identityProviderName =
-        field_map json "identityProviderName" IdentityProviderName.of_json in
+        field_map json__ "identityProviderName" IdentityProviderName.of_json in
       let identityProviderArn =
-        field_map json "identityProviderArn" ARN.of_json in
+        field_map json__ "identityProviderArn" SubresourceARN.of_json in
       make ?identityProviderType ?identityProviderName ?identityProviderArn
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The summary of the identity provider."]
+module DataProtectionSettingsSummary =
+  struct
+    type nonrec t =
+      {
+      dataProtectionSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the data protection settings."];
+      displayName: DisplayNameSafe.t option
+        [@ocaml.doc "The display name of the data protection settings."];
+      description: DescriptionSafe.t option
+        [@ocaml.doc "The description of the data protection settings."];
+      creationDate: Timestamp.t option
+        [@ocaml.doc
+          "The creation date timestamp of the data protection settings."]}
+    let make ?dataProtectionSettingsArn =
+      fun ?displayName ->
+        fun ?description ->
+          fun ?creationDate ->
+            fun () ->
+              {
+                dataProtectionSettingsArn;
+                displayName;
+                description;
+                creationDate
+              }
+    let to_value x =
+      structure_to_value
+        [("dataProtectionSettingsArn",
+           (Option.map x.dataProtectionSettingsArn ~f:ARN.to_value));
+        ("displayName",
+          (Option.map x.displayName ~f:DisplayNameSafe.to_value));
+        ("description",
+          (Option.map x.description ~f:DescriptionSafe.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
+      let description =
+        (Option.map ~f:DescriptionSafe.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let displayName =
+        (Option.map ~f:DisplayNameSafe.of_xml)
+          (Xml.child xml_arg0 "displayName") in
+      let dataProtectionSettingsArn =
+        (Option.map ~f:ARN.of_xml)
+          (Xml.child xml_arg0 "dataProtectionSettingsArn") in
+      make ?creationDate ?description ?displayName ?dataProtectionSettingsArn
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let description =
+        field_map json__ "description" DescriptionSafe.of_json in
+      let displayName =
+        field_map json__ "displayName" DisplayNameSafe.of_json in
+      let dataProtectionSettingsArn =
+        field_map json__ "dataProtectionSettingsArn" ARN.of_json in
+      make ?creationDate ?description ?displayName ?dataProtectionSettingsArn
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The summary of the data protection settings."]
 module BrowserSettingsSummary =
   struct
     type nonrec t =
@@ -1169,12 +4174,43 @@ module BrowserSettingsSummary =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "browserSettingsArn") in
       make ?browserSettingsArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let browserSettingsArn =
-        field_map json "browserSettingsArn" ARN.of_json in
+        field_map json__ "browserSettingsArn" ARN.of_json in
       make ?browserSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The summary for browser settings."]
+module IpAddressList =
+  struct
+    type nonrec t = IpAddress.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:45) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IpAddress.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IpAddress.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IpAddressList" ~of_json:IpAddress.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AccessDeniedException =
   struct
     type nonrec t = {
@@ -1190,8 +4226,8 @@ module AccessDeniedException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Access is denied."]
@@ -1220,10 +4256,10 @@ module InternalServerException =
           (Xml.child xml_arg0 "message") in
       make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "retryAfterSeconds" RetryAfterSeconds.of_json in
-      let message = field_map json "message" ExceptionMessage.of_json in
+        field_map json__ "retryAfterSeconds" RetryAfterSeconds.of_json in
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "There is an internal server error."]
@@ -1257,10 +4293,10 @@ module ResourceNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "resourceType" ResourceType.of_json in
-      let resourceId = field_map json "resourceId" ResourceId.of_json in
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let resourceId = field_map json__ "resourceId" ResourceId.of_json in
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource cannot be found."]
@@ -1269,137 +4305,264 @@ module ThrottlingException =
     type nonrec t =
       {
       message: ExceptionMessage.t option ;
+      serviceCode: ServiceCode.t option
+        [@ocaml.doc "The originating service."];
       quotaCode: QuotaCode.t option [@ocaml.doc "The originating quota."];
       retryAfterSeconds: RetryAfterSeconds.t option
         [@ocaml.doc
-          "Advice to clients on when the call can be safely retried."];
-      serviceCode: ServiceCode.t option
-        [@ocaml.doc "The originating service."]}
+          "Advice to clients on when the call can be safely retried."]}
     let make ?message =
-      fun ?quotaCode ->
-        fun ?retryAfterSeconds ->
-          fun ?serviceCode ->
-            fun () -> { message; quotaCode; retryAfterSeconds; serviceCode }
+      fun ?serviceCode ->
+        fun ?quotaCode ->
+          fun ?retryAfterSeconds ->
+            fun () -> { message; serviceCode; quotaCode; retryAfterSeconds }
     let to_value x =
       structure_to_value
         [("message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("serviceCode", (Option.map x.serviceCode ~f:ServiceCode.to_value));
         ("quotaCode", (Option.map x.quotaCode ~f:QuotaCode.to_value));
         ("Retry-After",
-          (Option.map x.retryAfterSeconds ~f:RetryAfterSeconds.to_value));
-        ("serviceCode", (Option.map x.serviceCode ~f:ServiceCode.to_value))]
+          (Option.map x.retryAfterSeconds ~f:RetryAfterSeconds.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let serviceCode =
-        (Option.map ~f:ServiceCode.of_xml) (Xml.child xml_arg0 "serviceCode") in
       let retryAfterSeconds =
         (Option.map ~f:RetryAfterSeconds.of_xml)
           (Xml.child xml_arg0 "Retry-After") in
       let quotaCode =
         (Option.map ~f:QuotaCode.of_xml) (Xml.child xml_arg0 "quotaCode") in
+      let serviceCode =
+        (Option.map ~f:ServiceCode.of_xml) (Xml.child xml_arg0 "serviceCode") in
       let message =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
-      make ?serviceCode ?retryAfterSeconds ?quotaCode ?message ()
+      make ?retryAfterSeconds ?quotaCode ?serviceCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceCode = field_map json "serviceCode" ServiceCode.of_json in
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "retryAfterSeconds" RetryAfterSeconds.of_json in
-      let quotaCode = field_map json "quotaCode" QuotaCode.of_json in
-      let message = field_map json "message" ExceptionMessage.of_json in
-      make ?serviceCode ?retryAfterSeconds ?quotaCode ?message ()
+        field_map json__ "retryAfterSeconds" RetryAfterSeconds.of_json in
+      let quotaCode = field_map json__ "quotaCode" QuotaCode.of_json in
+      let serviceCode = field_map json__ "serviceCode" ServiceCode.of_json in
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?retryAfterSeconds ?quotaCode ?serviceCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "There is a throttling error."]
 module UserSettings =
   struct
     type nonrec t =
       {
+      userSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the user settings."];
       associatedPortalArns: ArnList.t option
         [@ocaml.doc
           "A list of web portal ARNs that this user settings is associated with."];
       copyAllowed: EnabledType.t option
         [@ocaml.doc
           "Specifies whether the user can copy text from the streaming session to the local device."];
-      downloadAllowed: EnabledType.t option
-        [@ocaml.doc
-          "Specifies whether the user can download files from the streaming session to the local device."];
       pasteAllowed: EnabledType.t option
         [@ocaml.doc
           "Specifies whether the user can paste text from the local device to the streaming session."];
-      printAllowed: EnabledType.t option
+      downloadAllowed: EnabledType.t option
         [@ocaml.doc
-          "Specifies whether the user can print to the local device."];
+          "Specifies whether the user can download files from the streaming session to the local device."];
       uploadAllowed: EnabledType.t option
         [@ocaml.doc
           "Specifies whether the user can upload files from the local device to the streaming session."];
-      userSettingsArn: ARN.t [@ocaml.doc "The ARN of the user settings."]}
-    let context_ = "UserSettings"
-    let make ?associatedPortalArns =
-      fun ?copyAllowed ->
-        fun ?downloadAllowed ->
+      printAllowed: EnabledType.t option
+        [@ocaml.doc
+          "Specifies whether the user can print to the local device."];
+      disconnectTimeoutInMinutes: DisconnectTimeoutInMinutes.t option
+        [@ocaml.doc
+          "The amount of time that a streaming session remains active after users disconnect."];
+      idleDisconnectTimeoutInMinutes: IdleDisconnectTimeoutInMinutes.t option
+        [@ocaml.doc
+          "The amount of time that users can be idle (inactive) before they are disconnected from their streaming session and the disconnect timeout interval begins."];
+      cookieSynchronizationConfiguration:
+        CookieSynchronizationConfiguration.t option
+        [@ocaml.doc
+          "The configuration that specifies which cookies should be synchronized from the end user's local browser to the remote browser."];
+      customerManagedKey: KeyArn.t option
+        [@ocaml.doc
+          "The customer managed key used to encrypt sensitive information in the user settings."];
+      additionalEncryptionContext: EncryptionContextMap.t option
+        [@ocaml.doc
+          "The additional encryption context of the user settings."];
+      deepLinkAllowed: EnabledType.t option
+        [@ocaml.doc
+          "Specifies whether the user can use deep links that open automatically when connecting to a session."];
+      toolbarConfiguration: ToolbarConfiguration.t option
+        [@ocaml.doc
+          "The configuration of the toolbar. This allows administrators to select the toolbar type and visual mode, set maximum display resolution for sessions, and choose which items are visible to end users during their sessions. If administrators do not modify these settings, end users retain control over their toolbar preferences."];
+      brandingConfiguration: BrandingConfiguration.t option
+        [@ocaml.doc
+          "The branding configuration output that customizes the appearance of the web portal for end users."];
+      webAuthnAllowed: EnabledType.t option
+        [@ocaml.doc
+          "Specifies whether the user can use WebAuthn redirection for passwordless login to websites within the streaming session."]}
+    let make ?userSettingsArn =
+      fun ?associatedPortalArns ->
+        fun ?copyAllowed ->
           fun ?pasteAllowed ->
-            fun ?printAllowed ->
+            fun ?downloadAllowed ->
               fun ?uploadAllowed ->
-                fun ~userSettingsArn ->
-                  fun () ->
-                    {
-                      associatedPortalArns;
-                      copyAllowed;
-                      downloadAllowed;
-                      pasteAllowed;
-                      printAllowed;
-                      uploadAllowed;
-                      userSettingsArn
-                    }
+                fun ?printAllowed ->
+                  fun ?disconnectTimeoutInMinutes ->
+                    fun ?idleDisconnectTimeoutInMinutes ->
+                      fun ?cookieSynchronizationConfiguration ->
+                        fun ?customerManagedKey ->
+                          fun ?additionalEncryptionContext ->
+                            fun ?deepLinkAllowed ->
+                              fun ?toolbarConfiguration ->
+                                fun ?brandingConfiguration ->
+                                  fun ?webAuthnAllowed ->
+                                    fun () ->
+                                      {
+                                        userSettingsArn;
+                                        associatedPortalArns;
+                                        copyAllowed;
+                                        pasteAllowed;
+                                        downloadAllowed;
+                                        uploadAllowed;
+                                        printAllowed;
+                                        disconnectTimeoutInMinutes;
+                                        idleDisconnectTimeoutInMinutes;
+                                        cookieSynchronizationConfiguration;
+                                        customerManagedKey;
+                                        additionalEncryptionContext;
+                                        deepLinkAllowed;
+                                        toolbarConfiguration;
+                                        brandingConfiguration;
+                                        webAuthnAllowed
+                                      }
     let to_value x =
       structure_to_value
-        [("associatedPortalArns",
-           (Option.map x.associatedPortalArns ~f:ArnList.to_value));
+        [("userSettingsArn", (Option.map x.userSettingsArn ~f:ARN.to_value));
+        ("associatedPortalArns",
+          (Option.map x.associatedPortalArns ~f:ArnList.to_value));
         ("copyAllowed", (Option.map x.copyAllowed ~f:EnabledType.to_value));
+        ("pasteAllowed", (Option.map x.pasteAllowed ~f:EnabledType.to_value));
         ("downloadAllowed",
           (Option.map x.downloadAllowed ~f:EnabledType.to_value));
-        ("pasteAllowed", (Option.map x.pasteAllowed ~f:EnabledType.to_value));
-        ("printAllowed", (Option.map x.printAllowed ~f:EnabledType.to_value));
         ("uploadAllowed",
           (Option.map x.uploadAllowed ~f:EnabledType.to_value));
-        ("userSettingsArn", (Some (ARN.to_value x.userSettingsArn)))]
+        ("printAllowed", (Option.map x.printAllowed ~f:EnabledType.to_value));
+        ("disconnectTimeoutInMinutes",
+          (Option.map x.disconnectTimeoutInMinutes
+             ~f:DisconnectTimeoutInMinutes.to_value));
+        ("idleDisconnectTimeoutInMinutes",
+          (Option.map x.idleDisconnectTimeoutInMinutes
+             ~f:IdleDisconnectTimeoutInMinutes.to_value));
+        ("cookieSynchronizationConfiguration",
+          (Option.map x.cookieSynchronizationConfiguration
+             ~f:CookieSynchronizationConfiguration.to_value));
+        ("customerManagedKey",
+          (Option.map x.customerManagedKey ~f:KeyArn.to_value));
+        ("additionalEncryptionContext",
+          (Option.map x.additionalEncryptionContext
+             ~f:EncryptionContextMap.to_value));
+        ("deepLinkAllowed",
+          (Option.map x.deepLinkAllowed ~f:EnabledType.to_value));
+        ("toolbarConfiguration",
+          (Option.map x.toolbarConfiguration ~f:ToolbarConfiguration.to_value));
+        ("brandingConfiguration",
+          (Option.map x.brandingConfiguration
+             ~f:BrandingConfiguration.to_value));
+        ("webAuthnAllowed",
+          (Option.map x.webAuthnAllowed ~f:EnabledType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let userSettingsArn =
-        ARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "userSettingsArn") in
-      let uploadAllowed =
+      let webAuthnAllowed =
         (Option.map ~f:EnabledType.of_xml)
-          (Xml.child xml_arg0 "uploadAllowed") in
+          (Xml.child xml_arg0 "webAuthnAllowed") in
+      let brandingConfiguration =
+        (Option.map ~f:BrandingConfiguration.of_xml)
+          (Xml.child xml_arg0 "brandingConfiguration") in
+      let toolbarConfiguration =
+        (Option.map ~f:ToolbarConfiguration.of_xml)
+          (Xml.child xml_arg0 "toolbarConfiguration") in
+      let deepLinkAllowed =
+        (Option.map ~f:EnabledType.of_xml)
+          (Xml.child xml_arg0 "deepLinkAllowed") in
+      let additionalEncryptionContext =
+        (Option.map ~f:EncryptionContextMap.of_xml)
+          (Xml.child xml_arg0 "additionalEncryptionContext") in
+      let customerManagedKey =
+        (Option.map ~f:KeyArn.of_xml)
+          (Xml.child xml_arg0 "customerManagedKey") in
+      let cookieSynchronizationConfiguration =
+        (Option.map ~f:CookieSynchronizationConfiguration.of_xml)
+          (Xml.child xml_arg0 "cookieSynchronizationConfiguration") in
+      let idleDisconnectTimeoutInMinutes =
+        (Option.map ~f:IdleDisconnectTimeoutInMinutes.of_xml)
+          (Xml.child xml_arg0 "idleDisconnectTimeoutInMinutes") in
+      let disconnectTimeoutInMinutes =
+        (Option.map ~f:DisconnectTimeoutInMinutes.of_xml)
+          (Xml.child xml_arg0 "disconnectTimeoutInMinutes") in
       let printAllowed =
         (Option.map ~f:EnabledType.of_xml)
           (Xml.child xml_arg0 "printAllowed") in
-      let pasteAllowed =
+      let uploadAllowed =
         (Option.map ~f:EnabledType.of_xml)
-          (Xml.child xml_arg0 "pasteAllowed") in
+          (Xml.child xml_arg0 "uploadAllowed") in
       let downloadAllowed =
         (Option.map ~f:EnabledType.of_xml)
           (Xml.child xml_arg0 "downloadAllowed") in
+      let pasteAllowed =
+        (Option.map ~f:EnabledType.of_xml)
+          (Xml.child xml_arg0 "pasteAllowed") in
       let copyAllowed =
         (Option.map ~f:EnabledType.of_xml) (Xml.child xml_arg0 "copyAllowed") in
       let associatedPortalArns =
         (Option.map ~f:ArnList.of_xml)
           (Xml.child xml_arg0 "associatedPortalArns") in
-      make ~userSettingsArn ?uploadAllowed ?printAllowed ?pasteAllowed
-        ?downloadAllowed ?copyAllowed ?associatedPortalArns ()
+      let userSettingsArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "userSettingsArn") in
+      make ?webAuthnAllowed ?brandingConfiguration ?toolbarConfiguration
+        ?deepLinkAllowed ?additionalEncryptionContext ?customerManagedKey
+        ?cookieSynchronizationConfiguration ?idleDisconnectTimeoutInMinutes
+        ?disconnectTimeoutInMinutes ?printAllowed ?uploadAllowed
+        ?downloadAllowed ?pasteAllowed ?copyAllowed ?associatedPortalArns
+        ?userSettingsArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userSettingsArn = field_map_exn json "userSettingsArn" ARN.of_json in
-      let uploadAllowed = field_map json "uploadAllowed" EnabledType.of_json in
-      let printAllowed = field_map json "printAllowed" EnabledType.of_json in
-      let pasteAllowed = field_map json "pasteAllowed" EnabledType.of_json in
+    let of_json json__ =
+      let webAuthnAllowed =
+        field_map json__ "webAuthnAllowed" EnabledType.of_json in
+      let brandingConfiguration =
+        field_map json__ "brandingConfiguration"
+          BrandingConfiguration.of_json in
+      let toolbarConfiguration =
+        field_map json__ "toolbarConfiguration" ToolbarConfiguration.of_json in
+      let deepLinkAllowed =
+        field_map json__ "deepLinkAllowed" EnabledType.of_json in
+      let additionalEncryptionContext =
+        field_map json__ "additionalEncryptionContext"
+          EncryptionContextMap.of_json in
+      let customerManagedKey =
+        field_map json__ "customerManagedKey" KeyArn.of_json in
+      let cookieSynchronizationConfiguration =
+        field_map json__ "cookieSynchronizationConfiguration"
+          CookieSynchronizationConfiguration.of_json in
+      let idleDisconnectTimeoutInMinutes =
+        field_map json__ "idleDisconnectTimeoutInMinutes"
+          IdleDisconnectTimeoutInMinutes.of_json in
+      let disconnectTimeoutInMinutes =
+        field_map json__ "disconnectTimeoutInMinutes"
+          DisconnectTimeoutInMinutes.of_json in
+      let printAllowed = field_map json__ "printAllowed" EnabledType.of_json in
+      let uploadAllowed =
+        field_map json__ "uploadAllowed" EnabledType.of_json in
       let downloadAllowed =
-        field_map json "downloadAllowed" EnabledType.of_json in
-      let copyAllowed = field_map json "copyAllowed" EnabledType.of_json in
+        field_map json__ "downloadAllowed" EnabledType.of_json in
+      let pasteAllowed = field_map json__ "pasteAllowed" EnabledType.of_json in
+      let copyAllowed = field_map json__ "copyAllowed" EnabledType.of_json in
       let associatedPortalArns =
-        field_map json "associatedPortalArns" ArnList.of_json in
-      make ~userSettingsArn ?uploadAllowed ?printAllowed ?pasteAllowed
-        ?downloadAllowed ?copyAllowed ?associatedPortalArns ()
+        field_map json__ "associatedPortalArns" ArnList.of_json in
+      let userSettingsArn = field_map json__ "userSettingsArn" ARN.of_json in
+      make ?webAuthnAllowed ?brandingConfiguration ?toolbarConfiguration
+        ?deepLinkAllowed ?additionalEncryptionContext ?customerManagedKey
+        ?cookieSynchronizationConfiguration ?idleDisconnectTimeoutInMinutes
+        ?disconnectTimeoutInMinutes ?printAllowed ?uploadAllowed
+        ?downloadAllowed ?pasteAllowed ?copyAllowed ?associatedPortalArns
+        ?userSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A user settings resource that can be associated with a web portal. Once associated with a web portal, user settings control how users can transfer data between a streaming session and the their local devices."]
@@ -1407,41 +4570,126 @@ module ValidationException =
   struct
     type nonrec t =
       {
-      fieldList: ValidationExceptionFieldList.t option
-        [@ocaml.doc "The field that caused the error."];
       message: ExceptionMessage.t option ;
       reason: ValidationExceptionReason.t option
-        [@ocaml.doc "Reason the request failed validation"]}
-    let make ?fieldList =
-      fun ?message -> fun ?reason -> fun () -> { fieldList; message; reason }
+        [@ocaml.doc "Reason the request failed validation"];
+      fieldList: ValidationExceptionFieldList.t option
+        [@ocaml.doc "The field that caused the error."]}
+    let make ?message =
+      fun ?reason ->
+        fun ?fieldList -> fun () -> { message; reason; fieldList }
     let to_value x =
       structure_to_value
-        [("fieldList",
-           (Option.map x.fieldList ~f:ValidationExceptionFieldList.to_value));
-        ("message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value));
         ("reason",
-          (Option.map x.reason ~f:ValidationExceptionReason.to_value))]
+          (Option.map x.reason ~f:ValidationExceptionReason.to_value));
+        ("fieldList",
+          (Option.map x.fieldList ~f:ValidationExceptionFieldList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let fieldList =
+        (Option.map ~f:ValidationExceptionFieldList.of_xml)
+          (Xml.child xml_arg0 "fieldList") in
       let reason =
         (Option.map ~f:ValidationExceptionReason.of_xml)
           (Xml.child xml_arg0 "reason") in
       let message =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
-      let fieldList =
-        (Option.map ~f:ValidationExceptionFieldList.of_xml)
-          (Xml.child xml_arg0 "fieldList") in
-      make ?reason ?message ?fieldList ()
+      make ?fieldList ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "reason" ValidationExceptionReason.of_json in
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
       let fieldList =
-        field_map json "fieldList" ValidationExceptionFieldList.of_json in
-      make ?reason ?message ?fieldList ()
+        field_map json__ "fieldList" ValidationExceptionFieldList.of_json in
+      let reason =
+        field_map json__ "reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?fieldList ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "There is a validation error."]
+module BrandingConfigurationUpdateInput =
+  struct
+    type nonrec t =
+      {
+      logo: IconImageInput.t option
+        [@ocaml.doc
+          "The logo image for the portal. Provide either a binary image file or an S3 URI pointing to the image file. Maximum 100 KB in JPEG, PNG, or ICO format."];
+      wallpaper: WallpaperImageInput.t option
+        [@ocaml.doc
+          "The wallpaper image for the portal. Provide either a binary image file or an S3 URI pointing to the image file. Maximum 5 MB in JPEG or PNG format."];
+      favicon: IconImageInput.t option
+        [@ocaml.doc
+          "The favicon image for the portal. Provide either a binary image file or an S3 URI pointing to the image file. Maximum 100 KB in JPEG, PNG, or ICO format."];
+      localizedStrings: LocalizedBrandingStringMap.t option
+        [@ocaml.doc
+          "A map of localized text strings for different supported languages. Each locale must provide the required fields browserTabTitle and welcomeText."];
+      colorTheme: ColorTheme.t option
+        [@ocaml.doc
+          "The color theme for components on the web portal. Choose Light if you upload a dark wallpaper, or Dark for a light wallpaper."];
+      termsOfService: Markdown.t option
+        [@ocaml.doc
+          "The terms of service text in Markdown format. To remove existing terms of service, provide an empty string."]}
+    let make ?logo =
+      fun ?wallpaper ->
+        fun ?favicon ->
+          fun ?localizedStrings ->
+            fun ?colorTheme ->
+              fun ?termsOfService ->
+                fun () ->
+                  {
+                    logo;
+                    wallpaper;
+                    favicon;
+                    localizedStrings;
+                    colorTheme;
+                    termsOfService
+                  }
+    let to_value x =
+      structure_to_value
+        [("logo", (Option.map x.logo ~f:IconImageInput.to_value));
+        ("wallpaper",
+          (Option.map x.wallpaper ~f:WallpaperImageInput.to_value));
+        ("favicon", (Option.map x.favicon ~f:IconImageInput.to_value));
+        ("localizedStrings",
+          (Option.map x.localizedStrings
+             ~f:LocalizedBrandingStringMap.to_value));
+        ("colorTheme", (Option.map x.colorTheme ~f:ColorTheme.to_value));
+        ("termsOfService",
+          (Option.map x.termsOfService ~f:Markdown.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let termsOfService =
+        (Option.map ~f:Markdown.of_xml) (Xml.child xml_arg0 "termsOfService") in
+      let colorTheme =
+        (Option.map ~f:ColorTheme.of_xml) (Xml.child xml_arg0 "colorTheme") in
+      let localizedStrings =
+        (Option.map ~f:LocalizedBrandingStringMap.of_xml)
+          (Xml.child xml_arg0 "localizedStrings") in
+      let favicon =
+        (Option.map ~f:IconImageInput.of_xml) (Xml.child xml_arg0 "favicon") in
+      let wallpaper =
+        (Option.map ~f:WallpaperImageInput.of_xml)
+          (Xml.child xml_arg0 "wallpaper") in
+      let logo =
+        (Option.map ~f:IconImageInput.of_xml) (Xml.child xml_arg0 "logo") in
+      make ?termsOfService ?colorTheme ?localizedStrings ?favicon ?wallpaper
+        ?logo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let termsOfService = field_map json__ "termsOfService" Markdown.of_json in
+      let colorTheme = field_map json__ "colorTheme" ColorTheme.of_json in
+      let localizedStrings =
+        field_map json__ "localizedStrings"
+          LocalizedBrandingStringMap.of_json in
+      let favicon = field_map json__ "favicon" IconImageInput.of_json in
+      let wallpaper =
+        field_map json__ "wallpaper" WallpaperImageInput.of_json in
+      let logo = field_map json__ "logo" IconImageInput.of_json in
+      make ?termsOfService ?colorTheme ?localizedStrings ?favicon ?wallpaper
+        ?logo ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The input configuration for updating branding settings. All fields are optional when updating existing branding."]
 module ClientToken =
   struct
     type nonrec t = string
@@ -1460,35 +4708,91 @@ module ClientToken =
     let of_json j = string_of_json ~kind:"ClientToken" j
     let to_json = simple_to_json to_value
   end
+module UserAccessLoggingSettings =
+  struct
+    type nonrec t =
+      {
+      userAccessLoggingSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the user access logging settings."];
+      associatedPortalArns: ArnList.t option
+        [@ocaml.doc
+          "A list of web portal ARNs that this user access logging settings is associated with."];
+      kinesisStreamArn: KinesisStreamArn.t option
+        [@ocaml.doc "The ARN of the Kinesis stream."]}
+    let make ?userAccessLoggingSettingsArn =
+      fun ?associatedPortalArns ->
+        fun ?kinesisStreamArn ->
+          fun () ->
+            {
+              userAccessLoggingSettingsArn;
+              associatedPortalArns;
+              kinesisStreamArn
+            }
+    let to_value x =
+      structure_to_value
+        [("userAccessLoggingSettingsArn",
+           (Option.map x.userAccessLoggingSettingsArn ~f:ARN.to_value));
+        ("associatedPortalArns",
+          (Option.map x.associatedPortalArns ~f:ArnList.to_value));
+        ("kinesisStreamArn",
+          (Option.map x.kinesisStreamArn ~f:KinesisStreamArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kinesisStreamArn =
+        (Option.map ~f:KinesisStreamArn.of_xml)
+          (Xml.child xml_arg0 "kinesisStreamArn") in
+      let associatedPortalArns =
+        (Option.map ~f:ArnList.of_xml)
+          (Xml.child xml_arg0 "associatedPortalArns") in
+      let userAccessLoggingSettingsArn =
+        (Option.map ~f:ARN.of_xml)
+          (Xml.child xml_arg0 "userAccessLoggingSettingsArn") in
+      make ?kinesisStreamArn ?associatedPortalArns
+        ?userAccessLoggingSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kinesisStreamArn =
+        field_map json__ "kinesisStreamArn" KinesisStreamArn.of_json in
+      let associatedPortalArns =
+        field_map json__ "associatedPortalArns" ArnList.of_json in
+      let userAccessLoggingSettingsArn =
+        field_map json__ "userAccessLoggingSettingsArn" ARN.of_json in
+      make ?kinesisStreamArn ?associatedPortalArns
+        ?userAccessLoggingSettingsArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A user access logging settings resource that can be associated with a web portal."]
 module ServiceQuotaExceededException =
   struct
     type nonrec t =
       {
       message: ExceptionMessage.t option ;
-      quotaCode: QuotaCode.t option [@ocaml.doc "The originating quota."];
       resourceId: ResourceId.t option
         [@ocaml.doc "Identifier of the resource affected."];
       resourceType: ResourceType.t option
         [@ocaml.doc "Type of the resource affected."];
       serviceCode: ServiceCode.t option
-        [@ocaml.doc "The originating service."]}
+        [@ocaml.doc "The originating service."];
+      quotaCode: QuotaCode.t option [@ocaml.doc "The originating quota."]}
     let make ?message =
-      fun ?quotaCode ->
-        fun ?resourceId ->
-          fun ?resourceType ->
-            fun ?serviceCode ->
+      fun ?resourceId ->
+        fun ?resourceType ->
+          fun ?serviceCode ->
+            fun ?quotaCode ->
               fun () ->
-                { message; quotaCode; resourceId; resourceType; serviceCode }
+                { message; resourceId; resourceType; serviceCode; quotaCode }
     let to_value x =
       structure_to_value
         [("message", (Option.map x.message ~f:ExceptionMessage.to_value));
-        ("quotaCode", (Option.map x.quotaCode ~f:QuotaCode.to_value));
         ("resourceId", (Option.map x.resourceId ~f:ResourceId.to_value));
         ("resourceType",
           (Option.map x.resourceType ~f:ResourceType.to_value));
-        ("serviceCode", (Option.map x.serviceCode ~f:ServiceCode.to_value))]
+        ("serviceCode", (Option.map x.serviceCode ~f:ServiceCode.to_value));
+        ("quotaCode", (Option.map x.quotaCode ~f:QuotaCode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let quotaCode =
+        (Option.map ~f:QuotaCode.of_xml) (Xml.child xml_arg0 "quotaCode") in
       let serviceCode =
         (Option.map ~f:ServiceCode.of_xml) (Xml.child xml_arg0 "serviceCode") in
       let resourceType =
@@ -1496,26 +4800,27 @@ module ServiceQuotaExceededException =
           (Xml.child xml_arg0 "resourceType") in
       let resourceId =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "resourceId") in
-      let quotaCode =
-        (Option.map ~f:QuotaCode.of_xml) (Xml.child xml_arg0 "quotaCode") in
       let message =
         (Option.map ~f:ExceptionMessage.of_xml)
           (Xml.child xml_arg0 "message") in
-      make ?serviceCode ?resourceType ?resourceId ?quotaCode ?message ()
+      make ?quotaCode ?serviceCode ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceCode = field_map json "serviceCode" ServiceCode.of_json in
-      let resourceType = field_map json "resourceType" ResourceType.of_json in
-      let resourceId = field_map json "resourceId" ResourceId.of_json in
-      let quotaCode = field_map json "quotaCode" QuotaCode.of_json in
-      let message = field_map json "message" ExceptionMessage.of_json in
-      make ?serviceCode ?resourceType ?resourceId ?quotaCode ?message ()
+    let of_json json__ =
+      let quotaCode = field_map json__ "quotaCode" QuotaCode.of_json in
+      let serviceCode = field_map json__ "serviceCode" ServiceCode.of_json in
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let resourceId = field_map json__ "resourceId" ResourceId.of_json in
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?quotaCode ?serviceCode ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service quota has been exceeded."]
 module CertificateList =
   struct
     type nonrec t = CertificateAuthorityBody.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CertificateAuthorityBody.to_value)) |>
         (fun x -> `List x)
@@ -1542,6 +4847,9 @@ module CertificateThumbprintList =
   struct
     type nonrec t = CertificateThumbprint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CertificateThumbprint.to_value)) |>
         (fun x -> `List x)
@@ -1564,325 +4872,854 @@ module CertificateThumbprintList =
         ~of_json:CertificateThumbprint.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SessionLogger =
+  struct
+    type nonrec t =
+      {
+      sessionLoggerArn: ARN.t option
+        [@ocaml.doc "The ARN of the session logger resource."];
+      eventFilter: EventFilter.t option
+        [@ocaml.doc "The filter that specifies which events to monitor."];
+      logConfiguration: LogConfiguration.t option
+        [@ocaml.doc
+          "The configuration that specifies where logs are fowarded."];
+      customerManagedKey: KeyArn.t option
+        [@ocaml.doc "The custom managed key of the session logger."];
+      additionalEncryptionContext: EncryptionContextMap.t option
+        [@ocaml.doc
+          "The additional encryption context of the session logger."];
+      associatedPortalArns: ArnList.t option
+        [@ocaml.doc "The associated portal ARN."];
+      displayName: DisplayNameSafe.t option
+        [@ocaml.doc "The human-readable display name."];
+      creationDate: Timestamp.t option
+        [@ocaml.doc "The date the session logger resource was created."]}
+    let make ?sessionLoggerArn =
+      fun ?eventFilter ->
+        fun ?logConfiguration ->
+          fun ?customerManagedKey ->
+            fun ?additionalEncryptionContext ->
+              fun ?associatedPortalArns ->
+                fun ?displayName ->
+                  fun ?creationDate ->
+                    fun () ->
+                      {
+                        sessionLoggerArn;
+                        eventFilter;
+                        logConfiguration;
+                        customerManagedKey;
+                        additionalEncryptionContext;
+                        associatedPortalArns;
+                        displayName;
+                        creationDate
+                      }
+    let to_value x =
+      structure_to_value
+        [("sessionLoggerArn",
+           (Option.map x.sessionLoggerArn ~f:ARN.to_value));
+        ("eventFilter", (Option.map x.eventFilter ~f:EventFilter.to_value));
+        ("logConfiguration",
+          (Option.map x.logConfiguration ~f:LogConfiguration.to_value));
+        ("customerManagedKey",
+          (Option.map x.customerManagedKey ~f:KeyArn.to_value));
+        ("additionalEncryptionContext",
+          (Option.map x.additionalEncryptionContext
+             ~f:EncryptionContextMap.to_value));
+        ("associatedPortalArns",
+          (Option.map x.associatedPortalArns ~f:ArnList.to_value));
+        ("displayName",
+          (Option.map x.displayName ~f:DisplayNameSafe.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
+      let displayName =
+        (Option.map ~f:DisplayNameSafe.of_xml)
+          (Xml.child xml_arg0 "displayName") in
+      let associatedPortalArns =
+        (Option.map ~f:ArnList.of_xml)
+          (Xml.child xml_arg0 "associatedPortalArns") in
+      let additionalEncryptionContext =
+        (Option.map ~f:EncryptionContextMap.of_xml)
+          (Xml.child xml_arg0 "additionalEncryptionContext") in
+      let customerManagedKey =
+        (Option.map ~f:KeyArn.of_xml)
+          (Xml.child xml_arg0 "customerManagedKey") in
+      let logConfiguration =
+        (Option.map ~f:LogConfiguration.of_xml)
+          (Xml.child xml_arg0 "logConfiguration") in
+      let eventFilter =
+        (Option.map ~f:EventFilter.of_xml) (Xml.child xml_arg0 "eventFilter") in
+      let sessionLoggerArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "sessionLoggerArn") in
+      make ?creationDate ?displayName ?associatedPortalArns
+        ?additionalEncryptionContext ?customerManagedKey ?logConfiguration
+        ?eventFilter ?sessionLoggerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let displayName =
+        field_map json__ "displayName" DisplayNameSafe.of_json in
+      let associatedPortalArns =
+        field_map json__ "associatedPortalArns" ArnList.of_json in
+      let additionalEncryptionContext =
+        field_map json__ "additionalEncryptionContext"
+          EncryptionContextMap.of_json in
+      let customerManagedKey =
+        field_map json__ "customerManagedKey" KeyArn.of_json in
+      let logConfiguration =
+        field_map json__ "logConfiguration" LogConfiguration.of_json in
+      let eventFilter = field_map json__ "eventFilter" EventFilter.of_json in
+      let sessionLoggerArn = field_map json__ "sessionLoggerArn" ARN.of_json in
+      make ?creationDate ?displayName ?associatedPortalArns
+        ?additionalEncryptionContext ?customerManagedKey ?logConfiguration
+        ?eventFilter ?sessionLoggerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The session logger resource."]
+module ConflictException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option ;
+      resourceId: ResourceId.t option
+        [@ocaml.doc "Identifier of the resource affected."];
+      resourceType: ResourceType.t option
+        [@ocaml.doc "Type of the resource affected."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:ResourceId.to_value));
+        ("resourceType",
+          (Option.map x.resourceType ~f:ResourceType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceType =
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      let resourceId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "resourceId") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let resourceId = field_map json__ "resourceId" ResourceId.of_json in
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?resourceType ?resourceId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "There is a conflict."]
 module Portal =
   struct
     type nonrec t =
       {
-      browserSettingsArn: ARN.t option
-        [@ocaml.doc
-          "The ARN of the browser settings that is associated with this web portal."];
+      portalArn: ARN.t option [@ocaml.doc "The ARN of the web portal."];
+      rendererType: RendererType.t option
+        [@ocaml.doc "The renderer that is used in streaming sessions."];
       browserType: BrowserType.t option
         [@ocaml.doc
           "The browser that users see when using a streaming session."];
-      creationDate: Timestamp.t option
-        [@ocaml.doc "The creation date of the web portal."];
-      displayName: DisplayName.t option
-        [@ocaml.doc "The name of the web portal."];
-      networkSettingsArn: ARN.t option
-        [@ocaml.doc
-          "The ARN of the network settings that is associated with the web portal."];
-      portalArn: ARN.t option [@ocaml.doc "The ARN of the web portal."];
+      portalStatus: PortalStatus.t option
+        [@ocaml.doc "The status of the web portal."];
       portalEndpoint: PortalEndpoint.t option
         [@ocaml.doc
           "The endpoint URL of the web portal that users access in order to start streaming sessions."];
-      portalStatus: PortalStatus.t option
-        [@ocaml.doc "The status of the web portal."];
-      rendererType: RendererType.t option
-        [@ocaml.doc "The renderer that is used in streaming sessions."];
-      statusReason: StatusReason.t option
+      displayName: DisplayName.t option
+        [@ocaml.doc "The name of the web portal."];
+      creationDate: Timestamp.t option
+        [@ocaml.doc "The creation date of the web portal."];
+      browserSettingsArn: ARN.t option
         [@ocaml.doc
-          "A message that explains why the web portal is in its current status."];
+          "The ARN of the browser settings that is associated with this web portal."];
+      dataProtectionSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the data protection settings."];
+      userSettingsArn: ARN.t option
+        [@ocaml.doc
+          "The ARN of the user settings that is associated with the web portal."];
+      networkSettingsArn: ARN.t option
+        [@ocaml.doc
+          "The ARN of the network settings that is associated with the web portal."];
+      sessionLoggerArn: ARN.t option
+        [@ocaml.doc
+          "The ARN of the session logger that is assocaited with the portal."];
       trustStoreArn: ARN.t option
         [@ocaml.doc
           "The ARN of the trust store that is associated with the web portal."];
-      userSettingsArn: ARN.t option
+      statusReason: StatusReason.t option
         [@ocaml.doc
-          "The ARN of the trust store that is associated with the web portal."]}
-    let make ?browserSettingsArn =
-      fun ?browserType ->
-        fun ?creationDate ->
-          fun ?displayName ->
-            fun ?networkSettingsArn ->
-              fun ?portalArn ->
-                fun ?portalEndpoint ->
-                  fun ?portalStatus ->
-                    fun ?rendererType ->
-                      fun ?statusReason ->
-                        fun ?trustStoreArn ->
-                          fun ?userSettingsArn ->
-                            fun () ->
-                              {
-                                browserSettingsArn;
-                                browserType;
-                                creationDate;
-                                displayName;
-                                networkSettingsArn;
-                                portalArn;
-                                portalEndpoint;
-                                portalStatus;
-                                rendererType;
-                                statusReason;
-                                trustStoreArn;
-                                userSettingsArn
-                              }
+          "A message that explains why the web portal is in its current status."];
+      userAccessLoggingSettingsArn: ARN.t option
+        [@ocaml.doc
+          "The ARN of the user access logging settings that is associated with the web portal."];
+      authenticationType: AuthenticationType.t option
+        [@ocaml.doc
+          "The type of authentication integration points used when signing into the web portal. Defaults to Standard. Standard web portals are authenticated directly through your identity provider. You need to call CreateIdentityProvider to integrate your identity provider with your web portal. User and group access to your web portal is controlled through your identity provider. IAM Identity Center web portals are authenticated through IAM Identity Center. Identity sources (including external identity provider integration), plus user and group access to your web portal, can be configured in the IAM Identity Center."];
+      ipAccessSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the IP access settings."];
+      customerManagedKey: KeyArn.t option
+        [@ocaml.doc
+          "The customer managed key used to encrypt sensitive information in the portal."];
+      additionalEncryptionContext: EncryptionContextMap.t option
+        [@ocaml.doc "The additional encryption context of the portal."];
+      instanceType: InstanceType.t option
+        [@ocaml.doc "The type and resources of the underlying instance."];
+      maxConcurrentSessions: MaxConcurrentSessions.t option
+        [@ocaml.doc
+          "The maximum number of concurrent sessions for the portal."];
+      portalCustomDomain: PortalCustomDomain.t option
+        [@ocaml.doc
+          "The custom domain of the web portal that users access in order to start streaming sessions."]}
+    let make ?portalArn =
+      fun ?rendererType ->
+        fun ?browserType ->
+          fun ?portalStatus ->
+            fun ?portalEndpoint ->
+              fun ?displayName ->
+                fun ?creationDate ->
+                  fun ?browserSettingsArn ->
+                    fun ?dataProtectionSettingsArn ->
+                      fun ?userSettingsArn ->
+                        fun ?networkSettingsArn ->
+                          fun ?sessionLoggerArn ->
+                            fun ?trustStoreArn ->
+                              fun ?statusReason ->
+                                fun ?userAccessLoggingSettingsArn ->
+                                  fun ?authenticationType ->
+                                    fun ?ipAccessSettingsArn ->
+                                      fun ?customerManagedKey ->
+                                        fun ?additionalEncryptionContext ->
+                                          fun ?instanceType ->
+                                            fun ?maxConcurrentSessions ->
+                                              fun ?portalCustomDomain ->
+                                                fun () ->
+                                                  {
+                                                    portalArn;
+                                                    rendererType;
+                                                    browserType;
+                                                    portalStatus;
+                                                    portalEndpoint;
+                                                    displayName;
+                                                    creationDate;
+                                                    browserSettingsArn;
+                                                    dataProtectionSettingsArn;
+                                                    userSettingsArn;
+                                                    networkSettingsArn;
+                                                    sessionLoggerArn;
+                                                    trustStoreArn;
+                                                    statusReason;
+                                                    userAccessLoggingSettingsArn;
+                                                    authenticationType;
+                                                    ipAccessSettingsArn;
+                                                    customerManagedKey;
+                                                    additionalEncryptionContext;
+                                                    instanceType;
+                                                    maxConcurrentSessions;
+                                                    portalCustomDomain
+                                                  }
     let to_value x =
       structure_to_value
-        [("browserSettingsArn",
-           (Option.map x.browserSettingsArn ~f:ARN.to_value));
-        ("browserType", (Option.map x.browserType ~f:BrowserType.to_value));
-        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value));
-        ("displayName", (Option.map x.displayName ~f:DisplayName.to_value));
-        ("networkSettingsArn",
-          (Option.map x.networkSettingsArn ~f:ARN.to_value));
-        ("portalArn", (Option.map x.portalArn ~f:ARN.to_value));
-        ("portalEndpoint",
-          (Option.map x.portalEndpoint ~f:PortalEndpoint.to_value));
-        ("portalStatus",
-          (Option.map x.portalStatus ~f:PortalStatus.to_value));
+        [("portalArn", (Option.map x.portalArn ~f:ARN.to_value));
         ("rendererType",
           (Option.map x.rendererType ~f:RendererType.to_value));
+        ("browserType", (Option.map x.browserType ~f:BrowserType.to_value));
+        ("portalStatus",
+          (Option.map x.portalStatus ~f:PortalStatus.to_value));
+        ("portalEndpoint",
+          (Option.map x.portalEndpoint ~f:PortalEndpoint.to_value));
+        ("displayName", (Option.map x.displayName ~f:DisplayName.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value));
+        ("browserSettingsArn",
+          (Option.map x.browserSettingsArn ~f:ARN.to_value));
+        ("dataProtectionSettingsArn",
+          (Option.map x.dataProtectionSettingsArn ~f:ARN.to_value));
+        ("userSettingsArn", (Option.map x.userSettingsArn ~f:ARN.to_value));
+        ("networkSettingsArn",
+          (Option.map x.networkSettingsArn ~f:ARN.to_value));
+        ("sessionLoggerArn", (Option.map x.sessionLoggerArn ~f:ARN.to_value));
+        ("trustStoreArn", (Option.map x.trustStoreArn ~f:ARN.to_value));
         ("statusReason",
           (Option.map x.statusReason ~f:StatusReason.to_value));
-        ("trustStoreArn", (Option.map x.trustStoreArn ~f:ARN.to_value));
-        ("userSettingsArn", (Option.map x.userSettingsArn ~f:ARN.to_value))]
+        ("userAccessLoggingSettingsArn",
+          (Option.map x.userAccessLoggingSettingsArn ~f:ARN.to_value));
+        ("authenticationType",
+          (Option.map x.authenticationType ~f:AuthenticationType.to_value));
+        ("ipAccessSettingsArn",
+          (Option.map x.ipAccessSettingsArn ~f:ARN.to_value));
+        ("customerManagedKey",
+          (Option.map x.customerManagedKey ~f:KeyArn.to_value));
+        ("additionalEncryptionContext",
+          (Option.map x.additionalEncryptionContext
+             ~f:EncryptionContextMap.to_value));
+        ("instanceType",
+          (Option.map x.instanceType ~f:InstanceType.to_value));
+        ("maxConcurrentSessions",
+          (Option.map x.maxConcurrentSessions
+             ~f:MaxConcurrentSessions.to_value));
+        ("portalCustomDomain",
+          (Option.map x.portalCustomDomain ~f:PortalCustomDomain.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let userSettingsArn =
-        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "userSettingsArn") in
-      let trustStoreArn =
-        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "trustStoreArn") in
+      let portalCustomDomain =
+        (Option.map ~f:PortalCustomDomain.of_xml)
+          (Xml.child xml_arg0 "portalCustomDomain") in
+      let maxConcurrentSessions =
+        (Option.map ~f:MaxConcurrentSessions.of_xml)
+          (Xml.child xml_arg0 "maxConcurrentSessions") in
+      let instanceType =
+        (Option.map ~f:InstanceType.of_xml)
+          (Xml.child xml_arg0 "instanceType") in
+      let additionalEncryptionContext =
+        (Option.map ~f:EncryptionContextMap.of_xml)
+          (Xml.child xml_arg0 "additionalEncryptionContext") in
+      let customerManagedKey =
+        (Option.map ~f:KeyArn.of_xml)
+          (Xml.child xml_arg0 "customerManagedKey") in
+      let ipAccessSettingsArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "ipAccessSettingsArn") in
+      let authenticationType =
+        (Option.map ~f:AuthenticationType.of_xml)
+          (Xml.child xml_arg0 "authenticationType") in
+      let userAccessLoggingSettingsArn =
+        (Option.map ~f:ARN.of_xml)
+          (Xml.child xml_arg0 "userAccessLoggingSettingsArn") in
       let statusReason =
         (Option.map ~f:StatusReason.of_xml)
           (Xml.child xml_arg0 "statusReason") in
-      let rendererType =
-        (Option.map ~f:RendererType.of_xml)
-          (Xml.child xml_arg0 "rendererType") in
-      let portalStatus =
-        (Option.map ~f:PortalStatus.of_xml)
-          (Xml.child xml_arg0 "portalStatus") in
+      let trustStoreArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "trustStoreArn") in
+      let sessionLoggerArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "sessionLoggerArn") in
+      let networkSettingsArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "networkSettingsArn") in
+      let userSettingsArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "userSettingsArn") in
+      let dataProtectionSettingsArn =
+        (Option.map ~f:ARN.of_xml)
+          (Xml.child xml_arg0 "dataProtectionSettingsArn") in
+      let browserSettingsArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "browserSettingsArn") in
+      let creationDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
+      let displayName =
+        (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "displayName") in
       let portalEndpoint =
         (Option.map ~f:PortalEndpoint.of_xml)
           (Xml.child xml_arg0 "portalEndpoint") in
-      let portalArn =
-        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "portalArn") in
-      let networkSettingsArn =
-        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "networkSettingsArn") in
-      let displayName =
-        (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "displayName") in
-      let creationDate =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
+      let portalStatus =
+        (Option.map ~f:PortalStatus.of_xml)
+          (Xml.child xml_arg0 "portalStatus") in
       let browserType =
         (Option.map ~f:BrowserType.of_xml) (Xml.child xml_arg0 "browserType") in
-      let browserSettingsArn =
-        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "browserSettingsArn") in
-      make ?userSettingsArn ?trustStoreArn ?statusReason ?rendererType
-        ?portalStatus ?portalEndpoint ?portalArn ?networkSettingsArn
-        ?displayName ?creationDate ?browserType ?browserSettingsArn ()
+      let rendererType =
+        (Option.map ~f:RendererType.of_xml)
+          (Xml.child xml_arg0 "rendererType") in
+      let portalArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "portalArn") in
+      make ?portalCustomDomain ?maxConcurrentSessions ?instanceType
+        ?additionalEncryptionContext ?customerManagedKey ?ipAccessSettingsArn
+        ?authenticationType ?userAccessLoggingSettingsArn ?statusReason
+        ?trustStoreArn ?sessionLoggerArn ?networkSettingsArn ?userSettingsArn
+        ?dataProtectionSettingsArn ?browserSettingsArn ?creationDate
+        ?displayName ?portalEndpoint ?portalStatus ?browserType ?rendererType
+        ?portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userSettingsArn = field_map json "userSettingsArn" ARN.of_json in
-      let trustStoreArn = field_map json "trustStoreArn" ARN.of_json in
-      let statusReason = field_map json "statusReason" StatusReason.of_json in
-      let rendererType = field_map json "rendererType" RendererType.of_json in
-      let portalStatus = field_map json "portalStatus" PortalStatus.of_json in
-      let portalEndpoint =
-        field_map json "portalEndpoint" PortalEndpoint.of_json in
-      let portalArn = field_map json "portalArn" ARN.of_json in
+    let of_json json__ =
+      let portalCustomDomain =
+        field_map json__ "portalCustomDomain" PortalCustomDomain.of_json in
+      let maxConcurrentSessions =
+        field_map json__ "maxConcurrentSessions"
+          MaxConcurrentSessions.of_json in
+      let instanceType = field_map json__ "instanceType" InstanceType.of_json in
+      let additionalEncryptionContext =
+        field_map json__ "additionalEncryptionContext"
+          EncryptionContextMap.of_json in
+      let customerManagedKey =
+        field_map json__ "customerManagedKey" KeyArn.of_json in
+      let ipAccessSettingsArn =
+        field_map json__ "ipAccessSettingsArn" ARN.of_json in
+      let authenticationType =
+        field_map json__ "authenticationType" AuthenticationType.of_json in
+      let userAccessLoggingSettingsArn =
+        field_map json__ "userAccessLoggingSettingsArn" ARN.of_json in
+      let statusReason = field_map json__ "statusReason" StatusReason.of_json in
+      let trustStoreArn = field_map json__ "trustStoreArn" ARN.of_json in
+      let sessionLoggerArn = field_map json__ "sessionLoggerArn" ARN.of_json in
       let networkSettingsArn =
-        field_map json "networkSettingsArn" ARN.of_json in
-      let displayName = field_map json "displayName" DisplayName.of_json in
-      let creationDate = field_map json "creationDate" Timestamp.of_json in
-      let browserType = field_map json "browserType" BrowserType.of_json in
+        field_map json__ "networkSettingsArn" ARN.of_json in
+      let userSettingsArn = field_map json__ "userSettingsArn" ARN.of_json in
+      let dataProtectionSettingsArn =
+        field_map json__ "dataProtectionSettingsArn" ARN.of_json in
       let browserSettingsArn =
-        field_map json "browserSettingsArn" ARN.of_json in
-      make ?userSettingsArn ?trustStoreArn ?statusReason ?rendererType
-        ?portalStatus ?portalEndpoint ?portalArn ?networkSettingsArn
-        ?displayName ?creationDate ?browserType ?browserSettingsArn ()
+        field_map json__ "browserSettingsArn" ARN.of_json in
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let portalEndpoint =
+        field_map json__ "portalEndpoint" PortalEndpoint.of_json in
+      let portalStatus = field_map json__ "portalStatus" PortalStatus.of_json in
+      let browserType = field_map json__ "browserType" BrowserType.of_json in
+      let rendererType = field_map json__ "rendererType" RendererType.of_json in
+      let portalArn = field_map json__ "portalArn" ARN.of_json in
+      make ?portalCustomDomain ?maxConcurrentSessions ?instanceType
+        ?additionalEncryptionContext ?customerManagedKey ?ipAccessSettingsArn
+        ?authenticationType ?userAccessLoggingSettingsArn ?statusReason
+        ?trustStoreArn ?sessionLoggerArn ?networkSettingsArn ?userSettingsArn
+        ?dataProtectionSettingsArn ?browserSettingsArn ?creationDate
+        ?displayName ?portalEndpoint ?portalStatus ?browserType ?rendererType
+        ?portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The web portal."]
 module NetworkSettings =
   struct
     type nonrec t =
       {
+      networkSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the network settings."];
       associatedPortalArns: ArnList.t option
         [@ocaml.doc
           "A list of web portal ARNs that this network settings is associated with."];
-      networkSettingsArn: ARN.t
-        [@ocaml.doc "The ARN of the network settings."];
-      securityGroupIds: SecurityGroupIdList.t option
-        [@ocaml.doc
-          "One or more security groups used to control access from streaming instances to your VPC."];
+      vpcId: VpcId.t option
+        [@ocaml.doc "The VPC that streaming instances will connect to."];
       subnetIds: SubnetIdList.t option
         [@ocaml.doc
           "The subnets in which network interfaces are created to connect streaming instances to your VPC. At least two of these subnets must be in different availability zones."];
-      vpcId: VpcId.t option
-        [@ocaml.doc "The VPC that streaming instances will connect to."]}
-    let context_ = "NetworkSettings"
-    let make ?associatedPortalArns =
-      fun ?securityGroupIds ->
-        fun ?subnetIds ->
-          fun ?vpcId ->
-            fun ~networkSettingsArn ->
+      securityGroupIds: SecurityGroupIdList.t option
+        [@ocaml.doc
+          "One or more security groups used to control access from streaming instances to your VPC."]}
+    let make ?networkSettingsArn =
+      fun ?associatedPortalArns ->
+        fun ?vpcId ->
+          fun ?subnetIds ->
+            fun ?securityGroupIds ->
               fun () ->
                 {
+                  networkSettingsArn;
                   associatedPortalArns;
-                  securityGroupIds;
-                  subnetIds;
                   vpcId;
-                  networkSettingsArn
+                  subnetIds;
+                  securityGroupIds
                 }
     let to_value x =
       structure_to_value
-        [("associatedPortalArns",
-           (Option.map x.associatedPortalArns ~f:ArnList.to_value));
-        ("networkSettingsArn", (Some (ARN.to_value x.networkSettingsArn)));
-        ("securityGroupIds",
-          (Option.map x.securityGroupIds ~f:SecurityGroupIdList.to_value));
+        [("networkSettingsArn",
+           (Option.map x.networkSettingsArn ~f:ARN.to_value));
+        ("associatedPortalArns",
+          (Option.map x.associatedPortalArns ~f:ArnList.to_value));
+        ("vpcId", (Option.map x.vpcId ~f:VpcId.to_value));
         ("subnetIds", (Option.map x.subnetIds ~f:SubnetIdList.to_value));
-        ("vpcId", (Option.map x.vpcId ~f:VpcId.to_value))]
+        ("securityGroupIds",
+          (Option.map x.securityGroupIds ~f:SecurityGroupIdList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "vpcId") in
-      let subnetIds =
-        (Option.map ~f:SubnetIdList.of_xml) (Xml.child xml_arg0 "subnetIds") in
       let securityGroupIds =
         (Option.map ~f:SecurityGroupIdList.of_xml)
           (Xml.child xml_arg0 "securityGroupIds") in
-      let networkSettingsArn =
-        ARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "networkSettingsArn") in
+      let subnetIds =
+        (Option.map ~f:SubnetIdList.of_xml) (Xml.child xml_arg0 "subnetIds") in
+      let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "vpcId") in
       let associatedPortalArns =
         (Option.map ~f:ArnList.of_xml)
           (Xml.child xml_arg0 "associatedPortalArns") in
-      make ?vpcId ?subnetIds ?securityGroupIds ~networkSettingsArn
-        ?associatedPortalArns ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "vpcId" VpcId.of_json in
-      let subnetIds = field_map json "subnetIds" SubnetIdList.of_json in
-      let securityGroupIds =
-        field_map json "securityGroupIds" SecurityGroupIdList.of_json in
       let networkSettingsArn =
-        field_map_exn json "networkSettingsArn" ARN.of_json in
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "networkSettingsArn") in
+      make ?securityGroupIds ?subnetIds ?vpcId ?associatedPortalArns
+        ?networkSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let securityGroupIds =
+        field_map json__ "securityGroupIds" SecurityGroupIdList.of_json in
+      let subnetIds = field_map json__ "subnetIds" SubnetIdList.of_json in
+      let vpcId = field_map json__ "vpcId" VpcId.of_json in
       let associatedPortalArns =
-        field_map json "associatedPortalArns" ArnList.of_json in
-      make ?vpcId ?subnetIds ?securityGroupIds ~networkSettingsArn
-        ?associatedPortalArns ()
+        field_map json__ "associatedPortalArns" ArnList.of_json in
+      let networkSettingsArn =
+        field_map json__ "networkSettingsArn" ARN.of_json in
+      make ?securityGroupIds ?subnetIds ?vpcId ?associatedPortalArns
+        ?networkSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A network settings resource that can be associated with a web portal. Once associated with a web portal, network settings define how streaming instances will connect with your specified VPC."]
+module IpAccessSettings =
+  struct
+    type nonrec t =
+      {
+      ipAccessSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the IP access settings resource."];
+      associatedPortalArns: ArnList.t option
+        [@ocaml.doc
+          "A list of web portal ARNs that this IP access settings resource is associated with."];
+      ipRules: IpRuleList.t option
+        [@ocaml.doc "The IP rules of the IP access settings."];
+      displayName: DisplayName.t option
+        [@ocaml.doc "The display name of the IP access settings."];
+      description: Description.t option
+        [@ocaml.doc "The description of the IP access settings."];
+      creationDate: Timestamp.t option
+        [@ocaml.doc "The creation date timestamp of the IP access settings."];
+      customerManagedKey: KeyArn.t option
+        [@ocaml.doc
+          "The customer managed key used to encrypt sensitive information in the IP access settings."];
+      additionalEncryptionContext: EncryptionContextMap.t option
+        [@ocaml.doc
+          "The additional encryption context of the IP access settings."]}
+    let make ?ipAccessSettingsArn =
+      fun ?associatedPortalArns ->
+        fun ?ipRules ->
+          fun ?displayName ->
+            fun ?description ->
+              fun ?creationDate ->
+                fun ?customerManagedKey ->
+                  fun ?additionalEncryptionContext ->
+                    fun () ->
+                      {
+                        ipAccessSettingsArn;
+                        associatedPortalArns;
+                        ipRules;
+                        displayName;
+                        description;
+                        creationDate;
+                        customerManagedKey;
+                        additionalEncryptionContext
+                      }
+    let to_value x =
+      structure_to_value
+        [("ipAccessSettingsArn",
+           (Option.map x.ipAccessSettingsArn ~f:ARN.to_value));
+        ("associatedPortalArns",
+          (Option.map x.associatedPortalArns ~f:ArnList.to_value));
+        ("ipRules", (Option.map x.ipRules ~f:IpRuleList.to_value));
+        ("displayName", (Option.map x.displayName ~f:DisplayName.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value));
+        ("customerManagedKey",
+          (Option.map x.customerManagedKey ~f:KeyArn.to_value));
+        ("additionalEncryptionContext",
+          (Option.map x.additionalEncryptionContext
+             ~f:EncryptionContextMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let additionalEncryptionContext =
+        (Option.map ~f:EncryptionContextMap.of_xml)
+          (Xml.child xml_arg0 "additionalEncryptionContext") in
+      let customerManagedKey =
+        (Option.map ~f:KeyArn.of_xml)
+          (Xml.child xml_arg0 "customerManagedKey") in
+      let creationDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let displayName =
+        (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "displayName") in
+      let ipRules =
+        (Option.map ~f:IpRuleList.of_xml) (Xml.child xml_arg0 "ipRules") in
+      let associatedPortalArns =
+        (Option.map ~f:ArnList.of_xml)
+          (Xml.child xml_arg0 "associatedPortalArns") in
+      let ipAccessSettingsArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "ipAccessSettingsArn") in
+      make ?additionalEncryptionContext ?customerManagedKey ?creationDate
+        ?description ?displayName ?ipRules ?associatedPortalArns
+        ?ipAccessSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let additionalEncryptionContext =
+        field_map json__ "additionalEncryptionContext"
+          EncryptionContextMap.of_json in
+      let customerManagedKey =
+        field_map json__ "customerManagedKey" KeyArn.of_json in
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let ipRules = field_map json__ "ipRules" IpRuleList.of_json in
+      let associatedPortalArns =
+        field_map json__ "associatedPortalArns" ArnList.of_json in
+      let ipAccessSettingsArn =
+        field_map json__ "ipAccessSettingsArn" ARN.of_json in
+      make ?additionalEncryptionContext ?customerManagedKey ?creationDate
+        ?description ?displayName ?ipRules ?associatedPortalArns
+        ?ipAccessSettingsArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The IP access settings resource that can be associated with a web portal."]
 module IdentityProvider =
   struct
     type nonrec t =
       {
-      identityProviderArn: ARN.t
+      identityProviderArn: SubresourceARN.t option
         [@ocaml.doc "The ARN of the identity provider."];
-      identityProviderDetails: IdentityProviderDetails.t option
-        [@ocaml.doc
-          "The identity provider details. The following list describes the provider detail keys for each identity provider type. For Google and Login with Amazon: client_id client_secret authorize_scopes For Facebook: client_id client_secret authorize_scopes api_version For Sign in with Apple: client_id team_id key_id private_key authorize_scopes For OIDC providers: client_id client_secret attributes_request_method oidc_issuer authorize_scopes authorize_url if not available from discovery URL specified by oidc_issuer key token_url if not available from discovery URL specified by oidc_issuer key attributes_url if not available from discovery URL specified by oidc_issuer key jwks_uri if not available from discovery URL specified by oidc_issuer key For SAML providers: MetadataFile OR MetadataURL IDPSignout optional"];
       identityProviderName: IdentityProviderName.t option
         [@ocaml.doc "The identity provider name."];
       identityProviderType: IdentityProviderType.t option
-        [@ocaml.doc "The identity provider type."]}
-    let context_ = "IdentityProvider"
-    let make ?identityProviderDetails =
+        [@ocaml.doc "The identity provider type."];
+      identityProviderDetails: IdentityProviderDetails.t option
+        [@ocaml.doc
+          "The identity provider details. The following list describes the provider detail keys for each identity provider type. For Google and Login with Amazon: client_id client_secret authorize_scopes For Facebook: client_id client_secret authorize_scopes api_version For Sign in with Apple: client_id team_id key_id private_key authorize_scopes For OIDC providers: client_id client_secret attributes_request_method oidc_issuer authorize_scopes authorize_url if not available from discovery URL specified by oidc_issuer key token_url if not available from discovery URL specified by oidc_issuer key attributes_url if not available from discovery URL specified by oidc_issuer key jwks_uri if not available from discovery URL specified by oidc_issuer key For SAML providers: MetadataFile OR MetadataURL IDPSignout (boolean) optional IDPInit (boolean) optional RequestSigningAlgorithm (string) optional - Only accepts rsa-sha256 EncryptedResponses (boolean) optional"]}
+    let make ?identityProviderArn =
       fun ?identityProviderName ->
         fun ?identityProviderType ->
-          fun ~identityProviderArn ->
+          fun ?identityProviderDetails ->
             fun () ->
               {
-                identityProviderDetails;
+                identityProviderArn;
                 identityProviderName;
                 identityProviderType;
-                identityProviderArn
+                identityProviderDetails
               }
     let to_value x =
       structure_to_value
-        [("identityProviderArn", (Some (ARN.to_value x.identityProviderArn)));
-        ("identityProviderDetails",
-          (Option.map x.identityProviderDetails
-             ~f:IdentityProviderDetails.to_value));
+        [("identityProviderArn",
+           (Option.map x.identityProviderArn ~f:SubresourceARN.to_value));
         ("identityProviderName",
           (Option.map x.identityProviderName ~f:IdentityProviderName.to_value));
         ("identityProviderType",
-          (Option.map x.identityProviderType ~f:IdentityProviderType.to_value))]
+          (Option.map x.identityProviderType ~f:IdentityProviderType.to_value));
+        ("identityProviderDetails",
+          (Option.map x.identityProviderDetails
+             ~f:IdentityProviderDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let identityProviderDetails =
+        (Option.map ~f:IdentityProviderDetails.of_xml)
+          (Xml.child xml_arg0 "identityProviderDetails") in
       let identityProviderType =
         (Option.map ~f:IdentityProviderType.of_xml)
           (Xml.child xml_arg0 "identityProviderType") in
       let identityProviderName =
         (Option.map ~f:IdentityProviderName.of_xml)
           (Xml.child xml_arg0 "identityProviderName") in
-      let identityProviderDetails =
-        (Option.map ~f:IdentityProviderDetails.of_xml)
-          (Xml.child xml_arg0 "identityProviderDetails") in
       let identityProviderArn =
-        ARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "identityProviderArn") in
-      make ?identityProviderType ?identityProviderName
-        ?identityProviderDetails ~identityProviderArn ()
+        (Option.map ~f:SubresourceARN.of_xml)
+          (Xml.child xml_arg0 "identityProviderArn") in
+      make ?identityProviderDetails ?identityProviderType
+        ?identityProviderName ?identityProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identityProviderType =
-        field_map json "identityProviderType" IdentityProviderType.of_json in
-      let identityProviderName =
-        field_map json "identityProviderName" IdentityProviderName.of_json in
+    let of_json json__ =
       let identityProviderDetails =
-        field_map json "identityProviderDetails"
+        field_map json__ "identityProviderDetails"
           IdentityProviderDetails.of_json in
+      let identityProviderType =
+        field_map json__ "identityProviderType" IdentityProviderType.of_json in
+      let identityProviderName =
+        field_map json__ "identityProviderName" IdentityProviderName.of_json in
       let identityProviderArn =
-        field_map_exn json "identityProviderArn" ARN.of_json in
-      make ?identityProviderType ?identityProviderName
-        ?identityProviderDetails ~identityProviderArn ()
+        field_map json__ "identityProviderArn" SubresourceARN.of_json in
+      make ?identityProviderDetails ?identityProviderType
+        ?identityProviderName ?identityProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The identity provider."]
+module DataProtectionSettings =
+  struct
+    type nonrec t =
+      {
+      dataProtectionSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the data protection settings resource."];
+      inlineRedactionConfiguration: InlineRedactionConfiguration.t option
+        [@ocaml.doc
+          "The inline redaction configuration for the data protection settings."];
+      associatedPortalArns: ArnList.t option
+        [@ocaml.doc
+          "A list of web portal ARNs that this data protection settings resource is associated with."];
+      displayName: DisplayNameSafe.t option
+        [@ocaml.doc "The display name of the data protection settings."];
+      description: DescriptionSafe.t option
+        [@ocaml.doc "The description of the data protection settings."];
+      creationDate: Timestamp.t option
+        [@ocaml.doc
+          "The creation date timestamp of the data protection settings."];
+      customerManagedKey: KeyArn.t option
+        [@ocaml.doc
+          "The customer managed key used to encrypt sensitive information in the data protection settings."];
+      additionalEncryptionContext: EncryptionContextMap.t option
+        [@ocaml.doc
+          "The additional encryption context of the data protection settings."]}
+    let make ?dataProtectionSettingsArn =
+      fun ?inlineRedactionConfiguration ->
+        fun ?associatedPortalArns ->
+          fun ?displayName ->
+            fun ?description ->
+              fun ?creationDate ->
+                fun ?customerManagedKey ->
+                  fun ?additionalEncryptionContext ->
+                    fun () ->
+                      {
+                        dataProtectionSettingsArn;
+                        inlineRedactionConfiguration;
+                        associatedPortalArns;
+                        displayName;
+                        description;
+                        creationDate;
+                        customerManagedKey;
+                        additionalEncryptionContext
+                      }
+    let to_value x =
+      structure_to_value
+        [("dataProtectionSettingsArn",
+           (Option.map x.dataProtectionSettingsArn ~f:ARN.to_value));
+        ("inlineRedactionConfiguration",
+          (Option.map x.inlineRedactionConfiguration
+             ~f:InlineRedactionConfiguration.to_value));
+        ("associatedPortalArns",
+          (Option.map x.associatedPortalArns ~f:ArnList.to_value));
+        ("displayName",
+          (Option.map x.displayName ~f:DisplayNameSafe.to_value));
+        ("description",
+          (Option.map x.description ~f:DescriptionSafe.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value));
+        ("customerManagedKey",
+          (Option.map x.customerManagedKey ~f:KeyArn.to_value));
+        ("additionalEncryptionContext",
+          (Option.map x.additionalEncryptionContext
+             ~f:EncryptionContextMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let additionalEncryptionContext =
+        (Option.map ~f:EncryptionContextMap.of_xml)
+          (Xml.child xml_arg0 "additionalEncryptionContext") in
+      let customerManagedKey =
+        (Option.map ~f:KeyArn.of_xml)
+          (Xml.child xml_arg0 "customerManagedKey") in
+      let creationDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
+      let description =
+        (Option.map ~f:DescriptionSafe.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let displayName =
+        (Option.map ~f:DisplayNameSafe.of_xml)
+          (Xml.child xml_arg0 "displayName") in
+      let associatedPortalArns =
+        (Option.map ~f:ArnList.of_xml)
+          (Xml.child xml_arg0 "associatedPortalArns") in
+      let inlineRedactionConfiguration =
+        (Option.map ~f:InlineRedactionConfiguration.of_xml)
+          (Xml.child xml_arg0 "inlineRedactionConfiguration") in
+      let dataProtectionSettingsArn =
+        (Option.map ~f:ARN.of_xml)
+          (Xml.child xml_arg0 "dataProtectionSettingsArn") in
+      make ?additionalEncryptionContext ?customerManagedKey ?creationDate
+        ?description ?displayName ?associatedPortalArns
+        ?inlineRedactionConfiguration ?dataProtectionSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let additionalEncryptionContext =
+        field_map json__ "additionalEncryptionContext"
+          EncryptionContextMap.of_json in
+      let customerManagedKey =
+        field_map json__ "customerManagedKey" KeyArn.of_json in
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let description =
+        field_map json__ "description" DescriptionSafe.of_json in
+      let displayName =
+        field_map json__ "displayName" DisplayNameSafe.of_json in
+      let associatedPortalArns =
+        field_map json__ "associatedPortalArns" ArnList.of_json in
+      let inlineRedactionConfiguration =
+        field_map json__ "inlineRedactionConfiguration"
+          InlineRedactionConfiguration.of_json in
+      let dataProtectionSettingsArn =
+        field_map json__ "dataProtectionSettingsArn" ARN.of_json in
+      make ?additionalEncryptionContext ?customerManagedKey ?creationDate
+        ?description ?displayName ?associatedPortalArns
+        ?inlineRedactionConfiguration ?dataProtectionSettingsArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The data protection settings resource that can be associated with a web portal."]
 module BrowserSettings =
   struct
     type nonrec t =
       {
+      browserSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the browser settings."];
       associatedPortalArns: ArnList.t option
         [@ocaml.doc
           "A list of web portal ARNs that this browser settings is associated with."];
       browserPolicy: BrowserPolicy.t option
         [@ocaml.doc
           "A JSON string containing Chrome Enterprise policies that will be applied to all streaming sessions."];
-      browserSettingsArn: ARN.t
-        [@ocaml.doc "The ARN of the browser settings."]}
-    let context_ = "BrowserSettings"
-    let make ?associatedPortalArns =
-      fun ?browserPolicy ->
-        fun ~browserSettingsArn ->
-          fun () ->
-            { associatedPortalArns; browserPolicy; browserSettingsArn }
+      customerManagedKey: KeyArn.t option
+        [@ocaml.doc
+          "The customer managed key used to encrypt sensitive information in the browser settings."];
+      additionalEncryptionContext: EncryptionContextMap.t option
+        [@ocaml.doc
+          "The additional encryption context of the browser settings."];
+      webContentFilteringPolicy: WebContentFilteringPolicy.t option
+        [@ocaml.doc
+          "The policy that specifies which URLs end users are allowed to access or which URLs or domain categories they are restricted from accessing for enhanced security."]}
+    let make ?browserSettingsArn =
+      fun ?associatedPortalArns ->
+        fun ?browserPolicy ->
+          fun ?customerManagedKey ->
+            fun ?additionalEncryptionContext ->
+              fun ?webContentFilteringPolicy ->
+                fun () ->
+                  {
+                    browserSettingsArn;
+                    associatedPortalArns;
+                    browserPolicy;
+                    customerManagedKey;
+                    additionalEncryptionContext;
+                    webContentFilteringPolicy
+                  }
     let to_value x =
       structure_to_value
-        [("associatedPortalArns",
-           (Option.map x.associatedPortalArns ~f:ArnList.to_value));
+        [("browserSettingsArn",
+           (Option.map x.browserSettingsArn ~f:ARN.to_value));
+        ("associatedPortalArns",
+          (Option.map x.associatedPortalArns ~f:ArnList.to_value));
         ("browserPolicy",
           (Option.map x.browserPolicy ~f:BrowserPolicy.to_value));
-        ("browserSettingsArn", (Some (ARN.to_value x.browserSettingsArn)))]
+        ("customerManagedKey",
+          (Option.map x.customerManagedKey ~f:KeyArn.to_value));
+        ("additionalEncryptionContext",
+          (Option.map x.additionalEncryptionContext
+             ~f:EncryptionContextMap.to_value));
+        ("webContentFilteringPolicy",
+          (Option.map x.webContentFilteringPolicy
+             ~f:WebContentFilteringPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let browserSettingsArn =
-        ARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "browserSettingsArn") in
+      let webContentFilteringPolicy =
+        (Option.map ~f:WebContentFilteringPolicy.of_xml)
+          (Xml.child xml_arg0 "webContentFilteringPolicy") in
+      let additionalEncryptionContext =
+        (Option.map ~f:EncryptionContextMap.of_xml)
+          (Xml.child xml_arg0 "additionalEncryptionContext") in
+      let customerManagedKey =
+        (Option.map ~f:KeyArn.of_xml)
+          (Xml.child xml_arg0 "customerManagedKey") in
       let browserPolicy =
         (Option.map ~f:BrowserPolicy.of_xml)
           (Xml.child xml_arg0 "browserPolicy") in
       let associatedPortalArns =
         (Option.map ~f:ArnList.of_xml)
           (Xml.child xml_arg0 "associatedPortalArns") in
-      make ~browserSettingsArn ?browserPolicy ?associatedPortalArns ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let browserSettingsArn =
-        field_map_exn json "browserSettingsArn" ARN.of_json in
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "browserSettingsArn") in
+      make ?webContentFilteringPolicy ?additionalEncryptionContext
+        ?customerManagedKey ?browserPolicy ?associatedPortalArns
+        ?browserSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let webContentFilteringPolicy =
+        field_map json__ "webContentFilteringPolicy"
+          WebContentFilteringPolicy.of_json in
+      let additionalEncryptionContext =
+        field_map json__ "additionalEncryptionContext"
+          EncryptionContextMap.of_json in
+      let customerManagedKey =
+        field_map json__ "customerManagedKey" KeyArn.of_json in
       let browserPolicy =
-        field_map json "browserPolicy" BrowserPolicy.of_json in
+        field_map json__ "browserPolicy" BrowserPolicy.of_json in
       let associatedPortalArns =
-        field_map json "associatedPortalArns" ArnList.of_json in
-      make ~browserSettingsArn ?browserPolicy ?associatedPortalArns ()
+        field_map json__ "associatedPortalArns" ArnList.of_json in
+      let browserSettingsArn =
+        field_map json__ "browserSettingsArn" ARN.of_json in
+      make ?webContentFilteringPolicy ?additionalEncryptionContext
+        ?customerManagedKey ?browserPolicy ?associatedPortalArns
+        ?browserSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The browser settings resource that can be associated with a web portal. Once associated with a web portal, browser settings control how the browser will behave once a user starts a streaming session for the web portal."]
@@ -1895,6 +5732,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1936,9 +5776,9 @@ module TooManyTagsException =
           (Xml.child xml_arg0 "message") in
       make ?resourceName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "resourceName" ARN.of_json in
-      let message = field_map json "message" TagExceptionMessage.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "resourceName" ARN.of_json in
+      let message = field_map json__ "message" TagExceptionMessage.of_json in
       make ?resourceName ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "There are too many tags."]
@@ -1951,6 +5791,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1980,7 +5823,7 @@ module PaginationToken =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:2048) >>=
-                  (fun () -> check_pattern i ~pattern:"^\\S+$")));
+                  (fun () -> check_pattern i ~pattern:"\\S+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1994,6 +5837,9 @@ module UserSettingsList =
   struct
     type nonrec t = UserSettingsSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UserSettingsSummary.to_value)) |>
         (fun x -> `List x)
@@ -2031,10 +5877,43 @@ module MaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module UserAccessLoggingSettingsList =
+  struct
+    type nonrec t = UserAccessLoggingSettingsSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UserAccessLoggingSettingsSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:UserAccessLoggingSettingsSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UserAccessLoggingSettingsList"
+        ~of_json:UserAccessLoggingSettingsSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TrustStoreSummaryList =
   struct
     type nonrec t = TrustStoreSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrustStoreSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2060,6 +5939,9 @@ module CertificateSummaryList =
   struct
     type nonrec t = CertificateSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CertificateSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2081,10 +5963,135 @@ module CertificateSummaryList =
         ~of_json:CertificateSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SessionSummaryList =
+  struct
+    type nonrec t = SessionSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SessionSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SessionSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SessionSummaryList" ~of_json:SessionSummary.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module PortalId =
+  struct
+    type nonrec t = string
+    let context_ = "PortalId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9\\-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PortalId" j
+    let to_json = simple_to_json to_value
+  end
+module SessionId =
+  struct
+    type nonrec t = string
+    let context_ = "SessionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9\\-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SessionId" j
+    let to_json = simple_to_json to_value
+  end
+module SessionSortBy =
+  struct
+    type nonrec t =
+      | StartTimeAscending 
+      | StartTimeDescending 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | StartTimeAscending -> "StartTimeAscending"
+      | StartTimeDescending -> "StartTimeDescending"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "StartTimeAscending" -> StartTimeAscending
+      | "StartTimeDescending" -> StartTimeDescending
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SessionSortBy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SessionSortBy" j)
+    let to_json = simple_to_json to_value
+  end
+module SessionLoggerList =
+  struct
+    type nonrec t = SessionLoggerSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SessionLoggerSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SessionLoggerSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SessionLoggerList"
+        ~of_json:SessionLoggerSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module PortalList =
   struct
     type nonrec t = PortalSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PortalSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2109,6 +6116,9 @@ module NetworkSettingsList =
   struct
     type nonrec t = NetworkSettingsSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkSettingsSummary.to_value)) |>
         (fun x -> `List x)
@@ -2131,10 +6141,42 @@ module NetworkSettingsList =
         ~of_json:NetworkSettingsSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module IpAccessSettingsList =
+  struct
+    type nonrec t = IpAccessSettingsSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IpAccessSettingsSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IpAccessSettingsSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IpAccessSettingsList"
+        ~of_json:IpAccessSettingsSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module IdentityProviderList =
   struct
     type nonrec t = IdentityProviderSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IdentityProviderSummary.to_value)) |>
         (fun x -> `List x)
@@ -2157,10 +6199,42 @@ module IdentityProviderList =
         ~of_json:IdentityProviderSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DataProtectionSettingsList =
+  struct
+    type nonrec t = DataProtectionSettingsSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DataProtectionSettingsSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DataProtectionSettingsSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DataProtectionSettingsList"
+        ~of_json:DataProtectionSettingsSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module BrowserSettingsList =
   struct
     type nonrec t = BrowserSettingsSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BrowserSettingsSummary.to_value)) |>
         (fun x -> `List x)
@@ -2207,10 +6281,10 @@ module TrustStore =
           (Xml.child xml_arg0 "associatedPortalArns") in
       make ?trustStoreArn ?associatedPortalArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustStoreArn = field_map json "trustStoreArn" ARN.of_json in
+    let of_json json__ =
+      let trustStoreArn = field_map json__ "trustStoreArn" ARN.of_json in
       let associatedPortalArns =
-        field_map json "associatedPortalArns" ArnList.of_json in
+        field_map json__ "associatedPortalArns" ArnList.of_json in
       make ?trustStoreArn ?associatedPortalArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2219,77 +6293,152 @@ module Certificate =
   struct
     type nonrec t =
       {
-      body: CertificateAuthorityBody.t option
-        [@ocaml.doc "The body of the certificate."];
-      issuer: CertificatePrincipal.t option
-        [@ocaml.doc "The entity that issued the certificate."];
-      notValidAfter: Timestamp.t option
-        [@ocaml.doc "The certificate is not valid after this date."];
-      notValidBefore: Timestamp.t option
-        [@ocaml.doc "The certificate is not valid before this date."];
+      thumbprint: CertificateThumbprint.t option
+        [@ocaml.doc "A hexadecimal identifier for the certificate."];
       subject: CertificatePrincipal.t option
         [@ocaml.doc "The entity the certificate belongs to."];
-      thumbprint: CertificateThumbprint.t option
-        [@ocaml.doc "A hexadecimal identifier for the certificate."]}
-    let make ?body =
-      fun ?issuer ->
-        fun ?notValidAfter ->
+      issuer: CertificatePrincipal.t option
+        [@ocaml.doc "The entity that issued the certificate."];
+      notValidBefore: Timestamp.t option
+        [@ocaml.doc "The certificate is not valid before this date."];
+      notValidAfter: Timestamp.t option
+        [@ocaml.doc "The certificate is not valid after this date."];
+      body: CertificateAuthorityBody.t option
+        [@ocaml.doc "The body of the certificate."]}
+    let make ?thumbprint =
+      fun ?subject ->
+        fun ?issuer ->
           fun ?notValidBefore ->
-            fun ?subject ->
-              fun ?thumbprint ->
+            fun ?notValidAfter ->
+              fun ?body ->
                 fun () ->
                   {
-                    body;
-                    issuer;
-                    notValidAfter;
-                    notValidBefore;
+                    thumbprint;
                     subject;
-                    thumbprint
+                    issuer;
+                    notValidBefore;
+                    notValidAfter;
+                    body
                   }
     let to_value x =
       structure_to_value
-        [("body", (Option.map x.body ~f:CertificateAuthorityBody.to_value));
+        [("thumbprint",
+           (Option.map x.thumbprint ~f:CertificateThumbprint.to_value));
+        ("subject", (Option.map x.subject ~f:CertificatePrincipal.to_value));
         ("issuer", (Option.map x.issuer ~f:CertificatePrincipal.to_value));
-        ("notValidAfter", (Option.map x.notValidAfter ~f:Timestamp.to_value));
         ("notValidBefore",
           (Option.map x.notValidBefore ~f:Timestamp.to_value));
-        ("subject", (Option.map x.subject ~f:CertificatePrincipal.to_value));
-        ("thumbprint",
-          (Option.map x.thumbprint ~f:CertificateThumbprint.to_value))]
+        ("notValidAfter", (Option.map x.notValidAfter ~f:Timestamp.to_value));
+        ("body", (Option.map x.body ~f:CertificateAuthorityBody.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let thumbprint =
-        (Option.map ~f:CertificateThumbprint.of_xml)
-          (Xml.child xml_arg0 "thumbprint") in
-      let subject =
-        (Option.map ~f:CertificatePrincipal.of_xml)
-          (Xml.child xml_arg0 "subject") in
-      let notValidBefore =
-        (Option.map ~f:Timestamp.of_xml)
-          (Xml.child xml_arg0 "notValidBefore") in
-      let notValidAfter =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "notValidAfter") in
-      let issuer =
-        (Option.map ~f:CertificatePrincipal.of_xml)
-          (Xml.child xml_arg0 "issuer") in
       let body =
         (Option.map ~f:CertificateAuthorityBody.of_xml)
           (Xml.child xml_arg0 "body") in
-      make ?thumbprint ?subject ?notValidBefore ?notValidAfter ?issuer ?body
+      let notValidAfter =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "notValidAfter") in
+      let notValidBefore =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "notValidBefore") in
+      let issuer =
+        (Option.map ~f:CertificatePrincipal.of_xml)
+          (Xml.child xml_arg0 "issuer") in
+      let subject =
+        (Option.map ~f:CertificatePrincipal.of_xml)
+          (Xml.child xml_arg0 "subject") in
+      let thumbprint =
+        (Option.map ~f:CertificateThumbprint.of_xml)
+          (Xml.child xml_arg0 "thumbprint") in
+      make ?body ?notValidAfter ?notValidBefore ?issuer ?subject ?thumbprint
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let body = field_map json__ "body" CertificateAuthorityBody.of_json in
+      let notValidAfter = field_map json__ "notValidAfter" Timestamp.of_json in
+      let notValidBefore =
+        field_map json__ "notValidBefore" Timestamp.of_json in
+      let issuer = field_map json__ "issuer" CertificatePrincipal.of_json in
+      let subject = field_map json__ "subject" CertificatePrincipal.of_json in
       let thumbprint =
-        field_map json "thumbprint" CertificateThumbprint.of_json in
-      let subject = field_map json "subject" CertificatePrincipal.of_json in
-      let notValidBefore = field_map json "notValidBefore" Timestamp.of_json in
-      let notValidAfter = field_map json "notValidAfter" Timestamp.of_json in
-      let issuer = field_map json "issuer" CertificatePrincipal.of_json in
-      let body = field_map json "body" CertificateAuthorityBody.of_json in
-      make ?thumbprint ?subject ?notValidBefore ?notValidAfter ?issuer ?body
+        field_map json__ "thumbprint" CertificateThumbprint.of_json in
+      make ?body ?notValidAfter ?notValidBefore ?issuer ?subject ?thumbprint
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The certificate."]
+module Session =
+  struct
+    type nonrec t =
+      {
+      portalArn: ARN.t option [@ocaml.doc "The ARN of the web portal."];
+      sessionId: StringType.t option [@ocaml.doc "The ID of the session."];
+      username: Username.t option [@ocaml.doc "The username of the session."];
+      clientIpAddresses: IpAddressList.t option
+        [@ocaml.doc "The IP address of the client."];
+      status: SessionStatus.t option
+        [@ocaml.doc "The status of the session."];
+      startTime: Timestamp.t option
+        [@ocaml.doc "The start time of the session."];
+      endTime: Timestamp.t option [@ocaml.doc "The end time of the session."]}
+    let make ?portalArn =
+      fun ?sessionId ->
+        fun ?username ->
+          fun ?clientIpAddresses ->
+            fun ?status ->
+              fun ?startTime ->
+                fun ?endTime ->
+                  fun () ->
+                    {
+                      portalArn;
+                      sessionId;
+                      username;
+                      clientIpAddresses;
+                      status;
+                      startTime;
+                      endTime
+                    }
+    let to_value x =
+      structure_to_value
+        [("portalArn", (Option.map x.portalArn ~f:ARN.to_value));
+        ("sessionId", (Option.map x.sessionId ~f:StringType.to_value));
+        ("username", (Option.map x.username ~f:Username.to_value));
+        ("clientIpAddresses",
+          (Option.map x.clientIpAddresses ~f:IpAddressList.to_value));
+        ("status", (Option.map x.status ~f:SessionStatus.to_value));
+        ("startTime", (Option.map x.startTime ~f:Timestamp.to_value));
+        ("endTime", (Option.map x.endTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startTime") in
+      let status =
+        (Option.map ~f:SessionStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let clientIpAddresses =
+        (Option.map ~f:IpAddressList.of_xml)
+          (Xml.child xml_arg0 "clientIpAddresses") in
+      let username =
+        (Option.map ~f:Username.of_xml) (Xml.child xml_arg0 "username") in
+      let sessionId =
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "sessionId") in
+      let portalArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "portalArn") in
+      make ?endTime ?startTime ?status ?clientIpAddresses ?username
+        ?sessionId ?portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let status = field_map json__ "status" SessionStatus.of_json in
+      let clientIpAddresses =
+        field_map json__ "clientIpAddresses" IpAddressList.of_json in
+      let username = field_map json__ "username" Username.of_json in
+      let sessionId = field_map json__ "sessionId" StringType.of_json in
+      let portalArn = field_map json__ "portalArn" ARN.of_json in
+      make ?endTime ?startTime ?status ?clientIpAddresses ?username
+        ?sessionId ?portalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a secure browser session."]
 module SamlMetadata =
   struct
     type nonrec t = string
@@ -2300,7 +6449,7 @@ module SamlMetadata =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:204800) >>=
-                  (fun () -> check_pattern i ~pattern:"^.+$")));
+                  (fun () -> check_pattern i ~pattern:".+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2310,98 +6459,96 @@ module SamlMetadata =
     let of_json j = string_of_json ~kind:"SamlMetadata" j
     let to_json = simple_to_json to_value
   end
-module ConflictException =
+module BrandingConfigurationCreateInput =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t option ;
-      resourceId: ResourceId.t option
-        [@ocaml.doc "Identifier of the resource affected."];
-      resourceType: ResourceType.t option
-        [@ocaml.doc "Type of the resource affected."]}
-    let make ?message =
-      fun ?resourceId ->
-        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
+      logo: IconImageInput.t
+        [@ocaml.doc
+          "The logo image for the portal. Provide either a binary image file or an S3 URI pointing to the image file. Maximum 100 KB in JPEG, PNG, or ICO format."];
+      wallpaper: WallpaperImageInput.t option
+        [@ocaml.doc
+          "The wallpaper image for the portal. Provide either a binary image file or an S3 URI pointing to the image file. Maximum 5 MB in JPEG or PNG format. If not provided, a default wallpaper will be used as the background image."];
+      favicon: IconImageInput.t
+        [@ocaml.doc
+          "The favicon image for the portal. Provide either a binary image file or an S3 URI pointing to the image file. Maximum 100 KB in JPEG, PNG, or ICO format."];
+      localizedStrings: LocalizedBrandingStringMap.t
+        [@ocaml.doc
+          "A map of localized text strings for different supported languages. Each locale must provide the required fields browserTabTitle and welcomeText."];
+      colorTheme: ColorTheme.t
+        [@ocaml.doc
+          "The color theme for components on the web portal. Choose Light if you upload a dark wallpaper, or Dark for a light wallpaper."];
+      termsOfService: Markdown.t option
+        [@ocaml.doc
+          "The terms of service text in Markdown format. Users will be presented with the terms of service after successfully signing in."]}
+    let context_ = "BrandingConfigurationCreateInput"
+    let make ?wallpaper =
+      fun ?termsOfService ->
+        fun ~logo ->
+          fun ~favicon ->
+            fun ~localizedStrings ->
+              fun ~colorTheme ->
+                fun () ->
+                  {
+                    wallpaper;
+                    termsOfService;
+                    logo;
+                    favicon;
+                    localizedStrings;
+                    colorTheme
+                  }
     let to_value x =
       structure_to_value
-        [("message", (Option.map x.message ~f:ExceptionMessage.to_value));
-        ("resourceId", (Option.map x.resourceId ~f:ResourceId.to_value));
-        ("resourceType",
-          (Option.map x.resourceType ~f:ResourceType.to_value))]
+        [("logo", (Some (IconImageInput.to_value x.logo)));
+        ("wallpaper",
+          (Option.map x.wallpaper ~f:WallpaperImageInput.to_value));
+        ("favicon", (Some (IconImageInput.to_value x.favicon)));
+        ("localizedStrings",
+          (Some (LocalizedBrandingStringMap.to_value x.localizedStrings)));
+        ("colorTheme", (Some (ColorTheme.to_value x.colorTheme)));
+        ("termsOfService",
+          (Option.map x.termsOfService ~f:Markdown.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let resourceType =
-        (Option.map ~f:ResourceType.of_xml)
-          (Xml.child xml_arg0 "resourceType") in
-      let resourceId =
-        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "resourceId") in
-      let message =
-        (Option.map ~f:ExceptionMessage.of_xml)
-          (Xml.child xml_arg0 "message") in
-      make ?resourceType ?resourceId ?message ()
+      let termsOfService =
+        (Option.map ~f:Markdown.of_xml) (Xml.child xml_arg0 "termsOfService") in
+      let colorTheme =
+        ColorTheme.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "colorTheme") in
+      let localizedStrings =
+        LocalizedBrandingStringMap.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "localizedStrings") in
+      let favicon =
+        IconImageInput.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "favicon") in
+      let wallpaper =
+        (Option.map ~f:WallpaperImageInput.of_xml)
+          (Xml.child xml_arg0 "wallpaper") in
+      let logo =
+        IconImageInput.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "logo") in
+      make ?termsOfService ~colorTheme ~localizedStrings ~favicon ?wallpaper
+        ~logo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "resourceType" ResourceType.of_json in
-      let resourceId = field_map json "resourceId" ResourceId.of_json in
-      let message = field_map json "message" ExceptionMessage.of_json in
-      make ?resourceType ?resourceId ?message ()
+    let of_json json__ =
+      let termsOfService = field_map json__ "termsOfService" Markdown.of_json in
+      let colorTheme = field_map_exn json__ "colorTheme" ColorTheme.of_json in
+      let localizedStrings =
+        field_map_exn json__ "localizedStrings"
+          LocalizedBrandingStringMap.of_json in
+      let favicon = field_map_exn json__ "favicon" IconImageInput.of_json in
+      let wallpaper =
+        field_map json__ "wallpaper" WallpaperImageInput.of_json in
+      let logo = field_map_exn json__ "logo" IconImageInput.of_json in
+      make ?termsOfService ~colorTheme ~localizedStrings ~favicon ?wallpaper
+        ~logo ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "There is a conflict."]
-module EncryptionContextMap =
-  struct
-    type nonrec t = (StringType.t * StringType.t) list
-    let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((StringType.of_string chopped),
-                              (StringType.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (StringType.to_value x) |>
-                    (fun x -> (StringType.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:StringType.of_string
-        ~of_json:StringType.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module KeyArn =
-  struct
-    type nonrec t = string
-    let context_ = "keyArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:20) >>=
-             (fun () ->
-                (check_string_max i ~max:2048) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^arn:[\\w+=\\/,.@-]+:kms:[a-zA-Z0-9\\-]*:[a-zA-Z0-9]{1,12}:key\\/[a-zA-Z0-9-]+$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"keyArn" j
-    let to_json = simple_to_json to_value
-  end
+  end[@@ocaml.doc "The input configuration for creating branding settings."]
 module UpdateUserSettingsResponse =
   struct
     type nonrec t =
       {
-      userSettings: UserSettings.t [@ocaml.doc "The user settings."]}
+      userSettings: UserSettings.t option [@ocaml.doc "The user settings."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -2409,8 +6556,7 @@ module UpdateUserSettingsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateUserSettingsResponse"
-    let make ~userSettings = fun () -> { userSettings }
+    let make ?userSettings = fun () -> { userSettings }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2469,114 +6615,351 @@ module UpdateUserSettingsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("userSettings", (Some (UserSettings.to_value x.userSettings)))]
+        [("userSettings",
+           (Option.map x.userSettings ~f:UserSettings.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let userSettings =
-        UserSettings.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "userSettings") in
-      make ~userSettings ()
+        (Option.map ~f:UserSettings.of_xml)
+          (Xml.child xml_arg0 "userSettings") in
+      make ?userSettings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userSettings =
-        field_map_exn json "userSettings" UserSettings.of_json in
-      make ~userSettings ()
+    let of_json json__ =
+      let userSettings = field_map json__ "userSettings" UserSettings.of_json in
+      make ?userSettings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the user settings."]
 module UpdateUserSettingsRequest =
   struct
     type nonrec t =
       {
-      clientToken: ClientToken.t option
-        [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token return the result from the original successful request. If you do not specify a client token, one is automatically generated by the AWS SDK."];
+      userSettingsArn: ARN.t [@ocaml.doc "The ARN of the user settings."];
       copyAllowed: EnabledType.t option
         [@ocaml.doc
           "Specifies whether the user can copy text from the streaming session to the local device."];
-      downloadAllowed: EnabledType.t option
-        [@ocaml.doc
-          "Specifies whether the user can download files from the streaming session to the local device."];
       pasteAllowed: EnabledType.t option
         [@ocaml.doc
           "Specifies whether the user can paste text from the local device to the streaming session."];
-      printAllowed: EnabledType.t option
+      downloadAllowed: EnabledType.t option
         [@ocaml.doc
-          "Specifies whether the user can print to the local device."];
+          "Specifies whether the user can download files from the streaming session to the local device."];
       uploadAllowed: EnabledType.t option
         [@ocaml.doc
           "Specifies whether the user can upload files from the local device to the streaming session."];
-      userSettingsArn: ARN.t [@ocaml.doc "The ARN of the user settings."]}
+      printAllowed: EnabledType.t option
+        [@ocaml.doc
+          "Specifies whether the user can print to the local device."];
+      disconnectTimeoutInMinutes: DisconnectTimeoutInMinutes.t option
+        [@ocaml.doc
+          "The amount of time that a streaming session remains active after users disconnect."];
+      idleDisconnectTimeoutInMinutes: IdleDisconnectTimeoutInMinutes.t option
+        [@ocaml.doc
+          "The amount of time that users can be idle (inactive) before they are disconnected from their streaming session and the disconnect timeout interval begins."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token return the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."];
+      cookieSynchronizationConfiguration:
+        CookieSynchronizationConfiguration.t option
+        [@ocaml.doc
+          "The configuration that specifies which cookies should be synchronized from the end user's local browser to the remote browser. If the allowlist and blocklist are empty, the configuration becomes null."];
+      deepLinkAllowed: EnabledType.t option
+        [@ocaml.doc
+          "Specifies whether the user can use deep links that open automatically when connecting to a session."];
+      toolbarConfiguration: ToolbarConfiguration.t option
+        [@ocaml.doc
+          "The configuration of the toolbar. This allows administrators to select the toolbar type and visual mode, set maximum display resolution for sessions, and choose which items are visible to end users during their sessions. If administrators do not modify these settings, end users retain control over their toolbar preferences."];
+      brandingConfigurationInput: BrandingConfigurationUpdateInput.t option
+        [@ocaml.doc
+          "The branding configuration that customizes the appearance of the web portal for end users. When updating user settings without an existing branding configuration, all fields (logo, favicon, localized strings, and color theme) are required except for wallpaper and terms of service. When updating user settings with an existing branding configuration, all fields are optional."];
+      webAuthnAllowed: EnabledType.t option
+        [@ocaml.doc
+          "Specifies whether the user can use WebAuthn redirection for passwordless login to websites within the streaming session."]}
     let context_ = "UpdateUserSettingsRequest"
-    let make ?clientToken =
-      fun ?copyAllowed ->
+    let make ?copyAllowed =
+      fun ?pasteAllowed ->
         fun ?downloadAllowed ->
-          fun ?pasteAllowed ->
+          fun ?uploadAllowed ->
             fun ?printAllowed ->
-              fun ?uploadAllowed ->
-                fun ~userSettingsArn ->
-                  fun () ->
-                    {
-                      clientToken;
-                      copyAllowed;
-                      downloadAllowed;
-                      pasteAllowed;
-                      printAllowed;
-                      uploadAllowed;
-                      userSettingsArn
-                    }
+              fun ?disconnectTimeoutInMinutes ->
+                fun ?idleDisconnectTimeoutInMinutes ->
+                  fun ?clientToken ->
+                    fun ?cookieSynchronizationConfiguration ->
+                      fun ?deepLinkAllowed ->
+                        fun ?toolbarConfiguration ->
+                          fun ?brandingConfigurationInput ->
+                            fun ?webAuthnAllowed ->
+                              fun ~userSettingsArn ->
+                                fun () ->
+                                  {
+                                    copyAllowed;
+                                    pasteAllowed;
+                                    downloadAllowed;
+                                    uploadAllowed;
+                                    printAllowed;
+                                    disconnectTimeoutInMinutes;
+                                    idleDisconnectTimeoutInMinutes;
+                                    clientToken;
+                                    cookieSynchronizationConfiguration;
+                                    deepLinkAllowed;
+                                    toolbarConfiguration;
+                                    brandingConfigurationInput;
+                                    webAuthnAllowed;
+                                    userSettingsArn
+                                  }
     let to_value x =
       structure_to_value
-        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        [("userSettingsArn", (Some (ARN.to_value x.userSettingsArn)));
         ("copyAllowed", (Option.map x.copyAllowed ~f:EnabledType.to_value));
+        ("pasteAllowed", (Option.map x.pasteAllowed ~f:EnabledType.to_value));
         ("downloadAllowed",
           (Option.map x.downloadAllowed ~f:EnabledType.to_value));
-        ("pasteAllowed", (Option.map x.pasteAllowed ~f:EnabledType.to_value));
-        ("printAllowed", (Option.map x.printAllowed ~f:EnabledType.to_value));
         ("uploadAllowed",
           (Option.map x.uploadAllowed ~f:EnabledType.to_value));
-        ("userSettingsArn", (Some (ARN.to_value x.userSettingsArn)))]
+        ("printAllowed", (Option.map x.printAllowed ~f:EnabledType.to_value));
+        ("disconnectTimeoutInMinutes",
+          (Option.map x.disconnectTimeoutInMinutes
+             ~f:DisconnectTimeoutInMinutes.to_value));
+        ("idleDisconnectTimeoutInMinutes",
+          (Option.map x.idleDisconnectTimeoutInMinutes
+             ~f:IdleDisconnectTimeoutInMinutes.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("cookieSynchronizationConfiguration",
+          (Option.map x.cookieSynchronizationConfiguration
+             ~f:CookieSynchronizationConfiguration.to_value));
+        ("deepLinkAllowed",
+          (Option.map x.deepLinkAllowed ~f:EnabledType.to_value));
+        ("toolbarConfiguration",
+          (Option.map x.toolbarConfiguration ~f:ToolbarConfiguration.to_value));
+        ("brandingConfigurationInput",
+          (Option.map x.brandingConfigurationInput
+             ~f:BrandingConfigurationUpdateInput.to_value));
+        ("webAuthnAllowed",
+          (Option.map x.webAuthnAllowed ~f:EnabledType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let userSettingsArn =
-        ARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "userSettingsArn") in
-      let uploadAllowed =
+      let webAuthnAllowed =
         (Option.map ~f:EnabledType.of_xml)
-          (Xml.child xml_arg0 "uploadAllowed") in
+          (Xml.child xml_arg0 "webAuthnAllowed") in
+      let brandingConfigurationInput =
+        (Option.map ~f:BrandingConfigurationUpdateInput.of_xml)
+          (Xml.child xml_arg0 "brandingConfigurationInput") in
+      let toolbarConfiguration =
+        (Option.map ~f:ToolbarConfiguration.of_xml)
+          (Xml.child xml_arg0 "toolbarConfiguration") in
+      let deepLinkAllowed =
+        (Option.map ~f:EnabledType.of_xml)
+          (Xml.child xml_arg0 "deepLinkAllowed") in
+      let cookieSynchronizationConfiguration =
+        (Option.map ~f:CookieSynchronizationConfiguration.of_xml)
+          (Xml.child xml_arg0 "cookieSynchronizationConfiguration") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let idleDisconnectTimeoutInMinutes =
+        (Option.map ~f:IdleDisconnectTimeoutInMinutes.of_xml)
+          (Xml.child xml_arg0 "idleDisconnectTimeoutInMinutes") in
+      let disconnectTimeoutInMinutes =
+        (Option.map ~f:DisconnectTimeoutInMinutes.of_xml)
+          (Xml.child xml_arg0 "disconnectTimeoutInMinutes") in
       let printAllowed =
         (Option.map ~f:EnabledType.of_xml)
           (Xml.child xml_arg0 "printAllowed") in
-      let pasteAllowed =
+      let uploadAllowed =
         (Option.map ~f:EnabledType.of_xml)
-          (Xml.child xml_arg0 "pasteAllowed") in
+          (Xml.child xml_arg0 "uploadAllowed") in
       let downloadAllowed =
         (Option.map ~f:EnabledType.of_xml)
           (Xml.child xml_arg0 "downloadAllowed") in
+      let pasteAllowed =
+        (Option.map ~f:EnabledType.of_xml)
+          (Xml.child xml_arg0 "pasteAllowed") in
       let copyAllowed =
         (Option.map ~f:EnabledType.of_xml) (Xml.child xml_arg0 "copyAllowed") in
-      let clientToken =
-        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
-      make ~userSettingsArn ?uploadAllowed ?printAllowed ?pasteAllowed
-        ?downloadAllowed ?copyAllowed ?clientToken ()
+      let userSettingsArn =
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "userSettingsArn") in
+      make ?webAuthnAllowed ?brandingConfigurationInput ?toolbarConfiguration
+        ?deepLinkAllowed ?cookieSynchronizationConfiguration ?clientToken
+        ?idleDisconnectTimeoutInMinutes ?disconnectTimeoutInMinutes
+        ?printAllowed ?uploadAllowed ?downloadAllowed ?pasteAllowed
+        ?copyAllowed ~userSettingsArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userSettingsArn = field_map_exn json "userSettingsArn" ARN.of_json in
-      let uploadAllowed = field_map json "uploadAllowed" EnabledType.of_json in
-      let printAllowed = field_map json "printAllowed" EnabledType.of_json in
-      let pasteAllowed = field_map json "pasteAllowed" EnabledType.of_json in
+    let of_json json__ =
+      let webAuthnAllowed =
+        field_map json__ "webAuthnAllowed" EnabledType.of_json in
+      let brandingConfigurationInput =
+        field_map json__ "brandingConfigurationInput"
+          BrandingConfigurationUpdateInput.of_json in
+      let toolbarConfiguration =
+        field_map json__ "toolbarConfiguration" ToolbarConfiguration.of_json in
+      let deepLinkAllowed =
+        field_map json__ "deepLinkAllowed" EnabledType.of_json in
+      let cookieSynchronizationConfiguration =
+        field_map json__ "cookieSynchronizationConfiguration"
+          CookieSynchronizationConfiguration.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let idleDisconnectTimeoutInMinutes =
+        field_map json__ "idleDisconnectTimeoutInMinutes"
+          IdleDisconnectTimeoutInMinutes.of_json in
+      let disconnectTimeoutInMinutes =
+        field_map json__ "disconnectTimeoutInMinutes"
+          DisconnectTimeoutInMinutes.of_json in
+      let printAllowed = field_map json__ "printAllowed" EnabledType.of_json in
+      let uploadAllowed =
+        field_map json__ "uploadAllowed" EnabledType.of_json in
       let downloadAllowed =
-        field_map json "downloadAllowed" EnabledType.of_json in
-      let copyAllowed = field_map json "copyAllowed" EnabledType.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      make ~userSettingsArn ?uploadAllowed ?printAllowed ?pasteAllowed
-        ?downloadAllowed ?copyAllowed ?clientToken ()
+        field_map json__ "downloadAllowed" EnabledType.of_json in
+      let pasteAllowed = field_map json__ "pasteAllowed" EnabledType.of_json in
+      let copyAllowed = field_map json__ "copyAllowed" EnabledType.of_json in
+      let userSettingsArn =
+        field_map_exn json__ "userSettingsArn" ARN.of_json in
+      make ?webAuthnAllowed ?brandingConfigurationInput ?toolbarConfiguration
+        ?deepLinkAllowed ?cookieSynchronizationConfiguration ?clientToken
+        ?idleDisconnectTimeoutInMinutes ?disconnectTimeoutInMinutes
+        ?printAllowed ?uploadAllowed ?downloadAllowed ?pasteAllowed
+        ?copyAllowed ~userSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the user settings."]
+module UpdateUserAccessLoggingSettingsResponse =
+  struct
+    type nonrec t =
+      {
+      userAccessLoggingSettings: UserAccessLoggingSettings.t option
+        [@ocaml.doc "The user access logging settings."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?userAccessLoggingSettings =
+      fun () -> { userAccessLoggingSettings }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("userAccessLoggingSettings",
+           (Option.map x.userAccessLoggingSettings
+              ~f:UserAccessLoggingSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userAccessLoggingSettings =
+        (Option.map ~f:UserAccessLoggingSettings.of_xml)
+          (Xml.child xml_arg0 "userAccessLoggingSettings") in
+      make ?userAccessLoggingSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userAccessLoggingSettings =
+        field_map json__ "userAccessLoggingSettings"
+          UserAccessLoggingSettings.of_json in
+      make ?userAccessLoggingSettings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the user access logging settings."]
+module UpdateUserAccessLoggingSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      userAccessLoggingSettingsArn: ARN.t
+        [@ocaml.doc "The ARN of the user access logging settings."];
+      kinesisStreamArn: KinesisStreamArn.t option
+        [@ocaml.doc "The ARN of the Kinesis stream."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token return the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."]}
+    let context_ = "UpdateUserAccessLoggingSettingsRequest"
+    let make ?kinesisStreamArn =
+      fun ?clientToken ->
+        fun ~userAccessLoggingSettingsArn ->
+          fun () ->
+            { kinesisStreamArn; clientToken; userAccessLoggingSettingsArn }
+    let to_value x =
+      structure_to_value
+        [("userAccessLoggingSettingsArn",
+           (Some (ARN.to_value x.userAccessLoggingSettingsArn)));
+        ("kinesisStreamArn",
+          (Option.map x.kinesisStreamArn ~f:KinesisStreamArn.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let kinesisStreamArn =
+        (Option.map ~f:KinesisStreamArn.of_xml)
+          (Xml.child xml_arg0 "kinesisStreamArn") in
+      let userAccessLoggingSettingsArn =
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "userAccessLoggingSettingsArn") in
+      make ?clientToken ?kinesisStreamArn ~userAccessLoggingSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let kinesisStreamArn =
+        field_map json__ "kinesisStreamArn" KinesisStreamArn.of_json in
+      let userAccessLoggingSettingsArn =
+        field_map_exn json__ "userAccessLoggingSettingsArn" ARN.of_json in
+      make ?clientToken ?kinesisStreamArn ~userAccessLoggingSettingsArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the user access logging settings."]
 module UpdateTrustStoreResponse =
   struct
     type nonrec t =
       {
-      trustStoreArn: ARN.t [@ocaml.doc "The ARN of the trust store."]}
+      trustStoreArn: ARN.t option [@ocaml.doc "The ARN of the trust store."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -2585,8 +6968,7 @@ module UpdateTrustStoreResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateTrustStoreResponse"
-    let make ~trustStoreArn = fun () -> { trustStoreArn }
+    let make ?trustStoreArn = fun () -> { trustStoreArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2655,22 +7037,23 @@ module UpdateTrustStoreResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("trustStoreArn", (Some (ARN.to_value x.trustStoreArn)))]
+        [("trustStoreArn", (Option.map x.trustStoreArn ~f:ARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let trustStoreArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "trustStoreArn") in
-      make ~trustStoreArn ()
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "trustStoreArn") in
+      make ?trustStoreArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
-      make ~trustStoreArn ()
+    let of_json json__ =
+      let trustStoreArn = field_map json__ "trustStoreArn" ARN.of_json in
+      make ?trustStoreArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the trust store."]
 module UpdateTrustStoreRequest =
   struct
     type nonrec t =
       {
+      trustStoreArn: ARN.t [@ocaml.doc "The ARN of the trust store."];
       certificatesToAdd: CertificateList.t option
         [@ocaml.doc "A list of CA certificates to add to the trust store."];
       certificatesToDelete: CertificateThumbprintList.t option
@@ -2678,8 +7061,7 @@ module UpdateTrustStoreRequest =
           "A list of CA certificates to delete from a trust store."];
       clientToken: ClientToken.t option
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token return the result from the original successful request. If you do not specify a client token, one is automatically generated by the AWS SDK."];
-      trustStoreArn: ARN.t [@ocaml.doc "The ARN of the trust store."]}
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token return the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."]}
     let context_ = "UpdateTrustStoreRequest"
     let make ?certificatesToAdd =
       fun ?certificatesToDelete ->
@@ -2694,17 +7076,15 @@ module UpdateTrustStoreRequest =
               }
     let to_value x =
       structure_to_value
-        [("certificatesToAdd",
-           (Option.map x.certificatesToAdd ~f:CertificateList.to_value));
+        [("trustStoreArn", (Some (ARN.to_value x.trustStoreArn)));
+        ("certificatesToAdd",
+          (Option.map x.certificatesToAdd ~f:CertificateList.to_value));
         ("certificatesToDelete",
           (Option.map x.certificatesToDelete
              ~f:CertificateThumbprintList.to_value));
-        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
-        ("trustStoreArn", (Some (ARN.to_value x.trustStoreArn)))]
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let trustStoreArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "trustStoreArn") in
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       let certificatesToDelete =
@@ -2713,25 +7093,29 @@ module UpdateTrustStoreRequest =
       let certificatesToAdd =
         (Option.map ~f:CertificateList.of_xml)
           (Xml.child xml_arg0 "certificatesToAdd") in
-      make ~trustStoreArn ?clientToken ?certificatesToDelete
-        ?certificatesToAdd ()
+      let trustStoreArn =
+        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "trustStoreArn") in
+      make ?clientToken ?certificatesToDelete ?certificatesToAdd
+        ~trustStoreArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let certificatesToDelete =
-        field_map json "certificatesToDelete"
+        field_map json__ "certificatesToDelete"
           CertificateThumbprintList.of_json in
       let certificatesToAdd =
-        field_map json "certificatesToAdd" CertificateList.of_json in
-      make ~trustStoreArn ?clientToken ?certificatesToDelete
-        ?certificatesToAdd ()
+        field_map json__ "certificatesToAdd" CertificateList.of_json in
+      let trustStoreArn = field_map_exn json__ "trustStoreArn" ARN.of_json in
+      make ?clientToken ?certificatesToDelete ?certificatesToAdd
+        ~trustStoreArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the trust store."]
-module UpdatePortalResponse =
+module UpdateSessionLoggerResponse =
   struct
-    type nonrec t = {
-      portal: Portal.t option [@ocaml.doc "The web portal."]}
+    type nonrec t =
+      {
+      sessionLogger: SessionLogger.t option
+        [@ocaml.doc "The updated details of the session logger."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -2739,7 +7123,7 @@ module UpdatePortalResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?portal = fun () -> { portal }
+    let make ?sessionLogger = fun () -> { sessionLogger }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2798,6 +7182,165 @@ module UpdatePortalResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
+        [("sessionLogger",
+           (Option.map x.sessionLogger ~f:SessionLogger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sessionLogger =
+        (Option.map ~f:SessionLogger.of_xml)
+          (Xml.child xml_arg0 "sessionLogger") in
+      make ?sessionLogger ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sessionLogger =
+        field_map json__ "sessionLogger" SessionLogger.of_json in
+      make ?sessionLogger ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the details of a session logger."]
+module UpdateSessionLoggerRequest =
+  struct
+    type nonrec t =
+      {
+      sessionLoggerArn: ARN.t
+        [@ocaml.doc "The ARN of the session logger to update."];
+      eventFilter: EventFilter.t option
+        [@ocaml.doc "The updated eventFilter."];
+      logConfiguration: LogConfiguration.t option
+        [@ocaml.doc "The updated logConfiguration."];
+      displayName: DisplayNameSafe.t option
+        [@ocaml.doc "The updated display name."]}
+    let context_ = "UpdateSessionLoggerRequest"
+    let make ?eventFilter =
+      fun ?logConfiguration ->
+        fun ?displayName ->
+          fun ~sessionLoggerArn ->
+            fun () ->
+              { eventFilter; logConfiguration; displayName; sessionLoggerArn
+              }
+    let to_value x =
+      structure_to_value
+        [("sessionLoggerArn", (Some (ARN.to_value x.sessionLoggerArn)));
+        ("eventFilter", (Option.map x.eventFilter ~f:EventFilter.to_value));
+        ("logConfiguration",
+          (Option.map x.logConfiguration ~f:LogConfiguration.to_value));
+        ("displayName",
+          (Option.map x.displayName ~f:DisplayNameSafe.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let displayName =
+        (Option.map ~f:DisplayNameSafe.of_xml)
+          (Xml.child xml_arg0 "displayName") in
+      let logConfiguration =
+        (Option.map ~f:LogConfiguration.of_xml)
+          (Xml.child xml_arg0 "logConfiguration") in
+      let eventFilter =
+        (Option.map ~f:EventFilter.of_xml) (Xml.child xml_arg0 "eventFilter") in
+      let sessionLoggerArn =
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sessionLoggerArn") in
+      make ?displayName ?logConfiguration ?eventFilter ~sessionLoggerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let displayName =
+        field_map json__ "displayName" DisplayNameSafe.of_json in
+      let logConfiguration =
+        field_map json__ "logConfiguration" LogConfiguration.of_json in
+      let eventFilter = field_map json__ "eventFilter" EventFilter.of_json in
+      let sessionLoggerArn =
+        field_map_exn json__ "sessionLoggerArn" ARN.of_json in
+      make ?displayName ?logConfiguration ?eventFilter ~sessionLoggerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the details of a session logger."]
+module UpdatePortalResponse =
+  struct
+    type nonrec t = {
+      portal: Portal.t option [@ocaml.doc "The web portal."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?portal = fun () -> { portal }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
         [("portal", (Option.map x.portal ~f:Portal.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -2805,44 +7348,101 @@ module UpdatePortalResponse =
         (Option.map ~f:Portal.of_xml) (Xml.child xml_arg0 "portal") in
       make ?portal ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portal = field_map json "portal" Portal.of_json in make ?portal ()
+    let of_json json__ =
+      let portal = field_map json__ "portal" Portal.of_json in
+      make ?portal ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a web portal."]
 module UpdatePortalRequest =
   struct
     type nonrec t =
       {
+      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."];
       displayName: DisplayName.t option
         [@ocaml.doc
           "The name of the web portal. This is not visible to users who log into the web portal."];
-      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."]}
+      authenticationType: AuthenticationType.t option
+        [@ocaml.doc
+          "The type of authentication integration points used when signing into the web portal. Defaults to Standard. Standard web portals are authenticated directly through your identity provider. You need to call CreateIdentityProvider to integrate your identity provider with your web portal. User and group access to your web portal is controlled through your identity provider. IAM Identity Center web portals are authenticated through IAM Identity Center. Identity sources (including external identity provider integration), plus user and group access to your web portal, can be configured in the IAM Identity Center."];
+      instanceType: InstanceType.t option
+        [@ocaml.doc "The type and resources of the underlying instance."];
+      maxConcurrentSessions: MaxConcurrentSessions.t option
+        [@ocaml.doc
+          "The maximum number of concurrent sessions for the portal."];
+      portalCustomDomain: PortalCustomDomain.t option
+        [@ocaml.doc
+          "The custom domain of the web portal that users access in order to start streaming sessions."]}
     let context_ = "UpdatePortalRequest"
     let make ?displayName =
-      fun ~portalArn -> fun () -> { displayName; portalArn }
+      fun ?authenticationType ->
+        fun ?instanceType ->
+          fun ?maxConcurrentSessions ->
+            fun ?portalCustomDomain ->
+              fun ~portalArn ->
+                fun () ->
+                  {
+                    displayName;
+                    authenticationType;
+                    instanceType;
+                    maxConcurrentSessions;
+                    portalCustomDomain;
+                    portalArn
+                  }
     let to_value x =
       structure_to_value
-        [("displayName", (Option.map x.displayName ~f:DisplayName.to_value));
-        ("portalArn", (Some (ARN.to_value x.portalArn)))]
+        [("portalArn", (Some (ARN.to_value x.portalArn)));
+        ("displayName", (Option.map x.displayName ~f:DisplayName.to_value));
+        ("authenticationType",
+          (Option.map x.authenticationType ~f:AuthenticationType.to_value));
+        ("instanceType",
+          (Option.map x.instanceType ~f:InstanceType.to_value));
+        ("maxConcurrentSessions",
+          (Option.map x.maxConcurrentSessions
+             ~f:MaxConcurrentSessions.to_value));
+        ("portalCustomDomain",
+          (Option.map x.portalCustomDomain ~f:PortalCustomDomain.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let portalArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
+      let portalCustomDomain =
+        (Option.map ~f:PortalCustomDomain.of_xml)
+          (Xml.child xml_arg0 "portalCustomDomain") in
+      let maxConcurrentSessions =
+        (Option.map ~f:MaxConcurrentSessions.of_xml)
+          (Xml.child xml_arg0 "maxConcurrentSessions") in
+      let instanceType =
+        (Option.map ~f:InstanceType.of_xml)
+          (Xml.child xml_arg0 "instanceType") in
+      let authenticationType =
+        (Option.map ~f:AuthenticationType.of_xml)
+          (Xml.child xml_arg0 "authenticationType") in
       let displayName =
         (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "displayName") in
-      make ~portalArn ?displayName ()
+      let portalArn =
+        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
+      make ?portalCustomDomain ?maxConcurrentSessions ?instanceType
+        ?authenticationType ?displayName ~portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
-      let displayName = field_map json "displayName" DisplayName.of_json in
-      make ~portalArn ?displayName ()
+    let of_json json__ =
+      let portalCustomDomain =
+        field_map json__ "portalCustomDomain" PortalCustomDomain.of_json in
+      let maxConcurrentSessions =
+        field_map json__ "maxConcurrentSessions"
+          MaxConcurrentSessions.of_json in
+      let instanceType = field_map json__ "instanceType" InstanceType.of_json in
+      let authenticationType =
+        field_map json__ "authenticationType" AuthenticationType.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
+      make ?portalCustomDomain ?maxConcurrentSessions ?instanceType
+        ?authenticationType ?displayName ~portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a web portal."]
 module UpdateNetworkSettingsResponse =
   struct
     type nonrec t =
       {
-      networkSettings: NetworkSettings.t [@ocaml.doc "The network settings."]}
+      networkSettings: NetworkSettings.t option
+        [@ocaml.doc "The network settings."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -2850,8 +7450,7 @@ module UpdateNetworkSettingsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateNetworkSettingsResponse"
-    let make ~networkSettings = fun () -> { networkSettings }
+    let make ?networkSettings = fun () -> { networkSettings }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2911,92 +7510,242 @@ module UpdateNetworkSettingsResponse =
     let to_value x =
       structure_to_value
         [("networkSettings",
-           (Some (NetworkSettings.to_value x.networkSettings)))]
+           (Option.map x.networkSettings ~f:NetworkSettings.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let networkSettings =
-        NetworkSettings.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "networkSettings") in
-      make ~networkSettings ()
+        (Option.map ~f:NetworkSettings.of_xml)
+          (Xml.child xml_arg0 "networkSettings") in
+      make ?networkSettings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let networkSettings =
-        field_map_exn json "networkSettings" NetworkSettings.of_json in
-      make ~networkSettings ()
+        field_map json__ "networkSettings" NetworkSettings.of_json in
+      make ?networkSettings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates network settings."]
 module UpdateNetworkSettingsRequest =
   struct
     type nonrec t =
       {
-      clientToken: ClientToken.t option
-        [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token return the result from the original successful request. If you do not specify a client token, one is automatically generated by the AWS SDK."];
       networkSettingsArn: ARN.t
         [@ocaml.doc "The ARN of the network settings."];
-      securityGroupIds: SecurityGroupIdList.t option
-        [@ocaml.doc
-          "One or more security groups used to control access from streaming instances to your VPC."];
+      vpcId: VpcId.t option
+        [@ocaml.doc "The VPC that streaming instances will connect to."];
       subnetIds: SubnetIdList.t option
         [@ocaml.doc
           "The subnets in which network interfaces are created to connect streaming instances to your VPC. At least two of these subnets must be in different availability zones."];
-      vpcId: VpcId.t option
-        [@ocaml.doc "The VPC that streaming instances will connect to."]}
+      securityGroupIds: SecurityGroupIdList.t option
+        [@ocaml.doc
+          "One or more security groups used to control access from streaming instances to your VPC."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token return the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."]}
     let context_ = "UpdateNetworkSettingsRequest"
-    let make ?clientToken =
-      fun ?securityGroupIds ->
-        fun ?subnetIds ->
-          fun ?vpcId ->
+    let make ?vpcId =
+      fun ?subnetIds ->
+        fun ?securityGroupIds ->
+          fun ?clientToken ->
             fun ~networkSettingsArn ->
               fun () ->
                 {
-                  clientToken;
-                  securityGroupIds;
-                  subnetIds;
                   vpcId;
+                  subnetIds;
+                  securityGroupIds;
+                  clientToken;
                   networkSettingsArn
                 }
     let to_value x =
       structure_to_value
-        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
-        ("networkSettingsArn", (Some (ARN.to_value x.networkSettingsArn)));
+        [("networkSettingsArn", (Some (ARN.to_value x.networkSettingsArn)));
+        ("vpcId", (Option.map x.vpcId ~f:VpcId.to_value));
+        ("subnetIds", (Option.map x.subnetIds ~f:SubnetIdList.to_value));
         ("securityGroupIds",
           (Option.map x.securityGroupIds ~f:SecurityGroupIdList.to_value));
-        ("subnetIds", (Option.map x.subnetIds ~f:SubnetIdList.to_value));
-        ("vpcId", (Option.map x.vpcId ~f:VpcId.to_value))]
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "vpcId") in
-      let subnetIds =
-        (Option.map ~f:SubnetIdList.of_xml) (Xml.child xml_arg0 "subnetIds") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       let securityGroupIds =
         (Option.map ~f:SecurityGroupIdList.of_xml)
           (Xml.child xml_arg0 "securityGroupIds") in
+      let subnetIds =
+        (Option.map ~f:SubnetIdList.of_xml) (Xml.child xml_arg0 "subnetIds") in
+      let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "vpcId") in
       let networkSettingsArn =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkSettingsArn") in
-      let clientToken =
-        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
-      make ?vpcId ?subnetIds ?securityGroupIds ~networkSettingsArn
-        ?clientToken ()
+      make ?clientToken ?securityGroupIds ?subnetIds ?vpcId
+        ~networkSettingsArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "vpcId" VpcId.of_json in
-      let subnetIds = field_map json "subnetIds" SubnetIdList.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let securityGroupIds =
-        field_map json "securityGroupIds" SecurityGroupIdList.of_json in
+        field_map json__ "securityGroupIds" SecurityGroupIdList.of_json in
+      let subnetIds = field_map json__ "subnetIds" SubnetIdList.of_json in
+      let vpcId = field_map json__ "vpcId" VpcId.of_json in
       let networkSettingsArn =
-        field_map_exn json "networkSettingsArn" ARN.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      make ?vpcId ?subnetIds ?securityGroupIds ~networkSettingsArn
-        ?clientToken ()
+        field_map_exn json__ "networkSettingsArn" ARN.of_json in
+      make ?clientToken ?securityGroupIds ?subnetIds ?vpcId
+        ~networkSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates network settings."]
+module UpdateIpAccessSettingsResponse =
+  struct
+    type nonrec t =
+      {
+      ipAccessSettings: IpAccessSettings.t option
+        [@ocaml.doc "The IP access settings."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?ipAccessSettings = fun () -> { ipAccessSettings }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ipAccessSettings",
+           (Option.map x.ipAccessSettings ~f:IpAccessSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipAccessSettings =
+        (Option.map ~f:IpAccessSettings.of_xml)
+          (Xml.child xml_arg0 "ipAccessSettings") in
+      make ?ipAccessSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipAccessSettings =
+        field_map json__ "ipAccessSettings" IpAccessSettings.of_json in
+      make ?ipAccessSettings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates IP access settings."]
+module UpdateIpAccessSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      ipAccessSettingsArn: ARN.t
+        [@ocaml.doc "The ARN of the IP access settings."];
+      displayName: DisplayName.t option
+        [@ocaml.doc "The display name of the IP access settings."];
+      description: Description.t option
+        [@ocaml.doc "The description of the IP access settings."];
+      ipRules: IpRuleList.t option
+        [@ocaml.doc "The updated IP rules of the IP access settings."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token return the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."]}
+    let context_ = "UpdateIpAccessSettingsRequest"
+    let make ?displayName =
+      fun ?description ->
+        fun ?ipRules ->
+          fun ?clientToken ->
+            fun ~ipAccessSettingsArn ->
+              fun () ->
+                {
+                  displayName;
+                  description;
+                  ipRules;
+                  clientToken;
+                  ipAccessSettingsArn
+                }
+    let to_value x =
+      structure_to_value
+        [("ipAccessSettingsArn", (Some (ARN.to_value x.ipAccessSettingsArn)));
+        ("displayName", (Option.map x.displayName ~f:DisplayName.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("ipRules", (Option.map x.ipRules ~f:IpRuleList.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let ipRules =
+        (Option.map ~f:IpRuleList.of_xml) (Xml.child xml_arg0 "ipRules") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let displayName =
+        (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "displayName") in
+      let ipAccessSettingsArn =
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ipAccessSettingsArn") in
+      make ?clientToken ?ipRules ?description ?displayName
+        ~ipAccessSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let ipRules = field_map json__ "ipRules" IpRuleList.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let ipAccessSettingsArn =
+        field_map_exn json__ "ipAccessSettingsArn" ARN.of_json in
+      make ?clientToken ?ipRules ?description ?displayName
+        ~ipAccessSettingsArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates IP access settings."]
 module UpdateIdentityProviderResponse =
   struct
     type nonrec t =
       {
-      identityProvider: IdentityProvider.t
+      identityProvider: IdentityProvider.t option
         [@ocaml.doc "The identity provider."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -3005,8 +7754,7 @@ module UpdateIdentityProviderResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateIdentityProviderResponse"
-    let make ~identityProvider = fun () -> { identityProvider }
+    let make ?identityProvider = fun () -> { identityProvider }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3066,99 +7814,102 @@ module UpdateIdentityProviderResponse =
     let to_value x =
       structure_to_value
         [("identityProvider",
-           (Some (IdentityProvider.to_value x.identityProvider)))]
+           (Option.map x.identityProvider ~f:IdentityProvider.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let identityProvider =
-        IdentityProvider.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "identityProvider") in
-      make ~identityProvider ()
+        (Option.map ~f:IdentityProvider.of_xml)
+          (Xml.child xml_arg0 "identityProvider") in
+      make ?identityProvider ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityProvider =
-        field_map_exn json "identityProvider" IdentityProvider.of_json in
-      make ~identityProvider ()
+        field_map json__ "identityProvider" IdentityProvider.of_json in
+      make ?identityProvider ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the identity provider."]
 module UpdateIdentityProviderRequest =
   struct
     type nonrec t =
       {
-      clientToken: ClientToken.t option
-        [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token return the result from the original successful request. If you do not specify a client token, one is automatically generated by the AWS SDK."];
-      identityProviderArn: ARN.t
+      identityProviderArn: SubresourceARN.t
         [@ocaml.doc "The ARN of the identity provider."];
-      identityProviderDetails: IdentityProviderDetails.t option
-        [@ocaml.doc "The details of the identity provider."];
       identityProviderName: IdentityProviderName.t option
         [@ocaml.doc "The name of the identity provider."];
       identityProviderType: IdentityProviderType.t option
-        [@ocaml.doc "The type of the identity provider."]}
+        [@ocaml.doc "The type of the identity provider."];
+      identityProviderDetails: IdentityProviderDetails.t option
+        [@ocaml.doc
+          "The details of the identity provider. The following list describes the provider detail keys for each identity provider type. For Google and Login with Amazon: client_id client_secret authorize_scopes For Facebook: client_id client_secret authorize_scopes api_version For Sign in with Apple: client_id team_id key_id private_key authorize_scopes For OIDC providers: client_id client_secret attributes_request_method oidc_issuer authorize_scopes authorize_url if not available from discovery URL specified by oidc_issuer key token_url if not available from discovery URL specified by oidc_issuer key attributes_url if not available from discovery URL specified by oidc_issuer key jwks_uri if not available from discovery URL specified by oidc_issuer key For SAML providers: MetadataFile OR MetadataURL IDPSignout (boolean) optional IDPInit (boolean) optional RequestSigningAlgorithm (string) optional - Only accepts rsa-sha256 EncryptedResponses (boolean) optional"];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token return the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."]}
     let context_ = "UpdateIdentityProviderRequest"
-    let make ?clientToken =
-      fun ?identityProviderDetails ->
-        fun ?identityProviderName ->
-          fun ?identityProviderType ->
+    let make ?identityProviderName =
+      fun ?identityProviderType ->
+        fun ?identityProviderDetails ->
+          fun ?clientToken ->
             fun ~identityProviderArn ->
               fun () ->
                 {
-                  clientToken;
-                  identityProviderDetails;
                   identityProviderName;
                   identityProviderType;
+                  identityProviderDetails;
+                  clientToken;
                   identityProviderArn
                 }
     let to_value x =
       structure_to_value
-        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
-        ("identityProviderArn", (Some (ARN.to_value x.identityProviderArn)));
-        ("identityProviderDetails",
-          (Option.map x.identityProviderDetails
-             ~f:IdentityProviderDetails.to_value));
+        [("identityProviderArn",
+           (Some (SubresourceARN.to_value x.identityProviderArn)));
         ("identityProviderName",
           (Option.map x.identityProviderName ~f:IdentityProviderName.to_value));
         ("identityProviderType",
-          (Option.map x.identityProviderType ~f:IdentityProviderType.to_value))]
+          (Option.map x.identityProviderType ~f:IdentityProviderType.to_value));
+        ("identityProviderDetails",
+          (Option.map x.identityProviderDetails
+             ~f:IdentityProviderDetails.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let identityProviderDetails =
+        (Option.map ~f:IdentityProviderDetails.of_xml)
+          (Xml.child xml_arg0 "identityProviderDetails") in
       let identityProviderType =
         (Option.map ~f:IdentityProviderType.of_xml)
           (Xml.child xml_arg0 "identityProviderType") in
       let identityProviderName =
         (Option.map ~f:IdentityProviderName.of_xml)
           (Xml.child xml_arg0 "identityProviderName") in
-      let identityProviderDetails =
-        (Option.map ~f:IdentityProviderDetails.of_xml)
-          (Xml.child xml_arg0 "identityProviderDetails") in
       let identityProviderArn =
-        ARN.of_xml
+        SubresourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "identityProviderArn") in
-      let clientToken =
-        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
-      make ?identityProviderType ?identityProviderName
-        ?identityProviderDetails ~identityProviderArn ?clientToken ()
+      make ?clientToken ?identityProviderDetails ?identityProviderType
+        ?identityProviderName ~identityProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identityProviderType =
-        field_map json "identityProviderType" IdentityProviderType.of_json in
-      let identityProviderName =
-        field_map json "identityProviderName" IdentityProviderName.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let identityProviderDetails =
-        field_map json "identityProviderDetails"
+        field_map json__ "identityProviderDetails"
           IdentityProviderDetails.of_json in
+      let identityProviderType =
+        field_map json__ "identityProviderType" IdentityProviderType.of_json in
+      let identityProviderName =
+        field_map json__ "identityProviderName" IdentityProviderName.of_json in
       let identityProviderArn =
-        field_map_exn json "identityProviderArn" ARN.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      make ?identityProviderType ?identityProviderName
-        ?identityProviderDetails ~identityProviderArn ?clientToken ()
+        field_map_exn json__ "identityProviderArn" SubresourceARN.of_json in
+      make ?clientToken ?identityProviderDetails ?identityProviderType
+        ?identityProviderName ~identityProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the identity provider."]
-module UpdateBrowserSettingsResponse =
+module UpdateDataProtectionSettingsResponse =
   struct
     type nonrec t =
       {
-      browserSettings: BrowserSettings.t [@ocaml.doc "The browser settings."]}
+      dataProtectionSettings: DataProtectionSettings.t option
+        [@ocaml.doc "The data protection settings."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -3166,8 +7917,173 @@ module UpdateBrowserSettingsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateBrowserSettingsResponse"
-    let make ~browserSettings = fun () -> { browserSettings }
+    let make ?dataProtectionSettings = fun () -> { dataProtectionSettings }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("dataProtectionSettings",
+           (Option.map x.dataProtectionSettings
+              ~f:DataProtectionSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataProtectionSettings =
+        (Option.map ~f:DataProtectionSettings.of_xml)
+          (Xml.child xml_arg0 "dataProtectionSettings") in
+      make ?dataProtectionSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataProtectionSettings =
+        field_map json__ "dataProtectionSettings"
+          DataProtectionSettings.of_json in
+      make ?dataProtectionSettings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates data protection settings."]
+module UpdateDataProtectionSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      dataProtectionSettingsArn: ARN.t
+        [@ocaml.doc "The ARN of the data protection settings."];
+      inlineRedactionConfiguration: InlineRedactionConfiguration.t option
+        [@ocaml.doc
+          "The inline redaction configuration of the data protection settings that will be applied to all sessions."];
+      displayName: DisplayNameSafe.t option
+        [@ocaml.doc "The display name of the data protection settings."];
+      description: DescriptionSafe.t option
+        [@ocaml.doc "The description of the data protection settings."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token return the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."]}
+    let context_ = "UpdateDataProtectionSettingsRequest"
+    let make ?inlineRedactionConfiguration =
+      fun ?displayName ->
+        fun ?description ->
+          fun ?clientToken ->
+            fun ~dataProtectionSettingsArn ->
+              fun () ->
+                {
+                  inlineRedactionConfiguration;
+                  displayName;
+                  description;
+                  clientToken;
+                  dataProtectionSettingsArn
+                }
+    let to_value x =
+      structure_to_value
+        [("dataProtectionSettingsArn",
+           (Some (ARN.to_value x.dataProtectionSettingsArn)));
+        ("inlineRedactionConfiguration",
+          (Option.map x.inlineRedactionConfiguration
+             ~f:InlineRedactionConfiguration.to_value));
+        ("displayName",
+          (Option.map x.displayName ~f:DisplayNameSafe.to_value));
+        ("description",
+          (Option.map x.description ~f:DescriptionSafe.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let description =
+        (Option.map ~f:DescriptionSafe.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let displayName =
+        (Option.map ~f:DisplayNameSafe.of_xml)
+          (Xml.child xml_arg0 "displayName") in
+      let inlineRedactionConfiguration =
+        (Option.map ~f:InlineRedactionConfiguration.of_xml)
+          (Xml.child xml_arg0 "inlineRedactionConfiguration") in
+      let dataProtectionSettingsArn =
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "dataProtectionSettingsArn") in
+      make ?clientToken ?description ?displayName
+        ?inlineRedactionConfiguration ~dataProtectionSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let description =
+        field_map json__ "description" DescriptionSafe.of_json in
+      let displayName =
+        field_map json__ "displayName" DisplayNameSafe.of_json in
+      let inlineRedactionConfiguration =
+        field_map json__ "inlineRedactionConfiguration"
+          InlineRedactionConfiguration.of_json in
+      let dataProtectionSettingsArn =
+        field_map_exn json__ "dataProtectionSettingsArn" ARN.of_json in
+      make ?clientToken ?description ?displayName
+        ?inlineRedactionConfiguration ~dataProtectionSettingsArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates data protection settings."]
+module UpdateBrowserSettingsResponse =
+  struct
+    type nonrec t =
+      {
+      browserSettings: BrowserSettings.t option
+        [@ocaml.doc "The browser settings."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?browserSettings = fun () -> { browserSettings }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3227,62 +8143,83 @@ module UpdateBrowserSettingsResponse =
     let to_value x =
       structure_to_value
         [("browserSettings",
-           (Some (BrowserSettings.to_value x.browserSettings)))]
+           (Option.map x.browserSettings ~f:BrowserSettings.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let browserSettings =
-        BrowserSettings.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "browserSettings") in
-      make ~browserSettings ()
+        (Option.map ~f:BrowserSettings.of_xml)
+          (Xml.child xml_arg0 "browserSettings") in
+      make ?browserSettings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let browserSettings =
-        field_map_exn json "browserSettings" BrowserSettings.of_json in
-      make ~browserSettings ()
+        field_map json__ "browserSettings" BrowserSettings.of_json in
+      make ?browserSettings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates browser settings."]
 module UpdateBrowserSettingsRequest =
   struct
     type nonrec t =
       {
+      browserSettingsArn: ARN.t
+        [@ocaml.doc "The ARN of the browser settings."];
       browserPolicy: BrowserPolicy.t option
         [@ocaml.doc
           "A JSON string containing Chrome Enterprise policies that will be applied to all streaming sessions."];
-      browserSettingsArn: ARN.t
-        [@ocaml.doc "The ARN of the browser settings."];
       clientToken: ClientToken.t option
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token return the result from the original successful request. If you do not specify a client token, one is automatically generated by the AWS SDK."]}
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token return the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."];
+      webContentFilteringPolicy: WebContentFilteringPolicy.t option
+        [@ocaml.doc
+          "The policy that specifies which URLs end users are allowed to access or which URLs or domain categories they are restricted from accessing for enhanced security."]}
     let context_ = "UpdateBrowserSettingsRequest"
     let make ?browserPolicy =
       fun ?clientToken ->
-        fun ~browserSettingsArn ->
-          fun () -> { browserPolicy; clientToken; browserSettingsArn }
+        fun ?webContentFilteringPolicy ->
+          fun ~browserSettingsArn ->
+            fun () ->
+              {
+                browserPolicy;
+                clientToken;
+                webContentFilteringPolicy;
+                browserSettingsArn
+              }
     let to_value x =
       structure_to_value
-        [("browserPolicy",
-           (Option.map x.browserPolicy ~f:BrowserPolicy.to_value));
-        ("browserSettingsArn", (Some (ARN.to_value x.browserSettingsArn)));
-        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+        [("browserSettingsArn", (Some (ARN.to_value x.browserSettingsArn)));
+        ("browserPolicy",
+          (Option.map x.browserPolicy ~f:BrowserPolicy.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("webContentFilteringPolicy",
+          (Option.map x.webContentFilteringPolicy
+             ~f:WebContentFilteringPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let webContentFilteringPolicy =
+        (Option.map ~f:WebContentFilteringPolicy.of_xml)
+          (Xml.child xml_arg0 "webContentFilteringPolicy") in
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
-      let browserSettingsArn =
-        ARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "browserSettingsArn") in
       let browserPolicy =
         (Option.map ~f:BrowserPolicy.of_xml)
           (Xml.child xml_arg0 "browserPolicy") in
-      make ?clientToken ~browserSettingsArn ?browserPolicy ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
       let browserSettingsArn =
-        field_map_exn json "browserSettingsArn" ARN.of_json in
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "browserSettingsArn") in
+      make ?webContentFilteringPolicy ?clientToken ?browserPolicy
+        ~browserSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let webContentFilteringPolicy =
+        field_map json__ "webContentFilteringPolicy"
+          WebContentFilteringPolicy.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let browserPolicy =
-        field_map json "browserPolicy" BrowserPolicy.of_json in
-      make ?clientToken ~browserSettingsArn ?browserPolicy ()
+        field_map json__ "browserPolicy" BrowserPolicy.of_json in
+      let browserSettingsArn =
+        field_map_exn json__ "browserSettingsArn" ARN.of_json in
+      make ?webContentFilteringPolicy ?clientToken ?browserPolicy
+        ~browserSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates browser settings."]
 module UntagResourceResponse =
@@ -3383,9 +8320,9 @@ module UntagResourceRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" ARN.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes one or more tags from the specified resource."]
@@ -3478,35 +8415,35 @@ module TagResourceRequest =
   struct
     type nonrec t =
       {
+      resourceArn: ARN.t [@ocaml.doc "The ARN of the resource."];
+      tags: TagList.t [@ocaml.doc "The tags of the resource."];
       clientToken: ClientToken.t option
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the AWS SDK."];
-      resourceArn: ARN.t [@ocaml.doc "The ARN of the resource."];
-      tags: TagList.t [@ocaml.doc "The tags of the resource."]}
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."]}
     let context_ = "TagResourceRequest"
     let make ?clientToken =
       fun ~resourceArn ->
         fun ~tags -> fun () -> { clientToken; resourceArn; tags }
     let to_value x =
       structure_to_value
-        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
-        ("resourceArn", (Some (ARN.to_value x.resourceArn)));
-        ("tags", (Some (TagList.to_value x.tags)))]
+        [("resourceArn", (Some (ARN.to_value x.resourceArn)));
+        ("tags", (Some (TagList.to_value x.tags)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       let tags =
         TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
       let resourceArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
-      let clientToken =
-        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
-      make ~tags ~resourceArn ?clientToken ()
+      make ?clientToken ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      make ~tags ~resourceArn ?clientToken ()
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let tags = field_map_exn json__ "tags" TagList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" ARN.of_json in
+      make ?clientToken ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Adds or overwrites one or more tags for the specified resource."]
@@ -3514,19 +8451,19 @@ module ListUserSettingsResponse =
   struct
     type nonrec t =
       {
+      userSettings: UserSettingsList.t option
+        [@ocaml.doc "The user settings."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The pagination token used to retrieve the next page of results for this operation."];
-      userSettings: UserSettingsList.t option
-        [@ocaml.doc "The user settings."]}
+          "The pagination token used to retrieve the next page of results for this operation."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?nextToken =
-      fun ?userSettings -> fun () -> { nextToken; userSettings }
+    let make ?userSettings =
+      fun ?nextToken -> fun () -> { userSettings; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3577,74 +8514,74 @@ module ListUserSettingsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("userSettings",
-          (Option.map x.userSettings ~f:UserSettingsList.to_value))]
+        [("userSettings",
+           (Option.map x.userSettings ~f:UserSettingsList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let userSettings =
-        (Option.map ~f:UserSettingsList.of_xml)
-          (Xml.child xml_arg0 "userSettings") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      make ?userSettings ?nextToken ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let userSettings =
-        field_map json "userSettings" UserSettingsList.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      make ?userSettings ?nextToken ()
+        (Option.map ~f:UserSettingsList.of_xml)
+          (Xml.child xml_arg0 "userSettings") in
+      make ?nextToken ?userSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let userSettings =
+        field_map json__ "userSettings" UserSettingsList.of_json in
+      make ?nextToken ?userSettings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of user settings."]
 module ListUserSettingsRequest =
   struct
     type nonrec t =
       {
-      maxResults: MaxResults.t option
-        [@ocaml.doc
-          "The maximum number of results to be included in the next page."];
-      nextToken: PaginationToken.t option
-        [@ocaml.doc
-          "The pagination token used to retrieve the next page of results for this operation."]}
-    let make ?maxResults =
-      fun ?nextToken -> fun () -> { maxResults; nextToken }
-    let to_value x =
-      structure_to_value
-        [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:PaginationToken.of_xml)
-          (Xml.child xml_arg0 "nextToken") in
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
-      make ?nextToken ?maxResults ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      make ?nextToken ?maxResults ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves a list of user settings."]
-module ListTrustStoresResponse =
-  struct
-    type nonrec t =
-      {
       nextToken: PaginationToken.t option
         [@ocaml.doc
           "The pagination token used to retrieve the next page of results for this operation."];
-      trustStores: TrustStoreSummaryList.t option
-        [@ocaml.doc "The trust stores."]}
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to be included in the next page."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves a list of user settings."]
+module ListUserAccessLoggingSettingsResponse =
+  struct
+    type nonrec t =
+      {
+      userAccessLoggingSettings: UserAccessLoggingSettingsList.t option
+        [@ocaml.doc "The user access logging settings."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The pagination token used to retrieve the next page of results for this operation."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?nextToken =
-      fun ?trustStores -> fun () -> { nextToken; trustStores }
+    let make ?userAccessLoggingSettings =
+      fun ?nextToken -> fun () -> { userAccessLoggingSettings; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3695,55 +8632,175 @@ module ListTrustStoresResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("trustStores",
-          (Option.map x.trustStores ~f:TrustStoreSummaryList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let trustStores =
-        (Option.map ~f:TrustStoreSummaryList.of_xml)
-          (Xml.child xml_arg0 "trustStores") in
-      let nextToken =
-        (Option.map ~f:PaginationToken.of_xml)
-          (Xml.child xml_arg0 "nextToken") in
-      make ?trustStores ?nextToken ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustStores =
-        field_map json "trustStores" TrustStoreSummaryList.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      make ?trustStores ?nextToken ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves a list of trust stores."]
-module ListTrustStoresRequest =
-  struct
-    type nonrec t =
-      {
-      maxResults: MaxResults.t option
-        [@ocaml.doc
-          "The maximum number of results to be included in the next page."];
-      nextToken: PaginationToken.t option
-        [@ocaml.doc
-          "The pagination token used to retrieve the next page of results for this operation."]}
-    let make ?maxResults =
-      fun ?nextToken -> fun () -> { maxResults; nextToken }
-    let to_value x =
-      structure_to_value
-        [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        [("userAccessLoggingSettings",
+           (Option.map x.userAccessLoggingSettings
+              ~f:UserAccessLoggingSettingsList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
+      let userAccessLoggingSettings =
+        (Option.map ~f:UserAccessLoggingSettingsList.of_xml)
+          (Xml.child xml_arg0 "userAccessLoggingSettings") in
+      make ?nextToken ?userAccessLoggingSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let userAccessLoggingSettings =
+        field_map json__ "userAccessLoggingSettings"
+          UserAccessLoggingSettingsList.of_json in
+      make ?nextToken ?userAccessLoggingSettings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves a list of user access logging settings."]
+module ListUserAccessLoggingSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The pagination token used to retrieve the next page of results for this operation."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to be included in the next page."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
-      make ?nextToken ?maxResults ()
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      make ?nextToken ?maxResults ()
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves a list of user access logging settings."]
+module ListTrustStoresResponse =
+  struct
+    type nonrec t =
+      {
+      trustStores: TrustStoreSummaryList.t option
+        [@ocaml.doc "The trust stores."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The pagination token used to retrieve the next page of results for this operation."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?trustStores =
+      fun ?nextToken -> fun () -> { trustStores; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("trustStores",
+           (Option.map x.trustStores ~f:TrustStoreSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let trustStores =
+        (Option.map ~f:TrustStoreSummaryList.of_xml)
+          (Xml.child xml_arg0 "trustStores") in
+      make ?nextToken ?trustStores ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let trustStores =
+        field_map json__ "trustStores" TrustStoreSummaryList.of_json in
+      make ?nextToken ?trustStores ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves a list of trust stores."]
+module ListTrustStoresRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The pagination token used to retrieve the next page of results for this operation."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to be included in the next page."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of trust stores."]
 module ListTrustStoreCertificatesResponse =
@@ -3752,10 +8809,10 @@ module ListTrustStoreCertificatesResponse =
       {
       certificateList: CertificateSummaryList.t option
         [@ocaml.doc "The certificate list."];
+      trustStoreArn: ARN.t option [@ocaml.doc "The ARN of the trust store."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The pagination token used to retrieve the next page of results for this operation.>"];
-      trustStoreArn: ARN.t option [@ocaml.doc "The ARN of the trust store."]}
+          "The pagination token used to retrieve the next page of results for this operation.>"]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -3764,9 +8821,9 @@ module ListTrustStoreCertificatesResponse =
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?certificateList =
-      fun ?nextToken ->
-        fun ?trustStoreArn ->
-          fun () -> { certificateList; nextToken; trustStoreArn }
+      fun ?trustStoreArn ->
+        fun ?nextToken ->
+          fun () -> { certificateList; trustStoreArn; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3827,65 +8884,65 @@ module ListTrustStoreCertificatesResponse =
       structure_to_value
         [("certificateList",
            (Option.map x.certificateList ~f:CertificateSummaryList.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("trustStoreArn", (Option.map x.trustStoreArn ~f:ARN.to_value))]
+        ("trustStoreArn", (Option.map x.trustStoreArn ~f:ARN.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let trustStoreArn =
-        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "trustStoreArn") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
+      let trustStoreArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "trustStoreArn") in
       let certificateList =
         (Option.map ~f:CertificateSummaryList.of_xml)
           (Xml.child xml_arg0 "certificateList") in
-      make ?trustStoreArn ?nextToken ?certificateList ()
+      make ?nextToken ?trustStoreArn ?certificateList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustStoreArn = field_map json "trustStoreArn" ARN.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let trustStoreArn = field_map json__ "trustStoreArn" ARN.of_json in
       let certificateList =
-        field_map json "certificateList" CertificateSummaryList.of_json in
-      make ?trustStoreArn ?nextToken ?certificateList ()
+        field_map json__ "certificateList" CertificateSummaryList.of_json in
+      make ?nextToken ?trustStoreArn ?certificateList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of trust store certificates."]
 module ListTrustStoreCertificatesRequest =
   struct
     type nonrec t =
       {
-      maxResults: MaxResults.t option
-        [@ocaml.doc
-          "The maximum number of results to be included in the next page."];
+      trustStoreArn: ARN.t [@ocaml.doc "The ARN of the trust store"];
       nextToken: PaginationToken.t option
         [@ocaml.doc
           "The pagination token used to retrieve the next page of results for this operation."];
-      trustStoreArn: ARN.t [@ocaml.doc "The ARN of the trust store"]}
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to be included in the next page."]}
     let context_ = "ListTrustStoreCertificatesRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
+    let make ?nextToken =
+      fun ?maxResults ->
         fun ~trustStoreArn ->
-          fun () -> { maxResults; nextToken; trustStoreArn }
+          fun () -> { nextToken; maxResults; trustStoreArn }
     let to_value x =
       structure_to_value
-        [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        [("trustStoreArn", (Some (ARN.to_value x.trustStoreArn)));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("trustStoreArn", (Some (ARN.to_value x.trustStoreArn)))]
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let trustStoreArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "trustStoreArn") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
-      make ~trustStoreArn ?nextToken ?maxResults ()
+      let trustStoreArn =
+        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "trustStoreArn") in
+      make ?maxResults ?nextToken ~trustStoreArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      make ~trustStoreArn ?nextToken ?maxResults ()
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let trustStoreArn = field_map_exn json__ "trustStoreArn" ARN.of_json in
+      make ?maxResults ?nextToken ~trustStoreArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of trust store certificates."]
 module ListTagsForResourceResponse =
@@ -3964,8 +9021,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of tags for a resource."]
 module ListTagsForResourceRequest =
@@ -3984,26 +9041,202 @@ module ListTagsForResourceRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" ARN.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of tags for a resource."]
-module ListPortalsResponse =
+module ListSessionsResponse =
   struct
     type nonrec t =
       {
+      sessions: SessionSummaryList.t option
+        [@ocaml.doc "The sessions in a list."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The pagination token used to retrieve the next page of results for this operation."];
-      portals: PortalList.t option [@ocaml.doc "The portals in the list."]}
+          "The pagination token used to retrieve the next page of results for this operation."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sessions = fun ?nextToken -> fun () -> { sessions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("sessions", (Option.map x.sessions ~f:SessionSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let sessions =
+        (Option.map ~f:SessionSummaryList.of_xml)
+          (Xml.child xml_arg0 "sessions") in
+      make ?nextToken ?sessions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let sessions = field_map json__ "sessions" SessionSummaryList.of_json in
+      make ?nextToken ?sessions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists information for multiple secure browser sessions from a specific portal."]
+module ListSessionsRequest =
+  struct
+    type nonrec t =
+      {
+      portalId: PortalId.t
+        [@ocaml.doc "The ID of the web portal for the sessions."];
+      username: Username.t option [@ocaml.doc "The username of the session."];
+      sessionId: SessionId.t option [@ocaml.doc "The ID of the session."];
+      sortBy: SessionSortBy.t option
+        [@ocaml.doc
+          "The method in which the returned sessions should be sorted."];
+      status: SessionStatus.t option
+        [@ocaml.doc "The status of the session."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to be included in the next page."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The pagination token used to retrieve the next page of results for this operation."]}
+    let context_ = "ListSessionsRequest"
+    let make ?username =
+      fun ?sessionId ->
+        fun ?sortBy ->
+          fun ?status ->
+            fun ?maxResults ->
+              fun ?nextToken ->
+                fun ~portalId ->
+                  fun () ->
+                    {
+                      username;
+                      sessionId;
+                      sortBy;
+                      status;
+                      maxResults;
+                      nextToken;
+                      portalId
+                    }
+    let to_value x =
+      structure_to_value
+        [("portalId", (Some (PortalId.to_value x.portalId)));
+        ("username", (Option.map x.username ~f:Username.to_value));
+        ("sessionId", (Option.map x.sessionId ~f:SessionId.to_value));
+        ("sortBy", (Option.map x.sortBy ~f:SessionSortBy.to_value));
+        ("status", (Option.map x.status ~f:SessionStatus.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let status =
+        (Option.map ~f:SessionStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let sortBy =
+        (Option.map ~f:SessionSortBy.of_xml) (Xml.child xml_arg0 "sortBy") in
+      let sessionId =
+        (Option.map ~f:SessionId.of_xml) (Xml.child xml_arg0 "sessionId") in
+      let username =
+        (Option.map ~f:Username.of_xml) (Xml.child xml_arg0 "username") in
+      let portalId =
+        PortalId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalId") in
+      make ?nextToken ?maxResults ?status ?sortBy ?sessionId ?username
+        ~portalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let status = field_map json__ "status" SessionStatus.of_json in
+      let sortBy = field_map json__ "sortBy" SessionSortBy.of_json in
+      let sessionId = field_map json__ "sessionId" SessionId.of_json in
+      let username = field_map json__ "username" Username.of_json in
+      let portalId = field_map_exn json__ "portalId" PortalId.of_json in
+      make ?nextToken ?maxResults ?status ?sortBy ?sessionId ?username
+        ~portalId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists information for multiple secure browser sessions from a specific portal."]
+module ListSessionLoggersResponse =
+  struct
+    type nonrec t =
+      {
+      sessionLoggers: SessionLoggerList.t option
+        [@ocaml.doc
+          "The list of session loggers, including summaries of their details."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The pagination token used to retrieve the next page of results for this operation."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?nextToken = fun ?portals -> fun () -> { nextToken; portals }
+    let make ?sessionLoggers =
+      fun ?nextToken -> fun () -> { sessionLoggers; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4054,52 +9287,168 @@ module ListPortalsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("portals", (Option.map x.portals ~f:PortalList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let portals =
-        (Option.map ~f:PortalList.of_xml) (Xml.child xml_arg0 "portals") in
-      let nextToken =
-        (Option.map ~f:PaginationToken.of_xml)
-          (Xml.child xml_arg0 "nextToken") in
-      make ?portals ?nextToken ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portals = field_map json "portals" PortalList.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      make ?portals ?nextToken ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves a list or web portals."]
-module ListPortalsRequest =
-  struct
-    type nonrec t =
-      {
-      maxResults: MaxResults.t option
-        [@ocaml.doc
-          "The maximum number of results to be included in the next page."];
-      nextToken: PaginationToken.t option
-        [@ocaml.doc
-          "The pagination token used to retrieve the next page of results for this operation."]}
-    let make ?maxResults =
-      fun ?nextToken -> fun () -> { maxResults; nextToken }
-    let to_value x =
-      structure_to_value
-        [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        [("sessionLoggers",
+           (Option.map x.sessionLoggers ~f:SessionLoggerList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
+      let sessionLoggers =
+        (Option.map ~f:SessionLoggerList.of_xml)
+          (Xml.child xml_arg0 "sessionLoggers") in
+      make ?nextToken ?sessionLoggers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let sessionLoggers =
+        field_map json__ "sessionLoggers" SessionLoggerList.of_json in
+      make ?nextToken ?sessionLoggers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists all available session logger resources."]
+module ListSessionLoggersRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The pagination token used to retrieve the next page of results for this operation."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to be included in the next page."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
-      make ?nextToken ?maxResults ()
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      make ?nextToken ?maxResults ()
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists all available session logger resources."]
+module ListPortalsResponse =
+  struct
+    type nonrec t =
+      {
+      portals: PortalList.t option [@ocaml.doc "The portals in the list."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The pagination token used to retrieve the next page of results for this operation."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?portals = fun ?nextToken -> fun () -> { portals; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("portals", (Option.map x.portals ~f:PortalList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let portals =
+        (Option.map ~f:PortalList.of_xml) (Xml.child xml_arg0 "portals") in
+      make ?nextToken ?portals ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let portals = field_map json__ "portals" PortalList.of_json in
+      make ?nextToken ?portals ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves a list or web portals."]
+module ListPortalsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The pagination token used to retrieve the next page of results for this operation."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to be included in the next page."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list or web portals."]
 module ListNetworkSettingsResponse =
@@ -4182,10 +9531,10 @@ module ListNetworkSettingsResponse =
           (Xml.child xml_arg0 "networkSettings") in
       make ?nextToken ?networkSettings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let networkSettings =
-        field_map json "networkSettings" NetworkSettingsList.of_json in
+        field_map json__ "networkSettings" NetworkSettingsList.of_json in
       make ?nextToken ?networkSettings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of network settings."]
@@ -4193,39 +9542,39 @@ module ListNetworkSettingsRequest =
   struct
     type nonrec t =
       {
-      maxResults: MaxResults.t option
-        [@ocaml.doc
-          "The maximum number of results to be included in the next page."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The pagination token used to retrieve the next page of results for this operation."]}
-    let make ?maxResults =
-      fun ?nextToken -> fun () -> { maxResults; nextToken }
+          "The pagination token used to retrieve the next page of results for this operation."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to be included in the next page."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
     let to_value x =
       structure_to_value
-        [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
-      make ?nextToken ?maxResults ()
+      make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      make ?nextToken ?maxResults ()
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of network settings."]
-module ListIdentityProvidersResponse =
+module ListIpAccessSettingsResponse =
   struct
     type nonrec t =
       {
-      identityProviders: IdentityProviderList.t option
-        [@ocaml.doc "The identity providers."];
+      ipAccessSettings: IpAccessSettingsList.t option
+        [@ocaml.doc "The IP access settings."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
           "The pagination token used to retrieve the next page of results for this operation."]}
@@ -4235,8 +9584,8 @@ module ListIdentityProvidersResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?identityProviders =
-      fun ?nextToken -> fun () -> { identityProviders; nextToken }
+    let make ?ipAccessSettings =
+      fun ?nextToken -> fun () -> { ipAccessSettings; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4287,24 +9636,142 @@ module ListIdentityProvidersResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("identityProviders",
-           (Option.map x.identityProviders ~f:IdentityProviderList.to_value));
+        [("ipAccessSettings",
+           (Option.map x.ipAccessSettings ~f:IpAccessSettingsList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
+      let ipAccessSettings =
+        (Option.map ~f:IpAccessSettingsList.of_xml)
+          (Xml.child xml_arg0 "ipAccessSettings") in
+      make ?nextToken ?ipAccessSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let ipAccessSettings =
+        field_map json__ "ipAccessSettings" IpAccessSettingsList.of_json in
+      make ?nextToken ?ipAccessSettings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves a list of IP access settings."]
+module ListIpAccessSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The pagination token used to retrieve the next page of results for this operation."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to be included in the next page."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves a list of IP access settings."]
+module ListIdentityProvidersResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The pagination token used to retrieve the next page of results for this operation."];
+      identityProviders: IdentityProviderList.t option
+        [@ocaml.doc "The identity providers."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?identityProviders -> fun () -> { nextToken; identityProviders }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("identityProviders",
+          (Option.map x.identityProviders ~f:IdentityProviderList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
       let identityProviders =
         (Option.map ~f:IdentityProviderList.of_xml)
           (Xml.child xml_arg0 "identityProviders") in
-      make ?nextToken ?identityProviders ()
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?identityProviders ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
       let identityProviders =
-        field_map json "identityProviders" IdentityProviderList.of_json in
-      make ?nextToken ?identityProviders ()
+        field_map json__ "identityProviders" IdentityProviderList.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?identityProviders ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of identity providers for a specific web portal."]
@@ -4312,41 +9779,161 @@ module ListIdentityProvidersRequest =
   struct
     type nonrec t =
       {
-      maxResults: MaxResults.t option
-        [@ocaml.doc
-          "The maximum number of results to be included in the next page."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
           "The pagination token used to retrieve the next page of results for this operation."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to be included in the next page."];
       portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."]}
     let context_ = "ListIdentityProvidersRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~portalArn -> fun () -> { maxResults; nextToken; portalArn }
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~portalArn -> fun () -> { nextToken; maxResults; portalArn }
     let to_value x =
       structure_to_value
-        [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("portalArn", (Some (ARN.to_value x.portalArn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let portalArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
-      make ~portalArn ?nextToken ?maxResults ()
+      make ~portalArn ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      make ~portalArn ?nextToken ?maxResults ()
+    let of_json json__ =
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ~portalArn ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of identity providers for a specific web portal."]
+module ListDataProtectionSettingsResponse =
+  struct
+    type nonrec t =
+      {
+      dataProtectionSettings: DataProtectionSettingsList.t option
+        [@ocaml.doc "The data protection settings."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The pagination token used to retrieve the next page of results for this operation."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dataProtectionSettings =
+      fun ?nextToken -> fun () -> { dataProtectionSettings; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("dataProtectionSettings",
+           (Option.map x.dataProtectionSettings
+              ~f:DataProtectionSettingsList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let dataProtectionSettings =
+        (Option.map ~f:DataProtectionSettingsList.of_xml)
+          (Xml.child xml_arg0 "dataProtectionSettings") in
+      make ?nextToken ?dataProtectionSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let dataProtectionSettings =
+        field_map json__ "dataProtectionSettings"
+          DataProtectionSettingsList.of_json in
+      make ?nextToken ?dataProtectionSettings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves a list of data protection settings."]
+module ListDataProtectionSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The pagination token used to retrieve the next page of results for this operation."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to be included in the next page."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves a list of data protection settings."]
 module ListBrowserSettingsResponse =
   struct
     type nonrec t =
@@ -4427,10 +10014,10 @@ module ListBrowserSettingsResponse =
           (Xml.child xml_arg0 "browserSettings") in
       make ?nextToken ?browserSettings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let browserSettings =
-        field_map json "browserSettings" BrowserSettingsList.of_json in
+        field_map json__ "browserSettings" BrowserSettingsList.of_json in
       make ?nextToken ?browserSettings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of browser settings."]
@@ -4438,31 +10025,31 @@ module ListBrowserSettingsRequest =
   struct
     type nonrec t =
       {
-      maxResults: MaxResults.t option
-        [@ocaml.doc
-          "The maximum number of results to be included in the next page."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The pagination token used to retrieve the next page of results for this operation."]}
-    let make ?maxResults =
-      fun ?nextToken -> fun () -> { maxResults; nextToken }
+          "The pagination token used to retrieve the next page of results for this operation."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to be included in the next page."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
     let to_value x =
       structure_to_value
-        [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
-      make ?nextToken ?maxResults ()
+      make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      make ?nextToken ?maxResults ()
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of browser settings."]
 module GetUserSettingsResponse =
@@ -4545,8 +10132,8 @@ module GetUserSettingsResponse =
           (Xml.child xml_arg0 "userSettings") in
       make ?userSettings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userSettings = field_map json "userSettings" UserSettings.of_json in
+    let of_json json__ =
+      let userSettings = field_map json__ "userSettings" UserSettings.of_json in
       make ?userSettings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets user settings."]
@@ -4567,11 +10154,129 @@ module GetUserSettingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "userSettingsArn") in
       make ~userSettingsArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userSettingsArn = field_map_exn json "userSettingsArn" ARN.of_json in
+    let of_json json__ =
+      let userSettingsArn =
+        field_map_exn json__ "userSettingsArn" ARN.of_json in
       make ~userSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets user settings."]
+module GetUserAccessLoggingSettingsResponse =
+  struct
+    type nonrec t =
+      {
+      userAccessLoggingSettings: UserAccessLoggingSettings.t option
+        [@ocaml.doc "The user access logging settings."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?userAccessLoggingSettings =
+      fun () -> { userAccessLoggingSettings }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("userAccessLoggingSettings",
+           (Option.map x.userAccessLoggingSettings
+              ~f:UserAccessLoggingSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userAccessLoggingSettings =
+        (Option.map ~f:UserAccessLoggingSettings.of_xml)
+          (Xml.child xml_arg0 "userAccessLoggingSettings") in
+      make ?userAccessLoggingSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userAccessLoggingSettings =
+        field_map json__ "userAccessLoggingSettings"
+          UserAccessLoggingSettings.of_json in
+      make ?userAccessLoggingSettings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets user access logging settings."]
+module GetUserAccessLoggingSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      userAccessLoggingSettingsArn: ARN.t
+        [@ocaml.doc "The ARN of the user access logging settings."]}
+    let context_ = "GetUserAccessLoggingSettingsRequest"
+    let make ~userAccessLoggingSettingsArn =
+      fun () -> { userAccessLoggingSettingsArn }
+    let to_value x =
+      structure_to_value
+        [("userAccessLoggingSettingsArn",
+           (Some (ARN.to_value x.userAccessLoggingSettingsArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userAccessLoggingSettingsArn =
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "userAccessLoggingSettingsArn") in
+      make ~userAccessLoggingSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userAccessLoggingSettingsArn =
+        field_map_exn json__ "userAccessLoggingSettingsArn" ARN.of_json in
+      make ~userAccessLoggingSettingsArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets user access logging settings."]
 module GetTrustStoreResponse =
   struct
     type nonrec t =
@@ -4650,8 +10355,8 @@ module GetTrustStoreResponse =
         (Option.map ~f:TrustStore.of_xml) (Xml.child xml_arg0 "trustStore") in
       make ?trustStore ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustStore = field_map json "trustStore" TrustStore.of_json in
+    let of_json json__ =
+      let trustStore = field_map json__ "trustStore" TrustStore.of_json in
       make ?trustStore ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the trust store."]
@@ -4671,8 +10376,8 @@ module GetTrustStoreRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "trustStoreArn") in
       make ~trustStoreArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
+    let of_json json__ =
+      let trustStoreArn = field_map_exn json__ "trustStoreArn" ARN.of_json in
       make ~trustStoreArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the trust store."]
@@ -4680,10 +10385,10 @@ module GetTrustStoreCertificateResponse =
   struct
     type nonrec t =
       {
-      certificate: Certificate.t option
-        [@ocaml.doc "The certificate of the trust store certificate."];
       trustStoreArn: ARN.t option
-        [@ocaml.doc "The ARN of the trust store certificate."]}
+        [@ocaml.doc "The ARN of the trust store certificate."];
+      certificate: Certificate.t option
+        [@ocaml.doc "The certificate of the trust store certificate."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -4691,8 +10396,8 @@ module GetTrustStoreCertificateResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?certificate =
-      fun ?trustStoreArn -> fun () -> { certificate; trustStoreArn }
+    let make ?trustStoreArn =
+      fun ?certificate -> fun () -> { trustStoreArn; certificate }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4751,58 +10456,279 @@ module GetTrustStoreCertificateResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("certificate", (Option.map x.certificate ~f:Certificate.to_value));
-        ("trustStoreArn", (Option.map x.trustStoreArn ~f:ARN.to_value))]
+        [("trustStoreArn", (Option.map x.trustStoreArn ~f:ARN.to_value));
+        ("certificate", (Option.map x.certificate ~f:Certificate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let trustStoreArn =
-        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "trustStoreArn") in
       let certificate =
         (Option.map ~f:Certificate.of_xml) (Xml.child xml_arg0 "certificate") in
-      make ?trustStoreArn ?certificate ()
+      let trustStoreArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "trustStoreArn") in
+      make ?certificate ?trustStoreArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustStoreArn = field_map json "trustStoreArn" ARN.of_json in
-      let certificate = field_map json "certificate" Certificate.of_json in
-      make ?trustStoreArn ?certificate ()
+    let of_json json__ =
+      let certificate = field_map json__ "certificate" Certificate.of_json in
+      let trustStoreArn = field_map json__ "trustStoreArn" ARN.of_json in
+      make ?certificate ?trustStoreArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the trust store certificate."]
 module GetTrustStoreCertificateRequest =
   struct
     type nonrec t =
       {
-      thumbprint: CertificateThumbprint.t
-        [@ocaml.doc "The thumbprint of the trust store certificate."];
       trustStoreArn: ARN.t
-        [@ocaml.doc "The ARN of the trust store certificate."]}
+        [@ocaml.doc "The ARN of the trust store certificate."];
+      thumbprint: CertificateThumbprint.t
+        [@ocaml.doc "The thumbprint of the trust store certificate."]}
     let context_ = "GetTrustStoreCertificateRequest"
-    let make ~thumbprint =
-      fun ~trustStoreArn -> fun () -> { thumbprint; trustStoreArn }
+    let make ~trustStoreArn =
+      fun ~thumbprint -> fun () -> { trustStoreArn; thumbprint }
     let to_value x =
       structure_to_value
-        [("thumbprint", (Some (CertificateThumbprint.to_value x.thumbprint)));
-        ("trustStoreArn", (Some (ARN.to_value x.trustStoreArn)))]
+        [("trustStoreArn", (Some (ARN.to_value x.trustStoreArn)));
+        ("thumbprint", (Some (CertificateThumbprint.to_value x.thumbprint)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let trustStoreArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "trustStoreArn") in
       let thumbprint =
         CertificateThumbprint.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "thumbprint") in
-      make ~trustStoreArn ~thumbprint ()
+      let trustStoreArn =
+        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "trustStoreArn") in
+      make ~thumbprint ~trustStoreArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
+    let of_json json__ =
       let thumbprint =
-        field_map_exn json "thumbprint" CertificateThumbprint.of_json in
-      make ~trustStoreArn ~thumbprint ()
+        field_map_exn json__ "thumbprint" CertificateThumbprint.of_json in
+      let trustStoreArn = field_map_exn json__ "trustStoreArn" ARN.of_json in
+      make ~thumbprint ~trustStoreArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the trust store certificate."]
+module GetSessionResponse =
+  struct
+    type nonrec t =
+      {
+      session: Session.t option [@ocaml.doc "The sessions in a list."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?session = fun () -> { session }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("session", (Option.map x.session ~f:Session.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let session =
+        (Option.map ~f:Session.of_xml) (Xml.child xml_arg0 "session") in
+      make ?session ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let session = field_map json__ "session" Session.of_json in
+      make ?session ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets information for a secure browser session."]
+module GetSessionRequest =
+  struct
+    type nonrec t =
+      {
+      portalId: PortalId.t
+        [@ocaml.doc "The ID of the web portal for the session."];
+      sessionId: SessionId.t [@ocaml.doc "The ID of the session."]}
+    let context_ = "GetSessionRequest"
+    let make ~portalId = fun ~sessionId -> fun () -> { portalId; sessionId }
+    let to_value x =
+      structure_to_value
+        [("portalId", (Some (PortalId.to_value x.portalId)));
+        ("sessionId", (Some (SessionId.to_value x.sessionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sessionId =
+        SessionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sessionId") in
+      let portalId =
+        PortalId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalId") in
+      make ~sessionId ~portalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sessionId = field_map_exn json__ "sessionId" SessionId.of_json in
+      let portalId = field_map_exn json__ "portalId" PortalId.of_json in
+      make ~sessionId ~portalId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets information for a secure browser session."]
+module GetSessionLoggerResponse =
+  struct
+    type nonrec t =
+      {
+      sessionLogger: SessionLogger.t option
+        [@ocaml.doc "The session logger details."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sessionLogger = fun () -> { sessionLogger }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("sessionLogger",
+           (Option.map x.sessionLogger ~f:SessionLogger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sessionLogger =
+        (Option.map ~f:SessionLogger.of_xml)
+          (Xml.child xml_arg0 "sessionLogger") in
+      make ?sessionLogger ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sessionLogger =
+        field_map json__ "sessionLogger" SessionLogger.of_json in
+      make ?sessionLogger ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets details about a specific session logger resource."]
+module GetSessionLoggerRequest =
+  struct
+    type nonrec t =
+      {
+      sessionLoggerArn: ARN.t [@ocaml.doc "The ARN of the session logger."]}
+    let context_ = "GetSessionLoggerRequest"
+    let make ~sessionLoggerArn = fun () -> { sessionLoggerArn }
+    let to_value x =
+      structure_to_value
+        [("sessionLoggerArn", (Some (ARN.to_value x.sessionLoggerArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sessionLoggerArn =
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sessionLoggerArn") in
+      make ~sessionLoggerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sessionLoggerArn =
+        field_map_exn json__ "sessionLoggerArn" ARN.of_json in
+      make ~sessionLoggerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets details about a specific session logger resource."]
 module GetPortalServiceProviderMetadataResponse =
   struct
     type nonrec t =
       {
-      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."];
+      portalArn: ARN.t option [@ocaml.doc "The ARN of the web portal."];
       serviceProviderSamlMetadata: SamlMetadata.t option
         [@ocaml.doc "The service provider SAML metadata."]}
     type nonrec error =
@@ -4812,9 +10738,9 @@ module GetPortalServiceProviderMetadataResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetPortalServiceProviderMetadataResponse"
-    let make ?serviceProviderSamlMetadata =
-      fun ~portalArn -> fun () -> { serviceProviderSamlMetadata; portalArn }
+    let make ?portalArn =
+      fun ?serviceProviderSamlMetadata ->
+        fun () -> { portalArn; serviceProviderSamlMetadata }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4873,7 +10799,7 @@ module GetPortalServiceProviderMetadataResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("portalArn", (Some (ARN.to_value x.portalArn)));
+        [("portalArn", (Option.map x.portalArn ~f:ARN.to_value));
         ("serviceProviderSamlMetadata",
           (Option.map x.serviceProviderSamlMetadata ~f:SamlMetadata.to_value))]
     let to_query v = to_query to_value v
@@ -4882,14 +10808,14 @@ module GetPortalServiceProviderMetadataResponse =
         (Option.map ~f:SamlMetadata.of_xml)
           (Xml.child xml_arg0 "serviceProviderSamlMetadata") in
       let portalArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
-      make ?serviceProviderSamlMetadata ~portalArn ()
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "portalArn") in
+      make ?serviceProviderSamlMetadata ?portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceProviderSamlMetadata =
-        field_map json "serviceProviderSamlMetadata" SamlMetadata.of_json in
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
-      make ?serviceProviderSamlMetadata ~portalArn ()
+        field_map json__ "serviceProviderSamlMetadata" SamlMetadata.of_json in
+      let portalArn = field_map json__ "portalArn" ARN.of_json in
+      make ?serviceProviderSamlMetadata ?portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the service provider metadata."]
 module GetPortalServiceProviderMetadataRequest =
@@ -4907,8 +10833,8 @@ module GetPortalServiceProviderMetadataRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
+    let of_json json__ =
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
       make ~portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the service provider metadata."]
@@ -4989,8 +10915,9 @@ module GetPortalResponse =
         (Option.map ~f:Portal.of_xml) (Xml.child xml_arg0 "portal") in
       make ?portal ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portal = field_map json "portal" Portal.of_json in make ?portal ()
+    let of_json json__ =
+      let portal = field_map json__ "portal" Portal.of_json in
+      make ?portal ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the web portal."]
 module GetPortalRequest =
@@ -5008,8 +10935,8 @@ module GetPortalRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
+    let of_json json__ =
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
       make ~portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the web portal."]
@@ -5094,9 +11021,9 @@ module GetNetworkSettingsResponse =
           (Xml.child xml_arg0 "networkSettings") in
       make ?networkSettings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let networkSettings =
-        field_map json "networkSettings" NetworkSettings.of_json in
+        field_map json__ "networkSettings" NetworkSettings.of_json in
       make ?networkSettings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the network settings."]
@@ -5118,12 +11045,123 @@ module GetNetworkSettingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "networkSettingsArn") in
       make ~networkSettingsArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let networkSettingsArn =
-        field_map_exn json "networkSettingsArn" ARN.of_json in
+        field_map_exn json__ "networkSettingsArn" ARN.of_json in
       make ~networkSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the network settings."]
+module GetIpAccessSettingsResponse =
+  struct
+    type nonrec t =
+      {
+      ipAccessSettings: IpAccessSettings.t option
+        [@ocaml.doc "The IP access settings."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?ipAccessSettings = fun () -> { ipAccessSettings }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ipAccessSettings",
+           (Option.map x.ipAccessSettings ~f:IpAccessSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipAccessSettings =
+        (Option.map ~f:IpAccessSettings.of_xml)
+          (Xml.child xml_arg0 "ipAccessSettings") in
+      make ?ipAccessSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipAccessSettings =
+        field_map json__ "ipAccessSettings" IpAccessSettings.of_json in
+      make ?ipAccessSettings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets the IP access settings."]
+module GetIpAccessSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      ipAccessSettingsArn: ARN.t
+        [@ocaml.doc "The ARN of the IP access settings."]}
+    let context_ = "GetIpAccessSettingsRequest"
+    let make ~ipAccessSettingsArn = fun () -> { ipAccessSettingsArn }
+    let to_value x =
+      structure_to_value
+        [("ipAccessSettingsArn", (Some (ARN.to_value x.ipAccessSettingsArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipAccessSettingsArn =
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ipAccessSettingsArn") in
+      make ~ipAccessSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipAccessSettingsArn =
+        field_map_exn json__ "ipAccessSettingsArn" ARN.of_json in
+      make ~ipAccessSettingsArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets the IP access settings."]
 module GetIdentityProviderResponse =
   struct
     type nonrec t =
@@ -5205,9 +11243,9 @@ module GetIdentityProviderResponse =
           (Xml.child xml_arg0 "identityProvider") in
       make ?identityProvider ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityProvider =
-        field_map json "identityProvider" IdentityProvider.of_json in
+        field_map json__ "identityProvider" IdentityProvider.of_json in
       make ?identityProvider ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the identity provider."]
@@ -5215,26 +11253,143 @@ module GetIdentityProviderRequest =
   struct
     type nonrec t =
       {
-      identityProviderArn: ARN.t
+      identityProviderArn: SubresourceARN.t
         [@ocaml.doc "The ARN of the identity provider."]}
     let context_ = "GetIdentityProviderRequest"
     let make ~identityProviderArn = fun () -> { identityProviderArn }
     let to_value x =
       structure_to_value
-        [("identityProviderArn", (Some (ARN.to_value x.identityProviderArn)))]
+        [("identityProviderArn",
+           (Some (SubresourceARN.to_value x.identityProviderArn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let identityProviderArn =
-        ARN.of_xml
+        SubresourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "identityProviderArn") in
       make ~identityProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityProviderArn =
-        field_map_exn json "identityProviderArn" ARN.of_json in
+        field_map_exn json__ "identityProviderArn" SubresourceARN.of_json in
       make ~identityProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the identity provider."]
+module GetDataProtectionSettingsResponse =
+  struct
+    type nonrec t =
+      {
+      dataProtectionSettings: DataProtectionSettings.t option
+        [@ocaml.doc "The data protection settings."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dataProtectionSettings = fun () -> { dataProtectionSettings }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("dataProtectionSettings",
+           (Option.map x.dataProtectionSettings
+              ~f:DataProtectionSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataProtectionSettings =
+        (Option.map ~f:DataProtectionSettings.of_xml)
+          (Xml.child xml_arg0 "dataProtectionSettings") in
+      make ?dataProtectionSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataProtectionSettings =
+        field_map json__ "dataProtectionSettings"
+          DataProtectionSettings.of_json in
+      make ?dataProtectionSettings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets the data protection settings."]
+module GetDataProtectionSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      dataProtectionSettingsArn: ARN.t
+        [@ocaml.doc "The ARN of the data protection settings."]}
+    let context_ = "GetDataProtectionSettingsRequest"
+    let make ~dataProtectionSettingsArn =
+      fun () -> { dataProtectionSettingsArn }
+    let to_value x =
+      structure_to_value
+        [("dataProtectionSettingsArn",
+           (Some (ARN.to_value x.dataProtectionSettingsArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataProtectionSettingsArn =
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "dataProtectionSettingsArn") in
+      make ~dataProtectionSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataProtectionSettingsArn =
+        field_map_exn json__ "dataProtectionSettingsArn" ARN.of_json in
+      make ~dataProtectionSettingsArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets the data protection settings."]
 module GetBrowserSettingsResponse =
   struct
     type nonrec t =
@@ -5316,9 +11471,9 @@ module GetBrowserSettingsResponse =
           (Xml.child xml_arg0 "browserSettings") in
       make ?browserSettings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let browserSettings =
-        field_map json "browserSettings" BrowserSettings.of_json in
+        field_map json__ "browserSettings" BrowserSettings.of_json in
       make ?browserSettings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets browser settings."]
@@ -5340,13 +11495,13 @@ module GetBrowserSettingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "browserSettingsArn") in
       make ~browserSettingsArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let browserSettingsArn =
-        field_map_exn json "browserSettingsArn" ARN.of_json in
+        field_map_exn json__ "browserSettingsArn" ARN.of_json in
       make ~browserSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets browser settings."]
-module DisassociateUserSettingsResponse =
+module ExpireSessionResponse =
   struct
     type nonrec t = unit
     type nonrec error =
@@ -5392,6 +11547,118 @@ module DisassociateUserSettingsResponse =
           `Assoc
             [("error", (`String "AccessDeniedException"));
             ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Expires an active secure browser session."]
+module ExpireSessionRequest =
+  struct
+    type nonrec t =
+      {
+      portalId: PortalId.t
+        [@ocaml.doc "The ID of the web portal for the session."];
+      sessionId: SessionId.t [@ocaml.doc "The ID of the session to expire."]}
+    let context_ = "ExpireSessionRequest"
+    let make ~portalId = fun ~sessionId -> fun () -> { portalId; sessionId }
+    let to_value x =
+      structure_to_value
+        [("portalId", (Some (PortalId.to_value x.portalId)));
+        ("sessionId", (Some (SessionId.to_value x.sessionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sessionId =
+        SessionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sessionId") in
+      let portalId =
+        PortalId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalId") in
+      make ~sessionId ~portalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sessionId = field_map_exn json__ "sessionId" SessionId.of_json in
+      let portalId = field_map_exn json__ "portalId" PortalId.of_json in
+      make ~sessionId ~portalId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Expires an active secure browser session."]
+module DisassociateUserSettingsResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -5436,16 +11703,17 @@ module DisassociateUserSettingsRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
+    let of_json json__ =
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
       make ~portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates user settings from a web portal."]
-module DisassociateTrustStoreResponse =
+module DisassociateUserAccessLoggingSettingsResponse =
   struct
     type nonrec t = unit
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
@@ -5456,6 +11724,8 @@ module DisassociateTrustStoreResponse =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
@@ -5471,6 +11741,8 @@ module DisassociateTrustStoreResponse =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -5487,6 +11759,116 @@ module DisassociateTrustStoreResponse =
           `Assoc
             [("error", (`String "AccessDeniedException"));
             ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disassociates user access logging settings from a web portal."]
+module DisassociateUserAccessLoggingSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."]}
+    let context_ = "DisassociateUserAccessLoggingSettingsRequest"
+    let make ~portalArn = fun () -> { portalArn }
+    let to_value x =
+      structure_to_value [("portalArn", (Some (ARN.to_value x.portalArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let portalArn =
+        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
+      make ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
+      make ~portalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disassociates user access logging settings from a web portal."]
+module DisassociateTrustStoreResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -5531,12 +11913,12 @@ module DisassociateTrustStoreRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
+    let of_json json__ =
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
       make ~portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates a trust store from a web portal."]
-module DisassociateNetworkSettingsResponse =
+module DisassociateSessionLoggerResponse =
   struct
     type nonrec t = unit
     type nonrec error =
@@ -5582,6 +11964,112 @@ module DisassociateNetworkSettingsResponse =
           `Assoc
             [("error", (`String "AccessDeniedException"));
             ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Disassociates a session logger from a portal."]
+module DisassociateSessionLoggerRequest =
+  struct
+    type nonrec t =
+      {
+      portalArn: ARN.t
+        [@ocaml.doc
+          "The ARN of the portal to disassociate from the a session logger."]}
+    let context_ = "DisassociateSessionLoggerRequest"
+    let make ~portalArn = fun () -> { portalArn }
+    let to_value x =
+      structure_to_value [("portalArn", (Some (ARN.to_value x.portalArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let portalArn =
+        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
+      make ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
+      make ~portalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Disassociates a session logger from a portal."]
+module DisassociateNetworkSettingsResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -5626,16 +12114,17 @@ module DisassociateNetworkSettingsRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
+    let of_json json__ =
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
       make ~portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates network settings from a web portal."]
-module DisassociateBrowserSettingsResponse =
+module DisassociateIpAccessSettingsResponse =
   struct
     type nonrec t = unit
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
@@ -5646,6 +12135,8 @@ module DisassociateBrowserSettingsResponse =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
@@ -5661,6 +12152,8 @@ module DisassociateBrowserSettingsResponse =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -5677,6 +12170,220 @@ module DisassociateBrowserSettingsResponse =
           `Assoc
             [("error", (`String "AccessDeniedException"));
             ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Disassociates IP access settings from a web portal."]
+module DisassociateIpAccessSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."]}
+    let context_ = "DisassociateIpAccessSettingsRequest"
+    let make ~portalArn = fun () -> { portalArn }
+    let to_value x =
+      structure_to_value [("portalArn", (Some (ARN.to_value x.portalArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let portalArn =
+        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
+      make ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
+      make ~portalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Disassociates IP access settings from a web portal."]
+module DisassociateDataProtectionSettingsResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disassociates data protection settings from a web portal."]
+module DisassociateDataProtectionSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."]}
+    let context_ = "DisassociateDataProtectionSettingsRequest"
+    let make ~portalArn = fun () -> { portalArn }
+    let to_value x =
+      structure_to_value [("portalArn", (Some (ARN.to_value x.portalArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let portalArn =
+        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
+      make ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
+      make ~portalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disassociates data protection settings from a web portal."]
+module DisassociateBrowserSettingsResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -5721,8 +12428,8 @@ module DisassociateBrowserSettingsRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
+    let of_json json__ =
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
       make ~portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates browser settings from a web portal."]
@@ -5818,11 +12525,114 @@ module DeleteUserSettingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "userSettingsArn") in
       make ~userSettingsArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userSettingsArn = field_map_exn json "userSettingsArn" ARN.of_json in
+    let of_json json__ =
+      let userSettingsArn =
+        field_map_exn json__ "userSettingsArn" ARN.of_json in
       make ~userSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes user settings."]
+module DeleteUserAccessLoggingSettingsResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes user access logging settings."]
+module DeleteUserAccessLoggingSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      userAccessLoggingSettingsArn: ARN.t
+        [@ocaml.doc "The ARN of the user access logging settings."]}
+    let context_ = "DeleteUserAccessLoggingSettingsRequest"
+    let make ~userAccessLoggingSettingsArn =
+      fun () -> { userAccessLoggingSettingsArn }
+    let to_value x =
+      structure_to_value
+        [("userAccessLoggingSettingsArn",
+           (Some (ARN.to_value x.userAccessLoggingSettingsArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userAccessLoggingSettingsArn =
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "userAccessLoggingSettingsArn") in
+      make ~userAccessLoggingSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userAccessLoggingSettingsArn =
+        field_map_exn json__ "userAccessLoggingSettingsArn" ARN.of_json in
+      make ~userAccessLoggingSettingsArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes user access logging settings."]
 module DeleteTrustStoreResponse =
   struct
     type nonrec t = unit
@@ -5914,11 +12724,109 @@ module DeleteTrustStoreRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "trustStoreArn") in
       make ~trustStoreArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
+    let of_json json__ =
+      let trustStoreArn = field_map_exn json__ "trustStoreArn" ARN.of_json in
       make ~trustStoreArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the trust store."]
+module DeleteSessionLoggerResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a session logger resource."]
+module DeleteSessionLoggerRequest =
+  struct
+    type nonrec t =
+      {
+      sessionLoggerArn: ARN.t [@ocaml.doc "The ARN of the session logger."]}
+    let context_ = "DeleteSessionLoggerRequest"
+    let make ~sessionLoggerArn = fun () -> { sessionLoggerArn }
+    let to_value x =
+      structure_to_value
+        [("sessionLoggerArn", (Some (ARN.to_value x.sessionLoggerArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sessionLoggerArn =
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sessionLoggerArn") in
+      make ~sessionLoggerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sessionLoggerArn =
+        field_map_exn json__ "sessionLoggerArn" ARN.of_json in
+      make ~sessionLoggerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a session logger resource."]
 module DeletePortalResponse =
   struct
     type nonrec t = unit
@@ -6009,8 +12917,8 @@ module DeletePortalRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
+    let of_json json__ =
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
       make ~portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a web portal."]
@@ -6107,12 +13015,111 @@ module DeleteNetworkSettingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "networkSettingsArn") in
       make ~networkSettingsArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let networkSettingsArn =
-        field_map_exn json "networkSettingsArn" ARN.of_json in
+        field_map_exn json__ "networkSettingsArn" ARN.of_json in
       make ~networkSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes network settings."]
+module DeleteIpAccessSettingsResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes IP access settings."]
+module DeleteIpAccessSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      ipAccessSettingsArn: ARN.t
+        [@ocaml.doc "The ARN of the IP access settings."]}
+    let context_ = "DeleteIpAccessSettingsRequest"
+    let make ~ipAccessSettingsArn = fun () -> { ipAccessSettingsArn }
+    let to_value x =
+      structure_to_value
+        [("ipAccessSettingsArn", (Some (ARN.to_value x.ipAccessSettingsArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipAccessSettingsArn =
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ipAccessSettingsArn") in
+      make ~ipAccessSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipAccessSettingsArn =
+        field_map_exn json__ "ipAccessSettingsArn" ARN.of_json in
+      make ~ipAccessSettingsArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes IP access settings."]
 module DeleteIdentityProviderResponse =
   struct
     type nonrec t = unit
@@ -6192,26 +13199,129 @@ module DeleteIdentityProviderRequest =
   struct
     type nonrec t =
       {
-      identityProviderArn: ARN.t
+      identityProviderArn: SubresourceARN.t
         [@ocaml.doc "The ARN of the identity provider."]}
     let context_ = "DeleteIdentityProviderRequest"
     let make ~identityProviderArn = fun () -> { identityProviderArn }
     let to_value x =
       structure_to_value
-        [("identityProviderArn", (Some (ARN.to_value x.identityProviderArn)))]
+        [("identityProviderArn",
+           (Some (SubresourceARN.to_value x.identityProviderArn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let identityProviderArn =
-        ARN.of_xml
+        SubresourceARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "identityProviderArn") in
       make ~identityProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityProviderArn =
-        field_map_exn json "identityProviderArn" ARN.of_json in
+        field_map_exn json__ "identityProviderArn" SubresourceARN.of_json in
       make ~identityProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the identity provider."]
+module DeleteDataProtectionSettingsResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes data protection settings."]
+module DeleteDataProtectionSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      dataProtectionSettingsArn: ARN.t
+        [@ocaml.doc "The ARN of the data protection settings."]}
+    let context_ = "DeleteDataProtectionSettingsRequest"
+    let make ~dataProtectionSettingsArn =
+      fun () -> { dataProtectionSettingsArn }
+    let to_value x =
+      structure_to_value
+        [("dataProtectionSettingsArn",
+           (Some (ARN.to_value x.dataProtectionSettingsArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataProtectionSettingsArn =
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "dataProtectionSettingsArn") in
+      make ~dataProtectionSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataProtectionSettingsArn =
+        field_map_exn json__ "dataProtectionSettingsArn" ARN.of_json in
+      make ~dataProtectionSettingsArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes data protection settings."]
 module DeleteBrowserSettingsResponse =
   struct
     type nonrec t = unit
@@ -6305,9 +13415,9 @@ module DeleteBrowserSettingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "browserSettingsArn") in
       make ~browserSettingsArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let browserSettingsArn =
-        field_map_exn json "browserSettingsArn" ARN.of_json in
+        field_map_exn json__ "browserSettingsArn" ARN.of_json in
       make ~browserSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes browser settings."]
@@ -6315,17 +13425,18 @@ module CreateUserSettingsResponse =
   struct
     type nonrec t =
       {
-      userSettingsArn: ARN.t [@ocaml.doc "The ARN of the user settings."]}
+      userSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the user settings."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateUserSettingsResponse"
-    let make ~userSettingsArn = fun () -> { userSettingsArn }
+    let make ?userSettingsArn = fun () -> { userSettingsArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6334,6 +13445,8 @@ module CreateUserSettingsResponse =
           `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceQuotaExceededException" ->
           `ServiceQuotaExceededException
             (ServiceQuotaExceededException.of_json json)
@@ -6352,6 +13465,8 @@ module CreateUserSettingsResponse =
           `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceQuotaExceededException" ->
           `ServiceQuotaExceededException
             (ServiceQuotaExceededException.of_xml xml)
@@ -6375,6 +13490,10 @@ module CreateUserSettingsResponse =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `ServiceQuotaExceededException e ->
           `Assoc
             [("error", (`String "ServiceQuotaExceededException"));
@@ -6394,17 +13513,16 @@ module CreateUserSettingsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("userSettingsArn", (Some (ARN.to_value x.userSettingsArn)))]
+        [("userSettingsArn", (Option.map x.userSettingsArn ~f:ARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let userSettingsArn =
-        ARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "userSettingsArn") in
-      make ~userSettingsArn ()
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "userSettingsArn") in
+      make ?userSettingsArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userSettingsArn = field_map_exn json "userSettingsArn" ARN.of_json in
-      make ~userSettingsArn ()
+    let of_json json__ =
+      let userSettingsArn = field_map json__ "userSettingsArn" ARN.of_json in
+      make ?userSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a user settings resource that can be associated with a web portal. Once associated with a web portal, user settings control how users can transfer data between a streaming session and the their local devices."]
@@ -6412,99 +13530,228 @@ module CreateUserSettingsRequest =
   struct
     type nonrec t =
       {
-      clientToken: ClientToken.t option
-        [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the AWS SDK."];
       copyAllowed: EnabledType.t
         [@ocaml.doc
           "Specifies whether the user can copy text from the streaming session to the local device."];
-      downloadAllowed: EnabledType.t
-        [@ocaml.doc
-          "Specifies whether the user can download files from the streaming session to the local device."];
       pasteAllowed: EnabledType.t
         [@ocaml.doc
           "Specifies whether the user can paste text from the local device to the streaming session."];
+      downloadAllowed: EnabledType.t
+        [@ocaml.doc
+          "Specifies whether the user can download files from the streaming session to the local device."];
+      uploadAllowed: EnabledType.t
+        [@ocaml.doc
+          "Specifies whether the user can upload files from the local device to the streaming session."];
       printAllowed: EnabledType.t
         [@ocaml.doc
           "Specifies whether the user can print to the local device."];
       tags: TagList.t option
         [@ocaml.doc
           "The tags to add to the user settings resource. A tag is a key-value pair."];
-      uploadAllowed: EnabledType.t
+      disconnectTimeoutInMinutes: DisconnectTimeoutInMinutes.t option
         [@ocaml.doc
-          "Specifies whether the user can upload files from the local device to the streaming session."]}
+          "The amount of time that a streaming session remains active after users disconnect."];
+      idleDisconnectTimeoutInMinutes: IdleDisconnectTimeoutInMinutes.t option
+        [@ocaml.doc
+          "The amount of time that users can be idle (inactive) before they are disconnected from their streaming session and the disconnect timeout interval begins."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."];
+      cookieSynchronizationConfiguration:
+        CookieSynchronizationConfiguration.t option
+        [@ocaml.doc
+          "The configuration that specifies which cookies should be synchronized from the end user's local browser to the remote browser."];
+      customerManagedKey: KeyArn.t option
+        [@ocaml.doc
+          "The customer managed key used to encrypt sensitive information in the user settings."];
+      additionalEncryptionContext: EncryptionContextMap.t option
+        [@ocaml.doc
+          "The additional encryption context of the user settings."];
+      deepLinkAllowed: EnabledType.t option
+        [@ocaml.doc
+          "Specifies whether the user can use deep links that open automatically when connecting to a session."];
+      toolbarConfiguration: ToolbarConfiguration.t option
+        [@ocaml.doc
+          "The configuration of the toolbar. This allows administrators to select the toolbar type and visual mode, set maximum display resolution for sessions, and choose which items are visible to end users during their sessions. If administrators do not modify these settings, end users retain control over their toolbar preferences."];
+      brandingConfigurationInput: BrandingConfigurationCreateInput.t option
+        [@ocaml.doc
+          "The branding configuration input that customizes the appearance of the web portal for end users. This includes a custom logo, favicon, localized strings, color theme, and optionally a wallpaper and terms of service."];
+      webAuthnAllowed: EnabledType.t option
+        [@ocaml.doc
+          "Specifies whether the user can use WebAuthn redirection for passwordless login to websites within the streaming session."]}
     let context_ = "CreateUserSettingsRequest"
-    let make ?clientToken =
-      fun ?tags ->
-        fun ~copyAllowed ->
-          fun ~downloadAllowed ->
-            fun ~pasteAllowed ->
-              fun ~printAllowed ->
-                fun ~uploadAllowed ->
-                  fun () ->
-                    {
-                      clientToken;
-                      tags;
-                      copyAllowed;
-                      downloadAllowed;
-                      pasteAllowed;
-                      printAllowed;
-                      uploadAllowed
-                    }
+    let make ?tags =
+      fun ?disconnectTimeoutInMinutes ->
+        fun ?idleDisconnectTimeoutInMinutes ->
+          fun ?clientToken ->
+            fun ?cookieSynchronizationConfiguration ->
+              fun ?customerManagedKey ->
+                fun ?additionalEncryptionContext ->
+                  fun ?deepLinkAllowed ->
+                    fun ?toolbarConfiguration ->
+                      fun ?brandingConfigurationInput ->
+                        fun ?webAuthnAllowed ->
+                          fun ~copyAllowed ->
+                            fun ~pasteAllowed ->
+                              fun ~downloadAllowed ->
+                                fun ~uploadAllowed ->
+                                  fun ~printAllowed ->
+                                    fun () ->
+                                      {
+                                        tags;
+                                        disconnectTimeoutInMinutes;
+                                        idleDisconnectTimeoutInMinutes;
+                                        clientToken;
+                                        cookieSynchronizationConfiguration;
+                                        customerManagedKey;
+                                        additionalEncryptionContext;
+                                        deepLinkAllowed;
+                                        toolbarConfiguration;
+                                        brandingConfigurationInput;
+                                        webAuthnAllowed;
+                                        copyAllowed;
+                                        pasteAllowed;
+                                        downloadAllowed;
+                                        uploadAllowed;
+                                        printAllowed
+                                      }
     let to_value x =
       structure_to_value
-        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
-        ("copyAllowed", (Some (EnabledType.to_value x.copyAllowed)));
-        ("downloadAllowed", (Some (EnabledType.to_value x.downloadAllowed)));
+        [("copyAllowed", (Some (EnabledType.to_value x.copyAllowed)));
         ("pasteAllowed", (Some (EnabledType.to_value x.pasteAllowed)));
+        ("downloadAllowed", (Some (EnabledType.to_value x.downloadAllowed)));
+        ("uploadAllowed", (Some (EnabledType.to_value x.uploadAllowed)));
         ("printAllowed", (Some (EnabledType.to_value x.printAllowed)));
         ("tags", (Option.map x.tags ~f:TagList.to_value));
-        ("uploadAllowed", (Some (EnabledType.to_value x.uploadAllowed)))]
+        ("disconnectTimeoutInMinutes",
+          (Option.map x.disconnectTimeoutInMinutes
+             ~f:DisconnectTimeoutInMinutes.to_value));
+        ("idleDisconnectTimeoutInMinutes",
+          (Option.map x.idleDisconnectTimeoutInMinutes
+             ~f:IdleDisconnectTimeoutInMinutes.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("cookieSynchronizationConfiguration",
+          (Option.map x.cookieSynchronizationConfiguration
+             ~f:CookieSynchronizationConfiguration.to_value));
+        ("customerManagedKey",
+          (Option.map x.customerManagedKey ~f:KeyArn.to_value));
+        ("additionalEncryptionContext",
+          (Option.map x.additionalEncryptionContext
+             ~f:EncryptionContextMap.to_value));
+        ("deepLinkAllowed",
+          (Option.map x.deepLinkAllowed ~f:EnabledType.to_value));
+        ("toolbarConfiguration",
+          (Option.map x.toolbarConfiguration ~f:ToolbarConfiguration.to_value));
+        ("brandingConfigurationInput",
+          (Option.map x.brandingConfigurationInput
+             ~f:BrandingConfigurationCreateInput.to_value));
+        ("webAuthnAllowed",
+          (Option.map x.webAuthnAllowed ~f:EnabledType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let uploadAllowed =
-        EnabledType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "uploadAllowed") in
+      let webAuthnAllowed =
+        (Option.map ~f:EnabledType.of_xml)
+          (Xml.child xml_arg0 "webAuthnAllowed") in
+      let brandingConfigurationInput =
+        (Option.map ~f:BrandingConfigurationCreateInput.of_xml)
+          (Xml.child xml_arg0 "brandingConfigurationInput") in
+      let toolbarConfiguration =
+        (Option.map ~f:ToolbarConfiguration.of_xml)
+          (Xml.child xml_arg0 "toolbarConfiguration") in
+      let deepLinkAllowed =
+        (Option.map ~f:EnabledType.of_xml)
+          (Xml.child xml_arg0 "deepLinkAllowed") in
+      let additionalEncryptionContext =
+        (Option.map ~f:EncryptionContextMap.of_xml)
+          (Xml.child xml_arg0 "additionalEncryptionContext") in
+      let customerManagedKey =
+        (Option.map ~f:KeyArn.of_xml)
+          (Xml.child xml_arg0 "customerManagedKey") in
+      let cookieSynchronizationConfiguration =
+        (Option.map ~f:CookieSynchronizationConfiguration.of_xml)
+          (Xml.child xml_arg0 "cookieSynchronizationConfiguration") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let idleDisconnectTimeoutInMinutes =
+        (Option.map ~f:IdleDisconnectTimeoutInMinutes.of_xml)
+          (Xml.child xml_arg0 "idleDisconnectTimeoutInMinutes") in
+      let disconnectTimeoutInMinutes =
+        (Option.map ~f:DisconnectTimeoutInMinutes.of_xml)
+          (Xml.child xml_arg0 "disconnectTimeoutInMinutes") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       let printAllowed =
         EnabledType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "printAllowed") in
-      let pasteAllowed =
+      let uploadAllowed =
         EnabledType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "pasteAllowed") in
+          (Xml.child_exn ~context:context_ xml_arg0 "uploadAllowed") in
       let downloadAllowed =
         EnabledType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "downloadAllowed") in
+      let pasteAllowed =
+        EnabledType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "pasteAllowed") in
       let copyAllowed =
         EnabledType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "copyAllowed") in
-      let clientToken =
-        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
-      make ~uploadAllowed ?tags ~printAllowed ~pasteAllowed ~downloadAllowed
-        ~copyAllowed ?clientToken ()
+      make ?webAuthnAllowed ?brandingConfigurationInput ?toolbarConfiguration
+        ?deepLinkAllowed ?additionalEncryptionContext ?customerManagedKey
+        ?cookieSynchronizationConfiguration ?clientToken
+        ?idleDisconnectTimeoutInMinutes ?disconnectTimeoutInMinutes ?tags
+        ~printAllowed ~uploadAllowed ~downloadAllowed ~pasteAllowed
+        ~copyAllowed ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let uploadAllowed =
-        field_map_exn json "uploadAllowed" EnabledType.of_json in
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let webAuthnAllowed =
+        field_map json__ "webAuthnAllowed" EnabledType.of_json in
+      let brandingConfigurationInput =
+        field_map json__ "brandingConfigurationInput"
+          BrandingConfigurationCreateInput.of_json in
+      let toolbarConfiguration =
+        field_map json__ "toolbarConfiguration" ToolbarConfiguration.of_json in
+      let deepLinkAllowed =
+        field_map json__ "deepLinkAllowed" EnabledType.of_json in
+      let additionalEncryptionContext =
+        field_map json__ "additionalEncryptionContext"
+          EncryptionContextMap.of_json in
+      let customerManagedKey =
+        field_map json__ "customerManagedKey" KeyArn.of_json in
+      let cookieSynchronizationConfiguration =
+        field_map json__ "cookieSynchronizationConfiguration"
+          CookieSynchronizationConfiguration.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let idleDisconnectTimeoutInMinutes =
+        field_map json__ "idleDisconnectTimeoutInMinutes"
+          IdleDisconnectTimeoutInMinutes.of_json in
+      let disconnectTimeoutInMinutes =
+        field_map json__ "disconnectTimeoutInMinutes"
+          DisconnectTimeoutInMinutes.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let printAllowed =
-        field_map_exn json "printAllowed" EnabledType.of_json in
-      let pasteAllowed =
-        field_map_exn json "pasteAllowed" EnabledType.of_json in
+        field_map_exn json__ "printAllowed" EnabledType.of_json in
+      let uploadAllowed =
+        field_map_exn json__ "uploadAllowed" EnabledType.of_json in
       let downloadAllowed =
-        field_map_exn json "downloadAllowed" EnabledType.of_json in
-      let copyAllowed = field_map_exn json "copyAllowed" EnabledType.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      make ~uploadAllowed ?tags ~printAllowed ~pasteAllowed ~downloadAllowed
-        ~copyAllowed ?clientToken ()
+        field_map_exn json__ "downloadAllowed" EnabledType.of_json in
+      let pasteAllowed =
+        field_map_exn json__ "pasteAllowed" EnabledType.of_json in
+      let copyAllowed =
+        field_map_exn json__ "copyAllowed" EnabledType.of_json in
+      make ?webAuthnAllowed ?brandingConfigurationInput ?toolbarConfiguration
+        ?deepLinkAllowed ?additionalEncryptionContext ?customerManagedKey
+        ?cookieSynchronizationConfiguration ?clientToken
+        ?idleDisconnectTimeoutInMinutes ?disconnectTimeoutInMinutes ?tags
+        ~printAllowed ~uploadAllowed ~downloadAllowed ~pasteAllowed
+        ~copyAllowed ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a user settings resource that can be associated with a web portal. Once associated with a web portal, user settings control how users can transfer data between a streaming session and the their local devices."]
-module CreateTrustStoreResponse =
+module CreateUserAccessLoggingSettingsResponse =
   struct
     type nonrec t =
       {
-      trustStoreArn: ARN.t [@ocaml.doc "The ARN of the trust store."]}
+      userAccessLoggingSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the user access logging settings."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -6513,8 +13760,8 @@ module CreateTrustStoreResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateTrustStoreResponse"
-    let make ~trustStoreArn = fun () -> { trustStoreArn }
+    let make ?userAccessLoggingSettingsArn =
+      fun () -> { userAccessLoggingSettingsArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6583,16 +13830,156 @@ module CreateTrustStoreResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("trustStoreArn", (Some (ARN.to_value x.trustStoreArn)))]
+        [("userAccessLoggingSettingsArn",
+           (Option.map x.userAccessLoggingSettingsArn ~f:ARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userAccessLoggingSettingsArn =
+        (Option.map ~f:ARN.of_xml)
+          (Xml.child xml_arg0 "userAccessLoggingSettingsArn") in
+      make ?userAccessLoggingSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userAccessLoggingSettingsArn =
+        field_map json__ "userAccessLoggingSettingsArn" ARN.of_json in
+      make ?userAccessLoggingSettingsArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a user access logging settings resource that can be associated with a web portal."]
+module CreateUserAccessLoggingSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      kinesisStreamArn: KinesisStreamArn.t
+        [@ocaml.doc "The ARN of the Kinesis stream."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "The tags to add to the user settings resource. A tag is a key-value pair."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."]}
+    let context_ = "CreateUserAccessLoggingSettingsRequest"
+    let make ?tags =
+      fun ?clientToken ->
+        fun ~kinesisStreamArn ->
+          fun () -> { tags; clientToken; kinesisStreamArn }
+    let to_value x =
+      structure_to_value
+        [("kinesisStreamArn",
+           (Some (KinesisStreamArn.to_value x.kinesisStreamArn)));
+        ("tags", (Option.map x.tags ~f:TagList.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let kinesisStreamArn =
+        KinesisStreamArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "kinesisStreamArn") in
+      make ?clientToken ?tags ~kinesisStreamArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let kinesisStreamArn =
+        field_map_exn json__ "kinesisStreamArn" KinesisStreamArn.of_json in
+      make ?clientToken ?tags ~kinesisStreamArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a user access logging settings resource that can be associated with a web portal."]
+module CreateTrustStoreResponse =
+  struct
+    type nonrec t =
+      {
+      trustStoreArn: ARN.t option [@ocaml.doc "The ARN of the trust store."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?trustStoreArn = fun () -> { trustStoreArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("trustStoreArn", (Option.map x.trustStoreArn ~f:ARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let trustStoreArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "trustStoreArn") in
-      make ~trustStoreArn ()
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "trustStoreArn") in
+      make ?trustStoreArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
-      make ~trustStoreArn ()
+    let of_json json__ =
+      let trustStoreArn = field_map json__ "trustStoreArn" ARN.of_json in
+      make ?trustStoreArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a trust store that can be associated with a web portal. A trust store contains certificate authority (CA) certificates. Once associated with a web portal, the browser in a streaming session will recognize certificates that have been issued using any of the CAs in the trust store. If your organization has internal websites that use certificates issued by private CAs, you should add the private CA certificate to the trust store."]
@@ -6603,48 +13990,239 @@ module CreateTrustStoreRequest =
       certificateList: CertificateList.t
         [@ocaml.doc
           "A list of CA certificates to be added to the trust store."];
-      clientToken: ClientToken.t option
-        [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the AWS SDK."];
       tags: TagList.t option
         [@ocaml.doc
-          "The tags to add to the trust store. A tag is a key-value pair."]}
+          "The tags to add to the trust store. A tag is a key-value pair."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."]}
     let context_ = "CreateTrustStoreRequest"
-    let make ?clientToken =
-      fun ?tags ->
+    let make ?tags =
+      fun ?clientToken ->
         fun ~certificateList ->
-          fun () -> { clientToken; tags; certificateList }
+          fun () -> { tags; clientToken; certificateList }
     let to_value x =
       structure_to_value
         [("certificateList",
            (Some (CertificateList.to_value x.certificateList)));
-        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
-        ("tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("tags", (Option.map x.tags ~f:TagList.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       let certificateList =
         CertificateList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "certificateList") in
-      make ?tags ?clientToken ~certificateList ()
+      make ?clientToken ?tags ~certificateList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let certificateList =
-        field_map_exn json "certificateList" CertificateList.of_json in
-      make ?tags ?clientToken ~certificateList ()
+        field_map_exn json__ "certificateList" CertificateList.of_json in
+      make ?clientToken ?tags ~certificateList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a trust store that can be associated with a web portal. A trust store contains certificate authority (CA) certificates. Once associated with a web portal, the browser in a streaming session will recognize certificates that have been issued using any of the CAs in the trust store. If your organization has internal websites that use certificates issued by private CAs, you should add the private CA certificate to the trust store."]
+module CreateSessionLoggerResponse =
+  struct
+    type nonrec t =
+      {
+      sessionLoggerArn: ARN.t option
+        [@ocaml.doc "The ARN of the session logger."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sessionLoggerArn = fun () -> { sessionLoggerArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("sessionLoggerArn",
+           (Option.map x.sessionLoggerArn ~f:ARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sessionLoggerArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "sessionLoggerArn") in
+      make ?sessionLoggerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sessionLoggerArn = field_map json__ "sessionLoggerArn" ARN.of_json in
+      make ?sessionLoggerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a session logger."]
+module CreateSessionLoggerRequest =
+  struct
+    type nonrec t =
+      {
+      eventFilter: EventFilter.t
+        [@ocaml.doc "The filter that specifies the events to monitor."];
+      logConfiguration: LogConfiguration.t
+        [@ocaml.doc
+          "The configuration that specifies where logs are delivered."];
+      displayName: DisplayNameSafe.t option
+        [@ocaml.doc
+          "The human-readable display name for the session logger resource."];
+      customerManagedKey: KeyArn.t option
+        [@ocaml.doc "The custom managed key of the session logger."];
+      additionalEncryptionContext: EncryptionContextMap.t option
+        [@ocaml.doc
+          "The additional encryption context of the session logger."];
+      tags: TagList.t option
+        [@ocaml.doc "The tags to add to the session logger."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the AWS SDK."]}
+    let context_ = "CreateSessionLoggerRequest"
+    let make ?displayName =
+      fun ?customerManagedKey ->
+        fun ?additionalEncryptionContext ->
+          fun ?tags ->
+            fun ?clientToken ->
+              fun ~eventFilter ->
+                fun ~logConfiguration ->
+                  fun () ->
+                    {
+                      displayName;
+                      customerManagedKey;
+                      additionalEncryptionContext;
+                      tags;
+                      clientToken;
+                      eventFilter;
+                      logConfiguration
+                    }
+    let to_value x =
+      structure_to_value
+        [("eventFilter", (Some (EventFilter.to_value x.eventFilter)));
+        ("logConfiguration",
+          (Some (LogConfiguration.to_value x.logConfiguration)));
+        ("displayName",
+          (Option.map x.displayName ~f:DisplayNameSafe.to_value));
+        ("customerManagedKey",
+          (Option.map x.customerManagedKey ~f:KeyArn.to_value));
+        ("additionalEncryptionContext",
+          (Option.map x.additionalEncryptionContext
+             ~f:EncryptionContextMap.to_value));
+        ("tags", (Option.map x.tags ~f:TagList.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let additionalEncryptionContext =
+        (Option.map ~f:EncryptionContextMap.of_xml)
+          (Xml.child xml_arg0 "additionalEncryptionContext") in
+      let customerManagedKey =
+        (Option.map ~f:KeyArn.of_xml)
+          (Xml.child xml_arg0 "customerManagedKey") in
+      let displayName =
+        (Option.map ~f:DisplayNameSafe.of_xml)
+          (Xml.child xml_arg0 "displayName") in
+      let logConfiguration =
+        LogConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "logConfiguration") in
+      let eventFilter =
+        EventFilter.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "eventFilter") in
+      make ?clientToken ?tags ?additionalEncryptionContext
+        ?customerManagedKey ?displayName ~logConfiguration ~eventFilter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let additionalEncryptionContext =
+        field_map json__ "additionalEncryptionContext"
+          EncryptionContextMap.of_json in
+      let customerManagedKey =
+        field_map json__ "customerManagedKey" KeyArn.of_json in
+      let displayName =
+        field_map json__ "displayName" DisplayNameSafe.of_json in
+      let logConfiguration =
+        field_map_exn json__ "logConfiguration" LogConfiguration.of_json in
+      let eventFilter =
+        field_map_exn json__ "eventFilter" EventFilter.of_json in
+      make ?clientToken ?tags ?additionalEncryptionContext
+        ?customerManagedKey ?displayName ~logConfiguration ~eventFilter ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a session logger."]
 module CreatePortalResponse =
   struct
     type nonrec t =
       {
-      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."];
-      portalEndpoint: PortalEndpoint.t
+      portalArn: ARN.t option [@ocaml.doc "The ARN of the web portal."];
+      portalEndpoint: PortalEndpoint.t option
         [@ocaml.doc
           "The endpoint URL of the web portal that users access in order to start streaming sessions."]}
     type nonrec error =
@@ -6656,9 +14234,8 @@ module CreatePortalResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreatePortalResponse"
-    let make ~portalArn =
-      fun ~portalEndpoint -> fun () -> { portalArn; portalEndpoint }
+    let make ?portalArn =
+      fun ?portalEndpoint -> fun () -> { portalArn; portalEndpoint }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6735,98 +14312,149 @@ module CreatePortalResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("portalArn", (Some (ARN.to_value x.portalArn)));
-        ("portalEndpoint", (Some (PortalEndpoint.to_value x.portalEndpoint)))]
+        [("portalArn", (Option.map x.portalArn ~f:ARN.to_value));
+        ("portalEndpoint",
+          (Option.map x.portalEndpoint ~f:PortalEndpoint.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let portalEndpoint =
-        PortalEndpoint.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "portalEndpoint") in
+        (Option.map ~f:PortalEndpoint.of_xml)
+          (Xml.child xml_arg0 "portalEndpoint") in
       let portalArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
-      make ~portalEndpoint ~portalArn ()
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "portalArn") in
+      make ?portalEndpoint ?portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let portalEndpoint =
-        field_map_exn json "portalEndpoint" PortalEndpoint.of_json in
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
-      make ~portalEndpoint ~portalArn ()
+        field_map json__ "portalEndpoint" PortalEndpoint.of_json in
+      let portalArn = field_map json__ "portalArn" ARN.of_json in
+      make ?portalEndpoint ?portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a web portal."]
 module CreatePortalRequest =
   struct
     type nonrec t =
       {
-      additionalEncryptionContext: EncryptionContextMap.t option
-        [@ocaml.doc "The additional encryption context of the portal."];
-      clientToken: ClientToken.t option
-        [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the AWS SDK."];
-      customerManagedKey: KeyArn.t option
-        [@ocaml.doc "The customer managed key of the web portal."];
       displayName: DisplayName.t option
         [@ocaml.doc
           "The name of the web portal. This is not visible to users who log into the web portal."];
       tags: TagList.t option
         [@ocaml.doc
-          "The tags to add to the web portal. A tag is a key-value pair."]}
-    let make ?additionalEncryptionContext =
-      fun ?clientToken ->
+          "The tags to add to the web portal. A tag is a key-value pair."];
+      customerManagedKey: KeyArn.t option
+        [@ocaml.doc "The customer managed key of the web portal."];
+      additionalEncryptionContext: EncryptionContextMap.t option
+        [@ocaml.doc "The additional encryption context of the portal."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."];
+      authenticationType: AuthenticationType.t option
+        [@ocaml.doc
+          "The type of authentication integration points used when signing into the web portal. Defaults to Standard. Standard web portals are authenticated directly through your identity provider. You need to call CreateIdentityProvider to integrate your identity provider with your web portal. User and group access to your web portal is controlled through your identity provider. IAM Identity Center web portals are authenticated through IAM Identity Center. Identity sources (including external identity provider integration), plus user and group access to your web portal, can be configured in the IAM Identity Center."];
+      instanceType: InstanceType.t option
+        [@ocaml.doc "The type and resources of the underlying instance."];
+      maxConcurrentSessions: MaxConcurrentSessions.t option
+        [@ocaml.doc
+          "The maximum number of concurrent sessions for the portal."];
+      portalCustomDomain: PortalCustomDomain.t option
+        [@ocaml.doc
+          "The custom domain of the web portal that users access in order to start streaming sessions."]}
+    let make ?displayName =
+      fun ?tags ->
         fun ?customerManagedKey ->
-          fun ?displayName ->
-            fun ?tags ->
-              fun () ->
-                {
-                  additionalEncryptionContext;
-                  clientToken;
-                  customerManagedKey;
-                  displayName;
-                  tags
-                }
+          fun ?additionalEncryptionContext ->
+            fun ?clientToken ->
+              fun ?authenticationType ->
+                fun ?instanceType ->
+                  fun ?maxConcurrentSessions ->
+                    fun ?portalCustomDomain ->
+                      fun () ->
+                        {
+                          displayName;
+                          tags;
+                          customerManagedKey;
+                          additionalEncryptionContext;
+                          clientToken;
+                          authenticationType;
+                          instanceType;
+                          maxConcurrentSessions;
+                          portalCustomDomain
+                        }
     let to_value x =
       structure_to_value
-        [("additionalEncryptionContext",
-           (Option.map x.additionalEncryptionContext
-              ~f:EncryptionContextMap.to_value));
-        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        [("displayName", (Option.map x.displayName ~f:DisplayName.to_value));
+        ("tags", (Option.map x.tags ~f:TagList.to_value));
         ("customerManagedKey",
           (Option.map x.customerManagedKey ~f:KeyArn.to_value));
-        ("displayName", (Option.map x.displayName ~f:DisplayName.to_value));
-        ("tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("additionalEncryptionContext",
+          (Option.map x.additionalEncryptionContext
+             ~f:EncryptionContextMap.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("authenticationType",
+          (Option.map x.authenticationType ~f:AuthenticationType.to_value));
+        ("instanceType",
+          (Option.map x.instanceType ~f:InstanceType.to_value));
+        ("maxConcurrentSessions",
+          (Option.map x.maxConcurrentSessions
+             ~f:MaxConcurrentSessions.to_value));
+        ("portalCustomDomain",
+          (Option.map x.portalCustomDomain ~f:PortalCustomDomain.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
-      let displayName =
-        (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "displayName") in
-      let customerManagedKey =
-        (Option.map ~f:KeyArn.of_xml)
-          (Xml.child xml_arg0 "customerManagedKey") in
+      let portalCustomDomain =
+        (Option.map ~f:PortalCustomDomain.of_xml)
+          (Xml.child xml_arg0 "portalCustomDomain") in
+      let maxConcurrentSessions =
+        (Option.map ~f:MaxConcurrentSessions.of_xml)
+          (Xml.child xml_arg0 "maxConcurrentSessions") in
+      let instanceType =
+        (Option.map ~f:InstanceType.of_xml)
+          (Xml.child xml_arg0 "instanceType") in
+      let authenticationType =
+        (Option.map ~f:AuthenticationType.of_xml)
+          (Xml.child xml_arg0 "authenticationType") in
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       let additionalEncryptionContext =
         (Option.map ~f:EncryptionContextMap.of_xml)
           (Xml.child xml_arg0 "additionalEncryptionContext") in
-      make ?tags ?displayName ?customerManagedKey ?clientToken
-        ?additionalEncryptionContext ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let displayName = field_map json "displayName" DisplayName.of_json in
       let customerManagedKey =
-        field_map json "customerManagedKey" KeyArn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+        (Option.map ~f:KeyArn.of_xml)
+          (Xml.child xml_arg0 "customerManagedKey") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let displayName =
+        (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "displayName") in
+      make ?portalCustomDomain ?maxConcurrentSessions ?instanceType
+        ?authenticationType ?clientToken ?additionalEncryptionContext
+        ?customerManagedKey ?tags ?displayName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let portalCustomDomain =
+        field_map json__ "portalCustomDomain" PortalCustomDomain.of_json in
+      let maxConcurrentSessions =
+        field_map json__ "maxConcurrentSessions"
+          MaxConcurrentSessions.of_json in
+      let instanceType = field_map json__ "instanceType" InstanceType.of_json in
+      let authenticationType =
+        field_map json__ "authenticationType" AuthenticationType.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let additionalEncryptionContext =
-        field_map json "additionalEncryptionContext"
+        field_map json__ "additionalEncryptionContext"
           EncryptionContextMap.of_json in
-      make ?tags ?displayName ?customerManagedKey ?clientToken
-        ?additionalEncryptionContext ()
+      let customerManagedKey =
+        field_map json__ "customerManagedKey" KeyArn.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      make ?portalCustomDomain ?maxConcurrentSessions ?instanceType
+        ?authenticationType ?clientToken ?additionalEncryptionContext
+        ?customerManagedKey ?tags ?displayName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a web portal."]
 module CreateNetworkSettingsResponse =
   struct
     type nonrec t =
       {
-      networkSettingsArn: ARN.t
+      networkSettingsArn: ARN.t option
         [@ocaml.doc "The ARN of the network settings."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -6836,8 +14464,7 @@ module CreateNetworkSettingsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateNetworkSettingsResponse"
-    let make ~networkSettingsArn = fun () -> { networkSettingsArn }
+    let make ?networkSettingsArn = fun () -> { networkSettingsArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6906,18 +14533,18 @@ module CreateNetworkSettingsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("networkSettingsArn", (Some (ARN.to_value x.networkSettingsArn)))]
+        [("networkSettingsArn",
+           (Option.map x.networkSettingsArn ~f:ARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let networkSettingsArn =
-        ARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "networkSettingsArn") in
-      make ~networkSettingsArn ()
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "networkSettingsArn") in
+      make ?networkSettingsArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let networkSettingsArn =
-        field_map_exn json "networkSettingsArn" ARN.of_json in
-      make ~networkSettingsArn ()
+        field_map json__ "networkSettingsArn" ARN.of_json in
+      make ?networkSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a network settings resource that can be associated with a web portal. Once associated with a web portal, network settings define how streaming instances will connect with your specified VPC."]
@@ -6925,78 +14552,264 @@ module CreateNetworkSettingsRequest =
   struct
     type nonrec t =
       {
-      clientToken: ClientToken.t option
-        [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the AWS SDK."];
-      securityGroupIds: SecurityGroupIdList.t
-        [@ocaml.doc
-          "One or more security groups used to control access from streaming instances to your VPC."];
+      vpcId: VpcId.t
+        [@ocaml.doc "The VPC that streaming instances will connect to."];
       subnetIds: SubnetIdList.t
         [@ocaml.doc
           "The subnets in which network interfaces are created to connect streaming instances to your VPC. At least two of these subnets must be in different availability zones."];
+      securityGroupIds: SecurityGroupIdList.t
+        [@ocaml.doc
+          "One or more security groups used to control access from streaming instances to your VPC."];
       tags: TagList.t option
         [@ocaml.doc
           "The tags to add to the network settings resource. A tag is a key-value pair."];
-      vpcId: VpcId.t
-        [@ocaml.doc "The VPC that streaming instances will connect to."]}
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."]}
     let context_ = "CreateNetworkSettingsRequest"
-    let make ?clientToken =
-      fun ?tags ->
-        fun ~securityGroupIds ->
+    let make ?tags =
+      fun ?clientToken ->
+        fun ~vpcId ->
           fun ~subnetIds ->
-            fun ~vpcId ->
+            fun ~securityGroupIds ->
               fun () ->
-                { clientToken; tags; securityGroupIds; subnetIds; vpcId }
+                { tags; clientToken; vpcId; subnetIds; securityGroupIds }
     let to_value x =
       structure_to_value
-        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        [("vpcId", (Some (VpcId.to_value x.vpcId)));
+        ("subnetIds", (Some (SubnetIdList.to_value x.subnetIds)));
         ("securityGroupIds",
           (Some (SecurityGroupIdList.to_value x.securityGroupIds)));
-        ("subnetIds", (Some (SubnetIdList.to_value x.subnetIds)));
         ("tags", (Option.map x.tags ~f:TagList.to_value));
-        ("vpcId", (Some (VpcId.to_value x.vpcId)))]
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let vpcId =
-        VpcId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "vpcId") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
-      let subnetIds =
-        SubnetIdList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "subnetIds") in
       let securityGroupIds =
         SecurityGroupIdList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "securityGroupIds") in
-      let clientToken =
-        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
-      make ~vpcId ?tags ~subnetIds ~securityGroupIds ?clientToken ()
+      let subnetIds =
+        SubnetIdList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "subnetIds") in
+      let vpcId =
+        VpcId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "vpcId") in
+      make ?clientToken ?tags ~securityGroupIds ~subnetIds ~vpcId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map_exn json "vpcId" VpcId.of_json in
-      let tags = field_map json "tags" TagList.of_json in
-      let subnetIds = field_map_exn json "subnetIds" SubnetIdList.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let securityGroupIds =
-        field_map_exn json "securityGroupIds" SecurityGroupIdList.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      make ~vpcId ?tags ~subnetIds ~securityGroupIds ?clientToken ()
+        field_map_exn json__ "securityGroupIds" SecurityGroupIdList.of_json in
+      let subnetIds = field_map_exn json__ "subnetIds" SubnetIdList.of_json in
+      let vpcId = field_map_exn json__ "vpcId" VpcId.of_json in
+      make ?clientToken ?tags ~securityGroupIds ~subnetIds ~vpcId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a network settings resource that can be associated with a web portal. Once associated with a web portal, network settings define how streaming instances will connect with your specified VPC."]
+module CreateIpAccessSettingsResponse =
+  struct
+    type nonrec t =
+      {
+      ipAccessSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the IP access settings resource."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?ipAccessSettingsArn = fun () -> { ipAccessSettingsArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ipAccessSettingsArn",
+           (Option.map x.ipAccessSettingsArn ~f:ARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipAccessSettingsArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "ipAccessSettingsArn") in
+      make ?ipAccessSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipAccessSettingsArn =
+        field_map json__ "ipAccessSettingsArn" ARN.of_json in
+      make ?ipAccessSettingsArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an IP access settings resource that can be associated with a web portal."]
+module CreateIpAccessSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      displayName: DisplayName.t option
+        [@ocaml.doc "The display name of the IP access settings."];
+      description: Description.t option
+        [@ocaml.doc "The description of the IP access settings."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "The tags to add to the IP access settings resource. A tag is a key-value pair."];
+      customerManagedKey: KeyArn.t option
+        [@ocaml.doc "The custom managed key of the IP access settings."];
+      additionalEncryptionContext: EncryptionContextMap.t option
+        [@ocaml.doc
+          "Additional encryption context of the IP access settings."];
+      ipRules: IpRuleList.t
+        [@ocaml.doc "The IP rules of the IP access settings."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."]}
+    let context_ = "CreateIpAccessSettingsRequest"
+    let make ?displayName =
+      fun ?description ->
+        fun ?tags ->
+          fun ?customerManagedKey ->
+            fun ?additionalEncryptionContext ->
+              fun ?clientToken ->
+                fun ~ipRules ->
+                  fun () ->
+                    {
+                      displayName;
+                      description;
+                      tags;
+                      customerManagedKey;
+                      additionalEncryptionContext;
+                      clientToken;
+                      ipRules
+                    }
+    let to_value x =
+      structure_to_value
+        [("displayName", (Option.map x.displayName ~f:DisplayName.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("tags", (Option.map x.tags ~f:TagList.to_value));
+        ("customerManagedKey",
+          (Option.map x.customerManagedKey ~f:KeyArn.to_value));
+        ("additionalEncryptionContext",
+          (Option.map x.additionalEncryptionContext
+             ~f:EncryptionContextMap.to_value));
+        ("ipRules", (Some (IpRuleList.to_value x.ipRules)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let ipRules =
+        IpRuleList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ipRules") in
+      let additionalEncryptionContext =
+        (Option.map ~f:EncryptionContextMap.of_xml)
+          (Xml.child xml_arg0 "additionalEncryptionContext") in
+      let customerManagedKey =
+        (Option.map ~f:KeyArn.of_xml)
+          (Xml.child xml_arg0 "customerManagedKey") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let displayName =
+        (Option.map ~f:DisplayName.of_xml) (Xml.child xml_arg0 "displayName") in
+      make ?clientToken ~ipRules ?additionalEncryptionContext
+        ?customerManagedKey ?tags ?description ?displayName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let ipRules = field_map_exn json__ "ipRules" IpRuleList.of_json in
+      let additionalEncryptionContext =
+        field_map json__ "additionalEncryptionContext"
+          EncryptionContextMap.of_json in
+      let customerManagedKey =
+        field_map json__ "customerManagedKey" KeyArn.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      make ?clientToken ~ipRules ?additionalEncryptionContext
+        ?customerManagedKey ?tags ?description ?displayName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an IP access settings resource that can be associated with a web portal."]
 module CreateIdentityProviderResponse =
   struct
     type nonrec t =
       {
-      identityProviderArn: ARN.t
+      identityProviderArn: SubresourceARN.t option
         [@ocaml.doc "The ARN of the identity provider."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateIdentityProviderResponse"
-    let make ~identityProviderArn = fun () -> { identityProviderArn }
+    let make ?identityProviderArn = fun () -> { identityProviderArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7007,6 +14820,9 @@ module CreateIdentityProviderResponse =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
@@ -7024,6 +14840,9 @@ module CreateIdentityProviderResponse =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
@@ -7048,6 +14867,10 @@ module CreateIdentityProviderResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
       | `ThrottlingException e ->
           `Assoc
             [("error", (`String "ThrottlingException"));
@@ -7063,18 +14886,19 @@ module CreateIdentityProviderResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("identityProviderArn", (Some (ARN.to_value x.identityProviderArn)))]
+        [("identityProviderArn",
+           (Option.map x.identityProviderArn ~f:SubresourceARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let identityProviderArn =
-        ARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "identityProviderArn") in
-      make ~identityProviderArn ()
+        (Option.map ~f:SubresourceARN.of_xml)
+          (Xml.child xml_arg0 "identityProviderArn") in
+      make ?identityProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityProviderArn =
-        field_map_exn json "identityProviderArn" ARN.of_json in
-      make ~identityProviderArn ()
+        field_map json__ "identityProviderArn" SubresourceARN.of_json in
+      make ?identityProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an identity provider resource that is then associated with a web portal."]
@@ -7082,81 +14906,299 @@ module CreateIdentityProviderRequest =
   struct
     type nonrec t =
       {
-      clientToken: ClientToken.t option
-        [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the AWS SDK."];
-      identityProviderDetails: IdentityProviderDetails.t
-        [@ocaml.doc
-          "The identity provider details. The following list describes the provider detail keys for each identity provider type. For Google and Login with Amazon: client_id client_secret authorize_scopes For Facebook: client_id client_secret authorize_scopes api_version For Sign in with Apple: client_id team_id key_id private_key authorize_scopes For OIDC providers: client_id client_secret attributes_request_method oidc_issuer authorize_scopes authorize_url if not available from discovery URL specified by oidc_issuer key token_url if not available from discovery URL specified by oidc_issuer key attributes_url if not available from discovery URL specified by oidc_issuer key jwks_uri if not available from discovery URL specified by oidc_issuer key For SAML providers: MetadataFile OR MetadataURL IDPSignout optional"];
+      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."];
       identityProviderName: IdentityProviderName.t
         [@ocaml.doc "The identity provider name."];
       identityProviderType: IdentityProviderType.t
         [@ocaml.doc "The identity provider type."];
-      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."]}
+      identityProviderDetails: IdentityProviderDetails.t
+        [@ocaml.doc
+          "The identity provider details. The following list describes the provider detail keys for each identity provider type. For Google and Login with Amazon: client_id client_secret authorize_scopes For Facebook: client_id client_secret authorize_scopes api_version For Sign in with Apple: client_id team_id key_id private_key authorize_scopes For OIDC providers: client_id client_secret attributes_request_method oidc_issuer authorize_scopes authorize_url if not available from discovery URL specified by oidc_issuer key token_url if not available from discovery URL specified by oidc_issuer key attributes_url if not available from discovery URL specified by oidc_issuer key jwks_uri if not available from discovery URL specified by oidc_issuer key For SAML providers: MetadataFile OR MetadataURL IDPSignout (boolean) optional IDPInit (boolean) optional RequestSigningAlgorithm (string) optional - Only accepts rsa-sha256 EncryptedResponses (boolean) optional"];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "The tags to add to the identity provider resource. A tag is a key-value pair."]}
     let context_ = "CreateIdentityProviderRequest"
     let make ?clientToken =
-      fun ~identityProviderDetails ->
-        fun ~identityProviderName ->
-          fun ~identityProviderType ->
-            fun ~portalArn ->
-              fun () ->
-                {
-                  clientToken;
-                  identityProviderDetails;
-                  identityProviderName;
-                  identityProviderType;
-                  portalArn
-                }
+      fun ?tags ->
+        fun ~portalArn ->
+          fun ~identityProviderName ->
+            fun ~identityProviderType ->
+              fun ~identityProviderDetails ->
+                fun () ->
+                  {
+                    clientToken;
+                    tags;
+                    portalArn;
+                    identityProviderName;
+                    identityProviderType;
+                    identityProviderDetails
+                  }
     let to_value x =
       structure_to_value
-        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
-        ("identityProviderDetails",
-          (Some (IdentityProviderDetails.to_value x.identityProviderDetails)));
+        [("portalArn", (Some (ARN.to_value x.portalArn)));
         ("identityProviderName",
           (Some (IdentityProviderName.to_value x.identityProviderName)));
         ("identityProviderType",
           (Some (IdentityProviderType.to_value x.identityProviderType)));
-        ("portalArn", (Some (ARN.to_value x.portalArn)))]
+        ("identityProviderDetails",
+          (Some (IdentityProviderDetails.to_value x.identityProviderDetails)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let portalArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let identityProviderDetails =
+        IdentityProviderDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "identityProviderDetails") in
       let identityProviderType =
         IdentityProviderType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "identityProviderType") in
       let identityProviderName =
         IdentityProviderName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "identityProviderName") in
-      let identityProviderDetails =
-        IdentityProviderDetails.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "identityProviderDetails") in
-      let clientToken =
-        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
-      make ~portalArn ~identityProviderType ~identityProviderName
-        ~identityProviderDetails ?clientToken ()
+      let portalArn =
+        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
+      make ?tags ?clientToken ~identityProviderDetails ~identityProviderType
+        ~identityProviderName ~portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let identityProviderDetails =
+        field_map_exn json__ "identityProviderDetails"
+          IdentityProviderDetails.of_json in
       let identityProviderType =
-        field_map_exn json "identityProviderType"
+        field_map_exn json__ "identityProviderType"
           IdentityProviderType.of_json in
       let identityProviderName =
-        field_map_exn json "identityProviderName"
+        field_map_exn json__ "identityProviderName"
           IdentityProviderName.of_json in
-      let identityProviderDetails =
-        field_map_exn json "identityProviderDetails"
-          IdentityProviderDetails.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      make ~portalArn ~identityProviderType ~identityProviderName
-        ~identityProviderDetails ?clientToken ()
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
+      make ?tags ?clientToken ~identityProviderDetails ~identityProviderType
+        ~identityProviderName ~portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an identity provider resource that is then associated with a web portal."]
+module CreateDataProtectionSettingsResponse =
+  struct
+    type nonrec t =
+      {
+      dataProtectionSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the data protection settings resource."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dataProtectionSettingsArn =
+      fun () -> { dataProtectionSettingsArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("dataProtectionSettingsArn",
+           (Option.map x.dataProtectionSettingsArn ~f:ARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataProtectionSettingsArn =
+        (Option.map ~f:ARN.of_xml)
+          (Xml.child xml_arg0 "dataProtectionSettingsArn") in
+      make ?dataProtectionSettingsArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataProtectionSettingsArn =
+        field_map json__ "dataProtectionSettingsArn" ARN.of_json in
+      make ?dataProtectionSettingsArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a data protection settings resource that can be associated with a web portal."]
+module CreateDataProtectionSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      displayName: DisplayNameSafe.t option
+        [@ocaml.doc "The display name of the data protection settings."];
+      description: DescriptionSafe.t option
+        [@ocaml.doc "The description of the data protection settings."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "The tags to add to the data protection settings resource. A tag is a key-value pair."];
+      customerManagedKey: KeyArn.t option
+        [@ocaml.doc
+          "The custom managed key of the data protection settings."];
+      additionalEncryptionContext: EncryptionContextMap.t option
+        [@ocaml.doc
+          "Additional encryption context of the data protection settings."];
+      inlineRedactionConfiguration: InlineRedactionConfiguration.t option
+        [@ocaml.doc
+          "The inline redaction configuration of the data protection settings that will be applied to all sessions."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."]}
+    let make ?displayName =
+      fun ?description ->
+        fun ?tags ->
+          fun ?customerManagedKey ->
+            fun ?additionalEncryptionContext ->
+              fun ?inlineRedactionConfiguration ->
+                fun ?clientToken ->
+                  fun () ->
+                    {
+                      displayName;
+                      description;
+                      tags;
+                      customerManagedKey;
+                      additionalEncryptionContext;
+                      inlineRedactionConfiguration;
+                      clientToken
+                    }
+    let to_value x =
+      structure_to_value
+        [("displayName",
+           (Option.map x.displayName ~f:DisplayNameSafe.to_value));
+        ("description",
+          (Option.map x.description ~f:DescriptionSafe.to_value));
+        ("tags", (Option.map x.tags ~f:TagList.to_value));
+        ("customerManagedKey",
+          (Option.map x.customerManagedKey ~f:KeyArn.to_value));
+        ("additionalEncryptionContext",
+          (Option.map x.additionalEncryptionContext
+             ~f:EncryptionContextMap.to_value));
+        ("inlineRedactionConfiguration",
+          (Option.map x.inlineRedactionConfiguration
+             ~f:InlineRedactionConfiguration.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let inlineRedactionConfiguration =
+        (Option.map ~f:InlineRedactionConfiguration.of_xml)
+          (Xml.child xml_arg0 "inlineRedactionConfiguration") in
+      let additionalEncryptionContext =
+        (Option.map ~f:EncryptionContextMap.of_xml)
+          (Xml.child xml_arg0 "additionalEncryptionContext") in
+      let customerManagedKey =
+        (Option.map ~f:KeyArn.of_xml)
+          (Xml.child xml_arg0 "customerManagedKey") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let description =
+        (Option.map ~f:DescriptionSafe.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let displayName =
+        (Option.map ~f:DisplayNameSafe.of_xml)
+          (Xml.child xml_arg0 "displayName") in
+      make ?clientToken ?inlineRedactionConfiguration
+        ?additionalEncryptionContext ?customerManagedKey ?tags ?description
+        ?displayName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let inlineRedactionConfiguration =
+        field_map json__ "inlineRedactionConfiguration"
+          InlineRedactionConfiguration.of_json in
+      let additionalEncryptionContext =
+        field_map json__ "additionalEncryptionContext"
+          EncryptionContextMap.of_json in
+      let customerManagedKey =
+        field_map json__ "customerManagedKey" KeyArn.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let description =
+        field_map json__ "description" DescriptionSafe.of_json in
+      let displayName =
+        field_map json__ "displayName" DisplayNameSafe.of_json in
+      make ?clientToken ?inlineRedactionConfiguration
+        ?additionalEncryptionContext ?customerManagedKey ?tags ?description
+        ?displayName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a data protection settings resource that can be associated with a web portal."]
 module CreateBrowserSettingsResponse =
   struct
     type nonrec t =
       {
-      browserSettingsArn: ARN.t
+      browserSettingsArn: ARN.t option
         [@ocaml.doc "The ARN of the browser settings."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -7167,8 +15209,7 @@ module CreateBrowserSettingsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateBrowserSettingsResponse"
-    let make ~browserSettingsArn = fun () -> { browserSettingsArn }
+    let make ?browserSettingsArn = fun () -> { browserSettingsArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7245,18 +15286,18 @@ module CreateBrowserSettingsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("browserSettingsArn", (Some (ARN.to_value x.browserSettingsArn)))]
+        [("browserSettingsArn",
+           (Option.map x.browserSettingsArn ~f:ARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let browserSettingsArn =
-        ARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "browserSettingsArn") in
-      make ~browserSettingsArn ()
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "browserSettingsArn") in
+      make ?browserSettingsArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let browserSettingsArn =
-        field_map_exn json "browserSettingsArn" ARN.of_json in
-      make ~browserSettingsArn ()
+        field_map json__ "browserSettingsArn" ARN.of_json in
+      make ?browserSettingsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a browser settings resource that can be associated with a web portal. Once associated with a web portal, browser settings control how the browser will behave once a user starts a streaming session for the web portal."]
@@ -7264,72 +15305,86 @@ module CreateBrowserSettingsRequest =
   struct
     type nonrec t =
       {
+      tags: TagList.t option
+        [@ocaml.doc
+          "The tags to add to the browser settings resource. A tag is a key-value pair."];
+      customerManagedKey: KeyArn.t option
+        [@ocaml.doc "The custom managed key of the browser settings."];
       additionalEncryptionContext: EncryptionContextMap.t option
         [@ocaml.doc "Additional encryption context of the browser settings."];
-      browserPolicy: BrowserPolicy.t
+      browserPolicy: BrowserPolicy.t option
         [@ocaml.doc
           "A JSON string containing Chrome Enterprise policies that will be applied to all streaming sessions."];
       clientToken: ClientToken.t option
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the AWS SDK."];
-      customerManagedKey: KeyArn.t option
-        [@ocaml.doc "The custom managed key of the browser settings."];
-      tags: TagList.t option
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, subsequent retries with the same client token returns the result from the original successful request. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."];
+      webContentFilteringPolicy: WebContentFilteringPolicy.t option
         [@ocaml.doc
-          "The tags to add to the browser settings resource. A tag is a key-value pair."]}
-    let context_ = "CreateBrowserSettingsRequest"
-    let make ?additionalEncryptionContext =
-      fun ?clientToken ->
-        fun ?customerManagedKey ->
-          fun ?tags ->
-            fun ~browserPolicy ->
-              fun () ->
-                {
-                  additionalEncryptionContext;
-                  clientToken;
-                  customerManagedKey;
-                  tags;
-                  browserPolicy
-                }
+          "The policy that specifies which URLs end users are allowed to access or which URLs or domain categories they are restricted from accessing for enhanced security."]}
+    let make ?tags =
+      fun ?customerManagedKey ->
+        fun ?additionalEncryptionContext ->
+          fun ?browserPolicy ->
+            fun ?clientToken ->
+              fun ?webContentFilteringPolicy ->
+                fun () ->
+                  {
+                    tags;
+                    customerManagedKey;
+                    additionalEncryptionContext;
+                    browserPolicy;
+                    clientToken;
+                    webContentFilteringPolicy
+                  }
     let to_value x =
       structure_to_value
-        [("additionalEncryptionContext",
-           (Option.map x.additionalEncryptionContext
-              ~f:EncryptionContextMap.to_value));
-        ("browserPolicy", (Some (BrowserPolicy.to_value x.browserPolicy)));
-        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        [("tags", (Option.map x.tags ~f:TagList.to_value));
         ("customerManagedKey",
           (Option.map x.customerManagedKey ~f:KeyArn.to_value));
-        ("tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("additionalEncryptionContext",
+          (Option.map x.additionalEncryptionContext
+             ~f:EncryptionContextMap.to_value));
+        ("browserPolicy",
+          (Option.map x.browserPolicy ~f:BrowserPolicy.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("webContentFilteringPolicy",
+          (Option.map x.webContentFilteringPolicy
+             ~f:WebContentFilteringPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
-      let customerManagedKey =
-        (Option.map ~f:KeyArn.of_xml)
-          (Xml.child xml_arg0 "customerManagedKey") in
+      let webContentFilteringPolicy =
+        (Option.map ~f:WebContentFilteringPolicy.of_xml)
+          (Xml.child xml_arg0 "webContentFilteringPolicy") in
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       let browserPolicy =
-        BrowserPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "browserPolicy") in
+        (Option.map ~f:BrowserPolicy.of_xml)
+          (Xml.child xml_arg0 "browserPolicy") in
       let additionalEncryptionContext =
         (Option.map ~f:EncryptionContextMap.of_xml)
           (Xml.child xml_arg0 "additionalEncryptionContext") in
-      make ?tags ?customerManagedKey ?clientToken ~browserPolicy
-        ?additionalEncryptionContext ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
       let customerManagedKey =
-        field_map json "customerManagedKey" KeyArn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+        (Option.map ~f:KeyArn.of_xml)
+          (Xml.child xml_arg0 "customerManagedKey") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      make ?webContentFilteringPolicy ?clientToken ?browserPolicy
+        ?additionalEncryptionContext ?customerManagedKey ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let webContentFilteringPolicy =
+        field_map json__ "webContentFilteringPolicy"
+          WebContentFilteringPolicy.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let browserPolicy =
-        field_map_exn json "browserPolicy" BrowserPolicy.of_json in
+        field_map json__ "browserPolicy" BrowserPolicy.of_json in
       let additionalEncryptionContext =
-        field_map json "additionalEncryptionContext"
+        field_map json__ "additionalEncryptionContext"
           EncryptionContextMap.of_json in
-      make ?tags ?customerManagedKey ?clientToken ~browserPolicy
-        ?additionalEncryptionContext ()
+      let customerManagedKey =
+        field_map json__ "customerManagedKey" KeyArn.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      make ?webContentFilteringPolicy ?clientToken ?browserPolicy
+        ?additionalEncryptionContext ?customerManagedKey ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a browser settings resource that can be associated with a web portal. Once associated with a web portal, browser settings control how the browser will behave once a user starts a streaming session for the web portal."]
@@ -7337,8 +15392,9 @@ module AssociateUserSettingsResponse =
   struct
     type nonrec t =
       {
-      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."];
-      userSettingsArn: ARN.t [@ocaml.doc "The ARN of the user settings."]}
+      portalArn: ARN.t option [@ocaml.doc "The ARN of the web portal."];
+      userSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the user settings."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -7347,9 +15403,8 @@ module AssociateUserSettingsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "AssociateUserSettingsResponse"
-    let make ~portalArn =
-      fun ~userSettingsArn -> fun () -> { portalArn; userSettingsArn }
+    let make ?portalArn =
+      fun ?userSettingsArn -> fun () -> { portalArn; userSettingsArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7416,21 +15471,20 @@ module AssociateUserSettingsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("portalArn", (Some (ARN.to_value x.portalArn)));
-        ("userSettingsArn", (Some (ARN.to_value x.userSettingsArn)))]
+        [("portalArn", (Option.map x.portalArn ~f:ARN.to_value));
+        ("userSettingsArn", (Option.map x.userSettingsArn ~f:ARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let userSettingsArn =
-        ARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "userSettingsArn") in
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "userSettingsArn") in
       let portalArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
-      make ~userSettingsArn ~portalArn ()
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "portalArn") in
+      make ?userSettingsArn ?portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userSettingsArn = field_map_exn json "userSettingsArn" ARN.of_json in
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
-      make ~userSettingsArn ~portalArn ()
+    let of_json json__ =
+      let userSettingsArn = field_map json__ "userSettingsArn" ARN.of_json in
+      let portalArn = field_map json__ "portalArn" ARN.of_json in
+      make ?userSettingsArn ?portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a user settings resource with a web portal."]
 module AssociateUserSettingsRequest =
@@ -7455,32 +15509,37 @@ module AssociateUserSettingsRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~userSettingsArn ~portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userSettingsArn = field_map_exn json "userSettingsArn" ARN.of_json in
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
+    let of_json json__ =
+      let userSettingsArn =
+        field_map_exn json__ "userSettingsArn" ARN.of_json in
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
       make ~userSettingsArn ~portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a user settings resource with a web portal."]
-module AssociateTrustStoreResponse =
+module AssociateUserAccessLoggingSettingsResponse =
   struct
     type nonrec t =
       {
-      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."];
-      trustStoreArn: ARN.t [@ocaml.doc "The ARN of the trust store."]}
+      portalArn: ARN.t option [@ocaml.doc "The ARN of the web portal."];
+      userAccessLoggingSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the user access logging settings."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "AssociateTrustStoreResponse"
-    let make ~portalArn =
-      fun ~trustStoreArn -> fun () -> { portalArn; trustStoreArn }
+    let make ?portalArn =
+      fun ?userAccessLoggingSettingsArn ->
+        fun () -> { portalArn; userAccessLoggingSettingsArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
@@ -7496,6 +15555,8 @@ module AssociateTrustStoreResponse =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -7512,6 +15573,10 @@ module AssociateTrustStoreResponse =
           `Assoc
             [("error", (`String "AccessDeniedException"));
             ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -7535,20 +15600,156 @@ module AssociateTrustStoreResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
+        [("portalArn", (Option.map x.portalArn ~f:ARN.to_value));
+        ("userAccessLoggingSettingsArn",
+          (Option.map x.userAccessLoggingSettingsArn ~f:ARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userAccessLoggingSettingsArn =
+        (Option.map ~f:ARN.of_xml)
+          (Xml.child xml_arg0 "userAccessLoggingSettingsArn") in
+      let portalArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "portalArn") in
+      make ?userAccessLoggingSettingsArn ?portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userAccessLoggingSettingsArn =
+        field_map json__ "userAccessLoggingSettingsArn" ARN.of_json in
+      let portalArn = field_map json__ "portalArn" ARN.of_json in
+      make ?userAccessLoggingSettingsArn ?portalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates a user access logging settings resource with a web portal."]
+module AssociateUserAccessLoggingSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."];
+      userAccessLoggingSettingsArn: ARN.t
+        [@ocaml.doc "The ARN of the user access logging settings."]}
+    let context_ = "AssociateUserAccessLoggingSettingsRequest"
+    let make ~portalArn =
+      fun ~userAccessLoggingSettingsArn ->
+        fun () -> { portalArn; userAccessLoggingSettingsArn }
+    let to_value x =
+      structure_to_value
         [("portalArn", (Some (ARN.to_value x.portalArn)));
-        ("trustStoreArn", (Some (ARN.to_value x.trustStoreArn)))]
+        ("userAccessLoggingSettingsArn",
+          (Some (ARN.to_value x.userAccessLoggingSettingsArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userAccessLoggingSettingsArn =
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "userAccessLoggingSettingsArn") in
+      let portalArn =
+        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
+      make ~userAccessLoggingSettingsArn ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userAccessLoggingSettingsArn =
+        field_map_exn json__ "userAccessLoggingSettingsArn" ARN.of_json in
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
+      make ~userAccessLoggingSettingsArn ~portalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates a user access logging settings resource with a web portal."]
+module AssociateTrustStoreResponse =
+  struct
+    type nonrec t =
+      {
+      portalArn: ARN.t option [@ocaml.doc "The ARN of the web portal."];
+      trustStoreArn: ARN.t option [@ocaml.doc "The ARN of the trust store."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?portalArn =
+      fun ?trustStoreArn -> fun () -> { portalArn; trustStoreArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("portalArn", (Option.map x.portalArn ~f:ARN.to_value));
+        ("trustStoreArn", (Option.map x.trustStoreArn ~f:ARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let trustStoreArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "trustStoreArn") in
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "trustStoreArn") in
       let portalArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
-      make ~trustStoreArn ~portalArn ()
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "portalArn") in
+      make ?trustStoreArn ?portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
-      make ~trustStoreArn ~portalArn ()
+    let of_json json__ =
+      let trustStoreArn = field_map json__ "trustStoreArn" ARN.of_json in
+      let portalArn = field_map json__ "portalArn" ARN.of_json in
+      make ?trustStoreArn ?portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a trust store with a web portal."]
 module AssociateTrustStoreRequest =
@@ -7572,19 +15773,19 @@ module AssociateTrustStoreRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       make ~trustStoreArn ~portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustStoreArn = field_map_exn json "trustStoreArn" ARN.of_json in
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
+    let of_json json__ =
+      let trustStoreArn = field_map_exn json__ "trustStoreArn" ARN.of_json in
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
       make ~trustStoreArn ~portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a trust store with a web portal."]
-module AssociateNetworkSettingsResponse =
+module AssociateSessionLoggerResponse =
   struct
     type nonrec t =
       {
-      networkSettingsArn: ARN.t
-        [@ocaml.doc "The ARN of the network settings."];
-      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."]}
+      portalArn: ARN.t option [@ocaml.doc "The ARN of the portal."];
+      sessionLoggerArn: ARN.t option
+        [@ocaml.doc "The ARN of the session logger."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -7593,9 +15794,8 @@ module AssociateNetworkSettingsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "AssociateNetworkSettingsResponse"
-    let make ~networkSettingsArn =
-      fun ~portalArn -> fun () -> { networkSettingsArn; portalArn }
+    let make ?portalArn =
+      fun ?sessionLoggerArn -> fun () -> { portalArn; sessionLoggerArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7662,22 +15862,154 @@ module AssociateNetworkSettingsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("networkSettingsArn", (Some (ARN.to_value x.networkSettingsArn)));
-        ("portalArn", (Some (ARN.to_value x.portalArn)))]
+        [("portalArn", (Option.map x.portalArn ~f:ARN.to_value));
+        ("sessionLoggerArn", (Option.map x.sessionLoggerArn ~f:ARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sessionLoggerArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "sessionLoggerArn") in
+      let portalArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "portalArn") in
+      make ?sessionLoggerArn ?portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sessionLoggerArn = field_map json__ "sessionLoggerArn" ARN.of_json in
+      let portalArn = field_map json__ "portalArn" ARN.of_json in
+      make ?sessionLoggerArn ?portalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Associates a session logger with a portal."]
+module AssociateSessionLoggerRequest =
+  struct
+    type nonrec t =
+      {
+      portalArn: ARN.t
+        [@ocaml.doc
+          "The ARN of the portal to associate to the session logger ARN."];
+      sessionLoggerArn: ARN.t
+        [@ocaml.doc
+          "The ARN of the session logger to associate to the portal ARN."]}
+    let context_ = "AssociateSessionLoggerRequest"
+    let make ~portalArn =
+      fun ~sessionLoggerArn -> fun () -> { portalArn; sessionLoggerArn }
+    let to_value x =
+      structure_to_value
+        [("portalArn", (Some (ARN.to_value x.portalArn)));
+        ("sessionLoggerArn", (Some (ARN.to_value x.sessionLoggerArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sessionLoggerArn =
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sessionLoggerArn") in
       let portalArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
-      let networkSettingsArn =
-        ARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "networkSettingsArn") in
-      make ~portalArn ~networkSettingsArn ()
+      make ~sessionLoggerArn ~portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
+    let of_json json__ =
+      let sessionLoggerArn =
+        field_map_exn json__ "sessionLoggerArn" ARN.of_json in
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
+      make ~sessionLoggerArn ~portalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Associates a session logger with a portal."]
+module AssociateNetworkSettingsResponse =
+  struct
+    type nonrec t =
+      {
+      portalArn: ARN.t option [@ocaml.doc "The ARN of the web portal."];
+      networkSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the network settings."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?portalArn =
+      fun ?networkSettingsArn -> fun () -> { portalArn; networkSettingsArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("portalArn", (Option.map x.portalArn ~f:ARN.to_value));
+        ("networkSettingsArn",
+          (Option.map x.networkSettingsArn ~f:ARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
       let networkSettingsArn =
-        field_map_exn json "networkSettingsArn" ARN.of_json in
-      make ~portalArn ~networkSettingsArn ()
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "networkSettingsArn") in
+      let portalArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "portalArn") in
+      make ?networkSettingsArn ?portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkSettingsArn =
+        field_map json__ "networkSettingsArn" ARN.of_json in
+      let portalArn = field_map json__ "portalArn" ARN.of_json in
+      make ?networkSettingsArn ?portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Associates a network settings resource with a web portal."]
@@ -7685,40 +16017,40 @@ module AssociateNetworkSettingsRequest =
   struct
     type nonrec t =
       {
+      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."];
       networkSettingsArn: ARN.t
-        [@ocaml.doc "The ARN of the network settings."];
-      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."]}
+        [@ocaml.doc "The ARN of the network settings."]}
     let context_ = "AssociateNetworkSettingsRequest"
-    let make ~networkSettingsArn =
-      fun ~portalArn -> fun () -> { networkSettingsArn; portalArn }
+    let make ~portalArn =
+      fun ~networkSettingsArn -> fun () -> { portalArn; networkSettingsArn }
     let to_value x =
       structure_to_value
-        [("networkSettingsArn", (Some (ARN.to_value x.networkSettingsArn)));
-        ("portalArn", (Some (ARN.to_value x.portalArn)))]
+        [("portalArn", (Some (ARN.to_value x.portalArn)));
+        ("networkSettingsArn", (Some (ARN.to_value x.networkSettingsArn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let portalArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       let networkSettingsArn =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "networkSettingsArn") in
-      make ~portalArn ~networkSettingsArn ()
+      let portalArn =
+        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
+      make ~networkSettingsArn ~portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
+    let of_json json__ =
       let networkSettingsArn =
-        field_map_exn json "networkSettingsArn" ARN.of_json in
-      make ~portalArn ~networkSettingsArn ()
+        field_map_exn json__ "networkSettingsArn" ARN.of_json in
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
+      make ~networkSettingsArn ~portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Associates a network settings resource with a web portal."]
-module AssociateBrowserSettingsResponse =
+module AssociateIpAccessSettingsResponse =
   struct
     type nonrec t =
       {
-      browserSettingsArn: ARN.t
-        [@ocaml.doc "The ARN of the browser settings."];
-      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."]}
+      portalArn: ARN.t option [@ocaml.doc "The ARN of the web portal."];
+      ipAccessSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the IP access settings resource."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -7727,9 +16059,9 @@ module AssociateBrowserSettingsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "AssociateBrowserSettingsResponse"
-    let make ~browserSettingsArn =
-      fun ~portalArn -> fun () -> { browserSettingsArn; portalArn }
+    let make ?portalArn =
+      fun ?ipAccessSettingsArn ->
+        fun () -> { portalArn; ipAccessSettingsArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7796,22 +16128,294 @@ module AssociateBrowserSettingsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("browserSettingsArn", (Some (ARN.to_value x.browserSettingsArn)));
-        ("portalArn", (Some (ARN.to_value x.portalArn)))]
+        [("portalArn", (Option.map x.portalArn ~f:ARN.to_value));
+        ("ipAccessSettingsArn",
+          (Option.map x.ipAccessSettingsArn ~f:ARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipAccessSettingsArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "ipAccessSettingsArn") in
+      let portalArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "portalArn") in
+      make ?ipAccessSettingsArn ?portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipAccessSettingsArn =
+        field_map json__ "ipAccessSettingsArn" ARN.of_json in
+      let portalArn = field_map json__ "portalArn" ARN.of_json in
+      make ?ipAccessSettingsArn ?portalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates an IP access settings resource with a web portal."]
+module AssociateIpAccessSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."];
+      ipAccessSettingsArn: ARN.t
+        [@ocaml.doc "The ARN of the IP access settings."]}
+    let context_ = "AssociateIpAccessSettingsRequest"
+    let make ~portalArn =
+      fun ~ipAccessSettingsArn ->
+        fun () -> { portalArn; ipAccessSettingsArn }
+    let to_value x =
+      structure_to_value
+        [("portalArn", (Some (ARN.to_value x.portalArn)));
+        ("ipAccessSettingsArn", (Some (ARN.to_value x.ipAccessSettingsArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipAccessSettingsArn =
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ipAccessSettingsArn") in
       let portalArn =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
-      let browserSettingsArn =
-        ARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "browserSettingsArn") in
-      make ~portalArn ~browserSettingsArn ()
+      make ~ipAccessSettingsArn ~portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
+    let of_json json__ =
+      let ipAccessSettingsArn =
+        field_map_exn json__ "ipAccessSettingsArn" ARN.of_json in
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
+      make ~ipAccessSettingsArn ~portalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates an IP access settings resource with a web portal."]
+module AssociateDataProtectionSettingsResponse =
+  struct
+    type nonrec t =
+      {
+      portalArn: ARN.t option [@ocaml.doc "The ARN of the web portal."];
+      dataProtectionSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the data protection settings resource."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?portalArn =
+      fun ?dataProtectionSettingsArn ->
+        fun () -> { portalArn; dataProtectionSettingsArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("portalArn", (Option.map x.portalArn ~f:ARN.to_value));
+        ("dataProtectionSettingsArn",
+          (Option.map x.dataProtectionSettingsArn ~f:ARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataProtectionSettingsArn =
+        (Option.map ~f:ARN.of_xml)
+          (Xml.child xml_arg0 "dataProtectionSettingsArn") in
+      let portalArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "portalArn") in
+      make ?dataProtectionSettingsArn ?portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataProtectionSettingsArn =
+        field_map json__ "dataProtectionSettingsArn" ARN.of_json in
+      let portalArn = field_map json__ "portalArn" ARN.of_json in
+      make ?dataProtectionSettingsArn ?portalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates a data protection settings resource with a web portal."]
+module AssociateDataProtectionSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."];
+      dataProtectionSettingsArn: ARN.t
+        [@ocaml.doc "The ARN of the data protection settings."]}
+    let context_ = "AssociateDataProtectionSettingsRequest"
+    let make ~portalArn =
+      fun ~dataProtectionSettingsArn ->
+        fun () -> { portalArn; dataProtectionSettingsArn }
+    let to_value x =
+      structure_to_value
+        [("portalArn", (Some (ARN.to_value x.portalArn)));
+        ("dataProtectionSettingsArn",
+          (Some (ARN.to_value x.dataProtectionSettingsArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataProtectionSettingsArn =
+        ARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "dataProtectionSettingsArn") in
+      let portalArn =
+        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
+      make ~dataProtectionSettingsArn ~portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataProtectionSettingsArn =
+        field_map_exn json__ "dataProtectionSettingsArn" ARN.of_json in
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
+      make ~dataProtectionSettingsArn ~portalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates a data protection settings resource with a web portal."]
+module AssociateBrowserSettingsResponse =
+  struct
+    type nonrec t =
+      {
+      portalArn: ARN.t option [@ocaml.doc "The ARN of the web portal."];
+      browserSettingsArn: ARN.t option
+        [@ocaml.doc "The ARN of the browser settings."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?portalArn =
+      fun ?browserSettingsArn -> fun () -> { portalArn; browserSettingsArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("portalArn", (Option.map x.portalArn ~f:ARN.to_value));
+        ("browserSettingsArn",
+          (Option.map x.browserSettingsArn ~f:ARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
       let browserSettingsArn =
-        field_map_exn json "browserSettingsArn" ARN.of_json in
-      make ~portalArn ~browserSettingsArn ()
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "browserSettingsArn") in
+      let portalArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "portalArn") in
+      make ?browserSettingsArn ?portalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let browserSettingsArn =
+        field_map json__ "browserSettingsArn" ARN.of_json in
+      let portalArn = field_map json__ "portalArn" ARN.of_json in
+      make ?browserSettingsArn ?portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Associates a browser settings resource with a web portal."]
@@ -7819,30 +16423,30 @@ module AssociateBrowserSettingsRequest =
   struct
     type nonrec t =
       {
+      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."];
       browserSettingsArn: ARN.t
-        [@ocaml.doc "The ARN of the browser settings."];
-      portalArn: ARN.t [@ocaml.doc "The ARN of the web portal."]}
+        [@ocaml.doc "The ARN of the browser settings."]}
     let context_ = "AssociateBrowserSettingsRequest"
-    let make ~browserSettingsArn =
-      fun ~portalArn -> fun () -> { browserSettingsArn; portalArn }
+    let make ~portalArn =
+      fun ~browserSettingsArn -> fun () -> { portalArn; browserSettingsArn }
     let to_value x =
       structure_to_value
-        [("browserSettingsArn", (Some (ARN.to_value x.browserSettingsArn)));
-        ("portalArn", (Some (ARN.to_value x.portalArn)))]
+        [("portalArn", (Some (ARN.to_value x.portalArn)));
+        ("browserSettingsArn", (Some (ARN.to_value x.browserSettingsArn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let portalArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
       let browserSettingsArn =
         ARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "browserSettingsArn") in
-      make ~portalArn ~browserSettingsArn ()
+      let portalArn =
+        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "portalArn") in
+      make ~browserSettingsArn ~portalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portalArn = field_map_exn json "portalArn" ARN.of_json in
+    let of_json json__ =
       let browserSettingsArn =
-        field_map_exn json "browserSettingsArn" ARN.of_json in
-      make ~portalArn ~browserSettingsArn ()
+        field_map_exn json__ "browserSettingsArn" ARN.of_json in
+      let portalArn = field_map_exn json__ "portalArn" ARN.of_json in
+      make ~browserSettingsArn ~portalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Associates a browser settings resource with a web portal."]

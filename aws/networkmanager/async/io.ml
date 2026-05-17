@@ -29,8 +29,14 @@ let create_connection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateConnection input
 let create_core_network ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCoreNetwork input
+let create_core_network_prefix_list_association ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCoreNetworkPrefixListAssociation
+    input
 let create_device ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDevice input
+let create_direct_connect_gateway_attachment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateDirectConnectGatewayAttachment
+    input
 let create_global_network ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateGlobalNetwork input
 let create_link ?endpoint_url ?cfg input =
@@ -39,6 +45,11 @@ let create_site ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateSite input
 let create_site_to_site_vpn_attachment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateSiteToSiteVpnAttachment input
+let create_transit_gateway_peering ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTransitGatewayPeering input
+let create_transit_gateway_route_table_attachment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTransitGatewayRouteTableAttachment
+    input
 let create_vpc_attachment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateVpcAttachment input
 let delete_attachment ?endpoint_url ?cfg input =
@@ -51,12 +62,17 @@ let delete_core_network ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCoreNetwork input
 let delete_core_network_policy_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCoreNetworkPolicyVersion input
+let delete_core_network_prefix_list_association ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCoreNetworkPrefixListAssociation
+    input
 let delete_device ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDevice input
 let delete_global_network ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteGlobalNetwork input
 let delete_link ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteLink input
+let delete_peering ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeletePeering input
 let delete_resource_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteResourcePolicy input
 let delete_site ?endpoint_url ?cfg input =
@@ -86,6 +102,8 @@ let get_connections ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetConnections input
 let get_core_network ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCoreNetwork input
+let get_core_network_change_events ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCoreNetworkChangeEvents input
 let get_core_network_change_set ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCoreNetworkChangeSet input
 let get_core_network_policy ?endpoint_url ?cfg input =
@@ -94,6 +112,8 @@ let get_customer_gateway_associations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCustomerGatewayAssociations input
 let get_devices ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDevices input
+let get_direct_connect_gateway_attachment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDirectConnectGatewayAttachment input
 let get_link_associations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLinkAssociations input
 let get_links ?endpoint_url ?cfg input =
@@ -119,20 +139,39 @@ let get_sites ?endpoint_url ?cfg input =
 let get_transit_gateway_connect_peer_associations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTransitGatewayConnectPeerAssociations
     input
+let get_transit_gateway_peering ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTransitGatewayPeering input
 let get_transit_gateway_registrations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTransitGatewayRegistrations input
+let get_transit_gateway_route_table_attachment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTransitGatewayRouteTableAttachment
+    input
 let get_vpc_attachment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetVpcAttachment input
+let list_attachment_routing_policy_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAttachmentRoutingPolicyAssociations
+    input
 let list_attachments ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAttachments input
 let list_connect_peers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListConnectPeers input
 let list_core_network_policy_versions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCoreNetworkPolicyVersions input
+let list_core_network_prefix_list_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCoreNetworkPrefixListAssociations
+    input
+let list_core_network_routing_information ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCoreNetworkRoutingInformation input
 let list_core_networks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCoreNetworks input
+let list_organization_service_access_status ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListOrganizationServiceAccessStatus input
+let list_peerings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPeerings input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let put_attachment_routing_policy_label ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutAttachmentRoutingPolicyLabel input
 let put_core_network_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutCoreNetworkPolicy input
 let put_resource_policy ?endpoint_url ?cfg input =
@@ -141,8 +180,13 @@ let register_transit_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterTransitGateway input
 let reject_attachment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RejectAttachment input
+let remove_attachment_routing_policy_label ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RemoveAttachmentRoutingPolicyLabel input
 let restore_core_network_policy_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RestoreCoreNetworkPolicyVersion input
+let start_organization_service_access_update ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartOrganizationServiceAccessUpdate
+    input
 let start_route_analysis ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartRouteAnalysis input
 let tag_resource ?endpoint_url ?cfg input =
@@ -155,6 +199,9 @@ let update_core_network ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateCoreNetwork input
 let update_device ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDevice input
+let update_direct_connect_gateway_attachment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateDirectConnectGatewayAttachment
+    input
 let update_global_network ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateGlobalNetwork input
 let update_link ?endpoint_url ?cfg input =

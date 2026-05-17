@@ -66,6 +66,51 @@ let associate_third_party_firewall =
                                      thirdPartyFirewall) ())
            (Some Values.AssociateThirdPartyFirewallResponse.to_json)
            (Some Values.AssociateThirdPartyFirewallResponse.error_to_json)])
+let batch_associate_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceSetIdentifier =
+         flag "resource-set-identifier" (required string)
+           ~doc:"STRING Identifier"
+       and items =
+         flag "items" (required json_arg) ~doc:"JSON IdentifierList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_associate_resource
+           (Values.BatchAssociateResourceRequest.make ~resourceSetIdentifier
+              ~items:(Values.IdentifierList.of_json items) ())
+           (Some Values.BatchAssociateResourceResponse.to_json)
+           (Some Values.BatchAssociateResourceResponse.error_to_json)])
+let batch_disassociate_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceSetIdentifier =
+         flag "resource-set-identifier" (required string)
+           ~doc:"STRING Identifier"
+       and items =
+         flag "items" (required json_arg) ~doc:"JSON IdentifierList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_disassociate_resource
+           (Values.BatchDisassociateResourceRequest.make
+              ~resourceSetIdentifier
+              ~items:(Values.IdentifierList.of_json items) ())
+           (Some Values.BatchDisassociateResourceResponse.to_json)
+           (Some Values.BatchDisassociateResourceResponse.error_to_json)])
 let delete_apps_list =
   Command.async ~summary:""
     ([%map_open.Command
@@ -131,6 +176,22 @@ let delete_protocols_list =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_protocols_list
            (Values.DeleteProtocolsListRequest.make ~listId ()) None None])
+let delete_resource_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identifier =
+         flag "identifier" (required string) ~doc:"STRING Base62Id" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_resource_set
+           (Values.DeleteResourceSetRequest.make ~identifier ()) None None])
 let disassociate_admin_account =
   Command.async ~summary:""
     ([%map_open.Command
@@ -183,6 +244,24 @@ let get_admin_account =
            Io.get_admin_account (Values.GetAdminAccountRequest.make ())
            (Some Values.GetAdminAccountResponse.to_json)
            (Some Values.GetAdminAccountResponse.error_to_json)])
+let get_admin_scope =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and adminAccount =
+         flag "admin-account" (required string) ~doc:"STRING AWSAccountId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_admin_scope
+           (Values.GetAdminScopeRequest.make ~adminAccount ())
+           (Some Values.GetAdminScopeResponse.to_json)
+           (Some Values.GetAdminScopeResponse.error_to_json)])
 let get_apps_list =
   Command.async ~summary:""
     ([%map_open.Command
@@ -307,6 +386,24 @@ let get_protocols_list =
            (Values.GetProtocolsListRequest.make ?defaultList ~listId ())
            (Some Values.GetProtocolsListResponse.to_json)
            (Some Values.GetProtocolsListResponse.error_to_json)])
+let get_resource_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identifier =
+         flag "identifier" (required string) ~doc:"STRING Base62Id" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resource_set
+           (Values.GetResourceSetRequest.make ~identifier ())
+           (Some Values.GetResourceSetResponse.to_json)
+           (Some Values.GetResourceSetResponse.error_to_json)])
 let get_third_party_firewall_association_status =
   Command.async ~summary:""
     ([%map_open.Command
@@ -355,6 +452,49 @@ let get_violation_details =
               ~resourceId ~resourceType ())
            (Some Values.GetViolationDetailsResponse.to_json)
            (Some Values.GetViolationDetailsResponse.error_to_json)])
+let list_admin_accounts_for_organization =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_admin_accounts_for_organization
+           (Values.ListAdminAccountsForOrganizationRequest.make ?nextToken
+              ?maxResults ())
+           (Some Values.ListAdminAccountsForOrganizationResponse.to_json)
+           (Some
+              Values.ListAdminAccountsForOrganizationResponse.error_to_json)])
+let list_admins_managing_account =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_admins_managing_account
+           (Values.ListAdminsManagingAccountRequest.make ?nextToken
+              ?maxResults ())
+           (Some Values.ListAdminsManagingAccountResponse.to_json)
+           (Some Values.ListAdminsManagingAccountResponse.error_to_json)])
 let list_apps_lists =
   Command.async ~summary:""
     ([%map_open.Command
@@ -400,6 +540,33 @@ let list_compliance_status =
               ~policyId ())
            (Some Values.ListComplianceStatusResponse.to_json)
            (Some Values.ListComplianceStatusResponse.error_to_json)])
+let list_discovered_resources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and memberAccountIds =
+         flag "member-account-ids" (required json_arg)
+           ~doc:"JSON AWSAccountIdList"
+       and resourceType =
+         flag "resource-type" (required string) ~doc:"STRING ResourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_discovered_resources
+           (Values.ListDiscoveredResourcesRequest.make ?maxResults ?nextToken
+              ~memberAccountIds:(Values.AWSAccountIdList.of_json
+                                   memberAccountIds) ~resourceType ())
+           (Some Values.ListDiscoveredResourcesResponse.to_json)
+           (Some Values.ListDiscoveredResourcesResponse.error_to_json)])
 let list_member_accounts =
   Command.async ~summary:""
     ([%map_open.Command
@@ -463,6 +630,49 @@ let list_protocols_lists =
               ~maxResults ())
            (Some Values.ListProtocolsListsResponse.to_json)
            (Some Values.ListProtocolsListsResponse.error_to_json)])
+let list_resource_set_resources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and identifier =
+         flag "identifier" (required string) ~doc:"STRING ResourceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_resource_set_resources
+           (Values.ListResourceSetResourcesRequest.make ?maxResults
+              ?nextToken ~identifier ())
+           (Some Values.ListResourceSetResourcesResponse.to_json)
+           (Some Values.ListResourceSetResourcesResponse.error_to_json)])
+let list_resource_sets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_resource_sets
+           (Values.ListResourceSetsRequest.make ?nextToken ?maxResults ())
+           (Some Values.ListResourceSetsResponse.to_json)
+           (Some Values.ListResourceSetsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -509,6 +719,26 @@ let list_third_party_firewall_firewall_policies =
               Values.ListThirdPartyFirewallFirewallPoliciesResponse.to_json)
            (Some
               Values.ListThirdPartyFirewallFirewallPoliciesResponse.error_to_json)])
+let put_admin_account =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and adminScope =
+         flag "admin-scope" (optional json_arg) ~doc:"JSON AdminScope"
+       and adminAccount =
+         flag "admin-account" (required string) ~doc:"STRING AWSAccountId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_admin_account
+           (Values.PutAdminAccountRequest.make
+              ?adminScope:(Option.map ~f:Values.AdminScope.of_json adminScope)
+              ~adminAccount ()) None None])
 let put_apps_list =
   Command.async ~summary:""
     ([%map_open.Command
@@ -591,6 +821,27 @@ let put_protocols_list =
               ~protocolsList:(Values.ProtocolsListData.of_json protocolsList)
               ()) (Some Values.PutProtocolsListResponse.to_json)
            (Some Values.PutProtocolsListResponse.error_to_json)])
+let put_resource_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tagList = flag "tag-list" (optional json_arg) ~doc:"JSON TagList"
+       and resourceSet =
+         flag "resource-set" (required json_arg) ~doc:"JSON ResourceSet" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_resource_set
+           (Values.PutResourceSetRequest.make
+              ?tagList:(Option.map ~f:Values.TagList.of_json tagList)
+              ~resourceSet:(Values.ResourceSet.of_json resourceSet) ())
+           (Some Values.PutResourceSetResponse.to_json)
+           (Some Values.PutResourceSetResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -637,33 +888,46 @@ let main =
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-admin-account", associate_admin_account);
     ("associate-third-party-firewall", associate_third_party_firewall);
+    ("batch-associate-resource", batch_associate_resource);
+    ("batch-disassociate-resource", batch_disassociate_resource);
     ("delete-apps-list", delete_apps_list);
     ("delete-notification-channel", delete_notification_channel);
     ("delete-policy", delete_policy);
     ("delete-protocols-list", delete_protocols_list);
+    ("delete-resource-set", delete_resource_set);
     ("disassociate-admin-account", disassociate_admin_account);
     ("disassociate-third-party-firewall", disassociate_third_party_firewall);
     ("get-admin-account", get_admin_account);
+    ("get-admin-scope", get_admin_scope);
     ("get-apps-list", get_apps_list);
     ("get-compliance-detail", get_compliance_detail);
     ("get-notification-channel", get_notification_channel);
     ("get-policy", get_policy);
     ("get-protection-status", get_protection_status);
     ("get-protocols-list", get_protocols_list);
+    ("get-resource-set", get_resource_set);
     ("get-third-party-firewall-association-status",
       get_third_party_firewall_association_status);
     ("get-violation-details", get_violation_details);
+    ("list-admin-accounts-for-organization",
+      list_admin_accounts_for_organization);
+    ("list-admins-managing-account", list_admins_managing_account);
     ("list-apps-lists", list_apps_lists);
     ("list-compliance-status", list_compliance_status);
+    ("list-discovered-resources", list_discovered_resources);
     ("list-member-accounts", list_member_accounts);
     ("list-policies", list_policies);
     ("list-protocols-lists", list_protocols_lists);
+    ("list-resource-set-resources", list_resource_set_resources);
+    ("list-resource-sets", list_resource_sets);
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-third-party-firewall-firewall-policies",
       list_third_party_firewall_firewall_policies);
+    ("put-admin-account", put_admin_account);
     ("put-apps-list", put_apps_list);
     ("put-notification-channel", put_notification_channel);
     ("put-policy", put_policy);
     ("put-protocols-list", put_protocols_list);
+    ("put-resource-set", put_resource_set);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource)]

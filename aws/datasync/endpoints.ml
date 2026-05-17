@@ -6,11 +6,16 @@ type ('i, 'o, 'e) t =
   CancelTaskExecutionResponse.t, CancelTaskExecutionResponse.error) t 
   | CreateAgent: (CreateAgentRequest.t, CreateAgentResponse.t,
   CreateAgentResponse.error) t 
+  | CreateLocationAzureBlob: (CreateLocationAzureBlobRequest.t,
+  CreateLocationAzureBlobResponse.t, CreateLocationAzureBlobResponse.error) t
+  
   | CreateLocationEfs: (CreateLocationEfsRequest.t,
   CreateLocationEfsResponse.t, CreateLocationEfsResponse.error) t 
   | CreateLocationFsxLustre: (CreateLocationFsxLustreRequest.t,
   CreateLocationFsxLustreResponse.t, CreateLocationFsxLustreResponse.error) t
   
+  | CreateLocationFsxOntap: (CreateLocationFsxOntapRequest.t,
+  CreateLocationFsxOntapResponse.t, CreateLocationFsxOntapResponse.error) t 
   | CreateLocationFsxOpenZfs: (CreateLocationFsxOpenZfsRequest.t,
   CreateLocationFsxOpenZfsResponse.t, CreateLocationFsxOpenZfsResponse.error)
   t 
@@ -38,11 +43,17 @@ type ('i, 'o, 'e) t =
   DeleteTaskResponse.error) t 
   | DescribeAgent: (DescribeAgentRequest.t, DescribeAgentResponse.t,
   DescribeAgentResponse.error) t 
+  | DescribeLocationAzureBlob: (DescribeLocationAzureBlobRequest.t,
+  DescribeLocationAzureBlobResponse.t,
+  DescribeLocationAzureBlobResponse.error) t 
   | DescribeLocationEfs: (DescribeLocationEfsRequest.t,
   DescribeLocationEfsResponse.t, DescribeLocationEfsResponse.error) t 
   | DescribeLocationFsxLustre: (DescribeLocationFsxLustreRequest.t,
   DescribeLocationFsxLustreResponse.t,
   DescribeLocationFsxLustreResponse.error) t 
+  | DescribeLocationFsxOntap: (DescribeLocationFsxOntapRequest.t,
+  DescribeLocationFsxOntapResponse.t, DescribeLocationFsxOntapResponse.error)
+  t 
   | DescribeLocationFsxOpenZfs: (DescribeLocationFsxOpenZfsRequest.t,
   DescribeLocationFsxOpenZfsResponse.t,
   DescribeLocationFsxOpenZfsResponse.error) t 
@@ -82,6 +93,22 @@ type ('i, 'o, 'e) t =
   UntagResourceResponse.error) t 
   | UpdateAgent: (UpdateAgentRequest.t, UpdateAgentResponse.t,
   UpdateAgentResponse.error) t 
+  | UpdateLocationAzureBlob: (UpdateLocationAzureBlobRequest.t,
+  UpdateLocationAzureBlobResponse.t, UpdateLocationAzureBlobResponse.error) t
+  
+  | UpdateLocationEfs: (UpdateLocationEfsRequest.t,
+  UpdateLocationEfsResponse.t, UpdateLocationEfsResponse.error) t 
+  | UpdateLocationFsxLustre: (UpdateLocationFsxLustreRequest.t,
+  UpdateLocationFsxLustreResponse.t, UpdateLocationFsxLustreResponse.error) t
+  
+  | UpdateLocationFsxOntap: (UpdateLocationFsxOntapRequest.t,
+  UpdateLocationFsxOntapResponse.t, UpdateLocationFsxOntapResponse.error) t 
+  | UpdateLocationFsxOpenZfs: (UpdateLocationFsxOpenZfsRequest.t,
+  UpdateLocationFsxOpenZfsResponse.t, UpdateLocationFsxOpenZfsResponse.error)
+  t 
+  | UpdateLocationFsxWindows: (UpdateLocationFsxWindowsRequest.t,
+  UpdateLocationFsxWindowsResponse.t, UpdateLocationFsxWindowsResponse.error)
+  t 
   | UpdateLocationHdfs: (UpdateLocationHdfsRequest.t,
   UpdateLocationHdfsResponse.t, UpdateLocationHdfsResponse.error) t 
   | UpdateLocationNfs: (UpdateLocationNfsRequest.t,
@@ -89,6 +116,8 @@ type ('i, 'o, 'e) t =
   | UpdateLocationObjectStorage: (UpdateLocationObjectStorageRequest.t,
   UpdateLocationObjectStorageResponse.t,
   UpdateLocationObjectStorageResponse.error) t 
+  | UpdateLocationS3: (UpdateLocationS3Request.t, UpdateLocationS3Response.t,
+  UpdateLocationS3Response.error) t 
   | UpdateLocationSmb: (UpdateLocationSmbRequest.t,
   UpdateLocationSmbResponse.t, UpdateLocationSmbResponse.error) t 
   | UpdateTask: (UpdateTaskRequest.t, UpdateTaskResponse.t,
@@ -99,8 +128,10 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CancelTaskExecution -> `POST
   | CreateAgent -> `POST
+  | CreateLocationAzureBlob -> `POST
   | CreateLocationEfs -> `POST
   | CreateLocationFsxLustre -> `POST
+  | CreateLocationFsxOntap -> `POST
   | CreateLocationFsxOpenZfs -> `POST
   | CreateLocationFsxWindows -> `POST
   | CreateLocationHdfs -> `POST
@@ -113,8 +144,10 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteLocation -> `POST
   | DeleteTask -> `POST
   | DescribeAgent -> `POST
+  | DescribeLocationAzureBlob -> `POST
   | DescribeLocationEfs -> `POST
   | DescribeLocationFsxLustre -> `POST
+  | DescribeLocationFsxOntap -> `POST
   | DescribeLocationFsxOpenZfs -> `POST
   | DescribeLocationFsxWindows -> `POST
   | DescribeLocationHdfs -> `POST
@@ -133,9 +166,16 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateAgent -> `POST
+  | UpdateLocationAzureBlob -> `POST
+  | UpdateLocationEfs -> `POST
+  | UpdateLocationFsxLustre -> `POST
+  | UpdateLocationFsxOntap -> `POST
+  | UpdateLocationFsxOpenZfs -> `POST
+  | UpdateLocationFsxWindows -> `POST
   | UpdateLocationHdfs -> `POST
   | UpdateLocationNfs -> `POST
   | UpdateLocationObjectStorage -> `POST
+  | UpdateLocationS3 -> `POST
   | UpdateLocationSmb -> `POST
   | UpdateTask -> `POST
   | UpdateTaskExecution -> `POST
@@ -144,8 +184,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       match endpoint with
       | CancelTaskExecution -> (Format.kasprintf Uri.of_string) "/"
       | CreateAgent -> (Format.kasprintf Uri.of_string) "/"
+      | CreateLocationAzureBlob -> (Format.kasprintf Uri.of_string) "/"
       | CreateLocationEfs -> (Format.kasprintf Uri.of_string) "/"
       | CreateLocationFsxLustre -> (Format.kasprintf Uri.of_string) "/"
+      | CreateLocationFsxOntap -> (Format.kasprintf Uri.of_string) "/"
       | CreateLocationFsxOpenZfs -> (Format.kasprintf Uri.of_string) "/"
       | CreateLocationFsxWindows -> (Format.kasprintf Uri.of_string) "/"
       | CreateLocationHdfs -> (Format.kasprintf Uri.of_string) "/"
@@ -158,8 +200,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteLocation -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTask -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAgent -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeLocationAzureBlob -> (Format.kasprintf Uri.of_string) "/"
       | DescribeLocationEfs -> (Format.kasprintf Uri.of_string) "/"
       | DescribeLocationFsxLustre -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeLocationFsxOntap -> (Format.kasprintf Uri.of_string) "/"
       | DescribeLocationFsxOpenZfs -> (Format.kasprintf Uri.of_string) "/"
       | DescribeLocationFsxWindows -> (Format.kasprintf Uri.of_string) "/"
       | DescribeLocationHdfs -> (Format.kasprintf Uri.of_string) "/"
@@ -178,9 +222,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateAgent -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateLocationAzureBlob -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateLocationEfs -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateLocationFsxLustre -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateLocationFsxOntap -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateLocationFsxOpenZfs -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateLocationFsxWindows -> (Format.kasprintf Uri.of_string) "/"
       | UpdateLocationHdfs -> (Format.kasprintf Uri.of_string) "/"
       | UpdateLocationNfs -> (Format.kasprintf Uri.of_string) "/"
       | UpdateLocationObjectStorage -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateLocationS3 -> (Format.kasprintf Uri.of_string) "/"
       | UpdateLocationSmb -> (Format.kasprintf Uri.of_string) "/"
       | UpdateTask -> (Format.kasprintf Uri.of_string) "/"
       | UpdateTaskExecution -> (Format.kasprintf Uri.of_string) "/")
@@ -203,6 +254,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "FmrsService.CreateAgent")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateLocationAzureBlob ->
+      let json = CreateLocationAzureBlobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "FmrsService.CreateLocationAzureBlob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateLocationEfs ->
       let json = CreateLocationEfsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -218,6 +277,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "FmrsService.CreateLocationFsxLustre")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateLocationFsxOntap ->
+      let json = CreateLocationFsxOntapRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "FmrsService.CreateLocationFsxOntap")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateLocationFsxOpenZfs ->
       let json = CreateLocationFsxOpenZfsRequest.to_json req in
@@ -315,6 +382,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "FmrsService.DescribeAgent")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeLocationAzureBlob ->
+      let json = DescribeLocationAzureBlobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "FmrsService.DescribeLocationAzureBlob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeLocationEfs ->
       let json = DescribeLocationEfsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -330,6 +405,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "FmrsService.DescribeLocationFsxLustre")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeLocationFsxOntap ->
+      let json = DescribeLocationFsxOntapRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "FmrsService.DescribeLocationFsxOntap")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeLocationFsxOpenZfs ->
       let json = DescribeLocationFsxOpenZfsRequest.to_json req in
@@ -475,6 +558,54 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "FmrsService.UpdateAgent")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateLocationAzureBlob ->
+      let json = UpdateLocationAzureBlobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "FmrsService.UpdateLocationAzureBlob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateLocationEfs ->
+      let json = UpdateLocationEfsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "FmrsService.UpdateLocationEfs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateLocationFsxLustre ->
+      let json = UpdateLocationFsxLustreRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "FmrsService.UpdateLocationFsxLustre")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateLocationFsxOntap ->
+      let json = UpdateLocationFsxOntapRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "FmrsService.UpdateLocationFsxOntap")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateLocationFsxOpenZfs ->
+      let json = UpdateLocationFsxOpenZfsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "FmrsService.UpdateLocationFsxOpenZfs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateLocationFsxWindows ->
+      let json = UpdateLocationFsxWindowsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "FmrsService.UpdateLocationFsxWindows")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateLocationHdfs ->
       let json = UpdateLocationHdfsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -498,6 +629,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "FmrsService.UpdateLocationObjectStorage")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateLocationS3 ->
+      let json = UpdateLocationS3Request.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "FmrsService.UpdateLocationS3")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateLocationSmb ->
       let json = UpdateLocationSmbRequest.to_json req in
@@ -560,6 +699,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateAgentResponse.of_json json)
       else Error (parse_aws_error (Some CreateAgentResponse.error_of_json))
+  | CreateLocationAzureBlob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateLocationAzureBlobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateLocationAzureBlobResponse.error_of_json))
   | CreateLocationEfs ->
       if is_success
       then
@@ -577,6 +725,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateLocationFsxLustreResponse.error_of_json))
+  | CreateLocationFsxOntap ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateLocationFsxOntapResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateLocationFsxOntapResponse.error_of_json))
   | CreateLocationFsxOpenZfs ->
       if is_success
       then
@@ -666,6 +823,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeAgentResponse.of_json json)
       else Error (parse_aws_error (Some DescribeAgentResponse.error_of_json))
+  | DescribeLocationAzureBlob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeLocationAzureBlobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeLocationAzureBlobResponse.error_of_json))
   | DescribeLocationEfs ->
       if is_success
       then
@@ -683,6 +849,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeLocationFsxLustreResponse.error_of_json))
+  | DescribeLocationFsxOntap ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeLocationFsxOntapResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeLocationFsxOntapResponse.error_of_json))
   | DescribeLocationFsxOpenZfs ->
       if is_success
       then
@@ -816,6 +991,59 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateAgentResponse.of_json json)
       else Error (parse_aws_error (Some UpdateAgentResponse.error_of_json))
+  | UpdateLocationAzureBlob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateLocationAzureBlobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateLocationAzureBlobResponse.error_of_json))
+  | UpdateLocationEfs ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateLocationEfsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateLocationEfsResponse.error_of_json))
+  | UpdateLocationFsxLustre ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateLocationFsxLustreResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateLocationFsxLustreResponse.error_of_json))
+  | UpdateLocationFsxOntap ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateLocationFsxOntapResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateLocationFsxOntapResponse.error_of_json))
+  | UpdateLocationFsxOpenZfs ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateLocationFsxOpenZfsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateLocationFsxOpenZfsResponse.error_of_json))
+  | UpdateLocationFsxWindows ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateLocationFsxWindowsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateLocationFsxWindowsResponse.error_of_json))
   | UpdateLocationHdfs ->
       if is_success
       then
@@ -841,6 +1069,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateLocationObjectStorageResponse.error_of_json))
+  | UpdateLocationS3 ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateLocationS3Response.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateLocationS3Response.error_of_json))
   | UpdateLocationSmb ->
       if is_success
       then

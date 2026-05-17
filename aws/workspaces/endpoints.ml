@@ -2,20 +2,31 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | AcceptAccountLinkInvitation: (AcceptAccountLinkInvitationRequest.t,
+  AcceptAccountLinkInvitationResult.t,
+  AcceptAccountLinkInvitationResult.error) t 
   | AssociateConnectionAlias: (AssociateConnectionAliasRequest.t,
   AssociateConnectionAliasResult.t, AssociateConnectionAliasResult.error) t 
   | AssociateIpGroups: (AssociateIpGroupsRequest.t,
   AssociateIpGroupsResult.t, AssociateIpGroupsResult.error) t 
+  | AssociateWorkspaceApplication: (AssociateWorkspaceApplicationRequest.t,
+  AssociateWorkspaceApplicationResult.t,
+  AssociateWorkspaceApplicationResult.error) t 
   | AuthorizeIpRules: (AuthorizeIpRulesRequest.t, AuthorizeIpRulesResult.t,
   AuthorizeIpRulesResult.error) t 
   | CopyWorkspaceImage: (CopyWorkspaceImageRequest.t,
   CopyWorkspaceImageResult.t, CopyWorkspaceImageResult.error) t 
+  | CreateAccountLinkInvitation: (CreateAccountLinkInvitationRequest.t,
+  CreateAccountLinkInvitationResult.t,
+  CreateAccountLinkInvitationResult.error) t 
   | CreateConnectClientAddIn: (CreateConnectClientAddInRequest.t,
   CreateConnectClientAddInResult.t, CreateConnectClientAddInResult.error) t 
   | CreateConnectionAlias: (CreateConnectionAliasRequest.t,
   CreateConnectionAliasResult.t, CreateConnectionAliasResult.error) t 
   | CreateIpGroup: (CreateIpGroupRequest.t, CreateIpGroupResult.t,
   CreateIpGroupResult.error) t 
+  | CreateStandbyWorkspaces: (CreateStandbyWorkspacesRequest.t,
+  CreateStandbyWorkspacesResult.t, CreateStandbyWorkspacesResult.error) t 
   | CreateTags: (CreateTagsRequest.t, CreateTagsResult.t,
   CreateTagsResult.error) t 
   | CreateUpdatedWorkspaceImage: (CreateUpdatedWorkspaceImageRequest.t,
@@ -23,8 +34,15 @@ type ('i, 'o, 'e) t =
   CreateUpdatedWorkspaceImageResult.error) t 
   | CreateWorkspaceBundle: (CreateWorkspaceBundleRequest.t,
   CreateWorkspaceBundleResult.t, CreateWorkspaceBundleResult.error) t 
+  | CreateWorkspaceImage: (CreateWorkspaceImageRequest.t,
+  CreateWorkspaceImageResult.t, CreateWorkspaceImageResult.error) t 
   | CreateWorkspaces: (CreateWorkspacesRequest.t, CreateWorkspacesResult.t,
   CreateWorkspacesResult.error) t 
+  | CreateWorkspacesPool: (CreateWorkspacesPoolRequest.t,
+  CreateWorkspacesPoolResult.t, CreateWorkspacesPoolResult.error) t 
+  | DeleteAccountLinkInvitation: (DeleteAccountLinkInvitationRequest.t,
+  DeleteAccountLinkInvitationResult.t,
+  DeleteAccountLinkInvitationResult.error) t 
   | DeleteClientBranding: (DeleteClientBrandingRequest.t,
   DeleteClientBrandingResult.t, DeleteClientBrandingResult.error) t 
   | DeleteConnectClientAddIn: (DeleteConnectClientAddInRequest.t,
@@ -39,6 +57,9 @@ type ('i, 'o, 'e) t =
   DeleteWorkspaceBundleResult.t, DeleteWorkspaceBundleResult.error) t 
   | DeleteWorkspaceImage: (DeleteWorkspaceImageRequest.t,
   DeleteWorkspaceImageResult.t, DeleteWorkspaceImageResult.error) t 
+  | DeployWorkspaceApplications: (DeployWorkspaceApplicationsRequest.t,
+  DeployWorkspaceApplicationsResult.t,
+  DeployWorkspaceApplicationsResult.error) t 
   | DeregisterWorkspaceDirectory: (DeregisterWorkspaceDirectoryRequest.t,
   DeregisterWorkspaceDirectoryResult.t,
   DeregisterWorkspaceDirectoryResult.error) t 
@@ -47,6 +68,15 @@ type ('i, 'o, 'e) t =
   | DescribeAccountModifications: (DescribeAccountModificationsRequest.t,
   DescribeAccountModificationsResult.t,
   DescribeAccountModificationsResult.error) t 
+  | DescribeApplicationAssociations:
+  (DescribeApplicationAssociationsRequest.t,
+  DescribeApplicationAssociationsResult.t,
+  DescribeApplicationAssociationsResult.error) t 
+  | DescribeApplications: (DescribeApplicationsRequest.t,
+  DescribeApplicationsResult.t, DescribeApplicationsResult.error) t 
+  | DescribeBundleAssociations: (DescribeBundleAssociationsRequest.t,
+  DescribeBundleAssociationsResult.t, DescribeBundleAssociationsResult.error)
+  t 
   | DescribeClientBranding: (DescribeClientBrandingRequest.t,
   DescribeClientBrandingResult.t, DescribeClientBrandingResult.error) t 
   | DescribeClientProperties: (DescribeClientPropertiesRequest.t,
@@ -61,10 +91,20 @@ type ('i, 'o, 'e) t =
   | DescribeConnectionAliases: (DescribeConnectionAliasesRequest.t,
   DescribeConnectionAliasesResult.t, DescribeConnectionAliasesResult.error) t
   
+  | DescribeCustomWorkspaceImageImport:
+  (DescribeCustomWorkspaceImageImportRequest.t,
+  DescribeCustomWorkspaceImageImportResult.t,
+  DescribeCustomWorkspaceImageImportResult.error) t 
+  | DescribeImageAssociations: (DescribeImageAssociationsRequest.t,
+  DescribeImageAssociationsResult.t, DescribeImageAssociationsResult.error) t
+  
   | DescribeIpGroups: (DescribeIpGroupsRequest.t, DescribeIpGroupsResult.t,
   DescribeIpGroupsResult.error) t 
   | DescribeTags: (DescribeTagsRequest.t, DescribeTagsResult.t,
   DescribeTagsResult.error) t 
+  | DescribeWorkspaceAssociations: (DescribeWorkspaceAssociationsRequest.t,
+  DescribeWorkspaceAssociationsResult.t,
+  DescribeWorkspaceAssociationsResult.error) t 
   | DescribeWorkspaceBundles: (DescribeWorkspaceBundlesRequest.t,
   DescribeWorkspaceBundlesResult.t, DescribeWorkspaceBundlesResult.error) t 
   | DescribeWorkspaceDirectories: (DescribeWorkspaceDirectoriesRequest.t,
@@ -85,15 +125,31 @@ type ('i, 'o, 'e) t =
   (DescribeWorkspacesConnectionStatusRequest.t,
   DescribeWorkspacesConnectionStatusResult.t,
   DescribeWorkspacesConnectionStatusResult.error) t 
+  | DescribeWorkspacesPoolSessions: (DescribeWorkspacesPoolSessionsRequest.t,
+  DescribeWorkspacesPoolSessionsResult.t,
+  DescribeWorkspacesPoolSessionsResult.error) t 
+  | DescribeWorkspacesPools: (DescribeWorkspacesPoolsRequest.t,
+  DescribeWorkspacesPoolsResult.t, DescribeWorkspacesPoolsResult.error) t 
   | DisassociateConnectionAlias: (DisassociateConnectionAliasRequest.t,
   DisassociateConnectionAliasResult.t,
   DisassociateConnectionAliasResult.error) t 
   | DisassociateIpGroups: (DisassociateIpGroupsRequest.t,
   DisassociateIpGroupsResult.t, DisassociateIpGroupsResult.error) t 
+  | DisassociateWorkspaceApplication:
+  (DisassociateWorkspaceApplicationRequest.t,
+  DisassociateWorkspaceApplicationResult.t,
+  DisassociateWorkspaceApplicationResult.error) t 
+  | GetAccountLink: (GetAccountLinkRequest.t, GetAccountLinkResult.t,
+  GetAccountLinkResult.error) t 
   | ImportClientBranding: (ImportClientBrandingRequest.t,
   ImportClientBrandingResult.t, ImportClientBrandingResult.error) t 
+  | ImportCustomWorkspaceImage: (ImportCustomWorkspaceImageRequest.t,
+  ImportCustomWorkspaceImageResult.t, ImportCustomWorkspaceImageResult.error)
+  t 
   | ImportWorkspaceImage: (ImportWorkspaceImageRequest.t,
   ImportWorkspaceImageResult.t, ImportWorkspaceImageResult.error) t 
+  | ListAccountLinks: (ListAccountLinksRequest.t, ListAccountLinksResult.t,
+  ListAccountLinksResult.error) t 
   | ListAvailableManagementCidrRanges:
   (ListAvailableManagementCidrRangesRequest.t,
   ListAvailableManagementCidrRangesResult.t,
@@ -102,11 +158,23 @@ type ('i, 'o, 'e) t =
   MigrateWorkspaceResult.error) t 
   | ModifyAccount: (ModifyAccountRequest.t, ModifyAccountResult.t,
   ModifyAccountResult.error) t 
+  | ModifyCertificateBasedAuthProperties:
+  (ModifyCertificateBasedAuthPropertiesRequest.t,
+  ModifyCertificateBasedAuthPropertiesResult.t,
+  ModifyCertificateBasedAuthPropertiesResult.error) t 
   | ModifyClientProperties: (ModifyClientPropertiesRequest.t,
   ModifyClientPropertiesResult.t, ModifyClientPropertiesResult.error) t 
+  | ModifyEndpointEncryptionMode: (ModifyEndpointEncryptionModeRequest.t,
+  ModifyEndpointEncryptionModeResponse.t,
+  ModifyEndpointEncryptionModeResponse.error) t 
+  | ModifySamlProperties: (ModifySamlPropertiesRequest.t,
+  ModifySamlPropertiesResult.t, ModifySamlPropertiesResult.error) t 
   | ModifySelfservicePermissions: (ModifySelfservicePermissionsRequest.t,
   ModifySelfservicePermissionsResult.t,
   ModifySelfservicePermissionsResult.error) t 
+  | ModifyStreamingProperties: (ModifyStreamingPropertiesRequest.t,
+  ModifyStreamingPropertiesResult.t, ModifyStreamingPropertiesResult.error) t
+  
   | ModifyWorkspaceAccessProperties:
   (ModifyWorkspaceAccessPropertiesRequest.t,
   ModifyWorkspaceAccessPropertiesResult.t,
@@ -127,16 +195,28 @@ type ('i, 'o, 'e) t =
   | RegisterWorkspaceDirectory: (RegisterWorkspaceDirectoryRequest.t,
   RegisterWorkspaceDirectoryResult.t, RegisterWorkspaceDirectoryResult.error)
   t 
+  | RejectAccountLinkInvitation: (RejectAccountLinkInvitationRequest.t,
+  RejectAccountLinkInvitationResult.t,
+  RejectAccountLinkInvitationResult.error) t 
   | RestoreWorkspace: (RestoreWorkspaceRequest.t, RestoreWorkspaceResult.t,
   RestoreWorkspaceResult.error) t 
   | RevokeIpRules: (RevokeIpRulesRequest.t, RevokeIpRulesResult.t,
   RevokeIpRulesResult.error) t 
   | StartWorkspaces: (StartWorkspacesRequest.t, StartWorkspacesResult.t,
   StartWorkspacesResult.error) t 
+  | StartWorkspacesPool: (StartWorkspacesPoolRequest.t,
+  StartWorkspacesPoolResult.t, StartWorkspacesPoolResult.error) t 
   | StopWorkspaces: (StopWorkspacesRequest.t, StopWorkspacesResult.t,
   StopWorkspacesResult.error) t 
+  | StopWorkspacesPool: (StopWorkspacesPoolRequest.t,
+  StopWorkspacesPoolResult.t, StopWorkspacesPoolResult.error) t 
   | TerminateWorkspaces: (TerminateWorkspacesRequest.t,
   TerminateWorkspacesResult.t, TerminateWorkspacesResult.error) t 
+  | TerminateWorkspacesPool: (TerminateWorkspacesPoolRequest.t,
+  TerminateWorkspacesPoolResult.t, TerminateWorkspacesPoolResult.error) t 
+  | TerminateWorkspacesPoolSession: (TerminateWorkspacesPoolSessionRequest.t,
+  TerminateWorkspacesPoolSessionResult.t,
+  TerminateWorkspacesPoolSessionResult.error) t 
   | UpdateConnectClientAddIn: (UpdateConnectClientAddInRequest.t,
   UpdateConnectClientAddInResult.t, UpdateConnectClientAddInResult.error) t 
   | UpdateConnectionAliasPermission:
@@ -150,19 +230,28 @@ type ('i, 'o, 'e) t =
   | UpdateWorkspaceImagePermission: (UpdateWorkspaceImagePermissionRequest.t,
   UpdateWorkspaceImagePermissionResult.t,
   UpdateWorkspaceImagePermissionResult.error) t 
+  | UpdateWorkspacesPool: (UpdateWorkspacesPoolRequest.t,
+  UpdateWorkspacesPoolResult.t, UpdateWorkspacesPoolResult.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | AcceptAccountLinkInvitation -> `POST
   | AssociateConnectionAlias -> `POST
   | AssociateIpGroups -> `POST
+  | AssociateWorkspaceApplication -> `POST
   | AuthorizeIpRules -> `POST
   | CopyWorkspaceImage -> `POST
+  | CreateAccountLinkInvitation -> `POST
   | CreateConnectClientAddIn -> `POST
   | CreateConnectionAlias -> `POST
   | CreateIpGroup -> `POST
+  | CreateStandbyWorkspaces -> `POST
   | CreateTags -> `POST
   | CreateUpdatedWorkspaceImage -> `POST
   | CreateWorkspaceBundle -> `POST
+  | CreateWorkspaceImage -> `POST
   | CreateWorkspaces -> `POST
+  | CreateWorkspacesPool -> `POST
+  | DeleteAccountLinkInvitation -> `POST
   | DeleteClientBranding -> `POST
   | DeleteConnectClientAddIn -> `POST
   | DeleteConnectionAlias -> `POST
@@ -170,16 +259,23 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteTags -> `POST
   | DeleteWorkspaceBundle -> `POST
   | DeleteWorkspaceImage -> `POST
+  | DeployWorkspaceApplications -> `POST
   | DeregisterWorkspaceDirectory -> `POST
   | DescribeAccount -> `POST
   | DescribeAccountModifications -> `POST
+  | DescribeApplicationAssociations -> `POST
+  | DescribeApplications -> `POST
+  | DescribeBundleAssociations -> `POST
   | DescribeClientBranding -> `POST
   | DescribeClientProperties -> `POST
   | DescribeConnectClientAddIns -> `POST
   | DescribeConnectionAliasPermissions -> `POST
   | DescribeConnectionAliases -> `POST
+  | DescribeCustomWorkspaceImageImport -> `POST
+  | DescribeImageAssociations -> `POST
   | DescribeIpGroups -> `POST
   | DescribeTags -> `POST
+  | DescribeWorkspaceAssociations -> `POST
   | DescribeWorkspaceBundles -> `POST
   | DescribeWorkspaceDirectories -> `POST
   | DescribeWorkspaceImagePermissions -> `POST
@@ -187,15 +283,25 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeWorkspaceSnapshots -> `POST
   | DescribeWorkspaces -> `POST
   | DescribeWorkspacesConnectionStatus -> `POST
+  | DescribeWorkspacesPoolSessions -> `POST
+  | DescribeWorkspacesPools -> `POST
   | DisassociateConnectionAlias -> `POST
   | DisassociateIpGroups -> `POST
+  | DisassociateWorkspaceApplication -> `POST
+  | GetAccountLink -> `POST
   | ImportClientBranding -> `POST
+  | ImportCustomWorkspaceImage -> `POST
   | ImportWorkspaceImage -> `POST
+  | ListAccountLinks -> `POST
   | ListAvailableManagementCidrRanges -> `POST
   | MigrateWorkspace -> `POST
   | ModifyAccount -> `POST
+  | ModifyCertificateBasedAuthProperties -> `POST
   | ModifyClientProperties -> `POST
+  | ModifyEndpointEncryptionMode -> `POST
+  | ModifySamlProperties -> `POST
   | ModifySelfservicePermissions -> `POST
+  | ModifyStreamingProperties -> `POST
   | ModifyWorkspaceAccessProperties -> `POST
   | ModifyWorkspaceCreationProperties -> `POST
   | ModifyWorkspaceProperties -> `POST
@@ -203,30 +309,43 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | RebootWorkspaces -> `POST
   | RebuildWorkspaces -> `POST
   | RegisterWorkspaceDirectory -> `POST
+  | RejectAccountLinkInvitation -> `POST
   | RestoreWorkspace -> `POST
   | RevokeIpRules -> `POST
   | StartWorkspaces -> `POST
+  | StartWorkspacesPool -> `POST
   | StopWorkspaces -> `POST
+  | StopWorkspacesPool -> `POST
   | TerminateWorkspaces -> `POST
+  | TerminateWorkspacesPool -> `POST
+  | TerminateWorkspacesPoolSession -> `POST
   | UpdateConnectClientAddIn -> `POST
   | UpdateConnectionAliasPermission -> `POST
   | UpdateRulesOfIpGroup -> `POST
   | UpdateWorkspaceBundle -> `POST
   | UpdateWorkspaceImagePermission -> `POST
+  | UpdateWorkspacesPool -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | AcceptAccountLinkInvitation -> (Format.kasprintf Uri.of_string) "/"
       | AssociateConnectionAlias -> (Format.kasprintf Uri.of_string) "/"
       | AssociateIpGroups -> (Format.kasprintf Uri.of_string) "/"
+      | AssociateWorkspaceApplication -> (Format.kasprintf Uri.of_string) "/"
       | AuthorizeIpRules -> (Format.kasprintf Uri.of_string) "/"
       | CopyWorkspaceImage -> (Format.kasprintf Uri.of_string) "/"
+      | CreateAccountLinkInvitation -> (Format.kasprintf Uri.of_string) "/"
       | CreateConnectClientAddIn -> (Format.kasprintf Uri.of_string) "/"
       | CreateConnectionAlias -> (Format.kasprintf Uri.of_string) "/"
       | CreateIpGroup -> (Format.kasprintf Uri.of_string) "/"
+      | CreateStandbyWorkspaces -> (Format.kasprintf Uri.of_string) "/"
       | CreateTags -> (Format.kasprintf Uri.of_string) "/"
       | CreateUpdatedWorkspaceImage -> (Format.kasprintf Uri.of_string) "/"
       | CreateWorkspaceBundle -> (Format.kasprintf Uri.of_string) "/"
+      | CreateWorkspaceImage -> (Format.kasprintf Uri.of_string) "/"
       | CreateWorkspaces -> (Format.kasprintf Uri.of_string) "/"
+      | CreateWorkspacesPool -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteAccountLinkInvitation -> (Format.kasprintf Uri.of_string) "/"
       | DeleteClientBranding -> (Format.kasprintf Uri.of_string) "/"
       | DeleteConnectClientAddIn -> (Format.kasprintf Uri.of_string) "/"
       | DeleteConnectionAlias -> (Format.kasprintf Uri.of_string) "/"
@@ -234,17 +353,26 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteTags -> (Format.kasprintf Uri.of_string) "/"
       | DeleteWorkspaceBundle -> (Format.kasprintf Uri.of_string) "/"
       | DeleteWorkspaceImage -> (Format.kasprintf Uri.of_string) "/"
+      | DeployWorkspaceApplications -> (Format.kasprintf Uri.of_string) "/"
       | DeregisterWorkspaceDirectory -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAccount -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAccountModifications -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeApplicationAssociations ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeApplications -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeBundleAssociations -> (Format.kasprintf Uri.of_string) "/"
       | DescribeClientBranding -> (Format.kasprintf Uri.of_string) "/"
       | DescribeClientProperties -> (Format.kasprintf Uri.of_string) "/"
       | DescribeConnectClientAddIns -> (Format.kasprintf Uri.of_string) "/"
       | DescribeConnectionAliasPermissions ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeConnectionAliases -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeCustomWorkspaceImageImport ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeImageAssociations -> (Format.kasprintf Uri.of_string) "/"
       | DescribeIpGroups -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTags -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeWorkspaceAssociations -> (Format.kasprintf Uri.of_string) "/"
       | DescribeWorkspaceBundles -> (Format.kasprintf Uri.of_string) "/"
       | DescribeWorkspaceDirectories -> (Format.kasprintf Uri.of_string) "/"
       | DescribeWorkspaceImagePermissions ->
@@ -254,16 +382,29 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeWorkspaces -> (Format.kasprintf Uri.of_string) "/"
       | DescribeWorkspacesConnectionStatus ->
           (Format.kasprintf Uri.of_string) "/"
+      | DescribeWorkspacesPoolSessions ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeWorkspacesPools -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateConnectionAlias -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateIpGroups -> (Format.kasprintf Uri.of_string) "/"
+      | DisassociateWorkspaceApplication ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetAccountLink -> (Format.kasprintf Uri.of_string) "/"
       | ImportClientBranding -> (Format.kasprintf Uri.of_string) "/"
+      | ImportCustomWorkspaceImage -> (Format.kasprintf Uri.of_string) "/"
       | ImportWorkspaceImage -> (Format.kasprintf Uri.of_string) "/"
+      | ListAccountLinks -> (Format.kasprintf Uri.of_string) "/"
       | ListAvailableManagementCidrRanges ->
           (Format.kasprintf Uri.of_string) "/"
       | MigrateWorkspace -> (Format.kasprintf Uri.of_string) "/"
       | ModifyAccount -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyCertificateBasedAuthProperties ->
+          (Format.kasprintf Uri.of_string) "/"
       | ModifyClientProperties -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyEndpointEncryptionMode -> (Format.kasprintf Uri.of_string) "/"
+      | ModifySamlProperties -> (Format.kasprintf Uri.of_string) "/"
       | ModifySelfservicePermissions -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyStreamingProperties -> (Format.kasprintf Uri.of_string) "/"
       | ModifyWorkspaceAccessProperties ->
           (Format.kasprintf Uri.of_string) "/"
       | ModifyWorkspaceCreationProperties ->
@@ -273,21 +414,36 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | RebootWorkspaces -> (Format.kasprintf Uri.of_string) "/"
       | RebuildWorkspaces -> (Format.kasprintf Uri.of_string) "/"
       | RegisterWorkspaceDirectory -> (Format.kasprintf Uri.of_string) "/"
+      | RejectAccountLinkInvitation -> (Format.kasprintf Uri.of_string) "/"
       | RestoreWorkspace -> (Format.kasprintf Uri.of_string) "/"
       | RevokeIpRules -> (Format.kasprintf Uri.of_string) "/"
       | StartWorkspaces -> (Format.kasprintf Uri.of_string) "/"
+      | StartWorkspacesPool -> (Format.kasprintf Uri.of_string) "/"
       | StopWorkspaces -> (Format.kasprintf Uri.of_string) "/"
+      | StopWorkspacesPool -> (Format.kasprintf Uri.of_string) "/"
       | TerminateWorkspaces -> (Format.kasprintf Uri.of_string) "/"
+      | TerminateWorkspacesPool -> (Format.kasprintf Uri.of_string) "/"
+      | TerminateWorkspacesPoolSession ->
+          (Format.kasprintf Uri.of_string) "/"
       | UpdateConnectClientAddIn -> (Format.kasprintf Uri.of_string) "/"
       | UpdateConnectionAliasPermission ->
           (Format.kasprintf Uri.of_string) "/"
       | UpdateRulesOfIpGroup -> (Format.kasprintf Uri.of_string) "/"
       | UpdateWorkspaceBundle -> (Format.kasprintf Uri.of_string) "/"
       | UpdateWorkspaceImagePermission ->
-          (Format.kasprintf Uri.of_string) "/")
+          (Format.kasprintf Uri.of_string) "/"
+      | UpdateWorkspacesPool -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
+  | AcceptAccountLinkInvitation ->
+      let json = AcceptAccountLinkInvitationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.AcceptAccountLinkInvitation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | AssociateConnectionAlias ->
       let json = AssociateConnectionAliasRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -304,6 +460,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.AssociateIpGroups")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | AssociateWorkspaceApplication ->
+      let json = AssociateWorkspaceApplicationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.AssociateWorkspaceApplication")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | AuthorizeIpRules ->
       let json = AuthorizeIpRulesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -319,6 +483,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.CopyWorkspaceImage")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateAccountLinkInvitation ->
+      let json = CreateAccountLinkInvitationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.CreateAccountLinkInvitation")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateConnectClientAddIn ->
       let json = CreateConnectClientAddInRequest.to_json req in
@@ -344,6 +516,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.CreateIpGroup")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateStandbyWorkspaces ->
+      let json = CreateStandbyWorkspacesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.CreateStandbyWorkspaces")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateTags ->
       let json = CreateTagsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -368,6 +548,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.CreateWorkspaceBundle")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateWorkspaceImage ->
+      let json = CreateWorkspaceImageRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.CreateWorkspaceImage")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateWorkspaces ->
       let json = CreateWorkspacesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -375,6 +563,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.CreateWorkspaces")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateWorkspacesPool ->
+      let json = CreateWorkspacesPoolRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.CreateWorkspacesPool")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteAccountLinkInvitation ->
+      let json = DeleteAccountLinkInvitationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.DeleteAccountLinkInvitation")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteClientBranding ->
       let json = DeleteClientBrandingRequest.to_json req in
@@ -432,6 +636,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.DeleteWorkspaceImage")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeployWorkspaceApplications ->
+      let json = DeployWorkspaceApplicationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.DeployWorkspaceApplications")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeregisterWorkspaceDirectory ->
       let json = DeregisterWorkspaceDirectoryRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -455,6 +667,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.DescribeAccountModifications")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeApplicationAssociations ->
+      let json = DescribeApplicationAssociationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "WorkspacesService.DescribeApplicationAssociations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeApplications ->
+      let json = DescribeApplicationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.DescribeApplications")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeBundleAssociations ->
+      let json = DescribeBundleAssociationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.DescribeBundleAssociations")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeClientBranding ->
       let json = DescribeClientBrandingRequest.to_json req in
@@ -497,6 +734,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.DescribeConnectionAliases")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeCustomWorkspaceImageImport ->
+      let json = DescribeCustomWorkspaceImageImportRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "WorkspacesService.DescribeCustomWorkspaceImageImport")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeImageAssociations ->
+      let json = DescribeImageAssociationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.DescribeImageAssociations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeIpGroups ->
       let json = DescribeIpGroupsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -512,6 +766,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.DescribeTags")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeWorkspaceAssociations ->
+      let json = DescribeWorkspaceAssociationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.DescribeWorkspaceAssociations")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeWorkspaceBundles ->
       let json = DescribeWorkspaceBundlesRequest.to_json req in
@@ -571,6 +833,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "WorkspacesService.DescribeWorkspacesConnectionStatus")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeWorkspacesPoolSessions ->
+      let json = DescribeWorkspacesPoolSessionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "WorkspacesService.DescribeWorkspacesPoolSessions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeWorkspacesPools ->
+      let json = DescribeWorkspacesPoolsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.DescribeWorkspacesPools")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DisassociateConnectionAlias ->
       let json = DisassociateConnectionAliasRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -587,6 +866,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.DisassociateIpGroups")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DisassociateWorkspaceApplication ->
+      let json = DisassociateWorkspaceApplicationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "WorkspacesService.DisassociateWorkspaceApplication")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetAccountLink ->
+      let json = GetAccountLinkRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.GetAccountLink")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ImportClientBranding ->
       let json = ImportClientBrandingRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -595,6 +891,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.ImportClientBranding")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ImportCustomWorkspaceImage ->
+      let json = ImportCustomWorkspaceImageRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.ImportCustomWorkspaceImage")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ImportWorkspaceImage ->
       let json = ImportWorkspaceImageRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -602,6 +906,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.ImportWorkspaceImage")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAccountLinks ->
+      let json = ListAccountLinksRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.ListAccountLinks")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListAvailableManagementCidrRanges ->
       let json = ListAvailableManagementCidrRangesRequest.to_json req in
@@ -628,6 +940,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.ModifyAccount")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ModifyCertificateBasedAuthProperties ->
+      let json = ModifyCertificateBasedAuthPropertiesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "WorkspacesService.ModifyCertificateBasedAuthProperties")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ModifyClientProperties ->
       let json = ModifyClientPropertiesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -636,6 +957,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.ModifyClientProperties")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ModifyEndpointEncryptionMode ->
+      let json = ModifyEndpointEncryptionModeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.ModifyEndpointEncryptionMode")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ModifySamlProperties ->
+      let json = ModifySamlPropertiesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.ModifySamlProperties")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ModifySelfservicePermissions ->
       let json = ModifySelfservicePermissionsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -643,6 +980,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.ModifySelfservicePermissions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ModifyStreamingProperties ->
+      let json = ModifyStreamingPropertiesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.ModifyStreamingProperties")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ModifyWorkspaceAccessProperties ->
       let json = ModifyWorkspaceAccessPropertiesRequest.to_json req in
@@ -702,6 +1047,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.RegisterWorkspaceDirectory")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | RejectAccountLinkInvitation ->
+      let json = RejectAccountLinkInvitationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.RejectAccountLinkInvitation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | RestoreWorkspace ->
       let json = RestoreWorkspaceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -726,6 +1079,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.StartWorkspaces")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartWorkspacesPool ->
+      let json = StartWorkspacesPoolRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.StartWorkspacesPool")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopWorkspaces ->
       let json = StopWorkspacesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -734,6 +1095,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.StopWorkspaces")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopWorkspacesPool ->
+      let json = StopWorkspacesPoolRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.StopWorkspacesPool")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TerminateWorkspaces ->
       let json = TerminateWorkspacesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -741,6 +1110,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkspacesService.TerminateWorkspaces")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TerminateWorkspacesPool ->
+      let json = TerminateWorkspacesPoolRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.TerminateWorkspacesPool")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TerminateWorkspacesPoolSession ->
+      let json = TerminateWorkspacesPoolSessionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "WorkspacesService.TerminateWorkspacesPoolSession")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateConnectClientAddIn ->
       let json = UpdateConnectClientAddInRequest.to_json req in
@@ -784,6 +1170,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "WorkspacesService.UpdateWorkspaceImagePermission")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateWorkspacesPool ->
+      let json = UpdateWorkspacesPoolRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkspacesService.UpdateWorkspacesPool")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -807,6 +1201,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = parse_aws_error in
   let _ = resp in
   match endpoint with
+  | AcceptAccountLinkInvitation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AcceptAccountLinkInvitationResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AcceptAccountLinkInvitationResult.error_of_json))
   | AssociateConnectionAlias ->
       if is_success
       then
@@ -823,6 +1226,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (AssociateIpGroupsResult.of_json json)
       else
         Error (parse_aws_error (Some AssociateIpGroupsResult.error_of_json))
+  | AssociateWorkspaceApplication ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AssociateWorkspaceApplicationResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateWorkspaceApplicationResult.error_of_json))
   | AuthorizeIpRules ->
       if is_success
       then
@@ -837,6 +1249,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CopyWorkspaceImageResult.of_json json)
       else
         Error (parse_aws_error (Some CopyWorkspaceImageResult.error_of_json))
+  | CreateAccountLinkInvitation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAccountLinkInvitationResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAccountLinkInvitationResult.error_of_json))
   | CreateConnectClientAddIn ->
       if is_success
       then
@@ -860,6 +1281,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateIpGroupResult.of_json json)
       else Error (parse_aws_error (Some CreateIpGroupResult.error_of_json))
+  | CreateStandbyWorkspaces ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateStandbyWorkspacesResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateStandbyWorkspacesResult.error_of_json))
   | CreateTags ->
       if is_success
       then
@@ -883,6 +1312,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateWorkspaceBundleResult.error_of_json))
+  | CreateWorkspaceImage ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateWorkspaceImageResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateWorkspaceImageResult.error_of_json))
   | CreateWorkspaces ->
       if is_success
       then
@@ -890,6 +1327,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateWorkspacesResult.of_json json)
       else
         Error (parse_aws_error (Some CreateWorkspacesResult.error_of_json))
+  | CreateWorkspacesPool ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateWorkspacesPoolResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateWorkspacesPoolResult.error_of_json))
+  | DeleteAccountLinkInvitation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteAccountLinkInvitationResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAccountLinkInvitationResult.error_of_json))
   | DeleteClientBranding ->
       if is_success
       then
@@ -943,6 +1397,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteWorkspaceImageResult.error_of_json))
+  | DeployWorkspaceApplications ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeployWorkspaceApplicationsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeployWorkspaceApplicationsResult.error_of_json))
   | DeregisterWorkspaceDirectory ->
       if is_success
       then
@@ -967,6 +1430,32 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeAccountModificationsResult.error_of_json))
+  | DescribeApplicationAssociations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeApplicationAssociationsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeApplicationAssociationsResult.error_of_json))
+  | DescribeApplications ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeApplicationsResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeApplicationsResult.error_of_json))
+  | DescribeBundleAssociations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeBundleAssociationsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeBundleAssociationsResult.error_of_json))
   | DescribeClientBranding ->
       if is_success
       then
@@ -1011,6 +1500,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeConnectionAliasesResult.error_of_json))
+  | DescribeCustomWorkspaceImageImport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeCustomWorkspaceImageImportResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeCustomWorkspaceImageImportResult.error_of_json))
+  | DescribeImageAssociations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeImageAssociationsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeImageAssociationsResult.error_of_json))
   | DescribeIpGroups ->
       if is_success
       then
@@ -1024,6 +1531,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeTagsResult.of_json json)
       else Error (parse_aws_error (Some DescribeTagsResult.error_of_json))
+  | DescribeWorkspaceAssociations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeWorkspaceAssociationsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeWorkspaceAssociationsResult.error_of_json))
   | DescribeWorkspaceBundles ->
       if is_success
       then
@@ -1084,6 +1600,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeWorkspacesConnectionStatusResult.error_of_json))
+  | DescribeWorkspacesPoolSessions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeWorkspacesPoolSessionsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeWorkspacesPoolSessionsResult.error_of_json))
+  | DescribeWorkspacesPools ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeWorkspacesPoolsResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeWorkspacesPoolsResult.error_of_json))
   | DisassociateConnectionAlias ->
       if is_success
       then
@@ -1101,6 +1634,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DisassociateIpGroupsResult.error_of_json))
+  | DisassociateWorkspaceApplication ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisassociateWorkspaceApplicationResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateWorkspaceApplicationResult.error_of_json))
+  | GetAccountLink ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAccountLinkResult.of_json json)
+      else Error (parse_aws_error (Some GetAccountLinkResult.error_of_json))
   | ImportClientBranding ->
       if is_success
       then
@@ -1109,6 +1657,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ImportClientBrandingResult.error_of_json))
+  | ImportCustomWorkspaceImage ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ImportCustomWorkspaceImageResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ImportCustomWorkspaceImageResult.error_of_json))
   | ImportWorkspaceImage ->
       if is_success
       then
@@ -1117,6 +1674,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ImportWorkspaceImageResult.error_of_json))
+  | ListAccountLinks ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAccountLinksResult.of_json json)
+      else
+        Error (parse_aws_error (Some ListAccountLinksResult.error_of_json))
   | ListAvailableManagementCidrRanges ->
       if is_success
       then
@@ -1139,6 +1703,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ModifyAccountResult.of_json json)
       else Error (parse_aws_error (Some ModifyAccountResult.error_of_json))
+  | ModifyCertificateBasedAuthProperties ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ModifyCertificateBasedAuthPropertiesResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ModifyCertificateBasedAuthPropertiesResult.error_of_json))
   | ModifyClientProperties ->
       if is_success
       then
@@ -1147,6 +1720,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ModifyClientPropertiesResult.error_of_json))
+  | ModifyEndpointEncryptionMode ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ModifyEndpointEncryptionModeResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ModifyEndpointEncryptionModeResponse.error_of_json))
+  | ModifySamlProperties ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ModifySamlPropertiesResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ModifySamlPropertiesResult.error_of_json))
   | ModifySelfservicePermissions ->
       if is_success
       then
@@ -1156,6 +1746,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ModifySelfservicePermissionsResult.error_of_json))
+  | ModifyStreamingProperties ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ModifyStreamingPropertiesResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ModifyStreamingPropertiesResult.error_of_json))
   | ModifyWorkspaceAccessProperties ->
       if is_success
       then
@@ -1196,13 +1795,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (RebootWorkspacesResult.of_json json)
-      else Error (parse_aws_error None)
+      else
+        Error (parse_aws_error (Some RebootWorkspacesResult.error_of_json))
   | RebuildWorkspaces ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (RebuildWorkspacesResult.of_json json)
-      else Error (parse_aws_error None)
+      else
+        Error (parse_aws_error (Some RebuildWorkspacesResult.error_of_json))
   | RegisterWorkspaceDirectory ->
       if is_success
       then
@@ -1212,6 +1813,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some RegisterWorkspaceDirectoryResult.error_of_json))
+  | RejectAccountLinkInvitation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RejectAccountLinkInvitationResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some RejectAccountLinkInvitationResult.error_of_json))
   | RestoreWorkspace ->
       if is_success
       then
@@ -1231,18 +1841,50 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (StartWorkspacesResult.of_json json)
       else Error (parse_aws_error None)
+  | StartWorkspacesPool ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartWorkspacesPoolResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartWorkspacesPoolResult.error_of_json))
   | StopWorkspaces ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (StopWorkspacesResult.of_json json)
       else Error (parse_aws_error None)
+  | StopWorkspacesPool ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopWorkspacesPoolResult.of_json json)
+      else
+        Error (parse_aws_error (Some StopWorkspacesPoolResult.error_of_json))
   | TerminateWorkspaces ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (TerminateWorkspacesResult.of_json json)
       else Error (parse_aws_error None)
+  | TerminateWorkspacesPool ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TerminateWorkspacesPoolResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some TerminateWorkspacesPoolResult.error_of_json))
+  | TerminateWorkspacesPoolSession ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TerminateWorkspacesPoolSessionResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some TerminateWorkspacesPoolSessionResult.error_of_json))
   | UpdateConnectClientAddIn ->
       if is_success
       then
@@ -1286,3 +1928,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateWorkspaceImagePermissionResult.error_of_json))
+  | UpdateWorkspacesPool ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateWorkspacesPoolResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateWorkspacesPoolResult.error_of_json))

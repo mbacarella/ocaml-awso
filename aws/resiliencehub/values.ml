@@ -23,22 +23,46 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module String1024 =
+  struct
+    type nonrec t = string
+    let context_ = "String1024"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String1024" j
+    let to_json = simple_to_json to_value
+  end
 module ComplianceStatus =
   struct
     type nonrec t =
       | PolicyBreached 
       | PolicyMet 
+      | NotApplicable 
+      | MissingPolicy 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | PolicyBreached -> "PolicyBreached"
       | PolicyMet -> "PolicyMet"
+      | NotApplicable -> "NotApplicable"
+      | MissingPolicy -> "MissingPolicy"
       | Non_static_id s -> s
     let of_string =
       function
       | "PolicyBreached" -> PolicyBreached
       | "PolicyMet" -> PolicyMet
+      | "NotApplicable" -> NotApplicable
+      | "MissingPolicy" -> MissingPolicy
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -80,6 +104,160 @@ module String500 =
     let of_json j = string_of_json ~kind:"String500" j
     let to_json = simple_to_json to_value
   end
+module String255 =
+  struct
+    type nonrec t = string
+    let context_ = "String255"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String255" j
+    let to_json = simple_to_json to_value
+  end
+module Arn =
+  struct
+    type nonrec t = string
+    let context_ = "Arn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^arn:(aws|aws-cn|aws-iso|aws-iso-[a-z]{1}|aws-us-gov):[A-Za-z0-9][A-Za-z0-9_/.-]{0,62}:([a-z]{2}-((iso[a-z]{0,1}-)|(gov-)){0,1}[a-z]+-[0-9]):[0-9]{12}:[A-Za-z0-9/][A-Za-z0-9:_/+.-]{0,1023}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Arn" j
+    let to_json = simple_to_json to_value
+  end
+module EntityName =
+  struct
+    type nonrec t = string
+    let context_ = "EntityName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i ~pattern:"^[A-Za-z0-9][A-Za-z0-9_\\-]{1,59}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EntityName" j
+    let to_json = simple_to_json to_value
+  end
+module AwsRegion =
+  struct
+    type nonrec t = string
+    let context_ = "AwsRegion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^[a-z]{2}-((iso[a-z]{0,1}-)|(gov-)){0,1}[a-z]+-[0-9]$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AwsRegion" j
+    let to_json = simple_to_json to_value
+  end
+module CustomerId =
+  struct
+    type nonrec t = string
+    let context_ = "CustomerId"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^[0-9]{12}$"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CustomerId" j
+    let to_json = simple_to_json to_value
+  end
+module PhysicalIdentifierType =
+  struct
+    type nonrec t =
+      | Arn 
+      | Native 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Arn -> "Arn" | Native -> "Native" | Non_static_id s -> s
+    let of_string =
+      function | "Arn" -> Arn | "Native" -> Native | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PhysicalIdentifierType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PhysicalIdentifierType" j)
+    let to_json = simple_to_json to_value
+  end
+module AdditionalInfoValueList =
+  struct
+    type nonrec t = String1024.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String1024.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String1024.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AdditionalInfoValueList"
+        ~of_json:String1024.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module String128WithoutWhitespace =
+  struct
+    type nonrec t = string
+    let context_ = "String128WithoutWhitespace"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^\\S{1,128}$"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String128WithoutWhitespace" j
+    let to_json = simple_to_json to_value
+  end
 module DisruptionCompliance =
   struct
     type nonrec t =
@@ -90,7 +268,7 @@ module DisruptionCompliance =
       achievableRtoInSecs: Seconds.t option
         [@ocaml.doc
           "The Recovery Time Objective (RTO) that is achievable, in seconds"];
-      complianceStatus: ComplianceStatus.t
+      complianceStatus: ComplianceStatus.t option
         [@ocaml.doc
           "The current status of compliance for the resiliency policy."];
       currentRpoInSecs: Seconds.t option
@@ -101,33 +279,32 @@ module DisruptionCompliance =
         [@ocaml.doc "The disruption compliance message."];
       rpoDescription: String500.t option [@ocaml.doc "The RPO description."];
       rpoReferenceId: String500.t option
-        [@ocaml.doc "The RPO reference identifier."];
+        [@ocaml.doc "Reference identifier of the RPO ."];
       rtoDescription: String500.t option [@ocaml.doc "The RTO description."];
       rtoReferenceId: String500.t option
-        [@ocaml.doc "The RTO reference identifier."]}
-    let context_ = "DisruptionCompliance"
+        [@ocaml.doc "Reference identifier of the RTO."]}
     let make ?achievableRpoInSecs =
       fun ?achievableRtoInSecs ->
-        fun ?currentRpoInSecs ->
-          fun ?currentRtoInSecs ->
-            fun ?message ->
-              fun ?rpoDescription ->
-                fun ?rpoReferenceId ->
-                  fun ?rtoDescription ->
-                    fun ?rtoReferenceId ->
-                      fun ~complianceStatus ->
+        fun ?complianceStatus ->
+          fun ?currentRpoInSecs ->
+            fun ?currentRtoInSecs ->
+              fun ?message ->
+                fun ?rpoDescription ->
+                  fun ?rpoReferenceId ->
+                    fun ?rtoDescription ->
+                      fun ?rtoReferenceId ->
                         fun () ->
                           {
                             achievableRpoInSecs;
                             achievableRtoInSecs;
+                            complianceStatus;
                             currentRpoInSecs;
                             currentRtoInSecs;
                             message;
                             rpoDescription;
                             rpoReferenceId;
                             rtoDescription;
-                            rtoReferenceId;
-                            complianceStatus
+                            rtoReferenceId
                           }
     let to_value x =
       structure_to_value
@@ -136,7 +313,7 @@ module DisruptionCompliance =
         ("achievableRtoInSecs",
           (Option.map x.achievableRtoInSecs ~f:Seconds.to_value));
         ("complianceStatus",
-          (Some (ComplianceStatus.to_value x.complianceStatus)));
+          (Option.map x.complianceStatus ~f:ComplianceStatus.to_value));
         ("currentRpoInSecs",
           (Option.map x.currentRpoInSecs ~f:Seconds.to_value));
         ("currentRtoInSecs",
@@ -173,8 +350,8 @@ module DisruptionCompliance =
         (Option.map ~f:Seconds.of_xml)
           (Xml.child xml_arg0 "currentRpoInSecs") in
       let complianceStatus =
-        ComplianceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "complianceStatus") in
+        (Option.map ~f:ComplianceStatus.of_xml)
+          (Xml.child xml_arg0 "complianceStatus") in
       let achievableRtoInSecs =
         (Option.map ~f:Seconds.of_xml)
           (Xml.child xml_arg0 "achievableRtoInSecs") in
@@ -182,27 +359,31 @@ module DisruptionCompliance =
         (Option.map ~f:Seconds.of_xml)
           (Xml.child xml_arg0 "achievableRpoInSecs") in
       make ?rtoReferenceId ?rtoDescription ?rpoReferenceId ?rpoDescription
-        ?message ?currentRtoInSecs ?currentRpoInSecs ~complianceStatus
+        ?message ?currentRtoInSecs ?currentRpoInSecs ?complianceStatus
         ?achievableRtoInSecs ?achievableRpoInSecs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rtoReferenceId = field_map json "rtoReferenceId" String500.of_json in
-      let rtoDescription = field_map json "rtoDescription" String500.of_json in
-      let rpoReferenceId = field_map json "rpoReferenceId" String500.of_json in
-      let rpoDescription = field_map json "rpoDescription" String500.of_json in
-      let message = field_map json "message" String500.of_json in
+    let of_json json__ =
+      let rtoReferenceId =
+        field_map json__ "rtoReferenceId" String500.of_json in
+      let rtoDescription =
+        field_map json__ "rtoDescription" String500.of_json in
+      let rpoReferenceId =
+        field_map json__ "rpoReferenceId" String500.of_json in
+      let rpoDescription =
+        field_map json__ "rpoDescription" String500.of_json in
+      let message = field_map json__ "message" String500.of_json in
       let currentRtoInSecs =
-        field_map json "currentRtoInSecs" Seconds.of_json in
+        field_map json__ "currentRtoInSecs" Seconds.of_json in
       let currentRpoInSecs =
-        field_map json "currentRpoInSecs" Seconds.of_json in
+        field_map json__ "currentRpoInSecs" Seconds.of_json in
       let complianceStatus =
-        field_map_exn json "complianceStatus" ComplianceStatus.of_json in
+        field_map json__ "complianceStatus" ComplianceStatus.of_json in
       let achievableRtoInSecs =
-        field_map json "achievableRtoInSecs" Seconds.of_json in
+        field_map json__ "achievableRtoInSecs" Seconds.of_json in
       let achievableRpoInSecs =
-        field_map json "achievableRpoInSecs" Seconds.of_json in
+        field_map json__ "achievableRpoInSecs" Seconds.of_json in
       make ?rtoReferenceId ?rtoDescription ?rpoReferenceId ?rpoDescription
-        ?message ?currentRtoInSecs ?currentRpoInSecs ~complianceStatus
+        ?message ?currentRtoInSecs ?currentRpoInSecs ?complianceStatus
         ?achievableRtoInSecs ?achievableRpoInSecs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -304,7 +485,7 @@ module RecommendationDisruptionCompliance =
   struct
     type nonrec t =
       {
-      expectedComplianceStatus: ComplianceStatus.t
+      expectedComplianceStatus: ComplianceStatus.t option
         [@ocaml.doc
           "The expected compliance status after applying the recommended configuration change."];
       expectedRpoDescription: String500.t option
@@ -319,24 +500,24 @@ module RecommendationDisruptionCompliance =
       expectedRtoInSecs: Seconds.t option
         [@ocaml.doc
           "The expected RTO after applying the recommended configuration change."]}
-    let context_ = "RecommendationDisruptionCompliance"
-    let make ?expectedRpoDescription =
-      fun ?expectedRpoInSecs ->
-        fun ?expectedRtoDescription ->
-          fun ?expectedRtoInSecs ->
-            fun ~expectedComplianceStatus ->
+    let make ?expectedComplianceStatus =
+      fun ?expectedRpoDescription ->
+        fun ?expectedRpoInSecs ->
+          fun ?expectedRtoDescription ->
+            fun ?expectedRtoInSecs ->
               fun () ->
                 {
+                  expectedComplianceStatus;
                   expectedRpoDescription;
                   expectedRpoInSecs;
                   expectedRtoDescription;
-                  expectedRtoInSecs;
-                  expectedComplianceStatus
+                  expectedRtoInSecs
                 }
     let to_value x =
       structure_to_value
         [("expectedComplianceStatus",
-           (Some (ComplianceStatus.to_value x.expectedComplianceStatus)));
+           (Option.map x.expectedComplianceStatus
+              ~f:ComplianceStatus.to_value));
         ("expectedRpoDescription",
           (Option.map x.expectedRpoDescription ~f:String500.to_value));
         ("expectedRpoInSecs",
@@ -360,26 +541,24 @@ module RecommendationDisruptionCompliance =
         (Option.map ~f:String500.of_xml)
           (Xml.child xml_arg0 "expectedRpoDescription") in
       let expectedComplianceStatus =
-        ComplianceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "expectedComplianceStatus") in
+        (Option.map ~f:ComplianceStatus.of_xml)
+          (Xml.child xml_arg0 "expectedComplianceStatus") in
       make ?expectedRtoInSecs ?expectedRtoDescription ?expectedRpoInSecs
-        ?expectedRpoDescription ~expectedComplianceStatus ()
+        ?expectedRpoDescription ?expectedComplianceStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let expectedRtoInSecs =
-        field_map json "expectedRtoInSecs" Seconds.of_json in
+        field_map json__ "expectedRtoInSecs" Seconds.of_json in
       let expectedRtoDescription =
-        field_map json "expectedRtoDescription" String500.of_json in
+        field_map json__ "expectedRtoDescription" String500.of_json in
       let expectedRpoInSecs =
-        field_map json "expectedRpoInSecs" Seconds.of_json in
+        field_map json__ "expectedRpoInSecs" Seconds.of_json in
       let expectedRpoDescription =
-        field_map json "expectedRpoDescription" String500.of_json in
+        field_map json__ "expectedRpoDescription" String500.of_json in
       let expectedComplianceStatus =
-        field_map_exn json "expectedComplianceStatus"
-          ComplianceStatus.of_json in
+        field_map json__ "expectedComplianceStatus" ComplianceStatus.of_json in
       make ?expectedRtoInSecs ?expectedRtoDescription ?expectedRpoInSecs
-        ?expectedRpoDescription ~expectedComplianceStatus ()
+        ?expectedRpoDescription ?expectedComplianceStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Defines a disruption compliance recommendation."]
 module EntityDescription =
@@ -400,24 +579,94 @@ module EntityDescription =
     let of_json j = string_of_json ~kind:"EntityDescription" j
     let to_json = simple_to_json to_value
   end
-module AwsRegion =
+module Long =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module AppComponentNameList =
+  struct
+    type nonrec t = String255.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String255.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String255.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AppComponentNameList" ~of_json:String255.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ErrorMessage =
   struct
     type nonrec t = string
-    let context_ = "AwsRegion"
+    let context_ = "ErrorMessage"
     let make i =
       let open Result in
         ok_or_failwith
-          (check_pattern i
-             ~pattern:"^[a-z]{2}-((iso[a-z]{0,1}-)|(gov-)){0,1}[a-z]+-[0-9]$");
+          ((check_string_max i ~max:500) >>=
+             (fun () -> check_string_min i ~min:0));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AwsRegion" j
+    let of_json j = string_of_json ~kind:"ErrorMessage" j
     let to_json = simple_to_json to_value
   end
+module Alarm =
+  struct
+    type nonrec t =
+      {
+      alarmArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Amazon CloudWatch alarm."];
+      source: String255.t option
+        [@ocaml.doc
+          "Indicates the source of the Amazon CloudWatch alarm. That is, it indicates if the alarm was created using Resilience Hub recommendation (AwsResilienceHub), or if you had created the alarm in Amazon CloudWatch (Customer)."]}
+    let make ?alarmArn = fun ?source -> fun () -> { alarmArn; source }
+    let to_value x =
+      structure_to_value
+        [("alarmArn", (Option.map x.alarmArn ~f:Arn.to_value));
+        ("source", (Option.map x.source ~f:String255.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let source =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "source") in
+      let alarmArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "alarmArn") in
+      make ?source ?alarmArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let source = field_map json__ "source" String255.of_json in
+      let alarmArn = field_map json__ "alarmArn" Arn.of_json in
+      make ?source ?alarmArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the Amazon CloudWatch alarm detected while running an assessment."]
 module BooleanOptional =
   struct
     type nonrec t = bool
@@ -431,37 +680,271 @@ module BooleanOptional =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
-module CustomerId =
+module ExcludeRecommendationReason =
   struct
-    type nonrec t = string
-    let context_ = "CustomerId"
-    let make i =
-      let open Result in
-        ok_or_failwith (check_pattern i ~pattern:"^[0-9]{12}$"); i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      | AlreadyImplemented 
+      | NotRelevant 
+      | ComplexityOfImplementation 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AlreadyImplemented -> "AlreadyImplemented"
+      | NotRelevant -> "NotRelevant"
+      | ComplexityOfImplementation -> "ComplexityOfImplementation"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AlreadyImplemented" -> AlreadyImplemented
+      | "NotRelevant" -> NotRelevant
+      | "ComplexityOfImplementation" -> ComplexityOfImplementation
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"CustomerId" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ExcludeRecommendationReason"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ExcludeRecommendationReason" j)
     let to_json = simple_to_json to_value
   end
-module String255 =
+module Experiment =
+  struct
+    type nonrec t =
+      {
+      experimentArn: String255.t option
+        [@ocaml.doc "Amazon Resource Name (ARN) of the FIS experiment."];
+      experimentTemplateId: String255.t option
+        [@ocaml.doc "Identifier of the FIS experiment template."]}
+    let make ?experimentArn =
+      fun ?experimentTemplateId ->
+        fun () -> { experimentArn; experimentTemplateId }
+    let to_value x =
+      structure_to_value
+        [("experimentArn",
+           (Option.map x.experimentArn ~f:String255.to_value));
+        ("experimentTemplateId",
+          (Option.map x.experimentTemplateId ~f:String255.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let experimentTemplateId =
+        (Option.map ~f:String255.of_xml)
+          (Xml.child xml_arg0 "experimentTemplateId") in
+      let experimentArn =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "experimentArn") in
+      make ?experimentTemplateId ?experimentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let experimentTemplateId =
+        field_map json__ "experimentTemplateId" String255.of_json in
+      let experimentArn = field_map json__ "experimentArn" String255.of_json in
+      make ?experimentTemplateId ?experimentArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the FIS experiment detected while running an assessment."]
+module LogicalResourceId =
+  struct
+    type nonrec t =
+      {
+      eksSourceName: String255.t option
+        [@ocaml.doc
+          "Name of the Amazon Elastic Kubernetes Service cluster and namespace this resource belongs to. This parameter accepts values in \"eks-cluster/namespace\" format."];
+      identifier: String255.t [@ocaml.doc "Identifier of the resource."];
+      logicalStackName: String255.t option
+        [@ocaml.doc
+          "The name of the CloudFormation stack this resource belongs to."];
+      resourceGroupName: EntityName.t option
+        [@ocaml.doc
+          "The name of the resource group that this resource belongs to."];
+      terraformSourceName: String255.t option
+        [@ocaml.doc
+          "The name of the Terraform S3 state file this resource belongs to."]}
+    let context_ = "LogicalResourceId"
+    let make ?eksSourceName =
+      fun ?logicalStackName ->
+        fun ?resourceGroupName ->
+          fun ?terraformSourceName ->
+            fun ~identifier ->
+              fun () ->
+                {
+                  eksSourceName;
+                  logicalStackName;
+                  resourceGroupName;
+                  terraformSourceName;
+                  identifier
+                }
+    let to_value x =
+      structure_to_value
+        [("eksSourceName",
+           (Option.map x.eksSourceName ~f:String255.to_value));
+        ("identifier", (Some (String255.to_value x.identifier)));
+        ("logicalStackName",
+          (Option.map x.logicalStackName ~f:String255.to_value));
+        ("resourceGroupName",
+          (Option.map x.resourceGroupName ~f:EntityName.to_value));
+        ("terraformSourceName",
+          (Option.map x.terraformSourceName ~f:String255.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let terraformSourceName =
+        (Option.map ~f:String255.of_xml)
+          (Xml.child xml_arg0 "terraformSourceName") in
+      let resourceGroupName =
+        (Option.map ~f:EntityName.of_xml)
+          (Xml.child xml_arg0 "resourceGroupName") in
+      let logicalStackName =
+        (Option.map ~f:String255.of_xml)
+          (Xml.child xml_arg0 "logicalStackName") in
+      let identifier =
+        String255.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "identifier") in
+      let eksSourceName =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "eksSourceName") in
+      make ?terraformSourceName ?resourceGroupName ?logicalStackName
+        ~identifier ?eksSourceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let terraformSourceName =
+        field_map json__ "terraformSourceName" String255.of_json in
+      let resourceGroupName =
+        field_map json__ "resourceGroupName" EntityName.of_json in
+      let logicalStackName =
+        field_map json__ "logicalStackName" String255.of_json in
+      let identifier = field_map_exn json__ "identifier" String255.of_json in
+      let eksSourceName = field_map json__ "eksSourceName" String255.of_json in
+      make ?terraformSourceName ?resourceGroupName ?logicalStackName
+        ~identifier ?eksSourceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Defines a logical resource identifier."]
+module PhysicalResourceId =
+  struct
+    type nonrec t =
+      {
+      awsAccountId: CustomerId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account that owns the physical resource."];
+      awsRegion: AwsRegion.t option
+        [@ocaml.doc
+          "The Amazon Web Services Region that the physical resource is located in."];
+      identifier: String255.t
+        [@ocaml.doc "Identifier of the physical resource."];
+      type_: PhysicalIdentifierType.t
+        [@ocaml.doc
+          "Specifies the type of physical resource identifier. Arn The resource identifier is an Amazon Resource Name (ARN) and it can identify the following list of resources: AWS::ECS::Service AWS::EFS::FileSystem AWS::ElasticLoadBalancingV2::LoadBalancer AWS::Lambda::Function AWS::SNS::Topic Native The resource identifier is an Resilience Hub-native identifier and it can identify the following list of resources: AWS::ApiGateway::RestApi AWS::ApiGatewayV2::Api AWS::AutoScaling::AutoScalingGroup AWS::DocDB::DBCluster AWS::DocDB::DBGlobalCluster AWS::DocDB::DBInstance AWS::DynamoDB::GlobalTable AWS::DynamoDB::Table AWS::EC2::EC2Fleet AWS::EC2::Instance AWS::EC2::NatGateway AWS::EC2::Volume AWS::ElasticLoadBalancing::LoadBalancer AWS::RDS::DBCluster AWS::RDS::DBInstance AWS::RDS::GlobalCluster AWS::Route53::RecordSet AWS::S3::Bucket AWS::SQS::Queue"]}
+    let context_ = "PhysicalResourceId"
+    let make ?awsAccountId =
+      fun ?awsRegion ->
+        fun ~identifier ->
+          fun ~type_ ->
+            fun () -> { awsAccountId; awsRegion; identifier; type_ }
+    let to_value x =
+      structure_to_value
+        [("awsAccountId", (Option.map x.awsAccountId ~f:CustomerId.to_value));
+        ("awsRegion", (Option.map x.awsRegion ~f:AwsRegion.to_value));
+        ("identifier", (Some (String255.to_value x.identifier)));
+        ("type", (Some (PhysicalIdentifierType.to_value x.type_)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        PhysicalIdentifierType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      let identifier =
+        String255.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "identifier") in
+      let awsRegion =
+        (Option.map ~f:AwsRegion.of_xml) (Xml.child xml_arg0 "awsRegion") in
+      let awsAccountId =
+        (Option.map ~f:CustomerId.of_xml) (Xml.child xml_arg0 "awsAccountId") in
+      make ~type_ ~identifier ?awsRegion ?awsAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map_exn json__ "type" PhysicalIdentifierType.of_json in
+      let identifier = field_map_exn json__ "identifier" String255.of_json in
+      let awsRegion = field_map json__ "awsRegion" AwsRegion.of_json in
+      let awsAccountId = field_map json__ "awsAccountId" CustomerId.of_json in
+      make ~type_ ~identifier ?awsRegion ?awsAccountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Defines a physical resource identifier."]
+module String255List =
+  struct
+    type nonrec t = String255.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String255.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String255.of_xml)
+    let of_json j =
+      list_of_json ~kind:"String255List" ~of_json:String255.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AdditionalInfoMap =
+  struct
+    type nonrec t =
+      (String128WithoutWhitespace.t * AdditionalInfoValueList.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types String128WithoutWhitespace AdditionalInfoValueList"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String128WithoutWhitespace.to_value x) |>
+                    (fun x ->
+                       (AdditionalInfoValueList.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String128WithoutWhitespace.of_string
+        ~of_json:AdditionalInfoValueList.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EntityName255 =
   struct
     type nonrec t = string
-    let context_ = "String255"
+    let context_ = "EntityName255"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:255) >>=
-             (fun () -> check_string_min i ~min:1));
+          (check_pattern i ~pattern:"^[A-Za-z0-9][A-Za-z0-9_\\-]{0,254}$");
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String255" j
+    let of_json j = string_of_json ~kind:"EntityName255" j
     let to_json = simple_to_json to_value
   end
 module AssessmentCompliance =
@@ -488,6 +971,8 @@ module AssessmentCompliance =
                        (DisruptionCompliance.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -503,6 +988,7 @@ module ConfigRecommendationOptimizationType =
       | BestAZRecovery 
       | LeastErrors 
       | BestAttainable 
+      | BestRegionRecovery 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -512,6 +998,7 @@ module ConfigRecommendationOptimizationType =
       | BestAZRecovery -> "BestAZRecovery"
       | LeastErrors -> "LeastErrors"
       | BestAttainable -> "BestAttainable"
+      | BestRegionRecovery -> "BestRegionRecovery"
       | Non_static_id s -> s
     let of_string =
       function
@@ -520,6 +1007,7 @@ module ConfigRecommendationOptimizationType =
       | "BestAZRecovery" -> BestAZRecovery
       | "LeastErrors" -> LeastErrors
       | "BestAttainable" -> BestAttainable
+      | "BestRegionRecovery" -> BestRegionRecovery
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -537,36 +1025,33 @@ module Cost =
   struct
     type nonrec t =
       {
-      amount: Double.t [@ocaml.doc "The cost amount."];
-      currency: CurrencyCode.t
+      amount: Double.t option [@ocaml.doc "The cost amount."];
+      currency: CurrencyCode.t option
         [@ocaml.doc "The cost currency, for example USD."];
-      frequency: CostFrequency.t [@ocaml.doc "The cost frequency."]}
-    let context_ = "Cost"
-    let make ~amount =
-      fun ~currency ->
-        fun ~frequency -> fun () -> { amount; currency; frequency }
+      frequency: CostFrequency.t option [@ocaml.doc "The cost frequency."]}
+    let make ?amount =
+      fun ?currency ->
+        fun ?frequency -> fun () -> { amount; currency; frequency }
     let to_value x =
       structure_to_value
-        [("amount", (Some (Double.to_value x.amount)));
-        ("currency", (Some (CurrencyCode.to_value x.currency)));
-        ("frequency", (Some (CostFrequency.to_value x.frequency)))]
+        [("amount", (Option.map x.amount ~f:Double.to_value));
+        ("currency", (Option.map x.currency ~f:CurrencyCode.to_value));
+        ("frequency", (Option.map x.frequency ~f:CostFrequency.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let frequency =
-        CostFrequency.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "frequency") in
+        (Option.map ~f:CostFrequency.of_xml) (Xml.child xml_arg0 "frequency") in
       let currency =
-        CurrencyCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "currency") in
+        (Option.map ~f:CurrencyCode.of_xml) (Xml.child xml_arg0 "currency") in
       let amount =
-        Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "amount") in
-      make ~frequency ~currency ~amount ()
+        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "amount") in
+      make ?frequency ?currency ?amount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let frequency = field_map_exn json "frequency" CostFrequency.of_json in
-      let currency = field_map_exn json "currency" CurrencyCode.of_json in
-      let amount = field_map_exn json "amount" Double.of_json in
-      make ~frequency ~currency ~amount ()
+    let of_json json__ =
+      let frequency = field_map json__ "frequency" CostFrequency.of_json in
+      let currency = field_map json__ "currency" CurrencyCode.of_json in
+      let amount = field_map json__ "amount" Double.of_json in
+      make ?frequency ?currency ?amount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Defines a cost object."]
 module EntityId =
@@ -575,30 +1060,13 @@ module EntityId =
     let context_ = "EntityId"
     let make i =
       let open Result in
-        ok_or_failwith (check_pattern i ~pattern:"^\\S{1,100}$"); i
+        ok_or_failwith (check_pattern i ~pattern:"^\\S{1,255}$"); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"EntityId" j
-    let to_json = simple_to_json to_value
-  end
-module EntityName =
-  struct
-    type nonrec t = string
-    let context_ = "EntityName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          (check_pattern i ~pattern:"^[A-Za-z0-9][A-Za-z0-9_\\-]{1,59}$");
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"EntityName" j
     let to_json = simple_to_json to_value
   end
 module HaArchitecture =
@@ -661,6 +1129,8 @@ module RecommendationCompliance =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -690,6 +1160,9 @@ module SuggestedChangesList =
   struct
     type nonrec t = EntityDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EntityDescription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -711,14 +1184,182 @@ module SuggestedChangesList =
         ~of_json:EntityDescription.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ResiliencyScoreType =
+  struct
+    type nonrec t =
+      | Compliance 
+      | Test 
+      | Alarm 
+      | Sop 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Compliance -> "Compliance"
+      | Test -> "Test"
+      | Alarm -> "Alarm"
+      | Sop -> "Sop"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Compliance" -> Compliance
+      | "Test" -> Test
+      | "Alarm" -> Alarm
+      | "Sop" -> Sop
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResiliencyScoreType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResiliencyScoreType" j)
+    let to_json = simple_to_json to_value
+  end
+module ScoringComponentResiliencyScore =
+  struct
+    type nonrec t =
+      {
+      excludedCount: Long.t option
+        [@ocaml.doc
+          "Number of recommendations that were excluded from the assessment. For example, if the excludedCount for Alarms coverage scoring component is 7, it indicates that 7 Amazon CloudWatch alarms are excluded from the assessment."];
+      outstandingCount: Long.t option
+        [@ocaml.doc
+          "Number of recommendations that must be implemented to obtain the maximum possible score for the scoring component. For SOPs, alarms, and tests, these are the number of recommendations that must be implemented. For compliance, these are the number of Application Components that have breached the resiliency policy. For example, if the outstandingCount for Alarms coverage scoring component is 5, it indicates that 5 Amazon CloudWatch alarms need to be implemented to achieve the maximum possible score."];
+      possibleScore: Double.t option
+        [@ocaml.doc
+          "Maximum possible score that can be obtained for the scoring component. For example, if the possibleScore is 20 points, it indicates the maximum possible score you can achieve for the scoring component when you run a new assessment after implementing all the Resilience Hub recommendations."];
+      score: Double.t option
+        [@ocaml.doc
+          "Resiliency score points given for the scoring component. The score is always less than or equal to the possibleScore."]}
+    let make ?excludedCount =
+      fun ?outstandingCount ->
+        fun ?possibleScore ->
+          fun ?score ->
+            fun () ->
+              { excludedCount; outstandingCount; possibleScore; score }
+    let to_value x =
+      structure_to_value
+        [("excludedCount", (Option.map x.excludedCount ~f:Long.to_value));
+        ("outstandingCount",
+          (Option.map x.outstandingCount ~f:Long.to_value));
+        ("possibleScore", (Option.map x.possibleScore ~f:Double.to_value));
+        ("score", (Option.map x.score ~f:Double.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let score = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "score") in
+      let possibleScore =
+        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "possibleScore") in
+      let outstandingCount =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "outstandingCount") in
+      let excludedCount =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "excludedCount") in
+      make ?score ?possibleScore ?outstandingCount ?excludedCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let score = field_map json__ "score" Double.of_json in
+      let possibleScore = field_map json__ "possibleScore" Double.of_json in
+      let outstandingCount = field_map json__ "outstandingCount" Long.of_json in
+      let excludedCount = field_map json__ "excludedCount" Long.of_json in
+      make ?score ?possibleScore ?outstandingCount ?excludedCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Resiliency score of each scoring component. For more information about scoring component, see Calculating resiliency score."]
+module EventType =
+  struct
+    type nonrec t =
+      | ScheduledAssessmentFailure 
+      | DriftDetected 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ScheduledAssessmentFailure -> "ScheduledAssessmentFailure"
+      | DriftDetected -> "DriftDetected"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ScheduledAssessmentFailure" -> ScheduledAssessmentFailure
+      | "DriftDetected" -> DriftDetected
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EventType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EventType" j)
+    let to_json = simple_to_json to_value
+  end
+module IamRoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "IamRoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^arn:(aws|aws-cn|aws-iso|aws-iso-[a-z]{1}|aws-us-gov):iam::[0-9]{12}:role/(([^/][!-~]+/){1,511})?[A-Za-z0-9_+=,.@-]{1,64}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IamRoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module AssessmentRiskRecommendation =
+  struct
+    type nonrec t =
+      {
+      appComponents: AppComponentNameList.t option
+        [@ocaml.doc
+          "Indicates the Application Components (AppComponents) that were assessed as part of the assessment and are associated with the identified risk and recommendation. This property is available only in the US East (N. Virginia) Region."];
+      recommendation: String255.t option
+        [@ocaml.doc
+          "Indicates the recommendation provided by the Resilience Hub to address the identified risks in the application. This property is available only in the US East (N. Virginia) Region."];
+      risk: String255.t option
+        [@ocaml.doc
+          "Indicates the description of the potential risk identified in the application as part of the Resilience Hub assessment. This property is available only in the US East (N. Virginia) Region."]}
+    let make ?appComponents =
+      fun ?recommendation ->
+        fun ?risk -> fun () -> { appComponents; recommendation; risk }
+    let to_value x =
+      structure_to_value
+        [("appComponents",
+           (Option.map x.appComponents ~f:AppComponentNameList.to_value));
+        ("recommendation",
+          (Option.map x.recommendation ~f:String255.to_value));
+        ("risk", (Option.map x.risk ~f:String255.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let risk = (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "risk") in
+      let recommendation =
+        (Option.map ~f:String255.of_xml)
+          (Xml.child xml_arg0 "recommendation") in
+      let appComponents =
+        (Option.map ~f:AppComponentNameList.of_xml)
+          (Xml.child xml_arg0 "appComponents") in
+      make ?risk ?recommendation ?appComponents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let risk = field_map json__ "risk" String255.of_json in
+      let recommendation =
+        field_map json__ "recommendation" String255.of_json in
+      let appComponents =
+        field_map json__ "appComponents" AppComponentNameList.of_json in
+      make ?risk ?recommendation ?appComponents ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates a specific risk identified in the Resilience Hub assessment and the corresponding recommendation provided to address that risk. The assessment summary generated by large language models (LLMs) on Amazon Bedrock are only suggestions. The current level of generative AI technology is not perfect and LLMs are not infallible. Bias and incorrect answers, although rare, should be expected. Review each recommendation in the assessment summary before you use the output from an LLM. This property is available only in the US East (N. Virginia) Region."]
 module FailurePolicy =
   struct
     type nonrec t =
       {
       rpoInSecs: Seconds.t
-        [@ocaml.doc "The Recovery Point Objective (RPO), in seconds."];
+        [@ocaml.doc "Recovery Point Objective (RPO) in seconds."];
       rtoInSecs: Seconds.t
-        [@ocaml.doc "The Recovery Time Objective (RTO), in seconds."]}
+        [@ocaml.doc "Recovery Time Objective (RTO) in seconds."]}
     let context_ = "FailurePolicy"
     let make ~rpoInSecs =
       fun ~rtoInSecs -> fun () -> { rpoInSecs; rtoInSecs }
@@ -734,9 +1375,9 @@ module FailurePolicy =
         Seconds.of_xml (Xml.child_exn ~context:context_ xml_arg0 "rpoInSecs") in
       make ~rtoInSecs ~rpoInSecs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rtoInSecs = field_map_exn json "rtoInSecs" Seconds.of_json in
-      let rpoInSecs = field_map_exn json "rpoInSecs" Seconds.of_json in
+    let of_json json__ =
+      let rtoInSecs = field_map_exn json__ "rtoInSecs" Seconds.of_json in
+      let rpoInSecs = field_map_exn json__ "rpoInSecs" Seconds.of_json in
       make ~rtoInSecs ~rpoInSecs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Defines a failure policy."]
@@ -750,7 +1391,8 @@ module TagKey =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:128) >>=
-                  (fun () -> check_pattern i ~pattern:"^(?!aws:).+$")));
+                  (fun () ->
+                     check_pattern i ~pattern:"^[^\\x00-\\x1f\\x22]+$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -767,8 +1409,11 @@ module TagValue =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[^\\x00-\\x1f\\x22]*$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -778,27 +1423,47 @@ module TagValue =
     let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
-module PhysicalIdentifierType =
+module ResourceError =
   struct
     type nonrec t =
-      | Arn 
-      | Native 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | Arn -> "Arn" | Native -> "Native" | Non_static_id s -> s
-    let of_string =
-      function | "Arn" -> Arn | "Native" -> Native | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+      {
+      logicalResourceId: String255.t option
+        [@ocaml.doc "Identifier of the logical resource."];
+      physicalResourceId: String255.t option
+        [@ocaml.doc "Identifier of the physical resource."];
+      reason: ErrorMessage.t option [@ocaml.doc "This is the error message."]}
+    let make ?logicalResourceId =
+      fun ?physicalResourceId ->
+        fun ?reason ->
+          fun () -> { logicalResourceId; physicalResourceId; reason }
+    let to_value x =
+      structure_to_value
+        [("logicalResourceId",
+           (Option.map x.logicalResourceId ~f:String255.to_value));
+        ("physicalResourceId",
+          (Option.map x.physicalResourceId ~f:String255.to_value));
+        ("reason", (Option.map x.reason ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration PhysicalIdentifierType" xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"PhysicalIdentifierType" j)
-    let to_json = simple_to_json to_value
-  end
+      let reason =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "reason") in
+      let physicalResourceId =
+        (Option.map ~f:String255.of_xml)
+          (Xml.child xml_arg0 "physicalResourceId") in
+      let logicalResourceId =
+        (Option.map ~f:String255.of_xml)
+          (Xml.child xml_arg0 "logicalResourceId") in
+      make ?reason ?physicalResourceId ?logicalResourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "reason" ErrorMessage.of_json in
+      let physicalResourceId =
+        field_map json__ "physicalResourceId" String255.of_json in
+      let logicalResourceId =
+        field_map json__ "logicalResourceId" String255.of_json in
+      make ?reason ?physicalResourceId ?logicalResourceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Defines application resource errors."]
 module RecommendationItem =
   struct
     type nonrec t =
@@ -806,21 +1471,52 @@ module RecommendationItem =
       alreadyImplemented: BooleanOptional.t option
         [@ocaml.doc
           "Specifies if the recommendation has already been implemented."];
-      resourceId: String500.t option [@ocaml.doc "The resource identifier."];
+      discoveredAlarm: Alarm.t option
+        [@ocaml.doc
+          "Indicates the previously implemented Amazon CloudWatch alarm discovered by Resilience Hub."];
+      excludeReason: ExcludeRecommendationReason.t option
+        [@ocaml.doc
+          "Indicates the reason for excluding an operational recommendation."];
+      excluded: BooleanOptional.t option
+        [@ocaml.doc
+          "Indicates if an operational recommendation item is excluded."];
+      latestDiscoveredExperiment: Experiment.t option
+        [@ocaml.doc
+          "Indicates the experiment created in FIS that was discovered by Resilience Hub, which matches the recommendation."];
+      resourceId: String500.t option
+        [@ocaml.doc "Identifier of the resource."];
       targetAccountId: CustomerId.t option
-        [@ocaml.doc "The target account identifier."];
+        [@ocaml.doc "Identifier of the target account."];
       targetRegion: AwsRegion.t option [@ocaml.doc "The target region."]}
     let make ?alreadyImplemented =
-      fun ?resourceId ->
-        fun ?targetAccountId ->
-          fun ?targetRegion ->
-            fun () ->
-              { alreadyImplemented; resourceId; targetAccountId; targetRegion
-              }
+      fun ?discoveredAlarm ->
+        fun ?excludeReason ->
+          fun ?excluded ->
+            fun ?latestDiscoveredExperiment ->
+              fun ?resourceId ->
+                fun ?targetAccountId ->
+                  fun ?targetRegion ->
+                    fun () ->
+                      {
+                        alreadyImplemented;
+                        discoveredAlarm;
+                        excludeReason;
+                        excluded;
+                        latestDiscoveredExperiment;
+                        resourceId;
+                        targetAccountId;
+                        targetRegion
+                      }
     let to_value x =
       structure_to_value
         [("alreadyImplemented",
            (Option.map x.alreadyImplemented ~f:BooleanOptional.to_value));
+        ("discoveredAlarm", (Option.map x.discoveredAlarm ~f:Alarm.to_value));
+        ("excludeReason",
+          (Option.map x.excludeReason ~f:ExcludeRecommendationReason.to_value));
+        ("excluded", (Option.map x.excluded ~f:BooleanOptional.to_value));
+        ("latestDiscoveredExperiment",
+          (Option.map x.latestDiscoveredExperiment ~f:Experiment.to_value));
         ("resourceId", (Option.map x.resourceId ~f:String500.to_value));
         ("targetAccountId",
           (Option.map x.targetAccountId ~f:CustomerId.to_value));
@@ -834,21 +1530,112 @@ module RecommendationItem =
           (Xml.child xml_arg0 "targetAccountId") in
       let resourceId =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "resourceId") in
+      let latestDiscoveredExperiment =
+        (Option.map ~f:Experiment.of_xml)
+          (Xml.child xml_arg0 "latestDiscoveredExperiment") in
+      let excluded =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "excluded") in
+      let excludeReason =
+        (Option.map ~f:ExcludeRecommendationReason.of_xml)
+          (Xml.child xml_arg0 "excludeReason") in
+      let discoveredAlarm =
+        (Option.map ~f:Alarm.of_xml) (Xml.child xml_arg0 "discoveredAlarm") in
       let alreadyImplemented =
         (Option.map ~f:BooleanOptional.of_xml)
           (Xml.child xml_arg0 "alreadyImplemented") in
-      make ?targetRegion ?targetAccountId ?resourceId ?alreadyImplemented ()
+      make ?targetRegion ?targetAccountId ?resourceId
+        ?latestDiscoveredExperiment ?excluded ?excludeReason ?discoveredAlarm
+        ?alreadyImplemented ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetRegion = field_map json "targetRegion" AwsRegion.of_json in
+    let of_json json__ =
+      let targetRegion = field_map json__ "targetRegion" AwsRegion.of_json in
       let targetAccountId =
-        field_map json "targetAccountId" CustomerId.of_json in
-      let resourceId = field_map json "resourceId" String500.of_json in
+        field_map json__ "targetAccountId" CustomerId.of_json in
+      let resourceId = field_map json__ "resourceId" String500.of_json in
+      let latestDiscoveredExperiment =
+        field_map json__ "latestDiscoveredExperiment" Experiment.of_json in
+      let excluded = field_map json__ "excluded" BooleanOptional.of_json in
+      let excludeReason =
+        field_map json__ "excludeReason" ExcludeRecommendationReason.of_json in
+      let discoveredAlarm = field_map json__ "discoveredAlarm" Alarm.of_json in
       let alreadyImplemented =
-        field_map json "alreadyImplemented" BooleanOptional.of_json in
-      make ?targetRegion ?targetAccountId ?resourceId ?alreadyImplemented ()
+        field_map json__ "alreadyImplemented" BooleanOptional.of_json in
+      make ?targetRegion ?targetAccountId ?resourceId
+        ?latestDiscoveredExperiment ?excluded ?excludeReason ?discoveredAlarm
+        ?alreadyImplemented ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Defines a recommendation."]
+module GroupingResource =
+  struct
+    type nonrec t =
+      {
+      logicalResourceId: LogicalResourceId.t option
+        [@ocaml.doc "Indicates the logical identifier of the resource."];
+      physicalResourceId: PhysicalResourceId.t option
+        [@ocaml.doc "Indicates the physical identifier of the resource."];
+      resourceName: String255.t option
+        [@ocaml.doc "Indicates the resource name."];
+      resourceType: String255.t option
+        [@ocaml.doc "Indicates the resource type."];
+      sourceAppComponentIds: String255List.t option
+        [@ocaml.doc
+          "Indicates the identifier of the source AppComponents in which the resources were previously grouped into."]}
+    let make ?logicalResourceId =
+      fun ?physicalResourceId ->
+        fun ?resourceName ->
+          fun ?resourceType ->
+            fun ?sourceAppComponentIds ->
+              fun () ->
+                {
+                  logicalResourceId;
+                  physicalResourceId;
+                  resourceName;
+                  resourceType;
+                  sourceAppComponentIds
+                }
+    let to_value x =
+      structure_to_value
+        [("logicalResourceId",
+           (Option.map x.logicalResourceId ~f:LogicalResourceId.to_value));
+        ("physicalResourceId",
+          (Option.map x.physicalResourceId ~f:PhysicalResourceId.to_value));
+        ("resourceName", (Option.map x.resourceName ~f:String255.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String255.to_value));
+        ("sourceAppComponentIds",
+          (Option.map x.sourceAppComponentIds ~f:String255List.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceAppComponentIds =
+        (Option.map ~f:String255List.of_xml)
+          (Xml.child xml_arg0 "sourceAppComponentIds") in
+      let resourceType =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "resourceType") in
+      let resourceName =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "resourceName") in
+      let physicalResourceId =
+        (Option.map ~f:PhysicalResourceId.of_xml)
+          (Xml.child xml_arg0 "physicalResourceId") in
+      let logicalResourceId =
+        (Option.map ~f:LogicalResourceId.of_xml)
+          (Xml.child xml_arg0 "logicalResourceId") in
+      make ?sourceAppComponentIds ?resourceType ?resourceName
+        ?physicalResourceId ?logicalResourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceAppComponentIds =
+        field_map json__ "sourceAppComponentIds" String255List.of_json in
+      let resourceType = field_map json__ "resourceType" String255.of_json in
+      let resourceName = field_map json__ "resourceName" String255.of_json in
+      let physicalResourceId =
+        field_map json__ "physicalResourceId" PhysicalResourceId.of_json in
+      let logicalResourceId =
+        field_map json__ "logicalResourceId" LogicalResourceId.of_json in
+      make ?sourceAppComponentIds ?resourceType ?resourceName
+        ?physicalResourceId ?logicalResourceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the resource that will be grouped in the recommended Application Component (AppComponent)."]
 module Uuid =
   struct
     type nonrec t = string
@@ -901,34 +1688,97 @@ module AppComponent =
   struct
     type nonrec t =
       {
-      name: String255.t [@ocaml.doc "The name of the application component."];
-      type_: String255.t [@ocaml.doc "The type of application component."]}
-    let context_ = "AppComponent"
-    let make ~name = fun ~type_ -> fun () -> { name; type_ }
+      additionalInfo: AdditionalInfoMap.t option
+        [@ocaml.doc
+          "Additional configuration parameters for an Resilience Hub application. If you want to implement additionalInfo through the Resilience Hub console rather than using an API call, see Configure the application configuration parameters. Currently, this parameter accepts a key-value mapping (in a string format) of only one failover region and one associated account. Key: \"failover-regions\" Value: \"\\[\\{\"region\":\"<REGION>\", \"accounts\":\\[\\{\"id\":\"<ACCOUNT_ID>\"\\}\\]\\}\\]\""];
+      id: EntityName255.t option
+        [@ocaml.doc "Identifier of the Application Component."];
+      name: EntityName255.t option
+        [@ocaml.doc "Name of the Application Component."];
+      type_: String255.t option
+        [@ocaml.doc "The type of Application Component."]}
+    let make ?additionalInfo =
+      fun ?id ->
+        fun ?name ->
+          fun ?type_ -> fun () -> { additionalInfo; id; name; type_ }
     let to_value x =
       structure_to_value
-        [("name", (Some (String255.to_value x.name)));
-        ("type", (Some (String255.to_value x.type_)))]
+        [("additionalInfo",
+           (Option.map x.additionalInfo ~f:AdditionalInfoMap.to_value));
+        ("id", (Option.map x.id ~f:EntityName255.to_value));
+        ("name", (Option.map x.name ~f:EntityName255.to_value));
+        ("type", (Option.map x.type_ ~f:String255.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let type_ =
-        String255.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "type") in
       let name =
-        String255.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~type_ ~name ()
+        (Option.map ~f:EntityName255.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:EntityName255.of_xml) (Xml.child xml_arg0 "id") in
+      let additionalInfo =
+        (Option.map ~f:AdditionalInfoMap.of_xml)
+          (Xml.child xml_arg0 "additionalInfo") in
+      make ?type_ ?name ?id ?additionalInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" String255.of_json in
-      let name = field_map_exn json "name" String255.of_json in
-      make ~type_ ~name ()
+    let of_json json__ =
+      let type_ = field_map json__ "type" String255.of_json in
+      let name = field_map json__ "name" EntityName255.of_json in
+      let id = field_map json__ "id" EntityName255.of_json in
+      let additionalInfo =
+        field_map json__ "additionalInfo" AdditionalInfoMap.of_json in
+      make ?type_ ?name ?id ?additionalInfo ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Defines an application component."]
+  end[@@ocaml.doc "Defines an Application Component."]
+module EksNamespace =
+  struct
+    type nonrec t = string
+    let context_ = "EksNamespace"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EksNamespace" j
+    let to_json = simple_to_json to_value
+  end
+module S3Url =
+  struct
+    type nonrec t = string
+    let context_ = "S3Url"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:2000) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^((https://([^/]+)\\.s3((-|\\.)[^/]+)?\\.amazonaws\\.com(.cn)?)|(s3://([^/]+)))/\\S{1,2000}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3Url" j
+    let to_json = simple_to_json to_value
+  end
 module ConfigRecommendation =
   struct
     type nonrec t =
       {
       appComponentName: EntityId.t option
-        [@ocaml.doc "The application component name."];
+        [@ocaml.doc "Name of the Application Component."];
       compliance: AssessmentCompliance.t option
         [@ocaml.doc
           "The current compliance against the resiliency policy before applying the configuration change."];
@@ -937,29 +1787,28 @@ module ConfigRecommendation =
         [@ocaml.doc "The optional description for an app."];
       haArchitecture: HaArchitecture.t option
         [@ocaml.doc "The architecture type."];
-      name: EntityName.t
+      name: EntityName.t option
         [@ocaml.doc "The name of the recommendation configuration."];
-      optimizationType: ConfigRecommendationOptimizationType.t
+      optimizationType: ConfigRecommendationOptimizationType.t option
         [@ocaml.doc "The type of optimization."];
       recommendationCompliance: RecommendationCompliance.t option
         [@ocaml.doc
           "The expected compliance against the resiliency policy after applying the configuration change."];
-      referenceId: SpecReferenceId.t
+      referenceId: SpecReferenceId.t option
         [@ocaml.doc
-          "The reference identifier for the recommendation configuration."];
+          "Reference identifier for the recommendation configuration."];
       suggestedChanges: SuggestedChangesList.t option
         [@ocaml.doc "List of the suggested configuration changes."]}
-    let context_ = "ConfigRecommendation"
     let make ?appComponentName =
       fun ?compliance ->
         fun ?cost ->
           fun ?description ->
             fun ?haArchitecture ->
-              fun ?recommendationCompliance ->
-                fun ?suggestedChanges ->
-                  fun ~name ->
-                    fun ~optimizationType ->
-                      fun ~referenceId ->
+              fun ?name ->
+                fun ?optimizationType ->
+                  fun ?recommendationCompliance ->
+                    fun ?referenceId ->
+                      fun ?suggestedChanges ->
                         fun () ->
                           {
                             appComponentName;
@@ -967,11 +1816,11 @@ module ConfigRecommendation =
                             cost;
                             description;
                             haArchitecture;
-                            recommendationCompliance;
-                            suggestedChanges;
                             name;
                             optimizationType;
-                            referenceId
+                            recommendationCompliance;
+                            referenceId;
+                            suggestedChanges
                           }
     let to_value x =
       structure_to_value
@@ -984,15 +1833,15 @@ module ConfigRecommendation =
           (Option.map x.description ~f:EntityDescription.to_value));
         ("haArchitecture",
           (Option.map x.haArchitecture ~f:HaArchitecture.to_value));
-        ("name", (Some (EntityName.to_value x.name)));
+        ("name", (Option.map x.name ~f:EntityName.to_value));
         ("optimizationType",
-          (Some
-             (ConfigRecommendationOptimizationType.to_value
-                x.optimizationType)));
+          (Option.map x.optimizationType
+             ~f:ConfigRecommendationOptimizationType.to_value));
         ("recommendationCompliance",
           (Option.map x.recommendationCompliance
              ~f:RecommendationCompliance.to_value));
-        ("referenceId", (Some (SpecReferenceId.to_value x.referenceId)));
+        ("referenceId",
+          (Option.map x.referenceId ~f:SpecReferenceId.to_value));
         ("suggestedChanges",
           (Option.map x.suggestedChanges ~f:SuggestedChangesList.to_value))]
     let to_query v = to_query to_value v
@@ -1001,16 +1850,16 @@ module ConfigRecommendation =
         (Option.map ~f:SuggestedChangesList.of_xml)
           (Xml.child xml_arg0 "suggestedChanges") in
       let referenceId =
-        SpecReferenceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "referenceId") in
+        (Option.map ~f:SpecReferenceId.of_xml)
+          (Xml.child xml_arg0 "referenceId") in
       let recommendationCompliance =
         (Option.map ~f:RecommendationCompliance.of_xml)
           (Xml.child xml_arg0 "recommendationCompliance") in
       let optimizationType =
-        ConfigRecommendationOptimizationType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "optimizationType") in
+        (Option.map ~f:ConfigRecommendationOptimizationType.of_xml)
+          (Xml.child xml_arg0 "optimizationType") in
       let name =
-        EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "name") in
       let haArchitecture =
         (Option.map ~f:HaArchitecture.of_xml)
           (Xml.child xml_arg0 "haArchitecture") in
@@ -1024,36 +1873,36 @@ module ConfigRecommendation =
       let appComponentName =
         (Option.map ~f:EntityId.of_xml)
           (Xml.child xml_arg0 "appComponentName") in
-      make ?suggestedChanges ~referenceId ?recommendationCompliance
-        ~optimizationType ~name ?haArchitecture ?description ?cost
+      make ?suggestedChanges ?referenceId ?recommendationCompliance
+        ?optimizationType ?name ?haArchitecture ?description ?cost
         ?compliance ?appComponentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let suggestedChanges =
-        field_map json "suggestedChanges" SuggestedChangesList.of_json in
+        field_map json__ "suggestedChanges" SuggestedChangesList.of_json in
       let referenceId =
-        field_map_exn json "referenceId" SpecReferenceId.of_json in
+        field_map json__ "referenceId" SpecReferenceId.of_json in
       let recommendationCompliance =
-        field_map json "recommendationCompliance"
+        field_map json__ "recommendationCompliance"
           RecommendationCompliance.of_json in
       let optimizationType =
-        field_map_exn json "optimizationType"
+        field_map json__ "optimizationType"
           ConfigRecommendationOptimizationType.of_json in
-      let name = field_map_exn json "name" EntityName.of_json in
+      let name = field_map json__ "name" EntityName.of_json in
       let haArchitecture =
-        field_map json "haArchitecture" HaArchitecture.of_json in
+        field_map json__ "haArchitecture" HaArchitecture.of_json in
       let description =
-        field_map json "description" EntityDescription.of_json in
-      let cost = field_map json "cost" Cost.of_json in
+        field_map json__ "description" EntityDescription.of_json in
+      let cost = field_map json__ "cost" Cost.of_json in
       let compliance =
-        field_map json "compliance" AssessmentCompliance.of_json in
+        field_map json__ "compliance" AssessmentCompliance.of_json in
       let appComponentName =
-        field_map json "appComponentName" EntityId.of_json in
-      make ?suggestedChanges ~referenceId ?recommendationCompliance
-        ~optimizationType ~name ?haArchitecture ?description ?cost
+        field_map json__ "appComponentName" EntityId.of_json in
+      make ?suggestedChanges ?referenceId ?recommendationCompliance
+        ?optimizationType ?name ?haArchitecture ?description ?cost
         ?compliance ?appComponentName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Defines a configuration recommendation."]
+  end[@@ocaml.doc "Defines a recommendation configuration."]
 module DisruptionResiliencyScore =
   struct
     type nonrec t = (DisruptionType.t * Double.t) list
@@ -1075,6 +1924,8 @@ module DisruptionResiliencyScore =
                     (fun x -> (Double.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1082,23 +1933,184 @@ module DisruptionResiliencyScore =
         ~of_json:Double.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Arn =
+module ScoringComponentResiliencyScores =
+  struct
+    type nonrec t =
+      (ResiliencyScoreType.t * ScoringComponentResiliencyScore.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types ResiliencyScoreType ScoringComponentResiliencyScore"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ResiliencyScoreType.to_value x) |>
+                    (fun x ->
+                       (ScoringComponentResiliencyScore.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ResiliencyScoreType.of_string
+        ~of_json:ScoringComponentResiliencyScore.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EventSubscription =
+  struct
+    type nonrec t =
+      {
+      eventType: EventType.t
+        [@ocaml.doc
+          "The type of event you would like to subscribe and get notification for. Currently, Resilience Hub supports notifications only for Drift detected (DriftDetected) and Scheduled assessment failure (ScheduledAssessmentFailure) events."];
+      name: String255.t
+        [@ocaml.doc "Unique name to identify an event subscription."];
+      snsTopicArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Amazon Simple Notification Service topic. The format for this ARN is: arn:partition:sns:region:account:topic-name. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."]}
+    let context_ = "EventSubscription"
+    let make ?snsTopicArn =
+      fun ~eventType ->
+        fun ~name -> fun () -> { snsTopicArn; eventType; name }
+    let to_value x =
+      structure_to_value
+        [("eventType", (Some (EventType.to_value x.eventType)));
+        ("name", (Some (String255.to_value x.name)));
+        ("snsTopicArn", (Option.map x.snsTopicArn ~f:Arn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let snsTopicArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "snsTopicArn") in
+      let name =
+        String255.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let eventType =
+        EventType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "eventType") in
+      make ?snsTopicArn ~name ~eventType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let snsTopicArn = field_map json__ "snsTopicArn" Arn.of_json in
+      let name = field_map_exn json__ "name" String255.of_json in
+      let eventType = field_map_exn json__ "eventType" EventType.of_json in
+      make ?snsTopicArn ~name ~eventType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates an event you would like to subscribe and get notification for. Currently, Resilience Hub supports notifications only for Drift detected and Scheduled assessment failure events."]
+module IamRoleArnList =
+  struct
+    type nonrec t = IamRoleArn.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IamRoleArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IamRoleArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IamRoleArnList" ~of_json:IamRoleArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IamRoleName =
   struct
     type nonrec t = string
-    let context_ = "Arn"
+    let context_ = "IamRoleName"
     let make i =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"^arn:(aws|aws-cn|aws-iso|aws-iso-[a-z]{1}|aws-us-gov):[A-Za-z0-9][A-Za-z0-9_/.-]{0,62}:([a-z]{2}-((iso[a-z]{0,1}-)|(gov-)){0,1}[a-z]+-[0-9]):[0-9]{12}:[A-Za-z0-9/][A-Za-z0-9:_/+=,@.-]{0,1023}$");
+             ~pattern:"^([^/]([!-~]+/){1,511})?[A-Za-z0-9_+=,.@-]{1,64}$");
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Arn" j
+    let of_json j = string_of_json ~kind:"IamRoleName" j
     let to_json = simple_to_json to_value
+  end
+module PermissionModelType =
+  struct
+    type nonrec t =
+      | LegacyIAMUser 
+      | RoleBased 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | LegacyIAMUser -> "LegacyIAMUser"
+      | RoleBased -> "RoleBased"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "LegacyIAMUser" -> LegacyIAMUser
+      | "RoleBased" -> RoleBased
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PermissionModelType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PermissionModelType" j)
+    let to_json = simple_to_json to_value
+  end
+module AssessmentRiskRecommendationList =
+  struct
+    type nonrec t = AssessmentRiskRecommendation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssessmentRiskRecommendation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssessmentRiskRecommendation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssessmentRiskRecommendationList"
+        ~of_json:AssessmentRiskRecommendation.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module DataLocationConstraint =
   struct
@@ -1153,6 +2165,8 @@ module DisruptionPolicy =
                     (fun x -> (FailurePolicy.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1200,6 +2214,7 @@ module ResiliencyPolicyTier =
       | Important 
       | CoreServices 
       | NonCritical 
+      | NotApplicable 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1209,6 +2224,7 @@ module ResiliencyPolicyTier =
       | Important -> "Important"
       | CoreServices -> "CoreServices"
       | NonCritical -> "NonCritical"
+      | NotApplicable -> "NotApplicable"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1217,6 +2233,7 @@ module ResiliencyPolicyTier =
       | "Important" -> Important
       | "CoreServices" -> CoreServices
       | "NonCritical" -> NonCritical
+      | "NotApplicable" -> NotApplicable
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1252,6 +2269,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1271,100 +2290,100 @@ module TimeStamp =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
-module LogicalResourceId =
+module ResourceErrorList =
+  struct
+    type nonrec t = ResourceError.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceError.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceErrorList" ~of_json:ResourceError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GroupingRecommendationRejectionReason =
   struct
     type nonrec t =
-      {
-      identifier: String255.t [@ocaml.doc "The identifier of the resource."];
-      logicalStackName: String255.t option
-        [@ocaml.doc
-          "The name of the CloudFormation stack this resource belongs to."];
-      resourceGroupName: EntityName.t option
-        [@ocaml.doc
-          "The name of the resource group that this resource belongs to."]}
-    let context_ = "LogicalResourceId"
-    let make ?logicalStackName =
-      fun ?resourceGroupName ->
-        fun ~identifier ->
-          fun () -> { logicalStackName; resourceGroupName; identifier }
-    let to_value x =
-      structure_to_value
-        [("identifier", (Some (String255.to_value x.identifier)));
-        ("logicalStackName",
-          (Option.map x.logicalStackName ~f:String255.to_value));
-        ("resourceGroupName",
-          (Option.map x.resourceGroupName ~f:EntityName.to_value))]
+      | DistinctBusinessPurpose 
+      | SeparateDataConcern 
+      | DistinctUserGroupHandling 
+      | Other 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DistinctBusinessPurpose -> "DistinctBusinessPurpose"
+      | SeparateDataConcern -> "SeparateDataConcern"
+      | DistinctUserGroupHandling -> "DistinctUserGroupHandling"
+      | Other -> "Other"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DistinctBusinessPurpose" -> DistinctBusinessPurpose
+      | "SeparateDataConcern" -> SeparateDataConcern
+      | "DistinctUserGroupHandling" -> DistinctUserGroupHandling
+      | "Other" -> Other
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
+    let to_header x = to_string x
     let of_xml xml_arg0 =
-      let resourceGroupName =
-        (Option.map ~f:EntityName.of_xml)
-          (Xml.child xml_arg0 "resourceGroupName") in
-      let logicalStackName =
-        (Option.map ~f:String255.of_xml)
-          (Xml.child xml_arg0 "logicalStackName") in
-      let identifier =
-        String255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "identifier") in
-      make ?resourceGroupName ?logicalStackName ~identifier ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceGroupName =
-        field_map json "resourceGroupName" EntityName.of_json in
-      let logicalStackName =
-        field_map json "logicalStackName" String255.of_json in
-      let identifier = field_map_exn json "identifier" String255.of_json in
-      make ?resourceGroupName ?logicalStackName ~identifier ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Defines a logical resource identifier."]
-module PhysicalResourceId =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration GroupingRecommendationRejectionReason" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"GroupingRecommendationRejectionReason" j)
+    let to_json = simple_to_json to_value
+  end
+module AlarmReferenceIdList =
   struct
-    type nonrec t =
-      {
-      awsAccountId: CustomerId.t option
-        [@ocaml.doc
-          "The Amazon Web Services account that owns the physical resource."];
-      awsRegion: AwsRegion.t option
-        [@ocaml.doc
-          "The Amazon Web Services Region that the physical resource is located in."];
-      identifier: String255.t
-        [@ocaml.doc "The identifier of the physical resource."];
-      type_: PhysicalIdentifierType.t
-        [@ocaml.doc
-          "Specifies the type of physical resource identifier. Arn The resource identifier is an Amazon Resource Name (ARN) . Native The resource identifier is a Resilience Hub-native identifier."]}
-    let context_ = "PhysicalResourceId"
-    let make ?awsAccountId =
-      fun ?awsRegion ->
-        fun ~identifier ->
-          fun ~type_ ->
-            fun () -> { awsAccountId; awsRegion; identifier; type_ }
-    let to_value x =
-      structure_to_value
-        [("awsAccountId", (Option.map x.awsAccountId ~f:CustomerId.to_value));
-        ("awsRegion", (Option.map x.awsRegion ~f:AwsRegion.to_value));
-        ("identifier", (Some (String255.to_value x.identifier)));
-        ("type", (Some (PhysicalIdentifierType.to_value x.type_)))]
+    type nonrec t = String500.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String500.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let type_ =
-        PhysicalIdentifierType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "type") in
-      let identifier =
-        String255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "identifier") in
-      let awsRegion =
-        (Option.map ~f:AwsRegion.of_xml) (Xml.child xml_arg0 "awsRegion") in
-      let awsAccountId =
-        (Option.map ~f:CustomerId.of_xml) (Xml.child xml_arg0 "awsAccountId") in
-      make ~type_ ~identifier ?awsRegion ?awsAccountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" PhysicalIdentifierType.of_json in
-      let identifier = field_map_exn json "identifier" String255.of_json in
-      let awsRegion = field_map json "awsRegion" AwsRegion.of_json in
-      let awsAccountId = field_map json "awsAccountId" CustomerId.of_json in
-      make ~type_ ~identifier ?awsRegion ?awsAccountId ()
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String500.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AlarmReferenceIdList" ~of_json:String500.of_json j
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Defines a physical resource identifier."]
+  end
 module DocumentName =
   struct
     type nonrec t = string
@@ -1387,6 +2406,9 @@ module RecommendationItemList =
   struct
     type nonrec t = RecommendationItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendationItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1407,6 +2429,38 @@ module RecommendationItemList =
       list_of_json ~kind:"RecommendationItemList"
         ~of_json:RecommendationItem.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module RecommendationStatus =
+  struct
+    type nonrec t =
+      | Implemented 
+      | Inactive 
+      | NotImplemented 
+      | Excluded 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Implemented -> "Implemented"
+      | Inactive -> "Inactive"
+      | NotImplemented -> "NotImplemented"
+      | Excluded -> "Excluded"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Implemented" -> Implemented
+      | "Inactive" -> Inactive
+      | "NotImplemented" -> NotImplemented
+      | "Excluded" -> Excluded
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RecommendationStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RecommendationStatus" j)
+    let to_json = simple_to_json to_value
   end
 module TestRisk =
   struct
@@ -1483,6 +2537,134 @@ module SopServiceType =
     let of_json j = of_string (string_of_json ~kind:"SopServiceType" j)
     let to_json = simple_to_json to_value
   end
+module GroupingAppComponent =
+  struct
+    type nonrec t =
+      {
+      appComponentId: EntityName255.t option
+        [@ocaml.doc "Indicates the identifier of an AppComponent."];
+      appComponentName: EntityName255.t option
+        [@ocaml.doc "Indicates the name of an AppComponent."];
+      appComponentType: String255.t option
+        [@ocaml.doc "Indicates the type of an AppComponent."]}
+    let make ?appComponentId =
+      fun ?appComponentName ->
+        fun ?appComponentType ->
+          fun () -> { appComponentId; appComponentName; appComponentType }
+    let to_value x =
+      structure_to_value
+        [("appComponentId",
+           (Option.map x.appComponentId ~f:EntityName255.to_value));
+        ("appComponentName",
+          (Option.map x.appComponentName ~f:EntityName255.to_value));
+        ("appComponentType",
+          (Option.map x.appComponentType ~f:String255.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appComponentType =
+        (Option.map ~f:String255.of_xml)
+          (Xml.child xml_arg0 "appComponentType") in
+      let appComponentName =
+        (Option.map ~f:EntityName255.of_xml)
+          (Xml.child xml_arg0 "appComponentName") in
+      let appComponentId =
+        (Option.map ~f:EntityName255.of_xml)
+          (Xml.child xml_arg0 "appComponentId") in
+      make ?appComponentType ?appComponentName ?appComponentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appComponentType =
+        field_map json__ "appComponentType" String255.of_json in
+      let appComponentName =
+        field_map json__ "appComponentName" EntityName255.of_json in
+      let appComponentId =
+        field_map json__ "appComponentId" EntityName255.of_json in
+      make ?appComponentType ?appComponentName ?appComponentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new recommended Application Component (AppComponent)."]
+module GroupingRecommendationConfidenceLevel =
+  struct
+    type nonrec t =
+      | High 
+      | Medium 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | High -> "High" | Medium -> "Medium" | Non_static_id s -> s
+    let of_string =
+      function | "High" -> High | "Medium" -> Medium | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration GroupingRecommendationConfidenceLevel" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"GroupingRecommendationConfidenceLevel" j)
+    let to_json = simple_to_json to_value
+  end
+module GroupingRecommendationStatusType =
+  struct
+    type nonrec t =
+      | Accepted 
+      | Rejected 
+      | PendingDecision 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Accepted -> "Accepted"
+      | Rejected -> "Rejected"
+      | PendingDecision -> "PendingDecision"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Accepted" -> Accepted
+      | "Rejected" -> Rejected
+      | "PendingDecision" -> PendingDecision
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration GroupingRecommendationStatusType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"GroupingRecommendationStatusType" j)
+    let to_json = simple_to_json to_value
+  end
+module GroupingResourceList =
+  struct
+    type nonrec t = GroupingResource.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GroupingResource.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GroupingResource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GroupingResourceList"
+        ~of_json:GroupingResource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module RecommendationIdList =
   struct
     type nonrec t = Uuid.t list
@@ -1492,6 +2674,9 @@ module RecommendationIdList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Uuid.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1554,6 +2739,9 @@ module RenderRecommendationTypeList =
         ok_or_failwith
           ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RenderRecommendationType.to_value)) |>
         (fun x -> `List x)
@@ -1597,9 +2785,9 @@ module S3Location =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?prefix ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let prefix = field_map json "prefix" String500.of_json in
-      let bucket = field_map json "bucket" String500.of_json in
+    let of_json json__ =
+      let prefix = field_map json__ "prefix" String500.of_json in
+      let bucket = field_map json__ "bucket" String500.of_json in
       make ?prefix ?bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The location of the Amazon S3 bucket."]
@@ -1628,6 +2816,107 @@ module TemplateFormat =
     let of_json j = of_string (string_of_json ~kind:"TemplateFormat" j)
     let to_json = simple_to_json to_value
   end
+module ConditionOperatorType =
+  struct
+    type nonrec t =
+      | Equals 
+      | NotEquals 
+      | GreaterThen 
+      | GreaterOrEquals 
+      | LessThen 
+      | LessOrEquals 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Equals -> "Equals"
+      | NotEquals -> "NotEquals"
+      | GreaterThen -> "GreaterThen"
+      | GreaterOrEquals -> "GreaterOrEquals"
+      | LessThen -> "LessThen"
+      | LessOrEquals -> "LessOrEquals"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Equals" -> Equals
+      | "NotEquals" -> NotEquals
+      | "GreaterThen" -> GreaterThen
+      | "GreaterOrEquals" -> GreaterOrEquals
+      | "LessThen" -> LessThen
+      | "LessOrEquals" -> LessOrEquals
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConditionOperatorType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ConditionOperatorType" j)
+    let to_json = simple_to_json to_value
+  end
+module FieldAggregationType =
+  struct
+    type nonrec t =
+      | Min 
+      | Max 
+      | Sum 
+      | Avg 
+      | Count 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Min -> "Min"
+      | Max -> "Max"
+      | Sum -> "Sum"
+      | Avg -> "Avg"
+      | Count -> "Count"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Min" -> Min
+      | "Max" -> Max
+      | "Sum" -> Sum
+      | "Avg" -> Avg
+      | "Count" -> Count
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FieldAggregationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FieldAggregationType" j)
+    let to_json = simple_to_json to_value
+  end
+module AppAssessmentScheduleType =
+  struct
+    type nonrec t =
+      | Disabled 
+      | Daily 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Disabled -> "Disabled"
+      | Daily -> "Daily"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Disabled" -> Disabled
+      | "Daily" -> Daily
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AppAssessmentScheduleType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AppAssessmentScheduleType" j)
+    let to_json = simple_to_json to_value
+  end
 module AppComplianceStatusType =
   struct
     type nonrec t =
@@ -1635,6 +2924,8 @@ module AppComplianceStatusType =
       | PolicyMet 
       | NotAssessed 
       | ChangesDetected 
+      | NotApplicable 
+      | MissingPolicy 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1643,6 +2934,8 @@ module AppComplianceStatusType =
       | PolicyMet -> "PolicyMet"
       | NotAssessed -> "NotAssessed"
       | ChangesDetected -> "ChangesDetected"
+      | NotApplicable -> "NotApplicable"
+      | MissingPolicy -> "MissingPolicy"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1650,6 +2943,8 @@ module AppComplianceStatusType =
       | "PolicyMet" -> PolicyMet
       | "NotAssessed" -> NotAssessed
       | "ChangesDetected" -> ChangesDetected
+      | "NotApplicable" -> NotApplicable
+      | "MissingPolicy" -> MissingPolicy
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1659,6 +2954,74 @@ module AppComplianceStatusType =
         (string_of_xml ~kind:"enumeration AppComplianceStatusType" xml_arg0)
     let of_json j =
       of_string (string_of_json ~kind:"AppComplianceStatusType" j)
+    let to_json = simple_to_json to_value
+  end
+module AppDriftStatusType =
+  struct
+    type nonrec t =
+      | NotChecked 
+      | NotDetected 
+      | Detected 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NotChecked -> "NotChecked"
+      | NotDetected -> "NotDetected"
+      | Detected -> "Detected"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NotChecked" -> NotChecked
+      | "NotDetected" -> NotDetected
+      | "Detected" -> Detected
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AppDriftStatusType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AppDriftStatusType" j)
+    let to_json = simple_to_json to_value
+  end
+module AppStatusType =
+  struct
+    type nonrec t =
+      | Active 
+      | Deleting 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Active -> "Active"
+      | Deleting -> "Deleting"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Active" -> Active
+      | "Deleting" -> Deleting
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AppStatusType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AppStatusType" j)
+    let to_json = simple_to_json to_value
+  end
+module IntegerOptional =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for IntegerOptional" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module EntityVersion =
@@ -1676,10 +3039,26 @@ module EntityVersion =
     let of_json j = string_of_json ~kind:"EntityVersion" j
     let to_json = simple_to_json to_value
   end
+module LongOptional =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module AppComponentList =
   struct
     type nonrec t = AppComponent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AppComponent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1700,6 +3079,32 @@ module AppComponentList =
       list_of_json ~kind:"AppComponentList" ~of_json:AppComponent.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ResourceSourceType =
+  struct
+    type nonrec t =
+      | AppTemplate 
+      | Discovered 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AppTemplate -> "AppTemplate"
+      | Discovered -> "Discovered"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AppTemplate" -> AppTemplate
+      | "Discovered" -> Discovered
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResourceSourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResourceSourceType" j)
+    let to_json = simple_to_json to_value
+  end
 module ResourceMappingType =
   struct
     type nonrec t =
@@ -1707,6 +3112,8 @@ module ResourceMappingType =
       | Resource 
       | AppRegistryApp 
       | ResourceGroup 
+      | Terraform 
+      | EKS 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1715,6 +3122,8 @@ module ResourceMappingType =
       | Resource -> "Resource"
       | AppRegistryApp -> "AppRegistryApp"
       | ResourceGroup -> "ResourceGroup"
+      | Terraform -> "Terraform"
+      | EKS -> "EKS"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1722,6 +3131,8 @@ module ResourceMappingType =
       | "Resource" -> Resource
       | "AppRegistryApp" -> AppRegistryApp
       | "ResourceGroup" -> ResourceGroup
+      | "Terraform" -> Terraform
+      | "EKS" -> EKS
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1732,10 +3143,84 @@ module ResourceMappingType =
     let of_json j = of_string (string_of_json ~kind:"ResourceMappingType" j)
     let to_json = simple_to_json to_value
   end
+module EksSourceClusterNamespace =
+  struct
+    type nonrec t =
+      {
+      eksClusterArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Amazon Elastic Kubernetes Service cluster. The format for this ARN is: arn:aws:eks:region:account-id:cluster/cluster-name. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      namespace: EksNamespace.t
+        [@ocaml.doc
+          "Name of the namespace that is located on your Amazon Elastic Kubernetes Service cluster."]}
+    let context_ = "EksSourceClusterNamespace"
+    let make ~eksClusterArn =
+      fun ~namespace -> fun () -> { eksClusterArn; namespace }
+    let to_value x =
+      structure_to_value
+        [("eksClusterArn", (Some (Arn.to_value x.eksClusterArn)));
+        ("namespace", (Some (EksNamespace.to_value x.namespace)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let namespace =
+        EksNamespace.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "namespace") in
+      let eksClusterArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "eksClusterArn") in
+      make ~namespace ~eksClusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let namespace = field_map_exn json__ "namespace" EksNamespace.of_json in
+      let eksClusterArn = field_map_exn json__ "eksClusterArn" Arn.of_json in
+      make ~namespace ~eksClusterArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The input source of the namespace that is located on your Amazon Elastic Kubernetes Service cluster."]
+module Integer =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module TerraformSource =
+  struct
+    type nonrec t =
+      {
+      s3StateFileUrl: S3Url.t
+        [@ocaml.doc
+          "The URL of the Terraform s3 state file you need to import."]}
+    let context_ = "TerraformSource"
+    let make ~s3StateFileUrl = fun () -> { s3StateFileUrl }
+    let to_value x =
+      structure_to_value
+        [("s3StateFileUrl", (Some (S3Url.to_value x.s3StateFileUrl)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3StateFileUrl =
+        S3Url.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "s3StateFileUrl") in
+      make ~s3StateFileUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3StateFileUrl =
+        field_map_exn json__ "s3StateFileUrl" S3Url.of_json in
+      make ~s3StateFileUrl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The Terraform s3 state file you need to import."]
 module ConfigRecommendationList =
   struct
     type nonrec t = ConfigRecommendation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigRecommendation.to_value)) |>
         (fun x -> `List x)
@@ -1764,6 +3249,7 @@ module RecommendationComplianceStatus =
       | BreachedUnattainable 
       | BreachedCanMeet 
       | MetCanImprove 
+      | MissingPolicy 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1771,12 +3257,14 @@ module RecommendationComplianceStatus =
       | BreachedUnattainable -> "BreachedUnattainable"
       | BreachedCanMeet -> "BreachedCanMeet"
       | MetCanImprove -> "MetCanImprove"
+      | MissingPolicy -> "MissingPolicy"
       | Non_static_id s -> s
     let of_string =
       function
       | "BreachedUnattainable" -> BreachedUnattainable
       | "BreachedCanMeet" -> BreachedCanMeet
       | "MetCanImprove" -> MetCanImprove
+      | "MissingPolicy" -> MissingPolicy
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1793,32 +3281,42 @@ module ResiliencyScore =
   struct
     type nonrec t =
       {
-      disruptionScore: DisruptionResiliencyScore.t
+      componentScore: ScoringComponentResiliencyScores.t option
+        [@ocaml.doc
+          "The score generated by Resilience Hub for the scoring component after running an assessment. For example, if the score is 25 points, it indicates the overall score of your application generated by Resilience Hub after running an assessment."];
+      disruptionScore: DisruptionResiliencyScore.t option
         [@ocaml.doc "The disruption score for a valid key."];
-      score: Double.t [@ocaml.doc "The outage score for a valid key."]}
-    let context_ = "ResiliencyScore"
-    let make ~disruptionScore =
-      fun ~score -> fun () -> { disruptionScore; score }
+      score: Double.t option [@ocaml.doc "The outage score for a valid key."]}
+    let make ?componentScore =
+      fun ?disruptionScore ->
+        fun ?score -> fun () -> { componentScore; disruptionScore; score }
     let to_value x =
       structure_to_value
-        [("disruptionScore",
-           (Some (DisruptionResiliencyScore.to_value x.disruptionScore)));
-        ("score", (Some (Double.to_value x.score)))]
+        [("componentScore",
+           (Option.map x.componentScore
+              ~f:ScoringComponentResiliencyScores.to_value));
+        ("disruptionScore",
+          (Option.map x.disruptionScore ~f:DisruptionResiliencyScore.to_value));
+        ("score", (Option.map x.score ~f:Double.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let score =
-        Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "score") in
+      let score = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "score") in
       let disruptionScore =
-        DisruptionResiliencyScore.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "disruptionScore") in
-      make ~score ~disruptionScore ()
+        (Option.map ~f:DisruptionResiliencyScore.of_xml)
+          (Xml.child xml_arg0 "disruptionScore") in
+      let componentScore =
+        (Option.map ~f:ScoringComponentResiliencyScores.of_xml)
+          (Xml.child xml_arg0 "componentScore") in
+      make ?score ?disruptionScore ?componentScore ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let score = field_map_exn json "score" Double.of_json in
+    let of_json json__ =
+      let score = field_map json__ "score" Double.of_json in
       let disruptionScore =
-        field_map_exn json "disruptionScore"
-          DisruptionResiliencyScore.of_json in
-      make ~score ~disruptionScore ()
+        field_map json__ "disruptionScore" DisruptionResiliencyScore.of_json in
+      let componentScore =
+        field_map json__ "componentScore"
+          ScoringComponentResiliencyScores.of_json in
+      make ?score ?disruptionScore ?componentScore ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The overall resiliency score, returned as an object that includes the disruption score and outage score."]
@@ -1873,6 +3371,120 @@ module AssessmentStatus =
     let of_json j = of_string (string_of_json ~kind:"AssessmentStatus" j)
     let to_json = simple_to_json to_value
   end
+module DriftStatus =
+  struct
+    type nonrec t =
+      | NotChecked 
+      | NotDetected 
+      | Detected 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NotChecked -> "NotChecked"
+      | NotDetected -> "NotDetected"
+      | Detected -> "Detected"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NotChecked" -> NotChecked
+      | "NotDetected" -> NotDetected
+      | "Detected" -> Detected
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DriftStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DriftStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module DifferenceType =
+  struct
+    type nonrec t =
+      | NotEqual 
+      | Added 
+      | Removed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NotEqual -> "NotEqual"
+      | Added -> "Added"
+      | Removed -> "Removed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NotEqual" -> NotEqual
+      | "Added" -> Added
+      | "Removed" -> Removed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DifferenceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DifferenceType" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceIdentifier =
+  struct
+    type nonrec t =
+      {
+      logicalResourceId: LogicalResourceId.t option
+        [@ocaml.doc "Logical identifier of the drifted resource."];
+      resourceType: String255.t option
+        [@ocaml.doc "Type of the drifted resource."]}
+    let make ?logicalResourceId =
+      fun ?resourceType -> fun () -> { logicalResourceId; resourceType }
+    let to_value x =
+      structure_to_value
+        [("logicalResourceId",
+           (Option.map x.logicalResourceId ~f:LogicalResourceId.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String255.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceType =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "resourceType") in
+      let logicalResourceId =
+        (Option.map ~f:LogicalResourceId.of_xml)
+          (Xml.child xml_arg0 "logicalResourceId") in
+      make ?resourceType ?logicalResourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String255.of_json in
+      let logicalResourceId =
+        field_map json__ "logicalResourceId" LogicalResourceId.of_json in
+      make ?resourceType ?logicalResourceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Defines a resource identifier for the drifted resource."]
+module DriftType =
+  struct
+    type nonrec t =
+      | ApplicationCompliance 
+      | AppComponentResiliencyComplianceStatus 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ApplicationCompliance -> "ApplicationCompliance"
+      | AppComponentResiliencyComplianceStatus ->
+          "AppComponentResiliencyComplianceStatus"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ApplicationCompliance" -> ApplicationCompliance
+      | "AppComponentResiliencyComplianceStatus" ->
+          AppComponentResiliencyComplianceStatus
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DriftType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DriftType" j)
+    let to_json = simple_to_json to_value
+  end
 module AlarmType =
   struct
     type nonrec t =
@@ -1907,6 +3519,74 @@ module AlarmType =
     let of_json j = of_string (string_of_json ~kind:"AlarmType" j)
     let to_json = simple_to_json to_value
   end
+module EksNamespaceList =
+  struct
+    type nonrec t = EksNamespace.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EksNamespace.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EksNamespace.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EksNamespaceList" ~of_json:EksNamespace.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UpdateRecommendationStatusItem =
+  struct
+    type nonrec t =
+      {
+      resourceId: String500.t option
+        [@ocaml.doc
+          "Resource identifier of the operational recommendation item."];
+      targetAccountId: CustomerId.t option
+        [@ocaml.doc "Identifier of the target Amazon Web Services account."];
+      targetRegion: AwsRegion.t option
+        [@ocaml.doc "Identifier of the target Amazon Web Services Region."]}
+    let make ?resourceId =
+      fun ?targetAccountId ->
+        fun ?targetRegion ->
+          fun () -> { resourceId; targetAccountId; targetRegion }
+    let to_value x =
+      structure_to_value
+        [("resourceId", (Option.map x.resourceId ~f:String500.to_value));
+        ("targetAccountId",
+          (Option.map x.targetAccountId ~f:CustomerId.to_value));
+        ("targetRegion", (Option.map x.targetRegion ~f:AwsRegion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetRegion =
+        (Option.map ~f:AwsRegion.of_xml) (Xml.child xml_arg0 "targetRegion") in
+      let targetAccountId =
+        (Option.map ~f:CustomerId.of_xml)
+          (Xml.child xml_arg0 "targetAccountId") in
+      let resourceId =
+        (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "resourceId") in
+      make ?targetRegion ?targetAccountId ?resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetRegion = field_map json__ "targetRegion" AwsRegion.of_json in
+      let targetAccountId =
+        field_map json__ "targetAccountId" CustomerId.of_json in
+      let resourceId = field_map json__ "resourceId" String500.of_json in
+      make ?targetRegion ?targetAccountId ?resourceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the operational recommendation item that needs a status update."]
 module ResourceId =
   struct
     type nonrec t = string
@@ -1949,38 +3629,128 @@ module RetryAfterSeconds =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module AppStatusType =
+module EventSubscriptionList =
+  struct
+    type nonrec t = EventSubscription.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EventSubscription.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EventSubscription.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EventSubscriptionList"
+        ~of_json:EventSubscription.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PermissionModel =
   struct
     type nonrec t =
-      | Active 
-      | Deleting 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | Active -> "Active"
-      | Deleting -> "Deleting"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "Active" -> Active
-      | "Deleting" -> Deleting
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+      {
+      crossAccountRoleArns: IamRoleArnList.t option
+        [@ocaml.doc
+          "Defines a list of role Amazon Resource Names (ARNs) to be used in other accounts. These ARNs are used for querying purposes while importing resources and assessing your application. These ARNs are required only when your resources are in other accounts and you have different role name in these accounts. Else, the invoker role name will be used in the other accounts. These roles must have a trust policy with iam:AssumeRole permission to the invoker role in the primary account."];
+      invokerRoleName: IamRoleName.t option
+        [@ocaml.doc
+          "Existing Amazon Web Services IAM role name in the primary Amazon Web Services account that will be assumed by Resilience Hub Service Principle to obtain a read-only access to your application resources while running an assessment. If your IAM role includes a path, you must include the path in the invokerRoleName parameter. For example, if your IAM role's ARN is arn:aws:iam:123456789012:role/my-path/role-name, you should pass my-path/role-name. You must have iam:passRole permission for this role while creating or updating the application. Currently, invokerRoleName accepts only \\[A-Za-z0-9_+=,.\\@-\\] characters."];
+      type_: PermissionModelType.t
+        [@ocaml.doc
+          "Defines how Resilience Hub scans your resources. It can scan for the resources by using a pre-existing role in your Amazon Web Services account, or by using the credentials of the current IAM user."]}
+    let context_ = "PermissionModel"
+    let make ?crossAccountRoleArns =
+      fun ?invokerRoleName ->
+        fun ~type_ ->
+          fun () -> { crossAccountRoleArns; invokerRoleName; type_ }
+    let to_value x =
+      structure_to_value
+        [("crossAccountRoleArns",
+           (Option.map x.crossAccountRoleArns ~f:IamRoleArnList.to_value));
+        ("invokerRoleName",
+          (Option.map x.invokerRoleName ~f:IamRoleName.to_value));
+        ("type", (Some (PermissionModelType.to_value x.type_)))]
     let to_query v = to_query to_value v
-    let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration AppStatusType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"AppStatusType" j)
-    let to_json = simple_to_json to_value
-  end
+      let type_ =
+        PermissionModelType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      let invokerRoleName =
+        (Option.map ~f:IamRoleName.of_xml)
+          (Xml.child xml_arg0 "invokerRoleName") in
+      let crossAccountRoleArns =
+        (Option.map ~f:IamRoleArnList.of_xml)
+          (Xml.child xml_arg0 "crossAccountRoleArns") in
+      make ~type_ ?invokerRoleName ?crossAccountRoleArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map_exn json__ "type" PermissionModelType.of_json in
+      let invokerRoleName =
+        field_map json__ "invokerRoleName" IamRoleName.of_json in
+      let crossAccountRoleArns =
+        field_map json__ "crossAccountRoleArns" IamRoleArnList.of_json in
+      make ~type_ ?invokerRoleName ?crossAccountRoleArns ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the roles and credentials that Resilience Hub would use while creating the application, importing its resources, and running an assessment."]
+module AssessmentSummary =
+  struct
+    type nonrec t =
+      {
+      riskRecommendations: AssessmentRiskRecommendationList.t option
+        [@ocaml.doc
+          "Indicates the top risks and recommendations identified by the Resilience Hub assessment, each representing a specific risk and the corresponding recommendation to address it. This property is available only in the US East (N. Virginia) Region."];
+      summary: String500.t option
+        [@ocaml.doc
+          "Indicates a concise summary that provides an overview of the Resilience Hub assessment. This property is available only in the US East (N. Virginia) Region."]}
+    let make ?riskRecommendations =
+      fun ?summary -> fun () -> { riskRecommendations; summary }
+    let to_value x =
+      structure_to_value
+        [("riskRecommendations",
+           (Option.map x.riskRecommendations
+              ~f:AssessmentRiskRecommendationList.to_value));
+        ("summary", (Option.map x.summary ~f:String500.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let summary =
+        (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "summary") in
+      let riskRecommendations =
+        (Option.map ~f:AssessmentRiskRecommendationList.of_xml)
+          (Xml.child xml_arg0 "riskRecommendations") in
+      make ?summary ?riskRecommendations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let summary = field_map json__ "summary" String500.of_json in
+      let riskRecommendations =
+        field_map json__ "riskRecommendations"
+          AssessmentRiskRecommendationList.of_json in
+      make ?summary ?riskRecommendations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the AI-generated summary for the Resilience Hub assessment, providing a concise overview that highlights the top risks and recommendations. This property is available only in the US East (N. Virginia) Region."]
 module ResiliencyPolicy =
   struct
     type nonrec t =
       {
       creationTime: TimeStamp.t option
-        [@ocaml.doc
-          "The timestamp for when the resiliency policy was created."];
+        [@ocaml.doc "Date and time when the resiliency policy was created."];
       dataLocationConstraint: DataLocationConstraint.t option
         [@ocaml.doc
           "Specifies a high-level geographical location constraint for where your resilience policy data can be stored."];
@@ -1990,13 +3760,13 @@ module ResiliencyPolicy =
       policy: DisruptionPolicy.t option [@ocaml.doc "The resiliency policy."];
       policyArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resiliency policy. The format for this ARN is: arn:partition:dcps:region:account:resiliency-policy/policy-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the resiliency policy. The format for this ARN is: arn:partition:resiliencehub:region:account:resiliency-policy/policy-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       policyDescription: EntityDescription.t option
-        [@ocaml.doc "The description for the policy."];
+        [@ocaml.doc "Description of the resiliency policy."];
       policyName: EntityName.t option [@ocaml.doc "The name of the policy"];
       tags: TagMap.t option
         [@ocaml.doc
-          "The tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."];
+          "Tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."];
       tier: ResiliencyPolicyTier.t option
         [@ocaml.doc
           "The tier for this resiliency policy, ranging from the highest severity (MissionCritical) to lowest (NonCritical)."]}
@@ -2062,67 +3832,198 @@ module ResiliencyPolicy =
       make ?tier ?tags ?policyName ?policyDescription ?policyArn ?policy
         ?estimatedCostTier ?dataLocationConstraint ?creationTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tier = field_map json "tier" ResiliencyPolicyTier.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let policyName = field_map json "policyName" EntityName.of_json in
+    let of_json json__ =
+      let tier = field_map json__ "tier" ResiliencyPolicyTier.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let policyName = field_map json__ "policyName" EntityName.of_json in
       let policyDescription =
-        field_map json "policyDescription" EntityDescription.of_json in
-      let policyArn = field_map json "policyArn" Arn.of_json in
-      let policy = field_map json "policy" DisruptionPolicy.of_json in
+        field_map json__ "policyDescription" EntityDescription.of_json in
+      let policyArn = field_map json__ "policyArn" Arn.of_json in
+      let policy = field_map json__ "policy" DisruptionPolicy.of_json in
       let estimatedCostTier =
-        field_map json "estimatedCostTier" EstimatedCostTier.of_json in
+        field_map json__ "estimatedCostTier" EstimatedCostTier.of_json in
       let dataLocationConstraint =
-        field_map json "dataLocationConstraint"
+        field_map json__ "dataLocationConstraint"
           DataLocationConstraint.of_json in
-      let creationTime = field_map json "creationTime" TimeStamp.of_json in
+      let creationTime = field_map json__ "creationTime" TimeStamp.of_json in
       make ?tier ?tags ?policyName ?policyDescription ?policyArn ?policy
         ?estimatedCostTier ?dataLocationConstraint ?creationTime ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Defines a resiliency policy."]
+  end[@@ocaml.doc
+       "Defines a resiliency policy. Resilience Hub allows you to provide a value of zero for rtoInSecs and rpoInSecs of your resiliency policy. But, while assessing your application, the lowest possible assessment result is near zero. Hence, if you provide value zero for rtoInSecs and rpoInSecs, the estimated workload RTO and estimated workload RPO result will be near zero and the Compliance status for your application will be set to Policy breached."]
+module ResourceErrorsDetails =
+  struct
+    type nonrec t =
+      {
+      hasMoreErrors: BooleanOptional.t option
+        [@ocaml.doc
+          "This indicates if there are more errors not listed in the resourceErrors list."];
+      resourceErrors: ResourceErrorList.t option
+        [@ocaml.doc
+          "A list of errors retrieving an application's resources."]}
+    let make ?hasMoreErrors =
+      fun ?resourceErrors -> fun () -> { hasMoreErrors; resourceErrors }
+    let to_value x =
+      structure_to_value
+        [("hasMoreErrors",
+           (Option.map x.hasMoreErrors ~f:BooleanOptional.to_value));
+        ("resourceErrors",
+          (Option.map x.resourceErrors ~f:ResourceErrorList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceErrors =
+        (Option.map ~f:ResourceErrorList.of_xml)
+          (Xml.child xml_arg0 "resourceErrors") in
+      let hasMoreErrors =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "hasMoreErrors") in
+      make ?resourceErrors ?hasMoreErrors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceErrors =
+        field_map json__ "resourceErrors" ResourceErrorList.of_json in
+      let hasMoreErrors =
+        field_map json__ "hasMoreErrors" BooleanOptional.of_json in
+      make ?resourceErrors ?hasMoreErrors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A list of errors retrieving an application's resources."]
+module FailedGroupingRecommendationEntry =
+  struct
+    type nonrec t =
+      {
+      errorMessage: ErrorMessage.t option
+        [@ocaml.doc
+          "Indicates the error that occurred while implementing a grouping recommendation."];
+      groupingRecommendationId: String255.t option
+        [@ocaml.doc
+          "Indicates the identifier of the grouping recommendation."]}
+    let make ?errorMessage =
+      fun ?groupingRecommendationId ->
+        fun () -> { errorMessage; groupingRecommendationId }
+    let to_value x =
+      structure_to_value
+        [("errorMessage",
+           (Option.map x.errorMessage ~f:ErrorMessage.to_value));
+        ("groupingRecommendationId",
+          (Option.map x.groupingRecommendationId ~f:String255.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let groupingRecommendationId =
+        (Option.map ~f:String255.of_xml)
+          (Xml.child xml_arg0 "groupingRecommendationId") in
+      let errorMessage =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "errorMessage") in
+      make ?groupingRecommendationId ?errorMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let groupingRecommendationId =
+        field_map json__ "groupingRecommendationId" String255.of_json in
+      let errorMessage = field_map json__ "errorMessage" ErrorMessage.of_json in
+      make ?groupingRecommendationId ?errorMessage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the accepted grouping recommendation whose implementation failed."]
+module RejectGroupingRecommendationEntry =
+  struct
+    type nonrec t =
+      {
+      groupingRecommendationId: String255.t
+        [@ocaml.doc
+          "Indicates the identifier of the grouping recommendation."];
+      rejectionReason: GroupingRecommendationRejectionReason.t option
+        [@ocaml.doc
+          "Indicates the reason you had selected while rejecting a grouping recommendation."]}
+    let context_ = "RejectGroupingRecommendationEntry"
+    let make ?rejectionReason =
+      fun ~groupingRecommendationId ->
+        fun () -> { rejectionReason; groupingRecommendationId }
+    let to_value x =
+      structure_to_value
+        [("groupingRecommendationId",
+           (Some (String255.to_value x.groupingRecommendationId)));
+        ("rejectionReason",
+          (Option.map x.rejectionReason
+             ~f:GroupingRecommendationRejectionReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let rejectionReason =
+        (Option.map ~f:GroupingRecommendationRejectionReason.of_xml)
+          (Xml.child xml_arg0 "rejectionReason") in
+      let groupingRecommendationId =
+        String255.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "groupingRecommendationId") in
+      make ?rejectionReason ~groupingRecommendationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rejectionReason =
+        field_map json__ "rejectionReason"
+          GroupingRecommendationRejectionReason.of_json in
+      let groupingRecommendationId =
+        field_map_exn json__ "groupingRecommendationId" String255.of_json in
+      make ?rejectionReason ~groupingRecommendationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Indicates the rejected grouping recommendation."]
 module UnsupportedResource =
   struct
     type nonrec t =
       {
-      logicalResourceId: LogicalResourceId.t
+      logicalResourceId: LogicalResourceId.t option
         [@ocaml.doc
-          "The logical resource identifier for the unsupported resource."];
-      physicalResourceId: PhysicalResourceId.t
+          "Logical resource identifier for the unsupported resource."];
+      physicalResourceId: PhysicalResourceId.t option
         [@ocaml.doc
-          "The physical resource identifier for the unsupported resource."];
-      resourceType: String255.t [@ocaml.doc "The type of resource."]}
-    let context_ = "UnsupportedResource"
-    let make ~logicalResourceId =
-      fun ~physicalResourceId ->
-        fun ~resourceType ->
-          fun () -> { logicalResourceId; physicalResourceId; resourceType }
+          "Physical resource identifier for the unsupported resource."];
+      resourceType: String255.t option [@ocaml.doc "The type of resource."];
+      unsupportedResourceStatus: String255.t option
+        [@ocaml.doc "The status of the unsupported resource."]}
+    let make ?logicalResourceId =
+      fun ?physicalResourceId ->
+        fun ?resourceType ->
+          fun ?unsupportedResourceStatus ->
+            fun () ->
+              {
+                logicalResourceId;
+                physicalResourceId;
+                resourceType;
+                unsupportedResourceStatus
+              }
     let to_value x =
       structure_to_value
         [("logicalResourceId",
-           (Some (LogicalResourceId.to_value x.logicalResourceId)));
+           (Option.map x.logicalResourceId ~f:LogicalResourceId.to_value));
         ("physicalResourceId",
-          (Some (PhysicalResourceId.to_value x.physicalResourceId)));
-        ("resourceType", (Some (String255.to_value x.resourceType)))]
+          (Option.map x.physicalResourceId ~f:PhysicalResourceId.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String255.to_value));
+        ("unsupportedResourceStatus",
+          (Option.map x.unsupportedResourceStatus ~f:String255.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let unsupportedResourceStatus =
+        (Option.map ~f:String255.of_xml)
+          (Xml.child xml_arg0 "unsupportedResourceStatus") in
       let resourceType =
-        String255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "resourceType") in
       let physicalResourceId =
-        PhysicalResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "physicalResourceId") in
+        (Option.map ~f:PhysicalResourceId.of_xml)
+          (Xml.child xml_arg0 "physicalResourceId") in
       let logicalResourceId =
-        LogicalResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "logicalResourceId") in
-      make ~resourceType ~physicalResourceId ~logicalResourceId ()
+        (Option.map ~f:LogicalResourceId.of_xml)
+          (Xml.child xml_arg0 "logicalResourceId") in
+      make ?unsupportedResourceStatus ?resourceType ?physicalResourceId
+        ?logicalResourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "resourceType" String255.of_json in
+    let of_json json__ =
+      let unsupportedResourceStatus =
+        field_map json__ "unsupportedResourceStatus" String255.of_json in
+      let resourceType = field_map json__ "resourceType" String255.of_json in
       let physicalResourceId =
-        field_map_exn json "physicalResourceId" PhysicalResourceId.of_json in
+        field_map json__ "physicalResourceId" PhysicalResourceId.of_json in
       let logicalResourceId =
-        field_map_exn json "logicalResourceId" LogicalResourceId.of_json in
-      make ~resourceType ~physicalResourceId ~logicalResourceId ()
+        field_map json__ "logicalResourceId" LogicalResourceId.of_json in
+      make ?unsupportedResourceStatus ?resourceType ?physicalResourceId
+        ?logicalResourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Defines a resource that is not supported by Resilience Hub."]
@@ -2130,54 +4031,69 @@ module TestRecommendation =
   struct
     type nonrec t =
       {
+      appComponentId: EntityName255.t option
+        [@ocaml.doc "Indicates the identifier of the AppComponent."];
       appComponentName: EntityId.t option
-        [@ocaml.doc "The name of the application component."];
+        [@ocaml.doc "Name of the Application Component."];
+      dependsOnAlarms: AlarmReferenceIdList.t option
+        [@ocaml.doc
+          "A list of recommended alarms that are used in the test and must be exported before or with the test."];
       description: String500.t option
-        [@ocaml.doc "The description for the test recommendation."];
+        [@ocaml.doc "Description for the test recommendation."];
       intent: EntityDescription.t option
-        [@ocaml.doc "The intent of the test recommendation."];
+        [@ocaml.doc "Intent of the test recommendation."];
       items: RecommendationItemList.t option
         [@ocaml.doc "The test recommendation items."];
       name: DocumentName.t option
-        [@ocaml.doc "The name of the test recommendation."];
+        [@ocaml.doc "Name of the test recommendation."];
       prerequisite: String500.t option
-        [@ocaml.doc "The prerequisite of the test recommendation."];
+        [@ocaml.doc "Prerequisite of the test recommendation."];
       recommendationId: Uuid.t option
         [@ocaml.doc "Identifier for the test recommendation."];
-      referenceId: SpecReferenceId.t
-        [@ocaml.doc "The reference identifier for the test recommendation."];
+      recommendationStatus: RecommendationStatus.t option
+        [@ocaml.doc "Status of the recommended test."];
+      referenceId: SpecReferenceId.t option
+        [@ocaml.doc "Reference identifier for the test recommendation."];
       risk: TestRisk.t option
-        [@ocaml.doc "The level of risk for this test recommendation."];
-      type_: TestType.t option
-        [@ocaml.doc "The type of test recommendation."]}
-    let context_ = "TestRecommendation"
-    let make ?appComponentName =
-      fun ?description ->
-        fun ?intent ->
-          fun ?items ->
-            fun ?name ->
-              fun ?prerequisite ->
-                fun ?recommendationId ->
-                  fun ?risk ->
-                    fun ?type_ ->
-                      fun ~referenceId ->
-                        fun () ->
-                          {
-                            appComponentName;
-                            description;
-                            intent;
-                            items;
-                            name;
-                            prerequisite;
-                            recommendationId;
-                            risk;
-                            type_;
-                            referenceId
-                          }
+        [@ocaml.doc "Level of risk for this test recommendation."];
+      type_: TestType.t option [@ocaml.doc "Type of test recommendation."]}
+    let make ?appComponentId =
+      fun ?appComponentName ->
+        fun ?dependsOnAlarms ->
+          fun ?description ->
+            fun ?intent ->
+              fun ?items ->
+                fun ?name ->
+                  fun ?prerequisite ->
+                    fun ?recommendationId ->
+                      fun ?recommendationStatus ->
+                        fun ?referenceId ->
+                          fun ?risk ->
+                            fun ?type_ ->
+                              fun () ->
+                                {
+                                  appComponentId;
+                                  appComponentName;
+                                  dependsOnAlarms;
+                                  description;
+                                  intent;
+                                  items;
+                                  name;
+                                  prerequisite;
+                                  recommendationId;
+                                  recommendationStatus;
+                                  referenceId;
+                                  risk;
+                                  type_
+                                }
     let to_value x =
       structure_to_value
-        [("appComponentName",
-           (Option.map x.appComponentName ~f:EntityId.to_value));
+        [("appComponentId",
+           (Option.map x.appComponentId ~f:EntityName255.to_value));
+        ("appComponentName",
+          (Option.map x.appComponentName ~f:EntityId.to_value));
+        ("dependsOnAlarms",
+          (Option.map x.dependsOnAlarms ~f:AlarmReferenceIdList.to_value));
         ("description", (Option.map x.description ~f:String500.to_value));
         ("intent", (Option.map x.intent ~f:EntityDescription.to_value));
         ("items", (Option.map x.items ~f:RecommendationItemList.to_value));
@@ -2185,7 +4101,10 @@ module TestRecommendation =
         ("prerequisite", (Option.map x.prerequisite ~f:String500.to_value));
         ("recommendationId",
           (Option.map x.recommendationId ~f:Uuid.to_value));
-        ("referenceId", (Some (SpecReferenceId.to_value x.referenceId)));
+        ("recommendationStatus",
+          (Option.map x.recommendationStatus ~f:RecommendationStatus.to_value));
+        ("referenceId",
+          (Option.map x.referenceId ~f:SpecReferenceId.to_value));
         ("risk", (Option.map x.risk ~f:TestRisk.to_value));
         ("type", (Option.map x.type_ ~f:TestType.to_value))]
     let to_query v = to_query to_value v
@@ -2193,8 +4112,11 @@ module TestRecommendation =
       let type_ = (Option.map ~f:TestType.of_xml) (Xml.child xml_arg0 "type") in
       let risk = (Option.map ~f:TestRisk.of_xml) (Xml.child xml_arg0 "risk") in
       let referenceId =
-        SpecReferenceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "referenceId") in
+        (Option.map ~f:SpecReferenceId.of_xml)
+          (Xml.child xml_arg0 "referenceId") in
+      let recommendationStatus =
+        (Option.map ~f:RecommendationStatus.of_xml)
+          (Xml.child xml_arg0 "recommendationStatus") in
       let recommendationId =
         (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "recommendationId") in
       let prerequisite =
@@ -2209,27 +4131,41 @@ module TestRecommendation =
           (Xml.child xml_arg0 "intent") in
       let description =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "description") in
+      let dependsOnAlarms =
+        (Option.map ~f:AlarmReferenceIdList.of_xml)
+          (Xml.child xml_arg0 "dependsOnAlarms") in
       let appComponentName =
         (Option.map ~f:EntityId.of_xml)
           (Xml.child xml_arg0 "appComponentName") in
-      make ?type_ ?risk ~referenceId ?recommendationId ?prerequisite ?name
-        ?items ?intent ?description ?appComponentName ()
+      let appComponentId =
+        (Option.map ~f:EntityName255.of_xml)
+          (Xml.child xml_arg0 "appComponentId") in
+      make ?type_ ?risk ?referenceId ?recommendationStatus ?recommendationId
+        ?prerequisite ?name ?items ?intent ?description ?dependsOnAlarms
+        ?appComponentName ?appComponentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" TestType.of_json in
-      let risk = field_map json "risk" TestRisk.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "type" TestType.of_json in
+      let risk = field_map json__ "risk" TestRisk.of_json in
       let referenceId =
-        field_map_exn json "referenceId" SpecReferenceId.of_json in
-      let recommendationId = field_map json "recommendationId" Uuid.of_json in
-      let prerequisite = field_map json "prerequisite" String500.of_json in
-      let name = field_map json "name" DocumentName.of_json in
-      let items = field_map json "items" RecommendationItemList.of_json in
-      let intent = field_map json "intent" EntityDescription.of_json in
-      let description = field_map json "description" String500.of_json in
+        field_map json__ "referenceId" SpecReferenceId.of_json in
+      let recommendationStatus =
+        field_map json__ "recommendationStatus" RecommendationStatus.of_json in
+      let recommendationId = field_map json__ "recommendationId" Uuid.of_json in
+      let prerequisite = field_map json__ "prerequisite" String500.of_json in
+      let name = field_map json__ "name" DocumentName.of_json in
+      let items = field_map json__ "items" RecommendationItemList.of_json in
+      let intent = field_map json__ "intent" EntityDescription.of_json in
+      let description = field_map json__ "description" String500.of_json in
+      let dependsOnAlarms =
+        field_map json__ "dependsOnAlarms" AlarmReferenceIdList.of_json in
       let appComponentName =
-        field_map json "appComponentName" EntityId.of_json in
-      make ?type_ ?risk ~referenceId ?recommendationId ?prerequisite ?name
-        ?items ?intent ?description ?appComponentName ()
+        field_map json__ "appComponentName" EntityId.of_json in
+      let appComponentId =
+        field_map json__ "appComponentId" EntityName255.of_json in
+      make ?type_ ?risk ?referenceId ?recommendationStatus ?recommendationId
+        ?prerequisite ?name ?items ?intent ?description ?dependsOnAlarms
+        ?appComponentName ?appComponentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Defines a test recommendation."]
 module SopRecommendation =
@@ -2237,40 +4173,44 @@ module SopRecommendation =
     type nonrec t =
       {
       appComponentName: EntityId.t option
-        [@ocaml.doc "The application component name."];
+        [@ocaml.doc "Name of the Application Component."];
       description: String500.t option
-        [@ocaml.doc "The description of the SOP recommendation."];
+        [@ocaml.doc "Description of the SOP recommendation."];
       items: RecommendationItemList.t option
         [@ocaml.doc "The recommendation items."];
       name: DocumentName.t option
-        [@ocaml.doc "The name of the SOP recommendation."];
+        [@ocaml.doc "Name of the SOP recommendation."];
       prerequisite: String500.t option
-        [@ocaml.doc "The prerequisite for the SOP recommendation."];
-      recommendationId: Uuid.t
+        [@ocaml.doc "Prerequisite for the SOP recommendation."];
+      recommendationId: Uuid.t option
         [@ocaml.doc "Identifier for the SOP recommendation."];
-      referenceId: SpecReferenceId.t
-        [@ocaml.doc "The reference identifier for the SOP recommendation."];
-      serviceType: SopServiceType.t [@ocaml.doc "The service type."]}
-    let context_ = "SopRecommendation"
+      recommendationStatus: RecommendationStatus.t option
+        [@ocaml.doc
+          "Status of the recommended standard operating procedure."];
+      referenceId: SpecReferenceId.t option
+        [@ocaml.doc "Reference identifier for the SOP recommendation."];
+      serviceType: SopServiceType.t option [@ocaml.doc "The service type."]}
     let make ?appComponentName =
       fun ?description ->
         fun ?items ->
           fun ?name ->
             fun ?prerequisite ->
-              fun ~recommendationId ->
-                fun ~referenceId ->
-                  fun ~serviceType ->
-                    fun () ->
-                      {
-                        appComponentName;
-                        description;
-                        items;
-                        name;
-                        prerequisite;
-                        recommendationId;
-                        referenceId;
-                        serviceType
-                      }
+              fun ?recommendationId ->
+                fun ?recommendationStatus ->
+                  fun ?referenceId ->
+                    fun ?serviceType ->
+                      fun () ->
+                        {
+                          appComponentName;
+                          description;
+                          items;
+                          name;
+                          prerequisite;
+                          recommendationId;
+                          recommendationStatus;
+                          referenceId;
+                          serviceType
+                        }
     let to_value x =
       structure_to_value
         [("appComponentName",
@@ -2279,20 +4219,27 @@ module SopRecommendation =
         ("items", (Option.map x.items ~f:RecommendationItemList.to_value));
         ("name", (Option.map x.name ~f:DocumentName.to_value));
         ("prerequisite", (Option.map x.prerequisite ~f:String500.to_value));
-        ("recommendationId", (Some (Uuid.to_value x.recommendationId)));
-        ("referenceId", (Some (SpecReferenceId.to_value x.referenceId)));
-        ("serviceType", (Some (SopServiceType.to_value x.serviceType)))]
+        ("recommendationId",
+          (Option.map x.recommendationId ~f:Uuid.to_value));
+        ("recommendationStatus",
+          (Option.map x.recommendationStatus ~f:RecommendationStatus.to_value));
+        ("referenceId",
+          (Option.map x.referenceId ~f:SpecReferenceId.to_value));
+        ("serviceType",
+          (Option.map x.serviceType ~f:SopServiceType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceType =
-        SopServiceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceType") in
+        (Option.map ~f:SopServiceType.of_xml)
+          (Xml.child xml_arg0 "serviceType") in
       let referenceId =
-        SpecReferenceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "referenceId") in
+        (Option.map ~f:SpecReferenceId.of_xml)
+          (Xml.child xml_arg0 "referenceId") in
+      let recommendationStatus =
+        (Option.map ~f:RecommendationStatus.of_xml)
+          (Xml.child xml_arg0 "recommendationStatus") in
       let recommendationId =
-        Uuid.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "recommendationId") in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "recommendationId") in
       let prerequisite =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "prerequisite") in
       let name =
@@ -2305,115 +4252,242 @@ module SopRecommendation =
       let appComponentName =
         (Option.map ~f:EntityId.of_xml)
           (Xml.child xml_arg0 "appComponentName") in
-      make ~serviceType ~referenceId ~recommendationId ?prerequisite ?name
-        ?items ?description ?appComponentName ()
+      make ?serviceType ?referenceId ?recommendationStatus ?recommendationId
+        ?prerequisite ?name ?items ?description ?appComponentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceType =
-        field_map_exn json "serviceType" SopServiceType.of_json in
+    let of_json json__ =
+      let serviceType = field_map json__ "serviceType" SopServiceType.of_json in
       let referenceId =
-        field_map_exn json "referenceId" SpecReferenceId.of_json in
-      let recommendationId =
-        field_map_exn json "recommendationId" Uuid.of_json in
-      let prerequisite = field_map json "prerequisite" String500.of_json in
-      let name = field_map json "name" DocumentName.of_json in
-      let items = field_map json "items" RecommendationItemList.of_json in
-      let description = field_map json "description" String500.of_json in
+        field_map json__ "referenceId" SpecReferenceId.of_json in
+      let recommendationStatus =
+        field_map json__ "recommendationStatus" RecommendationStatus.of_json in
+      let recommendationId = field_map json__ "recommendationId" Uuid.of_json in
+      let prerequisite = field_map json__ "prerequisite" String500.of_json in
+      let name = field_map json__ "name" DocumentName.of_json in
+      let items = field_map json__ "items" RecommendationItemList.of_json in
+      let description = field_map json__ "description" String500.of_json in
       let appComponentName =
-        field_map json "appComponentName" EntityId.of_json in
-      make ~serviceType ~referenceId ~recommendationId ?prerequisite ?name
-        ?items ?description ?appComponentName ()
+        field_map json__ "appComponentName" EntityId.of_json in
+      make ?serviceType ?referenceId ?recommendationStatus ?recommendationId
+        ?prerequisite ?name ?items ?description ?appComponentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Defines a standard operating procedure (SOP) recommendation."]
+module GroupingRecommendation =
+  struct
+    type nonrec t =
+      {
+      confidenceLevel: GroupingRecommendationConfidenceLevel.t option
+        [@ocaml.doc
+          "Indicates the confidence level of Resilience Hub on the grouping recommendation."];
+      creationTime: TimeStamp.t option
+        [@ocaml.doc
+          "Indicates the creation time of the grouping recommendation."];
+      groupingAppComponent: GroupingAppComponent.t option
+        [@ocaml.doc
+          "Indicates the name of the recommended Application Component (AppComponent)."];
+      groupingRecommendationId: String255.t option
+        [@ocaml.doc
+          "Indicates all the reasons available for rejecting a grouping recommendation."];
+      recommendationReasons: String255List.t option
+        [@ocaml.doc
+          "Indicates all the reasons available for rejecting a grouping recommendation."];
+      rejectionReason: GroupingRecommendationRejectionReason.t option
+        [@ocaml.doc
+          "Indicates the reason you had selected while rejecting a grouping recommendation."];
+      resources: GroupingResourceList.t option
+        [@ocaml.doc
+          "Indicates the resources that are grouped in a recommended AppComponent."];
+      score: Double.t option
+        [@ocaml.doc
+          "Indicates the confidence level of the grouping recommendation."];
+      status: GroupingRecommendationStatusType.t option
+        [@ocaml.doc
+          "Indicates the status of grouping resources into AppComponents."]}
+    let make ?confidenceLevel =
+      fun ?creationTime ->
+        fun ?groupingAppComponent ->
+          fun ?groupingRecommendationId ->
+            fun ?recommendationReasons ->
+              fun ?rejectionReason ->
+                fun ?resources ->
+                  fun ?score ->
+                    fun ?status ->
+                      fun () ->
+                        {
+                          confidenceLevel;
+                          creationTime;
+                          groupingAppComponent;
+                          groupingRecommendationId;
+                          recommendationReasons;
+                          rejectionReason;
+                          resources;
+                          score;
+                          status
+                        }
+    let to_value x =
+      structure_to_value
+        [("confidenceLevel",
+           (Option.map x.confidenceLevel
+              ~f:GroupingRecommendationConfidenceLevel.to_value));
+        ("creationTime", (Option.map x.creationTime ~f:TimeStamp.to_value));
+        ("groupingAppComponent",
+          (Option.map x.groupingAppComponent ~f:GroupingAppComponent.to_value));
+        ("groupingRecommendationId",
+          (Option.map x.groupingRecommendationId ~f:String255.to_value));
+        ("recommendationReasons",
+          (Option.map x.recommendationReasons ~f:String255List.to_value));
+        ("rejectionReason",
+          (Option.map x.rejectionReason
+             ~f:GroupingRecommendationRejectionReason.to_value));
+        ("resources",
+          (Option.map x.resources ~f:GroupingResourceList.to_value));
+        ("score", (Option.map x.score ~f:Double.to_value));
+        ("status",
+          (Option.map x.status ~f:GroupingRecommendationStatusType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:GroupingRecommendationStatusType.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let score = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "score") in
+      let resources =
+        (Option.map ~f:GroupingResourceList.of_xml)
+          (Xml.child xml_arg0 "resources") in
+      let rejectionReason =
+        (Option.map ~f:GroupingRecommendationRejectionReason.of_xml)
+          (Xml.child xml_arg0 "rejectionReason") in
+      let recommendationReasons =
+        (Option.map ~f:String255List.of_xml)
+          (Xml.child xml_arg0 "recommendationReasons") in
+      let groupingRecommendationId =
+        (Option.map ~f:String255.of_xml)
+          (Xml.child xml_arg0 "groupingRecommendationId") in
+      let groupingAppComponent =
+        (Option.map ~f:GroupingAppComponent.of_xml)
+          (Xml.child xml_arg0 "groupingAppComponent") in
+      let creationTime =
+        (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "creationTime") in
+      let confidenceLevel =
+        (Option.map ~f:GroupingRecommendationConfidenceLevel.of_xml)
+          (Xml.child xml_arg0 "confidenceLevel") in
+      make ?status ?score ?resources ?rejectionReason ?recommendationReasons
+        ?groupingRecommendationId ?groupingAppComponent ?creationTime
+        ?confidenceLevel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map json__ "status" GroupingRecommendationStatusType.of_json in
+      let score = field_map json__ "score" Double.of_json in
+      let resources =
+        field_map json__ "resources" GroupingResourceList.of_json in
+      let rejectionReason =
+        field_map json__ "rejectionReason"
+          GroupingRecommendationRejectionReason.of_json in
+      let recommendationReasons =
+        field_map json__ "recommendationReasons" String255List.of_json in
+      let groupingRecommendationId =
+        field_map json__ "groupingRecommendationId" String255.of_json in
+      let groupingAppComponent =
+        field_map json__ "groupingAppComponent" GroupingAppComponent.of_json in
+      let creationTime = field_map json__ "creationTime" TimeStamp.of_json in
+      let confidenceLevel =
+        field_map json__ "confidenceLevel"
+          GroupingRecommendationConfidenceLevel.of_json in
+      make ?status ?score ?resources ?rejectionReason ?recommendationReasons
+        ?groupingRecommendationId ?groupingAppComponent ?creationTime
+        ?confidenceLevel ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a new grouping recommendation."]
 module RecommendationTemplate =
   struct
     type nonrec t =
       {
       appArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
-      assessmentArn: Arn.t
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      assessmentArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:dcps:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:resiliencehub:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       endTime: TimeStamp.t option [@ocaml.doc "The end time for the action."];
-      format: TemplateFormat.t
+      format: TemplateFormat.t option
         [@ocaml.doc
-          "The format of the recommendation template. CfnJson The template is CloudFormation JSON. CfnYaml The template is CloudFormation YAML."];
+          "Format of the recommendation template. CfnJson The template is CloudFormation JSON. CfnYaml The template is CloudFormation YAML."];
       message: String500.t option
-        [@ocaml.doc "The message for the recommendation template."];
-      name: EntityName.t
-        [@ocaml.doc "The name for the recommendation template."];
+        [@ocaml.doc "Message for the recommendation template."];
+      name: EntityName.t option
+        [@ocaml.doc "Name for the recommendation template."];
       needsReplacements: BooleanOptional.t option
         [@ocaml.doc "Indicates if replacements are needed."];
       recommendationIds: RecommendationIdList.t option
         [@ocaml.doc
           "Identifiers for the recommendations used in the recommendation template."];
-      recommendationTemplateArn: Arn.t
+      recommendationTemplateArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the recommendation template."];
-      recommendationTypes: RenderRecommendationTypeList.t
+          "Amazon Resource Name (ARN) for the recommendation template."];
+      recommendationTypes: RenderRecommendationTypeList.t option
         [@ocaml.doc
           "An array of strings that specify the recommendation template type or types. Alarm The template is an AlarmRecommendation template. Sop The template is a SopRecommendation template. Test The template is a TestRecommendation template."];
       startTime: TimeStamp.t option
         [@ocaml.doc "The start time for the action."];
-      status: RecommendationTemplateStatus.t
-        [@ocaml.doc "The status of the action."];
+      status: RecommendationTemplateStatus.t option
+        [@ocaml.doc "Status of the action."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."];
+          "Tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."];
       templatesLocation: S3Location.t option
         [@ocaml.doc "The file location of the template."]}
-    let context_ = "RecommendationTemplate"
     let make ?appArn =
-      fun ?endTime ->
-        fun ?message ->
-          fun ?needsReplacements ->
-            fun ?recommendationIds ->
-              fun ?startTime ->
-                fun ?tags ->
-                  fun ?templatesLocation ->
-                    fun ~assessmentArn ->
-                      fun ~format ->
-                        fun ~name ->
-                          fun ~recommendationTemplateArn ->
-                            fun ~recommendationTypes ->
-                              fun ~status ->
+      fun ?assessmentArn ->
+        fun ?endTime ->
+          fun ?format ->
+            fun ?message ->
+              fun ?name ->
+                fun ?needsReplacements ->
+                  fun ?recommendationIds ->
+                    fun ?recommendationTemplateArn ->
+                      fun ?recommendationTypes ->
+                        fun ?startTime ->
+                          fun ?status ->
+                            fun ?tags ->
+                              fun ?templatesLocation ->
                                 fun () ->
                                   {
                                     appArn;
+                                    assessmentArn;
                                     endTime;
+                                    format;
                                     message;
+                                    name;
                                     needsReplacements;
                                     recommendationIds;
-                                    startTime;
-                                    tags;
-                                    templatesLocation;
-                                    assessmentArn;
-                                    format;
-                                    name;
                                     recommendationTemplateArn;
                                     recommendationTypes;
-                                    status
+                                    startTime;
+                                    status;
+                                    tags;
+                                    templatesLocation
                                   }
     let to_value x =
       structure_to_value
         [("appArn", (Option.map x.appArn ~f:Arn.to_value));
-        ("assessmentArn", (Some (Arn.to_value x.assessmentArn)));
+        ("assessmentArn", (Option.map x.assessmentArn ~f:Arn.to_value));
         ("endTime", (Option.map x.endTime ~f:TimeStamp.to_value));
-        ("format", (Some (TemplateFormat.to_value x.format)));
+        ("format", (Option.map x.format ~f:TemplateFormat.to_value));
         ("message", (Option.map x.message ~f:String500.to_value));
-        ("name", (Some (EntityName.to_value x.name)));
+        ("name", (Option.map x.name ~f:EntityName.to_value));
         ("needsReplacements",
           (Option.map x.needsReplacements ~f:BooleanOptional.to_value));
         ("recommendationIds",
           (Option.map x.recommendationIds ~f:RecommendationIdList.to_value));
         ("recommendationTemplateArn",
-          (Some (Arn.to_value x.recommendationTemplateArn)));
+          (Option.map x.recommendationTemplateArn ~f:Arn.to_value));
         ("recommendationTypes",
-          (Some (RenderRecommendationTypeList.to_value x.recommendationTypes)));
+          (Option.map x.recommendationTypes
+             ~f:RenderRecommendationTypeList.to_value));
         ("startTime", (Option.map x.startTime ~f:TimeStamp.to_value));
-        ("status", (Some (RecommendationTemplateStatus.to_value x.status)));
+        ("status",
+          (Option.map x.status ~f:RecommendationTemplateStatus.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
         ("templatesLocation",
           (Option.map x.templatesLocation ~f:S3Location.to_value))]
@@ -2424,17 +4498,16 @@ module RecommendationTemplate =
           (Xml.child xml_arg0 "templatesLocation") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let status =
-        RecommendationTemplateStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:RecommendationTemplateStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let startTime =
         (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "startTime") in
       let recommendationTypes =
-        RenderRecommendationTypeList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "recommendationTypes") in
+        (Option.map ~f:RenderRecommendationTypeList.of_xml)
+          (Xml.child xml_arg0 "recommendationTypes") in
       let recommendationTemplateArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "recommendationTemplateArn") in
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "recommendationTemplateArn") in
       let recommendationIds =
         (Option.map ~f:RecommendationIdList.of_xml)
           (Xml.child xml_arg0 "recommendationIds") in
@@ -2442,260 +4515,541 @@ module RecommendationTemplate =
         (Option.map ~f:BooleanOptional.of_xml)
           (Xml.child xml_arg0 "needsReplacements") in
       let name =
-        EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "name") in
       let message =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
       let format =
-        TemplateFormat.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "format") in
+        (Option.map ~f:TemplateFormat.of_xml) (Xml.child xml_arg0 "format") in
       let endTime =
         (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "endTime") in
       let assessmentArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "assessmentArn") in
       let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
-      make ?templatesLocation ?tags ~status ?startTime ~recommendationTypes
-        ~recommendationTemplateArn ?recommendationIds ?needsReplacements
-        ~name ?message ~format ?endTime ~assessmentArn ?appArn ()
+      make ?templatesLocation ?tags ?status ?startTime ?recommendationTypes
+        ?recommendationTemplateArn ?recommendationIds ?needsReplacements
+        ?name ?message ?format ?endTime ?assessmentArn ?appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templatesLocation =
-        field_map json "templatesLocation" S3Location.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+        field_map json__ "templatesLocation" S3Location.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let status =
-        field_map_exn json "status" RecommendationTemplateStatus.of_json in
-      let startTime = field_map json "startTime" TimeStamp.of_json in
+        field_map json__ "status" RecommendationTemplateStatus.of_json in
+      let startTime = field_map json__ "startTime" TimeStamp.of_json in
       let recommendationTypes =
-        field_map_exn json "recommendationTypes"
+        field_map json__ "recommendationTypes"
           RenderRecommendationTypeList.of_json in
       let recommendationTemplateArn =
-        field_map_exn json "recommendationTemplateArn" Arn.of_json in
+        field_map json__ "recommendationTemplateArn" Arn.of_json in
       let recommendationIds =
-        field_map json "recommendationIds" RecommendationIdList.of_json in
+        field_map json__ "recommendationIds" RecommendationIdList.of_json in
       let needsReplacements =
-        field_map json "needsReplacements" BooleanOptional.of_json in
-      let name = field_map_exn json "name" EntityName.of_json in
-      let message = field_map json "message" String500.of_json in
-      let format = field_map_exn json "format" TemplateFormat.of_json in
-      let endTime = field_map json "endTime" TimeStamp.of_json in
-      let assessmentArn = field_map_exn json "assessmentArn" Arn.of_json in
-      let appArn = field_map json "appArn" Arn.of_json in
-      make ?templatesLocation ?tags ~status ?startTime ~recommendationTypes
-        ~recommendationTemplateArn ?recommendationIds ?needsReplacements
-        ~name ?message ~format ?endTime ~assessmentArn ?appArn ()
+        field_map json__ "needsReplacements" BooleanOptional.of_json in
+      let name = field_map json__ "name" EntityName.of_json in
+      let message = field_map json__ "message" String500.of_json in
+      let format = field_map json__ "format" TemplateFormat.of_json in
+      let endTime = field_map json__ "endTime" TimeStamp.of_json in
+      let assessmentArn = field_map json__ "assessmentArn" Arn.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?templatesLocation ?tags ?status ?startTime ?recommendationTypes
+        ?recommendationTemplateArn ?recommendationIds ?needsReplacements
+        ?name ?message ?format ?endTime ?assessmentArn ?appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Defines a recommendation template created with the CreateRecommendationTemplate action."]
+module Row =
+  struct
+    type nonrec t = String255.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String255.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String255.of_xml)
+    let of_json j = list_of_json ~kind:"Row" ~of_json:String255.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Condition =
+  struct
+    type nonrec t =
+      {
+      field: String255.t [@ocaml.doc "Indicates the field in the metric."];
+      operator: ConditionOperatorType.t
+        [@ocaml.doc
+          "Indicates the type of operator or comparison to be used when evaluating a condition against the specified field."];
+      value: String255.t option
+        [@ocaml.doc
+          "Indicates the value or data against which a condition is evaluated."]}
+    let context_ = "Condition"
+    let make ?value =
+      fun ~field -> fun ~operator -> fun () -> { value; field; operator }
+    let to_value x =
+      structure_to_value
+        [("field", (Some (String255.to_value x.field)));
+        ("operator", (Some (ConditionOperatorType.to_value x.operator)));
+        ("value", (Option.map x.value ~f:String255.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "value") in
+      let operator =
+        ConditionOperatorType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "operator") in
+      let field =
+        String255.of_xml (Xml.child_exn ~context:context_ xml_arg0 "field") in
+      make ?value ~operator ~field ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" String255.of_json in
+      let operator =
+        field_map_exn json__ "operator" ConditionOperatorType.of_json in
+      let field = field_map_exn json__ "field" String255.of_json in
+      make ?value ~operator ~field ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the condition based on which you want to filter the metrics."]
+module Field =
+  struct
+    type nonrec t =
+      {
+      aggregation: FieldAggregationType.t option
+        [@ocaml.doc
+          "(Optional) Indicates the type of aggregation or summary operation (such as Sum, Average, and so on) to be performed on a particular field or set of data."];
+      name: String255.t [@ocaml.doc "Name of the field."]}
+    let context_ = "Field"
+    let make ?aggregation = fun ~name -> fun () -> { aggregation; name }
+    let to_value x =
+      structure_to_value
+        [("aggregation",
+           (Option.map x.aggregation ~f:FieldAggregationType.to_value));
+        ("name", (Some (String255.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        String255.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let aggregation =
+        (Option.map ~f:FieldAggregationType.of_xml)
+          (Xml.child xml_arg0 "aggregation") in
+      make ~name ?aggregation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "name" String255.of_json in
+      let aggregation =
+        field_map json__ "aggregation" FieldAggregationType.of_json in
+      make ~name ?aggregation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the field or attribute of a resource or data structure on which a condition is being applied or evaluated."]
+module Sort =
+  struct
+    type nonrec t =
+      {
+      ascending: BooleanOptional.t option
+        [@ocaml.doc
+          "Indicates the name or identifier of the field or attribute that should be used as the basis for sorting the metrics."];
+      field: String255.t
+        [@ocaml.doc
+          "Indicates the order in which you want to sort the metrics. By default, the list is sorted in ascending order. To sort the list in descending order, set this field to False."]}
+    let context_ = "Sort"
+    let make ?ascending = fun ~field -> fun () -> { ascending; field }
+    let to_value x =
+      structure_to_value
+        [("ascending", (Option.map x.ascending ~f:BooleanOptional.to_value));
+        ("field", (Some (String255.to_value x.field)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let field =
+        String255.of_xml (Xml.child_exn ~context:context_ xml_arg0 "field") in
+      let ascending =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "ascending") in
+      make ~field ?ascending ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let field = field_map_exn json__ "field" String255.of_json in
+      let ascending = field_map json__ "ascending" BooleanOptional.of_json in
+      make ~field ?ascending ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the sorting order of the fields in the metrics."]
 module AppSummary =
   struct
     type nonrec t =
       {
-      appArn: Arn.t
+      appArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      assessmentSchedule: AppAssessmentScheduleType.t option
+        [@ocaml.doc
+          "Assessment execution schedule with 'Daily' or 'Disabled' values."];
+      awsApplicationArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of Resource Groups group that is integrated with an AppRegistry application. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       complianceStatus: AppComplianceStatusType.t option
         [@ocaml.doc
           "The current status of compliance for the resiliency policy."];
-      creationTime: TimeStamp.t
-        [@ocaml.doc "The timestamp for when the app was created."];
+      creationTime: TimeStamp.t option
+        [@ocaml.doc "Date and time when the app was created."];
       description: EntityDescription.t option
         [@ocaml.doc "The optional description for an app."];
-      name: EntityName.t [@ocaml.doc "The name of the application."];
+      driftStatus: AppDriftStatusType.t option
+        [@ocaml.doc
+          "Indicates if compliance drifts (deviations) were detected while running an assessment for your application."];
+      lastAppComplianceEvaluationTime: TimeStamp.t option
+        [@ocaml.doc
+          "Date and time of the most recent compliance evaluation."];
+      name: EntityName.t option [@ocaml.doc "The name of the application."];
       resiliencyScore: Double.t option
-        [@ocaml.doc "The current resiliency score for the application."]}
-    let context_ = "AppSummary"
-    let make ?complianceStatus =
-      fun ?description ->
-        fun ?resiliencyScore ->
-          fun ~appArn ->
-            fun ~creationTime ->
-              fun ~name ->
-                fun () ->
-                  {
-                    complianceStatus;
-                    description;
-                    resiliencyScore;
-                    appArn;
-                    creationTime;
-                    name
-                  }
+        [@ocaml.doc "The current resiliency score for the application."];
+      rpoInSecs: IntegerOptional.t option
+        [@ocaml.doc "Recovery Point Objective (RPO) in seconds."];
+      rtoInSecs: IntegerOptional.t option
+        [@ocaml.doc "Recovery Time Objective (RTO) in seconds."];
+      status: AppStatusType.t option
+        [@ocaml.doc "Status of the application."]}
+    let make ?appArn =
+      fun ?assessmentSchedule ->
+        fun ?awsApplicationArn ->
+          fun ?complianceStatus ->
+            fun ?creationTime ->
+              fun ?description ->
+                fun ?driftStatus ->
+                  fun ?lastAppComplianceEvaluationTime ->
+                    fun ?name ->
+                      fun ?resiliencyScore ->
+                        fun ?rpoInSecs ->
+                          fun ?rtoInSecs ->
+                            fun ?status ->
+                              fun () ->
+                                {
+                                  appArn;
+                                  assessmentSchedule;
+                                  awsApplicationArn;
+                                  complianceStatus;
+                                  creationTime;
+                                  description;
+                                  driftStatus;
+                                  lastAppComplianceEvaluationTime;
+                                  name;
+                                  resiliencyScore;
+                                  rpoInSecs;
+                                  rtoInSecs;
+                                  status
+                                }
     let to_value x =
       structure_to_value
-        [("appArn", (Some (Arn.to_value x.appArn)));
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("assessmentSchedule",
+          (Option.map x.assessmentSchedule
+             ~f:AppAssessmentScheduleType.to_value));
+        ("awsApplicationArn",
+          (Option.map x.awsApplicationArn ~f:Arn.to_value));
         ("complianceStatus",
           (Option.map x.complianceStatus ~f:AppComplianceStatusType.to_value));
-        ("creationTime", (Some (TimeStamp.to_value x.creationTime)));
+        ("creationTime", (Option.map x.creationTime ~f:TimeStamp.to_value));
         ("description",
           (Option.map x.description ~f:EntityDescription.to_value));
-        ("name", (Some (EntityName.to_value x.name)));
+        ("driftStatus",
+          (Option.map x.driftStatus ~f:AppDriftStatusType.to_value));
+        ("lastAppComplianceEvaluationTime",
+          (Option.map x.lastAppComplianceEvaluationTime ~f:TimeStamp.to_value));
+        ("name", (Option.map x.name ~f:EntityName.to_value));
         ("resiliencyScore",
-          (Option.map x.resiliencyScore ~f:Double.to_value))]
+          (Option.map x.resiliencyScore ~f:Double.to_value));
+        ("rpoInSecs", (Option.map x.rpoInSecs ~f:IntegerOptional.to_value));
+        ("rtoInSecs", (Option.map x.rtoInSecs ~f:IntegerOptional.to_value));
+        ("status", (Option.map x.status ~f:AppStatusType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:AppStatusType.of_xml) (Xml.child xml_arg0 "status") in
+      let rtoInSecs =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "rtoInSecs") in
+      let rpoInSecs =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "rpoInSecs") in
       let resiliencyScore =
         (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "resiliencyScore") in
       let name =
-        EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "name") in
+      let lastAppComplianceEvaluationTime =
+        (Option.map ~f:TimeStamp.of_xml)
+          (Xml.child xml_arg0 "lastAppComplianceEvaluationTime") in
+      let driftStatus =
+        (Option.map ~f:AppDriftStatusType.of_xml)
+          (Xml.child xml_arg0 "driftStatus") in
       let description =
         (Option.map ~f:EntityDescription.of_xml)
           (Xml.child xml_arg0 "description") in
       let creationTime =
-        TimeStamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "creationTime") in
+        (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "creationTime") in
       let complianceStatus =
         (Option.map ~f:AppComplianceStatusType.of_xml)
           (Xml.child xml_arg0 "complianceStatus") in
-      let appArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      make ?resiliencyScore ~name ?description ~creationTime
-        ?complianceStatus ~appArn ()
+      let awsApplicationArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "awsApplicationArn") in
+      let assessmentSchedule =
+        (Option.map ~f:AppAssessmentScheduleType.of_xml)
+          (Xml.child xml_arg0 "assessmentSchedule") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?status ?rtoInSecs ?rpoInSecs ?resiliencyScore ?name
+        ?lastAppComplianceEvaluationTime ?driftStatus ?description
+        ?creationTime ?complianceStatus ?awsApplicationArn
+        ?assessmentSchedule ?appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resiliencyScore = field_map json "resiliencyScore" Double.of_json in
-      let name = field_map_exn json "name" EntityName.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" AppStatusType.of_json in
+      let rtoInSecs = field_map json__ "rtoInSecs" IntegerOptional.of_json in
+      let rpoInSecs = field_map json__ "rpoInSecs" IntegerOptional.of_json in
+      let resiliencyScore = field_map json__ "resiliencyScore" Double.of_json in
+      let name = field_map json__ "name" EntityName.of_json in
+      let lastAppComplianceEvaluationTime =
+        field_map json__ "lastAppComplianceEvaluationTime" TimeStamp.of_json in
+      let driftStatus =
+        field_map json__ "driftStatus" AppDriftStatusType.of_json in
       let description =
-        field_map json "description" EntityDescription.of_json in
-      let creationTime = field_map_exn json "creationTime" TimeStamp.of_json in
+        field_map json__ "description" EntityDescription.of_json in
+      let creationTime = field_map json__ "creationTime" TimeStamp.of_json in
       let complianceStatus =
-        field_map json "complianceStatus" AppComplianceStatusType.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
-      make ?resiliencyScore ~name ?description ~creationTime
-        ?complianceStatus ~appArn ()
+        field_map json__ "complianceStatus" AppComplianceStatusType.of_json in
+      let awsApplicationArn =
+        field_map json__ "awsApplicationArn" Arn.of_json in
+      let assessmentSchedule =
+        field_map json__ "assessmentSchedule"
+          AppAssessmentScheduleType.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?status ?rtoInSecs ?rpoInSecs ?resiliencyScore ?name
+        ?lastAppComplianceEvaluationTime ?driftStatus ?description
+        ?creationTime ?complianceStatus ?awsApplicationArn
+        ?assessmentSchedule ?appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Defines an application summary."]
 module AppVersionSummary =
   struct
     type nonrec t =
       {
-      appVersion: EntityVersion.t
-        [@ocaml.doc "The version of the application."]}
-    let context_ = "AppVersionSummary"
-    let make ~appVersion = fun () -> { appVersion }
+      appVersion: EntityVersion.t option
+        [@ocaml.doc "Version of an application."];
+      creationTime: TimeStamp.t option
+        [@ocaml.doc "Creation time of the application version."];
+      identifier: LongOptional.t option
+        [@ocaml.doc "Identifier of the application version."];
+      versionName: EntityVersion.t option
+        [@ocaml.doc "Name of the application version."]}
+    let make ?appVersion =
+      fun ?creationTime ->
+        fun ?identifier ->
+          fun ?versionName ->
+            fun () -> { appVersion; creationTime; identifier; versionName }
     let to_value x =
       structure_to_value
-        [("appVersion", (Some (EntityVersion.to_value x.appVersion)))]
+        [("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value));
+        ("creationTime", (Option.map x.creationTime ~f:TimeStamp.to_value));
+        ("identifier", (Option.map x.identifier ~f:LongOptional.to_value));
+        ("versionName", (Option.map x.versionName ~f:EntityVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let versionName =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "versionName") in
+      let identifier =
+        (Option.map ~f:LongOptional.of_xml) (Xml.child xml_arg0 "identifier") in
+      let creationTime =
+        (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "creationTime") in
       let appVersion =
-        EntityVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "appVersion") in
-      make ~appVersion ()
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      make ?versionName ?identifier ?creationTime ?appVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
-      make ~appVersion ()
+    let of_json json__ =
+      let versionName = field_map json__ "versionName" EntityVersion.of_json in
+      let identifier = field_map json__ "identifier" LongOptional.of_json in
+      let creationTime = field_map json__ "creationTime" TimeStamp.of_json in
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      make ?versionName ?identifier ?creationTime ?appVersion ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The version of the application."]
+  end[@@ocaml.doc "Version of an application."]
 module PhysicalResource =
   struct
     type nonrec t =
       {
+      additionalInfo: AdditionalInfoMap.t option
+        [@ocaml.doc
+          "Additional configuration parameters for an Resilience Hub application. If you want to implement additionalInfo through the Resilience Hub console rather than using an API call, see Configure the application configuration parameters. Currently, this parameter accepts a key-value mapping (in a string format) of only one failover region and one associated account. Key: \"failover-regions\" Value: \"\\[\\{\"region\":\"<REGION>\", \"accounts\":\\[\\{\"id\":\"<ACCOUNT_ID>\"\\}\\]\\}\\]\""];
       appComponents: AppComponentList.t option
         [@ocaml.doc
           "The application components that belong to this resource."];
-      logicalResourceId: LogicalResourceId.t
-        [@ocaml.doc "The logical identifier of the resource."];
-      physicalResourceId: PhysicalResourceId.t
-        [@ocaml.doc "The physical identifier of the resource."];
+      excluded: BooleanOptional.t option
+        [@ocaml.doc
+          "Indicates if a resource is included or excluded from the assessment."];
+      logicalResourceId: LogicalResourceId.t option
+        [@ocaml.doc "Logical identifier of the resource."];
+      parentResourceName: EntityName.t option
+        [@ocaml.doc "Name of the parent resource."];
+      physicalResourceId: PhysicalResourceId.t option
+        [@ocaml.doc "Identifier of the physical resource."];
       resourceName: EntityName.t option
         [@ocaml.doc "The name of the resource."];
-      resourceType: String255.t [@ocaml.doc "The type of resource."]}
-    let context_ = "PhysicalResource"
-    let make ?appComponents =
-      fun ?resourceName ->
-        fun ~logicalResourceId ->
-          fun ~physicalResourceId ->
-            fun ~resourceType ->
-              fun () ->
-                {
-                  appComponents;
-                  resourceName;
-                  logicalResourceId;
-                  physicalResourceId;
-                  resourceType
-                }
+      resourceType: String255.t option [@ocaml.doc "Type of resource."];
+      sourceType: ResourceSourceType.t option
+        [@ocaml.doc "Type of input source."]}
+    let make ?additionalInfo =
+      fun ?appComponents ->
+        fun ?excluded ->
+          fun ?logicalResourceId ->
+            fun ?parentResourceName ->
+              fun ?physicalResourceId ->
+                fun ?resourceName ->
+                  fun ?resourceType ->
+                    fun ?sourceType ->
+                      fun () ->
+                        {
+                          additionalInfo;
+                          appComponents;
+                          excluded;
+                          logicalResourceId;
+                          parentResourceName;
+                          physicalResourceId;
+                          resourceName;
+                          resourceType;
+                          sourceType
+                        }
     let to_value x =
       structure_to_value
-        [("appComponents",
-           (Option.map x.appComponents ~f:AppComponentList.to_value));
+        [("additionalInfo",
+           (Option.map x.additionalInfo ~f:AdditionalInfoMap.to_value));
+        ("appComponents",
+          (Option.map x.appComponents ~f:AppComponentList.to_value));
+        ("excluded", (Option.map x.excluded ~f:BooleanOptional.to_value));
         ("logicalResourceId",
-          (Some (LogicalResourceId.to_value x.logicalResourceId)));
+          (Option.map x.logicalResourceId ~f:LogicalResourceId.to_value));
+        ("parentResourceName",
+          (Option.map x.parentResourceName ~f:EntityName.to_value));
         ("physicalResourceId",
-          (Some (PhysicalResourceId.to_value x.physicalResourceId)));
+          (Option.map x.physicalResourceId ~f:PhysicalResourceId.to_value));
         ("resourceName", (Option.map x.resourceName ~f:EntityName.to_value));
-        ("resourceType", (Some (String255.to_value x.resourceType)))]
+        ("resourceType", (Option.map x.resourceType ~f:String255.to_value));
+        ("sourceType",
+          (Option.map x.sourceType ~f:ResourceSourceType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sourceType =
+        (Option.map ~f:ResourceSourceType.of_xml)
+          (Xml.child xml_arg0 "sourceType") in
       let resourceType =
-        String255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "resourceType") in
       let resourceName =
         (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "resourceName") in
       let physicalResourceId =
-        PhysicalResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "physicalResourceId") in
+        (Option.map ~f:PhysicalResourceId.of_xml)
+          (Xml.child xml_arg0 "physicalResourceId") in
+      let parentResourceName =
+        (Option.map ~f:EntityName.of_xml)
+          (Xml.child xml_arg0 "parentResourceName") in
       let logicalResourceId =
-        LogicalResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "logicalResourceId") in
+        (Option.map ~f:LogicalResourceId.of_xml)
+          (Xml.child xml_arg0 "logicalResourceId") in
+      let excluded =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "excluded") in
       let appComponents =
         (Option.map ~f:AppComponentList.of_xml)
           (Xml.child xml_arg0 "appComponents") in
-      make ~resourceType ?resourceName ~physicalResourceId ~logicalResourceId
-        ?appComponents ()
+      let additionalInfo =
+        (Option.map ~f:AdditionalInfoMap.of_xml)
+          (Xml.child xml_arg0 "additionalInfo") in
+      make ?sourceType ?resourceType ?resourceName ?physicalResourceId
+        ?parentResourceName ?logicalResourceId ?excluded ?appComponents
+        ?additionalInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "resourceType" String255.of_json in
-      let resourceName = field_map json "resourceName" EntityName.of_json in
+    let of_json json__ =
+      let sourceType =
+        field_map json__ "sourceType" ResourceSourceType.of_json in
+      let resourceType = field_map json__ "resourceType" String255.of_json in
+      let resourceName = field_map json__ "resourceName" EntityName.of_json in
       let physicalResourceId =
-        field_map_exn json "physicalResourceId" PhysicalResourceId.of_json in
+        field_map json__ "physicalResourceId" PhysicalResourceId.of_json in
+      let parentResourceName =
+        field_map json__ "parentResourceName" EntityName.of_json in
       let logicalResourceId =
-        field_map_exn json "logicalResourceId" LogicalResourceId.of_json in
+        field_map json__ "logicalResourceId" LogicalResourceId.of_json in
+      let excluded = field_map json__ "excluded" BooleanOptional.of_json in
       let appComponents =
-        field_map json "appComponents" AppComponentList.of_json in
-      make ~resourceType ?resourceName ~physicalResourceId ~logicalResourceId
-        ?appComponents ()
+        field_map json__ "appComponents" AppComponentList.of_json in
+      let additionalInfo =
+        field_map json__ "additionalInfo" AdditionalInfoMap.of_json in
+      make ?sourceType ?resourceType ?resourceName ?physicalResourceId
+        ?parentResourceName ?logicalResourceId ?excluded ?appComponents
+        ?additionalInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Defines a physical resource. A physical resource is a resource that exists in your account. It can be identified using an Amazon Resource Name (ARN) or a Resilience Hub-native identifier."]
+       "Defines a physical resource. A physical resource is a resource that exists in your account. It can be identified using an Amazon Resource Name (ARN) or an Resilience Hub-native identifier."]
 module ResourceMapping =
   struct
     type nonrec t =
       {
       appRegistryAppName: EntityName.t option
         [@ocaml.doc
-          "The name of the application this resource is mapped to."];
+          "Name of the application this resource is mapped to when the mappingType is AppRegistryApp."];
+      eksSourceName: String255.t option
+        [@ocaml.doc
+          "Name of the Amazon Elastic Kubernetes Service cluster and namespace that this resource is mapped to when the mappingType is EKS. This parameter accepts values in \"eks-cluster/namespace\" format."];
       logicalStackName: String255.t option
         [@ocaml.doc
-          "The name of the CloudFormation stack this resource is mapped to."];
+          "Name of the CloudFormation stack this resource is mapped to when the mappingType is CfnStack."];
       mappingType: ResourceMappingType.t
-        [@ocaml.doc
-          "Specifies the type of resource mapping. AppRegistryApp The resource is mapped to another application. The name of the application is contained in the appRegistryAppName property. CfnStack The resource is mapped to a CloudFormation stack. The name of the CloudFormation stack is contained in the logicalStackName property. Resource The resource is mapped to another resource. The name of the resource is contained in the resourceName property. ResourceGroup The resource is mapped to a resource group. The name of the resource group is contained in the resourceGroupName property."];
+        [@ocaml.doc "Specifies the type of resource mapping."];
       physicalResourceId: PhysicalResourceId.t
-        [@ocaml.doc "The identifier of this resource."];
+        [@ocaml.doc "Identifier of the physical resource."];
       resourceGroupName: EntityName.t option
         [@ocaml.doc
-          "The name of the resource group this resource is mapped to."];
+          "Name of the Resource Groups that this resource is mapped to when the mappingType is ResourceGroup."];
       resourceName: EntityName.t option
-        [@ocaml.doc "The name of the resource this resource is mapped to."]}
+        [@ocaml.doc
+          "Name of the resource that this resource is mapped to when the mappingType is Resource."];
+      terraformSourceName: String255.t option
+        [@ocaml.doc
+          "Name of the Terraform source that this resource is mapped to when the mappingType is Terraform."]}
     let context_ = "ResourceMapping"
     let make ?appRegistryAppName =
-      fun ?logicalStackName ->
-        fun ?resourceGroupName ->
-          fun ?resourceName ->
-            fun ~mappingType ->
-              fun ~physicalResourceId ->
-                fun () ->
-                  {
-                    appRegistryAppName;
-                    logicalStackName;
-                    resourceGroupName;
-                    resourceName;
-                    mappingType;
-                    physicalResourceId
-                  }
+      fun ?eksSourceName ->
+        fun ?logicalStackName ->
+          fun ?resourceGroupName ->
+            fun ?resourceName ->
+              fun ?terraformSourceName ->
+                fun ~mappingType ->
+                  fun ~physicalResourceId ->
+                    fun () ->
+                      {
+                        appRegistryAppName;
+                        eksSourceName;
+                        logicalStackName;
+                        resourceGroupName;
+                        resourceName;
+                        terraformSourceName;
+                        mappingType;
+                        physicalResourceId
+                      }
     let to_value x =
       structure_to_value
         [("appRegistryAppName",
            (Option.map x.appRegistryAppName ~f:EntityName.to_value));
+        ("eksSourceName", (Option.map x.eksSourceName ~f:String255.to_value));
         ("logicalStackName",
           (Option.map x.logicalStackName ~f:String255.to_value));
         ("mappingType", (Some (ResourceMappingType.to_value x.mappingType)));
@@ -2703,9 +5057,14 @@ module ResourceMapping =
           (Some (PhysicalResourceId.to_value x.physicalResourceId)));
         ("resourceGroupName",
           (Option.map x.resourceGroupName ~f:EntityName.to_value));
-        ("resourceName", (Option.map x.resourceName ~f:EntityName.to_value))]
+        ("resourceName", (Option.map x.resourceName ~f:EntityName.to_value));
+        ("terraformSourceName",
+          (Option.map x.terraformSourceName ~f:String255.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let terraformSourceName =
+        (Option.map ~f:String255.of_xml)
+          (Xml.child xml_arg0 "terraformSourceName") in
       let resourceName =
         (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "resourceName") in
       let resourceGroupName =
@@ -2720,93 +5079,179 @@ module ResourceMapping =
       let logicalStackName =
         (Option.map ~f:String255.of_xml)
           (Xml.child xml_arg0 "logicalStackName") in
+      let eksSourceName =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "eksSourceName") in
       let appRegistryAppName =
         (Option.map ~f:EntityName.of_xml)
           (Xml.child xml_arg0 "appRegistryAppName") in
-      make ?resourceName ?resourceGroupName ~physicalResourceId ~mappingType
-        ?logicalStackName ?appRegistryAppName ()
+      make ?terraformSourceName ?resourceName ?resourceGroupName
+        ~physicalResourceId ~mappingType ?logicalStackName ?eksSourceName
+        ?appRegistryAppName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "resourceName" EntityName.of_json in
+    let of_json json__ =
+      let terraformSourceName =
+        field_map json__ "terraformSourceName" String255.of_json in
+      let resourceName = field_map json__ "resourceName" EntityName.of_json in
       let resourceGroupName =
-        field_map json "resourceGroupName" EntityName.of_json in
+        field_map json__ "resourceGroupName" EntityName.of_json in
       let physicalResourceId =
-        field_map_exn json "physicalResourceId" PhysicalResourceId.of_json in
+        field_map_exn json__ "physicalResourceId" PhysicalResourceId.of_json in
       let mappingType =
-        field_map_exn json "mappingType" ResourceMappingType.of_json in
+        field_map_exn json__ "mappingType" ResourceMappingType.of_json in
       let logicalStackName =
-        field_map json "logicalStackName" String255.of_json in
+        field_map json__ "logicalStackName" String255.of_json in
+      let eksSourceName = field_map json__ "eksSourceName" String255.of_json in
       let appRegistryAppName =
-        field_map json "appRegistryAppName" EntityName.of_json in
-      make ?resourceName ?resourceGroupName ~physicalResourceId ~mappingType
-        ?logicalStackName ?appRegistryAppName ()
+        field_map json__ "appRegistryAppName" EntityName.of_json in
+      make ?terraformSourceName ?resourceName ?resourceGroupName
+        ~physicalResourceId ~mappingType ?logicalStackName ?eksSourceName
+        ?appRegistryAppName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Defines a resource mapping."]
+module AppInputSource =
+  struct
+    type nonrec t =
+      {
+      eksSourceClusterNamespace: EksSourceClusterNamespace.t option
+        [@ocaml.doc
+          "The namespace on your Amazon Elastic Kubernetes Service cluster."];
+      importType: ResourceMappingType.t option
+        [@ocaml.doc "The resource type of the input source."];
+      resourceCount: Integer.t option [@ocaml.doc "The number of resources."];
+      sourceArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the input source. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      sourceName: String255.t option
+        [@ocaml.doc "The name of the input source."];
+      terraformSource: TerraformSource.t option
+        [@ocaml.doc "The name of the Terraform s3 state \239\172\129le."]}
+    let make ?eksSourceClusterNamespace =
+      fun ?importType ->
+        fun ?resourceCount ->
+          fun ?sourceArn ->
+            fun ?sourceName ->
+              fun ?terraformSource ->
+                fun () ->
+                  {
+                    eksSourceClusterNamespace;
+                    importType;
+                    resourceCount;
+                    sourceArn;
+                    sourceName;
+                    terraformSource
+                  }
+    let to_value x =
+      structure_to_value
+        [("eksSourceClusterNamespace",
+           (Option.map x.eksSourceClusterNamespace
+              ~f:EksSourceClusterNamespace.to_value));
+        ("importType",
+          (Option.map x.importType ~f:ResourceMappingType.to_value));
+        ("resourceCount", (Option.map x.resourceCount ~f:Integer.to_value));
+        ("sourceArn", (Option.map x.sourceArn ~f:Arn.to_value));
+        ("sourceName", (Option.map x.sourceName ~f:String255.to_value));
+        ("terraformSource",
+          (Option.map x.terraformSource ~f:TerraformSource.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let terraformSource =
+        (Option.map ~f:TerraformSource.of_xml)
+          (Xml.child xml_arg0 "terraformSource") in
+      let sourceName =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "sourceName") in
+      let sourceArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "sourceArn") in
+      let resourceCount =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "resourceCount") in
+      let importType =
+        (Option.map ~f:ResourceMappingType.of_xml)
+          (Xml.child xml_arg0 "importType") in
+      let eksSourceClusterNamespace =
+        (Option.map ~f:EksSourceClusterNamespace.of_xml)
+          (Xml.child xml_arg0 "eksSourceClusterNamespace") in
+      make ?terraformSource ?sourceName ?sourceArn ?resourceCount ?importType
+        ?eksSourceClusterNamespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let terraformSource =
+        field_map json__ "terraformSource" TerraformSource.of_json in
+      let sourceName = field_map json__ "sourceName" String255.of_json in
+      let sourceArn = field_map json__ "sourceArn" Arn.of_json in
+      let resourceCount = field_map json__ "resourceCount" Integer.of_json in
+      let importType =
+        field_map json__ "importType" ResourceMappingType.of_json in
+      let eksSourceClusterNamespace =
+        field_map json__ "eksSourceClusterNamespace"
+          EksSourceClusterNamespace.of_json in
+      make ?terraformSource ?sourceName ?sourceArn ?resourceCount ?importType
+        ?eksSourceClusterNamespace ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The list of Resilience Hub application input sources."]
 module ComponentRecommendation =
   struct
     type nonrec t =
       {
-      appComponentName: EntityId.t
-        [@ocaml.doc "The name of the application component."];
-      configRecommendations: ConfigRecommendationList.t
-        [@ocaml.doc "The list of recommendations."];
-      recommendationStatus: RecommendationComplianceStatus.t
-        [@ocaml.doc "The recommendation status."]}
-    let context_ = "ComponentRecommendation"
-    let make ~appComponentName =
-      fun ~configRecommendations ->
-        fun ~recommendationStatus ->
+      appComponentName: EntityId.t option
+        [@ocaml.doc "Name of the Application Component."];
+      configRecommendations: ConfigRecommendationList.t option
+        [@ocaml.doc "List of recommendations."];
+      recommendationStatus: RecommendationComplianceStatus.t option
+        [@ocaml.doc "Status of the recommendation."]}
+    let make ?appComponentName =
+      fun ?configRecommendations ->
+        fun ?recommendationStatus ->
           fun () ->
             { appComponentName; configRecommendations; recommendationStatus }
     let to_value x =
       structure_to_value
-        [("appComponentName", (Some (EntityId.to_value x.appComponentName)));
+        [("appComponentName",
+           (Option.map x.appComponentName ~f:EntityId.to_value));
         ("configRecommendations",
-          (Some (ConfigRecommendationList.to_value x.configRecommendations)));
+          (Option.map x.configRecommendations
+             ~f:ConfigRecommendationList.to_value));
         ("recommendationStatus",
-          (Some
-             (RecommendationComplianceStatus.to_value x.recommendationStatus)))]
+          (Option.map x.recommendationStatus
+             ~f:RecommendationComplianceStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let recommendationStatus =
-        RecommendationComplianceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "recommendationStatus") in
+        (Option.map ~f:RecommendationComplianceStatus.of_xml)
+          (Xml.child xml_arg0 "recommendationStatus") in
       let configRecommendations =
-        ConfigRecommendationList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "configRecommendations") in
+        (Option.map ~f:ConfigRecommendationList.of_xml)
+          (Xml.child xml_arg0 "configRecommendations") in
       let appComponentName =
-        EntityId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "appComponentName") in
-      make ~recommendationStatus ~configRecommendations ~appComponentName ()
+        (Option.map ~f:EntityId.of_xml)
+          (Xml.child xml_arg0 "appComponentName") in
+      make ?recommendationStatus ?configRecommendations ?appComponentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationStatus =
-        field_map_exn json "recommendationStatus"
+        field_map json__ "recommendationStatus"
           RecommendationComplianceStatus.of_json in
       let configRecommendations =
-        field_map_exn json "configRecommendations"
+        field_map json__ "configRecommendations"
           ConfigRecommendationList.of_json in
       let appComponentName =
-        field_map_exn json "appComponentName" EntityId.of_json in
-      make ~recommendationStatus ~configRecommendations ~appComponentName ()
+        field_map json__ "appComponentName" EntityId.of_json in
+      make ?recommendationStatus ?configRecommendations ?appComponentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Defines recommendations for a Resilience Hub application component, returned as an object. This object contains component names, configuration recommendations, and recommendation statuses."]
+       "Defines recommendations for an Resilience Hub Application Component, returned as an object. This object contains component names, configuration recommendations, and recommendation statuses."]
 module AppComponentCompliance =
   struct
     type nonrec t =
       {
       appComponentName: EntityId.t option
-        [@ocaml.doc "The name of the application component."];
+        [@ocaml.doc "Name of the Application Component."];
       compliance: AssessmentCompliance.t option
         [@ocaml.doc
-          "The compliance of the application component against the resiliency policy."];
+          "The compliance of the Application Component against the resiliency policy."];
       cost: Cost.t option [@ocaml.doc "The cost for the application."];
       message: String500.t option [@ocaml.doc "The compliance message."];
       resiliencyScore: ResiliencyScore.t option
         [@ocaml.doc "The current resiliency score for the application."];
-      status: ComplianceStatus.t option
-        [@ocaml.doc "The status of the action."]}
+      status: ComplianceStatus.t option [@ocaml.doc "Status of the action."]}
     let make ?appComponentName =
       fun ?compliance ->
         fun ?cost ->
@@ -2852,99 +5297,112 @@ module AppComponentCompliance =
       make ?status ?resiliencyScore ?message ?cost ?compliance
         ?appComponentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" ComplianceStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" ComplianceStatus.of_json in
       let resiliencyScore =
-        field_map json "resiliencyScore" ResiliencyScore.of_json in
-      let message = field_map json "message" String500.of_json in
-      let cost = field_map json "cost" Cost.of_json in
+        field_map json__ "resiliencyScore" ResiliencyScore.of_json in
+      let message = field_map json__ "message" String500.of_json in
+      let cost = field_map json__ "cost" Cost.of_json in
       let compliance =
-        field_map json "compliance" AssessmentCompliance.of_json in
+        field_map json__ "compliance" AssessmentCompliance.of_json in
       let appComponentName =
-        field_map json "appComponentName" EntityId.of_json in
+        field_map json__ "appComponentName" EntityId.of_json in
       make ?status ?resiliencyScore ?message ?cost ?compliance
         ?appComponentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Defines the compliance of an application component against the resiliency policy."]
+       "Defines the compliance of an Application Component against the resiliency policy."]
 module AppAssessmentSummary =
   struct
     type nonrec t =
       {
       appArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       appVersion: EntityVersion.t option
-        [@ocaml.doc "The version of the application."];
-      assessmentArn: Arn.t
+        [@ocaml.doc "Version of an application."];
+      assessmentArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:dcps:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:resiliencehub:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       assessmentName: EntityName.t option
-        [@ocaml.doc "The name of the assessment."];
-      assessmentStatus: AssessmentStatus.t
+        [@ocaml.doc "Name of the assessment."];
+      assessmentStatus: AssessmentStatus.t option
         [@ocaml.doc
-          "The current status of the assessment for the resiliency policy."];
+          "Current status of the assessment for the resiliency policy."];
       complianceStatus: ComplianceStatus.t option
         [@ocaml.doc
-          "The current status of compliance for the resiliency policy."];
-      cost: Cost.t option [@ocaml.doc "The cost for the application."];
-      endTime: TimeStamp.t option [@ocaml.doc "The end time for the action."];
+          "Current status of compliance for the resiliency policy."];
+      cost: Cost.t option [@ocaml.doc "Cost for an application."];
+      driftStatus: DriftStatus.t option
+        [@ocaml.doc
+          "Indicates if compliance drifts (deviations) were detected while running an assessment for your application."];
+      endTime: TimeStamp.t option [@ocaml.doc "End time for the action."];
       invoker: AssessmentInvoker.t option
-        [@ocaml.doc "The entity that invoked the assessment."];
+        [@ocaml.doc "Entity that invoked the assessment."];
       message: String500.t option
-        [@ocaml.doc "The message from the assessment run."];
+        [@ocaml.doc "Message from the assessment run."];
       resiliencyScore: Double.t option
-        [@ocaml.doc "The current resiliency score for the application."];
+        [@ocaml.doc "Current resiliency score for the application."];
       startTime: TimeStamp.t option
-        [@ocaml.doc "The starting time for the action."]}
-    let context_ = "AppAssessmentSummary"
+        [@ocaml.doc "Starting time for the action."];
+      versionName: EntityVersion.t option
+        [@ocaml.doc "Name of an application version."]}
     let make ?appArn =
       fun ?appVersion ->
-        fun ?assessmentName ->
-          fun ?complianceStatus ->
-            fun ?cost ->
-              fun ?endTime ->
-                fun ?invoker ->
-                  fun ?message ->
-                    fun ?resiliencyScore ->
-                      fun ?startTime ->
-                        fun ~assessmentArn ->
-                          fun ~assessmentStatus ->
-                            fun () ->
-                              {
-                                appArn;
-                                appVersion;
-                                assessmentName;
-                                complianceStatus;
-                                cost;
-                                endTime;
-                                invoker;
-                                message;
-                                resiliencyScore;
-                                startTime;
-                                assessmentArn;
-                                assessmentStatus
-                              }
+        fun ?assessmentArn ->
+          fun ?assessmentName ->
+            fun ?assessmentStatus ->
+              fun ?complianceStatus ->
+                fun ?cost ->
+                  fun ?driftStatus ->
+                    fun ?endTime ->
+                      fun ?invoker ->
+                        fun ?message ->
+                          fun ?resiliencyScore ->
+                            fun ?startTime ->
+                              fun ?versionName ->
+                                fun () ->
+                                  {
+                                    appArn;
+                                    appVersion;
+                                    assessmentArn;
+                                    assessmentName;
+                                    assessmentStatus;
+                                    complianceStatus;
+                                    cost;
+                                    driftStatus;
+                                    endTime;
+                                    invoker;
+                                    message;
+                                    resiliencyScore;
+                                    startTime;
+                                    versionName
+                                  }
     let to_value x =
       structure_to_value
         [("appArn", (Option.map x.appArn ~f:Arn.to_value));
         ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value));
-        ("assessmentArn", (Some (Arn.to_value x.assessmentArn)));
+        ("assessmentArn", (Option.map x.assessmentArn ~f:Arn.to_value));
         ("assessmentName",
           (Option.map x.assessmentName ~f:EntityName.to_value));
         ("assessmentStatus",
-          (Some (AssessmentStatus.to_value x.assessmentStatus)));
+          (Option.map x.assessmentStatus ~f:AssessmentStatus.to_value));
         ("complianceStatus",
           (Option.map x.complianceStatus ~f:ComplianceStatus.to_value));
         ("cost", (Option.map x.cost ~f:Cost.to_value));
+        ("driftStatus", (Option.map x.driftStatus ~f:DriftStatus.to_value));
         ("endTime", (Option.map x.endTime ~f:TimeStamp.to_value));
         ("invoker", (Option.map x.invoker ~f:AssessmentInvoker.to_value));
         ("message", (Option.map x.message ~f:String500.to_value));
         ("resiliencyScore",
           (Option.map x.resiliencyScore ~f:Double.to_value));
-        ("startTime", (Option.map x.startTime ~f:TimeStamp.to_value))]
+        ("startTime", (Option.map x.startTime ~f:TimeStamp.to_value));
+        ("versionName", (Option.map x.versionName ~f:EntityVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let versionName =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "versionName") in
       let startTime =
         (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "startTime") in
       let resiliencyScore =
@@ -2956,140 +5414,643 @@ module AppAssessmentSummary =
           (Xml.child xml_arg0 "invoker") in
       let endTime =
         (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "endTime") in
+      let driftStatus =
+        (Option.map ~f:DriftStatus.of_xml) (Xml.child xml_arg0 "driftStatus") in
       let cost = (Option.map ~f:Cost.of_xml) (Xml.child xml_arg0 "cost") in
       let complianceStatus =
         (Option.map ~f:ComplianceStatus.of_xml)
           (Xml.child xml_arg0 "complianceStatus") in
       let assessmentStatus =
-        AssessmentStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentStatus") in
+        (Option.map ~f:AssessmentStatus.of_xml)
+          (Xml.child xml_arg0 "assessmentStatus") in
       let assessmentName =
         (Option.map ~f:EntityName.of_xml)
           (Xml.child xml_arg0 "assessmentName") in
       let assessmentArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "assessmentArn") in
       let appVersion =
         (Option.map ~f:EntityVersion.of_xml)
           (Xml.child xml_arg0 "appVersion") in
       let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
-      make ?startTime ?resiliencyScore ?message ?invoker ?endTime ?cost
-        ?complianceStatus ~assessmentStatus ?assessmentName ~assessmentArn
-        ?appVersion ?appArn ()
+      make ?versionName ?startTime ?resiliencyScore ?message ?invoker
+        ?endTime ?driftStatus ?cost ?complianceStatus ?assessmentStatus
+        ?assessmentName ?assessmentArn ?appVersion ?appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startTime = field_map json "startTime" TimeStamp.of_json in
-      let resiliencyScore = field_map json "resiliencyScore" Double.of_json in
-      let message = field_map json "message" String500.of_json in
-      let invoker = field_map json "invoker" AssessmentInvoker.of_json in
-      let endTime = field_map json "endTime" TimeStamp.of_json in
-      let cost = field_map json "cost" Cost.of_json in
+    let of_json json__ =
+      let versionName = field_map json__ "versionName" EntityVersion.of_json in
+      let startTime = field_map json__ "startTime" TimeStamp.of_json in
+      let resiliencyScore = field_map json__ "resiliencyScore" Double.of_json in
+      let message = field_map json__ "message" String500.of_json in
+      let invoker = field_map json__ "invoker" AssessmentInvoker.of_json in
+      let endTime = field_map json__ "endTime" TimeStamp.of_json in
+      let driftStatus = field_map json__ "driftStatus" DriftStatus.of_json in
+      let cost = field_map json__ "cost" Cost.of_json in
       let complianceStatus =
-        field_map json "complianceStatus" ComplianceStatus.of_json in
+        field_map json__ "complianceStatus" ComplianceStatus.of_json in
       let assessmentStatus =
-        field_map_exn json "assessmentStatus" AssessmentStatus.of_json in
-      let assessmentName = field_map json "assessmentName" EntityName.of_json in
-      let assessmentArn = field_map_exn json "assessmentArn" Arn.of_json in
-      let appVersion = field_map json "appVersion" EntityVersion.of_json in
-      let appArn = field_map json "appArn" Arn.of_json in
-      make ?startTime ?resiliencyScore ?message ?invoker ?endTime ?cost
-        ?complianceStatus ~assessmentStatus ?assessmentName ~assessmentArn
-        ?appVersion ?appArn ()
+        field_map json__ "assessmentStatus" AssessmentStatus.of_json in
+      let assessmentName =
+        field_map json__ "assessmentName" EntityName.of_json in
+      let assessmentArn = field_map json__ "assessmentArn" Arn.of_json in
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?versionName ?startTime ?resiliencyScore ?message ?invoker
+        ?endTime ?driftStatus ?cost ?complianceStatus ?assessmentStatus
+        ?assessmentName ?assessmentArn ?appVersion ?appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Defines an application assessment summary."]
+module ResourceDrift =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the application whose resources have drifted. The format for this ARN is: arn:partition:resiliencehub:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t option
+        [@ocaml.doc
+          "Version of the application whose resources have drifted."];
+      diffType: DifferenceType.t option
+        [@ocaml.doc "Indicates if the resource was added or removed."];
+      referenceId: EntityId.t option
+        [@ocaml.doc "Reference identifier of the resource drift."];
+      resourceIdentifier: ResourceIdentifier.t option
+        [@ocaml.doc "Identifier of the drifted resource."]}
+    let make ?appArn =
+      fun ?appVersion ->
+        fun ?diffType ->
+          fun ?referenceId ->
+            fun ?resourceIdentifier ->
+              fun () ->
+                {
+                  appArn;
+                  appVersion;
+                  diffType;
+                  referenceId;
+                  resourceIdentifier
+                }
+    let to_value x =
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value));
+        ("diffType", (Option.map x.diffType ~f:DifferenceType.to_value));
+        ("referenceId", (Option.map x.referenceId ~f:EntityId.to_value));
+        ("resourceIdentifier",
+          (Option.map x.resourceIdentifier ~f:ResourceIdentifier.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceIdentifier =
+        (Option.map ~f:ResourceIdentifier.of_xml)
+          (Xml.child xml_arg0 "resourceIdentifier") in
+      let referenceId =
+        (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "referenceId") in
+      let diffType =
+        (Option.map ~f:DifferenceType.of_xml) (Xml.child xml_arg0 "diffType") in
+      let appVersion =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?resourceIdentifier ?referenceId ?diffType ?appVersion ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceIdentifier =
+        field_map json__ "resourceIdentifier" ResourceIdentifier.of_json in
+      let referenceId = field_map json__ "referenceId" EntityId.of_json in
+      let diffType = field_map json__ "diffType" DifferenceType.of_json in
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?resourceIdentifier ?referenceId ?diffType ?appVersion ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the resources that have drifted in the current application version."]
+module ComplianceDrift =
+  struct
+    type nonrec t =
+      {
+      actualReferenceId: String255.t option
+        [@ocaml.doc
+          "Assessment identifier that is associated with this drift item."];
+      actualValue: AssessmentCompliance.t option
+        [@ocaml.doc "Actual compliance value of the entity."];
+      appId: String255.t option
+        [@ocaml.doc "Identifier of your application."];
+      appVersion: String255.t option
+        [@ocaml.doc
+          "Published version of your application on which drift was detected."];
+      diffType: DifferenceType.t option
+        [@ocaml.doc
+          "Difference type between actual and expected recovery point objective (RPO) and recovery time objective (RTO) values. Currently, Resilience Hub supports only NotEqual difference type."];
+      driftType: DriftType.t option
+        [@ocaml.doc
+          "The type of drift detected. Currently, Resilience Hub supports only ApplicationCompliance drift type."];
+      entityId: String255.t option
+        [@ocaml.doc
+          "Identifier of an entity in which drift was detected. For compliance drift, the entity ID can be either application ID or the AppComponent ID."];
+      entityType: String255.t option
+        [@ocaml.doc
+          "The type of entity in which drift was detected. For compliance drifts, Resilience Hub supports AWS::ResilienceHub::AppComponent and AWS::ResilienceHub::Application."];
+      expectedReferenceId: String255.t option
+        [@ocaml.doc
+          "Assessment identifier of a previous assessment of the same application version. Resilience Hub uses the previous assessment (associated with the reference identifier) to compare the compliance with the current assessment to identify drifts."];
+      expectedValue: AssessmentCompliance.t option
+        [@ocaml.doc "The expected compliance value of an entity."]}
+    let make ?actualReferenceId =
+      fun ?actualValue ->
+        fun ?appId ->
+          fun ?appVersion ->
+            fun ?diffType ->
+              fun ?driftType ->
+                fun ?entityId ->
+                  fun ?entityType ->
+                    fun ?expectedReferenceId ->
+                      fun ?expectedValue ->
+                        fun () ->
+                          {
+                            actualReferenceId;
+                            actualValue;
+                            appId;
+                            appVersion;
+                            diffType;
+                            driftType;
+                            entityId;
+                            entityType;
+                            expectedReferenceId;
+                            expectedValue
+                          }
+    let to_value x =
+      structure_to_value
+        [("actualReferenceId",
+           (Option.map x.actualReferenceId ~f:String255.to_value));
+        ("actualValue",
+          (Option.map x.actualValue ~f:AssessmentCompliance.to_value));
+        ("appId", (Option.map x.appId ~f:String255.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:String255.to_value));
+        ("diffType", (Option.map x.diffType ~f:DifferenceType.to_value));
+        ("driftType", (Option.map x.driftType ~f:DriftType.to_value));
+        ("entityId", (Option.map x.entityId ~f:String255.to_value));
+        ("entityType", (Option.map x.entityType ~f:String255.to_value));
+        ("expectedReferenceId",
+          (Option.map x.expectedReferenceId ~f:String255.to_value));
+        ("expectedValue",
+          (Option.map x.expectedValue ~f:AssessmentCompliance.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expectedValue =
+        (Option.map ~f:AssessmentCompliance.of_xml)
+          (Xml.child xml_arg0 "expectedValue") in
+      let expectedReferenceId =
+        (Option.map ~f:String255.of_xml)
+          (Xml.child xml_arg0 "expectedReferenceId") in
+      let entityType =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "entityType") in
+      let entityId =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "entityId") in
+      let driftType =
+        (Option.map ~f:DriftType.of_xml) (Xml.child xml_arg0 "driftType") in
+      let diffType =
+        (Option.map ~f:DifferenceType.of_xml) (Xml.child xml_arg0 "diffType") in
+      let appVersion =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "appVersion") in
+      let appId =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "appId") in
+      let actualValue =
+        (Option.map ~f:AssessmentCompliance.of_xml)
+          (Xml.child xml_arg0 "actualValue") in
+      let actualReferenceId =
+        (Option.map ~f:String255.of_xml)
+          (Xml.child xml_arg0 "actualReferenceId") in
+      make ?expectedValue ?expectedReferenceId ?entityType ?entityId
+        ?driftType ?diffType ?appVersion ?appId ?actualValue
+        ?actualReferenceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expectedValue =
+        field_map json__ "expectedValue" AssessmentCompliance.of_json in
+      let expectedReferenceId =
+        field_map json__ "expectedReferenceId" String255.of_json in
+      let entityType = field_map json__ "entityType" String255.of_json in
+      let entityId = field_map json__ "entityId" String255.of_json in
+      let driftType = field_map json__ "driftType" DriftType.of_json in
+      let diffType = field_map json__ "diffType" DifferenceType.of_json in
+      let appVersion = field_map json__ "appVersion" String255.of_json in
+      let appId = field_map json__ "appId" String255.of_json in
+      let actualValue =
+        field_map json__ "actualValue" AssessmentCompliance.of_json in
+      let actualReferenceId =
+        field_map json__ "actualReferenceId" String255.of_json in
+      make ?expectedValue ?expectedReferenceId ?entityType ?entityId
+        ?driftType ?diffType ?appVersion ?appId ?actualValue
+        ?actualReferenceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the compliance drifts (recovery time objective (RTO) and recovery point objective (RPO)) that were detected for an assessed entity."]
 module AlarmRecommendation =
   struct
     type nonrec t =
       {
       appComponentName: EntityId.t option
         [@ocaml.doc
-          "The application component for the CloudWatch alarm recommendation."];
+          "Application Component name for the CloudWatch alarm recommendation. This name is saved as the first item in the appComponentNames list."];
+      appComponentNames: AppComponentNameList.t option
+        [@ocaml.doc
+          "List of Application Component names for the CloudWatch alarm recommendation."];
       description: EntityDescription.t option
-        [@ocaml.doc "The description of the recommendation."];
+        [@ocaml.doc "Description of the alarm recommendation."];
       items: RecommendationItemList.t option
-        [@ocaml.doc "The list of CloudWatch alarm recommendations."];
-      name: String500.t [@ocaml.doc "The name of the alarm recommendation."];
+        [@ocaml.doc "List of CloudWatch alarm recommendations."];
+      name: String500.t option
+        [@ocaml.doc "Name of the alarm recommendation."];
       prerequisite: String500.t option
         [@ocaml.doc "The prerequisite for the alarm recommendation."];
-      recommendationId: Uuid.t
-        [@ocaml.doc "The identifier of the alarm recommendation."];
-      referenceId: SpecReferenceId.t
-        [@ocaml.doc "The reference identifier of the alarm recommendation."];
-      type_: AlarmType.t [@ocaml.doc "The type of alarm recommendation."]}
-    let context_ = "AlarmRecommendation"
+      recommendationId: Uuid.t option
+        [@ocaml.doc "Identifier of the alarm recommendation."];
+      recommendationStatus: RecommendationStatus.t option
+        [@ocaml.doc "Status of the recommended Amazon CloudWatch alarm."];
+      referenceId: SpecReferenceId.t option
+        [@ocaml.doc "Reference identifier of the alarm recommendation."];
+      type_: AlarmType.t option [@ocaml.doc "Type of alarm recommendation."]}
     let make ?appComponentName =
-      fun ?description ->
-        fun ?items ->
-          fun ?prerequisite ->
-            fun ~name ->
-              fun ~recommendationId ->
-                fun ~referenceId ->
-                  fun ~type_ ->
-                    fun () ->
-                      {
-                        appComponentName;
-                        description;
-                        items;
-                        prerequisite;
-                        name;
-                        recommendationId;
-                        referenceId;
-                        type_
-                      }
+      fun ?appComponentNames ->
+        fun ?description ->
+          fun ?items ->
+            fun ?name ->
+              fun ?prerequisite ->
+                fun ?recommendationId ->
+                  fun ?recommendationStatus ->
+                    fun ?referenceId ->
+                      fun ?type_ ->
+                        fun () ->
+                          {
+                            appComponentName;
+                            appComponentNames;
+                            description;
+                            items;
+                            name;
+                            prerequisite;
+                            recommendationId;
+                            recommendationStatus;
+                            referenceId;
+                            type_
+                          }
     let to_value x =
       structure_to_value
         [("appComponentName",
            (Option.map x.appComponentName ~f:EntityId.to_value));
+        ("appComponentNames",
+          (Option.map x.appComponentNames ~f:AppComponentNameList.to_value));
         ("description",
           (Option.map x.description ~f:EntityDescription.to_value));
         ("items", (Option.map x.items ~f:RecommendationItemList.to_value));
-        ("name", (Some (String500.to_value x.name)));
+        ("name", (Option.map x.name ~f:String500.to_value));
         ("prerequisite", (Option.map x.prerequisite ~f:String500.to_value));
-        ("recommendationId", (Some (Uuid.to_value x.recommendationId)));
-        ("referenceId", (Some (SpecReferenceId.to_value x.referenceId)));
-        ("type", (Some (AlarmType.to_value x.type_)))]
+        ("recommendationId",
+          (Option.map x.recommendationId ~f:Uuid.to_value));
+        ("recommendationStatus",
+          (Option.map x.recommendationStatus ~f:RecommendationStatus.to_value));
+        ("referenceId",
+          (Option.map x.referenceId ~f:SpecReferenceId.to_value));
+        ("type", (Option.map x.type_ ~f:AlarmType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let type_ =
-        AlarmType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
+        (Option.map ~f:AlarmType.of_xml) (Xml.child xml_arg0 "type") in
       let referenceId =
-        SpecReferenceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "referenceId") in
+        (Option.map ~f:SpecReferenceId.of_xml)
+          (Xml.child xml_arg0 "referenceId") in
+      let recommendationStatus =
+        (Option.map ~f:RecommendationStatus.of_xml)
+          (Xml.child xml_arg0 "recommendationStatus") in
       let recommendationId =
-        Uuid.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "recommendationId") in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "recommendationId") in
       let prerequisite =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "prerequisite") in
-      let name =
-        String500.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let name = (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "name") in
       let items =
         (Option.map ~f:RecommendationItemList.of_xml)
           (Xml.child xml_arg0 "items") in
       let description =
         (Option.map ~f:EntityDescription.of_xml)
           (Xml.child xml_arg0 "description") in
+      let appComponentNames =
+        (Option.map ~f:AppComponentNameList.of_xml)
+          (Xml.child xml_arg0 "appComponentNames") in
       let appComponentName =
         (Option.map ~f:EntityId.of_xml)
           (Xml.child xml_arg0 "appComponentName") in
-      make ~type_ ~referenceId ~recommendationId ?prerequisite ~name ?items
-        ?description ?appComponentName ()
+      make ?type_ ?referenceId ?recommendationStatus ?recommendationId
+        ?prerequisite ?name ?items ?description ?appComponentNames
+        ?appComponentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" AlarmType.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "type" AlarmType.of_json in
       let referenceId =
-        field_map_exn json "referenceId" SpecReferenceId.of_json in
-      let recommendationId =
-        field_map_exn json "recommendationId" Uuid.of_json in
-      let prerequisite = field_map json "prerequisite" String500.of_json in
-      let name = field_map_exn json "name" String500.of_json in
-      let items = field_map json "items" RecommendationItemList.of_json in
+        field_map json__ "referenceId" SpecReferenceId.of_json in
+      let recommendationStatus =
+        field_map json__ "recommendationStatus" RecommendationStatus.of_json in
+      let recommendationId = field_map json__ "recommendationId" Uuid.of_json in
+      let prerequisite = field_map json__ "prerequisite" String500.of_json in
+      let name = field_map json__ "name" String500.of_json in
+      let items = field_map json__ "items" RecommendationItemList.of_json in
       let description =
-        field_map json "description" EntityDescription.of_json in
+        field_map json__ "description" EntityDescription.of_json in
+      let appComponentNames =
+        field_map json__ "appComponentNames" AppComponentNameList.of_json in
       let appComponentName =
-        field_map json "appComponentName" EntityId.of_json in
-      make ~type_ ~referenceId ~recommendationId ?prerequisite ~name ?items
-        ?description ?appComponentName ()
+        field_map json__ "appComponentName" EntityId.of_json in
+      make ?type_ ?referenceId ?recommendationStatus ?recommendationId
+        ?prerequisite ?name ?items ?description ?appComponentNames
+        ?appComponentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Defines a recommendation for a CloudWatch alarm."]
+module EksSource =
+  struct
+    type nonrec t =
+      {
+      eksClusterArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Amazon Elastic Kubernetes Service cluster. The format for this ARN is: arn:aws:eks:region:account-id:cluster/cluster-name. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      namespaces: EksNamespaceList.t
+        [@ocaml.doc
+          "The list of namespaces located on your Amazon Elastic Kubernetes Service cluster."]}
+    let context_ = "EksSource"
+    let make ~eksClusterArn =
+      fun ~namespaces -> fun () -> { eksClusterArn; namespaces }
+    let to_value x =
+      structure_to_value
+        [("eksClusterArn", (Some (Arn.to_value x.eksClusterArn)));
+        ("namespaces", (Some (EksNamespaceList.to_value x.namespaces)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let namespaces =
+        EksNamespaceList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "namespaces") in
+      let eksClusterArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "eksClusterArn") in
+      make ~namespaces ~eksClusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let namespaces =
+        field_map_exn json__ "namespaces" EksNamespaceList.of_json in
+      let eksClusterArn = field_map_exn json__ "eksClusterArn" Arn.of_json in
+      make ~namespaces ~eksClusterArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The input source of the Amazon Elastic Kubernetes Service cluster."]
+module ErrorDetail =
+  struct
+    type nonrec t =
+      {
+      errorMessage: ErrorMessage.t option
+        [@ocaml.doc "Provides additional information about the error."]}
+    let make ?errorMessage = fun () -> { errorMessage }
+    let to_value x =
+      structure_to_value
+        [("errorMessage",
+           (Option.map x.errorMessage ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "errorMessage") in
+      make ?errorMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" ErrorMessage.of_json in
+      make ?errorMessage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the error that was encountered while importing a resource."]
+module BatchUpdateRecommendationStatusFailedEntry =
+  struct
+    type nonrec t =
+      {
+      entryId: String255.t option
+        [@ocaml.doc
+          "An identifier of an entry in this batch that is used to communicate the result. The entryIds of a batch request need to be unique within a request."];
+      errorMessage: ErrorMessage.t option
+        [@ocaml.doc
+          "Indicates the error that occurred while excluding an operational recommendation."]}
+    let make ?entryId =
+      fun ?errorMessage -> fun () -> { entryId; errorMessage }
+    let to_value x =
+      structure_to_value
+        [("entryId", (Option.map x.entryId ~f:String255.to_value));
+        ("errorMessage",
+          (Option.map x.errorMessage ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "errorMessage") in
+      let entryId =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "entryId") in
+      make ?errorMessage ?entryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" ErrorMessage.of_json in
+      let entryId = field_map json__ "entryId" String255.of_json in
+      make ?errorMessage ?entryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List of operational recommendations that did not get included or excluded."]
+module BatchUpdateRecommendationStatusSuccessfulEntry =
+  struct
+    type nonrec t =
+      {
+      appComponentId: EntityName255.t option
+        [@ocaml.doc "Indicates the identifier of an AppComponent."];
+      entryId: String255.t option
+        [@ocaml.doc
+          "An identifier for an entry in this batch that is used to communicate the result. The entryIds of a batch request need to be unique within a request."];
+      excludeReason: ExcludeRecommendationReason.t option
+        [@ocaml.doc
+          "Indicates the reason for excluding an operational recommendation."];
+      excluded: BooleanOptional.t option
+        [@ocaml.doc
+          "Indicates if the operational recommendation was successfully excluded."];
+      item: UpdateRecommendationStatusItem.t option
+        [@ocaml.doc "The operational recommendation item."];
+      referenceId: SpecReferenceId.t option
+        [@ocaml.doc
+          "Reference identifier of the operational recommendation."]}
+    let make ?appComponentId =
+      fun ?entryId ->
+        fun ?excludeReason ->
+          fun ?excluded ->
+            fun ?item ->
+              fun ?referenceId ->
+                fun () ->
+                  {
+                    appComponentId;
+                    entryId;
+                    excludeReason;
+                    excluded;
+                    item;
+                    referenceId
+                  }
+    let to_value x =
+      structure_to_value
+        [("appComponentId",
+           (Option.map x.appComponentId ~f:EntityName255.to_value));
+        ("entryId", (Option.map x.entryId ~f:String255.to_value));
+        ("excludeReason",
+          (Option.map x.excludeReason ~f:ExcludeRecommendationReason.to_value));
+        ("excluded", (Option.map x.excluded ~f:BooleanOptional.to_value));
+        ("item",
+          (Option.map x.item ~f:UpdateRecommendationStatusItem.to_value));
+        ("referenceId",
+          (Option.map x.referenceId ~f:SpecReferenceId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let referenceId =
+        (Option.map ~f:SpecReferenceId.of_xml)
+          (Xml.child xml_arg0 "referenceId") in
+      let item =
+        (Option.map ~f:UpdateRecommendationStatusItem.of_xml)
+          (Xml.child xml_arg0 "item") in
+      let excluded =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "excluded") in
+      let excludeReason =
+        (Option.map ~f:ExcludeRecommendationReason.of_xml)
+          (Xml.child xml_arg0 "excludeReason") in
+      let entryId =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "entryId") in
+      let appComponentId =
+        (Option.map ~f:EntityName255.of_xml)
+          (Xml.child xml_arg0 "appComponentId") in
+      make ?referenceId ?item ?excluded ?excludeReason ?entryId
+        ?appComponentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let referenceId =
+        field_map json__ "referenceId" SpecReferenceId.of_json in
+      let item =
+        field_map json__ "item" UpdateRecommendationStatusItem.of_json in
+      let excluded = field_map json__ "excluded" BooleanOptional.of_json in
+      let excludeReason =
+        field_map json__ "excludeReason" ExcludeRecommendationReason.of_json in
+      let entryId = field_map json__ "entryId" String255.of_json in
+      let appComponentId =
+        field_map json__ "appComponentId" EntityName255.of_json in
+      make ?referenceId ?item ?excluded ?excludeReason ?entryId
+        ?appComponentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List of operational recommendations that were successfully included or excluded."]
+module UpdateRecommendationStatusRequestEntry =
+  struct
+    type nonrec t =
+      {
+      appComponentId: EntityName255.t option
+        [@ocaml.doc "Indicates the identifier of the AppComponent."];
+      entryId: String255.t
+        [@ocaml.doc
+          "An identifier for an entry in this batch that is used to communicate the result. The entryIds of a batch request need to be unique within a request."];
+      excludeReason: ExcludeRecommendationReason.t option
+        [@ocaml.doc
+          "Indicates the reason for excluding an operational recommendation."];
+      excluded: BooleanOptional.t
+        [@ocaml.doc
+          "Indicates if the operational recommendation needs to be excluded. If set to True, the operational recommendation will be excluded."];
+      item: UpdateRecommendationStatusItem.t option
+        [@ocaml.doc "The operational recommendation item."];
+      referenceId: SpecReferenceId.t
+        [@ocaml.doc
+          "Reference identifier of the operational recommendation item."]}
+    let context_ = "UpdateRecommendationStatusRequestEntry"
+    let make ?appComponentId =
+      fun ?excludeReason ->
+        fun ?item ->
+          fun ~entryId ->
+            fun ~excluded ->
+              fun ~referenceId ->
+                fun () ->
+                  {
+                    appComponentId;
+                    excludeReason;
+                    item;
+                    entryId;
+                    excluded;
+                    referenceId
+                  }
+    let to_value x =
+      structure_to_value
+        [("appComponentId",
+           (Option.map x.appComponentId ~f:EntityName255.to_value));
+        ("entryId", (Some (String255.to_value x.entryId)));
+        ("excludeReason",
+          (Option.map x.excludeReason ~f:ExcludeRecommendationReason.to_value));
+        ("excluded", (Some (BooleanOptional.to_value x.excluded)));
+        ("item",
+          (Option.map x.item ~f:UpdateRecommendationStatusItem.to_value));
+        ("referenceId", (Some (SpecReferenceId.to_value x.referenceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let referenceId =
+        SpecReferenceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "referenceId") in
+      let item =
+        (Option.map ~f:UpdateRecommendationStatusItem.of_xml)
+          (Xml.child xml_arg0 "item") in
+      let excluded =
+        BooleanOptional.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "excluded") in
+      let excludeReason =
+        (Option.map ~f:ExcludeRecommendationReason.of_xml)
+          (Xml.child xml_arg0 "excludeReason") in
+      let entryId =
+        String255.of_xml (Xml.child_exn ~context:context_ xml_arg0 "entryId") in
+      let appComponentId =
+        (Option.map ~f:EntityName255.of_xml)
+          (Xml.child xml_arg0 "appComponentId") in
+      make ~referenceId ?item ~excluded ?excludeReason ~entryId
+        ?appComponentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let referenceId =
+        field_map_exn json__ "referenceId" SpecReferenceId.of_json in
+      let item =
+        field_map json__ "item" UpdateRecommendationStatusItem.of_json in
+      let excluded = field_map_exn json__ "excluded" BooleanOptional.of_json in
+      let excludeReason =
+        field_map json__ "excludeReason" ExcludeRecommendationReason.of_json in
+      let entryId = field_map_exn json__ "entryId" String255.of_json in
+      let appComponentId =
+        field_map json__ "appComponentId" EntityName255.of_json in
+      make ~referenceId ?item ~excluded ?excludeReason ~entryId
+        ?appComponentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the operational recommendation item that is to be included or excluded."]
+module AcceptGroupingRecommendationEntry =
+  struct
+    type nonrec t =
+      {
+      groupingRecommendationId: String255.t
+        [@ocaml.doc
+          "Indicates the identifier of the grouping recommendation."]}
+    let context_ = "AcceptGroupingRecommendationEntry"
+    let make ~groupingRecommendationId =
+      fun () -> { groupingRecommendationId }
+    let to_value x =
+      structure_to_value
+        [("groupingRecommendationId",
+           (Some (String255.to_value x.groupingRecommendationId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let groupingRecommendationId =
+        String255.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "groupingRecommendationId") in
+      make ~groupingRecommendationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let groupingRecommendationId =
+        field_map_exn json__ "groupingRecommendationId" String255.of_json in
+      make ~groupingRecommendationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the grouping recommendation you have accepted to include in your application."]
 module AccessDeniedException =
   struct
     type nonrec t = {
@@ -3104,8 +6065,8 @@ module AccessDeniedException =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String500.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String500.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3141,14 +6102,14 @@ module ConflictException =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "resourceType" ResourceType.of_json in
-      let resourceId = field_map json "resourceId" ResourceId.of_json in
-      let message = field_map json "message" String500.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let resourceId = field_map json__ "resourceId" ResourceId.of_json in
+      let message = field_map json__ "message" String500.of_json in
       make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Occurs when a conflict with a previous successful write is detected. This generally occurs when the previous write did not have time to propagate to the host serving the current request. A retry (with appropriate backoff logic) is the recommended response to this exception."]
+       "This exception occurs when a conflict with a previous successful write is detected. This generally occurs when the previous write did not have time to propagate to the host serving the current request. A retry (with appropriate backoff logic) is the recommended response to this exception."]
 module InternalServerException =
   struct
     type nonrec t = {
@@ -3163,12 +6124,12 @@ module InternalServerException =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String500.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String500.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This exception occurs when there is an internal failure in the AWS Resilience Hub service."]
+       "This exception occurs when there is an internal failure in the Resilience Hub service."]
 module ResourceNotFoundException =
   struct
     type nonrec t =
@@ -3200,13 +6161,14 @@ module ResourceNotFoundException =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "resourceType" ResourceType.of_json in
-      let resourceId = field_map json "resourceId" ResourceId.of_json in
-      let message = field_map json "message" String500.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let resourceId = field_map json__ "resourceId" ResourceId.of_json in
+      let message = field_map json__ "message" String500.of_json in
       make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified resource could not be found."]
+  end[@@ocaml.doc
+       "This exception occurs when the specified resource could not be found."]
 module ThrottlingException =
   struct
     type nonrec t =
@@ -3231,14 +6193,14 @@ module ThrottlingException =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
       make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "retryAfterSeconds" RetryAfterSeconds.of_json in
-      let message = field_map json "message" String500.of_json in
+        field_map json__ "retryAfterSeconds" RetryAfterSeconds.of_json in
+      let message = field_map json__ "message" String500.of_json in
       make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The limit on the number of requests per second was exceeded."]
+       "This exception occurs when you have exceeded the limit on the number of requests per second."]
 module ValidationException =
   struct
     type nonrec t = {
@@ -3253,84 +6215,173 @@ module ValidationException =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String500.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String500.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Indicates that a request was not valid."]
+  end[@@ocaml.doc "This exception occurs when a request is not valid."]
+module ServiceQuotaExceededException =
+  struct
+    type nonrec t = {
+      message: String500.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String500.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String500.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This exception occurs when you have exceeded your service quota. To perform the requested action, remove some of the relevant resources, or use Service Quotas to request a service quota increase."]
+module String2048 =
+  struct
+    type nonrec t = string
+    let context_ = "String2048"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String2048" j
+    let to_json = simple_to_json to_value
+  end
 module App =
   struct
     type nonrec t =
       {
-      appArn: Arn.t
+      appArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      assessmentSchedule: AppAssessmentScheduleType.t option
+        [@ocaml.doc
+          "Assessment execution schedule with 'Daily' or 'Disabled' values."];
+      awsApplicationArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of Resource Groups group that is integrated with an AppRegistry application. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       complianceStatus: AppComplianceStatusType.t option
         [@ocaml.doc
-          "The current status of compliance for the resiliency policy."];
-      creationTime: TimeStamp.t
-        [@ocaml.doc "The timestamp for when the app was created."];
+          "Current status of compliance for the resiliency policy."];
+      creationTime: TimeStamp.t option
+        [@ocaml.doc "Date and time when the application was created."];
       description: EntityDescription.t option
-        [@ocaml.doc "The optional description for an app."];
-      lastAppComplianceEvaluationTime: TimeStamp.t option
+        [@ocaml.doc "Optional description for an application."];
+      driftStatus: AppDriftStatusType.t option
         [@ocaml.doc
-          "The timestamp for the most recent compliance evaluation."];
+          "Indicates if compliance drifts (deviations) were detected while running an assessment for your application."];
+      eventSubscriptions: EventSubscriptionList.t option
+        [@ocaml.doc
+          "The list of events you would like to subscribe and get notification for. Currently, Resilience Hub supports notifications only for Drift detected and Scheduled assessment failure events."];
+      lastAppComplianceEvaluationTime: TimeStamp.t option
+        [@ocaml.doc "Date and time the most recent compliance evaluation."];
+      lastDriftEvaluationTime: TimeStamp.t option
+        [@ocaml.doc "Indicates the last time that a drift was evaluated."];
       lastResiliencyScoreEvaluationTime: TimeStamp.t option
         [@ocaml.doc
-          "The timestamp for the most recent resiliency score evaluation."];
-      name: EntityName.t [@ocaml.doc "The name for the application."];
+          "Date and time the most recent resiliency score evaluation."];
+      name: EntityName.t option [@ocaml.doc "Name for the application."];
+      permissionModel: PermissionModel.t option
+        [@ocaml.doc
+          "Defines the roles and credentials that Resilience Hub would use while creating the application, importing its resources, and running an assessment."];
       policyArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resiliency policy. The format for this ARN is: arn:partition:dcps:region:account:resiliency-policy/policy-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the resiliency policy. The format for this ARN is: arn:partition:resiliencehub:region:account:resiliency-policy/policy-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       resiliencyScore: Double.t option
-        [@ocaml.doc "The current resiliency score for the application."];
-      status: AppStatusType.t option [@ocaml.doc "The status of the action."];
+        [@ocaml.doc "Current resiliency score for the application."];
+      rpoInSecs: IntegerOptional.t option
+        [@ocaml.doc "Recovery Point Objective (RPO) in seconds."];
+      rtoInSecs: IntegerOptional.t option
+        [@ocaml.doc "Recovery Time Objective (RTO) in seconds."];
+      status: AppStatusType.t option
+        [@ocaml.doc "Status of the application."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."]}
-    let context_ = "App"
-    let make ?complianceStatus =
-      fun ?description ->
-        fun ?lastAppComplianceEvaluationTime ->
-          fun ?lastResiliencyScoreEvaluationTime ->
-            fun ?policyArn ->
-              fun ?resiliencyScore ->
-                fun ?status ->
-                  fun ?tags ->
-                    fun ~appArn ->
-                      fun ~creationTime ->
-                        fun ~name ->
-                          fun () ->
-                            {
-                              complianceStatus;
-                              description;
-                              lastAppComplianceEvaluationTime;
-                              lastResiliencyScoreEvaluationTime;
-                              policyArn;
-                              resiliencyScore;
-                              status;
-                              tags;
-                              appArn;
-                              creationTime;
-                              name
-                            }
+          "Tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."]}
+    let make ?appArn =
+      fun ?assessmentSchedule ->
+        fun ?awsApplicationArn ->
+          fun ?complianceStatus ->
+            fun ?creationTime ->
+              fun ?description ->
+                fun ?driftStatus ->
+                  fun ?eventSubscriptions ->
+                    fun ?lastAppComplianceEvaluationTime ->
+                      fun ?lastDriftEvaluationTime ->
+                        fun ?lastResiliencyScoreEvaluationTime ->
+                          fun ?name ->
+                            fun ?permissionModel ->
+                              fun ?policyArn ->
+                                fun ?resiliencyScore ->
+                                  fun ?rpoInSecs ->
+                                    fun ?rtoInSecs ->
+                                      fun ?status ->
+                                        fun ?tags ->
+                                          fun () ->
+                                            {
+                                              appArn;
+                                              assessmentSchedule;
+                                              awsApplicationArn;
+                                              complianceStatus;
+                                              creationTime;
+                                              description;
+                                              driftStatus;
+                                              eventSubscriptions;
+                                              lastAppComplianceEvaluationTime;
+                                              lastDriftEvaluationTime;
+                                              lastResiliencyScoreEvaluationTime;
+                                              name;
+                                              permissionModel;
+                                              policyArn;
+                                              resiliencyScore;
+                                              rpoInSecs;
+                                              rtoInSecs;
+                                              status;
+                                              tags
+                                            }
     let to_value x =
       structure_to_value
-        [("appArn", (Some (Arn.to_value x.appArn)));
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("assessmentSchedule",
+          (Option.map x.assessmentSchedule
+             ~f:AppAssessmentScheduleType.to_value));
+        ("awsApplicationArn",
+          (Option.map x.awsApplicationArn ~f:Arn.to_value));
         ("complianceStatus",
           (Option.map x.complianceStatus ~f:AppComplianceStatusType.to_value));
-        ("creationTime", (Some (TimeStamp.to_value x.creationTime)));
+        ("creationTime", (Option.map x.creationTime ~f:TimeStamp.to_value));
         ("description",
           (Option.map x.description ~f:EntityDescription.to_value));
+        ("driftStatus",
+          (Option.map x.driftStatus ~f:AppDriftStatusType.to_value));
+        ("eventSubscriptions",
+          (Option.map x.eventSubscriptions ~f:EventSubscriptionList.to_value));
         ("lastAppComplianceEvaluationTime",
           (Option.map x.lastAppComplianceEvaluationTime ~f:TimeStamp.to_value));
+        ("lastDriftEvaluationTime",
+          (Option.map x.lastDriftEvaluationTime ~f:TimeStamp.to_value));
         ("lastResiliencyScoreEvaluationTime",
           (Option.map x.lastResiliencyScoreEvaluationTime
              ~f:TimeStamp.to_value));
-        ("name", (Some (EntityName.to_value x.name)));
+        ("name", (Option.map x.name ~f:EntityName.to_value));
+        ("permissionModel",
+          (Option.map x.permissionModel ~f:PermissionModel.to_value));
         ("policyArn", (Option.map x.policyArn ~f:Arn.to_value));
         ("resiliencyScore",
           (Option.map x.resiliencyScore ~f:Double.to_value));
+        ("rpoInSecs", (Option.map x.rpoInSecs ~f:IntegerOptional.to_value));
+        ("rtoInSecs", (Option.map x.rtoInSecs ~f:IntegerOptional.to_value));
         ("status", (Option.map x.status ~f:AppStatusType.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
@@ -3338,54 +6389,95 @@ module App =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let status =
         (Option.map ~f:AppStatusType.of_xml) (Xml.child xml_arg0 "status") in
+      let rtoInSecs =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "rtoInSecs") in
+      let rpoInSecs =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "rpoInSecs") in
       let resiliencyScore =
         (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "resiliencyScore") in
       let policyArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "policyArn") in
+      let permissionModel =
+        (Option.map ~f:PermissionModel.of_xml)
+          (Xml.child xml_arg0 "permissionModel") in
       let name =
-        EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "name") in
       let lastResiliencyScoreEvaluationTime =
         (Option.map ~f:TimeStamp.of_xml)
           (Xml.child xml_arg0 "lastResiliencyScoreEvaluationTime") in
+      let lastDriftEvaluationTime =
+        (Option.map ~f:TimeStamp.of_xml)
+          (Xml.child xml_arg0 "lastDriftEvaluationTime") in
       let lastAppComplianceEvaluationTime =
         (Option.map ~f:TimeStamp.of_xml)
           (Xml.child xml_arg0 "lastAppComplianceEvaluationTime") in
+      let eventSubscriptions =
+        (Option.map ~f:EventSubscriptionList.of_xml)
+          (Xml.child xml_arg0 "eventSubscriptions") in
+      let driftStatus =
+        (Option.map ~f:AppDriftStatusType.of_xml)
+          (Xml.child xml_arg0 "driftStatus") in
       let description =
         (Option.map ~f:EntityDescription.of_xml)
           (Xml.child xml_arg0 "description") in
       let creationTime =
-        TimeStamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "creationTime") in
+        (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "creationTime") in
       let complianceStatus =
         (Option.map ~f:AppComplianceStatusType.of_xml)
           (Xml.child xml_arg0 "complianceStatus") in
-      let appArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      make ?tags ?status ?resiliencyScore ?policyArn ~name
-        ?lastResiliencyScoreEvaluationTime ?lastAppComplianceEvaluationTime
-        ?description ~creationTime ?complianceStatus ~appArn ()
+      let awsApplicationArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "awsApplicationArn") in
+      let assessmentSchedule =
+        (Option.map ~f:AppAssessmentScheduleType.of_xml)
+          (Xml.child xml_arg0 "assessmentSchedule") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?tags ?status ?rtoInSecs ?rpoInSecs ?resiliencyScore ?policyArn
+        ?permissionModel ?name ?lastResiliencyScoreEvaluationTime
+        ?lastDriftEvaluationTime ?lastAppComplianceEvaluationTime
+        ?eventSubscriptions ?driftStatus ?description ?creationTime
+        ?complianceStatus ?awsApplicationArn ?assessmentSchedule ?appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let status = field_map json "status" AppStatusType.of_json in
-      let resiliencyScore = field_map json "resiliencyScore" Double.of_json in
-      let policyArn = field_map json "policyArn" Arn.of_json in
-      let name = field_map_exn json "name" EntityName.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let status = field_map json__ "status" AppStatusType.of_json in
+      let rtoInSecs = field_map json__ "rtoInSecs" IntegerOptional.of_json in
+      let rpoInSecs = field_map json__ "rpoInSecs" IntegerOptional.of_json in
+      let resiliencyScore = field_map json__ "resiliencyScore" Double.of_json in
+      let policyArn = field_map json__ "policyArn" Arn.of_json in
+      let permissionModel =
+        field_map json__ "permissionModel" PermissionModel.of_json in
+      let name = field_map json__ "name" EntityName.of_json in
       let lastResiliencyScoreEvaluationTime =
-        field_map json "lastResiliencyScoreEvaluationTime" TimeStamp.of_json in
+        field_map json__ "lastResiliencyScoreEvaluationTime"
+          TimeStamp.of_json in
+      let lastDriftEvaluationTime =
+        field_map json__ "lastDriftEvaluationTime" TimeStamp.of_json in
       let lastAppComplianceEvaluationTime =
-        field_map json "lastAppComplianceEvaluationTime" TimeStamp.of_json in
+        field_map json__ "lastAppComplianceEvaluationTime" TimeStamp.of_json in
+      let eventSubscriptions =
+        field_map json__ "eventSubscriptions" EventSubscriptionList.of_json in
+      let driftStatus =
+        field_map json__ "driftStatus" AppDriftStatusType.of_json in
       let description =
-        field_map json "description" EntityDescription.of_json in
-      let creationTime = field_map_exn json "creationTime" TimeStamp.of_json in
+        field_map json__ "description" EntityDescription.of_json in
+      let creationTime = field_map json__ "creationTime" TimeStamp.of_json in
       let complianceStatus =
-        field_map json "complianceStatus" AppComplianceStatusType.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
-      make ?tags ?status ?resiliencyScore ?policyArn ~name
-        ?lastResiliencyScoreEvaluationTime ?lastAppComplianceEvaluationTime
-        ?description ~creationTime ?complianceStatus ~appArn ()
+        field_map json__ "complianceStatus" AppComplianceStatusType.of_json in
+      let awsApplicationArn =
+        field_map json__ "awsApplicationArn" Arn.of_json in
+      let assessmentSchedule =
+        field_map json__ "assessmentSchedule"
+          AppAssessmentScheduleType.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?tags ?status ?rtoInSecs ?rpoInSecs ?resiliencyScore ?policyArn
+        ?permissionModel ?name ?lastResiliencyScoreEvaluationTime
+        ?lastDriftEvaluationTime ?lastAppComplianceEvaluationTime
+        ?eventSubscriptions ?driftStatus ?description ?creationTime
+        ?complianceStatus ?awsApplicationArn ?assessmentSchedule ?appArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Defines a Resilience Hub application."]
+  end[@@ocaml.doc "Defines an Resilience Hub application."]
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
@@ -3394,6 +6486,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3413,184 +6508,73 @@ module TagKeyList =
     let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
     let to_json v = composed_to_json to_value v
   end
-module AppAssessment =
+module ResourcesGroupingRecGenStatusType =
   struct
     type nonrec t =
-      {
-      appArn: Arn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
-      appVersion: EntityVersion.t option
-        [@ocaml.doc "The version of the application."];
-      assessmentArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:dcps:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
-      assessmentName: EntityName.t option
-        [@ocaml.doc "The name of the assessment."];
-      assessmentStatus: AssessmentStatus.t
-        [@ocaml.doc
-          "The current status of the assessment for the resiliency policy."];
-      compliance: AssessmentCompliance.t option
-        [@ocaml.doc
-          "The application compliance against the resiliency policy."];
-      complianceStatus: ComplianceStatus.t option
-        [@ocaml.doc
-          "The current status of the compliance for the resiliency policy."];
-      cost: Cost.t option [@ocaml.doc "The cost for the application."];
-      endTime: TimeStamp.t option [@ocaml.doc "The end time for the action."];
-      invoker: AssessmentInvoker.t
-        [@ocaml.doc "The entity that invoked the assessment."];
-      message: String500.t option
-        [@ocaml.doc "Error or warning message from the assessment execution"];
-      policy: ResiliencyPolicy.t option [@ocaml.doc "The resiliency policy."];
-      resiliencyScore: ResiliencyScore.t option
-        [@ocaml.doc "The current resiliency score for the application."];
-      startTime: TimeStamp.t option
-        [@ocaml.doc "The starting time for the action."];
-      tags: TagMap.t option
-        [@ocaml.doc
-          "The tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."]}
-    let context_ = "AppAssessment"
-    let make ?appArn =
-      fun ?appVersion ->
-        fun ?assessmentName ->
-          fun ?compliance ->
-            fun ?complianceStatus ->
-              fun ?cost ->
-                fun ?endTime ->
-                  fun ?message ->
-                    fun ?policy ->
-                      fun ?resiliencyScore ->
-                        fun ?startTime ->
-                          fun ?tags ->
-                            fun ~assessmentArn ->
-                              fun ~assessmentStatus ->
-                                fun ~invoker ->
-                                  fun () ->
-                                    {
-                                      appArn;
-                                      appVersion;
-                                      assessmentName;
-                                      compliance;
-                                      complianceStatus;
-                                      cost;
-                                      endTime;
-                                      message;
-                                      policy;
-                                      resiliencyScore;
-                                      startTime;
-                                      tags;
-                                      assessmentArn;
-                                      assessmentStatus;
-                                      invoker
-                                    }
-    let to_value x =
-      structure_to_value
-        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
-        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value));
-        ("assessmentArn", (Some (Arn.to_value x.assessmentArn)));
-        ("assessmentName",
-          (Option.map x.assessmentName ~f:EntityName.to_value));
-        ("assessmentStatus",
-          (Some (AssessmentStatus.to_value x.assessmentStatus)));
-        ("compliance",
-          (Option.map x.compliance ~f:AssessmentCompliance.to_value));
-        ("complianceStatus",
-          (Option.map x.complianceStatus ~f:ComplianceStatus.to_value));
-        ("cost", (Option.map x.cost ~f:Cost.to_value));
-        ("endTime", (Option.map x.endTime ~f:TimeStamp.to_value));
-        ("invoker", (Some (AssessmentInvoker.to_value x.invoker)));
-        ("message", (Option.map x.message ~f:String500.to_value));
-        ("policy", (Option.map x.policy ~f:ResiliencyPolicy.to_value));
-        ("resiliencyScore",
-          (Option.map x.resiliencyScore ~f:ResiliencyScore.to_value));
-        ("startTime", (Option.map x.startTime ~f:TimeStamp.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+      | Pending 
+      | InProgress 
+      | Failed 
+      | Success 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "Pending"
+      | InProgress -> "InProgress"
+      | Failed -> "Failed"
+      | Success -> "Success"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Pending" -> Pending
+      | "InProgress" -> InProgress
+      | "Failed" -> Failed
+      | "Success" -> Success
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
+    let to_header x = to_string x
     let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let startTime =
-        (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "startTime") in
-      let resiliencyScore =
-        (Option.map ~f:ResiliencyScore.of_xml)
-          (Xml.child xml_arg0 "resiliencyScore") in
-      let policy =
-        (Option.map ~f:ResiliencyPolicy.of_xml) (Xml.child xml_arg0 "policy") in
-      let message =
-        (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
-      let invoker =
-        AssessmentInvoker.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "invoker") in
-      let endTime =
-        (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "endTime") in
-      let cost = (Option.map ~f:Cost.of_xml) (Xml.child xml_arg0 "cost") in
-      let complianceStatus =
-        (Option.map ~f:ComplianceStatus.of_xml)
-          (Xml.child xml_arg0 "complianceStatus") in
-      let compliance =
-        (Option.map ~f:AssessmentCompliance.of_xml)
-          (Xml.child xml_arg0 "compliance") in
-      let assessmentStatus =
-        AssessmentStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentStatus") in
-      let assessmentName =
-        (Option.map ~f:EntityName.of_xml)
-          (Xml.child xml_arg0 "assessmentName") in
-      let assessmentArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
-      let appVersion =
-        (Option.map ~f:EntityVersion.of_xml)
-          (Xml.child xml_arg0 "appVersion") in
-      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
-      make ?tags ?startTime ?resiliencyScore ?policy ?message ~invoker
-        ?endTime ?cost ?complianceStatus ?compliance ~assessmentStatus
-        ?assessmentName ~assessmentArn ?appVersion ?appArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let startTime = field_map json "startTime" TimeStamp.of_json in
-      let resiliencyScore =
-        field_map json "resiliencyScore" ResiliencyScore.of_json in
-      let policy = field_map json "policy" ResiliencyPolicy.of_json in
-      let message = field_map json "message" String500.of_json in
-      let invoker = field_map_exn json "invoker" AssessmentInvoker.of_json in
-      let endTime = field_map json "endTime" TimeStamp.of_json in
-      let cost = field_map json "cost" Cost.of_json in
-      let complianceStatus =
-        field_map json "complianceStatus" ComplianceStatus.of_json in
-      let compliance =
-        field_map json "compliance" AssessmentCompliance.of_json in
-      let assessmentStatus =
-        field_map_exn json "assessmentStatus" AssessmentStatus.of_json in
-      let assessmentName = field_map json "assessmentName" EntityName.of_json in
-      let assessmentArn = field_map_exn json "assessmentArn" Arn.of_json in
-      let appVersion = field_map json "appVersion" EntityVersion.of_json in
-      let appArn = field_map json "appArn" Arn.of_json in
-      make ?tags ?startTime ?resiliencyScore ?policy ?message ~invoker
-        ?endTime ?cost ?complianceStatus ?compliance ~assessmentStatus
-        ?assessmentName ~assessmentArn ?appVersion ?appArn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Defines an application assessment."]
-module ServiceQuotaExceededException =
+      of_string
+        (string_of_xml ~kind:"enumeration ResourcesGroupingRecGenStatusType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ResourcesGroupingRecGenStatusType" j)
+    let to_json = simple_to_json to_value
+  end
+module MetricsExportStatusType =
   struct
-    type nonrec t = {
-      message: String500.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String500.to_value))]
+    type nonrec t =
+      | Pending 
+      | InProgress 
+      | Failed 
+      | Success 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "Pending"
+      | InProgress -> "InProgress"
+      | Failed -> "Failed"
+      | Success -> "Success"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Pending" -> Pending
+      | "InProgress" -> InProgress
+      | "Failed" -> Failed
+      | "Success" -> Success
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
+    let to_header x = to_string x
     let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String500.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "You have exceeded your service quota. To perform the requested action, remove some of the relevant resources, or use Service Quotas to request a service quota increase."]
+      of_string
+        (string_of_xml ~kind:"enumeration MetricsExportStatusType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MetricsExportStatusType" j)
+    let to_json = simple_to_json to_value
+  end
 module ClientToken =
   struct
     type nonrec t = string
@@ -3602,7 +6586,7 @@ module ClientToken =
              (fun () ->
                 (check_string_max i ~max:63) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"^[A-za-z0-9_.-]{0,63}$")));
+                     check_pattern i ~pattern:"^[A-Za-z0-9_.-]{0,63}$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -3612,6 +6596,208 @@ module ClientToken =
     let of_json j = string_of_json ~kind:"ClientToken" j
     let to_json = simple_to_json to_value
   end
+module AppAssessment =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t option
+        [@ocaml.doc "Version of an application."];
+      assessmentArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:resiliencehub:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      assessmentName: EntityName.t option
+        [@ocaml.doc "Name of the assessment."];
+      assessmentStatus: AssessmentStatus.t option
+        [@ocaml.doc
+          "Current status of the assessment for the resiliency policy."];
+      compliance: AssessmentCompliance.t option
+        [@ocaml.doc "Application compliance against the resiliency policy."];
+      complianceStatus: ComplianceStatus.t option
+        [@ocaml.doc
+          "Current status of the compliance for the resiliency policy."];
+      cost: Cost.t option [@ocaml.doc "Cost for the application."];
+      driftStatus: DriftStatus.t option
+        [@ocaml.doc
+          "Indicates if compliance drifts (deviations) were detected while running an assessment for your application."];
+      endTime: TimeStamp.t option [@ocaml.doc "End time for the action."];
+      invoker: AssessmentInvoker.t option
+        [@ocaml.doc "The entity that invoked the assessment."];
+      message: String500.t option
+        [@ocaml.doc "Error or warning message from the assessment execution"];
+      policy: ResiliencyPolicy.t option
+        [@ocaml.doc "Resiliency policy of an application."];
+      resiliencyScore: ResiliencyScore.t option
+        [@ocaml.doc "Current resiliency score for an application."];
+      resourceErrorsDetails: ResourceErrorsDetails.t option
+        [@ocaml.doc
+          "A resource error object containing a list of errors retrieving an application's resources."];
+      startTime: TimeStamp.t option
+        [@ocaml.doc "Starting time for the action."];
+      summary: AssessmentSummary.t option
+        [@ocaml.doc
+          "Indicates the AI-generated summary for the Resilience Hub assessment, providing a concise overview that highlights the top risks and recommendations. This property is available only in the US East (N. Virginia) Region."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "Tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."];
+      versionName: EntityVersion.t option
+        [@ocaml.doc "Version name of the published application."]}
+    let make ?appArn =
+      fun ?appVersion ->
+        fun ?assessmentArn ->
+          fun ?assessmentName ->
+            fun ?assessmentStatus ->
+              fun ?compliance ->
+                fun ?complianceStatus ->
+                  fun ?cost ->
+                    fun ?driftStatus ->
+                      fun ?endTime ->
+                        fun ?invoker ->
+                          fun ?message ->
+                            fun ?policy ->
+                              fun ?resiliencyScore ->
+                                fun ?resourceErrorsDetails ->
+                                  fun ?startTime ->
+                                    fun ?summary ->
+                                      fun ?tags ->
+                                        fun ?versionName ->
+                                          fun () ->
+                                            {
+                                              appArn;
+                                              appVersion;
+                                              assessmentArn;
+                                              assessmentName;
+                                              assessmentStatus;
+                                              compliance;
+                                              complianceStatus;
+                                              cost;
+                                              driftStatus;
+                                              endTime;
+                                              invoker;
+                                              message;
+                                              policy;
+                                              resiliencyScore;
+                                              resourceErrorsDetails;
+                                              startTime;
+                                              summary;
+                                              tags;
+                                              versionName
+                                            }
+    let to_value x =
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value));
+        ("assessmentArn", (Option.map x.assessmentArn ~f:Arn.to_value));
+        ("assessmentName",
+          (Option.map x.assessmentName ~f:EntityName.to_value));
+        ("assessmentStatus",
+          (Option.map x.assessmentStatus ~f:AssessmentStatus.to_value));
+        ("compliance",
+          (Option.map x.compliance ~f:AssessmentCompliance.to_value));
+        ("complianceStatus",
+          (Option.map x.complianceStatus ~f:ComplianceStatus.to_value));
+        ("cost", (Option.map x.cost ~f:Cost.to_value));
+        ("driftStatus", (Option.map x.driftStatus ~f:DriftStatus.to_value));
+        ("endTime", (Option.map x.endTime ~f:TimeStamp.to_value));
+        ("invoker", (Option.map x.invoker ~f:AssessmentInvoker.to_value));
+        ("message", (Option.map x.message ~f:String500.to_value));
+        ("policy", (Option.map x.policy ~f:ResiliencyPolicy.to_value));
+        ("resiliencyScore",
+          (Option.map x.resiliencyScore ~f:ResiliencyScore.to_value));
+        ("resourceErrorsDetails",
+          (Option.map x.resourceErrorsDetails
+             ~f:ResourceErrorsDetails.to_value));
+        ("startTime", (Option.map x.startTime ~f:TimeStamp.to_value));
+        ("summary", (Option.map x.summary ~f:AssessmentSummary.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("versionName", (Option.map x.versionName ~f:EntityVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let versionName =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "versionName") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let summary =
+        (Option.map ~f:AssessmentSummary.of_xml)
+          (Xml.child xml_arg0 "summary") in
+      let startTime =
+        (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "startTime") in
+      let resourceErrorsDetails =
+        (Option.map ~f:ResourceErrorsDetails.of_xml)
+          (Xml.child xml_arg0 "resourceErrorsDetails") in
+      let resiliencyScore =
+        (Option.map ~f:ResiliencyScore.of_xml)
+          (Xml.child xml_arg0 "resiliencyScore") in
+      let policy =
+        (Option.map ~f:ResiliencyPolicy.of_xml) (Xml.child xml_arg0 "policy") in
+      let message =
+        (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "message") in
+      let invoker =
+        (Option.map ~f:AssessmentInvoker.of_xml)
+          (Xml.child xml_arg0 "invoker") in
+      let endTime =
+        (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "endTime") in
+      let driftStatus =
+        (Option.map ~f:DriftStatus.of_xml) (Xml.child xml_arg0 "driftStatus") in
+      let cost = (Option.map ~f:Cost.of_xml) (Xml.child xml_arg0 "cost") in
+      let complianceStatus =
+        (Option.map ~f:ComplianceStatus.of_xml)
+          (Xml.child xml_arg0 "complianceStatus") in
+      let compliance =
+        (Option.map ~f:AssessmentCompliance.of_xml)
+          (Xml.child xml_arg0 "compliance") in
+      let assessmentStatus =
+        (Option.map ~f:AssessmentStatus.of_xml)
+          (Xml.child xml_arg0 "assessmentStatus") in
+      let assessmentName =
+        (Option.map ~f:EntityName.of_xml)
+          (Xml.child xml_arg0 "assessmentName") in
+      let assessmentArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "assessmentArn") in
+      let appVersion =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?versionName ?tags ?summary ?startTime ?resourceErrorsDetails
+        ?resiliencyScore ?policy ?message ?invoker ?endTime ?driftStatus
+        ?cost ?complianceStatus ?compliance ?assessmentStatus ?assessmentName
+        ?assessmentArn ?appVersion ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let versionName = field_map json__ "versionName" EntityVersion.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let summary = field_map json__ "summary" AssessmentSummary.of_json in
+      let startTime = field_map json__ "startTime" TimeStamp.of_json in
+      let resourceErrorsDetails =
+        field_map json__ "resourceErrorsDetails"
+          ResourceErrorsDetails.of_json in
+      let resiliencyScore =
+        field_map json__ "resiliencyScore" ResiliencyScore.of_json in
+      let policy = field_map json__ "policy" ResiliencyPolicy.of_json in
+      let message = field_map json__ "message" String500.of_json in
+      let invoker = field_map json__ "invoker" AssessmentInvoker.of_json in
+      let endTime = field_map json__ "endTime" TimeStamp.of_json in
+      let driftStatus = field_map json__ "driftStatus" DriftStatus.of_json in
+      let cost = field_map json__ "cost" Cost.of_json in
+      let complianceStatus =
+        field_map json__ "complianceStatus" ComplianceStatus.of_json in
+      let compliance =
+        field_map json__ "compliance" AssessmentCompliance.of_json in
+      let assessmentStatus =
+        field_map json__ "assessmentStatus" AssessmentStatus.of_json in
+      let assessmentName =
+        field_map json__ "assessmentName" EntityName.of_json in
+      let assessmentArn = field_map json__ "assessmentArn" Arn.of_json in
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?versionName ?tags ?summary ?startTime ?resourceErrorsDetails
+        ?resiliencyScore ?policy ?message ?invoker ?endTime ?driftStatus
+        ?cost ?complianceStatus ?compliance ?assessmentStatus ?assessmentName
+        ?assessmentArn ?appVersion ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Defines an application assessment."]
 module ResourceResolutionStatusType =
   struct
     type nonrec t =
@@ -3650,6 +6836,9 @@ module EntityNameList =
   struct
     type nonrec t = EntityName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EntityName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3670,12 +6859,16 @@ module EntityNameList =
       list_of_json ~kind:"EntityNameList" ~of_json:EntityName.of_json j
     let to_json v = composed_to_json to_value v
   end
-module String255List =
+module FailedGroupingRecommendationEntries =
   struct
-    type nonrec t = String255.t list
+    type nonrec t = FailedGroupingRecommendationEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:String255.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:FailedGroupingRecommendationEntry.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -3689,9 +6882,45 @@ module String255List =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:String255.of_xml)
+                     | _ -> true)))
+           ~f:FailedGroupingRecommendationEntry.of_xml)
     let of_json j =
-      list_of_json ~kind:"String255List" ~of_json:String255.of_json j
+      list_of_json ~kind:"FailedGroupingRecommendationEntries"
+        ~of_json:FailedGroupingRecommendationEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RejectGroupingRecommendationEntries =
+  struct
+    type nonrec t = RejectGroupingRecommendationEntry.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RejectGroupingRecommendationEntry.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:RejectGroupingRecommendationEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RejectGroupingRecommendationEntries"
+        ~of_json:RejectGroupingRecommendationEntry.of_json j
     let to_json v = composed_to_json to_value v
   end
 module AppTemplateBody =
@@ -3703,9 +6932,10 @@ module AppTemplateBody =
         ok_or_failwith
           ((check_string_min i ~min:0) >>=
              (fun () ->
-                (check_string_max i ~max:5000) >>=
+                (check_string_max i ~max:409600) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"^[\\w\\s:,-\\.'{}\\[\\]:\"]+$")));
+                     check_pattern i
+                       ~pattern:"^[\\w\\s:,-\\.'\\/{}\\[\\]:\"\\\\]+$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -3734,6 +6964,9 @@ module UnsupportedResourceList =
   struct
     type nonrec t = UnsupportedResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UnsupportedResource.to_value)) |>
         (fun x -> `List x)
@@ -3778,6 +7011,9 @@ module TestRecommendationList =
   struct
     type nonrec t = TestRecommendation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TestRecommendation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3803,6 +7039,9 @@ module ResiliencyPolicies =
   struct
     type nonrec t = ResiliencyPolicy.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResiliencyPolicy.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3828,6 +7067,9 @@ module SopRecommendationList =
   struct
     type nonrec t = SopRecommendation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SopRecommendation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3849,10 +7091,42 @@ module SopRecommendationList =
         ~of_json:SopRecommendation.of_json j
     let to_json v = composed_to_json to_value v
   end
+module GroupingRecommendationList =
+  struct
+    type nonrec t = GroupingRecommendation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GroupingRecommendation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GroupingRecommendation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GroupingRecommendationList"
+        ~of_json:GroupingRecommendation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module RecommendationTemplateList =
   struct
     type nonrec t = RecommendationTemplate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendationTemplate.to_value)) |>
         (fun x -> `List x)
@@ -3883,6 +7157,9 @@ module RecommendationTemplateStatusList =
         ok_or_failwith
           ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendationTemplateStatus.to_value)) |>
         (fun x -> `List x)
@@ -3905,10 +7182,130 @@ module RecommendationTemplateStatusList =
         ~of_json:RecommendationTemplateStatus.of_json j
     let to_json v = composed_to_json to_value v
   end
+module RowList =
+  struct
+    type nonrec t = Row.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Row.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Row.of_xml)
+    let of_json j = list_of_json ~kind:"RowList" ~of_json:Row.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ConditionList =
+  struct
+    type nonrec t = Condition.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Condition.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Condition.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConditionList" ~of_json:Condition.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FieldList =
+  struct
+    type nonrec t = Field.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Field.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Field.of_xml)
+    let of_json j = list_of_json ~kind:"FieldList" ~of_json:Field.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SortList =
+  struct
+    type nonrec t = Sort.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Sort.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Sort.of_xml)
+    let of_json j = list_of_json ~kind:"SortList" ~of_json:Sort.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AppSummaryList =
   struct
     type nonrec t = AppSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AppSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3933,6 +7330,9 @@ module AppVersionList =
   struct
     type nonrec t = AppVersionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AppVersionSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3958,6 +7358,9 @@ module PhysicalResourceList =
   struct
     type nonrec t = PhysicalResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PhysicalResource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3983,6 +7386,9 @@ module ResourceMappingList =
   struct
     type nonrec t = ResourceMapping.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceMapping.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4004,10 +7410,41 @@ module ResourceMappingList =
         ~of_json:ResourceMapping.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AppInputSourceList =
+  struct
+    type nonrec t = AppInputSource.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AppInputSource.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AppInputSource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AppInputSourceList" ~of_json:AppInputSource.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
 module ComponentRecommendationList =
   struct
     type nonrec t = ComponentRecommendation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComponentRecommendation.to_value)) |>
         (fun x -> `List x)
@@ -4034,6 +7471,9 @@ module ComponentCompliancesList =
   struct
     type nonrec t = AppComponentCompliance.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AppComponentCompliance.to_value)) |>
         (fun x -> `List x)
@@ -4060,6 +7500,9 @@ module AppAssessmentSummaryList =
   struct
     type nonrec t = AppAssessmentSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AppAssessmentSummary.to_value)) |>
         (fun x -> `List x)
@@ -4090,6 +7533,9 @@ module AssessmentStatusList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssessmentStatus.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4111,10 +7557,68 @@ module AssessmentStatusList =
         ~of_json:AssessmentStatus.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ResourceDriftList =
+  struct
+    type nonrec t = ResourceDrift.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceDrift.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceDrift.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceDriftList" ~of_json:ResourceDrift.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ComplianceDriftList =
+  struct
+    type nonrec t = ComplianceDrift.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ComplianceDrift.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ComplianceDrift.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ComplianceDriftList"
+        ~of_json:ComplianceDrift.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AlarmRecommendationList =
   struct
     type nonrec t = AlarmRecommendation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AlarmRecommendation.to_value)) |>
         (fun x -> `List x)
@@ -4141,6 +7645,9 @@ module ArnList =
   struct
     type nonrec t = Arn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4158,6 +7665,33 @@ module ArnList =
                           | _ -> true)
                      | _ -> true))) ~f:Arn.of_xml)
     let of_json j = list_of_json ~kind:"ArnList" ~of_json:Arn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EksSourceList =
+  struct
+    type nonrec t = EksSource.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EksSource.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EksSource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EksSourceList" ~of_json:EksSource.of_json j
     let to_json v = composed_to_json to_value v
   end
 module ResourceImportStatusType =
@@ -4193,13 +7727,226 @@ module ResourceImportStatusType =
       of_string (string_of_json ~kind:"ResourceImportStatusType" j)
     let to_json = simple_to_json to_value
   end
+module TerraformSourceList =
+  struct
+    type nonrec t = TerraformSource.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TerraformSource.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TerraformSource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TerraformSourceList"
+        ~of_json:TerraformSource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceImportStrategyType =
+  struct
+    type nonrec t =
+      | AddOnly 
+      | ReplaceAll 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AddOnly -> "AddOnly"
+      | ReplaceAll -> "ReplaceAll"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AddOnly" -> AddOnly
+      | "ReplaceAll" -> ReplaceAll
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResourceImportStrategyType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ResourceImportStrategyType" j)
+    let to_json = simple_to_json to_value
+  end
+module ErrorDetailList =
+  struct
+    type nonrec t = ErrorDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ErrorDetail.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ErrorDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ErrorDetailList" ~of_json:ErrorDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BatchUpdateRecommendationStatusFailedEntries =
+  struct
+    type nonrec t = BatchUpdateRecommendationStatusFailedEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map ~f:BatchUpdateRecommendationStatusFailedEntry.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:BatchUpdateRecommendationStatusFailedEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BatchUpdateRecommendationStatusFailedEntries"
+        ~of_json:BatchUpdateRecommendationStatusFailedEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BatchUpdateRecommendationStatusSuccessfulEntries =
+  struct
+    type nonrec t = BatchUpdateRecommendationStatusSuccessfulEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map ~f:BatchUpdateRecommendationStatusSuccessfulEntry.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:BatchUpdateRecommendationStatusSuccessfulEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BatchUpdateRecommendationStatusSuccessfulEntries"
+        ~of_json:BatchUpdateRecommendationStatusSuccessfulEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UpdateRecommendationStatusRequestEntries =
+  struct
+    type nonrec t = UpdateRecommendationStatusRequestEntry.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UpdateRecommendationStatusRequestEntry.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:UpdateRecommendationStatusRequestEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UpdateRecommendationStatusRequestEntries"
+        ~of_json:UpdateRecommendationStatusRequestEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AcceptGroupingRecommendationEntries =
+  struct
+    type nonrec t = AcceptGroupingRecommendationEntry.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AcceptGroupingRecommendationEntry.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:AcceptGroupingRecommendationEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AcceptGroupingRecommendationEntries"
+        ~of_json:AcceptGroupingRecommendationEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module UpdateResiliencyPolicyResponse =
   struct
     type nonrec t =
       {
-      policy: ResiliencyPolicy.t
+      policy: ResiliencyPolicy.t option
         [@ocaml.doc
-          "The type of resiliency policy that was updated, including the recovery time objective (RTO) and recovery point objective (RPO) in seconds."]}
+          "The resiliency policy that was updated, including the recovery time objective (RTO) and recovery point objective (RPO) in seconds."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -4208,8 +7955,7 @@ module UpdateResiliencyPolicyResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateResiliencyPolicyResponse"
-    let make ~policy = fun () -> { policy }
+    let make ?policy = fun () -> { policy }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4276,19 +8022,19 @@ module UpdateResiliencyPolicyResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("policy", (Some (ResiliencyPolicy.to_value x.policy)))]
+        [("policy", (Option.map x.policy ~f:ResiliencyPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let policy =
-        ResiliencyPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "policy") in
-      make ~policy ()
+        (Option.map ~f:ResiliencyPolicy.of_xml) (Xml.child xml_arg0 "policy") in
+      make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map_exn json "policy" ResiliencyPolicy.of_json in
-      make ~policy ()
+    let of_json json__ =
+      let policy = field_map json__ "policy" ResiliencyPolicy.of_json in
+      make ?policy ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates a resiliency policy."]
+  end[@@ocaml.doc
+       "Updates a resiliency policy. Resilience Hub allows you to provide a value of zero for rtoInSecs and rpoInSecs of your resiliency policy. But, while assessing your application, the lowest possible assessment result is near zero. Hence, if you provide value zero for rtoInSecs and rpoInSecs, the estimated workload RTO and estimated workload RPO result will be near zero and the Compliance status for your application will be set to Policy breached."]
 module UpdateResiliencyPolicyRequest =
   struct
     type nonrec t =
@@ -4298,13 +8044,14 @@ module UpdateResiliencyPolicyRequest =
           "Specifies a high-level geographical location constraint for where your resilience policy data can be stored."];
       policy: DisruptionPolicy.t option
         [@ocaml.doc
-          "The type of resiliency policy to be created, including the recovery time objective (RTO) and recovery point objective (RPO) in seconds."];
+          "Resiliency policy to be created, including the recovery time objective (RTO) and recovery point objective (RPO) in seconds."];
       policyArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resiliency policy. The format for this ARN is: arn:partition:dcps:region:account:resiliency-policy/policy-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the resiliency policy. The format for this ARN is: arn:partition:resiliencehub:region:account:resiliency-policy/policy-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       policyDescription: EntityDescription.t option
-        [@ocaml.doc "The description for the policy."];
-      policyName: EntityName.t option [@ocaml.doc "The name of the policy"];
+        [@ocaml.doc "Description of the resiliency policy."];
+      policyName: EntityName.t option
+        [@ocaml.doc "Name of the resiliency policy."];
       tier: ResiliencyPolicyTier.t option
         [@ocaml.doc
           "The tier for this resiliency policy, ranging from the highest severity (MissionCritical) to lowest (NonCritical)."]}
@@ -4355,27 +8102,33 @@ module UpdateResiliencyPolicyRequest =
       make ?tier ?policyName ?policyDescription ~policyArn ?policy
         ?dataLocationConstraint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tier = field_map json "tier" ResiliencyPolicyTier.of_json in
-      let policyName = field_map json "policyName" EntityName.of_json in
+    let of_json json__ =
+      let tier = field_map json__ "tier" ResiliencyPolicyTier.of_json in
+      let policyName = field_map json__ "policyName" EntityName.of_json in
       let policyDescription =
-        field_map json "policyDescription" EntityDescription.of_json in
-      let policyArn = field_map_exn json "policyArn" Arn.of_json in
-      let policy = field_map json "policy" DisruptionPolicy.of_json in
+        field_map json__ "policyDescription" EntityDescription.of_json in
+      let policyArn = field_map_exn json__ "policyArn" Arn.of_json in
+      let policy = field_map json__ "policy" DisruptionPolicy.of_json in
       let dataLocationConstraint =
-        field_map json "dataLocationConstraint"
+        field_map json__ "dataLocationConstraint"
           DataLocationConstraint.of_json in
       make ?tier ?policyName ?policyDescription ~policyArn ?policy
         ?dataLocationConstraint ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates a resiliency policy."]
-module UpdateAppResponse =
+  end[@@ocaml.doc
+       "Updates a resiliency policy. Resilience Hub allows you to provide a value of zero for rtoInSecs and rpoInSecs of your resiliency policy. But, while assessing your application, the lowest possible assessment result is near zero. Hence, if you provide value zero for rtoInSecs and rpoInSecs, the estimated workload RTO and estimated workload RPO result will be near zero and the Compliance status for your application will be set to Policy breached."]
+module UpdateAppVersionResponse =
   struct
     type nonrec t =
       {
-      app: App.t
+      additionalInfo: AdditionalInfoMap.t option
         [@ocaml.doc
-          "The specified application, returned as an object with details including compliance status, creation time, description, resiliency score, and more."]}
+          "Additional configuration parameters for an Resilience Hub application. If you want to implement additionalInfo through the Resilience Hub console rather than using an API call, see Configure the application configuration parameters. Currently, this parameter supports only failover region and account."];
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t option
+        [@ocaml.doc "Resilience Hub application version."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -4384,8 +8137,9 @@ module UpdateAppResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateAppResponse"
-    let make ~app = fun () -> { app }
+    let make ?additionalInfo =
+      fun ?appArn ->
+        fun ?appVersion -> fun () -> { additionalInfo; appArn; appVersion }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4451,14 +8205,567 @@ module UpdateAppResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("app", (Some (App.to_value x.app)))]
+      structure_to_value
+        [("additionalInfo",
+           (Option.map x.additionalInfo ~f:AdditionalInfoMap.to_value));
+        ("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let app = App.of_xml (Xml.child_exn ~context:context_ xml_arg0 "app") in
-      make ~app ()
+      let appVersion =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      let additionalInfo =
+        (Option.map ~f:AdditionalInfoMap.of_xml)
+          (Xml.child xml_arg0 "additionalInfo") in
+      make ?appVersion ?appArn ?additionalInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let app = field_map_exn json "app" App.of_json in make ~app ()
+    let of_json json__ =
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      let additionalInfo =
+        field_map json__ "additionalInfo" AdditionalInfoMap.of_json in
+      make ?appVersion ?appArn ?additionalInfo ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the Resilience Hub application version. This API updates the Resilience Hub application draft version. To use this information for running resiliency assessments, you must publish the Resilience Hub application using the PublishAppVersion API."]
+module UpdateAppVersionResourceResponse =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t option
+        [@ocaml.doc "Resilience Hub application version."];
+      physicalResource: PhysicalResource.t option
+        [@ocaml.doc
+          "Defines a physical resource. A physical resource is a resource that exists in your account. It can be identified using an Amazon Resource Name (ARN) or a Resilience Hub-native identifier."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appArn =
+      fun ?appVersion ->
+        fun ?physicalResource ->
+          fun () -> { appArn; appVersion; physicalResource }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value));
+        ("physicalResource",
+          (Option.map x.physicalResource ~f:PhysicalResource.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let physicalResource =
+        (Option.map ~f:PhysicalResource.of_xml)
+          (Xml.child xml_arg0 "physicalResource") in
+      let appVersion =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?physicalResource ?appVersion ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let physicalResource =
+        field_map json__ "physicalResource" PhysicalResource.of_json in
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?physicalResource ?appVersion ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the resource details in the Resilience Hub application. This action has no effect outside Resilience Hub. This API updates the Resilience Hub application draft version. To use this resource for running resiliency assessments, you must publish the Resilience Hub application using the PublishAppVersion API. To update application version with new physicalResourceID, you must call ResolveAppVersionResources API."]
+module UpdateAppVersionResourceRequest =
+  struct
+    type nonrec t =
+      {
+      additionalInfo: AdditionalInfoMap.t option
+        [@ocaml.doc
+          "Currently, there is no supported additional information for resources."];
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appComponents: AppComponentNameList.t option
+        [@ocaml.doc
+          "List of Application Components that this resource belongs to. If an Application Component is not part of the Resilience Hub application, it will be added."];
+      awsAccountId: CustomerId.t option
+        [@ocaml.doc
+          "Amazon Web Services account that owns the physical resource."];
+      awsRegion: AwsRegion.t option
+        [@ocaml.doc
+          "Amazon Web Services region that owns the physical resource."];
+      excluded: BooleanOptional.t option
+        [@ocaml.doc
+          "Indicates if a resource is excluded from an Resilience Hub application. You can exclude only imported resources from an Resilience Hub application."];
+      logicalResourceId: LogicalResourceId.t option
+        [@ocaml.doc "Logical identifier of the resource."];
+      physicalResourceId: String2048.t option
+        [@ocaml.doc "Physical identifier of the resource."];
+      resourceName: EntityName.t option [@ocaml.doc "Name of the resource."];
+      resourceType: String255.t option [@ocaml.doc "Type of resource."]}
+    let context_ = "UpdateAppVersionResourceRequest"
+    let make ?additionalInfo =
+      fun ?appComponents ->
+        fun ?awsAccountId ->
+          fun ?awsRegion ->
+            fun ?excluded ->
+              fun ?logicalResourceId ->
+                fun ?physicalResourceId ->
+                  fun ?resourceName ->
+                    fun ?resourceType ->
+                      fun ~appArn ->
+                        fun () ->
+                          {
+                            additionalInfo;
+                            appComponents;
+                            awsAccountId;
+                            awsRegion;
+                            excluded;
+                            logicalResourceId;
+                            physicalResourceId;
+                            resourceName;
+                            resourceType;
+                            appArn
+                          }
+    let to_value x =
+      structure_to_value
+        [("additionalInfo",
+           (Option.map x.additionalInfo ~f:AdditionalInfoMap.to_value));
+        ("appArn", (Some (Arn.to_value x.appArn)));
+        ("appComponents",
+          (Option.map x.appComponents ~f:AppComponentNameList.to_value));
+        ("awsAccountId", (Option.map x.awsAccountId ~f:CustomerId.to_value));
+        ("awsRegion", (Option.map x.awsRegion ~f:AwsRegion.to_value));
+        ("excluded", (Option.map x.excluded ~f:BooleanOptional.to_value));
+        ("logicalResourceId",
+          (Option.map x.logicalResourceId ~f:LogicalResourceId.to_value));
+        ("physicalResourceId",
+          (Option.map x.physicalResourceId ~f:String2048.to_value));
+        ("resourceName", (Option.map x.resourceName ~f:EntityName.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String255.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceType =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "resourceType") in
+      let resourceName =
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "resourceName") in
+      let physicalResourceId =
+        (Option.map ~f:String2048.of_xml)
+          (Xml.child xml_arg0 "physicalResourceId") in
+      let logicalResourceId =
+        (Option.map ~f:LogicalResourceId.of_xml)
+          (Xml.child xml_arg0 "logicalResourceId") in
+      let excluded =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "excluded") in
+      let awsRegion =
+        (Option.map ~f:AwsRegion.of_xml) (Xml.child xml_arg0 "awsRegion") in
+      let awsAccountId =
+        (Option.map ~f:CustomerId.of_xml) (Xml.child xml_arg0 "awsAccountId") in
+      let appComponents =
+        (Option.map ~f:AppComponentNameList.of_xml)
+          (Xml.child xml_arg0 "appComponents") in
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      let additionalInfo =
+        (Option.map ~f:AdditionalInfoMap.of_xml)
+          (Xml.child xml_arg0 "additionalInfo") in
+      make ?resourceType ?resourceName ?physicalResourceId ?logicalResourceId
+        ?excluded ?awsRegion ?awsAccountId ?appComponents ~appArn
+        ?additionalInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String255.of_json in
+      let resourceName = field_map json__ "resourceName" EntityName.of_json in
+      let physicalResourceId =
+        field_map json__ "physicalResourceId" String2048.of_json in
+      let logicalResourceId =
+        field_map json__ "logicalResourceId" LogicalResourceId.of_json in
+      let excluded = field_map json__ "excluded" BooleanOptional.of_json in
+      let awsRegion = field_map json__ "awsRegion" AwsRegion.of_json in
+      let awsAccountId = field_map json__ "awsAccountId" CustomerId.of_json in
+      let appComponents =
+        field_map json__ "appComponents" AppComponentNameList.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      let additionalInfo =
+        field_map json__ "additionalInfo" AdditionalInfoMap.of_json in
+      make ?resourceType ?resourceName ?physicalResourceId ?logicalResourceId
+        ?excluded ?awsRegion ?awsAccountId ?appComponents ~appArn
+        ?additionalInfo ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the resource details in the Resilience Hub application. This action has no effect outside Resilience Hub. This API updates the Resilience Hub application draft version. To use this resource for running resiliency assessments, you must publish the Resilience Hub application using the PublishAppVersion API. To update application version with new physicalResourceID, you must call ResolveAppVersionResources API."]
+module UpdateAppVersionRequest =
+  struct
+    type nonrec t =
+      {
+      additionalInfo: AdditionalInfoMap.t option
+        [@ocaml.doc
+          "Additional configuration parameters for an Resilience Hub application. If you want to implement additionalInfo through the Resilience Hub console rather than using an API call, see Configure the application configuration parameters. Currently, this parameter accepts a key-value mapping (in a string format) of only one failover region and one associated account. Key: \"failover-regions\" Value: \"\\[\\{\"region\":\"<REGION>\", \"accounts\":\\[\\{\"id\":\"<ACCOUNT_ID>\"\\}\\]\\}\\]\""];
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."]}
+    let context_ = "UpdateAppVersionRequest"
+    let make ?additionalInfo =
+      fun ~appArn -> fun () -> { additionalInfo; appArn }
+    let to_value x =
+      structure_to_value
+        [("additionalInfo",
+           (Option.map x.additionalInfo ~f:AdditionalInfoMap.to_value));
+        ("appArn", (Some (Arn.to_value x.appArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      let additionalInfo =
+        (Option.map ~f:AdditionalInfoMap.of_xml)
+          (Xml.child xml_arg0 "additionalInfo") in
+      make ~appArn ?additionalInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      let additionalInfo =
+        field_map json__ "additionalInfo" AdditionalInfoMap.of_json in
+      make ~appArn ?additionalInfo ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the Resilience Hub application version. This API updates the Resilience Hub application draft version. To use this information for running resiliency assessments, you must publish the Resilience Hub application using the PublishAppVersion API."]
+module UpdateAppVersionAppComponentResponse =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appComponent: AppComponent.t option
+        [@ocaml.doc
+          "List of Application Components that belong to this resource."];
+      appVersion: EntityVersion.t option
+        [@ocaml.doc "Resilience Hub application version."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appArn =
+      fun ?appComponent ->
+        fun ?appVersion -> fun () -> { appArn; appComponent; appVersion }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appComponent",
+          (Option.map x.appComponent ~f:AppComponent.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appVersion =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appComponent =
+        (Option.map ~f:AppComponent.of_xml)
+          (Xml.child xml_arg0 "appComponent") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?appVersion ?appComponent ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appComponent = field_map json__ "appComponent" AppComponent.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?appVersion ?appComponent ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an existing Application Component in the Resilience Hub application. This API updates the Resilience Hub application draft version. To use this Application Component for running assessments, you must publish the Resilience Hub application using the PublishAppVersion API."]
+module UpdateAppVersionAppComponentRequest =
+  struct
+    type nonrec t =
+      {
+      additionalInfo: AdditionalInfoMap.t option
+        [@ocaml.doc
+          "Currently, there is no supported additional information for Application Components."];
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      id: String255.t [@ocaml.doc "Identifier of the Application Component."];
+      name: String255.t option
+        [@ocaml.doc "Name of the Application Component."];
+      type_: String255.t option
+        [@ocaml.doc
+          "Type of Application Component. For more information about the types of Application Component, see Grouping resources in an AppComponent."]}
+    let context_ = "UpdateAppVersionAppComponentRequest"
+    let make ?additionalInfo =
+      fun ?name ->
+        fun ?type_ ->
+          fun ~appArn ->
+            fun ~id -> fun () -> { additionalInfo; name; type_; appArn; id }
+    let to_value x =
+      structure_to_value
+        [("additionalInfo",
+           (Option.map x.additionalInfo ~f:AdditionalInfoMap.to_value));
+        ("appArn", (Some (Arn.to_value x.appArn)));
+        ("id", (Some (String255.to_value x.id)));
+        ("name", (Option.map x.name ~f:String255.to_value));
+        ("type", (Option.map x.type_ ~f:String255.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "type") in
+      let name = (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "name") in
+      let id =
+        String255.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      let additionalInfo =
+        (Option.map ~f:AdditionalInfoMap.of_xml)
+          (Xml.child xml_arg0 "additionalInfo") in
+      make ?type_ ?name ~id ~appArn ?additionalInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "type" String255.of_json in
+      let name = field_map json__ "name" String255.of_json in
+      let id = field_map_exn json__ "id" String255.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      let additionalInfo =
+        field_map json__ "additionalInfo" AdditionalInfoMap.of_json in
+      make ?type_ ?name ~id ~appArn ?additionalInfo ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an existing Application Component in the Resilience Hub application. This API updates the Resilience Hub application draft version. To use this Application Component for running assessments, you must publish the Resilience Hub application using the PublishAppVersion API."]
+module UpdateAppResponse =
+  struct
+    type nonrec t =
+      {
+      app: App.t option
+        [@ocaml.doc
+          "The specified application, returned as an object with details including compliance status, creation time, description, resiliency score, and more."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?app = fun () -> { app }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("app", (Option.map x.app ~f:App.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let app = (Option.map ~f:App.of_xml) (Xml.child xml_arg0 "app") in
+      make ?app ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let app = field_map json__ "app" App.of_json in make ?app ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an application."]
 module UpdateAppRequest =
@@ -4467,52 +8774,97 @@ module UpdateAppRequest =
       {
       appArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      assessmentSchedule: AppAssessmentScheduleType.t option
+        [@ocaml.doc
+          "Assessment execution schedule with 'Daily' or 'Disabled' values."];
       clearResiliencyPolicyArn: BooleanOptional.t option
         [@ocaml.doc
           "Specifies if the resiliency policy ARN should be cleared."];
       description: EntityDescription.t option
         [@ocaml.doc "The optional description for an app."];
+      eventSubscriptions: EventSubscriptionList.t option
+        [@ocaml.doc
+          "The list of events you would like to subscribe and get notification for. Currently, Resilience Hub supports notifications only for Drift detected and Scheduled assessment failure events."];
+      permissionModel: PermissionModel.t option
+        [@ocaml.doc
+          "Defines the roles and credentials that Resilience Hub would use while creating an application, importing its resources, and running an assessment."];
       policyArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resiliency policy. The format for this ARN is: arn:partition:dcps:region:account:resiliency-policy/policy-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."]}
+          "Amazon Resource Name (ARN) of the resiliency policy. The format for this ARN is: arn:partition:resiliencehub:region:account:resiliency-policy/policy-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."]}
     let context_ = "UpdateAppRequest"
-    let make ?clearResiliencyPolicyArn =
-      fun ?description ->
-        fun ?policyArn ->
-          fun ~appArn ->
-            fun () ->
-              { clearResiliencyPolicyArn; description; policyArn; appArn }
+    let make ?assessmentSchedule =
+      fun ?clearResiliencyPolicyArn ->
+        fun ?description ->
+          fun ?eventSubscriptions ->
+            fun ?permissionModel ->
+              fun ?policyArn ->
+                fun ~appArn ->
+                  fun () ->
+                    {
+                      assessmentSchedule;
+                      clearResiliencyPolicyArn;
+                      description;
+                      eventSubscriptions;
+                      permissionModel;
+                      policyArn;
+                      appArn
+                    }
     let to_value x =
       structure_to_value
         [("appArn", (Some (Arn.to_value x.appArn)));
+        ("assessmentSchedule",
+          (Option.map x.assessmentSchedule
+             ~f:AppAssessmentScheduleType.to_value));
         ("clearResiliencyPolicyArn",
           (Option.map x.clearResiliencyPolicyArn ~f:BooleanOptional.to_value));
         ("description",
           (Option.map x.description ~f:EntityDescription.to_value));
+        ("eventSubscriptions",
+          (Option.map x.eventSubscriptions ~f:EventSubscriptionList.to_value));
+        ("permissionModel",
+          (Option.map x.permissionModel ~f:PermissionModel.to_value));
         ("policyArn", (Option.map x.policyArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let policyArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "policyArn") in
+      let permissionModel =
+        (Option.map ~f:PermissionModel.of_xml)
+          (Xml.child xml_arg0 "permissionModel") in
+      let eventSubscriptions =
+        (Option.map ~f:EventSubscriptionList.of_xml)
+          (Xml.child xml_arg0 "eventSubscriptions") in
       let description =
         (Option.map ~f:EntityDescription.of_xml)
           (Xml.child xml_arg0 "description") in
       let clearResiliencyPolicyArn =
         (Option.map ~f:BooleanOptional.of_xml)
           (Xml.child xml_arg0 "clearResiliencyPolicyArn") in
+      let assessmentSchedule =
+        (Option.map ~f:AppAssessmentScheduleType.of_xml)
+          (Xml.child xml_arg0 "assessmentSchedule") in
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      make ?policyArn ?description ?clearResiliencyPolicyArn ~appArn ()
+      make ?policyArn ?permissionModel ?eventSubscriptions ?description
+        ?clearResiliencyPolicyArn ?assessmentSchedule ~appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyArn = field_map json "policyArn" Arn.of_json in
+    let of_json json__ =
+      let policyArn = field_map json__ "policyArn" Arn.of_json in
+      let permissionModel =
+        field_map json__ "permissionModel" PermissionModel.of_json in
+      let eventSubscriptions =
+        field_map json__ "eventSubscriptions" EventSubscriptionList.of_json in
       let description =
-        field_map json "description" EntityDescription.of_json in
+        field_map json__ "description" EntityDescription.of_json in
       let clearResiliencyPolicyArn =
-        field_map json "clearResiliencyPolicyArn" BooleanOptional.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
-      make ?policyArn ?description ?clearResiliencyPolicyArn ~appArn ()
+        field_map json__ "clearResiliencyPolicyArn" BooleanOptional.of_json in
+      let assessmentSchedule =
+        field_map json__ "assessmentSchedule"
+          AppAssessmentScheduleType.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ?policyArn ?permissionModel ?eventSubscriptions ?description
+        ?clearResiliencyPolicyArn ?assessmentSchedule ~appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an application."]
 module UntagResourceResponse =
@@ -4595,8 +8947,9 @@ module UntagResourceRequest =
     type nonrec t =
       {
       resourceArn: Arn.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."];
-      tagKeys: TagKeyList.t [@ocaml.doc "The keys of the tags to remove."]}
+        [@ocaml.doc "Amazon Resource Name (ARN) of the resource."];
+      tagKeys: TagKeyList.t
+        [@ocaml.doc "The keys of the tags you want to remove."]}
     let context_ = "UntagResourceRequest"
     let make ~resourceArn =
       fun ~tagKeys -> fun () -> { resourceArn; tagKeys }
@@ -4613,9 +8966,9 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes one or more tags from a resource."]
@@ -4699,7 +9052,7 @@ module TagResourceRequest =
     type nonrec t =
       {
       resourceArn: Arn.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."];
+        [@ocaml.doc "Amazon Resource Name (ARN) of the resource."];
       tags: TagMap.t
         [@ocaml.doc
           "The tags to assign to the resource. Each tag consists of a key/value pair."]}
@@ -4717,17 +9070,295 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Applies one or more tags to a resource."]
+module StartResourceGroupingRecommendationTaskResponse =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      errorMessage: String500.t option
+        [@ocaml.doc
+          "Error that occurred while executing a grouping recommendation task."];
+      groupingId: String255.t option
+        [@ocaml.doc "Identifier of the grouping recommendation task."];
+      status: ResourcesGroupingRecGenStatusType.t option
+        [@ocaml.doc "Status of the action."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appArn =
+      fun ?errorMessage ->
+        fun ?groupingId ->
+          fun ?status ->
+            fun () -> { appArn; errorMessage; groupingId; status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("errorMessage", (Option.map x.errorMessage ~f:String500.to_value));
+        ("groupingId", (Option.map x.groupingId ~f:String255.to_value));
+        ("status",
+          (Option.map x.status ~f:ResourcesGroupingRecGenStatusType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:ResourcesGroupingRecGenStatusType.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let groupingId =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "groupingId") in
+      let errorMessage =
+        (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "errorMessage") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?status ?groupingId ?errorMessage ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map json__ "status" ResourcesGroupingRecGenStatusType.of_json in
+      let groupingId = field_map json__ "groupingId" String255.of_json in
+      let errorMessage = field_map json__ "errorMessage" String500.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?status ?groupingId ?errorMessage ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Starts grouping recommendation task."]
+module StartResourceGroupingRecommendationTaskRequest =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."]}
+    let context_ = "StartResourceGroupingRecommendationTaskRequest"
+    let make ~appArn = fun () -> { appArn }
+    let to_value x =
+      structure_to_value [("appArn", (Some (Arn.to_value x.appArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      make ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ~appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Starts grouping recommendation task."]
+module StartMetricsExportResponse =
+  struct
+    type nonrec t =
+      {
+      metricsExportId: String255.t option
+        [@ocaml.doc "Identifier of the metrics export task."];
+      status: MetricsExportStatusType.t option
+        [@ocaml.doc "Indicates the status of the metrics export task."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?metricsExportId =
+      fun ?status -> fun () -> { metricsExportId; status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("metricsExportId",
+           (Option.map x.metricsExportId ~f:String255.to_value));
+        ("status", (Option.map x.status ~f:MetricsExportStatusType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:MetricsExportStatusType.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let metricsExportId =
+        (Option.map ~f:String255.of_xml)
+          (Xml.child xml_arg0 "metricsExportId") in
+      make ?status ?metricsExportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "status" MetricsExportStatusType.of_json in
+      let metricsExportId =
+        field_map json__ "metricsExportId" String255.of_json in
+      make ?status ?metricsExportId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Initiates the export task of metrics."]
+module StartMetricsExportRequest =
+  struct
+    type nonrec t =
+      {
+      bucketName: EntityName.t option
+        [@ocaml.doc
+          "(Optional) Specifies the name of the Amazon Simple Storage Service bucket where the exported metrics will be stored."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "Used for an idempotency token. A client token is a unique, case-sensitive string of up to 64 ASCII characters. You should not reuse the same client token for other API requests."]}
+    let make ?bucketName =
+      fun ?clientToken -> fun () -> { bucketName; clientToken }
+    let to_value x =
+      structure_to_value
+        [("bucketName", (Option.map x.bucketName ~f:EntityName.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let bucketName =
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "bucketName") in
+      make ?clientToken ?bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let bucketName = field_map json__ "bucketName" EntityName.of_json in
+      make ?clientToken ?bucketName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Initiates the export task of metrics."]
 module StartAppAssessmentResponse =
   struct
     type nonrec t =
       {
-      assessment: AppAssessment.t [@ocaml.doc "The assessment created."]}
+      assessment: AppAssessment.t option
+        [@ocaml.doc "The assessment created."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -4737,8 +9368,7 @@ module StartAppAssessmentResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "StartAppAssessmentResponse"
-    let make ~assessment = fun () -> { assessment }
+    let make ?assessment = fun () -> { assessment }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4815,17 +9445,17 @@ module StartAppAssessmentResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("assessment", (Some (AppAssessment.to_value x.assessment)))]
+        [("assessment", (Option.map x.assessment ~f:AppAssessment.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let assessment =
-        AppAssessment.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessment") in
-      make ~assessment ()
+        (Option.map ~f:AppAssessment.of_xml)
+          (Xml.child xml_arg0 "assessment") in
+      make ?assessment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assessment = field_map_exn json "assessment" AppAssessment.of_json in
-      make ~assessment ()
+    let of_json json__ =
+      let assessment = field_map json__ "assessment" AppAssessment.of_json in
+      make ?assessment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new application assessment for an application."]
 module StartAppAssessmentRequest =
@@ -4834,7 +9464,7 @@ module StartAppAssessmentRequest =
       {
       appArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       appVersion: EntityVersion.t
         [@ocaml.doc "The version of the application."];
       assessmentName: EntityName.t
@@ -4844,7 +9474,7 @@ module StartAppAssessmentRequest =
           "Used for an idempotency token. A client token is a unique, case-sensitive string of up to 64 ASCII characters. You should not reuse the same client token for other API requests."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."]}
+          "Tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."]}
     let context_ = "StartAppAssessmentRequest"
     let make ?clientToken =
       fun ?tags ->
@@ -4875,13 +9505,14 @@ module StartAppAssessmentRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ?tags ?clientToken ~assessmentName ~appVersion ~appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let assessmentName =
-        field_map_exn json "assessmentName" EntityName.of_json in
-      let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
+        field_map_exn json__ "assessmentName" EntityName.of_json in
+      let appVersion =
+        field_map_exn json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
       make ?tags ?clientToken ~assessmentName ~appVersion ~appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new application assessment for an application."]
@@ -4889,15 +9520,15 @@ module ResolveAppVersionResourcesResponse =
   struct
     type nonrec t =
       {
-      appArn: Arn.t
+      appArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
-      appVersion: EntityVersion.t
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t option
         [@ocaml.doc "The version of the application."];
-      resolutionId: String255.t
+      resolutionId: String255.t option
         [@ocaml.doc "The identifier for a specific resolution."];
-      status: ResourceResolutionStatusType.t
-        [@ocaml.doc "The status of the action."]}
+      status: ResourceResolutionStatusType.t option
+        [@ocaml.doc "Status of the action."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -4906,11 +9537,10 @@ module ResolveAppVersionResourcesResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ResolveAppVersionResourcesResponse"
-    let make ~appArn =
-      fun ~appVersion ->
-        fun ~resolutionId ->
-          fun ~status ->
+    let make ?appArn =
+      fun ?appVersion ->
+        fun ?resolutionId ->
+          fun ?status ->
             fun () -> { appArn; appVersion; resolutionId; status }
     let error_of_json name json =
       match name with
@@ -4978,32 +9608,31 @@ module ResolveAppVersionResourcesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("appArn", (Some (Arn.to_value x.appArn)));
-        ("appVersion", (Some (EntityVersion.to_value x.appVersion)));
-        ("resolutionId", (Some (String255.to_value x.resolutionId)));
-        ("status", (Some (ResourceResolutionStatusType.to_value x.status)))]
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value));
+        ("resolutionId", (Option.map x.resolutionId ~f:String255.to_value));
+        ("status",
+          (Option.map x.status ~f:ResourceResolutionStatusType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        ResourceResolutionStatusType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:ResourceResolutionStatusType.of_xml)
+          (Xml.child xml_arg0 "status") in
       let resolutionId =
-        String255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resolutionId") in
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "resolutionId") in
       let appVersion =
-        EntityVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "appVersion") in
-      let appArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      make ~status ~resolutionId ~appVersion ~appArn ()
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?status ?resolutionId ?appVersion ?appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map_exn json "status" ResourceResolutionStatusType.of_json in
-      let resolutionId = field_map_exn json "resolutionId" String255.of_json in
-      let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
-      make ~status ~resolutionId ~appVersion ~appArn ()
+        field_map json__ "status" ResourceResolutionStatusType.of_json in
+      let resolutionId = field_map json__ "resolutionId" String255.of_json in
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?status ?resolutionId ?appVersion ?appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Resolves the resources for an application version."]
 module ResolveAppVersionResourcesRequest =
@@ -5012,7 +9641,7 @@ module ResolveAppVersionResourcesRequest =
       {
       appArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       appVersion: EntityVersion.t
         [@ocaml.doc "The version of the application."]}
     let context_ = "ResolveAppVersionResourcesRequest"
@@ -5030,9 +9659,10 @@ module ResolveAppVersionResourcesRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~appVersion ~appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
+    let of_json json__ =
+      let appVersion =
+        field_map_exn json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
       make ~appVersion ~appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Resolves the resources for an application version."]
@@ -5042,7 +9672,7 @@ module RemoveDraftAppVersionResourceMappingsResponse =
       {
       appArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       appVersion: EntityVersion.t option
         [@ocaml.doc "The version of the application."]}
     type nonrec error =
@@ -5130,9 +9760,9 @@ module RemoveDraftAppVersionResourceMappingsResponse =
       let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
       make ?appVersion ?appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appVersion = field_map json "appVersion" EntityVersion.of_json in
-      let appArn = field_map json "appArn" Arn.of_json in
+    let of_json json__ =
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
       make ?appVersion ?appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5143,46 +9773,63 @@ module RemoveDraftAppVersionResourceMappingsRequest =
       {
       appArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       appRegistryAppNames: EntityNameList.t option
         [@ocaml.doc
-          "The names of the registered applications to remove from the resource mappings."];
+          "The names of the registered applications you want to remove from the resource mappings."];
+      eksSourceNames: String255List.t option
+        [@ocaml.doc
+          "The names of the Amazon Elastic Kubernetes Service clusters and namespaces you want to remove from the resource mappings. This parameter accepts values in \"eks-cluster/namespace\" format."];
       logicalStackNames: String255List.t option
         [@ocaml.doc
-          "The names of the CloudFormation stacks to remove from the resource mappings."];
+          "The names of the CloudFormation stacks you want to remove from the resource mappings."];
       resourceGroupNames: EntityNameList.t option
         [@ocaml.doc
-          "The names of the resource groups to remove from the resource mappings."];
+          "The names of the resource groups you want to remove from the resource mappings."];
       resourceNames: EntityNameList.t option
         [@ocaml.doc
-          "The names of the resources to remove from the resource mappings."]}
+          "The names of the resources you want to remove from the resource mappings."];
+      terraformSourceNames: String255List.t option
+        [@ocaml.doc
+          "The names of the Terraform sources you want to remove from the resource mappings."]}
     let context_ = "RemoveDraftAppVersionResourceMappingsRequest"
     let make ?appRegistryAppNames =
-      fun ?logicalStackNames ->
-        fun ?resourceGroupNames ->
-          fun ?resourceNames ->
-            fun ~appArn ->
-              fun () ->
-                {
-                  appRegistryAppNames;
-                  logicalStackNames;
-                  resourceGroupNames;
-                  resourceNames;
-                  appArn
-                }
+      fun ?eksSourceNames ->
+        fun ?logicalStackNames ->
+          fun ?resourceGroupNames ->
+            fun ?resourceNames ->
+              fun ?terraformSourceNames ->
+                fun ~appArn ->
+                  fun () ->
+                    {
+                      appRegistryAppNames;
+                      eksSourceNames;
+                      logicalStackNames;
+                      resourceGroupNames;
+                      resourceNames;
+                      terraformSourceNames;
+                      appArn
+                    }
     let to_value x =
       structure_to_value
         [("appArn", (Some (Arn.to_value x.appArn)));
         ("appRegistryAppNames",
           (Option.map x.appRegistryAppNames ~f:EntityNameList.to_value));
+        ("eksSourceNames",
+          (Option.map x.eksSourceNames ~f:String255List.to_value));
         ("logicalStackNames",
           (Option.map x.logicalStackNames ~f:String255List.to_value));
         ("resourceGroupNames",
           (Option.map x.resourceGroupNames ~f:EntityNameList.to_value));
         ("resourceNames",
-          (Option.map x.resourceNames ~f:EntityNameList.to_value))]
+          (Option.map x.resourceNames ~f:EntityNameList.to_value));
+        ("terraformSourceNames",
+          (Option.map x.terraformSourceNames ~f:String255List.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let terraformSourceNames =
+        (Option.map ~f:String255List.of_xml)
+          (Xml.child xml_arg0 "terraformSourceNames") in
       let resourceNames =
         (Option.map ~f:EntityNameList.of_xml)
           (Xml.child xml_arg0 "resourceNames") in
@@ -5192,36 +9839,174 @@ module RemoveDraftAppVersionResourceMappingsRequest =
       let logicalStackNames =
         (Option.map ~f:String255List.of_xml)
           (Xml.child xml_arg0 "logicalStackNames") in
+      let eksSourceNames =
+        (Option.map ~f:String255List.of_xml)
+          (Xml.child xml_arg0 "eksSourceNames") in
       let appRegistryAppNames =
         (Option.map ~f:EntityNameList.of_xml)
           (Xml.child xml_arg0 "appRegistryAppNames") in
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      make ?resourceNames ?resourceGroupNames ?logicalStackNames
-        ?appRegistryAppNames ~appArn ()
+      make ?terraformSourceNames ?resourceNames ?resourceGroupNames
+        ?logicalStackNames ?eksSourceNames ?appRegistryAppNames ~appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let terraformSourceNames =
+        field_map json__ "terraformSourceNames" String255List.of_json in
       let resourceNames =
-        field_map json "resourceNames" EntityNameList.of_json in
+        field_map json__ "resourceNames" EntityNameList.of_json in
       let resourceGroupNames =
-        field_map json "resourceGroupNames" EntityNameList.of_json in
+        field_map json__ "resourceGroupNames" EntityNameList.of_json in
       let logicalStackNames =
-        field_map json "logicalStackNames" String255List.of_json in
+        field_map json__ "logicalStackNames" String255List.of_json in
+      let eksSourceNames =
+        field_map json__ "eksSourceNames" String255List.of_json in
       let appRegistryAppNames =
-        field_map json "appRegistryAppNames" EntityNameList.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
-      make ?resourceNames ?resourceGroupNames ?logicalStackNames
-        ?appRegistryAppNames ~appArn ()
+        field_map json__ "appRegistryAppNames" EntityNameList.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ?terraformSourceNames ?resourceNames ?resourceGroupNames
+        ?logicalStackNames ?eksSourceNames ?appRegistryAppNames ~appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Removes resource mappings from a draft application version."]
+module RejectResourceGroupingRecommendationsResponse =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      failedEntries: FailedGroupingRecommendationEntries.t option
+        [@ocaml.doc
+          "List of resource grouping recommendations that failed to get excluded in your application."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appArn =
+      fun ?failedEntries -> fun () -> { appArn; failedEntries }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("failedEntries",
+          (Option.map x.failedEntries
+             ~f:FailedGroupingRecommendationEntries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failedEntries =
+        (Option.map ~f:FailedGroupingRecommendationEntries.of_xml)
+          (Xml.child xml_arg0 "failedEntries") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?failedEntries ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failedEntries =
+        field_map json__ "failedEntries"
+          FailedGroupingRecommendationEntries.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?failedEntries ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Rejects resource grouping recommendations."]
+module RejectResourceGroupingRecommendationsRequest =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      entries: RejectGroupingRecommendationEntries.t
+        [@ocaml.doc
+          "List of resource grouping recommendations you have selected to exclude from your application."]}
+    let context_ = "RejectResourceGroupingRecommendationsRequest"
+    let make ~appArn = fun ~entries -> fun () -> { appArn; entries }
+    let to_value x =
+      structure_to_value
+        [("appArn", (Some (Arn.to_value x.appArn)));
+        ("entries",
+          (Some (RejectGroupingRecommendationEntries.to_value x.entries)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entries =
+        RejectGroupingRecommendationEntries.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "entries") in
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      make ~entries ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entries =
+        field_map_exn json__ "entries"
+          RejectGroupingRecommendationEntries.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ~entries ~appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Rejects resource grouping recommendations."]
 module PutDraftAppVersionTemplateResponse =
   struct
     type nonrec t =
       {
       appArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       appVersion: EntityVersion.t option
         [@ocaml.doc "The version of the application."]}
     type nonrec error =
@@ -5309,23 +10094,23 @@ module PutDraftAppVersionTemplateResponse =
       let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
       make ?appVersion ?appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appVersion = field_map json "appVersion" EntityVersion.of_json in
-      let appArn = field_map json "appArn" Arn.of_json in
+    let of_json json__ =
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
       make ?appVersion ?appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates the app template for a draft version of a Resilience Hub app."]
+       "Adds or updates the app template for an Resilience Hub application draft version."]
 module PutDraftAppVersionTemplateRequest =
   struct
     type nonrec t =
       {
       appArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       appTemplateBody: AppTemplateBody.t
         [@ocaml.doc
-          "A JSON string that contains the body of the app template."]}
+          "A JSON string that provides information about your application structure. To learn more about the appTemplateBody template, see the sample template provided in the Examples section. The appTemplateBody JSON string has the following structure: resources The list of logical resources that must be included in the Resilience Hub application. Type: Array Don't add the resources that you want to exclude. Each resources array item includes the following fields: logicalResourceId Logical identifier of the resource. Type: Object Each logicalResourceId object includes the following fields: identifier Identifier of the resource. Type: String logicalStackName The name of the CloudFormation stack this resource belongs to. Type: String resourceGroupName The name of the resource group this resource belongs to. Type: String terraformSourceName The name of the Terraform S3 state file this resource belongs to. Type: String eksSourceName Name of the Amazon Elastic Kubernetes Service cluster and namespace this resource belongs to. This parameter accepts values in \"eks-cluster/namespace\" format. Type: String type The type of resource. Type: string name The name of the resource. Type: String additionalInfo Additional configuration parameters for an Resilience Hub application. If you want to implement additionalInfo through the Resilience Hub console rather than using an API call, see Configure the application configuration parameters. Currently, this parameter accepts a key-value mapping (in a string format) of only one failover region and one associated account. Key: \"failover-regions\" Value: \"\\[\\{\"region\":\"<REGION>\", \"accounts\":\\[\\{\"id\":\"<ACCOUNT_ID>\"\\}\\]\\}\\]\" appComponents List of Application Components that this resource belongs to. If an Application Component is not part of the Resilience Hub application, it will be added. Type: Array Each appComponents array item includes the following fields: name Name of the Application Component. Type: String type Type of Application Component. For more information about the types of Application Component, see Grouping resources in an AppComponent. Type: String resourceNames The list of included resources that are assigned to the Application Component. Type: Array of strings additionalInfo Additional configuration parameters for an Resilience Hub application. If you want to implement additionalInfo through the Resilience Hub console rather than using an API call, see Configure the application configuration parameters. Currently, this parameter accepts a key-value mapping (in a string format) of only one failover region and one associated account. Key: \"failover-regions\" Value: \"\\[\\{\"region\":\"<REGION>\", \"accounts\":\\[\\{\"id\":\"<ACCOUNT_ID>\"\\}\\]\\}\\]\" excludedResources The list of logical resource identifiers to be excluded from the application. Type: Array Don't add the resources that you want to include. Each excludedResources array item includes the following fields: logicalResourceIds Logical identifier of the resource. Type: Object You can configure only one of the following fields: logicalStackName resourceGroupName terraformSourceName eksSourceName Each logicalResourceIds object includes the following fields: identifier Identifier of the resource. Type: String logicalStackName The name of the CloudFormation stack this resource belongs to. Type: String resourceGroupName The name of the resource group this resource belongs to. Type: String terraformSourceName The name of the Terraform S3 state file this resource belongs to. Type: String eksSourceName Name of the Amazon Elastic Kubernetes Service cluster and namespace this resource belongs to. This parameter accepts values in \"eks-cluster/namespace\" format. Type: String version Resilience Hub application version. additionalInfo Additional configuration parameters for an Resilience Hub application. If you want to implement additionalInfo through the Resilience Hub console rather than using an API call, see Configure the application configuration parameters. Currently, this parameter accepts a key-value mapping (in a string format) of only one failover region and one associated account. Key: \"failover-regions\" Value: \"\\[\\{\"region\":\"<REGION>\", \"accounts\":\\[\\{\"id\":\"<ACCOUNT_ID>\"\\}\\]\\}\\]\""]}
     let context_ = "PutDraftAppVersionTemplateRequest"
     let make ~appArn =
       fun ~appTemplateBody -> fun () -> { appArn; appTemplateBody }
@@ -5343,23 +10128,27 @@ module PutDraftAppVersionTemplateRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~appTemplateBody ~appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appTemplateBody =
-        field_map_exn json "appTemplateBody" AppTemplateBody.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
+        field_map_exn json__ "appTemplateBody" AppTemplateBody.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
       make ~appTemplateBody ~appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates the app template for a draft version of a Resilience Hub app."]
+       "Adds or updates the app template for an Resilience Hub application draft version."]
 module PublishAppVersionResponse =
   struct
     type nonrec t =
       {
-      appArn: Arn.t
+      appArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       appVersion: EntityVersion.t option
-        [@ocaml.doc "The version of the application."]}
+        [@ocaml.doc "The version of the application."];
+      identifier: LongOptional.t option
+        [@ocaml.doc "Identifier of the application version."];
+      versionName: EntityVersion.t option
+        [@ocaml.doc "Name of the application version."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -5368,8 +10157,11 @@ module PublishAppVersionResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "PublishAppVersionResponse"
-    let make ?appVersion = fun ~appArn -> fun () -> { appVersion; appArn }
+    let make ?appArn =
+      fun ?appVersion ->
+        fun ?identifier ->
+          fun ?versionName ->
+            fun () -> { appArn; appVersion; identifier; versionName }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5436,21 +10228,29 @@ module PublishAppVersionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("appArn", (Some (Arn.to_value x.appArn)));
-        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value))]
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value));
+        ("identifier", (Option.map x.identifier ~f:LongOptional.to_value));
+        ("versionName", (Option.map x.versionName ~f:EntityVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let versionName =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "versionName") in
+      let identifier =
+        (Option.map ~f:LongOptional.of_xml) (Xml.child xml_arg0 "identifier") in
       let appVersion =
         (Option.map ~f:EntityVersion.of_xml)
           (Xml.child xml_arg0 "appVersion") in
-      let appArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      make ?appVersion ~appArn ()
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?versionName ?identifier ?appVersion ?appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appVersion = field_map json "appVersion" EntityVersion.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
-      make ?appVersion ~appArn ()
+    let of_json json__ =
+      let versionName = field_map json__ "versionName" EntityVersion.of_json in
+      let identifier = field_map json__ "identifier" LongOptional.of_json in
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?versionName ?identifier ?appVersion ?appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Publishes a new version of a specific Resilience Hub application."]
@@ -5460,19 +10260,28 @@ module PublishAppVersionRequest =
       {
       appArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."]}
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      versionName: EntityVersion.t option
+        [@ocaml.doc "Name of the application version."]}
     let context_ = "PublishAppVersionRequest"
-    let make ~appArn = fun () -> { appArn }
+    let make ?versionName = fun ~appArn -> fun () -> { versionName; appArn }
     let to_value x =
-      structure_to_value [("appArn", (Some (Arn.to_value x.appArn)))]
+      structure_to_value
+        [("appArn", (Some (Arn.to_value x.appArn)));
+        ("versionName", (Option.map x.versionName ~f:EntityVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let versionName =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "versionName") in
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      make ~appArn ()
+      make ?versionName ~appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appArn = field_map_exn json "appArn" Arn.of_json in make ~appArn ()
+    let of_json json__ =
+      let versionName = field_map json__ "versionName" EntityVersion.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ?versionName ~appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Publishes a new version of a specific Resilience Hub application."]
@@ -5482,10 +10291,10 @@ module ListUnsupportedAppVersionResourcesResponse =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token for the next set of results, or null if there are no more results."];
-      resolutionId: String255.t
+          "Token for the next set of results, or null if there are no more results."];
+      resolutionId: String255.t option
         [@ocaml.doc "The identifier for a specific resolution."];
-      unsupportedResources: UnsupportedResourceList.t
+      unsupportedResources: UnsupportedResourceList.t option
         [@ocaml.doc "The unsupported resources for the application."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -5495,10 +10304,9 @@ module ListUnsupportedAppVersionResourcesResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListUnsupportedAppVersionResourcesResponse"
     let make ?nextToken =
-      fun ~resolutionId ->
-        fun ~unsupportedResources ->
+      fun ?resolutionId ->
+        fun ?unsupportedResources ->
           fun () -> { nextToken; resolutionId; unsupportedResources }
     let error_of_json name json =
       match name with
@@ -5567,43 +10375,43 @@ module ListUnsupportedAppVersionResourcesResponse =
     let to_value x =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("resolutionId", (Some (String255.to_value x.resolutionId)));
+        ("resolutionId", (Option.map x.resolutionId ~f:String255.to_value));
         ("unsupportedResources",
-          (Some (UnsupportedResourceList.to_value x.unsupportedResources)))]
+          (Option.map x.unsupportedResources
+             ~f:UnsupportedResourceList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let unsupportedResources =
-        UnsupportedResourceList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "unsupportedResources") in
+        (Option.map ~f:UnsupportedResourceList.of_xml)
+          (Xml.child xml_arg0 "unsupportedResources") in
       let resolutionId =
-        String255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resolutionId") in
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "resolutionId") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~unsupportedResources ~resolutionId ?nextToken ()
+      make ?unsupportedResources ?resolutionId ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unsupportedResources =
-        field_map_exn json "unsupportedResources"
+        field_map json__ "unsupportedResources"
           UnsupportedResourceList.of_json in
-      let resolutionId = field_map_exn json "resolutionId" String255.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      make ~unsupportedResources ~resolutionId ?nextToken ()
+      let resolutionId = field_map json__ "resolutionId" String255.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?unsupportedResources ?resolutionId ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the resources that are not currently supported in AWS Resilience Hub. An unsupported resource is a resource that exists in the object that was used to create an app, but is not supported by Resilience Hub."]
+       "Lists the resources that are not currently supported in Resilience Hub. An unsupported resource is a resource that exists in the object that was used to create an app, but is not supported by Resilience Hub."]
 module ListUnsupportedAppVersionResourcesRequest =
   struct
     type nonrec t =
       {
       appArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       appVersion: EntityVersion.t
         [@ocaml.doc "The version of the application."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+          "Maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "Null, or the token from a previous call to get the next set of results."];
@@ -5639,24 +10447,25 @@ module ListUnsupportedAppVersionResourcesRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ?resolutionId ?nextToken ?maxResults ~appVersion ~appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resolutionId = field_map json "resolutionId" String255.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
+    let of_json json__ =
+      let resolutionId = field_map json__ "resolutionId" String255.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let appVersion =
+        field_map_exn json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
       make ?resolutionId ?nextToken ?maxResults ~appVersion ~appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the resources that are not currently supported in AWS Resilience Hub. An unsupported resource is a resource that exists in the object that was used to create an app, but is not supported by Resilience Hub."]
+       "Lists the resources that are not currently supported in Resilience Hub. An unsupported resource is a resource that exists in the object that was used to create an app, but is not supported by Resilience Hub."]
 module ListTestRecommendationsResponse =
   struct
     type nonrec t =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token for the next set of results, or null if there are no more results."];
-      testRecommendations: TestRecommendationList.t
+          "Token for the next set of results, or null if there are no more results."];
+      testRecommendations: TestRecommendationList.t option
         [@ocaml.doc
           "The test recommendations for the Resilience Hub application."]}
     type nonrec error =
@@ -5667,9 +10476,8 @@ module ListTestRecommendationsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTestRecommendationsResponse"
     let make ?nextToken =
-      fun ~testRecommendations ->
+      fun ?testRecommendations ->
         fun () -> { nextToken; testRecommendations }
     let error_of_json name json =
       match name with
@@ -5739,22 +10547,22 @@ module ListTestRecommendationsResponse =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("testRecommendations",
-          (Some (TestRecommendationList.to_value x.testRecommendations)))]
+          (Option.map x.testRecommendations
+             ~f:TestRecommendationList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let testRecommendations =
-        TestRecommendationList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "testRecommendations") in
+        (Option.map ~f:TestRecommendationList.of_xml)
+          (Xml.child xml_arg0 "testRecommendations") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~testRecommendations ?nextToken ()
+      make ?testRecommendations ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let testRecommendations =
-        field_map_exn json "testRecommendations"
-          TestRecommendationList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      make ~testRecommendations ?nextToken ()
+        field_map json__ "testRecommendations" TestRecommendationList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?testRecommendations ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the test recommendations for the Resilience Hub application."]
@@ -5764,10 +10572,10 @@ module ListTestRecommendationsRequest =
       {
       assessmentArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:dcps:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:resiliencehub:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+          "Maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "Null, or the token from a previous call to get the next set of results."]}
@@ -5791,10 +10599,10 @@ module ListTestRecommendationsRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
       make ?nextToken ?maxResults ~assessmentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let assessmentArn = field_map_exn json "assessmentArn" Arn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let assessmentArn = field_map_exn json__ "assessmentArn" Arn.of_json in
       make ?nextToken ?maxResults ~assessmentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5805,7 +10613,7 @@ module ListTagsForResourceResponse =
       {
       tags: TagMap.t option
         [@ocaml.doc
-          "The tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."]}
+          "Tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -5877,8 +10685,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the tags for your resources in your Resilience Hub applications."]
@@ -5900,8 +10708,8 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5912,8 +10720,8 @@ module ListSuggestedResiliencyPoliciesResponse =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token for the next set of results, or null if there are no more results."];
-      resiliencyPolicies: ResiliencyPolicies.t
+          "Token for the next set of results, or null if there are no more results."];
+      resiliencyPolicies: ResiliencyPolicies.t option
         [@ocaml.doc
           "The suggested resiliency policies for the Resilience Hub applications."]}
     type nonrec error =
@@ -5923,9 +10731,8 @@ module ListSuggestedResiliencyPoliciesResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListSuggestedResiliencyPoliciesResponse"
     let make ?nextToken =
-      fun ~resiliencyPolicies -> fun () -> { nextToken; resiliencyPolicies }
+      fun ?resiliencyPolicies -> fun () -> { nextToken; resiliencyPolicies }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5986,21 +10793,21 @@ module ListSuggestedResiliencyPoliciesResponse =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("resiliencyPolicies",
-          (Some (ResiliencyPolicies.to_value x.resiliencyPolicies)))]
+          (Option.map x.resiliencyPolicies ~f:ResiliencyPolicies.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resiliencyPolicies =
-        ResiliencyPolicies.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resiliencyPolicies") in
+        (Option.map ~f:ResiliencyPolicies.of_xml)
+          (Xml.child xml_arg0 "resiliencyPolicies") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~resiliencyPolicies ?nextToken ()
+      make ?resiliencyPolicies ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resiliencyPolicies =
-        field_map_exn json "resiliencyPolicies" ResiliencyPolicies.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      make ~resiliencyPolicies ?nextToken ()
+        field_map json__ "resiliencyPolicies" ResiliencyPolicies.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?resiliencyPolicies ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the suggested resiliency policies for the Resilience Hub applications."]
@@ -6010,7 +10817,7 @@ module ListSuggestedResiliencyPoliciesRequest =
       {
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+          "Maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "Null, or the token from a previous call to get the next set of results."]}
@@ -6028,9 +10835,9 @@ module ListSuggestedResiliencyPoliciesRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6041,8 +10848,8 @@ module ListSopRecommendationsResponse =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token for the next set of results, or null if there are no more results."];
-      sopRecommendations: SopRecommendationList.t
+          "Token for the next set of results, or null if there are no more results."];
+      sopRecommendations: SopRecommendationList.t option
         [@ocaml.doc
           "The standard operating procedure (SOP) recommendations for the Resilience Hub applications."]}
     type nonrec error =
@@ -6053,9 +10860,8 @@ module ListSopRecommendationsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListSopRecommendationsResponse"
     let make ?nextToken =
-      fun ~sopRecommendations -> fun () -> { nextToken; sopRecommendations }
+      fun ?sopRecommendations -> fun () -> { nextToken; sopRecommendations }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6124,21 +10930,21 @@ module ListSopRecommendationsResponse =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("sopRecommendations",
-          (Some (SopRecommendationList.to_value x.sopRecommendations)))]
+          (Option.map x.sopRecommendations ~f:SopRecommendationList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let sopRecommendations =
-        SopRecommendationList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sopRecommendations") in
+        (Option.map ~f:SopRecommendationList.of_xml)
+          (Xml.child xml_arg0 "sopRecommendations") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~sopRecommendations ?nextToken ()
+      make ?sopRecommendations ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sopRecommendations =
-        field_map_exn json "sopRecommendations" SopRecommendationList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      make ~sopRecommendations ?nextToken ()
+        field_map json__ "sopRecommendations" SopRecommendationList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?sopRecommendations ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the standard operating procedure (SOP) recommendations for the Resilience Hub applications."]
@@ -6148,10 +10954,10 @@ module ListSopRecommendationsRequest =
       {
       assessmentArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:dcps:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:resiliencehub:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+          "Maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "Null, or the token from a previous call to get the next set of results."]}
@@ -6175,22 +10981,159 @@ module ListSopRecommendationsRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
       make ?nextToken ?maxResults ~assessmentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let assessmentArn = field_map_exn json "assessmentArn" Arn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let assessmentArn = field_map_exn json__ "assessmentArn" Arn.of_json in
       make ?nextToken ?maxResults ~assessmentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the standard operating procedure (SOP) recommendations for the Resilience Hub applications."]
+module ListResourceGroupingRecommendationsResponse =
+  struct
+    type nonrec t =
+      {
+      groupingRecommendations: GroupingRecommendationList.t option
+        [@ocaml.doc
+          "List of resource grouping recommendations generated by Resilience Hub."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Null, or the token from a previous call to get the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?groupingRecommendations =
+      fun ?nextToken -> fun () -> { groupingRecommendations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("groupingRecommendations",
+           (Option.map x.groupingRecommendations
+              ~f:GroupingRecommendationList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let groupingRecommendations =
+        (Option.map ~f:GroupingRecommendationList.of_xml)
+          (Xml.child xml_arg0 "groupingRecommendations") in
+      make ?nextToken ?groupingRecommendations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let groupingRecommendations =
+        field_map json__ "groupingRecommendations"
+          GroupingRecommendationList.of_json in
+      make ?nextToken ?groupingRecommendations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the resource grouping recommendations suggested by Resilience Hub for your application."]
+module ListResourceGroupingRecommendationsRequest =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "Maximum number of grouping recommendations to be displayed per Resilience Hub application."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Null, or the token from a previous call to get the next set of results."]}
+    let make ?appArn =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { appArn; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?nextToken ?maxResults ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?nextToken ?maxResults ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the resource grouping recommendations suggested by Resilience Hub for your application."]
 module ListResiliencyPoliciesResponse =
   struct
     type nonrec t =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token for the next set of results, or null if there are no more results."];
-      resiliencyPolicies: ResiliencyPolicies.t
+          "Token for the next set of results, or null if there are no more results."];
+      resiliencyPolicies: ResiliencyPolicies.t option
         [@ocaml.doc
           "The resiliency policies for the Resilience Hub applications."]}
     type nonrec error =
@@ -6200,9 +11143,8 @@ module ListResiliencyPoliciesResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListResiliencyPoliciesResponse"
     let make ?nextToken =
-      fun ~resiliencyPolicies -> fun () -> { nextToken; resiliencyPolicies }
+      fun ?resiliencyPolicies -> fun () -> { nextToken; resiliencyPolicies }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6263,21 +11205,21 @@ module ListResiliencyPoliciesResponse =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("resiliencyPolicies",
-          (Some (ResiliencyPolicies.to_value x.resiliencyPolicies)))]
+          (Option.map x.resiliencyPolicies ~f:ResiliencyPolicies.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resiliencyPolicies =
-        ResiliencyPolicies.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resiliencyPolicies") in
+        (Option.map ~f:ResiliencyPolicies.of_xml)
+          (Xml.child xml_arg0 "resiliencyPolicies") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~resiliencyPolicies ?nextToken ()
+      make ?resiliencyPolicies ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resiliencyPolicies =
-        field_map_exn json "resiliencyPolicies" ResiliencyPolicies.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      make ~resiliencyPolicies ?nextToken ()
+        field_map json__ "resiliencyPolicies" ResiliencyPolicies.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?resiliencyPolicies ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the resiliency policies for the Resilience Hub applications."]
@@ -6287,11 +11229,12 @@ module ListResiliencyPoliciesRequest =
       {
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+          "Maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "Null, or the token from a previous call to get the next set of results."];
-      policyName: EntityName.t option [@ocaml.doc "The name of the policy"]}
+      policyName: EntityName.t option
+        [@ocaml.doc "Name of the resiliency policy."]}
     let make ?maxResults =
       fun ?nextToken ->
         fun ?policyName -> fun () -> { maxResults; nextToken; policyName }
@@ -6310,10 +11253,10 @@ module ListResiliencyPoliciesRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?policyName ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyName = field_map json "policyName" EntityName.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let policyName = field_map json__ "policyName" EntityName.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       make ?policyName ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6324,7 +11267,7 @@ module ListRecommendationTemplatesResponse =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token for the next set of results, or null if there are no more results."];
+          "Token for the next set of results, or null if there are no more results."];
       recommendationTemplates: RecommendationTemplateList.t option
         [@ocaml.doc
           "The recommendation templates for the Resilience Hub applications."]}
@@ -6400,11 +11343,11 @@ module ListRecommendationTemplatesResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?recommendationTemplates ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationTemplates =
-        field_map json "recommendationTemplates"
+        field_map json__ "recommendationTemplates"
           RecommendationTemplateList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?recommendationTemplates ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6413,12 +11356,12 @@ module ListRecommendationTemplatesRequest =
   struct
     type nonrec t =
       {
-      assessmentArn: Arn.t
+      assessmentArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:dcps:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:resiliencehub:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+          "Maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
       name: EntityName.t option
         [@ocaml.doc
           "The name for one of the listed recommendation templates."];
@@ -6432,28 +11375,27 @@ module ListRecommendationTemplatesRequest =
         [@ocaml.doc
           "The default is to sort by ascending startTime. To sort by descending startTime, set reverseOrder to true."];
       status: RecommendationTemplateStatusList.t option
-        [@ocaml.doc "The status of the action."]}
-    let context_ = "ListRecommendationTemplatesRequest"
-    let make ?maxResults =
-      fun ?name ->
-        fun ?nextToken ->
-          fun ?recommendationTemplateArn ->
-            fun ?reverseOrder ->
-              fun ?status ->
-                fun ~assessmentArn ->
+        [@ocaml.doc "Status of the action."]}
+    let make ?assessmentArn =
+      fun ?maxResults ->
+        fun ?name ->
+          fun ?nextToken ->
+            fun ?recommendationTemplateArn ->
+              fun ?reverseOrder ->
+                fun ?status ->
                   fun () ->
                     {
+                      assessmentArn;
                       maxResults;
                       name;
                       nextToken;
                       recommendationTemplateArn;
                       reverseOrder;
-                      status;
-                      assessmentArn
+                      status
                     }
     let to_value x =
       structure_to_value
-        [("assessmentArn", (Some (Arn.to_value x.assessmentArn)));
+        [("assessmentArn", (Option.map x.assessmentArn ~f:Arn.to_value));
         ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("name", (Option.map x.name ~f:EntityName.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
@@ -6481,44 +11423,43 @@ module ListRecommendationTemplatesRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       let assessmentArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "assessmentArn") in
       make ?status ?reverseOrder ?recommendationTemplateArn ?nextToken ?name
-        ?maxResults ~assessmentArn ()
+        ?maxResults ?assessmentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map json "status" RecommendationTemplateStatusList.of_json in
+        field_map json__ "status" RecommendationTemplateStatusList.of_json in
       let reverseOrder =
-        field_map json "reverseOrder" BooleanOptional.of_json in
+        field_map json__ "reverseOrder" BooleanOptional.of_json in
       let recommendationTemplateArn =
-        field_map json "recommendationTemplateArn" Arn.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let name = field_map json "name" EntityName.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let assessmentArn = field_map_exn json "assessmentArn" Arn.of_json in
+        field_map json__ "recommendationTemplateArn" Arn.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let name = field_map json__ "name" EntityName.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let assessmentArn = field_map json__ "assessmentArn" Arn.of_json in
       make ?status ?reverseOrder ?recommendationTemplateArn ?nextToken ?name
-        ?maxResults ~assessmentArn ()
+        ?maxResults ?assessmentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the recommendation templates for the Resilience Hub applications."]
-module ListAppsResponse =
+module ListMetricsResponse =
   struct
     type nonrec t =
       {
-      appSummaries: AppSummaryList.t
-        [@ocaml.doc "Summaries for the Resilience Hub application."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token for the next set of results, or null if there are no more results."]}
+          "Token for the next set of results, or null if there are no more results."];
+      rows: RowList.t option
+        [@ocaml.doc
+          "Specifies all the list of metric values for each row of metrics."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAppsResponse"
-    let make ?nextToken =
-      fun ~appSummaries -> fun () -> { nextToken; appSummaries }
+    let make ?nextToken = fun ?rows -> fun () -> { nextToken; rows }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6569,86 +11510,296 @@ module ListAppsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("appSummaries", (Some (AppSummaryList.to_value x.appSummaries)));
+        [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("rows", (Option.map x.rows ~f:RowList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let rows = (Option.map ~f:RowList.of_xml) (Xml.child xml_arg0 "rows") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ?rows ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rows = field_map json__ "rows" RowList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?rows ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the metrics that can be exported."]
+module ListMetricsRequest =
+  struct
+    type nonrec t =
+      {
+      conditions: ConditionList.t option
+        [@ocaml.doc
+          "Indicates the list of all the conditions that were applied on the metrics."];
+      dataSource: String255.t option
+        [@ocaml.doc "Indicates the data source of the metrics."];
+      fields: FieldList.t option
+        [@ocaml.doc "Indicates the list of fields in the data source."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "Maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Null, or the token from a previous call to get the next set of results."];
+      sorts: SortList.t option
+        [@ocaml.doc
+          "(Optional) Indicates the order in which you want to sort the fields in the metrics. By default, the fields are sorted in the ascending order."]}
+    let make ?conditions =
+      fun ?dataSource ->
+        fun ?fields ->
+          fun ?maxResults ->
+            fun ?nextToken ->
+              fun ?sorts ->
+                fun () ->
+                  {
+                    conditions;
+                    dataSource;
+                    fields;
+                    maxResults;
+                    nextToken;
+                    sorts
+                  }
+    let to_value x =
+      structure_to_value
+        [("conditions", (Option.map x.conditions ~f:ConditionList.to_value));
+        ("dataSource", (Option.map x.dataSource ~f:String255.to_value));
+        ("fields", (Option.map x.fields ~f:FieldList.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("sorts", (Option.map x.sorts ~f:SortList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sorts =
+        (Option.map ~f:SortList.of_xml) (Xml.child xml_arg0 "sorts") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let fields =
+        (Option.map ~f:FieldList.of_xml) (Xml.child xml_arg0 "fields") in
+      let dataSource =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "dataSource") in
+      let conditions =
+        (Option.map ~f:ConditionList.of_xml)
+          (Xml.child xml_arg0 "conditions") in
+      make ?sorts ?nextToken ?maxResults ?fields ?dataSource ?conditions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sorts = field_map json__ "sorts" SortList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let fields = field_map json__ "fields" FieldList.of_json in
+      let dataSource = field_map json__ "dataSource" String255.of_json in
+      let conditions = field_map json__ "conditions" ConditionList.of_json in
+      make ?sorts ?nextToken ?maxResults ?fields ?dataSource ?conditions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the metrics that can be exported."]
+module ListAppsResponse =
+  struct
+    type nonrec t =
+      {
+      appSummaries: AppSummaryList.t option
+        [@ocaml.doc "Summaries for the Resilience Hub application."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Token for the next set of results, or null if there are no more results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appSummaries =
+      fun ?nextToken -> fun () -> { appSummaries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("appSummaries",
+           (Option.map x.appSummaries ~f:AppSummaryList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let appSummaries =
-        AppSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "appSummaries") in
-      make ?nextToken ~appSummaries ()
+        (Option.map ~f:AppSummaryList.of_xml)
+          (Xml.child xml_arg0 "appSummaries") in
+      make ?nextToken ?appSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let appSummaries =
-        field_map_exn json "appSummaries" AppSummaryList.of_json in
-      make ?nextToken ~appSummaries ()
+        field_map json__ "appSummaries" AppSummaryList.of_json in
+      make ?nextToken ?appSummaries ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists your Resilience Hub applications."]
+  end[@@ocaml.doc
+       "Lists your Resilience Hub applications. You can filter applications using only one filter at a time or without using any filter. If you try to filter applications using multiple filters, you will get the following error: An error occurred (ValidationException) when calling the ListApps operation: Only one filter is supported for this operation."]
 module ListAppsRequest =
   struct
     type nonrec t =
       {
       appArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      awsApplicationArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of Resource Groups group that is integrated with an AppRegistry application. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      fromLastAssessmentTime: TimeStamp.t option
+        [@ocaml.doc
+          "Lower limit of the range that is used to filter applications based on their last assessment times."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+          "Maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
       name: EntityName.t option
         [@ocaml.doc "The name for the one of the listed applications."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "Null, or the token from a previous call to get the next set of results."]}
+          "Null, or the token from a previous call to get the next set of results."];
+      reverseOrder: BooleanOptional.t option
+        [@ocaml.doc
+          "The application list is sorted based on the values of lastAppComplianceEvaluationTime field. By default, application list is sorted in ascending order. To sort the application list in descending order, set this field to True."];
+      toLastAssessmentTime: TimeStamp.t option
+        [@ocaml.doc
+          "Upper limit of the range that is used to filter the applications based on their last assessment times."]}
     let make ?appArn =
-      fun ?maxResults ->
-        fun ?name ->
-          fun ?nextToken -> fun () -> { appArn; maxResults; name; nextToken }
+      fun ?awsApplicationArn ->
+        fun ?fromLastAssessmentTime ->
+          fun ?maxResults ->
+            fun ?name ->
+              fun ?nextToken ->
+                fun ?reverseOrder ->
+                  fun ?toLastAssessmentTime ->
+                    fun () ->
+                      {
+                        appArn;
+                        awsApplicationArn;
+                        fromLastAssessmentTime;
+                        maxResults;
+                        name;
+                        nextToken;
+                        reverseOrder;
+                        toLastAssessmentTime
+                      }
     let to_value x =
       structure_to_value
         [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("awsApplicationArn",
+          (Option.map x.awsApplicationArn ~f:Arn.to_value));
+        ("fromLastAssessmentTime",
+          (Option.map x.fromLastAssessmentTime ~f:TimeStamp.to_value));
         ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("name", (Option.map x.name ~f:EntityName.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("reverseOrder",
+          (Option.map x.reverseOrder ~f:BooleanOptional.to_value));
+        ("toLastAssessmentTime",
+          (Option.map x.toLastAssessmentTime ~f:TimeStamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let toLastAssessmentTime =
+        (Option.map ~f:TimeStamp.of_xml)
+          (Xml.child xml_arg0 "toLastAssessmentTime") in
+      let reverseOrder =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "reverseOrder") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let name =
         (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "name") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let fromLastAssessmentTime =
+        (Option.map ~f:TimeStamp.of_xml)
+          (Xml.child xml_arg0 "fromLastAssessmentTime") in
+      let awsApplicationArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "awsApplicationArn") in
       let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
-      make ?nextToken ?name ?maxResults ?appArn ()
+      make ?toLastAssessmentTime ?reverseOrder ?nextToken ?name ?maxResults
+        ?fromLastAssessmentTime ?awsApplicationArn ?appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let name = field_map json "name" EntityName.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let appArn = field_map json "appArn" Arn.of_json in
-      make ?nextToken ?name ?maxResults ?appArn ()
+    let of_json json__ =
+      let toLastAssessmentTime =
+        field_map json__ "toLastAssessmentTime" TimeStamp.of_json in
+      let reverseOrder =
+        field_map json__ "reverseOrder" BooleanOptional.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let name = field_map json__ "name" EntityName.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let fromLastAssessmentTime =
+        field_map json__ "fromLastAssessmentTime" TimeStamp.of_json in
+      let awsApplicationArn =
+        field_map json__ "awsApplicationArn" Arn.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?toLastAssessmentTime ?reverseOrder ?nextToken ?name ?maxResults
+        ?fromLastAssessmentTime ?awsApplicationArn ?appArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists your Resilience Hub applications."]
+  end[@@ocaml.doc
+       "Lists your Resilience Hub applications. You can filter applications using only one filter at a time or without using any filter. If you try to filter applications using multiple filters, you will get the following error: An error occurred (ValidationException) when calling the ListApps operation: Only one filter is supported for this operation."]
 module ListAppVersionsResponse =
   struct
     type nonrec t =
       {
-      appVersions: AppVersionList.t
+      appVersions: AppVersionList.t option
         [@ocaml.doc "The version of the application."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token for the next set of results, or null if there are no more results."]}
+          "Token for the next set of results, or null if there are no more results."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAppVersionsResponse"
-    let make ?nextToken =
-      fun ~appVersions -> fun () -> { nextToken; appVersions }
+    let make ?appVersions =
+      fun ?nextToken -> fun () -> { appVersions; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6699,22 +11850,22 @@ module ListAppVersionsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("appVersions", (Some (AppVersionList.to_value x.appVersions)));
+        [("appVersions",
+           (Option.map x.appVersions ~f:AppVersionList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let appVersions =
-        AppVersionList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "appVersions") in
-      make ?nextToken ~appVersions ()
+        (Option.map ~f:AppVersionList.of_xml)
+          (Xml.child xml_arg0 "appVersions") in
+      make ?nextToken ?appVersions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let appVersions =
-        field_map_exn json "appVersions" AppVersionList.of_json in
-      make ?nextToken ~appVersions ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let appVersions = field_map json__ "appVersions" AppVersionList.of_json in
+      make ?nextToken ?appVersions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the different versions for the Resilience Hub applications."]
@@ -6724,37 +11875,54 @@ module ListAppVersionsRequest =
       {
       appArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      endTime: TimeStamp.t option
+        [@ocaml.doc
+          "Upper limit of the time range to filter the application versions."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+          "Maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "Null, or the token from a previous call to get the next set of results."]}
+          "Null, or the token from a previous call to get the next set of results."];
+      startTime: TimeStamp.t option
+        [@ocaml.doc
+          "Lower limit of the time range to filter the application versions."]}
     let context_ = "ListAppVersionsRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~appArn -> fun () -> { maxResults; nextToken; appArn }
+    let make ?endTime =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ?startTime ->
+            fun ~appArn ->
+              fun () -> { endTime; maxResults; nextToken; startTime; appArn }
     let to_value x =
       structure_to_value
         [("appArn", (Some (Arn.to_value x.appArn)));
+        ("endTime", (Option.map x.endTime ~f:TimeStamp.to_value));
         ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("startTime", (Option.map x.startTime ~f:TimeStamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let startTime =
+        (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "startTime") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let endTime =
+        (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "endTime") in
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      make ?nextToken ?maxResults ~appArn ()
+      make ?startTime ?nextToken ?maxResults ?endTime ~appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
-      make ?nextToken ?maxResults ~appArn ()
+    let of_json json__ =
+      let startTime = field_map json__ "startTime" TimeStamp.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let endTime = field_map json__ "endTime" TimeStamp.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ?startTime ?nextToken ?maxResults ?endTime ~appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the different versions for the Resilience Hub applications."]
@@ -6764,11 +11932,11 @@ module ListAppVersionResourcesResponse =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token for the next set of results, or null if there are no more results."];
-      physicalResources: PhysicalResourceList.t
+          "Token for the next set of results, or null if there are no more results."];
+      physicalResources: PhysicalResourceList.t option
         [@ocaml.doc "The physical resources in the application version."];
-      resolutionId: String255.t
-        [@ocaml.doc "The identifier for a specific resolution."]}
+      resolutionId: String255.t option
+        [@ocaml.doc "The ID for a specific resolution."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -6777,10 +11945,9 @@ module ListAppVersionResourcesResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAppVersionResourcesResponse"
     let make ?nextToken =
-      fun ~physicalResources ->
-        fun ~resolutionId ->
+      fun ?physicalResources ->
+        fun ?resolutionId ->
           fun () -> { nextToken; physicalResources; resolutionId }
     let error_of_json name json =
       match name with
@@ -6850,40 +12017,40 @@ module ListAppVersionResourcesResponse =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("physicalResources",
-          (Some (PhysicalResourceList.to_value x.physicalResources)));
-        ("resolutionId", (Some (String255.to_value x.resolutionId)))]
+          (Option.map x.physicalResources ~f:PhysicalResourceList.to_value));
+        ("resolutionId", (Option.map x.resolutionId ~f:String255.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resolutionId =
-        String255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resolutionId") in
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "resolutionId") in
       let physicalResources =
-        PhysicalResourceList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "physicalResources") in
+        (Option.map ~f:PhysicalResourceList.of_xml)
+          (Xml.child xml_arg0 "physicalResources") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~resolutionId ~physicalResources ?nextToken ()
+      make ?resolutionId ?physicalResources ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resolutionId = field_map_exn json "resolutionId" String255.of_json in
+    let of_json json__ =
+      let resolutionId = field_map json__ "resolutionId" String255.of_json in
       let physicalResources =
-        field_map_exn json "physicalResources" PhysicalResourceList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      make ~resolutionId ~physicalResources ?nextToken ()
+        field_map json__ "physicalResources" PhysicalResourceList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?resolutionId ?physicalResources ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists all the resources in an application version."]
+  end[@@ocaml.doc
+       "Lists all the resources in an Resilience Hub application."]
 module ListAppVersionResourcesRequest =
   struct
     type nonrec t =
       {
       appArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       appVersion: EntityVersion.t
         [@ocaml.doc "The version of the application."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+          "Maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "Null, or the token from a previous call to get the next set of results."];
@@ -6919,23 +12086,25 @@ module ListAppVersionResourcesRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ?resolutionId ?nextToken ?maxResults ~appVersion ~appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resolutionId = field_map json "resolutionId" String255.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
+    let of_json json__ =
+      let resolutionId = field_map json__ "resolutionId" String255.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let appVersion =
+        field_map_exn json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
       make ?resolutionId ?nextToken ?maxResults ~appVersion ~appArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists all the resources in an application version."]
+  end[@@ocaml.doc
+       "Lists all the resources in an Resilience Hub application."]
 module ListAppVersionResourceMappingsResponse =
   struct
     type nonrec t =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token for the next set of results, or null if there are no more results."];
-      resourceMappings: ResourceMappingList.t
+          "Token for the next set of results, or null if there are no more results."];
+      resourceMappings: ResourceMappingList.t option
         [@ocaml.doc
           "Mappings used to map logical resources from the template to physical resources. You can use the mapping type CFN_STACK if the application template uses a logical stack name. Or you can map individual resources by using the mapping type RESOURCE. We recommend using the mapping type CFN_STACK if the application is backed by a CloudFormation stack."]}
     type nonrec error =
@@ -6945,9 +12114,8 @@ module ListAppVersionResourceMappingsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAppVersionResourceMappingsResponse"
     let make ?nextToken =
-      fun ~resourceMappings -> fun () -> { nextToken; resourceMappings }
+      fun ?resourceMappings -> fun () -> { nextToken; resourceMappings }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7008,21 +12176,21 @@ module ListAppVersionResourceMappingsResponse =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("resourceMappings",
-          (Some (ResourceMappingList.to_value x.resourceMappings)))]
+          (Option.map x.resourceMappings ~f:ResourceMappingList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceMappings =
-        ResourceMappingList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceMappings") in
+        (Option.map ~f:ResourceMappingList.of_xml)
+          (Xml.child xml_arg0 "resourceMappings") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~resourceMappings ?nextToken ()
+      make ?resourceMappings ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceMappings =
-        field_map_exn json "resourceMappings" ResourceMappingList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      make ~resourceMappings ?nextToken ()
+        field_map json__ "resourceMappings" ResourceMappingList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?resourceMappings ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists how the resources in an application version are mapped/sourced from. Mappings can be physical resource identifiers, CloudFormation stacks, resource-groups, or an application registry app."]
@@ -7032,12 +12200,12 @@ module ListAppVersionResourceMappingsRequest =
       {
       appArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       appVersion: EntityVersion.t
         [@ocaml.doc "The version of the application."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+          "Maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "Null, or the token from a previous call to get the next set of results."]}
@@ -7066,25 +12234,196 @@ module ListAppVersionResourceMappingsRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ?nextToken ?maxResults ~appVersion ~appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let appVersion =
+        field_map_exn json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
       make ?nextToken ?maxResults ~appVersion ~appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists how the resources in an application version are mapped/sourced from. Mappings can be physical resource identifiers, CloudFormation stacks, resource-groups, or an application registry app."]
-module ListAppComponentRecommendationsResponse =
+module ListAppVersionAppComponentsResponse =
   struct
     type nonrec t =
       {
-      componentRecommendations: ComponentRecommendationList.t
+      appArn: Arn.t option
         [@ocaml.doc
-          "The recommendations for an Resilience Hub application component, returned as an object. This object contains component names, configuration recommendations, and recommendation statuses."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appComponents: AppComponentList.t option
+        [@ocaml.doc "Defines an Application Component."];
+      appVersion: EntityVersion.t option
+        [@ocaml.doc "Resilience Hub application version."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token for the next set of results, or null if there are no more results."]}
+          "Token for the next set of results, or null if there are no more results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appArn =
+      fun ?appComponents ->
+        fun ?appVersion ->
+          fun ?nextToken ->
+            fun () -> { appArn; appComponents; appVersion; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appComponents",
+          (Option.map x.appComponents ~f:AppComponentList.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let appVersion =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appComponents =
+        (Option.map ~f:AppComponentList.of_xml)
+          (Xml.child xml_arg0 "appComponents") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?nextToken ?appVersion ?appComponents ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appComponents =
+        field_map json__ "appComponents" AppComponentList.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?nextToken ?appVersion ?appComponents ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the Application Components in the Resilience Hub application."]
+module ListAppVersionAppComponentsRequest =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t
+        [@ocaml.doc "Version of the Application Component."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "Maximum number of Application Components to be displayed per Resilience Hub application version."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Null, or the token from a previous call to get the next set of results."]}
+    let context_ = "ListAppVersionAppComponentsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~appArn ->
+          fun ~appVersion ->
+            fun () -> { maxResults; nextToken; appArn; appVersion }
+    let to_value x =
+      structure_to_value
+        [("appArn", (Some (Arn.to_value x.appArn)));
+        ("appVersion", (Some (EntityVersion.to_value x.appVersion)));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let appVersion =
+        EntityVersion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "appVersion") in
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      make ?nextToken ?maxResults ~appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let appVersion =
+        field_map_exn json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ?nextToken ?maxResults ~appVersion ~appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the Application Components in the Resilience Hub application."]
+module ListAppInputSourcesResponse =
+  struct
+    type nonrec t =
+      {
+      appInputSources: AppInputSourceList.t option
+        [@ocaml.doc "The list of Resilience Hub application input sources."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Token for the next set of results, or null if there are no more results."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -7092,10 +12431,155 @@ module ListAppComponentRecommendationsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAppComponentRecommendationsResponse"
-    let make ?nextToken =
-      fun ~componentRecommendations ->
-        fun () -> { nextToken; componentRecommendations }
+    let make ?appInputSources =
+      fun ?nextToken -> fun () -> { appInputSources; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("appInputSources",
+           (Option.map x.appInputSources ~f:AppInputSourceList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let appInputSources =
+        (Option.map ~f:AppInputSourceList.of_xml)
+          (Xml.child xml_arg0 "appInputSources") in
+      make ?nextToken ?appInputSources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let appInputSources =
+        field_map json__ "appInputSources" AppInputSourceList.of_json in
+      make ?nextToken ?appInputSources ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the input sources of the Resilience Hub application. For more information about the input sources supported by Resilience Hub, see Discover the structure and describe your Resilience Hub application."]
+module ListAppInputSourcesRequest =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t
+        [@ocaml.doc "Resilience Hub application version."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "Maximum number of input sources to be displayed per Resilience Hub application."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Null, or the token from a previous call to get the next set of results."]}
+    let context_ = "ListAppInputSourcesRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~appArn ->
+          fun ~appVersion ->
+            fun () -> { maxResults; nextToken; appArn; appVersion }
+    let to_value x =
+      structure_to_value
+        [("appArn", (Some (Arn.to_value x.appArn)));
+        ("appVersion", (Some (EntityVersion.to_value x.appVersion)));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let appVersion =
+        EntityVersion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "appVersion") in
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      make ?nextToken ?maxResults ~appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let appVersion =
+        field_map_exn json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ?nextToken ?maxResults ~appVersion ~appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the input sources of the Resilience Hub application. For more information about the input sources supported by Resilience Hub, see Discover the structure and describe your Resilience Hub application."]
+module ListAppComponentRecommendationsResponse =
+  struct
+    type nonrec t =
+      {
+      componentRecommendations: ComponentRecommendationList.t option
+        [@ocaml.doc
+          "The recommendations for an Resilience Hub Application Component, returned as an object. This object contains the names of the Application Components, configuration recommendations, and recommendation statuses."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Token for the next set of results, or null if there are no more results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?componentRecommendations =
+      fun ?nextToken -> fun () -> { componentRecommendations; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7155,39 +12639,37 @@ module ListAppComponentRecommendationsResponse =
     let to_value x =
       structure_to_value
         [("componentRecommendations",
-           (Some
-              (ComponentRecommendationList.to_value
-                 x.componentRecommendations)));
+           (Option.map x.componentRecommendations
+              ~f:ComponentRecommendationList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let componentRecommendations =
-        ComponentRecommendationList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "componentRecommendations") in
-      make ?nextToken ~componentRecommendations ()
+        (Option.map ~f:ComponentRecommendationList.of_xml)
+          (Xml.child xml_arg0 "componentRecommendations") in
+      make ?nextToken ?componentRecommendations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let componentRecommendations =
-        field_map_exn json "componentRecommendations"
+        field_map json__ "componentRecommendations"
           ComponentRecommendationList.of_json in
-      make ?nextToken ~componentRecommendations ()
+      make ?nextToken ?componentRecommendations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the recommendations for an AWS Resilience Hub component."]
+       "Lists the recommendations for an Resilience Hub Application Component."]
 module ListAppComponentRecommendationsRequest =
   struct
     type nonrec t =
       {
       assessmentArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:dcps:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:resiliencehub:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+          "Maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "Null, or the token from a previous call to get the next set of results."]}
@@ -7211,24 +12693,24 @@ module ListAppComponentRecommendationsRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
       make ?nextToken ?maxResults ~assessmentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let assessmentArn = field_map_exn json "assessmentArn" Arn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let assessmentArn = field_map_exn json__ "assessmentArn" Arn.of_json in
       make ?nextToken ?maxResults ~assessmentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the recommendations for an AWS Resilience Hub component."]
+       "Lists the recommendations for an Resilience Hub Application Component."]
 module ListAppComponentCompliancesResponse =
   struct
     type nonrec t =
       {
-      componentCompliances: ComponentCompliancesList.t
+      componentCompliances: ComponentCompliancesList.t option
         [@ocaml.doc
-          "The compliances for an AWS Resilience Hub application component, returned as an object. This object contains component names, compliances, costs, resiliency scores, outage scores, and more."];
+          "The compliances for an Resilience Hub Application Component, returned as an object. This object contains the names of the Application Components, compliances, costs, resiliency scores, outage scores, and more."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token for the next set of results, or null if there are no more results."]}
+          "Token for the next set of results, or null if there are no more results."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -7236,10 +12718,8 @@ module ListAppComponentCompliancesResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAppComponentCompliancesResponse"
-    let make ?nextToken =
-      fun ~componentCompliances ->
-        fun () -> { nextToken; componentCompliances }
+    let make ?componentCompliances =
+      fun ?nextToken -> fun () -> { componentCompliances; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7299,36 +12779,37 @@ module ListAppComponentCompliancesResponse =
     let to_value x =
       structure_to_value
         [("componentCompliances",
-           (Some (ComponentCompliancesList.to_value x.componentCompliances)));
+           (Option.map x.componentCompliances
+              ~f:ComponentCompliancesList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let componentCompliances =
-        ComponentCompliancesList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "componentCompliances") in
-      make ?nextToken ~componentCompliances ()
+        (Option.map ~f:ComponentCompliancesList.of_xml)
+          (Xml.child xml_arg0 "componentCompliances") in
+      make ?nextToken ?componentCompliances ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let componentCompliances =
-        field_map_exn json "componentCompliances"
+        field_map json__ "componentCompliances"
           ComponentCompliancesList.of_json in
-      make ?nextToken ~componentCompliances ()
+      make ?nextToken ?componentCompliances ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the compliances for an AWS Resilience Hub component."]
+       "Lists the compliances for an Resilience Hub Application Component."]
 module ListAppComponentCompliancesRequest =
   struct
     type nonrec t =
       {
       assessmentArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:dcps:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:resiliencehub:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+          "Maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "Null, or the token from a previous call to get the next set of results."]}
@@ -7352,24 +12833,24 @@ module ListAppComponentCompliancesRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
       make ?nextToken ?maxResults ~assessmentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let assessmentArn = field_map_exn json "assessmentArn" Arn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let assessmentArn = field_map_exn json__ "assessmentArn" Arn.of_json in
       make ?nextToken ?maxResults ~assessmentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the compliances for an AWS Resilience Hub component."]
+       "Lists the compliances for an Resilience Hub Application Component."]
 module ListAppAssessmentsResponse =
   struct
     type nonrec t =
       {
-      assessmentSummaries: AppAssessmentSummaryList.t
+      assessmentSummaries: AppAssessmentSummaryList.t option
         [@ocaml.doc
           "The summaries for the specified assessments, returned as an object. This object includes application versions, associated Amazon Resource Numbers (ARNs), cost, messages, resiliency scores, and more."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token for the next set of results, or null if there are no more results."]}
+          "Token for the next set of results, or null if there are no more results."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -7377,10 +12858,8 @@ module ListAppAssessmentsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAppAssessmentsResponse"
-    let make ?nextToken =
-      fun ~assessmentSummaries ->
-        fun () -> { nextToken; assessmentSummaries }
+    let make ?assessmentSummaries =
+      fun ?nextToken -> fun () -> { assessmentSummaries; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7440,33 +12919,34 @@ module ListAppAssessmentsResponse =
     let to_value x =
       structure_to_value
         [("assessmentSummaries",
-           (Some (AppAssessmentSummaryList.to_value x.assessmentSummaries)));
+           (Option.map x.assessmentSummaries
+              ~f:AppAssessmentSummaryList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let assessmentSummaries =
-        AppAssessmentSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentSummaries") in
-      make ?nextToken ~assessmentSummaries ()
+        (Option.map ~f:AppAssessmentSummaryList.of_xml)
+          (Xml.child xml_arg0 "assessmentSummaries") in
+      make ?nextToken ?assessmentSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let assessmentSummaries =
-        field_map_exn json "assessmentSummaries"
+        field_map json__ "assessmentSummaries"
           AppAssessmentSummaryList.of_json in
-      make ?nextToken ~assessmentSummaries ()
+      make ?nextToken ?assessmentSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the assessments for an AWS Resilience Hub application. You can use request parameters to refine the results for the response object."]
+       "Lists the assessments for an Resilience Hub application. You can use request parameters to refine the results for the response object."]
 module ListAppAssessmentsRequest =
   struct
     type nonrec t =
       {
       appArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       assessmentName: EntityName.t option
         [@ocaml.doc "The name for the assessment."];
       assessmentStatus: AssessmentStatusList.t option
@@ -7480,7 +12960,7 @@ module ListAppAssessmentsRequest =
           "Specifies the entity that invoked a specific assessment, either a User or the System."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+          "Maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "Null, or the token from a previous call to get the next set of results."];
@@ -7545,33 +13025,291 @@ module ListAppAssessmentsRequest =
       make ?reverseOrder ?nextToken ?maxResults ?invoker ?complianceStatus
         ?assessmentStatus ?assessmentName ?appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reverseOrder =
-        field_map json "reverseOrder" BooleanOptional.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let invoker = field_map json "invoker" AssessmentInvoker.of_json in
+        field_map json__ "reverseOrder" BooleanOptional.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let invoker = field_map json__ "invoker" AssessmentInvoker.of_json in
       let complianceStatus =
-        field_map json "complianceStatus" ComplianceStatus.of_json in
+        field_map json__ "complianceStatus" ComplianceStatus.of_json in
       let assessmentStatus =
-        field_map json "assessmentStatus" AssessmentStatusList.of_json in
-      let assessmentName = field_map json "assessmentName" EntityName.of_json in
-      let appArn = field_map json "appArn" Arn.of_json in
+        field_map json__ "assessmentStatus" AssessmentStatusList.of_json in
+      let assessmentName =
+        field_map json__ "assessmentName" EntityName.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
       make ?reverseOrder ?nextToken ?maxResults ?invoker ?complianceStatus
         ?assessmentStatus ?assessmentName ?appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the assessments for an AWS Resilience Hub application. You can use request parameters to refine the results for the response object."]
+       "Lists the assessments for an Resilience Hub application. You can use request parameters to refine the results for the response object."]
+module ListAppAssessmentResourceDriftsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Null, or the token from a previous call to get the next set of results."];
+      resourceDrifts: ResourceDriftList.t option
+        [@ocaml.doc
+          "Indicates all the resource drifts detected for an assessed entity."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?resourceDrifts -> fun () -> { nextToken; resourceDrifts }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("resourceDrifts",
+          (Option.map x.resourceDrifts ~f:ResourceDriftList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceDrifts =
+        (Option.map ~f:ResourceDriftList.of_xml)
+          (Xml.child xml_arg0 "resourceDrifts") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ?resourceDrifts ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceDrifts =
+        field_map json__ "resourceDrifts" ResourceDriftList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?resourceDrifts ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List of resource drifts that were detected while running an assessment."]
+module ListAppAssessmentResourceDriftsRequest =
+  struct
+    type nonrec t =
+      {
+      assessmentArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:resiliencehub:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "Maximum number of drift results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Null, or the token from a previous call to get the next set of results."]}
+    let context_ = "ListAppAssessmentResourceDriftsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~assessmentArn ->
+          fun () -> { maxResults; nextToken; assessmentArn }
+    let to_value x =
+      structure_to_value
+        [("assessmentArn", (Some (Arn.to_value x.assessmentArn)));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let assessmentArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
+      make ?nextToken ?maxResults ~assessmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let assessmentArn = field_map_exn json__ "assessmentArn" Arn.of_json in
+      make ?nextToken ?maxResults ~assessmentArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List of resource drifts that were detected while running an assessment."]
+module ListAppAssessmentComplianceDriftsResponse =
+  struct
+    type nonrec t =
+      {
+      complianceDrifts: ComplianceDriftList.t option
+        [@ocaml.doc
+          "Indicates compliance drifts (recovery time objective (RTO) and recovery point objective (RPO)) detected for an assessed entity."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Null, or the token from a previous call to get the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?complianceDrifts =
+      fun ?nextToken -> fun () -> { complianceDrifts; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("complianceDrifts",
+           (Option.map x.complianceDrifts ~f:ComplianceDriftList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let complianceDrifts =
+        (Option.map ~f:ComplianceDriftList.of_xml)
+          (Xml.child xml_arg0 "complianceDrifts") in
+      make ?nextToken ?complianceDrifts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let complianceDrifts =
+        field_map json__ "complianceDrifts" ComplianceDriftList.of_json in
+      make ?nextToken ?complianceDrifts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List of compliance drifts that were detected while running an assessment."]
+module ListAppAssessmentComplianceDriftsRequest =
+  struct
+    type nonrec t =
+      {
+      assessmentArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:resiliencehub:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "Maximum number of compliance drifts requested."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Null, or the token from a previous call to get the next set of results."]}
+    let context_ = "ListAppAssessmentComplianceDriftsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~assessmentArn ->
+          fun () -> { maxResults; nextToken; assessmentArn }
+    let to_value x =
+      structure_to_value
+        [("assessmentArn", (Some (Arn.to_value x.assessmentArn)));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let assessmentArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
+      make ?nextToken ?maxResults ~assessmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let assessmentArn = field_map_exn json__ "assessmentArn" Arn.of_json in
+      make ?nextToken ?maxResults ~assessmentArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List of compliance drifts that were detected while running an assessment."]
 module ListAlarmRecommendationsResponse =
   struct
     type nonrec t =
       {
-      alarmRecommendations: AlarmRecommendationList.t
+      alarmRecommendations: AlarmRecommendationList.t option
         [@ocaml.doc
-          "The alarm recommendations for an AWS Resilience Hub application, returned as an object. This object includes application component names, descriptions, information about whether a recommendation has already been implemented or not, prerequisites, and more."];
+          "The alarm recommendations for an Resilience Hub application, returned as an object. This object includes Application Component names, descriptions, information about whether a recommendation has already been implemented or not, prerequisites, and more."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token for the next set of results, or null if there are no more results."]}
+          "Token for the next set of results, or null if there are no more results."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -7579,10 +13317,8 @@ module ListAlarmRecommendationsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAlarmRecommendationsResponse"
-    let make ?nextToken =
-      fun ~alarmRecommendations ->
-        fun () -> { nextToken; alarmRecommendations }
+    let make ?alarmRecommendations =
+      fun ?nextToken -> fun () -> { alarmRecommendations; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7642,36 +13378,37 @@ module ListAlarmRecommendationsResponse =
     let to_value x =
       structure_to_value
         [("alarmRecommendations",
-           (Some (AlarmRecommendationList.to_value x.alarmRecommendations)));
+           (Option.map x.alarmRecommendations
+              ~f:AlarmRecommendationList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let alarmRecommendations =
-        AlarmRecommendationList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "alarmRecommendations") in
-      make ?nextToken ~alarmRecommendations ()
+        (Option.map ~f:AlarmRecommendationList.of_xml)
+          (Xml.child xml_arg0 "alarmRecommendations") in
+      make ?nextToken ?alarmRecommendations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let alarmRecommendations =
-        field_map_exn json "alarmRecommendations"
+        field_map json__ "alarmRecommendations"
           AlarmRecommendationList.of_json in
-      make ?nextToken ~alarmRecommendations ()
+      make ?nextToken ?alarmRecommendations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the alarm recommendations for a AWS Resilience Hub application."]
+       "Lists the alarm recommendations for an Resilience Hub application."]
 module ListAlarmRecommendationsRequest =
   struct
     type nonrec t =
       {
       assessmentArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:dcps:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:resiliencehub:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
+          "Maximum number of results to include in the response. If more results exist than the specified MaxResults value, a token is included in the response so that the remaining results can be retrieved."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "Null, or the token from a previous call to get the next set of results."]}
@@ -7695,41 +13432,57 @@ module ListAlarmRecommendationsRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
       make ?nextToken ?maxResults ~assessmentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let assessmentArn = field_map_exn json "assessmentArn" Arn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let assessmentArn = field_map_exn json__ "assessmentArn" Arn.of_json in
       make ?nextToken ?maxResults ~assessmentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the alarm recommendations for a AWS Resilience Hub application."]
+       "Lists the alarm recommendations for an Resilience Hub application."]
 module ImportResourcesToDraftAppVersionResponse =
   struct
     type nonrec t =
       {
-      appArn: Arn.t
+      appArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
-      appVersion: EntityVersion.t
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t option
         [@ocaml.doc "The version of the application."];
-      sourceArns: ArnList.t
+      eksSources: EksSourceList.t option
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) for the resources that you imported."];
-      status: ResourceImportStatusType.t
-        [@ocaml.doc "The status of the action."]}
+          "The input sources of the Amazon Elastic Kubernetes Service resources you have imported."];
+      sourceArns: ArnList.t option
+        [@ocaml.doc
+          "The Amazon Resource Names (ARNs) for the resources you have imported."];
+      status: ResourceImportStatusType.t option
+        [@ocaml.doc "Status of the action."];
+      terraformSources: TerraformSourceList.t option
+        [@ocaml.doc "A list of terraform file s3 URLs you have imported."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ImportResourcesToDraftAppVersionResponse"
-    let make ~appArn =
-      fun ~appVersion ->
-        fun ~sourceArns ->
-          fun ~status -> fun () -> { appArn; appVersion; sourceArns; status }
+    let make ?appArn =
+      fun ?appVersion ->
+        fun ?eksSources ->
+          fun ?sourceArns ->
+            fun ?status ->
+              fun ?terraformSources ->
+                fun () ->
+                  {
+                    appArn;
+                    appVersion;
+                    eksSources;
+                    sourceArns;
+                    status;
+                    terraformSources
+                  }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7740,6 +13493,9 @@ module ImportResourcesToDraftAppVersionResponse =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
@@ -7757,6 +13513,9 @@ module ImportResourcesToDraftAppVersionResponse =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
@@ -7781,6 +13540,10 @@ module ImportResourcesToDraftAppVersionResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
       | `ThrottlingException e ->
           `Assoc
             [("error", (`String "ThrottlingException"));
@@ -7796,74 +13559,129 @@ module ImportResourcesToDraftAppVersionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("appArn", (Some (Arn.to_value x.appArn)));
-        ("appVersion", (Some (EntityVersion.to_value x.appVersion)));
-        ("sourceArns", (Some (ArnList.to_value x.sourceArns)));
-        ("status", (Some (ResourceImportStatusType.to_value x.status)))]
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value));
+        ("eksSources", (Option.map x.eksSources ~f:EksSourceList.to_value));
+        ("sourceArns", (Option.map x.sourceArns ~f:ArnList.to_value));
+        ("status",
+          (Option.map x.status ~f:ResourceImportStatusType.to_value));
+        ("terraformSources",
+          (Option.map x.terraformSources ~f:TerraformSourceList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let terraformSources =
+        (Option.map ~f:TerraformSourceList.of_xml)
+          (Xml.child xml_arg0 "terraformSources") in
       let status =
-        ResourceImportStatusType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:ResourceImportStatusType.of_xml)
+          (Xml.child xml_arg0 "status") in
       let sourceArns =
-        ArnList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceArns") in
+        (Option.map ~f:ArnList.of_xml) (Xml.child xml_arg0 "sourceArns") in
+      let eksSources =
+        (Option.map ~f:EksSourceList.of_xml)
+          (Xml.child xml_arg0 "eksSources") in
       let appVersion =
-        EntityVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "appVersion") in
-      let appArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      make ~status ~sourceArns ~appVersion ~appArn ()
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?terraformSources ?status ?sourceArns ?eksSources ?appVersion
+        ?appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status =
-        field_map_exn json "status" ResourceImportStatusType.of_json in
-      let sourceArns = field_map_exn json "sourceArns" ArnList.of_json in
-      let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
-      make ~status ~sourceArns ~appVersion ~appArn ()
+    let of_json json__ =
+      let terraformSources =
+        field_map json__ "terraformSources" TerraformSourceList.of_json in
+      let status = field_map json__ "status" ResourceImportStatusType.of_json in
+      let sourceArns = field_map json__ "sourceArns" ArnList.of_json in
+      let eksSources = field_map json__ "eksSources" EksSourceList.of_json in
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?terraformSources ?status ?sourceArns ?eksSources ?appVersion
+        ?appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Imports resources from sources such as a CloudFormation stack, resource-groups, or application registry app to a draft application version."]
+       "Imports resources to Resilience Hub application draft version from different input sources. For more information about the input sources supported by Resilience Hub, see Discover the structure and describe your Resilience Hub application."]
 module ImportResourcesToDraftAppVersionRequest =
   struct
     type nonrec t =
       {
       appArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
-      sourceArns: ArnList.t
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      eksSources: EksSourceList.t option
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) for the resources that you want to import."]}
+          "The input sources of the Amazon Elastic Kubernetes Service resources you need to import."];
+      importStrategy: ResourceImportStrategyType.t option
+        [@ocaml.doc
+          "The import strategy you would like to set to import resources into Resilience Hub application."];
+      sourceArns: ArnList.t option
+        [@ocaml.doc "The Amazon Resource Names (ARNs) for the resources."];
+      terraformSources: TerraformSourceList.t option
+        [@ocaml.doc "A list of terraform file s3 URLs you need to import."]}
     let context_ = "ImportResourcesToDraftAppVersionRequest"
-    let make ~appArn = fun ~sourceArns -> fun () -> { appArn; sourceArns }
+    let make ?eksSources =
+      fun ?importStrategy ->
+        fun ?sourceArns ->
+          fun ?terraformSources ->
+            fun ~appArn ->
+              fun () ->
+                {
+                  eksSources;
+                  importStrategy;
+                  sourceArns;
+                  terraformSources;
+                  appArn
+                }
     let to_value x =
       structure_to_value
         [("appArn", (Some (Arn.to_value x.appArn)));
-        ("sourceArns", (Some (ArnList.to_value x.sourceArns)))]
+        ("eksSources", (Option.map x.eksSources ~f:EksSourceList.to_value));
+        ("importStrategy",
+          (Option.map x.importStrategy ~f:ResourceImportStrategyType.to_value));
+        ("sourceArns", (Option.map x.sourceArns ~f:ArnList.to_value));
+        ("terraformSources",
+          (Option.map x.terraformSources ~f:TerraformSourceList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let terraformSources =
+        (Option.map ~f:TerraformSourceList.of_xml)
+          (Xml.child xml_arg0 "terraformSources") in
       let sourceArns =
-        ArnList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceArns") in
+        (Option.map ~f:ArnList.of_xml) (Xml.child xml_arg0 "sourceArns") in
+      let importStrategy =
+        (Option.map ~f:ResourceImportStrategyType.of_xml)
+          (Xml.child xml_arg0 "importStrategy") in
+      let eksSources =
+        (Option.map ~f:EksSourceList.of_xml)
+          (Xml.child xml_arg0 "eksSources") in
       let appArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      make ~sourceArns ~appArn ()
+      make ?terraformSources ?sourceArns ?importStrategy ?eksSources ~appArn
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceArns = field_map_exn json "sourceArns" ArnList.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
-      make ~sourceArns ~appArn ()
+    let of_json json__ =
+      let terraformSources =
+        field_map json__ "terraformSources" TerraformSourceList.of_json in
+      let sourceArns = field_map json__ "sourceArns" ArnList.of_json in
+      let importStrategy =
+        field_map json__ "importStrategy" ResourceImportStrategyType.of_json in
+      let eksSources = field_map json__ "eksSources" EksSourceList.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ?terraformSources ?sourceArns ?importStrategy ?eksSources ~appArn
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Imports resources from sources such as a CloudFormation stack, resource-groups, or application registry app to a draft application version."]
-module DescribeResiliencyPolicyResponse =
+       "Imports resources to Resilience Hub application draft version from different input sources. For more information about the input sources supported by Resilience Hub, see Discover the structure and describe your Resilience Hub application."]
+module DescribeResourceGroupingRecommendationTaskResponse =
   struct
     type nonrec t =
       {
-      policy: ResiliencyPolicy.t
+      errorMessage: String500.t option
         [@ocaml.doc
-          "Information about the specific resiliency policy, returned as an object. This object includes creation time, data location constraints, its name, description, tags, the recovery time objective (RTO) and recovery point objective (RPO) in seconds, and more."]}
+          "Error that occurred while generating a grouping recommendation."];
+      groupingId: String255.t option
+        [@ocaml.doc "Identifier of the grouping recommendation task."];
+      status: ResourcesGroupingRecGenStatusType.t option
+        [@ocaml.doc "Status of the action."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -7871,8 +13689,9 @@ module DescribeResiliencyPolicyResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeResiliencyPolicyResponse"
-    let make ~policy = fun () -> { policy }
+    let make ?errorMessage =
+      fun ?groupingId ->
+        fun ?status -> fun () -> { errorMessage; groupingId; status }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7931,27 +13750,153 @@ module DescribeResiliencyPolicyResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("policy", (Some (ResiliencyPolicy.to_value x.policy)))]
+        [("errorMessage", (Option.map x.errorMessage ~f:String500.to_value));
+        ("groupingId", (Option.map x.groupingId ~f:String255.to_value));
+        ("status",
+          (Option.map x.status ~f:ResourcesGroupingRecGenStatusType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:ResourcesGroupingRecGenStatusType.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let groupingId =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "groupingId") in
+      let errorMessage =
+        (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "errorMessage") in
+      make ?status ?groupingId ?errorMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map json__ "status" ResourcesGroupingRecGenStatusType.of_json in
+      let groupingId = field_map json__ "groupingId" String255.of_json in
+      let errorMessage = field_map json__ "errorMessage" String500.of_json in
+      make ?status ?groupingId ?errorMessage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the resource grouping recommendation tasks run by Resilience Hub for your application."]
+module DescribeResourceGroupingRecommendationTaskRequest =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      groupingId: String255.t option
+        [@ocaml.doc "Identifier of the grouping recommendation task."]}
+    let context_ = "DescribeResourceGroupingRecommendationTaskRequest"
+    let make ?groupingId = fun ~appArn -> fun () -> { groupingId; appArn }
+    let to_value x =
+      structure_to_value
+        [("appArn", (Some (Arn.to_value x.appArn)));
+        ("groupingId", (Option.map x.groupingId ~f:String255.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let groupingId =
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "groupingId") in
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      make ?groupingId ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let groupingId = field_map json__ "groupingId" String255.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ?groupingId ~appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the resource grouping recommendation tasks run by Resilience Hub for your application."]
+module DescribeResiliencyPolicyResponse =
+  struct
+    type nonrec t =
+      {
+      policy: ResiliencyPolicy.t option
+        [@ocaml.doc
+          "Information about the specific resiliency policy, returned as an object. This object includes creation time, data location constraints, its name, description, tags, the recovery time objective (RTO) and recovery point objective (RPO) in seconds, and more."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?policy = fun () -> { policy }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("policy", (Option.map x.policy ~f:ResiliencyPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let policy =
-        ResiliencyPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "policy") in
-      make ~policy ()
+        (Option.map ~f:ResiliencyPolicy.of_xml) (Xml.child xml_arg0 "policy") in
+      make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map_exn json "policy" ResiliencyPolicy.of_json in
-      make ~policy ()
+    let of_json json__ =
+      let policy = field_map json__ "policy" ResiliencyPolicy.of_json in
+      make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes a specified resiliency policy for an AWS Resilience Hub application. The returned policy object includes creation time, data location constraints, the Amazon Resource Name (ARN) for the policy, tags, tier, and more."]
+       "Describes a specified resiliency policy for an Resilience Hub application. The returned policy object includes creation time, data location constraints, the Amazon Resource Name (ARN) for the policy, tags, tier, and more."]
 module DescribeResiliencyPolicyRequest =
   struct
     type nonrec t =
       {
       policyArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resiliency policy. The format for this ARN is: arn:partition:dcps:region:account:resiliency-policy/policy-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."]}
+          "Amazon Resource Name (ARN) of the resiliency policy. The format for this ARN is: arn:partition:resiliencehub:region:account:resiliency-policy/policy-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."]}
     let context_ = "DescribeResiliencyPolicyRequest"
     let make ~policyArn = fun () -> { policyArn }
     let to_value x =
@@ -7962,27 +13907,26 @@ module DescribeResiliencyPolicyRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policyArn") in
       make ~policyArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyArn = field_map_exn json "policyArn" Arn.of_json in
+    let of_json json__ =
+      let policyArn = field_map_exn json__ "policyArn" Arn.of_json in
       make ~policyArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes a specified resiliency policy for an AWS Resilience Hub application. The returned policy object includes creation time, data location constraints, the Amazon Resource Name (ARN) for the policy, tags, tier, and more."]
-module DescribeDraftAppVersionResourcesImportStatusResponse =
+       "Describes a specified resiliency policy for an Resilience Hub application. The returned policy object includes creation time, data location constraints, the Amazon Resource Name (ARN) for the policy, tags, tier, and more."]
+module DescribeMetricsExportResponse =
   struct
     type nonrec t =
       {
-      appArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
-      appVersion: EntityVersion.t
-        [@ocaml.doc "The version of the application."];
       errorMessage: String500.t option
-        [@ocaml.doc "The returned error message for the request."];
-      status: ResourceImportStatusType.t
-        [@ocaml.doc "The status of the action."];
-      statusChangeTime: TimeStamp.t
-        [@ocaml.doc "The timestamp for when the status last changed."]}
+        [@ocaml.doc
+          "Explains the error that occurred while exporting the metrics."];
+      exportLocation: S3Location.t option
+        [@ocaml.doc
+          "Specifies the name of the Amazon S3 bucket where the exported metrics is stored."];
+      metricsExportId: String255.t option
+        [@ocaml.doc "Identifier for the metrics export task."];
+      status: MetricsExportStatusType.t option
+        [@ocaml.doc "Indicates the status of the metrics export task."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -7990,15 +13934,12 @@ module DescribeDraftAppVersionResourcesImportStatusResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeDraftAppVersionResourcesImportStatusResponse"
     let make ?errorMessage =
-      fun ~appArn ->
-        fun ~appVersion ->
-          fun ~status ->
-            fun ~statusChangeTime ->
-              fun () ->
-                { errorMessage; appArn; appVersion; status; statusChangeTime
-                }
+      fun ?exportLocation ->
+        fun ?metricsExportId ->
+          fun ?status ->
+            fun () ->
+              { errorMessage; exportLocation; metricsExportId; status }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8057,47 +13998,211 @@ module DescribeDraftAppVersionResourcesImportStatusResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("appArn", (Some (Arn.to_value x.appArn)));
-        ("appVersion", (Some (EntityVersion.to_value x.appVersion)));
+        [("errorMessage", (Option.map x.errorMessage ~f:String500.to_value));
+        ("exportLocation",
+          (Option.map x.exportLocation ~f:S3Location.to_value));
+        ("metricsExportId",
+          (Option.map x.metricsExportId ~f:String255.to_value));
+        ("status", (Option.map x.status ~f:MetricsExportStatusType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:MetricsExportStatusType.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let metricsExportId =
+        (Option.map ~f:String255.of_xml)
+          (Xml.child xml_arg0 "metricsExportId") in
+      let exportLocation =
+        (Option.map ~f:S3Location.of_xml)
+          (Xml.child xml_arg0 "exportLocation") in
+      let errorMessage =
+        (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "errorMessage") in
+      make ?status ?metricsExportId ?exportLocation ?errorMessage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "status" MetricsExportStatusType.of_json in
+      let metricsExportId =
+        field_map json__ "metricsExportId" String255.of_json in
+      let exportLocation =
+        field_map json__ "exportLocation" S3Location.of_json in
+      let errorMessage = field_map json__ "errorMessage" String500.of_json in
+      make ?status ?metricsExportId ?exportLocation ?errorMessage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the metrics of the application configuration being exported."]
+module DescribeMetricsExportRequest =
+  struct
+    type nonrec t =
+      {
+      metricsExportId: String255.t
+        [@ocaml.doc "Identifier of the metrics export task."]}
+    let context_ = "DescribeMetricsExportRequest"
+    let make ~metricsExportId = fun () -> { metricsExportId }
+    let to_value x =
+      structure_to_value
+        [("metricsExportId", (Some (String255.to_value x.metricsExportId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricsExportId =
+        String255.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "metricsExportId") in
+      make ~metricsExportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricsExportId =
+        field_map_exn json__ "metricsExportId" String255.of_json in
+      make ~metricsExportId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the metrics of the application configuration being exported."]
+module DescribeDraftAppVersionResourcesImportStatusResponse =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t option
+        [@ocaml.doc "The version of the application."];
+      errorDetails: ErrorDetailList.t option
+        [@ocaml.doc
+          "List of errors that were encountered while importing resources."];
+      errorMessage: String500.t option
+        [@ocaml.doc "The error message returned for the resource request."];
+      status: ResourceImportStatusType.t option
+        [@ocaml.doc "Status of the action."];
+      statusChangeTime: TimeStamp.t option
+        [@ocaml.doc "The time when the status last changed."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appArn =
+      fun ?appVersion ->
+        fun ?errorDetails ->
+          fun ?errorMessage ->
+            fun ?status ->
+              fun ?statusChangeTime ->
+                fun () ->
+                  {
+                    appArn;
+                    appVersion;
+                    errorDetails;
+                    errorMessage;
+                    status;
+                    statusChangeTime
+                  }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value));
+        ("errorDetails",
+          (Option.map x.errorDetails ~f:ErrorDetailList.to_value));
         ("errorMessage", (Option.map x.errorMessage ~f:String500.to_value));
-        ("status", (Some (ResourceImportStatusType.to_value x.status)));
-        ("statusChangeTime", (Some (TimeStamp.to_value x.statusChangeTime)))]
+        ("status",
+          (Option.map x.status ~f:ResourceImportStatusType.to_value));
+        ("statusChangeTime",
+          (Option.map x.statusChangeTime ~f:TimeStamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let statusChangeTime =
-        TimeStamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "statusChangeTime") in
+        (Option.map ~f:TimeStamp.of_xml)
+          (Xml.child xml_arg0 "statusChangeTime") in
       let status =
-        ResourceImportStatusType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:ResourceImportStatusType.of_xml)
+          (Xml.child xml_arg0 "status") in
       let errorMessage =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "errorMessage") in
+      let errorDetails =
+        (Option.map ~f:ErrorDetailList.of_xml)
+          (Xml.child xml_arg0 "errorDetails") in
       let appVersion =
-        EntityVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "appVersion") in
-      let appArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      make ~statusChangeTime ~status ?errorMessage ~appVersion ~appArn ()
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?statusChangeTime ?status ?errorMessage ?errorDetails ?appVersion
+        ?appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusChangeTime =
-        field_map_exn json "statusChangeTime" TimeStamp.of_json in
-      let status =
-        field_map_exn json "status" ResourceImportStatusType.of_json in
-      let errorMessage = field_map json "errorMessage" String500.of_json in
-      let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
-      make ~statusChangeTime ~status ?errorMessage ~appVersion ~appArn ()
+        field_map json__ "statusChangeTime" TimeStamp.of_json in
+      let status = field_map json__ "status" ResourceImportStatusType.of_json in
+      let errorMessage = field_map json__ "errorMessage" String500.of_json in
+      let errorDetails =
+        field_map json__ "errorDetails" ErrorDetailList.of_json in
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?statusChangeTime ?status ?errorMessage ?errorDetails ?appVersion
+        ?appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the status of importing resources to an application version."]
+       "Describes the status of importing resources to an application version. If you get a 404 error with ResourceImportStatusNotFoundAppMetadataException, you must call importResourcesToDraftAppVersion after creating the application and before calling describeDraftAppVersionResourcesImportStatus to obtain the status."]
 module DescribeDraftAppVersionResourcesImportStatusRequest =
   struct
     type nonrec t =
       {
       appArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."]}
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."]}
     let context_ = "DescribeDraftAppVersionResourcesImportStatusRequest"
     let make ~appArn = fun () -> { appArn }
     let to_value x =
@@ -8108,21 +14213,23 @@ module DescribeDraftAppVersionResourcesImportStatusRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appArn = field_map_exn json "appArn" Arn.of_json in make ~appArn ()
+    let of_json json__ =
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ~appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the status of importing resources to an application version."]
+       "Describes the status of importing resources to an application version. If you get a 404 error with ResourceImportStatusNotFoundAppMetadataException, you must call importResourcesToDraftAppVersion after creating the application and before calling describeDraftAppVersionResourcesImportStatus to obtain the status."]
 module DescribeAppVersionTemplateResponse =
   struct
     type nonrec t =
       {
-      appArn: Arn.t
+      appArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
-      appTemplateBody: AppTemplateBody.t
-        [@ocaml.doc "The body of the template."];
-      appVersion: EntityVersion.t
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appTemplateBody: AppTemplateBody.t option
+        [@ocaml.doc
+          "A JSON string that provides information about your application structure. To learn more about the appTemplateBody template, see the sample template provided in the Examples section. The appTemplateBody JSON string has the following structure: resources The list of logical resources that must be included in the Resilience Hub application. Type: Array Don't add the resources that you want to exclude. Each resources array item includes the following fields: logicalResourceId Logical identifier of the resource. Type: Object Each logicalResourceId object includes the following fields: identifier Identifier of the resource. Type: String logicalStackName The name of the CloudFormation stack this resource belongs to. Type: String resourceGroupName The name of the resource group this resource belongs to. Type: String terraformSourceName The name of the Terraform S3 state file this resource belongs to. Type: String eksSourceName Name of the Amazon Elastic Kubernetes Service cluster and namespace this resource belongs to. This parameter accepts values in \"eks-cluster/namespace\" format. Type: String type The type of resource. Type: string name The name of the resource. Type: String additionalInfo Additional configuration parameters for an Resilience Hub application. If you want to implement additionalInfo through the Resilience Hub console rather than using an API call, see Configure the application configuration parameters. Currently, this parameter accepts a key-value mapping (in a string format) of only one failover region and one associated account. Key: \"failover-regions\" Value: \"\\[\\{\"region\":\"<REGION>\", \"accounts\":\\[\\{\"id\":\"<ACCOUNT_ID>\"\\}\\]\\}\\]\" appComponents List of Application Components that this resource belongs to. If an Application Component is not part of the Resilience Hub application, it will be added. Type: Array Each appComponents array item includes the following fields: name Name of the Application Component. Type: String type Type of Application Component. For more information about the types of Application Component, see Grouping resources in an AppComponent. Type: String resourceNames The list of included resources that are assigned to the Application Component. Type: Array of strings additionalInfo Additional configuration parameters for an Resilience Hub application. If you want to implement additionalInfo through the Resilience Hub console rather than using an API call, see Configure the application configuration parameters. Currently, this parameter accepts a key-value mapping (in a string format) of only one failover region and one associated account. Key: \"failover-regions\" Value: \"\\[\\{\"region\":\"<REGION>\", \"accounts\":\\[\\{\"id\":\"<ACCOUNT_ID>\"\\}\\]\\}\\]\" excludedResources The list of logical resource identifiers to be excluded from the application. Type: Array Don't add the resources that you want to include. Each excludedResources array item includes the following fields: logicalResourceIds Logical identifier of the resource. Type: Object You can configure only one of the following fields: logicalStackName resourceGroupName terraformSourceName eksSourceName Each logicalResourceIds object includes the following fields: identifier Identifier of the resource. Type: String logicalStackName The name of the CloudFormation stack this resource belongs to. Type: String resourceGroupName The name of the resource group this resource belongs to. Type: String terraformSourceName The name of the Terraform S3 state file this resource belongs to. Type: String eksSourceName Name of the Amazon Elastic Kubernetes Service cluster and namespace this resource belongs to. This parameter accepts values in \"eks-cluster/namespace\" format. Type: String version Resilience Hub application version. additionalInfo Additional configuration parameters for an Resilience Hub application. If you want to implement additionalInfo through the Resilience Hub console rather than using an API call, see Configure the application configuration parameters. Currently, this parameter accepts a key-value mapping (in a string format) of only one failover region and one associated account. Key: \"failover-regions\" Value: \"\\[\\{\"region\":\"<REGION>\", \"accounts\":\\[\\{\"id\":\"<ACCOUNT_ID>\"\\}\\]\\}\\]\""];
+      appVersion: EntityVersion.t option
         [@ocaml.doc "The version of the application."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -8131,10 +14238,9 @@ module DescribeAppVersionTemplateResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeAppVersionTemplateResponse"
-    let make ~appArn =
-      fun ~appTemplateBody ->
-        fun ~appVersion -> fun () -> { appArn; appTemplateBody; appVersion }
+    let make ?appArn =
+      fun ?appTemplateBody ->
+        fun ?appVersion -> fun () -> { appArn; appTemplateBody; appVersion }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8193,37 +14299,36 @@ module DescribeAppVersionTemplateResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("appArn", (Some (Arn.to_value x.appArn)));
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
         ("appTemplateBody",
-          (Some (AppTemplateBody.to_value x.appTemplateBody)));
-        ("appVersion", (Some (EntityVersion.to_value x.appVersion)))]
+          (Option.map x.appTemplateBody ~f:AppTemplateBody.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let appVersion =
-        EntityVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "appVersion") in
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
       let appTemplateBody =
-        AppTemplateBody.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "appTemplateBody") in
-      let appArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      make ~appVersion ~appTemplateBody ~appArn ()
+        (Option.map ~f:AppTemplateBody.of_xml)
+          (Xml.child xml_arg0 "appTemplateBody") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?appVersion ?appTemplateBody ?appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
+    let of_json json__ =
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
       let appTemplateBody =
-        field_map_exn json "appTemplateBody" AppTemplateBody.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
-      make ~appVersion ~appTemplateBody ~appArn ()
+        field_map json__ "appTemplateBody" AppTemplateBody.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?appVersion ?appTemplateBody ?appArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes details about an AWS Resilience Hub"]
+  end[@@ocaml.doc "Describes details about an Resilience Hub application."]
 module DescribeAppVersionTemplateRequest =
   struct
     type nonrec t =
       {
       appArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       appVersion: EntityVersion.t
         [@ocaml.doc "The version of the application."]}
     let context_ = "DescribeAppVersionTemplateRequest"
@@ -8241,27 +14346,25 @@ module DescribeAppVersionTemplateRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~appVersion ~appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
+    let of_json json__ =
+      let appVersion =
+        field_map_exn json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
       make ~appVersion ~appArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes details about an AWS Resilience Hub"]
-module DescribeAppVersionResourcesResolutionStatusResponse =
+  end[@@ocaml.doc "Describes details about an Resilience Hub application."]
+module DescribeAppVersionResponse =
   struct
     type nonrec t =
       {
-      appArn: Arn.t
+      additionalInfo: AdditionalInfoMap.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
-      appVersion: EntityVersion.t
-        [@ocaml.doc "The version of the application."];
-      errorMessage: String500.t option
-        [@ocaml.doc "The returned error message for the request."];
-      resolutionId: String255.t
-        [@ocaml.doc "The identifier for a specific resolution."];
-      status: ResourceResolutionStatusType.t
-        [@ocaml.doc "The status of the action."]}
+          "Additional configuration parameters for an Resilience Hub application. If you want to implement additionalInfo through the Resilience Hub console rather than using an API call, see Configure the application configuration parameters. Currently, this parameter supports only failover region and account."];
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t option
+        [@ocaml.doc "Resilience Hub application version."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -8269,14 +14372,9 @@ module DescribeAppVersionResourcesResolutionStatusResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeAppVersionResourcesResolutionStatusResponse"
-    let make ?errorMessage =
-      fun ~appArn ->
-        fun ~appVersion ->
-          fun ~resolutionId ->
-            fun ~status ->
-              fun () ->
-                { errorMessage; appArn; appVersion; resolutionId; status }
+    let make ?additionalInfo =
+      fun ?appArn ->
+        fun ?appVersion -> fun () -> { additionalInfo; appArn; appVersion }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8335,36 +14433,145 @@ module DescribeAppVersionResourcesResolutionStatusResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("appArn", (Some (Arn.to_value x.appArn)));
-        ("appVersion", (Some (EntityVersion.to_value x.appVersion)));
+        [("additionalInfo",
+           (Option.map x.additionalInfo ~f:AdditionalInfoMap.to_value));
+        ("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appVersion =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      let additionalInfo =
+        (Option.map ~f:AdditionalInfoMap.of_xml)
+          (Xml.child xml_arg0 "additionalInfo") in
+      make ?appVersion ?appArn ?additionalInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      let additionalInfo =
+        field_map json__ "additionalInfo" AdditionalInfoMap.of_json in
+      make ?appVersion ?appArn ?additionalInfo ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the Resilience Hub application version."]
+module DescribeAppVersionResourcesResolutionStatusResponse =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t option
+        [@ocaml.doc "The version of the application."];
+      errorMessage: String500.t option
+        [@ocaml.doc "The returned error message for the request."];
+      resolutionId: String255.t option
+        [@ocaml.doc "The identifier for a specific resolution."];
+      status: ResourceResolutionStatusType.t option
+        [@ocaml.doc "Status of the action."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appArn =
+      fun ?appVersion ->
+        fun ?errorMessage ->
+          fun ?resolutionId ->
+            fun ?status ->
+              fun () ->
+                { appArn; appVersion; errorMessage; resolutionId; status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value));
         ("errorMessage", (Option.map x.errorMessage ~f:String500.to_value));
-        ("resolutionId", (Some (String255.to_value x.resolutionId)));
-        ("status", (Some (ResourceResolutionStatusType.to_value x.status)))]
+        ("resolutionId", (Option.map x.resolutionId ~f:String255.to_value));
+        ("status",
+          (Option.map x.status ~f:ResourceResolutionStatusType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        ResourceResolutionStatusType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:ResourceResolutionStatusType.of_xml)
+          (Xml.child xml_arg0 "status") in
       let resolutionId =
-        String255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resolutionId") in
+        (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "resolutionId") in
       let errorMessage =
         (Option.map ~f:String500.of_xml) (Xml.child xml_arg0 "errorMessage") in
       let appVersion =
-        EntityVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "appVersion") in
-      let appArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      make ~status ~resolutionId ?errorMessage ~appVersion ~appArn ()
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?status ?resolutionId ?errorMessage ?appVersion ?appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map_exn json "status" ResourceResolutionStatusType.of_json in
-      let resolutionId = field_map_exn json "resolutionId" String255.of_json in
-      let errorMessage = field_map json "errorMessage" String500.of_json in
-      let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
-      make ~status ~resolutionId ?errorMessage ~appVersion ~appArn ()
+        field_map json__ "status" ResourceResolutionStatusType.of_json in
+      let resolutionId = field_map json__ "resolutionId" String255.of_json in
+      let errorMessage = field_map json__ "errorMessage" String500.of_json in
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?status ?resolutionId ?errorMessage ?appVersion ?appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the resolution status for the specified resolution identifier for an application version. If resolutionId is not specified, the current resolution status is returned."]
@@ -8374,7 +14581,7 @@ module DescribeAppVersionResourcesResolutionStatusRequest =
       {
       appArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       appVersion: EntityVersion.t
         [@ocaml.doc "The version of the application."];
       resolutionId: String255.t option
@@ -8399,237 +14606,27 @@ module DescribeAppVersionResourcesResolutionStatusRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ?resolutionId ~appVersion ~appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resolutionId = field_map json "resolutionId" String255.of_json in
-      let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
+    let of_json json__ =
+      let resolutionId = field_map json__ "resolutionId" String255.of_json in
+      let appVersion =
+        field_map_exn json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
       make ?resolutionId ~appVersion ~appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the resolution status for the specified resolution identifier for an application version. If resolutionId is not specified, the current resolution status is returned."]
-module DescribeAppResponse =
+module DescribeAppVersionResourceResponse =
   struct
     type nonrec t =
       {
-      app: App.t
+      appArn: Arn.t option
         [@ocaml.doc
-          "The specified application, returned as an object with details including compliance status, creation time, description, resiliency score, and more."]}
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `InternalServerException of InternalServerException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `ThrottlingException of ThrottlingException.t 
-      | `ValidationException of ValidationException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeAppResponse"
-    let make ~app = fun () -> { app }
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | "ThrottlingException" ->
-          `ThrottlingException (ThrottlingException.of_json json)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | "ThrottlingException" ->
-          `ThrottlingException (ThrottlingException.of_xml xml)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `ThrottlingException e ->
-          `Assoc
-            [("error", (`String "ThrottlingException"));
-            ("details", (ThrottlingException.to_json e))]
-      | `ValidationException e ->
-          `Assoc
-            [("error", (`String "ValidationException"));
-            ("details", (ValidationException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value [("app", (Some (App.to_value x.app)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let app = App.of_xml (Xml.child_exn ~context:context_ xml_arg0 "app") in
-      make ~app ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let app = field_map_exn json "app" App.of_json in make ~app ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes an AWS Resilience Hub application."]
-module DescribeAppRequest =
-  struct
-    type nonrec t =
-      {
-      appArn: Arn.t
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t option
+        [@ocaml.doc "Resilience Hub application version."];
+      physicalResource: PhysicalResource.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."]}
-    let context_ = "DescribeAppRequest"
-    let make ~appArn = fun () -> { appArn }
-    let to_value x =
-      structure_to_value [("appArn", (Some (Arn.to_value x.appArn)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let appArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      make ~appArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appArn = field_map_exn json "appArn" Arn.of_json in make ~appArn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes an AWS Resilience Hub application."]
-module DescribeAppAssessmentResponse =
-  struct
-    type nonrec t =
-      {
-      assessment: AppAssessment.t
-        [@ocaml.doc
-          "The assessment for an AWS Resilience Hub application, returned as an object. This object includes Amazon Resource Names (ARNs), compliance information, compliance status, cost, messages, resiliency scores, and more."]}
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `InternalServerException of InternalServerException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `ThrottlingException of ThrottlingException.t 
-      | `ValidationException of ValidationException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeAppAssessmentResponse"
-    let make ~assessment = fun () -> { assessment }
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | "ThrottlingException" ->
-          `ThrottlingException (ThrottlingException.of_json json)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | "ThrottlingException" ->
-          `ThrottlingException (ThrottlingException.of_xml xml)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `ThrottlingException e ->
-          `Assoc
-            [("error", (`String "ThrottlingException"));
-            ("details", (ThrottlingException.to_json e))]
-      | `ValidationException e ->
-          `Assoc
-            [("error", (`String "ValidationException"));
-            ("details", (ValidationException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("assessment", (Some (AppAssessment.to_value x.assessment)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let assessment =
-        AppAssessment.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessment") in
-      make ~assessment ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assessment = field_map_exn json "assessment" AppAssessment.of_json in
-      make ~assessment ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Describes an assessment for an AWS Resilience Hub application."]
-module DescribeAppAssessmentRequest =
-  struct
-    type nonrec t =
-      {
-      assessmentArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:dcps:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."]}
-    let context_ = "DescribeAppAssessmentRequest"
-    let make ~assessmentArn = fun () -> { assessmentArn }
-    let to_value x =
-      structure_to_value
-        [("assessmentArn", (Some (Arn.to_value x.assessmentArn)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let assessmentArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
-      make ~assessmentArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assessmentArn = field_map_exn json "assessmentArn" Arn.of_json in
-      make ~assessmentArn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Describes an assessment for an AWS Resilience Hub application."]
-module DeleteResiliencyPolicyResponse =
-  struct
-    type nonrec t =
-      {
-      policyArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resiliency policy. The format for this ARN is: arn:partition:dcps:region:account:resiliency-policy/policy-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."]}
+          "Defines a physical resource. A physical resource is a resource that exists in your account. It can be identified using an Amazon Resource Name (ARN) or a Resilience Hub-native identifier."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -8638,8 +14635,10 @@ module DeleteResiliencyPolicyResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteResiliencyPolicyResponse"
-    let make ~policyArn = fun () -> { policyArn }
+    let make ?appArn =
+      fun ?appVersion ->
+        fun ?physicalResource ->
+          fun () -> { appArn; appVersion; physicalResource }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8705,16 +14704,606 @@ module DeleteResiliencyPolicyResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("policyArn", (Some (Arn.to_value x.policyArn)))]
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value));
+        ("physicalResource",
+          (Option.map x.physicalResource ~f:PhysicalResource.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let physicalResource =
+        (Option.map ~f:PhysicalResource.of_xml)
+          (Xml.child xml_arg0 "physicalResource") in
+      let appVersion =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?physicalResource ?appVersion ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let physicalResource =
+        field_map json__ "physicalResource" PhysicalResource.of_json in
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?physicalResource ?appVersion ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a resource of the Resilience Hub application. This API accepts only one of the following parameters to describe the resource: resourceName logicalResourceId physicalResourceId (Along with physicalResourceId, you can also provide awsAccountId, and awsRegion)"]
+module DescribeAppVersionResourceRequest =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t
+        [@ocaml.doc "Resilience Hub application version."];
+      awsAccountId: CustomerId.t option
+        [@ocaml.doc
+          "Amazon Web Services account that owns the physical resource."];
+      awsRegion: AwsRegion.t option
+        [@ocaml.doc
+          "Amazon Web Services region that owns the physical resource."];
+      logicalResourceId: LogicalResourceId.t option
+        [@ocaml.doc "Logical identifier of the resource."];
+      physicalResourceId: String2048.t option
+        [@ocaml.doc "Physical identifier of the resource."];
+      resourceName: EntityName.t option [@ocaml.doc "Name of the resource."]}
+    let context_ = "DescribeAppVersionResourceRequest"
+    let make ?awsAccountId =
+      fun ?awsRegion ->
+        fun ?logicalResourceId ->
+          fun ?physicalResourceId ->
+            fun ?resourceName ->
+              fun ~appArn ->
+                fun ~appVersion ->
+                  fun () ->
+                    {
+                      awsAccountId;
+                      awsRegion;
+                      logicalResourceId;
+                      physicalResourceId;
+                      resourceName;
+                      appArn;
+                      appVersion
+                    }
+    let to_value x =
+      structure_to_value
+        [("appArn", (Some (Arn.to_value x.appArn)));
+        ("appVersion", (Some (EntityVersion.to_value x.appVersion)));
+        ("awsAccountId", (Option.map x.awsAccountId ~f:CustomerId.to_value));
+        ("awsRegion", (Option.map x.awsRegion ~f:AwsRegion.to_value));
+        ("logicalResourceId",
+          (Option.map x.logicalResourceId ~f:LogicalResourceId.to_value));
+        ("physicalResourceId",
+          (Option.map x.physicalResourceId ~f:String2048.to_value));
+        ("resourceName", (Option.map x.resourceName ~f:EntityName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceName =
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "resourceName") in
+      let physicalResourceId =
+        (Option.map ~f:String2048.of_xml)
+          (Xml.child xml_arg0 "physicalResourceId") in
+      let logicalResourceId =
+        (Option.map ~f:LogicalResourceId.of_xml)
+          (Xml.child xml_arg0 "logicalResourceId") in
+      let awsRegion =
+        (Option.map ~f:AwsRegion.of_xml) (Xml.child xml_arg0 "awsRegion") in
+      let awsAccountId =
+        (Option.map ~f:CustomerId.of_xml) (Xml.child xml_arg0 "awsAccountId") in
+      let appVersion =
+        EntityVersion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "appVersion") in
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      make ?resourceName ?physicalResourceId ?logicalResourceId ?awsRegion
+        ?awsAccountId ~appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceName = field_map json__ "resourceName" EntityName.of_json in
+      let physicalResourceId =
+        field_map json__ "physicalResourceId" String2048.of_json in
+      let logicalResourceId =
+        field_map json__ "logicalResourceId" LogicalResourceId.of_json in
+      let awsRegion = field_map json__ "awsRegion" AwsRegion.of_json in
+      let awsAccountId = field_map json__ "awsAccountId" CustomerId.of_json in
+      let appVersion =
+        field_map_exn json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ?resourceName ?physicalResourceId ?logicalResourceId ?awsRegion
+        ?awsAccountId ~appVersion ~appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a resource of the Resilience Hub application. This API accepts only one of the following parameters to describe the resource: resourceName logicalResourceId physicalResourceId (Along with physicalResourceId, you can also provide awsAccountId, and awsRegion)"]
+module DescribeAppVersionRequest =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t
+        [@ocaml.doc "Resilience Hub application version."]}
+    let context_ = "DescribeAppVersionRequest"
+    let make ~appArn = fun ~appVersion -> fun () -> { appArn; appVersion }
+    let to_value x =
+      structure_to_value
+        [("appArn", (Some (Arn.to_value x.appArn)));
+        ("appVersion", (Some (EntityVersion.to_value x.appVersion)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appVersion =
+        EntityVersion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "appVersion") in
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      make ~appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appVersion =
+        field_map_exn json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ~appVersion ~appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the Resilience Hub application version."]
+module DescribeAppVersionAppComponentResponse =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appComponent: AppComponent.t option
+        [@ocaml.doc
+          "List of Application Components that belong to this resource."];
+      appVersion: EntityVersion.t option
+        [@ocaml.doc "Resilience Hub application version."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appArn =
+      fun ?appComponent ->
+        fun ?appVersion -> fun () -> { appArn; appComponent; appVersion }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appComponent",
+          (Option.map x.appComponent ~f:AppComponent.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appVersion =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appComponent =
+        (Option.map ~f:AppComponent.of_xml)
+          (Xml.child xml_arg0 "appComponent") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?appVersion ?appComponent ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appComponent = field_map json__ "appComponent" AppComponent.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?appVersion ?appComponent ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes an Application Component in the Resilience Hub application."]
+module DescribeAppVersionAppComponentRequest =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t
+        [@ocaml.doc "Resilience Hub application version."];
+      id: String255.t [@ocaml.doc "Identifier of the Application Component."]}
+    let context_ = "DescribeAppVersionAppComponentRequest"
+    let make ~appArn =
+      fun ~appVersion -> fun ~id -> fun () -> { appArn; appVersion; id }
+    let to_value x =
+      structure_to_value
+        [("appArn", (Some (Arn.to_value x.appArn)));
+        ("appVersion", (Some (EntityVersion.to_value x.appVersion)));
+        ("id", (Some (String255.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        String255.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let appVersion =
+        EntityVersion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "appVersion") in
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      make ~id ~appVersion ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" String255.of_json in
+      let appVersion =
+        field_map_exn json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ~id ~appVersion ~appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes an Application Component in the Resilience Hub application."]
+module DescribeAppResponse =
+  struct
+    type nonrec t =
+      {
+      app: App.t option
+        [@ocaml.doc
+          "The specified application, returned as an object with details including compliance status, creation time, description, resiliency score, and more."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?app = fun () -> { app }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("app", (Option.map x.app ~f:App.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let app = (Option.map ~f:App.of_xml) (Xml.child xml_arg0 "app") in
+      make ?app ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let app = field_map json__ "app" App.of_json in make ?app ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes an Resilience Hub application."]
+module DescribeAppRequest =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."]}
+    let context_ = "DescribeAppRequest"
+    let make ~appArn = fun () -> { appArn }
+    let to_value x =
+      structure_to_value [("appArn", (Some (Arn.to_value x.appArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      make ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ~appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes an Resilience Hub application."]
+module DescribeAppAssessmentResponse =
+  struct
+    type nonrec t =
+      {
+      assessment: AppAssessment.t option
+        [@ocaml.doc
+          "The assessment for an Resilience Hub application, returned as an object. This object includes Amazon Resource Names (ARNs), compliance information, compliance status, cost, messages, resiliency scores, and more."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?assessment = fun () -> { assessment }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("assessment", (Option.map x.assessment ~f:AppAssessment.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let assessment =
+        (Option.map ~f:AppAssessment.of_xml)
+          (Xml.child xml_arg0 "assessment") in
+      make ?assessment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let assessment = field_map json__ "assessment" AppAssessment.of_json in
+      make ?assessment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes an assessment for an Resilience Hub application."]
+module DescribeAppAssessmentRequest =
+  struct
+    type nonrec t =
+      {
+      assessmentArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:resiliencehub:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."]}
+    let context_ = "DescribeAppAssessmentRequest"
+    let make ~assessmentArn = fun () -> { assessmentArn }
+    let to_value x =
+      structure_to_value
+        [("assessmentArn", (Some (Arn.to_value x.assessmentArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let assessmentArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
+      make ~assessmentArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let assessmentArn = field_map_exn json__ "assessmentArn" Arn.of_json in
+      make ~assessmentArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes an assessment for an Resilience Hub application."]
+module DeleteResiliencyPolicyResponse =
+  struct
+    type nonrec t =
+      {
+      policyArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the resiliency policy. The format for this ARN is: arn:partition:resiliencehub:region:account:resiliency-policy/policy-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?policyArn = fun () -> { policyArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("policyArn", (Option.map x.policyArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let policyArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policyArn") in
-      make ~policyArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "policyArn") in
+      make ?policyArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyArn = field_map_exn json "policyArn" Arn.of_json in
-      make ~policyArn ()
+    let of_json json__ =
+      let policyArn = field_map json__ "policyArn" Arn.of_json in
+      make ?policyArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a resiliency policy. This is a destructive action that can't be undone."]
@@ -8727,7 +15316,7 @@ module DeleteResiliencyPolicyRequest =
           "Used for an idempotency token. A client token is a unique, case-sensitive string of up to 64 ASCII characters. You should not reuse the same client token for other API requests."];
       policyArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resiliency policy. The format for this ARN is: arn:partition:dcps:region:account:resiliency-policy/policy-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."]}
+          "Amazon Resource Name (ARN) of the resiliency policy. The format for this ARN is: arn:partition:resiliencehub:region:account:resiliency-policy/policy-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."]}
     let context_ = "DeleteResiliencyPolicyRequest"
     let make ?clientToken =
       fun ~policyArn -> fun () -> { clientToken; policyArn }
@@ -8743,9 +15332,9 @@ module DeleteResiliencyPolicyRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~policyArn ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyArn = field_map_exn json "policyArn" Arn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+    let of_json json__ =
+      let policyArn = field_map_exn json__ "policyArn" Arn.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       make ~policyArn ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8754,11 +15343,11 @@ module DeleteRecommendationTemplateResponse =
   struct
     type nonrec t =
       {
-      recommendationTemplateArn: Arn.t
+      recommendationTemplateArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) for a recommendation template."];
-      status: RecommendationTemplateStatus.t
-        [@ocaml.doc "The status of the action."]}
+      status: RecommendationTemplateStatus.t option
+        [@ocaml.doc "Status of the action."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -8766,9 +15355,8 @@ module DeleteRecommendationTemplateResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteRecommendationTemplateResponse"
-    let make ~recommendationTemplateArn =
-      fun ~status -> fun () -> { recommendationTemplateArn; status }
+    let make ?recommendationTemplateArn =
+      fun ?status -> fun () -> { recommendationTemplateArn; status }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8828,25 +15416,25 @@ module DeleteRecommendationTemplateResponse =
     let to_value x =
       structure_to_value
         [("recommendationTemplateArn",
-           (Some (Arn.to_value x.recommendationTemplateArn)));
-        ("status", (Some (RecommendationTemplateStatus.to_value x.status)))]
+           (Option.map x.recommendationTemplateArn ~f:Arn.to_value));
+        ("status",
+          (Option.map x.status ~f:RecommendationTemplateStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        RecommendationTemplateStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:RecommendationTemplateStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let recommendationTemplateArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "recommendationTemplateArn") in
-      make ~status ~recommendationTemplateArn ()
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "recommendationTemplateArn") in
+      make ?status ?recommendationTemplateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map_exn json "status" RecommendationTemplateStatus.of_json in
+        field_map json__ "status" RecommendationTemplateStatus.of_json in
       let recommendationTemplateArn =
-        field_map_exn json "recommendationTemplateArn" Arn.of_json in
-      make ~status ~recommendationTemplateArn ()
+        field_map json__ "recommendationTemplateArn" Arn.of_json in
+      make ?status ?recommendationTemplateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a recommendation template. This is a destructive action that can't be undone."]
@@ -8879,151 +15467,26 @@ module DeleteRecommendationTemplateRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~recommendationTemplateArn ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationTemplateArn =
-        field_map_exn json "recommendationTemplateArn" Arn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+        field_map_exn json__ "recommendationTemplateArn" Arn.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       make ~recommendationTemplateArn ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a recommendation template. This is a destructive action that can't be undone."]
-module DeleteAppResponse =
+module DeleteAppVersionResourceResponse =
   struct
     type nonrec t =
       {
-      appArn: Arn.t
+      appArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."]}
-    type nonrec error =
-      [ `ConflictException of ConflictException.t 
-      | `InternalServerException of InternalServerException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `ThrottlingException of ThrottlingException.t 
-      | `ValidationException of ValidationException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteAppResponse"
-    let make ~appArn = fun () -> { appArn }
-    let error_of_json name json =
-      match name with
-      | "ConflictException" ->
-          `ConflictException (ConflictException.of_json json)
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | "ThrottlingException" ->
-          `ThrottlingException (ThrottlingException.of_json json)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "ConflictException" ->
-          `ConflictException (ConflictException.of_xml xml)
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | "ThrottlingException" ->
-          `ThrottlingException (ThrottlingException.of_xml xml)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `ConflictException e ->
-          `Assoc
-            [("error", (`String "ConflictException"));
-            ("details", (ConflictException.to_json e))]
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `ThrottlingException e ->
-          `Assoc
-            [("error", (`String "ThrottlingException"));
-            ("details", (ThrottlingException.to_json e))]
-      | `ValidationException e ->
-          `Assoc
-            [("error", (`String "ValidationException"));
-            ("details", (ValidationException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value [("appArn", (Some (Arn.to_value x.appArn)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let appArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      make ~appArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appArn = field_map_exn json "appArn" Arn.of_json in make ~appArn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Deletes an AWS Resilience Hub application. This is a destructive action that can't be undone."]
-module DeleteAppRequest =
-  struct
-    type nonrec t =
-      {
-      appArn: Arn.t
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t option
+        [@ocaml.doc "Resilience Hub application version."];
+      physicalResource: PhysicalResource.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
-      clientToken: ClientToken.t option
-        [@ocaml.doc
-          "Used for an idempotency token. A client token is a unique, case-sensitive string of up to 64 ASCII characters. You should not reuse the same client token for other API requests."];
-      forceDelete: BooleanOptional.t option
-        [@ocaml.doc
-          "A boolean option to force the deletion of a Resilience Hub application."]}
-    let context_ = "DeleteAppRequest"
-    let make ?clientToken =
-      fun ?forceDelete ->
-        fun ~appArn -> fun () -> { clientToken; forceDelete; appArn }
-    let to_value x =
-      structure_to_value
-        [("appArn", (Some (Arn.to_value x.appArn)));
-        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
-        ("forceDelete",
-          (Option.map x.forceDelete ~f:BooleanOptional.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let forceDelete =
-        (Option.map ~f:BooleanOptional.of_xml)
-          (Xml.child xml_arg0 "forceDelete") in
-      let clientToken =
-        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
-      let appArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      make ?forceDelete ?clientToken ~appArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let forceDelete = field_map json "forceDelete" BooleanOptional.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
-      make ?forceDelete ?clientToken ~appArn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Deletes an AWS Resilience Hub application. This is a destructive action that can't be undone."]
-module DeleteAppAssessmentResponse =
-  struct
-    type nonrec t =
-      {
-      assessmentArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:dcps:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
-      assessmentStatus: AssessmentStatus.t
-        [@ocaml.doc
-          "The current status of the assessment for the resiliency policy."]}
+          "Defines a physical resource. A physical resource is a resource that exists in your account. It can be identified using an Amazon Resource Name (ARN) or a Resilience Hub-native identifier."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -9032,9 +15495,10 @@ module DeleteAppAssessmentResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteAppAssessmentResponse"
-    let make ~assessmentArn =
-      fun ~assessmentStatus -> fun () -> { assessmentArn; assessmentStatus }
+    let make ?appArn =
+      fun ?appVersion ->
+        fun ?physicalResource ->
+          fun () -> { appArn; appVersion; physicalResource }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -9101,33 +15565,683 @@ module DeleteAppAssessmentResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("assessmentArn", (Some (Arn.to_value x.assessmentArn)));
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value));
+        ("physicalResource",
+          (Option.map x.physicalResource ~f:PhysicalResource.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let physicalResource =
+        (Option.map ~f:PhysicalResource.of_xml)
+          (Xml.child xml_arg0 "physicalResource") in
+      let appVersion =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?physicalResource ?appVersion ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let physicalResource =
+        field_map json__ "physicalResource" PhysicalResource.of_json in
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?physicalResource ?appVersion ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a resource from the Resilience Hub application. You can only delete a manually added resource. To exclude non-manually added resources, use the UpdateAppVersionResource API. This action has no effect outside Resilience Hub. This API updates the Resilience Hub application draft version. To use this resource for running resiliency assessments, you must publish the Resilience Hub application using the PublishAppVersion API."]
+module DeleteAppVersionResourceRequest =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      awsAccountId: CustomerId.t option
+        [@ocaml.doc
+          "Amazon Web Services account that owns the physical resource."];
+      awsRegion: AwsRegion.t option
+        [@ocaml.doc
+          "Amazon Web Services region that owns the physical resource."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "Used for an idempotency token. A client token is a unique, case-sensitive string of up to 64 ASCII characters. You should not reuse the same client token for other API requests."];
+      logicalResourceId: LogicalResourceId.t option
+        [@ocaml.doc "Logical identifier of the resource."];
+      physicalResourceId: String2048.t option
+        [@ocaml.doc "Physical identifier of the resource."];
+      resourceName: EntityName.t option [@ocaml.doc "Name of the resource."]}
+    let context_ = "DeleteAppVersionResourceRequest"
+    let make ?awsAccountId =
+      fun ?awsRegion ->
+        fun ?clientToken ->
+          fun ?logicalResourceId ->
+            fun ?physicalResourceId ->
+              fun ?resourceName ->
+                fun ~appArn ->
+                  fun () ->
+                    {
+                      awsAccountId;
+                      awsRegion;
+                      clientToken;
+                      logicalResourceId;
+                      physicalResourceId;
+                      resourceName;
+                      appArn
+                    }
+    let to_value x =
+      structure_to_value
+        [("appArn", (Some (Arn.to_value x.appArn)));
+        ("awsAccountId", (Option.map x.awsAccountId ~f:CustomerId.to_value));
+        ("awsRegion", (Option.map x.awsRegion ~f:AwsRegion.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("logicalResourceId",
+          (Option.map x.logicalResourceId ~f:LogicalResourceId.to_value));
+        ("physicalResourceId",
+          (Option.map x.physicalResourceId ~f:String2048.to_value));
+        ("resourceName", (Option.map x.resourceName ~f:EntityName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceName =
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "resourceName") in
+      let physicalResourceId =
+        (Option.map ~f:String2048.of_xml)
+          (Xml.child xml_arg0 "physicalResourceId") in
+      let logicalResourceId =
+        (Option.map ~f:LogicalResourceId.of_xml)
+          (Xml.child xml_arg0 "logicalResourceId") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let awsRegion =
+        (Option.map ~f:AwsRegion.of_xml) (Xml.child xml_arg0 "awsRegion") in
+      let awsAccountId =
+        (Option.map ~f:CustomerId.of_xml) (Xml.child xml_arg0 "awsAccountId") in
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      make ?resourceName ?physicalResourceId ?logicalResourceId ?clientToken
+        ?awsRegion ?awsAccountId ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceName = field_map json__ "resourceName" EntityName.of_json in
+      let physicalResourceId =
+        field_map json__ "physicalResourceId" String2048.of_json in
+      let logicalResourceId =
+        field_map json__ "logicalResourceId" LogicalResourceId.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let awsRegion = field_map json__ "awsRegion" AwsRegion.of_json in
+      let awsAccountId = field_map json__ "awsAccountId" CustomerId.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ?resourceName ?physicalResourceId ?logicalResourceId ?clientToken
+        ?awsRegion ?awsAccountId ~appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a resource from the Resilience Hub application. You can only delete a manually added resource. To exclude non-manually added resources, use the UpdateAppVersionResource API. This action has no effect outside Resilience Hub. This API updates the Resilience Hub application draft version. To use this resource for running resiliency assessments, you must publish the Resilience Hub application using the PublishAppVersion API."]
+module DeleteAppVersionAppComponentResponse =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appComponent: AppComponent.t option
+        [@ocaml.doc
+          "List of Application Components that belong to this resource."];
+      appVersion: EntityVersion.t option
+        [@ocaml.doc "Resilience Hub application version."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appArn =
+      fun ?appComponent ->
+        fun ?appVersion -> fun () -> { appArn; appComponent; appVersion }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appComponent",
+          (Option.map x.appComponent ~f:AppComponent.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appVersion =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appComponent =
+        (Option.map ~f:AppComponent.of_xml)
+          (Xml.child xml_arg0 "appComponent") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?appVersion ?appComponent ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appComponent = field_map json__ "appComponent" AppComponent.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?appVersion ?appComponent ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an Application Component from the Resilience Hub application. This API updates the Resilience Hub application draft version. To use this Application Component for running assessments, you must publish the Resilience Hub application using the PublishAppVersion API. You will not be able to delete an Application Component if it has resources associated with it."]
+module DeleteAppVersionAppComponentRequest =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "Used for an idempotency token. A client token is a unique, case-sensitive string of up to 64 ASCII characters. You should not reuse the same client token for other API requests."];
+      id: String255.t [@ocaml.doc "Identifier of the Application Component."]}
+    let context_ = "DeleteAppVersionAppComponentRequest"
+    let make ?clientToken =
+      fun ~appArn -> fun ~id -> fun () -> { clientToken; appArn; id }
+    let to_value x =
+      structure_to_value
+        [("appArn", (Some (Arn.to_value x.appArn)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("id", (Some (String255.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        String255.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      make ~id ?clientToken ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" String255.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ~id ?clientToken ~appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an Application Component from the Resilience Hub application. This API updates the Resilience Hub application draft version. To use this Application Component for running assessments, you must publish the Resilience Hub application using the PublishAppVersion API. You will not be able to delete an Application Component if it has resources associated with it."]
+module DeleteAppResponse =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appArn = fun () -> { appArn }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("appArn", (Option.map x.appArn ~f:Arn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appArn = field_map json__ "appArn" Arn.of_json in make ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an Resilience Hub application. This is a destructive action that can't be undone."]
+module DeleteAppRequest =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "Used for an idempotency token. A client token is a unique, case-sensitive string of up to 64 ASCII characters. You should not reuse the same client token for other API requests."];
+      forceDelete: BooleanOptional.t option
+        [@ocaml.doc
+          "A boolean option to force the deletion of an Resilience Hub application."]}
+    let context_ = "DeleteAppRequest"
+    let make ?clientToken =
+      fun ?forceDelete ->
+        fun ~appArn -> fun () -> { clientToken; forceDelete; appArn }
+    let to_value x =
+      structure_to_value
+        [("appArn", (Some (Arn.to_value x.appArn)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("forceDelete",
+          (Option.map x.forceDelete ~f:BooleanOptional.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let forceDelete =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "forceDelete") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      make ?forceDelete ?clientToken ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let forceDelete =
+        field_map json__ "forceDelete" BooleanOptional.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ?forceDelete ?clientToken ~appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an Resilience Hub application. This is a destructive action that can't be undone."]
+module DeleteAppInputSourceResponse =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appInputSource: AppInputSource.t option
+        [@ocaml.doc
+          "Name of the input source from where the application resource is imported from."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appArn =
+      fun ?appInputSource -> fun () -> { appArn; appInputSource }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appInputSource",
+          (Option.map x.appInputSource ~f:AppInputSource.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appInputSource =
+        (Option.map ~f:AppInputSource.of_xml)
+          (Xml.child xml_arg0 "appInputSource") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?appInputSource ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appInputSource =
+        field_map json__ "appInputSource" AppInputSource.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?appInputSource ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the input source and all of its imported resources from the Resilience Hub application."]
+module DeleteAppInputSourceRequest =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "Used for an idempotency token. A client token is a unique, case-sensitive string of up to 64 ASCII characters. You should not reuse the same client token for other API requests."];
+      eksSourceClusterNamespace: EksSourceClusterNamespace.t option
+        [@ocaml.doc
+          "The namespace on your Amazon Elastic Kubernetes Service cluster that you want to delete from the Resilience Hub application."];
+      sourceArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the imported resource you want to remove from the Resilience Hub application. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      terraformSource: TerraformSource.t option
+        [@ocaml.doc
+          "The imported Terraform s3 state \239\172\129le you want to remove from the Resilience Hub application."]}
+    let context_ = "DeleteAppInputSourceRequest"
+    let make ?clientToken =
+      fun ?eksSourceClusterNamespace ->
+        fun ?sourceArn ->
+          fun ?terraformSource ->
+            fun ~appArn ->
+              fun () ->
+                {
+                  clientToken;
+                  eksSourceClusterNamespace;
+                  sourceArn;
+                  terraformSource;
+                  appArn
+                }
+    let to_value x =
+      structure_to_value
+        [("appArn", (Some (Arn.to_value x.appArn)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("eksSourceClusterNamespace",
+          (Option.map x.eksSourceClusterNamespace
+             ~f:EksSourceClusterNamespace.to_value));
+        ("sourceArn", (Option.map x.sourceArn ~f:Arn.to_value));
+        ("terraformSource",
+          (Option.map x.terraformSource ~f:TerraformSource.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let terraformSource =
+        (Option.map ~f:TerraformSource.of_xml)
+          (Xml.child xml_arg0 "terraformSource") in
+      let sourceArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "sourceArn") in
+      let eksSourceClusterNamespace =
+        (Option.map ~f:EksSourceClusterNamespace.of_xml)
+          (Xml.child xml_arg0 "eksSourceClusterNamespace") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      make ?terraformSource ?sourceArn ?eksSourceClusterNamespace
+        ?clientToken ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let terraformSource =
+        field_map json__ "terraformSource" TerraformSource.of_json in
+      let sourceArn = field_map json__ "sourceArn" Arn.of_json in
+      let eksSourceClusterNamespace =
+        field_map json__ "eksSourceClusterNamespace"
+          EksSourceClusterNamespace.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ?terraformSource ?sourceArn ?eksSourceClusterNamespace
+        ?clientToken ~appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the input source and all of its imported resources from the Resilience Hub application."]
+module DeleteAppAssessmentResponse =
+  struct
+    type nonrec t =
+      {
+      assessmentArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:resiliencehub:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      assessmentStatus: AssessmentStatus.t option
+        [@ocaml.doc
+          "The current status of the assessment for the resiliency policy."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?assessmentArn =
+      fun ?assessmentStatus -> fun () -> { assessmentArn; assessmentStatus }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("assessmentArn", (Option.map x.assessmentArn ~f:Arn.to_value));
         ("assessmentStatus",
-          (Some (AssessmentStatus.to_value x.assessmentStatus)))]
+          (Option.map x.assessmentStatus ~f:AssessmentStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let assessmentStatus =
-        AssessmentStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentStatus") in
+        (Option.map ~f:AssessmentStatus.of_xml)
+          (Xml.child xml_arg0 "assessmentStatus") in
       let assessmentArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
-      make ~assessmentStatus ~assessmentArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "assessmentArn") in
+      make ?assessmentStatus ?assessmentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentStatus =
-        field_map_exn json "assessmentStatus" AssessmentStatus.of_json in
-      let assessmentArn = field_map_exn json "assessmentArn" Arn.of_json in
-      make ~assessmentStatus ~assessmentArn ()
+        field_map json__ "assessmentStatus" AssessmentStatus.of_json in
+      let assessmentArn = field_map json__ "assessmentArn" Arn.of_json in
+      make ?assessmentStatus ?assessmentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an AWS Resilience Hub application assessment. This is a destructive action that can't be undone."]
+       "Deletes an Resilience Hub application assessment. This is a destructive action that can't be undone."]
 module DeleteAppAssessmentRequest =
   struct
     type nonrec t =
       {
       assessmentArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:dcps:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:resiliencehub:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       clientToken: ClientToken.t option
         [@ocaml.doc
           "Used for an idempotency token. A client token is a unique, case-sensitive string of up to 64 ASCII characters. You should not reuse the same client token for other API requests."]}
@@ -9146,18 +16260,18 @@ module DeleteAppAssessmentRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
       make ?clientToken ~assessmentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let assessmentArn = field_map_exn json "assessmentArn" Arn.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let assessmentArn = field_map_exn json__ "assessmentArn" Arn.of_json in
       make ?clientToken ~assessmentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an AWS Resilience Hub application assessment. This is a destructive action that can't be undone."]
+       "Deletes an Resilience Hub application assessment. This is a destructive action that can't be undone."]
 module CreateResiliencyPolicyResponse =
   struct
     type nonrec t =
       {
-      policy: ResiliencyPolicy.t
+      policy: ResiliencyPolicy.t option
         [@ocaml.doc
           "The type of resiliency policy that was created, including the recovery time objective (RTO) and recovery point objective (RPO) in seconds."]}
     type nonrec error =
@@ -9168,8 +16282,7 @@ module CreateResiliencyPolicyResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateResiliencyPolicyResponse"
-    let make ~policy = fun () -> { policy }
+    let make ?policy = fun () -> { policy }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -9238,19 +16351,19 @@ module CreateResiliencyPolicyResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("policy", (Some (ResiliencyPolicy.to_value x.policy)))]
+        [("policy", (Option.map x.policy ~f:ResiliencyPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let policy =
-        ResiliencyPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "policy") in
-      make ~policy ()
+        (Option.map ~f:ResiliencyPolicy.of_xml) (Xml.child xml_arg0 "policy") in
+      make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map_exn json "policy" ResiliencyPolicy.of_json in
-      make ~policy ()
+    let of_json json__ =
+      let policy = field_map json__ "policy" ResiliencyPolicy.of_json in
+      make ?policy ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a resiliency policy for an application."]
+  end[@@ocaml.doc
+       "Creates a resiliency policy for an application. Resilience Hub allows you to provide a value of zero for rtoInSecs and rpoInSecs of your resiliency policy. But, while assessing your application, the lowest possible assessment result is near zero. Hence, if you provide value zero for rtoInSecs and rpoInSecs, the estimated workload RTO and estimated workload RPO result will be near zero and the Compliance status for your application will be set to Policy breached."]
 module CreateResiliencyPolicyRequest =
   struct
     type nonrec t =
@@ -9265,11 +16378,11 @@ module CreateResiliencyPolicyRequest =
         [@ocaml.doc
           "The type of resiliency policy to be created, including the recovery time objective (RTO) and recovery point objective (RPO) in seconds."];
       policyDescription: EntityDescription.t option
-        [@ocaml.doc "The description for the policy."];
-      policyName: EntityName.t [@ocaml.doc "The name of the policy"];
+        [@ocaml.doc "Description of the resiliency policy."];
+      policyName: EntityName.t [@ocaml.doc "Name of the resiliency policy."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."];
+          "Tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."];
       tier: ResiliencyPolicyTier.t
         [@ocaml.doc
           "The tier for this resiliency policy, ranging from the highest severity (MissionCritical) to lowest (NonCritical)."]}
@@ -9326,21 +16439,22 @@ module CreateResiliencyPolicyRequest =
       make ~tier ?tags ~policyName ?policyDescription ~policy
         ?dataLocationConstraint ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tier = field_map_exn json "tier" ResiliencyPolicyTier.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let policyName = field_map_exn json "policyName" EntityName.of_json in
+    let of_json json__ =
+      let tier = field_map_exn json__ "tier" ResiliencyPolicyTier.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let policyName = field_map_exn json__ "policyName" EntityName.of_json in
       let policyDescription =
-        field_map json "policyDescription" EntityDescription.of_json in
-      let policy = field_map_exn json "policy" DisruptionPolicy.of_json in
+        field_map json__ "policyDescription" EntityDescription.of_json in
+      let policy = field_map_exn json__ "policy" DisruptionPolicy.of_json in
       let dataLocationConstraint =
-        field_map json "dataLocationConstraint"
+        field_map json__ "dataLocationConstraint"
           DataLocationConstraint.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       make ~tier ?tags ~policyName ?policyDescription ~policy
         ?dataLocationConstraint ?clientToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a resiliency policy for an application."]
+  end[@@ocaml.doc
+       "Creates a resiliency policy for an application. Resilience Hub allows you to provide a value of zero for rtoInSecs and rpoInSecs of your resiliency policy. But, while assessing your application, the lowest possible assessment result is near zero. Hence, if you provide value zero for rtoInSecs and rpoInSecs, the estimated workload RTO and estimated workload RPO result will be near zero and the Compliance status for your application will be set to Policy breached."]
 module CreateRecommendationTemplateResponse =
   struct
     type nonrec t =
@@ -9353,209 +16467,11 @@ module CreateRecommendationTemplateResponse =
       | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `ThrottlingException of ThrottlingException.t 
-      | `ValidationException of ValidationException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?recommendationTemplate = fun () -> { recommendationTemplate }
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "ConflictException" ->
-          `ConflictException (ConflictException.of_json json)
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | "ThrottlingException" ->
-          `ThrottlingException (ThrottlingException.of_json json)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "ConflictException" ->
-          `ConflictException (ConflictException.of_xml xml)
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | "ThrottlingException" ->
-          `ThrottlingException (ThrottlingException.of_xml xml)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `ConflictException e ->
-          `Assoc
-            [("error", (`String "ConflictException"));
-            ("details", (ConflictException.to_json e))]
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `ThrottlingException e ->
-          `Assoc
-            [("error", (`String "ThrottlingException"));
-            ("details", (ThrottlingException.to_json e))]
-      | `ValidationException e ->
-          `Assoc
-            [("error", (`String "ValidationException"));
-            ("details", (ValidationException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("recommendationTemplate",
-           (Option.map x.recommendationTemplate
-              ~f:RecommendationTemplate.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let recommendationTemplate =
-        (Option.map ~f:RecommendationTemplate.of_xml)
-          (Xml.child xml_arg0 "recommendationTemplate") in
-      make ?recommendationTemplate ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recommendationTemplate =
-        field_map json "recommendationTemplate"
-          RecommendationTemplate.of_json in
-      make ?recommendationTemplate ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a new recommendation template."]
-module CreateRecommendationTemplateRequest =
-  struct
-    type nonrec t =
-      {
-      assessmentArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:dcps:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
-      bucketName: EntityName.t option
-        [@ocaml.doc
-          "The name of the Amazon S3 bucket that will contain the recommendation template."];
-      clientToken: ClientToken.t option
-        [@ocaml.doc
-          "Used for an idempotency token. A client token is a unique, case-sensitive string of up to 64 ASCII characters. You should not reuse the same client token for other API requests."];
-      format: TemplateFormat.t option
-        [@ocaml.doc
-          "The format for the recommendation template. CfnJson The template is CloudFormation JSON. CfnYaml The template is CloudFormation YAML."];
-      name: EntityName.t
-        [@ocaml.doc "The name for the recommendation template."];
-      recommendationIds: RecommendationIdList.t option
-        [@ocaml.doc
-          "Identifiers for the recommendations used to create a recommendation template."];
-      recommendationTypes: RenderRecommendationTypeList.t option
-        [@ocaml.doc
-          "An array of strings that specify the recommendation template type or types. Alarm The template is an AlarmRecommendation template. Sop The template is a SopRecommendation template. Test The template is a TestRecommendation template."];
-      tags: TagMap.t option
-        [@ocaml.doc
-          "The tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."]}
-    let context_ = "CreateRecommendationTemplateRequest"
-    let make ?bucketName =
-      fun ?clientToken ->
-        fun ?format ->
-          fun ?recommendationIds ->
-            fun ?recommendationTypes ->
-              fun ?tags ->
-                fun ~assessmentArn ->
-                  fun ~name ->
-                    fun () ->
-                      {
-                        bucketName;
-                        clientToken;
-                        format;
-                        recommendationIds;
-                        recommendationTypes;
-                        tags;
-                        assessmentArn;
-                        name
-                      }
-    let to_value x =
-      structure_to_value
-        [("assessmentArn", (Some (Arn.to_value x.assessmentArn)));
-        ("bucketName", (Option.map x.bucketName ~f:EntityName.to_value));
-        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
-        ("format", (Option.map x.format ~f:TemplateFormat.to_value));
-        ("name", (Some (EntityName.to_value x.name)));
-        ("recommendationIds",
-          (Option.map x.recommendationIds ~f:RecommendationIdList.to_value));
-        ("recommendationTypes",
-          (Option.map x.recommendationTypes
-             ~f:RenderRecommendationTypeList.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let recommendationTypes =
-        (Option.map ~f:RenderRecommendationTypeList.of_xml)
-          (Xml.child xml_arg0 "recommendationTypes") in
-      let recommendationIds =
-        (Option.map ~f:RecommendationIdList.of_xml)
-          (Xml.child xml_arg0 "recommendationIds") in
-      let name =
-        EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let format =
-        (Option.map ~f:TemplateFormat.of_xml) (Xml.child xml_arg0 "format") in
-      let clientToken =
-        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
-      let bucketName =
-        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "bucketName") in
-      let assessmentArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
-      make ?tags ?recommendationTypes ?recommendationIds ~name ?format
-        ?clientToken ?bucketName ~assessmentArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let recommendationTypes =
-        field_map json "recommendationTypes"
-          RenderRecommendationTypeList.of_json in
-      let recommendationIds =
-        field_map json "recommendationIds" RecommendationIdList.of_json in
-      let name = field_map_exn json "name" EntityName.of_json in
-      let format = field_map json "format" TemplateFormat.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let bucketName = field_map json "bucketName" EntityName.of_json in
-      let assessmentArn = field_map_exn json "assessmentArn" Arn.of_json in
-      make ?tags ?recommendationTypes ?recommendationIds ~name ?format
-        ?clientToken ?bucketName ~assessmentArn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a new recommendation template."]
-module CreateAppResponse =
-  struct
-    type nonrec t =
-      {
-      app: App.t
-        [@ocaml.doc
-          "The created application returned as an object with details including compliance status, creation time, description, resiliency score, and more."]}
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `ConflictException of ConflictException.t 
-      | `InternalServerException of InternalServerException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateAppResponse"
-    let make ~app = fun () -> { app }
+    let make ?recommendationTemplate = fun () -> { recommendationTemplate }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -9631,98 +16547,149 @@ module CreateAppResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("app", (Some (App.to_value x.app)))]
+      structure_to_value
+        [("recommendationTemplate",
+           (Option.map x.recommendationTemplate
+              ~f:RecommendationTemplate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let app = App.of_xml (Xml.child_exn ~context:context_ xml_arg0 "app") in
-      make ~app ()
+      let recommendationTemplate =
+        (Option.map ~f:RecommendationTemplate.of_xml)
+          (Xml.child xml_arg0 "recommendationTemplate") in
+      make ?recommendationTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let app = field_map_exn json "app" App.of_json in make ~app ()
+    let of_json json__ =
+      let recommendationTemplate =
+        field_map json__ "recommendationTemplate"
+          RecommendationTemplate.of_json in
+      make ?recommendationTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a Resilience Hub application. A Resilience Hub application is a collection of Amazon Web Services resources structured to prevent and recover Amazon Web Services application disruptions. To describe a Resilience Hub application, you provide an application name, resources from one or more\226\128\147up to five\226\128\147CloudFormation stacks, and an appropriate resiliency policy. <p>After you create a Resilience Hub application, you publish it so that you can run a resiliency assessment on it. You can then use recommendations from the assessment to improve resiliency by running another assessment, comparing results, and then iterating the process until you achieve your goals for recovery time objective (RTO) and recovery point objective (RPO).</p>"]
-module CreateAppRequest =
+       "Creates a new recommendation template for the Resilience Hub application."]
+module CreateRecommendationTemplateRequest =
   struct
     type nonrec t =
       {
+      assessmentArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the assessment. The format for this ARN is: arn:partition:resiliencehub:region:account:app-assessment/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      bucketName: EntityName.t option
+        [@ocaml.doc
+          "The name of the Amazon S3 bucket that will contain the recommendation template."];
       clientToken: ClientToken.t option
         [@ocaml.doc
           "Used for an idempotency token. A client token is a unique, case-sensitive string of up to 64 ASCII characters. You should not reuse the same client token for other API requests."];
-      description: EntityDescription.t option
-        [@ocaml.doc "The optional description for an app."];
-      name: EntityName.t [@ocaml.doc "The name for the application."];
-      policyArn: Arn.t option
+      format: TemplateFormat.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resiliency policy. The format for this ARN is: arn:partition:dcps:region:account:resiliency-policy/policy-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "The format for the recommendation template. CfnJson The template is CloudFormation JSON. CfnYaml The template is CloudFormation YAML."];
+      name: EntityName.t
+        [@ocaml.doc "The name for the recommendation template."];
+      recommendationIds: RecommendationIdList.t option
+        [@ocaml.doc
+          "Identifiers for the recommendations used to create a recommendation template."];
+      recommendationTypes: RenderRecommendationTypeList.t option
+        [@ocaml.doc
+          "An array of strings that specify the recommendation template type or types. Alarm The template is an AlarmRecommendation template. Sop The template is a SopRecommendation template. Test The template is a TestRecommendation template."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."]}
-    let context_ = "CreateAppRequest"
-    let make ?clientToken =
-      fun ?description ->
-        fun ?policyArn ->
-          fun ?tags ->
-            fun ~name ->
-              fun () -> { clientToken; description; policyArn; tags; name }
+          "Tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."]}
+    let context_ = "CreateRecommendationTemplateRequest"
+    let make ?bucketName =
+      fun ?clientToken ->
+        fun ?format ->
+          fun ?recommendationIds ->
+            fun ?recommendationTypes ->
+              fun ?tags ->
+                fun ~assessmentArn ->
+                  fun ~name ->
+                    fun () ->
+                      {
+                        bucketName;
+                        clientToken;
+                        format;
+                        recommendationIds;
+                        recommendationTypes;
+                        tags;
+                        assessmentArn;
+                        name
+                      }
     let to_value x =
       structure_to_value
-        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
-        ("description",
-          (Option.map x.description ~f:EntityDescription.to_value));
+        [("assessmentArn", (Some (Arn.to_value x.assessmentArn)));
+        ("bucketName", (Option.map x.bucketName ~f:EntityName.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("format", (Option.map x.format ~f:TemplateFormat.to_value));
         ("name", (Some (EntityName.to_value x.name)));
-        ("policyArn", (Option.map x.policyArn ~f:Arn.to_value));
+        ("recommendationIds",
+          (Option.map x.recommendationIds ~f:RecommendationIdList.to_value));
+        ("recommendationTypes",
+          (Option.map x.recommendationTypes
+             ~f:RenderRecommendationTypeList.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let policyArn =
-        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "policyArn") in
+      let recommendationTypes =
+        (Option.map ~f:RenderRecommendationTypeList.of_xml)
+          (Xml.child xml_arg0 "recommendationTypes") in
+      let recommendationIds =
+        (Option.map ~f:RecommendationIdList.of_xml)
+          (Xml.child xml_arg0 "recommendationIds") in
       let name =
         EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let description =
-        (Option.map ~f:EntityDescription.of_xml)
-          (Xml.child xml_arg0 "description") in
+      let format =
+        (Option.map ~f:TemplateFormat.of_xml) (Xml.child xml_arg0 "format") in
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
-      make ?tags ?policyArn ~name ?description ?clientToken ()
+      let bucketName =
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "bucketName") in
+      let assessmentArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentArn") in
+      make ?tags ?recommendationTypes ?recommendationIds ~name ?format
+        ?clientToken ?bucketName ~assessmentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let policyArn = field_map json "policyArn" Arn.of_json in
-      let name = field_map_exn json "name" EntityName.of_json in
-      let description =
-        field_map json "description" EntityDescription.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      make ?tags ?policyArn ~name ?description ?clientToken ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let recommendationTypes =
+        field_map json__ "recommendationTypes"
+          RenderRecommendationTypeList.of_json in
+      let recommendationIds =
+        field_map json__ "recommendationIds" RecommendationIdList.of_json in
+      let name = field_map_exn json__ "name" EntityName.of_json in
+      let format = field_map json__ "format" TemplateFormat.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let bucketName = field_map json__ "bucketName" EntityName.of_json in
+      let assessmentArn = field_map_exn json__ "assessmentArn" Arn.of_json in
+      make ?tags ?recommendationTypes ?recommendationIds ~name ?format
+        ?clientToken ?bucketName ~assessmentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a Resilience Hub application. A Resilience Hub application is a collection of Amazon Web Services resources structured to prevent and recover Amazon Web Services application disruptions. To describe a Resilience Hub application, you provide an application name, resources from one or more\226\128\147up to five\226\128\147CloudFormation stacks, and an appropriate resiliency policy. <p>After you create a Resilience Hub application, you publish it so that you can run a resiliency assessment on it. You can then use recommendations from the assessment to improve resiliency by running another assessment, comparing results, and then iterating the process until you achieve your goals for recovery time objective (RTO) and recovery point objective (RPO).</p>"]
-module AddDraftAppVersionResourceMappingsResponse =
+       "Creates a new recommendation template for the Resilience Hub application."]
+module CreateAppVersionResourceResponse =
   struct
     type nonrec t =
       {
-      appArn: Arn.t
+      appArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
-      appVersion: EntityVersion.t
-        [@ocaml.doc "The version of the application."];
-      resourceMappings: ResourceMappingList.t
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t option
+        [@ocaml.doc "Resilience Hub application version."];
+      physicalResource: PhysicalResource.t option
         [@ocaml.doc
-          "Mappings used to map logical resources from the template to physical resources. You can use the mapping type CFN_STACK if the application template uses a logical stack name. Or you can map individual resources by using the mapping type RESOURCE. We recommend using the mapping type CFN_STACK if the application is backed by a CloudFormation stack."]}
+          "Defines a physical resource. A physical resource is a resource that exists in your account. It can be identified using an Amazon Resource Name (ARN) or a Resilience Hub-native identifier."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "AddDraftAppVersionResourceMappingsResponse"
-    let make ~appArn =
-      fun ~appVersion ->
-        fun ~resourceMappings ->
-          fun () -> { appArn; appVersion; resourceMappings }
+    let make ?appArn =
+      fun ?appVersion ->
+        fun ?physicalResource ->
+          fun () -> { appArn; appVersion; physicalResource }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -9733,6 +16700,9 @@ module AddDraftAppVersionResourceMappingsResponse =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
@@ -9750,6 +16720,9 @@ module AddDraftAppVersionResourceMappingsResponse =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
@@ -9774,6 +16747,10 @@ module AddDraftAppVersionResourceMappingsResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
       | `ThrottlingException e ->
           `Assoc
             [("error", (`String "ThrottlingException"));
@@ -9789,38 +16766,839 @@ module AddDraftAppVersionResourceMappingsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value));
+        ("physicalResource",
+          (Option.map x.physicalResource ~f:PhysicalResource.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let physicalResource =
+        (Option.map ~f:PhysicalResource.of_xml)
+          (Xml.child xml_arg0 "physicalResource") in
+      let appVersion =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?physicalResource ?appVersion ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let physicalResource =
+        field_map json__ "physicalResource" PhysicalResource.of_json in
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?physicalResource ?appVersion ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds a resource to the Resilience Hub application and assigns it to the specified Application Components. If you specify a new Application Component, Resilience Hub will automatically create the Application Component. This action has no effect outside Resilience Hub. This API updates the Resilience Hub application draft version. To use this resource for running resiliency assessments, you must publish the Resilience Hub application using the PublishAppVersion API. To update application version with new physicalResourceID, you must call ResolveAppVersionResources API."]
+module CreateAppVersionResourceRequest =
+  struct
+    type nonrec t =
+      {
+      additionalInfo: AdditionalInfoMap.t option
+        [@ocaml.doc
+          "Currently, there is no supported additional information for resources."];
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appComponents: AppComponentNameList.t
+        [@ocaml.doc
+          "List of Application Components that this resource belongs to. If an Application Component is not part of the Resilience Hub application, it will be added."];
+      awsAccountId: CustomerId.t option
+        [@ocaml.doc
+          "Amazon Web Services account that owns the physical resource."];
+      awsRegion: AwsRegion.t option
+        [@ocaml.doc
+          "Amazon Web Services region that owns the physical resource."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "Used for an idempotency token. A client token is a unique, case-sensitive string of up to 64 ASCII characters. You should not reuse the same client token for other API requests."];
+      logicalResourceId: LogicalResourceId.t
+        [@ocaml.doc "Logical identifier of the resource."];
+      physicalResourceId: String2048.t
+        [@ocaml.doc "Physical identifier of the resource."];
+      resourceName: EntityName.t option [@ocaml.doc "Name of the resource."];
+      resourceType: String255.t [@ocaml.doc "Type of resource."]}
+    let context_ = "CreateAppVersionResourceRequest"
+    let make ?additionalInfo =
+      fun ?awsAccountId ->
+        fun ?awsRegion ->
+          fun ?clientToken ->
+            fun ?resourceName ->
+              fun ~appArn ->
+                fun ~appComponents ->
+                  fun ~logicalResourceId ->
+                    fun ~physicalResourceId ->
+                      fun ~resourceType ->
+                        fun () ->
+                          {
+                            additionalInfo;
+                            awsAccountId;
+                            awsRegion;
+                            clientToken;
+                            resourceName;
+                            appArn;
+                            appComponents;
+                            logicalResourceId;
+                            physicalResourceId;
+                            resourceType
+                          }
+    let to_value x =
+      structure_to_value
+        [("additionalInfo",
+           (Option.map x.additionalInfo ~f:AdditionalInfoMap.to_value));
+        ("appArn", (Some (Arn.to_value x.appArn)));
+        ("appComponents",
+          (Some (AppComponentNameList.to_value x.appComponents)));
+        ("awsAccountId", (Option.map x.awsAccountId ~f:CustomerId.to_value));
+        ("awsRegion", (Option.map x.awsRegion ~f:AwsRegion.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("logicalResourceId",
+          (Some (LogicalResourceId.to_value x.logicalResourceId)));
+        ("physicalResourceId",
+          (Some (String2048.to_value x.physicalResourceId)));
+        ("resourceName", (Option.map x.resourceName ~f:EntityName.to_value));
+        ("resourceType", (Some (String255.to_value x.resourceType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceType =
+        String255.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+      let resourceName =
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "resourceName") in
+      let physicalResourceId =
+        String2048.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "physicalResourceId") in
+      let logicalResourceId =
+        LogicalResourceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "logicalResourceId") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let awsRegion =
+        (Option.map ~f:AwsRegion.of_xml) (Xml.child xml_arg0 "awsRegion") in
+      let awsAccountId =
+        (Option.map ~f:CustomerId.of_xml) (Xml.child xml_arg0 "awsAccountId") in
+      let appComponents =
+        AppComponentNameList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "appComponents") in
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      let additionalInfo =
+        (Option.map ~f:AdditionalInfoMap.of_xml)
+          (Xml.child xml_arg0 "additionalInfo") in
+      make ~resourceType ?resourceName ~physicalResourceId ~logicalResourceId
+        ?clientToken ?awsRegion ?awsAccountId ~appComponents ~appArn
+        ?additionalInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceType =
+        field_map_exn json__ "resourceType" String255.of_json in
+      let resourceName = field_map json__ "resourceName" EntityName.of_json in
+      let physicalResourceId =
+        field_map_exn json__ "physicalResourceId" String2048.of_json in
+      let logicalResourceId =
+        field_map_exn json__ "logicalResourceId" LogicalResourceId.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let awsRegion = field_map json__ "awsRegion" AwsRegion.of_json in
+      let awsAccountId = field_map json__ "awsAccountId" CustomerId.of_json in
+      let appComponents =
+        field_map_exn json__ "appComponents" AppComponentNameList.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      let additionalInfo =
+        field_map json__ "additionalInfo" AdditionalInfoMap.of_json in
+      make ~resourceType ?resourceName ~physicalResourceId ~logicalResourceId
+        ?clientToken ?awsRegion ?awsAccountId ~appComponents ~appArn
+        ?additionalInfo ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds a resource to the Resilience Hub application and assigns it to the specified Application Components. If you specify a new Application Component, Resilience Hub will automatically create the Application Component. This action has no effect outside Resilience Hub. This API updates the Resilience Hub application draft version. To use this resource for running resiliency assessments, you must publish the Resilience Hub application using the PublishAppVersion API. To update application version with new physicalResourceID, you must call ResolveAppVersionResources API."]
+module CreateAppVersionAppComponentResponse =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appComponent: AppComponent.t option
+        [@ocaml.doc
+          "List of Application Components that belong to this resource."];
+      appVersion: EntityVersion.t option
+        [@ocaml.doc "Resilience Hub application version."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appArn =
+      fun ?appComponent ->
+        fun ?appVersion -> fun () -> { appArn; appComponent; appVersion }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appComponent",
+          (Option.map x.appComponent ~f:AppComponent.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appVersion =
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appComponent =
+        (Option.map ~f:AppComponent.of_xml)
+          (Xml.child xml_arg0 "appComponent") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?appVersion ?appComponent ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appComponent = field_map json__ "appComponent" AppComponent.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?appVersion ?appComponent ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new Application Component in the Resilience Hub application. This API updates the Resilience Hub application draft version. To use this Application Component for running assessments, you must publish the Resilience Hub application using the PublishAppVersion API."]
+module CreateAppVersionAppComponentRequest =
+  struct
+    type nonrec t =
+      {
+      additionalInfo: AdditionalInfoMap.t option
+        [@ocaml.doc
+          "Currently, there is no supported additional information for Application Components."];
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "Used for an idempotency token. A client token is a unique, case-sensitive string of up to 64 ASCII characters. You should not reuse the same client token for other API requests."];
+      id: String255.t option
+        [@ocaml.doc "Identifier of the Application Component."];
+      name: String255.t [@ocaml.doc "Name of the Application Component."];
+      type_: String255.t
+        [@ocaml.doc
+          "Type of Application Component. For more information about the types of Application Component, see Grouping resources in an AppComponent."]}
+    let context_ = "CreateAppVersionAppComponentRequest"
+    let make ?additionalInfo =
+      fun ?clientToken ->
+        fun ?id ->
+          fun ~appArn ->
+            fun ~name ->
+              fun ~type_ ->
+                fun () ->
+                  { additionalInfo; clientToken; id; appArn; name; type_ }
+    let to_value x =
+      structure_to_value
+        [("additionalInfo",
+           (Option.map x.additionalInfo ~f:AdditionalInfoMap.to_value));
+        ("appArn", (Some (Arn.to_value x.appArn)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("id", (Option.map x.id ~f:String255.to_value));
+        ("name", (Some (String255.to_value x.name)));
+        ("type", (Some (String255.to_value x.type_)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        String255.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      let name =
+        String255.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let id = (Option.map ~f:String255.of_xml) (Xml.child xml_arg0 "id") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      let additionalInfo =
+        (Option.map ~f:AdditionalInfoMap.of_xml)
+          (Xml.child xml_arg0 "additionalInfo") in
+      make ~type_ ~name ?id ?clientToken ~appArn ?additionalInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map_exn json__ "type" String255.of_json in
+      let name = field_map_exn json__ "name" String255.of_json in
+      let id = field_map json__ "id" String255.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      let additionalInfo =
+        field_map json__ "additionalInfo" AdditionalInfoMap.of_json in
+      make ~type_ ~name ?id ?clientToken ~appArn ?additionalInfo ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new Application Component in the Resilience Hub application. This API updates the Resilience Hub application draft version. To use this Application Component for running assessments, you must publish the Resilience Hub application using the PublishAppVersion API."]
+module CreateAppResponse =
+  struct
+    type nonrec t =
+      {
+      app: App.t option
+        [@ocaml.doc
+          "The created application returned as an object with details including compliance status, creation time, description, resiliency score, and more."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?app = fun () -> { app }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("app", (Option.map x.app ~f:App.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let app = (Option.map ~f:App.of_xml) (Xml.child xml_arg0 "app") in
+      make ?app ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let app = field_map json__ "app" App.of_json in make ?app ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an Resilience Hub application. An Resilience Hub application is a collection of Amazon Web Services resources structured to prevent and recover Amazon Web Services application disruptions. To describe a Resilience Hub application, you provide an application name, resources from one or more CloudFormation stacks, Resource Groups, Terraform state files, AppRegistry applications, and an appropriate resiliency policy. In addition, you can also add resources that are located on Amazon Elastic Kubernetes Service (Amazon EKS) clusters as optional resources. For more information about the number of resources supported per application, see Service quotas. After you create an Resilience Hub application, you publish it so that you can run a resiliency assessment on it. You can then use recommendations from the assessment to improve resiliency by running another assessment, comparing results, and then iterating the process until you achieve your goals for recovery time objective (RTO) and recovery point objective (RPO)."]
+module CreateAppRequest =
+  struct
+    type nonrec t =
+      {
+      assessmentSchedule: AppAssessmentScheduleType.t option
+        [@ocaml.doc
+          "Assessment execution schedule with 'Daily' or 'Disabled' values."];
+      awsApplicationArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of Resource Groups group that is integrated with an AppRegistry application. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "Used for an idempotency token. A client token is a unique, case-sensitive string of up to 64 ASCII characters. You should not reuse the same client token for other API requests."];
+      description: EntityDescription.t option
+        [@ocaml.doc "The optional description for an app."];
+      eventSubscriptions: EventSubscriptionList.t option
+        [@ocaml.doc
+          "The list of events you would like to subscribe and get notification for. Currently, Resilience Hub supports only Drift detected and Scheduled assessment failure events notification."];
+      name: EntityName.t [@ocaml.doc "Name of the application."];
+      permissionModel: PermissionModel.t option
+        [@ocaml.doc
+          "Defines the roles and credentials that Resilience Hub would use while creating the application, importing its resources, and running an assessment."];
+      policyArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the resiliency policy. The format for this ARN is: arn:partition:resiliencehub:region:account:resiliency-policy/policy-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "Tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key/value pair."]}
+    let context_ = "CreateAppRequest"
+    let make ?assessmentSchedule =
+      fun ?awsApplicationArn ->
+        fun ?clientToken ->
+          fun ?description ->
+            fun ?eventSubscriptions ->
+              fun ?permissionModel ->
+                fun ?policyArn ->
+                  fun ?tags ->
+                    fun ~name ->
+                      fun () ->
+                        {
+                          assessmentSchedule;
+                          awsApplicationArn;
+                          clientToken;
+                          description;
+                          eventSubscriptions;
+                          permissionModel;
+                          policyArn;
+                          tags;
+                          name
+                        }
+    let to_value x =
+      structure_to_value
+        [("assessmentSchedule",
+           (Option.map x.assessmentSchedule
+              ~f:AppAssessmentScheduleType.to_value));
+        ("awsApplicationArn",
+          (Option.map x.awsApplicationArn ~f:Arn.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("description",
+          (Option.map x.description ~f:EntityDescription.to_value));
+        ("eventSubscriptions",
+          (Option.map x.eventSubscriptions ~f:EventSubscriptionList.to_value));
+        ("name", (Some (EntityName.to_value x.name)));
+        ("permissionModel",
+          (Option.map x.permissionModel ~f:PermissionModel.to_value));
+        ("policyArn", (Option.map x.policyArn ~f:Arn.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let policyArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "policyArn") in
+      let permissionModel =
+        (Option.map ~f:PermissionModel.of_xml)
+          (Xml.child xml_arg0 "permissionModel") in
+      let name =
+        EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let eventSubscriptions =
+        (Option.map ~f:EventSubscriptionList.of_xml)
+          (Xml.child xml_arg0 "eventSubscriptions") in
+      let description =
+        (Option.map ~f:EntityDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let awsApplicationArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "awsApplicationArn") in
+      let assessmentSchedule =
+        (Option.map ~f:AppAssessmentScheduleType.of_xml)
+          (Xml.child xml_arg0 "assessmentSchedule") in
+      make ?tags ?policyArn ?permissionModel ~name ?eventSubscriptions
+        ?description ?clientToken ?awsApplicationArn ?assessmentSchedule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let policyArn = field_map json__ "policyArn" Arn.of_json in
+      let permissionModel =
+        field_map json__ "permissionModel" PermissionModel.of_json in
+      let name = field_map_exn json__ "name" EntityName.of_json in
+      let eventSubscriptions =
+        field_map json__ "eventSubscriptions" EventSubscriptionList.of_json in
+      let description =
+        field_map json__ "description" EntityDescription.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let awsApplicationArn =
+        field_map json__ "awsApplicationArn" Arn.of_json in
+      let assessmentSchedule =
+        field_map json__ "assessmentSchedule"
+          AppAssessmentScheduleType.of_json in
+      make ?tags ?policyArn ?permissionModel ~name ?eventSubscriptions
+        ?description ?clientToken ?awsApplicationArn ?assessmentSchedule ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an Resilience Hub application. An Resilience Hub application is a collection of Amazon Web Services resources structured to prevent and recover Amazon Web Services application disruptions. To describe a Resilience Hub application, you provide an application name, resources from one or more CloudFormation stacks, Resource Groups, Terraform state files, AppRegistry applications, and an appropriate resiliency policy. In addition, you can also add resources that are located on Amazon Elastic Kubernetes Service (Amazon EKS) clusters as optional resources. For more information about the number of resources supported per application, see Service quotas. After you create an Resilience Hub application, you publish it so that you can run a resiliency assessment on it. You can then use recommendations from the assessment to improve resiliency by running another assessment, comparing results, and then iterating the process until you achieve your goals for recovery time objective (RTO) and recovery point objective (RPO)."]
+module BatchUpdateRecommendationStatusResponse =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      failedEntries: BatchUpdateRecommendationStatusFailedEntries.t option
+        [@ocaml.doc
+          "A list of items with error details about each item, which could not be included or excluded."];
+      successfulEntries:
+        BatchUpdateRecommendationStatusSuccessfulEntries.t option
+        [@ocaml.doc "A list of items that were included or excluded."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appArn =
+      fun ?failedEntries ->
+        fun ?successfulEntries ->
+          fun () -> { appArn; failedEntries; successfulEntries }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("failedEntries",
+          (Option.map x.failedEntries
+             ~f:BatchUpdateRecommendationStatusFailedEntries.to_value));
+        ("successfulEntries",
+          (Option.map x.successfulEntries
+             ~f:BatchUpdateRecommendationStatusSuccessfulEntries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let successfulEntries =
+        (Option.map
+           ~f:BatchUpdateRecommendationStatusSuccessfulEntries.of_xml)
+          (Xml.child xml_arg0 "successfulEntries") in
+      let failedEntries =
+        (Option.map ~f:BatchUpdateRecommendationStatusFailedEntries.of_xml)
+          (Xml.child xml_arg0 "failedEntries") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?successfulEntries ?failedEntries ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let successfulEntries =
+        field_map json__ "successfulEntries"
+          BatchUpdateRecommendationStatusSuccessfulEntries.of_json in
+      let failedEntries =
+        field_map json__ "failedEntries"
+          BatchUpdateRecommendationStatusFailedEntries.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?successfulEntries ?failedEntries ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enables you to include or exclude one or more operational recommendations."]
+module BatchUpdateRecommendationStatusRequest =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      requestEntries: UpdateRecommendationStatusRequestEntries.t
+        [@ocaml.doc
+          "Defines the list of operational recommendations that need to be included or excluded."]}
+    let context_ = "BatchUpdateRecommendationStatusRequest"
+    let make ~appArn =
+      fun ~requestEntries -> fun () -> { appArn; requestEntries }
+    let to_value x =
+      structure_to_value
         [("appArn", (Some (Arn.to_value x.appArn)));
-        ("appVersion", (Some (EntityVersion.to_value x.appVersion)));
+        ("requestEntries",
+          (Some
+             (UpdateRecommendationStatusRequestEntries.to_value
+                x.requestEntries)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestEntries =
+        UpdateRecommendationStatusRequestEntries.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "requestEntries") in
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      make ~requestEntries ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestEntries =
+        field_map_exn json__ "requestEntries"
+          UpdateRecommendationStatusRequestEntries.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ~requestEntries ~appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enables you to include or exclude one or more operational recommendations."]
+module AddDraftAppVersionResourceMappingsResponse =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      appVersion: EntityVersion.t option
+        [@ocaml.doc "The version of the application."];
+      resourceMappings: ResourceMappingList.t option
+        [@ocaml.doc
+          "List of sources that are used to map a logical resource from the template to a physical resource. You can use sources such as CloudFormation, Terraform state files, AppRegistry applications, or Amazon EKS."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appArn =
+      fun ?appVersion ->
+        fun ?resourceMappings ->
+          fun () -> { appArn; appVersion; resourceMappings }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("appVersion", (Option.map x.appVersion ~f:EntityVersion.to_value));
         ("resourceMappings",
-          (Some (ResourceMappingList.to_value x.resourceMappings)))]
+          (Option.map x.resourceMappings ~f:ResourceMappingList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceMappings =
-        ResourceMappingList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceMappings") in
+        (Option.map ~f:ResourceMappingList.of_xml)
+          (Xml.child xml_arg0 "resourceMappings") in
       let appVersion =
-        EntityVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "appVersion") in
-      let appArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
-      make ~resourceMappings ~appVersion ~appArn ()
+        (Option.map ~f:EntityVersion.of_xml)
+          (Xml.child xml_arg0 "appVersion") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?resourceMappings ?appVersion ?appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceMappings =
-        field_map_exn json "resourceMappings" ResourceMappingList.of_json in
-      let appVersion = field_map_exn json "appVersion" EntityVersion.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
-      make ~resourceMappings ~appVersion ~appArn ()
+        field_map json__ "resourceMappings" ResourceMappingList.of_json in
+      let appVersion = field_map json__ "appVersion" EntityVersion.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?resourceMappings ?appVersion ?appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the resource mapping for the draft application version."]
+       "Adds the source of resource-maps to the draft version of an application. During assessment, Resilience Hub will use these resource-maps to resolve the latest physical ID for each resource in the application template. For more information about different types of resources supported by Resilience Hub and how to add them in your application, see Step 2: How is your application managed? in the Resilience Hub User Guide."]
 module AddDraftAppVersionResourceMappingsRequest =
   struct
     type nonrec t =
       {
       appArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the application. The format for this ARN is: arn:partition:dcps:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
       resourceMappings: ResourceMappingList.t
         [@ocaml.doc
           "Mappings used to map logical resources from the template to physical resources. You can use the mapping type CFN_STACK if the application template uses a logical stack name. Or you can map individual resources by using the mapping type RESOURCE. We recommend using the mapping type CFN_STACK if the application is backed by a CloudFormation stack."]}
@@ -9841,11 +17619,144 @@ module AddDraftAppVersionResourceMappingsRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
       make ~resourceMappings ~appArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceMappings =
-        field_map_exn json "resourceMappings" ResourceMappingList.of_json in
-      let appArn = field_map_exn json "appArn" Arn.of_json in
+        field_map_exn json__ "resourceMappings" ResourceMappingList.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
       make ~resourceMappings ~appArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the resource mapping for the draft application version."]
+       "Adds the source of resource-maps to the draft version of an application. During assessment, Resilience Hub will use these resource-maps to resolve the latest physical ID for each resource in the application template. For more information about different types of resources supported by Resilience Hub and how to add them in your application, see Step 2: How is your application managed? in the Resilience Hub User Guide."]
+module AcceptResourceGroupingRecommendationsResponse =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      failedEntries: FailedGroupingRecommendationEntries.t option
+        [@ocaml.doc
+          "List of resource grouping recommendations that could not be included in your application."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appArn =
+      fun ?failedEntries -> fun () -> { appArn; failedEntries }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("appArn", (Option.map x.appArn ~f:Arn.to_value));
+        ("failedEntries",
+          (Option.map x.failedEntries
+             ~f:FailedGroupingRecommendationEntries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failedEntries =
+        (Option.map ~f:FailedGroupingRecommendationEntries.of_xml)
+          (Xml.child xml_arg0 "failedEntries") in
+      let appArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "appArn") in
+      make ?failedEntries ?appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failedEntries =
+        field_map json__ "failedEntries"
+          FailedGroupingRecommendationEntries.of_json in
+      let appArn = field_map json__ "appArn" Arn.of_json in
+      make ?failedEntries ?appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Accepts the resource grouping recommendations suggested by Resilience Hub for your application."]
+module AcceptResourceGroupingRecommendationsRequest =
+  struct
+    type nonrec t =
+      {
+      appArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the Resilience Hub application. The format for this ARN is: arn:partition:resiliencehub:region:account:app/app-id. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference guide."];
+      entries: AcceptGroupingRecommendationEntries.t
+        [@ocaml.doc
+          "List of resource grouping recommendations you want to include in your application."]}
+    let context_ = "AcceptResourceGroupingRecommendationsRequest"
+    let make ~appArn = fun ~entries -> fun () -> { appArn; entries }
+    let to_value x =
+      structure_to_value
+        [("appArn", (Some (Arn.to_value x.appArn)));
+        ("entries",
+          (Some (AcceptGroupingRecommendationEntries.to_value x.entries)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entries =
+        AcceptGroupingRecommendationEntries.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "entries") in
+      let appArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appArn") in
+      make ~entries ~appArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entries =
+        field_map_exn json__ "entries"
+          AcceptGroupingRecommendationEntries.of_json in
+      let appArn = field_map_exn json__ "appArn" Arn.of_json in
+      make ~entries ~appArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Accepts the resource grouping recommendations suggested by Resilience Hub for your application."]

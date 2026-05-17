@@ -30,6 +30,8 @@ let delete_component ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteComponent input
 let delete_core_device ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCoreDevice input
+let delete_deployment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDeployment input
 let describe_component ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeComponent input
 let disassociate_service_role_from_account ?endpoint_url ?cfg input =

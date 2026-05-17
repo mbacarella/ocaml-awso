@@ -58,9 +58,9 @@ module Dimension =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" String_.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" String_.of_json in
+      let name = field_map_exn json__ "Name" String_.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -114,7 +114,7 @@ module ErrorMessage =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:1024) >>=
-                  (fun () -> check_pattern i ~pattern:"^.+$")));
+                  (fun () -> check_pattern i ~pattern:".+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -136,7 +136,7 @@ module CloudWatchLogGroupArn =
                 (check_string_max i ~max:1224) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn:aws(-[a-z]+)?:logs:[a-z0-9\\-]+:\\d{12}:log-group:\\w+")));
+                       ~pattern:"arn:aws(-[a-z]+)?:logs:[a-z0-9\\-]+:\\d{12}:log-group:\\w+.*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -203,8 +203,7 @@ module SecurityGroupId =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:1024) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"^sg-[a-zA-Z0-9\\-._]+$")));
+                  (fun () -> check_pattern i ~pattern:"sg-[a-zA-Z0-9\\-._]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -225,7 +224,7 @@ module SubnetId =
              (fun () ->
                 (check_string_max i ~max:1024) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"^subnet-[a-zA-Z0-9\\-._]+$")));
+                     check_pattern i ~pattern:"subnet-[a-zA-Z0-9\\-._]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -239,6 +238,9 @@ module Dimensions =
   struct
     type nonrec t = Dimension.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Dimension.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -263,42 +265,42 @@ module StatisticSet =
   struct
     type nonrec t =
       {
-      maximum: Double.t option
-        [@ocaml.doc "Internal only. The maximum value of the sample set."];
-      minimum: Double.t option
-        [@ocaml.doc "Internal only. The minimum value of the sample set."];
       sampleCount: Integer.t option
         [@ocaml.doc
           "Internal only. The number of samples used for the statistic set."];
       sum: Double.t option
-        [@ocaml.doc "Internal only. The sum of values for the sample set."]}
-    let make ?maximum =
-      fun ?minimum ->
-        fun ?sampleCount ->
-          fun ?sum -> fun () -> { maximum; minimum; sampleCount; sum }
+        [@ocaml.doc "Internal only. The sum of values for the sample set."];
+      minimum: Double.t option
+        [@ocaml.doc "Internal only. The minimum value of the sample set."];
+      maximum: Double.t option
+        [@ocaml.doc "Internal only. The maximum value of the sample set."]}
+    let make ?sampleCount =
+      fun ?sum ->
+        fun ?minimum ->
+          fun ?maximum -> fun () -> { sampleCount; sum; minimum; maximum }
     let to_value x =
       structure_to_value
-        [("Maximum", (Option.map x.maximum ~f:Double.to_value));
+        [("SampleCount", (Option.map x.sampleCount ~f:Integer.to_value));
+        ("Sum", (Option.map x.sum ~f:Double.to_value));
         ("Minimum", (Option.map x.minimum ~f:Double.to_value));
-        ("SampleCount", (Option.map x.sampleCount ~f:Integer.to_value));
-        ("Sum", (Option.map x.sum ~f:Double.to_value))]
+        ("Maximum", (Option.map x.maximum ~f:Double.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maximum =
+        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Maximum") in
+      let minimum =
+        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Minimum") in
       let sum = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Sum") in
       let sampleCount =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "SampleCount") in
-      let minimum =
-        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Minimum") in
-      let maximum =
-        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Maximum") in
-      make ?sum ?sampleCount ?minimum ?maximum ()
+      make ?maximum ?minimum ?sum ?sampleCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sum = field_map json "Sum" Double.of_json in
-      let sampleCount = field_map json "SampleCount" Integer.of_json in
-      let minimum = field_map json "Minimum" Double.of_json in
-      let maximum = field_map json "Maximum" Double.of_json in
-      make ?sum ?sampleCount ?minimum ?maximum ()
+    let of_json json__ =
+      let maximum = field_map json__ "Maximum" Double.of_json in
+      let minimum = field_map json__ "Minimum" Double.of_json in
+      let sum = field_map json__ "Sum" Double.of_json in
+      let sampleCount = field_map json__ "SampleCount" Integer.of_json in
+      make ?maximum ?minimum ?sum ?sampleCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Internal only. Represents a set of statistics that describe a specific metric. To learn more about the metrics published to Amazon CloudWatch, see Amazon MWAA performance metrics in Amazon CloudWatch."]
@@ -426,7 +428,7 @@ module ConfigKey =
                 (check_string_max i ~max:64) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^[a-z]+([a-z0-9._]*[a-z0-9_]+)?$")));
+                       ~pattern:"[a-z]+([a-z0-9._]*[a-z0-9_]+)?")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -446,7 +448,7 @@ module ConfigValue =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:65536) >>=
-                  (fun () -> check_pattern i ~pattern:"^[ -~]+$")));
+                  (fun () -> check_pattern i ~pattern:"[ -~]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -493,9 +495,9 @@ module UpdateError =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?errorMessage ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
       make ?errorMessage ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -510,7 +512,7 @@ module UpdateSource =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:"^.+$")));
+                  (fun () -> check_pattern i ~pattern:".+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -548,47 +550,75 @@ module UpdateStatus =
     let of_json j = of_string (string_of_json ~kind:"UpdateStatus" j)
     let to_json = simple_to_json to_value
   end
+module WorkerReplacementStrategy =
+  struct
+    type nonrec t =
+      | FORCED 
+      | GRACEFUL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FORCED -> "FORCED"
+      | GRACEFUL -> "GRACEFUL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FORCED" -> FORCED
+      | "GRACEFUL" -> GRACEFUL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration WorkerReplacementStrategy" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"WorkerReplacementStrategy" j)
+    let to_json = simple_to_json to_value
+  end
 module ModuleLoggingConfiguration =
   struct
     type nonrec t =
       {
-      cloudWatchLogGroupArn: CloudWatchLogGroupArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the CloudWatch Logs group where the Apache Airflow log type (e.g. DagProcessingLogs) is published. For example, arn:aws:logs:us-east-1:123456789012:log-group:airflow-MyMWAAEnvironment-MwaaEnvironment-DAGProcessing:*."];
       enabled: LoggingEnabled.t option
         [@ocaml.doc
           "Indicates whether the Apache Airflow log type (e.g. DagProcessingLogs) is enabled."];
       logLevel: LoggingLevel.t option
         [@ocaml.doc
-          "The Apache Airflow log level for the log type (e.g. DagProcessingLogs)."]}
-    let make ?cloudWatchLogGroupArn =
-      fun ?enabled ->
-        fun ?logLevel ->
-          fun () -> { cloudWatchLogGroupArn; enabled; logLevel }
+          "The Apache Airflow log level for the log type (e.g. DagProcessingLogs)."];
+      cloudWatchLogGroupArn: CloudWatchLogGroupArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the CloudWatch Logs group where the Apache Airflow log type (e.g. DagProcessingLogs) is published. For example, arn:aws:logs:us-east-1:123456789012:log-group:airflow-MyMWAAEnvironment-MwaaEnvironment-DAGProcessing:*."]}
+    let make ?enabled =
+      fun ?logLevel ->
+        fun ?cloudWatchLogGroupArn ->
+          fun () -> { enabled; logLevel; cloudWatchLogGroupArn }
     let to_value x =
       structure_to_value
-        [("CloudWatchLogGroupArn",
-           (Option.map x.cloudWatchLogGroupArn
-              ~f:CloudWatchLogGroupArn.to_value));
-        ("Enabled", (Option.map x.enabled ~f:LoggingEnabled.to_value));
-        ("LogLevel", (Option.map x.logLevel ~f:LoggingLevel.to_value))]
+        [("Enabled", (Option.map x.enabled ~f:LoggingEnabled.to_value));
+        ("LogLevel", (Option.map x.logLevel ~f:LoggingLevel.to_value));
+        ("CloudWatchLogGroupArn",
+          (Option.map x.cloudWatchLogGroupArn
+             ~f:CloudWatchLogGroupArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let cloudWatchLogGroupArn =
+        (Option.map ~f:CloudWatchLogGroupArn.of_xml)
+          (Xml.child xml_arg0 "CloudWatchLogGroupArn") in
       let logLevel =
         (Option.map ~f:LoggingLevel.of_xml) (Xml.child xml_arg0 "LogLevel") in
       let enabled =
         (Option.map ~f:LoggingEnabled.of_xml) (Xml.child xml_arg0 "Enabled") in
-      let cloudWatchLogGroupArn =
-        (Option.map ~f:CloudWatchLogGroupArn.of_xml)
-          (Xml.child xml_arg0 "CloudWatchLogGroupArn") in
-      make ?logLevel ?enabled ?cloudWatchLogGroupArn ()
+      make ?cloudWatchLogGroupArn ?logLevel ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logLevel = field_map json "LogLevel" LoggingLevel.of_json in
-      let enabled = field_map json "Enabled" LoggingEnabled.of_json in
+    let of_json json__ =
       let cloudWatchLogGroupArn =
-        field_map json "CloudWatchLogGroupArn" CloudWatchLogGroupArn.of_json in
-      make ?logLevel ?enabled ?cloudWatchLogGroupArn ()
+        field_map json__ "CloudWatchLogGroupArn"
+          CloudWatchLogGroupArn.of_json in
+      let logLevel = field_map json__ "LogLevel" LoggingLevel.of_json in
+      let enabled = field_map json__ "Enabled" LoggingEnabled.of_json in
+      make ?cloudWatchLogGroupArn ?logLevel ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the Apache Airflow log details for the log type (e.g. DagProcessingLogs)."]
@@ -600,6 +630,9 @@ module SecurityGroupList =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -629,6 +662,9 @@ module SubnetList =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:2));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -661,7 +697,7 @@ module TagKey =
                 (check_string_max i ~max:128) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+                       ~pattern:"([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -683,7 +719,7 @@ module TagValue =
                 (check_string_max i ~max:256) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+                       ~pattern:"([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -719,9 +755,9 @@ module ModuleLoggingConfigurationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ~logLevel ~enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logLevel = field_map_exn json "LogLevel" LoggingLevel.of_json in
-      let enabled = field_map_exn json "Enabled" LoggingEnabled.of_json in
+    let of_json json__ =
+      let logLevel = field_map_exn json__ "LogLevel" LoggingLevel.of_json in
+      let enabled = field_map_exn json__ "Enabled" LoggingEnabled.of_json in
       make ~logLevel ~enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -730,71 +766,72 @@ module MetricDatum =
   struct
     type nonrec t =
       {
+      metricName: String_.t
+        [@ocaml.doc "Internal only. The name of the metric."];
+      timestamp: Timestamp.t
+        [@ocaml.doc
+          "Internal only. The time the metric data was received, expressed as an ISO 8601 datetime string."];
       dimensions: Dimensions.t option
         [@ocaml.doc
           "Internal only. The dimensions associated with the metric."];
-      metricName: String_.t
-        [@ocaml.doc "Internal only. The name of the metric."];
-      statisticValues: StatisticSet.t option
-        [@ocaml.doc "Internal only. The statistical values for the metric."];
-      timestamp: Timestamp.t
-        [@ocaml.doc "Internal only. The time the metric data was received."];
+      value: Double.t option
+        [@ocaml.doc "Internal only. The value for the metric."];
       unit: Unit.t option
         [@ocaml.doc "Internal only. The unit used to store the metric."];
-      value: Double.t option
-        [@ocaml.doc "Internal only. The value for the metric."]}
+      statisticValues: StatisticSet.t option
+        [@ocaml.doc "Internal only. The statistical values for the metric."]}
     let context_ = "MetricDatum"
     let make ?dimensions =
-      fun ?statisticValues ->
+      fun ?value ->
         fun ?unit ->
-          fun ?value ->
+          fun ?statisticValues ->
             fun ~metricName ->
               fun ~timestamp ->
                 fun () ->
                   {
                     dimensions;
-                    statisticValues;
-                    unit;
                     value;
+                    unit;
+                    statisticValues;
                     metricName;
                     timestamp
                   }
     let to_value x =
       structure_to_value
-        [("Dimensions", (Option.map x.dimensions ~f:Dimensions.to_value));
-        ("MetricName", (Some (String_.to_value x.metricName)));
-        ("StatisticValues",
-          (Option.map x.statisticValues ~f:StatisticSet.to_value));
+        [("MetricName", (Some (String_.to_value x.metricName)));
         ("Timestamp", (Some (Timestamp.to_value x.timestamp)));
+        ("Dimensions", (Option.map x.dimensions ~f:Dimensions.to_value));
+        ("Value", (Option.map x.value ~f:Double.to_value));
         ("Unit", (Option.map x.unit ~f:Unit.to_value));
-        ("Value", (Option.map x.value ~f:Double.to_value))]
+        ("StatisticValues",
+          (Option.map x.statisticValues ~f:StatisticSet.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let value = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Value") in
-      let unit = (Option.map ~f:Unit.of_xml) (Xml.child xml_arg0 "Unit") in
-      let timestamp =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Timestamp") in
       let statisticValues =
         (Option.map ~f:StatisticSet.of_xml)
           (Xml.child xml_arg0 "StatisticValues") in
+      let unit = (Option.map ~f:Unit.of_xml) (Xml.child xml_arg0 "Unit") in
+      let value = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Value") in
+      let dimensions =
+        (Option.map ~f:Dimensions.of_xml) (Xml.child xml_arg0 "Dimensions") in
+      let timestamp =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Timestamp") in
       let metricName =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MetricName") in
-      let dimensions =
-        (Option.map ~f:Dimensions.of_xml) (Xml.child xml_arg0 "Dimensions") in
-      make ?value ?unit ~timestamp ?statisticValues ~metricName ?dimensions
+      make ?statisticValues ?unit ?value ?dimensions ~timestamp ~metricName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" Double.of_json in
-      let unit = field_map json "Unit" Unit.of_json in
-      let timestamp = field_map_exn json "Timestamp" Timestamp.of_json in
+    let of_json json__ =
       let statisticValues =
-        field_map json "StatisticValues" StatisticSet.of_json in
-      let metricName = field_map_exn json "MetricName" String_.of_json in
-      let dimensions = field_map json "Dimensions" Dimensions.of_json in
-      make ?value ?unit ~timestamp ?statisticValues ~metricName ?dimensions
+        field_map json__ "StatisticValues" StatisticSet.of_json in
+      let unit = field_map json__ "Unit" Unit.of_json in
+      let value = field_map json__ "Value" Double.of_json in
+      let dimensions = field_map json__ "Dimensions" Dimensions.of_json in
+      let timestamp = field_map_exn json__ "Timestamp" Timestamp.of_json in
+      let metricName = field_map_exn json__ "MetricName" String_.of_json in
+      make ?statisticValues ?unit ?value ?dimensions ~timestamp ~metricName
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -810,7 +847,7 @@ module EnvironmentName =
              (fun () ->
                 (check_string_max i ~max:80) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"^[a-zA-Z][0-9a-zA-Z-_]*$")));
+                     check_pattern i ~pattern:"[a-zA-Z][0-9a-zA-Z-_]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -819,6 +856,18 @@ module EnvironmentName =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"EnvironmentName" j
     let to_json = simple_to_json to_value
+  end
+module RestApiResponse =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
   end
 module AirflowConfigurationOptions =
   struct
@@ -841,6 +890,8 @@ module AirflowConfigurationOptions =
                     (fun x -> (ConfigValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -858,7 +909,7 @@ module AirflowVersion =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:32) >>=
-                  (fun () -> check_pattern i ~pattern:"^[0-9a-z.]+$")));
+                  (fun () -> check_pattern i ~pattern:"[0-9a-z.]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -866,6 +917,28 @@ module AirflowVersion =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"AirflowVersion" j
+    let to_json = simple_to_json to_value
+  end
+module CeleryExecutorQueue =
+  struct
+    type nonrec t = string
+    let context_ = "CeleryExecutorQueue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1224) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws(-[a-z]+)?:sqs:[a-z0-9\\-]+:\\d{12}:[a-zA-Z_0-9+=,.@\\-_/]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CeleryExecutorQueue" j
     let to_json = simple_to_json to_value
   end
 module CreatedAt =
@@ -880,6 +953,32 @@ module CreatedAt =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
+module EndpointManagement =
+  struct
+    type nonrec t =
+      | CUSTOMER 
+      | SERVICE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CUSTOMER -> "CUSTOMER"
+      | SERVICE -> "SERVICE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CUSTOMER" -> CUSTOMER
+      | "SERVICE" -> SERVICE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EndpointManagement" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EndpointManagement" j)
+    let to_json = simple_to_json to_value
+  end
 module EnvironmentArn =
   struct
     type nonrec t = string
@@ -892,7 +991,7 @@ module EnvironmentArn =
                 (check_string_max i ~max:1224) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn:aws(-[a-z]+)?:airflow:[a-z0-9\\-]+:\\d{12}:environment/\\w+")));
+                       ~pattern:"arn:aws(-[a-z]+)?:airflow:[a-z0-9\\-]+:\\d{12}:environment/\\w+.*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -931,6 +1030,10 @@ module EnvironmentStatus =
       | DELETED 
       | UNAVAILABLE 
       | UPDATE_FAILED 
+      | ROLLING_BACK 
+      | CREATING_SNAPSHOT 
+      | PENDING 
+      | MAINTENANCE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -943,6 +1046,10 @@ module EnvironmentStatus =
       | DELETED -> "DELETED"
       | UNAVAILABLE -> "UNAVAILABLE"
       | UPDATE_FAILED -> "UPDATE_FAILED"
+      | ROLLING_BACK -> "ROLLING_BACK"
+      | CREATING_SNAPSHOT -> "CREATING_SNAPSHOT"
+      | PENDING -> "PENDING"
+      | MAINTENANCE -> "MAINTENANCE"
       | Non_static_id s -> s
     let of_string =
       function
@@ -954,6 +1061,10 @@ module EnvironmentStatus =
       | "DELETED" -> DELETED
       | "UNAVAILABLE" -> UNAVAILABLE
       | "UPDATE_FAILED" -> UPDATE_FAILED
+      | "ROLLING_BACK" -> ROLLING_BACK
+      | "CREATING_SNAPSHOT" -> CREATING_SNAPSHOT
+      | "PENDING" -> PENDING
+      | "MAINTENANCE" -> MAINTENANCE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -976,7 +1087,7 @@ module IamRoleArn =
                 (check_string_max i ~max:1224) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn:aws(-[a-z]+)?:iam::\\d{12}:role/?[a-zA-Z_0-9+=,.@\\-_/]+$")));
+                       ~pattern:"arn:aws(-[a-z]+)?:iam::\\d{12}:role/?[a-zA-Z_0-9+=,.@\\-_/]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -998,7 +1109,7 @@ module KmsKey =
                 (check_string_max i ~max:1224) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^(((arn:aws(-[a-z]+)?:kms:[a-z]{2}-[a-z]+-\\d:\\d+:)?key\\/)?[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}|(arn:aws(-[a-z]+)?:kms:[a-z]{2}-[a-z]+-\\d:\\d+:)?alias/.+)$")));
+                       ~pattern:"(((arn:aws(-[a-z]+)?:kms:[a-z]{2}-[a-z]+-\\d:\\d+:)?key\\/)?[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}|(arn:aws(-[a-z]+)?:kms:[a-z]{2}-[a-z]+-\\d:\\d+:)?alias/.+)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1012,6 +1123,8 @@ module LastUpdate =
   struct
     type nonrec t =
       {
+      status: UpdateStatus.t option
+        [@ocaml.doc "The status of the last update on the environment."];
       createdAt: UpdateCreatedAt.t option
         [@ocaml.doc
           "The day and time of the last update on the environment."];
@@ -1021,22 +1134,31 @@ module LastUpdate =
       source: UpdateSource.t option
         [@ocaml.doc
           "The source of the last update to the environment. Includes internal processes by Amazon MWAA, such as an environment maintenance update."];
-      status: UpdateStatus.t option
-        [@ocaml.doc "The status of the last update on the environment."]}
-    let make ?createdAt =
-      fun ?error ->
-        fun ?source ->
-          fun ?status -> fun () -> { createdAt; error; source; status }
+      workerReplacementStrategy: WorkerReplacementStrategy.t option
+        [@ocaml.doc
+          "The worker replacement strategy used in the last update of the environment."]}
+    let make ?status =
+      fun ?createdAt ->
+        fun ?error ->
+          fun ?source ->
+            fun ?workerReplacementStrategy ->
+              fun () ->
+                { status; createdAt; error; source; workerReplacementStrategy
+                }
     let to_value x =
       structure_to_value
-        [("CreatedAt", (Option.map x.createdAt ~f:UpdateCreatedAt.to_value));
+        [("Status", (Option.map x.status ~f:UpdateStatus.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:UpdateCreatedAt.to_value));
         ("Error", (Option.map x.error ~f:UpdateError.to_value));
         ("Source", (Option.map x.source ~f:UpdateSource.to_value));
-        ("Status", (Option.map x.status ~f:UpdateStatus.to_value))]
+        ("WorkerReplacementStrategy",
+          (Option.map x.workerReplacementStrategy
+             ~f:WorkerReplacementStrategy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let status =
-        (Option.map ~f:UpdateStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let workerReplacementStrategy =
+        (Option.map ~f:WorkerReplacementStrategy.of_xml)
+          (Xml.child xml_arg0 "WorkerReplacementStrategy") in
       let source =
         (Option.map ~f:UpdateSource.of_xml) (Xml.child xml_arg0 "Source") in
       let error =
@@ -1044,14 +1166,19 @@ module LastUpdate =
       let createdAt =
         (Option.map ~f:UpdateCreatedAt.of_xml)
           (Xml.child xml_arg0 "CreatedAt") in
-      make ?status ?source ?error ?createdAt ()
+      let status =
+        (Option.map ~f:UpdateStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      make ?workerReplacementStrategy ?source ?error ?createdAt ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" UpdateStatus.of_json in
-      let source = field_map json "Source" UpdateSource.of_json in
-      let error = field_map json "Error" UpdateError.of_json in
-      let createdAt = field_map json "CreatedAt" UpdateCreatedAt.of_json in
-      make ?status ?source ?error ?createdAt ()
+    let of_json json__ =
+      let workerReplacementStrategy =
+        field_map json__ "WorkerReplacementStrategy"
+          WorkerReplacementStrategy.of_json in
+      let source = field_map json__ "Source" UpdateSource.of_json in
+      let error = field_map json__ "Error" UpdateError.of_json in
+      let createdAt = field_map json__ "CreatedAt" UpdateCreatedAt.of_json in
+      let status = field_map json__ "Status" UpdateStatus.of_json in
+      make ?workerReplacementStrategy ?source ?error ?createdAt ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the status of the last update on the environment, and any errors that were encountered."]
@@ -1065,27 +1192,27 @@ module LoggingConfiguration =
       schedulerLogs: ModuleLoggingConfiguration.t option
         [@ocaml.doc
           "The Airflow scheduler logs published to CloudWatch Logs and the log level."];
-      taskLogs: ModuleLoggingConfiguration.t option
-        [@ocaml.doc
-          "The Airflow task logs published to CloudWatch Logs and the log level."];
       webserverLogs: ModuleLoggingConfiguration.t option
         [@ocaml.doc
           "The Airflow web server logs published to CloudWatch Logs and the log level."];
       workerLogs: ModuleLoggingConfiguration.t option
         [@ocaml.doc
-          "The Airflow worker logs published to CloudWatch Logs and the log level."]}
+          "The Airflow worker logs published to CloudWatch Logs and the log level."];
+      taskLogs: ModuleLoggingConfiguration.t option
+        [@ocaml.doc
+          "The Airflow task logs published to CloudWatch Logs and the log level."]}
     let make ?dagProcessingLogs =
       fun ?schedulerLogs ->
-        fun ?taskLogs ->
-          fun ?webserverLogs ->
-            fun ?workerLogs ->
+        fun ?webserverLogs ->
+          fun ?workerLogs ->
+            fun ?taskLogs ->
               fun () ->
                 {
                   dagProcessingLogs;
                   schedulerLogs;
-                  taskLogs;
                   webserverLogs;
-                  workerLogs
+                  workerLogs;
+                  taskLogs
                 }
     let to_value x =
       structure_to_value
@@ -1094,48 +1221,64 @@ module LoggingConfiguration =
               ~f:ModuleLoggingConfiguration.to_value));
         ("SchedulerLogs",
           (Option.map x.schedulerLogs ~f:ModuleLoggingConfiguration.to_value));
-        ("TaskLogs",
-          (Option.map x.taskLogs ~f:ModuleLoggingConfiguration.to_value));
         ("WebserverLogs",
           (Option.map x.webserverLogs ~f:ModuleLoggingConfiguration.to_value));
         ("WorkerLogs",
-          (Option.map x.workerLogs ~f:ModuleLoggingConfiguration.to_value))]
+          (Option.map x.workerLogs ~f:ModuleLoggingConfiguration.to_value));
+        ("TaskLogs",
+          (Option.map x.taskLogs ~f:ModuleLoggingConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let taskLogs =
+        (Option.map ~f:ModuleLoggingConfiguration.of_xml)
+          (Xml.child xml_arg0 "TaskLogs") in
       let workerLogs =
         (Option.map ~f:ModuleLoggingConfiguration.of_xml)
           (Xml.child xml_arg0 "WorkerLogs") in
       let webserverLogs =
         (Option.map ~f:ModuleLoggingConfiguration.of_xml)
           (Xml.child xml_arg0 "WebserverLogs") in
-      let taskLogs =
-        (Option.map ~f:ModuleLoggingConfiguration.of_xml)
-          (Xml.child xml_arg0 "TaskLogs") in
       let schedulerLogs =
         (Option.map ~f:ModuleLoggingConfiguration.of_xml)
           (Xml.child xml_arg0 "SchedulerLogs") in
       let dagProcessingLogs =
         (Option.map ~f:ModuleLoggingConfiguration.of_xml)
           (Xml.child xml_arg0 "DagProcessingLogs") in
-      make ?workerLogs ?webserverLogs ?taskLogs ?schedulerLogs
+      make ?taskLogs ?workerLogs ?webserverLogs ?schedulerLogs
         ?dagProcessingLogs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workerLogs =
-        field_map json "WorkerLogs" ModuleLoggingConfiguration.of_json in
-      let webserverLogs =
-        field_map json "WebserverLogs" ModuleLoggingConfiguration.of_json in
+    let of_json json__ =
       let taskLogs =
-        field_map json "TaskLogs" ModuleLoggingConfiguration.of_json in
+        field_map json__ "TaskLogs" ModuleLoggingConfiguration.of_json in
+      let workerLogs =
+        field_map json__ "WorkerLogs" ModuleLoggingConfiguration.of_json in
+      let webserverLogs =
+        field_map json__ "WebserverLogs" ModuleLoggingConfiguration.of_json in
       let schedulerLogs =
-        field_map json "SchedulerLogs" ModuleLoggingConfiguration.of_json in
+        field_map json__ "SchedulerLogs" ModuleLoggingConfiguration.of_json in
       let dagProcessingLogs =
-        field_map json "DagProcessingLogs" ModuleLoggingConfiguration.of_json in
-      make ?workerLogs ?webserverLogs ?taskLogs ?schedulerLogs
+        field_map json__ "DagProcessingLogs"
+          ModuleLoggingConfiguration.of_json in
+      make ?taskLogs ?workerLogs ?webserverLogs ?schedulerLogs
         ?dagProcessingLogs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the Apache Airflow log types that are published to CloudWatch Logs."]
+module MaxWebservers =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxWebservers" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module MaxWorkers =
   struct
     type nonrec t = int
@@ -1148,6 +1291,21 @@ module MaxWorkers =
     let of_xml xml_arg0 =
       Int.of_string
         (string_of_xml ~kind:"an integer for MaxWorkers" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MinWebservers =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MinWebservers" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
@@ -1170,36 +1328,36 @@ module NetworkConfiguration =
   struct
     type nonrec t =
       {
-      securityGroupIds: SecurityGroupList.t option
-        [@ocaml.doc
-          "A list of security group IDs. To learn more, see Security in your VPC on Amazon MWAA."];
       subnetIds: SubnetList.t option
         [@ocaml.doc
-          "A list of subnet IDs. To learn more, see About networking on Amazon MWAA."]}
-    let make ?securityGroupIds =
-      fun ?subnetIds -> fun () -> { securityGroupIds; subnetIds }
+          "A list of subnet IDs. For more information, refer to About networking on Amazon MWAA."];
+      securityGroupIds: SecurityGroupList.t option
+        [@ocaml.doc
+          "A list of security group IDs. For more information, refer to Security in your VPC on Amazon MWAA."]}
+    let make ?subnetIds =
+      fun ?securityGroupIds -> fun () -> { subnetIds; securityGroupIds }
     let to_value x =
       structure_to_value
-        [("SecurityGroupIds",
-           (Option.map x.securityGroupIds ~f:SecurityGroupList.to_value));
-        ("SubnetIds", (Option.map x.subnetIds ~f:SubnetList.to_value))]
+        [("SubnetIds", (Option.map x.subnetIds ~f:SubnetList.to_value));
+        ("SecurityGroupIds",
+          (Option.map x.securityGroupIds ~f:SecurityGroupList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let subnetIds =
-        (Option.map ~f:SubnetList.of_xml) (Xml.child xml_arg0 "SubnetIds") in
       let securityGroupIds =
         (Option.map ~f:SecurityGroupList.of_xml)
           (Xml.child xml_arg0 "SecurityGroupIds") in
-      make ?subnetIds ?securityGroupIds ()
+      let subnetIds =
+        (Option.map ~f:SubnetList.of_xml) (Xml.child xml_arg0 "SubnetIds") in
+      make ?securityGroupIds ?subnetIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnetIds = field_map json "SubnetIds" SubnetList.of_json in
+    let of_json json__ =
       let securityGroupIds =
-        field_map json "SecurityGroupIds" SecurityGroupList.of_json in
-      make ?subnetIds ?securityGroupIds ()
+        field_map json__ "SecurityGroupIds" SecurityGroupList.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetList.of_json in
+      make ?securityGroupIds ?subnetIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the VPC networking components used to secure and enable network traffic between the Amazon Web Services resources for your environment. To learn more, see About networking on Amazon MWAA."]
+       "Describes the VPC networking components used to secure and enable network traffic between the Amazon Web Services resources for your environment. For more information, refer to About networking on Amazon MWAA."]
 module RelativePath =
   struct
     type nonrec t = string
@@ -1232,7 +1390,7 @@ module S3BucketArn =
                 (check_string_max i ~max:1224) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn:aws(-[a-z]+)?:s3:::[a-z0-9.\\-]+$")));
+                       ~pattern:"arn:aws(-[a-z]+)?:s3:::[a-z0-9.\\-]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1300,6 +1458,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1307,22 +1467,47 @@ module TagMap =
         ~of_json:TagValue.of_json j
     let to_json v = composed_to_json to_value v
   end
+module VpcEndpointServiceName =
+  struct
+    type nonrec t = string
+    let context_ = "VpcEndpointServiceName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1224) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"([a-z.-]+)?com\\.amazonaws\\.vpce\\.[a-z0-9\\-]+\\.[a-zA-Z_0-9+=,.@\\-_/]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VpcEndpointServiceName" j
+    let to_json = simple_to_json to_value
+  end
 module WebserverAccessMode =
   struct
     type nonrec t =
       | PRIVATE_ONLY 
       | PUBLIC_ONLY 
+      | PUBLIC_AND_PRIVATE 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | PRIVATE_ONLY -> "PRIVATE_ONLY"
       | PUBLIC_ONLY -> "PUBLIC_ONLY"
+      | PUBLIC_AND_PRIVATE -> "PUBLIC_AND_PRIVATE"
       | Non_static_id s -> s
     let of_string =
       function
       | "PRIVATE_ONLY" -> PRIVATE_ONLY
       | "PUBLIC_ONLY" -> PUBLIC_ONLY
+      | "PUBLIC_AND_PRIVATE" -> PUBLIC_AND_PRIVATE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1343,7 +1528,7 @@ module WebserverUrl =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:"^https://.+$")));
+                  (fun () -> check_pattern i ~pattern:"https://.+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1365,7 +1550,7 @@ module WeeklyMaintenanceWindowStart =
                 (check_string_max i ~max:9) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"(MON|TUE|WED|THU|FRI|SAT|SUN):([01]\\d|2[0-3]):(00|30)")));
+                       ~pattern:".*(MON|TUE|WED|THU|FRI|SAT|SUN):([01]\\d|2[0-3]):(00|30).*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1389,8 +1574,8 @@ module InternalServerException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "InternalServerException: An internal error has occurred."]
@@ -1408,12 +1593,32 @@ module ResourceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "ResourceNotFoundException: The resource is not available."]
+module ServiceUnavailableException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "ServiceUnavailableException: The service is currently unavailable."]
 module ValidationException =
   struct
     type nonrec t = {
@@ -1428,8 +1633,8 @@ module ValidationException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ValidationException: The provided input is not valid."]
@@ -1442,24 +1647,24 @@ module LoggingConfigurationInput =
           "Publishes Airflow DAG processing logs to CloudWatch Logs."];
       schedulerLogs: ModuleLoggingConfigurationInput.t option
         [@ocaml.doc "Publishes Airflow scheduler logs to CloudWatch Logs."];
-      taskLogs: ModuleLoggingConfigurationInput.t option
-        [@ocaml.doc "Publishes Airflow task logs to CloudWatch Logs."];
       webserverLogs: ModuleLoggingConfigurationInput.t option
         [@ocaml.doc "Publishes Airflow web server logs to CloudWatch Logs."];
       workerLogs: ModuleLoggingConfigurationInput.t option
-        [@ocaml.doc "Publishes Airflow worker logs to CloudWatch Logs."]}
+        [@ocaml.doc "Publishes Airflow worker logs to CloudWatch Logs."];
+      taskLogs: ModuleLoggingConfigurationInput.t option
+        [@ocaml.doc "Publishes Airflow task logs to CloudWatch Logs."]}
     let make ?dagProcessingLogs =
       fun ?schedulerLogs ->
-        fun ?taskLogs ->
-          fun ?webserverLogs ->
-            fun ?workerLogs ->
+        fun ?webserverLogs ->
+          fun ?workerLogs ->
+            fun ?taskLogs ->
               fun () ->
                 {
                   dagProcessingLogs;
                   schedulerLogs;
-                  taskLogs;
                   webserverLogs;
-                  workerLogs
+                  workerLogs;
+                  taskLogs
                 }
     let to_value x =
       structure_to_value
@@ -1469,88 +1674,60 @@ module LoggingConfigurationInput =
         ("SchedulerLogs",
           (Option.map x.schedulerLogs
              ~f:ModuleLoggingConfigurationInput.to_value));
-        ("TaskLogs",
-          (Option.map x.taskLogs ~f:ModuleLoggingConfigurationInput.to_value));
         ("WebserverLogs",
           (Option.map x.webserverLogs
              ~f:ModuleLoggingConfigurationInput.to_value));
         ("WorkerLogs",
           (Option.map x.workerLogs
-             ~f:ModuleLoggingConfigurationInput.to_value))]
+             ~f:ModuleLoggingConfigurationInput.to_value));
+        ("TaskLogs",
+          (Option.map x.taskLogs ~f:ModuleLoggingConfigurationInput.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let taskLogs =
+        (Option.map ~f:ModuleLoggingConfigurationInput.of_xml)
+          (Xml.child xml_arg0 "TaskLogs") in
       let workerLogs =
         (Option.map ~f:ModuleLoggingConfigurationInput.of_xml)
           (Xml.child xml_arg0 "WorkerLogs") in
       let webserverLogs =
         (Option.map ~f:ModuleLoggingConfigurationInput.of_xml)
           (Xml.child xml_arg0 "WebserverLogs") in
-      let taskLogs =
-        (Option.map ~f:ModuleLoggingConfigurationInput.of_xml)
-          (Xml.child xml_arg0 "TaskLogs") in
       let schedulerLogs =
         (Option.map ~f:ModuleLoggingConfigurationInput.of_xml)
           (Xml.child xml_arg0 "SchedulerLogs") in
       let dagProcessingLogs =
         (Option.map ~f:ModuleLoggingConfigurationInput.of_xml)
           (Xml.child xml_arg0 "DagProcessingLogs") in
-      make ?workerLogs ?webserverLogs ?taskLogs ?schedulerLogs
+      make ?taskLogs ?workerLogs ?webserverLogs ?schedulerLogs
         ?dagProcessingLogs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workerLogs =
-        field_map json "WorkerLogs" ModuleLoggingConfigurationInput.of_json in
-      let webserverLogs =
-        field_map json "WebserverLogs"
-          ModuleLoggingConfigurationInput.of_json in
+    let of_json json__ =
       let taskLogs =
-        field_map json "TaskLogs" ModuleLoggingConfigurationInput.of_json in
+        field_map json__ "TaskLogs" ModuleLoggingConfigurationInput.of_json in
+      let workerLogs =
+        field_map json__ "WorkerLogs" ModuleLoggingConfigurationInput.of_json in
+      let webserverLogs =
+        field_map json__ "WebserverLogs"
+          ModuleLoggingConfigurationInput.of_json in
       let schedulerLogs =
-        field_map json "SchedulerLogs"
+        field_map json__ "SchedulerLogs"
           ModuleLoggingConfigurationInput.of_json in
       let dagProcessingLogs =
-        field_map json "DagProcessingLogs"
+        field_map json__ "DagProcessingLogs"
           ModuleLoggingConfigurationInput.of_json in
-      make ?workerLogs ?webserverLogs ?taskLogs ?schedulerLogs
+      make ?taskLogs ?workerLogs ?webserverLogs ?schedulerLogs
         ?dagProcessingLogs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Defines the Apache Airflow log types to send to CloudWatch Logs."]
-module SyntheticUpdateEnvironmentInputAirflowConfigurationOptions =
-  struct
-    type nonrec t = (ConfigKey.t * ConfigValue.t) list
-    let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((ConfigKey.of_string chopped),
-                              (ConfigValue.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (ConfigKey.to_value x) |>
-                    (fun x -> (ConfigValue.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:ConfigKey.of_string
-        ~of_json:ConfigValue.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module UpdateNetworkConfigurationInput =
   struct
     type nonrec t =
       {
       securityGroupIds: SecurityGroupList.t
         [@ocaml.doc
-          "A list of security group IDs. A security group must be attached to the same VPC as the subnets. To learn more, see Security in your VPC on Amazon MWAA."]}
+          "A list of security group IDs. A security group must be attached to the same VPC as the subnets. For more information, refer to Security in your VPC on Amazon MWAA."]}
     let context_ = "UpdateNetworkConfigurationInput"
     let make ~securityGroupIds = fun () -> { securityGroupIds }
     let to_value x =
@@ -1564,13 +1741,13 @@ module UpdateNetworkConfigurationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "SecurityGroupIds") in
       make ~securityGroupIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroupIds =
-        field_map_exn json "SecurityGroupIds" SecurityGroupList.of_json in
+        field_map_exn json__ "SecurityGroupIds" SecurityGroupList.of_json in
       make ~securityGroupIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Defines the VPC networking components used to secure and enable network traffic between the Amazon Web Services resources for your environment. To learn more, see About networking on Amazon MWAA."]
+       "Defines the VPC networking components used to secure and enable network traffic between the Amazon Web Services resources for your environment. For more information, refer to About networking on Amazon MWAA."]
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
@@ -1579,6 +1756,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1602,6 +1782,9 @@ module MetricData =
   struct
     type nonrec t = MetricDatum.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricDatum.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1626,6 +1809,9 @@ module EnvironmentList =
   struct
     type nonrec t = EnvironmentName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnvironmentName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1684,316 +1870,6 @@ module ListEnvironmentsInputMaxResultsInteger =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module Environment =
-  struct
-    type nonrec t =
-      {
-      airflowConfigurationOptions: AirflowConfigurationOptions.t option
-        [@ocaml.doc
-          "A list of key-value pairs containing the Apache Airflow configuration options attached to your environment. To learn more, see Apache Airflow configuration options."];
-      airflowVersion: AirflowVersion.t option
-        [@ocaml.doc
-          "The Apache Airflow version on your environment. Valid values: 1.10.12, 2.0.2."];
-      arn: EnvironmentArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon MWAA environment."];
-      createdAt: CreatedAt.t option
-        [@ocaml.doc "The day and time the environment was created."];
-      dagS3Path: RelativePath.t option
-        [@ocaml.doc
-          "The relative path to the DAGs folder on your Amazon S3 bucket. For example, dags. To learn more, see Adding or updating DAGs."];
-      environmentClass: EnvironmentClass.t option
-        [@ocaml.doc
-          "The environment class type. Valid values: mw1.small, mw1.medium, mw1.large. To learn more, see Amazon MWAA environment class."];
-      executionRoleArn: IamRoleArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the execution role in IAM that allows MWAA to access Amazon Web Services resources in your environment. For example, arn:aws:iam::123456789:role/my-execution-role. To learn more, see Amazon MWAA Execution role."];
-      kmsKey: KmsKey.t option
-        [@ocaml.doc
-          "The Amazon Web Services Key Management Service (KMS) encryption key used to encrypt the data in your environment."];
-      lastUpdate: LastUpdate.t option
-        [@ocaml.doc "The status of the last update on the environment."];
-      loggingConfiguration: LoggingConfiguration.t option
-        [@ocaml.doc "The Apache Airflow logs published to CloudWatch Logs."];
-      maxWorkers: MaxWorkers.t option
-        [@ocaml.doc
-          "The maximum number of workers that run in your environment. For example, 20."];
-      minWorkers: MinWorkers.t option
-        [@ocaml.doc
-          "The minimum number of workers that run in your environment. For example, 2."];
-      name: EnvironmentName.t option
-        [@ocaml.doc
-          "The name of the Amazon MWAA environment. For example, MyMWAAEnvironment."];
-      networkConfiguration: NetworkConfiguration.t option
-        [@ocaml.doc
-          "Describes the VPC networking components used to secure and enable network traffic between the Amazon Web Services resources for your environment. To learn more, see About networking on Amazon MWAA."];
-      pluginsS3ObjectVersion: S3ObjectVersion.t option
-        [@ocaml.doc
-          "The version of the plugins.zip file on your Amazon S3 bucket. To learn more, see Installing custom plugins."];
-      pluginsS3Path: RelativePath.t option
-        [@ocaml.doc
-          "The relative path to the plugins.zip file on your Amazon S3 bucket. For example, plugins.zip. To learn more, see Installing custom plugins."];
-      requirementsS3ObjectVersion: S3ObjectVersion.t option
-        [@ocaml.doc
-          "The version of the requirements.txt file on your Amazon S3 bucket. To learn more, see Installing Python dependencies."];
-      requirementsS3Path: RelativePath.t option
-        [@ocaml.doc
-          "The relative path to the requirements.txt file on your Amazon S3 bucket. For example, requirements.txt. To learn more, see Installing Python dependencies."];
-      schedulers: Schedulers.t option
-        [@ocaml.doc
-          "The number of Apache Airflow schedulers that run in your Amazon MWAA environment."];
-      serviceRoleArn: IamRoleArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the service-linked role of the environment. To learn more, see Amazon MWAA Service-linked role."];
-      sourceBucketArn: S3BucketArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon S3 bucket where your DAG code and supporting files are stored. For example, arn:aws:s3:::my-airflow-bucket-unique-name. To learn more, see Create an Amazon S3 bucket for Amazon MWAA."];
-      status: EnvironmentStatus.t option
-        [@ocaml.doc
-          "The status of the Amazon MWAA environment. Valid values: CREATING - Indicates the request to create the environment is in progress. CREATE_FAILED - Indicates the request to create the environment failed, and the environment could not be created. AVAILABLE - Indicates the request was successful and the environment is ready to use. UPDATING - Indicates the request to update the environment is in progress. DELETING - Indicates the request to delete the environment is in progress. DELETED - Indicates the request to delete the environment is complete, and the environment has been deleted. UNAVAILABLE - Indicates the request failed, but the environment was unable to rollback and is not in a stable state. UPDATE_FAILED - Indicates the request to update the environment failed, and the environment has rolled back successfully and is ready to use. We recommend reviewing our troubleshooting guide for a list of common errors and their solutions. To learn more, see Amazon MWAA troubleshooting."];
-      tags: TagMap.t option
-        [@ocaml.doc
-          "The key-value tag pairs associated to your environment. For example, \"Environment\": \"Staging\". To learn more, see Tagging Amazon Web Services resources."];
-      webserverAccessMode: WebserverAccessMode.t option
-        [@ocaml.doc
-          "The Apache Airflow Web server access mode. To learn more, see Apache Airflow access modes."];
-      webserverUrl: WebserverUrl.t option
-        [@ocaml.doc
-          "The Apache Airflow Web server host name for the Amazon MWAA environment. To learn more, see Accessing the Apache Airflow UI."];
-      weeklyMaintenanceWindowStart: WeeklyMaintenanceWindowStart.t option
-        [@ocaml.doc
-          "The day and time of the week in Coordinated Universal Time (UTC) 24-hour standard time that weekly maintenance updates are scheduled. For example: TUE:03:30."]}
-    let make ?airflowConfigurationOptions =
-      fun ?airflowVersion ->
-        fun ?arn ->
-          fun ?createdAt ->
-            fun ?dagS3Path ->
-              fun ?environmentClass ->
-                fun ?executionRoleArn ->
-                  fun ?kmsKey ->
-                    fun ?lastUpdate ->
-                      fun ?loggingConfiguration ->
-                        fun ?maxWorkers ->
-                          fun ?minWorkers ->
-                            fun ?name ->
-                              fun ?networkConfiguration ->
-                                fun ?pluginsS3ObjectVersion ->
-                                  fun ?pluginsS3Path ->
-                                    fun ?requirementsS3ObjectVersion ->
-                                      fun ?requirementsS3Path ->
-                                        fun ?schedulers ->
-                                          fun ?serviceRoleArn ->
-                                            fun ?sourceBucketArn ->
-                                              fun ?status ->
-                                                fun ?tags ->
-                                                  fun ?webserverAccessMode ->
-                                                    fun ?webserverUrl ->
-                                                      fun
-                                                        ?weeklyMaintenanceWindowStart
-                                                        ->
-                                                        fun () ->
-                                                          {
-                                                            airflowConfigurationOptions;
-                                                            airflowVersion;
-                                                            arn;
-                                                            createdAt;
-                                                            dagS3Path;
-                                                            environmentClass;
-                                                            executionRoleArn;
-                                                            kmsKey;
-                                                            lastUpdate;
-                                                            loggingConfiguration;
-                                                            maxWorkers;
-                                                            minWorkers;
-                                                            name;
-                                                            networkConfiguration;
-                                                            pluginsS3ObjectVersion;
-                                                            pluginsS3Path;
-                                                            requirementsS3ObjectVersion;
-                                                            requirementsS3Path;
-                                                            schedulers;
-                                                            serviceRoleArn;
-                                                            sourceBucketArn;
-                                                            status;
-                                                            tags;
-                                                            webserverAccessMode;
-                                                            webserverUrl;
-                                                            weeklyMaintenanceWindowStart
-                                                          }
-    let to_value x =
-      structure_to_value
-        [("AirflowConfigurationOptions",
-           (Option.map x.airflowConfigurationOptions
-              ~f:AirflowConfigurationOptions.to_value));
-        ("AirflowVersion",
-          (Option.map x.airflowVersion ~f:AirflowVersion.to_value));
-        ("Arn", (Option.map x.arn ~f:EnvironmentArn.to_value));
-        ("CreatedAt", (Option.map x.createdAt ~f:CreatedAt.to_value));
-        ("DagS3Path", (Option.map x.dagS3Path ~f:RelativePath.to_value));
-        ("EnvironmentClass",
-          (Option.map x.environmentClass ~f:EnvironmentClass.to_value));
-        ("ExecutionRoleArn",
-          (Option.map x.executionRoleArn ~f:IamRoleArn.to_value));
-        ("KmsKey", (Option.map x.kmsKey ~f:KmsKey.to_value));
-        ("LastUpdate", (Option.map x.lastUpdate ~f:LastUpdate.to_value));
-        ("LoggingConfiguration",
-          (Option.map x.loggingConfiguration ~f:LoggingConfiguration.to_value));
-        ("MaxWorkers", (Option.map x.maxWorkers ~f:MaxWorkers.to_value));
-        ("MinWorkers", (Option.map x.minWorkers ~f:MinWorkers.to_value));
-        ("Name", (Option.map x.name ~f:EnvironmentName.to_value));
-        ("NetworkConfiguration",
-          (Option.map x.networkConfiguration ~f:NetworkConfiguration.to_value));
-        ("PluginsS3ObjectVersion",
-          (Option.map x.pluginsS3ObjectVersion ~f:S3ObjectVersion.to_value));
-        ("PluginsS3Path",
-          (Option.map x.pluginsS3Path ~f:RelativePath.to_value));
-        ("RequirementsS3ObjectVersion",
-          (Option.map x.requirementsS3ObjectVersion
-             ~f:S3ObjectVersion.to_value));
-        ("RequirementsS3Path",
-          (Option.map x.requirementsS3Path ~f:RelativePath.to_value));
-        ("Schedulers", (Option.map x.schedulers ~f:Schedulers.to_value));
-        ("ServiceRoleArn",
-          (Option.map x.serviceRoleArn ~f:IamRoleArn.to_value));
-        ("SourceBucketArn",
-          (Option.map x.sourceBucketArn ~f:S3BucketArn.to_value));
-        ("Status", (Option.map x.status ~f:EnvironmentStatus.to_value));
-        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("WebserverAccessMode",
-          (Option.map x.webserverAccessMode ~f:WebserverAccessMode.to_value));
-        ("WebserverUrl",
-          (Option.map x.webserverUrl ~f:WebserverUrl.to_value));
-        ("WeeklyMaintenanceWindowStart",
-          (Option.map x.weeklyMaintenanceWindowStart
-             ~f:WeeklyMaintenanceWindowStart.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let weeklyMaintenanceWindowStart =
-        (Option.map ~f:WeeklyMaintenanceWindowStart.of_xml)
-          (Xml.child xml_arg0 "WeeklyMaintenanceWindowStart") in
-      let webserverUrl =
-        (Option.map ~f:WebserverUrl.of_xml)
-          (Xml.child xml_arg0 "WebserverUrl") in
-      let webserverAccessMode =
-        (Option.map ~f:WebserverAccessMode.of_xml)
-          (Xml.child xml_arg0 "WebserverAccessMode") in
-      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
-      let status =
-        (Option.map ~f:EnvironmentStatus.of_xml)
-          (Xml.child xml_arg0 "Status") in
-      let sourceBucketArn =
-        (Option.map ~f:S3BucketArn.of_xml)
-          (Xml.child xml_arg0 "SourceBucketArn") in
-      let serviceRoleArn =
-        (Option.map ~f:IamRoleArn.of_xml)
-          (Xml.child xml_arg0 "ServiceRoleArn") in
-      let schedulers =
-        (Option.map ~f:Schedulers.of_xml) (Xml.child xml_arg0 "Schedulers") in
-      let requirementsS3Path =
-        (Option.map ~f:RelativePath.of_xml)
-          (Xml.child xml_arg0 "RequirementsS3Path") in
-      let requirementsS3ObjectVersion =
-        (Option.map ~f:S3ObjectVersion.of_xml)
-          (Xml.child xml_arg0 "RequirementsS3ObjectVersion") in
-      let pluginsS3Path =
-        (Option.map ~f:RelativePath.of_xml)
-          (Xml.child xml_arg0 "PluginsS3Path") in
-      let pluginsS3ObjectVersion =
-        (Option.map ~f:S3ObjectVersion.of_xml)
-          (Xml.child xml_arg0 "PluginsS3ObjectVersion") in
-      let networkConfiguration =
-        (Option.map ~f:NetworkConfiguration.of_xml)
-          (Xml.child xml_arg0 "NetworkConfiguration") in
-      let name =
-        (Option.map ~f:EnvironmentName.of_xml) (Xml.child xml_arg0 "Name") in
-      let minWorkers =
-        (Option.map ~f:MinWorkers.of_xml) (Xml.child xml_arg0 "MinWorkers") in
-      let maxWorkers =
-        (Option.map ~f:MaxWorkers.of_xml) (Xml.child xml_arg0 "MaxWorkers") in
-      let loggingConfiguration =
-        (Option.map ~f:LoggingConfiguration.of_xml)
-          (Xml.child xml_arg0 "LoggingConfiguration") in
-      let lastUpdate =
-        (Option.map ~f:LastUpdate.of_xml) (Xml.child xml_arg0 "LastUpdate") in
-      let kmsKey =
-        (Option.map ~f:KmsKey.of_xml) (Xml.child xml_arg0 "KmsKey") in
-      let executionRoleArn =
-        (Option.map ~f:IamRoleArn.of_xml)
-          (Xml.child xml_arg0 "ExecutionRoleArn") in
-      let environmentClass =
-        (Option.map ~f:EnvironmentClass.of_xml)
-          (Xml.child xml_arg0 "EnvironmentClass") in
-      let dagS3Path =
-        (Option.map ~f:RelativePath.of_xml) (Xml.child xml_arg0 "DagS3Path") in
-      let createdAt =
-        (Option.map ~f:CreatedAt.of_xml) (Xml.child xml_arg0 "CreatedAt") in
-      let arn =
-        (Option.map ~f:EnvironmentArn.of_xml) (Xml.child xml_arg0 "Arn") in
-      let airflowVersion =
-        (Option.map ~f:AirflowVersion.of_xml)
-          (Xml.child xml_arg0 "AirflowVersion") in
-      let airflowConfigurationOptions =
-        (Option.map ~f:AirflowConfigurationOptions.of_xml)
-          (Xml.child xml_arg0 "AirflowConfigurationOptions") in
-      make ?weeklyMaintenanceWindowStart ?webserverUrl ?webserverAccessMode
-        ?tags ?status ?sourceBucketArn ?serviceRoleArn ?schedulers
-        ?requirementsS3Path ?requirementsS3ObjectVersion ?pluginsS3Path
-        ?pluginsS3ObjectVersion ?networkConfiguration ?name ?minWorkers
-        ?maxWorkers ?loggingConfiguration ?lastUpdate ?kmsKey
-        ?executionRoleArn ?environmentClass ?dagS3Path ?createdAt ?arn
-        ?airflowVersion ?airflowConfigurationOptions ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let weeklyMaintenanceWindowStart =
-        field_map json "WeeklyMaintenanceWindowStart"
-          WeeklyMaintenanceWindowStart.of_json in
-      let webserverUrl = field_map json "WebserverUrl" WebserverUrl.of_json in
-      let webserverAccessMode =
-        field_map json "WebserverAccessMode" WebserverAccessMode.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let status = field_map json "Status" EnvironmentStatus.of_json in
-      let sourceBucketArn =
-        field_map json "SourceBucketArn" S3BucketArn.of_json in
-      let serviceRoleArn = field_map json "ServiceRoleArn" IamRoleArn.of_json in
-      let schedulers = field_map json "Schedulers" Schedulers.of_json in
-      let requirementsS3Path =
-        field_map json "RequirementsS3Path" RelativePath.of_json in
-      let requirementsS3ObjectVersion =
-        field_map json "RequirementsS3ObjectVersion" S3ObjectVersion.of_json in
-      let pluginsS3Path = field_map json "PluginsS3Path" RelativePath.of_json in
-      let pluginsS3ObjectVersion =
-        field_map json "PluginsS3ObjectVersion" S3ObjectVersion.of_json in
-      let networkConfiguration =
-        field_map json "NetworkConfiguration" NetworkConfiguration.of_json in
-      let name = field_map json "Name" EnvironmentName.of_json in
-      let minWorkers = field_map json "MinWorkers" MinWorkers.of_json in
-      let maxWorkers = field_map json "MaxWorkers" MaxWorkers.of_json in
-      let loggingConfiguration =
-        field_map json "LoggingConfiguration" LoggingConfiguration.of_json in
-      let lastUpdate = field_map json "LastUpdate" LastUpdate.of_json in
-      let kmsKey = field_map json "KmsKey" KmsKey.of_json in
-      let executionRoleArn =
-        field_map json "ExecutionRoleArn" IamRoleArn.of_json in
-      let environmentClass =
-        field_map json "EnvironmentClass" EnvironmentClass.of_json in
-      let dagS3Path = field_map json "DagS3Path" RelativePath.of_json in
-      let createdAt = field_map json "CreatedAt" CreatedAt.of_json in
-      let arn = field_map json "Arn" EnvironmentArn.of_json in
-      let airflowVersion =
-        field_map json "AirflowVersion" AirflowVersion.of_json in
-      let airflowConfigurationOptions =
-        field_map json "AirflowConfigurationOptions"
-          AirflowConfigurationOptions.of_json in
-      make ?weeklyMaintenanceWindowStart ?webserverUrl ?webserverAccessMode
-        ?tags ?status ?sourceBucketArn ?serviceRoleArn ?schedulers
-        ?requirementsS3Path ?requirementsS3ObjectVersion ?pluginsS3Path
-        ?pluginsS3ObjectVersion ?networkConfiguration ?name ?minWorkers
-        ?maxWorkers ?loggingConfiguration ?lastUpdate ?kmsKey
-        ?executionRoleArn ?environmentClass ?dagS3Path ?createdAt ?arn
-        ?airflowVersion ?airflowConfigurationOptions ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Describes an Amazon Managed Workflows for Apache Airflow (MWAA) environment."]
 module AccessDeniedException =
   struct
     type nonrec t = {
@@ -2008,12 +1884,616 @@ module AccessDeniedException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Access to the Apache Airflow Web UI or CLI has been denied due to insufficient permissions. To learn more, see Accessing an Amazon MWAA environment."]
+module RestApiClientException =
+  struct
+    type nonrec t =
+      {
+      restApiStatusCode: Integer.t option
+        [@ocaml.doc
+          "The HTTP status code returned by the Apache Airflow REST API call."];
+      restApiResponse: RestApiResponse.t option
+        [@ocaml.doc
+          "The error response data from the Apache Airflow REST API call, provided as a JSON object."]}
+    let make ?restApiStatusCode =
+      fun ?restApiResponse ->
+        fun () -> { restApiStatusCode; restApiResponse }
+    let to_value x =
+      structure_to_value
+        [("RestApiStatusCode",
+           (Option.map x.restApiStatusCode ~f:Integer.to_value));
+        ("RestApiResponse",
+          (Option.map x.restApiResponse ~f:RestApiResponse.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let restApiResponse =
+        (Option.map ~f:RestApiResponse.of_xml)
+          (Xml.child xml_arg0 "RestApiResponse") in
+      let restApiStatusCode =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "RestApiStatusCode") in
+      make ?restApiResponse ?restApiStatusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let restApiResponse =
+        field_map json__ "RestApiResponse" RestApiResponse.of_json in
+      let restApiStatusCode =
+        field_map json__ "RestApiStatusCode" Integer.of_json in
+      make ?restApiResponse ?restApiStatusCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An exception indicating that a client-side error occurred during the Apache Airflow REST API call."]
+module RestApiServerException =
+  struct
+    type nonrec t =
+      {
+      restApiStatusCode: Integer.t option
+        [@ocaml.doc
+          "The HTTP status code returned by the Apache Airflow REST API call."];
+      restApiResponse: RestApiResponse.t option
+        [@ocaml.doc
+          "The error response data from the Apache Airflow REST API call, provided as a JSON object."]}
+    let make ?restApiStatusCode =
+      fun ?restApiResponse ->
+        fun () -> { restApiStatusCode; restApiResponse }
+    let to_value x =
+      structure_to_value
+        [("RestApiStatusCode",
+           (Option.map x.restApiStatusCode ~f:Integer.to_value));
+        ("RestApiResponse",
+          (Option.map x.restApiResponse ~f:RestApiResponse.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let restApiResponse =
+        (Option.map ~f:RestApiResponse.of_xml)
+          (Xml.child xml_arg0 "RestApiResponse") in
+      let restApiStatusCode =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "RestApiStatusCode") in
+      make ?restApiResponse ?restApiStatusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let restApiResponse =
+        field_map json__ "RestApiResponse" RestApiResponse.of_json in
+      let restApiStatusCode =
+        field_map json__ "RestApiStatusCode" Integer.of_json in
+      make ?restApiResponse ?restApiStatusCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An exception indicating that a server-side error occurred during the Apache Airflow REST API call."]
+module Document =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end
+module RestApiMethod =
+  struct
+    type nonrec t =
+      | GET 
+      | PUT 
+      | POST 
+      | PATCH 
+      | DELETE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | GET -> "GET"
+      | PUT -> "PUT"
+      | POST -> "POST"
+      | PATCH -> "PATCH"
+      | DELETE -> "DELETE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "GET" -> GET
+      | "PUT" -> PUT
+      | "POST" -> POST
+      | "PATCH" -> PATCH
+      | "DELETE" -> DELETE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RestApiMethod" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RestApiMethod" j)
+    let to_json = simple_to_json to_value
+  end
+module RestApiPath =
+  struct
+    type nonrec t = string
+    let context_ = "RestApiPath"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RestApiPath" j
+    let to_json = simple_to_json to_value
+  end
+module RestApiRequestBody =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end
+module Environment =
+  struct
+    type nonrec t =
+      {
+      name: EnvironmentName.t option
+        [@ocaml.doc
+          "The name of the Amazon MWAA environment. For example, MyMWAAEnvironment."];
+      status: EnvironmentStatus.t option
+        [@ocaml.doc
+          "The status of the Amazon MWAA environment. Valid values: CREATING - The request to create the environment is in progress. CREATING_SNAPSHOT - The request to update environment details, or upgrade the environment version, is in progress and Amazon MWAA is creating a storage volume snapshot of the Amazon RDS database cluster associated with the environment. A database snapshot is a backup created at a specific point in time. Amazon MWAA uses snapshots to recover environment metadata if the process to update or upgrade an environment fails. CREATE_FAILED - The request to create the environment failed and the environment was not created. AVAILABLE - The request was successful and the environment is ready to use. PENDING - The request was successful, but the process to create the environment is paused until you create the required VPC endpoints in your VPC. After you create the VPC endpoints, the process resumes. UPDATING - The request to update the environment is in progress. ROLLING_BACK - The request to update environment details or upgrade the environment version failed and Amazon MWAA is restoring the environment using the latest storage volume snapshot. DELETING - The request to delete the environment is in progress. DELETED - The request to delete the environment is complete, and the environment has been deleted. UNAVAILABLE - The request failed, but the environment did not return to its previous state and is not stable. UPDATE_FAILED - The request to update the environment failed and the environment was restored to its previous state successfully and is ready to use. MAINTENANCE - The environment is undergoing maintenance. Depending on the type of work Amazon MWAA is performing, your environment might be unavailable during this process. Note that as part of the maintenance work, Amazon MWAA performs with a GRACEFUL workerReplacementStrategy . You can review our troubleshooting guide for a list of common errors and their solutions. For more information, refer to Amazon MWAA troubleshooting."];
+      arn: EnvironmentArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon MWAA environment."];
+      createdAt: CreatedAt.t option
+        [@ocaml.doc "The day and time the environment was created."];
+      webserverUrl: WebserverUrl.t option
+        [@ocaml.doc
+          "The Apache Airflow web server host name for the Amazon MWAA environment. For more information, refer to Accessing the Apache Airflow UI."];
+      executionRoleArn: IamRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the execution role in IAM that allows MWAA to access Amazon Web Services resources in your environment. For example, arn:aws:iam::123456789:role/my-execution-role. For more information, refer to Amazon MWAA Execution role."];
+      serviceRoleArn: IamRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the service-linked role of the environment. For more information, refer to Amazon MWAA Service-linked role."];
+      kmsKey: KmsKey.t option
+        [@ocaml.doc
+          "The KMS encryption key used to encrypt the data in your environment."];
+      airflowVersion: AirflowVersion.t option
+        [@ocaml.doc
+          "The Apache Airflow version on your environment. Valid values: 2.7.2, 2.8.1, 2.9.2, 2.10.1, 2.10.3, 2.11.0, and 3.0.6."];
+      sourceBucketArn: S3BucketArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon S3 bucket where your DAG code and supporting files are stored. For example, arn:aws:s3:::my-airflow-bucket-unique-name. For more information, refer to Create an Amazon S3 bucket for Amazon MWAA."];
+      dagS3Path: RelativePath.t option
+        [@ocaml.doc
+          "The relative path to the DAGs folder in your Amazon S3 bucket. For example, s3://mwaa-environment/dags. For more information, refer to Adding or updating DAGs."];
+      pluginsS3Path: RelativePath.t option
+        [@ocaml.doc
+          "The relative path to the file in your Amazon S3 bucket. For example, s3://mwaa-environment/plugins.zip. For more information, refer to Installing custom plugins."];
+      pluginsS3ObjectVersion: S3ObjectVersion.t option
+        [@ocaml.doc
+          "The version of the plugins.zip file in your Amazon S3 bucket. You must specify the version ID that Amazon S3 assigns to the file. Version IDs are Unicode, UTF-8 encoded, URL-ready, opaque strings that are no more than 1,024 bytes long. The following is an example: 3sL4kqtJlcpXroDTDmJ+rmSpXd3dIbrHY+MTRCxf3vjVBH40Nr8X8gdRQBpUMLUo For more information, refer to Installing custom plugins."];
+      requirementsS3Path: RelativePath.t option
+        [@ocaml.doc
+          "The relative path to the requirements.txt file in your Amazon S3 bucket. For example, s3://mwaa-environment/requirements.txt. For more information, refer to Installing Python dependencies."];
+      requirementsS3ObjectVersion: S3ObjectVersion.t option
+        [@ocaml.doc
+          "The version of the requirements.txt file on your Amazon S3 bucket. You must specify the version ID that Amazon S3 assigns to the file. Version IDs are Unicode, UTF-8 encoded, URL-ready, opaque strings that are no more than 1,024 bytes long. The following is an example: 3sL4kqtJlcpXroDTDmJ+rmSpXd3dIbrHY+MTRCxf3vjVBH40Nr8X8gdRQBpUMLUo For more information, refer to Installing Python dependencies."];
+      startupScriptS3Path: String_.t option
+        [@ocaml.doc
+          "The relative path to the startup shell script in your Amazon S3 bucket. For example, s3://mwaa-environment/startup.sh. Amazon MWAA runs the script as your environment starts, and before running the Apache Airflow process. You can use this script to install dependencies, modify Apache Airflow configuration options, and set environment variables. For more information, refer to Using a startup script."];
+      startupScriptS3ObjectVersion: String_.t option
+        [@ocaml.doc
+          "The version of the startup shell script in your Amazon S3 bucket. You must specify the version ID that Amazon S3 assigns to the file. Version IDs are Unicode, UTF-8 encoded, URL-ready, opaque strings that are no more than 1,024 bytes long. The following is an example: 3sL4kqtJlcpXroDTDmJ+rmSpXd3dIbrHY+MTRCxf3vjVBH40Nr8X8gdRQBpUMLUo For more information, refer to Using a startup script."];
+      airflowConfigurationOptions: AirflowConfigurationOptions.t option
+        [@ocaml.doc
+          "A list of key-value pairs containing the Apache Airflow configuration options attached to your environment. For more information, refer to Apache Airflow configuration options."];
+      environmentClass: EnvironmentClass.t option
+        [@ocaml.doc
+          "The environment class type. Valid values: mw1.micro, mw1.small, mw1.medium, mw1.large, mw1.xlarge, and mw1.2xlarge. For more information, refer to Amazon MWAA environment class."];
+      maxWorkers: MaxWorkers.t option
+        [@ocaml.doc
+          "The maximum number of workers that run in your environment. For example, 20."];
+      networkConfiguration: NetworkConfiguration.t option
+        [@ocaml.doc
+          "Describes the VPC networking components used to secure and enable network traffic between the Amazon Web Services resources for your environment. For more information, refer to About networking on Amazon MWAA."];
+      loggingConfiguration: LoggingConfiguration.t option
+        [@ocaml.doc "The Apache Airflow logs published to CloudWatch Logs."];
+      lastUpdate: LastUpdate.t option
+        [@ocaml.doc "The status of the last update on the environment."];
+      weeklyMaintenanceWindowStart: WeeklyMaintenanceWindowStart.t option
+        [@ocaml.doc
+          "The day and time of the week in Coordinated Universal Time (UTC) 24-hour standard time that weekly maintenance updates are scheduled. For example: TUE:03:30."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The key-value tag pairs associated to your environment. For example, \"Environment\": \"Staging\". For more information, refer to Tagging Amazon Web Services resources."];
+      webserverAccessMode: WebserverAccessMode.t option
+        [@ocaml.doc
+          "The Apache Airflow web server access mode. For more information, refer to Apache Airflow access modes."];
+      minWorkers: MinWorkers.t option
+        [@ocaml.doc
+          "The minimum number of workers that run in your environment. For example, 2."];
+      schedulers: Schedulers.t option
+        [@ocaml.doc
+          "The number of Apache Airflow schedulers that run in your Amazon MWAA environment."];
+      webserverVpcEndpointService: VpcEndpointServiceName.t option
+        [@ocaml.doc "The VPC endpoint for the environment's web server."];
+      databaseVpcEndpointService: VpcEndpointServiceName.t option
+        [@ocaml.doc
+          "The VPC endpoint for the environment's Amazon RDS database."];
+      celeryExecutorQueue: CeleryExecutorQueue.t option
+        [@ocaml.doc
+          "The queue ARN for the environment's Celery Executor. Amazon MWAA uses a Celery Executor to distribute tasks across multiple workers. When you create an environment in a shared VPC, you must provide access to the Celery Executor queue from your VPC."];
+      endpointManagement: EndpointManagement.t option
+        [@ocaml.doc
+          "Defines whether the VPC endpoints configured for the environment are created, and managed, by the customer or by Amazon MWAA. If set to SERVICE, Amazon MWAA will create and manage the required VPC endpoints in your VPC. If set to CUSTOMER, you must create, and manage, the VPC endpoints in your VPC."];
+      minWebservers: MinWebservers.t option
+        [@ocaml.doc
+          "The minimum number of web servers that you want to run in your environment. Amazon MWAA scales the number of Apache Airflow web servers up to the number you specify for MaxWebservers when you interact with your Apache Airflow environment using Apache Airflow REST API, or the Apache Airflow CLI. As the transaction-per-second rate, and the network load, decrease, Amazon MWAA disposes of the additional web servers, and scales down to the number set in MinxWebserers. Valid values: For environments larger than mw1.micro, accepts values from 2 to 5. Defaults to 2 for all environment sizes except mw1.micro, which defaults to 1."];
+      maxWebservers: MaxWebservers.t option
+        [@ocaml.doc
+          "The maximum number of web servers that you want to run in your environment. Amazon MWAA scales the number of Apache Airflow web servers up to the number you specify for MaxWebservers when you interact with your Apache Airflow environment using Apache Airflow REST API, or the Apache Airflow CLI. For example, in scenarios where your workload requires network calls to the Apache Airflow REST API with a high transaction-per-second (TPS) rate, Amazon MWAA will increase the number of web servers up to the number set in MaxWebserers. As TPS rates decrease Amazon MWAA disposes of the additional web servers, and scales down to the number set in MinxWebserers. Valid values: For environments larger than mw1.micro, accepts values from 2 to 5. Defaults to 2 for all environment sizes except mw1.micro, which defaults to 1."]}
+    let make ?name =
+      fun ?status ->
+        fun ?arn ->
+          fun ?createdAt ->
+            fun ?webserverUrl ->
+              fun ?executionRoleArn ->
+                fun ?serviceRoleArn ->
+                  fun ?kmsKey ->
+                    fun ?airflowVersion ->
+                      fun ?sourceBucketArn ->
+                        fun ?dagS3Path ->
+                          fun ?pluginsS3Path ->
+                            fun ?pluginsS3ObjectVersion ->
+                              fun ?requirementsS3Path ->
+                                fun ?requirementsS3ObjectVersion ->
+                                  fun ?startupScriptS3Path ->
+                                    fun ?startupScriptS3ObjectVersion ->
+                                      fun ?airflowConfigurationOptions ->
+                                        fun ?environmentClass ->
+                                          fun ?maxWorkers ->
+                                            fun ?networkConfiguration ->
+                                              fun ?loggingConfiguration ->
+                                                fun ?lastUpdate ->
+                                                  fun
+                                                    ?weeklyMaintenanceWindowStart
+                                                    ->
+                                                    fun ?tags ->
+                                                      fun
+                                                        ?webserverAccessMode
+                                                        ->
+                                                        fun ?minWorkers ->
+                                                          fun ?schedulers ->
+                                                            fun
+                                                              ?webserverVpcEndpointService
+                                                              ->
+                                                              fun
+                                                                ?databaseVpcEndpointService
+                                                                ->
+                                                                fun
+                                                                  ?celeryExecutorQueue
+                                                                  ->
+                                                                  fun
+                                                                    ?endpointManagement
+                                                                    ->
+                                                                    fun
+                                                                    ?minWebservers
+                                                                    ->
+                                                                    fun
+                                                                    ?maxWebservers
+                                                                    ->
+                                                                    fun () ->
+                                                                    {
+                                                                    name;
+                                                                    status;
+                                                                    arn;
+                                                                    createdAt;
+                                                                    webserverUrl;
+                                                                    executionRoleArn;
+                                                                    serviceRoleArn;
+                                                                    kmsKey;
+                                                                    airflowVersion;
+                                                                    sourceBucketArn;
+                                                                    dagS3Path;
+                                                                    pluginsS3Path;
+                                                                    pluginsS3ObjectVersion;
+                                                                    requirementsS3Path;
+                                                                    requirementsS3ObjectVersion;
+                                                                    startupScriptS3Path;
+                                                                    startupScriptS3ObjectVersion;
+                                                                    airflowConfigurationOptions;
+                                                                    environmentClass;
+                                                                    maxWorkers;
+                                                                    networkConfiguration;
+                                                                    loggingConfiguration;
+                                                                    lastUpdate;
+                                                                    weeklyMaintenanceWindowStart;
+                                                                    tags;
+                                                                    webserverAccessMode;
+                                                                    minWorkers;
+                                                                    schedulers;
+                                                                    webserverVpcEndpointService;
+                                                                    databaseVpcEndpointService;
+                                                                    celeryExecutorQueue;
+                                                                    endpointManagement;
+                                                                    minWebservers;
+                                                                    maxWebservers
+                                                                    }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:EnvironmentName.to_value));
+        ("Status", (Option.map x.status ~f:EnvironmentStatus.to_value));
+        ("Arn", (Option.map x.arn ~f:EnvironmentArn.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:CreatedAt.to_value));
+        ("WebserverUrl",
+          (Option.map x.webserverUrl ~f:WebserverUrl.to_value));
+        ("ExecutionRoleArn",
+          (Option.map x.executionRoleArn ~f:IamRoleArn.to_value));
+        ("ServiceRoleArn",
+          (Option.map x.serviceRoleArn ~f:IamRoleArn.to_value));
+        ("KmsKey", (Option.map x.kmsKey ~f:KmsKey.to_value));
+        ("AirflowVersion",
+          (Option.map x.airflowVersion ~f:AirflowVersion.to_value));
+        ("SourceBucketArn",
+          (Option.map x.sourceBucketArn ~f:S3BucketArn.to_value));
+        ("DagS3Path", (Option.map x.dagS3Path ~f:RelativePath.to_value));
+        ("PluginsS3Path",
+          (Option.map x.pluginsS3Path ~f:RelativePath.to_value));
+        ("PluginsS3ObjectVersion",
+          (Option.map x.pluginsS3ObjectVersion ~f:S3ObjectVersion.to_value));
+        ("RequirementsS3Path",
+          (Option.map x.requirementsS3Path ~f:RelativePath.to_value));
+        ("RequirementsS3ObjectVersion",
+          (Option.map x.requirementsS3ObjectVersion
+             ~f:S3ObjectVersion.to_value));
+        ("StartupScriptS3Path",
+          (Option.map x.startupScriptS3Path ~f:String_.to_value));
+        ("StartupScriptS3ObjectVersion",
+          (Option.map x.startupScriptS3ObjectVersion ~f:String_.to_value));
+        ("AirflowConfigurationOptions",
+          (Option.map x.airflowConfigurationOptions
+             ~f:AirflowConfigurationOptions.to_value));
+        ("EnvironmentClass",
+          (Option.map x.environmentClass ~f:EnvironmentClass.to_value));
+        ("MaxWorkers", (Option.map x.maxWorkers ~f:MaxWorkers.to_value));
+        ("NetworkConfiguration",
+          (Option.map x.networkConfiguration ~f:NetworkConfiguration.to_value));
+        ("LoggingConfiguration",
+          (Option.map x.loggingConfiguration ~f:LoggingConfiguration.to_value));
+        ("LastUpdate", (Option.map x.lastUpdate ~f:LastUpdate.to_value));
+        ("WeeklyMaintenanceWindowStart",
+          (Option.map x.weeklyMaintenanceWindowStart
+             ~f:WeeklyMaintenanceWindowStart.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("WebserverAccessMode",
+          (Option.map x.webserverAccessMode ~f:WebserverAccessMode.to_value));
+        ("MinWorkers", (Option.map x.minWorkers ~f:MinWorkers.to_value));
+        ("Schedulers", (Option.map x.schedulers ~f:Schedulers.to_value));
+        ("WebserverVpcEndpointService",
+          (Option.map x.webserverVpcEndpointService
+             ~f:VpcEndpointServiceName.to_value));
+        ("DatabaseVpcEndpointService",
+          (Option.map x.databaseVpcEndpointService
+             ~f:VpcEndpointServiceName.to_value));
+        ("CeleryExecutorQueue",
+          (Option.map x.celeryExecutorQueue ~f:CeleryExecutorQueue.to_value));
+        ("EndpointManagement",
+          (Option.map x.endpointManagement ~f:EndpointManagement.to_value));
+        ("MinWebservers",
+          (Option.map x.minWebservers ~f:MinWebservers.to_value));
+        ("MaxWebservers",
+          (Option.map x.maxWebservers ~f:MaxWebservers.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxWebservers =
+        (Option.map ~f:MaxWebservers.of_xml)
+          (Xml.child xml_arg0 "MaxWebservers") in
+      let minWebservers =
+        (Option.map ~f:MinWebservers.of_xml)
+          (Xml.child xml_arg0 "MinWebservers") in
+      let endpointManagement =
+        (Option.map ~f:EndpointManagement.of_xml)
+          (Xml.child xml_arg0 "EndpointManagement") in
+      let celeryExecutorQueue =
+        (Option.map ~f:CeleryExecutorQueue.of_xml)
+          (Xml.child xml_arg0 "CeleryExecutorQueue") in
+      let databaseVpcEndpointService =
+        (Option.map ~f:VpcEndpointServiceName.of_xml)
+          (Xml.child xml_arg0 "DatabaseVpcEndpointService") in
+      let webserverVpcEndpointService =
+        (Option.map ~f:VpcEndpointServiceName.of_xml)
+          (Xml.child xml_arg0 "WebserverVpcEndpointService") in
+      let schedulers =
+        (Option.map ~f:Schedulers.of_xml) (Xml.child xml_arg0 "Schedulers") in
+      let minWorkers =
+        (Option.map ~f:MinWorkers.of_xml) (Xml.child xml_arg0 "MinWorkers") in
+      let webserverAccessMode =
+        (Option.map ~f:WebserverAccessMode.of_xml)
+          (Xml.child xml_arg0 "WebserverAccessMode") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let weeklyMaintenanceWindowStart =
+        (Option.map ~f:WeeklyMaintenanceWindowStart.of_xml)
+          (Xml.child xml_arg0 "WeeklyMaintenanceWindowStart") in
+      let lastUpdate =
+        (Option.map ~f:LastUpdate.of_xml) (Xml.child xml_arg0 "LastUpdate") in
+      let loggingConfiguration =
+        (Option.map ~f:LoggingConfiguration.of_xml)
+          (Xml.child xml_arg0 "LoggingConfiguration") in
+      let networkConfiguration =
+        (Option.map ~f:NetworkConfiguration.of_xml)
+          (Xml.child xml_arg0 "NetworkConfiguration") in
+      let maxWorkers =
+        (Option.map ~f:MaxWorkers.of_xml) (Xml.child xml_arg0 "MaxWorkers") in
+      let environmentClass =
+        (Option.map ~f:EnvironmentClass.of_xml)
+          (Xml.child xml_arg0 "EnvironmentClass") in
+      let airflowConfigurationOptions =
+        (Option.map ~f:AirflowConfigurationOptions.of_xml)
+          (Xml.child xml_arg0 "AirflowConfigurationOptions") in
+      let startupScriptS3ObjectVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "StartupScriptS3ObjectVersion") in
+      let startupScriptS3Path =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "StartupScriptS3Path") in
+      let requirementsS3ObjectVersion =
+        (Option.map ~f:S3ObjectVersion.of_xml)
+          (Xml.child xml_arg0 "RequirementsS3ObjectVersion") in
+      let requirementsS3Path =
+        (Option.map ~f:RelativePath.of_xml)
+          (Xml.child xml_arg0 "RequirementsS3Path") in
+      let pluginsS3ObjectVersion =
+        (Option.map ~f:S3ObjectVersion.of_xml)
+          (Xml.child xml_arg0 "PluginsS3ObjectVersion") in
+      let pluginsS3Path =
+        (Option.map ~f:RelativePath.of_xml)
+          (Xml.child xml_arg0 "PluginsS3Path") in
+      let dagS3Path =
+        (Option.map ~f:RelativePath.of_xml) (Xml.child xml_arg0 "DagS3Path") in
+      let sourceBucketArn =
+        (Option.map ~f:S3BucketArn.of_xml)
+          (Xml.child xml_arg0 "SourceBucketArn") in
+      let airflowVersion =
+        (Option.map ~f:AirflowVersion.of_xml)
+          (Xml.child xml_arg0 "AirflowVersion") in
+      let kmsKey =
+        (Option.map ~f:KmsKey.of_xml) (Xml.child xml_arg0 "KmsKey") in
+      let serviceRoleArn =
+        (Option.map ~f:IamRoleArn.of_xml)
+          (Xml.child xml_arg0 "ServiceRoleArn") in
+      let executionRoleArn =
+        (Option.map ~f:IamRoleArn.of_xml)
+          (Xml.child xml_arg0 "ExecutionRoleArn") in
+      let webserverUrl =
+        (Option.map ~f:WebserverUrl.of_xml)
+          (Xml.child xml_arg0 "WebserverUrl") in
+      let createdAt =
+        (Option.map ~f:CreatedAt.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let arn =
+        (Option.map ~f:EnvironmentArn.of_xml) (Xml.child xml_arg0 "Arn") in
+      let status =
+        (Option.map ~f:EnvironmentStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let name =
+        (Option.map ~f:EnvironmentName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?maxWebservers ?minWebservers ?endpointManagement
+        ?celeryExecutorQueue ?databaseVpcEndpointService
+        ?webserverVpcEndpointService ?schedulers ?minWorkers
+        ?webserverAccessMode ?tags ?weeklyMaintenanceWindowStart ?lastUpdate
+        ?loggingConfiguration ?networkConfiguration ?maxWorkers
+        ?environmentClass ?airflowConfigurationOptions
+        ?startupScriptS3ObjectVersion ?startupScriptS3Path
+        ?requirementsS3ObjectVersion ?requirementsS3Path
+        ?pluginsS3ObjectVersion ?pluginsS3Path ?dagS3Path ?sourceBucketArn
+        ?airflowVersion ?kmsKey ?serviceRoleArn ?executionRoleArn
+        ?webserverUrl ?createdAt ?arn ?status ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxWebservers =
+        field_map json__ "MaxWebservers" MaxWebservers.of_json in
+      let minWebservers =
+        field_map json__ "MinWebservers" MinWebservers.of_json in
+      let endpointManagement =
+        field_map json__ "EndpointManagement" EndpointManagement.of_json in
+      let celeryExecutorQueue =
+        field_map json__ "CeleryExecutorQueue" CeleryExecutorQueue.of_json in
+      let databaseVpcEndpointService =
+        field_map json__ "DatabaseVpcEndpointService"
+          VpcEndpointServiceName.of_json in
+      let webserverVpcEndpointService =
+        field_map json__ "WebserverVpcEndpointService"
+          VpcEndpointServiceName.of_json in
+      let schedulers = field_map json__ "Schedulers" Schedulers.of_json in
+      let minWorkers = field_map json__ "MinWorkers" MinWorkers.of_json in
+      let webserverAccessMode =
+        field_map json__ "WebserverAccessMode" WebserverAccessMode.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let weeklyMaintenanceWindowStart =
+        field_map json__ "WeeklyMaintenanceWindowStart"
+          WeeklyMaintenanceWindowStart.of_json in
+      let lastUpdate = field_map json__ "LastUpdate" LastUpdate.of_json in
+      let loggingConfiguration =
+        field_map json__ "LoggingConfiguration" LoggingConfiguration.of_json in
+      let networkConfiguration =
+        field_map json__ "NetworkConfiguration" NetworkConfiguration.of_json in
+      let maxWorkers = field_map json__ "MaxWorkers" MaxWorkers.of_json in
+      let environmentClass =
+        field_map json__ "EnvironmentClass" EnvironmentClass.of_json in
+      let airflowConfigurationOptions =
+        field_map json__ "AirflowConfigurationOptions"
+          AirflowConfigurationOptions.of_json in
+      let startupScriptS3ObjectVersion =
+        field_map json__ "StartupScriptS3ObjectVersion" String_.of_json in
+      let startupScriptS3Path =
+        field_map json__ "StartupScriptS3Path" String_.of_json in
+      let requirementsS3ObjectVersion =
+        field_map json__ "RequirementsS3ObjectVersion"
+          S3ObjectVersion.of_json in
+      let requirementsS3Path =
+        field_map json__ "RequirementsS3Path" RelativePath.of_json in
+      let pluginsS3ObjectVersion =
+        field_map json__ "PluginsS3ObjectVersion" S3ObjectVersion.of_json in
+      let pluginsS3Path =
+        field_map json__ "PluginsS3Path" RelativePath.of_json in
+      let dagS3Path = field_map json__ "DagS3Path" RelativePath.of_json in
+      let sourceBucketArn =
+        field_map json__ "SourceBucketArn" S3BucketArn.of_json in
+      let airflowVersion =
+        field_map json__ "AirflowVersion" AirflowVersion.of_json in
+      let kmsKey = field_map json__ "KmsKey" KmsKey.of_json in
+      let serviceRoleArn =
+        field_map json__ "ServiceRoleArn" IamRoleArn.of_json in
+      let executionRoleArn =
+        field_map json__ "ExecutionRoleArn" IamRoleArn.of_json in
+      let webserverUrl = field_map json__ "WebserverUrl" WebserverUrl.of_json in
+      let createdAt = field_map json__ "CreatedAt" CreatedAt.of_json in
+      let arn = field_map json__ "Arn" EnvironmentArn.of_json in
+      let status = field_map json__ "Status" EnvironmentStatus.of_json in
+      let name = field_map json__ "Name" EnvironmentName.of_json in
+      make ?maxWebservers ?minWebservers ?endpointManagement
+        ?celeryExecutorQueue ?databaseVpcEndpointService
+        ?webserverVpcEndpointService ?schedulers ?minWorkers
+        ?webserverAccessMode ?tags ?weeklyMaintenanceWindowStart ?lastUpdate
+        ?loggingConfiguration ?networkConfiguration ?maxWorkers
+        ?environmentClass ?airflowConfigurationOptions
+        ?startupScriptS3ObjectVersion ?startupScriptS3Path
+        ?requirementsS3ObjectVersion ?requirementsS3Path
+        ?pluginsS3ObjectVersion ?pluginsS3Path ?dagS3Path ?sourceBucketArn
+        ?airflowVersion ?kmsKey ?serviceRoleArn ?executionRoleArn
+        ?webserverUrl ?createdAt ?arn ?status ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes an Amazon Managed Workflows for Apache Airflow (MWAA) environment."]
+module AirflowIdentity =
+  struct
+    type nonrec t = string
+    let context_ = "AirflowIdentity"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AirflowIdentity" j
+    let to_json = simple_to_json to_value
+  end
 module Hostname =
   struct
     type nonrec t = string
@@ -2026,7 +2506,7 @@ module Hostname =
                 (check_string_max i ~max:255) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$")));
+                       ~pattern:"(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2036,60 +2516,30 @@ module Hostname =
     let of_json j = string_of_json ~kind:"Hostname" j
     let to_json = simple_to_json to_value
   end
-module SyntheticCreateWebLoginTokenResponseToken =
+module IamIdentity =
   struct
     type nonrec t = string
-    let context_ = "SyntheticCreateWebLoginTokenResponseToken"
+    let context_ = "IamIdentity"
     let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j =
-      string_of_json ~kind:"SyntheticCreateWebLoginTokenResponseToken" j
+    let of_json j = string_of_json ~kind:"IamIdentity" j
     let to_json = simple_to_json to_value
   end
-module SyntheticCreateEnvironmentInputAirflowConfigurationOptions =
-  struct
-    type nonrec t = (ConfigKey.t * ConfigValue.t) list
-    let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((ConfigKey.of_string chopped),
-                              (ConfigValue.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (ConfigKey.to_value x) |>
-                    (fun x -> (ConfigValue.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:ConfigKey.of_string
-        ~of_json:ConfigValue.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module SyntheticCreateCliTokenResponseToken =
+module Token =
   struct
     type nonrec t = string
-    let context_ = "SyntheticCreateCliTokenResponseToken"
+    let context_ = "Token"
     let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j =
-      string_of_json ~kind:"SyntheticCreateCliTokenResponseToken" j
+    let of_json j = string_of_json ~kind:"Token" j
     let to_json = simple_to_json to_value
   end
 module UpdateEnvironmentOutput =
@@ -2102,6 +2552,7 @@ module UpdateEnvironmentOutput =
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?arn = fun () -> { arn }
@@ -2111,6 +2562,9 @@ module UpdateEnvironmentOutput =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -2122,6 +2576,9 @@ module UpdateEnvironmentOutput =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -2136,6 +2593,10 @@ module UpdateEnvironmentOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -2154,8 +2615,8 @@ module UpdateEnvironmentOutput =
         (Option.map ~f:EnvironmentArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" EnvironmentArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" EnvironmentArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates an Amazon Managed Workflows for Apache Airflow (MWAA) environment."]
@@ -2163,22 +2624,24 @@ module UpdateEnvironmentInput =
   struct
     type nonrec t =
       {
-      airflowConfigurationOptions:
-        SyntheticUpdateEnvironmentInputAirflowConfigurationOptions.t option
+      name: EnvironmentName.t
         [@ocaml.doc
-          "A list of key-value pairs containing the Apache Airflow configuration options you want to attach to your environment. To learn more, see Apache Airflow configuration options."];
-      airflowVersion: AirflowVersion.t option
-        [@ocaml.doc
-          "The Apache Airflow version for your environment. If no value is specified, defaults to the latest version. Valid values: 1.10.12, 2.0.2."];
-      dagS3Path: RelativePath.t option
-        [@ocaml.doc
-          "The relative path to the DAGs folder on your Amazon S3 bucket. For example, dags. To learn more, see Adding or updating DAGs."];
-      environmentClass: EnvironmentClass.t option
-        [@ocaml.doc
-          "The environment class type. Valid values: mw1.small, mw1.medium, mw1.large. To learn more, see Amazon MWAA environment class."];
+          "The name of your Amazon MWAA environment. For example, MyMWAAEnvironment."];
       executionRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the execution role in IAM that allows MWAA to access Amazon Web Services resources in your environment. For example, arn:aws:iam::123456789:role/my-execution-role. To learn more, see Amazon MWAA Execution role."];
+          "The Amazon Resource Name (ARN) of the execution role in IAM that allows MWAA to access Amazon Web Services resources in your environment. For example, arn:aws:iam::123456789:role/my-execution-role. For more information, refer to Amazon MWAA Execution role."];
+      airflowConfigurationOptions: AirflowConfigurationOptions.t option
+        [@ocaml.doc
+          "A list of key-value pairs containing the Apache Airflow configuration options you want to attach to your environment. For more information, refer to Apache Airflow configuration options."];
+      airflowVersion: AirflowVersion.t option
+        [@ocaml.doc
+          "The Apache Airflow version for your environment. To upgrade your environment, specify a newer version of Apache Airflow supported by Amazon MWAA. To downgrade your environment, specify an older version of Apache Airflow supported by Amazon MWAA. Before you upgrade or downgrade an environment, make sure your requirements, DAGs, plugins, and other resources used in your workflows are compatible with the new Apache Airflow version. For more information about updating your resources, see Upgrading and downgrading an Amazon MWAA environment. Valid values: 2.7.2, 2.8.1, 2.9.2, 2.10.1, 2.10.3, 2.11.0, and 3.0.6."];
+      dagS3Path: RelativePath.t option
+        [@ocaml.doc
+          "The relative path to the DAGs folder on your Amazon S3 bucket. For example, dags. For more information, refer to Adding or updating DAGs."];
+      environmentClass: EnvironmentClass.t option
+        [@ocaml.doc
+          "The environment class type. Valid values: mw1.micro, mw1.small, mw1.medium, mw1.large, mw1.xlarge, and mw1.2xlarge. For more information, refer to Amazon MWAA environment class."];
       loggingConfiguration: LoggingConfigurationInput.t option
         [@ocaml.doc
           "The Apache Airflow log types to send to CloudWatch Logs."];
@@ -2188,109 +2651,146 @@ module UpdateEnvironmentInput =
       minWorkers: MinWorkers.t option
         [@ocaml.doc
           "The minimum number of workers that you want to run in your environment. MWAA scales the number of Apache Airflow workers up to the number you specify in the MaxWorkers field. When there are no more tasks running, and no more in the queue, MWAA disposes of the extra workers leaving the worker count you specify in the MinWorkers field. For example, 2."];
-      name: EnvironmentName.t
+      maxWebservers: MaxWebservers.t option
         [@ocaml.doc
-          "The name of your Amazon MWAA environment. For example, MyMWAAEnvironment."];
+          "The maximum number of web servers that you want to run in your environment. Amazon MWAA scales the number of Apache Airflow web servers up to the number you specify for MaxWebservers when you interact with your Apache Airflow environment using Apache Airflow REST API, or the Apache Airflow CLI. For example, in scenarios where your workload requires network calls to the Apache Airflow REST API with a high transaction-per-second (TPS) rate, Amazon MWAA will increase the number of web servers up to the number set in MaxWebserers. As TPS rates decrease Amazon MWAA disposes of the additional web servers, and scales down to the number set in MinxWebserers. Valid values: For environments larger than mw1.micro, accepts values from 2 to 5. Defaults to 2 for all environment sizes except mw1.micro, which defaults to 1."];
+      minWebservers: MinWebservers.t option
+        [@ocaml.doc
+          "The minimum number of web servers that you want to run in your environment. Amazon MWAA scales the number of Apache Airflow web servers up to the number you specify for MaxWebservers when you interact with your Apache Airflow environment using Apache Airflow REST API, or the Apache Airflow CLI. As the transaction-per-second rate, and the network load, decrease, Amazon MWAA disposes of the additional web servers, and scales down to the number set in MinxWebserers. Valid values: For environments larger than mw1.micro, accepts values from 2 to 5. Defaults to 2 for all environment sizes except mw1.micro, which defaults to 1."];
+      workerReplacementStrategy: WorkerReplacementStrategy.t option
+        [@ocaml.doc
+          "The worker replacement strategy to use when updating the environment. You can select one of the following strategies: Forced - Stops and replaces Apache Airflow workers without waiting for tasks to complete before an update. Graceful - Allows Apache Airflow workers to complete running tasks for up to 12 hours during an update before they're stopped and replaced."];
       networkConfiguration: UpdateNetworkConfigurationInput.t option
         [@ocaml.doc
-          "The VPC networking components used to secure and enable network traffic between the Amazon Web Services resources for your environment. To learn more, see About networking on Amazon MWAA."];
-      pluginsS3ObjectVersion: S3ObjectVersion.t option
-        [@ocaml.doc
-          "The version of the plugins.zip file on your Amazon S3 bucket. A version must be specified each time a plugins.zip file is updated. To learn more, see How S3 Versioning works."];
+          "The VPC networking components used to secure and enable network traffic between the Amazon Web Services resources for your environment. For more information, refer to About networking on Amazon MWAA."];
       pluginsS3Path: RelativePath.t option
         [@ocaml.doc
-          "The relative path to the plugins.zip file on your Amazon S3 bucket. For example, plugins.zip. If specified, then the plugins.zip version is required. To learn more, see Installing custom plugins."];
-      requirementsS3ObjectVersion: S3ObjectVersion.t option
+          "The relative path to the plugins.zip file on your Amazon S3 bucket. For example, plugins.zip. If specified, then the plugins.zip version is required. For more information, refer to Installing custom plugins."];
+      pluginsS3ObjectVersion: S3ObjectVersion.t option
         [@ocaml.doc
-          "The version of the requirements.txt file on your Amazon S3 bucket. A version must be specified each time a requirements.txt file is updated. To learn more, see How S3 Versioning works."];
+          "The version of the plugins.zip file on your Amazon S3 bucket. You must specify a version each time a plugins.zip file is updated. For more information, refer to How S3 Versioning works."];
       requirementsS3Path: RelativePath.t option
         [@ocaml.doc
-          "The relative path to the requirements.txt file on your Amazon S3 bucket. For example, requirements.txt. If specified, then a file version is required. To learn more, see Installing Python dependencies."];
+          "The relative path to the requirements.txt file on your Amazon S3 bucket. For example, requirements.txt. If specified, then a file version is required. For more information, refer to Installing Python dependencies."];
+      requirementsS3ObjectVersion: S3ObjectVersion.t option
+        [@ocaml.doc
+          "The version of the requirements.txt file on your Amazon S3 bucket. You must specify a version each time a requirements.txt file is updated. For more information, refer to How S3 Versioning works."];
       schedulers: Schedulers.t option
         [@ocaml.doc
           "The number of Apache Airflow schedulers to run in your Amazon MWAA environment."];
       sourceBucketArn: S3BucketArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon S3 bucket where your DAG code and supporting files are stored. For example, arn:aws:s3:::my-airflow-bucket-unique-name. To learn more, see Create an Amazon S3 bucket for Amazon MWAA."];
+          "The Amazon Resource Name (ARN) of the Amazon S3 bucket where your DAG code and supporting files are stored. For example, arn:aws:s3:::my-airflow-bucket-unique-name. For more information, refer to Create an Amazon S3 bucket for Amazon MWAA."];
+      startupScriptS3Path: RelativePath.t option
+        [@ocaml.doc
+          "The relative path to the startup shell script in your Amazon S3 bucket. For example, s3://mwaa-environment/startup.sh. Amazon MWAA runs the script as your environment starts, and before running the Apache Airflow process. You can use this script to install dependencies, modify Apache Airflow configuration options, and set environment variables. For more information, refer to Using a startup script."];
+      startupScriptS3ObjectVersion: S3ObjectVersion.t option
+        [@ocaml.doc
+          "The version of the startup shell script in your Amazon S3 bucket. You must specify the version ID that Amazon S3 assigns to the file every time you update the script. Version IDs are Unicode, UTF-8 encoded, URL-ready, opaque strings that are no more than 1,024 bytes long. The following is an example: 3sL4kqtJlcpXroDTDmJ+rmSpXd3dIbrHY+MTRCxf3vjVBH40Nr8X8gdRQBpUMLUo For more information, refer to Using a startup script."];
       webserverAccessMode: WebserverAccessMode.t option
         [@ocaml.doc
-          "The Apache Airflow Web server access mode. To learn more, see Apache Airflow access modes."];
+          "The Apache Airflow Web server access mode. For more information, refer to Apache Airflow access modes."];
       weeklyMaintenanceWindowStart: WeeklyMaintenanceWindowStart.t option
         [@ocaml.doc
           "The day and time of the week in Coordinated Universal Time (UTC) 24-hour standard time to start weekly maintenance updates of your environment in the following format: DAY:HH:MM. For example: TUE:03:30. You can specify a start time in 30 minute increments only."]}
     let context_ = "UpdateEnvironmentInput"
-    let make ?airflowConfigurationOptions =
-      fun ?airflowVersion ->
-        fun ?dagS3Path ->
-          fun ?environmentClass ->
-            fun ?executionRoleArn ->
+    let make ?executionRoleArn =
+      fun ?airflowConfigurationOptions ->
+        fun ?airflowVersion ->
+          fun ?dagS3Path ->
+            fun ?environmentClass ->
               fun ?loggingConfiguration ->
                 fun ?maxWorkers ->
                   fun ?minWorkers ->
-                    fun ?networkConfiguration ->
-                      fun ?pluginsS3ObjectVersion ->
-                        fun ?pluginsS3Path ->
-                          fun ?requirementsS3ObjectVersion ->
-                            fun ?requirementsS3Path ->
-                              fun ?schedulers ->
-                                fun ?sourceBucketArn ->
-                                  fun ?webserverAccessMode ->
-                                    fun ?weeklyMaintenanceWindowStart ->
-                                      fun ~name ->
-                                        fun () ->
-                                          {
-                                            airflowConfigurationOptions;
-                                            airflowVersion;
-                                            dagS3Path;
-                                            environmentClass;
-                                            executionRoleArn;
-                                            loggingConfiguration;
-                                            maxWorkers;
-                                            minWorkers;
-                                            networkConfiguration;
-                                            pluginsS3ObjectVersion;
-                                            pluginsS3Path;
-                                            requirementsS3ObjectVersion;
-                                            requirementsS3Path;
-                                            schedulers;
-                                            sourceBucketArn;
-                                            webserverAccessMode;
-                                            weeklyMaintenanceWindowStart;
-                                            name
-                                          }
+                    fun ?maxWebservers ->
+                      fun ?minWebservers ->
+                        fun ?workerReplacementStrategy ->
+                          fun ?networkConfiguration ->
+                            fun ?pluginsS3Path ->
+                              fun ?pluginsS3ObjectVersion ->
+                                fun ?requirementsS3Path ->
+                                  fun ?requirementsS3ObjectVersion ->
+                                    fun ?schedulers ->
+                                      fun ?sourceBucketArn ->
+                                        fun ?startupScriptS3Path ->
+                                          fun ?startupScriptS3ObjectVersion
+                                            ->
+                                            fun ?webserverAccessMode ->
+                                              fun
+                                                ?weeklyMaintenanceWindowStart
+                                                ->
+                                                fun ~name ->
+                                                  fun () ->
+                                                    {
+                                                      executionRoleArn;
+                                                      airflowConfigurationOptions;
+                                                      airflowVersion;
+                                                      dagS3Path;
+                                                      environmentClass;
+                                                      loggingConfiguration;
+                                                      maxWorkers;
+                                                      minWorkers;
+                                                      maxWebservers;
+                                                      minWebservers;
+                                                      workerReplacementStrategy;
+                                                      networkConfiguration;
+                                                      pluginsS3Path;
+                                                      pluginsS3ObjectVersion;
+                                                      requirementsS3Path;
+                                                      requirementsS3ObjectVersion;
+                                                      schedulers;
+                                                      sourceBucketArn;
+                                                      startupScriptS3Path;
+                                                      startupScriptS3ObjectVersion;
+                                                      webserverAccessMode;
+                                                      weeklyMaintenanceWindowStart;
+                                                      name
+                                                    }
     let to_value x =
       structure_to_value
-        [("AirflowConfigurationOptions",
-           (Option.map x.airflowConfigurationOptions
-              ~f:SyntheticUpdateEnvironmentInputAirflowConfigurationOptions.to_value));
+        [("Name", (Some (EnvironmentName.to_value x.name)));
+        ("ExecutionRoleArn",
+          (Option.map x.executionRoleArn ~f:IamRoleArn.to_value));
+        ("AirflowConfigurationOptions",
+          (Option.map x.airflowConfigurationOptions
+             ~f:AirflowConfigurationOptions.to_value));
         ("AirflowVersion",
           (Option.map x.airflowVersion ~f:AirflowVersion.to_value));
         ("DagS3Path", (Option.map x.dagS3Path ~f:RelativePath.to_value));
         ("EnvironmentClass",
           (Option.map x.environmentClass ~f:EnvironmentClass.to_value));
-        ("ExecutionRoleArn",
-          (Option.map x.executionRoleArn ~f:IamRoleArn.to_value));
         ("LoggingConfiguration",
           (Option.map x.loggingConfiguration
              ~f:LoggingConfigurationInput.to_value));
         ("MaxWorkers", (Option.map x.maxWorkers ~f:MaxWorkers.to_value));
         ("MinWorkers", (Option.map x.minWorkers ~f:MinWorkers.to_value));
-        ("Name", (Some (EnvironmentName.to_value x.name)));
+        ("MaxWebservers",
+          (Option.map x.maxWebservers ~f:MaxWebservers.to_value));
+        ("MinWebservers",
+          (Option.map x.minWebservers ~f:MinWebservers.to_value));
+        ("WorkerReplacementStrategy",
+          (Option.map x.workerReplacementStrategy
+             ~f:WorkerReplacementStrategy.to_value));
         ("NetworkConfiguration",
           (Option.map x.networkConfiguration
              ~f:UpdateNetworkConfigurationInput.to_value));
-        ("PluginsS3ObjectVersion",
-          (Option.map x.pluginsS3ObjectVersion ~f:S3ObjectVersion.to_value));
         ("PluginsS3Path",
           (Option.map x.pluginsS3Path ~f:RelativePath.to_value));
+        ("PluginsS3ObjectVersion",
+          (Option.map x.pluginsS3ObjectVersion ~f:S3ObjectVersion.to_value));
+        ("RequirementsS3Path",
+          (Option.map x.requirementsS3Path ~f:RelativePath.to_value));
         ("RequirementsS3ObjectVersion",
           (Option.map x.requirementsS3ObjectVersion
              ~f:S3ObjectVersion.to_value));
-        ("RequirementsS3Path",
-          (Option.map x.requirementsS3Path ~f:RelativePath.to_value));
         ("Schedulers", (Option.map x.schedulers ~f:Schedulers.to_value));
         ("SourceBucketArn",
           (Option.map x.sourceBucketArn ~f:S3BucketArn.to_value));
+        ("StartupScriptS3Path",
+          (Option.map x.startupScriptS3Path ~f:RelativePath.to_value));
+        ("StartupScriptS3ObjectVersion",
+          (Option.map x.startupScriptS3ObjectVersion
+             ~f:S3ObjectVersion.to_value));
         ("WebserverAccessMode",
           (Option.map x.webserverAccessMode ~f:WebserverAccessMode.to_value));
         ("WeeklyMaintenanceWindowStart",
@@ -2304,29 +2804,41 @@ module UpdateEnvironmentInput =
       let webserverAccessMode =
         (Option.map ~f:WebserverAccessMode.of_xml)
           (Xml.child xml_arg0 "WebserverAccessMode") in
+      let startupScriptS3ObjectVersion =
+        (Option.map ~f:S3ObjectVersion.of_xml)
+          (Xml.child xml_arg0 "StartupScriptS3ObjectVersion") in
+      let startupScriptS3Path =
+        (Option.map ~f:RelativePath.of_xml)
+          (Xml.child xml_arg0 "StartupScriptS3Path") in
       let sourceBucketArn =
         (Option.map ~f:S3BucketArn.of_xml)
           (Xml.child xml_arg0 "SourceBucketArn") in
       let schedulers =
         (Option.map ~f:Schedulers.of_xml) (Xml.child xml_arg0 "Schedulers") in
-      let requirementsS3Path =
-        (Option.map ~f:RelativePath.of_xml)
-          (Xml.child xml_arg0 "RequirementsS3Path") in
       let requirementsS3ObjectVersion =
         (Option.map ~f:S3ObjectVersion.of_xml)
           (Xml.child xml_arg0 "RequirementsS3ObjectVersion") in
-      let pluginsS3Path =
+      let requirementsS3Path =
         (Option.map ~f:RelativePath.of_xml)
-          (Xml.child xml_arg0 "PluginsS3Path") in
+          (Xml.child xml_arg0 "RequirementsS3Path") in
       let pluginsS3ObjectVersion =
         (Option.map ~f:S3ObjectVersion.of_xml)
           (Xml.child xml_arg0 "PluginsS3ObjectVersion") in
+      let pluginsS3Path =
+        (Option.map ~f:RelativePath.of_xml)
+          (Xml.child xml_arg0 "PluginsS3Path") in
       let networkConfiguration =
         (Option.map ~f:UpdateNetworkConfigurationInput.of_xml)
           (Xml.child xml_arg0 "NetworkConfiguration") in
-      let name =
-        EnvironmentName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let workerReplacementStrategy =
+        (Option.map ~f:WorkerReplacementStrategy.of_xml)
+          (Xml.child xml_arg0 "WorkerReplacementStrategy") in
+      let minWebservers =
+        (Option.map ~f:MinWebservers.of_xml)
+          (Xml.child xml_arg0 "MinWebservers") in
+      let maxWebservers =
+        (Option.map ~f:MaxWebservers.of_xml)
+          (Xml.child xml_arg0 "MaxWebservers") in
       let minWorkers =
         (Option.map ~f:MinWorkers.of_xml) (Xml.child xml_arg0 "MinWorkers") in
       let maxWorkers =
@@ -2334,9 +2846,6 @@ module UpdateEnvironmentInput =
       let loggingConfiguration =
         (Option.map ~f:LoggingConfigurationInput.of_xml)
           (Xml.child xml_arg0 "LoggingConfiguration") in
-      let executionRoleArn =
-        (Option.map ~f:IamRoleArn.of_xml)
-          (Xml.child xml_arg0 "ExecutionRoleArn") in
       let environmentClass =
         (Option.map ~f:EnvironmentClass.of_xml)
           (Xml.child xml_arg0 "EnvironmentClass") in
@@ -2346,57 +2855,80 @@ module UpdateEnvironmentInput =
         (Option.map ~f:AirflowVersion.of_xml)
           (Xml.child xml_arg0 "AirflowVersion") in
       let airflowConfigurationOptions =
-        (Option.map
-           ~f:SyntheticUpdateEnvironmentInputAirflowConfigurationOptions.of_xml)
+        (Option.map ~f:AirflowConfigurationOptions.of_xml)
           (Xml.child xml_arg0 "AirflowConfigurationOptions") in
+      let executionRoleArn =
+        (Option.map ~f:IamRoleArn.of_xml)
+          (Xml.child xml_arg0 "ExecutionRoleArn") in
+      let name =
+        EnvironmentName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?weeklyMaintenanceWindowStart ?webserverAccessMode
-        ?sourceBucketArn ?schedulers ?requirementsS3Path
-        ?requirementsS3ObjectVersion ?pluginsS3Path ?pluginsS3ObjectVersion
-        ?networkConfiguration ~name ?minWorkers ?maxWorkers
-        ?loggingConfiguration ?executionRoleArn ?environmentClass ?dagS3Path
-        ?airflowVersion ?airflowConfigurationOptions ()
+        ?startupScriptS3ObjectVersion ?startupScriptS3Path ?sourceBucketArn
+        ?schedulers ?requirementsS3ObjectVersion ?requirementsS3Path
+        ?pluginsS3ObjectVersion ?pluginsS3Path ?networkConfiguration
+        ?workerReplacementStrategy ?minWebservers ?maxWebservers ?minWorkers
+        ?maxWorkers ?loggingConfiguration ?environmentClass ?dagS3Path
+        ?airflowVersion ?airflowConfigurationOptions ?executionRoleArn ~name
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let weeklyMaintenanceWindowStart =
-        field_map json "WeeklyMaintenanceWindowStart"
+        field_map json__ "WeeklyMaintenanceWindowStart"
           WeeklyMaintenanceWindowStart.of_json in
       let webserverAccessMode =
-        field_map json "WebserverAccessMode" WebserverAccessMode.of_json in
+        field_map json__ "WebserverAccessMode" WebserverAccessMode.of_json in
+      let startupScriptS3ObjectVersion =
+        field_map json__ "StartupScriptS3ObjectVersion"
+          S3ObjectVersion.of_json in
+      let startupScriptS3Path =
+        field_map json__ "StartupScriptS3Path" RelativePath.of_json in
       let sourceBucketArn =
-        field_map json "SourceBucketArn" S3BucketArn.of_json in
-      let schedulers = field_map json "Schedulers" Schedulers.of_json in
-      let requirementsS3Path =
-        field_map json "RequirementsS3Path" RelativePath.of_json in
+        field_map json__ "SourceBucketArn" S3BucketArn.of_json in
+      let schedulers = field_map json__ "Schedulers" Schedulers.of_json in
       let requirementsS3ObjectVersion =
-        field_map json "RequirementsS3ObjectVersion" S3ObjectVersion.of_json in
-      let pluginsS3Path = field_map json "PluginsS3Path" RelativePath.of_json in
+        field_map json__ "RequirementsS3ObjectVersion"
+          S3ObjectVersion.of_json in
+      let requirementsS3Path =
+        field_map json__ "RequirementsS3Path" RelativePath.of_json in
       let pluginsS3ObjectVersion =
-        field_map json "PluginsS3ObjectVersion" S3ObjectVersion.of_json in
+        field_map json__ "PluginsS3ObjectVersion" S3ObjectVersion.of_json in
+      let pluginsS3Path =
+        field_map json__ "PluginsS3Path" RelativePath.of_json in
       let networkConfiguration =
-        field_map json "NetworkConfiguration"
+        field_map json__ "NetworkConfiguration"
           UpdateNetworkConfigurationInput.of_json in
-      let name = field_map_exn json "Name" EnvironmentName.of_json in
-      let minWorkers = field_map json "MinWorkers" MinWorkers.of_json in
-      let maxWorkers = field_map json "MaxWorkers" MaxWorkers.of_json in
+      let workerReplacementStrategy =
+        field_map json__ "WorkerReplacementStrategy"
+          WorkerReplacementStrategy.of_json in
+      let minWebservers =
+        field_map json__ "MinWebservers" MinWebservers.of_json in
+      let maxWebservers =
+        field_map json__ "MaxWebservers" MaxWebservers.of_json in
+      let minWorkers = field_map json__ "MinWorkers" MinWorkers.of_json in
+      let maxWorkers = field_map json__ "MaxWorkers" MaxWorkers.of_json in
       let loggingConfiguration =
-        field_map json "LoggingConfiguration"
+        field_map json__ "LoggingConfiguration"
           LoggingConfigurationInput.of_json in
-      let executionRoleArn =
-        field_map json "ExecutionRoleArn" IamRoleArn.of_json in
       let environmentClass =
-        field_map json "EnvironmentClass" EnvironmentClass.of_json in
-      let dagS3Path = field_map json "DagS3Path" RelativePath.of_json in
+        field_map json__ "EnvironmentClass" EnvironmentClass.of_json in
+      let dagS3Path = field_map json__ "DagS3Path" RelativePath.of_json in
       let airflowVersion =
-        field_map json "AirflowVersion" AirflowVersion.of_json in
+        field_map json__ "AirflowVersion" AirflowVersion.of_json in
       let airflowConfigurationOptions =
-        field_map json "AirflowConfigurationOptions"
-          SyntheticUpdateEnvironmentInputAirflowConfigurationOptions.of_json in
+        field_map json__ "AirflowConfigurationOptions"
+          AirflowConfigurationOptions.of_json in
+      let executionRoleArn =
+        field_map json__ "ExecutionRoleArn" IamRoleArn.of_json in
+      let name = field_map_exn json__ "Name" EnvironmentName.of_json in
       make ?weeklyMaintenanceWindowStart ?webserverAccessMode
-        ?sourceBucketArn ?schedulers ?requirementsS3Path
-        ?requirementsS3ObjectVersion ?pluginsS3Path ?pluginsS3ObjectVersion
-        ?networkConfiguration ~name ?minWorkers ?maxWorkers
-        ?loggingConfiguration ?executionRoleArn ?environmentClass ?dagS3Path
-        ?airflowVersion ?airflowConfigurationOptions ()
+        ?startupScriptS3ObjectVersion ?startupScriptS3Path ?sourceBucketArn
+        ?schedulers ?requirementsS3ObjectVersion ?requirementsS3Path
+        ?pluginsS3ObjectVersion ?pluginsS3Path ?networkConfiguration
+        ?workerReplacementStrategy ?minWebservers ?maxWebservers ?minWorkers
+        ?maxWorkers ?loggingConfiguration ?environmentClass ?dagS3Path
+        ?airflowVersion ?airflowConfigurationOptions ?executionRoleArn ~name
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates an Amazon Managed Workflows for Apache Airflow (MWAA) environment."]
@@ -2485,10 +3017,10 @@ module UntagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" EnvironmentArn.of_json in
+        field_map_exn json__ "ResourceArn" EnvironmentArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2560,7 +3092,7 @@ module TagResourceInput =
           "The Amazon Resource Name (ARN) of the Amazon MWAA environment. For example, arn:aws:airflow:us-east-1:123456789012:environment/MyMWAAEnvironment."];
       tags: TagMap.t
         [@ocaml.doc
-          "The key-value tag pairs you want to associate to your environment. For example, \"Environment\": \"Staging\". To learn more, see Tagging Amazon Web Services resources."]}
+          "The key-value tag pairs you want to associate to your environment. For example, \"Environment\": \"Staging\". For more information, refer to Tagging Amazon Web Services resources."]}
     let context_ = "TagResourceInput"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
@@ -2576,10 +3108,10 @@ module TagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" EnvironmentArn.of_json in
+        field_map_exn json__ "ResourceArn" EnvironmentArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2660,10 +3192,10 @@ module PublishMetricsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "EnvironmentName") in
       make ~metricData ~environmentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metricData = field_map_exn json "MetricData" MetricData.of_json in
+    let of_json json__ =
+      let metricData = field_map_exn json__ "MetricData" MetricData.of_json in
       let environmentName =
-        field_map_exn json "EnvironmentName" EnvironmentName.of_json in
+        field_map_exn json__ "EnvironmentName" EnvironmentName.of_json in
       make ~metricData ~environmentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2674,7 +3206,7 @@ module ListTagsForResourceOutput =
       {
       tags: TagMap.t option
         [@ocaml.doc
-          "The key-value tag pairs associated to your environment. To learn more, see Tagging Amazon Web Services resources."]}
+          "The key-value tag pairs associated to your environment. For more information, refer to Tagging Amazon Web Services resources."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -2728,8 +3260,8 @@ module ListTagsForResourceOutput =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the key-value tag pairs associated to the Amazon Managed Workflows for Apache Airflow (MWAA) environment. For example, \"Environment\": \"Staging\"."]
@@ -2752,9 +3284,9 @@ module ListTagsForResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "ResourceArn" EnvironmentArn.of_json in
+        field_map_exn json__ "ResourceArn" EnvironmentArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2763,7 +3295,7 @@ module ListEnvironmentsOutput =
   struct
     type nonrec t =
       {
-      environments: EnvironmentList.t
+      environments: EnvironmentList.t option
         [@ocaml.doc "Returns a list of Amazon MWAA environments."];
       nextToken: NextToken.t option
         [@ocaml.doc "Retrieves the next page of the results."]}
@@ -2771,9 +3303,8 @@ module ListEnvironmentsOutput =
       [ `InternalServerException of InternalServerException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListEnvironmentsOutput"
-    let make ?nextToken =
-      fun ~environments -> fun () -> { nextToken; environments }
+    let make ?environments =
+      fun ?nextToken -> fun () -> { environments; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -2808,22 +3339,23 @@ module ListEnvironmentsOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Environments", (Some (EnvironmentList.to_value x.environments)));
+        [("Environments",
+           (Option.map x.environments ~f:EnvironmentList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let environments =
-        EnvironmentList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Environments") in
-      make ?nextToken ~environments ()
+        (Option.map ~f:EnvironmentList.of_xml)
+          (Xml.child xml_arg0 "Environments") in
+      make ?nextToken ?environments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let environments =
-        field_map_exn json "Environments" EnvironmentList.of_json in
-      make ?nextToken ~environments ()
+        field_map json__ "Environments" EnvironmentList.of_json in
+      make ?nextToken ?environments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the Amazon Managed Workflows for Apache Airflow (MWAA) environments."]
@@ -2831,37 +3363,209 @@ module ListEnvironmentsInput =
   struct
     type nonrec t =
       {
+      nextToken: NextToken.t option
+        [@ocaml.doc "Retrieves the next page of the results."];
       maxResults: ListEnvironmentsInputMaxResultsInteger.t option
         [@ocaml.doc
-          "The maximum number of results to retrieve per page. For example, 5 environments per page."];
-      nextToken: NextToken.t option
-        [@ocaml.doc "Retrieves the next page of the results."]}
-    let make ?maxResults =
-      fun ?nextToken -> fun () -> { maxResults; nextToken }
+          "The maximum number of results to retrieve per page. For example, 5 environments per page."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
     let to_value x =
       structure_to_value
-        [("MaxResults",
-           (Option.map x.maxResults
-              ~f:ListEnvironmentsInputMaxResultsInteger.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:ListEnvironmentsInputMaxResultsInteger.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let maxResults =
         (Option.map ~f:ListEnvironmentsInputMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
-      make ?nextToken ?maxResults ()
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           ListEnvironmentsInputMaxResultsInteger.of_json in
-      make ?nextToken ?maxResults ()
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the Amazon Managed Workflows for Apache Airflow (MWAA) environments."]
+module InvokeRestApiResponse =
+  struct
+    type nonrec t =
+      {
+      restApiStatusCode: Integer.t option
+        [@ocaml.doc
+          "The HTTP status code returned by the Apache Airflow REST API call."];
+      restApiResponse: RestApiResponse.t option
+        [@ocaml.doc
+          "The response data from the Apache Airflow REST API call, provided as a JSON object."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `RestApiClientException of RestApiClientException.t 
+      | `RestApiServerException of RestApiServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?restApiStatusCode =
+      fun ?restApiResponse ->
+        fun () -> { restApiStatusCode; restApiResponse }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "RestApiClientException" ->
+          `RestApiClientException (RestApiClientException.of_json json)
+      | "RestApiServerException" ->
+          `RestApiServerException (RestApiServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "RestApiClientException" ->
+          `RestApiClientException (RestApiClientException.of_xml xml)
+      | "RestApiServerException" ->
+          `RestApiServerException (RestApiServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `RestApiClientException e ->
+          `Assoc
+            [("error", (`String "RestApiClientException"));
+            ("details", (RestApiClientException.to_json e))]
+      | `RestApiServerException e ->
+          `Assoc
+            [("error", (`String "RestApiServerException"));
+            ("details", (RestApiServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("RestApiStatusCode",
+           (Option.map x.restApiStatusCode ~f:Integer.to_value));
+        ("RestApiResponse",
+          (Option.map x.restApiResponse ~f:RestApiResponse.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let restApiResponse =
+        (Option.map ~f:RestApiResponse.of_xml)
+          (Xml.child xml_arg0 "RestApiResponse") in
+      let restApiStatusCode =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "RestApiStatusCode") in
+      make ?restApiResponse ?restApiStatusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let restApiResponse =
+        field_map json__ "RestApiResponse" RestApiResponse.of_json in
+      let restApiStatusCode =
+        field_map json__ "RestApiStatusCode" Integer.of_json in
+      make ?restApiResponse ?restApiStatusCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Invokes the Apache Airflow REST API on the webserver with the specified inputs. To learn more, see Using the Apache Airflow REST API"]
+module InvokeRestApiRequest =
+  struct
+    type nonrec t =
+      {
+      name: EnvironmentName.t
+        [@ocaml.doc
+          "The name of the Amazon MWAA environment. For example, MyMWAAEnvironment."];
+      path: RestApiPath.t
+        [@ocaml.doc
+          "The Apache Airflow REST API endpoint path to be called. For example, /dags/123456/clearTaskInstances. For more information, see Apache Airflow API"];
+      method_: RestApiMethod.t
+        [@ocaml.doc
+          "The HTTP method used for making Airflow REST API calls. For example, POST."];
+      queryParameters: Document.t option
+        [@ocaml.doc
+          "Query parameters to be included in the Apache Airflow REST API call, provided as a JSON object."];
+      body: RestApiRequestBody.t option
+        [@ocaml.doc
+          "The request body for the Apache Airflow REST API call, provided as a JSON object."]}
+    let context_ = "InvokeRestApiRequest"
+    let make ?queryParameters =
+      fun ?body ->
+        fun ~name ->
+          fun ~path ->
+            fun ~method_ ->
+              fun () -> { queryParameters; body; name; path; method_ }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (EnvironmentName.to_value x.name)));
+        ("Path", (Some (RestApiPath.to_value x.path)));
+        ("Method", (Some (RestApiMethod.to_value x.method_)));
+        ("QueryParameters",
+          (Option.map x.queryParameters ~f:Document.to_value));
+        ("Body", (Option.map x.body ~f:RestApiRequestBody.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let body =
+        (Option.map ~f:RestApiRequestBody.of_xml) (Xml.child xml_arg0 "Body") in
+      let queryParameters =
+        (Option.map ~f:Document.of_xml)
+          (Xml.child xml_arg0 "QueryParameters") in
+      let method_ =
+        RestApiMethod.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Method") in
+      let path =
+        RestApiPath.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
+      let name =
+        EnvironmentName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?body ?queryParameters ~method_ ~path ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let body = field_map json__ "Body" RestApiRequestBody.of_json in
+      let queryParameters =
+        field_map json__ "QueryParameters" Document.of_json in
+      let method_ = field_map_exn json__ "Method" RestApiMethod.of_json in
+      let path = field_map_exn json__ "Path" RestApiPath.of_json in
+      let name = field_map_exn json__ "Name" EnvironmentName.of_json in
+      make ?body ?queryParameters ~method_ ~path ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Invokes the Apache Airflow REST API on the webserver with the specified inputs. To learn more, see Using the Apache Airflow REST API"]
 module GetEnvironmentOutput =
   struct
     type nonrec t =
@@ -2924,8 +3628,8 @@ module GetEnvironmentOutput =
         (Option.map ~f:Environment.of_xml) (Xml.child xml_arg0 "Environment") in
       make ?environment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let environment = field_map json "Environment" Environment.of_json in
+    let of_json json__ =
+      let environment = field_map json__ "Environment" Environment.of_json in
       make ?environment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2948,8 +3652,8 @@ module GetEnvironmentInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" EnvironmentName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" EnvironmentName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2960,6 +3664,7 @@ module DeleteEnvironmentOutput =
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
@@ -2969,6 +3674,9 @@ module DeleteEnvironmentOutput =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -2980,6 +3688,9 @@ module DeleteEnvironmentOutput =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -2994,6 +3705,10 @@ module DeleteEnvironmentOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -3011,7 +3726,7 @@ module DeleteEnvironmentOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an Amazon Managed Workflows for Apache Airflow (MWAA) environment."]
+       "Deletes an Amazon Managed Workflows for Apache Airflow (Amazon MWAA) environment."]
 module DeleteEnvironmentInput =
   struct
     type nonrec t =
@@ -3030,28 +3745,38 @@ module DeleteEnvironmentInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" EnvironmentName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" EnvironmentName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an Amazon Managed Workflows for Apache Airflow (MWAA) environment."]
+       "Deletes an Amazon Managed Workflows for Apache Airflow (Amazon MWAA) environment."]
 module CreateWebLoginTokenResponse =
   struct
     type nonrec t =
       {
+      webToken: Token.t option
+        [@ocaml.doc "An Airflow web server login token."];
       webServerHostname: Hostname.t option
         [@ocaml.doc "The Airflow web server hostname for the environment."];
-      webToken: SyntheticCreateWebLoginTokenResponseToken.t option
-        [@ocaml.doc "An Airflow web server login token."]}
+      iamIdentity: IamIdentity.t option
+        [@ocaml.doc
+          "The name of the IAM identity creating the web login token. This might be an IAM user, or an assumed or federated identity. For example, assumed-role/Admin/your-name."];
+      airflowIdentity: AirflowIdentity.t option
+        [@ocaml.doc
+          "The user name of the Apache Airflow identity creating the web login token."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?webServerHostname =
-      fun ?webToken -> fun () -> { webServerHostname; webToken }
+    let make ?webToken =
+      fun ?webServerHostname ->
+        fun ?iamIdentity ->
+          fun ?airflowIdentity ->
+            fun () ->
+              { webToken; webServerHostname; iamIdentity; airflowIdentity }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3102,28 +3827,34 @@ module CreateWebLoginTokenResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("WebServerHostname",
-           (Option.map x.webServerHostname ~f:Hostname.to_value));
-        ("WebToken",
-          (Option.map x.webToken
-             ~f:SyntheticCreateWebLoginTokenResponseToken.to_value))]
+        [("WebToken", (Option.map x.webToken ~f:Token.to_value));
+        ("WebServerHostname",
+          (Option.map x.webServerHostname ~f:Hostname.to_value));
+        ("IamIdentity", (Option.map x.iamIdentity ~f:IamIdentity.to_value));
+        ("AirflowIdentity",
+          (Option.map x.airflowIdentity ~f:AirflowIdentity.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let webToken =
-        (Option.map ~f:SyntheticCreateWebLoginTokenResponseToken.of_xml)
-          (Xml.child xml_arg0 "WebToken") in
+      let airflowIdentity =
+        (Option.map ~f:AirflowIdentity.of_xml)
+          (Xml.child xml_arg0 "AirflowIdentity") in
+      let iamIdentity =
+        (Option.map ~f:IamIdentity.of_xml) (Xml.child xml_arg0 "IamIdentity") in
       let webServerHostname =
         (Option.map ~f:Hostname.of_xml)
           (Xml.child xml_arg0 "WebServerHostname") in
-      make ?webToken ?webServerHostname ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let webToken =
-        field_map json "WebToken"
-          SyntheticCreateWebLoginTokenResponseToken.of_json in
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "WebToken") in
+      make ?airflowIdentity ?iamIdentity ?webServerHostname ?webToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let airflowIdentity =
+        field_map json__ "AirflowIdentity" AirflowIdentity.of_json in
+      let iamIdentity = field_map json__ "IamIdentity" IamIdentity.of_json in
       let webServerHostname =
-        field_map json "WebServerHostname" Hostname.of_json in
-      make ?webToken ?webServerHostname ()
+        field_map json__ "WebServerHostname" Hostname.of_json in
+      let webToken = field_map json__ "WebToken" Token.of_json in
+      make ?airflowIdentity ?iamIdentity ?webServerHostname ?webToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a web login token for the Airflow Web UI. To learn more, see Creating an Apache Airflow web login token."]
@@ -3145,8 +3876,8 @@ module CreateWebLoginTokenRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" EnvironmentName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" EnvironmentName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3160,6 +3891,7 @@ module CreateEnvironmentOutput =
           "The Amazon Resource Name (ARN) returned in the response for the environment."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?arn = fun () -> { arn }
@@ -3167,6 +3899,9 @@ module CreateEnvironmentOutput =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -3176,6 +3911,9 @@ module CreateEnvironmentOutput =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -3186,6 +3924,10 @@ module CreateEnvironmentOutput =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -3204,273 +3946,339 @@ module CreateEnvironmentOutput =
         (Option.map ~f:EnvironmentArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" EnvironmentArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" EnvironmentArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Managed Workflows for Apache Airflow (MWAA) environment."]
+       "Creates an Amazon Managed Workflows for Apache Airflow (Amazon MWAA) environment."]
 module CreateEnvironmentInput =
   struct
     type nonrec t =
       {
-      airflowConfigurationOptions:
-        SyntheticCreateEnvironmentInputAirflowConfigurationOptions.t option
-        [@ocaml.doc
-          "A list of key-value pairs containing the Apache Airflow configuration options you want to attach to your environment. To learn more, see Apache Airflow configuration options."];
-      airflowVersion: AirflowVersion.t option
-        [@ocaml.doc
-          "The Apache Airflow version for your environment. If no value is specified, defaults to the latest version. Valid values: 1.10.12, 2.0.2. To learn more, see Apache Airflow versions on Amazon Managed Workflows for Apache Airflow (MWAA)."];
-      dagS3Path: RelativePath.t
-        [@ocaml.doc
-          "The relative path to the DAGs folder on your Amazon S3 bucket. For example, dags. To learn more, see Adding or updating DAGs."];
-      environmentClass: EnvironmentClass.t option
-        [@ocaml.doc
-          "The environment class type. Valid values: mw1.small, mw1.medium, mw1.large. To learn more, see Amazon MWAA environment class."];
-      executionRoleArn: IamRoleArn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the execution role for your environment. An execution role is an Amazon Web Services Identity and Access Management (IAM) role that grants MWAA permission to access Amazon Web Services services and resources used by your environment. For example, arn:aws:iam::123456789:role/my-execution-role. To learn more, see Amazon MWAA Execution role."];
-      kmsKey: KmsKey.t option
-        [@ocaml.doc
-          "The Amazon Web Services Key Management Service (KMS) key to encrypt the data in your environment. You can use an Amazon Web Services owned CMK, or a Customer managed CMK (advanced). To learn more, see Create an Amazon MWAA environment."];
-      loggingConfiguration: LoggingConfigurationInput.t option
-        [@ocaml.doc
-          "Defines the Apache Airflow logs to send to CloudWatch Logs."];
-      maxWorkers: MaxWorkers.t option
-        [@ocaml.doc
-          "The maximum number of workers that you want to run in your environment. MWAA scales the number of Apache Airflow workers up to the number you specify in the MaxWorkers field. For example, 20. When there are no more tasks running, and no more in the queue, MWAA disposes of the extra workers leaving the one worker that is included with your environment, or the number you specify in MinWorkers."];
-      minWorkers: MinWorkers.t option
-        [@ocaml.doc
-          "The minimum number of workers that you want to run in your environment. MWAA scales the number of Apache Airflow workers up to the number you specify in the MaxWorkers field. When there are no more tasks running, and no more in the queue, MWAA disposes of the extra workers leaving the worker count you specify in the MinWorkers field. For example, 2."];
       name: EnvironmentName.t
         [@ocaml.doc
           "The name of the Amazon MWAA environment. For example, MyMWAAEnvironment."];
-      networkConfiguration: NetworkConfiguration.t
+      executionRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The VPC networking components used to secure and enable network traffic between the Amazon Web Services resources for your environment. To learn more, see About networking on Amazon MWAA."];
-      pluginsS3ObjectVersion: S3ObjectVersion.t option
-        [@ocaml.doc
-          "The version of the plugins.zip file on your Amazon S3 bucket. A version must be specified each time a plugins.zip file is updated. To learn more, see How S3 Versioning works."];
-      pluginsS3Path: RelativePath.t option
-        [@ocaml.doc
-          "The relative path to the plugins.zip file on your Amazon S3 bucket. For example, plugins.zip. If specified, then the plugins.zip version is required. To learn more, see Installing custom plugins."];
-      requirementsS3ObjectVersion: S3ObjectVersion.t option
-        [@ocaml.doc
-          "The version of the requirements.txt file on your Amazon S3 bucket. A version must be specified each time a requirements.txt file is updated. To learn more, see How S3 Versioning works."];
-      requirementsS3Path: RelativePath.t option
-        [@ocaml.doc
-          "The relative path to the requirements.txt file on your Amazon S3 bucket. For example, requirements.txt. If specified, then a file version is required. To learn more, see Installing Python dependencies."];
-      schedulers: Schedulers.t option
-        [@ocaml.doc
-          "The number of Apache Airflow schedulers to run in your environment. Valid values: v2.0.2 - Accepts between 2 to 5. Defaults to 2. v1.10.12 - Accepts 1."];
+          "The Amazon Resource Name (ARN) of the execution role for your environment. An execution role is an Amazon Web Services Identity and Access Management (IAM) role that grants MWAA permission to access Amazon Web Services services and resources used by your environment. For example, arn:aws:iam::123456789:role/my-execution-role. For more information, refer to Amazon MWAA Execution role."];
       sourceBucketArn: S3BucketArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon S3 bucket where your DAG code and supporting files are stored. For example, arn:aws:s3:::my-airflow-bucket-unique-name. To learn more, see Create an Amazon S3 bucket for Amazon MWAA."];
-      tags: TagMap.t option
+          "The Amazon Resource Name (ARN) of the Amazon S3 bucket where your DAG code and supporting files are stored. For example, arn:aws:s3:::my-airflow-bucket-unique-name. For more information, refer to Create an Amazon S3 bucket for Amazon MWAA."];
+      dagS3Path: RelativePath.t
         [@ocaml.doc
-          "The key-value tag pairs you want to associate to your environment. For example, \"Environment\": \"Staging\". To learn more, see Tagging Amazon Web Services resources."];
-      webserverAccessMode: WebserverAccessMode.t option
+          "The relative path to the DAGs folder on your Amazon S3 bucket. For example, dags. For more information, refer to Adding or updating DAGs."];
+      networkConfiguration: NetworkConfiguration.t
         [@ocaml.doc
-          "The Apache Airflow Web server access mode. To learn more, see Apache Airflow access modes."];
+          "The VPC networking components used to secure and enable network traffic between the Amazon Web Services resources for your environment. For more information, refer to About networking on Amazon MWAA."];
+      pluginsS3Path: RelativePath.t option
+        [@ocaml.doc
+          "The relative path to the plugins.zip file on your Amazon S3 bucket. For example, plugins.zip. If specified, then the plugins.zip version is required. For more information, refer to Installing custom plugins."];
+      pluginsS3ObjectVersion: S3ObjectVersion.t option
+        [@ocaml.doc
+          "The version of the plugins.zip file on your Amazon S3 bucket. You must specify a version each time a plugins.zip file is updated. For more information, refer to How S3 Versioning works."];
+      requirementsS3Path: RelativePath.t option
+        [@ocaml.doc
+          "The relative path to the requirements.txt file on your Amazon S3 bucket. For example, requirements.txt. If specified, then a version is required. For more information, refer to Installing Python dependencies."];
+      requirementsS3ObjectVersion: S3ObjectVersion.t option
+        [@ocaml.doc
+          "The version of the requirements.txt file on your Amazon S3 bucket. You must specify a version each time a requirements.txt file is updated. For more information, refer to How S3 Versioning works."];
+      startupScriptS3Path: RelativePath.t option
+        [@ocaml.doc
+          "The relative path to the startup shell script in your Amazon S3 bucket. For example, s3://mwaa-environment/startup.sh. Amazon MWAA runs the script as your environment starts, and before running the Apache Airflow process. You can use this script to install dependencies, modify Apache Airflow configuration options, and set environment variables. For more information, refer to Using a startup script."];
+      startupScriptS3ObjectVersion: S3ObjectVersion.t option
+        [@ocaml.doc
+          "The version of the startup shell script in your Amazon S3 bucket. You must specify the version ID that Amazon S3 assigns to the file every time you update the script. Version IDs are Unicode, UTF-8 encoded, URL-ready, opaque strings that are no more than 1,024 bytes long. The following is an example: 3sL4kqtJlcpXroDTDmJ+rmSpXd3dIbrHY+MTRCxf3vjVBH40Nr8X8gdRQBpUMLUo For more information, refer to Using a startup script."];
+      airflowConfigurationOptions: AirflowConfigurationOptions.t option
+        [@ocaml.doc
+          "A list of key-value pairs containing the Apache Airflow configuration options you want to attach to your environment. For more information, refer to Apache Airflow configuration options."];
+      environmentClass: EnvironmentClass.t option
+        [@ocaml.doc
+          "The environment class type. Valid values: mw1.micro, mw1.small, mw1.medium, mw1.large, mw1.xlarge, and mw1.2xlarge. For more information, refer to Amazon MWAA environment class."];
+      maxWorkers: MaxWorkers.t option
+        [@ocaml.doc
+          "The maximum number of workers that you want to run in your environment. MWAA scales the number of Apache Airflow workers up to the number you specify in the MaxWorkers field. For example, 20. When there are no more tasks running, and no more in the queue, MWAA disposes of the extra workers leaving the one worker that is included with your environment, or the number you specify in MinWorkers."];
+      kmsKey: KmsKey.t option
+        [@ocaml.doc
+          "The Amazon Web Services Key Management Service (KMS) key to encrypt the data in your environment. You can use an Amazon Web Services owned CMK, or a Customer managed CMK (advanced). For more information, refer to Create an Amazon MWAA environment."];
+      airflowVersion: AirflowVersion.t option
+        [@ocaml.doc
+          "The Apache Airflow version for your environment. If no value is specified, it defaults to the latest version. For more information, refer to Apache Airflow versions on Amazon Managed Workflows for Apache Airflow (Amazon MWAA). Valid values: 2.7.2, 2.8.1, 2.9.2, 2.10.1, 2.10.3, 2.11.0, and 3.0.6."];
+      loggingConfiguration: LoggingConfigurationInput.t option
+        [@ocaml.doc
+          "Defines the Apache Airflow logs to send to CloudWatch Logs."];
       weeklyMaintenanceWindowStart: WeeklyMaintenanceWindowStart.t option
         [@ocaml.doc
-          "The day and time of the week in Coordinated Universal Time (UTC) 24-hour standard time to start weekly maintenance updates of your environment in the following format: DAY:HH:MM. For example: TUE:03:30. You can specify a start time in 30 minute increments only."]}
+          "The day and time of the week in Coordinated Universal Time (UTC) 24-hour standard time to start weekly maintenance updates of your environment in the following format: DAY:HH:MM. For example: TUE:03:30. You can specify a start time in 30 minute increments only."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The key-value tag pairs you want to associate to your environment. For example, \"Environment\": \"Staging\". For more information, refer to Tagging Amazon Web Services resources."];
+      webserverAccessMode: WebserverAccessMode.t option
+        [@ocaml.doc
+          "Defines the access mode for the Apache Airflow web server. For more information, refer to Apache Airflow access modes."];
+      minWorkers: MinWorkers.t option
+        [@ocaml.doc
+          "The minimum number of workers that you want to run in your environment. MWAA scales the number of Apache Airflow workers up to the number you specify in the MaxWorkers field. When there are no more tasks running, and no more in the queue, MWAA disposes of the extra workers leaving the worker count you specify in the MinWorkers field. For example, 2."];
+      schedulers: Schedulers.t option
+        [@ocaml.doc
+          "The number of Apache Airflow schedulers to run in your environment. Valid values: v2 - For environments larger than mw1.micro, accepts values from 2 to 5. Defaults to 2 for all environment sizes except mw1.micro, which defaults to 1. v1 - Accepts 1."];
+      endpointManagement: EndpointManagement.t option
+        [@ocaml.doc
+          "Defines whether the VPC endpoints configured for the environment are created, and managed, by the customer or by Amazon MWAA. If set to SERVICE, Amazon MWAA will create and manage the required VPC endpoints in your VPC. If set to CUSTOMER, you must create, and manage, the VPC endpoints for your VPC. If you choose to create an environment in a shared VPC, you must set this value to CUSTOMER. In a shared VPC deployment, the environment will remain in PENDING status until you create the VPC endpoints. If you do not take action to create the endpoints within 72 hours, the status will change to CREATE_FAILED. You can delete the failed environment and create a new one."];
+      minWebservers: MinWebservers.t option
+        [@ocaml.doc
+          "The minimum number of web servers that you want to run in your environment. Amazon MWAA scales the number of Apache Airflow web servers up to the number you specify for MaxWebservers when you interact with your Apache Airflow environment using Apache Airflow REST API, or the Apache Airflow CLI. As the transaction-per-second rate, and the network load, decrease, Amazon MWAA disposes of the additional web servers, and scales down to the number set in MinxWebserers. Valid values: For environments larger than mw1.micro, accepts values from 2 to 5. Defaults to 2 for all environment sizes except mw1.micro, which defaults to 1."];
+      maxWebservers: MaxWebservers.t option
+        [@ocaml.doc
+          "The maximum number of web servers that you want to run in your environment. Amazon MWAA scales the number of Apache Airflow web servers up to the number you specify for MaxWebservers when you interact with your Apache Airflow environment using Apache Airflow REST API, or the Apache Airflow CLI. For example, in scenarios where your workload requires network calls to the Apache Airflow REST API with a high transaction-per-second (TPS) rate, Amazon MWAA will increase the number of web servers up to the number set in MaxWebserers. As TPS rates decrease Amazon MWAA disposes of the additional web servers, and scales down to the number set in MinxWebserers. Valid values: For environments larger than mw1.micro, accepts values from 2 to 5. Defaults to 2 for all environment sizes except mw1.micro, which defaults to 1."]}
     let context_ = "CreateEnvironmentInput"
-    let make ?airflowConfigurationOptions =
-      fun ?airflowVersion ->
-        fun ?environmentClass ->
-          fun ?kmsKey ->
-            fun ?loggingConfiguration ->
-              fun ?maxWorkers ->
-                fun ?minWorkers ->
-                  fun ?pluginsS3ObjectVersion ->
-                    fun ?pluginsS3Path ->
-                      fun ?requirementsS3ObjectVersion ->
-                        fun ?requirementsS3Path ->
-                          fun ?schedulers ->
-                            fun ?tags ->
-                              fun ?webserverAccessMode ->
-                                fun ?weeklyMaintenanceWindowStart ->
-                                  fun ~dagS3Path ->
-                                    fun ~executionRoleArn ->
-                                      fun ~name ->
-                                        fun ~networkConfiguration ->
-                                          fun ~sourceBucketArn ->
-                                            fun () ->
-                                              {
-                                                airflowConfigurationOptions;
-                                                airflowVersion;
-                                                environmentClass;
-                                                kmsKey;
-                                                loggingConfiguration;
-                                                maxWorkers;
-                                                minWorkers;
-                                                pluginsS3ObjectVersion;
-                                                pluginsS3Path;
-                                                requirementsS3ObjectVersion;
-                                                requirementsS3Path;
-                                                schedulers;
-                                                tags;
-                                                webserverAccessMode;
-                                                weeklyMaintenanceWindowStart;
-                                                dagS3Path;
-                                                executionRoleArn;
-                                                name;
-                                                networkConfiguration;
-                                                sourceBucketArn
-                                              }
+    let make ?pluginsS3Path =
+      fun ?pluginsS3ObjectVersion ->
+        fun ?requirementsS3Path ->
+          fun ?requirementsS3ObjectVersion ->
+            fun ?startupScriptS3Path ->
+              fun ?startupScriptS3ObjectVersion ->
+                fun ?airflowConfigurationOptions ->
+                  fun ?environmentClass ->
+                    fun ?maxWorkers ->
+                      fun ?kmsKey ->
+                        fun ?airflowVersion ->
+                          fun ?loggingConfiguration ->
+                            fun ?weeklyMaintenanceWindowStart ->
+                              fun ?tags ->
+                                fun ?webserverAccessMode ->
+                                  fun ?minWorkers ->
+                                    fun ?schedulers ->
+                                      fun ?endpointManagement ->
+                                        fun ?minWebservers ->
+                                          fun ?maxWebservers ->
+                                            fun ~name ->
+                                              fun ~executionRoleArn ->
+                                                fun ~sourceBucketArn ->
+                                                  fun ~dagS3Path ->
+                                                    fun ~networkConfiguration
+                                                      ->
+                                                      fun () ->
+                                                        {
+                                                          pluginsS3Path;
+                                                          pluginsS3ObjectVersion;
+                                                          requirementsS3Path;
+                                                          requirementsS3ObjectVersion;
+                                                          startupScriptS3Path;
+                                                          startupScriptS3ObjectVersion;
+                                                          airflowConfigurationOptions;
+                                                          environmentClass;
+                                                          maxWorkers;
+                                                          kmsKey;
+                                                          airflowVersion;
+                                                          loggingConfiguration;
+                                                          weeklyMaintenanceWindowStart;
+                                                          tags;
+                                                          webserverAccessMode;
+                                                          minWorkers;
+                                                          schedulers;
+                                                          endpointManagement;
+                                                          minWebservers;
+                                                          maxWebservers;
+                                                          name;
+                                                          executionRoleArn;
+                                                          sourceBucketArn;
+                                                          dagS3Path;
+                                                          networkConfiguration
+                                                        }
     let to_value x =
       structure_to_value
-        [("AirflowConfigurationOptions",
-           (Option.map x.airflowConfigurationOptions
-              ~f:SyntheticCreateEnvironmentInputAirflowConfigurationOptions.to_value));
-        ("AirflowVersion",
-          (Option.map x.airflowVersion ~f:AirflowVersion.to_value));
-        ("DagS3Path", (Some (RelativePath.to_value x.dagS3Path)));
-        ("EnvironmentClass",
-          (Option.map x.environmentClass ~f:EnvironmentClass.to_value));
+        [("Name", (Some (EnvironmentName.to_value x.name)));
         ("ExecutionRoleArn", (Some (IamRoleArn.to_value x.executionRoleArn)));
-        ("KmsKey", (Option.map x.kmsKey ~f:KmsKey.to_value));
-        ("LoggingConfiguration",
-          (Option.map x.loggingConfiguration
-             ~f:LoggingConfigurationInput.to_value));
-        ("MaxWorkers", (Option.map x.maxWorkers ~f:MaxWorkers.to_value));
-        ("MinWorkers", (Option.map x.minWorkers ~f:MinWorkers.to_value));
-        ("Name", (Some (EnvironmentName.to_value x.name)));
+        ("SourceBucketArn", (Some (S3BucketArn.to_value x.sourceBucketArn)));
+        ("DagS3Path", (Some (RelativePath.to_value x.dagS3Path)));
         ("NetworkConfiguration",
           (Some (NetworkConfiguration.to_value x.networkConfiguration)));
-        ("PluginsS3ObjectVersion",
-          (Option.map x.pluginsS3ObjectVersion ~f:S3ObjectVersion.to_value));
         ("PluginsS3Path",
           (Option.map x.pluginsS3Path ~f:RelativePath.to_value));
+        ("PluginsS3ObjectVersion",
+          (Option.map x.pluginsS3ObjectVersion ~f:S3ObjectVersion.to_value));
+        ("RequirementsS3Path",
+          (Option.map x.requirementsS3Path ~f:RelativePath.to_value));
         ("RequirementsS3ObjectVersion",
           (Option.map x.requirementsS3ObjectVersion
              ~f:S3ObjectVersion.to_value));
-        ("RequirementsS3Path",
-          (Option.map x.requirementsS3Path ~f:RelativePath.to_value));
-        ("Schedulers", (Option.map x.schedulers ~f:Schedulers.to_value));
-        ("SourceBucketArn", (Some (S3BucketArn.to_value x.sourceBucketArn)));
+        ("StartupScriptS3Path",
+          (Option.map x.startupScriptS3Path ~f:RelativePath.to_value));
+        ("StartupScriptS3ObjectVersion",
+          (Option.map x.startupScriptS3ObjectVersion
+             ~f:S3ObjectVersion.to_value));
+        ("AirflowConfigurationOptions",
+          (Option.map x.airflowConfigurationOptions
+             ~f:AirflowConfigurationOptions.to_value));
+        ("EnvironmentClass",
+          (Option.map x.environmentClass ~f:EnvironmentClass.to_value));
+        ("MaxWorkers", (Option.map x.maxWorkers ~f:MaxWorkers.to_value));
+        ("KmsKey", (Option.map x.kmsKey ~f:KmsKey.to_value));
+        ("AirflowVersion",
+          (Option.map x.airflowVersion ~f:AirflowVersion.to_value));
+        ("LoggingConfiguration",
+          (Option.map x.loggingConfiguration
+             ~f:LoggingConfigurationInput.to_value));
+        ("WeeklyMaintenanceWindowStart",
+          (Option.map x.weeklyMaintenanceWindowStart
+             ~f:WeeklyMaintenanceWindowStart.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
         ("WebserverAccessMode",
           (Option.map x.webserverAccessMode ~f:WebserverAccessMode.to_value));
-        ("WeeklyMaintenanceWindowStart",
-          (Option.map x.weeklyMaintenanceWindowStart
-             ~f:WeeklyMaintenanceWindowStart.to_value))]
+        ("MinWorkers", (Option.map x.minWorkers ~f:MinWorkers.to_value));
+        ("Schedulers", (Option.map x.schedulers ~f:Schedulers.to_value));
+        ("EndpointManagement",
+          (Option.map x.endpointManagement ~f:EndpointManagement.to_value));
+        ("MinWebservers",
+          (Option.map x.minWebservers ~f:MinWebservers.to_value));
+        ("MaxWebservers",
+          (Option.map x.maxWebservers ~f:MaxWebservers.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let weeklyMaintenanceWindowStart =
-        (Option.map ~f:WeeklyMaintenanceWindowStart.of_xml)
-          (Xml.child xml_arg0 "WeeklyMaintenanceWindowStart") in
+      let maxWebservers =
+        (Option.map ~f:MaxWebservers.of_xml)
+          (Xml.child xml_arg0 "MaxWebservers") in
+      let minWebservers =
+        (Option.map ~f:MinWebservers.of_xml)
+          (Xml.child xml_arg0 "MinWebservers") in
+      let endpointManagement =
+        (Option.map ~f:EndpointManagement.of_xml)
+          (Xml.child xml_arg0 "EndpointManagement") in
+      let schedulers =
+        (Option.map ~f:Schedulers.of_xml) (Xml.child xml_arg0 "Schedulers") in
+      let minWorkers =
+        (Option.map ~f:MinWorkers.of_xml) (Xml.child xml_arg0 "MinWorkers") in
       let webserverAccessMode =
         (Option.map ~f:WebserverAccessMode.of_xml)
           (Xml.child xml_arg0 "WebserverAccessMode") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
-      let sourceBucketArn =
-        S3BucketArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SourceBucketArn") in
-      let schedulers =
-        (Option.map ~f:Schedulers.of_xml) (Xml.child xml_arg0 "Schedulers") in
-      let requirementsS3Path =
-        (Option.map ~f:RelativePath.of_xml)
-          (Xml.child xml_arg0 "RequirementsS3Path") in
-      let requirementsS3ObjectVersion =
-        (Option.map ~f:S3ObjectVersion.of_xml)
-          (Xml.child xml_arg0 "RequirementsS3ObjectVersion") in
-      let pluginsS3Path =
-        (Option.map ~f:RelativePath.of_xml)
-          (Xml.child xml_arg0 "PluginsS3Path") in
-      let pluginsS3ObjectVersion =
-        (Option.map ~f:S3ObjectVersion.of_xml)
-          (Xml.child xml_arg0 "PluginsS3ObjectVersion") in
-      let networkConfiguration =
-        NetworkConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "NetworkConfiguration") in
-      let name =
-        EnvironmentName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      let minWorkers =
-        (Option.map ~f:MinWorkers.of_xml) (Xml.child xml_arg0 "MinWorkers") in
-      let maxWorkers =
-        (Option.map ~f:MaxWorkers.of_xml) (Xml.child xml_arg0 "MaxWorkers") in
+      let weeklyMaintenanceWindowStart =
+        (Option.map ~f:WeeklyMaintenanceWindowStart.of_xml)
+          (Xml.child xml_arg0 "WeeklyMaintenanceWindowStart") in
       let loggingConfiguration =
         (Option.map ~f:LoggingConfigurationInput.of_xml)
           (Xml.child xml_arg0 "LoggingConfiguration") in
-      let kmsKey =
-        (Option.map ~f:KmsKey.of_xml) (Xml.child xml_arg0 "KmsKey") in
-      let executionRoleArn =
-        IamRoleArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ExecutionRoleArn") in
-      let environmentClass =
-        (Option.map ~f:EnvironmentClass.of_xml)
-          (Xml.child xml_arg0 "EnvironmentClass") in
-      let dagS3Path =
-        RelativePath.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DagS3Path") in
       let airflowVersion =
         (Option.map ~f:AirflowVersion.of_xml)
           (Xml.child xml_arg0 "AirflowVersion") in
-      let airflowConfigurationOptions =
-        (Option.map
-           ~f:SyntheticCreateEnvironmentInputAirflowConfigurationOptions.of_xml)
-          (Xml.child xml_arg0 "AirflowConfigurationOptions") in
-      make ?weeklyMaintenanceWindowStart ?webserverAccessMode ?tags
-        ~sourceBucketArn ?schedulers ?requirementsS3Path
-        ?requirementsS3ObjectVersion ?pluginsS3Path ?pluginsS3ObjectVersion
-        ~networkConfiguration ~name ?minWorkers ?maxWorkers
-        ?loggingConfiguration ?kmsKey ~executionRoleArn ?environmentClass
-        ~dagS3Path ?airflowVersion ?airflowConfigurationOptions ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let weeklyMaintenanceWindowStart =
-        field_map json "WeeklyMaintenanceWindowStart"
-          WeeklyMaintenanceWindowStart.of_json in
-      let webserverAccessMode =
-        field_map json "WebserverAccessMode" WebserverAccessMode.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let sourceBucketArn =
-        field_map_exn json "SourceBucketArn" S3BucketArn.of_json in
-      let schedulers = field_map json "Schedulers" Schedulers.of_json in
-      let requirementsS3Path =
-        field_map json "RequirementsS3Path" RelativePath.of_json in
-      let requirementsS3ObjectVersion =
-        field_map json "RequirementsS3ObjectVersion" S3ObjectVersion.of_json in
-      let pluginsS3Path = field_map json "PluginsS3Path" RelativePath.of_json in
-      let pluginsS3ObjectVersion =
-        field_map json "PluginsS3ObjectVersion" S3ObjectVersion.of_json in
-      let networkConfiguration =
-        field_map_exn json "NetworkConfiguration"
-          NetworkConfiguration.of_json in
-      let name = field_map_exn json "Name" EnvironmentName.of_json in
-      let minWorkers = field_map json "MinWorkers" MinWorkers.of_json in
-      let maxWorkers = field_map json "MaxWorkers" MaxWorkers.of_json in
-      let loggingConfiguration =
-        field_map json "LoggingConfiguration"
-          LoggingConfigurationInput.of_json in
-      let kmsKey = field_map json "KmsKey" KmsKey.of_json in
-      let executionRoleArn =
-        field_map_exn json "ExecutionRoleArn" IamRoleArn.of_json in
+      let kmsKey =
+        (Option.map ~f:KmsKey.of_xml) (Xml.child xml_arg0 "KmsKey") in
+      let maxWorkers =
+        (Option.map ~f:MaxWorkers.of_xml) (Xml.child xml_arg0 "MaxWorkers") in
       let environmentClass =
-        field_map json "EnvironmentClass" EnvironmentClass.of_json in
-      let dagS3Path = field_map_exn json "DagS3Path" RelativePath.of_json in
-      let airflowVersion =
-        field_map json "AirflowVersion" AirflowVersion.of_json in
+        (Option.map ~f:EnvironmentClass.of_xml)
+          (Xml.child xml_arg0 "EnvironmentClass") in
       let airflowConfigurationOptions =
-        field_map json "AirflowConfigurationOptions"
-          SyntheticCreateEnvironmentInputAirflowConfigurationOptions.of_json in
-      make ?weeklyMaintenanceWindowStart ?webserverAccessMode ?tags
-        ~sourceBucketArn ?schedulers ?requirementsS3Path
-        ?requirementsS3ObjectVersion ?pluginsS3Path ?pluginsS3ObjectVersion
-        ~networkConfiguration ~name ?minWorkers ?maxWorkers
-        ?loggingConfiguration ?kmsKey ~executionRoleArn ?environmentClass
-        ~dagS3Path ?airflowVersion ?airflowConfigurationOptions ()
+        (Option.map ~f:AirflowConfigurationOptions.of_xml)
+          (Xml.child xml_arg0 "AirflowConfigurationOptions") in
+      let startupScriptS3ObjectVersion =
+        (Option.map ~f:S3ObjectVersion.of_xml)
+          (Xml.child xml_arg0 "StartupScriptS3ObjectVersion") in
+      let startupScriptS3Path =
+        (Option.map ~f:RelativePath.of_xml)
+          (Xml.child xml_arg0 "StartupScriptS3Path") in
+      let requirementsS3ObjectVersion =
+        (Option.map ~f:S3ObjectVersion.of_xml)
+          (Xml.child xml_arg0 "RequirementsS3ObjectVersion") in
+      let requirementsS3Path =
+        (Option.map ~f:RelativePath.of_xml)
+          (Xml.child xml_arg0 "RequirementsS3Path") in
+      let pluginsS3ObjectVersion =
+        (Option.map ~f:S3ObjectVersion.of_xml)
+          (Xml.child xml_arg0 "PluginsS3ObjectVersion") in
+      let pluginsS3Path =
+        (Option.map ~f:RelativePath.of_xml)
+          (Xml.child xml_arg0 "PluginsS3Path") in
+      let networkConfiguration =
+        NetworkConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NetworkConfiguration") in
+      let dagS3Path =
+        RelativePath.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DagS3Path") in
+      let sourceBucketArn =
+        S3BucketArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceBucketArn") in
+      let executionRoleArn =
+        IamRoleArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ExecutionRoleArn") in
+      let name =
+        EnvironmentName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?maxWebservers ?minWebservers ?endpointManagement ?schedulers
+        ?minWorkers ?webserverAccessMode ?tags ?weeklyMaintenanceWindowStart
+        ?loggingConfiguration ?airflowVersion ?kmsKey ?maxWorkers
+        ?environmentClass ?airflowConfigurationOptions
+        ?startupScriptS3ObjectVersion ?startupScriptS3Path
+        ?requirementsS3ObjectVersion ?requirementsS3Path
+        ?pluginsS3ObjectVersion ?pluginsS3Path ~networkConfiguration
+        ~dagS3Path ~sourceBucketArn ~executionRoleArn ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxWebservers =
+        field_map json__ "MaxWebservers" MaxWebservers.of_json in
+      let minWebservers =
+        field_map json__ "MinWebservers" MinWebservers.of_json in
+      let endpointManagement =
+        field_map json__ "EndpointManagement" EndpointManagement.of_json in
+      let schedulers = field_map json__ "Schedulers" Schedulers.of_json in
+      let minWorkers = field_map json__ "MinWorkers" MinWorkers.of_json in
+      let webserverAccessMode =
+        field_map json__ "WebserverAccessMode" WebserverAccessMode.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let weeklyMaintenanceWindowStart =
+        field_map json__ "WeeklyMaintenanceWindowStart"
+          WeeklyMaintenanceWindowStart.of_json in
+      let loggingConfiguration =
+        field_map json__ "LoggingConfiguration"
+          LoggingConfigurationInput.of_json in
+      let airflowVersion =
+        field_map json__ "AirflowVersion" AirflowVersion.of_json in
+      let kmsKey = field_map json__ "KmsKey" KmsKey.of_json in
+      let maxWorkers = field_map json__ "MaxWorkers" MaxWorkers.of_json in
+      let environmentClass =
+        field_map json__ "EnvironmentClass" EnvironmentClass.of_json in
+      let airflowConfigurationOptions =
+        field_map json__ "AirflowConfigurationOptions"
+          AirflowConfigurationOptions.of_json in
+      let startupScriptS3ObjectVersion =
+        field_map json__ "StartupScriptS3ObjectVersion"
+          S3ObjectVersion.of_json in
+      let startupScriptS3Path =
+        field_map json__ "StartupScriptS3Path" RelativePath.of_json in
+      let requirementsS3ObjectVersion =
+        field_map json__ "RequirementsS3ObjectVersion"
+          S3ObjectVersion.of_json in
+      let requirementsS3Path =
+        field_map json__ "RequirementsS3Path" RelativePath.of_json in
+      let pluginsS3ObjectVersion =
+        field_map json__ "PluginsS3ObjectVersion" S3ObjectVersion.of_json in
+      let pluginsS3Path =
+        field_map json__ "PluginsS3Path" RelativePath.of_json in
+      let networkConfiguration =
+        field_map_exn json__ "NetworkConfiguration"
+          NetworkConfiguration.of_json in
+      let dagS3Path = field_map_exn json__ "DagS3Path" RelativePath.of_json in
+      let sourceBucketArn =
+        field_map_exn json__ "SourceBucketArn" S3BucketArn.of_json in
+      let executionRoleArn =
+        field_map_exn json__ "ExecutionRoleArn" IamRoleArn.of_json in
+      let name = field_map_exn json__ "Name" EnvironmentName.of_json in
+      make ?maxWebservers ?minWebservers ?endpointManagement ?schedulers
+        ?minWorkers ?webserverAccessMode ?tags ?weeklyMaintenanceWindowStart
+        ?loggingConfiguration ?airflowVersion ?kmsKey ?maxWorkers
+        ?environmentClass ?airflowConfigurationOptions
+        ?startupScriptS3ObjectVersion ?startupScriptS3Path
+        ?requirementsS3ObjectVersion ?requirementsS3Path
+        ?pluginsS3ObjectVersion ?pluginsS3Path ~networkConfiguration
+        ~dagS3Path ~sourceBucketArn ~executionRoleArn ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This section contains the Amazon Managed Workflows for Apache Airflow (MWAA) API reference documentation to create an environment. For more information, see Get started with Amazon Managed Workflows for Apache Airflow."]
+       "This section contains the Amazon Managed Workflows for Apache Airflow (Amazon MWAA) API reference documentation to create an environment. For more information, refer to Get started with Amazon Managed Workflows for Apache Airflow."]
 module CreateCliTokenResponse =
   struct
     type nonrec t =
       {
-      cliToken: SyntheticCreateCliTokenResponseToken.t option
-        [@ocaml.doc "An Airflow CLI login token."];
+      cliToken: Token.t option [@ocaml.doc "An Airflow CLI login token."];
       webServerHostname: Hostname.t option
         [@ocaml.doc "The Airflow web server hostname for the environment."]}
     type nonrec error =
@@ -3504,9 +4312,7 @@ module CreateCliTokenResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("CliToken",
-           (Option.map x.cliToken
-              ~f:SyntheticCreateCliTokenResponseToken.to_value));
+        [("CliToken", (Option.map x.cliToken ~f:Token.to_value));
         ("WebServerHostname",
           (Option.map x.webServerHostname ~f:Hostname.to_value))]
     let to_query v = to_query to_value v
@@ -3515,16 +4321,13 @@ module CreateCliTokenResponse =
         (Option.map ~f:Hostname.of_xml)
           (Xml.child xml_arg0 "WebServerHostname") in
       let cliToken =
-        (Option.map ~f:SyntheticCreateCliTokenResponseToken.of_xml)
-          (Xml.child xml_arg0 "CliToken") in
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "CliToken") in
       make ?webServerHostname ?cliToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let webServerHostname =
-        field_map json "WebServerHostname" Hostname.of_json in
-      let cliToken =
-        field_map json "CliToken"
-          SyntheticCreateCliTokenResponseToken.of_json in
+        field_map json__ "WebServerHostname" Hostname.of_json in
+      let cliToken = field_map json__ "CliToken" Token.of_json in
       make ?webServerHostname ?cliToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3547,8 +4350,8 @@ module CreateCliTokenRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" EnvironmentName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" EnvironmentName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

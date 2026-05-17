@@ -38,6 +38,9 @@ let batch_get_record =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and expirationTimeResponse =
+         flag "expiration-time-response" (optional json_arg)
+           ~doc:"JSON ExpirationTimeResponse"
        and identifiers =
          flag "identifiers" (required json_arg)
            ~doc:"JSON BatchGetRecordIdentifiers" in
@@ -45,6 +48,9 @@ let batch_get_record =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.batch_get_record
            (Values.BatchGetRecordRequest.make
+              ?expirationTimeResponse:(Option.map
+                                         ~f:Values.ExpirationTimeResponse.of_json
+                                         expirationTimeResponse)
               ~identifiers:(Values.BatchGetRecordIdentifiers.of_json
                               identifiers) ())
            (Some Values.BatchGetRecordResponse.to_json)
@@ -59,9 +65,13 @@ let delete_record =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and targetStores =
+         flag "target-stores" (optional json_arg) ~doc:"JSON TargetStores"
+       and deletionMode =
+         flag "deletion-mode" (optional json_arg) ~doc:"JSON DeletionMode"
        and featureGroupName =
          flag "feature-group-name" (required string)
-           ~doc:"STRING FeatureGroupName"
+           ~doc:"STRING FeatureGroupNameOrArn"
        and recordIdentifierValueAsString =
          flag "record-identifier-value-as-string" (required string)
            ~doc:"STRING ValueAsString"
@@ -70,7 +80,11 @@ let delete_record =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_record
-           (Values.DeleteRecordRequest.make ~featureGroupName
+           (Values.DeleteRecordRequest.make
+              ?targetStores:(Option.map ~f:Values.TargetStores.of_json
+                               targetStores)
+              ?deletionMode:(Option.map ~f:Values.DeletionMode.of_json
+                               deletionMode) ~featureGroupName
               ~recordIdentifierValueAsString ~eventTime ()) None None])
 let get_record =
   Command.async ~summary:""
@@ -84,9 +98,12 @@ let get_record =
            ~doc:"URL override endpoint url"
        and featureNames =
          flag "feature-names" (optional json_arg) ~doc:"JSON FeatureNames"
+       and expirationTimeResponse =
+         flag "expiration-time-response" (optional json_arg)
+           ~doc:"JSON ExpirationTimeResponse"
        and featureGroupName =
          flag "feature-group-name" (required string)
-           ~doc:"STRING FeatureGroupName"
+           ~doc:"STRING FeatureGroupNameOrArn"
        and recordIdentifierValueAsString =
          flag "record-identifier-value-as-string" (required string)
            ~doc:"STRING ValueAsString" in
@@ -95,8 +112,11 @@ let get_record =
            Io.get_record
            (Values.GetRecordRequest.make
               ?featureNames:(Option.map ~f:Values.FeatureNames.of_json
-                               featureNames) ~featureGroupName
-              ~recordIdentifierValueAsString ())
+                               featureNames)
+              ?expirationTimeResponse:(Option.map
+                                         ~f:Values.ExpirationTimeResponse.of_json
+                                         expirationTimeResponse)
+              ~featureGroupName ~recordIdentifierValueAsString ())
            (Some Values.GetRecordResponse.to_json)
            (Some Values.GetRecordResponse.error_to_json)])
 let put_record =
@@ -109,14 +129,22 @@ let put_record =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and targetStores =
+         flag "target-stores" (optional json_arg) ~doc:"JSON TargetStores"
+       and ttlDuration =
+         flag "ttl-duration" (optional json_arg) ~doc:"JSON TtlDuration"
        and featureGroupName =
          flag "feature-group-name" (required string)
-           ~doc:"STRING FeatureGroupName"
+           ~doc:"STRING FeatureGroupNameOrArn"
        and record = flag "record" (required json_arg) ~doc:"JSON Record" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_record
-           (Values.PutRecordRequest.make ~featureGroupName
+           (Values.PutRecordRequest.make
+              ?targetStores:(Option.map ~f:Values.TargetStores.of_json
+                               targetStores)
+              ?ttlDuration:(Option.map ~f:Values.TtlDuration.of_json
+                              ttlDuration) ~featureGroupName
               ~record:(Values.Record.of_json record) ()) None None])
 let main =
   Command.group

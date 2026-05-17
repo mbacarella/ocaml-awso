@@ -13,10 +13,15 @@ type ('i, 'o, 'e) t =
   BatchDetectSentimentResponse.t, BatchDetectSentimentResponse.error) t 
   | BatchDetectSyntax: (BatchDetectSyntaxRequest.t,
   BatchDetectSyntaxResponse.t, BatchDetectSyntaxResponse.error) t 
+  | BatchDetectTargetedSentiment: (BatchDetectTargetedSentimentRequest.t,
+  BatchDetectTargetedSentimentResponse.t,
+  BatchDetectTargetedSentimentResponse.error) t 
   | ClassifyDocument: (ClassifyDocumentRequest.t, ClassifyDocumentResponse.t,
   ClassifyDocumentResponse.error) t 
   | ContainsPiiEntities: (ContainsPiiEntitiesRequest.t,
   ContainsPiiEntitiesResponse.t, ContainsPiiEntitiesResponse.error) t 
+  | CreateDataset: (CreateDatasetRequest.t, CreateDatasetResponse.t,
+  CreateDatasetResponse.error) t 
   | CreateDocumentClassifier: (CreateDocumentClassifierRequest.t,
   CreateDocumentClassifierResponse.t, CreateDocumentClassifierResponse.error)
   t 
@@ -24,6 +29,8 @@ type ('i, 'o, 'e) t =
   CreateEndpointResponse.error) t 
   | CreateEntityRecognizer: (CreateEntityRecognizerRequest.t,
   CreateEntityRecognizerResponse.t, CreateEntityRecognizerResponse.error) t 
+  | CreateFlywheel: (CreateFlywheelRequest.t, CreateFlywheelResponse.t,
+  CreateFlywheelResponse.error) t 
   | DeleteDocumentClassifier: (DeleteDocumentClassifierRequest.t,
   DeleteDocumentClassifierResponse.t, DeleteDocumentClassifierResponse.error)
   t 
@@ -31,8 +38,12 @@ type ('i, 'o, 'e) t =
   DeleteEndpointResponse.error) t 
   | DeleteEntityRecognizer: (DeleteEntityRecognizerRequest.t,
   DeleteEntityRecognizerResponse.t, DeleteEntityRecognizerResponse.error) t 
+  | DeleteFlywheel: (DeleteFlywheelRequest.t, DeleteFlywheelResponse.t,
+  DeleteFlywheelResponse.error) t 
   | DeleteResourcePolicy: (DeleteResourcePolicyRequest.t,
   DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error) t 
+  | DescribeDataset: (DescribeDatasetRequest.t, DescribeDatasetResponse.t,
+  DescribeDatasetResponse.error) t 
   | DescribeDocumentClassificationJob:
   (DescribeDocumentClassificationJobRequest.t,
   DescribeDocumentClassificationJobResponse.t,
@@ -55,6 +66,11 @@ type ('i, 'o, 'e) t =
   | DescribeEventsDetectionJob: (DescribeEventsDetectionJobRequest.t,
   DescribeEventsDetectionJobResponse.t,
   DescribeEventsDetectionJobResponse.error) t 
+  | DescribeFlywheel: (DescribeFlywheelRequest.t, DescribeFlywheelResponse.t,
+  DescribeFlywheelResponse.error) t 
+  | DescribeFlywheelIteration: (DescribeFlywheelIterationRequest.t,
+  DescribeFlywheelIterationResponse.t,
+  DescribeFlywheelIterationResponse.error) t 
   | DescribeKeyPhrasesDetectionJob: (DescribeKeyPhrasesDetectionJobRequest.t,
   DescribeKeyPhrasesDetectionJobResponse.t,
   DescribeKeyPhrasesDetectionJobResponse.error) t 
@@ -86,8 +102,15 @@ type ('i, 'o, 'e) t =
   DetectSentimentResponse.error) t 
   | DetectSyntax: (DetectSyntaxRequest.t, DetectSyntaxResponse.t,
   DetectSyntaxResponse.error) t 
+  | DetectTargetedSentiment: (DetectTargetedSentimentRequest.t,
+  DetectTargetedSentimentResponse.t, DetectTargetedSentimentResponse.error) t
+  
+  | DetectToxicContent: (DetectToxicContentRequest.t,
+  DetectToxicContentResponse.t, DetectToxicContentResponse.error) t 
   | ImportModel: (ImportModelRequest.t, ImportModelResponse.t,
   ImportModelResponse.error) t 
+  | ListDatasets: (ListDatasetsRequest.t, ListDatasetsResponse.t,
+  ListDatasetsResponse.error) t 
   | ListDocumentClassificationJobs: (ListDocumentClassificationJobsRequest.t,
   ListDocumentClassificationJobsResponse.t,
   ListDocumentClassificationJobsResponse.error) t 
@@ -115,6 +138,11 @@ type ('i, 'o, 'e) t =
   | ListEventsDetectionJobs: (ListEventsDetectionJobsRequest.t,
   ListEventsDetectionJobsResponse.t, ListEventsDetectionJobsResponse.error) t
   
+  | ListFlywheelIterationHistory: (ListFlywheelIterationHistoryRequest.t,
+  ListFlywheelIterationHistoryResponse.t,
+  ListFlywheelIterationHistoryResponse.error) t 
+  | ListFlywheels: (ListFlywheelsRequest.t, ListFlywheelsResponse.t,
+  ListFlywheelsResponse.error) t 
   | ListKeyPhrasesDetectionJobs: (ListKeyPhrasesDetectionJobsRequest.t,
   ListKeyPhrasesDetectionJobsResponse.t,
   ListKeyPhrasesDetectionJobsResponse.error) t 
@@ -148,6 +176,8 @@ type ('i, 'o, 'e) t =
   | StartEventsDetectionJob: (StartEventsDetectionJobRequest.t,
   StartEventsDetectionJobResponse.t, StartEventsDetectionJobResponse.error) t
   
+  | StartFlywheelIteration: (StartFlywheelIterationRequest.t,
+  StartFlywheelIterationResponse.t, StartFlywheelIterationResponse.error) t 
   | StartKeyPhrasesDetectionJob: (StartKeyPhrasesDetectionJobRequest.t,
   StartKeyPhrasesDetectionJobResponse.t,
   StartKeyPhrasesDetectionJobResponse.error) t 
@@ -198,6 +228,8 @@ type ('i, 'o, 'e) t =
   UntagResourceResponse.error) t 
   | UpdateEndpoint: (UpdateEndpointRequest.t, UpdateEndpointResponse.t,
   UpdateEndpointResponse.error) t 
+  | UpdateFlywheel: (UpdateFlywheelRequest.t, UpdateFlywheelResponse.t,
+  UpdateFlywheelResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | BatchDetectDominantLanguage -> `POST
@@ -205,15 +237,20 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | BatchDetectKeyPhrases -> `POST
   | BatchDetectSentiment -> `POST
   | BatchDetectSyntax -> `POST
+  | BatchDetectTargetedSentiment -> `POST
   | ClassifyDocument -> `POST
   | ContainsPiiEntities -> `POST
+  | CreateDataset -> `POST
   | CreateDocumentClassifier -> `POST
   | CreateEndpoint -> `POST
   | CreateEntityRecognizer -> `POST
+  | CreateFlywheel -> `POST
   | DeleteDocumentClassifier -> `POST
   | DeleteEndpoint -> `POST
   | DeleteEntityRecognizer -> `POST
+  | DeleteFlywheel -> `POST
   | DeleteResourcePolicy -> `POST
+  | DescribeDataset -> `POST
   | DescribeDocumentClassificationJob -> `POST
   | DescribeDocumentClassifier -> `POST
   | DescribeDominantLanguageDetectionJob -> `POST
@@ -221,6 +258,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeEntitiesDetectionJob -> `POST
   | DescribeEntityRecognizer -> `POST
   | DescribeEventsDetectionJob -> `POST
+  | DescribeFlywheel -> `POST
+  | DescribeFlywheelIteration -> `POST
   | DescribeKeyPhrasesDetectionJob -> `POST
   | DescribePiiEntitiesDetectionJob -> `POST
   | DescribeResourcePolicy -> `POST
@@ -233,7 +272,10 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DetectPiiEntities -> `POST
   | DetectSentiment -> `POST
   | DetectSyntax -> `POST
+  | DetectTargetedSentiment -> `POST
+  | DetectToxicContent -> `POST
   | ImportModel -> `POST
+  | ListDatasets -> `POST
   | ListDocumentClassificationJobs -> `POST
   | ListDocumentClassifierSummaries -> `POST
   | ListDocumentClassifiers -> `POST
@@ -243,6 +285,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListEntityRecognizerSummaries -> `POST
   | ListEntityRecognizers -> `POST
   | ListEventsDetectionJobs -> `POST
+  | ListFlywheelIterationHistory -> `POST
+  | ListFlywheels -> `POST
   | ListKeyPhrasesDetectionJobs -> `POST
   | ListPiiEntitiesDetectionJobs -> `POST
   | ListSentimentDetectionJobs -> `POST
@@ -254,6 +298,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | StartDominantLanguageDetectionJob -> `POST
   | StartEntitiesDetectionJob -> `POST
   | StartEventsDetectionJob -> `POST
+  | StartFlywheelIteration -> `POST
   | StartKeyPhrasesDetectionJob -> `POST
   | StartPiiEntitiesDetectionJob -> `POST
   | StartSentimentDetectionJob -> `POST
@@ -271,6 +316,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateEndpoint -> `POST
+  | UpdateFlywheel -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -279,15 +325,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | BatchDetectKeyPhrases -> (Format.kasprintf Uri.of_string) "/"
       | BatchDetectSentiment -> (Format.kasprintf Uri.of_string) "/"
       | BatchDetectSyntax -> (Format.kasprintf Uri.of_string) "/"
+      | BatchDetectTargetedSentiment -> (Format.kasprintf Uri.of_string) "/"
       | ClassifyDocument -> (Format.kasprintf Uri.of_string) "/"
       | ContainsPiiEntities -> (Format.kasprintf Uri.of_string) "/"
+      | CreateDataset -> (Format.kasprintf Uri.of_string) "/"
       | CreateDocumentClassifier -> (Format.kasprintf Uri.of_string) "/"
       | CreateEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | CreateEntityRecognizer -> (Format.kasprintf Uri.of_string) "/"
+      | CreateFlywheel -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDocumentClassifier -> (Format.kasprintf Uri.of_string) "/"
       | DeleteEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | DeleteEntityRecognizer -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteFlywheel -> (Format.kasprintf Uri.of_string) "/"
       | DeleteResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeDataset -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDocumentClassificationJob ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeDocumentClassifier -> (Format.kasprintf Uri.of_string) "/"
@@ -297,6 +348,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeEntitiesDetectionJob -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEntityRecognizer -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEventsDetectionJob -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeFlywheel -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeFlywheelIteration -> (Format.kasprintf Uri.of_string) "/"
       | DescribeKeyPhrasesDetectionJob ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribePiiEntitiesDetectionJob ->
@@ -312,7 +365,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DetectPiiEntities -> (Format.kasprintf Uri.of_string) "/"
       | DetectSentiment -> (Format.kasprintf Uri.of_string) "/"
       | DetectSyntax -> (Format.kasprintf Uri.of_string) "/"
+      | DetectTargetedSentiment -> (Format.kasprintf Uri.of_string) "/"
+      | DetectToxicContent -> (Format.kasprintf Uri.of_string) "/"
       | ImportModel -> (Format.kasprintf Uri.of_string) "/"
+      | ListDatasets -> (Format.kasprintf Uri.of_string) "/"
       | ListDocumentClassificationJobs ->
           (Format.kasprintf Uri.of_string) "/"
       | ListDocumentClassifierSummaries ->
@@ -325,6 +381,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListEntityRecognizerSummaries -> (Format.kasprintf Uri.of_string) "/"
       | ListEntityRecognizers -> (Format.kasprintf Uri.of_string) "/"
       | ListEventsDetectionJobs -> (Format.kasprintf Uri.of_string) "/"
+      | ListFlywheelIterationHistory -> (Format.kasprintf Uri.of_string) "/"
+      | ListFlywheels -> (Format.kasprintf Uri.of_string) "/"
       | ListKeyPhrasesDetectionJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListPiiEntitiesDetectionJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListSentimentDetectionJobs -> (Format.kasprintf Uri.of_string) "/"
@@ -339,6 +397,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | StartEntitiesDetectionJob -> (Format.kasprintf Uri.of_string) "/"
       | StartEventsDetectionJob -> (Format.kasprintf Uri.of_string) "/"
+      | StartFlywheelIteration -> (Format.kasprintf Uri.of_string) "/"
       | StartKeyPhrasesDetectionJob -> (Format.kasprintf Uri.of_string) "/"
       | StartPiiEntitiesDetectionJob -> (Format.kasprintf Uri.of_string) "/"
       | StartSentimentDetectionJob -> (Format.kasprintf Uri.of_string) "/"
@@ -359,7 +418,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | StopTrainingEntityRecognizer -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
-      | UpdateEndpoint -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateEndpoint -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateFlywheel -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -403,6 +463,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Comprehend_20171127.BatchDetectSyntax")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchDetectTargetedSentiment ->
+      let json = BatchDetectTargetedSentimentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "Comprehend_20171127.BatchDetectTargetedSentiment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ClassifyDocument ->
       let json = ClassifyDocumentRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -418,6 +487,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Comprehend_20171127.ContainsPiiEntities")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateDataset ->
+      let json = CreateDatasetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Comprehend_20171127.CreateDataset")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateDocumentClassifier ->
       let json = CreateDocumentClassifierRequest.to_json req in
@@ -443,6 +520,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Comprehend_20171127.CreateEntityRecognizer")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateFlywheel ->
+      let json = CreateFlywheelRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Comprehend_20171127.CreateFlywheel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteDocumentClassifier ->
       let json = DeleteDocumentClassifierRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -467,6 +552,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Comprehend_20171127.DeleteEntityRecognizer")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteFlywheel ->
+      let json = DeleteFlywheelRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Comprehend_20171127.DeleteFlywheel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteResourcePolicy ->
       let json = DeleteResourcePolicyRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -474,6 +567,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Comprehend_20171127.DeleteResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeDataset ->
+      let json = DescribeDatasetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Comprehend_20171127.DescribeDataset")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeDocumentClassificationJob ->
       let json = DescribeDocumentClassificationJobRequest.to_json req in
@@ -533,6 +634,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Comprehend_20171127.DescribeEventsDetectionJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeFlywheel ->
+      let json = DescribeFlywheelRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Comprehend_20171127.DescribeFlywheel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeFlywheelIteration ->
+      let json = DescribeFlywheelIterationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Comprehend_20171127.DescribeFlywheelIteration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeKeyPhrasesDetectionJob ->
       let json = DescribeKeyPhrasesDetectionJobRequest.to_json req in
@@ -634,6 +751,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Comprehend_20171127.DetectSyntax")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DetectTargetedSentiment ->
+      let json = DetectTargetedSentimentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Comprehend_20171127.DetectTargetedSentiment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DetectToxicContent ->
+      let json = DetectToxicContentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Comprehend_20171127.DetectToxicContent")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ImportModel ->
       let json = ImportModelRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -641,6 +774,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Comprehend_20171127.ImportModel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListDatasets ->
+      let json = ListDatasetsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Comprehend_20171127.ListDatasets")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListDocumentClassificationJobs ->
       let json = ListDocumentClassificationJobsRequest.to_json req in
@@ -717,6 +858,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Comprehend_20171127.ListEventsDetectionJobs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListFlywheelIterationHistory ->
+      let json = ListFlywheelIterationHistoryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "Comprehend_20171127.ListFlywheelIterationHistory")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListFlywheels ->
+      let json = ListFlywheelsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Comprehend_20171127.ListFlywheels")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListKeyPhrasesDetectionJobs ->
       let json = ListKeyPhrasesDetectionJobsRequest.to_json req in
@@ -809,6 +967,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Comprehend_20171127.StartEventsDetectionJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartFlywheelIteration ->
+      let json = StartFlywheelIterationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Comprehend_20171127.StartFlywheelIteration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartKeyPhrasesDetectionJob ->
       let json = StartKeyPhrasesDetectionJobRequest.to_json req in
@@ -952,6 +1118,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Comprehend_20171127.UpdateEndpoint")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateFlywheel ->
+      let json = UpdateFlywheelRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Comprehend_20171127.UpdateFlywheel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -1016,6 +1190,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some BatchDetectSyntaxResponse.error_of_json))
+  | BatchDetectTargetedSentiment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchDetectTargetedSentimentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDetectTargetedSentimentResponse.error_of_json))
   | ClassifyDocument ->
       if is_success
       then
@@ -1031,6 +1214,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ContainsPiiEntitiesResponse.error_of_json))
+  | CreateDataset ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateDatasetResponse.of_json json)
+      else Error (parse_aws_error (Some CreateDatasetResponse.error_of_json))
   | CreateDocumentClassifier ->
       if is_success
       then
@@ -1056,6 +1245,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateEntityRecognizerResponse.error_of_json))
+  | CreateFlywheel ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateFlywheelResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateFlywheelResponse.error_of_json))
   | DeleteDocumentClassifier ->
       if is_success
       then
@@ -1081,6 +1277,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteEntityRecognizerResponse.error_of_json))
+  | DeleteFlywheel ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteFlywheelResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DeleteFlywheelResponse.error_of_json))
   | DeleteResourcePolicy ->
       if is_success
       then
@@ -1089,6 +1292,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteResourcePolicyResponse.error_of_json))
+  | DescribeDataset ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDatasetResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeDatasetResponse.error_of_json))
   | DescribeDocumentClassificationJob ->
       if is_success
       then
@@ -1150,6 +1360,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeEventsDetectionJobResponse.error_of_json))
+  | DescribeFlywheel ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeFlywheelResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeFlywheelResponse.error_of_json))
+  | DescribeFlywheelIteration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeFlywheelIterationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeFlywheelIterationResponse.error_of_json))
   | DescribeKeyPhrasesDetectionJob ->
       if is_success
       then
@@ -1249,12 +1475,35 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DetectSyntaxResponse.of_json json)
       else Error (parse_aws_error (Some DetectSyntaxResponse.error_of_json))
+  | DetectTargetedSentiment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DetectTargetedSentimentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DetectTargetedSentimentResponse.error_of_json))
+  | DetectToxicContent ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DetectToxicContentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DetectToxicContentResponse.error_of_json))
   | ImportModel ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ImportModelResponse.of_json json)
       else Error (parse_aws_error (Some ImportModelResponse.error_of_json))
+  | ListDatasets ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDatasetsResponse.of_json json)
+      else Error (parse_aws_error (Some ListDatasetsResponse.error_of_json))
   | ListDocumentClassificationJobs ->
       if is_success
       then
@@ -1332,6 +1581,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListEventsDetectionJobsResponse.error_of_json))
+  | ListFlywheelIterationHistory ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListFlywheelIterationHistoryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListFlywheelIterationHistoryResponse.error_of_json))
+  | ListFlywheels ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListFlywheelsResponse.of_json json)
+      else Error (parse_aws_error (Some ListFlywheelsResponse.error_of_json))
   | ListKeyPhrasesDetectionJobs ->
       if is_success
       then
@@ -1429,6 +1693,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some StartEventsDetectionJobResponse.error_of_json))
+  | StartFlywheelIteration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartFlywheelIterationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartFlywheelIterationResponse.error_of_json))
   | StartKeyPhrasesDetectionJob ->
       if is_success
       then
@@ -1574,3 +1847,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UpdateEndpointResponse.of_json json)
       else
         Error (parse_aws_error (Some UpdateEndpointResponse.error_of_json))
+  | UpdateFlywheel ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateFlywheelResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateFlywheelResponse.error_of_json))

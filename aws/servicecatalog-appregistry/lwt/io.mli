@@ -66,6 +66,12 @@ val get_attribute_group :
       GetAttributeGroupRequest.t ->
         (GetAttributeGroupResponse.t, GetAttributeGroupResponse.error)
           Result.t Lwt.t
+val get_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      unit ->
+        (GetConfigurationResponse.t, GetConfigurationResponse.error) Result.t
+          Lwt.t
 val list_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -90,12 +96,22 @@ val list_attribute_groups :
       ListAttributeGroupsRequest.t ->
         (ListAttributeGroupsResponse.t, ListAttributeGroupsResponse.error)
           Result.t Lwt.t
+val list_attribute_groups_for_application :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAttributeGroupsForApplicationRequest.t ->
+        (ListAttributeGroupsForApplicationResponse.t,
+          ListAttributeGroupsForApplicationResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t Lwt.t
+val put_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutConfigurationRequest.t -> (unit, unit) Result.t Lwt.t
 val sync_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

@@ -10,12 +10,20 @@ type ('i, 'o, 'e) t =
   CreateContactResult.error) t 
   | CreateContactChannel: (CreateContactChannelRequest.t,
   CreateContactChannelResult.t, CreateContactChannelResult.error) t 
+  | CreateRotation: (CreateRotationRequest.t, CreateRotationResult.t,
+  CreateRotationResult.error) t 
+  | CreateRotationOverride: (CreateRotationOverrideRequest.t,
+  CreateRotationOverrideResult.t, CreateRotationOverrideResult.error) t 
   | DeactivateContactChannel: (DeactivateContactChannelRequest.t,
   DeactivateContactChannelResult.t, DeactivateContactChannelResult.error) t 
   | DeleteContact: (DeleteContactRequest.t, DeleteContactResult.t,
   DeleteContactResult.error) t 
   | DeleteContactChannel: (DeleteContactChannelRequest.t,
   DeleteContactChannelResult.t, DeleteContactChannelResult.error) t 
+  | DeleteRotation: (DeleteRotationRequest.t, DeleteRotationResult.t,
+  DeleteRotationResult.error) t 
+  | DeleteRotationOverride: (DeleteRotationOverrideRequest.t,
+  DeleteRotationOverrideResult.t, DeleteRotationOverrideResult.error) t 
   | DescribeEngagement: (DescribeEngagementRequest.t,
   DescribeEngagementResult.t, DescribeEngagementResult.error) t 
   | DescribePage: (DescribePageRequest.t, DescribePageResult.t,
@@ -26,6 +34,10 @@ type ('i, 'o, 'e) t =
   GetContactChannelResult.t, GetContactChannelResult.error) t 
   | GetContactPolicy: (GetContactPolicyRequest.t, GetContactPolicyResult.t,
   GetContactPolicyResult.error) t 
+  | GetRotation: (GetRotationRequest.t, GetRotationResult.t,
+  GetRotationResult.error) t 
+  | GetRotationOverride: (GetRotationOverrideRequest.t,
+  GetRotationOverrideResult.t, GetRotationOverrideResult.error) t 
   | ListContactChannels: (ListContactChannelsRequest.t,
   ListContactChannelsResult.t, ListContactChannelsResult.error) t 
   | ListContacts: (ListContactsRequest.t, ListContactsResult.t,
@@ -34,10 +46,21 @@ type ('i, 'o, 'e) t =
   ListEngagementsResult.error) t 
   | ListPageReceipts: (ListPageReceiptsRequest.t, ListPageReceiptsResult.t,
   ListPageReceiptsResult.error) t 
+  | ListPageResolutions: (ListPageResolutionsRequest.t,
+  ListPageResolutionsResult.t, ListPageResolutionsResult.error) t 
   | ListPagesByContact: (ListPagesByContactRequest.t,
   ListPagesByContactResult.t, ListPagesByContactResult.error) t 
   | ListPagesByEngagement: (ListPagesByEngagementRequest.t,
   ListPagesByEngagementResult.t, ListPagesByEngagementResult.error) t 
+  | ListPreviewRotationShifts: (ListPreviewRotationShiftsRequest.t,
+  ListPreviewRotationShiftsResult.t, ListPreviewRotationShiftsResult.error) t
+  
+  | ListRotationOverrides: (ListRotationOverridesRequest.t,
+  ListRotationOverridesResult.t, ListRotationOverridesResult.error) t 
+  | ListRotationShifts: (ListRotationShiftsRequest.t,
+  ListRotationShiftsResult.t, ListRotationShiftsResult.error) t 
+  | ListRotations: (ListRotationsRequest.t, ListRotationsResult.t,
+  ListRotationsResult.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResult.t, ListTagsForResourceResult.error) t 
   | PutContactPolicy: (PutContactPolicyRequest.t, PutContactPolicyResult.t,
@@ -56,26 +79,39 @@ type ('i, 'o, 'e) t =
   UpdateContactResult.error) t 
   | UpdateContactChannel: (UpdateContactChannelRequest.t,
   UpdateContactChannelResult.t, UpdateContactChannelResult.error) t 
+  | UpdateRotation: (UpdateRotationRequest.t, UpdateRotationResult.t,
+  UpdateRotationResult.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AcceptPage -> `POST
   | ActivateContactChannel -> `POST
   | CreateContact -> `POST
   | CreateContactChannel -> `POST
+  | CreateRotation -> `POST
+  | CreateRotationOverride -> `POST
   | DeactivateContactChannel -> `POST
   | DeleteContact -> `POST
   | DeleteContactChannel -> `POST
+  | DeleteRotation -> `POST
+  | DeleteRotationOverride -> `POST
   | DescribeEngagement -> `POST
   | DescribePage -> `POST
   | GetContact -> `POST
   | GetContactChannel -> `POST
   | GetContactPolicy -> `POST
+  | GetRotation -> `POST
+  | GetRotationOverride -> `POST
   | ListContactChannels -> `POST
   | ListContacts -> `POST
   | ListEngagements -> `POST
   | ListPageReceipts -> `POST
+  | ListPageResolutions -> `POST
   | ListPagesByContact -> `POST
   | ListPagesByEngagement -> `POST
+  | ListPreviewRotationShifts -> `POST
+  | ListRotationOverrides -> `POST
+  | ListRotationShifts -> `POST
+  | ListRotations -> `POST
   | ListTagsForResource -> `POST
   | PutContactPolicy -> `POST
   | SendActivationCode -> `POST
@@ -85,6 +121,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UntagResource -> `POST
   | UpdateContact -> `POST
   | UpdateContactChannel -> `POST
+  | UpdateRotation -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -92,20 +129,31 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ActivateContactChannel -> (Format.kasprintf Uri.of_string) "/"
       | CreateContact -> (Format.kasprintf Uri.of_string) "/"
       | CreateContactChannel -> (Format.kasprintf Uri.of_string) "/"
+      | CreateRotation -> (Format.kasprintf Uri.of_string) "/"
+      | CreateRotationOverride -> (Format.kasprintf Uri.of_string) "/"
       | DeactivateContactChannel -> (Format.kasprintf Uri.of_string) "/"
       | DeleteContact -> (Format.kasprintf Uri.of_string) "/"
       | DeleteContactChannel -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteRotation -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteRotationOverride -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEngagement -> (Format.kasprintf Uri.of_string) "/"
       | DescribePage -> (Format.kasprintf Uri.of_string) "/"
       | GetContact -> (Format.kasprintf Uri.of_string) "/"
       | GetContactChannel -> (Format.kasprintf Uri.of_string) "/"
       | GetContactPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | GetRotation -> (Format.kasprintf Uri.of_string) "/"
+      | GetRotationOverride -> (Format.kasprintf Uri.of_string) "/"
       | ListContactChannels -> (Format.kasprintf Uri.of_string) "/"
       | ListContacts -> (Format.kasprintf Uri.of_string) "/"
       | ListEngagements -> (Format.kasprintf Uri.of_string) "/"
       | ListPageReceipts -> (Format.kasprintf Uri.of_string) "/"
+      | ListPageResolutions -> (Format.kasprintf Uri.of_string) "/"
       | ListPagesByContact -> (Format.kasprintf Uri.of_string) "/"
       | ListPagesByEngagement -> (Format.kasprintf Uri.of_string) "/"
+      | ListPreviewRotationShifts -> (Format.kasprintf Uri.of_string) "/"
+      | ListRotationOverrides -> (Format.kasprintf Uri.of_string) "/"
+      | ListRotationShifts -> (Format.kasprintf Uri.of_string) "/"
+      | ListRotations -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | PutContactPolicy -> (Format.kasprintf Uri.of_string) "/"
       | SendActivationCode -> (Format.kasprintf Uri.of_string) "/"
@@ -114,7 +162,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateContact -> (Format.kasprintf Uri.of_string) "/"
-      | UpdateContactChannel -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateContactChannel -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateRotation -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -150,6 +199,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SSMContacts.CreateContactChannel")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateRotation ->
+      let json = CreateRotationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SSMContacts.CreateRotation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateRotationOverride ->
+      let json = CreateRotationOverrideRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SSMContacts.CreateRotationOverride")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeactivateContactChannel ->
       let json = DeactivateContactChannelRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -173,6 +238,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SSMContacts.DeleteContactChannel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteRotation ->
+      let json = DeleteRotationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SSMContacts.DeleteRotation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteRotationOverride ->
+      let json = DeleteRotationOverrideRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SSMContacts.DeleteRotationOverride")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeEngagement ->
       let json = DescribeEngagementRequest.to_json req in
@@ -214,6 +295,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SSMContacts.GetContactPolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetRotation ->
+      let json = GetRotationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SSMContacts.GetRotation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetRotationOverride ->
+      let json = GetRotationOverrideRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SSMContacts.GetRotationOverride")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListContactChannels ->
       let json = ListContactChannelsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -246,6 +343,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SSMContacts.ListPageReceipts")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListPageResolutions ->
+      let json = ListPageResolutionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SSMContacts.ListPageResolutions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListPagesByContact ->
       let json = ListPagesByContactRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -261,6 +366,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SSMContacts.ListPagesByEngagement")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListPreviewRotationShifts ->
+      let json = ListPreviewRotationShiftsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SSMContacts.ListPreviewRotationShifts")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListRotationOverrides ->
+      let json = ListRotationOverridesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SSMContacts.ListRotationOverrides")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListRotationShifts ->
+      let json = ListRotationShiftsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SSMContacts.ListRotationShifts")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListRotations ->
+      let json = ListRotationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SSMContacts.ListRotations")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTagsForResource ->
       let json = ListTagsForResourceRequest.to_json req in
@@ -334,6 +471,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SSMContacts.UpdateContactChannel")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateRotation ->
+      let json = UpdateRotationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SSMContacts.UpdateRotation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -385,6 +530,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateContactChannelResult.error_of_json))
+  | CreateRotation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateRotationResult.of_json json)
+      else Error (parse_aws_error (Some CreateRotationResult.error_of_json))
+  | CreateRotationOverride ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateRotationOverrideResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateRotationOverrideResult.error_of_json))
   | DeactivateContactChannel ->
       if is_success
       then
@@ -408,6 +567,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteContactChannelResult.error_of_json))
+  | DeleteRotation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRotationResult.of_json json)
+      else Error (parse_aws_error (Some DeleteRotationResult.error_of_json))
+  | DeleteRotationOverride ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRotationOverrideResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteRotationOverrideResult.error_of_json))
   | DescribeEngagement ->
       if is_success
       then
@@ -441,6 +614,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetContactPolicyResult.of_json json)
       else
         Error (parse_aws_error (Some GetContactPolicyResult.error_of_json))
+  | GetRotation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRotationResult.of_json json)
+      else Error (parse_aws_error (Some GetRotationResult.error_of_json))
+  | GetRotationOverride ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRotationOverrideResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetRotationOverrideResult.error_of_json))
   | ListContactChannels ->
       if is_success
       then
@@ -468,6 +655,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListPageReceiptsResult.of_json json)
       else
         Error (parse_aws_error (Some ListPageReceiptsResult.error_of_json))
+  | ListPageResolutions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListPageResolutionsResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListPageResolutionsResult.error_of_json))
   | ListPagesByContact ->
       if is_success
       then
@@ -483,6 +678,36 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListPagesByEngagementResult.error_of_json))
+  | ListPreviewRotationShifts ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListPreviewRotationShiftsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListPreviewRotationShiftsResult.error_of_json))
+  | ListRotationOverrides ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRotationOverridesResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListRotationOverridesResult.error_of_json))
+  | ListRotationShifts ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRotationShiftsResult.of_json json)
+      else
+        Error (parse_aws_error (Some ListRotationShiftsResult.error_of_json))
+  | ListRotations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRotationsResult.of_json json)
+      else Error (parse_aws_error (Some ListRotationsResult.error_of_json))
   | ListTagsForResource ->
       if is_success
       then
@@ -543,3 +768,9 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateContactChannelResult.error_of_json))
+  | UpdateRotation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateRotationResult.of_json json)
+      else Error (parse_aws_error (Some UpdateRotationResult.error_of_json))

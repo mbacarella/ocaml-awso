@@ -24,6 +24,50 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module Latitude =
+  struct
+    type nonrec t = string
+    let context_ = "Latitude"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:6) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[-+]?[0-9]{1,2}(\\.[0-9]{0,2})?")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Latitude" j
+    let to_json = simple_to_json to_value
+  end
+module Longitude =
+  struct
+    type nonrec t = string
+    let context_ = "Longitude"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:7) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[-+]?[0-9]{1,3}(\\.[0-9]{0,2})?")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Longitude" j
+    let to_json = simple_to_json to_value
+  end
 module RData =
   struct
     type nonrec t = string
@@ -97,6 +141,44 @@ module ResourceId =
     let of_json j = string_of_json ~kind:"ResourceId" j
     let to_json = simple_to_json to_value
   end
+module CidrLocationNameDefaultAllowed =
+  struct
+    type nonrec t = string
+    let context_ = "CidrLocationNameDefaultAllowed"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:16) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9A-Za-z_\\-\\*]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CidrLocationNameDefaultAllowed" j
+    let to_json = simple_to_json to_value
+  end
+module UUID =
+  struct
+    type nonrec t = string
+    let context_ = "UUID"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UUID" j
+    let to_json = simple_to_json to_value
+  end
 module GeoLocationContinentCode =
   struct
     type nonrec t = string
@@ -151,6 +233,92 @@ module GeoLocationSubdivisionCode =
     let of_json j = string_of_json ~kind:"GeoLocationSubdivisionCode" j
     let to_json = simple_to_json to_value
   end
+module AWSRegion =
+  struct
+    type nonrec t = string
+    let context_ = "AWSRegion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AWSRegion" j
+    let to_json = simple_to_json to_value
+  end
+module Bias =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:99) >>=
+             (fun () -> check_int_min i ~min:(-99)));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Bias" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Coordinates =
+  struct
+    type nonrec t =
+      {
+      latitude: Latitude.t
+        [@ocaml.doc
+          "Specifies a coordinate of the north\226\128\147south position of a geographic point on the surface of the Earth (-90 - 90)."];
+      longitude: Longitude.t
+        [@ocaml.doc
+          "Specifies a coordinate of the east\226\128\147west position of a geographic point on the surface of the Earth (-180 - 180)."]}
+    let context_ = "Coordinates"
+    let make ~latitude = fun ~longitude -> fun () -> { latitude; longitude }
+    let to_value x =
+      structure_to_value
+        [("Latitude", (Some (Latitude.to_value x.latitude)));
+        ("Longitude", (Some (Longitude.to_value x.longitude)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let longitude =
+        Longitude.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Longitude") in
+      let latitude =
+        Latitude.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Latitude") in
+      make ~longitude ~latitude ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let longitude = field_map_exn json__ "Longitude" Longitude.of_json in
+      let latitude = field_map_exn json__ "Latitude" Latitude.of_json in
+      make ~longitude ~latitude ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A complex type that lists the coordinates for a geoproximity resource record."]
+module LocalZoneGroup =
+  struct
+    type nonrec t = string
+    let context_ = "LocalZoneGroup"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LocalZoneGroup" j
+    let to_json = simple_to_json to_value
+  end
 module ResourceRecord =
   struct
     type nonrec t =
@@ -168,8 +336,9 @@ module ResourceRecord =
         RData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
       make ~value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" RData.of_json in make ~value ()
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" RData.of_json in
+      make ~value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information specific to the resource record. If you're creating an alias resource record set, omit ResourceRecord."]
@@ -201,36 +370,46 @@ module TagValue =
     let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
+module FailureReason =
+  struct
+    type nonrec t = string
+    let context_ = "FailureReason"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FailureReason" j
+    let to_json = simple_to_json to_value
+  end
 module Dimension =
   struct
     type nonrec t =
       {
-      name: DimensionField.t
+      name: DimensionField.t option
         [@ocaml.doc
           "For the metric that the CloudWatch alarm is associated with, the name of one dimension."];
-      value: DimensionField.t
+      value: DimensionField.t option
         [@ocaml.doc
           "For the metric that the CloudWatch alarm is associated with, the value of one dimension."]}
-    let context_ = "Dimension"
-    let make ~name = fun ~value -> fun () -> { name; value }
+    let make ?name = fun ?value -> fun () -> { name; value }
     let to_value x =
       structure_to_value
-        [("Name", (Some (DimensionField.to_value x.name)));
-        ("Value", (Some (DimensionField.to_value x.value)))]
+        [("Name", (Option.map x.name ~f:DimensionField.to_value));
+        ("Value", (Option.map x.value ~f:DimensionField.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let value =
-        DimensionField.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+        (Option.map ~f:DimensionField.of_xml) (Xml.child xml_arg0 "Value") in
       let name =
-        DimensionField.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~value ~name ()
+        (Option.map ~f:DimensionField.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" DimensionField.of_json in
-      let name = field_map_exn json "Name" DimensionField.of_json in
-      make ~value ~name ()
+    let of_json json__ =
+      let value = field_map json__ "Value" DimensionField.of_json in
+      let name = field_map json__ "Name" DimensionField.of_json in
+      make ?value ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For the metric that the CloudWatch alarm is associated with, a complex type that contains information about one dimension."]
@@ -261,12 +440,15 @@ module CloudWatchRegion =
       | Us_west_2 
       | Ca_central_1 
       | Eu_central_1 
+      | Eu_central_2 
       | Eu_west_1 
       | Eu_west_2 
       | Eu_west_3 
       | Ap_east_1 
       | Me_south_1 
+      | Me_central_1 
       | Ap_south_1 
+      | Ap_south_2 
       | Ap_southeast_1 
       | Ap_southeast_2 
       | Ap_southeast_3 
@@ -279,11 +461,25 @@ module CloudWatchRegion =
       | Cn_north_1 
       | Af_south_1 
       | Eu_south_1 
+      | Eu_south_2 
       | Us_gov_west_1 
       | Us_gov_east_1 
       | Us_iso_east_1 
       | Us_iso_west_1 
       | Us_isob_east_1 
+      | Ap_southeast_4 
+      | Il_central_1 
+      | Ca_west_1 
+      | Ap_southeast_5 
+      | Mx_central_1 
+      | Us_isof_south_1 
+      | Us_isof_east_1 
+      | Ap_southeast_7 
+      | Ap_east_2 
+      | Eu_isoe_west_1 
+      | Ap_southeast_6 
+      | Us_isob_west_1 
+      | Eusc_de_east_1 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -294,12 +490,15 @@ module CloudWatchRegion =
       | Us_west_2 -> "us-west-2"
       | Ca_central_1 -> "ca-central-1"
       | Eu_central_1 -> "eu-central-1"
+      | Eu_central_2 -> "eu-central-2"
       | Eu_west_1 -> "eu-west-1"
       | Eu_west_2 -> "eu-west-2"
       | Eu_west_3 -> "eu-west-3"
       | Ap_east_1 -> "ap-east-1"
       | Me_south_1 -> "me-south-1"
+      | Me_central_1 -> "me-central-1"
       | Ap_south_1 -> "ap-south-1"
+      | Ap_south_2 -> "ap-south-2"
       | Ap_southeast_1 -> "ap-southeast-1"
       | Ap_southeast_2 -> "ap-southeast-2"
       | Ap_southeast_3 -> "ap-southeast-3"
@@ -312,11 +511,25 @@ module CloudWatchRegion =
       | Cn_north_1 -> "cn-north-1"
       | Af_south_1 -> "af-south-1"
       | Eu_south_1 -> "eu-south-1"
+      | Eu_south_2 -> "eu-south-2"
       | Us_gov_west_1 -> "us-gov-west-1"
       | Us_gov_east_1 -> "us-gov-east-1"
       | Us_iso_east_1 -> "us-iso-east-1"
       | Us_iso_west_1 -> "us-iso-west-1"
       | Us_isob_east_1 -> "us-isob-east-1"
+      | Ap_southeast_4 -> "ap-southeast-4"
+      | Il_central_1 -> "il-central-1"
+      | Ca_west_1 -> "ca-west-1"
+      | Ap_southeast_5 -> "ap-southeast-5"
+      | Mx_central_1 -> "mx-central-1"
+      | Us_isof_south_1 -> "us-isof-south-1"
+      | Us_isof_east_1 -> "us-isof-east-1"
+      | Ap_southeast_7 -> "ap-southeast-7"
+      | Ap_east_2 -> "ap-east-2"
+      | Eu_isoe_west_1 -> "eu-isoe-west-1"
+      | Ap_southeast_6 -> "ap-southeast-6"
+      | Us_isob_west_1 -> "us-isob-west-1"
+      | Eusc_de_east_1 -> "eusc-de-east-1"
       | Non_static_id s -> s
     let of_string =
       function
@@ -326,12 +539,15 @@ module CloudWatchRegion =
       | "us-west-2" -> Us_west_2
       | "ca-central-1" -> Ca_central_1
       | "eu-central-1" -> Eu_central_1
+      | "eu-central-2" -> Eu_central_2
       | "eu-west-1" -> Eu_west_1
       | "eu-west-2" -> Eu_west_2
       | "eu-west-3" -> Eu_west_3
       | "ap-east-1" -> Ap_east_1
       | "me-south-1" -> Me_south_1
+      | "me-central-1" -> Me_central_1
       | "ap-south-1" -> Ap_south_1
+      | "ap-south-2" -> Ap_south_2
       | "ap-southeast-1" -> Ap_southeast_1
       | "ap-southeast-2" -> Ap_southeast_2
       | "ap-southeast-3" -> Ap_southeast_3
@@ -344,11 +560,25 @@ module CloudWatchRegion =
       | "cn-north-1" -> Cn_north_1
       | "af-south-1" -> Af_south_1
       | "eu-south-1" -> Eu_south_1
+      | "eu-south-2" -> Eu_south_2
       | "us-gov-west-1" -> Us_gov_west_1
       | "us-gov-east-1" -> Us_gov_east_1
       | "us-iso-east-1" -> Us_iso_east_1
       | "us-iso-west-1" -> Us_iso_west_1
       | "us-isob-east-1" -> Us_isob_east_1
+      | "ap-southeast-4" -> Ap_southeast_4
+      | "il-central-1" -> Il_central_1
+      | "ca-west-1" -> Ca_west_1
+      | "ap-southeast-5" -> Ap_southeast_5
+      | "mx-central-1" -> Mx_central_1
+      | "us-isof-south-1" -> Us_isof_south_1
+      | "us-isof-east-1" -> Us_isof_east_1
+      | "ap-southeast-7" -> Ap_southeast_7
+      | "ap-east-2" -> Ap_east_2
+      | "eu-isoe-west-1" -> Eu_isoe_west_1
+      | "ap-southeast-6" -> Ap_southeast_6
+      | "us-isob-west-1" -> Us_isob_west_1
+      | "eusc-de-east-1" -> Eusc_de_east_1
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -422,13 +652,13 @@ module AliasTarget =
       {
       hostedZoneId: ResourceId.t
         [@ocaml.doc
-          "Alias resource records sets only: The value used depends on where you want to route traffic: Amazon API Gateway custom regional APIs and edge-optimized APIs Specify the hosted zone ID for your API. You can get the applicable value using the CLI command get-domain-names: For regional APIs, specify the value of regionalHostedZoneId. For edge-optimized APIs, specify the value of distributionHostedZoneId. Amazon Virtual Private Cloud interface VPC endpoint Specify the hosted zone ID for your interface endpoint. You can get the value of HostedZoneId using the CLI command describe-vpc-endpoints. CloudFront distribution Specify Z2FDTNDATAQYW2. Alias resource record sets for CloudFront can't be created in a private zone. Elastic Beanstalk environment Specify the hosted zone ID for the region that you created the environment in. The environment must have a regionalized subdomain. For a list of regions and the corresponding hosted zone IDs, see Elastic Beanstalk endpoints and quotas in the the Amazon Web Services General Reference. ELB load balancer Specify the value of the hosted zone ID for the load balancer. Use the following methods to get the hosted zone ID: Elastic Load Balancing endpoints and quotas topic in the Amazon Web Services General Reference: Use the value that corresponds with the region that you created your load balancer in. Note that there are separate columns for Application and Classic Load Balancers and for Network Load Balancers. Amazon Web Services Management Console: Go to the Amazon EC2 page, choose Load Balancers in the navigation pane, select the load balancer, and get the value of the Hosted zone field on the Description tab. Elastic Load Balancing API: Use DescribeLoadBalancers to get the applicable value. For more information, see the applicable guide: Classic Load Balancers: Use DescribeLoadBalancers to get the value of CanonicalHostedZoneNameId. Application and Network Load Balancers: Use DescribeLoadBalancers to get the value of CanonicalHostedZoneId. CLI: Use describe-load-balancers to get the applicable value. For more information, see the applicable guide: Classic Load Balancers: Use describe-load-balancers to get the value of CanonicalHostedZoneNameId. Application and Network Load Balancers: Use describe-load-balancers to get the value of CanonicalHostedZoneId. Global Accelerator accelerator Specify Z2BJ6XQ5FK7U4H. An Amazon S3 bucket configured as a static website Specify the hosted zone ID for the region that you created the bucket in. For more information about valid values, see the table Amazon S3 Website Endpoints in the Amazon Web Services General Reference. Another Route 53 resource record set in your hosted zone Specify the hosted zone ID of your hosted zone. (An alias resource record set can't reference a resource record set in a different hosted zone.)"];
+          "Alias resource records sets only: The value used depends on where you want to route traffic: Amazon API Gateway custom regional APIs and edge-optimized APIs Specify the hosted zone ID for your API. You can get the applicable value using the CLI command get-domain-names: For regional APIs, specify the value of regionalHostedZoneId. For edge-optimized APIs, specify the value of distributionHostedZoneId. Amazon Virtual Private Cloud interface VPC endpoint Specify the hosted zone ID for your interface endpoint. You can get the value of HostedZoneId using the CLI command describe-vpc-endpoints. CloudFront distribution Specify Z2FDTNDATAQYW2. Alias resource record sets for CloudFront can't be created in a private zone. Elastic Beanstalk environment Specify the hosted zone ID for the region that you created the environment in. The environment must have a regionalized subdomain. For a list of regions and the corresponding hosted zone IDs, see Elastic Beanstalk endpoints and quotas in the Amazon Web Services General Reference. ELB load balancer Specify the value of the hosted zone ID for the load balancer. Use the following methods to get the hosted zone ID: Elastic Load Balancing endpoints and quotas topic in the Amazon Web Services General Reference: Use the value that corresponds with the region that you created your load balancer in. Note that there are separate columns for Application and Classic Load Balancers and for Network Load Balancers. Amazon Web Services Management Console: Go to the Amazon EC2 page, choose Load Balancers in the navigation pane, select the load balancer, and get the value of the Hosted zone field on the Description tab. Elastic Load Balancing API: Use DescribeLoadBalancers to get the applicable value. For more information, see the applicable guide: Classic Load Balancers: Use DescribeLoadBalancers to get the value of CanonicalHostedZoneNameId. Application and Network Load Balancers: Use DescribeLoadBalancers to get the value of CanonicalHostedZoneId. CLI: Use describe-load-balancers to get the applicable value. For more information, see the applicable guide: Classic Load Balancers: Use describe-load-balancers to get the value of CanonicalHostedZoneNameId. Application and Network Load Balancers: Use describe-load-balancers to get the value of CanonicalHostedZoneId. Global Accelerator accelerator Specify Z2BJ6XQ5FK7U4H. An Amazon S3 bucket configured as a static website Specify the hosted zone ID for the region that you created the bucket in. For more information about valid values, see the table Amazon S3 Website Endpoints in the Amazon Web Services General Reference. Another Route 53 resource record set in your hosted zone Specify the hosted zone ID of your hosted zone. (An alias resource record set can't reference a resource record set in a different hosted zone.)"];
       dNSName: DNSName.t
         [@ocaml.doc
           "Alias resource record sets only: The value that you specify depends on where you want to route queries: Amazon API Gateway custom regional APIs and edge-optimized APIs Specify the applicable domain name for your API. You can get the applicable value using the CLI command get-domain-names: For regional APIs, specify the value of regionalDomainName. For edge-optimized APIs, specify the value of distributionDomainName. This is the name of the associated CloudFront distribution, such as da1b2c3d4e5.cloudfront.net. The name of the record that you're creating must match a custom domain name for your API, such as api.example.com. Amazon Virtual Private Cloud interface VPC endpoint Enter the API endpoint for the interface endpoint, such as vpce-123456789abcdef01-example-us-east-1a.elasticloadbalancing.us-east-1.vpce.amazonaws.com. For edge-optimized APIs, this is the domain name for the corresponding CloudFront distribution. You can get the value of DnsName using the CLI command describe-vpc-endpoints. CloudFront distribution Specify the domain name that CloudFront assigned when you created your distribution. Your CloudFront distribution must include an alternate domain name that matches the name of the resource record set. For example, if the name of the resource record set is acme.example.com, your CloudFront distribution must include acme.example.com as one of the alternate domain names. For more information, see Using Alternate Domain Names (CNAMEs) in the Amazon CloudFront Developer Guide. You can't create a resource record set in a private hosted zone to route traffic to a CloudFront distribution. For failover alias records, you can't specify a CloudFront distribution for both the primary and secondary records. A distribution must include an alternate domain name that matches the name of the record. However, the primary and secondary records have the same name, and you can't include the same alternate domain name in more than one distribution. Elastic Beanstalk environment If the domain name for your Elastic Beanstalk environment includes the region that you deployed the environment in, you can create an alias record that routes traffic to the environment. For example, the domain name my-environment.us-west-2.elasticbeanstalk.com is a regionalized domain name. For environments that were created before early 2016, the domain name doesn't include the region. To route traffic to these environments, you must create a CNAME record instead of an alias record. Note that you can't create a CNAME record for the root domain name. For example, if your domain name is example.com, you can create a record that routes traffic for acme.example.com to your Elastic Beanstalk environment, but you can't create a record that routes traffic for example.com to your Elastic Beanstalk environment. For Elastic Beanstalk environments that have regionalized subdomains, specify the CNAME attribute for the environment. You can use the following methods to get the value of the CNAME attribute: Amazon Web Services Management Console: For information about how to get the value by using the console, see Using Custom Domains with Elastic Beanstalk in the Elastic Beanstalk Developer Guide. Elastic Beanstalk API: Use the DescribeEnvironments action to get the value of the CNAME attribute. For more information, see DescribeEnvironments in the Elastic Beanstalk API Reference. CLI: Use the describe-environments command to get the value of the CNAME attribute. For more information, see describe-environments in the CLI Command Reference. ELB load balancer Specify the DNS name that is associated with the load balancer. Get the DNS name by using the Amazon Web Services Management Console, the ELB API, or the CLI. Amazon Web Services Management Console: Go to the EC2 page, choose Load Balancers in the navigation pane, choose the load balancer, choose the Description tab, and get the value of the DNS name field. If you're routing traffic to a Classic Load Balancer, get the value that begins with dualstack. If you're routing traffic to another type of load balancer, get the value that applies to the record type, A or AAAA. Elastic Load Balancing API: Use DescribeLoadBalancers to get the value of DNSName. For more information, see the applicable guide: Classic Load Balancers: DescribeLoadBalancers Application and Network Load Balancers: DescribeLoadBalancers CLI: Use describe-load-balancers to get the value of DNSName. For more information, see the applicable guide: Classic Load Balancers: describe-load-balancers Application and Network Load Balancers: describe-load-balancers Global Accelerator accelerator Specify the DNS name for your accelerator: Global Accelerator API: To get the DNS name, use DescribeAccelerator. CLI: To get the DNS name, use describe-accelerator. Amazon S3 bucket that is configured as a static website Specify the domain name of the Amazon S3 website endpoint that you created the bucket in, for example, s3-website.us-east-2.amazonaws.com. For more information about valid values, see the table Amazon S3 Website Endpoints in the Amazon Web Services General Reference. For more information about using S3 buckets for websites, see Getting Started with Amazon Route 53 in the Amazon Route 53 Developer Guide. Another Route 53 resource record set Specify the value of the Name element for a resource record set in the current hosted zone. If you're creating an alias record that has the same name as the hosted zone (known as the zone apex), you can't specify the domain name for a record for which the value of Type is CNAME. This is because the alias record must have the same type as the record that you're routing traffic to, and creating a CNAME record for the zone apex isn't supported even for an alias record."];
       evaluateTargetHealth: AliasHealthEnabled.t
         [@ocaml.doc
-          "Applies only to alias, failover alias, geolocation alias, latency alias, and weighted alias resource record sets: When EvaluateTargetHealth is true, an alias resource record set inherits the health of the referenced Amazon Web Services resource, such as an ELB load balancer or another resource record set in the hosted zone. Note the following: CloudFront distributions You can't set EvaluateTargetHealth to true when the alias target is a CloudFront distribution. Elastic Beanstalk environments that have regionalized subdomains If you specify an Elastic Beanstalk environment in DNSName and the environment contains an ELB load balancer, Elastic Load Balancing routes queries only to the healthy Amazon EC2 instances that are registered with the load balancer. (An environment automatically contains an ELB load balancer if it includes more than one Amazon EC2 instance.) If you set EvaluateTargetHealth to true and either no Amazon EC2 instances are healthy or the load balancer itself is unhealthy, Route 53 routes queries to other available resources that are healthy, if any. If the environment contains a single Amazon EC2 instance, there are no special requirements. ELB load balancers Health checking behavior depends on the type of load balancer: Classic Load Balancers: If you specify an ELB Classic Load Balancer in DNSName, Elastic Load Balancing routes queries only to the healthy Amazon EC2 instances that are registered with the load balancer. If you set EvaluateTargetHealth to true and either no EC2 instances are healthy or the load balancer itself is unhealthy, Route 53 routes queries to other resources. Application and Network Load Balancers: If you specify an ELB Application or Network Load Balancer and you set EvaluateTargetHealth to true, Route 53 routes queries to the load balancer based on the health of the target groups that are associated with the load balancer: For an Application or Network Load Balancer to be considered healthy, every target group that contains targets must contain at least one healthy target. If any target group contains only unhealthy targets, the load balancer is considered unhealthy, and Route 53 routes queries to other resources. A target group that has no registered targets is considered unhealthy. When you create a load balancer, you configure settings for Elastic Load Balancing health checks; they're not Route 53 health checks, but they perform a similar function. Do not create Route 53 health checks for the EC2 instances that you register with an ELB load balancer. S3 buckets There are no special requirements for setting EvaluateTargetHealth to true when the alias target is an S3 bucket. Other records in the same hosted zone If the Amazon Web Services resource that you specify in DNSName is a record or a group of records (for example, a group of weighted records) but is not another alias record, we recommend that you associate a health check with all of the records in the alias target. For more information, see What Happens When You Omit Health Checks? in the Amazon Route 53 Developer Guide. For more information and examples, see Amazon Route 53 Health Checks and DNS Failover in the Amazon Route 53 Developer Guide."]}
+          "Applies only to alias, failover alias, geolocation alias, latency alias, and weighted alias resource record sets: When EvaluateTargetHealth is true, an alias resource record set inherits the health of the referenced Amazon Web Services resource, such as an ELB load balancer or another resource record set in the hosted zone. Note the following: CloudFront distributions You can't set EvaluateTargetHealth to true when the alias target is a CloudFront distribution. Elastic Beanstalk environments that have regionalized subdomains If you specify an Elastic Beanstalk environment in DNSName and the environment contains an ELB load balancer, Elastic Load Balancing routes queries only to the healthy Amazon EC2 instances that are registered with the load balancer. (An environment automatically contains an ELB load balancer if it includes more than one Amazon EC2 instance.) If you set EvaluateTargetHealth to true and either no Amazon EC2 instances are healthy or the load balancer itself is unhealthy, Route 53 routes queries to other available resources that are healthy, if any. If the environment contains a single Amazon EC2 instance, there are no special requirements. ELB load balancers Health checking behavior depends on the type of load balancer: Classic Load Balancers: If you specify an ELB Classic Load Balancer in DNSName, Elastic Load Balancing routes queries only to the healthy Amazon EC2 instances that are registered with the load balancer. If you set EvaluateTargetHealth to true and either no EC2 instances are healthy or the load balancer itself is unhealthy, Route 53 routes queries to other resources. Application and Network Load Balancers: If you specify an ELB Application or Network Load Balancer and you set EvaluateTargetHealth to true, Route 53 routes queries to the load balancer based on the health of the target groups that are associated with the load balancer: For an Application or Network Load Balancer to be considered healthy, every target group that contains targets must contain at least one healthy target. If any target group contains only unhealthy targets, the load balancer is considered unhealthy, and Route 53 routes queries to other resources. A target group that has no registered targets is considered unhealthy. When you create a load balancer, you configure settings for Elastic Load Balancing health checks; they're not Route 53 health checks, but they perform a similar function. Do not create Route 53 health checks for the EC2 instances that you register with an ELB load balancer. API Gateway APIs There are no special requirements for setting EvaluateTargetHealth to true when the alias target is an API Gateway API. However, because API Gateway is highly available by design, EvaluateTargetHealth provides no operational benefit and Route 53 health checks are recommended instead for failover scenarios. S3 buckets There are no special requirements for setting EvaluateTargetHealth to true when the alias target is an S3 bucket. However, because S3 buckets are highly available by design, EvaluateTargetHealth provides no operational benefit and Route 53 health checks are recommended instead for failover scenarios. VPC interface endpoints There are no special requirements for setting EvaluateTargetHealth to true when the alias target is a VPC interface endpoint. However, because VPC interface endpoints are highly available by design, EvaluateTargetHealth provides no operational benefit and Route 53 health checks are recommended instead for failover scenarios. Other records in the same hosted zone If the Amazon Web Services resource that you specify in DNSName is a record or a group of records (for example, a group of weighted records) but is not another alias record, we recommend that you associate a health check with all of the records in the alias target. For more information, see What Happens When You Omit Health Checks? in the Amazon Route 53 Developer Guide. While EvaluateTargetHealth can be set to true for highly available Amazon Web Services services (such as S3 buckets, VPC interface endpoints, and API Gateway), these services are designed for high availability and rarely experience outages that would be detected by this feature. For failover scenarios with these services, consider using Route 53 health checks that monitor your application's ability to access the service instead. For more information and examples, see Amazon Route 53 Health Checks and DNS Failover in the Amazon Route 53 Developer Guide."]}
     let context_ = "AliasTarget"
     let make ~hostedZoneId =
       fun ~dNSName ->
@@ -452,15 +682,50 @@ module AliasTarget =
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
       make ~evaluateTargetHealth ~dNSName ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let evaluateTargetHealth =
-        field_map_exn json "EvaluateTargetHealth" AliasHealthEnabled.of_json in
-      let dNSName = field_map_exn json "DNSName" DNSName.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+        field_map_exn json__ "EvaluateTargetHealth"
+          AliasHealthEnabled.of_json in
+      let dNSName = field_map_exn json__ "DNSName" DNSName.of_json in
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ~evaluateTargetHealth ~dNSName ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Alias resource record sets only: Information about the Amazon Web Services resource, such as a CloudFront distribution or an Amazon S3 bucket, that you want to route traffic to. When creating resource record sets for a private hosted zone, note the following: Creating geolocation alias resource record sets or latency alias resource record sets in a private hosted zone is unsupported. For information about creating failover resource record sets in a private hosted zone, see Configuring Failover in a Private Hosted Zone."]
+       "Alias resource record sets only: Information about the Amazon Web Services resource, such as a CloudFront distribution or an Amazon S3 bucket, that you want to route traffic to. When creating resource record sets for a private hosted zone, note the following: For information about creating failover resource record sets in a private hosted zone, see Configuring Failover in a Private Hosted Zone."]
+module CidrRoutingConfig =
+  struct
+    type nonrec t =
+      {
+      collectionId: UUID.t [@ocaml.doc "The CIDR collection ID."];
+      locationName: CidrLocationNameDefaultAllowed.t
+        [@ocaml.doc "The CIDR collection location name."]}
+    let context_ = "CidrRoutingConfig"
+    let make ~collectionId =
+      fun ~locationName -> fun () -> { collectionId; locationName }
+    let to_value x =
+      structure_to_value
+        [("CollectionId", (Some (UUID.to_value x.collectionId)));
+        ("LocationName",
+          (Some (CidrLocationNameDefaultAllowed.to_value x.locationName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let locationName =
+        CidrLocationNameDefaultAllowed.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LocationName") in
+      let collectionId =
+        UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CollectionId") in
+      make ~locationName ~collectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let locationName =
+        field_map_exn json__ "LocationName"
+          CidrLocationNameDefaultAllowed.of_json in
+      let collectionId = field_map_exn json__ "CollectionId" UUID.of_json in
+      make ~locationName ~collectionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The object that is specified in resource record set object when you are linking a resource record set to a CIDR location. A LocationName with an asterisk \226\128\156*\226\128\157 can be used to create a default CIDR record. CollectionId is still required for default record."]
 module GeoLocation =
   struct
     type nonrec t =
@@ -470,7 +735,7 @@ module GeoLocation =
           "The two-letter code for the continent. Amazon Route 53 supports the following continent codes: AF: Africa AN: Antarctica AS: Asia EU: Europe OC: Oceania NA: North America SA: South America Constraint: Specifying ContinentCode with either CountryCode or SubdivisionCode returns an InvalidInput error."];
       countryCode: GeoLocationCountryCode.t option
         [@ocaml.doc
-          "For geolocation resource record sets, the two-letter code for a country. Amazon Route 53 uses the two-letter country codes that are specified in ISO standard 3166-1 alpha-2."];
+          "For geolocation resource record sets, the two-letter code for a country. Amazon Route 53 uses the two-letter country codes that are specified in ISO standard 3166-1 alpha-2. Route 53 also supports the country code UA for Ukraine."];
       subdivisionCode: GeoLocationSubdivisionCode.t option
         [@ocaml.doc
           "For geolocation resource record sets, the two-letter code for a state of the United States. Route 53 doesn't support any other values for SubdivisionCode. For a list of state abbreviations, see Appendix B: Two\226\128\147Letter State and Possession Abbreviations on the United States Postal Service website. If you specify subdivisioncode, you must also specify US for CountryCode."]}
@@ -500,17 +765,67 @@ module GeoLocation =
           (Xml.child xml_arg0 "ContinentCode") in
       make ?subdivisionCode ?countryCode ?continentCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subdivisionCode =
-        field_map json "SubdivisionCode" GeoLocationSubdivisionCode.of_json in
+        field_map json__ "SubdivisionCode" GeoLocationSubdivisionCode.of_json in
       let countryCode =
-        field_map json "CountryCode" GeoLocationCountryCode.of_json in
+        field_map json__ "CountryCode" GeoLocationCountryCode.of_json in
       let continentCode =
-        field_map json "ContinentCode" GeoLocationContinentCode.of_json in
+        field_map json__ "ContinentCode" GeoLocationContinentCode.of_json in
       make ?subdivisionCode ?countryCode ?continentCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about a geographic location."]
+module GeoProximityLocation =
+  struct
+    type nonrec t =
+      {
+      aWSRegion: AWSRegion.t option
+        [@ocaml.doc
+          "The Amazon Web Services Region the resource you are directing DNS traffic to, is in."];
+      localZoneGroup: LocalZoneGroup.t option
+        [@ocaml.doc
+          "Specifies an Amazon Web Services Local Zone Group. A local Zone Group is usually the Local Zone code without the ending character. For example, if the Local Zone is us-east-1-bue-1a the Local Zone Group is us-east-1-bue-1. You can identify the Local Zones Group for a specific Local Zone by using the describe-availability-zones CLI command: This command returns: \"GroupName\": \"us-west-2-den-1\", specifying that the Local Zone us-west-2-den-1a belongs to the Local Zone Group us-west-2-den-1."];
+      coordinates: Coordinates.t option
+        [@ocaml.doc
+          "Contains the longitude and latitude for a geographic region."];
+      bias: Bias.t option
+        [@ocaml.doc
+          "The bias increases or decreases the size of the geographic region from which Route\194\16053 routes traffic to a resource. To use Bias to change the size of the geographic region, specify the applicable value for the bias: To expand the size of the geographic region from which Route\194\16053 routes traffic to a resource, specify a positive integer from 1 to 99 for the bias. Route\194\16053 shrinks the size of adjacent regions. To shrink the size of the geographic region from which Route\194\16053 routes traffic to a resource, specify a negative bias of -1 to -99. Route\194\16053 expands the size of adjacent regions."]}
+    let make ?aWSRegion =
+      fun ?localZoneGroup ->
+        fun ?coordinates ->
+          fun ?bias ->
+            fun () -> { aWSRegion; localZoneGroup; coordinates; bias }
+    let to_value x =
+      structure_to_value
+        [("AWSRegion", (Option.map x.aWSRegion ~f:AWSRegion.to_value));
+        ("LocalZoneGroup",
+          (Option.map x.localZoneGroup ~f:LocalZoneGroup.to_value));
+        ("Coordinates", (Option.map x.coordinates ~f:Coordinates.to_value));
+        ("Bias", (Option.map x.bias ~f:Bias.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let bias = (Option.map ~f:Bias.of_xml) (Xml.child xml_arg0 "Bias") in
+      let coordinates =
+        (Option.map ~f:Coordinates.of_xml) (Xml.child xml_arg0 "Coordinates") in
+      let localZoneGroup =
+        (Option.map ~f:LocalZoneGroup.of_xml)
+          (Xml.child xml_arg0 "LocalZoneGroup") in
+      let aWSRegion =
+        (Option.map ~f:AWSRegion.of_xml) (Xml.child xml_arg0 "AWSRegion") in
+      make ?bias ?coordinates ?localZoneGroup ?aWSRegion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bias = field_map json__ "Bias" Bias.of_json in
+      let coordinates = field_map json__ "Coordinates" Coordinates.of_json in
+      let localZoneGroup =
+        field_map json__ "LocalZoneGroup" LocalZoneGroup.of_json in
+      let aWSRegion = field_map json__ "AWSRegion" AWSRegion.of_json in
+      make ?bias ?coordinates ?localZoneGroup ?aWSRegion ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "(Resource record sets only): A complex type that lets you specify where your resources are located. Only one of LocalZoneGroup, Coordinates, or Amazon Web ServicesRegion is allowed per request at a time. For more information about geoproximity routing, see Geoproximity routing in the Amazon Route\194\16053 Developer Guide."]
 module RRType =
   struct
     type nonrec t =
@@ -527,6 +842,10 @@ module RRType =
       | AAAA 
       | CAA 
       | DS 
+      | TLSA 
+      | SSHFP 
+      | SVCB 
+      | HTTPS 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -544,6 +863,10 @@ module RRType =
       | AAAA -> "AAAA"
       | CAA -> "CAA"
       | DS -> "DS"
+      | TLSA -> "TLSA"
+      | SSHFP -> "SSHFP"
+      | SVCB -> "SVCB"
+      | HTTPS -> "HTTPS"
       | Non_static_id s -> s
     let of_string =
       function
@@ -560,6 +883,10 @@ module RRType =
       | "AAAA" -> AAAA
       | "CAA" -> CAA
       | "DS" -> DS
+      | "TLSA" -> TLSA
+      | "SSHFP" -> SSHFP
+      | "SVCB" -> SVCB
+      | "HTTPS" -> HTTPS
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -639,6 +966,7 @@ module ResourceRecordSetRegion =
       | Eu_west_2 
       | Eu_west_3 
       | Eu_central_1 
+      | Eu_central_2 
       | Ap_southeast_1 
       | Ap_southeast_2 
       | Ap_southeast_3 
@@ -651,9 +979,23 @@ module ResourceRecordSetRegion =
       | Cn_northwest_1 
       | Ap_east_1 
       | Me_south_1 
+      | Me_central_1 
       | Ap_south_1 
+      | Ap_south_2 
       | Af_south_1 
       | Eu_south_1 
+      | Eu_south_2 
+      | Ap_southeast_4 
+      | Il_central_1 
+      | Ca_west_1 
+      | Ap_southeast_5 
+      | Mx_central_1 
+      | Ap_southeast_7 
+      | Us_gov_east_1 
+      | Us_gov_west_1 
+      | Ap_east_2 
+      | Ap_southeast_6 
+      | Eusc_de_east_1 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -667,6 +1009,7 @@ module ResourceRecordSetRegion =
       | Eu_west_2 -> "eu-west-2"
       | Eu_west_3 -> "eu-west-3"
       | Eu_central_1 -> "eu-central-1"
+      | Eu_central_2 -> "eu-central-2"
       | Ap_southeast_1 -> "ap-southeast-1"
       | Ap_southeast_2 -> "ap-southeast-2"
       | Ap_southeast_3 -> "ap-southeast-3"
@@ -679,9 +1022,23 @@ module ResourceRecordSetRegion =
       | Cn_northwest_1 -> "cn-northwest-1"
       | Ap_east_1 -> "ap-east-1"
       | Me_south_1 -> "me-south-1"
+      | Me_central_1 -> "me-central-1"
       | Ap_south_1 -> "ap-south-1"
+      | Ap_south_2 -> "ap-south-2"
       | Af_south_1 -> "af-south-1"
       | Eu_south_1 -> "eu-south-1"
+      | Eu_south_2 -> "eu-south-2"
+      | Ap_southeast_4 -> "ap-southeast-4"
+      | Il_central_1 -> "il-central-1"
+      | Ca_west_1 -> "ca-west-1"
+      | Ap_southeast_5 -> "ap-southeast-5"
+      | Mx_central_1 -> "mx-central-1"
+      | Ap_southeast_7 -> "ap-southeast-7"
+      | Us_gov_east_1 -> "us-gov-east-1"
+      | Us_gov_west_1 -> "us-gov-west-1"
+      | Ap_east_2 -> "ap-east-2"
+      | Ap_southeast_6 -> "ap-southeast-6"
+      | Eusc_de_east_1 -> "eusc-de-east-1"
       | Non_static_id s -> s
     let of_string =
       function
@@ -694,6 +1051,7 @@ module ResourceRecordSetRegion =
       | "eu-west-2" -> Eu_west_2
       | "eu-west-3" -> Eu_west_3
       | "eu-central-1" -> Eu_central_1
+      | "eu-central-2" -> Eu_central_2
       | "ap-southeast-1" -> Ap_southeast_1
       | "ap-southeast-2" -> Ap_southeast_2
       | "ap-southeast-3" -> Ap_southeast_3
@@ -706,9 +1064,23 @@ module ResourceRecordSetRegion =
       | "cn-northwest-1" -> Cn_northwest_1
       | "ap-east-1" -> Ap_east_1
       | "me-south-1" -> Me_south_1
+      | "me-central-1" -> Me_central_1
       | "ap-south-1" -> Ap_south_1
+      | "ap-south-2" -> Ap_south_2
       | "af-south-1" -> Af_south_1
       | "eu-south-1" -> Eu_south_1
+      | "eu-south-2" -> Eu_south_2
+      | "ap-southeast-4" -> Ap_southeast_4
+      | "il-central-1" -> Il_central_1
+      | "ca-west-1" -> Ca_west_1
+      | "ap-southeast-5" -> Ap_southeast_5
+      | "mx-central-1" -> Mx_central_1
+      | "ap-southeast-7" -> Ap_southeast_7
+      | "us-gov-east-1" -> Us_gov_east_1
+      | "us-gov-west-1" -> Us_gov_west_1
+      | "ap-east-2" -> Ap_east_2
+      | "ap-southeast-6" -> Ap_southeast_6
+      | "eusc-de-east-1" -> Eusc_de_east_1
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -743,6 +1115,9 @@ module ResourceRecords =
     type nonrec t = ResourceRecord.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceRecord.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -821,9 +1196,9 @@ module Tag =
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map json__ "Key" TagKey.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about a tag that you want to add or edit for the specified health check or hosted zone."]
@@ -854,6 +1229,77 @@ module ResourceDescription =
     let of_json j = string_of_json ~kind:"ResourceDescription" j
     let to_json = simple_to_json to_value
   end
+module AcceleratedRecoveryStatus =
+  struct
+    type nonrec t =
+      | ENABLING 
+      | ENABLE_FAILED 
+      | ENABLING_HOSTED_ZONE_LOCKED 
+      | ENABLED 
+      | DISABLING 
+      | DISABLE_FAILED 
+      | DISABLED 
+      | DISABLING_HOSTED_ZONE_LOCKED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLING -> "ENABLING"
+      | ENABLE_FAILED -> "ENABLE_FAILED"
+      | ENABLING_HOSTED_ZONE_LOCKED -> "ENABLING_HOSTED_ZONE_LOCKED"
+      | ENABLED -> "ENABLED"
+      | DISABLING -> "DISABLING"
+      | DISABLE_FAILED -> "DISABLE_FAILED"
+      | DISABLED -> "DISABLED"
+      | DISABLING_HOSTED_ZONE_LOCKED -> "DISABLING_HOSTED_ZONE_LOCKED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLING" -> ENABLING
+      | "ENABLE_FAILED" -> ENABLE_FAILED
+      | "ENABLING_HOSTED_ZONE_LOCKED" -> ENABLING_HOSTED_ZONE_LOCKED
+      | "ENABLED" -> ENABLED
+      | "DISABLING" -> DISABLING
+      | "DISABLE_FAILED" -> DISABLE_FAILED
+      | "DISABLED" -> DISABLED
+      | "DISABLING_HOSTED_ZONE_LOCKED" -> DISABLING_HOSTED_ZONE_LOCKED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AcceleratedRecoveryStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AcceleratedRecoveryStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module HostedZoneFailureReasons =
+  struct
+    type nonrec t =
+      {
+      acceleratedRecovery: FailureReason.t option
+        [@ocaml.doc
+          "The reason why accelerated recovery failed to be enabled or disabled for the hosted zone, if applicable."]}
+    let make ?acceleratedRecovery = fun () -> { acceleratedRecovery }
+    let to_value x =
+      structure_to_value
+        [("AcceleratedRecovery",
+           (Option.map x.acceleratedRecovery ~f:FailureReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let acceleratedRecovery =
+        (Option.map ~f:FailureReason.of_xml)
+          (Xml.child xml_arg0 "AcceleratedRecovery") in
+      make ?acceleratedRecovery ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let acceleratedRecovery =
+        field_map json__ "AcceleratedRecovery" FailureReason.of_json in
+      make ?acceleratedRecovery ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about why certain features failed to be enabled or configured for the hosted zone."]
 module ServicePrincipal =
   struct
     type nonrec t = string
@@ -932,6 +1378,9 @@ module DimensionList =
     type nonrec t = Dimension.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Dimension.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1089,9 +1538,9 @@ module AlarmIdentifier =
           (Xml.child_exn ~context:context_ xml_arg0 "Region") in
       make ~name ~region ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" AlarmName.of_json in
-      let region = field_map_exn json "Region" CloudWatchRegion.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" AlarmName.of_json in
+      let region = field_map_exn json__ "Region" CloudWatchRegion.of_json in
       make ~name ~region ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1101,6 +1550,9 @@ module ChildHealthCheckList =
     type nonrec t = HealthCheckId.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:256); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HealthCheckId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1188,6 +1640,9 @@ module HealthCheckRegionList =
         ok_or_failwith
           ((check_list_max i ~max:64) >>= (fun () -> check_list_min i ~min:3));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HealthCheckRegion.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1488,10 +1943,10 @@ module ResourceRecordSet =
       {
       name: DNSName.t
         [@ocaml.doc
-          "For ChangeResourceRecordSets requests, the name of the record that you want to create, update, or delete. For ListResourceRecordSets responses, the name of a record in the specified hosted zone. ChangeResourceRecordSets Only Enter a fully qualified domain name, for example, www.example.com. You can optionally include a trailing dot. If you omit the trailing dot, Amazon Route 53 assumes that the domain name that you specify is fully qualified. This means that Route 53 treats www.example.com (without a trailing dot) and www.example.com. (with a trailing dot) as identical. For information about how to specify characters other than a-z, 0-9, and - (hyphen) and how to specify internationalized domain names, see DNS Domain Name Format in the Amazon Route 53 Developer Guide. You can use the asterisk (*) wildcard to replace the leftmost label in a domain name, for example, *.example.com. Note the following: The * must replace the entire label. For example, you can't specify *prod.example.com or prod*.example.com. The * can't replace any of the middle labels, for example, marketing.*.example.com. If you include * in any position other than the leftmost label in a domain name, DNS treats it as an * character (ASCII 42), not as a wildcard. You can't use the * wildcard for resource records sets that have a type of NS. You can use the * wildcard as the leftmost label in a domain name, for example, *.example.com. You can't use an * for one of the middle labels, for example, marketing.*.example.com. In addition, the * must replace the entire label; for example, you can't specify prod*.example.com."];
+          "For ChangeResourceRecordSets requests, the name of the record that you want to create, update, or delete. For ListResourceRecordSets responses, the name of a record in the specified hosted zone. ChangeResourceRecordSets Only Enter a fully qualified domain name, for example, www.example.com. You can optionally include a trailing dot. If you omit the trailing dot, Amazon Route 53 assumes that the domain name that you specify is fully qualified. This means that Route 53 treats www.example.com (without a trailing dot) and www.example.com. (with a trailing dot) as identical. For information about how to specify characters other than a-z, 0-9, and - (hyphen) and how to specify internationalized domain names, see DNS Domain Name Format in the Amazon Route 53 Developer Guide. You can use the asterisk (*) wildcard to replace the leftmost label in a domain name, for example, *.example.com. Note the following: The * must replace the entire label. For example, you can't specify *prod.example.com or prod*.example.com. The * can't replace any of the middle labels, for example, marketing.*.example.com. If you include * in any position other than the leftmost label in a domain name, DNS treats it as an * character (ASCII 42), not as a wildcard. You can't use the * wildcard for resource records sets that have a type of NS."];
       type_: RRType.t
         [@ocaml.doc
-          "The DNS record type. For information about different record types and how data is encoded for them, see Supported DNS Resource Record Types in the Amazon Route 53 Developer Guide. Valid values for basic resource record sets: A | AAAA | CAA | CNAME | DS |MX | NAPTR | NS | PTR | SOA | SPF | SRV | TXT Values for weighted, latency, geolocation, and failover resource record sets: A | AAAA | CAA | CNAME | MX | NAPTR | PTR | SPF | SRV | TXT. When creating a group of weighted, latency, geolocation, or failover resource record sets, specify the same value for all of the resource record sets in the group. Valid values for multivalue answer resource record sets: A | AAAA | MX | NAPTR | PTR | SPF | SRV | TXT SPF records were formerly used to verify the identity of the sender of email messages. However, we no longer recommend that you create resource record sets for which the value of Type is SPF. RFC 7208, Sender Policy Framework (SPF) for Authorizing Use of Domains in Email, Version 1, has been updated to say, \"...\\[I\\]ts existence and mechanism defined in \\[RFC4408\\] have led to some interoperability issues. Accordingly, its use is no longer appropriate for SPF version 1; implementations are not to use it.\" In RFC 7208, see section 14.1, The SPF DNS Record Type. Values for alias resource record sets: Amazon API Gateway custom regional APIs and edge-optimized APIs: A CloudFront distributions: A If IPv6 is enabled for the distribution, create two resource record sets to route traffic to your distribution, one with a value of A and one with a value of AAAA. Amazon API Gateway environment that has a regionalized subdomain: A ELB load balancers: A | AAAA Amazon S3 buckets: A Amazon Virtual Private Cloud interface VPC endpoints A Another resource record set in this hosted zone: Specify the type of the resource record set that you're creating the alias for. All values are supported except NS and SOA. If you're creating an alias record that has the same name as the hosted zone (known as the zone apex), you can't route traffic to a record for which the value of Type is CNAME. This is because the alias record must have the same type as the record you're routing traffic to, and creating a CNAME record for the zone apex isn't supported even for an alias record."];
+          "The DNS record type. For information about different record types and how data is encoded for them, see Supported DNS Resource Record Types in the Amazon Route 53 Developer Guide. Valid values for basic resource record sets: A | AAAA | CAA | CNAME | DS |MX | NAPTR | NS | PTR | SOA | SPF | SRV | TXT| TLSA| SSHFP| SVCB| HTTPS Values for weighted, latency, geolocation, and failover resource record sets: A | AAAA | CAA | CNAME | MX | NAPTR | PTR | SPF | SRV | TXT| TLSA| SSHFP| SVCB| HTTPS. When creating a group of weighted, latency, geolocation, or failover resource record sets, specify the same value for all of the resource record sets in the group. Valid values for multivalue answer resource record sets: A | AAAA | MX | NAPTR | PTR | SPF | SRV | TXT| CAA| TLSA| SSHFP| SVCB| HTTPS SPF records were formerly used to verify the identity of the sender of email messages. However, we no longer recommend that you create resource record sets for which the value of Type is SPF. RFC 7208, Sender Policy Framework (SPF) for Authorizing Use of Domains in Email, Version 1, has been updated to say, \"...\\[I\\]ts existence and mechanism defined in \\[RFC4408\\] have led to some interoperability issues. Accordingly, its use is no longer appropriate for SPF version 1; implementations are not to use it.\" In RFC 7208, see section 14.1, The SPF DNS Record Type. Values for alias resource record sets: Amazon API Gateway custom regional APIs and edge-optimized APIs: A CloudFront distributions: A If IPv6 is enabled for the distribution, create two resource record sets to route traffic to your distribution, one with a value of A and one with a value of AAAA. Amazon API Gateway environment that has a regionalized subdomain: A ELB load balancers: A | AAAA Amazon S3 buckets: A Amazon Virtual Private Cloud interface VPC endpoints A Another resource record set in this hosted zone: Specify the type of the resource record set that you're creating the alias for. All values are supported except NS and SOA. If you're creating an alias record that has the same name as the hosted zone (known as the zone apex), you can't route traffic to a record for which the value of Type is CNAME. This is because the alias record must have the same type as the record you're routing traffic to, and creating a CNAME record for the zone apex isn't supported even for an alias record."];
       setIdentifier: ResourceRecordSetIdentifier.t option
         [@ocaml.doc
           "Resource record sets that have a routing policy other than simple: An identifier that differentiates among multiple resource record sets that have the same combination of name and type, such as multiple weighted resource record sets named acme.example.com that have a type of A. In a group of resource record sets that have the same name and type, the value of SetIdentifier must be unique for each resource record set. For information about routing policies, see Choosing a Routing Policy in the Amazon Route 53 Developer Guide."];
@@ -1500,10 +1955,10 @@ module ResourceRecordSet =
           "Weighted resource record sets only: Among resource record sets that have the same combination of DNS name and type, a value that determines the proportion of DNS queries that Amazon Route 53 responds to using the current resource record set. Route 53 calculates the sum of the weights for the resource record sets that have the same combination of DNS name and type. Route 53 then responds to queries based on the ratio of a resource's weight to the total. Note the following: You must specify a value for the Weight element for every weighted resource record set. You can only specify one ResourceRecord per weighted resource record set. You can't create latency, failover, or geolocation resource record sets that have the same values for the Name and Type elements as weighted resource record sets. You can create a maximum of 100 weighted resource record sets that have the same values for the Name and Type elements. For weighted (but not weighted alias) resource record sets, if you set Weight to 0 for a resource record set, Route 53 never responds to queries with the applicable value for that resource record set. However, if you set Weight to 0 for all resource record sets that have the same combination of DNS name and type, traffic is routed to all resources with equal probability. The effect of setting Weight to 0 is different when you associate health checks with weighted resource record sets. For more information, see Options for Configuring Route 53 Active-Active and Active-Passive Failover in the Amazon Route 53 Developer Guide."];
       region: ResourceRecordSetRegion.t option
         [@ocaml.doc
-          "Latency-based resource record sets only: The Amazon EC2 Region where you created the resource that this resource record set refers to. The resource typically is an Amazon Web Services resource, such as an EC2 instance or an ELB load balancer, and is referred to by an IP address or a DNS domain name, depending on the record type. Although creating latency and latency alias resource record sets in a private hosted zone is allowed, it's not supported. When Amazon Route 53 receives a DNS query for a domain name and type for which you have created latency resource record sets, Route 53 selects the latency resource record set that has the lowest latency between the end user and the associated Amazon EC2 Region. Route 53 then returns the value that is associated with the selected resource record set. Note the following: You can only specify one ResourceRecord per latency resource record set. You can only create one latency resource record set for each Amazon EC2 Region. You aren't required to create latency resource record sets for all Amazon EC2 Regions. Route 53 will choose the region with the best latency from among the regions that you create latency resource record sets for. You can't create non-latency resource record sets that have the same values for the Name and Type elements as latency resource record sets."];
+          "Latency-based resource record sets only: The Amazon EC2 Region where you created the resource that this resource record set refers to. The resource typically is an Amazon Web Services resource, such as an EC2 instance or an ELB load balancer, and is referred to by an IP address or a DNS domain name, depending on the record type. When Amazon Route 53 receives a DNS query for a domain name and type for which you have created latency resource record sets, Route 53 selects the latency resource record set that has the lowest latency between the end user and the associated Amazon EC2 Region. Route 53 then returns the value that is associated with the selected resource record set. Note the following: You can only specify one ResourceRecord per latency resource record set. You can only create one latency resource record set for each Amazon EC2 Region. You aren't required to create latency resource record sets for all Amazon EC2 Regions. Route 53 will choose the region with the best latency from among the regions that you create latency resource record sets for. You can't create non-latency resource record sets that have the same values for the Name and Type elements as latency resource record sets."];
       geoLocation: GeoLocation.t option
         [@ocaml.doc
-          "Geolocation resource record sets only: A complex type that lets you control how Amazon Route 53 responds to DNS queries based on the geographic origin of the query. For example, if you want all queries from Africa to be routed to a web server with an IP address of 192.0.2.111, create a resource record set with a Type of A and a ContinentCode of AF. Although creating geolocation and geolocation alias resource record sets in a private hosted zone is allowed, it's not supported. If you create separate resource record sets for overlapping geographic regions (for example, one resource record set for a continent and one for a country on the same continent), priority goes to the smallest geographic region. This allows you to route most queries for a continent to one resource and to route queries for a country on that continent to a different resource. You can't create two geolocation resource record sets that specify the same geographic location. The value * in the CountryCode element matches all geographic locations that aren't specified in other geolocation resource record sets that have the same values for the Name and Type elements. Geolocation works by mapping IP addresses to locations. However, some IP addresses aren't mapped to geographic locations, so even if you create geolocation resource record sets that cover all seven continents, Route 53 will receive some DNS queries from locations that it can't identify. We recommend that you create a resource record set for which the value of CountryCode is *. Two groups of queries are routed to the resource that you specify in this record: queries that come from locations for which you haven't created geolocation resource record sets and queries from IP addresses that aren't mapped to a location. If you don't create a * resource record set, Route 53 returns a \"no answer\" response for queries from those locations. You can't create non-geolocation resource record sets that have the same values for the Name and Type elements as geolocation resource record sets."];
+          "Geolocation resource record sets only: A complex type that lets you control how Amazon Route 53 responds to DNS queries based on the geographic origin of the query. For example, if you want all queries from Africa to be routed to a web server with an IP address of 192.0.2.111, create a resource record set with a Type of A and a ContinentCode of AF. If you create separate resource record sets for overlapping geographic regions (for example, one resource record set for a continent and one for a country on the same continent), priority goes to the smallest geographic region. This allows you to route most queries for a continent to one resource and to route queries for a country on that continent to a different resource. You can't create two geolocation resource record sets that specify the same geographic location. The value * in the CountryCode element matches all geographic locations that aren't specified in other geolocation resource record sets that have the same values for the Name and Type elements. Geolocation works by mapping IP addresses to locations. However, some IP addresses aren't mapped to geographic locations, so even if you create geolocation resource record sets that cover all seven continents, Route 53 will receive some DNS queries from locations that it can't identify. We recommend that you create a resource record set for which the value of CountryCode is *. Two groups of queries are routed to the resource that you specify in this record: queries that come from locations for which you haven't created geolocation resource record sets and queries from IP addresses that aren't mapped to a location. If you don't create a * resource record set, Route 53 returns a \"no answer\" response for queries from those locations. You can't create non-geolocation resource record sets that have the same values for the Name and Type elements as geolocation resource record sets."];
       failover: ResourceRecordSetFailover.t option
         [@ocaml.doc
           "Failover resource record sets only: To configure failover, you add the Failover element to two resource record sets. For one resource record set, you specify PRIMARY as the value for Failover; for the other resource record set, you specify SECONDARY. In addition, you include the HealthCheckId element and specify the health check that you want Amazon Route 53 to perform for each resource record set. Except where noted, the following failover behaviors assume that you have included the HealthCheckId element in both resource record sets: When the primary resource record set is healthy, Route 53 responds to DNS queries with the applicable value from the primary resource record set regardless of the health of the secondary resource record set. When the primary resource record set is unhealthy and the secondary resource record set is healthy, Route 53 responds to DNS queries with the applicable value from the secondary resource record set. When the secondary resource record set is unhealthy, Route 53 responds to DNS queries with the applicable value from the primary resource record set regardless of the health of the primary resource record set. If you omit the HealthCheckId element for the secondary resource record set, and if the primary resource record set is unhealthy, Route 53 always responds to DNS queries with the applicable value from the secondary resource record set. This is true regardless of the health of the associated endpoint. You can't create non-failover resource record sets that have the same values for the Name and Type elements as failover resource record sets. For failover alias resource record sets, you must also include the EvaluateTargetHealth element and set the value to true. For more information about configuring failover for Route 53, see the following topics in the Amazon Route 53 Developer Guide: Route 53 Health Checks and DNS Failover Configuring Failover in a Private Hosted Zone"];
@@ -1518,13 +1973,17 @@ module ResourceRecordSet =
           "Information about the resource records to act upon. If you're creating an alias resource record set, omit ResourceRecords."];
       aliasTarget: AliasTarget.t option
         [@ocaml.doc
-          "Alias resource record sets only: Information about the Amazon Web Services resource, such as a CloudFront distribution or an Amazon S3 bucket, that you want to route traffic to. If you're creating resource records sets for a private hosted zone, note the following: You can't create an alias resource record set in a private hosted zone to route traffic to a CloudFront distribution. Creating geolocation alias resource record sets or latency alias resource record sets in a private hosted zone is unsupported. For information about creating failover resource record sets in a private hosted zone, see Configuring Failover in a Private Hosted Zone in the Amazon Route 53 Developer Guide."];
+          "Alias resource record sets only: Information about the Amazon Web Services resource, such as a CloudFront distribution or an Amazon S3 bucket, that you want to route traffic to. If you're creating resource records sets for a private hosted zone, note the following: You can't create an alias resource record set in a private hosted zone to route traffic to a CloudFront distribution. For information about creating failover resource record sets in a private hosted zone, see Configuring Failover in a Private Hosted Zone in the Amazon Route 53 Developer Guide."];
       healthCheckId: HealthCheckId.t option
         [@ocaml.doc
           "If you want Amazon Route 53 to return this resource record set in response to a DNS query only when the status of a health check is healthy, include the HealthCheckId element and specify the ID of the applicable health check. Route 53 determines whether a resource record set is healthy based on one of the following: By periodically sending a request to the endpoint that is specified in the health check By aggregating the status of a specified group of health checks (calculated health checks) By determining the current state of a CloudWatch alarm (CloudWatch metric health checks) Route 53 doesn't check the health of the endpoint that is specified in the resource record set, for example, the endpoint specified by the IP address in the Value element. When you add a HealthCheckId element to a resource record set, Route 53 checks the health of the endpoint that you specified in the health check. For more information, see the following topics in the Amazon Route 53 Developer Guide: How Amazon Route 53 Determines Whether an Endpoint Is Healthy Route 53 Health Checks and DNS Failover Configuring Failover in a Private Hosted Zone When to Specify HealthCheckId Specifying a value for HealthCheckId is useful only when Route 53 is choosing between two or more resource record sets to respond to a DNS query, and you want Route 53 to base the choice in part on the status of a health check. Configuring health checks makes sense only in the following configurations: Non-alias resource record sets: You're checking the health of a group of non-alias resource record sets that have the same routing policy, name, and type (such as multiple weighted records named www.example.com with a type of A) and you specify health check IDs for all the resource record sets. If the health check status for a resource record set is healthy, Route 53 includes the record among the records that it responds to DNS queries with. If the health check status for a resource record set is unhealthy, Route 53 stops responding to DNS queries using the value for that resource record set. If the health check status for all resource record sets in the group is unhealthy, Route 53 considers all resource record sets in the group healthy and responds to DNS queries accordingly. Alias resource record sets: You specify the following settings: You set EvaluateTargetHealth to true for an alias resource record set in a group of resource record sets that have the same routing policy, name, and type (such as multiple weighted records named www.example.com with a type of A). You configure the alias resource record set to route traffic to a non-alias resource record set in the same hosted zone. You specify a health check ID for the non-alias resource record set. If the health check status is healthy, Route 53 considers the alias resource record set to be healthy and includes the alias record among the records that it responds to DNS queries with. If the health check status is unhealthy, Route 53 stops responding to DNS queries using the alias resource record set. The alias resource record set can also route traffic to a group of non-alias resource record sets that have the same routing policy, name, and type. In that configuration, associate health checks with all of the resource record sets in the group of non-alias resource record sets. Geolocation Routing For geolocation resource record sets, if an endpoint is unhealthy, Route 53 looks for a resource record set for the larger, associated geographic region. For example, suppose you have resource record sets for a state in the United States, for the entire United States, for North America, and a resource record set that has * for CountryCode is *, which applies to all locations. If the endpoint for the state resource record set is unhealthy, Route 53 checks for healthy resource record sets in the following order until it finds a resource record set for which the endpoint is healthy: The United States North America The default resource record set Specifying the Health Check Endpoint by Domain Name If your health checks specify the endpoint only by domain name, we recommend that you create a separate health check for each endpoint. For example, create a health check for each HTTP server that is serving content for www.example.com. For the value of FullyQualifiedDomainName, specify the domain name of the server (such as us-east-2-www.example.com), not the name of the resource record sets (www.example.com). Health check results will be unpredictable if you do the following: Create a health check that has the same value for FullyQualifiedDomainName as the name of a resource record set. Associate that health check with the resource record set."];
       trafficPolicyInstanceId: TrafficPolicyInstanceId.t option
         [@ocaml.doc
-          "When you create a traffic policy instance, Amazon Route 53 automatically creates a resource record set. TrafficPolicyInstanceId is the ID of the traffic policy instance that Route 53 created this resource record set for. To delete the resource record set that is associated with a traffic policy instance, use DeleteTrafficPolicyInstance. Route 53 will delete the resource record set automatically. If you delete the resource record set by using ChangeResourceRecordSets, Route 53 doesn't automatically delete the traffic policy instance, and you'll continue to be charged for it even though it's no longer in use."]}
+          "When you create a traffic policy instance, Amazon Route 53 automatically creates a resource record set. TrafficPolicyInstanceId is the ID of the traffic policy instance that Route 53 created this resource record set for. To delete the resource record set that is associated with a traffic policy instance, use DeleteTrafficPolicyInstance. Route 53 will delete the resource record set automatically. If you delete the resource record set by using ChangeResourceRecordSets, Route 53 doesn't automatically delete the traffic policy instance, and you'll continue to be charged for it even though it's no longer in use."];
+      cidrRoutingConfig: CidrRoutingConfig.t option ;
+      geoProximityLocation: GeoProximityLocation.t option
+        [@ocaml.doc
+          "GeoproximityLocation resource record sets only: A complex type that lets you control how Route\194\16053 responds to DNS queries based on the geographic origin of the query and your resources."]}
     let context_ = "ResourceRecordSet"
     let make ?setIdentifier =
       fun ?weight ->
@@ -1537,24 +1996,28 @@ module ResourceRecordSet =
                     fun ?aliasTarget ->
                       fun ?healthCheckId ->
                         fun ?trafficPolicyInstanceId ->
-                          fun ~name ->
-                            fun ~type_ ->
-                              fun () ->
-                                {
-                                  setIdentifier;
-                                  weight;
-                                  region;
-                                  geoLocation;
-                                  failover;
-                                  multiValueAnswer;
-                                  tTL;
-                                  resourceRecords;
-                                  aliasTarget;
-                                  healthCheckId;
-                                  trafficPolicyInstanceId;
-                                  name;
-                                  type_
-                                }
+                          fun ?cidrRoutingConfig ->
+                            fun ?geoProximityLocation ->
+                              fun ~name ->
+                                fun ~type_ ->
+                                  fun () ->
+                                    {
+                                      setIdentifier;
+                                      weight;
+                                      region;
+                                      geoLocation;
+                                      failover;
+                                      multiValueAnswer;
+                                      tTL;
+                                      resourceRecords;
+                                      aliasTarget;
+                                      healthCheckId;
+                                      trafficPolicyInstanceId;
+                                      cidrRoutingConfig;
+                                      geoProximityLocation;
+                                      name;
+                                      type_
+                                    }
     let to_value x =
       structure_to_value
         [("Name", (Some (DNSName.to_value x.name)));
@@ -1577,9 +2040,19 @@ module ResourceRecordSet =
           (Option.map x.healthCheckId ~f:HealthCheckId.to_value));
         ("TrafficPolicyInstanceId",
           (Option.map x.trafficPolicyInstanceId
-             ~f:TrafficPolicyInstanceId.to_value))]
+             ~f:TrafficPolicyInstanceId.to_value));
+        ("CidrRoutingConfig",
+          (Option.map x.cidrRoutingConfig ~f:CidrRoutingConfig.to_value));
+        ("GeoProximityLocation",
+          (Option.map x.geoProximityLocation ~f:GeoProximityLocation.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let geoProximityLocation =
+        (Option.map ~f:GeoProximityLocation.of_xml)
+          (Xml.child xml_arg0 "GeoProximityLocation") in
+      let cidrRoutingConfig =
+        (Option.map ~f:CidrRoutingConfig.of_xml)
+          (Xml.child xml_arg0 "CidrRoutingConfig") in
       let trafficPolicyInstanceId =
         (Option.map ~f:TrafficPolicyInstanceId.of_xml)
           (Xml.child xml_arg0 "TrafficPolicyInstanceId") in
@@ -1613,38 +2086,62 @@ module ResourceRecordSet =
         RRType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       let name =
         DNSName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?trafficPolicyInstanceId ?healthCheckId ?aliasTarget
-        ?resourceRecords ?tTL ?multiValueAnswer ?failover ?geoLocation
-        ?region ?weight ?setIdentifier ~type_ ~name ()
+      make ?geoProximityLocation ?cidrRoutingConfig ?trafficPolicyInstanceId
+        ?healthCheckId ?aliasTarget ?resourceRecords ?tTL ?multiValueAnswer
+        ?failover ?geoLocation ?region ?weight ?setIdentifier ~type_ ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let geoProximityLocation =
+        field_map json__ "GeoProximityLocation" GeoProximityLocation.of_json in
+      let cidrRoutingConfig =
+        field_map json__ "CidrRoutingConfig" CidrRoutingConfig.of_json in
       let trafficPolicyInstanceId =
-        field_map json "TrafficPolicyInstanceId"
+        field_map json__ "TrafficPolicyInstanceId"
           TrafficPolicyInstanceId.of_json in
       let healthCheckId =
-        field_map json "HealthCheckId" HealthCheckId.of_json in
-      let aliasTarget = field_map json "AliasTarget" AliasTarget.of_json in
+        field_map json__ "HealthCheckId" HealthCheckId.of_json in
+      let aliasTarget = field_map json__ "AliasTarget" AliasTarget.of_json in
       let resourceRecords =
-        field_map json "ResourceRecords" ResourceRecords.of_json in
-      let tTL = field_map json "TTL" TTL.of_json in
+        field_map json__ "ResourceRecords" ResourceRecords.of_json in
+      let tTL = field_map json__ "TTL" TTL.of_json in
       let multiValueAnswer =
-        field_map json "MultiValueAnswer"
+        field_map json__ "MultiValueAnswer"
           ResourceRecordSetMultiValueAnswer.of_json in
       let failover =
-        field_map json "Failover" ResourceRecordSetFailover.of_json in
-      let geoLocation = field_map json "GeoLocation" GeoLocation.of_json in
-      let region = field_map json "Region" ResourceRecordSetRegion.of_json in
-      let weight = field_map json "Weight" ResourceRecordSetWeight.of_json in
+        field_map json__ "Failover" ResourceRecordSetFailover.of_json in
+      let geoLocation = field_map json__ "GeoLocation" GeoLocation.of_json in
+      let region = field_map json__ "Region" ResourceRecordSetRegion.of_json in
+      let weight = field_map json__ "Weight" ResourceRecordSetWeight.of_json in
       let setIdentifier =
-        field_map json "SetIdentifier" ResourceRecordSetIdentifier.of_json in
-      let type_ = field_map_exn json "Type" RRType.of_json in
-      let name = field_map_exn json "Name" DNSName.of_json in
-      make ?trafficPolicyInstanceId ?healthCheckId ?aliasTarget
-        ?resourceRecords ?tTL ?multiValueAnswer ?failover ?geoLocation
-        ?region ?weight ?setIdentifier ~type_ ~name ()
+        field_map json__ "SetIdentifier" ResourceRecordSetIdentifier.of_json in
+      let type_ = field_map_exn json__ "Type" RRType.of_json in
+      let name = field_map_exn json__ "Name" DNSName.of_json in
+      make ?geoProximityLocation ?cidrRoutingConfig ?trafficPolicyInstanceId
+        ?healthCheckId ?aliasTarget ?resourceRecords ?tTL ?multiValueAnswer
+        ?failover ?geoLocation ?region ?weight ?setIdentifier ~type_ ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the resource record set to create or delete."]
+module Cidr =
+  struct
+    type nonrec t = string
+    let context_ = "Cidr"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Cidr" j
+    let to_json = simple_to_json to_value
+  end
 module VPCId =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -1671,6 +2168,7 @@ module VPCRegion =
       | Eu_west_2 
       | Eu_west_3 
       | Eu_central_1 
+      | Eu_central_2 
       | Ap_east_1 
       | Me_south_1 
       | Us_gov_west_1 
@@ -1678,10 +2176,12 @@ module VPCRegion =
       | Us_iso_east_1 
       | Us_iso_west_1 
       | Us_isob_east_1 
+      | Me_central_1 
       | Ap_southeast_1 
       | Ap_southeast_2 
       | Ap_southeast_3 
       | Ap_south_1 
+      | Ap_south_2 
       | Ap_northeast_1 
       | Ap_northeast_2 
       | Ap_northeast_3 
@@ -1689,8 +2189,23 @@ module VPCRegion =
       | Sa_east_1 
       | Ca_central_1 
       | Cn_north_1 
+      | Cn_northwest_1 
       | Af_south_1 
       | Eu_south_1 
+      | Eu_south_2 
+      | Ap_southeast_4 
+      | Il_central_1 
+      | Ca_west_1 
+      | Ap_southeast_5 
+      | Mx_central_1 
+      | Us_isof_south_1 
+      | Us_isof_east_1 
+      | Ap_southeast_7 
+      | Ap_east_2 
+      | Eu_isoe_west_1 
+      | Ap_southeast_6 
+      | Us_isob_west_1 
+      | Eusc_de_east_1 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1703,6 +2218,7 @@ module VPCRegion =
       | Eu_west_2 -> "eu-west-2"
       | Eu_west_3 -> "eu-west-3"
       | Eu_central_1 -> "eu-central-1"
+      | Eu_central_2 -> "eu-central-2"
       | Ap_east_1 -> "ap-east-1"
       | Me_south_1 -> "me-south-1"
       | Us_gov_west_1 -> "us-gov-west-1"
@@ -1710,10 +2226,12 @@ module VPCRegion =
       | Us_iso_east_1 -> "us-iso-east-1"
       | Us_iso_west_1 -> "us-iso-west-1"
       | Us_isob_east_1 -> "us-isob-east-1"
+      | Me_central_1 -> "me-central-1"
       | Ap_southeast_1 -> "ap-southeast-1"
       | Ap_southeast_2 -> "ap-southeast-2"
       | Ap_southeast_3 -> "ap-southeast-3"
       | Ap_south_1 -> "ap-south-1"
+      | Ap_south_2 -> "ap-south-2"
       | Ap_northeast_1 -> "ap-northeast-1"
       | Ap_northeast_2 -> "ap-northeast-2"
       | Ap_northeast_3 -> "ap-northeast-3"
@@ -1721,8 +2239,23 @@ module VPCRegion =
       | Sa_east_1 -> "sa-east-1"
       | Ca_central_1 -> "ca-central-1"
       | Cn_north_1 -> "cn-north-1"
+      | Cn_northwest_1 -> "cn-northwest-1"
       | Af_south_1 -> "af-south-1"
       | Eu_south_1 -> "eu-south-1"
+      | Eu_south_2 -> "eu-south-2"
+      | Ap_southeast_4 -> "ap-southeast-4"
+      | Il_central_1 -> "il-central-1"
+      | Ca_west_1 -> "ca-west-1"
+      | Ap_southeast_5 -> "ap-southeast-5"
+      | Mx_central_1 -> "mx-central-1"
+      | Us_isof_south_1 -> "us-isof-south-1"
+      | Us_isof_east_1 -> "us-isof-east-1"
+      | Ap_southeast_7 -> "ap-southeast-7"
+      | Ap_east_2 -> "ap-east-2"
+      | Eu_isoe_west_1 -> "eu-isoe-west-1"
+      | Ap_southeast_6 -> "ap-southeast-6"
+      | Us_isob_west_1 -> "us-isob-west-1"
+      | Eusc_de_east_1 -> "eusc-de-east-1"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1734,6 +2267,7 @@ module VPCRegion =
       | "eu-west-2" -> Eu_west_2
       | "eu-west-3" -> Eu_west_3
       | "eu-central-1" -> Eu_central_1
+      | "eu-central-2" -> Eu_central_2
       | "ap-east-1" -> Ap_east_1
       | "me-south-1" -> Me_south_1
       | "us-gov-west-1" -> Us_gov_west_1
@@ -1741,10 +2275,12 @@ module VPCRegion =
       | "us-iso-east-1" -> Us_iso_east_1
       | "us-iso-west-1" -> Us_iso_west_1
       | "us-isob-east-1" -> Us_isob_east_1
+      | "me-central-1" -> Me_central_1
       | "ap-southeast-1" -> Ap_southeast_1
       | "ap-southeast-2" -> Ap_southeast_2
       | "ap-southeast-3" -> Ap_southeast_3
       | "ap-south-1" -> Ap_south_1
+      | "ap-south-2" -> Ap_south_2
       | "ap-northeast-1" -> Ap_northeast_1
       | "ap-northeast-2" -> Ap_northeast_2
       | "ap-northeast-3" -> Ap_northeast_3
@@ -1752,8 +2288,23 @@ module VPCRegion =
       | "sa-east-1" -> Sa_east_1
       | "ca-central-1" -> Ca_central_1
       | "cn-north-1" -> Cn_north_1
+      | "cn-northwest-1" -> Cn_northwest_1
       | "af-south-1" -> Af_south_1
       | "eu-south-1" -> Eu_south_1
+      | "eu-south-2" -> Eu_south_2
+      | "ap-southeast-4" -> Ap_southeast_4
+      | "il-central-1" -> Il_central_1
+      | "ca-west-1" -> Ca_west_1
+      | "ap-southeast-5" -> Ap_southeast_5
+      | "mx-central-1" -> Mx_central_1
+      | "us-isof-south-1" -> Us_isof_south_1
+      | "us-isof-east-1" -> Us_isof_east_1
+      | "ap-southeast-7" -> Ap_southeast_7
+      | "ap-east-2" -> Ap_east_2
+      | "eu-isoe-west-1" -> Eu_isoe_west_1
+      | "ap-southeast-6" -> Ap_southeast_6
+      | "us-isob-west-1" -> Us_isob_west_1
+      | "eusc-de-east-1" -> Eusc_de_east_1
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1876,6 +2427,9 @@ module TagList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1939,6 +2493,9 @@ module DelegationSetNameServers =
     type nonrec t = DNSName.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DNSName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2035,13 +2592,53 @@ module HostedZoneConfig =
           (Xml.child xml_arg0 "Comment") in
       make ?privateZone ?comment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let privateZone = field_map json "PrivateZone" IsPrivateZone.of_json in
-      let comment = field_map json "Comment" ResourceDescription.of_json in
+    let of_json json__ =
+      let privateZone = field_map json__ "PrivateZone" IsPrivateZone.of_json in
+      let comment = field_map json__ "Comment" ResourceDescription.of_json in
       make ?privateZone ?comment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains an optional comment about your hosted zone. If you don't want to specify a comment, omit both the HostedZoneConfig and Comment elements."]
+module HostedZoneFeatures =
+  struct
+    type nonrec t =
+      {
+      acceleratedRecoveryStatus: AcceleratedRecoveryStatus.t option
+        [@ocaml.doc
+          "The current status of accelerated recovery for the hosted zone."];
+      failureReasons: HostedZoneFailureReasons.t option
+        [@ocaml.doc
+          "Information about any failures that occurred when attempting to enable or configure features for the hosted zone."]}
+    let make ?acceleratedRecoveryStatus =
+      fun ?failureReasons ->
+        fun () -> { acceleratedRecoveryStatus; failureReasons }
+    let to_value x =
+      structure_to_value
+        [("AcceleratedRecoveryStatus",
+           (Option.map x.acceleratedRecoveryStatus
+              ~f:AcceleratedRecoveryStatus.to_value));
+        ("FailureReasons",
+          (Option.map x.failureReasons ~f:HostedZoneFailureReasons.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureReasons =
+        (Option.map ~f:HostedZoneFailureReasons.of_xml)
+          (Xml.child xml_arg0 "FailureReasons") in
+      let acceleratedRecoveryStatus =
+        (Option.map ~f:AcceleratedRecoveryStatus.of_xml)
+          (Xml.child xml_arg0 "AcceleratedRecoveryStatus") in
+      make ?failureReasons ?acceleratedRecoveryStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureReasons =
+        field_map json__ "FailureReasons" HostedZoneFailureReasons.of_json in
+      let acceleratedRecoveryStatus =
+        field_map json__ "AcceleratedRecoveryStatus"
+          AcceleratedRecoveryStatus.of_json in
+      make ?failureReasons ?acceleratedRecoveryStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the features configuration for a hosted zone, including the status of various features and any associated failure reasons."]
 module HostedZoneRRSetCount =
   struct
     type nonrec t = Int64.t
@@ -2083,11 +2680,11 @@ module LinkedService =
           (Xml.child xml_arg0 "ServicePrincipal") in
       make ?description ?servicePrincipal ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" ResourceDescription.of_json in
+        field_map json__ "Description" ResourceDescription.of_json in
       let servicePrincipal =
-        field_map json "ServicePrincipal" ServicePrincipal.of_json in
+        field_map json__ "ServicePrincipal" ServicePrincipal.of_json in
       make ?description ?servicePrincipal ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2120,10 +2717,11 @@ module HostedZoneOwner =
           (Xml.child xml_arg0 "OwningAccount") in
       make ?owningService ?owningAccount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let owningService =
-        field_map json "OwningService" HostedZoneOwningService.of_json in
-      let owningAccount = field_map json "OwningAccount" AWSAccountID.of_json in
+        field_map json__ "OwningService" HostedZoneOwningService.of_json in
+      let owningAccount =
+        field_map json__ "OwningAccount" AWSAccountID.of_json in
       make ?owningService ?owningAccount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2132,61 +2730,60 @@ module CloudWatchAlarmConfiguration =
   struct
     type nonrec t =
       {
-      evaluationPeriods: EvaluationPeriods.t
+      evaluationPeriods: EvaluationPeriods.t option
         [@ocaml.doc
           "For the metric that the CloudWatch alarm is associated with, the number of periods that the metric is compared to the threshold."];
-      threshold: Threshold.t
+      threshold: Threshold.t option
         [@ocaml.doc
           "For the metric that the CloudWatch alarm is associated with, the value the metric is compared with."];
-      comparisonOperator: ComparisonOperator.t
+      comparisonOperator: ComparisonOperator.t option
         [@ocaml.doc
           "For the metric that the CloudWatch alarm is associated with, the arithmetic operation that is used for the comparison."];
-      period: Period.t
+      period: Period.t option
         [@ocaml.doc
           "For the metric that the CloudWatch alarm is associated with, the duration of one evaluation period in seconds."];
-      metricName: MetricName.t
+      metricName: MetricName.t option
         [@ocaml.doc
           "The name of the CloudWatch metric that the alarm is associated with."];
-      namespace: Namespace.t
+      namespace: Namespace.t option
         [@ocaml.doc
           "The namespace of the metric that the alarm is associated with. For more information, see Amazon CloudWatch Namespaces, Dimensions, and Metrics Reference in the Amazon CloudWatch User Guide."];
-      statistic: Statistic.t
+      statistic: Statistic.t option
         [@ocaml.doc
           "For the metric that the CloudWatch alarm is associated with, the statistic that is applied to the metric."];
       dimensions: DimensionList.t option
         [@ocaml.doc
           "For the metric that the CloudWatch alarm is associated with, a complex type that contains information about the dimensions for the metric. For information, see Amazon CloudWatch Namespaces, Dimensions, and Metrics Reference in the Amazon CloudWatch User Guide."]}
-    let context_ = "CloudWatchAlarmConfiguration"
-    let make ?dimensions =
-      fun ~evaluationPeriods ->
-        fun ~threshold ->
-          fun ~comparisonOperator ->
-            fun ~period ->
-              fun ~metricName ->
-                fun ~namespace ->
-                  fun ~statistic ->
+    let make ?evaluationPeriods =
+      fun ?threshold ->
+        fun ?comparisonOperator ->
+          fun ?period ->
+            fun ?metricName ->
+              fun ?namespace ->
+                fun ?statistic ->
+                  fun ?dimensions ->
                     fun () ->
                       {
-                        dimensions;
                         evaluationPeriods;
                         threshold;
                         comparisonOperator;
                         period;
                         metricName;
                         namespace;
-                        statistic
+                        statistic;
+                        dimensions
                       }
     let to_value x =
       structure_to_value
         [("EvaluationPeriods",
-           (Some (EvaluationPeriods.to_value x.evaluationPeriods)));
-        ("Threshold", (Some (Threshold.to_value x.threshold)));
+           (Option.map x.evaluationPeriods ~f:EvaluationPeriods.to_value));
+        ("Threshold", (Option.map x.threshold ~f:Threshold.to_value));
         ("ComparisonOperator",
-          (Some (ComparisonOperator.to_value x.comparisonOperator)));
-        ("Period", (Some (Period.to_value x.period)));
-        ("MetricName", (Some (MetricName.to_value x.metricName)));
-        ("Namespace", (Some (Namespace.to_value x.namespace)));
-        ("Statistic", (Some (Statistic.to_value x.statistic)));
+          (Option.map x.comparisonOperator ~f:ComparisonOperator.to_value));
+        ("Period", (Option.map x.period ~f:Period.to_value));
+        ("MetricName", (Option.map x.metricName ~f:MetricName.to_value));
+        ("Namespace", (Option.map x.namespace ~f:Namespace.to_value));
+        ("Statistic", (Option.map x.statistic ~f:Statistic.to_value));
         ("Dimensions", (Option.map x.dimensions ~f:DimensionList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -2194,41 +2791,37 @@ module CloudWatchAlarmConfiguration =
         (Option.map ~f:DimensionList.of_xml)
           (Xml.child xml_arg0 "Dimensions") in
       let statistic =
-        Statistic.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Statistic") in
+        (Option.map ~f:Statistic.of_xml) (Xml.child xml_arg0 "Statistic") in
       let namespace =
-        Namespace.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Namespace") in
+        (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "Namespace") in
       let metricName =
-        MetricName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MetricName") in
+        (Option.map ~f:MetricName.of_xml) (Xml.child xml_arg0 "MetricName") in
       let period =
-        Period.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Period") in
+        (Option.map ~f:Period.of_xml) (Xml.child xml_arg0 "Period") in
       let comparisonOperator =
-        ComparisonOperator.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ComparisonOperator") in
+        (Option.map ~f:ComparisonOperator.of_xml)
+          (Xml.child xml_arg0 "ComparisonOperator") in
       let threshold =
-        Threshold.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Threshold") in
+        (Option.map ~f:Threshold.of_xml) (Xml.child xml_arg0 "Threshold") in
       let evaluationPeriods =
-        EvaluationPeriods.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EvaluationPeriods") in
-      make ?dimensions ~statistic ~namespace ~metricName ~period
-        ~comparisonOperator ~threshold ~evaluationPeriods ()
+        (Option.map ~f:EvaluationPeriods.of_xml)
+          (Xml.child xml_arg0 "EvaluationPeriods") in
+      make ?dimensions ?statistic ?namespace ?metricName ?period
+        ?comparisonOperator ?threshold ?evaluationPeriods ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dimensions = field_map json "Dimensions" DimensionList.of_json in
-      let statistic = field_map_exn json "Statistic" Statistic.of_json in
-      let namespace = field_map_exn json "Namespace" Namespace.of_json in
-      let metricName = field_map_exn json "MetricName" MetricName.of_json in
-      let period = field_map_exn json "Period" Period.of_json in
+    let of_json json__ =
+      let dimensions = field_map json__ "Dimensions" DimensionList.of_json in
+      let statistic = field_map json__ "Statistic" Statistic.of_json in
+      let namespace = field_map json__ "Namespace" Namespace.of_json in
+      let metricName = field_map json__ "MetricName" MetricName.of_json in
+      let period = field_map json__ "Period" Period.of_json in
       let comparisonOperator =
-        field_map_exn json "ComparisonOperator" ComparisonOperator.of_json in
-      let threshold = field_map_exn json "Threshold" Threshold.of_json in
+        field_map json__ "ComparisonOperator" ComparisonOperator.of_json in
+      let threshold = field_map json__ "Threshold" Threshold.of_json in
       let evaluationPeriods =
-        field_map_exn json "EvaluationPeriods" EvaluationPeriods.of_json in
-      make ?dimensions ~statistic ~namespace ~metricName ~period
-        ~comparisonOperator ~threshold ~evaluationPeriods ()
+        field_map json__ "EvaluationPeriods" EvaluationPeriods.of_json in
+      make ?dimensions ?statistic ?namespace ?metricName ?period
+        ?comparisonOperator ?threshold ?evaluationPeriods ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about the CloudWatch alarm that Amazon Route 53 is monitoring for this health check."]
@@ -2244,7 +2837,7 @@ module HealthCheckConfig =
           "The port on the endpoint that you want Amazon Route 53 to perform health checks on. Don't specify a value for Port when you specify a value for Type of CLOUDWATCH_METRIC or CALCULATED."];
       type_: HealthCheckType.t
         [@ocaml.doc
-          "The type of health check that you want to create, which indicates how Amazon Route 53 determines whether an endpoint is healthy. You can't change the value of Type after you create a health check. You can create the following types of health checks: HTTP: Route 53 tries to establish a TCP connection. If successful, Route 53 submits an HTTP request and waits for an HTTP status code of 200 or greater and less than 400. HTTPS: Route 53 tries to establish a TCP connection. If successful, Route 53 submits an HTTPS request and waits for an HTTP status code of 200 or greater and less than 400. If you specify HTTPS for the value of Type, the endpoint must support TLS v1.0 or later. HTTP_STR_MATCH: Route 53 tries to establish a TCP connection. If successful, Route 53 submits an HTTP request and searches the first 5,120 bytes of the response body for the string that you specify in SearchString. HTTPS_STR_MATCH: Route 53 tries to establish a TCP connection. If successful, Route 53 submits an HTTPS request and searches the first 5,120 bytes of the response body for the string that you specify in SearchString. TCP: Route 53 tries to establish a TCP connection. CLOUDWATCH_METRIC: The health check is associated with a CloudWatch alarm. If the state of the alarm is OK, the health check is considered healthy. If the state is ALARM, the health check is considered unhealthy. If CloudWatch doesn't have sufficient data to determine whether the state is OK or ALARM, the health check status depends on the setting for InsufficientDataHealthStatus: Healthy, Unhealthy, or LastKnownStatus. CALCULATED: For health checks that monitor the status of other health checks, Route 53 adds up the number of health checks that Route 53 health checkers consider to be healthy and compares that number with the value of HealthThreshold. RECOVERY_CONTROL: The health check is assocated with a Route53 Application Recovery Controller routing control. If the routing control state is ON, the health check is considered healthy. If the state is OFF, the health check is considered unhealthy. For more information, see How Route 53 Determines Whether an Endpoint Is Healthy in the Amazon Route 53 Developer Guide."];
+          "The type of health check that you want to create, which indicates how Amazon Route 53 determines whether an endpoint is healthy. You can't change the value of Type after you create a health check. You can create the following types of health checks: HTTP: Route 53 tries to establish a TCP connection. If successful, Route 53 submits an HTTP request and waits for an HTTP status code of 200 or greater and less than 400. HTTPS: Route 53 tries to establish a TCP connection. If successful, Route 53 submits an HTTPS request and waits for an HTTP status code of 200 or greater and less than 400. If you specify HTTPS for the value of Type, the endpoint must support TLS v1.0, v1.1, or v1.2. HTTP_STR_MATCH: Route 53 tries to establish a TCP connection. If successful, Route 53 submits an HTTP request and searches the first 5,120 bytes of the response body for the string that you specify in SearchString. HTTPS_STR_MATCH: Route 53 tries to establish a TCP connection. If successful, Route 53 submits an HTTPS request and searches the first 5,120 bytes of the response body for the string that you specify in SearchString. TCP: Route 53 tries to establish a TCP connection. CLOUDWATCH_METRIC: The health check is associated with a CloudWatch alarm. If the state of the alarm is OK, the health check is considered healthy. If the state is ALARM, the health check is considered unhealthy. If CloudWatch doesn't have sufficient data to determine whether the state is OK or ALARM, the health check status depends on the setting for InsufficientDataHealthStatus: Healthy, Unhealthy, or LastKnownStatus. CALCULATED: For health checks that monitor the status of other health checks, Route 53 adds up the number of health checks that Route 53 health checkers consider to be healthy and compares that number with the value of HealthThreshold. RECOVERY_CONTROL: The health check is associated with a Route53 Application Recovery Controller routing control. If the routing control state is ON, the health check is considered healthy. If the state is OFF, the health check is considered unhealthy. For more information, see How Route 53 Determines Whether an Endpoint Is Healthy in the Amazon Route 53 Developer Guide."];
       resourcePath: ResourcePath.t option
         [@ocaml.doc
           "The path, if any, that you want Amazon Route 53 to request when performing health checks. The path can be any value for which your endpoint will return an HTTP status code of 2xx or 3xx when the endpoint is healthy, for example, the file /docs/route53-health-check.html. You can also include query string parameters, for example, /welcome.html?language=jp&login=y."];
@@ -2256,13 +2849,13 @@ module HealthCheckConfig =
           "If the value of Type is HTTP_STR_MATCH or HTTPS_STR_MATCH, the string that you want Amazon Route 53 to search for in the response body from the specified resource. If the string appears in the response body, Route 53 considers the resource healthy. Route 53 considers case when searching for SearchString in the response body."];
       requestInterval: RequestInterval.t option
         [@ocaml.doc
-          "The number of seconds between the time that Amazon Route 53 gets a response from your endpoint and the time that it sends the next health check request. Each Route 53 health checker makes requests at this interval. You can't change the value of RequestInterval after you create a health check. If you don't specify a value for RequestInterval, the default value is 30 seconds."];
+          "The number of seconds between the time that Amazon Route 53 gets a response from your endpoint and the time that it sends the next health check request. Each Route 53 health checker makes requests at this interval. RequestInterval is not supported when you specify a value for Type of RECOVERY_CONTROL. You can't change the value of RequestInterval after you create a health check. If you don't specify a value for RequestInterval, the default value is 30 seconds."];
       failureThreshold: FailureThreshold.t option
         [@ocaml.doc
-          "The number of consecutive health checks that an endpoint must pass or fail for Amazon Route 53 to change the current status of the endpoint from unhealthy to healthy or vice versa. For more information, see How Amazon Route 53 Determines Whether an Endpoint Is Healthy in the Amazon Route 53 Developer Guide. If you don't specify a value for FailureThreshold, the default value is three health checks."];
+          "The number of consecutive health checks that an endpoint must pass or fail for Amazon Route 53 to change the current status of the endpoint from unhealthy to healthy or vice versa. For more information, see How Amazon Route 53 Determines Whether an Endpoint Is Healthy in the Amazon Route 53 Developer Guide. FailureThreshold is not supported when you specify a value for Type of RECOVERY_CONTROL. Otherwise, if you don't specify a value for FailureThreshold, the default value is three health checks."];
       measureLatency: MeasureLatency.t option
         [@ocaml.doc
-          "Specify whether you want Amazon Route 53 to measure the latency between health checkers in multiple Amazon Web Services regions and your endpoint, and to display CloudWatch latency graphs on the Health Checks page in the Route 53 console. You can't change the value of MeasureLatency after you create a health check."];
+          "Specify whether you want Amazon Route 53 to measure the latency between health checkers in multiple Amazon Web Services regions and your endpoint, and to display CloudWatch latency graphs on the Health Checks page in the Route 53 console. MeasureLatency is not supported when you specify a value for Type of RECOVERY_CONTROL. You can't change the value of MeasureLatency after you create a health check."];
       inverted: Inverted.t option
         [@ocaml.doc
           "Specify whether you want Amazon Route 53 to invert the status of a health check, for example, to consider a health check unhealthy when it otherwise would be considered healthy."];
@@ -2419,36 +3012,36 @@ module HealthCheckConfig =
         ?searchString ?fullyQualifiedDomainName ?resourcePath ~type_ ?port
         ?iPAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routingControlArn =
-        field_map json "RoutingControlArn" RoutingControlArn.of_json in
+        field_map json__ "RoutingControlArn" RoutingControlArn.of_json in
       let insufficientDataHealthStatus =
-        field_map json "InsufficientDataHealthStatus"
+        field_map json__ "InsufficientDataHealthStatus"
           InsufficientDataHealthStatus.of_json in
       let alarmIdentifier =
-        field_map json "AlarmIdentifier" AlarmIdentifier.of_json in
-      let regions = field_map json "Regions" HealthCheckRegionList.of_json in
-      let enableSNI = field_map json "EnableSNI" EnableSNI.of_json in
+        field_map json__ "AlarmIdentifier" AlarmIdentifier.of_json in
+      let regions = field_map json__ "Regions" HealthCheckRegionList.of_json in
+      let enableSNI = field_map json__ "EnableSNI" EnableSNI.of_json in
       let childHealthChecks =
-        field_map json "ChildHealthChecks" ChildHealthCheckList.of_json in
+        field_map json__ "ChildHealthChecks" ChildHealthCheckList.of_json in
       let healthThreshold =
-        field_map json "HealthThreshold" HealthThreshold.of_json in
-      let disabled = field_map json "Disabled" Disabled.of_json in
-      let inverted = field_map json "Inverted" Inverted.of_json in
+        field_map json__ "HealthThreshold" HealthThreshold.of_json in
+      let disabled = field_map json__ "Disabled" Disabled.of_json in
+      let inverted = field_map json__ "Inverted" Inverted.of_json in
       let measureLatency =
-        field_map json "MeasureLatency" MeasureLatency.of_json in
+        field_map json__ "MeasureLatency" MeasureLatency.of_json in
       let failureThreshold =
-        field_map json "FailureThreshold" FailureThreshold.of_json in
+        field_map json__ "FailureThreshold" FailureThreshold.of_json in
       let requestInterval =
-        field_map json "RequestInterval" RequestInterval.of_json in
-      let searchString = field_map json "SearchString" SearchString.of_json in
+        field_map json__ "RequestInterval" RequestInterval.of_json in
+      let searchString = field_map json__ "SearchString" SearchString.of_json in
       let fullyQualifiedDomainName =
-        field_map json "FullyQualifiedDomainName"
+        field_map json__ "FullyQualifiedDomainName"
           FullyQualifiedDomainName.of_json in
-      let resourcePath = field_map json "ResourcePath" ResourcePath.of_json in
-      let type_ = field_map_exn json "Type" HealthCheckType.of_json in
-      let port = field_map json "Port" Port.of_json in
-      let iPAddress = field_map json "IPAddress" IPAddress.of_json in
+      let resourcePath = field_map json__ "ResourcePath" ResourcePath.of_json in
+      let type_ = field_map_exn json__ "Type" HealthCheckType.of_json in
+      let port = field_map json__ "Port" Port.of_json in
+      let iPAddress = field_map json__ "IPAddress" IPAddress.of_json in
       make ?routingControlArn ?insufficientDataHealthStatus ?alarmIdentifier
         ?regions ?enableSNI ?childHealthChecks ?healthThreshold ?disabled
         ?inverted ?measureLatency ?failureThreshold ?requestInterval
@@ -2543,6 +3136,81 @@ module GeoLocationSubdivisionName =
     let of_json j = string_of_json ~kind:"GeoLocationSubdivisionName" j
     let to_json = simple_to_json to_value
   end
+module ARN =
+  struct
+    type nonrec t = string
+    let context_ = "ARN"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ARN" j
+    let to_json = simple_to_json to_value
+  end
+module CollectionName =
+  struct
+    type nonrec t = string
+    let context_ = "CollectionName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9A-Za-z_\\-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CollectionName" j
+    let to_json = simple_to_json to_value
+  end
+module CollectionVersion =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:1L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module CidrLocationNameDefaultNotAllowed =
+  struct
+    type nonrec t = string
+    let context_ = "CidrLocationNameDefaultNotAllowed"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:16) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9A-Za-z_\\-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"CidrLocationNameDefaultNotAllowed" j
+    let to_json = simple_to_json to_value
+  end
 module StatusReport =
   struct
     type nonrec t =
@@ -2566,9 +3234,9 @@ module StatusReport =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
       make ?checkedTime ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let checkedTime = field_map json "CheckedTime" TimeStamp.of_json in
-      let status = field_map json "Status" Status.of_json in
+    let of_json json__ =
+      let checkedTime = field_map json__ "CheckedTime" TimeStamp.of_json in
+      let status = field_map json__ "Status" Status.of_json in
       make ?checkedTime ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2714,14 +3382,73 @@ module Change =
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ~resourceRecordSet ~action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceRecordSet =
-        field_map_exn json "ResourceRecordSet" ResourceRecordSet.of_json in
-      let action = field_map_exn json "Action" ChangeAction.of_json in
+        field_map_exn json__ "ResourceRecordSet" ResourceRecordSet.of_json in
+      let action = field_map_exn json__ "Action" ChangeAction.of_json in
       make ~resourceRecordSet ~action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The information for each resource record set that you want to change."]
+module CidrCollectionChangeAction =
+  struct
+    type nonrec t =
+      | PUT 
+      | DELETE_IF_EXISTS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PUT -> "PUT"
+      | DELETE_IF_EXISTS -> "DELETE_IF_EXISTS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PUT" -> PUT
+      | "DELETE_IF_EXISTS" -> DELETE_IF_EXISTS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CidrCollectionChangeAction"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CidrCollectionChangeAction" j)
+    let to_json = simple_to_json to_value
+  end
+module CidrList =
+  struct
+    type nonrec t = Cidr.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1000) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Cidr.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Cidr.of_xml)
+    let of_json j = list_of_json ~kind:"CidrList" ~of_json:Cidr.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ResettableElementName =
   struct
     type nonrec t =
@@ -2795,9 +3522,9 @@ module VPC =
         (Option.map ~f:VPCRegion.of_xml) (Xml.child xml_arg0 "VPCRegion") in
       make ?vPCId ?vPCRegion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vPCId = field_map json "VPCId" VPCId.of_json in
-      let vPCRegion = field_map json "VPCRegion" VPCRegion.of_json in
+    let of_json json__ =
+      let vPCId = field_map json__ "VPCId" VPCId.of_json in
+      let vPCRegion = field_map json__ "VPCRegion" VPCRegion.of_json in
       make ?vPCId ?vPCRegion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2806,39 +3533,39 @@ module TrafficPolicy =
   struct
     type nonrec t =
       {
-      id: TrafficPolicyId.t
+      id: TrafficPolicyId.t option
         [@ocaml.doc
           "The ID that Amazon Route 53 assigned to a traffic policy when you created it."];
-      version: TrafficPolicyVersion.t
+      version: TrafficPolicyVersion.t option
         [@ocaml.doc
           "The version number that Amazon Route 53 assigns to a traffic policy. For a new traffic policy, the value of Version is always 1."];
-      name: TrafficPolicyName.t
+      name: TrafficPolicyName.t option
         [@ocaml.doc
           "The name that you specified when you created the traffic policy."];
-      type_: RRType.t
+      type_: RRType.t option
         [@ocaml.doc
           "The DNS type of the resource record sets that Amazon Route 53 creates when you use a traffic policy to create a traffic policy instance."];
-      document: TrafficPolicyDocument.t
+      document: TrafficPolicyDocument.t option
         [@ocaml.doc
           "The definition of a traffic policy in JSON format. You specify the JSON document to use for a new traffic policy in the CreateTrafficPolicy request. For more information about the JSON format, see Traffic Policy Document Format."];
       comment: TrafficPolicyComment.t option
         [@ocaml.doc
           "The comment that you specify in the CreateTrafficPolicy request, if any."]}
-    let context_ = "TrafficPolicy"
-    let make ?comment =
-      fun ~id ->
-        fun ~version ->
-          fun ~name ->
-            fun ~type_ ->
-              fun ~document ->
-                fun () -> { comment; id; version; name; type_; document }
+    let make ?id =
+      fun ?version ->
+        fun ?name ->
+          fun ?type_ ->
+            fun ?document ->
+              fun ?comment ->
+                fun () -> { id; version; name; type_; document; comment }
     let to_value x =
       structure_to_value
-        [("Id", (Some (TrafficPolicyId.to_value x.id)));
-        ("Version", (Some (TrafficPolicyVersion.to_value x.version)));
-        ("Name", (Some (TrafficPolicyName.to_value x.name)));
-        ("Type", (Some (RRType.to_value x.type_)));
-        ("Document", (Some (TrafficPolicyDocument.to_value x.document)));
+        [("Id", (Option.map x.id ~f:TrafficPolicyId.to_value));
+        ("Version", (Option.map x.version ~f:TrafficPolicyVersion.to_value));
+        ("Name", (Option.map x.name ~f:TrafficPolicyName.to_value));
+        ("Type", (Option.map x.type_ ~f:RRType.to_value));
+        ("Document",
+          (Option.map x.document ~f:TrafficPolicyDocument.to_value));
         ("Comment", (Option.map x.comment ~f:TrafficPolicyComment.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -2846,30 +3573,27 @@ module TrafficPolicy =
         (Option.map ~f:TrafficPolicyComment.of_xml)
           (Xml.child xml_arg0 "Comment") in
       let document =
-        TrafficPolicyDocument.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Document") in
-      let type_ =
-        RRType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+        (Option.map ~f:TrafficPolicyDocument.of_xml)
+          (Xml.child xml_arg0 "Document") in
+      let type_ = (Option.map ~f:RRType.of_xml) (Xml.child xml_arg0 "Type") in
       let name =
-        TrafficPolicyName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:TrafficPolicyName.of_xml) (Xml.child xml_arg0 "Name") in
       let version =
-        TrafficPolicyVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Version") in
+        (Option.map ~f:TrafficPolicyVersion.of_xml)
+          (Xml.child xml_arg0 "Version") in
       let id =
-        TrafficPolicyId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ?comment ~document ~type_ ~name ~version ~id ()
+        (Option.map ~f:TrafficPolicyId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?comment ?document ?type_ ?name ?version ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map json "Comment" TrafficPolicyComment.of_json in
+    let of_json json__ =
+      let comment = field_map json__ "Comment" TrafficPolicyComment.of_json in
       let document =
-        field_map_exn json "Document" TrafficPolicyDocument.of_json in
-      let type_ = field_map_exn json "Type" RRType.of_json in
-      let name = field_map_exn json "Name" TrafficPolicyName.of_json in
-      let version = field_map_exn json "Version" TrafficPolicyVersion.of_json in
-      let id = field_map_exn json "Id" TrafficPolicyId.of_json in
-      make ?comment ~document ~type_ ~name ~version ~id ()
+        field_map json__ "Document" TrafficPolicyDocument.of_json in
+      let type_ = field_map json__ "Type" RRType.of_json in
+      let name = field_map json__ "Name" TrafficPolicyName.of_json in
+      let version = field_map json__ "Version" TrafficPolicyVersion.of_json in
+      let id = field_map json__ "Id" TrafficPolicyId.of_json in
+      make ?comment ?document ?type_ ?name ?version ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains settings for a traffic policy."]
@@ -2877,43 +3601,42 @@ module TrafficPolicyInstance =
   struct
     type nonrec t =
       {
-      id: TrafficPolicyInstanceId.t
+      id: TrafficPolicyInstanceId.t option
         [@ocaml.doc
           "The ID that Amazon Route 53 assigned to the new traffic policy instance."];
-      hostedZoneId: ResourceId.t
+      hostedZoneId: ResourceId.t option
         [@ocaml.doc
           "The ID of the hosted zone that Amazon Route 53 created resource record sets in."];
-      name: DNSName.t
+      name: DNSName.t option
         [@ocaml.doc
           "The DNS name, such as www.example.com, for which Amazon Route 53 responds to queries by using the resource record sets that are associated with this traffic policy instance."];
-      tTL: TTL.t
+      tTL: TTL.t option
         [@ocaml.doc
           "The TTL that Amazon Route 53 assigned to all of the resource record sets that it created in the specified hosted zone."];
-      state: TrafficPolicyInstanceState.t
+      state: TrafficPolicyInstanceState.t option
         [@ocaml.doc
           "The value of State is one of the following values: Applied Amazon Route 53 has finished creating resource record sets, and changes have propagated to all Route 53 edge locations. Creating Route 53 is creating the resource record sets. Use GetTrafficPolicyInstance to confirm that the CreateTrafficPolicyInstance request completed successfully. Failed Route 53 wasn't able to create or update the resource record sets. When the value of State is Failed, see Message for an explanation of what caused the request to fail."];
-      message: Message.t
+      message: Message.t option
         [@ocaml.doc
           "If State is Failed, an explanation of the reason for the failure. If State is another value, Message is empty."];
-      trafficPolicyId: TrafficPolicyId.t
+      trafficPolicyId: TrafficPolicyId.t option
         [@ocaml.doc
           "The ID of the traffic policy that Amazon Route 53 used to create resource record sets in the specified hosted zone."];
-      trafficPolicyVersion: TrafficPolicyVersion.t
+      trafficPolicyVersion: TrafficPolicyVersion.t option
         [@ocaml.doc
           "The version of the traffic policy that Amazon Route 53 used to create resource record sets in the specified hosted zone."];
-      trafficPolicyType: RRType.t
+      trafficPolicyType: RRType.t option
         [@ocaml.doc
           "The DNS type that Amazon Route 53 assigned to all of the resource record sets that it created for this traffic policy instance."]}
-    let context_ = "TrafficPolicyInstance"
-    let make ~id =
-      fun ~hostedZoneId ->
-        fun ~name ->
-          fun ~tTL ->
-            fun ~state ->
-              fun ~message ->
-                fun ~trafficPolicyId ->
-                  fun ~trafficPolicyVersion ->
-                    fun ~trafficPolicyType ->
+    let make ?id =
+      fun ?hostedZoneId ->
+        fun ?name ->
+          fun ?tTL ->
+            fun ?state ->
+              fun ?message ->
+                fun ?trafficPolicyId ->
+                  fun ?trafficPolicyVersion ->
+                    fun ?trafficPolicyType ->
                       fun () ->
                         {
                           id;
@@ -2928,62 +3651,60 @@ module TrafficPolicyInstance =
                         }
     let to_value x =
       structure_to_value
-        [("Id", (Some (TrafficPolicyInstanceId.to_value x.id)));
-        ("HostedZoneId", (Some (ResourceId.to_value x.hostedZoneId)));
-        ("Name", (Some (DNSName.to_value x.name)));
-        ("TTL", (Some (TTL.to_value x.tTL)));
-        ("State", (Some (TrafficPolicyInstanceState.to_value x.state)));
-        ("Message", (Some (Message.to_value x.message)));
+        [("Id", (Option.map x.id ~f:TrafficPolicyInstanceId.to_value));
+        ("HostedZoneId", (Option.map x.hostedZoneId ~f:ResourceId.to_value));
+        ("Name", (Option.map x.name ~f:DNSName.to_value));
+        ("TTL", (Option.map x.tTL ~f:TTL.to_value));
+        ("State",
+          (Option.map x.state ~f:TrafficPolicyInstanceState.to_value));
+        ("Message", (Option.map x.message ~f:Message.to_value));
         ("TrafficPolicyId",
-          (Some (TrafficPolicyId.to_value x.trafficPolicyId)));
+          (Option.map x.trafficPolicyId ~f:TrafficPolicyId.to_value));
         ("TrafficPolicyVersion",
-          (Some (TrafficPolicyVersion.to_value x.trafficPolicyVersion)));
-        ("TrafficPolicyType", (Some (RRType.to_value x.trafficPolicyType)))]
+          (Option.map x.trafficPolicyVersion ~f:TrafficPolicyVersion.to_value));
+        ("TrafficPolicyType",
+          (Option.map x.trafficPolicyType ~f:RRType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let trafficPolicyType =
-        RRType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicyType") in
+        (Option.map ~f:RRType.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicyType") in
       let trafficPolicyVersion =
-        TrafficPolicyVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicyVersion") in
+        (Option.map ~f:TrafficPolicyVersion.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicyVersion") in
       let trafficPolicyId =
-        TrafficPolicyId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicyId") in
+        (Option.map ~f:TrafficPolicyId.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicyId") in
       let message =
-        Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       let state =
-        TrafficPolicyInstanceState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "State") in
-      let tTL = TTL.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TTL") in
-      let name =
-        DNSName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:TrafficPolicyInstanceState.of_xml)
+          (Xml.child xml_arg0 "State") in
+      let tTL = (Option.map ~f:TTL.of_xml) (Xml.child xml_arg0 "TTL") in
+      let name = (Option.map ~f:DNSName.of_xml) (Xml.child xml_arg0 "Name") in
       let hostedZoneId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "HostedZoneId") in
       let id =
-        TrafficPolicyInstanceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ~trafficPolicyType ~trafficPolicyVersion ~trafficPolicyId ~message
-        ~state ~tTL ~name ~hostedZoneId ~id ()
+        (Option.map ~f:TrafficPolicyInstanceId.of_xml)
+          (Xml.child xml_arg0 "Id") in
+      make ?trafficPolicyType ?trafficPolicyVersion ?trafficPolicyId ?message
+        ?state ?tTL ?name ?hostedZoneId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let trafficPolicyType =
-        field_map_exn json "TrafficPolicyType" RRType.of_json in
+        field_map json__ "TrafficPolicyType" RRType.of_json in
       let trafficPolicyVersion =
-        field_map_exn json "TrafficPolicyVersion"
-          TrafficPolicyVersion.of_json in
+        field_map json__ "TrafficPolicyVersion" TrafficPolicyVersion.of_json in
       let trafficPolicyId =
-        field_map_exn json "TrafficPolicyId" TrafficPolicyId.of_json in
-      let message = field_map_exn json "Message" Message.of_json in
-      let state =
-        field_map_exn json "State" TrafficPolicyInstanceState.of_json in
-      let tTL = field_map_exn json "TTL" TTL.of_json in
-      let name = field_map_exn json "Name" DNSName.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
-      let id = field_map_exn json "Id" TrafficPolicyInstanceId.of_json in
-      make ~trafficPolicyType ~trafficPolicyVersion ~trafficPolicyId ~message
-        ~state ~tTL ~name ~hostedZoneId ~id ()
+        field_map json__ "TrafficPolicyId" TrafficPolicyId.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let state = field_map json__ "State" TrafficPolicyInstanceState.of_json in
+      let tTL = field_map json__ "TTL" TTL.of_json in
+      let name = field_map json__ "Name" DNSName.of_json in
+      let hostedZoneId = field_map json__ "HostedZoneId" ResourceId.of_json in
+      let id = field_map json__ "Id" TrafficPolicyInstanceId.of_json in
+      make ?trafficPolicyType ?trafficPolicyVersion ?trafficPolicyId ?message
+        ?state ?tTL ?name ?hostedZoneId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains settings for the new traffic policy instance."]
@@ -2991,65 +3712,61 @@ module TrafficPolicySummary =
   struct
     type nonrec t =
       {
-      id: TrafficPolicyId.t
+      id: TrafficPolicyId.t option
         [@ocaml.doc
           "The ID that Amazon Route 53 assigned to the traffic policy when you created it."];
-      name: TrafficPolicyName.t
+      name: TrafficPolicyName.t option
         [@ocaml.doc
           "The name that you specified for the traffic policy when you created it."];
-      type_: RRType.t
+      type_: RRType.t option
         [@ocaml.doc
           "The DNS type of the resource record sets that Amazon Route 53 creates when you use a traffic policy to create a traffic policy instance."];
-      latestVersion: TrafficPolicyVersion.t
+      latestVersion: TrafficPolicyVersion.t option
         [@ocaml.doc
           "The version number of the latest version of the traffic policy."];
-      trafficPolicyCount: TrafficPolicyVersion.t
+      trafficPolicyCount: TrafficPolicyVersion.t option
         [@ocaml.doc
           "The number of traffic policies that are associated with the current Amazon Web Services account."]}
-    let context_ = "TrafficPolicySummary"
-    let make ~id =
-      fun ~name ->
-        fun ~type_ ->
-          fun ~latestVersion ->
-            fun ~trafficPolicyCount ->
+    let make ?id =
+      fun ?name ->
+        fun ?type_ ->
+          fun ?latestVersion ->
+            fun ?trafficPolicyCount ->
               fun () ->
                 { id; name; type_; latestVersion; trafficPolicyCount }
     let to_value x =
       structure_to_value
-        [("Id", (Some (TrafficPolicyId.to_value x.id)));
-        ("Name", (Some (TrafficPolicyName.to_value x.name)));
-        ("Type", (Some (RRType.to_value x.type_)));
+        [("Id", (Option.map x.id ~f:TrafficPolicyId.to_value));
+        ("Name", (Option.map x.name ~f:TrafficPolicyName.to_value));
+        ("Type", (Option.map x.type_ ~f:RRType.to_value));
         ("LatestVersion",
-          (Some (TrafficPolicyVersion.to_value x.latestVersion)));
+          (Option.map x.latestVersion ~f:TrafficPolicyVersion.to_value));
         ("TrafficPolicyCount",
-          (Some (TrafficPolicyVersion.to_value x.trafficPolicyCount)))]
+          (Option.map x.trafficPolicyCount ~f:TrafficPolicyVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let trafficPolicyCount =
-        TrafficPolicyVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicyCount") in
+        (Option.map ~f:TrafficPolicyVersion.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicyCount") in
       let latestVersion =
-        TrafficPolicyVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LatestVersion") in
-      let type_ =
-        RRType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+        (Option.map ~f:TrafficPolicyVersion.of_xml)
+          (Xml.child xml_arg0 "LatestVersion") in
+      let type_ = (Option.map ~f:RRType.of_xml) (Xml.child xml_arg0 "Type") in
       let name =
-        TrafficPolicyName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:TrafficPolicyName.of_xml) (Xml.child xml_arg0 "Name") in
       let id =
-        TrafficPolicyId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ~trafficPolicyCount ~latestVersion ~type_ ~name ~id ()
+        (Option.map ~f:TrafficPolicyId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?trafficPolicyCount ?latestVersion ?type_ ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let trafficPolicyCount =
-        field_map_exn json "TrafficPolicyCount" TrafficPolicyVersion.of_json in
+        field_map json__ "TrafficPolicyCount" TrafficPolicyVersion.of_json in
       let latestVersion =
-        field_map_exn json "LatestVersion" TrafficPolicyVersion.of_json in
-      let type_ = field_map_exn json "Type" RRType.of_json in
-      let name = field_map_exn json "Name" TrafficPolicyName.of_json in
-      let id = field_map_exn json "Id" TrafficPolicyId.of_json in
-      make ~trafficPolicyCount ~latestVersion ~type_ ~name ~id ()
+        field_map json__ "LatestVersion" TrafficPolicyVersion.of_json in
+      let type_ = field_map json__ "Type" RRType.of_json in
+      let name = field_map json__ "Name" TrafficPolicyName.of_json in
+      let id = field_map json__ "Id" TrafficPolicyId.of_json in
+      make ?trafficPolicyCount ?latestVersion ?type_ ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about the latest version of one traffic policy that is associated with the current Amazon Web Services account."]
@@ -3084,11 +3801,11 @@ module ResourceTagSet =
           (Xml.child xml_arg0 "ResourceType") in
       make ?tags ?resourceId ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let resourceId = field_map json "ResourceId" TagResourceId.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let resourceId = field_map json__ "ResourceId" TagResourceId.of_json in
       let resourceType =
-        field_map json "ResourceType" TagResourceType.of_json in
+        field_map json__ "ResourceType" TagResourceType.of_json in
       make ?tags ?resourceId ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3103,35 +3820,34 @@ module DelegationSet =
       callerReference: Nonce.t option
         [@ocaml.doc
           "The value that you specified for CallerReference when you created the reusable delegation set."];
-      nameServers: DelegationSetNameServers.t
+      nameServers: DelegationSetNameServers.t option
         [@ocaml.doc
           "A complex type that contains a list of the authoritative name servers for a hosted zone or for a reusable delegation set."]}
-    let context_ = "DelegationSet"
     let make ?id =
       fun ?callerReference ->
-        fun ~nameServers -> fun () -> { id; callerReference; nameServers }
+        fun ?nameServers -> fun () -> { id; callerReference; nameServers }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:ResourceId.to_value));
         ("CallerReference", (Option.map x.callerReference ~f:Nonce.to_value));
         ("NameServers",
-          (Some (DelegationSetNameServers.to_value x.nameServers)))]
+          (Option.map x.nameServers ~f:DelegationSetNameServers.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nameServers =
-        DelegationSetNameServers.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "NameServers") in
+        (Option.map ~f:DelegationSetNameServers.of_xml)
+          (Xml.child xml_arg0 "NameServers") in
       let callerReference =
         (Option.map ~f:Nonce.of_xml) (Xml.child xml_arg0 "CallerReference") in
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ~nameServers ?callerReference ?id ()
+      make ?nameServers ?callerReference ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nameServers =
-        field_map_exn json "NameServers" DelegationSetNameServers.of_json in
-      let callerReference = field_map json "CallerReference" Nonce.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
-      make ~nameServers ?callerReference ?id ()
+        field_map json__ "NameServers" DelegationSetNameServers.of_json in
+      let callerReference = field_map json__ "CallerReference" Nonce.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
+      make ?nameServers ?callerReference ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that lists the name servers in a delegation set, as well as the CallerReference and the ID for the delegation set."]
@@ -3139,47 +3855,43 @@ module QueryLoggingConfig =
   struct
     type nonrec t =
       {
-      id: QueryLoggingConfigId.t
+      id: QueryLoggingConfigId.t option
         [@ocaml.doc "The ID for a configuration for DNS query logging."];
-      hostedZoneId: ResourceId.t
+      hostedZoneId: ResourceId.t option
         [@ocaml.doc
           "The ID of the hosted zone that CloudWatch Logs is logging queries for."];
-      cloudWatchLogsLogGroupArn: CloudWatchLogsLogGroupArn.t
+      cloudWatchLogsLogGroupArn: CloudWatchLogsLogGroupArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the CloudWatch Logs log group that Amazon Route 53 is publishing logs to."]}
-    let context_ = "QueryLoggingConfig"
-    let make ~id =
-      fun ~hostedZoneId ->
-        fun ~cloudWatchLogsLogGroupArn ->
+    let make ?id =
+      fun ?hostedZoneId ->
+        fun ?cloudWatchLogsLogGroupArn ->
           fun () -> { id; hostedZoneId; cloudWatchLogsLogGroupArn }
     let to_value x =
       structure_to_value
-        [("Id", (Some (QueryLoggingConfigId.to_value x.id)));
-        ("HostedZoneId", (Some (ResourceId.to_value x.hostedZoneId)));
+        [("Id", (Option.map x.id ~f:QueryLoggingConfigId.to_value));
+        ("HostedZoneId", (Option.map x.hostedZoneId ~f:ResourceId.to_value));
         ("CloudWatchLogsLogGroupArn",
-          (Some
-             (CloudWatchLogsLogGroupArn.to_value x.cloudWatchLogsLogGroupArn)))]
+          (Option.map x.cloudWatchLogsLogGroupArn
+             ~f:CloudWatchLogsLogGroupArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let cloudWatchLogsLogGroupArn =
-        CloudWatchLogsLogGroupArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "CloudWatchLogsLogGroupArn") in
+        (Option.map ~f:CloudWatchLogsLogGroupArn.of_xml)
+          (Xml.child xml_arg0 "CloudWatchLogsLogGroupArn") in
       let hostedZoneId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "HostedZoneId") in
       let id =
-        QueryLoggingConfigId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ~cloudWatchLogsLogGroupArn ~hostedZoneId ~id ()
+        (Option.map ~f:QueryLoggingConfigId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?cloudWatchLogsLogGroupArn ?hostedZoneId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cloudWatchLogsLogGroupArn =
-        field_map_exn json "CloudWatchLogsLogGroupArn"
+        field_map json__ "CloudWatchLogsLogGroupArn"
           CloudWatchLogsLogGroupArn.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
-      let id = field_map_exn json "Id" QueryLoggingConfigId.of_json in
-      make ~cloudWatchLogsLogGroupArn ~hostedZoneId ~id ()
+      let hostedZoneId = field_map json__ "HostedZoneId" ResourceId.of_json in
+      let id = field_map json__ "Id" QueryLoggingConfigId.of_json in
+      make ?cloudWatchLogsLogGroupArn ?hostedZoneId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about a configuration for DNS query logging."]
@@ -3187,13 +3899,13 @@ module HostedZone =
   struct
     type nonrec t =
       {
-      id: ResourceId.t
+      id: ResourceId.t option
         [@ocaml.doc
           "The ID that Amazon Route 53 assigned to the hosted zone when you created it."];
-      name: DNSName.t
+      name: DNSName.t option
         [@ocaml.doc
           "The name of the domain. For public hosted zones, this is the name that you have registered with your DNS registrar. For information about how to specify characters other than a-z, 0-9, and - (hyphen) and how to specify internationalized domain names, see CreateHostedZone."];
-      callerReference: Nonce.t
+      callerReference: Nonce.t option
         [@ocaml.doc
           "The value that you specified for CallerReference when you created the hosted zone."];
       config: HostedZoneConfig.t option
@@ -3203,36 +3915,44 @@ module HostedZone =
         [@ocaml.doc "The number of resource record sets in the hosted zone."];
       linkedService: LinkedService.t option
         [@ocaml.doc
-          "If the hosted zone was created by another service, the service that created the hosted zone. When a hosted zone is created by another service, you can't edit or delete it using Route 53."]}
-    let context_ = "HostedZone"
-    let make ?config =
-      fun ?resourceRecordSetCount ->
-        fun ?linkedService ->
-          fun ~id ->
-            fun ~name ->
-              fun ~callerReference ->
-                fun () ->
-                  {
-                    config;
-                    resourceRecordSetCount;
-                    linkedService;
-                    id;
-                    name;
-                    callerReference
-                  }
+          "If the hosted zone was created by another service, the service that created the hosted zone. When a hosted zone is created by another service, you can't edit or delete it using Route 53."];
+      features: HostedZoneFeatures.t option
+        [@ocaml.doc
+          "The features configuration for the hosted zone, including accelerated recovery settings and status information."]}
+    let make ?id =
+      fun ?name ->
+        fun ?callerReference ->
+          fun ?config ->
+            fun ?resourceRecordSetCount ->
+              fun ?linkedService ->
+                fun ?features ->
+                  fun () ->
+                    {
+                      id;
+                      name;
+                      callerReference;
+                      config;
+                      resourceRecordSetCount;
+                      linkedService;
+                      features
+                    }
     let to_value x =
       structure_to_value
-        [("Id", (Some (ResourceId.to_value x.id)));
-        ("Name", (Some (DNSName.to_value x.name)));
-        ("CallerReference", (Some (Nonce.to_value x.callerReference)));
+        [("Id", (Option.map x.id ~f:ResourceId.to_value));
+        ("Name", (Option.map x.name ~f:DNSName.to_value));
+        ("CallerReference", (Option.map x.callerReference ~f:Nonce.to_value));
         ("Config", (Option.map x.config ~f:HostedZoneConfig.to_value));
         ("ResourceRecordSetCount",
           (Option.map x.resourceRecordSetCount
              ~f:HostedZoneRRSetCount.to_value));
         ("LinkedService",
-          (Option.map x.linkedService ~f:LinkedService.to_value))]
+          (Option.map x.linkedService ~f:LinkedService.to_value));
+        ("Features", (Option.map x.features ~f:HostedZoneFeatures.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let features =
+        (Option.map ~f:HostedZoneFeatures.of_xml)
+          (Xml.child xml_arg0 "Features") in
       let linkedService =
         (Option.map ~f:LinkedService.of_xml)
           (Xml.child xml_arg0 "LinkedService") in
@@ -3242,27 +3962,25 @@ module HostedZone =
       let config =
         (Option.map ~f:HostedZoneConfig.of_xml) (Xml.child xml_arg0 "Config") in
       let callerReference =
-        Nonce.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CallerReference") in
-      let name =
-        DNSName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      let id =
-        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ?linkedService ?resourceRecordSetCount ?config ~callerReference
-        ~name ~id ()
+        (Option.map ~f:Nonce.of_xml) (Xml.child xml_arg0 "CallerReference") in
+      let name = (Option.map ~f:DNSName.of_xml) (Xml.child xml_arg0 "Name") in
+      let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?features ?linkedService ?resourceRecordSetCount ?config
+        ?callerReference ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let features = field_map json__ "Features" HostedZoneFeatures.of_json in
       let linkedService =
-        field_map json "LinkedService" LinkedService.of_json in
+        field_map json__ "LinkedService" LinkedService.of_json in
       let resourceRecordSetCount =
-        field_map json "ResourceRecordSetCount" HostedZoneRRSetCount.of_json in
-      let config = field_map json "Config" HostedZoneConfig.of_json in
-      let callerReference =
-        field_map_exn json "CallerReference" Nonce.of_json in
-      let name = field_map_exn json "Name" DNSName.of_json in
-      let id = field_map_exn json "Id" ResourceId.of_json in
-      make ?linkedService ?resourceRecordSetCount ?config ~callerReference
-        ~name ~id ()
+        field_map json__ "ResourceRecordSetCount"
+          HostedZoneRRSetCount.of_json in
+      let config = field_map json__ "Config" HostedZoneConfig.of_json in
+      let callerReference = field_map json__ "CallerReference" Nonce.of_json in
+      let name = field_map json__ "Name" DNSName.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
+      make ?features ?linkedService ?resourceRecordSetCount ?config
+        ?callerReference ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains general information about the hosted zone."]
@@ -3270,40 +3988,36 @@ module HostedZoneSummary =
   struct
     type nonrec t =
       {
-      hostedZoneId: ResourceId.t
+      hostedZoneId: ResourceId.t option
         [@ocaml.doc
           "The Route 53 hosted zone ID of a private hosted zone that the specified VPC is associated with."];
-      name: DNSName.t
+      name: DNSName.t option
         [@ocaml.doc
           "The name of the private hosted zone, such as example.com."];
-      owner: HostedZoneOwner.t
+      owner: HostedZoneOwner.t option
         [@ocaml.doc
           "The owner of a private hosted zone that the specified VPC is associated with. The owner can be either an Amazon Web Services account or an Amazon Web Services service."]}
-    let context_ = "HostedZoneSummary"
-    let make ~hostedZoneId =
-      fun ~name -> fun ~owner -> fun () -> { hostedZoneId; name; owner }
+    let make ?hostedZoneId =
+      fun ?name -> fun ?owner -> fun () -> { hostedZoneId; name; owner }
     let to_value x =
       structure_to_value
-        [("HostedZoneId", (Some (ResourceId.to_value x.hostedZoneId)));
-        ("Name", (Some (DNSName.to_value x.name)));
-        ("Owner", (Some (HostedZoneOwner.to_value x.owner)))]
+        [("HostedZoneId", (Option.map x.hostedZoneId ~f:ResourceId.to_value));
+        ("Name", (Option.map x.name ~f:DNSName.to_value));
+        ("Owner", (Option.map x.owner ~f:HostedZoneOwner.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let owner =
-        HostedZoneOwner.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Owner") in
-      let name =
-        DNSName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:HostedZoneOwner.of_xml) (Xml.child xml_arg0 "Owner") in
+      let name = (Option.map ~f:DNSName.of_xml) (Xml.child xml_arg0 "Name") in
       let hostedZoneId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
-      make ~owner ~name ~hostedZoneId ()
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "HostedZoneId") in
+      make ?owner ?name ?hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let owner = field_map_exn json "Owner" HostedZoneOwner.of_json in
-      let name = field_map_exn json "Name" DNSName.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
-      make ~owner ~name ~hostedZoneId ()
+    let of_json json__ =
+      let owner = field_map json__ "Owner" HostedZoneOwner.of_json in
+      let name = field_map json__ "Name" DNSName.of_json in
+      let hostedZoneId = field_map json__ "HostedZoneId" ResourceId.of_json in
+      make ?owner ?name ?hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "In the response to a ListHostedZonesByVPC request, the HostedZoneSummaries element contains one HostedZoneSummary element for each hosted zone that the specified Amazon VPC is associated with. Each HostedZoneSummary element contains the hosted zone name and ID, and information about who owns the hosted zone."]
@@ -3311,51 +4025,50 @@ module HealthCheck =
   struct
     type nonrec t =
       {
-      id: HealthCheckId.t
+      id: HealthCheckId.t option
         [@ocaml.doc
           "The identifier that Amazon Route 53 assigned to the health check when you created it. When you add or update a resource record set, you use this value to specify which health check to use. The value can be up to 64 characters long."];
-      callerReference: HealthCheckNonce.t
+      callerReference: HealthCheckNonce.t option
         [@ocaml.doc
           "A unique string that you specified when you created the health check."];
       linkedService: LinkedService.t option
         [@ocaml.doc
           "If the health check was created by another service, the service that created the health check. When a health check is created by another service, you can't edit or delete it using Amazon Route 53."];
-      healthCheckConfig: HealthCheckConfig.t
+      healthCheckConfig: HealthCheckConfig.t option
         [@ocaml.doc
           "A complex type that contains detailed information about one health check."];
-      healthCheckVersion: HealthCheckVersion.t
+      healthCheckVersion: HealthCheckVersion.t option
         [@ocaml.doc
           "The version of the health check. You can optionally pass this value in a call to UpdateHealthCheck to prevent overwriting another change to the health check."];
       cloudWatchAlarmConfiguration: CloudWatchAlarmConfiguration.t option
         [@ocaml.doc
           "A complex type that contains information about the CloudWatch alarm that Amazon Route 53 is monitoring for this health check."]}
-    let context_ = "HealthCheck"
-    let make ?linkedService =
-      fun ?cloudWatchAlarmConfiguration ->
-        fun ~id ->
-          fun ~callerReference ->
-            fun ~healthCheckConfig ->
-              fun ~healthCheckVersion ->
+    let make ?id =
+      fun ?callerReference ->
+        fun ?linkedService ->
+          fun ?healthCheckConfig ->
+            fun ?healthCheckVersion ->
+              fun ?cloudWatchAlarmConfiguration ->
                 fun () ->
                   {
-                    linkedService;
-                    cloudWatchAlarmConfiguration;
                     id;
                     callerReference;
+                    linkedService;
                     healthCheckConfig;
-                    healthCheckVersion
+                    healthCheckVersion;
+                    cloudWatchAlarmConfiguration
                   }
     let to_value x =
       structure_to_value
-        [("Id", (Some (HealthCheckId.to_value x.id)));
+        [("Id", (Option.map x.id ~f:HealthCheckId.to_value));
         ("CallerReference",
-          (Some (HealthCheckNonce.to_value x.callerReference)));
+          (Option.map x.callerReference ~f:HealthCheckNonce.to_value));
         ("LinkedService",
           (Option.map x.linkedService ~f:LinkedService.to_value));
         ("HealthCheckConfig",
-          (Some (HealthCheckConfig.to_value x.healthCheckConfig)));
+          (Option.map x.healthCheckConfig ~f:HealthCheckConfig.to_value));
         ("HealthCheckVersion",
-          (Some (HealthCheckVersion.to_value x.healthCheckVersion)));
+          (Option.map x.healthCheckVersion ~f:HealthCheckVersion.to_value));
         ("CloudWatchAlarmConfiguration",
           (Option.map x.cloudWatchAlarmConfiguration
              ~f:CloudWatchAlarmConfiguration.to_value))]
@@ -3365,37 +4078,36 @@ module HealthCheck =
         (Option.map ~f:CloudWatchAlarmConfiguration.of_xml)
           (Xml.child xml_arg0 "CloudWatchAlarmConfiguration") in
       let healthCheckVersion =
-        HealthCheckVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HealthCheckVersion") in
+        (Option.map ~f:HealthCheckVersion.of_xml)
+          (Xml.child xml_arg0 "HealthCheckVersion") in
       let healthCheckConfig =
-        HealthCheckConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HealthCheckConfig") in
+        (Option.map ~f:HealthCheckConfig.of_xml)
+          (Xml.child xml_arg0 "HealthCheckConfig") in
       let linkedService =
         (Option.map ~f:LinkedService.of_xml)
           (Xml.child xml_arg0 "LinkedService") in
       let callerReference =
-        HealthCheckNonce.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CallerReference") in
-      let id =
-        HealthCheckId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ?cloudWatchAlarmConfiguration ~healthCheckVersion
-        ~healthCheckConfig ?linkedService ~callerReference ~id ()
+        (Option.map ~f:HealthCheckNonce.of_xml)
+          (Xml.child xml_arg0 "CallerReference") in
+      let id = (Option.map ~f:HealthCheckId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?cloudWatchAlarmConfiguration ?healthCheckVersion
+        ?healthCheckConfig ?linkedService ?callerReference ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cloudWatchAlarmConfiguration =
-        field_map json "CloudWatchAlarmConfiguration"
+        field_map json__ "CloudWatchAlarmConfiguration"
           CloudWatchAlarmConfiguration.of_json in
       let healthCheckVersion =
-        field_map_exn json "HealthCheckVersion" HealthCheckVersion.of_json in
+        field_map json__ "HealthCheckVersion" HealthCheckVersion.of_json in
       let healthCheckConfig =
-        field_map_exn json "HealthCheckConfig" HealthCheckConfig.of_json in
+        field_map json__ "HealthCheckConfig" HealthCheckConfig.of_json in
       let linkedService =
-        field_map json "LinkedService" LinkedService.of_json in
+        field_map json__ "LinkedService" LinkedService.of_json in
       let callerReference =
-        field_map_exn json "CallerReference" HealthCheckNonce.of_json in
-      let id = field_map_exn json "Id" HealthCheckId.of_json in
-      make ?cloudWatchAlarmConfiguration ~healthCheckVersion
-        ~healthCheckConfig ?linkedService ~callerReference ~id ()
+        field_map json__ "CallerReference" HealthCheckNonce.of_json in
+      let id = field_map json__ "Id" HealthCheckId.of_json in
+      make ?cloudWatchAlarmConfiguration ?healthCheckVersion
+        ?healthCheckConfig ?linkedService ?callerReference ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about one health check that is associated with the current Amazon Web Services account."]
@@ -3471,24 +4183,125 @@ module GeoLocationDetails =
       make ?subdivisionName ?subdivisionCode ?countryName ?countryCode
         ?continentName ?continentCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subdivisionName =
-        field_map json "SubdivisionName" GeoLocationSubdivisionName.of_json in
+        field_map json__ "SubdivisionName" GeoLocationSubdivisionName.of_json in
       let subdivisionCode =
-        field_map json "SubdivisionCode" GeoLocationSubdivisionCode.of_json in
+        field_map json__ "SubdivisionCode" GeoLocationSubdivisionCode.of_json in
       let countryName =
-        field_map json "CountryName" GeoLocationCountryName.of_json in
+        field_map json__ "CountryName" GeoLocationCountryName.of_json in
       let countryCode =
-        field_map json "CountryCode" GeoLocationCountryCode.of_json in
+        field_map json__ "CountryCode" GeoLocationCountryCode.of_json in
       let continentName =
-        field_map json "ContinentName" GeoLocationContinentName.of_json in
+        field_map json__ "ContinentName" GeoLocationContinentName.of_json in
       let continentCode =
-        field_map json "ContinentCode" GeoLocationContinentCode.of_json in
+        field_map json__ "ContinentCode" GeoLocationContinentCode.of_json in
       make ?subdivisionName ?subdivisionCode ?countryName ?countryCode
         ?continentName ?continentCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the codes and full continent, country, and subdivision names for the specified geolocation code."]
+module LocationSummary =
+  struct
+    type nonrec t =
+      {
+      locationName: CidrLocationNameDefaultAllowed.t option
+        [@ocaml.doc "A string that specifies a location name."]}
+    let make ?locationName = fun () -> { locationName }
+    let to_value x =
+      structure_to_value
+        [("LocationName",
+           (Option.map x.locationName
+              ~f:CidrLocationNameDefaultAllowed.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let locationName =
+        (Option.map ~f:CidrLocationNameDefaultAllowed.of_xml)
+          (Xml.child xml_arg0 "LocationName") in
+      make ?locationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let locationName =
+        field_map json__ "LocationName"
+          CidrLocationNameDefaultAllowed.of_json in
+      make ?locationName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A complex type that contains information about the CIDR location."]
+module CollectionSummary =
+  struct
+    type nonrec t =
+      {
+      arn: ARN.t option
+        [@ocaml.doc
+          "The ARN of the collection summary. Can be used to reference the collection in IAM policy or cross-account."];
+      id: UUID.t option [@ocaml.doc "Unique ID for the CIDR collection."];
+      name: CollectionName.t option
+        [@ocaml.doc "The name of a CIDR collection."];
+      version: CollectionVersion.t option
+        [@ocaml.doc
+          "A sequential counter that Route\194\16053 sets to 1 when you create a CIDR collection and increments by 1 each time you update settings for the CIDR collection."]}
+    let make ?arn =
+      fun ?id ->
+        fun ?name -> fun ?version -> fun () -> { arn; id; name; version }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:ARN.to_value));
+        ("Id", (Option.map x.id ~f:UUID.to_value));
+        ("Name", (Option.map x.name ~f:CollectionName.to_value));
+        ("Version", (Option.map x.version ~f:CollectionVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let version =
+        (Option.map ~f:CollectionVersion.of_xml)
+          (Xml.child xml_arg0 "Version") in
+      let name =
+        (Option.map ~f:CollectionName.of_xml) (Xml.child xml_arg0 "Name") in
+      let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "Id") in
+      let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?version ?name ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let version = field_map json__ "Version" CollectionVersion.of_json in
+      let name = field_map json__ "Name" CollectionName.of_json in
+      let id = field_map json__ "Id" UUID.of_json in
+      let arn = field_map json__ "Arn" ARN.of_json in
+      make ?version ?name ?id ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A complex type that is an entry in an CidrCollection array."]
+module CidrBlockSummary =
+  struct
+    type nonrec t =
+      {
+      cidrBlock: Cidr.t option [@ocaml.doc "Value for the CIDR block."];
+      locationName: CidrLocationNameDefaultNotAllowed.t option
+        [@ocaml.doc "The location name of the CIDR block."]}
+    let make ?cidrBlock =
+      fun ?locationName -> fun () -> { cidrBlock; locationName }
+    let to_value x =
+      structure_to_value
+        [("CidrBlock", (Option.map x.cidrBlock ~f:Cidr.to_value));
+        ("LocationName",
+          (Option.map x.locationName
+             ~f:CidrLocationNameDefaultNotAllowed.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let locationName =
+        (Option.map ~f:CidrLocationNameDefaultNotAllowed.of_xml)
+          (Xml.child xml_arg0 "LocationName") in
+      let cidrBlock =
+        (Option.map ~f:Cidr.of_xml) (Xml.child xml_arg0 "CidrBlock") in
+      make ?locationName ?cidrBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let locationName =
+        field_map json__ "LocationName"
+          CidrLocationNameDefaultNotAllowed.of_json in
+      let cidrBlock = field_map json__ "CidrBlock" Cidr.of_json in
+      make ?locationName ?cidrBlock ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A complex type that lists the CIDR blocks."]
 module LimitValue =
   struct
     type nonrec t = Int64.t
@@ -3590,10 +4403,10 @@ module HealthCheckObservation =
           (Xml.child xml_arg0 "Region") in
       make ?statusReport ?iPAddress ?region ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statusReport = field_map json "StatusReport" StatusReport.of_json in
-      let iPAddress = field_map json "IPAddress" IPAddress.of_json in
-      let region = field_map json "Region" HealthCheckRegion.of_json in
+    let of_json json__ =
+      let statusReport = field_map json__ "StatusReport" StatusReport.of_json in
+      let iPAddress = field_map json__ "IPAddress" IPAddress.of_json in
+      let region = field_map json__ "Region" HealthCheckRegion.of_json in
       make ?statusReport ?iPAddress ?region ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3776,30 +4589,31 @@ module KeySigningKey =
         ?digestAlgorithmType ?digestAlgorithmMnemonic ?signingAlgorithmType
         ?signingAlgorithmMnemonic ?flag ?kmsArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModifiedDate =
-        field_map json "LastModifiedDate" TimeStamp.of_json in
-      let createdDate = field_map json "CreatedDate" TimeStamp.of_json in
+        field_map json__ "LastModifiedDate" TimeStamp.of_json in
+      let createdDate = field_map json__ "CreatedDate" TimeStamp.of_json in
       let statusMessage =
-        field_map json "StatusMessage" SigningKeyStatusMessage.of_json in
-      let status = field_map json "Status" SigningKeyStatus.of_json in
+        field_map json__ "StatusMessage" SigningKeyStatusMessage.of_json in
+      let status = field_map json__ "Status" SigningKeyStatus.of_json in
       let dNSKEYRecord =
-        field_map json "DNSKEYRecord" SigningKeyString.of_json in
-      let dSRecord = field_map json "DSRecord" SigningKeyString.of_json in
-      let publicKey = field_map json "PublicKey" SigningKeyString.of_json in
-      let digestValue = field_map json "DigestValue" SigningKeyString.of_json in
-      let keyTag = field_map json "KeyTag" SigningKeyTag.of_json in
+        field_map json__ "DNSKEYRecord" SigningKeyString.of_json in
+      let dSRecord = field_map json__ "DSRecord" SigningKeyString.of_json in
+      let publicKey = field_map json__ "PublicKey" SigningKeyString.of_json in
+      let digestValue =
+        field_map json__ "DigestValue" SigningKeyString.of_json in
+      let keyTag = field_map json__ "KeyTag" SigningKeyTag.of_json in
       let digestAlgorithmType =
-        field_map json "DigestAlgorithmType" SigningKeyInteger.of_json in
+        field_map json__ "DigestAlgorithmType" SigningKeyInteger.of_json in
       let digestAlgorithmMnemonic =
-        field_map json "DigestAlgorithmMnemonic" SigningKeyString.of_json in
+        field_map json__ "DigestAlgorithmMnemonic" SigningKeyString.of_json in
       let signingAlgorithmType =
-        field_map json "SigningAlgorithmType" SigningKeyInteger.of_json in
+        field_map json__ "SigningAlgorithmType" SigningKeyInteger.of_json in
       let signingAlgorithmMnemonic =
-        field_map json "SigningAlgorithmMnemonic" SigningKeyString.of_json in
-      let flag = field_map json "Flag" SigningKeyInteger.of_json in
-      let kmsArn = field_map json "KmsArn" SigningKeyString.of_json in
-      let name = field_map json "Name" SigningKeyName.of_json in
+        field_map json__ "SigningAlgorithmMnemonic" SigningKeyString.of_json in
+      let flag = field_map json__ "Flag" SigningKeyInteger.of_json in
+      let kmsArn = field_map json__ "KmsArn" SigningKeyString.of_json in
+      let name = field_map json__ "Name" SigningKeyName.of_json in
       make ?lastModifiedDate ?createdDate ?statusMessage ?status
         ?dNSKEYRecord ?dSRecord ?publicKey ?digestValue ?keyTag
         ?digestAlgorithmType ?digestAlgorithmMnemonic ?signingAlgorithmType
@@ -3887,6 +4701,9 @@ module ErrorMessages =
   struct
     type nonrec t = ErrorMessage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ErrorMessage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3912,6 +4729,9 @@ module Changes =
     type nonrec t = Change.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Change.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3931,6 +4751,49 @@ module Changes =
     let of_json j = list_of_json ~kind:"Changes" ~of_json:Change.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CidrCollectionChange =
+  struct
+    type nonrec t =
+      {
+      locationName: CidrLocationNameDefaultNotAllowed.t
+        [@ocaml.doc
+          "Name of the location that is associated with the CIDR collection."];
+      action: CidrCollectionChangeAction.t
+        [@ocaml.doc "CIDR collection change action."];
+      cidrList: CidrList.t [@ocaml.doc "List of CIDR blocks."]}
+    let context_ = "CidrCollectionChange"
+    let make ~locationName =
+      fun ~action ->
+        fun ~cidrList -> fun () -> { locationName; action; cidrList }
+    let to_value x =
+      structure_to_value
+        [("LocationName",
+           (Some (CidrLocationNameDefaultNotAllowed.to_value x.locationName)));
+        ("Action", (Some (CidrCollectionChangeAction.to_value x.action)));
+        ("CidrList", (Some (CidrList.to_value x.cidrList)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cidrList =
+        CidrList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CidrList") in
+      let action =
+        CidrCollectionChangeAction.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Action") in
+      let locationName =
+        CidrLocationNameDefaultNotAllowed.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LocationName") in
+      make ~cidrList ~action ~locationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cidrList = field_map_exn json__ "CidrList" CidrList.of_json in
+      let action =
+        field_map_exn json__ "Action" CidrCollectionChangeAction.of_json in
+      let locationName =
+        field_map_exn json__ "LocationName"
+          CidrLocationNameDefaultNotAllowed.of_json in
+      make ~cidrList ~action ~locationName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A complex type that contains information about the CIDR collection change."]
 module ConflictingTypes =
   struct
     type nonrec t = {
@@ -3945,8 +4808,8 @@ module ConflictingTypes =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3965,8 +4828,8 @@ module InvalidInput =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input is not valid."]
@@ -3984,8 +4847,8 @@ module NoSuchTrafficPolicy =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "No traffic policy exists with the specified ID."]
@@ -4003,8 +4866,8 @@ module NoSuchTrafficPolicyInstance =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "No traffic policy instance exists with the specified ID."]
@@ -4022,8 +4885,8 @@ module PriorRequestNotComplete =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4042,12 +4905,32 @@ module ConcurrentModification =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Another user submitted a request to create, update, or delete the object at the same time that you did. Retry the request."]
+module LimitsExceeded =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation can't be completed because the current account has reached the limit on the resource you are trying to create. To request a higher limit, create a case with the Amazon Web Services Support Center."]
 module NoSuchHostedZone =
   struct
     type nonrec t = {
@@ -4062,11 +4945,24 @@ module NoSuchHostedZone =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "No hosted zone exists with the ID that you specified."]
+module AcceleratedRecoveryEnabled =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module HealthCheckVersionMismatch =
   struct
     type nonrec t = {
@@ -4081,8 +4977,8 @@ module HealthCheckVersionMismatch =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4101,8 +4997,8 @@ module NoSuchHealthCheck =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "No health check exists with the specified ID."]
@@ -4111,6 +5007,9 @@ module ResettableElementNameList =
     type nonrec t = ResettableElementName.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:64); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResettableElementName.to_value)) |>
         (fun x -> `List x)
@@ -4168,6 +5067,9 @@ module RecordData =
   struct
     type nonrec t = RecordDataEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecordDataEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4233,8 +5135,8 @@ module InvalidPaginationToken =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4258,6 +5160,9 @@ module VPCs =
     type nonrec t = VPC.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VPC.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4320,6 +5225,9 @@ module TrafficPolicies =
   struct
     type nonrec t = TrafficPolicy.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrafficPolicy.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4358,6 +5266,9 @@ module TrafficPolicyInstances =
   struct
     type nonrec t = TrafficPolicyInstance.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrafficPolicyInstance.to_value)) |>
         (fun x -> `List x)
@@ -4384,6 +5295,9 @@ module TrafficPolicySummaries =
   struct
     type nonrec t = TrafficPolicySummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrafficPolicySummary.to_value)) |>
         (fun x -> `List x)
@@ -4410,6 +5324,9 @@ module ResourceTagSetList =
   struct
     type nonrec t = ResourceTagSet.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceTagSet.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4445,8 +5362,8 @@ module ThrottlingException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4459,6 +5376,9 @@ module TagResourceIdList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagResourceId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4483,6 +5403,9 @@ module DelegationSets =
   struct
     type nonrec t = DelegationSet.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DelegationSet.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4521,6 +5444,9 @@ module ResourceRecordSets =
   struct
     type nonrec t = ResourceRecordSet.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceRecordSet.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4546,6 +5472,9 @@ module QueryLoggingConfigs =
   struct
     type nonrec t = QueryLoggingConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:QueryLoggingConfig.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4581,8 +5510,8 @@ module DelegationSetNotReusable =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4591,6 +5520,9 @@ module HostedZones =
   struct
     type nonrec t = HostedZone.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HostedZone.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4625,16 +5557,41 @@ module NoSuchDelegationSet =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A reusable delegation set with the specified ID does not exist."]
+module HostedZoneType =
+  struct
+    type nonrec t =
+      | PrivateHostedZone 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PrivateHostedZone -> "PrivateHostedZone"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PrivateHostedZone" -> PrivateHostedZone
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration HostedZoneType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"HostedZoneType" j)
+    let to_json = simple_to_json to_value
+  end
 module HostedZoneSummaries =
   struct
     type nonrec t = HostedZoneSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HostedZoneSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4670,8 +5627,8 @@ module InvalidDomainName =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified domain name is not valid."]
@@ -4679,6 +5636,9 @@ module HealthChecks =
   struct
     type nonrec t = HealthCheck.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HealthCheck.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4713,8 +5673,8 @@ module IncompatibleVersion =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4723,6 +5683,9 @@ module GeoLocationDetailsList =
   struct
     type nonrec t = GeoLocationDetails.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GeoLocationDetails.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4744,6 +5707,129 @@ module GeoLocationDetailsList =
         ~of_json:GeoLocationDetails.of_json j
     let to_json v = composed_to_json to_value v
   end
+module LocationSummaries =
+  struct
+    type nonrec t = LocationSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LocationSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LocationSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LocationSummaries" ~of_json:LocationSummary.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module NoSuchCidrCollectionException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The CIDR collection you specified, doesn't exist."]
+module CollectionSummaries =
+  struct
+    type nonrec t = CollectionSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CollectionSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CollectionSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CollectionSummaries"
+        ~of_json:CollectionSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CidrBlockSummaries =
+  struct
+    type nonrec t = CidrBlockSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CidrBlockSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CidrBlockSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CidrBlockSummaries"
+        ~of_json:CidrBlockSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NoSuchCidrLocationException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The CIDR collection location doesn't match any locations in your account."]
 module TrafficPolicyInstanceCount =
   struct
     type nonrec t = int
@@ -4763,32 +5849,32 @@ module ReusableDelegationSetLimit =
   struct
     type nonrec t =
       {
-      type_: ReusableDelegationSetLimitType.t
+      type_: ReusableDelegationSetLimitType.t option
         [@ocaml.doc
           "The limit that you requested: MAX_ZONES_BY_REUSABLE_DELEGATION_SET, the maximum number of hosted zones that you can associate with the specified reusable delegation set."];
-      value: LimitValue.t
+      value: LimitValue.t option
         [@ocaml.doc
           "The current value for the MAX_ZONES_BY_REUSABLE_DELEGATION_SET limit."]}
-    let context_ = "ReusableDelegationSetLimit"
-    let make ~type_ = fun ~value -> fun () -> { type_; value }
+    let make ?type_ = fun ?value -> fun () -> { type_; value }
     let to_value x =
       structure_to_value
-        [("Type", (Some (ReusableDelegationSetLimitType.to_value x.type_)));
-        ("Value", (Some (LimitValue.to_value x.value)))]
+        [("Type",
+           (Option.map x.type_ ~f:ReusableDelegationSetLimitType.to_value));
+        ("Value", (Option.map x.value ~f:LimitValue.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let value =
-        LimitValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+        (Option.map ~f:LimitValue.of_xml) (Xml.child xml_arg0 "Value") in
       let type_ =
-        ReusableDelegationSetLimitType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
-      make ~value ~type_ ()
+        (Option.map ~f:ReusableDelegationSetLimitType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      make ?value ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" LimitValue.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" LimitValue.of_json in
       let type_ =
-        field_map_exn json "Type" ReusableDelegationSetLimitType.of_json in
-      make ~value ~type_ ()
+        field_map json__ "Type" ReusableDelegationSetLimitType.of_json in
+      make ?value ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the type of limit that you specified in the request and the current value for that limit."]
@@ -4820,8 +5906,8 @@ module NoSuchQueryLoggingConfig =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4830,31 +5916,30 @@ module HostedZoneLimit =
   struct
     type nonrec t =
       {
-      type_: HostedZoneLimitType.t
+      type_: HostedZoneLimitType.t option
         [@ocaml.doc
           "The limit that you requested. Valid values include the following: MAX_RRSETS_BY_ZONE: The maximum number of records that you can create in the specified hosted zone. MAX_VPCS_ASSOCIATED_BY_ZONE: The maximum number of Amazon VPCs that you can associate with the specified private hosted zone."];
-      value: LimitValue.t
+      value: LimitValue.t option
         [@ocaml.doc
           "The current value for the limit that is specified by Type."]}
-    let context_ = "HostedZoneLimit"
-    let make ~type_ = fun ~value -> fun () -> { type_; value }
+    let make ?type_ = fun ?value -> fun () -> { type_; value }
     let to_value x =
       structure_to_value
-        [("Type", (Some (HostedZoneLimitType.to_value x.type_)));
-        ("Value", (Some (LimitValue.to_value x.value)))]
+        [("Type", (Option.map x.type_ ~f:HostedZoneLimitType.to_value));
+        ("Value", (Option.map x.value ~f:LimitValue.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let value =
-        LimitValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+        (Option.map ~f:LimitValue.of_xml) (Xml.child xml_arg0 "Value") in
       let type_ =
-        HostedZoneLimitType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
-      make ~value ~type_ ()
+        (Option.map ~f:HostedZoneLimitType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      make ?value ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" LimitValue.of_json in
-      let type_ = field_map_exn json "Type" HostedZoneLimitType.of_json in
-      make ~value ~type_ ()
+    let of_json json__ =
+      let value = field_map json__ "Value" LimitValue.of_json in
+      let type_ = field_map json__ "Type" HostedZoneLimitType.of_json in
+      make ?value ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the type of limit that you specified in the request and the current value for that limit."]
@@ -4872,8 +5957,8 @@ module HostedZoneNotPrivate =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4895,6 +5980,9 @@ module HealthCheckObservations =
   struct
     type nonrec t = HealthCheckObservation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HealthCheckObservation.to_value)) |>
         (fun x -> `List x)
@@ -4944,8 +6032,8 @@ module NoSuchGeoLocation =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4978,14 +6066,14 @@ module DNSSECStatus =
           (Xml.child xml_arg0 "ServeSignature") in
       make ?statusMessage ?serveSignature ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusMessage =
-        field_map json "StatusMessage" SigningKeyStatusMessage.of_json in
+        field_map json__ "StatusMessage" SigningKeyStatusMessage.of_json in
       let serveSignature =
-        field_map json "ServeSignature" ServeSignature.of_json in
+        field_map json__ "ServeSignature" ServeSignature.of_json in
       make ?statusMessage ?serveSignature ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A string repesenting the status of DNSSEC signing."]
+  end[@@ocaml.doc "A string representing the status of DNSSEC signing."]
 module InvalidArgument =
   struct
     type nonrec t = {
@@ -5000,8 +6088,8 @@ module InvalidArgument =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Parameter name is not valid."]
@@ -5009,6 +6097,9 @@ module KeySigningKeys =
   struct
     type nonrec t = KeySigningKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KeySigningKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5033,6 +6124,9 @@ module CheckerIpRanges =
   struct
     type nonrec t = IPAddressCidr.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IPAddressCidr.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5057,27 +6151,26 @@ module ChangeInfo =
   struct
     type nonrec t =
       {
-      id: ResourceId.t
+      id: ResourceId.t option
         [@ocaml.doc
           "This element contains an ID that you use when performing a GetChange action to get detailed information about the change."];
-      status: ChangeStatus.t
+      status: ChangeStatus.t option
         [@ocaml.doc
           "The current state of the request. PENDING indicates that this request has not yet been applied to all Amazon Route 53 DNS servers."];
-      submittedAt: TimeStamp.t
+      submittedAt: TimeStamp.t option
         [@ocaml.doc
           "The date and time that the change request was submitted in ISO 8601 format and Coordinated Universal Time (UTC). For example, the value 2017-03-27T17:48:16.751Z represents March 27, 2017 at 17:48:16.751 UTC."];
       comment: ResourceDescription.t option
         [@ocaml.doc "A comment you can provide."]}
-    let context_ = "ChangeInfo"
-    let make ?comment =
-      fun ~id ->
-        fun ~status ->
-          fun ~submittedAt -> fun () -> { comment; id; status; submittedAt }
+    let make ?id =
+      fun ?status ->
+        fun ?submittedAt ->
+          fun ?comment -> fun () -> { id; status; submittedAt; comment }
     let to_value x =
       structure_to_value
-        [("Id", (Some (ResourceId.to_value x.id)));
-        ("Status", (Some (ChangeStatus.to_value x.status)));
-        ("SubmittedAt", (Some (TimeStamp.to_value x.submittedAt)));
+        [("Id", (Option.map x.id ~f:ResourceId.to_value));
+        ("Status", (Option.map x.status ~f:ChangeStatus.to_value));
+        ("SubmittedAt", (Option.map x.submittedAt ~f:TimeStamp.to_value));
         ("Comment", (Option.map x.comment ~f:ResourceDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -5085,21 +6178,18 @@ module ChangeInfo =
         (Option.map ~f:ResourceDescription.of_xml)
           (Xml.child xml_arg0 "Comment") in
       let submittedAt =
-        TimeStamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SubmittedAt") in
+        (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "SubmittedAt") in
       let status =
-        ChangeStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
-      let id =
-        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ?comment ~submittedAt ~status ~id ()
+        (Option.map ~f:ChangeStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?comment ?submittedAt ?status ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map json "Comment" ResourceDescription.of_json in
-      let submittedAt = field_map_exn json "SubmittedAt" TimeStamp.of_json in
-      let status = field_map_exn json "Status" ChangeStatus.of_json in
-      let id = field_map_exn json "Id" ResourceId.of_json in
-      make ?comment ~submittedAt ~status ~id ()
+    let of_json json__ =
+      let comment = field_map json__ "Comment" ResourceDescription.of_json in
+      let submittedAt = field_map json__ "SubmittedAt" TimeStamp.of_json in
+      let status = field_map json__ "Status" ChangeStatus.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
+      make ?comment ?submittedAt ?status ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that describes change information about changes made to your hosted zone."]
@@ -5117,40 +6207,56 @@ module NoSuchChange =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A change with the specified change ID does not exist."]
+module ChangeId =
+  struct
+    type nonrec t = string
+    let context_ = "ChangeId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:6500) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ChangeId" j
+    let to_json = simple_to_json to_value
+  end
 module AccountLimit =
   struct
     type nonrec t =
       {
-      type_: AccountLimitType.t
+      type_: AccountLimitType.t option
         [@ocaml.doc
           "The limit that you requested. Valid values include the following: MAX_HEALTH_CHECKS_BY_OWNER: The maximum number of health checks that you can create using the current account. MAX_HOSTED_ZONES_BY_OWNER: The maximum number of hosted zones that you can create using the current account. MAX_REUSABLE_DELEGATION_SETS_BY_OWNER: The maximum number of reusable delegation sets that you can create using the current account. MAX_TRAFFIC_POLICIES_BY_OWNER: The maximum number of traffic policies that you can create using the current account. MAX_TRAFFIC_POLICY_INSTANCES_BY_OWNER: The maximum number of traffic policy instances that you can create using the current account. (Traffic policy instances are referred to as traffic flow policy records in the Amazon Route 53 console.)"];
-      value: LimitValue.t
+      value: LimitValue.t option
         [@ocaml.doc
           "The current value for the limit that is specified by Type."]}
-    let context_ = "AccountLimit"
-    let make ~type_ = fun ~value -> fun () -> { type_; value }
+    let make ?type_ = fun ?value -> fun () -> { type_; value }
     let to_value x =
       structure_to_value
-        [("Type", (Some (AccountLimitType.to_value x.type_)));
-        ("Value", (Some (LimitValue.to_value x.value)))]
+        [("Type", (Option.map x.type_ ~f:AccountLimitType.to_value));
+        ("Value", (Option.map x.value ~f:LimitValue.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let value =
-        LimitValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+        (Option.map ~f:LimitValue.of_xml) (Xml.child xml_arg0 "Value") in
       let type_ =
-        AccountLimitType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
-      make ~value ~type_ ()
+        (Option.map ~f:AccountLimitType.of_xml) (Xml.child xml_arg0 "Type") in
+      make ?value ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" LimitValue.of_json in
-      let type_ = field_map_exn json "Type" AccountLimitType.of_json in
-      make ~value ~type_ ()
+    let of_json json__ =
+      let value = field_map json__ "Value" LimitValue.of_json in
+      let type_ = field_map json__ "Type" AccountLimitType.of_json in
+      make ?value ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the type of limit that you specified in the request and the current value for that limit."]
@@ -5168,8 +6274,8 @@ module DNSSECNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The hosted zone doesn't have any DNSSEC resources."]
@@ -5187,8 +6293,8 @@ module HostedZonePartiallyDelegated =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5207,8 +6313,8 @@ module InvalidKMSArn =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5227,8 +6333,8 @@ module InvalidKeySigningKeyStatus =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5247,8 +6353,8 @@ module KeySigningKeyWithActiveStatusNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A key-signing key (KSK) with ACTIVE status wasn't found."]
@@ -5266,8 +6372,8 @@ module InvalidVPCId =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5286,8 +6392,8 @@ module LastVPCAssociation =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5308,8 +6414,8 @@ module VPCAssociationNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5341,8 +6447,8 @@ module KeySigningKeyInParentDSRecord =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5361,8 +6467,8 @@ module VPCAssociationAuthorizationNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5381,8 +6487,8 @@ module TrafficPolicyInUse =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5401,8 +6507,8 @@ module DelegationSetInUse =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5421,8 +6527,8 @@ module InvalidSigningStatus =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5441,8 +6547,8 @@ module NoSuchKeySigningKey =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified key-signing key (KSK) doesn't exist."]
@@ -5460,8 +6566,8 @@ module HostedZoneNotEmpty =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5480,11 +6586,30 @@ module HealthCheckInUse =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This error code is not in use."]
+module CidrCollectionInUseException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "This CIDR collection is in use, and isn't empty."]
 module KeySigningKeyInUse =
   struct
     type nonrec t = {
@@ -5499,8 +6624,8 @@ module KeySigningKeyInUse =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5519,8 +6644,8 @@ module TooManyVPCAssociationAuthorizations =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5539,8 +6664,8 @@ module InvalidTrafficPolicyDocument =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5573,8 +6698,8 @@ module TooManyTrafficPolicyVersionsForCurrentPolicy =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5593,8 +6718,8 @@ module TooManyTrafficPolicies =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5613,8 +6738,8 @@ module TrafficPolicyAlreadyExists =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5633,8 +6758,8 @@ module TooManyTrafficPolicyInstances =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5653,8 +6778,8 @@ module TrafficPolicyInstanceAlreadyExists =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5673,8 +6798,8 @@ module DelegationSetAlreadyCreated =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5693,8 +6818,8 @@ module DelegationSetAlreadyReusable =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5713,8 +6838,8 @@ module DelegationSetNotAvailable =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5733,31 +6858,11 @@ module HostedZoneNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified HostedZone can't be found."]
-module LimitsExceeded =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "This operation can't be completed either because the current account has reached the limit on reusable delegation sets that it can create or because you've reached the limit on the number of Amazon VPCs that you can associate with a private hosted zone. To get the current limit on the number of reusable delegation sets, see GetAccountLimit. To get the current limit on the number of Amazon VPCs that you can associate with a private hosted zone, see GetHostedZoneLimit. To request a higher limit, create a case with the Amazon Web Services Support Center."]
 module InsufficientCloudWatchLogsResourcePolicy =
   struct
     type nonrec t = {
@@ -5772,12 +6877,12 @@ module InsufficientCloudWatchLogsResourcePolicy =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Amazon Route 53 doesn't have the permissions required to create log streams and send query logs to log streams. Possible causes include the following: There is no resource policy that specifies the log group ARN in the value for Resource. The resource policy that includes the log group ARN in the value for Resource doesn't have the necessary permissions. The resource policy hasn't finished propagating yet. The Key management service (KMS) key you specified doesn\226\128\153t exist or it can\226\128\153t be used with the log group associated with query log. Update or provide a resource policy to grant permissions for the KMS key."]
+       "Amazon Route 53 doesn't have the permissions required to create log streams and send query logs to log streams. Possible causes include the following: There is no resource policy that specifies the log group ARN in the value for Resource. The resource policy that includes the log group ARN in the value for Resource doesn't have the necessary permissions. The resource policy hasn't finished propagating yet. The Key management service (KMS) key you specified doesn\226\128\153t exist or it can\226\128\153t be used with the log group associated with query log. Update or provide a resource policy to grant permissions for the KMS key. The Key management service (KMS) key you specified is marked as disabled for the log group associated with query log. Update or provide a resource policy to grant permissions for the KMS key."]
 module NoSuchCloudWatchLogsLogGroup =
   struct
     type nonrec t = {
@@ -5792,8 +6897,8 @@ module NoSuchCloudWatchLogsLogGroup =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5812,8 +6917,8 @@ module QueryLoggingConfigAlreadyExists =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5832,8 +6937,8 @@ module InvalidKeySigningKeyName =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5852,8 +6957,8 @@ module KeySigningKeyAlreadyExists =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5872,8 +6977,8 @@ module TooManyKeySigningKeys =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5892,8 +6997,8 @@ module ConflictingDomainExists =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5912,8 +7017,8 @@ module HostedZoneAlreadyExists =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5932,8 +7037,8 @@ module TooManyHostedZones =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5952,8 +7057,8 @@ module HealthCheckAlreadyExists =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5972,12 +7077,93 @@ module TooManyHealthChecks =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This health check can't be created because the current account has reached the limit on the number of active health checks. For information about default limits, see Limits in the Amazon Route 53 Developer Guide. For information about how to get the current limit for an account, see GetAccountLimit. To request a higher limit, create a case with the Amazon Web Services Support Center. You have reached the maximum number of active health checks for an Amazon Web Services account. To request a higher limit, create a case with the Amazon Web Services Support Center."]
+module CidrCollection =
+  struct
+    type nonrec t =
+      {
+      arn: ARN.t option
+        [@ocaml.doc
+          "The ARN of the collection. Can be used to reference the collection in IAM policy or in another Amazon Web Services account."];
+      id: UUID.t option [@ocaml.doc "The unique ID of the CIDR collection."];
+      name: CollectionName.t option
+        [@ocaml.doc "The name of a CIDR collection."];
+      version: CollectionVersion.t option
+        [@ocaml.doc
+          "A sequential counter that Route\194\16053 sets to 1 when you create a CIDR collection and increments by 1 each time you update settings for the CIDR collection."]}
+    let make ?arn =
+      fun ?id ->
+        fun ?name -> fun ?version -> fun () -> { arn; id; name; version }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:ARN.to_value));
+        ("Id", (Option.map x.id ~f:UUID.to_value));
+        ("Name", (Option.map x.name ~f:CollectionName.to_value));
+        ("Version", (Option.map x.version ~f:CollectionVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let version =
+        (Option.map ~f:CollectionVersion.of_xml)
+          (Xml.child xml_arg0 "Version") in
+      let name =
+        (Option.map ~f:CollectionName.of_xml) (Xml.child xml_arg0 "Name") in
+      let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "Id") in
+      let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?version ?name ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let version = field_map json__ "Version" CollectionVersion.of_json in
+      let name = field_map json__ "Name" CollectionName.of_json in
+      let id = field_map json__ "Id" UUID.of_json in
+      let arn = field_map json__ "Arn" ARN.of_json in
+      make ?version ?name ?id ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A complex type that identifies a CIDR collection."]
+module CidrCollectionAlreadyExistsException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A CIDR collection with this name and a different caller reference already exists in this account."]
+module CidrNonce =
+  struct
+    type nonrec t = string
+    let context_ = "CidrNonce"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"\\p{ASCII}+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CidrNonce" j
+    let to_json = simple_to_json to_value
+  end
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
@@ -5986,6 +7172,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6024,9 +7213,9 @@ module InvalidChangeBatch =
         (Option.map ~f:ErrorMessages.of_xml) (Xml.child xml_arg0 "messages") in
       make ?message ?messages ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      let messages = field_map json "messages" ErrorMessages.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      let messages = field_map json__ "messages" ErrorMessages.of_json in
       make ?message ?messages ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6056,12 +7245,85 @@ module ChangeBatch =
           (Xml.child xml_arg0 "Comment") in
       make ~changes ?comment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changes = field_map_exn json "Changes" Changes.of_json in
-      let comment = field_map json "Comment" ResourceDescription.of_json in
+    let of_json json__ =
+      let changes = field_map_exn json__ "Changes" Changes.of_json in
+      let comment = field_map json__ "Comment" ResourceDescription.of_json in
       make ~changes ?comment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The information for a change request."]
+module CidrBlockInUseException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "This CIDR block is already in use."]
+module CidrCollectionVersionMismatchException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The CIDR collection version you provided, doesn't match the one in the ListCidrCollections operation."]
+module CidrCollectionChanges =
+  struct
+    type nonrec t = CidrCollectionChange.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1000) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CidrCollectionChange.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CidrCollectionChange.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CidrCollectionChanges"
+        ~of_json:CidrCollectionChange.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module NotAuthorizedException =
   struct
     type nonrec t = {
@@ -6076,8 +7338,8 @@ module NotAuthorizedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6096,8 +7358,8 @@ module PublicZoneVPCAssociation =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6119,7 +7381,7 @@ module UpdateTrafficPolicyInstanceResponse =
   struct
     type nonrec t =
       {
-      trafficPolicyInstance: TrafficPolicyInstance.t
+      trafficPolicyInstance: TrafficPolicyInstance.t option
         [@ocaml.doc
           "A complex type that contains settings for the updated traffic policy instance."]}
     type nonrec error =
@@ -6129,8 +7391,7 @@ module UpdateTrafficPolicyInstanceResponse =
       | `NoSuchTrafficPolicyInstance of NoSuchTrafficPolicyInstance.t 
       | `PriorRequestNotComplete of PriorRequestNotComplete.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateTrafficPolicyInstanceResponse"
-    let make ~trafficPolicyInstance = fun () -> { trafficPolicyInstance }
+    let make ?trafficPolicyInstance = fun () -> { trafficPolicyInstance }
     let error_of_json name json =
       match name with
       | "ConflictingTypes" ->
@@ -6189,19 +7450,20 @@ module UpdateTrafficPolicyInstanceResponse =
     let to_value x =
       structure_to_value
         [("TrafficPolicyInstance",
-           (Some (TrafficPolicyInstance.to_value x.trafficPolicyInstance)))]
+           (Option.map x.trafficPolicyInstance
+              ~f:TrafficPolicyInstance.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let trafficPolicyInstance =
-        TrafficPolicyInstance.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicyInstance") in
-      make ~trafficPolicyInstance ()
+        (Option.map ~f:TrafficPolicyInstance.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicyInstance") in
+      make ?trafficPolicyInstance ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let trafficPolicyInstance =
-        field_map_exn json "TrafficPolicyInstance"
+        field_map json__ "TrafficPolicyInstance"
           TrafficPolicyInstance.of_json in
-      make ~trafficPolicyInstance ()
+      make ?trafficPolicyInstance ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about the resource record sets that Amazon Route 53 created based on a specified traffic policy."]
@@ -6249,14 +7511,14 @@ module UpdateTrafficPolicyInstanceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~trafficPolicyVersion ~trafficPolicyId ~tTL ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let trafficPolicyVersion =
-        field_map_exn json "TrafficPolicyVersion"
+        field_map_exn json__ "TrafficPolicyVersion"
           TrafficPolicyVersion.of_json in
       let trafficPolicyId =
-        field_map_exn json "TrafficPolicyId" TrafficPolicyId.of_json in
-      let tTL = field_map_exn json "TTL" TTL.of_json in
-      let id = field_map_exn json "Id" TrafficPolicyInstanceId.of_json in
+        field_map_exn json__ "TrafficPolicyId" TrafficPolicyId.of_json in
+      let tTL = field_map_exn json__ "TTL" TTL.of_json in
+      let id = field_map_exn json__ "Id" TrafficPolicyInstanceId.of_json in
       make ~trafficPolicyVersion ~trafficPolicyId ~tTL ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6265,7 +7527,7 @@ module UpdateTrafficPolicyCommentResponse =
   struct
     type nonrec t =
       {
-      trafficPolicy: TrafficPolicy.t
+      trafficPolicy: TrafficPolicy.t option
         [@ocaml.doc
           "A complex type that contains settings for the specified traffic policy."]}
     type nonrec error =
@@ -6273,8 +7535,7 @@ module UpdateTrafficPolicyCommentResponse =
       | `InvalidInput of InvalidInput.t 
       | `NoSuchTrafficPolicy of NoSuchTrafficPolicy.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateTrafficPolicyCommentResponse"
-    let make ~trafficPolicy = fun () -> { trafficPolicy }
+    let make ?trafficPolicy = fun () -> { trafficPolicy }
     let error_of_json name json =
       match name with
       | "ConcurrentModification" ->
@@ -6315,18 +7576,19 @@ module UpdateTrafficPolicyCommentResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("TrafficPolicy", (Some (TrafficPolicy.to_value x.trafficPolicy)))]
+        [("TrafficPolicy",
+           (Option.map x.trafficPolicy ~f:TrafficPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let trafficPolicy =
-        TrafficPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicy") in
-      make ~trafficPolicy ()
+        (Option.map ~f:TrafficPolicy.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicy") in
+      make ?trafficPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let trafficPolicy =
-        field_map_exn json "TrafficPolicy" TrafficPolicy.of_json in
-      make ~trafficPolicy ()
+        field_map json__ "TrafficPolicy" TrafficPolicy.of_json in
+      make ?trafficPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response information for the traffic policy."]
@@ -6364,19 +7626,122 @@ module UpdateTrafficPolicyCommentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~comment ~version ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map_exn json "Comment" TrafficPolicyComment.of_json in
-      let version = field_map_exn json "Version" TrafficPolicyVersion.of_json in
-      let id = field_map_exn json "Id" TrafficPolicyId.of_json in
+    let of_json json__ =
+      let comment =
+        field_map_exn json__ "Comment" TrafficPolicyComment.of_json in
+      let version =
+        field_map_exn json__ "Version" TrafficPolicyVersion.of_json in
+      let id = field_map_exn json__ "Id" TrafficPolicyId.of_json in
       make ~comment ~version ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about the traffic policy that you want to update the comment for."]
+module UpdateHostedZoneFeaturesResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidInput of InvalidInput.t 
+      | `LimitsExceeded of LimitsExceeded.t 
+      | `NoSuchHostedZone of NoSuchHostedZone.t 
+      | `PriorRequestNotComplete of PriorRequestNotComplete.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
+      | "LimitsExceeded" -> `LimitsExceeded (LimitsExceeded.of_json json)
+      | "NoSuchHostedZone" ->
+          `NoSuchHostedZone (NoSuchHostedZone.of_json json)
+      | "PriorRequestNotComplete" ->
+          `PriorRequestNotComplete (PriorRequestNotComplete.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
+      | "LimitsExceeded" -> `LimitsExceeded (LimitsExceeded.of_xml xml)
+      | "NoSuchHostedZone" -> `NoSuchHostedZone (NoSuchHostedZone.of_xml xml)
+      | "PriorRequestNotComplete" ->
+          `PriorRequestNotComplete (PriorRequestNotComplete.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInput e ->
+          `Assoc
+            [("error", (`String "InvalidInput"));
+            ("details", (InvalidInput.to_json e))]
+      | `LimitsExceeded e ->
+          `Assoc
+            [("error", (`String "LimitsExceeded"));
+            ("details", (LimitsExceeded.to_json e))]
+      | `NoSuchHostedZone e ->
+          `Assoc
+            [("error", (`String "NoSuchHostedZone"));
+            ("details", (NoSuchHostedZone.to_json e))]
+      | `PriorRequestNotComplete e ->
+          `Assoc
+            [("error", (`String "PriorRequestNotComplete"));
+            ("details", (PriorRequestNotComplete.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the features configuration for a hosted zone. This operation allows you to enable or disable specific features for your hosted zone, such as accelerated recovery. Accelerated recovery enables you to update DNS records in your public hosted zone even when the us-east-1 region is unavailable."]
+module UpdateHostedZoneFeaturesRequest =
+  struct
+    type nonrec t =
+      {
+      hostedZoneId: ResourceId.t
+        [@ocaml.doc
+          "The ID of the hosted zone for which you want to update features. This is the unique identifier for your hosted zone."];
+      enableAcceleratedRecovery: AcceleratedRecoveryEnabled.t option
+        [@ocaml.doc
+          "Specifies whether to enable accelerated recovery for the hosted zone. Set to true to enable accelerated recovery, or false to disable it."]}
+    let context_ = "UpdateHostedZoneFeaturesRequest"
+    let make ?enableAcceleratedRecovery =
+      fun ~hostedZoneId ->
+        fun () -> { enableAcceleratedRecovery; hostedZoneId }
+    let to_value x =
+      structure_to_value
+        [("Id", (Some (ResourceId.to_value x.hostedZoneId)));
+        ("EnableAcceleratedRecovery",
+          (Option.map x.enableAcceleratedRecovery
+             ~f:AcceleratedRecoveryEnabled.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enableAcceleratedRecovery =
+        (Option.map ~f:AcceleratedRecoveryEnabled.of_xml)
+          (Xml.child xml_arg0 "EnableAcceleratedRecovery") in
+      let hostedZoneId =
+        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ?enableAcceleratedRecovery ~hostedZoneId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enableAcceleratedRecovery =
+        field_map json__ "EnableAcceleratedRecovery"
+          AcceleratedRecoveryEnabled.of_json in
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
+      make ?enableAcceleratedRecovery ~hostedZoneId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the features configuration for a hosted zone. This operation allows you to enable or disable specific features for your hosted zone, such as accelerated recovery. Accelerated recovery enables you to update DNS records in your public hosted zone even when the us-east-1 region is unavailable."]
 module UpdateHostedZoneCommentResponse =
   struct
     type nonrec t =
       {
-      hostedZone: HostedZone.t
+      hostedZone: HostedZone.t option
         [@ocaml.doc
           "A complex type that contains the response to the UpdateHostedZoneComment request."]}
     type nonrec error =
@@ -6384,8 +7749,7 @@ module UpdateHostedZoneCommentResponse =
       | `NoSuchHostedZone of NoSuchHostedZone.t 
       | `PriorRequestNotComplete of PriorRequestNotComplete.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateHostedZoneCommentResponse"
-    let make ~hostedZone = fun () -> { hostedZone }
+    let make ?hostedZone = fun () -> { hostedZone }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -6425,17 +7789,16 @@ module UpdateHostedZoneCommentResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("HostedZone", (Some (HostedZone.to_value x.hostedZone)))]
+        [("HostedZone", (Option.map x.hostedZone ~f:HostedZone.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let hostedZone =
-        HostedZone.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HostedZone") in
-      make ~hostedZone ()
+        (Option.map ~f:HostedZone.of_xml) (Xml.child xml_arg0 "HostedZone") in
+      make ?hostedZone ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hostedZone = field_map_exn json "HostedZone" HostedZone.of_json in
-      make ~hostedZone ()
+    let of_json json__ =
+      let hostedZone = field_map json__ "HostedZone" HostedZone.of_json in
+      make ?hostedZone ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response to the UpdateHostedZoneComment request."]
@@ -6464,9 +7827,9 @@ module UpdateHostedZoneCommentRequest =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?comment ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map json "Comment" ResourceDescription.of_json in
-      let id = field_map_exn json "Id" ResourceId.of_json in
+    let of_json json__ =
+      let comment = field_map json__ "Comment" ResourceDescription.of_json in
+      let id = field_map_exn json__ "Id" ResourceId.of_json in
       make ?comment ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to update the comment for a hosted zone."]
@@ -6474,7 +7837,7 @@ module UpdateHealthCheckResponse =
   struct
     type nonrec t =
       {
-      healthCheck: HealthCheck.t
+      healthCheck: HealthCheck.t option
         [@ocaml.doc
           "A complex type that contains the response to an UpdateHealthCheck request."]}
     type nonrec error =
@@ -6482,8 +7845,7 @@ module UpdateHealthCheckResponse =
       | `InvalidInput of InvalidInput.t 
       | `NoSuchHealthCheck of NoSuchHealthCheck.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateHealthCheckResponse"
-    let make ~healthCheck = fun () -> { healthCheck }
+    let make ?healthCheck = fun () -> { healthCheck }
     let error_of_json name json =
       match name with
       | "HealthCheckVersionMismatch" ->
@@ -6525,17 +7887,16 @@ module UpdateHealthCheckResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("HealthCheck", (Some (HealthCheck.to_value x.healthCheck)))]
+        [("HealthCheck", (Option.map x.healthCheck ~f:HealthCheck.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let healthCheck =
-        HealthCheck.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HealthCheck") in
-      make ~healthCheck ()
+        (Option.map ~f:HealthCheck.of_xml) (Xml.child xml_arg0 "HealthCheck") in
+      make ?healthCheck ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let healthCheck = field_map_exn json "HealthCheck" HealthCheck.of_json in
-      make ~healthCheck ()
+    let of_json json__ =
+      let healthCheck = field_map json__ "HealthCheck" HealthCheck.of_json in
+      make ?healthCheck ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response to the UpdateHealthCheck request."]
@@ -6560,19 +7921,19 @@ module UpdateHealthCheckRequest =
           "The path that you want Amazon Route 53 to request when performing health checks. The path can be any value for which your endpoint will return an HTTP status code of 2xx or 3xx when the endpoint is healthy, for example the file /docs/route53-health-check.html. You can also include query string parameters, for example, /welcome.html?language=jp&login=y. Specify this value only if you want to change it."];
       fullyQualifiedDomainName: FullyQualifiedDomainName.t option
         [@ocaml.doc
-          "Amazon Route 53 behavior depends on whether you specify a value for IPAddress. If a health check already has a value for IPAddress, you can change the value. However, you can't update an existing health check to add or remove the value of IPAddress. If you specify a value for IPAddress: Route 53 sends health check requests to the specified IPv4 or IPv6 address and passes the value of FullyQualifiedDomainName in the Host header for all health checks except TCP health checks. This is typically the fully qualified DNS name of the endpoint on which you want Route 53 to perform health checks. When Route 53 checks the health of an endpoint, here is how it constructs the Host header: If you specify a value of 80 for Port and HTTP or HTTP_STR_MATCH for Type, Route 53 passes the value of FullyQualifiedDomainName to the endpoint in the Host header. If you specify a value of 443 for Port and HTTPS or HTTPS_STR_MATCH for Type, Route 53 passes the value of FullyQualifiedDomainName to the endpoint in the Host header. If you specify another value for Port and any value except TCP for Type, Route 53 passes FullyQualifiedDomainName:Port to the endpoint in the Host header. If you don't specify a value for FullyQualifiedDomainName, Route 53 substitutes the value of IPAddress in the Host header in each of the above cases. If you don't specify a value for IPAddress: If you don't specify a value for IPAddress, Route 53 sends a DNS request to the domain that you specify in FullyQualifiedDomainName at the interval you specify in RequestInterval. Using an IPv4 address that is returned by DNS, Route 53 then checks the health of the endpoint. If you don't specify a value for IPAddress, Route 53 uses only IPv4 to send health checks to the endpoint. If there's no resource record set with a type of A for the name that you specify for FullyQualifiedDomainName, the health check fails with a \"DNS resolution failed\" error. If you want to check the health of weighted, latency, or failover resource record sets and you choose to specify the endpoint only by FullyQualifiedDomainName, we recommend that you create a separate health check for each endpoint. For example, create a health check for each HTTP server that is serving content for www.example.com. For the value of FullyQualifiedDomainName, specify the domain name of the server (such as us-east-2-www.example.com), not the name of the resource record sets (www.example.com). In this configuration, if the value of FullyQualifiedDomainName matches the name of the resource record sets and you then associate the health check with those resource record sets, health check results will be unpredictable. In addition, if the value of Type is HTTP, HTTPS, HTTP_STR_MATCH, or HTTPS_STR_MATCH, Route 53 passes the value of FullyQualifiedDomainName in the Host header, as it does when you specify a value for IPAddress. If the value of Type is TCP, Route 53 doesn't pass a Host header."];
+          "Amazon Route 53 behavior depends on whether you specify a value for IPAddress. If a health check already has a value for IPAddress, you can change the value. However, you can't update an existing health check to add or remove the value of IPAddress. If you specify a value for IPAddress: Route 53 sends health check requests to the specified IPv4 or IPv6 address and passes the value of FullyQualifiedDomainName in the Host header for all health checks except TCP health checks. This is typically the fully qualified DNS name of the endpoint on which you want Route 53 to perform health checks. When Route 53 checks the health of an endpoint, here is how it constructs the Host header: If you specify a value of 80 for Port and HTTP or HTTP_STR_MATCH for Type, Route 53 passes the value of FullyQualifiedDomainName to the endpoint in the Host header. If you specify a value of 443 for Port and HTTPS or HTTPS_STR_MATCH for Type, Route 53 passes the value of FullyQualifiedDomainName to the endpoint in the Host header. If you specify another value for Port and any value except TCP for Type, Route 53 passes FullyQualifiedDomainName:Port to the endpoint in the Host header. If you don't specify a value for FullyQualifiedDomainName, Route 53 substitutes the value of IPAddress in the Host header in each of the above cases. If you don't specify a value for IPAddress: If you don't specify a value for IPAddress, Route 53 sends a DNS request to the domain that you specify in FullyQualifiedDomainName at the interval you specify in RequestInterval. Using an IPv4 address that is returned by DNS, Route 53 then checks the health of the endpoint. If you don't specify a value for IPAddress, you can\226\128\153t update the health check to remove the FullyQualifiedDomainName; if you don\226\128\153t specify a value for IPAddress on creation, a FullyQualifiedDomainName is required. If you don't specify a value for IPAddress, Route 53 uses only IPv4 to send health checks to the endpoint. If there's no resource record set with a type of A for the name that you specify for FullyQualifiedDomainName, the health check fails with a \"DNS resolution failed\" error. If you want to check the health of weighted, latency, or failover resource record sets and you choose to specify the endpoint only by FullyQualifiedDomainName, we recommend that you create a separate health check for each endpoint. For example, create a health check for each HTTP server that is serving content for www.example.com. For the value of FullyQualifiedDomainName, specify the domain name of the server (such as us-east-2-www.example.com), not the name of the resource record sets (www.example.com). In this configuration, if the value of FullyQualifiedDomainName matches the name of the resource record sets and you then associate the health check with those resource record sets, health check results will be unpredictable. In addition, if the value of Type is HTTP, HTTPS, HTTP_STR_MATCH, or HTTPS_STR_MATCH, Route 53 passes the value of FullyQualifiedDomainName in the Host header, as it does when you specify a value for IPAddress. If the value of Type is TCP, Route 53 doesn't pass a Host header."];
       searchString: SearchString.t option
         [@ocaml.doc
           "If the value of Type is HTTP_STR_MATCH or HTTPS_STR_MATCH, the string that you want Amazon Route 53 to search for in the response body from the specified resource. If the string appears in the response body, Route 53 considers the resource healthy. (You can't change the value of Type when you update a health check.)"];
       failureThreshold: FailureThreshold.t option
         [@ocaml.doc
-          "The number of consecutive health checks that an endpoint must pass or fail for Amazon Route 53 to change the current status of the endpoint from unhealthy to healthy or vice versa. For more information, see How Amazon Route 53 Determines Whether an Endpoint Is Healthy in the Amazon Route 53 Developer Guide. If you don't specify a value for FailureThreshold, the default value is three health checks."];
+          "The number of consecutive health checks that an endpoint must pass or fail for Amazon Route 53 to change the current status of the endpoint from unhealthy to healthy or vice versa. For more information, see How Amazon Route 53 Determines Whether an Endpoint Is Healthy in the Amazon Route 53 Developer Guide. Otherwise, if you don't specify a value for FailureThreshold, the default value is three health checks."];
       inverted: Inverted.t option
         [@ocaml.doc
           "Specify whether you want Amazon Route 53 to invert the status of a health check, for example, to consider a health check unhealthy when it otherwise would be considered healthy."];
       disabled: Disabled.t option
         [@ocaml.doc
-          "Stops Route 53 from performing health checks. When you disable a health check, here's what happens: Health checks that check the health of endpoints: Route 53 stops submitting requests to your application, server, or other resource. Calculated health checks: Route 53 stops aggregating the status of the referenced health checks. Health checks that monitor CloudWatch alarms: Route 53 stops monitoring the corresponding CloudWatch metrics. After you disable a health check, Route 53 considers the status of the health check to always be healthy. If you configured DNS failover, Route 53 continues to route traffic to the corresponding resources. If you want to stop routing traffic to a resource, change the value of Inverted. Charges for a health check still apply when the health check is disabled. For more information, see Amazon Route 53 Pricing."];
+          "Stops Route 53 from performing health checks. When you disable a health check, here's what happens: Health checks that check the health of endpoints: Route 53 stops submitting requests to your application, server, or other resource. Calculated health checks: Route 53 stops aggregating the status of the referenced health checks. Health checks that monitor CloudWatch alarms: Route 53 stops monitoring the corresponding CloudWatch metrics. After you disable a health check, Route 53 considers the status of the health check to always be healthy. If you configured DNS failover, Route 53 continues to route traffic to the corresponding resources. Additionally, in disabled state, you can also invert the status of the health check to route traffic differently. For more information, see Inverted. Charges for a health check still apply when the health check is disabled. For more information, see Amazon Route 53 Pricing."];
       healthThreshold: HealthThreshold.t option
         [@ocaml.doc
           "The number of child health checks that are associated with a CALCULATED health that Amazon Route 53 must consider healthy for the CALCULATED health check to be considered healthy. To specify the child health checks that you want to associate with a CALCULATED health check, use the ChildHealthChecks and ChildHealthCheck elements. Note the following: If you specify a number greater than the number of child health checks, Route 53 always considers this health check to be unhealthy. If you specify 0, Route 53 always considers this health check to be healthy."];
@@ -6715,35 +8076,35 @@ module UpdateHealthCheckRequest =
         ?inverted ?failureThreshold ?searchString ?fullyQualifiedDomainName
         ?resourcePath ?port ?iPAddress ?healthCheckVersion ~healthCheckId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resetElements =
-        field_map json "ResetElements" ResettableElementNameList.of_json in
+        field_map json__ "ResetElements" ResettableElementNameList.of_json in
       let insufficientDataHealthStatus =
-        field_map json "InsufficientDataHealthStatus"
+        field_map json__ "InsufficientDataHealthStatus"
           InsufficientDataHealthStatus.of_json in
       let alarmIdentifier =
-        field_map json "AlarmIdentifier" AlarmIdentifier.of_json in
-      let regions = field_map json "Regions" HealthCheckRegionList.of_json in
-      let enableSNI = field_map json "EnableSNI" EnableSNI.of_json in
+        field_map json__ "AlarmIdentifier" AlarmIdentifier.of_json in
+      let regions = field_map json__ "Regions" HealthCheckRegionList.of_json in
+      let enableSNI = field_map json__ "EnableSNI" EnableSNI.of_json in
       let childHealthChecks =
-        field_map json "ChildHealthChecks" ChildHealthCheckList.of_json in
+        field_map json__ "ChildHealthChecks" ChildHealthCheckList.of_json in
       let healthThreshold =
-        field_map json "HealthThreshold" HealthThreshold.of_json in
-      let disabled = field_map json "Disabled" Disabled.of_json in
-      let inverted = field_map json "Inverted" Inverted.of_json in
+        field_map json__ "HealthThreshold" HealthThreshold.of_json in
+      let disabled = field_map json__ "Disabled" Disabled.of_json in
+      let inverted = field_map json__ "Inverted" Inverted.of_json in
       let failureThreshold =
-        field_map json "FailureThreshold" FailureThreshold.of_json in
-      let searchString = field_map json "SearchString" SearchString.of_json in
+        field_map json__ "FailureThreshold" FailureThreshold.of_json in
+      let searchString = field_map json__ "SearchString" SearchString.of_json in
       let fullyQualifiedDomainName =
-        field_map json "FullyQualifiedDomainName"
+        field_map json__ "FullyQualifiedDomainName"
           FullyQualifiedDomainName.of_json in
-      let resourcePath = field_map json "ResourcePath" ResourcePath.of_json in
-      let port = field_map json "Port" Port.of_json in
-      let iPAddress = field_map json "IPAddress" IPAddress.of_json in
+      let resourcePath = field_map json__ "ResourcePath" ResourcePath.of_json in
+      let port = field_map json__ "Port" Port.of_json in
+      let iPAddress = field_map json__ "IPAddress" IPAddress.of_json in
       let healthCheckVersion =
-        field_map json "HealthCheckVersion" HealthCheckVersion.of_json in
+        field_map json__ "HealthCheckVersion" HealthCheckVersion.of_json in
       let healthCheckId =
-        field_map_exn json "HealthCheckId" HealthCheckId.of_json in
+        field_map_exn json__ "HealthCheckId" HealthCheckId.of_json in
       make ?resetElements ?insufficientDataHealthStatus ?alarmIdentifier
         ?regions ?enableSNI ?childHealthChecks ?healthThreshold ?disabled
         ?inverted ?failureThreshold ?searchString ?fullyQualifiedDomainName
@@ -6755,35 +8116,34 @@ module TestDNSAnswerResponse =
   struct
     type nonrec t =
       {
-      nameserver: Nameserver.t
+      nameserver: Nameserver.t option
         [@ocaml.doc
           "The Amazon Route 53 name server used to respond to the request."];
-      recordName: DNSName.t
+      recordName: DNSName.t option
         [@ocaml.doc
           "The name of the resource record set that you submitted a request for."];
-      recordType: RRType.t
+      recordType: RRType.t option
         [@ocaml.doc
           "The type of the resource record set that you submitted a request for."];
-      recordData: RecordData.t
+      recordData: RecordData.t option
         [@ocaml.doc
           "A list that contains values that Amazon Route 53 returned for this resource record set."];
-      responseCode: DNSRCode.t
+      responseCode: DNSRCode.t option
         [@ocaml.doc
           "A code that indicates whether the request is valid or not. The most common response code is NOERROR, meaning that the request is valid. If the response is not valid, Amazon Route 53 returns a response code that describes the error. For a list of possible response codes, see DNS RCODES on the IANA website."];
-      protocol: TransportProtocol.t
+      protocol: TransportProtocol.t option
         [@ocaml.doc
           "The protocol that Amazon Route 53 used to respond to the request, either UDP or TCP."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `NoSuchHostedZone of NoSuchHostedZone.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "TestDNSAnswerResponse"
-    let make ~nameserver =
-      fun ~recordName ->
-        fun ~recordType ->
-          fun ~recordData ->
-            fun ~responseCode ->
-              fun ~protocol ->
+    let make ?nameserver =
+      fun ?recordName ->
+        fun ?recordType ->
+          fun ?recordData ->
+            fun ?responseCode ->
+              fun ?protocol ->
                 fun () ->
                   {
                     nameserver;
@@ -6824,43 +8184,39 @@ module TestDNSAnswerResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Nameserver", (Some (Nameserver.to_value x.nameserver)));
-        ("RecordName", (Some (DNSName.to_value x.recordName)));
-        ("RecordType", (Some (RRType.to_value x.recordType)));
-        ("RecordData", (Some (RecordData.to_value x.recordData)));
-        ("ResponseCode", (Some (DNSRCode.to_value x.responseCode)));
-        ("Protocol", (Some (TransportProtocol.to_value x.protocol)))]
+        [("Nameserver", (Option.map x.nameserver ~f:Nameserver.to_value));
+        ("RecordName", (Option.map x.recordName ~f:DNSName.to_value));
+        ("RecordType", (Option.map x.recordType ~f:RRType.to_value));
+        ("RecordData", (Option.map x.recordData ~f:RecordData.to_value));
+        ("ResponseCode", (Option.map x.responseCode ~f:DNSRCode.to_value));
+        ("Protocol", (Option.map x.protocol ~f:TransportProtocol.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let protocol =
-        TransportProtocol.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Protocol") in
+        (Option.map ~f:TransportProtocol.of_xml)
+          (Xml.child xml_arg0 "Protocol") in
       let responseCode =
-        DNSRCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResponseCode") in
+        (Option.map ~f:DNSRCode.of_xml) (Xml.child xml_arg0 "ResponseCode") in
       let recordData =
-        RecordData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RecordData") in
+        (Option.map ~f:RecordData.of_xml) (Xml.child xml_arg0 "RecordData") in
       let recordType =
-        RRType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RecordType") in
+        (Option.map ~f:RRType.of_xml) (Xml.child xml_arg0 "RecordType") in
       let recordName =
-        DNSName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RecordName") in
+        (Option.map ~f:DNSName.of_xml) (Xml.child xml_arg0 "RecordName") in
       let nameserver =
-        Nameserver.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Nameserver") in
-      make ~protocol ~responseCode ~recordData ~recordType ~recordName
-        ~nameserver ()
+        (Option.map ~f:Nameserver.of_xml) (Xml.child xml_arg0 "Nameserver") in
+      make ?protocol ?responseCode ?recordData ?recordType ?recordName
+        ?nameserver ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let protocol = field_map_exn json "Protocol" TransportProtocol.of_json in
-      let responseCode = field_map_exn json "ResponseCode" DNSRCode.of_json in
-      let recordData = field_map_exn json "RecordData" RecordData.of_json in
-      let recordType = field_map_exn json "RecordType" RRType.of_json in
-      let recordName = field_map_exn json "RecordName" DNSName.of_json in
-      let nameserver = field_map_exn json "Nameserver" Nameserver.of_json in
-      make ~protocol ~responseCode ~recordData ~recordType ~recordName
-        ~nameserver ()
+    let of_json json__ =
+      let protocol = field_map json__ "Protocol" TransportProtocol.of_json in
+      let responseCode = field_map json__ "ResponseCode" DNSRCode.of_json in
+      let recordData = field_map json__ "RecordData" RecordData.of_json in
+      let recordType = field_map json__ "RecordType" RRType.of_json in
+      let recordName = field_map json__ "RecordName" DNSName.of_json in
+      let nameserver = field_map json__ "Nameserver" Nameserver.of_json in
+      make ?protocol ?responseCode ?recordData ?recordType ?recordName
+        ?nameserver ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response to a TestDNSAnswer request."]
@@ -6932,15 +8288,16 @@ module TestDNSAnswerRequest =
       make ?eDNS0ClientSubnetMask ?eDNS0ClientSubnetIP ?resolverIP
         ~recordType ~recordName ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eDNS0ClientSubnetMask =
-        field_map json "EDNS0ClientSubnetMask" SubnetMask.of_json in
+        field_map json__ "EDNS0ClientSubnetMask" SubnetMask.of_json in
       let eDNS0ClientSubnetIP =
-        field_map json "EDNS0ClientSubnetIP" IPAddress.of_json in
-      let resolverIP = field_map json "ResolverIP" IPAddress.of_json in
-      let recordType = field_map_exn json "RecordType" RRType.of_json in
-      let recordName = field_map_exn json "RecordName" DNSName.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+        field_map json__ "EDNS0ClientSubnetIP" IPAddress.of_json in
+      let resolverIP = field_map json__ "ResolverIP" IPAddress.of_json in
+      let recordType = field_map_exn json__ "RecordType" RRType.of_json in
+      let recordName = field_map_exn json__ "RecordName" DNSName.of_json in
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ?eDNS0ClientSubnetMask ?eDNS0ClientSubnetIP ?resolverIP
         ~recordType ~recordName ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
@@ -6950,13 +8307,13 @@ module ListVPCAssociationAuthorizationsResponse =
   struct
     type nonrec t =
       {
-      hostedZoneId: ResourceId.t
+      hostedZoneId: ResourceId.t option
         [@ocaml.doc
           "The ID of the hosted zone that you can associate the listed VPCs with."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
           "When the response includes a NextToken element, there are more VPCs that can be associated with the specified hosted zone. To get the next page of VPCs, submit another ListVPCAssociationAuthorizations request, and include the value of the NextToken element from the response in the nexttoken request parameter."];
-      vPCs: VPCs.t
+      vPCs: VPCs.t option
         [@ocaml.doc
           "The list of VPCs that are authorized to be associated with the specified hosted zone."]}
     type nonrec error =
@@ -6964,10 +8321,9 @@ module ListVPCAssociationAuthorizationsResponse =
       | `InvalidPaginationToken of InvalidPaginationToken.t 
       | `NoSuchHostedZone of NoSuchHostedZone.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListVPCAssociationAuthorizationsResponse"
-    let make ?nextToken =
-      fun ~hostedZoneId ->
-        fun ~vPCs -> fun () -> { nextToken; hostedZoneId; vPCs }
+    let make ?hostedZoneId =
+      fun ?nextToken ->
+        fun ?vPCs -> fun () -> { hostedZoneId; nextToken; vPCs }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -7007,26 +8363,24 @@ module ListVPCAssociationAuthorizationsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("HostedZoneId", (Some (ResourceId.to_value x.hostedZoneId)));
+        [("HostedZoneId", (Option.map x.hostedZoneId ~f:ResourceId.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("VPCs", (Some (VPCs.to_value x.vPCs)))]
+        ("VPCs", (Option.map x.vPCs ~f:VPCs.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let vPCs =
-        VPCs.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VPCs") in
+      let vPCs = (Option.map ~f:VPCs.of_xml) (Xml.child xml_arg0 "VPCs") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       let hostedZoneId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
-      make ~vPCs ?nextToken ~hostedZoneId ()
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "HostedZoneId") in
+      make ?vPCs ?nextToken ?hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vPCs = field_map_exn json "VPCs" VPCs.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
-      make ~vPCs ?nextToken ~hostedZoneId ()
+    let of_json json__ =
+      let vPCs = field_map json__ "VPCs" VPCs.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let hostedZoneId = field_map json__ "HostedZoneId" ResourceId.of_json in
+      make ?vPCs ?nextToken ?hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response information for the request."]
@@ -7064,10 +8418,11 @@ module ListVPCAssociationAuthorizationsRequest =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?maxResults ?nextToken ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ?maxResults ?nextToken ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7076,27 +8431,26 @@ module ListTrafficPolicyVersionsResponse =
   struct
     type nonrec t =
       {
-      trafficPolicies: TrafficPolicies.t
+      trafficPolicies: TrafficPolicies.t option
         [@ocaml.doc
           "A list that contains one TrafficPolicy element for each traffic policy version that is associated with the specified traffic policy."];
-      isTruncated: PageTruncated.t
+      isTruncated: PageTruncated.t option
         [@ocaml.doc
           "A flag that indicates whether there are more traffic policies to be listed. If the response was truncated, you can get the next group of traffic policies by submitting another ListTrafficPolicyVersions request and specifying the value of NextMarker in the marker parameter."];
-      trafficPolicyVersionMarker: TrafficPolicyVersionMarker.t
+      trafficPolicyVersionMarker: TrafficPolicyVersionMarker.t option
         [@ocaml.doc
           "If IsTruncated is true, the value of TrafficPolicyVersionMarker identifies the first traffic policy that Amazon Route 53 will return if you submit another request. Call ListTrafficPolicyVersions again and specify the value of TrafficPolicyVersionMarker in the TrafficPolicyVersionMarker request parameter. This element is present only if IsTruncated is true."];
-      maxItems: PageMaxItems.t
+      maxItems: PageMaxItems.t option
         [@ocaml.doc
           "The value that you specified for the maxitems parameter in the ListTrafficPolicyVersions request that produced the current response."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `NoSuchTrafficPolicy of NoSuchTrafficPolicy.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTrafficPolicyVersionsResponse"
-    let make ~trafficPolicies =
-      fun ~isTruncated ->
-        fun ~trafficPolicyVersionMarker ->
-          fun ~maxItems ->
+    let make ?trafficPolicies =
+      fun ?isTruncated ->
+        fun ?trafficPolicyVersionMarker ->
+          fun ?maxItems ->
             fun () ->
               {
                 trafficPolicies;
@@ -7137,42 +8491,38 @@ module ListTrafficPolicyVersionsResponse =
     let to_value x =
       structure_to_value
         [("TrafficPolicies",
-           (Some (TrafficPolicies.to_value x.trafficPolicies)));
-        ("IsTruncated", (Some (PageTruncated.to_value x.isTruncated)));
+           (Option.map x.trafficPolicies ~f:TrafficPolicies.to_value));
+        ("IsTruncated", (Option.map x.isTruncated ~f:PageTruncated.to_value));
         ("TrafficPolicyVersionMarker",
-          (Some
-             (TrafficPolicyVersionMarker.to_value
-                x.trafficPolicyVersionMarker)));
-        ("MaxItems", (Some (PageMaxItems.to_value x.maxItems)))]
+          (Option.map x.trafficPolicyVersionMarker
+             ~f:TrafficPolicyVersionMarker.to_value));
+        ("MaxItems", (Option.map x.maxItems ~f:PageMaxItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxItems =
-        PageMaxItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MaxItems") in
+        (Option.map ~f:PageMaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       let trafficPolicyVersionMarker =
-        TrafficPolicyVersionMarker.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "TrafficPolicyVersionMarker") in
+        (Option.map ~f:TrafficPolicyVersionMarker.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicyVersionMarker") in
       let isTruncated =
-        PageTruncated.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IsTruncated") in
+        (Option.map ~f:PageTruncated.of_xml)
+          (Xml.child xml_arg0 "IsTruncated") in
       let trafficPolicies =
-        TrafficPolicies.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicies") in
-      make ~maxItems ~trafficPolicyVersionMarker ~isTruncated
-        ~trafficPolicies ()
+        (Option.map ~f:TrafficPolicies.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicies") in
+      make ?maxItems ?trafficPolicyVersionMarker ?isTruncated
+        ?trafficPolicies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
       let trafficPolicyVersionMarker =
-        field_map_exn json "TrafficPolicyVersionMarker"
+        field_map json__ "TrafficPolicyVersionMarker"
           TrafficPolicyVersionMarker.of_json in
-      let isTruncated =
-        field_map_exn json "IsTruncated" PageTruncated.of_json in
+      let isTruncated = field_map json__ "IsTruncated" PageTruncated.of_json in
       let trafficPolicies =
-        field_map_exn json "TrafficPolicies" TrafficPolicies.of_json in
-      make ~maxItems ~trafficPolicyVersionMarker ~isTruncated
-        ~trafficPolicies ()
+        field_map json__ "TrafficPolicies" TrafficPolicies.of_json in
+      make ?maxItems ?trafficPolicyVersionMarker ?isTruncated
+        ?trafficPolicies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response information for the request."]
@@ -7212,12 +8562,12 @@ module ListTrafficPolicyVersionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?maxItems ?trafficPolicyVersionMarker ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
       let trafficPolicyVersionMarker =
-        field_map json "TrafficPolicyVersionMarker"
+        field_map json__ "TrafficPolicyVersionMarker"
           TrafficPolicyVersionMarker.of_json in
-      let id = field_map_exn json "Id" TrafficPolicyId.of_json in
+      let id = field_map_exn json__ "Id" TrafficPolicyId.of_json in
       make ?maxItems ?trafficPolicyVersionMarker ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7226,7 +8576,7 @@ module ListTrafficPolicyInstancesResponse =
   struct
     type nonrec t =
       {
-      trafficPolicyInstances: TrafficPolicyInstances.t
+      trafficPolicyInstances: TrafficPolicyInstances.t option
         [@ocaml.doc
           "A list that contains one TrafficPolicyInstance element for each traffic policy instance that matches the elements in the request."];
       hostedZoneIdMarker: ResourceId.t option
@@ -7238,29 +8588,28 @@ module ListTrafficPolicyInstancesResponse =
       trafficPolicyInstanceTypeMarker: RRType.t option
         [@ocaml.doc
           "If IsTruncated is true, TrafficPolicyInstanceTypeMarker is the DNS type of the resource record sets that are associated with the first traffic policy instance that Amazon Route 53 will return if you submit another ListTrafficPolicyInstances request."];
-      isTruncated: PageTruncated.t
+      isTruncated: PageTruncated.t option
         [@ocaml.doc
           "A flag that indicates whether there are more traffic policy instances to be listed. If the response was truncated, you can get more traffic policy instances by calling ListTrafficPolicyInstances again and specifying the values of the HostedZoneIdMarker, TrafficPolicyInstanceNameMarker, and TrafficPolicyInstanceTypeMarker in the corresponding request parameters."];
-      maxItems: PageMaxItems.t
+      maxItems: PageMaxItems.t option
         [@ocaml.doc
           "The value that you specified for the MaxItems parameter in the call to ListTrafficPolicyInstances that produced the current response."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `NoSuchTrafficPolicyInstance of NoSuchTrafficPolicyInstance.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTrafficPolicyInstancesResponse"
-    let make ?hostedZoneIdMarker =
-      fun ?trafficPolicyInstanceNameMarker ->
-        fun ?trafficPolicyInstanceTypeMarker ->
-          fun ~trafficPolicyInstances ->
-            fun ~isTruncated ->
-              fun ~maxItems ->
+    let make ?trafficPolicyInstances =
+      fun ?hostedZoneIdMarker ->
+        fun ?trafficPolicyInstanceNameMarker ->
+          fun ?trafficPolicyInstanceTypeMarker ->
+            fun ?isTruncated ->
+              fun ?maxItems ->
                 fun () ->
                   {
+                    trafficPolicyInstances;
                     hostedZoneIdMarker;
                     trafficPolicyInstanceNameMarker;
                     trafficPolicyInstanceTypeMarker;
-                    trafficPolicyInstances;
                     isTruncated;
                     maxItems
                   }
@@ -7299,23 +8648,23 @@ module ListTrafficPolicyInstancesResponse =
     let to_value x =
       structure_to_value
         [("TrafficPolicyInstances",
-           (Some (TrafficPolicyInstances.to_value x.trafficPolicyInstances)));
+           (Option.map x.trafficPolicyInstances
+              ~f:TrafficPolicyInstances.to_value));
         ("HostedZoneIdMarker",
           (Option.map x.hostedZoneIdMarker ~f:ResourceId.to_value));
         ("TrafficPolicyInstanceNameMarker",
           (Option.map x.trafficPolicyInstanceNameMarker ~f:DNSName.to_value));
         ("TrafficPolicyInstanceTypeMarker",
           (Option.map x.trafficPolicyInstanceTypeMarker ~f:RRType.to_value));
-        ("IsTruncated", (Some (PageTruncated.to_value x.isTruncated)));
-        ("MaxItems", (Some (PageMaxItems.to_value x.maxItems)))]
+        ("IsTruncated", (Option.map x.isTruncated ~f:PageTruncated.to_value));
+        ("MaxItems", (Option.map x.maxItems ~f:PageMaxItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxItems =
-        PageMaxItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MaxItems") in
+        (Option.map ~f:PageMaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       let isTruncated =
-        PageTruncated.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IsTruncated") in
+        (Option.map ~f:PageTruncated.of_xml)
+          (Xml.child xml_arg0 "IsTruncated") in
       let trafficPolicyInstanceTypeMarker =
         (Option.map ~f:RRType.of_xml)
           (Xml.child xml_arg0 "TrafficPolicyInstanceTypeMarker") in
@@ -7326,28 +8675,27 @@ module ListTrafficPolicyInstancesResponse =
         (Option.map ~f:ResourceId.of_xml)
           (Xml.child xml_arg0 "HostedZoneIdMarker") in
       let trafficPolicyInstances =
-        TrafficPolicyInstances.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicyInstances") in
-      make ~maxItems ~isTruncated ?trafficPolicyInstanceTypeMarker
+        (Option.map ~f:TrafficPolicyInstances.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicyInstances") in
+      make ?maxItems ?isTruncated ?trafficPolicyInstanceTypeMarker
         ?trafficPolicyInstanceNameMarker ?hostedZoneIdMarker
-        ~trafficPolicyInstances ()
+        ?trafficPolicyInstances ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
-      let isTruncated =
-        field_map_exn json "IsTruncated" PageTruncated.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
+      let isTruncated = field_map json__ "IsTruncated" PageTruncated.of_json in
       let trafficPolicyInstanceTypeMarker =
-        field_map json "TrafficPolicyInstanceTypeMarker" RRType.of_json in
+        field_map json__ "TrafficPolicyInstanceTypeMarker" RRType.of_json in
       let trafficPolicyInstanceNameMarker =
-        field_map json "TrafficPolicyInstanceNameMarker" DNSName.of_json in
+        field_map json__ "TrafficPolicyInstanceNameMarker" DNSName.of_json in
       let hostedZoneIdMarker =
-        field_map json "HostedZoneIdMarker" ResourceId.of_json in
+        field_map json__ "HostedZoneIdMarker" ResourceId.of_json in
       let trafficPolicyInstances =
-        field_map_exn json "TrafficPolicyInstances"
+        field_map json__ "TrafficPolicyInstances"
           TrafficPolicyInstances.of_json in
-      make ~maxItems ~isTruncated ?trafficPolicyInstanceTypeMarker
+      make ?maxItems ?isTruncated ?trafficPolicyInstanceTypeMarker
         ?trafficPolicyInstanceNameMarker ?hostedZoneIdMarker
-        ~trafficPolicyInstances ()
+        ?trafficPolicyInstances ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response information for the request."]
@@ -7402,14 +8750,14 @@ module ListTrafficPolicyInstancesRequest =
       make ?maxItems ?trafficPolicyInstanceTypeMarker
         ?trafficPolicyInstanceNameMarker ?hostedZoneIdMarker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
       let trafficPolicyInstanceTypeMarker =
-        field_map json "TrafficPolicyInstanceTypeMarker" RRType.of_json in
+        field_map json__ "TrafficPolicyInstanceTypeMarker" RRType.of_json in
       let trafficPolicyInstanceNameMarker =
-        field_map json "TrafficPolicyInstanceNameMarker" DNSName.of_json in
+        field_map json__ "TrafficPolicyInstanceNameMarker" DNSName.of_json in
       let hostedZoneIdMarker =
-        field_map json "HostedZoneIdMarker" ResourceId.of_json in
+        field_map json__ "HostedZoneIdMarker" ResourceId.of_json in
       make ?maxItems ?trafficPolicyInstanceTypeMarker
         ?trafficPolicyInstanceNameMarker ?hostedZoneIdMarker ()
     let to_json v = composed_to_json to_value v
@@ -7419,7 +8767,7 @@ module ListTrafficPolicyInstancesByPolicyResponse =
   struct
     type nonrec t =
       {
-      trafficPolicyInstances: TrafficPolicyInstances.t
+      trafficPolicyInstances: TrafficPolicyInstances.t option
         [@ocaml.doc
           "A list that contains one TrafficPolicyInstance element for each traffic policy instance that matches the elements in the request."];
       hostedZoneIdMarker: ResourceId.t option
@@ -7431,10 +8779,10 @@ module ListTrafficPolicyInstancesByPolicyResponse =
       trafficPolicyInstanceTypeMarker: RRType.t option
         [@ocaml.doc
           "If IsTruncated is true, TrafficPolicyInstanceTypeMarker is the DNS type of the resource record sets that are associated with the first traffic policy instance in the next group of MaxItems traffic policy instances."];
-      isTruncated: PageTruncated.t
+      isTruncated: PageTruncated.t option
         [@ocaml.doc
           "A flag that indicates whether there are more traffic policy instances to be listed. If the response was truncated, you can get the next group of traffic policy instances by calling ListTrafficPolicyInstancesByPolicy again and specifying the values of the HostedZoneIdMarker, TrafficPolicyInstanceNameMarker, and TrafficPolicyInstanceTypeMarker elements in the corresponding request parameters."];
-      maxItems: PageMaxItems.t
+      maxItems: PageMaxItems.t option
         [@ocaml.doc
           "The value that you specified for the MaxItems parameter in the call to ListTrafficPolicyInstancesByPolicy that produced the current response."]}
     type nonrec error =
@@ -7442,19 +8790,18 @@ module ListTrafficPolicyInstancesByPolicyResponse =
       | `NoSuchTrafficPolicy of NoSuchTrafficPolicy.t 
       | `NoSuchTrafficPolicyInstance of NoSuchTrafficPolicyInstance.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTrafficPolicyInstancesByPolicyResponse"
-    let make ?hostedZoneIdMarker =
-      fun ?trafficPolicyInstanceNameMarker ->
-        fun ?trafficPolicyInstanceTypeMarker ->
-          fun ~trafficPolicyInstances ->
-            fun ~isTruncated ->
-              fun ~maxItems ->
+    let make ?trafficPolicyInstances =
+      fun ?hostedZoneIdMarker ->
+        fun ?trafficPolicyInstanceNameMarker ->
+          fun ?trafficPolicyInstanceTypeMarker ->
+            fun ?isTruncated ->
+              fun ?maxItems ->
                 fun () ->
                   {
+                    trafficPolicyInstances;
                     hostedZoneIdMarker;
                     trafficPolicyInstanceNameMarker;
                     trafficPolicyInstanceTypeMarker;
-                    trafficPolicyInstances;
                     isTruncated;
                     maxItems
                   }
@@ -7501,23 +8848,23 @@ module ListTrafficPolicyInstancesByPolicyResponse =
     let to_value x =
       structure_to_value
         [("TrafficPolicyInstances",
-           (Some (TrafficPolicyInstances.to_value x.trafficPolicyInstances)));
+           (Option.map x.trafficPolicyInstances
+              ~f:TrafficPolicyInstances.to_value));
         ("HostedZoneIdMarker",
           (Option.map x.hostedZoneIdMarker ~f:ResourceId.to_value));
         ("TrafficPolicyInstanceNameMarker",
           (Option.map x.trafficPolicyInstanceNameMarker ~f:DNSName.to_value));
         ("TrafficPolicyInstanceTypeMarker",
           (Option.map x.trafficPolicyInstanceTypeMarker ~f:RRType.to_value));
-        ("IsTruncated", (Some (PageTruncated.to_value x.isTruncated)));
-        ("MaxItems", (Some (PageMaxItems.to_value x.maxItems)))]
+        ("IsTruncated", (Option.map x.isTruncated ~f:PageTruncated.to_value));
+        ("MaxItems", (Option.map x.maxItems ~f:PageMaxItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxItems =
-        PageMaxItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MaxItems") in
+        (Option.map ~f:PageMaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       let isTruncated =
-        PageTruncated.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IsTruncated") in
+        (Option.map ~f:PageTruncated.of_xml)
+          (Xml.child xml_arg0 "IsTruncated") in
       let trafficPolicyInstanceTypeMarker =
         (Option.map ~f:RRType.of_xml)
           (Xml.child xml_arg0 "TrafficPolicyInstanceTypeMarker") in
@@ -7528,28 +8875,27 @@ module ListTrafficPolicyInstancesByPolicyResponse =
         (Option.map ~f:ResourceId.of_xml)
           (Xml.child xml_arg0 "HostedZoneIdMarker") in
       let trafficPolicyInstances =
-        TrafficPolicyInstances.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicyInstances") in
-      make ~maxItems ~isTruncated ?trafficPolicyInstanceTypeMarker
+        (Option.map ~f:TrafficPolicyInstances.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicyInstances") in
+      make ?maxItems ?isTruncated ?trafficPolicyInstanceTypeMarker
         ?trafficPolicyInstanceNameMarker ?hostedZoneIdMarker
-        ~trafficPolicyInstances ()
+        ?trafficPolicyInstances ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
-      let isTruncated =
-        field_map_exn json "IsTruncated" PageTruncated.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
+      let isTruncated = field_map json__ "IsTruncated" PageTruncated.of_json in
       let trafficPolicyInstanceTypeMarker =
-        field_map json "TrafficPolicyInstanceTypeMarker" RRType.of_json in
+        field_map json__ "TrafficPolicyInstanceTypeMarker" RRType.of_json in
       let trafficPolicyInstanceNameMarker =
-        field_map json "TrafficPolicyInstanceNameMarker" DNSName.of_json in
+        field_map json__ "TrafficPolicyInstanceNameMarker" DNSName.of_json in
       let hostedZoneIdMarker =
-        field_map json "HostedZoneIdMarker" ResourceId.of_json in
+        field_map json__ "HostedZoneIdMarker" ResourceId.of_json in
       let trafficPolicyInstances =
-        field_map_exn json "TrafficPolicyInstances"
+        field_map json__ "TrafficPolicyInstances"
           TrafficPolicyInstances.of_json in
-      make ~maxItems ~isTruncated ?trafficPolicyInstanceTypeMarker
+      make ?maxItems ?isTruncated ?trafficPolicyInstanceTypeMarker
         ?trafficPolicyInstanceNameMarker ?hostedZoneIdMarker
-        ~trafficPolicyInstances ()
+        ?trafficPolicyInstances ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response information for the request."]
@@ -7625,19 +8971,19 @@ module ListTrafficPolicyInstancesByPolicyRequest =
         ?trafficPolicyInstanceNameMarker ?hostedZoneIdMarker
         ~trafficPolicyVersion ~trafficPolicyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
       let trafficPolicyInstanceTypeMarker =
-        field_map json "TrafficPolicyInstanceTypeMarker" RRType.of_json in
+        field_map json__ "TrafficPolicyInstanceTypeMarker" RRType.of_json in
       let trafficPolicyInstanceNameMarker =
-        field_map json "TrafficPolicyInstanceNameMarker" DNSName.of_json in
+        field_map json__ "TrafficPolicyInstanceNameMarker" DNSName.of_json in
       let hostedZoneIdMarker =
-        field_map json "HostedZoneIdMarker" ResourceId.of_json in
+        field_map json__ "HostedZoneIdMarker" ResourceId.of_json in
       let trafficPolicyVersion =
-        field_map_exn json "TrafficPolicyVersion"
+        field_map_exn json__ "TrafficPolicyVersion"
           TrafficPolicyVersion.of_json in
       let trafficPolicyId =
-        field_map_exn json "TrafficPolicyId" TrafficPolicyId.of_json in
+        field_map_exn json__ "TrafficPolicyId" TrafficPolicyId.of_json in
       make ?maxItems ?trafficPolicyInstanceTypeMarker
         ?trafficPolicyInstanceNameMarker ?hostedZoneIdMarker
         ~trafficPolicyVersion ~trafficPolicyId ()
@@ -7648,7 +8994,7 @@ module ListTrafficPolicyInstancesByHostedZoneResponse =
   struct
     type nonrec t =
       {
-      trafficPolicyInstances: TrafficPolicyInstances.t
+      trafficPolicyInstances: TrafficPolicyInstances.t option
         [@ocaml.doc
           "A list that contains one TrafficPolicyInstance element for each traffic policy instance that matches the elements in the request."];
       trafficPolicyInstanceNameMarker: DNSName.t option
@@ -7657,10 +9003,10 @@ module ListTrafficPolicyInstancesByHostedZoneResponse =
       trafficPolicyInstanceTypeMarker: RRType.t option
         [@ocaml.doc
           "If IsTruncated is true, TrafficPolicyInstanceTypeMarker is the DNS type of the resource record sets that are associated with the first traffic policy instance in the next group of traffic policy instances."];
-      isTruncated: PageTruncated.t
+      isTruncated: PageTruncated.t option
         [@ocaml.doc
           "A flag that indicates whether there are more traffic policy instances to be listed. If the response was truncated, you can get the next group of traffic policy instances by submitting another ListTrafficPolicyInstancesByHostedZone request and specifying the values of HostedZoneIdMarker, TrafficPolicyInstanceNameMarker, and TrafficPolicyInstanceTypeMarker in the corresponding request parameters."];
-      maxItems: PageMaxItems.t
+      maxItems: PageMaxItems.t option
         [@ocaml.doc
           "The value that you specified for the MaxItems parameter in the ListTrafficPolicyInstancesByHostedZone request that produced the current response."]}
     type nonrec error =
@@ -7668,17 +9014,16 @@ module ListTrafficPolicyInstancesByHostedZoneResponse =
       | `NoSuchHostedZone of NoSuchHostedZone.t 
       | `NoSuchTrafficPolicyInstance of NoSuchTrafficPolicyInstance.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTrafficPolicyInstancesByHostedZoneResponse"
-    let make ?trafficPolicyInstanceNameMarker =
-      fun ?trafficPolicyInstanceTypeMarker ->
-        fun ~trafficPolicyInstances ->
-          fun ~isTruncated ->
-            fun ~maxItems ->
+    let make ?trafficPolicyInstances =
+      fun ?trafficPolicyInstanceNameMarker ->
+        fun ?trafficPolicyInstanceTypeMarker ->
+          fun ?isTruncated ->
+            fun ?maxItems ->
               fun () ->
                 {
+                  trafficPolicyInstances;
                   trafficPolicyInstanceNameMarker;
                   trafficPolicyInstanceTypeMarker;
-                  trafficPolicyInstances;
                   isTruncated;
                   maxItems
                 }
@@ -7724,21 +9069,21 @@ module ListTrafficPolicyInstancesByHostedZoneResponse =
     let to_value x =
       structure_to_value
         [("TrafficPolicyInstances",
-           (Some (TrafficPolicyInstances.to_value x.trafficPolicyInstances)));
+           (Option.map x.trafficPolicyInstances
+              ~f:TrafficPolicyInstances.to_value));
         ("TrafficPolicyInstanceNameMarker",
           (Option.map x.trafficPolicyInstanceNameMarker ~f:DNSName.to_value));
         ("TrafficPolicyInstanceTypeMarker",
           (Option.map x.trafficPolicyInstanceTypeMarker ~f:RRType.to_value));
-        ("IsTruncated", (Some (PageTruncated.to_value x.isTruncated)));
-        ("MaxItems", (Some (PageMaxItems.to_value x.maxItems)))]
+        ("IsTruncated", (Option.map x.isTruncated ~f:PageTruncated.to_value));
+        ("MaxItems", (Option.map x.maxItems ~f:PageMaxItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxItems =
-        PageMaxItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MaxItems") in
+        (Option.map ~f:PageMaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       let isTruncated =
-        PageTruncated.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IsTruncated") in
+        (Option.map ~f:PageTruncated.of_xml)
+          (Xml.child xml_arg0 "IsTruncated") in
       let trafficPolicyInstanceTypeMarker =
         (Option.map ~f:RRType.of_xml)
           (Xml.child xml_arg0 "TrafficPolicyInstanceTypeMarker") in
@@ -7746,24 +9091,23 @@ module ListTrafficPolicyInstancesByHostedZoneResponse =
         (Option.map ~f:DNSName.of_xml)
           (Xml.child xml_arg0 "TrafficPolicyInstanceNameMarker") in
       let trafficPolicyInstances =
-        TrafficPolicyInstances.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicyInstances") in
-      make ~maxItems ~isTruncated ?trafficPolicyInstanceTypeMarker
-        ?trafficPolicyInstanceNameMarker ~trafficPolicyInstances ()
+        (Option.map ~f:TrafficPolicyInstances.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicyInstances") in
+      make ?maxItems ?isTruncated ?trafficPolicyInstanceTypeMarker
+        ?trafficPolicyInstanceNameMarker ?trafficPolicyInstances ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
-      let isTruncated =
-        field_map_exn json "IsTruncated" PageTruncated.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
+      let isTruncated = field_map json__ "IsTruncated" PageTruncated.of_json in
       let trafficPolicyInstanceTypeMarker =
-        field_map json "TrafficPolicyInstanceTypeMarker" RRType.of_json in
+        field_map json__ "TrafficPolicyInstanceTypeMarker" RRType.of_json in
       let trafficPolicyInstanceNameMarker =
-        field_map json "TrafficPolicyInstanceNameMarker" DNSName.of_json in
+        field_map json__ "TrafficPolicyInstanceNameMarker" DNSName.of_json in
       let trafficPolicyInstances =
-        field_map_exn json "TrafficPolicyInstances"
+        field_map json__ "TrafficPolicyInstances"
           TrafficPolicyInstances.of_json in
-      make ~maxItems ~isTruncated ?trafficPolicyInstanceTypeMarker
-        ?trafficPolicyInstanceNameMarker ~trafficPolicyInstances ()
+      make ?maxItems ?isTruncated ?trafficPolicyInstanceTypeMarker
+        ?trafficPolicyInstanceNameMarker ?trafficPolicyInstances ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response information for the request."]
@@ -7818,13 +9162,14 @@ module ListTrafficPolicyInstancesByHostedZoneRequest =
       make ?maxItems ?trafficPolicyInstanceTypeMarker
         ?trafficPolicyInstanceNameMarker ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
       let trafficPolicyInstanceTypeMarker =
-        field_map json "TrafficPolicyInstanceTypeMarker" RRType.of_json in
+        field_map json__ "TrafficPolicyInstanceTypeMarker" RRType.of_json in
       let trafficPolicyInstanceNameMarker =
-        field_map json "TrafficPolicyInstanceNameMarker" DNSName.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+        field_map json__ "TrafficPolicyInstanceNameMarker" DNSName.of_json in
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ?maxItems ?trafficPolicyInstanceTypeMarker
         ?trafficPolicyInstanceNameMarker ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
@@ -7834,26 +9179,25 @@ module ListTrafficPoliciesResponse =
   struct
     type nonrec t =
       {
-      trafficPolicySummaries: TrafficPolicySummaries.t
+      trafficPolicySummaries: TrafficPolicySummaries.t option
         [@ocaml.doc
           "A list that contains one TrafficPolicySummary element for each traffic policy that was created by the current Amazon Web Services account."];
-      isTruncated: PageTruncated.t
+      isTruncated: PageTruncated.t option
         [@ocaml.doc
           "A flag that indicates whether there are more traffic policies to be listed. If the response was truncated, you can get the next group of traffic policies by submitting another ListTrafficPolicies request and specifying the value of TrafficPolicyIdMarker in the TrafficPolicyIdMarker request parameter."];
-      trafficPolicyIdMarker: TrafficPolicyId.t
+      trafficPolicyIdMarker: TrafficPolicyId.t option
         [@ocaml.doc
           "If the value of IsTruncated is true, TrafficPolicyIdMarker is the ID of the first traffic policy in the next group of MaxItems traffic policies."];
-      maxItems: PageMaxItems.t
+      maxItems: PageMaxItems.t option
         [@ocaml.doc
           "The value that you specified for the MaxItems parameter in the ListTrafficPolicies request that produced the current response."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTrafficPoliciesResponse"
-    let make ~trafficPolicySummaries =
-      fun ~isTruncated ->
-        fun ~trafficPolicyIdMarker ->
-          fun ~maxItems ->
+    let make ?trafficPolicySummaries =
+      fun ?isTruncated ->
+        fun ?trafficPolicyIdMarker ->
+          fun ?maxItems ->
             fun () ->
               {
                 trafficPolicySummaries;
@@ -7886,39 +9230,38 @@ module ListTrafficPoliciesResponse =
     let to_value x =
       structure_to_value
         [("TrafficPolicySummaries",
-           (Some (TrafficPolicySummaries.to_value x.trafficPolicySummaries)));
-        ("IsTruncated", (Some (PageTruncated.to_value x.isTruncated)));
+           (Option.map x.trafficPolicySummaries
+              ~f:TrafficPolicySummaries.to_value));
+        ("IsTruncated", (Option.map x.isTruncated ~f:PageTruncated.to_value));
         ("TrafficPolicyIdMarker",
-          (Some (TrafficPolicyId.to_value x.trafficPolicyIdMarker)));
-        ("MaxItems", (Some (PageMaxItems.to_value x.maxItems)))]
+          (Option.map x.trafficPolicyIdMarker ~f:TrafficPolicyId.to_value));
+        ("MaxItems", (Option.map x.maxItems ~f:PageMaxItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxItems =
-        PageMaxItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MaxItems") in
+        (Option.map ~f:PageMaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       let trafficPolicyIdMarker =
-        TrafficPolicyId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicyIdMarker") in
+        (Option.map ~f:TrafficPolicyId.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicyIdMarker") in
       let isTruncated =
-        PageTruncated.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IsTruncated") in
+        (Option.map ~f:PageTruncated.of_xml)
+          (Xml.child xml_arg0 "IsTruncated") in
       let trafficPolicySummaries =
-        TrafficPolicySummaries.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicySummaries") in
-      make ~maxItems ~trafficPolicyIdMarker ~isTruncated
-        ~trafficPolicySummaries ()
+        (Option.map ~f:TrafficPolicySummaries.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicySummaries") in
+      make ?maxItems ?trafficPolicyIdMarker ?isTruncated
+        ?trafficPolicySummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
       let trafficPolicyIdMarker =
-        field_map_exn json "TrafficPolicyIdMarker" TrafficPolicyId.of_json in
-      let isTruncated =
-        field_map_exn json "IsTruncated" PageTruncated.of_json in
+        field_map json__ "TrafficPolicyIdMarker" TrafficPolicyId.of_json in
+      let isTruncated = field_map json__ "IsTruncated" PageTruncated.of_json in
       let trafficPolicySummaries =
-        field_map_exn json "TrafficPolicySummaries"
+        field_map json__ "TrafficPolicySummaries"
           TrafficPolicySummaries.of_json in
-      make ~maxItems ~trafficPolicyIdMarker ~isTruncated
-        ~trafficPolicySummaries ()
+      make ?maxItems ?trafficPolicyIdMarker ?isTruncated
+        ?trafficPolicySummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response information for the request."]
@@ -7948,10 +9291,10 @@ module ListTrafficPoliciesRequest =
           (Xml.child xml_arg0 "trafficpolicyid") in
       make ?maxItems ?trafficPolicyIdMarker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
       let trafficPolicyIdMarker =
-        field_map json "TrafficPolicyIdMarker" TrafficPolicyId.of_json in
+        field_map json__ "TrafficPolicyIdMarker" TrafficPolicyId.of_json in
       make ?maxItems ?trafficPolicyIdMarker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7960,7 +9303,7 @@ module ListTagsForResourcesResponse =
   struct
     type nonrec t =
       {
-      resourceTagSets: ResourceTagSetList.t
+      resourceTagSets: ResourceTagSetList.t option
         [@ocaml.doc
           "A list of ResourceTagSets containing tags associated with the specified resources."]}
     type nonrec error =
@@ -7970,8 +9313,7 @@ module ListTagsForResourcesResponse =
       | `PriorRequestNotComplete of PriorRequestNotComplete.t 
       | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTagsForResourcesResponse"
-    let make ~resourceTagSets = fun () -> { resourceTagSets }
+    let make ?resourceTagSets = fun () -> { resourceTagSets }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -8028,18 +9370,18 @@ module ListTagsForResourcesResponse =
     let to_value x =
       structure_to_value
         [("ResourceTagSets",
-           (Some (ResourceTagSetList.to_value x.resourceTagSets)))]
+           (Option.map x.resourceTagSets ~f:ResourceTagSetList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceTagSets =
-        ResourceTagSetList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceTagSets") in
-      make ~resourceTagSets ()
+        (Option.map ~f:ResourceTagSetList.of_xml)
+          (Xml.child xml_arg0 "ResourceTagSets") in
+      make ?resourceTagSets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceTagSets =
-        field_map_exn json "ResourceTagSets" ResourceTagSetList.of_json in
-      make ~resourceTagSets ()
+        field_map json__ "ResourceTagSets" ResourceTagSetList.of_json in
+      make ?resourceTagSets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type containing tags for the specified resources."]
@@ -8070,11 +9412,11 @@ module ListTagsForResourcesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
       make ~resourceIds ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceIds =
-        field_map_exn json "ResourceIds" TagResourceIdList.of_json in
+        field_map_exn json__ "ResourceIds" TagResourceIdList.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" TagResourceType.of_json in
+        field_map_exn json__ "ResourceType" TagResourceType.of_json in
       make ~resourceIds ~resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8083,7 +9425,7 @@ module ListTagsForResourceResponse =
   struct
     type nonrec t =
       {
-      resourceTagSet: ResourceTagSet.t
+      resourceTagSet: ResourceTagSet.t option
         [@ocaml.doc
           "A ResourceTagSet containing tags associated with the specified resource."]}
     type nonrec error =
@@ -8093,8 +9435,7 @@ module ListTagsForResourceResponse =
       | `PriorRequestNotComplete of PriorRequestNotComplete.t 
       | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTagsForResourceResponse"
-    let make ~resourceTagSet = fun () -> { resourceTagSet }
+    let make ?resourceTagSet = fun () -> { resourceTagSet }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -8151,18 +9492,18 @@ module ListTagsForResourceResponse =
     let to_value x =
       structure_to_value
         [("ResourceTagSet",
-           (Some (ResourceTagSet.to_value x.resourceTagSet)))]
+           (Option.map x.resourceTagSet ~f:ResourceTagSet.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceTagSet =
-        ResourceTagSet.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceTagSet") in
-      make ~resourceTagSet ()
+        (Option.map ~f:ResourceTagSet.of_xml)
+          (Xml.child xml_arg0 "ResourceTagSet") in
+      make ?resourceTagSet ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceTagSet =
-        field_map_exn json "ResourceTagSet" ResourceTagSet.of_json in
-      make ~resourceTagSet ()
+        field_map json__ "ResourceTagSet" ResourceTagSet.of_json in
+      make ?resourceTagSet ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about the health checks or hosted zones for which you want to list tags."]
@@ -8193,10 +9534,11 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
       make ~resourceId ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map_exn json "ResourceId" TagResourceId.of_json in
+    let of_json json__ =
+      let resourceId =
+        field_map_exn json__ "ResourceId" TagResourceId.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" TagResourceType.of_json in
+        field_map_exn json__ "ResourceType" TagResourceType.of_json in
       make ~resourceId ~resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8205,32 +9547,31 @@ module ListReusableDelegationSetsResponse =
   struct
     type nonrec t =
       {
-      delegationSets: DelegationSets.t
+      delegationSets: DelegationSets.t option
         [@ocaml.doc
           "A complex type that contains one DelegationSet element for each reusable delegation set that was created by the current Amazon Web Services account."];
       marker: PageMarker.t option
         [@ocaml.doc
           "For the second and subsequent calls to ListReusableDelegationSets, Marker is the value that you specified for the marker parameter in the request that produced the current response."];
-      isTruncated: PageTruncated.t
+      isTruncated: PageTruncated.t option
         [@ocaml.doc
           "A flag that indicates whether there are more reusable delegation sets to be listed."];
       nextMarker: PageMarker.t option
         [@ocaml.doc
           "If IsTruncated is true, the value of NextMarker identifies the next reusable delegation set that Amazon Route 53 will return if you submit another ListReusableDelegationSets request and specify the value of NextMarker in the marker parameter."];
-      maxItems: PageMaxItems.t
+      maxItems: PageMaxItems.t option
         [@ocaml.doc
           "The value that you specified for the maxitems parameter in the call to ListReusableDelegationSets that produced the current response."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListReusableDelegationSetsResponse"
-    let make ?marker =
-      fun ?nextMarker ->
-        fun ~delegationSets ->
-          fun ~isTruncated ->
-            fun ~maxItems ->
+    let make ?delegationSets =
+      fun ?marker ->
+        fun ?isTruncated ->
+          fun ?nextMarker ->
+            fun ?maxItems ->
               fun () ->
-                { marker; nextMarker; delegationSets; isTruncated; maxItems }
+                { delegationSets; marker; isTruncated; nextMarker; maxItems }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -8256,37 +9597,35 @@ module ListReusableDelegationSetsResponse =
     let to_value x =
       structure_to_value
         [("DelegationSets",
-           (Some (DelegationSets.to_value x.delegationSets)));
+           (Option.map x.delegationSets ~f:DelegationSets.to_value));
         ("Marker", (Option.map x.marker ~f:PageMarker.to_value));
-        ("IsTruncated", (Some (PageTruncated.to_value x.isTruncated)));
+        ("IsTruncated", (Option.map x.isTruncated ~f:PageTruncated.to_value));
         ("NextMarker", (Option.map x.nextMarker ~f:PageMarker.to_value));
-        ("MaxItems", (Some (PageMaxItems.to_value x.maxItems)))]
+        ("MaxItems", (Option.map x.maxItems ~f:PageMaxItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxItems =
-        PageMaxItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MaxItems") in
+        (Option.map ~f:PageMaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       let nextMarker =
         (Option.map ~f:PageMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       let isTruncated =
-        PageTruncated.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IsTruncated") in
+        (Option.map ~f:PageTruncated.of_xml)
+          (Xml.child xml_arg0 "IsTruncated") in
       let marker =
         (Option.map ~f:PageMarker.of_xml) (Xml.child xml_arg0 "Marker") in
       let delegationSets =
-        DelegationSets.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DelegationSets") in
-      make ~maxItems ?nextMarker ~isTruncated ?marker ~delegationSets ()
+        (Option.map ~f:DelegationSets.of_xml)
+          (Xml.child xml_arg0 "DelegationSets") in
+      make ?maxItems ?nextMarker ?isTruncated ?marker ?delegationSets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
-      let nextMarker = field_map json "NextMarker" PageMarker.of_json in
-      let isTruncated =
-        field_map_exn json "IsTruncated" PageTruncated.of_json in
-      let marker = field_map json "Marker" PageMarker.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
+      let nextMarker = field_map json__ "NextMarker" PageMarker.of_json in
+      let isTruncated = field_map json__ "IsTruncated" PageTruncated.of_json in
+      let marker = field_map json__ "Marker" PageMarker.of_json in
       let delegationSets =
-        field_map_exn json "DelegationSets" DelegationSets.of_json in
-      make ~maxItems ?nextMarker ~isTruncated ?marker ~delegationSets ()
+        field_map json__ "DelegationSets" DelegationSets.of_json in
+      make ?maxItems ?nextMarker ?isTruncated ?marker ?delegationSets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about the reusable delegation sets that are associated with the current Amazon Web Services account."]
@@ -8313,9 +9652,9 @@ module ListReusableDelegationSetsRequest =
         (Option.map ~f:PageMarker.of_xml) (Xml.child xml_arg0 "marker") in
       make ?maxItems ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
-      let marker = field_map json "Marker" PageMarker.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
+      let marker = field_map json__ "Marker" PageMarker.of_json in
       make ?maxItems ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8324,9 +9663,9 @@ module ListResourceRecordSetsResponse =
   struct
     type nonrec t =
       {
-      resourceRecordSets: ResourceRecordSets.t
+      resourceRecordSets: ResourceRecordSets.t option
         [@ocaml.doc "Information about multiple resource record sets."];
-      isTruncated: PageTruncated.t
+      isTruncated: PageTruncated.t option
         [@ocaml.doc
           "A flag that indicates whether more resource record sets remain to be listed. If your results were truncated, you can make a follow-up pagination request by using the NextRecordName element."];
       nextRecordName: DNSName.t option
@@ -8338,26 +9677,25 @@ module ListResourceRecordSetsResponse =
       nextRecordIdentifier: ResourceRecordSetIdentifier.t option
         [@ocaml.doc
           "Resource record sets that have a routing policy other than simple: If results were truncated for a given DNS name and type, the value of SetIdentifier for the next resource record set that has the current DNS name and type. For information about routing policies, see Choosing a Routing Policy in the Amazon Route 53 Developer Guide."];
-      maxItems: PageMaxItems.t
+      maxItems: PageMaxItems.t option
         [@ocaml.doc "The maximum number of records you requested."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `NoSuchHostedZone of NoSuchHostedZone.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListResourceRecordSetsResponse"
-    let make ?nextRecordName =
-      fun ?nextRecordType ->
-        fun ?nextRecordIdentifier ->
-          fun ~resourceRecordSets ->
-            fun ~isTruncated ->
-              fun ~maxItems ->
+    let make ?resourceRecordSets =
+      fun ?isTruncated ->
+        fun ?nextRecordName ->
+          fun ?nextRecordType ->
+            fun ?nextRecordIdentifier ->
+              fun ?maxItems ->
                 fun () ->
                   {
+                    resourceRecordSets;
+                    isTruncated;
                     nextRecordName;
                     nextRecordType;
                     nextRecordIdentifier;
-                    resourceRecordSets;
-                    isTruncated;
                     maxItems
                   }
     let error_of_json name json =
@@ -8392,19 +9730,18 @@ module ListResourceRecordSetsResponse =
     let to_value x =
       structure_to_value
         [("ResourceRecordSets",
-           (Some (ResourceRecordSets.to_value x.resourceRecordSets)));
-        ("IsTruncated", (Some (PageTruncated.to_value x.isTruncated)));
+           (Option.map x.resourceRecordSets ~f:ResourceRecordSets.to_value));
+        ("IsTruncated", (Option.map x.isTruncated ~f:PageTruncated.to_value));
         ("NextRecordName", (Option.map x.nextRecordName ~f:DNSName.to_value));
         ("NextRecordType", (Option.map x.nextRecordType ~f:RRType.to_value));
         ("NextRecordIdentifier",
           (Option.map x.nextRecordIdentifier
              ~f:ResourceRecordSetIdentifier.to_value));
-        ("MaxItems", (Some (PageMaxItems.to_value x.maxItems)))]
+        ("MaxItems", (Option.map x.maxItems ~f:PageMaxItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxItems =
-        PageMaxItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MaxItems") in
+        (Option.map ~f:PageMaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       let nextRecordIdentifier =
         (Option.map ~f:ResourceRecordSetIdentifier.of_xml)
           (Xml.child xml_arg0 "NextRecordIdentifier") in
@@ -8413,27 +9750,26 @@ module ListResourceRecordSetsResponse =
       let nextRecordName =
         (Option.map ~f:DNSName.of_xml) (Xml.child xml_arg0 "NextRecordName") in
       let isTruncated =
-        PageTruncated.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IsTruncated") in
+        (Option.map ~f:PageTruncated.of_xml)
+          (Xml.child xml_arg0 "IsTruncated") in
       let resourceRecordSets =
-        ResourceRecordSets.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceRecordSets") in
-      make ~maxItems ?nextRecordIdentifier ?nextRecordType ?nextRecordName
-        ~isTruncated ~resourceRecordSets ()
+        (Option.map ~f:ResourceRecordSets.of_xml)
+          (Xml.child xml_arg0 "ResourceRecordSets") in
+      make ?maxItems ?nextRecordIdentifier ?nextRecordType ?nextRecordName
+        ?isTruncated ?resourceRecordSets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
       let nextRecordIdentifier =
-        field_map json "NextRecordIdentifier"
+        field_map json__ "NextRecordIdentifier"
           ResourceRecordSetIdentifier.of_json in
-      let nextRecordType = field_map json "NextRecordType" RRType.of_json in
-      let nextRecordName = field_map json "NextRecordName" DNSName.of_json in
-      let isTruncated =
-        field_map_exn json "IsTruncated" PageTruncated.of_json in
+      let nextRecordType = field_map json__ "NextRecordType" RRType.of_json in
+      let nextRecordName = field_map json__ "NextRecordName" DNSName.of_json in
+      let isTruncated = field_map json__ "IsTruncated" PageTruncated.of_json in
       let resourceRecordSets =
-        field_map_exn json "ResourceRecordSets" ResourceRecordSets.of_json in
-      make ~maxItems ?nextRecordIdentifier ?nextRecordType ?nextRecordName
-        ~isTruncated ~resourceRecordSets ()
+        field_map json__ "ResourceRecordSets" ResourceRecordSets.of_json in
+      make ?maxItems ?nextRecordIdentifier ?nextRecordType ?nextRecordName
+        ?isTruncated ?resourceRecordSets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains list information for the resource record set."]
@@ -8495,14 +9831,16 @@ module ListResourceRecordSetsRequest =
       make ?maxItems ?startRecordIdentifier ?startRecordType ?startRecordName
         ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
       let startRecordIdentifier =
-        field_map json "StartRecordIdentifier"
+        field_map json__ "StartRecordIdentifier"
           ResourceRecordSetIdentifier.of_json in
-      let startRecordType = field_map json "StartRecordType" RRType.of_json in
-      let startRecordName = field_map json "StartRecordName" DNSName.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+      let startRecordType = field_map json__ "StartRecordType" RRType.of_json in
+      let startRecordName =
+        field_map json__ "StartRecordName" DNSName.of_json in
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ?maxItems ?startRecordIdentifier ?startRecordType ?startRecordName
         ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
@@ -8512,7 +9850,7 @@ module ListQueryLoggingConfigsResponse =
   struct
     type nonrec t =
       {
-      queryLoggingConfigs: QueryLoggingConfigs.t
+      queryLoggingConfigs: QueryLoggingConfigs.t option
         [@ocaml.doc
           "An array that contains one QueryLoggingConfig element for each configuration for DNS query logging that is associated with the current Amazon Web Services account."];
       nextToken: PaginationToken.t option
@@ -8523,10 +9861,8 @@ module ListQueryLoggingConfigsResponse =
       | `InvalidPaginationToken of InvalidPaginationToken.t 
       | `NoSuchHostedZone of NoSuchHostedZone.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListQueryLoggingConfigsResponse"
-    let make ?nextToken =
-      fun ~queryLoggingConfigs ->
-        fun () -> { nextToken; queryLoggingConfigs }
+    let make ?queryLoggingConfigs =
+      fun ?nextToken -> fun () -> { queryLoggingConfigs; nextToken }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -8567,7 +9903,7 @@ module ListQueryLoggingConfigsResponse =
     let to_value x =
       structure_to_value
         [("QueryLoggingConfigs",
-           (Some (QueryLoggingConfigs.to_value x.queryLoggingConfigs)));
+           (Option.map x.queryLoggingConfigs ~f:QueryLoggingConfigs.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -8575,15 +9911,15 @@ module ListQueryLoggingConfigsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       let queryLoggingConfigs =
-        QueryLoggingConfigs.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryLoggingConfigs") in
-      make ?nextToken ~queryLoggingConfigs ()
+        (Option.map ~f:QueryLoggingConfigs.of_xml)
+          (Xml.child xml_arg0 "QueryLoggingConfigs") in
+      make ?nextToken ?queryLoggingConfigs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let queryLoggingConfigs =
-        field_map_exn json "QueryLoggingConfigs" QueryLoggingConfigs.of_json in
-      make ?nextToken ~queryLoggingConfigs ()
+        field_map json__ "QueryLoggingConfigs" QueryLoggingConfigs.of_json in
+      make ?nextToken ?queryLoggingConfigs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the configurations for DNS query logging that are associated with the current Amazon Web Services account or the configuration that is associated with a specified hosted zone. For more information about DNS query logs, see CreateQueryLoggingConfig. Additional information, including the format of DNS query logs, appears in Logging DNS Queries in the Amazon Route 53 Developer Guide."]
@@ -8619,10 +9955,10 @@ module ListQueryLoggingConfigsRequest =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "hostedzoneid") in
       make ?maxResults ?nextToken ?hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let hostedZoneId = field_map json "HostedZoneId" ResourceId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let hostedZoneId = field_map json__ "HostedZoneId" ResourceId.of_json in
       make ?maxResults ?nextToken ?hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8631,19 +9967,19 @@ module ListHostedZonesResponse =
   struct
     type nonrec t =
       {
-      hostedZones: HostedZones.t
+      hostedZones: HostedZones.t option
         [@ocaml.doc
           "A complex type that contains general information about the hosted zone."];
       marker: PageMarker.t option
         [@ocaml.doc
           "For the second and subsequent calls to ListHostedZones, Marker is the value that you specified for the marker parameter in the request that produced the current response."];
-      isTruncated: PageTruncated.t
+      isTruncated: PageTruncated.t option
         [@ocaml.doc
           "A flag indicating whether there are more hosted zones to be listed. If the response was truncated, you can get more hosted zones by submitting another ListHostedZones request and specifying the value of NextMarker in the marker parameter."];
       nextMarker: PageMarker.t option
         [@ocaml.doc
           "If IsTruncated is true, the value of NextMarker identifies the first hosted zone in the next group of hosted zones. Submit another ListHostedZones request, and specify the value of NextMarker from the response in the marker parameter. This element is present only if IsTruncated is true."];
-      maxItems: PageMaxItems.t
+      maxItems: PageMaxItems.t option
         [@ocaml.doc
           "The value that you specified for the maxitems parameter in the call to ListHostedZones that produced the current response."]}
     type nonrec error =
@@ -8651,14 +9987,13 @@ module ListHostedZonesResponse =
       | `InvalidInput of InvalidInput.t 
       | `NoSuchDelegationSet of NoSuchDelegationSet.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListHostedZonesResponse"
-    let make ?marker =
-      fun ?nextMarker ->
-        fun ~hostedZones ->
-          fun ~isTruncated ->
-            fun ~maxItems ->
+    let make ?hostedZones =
+      fun ?marker ->
+        fun ?isTruncated ->
+          fun ?nextMarker ->
+            fun ?maxItems ->
               fun () ->
-                { marker; nextMarker; hostedZones; isTruncated; maxItems }
+                { hostedZones; marker; isTruncated; nextMarker; maxItems }
     let error_of_json name json =
       match name with
       | "DelegationSetNotReusable" ->
@@ -8699,36 +10034,33 @@ module ListHostedZonesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("HostedZones", (Some (HostedZones.to_value x.hostedZones)));
+        [("HostedZones", (Option.map x.hostedZones ~f:HostedZones.to_value));
         ("Marker", (Option.map x.marker ~f:PageMarker.to_value));
-        ("IsTruncated", (Some (PageTruncated.to_value x.isTruncated)));
+        ("IsTruncated", (Option.map x.isTruncated ~f:PageTruncated.to_value));
         ("NextMarker", (Option.map x.nextMarker ~f:PageMarker.to_value));
-        ("MaxItems", (Some (PageMaxItems.to_value x.maxItems)))]
+        ("MaxItems", (Option.map x.maxItems ~f:PageMaxItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxItems =
-        PageMaxItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MaxItems") in
+        (Option.map ~f:PageMaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       let nextMarker =
         (Option.map ~f:PageMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       let isTruncated =
-        PageTruncated.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IsTruncated") in
+        (Option.map ~f:PageTruncated.of_xml)
+          (Xml.child xml_arg0 "IsTruncated") in
       let marker =
         (Option.map ~f:PageMarker.of_xml) (Xml.child xml_arg0 "Marker") in
       let hostedZones =
-        HostedZones.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HostedZones") in
-      make ~maxItems ?nextMarker ~isTruncated ?marker ~hostedZones ()
+        (Option.map ~f:HostedZones.of_xml) (Xml.child xml_arg0 "HostedZones") in
+      make ?maxItems ?nextMarker ?isTruncated ?marker ?hostedZones ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
-      let nextMarker = field_map json "NextMarker" PageMarker.of_json in
-      let isTruncated =
-        field_map_exn json "IsTruncated" PageTruncated.of_json in
-      let marker = field_map json "Marker" PageMarker.of_json in
-      let hostedZones = field_map_exn json "HostedZones" HostedZones.of_json in
-      make ~maxItems ?nextMarker ~isTruncated ?marker ~hostedZones ()
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
+      let nextMarker = field_map json__ "NextMarker" PageMarker.of_json in
+      let isTruncated = field_map json__ "IsTruncated" PageTruncated.of_json in
+      let marker = field_map json__ "Marker" PageMarker.of_json in
+      let hostedZones = field_map json__ "HostedZones" HostedZones.of_json in
+      make ?maxItems ?nextMarker ?isTruncated ?marker ?hostedZones ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of the public and private hosted zones that are associated with the current Amazon Web Services account. The response includes a HostedZones child element for each hosted zone. Amazon Route 53 returns a maximum of 100 items in each response. If you have a lot of hosted zones, you can use the maxitems parameter to list them in groups of up to 100."]
@@ -8744,19 +10076,27 @@ module ListHostedZonesRequest =
           "(Optional) The maximum number of hosted zones that you want Amazon Route 53 to return. If you have more than maxitems hosted zones, the value of IsTruncated in the response is true, and the value of NextMarker is the hosted zone ID of the first hosted zone that Route 53 will return if you submit another request."];
       delegationSetId: ResourceId.t option
         [@ocaml.doc
-          "If you're using reusable delegation sets and you want to list all of the hosted zones that are associated with a reusable delegation set, specify the ID of that reusable delegation set."]}
+          "If you're using reusable delegation sets and you want to list all of the hosted zones that are associated with a reusable delegation set, specify the ID of that reusable delegation set."];
+      hostedZoneType: HostedZoneType.t option
+        [@ocaml.doc "(Optional) Specifies if the hosted zone is private."]}
     let make ?marker =
       fun ?maxItems ->
         fun ?delegationSetId ->
-          fun () -> { marker; maxItems; delegationSetId }
+          fun ?hostedZoneType ->
+            fun () -> { marker; maxItems; delegationSetId; hostedZoneType }
     let to_value x =
       structure_to_value
         [("marker", (Option.map x.marker ~f:PageMarker.to_value));
         ("maxitems", (Option.map x.maxItems ~f:PageMaxItems.to_value));
         ("delegationsetid",
-          (Option.map x.delegationSetId ~f:ResourceId.to_value))]
+          (Option.map x.delegationSetId ~f:ResourceId.to_value));
+        ("hostedzonetype",
+          (Option.map x.hostedZoneType ~f:HostedZoneType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let hostedZoneType =
+        (Option.map ~f:HostedZoneType.of_xml)
+          (Xml.child xml_arg0 "hostedzonetype") in
       let delegationSetId =
         (Option.map ~f:ResourceId.of_xml)
           (Xml.child xml_arg0 "delegationsetid") in
@@ -8764,14 +10104,16 @@ module ListHostedZonesRequest =
         (Option.map ~f:PageMaxItems.of_xml) (Xml.child xml_arg0 "maxitems") in
       let marker =
         (Option.map ~f:PageMarker.of_xml) (Xml.child xml_arg0 "marker") in
-      make ?delegationSetId ?maxItems ?marker ()
+      make ?hostedZoneType ?delegationSetId ?maxItems ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let hostedZoneType =
+        field_map json__ "HostedZoneType" HostedZoneType.of_json in
       let delegationSetId =
-        field_map json "DelegationSetId" ResourceId.of_json in
-      let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
-      let marker = field_map json "Marker" PageMarker.of_json in
-      make ?delegationSetId ?maxItems ?marker ()
+        field_map json__ "DelegationSetId" ResourceId.of_json in
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
+      let marker = field_map json__ "Marker" PageMarker.of_json in
+      make ?hostedZoneType ?delegationSetId ?maxItems ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to retrieve a list of the public and private hosted zones that are associated with the current Amazon Web Services account."]
@@ -8779,10 +10121,10 @@ module ListHostedZonesByVPCResponse =
   struct
     type nonrec t =
       {
-      hostedZoneSummaries: HostedZoneSummaries.t
+      hostedZoneSummaries: HostedZoneSummaries.t option
         [@ocaml.doc
           "A list that contains one HostedZoneSummary element for each hosted zone that the specified Amazon VPC is associated with. Each HostedZoneSummary element contains the hosted zone name and ID, and information about who owns the hosted zone."];
-      maxItems: PageMaxItems.t
+      maxItems: PageMaxItems.t option
         [@ocaml.doc
           "The value that you specified for MaxItems in the most recent ListHostedZonesByVPC request."];
       nextToken: PaginationToken.t option
@@ -8792,11 +10134,10 @@ module ListHostedZonesByVPCResponse =
       [ `InvalidInput of InvalidInput.t 
       | `InvalidPaginationToken of InvalidPaginationToken.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListHostedZonesByVPCResponse"
-    let make ?nextToken =
-      fun ~hostedZoneSummaries ->
-        fun ~maxItems ->
-          fun () -> { nextToken; hostedZoneSummaries; maxItems }
+    let make ?hostedZoneSummaries =
+      fun ?maxItems ->
+        fun ?nextToken ->
+          fun () -> { hostedZoneSummaries; maxItems; nextToken }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -8830,8 +10171,8 @@ module ListHostedZonesByVPCResponse =
     let to_value x =
       structure_to_value
         [("HostedZoneSummaries",
-           (Some (HostedZoneSummaries.to_value x.hostedZoneSummaries)));
-        ("MaxItems", (Some (PageMaxItems.to_value x.maxItems)));
+           (Option.map x.hostedZoneSummaries ~f:HostedZoneSummaries.to_value));
+        ("MaxItems", (Option.map x.maxItems ~f:PageMaxItems.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -8839,22 +10180,21 @@ module ListHostedZonesByVPCResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       let maxItems =
-        PageMaxItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MaxItems") in
+        (Option.map ~f:PageMaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       let hostedZoneSummaries =
-        HostedZoneSummaries.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneSummaries") in
-      make ?nextToken ~maxItems ~hostedZoneSummaries ()
+        (Option.map ~f:HostedZoneSummaries.of_xml)
+          (Xml.child xml_arg0 "HostedZoneSummaries") in
+      make ?nextToken ?maxItems ?hostedZoneSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
       let hostedZoneSummaries =
-        field_map_exn json "HostedZoneSummaries" HostedZoneSummaries.of_json in
-      make ?nextToken ~maxItems ~hostedZoneSummaries ()
+        field_map json__ "HostedZoneSummaries" HostedZoneSummaries.of_json in
+      make ?nextToken ?maxItems ?hostedZoneSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all the private hosted zones that a specified VPC is associated with, regardless of which Amazon Web Services account or Amazon Web Services service owns the hosted zones. The HostedZoneOwner structure in the response contains one of the following values: An OwningAccount element, which contains the account number of either the current Amazon Web Services account or another Amazon Web Services account. Some services, such as Cloud Map, create hosted zones using the current account. An OwningService element, which identifies the Amazon Web Services service that created and owns the hosted zone. For example, if a hosted zone was created by Amazon Elastic File System (Amazon EFS), the value of Owner is efs.amazonaws.com. When listing private hosted zones, the hosted zone and the Amazon VPC must belong to the same partition where the hosted zones were created. A partition is a group of Amazon Web Services Regions. Each Amazon Web Services account is scoped to one partition. The following are the supported partitions: aws - Amazon Web Services Regions aws-cn - China Regions aws-us-gov - Amazon Web Services GovCloud (US) Region For more information, see Access Management in the Amazon Web Services General Reference."]
+       "Lists all the private hosted zones that a specified VPC is associated with, regardless of which Amazon Web Services account or Amazon Web Services service owns the hosted zones. The HostedZoneOwner structure in the response contains one of the following values: An OwningAccount element, which contains the account number of either the current Amazon Web Services account or another Amazon Web Services account. Some services, such as Cloud Map, create hosted zones using the current account. An OwningService element, which identifies the Amazon Web Services service that created and owns the hosted zone. For example, if a hosted zone was created by Amazon Elastic File System (Amazon EFS), the value of Owner is efs.amazonaws.com. ListHostedZonesByVPC returns the hosted zones associated with the specified VPC and does not reflect the hosted zone associations to VPCs via Route 53 Profiles. To get the associations to a Profile, call the ListProfileResourceAssociations API. When listing private hosted zones, the hosted zone and the Amazon VPC must belong to the same partition where the hosted zones were created. A partition is a group of Amazon Web Services Regions. Each Amazon Web Services account is scoped to one partition. The following are the supported partitions: aws - Amazon Web Services Regions aws-cn - China Regions aws-us-gov - Amazon Web Services GovCloud (US) Region For more information, see Access Management in the Amazon Web Services General Reference."]
 module ListHostedZonesByVPCRequest =
   struct
     type nonrec t =
@@ -8897,11 +10237,11 @@ module ListHostedZonesByVPCRequest =
         VPCId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "vpcid") in
       make ?nextToken ?maxItems ~vPCRegion ~vPCId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
-      let vPCRegion = field_map_exn json "VPCRegion" VPCRegion.of_json in
-      let vPCId = field_map_exn json "VPCId" VPCId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
+      let vPCRegion = field_map_exn json__ "VPCRegion" VPCRegion.of_json in
+      let vPCId = field_map_exn json__ "VPCId" VPCId.of_json in
       make ?nextToken ?maxItems ~vPCRegion ~vPCId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8910,7 +10250,7 @@ module ListHostedZonesByNameResponse =
   struct
     type nonrec t =
       {
-      hostedZones: HostedZones.t
+      hostedZones: HostedZones.t option
         [@ocaml.doc
           "A complex type that contains general information about the hosted zone."];
       dNSName: DNSName.t option
@@ -8919,7 +10259,7 @@ module ListHostedZonesByNameResponse =
       hostedZoneId: ResourceId.t option
         [@ocaml.doc
           "The ID that Amazon Route 53 assigned to the hosted zone when you created it."];
-      isTruncated: PageTruncated.t
+      isTruncated: PageTruncated.t option
         [@ocaml.doc
           "A flag that indicates whether there are more hosted zones to be listed. If the response was truncated, you can get the next group of maxitems hosted zones by calling ListHostedZonesByName again and specifying the values of NextDNSName and NextHostedZoneId elements in the dnsname and hostedzoneid parameters."];
       nextDNSName: DNSName.t option
@@ -8928,29 +10268,28 @@ module ListHostedZonesByNameResponse =
       nextHostedZoneId: ResourceId.t option
         [@ocaml.doc
           "If IsTruncated is true, the value of NextHostedZoneId identifies the first hosted zone in the next group of maxitems hosted zones. Call ListHostedZonesByName again and specify the value of NextDNSName and NextHostedZoneId in the dnsname and hostedzoneid parameters, respectively. This element is present only if IsTruncated is true."];
-      maxItems: PageMaxItems.t
+      maxItems: PageMaxItems.t option
         [@ocaml.doc
           "The value that you specified for the maxitems parameter in the call to ListHostedZonesByName that produced the current response."]}
     type nonrec error =
       [ `InvalidDomainName of InvalidDomainName.t 
       | `InvalidInput of InvalidInput.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListHostedZonesByNameResponse"
-    let make ?dNSName =
-      fun ?hostedZoneId ->
-        fun ?nextDNSName ->
-          fun ?nextHostedZoneId ->
-            fun ~hostedZones ->
-              fun ~isTruncated ->
-                fun ~maxItems ->
+    let make ?hostedZones =
+      fun ?dNSName ->
+        fun ?hostedZoneId ->
+          fun ?isTruncated ->
+            fun ?nextDNSName ->
+              fun ?nextHostedZoneId ->
+                fun ?maxItems ->
                   fun () ->
                     {
+                      hostedZones;
                       dNSName;
                       hostedZoneId;
+                      isTruncated;
                       nextDNSName;
                       nextHostedZoneId;
-                      hostedZones;
-                      isTruncated;
                       maxItems
                     }
     let error_of_json name json =
@@ -8985,49 +10324,46 @@ module ListHostedZonesByNameResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("HostedZones", (Some (HostedZones.to_value x.hostedZones)));
+        [("HostedZones", (Option.map x.hostedZones ~f:HostedZones.to_value));
         ("DNSName", (Option.map x.dNSName ~f:DNSName.to_value));
         ("HostedZoneId", (Option.map x.hostedZoneId ~f:ResourceId.to_value));
-        ("IsTruncated", (Some (PageTruncated.to_value x.isTruncated)));
+        ("IsTruncated", (Option.map x.isTruncated ~f:PageTruncated.to_value));
         ("NextDNSName", (Option.map x.nextDNSName ~f:DNSName.to_value));
         ("NextHostedZoneId",
           (Option.map x.nextHostedZoneId ~f:ResourceId.to_value));
-        ("MaxItems", (Some (PageMaxItems.to_value x.maxItems)))]
+        ("MaxItems", (Option.map x.maxItems ~f:PageMaxItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxItems =
-        PageMaxItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MaxItems") in
+        (Option.map ~f:PageMaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       let nextHostedZoneId =
         (Option.map ~f:ResourceId.of_xml)
           (Xml.child xml_arg0 "NextHostedZoneId") in
       let nextDNSName =
         (Option.map ~f:DNSName.of_xml) (Xml.child xml_arg0 "NextDNSName") in
       let isTruncated =
-        PageTruncated.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IsTruncated") in
+        (Option.map ~f:PageTruncated.of_xml)
+          (Xml.child xml_arg0 "IsTruncated") in
       let hostedZoneId =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "HostedZoneId") in
       let dNSName =
         (Option.map ~f:DNSName.of_xml) (Xml.child xml_arg0 "DNSName") in
       let hostedZones =
-        HostedZones.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HostedZones") in
-      make ~maxItems ?nextHostedZoneId ?nextDNSName ~isTruncated
-        ?hostedZoneId ?dNSName ~hostedZones ()
+        (Option.map ~f:HostedZones.of_xml) (Xml.child xml_arg0 "HostedZones") in
+      make ?maxItems ?nextHostedZoneId ?nextDNSName ?isTruncated
+        ?hostedZoneId ?dNSName ?hostedZones ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
       let nextHostedZoneId =
-        field_map json "NextHostedZoneId" ResourceId.of_json in
-      let nextDNSName = field_map json "NextDNSName" DNSName.of_json in
-      let isTruncated =
-        field_map_exn json "IsTruncated" PageTruncated.of_json in
-      let hostedZoneId = field_map json "HostedZoneId" ResourceId.of_json in
-      let dNSName = field_map json "DNSName" DNSName.of_json in
-      let hostedZones = field_map_exn json "HostedZones" HostedZones.of_json in
-      make ~maxItems ?nextHostedZoneId ?nextDNSName ~isTruncated
-        ?hostedZoneId ?dNSName ~hostedZones ()
+        field_map json__ "NextHostedZoneId" ResourceId.of_json in
+      let nextDNSName = field_map json__ "NextDNSName" DNSName.of_json in
+      let isTruncated = field_map json__ "IsTruncated" PageTruncated.of_json in
+      let hostedZoneId = field_map json__ "HostedZoneId" ResourceId.of_json in
+      let dNSName = field_map json__ "DNSName" DNSName.of_json in
+      let hostedZones = field_map json__ "HostedZones" HostedZones.of_json in
+      make ?maxItems ?nextHostedZoneId ?nextDNSName ?isTruncated
+        ?hostedZoneId ?dNSName ?hostedZones ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response information for the request."]
@@ -9062,10 +10398,10 @@ module ListHostedZonesByNameRequest =
         (Option.map ~f:DNSName.of_xml) (Xml.child xml_arg0 "dnsname") in
       make ?maxItems ?hostedZoneId ?dNSName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
-      let hostedZoneId = field_map json "HostedZoneId" ResourceId.of_json in
-      let dNSName = field_map json "DNSName" DNSName.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
+      let hostedZoneId = field_map json__ "HostedZoneId" ResourceId.of_json in
+      let dNSName = field_map json__ "DNSName" DNSName.of_json in
       make ?maxItems ?hostedZoneId ?dNSName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9074,33 +10410,32 @@ module ListHealthChecksResponse =
   struct
     type nonrec t =
       {
-      healthChecks: HealthChecks.t
+      healthChecks: HealthChecks.t option
         [@ocaml.doc
           "A complex type that contains one HealthCheck element for each health check that is associated with the current Amazon Web Services account."];
       marker: PageMarker.t option
         [@ocaml.doc
           "For the second and subsequent calls to ListHealthChecks, Marker is the value that you specified for the marker parameter in the previous request."];
-      isTruncated: PageTruncated.t
+      isTruncated: PageTruncated.t option
         [@ocaml.doc
           "A flag that indicates whether there are more health checks to be listed. If the response was truncated, you can get the next group of health checks by submitting another ListHealthChecks request and specifying the value of NextMarker in the marker parameter."];
       nextMarker: PageMarker.t option
         [@ocaml.doc
           "If IsTruncated is true, the value of NextMarker identifies the first health check that Amazon Route 53 returns if you submit another ListHealthChecks request and specify the value of NextMarker in the marker parameter."];
-      maxItems: PageMaxItems.t
+      maxItems: PageMaxItems.t option
         [@ocaml.doc
           "The value that you specified for the maxitems parameter in the call to ListHealthChecks that produced the current response."]}
     type nonrec error =
       [ `IncompatibleVersion of IncompatibleVersion.t 
       | `InvalidInput of InvalidInput.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListHealthChecksResponse"
-    let make ?marker =
-      fun ?nextMarker ->
-        fun ~healthChecks ->
-          fun ~isTruncated ->
-            fun ~maxItems ->
+    let make ?healthChecks =
+      fun ?marker ->
+        fun ?isTruncated ->
+          fun ?nextMarker ->
+            fun ?maxItems ->
               fun () ->
-                { marker; nextMarker; healthChecks; isTruncated; maxItems }
+                { healthChecks; marker; isTruncated; nextMarker; maxItems }
     let error_of_json name json =
       match name with
       | "IncompatibleVersion" ->
@@ -9133,37 +10468,35 @@ module ListHealthChecksResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("HealthChecks", (Some (HealthChecks.to_value x.healthChecks)));
+        [("HealthChecks",
+           (Option.map x.healthChecks ~f:HealthChecks.to_value));
         ("Marker", (Option.map x.marker ~f:PageMarker.to_value));
-        ("IsTruncated", (Some (PageTruncated.to_value x.isTruncated)));
+        ("IsTruncated", (Option.map x.isTruncated ~f:PageTruncated.to_value));
         ("NextMarker", (Option.map x.nextMarker ~f:PageMarker.to_value));
-        ("MaxItems", (Some (PageMaxItems.to_value x.maxItems)))]
+        ("MaxItems", (Option.map x.maxItems ~f:PageMaxItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxItems =
-        PageMaxItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MaxItems") in
+        (Option.map ~f:PageMaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       let nextMarker =
         (Option.map ~f:PageMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       let isTruncated =
-        PageTruncated.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IsTruncated") in
+        (Option.map ~f:PageTruncated.of_xml)
+          (Xml.child xml_arg0 "IsTruncated") in
       let marker =
         (Option.map ~f:PageMarker.of_xml) (Xml.child xml_arg0 "Marker") in
       let healthChecks =
-        HealthChecks.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HealthChecks") in
-      make ~maxItems ?nextMarker ~isTruncated ?marker ~healthChecks ()
+        (Option.map ~f:HealthChecks.of_xml)
+          (Xml.child xml_arg0 "HealthChecks") in
+      make ?maxItems ?nextMarker ?isTruncated ?marker ?healthChecks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
-      let nextMarker = field_map json "NextMarker" PageMarker.of_json in
-      let isTruncated =
-        field_map_exn json "IsTruncated" PageTruncated.of_json in
-      let marker = field_map json "Marker" PageMarker.of_json in
-      let healthChecks =
-        field_map_exn json "HealthChecks" HealthChecks.of_json in
-      make ~maxItems ?nextMarker ~isTruncated ?marker ~healthChecks ()
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
+      let nextMarker = field_map json__ "NextMarker" PageMarker.of_json in
+      let isTruncated = field_map json__ "IsTruncated" PageTruncated.of_json in
+      let marker = field_map json__ "Marker" PageMarker.of_json in
+      let healthChecks = field_map json__ "HealthChecks" HealthChecks.of_json in
+      make ?maxItems ?nextMarker ?isTruncated ?marker ?healthChecks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response to a ListHealthChecks request."]
@@ -9176,7 +10509,7 @@ module ListHealthChecksRequest =
           "If the value of IsTruncated in the previous response was true, you have more health checks. To get another group, submit another ListHealthChecks request. For the value of marker, specify the value of NextMarker from the previous response, which is the ID of the first health check that Amazon Route 53 will return if you submit another request. If the value of IsTruncated in the previous response was false, there are no more health checks to get."];
       maxItems: PageMaxItems.t option
         [@ocaml.doc
-          "The maximum number of health checks that you want ListHealthChecks to return in response to the current request. Amazon Route 53 returns a maximum of 100 items. If you set MaxItems to a value greater than 100, Route 53 returns only the first 100 health checks."]}
+          "The maximum number of health checks that you want ListHealthChecks to return in response to the current request. Amazon Route 53 returns a maximum of 1000 items. If you set MaxItems to a value greater than 1000, Route 53 returns only the first 1000 health checks."]}
     let make ?marker = fun ?maxItems -> fun () -> { marker; maxItems }
     let to_value x =
       structure_to_value
@@ -9190,9 +10523,9 @@ module ListHealthChecksRequest =
         (Option.map ~f:PageMarker.of_xml) (Xml.child xml_arg0 "marker") in
       make ?maxItems ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
-      let marker = field_map json "Marker" PageMarker.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
+      let marker = field_map json__ "Marker" PageMarker.of_json in
       make ?maxItems ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9201,10 +10534,10 @@ module ListGeoLocationsResponse =
   struct
     type nonrec t =
       {
-      geoLocationDetailsList: GeoLocationDetailsList.t
+      geoLocationDetailsList: GeoLocationDetailsList.t option
         [@ocaml.doc
           "A complex type that contains one GeoLocationDetails element for each location that Amazon Route 53 supports for geolocation."];
-      isTruncated: PageTruncated.t
+      isTruncated: PageTruncated.t option
         [@ocaml.doc
           "A value that indicates whether more locations remain to be listed after the last location in this response. If so, the value of IsTruncated is true. To get more values, submit another request and include the values of NextContinentCode, NextCountryCode, and NextSubdivisionCode in the startcontinentcode, startcountrycode, and startsubdivisioncode, as applicable."];
       nextContinentCode: GeoLocationContinentCode.t option
@@ -9216,26 +10549,25 @@ module ListGeoLocationsResponse =
       nextSubdivisionCode: GeoLocationSubdivisionCode.t option
         [@ocaml.doc
           "If IsTruncated is true, you can make a follow-up request to display more locations. Enter the value of NextSubdivisionCode in the startsubdivisioncode parameter in another ListGeoLocations request."];
-      maxItems: PageMaxItems.t
+      maxItems: PageMaxItems.t option
         [@ocaml.doc
           "The value that you specified for MaxItems in the request."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListGeoLocationsResponse"
-    let make ?nextContinentCode =
-      fun ?nextCountryCode ->
-        fun ?nextSubdivisionCode ->
-          fun ~geoLocationDetailsList ->
-            fun ~isTruncated ->
-              fun ~maxItems ->
+    let make ?geoLocationDetailsList =
+      fun ?isTruncated ->
+        fun ?nextContinentCode ->
+          fun ?nextCountryCode ->
+            fun ?nextSubdivisionCode ->
+              fun ?maxItems ->
                 fun () ->
                   {
+                    geoLocationDetailsList;
+                    isTruncated;
                     nextContinentCode;
                     nextCountryCode;
                     nextSubdivisionCode;
-                    geoLocationDetailsList;
-                    isTruncated;
                     maxItems
                   }
     let error_of_json name json =
@@ -9263,8 +10595,9 @@ module ListGeoLocationsResponse =
     let to_value x =
       structure_to_value
         [("GeoLocationDetailsList",
-           (Some (GeoLocationDetailsList.to_value x.geoLocationDetailsList)));
-        ("IsTruncated", (Some (PageTruncated.to_value x.isTruncated)));
+           (Option.map x.geoLocationDetailsList
+              ~f:GeoLocationDetailsList.to_value));
+        ("IsTruncated", (Option.map x.isTruncated ~f:PageTruncated.to_value));
         ("NextContinentCode",
           (Option.map x.nextContinentCode
              ~f:GeoLocationContinentCode.to_value));
@@ -9273,12 +10606,11 @@ module ListGeoLocationsResponse =
         ("NextSubdivisionCode",
           (Option.map x.nextSubdivisionCode
              ~f:GeoLocationSubdivisionCode.to_value));
-        ("MaxItems", (Some (PageMaxItems.to_value x.maxItems)))]
+        ("MaxItems", (Option.map x.maxItems ~f:PageMaxItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxItems =
-        PageMaxItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MaxItems") in
+        (Option.map ~f:PageMaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       let nextSubdivisionCode =
         (Option.map ~f:GeoLocationSubdivisionCode.of_xml)
           (Xml.child xml_arg0 "NextSubdivisionCode") in
@@ -9289,30 +10621,29 @@ module ListGeoLocationsResponse =
         (Option.map ~f:GeoLocationContinentCode.of_xml)
           (Xml.child xml_arg0 "NextContinentCode") in
       let isTruncated =
-        PageTruncated.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IsTruncated") in
+        (Option.map ~f:PageTruncated.of_xml)
+          (Xml.child xml_arg0 "IsTruncated") in
       let geoLocationDetailsList =
-        GeoLocationDetailsList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GeoLocationDetailsList") in
-      make ~maxItems ?nextSubdivisionCode ?nextCountryCode ?nextContinentCode
-        ~isTruncated ~geoLocationDetailsList ()
+        (Option.map ~f:GeoLocationDetailsList.of_xml)
+          (Xml.child xml_arg0 "GeoLocationDetailsList") in
+      make ?maxItems ?nextSubdivisionCode ?nextCountryCode ?nextContinentCode
+        ?isTruncated ?geoLocationDetailsList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map_exn json "MaxItems" PageMaxItems.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
       let nextSubdivisionCode =
-        field_map json "NextSubdivisionCode"
+        field_map json__ "NextSubdivisionCode"
           GeoLocationSubdivisionCode.of_json in
       let nextCountryCode =
-        field_map json "NextCountryCode" GeoLocationCountryCode.of_json in
+        field_map json__ "NextCountryCode" GeoLocationCountryCode.of_json in
       let nextContinentCode =
-        field_map json "NextContinentCode" GeoLocationContinentCode.of_json in
-      let isTruncated =
-        field_map_exn json "IsTruncated" PageTruncated.of_json in
+        field_map json__ "NextContinentCode" GeoLocationContinentCode.of_json in
+      let isTruncated = field_map json__ "IsTruncated" PageTruncated.of_json in
       let geoLocationDetailsList =
-        field_map_exn json "GeoLocationDetailsList"
+        field_map json__ "GeoLocationDetailsList"
           GeoLocationDetailsList.of_json in
-      make ~maxItems ?nextSubdivisionCode ?nextCountryCode ?nextContinentCode
-        ~isTruncated ~geoLocationDetailsList ()
+      make ?maxItems ?nextSubdivisionCode ?nextCountryCode ?nextContinentCode
+        ?isTruncated ?geoLocationDetailsList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type containing the response information for the request."]
@@ -9370,33 +10701,371 @@ module ListGeoLocationsRequest =
       make ?maxItems ?startSubdivisionCode ?startCountryCode
         ?startContinentCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
       let startSubdivisionCode =
-        field_map json "StartSubdivisionCode"
+        field_map json__ "StartSubdivisionCode"
           GeoLocationSubdivisionCode.of_json in
       let startCountryCode =
-        field_map json "StartCountryCode" GeoLocationCountryCode.of_json in
+        field_map json__ "StartCountryCode" GeoLocationCountryCode.of_json in
       let startContinentCode =
-        field_map json "StartContinentCode" GeoLocationContinentCode.of_json in
+        field_map json__ "StartContinentCode"
+          GeoLocationContinentCode.of_json in
       make ?maxItems ?startSubdivisionCode ?startCountryCode
         ?startContinentCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to get a list of geographic locations that Amazon Route 53 supports for geolocation resource record sets."]
+module ListCidrLocationsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "An opaque pagination token to indicate where the service is to begin enumerating results. If no value is provided, the listing of results starts from the beginning."];
+      cidrLocations: LocationSummaries.t option
+        [@ocaml.doc
+          "A complex type that contains information about the list of CIDR locations."]}
+    type nonrec error =
+      [ `InvalidInput of InvalidInput.t 
+      | `NoSuchCidrCollectionException of NoSuchCidrCollectionException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?cidrLocations -> fun () -> { nextToken; cidrLocations }
+    let error_of_json name json =
+      match name with
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
+      | "NoSuchCidrCollectionException" ->
+          `NoSuchCidrCollectionException
+            (NoSuchCidrCollectionException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
+      | "NoSuchCidrCollectionException" ->
+          `NoSuchCidrCollectionException
+            (NoSuchCidrCollectionException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInput e ->
+          `Assoc
+            [("error", (`String "InvalidInput"));
+            ("details", (InvalidInput.to_json e))]
+      | `NoSuchCidrCollectionException e ->
+          `Assoc
+            [("error", (`String "NoSuchCidrCollectionException"));
+            ("details", (NoSuchCidrCollectionException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("CidrLocations",
+          (Option.map x.cidrLocations ~f:LocationSummaries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cidrLocations =
+        (Option.map ~f:LocationSummaries.of_xml)
+          (Xml.child xml_arg0 "CidrLocations") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      make ?cidrLocations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cidrLocations =
+        field_map json__ "CidrLocations" LocationSummaries.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      make ?cidrLocations ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a paginated list of CIDR locations for the given collection (metadata only, does not include CIDR blocks)."]
+module ListCidrLocationsRequest =
+  struct
+    type nonrec t =
+      {
+      collectionId: UUID.t [@ocaml.doc "The CIDR collection ID."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "An opaque pagination token to indicate where the service is to begin enumerating results. If no value is provided, the listing of results starts from the beginning."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of CIDR collection locations to return in the response."]}
+    let context_ = "ListCidrLocationsRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~collectionId ->
+          fun () -> { nextToken; maxResults; collectionId }
+    let to_value x =
+      structure_to_value
+        [("CidrCollectionId", (Some (UUID.to_value x.collectionId)));
+        ("nexttoken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxresults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxresults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nexttoken") in
+      let collectionId =
+        UUID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CidrCollectionId") in
+      make ?maxResults ?nextToken ~collectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let collectionId = field_map_exn json__ "CollectionId" UUID.of_json in
+      make ?maxResults ?nextToken ~collectionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a paginated list of CIDR locations for the given collection (metadata only, does not include CIDR blocks)."]
+module ListCidrCollectionsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "An opaque pagination token to indicate where the service is to begin enumerating results. If no value is provided, the listing of results starts from the beginning."];
+      cidrCollections: CollectionSummaries.t option
+        [@ocaml.doc
+          "A complex type with information about the CIDR collection."]}
+    type nonrec error =
+      [ `InvalidInput of InvalidInput.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?cidrCollections -> fun () -> { nextToken; cidrCollections }
+    let error_of_json name json =
+      match name with
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInput e ->
+          `Assoc
+            [("error", (`String "InvalidInput"));
+            ("details", (InvalidInput.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("CidrCollections",
+          (Option.map x.cidrCollections ~f:CollectionSummaries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cidrCollections =
+        (Option.map ~f:CollectionSummaries.of_xml)
+          (Xml.child xml_arg0 "CidrCollections") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      make ?cidrCollections ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cidrCollections =
+        field_map json__ "CidrCollections" CollectionSummaries.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      make ?cidrCollections ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a paginated list of CIDR collections in the Amazon Web Services account (metadata only)."]
+module ListCidrCollectionsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "An opaque pagination token to indicate where the service is to begin enumerating results. If no value is provided, the listing of results starts from the beginning."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of CIDR collections to return in the response."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("nexttoken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxresults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxresults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nexttoken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a paginated list of CIDR collections in the Amazon Web Services account (metadata only)."]
+module ListCidrBlocksResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "An opaque pagination token to indicate where the service is to begin enumerating results. If no value is provided, the listing of results starts from the beginning."];
+      cidrBlocks: CidrBlockSummaries.t option
+        [@ocaml.doc
+          "A complex type that contains information about the CIDR blocks."]}
+    type nonrec error =
+      [ `InvalidInput of InvalidInput.t 
+      | `NoSuchCidrCollectionException of NoSuchCidrCollectionException.t 
+      | `NoSuchCidrLocationException of NoSuchCidrLocationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?cidrBlocks -> fun () -> { nextToken; cidrBlocks }
+    let error_of_json name json =
+      match name with
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
+      | "NoSuchCidrCollectionException" ->
+          `NoSuchCidrCollectionException
+            (NoSuchCidrCollectionException.of_json json)
+      | "NoSuchCidrLocationException" ->
+          `NoSuchCidrLocationException
+            (NoSuchCidrLocationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
+      | "NoSuchCidrCollectionException" ->
+          `NoSuchCidrCollectionException
+            (NoSuchCidrCollectionException.of_xml xml)
+      | "NoSuchCidrLocationException" ->
+          `NoSuchCidrLocationException
+            (NoSuchCidrLocationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInput e ->
+          `Assoc
+            [("error", (`String "InvalidInput"));
+            ("details", (InvalidInput.to_json e))]
+      | `NoSuchCidrCollectionException e ->
+          `Assoc
+            [("error", (`String "NoSuchCidrCollectionException"));
+            ("details", (NoSuchCidrCollectionException.to_json e))]
+      | `NoSuchCidrLocationException e ->
+          `Assoc
+            [("error", (`String "NoSuchCidrLocationException"));
+            ("details", (NoSuchCidrLocationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("CidrBlocks",
+          (Option.map x.cidrBlocks ~f:CidrBlockSummaries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cidrBlocks =
+        (Option.map ~f:CidrBlockSummaries.of_xml)
+          (Xml.child xml_arg0 "CidrBlocks") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      make ?cidrBlocks ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cidrBlocks =
+        field_map json__ "CidrBlocks" CidrBlockSummaries.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      make ?cidrBlocks ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a paginated list of location objects and their CIDR blocks."]
+module ListCidrBlocksRequest =
+  struct
+    type nonrec t =
+      {
+      collectionId: UUID.t [@ocaml.doc "The UUID of the CIDR collection."];
+      locationName: CidrLocationNameDefaultNotAllowed.t option
+        [@ocaml.doc "The name of the CIDR collection location."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "An opaque pagination token to indicate where the service is to begin enumerating results."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "Maximum number of results you want returned."]}
+    let context_ = "ListCidrBlocksRequest"
+    let make ?locationName =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ~collectionId ->
+            fun () -> { locationName; nextToken; maxResults; collectionId }
+    let to_value x =
+      structure_to_value
+        [("CidrCollectionId", (Some (UUID.to_value x.collectionId)));
+        ("location",
+          (Option.map x.locationName
+             ~f:CidrLocationNameDefaultNotAllowed.to_value));
+        ("nexttoken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxresults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxresults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nexttoken") in
+      let locationName =
+        (Option.map ~f:CidrLocationNameDefaultNotAllowed.of_xml)
+          (Xml.child xml_arg0 "location") in
+      let collectionId =
+        UUID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CidrCollectionId") in
+      make ?maxResults ?nextToken ?locationName ~collectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let locationName =
+        field_map json__ "LocationName"
+          CidrLocationNameDefaultNotAllowed.of_json in
+      let collectionId = field_map_exn json__ "CollectionId" UUID.of_json in
+      make ?maxResults ?nextToken ?locationName ~collectionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a paginated list of location objects and their CIDR blocks."]
 module GetTrafficPolicyResponse =
   struct
     type nonrec t =
       {
-      trafficPolicy: TrafficPolicy.t
+      trafficPolicy: TrafficPolicy.t option
         [@ocaml.doc
           "A complex type that contains settings for the specified traffic policy."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `NoSuchTrafficPolicy of NoSuchTrafficPolicy.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetTrafficPolicyResponse"
-    let make ~trafficPolicy = fun () -> { trafficPolicy }
+    let make ?trafficPolicy = fun () -> { trafficPolicy }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -9429,18 +11098,19 @@ module GetTrafficPolicyResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("TrafficPolicy", (Some (TrafficPolicy.to_value x.trafficPolicy)))]
+        [("TrafficPolicy",
+           (Option.map x.trafficPolicy ~f:TrafficPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let trafficPolicy =
-        TrafficPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicy") in
-      make ~trafficPolicy ()
+        (Option.map ~f:TrafficPolicy.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicy") in
+      make ?trafficPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let trafficPolicy =
-        field_map_exn json "TrafficPolicy" TrafficPolicy.of_json in
-      make ~trafficPolicy ()
+        field_map json__ "TrafficPolicy" TrafficPolicy.of_json in
+      make ?trafficPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response information for the request."]
@@ -9470,9 +11140,10 @@ module GetTrafficPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~version ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map_exn json "Version" TrafficPolicyVersion.of_json in
-      let id = field_map_exn json "Id" TrafficPolicyId.of_json in
+    let of_json json__ =
+      let version =
+        field_map_exn json__ "Version" TrafficPolicyVersion.of_json in
+      let id = field_map_exn json__ "Id" TrafficPolicyId.of_json in
       make ~version ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9481,15 +11152,14 @@ module GetTrafficPolicyInstanceResponse =
   struct
     type nonrec t =
       {
-      trafficPolicyInstance: TrafficPolicyInstance.t
+      trafficPolicyInstance: TrafficPolicyInstance.t option
         [@ocaml.doc
           "A complex type that contains settings for the traffic policy instance."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `NoSuchTrafficPolicyInstance of NoSuchTrafficPolicyInstance.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetTrafficPolicyInstanceResponse"
-    let make ~trafficPolicyInstance = fun () -> { trafficPolicyInstance }
+    let make ?trafficPolicyInstance = fun () -> { trafficPolicyInstance }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -9525,19 +11195,20 @@ module GetTrafficPolicyInstanceResponse =
     let to_value x =
       structure_to_value
         [("TrafficPolicyInstance",
-           (Some (TrafficPolicyInstance.to_value x.trafficPolicyInstance)))]
+           (Option.map x.trafficPolicyInstance
+              ~f:TrafficPolicyInstance.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let trafficPolicyInstance =
-        TrafficPolicyInstance.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicyInstance") in
-      make ~trafficPolicyInstance ()
+        (Option.map ~f:TrafficPolicyInstance.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicyInstance") in
+      make ?trafficPolicyInstance ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let trafficPolicyInstance =
-        field_map_exn json "TrafficPolicyInstance"
+        field_map json__ "TrafficPolicyInstance"
           TrafficPolicyInstance.of_json in
-      make ~trafficPolicyInstance ()
+      make ?trafficPolicyInstance ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about the resource record sets that Amazon Route 53 created based on a specified traffic policy."]
@@ -9560,8 +11231,8 @@ module GetTrafficPolicyInstanceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" TrafficPolicyInstanceId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" TrafficPolicyInstanceId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9570,13 +11241,12 @@ module GetTrafficPolicyInstanceCountResponse =
   struct
     type nonrec t =
       {
-      trafficPolicyInstanceCount: TrafficPolicyInstanceCount.t
+      trafficPolicyInstanceCount: TrafficPolicyInstanceCount.t option
         [@ocaml.doc
           "The number of traffic policy instances that are associated with the current Amazon Web Services account."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetTrafficPolicyInstanceCountResponse"
-    let make ~trafficPolicyInstanceCount =
+    let make ?trafficPolicyInstanceCount =
       fun () -> { trafficPolicyInstanceCount }
     let error_of_json name json =
       match name with
@@ -9597,22 +11267,20 @@ module GetTrafficPolicyInstanceCountResponse =
     let to_value x =
       structure_to_value
         [("TrafficPolicyInstanceCount",
-           (Some
-              (TrafficPolicyInstanceCount.to_value
-                 x.trafficPolicyInstanceCount)))]
+           (Option.map x.trafficPolicyInstanceCount
+              ~f:TrafficPolicyInstanceCount.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let trafficPolicyInstanceCount =
-        TrafficPolicyInstanceCount.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "TrafficPolicyInstanceCount") in
-      make ~trafficPolicyInstanceCount ()
+        (Option.map ~f:TrafficPolicyInstanceCount.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicyInstanceCount") in
+      make ?trafficPolicyInstanceCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let trafficPolicyInstanceCount =
-        field_map_exn json "TrafficPolicyInstanceCount"
+        field_map json__ "TrafficPolicyInstanceCount"
           TrafficPolicyInstanceCount.of_json in
-      make ~trafficPolicyInstanceCount ()
+      make ?trafficPolicyInstanceCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about the resource record sets that Amazon Route 53 created based on a specified traffic policy."]
@@ -9633,7 +11301,7 @@ module GetReusableDelegationSetResponse =
   struct
     type nonrec t =
       {
-      delegationSet: DelegationSet.t
+      delegationSet: DelegationSet.t option
         [@ocaml.doc
           "A complex type that contains information about the reusable delegation set."]}
     type nonrec error =
@@ -9641,8 +11309,7 @@ module GetReusableDelegationSetResponse =
       | `InvalidInput of InvalidInput.t 
       | `NoSuchDelegationSet of NoSuchDelegationSet.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetReusableDelegationSetResponse"
-    let make ~delegationSet = fun () -> { delegationSet }
+    let make ?delegationSet = fun () -> { delegationSet }
     let error_of_json name json =
       match name with
       | "DelegationSetNotReusable" ->
@@ -9683,18 +11350,19 @@ module GetReusableDelegationSetResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("DelegationSet", (Some (DelegationSet.to_value x.delegationSet)))]
+        [("DelegationSet",
+           (Option.map x.delegationSet ~f:DelegationSet.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let delegationSet =
-        DelegationSet.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DelegationSet") in
-      make ~delegationSet ()
+        (Option.map ~f:DelegationSet.of_xml)
+          (Xml.child xml_arg0 "DelegationSet") in
+      make ?delegationSet ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let delegationSet =
-        field_map_exn json "DelegationSet" DelegationSet.of_json in
-      make ~delegationSet ()
+        field_map json__ "DelegationSet" DelegationSet.of_json in
+      make ?delegationSet ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response to the GetReusableDelegationSet request."]
@@ -9715,8 +11383,8 @@ module GetReusableDelegationSetRequest =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" ResourceId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" ResourceId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to get information about a specified reusable delegation set."]
@@ -9724,18 +11392,17 @@ module GetReusableDelegationSetLimitResponse =
   struct
     type nonrec t =
       {
-      limit: ReusableDelegationSetLimit.t
+      limit: ReusableDelegationSetLimit.t option
         [@ocaml.doc
           "The current setting for the limit on hosted zones that you can associate with the specified reusable delegation set."];
-      count: UsageCount.t
+      count: UsageCount.t option
         [@ocaml.doc
           "The current number of hosted zones that you can associate with the specified reusable delegation set."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `NoSuchDelegationSet of NoSuchDelegationSet.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetReusableDelegationSetLimitResponse"
-    let make ~limit = fun ~count -> fun () -> { limit; count }
+    let make ?limit = fun ?count -> fun () -> { limit; count }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -9768,22 +11435,22 @@ module GetReusableDelegationSetLimitResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Limit", (Some (ReusableDelegationSetLimit.to_value x.limit)));
-        ("Count", (Some (UsageCount.to_value x.count)))]
+        [("Limit",
+           (Option.map x.limit ~f:ReusableDelegationSetLimit.to_value));
+        ("Count", (Option.map x.count ~f:UsageCount.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let count =
-        UsageCount.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Count") in
+        (Option.map ~f:UsageCount.of_xml) (Xml.child xml_arg0 "Count") in
       let limit =
-        ReusableDelegationSetLimit.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Limit") in
-      make ~count ~limit ()
+        (Option.map ~f:ReusableDelegationSetLimit.of_xml)
+          (Xml.child xml_arg0 "Limit") in
+      make ?count ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let count = field_map_exn json "Count" UsageCount.of_json in
-      let limit =
-        field_map_exn json "Limit" ReusableDelegationSetLimit.of_json in
-      make ~count ~limit ()
+    let of_json json__ =
+      let count = field_map json__ "Count" UsageCount.of_json in
+      let limit = field_map json__ "Limit" ReusableDelegationSetLimit.of_json in
+      make ?count ?limit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A complex type that contains the requested limit."]
 module GetReusableDelegationSetLimitRequest =
@@ -9812,11 +11479,11 @@ module GetReusableDelegationSetLimitRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~delegationSetId ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let delegationSetId =
-        field_map_exn json "DelegationSetId" ResourceId.of_json in
+        field_map_exn json__ "DelegationSetId" ResourceId.of_json in
       let type_ =
-        field_map_exn json "Type" ReusableDelegationSetLimitType.of_json in
+        field_map_exn json__ "Type" ReusableDelegationSetLimitType.of_json in
       make ~delegationSetId ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9825,15 +11492,14 @@ module GetQueryLoggingConfigResponse =
   struct
     type nonrec t =
       {
-      queryLoggingConfig: QueryLoggingConfig.t
+      queryLoggingConfig: QueryLoggingConfig.t option
         [@ocaml.doc
           "A complex type that contains information about the query logging configuration that you specified in a GetQueryLoggingConfig request."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `NoSuchQueryLoggingConfig of NoSuchQueryLoggingConfig.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetQueryLoggingConfigResponse"
-    let make ~queryLoggingConfig = fun () -> { queryLoggingConfig }
+    let make ?queryLoggingConfig = fun () -> { queryLoggingConfig }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -9867,18 +11533,18 @@ module GetQueryLoggingConfigResponse =
     let to_value x =
       structure_to_value
         [("QueryLoggingConfig",
-           (Some (QueryLoggingConfig.to_value x.queryLoggingConfig)))]
+           (Option.map x.queryLoggingConfig ~f:QueryLoggingConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let queryLoggingConfig =
-        QueryLoggingConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryLoggingConfig") in
-      make ~queryLoggingConfig ()
+        (Option.map ~f:QueryLoggingConfig.of_xml)
+          (Xml.child xml_arg0 "QueryLoggingConfig") in
+      make ?queryLoggingConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let queryLoggingConfig =
-        field_map_exn json "QueryLoggingConfig" QueryLoggingConfig.of_json in
-      make ~queryLoggingConfig ()
+        field_map json__ "QueryLoggingConfig" QueryLoggingConfig.of_json in
+      make ?queryLoggingConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about a specified configuration for DNS query logging. For more information about DNS query logs, see CreateQueryLoggingConfig and Logging DNS Queries."]
@@ -9901,8 +11567,8 @@ module GetQueryLoggingConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" QueryLoggingConfigId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" QueryLoggingConfigId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9911,7 +11577,7 @@ module GetHostedZoneResponse =
   struct
     type nonrec t =
       {
-      hostedZone: HostedZone.t
+      hostedZone: HostedZone.t option
         [@ocaml.doc
           "A complex type that contains general information about the specified hosted zone."];
       delegationSet: DelegationSet.t option
@@ -9924,10 +11590,9 @@ module GetHostedZoneResponse =
       [ `InvalidInput of InvalidInput.t 
       | `NoSuchHostedZone of NoSuchHostedZone.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetHostedZoneResponse"
-    let make ?delegationSet =
-      fun ?vPCs ->
-        fun ~hostedZone -> fun () -> { delegationSet; vPCs; hostedZone }
+    let make ?hostedZone =
+      fun ?delegationSet ->
+        fun ?vPCs -> fun () -> { hostedZone; delegationSet; vPCs }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -9959,7 +11624,7 @@ module GetHostedZoneResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("HostedZone", (Some (HostedZone.to_value x.hostedZone)));
+        [("HostedZone", (Option.map x.hostedZone ~f:HostedZone.to_value));
         ("DelegationSet",
           (Option.map x.delegationSet ~f:DelegationSet.to_value));
         ("VPCs", (Option.map x.vPCs ~f:VPCs.to_value))]
@@ -9970,16 +11635,15 @@ module GetHostedZoneResponse =
         (Option.map ~f:DelegationSet.of_xml)
           (Xml.child xml_arg0 "DelegationSet") in
       let hostedZone =
-        HostedZone.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HostedZone") in
-      make ?vPCs ?delegationSet ~hostedZone ()
+        (Option.map ~f:HostedZone.of_xml) (Xml.child xml_arg0 "HostedZone") in
+      make ?vPCs ?delegationSet ?hostedZone ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vPCs = field_map json "VPCs" VPCs.of_json in
+    let of_json json__ =
+      let vPCs = field_map json__ "VPCs" VPCs.of_json in
       let delegationSet =
-        field_map json "DelegationSet" DelegationSet.of_json in
-      let hostedZone = field_map_exn json "HostedZone" HostedZone.of_json in
-      make ?vPCs ?delegationSet ~hostedZone ()
+        field_map json__ "DelegationSet" DelegationSet.of_json in
+      let hostedZone = field_map json__ "HostedZone" HostedZone.of_json in
+      make ?vPCs ?delegationSet ?hostedZone ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contain the response to a GetHostedZone request."]
@@ -10000,8 +11664,8 @@ module GetHostedZoneRequest =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" ResourceId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" ResourceId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to get information about a specified hosted zone."]
@@ -10009,10 +11673,10 @@ module GetHostedZoneLimitResponse =
   struct
     type nonrec t =
       {
-      limit: HostedZoneLimit.t
+      limit: HostedZoneLimit.t option
         [@ocaml.doc
           "The current setting for the specified limit. For example, if you specified MAX_RRSETS_BY_ZONE for the value of Type in the request, the value of Limit is the maximum number of records that you can create in the specified hosted zone."];
-      count: UsageCount.t
+      count: UsageCount.t option
         [@ocaml.doc
           "The current number of entities that you have created of the specified type. For example, if you specified MAX_RRSETS_BY_ZONE for the value of Type in the request, the value of Count is the current number of records that you have created in the specified hosted zone."]}
     type nonrec error =
@@ -10020,8 +11684,7 @@ module GetHostedZoneLimitResponse =
       | `InvalidInput of InvalidInput.t 
       | `NoSuchHostedZone of NoSuchHostedZone.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetHostedZoneLimitResponse"
-    let make ~limit = fun ~count -> fun () -> { limit; count }
+    let make ?limit = fun ?count -> fun () -> { limit; count }
     let error_of_json name json =
       match name with
       | "HostedZoneNotPrivate" ->
@@ -10061,21 +11724,20 @@ module GetHostedZoneLimitResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Limit", (Some (HostedZoneLimit.to_value x.limit)));
-        ("Count", (Some (UsageCount.to_value x.count)))]
+        [("Limit", (Option.map x.limit ~f:HostedZoneLimit.to_value));
+        ("Count", (Option.map x.count ~f:UsageCount.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let count =
-        UsageCount.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Count") in
+        (Option.map ~f:UsageCount.of_xml) (Xml.child xml_arg0 "Count") in
       let limit =
-        HostedZoneLimit.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Limit") in
-      make ~count ~limit ()
+        (Option.map ~f:HostedZoneLimit.of_xml) (Xml.child xml_arg0 "Limit") in
+      make ?count ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let count = field_map_exn json "Count" UsageCount.of_json in
-      let limit = field_map_exn json "Limit" HostedZoneLimit.of_json in
-      make ~count ~limit ()
+    let of_json json__ =
+      let count = field_map json__ "Count" UsageCount.of_json in
+      let limit = field_map json__ "Limit" HostedZoneLimit.of_json in
+      make ?count ?limit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A complex type that contains the requested limit."]
 module GetHostedZoneLimitRequest =
@@ -10103,9 +11765,10 @@ module GetHostedZoneLimitRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~hostedZoneId ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
-      let type_ = field_map_exn json "Type" HostedZoneLimitType.of_json in
+    let of_json json__ =
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
+      let type_ = field_map_exn json__ "Type" HostedZoneLimitType.of_json in
       make ~hostedZoneId ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10114,14 +11777,13 @@ module GetHostedZoneCountResponse =
   struct
     type nonrec t =
       {
-      hostedZoneCount: HostedZoneCount.t
+      hostedZoneCount: HostedZoneCount.t option
         [@ocaml.doc
           "The total number of public and private hosted zones that are associated with the current Amazon Web Services account."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetHostedZoneCountResponse"
-    let make ~hostedZoneCount = fun () -> { hostedZoneCount }
+    let make ?hostedZoneCount = fun () -> { hostedZoneCount }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -10147,18 +11809,18 @@ module GetHostedZoneCountResponse =
     let to_value x =
       structure_to_value
         [("HostedZoneCount",
-           (Some (HostedZoneCount.to_value x.hostedZoneCount)))]
+           (Option.map x.hostedZoneCount ~f:HostedZoneCount.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let hostedZoneCount =
-        HostedZoneCount.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneCount") in
-      make ~hostedZoneCount ()
+        (Option.map ~f:HostedZoneCount.of_xml)
+          (Xml.child xml_arg0 "HostedZoneCount") in
+      make ?hostedZoneCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hostedZoneCount =
-        field_map_exn json "HostedZoneCount" HostedZoneCount.of_json in
-      make ~hostedZoneCount ()
+        field_map json__ "HostedZoneCount" HostedZoneCount.of_json in
+      make ?hostedZoneCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response to a GetHostedZoneCount request."]
@@ -10179,15 +11841,14 @@ module GetHealthCheckStatusResponse =
   struct
     type nonrec t =
       {
-      healthCheckObservations: HealthCheckObservations.t
+      healthCheckObservations: HealthCheckObservations.t option
         [@ocaml.doc
           "A list that contains one HealthCheckObservation element for each Amazon Route 53 health checker that is reporting a status about the health check endpoint."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `NoSuchHealthCheck of NoSuchHealthCheck.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetHealthCheckStatusResponse"
-    let make ~healthCheckObservations = fun () -> { healthCheckObservations }
+    let make ?healthCheckObservations = fun () -> { healthCheckObservations }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -10221,19 +11882,20 @@ module GetHealthCheckStatusResponse =
     let to_value x =
       structure_to_value
         [("HealthCheckObservations",
-           (Some (HealthCheckObservations.to_value x.healthCheckObservations)))]
+           (Option.map x.healthCheckObservations
+              ~f:HealthCheckObservations.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let healthCheckObservations =
-        HealthCheckObservations.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HealthCheckObservations") in
-      make ~healthCheckObservations ()
+        (Option.map ~f:HealthCheckObservations.of_xml)
+          (Xml.child xml_arg0 "HealthCheckObservations") in
+      make ?healthCheckObservations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let healthCheckObservations =
-        field_map_exn json "HealthCheckObservations"
+        field_map json__ "HealthCheckObservations"
           HealthCheckObservations.of_json in
-      make ~healthCheckObservations ()
+      make ?healthCheckObservations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response to a GetHealthCheck request."]
@@ -10256,9 +11918,9 @@ module GetHealthCheckStatusRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HealthCheckId") in
       make ~healthCheckId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let healthCheckId =
-        field_map_exn json "HealthCheckId" HealthCheckId.of_json in
+        field_map_exn json__ "HealthCheckId" HealthCheckId.of_json in
       make ~healthCheckId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to get the status for a health check."]
@@ -10266,7 +11928,7 @@ module GetHealthCheckResponse =
   struct
     type nonrec t =
       {
-      healthCheck: HealthCheck.t
+      healthCheck: HealthCheck.t option
         [@ocaml.doc
           "A complex type that contains information about one health check that is associated with the current Amazon Web Services account."]}
     type nonrec error =
@@ -10274,8 +11936,7 @@ module GetHealthCheckResponse =
       | `InvalidInput of InvalidInput.t 
       | `NoSuchHealthCheck of NoSuchHealthCheck.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetHealthCheckResponse"
-    let make ~healthCheck = fun () -> { healthCheck }
+    let make ?healthCheck = fun () -> { healthCheck }
     let error_of_json name json =
       match name with
       | "IncompatibleVersion" ->
@@ -10316,17 +11977,16 @@ module GetHealthCheckResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("HealthCheck", (Some (HealthCheck.to_value x.healthCheck)))]
+        [("HealthCheck", (Option.map x.healthCheck ~f:HealthCheck.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let healthCheck =
-        HealthCheck.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HealthCheck") in
-      make ~healthCheck ()
+        (Option.map ~f:HealthCheck.of_xml) (Xml.child xml_arg0 "HealthCheck") in
+      make ?healthCheck ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let healthCheck = field_map_exn json "HealthCheck" HealthCheck.of_json in
-      make ~healthCheck ()
+    let of_json json__ =
+      let healthCheck = field_map json__ "HealthCheck" HealthCheck.of_json in
+      make ?healthCheck ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response to a GetHealthCheck request."]
@@ -10349,9 +12009,9 @@ module GetHealthCheckRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HealthCheckId") in
       make ~healthCheckId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let healthCheckId =
-        field_map_exn json "HealthCheckId" HealthCheckId.of_json in
+        field_map_exn json__ "HealthCheckId" HealthCheckId.of_json in
       make ~healthCheckId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10360,15 +12020,14 @@ module GetHealthCheckLastFailureReasonResponse =
   struct
     type nonrec t =
       {
-      healthCheckObservations: HealthCheckObservations.t
+      healthCheckObservations: HealthCheckObservations.t option
         [@ocaml.doc
           "A list that contains one Observation element for each Amazon Route 53 health checker that is reporting a last failure reason."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `NoSuchHealthCheck of NoSuchHealthCheck.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetHealthCheckLastFailureReasonResponse"
-    let make ~healthCheckObservations = fun () -> { healthCheckObservations }
+    let make ?healthCheckObservations = fun () -> { healthCheckObservations }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -10402,19 +12061,20 @@ module GetHealthCheckLastFailureReasonResponse =
     let to_value x =
       structure_to_value
         [("HealthCheckObservations",
-           (Some (HealthCheckObservations.to_value x.healthCheckObservations)))]
+           (Option.map x.healthCheckObservations
+              ~f:HealthCheckObservations.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let healthCheckObservations =
-        HealthCheckObservations.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HealthCheckObservations") in
-      make ~healthCheckObservations ()
+        (Option.map ~f:HealthCheckObservations.of_xml)
+          (Xml.child xml_arg0 "HealthCheckObservations") in
+      make ?healthCheckObservations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let healthCheckObservations =
-        field_map_exn json "HealthCheckObservations"
+        field_map json__ "HealthCheckObservations"
           HealthCheckObservations.of_json in
-      make ~healthCheckObservations ()
+      make ?healthCheckObservations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response to a GetHealthCheckLastFailureReason request."]
@@ -10437,9 +12097,9 @@ module GetHealthCheckLastFailureReasonRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HealthCheckId") in
       make ~healthCheckId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let healthCheckId =
-        field_map_exn json "HealthCheckId" HealthCheckId.of_json in
+        field_map_exn json__ "HealthCheckId" HealthCheckId.of_json in
       make ~healthCheckId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10448,13 +12108,12 @@ module GetHealthCheckCountResponse =
   struct
     type nonrec t =
       {
-      healthCheckCount: HealthCheckCount.t
+      healthCheckCount: HealthCheckCount.t option
         [@ocaml.doc
           "The number of health checks associated with the current Amazon Web Services account."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetHealthCheckCountResponse"
-    let make ~healthCheckCount = fun () -> { healthCheckCount }
+    let make ?healthCheckCount = fun () -> { healthCheckCount }
     let error_of_json name json =
       match name with
       | name ->
@@ -10474,18 +12133,18 @@ module GetHealthCheckCountResponse =
     let to_value x =
       structure_to_value
         [("HealthCheckCount",
-           (Some (HealthCheckCount.to_value x.healthCheckCount)))]
+           (Option.map x.healthCheckCount ~f:HealthCheckCount.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let healthCheckCount =
-        HealthCheckCount.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HealthCheckCount") in
-      make ~healthCheckCount ()
+        (Option.map ~f:HealthCheckCount.of_xml)
+          (Xml.child xml_arg0 "HealthCheckCount") in
+      make ?healthCheckCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let healthCheckCount =
-        field_map_exn json "HealthCheckCount" HealthCheckCount.of_json in
-      make ~healthCheckCount ()
+        field_map json__ "HealthCheckCount" HealthCheckCount.of_json in
+      make ?healthCheckCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response to a GetHealthCheckCount request."]
@@ -10506,15 +12165,14 @@ module GetGeoLocationResponse =
   struct
     type nonrec t =
       {
-      geoLocationDetails: GeoLocationDetails.t
+      geoLocationDetails: GeoLocationDetails.t option
         [@ocaml.doc
           "A complex type that contains the codes and full continent, country, and subdivision names for the specified geolocation code."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `NoSuchGeoLocation of NoSuchGeoLocation.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetGeoLocationResponse"
-    let make ~geoLocationDetails = fun () -> { geoLocationDetails }
+    let make ?geoLocationDetails = fun () -> { geoLocationDetails }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -10548,18 +12206,18 @@ module GetGeoLocationResponse =
     let to_value x =
       structure_to_value
         [("GeoLocationDetails",
-           (Some (GeoLocationDetails.to_value x.geoLocationDetails)))]
+           (Option.map x.geoLocationDetails ~f:GeoLocationDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let geoLocationDetails =
-        GeoLocationDetails.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GeoLocationDetails") in
-      make ~geoLocationDetails ()
+        (Option.map ~f:GeoLocationDetails.of_xml)
+          (Xml.child xml_arg0 "GeoLocationDetails") in
+      make ?geoLocationDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let geoLocationDetails =
-        field_map_exn json "GeoLocationDetails" GeoLocationDetails.of_json in
-      make ~geoLocationDetails ()
+        field_map json__ "GeoLocationDetails" GeoLocationDetails.of_json in
+      make ?geoLocationDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response information for the specified geolocation code."]
@@ -10572,7 +12230,7 @@ module GetGeoLocationRequest =
           "For geolocation resource record sets, a two-letter abbreviation that identifies a continent. Amazon Route 53 supports the following continent codes: AF: Africa AN: Antarctica AS: Asia EU: Europe OC: Oceania NA: North America SA: South America"];
       countryCode: GeoLocationCountryCode.t option
         [@ocaml.doc
-          "Amazon Route 53 uses the two-letter country codes that are specified in ISO standard 3166-1 alpha-2."];
+          "Amazon Route 53 uses the two-letter country codes that are specified in ISO standard 3166-1 alpha-2. Route 53 also supports the country code UA for Ukraine."];
       subdivisionCode: GeoLocationSubdivisionCode.t option
         [@ocaml.doc
           "The code for the subdivision, such as a particular state within the United States. For a list of US state abbreviations, see Appendix B: Two\226\128\147Letter State and Possession Abbreviations on the United States Postal Service website. For a list of all supported subdivision codes, use the ListGeoLocations API."]}
@@ -10602,13 +12260,13 @@ module GetGeoLocationRequest =
           (Xml.child xml_arg0 "continentcode") in
       make ?subdivisionCode ?countryCode ?continentCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subdivisionCode =
-        field_map json "SubdivisionCode" GeoLocationSubdivisionCode.of_json in
+        field_map json__ "SubdivisionCode" GeoLocationSubdivisionCode.of_json in
       let countryCode =
-        field_map json "CountryCode" GeoLocationCountryCode.of_json in
+        field_map json__ "CountryCode" GeoLocationCountryCode.of_json in
       let continentCode =
-        field_map json "ContinentCode" GeoLocationContinentCode.of_json in
+        field_map json__ "ContinentCode" GeoLocationContinentCode.of_json in
       make ?subdivisionCode ?countryCode ?continentCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10617,18 +12275,17 @@ module GetDNSSECResponse =
   struct
     type nonrec t =
       {
-      status: DNSSECStatus.t
-        [@ocaml.doc "A string repesenting the status of DNSSEC."];
-      keySigningKeys: KeySigningKeys.t
+      status: DNSSECStatus.t option
+        [@ocaml.doc "A string representing the status of DNSSEC."];
+      keySigningKeys: KeySigningKeys.t option
         [@ocaml.doc "The key-signing keys (KSKs) in your account."]}
     type nonrec error =
       [ `InvalidArgument of InvalidArgument.t 
       | `InvalidInput of InvalidInput.t 
       | `NoSuchHostedZone of NoSuchHostedZone.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetDNSSECResponse"
-    let make ~status =
-      fun ~keySigningKeys -> fun () -> { status; keySigningKeys }
+    let make ?status =
+      fun ?keySigningKeys -> fun () -> { status; keySigningKeys }
     let error_of_json name json =
       match name with
       | "InvalidArgument" -> `InvalidArgument (InvalidArgument.of_json json)
@@ -10666,23 +12323,23 @@ module GetDNSSECResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Status", (Some (DNSSECStatus.to_value x.status)));
-        ("KeySigningKeys", (Some (KeySigningKeys.to_value x.keySigningKeys)))]
+        [("Status", (Option.map x.status ~f:DNSSECStatus.to_value));
+        ("KeySigningKeys",
+          (Option.map x.keySigningKeys ~f:KeySigningKeys.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let keySigningKeys =
-        KeySigningKeys.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "KeySigningKeys") in
+        (Option.map ~f:KeySigningKeys.of_xml)
+          (Xml.child xml_arg0 "KeySigningKeys") in
       let status =
-        DNSSECStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
-      make ~keySigningKeys ~status ()
+        (Option.map ~f:DNSSECStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      make ?keySigningKeys ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let keySigningKeys =
-        field_map_exn json "KeySigningKeys" KeySigningKeys.of_json in
-      let status = field_map_exn json "Status" DNSSECStatus.of_json in
-      make ~keySigningKeys ~status ()
+        field_map json__ "KeySigningKeys" KeySigningKeys.of_json in
+      let status = field_map json__ "Status" DNSSECStatus.of_json in
+      make ?keySigningKeys ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about DNSSEC for a specific hosted zone, including the key-signing keys (KSKs) in the hosted zone."]
@@ -10703,8 +12360,9 @@ module GetDNSSECRequest =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+    let of_json json__ =
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10713,13 +12371,12 @@ module GetCheckerIpRangesResponse =
   struct
     type nonrec t =
       {
-      checkerIpRanges: CheckerIpRanges.t
+      checkerIpRanges: CheckerIpRanges.t option
         [@ocaml.doc
           "A complex type that contains sorted list of IP ranges in CIDR format for Amazon Route 53 health checkers."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetCheckerIpRangesResponse"
-    let make ~checkerIpRanges = fun () -> { checkerIpRanges }
+    let make ?checkerIpRanges = fun () -> { checkerIpRanges }
     let error_of_json name json =
       match name with
       | name ->
@@ -10739,18 +12396,18 @@ module GetCheckerIpRangesResponse =
     let to_value x =
       structure_to_value
         [("CheckerIpRanges",
-           (Some (CheckerIpRanges.to_value x.checkerIpRanges)))]
+           (Option.map x.checkerIpRanges ~f:CheckerIpRanges.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let checkerIpRanges =
-        CheckerIpRanges.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CheckerIpRanges") in
-      make ~checkerIpRanges ()
+        (Option.map ~f:CheckerIpRanges.of_xml)
+          (Xml.child xml_arg0 "CheckerIpRanges") in
+      make ?checkerIpRanges ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let checkerIpRanges =
-        field_map_exn json "CheckerIpRanges" CheckerIpRanges.of_json in
-      make ~checkerIpRanges ()
+        field_map json__ "CheckerIpRanges" CheckerIpRanges.of_json in
+      make ?checkerIpRanges ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the CheckerIpRanges element."]
@@ -10770,14 +12427,13 @@ module GetChangeResponse =
   struct
     type nonrec t =
       {
-      changeInfo: ChangeInfo.t
+      changeInfo: ChangeInfo.t option
         [@ocaml.doc
           "A complex type that contains information about the specified change batch."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t  | `NoSuchChange of NoSuchChange.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetChangeResponse"
-    let make ~changeInfo = fun () -> { changeInfo }
+    let make ?changeInfo = fun () -> { changeInfo }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -10808,55 +12464,53 @@ module GetChangeResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ChangeInfo", (Some (ChangeInfo.to_value x.changeInfo)))]
+        [("ChangeInfo", (Option.map x.changeInfo ~f:ChangeInfo.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let changeInfo =
-        ChangeInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
-      make ~changeInfo ()
+        (Option.map ~f:ChangeInfo.of_xml) (Xml.child xml_arg0 "ChangeInfo") in
+      make ?changeInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
-      make ~changeInfo ()
+    let of_json json__ =
+      let changeInfo = field_map json__ "ChangeInfo" ChangeInfo.of_json in
+      make ?changeInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A complex type that contains the ChangeInfo element."]
 module GetChangeRequest =
   struct
     type nonrec t =
       {
-      id: ResourceId.t
+      id: ChangeId.t
         [@ocaml.doc
           "The ID of the change batch request. The value that you specify here is the value that ChangeResourceRecordSets returned in the Id element when you submitted the request."]}
     let context_ = "GetChangeRequest"
     let make ~id = fun () -> { id }
     let to_value x =
-      structure_to_value [("Id", (Some (ResourceId.to_value x.id)))]
+      structure_to_value [("Id", (Some (ChangeId.to_value x.id)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let id =
-        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+        ChangeId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" ResourceId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" ChangeId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for a GetChange request."]
 module GetAccountLimitResponse =
   struct
     type nonrec t =
       {
-      limit: AccountLimit.t
+      limit: AccountLimit.t option
         [@ocaml.doc
           "The current setting for the specified limit. For example, if you specified MAX_HEALTH_CHECKS_BY_OWNER for the value of Type in the request, the value of Limit is the maximum number of health checks that you can create using the current account."];
-      count: UsageCount.t
+      count: UsageCount.t option
         [@ocaml.doc
           "The current number of entities that you have created of the specified type. For example, if you specified MAX_HEALTH_CHECKS_BY_OWNER for the value of Type in the request, the value of Count is the current number of health checks that you have created using the current account."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetAccountLimitResponse"
-    let make ~limit = fun ~count -> fun () -> { limit; count }
+    let make ?limit = fun ?count -> fun () -> { limit; count }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -10881,21 +12535,20 @@ module GetAccountLimitResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Limit", (Some (AccountLimit.to_value x.limit)));
-        ("Count", (Some (UsageCount.to_value x.count)))]
+        [("Limit", (Option.map x.limit ~f:AccountLimit.to_value));
+        ("Count", (Option.map x.count ~f:UsageCount.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let count =
-        UsageCount.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Count") in
+        (Option.map ~f:UsageCount.of_xml) (Xml.child xml_arg0 "Count") in
       let limit =
-        AccountLimit.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Limit") in
-      make ~count ~limit ()
+        (Option.map ~f:AccountLimit.of_xml) (Xml.child xml_arg0 "Limit") in
+      make ?count ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let count = field_map_exn json "Count" UsageCount.of_json in
-      let limit = field_map_exn json "Limit" AccountLimit.of_json in
-      make ~count ~limit ()
+    let of_json json__ =
+      let count = field_map json__ "Count" UsageCount.of_json in
+      let limit = field_map json__ "Limit" AccountLimit.of_json in
+      make ?count ?limit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A complex type that contains the requested limit."]
 module GetAccountLimitRequest =
@@ -10917,8 +12570,8 @@ module GetAccountLimitRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" AccountLimitType.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" AccountLimitType.of_json in
       make ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10926,7 +12579,7 @@ module GetAccountLimitRequest =
 module EnableHostedZoneDNSSECResponse =
   struct
     type nonrec t = {
-      changeInfo: ChangeInfo.t }
+      changeInfo: ChangeInfo.t option }
     type nonrec error =
       [ `ConcurrentModification of ConcurrentModification.t 
       | `DNSSECNotFound of DNSSECNotFound.t 
@@ -10938,8 +12591,7 @@ module EnableHostedZoneDNSSECResponse =
           KeySigningKeyWithActiveStatusNotFound.t 
       | `NoSuchHostedZone of NoSuchHostedZone.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "EnableHostedZoneDNSSECResponse"
-    let make ~changeInfo = fun () -> { changeInfo }
+    let make ?changeInfo = fun () -> { changeInfo }
     let error_of_json name json =
       match name with
       | "ConcurrentModification" ->
@@ -11026,17 +12678,16 @@ module EnableHostedZoneDNSSECResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ChangeInfo", (Some (ChangeInfo.to_value x.changeInfo)))]
+        [("ChangeInfo", (Option.map x.changeInfo ~f:ChangeInfo.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let changeInfo =
-        ChangeInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
-      make ~changeInfo ()
+        (Option.map ~f:ChangeInfo.of_xml) (Xml.child xml_arg0 "ChangeInfo") in
+      make ?changeInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
-      make ~changeInfo ()
+    let of_json json__ =
+      let changeInfo = field_map json__ "ChangeInfo" ChangeInfo.of_json in
+      make ?changeInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Enables DNSSEC signing in a specific hosted zone."]
 module EnableHostedZoneDNSSECRequest =
@@ -11056,8 +12707,9 @@ module EnableHostedZoneDNSSECRequest =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+    let of_json json__ =
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Enables DNSSEC signing in a specific hosted zone."]
@@ -11065,7 +12717,7 @@ module DisassociateVPCFromHostedZoneResponse =
   struct
     type nonrec t =
       {
-      changeInfo: ChangeInfo.t
+      changeInfo: ChangeInfo.t option
         [@ocaml.doc
           "A complex type that describes the changes made to the specified private hosted zone."]}
     type nonrec error =
@@ -11074,8 +12726,7 @@ module DisassociateVPCFromHostedZoneResponse =
       | `NoSuchHostedZone of NoSuchHostedZone.t 
       | `VPCAssociationNotFound of VPCAssociationNotFound.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DisassociateVPCFromHostedZoneResponse"
-    let make ~changeInfo = fun () -> { changeInfo }
+    let make ?changeInfo = fun () -> { changeInfo }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -11129,17 +12780,16 @@ module DisassociateVPCFromHostedZoneResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ChangeInfo", (Some (ChangeInfo.to_value x.changeInfo)))]
+        [("ChangeInfo", (Option.map x.changeInfo ~f:ChangeInfo.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let changeInfo =
-        ChangeInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
-      make ~changeInfo ()
+        (Option.map ~f:ChangeInfo.of_xml) (Xml.child xml_arg0 "ChangeInfo") in
+      make ?changeInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
-      make ~changeInfo ()
+    let of_json json__ =
+      let changeInfo = field_map json__ "ChangeInfo" ChangeInfo.of_json in
+      make ?changeInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response information for the disassociate request."]
@@ -11175,10 +12825,11 @@ module DisassociateVPCFromHostedZoneRequest =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?comment ~vPC ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map json "Comment" DisassociateVPCComment.of_json in
-      let vPC = field_map_exn json "VPC" VPC.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+    let of_json json__ =
+      let comment = field_map json__ "Comment" DisassociateVPCComment.of_json in
+      let vPC = field_map_exn json__ "VPC" VPC.of_json in
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ?comment ~vPC ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11186,7 +12837,7 @@ module DisassociateVPCFromHostedZoneRequest =
 module DisableHostedZoneDNSSECResponse =
   struct
     type nonrec t = {
-      changeInfo: ChangeInfo.t }
+      changeInfo: ChangeInfo.t option }
     type nonrec error =
       [ `ConcurrentModification of ConcurrentModification.t 
       | `DNSSECNotFound of DNSSECNotFound.t 
@@ -11196,8 +12847,7 @@ module DisableHostedZoneDNSSECResponse =
       | `KeySigningKeyInParentDSRecord of KeySigningKeyInParentDSRecord.t 
       | `NoSuchHostedZone of NoSuchHostedZone.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DisableHostedZoneDNSSECResponse"
-    let make ~changeInfo = fun () -> { changeInfo }
+    let make ?changeInfo = fun () -> { changeInfo }
     let error_of_json name json =
       match name with
       | "ConcurrentModification" ->
@@ -11274,17 +12924,16 @@ module DisableHostedZoneDNSSECResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ChangeInfo", (Some (ChangeInfo.to_value x.changeInfo)))]
+        [("ChangeInfo", (Option.map x.changeInfo ~f:ChangeInfo.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let changeInfo =
-        ChangeInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
-      make ~changeInfo ()
+        (Option.map ~f:ChangeInfo.of_xml) (Xml.child xml_arg0 "ChangeInfo") in
+      make ?changeInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
-      make ~changeInfo ()
+    let of_json json__ =
+      let changeInfo = field_map json__ "ChangeInfo" ChangeInfo.of_json in
+      make ?changeInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Disables DNSSEC signing in a specific hosted zone. This action does not deactivate any key-signing keys (KSKs) that are active in the hosted zone."]
@@ -11305,8 +12954,9 @@ module DisableHostedZoneDNSSECRequest =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+    let of_json json__ =
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11406,9 +13056,10 @@ module DeleteVPCAssociationAuthorizationRequest =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~vPC ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vPC = field_map_exn json "VPC" VPC.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+    let of_json json__ =
+      let vPC = field_map_exn json__ "VPC" VPC.of_json in
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ~vPC ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11502,9 +13153,10 @@ module DeleteTrafficPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~version ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map_exn json "Version" TrafficPolicyVersion.of_json in
-      let id = field_map_exn json "Id" TrafficPolicyId.of_json in
+    let of_json json__ =
+      let version =
+        field_map_exn json__ "Version" TrafficPolicyVersion.of_json in
+      let id = field_map_exn json__ "Id" TrafficPolicyId.of_json in
       make ~version ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to delete a specified traffic policy version."]
@@ -11584,8 +13236,8 @@ module DeleteTrafficPolicyInstanceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" TrafficPolicyInstanceId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" TrafficPolicyInstanceId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to delete a specified traffic policy instance."]
@@ -11670,8 +13322,8 @@ module DeleteReusableDelegationSetRequest =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" ResourceId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" ResourceId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to delete a reusable delegation set."]
 module DeleteQueryLoggingConfigResponse =
@@ -11748,8 +13400,8 @@ module DeleteQueryLoggingConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" QueryLoggingConfigId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" QueryLoggingConfigId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11757,7 +13409,7 @@ module DeleteQueryLoggingConfigRequest =
 module DeleteKeySigningKeyResponse =
   struct
     type nonrec t = {
-      changeInfo: ChangeInfo.t }
+      changeInfo: ChangeInfo.t option }
     type nonrec error =
       [ `ConcurrentModification of ConcurrentModification.t 
       | `InvalidInput of InvalidInput.t  | `InvalidKMSArn of InvalidKMSArn.t 
@@ -11765,8 +13417,7 @@ module DeleteKeySigningKeyResponse =
       | `InvalidSigningStatus of InvalidSigningStatus.t 
       | `NoSuchKeySigningKey of NoSuchKeySigningKey.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteKeySigningKeyResponse"
-    let make ~changeInfo = fun () -> { changeInfo }
+    let make ?changeInfo = fun () -> { changeInfo }
     let error_of_json name json =
       match name with
       | "ConcurrentModification" ->
@@ -11830,17 +13481,16 @@ module DeleteKeySigningKeyResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ChangeInfo", (Some (ChangeInfo.to_value x.changeInfo)))]
+        [("ChangeInfo", (Option.map x.changeInfo ~f:ChangeInfo.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let changeInfo =
-        ChangeInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
-      make ~changeInfo ()
+        (Option.map ~f:ChangeInfo.of_xml) (Xml.child xml_arg0 "ChangeInfo") in
+      make ?changeInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
-      make ~changeInfo ()
+    let of_json json__ =
+      let changeInfo = field_map json__ "ChangeInfo" ChangeInfo.of_json in
+      make ?changeInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a key-signing key (KSK). Before you can delete a KSK, you must deactivate it. The KSK must be deactivated before you can delete it regardless of whether the hosted zone is enabled for DNSSEC signing. You can use DeactivateKeySigningKey to deactivate the key before you delete it. Use GetDNSSEC to verify that the KSK is in an INACTIVE status."]
@@ -11868,9 +13518,10 @@ module DeleteKeySigningKeyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
       make ~name ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" SigningKeyName.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" SigningKeyName.of_json in
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ~name ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11879,7 +13530,7 @@ module DeleteHostedZoneResponse =
   struct
     type nonrec t =
       {
-      changeInfo: ChangeInfo.t
+      changeInfo: ChangeInfo.t option
         [@ocaml.doc
           "A complex type that contains the ID, the status, and the date and time of a request to delete a hosted zone."]}
     type nonrec error =
@@ -11889,8 +13540,7 @@ module DeleteHostedZoneResponse =
       | `NoSuchHostedZone of NoSuchHostedZone.t 
       | `PriorRequestNotComplete of PriorRequestNotComplete.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteHostedZoneResponse"
-    let make ~changeInfo = fun () -> { changeInfo }
+    let make ?changeInfo = fun () -> { changeInfo }
     let error_of_json name json =
       match name with
       | "HostedZoneNotEmpty" ->
@@ -11946,17 +13596,16 @@ module DeleteHostedZoneResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ChangeInfo", (Some (ChangeInfo.to_value x.changeInfo)))]
+        [("ChangeInfo", (Option.map x.changeInfo ~f:ChangeInfo.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let changeInfo =
-        ChangeInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
-      make ~changeInfo ()
+        (Option.map ~f:ChangeInfo.of_xml) (Xml.child xml_arg0 "ChangeInfo") in
+      make ?changeInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
-      make ~changeInfo ()
+    let of_json json__ =
+      let changeInfo = field_map json__ "ChangeInfo" ChangeInfo.of_json in
+      make ?changeInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response to a DeleteHostedZone request."]
@@ -11976,8 +13625,8 @@ module DeleteHostedZoneRequest =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" ResourceId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" ResourceId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to delete a hosted zone."]
 module DeleteHealthCheckResponse =
@@ -12052,16 +13701,106 @@ module DeleteHealthCheckRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HealthCheckId") in
       make ~healthCheckId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let healthCheckId =
-        field_map_exn json "HealthCheckId" HealthCheckId.of_json in
+        field_map_exn json__ "HealthCheckId" HealthCheckId.of_json in
       make ~healthCheckId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This action deletes a health check."]
+module DeleteCidrCollectionResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `CidrCollectionInUseException of CidrCollectionInUseException.t 
+      | `ConcurrentModification of ConcurrentModification.t 
+      | `InvalidInput of InvalidInput.t 
+      | `NoSuchCidrCollectionException of NoSuchCidrCollectionException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "CidrCollectionInUseException" ->
+          `CidrCollectionInUseException
+            (CidrCollectionInUseException.of_json json)
+      | "ConcurrentModification" ->
+          `ConcurrentModification (ConcurrentModification.of_json json)
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
+      | "NoSuchCidrCollectionException" ->
+          `NoSuchCidrCollectionException
+            (NoSuchCidrCollectionException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CidrCollectionInUseException" ->
+          `CidrCollectionInUseException
+            (CidrCollectionInUseException.of_xml xml)
+      | "ConcurrentModification" ->
+          `ConcurrentModification (ConcurrentModification.of_xml xml)
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
+      | "NoSuchCidrCollectionException" ->
+          `NoSuchCidrCollectionException
+            (NoSuchCidrCollectionException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CidrCollectionInUseException e ->
+          `Assoc
+            [("error", (`String "CidrCollectionInUseException"));
+            ("details", (CidrCollectionInUseException.to_json e))]
+      | `ConcurrentModification e ->
+          `Assoc
+            [("error", (`String "ConcurrentModification"));
+            ("details", (ConcurrentModification.to_json e))]
+      | `InvalidInput e ->
+          `Assoc
+            [("error", (`String "InvalidInput"));
+            ("details", (InvalidInput.to_json e))]
+      | `NoSuchCidrCollectionException e ->
+          `Assoc
+            [("error", (`String "NoSuchCidrCollectionException"));
+            ("details", (NoSuchCidrCollectionException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a CIDR collection in the current Amazon Web Services account. The collection must be empty before it can be deleted."]
+module DeleteCidrCollectionRequest =
+  struct
+    type nonrec t =
+      {
+      id: UUID.t [@ocaml.doc "The UUID of the collection to delete."]}
+    let context_ = "DeleteCidrCollectionRequest"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value [("CidrCollectionId", (Some (UUID.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        UUID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CidrCollectionId") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" UUID.of_json in make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a CIDR collection in the current Amazon Web Services account. The collection must be empty before it can be deleted."]
 module DeactivateKeySigningKeyResponse =
   struct
     type nonrec t = {
-      changeInfo: ChangeInfo.t }
+      changeInfo: ChangeInfo.t option }
     type nonrec error =
       [ `ConcurrentModification of ConcurrentModification.t 
       | `InvalidInput of InvalidInput.t 
@@ -12071,8 +13810,7 @@ module DeactivateKeySigningKeyResponse =
       | `KeySigningKeyInUse of KeySigningKeyInUse.t 
       | `NoSuchKeySigningKey of NoSuchKeySigningKey.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeactivateKeySigningKeyResponse"
-    let make ~changeInfo = fun () -> { changeInfo }
+    let make ?changeInfo = fun () -> { changeInfo }
     let error_of_json name json =
       match name with
       | "ConcurrentModification" ->
@@ -12148,17 +13886,16 @@ module DeactivateKeySigningKeyResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ChangeInfo", (Some (ChangeInfo.to_value x.changeInfo)))]
+        [("ChangeInfo", (Option.map x.changeInfo ~f:ChangeInfo.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let changeInfo =
-        ChangeInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
-      make ~changeInfo ()
+        (Option.map ~f:ChangeInfo.of_xml) (Xml.child xml_arg0 "ChangeInfo") in
+      make ?changeInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
-      make ~changeInfo ()
+    let of_json json__ =
+      let changeInfo = field_map json__ "ChangeInfo" ChangeInfo.of_json in
+      make ?changeInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deactivates a key-signing key (KSK) so that it will not be used for signing by DNSSEC. This operation changes the KSK status to INACTIVE."]
@@ -12186,9 +13923,10 @@ module DeactivateKeySigningKeyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
       make ~name ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" SigningKeyName.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" SigningKeyName.of_json in
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ~name ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12197,10 +13935,10 @@ module CreateVPCAssociationAuthorizationResponse =
   struct
     type nonrec t =
       {
-      hostedZoneId: ResourceId.t
+      hostedZoneId: ResourceId.t option
         [@ocaml.doc
           "The ID of the hosted zone that you authorized associating a VPC with."];
-      vPC: VPC.t
+      vPC: VPC.t option
         [@ocaml.doc
           "The VPC that you authorized associating with a hosted zone."]}
     type nonrec error =
@@ -12210,8 +13948,7 @@ module CreateVPCAssociationAuthorizationResponse =
       | `TooManyVPCAssociationAuthorizations of
           TooManyVPCAssociationAuthorizations.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateVPCAssociationAuthorizationResponse"
-    let make ~hostedZoneId = fun ~vPC -> fun () -> { hostedZoneId; vPC }
+    let make ?hostedZoneId = fun ?vPC -> fun () -> { hostedZoneId; vPC }
     let error_of_json name json =
       match name with
       | "ConcurrentModification" ->
@@ -12267,20 +14004,19 @@ module CreateVPCAssociationAuthorizationResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("HostedZoneId", (Some (ResourceId.to_value x.hostedZoneId)));
-        ("VPC", (Some (VPC.to_value x.vPC)))]
+        [("HostedZoneId", (Option.map x.hostedZoneId ~f:ResourceId.to_value));
+        ("VPC", (Option.map x.vPC ~f:VPC.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let vPC = VPC.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VPC") in
+      let vPC = (Option.map ~f:VPC.of_xml) (Xml.child xml_arg0 "VPC") in
       let hostedZoneId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
-      make ~vPC ~hostedZoneId ()
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "HostedZoneId") in
+      make ?vPC ?hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vPC = field_map_exn json "VPC" VPC.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
-      make ~vPC ~hostedZoneId ()
+    let of_json json__ =
+      let vPC = field_map json__ "VPC" VPC.of_json in
+      let hostedZoneId = field_map json__ "HostedZoneId" ResourceId.of_json in
+      make ?vPC ?hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response information from a CreateVPCAssociationAuthorization request."]
@@ -12307,9 +14043,10 @@ module CreateVPCAssociationAuthorizationRequest =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~vPC ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vPC = field_map_exn json "VPC" VPC.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+    let of_json json__ =
+      let vPC = field_map_exn json__ "VPC" VPC.of_json in
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ~vPC ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12318,10 +14055,10 @@ module CreateTrafficPolicyVersionResponse =
   struct
     type nonrec t =
       {
-      trafficPolicy: TrafficPolicy.t
+      trafficPolicy: TrafficPolicy.t option
         [@ocaml.doc
           "A complex type that contains settings for the new version of the traffic policy."];
-      location: ResourceURI.t
+      location: ResourceURI.t option
         [@ocaml.doc
           "A unique URL that represents a new traffic policy version."]}
     type nonrec error =
@@ -12332,9 +14069,8 @@ module CreateTrafficPolicyVersionResponse =
       | `TooManyTrafficPolicyVersionsForCurrentPolicy of
           TooManyTrafficPolicyVersionsForCurrentPolicy.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateTrafficPolicyVersionResponse"
-    let make ~trafficPolicy =
-      fun ~location -> fun () -> { trafficPolicy; location }
+    let make ?trafficPolicy =
+      fun ?location -> fun () -> { trafficPolicy; location }
     let error_of_json name json =
       match name with
       | "ConcurrentModification" ->
@@ -12397,23 +14133,23 @@ module CreateTrafficPolicyVersionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("TrafficPolicy", (Some (TrafficPolicy.to_value x.trafficPolicy)));
-        ("Location", (Some (ResourceURI.to_value x.location)))]
+        [("TrafficPolicy",
+           (Option.map x.trafficPolicy ~f:TrafficPolicy.to_value));
+        ("Location", (Option.map x.location ~f:ResourceURI.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let location =
-        ResourceURI.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Location") in
+        (Option.map ~f:ResourceURI.of_xml) (Xml.child xml_arg0 "Location") in
       let trafficPolicy =
-        TrafficPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicy") in
-      make ~location ~trafficPolicy ()
+        (Option.map ~f:TrafficPolicy.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicy") in
+      make ?location ?trafficPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let location = field_map_exn json "Location" ResourceURI.of_json in
+    let of_json json__ =
+      let location = field_map json__ "Location" ResourceURI.of_json in
       let trafficPolicy =
-        field_map_exn json "TrafficPolicy" TrafficPolicy.of_json in
-      make ~location ~trafficPolicy ()
+        field_map json__ "TrafficPolicy" TrafficPolicy.of_json in
+      make ?location ?trafficPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response information for the CreateTrafficPolicyVersion request."]
@@ -12451,11 +14187,11 @@ module CreateTrafficPolicyVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?comment ~document ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map json "Comment" TrafficPolicyComment.of_json in
+    let of_json json__ =
+      let comment = field_map json__ "Comment" TrafficPolicyComment.of_json in
       let document =
-        field_map_exn json "Document" TrafficPolicyDocument.of_json in
-      let id = field_map_exn json "Id" TrafficPolicyId.of_json in
+        field_map_exn json__ "Document" TrafficPolicyDocument.of_json in
+      let id = field_map_exn json__ "Id" TrafficPolicyId.of_json in
       make ?comment ~document ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12464,10 +14200,10 @@ module CreateTrafficPolicyResponse =
   struct
     type nonrec t =
       {
-      trafficPolicy: TrafficPolicy.t
+      trafficPolicy: TrafficPolicy.t option
         [@ocaml.doc
           "A complex type that contains settings for the new traffic policy."];
-      location: ResourceURI.t
+      location: ResourceURI.t option
         [@ocaml.doc "A unique URL that represents a new traffic policy."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
@@ -12475,9 +14211,8 @@ module CreateTrafficPolicyResponse =
       | `TooManyTrafficPolicies of TooManyTrafficPolicies.t 
       | `TrafficPolicyAlreadyExists of TrafficPolicyAlreadyExists.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateTrafficPolicyResponse"
-    let make ~trafficPolicy =
-      fun ~location -> fun () -> { trafficPolicy; location }
+    let make ?trafficPolicy =
+      fun ?location -> fun () -> { trafficPolicy; location }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -12529,23 +14264,23 @@ module CreateTrafficPolicyResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("TrafficPolicy", (Some (TrafficPolicy.to_value x.trafficPolicy)));
-        ("Location", (Some (ResourceURI.to_value x.location)))]
+        [("TrafficPolicy",
+           (Option.map x.trafficPolicy ~f:TrafficPolicy.to_value));
+        ("Location", (Option.map x.location ~f:ResourceURI.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let location =
-        ResourceURI.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Location") in
+        (Option.map ~f:ResourceURI.of_xml) (Xml.child xml_arg0 "Location") in
       let trafficPolicy =
-        TrafficPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicy") in
-      make ~location ~trafficPolicy ()
+        (Option.map ~f:TrafficPolicy.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicy") in
+      make ?location ?trafficPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let location = field_map_exn json "Location" ResourceURI.of_json in
+    let of_json json__ =
+      let location = field_map json__ "Location" ResourceURI.of_json in
       let trafficPolicy =
-        field_map_exn json "TrafficPolicy" TrafficPolicy.of_json in
-      make ~location ~trafficPolicy ()
+        field_map json__ "TrafficPolicy" TrafficPolicy.of_json in
+      make ?location ?trafficPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response information for the CreateTrafficPolicy request."]
@@ -12582,11 +14317,11 @@ module CreateTrafficPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?comment ~document ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map json "Comment" TrafficPolicyComment.of_json in
+    let of_json json__ =
+      let comment = field_map json__ "Comment" TrafficPolicyComment.of_json in
       let document =
-        field_map_exn json "Document" TrafficPolicyDocument.of_json in
-      let name = field_map_exn json "Name" TrafficPolicyName.of_json in
+        field_map_exn json__ "Document" TrafficPolicyDocument.of_json in
+      let name = field_map_exn json__ "Name" TrafficPolicyName.of_json in
       make ?comment ~document ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12595,10 +14330,10 @@ module CreateTrafficPolicyInstanceResponse =
   struct
     type nonrec t =
       {
-      trafficPolicyInstance: TrafficPolicyInstance.t
+      trafficPolicyInstance: TrafficPolicyInstance.t option
         [@ocaml.doc
           "A complex type that contains settings for the new traffic policy instance."];
-      location: ResourceURI.t
+      location: ResourceURI.t option
         [@ocaml.doc
           "A unique URL that represents a new traffic policy instance."]}
     type nonrec error =
@@ -12609,9 +14344,8 @@ module CreateTrafficPolicyInstanceResponse =
       | `TrafficPolicyInstanceAlreadyExists of
           TrafficPolicyInstanceAlreadyExists.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateTrafficPolicyInstanceResponse"
-    let make ~trafficPolicyInstance =
-      fun ~location -> fun () -> { trafficPolicyInstance; location }
+    let make ?trafficPolicyInstance =
+      fun ?location -> fun () -> { trafficPolicyInstance; location }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -12672,24 +14406,24 @@ module CreateTrafficPolicyInstanceResponse =
     let to_value x =
       structure_to_value
         [("TrafficPolicyInstance",
-           (Some (TrafficPolicyInstance.to_value x.trafficPolicyInstance)));
-        ("Location", (Some (ResourceURI.to_value x.location)))]
+           (Option.map x.trafficPolicyInstance
+              ~f:TrafficPolicyInstance.to_value));
+        ("Location", (Option.map x.location ~f:ResourceURI.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let location =
-        ResourceURI.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Location") in
+        (Option.map ~f:ResourceURI.of_xml) (Xml.child xml_arg0 "Location") in
       let trafficPolicyInstance =
-        TrafficPolicyInstance.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrafficPolicyInstance") in
-      make ~location ~trafficPolicyInstance ()
+        (Option.map ~f:TrafficPolicyInstance.of_xml)
+          (Xml.child xml_arg0 "TrafficPolicyInstance") in
+      make ?location ?trafficPolicyInstance ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let location = field_map_exn json "Location" ResourceURI.of_json in
+    let of_json json__ =
+      let location = field_map json__ "Location" ResourceURI.of_json in
       let trafficPolicyInstance =
-        field_map_exn json "TrafficPolicyInstance"
+        field_map json__ "TrafficPolicyInstance"
           TrafficPolicyInstance.of_json in
-      make ~location ~trafficPolicyInstance ()
+      make ?location ?trafficPolicyInstance ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response information for the CreateTrafficPolicyInstance request."]
@@ -12751,15 +14485,16 @@ module CreateTrafficPolicyInstanceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
       make ~trafficPolicyVersion ~trafficPolicyId ~tTL ~name ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let trafficPolicyVersion =
-        field_map_exn json "TrafficPolicyVersion"
+        field_map_exn json__ "TrafficPolicyVersion"
           TrafficPolicyVersion.of_json in
       let trafficPolicyId =
-        field_map_exn json "TrafficPolicyId" TrafficPolicyId.of_json in
-      let tTL = field_map_exn json "TTL" TTL.of_json in
-      let name = field_map_exn json "Name" DNSName.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+        field_map_exn json__ "TrafficPolicyId" TrafficPolicyId.of_json in
+      let tTL = field_map_exn json__ "TTL" TTL.of_json in
+      let name = field_map_exn json__ "Name" DNSName.of_json in
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ~trafficPolicyVersion ~trafficPolicyId ~tTL ~name ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12768,9 +14503,9 @@ module CreateReusableDelegationSetResponse =
   struct
     type nonrec t =
       {
-      delegationSet: DelegationSet.t
+      delegationSet: DelegationSet.t option
         [@ocaml.doc "A complex type that contains name server information."];
-      location: ResourceURI.t
+      location: ResourceURI.t option
         [@ocaml.doc
           "The unique URL representing the new reusable delegation set."]}
     type nonrec error =
@@ -12782,9 +14517,8 @@ module CreateReusableDelegationSetResponse =
       | `InvalidInput of InvalidInput.t 
       | `LimitsExceeded of LimitsExceeded.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateReusableDelegationSetResponse"
-    let make ~delegationSet =
-      fun ~location -> fun () -> { delegationSet; location }
+    let make ?delegationSet =
+      fun ?location -> fun () -> { delegationSet; location }
     let error_of_json name json =
       match name with
       | "DelegationSetAlreadyCreated" ->
@@ -12857,23 +14591,23 @@ module CreateReusableDelegationSetResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("DelegationSet", (Some (DelegationSet.to_value x.delegationSet)));
-        ("Location", (Some (ResourceURI.to_value x.location)))]
+        [("DelegationSet",
+           (Option.map x.delegationSet ~f:DelegationSet.to_value));
+        ("Location", (Option.map x.location ~f:ResourceURI.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let location =
-        ResourceURI.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Location") in
+        (Option.map ~f:ResourceURI.of_xml) (Xml.child xml_arg0 "Location") in
       let delegationSet =
-        DelegationSet.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DelegationSet") in
-      make ~location ~delegationSet ()
+        (Option.map ~f:DelegationSet.of_xml)
+          (Xml.child xml_arg0 "DelegationSet") in
+      make ?location ?delegationSet ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let location = field_map_exn json "Location" ResourceURI.of_json in
+    let of_json json__ =
+      let location = field_map json__ "Location" ResourceURI.of_json in
       let delegationSet =
-        field_map_exn json "DelegationSet" DelegationSet.of_json in
-      make ~location ~delegationSet ()
+        field_map json__ "DelegationSet" DelegationSet.of_json in
+      make ?location ?delegationSet ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a delegation set (a group of four name servers) that can be reused by multiple hosted zones that were created by the same Amazon Web Services account. You can also create a reusable delegation set that uses the four name servers that are associated with an existing hosted zone. Specify the hosted zone ID in the CreateReusableDelegationSet request. You can't associate a reusable delegation set with a private hosted zone. For information about using a reusable delegation set to configure white label name servers, see Configuring White Label Name Servers. The process for migrating existing hosted zones to use a reusable delegation set is comparable to the process for configuring white label name servers. You need to perform the following steps: Create a reusable delegation set. Recreate hosted zones, and reduce the TTL to 60 seconds or less. Recreate resource record sets in the new hosted zones. Change the registrar's name servers to use the name servers for the new hosted zones. Monitor traffic for the website or application. Change TTLs back to their original values. If you want to migrate existing hosted zones to use a reusable delegation set, the existing hosted zones can't use any of the name servers that are assigned to the reusable delegation set. If one or more hosted zones do use one or more name servers that are assigned to the reusable delegation set, you can do one of the following: For small numbers of hosted zones\226\128\148up to a few hundred\226\128\148it's relatively easy to create reusable delegation sets until you get one that has four name servers that don't overlap with any of the name servers in your hosted zones. For larger numbers of hosted zones, the easiest solution is to use more than one reusable delegation set. For larger numbers of hosted zones, you can also migrate hosted zones that have overlapping name servers to hosted zones that don't have overlapping name servers, then migrate the hosted zones again to use the reusable delegation set."]
@@ -12903,10 +14637,10 @@ module CreateReusableDelegationSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CallerReference") in
       make ?hostedZoneId ~callerReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hostedZoneId = field_map json "HostedZoneId" ResourceId.of_json in
+    let of_json json__ =
+      let hostedZoneId = field_map json__ "HostedZoneId" ResourceId.of_json in
       let callerReference =
-        field_map_exn json "CallerReference" Nonce.of_json in
+        field_map_exn json__ "CallerReference" Nonce.of_json in
       make ?hostedZoneId ~callerReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12915,10 +14649,10 @@ module CreateQueryLoggingConfigResponse =
   struct
     type nonrec t =
       {
-      queryLoggingConfig: QueryLoggingConfig.t
+      queryLoggingConfig: QueryLoggingConfig.t option
         [@ocaml.doc
           "A complex type that contains the ID for a query logging configuration, the ID of the hosted zone that you want to log queries for, and the ARN for the log group that you want Amazon Route 53 to send query logs to."];
-      location: ResourceURI.t
+      location: ResourceURI.t option
         [@ocaml.doc
           "The unique URL representing the new query logging configuration."]}
     type nonrec error =
@@ -12930,9 +14664,8 @@ module CreateQueryLoggingConfigResponse =
       | `NoSuchHostedZone of NoSuchHostedZone.t 
       | `QueryLoggingConfigAlreadyExists of QueryLoggingConfigAlreadyExists.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateQueryLoggingConfigResponse"
-    let make ~queryLoggingConfig =
-      fun ~location -> fun () -> { queryLoggingConfig; location }
+    let make ?queryLoggingConfig =
+      fun ?location -> fun () -> { queryLoggingConfig; location }
     let error_of_json name json =
       match name with
       | "ConcurrentModification" ->
@@ -13003,26 +14736,25 @@ module CreateQueryLoggingConfigResponse =
     let to_value x =
       structure_to_value
         [("QueryLoggingConfig",
-           (Some (QueryLoggingConfig.to_value x.queryLoggingConfig)));
-        ("Location", (Some (ResourceURI.to_value x.location)))]
+           (Option.map x.queryLoggingConfig ~f:QueryLoggingConfig.to_value));
+        ("Location", (Option.map x.location ~f:ResourceURI.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let location =
-        ResourceURI.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Location") in
+        (Option.map ~f:ResourceURI.of_xml) (Xml.child xml_arg0 "Location") in
       let queryLoggingConfig =
-        QueryLoggingConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryLoggingConfig") in
-      make ~location ~queryLoggingConfig ()
+        (Option.map ~f:QueryLoggingConfig.of_xml)
+          (Xml.child xml_arg0 "QueryLoggingConfig") in
+      make ?location ?queryLoggingConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let location = field_map_exn json "Location" ResourceURI.of_json in
+    let of_json json__ =
+      let location = field_map json__ "Location" ResourceURI.of_json in
       let queryLoggingConfig =
-        field_map_exn json "QueryLoggingConfig" QueryLoggingConfig.of_json in
-      make ~location ~queryLoggingConfig ()
+        field_map json__ "QueryLoggingConfig" QueryLoggingConfig.of_json in
+      make ?location ?queryLoggingConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a configuration for DNS query logging. After you create a query logging configuration, Amazon Route 53 begins to publish log data to an Amazon CloudWatch Logs log group. DNS query logs contain information about the queries that Route 53 receives for a specified public hosted zone, such as the following: Route 53 edge location that responded to the DNS query Domain or subdomain that was requested DNS record type, such as A or AAAA DNS response code, such as NoError or ServFail Log Group and Resource Policy Before you create a query logging configuration, perform the following operations. If you create a query logging configuration using the Route 53 console, Route 53 performs these operations automatically. Create a CloudWatch Logs log group, and make note of the ARN, which you specify when you create a query logging configuration. Note the following: You must create the log group in the us-east-1 region. You must use the same Amazon Web Services account to create the log group and the hosted zone that you want to configure query logging for. When you create log groups for query logging, we recommend that you use a consistent prefix, for example: /aws/route53/hosted zone name In the next step, you'll create a resource policy, which controls access to one or more log groups and the associated Amazon Web Services resources, such as Route 53 hosted zones. There's a limit on the number of resource policies that you can create, so we recommend that you use a consistent prefix so you can use the same resource policy for all the log groups that you create for query logging. Create a CloudWatch Logs resource policy, and give it the permissions that Route 53 needs to create log streams and to send query logs to log streams. For the value of Resource, specify the ARN for the log group that you created in the previous step. To use the same resource policy for all the CloudWatch Logs log groups that you created for query logging configurations, replace the hosted zone name with *, for example: arn:aws:logs:us-east-1:123412341234:log-group:/aws/route53/* To avoid the confused deputy problem, a security issue where an entity without a permission for an action can coerce a more-privileged entity to perform it, you can optionally limit the permissions that a service has to a resource in a resource-based policy by supplying the following values: For aws:SourceArn, supply the hosted zone ARN used in creating the query logging configuration. For example, aws:SourceArn: arn:aws:route53:::hostedzone/hosted zone ID. For aws:SourceAccount, supply the account ID for the account that creates the query logging configuration. For example, aws:SourceAccount:111111111111. For more information, see The confused deputy problem in the Amazon Web Services IAM User Guide. You can't use the CloudWatch console to create or edit a resource policy. You must use the CloudWatch API, one of the Amazon Web Services SDKs, or the CLI. Log Streams and Edge Locations When Route 53 finishes creating the configuration for DNS query logging, it does the following: Creates a log stream for an edge location the first time that the edge location responds to DNS queries for the specified hosted zone. That log stream is used to log all queries that Route 53 responds to for that edge location. Begins to send query logs to the applicable log stream. The name of each log stream is in the following format: hosted zone ID/edge location code The edge location code is a three-letter code and an arbitrarily assigned number, for example, DFW3. The three-letter code typically corresponds with the International Air Transport Association airport code for an airport near the edge location. (These abbreviations might change in the future.) For a list of edge locations, see \"The Route 53 Global Network\" on the Route 53 Product Details page. Queries That Are Logged Query logs contain only the queries that DNS resolvers forward to Route 53. If a DNS resolver has already cached the response to a query (such as the IP address for a load balancer for example.com), the resolver will continue to return the cached response. It doesn't forward another query to Route 53 until the TTL for the corresponding resource record set expires. Depending on how many DNS queries are submitted for a resource record set, and depending on the TTL for that resource record set, query logs might contain information about only one query out of every several thousand queries that are submitted to DNS. For more information about how DNS works, see Routing Internet Traffic to Your Website or Web Application in the Amazon Route 53 Developer Guide. Log File Format For a list of the values in each query log and the format of each value, see Logging DNS Queries in the Amazon Route 53 Developer Guide. Pricing For information about charges for query logs, see Amazon CloudWatch Pricing. How to Stop Logging If you want Route 53 to stop sending query logs to CloudWatch Logs, delete the query logging configuration. For more information, see DeleteQueryLoggingConfig."]
+       "Creates a configuration for DNS query logging. After you create a query logging configuration, Amazon Route 53 begins to publish log data to an Amazon CloudWatch Logs log group. DNS query logs contain information about the queries that Route 53 receives for a specified public hosted zone, such as the following: Route 53 edge location that responded to the DNS query Domain or subdomain that was requested DNS record type, such as A or AAAA DNS response code, such as NoError or ServFail Log Group and Resource Policy Before you create a query logging configuration, perform the following operations. If you create a query logging configuration using the Route 53 console, Route 53 performs these operations automatically. Create a CloudWatch Logs log group, and make note of the ARN, which you specify when you create a query logging configuration. Note the following: You must create the log group in the us-east-1 region. You must use the same Amazon Web Services account to create the log group and the hosted zone that you want to configure query logging for. When you create log groups for query logging, we recommend that you use a consistent prefix, for example: /aws/route53/hosted zone name In the next step, you'll create a resource policy, which controls access to one or more log groups and the associated Amazon Web Services resources, such as Route 53 hosted zones. There's a limit on the number of resource policies that you can create, so we recommend that you use a consistent prefix so you can use the same resource policy for all the log groups that you create for query logging. Create a CloudWatch Logs resource policy, and give it the permissions that Route 53 needs to create log streams and to send query logs to log streams. You must create the CloudWatch Logs resource policy in the us-east-1 region. For the value of Resource, specify the ARN for the log group that you created in the previous step. To use the same resource policy for all the CloudWatch Logs log groups that you created for query logging configurations, replace the hosted zone name with *, for example: arn:aws:logs:us-east-1:123412341234:log-group:/aws/route53/* To avoid the confused deputy problem, a security issue where an entity without a permission for an action can coerce a more-privileged entity to perform it, you can optionally limit the permissions that a service has to a resource in a resource-based policy by supplying the following values: For aws:SourceArn, supply the hosted zone ARN used in creating the query logging configuration. For example, aws:SourceArn: arn:aws:route53:::hostedzone/hosted zone ID. For aws:SourceAccount, supply the account ID for the account that creates the query logging configuration. For example, aws:SourceAccount:111111111111. For more information, see The confused deputy problem in the Amazon Web Services IAM User Guide. You can't use the CloudWatch console to create or edit a resource policy. You must use the CloudWatch API, one of the Amazon Web Services SDKs, or the CLI. Log Streams and Edge Locations When Route 53 finishes creating the configuration for DNS query logging, it does the following: Creates a log stream for an edge location the first time that the edge location responds to DNS queries for the specified hosted zone. That log stream is used to log all queries that Route 53 responds to for that edge location. Begins to send query logs to the applicable log stream. The name of each log stream is in the following format: hosted zone ID/edge location code The edge location code is a three-letter code and an arbitrarily assigned number, for example, DFW3. The three-letter code typically corresponds with the International Air Transport Association airport code for an airport near the edge location. (These abbreviations might change in the future.) For a list of edge locations, see \"The Route 53 Global Network\" on the Route 53 Product Details page. Queries That Are Logged Query logs contain only the queries that DNS resolvers forward to Route 53. If a DNS resolver has already cached the response to a query (such as the IP address for a load balancer for example.com), the resolver will continue to return the cached response. It doesn't forward another query to Route 53 until the TTL for the corresponding resource record set expires. Depending on how many DNS queries are submitted for a resource record set, and depending on the TTL for that resource record set, query logs might contain information about only one query out of every several thousand queries that are submitted to DNS. For more information about how DNS works, see Routing Internet Traffic to Your Website or Web Application in the Amazon Route 53 Developer Guide. Log File Format For a list of the values in each query log and the format of each value, see Logging DNS Queries in the Amazon Route 53 Developer Guide. Pricing For information about charges for query logs, see Amazon CloudWatch Pricing. How to Stop Logging If you want Route 53 to stop sending query logs to CloudWatch Logs, delete the query logging configuration. For more information, see DeleteQueryLoggingConfig."]
 module CreateQueryLoggingConfigRequest =
   struct
     type nonrec t =
@@ -13054,23 +14786,24 @@ module CreateQueryLoggingConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
       make ~cloudWatchLogsLogGroupArn ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cloudWatchLogsLogGroupArn =
-        field_map_exn json "CloudWatchLogsLogGroupArn"
+        field_map_exn json__ "CloudWatchLogsLogGroupArn"
           CloudWatchLogsLogGroupArn.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ~cloudWatchLogsLogGroupArn ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a configuration for DNS query logging. After you create a query logging configuration, Amazon Route 53 begins to publish log data to an Amazon CloudWatch Logs log group. DNS query logs contain information about the queries that Route 53 receives for a specified public hosted zone, such as the following: Route 53 edge location that responded to the DNS query Domain or subdomain that was requested DNS record type, such as A or AAAA DNS response code, such as NoError or ServFail Log Group and Resource Policy Before you create a query logging configuration, perform the following operations. If you create a query logging configuration using the Route 53 console, Route 53 performs these operations automatically. Create a CloudWatch Logs log group, and make note of the ARN, which you specify when you create a query logging configuration. Note the following: You must create the log group in the us-east-1 region. You must use the same Amazon Web Services account to create the log group and the hosted zone that you want to configure query logging for. When you create log groups for query logging, we recommend that you use a consistent prefix, for example: /aws/route53/hosted zone name In the next step, you'll create a resource policy, which controls access to one or more log groups and the associated Amazon Web Services resources, such as Route 53 hosted zones. There's a limit on the number of resource policies that you can create, so we recommend that you use a consistent prefix so you can use the same resource policy for all the log groups that you create for query logging. Create a CloudWatch Logs resource policy, and give it the permissions that Route 53 needs to create log streams and to send query logs to log streams. For the value of Resource, specify the ARN for the log group that you created in the previous step. To use the same resource policy for all the CloudWatch Logs log groups that you created for query logging configurations, replace the hosted zone name with *, for example: arn:aws:logs:us-east-1:123412341234:log-group:/aws/route53/* To avoid the confused deputy problem, a security issue where an entity without a permission for an action can coerce a more-privileged entity to perform it, you can optionally limit the permissions that a service has to a resource in a resource-based policy by supplying the following values: For aws:SourceArn, supply the hosted zone ARN used in creating the query logging configuration. For example, aws:SourceArn: arn:aws:route53:::hostedzone/hosted zone ID. For aws:SourceAccount, supply the account ID for the account that creates the query logging configuration. For example, aws:SourceAccount:111111111111. For more information, see The confused deputy problem in the Amazon Web Services IAM User Guide. You can't use the CloudWatch console to create or edit a resource policy. You must use the CloudWatch API, one of the Amazon Web Services SDKs, or the CLI. Log Streams and Edge Locations When Route 53 finishes creating the configuration for DNS query logging, it does the following: Creates a log stream for an edge location the first time that the edge location responds to DNS queries for the specified hosted zone. That log stream is used to log all queries that Route 53 responds to for that edge location. Begins to send query logs to the applicable log stream. The name of each log stream is in the following format: hosted zone ID/edge location code The edge location code is a three-letter code and an arbitrarily assigned number, for example, DFW3. The three-letter code typically corresponds with the International Air Transport Association airport code for an airport near the edge location. (These abbreviations might change in the future.) For a list of edge locations, see \"The Route 53 Global Network\" on the Route 53 Product Details page. Queries That Are Logged Query logs contain only the queries that DNS resolvers forward to Route 53. If a DNS resolver has already cached the response to a query (such as the IP address for a load balancer for example.com), the resolver will continue to return the cached response. It doesn't forward another query to Route 53 until the TTL for the corresponding resource record set expires. Depending on how many DNS queries are submitted for a resource record set, and depending on the TTL for that resource record set, query logs might contain information about only one query out of every several thousand queries that are submitted to DNS. For more information about how DNS works, see Routing Internet Traffic to Your Website or Web Application in the Amazon Route 53 Developer Guide. Log File Format For a list of the values in each query log and the format of each value, see Logging DNS Queries in the Amazon Route 53 Developer Guide. Pricing For information about charges for query logs, see Amazon CloudWatch Pricing. How to Stop Logging If you want Route 53 to stop sending query logs to CloudWatch Logs, delete the query logging configuration. For more information, see DeleteQueryLoggingConfig."]
+       "Creates a configuration for DNS query logging. After you create a query logging configuration, Amazon Route 53 begins to publish log data to an Amazon CloudWatch Logs log group. DNS query logs contain information about the queries that Route 53 receives for a specified public hosted zone, such as the following: Route 53 edge location that responded to the DNS query Domain or subdomain that was requested DNS record type, such as A or AAAA DNS response code, such as NoError or ServFail Log Group and Resource Policy Before you create a query logging configuration, perform the following operations. If you create a query logging configuration using the Route 53 console, Route 53 performs these operations automatically. Create a CloudWatch Logs log group, and make note of the ARN, which you specify when you create a query logging configuration. Note the following: You must create the log group in the us-east-1 region. You must use the same Amazon Web Services account to create the log group and the hosted zone that you want to configure query logging for. When you create log groups for query logging, we recommend that you use a consistent prefix, for example: /aws/route53/hosted zone name In the next step, you'll create a resource policy, which controls access to one or more log groups and the associated Amazon Web Services resources, such as Route 53 hosted zones. There's a limit on the number of resource policies that you can create, so we recommend that you use a consistent prefix so you can use the same resource policy for all the log groups that you create for query logging. Create a CloudWatch Logs resource policy, and give it the permissions that Route 53 needs to create log streams and to send query logs to log streams. You must create the CloudWatch Logs resource policy in the us-east-1 region. For the value of Resource, specify the ARN for the log group that you created in the previous step. To use the same resource policy for all the CloudWatch Logs log groups that you created for query logging configurations, replace the hosted zone name with *, for example: arn:aws:logs:us-east-1:123412341234:log-group:/aws/route53/* To avoid the confused deputy problem, a security issue where an entity without a permission for an action can coerce a more-privileged entity to perform it, you can optionally limit the permissions that a service has to a resource in a resource-based policy by supplying the following values: For aws:SourceArn, supply the hosted zone ARN used in creating the query logging configuration. For example, aws:SourceArn: arn:aws:route53:::hostedzone/hosted zone ID. For aws:SourceAccount, supply the account ID for the account that creates the query logging configuration. For example, aws:SourceAccount:111111111111. For more information, see The confused deputy problem in the Amazon Web Services IAM User Guide. You can't use the CloudWatch console to create or edit a resource policy. You must use the CloudWatch API, one of the Amazon Web Services SDKs, or the CLI. Log Streams and Edge Locations When Route 53 finishes creating the configuration for DNS query logging, it does the following: Creates a log stream for an edge location the first time that the edge location responds to DNS queries for the specified hosted zone. That log stream is used to log all queries that Route 53 responds to for that edge location. Begins to send query logs to the applicable log stream. The name of each log stream is in the following format: hosted zone ID/edge location code The edge location code is a three-letter code and an arbitrarily assigned number, for example, DFW3. The three-letter code typically corresponds with the International Air Transport Association airport code for an airport near the edge location. (These abbreviations might change in the future.) For a list of edge locations, see \"The Route 53 Global Network\" on the Route 53 Product Details page. Queries That Are Logged Query logs contain only the queries that DNS resolvers forward to Route 53. If a DNS resolver has already cached the response to a query (such as the IP address for a load balancer for example.com), the resolver will continue to return the cached response. It doesn't forward another query to Route 53 until the TTL for the corresponding resource record set expires. Depending on how many DNS queries are submitted for a resource record set, and depending on the TTL for that resource record set, query logs might contain information about only one query out of every several thousand queries that are submitted to DNS. For more information about how DNS works, see Routing Internet Traffic to Your Website or Web Application in the Amazon Route 53 Developer Guide. Log File Format For a list of the values in each query log and the format of each value, see Logging DNS Queries in the Amazon Route 53 Developer Guide. Pricing For information about charges for query logs, see Amazon CloudWatch Pricing. How to Stop Logging If you want Route 53 to stop sending query logs to CloudWatch Logs, delete the query logging configuration. For more information, see DeleteQueryLoggingConfig."]
 module CreateKeySigningKeyResponse =
   struct
     type nonrec t =
       {
-      changeInfo: ChangeInfo.t ;
-      keySigningKey: KeySigningKey.t
+      changeInfo: ChangeInfo.t option ;
+      keySigningKey: KeySigningKey.t option
         [@ocaml.doc "The key-signing key (KSK) that the request creates."];
-      location: ResourceURI.t
+      location: ResourceURI.t option
         [@ocaml.doc
           "The unique URL representing the new key-signing key (KSK)."]}
     type nonrec error =
@@ -13084,10 +14817,9 @@ module CreateKeySigningKeyResponse =
       | `NoSuchHostedZone of NoSuchHostedZone.t 
       | `TooManyKeySigningKeys of TooManyKeySigningKeys.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateKeySigningKeyResponse"
-    let make ~changeInfo =
-      fun ~keySigningKey ->
-        fun ~location -> fun () -> { changeInfo; keySigningKey; location }
+    let make ?changeInfo =
+      fun ?keySigningKey ->
+        fun ?location -> fun () -> { changeInfo; keySigningKey; location }
     let error_of_json name json =
       match name with
       | "ConcurrentModification" ->
@@ -13181,28 +14913,27 @@ module CreateKeySigningKeyResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ChangeInfo", (Some (ChangeInfo.to_value x.changeInfo)));
-        ("KeySigningKey", (Some (KeySigningKey.to_value x.keySigningKey)));
-        ("Location", (Some (ResourceURI.to_value x.location)))]
+        [("ChangeInfo", (Option.map x.changeInfo ~f:ChangeInfo.to_value));
+        ("KeySigningKey",
+          (Option.map x.keySigningKey ~f:KeySigningKey.to_value));
+        ("Location", (Option.map x.location ~f:ResourceURI.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let location =
-        ResourceURI.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Location") in
+        (Option.map ~f:ResourceURI.of_xml) (Xml.child xml_arg0 "Location") in
       let keySigningKey =
-        KeySigningKey.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "KeySigningKey") in
+        (Option.map ~f:KeySigningKey.of_xml)
+          (Xml.child xml_arg0 "KeySigningKey") in
       let changeInfo =
-        ChangeInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
-      make ~location ~keySigningKey ~changeInfo ()
+        (Option.map ~f:ChangeInfo.of_xml) (Xml.child xml_arg0 "ChangeInfo") in
+      make ?location ?keySigningKey ?changeInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let location = field_map_exn json "Location" ResourceURI.of_json in
+    let of_json json__ =
+      let location = field_map json__ "Location" ResourceURI.of_json in
       let keySigningKey =
-        field_map_exn json "KeySigningKey" KeySigningKey.of_json in
-      let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
-      make ~location ~keySigningKey ~changeInfo ()
+        field_map json__ "KeySigningKey" KeySigningKey.of_json in
+      let changeInfo = field_map json__ "ChangeInfo" ChangeInfo.of_json in
+      make ?location ?keySigningKey ?changeInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new key-signing key (KSK) associated with a hosted zone. You can only have two KSKs per hosted zone."]
@@ -13265,14 +14996,16 @@ module CreateKeySigningKeyRequest =
       make ~status ~name ~keyManagementServiceArn ~hostedZoneId
         ~callerReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" SigningKeyStatus.of_json in
-      let name = field_map_exn json "Name" SigningKeyName.of_json in
+    let of_json json__ =
+      let status = field_map_exn json__ "Status" SigningKeyStatus.of_json in
+      let name = field_map_exn json__ "Name" SigningKeyName.of_json in
       let keyManagementServiceArn =
-        field_map_exn json "KeyManagementServiceArn" SigningKeyString.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+        field_map_exn json__ "KeyManagementServiceArn"
+          SigningKeyString.of_json in
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       let callerReference =
-        field_map_exn json "CallerReference" Nonce.of_json in
+        field_map_exn json__ "CallerReference" Nonce.of_json in
       make ~status ~name ~keyManagementServiceArn ~hostedZoneId
         ~callerReference ()
     let to_json v = composed_to_json to_value v
@@ -13282,19 +15015,19 @@ module CreateHostedZoneResponse =
   struct
     type nonrec t =
       {
-      hostedZone: HostedZone.t
+      hostedZone: HostedZone.t option
         [@ocaml.doc
           "A complex type that contains general information about the hosted zone."];
-      changeInfo: ChangeInfo.t
+      changeInfo: ChangeInfo.t option
         [@ocaml.doc
           "A complex type that contains information about the CreateHostedZone request."];
-      delegationSet: DelegationSet.t
+      delegationSet: DelegationSet.t option
         [@ocaml.doc
           "A complex type that describes the name servers for this hosted zone."];
       vPC: VPC.t option
         [@ocaml.doc
           "A complex type that contains information about an Amazon VPC that you associated with this hosted zone."];
-      location: ResourceURI.t
+      location: ResourceURI.t option
         [@ocaml.doc "The unique URL representing the new hosted zone."]}
     type nonrec error =
       [ `ConflictingDomainExists of ConflictingDomainExists.t 
@@ -13306,14 +15039,13 @@ module CreateHostedZoneResponse =
       | `NoSuchDelegationSet of NoSuchDelegationSet.t 
       | `TooManyHostedZones of TooManyHostedZones.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateHostedZoneResponse"
-    let make ?vPC =
-      fun ~hostedZone ->
-        fun ~changeInfo ->
-          fun ~delegationSet ->
-            fun ~location ->
+    let make ?hostedZone =
+      fun ?changeInfo ->
+        fun ?delegationSet ->
+          fun ?vPC ->
+            fun ?location ->
               fun () ->
-                { vPC; hostedZone; changeInfo; delegationSet; location }
+                { hostedZone; changeInfo; delegationSet; vPC; location }
     let error_of_json name json =
       match name with
       | "ConflictingDomainExists" ->
@@ -13400,36 +15132,34 @@ module CreateHostedZoneResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("HostedZone", (Some (HostedZone.to_value x.hostedZone)));
-        ("ChangeInfo", (Some (ChangeInfo.to_value x.changeInfo)));
-        ("DelegationSet", (Some (DelegationSet.to_value x.delegationSet)));
+        [("HostedZone", (Option.map x.hostedZone ~f:HostedZone.to_value));
+        ("ChangeInfo", (Option.map x.changeInfo ~f:ChangeInfo.to_value));
+        ("DelegationSet",
+          (Option.map x.delegationSet ~f:DelegationSet.to_value));
         ("VPC", (Option.map x.vPC ~f:VPC.to_value));
-        ("Location", (Some (ResourceURI.to_value x.location)))]
+        ("Location", (Option.map x.location ~f:ResourceURI.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let location =
-        ResourceURI.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Location") in
+        (Option.map ~f:ResourceURI.of_xml) (Xml.child xml_arg0 "Location") in
       let vPC = (Option.map ~f:VPC.of_xml) (Xml.child xml_arg0 "VPC") in
       let delegationSet =
-        DelegationSet.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DelegationSet") in
+        (Option.map ~f:DelegationSet.of_xml)
+          (Xml.child xml_arg0 "DelegationSet") in
       let changeInfo =
-        ChangeInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
+        (Option.map ~f:ChangeInfo.of_xml) (Xml.child xml_arg0 "ChangeInfo") in
       let hostedZone =
-        HostedZone.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HostedZone") in
-      make ~location ?vPC ~delegationSet ~changeInfo ~hostedZone ()
+        (Option.map ~f:HostedZone.of_xml) (Xml.child xml_arg0 "HostedZone") in
+      make ?location ?vPC ?delegationSet ?changeInfo ?hostedZone ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let location = field_map_exn json "Location" ResourceURI.of_json in
-      let vPC = field_map json "VPC" VPC.of_json in
+    let of_json json__ =
+      let location = field_map json__ "Location" ResourceURI.of_json in
+      let vPC = field_map json__ "VPC" VPC.of_json in
       let delegationSet =
-        field_map_exn json "DelegationSet" DelegationSet.of_json in
-      let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
-      let hostedZone = field_map_exn json "HostedZone" HostedZone.of_json in
-      make ~location ?vPC ~delegationSet ~changeInfo ~hostedZone ()
+        field_map json__ "DelegationSet" DelegationSet.of_json in
+      let changeInfo = field_map json__ "ChangeInfo" ChangeInfo.of_json in
+      let hostedZone = field_map json__ "HostedZone" HostedZone.of_json in
+      make ?location ?vPC ?delegationSet ?changeInfo ?hostedZone ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type containing the response information for the hosted zone."]
@@ -13439,7 +15169,7 @@ module CreateHostedZoneRequest =
       {
       name: DNSName.t
         [@ocaml.doc
-          "The name of the domain. Specify a fully qualified domain name, for example, www.example.com. The trailing dot is optional; Amazon Route 53 assumes that the domain name is fully qualified. This means that Route 53 treats www.example.com (without a trailing dot) and www.example.com. (with a trailing dot) as identical. If you're creating a public hosted zone, this is the name you have registered with your DNS registrar. If your domain name is registered with a registrar other than Route 53, change the name servers for your domain to the set of NameServers that CreateHostedZone returns in DelegationSet."];
+          "The name of the domain. Specify a fully qualified domain name, for example, www.example.com. The trailing dot is optional; Amazon Route\194\16053 assumes that the domain name is fully qualified. This means that Route\194\16053 treats www.example.com (without a trailing dot) and www.example.com. (with a trailing dot) as identical. If you're creating a public hosted zone, this is the name you have registered with your DNS registrar. If your domain name is registered with a registrar other than Route\194\16053, change the name servers for your domain to the set of NameServers that CreateHostedZone returns in DelegationSet."];
       vPC: VPC.t option
         [@ocaml.doc
           "(Private hosted zones only) A complex type that contains information about the Amazon VPC that you're associating with this hosted zone. You can specify only one Amazon VPC when you create a private hosted zone. If you are associating a VPC with a hosted zone with this request, the paramaters VPCId and VPCRegion are also required. To associate additional Amazon VPCs with the hosted zone, use AssociateVPCWithHostedZone after you create a hosted zone."];
@@ -13451,7 +15181,7 @@ module CreateHostedZoneRequest =
           "(Optional) A complex type that contains the following optional values: For public and private hosted zones, an optional comment For private hosted zones, an optional PrivateZone element If you don't specify a comment or the PrivateZone element, omit HostedZoneConfig and the other elements."];
       delegationSetId: ResourceId.t option
         [@ocaml.doc
-          "If you want to associate a reusable delegation set with this hosted zone, the ID that Amazon Route 53 assigned to the reusable delegation set when you created it. For more information about reusable delegation sets, see CreateReusableDelegationSet."]}
+          "If you want to associate a reusable delegation set with this hosted zone, the ID that Amazon Route\194\16053 assigned to the reusable delegation set when you created it. For more information about reusable delegation sets, see CreateReusableDelegationSet. If you are using a reusable delegation set to create a public hosted zone for a subdomain, make sure that the parent hosted zone doesn't use one or more of the same name servers. If you have overlapping nameservers, the operation will cause a ConflictingDomainsExist error."]}
     let context_ = "CreateHostedZoneRequest"
     let make ?vPC =
       fun ?hostedZoneConfig ->
@@ -13491,15 +15221,15 @@ module CreateHostedZoneRequest =
         DNSName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?delegationSetId ?hostedZoneConfig ~callerReference ?vPC ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let delegationSetId =
-        field_map json "DelegationSetId" ResourceId.of_json in
+        field_map json__ "DelegationSetId" ResourceId.of_json in
       let hostedZoneConfig =
-        field_map json "HostedZoneConfig" HostedZoneConfig.of_json in
+        field_map json__ "HostedZoneConfig" HostedZoneConfig.of_json in
       let callerReference =
-        field_map_exn json "CallerReference" Nonce.of_json in
-      let vPC = field_map json "VPC" VPC.of_json in
-      let name = field_map_exn json "Name" DNSName.of_json in
+        field_map_exn json__ "CallerReference" Nonce.of_json in
+      let vPC = field_map json__ "VPC" VPC.of_json in
+      let name = field_map_exn json__ "Name" DNSName.of_json in
       make ?delegationSetId ?hostedZoneConfig ~callerReference ?vPC ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13508,19 +15238,18 @@ module CreateHealthCheckResponse =
   struct
     type nonrec t =
       {
-      healthCheck: HealthCheck.t
+      healthCheck: HealthCheck.t option
         [@ocaml.doc
           "A complex type that contains identifying information about the health check."];
-      location: ResourceURI.t
+      location: ResourceURI.t option
         [@ocaml.doc "The unique URL representing the new health check."]}
     type nonrec error =
       [ `HealthCheckAlreadyExists of HealthCheckAlreadyExists.t 
       | `InvalidInput of InvalidInput.t 
       | `TooManyHealthChecks of TooManyHealthChecks.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateHealthCheckResponse"
-    let make ~healthCheck =
-      fun ~location -> fun () -> { healthCheck; location }
+    let make ?healthCheck =
+      fun ?location -> fun () -> { healthCheck; location }
     let error_of_json name json =
       match name with
       | "HealthCheckAlreadyExists" ->
@@ -13561,22 +15290,20 @@ module CreateHealthCheckResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("HealthCheck", (Some (HealthCheck.to_value x.healthCheck)));
-        ("Location", (Some (ResourceURI.to_value x.location)))]
+        [("HealthCheck", (Option.map x.healthCheck ~f:HealthCheck.to_value));
+        ("Location", (Option.map x.location ~f:ResourceURI.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let location =
-        ResourceURI.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Location") in
+        (Option.map ~f:ResourceURI.of_xml) (Xml.child xml_arg0 "Location") in
       let healthCheck =
-        HealthCheck.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HealthCheck") in
-      make ~location ~healthCheck ()
+        (Option.map ~f:HealthCheck.of_xml) (Xml.child xml_arg0 "HealthCheck") in
+      make ?location ?healthCheck ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let location = field_map_exn json "Location" ResourceURI.of_json in
-      let healthCheck = field_map_exn json "HealthCheck" HealthCheck.of_json in
-      make ~location ~healthCheck ()
+    let of_json json__ =
+      let location = field_map json__ "Location" ResourceURI.of_json in
+      let healthCheck = field_map json__ "HealthCheck" HealthCheck.of_json in
+      make ?location ?healthCheck ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type containing the response information for the new health check."]
@@ -13586,7 +15313,7 @@ module CreateHealthCheckRequest =
       {
       callerReference: HealthCheckNonce.t
         [@ocaml.doc
-          "A unique string that identifies the request and that allows you to retry a failed CreateHealthCheck request without the risk of creating two identical health checks: If you send a CreateHealthCheck request with the same CallerReference and settings as a previous request, and if the health check doesn't exist, Amazon Route 53 creates the health check. If the health check does exist, Route 53 returns the settings for the existing health check. If you send a CreateHealthCheck request with the same CallerReference as a deleted health check, regardless of the settings, Route 53 returns a HealthCheckAlreadyExists error. If you send a CreateHealthCheck request with the same CallerReference as an existing health check but with different settings, Route 53 returns a HealthCheckAlreadyExists error. If you send a CreateHealthCheck request with a unique CallerReference but settings identical to an existing health check, Route 53 creates the health check."];
+          "A unique string that identifies the request and that allows you to retry a failed CreateHealthCheck request without the risk of creating two identical health checks: If you send a CreateHealthCheck request with the same CallerReference and settings as a previous request, and if the health check doesn't exist, Amazon Route 53 creates the health check. If the health check does exist, Route 53 returns the health check configuration in the response. If you send a CreateHealthCheck request with the same CallerReference as a deleted health check, regardless of the settings, Route 53 returns a HealthCheckAlreadyExists error. If you send a CreateHealthCheck request with the same CallerReference as an existing health check but with different settings, Route 53 returns a HealthCheckAlreadyExists error. If you send a CreateHealthCheck request with a unique CallerReference but settings identical to an existing health check, Route 53 creates the health check. Route 53 does not store the CallerReference for a deleted health check indefinitely. The CallerReference for a deleted health check will be deleted after a number of days."];
       healthCheckConfig: HealthCheckConfig.t
         [@ocaml.doc
           "A complex type that contains settings for a new health check."]}
@@ -13610,15 +15337,136 @@ module CreateHealthCheckRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CallerReference") in
       make ~healthCheckConfig ~callerReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let healthCheckConfig =
-        field_map_exn json "HealthCheckConfig" HealthCheckConfig.of_json in
+        field_map_exn json__ "HealthCheckConfig" HealthCheckConfig.of_json in
       let callerReference =
-        field_map_exn json "CallerReference" HealthCheckNonce.of_json in
+        field_map_exn json__ "CallerReference" HealthCheckNonce.of_json in
       make ~healthCheckConfig ~callerReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the health check request information."]
+module CreateCidrCollectionResponse =
+  struct
+    type nonrec t =
+      {
+      collection: CidrCollection.t option
+        [@ocaml.doc
+          "A complex type that contains information about the CIDR collection."];
+      location: ResourceURI.t option
+        [@ocaml.doc
+          "A unique URL that represents the location for the CIDR collection."]}
+    type nonrec error =
+      [
+        `CidrCollectionAlreadyExistsException of
+          CidrCollectionAlreadyExistsException.t 
+      | `ConcurrentModification of ConcurrentModification.t 
+      | `InvalidInput of InvalidInput.t 
+      | `LimitsExceeded of LimitsExceeded.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?collection =
+      fun ?location -> fun () -> { collection; location }
+    let error_of_json name json =
+      match name with
+      | "CidrCollectionAlreadyExistsException" ->
+          `CidrCollectionAlreadyExistsException
+            (CidrCollectionAlreadyExistsException.of_json json)
+      | "ConcurrentModification" ->
+          `ConcurrentModification (ConcurrentModification.of_json json)
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
+      | "LimitsExceeded" -> `LimitsExceeded (LimitsExceeded.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CidrCollectionAlreadyExistsException" ->
+          `CidrCollectionAlreadyExistsException
+            (CidrCollectionAlreadyExistsException.of_xml xml)
+      | "ConcurrentModification" ->
+          `ConcurrentModification (ConcurrentModification.of_xml xml)
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
+      | "LimitsExceeded" -> `LimitsExceeded (LimitsExceeded.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CidrCollectionAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "CidrCollectionAlreadyExistsException"));
+            ("details", (CidrCollectionAlreadyExistsException.to_json e))]
+      | `ConcurrentModification e ->
+          `Assoc
+            [("error", (`String "ConcurrentModification"));
+            ("details", (ConcurrentModification.to_json e))]
+      | `InvalidInput e ->
+          `Assoc
+            [("error", (`String "InvalidInput"));
+            ("details", (InvalidInput.to_json e))]
+      | `LimitsExceeded e ->
+          `Assoc
+            [("error", (`String "LimitsExceeded"));
+            ("details", (LimitsExceeded.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Collection", (Option.map x.collection ~f:CidrCollection.to_value));
+        ("Location", (Option.map x.location ~f:ResourceURI.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let location =
+        (Option.map ~f:ResourceURI.of_xml) (Xml.child xml_arg0 "Location") in
+      let collection =
+        (Option.map ~f:CidrCollection.of_xml)
+          (Xml.child xml_arg0 "Collection") in
+      make ?location ?collection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let location = field_map json__ "Location" ResourceURI.of_json in
+      let collection = field_map json__ "Collection" CidrCollection.of_json in
+      make ?location ?collection ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a CIDR collection in the current Amazon Web Services account."]
+module CreateCidrCollectionRequest =
+  struct
+    type nonrec t =
+      {
+      name: CollectionName.t
+        [@ocaml.doc
+          "A unique identifier for the account that can be used to reference the collection from other API calls."];
+      callerReference: CidrNonce.t
+        [@ocaml.doc
+          "A client-specific token that allows requests to be securely retried so that the intended outcome will only occur once, retries receive a similar response, and there are no additional edge cases to handle."]}
+    let context_ = "CreateCidrCollectionRequest"
+    let make ~name =
+      fun ~callerReference -> fun () -> { name; callerReference }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (CollectionName.to_value x.name)));
+        ("CallerReference", (Some (CidrNonce.to_value x.callerReference)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let callerReference =
+        CidrNonce.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CallerReference") in
+      let name =
+        CollectionName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~callerReference ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let callerReference =
+        field_map_exn json__ "CallerReference" CidrNonce.of_json in
+      let name = field_map_exn json__ "Name" CollectionName.of_json in
+      make ~callerReference ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a CIDR collection in the current Amazon Web Services account."]
 module ChangeTagsForResourceResponse =
   struct
     type nonrec t = unit
@@ -13735,12 +15583,13 @@ module ChangeTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
       make ?removeTagKeys ?addTags ~resourceId ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let removeTagKeys = field_map json "RemoveTagKeys" TagKeyList.of_json in
-      let addTags = field_map json "AddTags" TagList.of_json in
-      let resourceId = field_map_exn json "ResourceId" TagResourceId.of_json in
+    let of_json json__ =
+      let removeTagKeys = field_map json__ "RemoveTagKeys" TagKeyList.of_json in
+      let addTags = field_map json__ "AddTags" TagList.of_json in
+      let resourceId =
+        field_map_exn json__ "ResourceId" TagResourceId.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" TagResourceType.of_json in
+        field_map_exn json__ "ResourceType" TagResourceType.of_json in
       make ?removeTagKeys ?addTags ~resourceId ~resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13749,7 +15598,7 @@ module ChangeResourceRecordSetsResponse =
   struct
     type nonrec t =
       {
-      changeInfo: ChangeInfo.t
+      changeInfo: ChangeInfo.t option
         [@ocaml.doc
           "A complex type that contains information about changes made to your hosted zone. This element contains an ID that you use when performing a GetChange action to get detailed information about the change."]}
     type nonrec error =
@@ -13759,8 +15608,7 @@ module ChangeResourceRecordSetsResponse =
       | `NoSuchHostedZone of NoSuchHostedZone.t 
       | `PriorRequestNotComplete of PriorRequestNotComplete.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ChangeResourceRecordSetsResponse"
-    let make ~changeInfo = fun () -> { changeInfo }
+    let make ?changeInfo = fun () -> { changeInfo }
     let error_of_json name json =
       match name with
       | "InvalidChangeBatch" ->
@@ -13816,17 +15664,16 @@ module ChangeResourceRecordSetsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ChangeInfo", (Some (ChangeInfo.to_value x.changeInfo)))]
+        [("ChangeInfo", (Option.map x.changeInfo ~f:ChangeInfo.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let changeInfo =
-        ChangeInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
-      make ~changeInfo ()
+        (Option.map ~f:ChangeInfo.of_xml) (Xml.child xml_arg0 "ChangeInfo") in
+      make ?changeInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
-      make ~changeInfo ()
+    let of_json json__ =
+      let changeInfo = field_map json__ "ChangeInfo" ChangeInfo.of_json in
+      make ?changeInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A complex type containing the response for the request."]
 module ChangeResourceRecordSetsRequest =
@@ -13855,18 +15702,155 @@ module ChangeResourceRecordSetsRequest =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~changeBatch ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeBatch = field_map_exn json "ChangeBatch" ChangeBatch.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+    let of_json json__ =
+      let changeBatch =
+        field_map_exn json__ "ChangeBatch" ChangeBatch.of_json in
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ~changeBatch ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains change information for the resource record set."]
+module ChangeCidrCollectionResponse =
+  struct
+    type nonrec t =
+      {
+      id: ChangeId.t option
+        [@ocaml.doc
+          "The ID that is returned by ChangeCidrCollection. You can use it as input to GetChange to see if a CIDR collection change has propagated or not."]}
+    type nonrec error =
+      [ `CidrBlockInUseException of CidrBlockInUseException.t 
+      | `CidrCollectionVersionMismatchException of
+          CidrCollectionVersionMismatchException.t 
+      | `ConcurrentModification of ConcurrentModification.t 
+      | `InvalidInput of InvalidInput.t 
+      | `LimitsExceeded of LimitsExceeded.t 
+      | `NoSuchCidrCollectionException of NoSuchCidrCollectionException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?id = fun () -> { id }
+    let error_of_json name json =
+      match name with
+      | "CidrBlockInUseException" ->
+          `CidrBlockInUseException (CidrBlockInUseException.of_json json)
+      | "CidrCollectionVersionMismatchException" ->
+          `CidrCollectionVersionMismatchException
+            (CidrCollectionVersionMismatchException.of_json json)
+      | "ConcurrentModification" ->
+          `ConcurrentModification (ConcurrentModification.of_json json)
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
+      | "LimitsExceeded" -> `LimitsExceeded (LimitsExceeded.of_json json)
+      | "NoSuchCidrCollectionException" ->
+          `NoSuchCidrCollectionException
+            (NoSuchCidrCollectionException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CidrBlockInUseException" ->
+          `CidrBlockInUseException (CidrBlockInUseException.of_xml xml)
+      | "CidrCollectionVersionMismatchException" ->
+          `CidrCollectionVersionMismatchException
+            (CidrCollectionVersionMismatchException.of_xml xml)
+      | "ConcurrentModification" ->
+          `ConcurrentModification (ConcurrentModification.of_xml xml)
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
+      | "LimitsExceeded" -> `LimitsExceeded (LimitsExceeded.of_xml xml)
+      | "NoSuchCidrCollectionException" ->
+          `NoSuchCidrCollectionException
+            (NoSuchCidrCollectionException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CidrBlockInUseException e ->
+          `Assoc
+            [("error", (`String "CidrBlockInUseException"));
+            ("details", (CidrBlockInUseException.to_json e))]
+      | `CidrCollectionVersionMismatchException e ->
+          `Assoc
+            [("error", (`String "CidrCollectionVersionMismatchException"));
+            ("details", (CidrCollectionVersionMismatchException.to_json e))]
+      | `ConcurrentModification e ->
+          `Assoc
+            [("error", (`String "ConcurrentModification"));
+            ("details", (ConcurrentModification.to_json e))]
+      | `InvalidInput e ->
+          `Assoc
+            [("error", (`String "InvalidInput"));
+            ("details", (InvalidInput.to_json e))]
+      | `LimitsExceeded e ->
+          `Assoc
+            [("error", (`String "LimitsExceeded"));
+            ("details", (LimitsExceeded.to_json e))]
+      | `NoSuchCidrCollectionException e ->
+          `Assoc
+            [("error", (`String "NoSuchCidrCollectionException"));
+            ("details", (NoSuchCidrCollectionException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("Id", (Option.map x.id ~f:ChangeId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id = (Option.map ~f:ChangeId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map json__ "Id" ChangeId.of_json in make ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates, changes, or deletes CIDR blocks within a collection. Contains authoritative IP information mapping blocks to one or multiple locations. A change request can update multiple locations in a collection at a time, which is helpful if you want to move one or more CIDR blocks from one location to another in one transaction, without downtime. Limits The max number of CIDR blocks included in the request is 1000. As a result, big updates require multiple API calls. PUT and DELETE_IF_EXISTS Use ChangeCidrCollection to perform the following actions: PUT: Create a CIDR block within the specified collection. DELETE_IF_EXISTS: Delete an existing CIDR block from the collection."]
+module ChangeCidrCollectionRequest =
+  struct
+    type nonrec t =
+      {
+      id: UUID.t [@ocaml.doc "The UUID of the CIDR collection to update."];
+      collectionVersion: CollectionVersion.t option
+        [@ocaml.doc
+          "A sequential counter that Amazon Route\194\16053 sets to 1 when you create a collection and increments it by 1 each time you update the collection. We recommend that you use ListCidrCollection to get the current value of CollectionVersion for the collection that you want to update, and then include that value with the change request. This prevents Route\194\16053 from overwriting an intervening update: If the value in the request matches the value of CollectionVersion in the collection, Route\194\16053 updates the collection. If the value of CollectionVersion in the collection is greater than the value in the request, the collection was changed after you got the version number. Route\194\16053 does not update the collection, and it returns a CidrCollectionVersionMismatch error."];
+      changes: CidrCollectionChanges.t
+        [@ocaml.doc "Information about changes to a CIDR collection."]}
+    let context_ = "ChangeCidrCollectionRequest"
+    let make ?collectionVersion =
+      fun ~id -> fun ~changes -> fun () -> { collectionVersion; id; changes }
+    let to_value x =
+      structure_to_value
+        [("CidrCollectionId", (Some (UUID.to_value x.id)));
+        ("CollectionVersion",
+          (Option.map x.collectionVersion ~f:CollectionVersion.to_value));
+        ("Changes", (Some (CidrCollectionChanges.to_value x.changes)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let changes =
+        CidrCollectionChanges.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Changes") in
+      let collectionVersion =
+        (Option.map ~f:CollectionVersion.of_xml)
+          (Xml.child xml_arg0 "CollectionVersion") in
+      let id =
+        UUID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CidrCollectionId") in
+      make ~changes ?collectionVersion ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let changes =
+        field_map_exn json__ "Changes" CidrCollectionChanges.of_json in
+      let collectionVersion =
+        field_map json__ "CollectionVersion" CollectionVersion.of_json in
+      let id = field_map_exn json__ "Id" UUID.of_json in
+      make ~changes ?collectionVersion ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates, changes, or deletes CIDR blocks within a collection. Contains authoritative IP information mapping blocks to one or multiple locations. A change request can update multiple locations in a collection at a time, which is helpful if you want to move one or more CIDR blocks from one location to another in one transaction, without downtime. Limits The max number of CIDR blocks included in the request is 1000. As a result, big updates require multiple API calls. PUT and DELETE_IF_EXISTS Use ChangeCidrCollection to perform the following actions: PUT: Create a CIDR block within the specified collection. DELETE_IF_EXISTS: Delete an existing CIDR block from the collection."]
 module AssociateVPCWithHostedZoneResponse =
   struct
     type nonrec t =
       {
-      changeInfo: ChangeInfo.t
+      changeInfo: ChangeInfo.t option
         [@ocaml.doc
           "A complex type that describes the changes made to your hosted zone."]}
     type nonrec error =
@@ -13878,8 +15862,7 @@ module AssociateVPCWithHostedZoneResponse =
       | `PriorRequestNotComplete of PriorRequestNotComplete.t 
       | `PublicZoneVPCAssociation of PublicZoneVPCAssociation.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "AssociateVPCWithHostedZoneResponse"
-    let make ~changeInfo = fun () -> { changeInfo }
+    let make ?changeInfo = fun () -> { changeInfo }
     let error_of_json name json =
       match name with
       | "ConflictingDomainExists" ->
@@ -13955,17 +15938,16 @@ module AssociateVPCWithHostedZoneResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ChangeInfo", (Some (ChangeInfo.to_value x.changeInfo)))]
+        [("ChangeInfo", (Option.map x.changeInfo ~f:ChangeInfo.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let changeInfo =
-        ChangeInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
-      make ~changeInfo ()
+        (Option.map ~f:ChangeInfo.of_xml) (Xml.child xml_arg0 "ChangeInfo") in
+      make ?changeInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
-      make ~changeInfo ()
+    let of_json json__ =
+      let changeInfo = field_map json__ "ChangeInfo" ChangeInfo.of_json in
+      make ?changeInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains the response information for the AssociateVPCWithHostedZone request."]
@@ -14000,10 +15982,11 @@ module AssociateVPCWithHostedZoneRequest =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?comment ~vPC ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map json "Comment" AssociateVPCComment.of_json in
-      let vPC = field_map_exn json "VPC" VPC.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+    let of_json json__ =
+      let comment = field_map json__ "Comment" AssociateVPCComment.of_json in
+      let vPC = field_map_exn json__ "VPC" VPC.of_json in
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ?comment ~vPC ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14011,7 +15994,7 @@ module AssociateVPCWithHostedZoneRequest =
 module ActivateKeySigningKeyResponse =
   struct
     type nonrec t = {
-      changeInfo: ChangeInfo.t }
+      changeInfo: ChangeInfo.t option }
     type nonrec error =
       [ `ConcurrentModification of ConcurrentModification.t 
       | `InvalidInput of InvalidInput.t  | `InvalidKMSArn of InvalidKMSArn.t 
@@ -14019,8 +16002,7 @@ module ActivateKeySigningKeyResponse =
       | `InvalidSigningStatus of InvalidSigningStatus.t 
       | `NoSuchKeySigningKey of NoSuchKeySigningKey.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ActivateKeySigningKeyResponse"
-    let make ~changeInfo = fun () -> { changeInfo }
+    let make ?changeInfo = fun () -> { changeInfo }
     let error_of_json name json =
       match name with
       | "ConcurrentModification" ->
@@ -14084,17 +16066,16 @@ module ActivateKeySigningKeyResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ChangeInfo", (Some (ChangeInfo.to_value x.changeInfo)))]
+        [("ChangeInfo", (Option.map x.changeInfo ~f:ChangeInfo.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let changeInfo =
-        ChangeInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ChangeInfo") in
-      make ~changeInfo ()
+        (Option.map ~f:ChangeInfo.of_xml) (Xml.child xml_arg0 "ChangeInfo") in
+      make ?changeInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeInfo = field_map_exn json "ChangeInfo" ChangeInfo.of_json in
-      make ~changeInfo ()
+    let of_json json__ =
+      let changeInfo = field_map json__ "ChangeInfo" ChangeInfo.of_json in
+      make ?changeInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Activates a key-signing key (KSK) so that it can be used for signing by DNSSEC. This operation changes the KSK status to ACTIVE."]
@@ -14123,9 +16104,10 @@ module ActivateKeySigningKeyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HostedZoneId") in
       make ~name ~hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" SigningKeyName.of_json in
-      let hostedZoneId = field_map_exn json "HostedZoneId" ResourceId.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" SigningKeyName.of_json in
+      let hostedZoneId =
+        field_map_exn json__ "HostedZoneId" ResourceId.of_json in
       make ~name ~hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

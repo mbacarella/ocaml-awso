@@ -2,6 +2,8 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | BatchGetIncidentFindings: (BatchGetIncidentFindingsInput.t,
+  BatchGetIncidentFindingsOutput.t, BatchGetIncidentFindingsOutput.error) t 
   | CreateReplicationSet: (CreateReplicationSetInput.t,
   CreateReplicationSetOutput.t, CreateReplicationSetOutput.error) t 
   | CreateResponsePlan: (CreateResponsePlanInput.t,
@@ -28,6 +30,8 @@ type ('i, 'o, 'e) t =
   GetResponsePlanOutput.error) t 
   | GetTimelineEvent: (GetTimelineEventInput.t, GetTimelineEventOutput.t,
   GetTimelineEventOutput.error) t 
+  | ListIncidentFindings: (ListIncidentFindingsInput.t,
+  ListIncidentFindingsOutput.t, ListIncidentFindingsOutput.error) t 
   | ListIncidentRecords: (ListIncidentRecordsInput.t,
   ListIncidentRecordsOutput.t, ListIncidentRecordsOutput.error) t 
   | ListRelatedItems: (ListRelatedItemsInput.t, ListRelatedItemsOutput.t,
@@ -62,6 +66,7 @@ type ('i, 'o, 'e) t =
   UpdateTimelineEventOutput.t, UpdateTimelineEventOutput.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | BatchGetIncidentFindings -> `POST
   | CreateReplicationSet -> `POST
   | CreateResponsePlan -> `POST
   | CreateTimelineEvent -> `POST
@@ -75,6 +80,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetResourcePolicies -> `POST
   | GetResponsePlan -> `GET
   | GetTimelineEvent -> `GET
+  | ListIncidentFindings -> `POST
   | ListIncidentRecords -> `POST
   | ListRelatedItems -> `POST
   | ListReplicationSets -> `POST
@@ -94,6 +100,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | BatchGetIncidentFindings ->
+          (Format.kasprintf Uri.of_string) "/batchGetIncidentFindings"
       | CreateReplicationSet ->
           (Format.kasprintf Uri.of_string) "/createReplicationSet"
       | CreateResponsePlan ->
@@ -136,6 +144,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Some ("eventId", (UUID.to_header x.eventId));
                Some
                  ("incidentRecordArn", (Arn.to_header x.incidentRecordArn))])
+      | ListIncidentFindings ->
+          (Format.kasprintf Uri.of_string) "/listIncidentFindings"
       | ListIncidentRecords ->
           (Format.kasprintf Uri.of_string) "/listIncidentRecords"
       | ListRelatedItems ->
@@ -177,6 +187,30 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | BatchGetIncidentFindings ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("findingIds",
+                           (FindingIdList.to_value
+                              req.BatchGetIncidentFindingsInput.findingIds));
+                      Some
+                        ("incidentRecordArn",
+                          (Arn.to_value
+                             req.BatchGetIncidentFindingsInput.incidentRecordArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateReplicationSet ->
       let (headers, body) =
         let headers =
@@ -192,7 +226,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("regions",
                           (RegionMapInput.to_value
-                             req.CreateReplicationSetInput.regions))])
+                             req.CreateReplicationSetInput.regions));
+                      Option.map req.CreateReplicationSetInput.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -228,6 +264,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("incidentTemplate",
                           (IncidentTemplate.to_value
                              req.CreateResponsePlanInput.incidentTemplate));
+                      Option.map req.CreateResponsePlanInput.integrations
+                        ~f:(fun x ->
+                              ("integrations", (Integrations.to_value x)));
                       Some
                         ("name",
                           (ResponsePlanName.to_value
@@ -257,6 +296,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("eventData",
                           (EventData.to_value
                              req.CreateTimelineEventInput.eventData));
+                      Option.map req.CreateTimelineEventInput.eventReferences
+                        ~f:(fun x ->
+                              ("eventReferences",
+                                (EventReferenceList.to_value x)));
                       Some
                         ("eventTime",
                           (Timestamp.to_value
@@ -396,6 +439,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetTimelineEvent ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListIncidentFindings ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("incidentRecordArn",
+                           (Arn.to_value
+                              req.ListIncidentFindingsInput.incidentRecordArn));
+                      Option.map req.ListIncidentFindingsInput.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (ListIncidentFindingsInputMaxResultsInteger.to_value
+                                   x)));
+                      Option.map req.ListIncidentFindingsInput.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListIncidentRecords ->
       let (headers, body) =
@@ -761,10 +831,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("incidentTemplateSummary",
                                 (IncidentSummary.to_value x)));
                       Option.map
+                        req.UpdateResponsePlanInput.incidentTemplateTags
+                        ~f:(fun x ->
+                              ("incidentTemplateTags",
+                                (TagMapUpdate.to_value x)));
+                      Option.map
                         req.UpdateResponsePlanInput.incidentTemplateTitle
                         ~f:(fun x ->
                               ("incidentTemplateTitle",
-                                (IncidentTitle.to_value x)))])
+                                (IncidentTitle.to_value x)));
+                      Option.map req.UpdateResponsePlanInput.integrations
+                        ~f:(fun x ->
+                              ("integrations", (Integrations.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -789,6 +867,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("eventId",
                           (UUID.to_value req.UpdateTimelineEventInput.eventId));
+                      Option.map req.UpdateTimelineEventInput.eventReferences
+                        ~f:(fun x ->
+                              ("eventReferences",
+                                (EventReferenceList.to_value x)));
                       Option.map req.UpdateTimelineEventInput.eventTime
                         ~f:(fun x -> ("eventTime", (Timestamp.to_value x)));
                       Option.map req.UpdateTimelineEventInput.eventType
@@ -853,6 +935,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | BatchGetIncidentFindings ->
+      if is_success
+      then
+        Ok (BatchGetIncidentFindingsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetIncidentFindingsOutput.error_of_json))
   | CreateReplicationSet ->
       if is_success
       then Ok (CreateReplicationSetOutput.of_json (response_to_json resp))
@@ -939,6 +1029,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (GetTimelineEventOutput.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some GetTimelineEventOutput.error_of_json))
+  | ListIncidentFindings ->
+      if is_success
+      then Ok (ListIncidentFindingsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListIncidentFindingsOutput.error_of_json))
   | ListIncidentRecords ->
       if is_success
       then Ok (ListIncidentRecordsOutput.of_json (response_to_json resp))

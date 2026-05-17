@@ -42,6 +42,12 @@ val list_tags_for_resource :
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t Lwt.t
+val return_savings_plan :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ReturnSavingsPlanRequest.t ->
+        (ReturnSavingsPlanResponse.t, ReturnSavingsPlanResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

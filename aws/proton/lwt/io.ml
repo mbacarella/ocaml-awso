@@ -13,12 +13,16 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let accept_environment_account_connection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AcceptEnvironmentAccountConnection input
+let cancel_component_deployment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelComponentDeployment input
 let cancel_environment_deployment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelEnvironmentDeployment input
 let cancel_service_instance_deployment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelServiceInstanceDeployment input
 let cancel_service_pipeline_deployment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelServicePipelineDeployment input
+let create_component ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateComponent input
 let create_environment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateEnvironment input
 let create_environment_account_connection ?endpoint_url ?cfg input =
@@ -31,12 +35,20 @@ let create_repository ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateRepository input
 let create_service ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateService input
+let create_service_instance ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateServiceInstance input
+let create_service_sync_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateServiceSyncConfig input
 let create_service_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateServiceTemplate input
 let create_service_template_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateServiceTemplateVersion input
 let create_template_sync_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTemplateSyncConfig input
+let delete_component ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteComponent input
+let delete_deployment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDeployment input
 let delete_environment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteEnvironment input
 let delete_environment_account_connection ?endpoint_url ?cfg input =
@@ -49,6 +61,8 @@ let delete_repository ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteRepository input
 let delete_service ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteService input
+let delete_service_sync_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteServiceSyncConfig input
 let delete_service_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteServiceTemplate input
 let delete_service_template_version ?endpoint_url ?cfg input =
@@ -57,6 +71,10 @@ let delete_template_sync_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTemplateSyncConfig input
 let get_account_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAccountSettings input
+let get_component ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetComponent input
+let get_deployment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDeployment input
 let get_environment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEnvironment input
 let get_environment_account_connection ?endpoint_url ?cfg input =
@@ -69,10 +87,18 @@ let get_repository ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRepository input
 let get_repository_sync_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRepositorySyncStatus input
+let get_resources_summary ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetResourcesSummary input
 let get_service ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetService input
 let get_service_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetServiceInstance input
+let get_service_instance_sync_status ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetServiceInstanceSyncStatus input
+let get_service_sync_blocker_summary ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetServiceSyncBlockerSummary input
+let get_service_sync_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetServiceSyncConfig input
 let get_service_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetServiceTemplate input
 let get_service_template_version ?endpoint_url ?cfg input =
@@ -81,6 +107,14 @@ let get_template_sync_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTemplateSyncConfig input
 let get_template_sync_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTemplateSyncStatus input
+let list_component_outputs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListComponentOutputs input
+let list_component_provisioned_resources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListComponentProvisionedResources input
+let list_components ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListComponents input
+let list_deployments ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDeployments input
 let list_environment_account_connections ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListEnvironmentAccountConnections input
 let list_environment_outputs ?endpoint_url ?cfg input =
@@ -128,6 +162,8 @@ let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_account_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAccountSettings input
+let update_component ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateComponent input
 let update_environment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateEnvironment input
 let update_environment_account_connection ?endpoint_url ?cfg input =
@@ -142,6 +178,10 @@ let update_service_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateServiceInstance input
 let update_service_pipeline ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateServicePipeline input
+let update_service_sync_blocker ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateServiceSyncBlocker input
+let update_service_sync_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateServiceSyncConfig input
 let update_service_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateServiceTemplate input
 let update_service_template_version ?endpoint_url ?cfg input =

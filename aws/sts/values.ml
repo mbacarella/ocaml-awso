@@ -25,28 +25,6 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
-module ArnType =
-  struct
-    type nonrec t = string
-    let context_ = "arnType"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:20) >>=
-             (fun () ->
-                (check_string_max i ~max:2048) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[\\u0009\\u000A\\u000D\\u0020-\\u007E\\u0085\\u00A0-\\uD7FF\\uE000-\\uFFFD\\u10000-\\u10FFFF]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"arnType" j
-    let to_json = simple_to_json to_value
-  end
 module TagKeyType =
   struct
     type nonrec t = string
@@ -89,6 +67,139 @@ module TagValueType =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"tagValueType" j
+    let to_json = simple_to_json to_value
+  end
+module ArnType =
+  struct
+    type nonrec t = string
+    let context_ = "arnType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0009\\u000A\\u000D\\u0020-\\u007E\\u0085\\u00A0-\\uD7FF\\uE000-\\uFFFD\\u10000-\\u10FFFF]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"arnType" j
+    let to_json = simple_to_json to_value
+  end
+module ContextAssertionType =
+  struct
+    type nonrec t = string
+    let context_ = "contextAssertionType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:4));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"contextAssertionType" j
+    let to_json = simple_to_json to_value
+  end
+module JwtPayloadSizeExceededException =
+  struct
+    type nonrec t = string
+    let context_ = "jwtPayloadSizeExceededException"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"jwtPayloadSizeExceededException" j
+    let to_json = simple_to_json to_value
+  end
+module OutboundWebIdentityFederationDisabledException__lc1 =
+  struct
+    type nonrec t = string
+    let context_ = "OutboundWebIdentityFederationDisabledException__lc1"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json
+        ~kind:"OutboundWebIdentityFederationDisabledException__lc1" j
+    let to_json = simple_to_json to_value
+  end
+module SessionDurationEscalationException__lc1 =
+  struct
+    type nonrec t = string
+    let context_ = "SessionDurationEscalationException__lc1"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"SessionDurationEscalationException__lc1" j
+    let to_json = simple_to_json to_value
+  end
+module Tag =
+  struct
+    type nonrec t =
+      {
+      key: TagKeyType.t
+        [@ocaml.doc
+          "The key for a session tag. You can pass up to 50 session tags. The plain text session tag keys can\226\128\153t exceed 128 characters. For these and additional limits, see IAM and STS Character Limits in the IAM User Guide."];
+      value: TagValueType.t
+        [@ocaml.doc
+          "The value for a session tag. You can pass up to 50 session tags. The plain text session tag values can\226\128\153t exceed 256 characters. For these and additional limits, see IAM and STS Character Limits in the IAM User Guide."]}
+    let context_ = "Tag"
+    let make ~key = fun ~value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (TagKeyType.to_value x.key)));
+        ("Value", (Some (TagValueType.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        TagValueType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let key =
+        TagKeyType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValueType.of_json in
+      let key = field_map_exn json__ "Key" TagKeyType.of_json in
+      make ~value ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You can pass custom key-value pair attributes when you assume a role or federate a user. These are called session tags. You can then use the session tags to control access to resources. For more information, see Tagging Amazon Web Services STS Sessions in the IAM User Guide."]
+module WebIdentityTokenAudienceStringType =
+  struct
+    type nonrec t = string
+    let context_ = "webIdentityTokenAudienceStringType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"webIdentityTokenAudienceStringType" j
     let to_json = simple_to_json to_value
   end
 module AccessKeyIdType =
@@ -223,43 +334,25 @@ module PolicyDescriptorType =
       let arn = (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "arn" ArnType.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "arn" ArnType.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A reference to the IAM managed policy that is passed as a session policy for a role session or a federated user session."]
-module Tag =
+module ExpiredTradeInTokenExceptionMessage =
   struct
-    type nonrec t =
-      {
-      key: TagKeyType.t
-        [@ocaml.doc
-          "The key for a session tag. You can pass up to 50 session tags. The plain text session tag keys can\226\128\153t exceed 128 characters. For these and additional limits, see IAM and STS Character Limits in the IAM User Guide."];
-      value: TagValueType.t
-        [@ocaml.doc
-          "The value for a session tag. You can pass up to 50 session tags. The plain text session tag values can\226\128\153t exceed 256 characters. For these and additional limits, see IAM and STS Character Limits in the IAM User Guide."]}
-    let context_ = "Tag"
-    let make ~key = fun ~value -> fun () -> { key; value }
-    let to_value x =
-      structure_to_value
-        [("Key", (Some (TagKeyType.to_value x.key)));
-        ("Value", (Some (TagValueType.to_value x.value)))]
+    type nonrec t = string
+    let context_ = "expiredTradeInTokenExceptionMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let value =
-        TagValueType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Value") in
-      let key =
-        TagKeyType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
-      make ~value ~key ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValueType.of_json in
-      let key = field_map_exn json "Key" TagKeyType.of_json in
-      make ~value ~key ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "You can pass custom key-value pair attributes when you assume a role or federate a user. These are called session tags. You can then use the session tags to control access to resources. For more information, see Tagging Amazon Web Services STS Sessions in the IAM User Guide."]
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"expiredTradeInTokenExceptionMessage" j
+    let to_json = simple_to_json to_value
+  end
 module InvalidAuthorizationMessage =
   struct
     type nonrec t = string
@@ -271,6 +364,19 @@ module InvalidAuthorizationMessage =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"invalidAuthorizationMessage" j
+    let to_json = simple_to_json to_value
+  end
+module ExpiredIdentityTokenMessage =
+  struct
+    type nonrec t = string
+    let context_ = "expiredIdentityTokenMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"expiredIdentityTokenMessage" j
     let to_json = simple_to_json to_value
   end
 module AssumedRoleIdType =
@@ -291,19 +397,6 @@ module AssumedRoleIdType =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"assumedRoleIdType" j
-    let to_json = simple_to_json to_value
-  end
-module ExpiredIdentityTokenMessage =
-  struct
-    type nonrec t = string
-    let context_ = "expiredIdentityTokenMessage"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"expiredIdentityTokenMessage" j
     let to_json = simple_to_json to_value
   end
 module IdpCommunicationErrorMessage =
@@ -345,59 +438,280 @@ module InvalidIdentityTokenMessage =
     let of_json j = string_of_json ~kind:"invalidIdentityTokenMessage" j
     let to_json = simple_to_json to_value
   end
+module ProvidedContext =
+  struct
+    type nonrec t =
+      {
+      providerArn: ArnType.t option
+        [@ocaml.doc
+          "The context provider ARN from which the trusted context assertion was generated."];
+      contextAssertion: ContextAssertionType.t option
+        [@ocaml.doc
+          "The signed and encrypted trusted context assertion generated by the context provider. The trusted context assertion is signed and encrypted by Amazon Web Services STS."]}
+    let make ?providerArn =
+      fun ?contextAssertion -> fun () -> { providerArn; contextAssertion }
+    let to_value x =
+      structure_to_value
+        [("ProviderArn", (Option.map x.providerArn ~f:ArnType.to_value));
+        ("ContextAssertion",
+          (Option.map x.contextAssertion ~f:ContextAssertionType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let contextAssertion =
+        (Option.map ~f:ContextAssertionType.of_xml)
+          (Xml.child xml_arg0 "ContextAssertion") in
+      let providerArn =
+        (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "ProviderArn") in
+      make ?contextAssertion ?providerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let contextAssertion =
+        field_map json__ "ContextAssertion" ContextAssertionType.of_json in
+      let providerArn = field_map json__ "ProviderArn" ArnType.of_json in
+      make ?contextAssertion ?providerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the provided context. This includes the signed and encrypted trusted context assertion and the context provider ARN from which the trusted context assertion was generated."]
+module JWTPayloadSizeExceededException =
+  struct
+    type nonrec t = {
+      message: JwtPayloadSizeExceededException.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message",
+           (Option.map x.message ~f:JwtPayloadSizeExceededException.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:JwtPayloadSizeExceededException.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message =
+        field_map json__ "message" JwtPayloadSizeExceededException.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The requested token payload size exceeds the maximum allowed size. Reduce the number of request tags included in the GetWebIdentityToken API call to reduce the token payload size."]
+module OutboundWebIdentityFederationDisabledException =
+  struct
+    type nonrec t =
+      {
+      message: OutboundWebIdentityFederationDisabledException__lc1.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message",
+           (Option.map x.message
+              ~f:OutboundWebIdentityFederationDisabledException__lc1.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map
+           ~f:OutboundWebIdentityFederationDisabledException__lc1.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message =
+        field_map json__ "message"
+          OutboundWebIdentityFederationDisabledException__lc1.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The outbound web identity federation feature is not enabled for this account. To use this feature, you must first enable it through the Amazon Web Services Management Console or API."]
+module SessionDurationEscalationException =
+  struct
+    type nonrec t =
+      {
+      message: SessionDurationEscalationException__lc1.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message",
+           (Option.map x.message
+              ~f:SessionDurationEscalationException__lc1.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:SessionDurationEscalationException__lc1.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message =
+        field_map json__ "message"
+          SessionDurationEscalationException__lc1.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The requested token duration would extend the session beyond its original expiration time. You cannot use this operation to extend the lifetime of a session beyond what was granted when the session was originally created."]
+module WebIdentityTokenType =
+  struct
+    type nonrec t = string
+    let context_ = "webIdentityTokenType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"webIdentityTokenType" j
+    let to_json = simple_to_json to_value
+  end
+module JwtAlgorithmType =
+  struct
+    type nonrec t = string
+    let context_ = "jwtAlgorithmType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:5) >>=
+             (fun () -> check_string_min i ~min:5));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"jwtAlgorithmType" j
+    let to_json = simple_to_json to_value
+  end
+module TagListType =
+  struct
+    type nonrec t = Tag.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j = list_of_json ~kind:"tagListType" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WebIdentityTokenAudienceListType =
+  struct
+    type nonrec t = WebIdentityTokenAudienceStringType.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WebIdentityTokenAudienceStringType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:WebIdentityTokenAudienceStringType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"webIdentityTokenAudienceListType"
+        ~of_json:WebIdentityTokenAudienceStringType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WebIdentityTokenDurationSecondsType =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:3600) >>=
+             (fun () -> check_int_min i ~min:60));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for webIdentityTokenDurationSecondsType"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module Credentials =
   struct
     type nonrec t =
       {
-      accessKeyId: AccessKeyIdType.t
+      accessKeyId: AccessKeyIdType.t option
         [@ocaml.doc
           "The access key ID that identifies the temporary security credentials."];
-      secretAccessKey: AccessKeySecretType.t
+      secretAccessKey: AccessKeySecretType.t option
         [@ocaml.doc
           "The secret access key that can be used to sign requests."];
-      sessionToken: TokenType.t
+      sessionToken: TokenType.t option
         [@ocaml.doc
           "The token that users must pass to the service API to use the temporary credentials."];
-      expiration: DateType.t
+      expiration: DateType.t option
         [@ocaml.doc "The date on which the current credentials expire."]}
-    let context_ = "Credentials"
-    let make ~accessKeyId =
-      fun ~secretAccessKey ->
-        fun ~sessionToken ->
-          fun ~expiration ->
+    let make ?accessKeyId =
+      fun ?secretAccessKey ->
+        fun ?sessionToken ->
+          fun ?expiration ->
             fun () ->
               { accessKeyId; secretAccessKey; sessionToken; expiration }
     let to_value x =
       structure_to_value
-        [("AccessKeyId", (Some (AccessKeyIdType.to_value x.accessKeyId)));
+        [("AccessKeyId",
+           (Option.map x.accessKeyId ~f:AccessKeyIdType.to_value));
         ("SecretAccessKey",
-          (Some (AccessKeySecretType.to_value x.secretAccessKey)));
-        ("SessionToken", (Some (TokenType.to_value x.sessionToken)));
-        ("Expiration", (Some (DateType.to_value x.expiration)))]
+          (Option.map x.secretAccessKey ~f:AccessKeySecretType.to_value));
+        ("SessionToken", (Option.map x.sessionToken ~f:TokenType.to_value));
+        ("Expiration", (Option.map x.expiration ~f:DateType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let expiration =
-        DateType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Expiration") in
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "Expiration") in
       let sessionToken =
-        TokenType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SessionToken") in
+        (Option.map ~f:TokenType.of_xml) (Xml.child xml_arg0 "SessionToken") in
       let secretAccessKey =
-        AccessKeySecretType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SecretAccessKey") in
+        (Option.map ~f:AccessKeySecretType.of_xml)
+          (Xml.child xml_arg0 "SecretAccessKey") in
       let accessKeyId =
-        AccessKeyIdType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccessKeyId") in
-      make ~expiration ~sessionToken ~secretAccessKey ~accessKeyId ()
+        (Option.map ~f:AccessKeyIdType.of_xml)
+          (Xml.child xml_arg0 "AccessKeyId") in
+      make ?expiration ?sessionToken ?secretAccessKey ?accessKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expiration = field_map_exn json "Expiration" DateType.of_json in
-      let sessionToken = field_map_exn json "SessionToken" TokenType.of_json in
+    let of_json json__ =
+      let expiration = field_map json__ "Expiration" DateType.of_json in
+      let sessionToken = field_map json__ "SessionToken" TokenType.of_json in
       let secretAccessKey =
-        field_map_exn json "SecretAccessKey" AccessKeySecretType.of_json in
+        field_map json__ "SecretAccessKey" AccessKeySecretType.of_json in
       let accessKeyId =
-        field_map_exn json "AccessKeyId" AccessKeyIdType.of_json in
-      make ~expiration ~sessionToken ~secretAccessKey ~accessKeyId ()
+        field_map json__ "AccessKeyId" AccessKeyIdType.of_json in
+      make ?expiration ?sessionToken ?secretAccessKey ?accessKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Amazon Web Services credentials for API authentication."]
 module RegionDisabledException =
@@ -416,12 +730,12 @@ module RegionDisabledException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" RegionDisabledMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" RegionDisabledMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "STS is not activated in the requested region for the account that is being asked to generate credentials. The account administrator must use the IAM console to activate STS in that region. For more information, see Activating and Deactivating Amazon Web Services STS in an Amazon Web Services Region in the IAM User Guide."]
+       "STS is not activated in the requested region for the account that is being asked to generate credentials. The account administrator must use the IAM console to activate STS in that region. For more information, see Activating and Deactivating STS in an Amazon Web Services Region in the IAM User Guide."]
 module DurationSecondsType =
   struct
     type nonrec t = int
@@ -485,34 +799,32 @@ module FederatedUser =
   struct
     type nonrec t =
       {
-      federatedUserId: FederatedIdType.t
+      federatedUserId: FederatedIdType.t option
         [@ocaml.doc
           "The string that identifies the federated user associated with the credentials, similar to the unique ID of an IAM user."];
-      arn: ArnType.t
+      arn: ArnType.t option
         [@ocaml.doc
           "The ARN that specifies the federated user that is associated with the credentials. For more information about ARNs and how to use them in policies, see IAM Identifiers in the IAM User Guide."]}
-    let context_ = "FederatedUser"
-    let make ~federatedUserId =
-      fun ~arn -> fun () -> { federatedUserId; arn }
+    let make ?federatedUserId =
+      fun ?arn -> fun () -> { federatedUserId; arn }
     let to_value x =
       structure_to_value
         [("FederatedUserId",
-           (Some (FederatedIdType.to_value x.federatedUserId)));
-        ("Arn", (Some (ArnType.to_value x.arn)))]
+           (Option.map x.federatedUserId ~f:FederatedIdType.to_value));
+        ("Arn", (Option.map x.arn ~f:ArnType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let arn =
-        ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+      let arn = (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "Arn") in
       let federatedUserId =
-        FederatedIdType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "FederatedUserId") in
-      make ~arn ~federatedUserId ()
+        (Option.map ~f:FederatedIdType.of_xml)
+          (Xml.child xml_arg0 "FederatedUserId") in
+      make ?arn ?federatedUserId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "Arn" ArnType.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" ArnType.of_json in
       let federatedUserId =
-        field_map_exn json "FederatedUserId" FederatedIdType.of_json in
-      make ~arn ~federatedUserId ()
+        field_map json__ "FederatedUserId" FederatedIdType.of_json in
+      make ?arn ?federatedUserId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Identifiers for the federated user that is associated with the credentials."]
@@ -532,9 +844,9 @@ module MalformedPolicyDocumentException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" MalformedPolicyDocumentMessage.of_json in
+        field_map json__ "message" MalformedPolicyDocumentMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -555,9 +867,9 @@ module PackedPolicyTooLargeException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" PackedPolicyTooLargeMessage.of_json in
+        field_map json__ "message" PackedPolicyTooLargeMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -581,6 +893,9 @@ module PolicyDescriptorListType =
   struct
     type nonrec t = PolicyDescriptorType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyDescriptorType.to_value)) |>
         (fun x -> `List x)
@@ -625,30 +940,6 @@ module SessionPolicyDocumentType =
     let of_json j = string_of_json ~kind:"sessionPolicyDocumentType" j
     let to_json = simple_to_json to_value
   end
-module TagListType =
-  struct
-    type nonrec t = Tag.t list
-    let make i =
-      let open Result in ok_or_failwith (check_list_max i ~max:50); i
-    let to_value xs =
-      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Tag.of_xml)
-    let of_json j = list_of_json ~kind:"tagListType" ~of_json:Tag.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module UserNameType =
   struct
     type nonrec t = string
@@ -667,6 +958,44 @@ module UserNameType =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"userNameType" j
+    let to_json = simple_to_json to_value
+  end
+module ExpiredTradeInTokenException =
+  struct
+    type nonrec t = {
+      message: ExpiredTradeInTokenExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message",
+           (Option.map x.message
+              ~f:ExpiredTradeInTokenExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExpiredTradeInTokenExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message =
+        field_map json__ "message"
+          ExpiredTradeInTokenExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The trade-in token provided in the request has expired and can no longer be exchanged for credentials. Request a new token and retry the operation."]
+module TradeInTokenType =
+  struct
+    type nonrec t = string
+    let context_ = "tradeInTokenType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"tradeInTokenType" j
     let to_json = simple_to_json to_value
   end
 module AccountType =
@@ -711,13 +1040,13 @@ module InvalidAuthorizationMessageException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" InvalidAuthorizationMessage.of_json in
+        field_map json__ "message" InvalidAuthorizationMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The error returned if the message passed to DecodeAuthorizationMessage was invalid. This can happen if the token contains invalid characters, such as linebreaks."]
+       "The error returned if the message passed to DecodeAuthorizationMessage was invalid. This can happen if the token contains invalid characters, such as line breaks, or if the message has expired."]
 module DecodedMessageType =
   struct
     type nonrec t = string
@@ -749,53 +1078,6 @@ module EncodedMessageType =
     let of_json j = string_of_json ~kind:"encodedMessageType" j
     let to_json = simple_to_json to_value
   end
-module AssumedRoleUser =
-  struct
-    type nonrec t =
-      {
-      assumedRoleId: AssumedRoleIdType.t
-        [@ocaml.doc
-          "A unique identifier that contains the role ID and the role session name of the role that is being assumed. The role ID is generated by Amazon Web Services when the role is created."];
-      arn: ArnType.t
-        [@ocaml.doc
-          "The ARN of the temporary security credentials that are returned from the AssumeRole action. For more information about ARNs and how to use them in policies, see IAM Identifiers in the IAM User Guide."]}
-    let context_ = "AssumedRoleUser"
-    let make ~assumedRoleId = fun ~arn -> fun () -> { assumedRoleId; arn }
-    let to_value x =
-      structure_to_value
-        [("AssumedRoleId",
-           (Some (AssumedRoleIdType.to_value x.assumedRoleId)));
-        ("Arn", (Some (ArnType.to_value x.arn)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let arn =
-        ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
-      let assumedRoleId =
-        AssumedRoleIdType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AssumedRoleId") in
-      make ~arn ~assumedRoleId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "Arn" ArnType.of_json in
-      let assumedRoleId =
-        field_map_exn json "AssumedRoleId" AssumedRoleIdType.of_json in
-      make ~arn ~assumedRoleId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The identifiers for the temporary security credentials that the operation returns."]
-module Audience =
-  struct
-    type nonrec t = string
-    let context_ = "Audience"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Audience" j
-    let to_json = simple_to_json to_value
-  end
 module ExpiredTokenException =
   struct
     type nonrec t = {
@@ -812,13 +1094,115 @@ module ExpiredTokenException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" ExpiredIdentityTokenMessage.of_json in
+        field_map json__ "message" ExpiredIdentityTokenMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The web identity token that was passed is expired or is not valid. Get a new identity token from the identity provider and then retry the request."]
+module SourceIdentityType =
+  struct
+    type nonrec t = string
+    let context_ = "sourceIdentityType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:2) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\w+=,.@-]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"sourceIdentityType" j
+    let to_json = simple_to_json to_value
+  end
+module RootDurationSecondsType =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:900) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RootDurationSecondsType"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module TargetPrincipalType =
+  struct
+    type nonrec t = string
+    let context_ = "TargetPrincipalType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:12));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TargetPrincipalType" j
+    let to_json = simple_to_json to_value
+  end
+module AssumedRoleUser =
+  struct
+    type nonrec t =
+      {
+      assumedRoleId: AssumedRoleIdType.t option
+        [@ocaml.doc
+          "A unique identifier that contains the role ID and the role session name of the role that is being assumed. The role ID is generated by Amazon Web Services when the role is created."];
+      arn: ArnType.t option
+        [@ocaml.doc
+          "The ARN of the temporary security credentials that are returned from the AssumeRole action. For more information about ARNs and how to use them in policies, see IAM Identifiers in the IAM User Guide."]}
+    let make ?assumedRoleId = fun ?arn -> fun () -> { assumedRoleId; arn }
+    let to_value x =
+      structure_to_value
+        [("AssumedRoleId",
+           (Option.map x.assumedRoleId ~f:AssumedRoleIdType.to_value));
+        ("Arn", (Option.map x.arn ~f:ArnType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn = (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "Arn") in
+      let assumedRoleId =
+        (Option.map ~f:AssumedRoleIdType.of_xml)
+          (Xml.child xml_arg0 "AssumedRoleId") in
+      make ?arn ?assumedRoleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn = field_map json__ "Arn" ArnType.of_json in
+      let assumedRoleId =
+        field_map json__ "AssumedRoleId" AssumedRoleIdType.of_json in
+      make ?arn ?assumedRoleId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The identifiers for the temporary security credentials that the operation returns."]
+module Audience =
+  struct
+    type nonrec t = string
+    let context_ = "Audience"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Audience" j
+    let to_json = simple_to_json to_value
+  end
 module IDPCommunicationErrorException =
   struct
     type nonrec t = {
@@ -835,9 +1219,9 @@ module IDPCommunicationErrorException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" IdpCommunicationErrorMessage.of_json in
+        field_map json__ "message" IdpCommunicationErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -858,8 +1242,9 @@ module IDPRejectedClaimException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" IdpRejectedClaimMessage.of_json in
+    let of_json json__ =
+      let message =
+        field_map json__ "message" IdpRejectedClaimMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -880,9 +1265,9 @@ module InvalidIdentityTokenException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" InvalidIdentityTokenMessage.of_json in
+        field_map json__ "message" InvalidIdentityTokenMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -898,26 +1283,6 @@ module Issuer =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"Issuer" j
-    let to_json = simple_to_json to_value
-  end
-module SourceIdentityType =
-  struct
-    type nonrec t = string
-    let context_ = "sourceIdentityType"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:2) >>=
-             (fun () ->
-                (check_string_max i ~max:64) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\w+=,.@-]*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"sourceIdentityType" j
     let to_json = simple_to_json to_value
   end
 module WebIdentitySubjectType =
@@ -1071,6 +1436,38 @@ module SAMLAssertionType =
     let of_json j = string_of_json ~kind:"SAMLAssertionType" j
     let to_json = simple_to_json to_value
   end
+module ProvidedContextsListType =
+  struct
+    type nonrec t = ProvidedContext.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProvidedContext.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProvidedContext.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProvidedContextsListType"
+        ~of_json:ProvidedContext.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ExternalIdType =
   struct
     type nonrec t = string
@@ -1096,6 +1493,9 @@ module TagKeyListType =
     type nonrec t = TagKeyType.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKeyType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1116,6 +1516,193 @@ module TagKeyListType =
       list_of_json ~kind:"tagKeyListType" ~of_json:TagKeyType.of_json j
     let to_json v = composed_to_json to_value v
   end
+module UnrestrictedSessionPolicyDocumentType =
+  struct
+    type nonrec t = string
+    let context_ = "unrestrictedSessionPolicyDocumentType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"[\\u0009\\u000A\\u000D\\u0020-\\u00FF]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"unrestrictedSessionPolicyDocumentType" j
+    let to_json = simple_to_json to_value
+  end
+module GetWebIdentityTokenResponse =
+  struct
+    type getWebIdentityTokenResult =
+      {
+      webIdentityToken: WebIdentityTokenType.t option
+        [@ocaml.doc
+          "A signed JSON Web Token (JWT) that represents the caller's Amazon Web Services identity. The token contains standard JWT claims such as subject, audience, expiration time, and additional identity attributes added by STS as custom claims. You can also add your own custom claims to the token by passing tags as request parameters to the GetWebIdentityToken API. The token is signed using the specified signing algorithm and can be verified using the verification keys available at the issuer's JWKS endpoint."];
+      expiration: DateType.t option
+        [@ocaml.doc
+          "The date and time when the web identity token expires, in UTC. The expiration is determined by adding the DurationSeconds value to the time the token was issued. After this time, the token should no longer be considered valid."]}
+    and responseMetaData = unit
+    and t =
+      {
+      getWebIdentityTokenResult: getWebIdentityTokenResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `JWTPayloadSizeExceededException of JWTPayloadSizeExceededException.t 
+      | `OutboundWebIdentityFederationDisabledException of
+          OutboundWebIdentityFederationDisabledException.t 
+      | `SessionDurationEscalationException of
+          SessionDurationEscalationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "GetWebIdentityTokenResponse"
+    let make ?webIdentityToken =
+      fun ?expiration ->
+        fun () ->
+          {
+            getWebIdentityTokenResult = { webIdentityToken; expiration };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "JWTPayloadSizeExceededException" ->
+          `JWTPayloadSizeExceededException
+            (JWTPayloadSizeExceededException.of_json json)
+      | "OutboundWebIdentityFederationDisabledException" ->
+          `OutboundWebIdentityFederationDisabledException
+            (OutboundWebIdentityFederationDisabledException.of_json json)
+      | "SessionDurationEscalationException" ->
+          `SessionDurationEscalationException
+            (SessionDurationEscalationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "JWTPayloadSizeExceededException" ->
+          `JWTPayloadSizeExceededException
+            (JWTPayloadSizeExceededException.of_xml xml)
+      | "OutboundWebIdentityFederationDisabledException" ->
+          `OutboundWebIdentityFederationDisabledException
+            (OutboundWebIdentityFederationDisabledException.of_xml xml)
+      | "SessionDurationEscalationException" ->
+          `SessionDurationEscalationException
+            (SessionDurationEscalationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `JWTPayloadSizeExceededException e ->
+          `Assoc
+            [("error", (`String "JWTPayloadSizeExceededException"));
+            ("details", (JWTPayloadSizeExceededException.to_json e))]
+      | `OutboundWebIdentityFederationDisabledException e ->
+          `Assoc
+            [("error",
+               (`String "OutboundWebIdentityFederationDisabledException"));
+            ("details",
+              (OutboundWebIdentityFederationDisabledException.to_json e))]
+      | `SessionDurationEscalationException e ->
+          `Assoc
+            [("error", (`String "SessionDurationEscalationException"));
+            ("details", (SessionDurationEscalationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.getWebIdentityTokenResult in
+      structure_to_wrapped_value
+        [("WebIdentityToken",
+           (Option.map x.webIdentityToken ~f:WebIdentityTokenType.to_value));
+        ("Expiration", (Option.map x.expiration ~f:DateType.to_value))]
+        ~wrapper:"GetWebIdentityTokenResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "GetWebIdentityTokenResult" in
+      let expiration =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "Expiration") in
+      let webIdentityToken =
+        (Option.map ~f:WebIdentityTokenType.of_xml)
+          (Xml.child xml_arg0 "WebIdentityToken") in
+      make ?expiration ?webIdentityToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expiration = field_map json__ "Expiration" DateType.of_json in
+      let webIdentityToken =
+        field_map json__ "WebIdentityToken" WebIdentityTokenType.of_json in
+      make ?expiration ?webIdentityToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a signed JSON Web Token (JWT) that represents the calling Amazon Web Services identity. The returned JWT can be used to authenticate with external services that support OIDC discovery. The token is signed by Amazon Web Services STS and can be publicly verified using the verification keys published at the issuer's JWKS endpoint."]
+module GetWebIdentityTokenRequest =
+  struct
+    type nonrec t =
+      {
+      audience: WebIdentityTokenAudienceListType.t
+        [@ocaml.doc
+          "The intended recipient of the web identity token. This value populates the aud claim in the JWT and should identify the service or application that will validate and use the token. The external service should verify this claim to ensure the token was intended for their use."];
+      durationSeconds: WebIdentityTokenDurationSecondsType.t option
+        [@ocaml.doc
+          "The duration, in seconds, for which the JSON Web Token (JWT) will remain valid. The value can range from 60 seconds (1 minute) to 3600 seconds (1 hour). If not specified, the default duration is 300 seconds (5 minutes). The token is designed to be short-lived and should be used for proof of identity, then exchanged for credentials or short-lived tokens in the external service."];
+      signingAlgorithm: JwtAlgorithmType.t
+        [@ocaml.doc
+          "The cryptographic algorithm to use for signing the JSON Web Token (JWT). Valid values are RS256 (RSA with SHA-256) and ES384 (ECDSA using P-384 curve with SHA-384)."];
+      tags: TagListType.t option
+        [@ocaml.doc
+          "An optional list of tags to include in the JSON Web Token (JWT). These tags are added as custom claims to the JWT and can be used by the downstream service for authorization decisions."]}
+    let context_ = "GetWebIdentityTokenRequest"
+    let make ?durationSeconds =
+      fun ?tags ->
+        fun ~audience ->
+          fun ~signingAlgorithm ->
+            fun () -> { durationSeconds; tags; audience; signingAlgorithm }
+    let to_value x =
+      structure_to_value
+        [("Audience",
+           (Some (WebIdentityTokenAudienceListType.to_value x.audience)));
+        ("DurationSeconds",
+          (Option.map x.durationSeconds
+             ~f:WebIdentityTokenDurationSecondsType.to_value));
+        ("SigningAlgorithm",
+          (Some (JwtAlgorithmType.to_value x.signingAlgorithm)));
+        ("Tags", (Option.map x.tags ~f:TagListType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:TagListType.of_xml) (Xml.child xml_arg0 "Tags") in
+      let signingAlgorithm =
+        JwtAlgorithmType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SigningAlgorithm") in
+      let durationSeconds =
+        (Option.map ~f:WebIdentityTokenDurationSecondsType.of_xml)
+          (Xml.child xml_arg0 "DurationSeconds") in
+      let audience =
+        WebIdentityTokenAudienceListType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Audience") in
+      make ?tags ~signingAlgorithm ?durationSeconds ~audience ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      let signingAlgorithm =
+        field_map_exn json__ "SigningAlgorithm" JwtAlgorithmType.of_json in
+      let durationSeconds =
+        field_map json__ "DurationSeconds"
+          WebIdentityTokenDurationSecondsType.of_json in
+      let audience =
+        field_map_exn json__ "Audience"
+          WebIdentityTokenAudienceListType.of_json in
+      make ?tags ~signingAlgorithm ?durationSeconds ~audience ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a signed JSON Web Token (JWT) that represents the calling Amazon Web Services identity. The returned JWT can be used to authenticate with external services that support OIDC discovery. The token is signed by Amazon Web Services STS and can be publicly verified using the verification keys published at the issuer's JWKS endpoint."]
 module GetSessionTokenResponse =
   struct
     type getSessionTokenResult =
@@ -1172,8 +1759,8 @@ module GetSessionTokenResponse =
         (Option.map ~f:Credentials.of_xml) (Xml.child xml_arg0 "Credentials") in
       make ?credentials ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let credentials = field_map json "Credentials" Credentials.of_json in
+    let of_json json__ =
+      let credentials = field_map json__ "Credentials" Credentials.of_json in
       make ?credentials ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1214,16 +1801,16 @@ module GetSessionTokenRequest =
           (Xml.child xml_arg0 "DurationSeconds") in
       make ?tokenCode ?serialNumber ?durationSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tokenCode = field_map json "TokenCode" TokenCodeType.of_json in
+    let of_json json__ =
+      let tokenCode = field_map json__ "TokenCode" TokenCodeType.of_json in
       let serialNumber =
-        field_map json "SerialNumber" SerialNumberType.of_json in
+        field_map json__ "SerialNumber" SerialNumberType.of_json in
       let durationSeconds =
-        field_map json "DurationSeconds" DurationSecondsType.of_json in
+        field_map json__ "DurationSeconds" DurationSecondsType.of_json in
       make ?tokenCode ?serialNumber ?durationSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a set of temporary credentials for an Amazon Web Services account or IAM user. The credentials consist of an access key ID, a secret access key, and a security token. Typically, you use GetSessionToken if you want to use MFA to protect programmatic calls to specific Amazon Web Services API operations like Amazon EC2 StopInstances. MFA-enabled IAM users would need to call GetSessionToken and submit an MFA code that is associated with their MFA device. Using the temporary security credentials that are returned from the call, IAM users can then make programmatic calls to API operations that require MFA authentication. If you do not supply a correct MFA code, then the API returns an access denied error. For a comparison of GetSessionToken with the other API operations that produce temporary credentials, see Requesting Temporary Security Credentials and Comparing the Amazon Web Services STS API operations in the IAM User Guide. Session Duration The GetSessionToken operation must be called by using the long-term Amazon Web Services security credentials of the Amazon Web Services account root user or an IAM user. Credentials that are created by IAM users are valid for the duration that you specify. This duration can range from 900 seconds (15 minutes) up to a maximum of 129,600 seconds (36 hours), with a default of 43,200 seconds (12 hours). Credentials based on account credentials can range from 900 seconds (15 minutes) up to 3,600 seconds (1 hour), with a default of 1 hour. Permissions The temporary security credentials created by GetSessionToken can be used to make API calls to any Amazon Web Services service with the following exceptions: You cannot call any IAM API operations unless MFA authentication information is included in the request. You cannot call any STS API except AssumeRole or GetCallerIdentity. We recommend that you do not call GetSessionToken with Amazon Web Services account root user credentials. Instead, follow our best practices by creating one or more IAM users, giving them the necessary permissions, and using IAM users for everyday interaction with Amazon Web Services. The credentials that are returned by GetSessionToken are based on permissions associated with the user whose credentials were used to call the operation. If GetSessionToken is called using Amazon Web Services account root user credentials, the temporary credentials have root user permissions. Similarly, if GetSessionToken is called using the credentials of an IAM user, the temporary credentials have the same permissions as the IAM user. For more information about using GetSessionToken to create temporary credentials, go to Temporary Credentials for Users in Untrusted Environments in the IAM User Guide."]
+       "Returns a set of temporary credentials for an Amazon Web Services account or IAM user. The credentials consist of an access key ID, a secret access key, and a security token. Typically, you use GetSessionToken if you want to use MFA to protect programmatic calls to specific Amazon Web Services API operations like Amazon EC2 StopInstances. MFA-enabled IAM users must call GetSessionToken and submit an MFA code that is associated with their MFA device. Using the temporary security credentials that the call returns, IAM users can then make programmatic calls to API operations that require MFA authentication. An incorrect MFA code causes the API to return an access denied error. For a comparison of GetSessionToken with the other API operations that produce temporary credentials, see Requesting Temporary Security Credentials and Compare STS credentials in the IAM User Guide. No permissions are required for users to perform this operation. The purpose of the sts:GetSessionToken operation is to authenticate the user using MFA. You cannot use policies to control authentication operations. For more information, see Permissions for GetSessionToken in the IAM User Guide. Session Duration The GetSessionToken operation must be called by using the long-term Amazon Web Services security credentials of an IAM user. Credentials that are created by IAM users are valid for the duration that you specify. This duration can range from 900 seconds (15 minutes) up to a maximum of 129,600 seconds (36 hours), with a default of 43,200 seconds (12 hours). Credentials based on account credentials can range from 900 seconds (15 minutes) up to 3,600 seconds (1 hour), with a default of 1 hour. Permissions The temporary security credentials created by GetSessionToken can be used to make API calls to any Amazon Web Services service with the following exceptions: You cannot call any IAM API operations unless MFA authentication information is included in the request. You cannot call any STS API except AssumeRole or GetCallerIdentity. The credentials that GetSessionToken returns are based on permissions associated with the IAM user whose credentials were used to call the operation. The temporary credentials have the same permissions as the IAM user. Although it is possible to call GetSessionToken using the security credentials of an Amazon Web Services account root user rather than an IAM user, we do not recommend it. If GetSessionToken is called using root user credentials, the temporary credentials have root user permissions. For more information, see Safeguard your root user credentials and don't use them for everyday tasks in the IAM User Guide For more information about using GetSessionToken to create temporary credentials, see Temporary Credentials for Users in Untrusted Environments in the IAM User Guide."]
 module GetFederationTokenResponse =
   struct
     type getFederationTokenResult =
@@ -1326,12 +1913,12 @@ module GetFederationTokenResponse =
         (Option.map ~f:Credentials.of_xml) (Xml.child xml_arg0 "Credentials") in
       make ?packedPolicySize ?federatedUser ?credentials ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let packedPolicySize =
-        field_map json "PackedPolicySize" NonNegativeIntegerType.of_json in
+        field_map json__ "PackedPolicySize" NonNegativeIntegerType.of_json in
       let federatedUser =
-        field_map json "FederatedUser" FederatedUser.of_json in
-      let credentials = field_map json "Credentials" Credentials.of_json in
+        field_map json__ "FederatedUser" FederatedUser.of_json in
+      let credentials = field_map json__ "Credentials" Credentials.of_json in
       make ?packedPolicySize ?federatedUser ?credentials ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1345,16 +1932,16 @@ module GetFederationTokenRequest =
           "The name of the federated user. The name is used as an identifier for the temporary security credentials (such as Bob). For example, you can reference the federated user name in a resource-based policy, such as in an Amazon S3 bucket policy. The regex used to validate this parameter is a string of characters consisting of upper- and lower-case alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@-"];
       policy: SessionPolicyDocumentType.t option
         [@ocaml.doc
-          "An IAM policy in JSON format that you want to use as an inline session policy. You must pass an inline or managed session policy to this operation. You can pass a single JSON policy document to use as an inline session policy. You can also specify up to 10 managed policies to use as managed session policies. This parameter is optional. However, if you do not pass any session policies, then the resulting federated user session has no permissions. When you pass session policies, the session permissions are the intersection of the IAM user policies and the session policies that you pass. This gives you a way to further restrict the permissions for a federated user. You cannot use session policies to grant more permissions than those that are defined in the permissions policy of the IAM user. For more information, see Session Policies in the IAM User Guide. The resulting credentials can be used to access a resource that has a resource-based policy. If that policy specifically references the federated user session in the Principal element of the policy, the session has the permissions allowed by the policy. These permissions are granted in addition to the permissions that are granted by the session policies. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. The JSON policy characters can be any ASCII character from the space character to the end of the valid character list (\\u0020 through \\u00FF). It can also include the tab (\\u0009), linefeed (\\u000A), and carriage return (\\u000D) characters. An Amazon Web Services conversion compresses the passed session policies and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit."];
+          "An IAM policy in JSON format that you want to use as an inline session policy. You must pass an inline or managed session policy to this operation. You can pass a single JSON policy document to use as an inline session policy. You can also specify up to 10 managed policy Amazon Resource Names (ARNs) to use as managed session policies. This parameter is optional. However, if you do not pass any session policies, then the resulting federated user session has no permissions. When you pass session policies, the session permissions are the intersection of the IAM user policies and the session policies that you pass. This gives you a way to further restrict the permissions for a federated user. You cannot use session policies to grant more permissions than those that are defined in the permissions policy of the IAM user. For more information, see Session Policies in the IAM User Guide. The resulting credentials can be used to access a resource that has a resource-based policy. If that policy specifically references the federated user session in the Principal element of the policy, the session has the permissions allowed by the policy. These permissions are granted in addition to the permissions that are granted by the session policies. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. The JSON policy characters can be any ASCII character from the space character to the end of the valid character list (\\u0020 through \\u00FF). It can also include the tab (\\u0009), linefeed (\\u000A), and carriage return (\\u000D) characters. An Amazon Web Services conversion compresses the passed inline session policy, managed policy ARNs, and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit."];
       policyArns: PolicyDescriptorListType.t option
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the IAM managed policies that you want to use as a managed session policy. The policies must exist in the same account as the IAM user that is requesting federated access. You must pass an inline or managed session policy to this operation. You can pass a single JSON policy document to use as an inline session policy. You can also specify up to 10 managed policies to use as managed session policies. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. You can provide up to 10 managed policy ARNs. For more information about ARNs, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces in the Amazon Web Services General Reference. This parameter is optional. However, if you do not pass any session policies, then the resulting federated user session has no permissions. When you pass session policies, the session permissions are the intersection of the IAM user policies and the session policies that you pass. This gives you a way to further restrict the permissions for a federated user. You cannot use session policies to grant more permissions than those that are defined in the permissions policy of the IAM user. For more information, see Session Policies in the IAM User Guide. The resulting credentials can be used to access a resource that has a resource-based policy. If that policy specifically references the federated user session in the Principal element of the policy, the session has the permissions allowed by the policy. These permissions are granted in addition to the permissions that are granted by the session policies. An Amazon Web Services conversion compresses the passed session policies and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit."];
+          "The Amazon Resource Names (ARNs) of the IAM managed policies that you want to use as a managed session policy. The policies must exist in the same account as the IAM user that is requesting federated access. You must pass an inline or managed session policy to this operation. You can pass a single JSON policy document to use as an inline session policy. You can also specify up to 10 managed policy Amazon Resource Names (ARNs) to use as managed session policies. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. You can provide up to 10 managed policy ARNs. For more information about ARNs, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces in the Amazon Web Services General Reference. This parameter is optional. However, if you do not pass any session policies, then the resulting federated user session has no permissions. When you pass session policies, the session permissions are the intersection of the IAM user policies and the session policies that you pass. This gives you a way to further restrict the permissions for a federated user. You cannot use session policies to grant more permissions than those that are defined in the permissions policy of the IAM user. For more information, see Session Policies in the IAM User Guide. The resulting credentials can be used to access a resource that has a resource-based policy. If that policy specifically references the federated user session in the Principal element of the policy, the session has the permissions allowed by the policy. These permissions are granted in addition to the permissions that are granted by the session policies. An Amazon Web Services conversion compresses the passed inline session policy, managed policy ARNs, and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit."];
       durationSeconds: DurationSecondsType.t option
         [@ocaml.doc
-          "The duration, in seconds, that the session should last. Acceptable durations for federation sessions range from 900 seconds (15 minutes) to 129,600 seconds (36 hours), with 43,200 seconds (12 hours) as the default. Sessions obtained using Amazon Web Services account root user credentials are restricted to a maximum of 3,600 seconds (one hour). If the specified duration is longer than one hour, the session obtained by using root user credentials defaults to one hour."];
+          "The duration, in seconds, that the session should last. Acceptable durations for federation sessions range from 900 seconds (15 minutes) to 129,600 seconds (36 hours), with 43,200 seconds (12 hours) as the default. Sessions obtained using root user credentials are restricted to a maximum of 3,600 seconds (one hour). If the specified duration is longer than one hour, the session obtained by using root user credentials defaults to one hour."];
       tags: TagListType.t option
         [@ocaml.doc
-          "A list of session tags. Each session tag consists of a key name and an associated value. For more information about session tags, see Passing Session Tags in STS in the IAM User Guide. This parameter is optional. You can pass up to 50 session tags. The plaintext session tag keys can\226\128\153t exceed 128 characters and the values can\226\128\153t exceed 256 characters. For these and additional limits, see IAM and STS Character Limits in the IAM User Guide. An Amazon Web Services conversion compresses the passed session policies and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit. You can pass a session tag with the same key as a tag that is already attached to the user you are federating. When you do, session tags override a user tag with the same key. Tag key\226\128\147value pairs are not case sensitive, but case is preserved. This means that you cannot have separate Department and department tag keys. Assume that the role has the Department=Marketing tag and you pass the department=engineering session tag. Department and department are not saved as separate tags, and the session tag passed in the request takes precedence over the role tag."]}
+          "A list of session tags. Each session tag consists of a key name and an associated value. For more information about session tags, see Passing Session Tags in STS in the IAM User Guide. This parameter is optional. You can pass up to 50 session tags. The plaintext session tag keys can\226\128\153t exceed 128 characters and the values can\226\128\153t exceed 256 characters. For these and additional limits, see IAM and STS Character Limits in the IAM User Guide. An Amazon Web Services conversion compresses the passed inline session policy, managed policy ARNs, and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit. You can pass a session tag with the same key as a tag that is already attached to the user you are federating. When you do, session tags override a user tag with the same key. Tag key\226\128\147value pairs are not case sensitive, but case is preserved. This means that you cannot have separate Department and department tag keys. Assume that the role has the Department=Marketing tag and you pass the department=engineering session tag. Department and department are not saved as separate tags, and the session tag passed in the request takes precedence over the role tag."]}
     let context_ = "GetFederationTokenRequest"
     let make ?policy =
       fun ?policyArns ->
@@ -1389,18 +1976,153 @@ module GetFederationTokenRequest =
         UserNameType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ?durationSeconds ?policyArns ?policy ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
       let durationSeconds =
-        field_map json "DurationSeconds" DurationSecondsType.of_json in
+        field_map json__ "DurationSeconds" DurationSecondsType.of_json in
       let policyArns =
-        field_map json "PolicyArns" PolicyDescriptorListType.of_json in
-      let policy = field_map json "Policy" SessionPolicyDocumentType.of_json in
-      let name = field_map_exn json "Name" UserNameType.of_json in
+        field_map json__ "PolicyArns" PolicyDescriptorListType.of_json in
+      let policy =
+        field_map json__ "Policy" SessionPolicyDocumentType.of_json in
+      let name = field_map_exn json__ "Name" UserNameType.of_json in
       make ?tags ?durationSeconds ?policyArns ?policy ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a set of temporary security credentials (consisting of an access key ID, a secret access key, and a security token) for a federated user. A typical use is in a proxy application that gets temporary security credentials on behalf of distributed applications inside a corporate network. You must call the GetFederationToken operation using the long-term security credentials of an IAM user. As a result, this call is appropriate in contexts where those credentials can be safely stored, usually in a server-based application. For a comparison of GetFederationToken with the other API operations that produce temporary credentials, see Requesting Temporary Security Credentials and Comparing the Amazon Web Services STS API operations in the IAM User Guide. You can create a mobile-based or browser-based app that can authenticate users using a web identity provider like Login with Amazon, Facebook, Google, or an OpenID Connect-compatible identity provider. In this case, we recommend that you use Amazon Cognito or AssumeRoleWithWebIdentity. For more information, see Federation Through a Web-based Identity Provider in the IAM User Guide. You can also call GetFederationToken using the security credentials of an Amazon Web Services account root user, but we do not recommend it. Instead, we recommend that you create an IAM user for the purpose of the proxy application. Then attach a policy to the IAM user that limits federated users to only the actions and resources that they need to access. For more information, see IAM Best Practices in the IAM User Guide. Session duration The temporary credentials are valid for the specified duration, from 900 seconds (15 minutes) up to a maximum of 129,600 seconds (36 hours). The default session duration is 43,200 seconds (12 hours). Temporary credentials obtained by using the Amazon Web Services account root user credentials have a maximum duration of 3,600 seconds (1 hour). Permissions You can use the temporary credentials created by GetFederationToken in any Amazon Web Services service except the following: You cannot call any IAM operations using the CLI or the Amazon Web Services API. You cannot call any STS operations except GetCallerIdentity. You must pass an inline or managed session policy to this operation. You can pass a single JSON policy document to use as an inline session policy. You can also specify up to 10 managed policies to use as managed session policies. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. Though the session policy parameters are optional, if you do not pass a policy, then the resulting federated user session has no permissions. When you pass session policies, the session permissions are the intersection of the IAM user policies and the session policies that you pass. This gives you a way to further restrict the permissions for a federated user. You cannot use session policies to grant more permissions than those that are defined in the permissions policy of the IAM user. For more information, see Session Policies in the IAM User Guide. For information about using GetFederationToken to create temporary security credentials, see GetFederationToken\226\128\148Federation Through a Custom Identity Broker. You can use the credentials to access a resource that has a resource-based policy. If that policy specifically references the federated user session in the Principal element of the policy, the session has the permissions allowed by the policy. These permissions are granted in addition to the permissions granted by the session policies. Tags (Optional) You can pass tag key-value pairs to your session. These are called session tags. For more information about session tags, see Passing Session Tags in STS in the IAM User Guide. You can create a mobile-based or browser-based app that can authenticate users using a web identity provider like Login with Amazon, Facebook, Google, or an OpenID Connect-compatible identity provider. In this case, we recommend that you use Amazon Cognito or AssumeRoleWithWebIdentity. For more information, see Federation Through a Web-based Identity Provider in the IAM User Guide. An administrator must grant you the permissions necessary to pass session tags. The administrator can also create granular permissions to allow you to pass only specific session tags. For more information, see Tutorial: Using Tags for Attribute-Based Access Control in the IAM User Guide. Tag key\226\128\147value pairs are not case sensitive, but case is preserved. This means that you cannot have separate Department and department tag keys. Assume that the user that you are federating has the Department=Marketing tag and you pass the department=engineering session tag. Department and department are not saved as separate tags, and the session tag passed in the request takes precedence over the user tag."]
+       "Returns a set of temporary security credentials (consisting of an access key ID, a secret access key, and a security token) for a user. A typical use is in a proxy application that gets temporary security credentials on behalf of distributed applications inside a corporate network. You must call the GetFederationToken operation using the long-term security credentials of an IAM user. As a result, this call is appropriate in contexts where those credentials can be safeguarded, usually in a server-based application. For a comparison of GetFederationToken with the other API operations that produce temporary credentials, see Requesting Temporary Security Credentials and Compare STS credentials in the IAM User Guide. Although it is possible to call GetFederationToken using the security credentials of an Amazon Web Services account root user rather than an IAM user that you create for the purpose of a proxy application, we do not recommend it. For more information, see Safeguard your root user credentials and don't use them for everyday tasks in the IAM User Guide. You can create a mobile-based or browser-based app that can authenticate users using a web identity provider like Login with Amazon, Facebook, Google, or an OpenID Connect-compatible identity provider. In this case, we recommend that you use Amazon Cognito or AssumeRoleWithWebIdentity. For more information, see Federation Through a Web-based Identity Provider in the IAM User Guide. Session duration The temporary credentials are valid for the specified duration, from 900 seconds (15 minutes) up to a maximum of 129,600 seconds (36 hours). The default session duration is 43,200 seconds (12 hours). Temporary credentials obtained by using the root user credentials have a maximum duration of 3,600 seconds (1 hour). Permissions You can use the temporary credentials created by GetFederationToken in any Amazon Web Services service with the following exceptions: You cannot call any IAM operations using the CLI or the Amazon Web Services API. This limitation does not apply to console sessions. You cannot call any STS operations except GetCallerIdentity. You can use temporary credentials for single sign-on (SSO) to the console. You must pass an inline or managed session policy to this operation. You can pass a single JSON policy document to use as an inline session policy. You can also specify up to 10 managed policy Amazon Resource Names (ARNs) to use as managed session policies. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. Though the session policy parameters are optional, if you do not pass a policy, then the resulting federated user session has no permissions. When you pass session policies, the session permissions are the intersection of the IAM user policies and the session policies that you pass. This gives you a way to further restrict the permissions for a federated user. You cannot use session policies to grant more permissions than those that are defined in the permissions policy of the IAM user. For more information, see Session Policies in the IAM User Guide. For information about using GetFederationToken to create temporary security credentials, see GetFederationToken\226\128\148Federation Through a Custom Identity Broker. You can use the credentials to access a resource that has a resource-based policy. If that policy specifically references the federated user session in the Principal element of the policy, the session has the permissions allowed by the policy. These permissions are granted in addition to the permissions granted by the session policies. Tags (Optional) You can pass tag key-value pairs to your session. These are called session tags. For more information about session tags, see Passing Session Tags in STS in the IAM User Guide. You can create a mobile-based or browser-based app that can authenticate users using a web identity provider like Login with Amazon, Facebook, Google, or an OpenID Connect-compatible identity provider. In this case, we recommend that you use Amazon Cognito or AssumeRoleWithWebIdentity. For more information, see Federation Through a Web-based Identity Provider in the IAM User Guide. An administrator must grant you the permissions necessary to pass session tags. The administrator can also create granular permissions to allow you to pass only specific session tags. For more information, see Tutorial: Using Tags for Attribute-Based Access Control in the IAM User Guide. Tag key\226\128\147value pairs are not case sensitive, but case is preserved. This means that you cannot have separate Department and department tag keys. Assume that the user that you are federating has the Department=Marketing tag and you pass the department=engineering session tag. Department and department are not saved as separate tags, and the session tag passed in the request takes precedence over the user tag."]
+module GetDelegatedAccessTokenResponse =
+  struct
+    type getDelegatedAccessTokenResult =
+      {
+      credentials: Credentials.t option ;
+      packedPolicySize: NonNegativeIntegerType.t option
+        [@ocaml.doc
+          "The percentage of the maximum policy size that is used by the session policy. The policy size is calculated as the sum of all the session policies and permission boundaries attached to the session. If the packed size exceeds 100%, the request fails."];
+      assumedPrincipal: ArnType.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the principal that was assumed when obtaining the delegated access token. This ARN identifies the IAM entity whose permissions are granted by the temporary credentials."]}
+    and responseMetaData = unit
+    and t =
+      {
+      getDelegatedAccessTokenResult: getDelegatedAccessTokenResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `ExpiredTradeInTokenException of ExpiredTradeInTokenException.t 
+      | `PackedPolicyTooLargeException of PackedPolicyTooLargeException.t 
+      | `RegionDisabledException of RegionDisabledException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "GetDelegatedAccessTokenResponse"
+    let make ?credentials =
+      fun ?packedPolicySize ->
+        fun ?assumedPrincipal ->
+          fun () ->
+            {
+              getDelegatedAccessTokenResult =
+                { credentials; packedPolicySize; assumedPrincipal };
+              responseMetaData = ()
+            }
+    let error_of_json name json =
+      match name with
+      | "ExpiredTradeInTokenException" ->
+          `ExpiredTradeInTokenException
+            (ExpiredTradeInTokenException.of_json json)
+      | "PackedPolicyTooLargeException" ->
+          `PackedPolicyTooLargeException
+            (PackedPolicyTooLargeException.of_json json)
+      | "RegionDisabledException" ->
+          `RegionDisabledException (RegionDisabledException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ExpiredTradeInTokenException" ->
+          `ExpiredTradeInTokenException
+            (ExpiredTradeInTokenException.of_xml xml)
+      | "PackedPolicyTooLargeException" ->
+          `PackedPolicyTooLargeException
+            (PackedPolicyTooLargeException.of_xml xml)
+      | "RegionDisabledException" ->
+          `RegionDisabledException (RegionDisabledException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ExpiredTradeInTokenException e ->
+          `Assoc
+            [("error", (`String "ExpiredTradeInTokenException"));
+            ("details", (ExpiredTradeInTokenException.to_json e))]
+      | `PackedPolicyTooLargeException e ->
+          `Assoc
+            [("error", (`String "PackedPolicyTooLargeException"));
+            ("details", (PackedPolicyTooLargeException.to_json e))]
+      | `RegionDisabledException e ->
+          `Assoc
+            [("error", (`String "RegionDisabledException"));
+            ("details", (RegionDisabledException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.getDelegatedAccessTokenResult in
+      structure_to_wrapped_value
+        [("Credentials", (Option.map x.credentials ~f:Credentials.to_value));
+        ("PackedPolicySize",
+          (Option.map x.packedPolicySize ~f:NonNegativeIntegerType.to_value));
+        ("AssumedPrincipal",
+          (Option.map x.assumedPrincipal ~f:ArnType.to_value))]
+        ~wrapper:"GetDelegatedAccessTokenResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "GetDelegatedAccessTokenResult" in
+      let assumedPrincipal =
+        (Option.map ~f:ArnType.of_xml)
+          (Xml.child xml_arg0 "AssumedPrincipal") in
+      let packedPolicySize =
+        (Option.map ~f:NonNegativeIntegerType.of_xml)
+          (Xml.child xml_arg0 "PackedPolicySize") in
+      let credentials =
+        (Option.map ~f:Credentials.of_xml) (Xml.child xml_arg0 "Credentials") in
+      make ?assumedPrincipal ?packedPolicySize ?credentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let assumedPrincipal =
+        field_map json__ "AssumedPrincipal" ArnType.of_json in
+      let packedPolicySize =
+        field_map json__ "PackedPolicySize" NonNegativeIntegerType.of_json in
+      let credentials = field_map json__ "Credentials" Credentials.of_json in
+      make ?assumedPrincipal ?packedPolicySize ?credentials ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Exchanges a trade-in token for temporary Amazon Web Services credentials with the permissions associated with the assumed principal. This operation allows you to obtain credentials for a specific principal based on a trade-in token, enabling delegation of access to Amazon Web Services resources."]
+module GetDelegatedAccessTokenRequest =
+  struct
+    type nonrec t =
+      {
+      tradeInToken: TradeInTokenType.t
+        [@ocaml.doc
+          "The token to exchange for temporary Amazon Web Services credentials. This token must be valid and unexpired at the time of the request."]}
+    let context_ = "GetDelegatedAccessTokenRequest"
+    let make ~tradeInToken = fun () -> { tradeInToken }
+    let to_value x =
+      structure_to_value
+        [("TradeInToken", (Some (TradeInTokenType.to_value x.tradeInToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tradeInToken =
+        TradeInTokenType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TradeInToken") in
+      make ~tradeInToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tradeInToken =
+        field_map_exn json__ "TradeInToken" TradeInTokenType.of_json in
+      make ~tradeInToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Exchanges a trade-in token for temporary Amazon Web Services credentials with the permissions associated with the assumed principal. This operation allows you to obtain credentials for a specific principal based on a trade-in token, enabling delegation of access to Amazon Web Services resources."]
 module GetCallerIdentityResponse =
   struct
     type getCallerIdentityResult =
@@ -1463,10 +2185,10 @@ module GetCallerIdentityResponse =
         (Option.map ~f:UserIdType.of_xml) (Xml.child xml_arg0 "UserId") in
       make ?arn ?account ?userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" ArnType.of_json in
-      let account = field_map json "Account" AccountType.of_json in
-      let userId = field_map json "UserId" UserIdType.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" ArnType.of_json in
+      let account = field_map json__ "Account" AccountType.of_json in
+      let userId = field_map json__ "UserId" UserIdType.of_json in
       make ?arn ?account ?userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1483,7 +2205,7 @@ module GetCallerIdentityRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns details about the IAM user or role whose credentials are used to call the operation. No permissions are required to perform this operation. If an administrator adds a policy to your IAM user or role that explicitly denies access to the sts:GetCallerIdentity action, you can still perform this operation. Permissions are not required because the same information is returned when an IAM user or role is denied access. To view an example response, see I Am Not Authorized to Perform: iam:DeleteVirtualMFADevice in the IAM User Guide."]
+       "Returns details about the IAM user or role whose credentials are used to call the operation. No permissions are required to perform this operation. If an administrator attaches a policy to your identity that explicitly denies access to the sts:GetCallerIdentity action, you can still perform this operation. Permissions are not required because the same information is returned when access is denied. To view an example response, see I Am Not Authorized to Perform: iam:DeleteVirtualMFADevice in the IAM User Guide."]
 module GetAccessKeyInfoResponse =
   struct
     type getAccessKeyInfoResult =
@@ -1530,8 +2252,8 @@ module GetAccessKeyInfoResponse =
         (Option.map ~f:AccountType.of_xml) (Xml.child xml_arg0 "Account") in
       make ?account ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let account = field_map json "Account" AccountType.of_json in
+    let of_json json__ =
+      let account = field_map json__ "Account" AccountType.of_json in
       make ?account ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1555,9 +2277,9 @@ module GetAccessKeyInfoRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AccessKeyId") in
       make ~accessKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessKeyId =
-        field_map_exn json "AccessKeyId" AccessKeyIdType.of_json in
+        field_map_exn json__ "AccessKeyId" AccessKeyIdType.of_json in
       make ~accessKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1627,9 +2349,9 @@ module DecodeAuthorizationMessageResponse =
           (Xml.child xml_arg0 "DecodedMessage") in
       make ?decodedMessage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decodedMessage =
-        field_map json "DecodedMessage" DecodedMessageType.of_json in
+        field_map json__ "DecodedMessage" DecodedMessageType.of_json in
       make ?decodedMessage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1654,13 +2376,146 @@ module DecodeAuthorizationMessageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EncodedMessage") in
       make ~encodedMessage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encodedMessage =
-        field_map_exn json "EncodedMessage" EncodedMessageType.of_json in
+        field_map_exn json__ "EncodedMessage" EncodedMessageType.of_json in
       make ~encodedMessage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Decodes additional information about the authorization status of a request from an encoded message returned in response to an Amazon Web Services request. For example, if a user is not authorized to perform an operation that he or she has requested, the request returns a Client.UnauthorizedOperation response (an HTTP 403 response). Some Amazon Web Services operations additionally return an encoded message that can provide details about this authorization failure. Only certain Amazon Web Services operations return an encoded authorization message. The documentation for an individual operation indicates whether that operation returns an encoded message in addition to returning an HTTP code. The message is encoded because the details of the authorization status can contain privileged information that the user who requested the operation should not see. To decode an authorization status message, a user must be granted permissions through an IAM policy to request the DecodeAuthorizationMessage (sts:DecodeAuthorizationMessage) action. The decoded message includes the following type of information: Whether the request was denied due to an explicit deny or due to the absence of an explicit allow. For more information, see Determining Whether a Request is Allowed or Denied in the IAM User Guide. The principal who made the request. The requested action. The requested resource. The values of condition keys in the context of the user's request."]
+module AssumeRootResponse =
+  struct
+    type assumeRootResult =
+      {
+      credentials: Credentials.t option
+        [@ocaml.doc
+          "The temporary security credentials, which include an access key ID, a secret access key, and a security token. The size of the security token that STS API operations return is not fixed. We strongly recommend that you make no assumptions about the maximum size."];
+      sourceIdentity: SourceIdentityType.t option
+        [@ocaml.doc
+          "The source identity specified by the principal that is calling the AssumeRoot operation. You can use the aws:SourceIdentity condition key to control access based on the value of source identity. For more information about using source identity, see Monitor and control actions taken with assumed roles in the IAM User Guide. The regex used to validate this parameter is a string of characters consisting of upper- and lower-case alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@-"]}
+    and responseMetaData = unit
+    and t =
+      {
+      assumeRootResult: assumeRootResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `ExpiredTokenException of ExpiredTokenException.t 
+      | `RegionDisabledException of RegionDisabledException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "AssumeRootResponse"
+    let make ?credentials =
+      fun ?sourceIdentity ->
+        fun () ->
+          {
+            assumeRootResult = { credentials; sourceIdentity };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "ExpiredTokenException" ->
+          `ExpiredTokenException (ExpiredTokenException.of_json json)
+      | "RegionDisabledException" ->
+          `RegionDisabledException (RegionDisabledException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ExpiredTokenException" ->
+          `ExpiredTokenException (ExpiredTokenException.of_xml xml)
+      | "RegionDisabledException" ->
+          `RegionDisabledException (RegionDisabledException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ExpiredTokenException e ->
+          `Assoc
+            [("error", (`String "ExpiredTokenException"));
+            ("details", (ExpiredTokenException.to_json e))]
+      | `RegionDisabledException e ->
+          `Assoc
+            [("error", (`String "RegionDisabledException"));
+            ("details", (RegionDisabledException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.assumeRootResult in
+      structure_to_wrapped_value
+        [("Credentials", (Option.map x.credentials ~f:Credentials.to_value));
+        ("SourceIdentity",
+          (Option.map x.sourceIdentity ~f:SourceIdentityType.to_value))]
+        ~wrapper:"AssumeRootResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 = Xml.child_exn ~context:context_ t "AssumeRootResult" in
+      let sourceIdentity =
+        (Option.map ~f:SourceIdentityType.of_xml)
+          (Xml.child xml_arg0 "SourceIdentity") in
+      let credentials =
+        (Option.map ~f:Credentials.of_xml) (Xml.child xml_arg0 "Credentials") in
+      make ?sourceIdentity ?credentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceIdentity =
+        field_map json__ "SourceIdentity" SourceIdentityType.of_json in
+      let credentials = field_map json__ "Credentials" Credentials.of_json in
+      make ?sourceIdentity ?credentials ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a set of short term credentials you can use to perform privileged tasks on a member account in your organization. You must use credentials from an Organizations management account or a delegated administrator account for IAM to call AssumeRoot. You cannot use root user credentials to make this call. Before you can launch a privileged session, you must have centralized root access in your organization. For steps to enable this feature, see Centralize root access for member accounts in the IAM User Guide. The STS global endpoint is not supported for AssumeRoot. You must send this request to a Regional STS endpoint. For more information, see Endpoints. You can track AssumeRoot in CloudTrail logs to determine what actions were performed in a session. For more information, see Track privileged tasks in CloudTrail in the IAM User Guide. When granting access to privileged tasks you should only grant the necessary permissions required to perform that task. For more information, see Security best practices in IAM. In addition, you can use service control policies (SCPs) to manage and limit permissions in your organization. See General examples in the Organizations User Guide for more information on SCPs."]
+module AssumeRootRequest =
+  struct
+    type nonrec t =
+      {
+      targetPrincipal: TargetPrincipalType.t
+        [@ocaml.doc "The member account principal ARN or account ID."];
+      taskPolicyArn: PolicyDescriptorType.t
+        [@ocaml.doc
+          "The identity based policy that scopes the session to the privileged tasks that can be performed. You must use one of following Amazon Web Services managed policies to scope root session actions: IAMAuditRootUserCredentials IAMCreateRootUserPassword IAMDeleteRootUserCredentials S3UnlockBucketPolicy SQSUnlockQueuePolicy"];
+      durationSeconds: RootDurationSecondsType.t option
+        [@ocaml.doc
+          "The duration, in seconds, of the privileged session. The value can range from 0 seconds up to the maximum session duration of 900 seconds (15 minutes). If you specify a value higher than this setting, the operation fails. By default, the value is set to 900 seconds."]}
+    let context_ = "AssumeRootRequest"
+    let make ?durationSeconds =
+      fun ~targetPrincipal ->
+        fun ~taskPolicyArn ->
+          fun () -> { durationSeconds; targetPrincipal; taskPolicyArn }
+    let to_value x =
+      structure_to_value
+        [("TargetPrincipal",
+           (Some (TargetPrincipalType.to_value x.targetPrincipal)));
+        ("TaskPolicyArn",
+          (Some (PolicyDescriptorType.to_value x.taskPolicyArn)));
+        ("DurationSeconds",
+          (Option.map x.durationSeconds ~f:RootDurationSecondsType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let durationSeconds =
+        (Option.map ~f:RootDurationSecondsType.of_xml)
+          (Xml.child xml_arg0 "DurationSeconds") in
+      let taskPolicyArn =
+        PolicyDescriptorType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TaskPolicyArn") in
+      let targetPrincipal =
+        TargetPrincipalType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TargetPrincipal") in
+      make ?durationSeconds ~taskPolicyArn ~targetPrincipal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let durationSeconds =
+        field_map json__ "DurationSeconds" RootDurationSecondsType.of_json in
+      let taskPolicyArn =
+        field_map_exn json__ "TaskPolicyArn" PolicyDescriptorType.of_json in
+      let targetPrincipal =
+        field_map_exn json__ "TargetPrincipal" TargetPrincipalType.of_json in
+      make ?durationSeconds ~taskPolicyArn ~targetPrincipal ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a set of short term credentials you can use to perform privileged tasks on a member account in your organization. You must use credentials from an Organizations management account or a delegated administrator account for IAM to call AssumeRoot. You cannot use root user credentials to make this call. Before you can launch a privileged session, you must have centralized root access in your organization. For steps to enable this feature, see Centralize root access for member accounts in the IAM User Guide. The STS global endpoint is not supported for AssumeRoot. You must send this request to a Regional STS endpoint. For more information, see Endpoints. You can track AssumeRoot in CloudTrail logs to determine what actions were performed in a session. For more information, see Track privileged tasks in CloudTrail in the IAM User Guide. When granting access to privileged tasks you should only grant the necessary permissions required to perform that task. For more information, see Security best practices in IAM. In addition, you can use service control policies (SCPs) to manage and limit permissions in your organization. See General examples in the Organizations User Guide for more information on SCPs."]
 module AssumeRoleWithWebIdentityResponse =
   struct
     type assumeRoleWithWebIdentityResult =
@@ -1845,19 +2700,19 @@ module AssumeRoleWithWebIdentityResponse =
       make ?sourceIdentity ?audience ?provider ?packedPolicySize
         ?assumedRoleUser ?subjectFromWebIdentityToken ?credentials ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceIdentity =
-        field_map json "SourceIdentity" SourceIdentityType.of_json in
-      let audience = field_map json "Audience" Audience.of_json in
-      let provider = field_map json "Provider" Issuer.of_json in
+        field_map json__ "SourceIdentity" SourceIdentityType.of_json in
+      let audience = field_map json__ "Audience" Audience.of_json in
+      let provider = field_map json__ "Provider" Issuer.of_json in
       let packedPolicySize =
-        field_map json "PackedPolicySize" NonNegativeIntegerType.of_json in
+        field_map json__ "PackedPolicySize" NonNegativeIntegerType.of_json in
       let assumedRoleUser =
-        field_map json "AssumedRoleUser" AssumedRoleUser.of_json in
+        field_map json__ "AssumedRoleUser" AssumedRoleUser.of_json in
       let subjectFromWebIdentityToken =
-        field_map json "SubjectFromWebIdentityToken"
+        field_map json__ "SubjectFromWebIdentityToken"
           WebIdentitySubjectType.of_json in
-      let credentials = field_map json "Credentials" Credentials.of_json in
+      let credentials = field_map json__ "Credentials" Credentials.of_json in
       make ?sourceIdentity ?audience ?provider ?packedPolicySize
         ?assumedRoleUser ?subjectFromWebIdentityToken ?credentials ()
     let to_json v = composed_to_json to_value v
@@ -1869,22 +2724,22 @@ module AssumeRoleWithWebIdentityRequest =
       {
       roleArn: ArnType.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the role that the caller is assuming."];
+          "The Amazon Resource Name (ARN) of the role that the caller is assuming. Additional considerations apply to Amazon Cognito identity pools that assume cross-account IAM roles. The trust policies of these roles must accept the cognito-identity.amazonaws.com service principal and must contain the cognito-identity.amazonaws.com:aud condition key to restrict role assumption to users from your intended identity pools. A policy that trusts Amazon Cognito identity pools without this condition creates a risk that a user from an unintended identity pool can assume the role. For more information, see Trust policies for IAM roles in Basic (Classic) authentication in the Amazon Cognito Developer Guide."];
       roleSessionName: RoleSessionNameType.t
         [@ocaml.doc
-          "An identifier for the assumed role session. Typically, you pass the name or identifier that is associated with the user who is using your application. That way, the temporary security credentials that your application will use are associated with that user. This session name is included as part of the ARN and assumed role ID in the AssumedRoleUser response element. The regex used to validate this parameter is a string of characters consisting of upper- and lower-case alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@-"];
+          "An identifier for the assumed role session. Typically, you pass the name or identifier that is associated with the user who is using your application. That way, the temporary security credentials that your application will use are associated with that user. This session name is included as part of the ARN and assumed role ID in the AssumedRoleUser response element. For security purposes, administrators can view this field in CloudTrail logs to help identify who performed an action in Amazon Web Services. Your administrator might require that you specify your user name as the session name when you assume the role. For more information, see sts:RoleSessionName . The regex used to validate this parameter is a string of characters consisting of upper- and lower-case alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@-"];
       webIdentityToken: ClientTokenType.t
         [@ocaml.doc
-          "The OAuth 2.0 access token or OpenID Connect ID token that is provided by the identity provider. Your application must get this token by authenticating the user who is using your application with a web identity provider before the application makes an AssumeRoleWithWebIdentity call."];
+          "The OAuth 2.0 access token or OpenID Connect ID token that is provided by the identity provider. Your application must get this token by authenticating the user who is using your application with a web identity provider before the application makes an AssumeRoleWithWebIdentity call. Timestamps in the token must be formatted as either an integer or a long integer. Tokens must be signed using either RSA keys (RS256, RS384, or RS512) or ECDSA keys (ES256, ES384, or ES512)."];
       providerId: UrlType.t option
         [@ocaml.doc
           "The fully qualified host component of the domain name of the OAuth 2.0 identity provider. Do not specify this value for an OpenID Connect identity provider. Currently www.amazon.com and graph.facebook.com are the only supported identity providers for OAuth 2.0 access tokens. Do not include URL schemes and port numbers. Do not specify this value for OpenID Connect ID tokens."];
       policyArns: PolicyDescriptorListType.t option
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the IAM managed policies that you want to use as managed session policies. The policies must exist in the same account as the role. This parameter is optional. You can provide up to 10 managed policy ARNs. However, the plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. For more information about ARNs, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces in the Amazon Web Services General Reference. An Amazon Web Services conversion compresses the passed session policies and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide."];
+          "The Amazon Resource Names (ARNs) of the IAM managed policies that you want to use as managed session policies. The policies must exist in the same account as the role. This parameter is optional. You can provide up to 10 managed policy ARNs. However, the plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. For more information about ARNs, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces in the Amazon Web Services General Reference. An Amazon Web Services conversion compresses the passed inline session policy, managed policy ARNs, and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide."];
       policy: SessionPolicyDocumentType.t option
         [@ocaml.doc
-          "An IAM policy in JSON format that you want to use as an inline session policy. This parameter is optional. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. The JSON policy characters can be any ASCII character from the space character to the end of the valid character list (\\u0020 through \\u00FF). It can also include the tab (\\u0009), linefeed (\\u000A), and carriage return (\\u000D) characters. An Amazon Web Services conversion compresses the passed session policies and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit."];
+          "An IAM policy in JSON format that you want to use as an inline session policy. This parameter is optional. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. The JSON policy characters can be any ASCII character from the space character to the end of the valid character list (\\u0020 through \\u00FF). It can also include the tab (\\u0009), linefeed (\\u000A), and carriage return (\\u000D) characters. For more information about role session permissions, see Session policies. An Amazon Web Services conversion compresses the passed inline session policy, managed policy ARNs, and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit."];
       durationSeconds: RoleDurationSecondsType.t option
         [@ocaml.doc
           "The duration, in seconds, of the role session. The value can range from 900 seconds (15 minutes) up to the maximum session duration setting for the role. This setting can have a value from 1 hour to 12 hours. If you specify a value higher than this setting, the operation fails. For example, if you specify a session duration of 12 hours, but your administrator set the maximum session duration to 6 hours, your operation fails. To learn how to view the maximum value for your role, see View the Maximum Session Duration Setting for a Role in the IAM User Guide. By default, the value is set to 3600 seconds. The DurationSeconds parameter is separate from the duration of a console session that you might request using the returned credentials. The request to the federation endpoint for a console sign-in token takes a SessionDuration parameter that specifies the maximum length of the console session. For more information, see Creating a URL that Enables Federated Users to Access the Amazon Web Services Management Console in the IAM User Guide."]}
@@ -1944,23 +2799,24 @@ module AssumeRoleWithWebIdentityRequest =
       make ?durationSeconds ?policy ?policyArns ?providerId ~webIdentityToken
         ~roleSessionName ~roleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let durationSeconds =
-        field_map json "DurationSeconds" RoleDurationSecondsType.of_json in
-      let policy = field_map json "Policy" SessionPolicyDocumentType.of_json in
+        field_map json__ "DurationSeconds" RoleDurationSecondsType.of_json in
+      let policy =
+        field_map json__ "Policy" SessionPolicyDocumentType.of_json in
       let policyArns =
-        field_map json "PolicyArns" PolicyDescriptorListType.of_json in
-      let providerId = field_map json "ProviderId" UrlType.of_json in
+        field_map json__ "PolicyArns" PolicyDescriptorListType.of_json in
+      let providerId = field_map json__ "ProviderId" UrlType.of_json in
       let webIdentityToken =
-        field_map_exn json "WebIdentityToken" ClientTokenType.of_json in
+        field_map_exn json__ "WebIdentityToken" ClientTokenType.of_json in
       let roleSessionName =
-        field_map_exn json "RoleSessionName" RoleSessionNameType.of_json in
-      let roleArn = field_map_exn json "RoleArn" ArnType.of_json in
+        field_map_exn json__ "RoleSessionName" RoleSessionNameType.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" ArnType.of_json in
       make ?durationSeconds ?policy ?policyArns ?providerId ~webIdentityToken
         ~roleSessionName ~roleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a set of temporary security credentials for users who have been authenticated in a mobile or web application with a web identity provider. Example providers include the OAuth 2.0 providers Login with Amazon and Facebook, or any OpenID Connect-compatible identity provider such as Google or Amazon Cognito federated identities. For mobile applications, we recommend that you use Amazon Cognito. You can use Amazon Cognito with the Amazon Web Services SDK for iOS Developer Guide and the Amazon Web Services SDK for Android Developer Guide to uniquely identify a user. You can also supply the user with a consistent identity throughout the lifetime of an application. To learn more about Amazon Cognito, see Amazon Cognito Overview in Amazon Web Services SDK for Android Developer Guide and Amazon Cognito Overview in the Amazon Web Services SDK for iOS Developer Guide. Calling AssumeRoleWithWebIdentity does not require the use of Amazon Web Services security credentials. Therefore, you can distribute an application (for example, on mobile devices) that requests temporary security credentials without including long-term Amazon Web Services credentials in the application. You also don't need to deploy server-based proxy services that use long-term Amazon Web Services credentials. Instead, the identity of the caller is validated by using a token from the web identity provider. For a comparison of AssumeRoleWithWebIdentity with the other API operations that produce temporary credentials, see Requesting Temporary Security Credentials and Comparing the Amazon Web Services STS API operations in the IAM User Guide. The temporary security credentials returned by this API consist of an access key ID, a secret access key, and a security token. Applications can use these temporary security credentials to sign calls to Amazon Web Services service API operations. Session Duration By default, the temporary security credentials created by AssumeRoleWithWebIdentity last for one hour. However, you can use the optional DurationSeconds parameter to specify the duration of your session. You can provide a value from 900 seconds (15 minutes) up to the maximum session duration setting for the role. This setting can have a value from 1 hour to 12 hours. To learn how to view the maximum value for your role, see View the Maximum Session Duration Setting for a Role in the IAM User Guide. The maximum session duration limit applies when you use the AssumeRole* API operations or the assume-role* CLI commands. However the limit does not apply when you use those operations to create a console URL. For more information, see Using IAM Roles in the IAM User Guide. Permissions The temporary security credentials created by AssumeRoleWithWebIdentity can be used to make API calls to any Amazon Web Services service with the following exception: you cannot call the STS GetFederationToken or GetSessionToken API operations. (Optional) You can pass inline or managed session policies to this operation. You can pass a single JSON policy document to use as an inline session policy. You can also specify up to 10 managed policies to use as managed session policies. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide. Tags (Optional) You can configure your IdP to pass attributes into your web identity token as session tags. Each session tag consists of a key name and an associated value. For more information about session tags, see Passing Session Tags in STS in the IAM User Guide. You can pass up to 50 session tags. The plaintext session tag keys can\226\128\153t exceed 128 characters and the values can\226\128\153t exceed 256 characters. For these and additional limits, see IAM and STS Character Limits in the IAM User Guide. An Amazon Web Services conversion compresses the passed session policies and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit. You can pass a session tag with the same key as a tag that is attached to the role. When you do, the session tag overrides the role tag with the same key. An administrator must grant you the permissions necessary to pass session tags. The administrator can also create granular permissions to allow you to pass only specific session tags. For more information, see Tutorial: Using Tags for Attribute-Based Access Control in the IAM User Guide. You can set the session tags as transitive. Transitive tags persist during role chaining. For more information, see Chaining Roles with Session Tags in the IAM User Guide. Identities Before your application can call AssumeRoleWithWebIdentity, you must have an identity token from a supported identity provider and create a role that the application can assume. The role that your application assumes must trust the identity provider that is associated with the identity token. In other words, the identity provider must be specified in the role's trust policy. Calling AssumeRoleWithWebIdentity can result in an entry in your CloudTrail logs. The entry includes the Subject of the provided web identity token. We recommend that you avoid using any personally identifiable information (PII) in this field. For example, you could instead use a GUID or a pairwise identifier, as suggested in the OIDC specification. For more information about how to use web identity federation and the AssumeRoleWithWebIdentity API, see the following resources: Using Web Identity Federation API Operations for Mobile Apps and Federation Through a Web-based Identity Provider. Web Identity Federation Playground. Walk through the process of authenticating through Login with Amazon, Facebook, or Google, getting temporary security credentials, and then using those credentials to make a request to Amazon Web Services. Amazon Web Services SDK for iOS Developer Guide and Amazon Web Services SDK for Android Developer Guide. These toolkits contain sample apps that show how to invoke the identity providers. The toolkits then show how to use the information from these providers to get and use temporary security credentials. Web Identity Federation with Mobile Applications. This article discusses web identity federation and shows an example of how to use web identity federation to get access to content in Amazon S3."]
+       "Returns a set of temporary security credentials for users who have been authenticated in a mobile or web application with a web identity provider. Example providers include the OAuth 2.0 providers Login with Amazon and Facebook, or any OpenID Connect-compatible identity provider such as Google or Amazon Cognito federated identities. For mobile applications, we recommend that you use Amazon Cognito. You can use Amazon Cognito with the Amazon Web Services SDK for iOS Developer Guide and the Amazon Web Services SDK for Android Developer Guide to uniquely identify a user. You can also supply the user with a consistent identity throughout the lifetime of an application. To learn more about Amazon Cognito, see Amazon Cognito identity pools in Amazon Cognito Developer Guide. Calling AssumeRoleWithWebIdentity does not require the use of Amazon Web Services security credentials. Therefore, you can distribute an application (for example, on mobile devices) that requests temporary security credentials without including long-term Amazon Web Services credentials in the application. You also don't need to deploy server-based proxy services that use long-term Amazon Web Services credentials. Instead, the identity of the caller is validated by using a token from the web identity provider. For a comparison of AssumeRoleWithWebIdentity with the other API operations that produce temporary credentials, see Requesting Temporary Security Credentials and Compare STS credentials in the IAM User Guide. The temporary security credentials returned by this API consist of an access key ID, a secret access key, and a security token. Applications can use these temporary security credentials to sign calls to Amazon Web Services service API operations. Session Duration By default, the temporary security credentials created by AssumeRoleWithWebIdentity last for one hour. However, you can use the optional DurationSeconds parameter to specify the duration of your session. You can provide a value from 900 seconds (15 minutes) up to the maximum session duration setting for the role. This setting can have a value from 1 hour to 12 hours. To learn how to view the maximum value for your role, see Update the maximum session duration for a role in the IAM User Guide. The maximum session duration limit applies when you use the AssumeRole* API operations or the assume-role* CLI commands. However the limit does not apply when you use those operations to create a console URL. For more information, see Using IAM Roles in the IAM User Guide. Permissions The temporary security credentials created by AssumeRoleWithWebIdentity can be used to make API calls to any Amazon Web Services service with the following exception: you cannot call the STS GetFederationToken or GetSessionToken API operations. (Optional) You can pass inline or managed session policies to this operation. You can pass a single JSON policy document to use as an inline session policy. You can also specify up to 10 managed policy Amazon Resource Names (ARNs) to use as managed session policies. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide. Tags (Optional) You can configure your IdP to pass attributes into your web identity token as session tags. Each session tag consists of a key name and an associated value. For more information about session tags, see Passing session tags using AssumeRoleWithWebIdentity in the IAM User Guide. You can pass up to 50 session tags. The plaintext session tag keys can\226\128\153t exceed 128 characters and the values can\226\128\153t exceed 256 characters. For these and additional limits, see IAM and STS Character Limits in the IAM User Guide. An Amazon Web Services conversion compresses the passed inline session policy, managed policy ARNs, and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit. You can pass a session tag with the same key as a tag that is attached to the role. When you do, the session tag overrides the role tag with the same key. An administrator must grant you the permissions necessary to pass session tags. The administrator can also create granular permissions to allow you to pass only specific session tags. For more information, see Tutorial: Using Tags for Attribute-Based Access Control in the IAM User Guide. You can set the session tags as transitive. Transitive tags persist during role chaining. For more information, see Chaining Roles with Session Tags in the IAM User Guide. Identities Before your application can call AssumeRoleWithWebIdentity, you must have an identity token from a supported identity provider and create a role that the application can assume. The role that your application assumes must trust the identity provider that is associated with the identity token. In other words, the identity provider must be specified in the role's trust policy. Calling AssumeRoleWithWebIdentity can result in an entry in your CloudTrail logs. The entry includes the Subject of the provided web identity token. We recommend that you avoid using any personally identifiable information (PII) in this field. For example, you could instead use a GUID or a pairwise identifier, as suggested in the OIDC specification. For more information about how to use OIDC federation and the AssumeRoleWithWebIdentity API, see the following resources: Using Web Identity Federation API Operations for Mobile Apps and Federation Through a Web-based Identity Provider. Amazon Web Services SDK for iOS Developer Guide and Amazon Web Services SDK for Android Developer Guide. These toolkits contain sample apps that show how to invoke the identity providers. The toolkits then show how to use the information from these providers to get and use temporary security credentials."]
 module AssumeRoleWithSAMLResponse =
   struct
     type assumeRoleWithSAMLResult =
@@ -1987,10 +2843,10 @@ module AssumeRoleWithSAMLResponse =
           "The value of the Recipient attribute of the SubjectConfirmationData element of the SAML assertion."];
       nameQualifier: NameQualifier.t option
         [@ocaml.doc
-          "A hash value based on the concatenation of the following: The Issuer response value. The Amazon Web Services account ID. The friendly name (the last part of the ARN) of the SAML provider in IAM. The combination of NameQualifier and Subject can be used to uniquely identify a federated user. The following pseudocode shows how the hash value is calculated: BASE64 ( SHA1 ( \"https://example.com/saml\" + \"123456789012\" + \"/MySAMLIdP\" ) )"];
+          "A hash value based on the concatenation of the following: The Issuer response value. The Amazon Web Services account ID. The friendly name (the last part of the ARN) of the SAML provider in IAM. The combination of NameQualifier and Subject can be used to uniquely identify a user. The following pseudocode shows how the hash value is calculated: BASE64 ( SHA1 ( \"https://example.com/saml\" + \"123456789012\" + \"/MySAMLIdP\" ) )"];
       sourceIdentity: SourceIdentityType.t option
         [@ocaml.doc
-          "The value in the SourceIdentity attribute in the SAML assertion. You can require users to set a source identity value when they assume a role. You do this by using the sts:SourceIdentity condition key in a role trust policy. That way, actions that are taken with the role are associated with that user. After the source identity is set, the value cannot be changed. It is present in the request for all actions that are taken by the role and persists across chained role sessions. You can configure your SAML identity provider to use an attribute associated with your users, like user name or email, as the source identity when calling AssumeRoleWithSAML. You do this by adding an attribute to the SAML assertion. For more information about using source identity, see Monitor and control actions taken with assumed roles in the IAM User Guide. The regex used to validate this parameter is a string of characters consisting of upper- and lower-case alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@-"]}
+          "The value in the SourceIdentity attribute in the SAML assertion. The source identity value persists across chained role sessions. You can require users to set a source identity value when they assume a role. You do this by using the sts:SourceIdentity condition key in a role trust policy. That way, actions that are taken with the role are associated with that user. After the source identity is set, the value cannot be changed. It is present in the request for all actions that are taken by the role and persists across chained role sessions. You can configure your SAML identity provider to use an attribute associated with your users, like user name or email, as the source identity when calling AssumeRoleWithSAML. You do this by adding an attribute to the SAML assertion. For more information about using source identity, see Monitor and control actions taken with assumed roles in the IAM User Guide. The regex used to validate this parameter is a string of characters consisting of upper- and lower-case alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@-"]}
     and responseMetaData = unit
     and t =
       {
@@ -2147,20 +3003,20 @@ module AssumeRoleWithSAMLResponse =
       make ?sourceIdentity ?nameQualifier ?audience ?issuer ?subjectType
         ?subject ?packedPolicySize ?assumedRoleUser ?credentials ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceIdentity =
-        field_map json "SourceIdentity" SourceIdentityType.of_json in
+        field_map json__ "SourceIdentity" SourceIdentityType.of_json in
       let nameQualifier =
-        field_map json "NameQualifier" NameQualifier.of_json in
-      let audience = field_map json "Audience" Audience.of_json in
-      let issuer = field_map json "Issuer" Issuer.of_json in
-      let subjectType = field_map json "SubjectType" SubjectType.of_json in
-      let subject = field_map json "Subject" Subject.of_json in
+        field_map json__ "NameQualifier" NameQualifier.of_json in
+      let audience = field_map json__ "Audience" Audience.of_json in
+      let issuer = field_map json__ "Issuer" Issuer.of_json in
+      let subjectType = field_map json__ "SubjectType" SubjectType.of_json in
+      let subject = field_map json__ "Subject" Subject.of_json in
       let packedPolicySize =
-        field_map json "PackedPolicySize" NonNegativeIntegerType.of_json in
+        field_map json__ "PackedPolicySize" NonNegativeIntegerType.of_json in
       let assumedRoleUser =
-        field_map json "AssumedRoleUser" AssumedRoleUser.of_json in
-      let credentials = field_map json "Credentials" Credentials.of_json in
+        field_map json__ "AssumedRoleUser" AssumedRoleUser.of_json in
+      let credentials = field_map json__ "Credentials" Credentials.of_json in
       make ?sourceIdentity ?nameQualifier ?audience ?issuer ?subjectType
         ?subject ?packedPolicySize ?assumedRoleUser ?credentials ()
     let to_json v = composed_to_json to_value v
@@ -2181,10 +3037,10 @@ module AssumeRoleWithSAMLRequest =
           "The base64 encoded SAML authentication response provided by the IdP. For more information, see Configuring a Relying Party and Adding Claims in the IAM User Guide."];
       policyArns: PolicyDescriptorListType.t option
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the IAM managed policies that you want to use as managed session policies. The policies must exist in the same account as the role. This parameter is optional. You can provide up to 10 managed policy ARNs. However, the plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. For more information about ARNs, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces in the Amazon Web Services General Reference. An Amazon Web Services conversion compresses the passed session policies and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide."];
+          "The Amazon Resource Names (ARNs) of the IAM managed policies that you want to use as managed session policies. The policies must exist in the same account as the role. This parameter is optional. You can provide up to 10 managed policy ARNs. However, the plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. For more information about ARNs, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces in the Amazon Web Services General Reference. An Amazon Web Services conversion compresses the passed inline session policy, managed policy ARNs, and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide."];
       policy: SessionPolicyDocumentType.t option
         [@ocaml.doc
-          "An IAM policy in JSON format that you want to use as an inline session policy. This parameter is optional. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. The JSON policy characters can be any ASCII character from the space character to the end of the valid character list (\\u0020 through \\u00FF). It can also include the tab (\\u0009), linefeed (\\u000A), and carriage return (\\u000D) characters. An Amazon Web Services conversion compresses the passed session policies and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit."];
+          "An IAM policy in JSON format that you want to use as an inline session policy. This parameter is optional. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. The JSON policy characters can be any ASCII character from the space character to the end of the valid character list (\\u0020 through \\u00FF). It can also include the tab (\\u0009), linefeed (\\u000A), and carriage return (\\u000D) characters. For more information about role session permissions, see Session policies. An Amazon Web Services conversion compresses the passed inline session policy, managed policy ARNs, and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit."];
       durationSeconds: RoleDurationSecondsType.t option
         [@ocaml.doc
           "The duration, in seconds, of the role session. Your role session lasts for the duration that you specify for the DurationSeconds parameter, or until the time specified in the SAML authentication response's SessionNotOnOrAfter value, whichever is shorter. You can provide a DurationSeconds value from 900 seconds (15 minutes) up to the maximum session duration setting for the role. This setting can have a value from 1 hour to 12 hours. If you specify a value higher than this setting, the operation fails. For example, if you specify a session duration of 12 hours, but your administrator set the maximum session duration to 6 hours, your operation fails. To learn how to view the maximum value for your role, see View the Maximum Session Duration Setting for a Role in the IAM User Guide. By default, the value is set to 3600 seconds. The DurationSeconds parameter is separate from the duration of a console session that you might request using the returned credentials. The request to the federation endpoint for a console sign-in token takes a SessionDuration parameter that specifies the maximum length of the console session. For more information, see Creating a URL that Enables Federated Users to Access the Amazon Web Services Management Console in the IAM User Guide."]}
@@ -2238,21 +3094,22 @@ module AssumeRoleWithSAMLRequest =
       make ?durationSeconds ?policy ?policyArns ~sAMLAssertion ~principalArn
         ~roleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let durationSeconds =
-        field_map json "DurationSeconds" RoleDurationSecondsType.of_json in
-      let policy = field_map json "Policy" SessionPolicyDocumentType.of_json in
+        field_map json__ "DurationSeconds" RoleDurationSecondsType.of_json in
+      let policy =
+        field_map json__ "Policy" SessionPolicyDocumentType.of_json in
       let policyArns =
-        field_map json "PolicyArns" PolicyDescriptorListType.of_json in
+        field_map json__ "PolicyArns" PolicyDescriptorListType.of_json in
       let sAMLAssertion =
-        field_map_exn json "SAMLAssertion" SAMLAssertionType.of_json in
-      let principalArn = field_map_exn json "PrincipalArn" ArnType.of_json in
-      let roleArn = field_map_exn json "RoleArn" ArnType.of_json in
+        field_map_exn json__ "SAMLAssertion" SAMLAssertionType.of_json in
+      let principalArn = field_map_exn json__ "PrincipalArn" ArnType.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" ArnType.of_json in
       make ?durationSeconds ?policy ?policyArns ~sAMLAssertion ~principalArn
         ~roleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a set of temporary security credentials for users who have been authenticated via a SAML authentication response. This operation provides a mechanism for tying an enterprise identity store or directory to role-based Amazon Web Services access without user-specific credentials or configuration. For a comparison of AssumeRoleWithSAML with the other API operations that produce temporary credentials, see Requesting Temporary Security Credentials and Comparing the Amazon Web Services STS API operations in the IAM User Guide. The temporary security credentials returned by this operation consist of an access key ID, a secret access key, and a security token. Applications can use these temporary security credentials to sign calls to Amazon Web Services services. Session Duration By default, the temporary security credentials created by AssumeRoleWithSAML last for one hour. However, you can use the optional DurationSeconds parameter to specify the duration of your session. Your role session lasts for the duration that you specify, or until the time specified in the SAML authentication response's SessionNotOnOrAfter value, whichever is shorter. You can provide a DurationSeconds value from 900 seconds (15 minutes) up to the maximum session duration setting for the role. This setting can have a value from 1 hour to 12 hours. To learn how to view the maximum value for your role, see View the Maximum Session Duration Setting for a Role in the IAM User Guide. The maximum session duration limit applies when you use the AssumeRole* API operations or the assume-role* CLI commands. However the limit does not apply when you use those operations to create a console URL. For more information, see Using IAM Roles in the IAM User Guide. Role chaining limits your CLI or Amazon Web Services API role session to a maximum of one hour. When you use the AssumeRole API operation to assume a role, you can specify the duration of your role session with the DurationSeconds parameter. You can specify a parameter value of up to 43200 seconds (12 hours), depending on the maximum session duration setting for your role. However, if you assume a role using role chaining and provide a DurationSeconds parameter value greater than one hour, the operation fails. Permissions The temporary security credentials created by AssumeRoleWithSAML can be used to make API calls to any Amazon Web Services service with the following exception: you cannot call the STS GetFederationToken or GetSessionToken API operations. (Optional) You can pass inline or managed session policies to this operation. You can pass a single JSON policy document to use as an inline session policy. You can also specify up to 10 managed policies to use as managed session policies. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide. Calling AssumeRoleWithSAML does not require the use of Amazon Web Services security credentials. The identity of the caller is validated by using keys in the metadata document that is uploaded for the SAML provider entity for your identity provider. Calling AssumeRoleWithSAML can result in an entry in your CloudTrail logs. The entry includes the value in the NameID element of the SAML assertion. We recommend that you use a NameIDType that is not associated with any personally identifiable information (PII). For example, you could instead use the persistent identifier (urn:oasis:names:tc:SAML:2.0:nameid-format:persistent). Tags (Optional) You can configure your IdP to pass attributes into your SAML assertion as session tags. Each session tag consists of a key name and an associated value. For more information about session tags, see Passing Session Tags in STS in the IAM User Guide. You can pass up to 50 session tags. The plaintext session tag keys can\226\128\153t exceed 128 characters and the values can\226\128\153t exceed 256 characters. For these and additional limits, see IAM and STS Character Limits in the IAM User Guide. An Amazon Web Services conversion compresses the passed session policies and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit. You can pass a session tag with the same key as a tag that is attached to the role. When you do, session tags override the role's tags with the same key. An administrator must grant you the permissions necessary to pass session tags. The administrator can also create granular permissions to allow you to pass only specific session tags. For more information, see Tutorial: Using Tags for Attribute-Based Access Control in the IAM User Guide. You can set the session tags as transitive. Transitive tags persist during role chaining. For more information, see Chaining Roles with Session Tags in the IAM User Guide. SAML Configuration Before your application can call AssumeRoleWithSAML, you must configure your SAML identity provider (IdP) to issue the claims required by Amazon Web Services. Additionally, you must use Identity and Access Management (IAM) to create a SAML provider entity in your Amazon Web Services account that represents your identity provider. You must also create an IAM role that specifies this SAML provider in its trust policy. For more information, see the following resources: About SAML 2.0-based Federation in the IAM User Guide. Creating SAML Identity Providers in the IAM User Guide. Configuring a Relying Party and Claims in the IAM User Guide. Creating a Role for SAML 2.0 Federation in the IAM User Guide."]
+       "Returns a set of temporary security credentials for users who have been authenticated via a SAML authentication response. This operation provides a mechanism for tying an enterprise identity store or directory to role-based Amazon Web Services access without user-specific credentials or configuration. For a comparison of AssumeRoleWithSAML with the other API operations that produce temporary credentials, see Requesting Temporary Security Credentials and Compare STS credentials in the IAM User Guide. The temporary security credentials returned by this operation consist of an access key ID, a secret access key, and a security token. Applications can use these temporary security credentials to sign calls to Amazon Web Services services. AssumeRoleWithSAML will not work on IAM Identity Center managed roles. These roles' names start with AWSReservedSSO_. Session Duration By default, the temporary security credentials created by AssumeRoleWithSAML last for one hour. However, you can use the optional DurationSeconds parameter to specify the duration of your session. Your role session lasts for the duration that you specify, or until the time specified in the SAML authentication response's SessionNotOnOrAfter value, whichever is shorter. You can provide a DurationSeconds value from 900 seconds (15 minutes) up to the maximum session duration setting for the role. This setting can have a value from 1 hour to 12 hours. To learn how to view the maximum value for your role, see View the Maximum Session Duration Setting for a Role in the IAM User Guide. The maximum session duration limit applies when you use the AssumeRole* API operations or the assume-role* CLI commands. However the limit does not apply when you use those operations to create a console URL. For more information, see Using IAM Roles in the IAM User Guide. Role chaining limits your CLI or Amazon Web Services API role session to a maximum of one hour. When you use the AssumeRole API operation to assume a role, you can specify the duration of your role session with the DurationSeconds parameter. You can specify a parameter value of up to 43200 seconds (12 hours), depending on the maximum session duration setting for your role. However, if you assume a role using role chaining and provide a DurationSeconds parameter value greater than one hour, the operation fails. Permissions The temporary security credentials created by AssumeRoleWithSAML can be used to make API calls to any Amazon Web Services service with the following exception: you cannot call the STS GetFederationToken or GetSessionToken API operations. (Optional) You can pass inline or managed session policies to this operation. You can pass a single JSON policy document to use as an inline session policy. You can also specify up to 10 managed policy Amazon Resource Names (ARNs) to use as managed session policies. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide. Calling AssumeRoleWithSAML does not require the use of Amazon Web Services security credentials. The identity of the caller is validated by using keys in the metadata document that is uploaded for the SAML provider entity for your identity provider. Calling AssumeRoleWithSAML can result in an entry in your CloudTrail logs. The entry includes the value in the NameID element of the SAML assertion. We recommend that you use a NameIDType that is not associated with any personally identifiable information (PII). For example, you could instead use the persistent identifier (urn:oasis:names:tc:SAML:2.0:nameid-format:persistent). Tags (Optional) You can configure your IdP to pass attributes into your SAML assertion as session tags. Each session tag consists of a key name and an associated value. For more information about session tags, see Passing Session Tags in STS in the IAM User Guide. You can pass up to 50 session tags. The plaintext session tag keys can\226\128\153t exceed 128 characters and the values can\226\128\153t exceed 256 characters. For these and additional limits, see IAM and STS Character Limits in the IAM User Guide. An Amazon Web Services conversion compresses the passed inline session policy, managed policy ARNs, and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit. You can pass a session tag with the same key as a tag that is attached to the role. When you do, session tags override the role's tags with the same key. An administrator must grant you the permissions necessary to pass session tags. The administrator can also create granular permissions to allow you to pass only specific session tags. For more information, see Tutorial: Using Tags for Attribute-Based Access Control in the IAM User Guide. You can set the session tags as transitive. Transitive tags persist during role chaining. For more information, see Chaining Roles with Session Tags in the IAM User Guide. SAML Configuration Before your application can call AssumeRoleWithSAML, you must configure your SAML identity provider (IdP) to issue the claims required by Amazon Web Services. Additionally, you must use Identity and Access Management (IAM) to create a SAML provider entity in your Amazon Web Services account that represents your identity provider. You must also create an IAM role that specifies this SAML provider in its trust policy. For more information, see the following resources: About SAML 2.0-based Federation in the IAM User Guide. Creating SAML Identity Providers in the IAM User Guide. Configuring a Relying Party and Claims in the IAM User Guide. Creating a Role for SAML 2.0 Federation in the IAM User Guide."]
 module AssumeRoleResponse =
   struct
     type assumeRoleResult =
@@ -2376,14 +3233,14 @@ module AssumeRoleResponse =
         (Option.map ~f:Credentials.of_xml) (Xml.child xml_arg0 "Credentials") in
       make ?sourceIdentity ?packedPolicySize ?assumedRoleUser ?credentials ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceIdentity =
-        field_map json "SourceIdentity" SourceIdentityType.of_json in
+        field_map json__ "SourceIdentity" SourceIdentityType.of_json in
       let packedPolicySize =
-        field_map json "PackedPolicySize" NonNegativeIntegerType.of_json in
+        field_map json__ "PackedPolicySize" NonNegativeIntegerType.of_json in
       let assumedRoleUser =
-        field_map json "AssumedRoleUser" AssumedRoleUser.of_json in
-      let credentials = field_map json "Credentials" Credentials.of_json in
+        field_map json__ "AssumedRoleUser" AssumedRoleUser.of_json in
+      let credentials = field_map json__ "Credentials" Credentials.of_json in
       make ?sourceIdentity ?packedPolicySize ?assumedRoleUser ?credentials ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2396,34 +3253,37 @@ module AssumeRoleRequest =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the role to assume."];
       roleSessionName: RoleSessionNameType.t
         [@ocaml.doc
-          "An identifier for the assumed role session. Use the role session name to uniquely identify a session when the same role is assumed by different principals or for different reasons. In cross-account scenarios, the role session name is visible to, and can be logged by the account that owns the role. The role session name is also used in the ARN of the assumed role principal. This means that subsequent cross-account API requests that use the temporary security credentials will expose the role session name to the external account in their CloudTrail logs. The regex used to validate this parameter is a string of characters consisting of upper- and lower-case alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@-"];
+          "An identifier for the assumed role session. Use the role session name to uniquely identify a session when the same role is assumed by different principals or for different reasons. In cross-account scenarios, the role session name is visible to, and can be logged by the account that owns the role. The role session name is also used in the ARN of the assumed role principal. This means that subsequent cross-account API requests that use the temporary security credentials will expose the role session name to the external account in their CloudTrail logs. For security purposes, administrators can view this field in CloudTrail logs to help identify who performed an action in Amazon Web Services. Your administrator might require that you specify your user name as the session name when you assume the role. For more information, see sts:RoleSessionName . The regex used to validate this parameter is a string of characters consisting of upper- and lower-case alphanumeric characters with no spaces. You can also include underscores or any of the following characters: +=,.\\@-"];
       policyArns: PolicyDescriptorListType.t option
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the IAM managed policies that you want to use as managed session policies. The policies must exist in the same account as the role. This parameter is optional. You can provide up to 10 managed policy ARNs. However, the plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. For more information about ARNs, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces in the Amazon Web Services General Reference. An Amazon Web Services conversion compresses the passed session policies and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide."];
-      policy: SessionPolicyDocumentType.t option
+          "The Amazon Resource Names (ARNs) of the IAM managed policies that you want to use as managed session policies. The policies must exist in the same account as the role. This parameter is optional. You can provide up to 10 managed policy ARNs. However, the plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. For more information about ARNs, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces in the Amazon Web Services General Reference. An Amazon Web Services conversion compresses the passed inline session policy, managed policy ARNs, and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide."];
+      policy: UnrestrictedSessionPolicyDocumentType.t option
         [@ocaml.doc
-          "An IAM policy in JSON format that you want to use as an inline session policy. This parameter is optional. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. The JSON policy characters can be any ASCII character from the space character to the end of the valid character list (\\u0020 through \\u00FF). It can also include the tab (\\u0009), linefeed (\\u000A), and carriage return (\\u000D) characters. An Amazon Web Services conversion compresses the passed session policies and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit."];
+          "An IAM policy in JSON format that you want to use as an inline session policy. This parameter is optional. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. The JSON policy characters can be any ASCII character from the space character to the end of the valid character list (\\u0020 through \\u00FF). It can also include the tab (\\u0009), linefeed (\\u000A), and carriage return (\\u000D) characters. An Amazon Web Services conversion compresses the passed inline session policy, managed policy ARNs, and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit. For more information about role session permissions, see Session policies."];
       durationSeconds: RoleDurationSecondsType.t option
         [@ocaml.doc
-          "The duration, in seconds, of the role session. The value specified can range from 900 seconds (15 minutes) up to the maximum session duration set for the role. The maximum session duration setting can have a value from 1 hour to 12 hours. If you specify a value higher than this setting or the administrator setting (whichever is lower), the operation fails. For example, if you specify a session duration of 12 hours, but your administrator set the maximum session duration to 6 hours, your operation fails. Role chaining limits your Amazon Web Services CLI or Amazon Web Services API role session to a maximum of one hour. When you use the AssumeRole API operation to assume a role, you can specify the duration of your role session with the DurationSeconds parameter. You can specify a parameter value of up to 43200 seconds (12 hours), depending on the maximum session duration setting for your role. However, if you assume a role using role chaining and provide a DurationSeconds parameter value greater than one hour, the operation fails. To learn how to view the maximum value for your role, see View the Maximum Session Duration Setting for a Role in the IAM User Guide. By default, the value is set to 3600 seconds. The DurationSeconds parameter is separate from the duration of a console session that you might request using the returned credentials. The request to the federation endpoint for a console sign-in token takes a SessionDuration parameter that specifies the maximum length of the console session. For more information, see Creating a URL that Enables Federated Users to Access the Amazon Web Services Management Console in the IAM User Guide."];
+          "The duration, in seconds, of the role session. The value specified can range from 900 seconds (15 minutes) up to the maximum session duration set for the role. The maximum session duration setting can have a value from 1 hour to 12 hours. If you specify a value higher than this setting or the administrator setting (whichever is lower), the operation fails. For example, if you specify a session duration of 12 hours, but your administrator set the maximum session duration to 6 hours, your operation fails. Role chaining limits your Amazon Web Services CLI or Amazon Web Services API role session to a maximum of one hour. When you use the AssumeRole API operation to assume a role, you can specify the duration of your role session with the DurationSeconds parameter. You can specify a parameter value of up to 43200 seconds (12 hours), depending on the maximum session duration setting for your role. However, if you assume a role using role chaining and provide a DurationSeconds parameter value greater than one hour, the operation fails. To learn how to view the maximum value for your role, see Update the maximum session duration for a role. By default, the value is set to 3600 seconds. The DurationSeconds parameter is separate from the duration of a console session that you might request using the returned credentials. The request to the federation endpoint for a console sign-in token takes a SessionDuration parameter that specifies the maximum length of the console session. For more information, see Creating a URL that Enables Federated Users to Access the Amazon Web Services Management Console in the IAM User Guide."];
       tags: TagListType.t option
         [@ocaml.doc
-          "A list of session tags that you want to pass. Each session tag consists of a key name and an associated value. For more information about session tags, see Tagging Amazon Web Services STS Sessions in the IAM User Guide. This parameter is optional. You can pass up to 50 session tags. The plaintext session tag keys can\226\128\153t exceed 128 characters, and the values can\226\128\153t exceed 256 characters. For these and additional limits, see IAM and STS Character Limits in the IAM User Guide. An Amazon Web Services conversion compresses the passed session policies and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit. You can pass a session tag with the same key as a tag that is already attached to the role. When you do, session tags override a role tag with the same key. Tag key\226\128\147value pairs are not case sensitive, but case is preserved. This means that you cannot have separate Department and department tag keys. Assume that the role has the Department=Marketing tag and you pass the department=engineering session tag. Department and department are not saved as separate tags, and the session tag passed in the request takes precedence over the role tag. Additionally, if you used temporary credentials to perform this operation, the new session inherits any transitive session tags from the calling session. If you pass a session tag with the same key as an inherited tag, the operation fails. To view the inherited tags for a session, see the CloudTrail logs. For more information, see Viewing Session Tags in CloudTrail in the IAM User Guide."];
+          "A list of session tags that you want to pass. Each session tag consists of a key name and an associated value. For more information about session tags, see Tagging Amazon Web Services STS Sessions in the IAM User Guide. This parameter is optional. You can pass up to 50 session tags. The plaintext session tag keys can\226\128\153t exceed 128 characters, and the values can\226\128\153t exceed 256 characters. For these and additional limits, see IAM and STS Character Limits in the IAM User Guide. An Amazon Web Services conversion compresses the passed inline session policy, managed policy ARNs, and session tags into a packed binary format that has a separate limit. Your request can fail for this limit even if your plaintext meets the other requirements. The PackedPolicySize response element indicates by percentage how close the policies and tags for your request are to the upper size limit. You can pass a session tag with the same key as a tag that is already attached to the role. When you do, session tags override a role tag with the same key. Tag key\226\128\147value pairs are not case sensitive, but case is preserved. This means that you cannot have separate Department and department tag keys. Assume that the role has the Department=Marketing tag and you pass the department=engineering session tag. Department and department are not saved as separate tags, and the session tag passed in the request takes precedence over the role tag. Additionally, if you used temporary credentials to perform this operation, the new session inherits any transitive session tags from the calling session. If you pass a session tag with the same key as an inherited tag, the operation fails. To view the inherited tags for a session, see the CloudTrail logs. For more information, see Viewing Session Tags in CloudTrail in the IAM User Guide."];
       transitiveTagKeys: TagKeyListType.t option
         [@ocaml.doc
-          "A list of keys for session tags that you want to set as transitive. If you set a tag key as transitive, the corresponding key and value passes to subsequent sessions in a role chain. For more information, see Chaining Roles with Session Tags in the IAM User Guide. This parameter is optional. When you set session tags as transitive, the session policy and session tags packed binary limit is not affected. If you choose not to specify a transitive tag key, then no tags are passed from this session to any subsequent sessions."];
+          "A list of keys for session tags that you want to set as transitive. If you set a tag key as transitive, the corresponding key and value passes to subsequent sessions in a role chain. For more information, see Chaining Roles with Session Tags in the IAM User Guide. This parameter is optional. The transitive status of a session tag does not impact its packed binary size. If you choose not to specify a transitive tag key, then no tags are passed from this session to any subsequent sessions."];
       externalId: ExternalIdType.t option
         [@ocaml.doc
-          "A unique identifier that might be required when you assume a role in another account. If the administrator of the account to which the role belongs provided you with an external ID, then provide that value in the ExternalId parameter. This value can be any string, such as a passphrase or account number. A cross-account role is usually set up to trust everyone in an account. Therefore, the administrator of the trusting account might send an external ID to the administrator of the trusted account. That way, only someone with the ID can assume the role, rather than everyone in the account. For more information about the external ID, see How to Use an External ID When Granting Access to Your Amazon Web Services Resources to a Third Party in the IAM User Guide. The regex used to validate this parameter is a string of characters consisting of upper- and lower-case alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@:/-"];
+          "A unique identifier that might be required when you assume a role in another account. If the administrator of the account to which the role belongs provided you with an external ID, then provide that value in the ExternalId parameter. This value can be any string, such as a passphrase or account number. A cross-account role is usually set up to trust everyone in an account. Therefore, the administrator of the trusting account might send an external ID to the administrator of the trusted account. That way, only someone with the ID can assume the role, rather than everyone in the account. For more information about the external ID, see How to Use an External ID When Granting Access to Your Amazon Web Services Resources to a Third Party in the IAM User Guide. The regex used to validate this parameter is a string of characters consisting of upper- and lower-case alphanumeric characters with no spaces. You can also include underscores or any of the following characters: +=,.\\@:\\/-"];
       serialNumber: SerialNumberType.t option
         [@ocaml.doc
-          "The identification number of the MFA device that is associated with the user who is making the AssumeRole call. Specify this value if the trust policy of the role being assumed includes a condition that requires MFA authentication. The value is either the serial number for a hardware device (such as GAHT12345678) or an Amazon Resource Name (ARN) for a virtual device (such as arn:aws:iam::123456789012:mfa/user). The regex used to validate this parameter is a string of characters consisting of upper- and lower-case alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@-"];
+          "The identification number of the MFA device that is associated with the user who is making the AssumeRole call. Specify this value if the trust policy of the role being assumed includes a condition that requires MFA authentication. The value is either the serial number for a hardware device (such as GAHT12345678) or an Amazon Resource Name (ARN) for a virtual device (such as arn:aws:iam::123456789012:mfa/user). The regex used to validate this parameter is a string of characters consisting of upper- and lower-case alphanumeric characters with no spaces. You can also include underscores or any of the following characters: +=/:,.\\@-"];
       tokenCode: TokenCodeType.t option
         [@ocaml.doc
           "The value provided by the MFA device, if the trust policy of the role being assumed requires MFA. (In other words, if the policy includes a condition that tests for MFA). If the role being assumed requires MFA and if the TokenCode value is missing or expired, the AssumeRole call returns an \"access denied\" error. The format for this parameter, as described by its regex pattern, is a sequence of six numeric digits."];
       sourceIdentity: SourceIdentityType.t option
         [@ocaml.doc
-          "The source identity specified by the principal that is calling the AssumeRole operation. You can require users to specify a source identity when they assume a role. You do this by using the sts:SourceIdentity condition key in a role trust policy. You can use source identity information in CloudTrail logs to determine who took actions with a role. You can use the aws:SourceIdentity condition key to further control access to Amazon Web Services resources based on the value of source identity. For more information about using source identity, see Monitor and control actions taken with assumed roles in the IAM User Guide. The regex used to validate this parameter is a string of characters consisting of upper- and lower-case alphanumeric characters with no spaces. You can also include underscores or any of the following characters: =,.\\@-. You cannot use a value that begins with the text aws:. This prefix is reserved for Amazon Web Services internal use."]}
+          "The source identity specified by the principal that is calling the AssumeRole operation. The source identity value persists across chained role sessions. You can require users to specify a source identity when they assume a role. You do this by using the sts:SourceIdentity condition key in a role trust policy. You can use source identity information in CloudTrail logs to determine who took actions with a role. You can use the aws:SourceIdentity condition key to further control access to Amazon Web Services resources based on the value of source identity. For more information about using source identity, see Monitor and control actions taken with assumed roles in the IAM User Guide. The regex used to validate this parameter is a string of characters consisting of upper- and lower-case alphanumeric characters with no spaces. You can also include underscores or any of the following characters: +=,.\\@-. You cannot use a value that begins with the text aws:. This prefix is reserved for Amazon Web Services internal use."];
+      providedContexts: ProvidedContextsListType.t option
+        [@ocaml.doc
+          "A list of previously acquired trusted context assertions in the format of a JSON array. The trusted context assertion is signed and encrypted by Amazon Web Services STS. The following is an example of a ProvidedContext value that includes a single trusted context assertion and the ARN of the context provider from which the trusted context assertion was generated. \\[\\{\"ProviderArn\":\"arn:aws:iam::aws:contextProvider/IdentityCenter\",\"ContextAssertion\":\"trusted-context-assertion\"\\}\\]"]}
     let context_ = "AssumeRoleRequest"
     let make ?policyArns =
       fun ?policy ->
@@ -2434,22 +3294,24 @@ module AssumeRoleRequest =
                 fun ?serialNumber ->
                   fun ?tokenCode ->
                     fun ?sourceIdentity ->
-                      fun ~roleArn ->
-                        fun ~roleSessionName ->
-                          fun () ->
-                            {
-                              policyArns;
-                              policy;
-                              durationSeconds;
-                              tags;
-                              transitiveTagKeys;
-                              externalId;
-                              serialNumber;
-                              tokenCode;
-                              sourceIdentity;
-                              roleArn;
-                              roleSessionName
-                            }
+                      fun ?providedContexts ->
+                        fun ~roleArn ->
+                          fun ~roleSessionName ->
+                            fun () ->
+                              {
+                                policyArns;
+                                policy;
+                                durationSeconds;
+                                tags;
+                                transitiveTagKeys;
+                                externalId;
+                                serialNumber;
+                                tokenCode;
+                                sourceIdentity;
+                                providedContexts;
+                                roleArn;
+                                roleSessionName
+                              }
     let to_value x =
       structure_to_value
         [("RoleArn", (Some (ArnType.to_value x.roleArn)));
@@ -2458,7 +3320,8 @@ module AssumeRoleRequest =
         ("PolicyArns",
           (Option.map x.policyArns ~f:PolicyDescriptorListType.to_value));
         ("Policy",
-          (Option.map x.policy ~f:SessionPolicyDocumentType.to_value));
+          (Option.map x.policy
+             ~f:UnrestrictedSessionPolicyDocumentType.to_value));
         ("DurationSeconds",
           (Option.map x.durationSeconds ~f:RoleDurationSecondsType.to_value));
         ("Tags", (Option.map x.tags ~f:TagListType.to_value));
@@ -2469,9 +3332,14 @@ module AssumeRoleRequest =
           (Option.map x.serialNumber ~f:SerialNumberType.to_value));
         ("TokenCode", (Option.map x.tokenCode ~f:TokenCodeType.to_value));
         ("SourceIdentity",
-          (Option.map x.sourceIdentity ~f:SourceIdentityType.to_value))]
+          (Option.map x.sourceIdentity ~f:SourceIdentityType.to_value));
+        ("ProvidedContexts",
+          (Option.map x.providedContexts ~f:ProvidedContextsListType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let providedContexts =
+        (Option.map ~f:ProvidedContextsListType.of_xml)
+          (Xml.child xml_arg0 "ProvidedContexts") in
       let sourceIdentity =
         (Option.map ~f:SourceIdentityType.of_xml)
           (Xml.child xml_arg0 "SourceIdentity") in
@@ -2492,7 +3360,7 @@ module AssumeRoleRequest =
         (Option.map ~f:RoleDurationSecondsType.of_xml)
           (Xml.child xml_arg0 "DurationSeconds") in
       let policy =
-        (Option.map ~f:SessionPolicyDocumentType.of_xml)
+        (Option.map ~f:UnrestrictedSessionPolicyDocumentType.of_xml)
           (Xml.child xml_arg0 "Policy") in
       let policyArns =
         (Option.map ~f:PolicyDescriptorListType.of_xml)
@@ -2502,31 +3370,35 @@ module AssumeRoleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleSessionName") in
       let roleArn =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
-      make ?sourceIdentity ?tokenCode ?serialNumber ?externalId
-        ?transitiveTagKeys ?tags ?durationSeconds ?policy ?policyArns
-        ~roleSessionName ~roleArn ()
+      make ?providedContexts ?sourceIdentity ?tokenCode ?serialNumber
+        ?externalId ?transitiveTagKeys ?tags ?durationSeconds ?policy
+        ?policyArns ~roleSessionName ~roleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let providedContexts =
+        field_map json__ "ProvidedContexts" ProvidedContextsListType.of_json in
       let sourceIdentity =
-        field_map json "SourceIdentity" SourceIdentityType.of_json in
-      let tokenCode = field_map json "TokenCode" TokenCodeType.of_json in
+        field_map json__ "SourceIdentity" SourceIdentityType.of_json in
+      let tokenCode = field_map json__ "TokenCode" TokenCodeType.of_json in
       let serialNumber =
-        field_map json "SerialNumber" SerialNumberType.of_json in
-      let externalId = field_map json "ExternalId" ExternalIdType.of_json in
+        field_map json__ "SerialNumber" SerialNumberType.of_json in
+      let externalId = field_map json__ "ExternalId" ExternalIdType.of_json in
       let transitiveTagKeys =
-        field_map json "TransitiveTagKeys" TagKeyListType.of_json in
-      let tags = field_map json "Tags" TagListType.of_json in
+        field_map json__ "TransitiveTagKeys" TagKeyListType.of_json in
+      let tags = field_map json__ "Tags" TagListType.of_json in
       let durationSeconds =
-        field_map json "DurationSeconds" RoleDurationSecondsType.of_json in
-      let policy = field_map json "Policy" SessionPolicyDocumentType.of_json in
+        field_map json__ "DurationSeconds" RoleDurationSecondsType.of_json in
+      let policy =
+        field_map json__ "Policy"
+          UnrestrictedSessionPolicyDocumentType.of_json in
       let policyArns =
-        field_map json "PolicyArns" PolicyDescriptorListType.of_json in
+        field_map json__ "PolicyArns" PolicyDescriptorListType.of_json in
       let roleSessionName =
-        field_map_exn json "RoleSessionName" RoleSessionNameType.of_json in
-      let roleArn = field_map_exn json "RoleArn" ArnType.of_json in
-      make ?sourceIdentity ?tokenCode ?serialNumber ?externalId
-        ?transitiveTagKeys ?tags ?durationSeconds ?policy ?policyArns
-        ~roleSessionName ~roleArn ()
+        field_map_exn json__ "RoleSessionName" RoleSessionNameType.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" ArnType.of_json in
+      make ?providedContexts ?sourceIdentity ?tokenCode ?serialNumber
+        ?externalId ?transitiveTagKeys ?tags ?durationSeconds ?policy
+        ?policyArns ~roleSessionName ~roleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a set of temporary security credentials that you can use to access Amazon Web Services resources that you might not normally have access to. These temporary credentials consist of an access key ID, a secret access key, and a security token. Typically, you use AssumeRole within your account or for cross-account access. For a comparison of AssumeRole with other API operations that produce temporary credentials, see Requesting Temporary Security Credentials and Comparing the Amazon Web Services STS API operations in the IAM User Guide. Permissions The temporary security credentials created by AssumeRole can be used to make API calls to any Amazon Web Services service with the following exception: You cannot call the Amazon Web Services STS GetFederationToken or GetSessionToken API operations. (Optional) You can pass inline or managed session policies to this operation. You can pass a single JSON policy document to use as an inline session policy. You can also specify up to 10 managed policies to use as managed session policies. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide. When you create a role, you create two policies: A role trust policy that specifies who can assume the role and a permissions policy that specifies what can be done with the role. You specify the trusted principal who is allowed to assume the role in the role trust policy. To assume a role from a different account, your Amazon Web Services account must be trusted by the role. The trust relationship is defined in the role's trust policy when the role is created. That trust policy states which accounts are allowed to delegate that access to users in the account. A user who wants to access a role in a different account must also have permissions that are delegated from the user account administrator. The administrator must attach a policy that allows the user to call AssumeRole for the ARN of the role in the other account. To allow a user to assume a role in the same account, you can do either of the following: Attach a policy to the user that allows the user to call AssumeRole (as long as the role's trust policy trusts the account). Add the user as a principal directly in the role's trust policy. You can do either because the role\226\128\153s trust policy acts as an IAM resource-based policy. When a resource-based policy grants access to a principal in the same account, no additional identity-based policy is required. For more information about trust policies and resource-based policies, see IAM Policies in the IAM User Guide. Tags (Optional) You can pass tag key-value pairs to your session. These tags are called session tags. For more information about session tags, see Passing Session Tags in STS in the IAM User Guide. An administrator must grant you the permissions necessary to pass session tags. The administrator can also create granular permissions to allow you to pass only specific session tags. For more information, see Tutorial: Using Tags for Attribute-Based Access Control in the IAM User Guide. You can set the session tags as transitive. Transitive tags persist during role chaining. For more information, see Chaining Roles with Session Tags in the IAM User Guide. Using MFA with AssumeRole (Optional) You can include multi-factor authentication (MFA) information when you call AssumeRole. This is useful for cross-account scenarios to ensure that the user that assumes the role has been authenticated with an Amazon Web Services MFA device. In that scenario, the trust policy of the role being assumed includes a condition that tests for MFA authentication. If the caller does not include valid MFA information, the request to assume the role is denied. The condition in a trust policy that tests for MFA authentication might look like the following example. \"Condition\": \\{\"Bool\": \\{\"aws:MultiFactorAuthPresent\": true\\}\\} For more information, see Configuring MFA-Protected API Access in the IAM User Guide guide. To use MFA with AssumeRole, you pass values for the SerialNumber and TokenCode parameters. The SerialNumber value identifies the user's hardware or virtual MFA device. The TokenCode is the time-based one-time password (TOTP) that the MFA device produces."]
+       "Returns a set of temporary security credentials that you can use to access Amazon Web Services resources. These temporary credentials consist of an access key ID, a secret access key, and a security token. Typically, you use AssumeRole within your account or for cross-account access. For a comparison of AssumeRole with other API operations that produce temporary credentials, see Requesting Temporary Security Credentials and Compare STS credentials in the IAM User Guide. Permissions The temporary security credentials created by AssumeRole can be used to make API calls to any Amazon Web Services service with the following exception: You cannot call the Amazon Web Services STS GetFederationToken or GetSessionToken API operations. (Optional) You can pass inline or managed session policies to this operation. You can pass a single JSON policy document to use as an inline session policy. You can also specify up to 10 managed policy Amazon Resource Names (ARNs) to use as managed session policies. The plaintext that you use for both inline and managed session policies can't exceed 2,048 characters. Passing policies to this operation returns new temporary credentials. The resulting session's permissions are the intersection of the role's identity-based policy and the session policies. You can use the role's temporary credentials in subsequent Amazon Web Services API calls to access resources in the account that owns the role. You cannot use session policies to grant more permissions than those allowed by the identity-based policy of the role that is being assumed. For more information, see Session Policies in the IAM User Guide. When you create a role, you create two policies: a role trust policy that specifies who can assume the role, and a permissions policy that specifies what can be done with the role. You specify the trusted principal that is allowed to assume the role in the role trust policy. To assume a role from a different account, your Amazon Web Services account must be trusted by the role. The trust relationship is defined in the role's trust policy when the role is created. That trust policy states which accounts are allowed to delegate that access to users in the account. A user who wants to access a role in a different account must also have permissions that are delegated from the account administrator. The administrator must attach a policy that allows the user to call AssumeRole for the ARN of the role in the other account. To allow a user to assume a role in the same account, you can do either of the following: Attach a policy to the user that allows the user to call AssumeRole (as long as the role's trust policy trusts the account). Add the user as a principal directly in the role's trust policy. You can do either because the role\226\128\153s trust policy acts as an IAM resource-based policy. When a resource-based policy grants access to a principal in the same account, no additional identity-based policy is required. For more information about trust policies and resource-based policies, see IAM Policies in the IAM User Guide. Tags (Optional) You can pass tag key-value pairs to your session. These tags are called session tags. For more information about session tags, see Passing Session Tags in STS in the IAM User Guide. An administrator must grant you the permissions necessary to pass session tags. The administrator can also create granular permissions to allow you to pass only specific session tags. For more information, see Tutorial: Using Tags for Attribute-Based Access Control in the IAM User Guide. You can set the session tags as transitive. Transitive tags persist during role chaining. For more information, see Chaining Roles with Session Tags in the IAM User Guide. Using MFA with AssumeRole (Optional) You can include multi-factor authentication (MFA) information when you call AssumeRole. This is useful for cross-account scenarios to ensure that the user that assumes the role has been authenticated with an Amazon Web Services MFA device. In that scenario, the trust policy of the role being assumed includes a condition that tests for MFA authentication. If the caller does not include valid MFA information, the request to assume the role is denied. The condition in a trust policy that tests for MFA authentication might look like the following example. \"Condition\": \\{\"Bool\": \\{\"aws:MultiFactorAuthPresent\": true\\}\\} For more information, see Configuring MFA-Protected API Access in the IAM User Guide guide. To use MFA with AssumeRole, you pass values for the SerialNumber and TokenCode parameters. The SerialNumber value identifies the user's hardware or virtual MFA device. The TokenCode is the time-based one-time password (TOTP) that the MFA device produces."]

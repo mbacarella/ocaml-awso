@@ -9,6 +9,8 @@ type ('i, 'o, 'e) t =
   CreateBatchSegmentJobResponse.t, CreateBatchSegmentJobResponse.error) t 
   | CreateCampaign: (CreateCampaignRequest.t, CreateCampaignResponse.t,
   CreateCampaignResponse.error) t 
+  | CreateDataDeletionJob: (CreateDataDeletionJobRequest.t,
+  CreateDataDeletionJobResponse.t, CreateDataDeletionJobResponse.error) t 
   | CreateDataset: (CreateDatasetRequest.t, CreateDatasetResponse.t,
   CreateDatasetResponse.error) t 
   | CreateDatasetExportJob: (CreateDatasetExportJobRequest.t,
@@ -21,6 +23,9 @@ type ('i, 'o, 'e) t =
   CreateEventTrackerResponse.t, CreateEventTrackerResponse.error) t 
   | CreateFilter: (CreateFilterRequest.t, CreateFilterResponse.t,
   CreateFilterResponse.error) t 
+  | CreateMetricAttribution: (CreateMetricAttributionRequest.t,
+  CreateMetricAttributionResponse.t, CreateMetricAttributionResponse.error) t
+  
   | CreateRecommender: (CreateRecommenderRequest.t,
   CreateRecommenderResponse.t, CreateRecommenderResponse.error) t 
   | CreateSchema: (CreateSchemaRequest.t, CreateSchemaResponse.t,
@@ -34,6 +39,8 @@ type ('i, 'o, 'e) t =
   | DeleteDatasetGroup: (DeleteDatasetGroupRequest.t, unit, unit) t 
   | DeleteEventTracker: (DeleteEventTrackerRequest.t, unit, unit) t 
   | DeleteFilter: (DeleteFilterRequest.t, unit, unit) t 
+  | DeleteMetricAttribution: (DeleteMetricAttributionRequest.t, unit, 
+  unit) t 
   | DeleteRecommender: (DeleteRecommenderRequest.t, unit, unit) t 
   | DeleteSchema: (DeleteSchemaRequest.t, unit, unit) t 
   | DeleteSolution: (DeleteSolutionRequest.t, unit, unit) t 
@@ -47,6 +54,9 @@ type ('i, 'o, 'e) t =
   
   | DescribeCampaign: (DescribeCampaignRequest.t, DescribeCampaignResponse.t,
   DescribeCampaignResponse.error) t 
+  | DescribeDataDeletionJob: (DescribeDataDeletionJobRequest.t,
+  DescribeDataDeletionJobResponse.t, DescribeDataDeletionJobResponse.error) t
+  
   | DescribeDataset: (DescribeDatasetRequest.t, DescribeDatasetResponse.t,
   DescribeDatasetResponse.error) t 
   | DescribeDatasetExportJob: (DescribeDatasetExportJobRequest.t,
@@ -64,6 +74,9 @@ type ('i, 'o, 'e) t =
   DescribeFeatureTransformationResponse.error) t 
   | DescribeFilter: (DescribeFilterRequest.t, DescribeFilterResponse.t,
   DescribeFilterResponse.error) t 
+  | DescribeMetricAttribution: (DescribeMetricAttributionRequest.t,
+  DescribeMetricAttributionResponse.t,
+  DescribeMetricAttributionResponse.error) t 
   | DescribeRecipe: (DescribeRecipeRequest.t, DescribeRecipeResponse.t,
   DescribeRecipeResponse.error) t 
   | DescribeRecommender: (DescribeRecommenderRequest.t,
@@ -83,6 +96,8 @@ type ('i, 'o, 'e) t =
   ListBatchSegmentJobsResponse.t, ListBatchSegmentJobsResponse.error) t 
   | ListCampaigns: (ListCampaignsRequest.t, ListCampaignsResponse.t,
   ListCampaignsResponse.error) t 
+  | ListDataDeletionJobs: (ListDataDeletionJobsRequest.t,
+  ListDataDeletionJobsResponse.t, ListDataDeletionJobsResponse.error) t 
   | ListDatasetExportJobs: (ListDatasetExportJobsRequest.t,
   ListDatasetExportJobsResponse.t, ListDatasetExportJobsResponse.error) t 
   | ListDatasetGroups: (ListDatasetGroupsRequest.t,
@@ -95,6 +110,11 @@ type ('i, 'o, 'e) t =
   ListEventTrackersResponse.t, ListEventTrackersResponse.error) t 
   | ListFilters: (ListFiltersRequest.t, ListFiltersResponse.t,
   ListFiltersResponse.error) t 
+  | ListMetricAttributionMetrics: (ListMetricAttributionMetricsRequest.t,
+  ListMetricAttributionMetricsResponse.t,
+  ListMetricAttributionMetricsResponse.error) t 
+  | ListMetricAttributions: (ListMetricAttributionsRequest.t,
+  ListMetricAttributionsResponse.t, ListMetricAttributionsResponse.error) t 
   | ListRecipes: (ListRecipesRequest.t, ListRecipesResponse.t,
   ListRecipesResponse.error) t 
   | ListRecommenders: (ListRecommendersRequest.t, ListRecommendersResponse.t,
@@ -107,6 +127,10 @@ type ('i, 'o, 'e) t =
   ListSolutionsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | StartRecommender: (StartRecommenderRequest.t, StartRecommenderResponse.t,
+  StartRecommenderResponse.error) t 
+  | StopRecommender: (StopRecommenderRequest.t, StopRecommenderResponse.t,
+  StopRecommenderResponse.error) t 
   | StopSolutionVersionCreation: (StopSolutionVersionCreationRequest.t, 
   unit, unit) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
@@ -115,19 +139,28 @@ type ('i, 'o, 'e) t =
   UntagResourceResponse.error) t 
   | UpdateCampaign: (UpdateCampaignRequest.t, UpdateCampaignResponse.t,
   UpdateCampaignResponse.error) t 
+  | UpdateDataset: (UpdateDatasetRequest.t, UpdateDatasetResponse.t,
+  UpdateDatasetResponse.error) t 
+  | UpdateMetricAttribution: (UpdateMetricAttributionRequest.t,
+  UpdateMetricAttributionResponse.t, UpdateMetricAttributionResponse.error) t
+  
   | UpdateRecommender: (UpdateRecommenderRequest.t,
   UpdateRecommenderResponse.t, UpdateRecommenderResponse.error) t 
+  | UpdateSolution: (UpdateSolutionRequest.t, UpdateSolutionResponse.t,
+  UpdateSolutionResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateBatchInferenceJob -> `POST
   | CreateBatchSegmentJob -> `POST
   | CreateCampaign -> `POST
+  | CreateDataDeletionJob -> `POST
   | CreateDataset -> `POST
   | CreateDatasetExportJob -> `POST
   | CreateDatasetGroup -> `POST
   | CreateDatasetImportJob -> `POST
   | CreateEventTracker -> `POST
   | CreateFilter -> `POST
+  | CreateMetricAttribution -> `POST
   | CreateRecommender -> `POST
   | CreateSchema -> `POST
   | CreateSolution -> `POST
@@ -137,6 +170,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteDatasetGroup -> `POST
   | DeleteEventTracker -> `POST
   | DeleteFilter -> `POST
+  | DeleteMetricAttribution -> `POST
   | DeleteRecommender -> `POST
   | DeleteSchema -> `POST
   | DeleteSolution -> `POST
@@ -144,6 +178,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeBatchInferenceJob -> `POST
   | DescribeBatchSegmentJob -> `POST
   | DescribeCampaign -> `POST
+  | DescribeDataDeletionJob -> `POST
   | DescribeDataset -> `POST
   | DescribeDatasetExportJob -> `POST
   | DescribeDatasetGroup -> `POST
@@ -151,6 +186,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeEventTracker -> `POST
   | DescribeFeatureTransformation -> `POST
   | DescribeFilter -> `POST
+  | DescribeMetricAttribution -> `POST
   | DescribeRecipe -> `POST
   | DescribeRecommender -> `POST
   | DescribeSchema -> `POST
@@ -160,35 +196,45 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListBatchInferenceJobs -> `POST
   | ListBatchSegmentJobs -> `POST
   | ListCampaigns -> `POST
+  | ListDataDeletionJobs -> `POST
   | ListDatasetExportJobs -> `POST
   | ListDatasetGroups -> `POST
   | ListDatasetImportJobs -> `POST
   | ListDatasets -> `POST
   | ListEventTrackers -> `POST
   | ListFilters -> `POST
+  | ListMetricAttributionMetrics -> `POST
+  | ListMetricAttributions -> `POST
   | ListRecipes -> `POST
   | ListRecommenders -> `POST
   | ListSchemas -> `POST
   | ListSolutionVersions -> `POST
   | ListSolutions -> `POST
   | ListTagsForResource -> `POST
+  | StartRecommender -> `POST
+  | StopRecommender -> `POST
   | StopSolutionVersionCreation -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateCampaign -> `POST
+  | UpdateDataset -> `POST
+  | UpdateMetricAttribution -> `POST
   | UpdateRecommender -> `POST
+  | UpdateSolution -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | CreateBatchInferenceJob -> (Format.kasprintf Uri.of_string) "/"
       | CreateBatchSegmentJob -> (Format.kasprintf Uri.of_string) "/"
       | CreateCampaign -> (Format.kasprintf Uri.of_string) "/"
+      | CreateDataDeletionJob -> (Format.kasprintf Uri.of_string) "/"
       | CreateDataset -> (Format.kasprintf Uri.of_string) "/"
       | CreateDatasetExportJob -> (Format.kasprintf Uri.of_string) "/"
       | CreateDatasetGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateDatasetImportJob -> (Format.kasprintf Uri.of_string) "/"
       | CreateEventTracker -> (Format.kasprintf Uri.of_string) "/"
       | CreateFilter -> (Format.kasprintf Uri.of_string) "/"
+      | CreateMetricAttribution -> (Format.kasprintf Uri.of_string) "/"
       | CreateRecommender -> (Format.kasprintf Uri.of_string) "/"
       | CreateSchema -> (Format.kasprintf Uri.of_string) "/"
       | CreateSolution -> (Format.kasprintf Uri.of_string) "/"
@@ -198,6 +244,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteDatasetGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteEventTracker -> (Format.kasprintf Uri.of_string) "/"
       | DeleteFilter -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteMetricAttribution -> (Format.kasprintf Uri.of_string) "/"
       | DeleteRecommender -> (Format.kasprintf Uri.of_string) "/"
       | DeleteSchema -> (Format.kasprintf Uri.of_string) "/"
       | DeleteSolution -> (Format.kasprintf Uri.of_string) "/"
@@ -205,6 +252,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeBatchInferenceJob -> (Format.kasprintf Uri.of_string) "/"
       | DescribeBatchSegmentJob -> (Format.kasprintf Uri.of_string) "/"
       | DescribeCampaign -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeDataDeletionJob -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDataset -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDatasetExportJob -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDatasetGroup -> (Format.kasprintf Uri.of_string) "/"
@@ -212,6 +260,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeEventTracker -> (Format.kasprintf Uri.of_string) "/"
       | DescribeFeatureTransformation -> (Format.kasprintf Uri.of_string) "/"
       | DescribeFilter -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeMetricAttribution -> (Format.kasprintf Uri.of_string) "/"
       | DescribeRecipe -> (Format.kasprintf Uri.of_string) "/"
       | DescribeRecommender -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSchema -> (Format.kasprintf Uri.of_string) "/"
@@ -221,23 +270,31 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListBatchInferenceJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListBatchSegmentJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListCampaigns -> (Format.kasprintf Uri.of_string) "/"
+      | ListDataDeletionJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListDatasetExportJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListDatasetGroups -> (Format.kasprintf Uri.of_string) "/"
       | ListDatasetImportJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListDatasets -> (Format.kasprintf Uri.of_string) "/"
       | ListEventTrackers -> (Format.kasprintf Uri.of_string) "/"
       | ListFilters -> (Format.kasprintf Uri.of_string) "/"
+      | ListMetricAttributionMetrics -> (Format.kasprintf Uri.of_string) "/"
+      | ListMetricAttributions -> (Format.kasprintf Uri.of_string) "/"
       | ListRecipes -> (Format.kasprintf Uri.of_string) "/"
       | ListRecommenders -> (Format.kasprintf Uri.of_string) "/"
       | ListSchemas -> (Format.kasprintf Uri.of_string) "/"
       | ListSolutionVersions -> (Format.kasprintf Uri.of_string) "/"
       | ListSolutions -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | StartRecommender -> (Format.kasprintf Uri.of_string) "/"
+      | StopRecommender -> (Format.kasprintf Uri.of_string) "/"
       | StopSolutionVersionCreation -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateCampaign -> (Format.kasprintf Uri.of_string) "/"
-      | UpdateRecommender -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateDataset -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateMetricAttribution -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateRecommender -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateSolution -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -264,6 +321,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonPersonalize.CreateCampaign")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateDataDeletionJob ->
+      let json = CreateDataDeletionJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonPersonalize.CreateDataDeletionJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateDataset ->
       let json = CreateDatasetRequest.to_json req in
@@ -312,6 +377,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonPersonalize.CreateFilter")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateMetricAttribution ->
+      let json = CreateMetricAttributionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonPersonalize.CreateMetricAttribution")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateRecommender ->
       let json = CreateRecommenderRequest.to_json req in
@@ -385,6 +458,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonPersonalize.DeleteFilter")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteMetricAttribution ->
+      let json = DeleteMetricAttributionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonPersonalize.DeleteMetricAttribution")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteRecommender ->
       let json = DeleteRecommenderRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -441,6 +522,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonPersonalize.DescribeCampaign")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeDataDeletionJob ->
+      let json = DescribeDataDeletionJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonPersonalize.DescribeDataDeletionJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeDataset ->
       let json = DescribeDatasetRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -496,6 +585,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonPersonalize.DescribeFilter")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeMetricAttribution ->
+      let json = DescribeMetricAttributionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonPersonalize.DescribeMetricAttribution")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeRecipe ->
       let json = DescribeRecipeRequest.to_json req in
@@ -569,6 +666,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonPersonalize.ListCampaigns")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListDataDeletionJobs ->
+      let json = ListDataDeletionJobsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonPersonalize.ListDataDeletionJobs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListDatasetExportJobs ->
       let json = ListDatasetExportJobsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -616,6 +721,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonPersonalize.ListFilters")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListMetricAttributionMetrics ->
+      let json = ListMetricAttributionMetricsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonPersonalize.ListMetricAttributionMetrics")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListMetricAttributions ->
+      let json = ListMetricAttributionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonPersonalize.ListMetricAttributions")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListRecipes ->
       let json = ListRecipesRequest.to_json req in
@@ -665,6 +786,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonPersonalize.ListTagsForResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartRecommender ->
+      let json = StartRecommenderRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonPersonalize.StartRecommender")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopRecommender ->
+      let json = StopRecommenderRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonPersonalize.StopRecommender")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopSolutionVersionCreation ->
       let json = StopSolutionVersionCreationRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -697,6 +834,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonPersonalize.UpdateCampaign")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateDataset ->
+      let json = UpdateDatasetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonPersonalize.UpdateDataset")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateMetricAttribution ->
+      let json = UpdateMetricAttributionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonPersonalize.UpdateMetricAttribution")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateRecommender ->
       let json = UpdateRecommenderRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -704,6 +857,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonPersonalize.UpdateRecommender")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateSolution ->
+      let json = UpdateSolutionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonPersonalize.UpdateSolution")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -752,6 +913,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateCampaignResponse.of_json json)
       else
         Error (parse_aws_error (Some CreateCampaignResponse.error_of_json))
+  | CreateDataDeletionJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateDataDeletionJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateDataDeletionJobResponse.error_of_json))
   | CreateDataset ->
       if is_success
       then
@@ -798,6 +967,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateFilterResponse.of_json json)
       else Error (parse_aws_error (Some CreateFilterResponse.error_of_json))
+  | CreateMetricAttribution ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateMetricAttributionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateMetricAttributionResponse.error_of_json))
   | CreateRecommender ->
       if is_success
       then
@@ -836,6 +1014,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DeleteEventTracker ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteFilter ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteMetricAttribution ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteRecommender ->
       if is_success then Ok () else Error (parse_aws_error None)
@@ -876,6 +1056,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DescribeCampaignResponse.of_json json)
       else
         Error (parse_aws_error (Some DescribeCampaignResponse.error_of_json))
+  | DescribeDataDeletionJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDataDeletionJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDataDeletionJobResponse.error_of_json))
   | DescribeDataset ->
       if is_success
       then
@@ -933,6 +1122,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DescribeFilterResponse.of_json json)
       else
         Error (parse_aws_error (Some DescribeFilterResponse.error_of_json))
+  | DescribeMetricAttribution ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMetricAttributionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMetricAttributionResponse.error_of_json))
   | DescribeRecipe ->
       if is_success
       then
@@ -1002,6 +1200,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListCampaignsResponse.of_json json)
       else Error (parse_aws_error (Some ListCampaignsResponse.error_of_json))
+  | ListDataDeletionJobs ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDataDeletionJobsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListDataDeletionJobsResponse.error_of_json))
   | ListDatasetExportJobs ->
       if is_success
       then
@@ -1046,6 +1252,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListFiltersResponse.of_json json)
       else Error (parse_aws_error (Some ListFiltersResponse.error_of_json))
+  | ListMetricAttributionMetrics ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMetricAttributionMetricsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListMetricAttributionMetricsResponse.error_of_json))
+  | ListMetricAttributions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMetricAttributionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListMetricAttributionsResponse.error_of_json))
   | ListRecipes ->
       if is_success
       then
@@ -1087,6 +1311,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | StartRecommender ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartRecommenderResponse.of_json json)
+      else
+        Error (parse_aws_error (Some StartRecommenderResponse.error_of_json))
+  | StopRecommender ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopRecommenderResponse.of_json json)
+      else
+        Error (parse_aws_error (Some StopRecommenderResponse.error_of_json))
   | StopSolutionVersionCreation ->
       if is_success then Ok () else Error (parse_aws_error None)
   | TagResource ->
@@ -1108,6 +1346,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UpdateCampaignResponse.of_json json)
       else
         Error (parse_aws_error (Some UpdateCampaignResponse.error_of_json))
+  | UpdateDataset ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateDatasetResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateDatasetResponse.error_of_json))
+  | UpdateMetricAttribution ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateMetricAttributionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateMetricAttributionResponse.error_of_json))
   | UpdateRecommender ->
       if is_success
       then
@@ -1116,3 +1369,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateRecommenderResponse.error_of_json))
+  | UpdateSolution ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateSolutionResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateSolutionResponse.error_of_json))

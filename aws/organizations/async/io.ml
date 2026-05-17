@@ -37,6 +37,8 @@ let delete_organizational_unit ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteOrganizationalUnit input
 let delete_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeletePolicy input
+let delete_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteResourcePolicy input
 let deregister_delegated_administrator ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeregisterDelegatedAdministrator input
 let describe_account ?endpoint_url ?cfg input =
@@ -53,6 +55,10 @@ let describe_organizational_unit ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeOrganizationalUnit input
 let describe_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribePolicy input
+let describe_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeResourcePolicy input
+let describe_responsibility_transfer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeResponsibilityTransfer input
 let detach_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DetachPolicy input
 let disable_a_w_s_service_access ?endpoint_url ?cfg input =
@@ -67,6 +73,9 @@ let enable_policy_type ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnablePolicyType input
 let invite_account_to_organization ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.InviteAccountToOrganization input
+let invite_organization_to_transfer_responsibility ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg
+    Endpoints.InviteOrganizationToTransferResponsibility input
 let leave_organization ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.LeaveOrganization input
 let list_a_w_s_service_access_for_organization ?endpoint_url ?cfg input =
@@ -75,6 +84,9 @@ let list_accounts ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAccounts input
 let list_accounts_for_parent ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAccountsForParent input
+let list_accounts_with_invalid_effective_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAccountsWithInvalidEffectivePolicy
+    input
 let list_children ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListChildren input
 let list_create_account_status ?endpoint_url ?cfg input =
@@ -83,12 +95,18 @@ let list_delegated_administrators ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDelegatedAdministrators input
 let list_delegated_services_for_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDelegatedServicesForAccount input
+let list_effective_policy_validation_errors ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListEffectivePolicyValidationErrors input
 let list_handshakes_for_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListHandshakesForAccount input
 let list_handshakes_for_organization ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListHandshakesForOrganization input
+let list_inbound_responsibility_transfers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListInboundResponsibilityTransfers input
 let list_organizational_units_for_parent ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListOrganizationalUnitsForParent input
+let list_outbound_responsibility_transfers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListOutboundResponsibilityTransfers input
 let list_parents ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListParents input
 let list_policies ?endpoint_url ?cfg input =
@@ -103,15 +121,21 @@ let list_targets_for_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTargetsForPolicy input
 let move_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.MoveAccount input
+let put_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutResourcePolicy input
 let register_delegated_administrator ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterDelegatedAdministrator input
 let remove_account_from_organization ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RemoveAccountFromOrganization input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
+let terminate_responsibility_transfer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TerminateResponsibilityTransfer input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_organizational_unit ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateOrganizationalUnit input
 let update_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdatePolicy input
+let update_responsibility_transfer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateResponsibilityTransfer input

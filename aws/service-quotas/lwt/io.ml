@@ -13,6 +13,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let associate_service_quota_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateServiceQuotaTemplate input
+let create_support_case ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateSupportCase input
 let delete_service_quota_increase_request_from_template ?endpoint_url ?cfg
   input =
   eval ?endpoint_url ?cfg
@@ -24,6 +26,10 @@ let get_a_w_s_default_service_quota ?endpoint_url ?cfg input =
 let get_association_for_service_quota_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAssociationForServiceQuotaTemplate
     input
+let get_auto_management_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAutoManagementConfiguration input
+let get_quota_utilization_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetQuotaUtilizationReport input
 let get_requested_service_quota_change ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRequestedServiceQuotaChange input
 let get_service_quota ?endpoint_url ?cfg input =
@@ -57,7 +63,15 @@ let put_service_quota_increase_request_into_template ?endpoint_url ?cfg input
     Endpoints.PutServiceQuotaIncreaseRequestIntoTemplate input
 let request_service_quota_increase ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RequestServiceQuotaIncrease input
+let start_auto_management ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartAutoManagement input
+let start_quota_utilization_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartQuotaUtilizationReport input
+let stop_auto_management ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopAutoManagement input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_auto_management ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAutoManagement input

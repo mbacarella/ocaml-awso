@@ -64,6 +64,19 @@ module TagValue =
     let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
+module CloudFormationResourceType =
+  struct
+    type nonrec t = string
+    let context_ = "CloudFormationResourceType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CloudFormationResourceType" j
+    let to_json = simple_to_json to_value
+  end
 module ComplianceStatus =
   struct
     type nonrec t = bool
@@ -81,6 +94,9 @@ module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -104,30 +120,27 @@ module Tag =
   struct
     type nonrec t =
       {
-      key: TagKey.t
+      key: TagKey.t option
         [@ocaml.doc
           "One part of a key-value pair that makes up a tag. A key is a general label that acts like a category for more specific tag values."];
-      value: TagValue.t
+      value: TagValue.t option
         [@ocaml.doc
           "One part of a key-value pair that make up a tag. A value acts as a descriptor within a tag category (key). The value can be empty or null."]}
-    let context_ = "Tag"
-    let make ~key = fun ~value -> fun () -> { key; value }
+    let make ?key = fun ?value -> fun () -> { key; value }
     let to_value x =
       structure_to_value
-        [("Key", (Some (TagKey.to_value x.key)));
-        ("Value", (Some (TagValue.to_value x.value)))]
+        [("Key", (Option.map x.key ~f:TagKey.to_value));
+        ("Value", (Option.map x.value ~f:TagValue.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let value =
-        TagValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
-      let key =
-        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
-      make ~value ~key ()
+        (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
+      let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
+      make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
-      make ~value ~key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map json__ "Key" TagKey.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The metadata that you apply to Amazon Web Services resources to help you categorize and organize them. Each tag consists of a key and a value, both of which you define. For more information, see Tagging Amazon Web Services Resources in the Amazon Web Services General Reference."]
@@ -183,6 +196,75 @@ module StatusCode =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module CloudFormationResourceTypes =
+  struct
+    type nonrec t = CloudFormationResourceType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CloudFormationResourceType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CloudFormationResourceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CloudFormationResourceTypes"
+        ~of_json:CloudFormationResourceType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ReportingTagKeys =
+  struct
+    type nonrec t = TagKey.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TagKey.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReportingTagKeys" ~of_json:TagKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceType =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceType" j
+    let to_json = simple_to_json to_value
+  end
 module ComplianceDetails =
   struct
     type nonrec t =
@@ -223,13 +305,13 @@ module ComplianceDetails =
           (Xml.child xml_arg0 "NoncompliantKeys") in
       make ?complianceStatus ?keysWithNoncompliantValues ?noncompliantKeys ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let complianceStatus =
-        field_map json "ComplianceStatus" ComplianceStatus.of_json in
+        field_map json__ "ComplianceStatus" ComplianceStatus.of_json in
       let keysWithNoncompliantValues =
-        field_map json "KeysWithNoncompliantValues" TagKeyList.of_json in
+        field_map json__ "KeysWithNoncompliantValues" TagKeyList.of_json in
       let noncompliantKeys =
-        field_map json "NoncompliantKeys" TagKeyList.of_json in
+        field_map json__ "NoncompliantKeys" TagKeyList.of_json in
       make ?complianceStatus ?keysWithNoncompliantValues ?noncompliantKeys ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -258,6 +340,9 @@ module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -285,6 +370,9 @@ module TagValueList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -451,10 +539,10 @@ module FailureInfo =
         (Option.map ~f:StatusCode.of_xml) (Xml.child xml_arg0 "StatusCode") in
       make ?errorMessage ?errorCode ?statusCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
-      let statusCode = field_map json "StatusCode" StatusCode.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let statusCode = field_map json__ "StatusCode" StatusCode.of_json in
       make ?errorMessage ?errorCode ?statusCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -477,6 +565,56 @@ module ExceptionMessage =
     let of_json j = string_of_json ~kind:"ExceptionMessage" j
     let to_json = simple_to_json to_value
   end
+module RequiredTag =
+  struct
+    type nonrec t =
+      {
+      resourceType: ResourceType.t option
+        [@ocaml.doc "Describes the resource type for the required tag keys."];
+      cloudFormationResourceTypes: CloudFormationResourceTypes.t option
+        [@ocaml.doc
+          "Describes the CloudFormation resource type assigned the required tag keys."];
+      reportingTagKeys: ReportingTagKeys.t option
+        [@ocaml.doc
+          "These tag keys are marked as required in the report_required_tag_for block of the effective tag policy."]}
+    let make ?resourceType =
+      fun ?cloudFormationResourceTypes ->
+        fun ?reportingTagKeys ->
+          fun () ->
+            { resourceType; cloudFormationResourceTypes; reportingTagKeys }
+    let to_value x =
+      structure_to_value
+        [("ResourceType",
+           (Option.map x.resourceType ~f:ResourceType.to_value));
+        ("CloudFormationResourceTypes",
+          (Option.map x.cloudFormationResourceTypes
+             ~f:CloudFormationResourceTypes.to_value));
+        ("ReportingTagKeys",
+          (Option.map x.reportingTagKeys ~f:ReportingTagKeys.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reportingTagKeys =
+        (Option.map ~f:ReportingTagKeys.of_xml)
+          (Xml.child xml_arg0 "ReportingTagKeys") in
+      let cloudFormationResourceTypes =
+        (Option.map ~f:CloudFormationResourceTypes.of_xml)
+          (Xml.child xml_arg0 "CloudFormationResourceTypes") in
+      let resourceType =
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      make ?reportingTagKeys ?cloudFormationResourceTypes ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reportingTagKeys =
+        field_map json__ "ReportingTagKeys" ReportingTagKeys.of_json in
+      let cloudFormationResourceTypes =
+        field_map json__ "CloudFormationResourceTypes"
+          CloudFormationResourceTypes.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      make ?reportingTagKeys ?cloudFormationResourceTypes ?resourceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information that describes the required tags for a given resource type."]
 module ResourceTagMapping =
   struct
     type nonrec t =
@@ -509,11 +647,11 @@ module ResourceTagMapping =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?complianceDetails ?tags ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let complianceDetails =
-        field_map json "ComplianceDetails" ComplianceDetails.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
+        field_map json__ "ComplianceDetails" ComplianceDetails.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
       make ?complianceDetails ?tags ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -540,9 +678,9 @@ module TagFilter =
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?values ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" TagValueList.of_json in
-      let key = field_map json "Key" TagKey.of_json in make ?values ?key ()
+    let of_json json__ =
+      let values = field_map json__ "Values" TagValueList.of_json in
+      let key = field_map json__ "Key" TagKey.of_json in make ?values ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A list of tags (keys and values) that are used to specify the associated resources."]
@@ -613,15 +751,16 @@ module Summary =
       make ?nonCompliantResources ?resourceType ?region ?targetIdType
         ?targetId ?lastUpdated ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nonCompliantResources =
-        field_map json "NonCompliantResources" NonCompliantResources.of_json in
+        field_map json__ "NonCompliantResources"
+          NonCompliantResources.of_json in
       let resourceType =
-        field_map json "ResourceType" AmazonResourceType.of_json in
-      let region = field_map json "Region" Region.of_json in
-      let targetIdType = field_map json "TargetIdType" TargetIdType.of_json in
-      let targetId = field_map json "TargetId" TargetId.of_json in
-      let lastUpdated = field_map json "LastUpdated" LastUpdated.of_json in
+        field_map json__ "ResourceType" AmazonResourceType.of_json in
+      let region = field_map json__ "Region" Region.of_json in
+      let targetIdType = field_map json__ "TargetIdType" TargetIdType.of_json in
+      let targetId = field_map json__ "TargetId" TargetId.of_json in
+      let lastUpdated = field_map json__ "LastUpdated" LastUpdated.of_json in
       make ?nonCompliantResources ?resourceType ?region ?targetIdType
         ?targetId ?lastUpdated ()
     let to_json v = composed_to_json to_value v
@@ -677,6 +816,8 @@ module FailedResourcesMap =
                     (fun x -> (FailureInfo.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -699,8 +840,8 @@ module InternalServiceException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -720,12 +861,12 @@ module InvalidParameterException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This error indicates one of the following: A parameter is missing. A malformed string was supplied for the request parameter. An out-of-range value was supplied for the request parameter. The target ID is invalid, unsupported, or doesn't exist. You can't access the Amazon S3 bucket for report storage. For more information, see Additional Requirements for Organization-wide Tag Compliance Reports in the Organizations User Guide."]
+       "The request failed because of one of the following reasons: A required parameter is missing. A provided string parameter is malformed. An provided parameter value is out of range. The target ID is invalid, unsupported, or doesn't exist. You can't access the Amazon S3 bucket for report storage. For more information, see Amazon S3 bucket policy for report storage in the Tagging Amazon Web Services resources and Tag Editor user guide. The partition specified in an ARN parameter in the request doesn't match the partition where you invoked the operation. The partition is specified by the second field of the ARN."]
 module ThrottledException =
   struct
     type nonrec t = {
@@ -741,12 +882,12 @@ module ThrottledException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The request was denied to limit the frequency of submitted requests."]
+       "The request failed because it exceeded the allowed frequency of submitted requests."]
 module ResourceARNListForTagUntag =
   struct
     type nonrec t = ResourceARN.t list
@@ -755,6 +896,9 @@ module ResourceARNListForTagUntag =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceARN.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -784,6 +928,9 @@ module TagKeyListForUntag =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -829,6 +976,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -851,12 +1000,12 @@ module ConcurrentModificationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The target of the operation is currently being modified by a different request. Try again later."]
+       "The request failed because the target of the operation is currently being modified by a different request. Try again later."]
 module ConstraintViolationException =
   struct
     type nonrec t = {
@@ -872,12 +1021,12 @@ module ConstraintViolationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The request was denied because performing this operation violates a constraint. Some of the reasons in the following list might not apply to this specific operation. You must meet the prerequisites for using tag policies. For information, see Prerequisites and Permissions for Using Tag Policies in the Organizations User Guide. You must enable the tag policies service principal (tagpolicies.tag.amazonaws.com) to integrate with Organizations For information, see EnableAWSServiceAccess. You must have a tag policy attached to the organization root, an OU, or an account."]
+       "The request failed because performing the operation would violate a constraint. Some of the reasons in the following list might not apply to this specific operation. You must meet the prerequisites for using tag policies. For information, see Prerequisites and permissions in the Tagging Amazon Web Services resources and Tag Editor user guide. You must enable the tag policies service principal (tagpolicies.tag.amazonaws.com) to integrate with Organizations For information, see EnableAWSServiceAccess. You must have a tag policy attached to the organization root, an OU, or an account."]
 module S3Bucket =
   struct
     type nonrec t = string
@@ -933,16 +1082,66 @@ module PaginationTokenExpiredException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A PaginationToken is valid for a maximum of 15 minutes. Your request was denied because the specified PaginationToken has expired."]
+       "The request failed because the specified PaginationToken has expired. A PaginationToken is valid for a maximum of 15 minutes."]
+module RequiredTagsForListRequiredTags =
+  struct
+    type nonrec t = RequiredTag.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RequiredTag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RequiredTag.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RequiredTagsForListRequiredTags"
+        ~of_json:RequiredTag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxResultsForListRequiredTags =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:200) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResultsForListRequiredTags"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module TagValuesOutputList =
   struct
     type nonrec t = TagValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -967,6 +1166,9 @@ module ResourceTagMappingList =
   struct
     type nonrec t = ResourceTagMapping.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceTagMapping.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1023,6 +1225,9 @@ module ResourceARNListForGet =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceARN.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1048,6 +1253,9 @@ module ResourceTypeFilterList =
   struct
     type nonrec t = AmazonResourceType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AmazonResourceType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1091,6 +1299,9 @@ module TagFilterList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1129,6 +1340,9 @@ module SummaryList =
   struct
     type nonrec t = Summary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Summary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1153,6 +1367,9 @@ module GroupBy =
   struct
     type nonrec t = GroupByAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroupByAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1201,6 +1418,9 @@ module RegionFilterList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Region.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1229,6 +1449,9 @@ module TagKeyFilterList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1258,6 +1481,9 @@ module TargetIdFilterList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1368,13 +1594,13 @@ module UntagResourcesOutput =
           (Xml.child xml_arg0 "FailedResourcesMap") in
       make ?failedResourcesMap ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedResourcesMap =
-        field_map json "FailedResourcesMap" FailedResourcesMap.of_json in
+        field_map json__ "FailedResourcesMap" FailedResourcesMap.of_json in
       make ?failedResourcesMap ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specified tags from the specified resources. When you specify a tag key, the action removes both that key and its associated value. The operation succeeds even if you attempt to remove tags from a resource that were already removed. Note the following: To remove tags from a resource, you need the necessary permissions for the service that the resource belongs to as well as permissions for removing tags. For more information, see the documentation for the service whose resource you want to untag. You can only tag resources that are located in the specified Amazon Web Services Region for the calling Amazon Web Services account. Minimum permissions In addition to the tag:UntagResources permission required by this operation, you must also have the remove tags permission defined by the service that created the resource. For example, to remove the tags from an Amazon EC2 instance using the UntagResources operation, you must have both of the following permissions: tag:UntagResource ec2:DeleteTags"]
+       "Removes the specified tags from the specified resources. When you specify a tag key, the action removes both that key and its associated value. The operation succeeds even if you attempt to remove tags from a resource that were already removed. Note the following: To remove tags from a resource, you need the necessary permissions for the service that the resource belongs to as well as permissions for removing tags. For more information, see the documentation for the service whose resource you want to untag. You can only tag resources that are located in the specified Amazon Web Services Region for the calling Amazon Web Services account. Minimum permissions In addition to the tag:UntagResources permission required by this operation, you must also have the remove tags permission defined by the service that created the resource. For example, to remove the tags from an Amazon EC2 instance using the UntagResources operation, you must have both of the following permissions: tag:UntagResources ec2:DeleteTags In addition, some services might have specific requirements for untagging some types of resources. For example, to untag Amazon Web Services Glue Connection, you must also have the glue:GetConnection permission. If the expected minimum permissions don't work, check the documentation for that service's tagging APIs for more information."]
 module UntagResourcesInput =
   struct
     type nonrec t =
@@ -1403,15 +1629,15 @@ module UntagResourcesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARNList") in
       make ~tagKeys ~resourceARNList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyListForUntag.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyListForUntag.of_json in
       let resourceARNList =
-        field_map_exn json "ResourceARNList"
+        field_map_exn json__ "ResourceARNList"
           ResourceARNListForTagUntag.of_json in
       make ~tagKeys ~resourceARNList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specified tags from the specified resources. When you specify a tag key, the action removes both that key and its associated value. The operation succeeds even if you attempt to remove tags from a resource that were already removed. Note the following: To remove tags from a resource, you need the necessary permissions for the service that the resource belongs to as well as permissions for removing tags. For more information, see the documentation for the service whose resource you want to untag. You can only tag resources that are located in the specified Amazon Web Services Region for the calling Amazon Web Services account. Minimum permissions In addition to the tag:UntagResources permission required by this operation, you must also have the remove tags permission defined by the service that created the resource. For example, to remove the tags from an Amazon EC2 instance using the UntagResources operation, you must have both of the following permissions: tag:UntagResource ec2:DeleteTags"]
+       "Removes the specified tags from the specified resources. When you specify a tag key, the action removes both that key and its associated value. The operation succeeds even if you attempt to remove tags from a resource that were already removed. Note the following: To remove tags from a resource, you need the necessary permissions for the service that the resource belongs to as well as permissions for removing tags. For more information, see the documentation for the service whose resource you want to untag. You can only tag resources that are located in the specified Amazon Web Services Region for the calling Amazon Web Services account. Minimum permissions In addition to the tag:UntagResources permission required by this operation, you must also have the remove tags permission defined by the service that created the resource. For example, to remove the tags from an Amazon EC2 instance using the UntagResources operation, you must have both of the following permissions: tag:UntagResources ec2:DeleteTags In addition, some services might have specific requirements for untagging some types of resources. For example, to untag Amazon Web Services Glue Connection, you must also have the glue:GetConnection permission. If the expected minimum permissions don't work, check the documentation for that service's tagging APIs for more information."]
 module TagResourcesOutput =
   struct
     type nonrec t =
@@ -1476,13 +1702,13 @@ module TagResourcesOutput =
           (Xml.child xml_arg0 "FailedResourcesMap") in
       make ?failedResourcesMap ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedResourcesMap =
-        field_map json "FailedResourcesMap" FailedResourcesMap.of_json in
+        field_map json__ "FailedResourcesMap" FailedResourcesMap.of_json in
       make ?failedResourcesMap ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Applies one or more tags to the specified resources. Note the following: Not all resources can have tags. For a list of services with resources that support tagging using this operation, see Services that support the Resource Groups Tagging API. If the resource doesn't yet support this operation, the resource's service might support tagging using its own API operations. For more information, refer to the documentation for that service. Each resource can have up to 50 tags. For other limits, see Tag Naming and Usage Conventions in the Amazon Web Services General Reference. You can only tag resources that are located in the specified Amazon Web Services Region for the Amazon Web Services account. To add tags to a resource, you need the necessary permissions for the service that the resource belongs to as well as permissions for adding tags. For more information, see the documentation for each service. Do not store personally identifiable information (PII) or other confidential or sensitive information in tags. We use tags to provide you with billing and administration services. Tags are not intended to be used for private or sensitive data. Minimum permissions In addition to the tag:TagResources permission required by this operation, you must also have the tagging permission defined by the service that created the resource. For example, to tag an Amazon EC2 instance using the TagResources operation, you must have both of the following permissions: tag:TagResource ec2:CreateTags"]
+       "Applies one or more tags to the specified resources. Note the following: Not all resources can have tags. For a list of services with resources that support tagging using this operation, see Services that support the Resource Groups Tagging API. If the resource doesn't yet support this operation, the resource's service might support tagging using its own API operations. For more information, refer to the documentation for that service. Each resource can have up to 50 tags. For other limits, see Tag Naming and Usage Conventions in the Amazon Web Services General Reference. You can only tag resources that are located in the specified Amazon Web Services Region for the Amazon Web Services account. To add tags to a resource, you need the necessary permissions for the service that the resource belongs to as well as permissions for adding tags. For more information, see the documentation for each service. When you use the Amazon Web Services Resource Groups Tagging API to update tags for Amazon Web Services CloudFormation stack sets, Amazon Web Services calls the Amazon Web Services CloudFormation UpdateStack operation. This operation may initiate additional resource property updates in addition to the desired tag updates. To avoid unexpected resource updates, Amazon Web Services recommends that you only apply or update tags to your CloudFormation stack sets using Amazon Web Services CloudFormation. Do not store personally identifiable information (PII) or other confidential or sensitive information in tags. We use tags to provide you with billing and administration services. Tags are not intended to be used for private or sensitive data. Minimum permissions In addition to the tag:TagResources permission required by this operation, you must also have the tagging permission defined by the service that created the resource. For example, to tag an Amazon EC2 instance using the TagResources operation, you must have both of the following permissions: tag:TagResources ec2:CreateTags In addition, some services might have specific requirements for tagging some types of resources. For example, to tag an Amazon S3 bucket, you must also have the s3:GetBucketTagging permission. If the expected minimum permissions don't work, check the documentation for that service's tagging APIs for more information."]
 module TagResourcesInput =
   struct
     type nonrec t =
@@ -1510,15 +1736,15 @@ module TagResourcesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARNList") in
       make ~tags ~resourceARNList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
       let resourceARNList =
-        field_map_exn json "ResourceARNList"
+        field_map_exn json__ "ResourceARNList"
           ResourceARNListForTagUntag.of_json in
       make ~tags ~resourceARNList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Applies one or more tags to the specified resources. Note the following: Not all resources can have tags. For a list of services with resources that support tagging using this operation, see Services that support the Resource Groups Tagging API. If the resource doesn't yet support this operation, the resource's service might support tagging using its own API operations. For more information, refer to the documentation for that service. Each resource can have up to 50 tags. For other limits, see Tag Naming and Usage Conventions in the Amazon Web Services General Reference. You can only tag resources that are located in the specified Amazon Web Services Region for the Amazon Web Services account. To add tags to a resource, you need the necessary permissions for the service that the resource belongs to as well as permissions for adding tags. For more information, see the documentation for each service. Do not store personally identifiable information (PII) or other confidential or sensitive information in tags. We use tags to provide you with billing and administration services. Tags are not intended to be used for private or sensitive data. Minimum permissions In addition to the tag:TagResources permission required by this operation, you must also have the tagging permission defined by the service that created the resource. For example, to tag an Amazon EC2 instance using the TagResources operation, you must have both of the following permissions: tag:TagResource ec2:CreateTags"]
+       "Applies one or more tags to the specified resources. Note the following: Not all resources can have tags. For a list of services with resources that support tagging using this operation, see Services that support the Resource Groups Tagging API. If the resource doesn't yet support this operation, the resource's service might support tagging using its own API operations. For more information, refer to the documentation for that service. Each resource can have up to 50 tags. For other limits, see Tag Naming and Usage Conventions in the Amazon Web Services General Reference. You can only tag resources that are located in the specified Amazon Web Services Region for the Amazon Web Services account. To add tags to a resource, you need the necessary permissions for the service that the resource belongs to as well as permissions for adding tags. For more information, see the documentation for each service. When you use the Amazon Web Services Resource Groups Tagging API to update tags for Amazon Web Services CloudFormation stack sets, Amazon Web Services calls the Amazon Web Services CloudFormation UpdateStack operation. This operation may initiate additional resource property updates in addition to the desired tag updates. To avoid unexpected resource updates, Amazon Web Services recommends that you only apply or update tags to your CloudFormation stack sets using Amazon Web Services CloudFormation. Do not store personally identifiable information (PII) or other confidential or sensitive information in tags. We use tags to provide you with billing and administration services. Tags are not intended to be used for private or sensitive data. Minimum permissions In addition to the tag:TagResources permission required by this operation, you must also have the tagging permission defined by the service that created the resource. For example, to tag an Amazon EC2 instance using the TagResources operation, you must have both of the following permissions: tag:TagResources ec2:CreateTags In addition, some services might have specific requirements for tagging some types of resources. For example, to tag an Amazon S3 bucket, you must also have the s3:GetBucketTagging permission. If the expected minimum permissions don't work, check the documentation for that service's tagging APIs for more information."]
 module StartReportCreationOutput =
   struct
     type nonrec t = unit
@@ -1599,14 +1825,14 @@ module StartReportCreationOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generates a report that lists all tagged resources in the accounts across your organization and tells whether each resource is compliant with the effective tag policy. Compliance data is refreshed daily. The report is generated asynchronously. The generated report is saved to the following location: s3://example-bucket/AwsTagPolicies/o-exampleorgid/YYYY-MM-ddTHH:mm:ssZ/report.csv You can call this operation only from the organization's management account and from the us-east-1 Region."]
+       "Generates a report that lists all tagged resources in the accounts across your organization and tells whether each resource is compliant with the effective tag policy. Compliance data is refreshed daily. The report is generated asynchronously. The generated report is saved to the following location: s3://amzn-s3-demo-bucket/AwsTagPolicies/o-exampleorgid/YYYY-MM-ddTHH:mm:ssZ/report.csv For more information about evaluating resource compliance with tag policies, including the required permissions, review Permissions for evaluating organization-wide compliance in the Tagging Amazon Web Services Resources and Tag Editor user guide. You can call this operation only from the organization's management account and from the us-east-1 Region. If the account associated with the identity used to call StartReportCreation is different from the account that owns the Amazon S3 bucket, there must be a bucket policy attached to the bucket to provide access. For more information, review Amazon S3 bucket policy for report storage in the Tagging Amazon Web Services Resources and Tag Editor user guide."]
 module StartReportCreationInput =
   struct
     type nonrec t =
       {
       s3Bucket: S3Bucket.t
         [@ocaml.doc
-          "The name of the Amazon S3 bucket where the report will be stored; for example: awsexamplebucket For more information on S3 bucket requirements, including an example bucket policy, see the example S3 bucket policy on this page."]}
+          "The name of the Amazon S3 bucket where the report will be stored; for example: amzn-s3-demo-bucket For more information on S3 bucket requirements, including an example bucket policy, see the example Amazon S3 bucket policy on this page."]}
     let context_ = "StartReportCreationInput"
     let make ~s3Bucket = fun () -> { s3Bucket }
     let to_value x =
@@ -1618,12 +1844,138 @@ module StartReportCreationInput =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Bucket") in
       make ~s3Bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Bucket = field_map_exn json "S3Bucket" S3Bucket.of_json in
+    let of_json json__ =
+      let s3Bucket = field_map_exn json__ "S3Bucket" S3Bucket.of_json in
       make ~s3Bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generates a report that lists all tagged resources in the accounts across your organization and tells whether each resource is compliant with the effective tag policy. Compliance data is refreshed daily. The report is generated asynchronously. The generated report is saved to the following location: s3://example-bucket/AwsTagPolicies/o-exampleorgid/YYYY-MM-ddTHH:mm:ssZ/report.csv You can call this operation only from the organization's management account and from the us-east-1 Region."]
+       "Generates a report that lists all tagged resources in the accounts across your organization and tells whether each resource is compliant with the effective tag policy. Compliance data is refreshed daily. The report is generated asynchronously. The generated report is saved to the following location: s3://amzn-s3-demo-bucket/AwsTagPolicies/o-exampleorgid/YYYY-MM-ddTHH:mm:ssZ/report.csv For more information about evaluating resource compliance with tag policies, including the required permissions, review Permissions for evaluating organization-wide compliance in the Tagging Amazon Web Services Resources and Tag Editor user guide. You can call this operation only from the organization's management account and from the us-east-1 Region. If the account associated with the identity used to call StartReportCreation is different from the account that owns the Amazon S3 bucket, there must be a bucket policy attached to the bucket to provide access. For more information, review Amazon S3 bucket policy for report storage in the Tagging Amazon Web Services Resources and Tag Editor user guide."]
+module ListRequiredTagsOutput =
+  struct
+    type nonrec t =
+      {
+      requiredTags: RequiredTagsForListRequiredTags.t option
+        [@ocaml.doc "The required tags."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token for requesting another page of required tags if the NextToken response element indicates that more required tags are available. Use the value of the returned NextToken element in your request until the token comes back as null. Pass null if this is the first call."]}
+    type nonrec error =
+      [ `InternalServiceException of InternalServiceException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `PaginationTokenExpiredException of PaginationTokenExpiredException.t 
+      | `ThrottledException of ThrottledException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?requiredTags =
+      fun ?nextToken -> fun () -> { requiredTags; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "PaginationTokenExpiredException" ->
+          `PaginationTokenExpiredException
+            (PaginationTokenExpiredException.of_json json)
+      | "ThrottledException" ->
+          `ThrottledException (ThrottledException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "PaginationTokenExpiredException" ->
+          `PaginationTokenExpiredException
+            (PaginationTokenExpiredException.of_xml xml)
+      | "ThrottledException" ->
+          `ThrottledException (ThrottledException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `PaginationTokenExpiredException e ->
+          `Assoc
+            [("error", (`String "PaginationTokenExpiredException"));
+            ("details", (PaginationTokenExpiredException.to_json e))]
+      | `ThrottledException e ->
+          `Assoc
+            [("error", (`String "ThrottledException"));
+            ("details", (ThrottledException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("RequiredTags",
+           (Option.map x.requiredTags
+              ~f:RequiredTagsForListRequiredTags.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let requiredTags =
+        (Option.map ~f:RequiredTagsForListRequiredTags.of_xml)
+          (Xml.child xml_arg0 "RequiredTags") in
+      make ?nextToken ?requiredTags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let requiredTags =
+        field_map json__ "RequiredTags"
+          RequiredTagsForListRequiredTags.of_json in
+      make ?nextToken ?requiredTags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the required tags for supported resource types in an Amazon Web Services account."]
+module ListRequiredTagsInput =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token for requesting another page of required tags if the NextToken response element indicates that more required tags are available. Use the value of the returned NextToken element in your request until the token comes back as null. Pass null if this is the first call."];
+      maxResults: MaxResultsForListRequiredTags.t option
+        [@ocaml.doc "The maximum number of required tags."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxResultsForListRequiredTags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResultsForListRequiredTags.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsForListRequiredTags.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the required tags for supported resource types in an Amazon Web Services account."]
 module GetTagValuesOutput =
   struct
     type nonrec t =
@@ -1708,10 +2060,11 @@ module GetTagValuesOutput =
           (Xml.child xml_arg0 "PaginationToken") in
       make ?tagValues ?paginationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map json "TagValues" TagValuesOutputList.of_json in
+    let of_json json__ =
+      let tagValues =
+        field_map json__ "TagValues" TagValuesOutputList.of_json in
       let paginationToken =
-        field_map json "PaginationToken" PaginationToken.of_json in
+        field_map json__ "PaginationToken" PaginationToken.of_json in
       make ?tagValues ?paginationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1743,10 +2096,10 @@ module GetTagValuesInput =
           (Xml.child xml_arg0 "PaginationToken") in
       make ~key ?paginationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       let paginationToken =
-        field_map json "PaginationToken" PaginationToken.of_json in
+        field_map json__ "PaginationToken" PaginationToken.of_json in
       make ~key ?paginationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1833,10 +2186,10 @@ module GetTagKeysOutput =
           (Xml.child xml_arg0 "PaginationToken") in
       make ?tagKeys ?paginationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map json__ "TagKeys" TagKeyList.of_json in
       let paginationToken =
-        field_map json "PaginationToken" PaginationToken.of_json in
+        field_map json__ "PaginationToken" PaginationToken.of_json in
       make ?tagKeys ?paginationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1860,9 +2213,9 @@ module GetTagKeysInput =
           (Xml.child xml_arg0 "PaginationToken") in
       make ?paginationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let paginationToken =
-        field_map json "PaginationToken" PaginationToken.of_json in
+        field_map json__ "PaginationToken" PaginationToken.of_json in
       make ?paginationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1953,16 +2306,16 @@ module GetResourcesOutput =
           (Xml.child xml_arg0 "PaginationToken") in
       make ?resourceTagMappingList ?paginationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceTagMappingList =
-        field_map json "ResourceTagMappingList"
+        field_map json__ "ResourceTagMappingList"
           ResourceTagMappingList.of_json in
       let paginationToken =
-        field_map json "PaginationToken" PaginationToken.of_json in
+        field_map json__ "PaginationToken" PaginationToken.of_json in
       make ?resourceTagMappingList ?paginationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns all the tagged or previously tagged resources that are located in the specified Amazon Web Services Region for the account. Depending on what information you want returned, you can also specify the following: Filters that specify what tags and resource types you want returned. The response includes all tags that are associated with the requested resources. Information about compliance with the account's effective tag policy. For more information on tag policies, see Tag Policies in the Organizations User Guide. This operation supports pagination, where the response can be sent in multiple pages. You should check the PaginationToken response parameter to determine if there are additional results available to return. Repeat the query, passing the PaginationToken response parameter value as an input to the next request until you recieve a null value. A null value for PaginationToken indicates that there are no more results waiting to be returned."]
+       "Returns all the tagged or previously tagged resources that are located in the specified Amazon Web Services Region for the account. Depending on what information you want returned, you can also specify the following: Filters that specify what tags and resource types you want returned. The response includes all tags that are associated with the requested resources. Information about compliance with the account's effective tag policy. For more information on tag policies, see Tag Policies in the Organizations User Guide. This operation supports pagination, where the response can be sent in multiple pages. You should check the PaginationToken response parameter to determine if there are additional results available to return. Repeat the query, passing the PaginationToken response parameter value as an input to the next request until you recieve a null value. A null value for PaginationToken indicates that there are no more results waiting to be returned. GetResources does not return untagged resources. To find untagged resources in your account, use Amazon Web Services Resource Explorer with a query that uses tag:none. For more information, see Search query syntax reference for Resource Explorer."]
 module GetResourcesInput =
   struct
     type nonrec t =
@@ -1972,7 +2325,7 @@ module GetResourcesInput =
           "Specifies a PaginationToken response value from a previous request to indicate that you want the next page of results. Leave this parameter empty in your initial request."];
       tagFilters: TagFilterList.t option
         [@ocaml.doc
-          "Specifies a list of TagFilters (keys and values) to restrict the output to only those resources that have tags with the specified keys and, if included, the specified values. Each TagFilter must contain a key with values optional. A request can include up to 50 keys, and each key can include up to 20 values. Note the following when deciding how to use TagFilters: If you don't specify a TagFilter, the response includes all resources that are currently tagged or ever had a tag. Resources that currently don't have tags are shown with an empty tag set, like this: \"Tags\": \\[\\]. If you specify more than one filter in a single request, the response returns only those resources that satisfy all filters. If you specify a filter that contains more than one value for a key, the response returns resources that match any of the specified values for that key. If you don't specify a value for a key, the response returns all resources that are tagged with that key, with any or no value. For example, for the following filters: filter1= \\{keyA,\\{value1\\}\\}, filter2=\\{keyB,\\{value2,value3,value4\\}\\}, filter3= \\{keyC\\}: GetResources(\\{filter1\\}) returns resources tagged with key1=value1 GetResources(\\{filter2\\}) returns resources tagged with key2=value2 or key2=value3 or key2=value4 GetResources(\\{filter3\\}) returns resources tagged with any tag with the key key3, and with any or no value GetResources(\\{filter1,filter2,filter3\\}) returns resources tagged with (key1=value1) and (key2=value2 or key2=value3 or key2=value4) and (key3, any or no value)"];
+          "Specifies a list of TagFilters (keys and values) to restrict the output to only those resources that have tags with the specified keys and, if included, the specified values. Each TagFilter must contain a key with values optional. A request can include up to 50 keys, and each key can include up to 20 values. You can't specify both this parameter and the ResourceArnList parameter in the same request. If you do, you get an Invalid Parameter exception. Note the following when deciding how to use TagFilters: If you don't specify a TagFilter, the response includes all resources that are currently tagged or ever had a tag. Resources that were previously tagged, but do not currently have tags, are shown with an empty tag set, like this: \"Tags\": \\[\\]. If you specify more than one filter in a single request, the response returns only those resources that satisfy all filters. If you specify a filter that contains more than one value for a key, the response returns resources that match any of the specified values for that key. If you don't specify a value for a key, the response returns all resources that are tagged with that key, with any or no value. For example, for the following filters: filter1= \\{key1,\\{value1\\}\\}, filter2=\\{key2,\\{value2,value3,value4\\}\\}, filter3= \\{key3\\}: GetResources(\\{filter1\\}) returns resources tagged with key1=value1 GetResources(\\{filter2\\}) returns resources tagged with key2=value2 or key2=value3 or key2=value4 GetResources(\\{filter3\\}) returns resources tagged with any tag with the key key3, and with any or no value GetResources(\\{filter1,filter2,filter3\\}) returns resources tagged with (key1=value1) and (key2=value2 or key2=value3 or key2=value4) and (key3, any or no value)"];
       resourcesPerPage: ResourcesPerPage.t option
         [@ocaml.doc
           "Specifies the maximum number of results to be returned in each page. A query can return fewer than this maximum, even if there are more results still to return. You should always check the PaginationToken response value to see if there are more results. You can specify a minimum of 1 and a maximum value of 100."];
@@ -1981,7 +2334,7 @@ module GetResourcesInput =
           "Amazon Web Services recommends using ResourcesPerPage instead of this parameter. A limit that restricts the number of tags (key and value pairs) returned by GetResources in paginated output. A resource with no tags is counted as having one tag (one key and value pair). GetResources does not split a resource and its associated tags across pages. If the specified TagsPerPage would cause such a break, a PaginationToken is returned in place of the affected resource and its tags. Use that token in another request to get the remaining data. For example, if you specify a TagsPerPage of 100 and the account has 22 resources with 10 tags each (meaning that each resource has 10 key and value pairs), the output will consist of three pages. The first page displays the first 10 resources, each with its 10 tags. The second page displays the next 10 resources, each with its 10 tags. The third page displays the remaining 2 resources, each with its 10 tags. You can set TagsPerPage to a minimum of 100 items up to a maximum of 500 items."];
       resourceTypeFilters: ResourceTypeFilterList.t option
         [@ocaml.doc
-          "Specifies the resource types that you want included in the response. The format of each resource type is service\\[:resourceType\\]. For example, specifying a resource type of ec2 returns all Amazon EC2 resources (which includes EC2 instances). Specifying a resource type of ec2:instance returns only EC2 instances. The string for each service name and resource type is the same as that embedded in a resource's Amazon Resource Name (ARN). For the list of services whose resources you can use in this parameter, see Services that support the Resource Groups Tagging API. You can specify multiple resource types by using an array. The array can include up to 100 items. Note that the length constraint requirement applies to each resource type filter. For example, the following string would limit the response to only Amazon EC2 instances, Amazon S3 buckets, or any Audit Manager resource: ec2:instance,s3:bucket,auditmanager"];
+          "Specifies the resource types that you want included in the response. The format of each resource type is service\\[:resourceType\\]. For example, specifying a service of ec2 returns all Amazon EC2 resources (which includes EC2 instances). Specifying a resource type of ec2:instance returns only EC2 instances. You can't specify both this parameter and the ResourceArnList parameter in the same request. If you do, you get an Invalid Parameter exception. The string for each service name and resource type is the same as that embedded in a resource's Amazon Resource Name (ARN). For the list of services whose resources you can tag using the Resource Groups Tagging API, see Services that support the Resource Groups Tagging API. If an Amazon Web Services service isn't listed on that page, you might still be able to tag that service's resources by using that service's native tagging operations instead of using Resource Groups Tagging API operations. All tagged resources, whether the tagging used the Resource Groups Tagging API or not, are returned by the Get* operation. You can specify multiple resource types by using an array. The array can include up to 100 items. Note that the length constraint requirement applies to each resource type filter. For example, the following string would limit the response to only Amazon EC2 instances, Amazon S3 buckets, or any Audit Manager resource: ec2:instance,s3:bucket,auditmanager"];
       includeComplianceDetails: IncludeComplianceDetails.t option
         [@ocaml.doc
           "Specifies whether to include details regarding the compliance with the effective tag policy. Set this to true to determine whether resources are compliant with the tag policy and to get details."];
@@ -1990,7 +2343,7 @@ module GetResourcesInput =
           "Specifies whether to exclude resources that are compliant with the tag policy. Set this to true if you are interested in retrieving information on noncompliant resources only. You can use this parameter only if the IncludeComplianceDetails parameter is also set to true."];
       resourceARNList: ResourceARNListForGet.t option
         [@ocaml.doc
-          "Specifies a list of ARNs of resources for which you want to retrieve tag data. You can't specify both this parameter and any of the pagination parameters (ResourcesPerPage, TagsPerPage, PaginationToken) in the same request. If you specify both, you get an Invalid Parameter exception. If a resource specified by this parameter doesn't exist, it doesn't generate an error; it simply isn't included in the response. An ARN (Amazon Resource Name) uniquely identifies a resource. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces in the Amazon Web Services General Reference."]}
+          "Specifies a list of ARNs of resources for which you want to retrieve tag data. You can't specify both this parameter and the ResourceTypeFilters parameter in the same request. If you do, you get an Invalid Parameter exception. You can't specify both this parameter and the TagFilters parameter in the same request. If you do, you get an Invalid Parameter exception. You can't specify both this parameter and any of the pagination parameters (ResourcesPerPage, TagsPerPage, PaginationToken) in the same request. If you do, you get an Invalid Parameter exception. If a resource specified by this parameter doesn't exist, it doesn't generate an error; it simply isn't included in the response. An ARN (Amazon Resource Name) uniquely identifies a resource. For more information, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces in the Amazon Web Services General Reference."]}
     let make ?paginationToken =
       fun ?tagFilters ->
         fun ?resourcesPerPage ->
@@ -2058,29 +2411,29 @@ module GetResourcesInput =
         ?includeComplianceDetails ?resourceTypeFilters ?tagsPerPage
         ?resourcesPerPage ?tagFilters ?paginationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARNList =
-        field_map json "ResourceARNList" ResourceARNListForGet.of_json in
+        field_map json__ "ResourceARNList" ResourceARNListForGet.of_json in
       let excludeCompliantResources =
-        field_map json "ExcludeCompliantResources"
+        field_map json__ "ExcludeCompliantResources"
           ExcludeCompliantResources.of_json in
       let includeComplianceDetails =
-        field_map json "IncludeComplianceDetails"
+        field_map json__ "IncludeComplianceDetails"
           IncludeComplianceDetails.of_json in
       let resourceTypeFilters =
-        field_map json "ResourceTypeFilters" ResourceTypeFilterList.of_json in
-      let tagsPerPage = field_map json "TagsPerPage" TagsPerPage.of_json in
+        field_map json__ "ResourceTypeFilters" ResourceTypeFilterList.of_json in
+      let tagsPerPage = field_map json__ "TagsPerPage" TagsPerPage.of_json in
       let resourcesPerPage =
-        field_map json "ResourcesPerPage" ResourcesPerPage.of_json in
-      let tagFilters = field_map json "TagFilters" TagFilterList.of_json in
+        field_map json__ "ResourcesPerPage" ResourcesPerPage.of_json in
+      let tagFilters = field_map json__ "TagFilters" TagFilterList.of_json in
       let paginationToken =
-        field_map json "PaginationToken" PaginationToken.of_json in
+        field_map json__ "PaginationToken" PaginationToken.of_json in
       make ?resourceARNList ?excludeCompliantResources
         ?includeComplianceDetails ?resourceTypeFilters ?tagsPerPage
         ?resourcesPerPage ?tagFilters ?paginationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns all the tagged or previously tagged resources that are located in the specified Amazon Web Services Region for the account. Depending on what information you want returned, you can also specify the following: Filters that specify what tags and resource types you want returned. The response includes all tags that are associated with the requested resources. Information about compliance with the account's effective tag policy. For more information on tag policies, see Tag Policies in the Organizations User Guide. This operation supports pagination, where the response can be sent in multiple pages. You should check the PaginationToken response parameter to determine if there are additional results available to return. Repeat the query, passing the PaginationToken response parameter value as an input to the next request until you recieve a null value. A null value for PaginationToken indicates that there are no more results waiting to be returned."]
+       "Returns all the tagged or previously tagged resources that are located in the specified Amazon Web Services Region for the account. Depending on what information you want returned, you can also specify the following: Filters that specify what tags and resource types you want returned. The response includes all tags that are associated with the requested resources. Information about compliance with the account's effective tag policy. For more information on tag policies, see Tag Policies in the Organizations User Guide. This operation supports pagination, where the response can be sent in multiple pages. You should check the PaginationToken response parameter to determine if there are additional results available to return. Repeat the query, passing the PaginationToken response parameter value as an input to the next request until you recieve a null value. A null value for PaginationToken indicates that there are no more results waiting to be returned. GetResources does not return untagged resources. To find untagged resources in your account, use Amazon Web Services Resource Explorer with a query that uses tag:none. For more information, see Search query syntax reference for Resource Explorer."]
 module GetComplianceSummaryOutput =
   struct
     type nonrec t =
@@ -2162,10 +2515,10 @@ module GetComplianceSummaryOutput =
         (Option.map ~f:SummaryList.of_xml) (Xml.child xml_arg0 "SummaryList") in
       make ?paginationToken ?summaryList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let paginationToken =
-        field_map json "PaginationToken" PaginationToken.of_json in
-      let summaryList = field_map json "SummaryList" SummaryList.of_json in
+        field_map json__ "PaginationToken" PaginationToken.of_json in
+      let summaryList = field_map json__ "SummaryList" SummaryList.of_json in
       make ?paginationToken ?summaryList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2182,7 +2535,7 @@ module GetComplianceSummaryInput =
           "Specifies a list of Amazon Web Services Regions to limit the output to. If you use this parameter, the count of returned noncompliant resources includes only resources in the specified Regions."];
       resourceTypeFilters: ResourceTypeFilterList.t option
         [@ocaml.doc
-          "Specifies that you want the response to include information for only resources of the specified types. The format of each resource type is service\\[:resourceType\\]. For example, specifying a resource type of ec2 returns all Amazon EC2 resources (which includes EC2 instances). Specifying a resource type of ec2:instance returns only EC2 instances. The string for each service name and resource type is the same as that embedded in a resource's Amazon Resource Name (ARN). Consult the Amazon Web Services General Reference for the following: For a list of service name strings, see Amazon Web Services Service Namespaces. For resource type strings, see Example ARNs. For more information about ARNs, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces. You can specify multiple resource types by using a comma separated array. The array can include up to 100 items. Note that the length constraint requirement applies to each resource type filter."];
+          "Specifies that you want the response to include information for only resources of the specified types. The format of each resource type is service\\[:resourceType\\]. For example, specifying a resource type of ec2 returns all Amazon EC2 resources (which includes EC2 instances). Specifying a resource type of ec2:instance returns only EC2 instances. The string for each service name and resource type is the same as that embedded in a resource's Amazon Resource Name (ARN). Consult the Amazon Web Services General Reference for the following: For a list of service name strings, see Amazon Web Services Service Namespaces. For resource type strings, see Example ARNs. For more information about ARNs, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces. For the list of services whose resources you can tag using the Resource Groups Tagging API, see Services that support the Resource Groups Tagging API. If an Amazon Web Services service isn't listed on that page, you might still be able to tag that service's resources by using that service's native tagging operations instead of using Resource Groups Tagging API operations. All tagged resources, whether the tagging used the Resource Groups Tagging API or not, are returned by the Get* operation. You can specify multiple resource types by using a comma separated array. The array can include up to 100 items. Note that the length constraint requirement applies to each resource type filter."];
       tagKeyFilters: TagKeyFilterList.t option
         [@ocaml.doc
           "Specifies that you want the response to include information for only resources that have tags with the specified tag keys. If you use this parameter, the count of returned noncompliant resources includes only resources that have the specified tag keys."];
@@ -2253,20 +2606,20 @@ module GetComplianceSummaryInput =
       make ?paginationToken ?maxResults ?groupBy ?tagKeyFilters
         ?resourceTypeFilters ?regionFilters ?targetIdFilters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let paginationToken =
-        field_map json "PaginationToken" PaginationToken.of_json in
+        field_map json__ "PaginationToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "MaxResults" MaxResultsGetComplianceSummary.of_json in
-      let groupBy = field_map json "GroupBy" GroupBy.of_json in
+        field_map json__ "MaxResults" MaxResultsGetComplianceSummary.of_json in
+      let groupBy = field_map json__ "GroupBy" GroupBy.of_json in
       let tagKeyFilters =
-        field_map json "TagKeyFilters" TagKeyFilterList.of_json in
+        field_map json__ "TagKeyFilters" TagKeyFilterList.of_json in
       let resourceTypeFilters =
-        field_map json "ResourceTypeFilters" ResourceTypeFilterList.of_json in
+        field_map json__ "ResourceTypeFilters" ResourceTypeFilterList.of_json in
       let regionFilters =
-        field_map json "RegionFilters" RegionFilterList.of_json in
+        field_map json__ "RegionFilters" RegionFilterList.of_json in
       let targetIdFilters =
-        field_map json "TargetIdFilters" TargetIdFilterList.of_json in
+        field_map json__ "TargetIdFilters" TargetIdFilterList.of_json in
       make ?paginationToken ?maxResults ?groupBy ?tagKeyFilters
         ?resourceTypeFilters ?regionFilters ?targetIdFilters ()
     let to_json v = composed_to_json to_value v
@@ -2361,10 +2714,10 @@ module DescribeReportCreationOutput =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
       make ?errorMessage ?s3Location ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let s3Location = field_map json "S3Location" S3Location.of_json in
-      let status = field_map json "Status" Status.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let s3Location = field_map json__ "S3Location" S3Location.of_json in
+      let status = field_map json__ "Status" Status.of_json in
       make ?errorMessage ?s3Location ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

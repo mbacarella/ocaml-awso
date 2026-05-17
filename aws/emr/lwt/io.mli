@@ -26,6 +26,12 @@ val cancel_steps :
     ?cfg:Awso.Cfg.t ->
       CancelStepsInput.t ->
         (CancelStepsOutput.t, CancelStepsOutput.error) Result.t Lwt.t
+val create_persistent_app_u_i :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreatePersistentAppUIInput.t ->
+        (CreatePersistentAppUIOutput.t, CreatePersistentAppUIOutput.error)
+          Result.t Lwt.t
 val create_security_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -71,6 +77,12 @@ val describe_notebook_execution :
       DescribeNotebookExecutionInput.t ->
         (DescribeNotebookExecutionOutput.t,
           DescribeNotebookExecutionOutput.error) Result.t Lwt.t
+val describe_persistent_app_u_i :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribePersistentAppUIInput.t ->
+        (DescribePersistentAppUIOutput.t,
+          DescribePersistentAppUIOutput.error) Result.t Lwt.t
 val describe_release_label :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -105,12 +117,30 @@ val get_block_public_access_configuration :
       GetBlockPublicAccessConfigurationInput.t ->
         (GetBlockPublicAccessConfigurationOutput.t,
           GetBlockPublicAccessConfigurationOutput.error) Result.t Lwt.t
+val get_cluster_session_credentials :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetClusterSessionCredentialsInput.t ->
+        (GetClusterSessionCredentialsOutput.t,
+          GetClusterSessionCredentialsOutput.error) Result.t Lwt.t
 val get_managed_scaling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetManagedScalingPolicyInput.t ->
         (GetManagedScalingPolicyOutput.t,
           GetManagedScalingPolicyOutput.error) Result.t Lwt.t
+val get_on_cluster_app_u_i_presigned_u_r_l :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetOnClusterAppUIPresignedURLInput.t ->
+        (GetOnClusterAppUIPresignedURLOutput.t,
+          GetOnClusterAppUIPresignedURLOutput.error) Result.t Lwt.t
+val get_persistent_app_u_i_presigned_u_r_l :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetPersistentAppUIPresignedURLInput.t ->
+        (GetPersistentAppUIPresignedURLOutput.t,
+          GetPersistentAppUIPresignedURLOutput.error) Result.t Lwt.t
 val get_studio_session_mapping :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -179,6 +209,12 @@ val list_studios :
     ?cfg:Awso.Cfg.t ->
       ListStudiosInput.t ->
         (ListStudiosOutput.t, ListStudiosOutput.error) Result.t Lwt.t
+val list_supported_instance_types :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSupportedInstanceTypesInput.t ->
+        (ListSupportedInstanceTypesOutput.t,
+          ListSupportedInstanceTypesOutput.error) Result.t Lwt.t
 val modify_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -244,10 +280,18 @@ val run_job_flow :
     ?cfg:Awso.Cfg.t ->
       RunJobFlowInput.t ->
         (RunJobFlowOutput.t, RunJobFlowOutput.error) Result.t Lwt.t
+val set_keep_job_flow_alive_when_no_steps :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SetKeepJobFlowAliveWhenNoStepsInput.t -> (unit, unit) Result.t Lwt.t
 val set_termination_protection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetTerminationProtectionInput.t -> (unit, unit) Result.t Lwt.t
+val set_unhealthy_node_replacement :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SetUnhealthyNodeReplacementInput.t -> (unit, unit) Result.t Lwt.t
 val set_visible_to_all_users :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

@@ -51,6 +51,30 @@ let add_custom_attributes =
                                    customAttributes) ())
            (Some Values.AddCustomAttributesResponse.to_json)
            (Some Values.AddCustomAttributesResponse.error_to_json)])
+let add_user_pool_client_secret =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientSecret =
+         flag "client-secret" (optional string)
+           ~doc:"STRING ClientSecretType"
+       and userPoolId =
+         flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType"
+       and clientId =
+         flag "client-id" (required string) ~doc:"STRING ClientIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.add_user_pool_client_secret
+           (Values.AddUserPoolClientSecretRequest.make ?clientSecret
+              ~userPoolId ~clientId ())
+           (Some Values.AddUserPoolClientSecretResponse.to_json)
+           (Some Values.AddUserPoolClientSecretResponse.error_to_json)])
 let admin_add_user_to_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -343,6 +367,8 @@ let admin_initiate_auth =
            ~doc:"JSON AnalyticsMetadataType"
        and contextData =
          flag "context-data" (optional json_arg) ~doc:"JSON ContextDataType"
+       and session =
+         flag "session" (optional string) ~doc:"STRING SessionType"
        and userPoolId =
          flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType"
        and clientId =
@@ -363,7 +389,7 @@ let admin_initiate_auth =
                                     ~f:Values.AnalyticsMetadataType.of_json
                                     analyticsMetadata)
               ?contextData:(Option.map ~f:Values.ContextDataType.of_json
-                              contextData) ~userPoolId ~clientId
+                              contextData) ?session ~userPoolId ~clientId
               ~authFlow:(Values.AuthFlowType.of_json authFlow) ())
            (Some Values.AdminInitiateAuthResponse.to_json)
            (Some Values.AdminInitiateAuthResponse.error_to_json)])
@@ -580,6 +606,12 @@ let admin_set_user_m_f_a_preference =
        and softwareTokenMfaSettings =
          flag "software-token-mfa-settings" (optional json_arg)
            ~doc:"JSON SoftwareTokenMfaSettingsType"
+       and emailMfaSettings =
+         flag "email-mfa-settings" (optional json_arg)
+           ~doc:"JSON EmailMfaSettingsType"
+       and webAuthnMfaSettings =
+         flag "web-authn-mfa-settings" (optional json_arg)
+           ~doc:"JSON WebAuthnMfaSettingsType"
        and username =
          flag "username" (required string) ~doc:"STRING UsernameType"
        and userPoolId =
@@ -594,7 +626,13 @@ let admin_set_user_m_f_a_preference =
               ?softwareTokenMfaSettings:(Option.map
                                            ~f:Values.SoftwareTokenMfaSettingsType.of_json
                                            softwareTokenMfaSettings)
-              ~username ~userPoolId ())
+              ?emailMfaSettings:(Option.map
+                                   ~f:Values.EmailMfaSettingsType.of_json
+                                   emailMfaSettings)
+              ?webAuthnMfaSettings:(Option.map
+                                      ~f:Values.WebAuthnMfaSettingsType.of_json
+                                      webAuthnMfaSettings) ~username
+              ~userPoolId ())
            (Some Values.AdminSetUserMFAPreferenceResponse.to_json)
            (Some Values.AdminSetUserMFAPreferenceResponse.error_to_json)])
 let admin_set_user_password =
@@ -784,7 +822,7 @@ let change_password =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and previousPassword =
-         flag "previous-password" (required string)
+         flag "previous-password" (optional string)
            ~doc:"STRING PasswordType"
        and proposedPassword =
          flag "proposed-password" (required string)
@@ -794,10 +832,31 @@ let change_password =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.change_password
-           (Values.ChangePasswordRequest.make ~previousPassword
+           (Values.ChangePasswordRequest.make ?previousPassword
               ~proposedPassword ~accessToken ())
            (Some Values.ChangePasswordResponse.to_json)
            (Some Values.ChangePasswordResponse.error_to_json)])
+let complete_web_authn_registration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accessToken =
+         flag "access-token" (required string) ~doc:"STRING TokenModelType"
+       and credential =
+         flag "credential" (required json_arg) ~doc:"JSON Document" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.complete_web_authn_registration
+           (Values.CompleteWebAuthnRegistrationRequest.make ~accessToken
+              ~credential:(Values.Document.of_json credential) ())
+           (Some Values.CompleteWebAuthnRegistrationResponse.to_json)
+           (Some Values.CompleteWebAuthnRegistrationResponse.error_to_json)])
 let confirm_device =
   Command.async ~summary:""
     ([%map_open.Command
@@ -897,6 +956,8 @@ let confirm_sign_up =
        and clientMetadata =
          flag "client-metadata" (optional json_arg)
            ~doc:"JSON ClientMetadataType"
+       and session =
+         flag "session" (optional string) ~doc:"STRING SessionType"
        and clientId =
          flag "client-id" (required string) ~doc:"STRING ClientIdType"
        and username =
@@ -916,7 +977,7 @@ let confirm_sign_up =
                                   userContextData)
               ?clientMetadata:(Option.map
                                  ~f:Values.ClientMetadataType.of_json
-                                 clientMetadata) ~clientId ~username
+                                 clientMetadata) ?session ~clientId ~username
               ~confirmationCode ())
            (Some Values.ConfirmSignUpResponse.to_json)
            (Some Values.ConfirmSignUpResponse.error_to_json)])
@@ -966,7 +1027,7 @@ let create_identity_provider =
          flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType"
        and providerName =
          flag "provider-name" (required string)
-           ~doc:"STRING ProviderNameTypeV1"
+           ~doc:"STRING ProviderNameTypeV2"
        and providerType =
          flag "provider-type" (required json_arg)
            ~doc:"JSON IdentityProviderTypeType"
@@ -989,6 +1050,37 @@ let create_identity_provider =
                                   providerDetails) ())
            (Some Values.CreateIdentityProviderResponse.to_json)
            (Some Values.CreateIdentityProviderResponse.error_to_json)])
+let create_managed_login_branding =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and useCognitoProvidedValues =
+         flag "use-cognito-provided-values" (optional bool)
+           ~doc:"BOOL BooleanType"
+       and settings =
+         flag "settings" (optional json_arg) ~doc:"JSON Document"
+       and assets =
+         flag "assets" (optional json_arg) ~doc:"JSON AssetListType"
+       and userPoolId =
+         flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType"
+       and clientId =
+         flag "client-id" (required string) ~doc:"STRING ClientIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_managed_login_branding
+           (Values.CreateManagedLoginBrandingRequest.make
+              ?useCognitoProvidedValues
+              ?settings:(Option.map ~f:Values.Document.of_json settings)
+              ?assets:(Option.map ~f:Values.AssetListType.of_json assets)
+              ~userPoolId ~clientId ())
+           (Some Values.CreateManagedLoginBrandingResponse.to_json)
+           (Some Values.CreateManagedLoginBrandingResponse.error_to_json)])
 let create_resource_server =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1018,6 +1110,38 @@ let create_resource_server =
               ~userPoolId ~identifier ~name ())
            (Some Values.CreateResourceServerResponse.to_json)
            (Some Values.CreateResourceServerResponse.error_to_json)])
+let create_terms =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and links = flag "links" (optional json_arg) ~doc:"JSON LinksType"
+       and userPoolId =
+         flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType"
+       and clientId =
+         flag "client-id" (required string) ~doc:"STRING ClientIdType"
+       and termsName =
+         flag "terms-name" (required string) ~doc:"STRING TermsNameType"
+       and termsSource =
+         flag "terms-source" (required json_arg) ~doc:"JSON TermsSourceType"
+       and enforcement =
+         flag "enforcement" (required json_arg)
+           ~doc:"JSON TermsEnforcementType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_terms
+           (Values.CreateTermsRequest.make
+              ?links:(Option.map ~f:Values.LinksType.of_json links)
+              ~userPoolId ~clientId ~termsName
+              ~termsSource:(Values.TermsSourceType.of_json termsSource)
+              ~enforcement:(Values.TermsEnforcementType.of_json enforcement)
+              ()) (Some Values.CreateTermsResponse.to_json)
+           (Some Values.CreateTermsResponse.error_to_json)])
 let create_user_import_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1055,6 +1179,9 @@ let create_user_pool =
            ~doc:"URL override endpoint url"
        and policies =
          flag "policies" (optional json_arg) ~doc:"JSON UserPoolPolicyType"
+       and deletionProtection =
+         flag "deletion-protection" (optional json_arg)
+           ~doc:"JSON DeletionProtectionType"
        and lambdaConfig =
          flag "lambda-config" (optional json_arg)
            ~doc:"JSON LambdaConfigType"
@@ -1085,6 +1212,9 @@ let create_user_pool =
        and mfaConfiguration =
          flag "mfa-configuration" (optional json_arg)
            ~doc:"JSON UserPoolMfaType"
+       and userAttributeUpdateSettings =
+         flag "user-attribute-update-settings" (optional json_arg)
+           ~doc:"JSON UserAttributeUpdateSettingsType"
        and deviceConfiguration =
          flag "device-configuration" (optional json_arg)
            ~doc:"JSON DeviceConfigurationType"
@@ -1112,6 +1242,9 @@ let create_user_pool =
        and accountRecoverySetting =
          flag "account-recovery-setting" (optional json_arg)
            ~doc:"JSON AccountRecoverySettingType"
+       and userPoolTier =
+         flag "user-pool-tier" (optional json_arg)
+           ~doc:"JSON UserPoolTierType"
        and poolName =
          flag "pool-name" (required string) ~doc:"STRING UserPoolNameType" in
        fun () ->
@@ -1120,6 +1253,9 @@ let create_user_pool =
            (Values.CreateUserPoolRequest.make
               ?policies:(Option.map ~f:Values.UserPoolPolicyType.of_json
                            policies)
+              ?deletionProtection:(Option.map
+                                     ~f:Values.DeletionProtectionType.of_json
+                                     deletionProtection)
               ?lambdaConfig:(Option.map ~f:Values.LambdaConfigType.of_json
                                lambdaConfig)
               ?autoVerifiedAttributes:(Option.map
@@ -1139,6 +1275,9 @@ let create_user_pool =
               ?smsAuthenticationMessage
               ?mfaConfiguration:(Option.map ~f:Values.UserPoolMfaType.of_json
                                    mfaConfiguration)
+              ?userAttributeUpdateSettings:(Option.map
+                                              ~f:Values.UserAttributeUpdateSettingsType.of_json
+                                              userAttributeUpdateSettings)
               ?deviceConfiguration:(Option.map
                                       ~f:Values.DeviceConfigurationType.of_json
                                       deviceConfiguration)
@@ -1163,7 +1302,9 @@ let create_user_pool =
                                         usernameConfiguration)
               ?accountRecoverySetting:(Option.map
                                          ~f:Values.AccountRecoverySettingType.of_json
-                                         accountRecoverySetting) ~poolName ())
+                                         accountRecoverySetting)
+              ?userPoolTier:(Option.map ~f:Values.UserPoolTierType.of_json
+                               userPoolTier) ~poolName ())
            (Some Values.CreateUserPoolResponse.to_json)
            (Some Values.CreateUserPoolResponse.error_to_json)])
 let create_user_pool_client =
@@ -1178,6 +1319,9 @@ let create_user_pool_client =
            ~doc:"URL override endpoint url"
        and generateSecret =
          flag "generate-secret" (optional bool) ~doc:"BOOL GenerateSecret"
+       and clientSecret =
+         flag "client-secret" (optional string)
+           ~doc:"STRING ClientSecretType"
        and refreshTokenValidity =
          flag "refresh-token-validity" (optional int)
            ~doc:"INT RefreshTokenValidityType"
@@ -1229,6 +1373,15 @@ let create_user_pool_client =
        and enableTokenRevocation =
          flag "enable-token-revocation" (optional bool)
            ~doc:"BOOL WrappedBooleanType"
+       and enablePropagateAdditionalUserContextData =
+         flag "enable-propagate-additional-user-context-data" (optional bool)
+           ~doc:"BOOL WrappedBooleanType"
+       and authSessionValidity =
+         flag "auth-session-validity" (optional int)
+           ~doc:"INT AuthSessionValidityType"
+       and refreshTokenRotation =
+         flag "refresh-token-rotation" (optional json_arg)
+           ~doc:"JSON RefreshTokenRotationType"
        and userPoolId =
          flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType"
        and clientName =
@@ -1237,7 +1390,8 @@ let create_user_pool_client =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_user_pool_client
            (Values.CreateUserPoolClientRequest.make ?generateSecret
-              ?refreshTokenValidity ?accessTokenValidity ?idTokenValidity
+              ?clientSecret ?refreshTokenValidity ?accessTokenValidity
+              ?idTokenValidity
               ?tokenValidityUnits:(Option.map
                                      ~f:Values.TokenValidityUnitsType.of_json
                                      tokenValidityUnits)
@@ -1269,7 +1423,12 @@ let create_user_pool_client =
               ?preventUserExistenceErrors:(Option.map
                                              ~f:Values.PreventUserExistenceErrorTypes.of_json
                                              preventUserExistenceErrors)
-              ?enableTokenRevocation ~userPoolId ~clientName ())
+              ?enableTokenRevocation
+              ?enablePropagateAdditionalUserContextData ?authSessionValidity
+              ?refreshTokenRotation:(Option.map
+                                       ~f:Values.RefreshTokenRotationType.of_json
+                                       refreshTokenRotation) ~userPoolId
+              ~clientName ())
            (Some Values.CreateUserPoolClientResponse.to_json)
            (Some Values.CreateUserPoolClientResponse.error_to_json)])
 let create_user_pool_domain =
@@ -1282,6 +1441,9 @@ let create_user_pool_domain =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and managedLoginVersion =
+         flag "managed-login-version" (optional int)
+           ~doc:"INT WrappedIntegerType"
        and customDomainConfig =
          flag "custom-domain-config" (optional json_arg)
            ~doc:"JSON CustomDomainConfigType"
@@ -1291,7 +1453,7 @@ let create_user_pool_domain =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_user_pool_domain
-           (Values.CreateUserPoolDomainRequest.make
+           (Values.CreateUserPoolDomainRequest.make ?managedLoginVersion
               ?customDomainConfig:(Option.map
                                      ~f:Values.CustomDomainConfigType.of_json
                                      customDomainConfig) ~domain ~userPoolId
@@ -1336,6 +1498,26 @@ let delete_identity_provider =
            Io.delete_identity_provider
            (Values.DeleteIdentityProviderRequest.make ~userPoolId
               ~providerName ()) None None])
+let delete_managed_login_branding =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and managedLoginBrandingId =
+         flag "managed-login-branding-id" (required string)
+           ~doc:"STRING ManagedLoginBrandingIdType"
+       and userPoolId =
+         flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_managed_login_branding
+           (Values.DeleteManagedLoginBrandingRequest.make
+              ~managedLoginBrandingId ~userPoolId ()) None None])
 let delete_resource_server =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1356,6 +1538,24 @@ let delete_resource_server =
            Io.delete_resource_server
            (Values.DeleteResourceServerRequest.make ~userPoolId ~identifier
               ()) None None])
+let delete_terms =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and termsId =
+         flag "terms-id" (required string) ~doc:"STRING TermsIdType"
+       and userPoolId =
+         flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_terms
+           (Values.DeleteTermsRequest.make ~termsId ~userPoolId ()) None None])
 let delete_user =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1430,6 +1630,30 @@ let delete_user_pool_client =
            Io.delete_user_pool_client
            (Values.DeleteUserPoolClientRequest.make ~userPoolId ~clientId ())
            None None])
+let delete_user_pool_client_secret =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and userPoolId =
+         flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType"
+       and clientId =
+         flag "client-id" (required string) ~doc:"STRING ClientIdType"
+       and clientSecretId =
+         flag "client-secret-id" (required string)
+           ~doc:"STRING ClientSecretIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_user_pool_client_secret
+           (Values.DeleteUserPoolClientSecretRequest.make ~userPoolId
+              ~clientId ~clientSecretId ())
+           (Some Values.DeleteUserPoolClientSecretResponse.to_json)
+           (Some Values.DeleteUserPoolClientSecretResponse.error_to_json)])
 let delete_user_pool_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1449,6 +1673,27 @@ let delete_user_pool_domain =
            (Values.DeleteUserPoolDomainRequest.make ~domain ~userPoolId ())
            (Some Values.DeleteUserPoolDomainResponse.to_json)
            (Some Values.DeleteUserPoolDomainResponse.error_to_json)])
+let delete_web_authn_credential =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accessToken =
+         flag "access-token" (required string) ~doc:"STRING TokenModelType"
+       and credentialId =
+         flag "credential-id" (required string) ~doc:"STRING StringType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_web_authn_credential
+           (Values.DeleteWebAuthnCredentialRequest.make ~accessToken
+              ~credentialId ())
+           (Some Values.DeleteWebAuthnCredentialResponse.to_json)
+           (Some Values.DeleteWebAuthnCredentialResponse.error_to_json)])
 let describe_identity_provider =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1471,6 +1716,56 @@ let describe_identity_provider =
               ~providerName ())
            (Some Values.DescribeIdentityProviderResponse.to_json)
            (Some Values.DescribeIdentityProviderResponse.error_to_json)])
+let describe_managed_login_branding =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and returnMergedResources =
+         flag "return-merged-resources" (optional bool)
+           ~doc:"BOOL BooleanType"
+       and userPoolId =
+         flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType"
+       and managedLoginBrandingId =
+         flag "managed-login-branding-id" (required string)
+           ~doc:"STRING ManagedLoginBrandingIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_managed_login_branding
+           (Values.DescribeManagedLoginBrandingRequest.make
+              ?returnMergedResources ~userPoolId ~managedLoginBrandingId ())
+           (Some Values.DescribeManagedLoginBrandingResponse.to_json)
+           (Some Values.DescribeManagedLoginBrandingResponse.error_to_json)])
+let describe_managed_login_branding_by_client =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and returnMergedResources =
+         flag "return-merged-resources" (optional bool)
+           ~doc:"BOOL BooleanType"
+       and userPoolId =
+         flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType"
+       and clientId =
+         flag "client-id" (required string) ~doc:"STRING ClientIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_managed_login_branding_by_client
+           (Values.DescribeManagedLoginBrandingByClientRequest.make
+              ?returnMergedResources ~userPoolId ~clientId ())
+           (Some Values.DescribeManagedLoginBrandingByClientResponse.to_json)
+           (Some
+              Values.DescribeManagedLoginBrandingByClientResponse.error_to_json)])
 let describe_resource_server =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1513,6 +1808,26 @@ let describe_risk_configuration =
               ~userPoolId ())
            (Some Values.DescribeRiskConfigurationResponse.to_json)
            (Some Values.DescribeRiskConfigurationResponse.error_to_json)])
+let describe_terms =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and termsId =
+         flag "terms-id" (required string) ~doc:"STRING TermsIdType"
+       and userPoolId =
+         flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_terms
+           (Values.DescribeTermsRequest.make ~termsId ~userPoolId ())
+           (Some Values.DescribeTermsResponse.to_json)
+           (Some Values.DescribeTermsResponse.error_to_json)])
 let describe_user_import_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1727,6 +2042,24 @@ let get_identity_provider_by_identifier =
               ~idpIdentifier ())
            (Some Values.GetIdentityProviderByIdentifierResponse.to_json)
            (Some Values.GetIdentityProviderByIdentifierResponse.error_to_json)])
+let get_log_delivery_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and userPoolId =
+         flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_log_delivery_configuration
+           (Values.GetLogDeliveryConfigurationRequest.make ~userPoolId ())
+           (Some Values.GetLogDeliveryConfigurationResponse.to_json)
+           (Some Values.GetLogDeliveryConfigurationResponse.error_to_json)])
 let get_signing_certificate =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1745,6 +2078,38 @@ let get_signing_certificate =
            (Values.GetSigningCertificateRequest.make ~userPoolId ())
            (Some Values.GetSigningCertificateResponse.to_json)
            (Some Values.GetSigningCertificateResponse.error_to_json)])
+let get_tokens_from_refresh_token =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientSecret =
+         flag "client-secret" (optional string)
+           ~doc:"STRING ClientSecretType"
+       and deviceKey =
+         flag "device-key" (optional string) ~doc:"STRING DeviceKeyType"
+       and clientMetadata =
+         flag "client-metadata" (optional json_arg)
+           ~doc:"JSON ClientMetadataType"
+       and refreshToken =
+         flag "refresh-token" (required string) ~doc:"STRING TokenModelType"
+       and clientId =
+         flag "client-id" (required string) ~doc:"STRING ClientIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_tokens_from_refresh_token
+           (Values.GetTokensFromRefreshTokenRequest.make ?clientSecret
+              ?deviceKey
+              ?clientMetadata:(Option.map
+                                 ~f:Values.ClientMetadataType.of_json
+                                 clientMetadata) ~refreshToken ~clientId ())
+           (Some Values.GetTokensFromRefreshTokenResponse.to_json)
+           (Some Values.GetTokensFromRefreshTokenResponse.error_to_json)])
 let get_u_i_customization =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1811,6 +2176,24 @@ let get_user_attribute_verification_code =
            (Some Values.GetUserAttributeVerificationCodeResponse.to_json)
            (Some
               Values.GetUserAttributeVerificationCodeResponse.error_to_json)])
+let get_user_auth_factors =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accessToken =
+         flag "access-token" (required string) ~doc:"STRING TokenModelType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_user_auth_factors
+           (Values.GetUserAuthFactorsRequest.make ~accessToken ())
+           (Some Values.GetUserAuthFactorsResponse.to_json)
+           (Some Values.GetUserAuthFactorsResponse.error_to_json)])
 let get_user_pool_mfa_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1869,6 +2252,8 @@ let initiate_auth =
        and userContextData =
          flag "user-context-data" (optional json_arg)
            ~doc:"JSON UserContextDataType"
+       and session =
+         flag "session" (optional string) ~doc:"STRING SessionType"
        and authFlow =
          flag "auth-flow" (required json_arg) ~doc:"JSON AuthFlowType"
        and clientId =
@@ -1888,7 +2273,7 @@ let initiate_auth =
                                     analyticsMetadata)
               ?userContextData:(Option.map
                                   ~f:Values.UserContextDataType.of_json
-                                  userContextData)
+                                  userContextData) ?session
               ~authFlow:(Values.AuthFlowType.of_json authFlow) ~clientId ())
            (Some Values.InitiateAuthResponse.to_json)
            (Some Values.InitiateAuthResponse.error_to_json)])
@@ -2000,6 +2385,29 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_terms =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListTermsRequestMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING StringType"
+       and userPoolId =
+         flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_terms
+           (Values.ListTermsRequest.make ?maxResults ?nextToken ~userPoolId
+              ()) (Some Values.ListTermsResponse.to_json)
+           (Some Values.ListTermsResponse.error_to_json)])
 let list_user_import_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2024,6 +2432,29 @@ let list_user_import_jobs =
               ~userPoolId ~maxResults ())
            (Some Values.ListUserImportJobsResponse.to_json)
            (Some Values.ListUserImportJobsResponse.error_to_json)])
+let list_user_pool_client_secrets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationKey"
+       and userPoolId =
+         flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType"
+       and clientId =
+         flag "client-id" (required string) ~doc:"STRING ClientIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_user_pool_client_secrets
+           (Values.ListUserPoolClientSecretsRequest.make ?nextToken
+              ~userPoolId ~clientId ())
+           (Some Values.ListUserPoolClientSecretsResponse.to_json)
+           (Some Values.ListUserPoolClientSecretsResponse.error_to_json)])
 let list_user_pool_clients =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2120,6 +2551,30 @@ let list_users_in_group =
            (Values.ListUsersInGroupRequest.make ?limit ?nextToken ~userPoolId
               ~groupName ()) (Some Values.ListUsersInGroupResponse.to_json)
            (Some Values.ListUsersInGroupResponse.error_to_json)])
+let list_web_authn_credentials =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationKey"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT WebAuthnCredentialsQueryLimitType"
+       and accessToken =
+         flag "access-token" (required string) ~doc:"STRING TokenModelType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_web_authn_credentials
+           (Values.ListWebAuthnCredentialsRequest.make ?nextToken ?maxResults
+              ~accessToken ())
+           (Some Values.ListWebAuthnCredentialsResponse.to_json)
+           (Some Values.ListWebAuthnCredentialsResponse.error_to_json)])
 let resend_confirmation_code =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2231,6 +2686,29 @@ let revoke_token =
            (Values.RevokeTokenRequest.make ?clientSecret ~token ~clientId ())
            (Some Values.RevokeTokenResponse.to_json)
            (Some Values.RevokeTokenResponse.error_to_json)])
+let set_log_delivery_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and userPoolId =
+         flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType"
+       and logConfigurations =
+         flag "log-configurations" (required json_arg)
+           ~doc:"JSON LogConfigurationListType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.set_log_delivery_configuration
+           (Values.SetLogDeliveryConfigurationRequest.make ~userPoolId
+              ~logConfigurations:(Values.LogConfigurationListType.of_json
+                                    logConfigurations) ())
+           (Some Values.SetLogDeliveryConfigurationResponse.to_json)
+           (Some Values.SetLogDeliveryConfigurationResponse.error_to_json)])
 let set_risk_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2312,6 +2790,12 @@ let set_user_m_f_a_preference =
        and softwareTokenMfaSettings =
          flag "software-token-mfa-settings" (optional json_arg)
            ~doc:"JSON SoftwareTokenMfaSettingsType"
+       and emailMfaSettings =
+         flag "email-mfa-settings" (optional json_arg)
+           ~doc:"JSON EmailMfaSettingsType"
+       and webAuthnMfaSettings =
+         flag "web-authn-mfa-settings" (optional json_arg)
+           ~doc:"JSON WebAuthnMfaSettingsType"
        and accessToken =
          flag "access-token" (required string) ~doc:"STRING TokenModelType" in
        fun () ->
@@ -2324,7 +2808,12 @@ let set_user_m_f_a_preference =
               ?softwareTokenMfaSettings:(Option.map
                                            ~f:Values.SoftwareTokenMfaSettingsType.of_json
                                            softwareTokenMfaSettings)
-              ~accessToken ())
+              ?emailMfaSettings:(Option.map
+                                   ~f:Values.EmailMfaSettingsType.of_json
+                                   emailMfaSettings)
+              ?webAuthnMfaSettings:(Option.map
+                                      ~f:Values.WebAuthnMfaSettingsType.of_json
+                                      webAuthnMfaSettings) ~accessToken ())
            (Some Values.SetUserMFAPreferenceResponse.to_json)
            (Some Values.SetUserMFAPreferenceResponse.error_to_json)])
 let set_user_pool_mfa_config =
@@ -2343,9 +2832,15 @@ let set_user_pool_mfa_config =
        and softwareTokenMfaConfiguration =
          flag "software-token-mfa-configuration" (optional json_arg)
            ~doc:"JSON SoftwareTokenMfaConfigType"
+       and emailMfaConfiguration =
+         flag "email-mfa-configuration" (optional json_arg)
+           ~doc:"JSON EmailMfaConfigType"
        and mfaConfiguration =
          flag "mfa-configuration" (optional json_arg)
            ~doc:"JSON UserPoolMfaType"
+       and webAuthnConfiguration =
+         flag "web-authn-configuration" (optional json_arg)
+           ~doc:"JSON WebAuthnConfigurationType"
        and userPoolId =
          flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType" in
        fun () ->
@@ -2358,8 +2853,14 @@ let set_user_pool_mfa_config =
               ?softwareTokenMfaConfiguration:(Option.map
                                                 ~f:Values.SoftwareTokenMfaConfigType.of_json
                                                 softwareTokenMfaConfiguration)
+              ?emailMfaConfiguration:(Option.map
+                                        ~f:Values.EmailMfaConfigType.of_json
+                                        emailMfaConfiguration)
               ?mfaConfiguration:(Option.map ~f:Values.UserPoolMfaType.of_json
-                                   mfaConfiguration) ~userPoolId ())
+                                   mfaConfiguration)
+              ?webAuthnConfiguration:(Option.map
+                                        ~f:Values.WebAuthnConfigurationType.of_json
+                                        webAuthnConfiguration) ~userPoolId ())
            (Some Values.SetUserPoolMfaConfigResponse.to_json)
            (Some Values.SetUserPoolMfaConfigResponse.error_to_json)])
 let set_user_settings =
@@ -2396,6 +2897,8 @@ let sign_up =
            ~doc:"URL override endpoint url"
        and secretHash =
          flag "secret-hash" (optional string) ~doc:"STRING SecretHashType"
+       and password =
+         flag "password" (optional string) ~doc:"STRING PasswordType"
        and userAttributes =
          flag "user-attributes" (optional json_arg)
            ~doc:"JSON AttributeListType"
@@ -2414,13 +2917,11 @@ let sign_up =
        and clientId =
          flag "client-id" (required string) ~doc:"STRING ClientIdType"
        and username =
-         flag "username" (required string) ~doc:"STRING UsernameType"
-       and password =
-         flag "password" (required string) ~doc:"STRING PasswordType" in
+         flag "username" (required string) ~doc:"STRING UsernameType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.sign_up
-           (Values.SignUpRequest.make ?secretHash
+           (Values.SignUpRequest.make ?secretHash ?password
               ?userAttributes:(Option.map ~f:Values.AttributeListType.of_json
                                  userAttributes)
               ?validationData:(Option.map ~f:Values.AttributeListType.of_json
@@ -2433,8 +2934,8 @@ let sign_up =
                                   userContextData)
               ?clientMetadata:(Option.map
                                  ~f:Values.ClientMetadataType.of_json
-                                 clientMetadata) ~clientId ~username
-              ~password ()) (Some Values.SignUpResponse.to_json)
+                                 clientMetadata) ~clientId ~username ())
+           (Some Values.SignUpResponse.to_json)
            (Some Values.SignUpResponse.error_to_json)])
 let start_user_import_job =
   Command.async ~summary:""
@@ -2456,6 +2957,24 @@ let start_user_import_job =
            (Values.StartUserImportJobRequest.make ~userPoolId ~jobId ())
            (Some Values.StartUserImportJobResponse.to_json)
            (Some Values.StartUserImportJobResponse.error_to_json)])
+let start_web_authn_registration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accessToken =
+         flag "access-token" (required string) ~doc:"STRING TokenModelType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_web_authn_registration
+           (Values.StartWebAuthnRegistrationRequest.make ~accessToken ())
+           (Some Values.StartWebAuthnRegistrationResponse.to_json)
+           (Some Values.StartWebAuthnRegistrationResponse.error_to_json)])
 let stop_user_import_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2638,6 +3157,37 @@ let update_identity_provider =
                                  idpIdentifiers) ~userPoolId ~providerName ())
            (Some Values.UpdateIdentityProviderResponse.to_json)
            (Some Values.UpdateIdentityProviderResponse.error_to_json)])
+let update_managed_login_branding =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and userPoolId =
+         flag "user-pool-id" (optional string) ~doc:"STRING UserPoolIdType"
+       and managedLoginBrandingId =
+         flag "managed-login-branding-id" (optional string)
+           ~doc:"STRING ManagedLoginBrandingIdType"
+       and useCognitoProvidedValues =
+         flag "use-cognito-provided-values" (optional bool)
+           ~doc:"BOOL BooleanType"
+       and settings =
+         flag "settings" (optional json_arg) ~doc:"JSON Document"
+       and assets =
+         flag "assets" (optional json_arg) ~doc:"JSON AssetListType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_managed_login_branding
+           (Values.UpdateManagedLoginBrandingRequest.make ?userPoolId
+              ?managedLoginBrandingId ?useCognitoProvidedValues
+              ?settings:(Option.map ~f:Values.Document.of_json settings)
+              ?assets:(Option.map ~f:Values.AssetListType.of_json assets) ())
+           (Some Values.UpdateManagedLoginBrandingResponse.to_json)
+           (Some Values.UpdateManagedLoginBrandingResponse.error_to_json)])
 let update_resource_server =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2667,6 +3217,39 @@ let update_resource_server =
               ~userPoolId ~identifier ~name ())
            (Some Values.UpdateResourceServerResponse.to_json)
            (Some Values.UpdateResourceServerResponse.error_to_json)])
+let update_terms =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and termsName =
+         flag "terms-name" (optional string) ~doc:"STRING TermsNameType"
+       and termsSource =
+         flag "terms-source" (optional json_arg) ~doc:"JSON TermsSourceType"
+       and enforcement =
+         flag "enforcement" (optional json_arg)
+           ~doc:"JSON TermsEnforcementType"
+       and links = flag "links" (optional json_arg) ~doc:"JSON LinksType"
+       and termsId =
+         flag "terms-id" (required string) ~doc:"STRING TermsIdType"
+       and userPoolId =
+         flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_terms
+           (Values.UpdateTermsRequest.make ?termsName
+              ?termsSource:(Option.map ~f:Values.TermsSourceType.of_json
+                              termsSource)
+              ?enforcement:(Option.map ~f:Values.TermsEnforcementType.of_json
+                              enforcement)
+              ?links:(Option.map ~f:Values.LinksType.of_json links) ~termsId
+              ~userPoolId ()) (Some Values.UpdateTermsResponse.to_json)
+           (Some Values.UpdateTermsResponse.error_to_json)])
 let update_user_attributes =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2708,6 +3291,9 @@ let update_user_pool =
            ~doc:"URL override endpoint url"
        and policies =
          flag "policies" (optional json_arg) ~doc:"JSON UserPoolPolicyType"
+       and deletionProtection =
+         flag "deletion-protection" (optional json_arg)
+           ~doc:"JSON DeletionProtectionType"
        and lambdaConfig =
          flag "lambda-config" (optional json_arg)
            ~doc:"JSON LambdaConfigType"
@@ -2729,6 +3315,9 @@ let update_user_pool =
        and smsAuthenticationMessage =
          flag "sms-authentication-message" (optional string)
            ~doc:"STRING SmsVerificationMessageType"
+       and userAttributeUpdateSettings =
+         flag "user-attribute-update-settings" (optional json_arg)
+           ~doc:"JSON UserAttributeUpdateSettingsType"
        and mfaConfiguration =
          flag "mfa-configuration" (optional json_arg)
            ~doc:"JSON UserPoolMfaType"
@@ -2753,6 +3342,11 @@ let update_user_pool =
        and accountRecoverySetting =
          flag "account-recovery-setting" (optional json_arg)
            ~doc:"JSON AccountRecoverySettingType"
+       and poolName =
+         flag "pool-name" (optional string) ~doc:"STRING UserPoolNameType"
+       and userPoolTier =
+         flag "user-pool-tier" (optional json_arg)
+           ~doc:"JSON UserPoolTierType"
        and userPoolId =
          flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType" in
        fun () ->
@@ -2761,6 +3355,9 @@ let update_user_pool =
            (Values.UpdateUserPoolRequest.make
               ?policies:(Option.map ~f:Values.UserPoolPolicyType.of_json
                            policies)
+              ?deletionProtection:(Option.map
+                                     ~f:Values.DeletionProtectionType.of_json
+                                     deletionProtection)
               ?lambdaConfig:(Option.map ~f:Values.LambdaConfigType.of_json
                                lambdaConfig)
               ?autoVerifiedAttributes:(Option.map
@@ -2772,6 +3369,9 @@ let update_user_pool =
                                               ~f:Values.VerificationMessageTemplateType.of_json
                                               verificationMessageTemplate)
               ?smsAuthenticationMessage
+              ?userAttributeUpdateSettings:(Option.map
+                                              ~f:Values.UserAttributeUpdateSettingsType.of_json
+                                              userAttributeUpdateSettings)
               ?mfaConfiguration:(Option.map ~f:Values.UserPoolMfaType.of_json
                                    mfaConfiguration)
               ?deviceConfiguration:(Option.map
@@ -2793,8 +3393,10 @@ let update_user_pool =
                                  userPoolAddOns)
               ?accountRecoverySetting:(Option.map
                                          ~f:Values.AccountRecoverySettingType.of_json
-                                         accountRecoverySetting) ~userPoolId
-              ()) (Some Values.UpdateUserPoolResponse.to_json)
+                                         accountRecoverySetting) ?poolName
+              ?userPoolTier:(Option.map ~f:Values.UserPoolTierType.of_json
+                               userPoolTier) ~userPoolId ())
+           (Some Values.UpdateUserPoolResponse.to_json)
            (Some Values.UpdateUserPoolResponse.error_to_json)])
 let update_user_pool_client =
   Command.async ~summary:""
@@ -2859,6 +3461,15 @@ let update_user_pool_client =
        and enableTokenRevocation =
          flag "enable-token-revocation" (optional bool)
            ~doc:"BOOL WrappedBooleanType"
+       and enablePropagateAdditionalUserContextData =
+         flag "enable-propagate-additional-user-context-data" (optional bool)
+           ~doc:"BOOL WrappedBooleanType"
+       and authSessionValidity =
+         flag "auth-session-validity" (optional int)
+           ~doc:"INT AuthSessionValidityType"
+       and refreshTokenRotation =
+         flag "refresh-token-rotation" (optional json_arg)
+           ~doc:"JSON RefreshTokenRotationType"
        and userPoolId =
          flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType"
        and clientId =
@@ -2899,7 +3510,12 @@ let update_user_pool_client =
               ?preventUserExistenceErrors:(Option.map
                                              ~f:Values.PreventUserExistenceErrorTypes.of_json
                                              preventUserExistenceErrors)
-              ?enableTokenRevocation ~userPoolId ~clientId ())
+              ?enableTokenRevocation
+              ?enablePropagateAdditionalUserContextData ?authSessionValidity
+              ?refreshTokenRotation:(Option.map
+                                       ~f:Values.RefreshTokenRotationType.of_json
+                                       refreshTokenRotation) ~userPoolId
+              ~clientId ())
            (Some Values.UpdateUserPoolClientResponse.to_json)
            (Some Values.UpdateUserPoolClientResponse.error_to_json)])
 let update_user_pool_domain =
@@ -2912,19 +3528,23 @@ let update_user_pool_domain =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and managedLoginVersion =
+         flag "managed-login-version" (optional int)
+           ~doc:"INT WrappedIntegerType"
+       and customDomainConfig =
+         flag "custom-domain-config" (optional json_arg)
+           ~doc:"JSON CustomDomainConfigType"
        and domain = flag "domain" (required string) ~doc:"STRING DomainType"
        and userPoolId =
-         flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType"
-       and customDomainConfig =
-         flag "custom-domain-config" (required json_arg)
-           ~doc:"JSON CustomDomainConfigType" in
+         flag "user-pool-id" (required string) ~doc:"STRING UserPoolIdType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_user_pool_domain
-           (Values.UpdateUserPoolDomainRequest.make ~domain ~userPoolId
-              ~customDomainConfig:(Values.CustomDomainConfigType.of_json
-                                     customDomainConfig) ())
-           (Some Values.UpdateUserPoolDomainResponse.to_json)
+           (Values.UpdateUserPoolDomainRequest.make ?managedLoginVersion
+              ?customDomainConfig:(Option.map
+                                     ~f:Values.CustomDomainConfigType.of_json
+                                     customDomainConfig) ~domain ~userPoolId
+              ()) (Some Values.UpdateUserPoolDomainResponse.to_json)
            (Some Values.UpdateUserPoolDomainResponse.error_to_json)])
 let verify_software_token =
   Command.async ~summary:""
@@ -2981,6 +3601,7 @@ let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-custom-attributes", add_custom_attributes);
+    ("add-user-pool-client-secret", add_user_pool_client_secret);
     ("admin-add-user-to-group", admin_add_user_to_group);
     ("admin-confirm-sign-up", admin_confirm_sign_up);
     ("admin-create-user", admin_create_user);
@@ -3009,27 +3630,38 @@ let main =
     ("admin-user-global-sign-out", admin_user_global_sign_out);
     ("associate-software-token", associate_software_token);
     ("change-password", change_password);
+    ("complete-web-authn-registration", complete_web_authn_registration);
     ("confirm-device", confirm_device);
     ("confirm-forgot-password", confirm_forgot_password);
     ("confirm-sign-up", confirm_sign_up);
     ("create-group", create_group);
     ("create-identity-provider", create_identity_provider);
+    ("create-managed-login-branding", create_managed_login_branding);
     ("create-resource-server", create_resource_server);
+    ("create-terms", create_terms);
     ("create-user-import-job", create_user_import_job);
     ("create-user-pool", create_user_pool);
     ("create-user-pool-client", create_user_pool_client);
     ("create-user-pool-domain", create_user_pool_domain);
     ("delete-group", delete_group);
     ("delete-identity-provider", delete_identity_provider);
+    ("delete-managed-login-branding", delete_managed_login_branding);
     ("delete-resource-server", delete_resource_server);
+    ("delete-terms", delete_terms);
     ("delete-user", delete_user);
     ("delete-user-attributes", delete_user_attributes);
     ("delete-user-pool", delete_user_pool);
     ("delete-user-pool-client", delete_user_pool_client);
+    ("delete-user-pool-client-secret", delete_user_pool_client_secret);
     ("delete-user-pool-domain", delete_user_pool_domain);
+    ("delete-web-authn-credential", delete_web_authn_credential);
     ("describe-identity-provider", describe_identity_provider);
+    ("describe-managed-login-branding", describe_managed_login_branding);
+    ("describe-managed-login-branding-by-client",
+      describe_managed_login_branding_by_client);
     ("describe-resource-server", describe_resource_server);
     ("describe-risk-configuration", describe_risk_configuration);
+    ("describe-terms", describe_terms);
     ("describe-user-import-job", describe_user_import_job);
     ("describe-user-pool", describe_user_pool);
     ("describe-user-pool-client", describe_user_pool_client);
@@ -3041,11 +3673,14 @@ let main =
     ("get-group", get_group);
     ("get-identity-provider-by-identifier",
       get_identity_provider_by_identifier);
+    ("get-log-delivery-configuration", get_log_delivery_configuration);
     ("get-signing-certificate", get_signing_certificate);
+    ("get-tokens-from-refresh-token", get_tokens_from_refresh_token);
     ("get-u-i-customization", get_u_i_customization);
     ("get-user", get_user);
     ("get-user-attribute-verification-code",
       get_user_attribute_verification_code);
+    ("get-user-auth-factors", get_user_auth_factors);
     ("get-user-pool-mfa-config", get_user_pool_mfa_config);
     ("global-sign-out", global_sign_out);
     ("initiate-auth", initiate_auth);
@@ -3054,14 +3689,18 @@ let main =
     ("list-identity-providers", list_identity_providers);
     ("list-resource-servers", list_resource_servers);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-terms", list_terms);
     ("list-user-import-jobs", list_user_import_jobs);
+    ("list-user-pool-client-secrets", list_user_pool_client_secrets);
     ("list-user-pool-clients", list_user_pool_clients);
     ("list-user-pools", list_user_pools);
     ("list-users", list_users);
     ("list-users-in-group", list_users_in_group);
+    ("list-web-authn-credentials", list_web_authn_credentials);
     ("resend-confirmation-code", resend_confirmation_code);
     ("respond-to-auth-challenge", respond_to_auth_challenge);
     ("revoke-token", revoke_token);
+    ("set-log-delivery-configuration", set_log_delivery_configuration);
     ("set-risk-configuration", set_risk_configuration);
     ("set-u-i-customization", set_u_i_customization);
     ("set-user-m-f-a-preference", set_user_m_f_a_preference);
@@ -3069,6 +3708,7 @@ let main =
     ("set-user-settings", set_user_settings);
     ("sign-up", sign_up);
     ("start-user-import-job", start_user_import_job);
+    ("start-web-authn-registration", start_web_authn_registration);
     ("stop-user-import-job", stop_user_import_job);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
@@ -3076,7 +3716,9 @@ let main =
     ("update-device-status", update_device_status);
     ("update-group", update_group);
     ("update-identity-provider", update_identity_provider);
+    ("update-managed-login-branding", update_managed_login_branding);
     ("update-resource-server", update_resource_server);
+    ("update-terms", update_terms);
     ("update-user-attributes", update_user_attributes);
     ("update-user-pool", update_user_pool);
     ("update-user-pool-client", update_user_pool_client);

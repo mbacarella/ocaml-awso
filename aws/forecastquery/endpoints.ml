@@ -4,12 +4,15 @@ open Values
 type ('i, 'o, 'e) t =
   | QueryForecast: (QueryForecastRequest.t, QueryForecastResponse.t,
   QueryForecastResponse.error) t 
+  | QueryWhatIfForecast: (QueryWhatIfForecastRequest.t,
+  QueryWhatIfForecastResponse.t, QueryWhatIfForecastResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
-  function | QueryForecast -> `POST
+  function | QueryForecast -> `POST | QueryWhatIfForecast -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
-      | QueryForecast -> (Format.kasprintf Uri.of_string) "/")
+      | QueryForecast -> (Format.kasprintf Uri.of_string) "/"
+      | QueryWhatIfForecast -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -20,6 +23,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonForecastRuntime.QueryForecast")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | QueryWhatIfForecast ->
+      let json = QueryWhatIfForecastRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecastRuntime.QueryWhatIfForecast")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -50,3 +61,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (QueryForecastResponse.of_json json)
       else Error (parse_aws_error (Some QueryForecastResponse.error_of_json))
+  | QueryWhatIfForecast ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (QueryWhatIfForecastResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some QueryWhatIfForecastResponse.error_of_json))

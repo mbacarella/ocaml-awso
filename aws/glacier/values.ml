@@ -102,12 +102,12 @@ module Grantee =
         Type.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?emailAddress ?iD ?uRI ?displayName ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let emailAddress = field_map json "EmailAddress" String_.of_json in
-      let iD = field_map json "ID" String_.of_json in
-      let uRI = field_map json "URI" String_.of_json in
-      let displayName = field_map json "DisplayName" String_.of_json in
-      let type_ = field_map_exn json "Type" Type.of_json in
+    let of_json json__ =
+      let emailAddress = field_map json__ "EmailAddress" String_.of_json in
+      let iD = field_map json__ "ID" String_.of_json in
+      let uRI = field_map json__ "URI" String_.of_json in
+      let displayName = field_map json__ "DisplayName" String_.of_json in
+      let type_ = field_map_exn json__ "Type" Type.of_json in
       make ?emailAddress ?iD ?uRI ?displayName ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the grantee."]
@@ -165,9 +165,9 @@ module Grant =
         (Option.map ~f:Grantee.of_xml) (Xml.child xml_arg0 "Grantee") in
       make ?permission ?grantee ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let permission = field_map json "Permission" Permission.of_json in
-      let grantee = field_map json "Grantee" Grantee.of_json in
+    let of_json json__ =
+      let permission = field_map json__ "Permission" Permission.of_json in
+      let grantee = field_map json__ "Grantee" Grantee.of_json in
       make ?permission ?grantee ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about a grant."]
@@ -253,6 +253,9 @@ module AccessControlPolicyList =
   struct
     type nonrec t = Grant.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Grant.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -346,11 +349,11 @@ module Encryption =
           (Xml.child xml_arg0 "EncryptionType") in
       make ?kMSContext ?kMSKeyId ?encryptionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kMSContext = field_map json "KMSContext" String_.of_json in
-      let kMSKeyId = field_map json "KMSKeyId" String_.of_json in
+    let of_json json__ =
+      let kMSContext = field_map json__ "KMSContext" String_.of_json in
+      let kMSKeyId = field_map json__ "KMSKeyId" String_.of_json in
       let encryptionType =
-        field_map json "EncryptionType" EncryptionType.of_json in
+        field_map json__ "EncryptionType" EncryptionType.of_json in
       make ?kMSContext ?kMSKeyId ?encryptionType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -404,6 +407,8 @@ module Hashmap =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -478,15 +483,16 @@ module CSVInput =
       make ?quoteCharacter ?fieldDelimiter ?recordDelimiter
         ?quoteEscapeCharacter ?comments ?fileHeaderInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let quoteCharacter = field_map json "QuoteCharacter" String_.of_json in
-      let fieldDelimiter = field_map json "FieldDelimiter" String_.of_json in
-      let recordDelimiter = field_map json "RecordDelimiter" String_.of_json in
+    let of_json json__ =
+      let quoteCharacter = field_map json__ "QuoteCharacter" String_.of_json in
+      let fieldDelimiter = field_map json__ "FieldDelimiter" String_.of_json in
+      let recordDelimiter =
+        field_map json__ "RecordDelimiter" String_.of_json in
       let quoteEscapeCharacter =
-        field_map json "QuoteEscapeCharacter" String_.of_json in
-      let comments = field_map json "Comments" String_.of_json in
+        field_map json__ "QuoteEscapeCharacter" String_.of_json in
+      let comments = field_map json__ "Comments" String_.of_json in
       let fileHeaderInfo =
-        field_map json "FileHeaderInfo" FileHeaderInfo.of_json in
+        field_map json__ "FileHeaderInfo" FileHeaderInfo.of_json in
       make ?quoteCharacter ?fieldDelimiter ?recordDelimiter
         ?quoteEscapeCharacter ?comments ?fileHeaderInfo ()
     let to_json v = composed_to_json to_value v
@@ -549,13 +555,14 @@ module CSVOutput =
       make ?quoteCharacter ?fieldDelimiter ?recordDelimiter
         ?quoteEscapeCharacter ?quoteFields ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let quoteCharacter = field_map json "QuoteCharacter" String_.of_json in
-      let fieldDelimiter = field_map json "FieldDelimiter" String_.of_json in
-      let recordDelimiter = field_map json "RecordDelimiter" String_.of_json in
+    let of_json json__ =
+      let quoteCharacter = field_map json__ "QuoteCharacter" String_.of_json in
+      let fieldDelimiter = field_map json__ "FieldDelimiter" String_.of_json in
+      let recordDelimiter =
+        field_map json__ "RecordDelimiter" String_.of_json in
       let quoteEscapeCharacter =
-        field_map json "QuoteEscapeCharacter" String_.of_json in
-      let quoteFields = field_map json "QuoteFields" QuoteFields.of_json in
+        field_map json__ "QuoteEscapeCharacter" String_.of_json in
+      let quoteFields = field_map json__ "QuoteFields" QuoteFields.of_json in
       make ?quoteCharacter ?fieldDelimiter ?recordDelimiter
         ?quoteEscapeCharacter ?quoteFields ()
     let to_json v = composed_to_json to_value v
@@ -667,16 +674,16 @@ module S3Location =
       make ?storageClass ?userMetadata ?tagging ?accessControlList ?cannedACL
         ?encryption ?prefix ?bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let storageClass = field_map json "StorageClass" StorageClass.of_json in
-      let userMetadata = field_map json "UserMetadata" Hashmap.of_json in
-      let tagging = field_map json "Tagging" Hashmap.of_json in
+    let of_json json__ =
+      let storageClass = field_map json__ "StorageClass" StorageClass.of_json in
+      let userMetadata = field_map json__ "UserMetadata" Hashmap.of_json in
+      let tagging = field_map json__ "Tagging" Hashmap.of_json in
       let accessControlList =
-        field_map json "AccessControlList" AccessControlPolicyList.of_json in
-      let cannedACL = field_map json "CannedACL" CannedACL.of_json in
-      let encryption = field_map json "Encryption" Encryption.of_json in
-      let prefix = field_map json "Prefix" String_.of_json in
-      let bucketName = field_map json "BucketName" String_.of_json in
+        field_map json__ "AccessControlList" AccessControlPolicyList.of_json in
+      let cannedACL = field_map json__ "CannedACL" CannedACL.of_json in
+      let encryption = field_map json__ "Encryption" Encryption.of_json in
+      let prefix = field_map json__ "Prefix" String_.of_json in
+      let bucketName = field_map json__ "BucketName" String_.of_json in
       make ?storageClass ?userMetadata ?tagging ?accessControlList ?cannedACL
         ?encryption ?prefix ?bucketName ()
     let to_json v = composed_to_json to_value v
@@ -712,8 +719,8 @@ module InputSerialization =
       let csv = (Option.map ~f:CSVInput.of_xml) (Xml.child xml_arg0 "csv") in
       make ?csv ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let csv = field_map json "csv" CSVInput.of_json in make ?csv ()
+    let of_json json__ =
+      let csv = field_map json__ "csv" CSVInput.of_json in make ?csv ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes how the archive is serialized."]
 module OutputSerialization =
@@ -731,8 +738,8 @@ module OutputSerialization =
       let csv = (Option.map ~f:CSVOutput.of_xml) (Xml.child xml_arg0 "csv") in
       make ?csv ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let csv = field_map json "csv" CSVOutput.of_json in make ?csv ()
+    let of_json json__ =
+      let csv = field_map json__ "csv" CSVOutput.of_json in make ?csv ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes how the select output is serialized."]
 module DataRetrievalRule =
@@ -761,9 +768,9 @@ module DataRetrievalRule =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Strategy") in
       make ?bytesPerHour ?strategy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let bytesPerHour = field_map json "BytesPerHour" NullableLong.of_json in
-      let strategy = field_map json "Strategy" String_.of_json in
+    let of_json json__ =
+      let bytesPerHour = field_map json__ "BytesPerHour" NullableLong.of_json in
+      let strategy = field_map json__ "Strategy" String_.of_json in
       make ?bytesPerHour ?strategy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Data retrieval policy rule."]
@@ -791,10 +798,10 @@ module InvalidParameterValueException =
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       make ?message ?code ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let code = field_map json "code" String_.of_json in
-      let type_ = field_map json "type" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
       make ?message ?code ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -823,14 +830,46 @@ module MissingParameterValueException =
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       make ?message ?code ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let code = field_map json "code" String_.of_json in
-      let type_ = field_map json "type" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
       make ?message ?code ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returned if a required header or parameter is missing from the request."]
+module NoLongerSupportedException =
+  struct
+    type nonrec t =
+      {
+      type_: String_.t option [@ocaml.doc "Client"];
+      code: String_.t option [@ocaml.doc "400 Bad Request"];
+      message: String_.t option
+        [@ocaml.doc
+          "This API is no longer supported for new accounts. Please use Amazon S3 Glacier storage classes instead."]}
+    let make ?type_ =
+      fun ?code -> fun ?message -> fun () -> { type_; code; message }
+    let to_value x =
+      structure_to_value
+        [("type", (Option.map x.type_ ~f:String_.to_value));
+        ("code", (Option.map x.code ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
+      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
+      make ?message ?code ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
+      make ?message ?code ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returned if the request was made by a customer with no Amazon Glacier storage. The request is denied as the API is no longer supported for new customers. Please use Amazon S3 Glacier storage classes instead."]
 module ResourceNotFoundException =
   struct
     type nonrec t =
@@ -855,10 +894,10 @@ module ResourceNotFoundException =
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       make ?message ?code ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let code = field_map json "code" String_.of_json in
-      let type_ = field_map json "type" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
       make ?message ?code ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -886,10 +925,10 @@ module ServiceUnavailableException =
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       make ?message ?code ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let code = field_map json "code" String_.of_json in
-      let type_ = field_map json "type" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
       make ?message ?code ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returned if the service cannot complete the request."]
@@ -979,12 +1018,12 @@ module InventoryRetrievalJobDescription =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Format") in
       make ?marker ?limit ?endDate ?startDate ?format ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let limit = field_map json "Limit" String_.of_json in
-      let endDate = field_map json "EndDate" DateTime.of_json in
-      let startDate = field_map json "StartDate" DateTime.of_json in
-      let format = field_map json "Format" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let limit = field_map json__ "Limit" String_.of_json in
+      let endDate = field_map json__ "EndDate" DateTime.of_json in
+      let startDate = field_map json__ "StartDate" DateTime.of_json in
+      let format = field_map json__ "Format" String_.of_json in
       make ?marker ?limit ?endDate ?startDate ?format ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1004,8 +1043,8 @@ module OutputLocation =
       let s3 = (Option.map ~f:S3Location.of_xml) (Xml.child xml_arg0 "S3") in
       make ?s3 ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3 = field_map json "S3" S3Location.of_json in make ?s3 ()
+    let of_json json__ =
+      let s3 = field_map json__ "S3" S3Location.of_json in make ?s3 ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about the location where the select job results are stored."]
@@ -1058,14 +1097,14 @@ module SelectParameters =
       make ?outputSerialization ?expression ?expressionType
         ?inputSerialization ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outputSerialization =
-        field_map json "OutputSerialization" OutputSerialization.of_json in
-      let expression = field_map json "Expression" String_.of_json in
+        field_map json__ "OutputSerialization" OutputSerialization.of_json in
+      let expression = field_map json__ "Expression" String_.of_json in
       let expressionType =
-        field_map json "ExpressionType" ExpressionType.of_json in
+        field_map json__ "ExpressionType" ExpressionType.of_json in
       let inputSerialization =
-        field_map json "InputSerialization" InputSerialization.of_json in
+        field_map json__ "InputSerialization" InputSerialization.of_json in
       make ?outputSerialization ?expression ?expressionType
         ?inputSerialization ()
     let to_json v = composed_to_json to_value v
@@ -1129,6 +1168,9 @@ module NotificationEventList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1153,6 +1195,9 @@ module DataRetrievalRulesList =
   struct
     type nonrec t = DataRetrievalRule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataRetrievalRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1186,7 +1231,7 @@ module DescribeVaultOutput =
           "The Universal Coordinated Time (UTC) date when the vault was created. This value should be a string in the ISO 8601 date format, for example 2012-03-20T17:03:43.221Z."];
       lastInventoryDate: String_.t option
         [@ocaml.doc
-          "The Universal Coordinated Time (UTC) date when Amazon S3 Glacier completed the last vault inventory. This value should be a string in the ISO 8601 date format, for example 2012-03-20T17:03:43.221Z."];
+          "The Universal Coordinated Time (UTC) date when Amazon Glacier completed the last vault inventory. This value should be a string in the ISO 8601 date format, for example 2012-03-20T17:03:43.221Z."];
       numberOfArchives: Long.t option
         [@ocaml.doc
           "The number of archives in the vault as of the last inventory date. This field will return null if an inventory has not yet run on the vault, for example if you just created the vault."];
@@ -1196,6 +1241,7 @@ module DescribeVaultOutput =
     type nonrec error =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -1222,6 +1268,9 @@ module DescribeVaultOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceUnavailableException" ->
@@ -1238,6 +1287,8 @@ module DescribeVaultOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -1255,6 +1306,10 @@ module DescribeVaultOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -1296,18 +1351,18 @@ module DescribeVaultOutput =
       make ?sizeInBytes ?numberOfArchives ?lastInventoryDate ?creationDate
         ?vaultName ?vaultARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sizeInBytes = field_map json "SizeInBytes" Long.of_json in
-      let numberOfArchives = field_map json "NumberOfArchives" Long.of_json in
+    let of_json json__ =
+      let sizeInBytes = field_map json__ "SizeInBytes" Long.of_json in
+      let numberOfArchives = field_map json__ "NumberOfArchives" Long.of_json in
       let lastInventoryDate =
-        field_map json "LastInventoryDate" String_.of_json in
-      let creationDate = field_map json "CreationDate" String_.of_json in
-      let vaultName = field_map json "VaultName" String_.of_json in
-      let vaultARN = field_map json "VaultARN" String_.of_json in
+        field_map json__ "LastInventoryDate" String_.of_json in
+      let creationDate = field_map json__ "CreationDate" String_.of_json in
+      let vaultName = field_map json__ "VaultName" String_.of_json in
+      let vaultARN = field_map json__ "VaultARN" String_.of_json in
       make ?sizeInBytes ?numberOfArchives ?lastInventoryDate ?creationDate
         ?vaultName ?vaultARN ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains the Amazon S3 Glacier response to your request."]
+  end[@@ocaml.doc "Contains the Amazon Glacier response to your request."]
 module TagKey =
   struct
     type nonrec t = string
@@ -1365,10 +1420,10 @@ module ProvisionedCapacityDescription =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CapacityId") in
       make ?expirationDate ?startDate ?capacityId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expirationDate = field_map json "ExpirationDate" String_.of_json in
-      let startDate = field_map json "StartDate" String_.of_json in
-      let capacityId = field_map json "CapacityId" String_.of_json in
+    let of_json json__ =
+      let expirationDate = field_map json__ "ExpirationDate" String_.of_json in
+      let startDate = field_map json__ "StartDate" String_.of_json in
+      let capacityId = field_map json__ "CapacityId" String_.of_json in
       make ?expirationDate ?startDate ?capacityId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The definition for a provisioned capacity unit."]
@@ -1381,7 +1436,7 @@ module PartListElement =
           "The byte range of a part, inclusive of the upper value of the range."];
       sHA256TreeHash: String_.t option
         [@ocaml.doc
-          "The SHA256 tree hash value that Amazon S3 Glacier calculated for the part. This field is never null."]}
+          "The SHA256 tree hash value that Amazon Glacier calculated for the part. This field is never null."]}
     let make ?rangeInBytes =
       fun ?sHA256TreeHash -> fun () -> { rangeInBytes; sHA256TreeHash }
     let to_value x =
@@ -1396,9 +1451,9 @@ module PartListElement =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RangeInBytes") in
       make ?sHA256TreeHash ?rangeInBytes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sHA256TreeHash = field_map json "SHA256TreeHash" String_.of_json in
-      let rangeInBytes = field_map json "RangeInBytes" String_.of_json in
+    let of_json json__ =
+      let sHA256TreeHash = field_map json__ "SHA256TreeHash" String_.of_json in
+      let rangeInBytes = field_map json__ "RangeInBytes" String_.of_json in
       make ?sHA256TreeHash ?rangeInBytes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of the part sizes of the multipart upload."]
@@ -1459,14 +1514,14 @@ module UploadListElement =
       make ?creationDate ?partSizeInBytes ?archiveDescription ?vaultARN
         ?multipartUploadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationDate = field_map json "CreationDate" String_.of_json in
-      let partSizeInBytes = field_map json "PartSizeInBytes" Long.of_json in
+    let of_json json__ =
+      let creationDate = field_map json__ "CreationDate" String_.of_json in
+      let partSizeInBytes = field_map json__ "PartSizeInBytes" Long.of_json in
       let archiveDescription =
-        field_map json "ArchiveDescription" String_.of_json in
-      let vaultARN = field_map json "VaultARN" String_.of_json in
+        field_map json__ "ArchiveDescription" String_.of_json in
+      let vaultARN = field_map json__ "VaultARN" String_.of_json in
       let multipartUploadId =
-        field_map json "MultipartUploadId" String_.of_json in
+        field_map json__ "MultipartUploadId" String_.of_json in
       make ?creationDate ?partSizeInBytes ?archiveDescription ?vaultARN
         ?multipartUploadId ()
     let to_json v = composed_to_json to_value v
@@ -1535,6 +1590,7 @@ module GlacierJobDescription =
     type nonrec error =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -1591,6 +1647,9 @@ module GlacierJobDescription =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceUnavailableException" ->
@@ -1607,6 +1666,8 @@ module GlacierJobDescription =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -1624,6 +1685,10 @@ module GlacierJobDescription =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -1723,36 +1788,36 @@ module GlacierJobDescription =
         ?completed ?creationDate ?vaultARN ?archiveId ?action ?jobDescription
         ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outputLocation =
-        field_map json "OutputLocation" OutputLocation.of_json in
+        field_map json__ "OutputLocation" OutputLocation.of_json in
       let selectParameters =
-        field_map json "SelectParameters" SelectParameters.of_json in
-      let jobOutputPath = field_map json "JobOutputPath" String_.of_json in
+        field_map json__ "SelectParameters" SelectParameters.of_json in
+      let jobOutputPath = field_map json__ "JobOutputPath" String_.of_json in
       let inventoryRetrievalParameters =
-        field_map json "InventoryRetrievalParameters"
+        field_map json__ "InventoryRetrievalParameters"
           InventoryRetrievalJobDescription.of_json in
-      let tier = field_map json "Tier" String_.of_json in
+      let tier = field_map json__ "Tier" String_.of_json in
       let retrievalByteRange =
-        field_map json "RetrievalByteRange" String_.of_json in
+        field_map json__ "RetrievalByteRange" String_.of_json in
       let archiveSHA256TreeHash =
-        field_map json "ArchiveSHA256TreeHash" String_.of_json in
-      let sHA256TreeHash = field_map json "SHA256TreeHash" String_.of_json in
-      let completionDate = field_map json "CompletionDate" String_.of_json in
-      let sNSTopic = field_map json "SNSTopic" String_.of_json in
+        field_map json__ "ArchiveSHA256TreeHash" String_.of_json in
+      let sHA256TreeHash = field_map json__ "SHA256TreeHash" String_.of_json in
+      let completionDate = field_map json__ "CompletionDate" String_.of_json in
+      let sNSTopic = field_map json__ "SNSTopic" String_.of_json in
       let inventorySizeInBytes =
-        field_map json "InventorySizeInBytes" Size.of_json in
+        field_map json__ "InventorySizeInBytes" Size.of_json in
       let archiveSizeInBytes =
-        field_map json "ArchiveSizeInBytes" Size.of_json in
-      let statusMessage = field_map json "StatusMessage" String_.of_json in
-      let statusCode = field_map json "StatusCode" StatusCode.of_json in
-      let completed = field_map json "Completed" Boolean.of_json in
-      let creationDate = field_map json "CreationDate" String_.of_json in
-      let vaultARN = field_map json "VaultARN" String_.of_json in
-      let archiveId = field_map json "ArchiveId" String_.of_json in
-      let action = field_map json "Action" ActionCode.of_json in
-      let jobDescription = field_map json "JobDescription" String_.of_json in
-      let jobId = field_map json "JobId" String_.of_json in
+        field_map json__ "ArchiveSizeInBytes" Size.of_json in
+      let statusMessage = field_map json__ "StatusMessage" String_.of_json in
+      let statusCode = field_map json__ "StatusCode" StatusCode.of_json in
+      let completed = field_map json__ "Completed" Boolean.of_json in
+      let creationDate = field_map json__ "CreationDate" String_.of_json in
+      let vaultARN = field_map json__ "VaultARN" String_.of_json in
+      let archiveId = field_map json__ "ArchiveId" String_.of_json in
+      let action = field_map json__ "Action" ActionCode.of_json in
+      let jobDescription = field_map json__ "JobDescription" String_.of_json in
+      let jobId = field_map json__ "JobId" String_.of_json in
       make ?outputLocation ?selectParameters ?jobOutputPath
         ?inventoryRetrievalParameters ?tier ?retrievalByteRange
         ?archiveSHA256TreeHash ?sHA256TreeHash ?completionDate ?sNSTopic
@@ -1798,11 +1863,11 @@ module InventoryRetrievalJobInput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StartDate") in
       make ?marker ?limit ?endDate ?startDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let limit = field_map json "Limit" String_.of_json in
-      let endDate = field_map json "EndDate" String_.of_json in
-      let startDate = field_map json "StartDate" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let limit = field_map json__ "Limit" String_.of_json in
+      let endDate = field_map json__ "EndDate" String_.of_json in
+      let startDate = field_map json__ "StartDate" String_.of_json in
       make ?marker ?limit ?endDate ?startDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1815,7 +1880,7 @@ module RequestTimeoutException =
       code: String_.t option [@ocaml.doc "408 Request Timeout"];
       message: String_.t option
         [@ocaml.doc
-          "Returned if, when uploading an archive, Amazon S3 Glacier times out while receiving the upload."]}
+          "Returned if, when uploading an archive, Amazon Glacier times out while receiving the upload."]}
     let make ?type_ =
       fun ?code -> fun ?message -> fun () -> { type_; code; message }
     let to_value x =
@@ -1831,14 +1896,14 @@ module RequestTimeoutException =
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       make ?message ?code ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let code = field_map json "code" String_.of_json in
-      let type_ = field_map json "type" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
       make ?message ?code ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returned if, when uploading an archive, Amazon S3 Glacier times out while receiving the upload."]
+       "Returned if, when uploading an archive, Amazon Glacier times out while receiving the upload."]
 module Stream =
   struct
     type nonrec t = string
@@ -1860,7 +1925,7 @@ module VaultNotificationConfig =
           "The Amazon Simple Notification Service (Amazon SNS) topic Amazon Resource Name (ARN)."];
       events: NotificationEventList.t option
         [@ocaml.doc
-          "A list of one or more events for which Amazon S3 Glacier will send a notification to the specified Amazon SNS topic."]}
+          "A list of one or more events for which Amazon Glacier will send a notification to the specified Amazon SNS topic."]}
     let make ?sNSTopic = fun ?events -> fun () -> { sNSTopic; events }
     let to_value x =
       structure_to_value
@@ -1875,9 +1940,9 @@ module VaultNotificationConfig =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SNSTopic") in
       make ?events ?sNSTopic ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let events = field_map json "Events" NotificationEventList.of_json in
-      let sNSTopic = field_map json "SNSTopic" String_.of_json in
+    let of_json json__ =
+      let events = field_map json__ "Events" NotificationEventList.of_json in
+      let sNSTopic = field_map json__ "SNSTopic" String_.of_json in
       make ?events ?sNSTopic ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a vault's notification configuration."]
@@ -1896,8 +1961,9 @@ module VaultAccessPolicy =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" String_.of_json in make ?policy ()
+    let of_json json__ =
+      let policy = field_map json__ "Policy" String_.of_json in
+      make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the vault access policy."]
 module DataRetrievalPolicy =
@@ -1918,8 +1984,8 @@ module DataRetrievalPolicy =
           (Xml.child xml_arg0 "Rules") in
       make ?rules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map json "Rules" DataRetrievalRulesList.of_json in
+    let of_json json__ =
+      let rules = field_map json__ "Rules" DataRetrievalRulesList.of_json in
       make ?rules ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Data retrieval policy."]
@@ -1927,6 +1993,9 @@ module TagKeyList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1971,10 +2040,10 @@ module LimitExceededException =
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       make ?message ?code ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let code = field_map json "code" String_.of_json in
-      let type_ = field_map json "type" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
       make ?message ?code ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1983,6 +2052,9 @@ module VaultList =
   struct
     type nonrec t = DescribeVaultOutput.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DescribeVaultOutput.to_value)) |>
         (fun x -> `List x)
@@ -2025,6 +2097,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2036,6 +2110,9 @@ module ProvisionedCapacityList =
   struct
     type nonrec t = ProvisionedCapacityDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProvisionedCapacityDescription.to_value)) |>
         (fun x -> `List x)
@@ -2062,6 +2139,9 @@ module PartList =
   struct
     type nonrec t = PartListElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PartListElement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2086,6 +2166,9 @@ module UploadsList =
   struct
     type nonrec t = UploadListElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UploadListElement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2110,6 +2193,9 @@ module JobList =
   struct
     type nonrec t = GlacierJobDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GlacierJobDescription.to_value)) |>
         (fun x -> `List x)
@@ -2146,8 +2232,9 @@ module VaultLockPolicy =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" String_.of_json in make ?policy ()
+    let of_json json__ =
+      let policy = field_map json__ "Policy" String_.of_json in
+      make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the vault lock policy."]
 module InsufficientCapacityException =
@@ -2172,10 +2259,10 @@ module InsufficientCapacityException =
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       make ?message ?code ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let code = field_map json "code" String_.of_json in
-      let type_ = field_map json "type" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
       make ?message ?code ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2204,10 +2291,10 @@ module PolicyEnforcedException =
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       make ?message ?code ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let code = field_map json "code" String_.of_json in
-      let type_ = field_map json "type" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
       make ?message ?code ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2230,7 +2317,7 @@ module JobParameters =
           "The optional description for the job. The description must be less than or equal to 1,024 bytes. The allowable characters are 7-bit ASCII without control codes-specifically, ASCII values 32-126 decimal or 0x20-0x7E hexadecimal."];
       sNSTopic: String_.t option
         [@ocaml.doc
-          "The Amazon SNS topic ARN to which Amazon S3 Glacier sends a notification when the job is completed and the output is ready for you to download. The specified topic publishes the notification to its subscribers. The SNS topic must exist."];
+          "The Amazon SNS topic ARN to which Amazon Glacier sends a notification when the job is completed and the output is ready for you to download. The specified topic publishes the notification to its subscribers. The SNS topic must exist."];
       retrievalByteRange: String_.t option
         [@ocaml.doc
           "The byte range to retrieve for an archive retrieval. in the form \"StartByteValue-EndByteValue\" If not specified, the whole archive is retrieved. If specified, the byte range must be megabyte (1024*1024) aligned which means that StartByteValue must be divisible by 1 MB and EndByteValue plus 1 must be divisible by 1 MB or be the end of the archive specified as the archive byte size value minus 1. If RetrievalByteRange is not megabyte aligned, this operation returns a 400 response. An error occurs if you specify this field for an inventory retrieval job request."];
@@ -2312,22 +2399,22 @@ module JobParameters =
         ?tier ?retrievalByteRange ?sNSTopic ?description ?archiveId ?type_
         ?format ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outputLocation =
-        field_map json "OutputLocation" OutputLocation.of_json in
+        field_map json__ "OutputLocation" OutputLocation.of_json in
       let selectParameters =
-        field_map json "SelectParameters" SelectParameters.of_json in
+        field_map json__ "SelectParameters" SelectParameters.of_json in
       let inventoryRetrievalParameters =
-        field_map json "InventoryRetrievalParameters"
+        field_map json__ "InventoryRetrievalParameters"
           InventoryRetrievalJobInput.of_json in
-      let tier = field_map json "Tier" String_.of_json in
+      let tier = field_map json__ "Tier" String_.of_json in
       let retrievalByteRange =
-        field_map json "RetrievalByteRange" String_.of_json in
-      let sNSTopic = field_map json "SNSTopic" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let archiveId = field_map json "ArchiveId" String_.of_json in
-      let type_ = field_map json "Type" String_.of_json in
-      let format = field_map json "Format" String_.of_json in
+        field_map json__ "RetrievalByteRange" String_.of_json in
+      let sNSTopic = field_map json__ "SNSTopic" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let archiveId = field_map json__ "ArchiveId" String_.of_json in
+      let type_ = field_map json__ "Type" String_.of_json in
+      let format = field_map json__ "Format" String_.of_json in
       make ?outputLocation ?selectParameters ?inventoryRetrievalParameters
         ?tier ?retrievalByteRange ?sNSTopic ?description ?archiveId ?type_
         ?format ()
@@ -2353,10 +2440,11 @@ module UploadMultipartPartOutput =
       {
       checksum: String_.t option
         [@ocaml.doc
-          "The SHA256 tree hash that Amazon S3 Glacier computed for the uploaded part."]}
+          "The SHA256 tree hash that Amazon Glacier computed for the uploaded part."]}
     type nonrec error =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `RequestTimeoutException of RequestTimeoutException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
@@ -2370,6 +2458,9 @@ module UploadMultipartPartOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "RequestTimeoutException" ->
           `RequestTimeoutException (RequestTimeoutException.of_json json)
       | "ResourceNotFoundException" ->
@@ -2388,6 +2479,8 @@ module UploadMultipartPartOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "RequestTimeoutException" ->
           `RequestTimeoutException (RequestTimeoutException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -2407,6 +2500,10 @@ module UploadMultipartPartOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `RequestTimeoutException e ->
           `Assoc
             [("error", (`String "RequestTimeoutException"));
@@ -2443,18 +2540,18 @@ module UploadMultipartPartOutput =
           (Xml.child xml_arg0 "x-amz-sha256-tree-hash") in
       make ?checksum ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let checksum = field_map json "checksum" String_.of_json in
+    let of_json json__ =
+      let checksum = field_map json__ "checksum" String_.of_json in
       make ?checksum ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains the Amazon S3 Glacier response to your request."]
+  end[@@ocaml.doc "Contains the Amazon Glacier response to your request."]
 module UploadMultipartPartInput =
   struct
     type nonrec t =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."];
       uploadId: String_.t
         [@ocaml.doc "The upload ID of the multipart upload."];
@@ -2462,7 +2559,7 @@ module UploadMultipartPartInput =
         [@ocaml.doc "The SHA256 tree hash of the data being uploaded."];
       range: String_.t option
         [@ocaml.doc
-          "Identifies the range of bytes in the assembled archive that will be uploaded in this part. Amazon S3 Glacier uses this information to assemble the archive in the proper sequence. The format of this header follows RFC 2616. An example header is Content-Range:bytes 0-4194303/*."];
+          "Identifies the range of bytes in the assembled archive that will be uploaded in this part. Amazon Glacier uses this information to assemble the archive in the proper sequence. The format of this header follows RFC 2616. An example header is Content-Range:bytes 0-4194303/*."];
       body: Stream.t option [@ocaml.doc "The data to upload."]}
     let context_ = "UploadMultipartPartInput"
     let make ?checksum =
@@ -2518,13 +2615,13 @@ module UploadMultipartPartInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?body ?range ?checksum ~uploadId ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let body = field_map json "body" Stream.of_json in
-      let range = field_map json "range" String_.of_json in
-      let checksum = field_map json "checksum" String_.of_json in
-      let uploadId = field_map_exn json "uploadId" String_.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let body = field_map json__ "body" Stream.of_json in
+      let range = field_map json__ "range" String_.of_json in
+      let checksum = field_map json__ "checksum" String_.of_json in
+      let uploadId = field_map_exn json__ "uploadId" String_.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ?body ?range ?checksum ~uploadId ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2536,7 +2633,7 @@ module UploadArchiveInput =
       vaultName: String_.t [@ocaml.doc "The name of the vault."];
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       archiveDescription: String_.t option
         [@ocaml.doc
           "The optional description of the archive you are uploading."];
@@ -2594,13 +2691,13 @@ module UploadArchiveInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "vaultName") in
       make ?body ?checksum ?archiveDescription ~accountId ~vaultName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let body = field_map json "body" Stream.of_json in
-      let checksum = field_map json "checksum" String_.of_json in
+    let of_json json__ =
+      let body = field_map json__ "body" Stream.of_json in
+      let checksum = field_map json__ "checksum" String_.of_json in
       let archiveDescription =
-        field_map json "archiveDescription" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
+        field_map json__ "archiveDescription" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
       make ?body ?checksum ?archiveDescription ~accountId ~vaultName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides options to add an archive to a vault."]
@@ -2610,7 +2707,7 @@ module SetVaultNotificationsInput =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."];
       vaultNotificationConfig: VaultNotificationConfig.t option
         [@ocaml.doc
@@ -2649,12 +2746,12 @@ module SetVaultNotificationsInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?vaultNotificationConfig ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vaultNotificationConfig =
-        field_map json "vaultNotificationConfig"
+        field_map json__ "vaultNotificationConfig"
           VaultNotificationConfig.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ?vaultNotificationConfig ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2665,7 +2762,7 @@ module SetVaultAccessPolicyInput =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."];
       policy: VaultAccessPolicy.t option
         [@ocaml.doc "The vault access policy as a JSON string."]}
@@ -2699,10 +2796,10 @@ module SetVaultAccessPolicyInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?policy ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "policy" VaultAccessPolicy.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "policy" VaultAccessPolicy.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ?policy ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "SetVaultAccessPolicy input."]
@@ -2730,9 +2827,9 @@ module SetDataRetrievalPolicyInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?policy ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" DataRetrievalPolicy.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "Policy" DataRetrievalPolicy.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ?policy ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "SetDataRetrievalPolicy input."]
@@ -2742,7 +2839,7 @@ module RemoveTagsFromVaultInput =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."];
       tagKeys: TagKeyList.t option
         [@ocaml.doc
@@ -2766,10 +2863,10 @@ module RemoveTagsFromVaultInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?tagKeys ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map json "TagKeys" TagKeyList.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map json__ "TagKeys" TagKeyList.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ?tagKeys ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input value for RemoveTagsFromVaultInput."]
@@ -2783,6 +2880,7 @@ module PurchaseProvisionedCapacityOutput =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?capacityId = fun () -> { capacityId }
@@ -2796,6 +2894,9 @@ module PurchaseProvisionedCapacityOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
@@ -2812,6 +2913,8 @@ module PurchaseProvisionedCapacityOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
@@ -2831,6 +2934,10 @@ module PurchaseProvisionedCapacityOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ServiceUnavailableException e ->
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
@@ -2857,8 +2964,8 @@ module PurchaseProvisionedCapacityOutput =
           (Xml.child xml_arg0 "x-amz-capacity-id") in
       make ?capacityId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let capacityId = field_map json "capacityId" String_.of_json in
+    let of_json json__ =
+      let capacityId = field_map json__ "capacityId" String_.of_json in
       make ?capacityId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2869,7 +2976,7 @@ module PurchaseProvisionedCapacityInput =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, don't include any hyphens ('-') in the ID."]}
+          "The AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, don't include any hyphens ('-') in the ID."]}
     let context_ = "PurchaseProvisionedCapacityInput"
     let make ~accountId = fun () -> { accountId }
     let to_value x =
@@ -2881,8 +2988,8 @@ module PurchaseProvisionedCapacityInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2898,6 +3005,7 @@ module ListVaultsOutput =
     type nonrec error =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -2910,6 +3018,9 @@ module ListVaultsOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceUnavailableException" ->
@@ -2926,6 +3037,8 @@ module ListVaultsOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -2943,6 +3056,10 @@ module ListVaultsOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -2968,12 +3085,12 @@ module ListVaultsOutput =
         (Option.map ~f:VaultList.of_xml) (Xml.child xml_arg0 "VaultList") in
       make ?marker ?vaultList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let vaultList = field_map json "VaultList" VaultList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let vaultList = field_map json__ "VaultList" VaultList.of_json in
       make ?marker ?vaultList ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains the Amazon S3 Glacier response to your request."]
+  end[@@ocaml.doc "Contains the Amazon Glacier response to your request."]
 module ListVaultsInput =
   struct
     type nonrec t =
@@ -3004,10 +3121,10 @@ module ListVaultsInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?limit ?marker ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "limit" String_.of_json in
-      let marker = field_map json "marker" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "limit" String_.of_json in
+      let marker = field_map json__ "marker" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ?limit ?marker ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3022,6 +3139,7 @@ module ListTagsForVaultOutput =
     type nonrec error =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -3034,6 +3152,9 @@ module ListTagsForVaultOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceUnavailableException" ->
@@ -3050,6 +3171,8 @@ module ListTagsForVaultOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -3067,6 +3190,10 @@ module ListTagsForVaultOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -3087,17 +3214,17 @@ module ListTagsForVaultOutput =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains the Amazon S3 Glacier response to your request."]
+  end[@@ocaml.doc "Contains the Amazon Glacier response to your request."]
 module ListTagsForVaultInput =
   struct
     type nonrec t =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."]}
     let context_ = "ListTagsForVaultInput"
     let make ~accountId =
@@ -3114,9 +3241,9 @@ module ListTagsForVaultInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input value for ListTagsForVaultInput."]
@@ -3129,6 +3256,7 @@ module ListProvisionedCapacityOutput =
     type nonrec error =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?provisionedCapacityList = fun () -> { provisionedCapacityList }
@@ -3140,6 +3268,9 @@ module ListProvisionedCapacityOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
@@ -3154,6 +3285,8 @@ module ListProvisionedCapacityOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
@@ -3169,6 +3302,10 @@ module ListProvisionedCapacityOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ServiceUnavailableException e ->
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
@@ -3190,9 +3327,9 @@ module ListProvisionedCapacityOutput =
           (Xml.child xml_arg0 "ProvisionedCapacityList") in
       make ?provisionedCapacityList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisionedCapacityList =
-        field_map json "ProvisionedCapacityList"
+        field_map json__ "ProvisionedCapacityList"
           ProvisionedCapacityList.of_json in
       make ?provisionedCapacityList ()
     let to_json v = composed_to_json to_value v
@@ -3204,7 +3341,7 @@ module ListProvisionedCapacityInput =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, don't include any hyphens ('-') in the ID."]}
+          "The AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, don't include any hyphens ('-') in the ID."]}
     let context_ = "ListProvisionedCapacityInput"
     let make ~accountId = fun () -> { accountId }
     let to_value x =
@@ -3216,8 +3353,8 @@ module ListProvisionedCapacityInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3250,6 +3387,7 @@ module ListPartsOutput =
     type nonrec error =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -3278,6 +3416,9 @@ module ListPartsOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceUnavailableException" ->
@@ -3294,6 +3435,8 @@ module ListPartsOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -3311,6 +3454,10 @@ module ListPartsOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -3356,27 +3503,27 @@ module ListPartsOutput =
       make ?marker ?parts ?creationDate ?partSizeInBytes ?archiveDescription
         ?vaultARN ?multipartUploadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let parts = field_map json "Parts" PartList.of_json in
-      let creationDate = field_map json "CreationDate" String_.of_json in
-      let partSizeInBytes = field_map json "PartSizeInBytes" Long.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let parts = field_map json__ "Parts" PartList.of_json in
+      let creationDate = field_map json__ "CreationDate" String_.of_json in
+      let partSizeInBytes = field_map json__ "PartSizeInBytes" Long.of_json in
       let archiveDescription =
-        field_map json "ArchiveDescription" String_.of_json in
-      let vaultARN = field_map json "VaultARN" String_.of_json in
+        field_map json__ "ArchiveDescription" String_.of_json in
+      let vaultARN = field_map json__ "VaultARN" String_.of_json in
       let multipartUploadId =
-        field_map json "MultipartUploadId" String_.of_json in
+        field_map json__ "MultipartUploadId" String_.of_json in
       make ?marker ?parts ?creationDate ?partSizeInBytes ?archiveDescription
         ?vaultARN ?multipartUploadId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains the Amazon S3 Glacier response to your request."]
+  end[@@ocaml.doc "Contains the Amazon Glacier response to your request."]
 module ListPartsInput =
   struct
     type nonrec t =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."];
       uploadId: String_.t
         [@ocaml.doc "The upload ID of the multipart upload."];
@@ -3413,12 +3560,12 @@ module ListPartsInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?limit ?marker ~uploadId ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "limit" String_.of_json in
-      let marker = field_map json "marker" String_.of_json in
-      let uploadId = field_map_exn json "uploadId" String_.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "limit" String_.of_json in
+      let marker = field_map json__ "marker" String_.of_json in
+      let uploadId = field_map_exn json__ "uploadId" String_.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ?limit ?marker ~uploadId ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3435,6 +3582,7 @@ module ListMultipartUploadsOutput =
     type nonrec error =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -3447,6 +3595,9 @@ module ListMultipartUploadsOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceUnavailableException" ->
@@ -3463,6 +3614,8 @@ module ListMultipartUploadsOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -3480,6 +3633,10 @@ module ListMultipartUploadsOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -3505,19 +3662,19 @@ module ListMultipartUploadsOutput =
         (Option.map ~f:UploadsList.of_xml) (Xml.child xml_arg0 "UploadsList") in
       make ?marker ?uploadsList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let uploadsList = field_map json "UploadsList" UploadsList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let uploadsList = field_map json__ "UploadsList" UploadsList.of_json in
       make ?marker ?uploadsList ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains the Amazon S3 Glacier response to your request."]
+  end[@@ocaml.doc "Contains the Amazon Glacier response to your request."]
 module ListMultipartUploadsInput =
   struct
     type nonrec t =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."];
       marker: String_.t option
         [@ocaml.doc
@@ -3547,11 +3704,11 @@ module ListMultipartUploadsInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?limit ?marker ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "limit" String_.of_json in
-      let marker = field_map json "marker" String_.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "limit" String_.of_json in
+      let marker = field_map json__ "marker" String_.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ?limit ?marker ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3569,6 +3726,7 @@ module ListJobsOutput =
     type nonrec error =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -3581,6 +3739,9 @@ module ListJobsOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceUnavailableException" ->
@@ -3597,6 +3758,8 @@ module ListJobsOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -3614,6 +3777,10 @@ module ListJobsOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -3639,19 +3806,19 @@ module ListJobsOutput =
         (Option.map ~f:JobList.of_xml) (Xml.child xml_arg0 "JobList") in
       make ?marker ?jobList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let jobList = field_map json "JobList" JobList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let jobList = field_map json__ "JobList" JobList.of_json in
       make ?marker ?jobList ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains the Amazon S3 Glacier response to your request."]
+  end[@@ocaml.doc "Contains the Amazon Glacier response to your request."]
 module ListJobsInput =
   struct
     type nonrec t =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."];
       limit: String_.t option
         [@ocaml.doc
@@ -3704,17 +3871,17 @@ module ListJobsInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?completed ?statuscode ?marker ?limit ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let completed = field_map json "completed" String_.of_json in
-      let statuscode = field_map json "statuscode" String_.of_json in
-      let marker = field_map json "marker" String_.of_json in
-      let limit = field_map json "limit" String_.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let completed = field_map json__ "completed" String_.of_json in
+      let statuscode = field_map json__ "statuscode" String_.of_json in
+      let marker = field_map json__ "marker" String_.of_json in
+      let limit = field_map json__ "limit" String_.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ?completed ?statuscode ?marker ?limit ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides options for retrieving a job list for an Amazon S3 Glacier vault."]
+       "Provides options for retrieving a job list for an Amazon Glacier vault."]
 module InitiateVaultLockOutput =
   struct
     type nonrec t =
@@ -3725,6 +3892,7 @@ module InitiateVaultLockOutput =
     type nonrec error =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -3737,6 +3905,9 @@ module InitiateVaultLockOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceUnavailableException" ->
@@ -3753,6 +3924,8 @@ module InitiateVaultLockOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -3770,6 +3943,10 @@ module InitiateVaultLockOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -3799,10 +3976,11 @@ module InitiateVaultLockOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "x-amz-lock-id") in
       make ?lockId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lockId = field_map json "lockId" String_.of_json in make ?lockId ()
+    let of_json json__ =
+      let lockId = field_map json__ "lockId" String_.of_json in
+      make ?lockId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains the Amazon S3 Glacier response to your request."]
+  end[@@ocaml.doc "Contains the Amazon Glacier response to your request."]
 module InitiateVaultLockInput =
   struct
     type nonrec t =
@@ -3843,10 +4021,10 @@ module InitiateVaultLockInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?policy ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "policy" VaultLockPolicy.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "policy" VaultLockPolicy.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ?policy ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input values for InitiateVaultLock."]
@@ -3856,13 +4034,14 @@ module InitiateMultipartUploadOutput =
       {
       location: String_.t option
         [@ocaml.doc
-          "The relative URI path of the multipart upload ID Amazon S3 Glacier created."];
+          "The relative URI path of the multipart upload ID Amazon Glacier created."];
       uploadId: String_.t option
         [@ocaml.doc
           "The ID of the multipart upload. This value is also included as part of the location."]}
     type nonrec error =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -3875,6 +4054,9 @@ module InitiateMultipartUploadOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceUnavailableException" ->
@@ -3891,6 +4073,8 @@ module InitiateMultipartUploadOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -3908,6 +4092,10 @@ module InitiateMultipartUploadOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -3946,19 +4134,19 @@ module InitiateMultipartUploadOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Location") in
       make ?uploadId ?location ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let uploadId = field_map json "uploadId" String_.of_json in
-      let location = field_map json "location" String_.of_json in
+    let of_json json__ =
+      let uploadId = field_map json__ "uploadId" String_.of_json in
+      let location = field_map json__ "location" String_.of_json in
       make ?uploadId ?location ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The Amazon S3 Glacier response to your request."]
+  end[@@ocaml.doc "The Amazon Glacier response to your request."]
 module InitiateMultipartUploadInput =
   struct
     type nonrec t =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."];
       archiveDescription: String_.t option
         [@ocaml.doc
@@ -3992,16 +4180,16 @@ module InitiateMultipartUploadInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?partSize ?archiveDescription ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let partSize = field_map json "partSize" String_.of_json in
+    let of_json json__ =
+      let partSize = field_map json__ "partSize" String_.of_json in
       let archiveDescription =
-        field_map json "archiveDescription" String_.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+        field_map json__ "archiveDescription" String_.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ?partSize ?archiveDescription ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides options for initiating a multipart upload to an Amazon S3 Glacier vault."]
+       "Provides options for initiating a multipart upload to an Amazon Glacier vault."]
 module InitiateJobOutput =
   struct
     type nonrec t =
@@ -4016,6 +4204,7 @@ module InitiateJobOutput =
       [ `InsufficientCapacityException of InsufficientCapacityException.t 
       | `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `PolicyEnforcedException of PolicyEnforcedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
@@ -4034,6 +4223,9 @@ module InitiateJobOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "PolicyEnforcedException" ->
           `PolicyEnforcedException (PolicyEnforcedException.of_json json)
       | "ResourceNotFoundException" ->
@@ -4055,6 +4247,8 @@ module InitiateJobOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "PolicyEnforcedException" ->
           `PolicyEnforcedException (PolicyEnforcedException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -4078,6 +4272,10 @@ module InitiateJobOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `PolicyEnforcedException e ->
           `Assoc
             [("error", (`String "PolicyEnforcedException"));
@@ -4126,20 +4324,20 @@ module InitiateJobOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Location") in
       make ?jobOutputPath ?jobId ?location ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobOutputPath = field_map json "jobOutputPath" String_.of_json in
-      let jobId = field_map json "jobId" String_.of_json in
-      let location = field_map json "location" String_.of_json in
+    let of_json json__ =
+      let jobOutputPath = field_map json__ "jobOutputPath" String_.of_json in
+      let jobId = field_map json__ "jobId" String_.of_json in
+      let location = field_map json__ "location" String_.of_json in
       make ?jobOutputPath ?jobId ?location ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains the Amazon S3 Glacier response to your request."]
+  end[@@ocaml.doc "Contains the Amazon Glacier response to your request."]
 module InitiateJobInput =
   struct
     type nonrec t =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."];
       jobParameters: JobParameters.t option
         [@ocaml.doc "Provides options for specifying job information."]}
@@ -4174,15 +4372,14 @@ module InitiateJobInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?jobParameters ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let jobParameters =
-        field_map json "jobParameters" JobParameters.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+        field_map json__ "jobParameters" JobParameters.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ?jobParameters ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Provides options for initiating an Amazon S3 Glacier job."]
+  end[@@ocaml.doc "Provides options for initiating an Amazon Glacier job."]
 module GetVaultNotificationsOutput =
   struct
     type nonrec t =
@@ -4193,6 +4390,7 @@ module GetVaultNotificationsOutput =
     type nonrec error =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -4205,6 +4403,9 @@ module GetVaultNotificationsOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceUnavailableException" ->
@@ -4221,6 +4422,8 @@ module GetVaultNotificationsOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -4238,6 +4441,10 @@ module GetVaultNotificationsOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -4266,20 +4473,20 @@ module GetVaultNotificationsOutput =
           (Xml.child xml_arg0 "vaultNotificationConfig") in
       make ?vaultNotificationConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vaultNotificationConfig =
-        field_map json "vaultNotificationConfig"
+        field_map json__ "vaultNotificationConfig"
           VaultNotificationConfig.of_json in
       make ?vaultNotificationConfig ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains the Amazon S3 Glacier response to your request."]
+  end[@@ocaml.doc "Contains the Amazon Glacier response to your request."]
 module GetVaultNotificationsInput =
   struct
     type nonrec t =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."]}
     let context_ = "GetVaultNotificationsInput"
     let make ~accountId =
@@ -4296,9 +4503,9 @@ module GetVaultNotificationsInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4321,6 +4528,7 @@ module GetVaultLockOutput =
     type nonrec error =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -4337,6 +4545,9 @@ module GetVaultLockOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceUnavailableException" ->
@@ -4353,6 +4564,8 @@ module GetVaultLockOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -4370,6 +4583,10 @@ module GetVaultLockOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -4400,21 +4617,21 @@ module GetVaultLockOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?creationDate ?expirationDate ?state ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationDate = field_map json "CreationDate" String_.of_json in
-      let expirationDate = field_map json "ExpirationDate" String_.of_json in
-      let state = field_map json "State" String_.of_json in
-      let policy = field_map json "Policy" String_.of_json in
+    let of_json json__ =
+      let creationDate = field_map json__ "CreationDate" String_.of_json in
+      let expirationDate = field_map json__ "ExpirationDate" String_.of_json in
+      let state = field_map json__ "State" String_.of_json in
+      let policy = field_map json__ "Policy" String_.of_json in
       make ?creationDate ?expirationDate ?state ?policy ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains the Amazon S3 Glacier response to your request."]
+  end[@@ocaml.doc "Contains the Amazon Glacier response to your request."]
 module GetVaultLockInput =
   struct
     type nonrec t =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."]}
     let context_ = "GetVaultLockInput"
     let make ~accountId =
@@ -4431,9 +4648,9 @@ module GetVaultLockInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input values for GetVaultLock."]
@@ -4447,6 +4664,7 @@ module GetVaultAccessPolicyOutput =
     type nonrec error =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -4459,6 +4677,9 @@ module GetVaultAccessPolicyOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceUnavailableException" ->
@@ -4475,6 +4696,8 @@ module GetVaultAccessPolicyOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -4492,6 +4715,10 @@ module GetVaultAccessPolicyOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -4517,8 +4744,8 @@ module GetVaultAccessPolicyOutput =
           (Xml.child xml_arg0 "policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "policy" VaultAccessPolicy.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "policy" VaultAccessPolicy.of_json in
       make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Output for GetVaultAccessPolicy."]
@@ -4528,7 +4755,7 @@ module GetVaultAccessPolicyInput =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."]}
     let context_ = "GetVaultAccessPolicyInput"
     let make ~accountId =
@@ -4545,9 +4772,9 @@ module GetVaultAccessPolicyInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for GetVaultAccessPolicy."]
@@ -4565,7 +4792,7 @@ module GetJobOutputOutput =
           "The HTTP response code for a job output request. The value depends on whether a range was specified in the request."];
       contentRange: String_.t option
         [@ocaml.doc
-          "The range of bytes returned by Amazon S3 Glacier. If only partial output is downloaded, the response provides the range of bytes Amazon S3 Glacier returned. For example, bytes 0-1048575/8388608 returns the first 1 MB from 8 MB."];
+          "The range of bytes returned by Amazon Glacier. If only partial output is downloaded, the response provides the range of bytes Amazon Glacier returned. For example, bytes 0-1048575/8388608 returns the first 1 MB from 8 MB."];
       acceptRanges: String_.t option
         [@ocaml.doc
           "Indicates the range units accepted. For more information, see RFC2616."];
@@ -4577,6 +4804,7 @@ module GetJobOutputOutput =
     type nonrec error =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -4605,6 +4833,9 @@ module GetJobOutputOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceUnavailableException" ->
@@ -4621,6 +4852,8 @@ module GetJobOutputOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -4638,6 +4871,10 @@ module GetJobOutputOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -4706,31 +4943,31 @@ module GetJobOutputOutput =
       make ?archiveDescription ?contentType ?acceptRanges ?contentRange
         ?status ?checksum ?body ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let archiveDescription =
-        field_map json "archiveDescription" String_.of_json in
-      let contentType = field_map json "contentType" String_.of_json in
-      let acceptRanges = field_map json "acceptRanges" String_.of_json in
-      let contentRange = field_map json "contentRange" String_.of_json in
-      let status = field_map json "status" Httpstatus.of_json in
-      let checksum = field_map json "checksum" String_.of_json in
-      let body = field_map json "body" Stream.of_json in
+        field_map json__ "archiveDescription" String_.of_json in
+      let contentType = field_map json__ "contentType" String_.of_json in
+      let acceptRanges = field_map json__ "acceptRanges" String_.of_json in
+      let contentRange = field_map json__ "contentRange" String_.of_json in
+      let status = field_map json__ "status" Httpstatus.of_json in
+      let checksum = field_map json__ "checksum" String_.of_json in
+      let body = field_map json__ "body" Stream.of_json in
       make ?archiveDescription ?contentType ?acceptRanges ?contentRange
         ?status ?checksum ?body ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains the Amazon S3 Glacier response to your request."]
+  end[@@ocaml.doc "Contains the Amazon Glacier response to your request."]
 module GetJobOutputInput =
   struct
     type nonrec t =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."];
       jobId: String_.t [@ocaml.doc "The job ID whose data is downloaded."];
       range: String_.t option
         [@ocaml.doc
-          "The range of bytes to retrieve from the output. For example, if you want to download the first 1,048,576 bytes, specify the range as bytes=0-1048575. By default, this operation downloads the entire output. If the job output is large, then you can use a range to retrieve a portion of the output. This allows you to download the entire output in smaller chunks of bytes. For example, suppose you have 1 GB of job output you want to download and you decide to download 128 MB chunks of data at a time, which is a total of eight Get Job Output requests. You use the following process to download the job output: Download a 128 MB chunk of output by specifying the appropriate byte range. Verify that all 128 MB of data was received. Along with the data, the response includes a SHA256 tree hash of the payload. You compute the checksum of the payload on the client and compare it with the checksum you received in the response to ensure you received all the expected data. Repeat steps 1 and 2 for all the eight 128 MB chunks of output data, each time specifying the appropriate byte range. After downloading all the parts of the job output, you have a list of eight checksum values. Compute the tree hash of these values to find the checksum of the entire output. Using the DescribeJob API, obtain job information of the job that provided you the output. The response includes the checksum of the entire archive stored in Amazon S3 Glacier. You compare this value with the checksum you computed to ensure you have downloaded the entire archive content with no errors."]}
+          "The range of bytes to retrieve from the output. For example, if you want to download the first 1,048,576 bytes, specify the range as bytes=0-1048575. By default, this operation downloads the entire output. If the job output is large, then you can use a range to retrieve a portion of the output. This allows you to download the entire output in smaller chunks of bytes. For example, suppose you have 1 GB of job output you want to download and you decide to download 128 MB chunks of data at a time, which is a total of eight Get Job Output requests. You use the following process to download the job output: Download a 128 MB chunk of output by specifying the appropriate byte range. Verify that all 128 MB of data was received. Along with the data, the response includes a SHA256 tree hash of the payload. You compute the checksum of the payload on the client and compare it with the checksum you received in the response to ensure you received all the expected data. Repeat steps 1 and 2 for all the eight 128 MB chunks of output data, each time specifying the appropriate byte range. After downloading all the parts of the job output, you have a list of eight checksum values. Compute the tree hash of these values to find the checksum of the entire output. Using the DescribeJob API, obtain job information of the job that provided you the output. The response includes the checksum of the entire archive stored in Amazon Glacier. You compare this value with the checksum you computed to ensure you have downloaded the entire archive content with no errors."]}
     let context_ = "GetJobOutputInput"
     let make ?range =
       fun ~accountId ->
@@ -4753,15 +4990,15 @@ module GetJobOutputInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?range ~jobId ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let range = field_map json "range" String_.of_json in
-      let jobId = field_map_exn json "jobId" String_.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let range = field_map json__ "range" String_.of_json in
+      let jobId = field_map_exn json__ "jobId" String_.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ?range ~jobId ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides options for downloading output of an Amazon S3 Glacier job."]
+       "Provides options for downloading output of an Amazon Glacier job."]
 module GetDataRetrievalPolicyOutput =
   struct
     type nonrec t =
@@ -4772,6 +5009,7 @@ module GetDataRetrievalPolicyOutput =
     type nonrec error =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?policy = fun () -> { policy }
@@ -4783,6 +5021,9 @@ module GetDataRetrievalPolicyOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
@@ -4797,6 +5038,8 @@ module GetDataRetrievalPolicyOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
@@ -4812,6 +5055,10 @@ module GetDataRetrievalPolicyOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ServiceUnavailableException e ->
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
@@ -4831,12 +5078,12 @@ module GetDataRetrievalPolicyOutput =
           (Xml.child xml_arg0 "Policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" DataRetrievalPolicy.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "Policy" DataRetrievalPolicy.of_json in
       make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains the Amazon S3 Glacier response to the GetDataRetrievalPolicy request."]
+       "Contains the Amazon Glacier response to the GetDataRetrievalPolicy request."]
 module GetDataRetrievalPolicyInput =
   struct
     type nonrec t =
@@ -4855,8 +5102,8 @@ module GetDataRetrievalPolicyInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for GetDataRetrievalPolicy."]
@@ -4866,7 +5113,7 @@ module DescribeVaultInput =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."]}
     let context_ = "DescribeVaultInput"
     let make ~accountId =
@@ -4883,9 +5130,9 @@ module DescribeVaultInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4896,7 +5143,7 @@ module DescribeJobInput =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."];
       jobId: String_.t [@ocaml.doc "The ID of the job to describe."]}
     let context_ = "DescribeJobInput"
@@ -4918,10 +5165,10 @@ module DescribeJobInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~jobId ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "jobId" String_.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let jobId = field_map_exn json__ "jobId" String_.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ~jobId ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides options for retrieving a job description."]
@@ -4931,7 +5178,7 @@ module DeleteVaultNotificationsInput =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."]}
     let context_ = "DeleteVaultNotificationsInput"
     let make ~accountId =
@@ -4948,9 +5195,9 @@ module DeleteVaultNotificationsInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4961,7 +5208,7 @@ module DeleteVaultInput =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."]}
     let context_ = "DeleteVaultInput"
     let make ~accountId =
@@ -4978,20 +5225,20 @@ module DeleteVaultInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides options for deleting a vault from Amazon S3 Glacier."]
+       "Provides options for deleting a vault from Amazon Glacier."]
 module DeleteVaultAccessPolicyInput =
   struct
     type nonrec t =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."]}
     let context_ = "DeleteVaultAccessPolicyInput"
     let make ~accountId =
@@ -5008,9 +5255,9 @@ module DeleteVaultAccessPolicyInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DeleteVaultAccessPolicy input."]
@@ -5020,7 +5267,7 @@ module DeleteArchiveInput =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."];
       archiveId: String_.t [@ocaml.doc "The ID of the archive to delete."]}
     let context_ = "DeleteArchiveInput"
@@ -5042,14 +5289,14 @@ module DeleteArchiveInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~archiveId ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let archiveId = field_map_exn json "archiveId" String_.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let archiveId = field_map_exn json__ "archiveId" String_.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ~archiveId ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides options for deleting an archive from an Amazon S3 Glacier vault."]
+       "Provides options for deleting an archive from an Amazon Glacier vault."]
 module CreateVaultOutput =
   struct
     type nonrec t =
@@ -5060,6 +5307,7 @@ module CreateVaultOutput =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?location = fun () -> { location }
@@ -5073,6 +5321,9 @@ module CreateVaultOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_json json)
@@ -5089,6 +5340,8 @@ module CreateVaultOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ServiceUnavailableException" ->
           `ServiceUnavailableException
             (ServiceUnavailableException.of_xml xml)
@@ -5108,6 +5361,10 @@ module CreateVaultOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ServiceUnavailableException e ->
           `Assoc
             [("error", (`String "ServiceUnavailableException"));
@@ -5133,11 +5390,11 @@ module CreateVaultOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Location") in
       make ?location ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let location = field_map json "location" String_.of_json in
+    let of_json json__ =
+      let location = field_map json__ "location" String_.of_json in
       make ?location ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains the Amazon S3 Glacier response to your request."]
+  end[@@ocaml.doc "Contains the Amazon Glacier response to your request."]
 module CreateVaultInput =
   struct
     type nonrec t =
@@ -5161,9 +5418,9 @@ module CreateVaultInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides options to create a vault."]
@@ -5197,10 +5454,10 @@ module CompleteVaultLockInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~lockId ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lockId = field_map_exn json "lockId" String_.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let lockId = field_map_exn json__ "lockId" String_.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ~lockId ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input values for CompleteVaultLock."]
@@ -5210,7 +5467,7 @@ module CompleteMultipartUploadInput =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."];
       uploadId: String_.t
         [@ocaml.doc "The upload ID of the multipart upload."];
@@ -5219,7 +5476,7 @@ module CompleteMultipartUploadInput =
           "The total size, in bytes, of the entire archive. This value should be the sum of all the sizes of the individual parts that you uploaded."];
       checksum: String_.t option
         [@ocaml.doc
-          "The SHA256 tree hash of the entire archive. It is the tree hash of SHA256 tree hash of the individual parts. If the value you specify in the request does not match the SHA256 tree hash of the final assembled archive as computed by Amazon S3 Glacier (Glacier), Glacier returns an error and the request fails."]}
+          "The SHA256 tree hash of the entire archive. It is the tree hash of SHA256 tree hash of the individual parts. If the value you specify in the request does not match the SHA256 tree hash of the final assembled archive as computed by Amazon Glacier (Glacier), Glacier returns an error and the request fails."]}
     let context_ = "CompleteMultipartUploadInput"
     let make ?archiveSize =
       fun ?checksum ->
@@ -5253,16 +5510,16 @@ module CompleteMultipartUploadInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?checksum ?archiveSize ~uploadId ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let checksum = field_map json "checksum" String_.of_json in
-      let archiveSize = field_map json "archiveSize" String_.of_json in
-      let uploadId = field_map_exn json "uploadId" String_.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let checksum = field_map json__ "checksum" String_.of_json in
+      let archiveSize = field_map json__ "archiveSize" String_.of_json in
+      let uploadId = field_map_exn json__ "uploadId" String_.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ?checksum ?archiveSize ~uploadId ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides options to complete a multipart upload operation. This informs Amazon Glacier that all the archive parts have been uploaded and Amazon S3 Glacier (Glacier) can now assemble the archive from the uploaded parts. After assembling and saving the archive to the vault, Glacier returns the URI path of the newly created archive resource."]
+       "Provides options to complete a multipart upload operation. This informs Amazon Glacier that all the archive parts have been uploaded and Amazon Glacier (Glacier) can now assemble the archive from the uploaded parts. After assembling and saving the archive to the vault, Glacier returns the URI path of the newly created archive resource."]
 module ArchiveCreationOutput =
   struct
     type nonrec t =
@@ -5272,13 +5529,14 @@ module ArchiveCreationOutput =
           "The relative URI path of the newly added archive resource."];
       checksum: String_.t option
         [@ocaml.doc
-          "The checksum of the archive computed by Amazon S3 Glacier."];
+          "The checksum of the archive computed by Amazon Glacier."];
       archiveId: String_.t option
         [@ocaml.doc
           "The ID of the archive. This value is also included as part of the location."]}
     type nonrec error =
       [ `InvalidParameterValueException of InvalidParameterValueException.t 
       | `MissingParameterValueException of MissingParameterValueException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -5293,6 +5551,9 @@ module ArchiveCreationOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceUnavailableException" ->
@@ -5309,6 +5570,8 @@ module ArchiveCreationOutput =
       | "MissingParameterValueException" ->
           `MissingParameterValueException
             (MissingParameterValueException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -5326,6 +5589,10 @@ module ArchiveCreationOutput =
           `Assoc
             [("error", (`String "MissingParameterValueException"));
             ("details", (MissingParameterValueException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -5370,21 +5637,21 @@ module ArchiveCreationOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Location") in
       make ?archiveId ?checksum ?location ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let archiveId = field_map json "archiveId" String_.of_json in
-      let checksum = field_map json "checksum" String_.of_json in
-      let location = field_map json "location" String_.of_json in
+    let of_json json__ =
+      let archiveId = field_map json__ "archiveId" String_.of_json in
+      let checksum = field_map json__ "checksum" String_.of_json in
+      let location = field_map json__ "location" String_.of_json in
       make ?archiveId ?checksum ?location ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains the Amazon S3 Glacier response to your request. For information about the underlying REST API, see Upload Archive. For conceptual information, see Working with Archives in Amazon S3 Glacier."]
+       "Contains the Amazon Glacier response to your request. For information about the underlying REST API, see Upload Archive. For conceptual information, see Working with Archives in Amazon Glacier."]
 module AddTagsToVaultInput =
   struct
     type nonrec t =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."];
       tags: TagMap.t option
         [@ocaml.doc
@@ -5407,10 +5674,10 @@ module AddTagsToVaultInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ?tags ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ?tags ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input values for AddTagsToVault."]
@@ -5437,9 +5704,9 @@ module AbortVaultLockInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input values for AbortVaultLock."]
@@ -5449,7 +5716,7 @@ module AbortMultipartUploadInput =
       {
       accountId: String_.t
         [@ocaml.doc
-          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon S3 Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
+          "The AccountId value is the AWS account ID of the account that owns the vault. You can either specify an AWS account ID or optionally a single '-' (hyphen), in which case Amazon Glacier uses the AWS account ID associated with the credentials used to sign the request. If you use an account ID, do not include any hyphens ('-') in the ID."];
       vaultName: String_.t [@ocaml.doc "The name of the vault."];
       uploadId: String_.t
         [@ocaml.doc "The upload ID of the multipart upload to delete."]}
@@ -5472,11 +5739,11 @@ module AbortMultipartUploadInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~uploadId ~vaultName ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let uploadId = field_map_exn json "uploadId" String_.of_json in
-      let vaultName = field_map_exn json "vaultName" String_.of_json in
-      let accountId = field_map_exn json "accountId" String_.of_json in
+    let of_json json__ =
+      let uploadId = field_map_exn json__ "uploadId" String_.of_json in
+      let vaultName = field_map_exn json__ "vaultName" String_.of_json in
+      let accountId = field_map_exn json__ "accountId" String_.of_json in
       make ~uploadId ~vaultName ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides options to abort a multipart upload identified by the upload ID. For information about the underlying REST API, see Abort Multipart Upload. For conceptual information, see Working with Archives in Amazon S3 Glacier."]
+       "Provides options to abort a multipart upload identified by the upload ID. For information about the underlying REST API, see Abort Multipart Upload. For conceptual information, see Working with Archives in Amazon Glacier."]

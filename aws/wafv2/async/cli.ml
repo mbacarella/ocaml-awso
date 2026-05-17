@@ -68,6 +68,28 @@ let check_capacity =
               ~rules:(Values.Rules.of_json rules) ())
            (Some Values.CheckCapacityResponse.to_json)
            (Some Values.CheckCapacityResponse.error_to_json)])
+let create_a_p_i_key =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scope = flag "scope" (required json_arg) ~doc:"JSON Scope"
+       and tokenDomains =
+         flag "token-domains" (required json_arg)
+           ~doc:"JSON APIKeyTokenDomains" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_a_p_i_key
+           (Values.CreateAPIKeyRequest.make
+              ~scope:(Values.Scope.of_json scope)
+              ~tokenDomains:(Values.APIKeyTokenDomains.of_json tokenDomains)
+              ()) (Some Values.CreateAPIKeyResponse.to_json)
+           (Some Values.CreateAPIKeyResponse.error_to_json)])
 let create_i_p_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -179,12 +201,29 @@ let create_web_a_c_l =
        and description =
          flag "description" (optional string) ~doc:"STRING EntityDescription"
        and rules = flag "rules" (optional json_arg) ~doc:"JSON Rules"
+       and dataProtectionConfig =
+         flag "data-protection-config" (optional json_arg)
+           ~doc:"JSON DataProtectionConfig"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and customResponseBodies =
          flag "custom-response-bodies" (optional json_arg)
            ~doc:"JSON CustomResponseBodies"
        and captchaConfig =
          flag "captcha-config" (optional json_arg) ~doc:"JSON CaptchaConfig"
+       and challengeConfig =
+         flag "challenge-config" (optional json_arg)
+           ~doc:"JSON ChallengeConfig"
+       and tokenDomains =
+         flag "token-domains" (optional json_arg) ~doc:"JSON TokenDomains"
+       and associationConfig =
+         flag "association-config" (optional json_arg)
+           ~doc:"JSON AssociationConfig"
+       and onSourceDDoSProtectionConfig =
+         flag "on-source-d-do-s-protection-config" (optional json_arg)
+           ~doc:"JSON OnSourceDDoSProtectionConfig"
+       and applicationConfig =
+         flag "application-config" (optional json_arg)
+           ~doc:"JSON ApplicationConfig"
        and name = flag "name" (required string) ~doc:"STRING EntityName"
        and scope = flag "scope" (required json_arg) ~doc:"JSON Scope"
        and defaultAction =
@@ -197,18 +236,53 @@ let create_web_a_c_l =
            Io.create_web_a_c_l
            (Values.CreateWebACLRequest.make ?description
               ?rules:(Option.map ~f:Values.Rules.of_json rules)
+              ?dataProtectionConfig:(Option.map
+                                       ~f:Values.DataProtectionConfig.of_json
+                                       dataProtectionConfig)
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ?customResponseBodies:(Option.map
                                        ~f:Values.CustomResponseBodies.of_json
                                        customResponseBodies)
               ?captchaConfig:(Option.map ~f:Values.CaptchaConfig.of_json
-                                captchaConfig) ~name
+                                captchaConfig)
+              ?challengeConfig:(Option.map ~f:Values.ChallengeConfig.of_json
+                                  challengeConfig)
+              ?tokenDomains:(Option.map ~f:Values.TokenDomains.of_json
+                               tokenDomains)
+              ?associationConfig:(Option.map
+                                    ~f:Values.AssociationConfig.of_json
+                                    associationConfig)
+              ?onSourceDDoSProtectionConfig:(Option.map
+                                               ~f:Values.OnSourceDDoSProtectionConfig.of_json
+                                               onSourceDDoSProtectionConfig)
+              ?applicationConfig:(Option.map
+                                    ~f:Values.ApplicationConfig.of_json
+                                    applicationConfig) ~name
               ~scope:(Values.Scope.of_json scope)
               ~defaultAction:(Values.DefaultAction.of_json defaultAction)
               ~visibilityConfig:(Values.VisibilityConfig.of_json
                                    visibilityConfig) ())
            (Some Values.CreateWebACLResponse.to_json)
            (Some Values.CreateWebACLResponse.error_to_json)])
+let delete_a_p_i_key =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scope = flag "scope" (required json_arg) ~doc:"JSON Scope"
+       and aPIKey = flag "a-p-i-key" (required string) ~doc:"STRING APIKey" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_a_p_i_key
+           (Values.DeleteAPIKeyRequest.make
+              ~scope:(Values.Scope.of_json scope) ~aPIKey ())
+           (Some Values.DeleteAPIKeyResponse.to_json)
+           (Some Values.DeleteAPIKeyResponse.error_to_json)])
 let delete_firewall_manager_rule_groups =
   Command.async ~summary:""
     ([%map_open.Command
@@ -263,12 +337,18 @@ let delete_logging_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and logType = flag "log-type" (optional json_arg) ~doc:"JSON LogType"
+       and logScope =
+         flag "log-scope" (optional json_arg) ~doc:"JSON LogScope"
        and resourceArn =
          flag "resource-arn" (required string) ~doc:"STRING ResourceArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_logging_configuration
-           (Values.DeleteLoggingConfigurationRequest.make ~resourceArn ())
+           (Values.DeleteLoggingConfigurationRequest.make
+              ?logType:(Option.map ~f:Values.LogType.of_json logType)
+              ?logScope:(Option.map ~f:Values.LogScope.of_json logScope)
+              ~resourceArn ())
            (Some Values.DeleteLoggingConfigurationResponse.to_json)
            (Some Values.DeleteLoggingConfigurationResponse.error_to_json)])
 let delete_permission_policy =
@@ -355,6 +435,44 @@ let delete_web_a_c_l =
               ~scope:(Values.Scope.of_json scope) ~id ~lockToken ())
            (Some Values.DeleteWebACLResponse.to_json)
            (Some Values.DeleteWebACLResponse.error_to_json)])
+let describe_all_managed_products =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scope = flag "scope" (required json_arg) ~doc:"JSON Scope" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_all_managed_products
+           (Values.DescribeAllManagedProductsRequest.make
+              ~scope:(Values.Scope.of_json scope) ())
+           (Some Values.DescribeAllManagedProductsResponse.to_json)
+           (Some Values.DescribeAllManagedProductsResponse.error_to_json)])
+let describe_managed_products_by_vendor =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and vendorName =
+         flag "vendor-name" (required string) ~doc:"STRING VendorName"
+       and scope = flag "scope" (required json_arg) ~doc:"JSON Scope" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_managed_products_by_vendor
+           (Values.DescribeManagedProductsByVendorRequest.make ~vendorName
+              ~scope:(Values.Scope.of_json scope) ())
+           (Some Values.DescribeManagedProductsByVendorResponse.to_json)
+           (Some Values.DescribeManagedProductsByVendorResponse.error_to_json)])
 let describe_managed_rule_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -418,6 +536,25 @@ let generate_mobile_sdk_release_url =
               ~platform:(Values.Platform.of_json platform) ~releaseVersion ())
            (Some Values.GenerateMobileSdkReleaseUrlResponse.to_json)
            (Some Values.GenerateMobileSdkReleaseUrlResponse.error_to_json)])
+let get_decrypted_a_p_i_key =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scope = flag "scope" (required json_arg) ~doc:"JSON Scope"
+       and aPIKey = flag "a-p-i-key" (required string) ~doc:"STRING APIKey" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_decrypted_a_p_i_key
+           (Values.GetDecryptedAPIKeyRequest.make
+              ~scope:(Values.Scope.of_json scope) ~aPIKey ())
+           (Some Values.GetDecryptedAPIKeyResponse.to_json)
+           (Some Values.GetDecryptedAPIKeyResponse.error_to_json)])
 let get_i_p_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -448,12 +585,18 @@ let get_logging_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and logType = flag "log-type" (optional json_arg) ~doc:"JSON LogType"
+       and logScope =
+         flag "log-scope" (optional json_arg) ~doc:"JSON LogScope"
        and resourceArn =
          flag "resource-arn" (required string) ~doc:"STRING ResourceArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_logging_configuration
-           (Values.GetLoggingConfigurationRequest.make ~resourceArn ())
+           (Values.GetLoggingConfigurationRequest.make
+              ?logType:(Option.map ~f:Values.LogType.of_json logType)
+              ?logScope:(Option.map ~f:Values.LogScope.of_json logScope)
+              ~resourceArn ())
            (Some Values.GetLoggingConfigurationResponse.to_json)
            (Some Values.GetLoggingConfigurationResponse.error_to_json)])
 let get_managed_rule_set =
@@ -614,6 +757,46 @@ let get_sampled_requests =
               ~maxItems:(Values.ListMaxItems.of_json maxItems) ())
            (Some Values.GetSampledRequestsResponse.to_json)
            (Some Values.GetSampledRequestsResponse.error_to_json)])
+let get_top_path_statistics_by_traffic =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and uriPathPrefix =
+         flag "uri-path-prefix" (optional string)
+           ~doc:"STRING UriPathPrefixString"
+       and botCategory =
+         flag "bot-category" (optional string) ~doc:"STRING FilterString"
+       and botOrganization =
+         flag "bot-organization" (optional string) ~doc:"STRING FilterString"
+       and botName =
+         flag "bot-name" (optional string) ~doc:"STRING FilterString"
+       and nextMarker =
+         flag "next-marker" (optional string) ~doc:"STRING NextMarker"
+       and webAclArn =
+         flag "web-acl-arn" (required string) ~doc:"STRING ResourceArn"
+       and scope = flag "scope" (required json_arg) ~doc:"JSON Scope"
+       and timeWindow =
+         flag "time-window" (required json_arg) ~doc:"JSON TimeWindow"
+       and limit = flag "limit" (required int) ~doc:"INT PathStatisticsLimit"
+       and numberOfTopTrafficBotsPerPath =
+         flag "number-of-top-traffic-bots-per-path" (required int)
+           ~doc:"INT NumberOfTopTrafficBotsPerPath" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_top_path_statistics_by_traffic
+           (Values.GetTopPathStatisticsByTrafficRequest.make ?uriPathPrefix
+              ?botCategory ?botOrganization ?botName ?nextMarker ~webAclArn
+              ~scope:(Values.Scope.of_json scope)
+              ~timeWindow:(Values.TimeWindow.of_json timeWindow) ~limit
+              ~numberOfTopTrafficBotsPerPath ())
+           (Some Values.GetTopPathStatisticsByTrafficResponse.to_json)
+           (Some Values.GetTopPathStatisticsByTrafficResponse.error_to_json)])
 let get_web_a_c_l =
   Command.async ~summary:""
     ([%map_open.Command
@@ -624,14 +807,15 @@ let get_web_a_c_l =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and name = flag "name" (required string) ~doc:"STRING EntityName"
-       and scope = flag "scope" (required json_arg) ~doc:"JSON Scope"
-       and id = flag "id" (required string) ~doc:"STRING EntityId" in
+       and name = flag "name" (optional string) ~doc:"STRING EntityName"
+       and scope = flag "scope" (optional json_arg) ~doc:"JSON Scope"
+       and id = flag "id" (optional string) ~doc:"STRING EntityId"
+       and aRN = flag "a-r-n" (optional string) ~doc:"STRING ResourceArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_web_a_c_l
-           (Values.GetWebACLRequest.make ~name
-              ~scope:(Values.Scope.of_json scope) ~id ())
+           (Values.GetWebACLRequest.make ?name
+              ?scope:(Option.map ~f:Values.Scope.of_json scope) ?id ?aRN ())
            (Some Values.GetWebACLResponse.to_json)
            (Some Values.GetWebACLResponse.error_to_json)])
 let get_web_a_c_l_for_resource =
@@ -652,6 +836,27 @@ let get_web_a_c_l_for_resource =
            (Values.GetWebACLForResourceRequest.make ~resourceArn ())
            (Some Values.GetWebACLForResourceResponse.to_json)
            (Some Values.GetWebACLForResourceResponse.error_to_json)])
+let list_a_p_i_keys =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextMarker =
+         flag "next-marker" (optional string) ~doc:"STRING NextMarker"
+       and limit = flag "limit" (optional int) ~doc:"INT PaginationLimit"
+       and scope = flag "scope" (required json_arg) ~doc:"JSON Scope" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_a_p_i_keys
+           (Values.ListAPIKeysRequest.make ?nextMarker ?limit
+              ~scope:(Values.Scope.of_json scope) ())
+           (Some Values.ListAPIKeysResponse.to_json)
+           (Some Values.ListAPIKeysResponse.error_to_json)])
 let list_available_managed_rule_group_versions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -733,11 +938,14 @@ let list_logging_configurations =
        and nextMarker =
          flag "next-marker" (optional string) ~doc:"STRING NextMarker"
        and limit = flag "limit" (optional int) ~doc:"INT PaginationLimit"
+       and logScope =
+         flag "log-scope" (optional json_arg) ~doc:"JSON LogScope"
        and scope = flag "scope" (required json_arg) ~doc:"JSON Scope" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_logging_configurations
            (Values.ListLoggingConfigurationsRequest.make ?nextMarker ?limit
+              ?logScope:(Option.map ~f:Values.LogScope.of_json logScope)
               ~scope:(Values.Scope.of_json scope) ())
            (Some Values.ListLoggingConfigurationsResponse.to_json)
            (Some Values.ListLoggingConfigurationsResponse.error_to_json)])
@@ -1140,11 +1348,28 @@ let update_web_a_c_l =
        and description =
          flag "description" (optional string) ~doc:"STRING EntityDescription"
        and rules = flag "rules" (optional json_arg) ~doc:"JSON Rules"
+       and dataProtectionConfig =
+         flag "data-protection-config" (optional json_arg)
+           ~doc:"JSON DataProtectionConfig"
        and customResponseBodies =
          flag "custom-response-bodies" (optional json_arg)
            ~doc:"JSON CustomResponseBodies"
        and captchaConfig =
          flag "captcha-config" (optional json_arg) ~doc:"JSON CaptchaConfig"
+       and challengeConfig =
+         flag "challenge-config" (optional json_arg)
+           ~doc:"JSON ChallengeConfig"
+       and tokenDomains =
+         flag "token-domains" (optional json_arg) ~doc:"JSON TokenDomains"
+       and associationConfig =
+         flag "association-config" (optional json_arg)
+           ~doc:"JSON AssociationConfig"
+       and onSourceDDoSProtectionConfig =
+         flag "on-source-d-do-s-protection-config" (optional json_arg)
+           ~doc:"JSON OnSourceDDoSProtectionConfig"
+       and applicationConfig =
+         flag "application-config" (optional json_arg)
+           ~doc:"JSON ApplicationConfig"
        and name = flag "name" (required string) ~doc:"STRING EntityName"
        and scope = flag "scope" (required json_arg) ~doc:"JSON Scope"
        and id = flag "id" (required string) ~doc:"STRING EntityId"
@@ -1160,11 +1385,27 @@ let update_web_a_c_l =
            Io.update_web_a_c_l
            (Values.UpdateWebACLRequest.make ?description
               ?rules:(Option.map ~f:Values.Rules.of_json rules)
+              ?dataProtectionConfig:(Option.map
+                                       ~f:Values.DataProtectionConfig.of_json
+                                       dataProtectionConfig)
               ?customResponseBodies:(Option.map
                                        ~f:Values.CustomResponseBodies.of_json
                                        customResponseBodies)
               ?captchaConfig:(Option.map ~f:Values.CaptchaConfig.of_json
-                                captchaConfig) ~name
+                                captchaConfig)
+              ?challengeConfig:(Option.map ~f:Values.ChallengeConfig.of_json
+                                  challengeConfig)
+              ?tokenDomains:(Option.map ~f:Values.TokenDomains.of_json
+                               tokenDomains)
+              ?associationConfig:(Option.map
+                                    ~f:Values.AssociationConfig.of_json
+                                    associationConfig)
+              ?onSourceDDoSProtectionConfig:(Option.map
+                                               ~f:Values.OnSourceDDoSProtectionConfig.of_json
+                                               onSourceDDoSProtectionConfig)
+              ?applicationConfig:(Option.map
+                                    ~f:Values.ApplicationConfig.of_json
+                                    applicationConfig) ~name
               ~scope:(Values.Scope.of_json scope) ~id
               ~defaultAction:(Values.DefaultAction.of_json defaultAction)
               ~visibilityConfig:(Values.VisibilityConfig.of_json
@@ -1176,10 +1417,12 @@ let main =
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-web-a-c-l", associate_web_a_c_l);
     ("check-capacity", check_capacity);
+    ("create-a-p-i-key", create_a_p_i_key);
     ("create-i-p-set", create_i_p_set);
     ("create-regex-pattern-set", create_regex_pattern_set);
     ("create-rule-group", create_rule_group);
     ("create-web-a-c-l", create_web_a_c_l);
+    ("delete-a-p-i-key", delete_a_p_i_key);
     ("delete-firewall-manager-rule-groups",
       delete_firewall_manager_rule_groups);
     ("delete-i-p-set", delete_i_p_set);
@@ -1188,9 +1431,13 @@ let main =
     ("delete-regex-pattern-set", delete_regex_pattern_set);
     ("delete-rule-group", delete_rule_group);
     ("delete-web-a-c-l", delete_web_a_c_l);
+    ("describe-all-managed-products", describe_all_managed_products);
+    ("describe-managed-products-by-vendor",
+      describe_managed_products_by_vendor);
     ("describe-managed-rule-group", describe_managed_rule_group);
     ("disassociate-web-a-c-l", disassociate_web_a_c_l);
     ("generate-mobile-sdk-release-url", generate_mobile_sdk_release_url);
+    ("get-decrypted-a-p-i-key", get_decrypted_a_p_i_key);
     ("get-i-p-set", get_i_p_set);
     ("get-logging-configuration", get_logging_configuration);
     ("get-managed-rule-set", get_managed_rule_set);
@@ -1201,8 +1448,11 @@ let main =
     ("get-regex-pattern-set", get_regex_pattern_set);
     ("get-rule-group", get_rule_group);
     ("get-sampled-requests", get_sampled_requests);
+    ("get-top-path-statistics-by-traffic",
+      get_top_path_statistics_by_traffic);
     ("get-web-a-c-l", get_web_a_c_l);
     ("get-web-a-c-l-for-resource", get_web_a_c_l_for_resource);
+    ("list-a-p-i-keys", list_a_p_i_keys);
     ("list-available-managed-rule-group-versions",
       list_available_managed_rule_group_versions);
     ("list-available-managed-rule-groups",

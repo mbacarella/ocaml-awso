@@ -29,6 +29,12 @@ val complete_migration :
       CompleteMigrationMessage.t ->
         (CompleteMigrationResponse.t, CompleteMigrationResponse.error)
           Result.t
+val copy_serverless_cache_snapshot :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CopyServerlessCacheSnapshotRequest.t ->
+        (CopyServerlessCacheSnapshotResponse.t,
+          CopyServerlessCacheSnapshotResponse.error) Result.t
 val copy_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -69,6 +75,18 @@ val create_replication_group :
       CreateReplicationGroupMessage.t ->
         (CreateReplicationGroupResult.t, CreateReplicationGroupResult.error)
           Result.t
+val create_serverless_cache :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateServerlessCacheRequest.t ->
+        (CreateServerlessCacheResponse.t,
+          CreateServerlessCacheResponse.error) Result.t
+val create_serverless_cache_snapshot :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateServerlessCacheSnapshotRequest.t ->
+        (CreateServerlessCacheSnapshotResponse.t,
+          CreateServerlessCacheSnapshotResponse.error) Result.t
 val create_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -122,6 +140,18 @@ val delete_replication_group :
       DeleteReplicationGroupMessage.t ->
         (DeleteReplicationGroupResult.t, DeleteReplicationGroupResult.error)
           Result.t
+val delete_serverless_cache :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteServerlessCacheRequest.t ->
+        (DeleteServerlessCacheResponse.t,
+          DeleteServerlessCacheResponse.error) Result.t
+val delete_serverless_cache_snapshot :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteServerlessCacheSnapshotRequest.t ->
+        (DeleteServerlessCacheSnapshotResponse.t,
+          DeleteServerlessCacheSnapshotResponse.error) Result.t
 val delete_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -201,6 +231,18 @@ val describe_reserved_cache_nodes_offerings :
       DescribeReservedCacheNodesOfferingsMessage.t ->
         (ReservedCacheNodesOfferingMessage.t,
           ReservedCacheNodesOfferingMessage.error) Result.t
+val describe_serverless_cache_snapshots :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeServerlessCacheSnapshotsRequest.t ->
+        (DescribeServerlessCacheSnapshotsResponse.t,
+          DescribeServerlessCacheSnapshotsResponse.error) Result.t
+val describe_serverless_caches :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeServerlessCachesRequest.t ->
+        (DescribeServerlessCachesResponse.t,
+          DescribeServerlessCachesResponse.error) Result.t
 val describe_service_updates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -233,6 +275,12 @@ val disassociate_global_replication_group :
       DisassociateGlobalReplicationGroupMessage.t ->
         (DisassociateGlobalReplicationGroupResult.t,
           DisassociateGlobalReplicationGroupResult.error) Result.t
+val export_serverless_cache_snapshot :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ExportServerlessCacheSnapshotRequest.t ->
+        (ExportServerlessCacheSnapshotResponse.t,
+          ExportServerlessCacheSnapshotResponse.error) Result.t
 val failover_global_replication_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -297,6 +345,12 @@ val modify_replication_group_shard_configuration :
       ModifyReplicationGroupShardConfigurationMessage.t ->
         (ModifyReplicationGroupShardConfigurationResult.t,
           ModifyReplicationGroupShardConfigurationResult.error) Result.t
+val modify_serverless_cache :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyServerlessCacheRequest.t ->
+        (ModifyServerlessCacheResponse.t,
+          ModifyServerlessCacheResponse.error) Result.t
 val modify_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> ModifyUserMessage.t -> (User.t, User.error) Result.t
@@ -348,3 +402,8 @@ val test_failover :
     ?cfg:Awso.Cfg.t ->
       TestFailoverMessage.t ->
         (TestFailoverResult.t, TestFailoverResult.error) Result.t
+val test_migration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TestMigrationMessage.t ->
+        (TestMigrationResponse.t, TestMigrationResponse.error) Result.t

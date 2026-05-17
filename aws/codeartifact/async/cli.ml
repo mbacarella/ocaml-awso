@@ -123,6 +123,36 @@ let create_domain =
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ~domain ())
            (Some Values.CreateDomainResult.to_json)
            (Some Values.CreateDomainResult.error_to_json)])
+let create_package_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainOwner =
+         flag "domain-owner" (optional string) ~doc:"STRING AccountId"
+       and contactInfo =
+         flag "contact-info" (optional string)
+           ~doc:"STRING PackageGroupContactInfo"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and domain = flag "domain" (required string) ~doc:"STRING DomainName"
+       and packageGroup =
+         flag "package-group" (required string)
+           ~doc:"STRING PackageGroupPattern" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_package_group
+           (Values.CreatePackageGroupRequest.make ?domainOwner ?contactInfo
+              ?description ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~domain ~packageGroup ())
+           (Some Values.CreatePackageGroupResult.to_json)
+           (Some Values.CreatePackageGroupResult.error_to_json)])
 let create_repository =
   Command.async ~summary:""
     ([%map_open.Command
@@ -195,6 +225,56 @@ let delete_domain_permissions_policy =
               ?policyRevision ~domain ())
            (Some Values.DeleteDomainPermissionsPolicyResult.to_json)
            (Some Values.DeleteDomainPermissionsPolicyResult.error_to_json)])
+let delete_package =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainOwner =
+         flag "domain-owner" (optional string) ~doc:"STRING AccountId"
+       and namespace =
+         flag "namespace" (optional string) ~doc:"STRING PackageNamespace"
+       and domain = flag "domain" (required string) ~doc:"STRING DomainName"
+       and repository =
+         flag "repository" (required string) ~doc:"STRING RepositoryName"
+       and format =
+         flag "format" (required json_arg) ~doc:"JSON PackageFormat"
+       and package =
+         flag "package" (required string) ~doc:"STRING PackageName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_package
+           (Values.DeletePackageRequest.make ?domainOwner ?namespace ~domain
+              ~repository ~format:(Values.PackageFormat.of_json format)
+              ~package ()) (Some Values.DeletePackageResult.to_json)
+           (Some Values.DeletePackageResult.error_to_json)])
+let delete_package_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainOwner =
+         flag "domain-owner" (optional string) ~doc:"STRING AccountId"
+       and domain = flag "domain" (required string) ~doc:"STRING DomainName"
+       and packageGroup =
+         flag "package-group" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_package_group
+           (Values.DeletePackageGroupRequest.make ?domainOwner ~domain
+              ~packageGroup ())
+           (Some Values.DeletePackageGroupResult.to_json)
+           (Some Values.DeletePackageGroupResult.error_to_json)])
 let delete_package_versions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -297,6 +377,58 @@ let describe_domain =
            (Values.DescribeDomainRequest.make ?domainOwner ~domain ())
            (Some Values.DescribeDomainResult.to_json)
            (Some Values.DescribeDomainResult.error_to_json)])
+let describe_package =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainOwner =
+         flag "domain-owner" (optional string) ~doc:"STRING AccountId"
+       and namespace =
+         flag "namespace" (optional string) ~doc:"STRING PackageNamespace"
+       and domain = flag "domain" (required string) ~doc:"STRING DomainName"
+       and repository =
+         flag "repository" (required string) ~doc:"STRING RepositoryName"
+       and format =
+         flag "format" (required json_arg) ~doc:"JSON PackageFormat"
+       and package =
+         flag "package" (required string) ~doc:"STRING PackageName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_package
+           (Values.DescribePackageRequest.make ?domainOwner ?namespace
+              ~domain ~repository
+              ~format:(Values.PackageFormat.of_json format) ~package ())
+           (Some Values.DescribePackageResult.to_json)
+           (Some Values.DescribePackageResult.error_to_json)])
+let describe_package_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainOwner =
+         flag "domain-owner" (optional string) ~doc:"STRING AccountId"
+       and domain = flag "domain" (required string) ~doc:"STRING DomainName"
+       and packageGroup =
+         flag "package-group" (required string)
+           ~doc:"STRING PackageGroupPattern" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_package_group
+           (Values.DescribePackageGroupRequest.make ?domainOwner ~domain
+              ~packageGroup ())
+           (Some Values.DescribePackageGroupResult.to_json)
+           (Some Values.DescribePackageGroupResult.error_to_json)])
 let describe_package_version =
   Command.async ~summary:""
     ([%map_open.Command
@@ -419,6 +551,33 @@ let dispose_package_versions =
               ~versions:(Values.PackageVersionList.of_json versions) ())
            (Some Values.DisposePackageVersionsResult.to_json)
            (Some Values.DisposePackageVersionsResult.error_to_json)])
+let get_associated_package_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainOwner =
+         flag "domain-owner" (optional string) ~doc:"STRING AccountId"
+       and namespace =
+         flag "namespace" (optional string) ~doc:"STRING PackageNamespace"
+       and domain = flag "domain" (required string) ~doc:"STRING DomainName"
+       and format =
+         flag "format" (required json_arg) ~doc:"JSON PackageFormat"
+       and package =
+         flag "package" (required string) ~doc:"STRING PackageName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_associated_package_group
+           (Values.GetAssociatedPackageGroupRequest.make ?domainOwner
+              ?namespace ~domain
+              ~format:(Values.PackageFormat.of_json format) ~package ())
+           (Some Values.GetAssociatedPackageGroupResult.to_json)
+           (Some Values.GetAssociatedPackageGroupResult.error_to_json)])
 let get_authorization_token =
   Command.async ~summary:""
     ([%map_open.Command
@@ -546,6 +705,8 @@ let get_repository_endpoint =
            ~doc:"URL override endpoint url"
        and domainOwner =
          flag "domain-owner" (optional string) ~doc:"STRING AccountId"
+       and endpointType =
+         flag "endpoint-type" (optional json_arg) ~doc:"JSON EndpointType"
        and domain = flag "domain" (required string) ~doc:"STRING DomainName"
        and repository =
          flag "repository" (required string) ~doc:"STRING RepositoryName"
@@ -554,8 +715,10 @@ let get_repository_endpoint =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_repository_endpoint
-           (Values.GetRepositoryEndpointRequest.make ?domainOwner ~domain
-              ~repository ~format:(Values.PackageFormat.of_json format) ())
+           (Values.GetRepositoryEndpointRequest.make ?domainOwner
+              ?endpointType:(Option.map ~f:Values.EndpointType.of_json
+                               endpointType) ~domain ~repository
+              ~format:(Values.PackageFormat.of_json format) ())
            (Some Values.GetRepositoryEndpointResult.to_json)
            (Some Values.GetRepositoryEndpointResult.error_to_json)])
 let get_repository_permissions_policy =
@@ -580,6 +743,68 @@ let get_repository_permissions_policy =
               ~domain ~repository ())
            (Some Values.GetRepositoryPermissionsPolicyResult.to_json)
            (Some Values.GetRepositoryPermissionsPolicyResult.error_to_json)])
+let list_allowed_repositories_for_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainOwner =
+         flag "domain-owner" (optional string) ~doc:"STRING AccountId"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListAllowedRepositoriesForGroupMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and domain = flag "domain" (required string) ~doc:"STRING DomainName"
+       and packageGroup =
+         flag "package-group" (required string)
+           ~doc:"STRING PackageGroupPattern"
+       and originRestrictionType =
+         flag "origin-restriction-type" (required json_arg)
+           ~doc:"JSON PackageGroupOriginRestrictionType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_allowed_repositories_for_group
+           (Values.ListAllowedRepositoriesForGroupRequest.make ?domainOwner
+              ?maxResults ?nextToken ~domain ~packageGroup
+              ~originRestrictionType:(Values.PackageGroupOriginRestrictionType.of_json
+                                        originRestrictionType) ())
+           (Some Values.ListAllowedRepositoriesForGroupResult.to_json)
+           (Some Values.ListAllowedRepositoriesForGroupResult.error_to_json)])
+let list_associated_packages =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainOwner =
+         flag "domain-owner" (optional string) ~doc:"STRING AccountId"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ListPackagesMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and preview =
+         flag "preview" (optional bool) ~doc:"BOOL BooleanOptional"
+       and domain = flag "domain" (required string) ~doc:"STRING DomainName"
+       and packageGroup =
+         flag "package-group" (required string)
+           ~doc:"STRING PackageGroupPattern" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_associated_packages
+           (Values.ListAssociatedPackagesRequest.make ?domainOwner
+              ?maxResults ?nextToken ?preview ~domain ~packageGroup ())
+           (Some Values.ListAssociatedPackagesResult.to_json)
+           (Some Values.ListAssociatedPackagesResult.error_to_json)])
 let list_domains =
   Command.async ~summary:""
     ([%map_open.Command
@@ -600,6 +825,34 @@ let list_domains =
            (Values.ListDomainsRequest.make ?maxResults ?nextToken ())
            (Some Values.ListDomainsResult.to_json)
            (Some Values.ListDomainsResult.error_to_json)])
+let list_package_groups =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainOwner =
+         flag "domain-owner" (optional string) ~doc:"STRING AccountId"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListPackageGroupsMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and prefix =
+         flag "prefix" (optional string)
+           ~doc:"STRING PackageGroupPatternPrefix"
+       and domain = flag "domain" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_package_groups
+           (Values.ListPackageGroupsRequest.make ?domainOwner ?maxResults
+              ?nextToken ?prefix ~domain ())
+           (Some Values.ListPackageGroupsResult.to_json)
+           (Some Values.ListPackageGroupsResult.error_to_json)])
 let list_package_version_assets =
   Command.async ~summary:""
     ([%map_open.Command
@@ -697,6 +950,9 @@ let list_package_versions =
            ~doc:"INT ListPackageVersionsMaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and originType =
+         flag "origin-type" (optional json_arg)
+           ~doc:"JSON PackageVersionOriginType"
        and domain = flag "domain" (required string) ~doc:"STRING DomainName"
        and repository =
          flag "repository" (required string) ~doc:"STRING RepositoryName"
@@ -711,7 +967,10 @@ let list_package_versions =
               ?status:(Option.map ~f:Values.PackageVersionStatus.of_json
                          status)
               ?sortBy:(Option.map ~f:Values.PackageVersionSortType.of_json
-                         sortBy) ?maxResults ?nextToken ~domain ~repository
+                         sortBy) ?maxResults ?nextToken
+              ?originType:(Option.map
+                             ~f:Values.PackageVersionOriginType.of_json
+                             originType) ~domain ~repository
               ~format:(Values.PackageFormat.of_json format) ~package ())
            (Some Values.ListPackageVersionsResult.to_json)
            (Some Values.ListPackageVersionsResult.error_to_json)])
@@ -737,6 +996,10 @@ let list_packages =
          flag "max-results" (optional int) ~doc:"INT ListPackagesMaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and publish =
+         flag "publish" (optional json_arg) ~doc:"JSON AllowPublish"
+       and upstream =
+         flag "upstream" (optional json_arg) ~doc:"JSON AllowUpstream"
        and domain = flag "domain" (required string) ~doc:"STRING DomainName"
        and repository =
          flag "repository" (required string) ~doc:"STRING RepositoryName" in
@@ -745,8 +1008,11 @@ let list_packages =
            Io.list_packages
            (Values.ListPackagesRequest.make ?domainOwner
               ?format:(Option.map ~f:Values.PackageFormat.of_json format)
-              ?namespace ?packagePrefix ?maxResults ?nextToken ~domain
-              ~repository ()) (Some Values.ListPackagesResult.to_json)
+              ?namespace ?packagePrefix ?maxResults ?nextToken
+              ?publish:(Option.map ~f:Values.AllowPublish.of_json publish)
+              ?upstream:(Option.map ~f:Values.AllowUpstream.of_json upstream)
+              ~domain ~repository ())
+           (Some Values.ListPackagesResult.to_json)
            (Some Values.ListPackagesResult.error_to_json)])
 let list_repositories =
   Command.async ~summary:""
@@ -804,6 +1070,34 @@ let list_repositories_in_domain =
               ~domain ())
            (Some Values.ListRepositoriesInDomainResult.to_json)
            (Some Values.ListRepositoriesInDomainResult.error_to_json)])
+let list_sub_package_groups =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainOwner =
+         flag "domain-owner" (optional string) ~doc:"STRING AccountId"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListPackageGroupsMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and domain = flag "domain" (required string) ~doc:"STRING DomainName"
+       and packageGroup =
+         flag "package-group" (required string)
+           ~doc:"STRING PackageGroupPattern" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_sub_package_groups
+           (Values.ListSubPackageGroupsRequest.make ?domainOwner ?maxResults
+              ?nextToken ~domain ~packageGroup ())
+           (Some Values.ListSubPackageGroupsResult.to_json)
+           (Some Values.ListSubPackageGroupsResult.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -822,6 +1116,49 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResult.to_json)
            (Some Values.ListTagsForResourceResult.error_to_json)])
+let publish_package_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainOwner =
+         flag "domain-owner" (optional string) ~doc:"STRING AccountId"
+       and namespace =
+         flag "namespace" (optional string) ~doc:"STRING PackageNamespace"
+       and unfinished =
+         flag "unfinished" (optional bool) ~doc:"BOOL BooleanOptional"
+       and domain = flag "domain" (required string) ~doc:"STRING DomainName"
+       and repository =
+         flag "repository" (required string) ~doc:"STRING RepositoryName"
+       and format =
+         flag "format" (required json_arg) ~doc:"JSON PackageFormat"
+       and package =
+         flag "package" (required string) ~doc:"STRING PackageName"
+       and packageVersion =
+         flag "package-version" (required string)
+           ~doc:"STRING PackageVersion"
+       and assetContent =
+         flag "asset-content" (required json_arg) ~doc:"JSON Asset"
+       and assetName =
+         flag "asset-name" (required string) ~doc:"STRING AssetName"
+       and assetSHA256 =
+         flag "asset-s-h-a256" (required string) ~doc:"STRING SHA256" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.publish_package_version
+           (Values.PublishPackageVersionRequest.make ?domainOwner ?namespace
+              ?unfinished ~domain ~repository
+              ~format:(Values.PackageFormat.of_json format) ~package
+              ~packageVersion
+              ~assetContent:(Values.Asset.of_json assetContent) ~assetName
+              ~assetSHA256 ())
+           (Some Values.PublishPackageVersionResult.to_json)
+           (Some Values.PublishPackageVersionResult.error_to_json)])
 let put_domain_permissions_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -848,6 +1185,40 @@ let put_domain_permissions_policy =
               ?policyRevision ~domain ~policyDocument ())
            (Some Values.PutDomainPermissionsPolicyResult.to_json)
            (Some Values.PutDomainPermissionsPolicyResult.error_to_json)])
+let put_package_origin_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainOwner =
+         flag "domain-owner" (optional string) ~doc:"STRING AccountId"
+       and namespace =
+         flag "namespace" (optional string) ~doc:"STRING PackageNamespace"
+       and domain = flag "domain" (required string) ~doc:"STRING DomainName"
+       and repository =
+         flag "repository" (required string) ~doc:"STRING RepositoryName"
+       and format =
+         flag "format" (required json_arg) ~doc:"JSON PackageFormat"
+       and package =
+         flag "package" (required string) ~doc:"STRING PackageName"
+       and restrictions =
+         flag "restrictions" (required json_arg)
+           ~doc:"JSON PackageOriginRestrictions" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_package_origin_configuration
+           (Values.PutPackageOriginConfigurationRequest.make ?domainOwner
+              ?namespace ~domain ~repository
+              ~format:(Values.PackageFormat.of_json format) ~package
+              ~restrictions:(Values.PackageOriginRestrictions.of_json
+                               restrictions) ())
+           (Some Values.PutPackageOriginConfigurationResult.to_json)
+           (Some Values.PutPackageOriginConfigurationResult.error_to_json)])
 let put_repository_permissions_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -917,6 +1288,76 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceResult.to_json)
            (Some Values.UntagResourceResult.error_to_json)])
+let update_package_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainOwner =
+         flag "domain-owner" (optional string) ~doc:"STRING AccountId"
+       and contactInfo =
+         flag "contact-info" (optional string)
+           ~doc:"STRING PackageGroupContactInfo"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and domain = flag "domain" (required string) ~doc:"STRING DomainName"
+       and packageGroup =
+         flag "package-group" (required string)
+           ~doc:"STRING PackageGroupPattern" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_package_group
+           (Values.UpdatePackageGroupRequest.make ?domainOwner ?contactInfo
+              ?description ~domain ~packageGroup ())
+           (Some Values.UpdatePackageGroupResult.to_json)
+           (Some Values.UpdatePackageGroupResult.error_to_json)])
+let update_package_group_origin_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainOwner =
+         flag "domain-owner" (optional string) ~doc:"STRING AccountId"
+       and restrictions =
+         flag "restrictions" (optional json_arg)
+           ~doc:"JSON OriginRestrictions"
+       and addAllowedRepositories =
+         flag "add-allowed-repositories" (optional json_arg)
+           ~doc:"JSON PackageGroupAllowedRepositoryList"
+       and removeAllowedRepositories =
+         flag "remove-allowed-repositories" (optional json_arg)
+           ~doc:"JSON PackageGroupAllowedRepositoryList"
+       and domain = flag "domain" (required string) ~doc:"STRING DomainName"
+       and packageGroup =
+         flag "package-group" (required string)
+           ~doc:"STRING PackageGroupPattern" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_package_group_origin_configuration
+           (Values.UpdatePackageGroupOriginConfigurationRequest.make
+              ?domainOwner
+              ?restrictions:(Option.map ~f:Values.OriginRestrictions.of_json
+                               restrictions)
+              ?addAllowedRepositories:(Option.map
+                                         ~f:Values.PackageGroupAllowedRepositoryList.of_json
+                                         addAllowedRepositories)
+              ?removeAllowedRepositories:(Option.map
+                                            ~f:Values.PackageGroupAllowedRepositoryList.of_json
+                                            removeAllowedRepositories)
+              ~domain ~packageGroup ())
+           (Some Values.UpdatePackageGroupOriginConfigurationResult.to_json)
+           (Some
+              Values.UpdatePackageGroupOriginConfigurationResult.error_to_json)])
 let update_package_versions_status =
   Command.async ~summary:""
     ([%map_open.Command
@@ -999,35 +1440,51 @@ let main =
     [("associate-external-connection", associate_external_connection);
     ("copy-package-versions", copy_package_versions);
     ("create-domain", create_domain);
+    ("create-package-group", create_package_group);
     ("create-repository", create_repository);
     ("delete-domain", delete_domain);
     ("delete-domain-permissions-policy", delete_domain_permissions_policy);
+    ("delete-package", delete_package);
+    ("delete-package-group", delete_package_group);
     ("delete-package-versions", delete_package_versions);
     ("delete-repository", delete_repository);
     ("delete-repository-permissions-policy",
       delete_repository_permissions_policy);
     ("describe-domain", describe_domain);
+    ("describe-package", describe_package);
+    ("describe-package-group", describe_package_group);
     ("describe-package-version", describe_package_version);
     ("describe-repository", describe_repository);
     ("disassociate-external-connection", disassociate_external_connection);
     ("dispose-package-versions", dispose_package_versions);
+    ("get-associated-package-group", get_associated_package_group);
     ("get-authorization-token", get_authorization_token);
     ("get-domain-permissions-policy", get_domain_permissions_policy);
     ("get-package-version-asset", get_package_version_asset);
     ("get-package-version-readme", get_package_version_readme);
     ("get-repository-endpoint", get_repository_endpoint);
     ("get-repository-permissions-policy", get_repository_permissions_policy);
+    ("list-allowed-repositories-for-group",
+      list_allowed_repositories_for_group);
+    ("list-associated-packages", list_associated_packages);
     ("list-domains", list_domains);
+    ("list-package-groups", list_package_groups);
     ("list-package-version-assets", list_package_version_assets);
     ("list-package-version-dependencies", list_package_version_dependencies);
     ("list-package-versions", list_package_versions);
     ("list-packages", list_packages);
     ("list-repositories", list_repositories);
     ("list-repositories-in-domain", list_repositories_in_domain);
+    ("list-sub-package-groups", list_sub_package_groups);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("publish-package-version", publish_package_version);
     ("put-domain-permissions-policy", put_domain_permissions_policy);
+    ("put-package-origin-configuration", put_package_origin_configuration);
     ("put-repository-permissions-policy", put_repository_permissions_policy);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
+    ("update-package-group", update_package_group);
+    ("update-package-group-origin-configuration",
+      update_package_group_origin_configuration);
     ("update-package-versions-status", update_package_versions_status);
     ("update-repository", update_repository)]

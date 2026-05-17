@@ -5,10 +5,100 @@ open Values_0[@@warning "-33"]
 open Values_1[@@warning "-33"]
 open Values_2[@@warning "-33"]
 open Values_3[@@warning "-33"]
+module IpamDiscoveredResourceCidrSet =
+  struct
+    type nonrec t = IpamDiscoveredResourceCidr.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IpamDiscoveredResourceCidr.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IpamDiscoveredResourceCidr.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IpamDiscoveredResourceCidrSet"
+        ~of_json:IpamDiscoveredResourceCidr.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IpamDiscoveredPublicAddressSet =
+  struct
+    type nonrec t = IpamDiscoveredPublicAddress.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IpamDiscoveredPublicAddress.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IpamDiscoveredPublicAddress.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IpamDiscoveredPublicAddressSet"
+        ~of_json:IpamDiscoveredPublicAddress.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IpamDiscoveredAccountSet =
+  struct
+    type nonrec t = IpamDiscoveredAccount.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IpamDiscoveredAccount.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IpamDiscoveredAccount.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IpamDiscoveredAccountSet"
+        ~of_json:IpamDiscoveredAccount.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module IpamAddressHistoryRecordSet =
   struct
     type nonrec t = IpamAddressHistoryRecord.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IpamAddressHistoryRecord.to_value)) |>
         (fun x -> `List x)
@@ -54,6 +144,9 @@ module InstanceTypeInfoFromInstanceRequirementsSet =
   struct
     type nonrec t = InstanceTypeInfoFromInstanceRequirements.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceTypeInfoFromInstanceRequirements.to_value))
         |> (fun x -> `List x)
@@ -77,10 +170,204 @@ module InstanceTypeInfoFromInstanceRequirementsSet =
         ~of_json:InstanceTypeInfoFromInstanceRequirements.of_json j
     let to_json v = composed_to_json to_value v
   end
+module EkPubKeyFormat =
+  struct
+    type nonrec t =
+      | Der 
+      | Tpmt 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Der -> "der" | Tpmt -> "tpmt" | Non_static_id s -> s
+    let of_string =
+      function | "der" -> Der | "tpmt" -> Tpmt | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EkPubKeyFormat" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EkPubKeyFormat" j)
+    let to_json = simple_to_json to_value
+  end
+module EkPubKeyType =
+  struct
+    type nonrec t =
+      | Rsa_2048 
+      | Ecc_sec_p384 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Rsa_2048 -> "rsa-2048"
+      | Ecc_sec_p384 -> "ecc-sec-p384"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "rsa-2048" -> Rsa_2048
+      | "ecc-sec-p384" -> Ecc_sec_p384
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EkPubKeyType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EkPubKeyType" j)
+    let to_json = simple_to_json to_value
+  end
+module EkPubKeyValue =
+  struct
+    type nonrec t = string
+    let context_ = "EkPubKeyValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EkPubKeyValue" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceMetadataDefaultsResponse =
+  struct
+    type nonrec t =
+      {
+      httpTokens: HttpTokensState.t option
+        [@ocaml.doc
+          "Indicates whether IMDSv2 is required. optional \226\128\147 IMDSv2 is optional, which means that you can use either IMDSv2 or IMDSv1. required \226\128\147 IMDSv2 is required, which means that IMDSv1 is disabled, and you must use IMDSv2."];
+      httpPutResponseHopLimit: BoxedInteger.t option
+        [@ocaml.doc
+          "The maximum number of hops that the metadata token can travel."];
+      httpEndpoint: InstanceMetadataEndpointState.t option
+        [@ocaml.doc
+          "Indicates whether the IMDS endpoint for an instance is enabled or disabled. When disabled, the instance metadata can't be accessed."];
+      instanceMetadataTags: InstanceMetadataTagsState.t option
+        [@ocaml.doc
+          "Indicates whether access to instance tags from the instance metadata is enabled or disabled. For more information, see View tags for your EC2 instances using instance metadata in the Amazon EC2 User Guide."];
+      managedBy: ManagedBy.t option
+        [@ocaml.doc
+          "The entity that manages the IMDS default settings. Possible values include: account - The IMDS default settings are managed by the account. declarative-policy - The IMDS default settings are managed by a declarative policy and can't be modified by the account."];
+      managedExceptionMessage: String_.t option
+        [@ocaml.doc
+          "The customized exception message that is specified in the declarative policy."];
+      httpTokensEnforced: HttpTokensEnforcedState.t option
+        [@ocaml.doc
+          "Indicates whether to enforce the requirement of IMDSv2 on an instance at the time of launch. When enforcement is enabled, the instance can't launch unless IMDSv2 (HttpTokens) is set to required."]}
+    let make ?httpTokens =
+      fun ?httpPutResponseHopLimit ->
+        fun ?httpEndpoint ->
+          fun ?instanceMetadataTags ->
+            fun ?managedBy ->
+              fun ?managedExceptionMessage ->
+                fun ?httpTokensEnforced ->
+                  fun () ->
+                    {
+                      httpTokens;
+                      httpPutResponseHopLimit;
+                      httpEndpoint;
+                      instanceMetadataTags;
+                      managedBy;
+                      managedExceptionMessage;
+                      httpTokensEnforced
+                    }
+    let to_value x =
+      structure_to_value
+        [("httpTokens",
+           (Option.map x.httpTokens ~f:HttpTokensState.to_value));
+        ("httpPutResponseHopLimit",
+          (Option.map x.httpPutResponseHopLimit ~f:BoxedInteger.to_value));
+        ("httpEndpoint",
+          (Option.map x.httpEndpoint
+             ~f:InstanceMetadataEndpointState.to_value));
+        ("instanceMetadataTags",
+          (Option.map x.instanceMetadataTags
+             ~f:InstanceMetadataTagsState.to_value));
+        ("managedBy", (Option.map x.managedBy ~f:ManagedBy.to_value));
+        ("managedExceptionMessage",
+          (Option.map x.managedExceptionMessage ~f:String_.to_value));
+        ("httpTokensEnforced",
+          (Option.map x.httpTokensEnforced
+             ~f:HttpTokensEnforcedState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let httpTokensEnforced =
+        (Option.map ~f:HttpTokensEnforcedState.of_xml)
+          (Xml.child xml_arg0 "httpTokensEnforced") in
+      let managedExceptionMessage =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "managedExceptionMessage") in
+      let managedBy =
+        (Option.map ~f:ManagedBy.of_xml) (Xml.child xml_arg0 "managedBy") in
+      let instanceMetadataTags =
+        (Option.map ~f:InstanceMetadataTagsState.of_xml)
+          (Xml.child xml_arg0 "instanceMetadataTags") in
+      let httpEndpoint =
+        (Option.map ~f:InstanceMetadataEndpointState.of_xml)
+          (Xml.child xml_arg0 "httpEndpoint") in
+      let httpPutResponseHopLimit =
+        (Option.map ~f:BoxedInteger.of_xml)
+          (Xml.child xml_arg0 "httpPutResponseHopLimit") in
+      let httpTokens =
+        (Option.map ~f:HttpTokensState.of_xml)
+          (Xml.child xml_arg0 "httpTokens") in
+      make ?httpTokensEnforced ?managedExceptionMessage ?managedBy
+        ?instanceMetadataTags ?httpEndpoint ?httpPutResponseHopLimit
+        ?httpTokens ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let httpTokensEnforced =
+        field_map json__ "HttpTokensEnforced" HttpTokensEnforcedState.of_json in
+      let managedExceptionMessage =
+        field_map json__ "ManagedExceptionMessage" String_.of_json in
+      let managedBy = field_map json__ "ManagedBy" ManagedBy.of_json in
+      let instanceMetadataTags =
+        field_map json__ "InstanceMetadataTags"
+          InstanceMetadataTagsState.of_json in
+      let httpEndpoint =
+        field_map json__ "HttpEndpoint" InstanceMetadataEndpointState.of_json in
+      let httpPutResponseHopLimit =
+        field_map json__ "HttpPutResponseHopLimit" BoxedInteger.of_json in
+      let httpTokens = field_map json__ "HttpTokens" HttpTokensState.of_json in
+      make ?httpTokensEnforced ?managedExceptionMessage ?managedBy
+        ?instanceMetadataTags ?httpEndpoint ?httpPutResponseHopLimit
+        ?httpTokens ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The default instance metadata service (IMDS) settings that were set at the account level in the specified Amazon Web Services&#x2028; Region."]
+module ImageAncestryEntryList =
+  struct
+    type nonrec t = ImageAncestryEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImageAncestryEntry.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImageAncestryEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImageAncestryEntryList"
+        ~of_json:ImageAncestryEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module CapacityReservationGroupSet =
   struct
     type nonrec t = CapacityReservationGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CapacityReservationGroup.to_value)) |>
         (fun x -> `List x)
@@ -141,16 +428,88 @@ module IntegrateServices =
           (Xml.child xml_arg0 "AthenaIntegration") in
       make ?athenaIntegrations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let athenaIntegrations =
-        field_map json "AthenaIntegrations" AthenaIntegrationsSet.of_json in
+        field_map json__ "AthenaIntegrations" AthenaIntegrationsSet.of_json in
       make ?athenaIntegrations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes service integrations with VPC Flow logs."]
+module IpamPolicyManagedBy =
+  struct
+    type nonrec t =
+      | Account 
+      | Delegated_administrator_for_ipam 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Account -> "account"
+      | Delegated_administrator_for_ipam ->
+          "delegated-administrator-for-ipam"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "account" -> Account
+      | "delegated-administrator-for-ipam" ->
+          Delegated_administrator_for_ipam
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration IpamPolicyManagedBy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IpamPolicyManagedBy" j)
+    let to_json = simple_to_json to_value
+  end
+module AttributeSummaryList =
+  struct
+    type nonrec t = AttributeSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AttributeSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AttributeSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AttributeSummaryList"
+        ~of_json:AttributeSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DeclarativePoliciesReportId =
+  struct
+    type nonrec t = string
+    let context_ = "DeclarativePoliciesReportId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DeclarativePoliciesReportId" j
+    let to_json = simple_to_json to_value
+  end
 module CoipAddressUsageSet =
   struct
     type nonrec t = CoipAddressUsage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CoipAddressUsage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -194,6 +553,9 @@ module InstanceUsageSet =
   struct
     type nonrec t = InstanceUsage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceUsage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -234,10 +596,280 @@ module GetCapacityReservationUsageRequestMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module GetCapacityManagerMonitoredTagKeysRequestMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for GetCapacityManagerMonitoredTagKeysRequestMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MetricDimensionResultSet =
+  struct
+    type nonrec t = CapacityManagerDimension.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapacityManagerDimension.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapacityManagerDimension.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricDimensionResultSet"
+        ~of_json:CapacityManagerDimension.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CapacityManagerConditionSet =
+  struct
+    type nonrec t = CapacityManagerCondition.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapacityManagerCondition.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapacityManagerCondition.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapacityManagerConditionSet"
+        ~of_json:CapacityManagerCondition.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GroupBySet =
+  struct
+    type nonrec t = GroupBy.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GroupBy.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GroupBy.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GroupBySet" ~of_json:GroupBy.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MetricSet =
+  struct
+    type nonrec t = Metric.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:40) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Metric.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Metric.of_xml)
+    let of_json j = list_of_json ~kind:"MetricSet" ~of_json:Metric.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MetricDataResultSet =
+  struct
+    type nonrec t = MetricDataResult.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricDataResult.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricDataResult.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricDataResultSet"
+        ~of_json:MetricDataResult.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Period =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:3600); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Period" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module IngestionStatus =
+  struct
+    type nonrec t =
+      | Initial_ingestion_in_progress 
+      | Ingestion_complete 
+      | Ingestion_failed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Initial_ingestion_in_progress -> "initial-ingestion-in-progress"
+      | Ingestion_complete -> "ingestion-complete"
+      | Ingestion_failed -> "ingestion-failed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "initial-ingestion-in-progress" -> Initial_ingestion_in_progress
+      | "ingestion-complete" -> Ingestion_complete
+      | "ingestion-failed" -> Ingestion_failed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IngestionStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IngestionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module DataResponses =
+  struct
+    type nonrec t = DataResponse.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DataResponse.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DataResponse.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DataResponses" ~of_json:DataResponse.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DataQueries =
+  struct
+    type nonrec t = DataQuery.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DataQuery.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DataQuery.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DataQueries" ~of_json:DataQuery.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Ipv6CidrAssociationSet =
   struct
     type nonrec t = Ipv6CidrAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Ipv6CidrAssociation.to_value)) |>
         (fun x -> `List x)
@@ -282,6 +914,9 @@ module AssociatedRolesList =
   struct
     type nonrec t = AssociatedRole.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssociatedRole.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -303,6 +938,347 @@ module AssociatedRolesList =
         ~of_json:AssociatedRole.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CertificateId =
+  struct
+    type nonrec t = string
+    let context_ = "CertificateId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CertificateId" j
+    let to_json = simple_to_json to_value
+  end
+module ImageCriterionList =
+  struct
+    type nonrec t = ImageCriterion.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImageCriterion.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImageCriterion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImageCriterionList" ~of_json:ImageCriterion.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ActiveVpnTunnelStatus =
+  struct
+    type nonrec t =
+      {
+      phase1EncryptionAlgorithm: String_.t option
+        [@ocaml.doc
+          "The encryption algorithm negotiated in Phase 1 IKE negotiations."];
+      phase2EncryptionAlgorithm: String_.t option
+        [@ocaml.doc
+          "The encryption algorithm negotiated in Phase 2 IKE negotiations."];
+      phase1IntegrityAlgorithm: String_.t option
+        [@ocaml.doc
+          "The integrity algorithm negotiated in Phase 1 IKE negotiations."];
+      phase2IntegrityAlgorithm: String_.t option
+        [@ocaml.doc
+          "The integrity algorithm negotiated in Phase 2 IKE negotiations."];
+      phase1DHGroup: Integer.t option
+        [@ocaml.doc
+          "The Diffie-Hellman group number being used in Phase 1 IKE negotiations."];
+      phase2DHGroup: Integer.t option
+        [@ocaml.doc
+          "The Diffie-Hellman group number being used in Phase 2 IKE negotiations."];
+      ikeVersion: String_.t option
+        [@ocaml.doc
+          "The version of the Internet Key Exchange (IKE) protocol being used."];
+      provisioningStatus: VpnTunnelProvisioningStatus.t option
+        [@ocaml.doc "The current provisioning status of the VPN tunnel."];
+      provisioningStatusReason: String_.t option
+        [@ocaml.doc "The reason for the current provisioning status."]}
+    let make ?phase1EncryptionAlgorithm =
+      fun ?phase2EncryptionAlgorithm ->
+        fun ?phase1IntegrityAlgorithm ->
+          fun ?phase2IntegrityAlgorithm ->
+            fun ?phase1DHGroup ->
+              fun ?phase2DHGroup ->
+                fun ?ikeVersion ->
+                  fun ?provisioningStatus ->
+                    fun ?provisioningStatusReason ->
+                      fun () ->
+                        {
+                          phase1EncryptionAlgorithm;
+                          phase2EncryptionAlgorithm;
+                          phase1IntegrityAlgorithm;
+                          phase2IntegrityAlgorithm;
+                          phase1DHGroup;
+                          phase2DHGroup;
+                          ikeVersion;
+                          provisioningStatus;
+                          provisioningStatusReason
+                        }
+    let to_value x =
+      structure_to_value
+        [("phase1EncryptionAlgorithm",
+           (Option.map x.phase1EncryptionAlgorithm ~f:String_.to_value));
+        ("phase2EncryptionAlgorithm",
+          (Option.map x.phase2EncryptionAlgorithm ~f:String_.to_value));
+        ("phase1IntegrityAlgorithm",
+          (Option.map x.phase1IntegrityAlgorithm ~f:String_.to_value));
+        ("phase2IntegrityAlgorithm",
+          (Option.map x.phase2IntegrityAlgorithm ~f:String_.to_value));
+        ("phase1DHGroup", (Option.map x.phase1DHGroup ~f:Integer.to_value));
+        ("phase2DHGroup", (Option.map x.phase2DHGroup ~f:Integer.to_value));
+        ("ikeVersion", (Option.map x.ikeVersion ~f:String_.to_value));
+        ("provisioningStatus",
+          (Option.map x.provisioningStatus
+             ~f:VpnTunnelProvisioningStatus.to_value));
+        ("provisioningStatusReason",
+          (Option.map x.provisioningStatusReason ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let provisioningStatusReason =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "provisioningStatusReason") in
+      let provisioningStatus =
+        (Option.map ~f:VpnTunnelProvisioningStatus.of_xml)
+          (Xml.child xml_arg0 "provisioningStatus") in
+      let ikeVersion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ikeVersion") in
+      let phase2DHGroup =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "phase2DHGroup") in
+      let phase1DHGroup =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "phase1DHGroup") in
+      let phase2IntegrityAlgorithm =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "phase2IntegrityAlgorithm") in
+      let phase1IntegrityAlgorithm =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "phase1IntegrityAlgorithm") in
+      let phase2EncryptionAlgorithm =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "phase2EncryptionAlgorithm") in
+      let phase1EncryptionAlgorithm =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "phase1EncryptionAlgorithm") in
+      make ?provisioningStatusReason ?provisioningStatus ?ikeVersion
+        ?phase2DHGroup ?phase1DHGroup ?phase2IntegrityAlgorithm
+        ?phase1IntegrityAlgorithm ?phase2EncryptionAlgorithm
+        ?phase1EncryptionAlgorithm ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let provisioningStatusReason =
+        field_map json__ "ProvisioningStatusReason" String_.of_json in
+      let provisioningStatus =
+        field_map json__ "ProvisioningStatus"
+          VpnTunnelProvisioningStatus.of_json in
+      let ikeVersion = field_map json__ "IkeVersion" String_.of_json in
+      let phase2DHGroup = field_map json__ "Phase2DHGroup" Integer.of_json in
+      let phase1DHGroup = field_map json__ "Phase1DHGroup" Integer.of_json in
+      let phase2IntegrityAlgorithm =
+        field_map json__ "Phase2IntegrityAlgorithm" String_.of_json in
+      let phase1IntegrityAlgorithm =
+        field_map json__ "Phase1IntegrityAlgorithm" String_.of_json in
+      let phase2EncryptionAlgorithm =
+        field_map json__ "Phase2EncryptionAlgorithm" String_.of_json in
+      let phase1EncryptionAlgorithm =
+        field_map json__ "Phase1EncryptionAlgorithm" String_.of_json in
+      make ?provisioningStatusReason ?provisioningStatus ?ikeVersion
+        ?phase2DHGroup ?phase1DHGroup ?phase2IntegrityAlgorithm
+        ?phase1IntegrityAlgorithm ?phase2EncryptionAlgorithm
+        ?phase1EncryptionAlgorithm ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the current security configuration of an active VPN tunnel."]
+module DeviceTrustProviderTypeList =
+  struct
+    type nonrec t = DeviceTrustProviderType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DeviceTrustProviderType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DeviceTrustProviderType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DeviceTrustProviderTypeList"
+        ~of_json:DeviceTrustProviderType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VerifiedAccessInstanceOpenVpnClientConfigurationList =
+  struct
+    type nonrec t = VerifiedAccessInstanceOpenVpnClientConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:VerifiedAccessInstanceOpenVpnClientConfiguration.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:VerifiedAccessInstanceOpenVpnClientConfiguration.of_xml)
+    let of_json j =
+      list_of_json
+        ~kind:"VerifiedAccessInstanceOpenVpnClientConfigurationList"
+        ~of_json:VerifiedAccessInstanceOpenVpnClientConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VerifiedAccessInstanceUserTrustProviderClientConfiguration =
+  struct
+    type nonrec t =
+      {
+      type_: UserTrustProviderType.t option
+        [@ocaml.doc "The trust provider type."];
+      scopes: String_.t option
+        [@ocaml.doc "The set of user claims to be requested from the IdP."];
+      issuer: String_.t option
+        [@ocaml.doc "The OIDC issuer identifier of the IdP."];
+      authorizationEndpoint: String_.t option
+        [@ocaml.doc "The authorization endpoint of the IdP."];
+      publicSigningKeyEndpoint: String_.t option
+        [@ocaml.doc "The public signing key endpoint."];
+      tokenEndpoint: String_.t option
+        [@ocaml.doc "The token endpoint of the IdP."];
+      userInfoEndpoint: String_.t option
+        [@ocaml.doc "The user info endpoint of the IdP."];
+      clientId: String_.t option
+        [@ocaml.doc "The OAuth 2.0 client identifier."];
+      clientSecret: ClientSecretType.t option
+        [@ocaml.doc "The OAuth 2.0 client secret."];
+      pkceEnabled: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether Proof of Key Code Exchange (PKCE) is enabled."]}
+    let make ?type_ =
+      fun ?scopes ->
+        fun ?issuer ->
+          fun ?authorizationEndpoint ->
+            fun ?publicSigningKeyEndpoint ->
+              fun ?tokenEndpoint ->
+                fun ?userInfoEndpoint ->
+                  fun ?clientId ->
+                    fun ?clientSecret ->
+                      fun ?pkceEnabled ->
+                        fun () ->
+                          {
+                            type_;
+                            scopes;
+                            issuer;
+                            authorizationEndpoint;
+                            publicSigningKeyEndpoint;
+                            tokenEndpoint;
+                            userInfoEndpoint;
+                            clientId;
+                            clientSecret;
+                            pkceEnabled
+                          }
+    let to_value x =
+      structure_to_value
+        [("type", (Option.map x.type_ ~f:UserTrustProviderType.to_value));
+        ("scopes", (Option.map x.scopes ~f:String_.to_value));
+        ("issuer", (Option.map x.issuer ~f:String_.to_value));
+        ("authorizationEndpoint",
+          (Option.map x.authorizationEndpoint ~f:String_.to_value));
+        ("publicSigningKeyEndpoint",
+          (Option.map x.publicSigningKeyEndpoint ~f:String_.to_value));
+        ("tokenEndpoint", (Option.map x.tokenEndpoint ~f:String_.to_value));
+        ("userInfoEndpoint",
+          (Option.map x.userInfoEndpoint ~f:String_.to_value));
+        ("clientId", (Option.map x.clientId ~f:String_.to_value));
+        ("clientSecret",
+          (Option.map x.clientSecret ~f:ClientSecretType.to_value));
+        ("pkceEnabled", (Option.map x.pkceEnabled ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pkceEnabled =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "pkceEnabled") in
+      let clientSecret =
+        (Option.map ~f:ClientSecretType.of_xml)
+          (Xml.child xml_arg0 "clientSecret") in
+      let clientId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientId") in
+      let userInfoEndpoint =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "userInfoEndpoint") in
+      let tokenEndpoint =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "tokenEndpoint") in
+      let publicSigningKeyEndpoint =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "publicSigningKeyEndpoint") in
+      let authorizationEndpoint =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "authorizationEndpoint") in
+      let issuer =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "issuer") in
+      let scopes =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "scopes") in
+      let type_ =
+        (Option.map ~f:UserTrustProviderType.of_xml)
+          (Xml.child xml_arg0 "type") in
+      make ?pkceEnabled ?clientSecret ?clientId ?userInfoEndpoint
+        ?tokenEndpoint ?publicSigningKeyEndpoint ?authorizationEndpoint
+        ?issuer ?scopes ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pkceEnabled = field_map json__ "PkceEnabled" Boolean.of_json in
+      let clientSecret =
+        field_map json__ "ClientSecret" ClientSecretType.of_json in
+      let clientId = field_map json__ "ClientId" String_.of_json in
+      let userInfoEndpoint =
+        field_map json__ "UserInfoEndpoint" String_.of_json in
+      let tokenEndpoint = field_map json__ "TokenEndpoint" String_.of_json in
+      let publicSigningKeyEndpoint =
+        field_map json__ "PublicSigningKeyEndpoint" String_.of_json in
+      let authorizationEndpoint =
+        field_map json__ "AuthorizationEndpoint" String_.of_json in
+      let issuer = field_map json__ "Issuer" String_.of_json in
+      let scopes = field_map json__ "Scopes" String_.of_json in
+      let type_ = field_map json__ "Type" UserTrustProviderType.of_json in
+      make ?pkceEnabled ?clientSecret ?clientId ?userInfoEndpoint
+        ?tokenEndpoint ?publicSigningKeyEndpoint ?authorizationEndpoint
+        ?issuer ?scopes ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the trust provider."]
 module ExportTaskS3LocationRequest =
   struct
     type nonrec t =
@@ -324,9 +1300,9 @@ module ExportTaskS3LocationRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Bucket") in
       make ?s3Prefix ~s3Bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Prefix = field_map json "S3Prefix" String_.of_json in
-      let s3Bucket = field_map_exn json "S3Bucket" String_.of_json in
+    let of_json json__ =
+      let s3Prefix = field_map json__ "S3Prefix" String_.of_json in
+      let s3Bucket = field_map_exn json__ "S3Bucket" String_.of_json in
       make ?s3Prefix ~s3Bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the destination for an export image task."]
@@ -355,10 +1331,10 @@ module ClientCertificateRevocationListStatus =
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       let code =
-        field_map json "Code"
+        field_map json__ "Code"
           ClientCertificateRevocationListStatusCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
@@ -377,20 +1353,26 @@ module TransitGatewayPropagation =
       transitGatewayRouteTableId: String_.t option
         [@ocaml.doc "The ID of the transit gateway route table."];
       state: TransitGatewayPropagationState.t option
-        [@ocaml.doc "The state."]}
+        [@ocaml.doc "The state."];
+      transitGatewayRouteTableAnnouncementId:
+        TransitGatewayRouteTableAnnouncementId.t option
+        [@ocaml.doc
+          "The ID of the transit gateway route table announcement."]}
     let make ?transitGatewayAttachmentId =
       fun ?resourceId ->
         fun ?resourceType ->
           fun ?transitGatewayRouteTableId ->
             fun ?state ->
-              fun () ->
-                {
-                  transitGatewayAttachmentId;
-                  resourceId;
-                  resourceType;
-                  transitGatewayRouteTableId;
-                  state
-                }
+              fun ?transitGatewayRouteTableAnnouncementId ->
+                fun () ->
+                  {
+                    transitGatewayAttachmentId;
+                    resourceId;
+                    resourceType;
+                    transitGatewayRouteTableId;
+                    state;
+                    transitGatewayRouteTableAnnouncementId
+                  }
     let to_value x =
       structure_to_value
         [("transitGatewayAttachmentId",
@@ -403,9 +1385,15 @@ module TransitGatewayPropagation =
         ("transitGatewayRouteTableId",
           (Option.map x.transitGatewayRouteTableId ~f:String_.to_value));
         ("state",
-          (Option.map x.state ~f:TransitGatewayPropagationState.to_value))]
+          (Option.map x.state ~f:TransitGatewayPropagationState.to_value));
+        ("transitGatewayRouteTableAnnouncementId",
+          (Option.map x.transitGatewayRouteTableAnnouncementId
+             ~f:TransitGatewayRouteTableAnnouncementId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let transitGatewayRouteTableAnnouncementId =
+        (Option.map ~f:TransitGatewayRouteTableAnnouncementId.of_xml)
+          (Xml.child xml_arg0 "transitGatewayRouteTableAnnouncementId") in
       let state =
         (Option.map ~f:TransitGatewayPropagationState.of_xml)
           (Xml.child xml_arg0 "state") in
@@ -420,29 +1408,140 @@ module TransitGatewayPropagation =
       let transitGatewayAttachmentId =
         (Option.map ~f:TransitGatewayAttachmentId.of_xml)
           (Xml.child xml_arg0 "transitGatewayAttachmentId") in
-      make ?state ?transitGatewayRouteTableId ?resourceType ?resourceId
+      make ?transitGatewayRouteTableAnnouncementId ?state
+        ?transitGatewayRouteTableId ?resourceType ?resourceId
         ?transitGatewayAttachmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let transitGatewayRouteTableAnnouncementId =
+        field_map json__ "TransitGatewayRouteTableAnnouncementId"
+          TransitGatewayRouteTableAnnouncementId.of_json in
       let state =
-        field_map json "State" TransitGatewayPropagationState.of_json in
+        field_map json__ "State" TransitGatewayPropagationState.of_json in
       let transitGatewayRouteTableId =
-        field_map json "TransitGatewayRouteTableId" String_.of_json in
+        field_map json__ "TransitGatewayRouteTableId" String_.of_json in
       let resourceType =
-        field_map json "ResourceType"
+        field_map json__ "ResourceType"
           TransitGatewayAttachmentResourceType.of_json in
-      let resourceId = field_map json "ResourceId" String_.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
       let transitGatewayAttachmentId =
-        field_map json "TransitGatewayAttachmentId"
+        field_map json__ "TransitGatewayAttachmentId"
           TransitGatewayAttachmentId.of_json in
-      make ?state ?transitGatewayRouteTableId ?resourceType ?resourceId
+      make ?transitGatewayRouteTableAnnouncementId ?state
+        ?transitGatewayRouteTableId ?resourceType ?resourceId
         ?transitGatewayAttachmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes route propagation."]
+module RegisteredInstanceList =
+  struct
+    type nonrec t = RegisteredInstance.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RegisteredInstance.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RegisteredInstance.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RegisteredInstanceList"
+        ~of_json:RegisteredInstance.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InstanceIdUpdateStringList =
+  struct
+    type nonrec t = InstanceId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstanceId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstanceId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstanceIdUpdateStringList"
+        ~of_json:InstanceId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SecretArn =
+  struct
+    type nonrec t = string
+    let context_ = "SecretArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^(?=.{20,2048}$)arn:aws[a-z-]*:secretsmanager:[a-z0-9-]+:\\d{12}:secret:[a-zA-Z0-9/_+=.@-]+");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SecretArn" j
+    let to_json = simple_to_json to_value
+  end
+module ImageBlockPublicAccessEnabledState =
+  struct
+    type nonrec t =
+      | Block_new_sharing 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Block_new_sharing -> "block-new-sharing"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "block-new-sharing" -> Block_new_sharing
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ImageBlockPublicAccessEnabledState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ImageBlockPublicAccessEnabledState" j)
+    let to_json = simple_to_json to_value
+  end
 module EnableFastSnapshotRestoreErrorSet =
   struct
     type nonrec t = EnableFastSnapshotRestoreErrorItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnableFastSnapshotRestoreErrorItem.to_value)) |>
         (fun x -> `List x)
@@ -470,6 +1569,9 @@ module EnableFastSnapshotRestoreSuccessSet =
   struct
     type nonrec t = EnableFastSnapshotRestoreSuccessItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnableFastSnapshotRestoreSuccessItem.to_value)) |>
         (fun x -> `List x)
@@ -493,10 +1595,41 @@ module EnableFastSnapshotRestoreSuccessSet =
         ~of_json:EnableFastSnapshotRestoreSuccessItem.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AvailabilityZoneIdStringList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AvailabilityZoneIdStringList"
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AvailabilityZoneStringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -524,13 +1657,13 @@ module FastLaunchLaunchTemplateSpecificationRequest =
       {
       launchTemplateId: LaunchTemplateId.t option
         [@ocaml.doc
-          "The ID of the launch template to use for faster launching for a Windows AMI."];
+          "Specify the ID of the launch template that the AMI should use for Windows fast launch."];
       launchTemplateName: String_.t option
         [@ocaml.doc
-          "The name of the launch template to use for faster launching for a Windows AMI."];
+          "Specify the name of the launch template that the AMI should use for Windows fast launch."];
       version: String_.t
         [@ocaml.doc
-          "The version of the launch template to use for faster launching for a Windows AMI."]}
+          "Specify the version of the launch template that the AMI should use for Windows fast launch."]}
     let context_ = "FastLaunchLaunchTemplateSpecificationRequest"
     let make ?launchTemplateId =
       fun ?launchTemplateName ->
@@ -555,23 +1688,23 @@ module FastLaunchLaunchTemplateSpecificationRequest =
           (Xml.child xml_arg0 "LaunchTemplateId") in
       make ~version ?launchTemplateName ?launchTemplateId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map_exn json "Version" String_.of_json in
+    let of_json json__ =
+      let version = field_map_exn json__ "Version" String_.of_json in
       let launchTemplateName =
-        field_map json "LaunchTemplateName" String_.of_json in
+        field_map json__ "LaunchTemplateName" String_.of_json in
       let launchTemplateId =
-        field_map json "LaunchTemplateId" LaunchTemplateId.of_json in
+        field_map json__ "LaunchTemplateId" LaunchTemplateId.of_json in
       make ~version ?launchTemplateName ?launchTemplateId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Request to create a launch template for a fast-launch enabled Windows AMI. Note - You can specify either the LaunchTemplateName or the LaunchTemplateId, but not both."]
+       "Request to create a launch template for a Windows fast launch enabled AMI. Note - You can specify either the LaunchTemplateName or the LaunchTemplateId, but not both."]
 module FastLaunchSnapshotConfigurationRequest =
   struct
     type nonrec t =
       {
       targetResourceCount: Integer.t option
         [@ocaml.doc
-          "The number of pre-provisioned snapshots to keep on hand for a fast-launch enabled Windows AMI."]}
+          "The number of pre-provisioned snapshots to keep on hand for a Windows fast launch enabled AMI."]}
     let make ?targetResourceCount = fun () -> { targetResourceCount }
     let to_value x =
       structure_to_value
@@ -584,13 +1717,41 @@ module FastLaunchSnapshotConfigurationRequest =
           (Xml.child xml_arg0 "TargetResourceCount") in
       make ?targetResourceCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetResourceCount =
-        field_map json "TargetResourceCount" Integer.of_json in
+        field_map json__ "TargetResourceCount" Integer.of_json in
       make ?targetResourceCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configuration settings for creating and managing pre-provisioned snapshots for a fast-launch enabled Windows AMI."]
+       "Configuration settings for creating and managing pre-provisioned snapshots for a Windows fast launch enabled AMI."]
+module AllowedImagesSettingsEnabledState =
+  struct
+    type nonrec t =
+      | Enabled 
+      | Audit_mode 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Enabled -> "enabled"
+      | Audit_mode -> "audit-mode"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "enabled" -> Enabled
+      | "audit-mode" -> Audit_mode
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AllowedImagesSettingsEnabledState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AllowedImagesSettingsEnabledState" j)
+    let to_json = simple_to_json to_value
+  end
 module VpcCidrAssociationId =
   struct
     type nonrec t = string
@@ -664,24 +1825,67 @@ module TransitGatewayAssociation =
       make ?state ?resourceType ?resourceId ?transitGatewayAttachmentId
         ?transitGatewayRouteTableId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let state =
-        field_map json "State" TransitGatewayAssociationState.of_json in
+        field_map json__ "State" TransitGatewayAssociationState.of_json in
       let resourceType =
-        field_map json "ResourceType"
+        field_map json__ "ResourceType"
           TransitGatewayAttachmentResourceType.of_json in
-      let resourceId = field_map json "ResourceId" String_.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
       let transitGatewayAttachmentId =
-        field_map json "TransitGatewayAttachmentId"
+        field_map json__ "TransitGatewayAttachmentId"
           TransitGatewayAttachmentId.of_json in
       let transitGatewayRouteTableId =
-        field_map json "TransitGatewayRouteTableId"
+        field_map json__ "TransitGatewayRouteTableId"
           TransitGatewayRouteTableId.of_json in
       make ?state ?resourceType ?resourceId ?transitGatewayAttachmentId
         ?transitGatewayRouteTableId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes an association between a resource attachment and a transit gateway route table."]
+module DisassociateSecurityGroupVpcSecurityGroupId =
+  struct
+    type nonrec t = string
+    let context_ = "DisassociateSecurityGroupVpcSecurityGroupId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"DisassociateSecurityGroupVpcSecurityGroupId" j
+    let to_json = simple_to_json to_value
+  end
+module EipAssociationIdList =
+  struct
+    type nonrec t = ElasticIpAssociationId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ElasticIpAssociationId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ElasticIpAssociationId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EipAssociationIdList"
+        ~of_json:ElasticIpAssociationId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module InstanceEventWindowDisassociationRequest =
   struct
     type nonrec t =
@@ -718,45 +1922,70 @@ module InstanceEventWindowDisassociationRequest =
           (Xml.child xml_arg0 "InstanceId") in
       make ?dedicatedHostIds ?instanceTags ?instanceIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dedicatedHostIds =
-        field_map json "DedicatedHostIds" DedicatedHostIdList.of_json in
-      let instanceTags = field_map json "InstanceTags" TagList.of_json in
-      let instanceIds = field_map json "InstanceIds" InstanceIdList.of_json in
+        field_map json__ "DedicatedHostIds" DedicatedHostIdList.of_json in
+      let instanceTags = field_map json__ "InstanceTags" TagList.of_json in
+      let instanceIds = field_map json__ "InstanceIds" InstanceIdList.of_json in
       make ?dedicatedHostIds ?instanceTags ?instanceIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The targets to disassociate from the specified event window."]
-module ClientVpnAssociationId =
+module RoleId =
   struct
     type nonrec t = string
-    let context_ = "ClientVpnAssociationId"
+    let context_ = "RoleId"
     let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ClientVpnAssociationId" j
+    let of_json j = string_of_json ~kind:"RoleId" j
     let to_json = simple_to_json to_value
   end
-module ElasticIpAssociationId =
+module EipAllocationPublicIp =
   struct
     type nonrec t = string
-    let context_ = "ElasticIpAssociationId"
+    let context_ = "EipAllocationPublicIp"
     let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ElasticIpAssociationId" j
+    let of_json j = string_of_json ~kind:"EipAllocationPublicIp" j
+    let to_json = simple_to_json to_value
+  end
+module ImageBlockPublicAccessDisabledState =
+  struct
+    type nonrec t =
+      | Unblocked 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Unblocked -> "unblocked" | Non_static_id s -> s
+    let of_string =
+      function | "unblocked" -> Unblocked | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration ImageBlockPublicAccessDisabledState" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"ImageBlockPublicAccessDisabledState" j)
     let to_json = simple_to_json to_value
   end
 module DisableFastSnapshotRestoreErrorSet =
   struct
     type nonrec t = DisableFastSnapshotRestoreErrorItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DisableFastSnapshotRestoreErrorItem.to_value)) |>
         (fun x -> `List x)
@@ -784,6 +2013,9 @@ module DisableFastSnapshotRestoreSuccessSet =
   struct
     type nonrec t = DisableFastSnapshotRestoreSuccessItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DisableFastSnapshotRestoreSuccessItem.to_value)) |>
         (fun x -> `List x)
@@ -807,10 +2039,58 @@ module DisableFastSnapshotRestoreSuccessSet =
         ~of_json:DisableFastSnapshotRestoreSuccessItem.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AllowedImagesSettingsDisabledState =
+  struct
+    type nonrec t =
+      | Disabled 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | Disabled -> "disabled" | Non_static_id s -> s
+    let of_string = function | "disabled" -> Disabled | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AllowedImagesSettingsDisabledState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AllowedImagesSettingsDisabledState" j)
+    let to_json = simple_to_json to_value
+  end
+module InstanceIdForResolver =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceIdForResolver"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceIdForResolver" j
+    let to_json = simple_to_json to_value
+  end
+module VolumeIdWithResolver =
+  struct
+    type nonrec t = string
+    let context_ = "VolumeIdWithResolver"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VolumeIdWithResolver" j
+    let to_json = simple_to_json to_value
+  end
 module VpnGatewayList =
   struct
     type nonrec t = VpnGateway.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpnGateway.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -835,6 +2115,9 @@ module VpnGatewayIdStringList =
   struct
     type nonrec t = VpnGatewayId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpnGatewayId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -860,6 +2143,9 @@ module VpnConnectionList =
   struct
     type nonrec t = VpnConnection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpnConnection.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -884,6 +2170,9 @@ module VpnConnectionIdStringList =
   struct
     type nonrec t = VpnConnectionId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpnConnectionId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -905,10 +2194,69 @@ module VpnConnectionIdStringList =
         ~of_json:VpnConnectionId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module VpnConcentratorList =
+  struct
+    type nonrec t = VpnConcentrator.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VpnConcentrator.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VpnConcentrator.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VpnConcentratorList"
+        ~of_json:VpnConcentrator.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VpnConcentratorIdStringList =
+  struct
+    type nonrec t = VpnConcentratorId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VpnConcentratorId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VpnConcentratorId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VpnConcentratorIdStringList"
+        ~of_json:VpnConcentratorId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module VpcList =
   struct
     type nonrec t = Vpc.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Vpc.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -950,6 +2298,9 @@ module VpcIdStringList =
   struct
     type nonrec t = VpcId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpcId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -974,6 +2325,9 @@ module VpcPeeringConnectionList =
   struct
     type nonrec t = VpcPeeringConnection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpcPeeringConnection.to_value)) |>
         (fun x -> `List x)
@@ -1020,6 +2374,9 @@ module VpcPeeringConnectionIdList =
   struct
     type nonrec t = VpcPeeringConnectionId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpcPeeringConnectionId.to_value)) |>
         (fun x -> `List x)
@@ -1046,6 +2403,9 @@ module VpcEndpointSet =
   struct
     type nonrec t = VpcEndpoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpcEndpoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1070,6 +2430,9 @@ module ServiceDetailSet =
   struct
     type nonrec t = ServiceDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1094,6 +2457,9 @@ module AllowedPrincipalSet =
   struct
     type nonrec t = AllowedPrincipal.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AllowedPrincipal.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1119,6 +2485,9 @@ module ServiceConfigurationSet =
   struct
     type nonrec t = ServiceConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -1145,6 +2514,9 @@ module VpcEndpointServiceIdList =
   struct
     type nonrec t = VpcEndpointServiceId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpcEndpointServiceId.to_value)) |>
         (fun x -> `List x)
@@ -1171,6 +2543,9 @@ module VpcEndpointConnectionSet =
   struct
     type nonrec t = VpcEndpointConnection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpcEndpointConnection.to_value)) |>
         (fun x -> `List x)
@@ -1197,6 +2572,9 @@ module ConnectionNotificationSet =
   struct
     type nonrec t = ConnectionNotification.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectionNotification.to_value)) |>
         (fun x -> `List x)
@@ -1219,10 +2597,138 @@ module ConnectionNotificationSet =
         ~of_json:ConnectionNotification.of_json j
     let to_json v = composed_to_json to_value v
   end
+module VpcEndpointAssociationSet =
+  struct
+    type nonrec t = VpcEndpointAssociation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VpcEndpointAssociation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VpcEndpointAssociation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VpcEndpointAssociationSet"
+        ~of_json:VpcEndpointAssociation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxResults__lc1 =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResults__lc1" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module VpcEncryptionControlList =
+  struct
+    type nonrec t = VpcEncryptionControl.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VpcEncryptionControl.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VpcEncryptionControl.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VpcEncryptionControlList"
+        ~of_json:VpcEncryptionControl.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeVpcEncryptionControlsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeVpcEncryptionControlsMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module VpcEncryptionControlIdList =
+  struct
+    type nonrec t = VpcEncryptionControlId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VpcEncryptionControlId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VpcEncryptionControlId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VpcEncryptionControlIdList"
+        ~of_json:VpcEncryptionControlId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module VpcClassicLinkList =
   struct
     type nonrec t = VpcClassicLink.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpcClassicLink.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1248,6 +2754,9 @@ module VpcClassicLinkIdList =
   struct
     type nonrec t = VpcId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpcId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1272,6 +2781,9 @@ module ClassicLinkDnsSupportList =
   struct
     type nonrec t = ClassicLinkDnsSupport.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClassicLinkDnsSupport.to_value)) |>
         (fun x -> `List x)
@@ -1333,22 +2845,105 @@ module DescribeVpcClassicLinkDnsSupportMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module VpcBlockPublicAccessExclusionList =
+  struct
+    type nonrec t = VpcBlockPublicAccessExclusion.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VpcBlockPublicAccessExclusion.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VpcBlockPublicAccessExclusion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VpcBlockPublicAccessExclusionList"
+        ~of_json:VpcBlockPublicAccessExclusion.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeVpcBlockPublicAccessExclusionsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeVpcBlockPublicAccessExclusionsMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module VpcBlockPublicAccessExclusionIdList =
+  struct
+    type nonrec t = VpcBlockPublicAccessExclusionId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VpcBlockPublicAccessExclusionId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VpcBlockPublicAccessExclusionId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VpcBlockPublicAccessExclusionIdList"
+        ~of_json:VpcBlockPublicAccessExclusionId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module VpcAttributeName =
   struct
     type nonrec t =
       | EnableDnsSupport 
       | EnableDnsHostnames 
+      | EnableNetworkAddressUsageMetrics 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | EnableDnsSupport -> "enableDnsSupport"
       | EnableDnsHostnames -> "enableDnsHostnames"
+      | EnableNetworkAddressUsageMetrics ->
+          "enableNetworkAddressUsageMetrics"
       | Non_static_id s -> s
     let of_string =
       function
       | "enableDnsSupport" -> EnableDnsSupport
       | "enableDnsHostnames" -> EnableDnsHostnames
+      | "enableNetworkAddressUsageMetrics" ->
+          EnableNetworkAddressUsageMetrics
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1362,6 +2957,9 @@ module VolumeList =
   struct
     type nonrec t = Volume.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Volume.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1381,34 +2979,13 @@ module VolumeList =
     let of_json j = list_of_json ~kind:"VolumeList" ~of_json:Volume.of_json j
     let to_json v = composed_to_json to_value v
   end
-module VolumeIdStringList =
-  struct
-    type nonrec t = VolumeId.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:VolumeId.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:VolumeId.of_xml)
-    let of_json j =
-      list_of_json ~kind:"VolumeIdStringList" ~of_json:VolumeId.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module VolumeModificationList =
   struct
     type nonrec t = VolumeModification.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VolumeModification.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1434,6 +3011,9 @@ module VolumeStatusList =
   struct
     type nonrec t = VolumeStatusItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VolumeStatusItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1481,10 +3061,376 @@ module VolumeAttributeName =
     let of_json j = of_string (string_of_json ~kind:"VolumeAttributeName" j)
     let to_json = simple_to_json to_value
   end
+module VerifiedAccessTrustProviderList =
+  struct
+    type nonrec t = VerifiedAccessTrustProvider.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VerifiedAccessTrustProvider.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VerifiedAccessTrustProvider.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VerifiedAccessTrustProviderList"
+        ~of_json:VerifiedAccessTrustProvider.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeVerifiedAccessTrustProvidersMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:200) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeVerifiedAccessTrustProvidersMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module VerifiedAccessTrustProviderIdList =
+  struct
+    type nonrec t = VerifiedAccessTrustProviderId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VerifiedAccessTrustProviderId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VerifiedAccessTrustProviderId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VerifiedAccessTrustProviderIdList"
+        ~of_json:VerifiedAccessTrustProviderId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VerifiedAccessInstanceList =
+  struct
+    type nonrec t = VerifiedAccessInstance.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VerifiedAccessInstance.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VerifiedAccessInstance.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VerifiedAccessInstanceList"
+        ~of_json:VerifiedAccessInstance.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeVerifiedAccessInstancesMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:200) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeVerifiedAccessInstancesMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module VerifiedAccessInstanceIdList =
+  struct
+    type nonrec t = VerifiedAccessInstanceId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VerifiedAccessInstanceId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VerifiedAccessInstanceId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VerifiedAccessInstanceIdList"
+        ~of_json:VerifiedAccessInstanceId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VerifiedAccessInstanceLoggingConfigurationList =
+  struct
+    type nonrec t = VerifiedAccessInstanceLoggingConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map ~f:VerifiedAccessInstanceLoggingConfiguration.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:VerifiedAccessInstanceLoggingConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VerifiedAccessInstanceLoggingConfigurationList"
+        ~of_json:VerifiedAccessInstanceLoggingConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeVerifiedAccessInstanceLoggingConfigurationsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeVerifiedAccessInstanceLoggingConfigurationsMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module VerifiedAccessGroupList =
+  struct
+    type nonrec t = VerifiedAccessGroup.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VerifiedAccessGroup.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VerifiedAccessGroup.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VerifiedAccessGroupList"
+        ~of_json:VerifiedAccessGroup.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeVerifiedAccessGroupMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeVerifiedAccessGroupMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module VerifiedAccessGroupIdList =
+  struct
+    type nonrec t = VerifiedAccessGroupId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VerifiedAccessGroupId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VerifiedAccessGroupId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VerifiedAccessGroupIdList"
+        ~of_json:VerifiedAccessGroupId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VerifiedAccessEndpointList =
+  struct
+    type nonrec t = VerifiedAccessEndpoint.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VerifiedAccessEndpoint.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VerifiedAccessEndpoint.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VerifiedAccessEndpointList"
+        ~of_json:VerifiedAccessEndpoint.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeVerifiedAccessEndpointsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeVerifiedAccessEndpointsMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module VerifiedAccessEndpointIdList =
+  struct
+    type nonrec t = VerifiedAccessEndpointId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VerifiedAccessEndpointId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VerifiedAccessEndpointId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VerifiedAccessEndpointIdList"
+        ~of_json:VerifiedAccessEndpointId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TrunkInterfaceAssociationList =
   struct
     type nonrec t = TrunkInterfaceAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrunkInterfaceAssociation.to_value)) |>
         (fun x -> `List x)
@@ -1531,6 +3477,9 @@ module TrunkInterfaceAssociationIdList =
   struct
     type nonrec t = TrunkInterfaceAssociationId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrunkInterfaceAssociationId.to_value)) |>
         (fun x -> `List x)
@@ -1557,6 +3506,9 @@ module TransitGatewayList =
   struct
     type nonrec t = TransitGateway.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransitGateway.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1582,6 +3534,9 @@ module TransitGatewayIdStringList =
   struct
     type nonrec t = TransitGatewayId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransitGatewayId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1607,6 +3562,9 @@ module TransitGatewayVpcAttachmentList =
   struct
     type nonrec t = TransitGatewayVpcAttachment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransitGatewayVpcAttachment.to_value)) |>
         (fun x -> `List x)
@@ -1629,36 +3587,13 @@ module TransitGatewayVpcAttachmentList =
         ~of_json:TransitGatewayVpcAttachment.of_json j
     let to_json v = composed_to_json to_value v
   end
-module TransitGatewayAttachmentIdStringList =
-  struct
-    type nonrec t = TransitGatewayAttachmentId.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:TransitGatewayAttachmentId.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:TransitGatewayAttachmentId.of_xml)
-    let of_json j =
-      list_of_json ~kind:"TransitGatewayAttachmentIdStringList"
-        ~of_json:TransitGatewayAttachmentId.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module TransitGatewayRouteTableList =
   struct
     type nonrec t = TransitGatewayRouteTable.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransitGatewayRouteTable.to_value)) |>
         (fun x -> `List x)
@@ -1685,6 +3620,9 @@ module TransitGatewayRouteTableIdStringList =
   struct
     type nonrec t = TransitGatewayRouteTableId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransitGatewayRouteTableId.to_value)) |>
         (fun x -> `List x)
@@ -1707,10 +3645,131 @@ module TransitGatewayRouteTableIdStringList =
         ~of_json:TransitGatewayRouteTableId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module TransitGatewayRouteTableAnnouncementList =
+  struct
+    type nonrec t = TransitGatewayRouteTableAnnouncement.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TransitGatewayRouteTableAnnouncement.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:TransitGatewayRouteTableAnnouncement.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TransitGatewayRouteTableAnnouncementList"
+        ~of_json:TransitGatewayRouteTableAnnouncement.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TransitGatewayRouteTableAnnouncementIdStringList =
+  struct
+    type nonrec t = TransitGatewayRouteTableAnnouncementId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TransitGatewayRouteTableAnnouncementId.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:TransitGatewayRouteTableAnnouncementId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TransitGatewayRouteTableAnnouncementIdStringList"
+        ~of_json:TransitGatewayRouteTableAnnouncementId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TransitGatewayPolicyTableList =
+  struct
+    type nonrec t = TransitGatewayPolicyTable.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TransitGatewayPolicyTable.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TransitGatewayPolicyTable.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TransitGatewayPolicyTableList"
+        ~of_json:TransitGatewayPolicyTable.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TransitGatewayPolicyTableIdStringList =
+  struct
+    type nonrec t = TransitGatewayPolicyTableId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TransitGatewayPolicyTableId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TransitGatewayPolicyTableId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TransitGatewayPolicyTableIdStringList"
+        ~of_json:TransitGatewayPolicyTableId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TransitGatewayPeeringAttachmentList =
   struct
     type nonrec t = TransitGatewayPeeringAttachment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransitGatewayPeeringAttachment.to_value)) |>
         (fun x -> `List x)
@@ -1737,6 +3796,9 @@ module TransitGatewayMulticastDomainList =
   struct
     type nonrec t = TransitGatewayMulticastDomain.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransitGatewayMulticastDomain.to_value)) |>
         (fun x -> `List x)
@@ -1763,6 +3825,9 @@ module TransitGatewayMulticastDomainIdStringList =
   struct
     type nonrec t = TransitGatewayMulticastDomainId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransitGatewayMulticastDomainId.to_value)) |>
         (fun x -> `List x)
@@ -1785,10 +3850,71 @@ module TransitGatewayMulticastDomainIdStringList =
         ~of_json:TransitGatewayMulticastDomainId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module TransitGatewayMeteringPolicyList =
+  struct
+    type nonrec t = TransitGatewayMeteringPolicy.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TransitGatewayMeteringPolicy.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TransitGatewayMeteringPolicy.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TransitGatewayMeteringPolicyList"
+        ~of_json:TransitGatewayMeteringPolicy.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TransitGatewayMeteringPolicyIdStringList =
+  struct
+    type nonrec t = TransitGatewayMeteringPolicyId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TransitGatewayMeteringPolicyId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TransitGatewayMeteringPolicyId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TransitGatewayMeteringPolicyIdStringList"
+        ~of_json:TransitGatewayMeteringPolicyId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TransitGatewayConnectList =
   struct
     type nonrec t = TransitGatewayConnect.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransitGatewayConnect.to_value)) |>
         (fun x -> `List x)
@@ -1815,6 +3941,9 @@ module TransitGatewayConnectPeerList =
   struct
     type nonrec t = TransitGatewayConnectPeer.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransitGatewayConnectPeer.to_value)) |>
         (fun x -> `List x)
@@ -1841,6 +3970,9 @@ module TransitGatewayConnectPeerIdStringList =
   struct
     type nonrec t = TransitGatewayConnectPeerId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransitGatewayConnectPeerId.to_value)) |>
         (fun x -> `List x)
@@ -1867,6 +3999,9 @@ module TransitGatewayAttachmentList =
   struct
     type nonrec t = TransitGatewayAttachment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransitGatewayAttachment.to_value)) |>
         (fun x -> `List x)
@@ -1893,6 +4028,9 @@ module TrafficMirrorTargetSet =
   struct
     type nonrec t = TrafficMirrorTarget.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrafficMirrorTarget.to_value)) |>
         (fun x -> `List x)
@@ -1919,6 +4057,9 @@ module TrafficMirrorTargetIdList =
   struct
     type nonrec t = TrafficMirrorTargetId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrafficMirrorTargetId.to_value)) |>
         (fun x -> `List x)
@@ -1964,6 +4105,9 @@ module TrafficMirrorSessionSet =
   struct
     type nonrec t = TrafficMirrorSession.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrafficMirrorSession.to_value)) |>
         (fun x -> `List x)
@@ -1990,6 +4134,9 @@ module TrafficMirrorSessionIdList =
   struct
     type nonrec t = TrafficMirrorSessionId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrafficMirrorSessionId.to_value)) |>
         (fun x -> `List x)
@@ -2016,6 +4163,9 @@ module TrafficMirrorFilterSet =
   struct
     type nonrec t = TrafficMirrorFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrafficMirrorFilter.to_value)) |>
         (fun x -> `List x)
@@ -2042,6 +4192,9 @@ module TrafficMirrorFilterIdList =
   struct
     type nonrec t = TrafficMirrorFilterId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrafficMirrorFilterId.to_value)) |>
         (fun x -> `List x)
@@ -2064,10 +4217,72 @@ module TrafficMirrorFilterIdList =
         ~of_json:TrafficMirrorFilterId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module TrafficMirrorFilterRuleSet =
+  struct
+    type nonrec t = TrafficMirrorFilterRule.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TrafficMirrorFilterRule.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TrafficMirrorFilterRule.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TrafficMirrorFilterRuleSet"
+        ~of_json:TrafficMirrorFilterRule.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TrafficMirrorFilterRuleIdList =
+  struct
+    type nonrec t = TrafficMirrorFilterRuleIdWithResolver.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TrafficMirrorFilterRuleIdWithResolver.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:TrafficMirrorFilterRuleIdWithResolver.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TrafficMirrorFilterRuleIdList"
+        ~of_json:TrafficMirrorFilterRuleIdWithResolver.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TagDescriptionList =
   struct
     type nonrec t = TagDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagDescription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2093,6 +4308,9 @@ module SubnetList =
   struct
     type nonrec t = Subnet.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Subnet.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2135,6 +4353,9 @@ module SubnetIdStringList =
   struct
     type nonrec t = SubnetId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2159,6 +4380,9 @@ module StoreImageTaskResultSet =
   struct
     type nonrec t = StoreImageTaskResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StoreImageTaskResult.to_value)) |>
         (fun x -> `List x)
@@ -2205,6 +4429,9 @@ module ImageIdList =
   struct
     type nonrec t = ImageId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2229,6 +4456,9 @@ module StaleSecurityGroupSet =
   struct
     type nonrec t = StaleSecurityGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StaleSecurityGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2293,6 +4523,9 @@ module SpotPriceHistoryList =
   struct
     type nonrec t = SpotPrice.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SpotPrice.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2317,6 +4550,9 @@ module InstanceTypeList =
   struct
     type nonrec t = InstanceType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2341,6 +4577,9 @@ module ProductDescriptionList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2365,6 +4604,9 @@ module SpotInstanceRequestIdList =
   struct
     type nonrec t = SpotInstanceRequestId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SpotInstanceRequestId.to_value)) |>
         (fun x -> `List x)
@@ -2391,6 +4633,9 @@ module SpotFleetRequestConfigSet =
   struct
     type nonrec t = SpotFleetRequestConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SpotFleetRequestConfig.to_value)) |>
         (fun x -> `List x)
@@ -2417,6 +4662,9 @@ module SpotFleetRequestIdList =
   struct
     type nonrec t = SpotFleetRequestId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SpotFleetRequestId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2442,6 +4690,9 @@ module HistoryRecords =
   struct
     type nonrec t = HistoryRecord.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HistoryRecord.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2486,6 +4737,9 @@ module ActiveInstanceSet =
   struct
     type nonrec t = ActiveInstance.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ActiveInstance.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2570,12 +4824,12 @@ module SpotDatafeedSubscription =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?state ?prefix ?ownerId ?fault ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" DatafeedSubscriptionState.of_json in
-      let prefix = field_map json "Prefix" String_.of_json in
-      let ownerId = field_map json "OwnerId" String_.of_json in
-      let fault = field_map json "Fault" SpotInstanceStateFault.of_json in
-      let bucket = field_map json "Bucket" String_.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" DatafeedSubscriptionState.of_json in
+      let prefix = field_map json__ "Prefix" String_.of_json in
+      let ownerId = field_map json__ "OwnerId" String_.of_json in
+      let fault = field_map json__ "Fault" SpotInstanceStateFault.of_json in
+      let bucket = field_map json__ "Bucket" String_.of_json in
       make ?state ?prefix ?ownerId ?fault ?bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the data feed for a Spot Instance."]
@@ -2583,6 +4837,9 @@ module SnapshotList =
   struct
     type nonrec t = Snapshot.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Snapshot.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2607,6 +4864,9 @@ module OwnerStringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2631,6 +4891,9 @@ module RestorableByStringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2655,6 +4918,9 @@ module SnapshotTierStatusSet =
   struct
     type nonrec t = SnapshotTierStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SnapshotTierStatus.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2692,10 +4958,60 @@ module DescribeSnapshotTierStatusMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ServiceLinkVirtualInterfaceSet =
+  struct
+    type nonrec t = ServiceLinkVirtualInterface.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceLinkVirtualInterface.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceLinkVirtualInterface.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceLinkVirtualInterfaceSet"
+        ~of_json:ServiceLinkVirtualInterface.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServiceLinkMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ServiceLinkMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module SecurityGroupList =
   struct
     type nonrec t = SecurityGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2735,10 +5051,62 @@ module DescribeSecurityGroupsMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module SecurityGroupVpcAssociationList =
+  struct
+    type nonrec t = SecurityGroupVpcAssociation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecurityGroupVpcAssociation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecurityGroupVpcAssociation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecurityGroupVpcAssociationList"
+        ~of_json:SecurityGroupVpcAssociation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeSecurityGroupVpcAssociationsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeSecurityGroupVpcAssociationsMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module SecurityGroupRuleList =
   struct
     type nonrec t = SecurityGroupRule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2784,6 +5152,9 @@ module SecurityGroupReferences =
   struct
     type nonrec t = SecurityGroupReference.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupReference.to_value)) |>
         (fun x -> `List x)
@@ -2810,6 +5181,9 @@ module GroupIds =
   struct
     type nonrec t = SecurityGroupId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2830,10 +5204,241 @@ module GroupIds =
       list_of_json ~kind:"GroupIds" ~of_json:SecurityGroupId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SecondarySubnetList =
+  struct
+    type nonrec t = SecondarySubnet.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecondarySubnet.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecondarySubnet.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecondarySubnetList"
+        ~of_json:SecondarySubnet.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeSecondarySubnetsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeSecondarySubnetsMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SecondarySubnetIdList =
+  struct
+    type nonrec t = SecondarySubnetId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecondarySubnetId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecondarySubnetId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecondarySubnetIdList"
+        ~of_json:SecondarySubnetId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SecondaryNetworkList =
+  struct
+    type nonrec t = SecondaryNetwork.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecondaryNetwork.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecondaryNetwork.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecondaryNetworkList"
+        ~of_json:SecondaryNetwork.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeSecondaryNetworksMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeSecondaryNetworksMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SecondaryNetworkIdList =
+  struct
+    type nonrec t = SecondaryNetworkId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecondaryNetworkId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecondaryNetworkId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecondaryNetworkIdList"
+        ~of_json:SecondaryNetworkId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SecondaryInterfaceList =
+  struct
+    type nonrec t = SecondaryInterface.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecondaryInterface.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecondaryInterface.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecondaryInterfaceList"
+        ~of_json:SecondaryInterface.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeSecondaryInterfacesMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeSecondaryInterfacesMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SecondaryInterfaceIdList =
+  struct
+    type nonrec t = SecondaryInterfaceId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecondaryInterfaceId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecondaryInterfaceId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecondaryInterfaceIdList"
+        ~of_json:SecondaryInterfaceId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ScheduledInstanceSet =
   struct
     type nonrec t = ScheduledInstance.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScheduledInstance.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2859,6 +5464,9 @@ module ScheduledInstanceIdRequestSet =
   struct
     type nonrec t = ScheduledInstanceId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScheduledInstanceId.to_value)) |>
         (fun x -> `List x)
@@ -2905,9 +5513,9 @@ module SlotStartTimeRangeRequest =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "EarliestTime") in
       make ?latestTime ?earliestTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let latestTime = field_map json "LatestTime" DateTime.of_json in
-      let earliestTime = field_map json "EarliestTime" DateTime.of_json in
+    let of_json json__ =
+      let latestTime = field_map json__ "LatestTime" DateTime.of_json in
+      let earliestTime = field_map json__ "EarliestTime" DateTime.of_json in
       make ?latestTime ?earliestTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2916,6 +5524,9 @@ module ScheduledInstanceAvailabilitySet =
   struct
     type nonrec t = ScheduledInstanceAvailability.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScheduledInstanceAvailability.to_value)) |>
         (fun x -> `List x)
@@ -3015,14 +5626,14 @@ module ScheduledInstanceRecurrenceRequest =
       make ?occurrenceUnit ?occurrenceRelativeToEnd ?occurrenceDays ?interval
         ?frequency ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let occurrenceUnit = field_map json "OccurrenceUnit" String_.of_json in
+    let of_json json__ =
+      let occurrenceUnit = field_map json__ "OccurrenceUnit" String_.of_json in
       let occurrenceRelativeToEnd =
-        field_map json "OccurrenceRelativeToEnd" Boolean.of_json in
+        field_map json__ "OccurrenceRelativeToEnd" Boolean.of_json in
       let occurrenceDays =
-        field_map json "OccurrenceDays" OccurrenceDayRequestSet.of_json in
-      let interval = field_map json "Interval" Integer.of_json in
-      let frequency = field_map json "Frequency" String_.of_json in
+        field_map json__ "OccurrenceDays" OccurrenceDayRequestSet.of_json in
+      let interval = field_map json__ "Interval" Integer.of_json in
+      let frequency = field_map json__ "Frequency" String_.of_json in
       make ?occurrenceUnit ?occurrenceRelativeToEnd ?occurrenceDays ?interval
         ?frequency ()
     let to_json v = composed_to_json to_value v
@@ -3055,9 +5666,9 @@ module SlotDateTimeRangeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EarliestTime") in
       make ~latestTime ~earliestTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let latestTime = field_map_exn json "LatestTime" DateTime.of_json in
-      let earliestTime = field_map_exn json "EarliestTime" DateTime.of_json in
+    let of_json json__ =
+      let latestTime = field_map_exn json__ "LatestTime" DateTime.of_json in
+      let earliestTime = field_map_exn json__ "EarliestTime" DateTime.of_json in
       make ~latestTime ~earliestTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3066,6 +5677,9 @@ module RouteTableList =
   struct
     type nonrec t = RouteTable.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RouteTable.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3109,6 +5723,9 @@ module RouteTableIdStringList =
   struct
     type nonrec t = RouteTableId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RouteTableId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3130,10 +5747,182 @@ module RouteTableIdStringList =
         ~of_json:RouteTableId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module RouteServersList =
+  struct
+    type nonrec t = RouteServer.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RouteServer.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RouteServer.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RouteServersList" ~of_json:RouteServer.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RouteServerIdsList =
+  struct
+    type nonrec t = RouteServerId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RouteServerId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RouteServerId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RouteServerIdsList" ~of_json:RouteServerId.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module RouteServerPeersList =
+  struct
+    type nonrec t = RouteServerPeer.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RouteServerPeer.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RouteServerPeer.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RouteServerPeersList"
+        ~of_json:RouteServerPeer.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RouteServerPeerIdsList =
+  struct
+    type nonrec t = RouteServerPeerId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RouteServerPeerId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RouteServerPeerId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RouteServerPeerIdsList"
+        ~of_json:RouteServerPeerId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RouteServerEndpointsList =
+  struct
+    type nonrec t = RouteServerEndpoint.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RouteServerEndpoint.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RouteServerEndpoint.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RouteServerEndpointsList"
+        ~of_json:RouteServerEndpoint.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RouteServerEndpointIdsList =
+  struct
+    type nonrec t = RouteServerEndpointId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RouteServerEndpointId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RouteServerEndpointId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RouteServerEndpointIdsList"
+        ~of_json:RouteServerEndpointId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ReservedInstancesList =
   struct
     type nonrec t = ReservedInstances.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservedInstances.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3159,6 +5948,9 @@ module ReservedInstancesOfferingList =
   struct
     type nonrec t = ReservedInstancesOffering.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservedInstancesOffering.to_value)) |>
         (fun x -> `List x)
@@ -3185,6 +5977,9 @@ module ReservedInstancesOfferingIdStringList =
   struct
     type nonrec t = ReservedInstancesOfferingId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservedInstancesOfferingId.to_value)) |>
         (fun x -> `List x)
@@ -3211,6 +6006,9 @@ module ReservedInstancesModificationList =
   struct
     type nonrec t = ReservedInstancesModification.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservedInstancesModification.to_value)) |>
         (fun x -> `List x)
@@ -3237,6 +6035,9 @@ module ReservedInstancesModificationIdStringList =
   struct
     type nonrec t = ReservedInstancesModificationId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservedInstancesModificationId.to_value)) |>
         (fun x -> `List x)
@@ -3263,6 +6064,9 @@ module ReservedInstancesListingList =
   struct
     type nonrec t = ReservedInstancesListing.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservedInstancesListing.to_value)) |>
         (fun x -> `List x)
@@ -3302,6 +6106,9 @@ module ReplaceRootVolumeTasks =
   struct
     type nonrec t = ReplaceRootVolumeTask.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplaceRootVolumeTask.to_value)) |>
         (fun x -> `List x)
@@ -3348,6 +6155,9 @@ module ReplaceRootVolumeTaskIds =
   struct
     type nonrec t = ReplaceRootVolumeTaskId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplaceRootVolumeTaskId.to_value)) |>
         (fun x -> `List x)
@@ -3374,6 +6184,9 @@ module RegionList =
   struct
     type nonrec t = Region.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Region.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3397,6 +6210,9 @@ module RegionNameStringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3421,6 +6237,9 @@ module PublicIpv4PoolSet =
   struct
     type nonrec t = PublicIpv4Pool.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PublicIpv4Pool.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3464,6 +6283,9 @@ module PublicIpv4PoolIdStringList =
   struct
     type nonrec t = Ipv4PoolEc2Id.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Ipv4PoolEc2Id.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3489,6 +6311,9 @@ module PrincipalIdFormatList =
   struct
     type nonrec t = PrincipalIdFormat.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PrincipalIdFormat.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3534,6 +6359,9 @@ module ResourceList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3558,6 +6386,9 @@ module PrefixListSet =
   struct
     type nonrec t = PrefixList.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PrefixList.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3582,6 +6413,9 @@ module PrefixListResourceIdStringList =
   struct
     type nonrec t = PrefixListResourceId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PrefixListResourceId.to_value)) |>
         (fun x -> `List x)
@@ -3608,6 +6442,9 @@ module PlacementGroupList =
   struct
     type nonrec t = PlacementGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PlacementGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3633,6 +6470,9 @@ module PlacementGroupIdStringList =
   struct
     type nonrec t = PlacementGroupId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PlacementGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3658,6 +6498,9 @@ module PlacementGroupStringList =
   struct
     type nonrec t = PlacementGroupName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PlacementGroupName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3679,10 +6522,85 @@ module PlacementGroupStringList =
         ~of_json:PlacementGroupName.of_json j
     let to_json v = composed_to_json to_value v
   end
+module OutpostLagSet =
+  struct
+    type nonrec t = OutpostLag.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OutpostLag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OutpostLag.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OutpostLagSet" ~of_json:OutpostLag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OutpostLagIdSet =
+  struct
+    type nonrec t = OutpostLagId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OutpostLagId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OutpostLagId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OutpostLagIdSet" ~of_json:OutpostLagId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OutpostLagMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for OutpostLagMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module NetworkInterfaceList =
   struct
     type nonrec t = NetworkInterface.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInterface.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3728,6 +6646,9 @@ module NetworkInterfaceIdList =
   struct
     type nonrec t = NetworkInterfaceId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInterfaceId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3753,6 +6674,9 @@ module NetworkInterfacePermissionList =
   struct
     type nonrec t = NetworkInterfacePermission.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInterfacePermission.to_value)) |>
         (fun x -> `List x)
@@ -3799,6 +6723,9 @@ module NetworkInterfacePermissionIdList =
   struct
     type nonrec t = NetworkInterfacePermissionId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInterfacePermissionId.to_value)) |>
         (fun x -> `List x)
@@ -3828,6 +6755,7 @@ module NetworkInterfaceAttribute =
       | GroupSet 
       | SourceDestCheck 
       | Attachment 
+      | AssociatePublicIpAddress 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -3836,6 +6764,7 @@ module NetworkInterfaceAttribute =
       | GroupSet -> "groupSet"
       | SourceDestCheck -> "sourceDestCheck"
       | Attachment -> "attachment"
+      | AssociatePublicIpAddress -> "associatePublicIpAddress"
       | Non_static_id s -> s
     let of_string =
       function
@@ -3843,6 +6772,7 @@ module NetworkInterfaceAttribute =
       | "groupSet" -> GroupSet
       | "sourceDestCheck" -> SourceDestCheck
       | "attachment" -> Attachment
+      | "associatePublicIpAddress" -> AssociatePublicIpAddress
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3858,6 +6788,9 @@ module NetworkInsightsPathList =
   struct
     type nonrec t = NetworkInsightsPath.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInsightsPath.to_value)) |>
         (fun x -> `List x)
@@ -3880,10 +6813,32 @@ module NetworkInsightsPathList =
         ~of_json:NetworkInsightsPath.of_json j
     let to_json v = composed_to_json to_value v
   end
+module NetworkInsightsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NetworkInsightsMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module NetworkInsightsPathIdList =
   struct
     type nonrec t = NetworkInsightsPathId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInsightsPathId.to_value)) |>
         (fun x -> `List x)
@@ -3910,6 +6865,9 @@ module NetworkInsightsAnalysisList =
   struct
     type nonrec t = NetworkInsightsAnalysis.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInsightsAnalysis.to_value)) |>
         (fun x -> `List x)
@@ -3936,6 +6894,9 @@ module NetworkInsightsAnalysisIdList =
   struct
     type nonrec t = NetworkInsightsAnalysisId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInsightsAnalysisId.to_value)) |>
         (fun x -> `List x)
@@ -3962,6 +6923,9 @@ module NetworkInsightsAccessScopeList =
   struct
     type nonrec t = NetworkInsightsAccessScope.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInsightsAccessScope.to_value)) |>
         (fun x -> `List x)
@@ -3988,6 +6952,9 @@ module NetworkInsightsAccessScopeIdList =
   struct
     type nonrec t = NetworkInsightsAccessScopeId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInsightsAccessScopeId.to_value)) |>
         (fun x -> `List x)
@@ -4014,6 +6981,9 @@ module NetworkInsightsAccessScopeAnalysisList =
   struct
     type nonrec t = NetworkInsightsAccessScopeAnalysis.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInsightsAccessScopeAnalysis.to_value)) |>
         (fun x -> `List x)
@@ -4041,6 +7011,9 @@ module NetworkInsightsAccessScopeAnalysisIdList =
   struct
     type nonrec t = NetworkInsightsAccessScopeAnalysisId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInsightsAccessScopeAnalysisId.to_value)) |>
         (fun x -> `List x)
@@ -4068,6 +7041,9 @@ module NetworkAclList =
   struct
     type nonrec t = NetworkAcl.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkAcl.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4111,6 +7087,9 @@ module NetworkAclIdStringList =
   struct
     type nonrec t = NetworkAclId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkAclId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4136,6 +7115,9 @@ module NatGatewayList =
   struct
     type nonrec t = NatGateway.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NatGateway.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4179,6 +7161,9 @@ module NatGatewayIdStringList =
   struct
     type nonrec t = NatGatewayId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NatGatewayId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4204,6 +7189,9 @@ module MovingAddressStatusSet =
   struct
     type nonrec t = MovingAddressStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MovingAddressStatus.to_value)) |>
         (fun x -> `List x)
@@ -4249,6 +7237,9 @@ module ManagedPrefixListSet =
   struct
     type nonrec t = ManagedPrefixList.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ManagedPrefixList.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4270,10 +7261,185 @@ module ManagedPrefixListSet =
         ~of_json:ManagedPrefixList.of_json j
     let to_json v = composed_to_json to_value v
   end
+module MacModificationTaskList =
+  struct
+    type nonrec t = MacModificationTask.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MacModificationTask.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MacModificationTask.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MacModificationTaskList"
+        ~of_json:MacModificationTask.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeMacModificationTasksMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:500) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeMacModificationTasksMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MacModificationTaskIdList =
+  struct
+    type nonrec t = MacModificationTaskId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MacModificationTaskId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MacModificationTaskId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MacModificationTaskIdList"
+        ~of_json:MacModificationTaskId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MacHostList =
+  struct
+    type nonrec t = MacHost.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MacHost.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MacHost.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MacHostList" ~of_json:MacHost.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeMacHostsRequestMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:500) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeMacHostsRequestMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LockedSnapshotsInfoList =
+  struct
+    type nonrec t = LockedSnapshotsInfo.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LockedSnapshotsInfo.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LockedSnapshotsInfo.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LockedSnapshotsInfoList"
+        ~of_json:LockedSnapshotsInfo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeLockedSnapshotsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeLockedSnapshotsMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module LocalGatewaySet =
   struct
     type nonrec t = LocalGateway.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LocalGateway.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4298,6 +7464,9 @@ module LocalGatewayIdSet =
   struct
     type nonrec t = LocalGatewayId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LocalGatewayId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4341,6 +7510,9 @@ module LocalGatewayVirtualInterfaceSet =
   struct
     type nonrec t = LocalGatewayVirtualInterface.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LocalGatewayVirtualInterface.to_value)) |>
         (fun x -> `List x)
@@ -4367,6 +7539,9 @@ module LocalGatewayVirtualInterfaceGroupSet =
   struct
     type nonrec t = LocalGatewayVirtualInterfaceGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LocalGatewayVirtualInterfaceGroup.to_value)) |>
         (fun x -> `List x)
@@ -4394,6 +7569,9 @@ module LocalGatewayVirtualInterfaceGroupIdSet =
   struct
     type nonrec t = LocalGatewayVirtualInterfaceGroupId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LocalGatewayVirtualInterfaceGroupId.to_value)) |>
         (fun x -> `List x)
@@ -4421,6 +7599,9 @@ module LocalGatewayRouteTableSet =
   struct
     type nonrec t = LocalGatewayRouteTable.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LocalGatewayRouteTable.to_value)) |>
         (fun x -> `List x)
@@ -4447,6 +7628,9 @@ module LocalGatewayRouteTableIdSet =
   struct
     type nonrec t = LocalGatewayRoutetableId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LocalGatewayRoutetableId.to_value)) |>
         (fun x -> `List x)
@@ -4473,6 +7657,9 @@ module LocalGatewayRouteTableVpcAssociationSet =
   struct
     type nonrec t = LocalGatewayRouteTableVpcAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LocalGatewayRouteTableVpcAssociation.to_value)) |>
         (fun x -> `List x)
@@ -4500,6 +7687,9 @@ module LocalGatewayRouteTableVpcAssociationIdSet =
   struct
     type nonrec t = LocalGatewayRouteTableVpcAssociationId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LocalGatewayRouteTableVpcAssociationId.to_value))
         |> (fun x -> `List x)
@@ -4528,6 +7718,9 @@ module LocalGatewayRouteTableVirtualInterfaceGroupAssociationSet =
     type nonrec t =
       LocalGatewayRouteTableVirtualInterfaceGroupAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map
@@ -4560,6 +7753,9 @@ module LocalGatewayRouteTableVirtualInterfaceGroupAssociationIdSet =
     type nonrec t =
       LocalGatewayRouteTableVirtualInterfaceGroupAssociationId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map
@@ -4591,6 +7787,9 @@ module LaunchTemplateSet =
   struct
     type nonrec t = LaunchTemplate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LaunchTemplate.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4635,6 +7834,9 @@ module LaunchTemplateIdStringList =
   struct
     type nonrec t = LaunchTemplateId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LaunchTemplateId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4660,6 +7862,9 @@ module LaunchTemplateNameStringList =
   struct
     type nonrec t = LaunchTemplateName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LaunchTemplateName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4685,6 +7890,9 @@ module LaunchTemplateVersionSet =
   struct
     type nonrec t = LaunchTemplateVersion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LaunchTemplateVersion.to_value)) |>
         (fun x -> `List x)
@@ -4711,6 +7919,9 @@ module VersionStringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4735,6 +7946,9 @@ module KeyPairList =
   struct
     type nonrec t = KeyPairInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KeyPairInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4759,6 +7973,9 @@ module KeyNameStringList =
   struct
     type nonrec t = KeyPairName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KeyPairName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4783,6 +8000,9 @@ module KeyPairIdStringList =
   struct
     type nonrec t = KeyPairId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KeyPairId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4807,6 +8027,9 @@ module Ipv6PoolSet =
   struct
     type nonrec t = Ipv6Pool.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Ipv6Pool.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4831,6 +8054,9 @@ module Ipv6PoolIdList =
   struct
     type nonrec t = Ipv6PoolEc2Id.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Ipv6PoolEc2Id.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4855,6 +8081,9 @@ module IpamSet =
   struct
     type nonrec t = Ipam.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Ipam.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4878,6 +8107,9 @@ module IpamScopeSet =
   struct
     type nonrec t = IpamScope.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IpamScope.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4898,10 +8130,130 @@ module IpamScopeSet =
       list_of_json ~kind:"IpamScopeSet" ~of_json:IpamScope.of_json j
     let to_json v = composed_to_json to_value v
   end
+module IpamResourceDiscoveryAssociationSet =
+  struct
+    type nonrec t = IpamResourceDiscoveryAssociation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IpamResourceDiscoveryAssociation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:IpamResourceDiscoveryAssociation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IpamResourceDiscoveryAssociationSet"
+        ~of_json:IpamResourceDiscoveryAssociation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IpamResourceDiscoverySet =
+  struct
+    type nonrec t = IpamResourceDiscovery.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IpamResourceDiscovery.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IpamResourceDiscovery.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IpamResourceDiscoverySet"
+        ~of_json:IpamResourceDiscovery.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IpamPrefixListResolverSet =
+  struct
+    type nonrec t = IpamPrefixListResolver.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IpamPrefixListResolver.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IpamPrefixListResolver.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IpamPrefixListResolverSet"
+        ~of_json:IpamPrefixListResolver.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IpamPrefixListResolverTargetSet =
+  struct
+    type nonrec t = IpamPrefixListResolverTarget.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IpamPrefixListResolverTarget.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IpamPrefixListResolverTarget.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IpamPrefixListResolverTargetSet"
+        ~of_json:IpamPrefixListResolverTarget.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module IpamPoolSet =
   struct
     type nonrec t = IpamPool.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IpamPool.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4922,10 +8274,115 @@ module IpamPoolSet =
       list_of_json ~kind:"IpamPoolSet" ~of_json:IpamPool.of_json j
     let to_json v = composed_to_json to_value v
   end
+module IpamPolicySet =
+  struct
+    type nonrec t = IpamPolicy.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IpamPolicy.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IpamPolicy.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IpamPolicySet" ~of_json:IpamPolicy.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IpamExternalResourceVerificationTokenSet =
+  struct
+    type nonrec t = IpamExternalResourceVerificationToken.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IpamExternalResourceVerificationToken.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:IpamExternalResourceVerificationToken.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IpamExternalResourceVerificationTokenSet"
+        ~of_json:IpamExternalResourceVerificationToken.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ByoasnSet =
+  struct
+    type nonrec t = Byoasn.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Byoasn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Byoasn.of_xml)
+    let of_json j = list_of_json ~kind:"ByoasnSet" ~of_json:Byoasn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeIpamByoasnMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for DescribeIpamByoasnMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module InternetGatewayList =
   struct
     type nonrec t = InternetGateway.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InternetGateway.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4970,6 +8427,9 @@ module InternetGatewayIdList =
   struct
     type nonrec t = InternetGatewayId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InternetGatewayId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4995,6 +8455,9 @@ module ReservationList =
   struct
     type nonrec t = Reservation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Reservation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5019,6 +8482,9 @@ module InstanceTypeInfoList =
   struct
     type nonrec t = InstanceTypeInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceTypeInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5058,6 +8524,19 @@ module DITMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module IncludeUnsupportedInRegion =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module RequestInstanceTypeList =
   struct
     type nonrec t = InstanceType.t list
@@ -5067,6 +8546,9 @@ module RequestInstanceTypeList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5092,6 +8574,9 @@ module InstanceTypeOfferingsList =
   struct
     type nonrec t = InstanceTypeOffering.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceTypeOffering.to_value)) |>
         (fun x -> `List x)
@@ -5132,10 +8617,115 @@ module DITOMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module InstanceSet =
+  struct
+    type nonrec t = InstanceTopology.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstanceTopology.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstanceTopology.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstanceSet" ~of_json:InstanceTopology.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeInstanceTopologyGroupNameSet =
+  struct
+    type nonrec t = PlacementGroupName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PlacementGroupName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PlacementGroupName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DescribeInstanceTopologyGroupNameSet"
+        ~of_json:PlacementGroupName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeInstanceTopologyInstanceIdSet =
+  struct
+    type nonrec t = InstanceId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstanceId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstanceId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DescribeInstanceTopologyInstanceIdSet"
+        ~of_json:InstanceId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeInstanceTopologyMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeInstanceTopologyMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module InstanceStatusList =
   struct
     type nonrec t = InstanceStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceStatus.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5157,10 +8747,82 @@ module InstanceStatusList =
         j
     let to_json v = composed_to_json to_value v
   end
+module DescribeInstanceSqlHaStatesRequestMaxResultsInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeInstanceSqlHaStatesRequestMaxResultsInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module InstanceImageMetadataList =
+  struct
+    type nonrec t = InstanceImageMetadata.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstanceImageMetadata.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstanceImageMetadata.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstanceImageMetadataList"
+        ~of_json:InstanceImageMetadata.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeInstanceImageMetadataMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeInstanceImageMetadataMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module InstanceEventWindowSet =
   struct
     type nonrec t = InstanceEventWindow.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceEventWindow.to_value)) |>
         (fun x -> `List x)
@@ -5187,6 +8849,9 @@ module InstanceEventWindowIdSet =
   struct
     type nonrec t = InstanceEventWindowId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceEventWindowId.to_value)) |>
         (fun x -> `List x)
@@ -5231,6 +8896,9 @@ module InstanceCreditSpecificationList =
   struct
     type nonrec t = InstanceCreditSpecification.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceCreditSpecification.to_value)) |>
         (fun x -> `List x)
@@ -5273,10 +8941,61 @@ module DescribeInstanceCreditSpecificationsMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module InstanceConnectEndpointSet =
+  struct
+    type nonrec t = Ec2InstanceConnectEndpoint.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Ec2InstanceConnectEndpoint.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Ec2InstanceConnectEndpoint.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstanceConnectEndpointSet"
+        ~of_json:Ec2InstanceConnectEndpoint.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InstanceConnectEndpointMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for InstanceConnectEndpointMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ImportSnapshotTaskList =
   struct
     type nonrec t = ImportSnapshotTask.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImportSnapshotTask.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5302,6 +9021,9 @@ module ImportSnapshotTaskIdList =
   struct
     type nonrec t = ImportSnapshotTaskId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImportSnapshotTaskId.to_value)) |>
         (fun x -> `List x)
@@ -5328,6 +9050,9 @@ module ImportImageTaskList =
   struct
     type nonrec t = ImportImageTask.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImportImageTask.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5353,6 +9078,9 @@ module ImportTaskIdList =
   struct
     type nonrec t = ImportImageTaskId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImportImageTaskId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5378,6 +9106,9 @@ module ImageList =
   struct
     type nonrec t = Image.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Image.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5401,6 +9132,9 @@ module ExecutableByStringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5421,6 +9155,268 @@ module ExecutableByStringList =
       list_of_json ~kind:"ExecutableByStringList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ImageUsageReportList =
+  struct
+    type nonrec t = ImageUsageReport.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImageUsageReport.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImageUsageReport.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImageUsageReportList"
+        ~of_json:ImageUsageReport.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeImageUsageReportsImageIdStringList =
+  struct
+    type nonrec t = ImageId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImageId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImageId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DescribeImageUsageReportsImageIdStringList"
+        ~of_json:ImageId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeImageUsageReportsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeImageUsageReportsMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ImageUsageReportIdStringList =
+  struct
+    type nonrec t = ImageUsageReportId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImageUsageReportId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImageUsageReportId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImageUsageReportIdStringList"
+        ~of_json:ImageUsageReportId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ImageUsageReportEntryList =
+  struct
+    type nonrec t = ImageUsageReportEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImageUsageReportEntry.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImageUsageReportEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImageUsageReportEntryList"
+        ~of_json:ImageUsageReportEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeImageUsageReportEntriesMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeImageUsageReportEntriesMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ImageReferenceList =
+  struct
+    type nonrec t = ImageReference.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImageReference.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImageReference.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImageReferenceList" ~of_json:ImageReference.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeImageReferencesImageIdStringList =
+  struct
+    type nonrec t = ImageId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImageId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImageId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DescribeImageReferencesImageIdStringList"
+        ~of_json:ImageId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeImageReferencesMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:5); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeImageReferencesMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceTypeRequestList =
+  struct
+    type nonrec t = ResourceTypeRequest.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceTypeRequest.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceTypeRequest.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceTypeRequestList"
+        ~of_json:ResourceTypeRequest.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ImageAttributeName =
   struct
     type nonrec t =
@@ -5432,7 +9428,11 @@ module ImageAttributeName =
       | BlockDeviceMapping 
       | SriovNetSupport 
       | BootMode 
+      | TpmSupport 
+      | UefiData 
       | LastLaunchedTime 
+      | ImdsSupport 
+      | DeregistrationProtection 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -5445,7 +9445,11 @@ module ImageAttributeName =
       | BlockDeviceMapping -> "blockDeviceMapping"
       | SriovNetSupport -> "sriovNetSupport"
       | BootMode -> "bootMode"
+      | TpmSupport -> "tpmSupport"
+      | UefiData -> "uefiData"
       | LastLaunchedTime -> "lastLaunchedTime"
+      | ImdsSupport -> "imdsSupport"
+      | DeregistrationProtection -> "deregistrationProtection"
       | Non_static_id s -> s
     let of_string =
       function
@@ -5457,7 +9461,11 @@ module ImageAttributeName =
       | "blockDeviceMapping" -> BlockDeviceMapping
       | "sriovNetSupport" -> SriovNetSupport
       | "bootMode" -> BootMode
+      | "tpmSupport" -> TpmSupport
+      | "uefiData" -> UefiData
       | "lastLaunchedTime" -> LastLaunchedTime
+      | "imdsSupport" -> ImdsSupport
+      | "deregistrationProtection" -> DeregistrationProtection
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -5472,6 +9480,9 @@ module IamInstanceProfileAssociationSet =
   struct
     type nonrec t = IamInstanceProfileAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IamInstanceProfileAssociation.to_value)) |>
         (fun x -> `List x)
@@ -5498,6 +9509,9 @@ module AssociationIdList =
   struct
     type nonrec t = IamInstanceProfileAssociationId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IamInstanceProfileAssociationId.to_value)) |>
         (fun x -> `List x)
@@ -5544,6 +9558,9 @@ module HostList =
   struct
     type nonrec t = Host.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Host.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5567,6 +9584,9 @@ module HostReservationSet =
   struct
     type nonrec t = HostReservation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HostReservation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5592,6 +9612,9 @@ module HostReservationIdSet =
   struct
     type nonrec t = HostReservationId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HostReservationId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5617,6 +9640,9 @@ module HostOfferingSet =
   struct
     type nonrec t = HostOffering.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HostOffering.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5660,6 +9686,9 @@ module FpgaImageList =
   struct
     type nonrec t = FpgaImage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FpgaImage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5703,6 +9732,9 @@ module FpgaImageIdList =
   struct
     type nonrec t = FpgaImageId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FpgaImageId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5727,6 +9759,9 @@ module FlowLogSet =
   struct
     type nonrec t = FlowLog.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FlowLog.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5751,6 +9786,9 @@ module FlowLogIdList =
   struct
     type nonrec t = VpcFlowLogId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpcFlowLogId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5775,6 +9813,9 @@ module FleetSet =
   struct
     type nonrec t = FleetData.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FleetData.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5799,6 +9840,9 @@ module FleetIdSet =
   struct
     type nonrec t = FleetId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FleetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5823,6 +9867,9 @@ module HistoryRecordSet =
   struct
     type nonrec t = HistoryRecordEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HistoryRecordEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5848,6 +9895,9 @@ module DescribeFastSnapshotRestoreSuccessSet =
   struct
     type nonrec t = DescribeFastSnapshotRestoreSuccessItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DescribeFastSnapshotRestoreSuccessItem.to_value))
         |> (fun x -> `List x)
@@ -5895,6 +9945,9 @@ module DescribeFastLaunchImagesSuccessSet =
   struct
     type nonrec t = DescribeFastLaunchImagesSuccessItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DescribeFastLaunchImagesSuccessItem.to_value)) |>
         (fun x -> `List x)
@@ -5942,6 +9995,9 @@ module FastLaunchImageIdList =
   struct
     type nonrec t = ImageId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5966,6 +10022,9 @@ module ExportTaskList =
   struct
     type nonrec t = ExportTask.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExportTask.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5990,6 +10049,9 @@ module ExportTaskIdStringList =
   struct
     type nonrec t = ExportTaskId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExportTaskId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6015,6 +10077,9 @@ module ExportImageTaskList =
   struct
     type nonrec t = ExportImageTask.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExportImageTask.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6059,6 +10124,9 @@ module ExportImageTaskIdList =
   struct
     type nonrec t = ExportImageTaskId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExportImageTaskId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6084,6 +10152,9 @@ module ElasticGpuSet =
   struct
     type nonrec t = ElasticGpus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ElasticGpus.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6128,6 +10199,9 @@ module ElasticGpuIdSet =
   struct
     type nonrec t = ElasticGpuId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ElasticGpuId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6152,6 +10226,9 @@ module EgressOnlyInternetGatewayList =
   struct
     type nonrec t = EgressOnlyInternetGateway.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EgressOnlyInternetGateway.to_value)) |>
         (fun x -> `List x)
@@ -6198,6 +10275,9 @@ module EgressOnlyInternetGatewayIdList =
   struct
     type nonrec t = EgressOnlyInternetGatewayId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EgressOnlyInternetGatewayId.to_value)) |>
         (fun x -> `List x)
@@ -6224,6 +10304,9 @@ module DhcpOptionsList =
   struct
     type nonrec t = DhcpOptions.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DhcpOptions.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6267,6 +10350,9 @@ module DhcpOptionsIdStringList =
   struct
     type nonrec t = DhcpOptionsId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DhcpOptionsId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6288,10 +10374,61 @@ module DhcpOptionsIdStringList =
         ~of_json:DhcpOptionsId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DeclarativePoliciesReportList =
+  struct
+    type nonrec t = DeclarativePoliciesReport.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DeclarativePoliciesReport.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DeclarativePoliciesReport.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DeclarativePoliciesReportList"
+        ~of_json:DeclarativePoliciesReport.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DeclarativePoliciesMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for DeclarativePoliciesMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module CustomerGatewayList =
   struct
     type nonrec t = CustomerGateway.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomerGateway.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6317,6 +10454,9 @@ module CustomerGatewayIdStringList =
   struct
     type nonrec t = CustomerGatewayId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomerGatewayId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6342,6 +10482,9 @@ module DescribeConversionTaskList =
   struct
     type nonrec t = ConversionTask.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConversionTask.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6367,6 +10510,9 @@ module ConversionIdStringList =
   struct
     type nonrec t = ConversionTaskId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConversionTaskId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6392,6 +10538,9 @@ module CoipPoolSet =
   struct
     type nonrec t = CoipPool.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CoipPool.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6416,6 +10565,9 @@ module CoipPoolIdSet =
   struct
     type nonrec t = Ipv4PoolCoipId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Ipv4PoolCoipId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6440,6 +10592,9 @@ module TargetNetworkSet =
   struct
     type nonrec t = TargetNetwork.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetNetwork.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6484,6 +10639,9 @@ module ClientVpnRouteSet =
   struct
     type nonrec t = ClientVpnRoute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClientVpnRoute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6528,6 +10686,9 @@ module EndpointSet =
   struct
     type nonrec t = ClientVpnEndpoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClientVpnEndpoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6552,6 +10713,9 @@ module ClientVpnEndpointIdList =
   struct
     type nonrec t = ClientVpnEndpointId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClientVpnEndpointId.to_value)) |>
         (fun x -> `List x)
@@ -6598,6 +10762,9 @@ module ClientVpnConnectionSet =
   struct
     type nonrec t = ClientVpnConnection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClientVpnConnection.to_value)) |>
         (fun x -> `List x)
@@ -6644,6 +10811,9 @@ module AuthorizationRuleSet =
   struct
     type nonrec t = AuthorizationRule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AuthorizationRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6689,6 +10859,9 @@ module ClassicLinkInstanceList =
   struct
     type nonrec t = ClassicLinkInstance.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClassicLinkInstance.to_value)) |>
         (fun x -> `List x)
@@ -6735,6 +10908,9 @@ module CarrierGatewaySet =
   struct
     type nonrec t = CarrierGateway.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CarrierGateway.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6760,6 +10936,9 @@ module CarrierGatewayIdSet =
   struct
     type nonrec t = CarrierGatewayId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CarrierGatewayId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6804,6 +10983,9 @@ module CapacityReservationSet =
   struct
     type nonrec t = CapacityReservation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CapacityReservation.to_value)) |>
         (fun x -> `List x)
@@ -6826,32 +11008,6 @@ module CapacityReservationSet =
         ~of_json:CapacityReservation.of_json j
     let to_json v = composed_to_json to_value v
   end
-module CapacityReservationIdSet =
-  struct
-    type nonrec t = CapacityReservationId.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:CapacityReservationId.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:CapacityReservationId.of_xml)
-    let of_json j =
-      list_of_json ~kind:"CapacityReservationIdSet"
-        ~of_json:CapacityReservationId.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module DescribeCapacityReservationsMaxResults =
   struct
     type nonrec t = int
@@ -6872,10 +11028,62 @@ module DescribeCapacityReservationsMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module CapacityReservationTopologySet =
+  struct
+    type nonrec t = CapacityReservationTopology.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapacityReservationTopology.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapacityReservationTopology.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapacityReservationTopologySet"
+        ~of_json:CapacityReservationTopology.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeCapacityReservationTopologyMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeCapacityReservationTopologyMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module CapacityReservationFleetSet =
   struct
     type nonrec t = CapacityReservationFleet.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CapacityReservationFleet.to_value)) |>
         (fun x -> `List x)
@@ -6902,6 +11110,9 @@ module CapacityReservationFleetIdSet =
   struct
     type nonrec t = CapacityReservationFleetId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CapacityReservationFleetId.to_value)) |>
         (fun x -> `List x)
@@ -6944,10 +11155,382 @@ module DescribeCapacityReservationFleetsMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module CapacityReservationBillingRequestSet =
+  struct
+    type nonrec t = CapacityReservationBillingRequest.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapacityReservationBillingRequest.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:CapacityReservationBillingRequest.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapacityReservationBillingRequestSet"
+        ~of_json:CapacityReservationBillingRequest.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CallerRole =
+  struct
+    type nonrec t =
+      | Odcr_owner 
+      | Unused_reservation_billing_owner 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Odcr_owner -> "odcr-owner"
+      | Unused_reservation_billing_owner ->
+          "unused-reservation-billing-owner"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "odcr-owner" -> Odcr_owner
+      | "unused-reservation-billing-owner" ->
+          Unused_reservation_billing_owner
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration CallerRole" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CallerRole" j)
+    let to_json = simple_to_json to_value
+  end
+module DescribeCapacityReservationBillingRequestsRequestMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeCapacityReservationBillingRequestsRequestMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module CapacityManagerDataExportResponseSet =
+  struct
+    type nonrec t = CapacityManagerDataExportResponse.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapacityManagerDataExportResponse.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:CapacityManagerDataExportResponse.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapacityManagerDataExportResponseSet"
+        ~of_json:CapacityManagerDataExportResponse.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CapacityManagerDataExportIdSet =
+  struct
+    type nonrec t = CapacityManagerDataExportId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapacityManagerDataExportId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapacityManagerDataExportId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapacityManagerDataExportIdSet"
+        ~of_json:CapacityManagerDataExportId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeCapacityManagerDataExportsRequestMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeCapacityManagerDataExportsRequestMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module CapacityBlockIds =
+  struct
+    type nonrec t = CapacityBlockId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapacityBlockId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapacityBlockId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapacityBlockIds" ~of_json:CapacityBlockId.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeCapacityBlocksMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeCapacityBlocksMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module CapacityBlockStatusSet =
+  struct
+    type nonrec t = CapacityBlockStatus.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapacityBlockStatus.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapacityBlockStatus.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapacityBlockStatusSet"
+        ~of_json:CapacityBlockStatus.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeCapacityBlockStatusMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeCapacityBlockStatusMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module CapacityBlockOfferingSet =
+  struct
+    type nonrec t = CapacityBlockOffering.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapacityBlockOffering.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapacityBlockOffering.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapacityBlockOfferingSet"
+        ~of_json:CapacityBlockOffering.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeCapacityBlockOfferingsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeCapacityBlockOfferingsMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module CapacityBlockExtensionOfferingSet =
+  struct
+    type nonrec t = CapacityBlockExtensionOffering.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapacityBlockExtensionOffering.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapacityBlockExtensionOffering.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapacityBlockExtensionOfferingSet"
+        ~of_json:CapacityBlockExtensionOffering.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeCapacityBlockExtensionOfferingsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeCapacityBlockExtensionOfferingsMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module DescribeFutureCapacityMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeFutureCapacityMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ByoipCidrSet =
   struct
     type nonrec t = ByoipCidr.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ByoipCidr.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6991,6 +11574,9 @@ module BundleTaskList =
   struct
     type nonrec t = BundleTask.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BundleTask.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7015,6 +11601,9 @@ module BundleIdStringList =
   struct
     type nonrec t = BundleId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BundleId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7035,10 +11624,58 @@ module BundleIdStringList =
       list_of_json ~kind:"BundleIdStringList" ~of_json:BundleId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SubscriptionList =
+  struct
+    type nonrec t = Subscription.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Subscription.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Subscription.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SubscriptionList" ~of_json:Subscription.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxResultsParam =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResultsParam" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module AvailabilityZoneList =
   struct
     type nonrec t = AvailabilityZone.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AvailabilityZone.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7064,6 +11701,9 @@ module ZoneIdStringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7088,6 +11728,9 @@ module ZoneNameStringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7112,6 +11755,9 @@ module AddressList =
   struct
     type nonrec t = Address.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Address.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7132,34 +11778,13 @@ module AddressList =
       list_of_json ~kind:"AddressList" ~of_json:Address.of_json j
     let to_json v = composed_to_json to_value v
   end
-module AllocationIdList =
-  struct
-    type nonrec t = AllocationId.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:AllocationId.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:AllocationId.of_xml)
-    let of_json j =
-      list_of_json ~kind:"AllocationIdList" ~of_json:AllocationId.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module PublicIpStringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7184,6 +11809,9 @@ module AddressSet =
   struct
     type nonrec t = AddressAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AddressAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7226,6 +11854,9 @@ module AllocationIds =
   struct
     type nonrec t = AllocationId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AllocationId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7246,10 +11877,60 @@ module AllocationIds =
       list_of_json ~kind:"AllocationIds" ~of_json:AllocationId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AddressTransferList =
+  struct
+    type nonrec t = AddressTransfer.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AddressTransfer.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AddressTransfer.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AddressTransferList"
+        ~of_json:AddressTransfer.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeAddressTransfersMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeAddressTransfersMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module AccountAttributeList =
   struct
     type nonrec t = AccountAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7275,6 +11956,9 @@ module AccountAttributeNameStringList =
   struct
     type nonrec t = AccountAttributeName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountAttributeName.to_value)) |>
         (fun x -> `List x)
@@ -7339,13 +12023,13 @@ module TransitGatewayMulticastDeregisteredGroupSources =
       make ?groupIpAddress ?deregisteredNetworkInterfaceIds
         ?transitGatewayMulticastDomainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupIpAddress = field_map json "GroupIpAddress" String_.of_json in
+    let of_json json__ =
+      let groupIpAddress = field_map json__ "GroupIpAddress" String_.of_json in
       let deregisteredNetworkInterfaceIds =
-        field_map json "DeregisteredNetworkInterfaceIds"
+        field_map json__ "DeregisteredNetworkInterfaceIds"
           ValueStringList.of_json in
       let transitGatewayMulticastDomainId =
-        field_map json "TransitGatewayMulticastDomainId" String_.of_json in
+        field_map json__ "TransitGatewayMulticastDomainId" String_.of_json in
       make ?groupIpAddress ?deregisteredNetworkInterfaceIds
         ?transitGatewayMulticastDomainId ()
     let to_json v = composed_to_json to_value v
@@ -7392,13 +12076,13 @@ module TransitGatewayMulticastDeregisteredGroupMembers =
       make ?groupIpAddress ?deregisteredNetworkInterfaceIds
         ?transitGatewayMulticastDomainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupIpAddress = field_map json "GroupIpAddress" String_.of_json in
+    let of_json json__ =
+      let groupIpAddress = field_map json__ "GroupIpAddress" String_.of_json in
       let deregisteredNetworkInterfaceIds =
-        field_map json "DeregisteredNetworkInterfaceIds"
+        field_map json__ "DeregisteredNetworkInterfaceIds"
           ValueStringList.of_json in
       let transitGatewayMulticastDomainId =
-        field_map json "TransitGatewayMulticastDomainId" String_.of_json in
+        field_map json__ "TransitGatewayMulticastDomainId" String_.of_json in
       make ?groupIpAddress ?deregisteredNetworkInterfaceIds
         ?transitGatewayMulticastDomainId ()
     let to_json v = composed_to_json to_value v
@@ -7432,19 +12116,51 @@ module DeregisterInstanceTagAttributeRequest =
           (Xml.child xml_arg0 "IncludeAllTagsOfInstance") in
       make ?instanceTagKeys ?includeAllTagsOfInstance ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceTagKeys =
-        field_map json "InstanceTagKeys" InstanceTagKeySet.of_json in
+        field_map json__ "InstanceTagKeys" InstanceTagKeySet.of_json in
       let includeAllTagsOfInstance =
-        field_map json "IncludeAllTagsOfInstance" Boolean.of_json in
+        field_map json__ "IncludeAllTagsOfInstance" Boolean.of_json in
       make ?instanceTagKeys ?includeAllTagsOfInstance ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the tag keys to deregister for the current Region. You can either specify individual tag keys or deregister all tag keys in the current Region. You must specify either IncludeAllTagsOfInstance or InstanceTagKeys in the request"]
+module DeleteSnapshotResultSet =
+  struct
+    type nonrec t = DeleteSnapshotReturnCode.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DeleteSnapshotReturnCode.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DeleteSnapshotReturnCode.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DeleteSnapshotResultSet"
+        ~of_json:DeleteSnapshotReturnCode.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DeprovisionedAddressSet =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7469,6 +12185,9 @@ module ConnectionNotificationIdsList =
   struct
     type nonrec t = ConnectionNotificationId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectionNotificationId.to_value)) |>
         (fun x -> `List x)
@@ -7495,6 +12214,9 @@ module ResourceIdList =
   struct
     type nonrec t = TaggableResourceId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TaggableResourceId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7520,6 +12242,9 @@ module FailedQueuedPurchaseDeletionSet =
   struct
     type nonrec t = FailedQueuedPurchaseDeletion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FailedQueuedPurchaseDeletion.to_value)) |>
         (fun x -> `List x)
@@ -7546,6 +12271,9 @@ module SuccessfulQueuedPurchaseDeletionSet =
   struct
     type nonrec t = SuccessfulQueuedPurchaseDeletion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SuccessfulQueuedPurchaseDeletion.to_value)) |>
         (fun x -> `List x)
@@ -7578,6 +12306,9 @@ module DeleteQueuedReservedInstancesIdList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservationId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7599,10 +12330,26 @@ module DeleteQueuedReservedInstancesIdList =
         ~of_json:ReservationId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module PlacementGroupNameWithResolver =
+  struct
+    type nonrec t = string
+    let context_ = "PlacementGroupNameWithResolver"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PlacementGroupNameWithResolver" j
+    let to_json = simple_to_json to_value
+  end
 module DeleteLaunchTemplateVersionsResponseErrorSet =
   struct
     type nonrec t = DeleteLaunchTemplateVersionsResponseErrorItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map ~f:DeleteLaunchTemplateVersionsResponseErrorItem.to_value))
@@ -7631,6 +12378,9 @@ module DeleteLaunchTemplateVersionsResponseSuccessSet =
   struct
     type nonrec t = DeleteLaunchTemplateVersionsResponseSuccessItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map
@@ -7682,10 +12432,11 @@ module InstanceEventWindowStateChange =
           (Xml.child xml_arg0 "instanceEventWindowId") in
       make ?state ?instanceEventWindowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" InstanceEventWindowState.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" InstanceEventWindowState.of_json in
       let instanceEventWindowId =
-        field_map json "InstanceEventWindowId" InstanceEventWindowId.of_json in
+        field_map json__ "InstanceEventWindowId"
+          InstanceEventWindowId.of_json in
       make ?state ?instanceEventWindowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The state of the event window."]
@@ -7693,6 +12444,9 @@ module DeleteFleetErrorSet =
   struct
     type nonrec t = DeleteFleetErrorItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeleteFleetErrorItem.to_value)) |>
         (fun x -> `List x)
@@ -7719,6 +12473,9 @@ module DeleteFleetSuccessSet =
   struct
     type nonrec t = DeleteFleetSuccessItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeleteFleetSuccessItem.to_value)) |>
         (fun x -> `List x)
@@ -7741,6 +12498,45 @@ module DeleteFleetSuccessSet =
         ~of_json:DeleteFleetSuccessItem.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CoipCidr =
+  struct
+    type nonrec t =
+      {
+      cidr: String_.t option
+        [@ocaml.doc "An address range in a customer-owned IP address space."];
+      coipPoolId: Ipv4PoolCoipId.t option
+        [@ocaml.doc "The ID of the address pool."];
+      localGatewayRouteTableId: String_.t option
+        [@ocaml.doc "The ID of the local gateway route table."]}
+    let make ?cidr =
+      fun ?coipPoolId ->
+        fun ?localGatewayRouteTableId ->
+          fun () -> { cidr; coipPoolId; localGatewayRouteTableId }
+    let to_value x =
+      structure_to_value
+        [("cidr", (Option.map x.cidr ~f:String_.to_value));
+        ("coipPoolId", (Option.map x.coipPoolId ~f:Ipv4PoolCoipId.to_value));
+        ("localGatewayRouteTableId",
+          (Option.map x.localGatewayRouteTableId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let localGatewayRouteTableId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "localGatewayRouteTableId") in
+      let coipPoolId =
+        (Option.map ~f:Ipv4PoolCoipId.of_xml)
+          (Xml.child xml_arg0 "coipPoolId") in
+      let cidr = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "cidr") in
+      make ?localGatewayRouteTableId ?coipPoolId ?cidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let localGatewayRouteTableId =
+        field_map json__ "LocalGatewayRouteTableId" String_.of_json in
+      let coipPoolId = field_map json__ "CoipPoolId" Ipv4PoolCoipId.of_json in
+      let cidr = field_map json__ "Cidr" String_.of_json in
+      make ?localGatewayRouteTableId ?coipPoolId ?cidr ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a customer-owned IP address range."]
 module VpnConnectionOptionsSpecification =
   struct
     type nonrec t =
@@ -7748,9 +12544,6 @@ module VpnConnectionOptionsSpecification =
       enableAcceleration: Boolean.t option
         [@ocaml.doc
           "Indicate whether to enable acceleration for the VPN connection. Default: false"];
-      staticRoutesOnly: Boolean.t option
-        [@ocaml.doc
-          "Indicate whether the VPN connection uses static routes only. If you are creating a VPN connection for a device that does not support BGP, you must specify true. Use CreateVpnConnectionRoute to create a static route. Default: false"];
       tunnelInsideIpVersion: TunnelInsideIpVersion.t option
         [@ocaml.doc
           "Indicate whether the VPN tunnels process IPv4 or IPv6 traffic. Default: ipv4"];
@@ -7767,32 +12560,49 @@ module VpnConnectionOptionsSpecification =
           "The IPv6 CIDR on the customer gateway (on-premises) side of the VPN connection. Default: ::/0"];
       remoteIpv6NetworkCidr: String_.t option
         [@ocaml.doc
-          "The IPv6 CIDR on the Amazon Web Services side of the VPN connection. Default: ::/0"]}
+          "The IPv6 CIDR on the Amazon Web Services side of the VPN connection. Default: ::/0"];
+      outsideIpAddressType: String_.t option
+        [@ocaml.doc
+          "The type of IP address assigned to the outside interface of the customer gateway device. Valid values: PrivateIpv4 | PublicIpv4 | Ipv6 Default: PublicIpv4"];
+      transportTransitGatewayAttachmentId:
+        TransitGatewayAttachmentId.t option
+        [@ocaml.doc
+          "The transit gateway attachment ID to use for the VPN tunnel. Required if OutsideIpAddressType is set to PrivateIpv4."];
+      tunnelBandwidth: VpnTunnelBandwidth.t option
+        [@ocaml.doc
+          "The desired bandwidth specification for the VPN tunnel, used when creating or modifying VPN connection options to set the tunnel's throughput capacity. standard supports up to 1.25 Gbps per tunnel, while large supports up to 5 Gbps per tunnel. The default value is standard. Existing VPN connections without a bandwidth setting will automatically default to standard."];
+      staticRoutesOnly: Boolean.t option
+        [@ocaml.doc
+          "Indicate whether the VPN connection uses static routes only. If you are creating a VPN connection for a device that does not support BGP, you must specify true. Use CreateVpnConnectionRoute to create a static route. Default: false"]}
     let make ?enableAcceleration =
-      fun ?staticRoutesOnly ->
-        fun ?tunnelInsideIpVersion ->
-          fun ?tunnelOptions ->
-            fun ?localIpv4NetworkCidr ->
-              fun ?remoteIpv4NetworkCidr ->
-                fun ?localIpv6NetworkCidr ->
-                  fun ?remoteIpv6NetworkCidr ->
-                    fun () ->
-                      {
-                        enableAcceleration;
-                        staticRoutesOnly;
-                        tunnelInsideIpVersion;
-                        tunnelOptions;
-                        localIpv4NetworkCidr;
-                        remoteIpv4NetworkCidr;
-                        localIpv6NetworkCidr;
-                        remoteIpv6NetworkCidr
-                      }
+      fun ?tunnelInsideIpVersion ->
+        fun ?tunnelOptions ->
+          fun ?localIpv4NetworkCidr ->
+            fun ?remoteIpv4NetworkCidr ->
+              fun ?localIpv6NetworkCidr ->
+                fun ?remoteIpv6NetworkCidr ->
+                  fun ?outsideIpAddressType ->
+                    fun ?transportTransitGatewayAttachmentId ->
+                      fun ?tunnelBandwidth ->
+                        fun ?staticRoutesOnly ->
+                          fun () ->
+                            {
+                              enableAcceleration;
+                              tunnelInsideIpVersion;
+                              tunnelOptions;
+                              localIpv4NetworkCidr;
+                              remoteIpv4NetworkCidr;
+                              localIpv6NetworkCidr;
+                              remoteIpv6NetworkCidr;
+                              outsideIpAddressType;
+                              transportTransitGatewayAttachmentId;
+                              tunnelBandwidth;
+                              staticRoutesOnly
+                            }
     let to_value x =
       structure_to_value
         [("EnableAcceleration",
            (Option.map x.enableAcceleration ~f:Boolean.to_value));
-        ("staticRoutesOnly",
-          (Option.map x.staticRoutesOnly ~f:Boolean.to_value));
         ("TunnelInsideIpVersion",
           (Option.map x.tunnelInsideIpVersion
              ~f:TunnelInsideIpVersion.to_value));
@@ -7806,9 +12616,30 @@ module VpnConnectionOptionsSpecification =
         ("LocalIpv6NetworkCidr",
           (Option.map x.localIpv6NetworkCidr ~f:String_.to_value));
         ("RemoteIpv6NetworkCidr",
-          (Option.map x.remoteIpv6NetworkCidr ~f:String_.to_value))]
+          (Option.map x.remoteIpv6NetworkCidr ~f:String_.to_value));
+        ("OutsideIpAddressType",
+          (Option.map x.outsideIpAddressType ~f:String_.to_value));
+        ("TransportTransitGatewayAttachmentId",
+          (Option.map x.transportTransitGatewayAttachmentId
+             ~f:TransitGatewayAttachmentId.to_value));
+        ("TunnelBandwidth",
+          (Option.map x.tunnelBandwidth ~f:VpnTunnelBandwidth.to_value));
+        ("staticRoutesOnly",
+          (Option.map x.staticRoutesOnly ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let staticRoutesOnly =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "staticRoutesOnly") in
+      let tunnelBandwidth =
+        (Option.map ~f:VpnTunnelBandwidth.of_xml)
+          (Xml.child xml_arg0 "TunnelBandwidth") in
+      let transportTransitGatewayAttachmentId =
+        (Option.map ~f:TransitGatewayAttachmentId.of_xml)
+          (Xml.child xml_arg0 "TransportTransitGatewayAttachmentId") in
+      let outsideIpAddressType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "OutsideIpAddressType") in
       let remoteIpv6NetworkCidr =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "RemoteIpv6NetworkCidr") in
@@ -7827,39 +12658,65 @@ module VpnConnectionOptionsSpecification =
       let tunnelInsideIpVersion =
         (Option.map ~f:TunnelInsideIpVersion.of_xml)
           (Xml.child xml_arg0 "TunnelInsideIpVersion") in
-      let staticRoutesOnly =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "staticRoutesOnly") in
       let enableAcceleration =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "EnableAcceleration") in
-      make ?remoteIpv6NetworkCidr ?localIpv6NetworkCidr
-        ?remoteIpv4NetworkCidr ?localIpv4NetworkCidr ?tunnelOptions
-        ?tunnelInsideIpVersion ?staticRoutesOnly ?enableAcceleration ()
+      make ?staticRoutesOnly ?tunnelBandwidth
+        ?transportTransitGatewayAttachmentId ?outsideIpAddressType
+        ?remoteIpv6NetworkCidr ?localIpv6NetworkCidr ?remoteIpv4NetworkCidr
+        ?localIpv4NetworkCidr ?tunnelOptions ?tunnelInsideIpVersion
+        ?enableAcceleration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let staticRoutesOnly =
+        field_map json__ "StaticRoutesOnly" Boolean.of_json in
+      let tunnelBandwidth =
+        field_map json__ "TunnelBandwidth" VpnTunnelBandwidth.of_json in
+      let transportTransitGatewayAttachmentId =
+        field_map json__ "TransportTransitGatewayAttachmentId"
+          TransitGatewayAttachmentId.of_json in
+      let outsideIpAddressType =
+        field_map json__ "OutsideIpAddressType" String_.of_json in
       let remoteIpv6NetworkCidr =
-        field_map json "RemoteIpv6NetworkCidr" String_.of_json in
+        field_map json__ "RemoteIpv6NetworkCidr" String_.of_json in
       let localIpv6NetworkCidr =
-        field_map json "LocalIpv6NetworkCidr" String_.of_json in
+        field_map json__ "LocalIpv6NetworkCidr" String_.of_json in
       let remoteIpv4NetworkCidr =
-        field_map json "RemoteIpv4NetworkCidr" String_.of_json in
+        field_map json__ "RemoteIpv4NetworkCidr" String_.of_json in
       let localIpv4NetworkCidr =
-        field_map json "LocalIpv4NetworkCidr" String_.of_json in
+        field_map json__ "LocalIpv4NetworkCidr" String_.of_json in
       let tunnelOptions =
-        field_map json "TunnelOptions"
+        field_map json__ "TunnelOptions"
           VpnTunnelOptionsSpecificationsList.of_json in
       let tunnelInsideIpVersion =
-        field_map json "TunnelInsideIpVersion" TunnelInsideIpVersion.of_json in
-      let staticRoutesOnly =
-        field_map json "StaticRoutesOnly" Boolean.of_json in
+        field_map json__ "TunnelInsideIpVersion"
+          TunnelInsideIpVersion.of_json in
       let enableAcceleration =
-        field_map json "EnableAcceleration" Boolean.of_json in
-      make ?remoteIpv6NetworkCidr ?localIpv6NetworkCidr
-        ?remoteIpv4NetworkCidr ?localIpv4NetworkCidr ?tunnelOptions
-        ?tunnelInsideIpVersion ?staticRoutesOnly ?enableAcceleration ()
+        field_map json__ "EnableAcceleration" Boolean.of_json in
+      make ?staticRoutesOnly ?tunnelBandwidth
+        ?transportTransitGatewayAttachmentId ?outsideIpAddressType
+        ?remoteIpv6NetworkCidr ?localIpv6NetworkCidr ?remoteIpv4NetworkCidr
+        ?localIpv4NetworkCidr ?tunnelOptions ?tunnelInsideIpVersion
+        ?enableAcceleration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes VPN connection options."]
+module VpnConcentratorType =
+  struct
+    type nonrec t =
+      | Ipsec_1 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | Ipsec_1 -> "ipsec.1" | Non_static_id s -> s
+    let of_string = function | "ipsec.1" -> Ipsec_1 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration VpnConcentratorType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"VpnConcentratorType" j)
+    let to_json = simple_to_json to_value
+  end
 module NetmaskLength =
   struct
     type nonrec t = int
@@ -7874,12 +12731,671 @@ module NetmaskLength =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module VpcEncryptionControlConfiguration =
+  struct
+    type nonrec t =
+      {
+      mode: VpcEncryptionControlMode.t
+        [@ocaml.doc
+          "The encryption mode for the VPC Encryption Control configuration."];
+      internetGatewayExclusion:
+        VpcEncryptionControlExclusionStateInput.t option
+        [@ocaml.doc
+          "Specifies whether to exclude internet gateway traffic from encryption enforcement."];
+      egressOnlyInternetGatewayExclusion:
+        VpcEncryptionControlExclusionStateInput.t option
+        [@ocaml.doc
+          "Specifies whether to exclude egress-only internet gateway traffic from encryption enforcement."];
+      natGatewayExclusion: VpcEncryptionControlExclusionStateInput.t option
+        [@ocaml.doc
+          "Specifies whether to exclude NAT gateway traffic from encryption enforcement."];
+      virtualPrivateGatewayExclusion:
+        VpcEncryptionControlExclusionStateInput.t option
+        [@ocaml.doc
+          "Specifies whether to exclude virtual private gateway traffic from encryption enforcement."];
+      vpcPeeringExclusion: VpcEncryptionControlExclusionStateInput.t option
+        [@ocaml.doc
+          "Specifies whether to exclude VPC peering connection traffic from encryption enforcement."];
+      lambdaExclusion: VpcEncryptionControlExclusionStateInput.t option
+        [@ocaml.doc
+          "Specifies whether to exclude Lambda function traffic from encryption enforcement."];
+      vpcLatticeExclusion: VpcEncryptionControlExclusionStateInput.t option
+        [@ocaml.doc
+          "Specifies whether to exclude VPC Lattice traffic from encryption enforcement."];
+      elasticFileSystemExclusion:
+        VpcEncryptionControlExclusionStateInput.t option
+        [@ocaml.doc
+          "Specifies whether to exclude Elastic File System traffic from encryption enforcement."]}
+    let context_ = "VpcEncryptionControlConfiguration"
+    let make ?internetGatewayExclusion =
+      fun ?egressOnlyInternetGatewayExclusion ->
+        fun ?natGatewayExclusion ->
+          fun ?virtualPrivateGatewayExclusion ->
+            fun ?vpcPeeringExclusion ->
+              fun ?lambdaExclusion ->
+                fun ?vpcLatticeExclusion ->
+                  fun ?elasticFileSystemExclusion ->
+                    fun ~mode ->
+                      fun () ->
+                        {
+                          internetGatewayExclusion;
+                          egressOnlyInternetGatewayExclusion;
+                          natGatewayExclusion;
+                          virtualPrivateGatewayExclusion;
+                          vpcPeeringExclusion;
+                          lambdaExclusion;
+                          vpcLatticeExclusion;
+                          elasticFileSystemExclusion;
+                          mode
+                        }
+    let to_value x =
+      structure_to_value
+        [("Mode", (Some (VpcEncryptionControlMode.to_value x.mode)));
+        ("InternetGatewayExclusion",
+          (Option.map x.internetGatewayExclusion
+             ~f:VpcEncryptionControlExclusionStateInput.to_value));
+        ("EgressOnlyInternetGatewayExclusion",
+          (Option.map x.egressOnlyInternetGatewayExclusion
+             ~f:VpcEncryptionControlExclusionStateInput.to_value));
+        ("NatGatewayExclusion",
+          (Option.map x.natGatewayExclusion
+             ~f:VpcEncryptionControlExclusionStateInput.to_value));
+        ("VirtualPrivateGatewayExclusion",
+          (Option.map x.virtualPrivateGatewayExclusion
+             ~f:VpcEncryptionControlExclusionStateInput.to_value));
+        ("VpcPeeringExclusion",
+          (Option.map x.vpcPeeringExclusion
+             ~f:VpcEncryptionControlExclusionStateInput.to_value));
+        ("LambdaExclusion",
+          (Option.map x.lambdaExclusion
+             ~f:VpcEncryptionControlExclusionStateInput.to_value));
+        ("VpcLatticeExclusion",
+          (Option.map x.vpcLatticeExclusion
+             ~f:VpcEncryptionControlExclusionStateInput.to_value));
+        ("ElasticFileSystemExclusion",
+          (Option.map x.elasticFileSystemExclusion
+             ~f:VpcEncryptionControlExclusionStateInput.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let elasticFileSystemExclusion =
+        (Option.map ~f:VpcEncryptionControlExclusionStateInput.of_xml)
+          (Xml.child xml_arg0 "ElasticFileSystemExclusion") in
+      let vpcLatticeExclusion =
+        (Option.map ~f:VpcEncryptionControlExclusionStateInput.of_xml)
+          (Xml.child xml_arg0 "VpcLatticeExclusion") in
+      let lambdaExclusion =
+        (Option.map ~f:VpcEncryptionControlExclusionStateInput.of_xml)
+          (Xml.child xml_arg0 "LambdaExclusion") in
+      let vpcPeeringExclusion =
+        (Option.map ~f:VpcEncryptionControlExclusionStateInput.of_xml)
+          (Xml.child xml_arg0 "VpcPeeringExclusion") in
+      let virtualPrivateGatewayExclusion =
+        (Option.map ~f:VpcEncryptionControlExclusionStateInput.of_xml)
+          (Xml.child xml_arg0 "VirtualPrivateGatewayExclusion") in
+      let natGatewayExclusion =
+        (Option.map ~f:VpcEncryptionControlExclusionStateInput.of_xml)
+          (Xml.child xml_arg0 "NatGatewayExclusion") in
+      let egressOnlyInternetGatewayExclusion =
+        (Option.map ~f:VpcEncryptionControlExclusionStateInput.of_xml)
+          (Xml.child xml_arg0 "EgressOnlyInternetGatewayExclusion") in
+      let internetGatewayExclusion =
+        (Option.map ~f:VpcEncryptionControlExclusionStateInput.of_xml)
+          (Xml.child xml_arg0 "InternetGatewayExclusion") in
+      let mode =
+        VpcEncryptionControlMode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Mode") in
+      make ?elasticFileSystemExclusion ?vpcLatticeExclusion ?lambdaExclusion
+        ?vpcPeeringExclusion ?virtualPrivateGatewayExclusion
+        ?natGatewayExclusion ?egressOnlyInternetGatewayExclusion
+        ?internetGatewayExclusion ~mode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let elasticFileSystemExclusion =
+        field_map json__ "ElasticFileSystemExclusion"
+          VpcEncryptionControlExclusionStateInput.of_json in
+      let vpcLatticeExclusion =
+        field_map json__ "VpcLatticeExclusion"
+          VpcEncryptionControlExclusionStateInput.of_json in
+      let lambdaExclusion =
+        field_map json__ "LambdaExclusion"
+          VpcEncryptionControlExclusionStateInput.of_json in
+      let vpcPeeringExclusion =
+        field_map json__ "VpcPeeringExclusion"
+          VpcEncryptionControlExclusionStateInput.of_json in
+      let virtualPrivateGatewayExclusion =
+        field_map json__ "VirtualPrivateGatewayExclusion"
+          VpcEncryptionControlExclusionStateInput.of_json in
+      let natGatewayExclusion =
+        field_map json__ "NatGatewayExclusion"
+          VpcEncryptionControlExclusionStateInput.of_json in
+      let egressOnlyInternetGatewayExclusion =
+        field_map json__ "EgressOnlyInternetGatewayExclusion"
+          VpcEncryptionControlExclusionStateInput.of_json in
+      let internetGatewayExclusion =
+        field_map json__ "InternetGatewayExclusion"
+          VpcEncryptionControlExclusionStateInput.of_json in
+      let mode = field_map_exn json__ "Mode" VpcEncryptionControlMode.of_json in
+      make ?elasticFileSystemExclusion ?vpcLatticeExclusion ?lambdaExclusion
+        ?vpcPeeringExclusion ?virtualPrivateGatewayExclusion
+        ?natGatewayExclusion ?egressOnlyInternetGatewayExclusion
+        ?internetGatewayExclusion ~mode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the configuration settings for VPC Encryption Control. For more information, see Enforce VPC encryption in transit in the Amazon VPC User Guide."]
+module CreateVerifiedAccessNativeApplicationOidcOptions =
+  struct
+    type nonrec t =
+      {
+      publicSigningKeyEndpoint: String_.t option
+        [@ocaml.doc "The public signing key endpoint."];
+      issuer: String_.t option
+        [@ocaml.doc "The OIDC issuer identifier of the IdP."];
+      authorizationEndpoint: String_.t option
+        [@ocaml.doc "The authorization endpoint of the IdP."];
+      tokenEndpoint: String_.t option
+        [@ocaml.doc "The token endpoint of the IdP."];
+      userInfoEndpoint: String_.t option
+        [@ocaml.doc "The user info endpoint of the IdP."];
+      clientId: String_.t option
+        [@ocaml.doc "The OAuth 2.0 client identifier."];
+      clientSecret: ClientSecretType.t option
+        [@ocaml.doc "The OAuth 2.0 client secret."];
+      scope: String_.t option
+        [@ocaml.doc "The set of user claims to be requested from the IdP."]}
+    let make ?publicSigningKeyEndpoint =
+      fun ?issuer ->
+        fun ?authorizationEndpoint ->
+          fun ?tokenEndpoint ->
+            fun ?userInfoEndpoint ->
+              fun ?clientId ->
+                fun ?clientSecret ->
+                  fun ?scope ->
+                    fun () ->
+                      {
+                        publicSigningKeyEndpoint;
+                        issuer;
+                        authorizationEndpoint;
+                        tokenEndpoint;
+                        userInfoEndpoint;
+                        clientId;
+                        clientSecret;
+                        scope
+                      }
+    let to_value x =
+      structure_to_value
+        [("PublicSigningKeyEndpoint",
+           (Option.map x.publicSigningKeyEndpoint ~f:String_.to_value));
+        ("Issuer", (Option.map x.issuer ~f:String_.to_value));
+        ("AuthorizationEndpoint",
+          (Option.map x.authorizationEndpoint ~f:String_.to_value));
+        ("TokenEndpoint", (Option.map x.tokenEndpoint ~f:String_.to_value));
+        ("UserInfoEndpoint",
+          (Option.map x.userInfoEndpoint ~f:String_.to_value));
+        ("ClientId", (Option.map x.clientId ~f:String_.to_value));
+        ("ClientSecret",
+          (Option.map x.clientSecret ~f:ClientSecretType.to_value));
+        ("Scope", (Option.map x.scope ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scope = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Scope") in
+      let clientSecret =
+        (Option.map ~f:ClientSecretType.of_xml)
+          (Xml.child xml_arg0 "ClientSecret") in
+      let clientId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ClientId") in
+      let userInfoEndpoint =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "UserInfoEndpoint") in
+      let tokenEndpoint =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TokenEndpoint") in
+      let authorizationEndpoint =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "AuthorizationEndpoint") in
+      let issuer =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Issuer") in
+      let publicSigningKeyEndpoint =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "PublicSigningKeyEndpoint") in
+      make ?scope ?clientSecret ?clientId ?userInfoEndpoint ?tokenEndpoint
+        ?authorizationEndpoint ?issuer ?publicSigningKeyEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scope = field_map json__ "Scope" String_.of_json in
+      let clientSecret =
+        field_map json__ "ClientSecret" ClientSecretType.of_json in
+      let clientId = field_map json__ "ClientId" String_.of_json in
+      let userInfoEndpoint =
+        field_map json__ "UserInfoEndpoint" String_.of_json in
+      let tokenEndpoint = field_map json__ "TokenEndpoint" String_.of_json in
+      let authorizationEndpoint =
+        field_map json__ "AuthorizationEndpoint" String_.of_json in
+      let issuer = field_map json__ "Issuer" String_.of_json in
+      let publicSigningKeyEndpoint =
+        field_map json__ "PublicSigningKeyEndpoint" String_.of_json in
+      make ?scope ?clientSecret ?clientId ?userInfoEndpoint ?tokenEndpoint
+        ?authorizationEndpoint ?issuer ?publicSigningKeyEndpoint ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the OpenID Connect (OIDC) options."]
+module CreateVerifiedAccessTrustProviderDeviceOptions =
+  struct
+    type nonrec t =
+      {
+      tenantId: String_.t option
+        [@ocaml.doc
+          "The ID of the tenant application with the device-identity provider."];
+      publicSigningKeyUrl: String_.t option
+        [@ocaml.doc
+          "The URL Amazon Web Services Verified Access will use to verify the authenticity of the device tokens."]}
+    let make ?tenantId =
+      fun ?publicSigningKeyUrl -> fun () -> { tenantId; publicSigningKeyUrl }
+    let to_value x =
+      structure_to_value
+        [("TenantId", (Option.map x.tenantId ~f:String_.to_value));
+        ("PublicSigningKeyUrl",
+          (Option.map x.publicSigningKeyUrl ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let publicSigningKeyUrl =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "PublicSigningKeyUrl") in
+      let tenantId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TenantId") in
+      make ?publicSigningKeyUrl ?tenantId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let publicSigningKeyUrl =
+        field_map json__ "PublicSigningKeyUrl" String_.of_json in
+      let tenantId = field_map json__ "TenantId" String_.of_json in
+      make ?publicSigningKeyUrl ?tenantId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the options when creating an Amazon Web Services Verified Access trust provider using the device type."]
+module CreateVerifiedAccessTrustProviderOidcOptions =
+  struct
+    type nonrec t =
+      {
+      issuer: String_.t option [@ocaml.doc "The OIDC issuer."];
+      authorizationEndpoint: String_.t option
+        [@ocaml.doc "The OIDC authorization endpoint."];
+      tokenEndpoint: String_.t option [@ocaml.doc "The OIDC token endpoint."];
+      userInfoEndpoint: String_.t option
+        [@ocaml.doc "The OIDC user info endpoint."];
+      clientId: String_.t option [@ocaml.doc "The client identifier."];
+      clientSecret: ClientSecretType.t option
+        [@ocaml.doc "The client secret."];
+      scope: String_.t option
+        [@ocaml.doc
+          "OpenID Connect (OIDC) scopes are used by an application during authentication to authorize access to a user's details. Each scope returns a specific set of user attributes."]}
+    let make ?issuer =
+      fun ?authorizationEndpoint ->
+        fun ?tokenEndpoint ->
+          fun ?userInfoEndpoint ->
+            fun ?clientId ->
+              fun ?clientSecret ->
+                fun ?scope ->
+                  fun () ->
+                    {
+                      issuer;
+                      authorizationEndpoint;
+                      tokenEndpoint;
+                      userInfoEndpoint;
+                      clientId;
+                      clientSecret;
+                      scope
+                    }
+    let to_value x =
+      structure_to_value
+        [("Issuer", (Option.map x.issuer ~f:String_.to_value));
+        ("AuthorizationEndpoint",
+          (Option.map x.authorizationEndpoint ~f:String_.to_value));
+        ("TokenEndpoint", (Option.map x.tokenEndpoint ~f:String_.to_value));
+        ("UserInfoEndpoint",
+          (Option.map x.userInfoEndpoint ~f:String_.to_value));
+        ("ClientId", (Option.map x.clientId ~f:String_.to_value));
+        ("ClientSecret",
+          (Option.map x.clientSecret ~f:ClientSecretType.to_value));
+        ("Scope", (Option.map x.scope ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scope = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Scope") in
+      let clientSecret =
+        (Option.map ~f:ClientSecretType.of_xml)
+          (Xml.child xml_arg0 "ClientSecret") in
+      let clientId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ClientId") in
+      let userInfoEndpoint =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "UserInfoEndpoint") in
+      let tokenEndpoint =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TokenEndpoint") in
+      let authorizationEndpoint =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "AuthorizationEndpoint") in
+      let issuer =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Issuer") in
+      make ?scope ?clientSecret ?clientId ?userInfoEndpoint ?tokenEndpoint
+        ?authorizationEndpoint ?issuer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scope = field_map json__ "Scope" String_.of_json in
+      let clientSecret =
+        field_map json__ "ClientSecret" ClientSecretType.of_json in
+      let clientId = field_map json__ "ClientId" String_.of_json in
+      let userInfoEndpoint =
+        field_map json__ "UserInfoEndpoint" String_.of_json in
+      let tokenEndpoint = field_map json__ "TokenEndpoint" String_.of_json in
+      let authorizationEndpoint =
+        field_map json__ "AuthorizationEndpoint" String_.of_json in
+      let issuer = field_map json__ "Issuer" String_.of_json in
+      make ?scope ?clientSecret ?clientId ?userInfoEndpoint ?tokenEndpoint
+        ?authorizationEndpoint ?issuer ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the options when creating an Amazon Web Services Verified Access trust provider using the user type."]
+module CertificateArn =
+  struct
+    type nonrec t = string
+    let context_ = "CertificateArn"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CertificateArn" j
+    let to_json = simple_to_json to_value
+  end
+module CreateVerifiedAccessEndpointCidrOptions =
+  struct
+    type nonrec t =
+      {
+      protocol: VerifiedAccessEndpointProtocol.t option
+        [@ocaml.doc "The protocol."];
+      subnetIds: CreateVerifiedAccessEndpointSubnetIdList.t option
+        [@ocaml.doc "The IDs of the subnets."];
+      cidr: String_.t option [@ocaml.doc "The CIDR."];
+      portRanges: CreateVerifiedAccessEndpointPortRangeList.t option
+        [@ocaml.doc "The port ranges."]}
+    let make ?protocol =
+      fun ?subnetIds ->
+        fun ?cidr ->
+          fun ?portRanges ->
+            fun () -> { protocol; subnetIds; cidr; portRanges }
+    let to_value x =
+      structure_to_value
+        [("Protocol",
+           (Option.map x.protocol ~f:VerifiedAccessEndpointProtocol.to_value));
+        ("SubnetId",
+          (Option.map x.subnetIds
+             ~f:CreateVerifiedAccessEndpointSubnetIdList.to_value));
+        ("Cidr", (Option.map x.cidr ~f:String_.to_value));
+        ("PortRange",
+          (Option.map x.portRanges
+             ~f:CreateVerifiedAccessEndpointPortRangeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let portRanges =
+        (Option.map ~f:CreateVerifiedAccessEndpointPortRangeList.of_xml)
+          (Xml.child xml_arg0 "PortRange") in
+      let cidr = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cidr") in
+      let subnetIds =
+        (Option.map ~f:CreateVerifiedAccessEndpointSubnetIdList.of_xml)
+          (Xml.child xml_arg0 "SubnetId") in
+      let protocol =
+        (Option.map ~f:VerifiedAccessEndpointProtocol.of_xml)
+          (Xml.child xml_arg0 "Protocol") in
+      make ?portRanges ?cidr ?subnetIds ?protocol ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let portRanges =
+        field_map json__ "PortRanges"
+          CreateVerifiedAccessEndpointPortRangeList.of_json in
+      let cidr = field_map json__ "Cidr" String_.of_json in
+      let subnetIds =
+        field_map json__ "SubnetIds"
+          CreateVerifiedAccessEndpointSubnetIdList.of_json in
+      let protocol =
+        field_map json__ "Protocol" VerifiedAccessEndpointProtocol.of_json in
+      make ?portRanges ?cidr ?subnetIds ?protocol ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the CIDR options for a Verified Access endpoint."]
+module CreateVerifiedAccessEndpointEniOptions =
+  struct
+    type nonrec t =
+      {
+      networkInterfaceId: NetworkInterfaceId.t option
+        [@ocaml.doc "The ID of the network interface."];
+      protocol: VerifiedAccessEndpointProtocol.t option
+        [@ocaml.doc "The IP protocol."];
+      port: VerifiedAccessEndpointPortNumber.t option
+        [@ocaml.doc "The IP port number."];
+      portRanges: CreateVerifiedAccessEndpointPortRangeList.t option
+        [@ocaml.doc "The port ranges."]}
+    let make ?networkInterfaceId =
+      fun ?protocol ->
+        fun ?port ->
+          fun ?portRanges ->
+            fun () -> { networkInterfaceId; protocol; port; portRanges }
+    let to_value x =
+      structure_to_value
+        [("NetworkInterfaceId",
+           (Option.map x.networkInterfaceId ~f:NetworkInterfaceId.to_value));
+        ("Protocol",
+          (Option.map x.protocol ~f:VerifiedAccessEndpointProtocol.to_value));
+        ("Port",
+          (Option.map x.port ~f:VerifiedAccessEndpointPortNumber.to_value));
+        ("PortRange",
+          (Option.map x.portRanges
+             ~f:CreateVerifiedAccessEndpointPortRangeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let portRanges =
+        (Option.map ~f:CreateVerifiedAccessEndpointPortRangeList.of_xml)
+          (Xml.child xml_arg0 "PortRange") in
+      let port =
+        (Option.map ~f:VerifiedAccessEndpointPortNumber.of_xml)
+          (Xml.child xml_arg0 "Port") in
+      let protocol =
+        (Option.map ~f:VerifiedAccessEndpointProtocol.of_xml)
+          (Xml.child xml_arg0 "Protocol") in
+      let networkInterfaceId =
+        (Option.map ~f:NetworkInterfaceId.of_xml)
+          (Xml.child xml_arg0 "NetworkInterfaceId") in
+      make ?portRanges ?port ?protocol ?networkInterfaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let portRanges =
+        field_map json__ "PortRanges"
+          CreateVerifiedAccessEndpointPortRangeList.of_json in
+      let port =
+        field_map json__ "Port" VerifiedAccessEndpointPortNumber.of_json in
+      let protocol =
+        field_map json__ "Protocol" VerifiedAccessEndpointProtocol.of_json in
+      let networkInterfaceId =
+        field_map json__ "NetworkInterfaceId" NetworkInterfaceId.of_json in
+      make ?portRanges ?port ?protocol ?networkInterfaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the network interface options when creating an Amazon Web Services Verified Access endpoint using the network-interface type."]
+module CreateVerifiedAccessEndpointLoadBalancerOptions =
+  struct
+    type nonrec t =
+      {
+      protocol: VerifiedAccessEndpointProtocol.t option
+        [@ocaml.doc "The IP protocol."];
+      port: VerifiedAccessEndpointPortNumber.t option
+        [@ocaml.doc "The IP port number."];
+      loadBalancerArn: LoadBalancerArn.t option
+        [@ocaml.doc "The ARN of the load balancer."];
+      subnetIds: CreateVerifiedAccessEndpointSubnetIdList.t option
+        [@ocaml.doc
+          "The IDs of the subnets. You can specify only one subnet per Availability Zone."];
+      portRanges: CreateVerifiedAccessEndpointPortRangeList.t option
+        [@ocaml.doc "The port ranges."]}
+    let make ?protocol =
+      fun ?port ->
+        fun ?loadBalancerArn ->
+          fun ?subnetIds ->
+            fun ?portRanges ->
+              fun () ->
+                { protocol; port; loadBalancerArn; subnetIds; portRanges }
+    let to_value x =
+      structure_to_value
+        [("Protocol",
+           (Option.map x.protocol ~f:VerifiedAccessEndpointProtocol.to_value));
+        ("Port",
+          (Option.map x.port ~f:VerifiedAccessEndpointPortNumber.to_value));
+        ("LoadBalancerArn",
+          (Option.map x.loadBalancerArn ~f:LoadBalancerArn.to_value));
+        ("SubnetId",
+          (Option.map x.subnetIds
+             ~f:CreateVerifiedAccessEndpointSubnetIdList.to_value));
+        ("PortRange",
+          (Option.map x.portRanges
+             ~f:CreateVerifiedAccessEndpointPortRangeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let portRanges =
+        (Option.map ~f:CreateVerifiedAccessEndpointPortRangeList.of_xml)
+          (Xml.child xml_arg0 "PortRange") in
+      let subnetIds =
+        (Option.map ~f:CreateVerifiedAccessEndpointSubnetIdList.of_xml)
+          (Xml.child xml_arg0 "SubnetId") in
+      let loadBalancerArn =
+        (Option.map ~f:LoadBalancerArn.of_xml)
+          (Xml.child xml_arg0 "LoadBalancerArn") in
+      let port =
+        (Option.map ~f:VerifiedAccessEndpointPortNumber.of_xml)
+          (Xml.child xml_arg0 "Port") in
+      let protocol =
+        (Option.map ~f:VerifiedAccessEndpointProtocol.of_xml)
+          (Xml.child xml_arg0 "Protocol") in
+      make ?portRanges ?subnetIds ?loadBalancerArn ?port ?protocol ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let portRanges =
+        field_map json__ "PortRanges"
+          CreateVerifiedAccessEndpointPortRangeList.of_json in
+      let subnetIds =
+        field_map json__ "SubnetIds"
+          CreateVerifiedAccessEndpointSubnetIdList.of_json in
+      let loadBalancerArn =
+        field_map json__ "LoadBalancerArn" LoadBalancerArn.of_json in
+      let port =
+        field_map json__ "Port" VerifiedAccessEndpointPortNumber.of_json in
+      let protocol =
+        field_map json__ "Protocol" VerifiedAccessEndpointProtocol.of_json in
+      make ?portRanges ?subnetIds ?loadBalancerArn ?port ?protocol ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the load balancer options when creating an Amazon Web Services Verified Access endpoint using the load-balancer type."]
+module CreateVerifiedAccessEndpointRdsOptions =
+  struct
+    type nonrec t =
+      {
+      protocol: VerifiedAccessEndpointProtocol.t option
+        [@ocaml.doc "The protocol."];
+      port: VerifiedAccessEndpointPortNumber.t option
+        [@ocaml.doc "The port."];
+      rdsDbInstanceArn: RdsDbInstanceArn.t option
+        [@ocaml.doc "The ARN of the RDS instance."];
+      rdsDbClusterArn: RdsDbClusterArn.t option
+        [@ocaml.doc "The ARN of the DB cluster."];
+      rdsDbProxyArn: RdsDbProxyArn.t option
+        [@ocaml.doc "The ARN of the RDS proxy."];
+      rdsEndpoint: String_.t option [@ocaml.doc "The RDS endpoint."];
+      subnetIds: CreateVerifiedAccessEndpointSubnetIdList.t option
+        [@ocaml.doc
+          "The IDs of the subnets. You can specify only one subnet per Availability Zone."]}
+    let make ?protocol =
+      fun ?port ->
+        fun ?rdsDbInstanceArn ->
+          fun ?rdsDbClusterArn ->
+            fun ?rdsDbProxyArn ->
+              fun ?rdsEndpoint ->
+                fun ?subnetIds ->
+                  fun () ->
+                    {
+                      protocol;
+                      port;
+                      rdsDbInstanceArn;
+                      rdsDbClusterArn;
+                      rdsDbProxyArn;
+                      rdsEndpoint;
+                      subnetIds
+                    }
+    let to_value x =
+      structure_to_value
+        [("Protocol",
+           (Option.map x.protocol ~f:VerifiedAccessEndpointProtocol.to_value));
+        ("Port",
+          (Option.map x.port ~f:VerifiedAccessEndpointPortNumber.to_value));
+        ("RdsDbInstanceArn",
+          (Option.map x.rdsDbInstanceArn ~f:RdsDbInstanceArn.to_value));
+        ("RdsDbClusterArn",
+          (Option.map x.rdsDbClusterArn ~f:RdsDbClusterArn.to_value));
+        ("RdsDbProxyArn",
+          (Option.map x.rdsDbProxyArn ~f:RdsDbProxyArn.to_value));
+        ("RdsEndpoint", (Option.map x.rdsEndpoint ~f:String_.to_value));
+        ("SubnetId",
+          (Option.map x.subnetIds
+             ~f:CreateVerifiedAccessEndpointSubnetIdList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subnetIds =
+        (Option.map ~f:CreateVerifiedAccessEndpointSubnetIdList.of_xml)
+          (Xml.child xml_arg0 "SubnetId") in
+      let rdsEndpoint =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RdsEndpoint") in
+      let rdsDbProxyArn =
+        (Option.map ~f:RdsDbProxyArn.of_xml)
+          (Xml.child xml_arg0 "RdsDbProxyArn") in
+      let rdsDbClusterArn =
+        (Option.map ~f:RdsDbClusterArn.of_xml)
+          (Xml.child xml_arg0 "RdsDbClusterArn") in
+      let rdsDbInstanceArn =
+        (Option.map ~f:RdsDbInstanceArn.of_xml)
+          (Xml.child xml_arg0 "RdsDbInstanceArn") in
+      let port =
+        (Option.map ~f:VerifiedAccessEndpointPortNumber.of_xml)
+          (Xml.child xml_arg0 "Port") in
+      let protocol =
+        (Option.map ~f:VerifiedAccessEndpointProtocol.of_xml)
+          (Xml.child xml_arg0 "Protocol") in
+      make ?subnetIds ?rdsEndpoint ?rdsDbProxyArn ?rdsDbClusterArn
+        ?rdsDbInstanceArn ?port ?protocol ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subnetIds =
+        field_map json__ "SubnetIds"
+          CreateVerifiedAccessEndpointSubnetIdList.of_json in
+      let rdsEndpoint = field_map json__ "RdsEndpoint" String_.of_json in
+      let rdsDbProxyArn =
+        field_map json__ "RdsDbProxyArn" RdsDbProxyArn.of_json in
+      let rdsDbClusterArn =
+        field_map json__ "RdsDbClusterArn" RdsDbClusterArn.of_json in
+      let rdsDbInstanceArn =
+        field_map json__ "RdsDbInstanceArn" RdsDbInstanceArn.of_json in
+      let port =
+        field_map json__ "Port" VerifiedAccessEndpointPortNumber.of_json in
+      let protocol =
+        field_map json__ "Protocol" VerifiedAccessEndpointProtocol.of_json in
+      make ?subnetIds ?rdsEndpoint ?rdsDbProxyArn ?rdsDbClusterArn
+        ?rdsDbInstanceArn ?port ?protocol ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the RDS options for a Verified Access endpoint."]
 module CreateTransitGatewayVpcAttachmentRequestOptions =
   struct
     type nonrec t =
       {
       dnsSupport: DnsSupportValue.t option
         [@ocaml.doc "Enable or disable DNS support. The default is enable."];
+      securityGroupReferencingSupport:
+        SecurityGroupReferencingSupportValue.t option
+        [@ocaml.doc
+          "Enables you to reference a security group across VPCs attached to a transit gateway to simplify security group management. This option is set to enable by default. However, at the transit gateway level the default is set to disable. For more information about security group referencing, see Security group referencing in the Amazon Web Services Transit Gateways Guide."];
       ipv6Support: Ipv6SupportValue.t option
         [@ocaml.doc
           "Enable or disable IPv6 support. The default is disable."];
@@ -7887,13 +13403,23 @@ module CreateTransitGatewayVpcAttachmentRequestOptions =
         [@ocaml.doc
           "Enable or disable support for appliance mode. If enabled, a traffic flow between a source and destination uses the same Availability Zone for the VPC attachment for the lifetime of that flow. The default is disable."]}
     let make ?dnsSupport =
-      fun ?ipv6Support ->
-        fun ?applianceModeSupport ->
-          fun () -> { dnsSupport; ipv6Support; applianceModeSupport }
+      fun ?securityGroupReferencingSupport ->
+        fun ?ipv6Support ->
+          fun ?applianceModeSupport ->
+            fun () ->
+              {
+                dnsSupport;
+                securityGroupReferencingSupport;
+                ipv6Support;
+                applianceModeSupport
+              }
     let to_value x =
       structure_to_value
         [("DnsSupport",
            (Option.map x.dnsSupport ~f:DnsSupportValue.to_value));
+        ("SecurityGroupReferencingSupport",
+          (Option.map x.securityGroupReferencingSupport
+             ~f:SecurityGroupReferencingSupportValue.to_value));
         ("Ipv6Support",
           (Option.map x.ipv6Support ~f:Ipv6SupportValue.to_value));
         ("ApplianceModeSupport",
@@ -7907,18 +13433,27 @@ module CreateTransitGatewayVpcAttachmentRequestOptions =
       let ipv6Support =
         (Option.map ~f:Ipv6SupportValue.of_xml)
           (Xml.child xml_arg0 "Ipv6Support") in
+      let securityGroupReferencingSupport =
+        (Option.map ~f:SecurityGroupReferencingSupportValue.of_xml)
+          (Xml.child xml_arg0 "SecurityGroupReferencingSupport") in
       let dnsSupport =
         (Option.map ~f:DnsSupportValue.of_xml)
           (Xml.child xml_arg0 "DnsSupport") in
-      make ?applianceModeSupport ?ipv6Support ?dnsSupport ()
+      make ?applianceModeSupport ?ipv6Support
+        ?securityGroupReferencingSupport ?dnsSupport ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applianceModeSupport =
-        field_map json "ApplianceModeSupport"
+        field_map json__ "ApplianceModeSupport"
           ApplianceModeSupportValue.of_json in
-      let ipv6Support = field_map json "Ipv6Support" Ipv6SupportValue.of_json in
-      let dnsSupport = field_map json "DnsSupport" DnsSupportValue.of_json in
-      make ?applianceModeSupport ?ipv6Support ?dnsSupport ()
+      let ipv6Support =
+        field_map json__ "Ipv6Support" Ipv6SupportValue.of_json in
+      let securityGroupReferencingSupport =
+        field_map json__ "SecurityGroupReferencingSupport"
+          SecurityGroupReferencingSupportValue.of_json in
+      let dnsSupport = field_map json__ "DnsSupport" DnsSupportValue.of_json in
+      make ?applianceModeSupport ?ipv6Support
+        ?securityGroupReferencingSupport ?dnsSupport ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the options for a VPC attachment."]
 module TransitGatewayRequestOptions =
@@ -7944,6 +13479,10 @@ module TransitGatewayRequestOptions =
           "Enable or disable Equal Cost Multipath Protocol support. Enabled by default."];
       dnsSupport: DnsSupportValue.t option
         [@ocaml.doc "Enable or disable DNS support. Enabled by default."];
+      securityGroupReferencingSupport:
+        SecurityGroupReferencingSupportValue.t option
+        [@ocaml.doc
+          "Enables you to reference a security group across VPCs attached to a transit gateway to simplify security group management. This option is disabled by default. For more information about security group referencing, see Security group referencing in the Amazon Web Services Transit Gateways Guide."];
       multicastSupport: MulticastSupportValue.t option
         [@ocaml.doc
           "Indicates whether multicast is enabled on the transit gateway"];
@@ -7956,19 +13495,21 @@ module TransitGatewayRequestOptions =
           fun ?defaultRouteTablePropagation ->
             fun ?vpnEcmpSupport ->
               fun ?dnsSupport ->
-                fun ?multicastSupport ->
-                  fun ?transitGatewayCidrBlocks ->
-                    fun () ->
-                      {
-                        amazonSideAsn;
-                        autoAcceptSharedAttachments;
-                        defaultRouteTableAssociation;
-                        defaultRouteTablePropagation;
-                        vpnEcmpSupport;
-                        dnsSupport;
-                        multicastSupport;
-                        transitGatewayCidrBlocks
-                      }
+                fun ?securityGroupReferencingSupport ->
+                  fun ?multicastSupport ->
+                    fun ?transitGatewayCidrBlocks ->
+                      fun () ->
+                        {
+                          amazonSideAsn;
+                          autoAcceptSharedAttachments;
+                          defaultRouteTableAssociation;
+                          defaultRouteTablePropagation;
+                          vpnEcmpSupport;
+                          dnsSupport;
+                          securityGroupReferencingSupport;
+                          multicastSupport;
+                          transitGatewayCidrBlocks
+                        }
     let to_value x =
       structure_to_value
         [("AmazonSideAsn", (Option.map x.amazonSideAsn ~f:Long.to_value));
@@ -7984,6 +13525,9 @@ module TransitGatewayRequestOptions =
         ("VpnEcmpSupport",
           (Option.map x.vpnEcmpSupport ~f:VpnEcmpSupportValue.to_value));
         ("DnsSupport", (Option.map x.dnsSupport ~f:DnsSupportValue.to_value));
+        ("SecurityGroupReferencingSupport",
+          (Option.map x.securityGroupReferencingSupport
+             ~f:SecurityGroupReferencingSupportValue.to_value));
         ("MulticastSupport",
           (Option.map x.multicastSupport ~f:MulticastSupportValue.to_value));
         ("TransitGatewayCidrBlocks",
@@ -7997,6 +13541,9 @@ module TransitGatewayRequestOptions =
       let multicastSupport =
         (Option.map ~f:MulticastSupportValue.of_xml)
           (Xml.child xml_arg0 "MulticastSupport") in
+      let securityGroupReferencingSupport =
+        (Option.map ~f:SecurityGroupReferencingSupportValue.of_xml)
+          (Xml.child xml_arg0 "SecurityGroupReferencingSupport") in
       let dnsSupport =
         (Option.map ~f:DnsSupportValue.of_xml)
           (Xml.child xml_arg0 "DnsSupport") in
@@ -8014,36 +13561,65 @@ module TransitGatewayRequestOptions =
           (Xml.child xml_arg0 "AutoAcceptSharedAttachments") in
       let amazonSideAsn =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "AmazonSideAsn") in
-      make ?transitGatewayCidrBlocks ?multicastSupport ?dnsSupport
-        ?vpnEcmpSupport ?defaultRouteTablePropagation
-        ?defaultRouteTableAssociation ?autoAcceptSharedAttachments
-        ?amazonSideAsn ()
+      make ?transitGatewayCidrBlocks ?multicastSupport
+        ?securityGroupReferencingSupport ?dnsSupport ?vpnEcmpSupport
+        ?defaultRouteTablePropagation ?defaultRouteTableAssociation
+        ?autoAcceptSharedAttachments ?amazonSideAsn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transitGatewayCidrBlocks =
-        field_map json "TransitGatewayCidrBlocks"
+        field_map json__ "TransitGatewayCidrBlocks"
           TransitGatewayCidrBlockStringList.of_json in
       let multicastSupport =
-        field_map json "MulticastSupport" MulticastSupportValue.of_json in
-      let dnsSupport = field_map json "DnsSupport" DnsSupportValue.of_json in
+        field_map json__ "MulticastSupport" MulticastSupportValue.of_json in
+      let securityGroupReferencingSupport =
+        field_map json__ "SecurityGroupReferencingSupport"
+          SecurityGroupReferencingSupportValue.of_json in
+      let dnsSupport = field_map json__ "DnsSupport" DnsSupportValue.of_json in
       let vpnEcmpSupport =
-        field_map json "VpnEcmpSupport" VpnEcmpSupportValue.of_json in
+        field_map json__ "VpnEcmpSupport" VpnEcmpSupportValue.of_json in
       let defaultRouteTablePropagation =
-        field_map json "DefaultRouteTablePropagation"
+        field_map json__ "DefaultRouteTablePropagation"
           DefaultRouteTablePropagationValue.of_json in
       let defaultRouteTableAssociation =
-        field_map json "DefaultRouteTableAssociation"
+        field_map json__ "DefaultRouteTableAssociation"
           DefaultRouteTableAssociationValue.of_json in
       let autoAcceptSharedAttachments =
-        field_map json "AutoAcceptSharedAttachments"
+        field_map json__ "AutoAcceptSharedAttachments"
           AutoAcceptSharedAttachmentsValue.of_json in
-      let amazonSideAsn = field_map json "AmazonSideAsn" Long.of_json in
-      make ?transitGatewayCidrBlocks ?multicastSupport ?dnsSupport
-        ?vpnEcmpSupport ?defaultRouteTablePropagation
-        ?defaultRouteTableAssociation ?autoAcceptSharedAttachments
-        ?amazonSideAsn ()
+      let amazonSideAsn = field_map json__ "AmazonSideAsn" Long.of_json in
+      make ?transitGatewayCidrBlocks ?multicastSupport
+        ?securityGroupReferencingSupport ?dnsSupport ?vpnEcmpSupport
+        ?defaultRouteTablePropagation ?defaultRouteTableAssociation
+        ?autoAcceptSharedAttachments ?amazonSideAsn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the options for a transit gateway."]
+module CreateTransitGatewayPeeringAttachmentRequestOptions =
+  struct
+    type nonrec t =
+      {
+      dynamicRouting: DynamicRoutingValue.t option
+        [@ocaml.doc
+          "Indicates whether dynamic routing is enabled or disabled."]}
+    let make ?dynamicRouting = fun () -> { dynamicRouting }
+    let to_value x =
+      structure_to_value
+        [("DynamicRouting",
+           (Option.map x.dynamicRouting ~f:DynamicRoutingValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dynamicRouting =
+        (Option.map ~f:DynamicRoutingValue.of_xml)
+          (Xml.child xml_arg0 "DynamicRouting") in
+      make ?dynamicRouting ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dynamicRouting =
+        field_map json__ "DynamicRouting" DynamicRoutingValue.of_json in
+      make ?dynamicRouting ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes whether dynamic routing is enabled or disabled for the transit gateway peering request."]
 module TransitAssociationGatewayId =
   struct
     type nonrec t = string
@@ -8104,15 +13680,15 @@ module CreateTransitGatewayMulticastDomainRequestOptions =
       make ?autoAcceptSharedAssociations ?staticSourcesSupport ?igmpv2Support
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoAcceptSharedAssociations =
-        field_map json "AutoAcceptSharedAssociations"
+        field_map json__ "AutoAcceptSharedAssociations"
           AutoAcceptSharedAssociationsValue.of_json in
       let staticSourcesSupport =
-        field_map json "StaticSourcesSupport"
+        field_map json__ "StaticSourcesSupport"
           StaticSourcesSupportValue.of_json in
       let igmpv2Support =
-        field_map json "Igmpv2Support" Igmpv2SupportValue.of_json in
+        field_map json__ "Igmpv2Support" Igmpv2SupportValue.of_json in
       make ?autoAcceptSharedAssociations ?staticSourcesSupport ?igmpv2Support
         ()
     let to_json v = composed_to_json to_value v
@@ -8134,8 +13710,8 @@ module CreateTransitGatewayConnectRequestOptions =
           (Xml.child_exn ~context:context_ xml_arg0 "Protocol") in
       make ~protocol ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let protocol = field_map_exn json "Protocol" ProtocolValue.of_json in
+    let of_json json__ =
+      let protocol = field_map_exn json__ "Protocol" ProtocolValue.of_json in
       make ~protocol ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The options for a Connect attachment."]
@@ -8155,14 +13731,18 @@ module TransitGatewayConnectRequestBgpOptions =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "PeerAsn") in
       make ?peerAsn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let peerAsn = field_map json "PeerAsn" Long.of_json in make ?peerAsn ()
+    let of_json json__ =
+      let peerAsn = field_map json__ "PeerAsn" Long.of_json in
+      make ?peerAsn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The BGP options for the Connect attachment."]
 module S3ObjectTagList =
   struct
     type nonrec t = S3ObjectTag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:S3ObjectTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8187,6 +13767,9 @@ module SnapshotSet =
   struct
     type nonrec t = SnapshotInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SnapshotInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8228,39 +13811,122 @@ module InstanceSpecification =
   struct
     type nonrec t =
       {
-      instanceId: InstanceId.t option
+      instanceId: InstanceIdWithVolumeResolver.t
         [@ocaml.doc
           "The instance to specify which volumes should be snapshotted."];
       excludeBootVolume: Boolean.t option
-        [@ocaml.doc "Excludes the root volume from being snapshotted."]}
-    let make ?instanceId =
-      fun ?excludeBootVolume -> fun () -> { instanceId; excludeBootVolume }
+        [@ocaml.doc "Excludes the root volume from being snapshotted."];
+      excludeDataVolumeIds: VolumeIdStringList.t option
+        [@ocaml.doc
+          "The IDs of the data (non-root) volumes to exclude from the multi-volume snapshot set. If you specify the ID of the root volume, the request fails. To exclude the root volume, use ExcludeBootVolume. You can specify up to 40 volume IDs per request."]}
+    let context_ = "InstanceSpecification"
+    let make ?excludeBootVolume =
+      fun ?excludeDataVolumeIds ->
+        fun ~instanceId ->
+          fun () -> { excludeBootVolume; excludeDataVolumeIds; instanceId }
     let to_value x =
       structure_to_value
-        [("InstanceId", (Option.map x.instanceId ~f:InstanceId.to_value));
+        [("InstanceId",
+           (Some (InstanceIdWithVolumeResolver.to_value x.instanceId)));
         ("ExcludeBootVolume",
-          (Option.map x.excludeBootVolume ~f:Boolean.to_value))]
+          (Option.map x.excludeBootVolume ~f:Boolean.to_value));
+        ("ExcludeDataVolumeId",
+          (Option.map x.excludeDataVolumeIds ~f:VolumeIdStringList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let excludeDataVolumeIds =
+        (Option.map ~f:VolumeIdStringList.of_xml)
+          (Xml.child xml_arg0 "ExcludeDataVolumeId") in
       let excludeBootVolume =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "ExcludeBootVolume") in
       let instanceId =
-        (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "InstanceId") in
-      make ?excludeBootVolume ?instanceId ()
+        InstanceIdWithVolumeResolver.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
+      make ?excludeDataVolumeIds ?excludeBootVolume ~instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let excludeDataVolumeIds =
+        field_map json__ "ExcludeDataVolumeIds" VolumeIdStringList.of_json in
       let excludeBootVolume =
-        field_map json "ExcludeBootVolume" Boolean.of_json in
-      let instanceId = field_map json "InstanceId" InstanceId.of_json in
-      make ?excludeBootVolume ?instanceId ()
+        field_map json__ "ExcludeBootVolume" Boolean.of_json in
+      let instanceId =
+        field_map_exn json__ "InstanceId"
+          InstanceIdWithVolumeResolver.of_json in
+      make ?excludeDataVolumeIds ?excludeBootVolume ~instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The instance details to specify which volumes should be snapshotted."]
+module SnapshotLocationEnum =
+  struct
+    type nonrec t =
+      | Regional 
+      | Local 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Regional -> "regional"
+      | Local -> "local"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "regional" -> Regional
+      | "local" -> Local
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SnapshotLocationEnum" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SnapshotLocationEnum" j)
+    let to_json = simple_to_json to_value
+  end
+module RouteServerBgpOptionsRequest =
+  struct
+    type nonrec t =
+      {
+      peerAsn: Long.t
+        [@ocaml.doc
+          "The Border Gateway Protocol (BGP) Autonomous System Number (ASN) for the appliance. Valid values are from 1 to 4294967295. We recommend using a private ASN in the 64512\226\128\14765534 (16-bit ASN) or 4200000000\226\128\1474294967294 (32-bit ASN) range."];
+      peerLivenessDetection: RouteServerPeerLivenessMode.t option
+        [@ocaml.doc
+          "The requested liveness detection protocol for the BGP peer. bgp-keepalive: The standard BGP keep alive mechanism (RFC4271) that is stable but may take longer to fail-over in cases of network impact or router failure. bfd: An additional Bidirectional Forwarding Detection (BFD) protocol (RFC5880) that enables fast failover by using more sensitive liveness detection. Defaults to bgp-keepalive."]}
+    let context_ = "RouteServerBgpOptionsRequest"
+    let make ?peerLivenessDetection =
+      fun ~peerAsn -> fun () -> { peerLivenessDetection; peerAsn }
+    let to_value x =
+      structure_to_value
+        [("PeerAsn", (Some (Long.to_value x.peerAsn)));
+        ("PeerLivenessDetection",
+          (Option.map x.peerLivenessDetection
+             ~f:RouteServerPeerLivenessMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let peerLivenessDetection =
+        (Option.map ~f:RouteServerPeerLivenessMode.of_xml)
+          (Xml.child xml_arg0 "PeerLivenessDetection") in
+      let peerAsn =
+        Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PeerAsn") in
+      make ?peerLivenessDetection ~peerAsn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let peerLivenessDetection =
+        field_map json__ "PeerLivenessDetection"
+          RouteServerPeerLivenessMode.of_json in
+      let peerAsn = field_map_exn json__ "PeerAsn" Long.of_json in
+      make ?peerLivenessDetection ~peerAsn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The BGP configuration options requested for a route server peer."]
 module PriceScheduleSpecificationList =
   struct
     type nonrec t = PriceScheduleSpecification.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PriceScheduleSpecification.to_value)) |>
         (fun x -> `List x)
@@ -8287,6 +13953,7 @@ module NetworkInterfaceCreationType =
   struct
     type nonrec t =
       | Efa 
+      | Efa_only 
       | Branch 
       | Trunk 
       | Non_static_id of string 
@@ -8294,12 +13961,14 @@ module NetworkInterfaceCreationType =
     let to_string =
       function
       | Efa -> "efa"
+      | Efa_only -> "efa-only"
       | Branch -> "branch"
       | Trunk -> "trunk"
       | Non_static_id s -> s
     let of_string =
       function
       | "efa" -> Efa
+      | "efa-only" -> Efa_only
       | "branch" -> Branch
       | "trunk" -> Trunk
       | x -> Non_static_id x
@@ -8327,10 +13996,77 @@ module NetworkInsightsResourceId =
     let of_json j = string_of_json ~kind:"NetworkInsightsResourceId" j
     let to_json = simple_to_json to_value
   end
+module PathRequestFilter =
+  struct
+    type nonrec t =
+      {
+      sourceAddress: IpAddress.t option
+        [@ocaml.doc "The source IPv4 address."];
+      sourcePortRange: RequestFilterPortRange.t option
+        [@ocaml.doc "The source port range."];
+      destinationAddress: IpAddress.t option
+        [@ocaml.doc "The destination IPv4 address."];
+      destinationPortRange: RequestFilterPortRange.t option
+        [@ocaml.doc "The destination port range."]}
+    let make ?sourceAddress =
+      fun ?sourcePortRange ->
+        fun ?destinationAddress ->
+          fun ?destinationPortRange ->
+            fun () ->
+              {
+                sourceAddress;
+                sourcePortRange;
+                destinationAddress;
+                destinationPortRange
+              }
+    let to_value x =
+      structure_to_value
+        [("SourceAddress",
+           (Option.map x.sourceAddress ~f:IpAddress.to_value));
+        ("SourcePortRange",
+          (Option.map x.sourcePortRange ~f:RequestFilterPortRange.to_value));
+        ("DestinationAddress",
+          (Option.map x.destinationAddress ~f:IpAddress.to_value));
+        ("DestinationPortRange",
+          (Option.map x.destinationPortRange
+             ~f:RequestFilterPortRange.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let destinationPortRange =
+        (Option.map ~f:RequestFilterPortRange.of_xml)
+          (Xml.child xml_arg0 "DestinationPortRange") in
+      let destinationAddress =
+        (Option.map ~f:IpAddress.of_xml)
+          (Xml.child xml_arg0 "DestinationAddress") in
+      let sourcePortRange =
+        (Option.map ~f:RequestFilterPortRange.of_xml)
+          (Xml.child xml_arg0 "SourcePortRange") in
+      let sourceAddress =
+        (Option.map ~f:IpAddress.of_xml) (Xml.child xml_arg0 "SourceAddress") in
+      make ?destinationPortRange ?destinationAddress ?sourcePortRange
+        ?sourceAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let destinationPortRange =
+        field_map json__ "DestinationPortRange"
+          RequestFilterPortRange.of_json in
+      let destinationAddress =
+        field_map json__ "DestinationAddress" IpAddress.of_json in
+      let sourcePortRange =
+        field_map json__ "SourcePortRange" RequestFilterPortRange.of_json in
+      let sourceAddress = field_map json__ "SourceAddress" IpAddress.of_json in
+      make ?destinationPortRange ?destinationAddress ?sourcePortRange
+        ?sourceAddress ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a set of filters for a path analysis. Use path filters to scope the analysis when there can be multiple resulting paths."]
 module AccessScopePathListRequest =
   struct
     type nonrec t = AccessScopePathRequest.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccessScopePathRequest.to_value)) |>
         (fun x -> `List x)
@@ -8353,6 +14089,181 @@ module AccessScopePathListRequest =
         ~of_json:AccessScopePathRequest.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AvailabilityZoneAddresses =
+  struct
+    type nonrec t = AvailabilityZoneAddress.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AvailabilityZoneAddress.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AvailabilityZoneAddress.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AvailabilityZoneAddresses"
+        ~of_json:AvailabilityZoneAddress.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PrivateIpAddressCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:31) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PrivateIpAddressCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MacSystemIntegrityProtectionConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      appleInternal: MacSystemIntegrityProtectionSettingStatus.t option
+        [@ocaml.doc "Enables or disables Apple Internal."];
+      baseSystem: MacSystemIntegrityProtectionSettingStatus.t option
+        [@ocaml.doc "Enables or disables Base System."];
+      debuggingRestrictions:
+        MacSystemIntegrityProtectionSettingStatus.t option
+        [@ocaml.doc "Enables or disables Debugging Restrictions."];
+      dTraceRestrictions: MacSystemIntegrityProtectionSettingStatus.t option
+        [@ocaml.doc "Enables or disables Dtrace Restrictions."];
+      filesystemProtections:
+        MacSystemIntegrityProtectionSettingStatus.t option
+        [@ocaml.doc "Enables or disables Filesystem Protections."];
+      kextSigning: MacSystemIntegrityProtectionSettingStatus.t option
+        [@ocaml.doc "Enables or disables Kext Signing."];
+      nvramProtections: MacSystemIntegrityProtectionSettingStatus.t option
+        [@ocaml.doc "Enables or disables Nvram Protections."]}
+    let make ?appleInternal =
+      fun ?baseSystem ->
+        fun ?debuggingRestrictions ->
+          fun ?dTraceRestrictions ->
+            fun ?filesystemProtections ->
+              fun ?kextSigning ->
+                fun ?nvramProtections ->
+                  fun () ->
+                    {
+                      appleInternal;
+                      baseSystem;
+                      debuggingRestrictions;
+                      dTraceRestrictions;
+                      filesystemProtections;
+                      kextSigning;
+                      nvramProtections
+                    }
+    let to_value x =
+      structure_to_value
+        [("AppleInternal",
+           (Option.map x.appleInternal
+              ~f:MacSystemIntegrityProtectionSettingStatus.to_value));
+        ("BaseSystem",
+          (Option.map x.baseSystem
+             ~f:MacSystemIntegrityProtectionSettingStatus.to_value));
+        ("DebuggingRestrictions",
+          (Option.map x.debuggingRestrictions
+             ~f:MacSystemIntegrityProtectionSettingStatus.to_value));
+        ("DTraceRestrictions",
+          (Option.map x.dTraceRestrictions
+             ~f:MacSystemIntegrityProtectionSettingStatus.to_value));
+        ("FilesystemProtections",
+          (Option.map x.filesystemProtections
+             ~f:MacSystemIntegrityProtectionSettingStatus.to_value));
+        ("KextSigning",
+          (Option.map x.kextSigning
+             ~f:MacSystemIntegrityProtectionSettingStatus.to_value));
+        ("NvramProtections",
+          (Option.map x.nvramProtections
+             ~f:MacSystemIntegrityProtectionSettingStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nvramProtections =
+        (Option.map ~f:MacSystemIntegrityProtectionSettingStatus.of_xml)
+          (Xml.child xml_arg0 "NvramProtections") in
+      let kextSigning =
+        (Option.map ~f:MacSystemIntegrityProtectionSettingStatus.of_xml)
+          (Xml.child xml_arg0 "KextSigning") in
+      let filesystemProtections =
+        (Option.map ~f:MacSystemIntegrityProtectionSettingStatus.of_xml)
+          (Xml.child xml_arg0 "FilesystemProtections") in
+      let dTraceRestrictions =
+        (Option.map ~f:MacSystemIntegrityProtectionSettingStatus.of_xml)
+          (Xml.child xml_arg0 "DTraceRestrictions") in
+      let debuggingRestrictions =
+        (Option.map ~f:MacSystemIntegrityProtectionSettingStatus.of_xml)
+          (Xml.child xml_arg0 "DebuggingRestrictions") in
+      let baseSystem =
+        (Option.map ~f:MacSystemIntegrityProtectionSettingStatus.of_xml)
+          (Xml.child xml_arg0 "BaseSystem") in
+      let appleInternal =
+        (Option.map ~f:MacSystemIntegrityProtectionSettingStatus.of_xml)
+          (Xml.child xml_arg0 "AppleInternal") in
+      make ?nvramProtections ?kextSigning ?filesystemProtections
+        ?dTraceRestrictions ?debuggingRestrictions ?baseSystem ?appleInternal
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nvramProtections =
+        field_map json__ "NvramProtections"
+          MacSystemIntegrityProtectionSettingStatus.of_json in
+      let kextSigning =
+        field_map json__ "KextSigning"
+          MacSystemIntegrityProtectionSettingStatus.of_json in
+      let filesystemProtections =
+        field_map json__ "FilesystemProtections"
+          MacSystemIntegrityProtectionSettingStatus.of_json in
+      let dTraceRestrictions =
+        field_map json__ "DTraceRestrictions"
+          MacSystemIntegrityProtectionSettingStatus.of_json in
+      let debuggingRestrictions =
+        field_map json__ "DebuggingRestrictions"
+          MacSystemIntegrityProtectionSettingStatus.of_json in
+      let baseSystem =
+        field_map json__ "BaseSystem"
+          MacSystemIntegrityProtectionSettingStatus.of_json in
+      let appleInternal =
+        field_map json__ "AppleInternal"
+          MacSystemIntegrityProtectionSettingStatus.of_json in
+      make ?nvramProtections ?kextSigning ?filesystemProtections
+        ?dTraceRestrictions ?debuggingRestrictions ?baseSystem ?appleInternal
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a custom configuration for a System Integrity Protection (SIP) modification task."]
+module SensitiveMacCredentials =
+  struct
+    type nonrec t = string
+    let context_ = "SensitiveMacCredentials"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SensitiveMacCredentials" j
+    let to_json = simple_to_json to_value
+  end
 module ValidationWarning =
   struct
     type nonrec t =
@@ -8369,8 +14280,8 @@ module ValidationWarning =
         (Option.map ~f:ErrorSet.of_xml) (Xml.child xml_arg0 "errorSet") in
       make ?errors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errors = field_map json "Errors" ErrorSet.of_json in
+    let of_json json__ =
+      let errors = field_map json__ "Errors" ErrorSet.of_json in
       make ?errors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8381,7 +14292,7 @@ module RequestLaunchTemplateData =
       {
       kernelId: KernelId.t option
         [@ocaml.doc
-          "The ID of the kernel. We recommend that you use PV-GRUB instead of kernels and RAM disks. For more information, see User Provided Kernels in the Amazon Elastic Compute Cloud User Guide."];
+          "The ID of the kernel. We recommend that you use PV-GRUB instead of kernels and RAM disks. For more information, see User provided kernels in the Amazon Linux 2 User Guide."];
       ebsOptimized: Boolean.t option
         [@ocaml.doc
           "Indicates whether the instance is optimized for Amazon EBS I/O. This optimization provides dedicated throughput to Amazon EBS and an optimized configuration stack to provide optimal Amazon EBS I/O performance. This optimization isn't available with all instance types. Additional usage charges apply when using an EBS-optimized instance."];
@@ -8395,12 +14306,13 @@ module RequestLaunchTemplateData =
       networkInterfaces:
         LaunchTemplateInstanceNetworkInterfaceSpecificationRequestList.t
           option
+        [@ocaml.doc "The network interfaces for the instance."];
+      imageId: ImageId.t option
         [@ocaml.doc
-          "One or more network interfaces. If you specify a network interface, you must specify any security groups and subnets as part of the network interface."];
-      imageId: ImageId.t option [@ocaml.doc "The ID of the AMI."];
+          "The ID of the AMI in the format ami-0ac394d6a3example. Alternatively, you can specify a Systems Manager parameter, using one of the following formats. The Systems Manager parameter will resolve to an AMI ID on launch. To reference a public parameter: resolve:ssm:public-parameter To reference a parameter stored in the same account: resolve:ssm:parameter-name resolve:ssm:parameter-name:version-number resolve:ssm:parameter-name:label To reference a parameter shared from another Amazon Web Services account: resolve:ssm:parameter-ARN resolve:ssm:parameter-ARN:version-number resolve:ssm:parameter-ARN:label For more information, see Use a Systems Manager parameter instead of an AMI ID in the Amazon EC2 User Guide. If the launch template will be used for an EC2 Fleet or Spot Fleet, note the following: Only EC2 Fleets of type instant support specifying a Systems Manager parameter. For EC2 Fleets of type maintain or request, or for Spot Fleets, you must specify the AMI ID."];
       instanceType: InstanceType.t option
         [@ocaml.doc
-          "The instance type. For more information, see Instance Types in the Amazon Elastic Compute Cloud User Guide. If you specify InstanceTypes, you can't specify InstanceRequirements."];
+          "The instance type. For more information, see Amazon EC2 instance types in the Amazon EC2 User Guide. If you specify InstanceType, you can't specify InstanceRequirements."];
       keyName: KeyPairName.t option
         [@ocaml.doc
           "The name of the key pair. You can create a key pair using CreateKeyPair or ImportKeyPair. If you do not specify a key pair, you can't connect to the instance unless you choose an AMI that is configured to allow users another way to log in."];
@@ -8410,39 +14322,41 @@ module RequestLaunchTemplateData =
         [@ocaml.doc "The placement for the instance."];
       ramDiskId: RamdiskId.t option
         [@ocaml.doc
-          "The ID of the RAM disk. We recommend that you use PV-GRUB instead of kernels and RAM disks. For more information, see User Provided Kernels in the Amazon Elastic Compute Cloud User Guide."];
+          "The ID of the RAM disk. We recommend that you use PV-GRUB instead of kernels and RAM disks. For more information, see User provided kernels in the Amazon EC2 User Guide."];
       disableApiTermination: Boolean.t option
         [@ocaml.doc
-          "If you set this parameter to true, you can't terminate the instance using the Amazon EC2 console, CLI, or API; otherwise, you can. To change this attribute after launch, use ModifyInstanceAttribute. Alternatively, if you set InstanceInitiatedShutdownBehavior to terminate, you can terminate the instance by running the shutdown command from the instance."];
+          "Indicates whether termination protection is enabled for the instance. The default is false, which means that you can terminate the instance using the Amazon EC2 console, command line tools, or API. You can enable termination protection when you launch an instance, while the instance is running, or while the instance is stopped."];
       instanceInitiatedShutdownBehavior: ShutdownBehavior.t option
         [@ocaml.doc
           "Indicates whether an instance stops or terminates when you initiate shutdown from the instance (using the operating system command for system shutdown). Default: stop"];
-      userData: String_.t option
+      userData: SensitiveUserData.t option
         [@ocaml.doc
-          "The user data to make available to the instance. You must provide base64-encoded text. User data is limited to 16 KB. For more information, see Running Commands on Your Linux Instance at Launch (Linux) or Adding User Data (Windows). If you are creating the launch template for use with Batch, the user data must be provided in the MIME multi-part archive format. For more information, see Amazon EC2 user data in launch templates in the Batch User Guide."];
+          "The user data to make available to the instance. You must provide base64-encoded text. User data is limited to 16 KB. For more information, see Run commands when you launch an EC2 instance with user data input in the Amazon EC2 User Guide. If you are creating the launch template for use with Batch, the user data must be provided in the MIME multi-part archive format. For more information, see Amazon EC2 user data in launch templates in the Batch User Guide."];
       tagSpecifications: LaunchTemplateTagSpecificationRequestList.t option
         [@ocaml.doc
-          "The tags to apply to the resources during launch. You can only tag instances and volumes on launch. The specified tags are applied to all instances or volumes that are created during launch. To tag a resource after it has been created, see CreateTags."];
+          "The tags to apply to the resources that are created during instance launch. These tags are not applied to the launch template."];
       elasticGpuSpecifications: ElasticGpuSpecificationList.t option
-        [@ocaml.doc "An elastic GPU to associate with the instance."];
+        [@ocaml.doc
+          "Deprecated. Amazon Elastic Graphics reached end of life on January 8, 2024."];
       elasticInferenceAccelerators:
         LaunchTemplateElasticInferenceAcceleratorList.t option
-        [@ocaml.doc "The elastic inference accelerator for the instance."];
+        [@ocaml.doc
+          "Amazon Elastic Inference is no longer available. An elastic inference accelerator to associate with the instance. Elastic inference accelerators are a resource you can attach to your Amazon EC2 instances to accelerate your Deep Learning (DL) inference workloads. You cannot specify accelerators from different generations in the same request."];
       securityGroupIds: SecurityGroupIdStringList.t option
         [@ocaml.doc
-          "One or more security group IDs. You can create a security group using CreateSecurityGroup. You cannot specify both a security group ID and security name in the same request."];
+          "The IDs of the security groups. If you specify a network interface, you must specify any security groups as part of the network interface instead of using this parameter."];
       securityGroups: SecurityGroupStringList.t option
         [@ocaml.doc
-          "\\[EC2-Classic, default VPC\\] One or more security group names. For a nondefault VPC, you must use security group IDs instead. You cannot specify both a security group ID and security name in the same request."];
+          "The names of the security groups. For a nondefault VPC, you must use security group IDs instead. If you specify a network interface, you must specify any security groups as part of the network interface instead of using this parameter."];
       instanceMarketOptions:
         LaunchTemplateInstanceMarketOptionsRequest.t option
         [@ocaml.doc "The market (purchasing) option for the instances."];
       creditSpecification: CreditSpecificationRequest.t option
         [@ocaml.doc
-          "The credit option for CPU usage of the instance. Valid for T2, T3, or T3a instances only."];
+          "The credit option for CPU usage of the instance. Valid only for T instances."];
       cpuOptions: LaunchTemplateCpuOptionsRequest.t option
         [@ocaml.doc
-          "The CPU options for the instance. For more information, see Optimizing CPU Options in the Amazon Elastic Compute Cloud User Guide."];
+          "The CPU options for the instance. For more information, see CPU options for Amazon EC2 instances in the Amazon EC2 User Guide."];
       capacityReservationSpecification:
         LaunchTemplateCapacityReservationSpecificationRequest.t option
         [@ocaml.doc
@@ -8452,23 +14366,37 @@ module RequestLaunchTemplateData =
         [@ocaml.doc "The license configurations."];
       hibernationOptions: LaunchTemplateHibernationOptionsRequest.t option
         [@ocaml.doc
-          "Indicates whether an instance is enabled for hibernation. This parameter is valid only if the instance meets the hibernation prerequisites. For more information, see Hibernate your instance in the Amazon Elastic Compute Cloud User Guide."];
+          "Indicates whether an instance is enabled for hibernation. This parameter is valid only if the instance meets the hibernation prerequisites. For more information, see Hibernate your Amazon EC2 instance in the Amazon EC2 User Guide."];
       metadataOptions: LaunchTemplateInstanceMetadataOptionsRequest.t option
         [@ocaml.doc
-          "The metadata options for the instance. For more information, see Instance metadata and user data in the Amazon Elastic Compute Cloud User Guide."];
+          "The metadata options for the instance. For more information, see Configure the Instance Metadata Service options in the Amazon EC2 User Guide."];
       enclaveOptions: LaunchTemplateEnclaveOptionsRequest.t option
         [@ocaml.doc
-          "Indicates whether the instance is enabled for Amazon Web Services Nitro Enclaves. For more information, see What is Amazon Web Services Nitro Enclaves? in the Amazon Web Services Nitro Enclaves User Guide. You can't enable Amazon Web Services Nitro Enclaves and hibernation on the same instance."];
+          "Indicates whether the instance is enabled for Amazon Web Services Nitro Enclaves. For more information, see What is Nitro Enclaves? in the Amazon Web Services Nitro Enclaves User Guide. You can't enable Amazon Web Services Nitro Enclaves and hibernation on the same instance."];
       instanceRequirements: InstanceRequirementsRequest.t option
         [@ocaml.doc
-          "The attributes for the instance types. When you specify instance attributes, Amazon EC2 will identify instance types with these attributes. If you specify InstanceRequirements, you can't specify InstanceTypes."];
+          "The attributes for the instance types. When you specify instance attributes, Amazon EC2 will identify instance types with these attributes. You must specify VCpuCount and MemoryMiB. All other attributes are optional. Any unspecified optional attribute is set to its default. When you specify multiple attributes, you get instance types that satisfy all of the specified attributes. If you specify multiple values for an attribute, you get instance types that satisfy any of the specified values. To limit the list of instance types from which Amazon EC2 can identify matching instance types, you can use one of the following parameters, but not both in the same request: AllowedInstanceTypes - The instance types to include in the list. All other instance types are ignored, even if they match your specified attributes. ExcludedInstanceTypes - The instance types to exclude from the list, even if they match your specified attributes. If you specify InstanceRequirements, you can't specify InstanceType. Attribute-based instance type selection is only supported when using Auto Scaling groups, EC2 Fleet, and Spot Fleet to launch instances. If you plan to use the launch template in the launch instance wizard, or with the RunInstances API or AWS::EC2::Instance Amazon Web Services CloudFormation resource, you can't specify InstanceRequirements. For more information, see Specify attributes for instance type selection for EC2 Fleet or Spot Fleet and Spot placement score in the Amazon EC2 User Guide."];
       privateDnsNameOptions:
         LaunchTemplatePrivateDnsNameOptionsRequest.t option
         [@ocaml.doc
           "The options for the instance hostname. The default values are inherited from the subnet."];
       maintenanceOptions:
         LaunchTemplateInstanceMaintenanceOptionsRequest.t option
-        [@ocaml.doc "The maintenance options for the instance."]}
+        [@ocaml.doc "The maintenance options for the instance."];
+      disableApiStop: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether to enable the instance for stop protection. For more information, see Enable stop protection for your EC2 instances in the Amazon EC2 User Guide."];
+      operator: OperatorRequest.t option
+        [@ocaml.doc "The entity that manages the launch template."];
+      networkPerformanceOptions:
+        LaunchTemplateNetworkPerformanceOptionsRequest.t option
+        [@ocaml.doc
+          "Contains launch template settings to boost network performance for the type of workload that runs on your instance."];
+      secondaryInterfaces:
+        LaunchTemplateInstanceSecondaryInterfaceSpecificationRequestList.t
+          option
+        [@ocaml.doc
+          "The secondary interfaces to associate with instances launched from the template."]}
     let make ?kernelId =
       fun ?ebsOptimized ->
         fun ?iamInstanceProfile ->
@@ -8510,8 +14438,20 @@ module RequestLaunchTemplateData =
                                                               fun
                                                                 ?maintenanceOptions
                                                                 ->
-                                                                fun () ->
-                                                                  {
+                                                                fun
+                                                                  ?disableApiStop
+                                                                  ->
+                                                                  fun
+                                                                    ?operator
+                                                                    ->
+                                                                    fun
+                                                                    ?networkPerformanceOptions
+                                                                    ->
+                                                                    fun
+                                                                    ?secondaryInterfaces
+                                                                    ->
+                                                                    fun () ->
+                                                                    {
                                                                     kernelId;
                                                                     ebsOptimized;
                                                                     iamInstanceProfile;
@@ -8541,8 +14481,12 @@ module RequestLaunchTemplateData =
                                                                     enclaveOptions;
                                                                     instanceRequirements;
                                                                     privateDnsNameOptions;
-                                                                    maintenanceOptions
-                                                                  }
+                                                                    maintenanceOptions;
+                                                                    disableApiStop;
+                                                                    operator;
+                                                                    networkPerformanceOptions;
+                                                                    secondaryInterfaces
+                                                                    }
     let to_value x =
       structure_to_value
         [("KernelId", (Option.map x.kernelId ~f:KernelId.to_value));
@@ -8571,7 +14515,7 @@ module RequestLaunchTemplateData =
         ("InstanceInitiatedShutdownBehavior",
           (Option.map x.instanceInitiatedShutdownBehavior
              ~f:ShutdownBehavior.to_value));
-        ("UserData", (Option.map x.userData ~f:String_.to_value));
+        ("UserData", (Option.map x.userData ~f:SensitiveUserData.to_value));
         ("TagSpecification",
           (Option.map x.tagSpecifications
              ~f:LaunchTemplateTagSpecificationRequestList.to_value));
@@ -8618,9 +14562,29 @@ module RequestLaunchTemplateData =
              ~f:LaunchTemplatePrivateDnsNameOptionsRequest.to_value));
         ("MaintenanceOptions",
           (Option.map x.maintenanceOptions
-             ~f:LaunchTemplateInstanceMaintenanceOptionsRequest.to_value))]
+             ~f:LaunchTemplateInstanceMaintenanceOptionsRequest.to_value));
+        ("DisableApiStop", (Option.map x.disableApiStop ~f:Boolean.to_value));
+        ("Operator", (Option.map x.operator ~f:OperatorRequest.to_value));
+        ("NetworkPerformanceOptions",
+          (Option.map x.networkPerformanceOptions
+             ~f:LaunchTemplateNetworkPerformanceOptionsRequest.to_value));
+        ("SecondaryInterface",
+          (Option.map x.secondaryInterfaces
+             ~f:LaunchTemplateInstanceSecondaryInterfaceSpecificationRequestList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let secondaryInterfaces =
+        (Option.map
+           ~f:LaunchTemplateInstanceSecondaryInterfaceSpecificationRequestList.of_xml)
+          (Xml.child xml_arg0 "SecondaryInterface") in
+      let networkPerformanceOptions =
+        (Option.map ~f:LaunchTemplateNetworkPerformanceOptionsRequest.of_xml)
+          (Xml.child xml_arg0 "NetworkPerformanceOptions") in
+      let operator =
+        (Option.map ~f:OperatorRequest.of_xml)
+          (Xml.child xml_arg0 "Operator") in
+      let disableApiStop =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DisableApiStop") in
       let maintenanceOptions =
         (Option.map ~f:LaunchTemplateInstanceMaintenanceOptionsRequest.of_xml)
           (Xml.child xml_arg0 "MaintenanceOptions") in
@@ -8671,7 +14635,8 @@ module RequestLaunchTemplateData =
         (Option.map ~f:LaunchTemplateTagSpecificationRequestList.of_xml)
           (Xml.child xml_arg0 "TagSpecification") in
       let userData =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "UserData") in
+        (Option.map ~f:SensitiveUserData.of_xml)
+          (Xml.child xml_arg0 "UserData") in
       let instanceInitiatedShutdownBehavior =
         (Option.map ~f:ShutdownBehavior.of_xml)
           (Xml.child xml_arg0 "InstanceInitiatedShutdownBehavior") in
@@ -8708,127 +14673,205 @@ module RequestLaunchTemplateData =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "EbsOptimized") in
       let kernelId =
         (Option.map ~f:KernelId.of_xml) (Xml.child xml_arg0 "KernelId") in
-      make ?maintenanceOptions ?privateDnsNameOptions ?instanceRequirements
-        ?enclaveOptions ?metadataOptions ?hibernationOptions
-        ?licenseSpecifications ?capacityReservationSpecification ?cpuOptions
-        ?creditSpecification ?instanceMarketOptions ?securityGroups
-        ?securityGroupIds ?elasticInferenceAccelerators
-        ?elasticGpuSpecifications ?tagSpecifications ?userData
-        ?instanceInitiatedShutdownBehavior ?disableApiTermination ?ramDiskId
-        ?placement ?monitoring ?keyName ?instanceType ?imageId
-        ?networkInterfaces ?blockDeviceMappings ?iamInstanceProfile
-        ?ebsOptimized ?kernelId ()
+      make ?secondaryInterfaces ?networkPerformanceOptions ?operator
+        ?disableApiStop ?maintenanceOptions ?privateDnsNameOptions
+        ?instanceRequirements ?enclaveOptions ?metadataOptions
+        ?hibernationOptions ?licenseSpecifications
+        ?capacityReservationSpecification ?cpuOptions ?creditSpecification
+        ?instanceMarketOptions ?securityGroups ?securityGroupIds
+        ?elasticInferenceAccelerators ?elasticGpuSpecifications
+        ?tagSpecifications ?userData ?instanceInitiatedShutdownBehavior
+        ?disableApiTermination ?ramDiskId ?placement ?monitoring ?keyName
+        ?instanceType ?imageId ?networkInterfaces ?blockDeviceMappings
+        ?iamInstanceProfile ?ebsOptimized ?kernelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let secondaryInterfaces =
+        field_map json__ "SecondaryInterfaces"
+          LaunchTemplateInstanceSecondaryInterfaceSpecificationRequestList.of_json in
+      let networkPerformanceOptions =
+        field_map json__ "NetworkPerformanceOptions"
+          LaunchTemplateNetworkPerformanceOptionsRequest.of_json in
+      let operator = field_map json__ "Operator" OperatorRequest.of_json in
+      let disableApiStop = field_map json__ "DisableApiStop" Boolean.of_json in
       let maintenanceOptions =
-        field_map json "MaintenanceOptions"
+        field_map json__ "MaintenanceOptions"
           LaunchTemplateInstanceMaintenanceOptionsRequest.of_json in
       let privateDnsNameOptions =
-        field_map json "PrivateDnsNameOptions"
+        field_map json__ "PrivateDnsNameOptions"
           LaunchTemplatePrivateDnsNameOptionsRequest.of_json in
       let instanceRequirements =
-        field_map json "InstanceRequirements"
+        field_map json__ "InstanceRequirements"
           InstanceRequirementsRequest.of_json in
       let enclaveOptions =
-        field_map json "EnclaveOptions"
+        field_map json__ "EnclaveOptions"
           LaunchTemplateEnclaveOptionsRequest.of_json in
       let metadataOptions =
-        field_map json "MetadataOptions"
+        field_map json__ "MetadataOptions"
           LaunchTemplateInstanceMetadataOptionsRequest.of_json in
       let hibernationOptions =
-        field_map json "HibernationOptions"
+        field_map json__ "HibernationOptions"
           LaunchTemplateHibernationOptionsRequest.of_json in
       let licenseSpecifications =
-        field_map json "LicenseSpecifications"
+        field_map json__ "LicenseSpecifications"
           LaunchTemplateLicenseSpecificationListRequest.of_json in
       let capacityReservationSpecification =
-        field_map json "CapacityReservationSpecification"
+        field_map json__ "CapacityReservationSpecification"
           LaunchTemplateCapacityReservationSpecificationRequest.of_json in
       let cpuOptions =
-        field_map json "CpuOptions" LaunchTemplateCpuOptionsRequest.of_json in
+        field_map json__ "CpuOptions" LaunchTemplateCpuOptionsRequest.of_json in
       let creditSpecification =
-        field_map json "CreditSpecification"
+        field_map json__ "CreditSpecification"
           CreditSpecificationRequest.of_json in
       let instanceMarketOptions =
-        field_map json "InstanceMarketOptions"
+        field_map json__ "InstanceMarketOptions"
           LaunchTemplateInstanceMarketOptionsRequest.of_json in
       let securityGroups =
-        field_map json "SecurityGroups" SecurityGroupStringList.of_json in
+        field_map json__ "SecurityGroups" SecurityGroupStringList.of_json in
       let securityGroupIds =
-        field_map json "SecurityGroupIds" SecurityGroupIdStringList.of_json in
+        field_map json__ "SecurityGroupIds" SecurityGroupIdStringList.of_json in
       let elasticInferenceAccelerators =
-        field_map json "ElasticInferenceAccelerators"
+        field_map json__ "ElasticInferenceAccelerators"
           LaunchTemplateElasticInferenceAcceleratorList.of_json in
       let elasticGpuSpecifications =
-        field_map json "ElasticGpuSpecifications"
+        field_map json__ "ElasticGpuSpecifications"
           ElasticGpuSpecificationList.of_json in
       let tagSpecifications =
-        field_map json "TagSpecifications"
+        field_map json__ "TagSpecifications"
           LaunchTemplateTagSpecificationRequestList.of_json in
-      let userData = field_map json "UserData" String_.of_json in
+      let userData = field_map json__ "UserData" SensitiveUserData.of_json in
       let instanceInitiatedShutdownBehavior =
-        field_map json "InstanceInitiatedShutdownBehavior"
+        field_map json__ "InstanceInitiatedShutdownBehavior"
           ShutdownBehavior.of_json in
       let disableApiTermination =
-        field_map json "DisableApiTermination" Boolean.of_json in
-      let ramDiskId = field_map json "RamDiskId" RamdiskId.of_json in
+        field_map json__ "DisableApiTermination" Boolean.of_json in
+      let ramDiskId = field_map json__ "RamDiskId" RamdiskId.of_json in
       let placement =
-        field_map json "Placement" LaunchTemplatePlacementRequest.of_json in
+        field_map json__ "Placement" LaunchTemplatePlacementRequest.of_json in
       let monitoring =
-        field_map json "Monitoring" LaunchTemplatesMonitoringRequest.of_json in
-      let keyName = field_map json "KeyName" KeyPairName.of_json in
-      let instanceType = field_map json "InstanceType" InstanceType.of_json in
-      let imageId = field_map json "ImageId" ImageId.of_json in
+        field_map json__ "Monitoring"
+          LaunchTemplatesMonitoringRequest.of_json in
+      let keyName = field_map json__ "KeyName" KeyPairName.of_json in
+      let instanceType = field_map json__ "InstanceType" InstanceType.of_json in
+      let imageId = field_map json__ "ImageId" ImageId.of_json in
       let networkInterfaces =
-        field_map json "NetworkInterfaces"
+        field_map json__ "NetworkInterfaces"
           LaunchTemplateInstanceNetworkInterfaceSpecificationRequestList.of_json in
       let blockDeviceMappings =
-        field_map json "BlockDeviceMappings"
+        field_map json__ "BlockDeviceMappings"
           LaunchTemplateBlockDeviceMappingRequestList.of_json in
       let iamInstanceProfile =
-        field_map json "IamInstanceProfile"
+        field_map json__ "IamInstanceProfile"
           LaunchTemplateIamInstanceProfileSpecificationRequest.of_json in
-      let ebsOptimized = field_map json "EbsOptimized" Boolean.of_json in
-      let kernelId = field_map json "KernelId" KernelId.of_json in
-      make ?maintenanceOptions ?privateDnsNameOptions ?instanceRequirements
-        ?enclaveOptions ?metadataOptions ?hibernationOptions
-        ?licenseSpecifications ?capacityReservationSpecification ?cpuOptions
-        ?creditSpecification ?instanceMarketOptions ?securityGroups
-        ?securityGroupIds ?elasticInferenceAccelerators
-        ?elasticGpuSpecifications ?tagSpecifications ?userData
-        ?instanceInitiatedShutdownBehavior ?disableApiTermination ?ramDiskId
-        ?placement ?monitoring ?keyName ?instanceType ?imageId
-        ?networkInterfaces ?blockDeviceMappings ?iamInstanceProfile
-        ?ebsOptimized ?kernelId ()
+      let ebsOptimized = field_map json__ "EbsOptimized" Boolean.of_json in
+      let kernelId = field_map json__ "KernelId" KernelId.of_json in
+      make ?secondaryInterfaces ?networkPerformanceOptions ?operator
+        ?disableApiStop ?maintenanceOptions ?privateDnsNameOptions
+        ?instanceRequirements ?enclaveOptions ?metadataOptions
+        ?hibernationOptions ?licenseSpecifications
+        ?capacityReservationSpecification ?cpuOptions ?creditSpecification
+        ?instanceMarketOptions ?securityGroups ?securityGroupIds
+        ?elasticInferenceAccelerators ?elasticGpuSpecifications
+        ?tagSpecifications ?userData ?instanceInitiatedShutdownBehavior
+        ?disableApiTermination ?ramDiskId ?placement ?monitoring ?keyName
+        ?instanceType ?imageId ?networkInterfaces ?blockDeviceMappings
+        ?iamInstanceProfile ?ebsOptimized ?kernelId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The information to include in the launch template."]
+  end[@@ocaml.doc
+       "The information to include in the launch template. You must specify at least one parameter for the launch template data."]
+module KeyFormat =
+  struct
+    type nonrec t =
+      | Pem 
+      | Ppk 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Pem -> "pem" | Ppk -> "ppk" | Non_static_id s -> s
+    let of_string =
+      function | "pem" -> Pem | "ppk" -> Ppk | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration KeyFormat" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"KeyFormat" j)
+    let to_json = simple_to_json to_value
+  end
+module IpamPoolSourceResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceId: String_.t option [@ocaml.doc "The source resource ID."];
+      resourceType: IpamPoolSourceResourceType.t option
+        [@ocaml.doc "The source resource type."];
+      resourceRegion: String_.t option
+        [@ocaml.doc "The source resource Region."];
+      resourceOwner: String_.t option
+        [@ocaml.doc "The source resource owner."]}
+    let make ?resourceId =
+      fun ?resourceType ->
+        fun ?resourceRegion ->
+          fun ?resourceOwner ->
+            fun () ->
+              { resourceId; resourceType; resourceRegion; resourceOwner }
+    let to_value x =
+      structure_to_value
+        [("ResourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType ~f:IpamPoolSourceResourceType.to_value));
+        ("ResourceRegion", (Option.map x.resourceRegion ~f:String_.to_value));
+        ("ResourceOwner", (Option.map x.resourceOwner ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceOwner =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceOwner") in
+      let resourceRegion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceRegion") in
+      let resourceType =
+        (Option.map ~f:IpamPoolSourceResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      let resourceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceId") in
+      make ?resourceOwner ?resourceRegion ?resourceType ?resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceOwner = field_map json__ "ResourceOwner" String_.of_json in
+      let resourceRegion = field_map json__ "ResourceRegion" String_.of_json in
+      let resourceType =
+        field_map json__ "ResourceType" IpamPoolSourceResourceType.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      make ?resourceOwner ?resourceRegion ?resourceType ?resourceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The resource used to provision CIDRs to a resource planning pool."]
 module ExportToS3TaskSpecification =
   struct
     type nonrec t =
       {
+      diskImageFormat: DiskImageFormat.t option
+        [@ocaml.doc "The format for the exported image."];
       containerFormat: ContainerFormat.t option
         [@ocaml.doc
           "The container format used to combine disk images with metadata (such as OVF). If absent, only the disk image is exported."];
-      diskImageFormat: DiskImageFormat.t option
-        [@ocaml.doc "The format for the exported image."];
       s3Bucket: String_.t option
         [@ocaml.doc
-          "The Amazon S3 bucket for the destination image. The destination bucket must exist and grant WRITE and READ_ACP permissions to the Amazon Web Services account vm-import-export\\@amazon.com."];
+          "The Amazon S3 bucket for the destination image. The destination bucket must exist and have an access control list (ACL) attached that specifies the Region-specific canonical account ID for the Grantee. For more information about the ACL to your S3 bucket, see Prerequisites in the VM Import/Export User Guide."];
       s3Prefix: String_.t option
         [@ocaml.doc
           "The image is written to a single object in the Amazon S3 bucket at the S3 key s3prefix + exportTaskId + '.' + diskImageFormat."]}
-    let make ?containerFormat =
-      fun ?diskImageFormat ->
+    let make ?diskImageFormat =
+      fun ?containerFormat ->
         fun ?s3Bucket ->
           fun ?s3Prefix ->
             fun () ->
-              { containerFormat; diskImageFormat; s3Bucket; s3Prefix }
+              { diskImageFormat; containerFormat; s3Bucket; s3Prefix }
     let to_value x =
       structure_to_value
-        [("containerFormat",
-           (Option.map x.containerFormat ~f:ContainerFormat.to_value));
-        ("diskImageFormat",
-          (Option.map x.diskImageFormat ~f:DiskImageFormat.to_value));
+        [("diskImageFormat",
+           (Option.map x.diskImageFormat ~f:DiskImageFormat.to_value));
+        ("containerFormat",
+          (Option.map x.containerFormat ~f:ContainerFormat.to_value));
         ("s3Bucket", (Option.map x.s3Bucket ~f:String_.to_value));
         ("s3Prefix", (Option.map x.s3Prefix ~f:String_.to_value))]
     let to_query v = to_query to_value v
@@ -8837,24 +14880,105 @@ module ExportToS3TaskSpecification =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "s3Prefix") in
       let s3Bucket =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "s3Bucket") in
-      let diskImageFormat =
-        (Option.map ~f:DiskImageFormat.of_xml)
-          (Xml.child xml_arg0 "diskImageFormat") in
       let containerFormat =
         (Option.map ~f:ContainerFormat.of_xml)
           (Xml.child xml_arg0 "containerFormat") in
-      make ?s3Prefix ?s3Bucket ?diskImageFormat ?containerFormat ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Prefix = field_map json "S3Prefix" String_.of_json in
-      let s3Bucket = field_map json "S3Bucket" String_.of_json in
       let diskImageFormat =
-        field_map json "DiskImageFormat" DiskImageFormat.of_json in
+        (Option.map ~f:DiskImageFormat.of_xml)
+          (Xml.child xml_arg0 "diskImageFormat") in
+      make ?s3Prefix ?s3Bucket ?containerFormat ?diskImageFormat ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Prefix = field_map json__ "S3Prefix" String_.of_json in
+      let s3Bucket = field_map json__ "S3Bucket" String_.of_json in
       let containerFormat =
-        field_map json "ContainerFormat" ContainerFormat.of_json in
-      make ?s3Prefix ?s3Bucket ?diskImageFormat ?containerFormat ()
+        field_map json__ "ContainerFormat" ContainerFormat.of_json in
+      let diskImageFormat =
+        field_map json__ "DiskImageFormat" DiskImageFormat.of_json in
+      make ?s3Prefix ?s3Bucket ?containerFormat ?diskImageFormat ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an export instance task."]
+module CreateImageUsageReportClientToken =
+  struct
+    type nonrec t = string
+    let context_ = "CreateImageUsageReportClientToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"CreateImageUsageReportClientToken" j
+    let to_json = simple_to_json to_value
+  end
+module ImageUsageReportUserIdStringList =
+  struct
+    type nonrec t = String_.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImageUsageReportUserIdStringList"
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ImageUsageResourceTypeRequestList =
+  struct
+    type nonrec t = ImageUsageResourceTypeRequest.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImageUsageResourceTypeRequest.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImageUsageResourceTypeRequest.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImageUsageResourceTypeRequestList"
+        ~of_json:ImageUsageResourceTypeRequest.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module StorageLocation =
   struct
     type nonrec t =
@@ -8873,258 +14997,9 @@ module StorageLocation =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Bucket") in
       make ?key ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let key = field_map json "Key" String_.of_json in
-      let bucket = field_map json "Bucket" String_.of_json in
+    let of_json json__ =
+      let key = field_map json__ "Key" String_.of_json in
+      let bucket = field_map json__ "Bucket" String_.of_json in
       make ?key ?bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a storage location in Amazon S3."]
-module DestinationOptionsRequest =
-  struct
-    type nonrec t =
-      {
-      fileFormat: DestinationFileFormat.t option
-        [@ocaml.doc
-          "The format for the flow log. The default is plain-text."];
-      hiveCompatiblePartitions: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether to use Hive-compatible prefixes for flow logs stored in Amazon S3. The default is false."];
-      perHourPartition: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether to partition the flow log per hour. This reduces the cost and response time for queries. The default is false."]}
-    let make ?fileFormat =
-      fun ?hiveCompatiblePartitions ->
-        fun ?perHourPartition ->
-          fun () ->
-            { fileFormat; hiveCompatiblePartitions; perHourPartition }
-    let to_value x =
-      structure_to_value
-        [("FileFormat",
-           (Option.map x.fileFormat ~f:DestinationFileFormat.to_value));
-        ("HiveCompatiblePartitions",
-          (Option.map x.hiveCompatiblePartitions ~f:Boolean.to_value));
-        ("PerHourPartition",
-          (Option.map x.perHourPartition ~f:Boolean.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let perHourPartition =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "PerHourPartition") in
-      let hiveCompatiblePartitions =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "HiveCompatiblePartitions") in
-      let fileFormat =
-        (Option.map ~f:DestinationFileFormat.of_xml)
-          (Xml.child xml_arg0 "FileFormat") in
-      make ?perHourPartition ?hiveCompatiblePartitions ?fileFormat ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let perHourPartition =
-        field_map json "PerHourPartition" Boolean.of_json in
-      let hiveCompatiblePartitions =
-        field_map json "HiveCompatiblePartitions" Boolean.of_json in
-      let fileFormat =
-        field_map json "FileFormat" DestinationFileFormat.of_json in
-      make ?perHourPartition ?hiveCompatiblePartitions ?fileFormat ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the destination options for a flow log."]
-module FlowLogResourceIds =
-  struct
-    type nonrec t = FlowLogResourceId.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:FlowLogResourceId.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:FlowLogResourceId.of_xml)
-    let of_json j =
-      list_of_json ~kind:"FlowLogResourceIds"
-        ~of_json:FlowLogResourceId.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module FlowLogsResourceType =
-  struct
-    type nonrec t =
-      | VPC 
-      | Subnet 
-      | NetworkInterface 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | VPC -> "VPC"
-      | Subnet -> "Subnet"
-      | NetworkInterface -> "NetworkInterface"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "VPC" -> VPC
-      | "Subnet" -> Subnet
-      | "NetworkInterface" -> NetworkInterface
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration FlowLogsResourceType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"FlowLogsResourceType" j)
-    let to_json = simple_to_json to_value
-  end
-module CreateFleetErrorsSet =
-  struct
-    type nonrec t = CreateFleetError.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:CreateFleetError.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:CreateFleetError.of_xml)
-    let of_json j =
-      list_of_json ~kind:"CreateFleetErrorsSet"
-        ~of_json:CreateFleetError.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module CreateFleetInstancesSet =
-  struct
-    type nonrec t = CreateFleetInstance.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:CreateFleetInstance.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:CreateFleetInstance.of_xml)
-    let of_json j =
-      list_of_json ~kind:"CreateFleetInstancesSet"
-        ~of_json:CreateFleetInstance.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module OnDemandOptionsRequest =
-  struct
-    type nonrec t =
-      {
-      allocationStrategy: FleetOnDemandAllocationStrategy.t option
-        [@ocaml.doc
-          "The strategy that determines the order of the launch template overrides to use in fulfilling On-Demand capacity. lowest-price - EC2 Fleet uses price to determine the order, launching the lowest price first. prioritized - EC2 Fleet uses the priority that you assigned to each launch template override, launching the highest priority first. Default: lowest-price"];
-      capacityReservationOptions: CapacityReservationOptionsRequest.t option
-        [@ocaml.doc
-          "The strategy for using unused Capacity Reservations for fulfilling On-Demand capacity. Supported only for fleets of type instant."];
-      singleInstanceType: Boolean.t option
-        [@ocaml.doc
-          "Indicates that the fleet uses a single instance type to launch all On-Demand Instances in the fleet. Supported only for fleets of type instant."];
-      singleAvailabilityZone: Boolean.t option
-        [@ocaml.doc
-          "Indicates that the fleet launches all On-Demand Instances into a single Availability Zone. Supported only for fleets of type instant."];
-      minTargetCapacity: Integer.t option
-        [@ocaml.doc
-          "The minimum target capacity for On-Demand Instances in the fleet. If the minimum target capacity is not reached, the fleet launches no instances. Supported only for fleets of type instant. At least one of the following must be specified: SingleAvailabilityZone | SingleInstanceType"];
-      maxTotalPrice: String_.t option
-        [@ocaml.doc
-          "The maximum amount per hour for On-Demand Instances that you're willing to pay."]}
-    let make ?allocationStrategy =
-      fun ?capacityReservationOptions ->
-        fun ?singleInstanceType ->
-          fun ?singleAvailabilityZone ->
-            fun ?minTargetCapacity ->
-              fun ?maxTotalPrice ->
-                fun () ->
-                  {
-                    allocationStrategy;
-                    capacityReservationOptions;
-                    singleInstanceType;
-                    singleAvailabilityZone;
-                    minTargetCapacity;
-                    maxTotalPrice
-                  }
-    let to_value x =
-      structure_to_value
-        [("AllocationStrategy",
-           (Option.map x.allocationStrategy
-              ~f:FleetOnDemandAllocationStrategy.to_value));
-        ("CapacityReservationOptions",
-          (Option.map x.capacityReservationOptions
-             ~f:CapacityReservationOptionsRequest.to_value));
-        ("SingleInstanceType",
-          (Option.map x.singleInstanceType ~f:Boolean.to_value));
-        ("SingleAvailabilityZone",
-          (Option.map x.singleAvailabilityZone ~f:Boolean.to_value));
-        ("MinTargetCapacity",
-          (Option.map x.minTargetCapacity ~f:Integer.to_value));
-        ("MaxTotalPrice", (Option.map x.maxTotalPrice ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let maxTotalPrice =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "MaxTotalPrice") in
-      let minTargetCapacity =
-        (Option.map ~f:Integer.of_xml)
-          (Xml.child xml_arg0 "MinTargetCapacity") in
-      let singleAvailabilityZone =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "SingleAvailabilityZone") in
-      let singleInstanceType =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "SingleInstanceType") in
-      let capacityReservationOptions =
-        (Option.map ~f:CapacityReservationOptionsRequest.of_xml)
-          (Xml.child xml_arg0 "CapacityReservationOptions") in
-      let allocationStrategy =
-        (Option.map ~f:FleetOnDemandAllocationStrategy.of_xml)
-          (Xml.child xml_arg0 "AllocationStrategy") in
-      make ?maxTotalPrice ?minTargetCapacity ?singleAvailabilityZone
-        ?singleInstanceType ?capacityReservationOptions ?allocationStrategy
-        ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxTotalPrice = field_map json "MaxTotalPrice" String_.of_json in
-      let minTargetCapacity =
-        field_map json "MinTargetCapacity" Integer.of_json in
-      let singleAvailabilityZone =
-        field_map json "SingleAvailabilityZone" Boolean.of_json in
-      let singleInstanceType =
-        field_map json "SingleInstanceType" Boolean.of_json in
-      let capacityReservationOptions =
-        field_map json "CapacityReservationOptions"
-          CapacityReservationOptionsRequest.of_json in
-      let allocationStrategy =
-        field_map json "AllocationStrategy"
-          FleetOnDemandAllocationStrategy.of_json in
-      make ?maxTotalPrice ?minTargetCapacity ?singleAvailabilityZone
-        ?singleInstanceType ?capacityReservationOptions ?allocationStrategy
-        ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Describes the configuration of On-Demand Instances in an EC2 Fleet."]

@@ -16,6 +16,17 @@ val create_dataflow_endpoint_group :
       CreateDataflowEndpointGroupRequest.t ->
         (DataflowEndpointGroupIdResponse.t,
           DataflowEndpointGroupIdResponse.error) Result.t Lwt.t
+val create_dataflow_endpoint_group_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateDataflowEndpointGroupV2Request.t ->
+        (CreateDataflowEndpointGroupV2Response.t,
+          CreateDataflowEndpointGroupV2Response.error) Result.t Lwt.t
+val create_ephemeris :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateEphemerisRequest.t ->
+        (EphemerisIdResponse.t, EphemerisIdResponse.error) Result.t Lwt.t
 val create_mission_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -33,6 +44,11 @@ val delete_dataflow_endpoint_group :
       DeleteDataflowEndpointGroupRequest.t ->
         (DataflowEndpointGroupIdResponse.t,
           DataflowEndpointGroupIdResponse.error) Result.t Lwt.t
+val delete_ephemeris :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteEphemerisRequest.t ->
+        (EphemerisIdResponse.t, EphemerisIdResponse.error) Result.t Lwt.t
 val delete_mission_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -45,6 +61,30 @@ val describe_contact :
       DescribeContactRequest.t ->
         (DescribeContactResponse.t, DescribeContactResponse.error) Result.t
           Lwt.t
+val describe_contact_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeContactVersionRequest.t ->
+        (DescribeContactVersionResponse.t,
+          DescribeContactVersionResponse.error) Result.t Lwt.t
+val describe_ephemeris :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeEphemerisRequest.t ->
+        (DescribeEphemerisResponse.t, DescribeEphemerisResponse.error)
+          Result.t Lwt.t
+val get_agent_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetAgentConfigurationRequest.t ->
+        (GetAgentConfigurationResponse.t,
+          GetAgentConfigurationResponse.error) Result.t Lwt.t
+val get_agent_task_response_url :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetAgentTaskResponseUrlRequest.t ->
+        (GetAgentTaskResponseUrlResponse.t,
+          GetAgentTaskResponseUrlResponse.error) Result.t Lwt.t
 val get_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -73,11 +113,22 @@ val get_satellite :
     ?cfg:Awso.Cfg.t ->
       GetSatelliteRequest.t ->
         (GetSatelliteResponse.t, GetSatelliteResponse.error) Result.t Lwt.t
+val list_antennas :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAntennasRequest.t ->
+        (ListAntennasResponse.t, ListAntennasResponse.error) Result.t Lwt.t
 val list_configs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListConfigsRequest.t ->
         (ListConfigsResponse.t, ListConfigsResponse.error) Result.t Lwt.t
+val list_contact_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListContactVersionsRequest.t ->
+        (ListContactVersionsResponse.t, ListContactVersionsResponse.error)
+          Result.t Lwt.t
 val list_contacts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -89,6 +140,18 @@ val list_dataflow_endpoint_groups :
       ListDataflowEndpointGroupsRequest.t ->
         (ListDataflowEndpointGroupsResponse.t,
           ListDataflowEndpointGroupsResponse.error) Result.t Lwt.t
+val list_ephemerides :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListEphemeridesRequest.t ->
+        (ListEphemeridesResponse.t, ListEphemeridesResponse.error) Result.t
+          Lwt.t
+val list_ground_station_reservations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListGroundStationReservationsRequest.t ->
+        (ListGroundStationReservationsResponse.t,
+          ListGroundStationReservationsResponse.error) Result.t Lwt.t
 val list_ground_stations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -113,6 +176,11 @@ val list_tags_for_resource :
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t Lwt.t
+val register_agent :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RegisterAgentRequest.t ->
+        (RegisterAgentResponse.t, RegisterAgentResponse.error) Result.t Lwt.t
 val reserve_contact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -128,11 +196,27 @@ val untag_resource :
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
+val update_agent_status :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAgentStatusRequest.t ->
+        (UpdateAgentStatusResponse.t, UpdateAgentStatusResponse.error)
+          Result.t Lwt.t
 val update_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConfigRequest.t ->
         (ConfigIdResponse.t, ConfigIdResponse.error) Result.t Lwt.t
+val update_contact :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateContactRequest.t ->
+        (UpdateContactResponse.t, UpdateContactResponse.error) Result.t Lwt.t
+val update_ephemeris :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateEphemerisRequest.t ->
+        (EphemerisIdResponse.t, EphemerisIdResponse.error) Result.t Lwt.t
 val update_mission_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

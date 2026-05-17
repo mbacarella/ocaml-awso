@@ -12,6 +12,12 @@ val check_capacity :
       CheckCapacityRequest.t ->
         (CheckCapacityResponse.t, CheckCapacityResponse.error) Result.t
           Async.Deferred.t
+val create_a_p_i_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAPIKeyRequest.t ->
+        (CreateAPIKeyResponse.t, CreateAPIKeyResponse.error) Result.t
+          Async.Deferred.t
 val create_i_p_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -35,6 +41,12 @@ val create_web_a_c_l :
     ?cfg:Awso.Cfg.t ->
       CreateWebACLRequest.t ->
         (CreateWebACLResponse.t, CreateWebACLResponse.error) Result.t
+          Async.Deferred.t
+val delete_a_p_i_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAPIKeyRequest.t ->
+        (DeleteAPIKeyResponse.t, DeleteAPIKeyResponse.error) Result.t
           Async.Deferred.t
 val delete_firewall_manager_rule_groups :
   ?endpoint_url:string ->
@@ -79,6 +91,19 @@ val delete_web_a_c_l :
       DeleteWebACLRequest.t ->
         (DeleteWebACLResponse.t, DeleteWebACLResponse.error) Result.t
           Async.Deferred.t
+val describe_all_managed_products :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeAllManagedProductsRequest.t ->
+        (DescribeAllManagedProductsResponse.t,
+          DescribeAllManagedProductsResponse.error) Result.t Async.Deferred.t
+val describe_managed_products_by_vendor :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeManagedProductsByVendorRequest.t ->
+        (DescribeManagedProductsByVendorResponse.t,
+          DescribeManagedProductsByVendorResponse.error) Result.t
+          Async.Deferred.t
 val describe_managed_rule_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -98,6 +123,12 @@ val generate_mobile_sdk_release_url :
         (GenerateMobileSdkReleaseUrlResponse.t,
           GenerateMobileSdkReleaseUrlResponse.error) Result.t
           Async.Deferred.t
+val get_decrypted_a_p_i_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDecryptedAPIKeyRequest.t ->
+        (GetDecryptedAPIKeyResponse.t, GetDecryptedAPIKeyResponse.error)
+          Result.t Async.Deferred.t
 val get_i_p_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -153,6 +184,13 @@ val get_sampled_requests :
       GetSampledRequestsRequest.t ->
         (GetSampledRequestsResponse.t, GetSampledRequestsResponse.error)
           Result.t Async.Deferred.t
+val get_top_path_statistics_by_traffic :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetTopPathStatisticsByTrafficRequest.t ->
+        (GetTopPathStatisticsByTrafficResponse.t,
+          GetTopPathStatisticsByTrafficResponse.error) Result.t
+          Async.Deferred.t
 val get_web_a_c_l :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -165,6 +203,12 @@ val get_web_a_c_l_for_resource :
       GetWebACLForResourceRequest.t ->
         (GetWebACLForResourceResponse.t, GetWebACLForResourceResponse.error)
           Result.t Async.Deferred.t
+val list_a_p_i_keys :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAPIKeysRequest.t ->
+        (ListAPIKeysResponse.t, ListAPIKeysResponse.error) Result.t
+          Async.Deferred.t
 val list_available_managed_rule_group_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

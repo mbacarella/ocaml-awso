@@ -7,6 +7,8 @@ let main =
     [("accept-certificate-transfer", accept_certificate_transfer);
     ("add-thing-to-billing-group", add_thing_to_billing_group);
     ("add-thing-to-thing-group", add_thing_to_thing_group);
+    ("associate-sbom-with-package-version",
+      associate_sbom_with_package_version);
     ("associate-targets-with-job", associate_targets_with_job);
     ("attach-policy", attach_policy);
     ("attach-principal-policy", attach_principal_policy);
@@ -26,6 +28,8 @@ let main =
     ("create-authorizer", create_authorizer);
     ("create-billing-group", create_billing_group);
     ("create-certificate-from-csr", create_certificate_from_csr);
+    ("create-certificate-provider", create_certificate_provider);
+    ("create-command", create_command);
     ("create-custom-metric", create_custom_metric);
     ("create-dimension", create_dimension);
     ("create-domain-configuration", create_domain_configuration);
@@ -36,6 +40,8 @@ let main =
     ("create-keys-and-certificate", create_keys_and_certificate);
     ("create-mitigation-action", create_mitigation_action);
     ("create-o-t-a-update", create_o_t_a_update);
+    ("create-package", create_package);
+    ("create-package-version", create_package_version);
     ("create-policy", create_policy);
     ("create-policy-version", create_policy_version);
     ("create-provisioning-claim", create_provisioning_claim);
@@ -58,6 +64,9 @@ let main =
     ("delete-billing-group", delete_billing_group);
     ("delete-c-a-certificate", delete_c_a_certificate);
     ("delete-certificate", delete_certificate);
+    ("delete-certificate-provider", delete_certificate_provider);
+    ("delete-command", delete_command);
+    ("delete-command-execution", delete_command_execution);
     ("delete-custom-metric", delete_custom_metric);
     ("delete-dimension", delete_dimension);
     ("delete-domain-configuration", delete_domain_configuration);
@@ -68,6 +77,8 @@ let main =
     ("delete-job-template", delete_job_template);
     ("delete-mitigation-action", delete_mitigation_action);
     ("delete-o-t-a-update", delete_o_t_a_update);
+    ("delete-package", delete_package);
+    ("delete-package-version", delete_package_version);
     ("delete-policy", delete_policy);
     ("delete-policy-version", delete_policy_version);
     ("delete-provisioning-template", delete_provisioning_template);
@@ -96,12 +107,14 @@ let main =
     ("describe-billing-group", describe_billing_group);
     ("describe-c-a-certificate", describe_c_a_certificate);
     ("describe-certificate", describe_certificate);
+    ("describe-certificate-provider", describe_certificate_provider);
     ("describe-custom-metric", describe_custom_metric);
     ("describe-default-authorizer", describe_default_authorizer);
     ("describe-detect-mitigation-actions-task",
       describe_detect_mitigation_actions_task);
     ("describe-dimension", describe_dimension);
     ("describe-domain-configuration", describe_domain_configuration);
+    ("describe-encryption-configuration", describe_encryption_configuration);
     ("describe-endpoint", describe_endpoint);
     ("describe-event-configurations", describe_event_configurations);
     ("describe-fleet-metric", describe_fleet_metric);
@@ -127,21 +140,29 @@ let main =
     ("detach-security-profile", detach_security_profile);
     ("detach-thing-principal", detach_thing_principal);
     ("disable-topic-rule", disable_topic_rule);
+    ("disassociate-sbom-from-package-version",
+      disassociate_sbom_from_package_version);
     ("enable-topic-rule", enable_topic_rule);
     ("get-behavior-model-training-summaries",
       get_behavior_model_training_summaries);
     ("get-buckets-aggregation", get_buckets_aggregation);
     ("get-cardinality", get_cardinality);
+    ("get-command", get_command);
+    ("get-command-execution", get_command_execution);
     ("get-effective-policies", get_effective_policies);
     ("get-indexing-configuration", get_indexing_configuration);
     ("get-job-document", get_job_document);
     ("get-logging-options", get_logging_options);
     ("get-o-t-a-update", get_o_t_a_update);
+    ("get-package", get_package);
+    ("get-package-configuration", get_package_configuration);
+    ("get-package-version", get_package_version);
     ("get-percentiles", get_percentiles);
     ("get-policy", get_policy);
     ("get-policy-version", get_policy_version);
     ("get-registration-code", get_registration_code);
     ("get-statistics", get_statistics);
+    ("get-thing-connectivity-data", get_thing_connectivity_data);
     ("get-topic-rule", get_topic_rule);
     ("get-topic-rule-destination", get_topic_rule_destination);
     ("get-v2-logging-options", get_v2_logging_options);
@@ -157,8 +178,11 @@ let main =
     ("list-authorizers", list_authorizers);
     ("list-billing-groups", list_billing_groups);
     ("list-c-a-certificates", list_c_a_certificates);
+    ("list-certificate-providers", list_certificate_providers);
     ("list-certificates", list_certificates);
     ("list-certificates-by-c-a", list_certificates_by_c_a);
+    ("list-command-executions", list_command_executions);
+    ("list-commands", list_commands);
     ("list-custom-metrics", list_custom_metrics);
     ("list-detect-mitigation-actions-executions",
       list_detect_mitigation_actions_executions);
@@ -177,15 +201,21 @@ let main =
     ("list-mitigation-actions", list_mitigation_actions);
     ("list-o-t-a-updates", list_o_t_a_updates);
     ("list-outgoing-certificates", list_outgoing_certificates);
+    ("list-package-versions", list_package_versions);
+    ("list-packages", list_packages);
     ("list-policies", list_policies);
     ("list-policy-principals", list_policy_principals);
     ("list-policy-versions", list_policy_versions);
     ("list-principal-policies", list_principal_policies);
     ("list-principal-things", list_principal_things);
+    ("list-principal-things-v2", list_principal_things_v2);
     ("list-provisioning-template-versions",
       list_provisioning_template_versions);
     ("list-provisioning-templates", list_provisioning_templates);
+    ("list-related-resources-for-audit-finding",
+      list_related_resources_for_audit_finding);
     ("list-role-aliases", list_role_aliases);
+    ("list-sbom-validation-results", list_sbom_validation_results);
     ("list-scheduled-audits", list_scheduled_audits);
     ("list-security-profiles", list_security_profiles);
     ("list-security-profiles-for-target", list_security_profiles_for_target);
@@ -196,6 +226,7 @@ let main =
     ("list-thing-groups", list_thing_groups);
     ("list-thing-groups-for-thing", list_thing_groups_for_thing);
     ("list-thing-principals", list_thing_principals);
+    ("list-thing-principals-v2", list_thing_principals_v2);
     ("list-thing-registration-task-reports",
       list_thing_registration_task_reports);
     ("list-thing-registration-tasks", list_thing_registration_tasks);
@@ -242,15 +273,21 @@ let main =
     ("update-billing-group", update_billing_group);
     ("update-c-a-certificate", update_c_a_certificate);
     ("update-certificate", update_certificate);
+    ("update-certificate-provider", update_certificate_provider);
+    ("update-command", update_command);
     ("update-custom-metric", update_custom_metric);
     ("update-dimension", update_dimension);
     ("update-domain-configuration", update_domain_configuration);
     ("update-dynamic-thing-group", update_dynamic_thing_group);
+    ("update-encryption-configuration", update_encryption_configuration);
     ("update-event-configurations", update_event_configurations);
     ("update-fleet-metric", update_fleet_metric);
     ("update-indexing-configuration", update_indexing_configuration);
     ("update-job", update_job);
     ("update-mitigation-action", update_mitigation_action);
+    ("update-package", update_package);
+    ("update-package-configuration", update_package_configuration);
+    ("update-package-version", update_package_version);
     ("update-provisioning-template", update_provisioning_template);
     ("update-role-alias", update_role_alias);
     ("update-scheduled-audit", update_scheduled_audit);
@@ -259,6 +296,7 @@ let main =
     ("update-thing", update_thing);
     ("update-thing-group", update_thing_group);
     ("update-thing-groups-for-thing", update_thing_groups_for_thing);
+    ("update-thing-type", update_thing_type);
     ("update-topic-rule-destination", update_topic_rule_destination);
     ("validate-security-profile-behaviors",
       validate_security_profile_behaviors)]

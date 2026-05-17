@@ -14,10 +14,16 @@ type ('i, 'o, 'e) t =
   DescribeCasesResponse.error) t 
   | DescribeCommunications: (DescribeCommunicationsRequest.t,
   DescribeCommunicationsResponse.t, DescribeCommunicationsResponse.error) t 
+  | DescribeCreateCaseOptions: (DescribeCreateCaseOptionsRequest.t,
+  DescribeCreateCaseOptionsResponse.t,
+  DescribeCreateCaseOptionsResponse.error) t 
   | DescribeServices: (DescribeServicesRequest.t, DescribeServicesResponse.t,
   DescribeServicesResponse.error) t 
   | DescribeSeverityLevels: (DescribeSeverityLevelsRequest.t,
   DescribeSeverityLevelsResponse.t, DescribeSeverityLevelsResponse.error) t 
+  | DescribeSupportedLanguages: (DescribeSupportedLanguagesRequest.t,
+  DescribeSupportedLanguagesResponse.t,
+  DescribeSupportedLanguagesResponse.error) t 
   | DescribeTrustedAdvisorCheckRefreshStatuses:
   (DescribeTrustedAdvisorCheckRefreshStatusesRequest.t,
   DescribeTrustedAdvisorCheckRefreshStatusesResponse.t,
@@ -46,8 +52,10 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeAttachment -> `POST
   | DescribeCases -> `POST
   | DescribeCommunications -> `POST
+  | DescribeCreateCaseOptions -> `POST
   | DescribeServices -> `POST
   | DescribeSeverityLevels -> `POST
+  | DescribeSupportedLanguages -> `POST
   | DescribeTrustedAdvisorCheckRefreshStatuses -> `POST
   | DescribeTrustedAdvisorCheckResult -> `POST
   | DescribeTrustedAdvisorCheckSummaries -> `POST
@@ -63,8 +71,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeAttachment -> (Format.kasprintf Uri.of_string) "/"
       | DescribeCases -> (Format.kasprintf Uri.of_string) "/"
       | DescribeCommunications -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeCreateCaseOptions -> (Format.kasprintf Uri.of_string) "/"
       | DescribeServices -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSeverityLevels -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeSupportedLanguages -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTrustedAdvisorCheckRefreshStatuses ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeTrustedAdvisorCheckResult ->
@@ -125,6 +135,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSSupport_20130415.DescribeCommunications")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeCreateCaseOptions ->
+      let json = DescribeCreateCaseOptionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSSupport_20130415.DescribeCreateCaseOptions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeServices ->
       let json = DescribeServicesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -140,6 +158,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSSupport_20130415.DescribeSeverityLevels")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeSupportedLanguages ->
+      let json = DescribeSupportedLanguagesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSSupport_20130415.DescribeSupportedLanguages")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeTrustedAdvisorCheckRefreshStatuses ->
       let json =
@@ -263,6 +289,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeCommunicationsResponse.error_of_json))
+  | DescribeCreateCaseOptions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeCreateCaseOptionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeCreateCaseOptionsResponse.error_of_json))
   | DescribeServices ->
       if is_success
       then
@@ -279,6 +314,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeSeverityLevelsResponse.error_of_json))
+  | DescribeSupportedLanguages ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeSupportedLanguagesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeSupportedLanguagesResponse.error_of_json))
   | DescribeTrustedAdvisorCheckRefreshStatuses ->
       if is_success
       then

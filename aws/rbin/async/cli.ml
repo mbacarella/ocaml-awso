@@ -43,6 +43,12 @@ let create_rule =
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and resourceTags =
          flag "resource-tags" (optional json_arg) ~doc:"JSON ResourceTags"
+       and lockConfiguration =
+         flag "lock-configuration" (optional json_arg)
+           ~doc:"JSON LockConfiguration"
+       and excludeResourceTags =
+         flag "exclude-resource-tags" (optional json_arg)
+           ~doc:"JSON ExcludeResourceTags"
        and retentionPeriod =
          flag "retention-period" (required json_arg)
            ~doc:"JSON RetentionPeriod"
@@ -55,6 +61,12 @@ let create_rule =
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ?resourceTags:(Option.map ~f:Values.ResourceTags.of_json
                                resourceTags)
+              ?lockConfiguration:(Option.map
+                                    ~f:Values.LockConfiguration.of_json
+                                    lockConfiguration)
+              ?excludeResourceTags:(Option.map
+                                      ~f:Values.ExcludeResourceTags.of_json
+                                      excludeResourceTags)
               ~retentionPeriod:(Values.RetentionPeriod.of_json
                                   retentionPeriod)
               ~resourceType:(Values.ResourceType.of_json resourceType) ())
@@ -110,6 +122,11 @@ let list_rules =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and resourceTags =
          flag "resource-tags" (optional json_arg) ~doc:"JSON ResourceTags"
+       and lockState =
+         flag "lock-state" (optional json_arg) ~doc:"JSON LockState"
+       and excludeResourceTags =
+         flag "exclude-resource-tags" (optional json_arg)
+           ~doc:"JSON ExcludeResourceTags"
        and resourceType =
          flag "resource-type" (required json_arg) ~doc:"JSON ResourceType" in
        fun () ->
@@ -118,6 +135,10 @@ let list_rules =
            (Values.ListRulesRequest.make ?maxResults ?nextToken
               ?resourceTags:(Option.map ~f:Values.ResourceTags.of_json
                                resourceTags)
+              ?lockState:(Option.map ~f:Values.LockState.of_json lockState)
+              ?excludeResourceTags:(Option.map
+                                      ~f:Values.ExcludeResourceTags.of_json
+                                      excludeResourceTags)
               ~resourceType:(Values.ResourceType.of_json resourceType) ())
            (Some Values.ListRulesResponse.to_json)
            (Some Values.ListRulesResponse.error_to_json)])
@@ -139,6 +160,29 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let lock_rule =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identifier =
+         flag "identifier" (required string) ~doc:"STRING RuleIdentifier"
+       and lockConfiguration =
+         flag "lock-configuration" (required json_arg)
+           ~doc:"JSON LockConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.lock_rule
+           (Values.LockRuleRequest.make ~identifier
+              ~lockConfiguration:(Values.LockConfiguration.of_json
+                                    lockConfiguration) ())
+           (Some Values.LockRuleResponse.to_json)
+           (Some Values.LockRuleResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -159,6 +203,23 @@ let tag_resource =
               ~tags:(Values.TagList.of_json tags) ())
            (Some Values.TagResourceResponse.to_json)
            (Some Values.TagResourceResponse.error_to_json)])
+let unlock_rule =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identifier =
+         flag "identifier" (required string) ~doc:"STRING RuleIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.unlock_rule (Values.UnlockRuleRequest.make ~identifier ())
+           (Some Values.UnlockRuleResponse.to_json)
+           (Some Values.UnlockRuleResponse.error_to_json)])
 let untag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -199,6 +260,9 @@ let update_rule =
          flag "resource-type" (optional json_arg) ~doc:"JSON ResourceType"
        and resourceTags =
          flag "resource-tags" (optional json_arg) ~doc:"JSON ResourceTags"
+       and excludeResourceTags =
+         flag "exclude-resource-tags" (optional json_arg)
+           ~doc:"JSON ExcludeResourceTags"
        and identifier =
          flag "identifier" (required string) ~doc:"STRING RuleIdentifier" in
        fun () ->
@@ -210,7 +274,10 @@ let update_rule =
               ?resourceType:(Option.map ~f:Values.ResourceType.of_json
                                resourceType)
               ?resourceTags:(Option.map ~f:Values.ResourceTags.of_json
-                               resourceTags) ~identifier ())
+                               resourceTags)
+              ?excludeResourceTags:(Option.map
+                                      ~f:Values.ExcludeResourceTags.of_json
+                                      excludeResourceTags) ~identifier ())
            (Some Values.UpdateRuleResponse.to_json)
            (Some Values.UpdateRuleResponse.error_to_json)])
 let main =
@@ -221,6 +288,8 @@ let main =
     ("get-rule", get_rule);
     ("list-rules", list_rules);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("lock-rule", lock_rule);
     ("tag-resource", tag_resource);
+    ("unlock-rule", unlock_rule);
     ("untag-resource", untag_resource);
     ("update-rule", update_rule)]

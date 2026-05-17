@@ -41,6 +41,8 @@ type ('i, 'o, 'e) t =
   DeleteInventoryResult.error) t 
   | DeleteMaintenanceWindow: (DeleteMaintenanceWindowRequest.t,
   DeleteMaintenanceWindowResult.t, DeleteMaintenanceWindowResult.error) t 
+  | DeleteOpsItem: (DeleteOpsItemRequest.t, DeleteOpsItemResponse.t,
+  DeleteOpsItemResponse.error) t 
   | DeleteOpsMetadata: (DeleteOpsMetadataRequest.t,
   DeleteOpsMetadataResult.t, DeleteOpsMetadataResult.error) t 
   | DeleteParameter: (DeleteParameterRequest.t, DeleteParameterResult.t,
@@ -51,6 +53,8 @@ type ('i, 'o, 'e) t =
   DeletePatchBaselineResult.t, DeletePatchBaselineResult.error) t 
   | DeleteResourceDataSync: (DeleteResourceDataSyncRequest.t,
   DeleteResourceDataSyncResult.t, DeleteResourceDataSyncResult.error) t 
+  | DeleteResourcePolicy: (DeleteResourcePolicyRequest.t,
+  DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error) t 
   | DeregisterManagedInstance: (DeregisterManagedInstanceRequest.t,
   DeregisterManagedInstanceResult.t, DeregisterManagedInstanceResult.error) t
   
@@ -115,6 +119,9 @@ type ('i, 'o, 'e) t =
   DescribeInstancePatchStatesForPatchGroupResult.error) t 
   | DescribeInstancePatches: (DescribeInstancePatchesRequest.t,
   DescribeInstancePatchesResult.t, DescribeInstancePatchesResult.error) t 
+  | DescribeInstanceProperties: (DescribeInstancePropertiesRequest.t,
+  DescribeInstancePropertiesResult.t, DescribeInstancePropertiesResult.error)
+  t 
   | DescribeInventoryDeletions: (DescribeInventoryDeletionsRequest.t,
   DescribeInventoryDeletionsResult.t, DescribeInventoryDeletionsResult.error)
   t 
@@ -165,6 +172,8 @@ type ('i, 'o, 'e) t =
   | DisassociateOpsItemRelatedItem: (DisassociateOpsItemRelatedItemRequest.t,
   DisassociateOpsItemRelatedItemResponse.t,
   DisassociateOpsItemRelatedItemResponse.error) t 
+  | GetAccessToken: (GetAccessTokenRequest.t, GetAccessTokenResponse.t,
+  GetAccessTokenResponse.error) t 
   | GetAutomationExecution: (GetAutomationExecutionRequest.t,
   GetAutomationExecutionResult.t, GetAutomationExecutionResult.error) t 
   | GetCalendarState: (GetCalendarStateRequest.t, GetCalendarStateResponse.t,
@@ -181,6 +190,8 @@ type ('i, 'o, 'e) t =
   GetDeployablePatchSnapshotForInstanceResult.error) t 
   | GetDocument: (GetDocumentRequest.t, GetDocumentResult.t,
   GetDocumentResult.error) t 
+  | GetExecutionPreview: (GetExecutionPreviewRequest.t,
+  GetExecutionPreviewResponse.t, GetExecutionPreviewResponse.error) t 
   | GetInventory: (GetInventoryRequest.t, GetInventoryResult.t,
   GetInventoryResult.error) t 
   | GetInventorySchema: (GetInventorySchemaRequest.t,
@@ -219,6 +230,8 @@ type ('i, 'o, 'e) t =
   | GetPatchBaselineForPatchGroup: (GetPatchBaselineForPatchGroupRequest.t,
   GetPatchBaselineForPatchGroupResult.t,
   GetPatchBaselineForPatchGroupResult.error) t 
+  | GetResourcePolicies: (GetResourcePoliciesRequest.t,
+  GetResourcePoliciesResponse.t, GetResourcePoliciesResponse.error) t 
   | GetServiceSetting: (GetServiceSettingRequest.t,
   GetServiceSettingResult.t, GetServiceSettingResult.error) t 
   | LabelParameterVersion: (LabelParameterVersionRequest.t,
@@ -244,6 +257,10 @@ type ('i, 'o, 'e) t =
   ListDocumentsResult.error) t 
   | ListInventoryEntries: (ListInventoryEntriesRequest.t,
   ListInventoryEntriesResult.t, ListInventoryEntriesResult.error) t 
+  | ListNodes: (ListNodesRequest.t, ListNodesResult.t, ListNodesResult.error)
+  t 
+  | ListNodesSummary: (ListNodesSummaryRequest.t, ListNodesSummaryResult.t,
+  ListNodesSummaryResult.error) t 
   | ListOpsItemEvents: (ListOpsItemEventsRequest.t,
   ListOpsItemEventsResponse.t, ListOpsItemEventsResponse.error) t 
   | ListOpsItemRelatedItems: (ListOpsItemRelatedItemsRequest.t,
@@ -268,6 +285,8 @@ type ('i, 'o, 'e) t =
   PutInventoryResult.error) t 
   | PutParameter: (PutParameterRequest.t, PutParameterResult.t,
   PutParameterResult.error) t 
+  | PutResourcePolicy: (PutResourcePolicyRequest.t,
+  PutResourcePolicyResponse.t, PutResourcePolicyResponse.error) t 
   | RegisterDefaultPatchBaseline: (RegisterDefaultPatchBaselineRequest.t,
   RegisterDefaultPatchBaselineResult.t,
   RegisterDefaultPatchBaselineResult.error) t 
@@ -293,6 +312,8 @@ type ('i, 'o, 'e) t =
   SendAutomationSignalResult.t, SendAutomationSignalResult.error) t 
   | SendCommand: (SendCommandRequest.t, SendCommandResult.t,
   SendCommandResult.error) t 
+  | StartAccessRequest: (StartAccessRequestRequest.t,
+  StartAccessRequestResponse.t, StartAccessRequestResponse.error) t 
   | StartAssociationsOnce: (StartAssociationsOnceRequest.t,
   StartAssociationsOnceResult.t, StartAssociationsOnceResult.error) t 
   | StartAutomationExecution: (StartAutomationExecutionRequest.t,
@@ -300,6 +321,8 @@ type ('i, 'o, 'e) t =
   | StartChangeRequestExecution: (StartChangeRequestExecutionRequest.t,
   StartChangeRequestExecutionResult.t,
   StartChangeRequestExecutionResult.error) t 
+  | StartExecutionPreview: (StartExecutionPreviewRequest.t,
+  StartExecutionPreviewResponse.t, StartExecutionPreviewResponse.error) t 
   | StartSession: (StartSessionRequest.t, StartSessionResponse.t,
   StartSessionResponse.error) t 
   | StopAutomationExecution: (StopAutomationExecutionRequest.t,
@@ -360,11 +383,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteDocument -> `POST
   | DeleteInventory -> `POST
   | DeleteMaintenanceWindow -> `POST
+  | DeleteOpsItem -> `POST
   | DeleteOpsMetadata -> `POST
   | DeleteParameter -> `POST
   | DeleteParameters -> `POST
   | DeletePatchBaseline -> `POST
   | DeleteResourceDataSync -> `POST
+  | DeleteResourcePolicy -> `POST
   | DeregisterManagedInstance -> `POST
   | DeregisterPatchBaselineForPatchGroup -> `POST
   | DeregisterTargetFromMaintenanceWindow -> `POST
@@ -385,6 +410,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeInstancePatchStates -> `POST
   | DescribeInstancePatchStatesForPatchGroup -> `POST
   | DescribeInstancePatches -> `POST
+  | DescribeInstanceProperties -> `POST
   | DescribeInventoryDeletions -> `POST
   | DescribeMaintenanceWindowExecutionTaskInvocations -> `POST
   | DescribeMaintenanceWindowExecutionTasks -> `POST
@@ -402,6 +428,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribePatchProperties -> `POST
   | DescribeSessions -> `POST
   | DisassociateOpsItemRelatedItem -> `POST
+  | GetAccessToken -> `POST
   | GetAutomationExecution -> `POST
   | GetCalendarState -> `POST
   | GetCommandInvocation -> `POST
@@ -409,6 +436,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetDefaultPatchBaseline -> `POST
   | GetDeployablePatchSnapshotForInstance -> `POST
   | GetDocument -> `POST
+  | GetExecutionPreview -> `POST
   | GetInventory -> `POST
   | GetInventorySchema -> `POST
   | GetMaintenanceWindow -> `POST
@@ -425,6 +453,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetParametersByPath -> `POST
   | GetPatchBaseline -> `POST
   | GetPatchBaselineForPatchGroup -> `POST
+  | GetResourcePolicies -> `POST
   | GetServiceSetting -> `POST
   | LabelParameterVersion -> `POST
   | ListAssociationVersions -> `POST
@@ -437,6 +466,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListDocumentVersions -> `POST
   | ListDocuments -> `POST
   | ListInventoryEntries -> `POST
+  | ListNodes -> `POST
+  | ListNodesSummary -> `POST
   | ListOpsItemEvents -> `POST
   | ListOpsItemRelatedItems -> `POST
   | ListOpsMetadata -> `POST
@@ -447,6 +478,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | PutComplianceItems -> `POST
   | PutInventory -> `POST
   | PutParameter -> `POST
+  | PutResourcePolicy -> `POST
   | RegisterDefaultPatchBaseline -> `POST
   | RegisterPatchBaselineForPatchGroup -> `POST
   | RegisterTargetWithMaintenanceWindow -> `POST
@@ -456,9 +488,11 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ResumeSession -> `POST
   | SendAutomationSignal -> `POST
   | SendCommand -> `POST
+  | StartAccessRequest -> `POST
   | StartAssociationsOnce -> `POST
   | StartAutomationExecution -> `POST
   | StartChangeRequestExecution -> `POST
+  | StartExecutionPreview -> `POST
   | StartSession -> `POST
   | StopAutomationExecution -> `POST
   | TerminateSession -> `POST
@@ -499,11 +533,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteDocument -> (Format.kasprintf Uri.of_string) "/"
       | DeleteInventory -> (Format.kasprintf Uri.of_string) "/"
       | DeleteMaintenanceWindow -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteOpsItem -> (Format.kasprintf Uri.of_string) "/"
       | DeleteOpsMetadata -> (Format.kasprintf Uri.of_string) "/"
       | DeleteParameter -> (Format.kasprintf Uri.of_string) "/"
       | DeleteParameters -> (Format.kasprintf Uri.of_string) "/"
       | DeletePatchBaseline -> (Format.kasprintf Uri.of_string) "/"
       | DeleteResourceDataSync -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | DeregisterManagedInstance -> (Format.kasprintf Uri.of_string) "/"
       | DeregisterPatchBaselineForPatchGroup ->
           (Format.kasprintf Uri.of_string) "/"
@@ -533,6 +569,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeInstancePatchStatesForPatchGroup ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeInstancePatches -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeInstanceProperties -> (Format.kasprintf Uri.of_string) "/"
       | DescribeInventoryDeletions -> (Format.kasprintf Uri.of_string) "/"
       | DescribeMaintenanceWindowExecutionTaskInvocations ->
           (Format.kasprintf Uri.of_string) "/"
@@ -558,6 +595,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeSessions -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateOpsItemRelatedItem ->
           (Format.kasprintf Uri.of_string) "/"
+      | GetAccessToken -> (Format.kasprintf Uri.of_string) "/"
       | GetAutomationExecution -> (Format.kasprintf Uri.of_string) "/"
       | GetCalendarState -> (Format.kasprintf Uri.of_string) "/"
       | GetCommandInvocation -> (Format.kasprintf Uri.of_string) "/"
@@ -566,6 +604,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetDeployablePatchSnapshotForInstance ->
           (Format.kasprintf Uri.of_string) "/"
       | GetDocument -> (Format.kasprintf Uri.of_string) "/"
+      | GetExecutionPreview -> (Format.kasprintf Uri.of_string) "/"
       | GetInventory -> (Format.kasprintf Uri.of_string) "/"
       | GetInventorySchema -> (Format.kasprintf Uri.of_string) "/"
       | GetMaintenanceWindow -> (Format.kasprintf Uri.of_string) "/"
@@ -584,6 +623,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetParametersByPath -> (Format.kasprintf Uri.of_string) "/"
       | GetPatchBaseline -> (Format.kasprintf Uri.of_string) "/"
       | GetPatchBaselineForPatchGroup -> (Format.kasprintf Uri.of_string) "/"
+      | GetResourcePolicies -> (Format.kasprintf Uri.of_string) "/"
       | GetServiceSetting -> (Format.kasprintf Uri.of_string) "/"
       | LabelParameterVersion -> (Format.kasprintf Uri.of_string) "/"
       | ListAssociationVersions -> (Format.kasprintf Uri.of_string) "/"
@@ -596,6 +636,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListDocumentVersions -> (Format.kasprintf Uri.of_string) "/"
       | ListDocuments -> (Format.kasprintf Uri.of_string) "/"
       | ListInventoryEntries -> (Format.kasprintf Uri.of_string) "/"
+      | ListNodes -> (Format.kasprintf Uri.of_string) "/"
+      | ListNodesSummary -> (Format.kasprintf Uri.of_string) "/"
       | ListOpsItemEvents -> (Format.kasprintf Uri.of_string) "/"
       | ListOpsItemRelatedItems -> (Format.kasprintf Uri.of_string) "/"
       | ListOpsMetadata -> (Format.kasprintf Uri.of_string) "/"
@@ -607,6 +649,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | PutComplianceItems -> (Format.kasprintf Uri.of_string) "/"
       | PutInventory -> (Format.kasprintf Uri.of_string) "/"
       | PutParameter -> (Format.kasprintf Uri.of_string) "/"
+      | PutResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | RegisterDefaultPatchBaseline -> (Format.kasprintf Uri.of_string) "/"
       | RegisterPatchBaselineForPatchGroup ->
           (Format.kasprintf Uri.of_string) "/"
@@ -619,9 +662,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ResumeSession -> (Format.kasprintf Uri.of_string) "/"
       | SendAutomationSignal -> (Format.kasprintf Uri.of_string) "/"
       | SendCommand -> (Format.kasprintf Uri.of_string) "/"
+      | StartAccessRequest -> (Format.kasprintf Uri.of_string) "/"
       | StartAssociationsOnce -> (Format.kasprintf Uri.of_string) "/"
       | StartAutomationExecution -> (Format.kasprintf Uri.of_string) "/"
       | StartChangeRequestExecution -> (Format.kasprintf Uri.of_string) "/"
+      | StartExecutionPreview -> (Format.kasprintf Uri.of_string) "/"
       | StartSession -> (Format.kasprintf Uri.of_string) "/"
       | StopAutomationExecution -> (Format.kasprintf Uri.of_string) "/"
       | TerminateSession -> (Format.kasprintf Uri.of_string) "/"
@@ -787,6 +832,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonSSM.DeleteMaintenanceWindow")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteOpsItem ->
+      let json = DeleteOpsItemRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonSSM.DeleteOpsItem")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteOpsMetadata ->
       let json = DeleteOpsMetadataRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -826,6 +879,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonSSM.DeleteResourceDataSync")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteResourcePolicy ->
+      let json = DeleteResourcePolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonSSM.DeleteResourcePolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeregisterManagedInstance ->
       let json = DeregisterManagedInstanceRequest.to_json req in
@@ -989,6 +1050,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonSSM.DescribeInstancePatches")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeInstanceProperties ->
+      let json = DescribeInstancePropertiesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonSSM.DescribeInstanceProperties")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeInventoryDeletions ->
       let json = DescribeInventoryDeletionsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1128,6 +1197,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonSSM.DisassociateOpsItemRelatedItem")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetAccessToken ->
+      let json = GetAccessTokenRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonSSM.GetAccessToken")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetAutomationExecution ->
       let json = GetAutomationExecutionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1183,6 +1260,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonSSM.GetDocument")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetExecutionPreview ->
+      let json = GetExecutionPreviewRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonSSM.GetExecutionPreview")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetInventory ->
       let json = GetInventoryRequest.to_json req in
@@ -1314,6 +1399,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonSSM.GetPatchBaselineForPatchGroup")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetResourcePolicies ->
+      let json = GetResourcePoliciesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonSSM.GetResourcePolicies")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetServiceSetting ->
       let json = GetServiceSettingRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1410,6 +1503,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonSSM.ListInventoryEntries")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListNodes ->
+      let json = ListNodesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonSSM.ListNodes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListNodesSummary ->
+      let json = ListNodesSummaryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonSSM.ListNodesSummary")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListOpsItemEvents ->
       let json = ListOpsItemEventsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1490,6 +1599,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonSSM.PutParameter")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutResourcePolicy ->
+      let json = PutResourcePolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonSSM.PutResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | RegisterDefaultPatchBaseline ->
       let json = RegisterDefaultPatchBaselineRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1562,6 +1679,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonSSM.SendCommand")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartAccessRequest ->
+      let json = StartAccessRequestRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonSSM.StartAccessRequest")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartAssociationsOnce ->
       let json = StartAssociationsOnceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1585,6 +1710,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonSSM.StartChangeRequestExecution")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartExecutionPreview ->
+      let json = StartExecutionPreviewRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonSSM.StartExecutionPreview")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartSession ->
       let json = StartSessionRequest.to_json req in
@@ -1883,6 +2016,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteMaintenanceWindowResult.error_of_json))
+  | DeleteOpsItem ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteOpsItemResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteOpsItemResponse.error_of_json))
   | DeleteOpsMetadata ->
       if is_success
       then
@@ -1919,6 +2058,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteResourceDataSyncResult.error_of_json))
+  | DeleteResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteResourcePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteResourcePolicyResponse.error_of_json))
   | DeregisterManagedInstance ->
       if is_success
       then
@@ -2096,6 +2243,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeInstancePatchesResult.error_of_json))
+  | DescribeInstanceProperties ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeInstancePropertiesResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeInstancePropertiesResult.error_of_json))
   | DescribeInventoryDeletions ->
       if is_success
       then
@@ -2243,6 +2399,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DisassociateOpsItemRelatedItemResponse.error_of_json))
+  | GetAccessToken ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAccessTokenResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetAccessTokenResponse.error_of_json))
   | GetAutomationExecution ->
       if is_success
       then
@@ -2297,6 +2460,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetDocumentResult.of_json json)
       else Error (parse_aws_error (Some GetDocumentResult.error_of_json))
+  | GetExecutionPreview ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetExecutionPreviewResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetExecutionPreviewResponse.error_of_json))
   | GetInventory ->
       if is_success
       then
@@ -2417,6 +2588,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetPatchBaselineForPatchGroupResult.error_of_json))
+  | GetResourcePolicies ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetResourcePoliciesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetResourcePoliciesResponse.error_of_json))
   | GetServiceSetting ->
       if is_success
       then
@@ -2508,6 +2687,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListInventoryEntriesResult.error_of_json))
+  | ListNodes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListNodesResult.of_json json)
+      else Error (parse_aws_error (Some ListNodesResult.error_of_json))
+  | ListNodesSummary ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListNodesSummaryResult.of_json json)
+      else
+        Error (parse_aws_error (Some ListNodesSummaryResult.error_of_json))
   | ListOpsItemEvents ->
       if is_success
       then
@@ -2584,6 +2776,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (PutParameterResult.of_json json)
       else Error (parse_aws_error (Some PutParameterResult.error_of_json))
+  | PutResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutResourcePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutResourcePolicyResponse.error_of_json))
   | RegisterDefaultPatchBaseline ->
       if is_success
       then
@@ -2656,6 +2856,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (SendCommandResult.of_json json)
       else Error (parse_aws_error (Some SendCommandResult.error_of_json))
+  | StartAccessRequest ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartAccessRequestResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartAccessRequestResponse.error_of_json))
   | StartAssociationsOnce ->
       if is_success
       then
@@ -2682,6 +2890,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some StartChangeRequestExecutionResult.error_of_json))
+  | StartExecutionPreview ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartExecutionPreviewResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartExecutionPreviewResponse.error_of_json))
   | StartSession ->
       if is_success
       then

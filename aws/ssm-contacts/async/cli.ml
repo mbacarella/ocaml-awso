@@ -145,6 +145,74 @@ let create_contact_channel =
                                   deliveryAddress) ())
            (Some Values.CreateContactChannelResult.to_json)
            (Some Values.CreateContactChannelResult.error_to_json)])
+let create_rotation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and startTime =
+         flag "start-time" (optional json_arg) ~doc:"JSON DateTime"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsList"
+       and idempotencyToken =
+         flag "idempotency-token" (optional string)
+           ~doc:"STRING IdempotencyToken"
+       and name = flag "name" (required string) ~doc:"STRING RotationName"
+       and contactIds =
+         flag "contact-ids" (required json_arg)
+           ~doc:"JSON RotationContactsArnList"
+       and timeZoneId =
+         flag "time-zone-id" (required string) ~doc:"STRING TimeZoneId"
+       and recurrence =
+         flag "recurrence" (required json_arg) ~doc:"JSON RecurrenceSettings" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_rotation
+           (Values.CreateRotationRequest.make
+              ?startTime:(Option.map ~f:Values.DateTime.of_json startTime)
+              ?tags:(Option.map ~f:Values.TagsList.of_json tags)
+              ?idempotencyToken ~name
+              ~contactIds:(Values.RotationContactsArnList.of_json contactIds)
+              ~timeZoneId
+              ~recurrence:(Values.RecurrenceSettings.of_json recurrence) ())
+           (Some Values.CreateRotationResult.to_json)
+           (Some Values.CreateRotationResult.error_to_json)])
+let create_rotation_override =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and idempotencyToken =
+         flag "idempotency-token" (optional string)
+           ~doc:"STRING IdempotencyToken"
+       and rotationId =
+         flag "rotation-id" (required string) ~doc:"STRING SsmContactsArn"
+       and newContactIds =
+         flag "new-contact-ids" (required json_arg)
+           ~doc:"JSON RotationOverrideContactsArnList"
+       and startTime =
+         flag "start-time" (required json_arg) ~doc:"JSON DateTime"
+       and endTime = flag "end-time" (required json_arg) ~doc:"JSON DateTime" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_rotation_override
+           (Values.CreateRotationOverrideRequest.make ?idempotencyToken
+              ~rotationId
+              ~newContactIds:(Values.RotationOverrideContactsArnList.of_json
+                                newContactIds)
+              ~startTime:(Values.DateTime.of_json startTime)
+              ~endTime:(Values.DateTime.of_json endTime) ())
+           (Some Values.CreateRotationOverrideResult.to_json)
+           (Some Values.CreateRotationOverrideResult.error_to_json)])
 let deactivate_contact_channel =
   Command.async ~summary:""
     ([%map_open.Command
@@ -200,6 +268,45 @@ let delete_contact_channel =
            (Values.DeleteContactChannelRequest.make ~contactChannelId ())
            (Some Values.DeleteContactChannelResult.to_json)
            (Some Values.DeleteContactChannelResult.error_to_json)])
+let delete_rotation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and rotationId =
+         flag "rotation-id" (required string) ~doc:"STRING SsmContactsArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_rotation
+           (Values.DeleteRotationRequest.make ~rotationId ())
+           (Some Values.DeleteRotationResult.to_json)
+           (Some Values.DeleteRotationResult.error_to_json)])
+let delete_rotation_override =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and rotationId =
+         flag "rotation-id" (required string) ~doc:"STRING SsmContactsArn"
+       and rotationOverrideId =
+         flag "rotation-override-id" (required string) ~doc:"STRING Uuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_rotation_override
+           (Values.DeleteRotationOverrideRequest.make ~rotationId
+              ~rotationOverrideId ())
+           (Some Values.DeleteRotationOverrideResult.to_json)
+           (Some Values.DeleteRotationOverrideResult.error_to_json)])
 let describe_engagement =
   Command.async ~summary:""
     ([%map_open.Command
@@ -289,6 +396,44 @@ let get_contact_policy =
            (Values.GetContactPolicyRequest.make ~contactArn ())
            (Some Values.GetContactPolicyResult.to_json)
            (Some Values.GetContactPolicyResult.error_to_json)])
+let get_rotation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and rotationId =
+         flag "rotation-id" (required string) ~doc:"STRING SsmContactsArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_rotation (Values.GetRotationRequest.make ~rotationId ())
+           (Some Values.GetRotationResult.to_json)
+           (Some Values.GetRotationResult.error_to_json)])
+let get_rotation_override =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and rotationId =
+         flag "rotation-id" (required string) ~doc:"STRING SsmContactsArn"
+       and rotationOverrideId =
+         flag "rotation-override-id" (required string) ~doc:"STRING Uuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_rotation_override
+           (Values.GetRotationOverrideRequest.make ~rotationId
+              ~rotationOverrideId ())
+           (Some Values.GetRotationOverrideResult.to_json)
+           (Some Values.GetRotationOverrideResult.error_to_json)])
 let list_contact_channels =
   Command.async ~summary:""
     ([%map_open.Command
@@ -385,6 +530,26 @@ let list_page_receipts =
            (Values.ListPageReceiptsRequest.make ?nextToken ?maxResults
               ~pageId ()) (Some Values.ListPageReceiptsResult.to_json)
            (Some Values.ListPageReceiptsResult.error_to_json)])
+let list_page_resolutions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and pageId =
+         flag "page-id" (required string) ~doc:"STRING SsmContactsArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_page_resolutions
+           (Values.ListPageResolutionsRequest.make ?nextToken ~pageId ())
+           (Some Values.ListPageResolutionsResult.to_json)
+           (Some Values.ListPageResolutionsResult.error_to_json)])
 let list_pages_by_contact =
   Command.async ~summary:""
     ([%map_open.Command
@@ -430,6 +595,127 @@ let list_pages_by_engagement =
               ~engagementId ())
            (Some Values.ListPagesByEngagementResult.to_json)
            (Some Values.ListPagesByEngagementResult.error_to_json)])
+let list_preview_rotation_shifts =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and rotationStartTime =
+         flag "rotation-start-time" (optional json_arg) ~doc:"JSON DateTime"
+       and startTime =
+         flag "start-time" (optional json_arg) ~doc:"JSON DateTime"
+       and overrides =
+         flag "overrides" (optional json_arg) ~doc:"JSON OverrideList"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and endTime = flag "end-time" (required json_arg) ~doc:"JSON DateTime"
+       and members =
+         flag "members" (required json_arg)
+           ~doc:"JSON RotationPreviewMemberList"
+       and timeZoneId =
+         flag "time-zone-id" (required string) ~doc:"STRING TimeZoneId"
+       and recurrence =
+         flag "recurrence" (required json_arg) ~doc:"JSON RecurrenceSettings" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_preview_rotation_shifts
+           (Values.ListPreviewRotationShiftsRequest.make
+              ?rotationStartTime:(Option.map ~f:Values.DateTime.of_json
+                                    rotationStartTime)
+              ?startTime:(Option.map ~f:Values.DateTime.of_json startTime)
+              ?overrides:(Option.map ~f:Values.OverrideList.of_json overrides)
+              ?nextToken ?maxResults
+              ~endTime:(Values.DateTime.of_json endTime)
+              ~members:(Values.RotationPreviewMemberList.of_json members)
+              ~timeZoneId
+              ~recurrence:(Values.RecurrenceSettings.of_json recurrence) ())
+           (Some Values.ListPreviewRotationShiftsResult.to_json)
+           (Some Values.ListPreviewRotationShiftsResult.error_to_json)])
+let list_rotation_overrides =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and rotationId =
+         flag "rotation-id" (required string) ~doc:"STRING SsmContactsArn"
+       and startTime =
+         flag "start-time" (required json_arg) ~doc:"JSON DateTime"
+       and endTime = flag "end-time" (required json_arg) ~doc:"JSON DateTime" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_rotation_overrides
+           (Values.ListRotationOverridesRequest.make ?nextToken ?maxResults
+              ~rotationId ~startTime:(Values.DateTime.of_json startTime)
+              ~endTime:(Values.DateTime.of_json endTime) ())
+           (Some Values.ListRotationOverridesResult.to_json)
+           (Some Values.ListRotationOverridesResult.error_to_json)])
+let list_rotation_shifts =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and startTime =
+         flag "start-time" (optional json_arg) ~doc:"JSON DateTime"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and rotationId =
+         flag "rotation-id" (required string) ~doc:"STRING SsmContactsArn"
+       and endTime = flag "end-time" (required json_arg) ~doc:"JSON DateTime" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_rotation_shifts
+           (Values.ListRotationShiftsRequest.make
+              ?startTime:(Option.map ~f:Values.DateTime.of_json startTime)
+              ?nextToken ?maxResults ~rotationId
+              ~endTime:(Values.DateTime.of_json endTime) ())
+           (Some Values.ListRotationShiftsResult.to_json)
+           (Some Values.ListRotationShiftsResult.error_to_json)])
+let list_rotations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and rotationNamePrefix =
+         flag "rotation-name-prefix" (optional string)
+           ~doc:"STRING RotationName"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_rotations
+           (Values.ListRotationsRequest.make ?rotationNamePrefix ?nextToken
+              ?maxResults ()) (Some Values.ListRotationsResult.to_json)
+           (Some Values.ListRotationsResult.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -628,6 +914,39 @@ let update_contact_channel =
                                   deliveryAddress) ~contactChannelId ())
            (Some Values.UpdateContactChannelResult.to_json)
            (Some Values.UpdateContactChannelResult.error_to_json)])
+let update_rotation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and contactIds =
+         flag "contact-ids" (optional json_arg)
+           ~doc:"JSON RotationContactsArnList"
+       and startTime =
+         flag "start-time" (optional json_arg) ~doc:"JSON DateTime"
+       and timeZoneId =
+         flag "time-zone-id" (optional string) ~doc:"STRING TimeZoneId"
+       and rotationId =
+         flag "rotation-id" (required string) ~doc:"STRING SsmContactsArn"
+       and recurrence =
+         flag "recurrence" (required json_arg) ~doc:"JSON RecurrenceSettings" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_rotation
+           (Values.UpdateRotationRequest.make
+              ?contactIds:(Option.map
+                             ~f:Values.RotationContactsArnList.of_json
+                             contactIds)
+              ?startTime:(Option.map ~f:Values.DateTime.of_json startTime)
+              ?timeZoneId ~rotationId
+              ~recurrence:(Values.RecurrenceSettings.of_json recurrence) ())
+           (Some Values.UpdateRotationResult.to_json)
+           (Some Values.UpdateRotationResult.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -635,20 +954,31 @@ let main =
     ("activate-contact-channel", activate_contact_channel);
     ("create-contact", create_contact);
     ("create-contact-channel", create_contact_channel);
+    ("create-rotation", create_rotation);
+    ("create-rotation-override", create_rotation_override);
     ("deactivate-contact-channel", deactivate_contact_channel);
     ("delete-contact", delete_contact);
     ("delete-contact-channel", delete_contact_channel);
+    ("delete-rotation", delete_rotation);
+    ("delete-rotation-override", delete_rotation_override);
     ("describe-engagement", describe_engagement);
     ("describe-page", describe_page);
     ("get-contact", get_contact);
     ("get-contact-channel", get_contact_channel);
     ("get-contact-policy", get_contact_policy);
+    ("get-rotation", get_rotation);
+    ("get-rotation-override", get_rotation_override);
     ("list-contact-channels", list_contact_channels);
     ("list-contacts", list_contacts);
     ("list-engagements", list_engagements);
     ("list-page-receipts", list_page_receipts);
+    ("list-page-resolutions", list_page_resolutions);
     ("list-pages-by-contact", list_pages_by_contact);
     ("list-pages-by-engagement", list_pages_by_engagement);
+    ("list-preview-rotation-shifts", list_preview_rotation_shifts);
+    ("list-rotation-overrides", list_rotation_overrides);
+    ("list-rotation-shifts", list_rotation_shifts);
+    ("list-rotations", list_rotations);
     ("list-tags-for-resource", list_tags_for_resource);
     ("put-contact-policy", put_contact_policy);
     ("send-activation-code", send_activation_code);
@@ -657,4 +987,5 @@ let main =
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-contact", update_contact);
-    ("update-contact-channel", update_contact_channel)]
+    ("update-contact-channel", update_contact_channel);
+    ("update-rotation", update_rotation)]

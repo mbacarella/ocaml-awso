@@ -7,6 +7,9 @@ type ('i, 'o, 'e) t =
   | CreateScheduledQuery: (CreateScheduledQueryRequest.t,
   CreateScheduledQueryResponse.t, CreateScheduledQueryResponse.error) t 
   | DeleteScheduledQuery: (DeleteScheduledQueryRequest.t, unit, unit) t 
+  | DescribeAccountSettings: (DescribeAccountSettingsRequest.t,
+  DescribeAccountSettingsResponse.t, DescribeAccountSettingsResponse.error) t
+  
   | DescribeEndpoints: (DescribeEndpointsRequest.t,
   DescribeEndpointsResponse.t, DescribeEndpointsResponse.error) t 
   | DescribeScheduledQuery: (DescribeScheduledQueryRequest.t,
@@ -23,12 +26,15 @@ type ('i, 'o, 'e) t =
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateAccountSettings: (UpdateAccountSettingsRequest.t,
+  UpdateAccountSettingsResponse.t, UpdateAccountSettingsResponse.error) t 
   | UpdateScheduledQuery: (UpdateScheduledQueryRequest.t, unit, unit) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CancelQuery -> `POST
   | CreateScheduledQuery -> `POST
   | DeleteScheduledQuery -> `POST
+  | DescribeAccountSettings -> `POST
   | DescribeEndpoints -> `POST
   | DescribeScheduledQuery -> `POST
   | ExecuteScheduledQuery -> `POST
@@ -38,6 +44,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | Query -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
+  | UpdateAccountSettings -> `POST
   | UpdateScheduledQuery -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
@@ -45,6 +52,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CancelQuery -> (Format.kasprintf Uri.of_string) "/"
       | CreateScheduledQuery -> (Format.kasprintf Uri.of_string) "/"
       | DeleteScheduledQuery -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeAccountSettings -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEndpoints -> (Format.kasprintf Uri.of_string) "/"
       | DescribeScheduledQuery -> (Format.kasprintf Uri.of_string) "/"
       | ExecuteScheduledQuery -> (Format.kasprintf Uri.of_string) "/"
@@ -54,6 +62,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | Query -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateAccountSettings -> (Format.kasprintf Uri.of_string) "/"
       | UpdateScheduledQuery -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
@@ -81,6 +90,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "Timestream_20181101.DeleteScheduledQuery")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeAccountSettings ->
+      let json = DescribeAccountSettingsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "Timestream_20181101.DescribeAccountSettings")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeEndpoints ->
       let json = DescribeEndpointsRequest.to_json req in
@@ -154,6 +171,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "Timestream_20181101.UntagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateAccountSettings ->
+      let json = UpdateAccountSettingsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "Timestream_20181101.UpdateAccountSettings")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateScheduledQuery ->
       let json = UpdateScheduledQueryRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -201,6 +226,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error (Some CreateScheduledQueryResponse.error_of_json))
   | DeleteScheduledQuery ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DescribeAccountSettings ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAccountSettingsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAccountSettingsResponse.error_of_json))
   | DescribeEndpoints ->
       if is_success
       then
@@ -260,5 +294,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UntagResourceResponse.of_json json)
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateAccountSettings ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateAccountSettingsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateAccountSettingsResponse.error_of_json))
   | UpdateScheduledQuery ->
       if is_success then Ok () else Error (parse_aws_error None)

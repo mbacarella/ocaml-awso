@@ -86,6 +86,34 @@ let associate_discovered_resource =
                                      discoveredResource) ())
            (Some Values.AssociateDiscoveredResourceResult.to_json)
            (Some Values.AssociateDiscoveredResourceResult.error_to_json)])
+let associate_source_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL DryRun"
+       and progressUpdateStream =
+         flag "progress-update-stream" (required string)
+           ~doc:"STRING ProgressUpdateStream"
+       and migrationTaskName =
+         flag "migration-task-name" (required string)
+           ~doc:"STRING MigrationTaskName"
+       and sourceResource =
+         flag "source-resource" (required json_arg)
+           ~doc:"JSON SourceResource" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_source_resource
+           (Values.AssociateSourceResourceRequest.make ?dryRun
+              ~progressUpdateStream ~migrationTaskName
+              ~sourceResource:(Values.SourceResource.of_json sourceResource)
+              ()) (Some Values.AssociateSourceResourceResult.to_json)
+           (Some Values.AssociateSourceResourceResult.error_to_json)])
 let create_progress_update_stream =
   Command.async ~summary:""
     ([%map_open.Command
@@ -223,6 +251,33 @@ let disassociate_discovered_resource =
               ~progressUpdateStream ~migrationTaskName ~configurationId ())
            (Some Values.DisassociateDiscoveredResourceResult.to_json)
            (Some Values.DisassociateDiscoveredResourceResult.error_to_json)])
+let disassociate_source_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL DryRun"
+       and progressUpdateStream =
+         flag "progress-update-stream" (required string)
+           ~doc:"STRING ProgressUpdateStream"
+       and migrationTaskName =
+         flag "migration-task-name" (required string)
+           ~doc:"STRING MigrationTaskName"
+       and sourceResourceName =
+         flag "source-resource-name" (required string)
+           ~doc:"STRING SourceResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_source_resource
+           (Values.DisassociateSourceResourceRequest.make ?dryRun
+              ~progressUpdateStream ~migrationTaskName ~sourceResourceName ())
+           (Some Values.DisassociateSourceResourceResult.to_json)
+           (Some Values.DisassociateSourceResourceResult.error_to_json)])
 let import_migration_task =
   Command.async ~summary:""
     ([%map_open.Command
@@ -327,6 +382,33 @@ let list_discovered_resources =
               ~progressUpdateStream ~migrationTaskName ())
            (Some Values.ListDiscoveredResourcesResult.to_json)
            (Some Values.ListDiscoveredResourcesResult.error_to_json)])
+let list_migration_task_updates =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and progressUpdateStream =
+         flag "progress-update-stream" (required string)
+           ~doc:"STRING ProgressUpdateStream"
+       and migrationTaskName =
+         flag "migration-task-name" (required string)
+           ~doc:"STRING MigrationTaskName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_migration_task_updates
+           (Values.ListMigrationTaskUpdatesRequest.make ?nextToken
+              ?maxResults ~progressUpdateStream ~migrationTaskName ())
+           (Some Values.ListMigrationTaskUpdatesResult.to_json)
+           (Some Values.ListMigrationTaskUpdatesResult.error_to_json)])
 let list_migration_tasks =
   Command.async ~summary:""
     ([%map_open.Command
@@ -371,6 +453,34 @@ let list_progress_update_streams =
               ?maxResults ())
            (Some Values.ListProgressUpdateStreamsResult.to_json)
            (Some Values.ListProgressUpdateStreamsResult.error_to_json)])
+let list_source_resources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT MaxResultsSourceResources"
+       and progressUpdateStream =
+         flag "progress-update-stream" (required string)
+           ~doc:"STRING ProgressUpdateStream"
+       and migrationTaskName =
+         flag "migration-task-name" (required string)
+           ~doc:"STRING MigrationTaskName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_source_resources
+           (Values.ListSourceResourcesRequest.make ?nextToken ?maxResults
+              ~progressUpdateStream ~migrationTaskName ())
+           (Some Values.ListSourceResourcesResult.to_json)
+           (Some Values.ListSourceResourcesResult.error_to_json)])
 let notify_application_state =
   Command.async ~summary:""
     ([%map_open.Command
@@ -466,18 +576,22 @@ let main =
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-created-artifact", associate_created_artifact);
     ("associate-discovered-resource", associate_discovered_resource);
+    ("associate-source-resource", associate_source_resource);
     ("create-progress-update-stream", create_progress_update_stream);
     ("delete-progress-update-stream", delete_progress_update_stream);
     ("describe-application-state", describe_application_state);
     ("describe-migration-task", describe_migration_task);
     ("disassociate-created-artifact", disassociate_created_artifact);
     ("disassociate-discovered-resource", disassociate_discovered_resource);
+    ("disassociate-source-resource", disassociate_source_resource);
     ("import-migration-task", import_migration_task);
     ("list-application-states", list_application_states);
     ("list-created-artifacts", list_created_artifacts);
     ("list-discovered-resources", list_discovered_resources);
+    ("list-migration-task-updates", list_migration_task_updates);
     ("list-migration-tasks", list_migration_tasks);
     ("list-progress-update-streams", list_progress_update_streams);
+    ("list-source-resources", list_source_resources);
     ("notify-application-state", notify_application_state);
     ("notify-migration-task-state", notify_migration_task_state);
     ("put-resource-attributes", put_resource_attributes)]

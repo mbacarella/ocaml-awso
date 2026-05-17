@@ -53,8 +53,8 @@ module AWSOrganizationsNotInUseException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -83,7 +83,7 @@ module AcceptHandshakeRequest =
       {
       handshakeId: HandshakeId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the handshake that you want to accept. The regex pattern for handshake ID string requires \"h-\" followed by from 8 to 32 lowercase letters or digits."]}
+          "ID for the handshake that you want to accept. The regex pattern for handshake ID string requires \"h-\" followed by from 8 to 32 lowercase letters or digits."]}
     let context_ = "AcceptHandshakeRequest"
     let make ~handshakeId = fun () -> { handshakeId }
     let to_value x =
@@ -96,12 +96,13 @@ module AcceptHandshakeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HandshakeId") in
       make ~handshakeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let handshakeId = field_map_exn json "HandshakeId" HandshakeId.of_json in
+    let of_json json__ =
+      let handshakeId =
+        field_map_exn json__ "HandshakeId" HandshakeId.of_json in
       make ~handshakeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sends a response to the originator of a handshake agreeing to the action proposed by the handshake request. This operation can be called only by the following principals when they also have the relevant IAM permissions: Invitation to join or Approve all features request handshakes: only a principal from the member account. The user who calls the API for an invitation to join must have the organizations:AcceptHandshake permission. If you enabled all features in the organization, the user must also have the iam:CreateServiceLinkedRole permission so that Organizations can create the required service-linked role named AWSServiceRoleForOrganizations. For more information, see Organizations and Service-Linked Roles in the Organizations User Guide. Enable all features final confirmation handshake: only a principal from the management account. For more information about invitations, see Inviting an Amazon Web Services account to join your organization in the Organizations User Guide. For more information about requests to enable all features in the organization, see Enabling all features in your organization in the Organizations User Guide. After you accept a handshake, it continues to appear in the results of relevant APIs for only 30 days. After that, it's deleted."]
+       "Accepts a handshake by sending an ACCEPTED response to the sender. You can view accepted handshakes in API responses for 30 days before they are deleted. Only the management account can accept the following handshakes: Enable all features final confirmation (APPROVE_ALL_FEATURES) Billing transfer (TRANSFER_RESPONSIBILITY) For more information, see Enabling all features and Responding to a billing transfer invitation in the Organizations User Guide. Only a member account can accept the following handshakes: Invitation to join (INVITE) Approve all features request (ENABLE_ALL_FEATURES) For more information, see Responding to invitations and Enabling all features in the Organizations User Guide."]
 module ExceptionType =
   struct
     type nonrec t = string
@@ -135,13 +136,13 @@ module TooManyRequestsException =
         (Option.map ~f:ExceptionType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?message ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
-      let type_ = field_map json "Type" ExceptionType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      let type_ = field_map json__ "Type" ExceptionType.of_json in
       make ?message ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You have sent too many requests in too short a period of time. The quota helps protect against denial-of-service attacks. Try again later. For information about quotas that affect Organizations, see Quotas for Organizationsin the Organizations User Guide."]
+       "You have sent too many requests in too short a period of time. The quota helps protect against denial-of-service attacks. Try again later. For information about quotas that affect Organizations, see Quotas for Organizations in the Organizations User Guide."]
 module ServiceException =
   struct
     type nonrec t = {
@@ -157,12 +158,33 @@ module ServiceException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Organizations can't complete your request because of an internal service error. Try again later."]
+module MasterCannotLeaveOrganizationException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You can't remove a management account from an organization. If you want the management account to become a member account in another organization, you must first delete the current organization of the management account."]
 module InvalidInputExceptionReason =
   struct
     type nonrec t =
@@ -190,6 +212,22 @@ module InvalidInputExceptionReason =
       | DUPLICATE_TAG_KEY 
       | TARGET_NOT_SUPPORTED 
       | INVALID_EMAIL_ADDRESS_TARGET 
+      | INVALID_RESOURCE_POLICY_JSON 
+      | INVALID_PRINCIPAL 
+      | UNSUPPORTED_ACTION_IN_RESOURCE_POLICY 
+      | UNSUPPORTED_POLICY_TYPE_IN_RESOURCE_POLICY 
+      | UNSUPPORTED_RESOURCE_IN_RESOURCE_POLICY 
+      | NON_DETACHABLE_POLICY 
+      | CALLER_REQUIRED_FIELD_MISSING 
+      | UNSUPPORTED_ACTION_IN_RESPONSIBILITY_TRANSFER 
+      | START_DATE_NOT_BEGINNING_OF_MONTH 
+      | START_DATE_NOT_BEGINNING_OF_DAY 
+      | START_DATE_TOO_EARLY 
+      | START_DATE_TOO_LATE 
+      | INVALID_START_DATE 
+      | END_DATE_NOT_END_OF_MONTH 
+      | END_DATE_TOO_EARLY 
+      | INVALID_END_DATE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -219,6 +257,27 @@ module InvalidInputExceptionReason =
       | DUPLICATE_TAG_KEY -> "DUPLICATE_TAG_KEY"
       | TARGET_NOT_SUPPORTED -> "TARGET_NOT_SUPPORTED"
       | INVALID_EMAIL_ADDRESS_TARGET -> "INVALID_EMAIL_ADDRESS_TARGET"
+      | INVALID_RESOURCE_POLICY_JSON -> "INVALID_RESOURCE_POLICY_JSON"
+      | INVALID_PRINCIPAL -> "INVALID_PRINCIPAL"
+      | UNSUPPORTED_ACTION_IN_RESOURCE_POLICY ->
+          "UNSUPPORTED_ACTION_IN_RESOURCE_POLICY"
+      | UNSUPPORTED_POLICY_TYPE_IN_RESOURCE_POLICY ->
+          "UNSUPPORTED_POLICY_TYPE_IN_RESOURCE_POLICY"
+      | UNSUPPORTED_RESOURCE_IN_RESOURCE_POLICY ->
+          "UNSUPPORTED_RESOURCE_IN_RESOURCE_POLICY"
+      | NON_DETACHABLE_POLICY -> "NON_DETACHABLE_POLICY"
+      | CALLER_REQUIRED_FIELD_MISSING -> "CALLER_REQUIRED_FIELD_MISSING"
+      | UNSUPPORTED_ACTION_IN_RESPONSIBILITY_TRANSFER ->
+          "UNSUPPORTED_ACTION_IN_RESPONSIBILITY_TRANSFER"
+      | START_DATE_NOT_BEGINNING_OF_MONTH ->
+          "START_DATE_NOT_BEGINNING_OF_MONTH"
+      | START_DATE_NOT_BEGINNING_OF_DAY -> "START_DATE_NOT_BEGINNING_OF_DAY"
+      | START_DATE_TOO_EARLY -> "START_DATE_TOO_EARLY"
+      | START_DATE_TOO_LATE -> "START_DATE_TOO_LATE"
+      | INVALID_START_DATE -> "INVALID_START_DATE"
+      | END_DATE_NOT_END_OF_MONTH -> "END_DATE_NOT_END_OF_MONTH"
+      | END_DATE_TOO_EARLY -> "END_DATE_TOO_EARLY"
+      | INVALID_END_DATE -> "INVALID_END_DATE"
       | Non_static_id s -> s
     let of_string =
       function
@@ -247,6 +306,27 @@ module InvalidInputExceptionReason =
       | "DUPLICATE_TAG_KEY" -> DUPLICATE_TAG_KEY
       | "TARGET_NOT_SUPPORTED" -> TARGET_NOT_SUPPORTED
       | "INVALID_EMAIL_ADDRESS_TARGET" -> INVALID_EMAIL_ADDRESS_TARGET
+      | "INVALID_RESOURCE_POLICY_JSON" -> INVALID_RESOURCE_POLICY_JSON
+      | "INVALID_PRINCIPAL" -> INVALID_PRINCIPAL
+      | "UNSUPPORTED_ACTION_IN_RESOURCE_POLICY" ->
+          UNSUPPORTED_ACTION_IN_RESOURCE_POLICY
+      | "UNSUPPORTED_POLICY_TYPE_IN_RESOURCE_POLICY" ->
+          UNSUPPORTED_POLICY_TYPE_IN_RESOURCE_POLICY
+      | "UNSUPPORTED_RESOURCE_IN_RESOURCE_POLICY" ->
+          UNSUPPORTED_RESOURCE_IN_RESOURCE_POLICY
+      | "NON_DETACHABLE_POLICY" -> NON_DETACHABLE_POLICY
+      | "CALLER_REQUIRED_FIELD_MISSING" -> CALLER_REQUIRED_FIELD_MISSING
+      | "UNSUPPORTED_ACTION_IN_RESPONSIBILITY_TRANSFER" ->
+          UNSUPPORTED_ACTION_IN_RESPONSIBILITY_TRANSFER
+      | "START_DATE_NOT_BEGINNING_OF_MONTH" ->
+          START_DATE_NOT_BEGINNING_OF_MONTH
+      | "START_DATE_NOT_BEGINNING_OF_DAY" -> START_DATE_NOT_BEGINNING_OF_DAY
+      | "START_DATE_TOO_EARLY" -> START_DATE_TOO_EARLY
+      | "START_DATE_TOO_LATE" -> START_DATE_TOO_LATE
+      | "INVALID_START_DATE" -> INVALID_START_DATE
+      | "END_DATE_NOT_END_OF_MONTH" -> END_DATE_NOT_END_OF_MONTH
+      | "END_DATE_TOO_EARLY" -> END_DATE_TOO_EARLY
+      | "INVALID_END_DATE" -> INVALID_END_DATE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -281,14 +361,14 @@ module InvalidInputException =
           (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reason =
-        field_map json "Reason" InvalidInputExceptionReason.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+        field_map json__ "Reason" InvalidInputExceptionReason.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The requested operation failed because you provided invalid values for one or more of the request parameters. This exception includes a reason that contains additional information about the violated limit: Some of the reasons in the following list might not be applicable to this specific API or operation. DUPLICATE_TAG_KEY: Tag keys must be unique among the tags attached to the same entity. IMMUTABLE_POLICY: You specified a policy that is managed by Amazon Web Services and can't be modified. INPUT_REQUIRED: You must include a value for all required parameters. INVALID_EMAIL_ADDRESS_TARGET: You specified an invalid email address for the invited account owner. INVALID_ENUM: You specified an invalid value. INVALID_ENUM_POLICY_TYPE: You specified an invalid policy type string. INVALID_FULL_NAME_TARGET: You specified a full name that contains invalid characters. INVALID_LIST_MEMBER: You provided a list to a parameter that contains at least one invalid value. INVALID_PAGINATION_TOKEN: Get the value for the NextToken parameter from the response to a previous call of the operation. INVALID_PARTY_TYPE_TARGET: You specified the wrong type of entity (account, organization, or email) as a party. INVALID_PATTERN: You provided a value that doesn't match the required pattern. INVALID_PATTERN_TARGET_ID: You specified a policy target ID that doesn't match the required pattern. INVALID_ROLE_NAME: You provided a role name that isn't valid. A role name can't begin with the reserved prefix AWSServiceRoleFor. INVALID_SYNTAX_ORGANIZATION_ARN: You specified an invalid Amazon Resource Name (ARN) for the organization. INVALID_SYNTAX_POLICY_ID: You specified an invalid policy ID. INVALID_SYSTEM_TAGS_PARAMETER: You specified a tag key that is a system tag. You can\226\128\153t add, edit, or delete system tag keys because they're reserved for Amazon Web Services use. System tags don\226\128\153t count against your tags per resource limit. MAX_FILTER_LIMIT_EXCEEDED: You can specify only one filter parameter for the operation. MAX_LENGTH_EXCEEDED: You provided a string parameter that is longer than allowed. MAX_VALUE_EXCEEDED: You provided a numeric parameter that has a larger value than allowed. MIN_LENGTH_EXCEEDED: You provided a string parameter that is shorter than allowed. MIN_VALUE_EXCEEDED: You provided a numeric parameter that has a smaller value than allowed. MOVING_ACCOUNT_BETWEEN_DIFFERENT_ROOTS: You can move an account only between entities in the same root. TARGET_NOT_SUPPORTED: You can't perform the specified operation on that target entity. UNRECOGNIZED_SERVICE_PRINCIPAL: You specified a service principal that isn't recognized."]
+       "The requested operation failed because you provided invalid values for one or more of the request parameters. This exception includes a reason that contains additional information about the violated limit: Some of the reasons in the following list might not be applicable to this specific API or operation. CALLER_REQUIRED_FIELD_MISSING: At least one of the required field is missing: Caller Account Id, Management Account Id or Organization Id. DUPLICATE_TAG_KEY: Tag keys must be unique among the tags attached to the same entity. END_DATE_NOT_END_OF_MONTH: You provided an invalid end date. The end date must be the end of the last day of the month (23.59.59.999). END_DATE_TOO_EARLY: You provided an invalid end date. It is too early for the transfer to end. IMMUTABLE_POLICY: You specified a policy that is managed by Amazon Web Services and can't be modified. INPUT_REQUIRED: You must include a value for all required parameters. INVALID_EMAIL_ADDRESS_TARGET: You specified an invalid email address for the invited account owner. INVALID_END_DATE: The selected withdrawal date doesn't meet the terms of your partner agreement. Visit Amazon Web Services Partner Central to view your partner agreements or contact your Amazon Web Services Partner for help. INVALID_ENUM: You specified an invalid value. INVALID_ENUM_POLICY_TYPE: You specified an invalid policy type string. INVALID_FULL_NAME_TARGET: You specified a full name that contains invalid characters. INVALID_LIST_MEMBER: You provided a list to a parameter that contains at least one invalid value. INVALID_PAGINATION_TOKEN: Get the value for the NextToken parameter from the response to a previous call of the operation. INVALID_PARTY_TYPE_TARGET: You specified the wrong type of entity (account, organization, or email) as a party. INVALID_PATTERN: You provided a value that doesn't match the required pattern. INVALID_PATTERN_TARGET_ID: You specified a policy target ID that doesn't match the required pattern. INVALID_PRINCIPAL: You specified an invalid principal element in the policy. INVALID_ROLE_NAME: You provided a role name that isn't valid. A role name can't begin with the reserved prefix AWSServiceRoleFor. INVALID_START_DATE: The start date doesn't meet the minimum requirements. INVALID_SYNTAX_ORGANIZATION_ARN: You specified an invalid Amazon Resource Name (ARN) for the organization. INVALID_SYNTAX_POLICY_ID: You specified an invalid policy ID. INVALID_SYSTEM_TAGS_PARAMETER: You specified a tag key that is a system tag. You can\226\128\153t add, edit, or delete system tag keys because they're reserved for Amazon Web Services use. System tags don\226\128\153t count against your tags per resource limit. MAX_FILTER_LIMIT_EXCEEDED: You can specify only one filter parameter for the operation. MAX_LENGTH_EXCEEDED: You provided a string parameter that is longer than allowed. MAX_VALUE_EXCEEDED: You provided a numeric parameter that has a larger value than allowed. MIN_LENGTH_EXCEEDED: You provided a string parameter that is shorter than allowed. MIN_VALUE_EXCEEDED: You provided a numeric parameter that has a smaller value than allowed. MOVING_ACCOUNT_BETWEEN_DIFFERENT_ROOTS: You can move an account only between entities in the same root. NON_DETACHABLE_POLICY: You can't detach this Amazon Web Services Managed Policy. START_DATE_NOT_BEGINNING_OF_DAY: You provided an invalid start date. The start date must be the beginning of the day (00:00:00.000). START_DATE_NOT_BEGINNING_OF_MONTH: You provided an invalid start date. The start date must be the first day of the month. START_DATE_TOO_EARLY: You provided an invalid start date. The start date is too early. START_DATE_TOO_LATE: You provided an invalid start date. The start date is too late. TARGET_NOT_SUPPORTED: You can't perform the specified operation on that target entity. UNRECOGNIZED_SERVICE_PRINCIPAL: You specified a service principal that isn't recognized. UNSUPPORTED_ACTION_IN_RESPONSIBILITY_TRANSFER: You provided a value that is not supported by this operation."]
 module InvalidHandshakeTransitionException =
   struct
     type nonrec t = {
@@ -304,8 +384,8 @@ module InvalidHandshakeTransitionException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -325,8 +405,8 @@ module HandshakeNotFoundException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -344,6 +424,10 @@ module HandshakeConstraintViolationExceptionReason =
       | ORGANIZATION_FROM_DIFFERENT_SELLER_OF_RECORD 
       | ORGANIZATION_MEMBERSHIP_CHANGE_RATE_LIMIT_EXCEEDED 
       | MANAGEMENT_ACCOUNT_EMAIL_NOT_VERIFIED 
+      | RESPONSIBILITY_TRANSFER_ALREADY_EXISTS 
+      | SOURCE_AND_TARGET_CANNOT_MATCH 
+      | UNUSED_PREPAYMENT_BALANCE 
+      | LEGACY_PERMISSIONS_STILL_IN_USE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -364,6 +448,11 @@ module HandshakeConstraintViolationExceptionReason =
           "ORGANIZATION_MEMBERSHIP_CHANGE_RATE_LIMIT_EXCEEDED"
       | MANAGEMENT_ACCOUNT_EMAIL_NOT_VERIFIED ->
           "MANAGEMENT_ACCOUNT_EMAIL_NOT_VERIFIED"
+      | RESPONSIBILITY_TRANSFER_ALREADY_EXISTS ->
+          "RESPONSIBILITY_TRANSFER_ALREADY_EXISTS"
+      | SOURCE_AND_TARGET_CANNOT_MATCH -> "SOURCE_AND_TARGET_CANNOT_MATCH"
+      | UNUSED_PREPAYMENT_BALANCE -> "UNUSED_PREPAYMENT_BALANCE"
+      | LEGACY_PERMISSIONS_STILL_IN_USE -> "LEGACY_PERMISSIONS_STILL_IN_USE"
       | Non_static_id s -> s
     let of_string =
       function
@@ -383,6 +472,11 @@ module HandshakeConstraintViolationExceptionReason =
           ORGANIZATION_MEMBERSHIP_CHANGE_RATE_LIMIT_EXCEEDED
       | "MANAGEMENT_ACCOUNT_EMAIL_NOT_VERIFIED" ->
           MANAGEMENT_ACCOUNT_EMAIL_NOT_VERIFIED
+      | "RESPONSIBILITY_TRANSFER_ALREADY_EXISTS" ->
+          RESPONSIBILITY_TRANSFER_ALREADY_EXISTS
+      | "SOURCE_AND_TARGET_CANNOT_MATCH" -> SOURCE_AND_TARGET_CANNOT_MATCH
+      | "UNUSED_PREPAYMENT_BALANCE" -> UNUSED_PREPAYMENT_BALANCE
+      | "LEGACY_PERMISSIONS_STILL_IN_USE" -> LEGACY_PERMISSIONS_STILL_IN_USE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -420,15 +514,15 @@ module HandshakeConstraintViolationException =
           (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reason =
-        field_map json "Reason"
+        field_map json__ "Reason"
           HandshakeConstraintViolationExceptionReason.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The requested operation would violate the constraint identified in the reason code. Some of the reasons in the following list might not be applicable to this specific API or operation: ACCOUNT_NUMBER_LIMIT_EXCEEDED: You attempted to exceed the limit on the number of accounts in an organization. Note that deleted and closed accounts still count toward your limit. If you get this exception immediately after creating the organization, wait one hour and try again. If after an hour it continues to fail with this error, contact Amazon Web Services Support. ALREADY_IN_AN_ORGANIZATION: The handshake request is invalid because the invited account is already a member of an organization. HANDSHAKE_RATE_LIMIT_EXCEEDED: You attempted to exceed the number of handshakes that you can send in one day. INVITE_DISABLED_DURING_ENABLE_ALL_FEATURES: You can't issue new invitations to join an organization while it's in the process of enabling all features. You can resume inviting accounts after you finalize the process when all accounts have agreed to the change. ORGANIZATION_ALREADY_HAS_ALL_FEATURES: The handshake request is invalid because the organization has already enabled all features. ORGANIZATION_IS_ALREADY_PENDING_ALL_FEATURES_MIGRATION: The handshake request is invalid because the organization has already started the process to enable all features. ORGANIZATION_FROM_DIFFERENT_SELLER_OF_RECORD: The request failed because the account is from a different marketplace than the accounts in the organization. For example, accounts with India addresses must be associated with the AISPL marketplace. All accounts in an organization must be from the same marketplace. ORGANIZATION_MEMBERSHIP_CHANGE_RATE_LIMIT_EXCEEDED: You attempted to change the membership of an account too quickly after its previous change. PAYMENT_INSTRUMENT_REQUIRED: You can't complete the operation with an account that doesn't have a payment instrument, such as a credit card, associated with it."]
+       "The requested operation would violate the constraint identified in the reason code. Some of the reasons in the following list might not be applicable to this specific API or operation: ACCOUNT_NUMBER_LIMIT_EXCEEDED: You attempted to exceed the limit on the number of accounts in an organization. Note that deleted and closed accounts still count toward your limit. If you get this exception immediately after creating the organization, wait one hour and try again. If after an hour it continues to fail with this error, contact Amazon Web Services Support. ALREADY_IN_AN_ORGANIZATION: The handshake request is invalid because the invited account is already a member of an organization. HANDSHAKE_RATE_LIMIT_EXCEEDED: You attempted to exceed the number of handshakes that you can send in one day. INVITE_DISABLED_DURING_ENABLE_ALL_FEATURES: You can't issue new invitations to join an organization while it's in the process of enabling all features. You can resume inviting accounts after you finalize the process when all accounts have agreed to the change. LEGACY_PERMISSIONS_STILL_IN_USE: Your organization must migrate to use the new IAM fine-grained actions for billing, cost management, and accounts. ORGANIZATION_ALREADY_HAS_ALL_FEATURES: The handshake request is invalid because the organization has already enabled all features. ORGANIZATION_FROM_DIFFERENT_SELLER_OF_RECORD: The request failed because the account is from a different marketplace than the accounts in the organization. ORGANIZATION_IS_ALREADY_PENDING_ALL_FEATURES_MIGRATION: The handshake request is invalid because the organization has already started the process to enable all features. ORGANIZATION_MEMBERSHIP_CHANGE_RATE_LIMIT_EXCEEDED: You attempted to change the membership of an account too quickly after its previous change. PAYMENT_INSTRUMENT_REQUIRED: You can't complete the operation with an account that doesn't have a payment instrument, such as a credit card, associated with it. RESPONSIBILITY_TRANSFER_ALREADY_EXISTS: You cannot perform this operation with the current transfer. SOURCE_AND_TARGET_CANNOT_MATCH: An account can't accept a transfer invitation if it is both the sender and recipient of the invitation. UNUSED_PREPAYMENT_BALANCE: Your organization has an outstanding pre-payment balance."]
 module HandshakeAlreadyInStateException =
   struct
     type nonrec t = {
@@ -444,8 +538,8 @@ module HandshakeAlreadyInStateException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -523,6 +617,12 @@ module HandshakeResourceType =
       | MASTER_NAME 
       | NOTES 
       | PARENT_HANDSHAKE 
+      | RESPONSIBILITY_TRANSFER 
+      | TRANSFER_START_TIMESTAMP 
+      | TRANSFER_TYPE 
+      | MANAGEMENT_ACCOUNT 
+      | MANAGEMENT_EMAIL 
+      | MANAGEMENT_NAME 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -535,6 +635,12 @@ module HandshakeResourceType =
       | MASTER_NAME -> "MASTER_NAME"
       | NOTES -> "NOTES"
       | PARENT_HANDSHAKE -> "PARENT_HANDSHAKE"
+      | RESPONSIBILITY_TRANSFER -> "RESPONSIBILITY_TRANSFER"
+      | TRANSFER_START_TIMESTAMP -> "TRANSFER_START_TIMESTAMP"
+      | TRANSFER_TYPE -> "TRANSFER_TYPE"
+      | MANAGEMENT_ACCOUNT -> "MANAGEMENT_ACCOUNT"
+      | MANAGEMENT_EMAIL -> "MANAGEMENT_EMAIL"
+      | MANAGEMENT_NAME -> "MANAGEMENT_NAME"
       | Non_static_id s -> s
     let of_string =
       function
@@ -546,6 +652,12 @@ module HandshakeResourceType =
       | "MASTER_NAME" -> MASTER_NAME
       | "NOTES" -> NOTES
       | "PARENT_HANDSHAKE" -> PARENT_HANDSHAKE
+      | "RESPONSIBILITY_TRANSFER" -> RESPONSIBILITY_TRANSFER
+      | "TRANSFER_START_TIMESTAMP" -> TRANSFER_START_TIMESTAMP
+      | "TRANSFER_TYPE" -> TRANSFER_TYPE
+      | "MANAGEMENT_ACCOUNT" -> MANAGEMENT_ACCOUNT
+      | "MANAGEMENT_EMAIL" -> MANAGEMENT_EMAIL
+      | "MANAGEMENT_NAME" -> MANAGEMENT_NAME
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -563,13 +675,13 @@ module rec
                         {
                         value: HandshakeResourceValue.t option
                           [@ocaml.doc
-                            "The information that is passed to the other party in the handshake. The format of the value string must match the requirements of the specified type."];
+                            "Additional information for the handshake. The format of the value string must match the requirements of the specified type."];
                         type_: HandshakeResourceType.t option
                           [@ocaml.doc
-                            "The type of information being passed, specifying how the value is to be interpreted by the other party: ACCOUNT - Specifies an Amazon Web Services account ID number. ORGANIZATION - Specifies an organization ID number. EMAIL - Specifies the email address that is associated with the account that receives the handshake. OWNER_EMAIL - Specifies the email address associated with the management account. Included as information about an organization. OWNER_NAME - Specifies the name associated with the management account. Included as information about an organization. NOTES - Additional text provided by the handshake initiator and intended for the recipient to read."];
+                            "The type of information being passed, specifying how the value is to be interpreted by the other party: ACCOUNT: ID for an Amazon Web Services account. ORGANIZATION: ID for an organization. EMAIL: Email address for the recipient. OWNER_EMAIL: Email address for the sender. OWNER_NAME: Name of the sender. NOTES: Additional text included by the sender for the recipient."];
                         resources: HandshakeResources.t option
                           [@ocaml.doc
-                            "When needed, contains an additional array of HandshakeResource objects."]}
+                            "An array of HandshakeResource objects. When needed, contains additional details for a handshake. For example, the email address for the sender."]}
                       val make :
                         ?value:HandshakeResourceValue.t ->
                           ?type_:HandshakeResourceType.t ->
@@ -585,13 +697,13 @@ module rec
       {
       value: HandshakeResourceValue.t option
         [@ocaml.doc
-          "The information that is passed to the other party in the handshake. The format of the value string must match the requirements of the specified type."];
+          "Additional information for the handshake. The format of the value string must match the requirements of the specified type."];
       type_: HandshakeResourceType.t option
         [@ocaml.doc
-          "The type of information being passed, specifying how the value is to be interpreted by the other party: ACCOUNT - Specifies an Amazon Web Services account ID number. ORGANIZATION - Specifies an organization ID number. EMAIL - Specifies the email address that is associated with the account that receives the handshake. OWNER_EMAIL - Specifies the email address associated with the management account. Included as information about an organization. OWNER_NAME - Specifies the name associated with the management account. Included as information about an organization. NOTES - Additional text provided by the handshake initiator and intended for the recipient to read."];
+          "The type of information being passed, specifying how the value is to be interpreted by the other party: ACCOUNT: ID for an Amazon Web Services account. ORGANIZATION: ID for an organization. EMAIL: Email address for the recipient. OWNER_EMAIL: Email address for the sender. OWNER_NAME: Name of the sender. NOTES: Additional text included by the sender for the recipient."];
       resources: HandshakeResources.t option
         [@ocaml.doc
-          "When needed, contains an additional array of HandshakeResource objects."]}
+          "An array of HandshakeResource objects. When needed, contains additional details for a handshake. For example, the email address for the sender."]}
     let make ?value =
       fun ?type_ -> fun ?resources -> fun () -> { value; type_; resources }
     let to_value x =
@@ -613,14 +725,13 @@ module rec
           (Xml.child xml_arg0 "Value") in
       make ?resources ?type_ ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resources = field_map json "Resources" HandshakeResources.of_json in
-      let type_ = field_map json "Type" HandshakeResourceType.of_json in
-      let value = field_map json "Value" HandshakeResourceValue.of_json in
+    let of_json json__ =
+      let resources = field_map json__ "Resources" HandshakeResources.of_json in
+      let type_ = field_map json__ "Type" HandshakeResourceType.of_json in
+      let value = field_map json__ "Value" HandshakeResourceValue.of_json in
       make ?resources ?type_ ?value ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Contains additional data that is needed to process a handshake."]
+  end[@@ocaml.doc "Contains additional details for a handshake."]
  and
   HandshakeResources:sig
                        type nonrec t = HandshakeResource.t list
@@ -635,6 +746,9 @@ module rec
   struct
     type nonrec t = HandshakeResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HandshakeResource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -711,8 +825,9 @@ module HandshakeParty =
       {
       id: HandshakePartyId.t
         [@ocaml.doc
-          "The unique identifier (ID) for the party. The regex pattern for handshake ID string requires \"h-\" followed by from 8 to 32 lowercase letters or digits."];
-      type_: HandshakePartyType.t [@ocaml.doc "The type of party."]}
+          "ID for the participant: Acccount ID, organization ID, or email address. The regex pattern for handshake ID string requires \"h-\" followed by from 8 to 32 lowercase letters or digits."];
+      type_: HandshakePartyType.t
+        [@ocaml.doc "The type of ID for the participant."]}
     let context_ = "HandshakeParty"
     let make ~id = fun ~type_ -> fun () -> { id; type_ }
     let to_value x =
@@ -729,16 +844,19 @@ module HandshakeParty =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~type_ ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" HandshakePartyType.of_json in
-      let id = field_map_exn json "Id" HandshakePartyId.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" HandshakePartyType.of_json in
+      let id = field_map_exn json__ "Id" HandshakePartyId.of_json in
       make ~type_ ~id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Identifies a participant in a handshake."]
+  end[@@ocaml.doc "Contains details for a participant in a handshake."]
 module HandshakeParties =
   struct
     type nonrec t = HandshakeParty.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HandshakeParty.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -784,6 +902,7 @@ module ActionType =
       | ENABLE_ALL_FEATURES 
       | APPROVE_ALL_FEATURES 
       | ADD_ORGANIZATIONS_SERVICE_LINKED_ROLE 
+      | TRANSFER_RESPONSIBILITY 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -793,6 +912,7 @@ module ActionType =
       | APPROVE_ALL_FEATURES -> "APPROVE_ALL_FEATURES"
       | ADD_ORGANIZATIONS_SERVICE_LINKED_ROLE ->
           "ADD_ORGANIZATIONS_SERVICE_LINKED_ROLE"
+      | TRANSFER_RESPONSIBILITY -> "TRANSFER_RESPONSIBILITY"
       | Non_static_id s -> s
     let of_string =
       function
@@ -801,6 +921,7 @@ module ActionType =
       | "APPROVE_ALL_FEATURES" -> APPROVE_ALL_FEATURES
       | "ADD_ORGANIZATIONS_SERVICE_LINKED_ROLE" ->
           ADD_ORGANIZATIONS_SERVICE_LINKED_ROLE
+      | "TRANSFER_RESPONSIBILITY" -> TRANSFER_RESPONSIBILITY
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -816,27 +937,26 @@ module Handshake =
       {
       id: HandshakeId.t option
         [@ocaml.doc
-          "The unique identifier (ID) of a handshake. The originating account creates the ID when it initiates the handshake. The regex pattern for handshake ID string requires \"h-\" followed by from 8 to 32 lowercase letters or digits."];
+          "ID for the handshake. The regex pattern for handshake ID string requires \"h-\" followed by from 8 to 32 lowercase letters or digits."];
       arn: HandshakeArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a handshake. For more information about ARNs in Organizations, see ARN Formats Supported by Organizations in the Amazon Web Services Service Authorization Reference."];
+          "Amazon Resource Name (ARN) for the handshake. For more information about ARNs in Organizations, see ARN Formats Supported by Organizations in the Amazon Web Services Service Authorization Reference."];
       parties: HandshakeParties.t option
         [@ocaml.doc
-          "Information about the two accounts that are participating in the handshake."];
+          "An array of HandshakeParty objects. Contains details for participant in a handshake."];
       state: HandshakeState.t option
         [@ocaml.doc
-          "The current state of the handshake. Use the state to trace the flow of the handshake through the process from its creation to its acceptance. The meaning of each of the valid values is as follows: REQUESTED: This handshake was sent to multiple recipients (applicable to only some handshake types) and not all recipients have responded yet. The request stays in this state until all recipients respond. OPEN: This handshake was sent to multiple recipients (applicable to only some policy types) and all recipients have responded, allowing the originator to complete the handshake action. CANCELED: This handshake is no longer active because it was canceled by the originating account. ACCEPTED: This handshake is complete because it has been accepted by the recipient. DECLINED: This handshake is no longer active because it was declined by the recipient account. EXPIRED: This handshake is no longer active because the originator did not receive a response of any kind from the recipient before the expiration time (15 days)."];
+          "Current state for the handshake. REQUESTED: Handshake awaiting a response from the recipient. OPEN: Handshake sent to multiple recipients and all recipients have responded. The sender can now complete the handshake action. CANCELED: Handshake canceled by the sender. ACCEPTED: Handshake accepted by the recipient. DECLINED: Handshake declined by the recipient. EXPIRED: Handshake has expired."];
       requestedTimestamp: Timestamp.t option
-        [@ocaml.doc "The date and time that the handshake request was made."];
+        [@ocaml.doc "Timestamp when the handshake request was made."];
       expirationTimestamp: Timestamp.t option
-        [@ocaml.doc
-          "The date and time that the handshake expires. If the recipient of the handshake request fails to respond before the specified date and time, the handshake becomes inactive and is no longer valid."];
+        [@ocaml.doc "Timestamp when the handshake expires."];
       action: ActionType.t option
         [@ocaml.doc
-          "The type of handshake, indicating what action occurs when the recipient accepts the handshake. The following handshake types are supported: INVITE: This type of handshake represents a request to join an organization. It is always sent from the management account to only non-member accounts. ENABLE_ALL_FEATURES: This type of handshake represents a request to enable all features in an organization. It is always sent from the management account to only invited member accounts. Created accounts do not receive this because those accounts were created by the organization's management account and approval is inferred. APPROVE_ALL_FEATURES: This type of handshake is sent from the Organizations service when all member accounts have approved the ENABLE_ALL_FEATURES invitation. It is sent only to the management account and signals the master that it can finalize the process to enable all features."];
+          "The type of handshake: INVITE: Handshake sent to a standalone account requesting that it to join the sender's organization. ENABLE_ALL_FEATURES: Handshake sent to invited member accounts to enable all features for the organization. APPROVE_ALL_FEATURES: Handshake sent to the management account when all invited member accounts have approved to enable all features. TRANSFER_RESPONSIBILITY: Handshake sent to another organization's management account requesting that it designate the sender with the specified responsibilities for recipient's organization."];
       resources: HandshakeResources.t option
         [@ocaml.doc
-          "Additional information that is needed to process the handshake."]}
+          "An array of HandshakeResource objects. When needed, contains additional details for a handshake. For example, the email address for the sender."]}
     let make ?id =
       fun ?arn ->
         fun ?parties ->
@@ -893,22 +1013,267 @@ module Handshake =
       make ?resources ?action ?expirationTimestamp ?requestedTimestamp ?state
         ?parties ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resources = field_map json "Resources" HandshakeResources.of_json in
-      let action = field_map json "Action" ActionType.of_json in
+    let of_json json__ =
+      let resources = field_map json__ "Resources" HandshakeResources.of_json in
+      let action = field_map json__ "Action" ActionType.of_json in
       let expirationTimestamp =
-        field_map json "ExpirationTimestamp" Timestamp.of_json in
+        field_map json__ "ExpirationTimestamp" Timestamp.of_json in
       let requestedTimestamp =
-        field_map json "RequestedTimestamp" Timestamp.of_json in
-      let state = field_map json "State" HandshakeState.of_json in
-      let parties = field_map json "Parties" HandshakeParties.of_json in
-      let arn = field_map json "Arn" HandshakeArn.of_json in
-      let id = field_map json "Id" HandshakeId.of_json in
+        field_map json__ "RequestedTimestamp" Timestamp.of_json in
+      let state = field_map json__ "State" HandshakeState.of_json in
+      let parties = field_map json__ "Parties" HandshakeParties.of_json in
+      let arn = field_map json__ "Arn" HandshakeArn.of_json in
+      let id = field_map json__ "Id" HandshakeId.of_json in
       make ?resources ?action ?expirationTimestamp ?requestedTimestamp ?state
         ?parties ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains information that must be exchanged to securely establish a relationship between two accounts (an originator and a recipient). For example, when a management account (the originator) invites another account (the recipient) to join its organization, the two accounts exchange information as a series of handshake requests and responses. Note: Handshakes that are CANCELED, ACCEPTED, DECLINED, or EXPIRED show up in lists for only 30 days after entering that state After that they are deleted."]
+       "Contains details for a handshake. A handshake is the secure exchange of information between two Amazon Web Services accounts: a sender and a recipient. Note: Handshakes that are CANCELED, ACCEPTED, DECLINED, or EXPIRED show up in lists for only 30 days after entering that state After that they are deleted."]
+module ConstraintViolationExceptionReason =
+  struct
+    type nonrec t =
+      | ACCOUNT_NUMBER_LIMIT_EXCEEDED 
+      | HANDSHAKE_RATE_LIMIT_EXCEEDED 
+      | OU_NUMBER_LIMIT_EXCEEDED 
+      | OU_DEPTH_LIMIT_EXCEEDED 
+      | POLICY_NUMBER_LIMIT_EXCEEDED 
+      | POLICY_CONTENT_LIMIT_EXCEEDED 
+      | MAX_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED 
+      | MIN_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED 
+      | ACCOUNT_CANNOT_LEAVE_ORGANIZATION 
+      | ACCOUNT_CANNOT_LEAVE_WITHOUT_EULA 
+      | ACCOUNT_CANNOT_LEAVE_WITHOUT_PHONE_VERIFICATION 
+      | MASTER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED 
+      | MEMBER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED 
+      | ACCOUNT_CREATION_RATE_LIMIT_EXCEEDED 
+      | MASTER_ACCOUNT_ADDRESS_DOES_NOT_MATCH_MARKETPLACE 
+      | MASTER_ACCOUNT_MISSING_CONTACT_INFO 
+      | MASTER_ACCOUNT_NOT_GOVCLOUD_ENABLED 
+      | ORGANIZATION_NOT_IN_ALL_FEATURES_MODE 
+      | CREATE_ORGANIZATION_IN_BILLING_MODE_UNSUPPORTED_REGION 
+      | EMAIL_VERIFICATION_CODE_EXPIRED 
+      | WAIT_PERIOD_ACTIVE 
+      | MAX_TAG_LIMIT_EXCEEDED 
+      | TAG_POLICY_VIOLATION 
+      | MAX_DELEGATED_ADMINISTRATORS_FOR_SERVICE_LIMIT_EXCEEDED 
+      | CANNOT_REGISTER_MASTER_AS_DELEGATED_ADMINISTRATOR 
+      | CANNOT_REMOVE_DELEGATED_ADMINISTRATOR_FROM_ORG 
+      | DELEGATED_ADMINISTRATOR_EXISTS_FOR_THIS_SERVICE 
+      | POLICY_TYPE_ENABLED_FOR_THIS_SERVICE 
+      | MASTER_ACCOUNT_MISSING_BUSINESS_LICENSE 
+      | CANNOT_CLOSE_MANAGEMENT_ACCOUNT 
+      | CLOSE_ACCOUNT_QUOTA_EXCEEDED 
+      | CLOSE_ACCOUNT_REQUESTS_LIMIT_EXCEEDED 
+      | SERVICE_ACCESS_NOT_ENABLED 
+      | INVALID_PAYMENT_INSTRUMENT 
+      | ACCOUNT_CREATION_NOT_COMPLETE 
+      | CANNOT_REGISTER_SUSPENDED_ACCOUNT_AS_DELEGATED_ADMINISTRATOR 
+      | ALL_FEATURES_MIGRATION_ORGANIZATION_SIZE_LIMIT_EXCEEDED 
+      | RESPONSIBILITY_TRANSFER_MAX_LEVEL_VIOLATION 
+      | RESPONSIBILITY_TRANSFER_MAX_INBOUND_QUOTA_VIOLATION 
+      | RESPONSIBILITY_TRANSFER_MAX_OUTBOUND_QUOTA_VIOLATION 
+      | RESPONSIBILITY_TRANSFER_MAX_TRANSFERS_QUOTA_VIOLATION 
+      | ACTIVE_RESPONSIBILITY_TRANSFER_PROCESS 
+      | TRANSFER_RESPONSIBILITY_TARGET_DELETION_IN_PROGRESS 
+      | TRANSFER_RESPONSIBILITY_SOURCE_DELETION_IN_PROGRESS 
+      | UNSUPPORTED_PRICING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACCOUNT_NUMBER_LIMIT_EXCEEDED -> "ACCOUNT_NUMBER_LIMIT_EXCEEDED"
+      | HANDSHAKE_RATE_LIMIT_EXCEEDED -> "HANDSHAKE_RATE_LIMIT_EXCEEDED"
+      | OU_NUMBER_LIMIT_EXCEEDED -> "OU_NUMBER_LIMIT_EXCEEDED"
+      | OU_DEPTH_LIMIT_EXCEEDED -> "OU_DEPTH_LIMIT_EXCEEDED"
+      | POLICY_NUMBER_LIMIT_EXCEEDED -> "POLICY_NUMBER_LIMIT_EXCEEDED"
+      | POLICY_CONTENT_LIMIT_EXCEEDED -> "POLICY_CONTENT_LIMIT_EXCEEDED"
+      | MAX_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED ->
+          "MAX_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED"
+      | MIN_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED ->
+          "MIN_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED"
+      | ACCOUNT_CANNOT_LEAVE_ORGANIZATION ->
+          "ACCOUNT_CANNOT_LEAVE_ORGANIZATION"
+      | ACCOUNT_CANNOT_LEAVE_WITHOUT_EULA ->
+          "ACCOUNT_CANNOT_LEAVE_WITHOUT_EULA"
+      | ACCOUNT_CANNOT_LEAVE_WITHOUT_PHONE_VERIFICATION ->
+          "ACCOUNT_CANNOT_LEAVE_WITHOUT_PHONE_VERIFICATION"
+      | MASTER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED ->
+          "MASTER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED"
+      | MEMBER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED ->
+          "MEMBER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED"
+      | ACCOUNT_CREATION_RATE_LIMIT_EXCEEDED ->
+          "ACCOUNT_CREATION_RATE_LIMIT_EXCEEDED"
+      | MASTER_ACCOUNT_ADDRESS_DOES_NOT_MATCH_MARKETPLACE ->
+          "MASTER_ACCOUNT_ADDRESS_DOES_NOT_MATCH_MARKETPLACE"
+      | MASTER_ACCOUNT_MISSING_CONTACT_INFO ->
+          "MASTER_ACCOUNT_MISSING_CONTACT_INFO"
+      | MASTER_ACCOUNT_NOT_GOVCLOUD_ENABLED ->
+          "MASTER_ACCOUNT_NOT_GOVCLOUD_ENABLED"
+      | ORGANIZATION_NOT_IN_ALL_FEATURES_MODE ->
+          "ORGANIZATION_NOT_IN_ALL_FEATURES_MODE"
+      | CREATE_ORGANIZATION_IN_BILLING_MODE_UNSUPPORTED_REGION ->
+          "CREATE_ORGANIZATION_IN_BILLING_MODE_UNSUPPORTED_REGION"
+      | EMAIL_VERIFICATION_CODE_EXPIRED -> "EMAIL_VERIFICATION_CODE_EXPIRED"
+      | WAIT_PERIOD_ACTIVE -> "WAIT_PERIOD_ACTIVE"
+      | MAX_TAG_LIMIT_EXCEEDED -> "MAX_TAG_LIMIT_EXCEEDED"
+      | TAG_POLICY_VIOLATION -> "TAG_POLICY_VIOLATION"
+      | MAX_DELEGATED_ADMINISTRATORS_FOR_SERVICE_LIMIT_EXCEEDED ->
+          "MAX_DELEGATED_ADMINISTRATORS_FOR_SERVICE_LIMIT_EXCEEDED"
+      | CANNOT_REGISTER_MASTER_AS_DELEGATED_ADMINISTRATOR ->
+          "CANNOT_REGISTER_MASTER_AS_DELEGATED_ADMINISTRATOR"
+      | CANNOT_REMOVE_DELEGATED_ADMINISTRATOR_FROM_ORG ->
+          "CANNOT_REMOVE_DELEGATED_ADMINISTRATOR_FROM_ORG"
+      | DELEGATED_ADMINISTRATOR_EXISTS_FOR_THIS_SERVICE ->
+          "DELEGATED_ADMINISTRATOR_EXISTS_FOR_THIS_SERVICE"
+      | POLICY_TYPE_ENABLED_FOR_THIS_SERVICE ->
+          "POLICY_TYPE_ENABLED_FOR_THIS_SERVICE"
+      | MASTER_ACCOUNT_MISSING_BUSINESS_LICENSE ->
+          "MASTER_ACCOUNT_MISSING_BUSINESS_LICENSE"
+      | CANNOT_CLOSE_MANAGEMENT_ACCOUNT -> "CANNOT_CLOSE_MANAGEMENT_ACCOUNT"
+      | CLOSE_ACCOUNT_QUOTA_EXCEEDED -> "CLOSE_ACCOUNT_QUOTA_EXCEEDED"
+      | CLOSE_ACCOUNT_REQUESTS_LIMIT_EXCEEDED ->
+          "CLOSE_ACCOUNT_REQUESTS_LIMIT_EXCEEDED"
+      | SERVICE_ACCESS_NOT_ENABLED -> "SERVICE_ACCESS_NOT_ENABLED"
+      | INVALID_PAYMENT_INSTRUMENT -> "INVALID_PAYMENT_INSTRUMENT"
+      | ACCOUNT_CREATION_NOT_COMPLETE -> "ACCOUNT_CREATION_NOT_COMPLETE"
+      | CANNOT_REGISTER_SUSPENDED_ACCOUNT_AS_DELEGATED_ADMINISTRATOR ->
+          "CANNOT_REGISTER_SUSPENDED_ACCOUNT_AS_DELEGATED_ADMINISTRATOR"
+      | ALL_FEATURES_MIGRATION_ORGANIZATION_SIZE_LIMIT_EXCEEDED ->
+          "ALL_FEATURES_MIGRATION_ORGANIZATION_SIZE_LIMIT_EXCEEDED"
+      | RESPONSIBILITY_TRANSFER_MAX_LEVEL_VIOLATION ->
+          "RESPONSIBILITY_TRANSFER_MAX_LEVEL_VIOLATION"
+      | RESPONSIBILITY_TRANSFER_MAX_INBOUND_QUOTA_VIOLATION ->
+          "RESPONSIBILITY_TRANSFER_MAX_INBOUND_QUOTA_VIOLATION"
+      | RESPONSIBILITY_TRANSFER_MAX_OUTBOUND_QUOTA_VIOLATION ->
+          "RESPONSIBILITY_TRANSFER_MAX_OUTBOUND_QUOTA_VIOLATION"
+      | RESPONSIBILITY_TRANSFER_MAX_TRANSFERS_QUOTA_VIOLATION ->
+          "RESPONSIBILITY_TRANSFER_MAX_TRANSFERS_QUOTA_VIOLATION"
+      | ACTIVE_RESPONSIBILITY_TRANSFER_PROCESS ->
+          "ACTIVE_RESPONSIBILITY_TRANSFER_PROCESS"
+      | TRANSFER_RESPONSIBILITY_TARGET_DELETION_IN_PROGRESS ->
+          "TRANSFER_RESPONSIBILITY_TARGET_DELETION_IN_PROGRESS"
+      | TRANSFER_RESPONSIBILITY_SOURCE_DELETION_IN_PROGRESS ->
+          "TRANSFER_RESPONSIBILITY_SOURCE_DELETION_IN_PROGRESS"
+      | UNSUPPORTED_PRICING -> "UNSUPPORTED_PRICING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACCOUNT_NUMBER_LIMIT_EXCEEDED" -> ACCOUNT_NUMBER_LIMIT_EXCEEDED
+      | "HANDSHAKE_RATE_LIMIT_EXCEEDED" -> HANDSHAKE_RATE_LIMIT_EXCEEDED
+      | "OU_NUMBER_LIMIT_EXCEEDED" -> OU_NUMBER_LIMIT_EXCEEDED
+      | "OU_DEPTH_LIMIT_EXCEEDED" -> OU_DEPTH_LIMIT_EXCEEDED
+      | "POLICY_NUMBER_LIMIT_EXCEEDED" -> POLICY_NUMBER_LIMIT_EXCEEDED
+      | "POLICY_CONTENT_LIMIT_EXCEEDED" -> POLICY_CONTENT_LIMIT_EXCEEDED
+      | "MAX_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED" ->
+          MAX_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED
+      | "MIN_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED" ->
+          MIN_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED
+      | "ACCOUNT_CANNOT_LEAVE_ORGANIZATION" ->
+          ACCOUNT_CANNOT_LEAVE_ORGANIZATION
+      | "ACCOUNT_CANNOT_LEAVE_WITHOUT_EULA" ->
+          ACCOUNT_CANNOT_LEAVE_WITHOUT_EULA
+      | "ACCOUNT_CANNOT_LEAVE_WITHOUT_PHONE_VERIFICATION" ->
+          ACCOUNT_CANNOT_LEAVE_WITHOUT_PHONE_VERIFICATION
+      | "MASTER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED" ->
+          MASTER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED
+      | "MEMBER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED" ->
+          MEMBER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED
+      | "ACCOUNT_CREATION_RATE_LIMIT_EXCEEDED" ->
+          ACCOUNT_CREATION_RATE_LIMIT_EXCEEDED
+      | "MASTER_ACCOUNT_ADDRESS_DOES_NOT_MATCH_MARKETPLACE" ->
+          MASTER_ACCOUNT_ADDRESS_DOES_NOT_MATCH_MARKETPLACE
+      | "MASTER_ACCOUNT_MISSING_CONTACT_INFO" ->
+          MASTER_ACCOUNT_MISSING_CONTACT_INFO
+      | "MASTER_ACCOUNT_NOT_GOVCLOUD_ENABLED" ->
+          MASTER_ACCOUNT_NOT_GOVCLOUD_ENABLED
+      | "ORGANIZATION_NOT_IN_ALL_FEATURES_MODE" ->
+          ORGANIZATION_NOT_IN_ALL_FEATURES_MODE
+      | "CREATE_ORGANIZATION_IN_BILLING_MODE_UNSUPPORTED_REGION" ->
+          CREATE_ORGANIZATION_IN_BILLING_MODE_UNSUPPORTED_REGION
+      | "EMAIL_VERIFICATION_CODE_EXPIRED" -> EMAIL_VERIFICATION_CODE_EXPIRED
+      | "WAIT_PERIOD_ACTIVE" -> WAIT_PERIOD_ACTIVE
+      | "MAX_TAG_LIMIT_EXCEEDED" -> MAX_TAG_LIMIT_EXCEEDED
+      | "TAG_POLICY_VIOLATION" -> TAG_POLICY_VIOLATION
+      | "MAX_DELEGATED_ADMINISTRATORS_FOR_SERVICE_LIMIT_EXCEEDED" ->
+          MAX_DELEGATED_ADMINISTRATORS_FOR_SERVICE_LIMIT_EXCEEDED
+      | "CANNOT_REGISTER_MASTER_AS_DELEGATED_ADMINISTRATOR" ->
+          CANNOT_REGISTER_MASTER_AS_DELEGATED_ADMINISTRATOR
+      | "CANNOT_REMOVE_DELEGATED_ADMINISTRATOR_FROM_ORG" ->
+          CANNOT_REMOVE_DELEGATED_ADMINISTRATOR_FROM_ORG
+      | "DELEGATED_ADMINISTRATOR_EXISTS_FOR_THIS_SERVICE" ->
+          DELEGATED_ADMINISTRATOR_EXISTS_FOR_THIS_SERVICE
+      | "POLICY_TYPE_ENABLED_FOR_THIS_SERVICE" ->
+          POLICY_TYPE_ENABLED_FOR_THIS_SERVICE
+      | "MASTER_ACCOUNT_MISSING_BUSINESS_LICENSE" ->
+          MASTER_ACCOUNT_MISSING_BUSINESS_LICENSE
+      | "CANNOT_CLOSE_MANAGEMENT_ACCOUNT" -> CANNOT_CLOSE_MANAGEMENT_ACCOUNT
+      | "CLOSE_ACCOUNT_QUOTA_EXCEEDED" -> CLOSE_ACCOUNT_QUOTA_EXCEEDED
+      | "CLOSE_ACCOUNT_REQUESTS_LIMIT_EXCEEDED" ->
+          CLOSE_ACCOUNT_REQUESTS_LIMIT_EXCEEDED
+      | "SERVICE_ACCESS_NOT_ENABLED" -> SERVICE_ACCESS_NOT_ENABLED
+      | "INVALID_PAYMENT_INSTRUMENT" -> INVALID_PAYMENT_INSTRUMENT
+      | "ACCOUNT_CREATION_NOT_COMPLETE" -> ACCOUNT_CREATION_NOT_COMPLETE
+      | "CANNOT_REGISTER_SUSPENDED_ACCOUNT_AS_DELEGATED_ADMINISTRATOR" ->
+          CANNOT_REGISTER_SUSPENDED_ACCOUNT_AS_DELEGATED_ADMINISTRATOR
+      | "ALL_FEATURES_MIGRATION_ORGANIZATION_SIZE_LIMIT_EXCEEDED" ->
+          ALL_FEATURES_MIGRATION_ORGANIZATION_SIZE_LIMIT_EXCEEDED
+      | "RESPONSIBILITY_TRANSFER_MAX_LEVEL_VIOLATION" ->
+          RESPONSIBILITY_TRANSFER_MAX_LEVEL_VIOLATION
+      | "RESPONSIBILITY_TRANSFER_MAX_INBOUND_QUOTA_VIOLATION" ->
+          RESPONSIBILITY_TRANSFER_MAX_INBOUND_QUOTA_VIOLATION
+      | "RESPONSIBILITY_TRANSFER_MAX_OUTBOUND_QUOTA_VIOLATION" ->
+          RESPONSIBILITY_TRANSFER_MAX_OUTBOUND_QUOTA_VIOLATION
+      | "RESPONSIBILITY_TRANSFER_MAX_TRANSFERS_QUOTA_VIOLATION" ->
+          RESPONSIBILITY_TRANSFER_MAX_TRANSFERS_QUOTA_VIOLATION
+      | "ACTIVE_RESPONSIBILITY_TRANSFER_PROCESS" ->
+          ACTIVE_RESPONSIBILITY_TRANSFER_PROCESS
+      | "TRANSFER_RESPONSIBILITY_TARGET_DELETION_IN_PROGRESS" ->
+          TRANSFER_RESPONSIBILITY_TARGET_DELETION_IN_PROGRESS
+      | "TRANSFER_RESPONSIBILITY_SOURCE_DELETION_IN_PROGRESS" ->
+          TRANSFER_RESPONSIBILITY_SOURCE_DELETION_IN_PROGRESS
+      | "UNSUPPORTED_PRICING" -> UNSUPPORTED_PRICING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConstraintViolationExceptionReason"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ConstraintViolationExceptionReason" j)
+    let to_json = simple_to_json to_value
+  end
+module ConstraintViolationException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option ;
+      reason: ConstraintViolationExceptionReason.t option }
+    let make ?message = fun ?reason -> fun () -> { message; reason }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("Reason",
+          (Option.map x.reason ~f:ConstraintViolationExceptionReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:ConstraintViolationExceptionReason.of_xml)
+          (Xml.child xml_arg0 "Reason") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason =
+        field_map json__ "Reason" ConstraintViolationExceptionReason.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?reason ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Performing this operation violates a minimum or maximum value limit. For example, attempting to remove the last service control policy (SCP) from an OU or root, inviting or creating too many accounts to the organization, or attaching too many policies to an account, OU, or root. This exception includes a reason that contains additional information about the violated limit: Some of the reasons in the following list might not be applicable to this specific API or operation. ACCOUNT_CANNOT_LEAVE_ORGANIZATION: You attempted to remove the management account from the organization. You can't remove the management account. Instead, after you remove all member accounts, delete the organization itself. ACCOUNT_CANNOT_LEAVE_WITHOUT_PHONE_VERIFICATION: You attempted to remove an account from the organization that doesn't yet have enough information to exist as a standalone account. This account requires you to first complete phone verification. Follow the steps at Removing a member account from your organization in the Organizations User Guide. ACCOUNT_CREATION_RATE_LIMIT_EXCEEDED: You attempted to exceed the number of accounts that you can create in one day. ACCOUNT_CREATION_NOT_COMPLETE: Your account setup isn't complete or your account isn't fully active. You must complete the account setup before you create an organization. ACTIVE_RESPONSIBILITY_TRANSFER_PROCESS: You cannot delete organization due to an ongoing responsibility transfer process. For example, a pending invitation or an in-progress transfer. To delete the organization, you must resolve the current transfer process. ACCOUNT_NUMBER_LIMIT_EXCEEDED: You attempted to exceed the limit on the number of accounts in an organization. If you need more accounts, contact Amazon Web Services Support to request an increase in your limit. Or the number of invitations that you tried to send would cause you to exceed the limit of accounts in your organization. Send fewer invitations or contact Amazon Web Services Support to request an increase in the number of accounts. Deleted and closed accounts still count toward your limit. If you get this exception when running a command immediately after creating the organization, wait one hour and try again. After an hour, if the command continues to fail with this error, contact Amazon Web Services Support. ALL_FEATURES_MIGRATION_ORGANIZATION_SIZE_LIMIT_EXCEEDED: Your organization has more than 5000 accounts, and you can only use the standard migration process for organizations with less than 5000 accounts. Use the assisted migration process to enable all features mode, or create a support case for assistance if you are unable to use assisted migration. CANNOT_REGISTER_SUSPENDED_ACCOUNT_AS_DELEGATED_ADMINISTRATOR: You cannot register a suspended account as a delegated administrator. CANNOT_REGISTER_MASTER_AS_DELEGATED_ADMINISTRATOR: You attempted to register the management account of the organization as a delegated administrator for an Amazon Web Services service integrated with Organizations. You can designate only a member account as a delegated administrator. CANNOT_CLOSE_MANAGEMENT_ACCOUNT: You attempted to close the management account. To close the management account for the organization, you must first either remove or close all member accounts in the organization. Follow standard account closure process using root credentials.\226\128\139 CANNOT_REMOVE_DELEGATED_ADMINISTRATOR_FROM_ORG: You attempted to remove an account that is registered as a delegated administrator for a service integrated with your organization. To complete this operation, you must first deregister this account as a delegated administrator. CLOSE_ACCOUNT_QUOTA_EXCEEDED: You have exceeded close account quota for the past 30 days. CLOSE_ACCOUNT_REQUESTS_LIMIT_EXCEEDED: You attempted to exceed the number of accounts that you can close at a time. \226\128\139 CREATE_ORGANIZATION_IN_BILLING_MODE_UNSUPPORTED_REGION: To create an organization in the specified region, you must enable all features mode. DELEGATED_ADMINISTRATOR_EXISTS_FOR_THIS_SERVICE: You attempted to register an Amazon Web Services account as a delegated administrator for an Amazon Web Services service that already has a delegated administrator. To complete this operation, you must first deregister any existing delegated administrators for this service. EMAIL_VERIFICATION_CODE_EXPIRED: The email verification code is only valid for a limited period of time. You must resubmit the request and generate a new verification code. HANDSHAKE_RATE_LIMIT_EXCEEDED: You attempted to exceed the number of handshakes that you can send in one day. INVALID_PAYMENT_INSTRUMENT: You cannot remove an account because no supported payment method is associated with the account. Amazon Web Services does not support cards issued by financial institutions in Russia or Belarus. For more information, see Managing your Amazon Web Services payments. MASTER_ACCOUNT_ADDRESS_DOES_NOT_MATCH_MARKETPLACE: To create an account in this organization, you first must migrate the organization's management account to the marketplace that corresponds to the management account's address. All accounts in an organization must be associated with the same marketplace. MASTER_ACCOUNT_MISSING_BUSINESS_LICENSE: Applies only to the Amazon Web Services Regions in China. To create an organization, the master must have a valid business license. For more information, contact customer support. MASTER_ACCOUNT_MISSING_CONTACT_INFO: To complete this operation, you must first provide a valid contact address and phone number for the management account. Then try the operation again. MASTER_ACCOUNT_NOT_GOVCLOUD_ENABLED: To complete this operation, the management account must have an associated account in the Amazon Web Services GovCloud (US-West) Region. For more information, see Organizations in the Amazon Web Services GovCloud User Guide. MASTER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED: To create an organization with this management account, you first must associate a valid payment instrument, such as a credit card, with the account. For more information, see Considerations before removing an account from an organization in the Organizations User Guide. MAX_DELEGATED_ADMINISTRATORS_FOR_SERVICE_LIMIT_EXCEEDED: You attempted to register more delegated administrators than allowed for the service principal. MAX_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED: You attempted to exceed the number of policies of a certain type that can be attached to an entity at one time. MAX_TAG_LIMIT_EXCEEDED: You have exceeded the number of tags allowed on this resource. MEMBER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED: To complete this operation with this member account, you first must associate a valid payment instrument, such as a credit card, with the account. For more information, see Considerations before removing an account from an organization in the Organizations User Guide. MIN_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED: You attempted to detach a policy from an entity that would cause the entity to have fewer than the minimum number of policies of a certain type required. ORGANIZATION_NOT_IN_ALL_FEATURES_MODE: You attempted to perform an operation that requires the organization to be configured to support all features. An organization that supports only consolidated billing features can't perform this operation. OU_DEPTH_LIMIT_EXCEEDED: You attempted to create an OU tree that is too many levels deep. OU_NUMBER_LIMIT_EXCEEDED: You attempted to exceed the number of OUs that you can have in an organization. POLICY_CONTENT_LIMIT_EXCEEDED: You attempted to create a policy that is larger than the maximum size. POLICY_NUMBER_LIMIT_EXCEEDED: You attempted to exceed the number of policies that you can have in an organization. POLICY_TYPE_ENABLED_FOR_THIS_SERVICE: You attempted to disable service access before you disabled the policy type (for example, SECURITYHUB_POLICY). To complete this operation, you must first disable the policy type. RESPONSIBILITY_TRANSFER_MAX_INBOUND_QUOTA_VIOLATION: You have exceeded your inbound transfers limit. RESPONSIBILITY_TRANSFER_MAX_LEVEL_VIOLATION: You have exceeded the maximum length of your transfer chain. RESPONSIBILITY_TRANSFER_MAX_OUTBOUND_QUOTA_VIOLATION: You have exceeded your outbound transfers limit. RESPONSIBILITY_TRANSFER_MAX_TRANSFERS_QUOTA_VIOLATION: You have exceeded the maximum number of inbound transfers allowed in a transfer chain. SERVICE_ACCESS_NOT_ENABLED: You attempted to register a delegated administrator before you enabled service access. Call the EnableAWSServiceAccess API first. You attempted to enable a policy type before you enabled service access. Call the EnableAWSServiceAccess API first. TAG_POLICY_VIOLATION: You attempted to create or update a resource with tags that are not compliant with the tag policy requirements for this account. TRANSFER_RESPONSIBILITY_SOURCE_DELETION_IN_PROGRESS: The source organization cannot accept this transfer invitation because it is marked for deletion. TRANSFER_RESPONSIBILITY_TARGET_DELETION_IN_PROGRESS: The source organization cannot accept this transfer invitation because target organization is marked for deletion. UNSUPPORTED_PRICING: Your organization has a pricing contract that is unsupported. WAIT_PERIOD_ACTIVE: After you create an Amazon Web Services account, you must wait until at least four days after the account was created. Invited accounts aren't subject to this waiting period."]
 module ConcurrentModificationException =
   struct
     type nonrec t = {
@@ -924,8 +1289,8 @@ module ConcurrentModificationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -982,11 +1347,11 @@ module AccessDeniedForDependencyException =
           (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reason =
-        field_map json "Reason"
+        field_map json__ "Reason"
           AccessDeniedForDependencyExceptionReason.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1006,8 +1371,8 @@ module AccessDeniedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1018,7 +1383,7 @@ module AcceptHandshakeResponse =
       {
       handshake: Handshake.t option
         [@ocaml.doc
-          "A structure that contains details about the accepted handshake."]}
+          "A Handshake object. Contains details for the handshake."]}
     type nonrec error =
       [
         `AWSOrganizationsNotInUseException of
@@ -1027,6 +1392,7 @@ module AcceptHandshakeResponse =
       | `AccessDeniedForDependencyException of
           AccessDeniedForDependencyException.t 
       | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `ConstraintViolationException of ConstraintViolationException.t 
       | `HandshakeAlreadyInStateException of
           HandshakeAlreadyInStateException.t 
       | `HandshakeConstraintViolationException of
@@ -1035,6 +1401,8 @@ module AcceptHandshakeResponse =
       | `InvalidHandshakeTransitionException of
           InvalidHandshakeTransitionException.t 
       | `InvalidInputException of InvalidInputException.t 
+      | `MasterCannotLeaveOrganizationException of
+          MasterCannotLeaveOrganizationException.t 
       | `ServiceException of ServiceException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -1052,6 +1420,9 @@ module AcceptHandshakeResponse =
       | "ConcurrentModificationException" ->
           `ConcurrentModificationException
             (ConcurrentModificationException.of_json json)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_json json)
       | "HandshakeAlreadyInStateException" ->
           `HandshakeAlreadyInStateException
             (HandshakeAlreadyInStateException.of_json json)
@@ -1066,6 +1437,9 @@ module AcceptHandshakeResponse =
             (InvalidHandshakeTransitionException.of_json json)
       | "InvalidInputException" ->
           `InvalidInputException (InvalidInputException.of_json json)
+      | "MasterCannotLeaveOrganizationException" ->
+          `MasterCannotLeaveOrganizationException
+            (MasterCannotLeaveOrganizationException.of_json json)
       | "ServiceException" ->
           `ServiceException (ServiceException.of_json json)
       | "TooManyRequestsException" ->
@@ -1086,6 +1460,9 @@ module AcceptHandshakeResponse =
       | "ConcurrentModificationException" ->
           `ConcurrentModificationException
             (ConcurrentModificationException.of_xml xml)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_xml xml)
       | "HandshakeAlreadyInStateException" ->
           `HandshakeAlreadyInStateException
             (HandshakeAlreadyInStateException.of_xml xml)
@@ -1099,6 +1476,9 @@ module AcceptHandshakeResponse =
             (InvalidHandshakeTransitionException.of_xml xml)
       | "InvalidInputException" ->
           `InvalidInputException (InvalidInputException.of_xml xml)
+      | "MasterCannotLeaveOrganizationException" ->
+          `MasterCannotLeaveOrganizationException
+            (MasterCannotLeaveOrganizationException.of_xml xml)
       | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_xml xml)
@@ -1122,6 +1502,10 @@ module AcceptHandshakeResponse =
           `Assoc
             [("error", (`String "ConcurrentModificationException"));
             ("details", (ConcurrentModificationException.to_json e))]
+      | `ConstraintViolationException e ->
+          `Assoc
+            [("error", (`String "ConstraintViolationException"));
+            ("details", (ConstraintViolationException.to_json e))]
       | `HandshakeAlreadyInStateException e ->
           `Assoc
             [("error", (`String "HandshakeAlreadyInStateException"));
@@ -1142,6 +1526,10 @@ module AcceptHandshakeResponse =
           `Assoc
             [("error", (`String "InvalidInputException"));
             ("details", (InvalidInputException.to_json e))]
+      | `MasterCannotLeaveOrganizationException e ->
+          `Assoc
+            [("error", (`String "MasterCannotLeaveOrganizationException"));
+            ("details", (MasterCannotLeaveOrganizationException.to_json e))]
       | `ServiceException e ->
           `Assoc
             [("error", (`String "ServiceException"));
@@ -1164,12 +1552,56 @@ module AcceptHandshakeResponse =
         (Option.map ~f:Handshake.of_xml) (Xml.child xml_arg0 "Handshake") in
       make ?handshake ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let handshake = field_map json "Handshake" Handshake.of_json in
+    let of_json json__ =
+      let handshake = field_map json__ "Handshake" Handshake.of_json in
       make ?handshake ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sends a response to the originator of a handshake agreeing to the action proposed by the handshake request. This operation can be called only by the following principals when they also have the relevant IAM permissions: Invitation to join or Approve all features request handshakes: only a principal from the member account. The user who calls the API for an invitation to join must have the organizations:AcceptHandshake permission. If you enabled all features in the organization, the user must also have the iam:CreateServiceLinkedRole permission so that Organizations can create the required service-linked role named AWSServiceRoleForOrganizations. For more information, see Organizations and Service-Linked Roles in the Organizations User Guide. Enable all features final confirmation handshake: only a principal from the management account. For more information about invitations, see Inviting an Amazon Web Services account to join your organization in the Organizations User Guide. For more information about requests to enable all features in the organization, see Enabling all features in your organization in the Organizations User Guide. After you accept a handshake, it continues to appear in the results of relevant APIs for only 30 days. After that, it's deleted."]
+       "Accepts a handshake by sending an ACCEPTED response to the sender. You can view accepted handshakes in API responses for 30 days before they are deleted. Only the management account can accept the following handshakes: Enable all features final confirmation (APPROVE_ALL_FEATURES) Billing transfer (TRANSFER_RESPONSIBILITY) For more information, see Enabling all features and Responding to a billing transfer invitation in the Organizations User Guide. Only a member account can accept the following handshakes: Invitation to join (INVITE) Approve all features request (ENABLE_ALL_FEATURES) For more information, see Responding to invitations and Enabling all features in the Organizations User Guide."]
+module Path =
+  struct
+    type nonrec t = string
+    let context_ = "Path"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^(o-[a-z0-9]{10,32}\\/r-[0-9a-z]{4,32}(\\/ou\\-[0-9a-z]{4,32}-[a-z0-9]{8,32})*(\\/\\d{12})*)\\/");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Path" j
+    let to_json = simple_to_json to_value
+  end
+module Paths =
+  struct
+    type nonrec t = Path.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Path.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Path.of_xml)
+    let of_json j = list_of_json ~kind:"Paths" ~of_json:Path.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Email =
   struct
     type nonrec t = string
@@ -1217,6 +1649,40 @@ module AccountStatus =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration AccountStatus" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"AccountStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module AccountState =
+  struct
+    type nonrec t =
+      | PENDING_ACTIVATION 
+      | ACTIVE 
+      | SUSPENDED 
+      | PENDING_CLOSURE 
+      | CLOSED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING_ACTIVATION -> "PENDING_ACTIVATION"
+      | ACTIVE -> "ACTIVE"
+      | SUSPENDED -> "SUSPENDED"
+      | PENDING_CLOSURE -> "PENDING_CLOSURE"
+      | CLOSED -> "CLOSED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING_ACTIVATION" -> PENDING_ACTIVATION
+      | "ACTIVE" -> ACTIVE
+      | "SUSPENDED" -> SUSPENDED
+      | "PENDING_CLOSURE" -> PENDING_CLOSURE
+      | "CLOSED" -> CLOSED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AccountState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AccountState" j)
     let to_json = simple_to_json to_value
   end
 module AccountName =
@@ -1318,7 +1784,14 @@ module Account =
         [@ocaml.doc
           "The friendly name of the account. The regex pattern that is used to validate this parameter is a string of any of the characters in the ASCII character range."];
       status: AccountStatus.t option
-        [@ocaml.doc "The status of the account in the organization."];
+        [@ocaml.doc
+          "The status of the account in the organization. The Status parameter in the Account object will be retired on September 9, 2026. Although both the account State and account Status parameters are currently available in the Organizations APIs (DescribeAccount, ListAccounts, ListAccountsForParent), we recommend that you update your scripts or other code to use the State parameter instead of Status before September 9, 2026."];
+      state: AccountState.t option
+        [@ocaml.doc
+          "Each state represents a specific phase in the account lifecycle. Use this information to manage account access, automate workflows, or trigger actions based on account state changes. For more information about account states and their implications, see Monitor the state of your Amazon Web Services accounts in the Organizations User Guide."];
+      paths: Paths.t option
+        [@ocaml.doc
+          "The paths in the organization where the account exists."];
       joinedMethod: AccountJoinedMethod.t option
         [@ocaml.doc
           "The method by which the account joined the organization."];
@@ -1330,18 +1803,22 @@ module Account =
         fun ?email ->
           fun ?name ->
             fun ?status ->
-              fun ?joinedMethod ->
-                fun ?joinedTimestamp ->
-                  fun () ->
-                    {
-                      id;
-                      arn;
-                      email;
-                      name;
-                      status;
-                      joinedMethod;
-                      joinedTimestamp
-                    }
+              fun ?state ->
+                fun ?paths ->
+                  fun ?joinedMethod ->
+                    fun ?joinedTimestamp ->
+                      fun () ->
+                        {
+                          id;
+                          arn;
+                          email;
+                          name;
+                          status;
+                          state;
+                          paths;
+                          joinedMethod;
+                          joinedTimestamp
+                        }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:AccountId.to_value));
@@ -1349,6 +1826,8 @@ module Account =
         ("Email", (Option.map x.email ~f:Email.to_value));
         ("Name", (Option.map x.name ~f:AccountName.to_value));
         ("Status", (Option.map x.status ~f:AccountStatus.to_value));
+        ("State", (Option.map x.state ~f:AccountState.to_value));
+        ("Paths", (Option.map x.paths ~f:Paths.to_value));
         ("JoinedMethod",
           (Option.map x.joinedMethod ~f:AccountJoinedMethod.to_value));
         ("JoinedTimestamp",
@@ -1361,6 +1840,9 @@ module Account =
       let joinedMethod =
         (Option.map ~f:AccountJoinedMethod.of_xml)
           (Xml.child xml_arg0 "JoinedMethod") in
+      let paths = (Option.map ~f:Paths.of_xml) (Xml.child xml_arg0 "Paths") in
+      let state =
+        (Option.map ~f:AccountState.of_xml) (Xml.child xml_arg0 "State") in
       let status =
         (Option.map ~f:AccountStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let name =
@@ -1368,19 +1850,23 @@ module Account =
       let email = (Option.map ~f:Email.of_xml) (Xml.child xml_arg0 "Email") in
       let arn = (Option.map ~f:AccountArn.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?joinedTimestamp ?joinedMethod ?status ?name ?email ?arn ?id ()
+      make ?joinedTimestamp ?joinedMethod ?paths ?state ?status ?name ?email
+        ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let joinedTimestamp =
-        field_map json "JoinedTimestamp" Timestamp.of_json in
+        field_map json__ "JoinedTimestamp" Timestamp.of_json in
       let joinedMethod =
-        field_map json "JoinedMethod" AccountJoinedMethod.of_json in
-      let status = field_map json "Status" AccountStatus.of_json in
-      let name = field_map json "Name" AccountName.of_json in
-      let email = field_map json "Email" Email.of_json in
-      let arn = field_map json "Arn" AccountArn.of_json in
-      let id = field_map json "Id" AccountId.of_json in
-      make ?joinedTimestamp ?joinedMethod ?status ?name ?email ?arn ?id ()
+        field_map json__ "JoinedMethod" AccountJoinedMethod.of_json in
+      let paths = field_map json__ "Paths" Paths.of_json in
+      let state = field_map json__ "State" AccountState.of_json in
+      let status = field_map json__ "Status" AccountStatus.of_json in
+      let name = field_map json__ "Name" AccountName.of_json in
+      let email = field_map json__ "Email" Email.of_json in
+      let arn = field_map json__ "Arn" AccountArn.of_json in
+      let id = field_map json__ "Id" AccountId.of_json in
+      make ?joinedTimestamp ?joinedMethod ?paths ?state ?status ?name ?email
+        ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about an Amazon Web Services account that is a member of an organization."]
@@ -1399,8 +1885,8 @@ module AccountAlreadyClosedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1420,8 +1906,8 @@ module AccountAlreadyRegisteredException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1441,8 +1927,8 @@ module AccountNotFoundException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1462,8 +1948,8 @@ module AccountNotRegisteredException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1483,16 +1969,19 @@ module AccountOwnerNotVerifiedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You can't invite an existing account to your organization until you verify that you own the email address associated with the management account. For more information, see Email Address Verification in the Organizations User Guide."]
+       "You can't invite an existing account to your organization until you verify that you own the email address associated with the management account. For more information, see Email address verification in the Organizations User Guide."]
 module Accounts =
   struct
     type nonrec t = Account.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Account.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1527,8 +2016,8 @@ module AlreadyInOrganizationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1577,10 +2066,10 @@ module AttachPolicyRequest =
       {
       policyId: PolicyId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the policy that you want to attach to the target. You can get the ID for the policy by calling the ListPolicies operation. The regex pattern for a policy ID string requires \"p-\" followed by from 8 to 128 lowercase or uppercase letters, digits, or the underscore character (_)."];
+          "ID for the policy that you want to attach to the target. You can get the ID for the policy by calling the ListPolicies operation. The regex pattern for a policy ID string requires \"p-\" followed by from 8 to 128 lowercase or uppercase letters, digits, or the underscore character (_)."];
       targetId: PolicyTargetId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the root, OU, or account that you want to attach the policy to. You can get the ID by calling the ListRoots, ListOrganizationalUnitsForParent, or ListAccounts operations. The regex pattern for a target ID string requires one of the following: Root - A string that begins with \"r-\" followed by from 4 to 32 lowercase letters or digits. Account - A string that consists of exactly 12 digits. Organizational unit (OU) - A string that begins with \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."]}
+          "ID for the root, OU, or account that you want to attach the policy to. You can get the ID by calling the ListRoots, ListOrganizationalUnitsForParent, or ListAccounts operations. The regex pattern for a target ID string requires one of the following: Root - A string that begins with \"r-\" followed by from 4 to 32 lowercase letters or digits. Account - A string that consists of exactly 12 digits. Organizational unit (OU) - A string that begins with \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."]}
     let context_ = "AttachPolicyRequest"
     let make ~policyId = fun ~targetId -> fun () -> { policyId; targetId }
     let to_value x =
@@ -1596,13 +2085,13 @@ module AttachPolicyRequest =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ~targetId ~policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetId = field_map_exn json "TargetId" PolicyTargetId.of_json in
-      let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
+    let of_json json__ =
+      let targetId = field_map_exn json__ "TargetId" PolicyTargetId.of_json in
+      let policyId = field_map_exn json__ "PolicyId" PolicyId.of_json in
       make ~targetId ~policyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attaches a policy to a root, an organizational unit (OU), or an individual account. How the policy affects accounts depends on the type of policy. Refer to the Organizations User Guide for information about each policy type: AISERVICES_OPT_OUT_POLICY BACKUP_POLICY SERVICE_CONTROL_POLICY TAG_POLICY This operation can be called only from the organization's management account."]
+       "Attaches a policy to a root, an organizational unit (OU), or an individual account. How the policy affects accounts depends on the type of policy. Refer to the Organizations User Guide for information about each policy type: SERVICE_CONTROL_POLICY RESOURCE_CONTROL_POLICY DECLARATIVE_POLICY_EC2 BACKUP_POLICY TAG_POLICY CHATBOT_POLICY AISERVICES_OPT_OUT_POLICY SECURITYHUB_POLICY UPGRADE_ROLLOUT_POLICY INSPECTOR_POLICY BEDROCK_POLICY S3_POLICY NETWORK_SECURITY_DIRECTOR_POLICY You can only call this operation from the management account or a member account that is a delegated administrator."]
 module AwsManagedPolicy =
   struct
     type nonrec t = bool
@@ -1622,7 +2111,7 @@ module CancelHandshakeRequest =
       {
       handshakeId: HandshakeId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the handshake that you want to cancel. You can get the ID from the ListHandshakesForOrganization operation. The regex pattern for handshake ID string requires \"h-\" followed by from 8 to 32 lowercase letters or digits."]}
+          "ID for the handshake that you want to cancel. You can get the ID from the ListHandshakesForOrganization operation. The regex pattern for handshake ID string requires \"h-\" followed by from 8 to 32 lowercase letters or digits."]}
     let context_ = "CancelHandshakeRequest"
     let make ~handshakeId = fun () -> { handshakeId }
     let to_value x =
@@ -1635,19 +2124,20 @@ module CancelHandshakeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HandshakeId") in
       make ~handshakeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let handshakeId = field_map_exn json "HandshakeId" HandshakeId.of_json in
+    let of_json json__ =
+      let handshakeId =
+        field_map_exn json__ "HandshakeId" HandshakeId.of_json in
       make ~handshakeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Cancels a handshake. Canceling a handshake sets the handshake state to CANCELED. This operation can be called only from the account that originated the handshake. The recipient of the handshake can't cancel it, but can use DeclineHandshake instead. After a handshake is canceled, the recipient can no longer respond to that handshake. After you cancel a handshake, it continues to appear in the results of relevant APIs for only 30 days. After that, it's deleted."]
+       "Cancels a Handshake. Only the account that sent a handshake can call this operation. The recipient of the handshake can't cancel it, but can use DeclineHandshake to decline. After a handshake is canceled, the recipient can no longer respond to the handshake. You can view canceled handshakes in API responses for 30 days before they are deleted."]
 module CancelHandshakeResponse =
   struct
     type nonrec t =
       {
       handshake: Handshake.t option
         [@ocaml.doc
-          "A structure that contains details about the handshake that you canceled."]}
+          "A Handshake object. Contains for the handshake that you canceled."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConcurrentModificationException of ConcurrentModificationException.t 
@@ -1756,12 +2246,12 @@ module CancelHandshakeResponse =
         (Option.map ~f:Handshake.of_xml) (Xml.child xml_arg0 "Handshake") in
       make ?handshake ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let handshake = field_map json "Handshake" Handshake.of_json in
+    let of_json json__ =
+      let handshake = field_map json__ "Handshake" Handshake.of_json in
       make ?handshake ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Cancels a handshake. Canceling a handshake sets the handshake state to CANCELED. This operation can be called only from the account that originated the handshake. The recipient of the handshake can't cancel it, but can use DeclineHandshake instead. After a handshake is canceled, the recipient can no longer respond to that handshake. After you cancel a handshake, it continues to appear in the results of relevant APIs for only 30 days. After that, it's deleted."]
+       "Cancels a Handshake. Only the account that sent a handshake can call this operation. The recipient of the handshake can't cancel it, but can use DeclineHandshake to decline. After a handshake is canceled, the recipient can no longer respond to the handshake. You can view canceled handshakes in API responses for 30 days before they are deleted."]
 module ChildType =
   struct
     type nonrec t =
@@ -1827,9 +2317,9 @@ module Child =
       let id = (Option.map ~f:ChildId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?type_ ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" ChildType.of_json in
-      let id = field_map json "Id" ChildId.of_json in make ?type_ ?id ()
+    let of_json json__ =
+      let type_ = field_map json__ "Type" ChildType.of_json in
+      let id = field_map json__ "Id" ChildId.of_json in make ?type_ ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains a list of child entities, either OUs or accounts."]
@@ -1848,8 +2338,8 @@ module ChildNotFoundException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1858,6 +2348,9 @@ module Children =
   struct
     type nonrec t = Child.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Child.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1896,12 +2389,12 @@ module CloseAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
+    let of_json json__ =
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
       make ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Closes an Amazon Web Services account that is now a part of an Organizations, either created within the organization, or invited to join the organization."]
+       "Closes an Amazon Web Services member account within an organization. You can close an account when all features are enabled . You can't close the management account with this API. This is an asynchronous request that Amazon Web Services performs in the background. Because CloseAccount operates asynchronously, it can return a successful completion message even though account closure might still be in progress. You need to wait a few minutes before the account is fully closed. To check the status of the request, do one of the following: Use the AccountId that you sent in the CloseAccount request to provide as a parameter to the DescribeAccount operation. While the close account request is in progress, Account status will indicate PENDING_CLOSURE. When the close account request completes, the status will change to SUSPENDED. Check the CloudTrail log for the CloseAccountResult event that gets published after the account closes successfully. For information on using CloudTrail with Organizations, see Logging and monitoring in Organizations in the Organizations User Guide. Resources remaining within the account after closing will be automatically deleted after 90 days. During this 90-day period, the resources won't be available unless you contact Amazon Web Services Support to reopen the account. After 90 days, you can't reopen an account. You might still receive a bill after account closure. Within a rolling 30 day period you can close the higher of either 250 or 20% of the member accounts in your organization, up to a maximum of 1,000. This quota is not bound by a calendar month, but starts when you close an account. After you reach this limit, you can't close additional accounts. For more information, see Closing a member account in your organization and Quotas for Organizations in the Organizations User Guide. To reinstate a closed account, contact Amazon Web Services Support within the 90-day grace period while the account is in SUSPENDED status. If the Amazon Web Services account you attempt to close is linked to an Amazon Web Services GovCloud (US) account, the CloseAccount request will close both accounts. To learn important pre-closure details, see Closing an Amazon Web Services GovCloud (US) account in the Amazon Web Services GovCloud User Guide."]
 module ConflictException =
   struct
     type nonrec t = {
@@ -1917,198 +2410,12 @@ module ConflictException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request failed because it conflicts with the current state of the specified resource."]
-module ConstraintViolationExceptionReason =
-  struct
-    type nonrec t =
-      | ACCOUNT_NUMBER_LIMIT_EXCEEDED 
-      | HANDSHAKE_RATE_LIMIT_EXCEEDED 
-      | OU_NUMBER_LIMIT_EXCEEDED 
-      | OU_DEPTH_LIMIT_EXCEEDED 
-      | POLICY_NUMBER_LIMIT_EXCEEDED 
-      | POLICY_CONTENT_LIMIT_EXCEEDED 
-      | MAX_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED 
-      | MIN_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED 
-      | ACCOUNT_CANNOT_LEAVE_ORGANIZATION 
-      | ACCOUNT_CANNOT_LEAVE_WITHOUT_EULA 
-      | ACCOUNT_CANNOT_LEAVE_WITHOUT_PHONE_VERIFICATION 
-      | MASTER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED 
-      | MEMBER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED 
-      | ACCOUNT_CREATION_RATE_LIMIT_EXCEEDED 
-      | MASTER_ACCOUNT_ADDRESS_DOES_NOT_MATCH_MARKETPLACE 
-      | MASTER_ACCOUNT_MISSING_CONTACT_INFO 
-      | MASTER_ACCOUNT_NOT_GOVCLOUD_ENABLED 
-      | ORGANIZATION_NOT_IN_ALL_FEATURES_MODE 
-      | CREATE_ORGANIZATION_IN_BILLING_MODE_UNSUPPORTED_REGION 
-      | EMAIL_VERIFICATION_CODE_EXPIRED 
-      | WAIT_PERIOD_ACTIVE 
-      | MAX_TAG_LIMIT_EXCEEDED 
-      | TAG_POLICY_VIOLATION 
-      | MAX_DELEGATED_ADMINISTRATORS_FOR_SERVICE_LIMIT_EXCEEDED 
-      | CANNOT_REGISTER_MASTER_AS_DELEGATED_ADMINISTRATOR 
-      | CANNOT_REMOVE_DELEGATED_ADMINISTRATOR_FROM_ORG 
-      | DELEGATED_ADMINISTRATOR_EXISTS_FOR_THIS_SERVICE 
-      | MASTER_ACCOUNT_MISSING_BUSINESS_LICENSE 
-      | CANNOT_CLOSE_MANAGEMENT_ACCOUNT 
-      | CLOSE_ACCOUNT_QUOTA_EXCEEDED 
-      | CLOSE_ACCOUNT_REQUESTS_LIMIT_EXCEEDED 
-      | SERVICE_ACCESS_NOT_ENABLED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | ACCOUNT_NUMBER_LIMIT_EXCEEDED -> "ACCOUNT_NUMBER_LIMIT_EXCEEDED"
-      | HANDSHAKE_RATE_LIMIT_EXCEEDED -> "HANDSHAKE_RATE_LIMIT_EXCEEDED"
-      | OU_NUMBER_LIMIT_EXCEEDED -> "OU_NUMBER_LIMIT_EXCEEDED"
-      | OU_DEPTH_LIMIT_EXCEEDED -> "OU_DEPTH_LIMIT_EXCEEDED"
-      | POLICY_NUMBER_LIMIT_EXCEEDED -> "POLICY_NUMBER_LIMIT_EXCEEDED"
-      | POLICY_CONTENT_LIMIT_EXCEEDED -> "POLICY_CONTENT_LIMIT_EXCEEDED"
-      | MAX_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED ->
-          "MAX_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED"
-      | MIN_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED ->
-          "MIN_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED"
-      | ACCOUNT_CANNOT_LEAVE_ORGANIZATION ->
-          "ACCOUNT_CANNOT_LEAVE_ORGANIZATION"
-      | ACCOUNT_CANNOT_LEAVE_WITHOUT_EULA ->
-          "ACCOUNT_CANNOT_LEAVE_WITHOUT_EULA"
-      | ACCOUNT_CANNOT_LEAVE_WITHOUT_PHONE_VERIFICATION ->
-          "ACCOUNT_CANNOT_LEAVE_WITHOUT_PHONE_VERIFICATION"
-      | MASTER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED ->
-          "MASTER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED"
-      | MEMBER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED ->
-          "MEMBER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED"
-      | ACCOUNT_CREATION_RATE_LIMIT_EXCEEDED ->
-          "ACCOUNT_CREATION_RATE_LIMIT_EXCEEDED"
-      | MASTER_ACCOUNT_ADDRESS_DOES_NOT_MATCH_MARKETPLACE ->
-          "MASTER_ACCOUNT_ADDRESS_DOES_NOT_MATCH_MARKETPLACE"
-      | MASTER_ACCOUNT_MISSING_CONTACT_INFO ->
-          "MASTER_ACCOUNT_MISSING_CONTACT_INFO"
-      | MASTER_ACCOUNT_NOT_GOVCLOUD_ENABLED ->
-          "MASTER_ACCOUNT_NOT_GOVCLOUD_ENABLED"
-      | ORGANIZATION_NOT_IN_ALL_FEATURES_MODE ->
-          "ORGANIZATION_NOT_IN_ALL_FEATURES_MODE"
-      | CREATE_ORGANIZATION_IN_BILLING_MODE_UNSUPPORTED_REGION ->
-          "CREATE_ORGANIZATION_IN_BILLING_MODE_UNSUPPORTED_REGION"
-      | EMAIL_VERIFICATION_CODE_EXPIRED -> "EMAIL_VERIFICATION_CODE_EXPIRED"
-      | WAIT_PERIOD_ACTIVE -> "WAIT_PERIOD_ACTIVE"
-      | MAX_TAG_LIMIT_EXCEEDED -> "MAX_TAG_LIMIT_EXCEEDED"
-      | TAG_POLICY_VIOLATION -> "TAG_POLICY_VIOLATION"
-      | MAX_DELEGATED_ADMINISTRATORS_FOR_SERVICE_LIMIT_EXCEEDED ->
-          "MAX_DELEGATED_ADMINISTRATORS_FOR_SERVICE_LIMIT_EXCEEDED"
-      | CANNOT_REGISTER_MASTER_AS_DELEGATED_ADMINISTRATOR ->
-          "CANNOT_REGISTER_MASTER_AS_DELEGATED_ADMINISTRATOR"
-      | CANNOT_REMOVE_DELEGATED_ADMINISTRATOR_FROM_ORG ->
-          "CANNOT_REMOVE_DELEGATED_ADMINISTRATOR_FROM_ORG"
-      | DELEGATED_ADMINISTRATOR_EXISTS_FOR_THIS_SERVICE ->
-          "DELEGATED_ADMINISTRATOR_EXISTS_FOR_THIS_SERVICE"
-      | MASTER_ACCOUNT_MISSING_BUSINESS_LICENSE ->
-          "MASTER_ACCOUNT_MISSING_BUSINESS_LICENSE"
-      | CANNOT_CLOSE_MANAGEMENT_ACCOUNT -> "CANNOT_CLOSE_MANAGEMENT_ACCOUNT"
-      | CLOSE_ACCOUNT_QUOTA_EXCEEDED -> "CLOSE_ACCOUNT_QUOTA_EXCEEDED"
-      | CLOSE_ACCOUNT_REQUESTS_LIMIT_EXCEEDED ->
-          "CLOSE_ACCOUNT_REQUESTS_LIMIT_EXCEEDED"
-      | SERVICE_ACCESS_NOT_ENABLED -> "SERVICE_ACCESS_NOT_ENABLED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "ACCOUNT_NUMBER_LIMIT_EXCEEDED" -> ACCOUNT_NUMBER_LIMIT_EXCEEDED
-      | "HANDSHAKE_RATE_LIMIT_EXCEEDED" -> HANDSHAKE_RATE_LIMIT_EXCEEDED
-      | "OU_NUMBER_LIMIT_EXCEEDED" -> OU_NUMBER_LIMIT_EXCEEDED
-      | "OU_DEPTH_LIMIT_EXCEEDED" -> OU_DEPTH_LIMIT_EXCEEDED
-      | "POLICY_NUMBER_LIMIT_EXCEEDED" -> POLICY_NUMBER_LIMIT_EXCEEDED
-      | "POLICY_CONTENT_LIMIT_EXCEEDED" -> POLICY_CONTENT_LIMIT_EXCEEDED
-      | "MAX_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED" ->
-          MAX_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED
-      | "MIN_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED" ->
-          MIN_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED
-      | "ACCOUNT_CANNOT_LEAVE_ORGANIZATION" ->
-          ACCOUNT_CANNOT_LEAVE_ORGANIZATION
-      | "ACCOUNT_CANNOT_LEAVE_WITHOUT_EULA" ->
-          ACCOUNT_CANNOT_LEAVE_WITHOUT_EULA
-      | "ACCOUNT_CANNOT_LEAVE_WITHOUT_PHONE_VERIFICATION" ->
-          ACCOUNT_CANNOT_LEAVE_WITHOUT_PHONE_VERIFICATION
-      | "MASTER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED" ->
-          MASTER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED
-      | "MEMBER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED" ->
-          MEMBER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED
-      | "ACCOUNT_CREATION_RATE_LIMIT_EXCEEDED" ->
-          ACCOUNT_CREATION_RATE_LIMIT_EXCEEDED
-      | "MASTER_ACCOUNT_ADDRESS_DOES_NOT_MATCH_MARKETPLACE" ->
-          MASTER_ACCOUNT_ADDRESS_DOES_NOT_MATCH_MARKETPLACE
-      | "MASTER_ACCOUNT_MISSING_CONTACT_INFO" ->
-          MASTER_ACCOUNT_MISSING_CONTACT_INFO
-      | "MASTER_ACCOUNT_NOT_GOVCLOUD_ENABLED" ->
-          MASTER_ACCOUNT_NOT_GOVCLOUD_ENABLED
-      | "ORGANIZATION_NOT_IN_ALL_FEATURES_MODE" ->
-          ORGANIZATION_NOT_IN_ALL_FEATURES_MODE
-      | "CREATE_ORGANIZATION_IN_BILLING_MODE_UNSUPPORTED_REGION" ->
-          CREATE_ORGANIZATION_IN_BILLING_MODE_UNSUPPORTED_REGION
-      | "EMAIL_VERIFICATION_CODE_EXPIRED" -> EMAIL_VERIFICATION_CODE_EXPIRED
-      | "WAIT_PERIOD_ACTIVE" -> WAIT_PERIOD_ACTIVE
-      | "MAX_TAG_LIMIT_EXCEEDED" -> MAX_TAG_LIMIT_EXCEEDED
-      | "TAG_POLICY_VIOLATION" -> TAG_POLICY_VIOLATION
-      | "MAX_DELEGATED_ADMINISTRATORS_FOR_SERVICE_LIMIT_EXCEEDED" ->
-          MAX_DELEGATED_ADMINISTRATORS_FOR_SERVICE_LIMIT_EXCEEDED
-      | "CANNOT_REGISTER_MASTER_AS_DELEGATED_ADMINISTRATOR" ->
-          CANNOT_REGISTER_MASTER_AS_DELEGATED_ADMINISTRATOR
-      | "CANNOT_REMOVE_DELEGATED_ADMINISTRATOR_FROM_ORG" ->
-          CANNOT_REMOVE_DELEGATED_ADMINISTRATOR_FROM_ORG
-      | "DELEGATED_ADMINISTRATOR_EXISTS_FOR_THIS_SERVICE" ->
-          DELEGATED_ADMINISTRATOR_EXISTS_FOR_THIS_SERVICE
-      | "MASTER_ACCOUNT_MISSING_BUSINESS_LICENSE" ->
-          MASTER_ACCOUNT_MISSING_BUSINESS_LICENSE
-      | "CANNOT_CLOSE_MANAGEMENT_ACCOUNT" -> CANNOT_CLOSE_MANAGEMENT_ACCOUNT
-      | "CLOSE_ACCOUNT_QUOTA_EXCEEDED" -> CLOSE_ACCOUNT_QUOTA_EXCEEDED
-      | "CLOSE_ACCOUNT_REQUESTS_LIMIT_EXCEEDED" ->
-          CLOSE_ACCOUNT_REQUESTS_LIMIT_EXCEEDED
-      | "SERVICE_ACCESS_NOT_ENABLED" -> SERVICE_ACCESS_NOT_ENABLED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration ConstraintViolationExceptionReason"
-           xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"ConstraintViolationExceptionReason" j)
-    let to_json = simple_to_json to_value
-  end
-module ConstraintViolationException =
-  struct
-    type nonrec t =
-      {
-      message: ExceptionMessage.t option ;
-      reason: ConstraintViolationExceptionReason.t option }
-    let make ?message = fun ?reason -> fun () -> { message; reason }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
-        ("Reason",
-          (Option.map x.reason ~f:ConstraintViolationExceptionReason.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let reason =
-        (Option.map ~f:ConstraintViolationExceptionReason.of_xml)
-          (Xml.child xml_arg0 "Reason") in
-      let message =
-        (Option.map ~f:ExceptionMessage.of_xml)
-          (Xml.child xml_arg0 "Message") in
-      make ?reason ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason =
-        field_map json "Reason" ConstraintViolationExceptionReason.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
-      make ?reason ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Performing this operation violates a minimum or maximum value limit. For example, attempting to remove the last service control policy (SCP) from an OU or root, inviting or creating too many accounts to the organization, or attaching too many policies to an account, OU, or root. This exception includes a reason that contains additional information about the violated limit: Some of the reasons in the following list might not be applicable to this specific API or operation. ACCOUNT_CANNOT_LEAVE_ORGANIZATION: You attempted to remove the management account from the organization. You can't remove the management account. Instead, after you remove all member accounts, delete the organization itself. ACCOUNT_CANNOT_LEAVE_WITHOUT_PHONE_VERIFICATION: You attempted to remove an account from the organization that doesn't yet have enough information to exist as a standalone account. This account requires you to first complete phone verification. Follow the steps at Removing a member account from your organization in the Organizations User Guide. ACCOUNT_CREATION_RATE_LIMIT_EXCEEDED: You attempted to exceed the number of accounts that you can create in one day. ACCOUNT_NUMBER_LIMIT_EXCEEDED: You attempted to exceed the limit on the number of accounts in an organization. If you need more accounts, contact Amazon Web Services Support to request an increase in your limit. Or the number of invitations that you tried to send would cause you to exceed the limit of accounts in your organization. Send fewer invitations or contact Amazon Web Services Support to request an increase in the number of accounts. Deleted and closed accounts still count toward your limit. If you get this exception when running a command immediately after creating the organization, wait one hour and try again. After an hour, if the command continues to fail with this error, contact Amazon Web Services Support. CANNOT_REGISTER_MASTER_AS_DELEGATED_ADMINISTRATOR: You attempted to register the management account of the organization as a delegated administrator for an Amazon Web Services service integrated with Organizations. You can designate only a member account as a delegated administrator. CANNOT_REMOVE_DELEGATED_ADMINISTRATOR_FROM_ORG: You attempted to remove an account that is registered as a delegated administrator for a service integrated with your organization. To complete this operation, you must first deregister this account as a delegated administrator. CREATE_ORGANIZATION_IN_BILLING_MODE_UNSUPPORTED_REGION: To create an organization in the specified region, you must enable all features mode. DELEGATED_ADMINISTRATOR_EXISTS_FOR_THIS_SERVICE: You attempted to register an Amazon Web Services account as a delegated administrator for an Amazon Web Services service that already has a delegated administrator. To complete this operation, you must first deregister any existing delegated administrators for this service. EMAIL_VERIFICATION_CODE_EXPIRED: The email verification code is only valid for a limited period of time. You must resubmit the request and generate a new verfication code. HANDSHAKE_RATE_LIMIT_EXCEEDED: You attempted to exceed the number of handshakes that you can send in one day. MASTER_ACCOUNT_ADDRESS_DOES_NOT_MATCH_MARKETPLACE: To create an account in this organization, you first must migrate the organization's management account to the marketplace that corresponds to the management account's address. For example, accounts with India addresses must be associated with the AISPL marketplace. All accounts in an organization must be associated with the same marketplace. MASTER_ACCOUNT_MISSING_BUSINESS_LICENSE: Applies only to the Amazon Web Services /> Regions in China. To create an organization, the master must have a valid business license. For more information, contact customer support. MASTER_ACCOUNT_MISSING_CONTACT_INFO: To complete this operation, you must first provide a valid contact address and phone number for the management account. Then try the operation again. MASTER_ACCOUNT_NOT_GOVCLOUD_ENABLED: To complete this operation, the management account must have an associated account in the Amazon Web Services GovCloud (US-West) Region. For more information, see Organizations in the Amazon Web Services GovCloud User Guide. MASTER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED: To create an organization with this management account, you first must associate a valid payment instrument, such as a credit card, with the account. Follow the steps at To leave an organization when all required account information has not yet been provided in the Organizations User Guide. MAX_DELEGATED_ADMINISTRATORS_FOR_SERVICE_LIMIT_EXCEEDED: You attempted to register more delegated administrators than allowed for the service principal. MAX_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED: You attempted to exceed the number of policies of a certain type that can be attached to an entity at one time. MAX_TAG_LIMIT_EXCEEDED: You have exceeded the number of tags allowed on this resource. MEMBER_ACCOUNT_PAYMENT_INSTRUMENT_REQUIRED: To complete this operation with this member account, you first must associate a valid payment instrument, such as a credit card, with the account. Follow the steps at To leave an organization when all required account information has not yet been provided in the Organizations User Guide. MIN_POLICY_TYPE_ATTACHMENT_LIMIT_EXCEEDED: You attempted to detach a policy from an entity that would cause the entity to have fewer than the minimum number of policies of a certain type required. ORGANIZATION_NOT_IN_ALL_FEATURES_MODE: You attempted to perform an operation that requires the organization to be configured to support all features. An organization that supports only consolidated billing features can't perform this operation. OU_DEPTH_LIMIT_EXCEEDED: You attempted to create an OU tree that is too many levels deep. OU_NUMBER_LIMIT_EXCEEDED: You attempted to exceed the number of OUs that you can have in an organization. POLICY_CONTENT_LIMIT_EXCEEDED: You attempted to create a policy that is larger than the maximum size. POLICY_NUMBER_LIMIT_EXCEEDED: You attempted to exceed the number of policies that you can have in an organization. SERVICE_ACCESS_NOT_ENABLED: You attempted to register a delegated administrator before you enabled service access. Call the EnableAWSServiceAccess API first. TAG_POLICY_VIOLATION: You attempted to create or update a resource with tags that are not compliant with the tag policy requirements for this account. WAIT_PERIOD_ACTIVE: After you create an Amazon Web Services account, there is a waiting period before you can remove it from the organization. If you get an error that indicates that a wait period is required, try again in a few days."]
 module CreateAccountFailureReason =
   struct
     type nonrec t =
@@ -2125,6 +2432,8 @@ module CreateAccountFailureReason =
       | INVALID_IDENTITY_FOR_BUSINESS_VALIDATION 
       | UNKNOWN_BUSINESS_VALIDATION 
       | MISSING_PAYMENT_INSTRUMENT 
+      | INVALID_PAYMENT_INSTRUMENT 
+      | UPDATE_EXISTING_RESOURCE_POLICY_WITH_TAGS_NOT_SUPPORTED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2143,6 +2452,9 @@ module CreateAccountFailureReason =
           "INVALID_IDENTITY_FOR_BUSINESS_VALIDATION"
       | UNKNOWN_BUSINESS_VALIDATION -> "UNKNOWN_BUSINESS_VALIDATION"
       | MISSING_PAYMENT_INSTRUMENT -> "MISSING_PAYMENT_INSTRUMENT"
+      | INVALID_PAYMENT_INSTRUMENT -> "INVALID_PAYMENT_INSTRUMENT"
+      | UPDATE_EXISTING_RESOURCE_POLICY_WITH_TAGS_NOT_SUPPORTED ->
+          "UPDATE_EXISTING_RESOURCE_POLICY_WITH_TAGS_NOT_SUPPORTED"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2160,6 +2472,9 @@ module CreateAccountFailureReason =
           INVALID_IDENTITY_FOR_BUSINESS_VALIDATION
       | "UNKNOWN_BUSINESS_VALIDATION" -> UNKNOWN_BUSINESS_VALIDATION
       | "MISSING_PAYMENT_INSTRUMENT" -> MISSING_PAYMENT_INSTRUMENT
+      | "INVALID_PAYMENT_INSTRUMENT" -> INVALID_PAYMENT_INSTRUMENT
+      | "UPDATE_EXISTING_RESOURCE_POLICY_WITH_TAGS_NOT_SUPPORTED" ->
+          UPDATE_EXISTING_RESOURCE_POLICY_WITH_TAGS_NOT_SUPPORTED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2258,9 +2573,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2269,6 +2584,9 @@ module Tags =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2338,13 +2656,13 @@ module CreateAccountRequest =
         [@ocaml.doc "The friendly name of the member account."];
       roleName: RoleName.t option
         [@ocaml.doc
-          "(Optional) The name of an IAM role that Organizations automatically preconfigures in the new member account. This role trusts the management account, allowing users in the management account to assume the role, as permitted by the management account administrator. The role has administrator permissions in the new member account. If you don't specify this parameter, the role name defaults to OrganizationAccountAccessRole. For more information about how to use this role to access the member account, see the following links: Accessing and Administering the Member Accounts in Your Organization in the Organizations User Guide Steps 2 and 3 in Tutorial: Delegate Access Across Amazon Web Services accounts Using IAM Roles in the IAM User Guide The regex pattern that is used to validate this parameter. The pattern can include uppercase letters, lowercase letters, digits with no spaces, and any of the following characters: =,.\\@-"];
+          "The name of an IAM role that Organizations automatically preconfigures in the new member account. This role trusts the management account, allowing users in the management account to assume the role, as permitted by the management account administrator. The role has administrator permissions in the new member account. If you don't specify this parameter, the role name defaults to OrganizationAccountAccessRole. For more information about how to use this role to access the member account, see the following links: Creating the OrganizationAccountAccessRole in an invited member account in the Organizations User Guide Steps 2 and 3 in IAM Tutorial: Delegate access across Amazon Web Services accounts using IAM roles in the IAM User Guide The regex pattern that is used to validate this parameter. The pattern can include uppercase letters, lowercase letters, digits with no spaces, and any of the following characters: =,.\\@-"];
       iamUserAccessToBilling: IAMUserAccessToBilling.t option
         [@ocaml.doc
-          "If set to ALLOW, the new account enables IAM users to access account billing information if they have the required permissions. If set to DENY, only the root user of the new account can access account billing information. For more information, see Activating Access to the Billing and Cost Management Console in the Amazon Web Services Billing and Cost Management User Guide. If you don't specify this parameter, the value defaults to ALLOW, and IAM users and roles with the required permissions can access billing information for the new account."];
+          "If set to ALLOW, the new account enables IAM users to access account billing information if they have the required permissions. If set to DENY, only the root user of the new account can access account billing information. For more information, see About IAM access to the Billing and Cost Management console in the Amazon Web Services Billing and Cost Management User Guide. If you don't specify this parameter, the value defaults to ALLOW, and IAM users and roles with the required permissions can access billing information for the new account."];
       tags: Tags.t option
         [@ocaml.doc
-          "A list of tags that you want to attach to the newly created account. For each tag in the list, you must specify both a tag key and a value. You can set the value to an empty string, but you can't set it to null. For more information about tagging, see Tagging Organizations resources in the Organizations User Guide. If any one of the tags is invalid or if you exceed the maximum allowed number of tags for an account, then the entire request fails and the account is not created."]}
+          "A list of tags that you want to attach to the newly created account. For each tag in the list, you must specify both a tag key and a value. You can set the value to an empty string, but you can't set it to null. For more information about tagging, see Tagging Organizations resources in the Organizations User Guide. If any one of the tags is not valid or if you exceed the maximum allowed number of tags for an account, then the entire request fails and the account is not created."]}
     let context_ = "CreateAccountRequest"
     let make ?roleName =
       fun ?iamUserAccessToBilling ->
@@ -2378,19 +2696,19 @@ module CreateAccountRequest =
         Email.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Email") in
       make ?tags ?iamUserAccessToBilling ?roleName ~accountName ~email ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let iamUserAccessToBilling =
-        field_map json "IamUserAccessToBilling"
+        field_map json__ "IamUserAccessToBilling"
           IAMUserAccessToBilling.of_json in
-      let roleName = field_map json "RoleName" RoleName.of_json in
+      let roleName = field_map json__ "RoleName" RoleName.of_json in
       let accountName =
-        field_map_exn json "AccountName" CreateAccountName.of_json in
-      let email = field_map_exn json "Email" Email.of_json in
+        field_map_exn json__ "AccountName" CreateAccountName.of_json in
+      let email = field_map_exn json__ "Email" Email.of_json in
       make ?tags ?iamUserAccessToBilling ?roleName ~accountName ~email ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Web Services account that is automatically a member of the organization whose credentials made the request. This is an asynchronous request that Amazon Web Services performs in the background. Because CreateAccount operates asynchronously, it can return a successful completion message even though account initialization might still be in progress. You might need to wait a few minutes before you can successfully access the account. To check the status of the request, do one of the following: Use the Id member of the CreateAccountStatus response element from this operation to provide as a parameter to the DescribeCreateAccountStatus operation. Check the CloudTrail log for the CreateAccountResult event. For information on using CloudTrail with Organizations, see Logging and monitoring in Organizations in the Organizations User Guide. The user who calls the API to create an account must have the organizations:CreateAccount permission. If you enabled all features in the organization, Organizations creates the required service-linked role named AWSServiceRoleForOrganizations. For more information, see Organizations and Service-Linked Roles in the Organizations User Guide. If the request includes tags, then the requester must have the organizations:TagResource permission. Organizations preconfigures the new member account with a role (named OrganizationAccountAccessRole by default) that grants users in the management account administrator permissions in the new member account. Principals in the management account can assume the role. Organizations clones the company name and address information for the new account from the organization's management account. This operation can be called only from the organization's management account. For more information about creating accounts, see Creating an Amazon Web Services account in Your Organization in the Organizations User Guide. When you create an account in an organization using the Organizations console, API, or CLI commands, the information required for the account to operate as a standalone account, such as a payment method and signing the end user license agreement (EULA) is not automatically collected. If you must remove an account from your organization later, you can do so only after you provide the missing information. Follow the steps at To leave an organization as a member account in the Organizations User Guide. If you get an exception that indicates that you exceeded your account limits for the organization, contact Amazon Web Services Support. If you get an exception that indicates that the operation failed because your organization is still initializing, wait one hour and then try again. If the error persists, contact Amazon Web Services Support. Using CreateAccount to create multiple temporary accounts isn't recommended. You can only close an account from the Billing and Cost Management console, and you must be signed in as the root user. For information on the requirements and process for closing an account, see Closing an Amazon Web Services account in the Organizations User Guide. When you create a member account with this operation, you can choose whether to create the account with the IAM User and Role Access to Billing Information switch enabled. If you enable it, IAM users and roles that have appropriate permissions can view billing information for the account. If you disable it, only the account root user can access billing information. For information about how to disable this switch for an account, see Granting Access to Your Billing Information and Tools."]
+       "Creates an Amazon Web Services account that is automatically a member of the organization whose credentials made the request. This is an asynchronous request that Amazon Web Services performs in the background. Because CreateAccount operates asynchronously, it can return a successful completion message even though account initialization might still be in progress. You might need to wait a few minutes before you can successfully access the account. To check the status of the request, do one of the following: Use the Id value of the CreateAccountStatus response element from this operation to provide as a parameter to the DescribeCreateAccountStatus operation. Check the CloudTrail log for the CreateAccountResult event. For information on using CloudTrail with Organizations, see Logging and monitoring in Organizations in the Organizations User Guide. The user who calls the API to create an account must have the organizations:CreateAccount permission. If you enabled all features in the organization, Organizations creates the required service-linked role named AWSServiceRoleForOrganizations. For more information, see Organizations and service-linked roles in the Organizations User Guide. If the request includes tags, then the requester must have the organizations:TagResource permission. Organizations preconfigures the new member account with a role (named OrganizationAccountAccessRole by default) that grants users in the management account administrator permissions in the new member account. Principals in the management account can assume the role. Organizations clones the company name and address information for the new account from the organization's management account. You can only call this operation from the management account. For more information about creating accounts, see Creating a member account in your organization in the Organizations User Guide. When you create an account in an organization using the Organizations console, API, or CLI commands, the information required for the account to operate as a standalone account, such as a payment method is not automatically collected. If you must remove an account from your organization later, you can do so only after you provide the missing information. For more information, see Considerations before removing an account from an organization in the Organizations User Guide. If you get an exception that indicates that you exceeded your account limits for the organization, contact Amazon Web Services Support. If you get an exception that indicates that the operation failed because your organization is still initializing, wait one hour and then try again. If the error persists, contact Amazon Web Services Support. It isn't recommended to use CreateAccount to create multiple temporary accounts, and using the CreateAccount API to close accounts is subject to a 30-day usage quota. For information on the requirements and process for closing an account, see Closing a member account in your organization in the Organizations User Guide. When you create a member account with this operation, you can choose whether to create the account with the IAM User and Role Access to Billing Information switch enabled. If you enable it, IAM users and roles that have appropriate permissions can view billing information for the account. If you disable it, only the account root user can access billing information. For information about how to disable this switch for an account, see Granting access to your billing information and tools."]
 module CreateAccountRequestId =
   struct
     type nonrec t = string
@@ -2424,8 +2742,8 @@ module UnsupportedAPIEndpointException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2445,8 +2763,8 @@ module FinalizingOrganizationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2504,10 +2822,10 @@ module CreateAccountStatus =
           "If the account was created successfully, the unique identifier (ID) of the new account. The regex pattern for an account ID string requires exactly 12 digits."];
       govCloudAccountId: AccountId.t option
         [@ocaml.doc
-          "If the account was created successfully, the unique identifier (ID) of the new account in the Amazon Web Services GovCloud (US) Region."];
+          "If the account was created successfully, the ID for the new account in the Amazon Web Services GovCloud (US) Region."];
       failureReason: CreateAccountFailureReason.t option
         [@ocaml.doc
-          "If the request failed, a description of the reason for the failure. ACCOUNT_LIMIT_EXCEEDED: The account couldn't be created because you reached the limit on the number of accounts in your organization. CONCURRENT_ACCOUNT_MODIFICATION: You already submitted a request with the same information. EMAIL_ALREADY_EXISTS: The account could not be created because another Amazon Web Services account with that email address already exists. FAILED_BUSINESS_VALIDATION: The Amazon Web Services account that owns your organization failed to receive business license validation. GOVCLOUD_ACCOUNT_ALREADY_EXISTS: The account in the Amazon Web Services GovCloud (US) Region could not be created because this Region already includes an account with that email address. IDENTITY_INVALID_BUSINESS_VALIDATION: The Amazon Web Services account that owns your organization can't complete business license validation because it doesn't have valid identity data. INVALID_ADDRESS: The account could not be created because the address you provided is not valid. INVALID_EMAIL: The account could not be created because the email address you provided is not valid. INTERNAL_FAILURE: The account could not be created because of an internal failure. Try again later. If the problem persists, contact Amazon Web Services Customer Support. MISSING_BUSINESS_VALIDATION: The Amazon Web Services account that owns your organization has not received Business Validation. MISSING_PAYMENT_INSTRUMENT: You must configure the management account with a valid payment method, such as a credit card. PENDING_BUSINESS_VALIDATION: The Amazon Web Services account that owns your organization is still in the process of completing business license validation. UNKNOWN_BUSINESS_VALIDATION: The Amazon Web Services account that owns your organization has an unknown issue with business license validation."]}
+          "If the request failed, a description of the reason for the failure. ACCOUNT_LIMIT_EXCEEDED: The account couldn't be created because you reached the limit on the number of accounts in your organization. CONCURRENT_ACCOUNT_MODIFICATION: You already submitted a request with the same information. EMAIL_ALREADY_EXISTS: The account could not be created because another Amazon Web Services account with that email address already exists. FAILED_BUSINESS_VALIDATION: The Amazon Web Services account that owns your organization failed to receive business license validation. GOVCLOUD_ACCOUNT_ALREADY_EXISTS: The account in the Amazon Web Services GovCloud (US) Region could not be created because this Region already includes an account with that email address. IDENTITY_INVALID_BUSINESS_VALIDATION: The Amazon Web Services account that owns your organization can't complete business license validation because it doesn't have valid identity data. INVALID_ADDRESS: The account could not be created because the address you provided is not valid. INVALID_EMAIL: The account could not be created because the email address you provided is not valid. INVALID_PAYMENT_INSTRUMENT: The Amazon Web Services account that owns your organization does not have a supported payment method associated with the account. Amazon Web Services does not support cards issued by financial institutions in Russia or Belarus. For more information, see Managing your Amazon Web Services payments. INTERNAL_FAILURE: The account could not be created because of an internal failure. Try again later. If the problem persists, contact Amazon Web Services Customer Support. MISSING_BUSINESS_VALIDATION: The Amazon Web Services account that owns your organization has not received Business Validation. MISSING_PAYMENT_INSTRUMENT: You must configure the management account with a valid payment method, such as a credit card. PENDING_BUSINESS_VALIDATION: The Amazon Web Services account that owns your organization is still in the process of completing business license validation. UNKNOWN_BUSINESS_VALIDATION: The Amazon Web Services account that owns your organization has an unknown issue with business license validation."]}
     let make ?id =
       fun ?accountName ->
         fun ?state ->
@@ -2570,20 +2888,20 @@ module CreateAccountStatus =
       make ?failureReason ?govCloudAccountId ?accountId ?completedTimestamp
         ?requestedTimestamp ?state ?accountName ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "FailureReason" CreateAccountFailureReason.of_json in
+        field_map json__ "FailureReason" CreateAccountFailureReason.of_json in
       let govCloudAccountId =
-        field_map json "GovCloudAccountId" AccountId.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+        field_map json__ "GovCloudAccountId" AccountId.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let completedTimestamp =
-        field_map json "CompletedTimestamp" Timestamp.of_json in
+        field_map json__ "CompletedTimestamp" Timestamp.of_json in
       let requestedTimestamp =
-        field_map json "RequestedTimestamp" Timestamp.of_json in
-      let state = field_map json "State" CreateAccountState.of_json in
+        field_map json__ "RequestedTimestamp" Timestamp.of_json in
+      let state = field_map json__ "State" CreateAccountState.of_json in
       let accountName =
-        field_map json "AccountName" CreateAccountName.of_json in
-      let id = field_map json "Id" CreateAccountRequestId.of_json in
+        field_map json__ "AccountName" CreateAccountName.of_json in
+      let id = field_map json__ "Id" CreateAccountRequestId.of_json in
       make ?failureReason ?govCloudAccountId ?accountId ?completedTimestamp
         ?requestedTimestamp ?state ?accountName ?id ()
     let to_json v = composed_to_json to_value v
@@ -2595,7 +2913,7 @@ module CreateAccountResponse =
       {
       createAccountStatus: CreateAccountStatus.t option
         [@ocaml.doc
-          "A structure that contains details about the request to create an account. This response structure might not be fully populated when you first receive it because account creation is an asynchronous process. You can pass the returned CreateAccountStatus ID as a parameter to DescribeCreateAccountStatus to get status about the progress of the request at later times. You can also check the CloudTrail log for the CreateAccountResult event. For more information, see Monitoring the Activity in Your Organization in the Organizations User Guide."]}
+          "A structure that contains details about the request to create an account. This response structure might not be fully populated when you first receive it because account creation is an asynchronous process. You can pass the returned CreateAccountStatus ID as a parameter to DescribeCreateAccountStatus to get status about the progress of the request at later times. You can also check the CloudTrail log for the CreateAccountResult event. For more information, see Logging and monitoring in Organizations in the Organizations User Guide."]}
     type nonrec error =
       [
         `AWSOrganizationsNotInUseException of
@@ -2718,17 +3036,20 @@ module CreateAccountResponse =
           (Xml.child xml_arg0 "CreateAccountStatus") in
       make ?createAccountStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let createAccountStatus =
-        field_map json "CreateAccountStatus" CreateAccountStatus.of_json in
+        field_map json__ "CreateAccountStatus" CreateAccountStatus.of_json in
       make ?createAccountStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Web Services account that is automatically a member of the organization whose credentials made the request. This is an asynchronous request that Amazon Web Services performs in the background. Because CreateAccount operates asynchronously, it can return a successful completion message even though account initialization might still be in progress. You might need to wait a few minutes before you can successfully access the account. To check the status of the request, do one of the following: Use the Id member of the CreateAccountStatus response element from this operation to provide as a parameter to the DescribeCreateAccountStatus operation. Check the CloudTrail log for the CreateAccountResult event. For information on using CloudTrail with Organizations, see Logging and monitoring in Organizations in the Organizations User Guide. The user who calls the API to create an account must have the organizations:CreateAccount permission. If you enabled all features in the organization, Organizations creates the required service-linked role named AWSServiceRoleForOrganizations. For more information, see Organizations and Service-Linked Roles in the Organizations User Guide. If the request includes tags, then the requester must have the organizations:TagResource permission. Organizations preconfigures the new member account with a role (named OrganizationAccountAccessRole by default) that grants users in the management account administrator permissions in the new member account. Principals in the management account can assume the role. Organizations clones the company name and address information for the new account from the organization's management account. This operation can be called only from the organization's management account. For more information about creating accounts, see Creating an Amazon Web Services account in Your Organization in the Organizations User Guide. When you create an account in an organization using the Organizations console, API, or CLI commands, the information required for the account to operate as a standalone account, such as a payment method and signing the end user license agreement (EULA) is not automatically collected. If you must remove an account from your organization later, you can do so only after you provide the missing information. Follow the steps at To leave an organization as a member account in the Organizations User Guide. If you get an exception that indicates that you exceeded your account limits for the organization, contact Amazon Web Services Support. If you get an exception that indicates that the operation failed because your organization is still initializing, wait one hour and then try again. If the error persists, contact Amazon Web Services Support. Using CreateAccount to create multiple temporary accounts isn't recommended. You can only close an account from the Billing and Cost Management console, and you must be signed in as the root user. For information on the requirements and process for closing an account, see Closing an Amazon Web Services account in the Organizations User Guide. When you create a member account with this operation, you can choose whether to create the account with the IAM User and Role Access to Billing Information switch enabled. If you enable it, IAM users and roles that have appropriate permissions can view billing information for the account. If you disable it, only the account root user can access billing information. For information about how to disable this switch for an account, see Granting Access to Your Billing Information and Tools."]
+       "Creates an Amazon Web Services account that is automatically a member of the organization whose credentials made the request. This is an asynchronous request that Amazon Web Services performs in the background. Because CreateAccount operates asynchronously, it can return a successful completion message even though account initialization might still be in progress. You might need to wait a few minutes before you can successfully access the account. To check the status of the request, do one of the following: Use the Id value of the CreateAccountStatus response element from this operation to provide as a parameter to the DescribeCreateAccountStatus operation. Check the CloudTrail log for the CreateAccountResult event. For information on using CloudTrail with Organizations, see Logging and monitoring in Organizations in the Organizations User Guide. The user who calls the API to create an account must have the organizations:CreateAccount permission. If you enabled all features in the organization, Organizations creates the required service-linked role named AWSServiceRoleForOrganizations. For more information, see Organizations and service-linked roles in the Organizations User Guide. If the request includes tags, then the requester must have the organizations:TagResource permission. Organizations preconfigures the new member account with a role (named OrganizationAccountAccessRole by default) that grants users in the management account administrator permissions in the new member account. Principals in the management account can assume the role. Organizations clones the company name and address information for the new account from the organization's management account. You can only call this operation from the management account. For more information about creating accounts, see Creating a member account in your organization in the Organizations User Guide. When you create an account in an organization using the Organizations console, API, or CLI commands, the information required for the account to operate as a standalone account, such as a payment method is not automatically collected. If you must remove an account from your organization later, you can do so only after you provide the missing information. For more information, see Considerations before removing an account from an organization in the Organizations User Guide. If you get an exception that indicates that you exceeded your account limits for the organization, contact Amazon Web Services Support. If you get an exception that indicates that the operation failed because your organization is still initializing, wait one hour and then try again. If the error persists, contact Amazon Web Services Support. It isn't recommended to use CreateAccount to create multiple temporary accounts, and using the CreateAccount API to close accounts is subject to a 30-day usage quota. For information on the requirements and process for closing an account, see Closing a member account in your organization in the Organizations User Guide. When you create a member account with this operation, you can choose whether to create the account with the IAM User and Role Access to Billing Information switch enabled. If you enable it, IAM users and roles that have appropriate permissions can view billing information for the account. If you disable it, only the account root user can access billing information. For information about how to disable this switch for an account, see Granting access to your billing information and tools."]
 module CreateAccountStates =
   struct
     type nonrec t = CreateAccountState.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CreateAccountState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2765,8 +3086,8 @@ module CreateAccountStatusNotFoundException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2775,6 +3096,9 @@ module CreateAccountStatuses =
   struct
     type nonrec t = CreateAccountStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CreateAccountStatus.to_value)) |>
         (fun x -> `List x)
@@ -2805,16 +3129,17 @@ module CreateGovCloudAccountRequest =
         [@ocaml.doc
           "Specifies the email address of the owner to assign to the new member account in the commercial Region. This email address must not already be associated with another Amazon Web Services account. You must use a valid email address to complete account creation. The rules for a valid email address: The address must be a minimum of 6 and a maximum of 64 characters long. All characters must be 7-bit ASCII characters. There must be one and only one \\@ symbol, which separates the local name from the domain name. The local name can't contain any of the following characters: whitespace, \" ' ( ) < > \\[ \\] : ; , \\ | % & The local name can't begin with a dot (.) The domain name can consist of only the characters \\[a-z\\],\\[A-Z\\],\\[0-9\\], hyphen (-), or dot (.) The domain name can't begin or end with a hyphen (-) or dot (.) The domain name must contain at least one dot You can't access the root user of the account or remove an account that was created with an invalid email address. Like all request parameters for CreateGovCloudAccount, the request for the email address for the Amazon Web Services GovCloud (US) account originates from the commercial Region, not from the Amazon Web Services GovCloud (US) Region."];
       accountName: CreateAccountName.t
-        [@ocaml.doc "The friendly name of the member account."];
+        [@ocaml.doc
+          "The friendly name of the member account. The account name can consist of only the characters \\[a-z\\],\\[A-Z\\],\\[0-9\\], hyphen (-), or dot (.) You can't separate characters with a dash (\226\128\147)."];
       roleName: RoleName.t option
         [@ocaml.doc
-          "(Optional) The name of an IAM role that Organizations automatically preconfigures in the new member accounts in both the Amazon Web Services GovCloud (US) Region and in the commercial Region. This role trusts the management account, allowing users in the management account to assume the role, as permitted by the management account administrator. The role has administrator permissions in the new member account. If you don't specify this parameter, the role name defaults to OrganizationAccountAccessRole. For more information about how to use this role to access the member account, see Accessing and Administering the Member Accounts in Your Organization in the Organizations User Guide and steps 2 and 3 in Tutorial: Delegate Access Across Amazon Web Services accounts Using IAM Roles in the IAM User Guide. The regex pattern that is used to validate this parameter. The pattern can include uppercase letters, lowercase letters, digits with no spaces, and any of the following characters: =,.\\@-"];
+          "(Optional) The name of an IAM role that Organizations automatically preconfigures in the new member accounts in both the Amazon Web Services GovCloud (US) Region and in the commercial Region. This role trusts the management account, allowing users in the management account to assume the role, as permitted by the management account administrator. The role has administrator permissions in the new member account. If you don't specify this parameter, the role name defaults to OrganizationAccountAccessRole. For more information about how to use this role to access the member account, see the following links: Creating the OrganizationAccountAccessRole in an invited member account in the Organizations User Guide Steps 2 and 3 in IAM Tutorial: Delegate access across Amazon Web Services accounts using IAM roles in the IAM User Guide The regex pattern that is used to validate this parameter. The pattern can include uppercase letters, lowercase letters, digits with no spaces, and any of the following characters: =,.\\@-"];
       iamUserAccessToBilling: IAMUserAccessToBilling.t option
         [@ocaml.doc
-          "If set to ALLOW, the new linked account in the commercial Region enables IAM users to access account billing information if they have the required permissions. If set to DENY, only the root user of the new account can access account billing information. For more information, see Activating Access to the Billing and Cost Management Console in the Amazon Web Services Billing and Cost Management User Guide. If you don't specify this parameter, the value defaults to ALLOW, and IAM users and roles with the required permissions can access billing information for the new account."];
+          "If set to ALLOW, the new linked account in the commercial Region enables IAM users to access account billing information if they have the required permissions. If set to DENY, only the root user of the new account can access account billing information. For more information, see About IAM access to the Billing and Cost Management console in the Amazon Web Services Billing and Cost Management User Guide. If you don't specify this parameter, the value defaults to ALLOW, and IAM users and roles with the required permissions can access billing information for the new account."];
       tags: Tags.t option
         [@ocaml.doc
-          "A list of tags that you want to attach to the newly created account. These tags are attached to the commercial account associated with the GovCloud account, and not to the GovCloud account itself. To add tags to the actual GovCloud account, call the TagResource operation in the GovCloud region after the new GovCloud account exists. For each tag in the list, you must specify both a tag key and a value. You can set the value to an empty string, but you can't set it to null. For more information about tagging, see Tagging Organizations resources in the Organizations User Guide. If any one of the tags is invalid or if you exceed the maximum allowed number of tags for an account, then the entire request fails and the account is not created."]}
+          "A list of tags that you want to attach to the newly created account. These tags are attached to the commercial account associated with the GovCloud account, and not to the GovCloud account itself. To add tags to the actual GovCloud account, call the TagResource operation in the GovCloud region after the new GovCloud account exists. For each tag in the list, you must specify both a tag key and a value. You can set the value to an empty string, but you can't set it to null. For more information about tagging, see Tagging Organizations resources in the Organizations User Guide. If any one of the tags is not valid or if you exceed the maximum allowed number of tags for an account, then the entire request fails and the account is not created."]}
     let context_ = "CreateGovCloudAccountRequest"
     let make ?roleName =
       fun ?iamUserAccessToBilling ->
@@ -2848,19 +3173,19 @@ module CreateGovCloudAccountRequest =
         Email.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Email") in
       make ?tags ?iamUserAccessToBilling ?roleName ~accountName ~email ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let iamUserAccessToBilling =
-        field_map json "IamUserAccessToBilling"
+        field_map json__ "IamUserAccessToBilling"
           IAMUserAccessToBilling.of_json in
-      let roleName = field_map json "RoleName" RoleName.of_json in
+      let roleName = field_map json__ "RoleName" RoleName.of_json in
       let accountName =
-        field_map_exn json "AccountName" CreateAccountName.of_json in
-      let email = field_map_exn json "Email" Email.of_json in
+        field_map_exn json__ "AccountName" CreateAccountName.of_json in
+      let email = field_map_exn json__ "Email" Email.of_json in
       make ?tags ?iamUserAccessToBilling ?roleName ~accountName ~email ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This action is available if all of the following are true: You're authorized to create accounts in the Amazon Web Services GovCloud (US) Region. For more information on the Amazon Web Services GovCloud (US) Region, see the Amazon Web Services GovCloud User Guide. You already have an account in the Amazon Web Services GovCloud (US) Region that is paired with a management account of an organization in the commercial Region. You call this action from the management account of your organization in the commercial Region. You have the organizations:CreateGovCloudAccount permission. Organizations automatically creates the required service-linked role named AWSServiceRoleForOrganizations. For more information, see Organizations and Service-Linked Roles in the Organizations User Guide. Amazon Web Services automatically enables CloudTrail for Amazon Web Services GovCloud (US) accounts, but you should also do the following: Verify that CloudTrail is enabled to store logs. Create an Amazon S3 bucket for CloudTrail log storage. For more information, see Verifying CloudTrail Is Enabled in the Amazon Web Services GovCloud User Guide. If the request includes tags, then the requester must have the organizations:TagResource permission. The tags are attached to the commercial account associated with the GovCloud account, rather than the GovCloud account itself. To add tags to the GovCloud account, call the TagResource operation in the GovCloud Region after the new GovCloud account exists. You call this action from the management account of your organization in the commercial Region to create a standalone Amazon Web Services account in the Amazon Web Services GovCloud (US) Region. After the account is created, the management account of an organization in the Amazon Web Services GovCloud (US) Region can invite it to that organization. For more information on inviting standalone accounts in the Amazon Web Services GovCloud (US) to join an organization, see Organizations in the Amazon Web Services GovCloud User Guide. Calling CreateGovCloudAccount is an asynchronous request that Amazon Web Services performs in the background. Because CreateGovCloudAccount operates asynchronously, it can return a successful completion message even though account initialization might still be in progress. You might need to wait a few minutes before you can successfully access the account. To check the status of the request, do one of the following: Use the OperationId response element from this operation to provide as a parameter to the DescribeCreateAccountStatus operation. Check the CloudTrail log for the CreateAccountResult event. For information on using CloudTrail with Organizations, see Monitoring the Activity in Your Organization in the Organizations User Guide. When you call the CreateGovCloudAccount action, you create two accounts: a standalone account in the Amazon Web Services GovCloud (US) Region and an associated account in the commercial Region for billing and support purposes. The account in the commercial Region is automatically a member of the organization whose credentials made the request. Both accounts are associated with the same email address. A role is created in the new account in the commercial Region that allows the management account in the organization in the commercial Region to assume it. An Amazon Web Services GovCloud (US) account is then created and associated with the commercial account that you just created. A role is also created in the new Amazon Web Services GovCloud (US) account that can be assumed by the Amazon Web Services GovCloud (US) account that is associated with the management account of the commercial organization. For more information and to view a diagram that explains how account access works, see Organizations in the Amazon Web Services GovCloud User Guide. For more information about creating accounts, see Creating an Amazon Web Services account in Your Organization in the Organizations User Guide. When you create an account in an organization using the Organizations console, API, or CLI commands, the information required for the account to operate as a standalone account is not automatically collected. This includes a payment method and signing the end user license agreement (EULA). If you must remove an account from your organization later, you can do so only after you provide the missing information. Follow the steps at To leave an organization as a member account in the Organizations User Guide. If you get an exception that indicates that you exceeded your account limits for the organization, contact Amazon Web Services Support. If you get an exception that indicates that the operation failed because your organization is still initializing, wait one hour and then try again. If the error persists, contact Amazon Web Services Support. Using CreateGovCloudAccount to create multiple temporary accounts isn't recommended. You can only close an account from the Amazon Web Services Billing and Cost Management console, and you must be signed in as the root user. For information on the requirements and process for closing an account, see Closing an Amazon Web Services account in the Organizations User Guide. When you create a member account with this operation, you can choose whether to create the account with the IAM User and Role Access to Billing Information switch enabled. If you enable it, IAM users and roles that have appropriate permissions can view billing information for the account. If you disable it, only the account root user can access billing information. For information about how to disable this switch for an account, see Granting Access to Your Billing Information and Tools."]
+       "This action is available if all of the following are true: You're authorized to create accounts in the Amazon Web Services GovCloud (US) Region. For more information on the Amazon Web Services GovCloud (US) Region, see the Amazon Web Services GovCloud User Guide. You already have an account in the Amazon Web Services GovCloud (US) Region that is paired with a management account of an organization in the commercial Region. You call this action from the management account of your organization in the commercial Region. You have the organizations:CreateGovCloudAccount permission. Organizations automatically creates the required service-linked role named AWSServiceRoleForOrganizations. For more information, see Organizations and service-linked roles in the Organizations User Guide. Amazon Web Services automatically enables CloudTrail for Amazon Web Services GovCloud (US) accounts, but you should also do the following: Verify that CloudTrail is enabled to store logs. Create an Amazon S3 bucket for CloudTrail log storage. For more information, see Verifying CloudTrail Is Enabled in the Amazon Web Services GovCloud User Guide. If the request includes tags, then the requester must have the organizations:TagResource permission. The tags are attached to the commercial account associated with the GovCloud account, rather than the GovCloud account itself. To add tags to the GovCloud account, call the TagResource operation in the GovCloud Region after the new GovCloud account exists. You call this action from the management account of your organization in the commercial Region to create a standalone Amazon Web Services account in the Amazon Web Services GovCloud (US) Region. After the account is created, the management account of an organization in the Amazon Web Services GovCloud (US) Region can invite it to that organization. For more information on inviting standalone accounts in the Amazon Web Services GovCloud (US) to join an organization, see Organizations in the Amazon Web Services GovCloud User Guide. Calling CreateGovCloudAccount is an asynchronous request that Amazon Web Services performs in the background. Because CreateGovCloudAccount operates asynchronously, it can return a successful completion message even though account initialization might still be in progress. You might need to wait a few minutes before you can successfully access the account. To check the status of the request, do one of the following: Use the OperationId response element from this operation to provide as a parameter to the DescribeCreateAccountStatus operation. Check the CloudTrail log for the CreateAccountResult event. For information on using CloudTrail with Organizations, see Logging and monitoring in Organizations in the Organizations User Guide. When you call the CreateGovCloudAccount action, you create two accounts: a standalone account in the Amazon Web Services GovCloud (US) Region and an associated account in the commercial Region for billing and support purposes. The account in the commercial Region is automatically a member of the organization whose credentials made the request. Both accounts are associated with the same email address. A role is created in the new account in the commercial Region that allows the management account in the organization in the commercial Region to assume it. An Amazon Web Services GovCloud (US) account is then created and associated with the commercial account that you just created. A role is also created in the new Amazon Web Services GovCloud (US) account that can be assumed by the Amazon Web Services GovCloud (US) account that is associated with the management account of the commercial organization. For more information and to view a diagram that explains how account access works, see Organizations in the Amazon Web Services GovCloud User Guide. For more information about creating accounts, see Creating a member account in your organization in the Organizations User Guide. When you create an account in an organization using the Organizations console, API, or CLI commands, the information required for the account to operate as a standalone account is not automatically collected. This includes a payment method and signing the end user license agreement (EULA). If you must remove an account from your organization later, you can do so only after you provide the missing information. For more information, see Considerations before removing an account from an organization in the Organizations User Guide. If you get an exception that indicates that you exceeded your account limits for the organization, contact Amazon Web Services Support. If you get an exception that indicates that the operation failed because your organization is still initializing, wait one hour and then try again. If the error persists, contact Amazon Web Services Support. Using CreateGovCloudAccount to create multiple temporary accounts isn't recommended. You can only close an account from the Amazon Web Services Billing and Cost Management console, and you must be signed in as the root user. For information on the requirements and process for closing an account, see Closing a member account in your organization in the Organizations User Guide. When you create a member account with this operation, you can choose whether to create the account with the IAM User and Role Access to Billing Information switch enabled. If you enable it, IAM users and roles that have appropriate permissions can view billing information for the account. If you disable it, only the account root user can access billing information. For information about how to disable this switch for an account, see Granting access to your billing information and tools."]
 module CreateGovCloudAccountResponse =
   struct
     type nonrec t = {
@@ -2987,13 +3312,13 @@ module CreateGovCloudAccountResponse =
           (Xml.child xml_arg0 "CreateAccountStatus") in
       make ?createAccountStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let createAccountStatus =
-        field_map json "CreateAccountStatus" CreateAccountStatus.of_json in
+        field_map json__ "CreateAccountStatus" CreateAccountStatus.of_json in
       make ?createAccountStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This action is available if all of the following are true: You're authorized to create accounts in the Amazon Web Services GovCloud (US) Region. For more information on the Amazon Web Services GovCloud (US) Region, see the Amazon Web Services GovCloud User Guide. You already have an account in the Amazon Web Services GovCloud (US) Region that is paired with a management account of an organization in the commercial Region. You call this action from the management account of your organization in the commercial Region. You have the organizations:CreateGovCloudAccount permission. Organizations automatically creates the required service-linked role named AWSServiceRoleForOrganizations. For more information, see Organizations and Service-Linked Roles in the Organizations User Guide. Amazon Web Services automatically enables CloudTrail for Amazon Web Services GovCloud (US) accounts, but you should also do the following: Verify that CloudTrail is enabled to store logs. Create an Amazon S3 bucket for CloudTrail log storage. For more information, see Verifying CloudTrail Is Enabled in the Amazon Web Services GovCloud User Guide. If the request includes tags, then the requester must have the organizations:TagResource permission. The tags are attached to the commercial account associated with the GovCloud account, rather than the GovCloud account itself. To add tags to the GovCloud account, call the TagResource operation in the GovCloud Region after the new GovCloud account exists. You call this action from the management account of your organization in the commercial Region to create a standalone Amazon Web Services account in the Amazon Web Services GovCloud (US) Region. After the account is created, the management account of an organization in the Amazon Web Services GovCloud (US) Region can invite it to that organization. For more information on inviting standalone accounts in the Amazon Web Services GovCloud (US) to join an organization, see Organizations in the Amazon Web Services GovCloud User Guide. Calling CreateGovCloudAccount is an asynchronous request that Amazon Web Services performs in the background. Because CreateGovCloudAccount operates asynchronously, it can return a successful completion message even though account initialization might still be in progress. You might need to wait a few minutes before you can successfully access the account. To check the status of the request, do one of the following: Use the OperationId response element from this operation to provide as a parameter to the DescribeCreateAccountStatus operation. Check the CloudTrail log for the CreateAccountResult event. For information on using CloudTrail with Organizations, see Monitoring the Activity in Your Organization in the Organizations User Guide. When you call the CreateGovCloudAccount action, you create two accounts: a standalone account in the Amazon Web Services GovCloud (US) Region and an associated account in the commercial Region for billing and support purposes. The account in the commercial Region is automatically a member of the organization whose credentials made the request. Both accounts are associated with the same email address. A role is created in the new account in the commercial Region that allows the management account in the organization in the commercial Region to assume it. An Amazon Web Services GovCloud (US) account is then created and associated with the commercial account that you just created. A role is also created in the new Amazon Web Services GovCloud (US) account that can be assumed by the Amazon Web Services GovCloud (US) account that is associated with the management account of the commercial organization. For more information and to view a diagram that explains how account access works, see Organizations in the Amazon Web Services GovCloud User Guide. For more information about creating accounts, see Creating an Amazon Web Services account in Your Organization in the Organizations User Guide. When you create an account in an organization using the Organizations console, API, or CLI commands, the information required for the account to operate as a standalone account is not automatically collected. This includes a payment method and signing the end user license agreement (EULA). If you must remove an account from your organization later, you can do so only after you provide the missing information. Follow the steps at To leave an organization as a member account in the Organizations User Guide. If you get an exception that indicates that you exceeded your account limits for the organization, contact Amazon Web Services Support. If you get an exception that indicates that the operation failed because your organization is still initializing, wait one hour and then try again. If the error persists, contact Amazon Web Services Support. Using CreateGovCloudAccount to create multiple temporary accounts isn't recommended. You can only close an account from the Amazon Web Services Billing and Cost Management console, and you must be signed in as the root user. For information on the requirements and process for closing an account, see Closing an Amazon Web Services account in the Organizations User Guide. When you create a member account with this operation, you can choose whether to create the account with the IAM User and Role Access to Billing Information switch enabled. If you enable it, IAM users and roles that have appropriate permissions can view billing information for the account. If you disable it, only the account root user can access billing information. For information about how to disable this switch for an account, see Granting Access to Your Billing Information and Tools."]
+       "This action is available if all of the following are true: You're authorized to create accounts in the Amazon Web Services GovCloud (US) Region. For more information on the Amazon Web Services GovCloud (US) Region, see the Amazon Web Services GovCloud User Guide. You already have an account in the Amazon Web Services GovCloud (US) Region that is paired with a management account of an organization in the commercial Region. You call this action from the management account of your organization in the commercial Region. You have the organizations:CreateGovCloudAccount permission. Organizations automatically creates the required service-linked role named AWSServiceRoleForOrganizations. For more information, see Organizations and service-linked roles in the Organizations User Guide. Amazon Web Services automatically enables CloudTrail for Amazon Web Services GovCloud (US) accounts, but you should also do the following: Verify that CloudTrail is enabled to store logs. Create an Amazon S3 bucket for CloudTrail log storage. For more information, see Verifying CloudTrail Is Enabled in the Amazon Web Services GovCloud User Guide. If the request includes tags, then the requester must have the organizations:TagResource permission. The tags are attached to the commercial account associated with the GovCloud account, rather than the GovCloud account itself. To add tags to the GovCloud account, call the TagResource operation in the GovCloud Region after the new GovCloud account exists. You call this action from the management account of your organization in the commercial Region to create a standalone Amazon Web Services account in the Amazon Web Services GovCloud (US) Region. After the account is created, the management account of an organization in the Amazon Web Services GovCloud (US) Region can invite it to that organization. For more information on inviting standalone accounts in the Amazon Web Services GovCloud (US) to join an organization, see Organizations in the Amazon Web Services GovCloud User Guide. Calling CreateGovCloudAccount is an asynchronous request that Amazon Web Services performs in the background. Because CreateGovCloudAccount operates asynchronously, it can return a successful completion message even though account initialization might still be in progress. You might need to wait a few minutes before you can successfully access the account. To check the status of the request, do one of the following: Use the OperationId response element from this operation to provide as a parameter to the DescribeCreateAccountStatus operation. Check the CloudTrail log for the CreateAccountResult event. For information on using CloudTrail with Organizations, see Logging and monitoring in Organizations in the Organizations User Guide. When you call the CreateGovCloudAccount action, you create two accounts: a standalone account in the Amazon Web Services GovCloud (US) Region and an associated account in the commercial Region for billing and support purposes. The account in the commercial Region is automatically a member of the organization whose credentials made the request. Both accounts are associated with the same email address. A role is created in the new account in the commercial Region that allows the management account in the organization in the commercial Region to assume it. An Amazon Web Services GovCloud (US) account is then created and associated with the commercial account that you just created. A role is also created in the new Amazon Web Services GovCloud (US) account that can be assumed by the Amazon Web Services GovCloud (US) account that is associated with the management account of the commercial organization. For more information and to view a diagram that explains how account access works, see Organizations in the Amazon Web Services GovCloud User Guide. For more information about creating accounts, see Creating a member account in your organization in the Organizations User Guide. When you create an account in an organization using the Organizations console, API, or CLI commands, the information required for the account to operate as a standalone account is not automatically collected. This includes a payment method and signing the end user license agreement (EULA). If you must remove an account from your organization later, you can do so only after you provide the missing information. For more information, see Considerations before removing an account from an organization in the Organizations User Guide. If you get an exception that indicates that you exceeded your account limits for the organization, contact Amazon Web Services Support. If you get an exception that indicates that the operation failed because your organization is still initializing, wait one hour and then try again. If the error persists, contact Amazon Web Services Support. Using CreateGovCloudAccount to create multiple temporary accounts isn't recommended. You can only close an account from the Amazon Web Services Billing and Cost Management console, and you must be signed in as the root user. For information on the requirements and process for closing an account, see Closing a member account in your organization in the Organizations User Guide. When you create a member account with this operation, you can choose whether to create the account with the IAM User and Role Access to Billing Information switch enabled. If you enable it, IAM users and roles that have appropriate permissions can view billing information for the account. If you disable it, only the account root user can access billing information. For information about how to disable this switch for an account, see Granting access to your billing information and tools."]
 module OrganizationFeatureSet =
   struct
     type nonrec t =
@@ -3040,13 +3365,13 @@ module CreateOrganizationRequest =
           (Xml.child xml_arg0 "FeatureSet") in
       make ?featureSet ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let featureSet =
-        field_map json "FeatureSet" OrganizationFeatureSet.of_json in
+        field_map json__ "FeatureSet" OrganizationFeatureSet.of_json in
       make ?featureSet ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Web Services organization. The account whose user is calling the CreateOrganization operation automatically becomes the management account of the new organization. This operation must be called using credentials from the account that is to become the new organization's management account. The principal must also have the relevant IAM permissions. By default (or if you set the FeatureSet parameter to ALL), the new organization is created with all features enabled and service control policies automatically enabled in the root. If you instead choose to create the organization supporting only the consolidated billing features by setting the FeatureSet parameter to CONSOLIDATED_BILLING\", no policy types are enabled by default, and you can't use organization policies"]
+       "Creates an Amazon Web Services organization. The account whose user is calling the CreateOrganization operation automatically becomes the management account of the new organization. This operation must be called using credentials from the account that is to become the new organization's management account. The principal must also have the relevant IAM permissions. By default (or if you set the FeatureSet parameter to ALL), the new organization is created with all features enabled and service control policies automatically enabled in the root. If you instead choose to create the organization supporting only the consolidated billing features by setting the FeatureSet parameter to CONSOLIDATED_BILLING, no policy types are enabled by default and you can't use organization policies."]
 module PolicyTypeStatus =
   struct
     type nonrec t =
@@ -3079,24 +3404,53 @@ module PolicyType =
   struct
     type nonrec t =
       | SERVICE_CONTROL_POLICY 
+      | RESOURCE_CONTROL_POLICY 
       | TAG_POLICY 
       | BACKUP_POLICY 
       | AISERVICES_OPT_OUT_POLICY 
+      | CHATBOT_POLICY 
+      | DECLARATIVE_POLICY_EC2 
+      | SECURITYHUB_POLICY 
+      | INSPECTOR_POLICY 
+      | UPGRADE_ROLLOUT_POLICY 
+      | BEDROCK_POLICY 
+      | S3_POLICY 
+      | NETWORK_SECURITY_DIRECTOR_POLICY 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | SERVICE_CONTROL_POLICY -> "SERVICE_CONTROL_POLICY"
+      | RESOURCE_CONTROL_POLICY -> "RESOURCE_CONTROL_POLICY"
       | TAG_POLICY -> "TAG_POLICY"
       | BACKUP_POLICY -> "BACKUP_POLICY"
       | AISERVICES_OPT_OUT_POLICY -> "AISERVICES_OPT_OUT_POLICY"
+      | CHATBOT_POLICY -> "CHATBOT_POLICY"
+      | DECLARATIVE_POLICY_EC2 -> "DECLARATIVE_POLICY_EC2"
+      | SECURITYHUB_POLICY -> "SECURITYHUB_POLICY"
+      | INSPECTOR_POLICY -> "INSPECTOR_POLICY"
+      | UPGRADE_ROLLOUT_POLICY -> "UPGRADE_ROLLOUT_POLICY"
+      | BEDROCK_POLICY -> "BEDROCK_POLICY"
+      | S3_POLICY -> "S3_POLICY"
+      | NETWORK_SECURITY_DIRECTOR_POLICY ->
+          "NETWORK_SECURITY_DIRECTOR_POLICY"
       | Non_static_id s -> s
     let of_string =
       function
       | "SERVICE_CONTROL_POLICY" -> SERVICE_CONTROL_POLICY
+      | "RESOURCE_CONTROL_POLICY" -> RESOURCE_CONTROL_POLICY
       | "TAG_POLICY" -> TAG_POLICY
       | "BACKUP_POLICY" -> BACKUP_POLICY
       | "AISERVICES_OPT_OUT_POLICY" -> AISERVICES_OPT_OUT_POLICY
+      | "CHATBOT_POLICY" -> CHATBOT_POLICY
+      | "DECLARATIVE_POLICY_EC2" -> DECLARATIVE_POLICY_EC2
+      | "SECURITYHUB_POLICY" -> SECURITYHUB_POLICY
+      | "INSPECTOR_POLICY" -> INSPECTOR_POLICY
+      | "UPGRADE_ROLLOUT_POLICY" -> UPGRADE_ROLLOUT_POLICY
+      | "BEDROCK_POLICY" -> BEDROCK_POLICY
+      | "S3_POLICY" -> S3_POLICY
+      | "NETWORK_SECURITY_DIRECTOR_POLICY" ->
+          NETWORK_SECURITY_DIRECTOR_POLICY
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3127,9 +3481,9 @@ module PolicyTypeSummary =
         (Option.map ~f:PolicyType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?status ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" PolicyTypeStatus.of_json in
-      let type_ = field_map json "Type" PolicyType.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" PolicyTypeStatus.of_json in
+      let type_ = field_map json__ "Type" PolicyType.of_json in
       make ?status ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3138,6 +3492,9 @@ module PolicyTypes =
   struct
     type nonrec t = PolicyTypeSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyTypeSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3203,7 +3560,7 @@ module Organization =
           "The Amazon Resource Name (ARN) of an organization. For more information about ARNs in Organizations, see ARN Formats Supported by Organizations in the Amazon Web Services Service Authorization Reference."];
       featureSet: OrganizationFeatureSet.t option
         [@ocaml.doc
-          "Specifies the functionality that currently is available to the organization. If set to \"ALL\", then all features are enabled and policies can be applied to accounts in the organization. If set to \"CONSOLIDATED_BILLING\", then only consolidated billing functionality is available. For more information, see Enabling All Features in Your Organization in the Organizations User Guide."];
+          "Specifies the functionality that currently is available to the organization. If set to \"ALL\", then all features are enabled and policies can be applied to accounts in the organization. If set to \"CONSOLIDATED_BILLING\", then only consolidated billing functionality is available. For more information, see Enabling all features in your organization in the Organizations User Guide."];
       masterAccountArn: AccountArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the account that is designated as the management account for the organization. For more information about ARNs in Organizations, see ARN Formats Supported by Organizations in the Amazon Web Services Service Authorization Reference."];
@@ -3271,19 +3628,19 @@ module Organization =
       make ?availablePolicyTypes ?masterAccountEmail ?masterAccountId
         ?masterAccountArn ?featureSet ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let availablePolicyTypes =
-        field_map json "AvailablePolicyTypes" PolicyTypes.of_json in
+        field_map json__ "AvailablePolicyTypes" PolicyTypes.of_json in
       let masterAccountEmail =
-        field_map json "MasterAccountEmail" Email.of_json in
+        field_map json__ "MasterAccountEmail" Email.of_json in
       let masterAccountId =
-        field_map json "MasterAccountId" AccountId.of_json in
+        field_map json__ "MasterAccountId" AccountId.of_json in
       let masterAccountArn =
-        field_map json "MasterAccountArn" AccountArn.of_json in
+        field_map json__ "MasterAccountArn" AccountArn.of_json in
       let featureSet =
-        field_map json "FeatureSet" OrganizationFeatureSet.of_json in
-      let arn = field_map json "Arn" OrganizationArn.of_json in
-      let id = field_map json "Id" OrganizationId.of_json in
+        field_map json__ "FeatureSet" OrganizationFeatureSet.of_json in
+      let arn = field_map json__ "Arn" OrganizationArn.of_json in
+      let id = field_map json__ "Id" OrganizationId.of_json in
       make ?availablePolicyTypes ?masterAccountEmail ?masterAccountId
         ?masterAccountArn ?featureSet ?arn ?id ()
     let to_json v = composed_to_json to_value v
@@ -3406,12 +3763,12 @@ module CreateOrganizationResponse =
           (Xml.child xml_arg0 "Organization") in
       make ?organization ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let organization = field_map json "Organization" Organization.of_json in
+    let of_json json__ =
+      let organization = field_map json__ "Organization" Organization.of_json in
       make ?organization ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Web Services organization. The account whose user is calling the CreateOrganization operation automatically becomes the management account of the new organization. This operation must be called using credentials from the account that is to become the new organization's management account. The principal must also have the relevant IAM permissions. By default (or if you set the FeatureSet parameter to ALL), the new organization is created with all features enabled and service control policies automatically enabled in the root. If you instead choose to create the organization supporting only the consolidated billing features by setting the FeatureSet parameter to CONSOLIDATED_BILLING\", no policy types are enabled by default, and you can't use organization policies"]
+       "Creates an Amazon Web Services organization. The account whose user is calling the CreateOrganization operation automatically becomes the management account of the new organization. This operation must be called using credentials from the account that is to become the new organization's management account. The principal must also have the relevant IAM permissions. By default (or if you set the FeatureSet parameter to ALL), the new organization is created with all features enabled and service control policies automatically enabled in the root. If you instead choose to create the organization supporting only the consolidated billing features by setting the FeatureSet parameter to CONSOLIDATED_BILLING, no policy types are enabled by default and you can't use organization policies."]
 module ParentId =
   struct
     type nonrec t = string
@@ -3458,12 +3815,12 @@ module CreateOrganizationalUnitRequest =
       {
       parentId: ParentId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the parent root or OU that you want to create the new OU in. The regex pattern for a parent ID string requires one of the following: Root - A string that begins with \"r-\" followed by from 4 to 32 lowercase letters or digits. Organizational unit (OU) - A string that begins with \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."];
+          "ID for the parent root or OU that you want to create the new OU in. The regex pattern for a parent ID string requires one of the following: Root - A string that begins with \"r-\" followed by from 4 to 32 lowercase letters or digits. Organizational unit (OU) - A string that begins with \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."];
       name: OrganizationalUnitName.t
         [@ocaml.doc "The friendly name to assign to the new OU."];
       tags: Tags.t option
         [@ocaml.doc
-          "A list of tags that you want to attach to the newly created OU. For each tag in the list, you must specify both a tag key and a value. You can set the value to an empty string, but you can't set it to null. For more information about tagging, see Tagging Organizations resources in the Organizations User Guide. If any one of the tags is invalid or if you exceed the allowed number of tags for an OU, then the entire request fails and the OU is not created."]}
+          "A list of tags that you want to attach to the newly created OU. For each tag in the list, you must specify both a tag key and a value. You can set the value to an empty string, but you can't set it to null. For more information about tagging, see Tagging Organizations resources in the Organizations User Guide. If any one of the tags is not valid or if you exceed the allowed number of tags for an OU, then the entire request fails and the OU is not created."]}
     let context_ = "CreateOrganizationalUnitRequest"
     let make ?tags =
       fun ~parentId -> fun ~name -> fun () -> { tags; parentId; name }
@@ -3482,14 +3839,14 @@ module CreateOrganizationalUnitRequest =
         ParentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ParentId") in
       make ?tags ~name ~parentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let name = field_map_exn json "Name" OrganizationalUnitName.of_json in
-      let parentId = field_map_exn json "ParentId" ParentId.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let name = field_map_exn json__ "Name" OrganizationalUnitName.of_json in
+      let parentId = field_map_exn json__ "ParentId" ParentId.of_json in
       make ?tags ~name ~parentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an organizational unit (OU) within a root or parent OU. An OU is a container for accounts that enables you to organize your accounts to apply policies according to your business requirements. The number of levels deep that you can nest OUs is dependent upon the policy types enabled for that root. For service control policies, the limit is five. For more information about OUs, see Managing Organizational Units in the Organizations User Guide. If the request includes tags, then the requester must have the organizations:TagResource permission. This operation can be called only from the organization's management account."]
+       "Creates an organizational unit (OU) within a root or parent OU. An OU is a container for accounts that enables you to organize your accounts to apply policies according to your business requirements. The number of levels deep that you can nest OUs is dependent upon the policy types enabled for that root. For service control policies, the limit is five. For more information about OUs, see Managing organizational units (OUs) in the Organizations User Guide. If the request includes tags, then the requester must have the organizations:TagResource permission. You can only call this operation from the management account."]
 module ParentNotFoundException =
   struct
     type nonrec t = {
@@ -3505,8 +3862,8 @@ module ParentNotFoundException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3554,21 +3911,26 @@ module OrganizationalUnit =
       {
       id: OrganizationalUnitId.t option
         [@ocaml.doc
-          "The unique identifier (ID) associated with this OU. The regex pattern for an organizational unit ID string requires \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that contains the OU). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."];
+          "The unique identifier (ID) associated with this OU. The ID is unique to the organization only. The regex pattern for an organizational unit ID string requires \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that contains the OU). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."];
       arn: OrganizationalUnitArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of this OU. For more information about ARNs in Organizations, see ARN Formats Supported by Organizations in the Amazon Web Services Service Authorization Reference."];
       name: OrganizationalUnitName.t option
         [@ocaml.doc
-          "The friendly name of this OU. The regex pattern that is used to validate this parameter is a string of any of the characters in the ASCII character range."]}
-    let make ?id = fun ?arn -> fun ?name -> fun () -> { id; arn; name }
+          "The friendly name of this OU. The regex pattern that is used to validate this parameter is a string of any of the characters in the ASCII character range."];
+      path: Path.t option
+        [@ocaml.doc "The path in the organization where this OU exists."]}
+    let make ?id =
+      fun ?arn -> fun ?name -> fun ?path -> fun () -> { id; arn; name; path }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:OrganizationalUnitId.to_value));
         ("Arn", (Option.map x.arn ~f:OrganizationalUnitArn.to_value));
-        ("Name", (Option.map x.name ~f:OrganizationalUnitName.to_value))]
+        ("Name", (Option.map x.name ~f:OrganizationalUnitName.to_value));
+        ("Path", (Option.map x.path ~f:Path.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let path = (Option.map ~f:Path.of_xml) (Xml.child xml_arg0 "Path") in
       let name =
         (Option.map ~f:OrganizationalUnitName.of_xml)
           (Xml.child xml_arg0 "Name") in
@@ -3577,13 +3939,14 @@ module OrganizationalUnit =
           (Xml.child xml_arg0 "Arn") in
       let id =
         (Option.map ~f:OrganizationalUnitId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?name ?arn ?id ()
+      make ?path ?name ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" OrganizationalUnitName.of_json in
-      let arn = field_map json "Arn" OrganizationalUnitArn.of_json in
-      let id = field_map json "Id" OrganizationalUnitId.of_json in
-      make ?name ?arn ?id ()
+    let of_json json__ =
+      let path = field_map json__ "Path" Path.of_json in
+      let name = field_map json__ "Name" OrganizationalUnitName.of_json in
+      let arn = field_map json__ "Arn" OrganizationalUnitArn.of_json in
+      let id = field_map json__ "Id" OrganizationalUnitId.of_json in
+      make ?path ?name ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about an organizational unit (OU). An OU is a container of Amazon Web Services accounts within a root of an organization. Policies that are attached to an OU apply to all accounts contained in that OU and in any child OUs."]
@@ -3602,8 +3965,8 @@ module DuplicateOrganizationalUnitException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An OU with the same name already exists."]
@@ -3735,13 +4098,13 @@ module CreateOrganizationalUnitResponse =
           (Xml.child xml_arg0 "OrganizationalUnit") in
       make ?organizationalUnit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationalUnit =
-        field_map json "OrganizationalUnit" OrganizationalUnit.of_json in
+        field_map json__ "OrganizationalUnit" OrganizationalUnit.of_json in
       make ?organizationalUnit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an organizational unit (OU) within a root or parent OU. An OU is a container for accounts that enables you to organize your accounts to apply policies according to your business requirements. The number of levels deep that you can nest OUs is dependent upon the policy types enabled for that root. For service control policies, the limit is five. For more information about OUs, see Managing Organizational Units in the Organizations User Guide. If the request includes tags, then the requester must have the organizations:TagResource permission. This operation can be called only from the organization's management account."]
+       "Creates an organizational unit (OU) within a root or parent OU. An OU is a container for accounts that enables you to organize your accounts to apply policies according to your business requirements. The number of levels deep that you can nest OUs is dependent upon the policy types enabled for that root. For service control policies, the limit is five. For more information about OUs, see Managing organizational units (OUs) in the Organizations User Guide. If the request includes tags, then the requester must have the organizations:TagResource permission. You can only call this operation from the management account."]
 module PolicyName =
   struct
     type nonrec t = string
@@ -3788,9 +4151,7 @@ module PolicyContent =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:1000000) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+             (fun () -> check_pattern i ~pattern:"[\\s\\S]*"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -3806,7 +4167,7 @@ module CreatePolicyRequest =
       {
       content: PolicyContent.t
         [@ocaml.doc
-          "The policy text content to add to the new policy. The text that you supply must adhere to the rules of the policy type you specify in the Type parameter."];
+          "The policy text content to add to the new policy. The text that you supply must adhere to the rules of the policy type you specify in the Type parameter. The maximum size of a policy document depends on the policy's type. For more information, see Maximum and minimum values in the Organizations User Guide."];
       description: PolicyDescription.t
         [@ocaml.doc "An optional description to assign to the policy."];
       name: PolicyName.t
@@ -3814,10 +4175,10 @@ module CreatePolicyRequest =
           "The friendly name to assign to the policy. The regex pattern that is used to validate this parameter is a string of any of the characters in the ASCII character range."];
       type_: PolicyType.t
         [@ocaml.doc
-          "The type of policy to create. You can specify one of the following values: AISERVICES_OPT_OUT_POLICY BACKUP_POLICY SERVICE_CONTROL_POLICY TAG_POLICY"];
+          "The type of policy to create. You can specify one of the following values: SERVICE_CONTROL_POLICY RESOURCE_CONTROL_POLICY DECLARATIVE_POLICY_EC2 BACKUP_POLICY TAG_POLICY CHATBOT_POLICY AISERVICES_OPT_OUT_POLICY SECURITYHUB_POLICY UPGRADE_ROLLOUT_POLICY INSPECTOR_POLICY BEDROCK_POLICY S3_POLICY NETWORK_SECURITY_DIRECTOR_POLICY"];
       tags: Tags.t option
         [@ocaml.doc
-          "A list of tags that you want to attach to the newly created policy. For each tag in the list, you must specify both a tag key and a value. You can set the value to an empty string, but you can't set it to null. For more information about tagging, see Tagging Organizations resources in the Organizations User Guide. If any one of the tags is invalid or if you exceed the allowed number of tags for a policy, then the entire request fails and the policy is not created."]}
+          "A list of tags that you want to attach to the newly created policy. For each tag in the list, you must specify both a tag key and a value. You can set the value to an empty string, but you can't set it to null. For more information about tagging, see Tagging Organizations resources in the Organizations User Guide. If any one of the tags is not valid or if you exceed the allowed number of tags for a policy, then the entire request fails and the policy is not created."]}
     let context_ = "CreatePolicyRequest"
     let make ?tags =
       fun ~content ->
@@ -3847,17 +4208,17 @@ module CreatePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Content") in
       make ?tags ~type_ ~name ~description ~content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let type_ = field_map_exn json "Type" PolicyType.of_json in
-      let name = field_map_exn json "Name" PolicyName.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let type_ = field_map_exn json__ "Type" PolicyType.of_json in
+      let name = field_map_exn json__ "Name" PolicyName.of_json in
       let description =
-        field_map_exn json "Description" PolicyDescription.of_json in
-      let content = field_map_exn json "Content" PolicyContent.of_json in
+        field_map_exn json__ "Description" PolicyDescription.of_json in
+      let content = field_map_exn json__ "Content" PolicyContent.of_json in
       make ?tags ~type_ ~name ~description ~content ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a policy of a specified type that you can attach to a root, an organizational unit (OU), or an individual Amazon Web Services account. For more information about policies and their use, see Managing Organization Policies. If the request includes tags, then the requester must have the organizations:TagResource permission. This operation can be called only from the organization's management account."]
+       "Creates a policy of a specified type that you can attach to a root, an organizational unit (OU), or an individual Amazon Web Services account. For more information about policies and their use, see Managing Organizations policies. If the request includes tags, then the requester must have the organizations:TagResource permission. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module PolicyTypeNotAvailableForOrganizationException =
   struct
     type nonrec t = {
@@ -3873,12 +4234,12 @@ module PolicyTypeNotAvailableForOrganizationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You can't use the specified policy type with the feature set currently enabled for this organization. For example, you can enable SCPs only after you enable all features in the organization. For more information, see Managing Organizations Policiesin the Organizations User Guide."]
+       "You can't use the specified policy type with the feature set currently enabled for this organization. For example, you can enable SCPs only after you enable all features in the organization. For more information, see Managing Organizations policiesin the Organizations User Guide."]
 module PolicyArn =
   struct
     type nonrec t = string
@@ -3949,14 +4310,14 @@ module PolicySummary =
       let id = (Option.map ~f:PolicyId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?awsManaged ?type_ ?description ?name ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let awsManaged = field_map json "AwsManaged" AwsManagedPolicy.of_json in
-      let type_ = field_map json "Type" PolicyType.of_json in
+    let of_json json__ =
+      let awsManaged = field_map json__ "AwsManaged" AwsManagedPolicy.of_json in
+      let type_ = field_map json__ "Type" PolicyType.of_json in
       let description =
-        field_map json "Description" PolicyDescription.of_json in
-      let name = field_map json "Name" PolicyName.of_json in
-      let arn = field_map json "Arn" PolicyArn.of_json in
-      let id = field_map json "Id" PolicyId.of_json in
+        field_map json__ "Description" PolicyDescription.of_json in
+      let name = field_map json__ "Name" PolicyName.of_json in
+      let arn = field_map json__ "Arn" PolicyArn.of_json in
+      let id = field_map json__ "Id" PolicyId.of_json in
       make ?awsManaged ?type_ ?description ?name ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3986,10 +4347,10 @@ module Policy =
           (Xml.child xml_arg0 "PolicySummary") in
       make ?content ?policySummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let content = field_map json "Content" PolicyContent.of_json in
+    let of_json json__ =
+      let content = field_map json__ "Content" PolicyContent.of_json in
       let policySummary =
-        field_map json "PolicySummary" PolicySummary.of_json in
+        field_map json__ "PolicySummary" PolicySummary.of_json in
       make ?content ?policySummary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4009,12 +4370,12 @@ module MalformedPolicyDocumentException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The provided policy document doesn't meet the requirements of the specified policy type. For example, the syntax might be incorrect. For details about service control policy syntax, see Service Control Policy Syntax in the Organizations User Guide."]
+       "The provided policy document doesn't meet the requirements of the specified policy type. For example, the syntax might be incorrect. For details about service control policy syntax, see SCP syntax in the Organizations User Guide."]
 module DuplicatePolicyException =
   struct
     type nonrec t = {
@@ -4030,8 +4391,8 @@ module DuplicatePolicyException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A policy with the same name already exists."]
@@ -4186,18 +4547,19 @@ module CreatePolicyResponse =
         (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" Policy.of_json in make ?policy ()
+    let of_json json__ =
+      let policy = field_map json__ "Policy" Policy.of_json in
+      make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a policy of a specified type that you can attach to a root, an organizational unit (OU), or an individual Amazon Web Services account. For more information about policies and their use, see Managing Organization Policies. If the request includes tags, then the requester must have the organizations:TagResource permission. This operation can be called only from the organization's management account."]
+       "Creates a policy of a specified type that you can attach to a root, an organizational unit (OU), or an individual Amazon Web Services account. For more information about policies and their use, see Managing Organizations policies. If the request includes tags, then the requester must have the organizations:TagResource permission. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module DeclineHandshakeRequest =
   struct
     type nonrec t =
       {
       handshakeId: HandshakeId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the handshake that you want to decline. You can get the ID from the ListHandshakesForAccount operation. The regex pattern for handshake ID string requires \"h-\" followed by from 8 to 32 lowercase letters or digits."]}
+          "ID for the handshake that you want to decline. You can get the ID from the ListHandshakesForAccount operation. The regex pattern for handshake ID string requires \"h-\" followed by from 8 to 32 lowercase letters or digits."]}
     let context_ = "DeclineHandshakeRequest"
     let make ~handshakeId = fun () -> { handshakeId }
     let to_value x =
@@ -4210,19 +4572,20 @@ module DeclineHandshakeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HandshakeId") in
       make ~handshakeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let handshakeId = field_map_exn json "HandshakeId" HandshakeId.of_json in
+    let of_json json__ =
+      let handshakeId =
+        field_map_exn json__ "HandshakeId" HandshakeId.of_json in
       make ~handshakeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Declines a handshake request. This sets the handshake state to DECLINED and effectively deactivates the request. This operation can be called only from the account that received the handshake. The originator of the handshake can use CancelHandshake instead. The originator can't reactivate a declined request, but can reinitiate the process with a new handshake request. After you decline a handshake, it continues to appear in the results of relevant APIs for only 30 days. After that, it's deleted."]
+       "Declines a Handshake. Only the account that receives a handshake can call this operation. The sender of the handshake can use CancelHandshake to cancel if the handshake hasn't yet been responded to. You can view canceled handshakes in API responses for 30 days before they are deleted."]
 module DeclineHandshakeResponse =
   struct
     type nonrec t =
       {
       handshake: Handshake.t option
         [@ocaml.doc
-          "A structure that contains details about the declined handshake. The state is updated to show the value DECLINED."]}
+          "A Handshake object. Contains details for the declined handshake."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConcurrentModificationException of ConcurrentModificationException.t 
@@ -4331,12 +4694,12 @@ module DeclineHandshakeResponse =
         (Option.map ~f:Handshake.of_xml) (Xml.child xml_arg0 "Handshake") in
       make ?handshake ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let handshake = field_map json "Handshake" Handshake.of_json in
+    let of_json json__ =
+      let handshake = field_map json__ "Handshake" Handshake.of_json in
       make ?handshake ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Declines a handshake request. This sets the handshake state to DECLINED and effectively deactivates the request. This operation can be called only from the account that received the handshake. The originator of the handshake can use CancelHandshake instead. The originator can't reactivate a declined request, but can reinitiate the process with a new handshake request. After you decline a handshake, it continues to appear in the results of relevant APIs for only 30 days. After that, it's deleted."]
+       "Declines a Handshake. Only the account that receives a handshake can call this operation. The sender of the handshake can use CancelHandshake to cancel if the handshake hasn't yet been responded to. You can view canceled handshakes in API responses for 30 days before they are deleted."]
 module DelegatedAdministrator =
   struct
     type nonrec t =
@@ -4356,6 +4719,9 @@ module DelegatedAdministrator =
       status: AccountStatus.t option
         [@ocaml.doc
           "The status of the delegated administrator's account in the organization."];
+      state: AccountState.t option
+        [@ocaml.doc
+          "Each state represents a specific phase in the account lifecycle. Use this information to manage account access, automate workflows, or trigger actions based on account state changes. For more information about account states and their implications, see Monitor the state of your Amazon Web Services accounts in the Organizations User Guide."];
       joinedMethod: AccountJoinedMethod.t option
         [@ocaml.doc
           "The method by which the delegated administrator's account joined the organization."];
@@ -4370,20 +4736,22 @@ module DelegatedAdministrator =
         fun ?email ->
           fun ?name ->
             fun ?status ->
-              fun ?joinedMethod ->
-                fun ?joinedTimestamp ->
-                  fun ?delegationEnabledDate ->
-                    fun () ->
-                      {
-                        id;
-                        arn;
-                        email;
-                        name;
-                        status;
-                        joinedMethod;
-                        joinedTimestamp;
-                        delegationEnabledDate
-                      }
+              fun ?state ->
+                fun ?joinedMethod ->
+                  fun ?joinedTimestamp ->
+                    fun ?delegationEnabledDate ->
+                      fun () ->
+                        {
+                          id;
+                          arn;
+                          email;
+                          name;
+                          status;
+                          state;
+                          joinedMethod;
+                          joinedTimestamp;
+                          delegationEnabledDate
+                        }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:AccountId.to_value));
@@ -4391,6 +4759,7 @@ module DelegatedAdministrator =
         ("Email", (Option.map x.email ~f:Email.to_value));
         ("Name", (Option.map x.name ~f:AccountName.to_value));
         ("Status", (Option.map x.status ~f:AccountStatus.to_value));
+        ("State", (Option.map x.state ~f:AccountState.to_value));
         ("JoinedMethod",
           (Option.map x.joinedMethod ~f:AccountJoinedMethod.to_value));
         ("JoinedTimestamp",
@@ -4408,6 +4777,8 @@ module DelegatedAdministrator =
       let joinedMethod =
         (Option.map ~f:AccountJoinedMethod.of_xml)
           (Xml.child xml_arg0 "JoinedMethod") in
+      let state =
+        (Option.map ~f:AccountState.of_xml) (Xml.child xml_arg0 "State") in
       let status =
         (Option.map ~f:AccountStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let name =
@@ -4415,29 +4786,33 @@ module DelegatedAdministrator =
       let email = (Option.map ~f:Email.of_xml) (Xml.child xml_arg0 "Email") in
       let arn = (Option.map ~f:AccountArn.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?delegationEnabledDate ?joinedTimestamp ?joinedMethod ?status
-        ?name ?email ?arn ?id ()
+      make ?delegationEnabledDate ?joinedTimestamp ?joinedMethod ?state
+        ?status ?name ?email ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let delegationEnabledDate =
-        field_map json "DelegationEnabledDate" Timestamp.of_json in
+        field_map json__ "DelegationEnabledDate" Timestamp.of_json in
       let joinedTimestamp =
-        field_map json "JoinedTimestamp" Timestamp.of_json in
+        field_map json__ "JoinedTimestamp" Timestamp.of_json in
       let joinedMethod =
-        field_map json "JoinedMethod" AccountJoinedMethod.of_json in
-      let status = field_map json "Status" AccountStatus.of_json in
-      let name = field_map json "Name" AccountName.of_json in
-      let email = field_map json "Email" Email.of_json in
-      let arn = field_map json "Arn" AccountArn.of_json in
-      let id = field_map json "Id" AccountId.of_json in
-      make ?delegationEnabledDate ?joinedTimestamp ?joinedMethod ?status
-        ?name ?email ?arn ?id ()
+        field_map json__ "JoinedMethod" AccountJoinedMethod.of_json in
+      let state = field_map json__ "State" AccountState.of_json in
+      let status = field_map json__ "Status" AccountStatus.of_json in
+      let name = field_map json__ "Name" AccountName.of_json in
+      let email = field_map json__ "Email" Email.of_json in
+      let arn = field_map json__ "Arn" AccountArn.of_json in
+      let id = field_map json__ "Id" AccountId.of_json in
+      make ?delegationEnabledDate ?joinedTimestamp ?joinedMethod ?state
+        ?status ?name ?email ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the delegated administrator."]
 module DelegatedAdministrators =
   struct
     type nonrec t = DelegatedAdministrator.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DelegatedAdministrator.to_value)) |>
         (fun x -> `List x)
@@ -4509,11 +4884,11 @@ module DelegatedService =
           (Xml.child xml_arg0 "ServicePrincipal") in
       make ?delegationEnabledDate ?servicePrincipal ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let delegationEnabledDate =
-        field_map json "DelegationEnabledDate" Timestamp.of_json in
+        field_map json__ "DelegationEnabledDate" Timestamp.of_json in
       let servicePrincipal =
-        field_map json "ServicePrincipal" ServicePrincipal.of_json in
+        field_map json__ "ServicePrincipal" ServicePrincipal.of_json in
       make ?delegationEnabledDate ?servicePrincipal ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4522,6 +4897,9 @@ module DelegatedServices =
   struct
     type nonrec t = DelegatedService.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DelegatedService.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4549,7 +4927,7 @@ module DeleteOrganizationalUnitRequest =
       {
       organizationalUnitId: OrganizationalUnitId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the organizational unit that you want to delete. You can get the ID from the ListOrganizationalUnitsForParent operation. The regex pattern for an organizational unit ID string requires \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that contains the OU). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."]}
+          "ID for the organizational unit that you want to delete. You can get the ID from the ListOrganizationalUnitsForParent operation. The regex pattern for an organizational unit ID string requires \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that contains the OU). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."]}
     let context_ = "DeleteOrganizationalUnitRequest"
     let make ~organizationalUnitId = fun () -> { organizationalUnitId }
     let to_value x =
@@ -4563,21 +4941,21 @@ module DeleteOrganizationalUnitRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationalUnitId") in
       make ~organizationalUnitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationalUnitId =
-        field_map_exn json "OrganizationalUnitId"
+        field_map_exn json__ "OrganizationalUnitId"
           OrganizationalUnitId.of_json in
       make ~organizationalUnitId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an organizational unit (OU) from a root or another OU. You must first remove all accounts and child OUs from the OU that you want to delete. This operation can be called only from the organization's management account."]
+       "Deletes an organizational unit (OU) from a root or another OU. You must first remove all accounts and child OUs from the OU that you want to delete. You can only call this operation from the management account."]
 module DeletePolicyRequest =
   struct
     type nonrec t =
       {
       policyId: PolicyId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the policy that you want to delete. You can get the ID from the ListPolicies or ListPoliciesForTarget operations. The regex pattern for a policy ID string requires \"p-\" followed by from 8 to 128 lowercase or uppercase letters, digits, or the underscore character (_)."]}
+          "ID for the policy that you want to delete. You can get the ID from the ListPolicies or ListPoliciesForTarget operations. The regex pattern for a policy ID string requires \"p-\" followed by from 8 to 128 lowercase or uppercase letters, digits, or the underscore character (_)."]}
     let context_ = "DeletePolicyRequest"
     let make ~policyId = fun () -> { policyId }
     let to_value x =
@@ -4589,12 +4967,12 @@ module DeletePolicyRequest =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ~policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
+    let of_json json__ =
+      let policyId = field_map_exn json__ "PolicyId" PolicyId.of_json in
       make ~policyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified policy from your organization. Before you perform this operation, you must first detach the policy from all organizational units (OUs), roots, and accounts. This operation can be called only from the organization's management account."]
+       "Deletes the specified policy from your organization. Before you perform this operation, you must first detach the policy from all organizational units (OUs), roots, and accounts. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module DeregisterDelegatedAdministratorRequest =
   struct
     type nonrec t =
@@ -4623,14 +5001,14 @@ module DeregisterDelegatedAdministratorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~servicePrincipal ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let servicePrincipal =
-        field_map_exn json "ServicePrincipal" ServicePrincipal.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
+        field_map_exn json__ "ServicePrincipal" ServicePrincipal.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
       make ~servicePrincipal ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specified member Amazon Web Services account as a delegated administrator for the specified Amazon Web Services service. Deregistering a delegated administrator can have unintended impacts on the functionality of the enabled Amazon Web Services service. See the documentation for the enabled service before you deregister a delegated administrator so that you understand any potential impacts. You can run this action only for Amazon Web Services services that support this feature. For a current list of services that support it, see the column Supports Delegated Administrator in the table at Amazon Web Services Services that you can use with Organizations in the Organizations User Guide. This operation can be called only from the organization's management account."]
+       "Removes the specified member Amazon Web Services account as a delegated administrator for the specified Amazon Web Services service. Deregistering a delegated administrator can have unintended impacts on the functionality of the enabled Amazon Web Services service. See the documentation for the enabled service before you deregister a delegated administrator so that you understand any potential impacts. You can run this action only for Amazon Web Services services that support this feature. For a current list of services that support it, see the column Supports Delegated Administrator in the table at Amazon Web Services Services that you can use with Organizations in the Organizations User Guide. You can only call this operation from the management account."]
 module DescribeAccountRequest =
   struct
     type nonrec t =
@@ -4650,19 +5028,19 @@ module DescribeAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
+    let of_json json__ =
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
       make ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves Organizations-related information about the specified account. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Retrieves Organizations-related information about the specified account. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module DescribeAccountResponse =
   struct
     type nonrec t =
       {
       account: Account.t option
         [@ocaml.doc
-          "A structure that contains information about the requested account."]}
+          "A structure that contains information about the requested account. The Status parameter in the API response will be retired on September 9, 2026. Although both the account State and account Status parameters are currently available in the Organizations APIs (DescribeAccount, ListAccounts, ListAccountsForParent), we recommend that you update your scripts or other code to use the State parameter instead of Status before September 9, 2026."]}
     type nonrec error =
       [
         `AWSOrganizationsNotInUseException of
@@ -4748,12 +5126,12 @@ module DescribeAccountResponse =
         (Option.map ~f:Account.of_xml) (Xml.child xml_arg0 "Account") in
       make ?account ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let account = field_map json "Account" Account.of_json in
+    let of_json json__ =
+      let account = field_map json__ "Account" Account.of_json in
       make ?account ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves Organizations-related information about the specified account. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Retrieves Organizations-related information about the specified account. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module DescribeCreateAccountStatusRequest =
   struct
     type nonrec t =
@@ -4774,14 +5152,14 @@ module DescribeCreateAccountStatusRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CreateAccountRequestId") in
       make ~createAccountRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let createAccountRequestId =
-        field_map_exn json "CreateAccountRequestId"
+        field_map_exn json__ "CreateAccountRequestId"
           CreateAccountRequestId.of_json in
       make ~createAccountRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the current status of an asynchronous request to create an account. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Retrieves the current status of an asynchronous request to create an account. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module DescribeCreateAccountStatusResponse =
   struct
     type nonrec t =
@@ -4890,19 +5268,27 @@ module DescribeCreateAccountStatusResponse =
           (Xml.child xml_arg0 "CreateAccountStatus") in
       make ?createAccountStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let createAccountStatus =
-        field_map json "CreateAccountStatus" CreateAccountStatus.of_json in
+        field_map json__ "CreateAccountStatus" CreateAccountStatus.of_json in
       make ?createAccountStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the current status of an asynchronous request to create an account. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Retrieves the current status of an asynchronous request to create an account. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module EffectivePolicyType =
   struct
     type nonrec t =
       | TAG_POLICY 
       | BACKUP_POLICY 
       | AISERVICES_OPT_OUT_POLICY 
+      | CHATBOT_POLICY 
+      | DECLARATIVE_POLICY_EC2 
+      | SECURITYHUB_POLICY 
+      | INSPECTOR_POLICY 
+      | UPGRADE_ROLLOUT_POLICY 
+      | BEDROCK_POLICY 
+      | S3_POLICY 
+      | NETWORK_SECURITY_DIRECTOR_POLICY 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -4910,12 +5296,30 @@ module EffectivePolicyType =
       | TAG_POLICY -> "TAG_POLICY"
       | BACKUP_POLICY -> "BACKUP_POLICY"
       | AISERVICES_OPT_OUT_POLICY -> "AISERVICES_OPT_OUT_POLICY"
+      | CHATBOT_POLICY -> "CHATBOT_POLICY"
+      | DECLARATIVE_POLICY_EC2 -> "DECLARATIVE_POLICY_EC2"
+      | SECURITYHUB_POLICY -> "SECURITYHUB_POLICY"
+      | INSPECTOR_POLICY -> "INSPECTOR_POLICY"
+      | UPGRADE_ROLLOUT_POLICY -> "UPGRADE_ROLLOUT_POLICY"
+      | BEDROCK_POLICY -> "BEDROCK_POLICY"
+      | S3_POLICY -> "S3_POLICY"
+      | NETWORK_SECURITY_DIRECTOR_POLICY ->
+          "NETWORK_SECURITY_DIRECTOR_POLICY"
       | Non_static_id s -> s
     let of_string =
       function
       | "TAG_POLICY" -> TAG_POLICY
       | "BACKUP_POLICY" -> BACKUP_POLICY
       | "AISERVICES_OPT_OUT_POLICY" -> AISERVICES_OPT_OUT_POLICY
+      | "CHATBOT_POLICY" -> CHATBOT_POLICY
+      | "DECLARATIVE_POLICY_EC2" -> DECLARATIVE_POLICY_EC2
+      | "SECURITYHUB_POLICY" -> SECURITYHUB_POLICY
+      | "INSPECTOR_POLICY" -> INSPECTOR_POLICY
+      | "UPGRADE_ROLLOUT_POLICY" -> UPGRADE_ROLLOUT_POLICY
+      | "BEDROCK_POLICY" -> BEDROCK_POLICY
+      | "S3_POLICY" -> S3_POLICY
+      | "NETWORK_SECURITY_DIRECTOR_POLICY" ->
+          NETWORK_SECURITY_DIRECTOR_POLICY
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -4932,7 +5336,7 @@ module DescribeEffectivePolicyRequest =
       {
       policyType: EffectivePolicyType.t
         [@ocaml.doc
-          "The type of policy that you want information about. You can specify one of the following values: AISERVICES_OPT_OUT_POLICY BACKUP_POLICY TAG_POLICY"];
+          "The type of policy that you want information about. You can specify one of the following values: DECLARATIVE_POLICY_EC2 BACKUP_POLICY TAG_POLICY CHATBOT_POLICY AISERVICES_OPT_OUT_POLICY SECURITYHUB_POLICY UPGRADE_ROLLOUT_POLICY INSPECTOR_POLICY BEDROCK_POLICY S3_POLICY NETWORK_SECURITY_DIRECTOR_POLICY"];
       targetId: PolicyTargetId.t option
         [@ocaml.doc
           "When you're signed in as the management account, specify the ID of the account that you want details about. Specifying an organization root or organizational unit (OU) as the target is not supported."]}
@@ -4952,14 +5356,14 @@ module DescribeEffectivePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyType") in
       make ?targetId ~policyType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetId = field_map json "TargetId" PolicyTargetId.of_json in
+    let of_json json__ =
+      let targetId = field_map json__ "TargetId" PolicyTargetId.of_json in
       let policyType =
-        field_map_exn json "PolicyType" EffectivePolicyType.of_json in
+        field_map_exn json__ "PolicyType" EffectivePolicyType.of_json in
       make ?targetId ~policyType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the contents of the effective policy for specified policy type and account. The effective policy is the aggregation of any policies of the specified type that the account inherits, plus any policy of that type that is directly attached to the account. This operation applies only to policy types other than service control policies (SCPs). For more information about policy inheritance, see How Policy Inheritance Works in the Organizations User Guide. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Returns the contents of the effective policy for specified policy type and account. The effective policy is the aggregation of any policies of the specified type that the account inherits, plus any policy of that type that is directly attached to the account. This operation applies only to management policies. It does not apply to authorization policies: service control policies (SCPs) and resource control policies (RCPs). For more information about policy inheritance, see Understanding management policy inheritance in the Organizations User Guide. You can call this operation from any account in a organization."]
 module TargetNotFoundException =
   struct
     type nonrec t = {
@@ -4975,8 +5379,8 @@ module TargetNotFoundException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4996,8 +5400,8 @@ module EffectivePolicyNotFoundException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5044,14 +5448,14 @@ module EffectivePolicy =
           (Xml.child xml_arg0 "PolicyContent") in
       make ?policyType ?targetId ?lastUpdatedTimestamp ?policyContent ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyType =
-        field_map json "PolicyType" EffectivePolicyType.of_json in
-      let targetId = field_map json "TargetId" PolicyTargetId.of_json in
+        field_map json__ "PolicyType" EffectivePolicyType.of_json in
+      let targetId = field_map json__ "TargetId" PolicyTargetId.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Timestamp.of_json in
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
       let policyContent =
-        field_map json "PolicyContent" PolicyContent.of_json in
+        field_map json__ "PolicyContent" PolicyContent.of_json in
       make ?policyType ?targetId ?lastUpdatedTimestamp ?policyContent ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5183,20 +5587,20 @@ module DescribeEffectivePolicyResponse =
           (Xml.child xml_arg0 "EffectivePolicy") in
       make ?effectivePolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let effectivePolicy =
-        field_map json "EffectivePolicy" EffectivePolicy.of_json in
+        field_map json__ "EffectivePolicy" EffectivePolicy.of_json in
       make ?effectivePolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the contents of the effective policy for specified policy type and account. The effective policy is the aggregation of any policies of the specified type that the account inherits, plus any policy of that type that is directly attached to the account. This operation applies only to policy types other than service control policies (SCPs). For more information about policy inheritance, see How Policy Inheritance Works in the Organizations User Guide. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Returns the contents of the effective policy for specified policy type and account. The effective policy is the aggregation of any policies of the specified type that the account inherits, plus any policy of that type that is directly attached to the account. This operation applies only to management policies. It does not apply to authorization policies: service control policies (SCPs) and resource control policies (RCPs). For more information about policy inheritance, see Understanding management policy inheritance in the Organizations User Guide. You can call this operation from any account in a organization."]
 module DescribeHandshakeRequest =
   struct
     type nonrec t =
       {
       handshakeId: HandshakeId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the handshake that you want information about. You can get the ID from the original call to InviteAccountToOrganization, or from a call to ListHandshakesForAccount or ListHandshakesForOrganization. The regex pattern for handshake ID string requires \"h-\" followed by from 8 to 32 lowercase letters or digits."]}
+          "ID for the handshake that you want information about. The regex pattern for handshake ID string requires \"h-\" followed by from 8 to 32 lowercase letters or digits."]}
     let context_ = "DescribeHandshakeRequest"
     let make ~handshakeId = fun () -> { handshakeId }
     let to_value x =
@@ -5209,19 +5613,20 @@ module DescribeHandshakeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HandshakeId") in
       make ~handshakeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let handshakeId = field_map_exn json "HandshakeId" HandshakeId.of_json in
+    let of_json json__ =
+      let handshakeId =
+        field_map_exn json__ "HandshakeId" HandshakeId.of_json in
       make ~handshakeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information about a previously requested handshake. The handshake ID comes from the response to the original InviteAccountToOrganization operation that generated the handshake. You can access handshakes that are ACCEPTED, DECLINED, or CANCELED for only 30 days after they change to that state. They're then deleted and no longer accessible. This operation can be called from any account in the organization."]
+       "Returns details for a handshake. A handshake is the secure exchange of information between two Amazon Web Services accounts: a sender and a recipient. You can view ACCEPTED, DECLINED, or CANCELED handshakes in API Responses for 30 days before they are deleted. You can call this operation from any account in a organization."]
 module DescribeHandshakeResponse =
   struct
     type nonrec t =
       {
       handshake: Handshake.t option
         [@ocaml.doc
-          "A structure that contains information about the specified handshake."]}
+          "A Handshake object. Contains details for the handshake."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConcurrentModificationException of ConcurrentModificationException.t 
@@ -5306,19 +5711,19 @@ module DescribeHandshakeResponse =
         (Option.map ~f:Handshake.of_xml) (Xml.child xml_arg0 "Handshake") in
       make ?handshake ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let handshake = field_map json "Handshake" Handshake.of_json in
+    let of_json json__ =
+      let handshake = field_map json__ "Handshake" Handshake.of_json in
       make ?handshake ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information about a previously requested handshake. The handshake ID comes from the response to the original InviteAccountToOrganization operation that generated the handshake. You can access handshakes that are ACCEPTED, DECLINED, or CANCELED for only 30 days after they change to that state. They're then deleted and no longer accessible. This operation can be called from any account in the organization."]
+       "Returns details for a handshake. A handshake is the secure exchange of information between two Amazon Web Services accounts: a sender and a recipient. You can view ACCEPTED, DECLINED, or CANCELED handshakes in API Responses for 30 days before they are deleted. You can call this operation from any account in a organization."]
 module DescribeOrganizationResponse =
   struct
     type nonrec t =
       {
       organization: Organization.t option
         [@ocaml.doc
-          "A structure that contains information about the organization. The AvailablePolicyTypes part of the response is deprecated, and you shouldn't use it in your apps. It doesn't include any policy type supported by Organizations other than SCPs. To determine which policy types are enabled in your organization, use the ListRoots operation."]}
+          "A structure that contains information about the organization. The AvailablePolicyTypes part of the response is deprecated, and you shouldn't use it in your apps. It doesn't include any policy type supported by Organizations other than SCPs. In the China (Ningxia) Region, no policy type is included. To determine which policy types are enabled in your organization, use the ListRoots operation."]}
     type nonrec error =
       [
         `AWSOrganizationsNotInUseException of
@@ -5399,19 +5804,19 @@ module DescribeOrganizationResponse =
           (Xml.child xml_arg0 "Organization") in
       make ?organization ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let organization = field_map json "Organization" Organization.of_json in
+    let of_json json__ =
+      let organization = field_map json__ "Organization" Organization.of_json in
       make ?organization ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information about the organization that the user's account belongs to. This operation can be called from any account in the organization. Even if a policy type is shown as available in the organization, you can disable it separately at the root level with DisablePolicyType. Use ListRoots to see the status of policy types for a specified root."]
+       "Retrieves information about the organization that the user's account belongs to. You can call this operation from any account in a organization. Even if a policy type is shown as available in the organization, you can disable it separately at the root level with DisablePolicyType. Use ListRoots to see the status of policy types for a specified root."]
 module DescribeOrganizationalUnitRequest =
   struct
     type nonrec t =
       {
       organizationalUnitId: OrganizationalUnitId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the organizational unit that you want details about. You can get the ID from the ListOrganizationalUnitsForParent operation. The regex pattern for an organizational unit ID string requires \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that contains the OU). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."]}
+          "ID for the organizational unit that you want details about. You can get the ID from the ListOrganizationalUnitsForParent operation. The regex pattern for an organizational unit ID string requires \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that contains the OU). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."]}
     let context_ = "DescribeOrganizationalUnitRequest"
     let make ~organizationalUnitId = fun () -> { organizationalUnitId }
     let to_value x =
@@ -5425,14 +5830,14 @@ module DescribeOrganizationalUnitRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationalUnitId") in
       make ~organizationalUnitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationalUnitId =
-        field_map_exn json "OrganizationalUnitId"
+        field_map_exn json__ "OrganizationalUnitId"
           OrganizationalUnitId.of_json in
       make ~organizationalUnitId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information about an organizational unit (OU). This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Retrieves information about an organizational unit (OU). You can only call this operation from the management account or a member account that is a delegated administrator."]
 module OrganizationalUnitNotFoundException =
   struct
     type nonrec t = {
@@ -5448,8 +5853,8 @@ module OrganizationalUnitNotFoundException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5551,20 +5956,20 @@ module DescribeOrganizationalUnitResponse =
           (Xml.child xml_arg0 "OrganizationalUnit") in
       make ?organizationalUnit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationalUnit =
-        field_map json "OrganizationalUnit" OrganizationalUnit.of_json in
+        field_map json__ "OrganizationalUnit" OrganizationalUnit.of_json in
       make ?organizationalUnit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information about an organizational unit (OU). This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Retrieves information about an organizational unit (OU). You can only call this operation from the management account or a member account that is a delegated administrator."]
 module DescribePolicyRequest =
   struct
     type nonrec t =
       {
       policyId: PolicyId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the policy that you want details about. You can get the ID from the ListPolicies or ListPoliciesForTarget operations. The regex pattern for a policy ID string requires \"p-\" followed by from 8 to 128 lowercase or uppercase letters, digits, or the underscore character (_)."]}
+          "ID for the policy that you want details about. You can get the ID from the ListPolicies or ListPoliciesForTarget operations. The regex pattern for a policy ID string requires \"p-\" followed by from 8 to 128 lowercase or uppercase letters, digits, or the underscore character (_)."]}
     let context_ = "DescribePolicyRequest"
     let make ~policyId = fun () -> { policyId }
     let to_value x =
@@ -5576,12 +5981,12 @@ module DescribePolicyRequest =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ~policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
+    let of_json json__ =
+      let policyId = field_map_exn json__ "PolicyId" PolicyId.of_json in
       make ~policyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information about a policy. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Retrieves information about a policy. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module PolicyNotFoundException =
   struct
     type nonrec t = {
@@ -5597,8 +6002,8 @@ module PolicyNotFoundException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5706,11 +6111,695 @@ module DescribePolicyResponse =
         (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" Policy.of_json in make ?policy ()
+    let of_json json__ =
+      let policy = field_map json__ "Policy" Policy.of_json in
+      make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information about a policy. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Retrieves information about a policy. You can only call this operation from the management account or a member account that is a delegated administrator."]
+module ResourcePolicyNotFoundException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "We can't find a resource policy request with the parameter that you specified."]
+module ResourcePolicyId =
+  struct
+    type nonrec t = string
+    let context_ = "ResourcePolicyId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:131) >>=
+             (fun () -> check_pattern i ~pattern:"^rp-[0-9a-zA-Z_]{4,128}$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourcePolicyId" j
+    let to_json = simple_to_json to_value
+  end
+module ResourcePolicyArn =
+  struct
+    type nonrec t = string
+    let context_ = "ResourcePolicyArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^arn:[a-z0-9][a-z0-9-.]{0,62}:organizations::\\d{12}:resourcepolicy\\/o-[a-z0-9]{10,32}\\/rp-[0-9a-zA-Z_]{4,128}");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourcePolicyArn" j
+    let to_json = simple_to_json to_value
+  end
+module ResourcePolicySummary =
+  struct
+    type nonrec t =
+      {
+      id: ResourcePolicyId.t option
+        [@ocaml.doc "The unique identifier (ID) of the resource policy."];
+      arn: ResourcePolicyArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource policy."]}
+    let make ?id = fun ?arn -> fun () -> { id; arn }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:ResourcePolicyId.to_value));
+        ("Arn", (Option.map x.arn ~f:ResourcePolicyArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn =
+        (Option.map ~f:ResourcePolicyArn.of_xml) (Xml.child xml_arg0 "Arn") in
+      let id =
+        (Option.map ~f:ResourcePolicyId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn = field_map json__ "Arn" ResourcePolicyArn.of_json in
+      let id = field_map json__ "Id" ResourcePolicyId.of_json in
+      make ?arn ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that contains resource policy ID and Amazon Resource Name (ARN)."]
+module ResourcePolicyContent =
+  struct
+    type nonrec t = string
+    let context_ = "ResourcePolicyContent"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:40000) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourcePolicyContent" j
+    let to_json = simple_to_json to_value
+  end
+module ResourcePolicy =
+  struct
+    type nonrec t =
+      {
+      resourcePolicySummary: ResourcePolicySummary.t option
+        [@ocaml.doc
+          "A structure that contains resource policy ID and Amazon Resource Name (ARN)."];
+      content: ResourcePolicyContent.t option
+        [@ocaml.doc "The policy text of the resource policy."]}
+    let make ?resourcePolicySummary =
+      fun ?content -> fun () -> { resourcePolicySummary; content }
+    let to_value x =
+      structure_to_value
+        [("ResourcePolicySummary",
+           (Option.map x.resourcePolicySummary
+              ~f:ResourcePolicySummary.to_value));
+        ("Content", (Option.map x.content ~f:ResourcePolicyContent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let content =
+        (Option.map ~f:ResourcePolicyContent.of_xml)
+          (Xml.child xml_arg0 "Content") in
+      let resourcePolicySummary =
+        (Option.map ~f:ResourcePolicySummary.of_xml)
+          (Xml.child xml_arg0 "ResourcePolicySummary") in
+      make ?content ?resourcePolicySummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let content = field_map json__ "Content" ResourcePolicyContent.of_json in
+      let resourcePolicySummary =
+        field_map json__ "ResourcePolicySummary"
+          ResourcePolicySummary.of_json in
+      make ?content ?resourcePolicySummary ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that contains details about a resource policy."]
+module DescribeResourcePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      resourcePolicy: ResourcePolicy.t option
+        [@ocaml.doc
+          "A structure that contains details about the resource policy."]}
+    type nonrec error =
+      [
+        `AWSOrganizationsNotInUseException of
+          AWSOrganizationsNotInUseException.t 
+      | `AccessDeniedException of AccessDeniedException.t 
+      | `ConstraintViolationException of ConstraintViolationException.t 
+      | `ResourcePolicyNotFoundException of ResourcePolicyNotFoundException.t 
+      | `ServiceException of ServiceException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnsupportedAPIEndpointException of UnsupportedAPIEndpointException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourcePolicy = fun () -> { resourcePolicy }
+    let error_of_json name json =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_json json)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_json json)
+      | "ResourcePolicyNotFoundException" ->
+          `ResourcePolicyNotFoundException
+            (ResourcePolicyNotFoundException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_xml xml)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_xml xml)
+      | "ResourcePolicyNotFoundException" ->
+          `ResourcePolicyNotFoundException
+            (ResourcePolicyNotFoundException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AWSOrganizationsNotInUseException e ->
+          `Assoc
+            [("error", (`String "AWSOrganizationsNotInUseException"));
+            ("details", (AWSOrganizationsNotInUseException.to_json e))]
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConstraintViolationException e ->
+          `Assoc
+            [("error", (`String "ConstraintViolationException"));
+            ("details", (ConstraintViolationException.to_json e))]
+      | `ResourcePolicyNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourcePolicyNotFoundException"));
+            ("details", (ResourcePolicyNotFoundException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnsupportedAPIEndpointException e ->
+          `Assoc
+            [("error", (`String "UnsupportedAPIEndpointException"));
+            ("details", (UnsupportedAPIEndpointException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourcePolicy",
+           (Option.map x.resourcePolicy ~f:ResourcePolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourcePolicy =
+        (Option.map ~f:ResourcePolicy.of_xml)
+          (Xml.child xml_arg0 "ResourcePolicy") in
+      make ?resourcePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourcePolicy =
+        field_map json__ "ResourcePolicy" ResourcePolicy.of_json in
+      make ?resourcePolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about a resource policy. You can only call this operation from the management account or a member account that is a delegated administrator."]
+module ResponsibilityTransferId =
+  struct
+    type nonrec t = string
+    let context_ = "ResponsibilityTransferId"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^rt-[0-9a-z]{8,32}$"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResponsibilityTransferId" j
+    let to_json = simple_to_json to_value
+  end
+module DescribeResponsibilityTransferRequest =
+  struct
+    type nonrec t =
+      {
+      id: ResponsibilityTransferId.t [@ocaml.doc "ID for the transfer."]}
+    let context_ = "DescribeResponsibilityTransferRequest"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value
+        [("Id", (Some (ResponsibilityTransferId.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        ResponsibilityTransferId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" ResponsibilityTransferId.of_json in
+      make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns details for a transfer. A transfer is an arrangement between two management accounts where one account designates the other with specified responsibilities for their organization."]
+module ResponsibilityTransferNotFoundException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "We can't find a transfer that you specified."]
+module TransferParticipant =
+  struct
+    type nonrec t =
+      {
+      managementAccountId: AccountId.t option
+        [@ocaml.doc "ID for the management account."];
+      managementAccountEmail: Email.t option
+        [@ocaml.doc "Email address for the management account."]}
+    let make ?managementAccountId =
+      fun ?managementAccountEmail ->
+        fun () -> { managementAccountId; managementAccountEmail }
+    let to_value x =
+      structure_to_value
+        [("ManagementAccountId",
+           (Option.map x.managementAccountId ~f:AccountId.to_value));
+        ("ManagementAccountEmail",
+          (Option.map x.managementAccountEmail ~f:Email.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let managementAccountEmail =
+        (Option.map ~f:Email.of_xml)
+          (Xml.child xml_arg0 "ManagementAccountEmail") in
+      let managementAccountId =
+        (Option.map ~f:AccountId.of_xml)
+          (Xml.child xml_arg0 "ManagementAccountId") in
+      make ?managementAccountEmail ?managementAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let managementAccountEmail =
+        field_map json__ "ManagementAccountEmail" Email.of_json in
+      let managementAccountId =
+        field_map json__ "ManagementAccountId" AccountId.of_json in
+      make ?managementAccountEmail ?managementAccountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains details for a participant in a transfer. A transfer is the arrangement between two management accounts where one account designates the other with specified responsibilities for their organization."]
+module ResponsibilityTransferType =
+  struct
+    type nonrec t =
+      | BILLING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | BILLING -> "BILLING" | Non_static_id s -> s
+    let of_string = function | "BILLING" -> BILLING | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResponsibilityTransferType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ResponsibilityTransferType" j)
+    let to_json = simple_to_json to_value
+  end
+module ResponsibilityTransferStatus =
+  struct
+    type nonrec t =
+      | REQUESTED 
+      | DECLINED 
+      | CANCELED 
+      | EXPIRED 
+      | ACCEPTED 
+      | WITHDRAWN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | REQUESTED -> "REQUESTED"
+      | DECLINED -> "DECLINED"
+      | CANCELED -> "CANCELED"
+      | EXPIRED -> "EXPIRED"
+      | ACCEPTED -> "ACCEPTED"
+      | WITHDRAWN -> "WITHDRAWN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "REQUESTED" -> REQUESTED
+      | "DECLINED" -> DECLINED
+      | "CANCELED" -> CANCELED
+      | "EXPIRED" -> EXPIRED
+      | "ACCEPTED" -> ACCEPTED
+      | "WITHDRAWN" -> WITHDRAWN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResponsibilityTransferStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ResponsibilityTransferStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ResponsibilityTransferName =
+  struct
+    type nonrec t = string
+    let context_ = "ResponsibilityTransferName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"^[ -~]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResponsibilityTransferName" j
+    let to_json = simple_to_json to_value
+  end
+module ResponsibilityTransferArn =
+  struct
+    type nonrec t = string
+    let context_ = "ResponsibilityTransferArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^arn:[a-z0-9][a-z0-9-.]{0,62}:organizations::\\d{12}:transfer\\/o-[a-z0-9]{10,32}\\/(billing)\\/(inbound|outbound)\\/rt-[0-9a-z]{8,32}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResponsibilityTransferArn" j
+    let to_json = simple_to_json to_value
+  end
+module ResponsibilityTransfer =
+  struct
+    type nonrec t =
+      {
+      arn: ResponsibilityTransferArn.t option
+        [@ocaml.doc "Amazon Resource Name (ARN) for the transfer."];
+      name: ResponsibilityTransferName.t option
+        [@ocaml.doc "Name assigned to the transfer."];
+      id: ResponsibilityTransferId.t option
+        [@ocaml.doc "ID for the transfer."];
+      type_: ResponsibilityTransferType.t option
+        [@ocaml.doc
+          "The type of transfer. Currently, only BILLING is supported."];
+      status: ResponsibilityTransferStatus.t option
+        [@ocaml.doc "Status for the transfer."];
+      source: TransferParticipant.t option
+        [@ocaml.doc
+          "Account that allows another account external to its organization to manage the specified responsibilities for the organization."];
+      target: TransferParticipant.t option
+        [@ocaml.doc
+          "Account that manages the specified responsibilities for another organization."];
+      startTimestamp: Timestamp.t option
+        [@ocaml.doc "Timestamp when the transfer starts."];
+      endTimestamp: Timestamp.t option
+        [@ocaml.doc "Timestamp when the transfer ends."];
+      activeHandshakeId: HandshakeId.t option
+        [@ocaml.doc "ID for the handshake of the transfer."]}
+    let make ?arn =
+      fun ?name ->
+        fun ?id ->
+          fun ?type_ ->
+            fun ?status ->
+              fun ?source ->
+                fun ?target ->
+                  fun ?startTimestamp ->
+                    fun ?endTimestamp ->
+                      fun ?activeHandshakeId ->
+                        fun () ->
+                          {
+                            arn;
+                            name;
+                            id;
+                            type_;
+                            status;
+                            source;
+                            target;
+                            startTimestamp;
+                            endTimestamp;
+                            activeHandshakeId
+                          }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:ResponsibilityTransferArn.to_value));
+        ("Name", (Option.map x.name ~f:ResponsibilityTransferName.to_value));
+        ("Id", (Option.map x.id ~f:ResponsibilityTransferId.to_value));
+        ("Type", (Option.map x.type_ ~f:ResponsibilityTransferType.to_value));
+        ("Status",
+          (Option.map x.status ~f:ResponsibilityTransferStatus.to_value));
+        ("Source", (Option.map x.source ~f:TransferParticipant.to_value));
+        ("Target", (Option.map x.target ~f:TransferParticipant.to_value));
+        ("StartTimestamp",
+          (Option.map x.startTimestamp ~f:Timestamp.to_value));
+        ("EndTimestamp", (Option.map x.endTimestamp ~f:Timestamp.to_value));
+        ("ActiveHandshakeId",
+          (Option.map x.activeHandshakeId ~f:HandshakeId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let activeHandshakeId =
+        (Option.map ~f:HandshakeId.of_xml)
+          (Xml.child xml_arg0 "ActiveHandshakeId") in
+      let endTimestamp =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EndTimestamp") in
+      let startTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "StartTimestamp") in
+      let target =
+        (Option.map ~f:TransferParticipant.of_xml)
+          (Xml.child xml_arg0 "Target") in
+      let source =
+        (Option.map ~f:TransferParticipant.of_xml)
+          (Xml.child xml_arg0 "Source") in
+      let status =
+        (Option.map ~f:ResponsibilityTransferStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let type_ =
+        (Option.map ~f:ResponsibilityTransferType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let id =
+        (Option.map ~f:ResponsibilityTransferId.of_xml)
+          (Xml.child xml_arg0 "Id") in
+      let name =
+        (Option.map ~f:ResponsibilityTransferName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let arn =
+        (Option.map ~f:ResponsibilityTransferArn.of_xml)
+          (Xml.child xml_arg0 "Arn") in
+      make ?activeHandshakeId ?endTimestamp ?startTimestamp ?target ?source
+        ?status ?type_ ?id ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let activeHandshakeId =
+        field_map json__ "ActiveHandshakeId" HandshakeId.of_json in
+      let endTimestamp = field_map json__ "EndTimestamp" Timestamp.of_json in
+      let startTimestamp =
+        field_map json__ "StartTimestamp" Timestamp.of_json in
+      let target = field_map json__ "Target" TransferParticipant.of_json in
+      let source = field_map json__ "Source" TransferParticipant.of_json in
+      let status =
+        field_map json__ "Status" ResponsibilityTransferStatus.of_json in
+      let type_ = field_map json__ "Type" ResponsibilityTransferType.of_json in
+      let id = field_map json__ "Id" ResponsibilityTransferId.of_json in
+      let name = field_map json__ "Name" ResponsibilityTransferName.of_json in
+      let arn = field_map json__ "Arn" ResponsibilityTransferArn.of_json in
+      make ?activeHandshakeId ?endTimestamp ?startTimestamp ?target ?source
+        ?status ?type_ ?id ?name ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains details for a transfer. A transfer is the arrangement between two management accounts where one account designates the other with specified responsibilities for their organization."]
+module DescribeResponsibilityTransferResponse =
+  struct
+    type nonrec t =
+      {
+      responsibilityTransfer: ResponsibilityTransfer.t option
+        [@ocaml.doc
+          "A ResponsibilityTransfer object. Contains details for a transfer."]}
+    type nonrec error =
+      [
+        `AWSOrganizationsNotInUseException of
+          AWSOrganizationsNotInUseException.t 
+      | `AccessDeniedException of AccessDeniedException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResponsibilityTransferNotFoundException of
+          ResponsibilityTransferNotFoundException.t 
+      | `ServiceException of ServiceException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnsupportedAPIEndpointException of UnsupportedAPIEndpointException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?responsibilityTransfer = fun () -> { responsibilityTransfer }
+    let error_of_json name json =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_json json)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResponsibilityTransferNotFoundException" ->
+          `ResponsibilityTransferNotFoundException
+            (ResponsibilityTransferNotFoundException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_xml xml)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResponsibilityTransferNotFoundException" ->
+          `ResponsibilityTransferNotFoundException
+            (ResponsibilityTransferNotFoundException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AWSOrganizationsNotInUseException e ->
+          `Assoc
+            [("error", (`String "AWSOrganizationsNotInUseException"));
+            ("details", (AWSOrganizationsNotInUseException.to_json e))]
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResponsibilityTransferNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResponsibilityTransferNotFoundException"));
+            ("details", (ResponsibilityTransferNotFoundException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnsupportedAPIEndpointException e ->
+          `Assoc
+            [("error", (`String "UnsupportedAPIEndpointException"));
+            ("details", (UnsupportedAPIEndpointException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResponsibilityTransfer",
+           (Option.map x.responsibilityTransfer
+              ~f:ResponsibilityTransfer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let responsibilityTransfer =
+        (Option.map ~f:ResponsibilityTransfer.of_xml)
+          (Xml.child xml_arg0 "ResponsibilityTransfer") in
+      make ?responsibilityTransfer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let responsibilityTransfer =
+        field_map json__ "ResponsibilityTransfer"
+          ResponsibilityTransfer.of_json in
+      make ?responsibilityTransfer ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns details for a transfer. A transfer is an arrangement between two management accounts where one account designates the other with specified responsibilities for their organization."]
 module DestinationParentNotFoundException =
   struct
     type nonrec t = {
@@ -5726,8 +6815,8 @@ module DestinationParentNotFoundException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5738,10 +6827,10 @@ module DetachPolicyRequest =
       {
       policyId: PolicyId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the policy you want to detach. You can get the ID from the ListPolicies or ListPoliciesForTarget operations. The regex pattern for a policy ID string requires \"p-\" followed by from 8 to 128 lowercase or uppercase letters, digits, or the underscore character (_)."];
+          "ID for the policy you want to detach. You can get the ID from the ListPolicies or ListPoliciesForTarget operations. The regex pattern for a policy ID string requires \"p-\" followed by from 8 to 128 lowercase or uppercase letters, digits, or the underscore character (_)."];
       targetId: PolicyTargetId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the root, OU, or account that you want to detach the policy from. You can get the ID from the ListRoots, ListOrganizationalUnitsForParent, or ListAccounts operations. The regex pattern for a target ID string requires one of the following: Root - A string that begins with \"r-\" followed by from 4 to 32 lowercase letters or digits. Account - A string that consists of exactly 12 digits. Organizational unit (OU) - A string that begins with \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."]}
+          "ID for the root, OU, or account that you want to detach the policy from. You can get the ID from the ListRoots, ListOrganizationalUnitsForParent, or ListAccounts operations. The regex pattern for a target ID string requires one of the following: Root - A string that begins with \"r-\" followed by from 4 to 32 lowercase letters or digits. Account - A string that consists of exactly 12 digits. Organizational unit (OU) - A string that begins with \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."]}
     let context_ = "DetachPolicyRequest"
     let make ~policyId = fun ~targetId -> fun () -> { policyId; targetId }
     let to_value x =
@@ -5757,13 +6846,13 @@ module DetachPolicyRequest =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ~targetId ~policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetId = field_map_exn json "TargetId" PolicyTargetId.of_json in
-      let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
+    let of_json json__ =
+      let targetId = field_map_exn json__ "TargetId" PolicyTargetId.of_json in
+      let policyId = field_map_exn json__ "PolicyId" PolicyId.of_json in
       make ~targetId ~policyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detaches a policy from a target root, organizational unit (OU), or account. If the policy being detached is a service control policy (SCP), the changes to permissions for Identity and Access Management (IAM) users and roles in affected accounts are immediate. Every root, OU, and account must have at least one SCP attached. If you want to replace the default FullAWSAccess policy with an SCP that limits the permissions that can be delegated, you must attach the replacement SCP before you can remove the default SCP. This is the authorization strategy of an \"allow list\". If you instead attach a second SCP and leave the FullAWSAccess SCP still attached, and specify \"Effect\": \"Deny\" in the second SCP to override the \"Effect\": \"Allow\" in the FullAWSAccess policy (or any other attached SCP), you're using the authorization strategy of a \"deny list\". This operation can be called only from the organization's management account."]
+       "Detaches a policy from a target root, organizational unit (OU), or account. If the policy being detached is a service control policy (SCP), the changes to permissions for Identity and Access Management (IAM) users and roles in affected accounts are immediate. Every root, OU, and account must have at least one SCP attached. If you want to replace the default FullAWSAccess policy with an SCP that limits the permissions that can be delegated, you must attach the replacement SCP before you can remove the default SCP. This is the authorization strategy of an \"allow list\". If you instead attach a second SCP and leave the FullAWSAccess SCP still attached, and specify \"Effect\": \"Deny\" in the second SCP to override the \"Effect\": \"Allow\" in the FullAWSAccess policy (or any other attached SCP), you're using the authorization strategy of a \"deny list\". You can only call this operation from the management account or a member account that is a delegated administrator."]
 module DisableAWSServiceAccessRequest =
   struct
     type nonrec t =
@@ -5784,13 +6873,13 @@ module DisableAWSServiceAccessRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServicePrincipal") in
       make ~servicePrincipal ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let servicePrincipal =
-        field_map_exn json "ServicePrincipal" ServicePrincipal.of_json in
+        field_map_exn json__ "ServicePrincipal" ServicePrincipal.of_json in
       make ~servicePrincipal ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disables the integration of an Amazon Web Services service (the service that is specified by ServicePrincipal) with Organizations. When you disable integration, the specified service no longer can create a service-linked role in new accounts in your organization. This means the service can't perform operations on your behalf on any new accounts in your organization. The service can still perform operations in older accounts until the service completes its clean-up from Organizations. We strongly recommend that you don't use this command to disable integration between Organizations and the specified Amazon Web Services service. Instead, use the console or commands that are provided by the specified service. This lets the trusted service perform any required initialization when enabling trusted access, such as creating any required resources and any required clean up of resources when disabling trusted access. For information about how to disable trusted service access to your organization using the trusted service, see the Learn more link under the Supports Trusted Access column at Amazon Web Services services that you can use with Organizations. on this page. If you disable access by using this command, it causes the following actions to occur: The service can no longer create a service-linked role in the accounts in your organization. This means that the service can't perform operations on your behalf on any new accounts in your organization. The service can still perform operations in older accounts until the service completes its clean-up from Organizations. The service can no longer perform tasks in the member accounts in the organization, unless those operations are explicitly permitted by the IAM policies that are attached to your roles. This includes any data aggregation from the member accounts to the management account, or to a delegated administrator account, where relevant. Some services detect this and clean up any remaining data or resources related to the integration, while other services stop accessing the organization but leave any historical data and configuration in place to support a possible re-enabling of the integration. Using the other service's console or commands to disable the integration ensures that the other service is aware that it can clean up any resources that are required only for the integration. How the service cleans up its resources in the organization's accounts depends on that service. For more information, see the documentation for the other Amazon Web Services service. After you perform the DisableAWSServiceAccess operation, the specified service can no longer perform operations in your organization's accounts For more information about integrating other services with Organizations, including the list of services that work with Organizations, see Integrating Organizations with Other Amazon Web Services Services in the Organizations User Guide. This operation can be called only from the organization's management account."]
+       "Disables the integration of an Amazon Web Services service (the service that is specified by ServicePrincipal) with Organizations. When you disable integration, the specified service no longer can create a service-linked role in new accounts in your organization. This means the service can't perform operations on your behalf on any new accounts in your organization. The service can still perform operations in older accounts until the service completes its clean-up from Organizations. We strongly recommend that you don't use this command to disable integration between Organizations and the specified Amazon Web Services service. Instead, use the console or commands that are provided by the specified service. This lets the trusted service perform any required initialization when enabling trusted access, such as creating any required resources and any required clean up of resources when disabling trusted access. For information about how to disable trusted service access to your organization using the trusted service, see the Learn more link under the Supports Trusted Access column at Amazon Web Services services that you can use with Organizations. on this page. If you disable access by using this command, it causes the following actions to occur: The service can no longer create a service-linked role in the accounts in your organization. This means that the service can't perform operations on your behalf on any new accounts in your organization. The service can still perform operations in older accounts until the service completes its clean-up from Organizations. The service can no longer perform tasks in the member accounts in the organization, unless those operations are explicitly permitted by the IAM policies that are attached to your roles. This includes any data aggregation from the member accounts to the management account, or to a delegated administrator account, where relevant. Some services detect this and clean up any remaining data or resources related to the integration, while other services stop accessing the organization but leave any historical data and configuration in place to support a possible re-enabling of the integration. Using the other service's console or commands to disable the integration ensures that the other service is aware that it can clean up any resources that are required only for the integration. How the service cleans up its resources in the organization's accounts depends on that service. For more information, see the documentation for the other Amazon Web Services service. After you perform the DisableAWSServiceAccess operation, the specified service can no longer perform operations in your organization's accounts For more information about integrating other services with Organizations, including the list of services that work with Organizations, see Using Organizations with other Amazon Web Services services in the Organizations User Guide. You can only call this operation from the management account."]
 module RootId =
   struct
     type nonrec t = string
@@ -5815,10 +6904,10 @@ module DisablePolicyTypeRequest =
       {
       rootId: RootId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the root in which you want to disable a policy type. You can get the ID from the ListRoots operation. The regex pattern for a root ID string requires \"r-\" followed by from 4 to 32 lowercase letters or digits."];
+          "ID for the root in which you want to disable a policy type. You can get the ID from the ListRoots operation. The regex pattern for a root ID string requires \"r-\" followed by from 4 to 32 lowercase letters or digits."];
       policyType: PolicyType.t
         [@ocaml.doc
-          "The policy type that you want to disable in this root. You can specify one of the following values: AISERVICES_OPT_OUT_POLICY BACKUP_POLICY SERVICE_CONTROL_POLICY TAG_POLICY"]}
+          "The policy type that you want to disable in this root. You can specify one of the following values: SERVICE_CONTROL_POLICY RESOURCE_CONTROL_POLICY DECLARATIVE_POLICY_EC2 BACKUP_POLICY TAG_POLICY CHATBOT_POLICY AISERVICES_OPT_OUT_POLICY SECURITYHUB_POLICY UPGRADE_ROLLOUT_POLICY INSPECTOR_POLICY BEDROCK_POLICY S3_POLICY NETWORK_SECURITY_DIRECTOR_POLICY"]}
     let context_ = "DisablePolicyTypeRequest"
     let make ~rootId = fun ~policyType -> fun () -> { rootId; policyType }
     let to_value x =
@@ -5834,13 +6923,13 @@ module DisablePolicyTypeRequest =
         RootId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RootId") in
       make ~policyType ~rootId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyType = field_map_exn json "PolicyType" PolicyType.of_json in
-      let rootId = field_map_exn json "RootId" RootId.of_json in
+    let of_json json__ =
+      let policyType = field_map_exn json__ "PolicyType" PolicyType.of_json in
+      let rootId = field_map_exn json__ "RootId" RootId.of_json in
       make ~policyType ~rootId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disables an organizational policy type in a root. A policy of a certain type can be attached to entities in a root only if that type is enabled in the root. After you perform this operation, you no longer can attach policies of the specified type to that root or to any organizational unit (OU) or account in that root. You can undo this by using the EnablePolicyType operation. This is an asynchronous request that Amazon Web Services performs in the background. If you disable a policy type for a root, it still appears enabled for the organization if all features are enabled for the organization. Amazon Web Services recommends that you first use ListRoots to see the status of policy types for a specified root, and then use this operation. This operation can be called only from the organization's management account. To view the status of available policy types in the organization, use DescribeOrganization."]
+       "Disables an organizational policy type in a root. A policy of a certain type can be attached to entities in a root only if that type is enabled in the root. After you perform this operation, you no longer can attach policies of the specified type to that root or to any organizational unit (OU) or account in that root. You can undo this by using the EnablePolicyType operation. This is an asynchronous request that Amazon Web Services performs in the background. If you disable a policy type for a root, it still appears enabled for the organization if all features are enabled for the organization. Amazon Web Services recommends that you first use ListRoots to see the status of policy types for a specified root, and then use this operation. You can only call this operation from the management account or a member account that is a delegated administrator. To view the status of available policy types in the organization, use ListRoots."]
 module RootNotFoundException =
   struct
     type nonrec t = {
@@ -5856,8 +6945,8 @@ module RootNotFoundException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "We can't find a root with the RootId that you specified."]
@@ -5903,7 +6992,7 @@ module Root =
       {
       id: RootId.t option
         [@ocaml.doc
-          "The unique identifier (ID) for the root. The regex pattern for a root ID string requires \"r-\" followed by from 4 to 32 lowercase letters or digits."];
+          "The unique identifier (ID) for the root. The ID is unique to the organization only. The regex pattern for a root ID string requires \"r-\" followed by from 4 to 32 lowercase letters or digits."];
       arn: RootArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the root. For more information about ARNs in Organizations, see ARN Formats Supported by Organizations in the Amazon Web Services Service Authorization Reference."];
@@ -5932,11 +7021,11 @@ module Root =
       let id = (Option.map ~f:RootId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?policyTypes ?name ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyTypes = field_map json "PolicyTypes" PolicyTypes.of_json in
-      let name = field_map json "Name" RootName.of_json in
-      let arn = field_map json "Arn" RootArn.of_json in
-      let id = field_map json "Id" RootId.of_json in
+    let of_json json__ =
+      let policyTypes = field_map json__ "PolicyTypes" PolicyTypes.of_json in
+      let name = field_map json__ "Name" RootName.of_json in
+      let arn = field_map json__ "Arn" RootArn.of_json in
+      let id = field_map json__ "Id" RootId.of_json in
       make ?policyTypes ?name ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5956,12 +7045,12 @@ module PolicyTypeNotEnabledException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified policy type isn't currently enabled in this root. You can't attach policies of the specified type to entities in a root until you enable that type in the root. For more information, see Enabling All Features in Your Organization in the Organizations User Guide."]
+       "The specified policy type isn't currently enabled in this root. You can't attach policies of the specified type to entities in a root until you enable that type in the root. For more information, see Enabling all features in your organization in the Organizations User Guide."]
 module PolicyChangesInProgressException =
   struct
     type nonrec t = {
@@ -5977,8 +7066,8 @@ module PolicyChangesInProgressException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6129,11 +7218,11 @@ module DisablePolicyTypeResponse =
       let root = (Option.map ~f:Root.of_xml) (Xml.child xml_arg0 "Root") in
       make ?root ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let root = field_map json "Root" Root.of_json in make ?root ()
+    let of_json json__ =
+      let root = field_map json__ "Root" Root.of_json in make ?root ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disables an organizational policy type in a root. A policy of a certain type can be attached to entities in a root only if that type is enabled in the root. After you perform this operation, you no longer can attach policies of the specified type to that root or to any organizational unit (OU) or account in that root. You can undo this by using the EnablePolicyType operation. This is an asynchronous request that Amazon Web Services performs in the background. If you disable a policy type for a root, it still appears enabled for the organization if all features are enabled for the organization. Amazon Web Services recommends that you first use ListRoots to see the status of policy types for a specified root, and then use this operation. This operation can be called only from the organization's management account. To view the status of available policy types in the organization, use DescribeOrganization."]
+       "Disables an organizational policy type in a root. A policy of a certain type can be attached to entities in a root only if that type is enabled in the root. After you perform this operation, you no longer can attach policies of the specified type to that root or to any organizational unit (OU) or account in that root. You can undo this by using the EnablePolicyType operation. This is an asynchronous request that Amazon Web Services performs in the background. If you disable a policy type for a root, it still appears enabled for the organization if all features are enabled for the organization. Amazon Web Services recommends that you first use ListRoots to see the status of policy types for a specified root, and then use this operation. You can only call this operation from the management account or a member account that is a delegated administrator. To view the status of available policy types in the organization, use ListRoots."]
 module DuplicateAccountException =
   struct
     type nonrec t = {
@@ -6149,8 +7238,8 @@ module DuplicateAccountException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6170,8 +7259,8 @@ module DuplicateHandshakeException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6191,12 +7280,160 @@ module DuplicatePolicyAttachmentException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The selected policy is already attached to the specified target."]
+module PolicyIds =
+  struct
+    type nonrec t = PolicyId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PolicyId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PolicyId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PolicyIds" ~of_json:PolicyId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PathToError =
+  struct
+    type nonrec t = string
+    let context_ = "PathToError"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PathToError" j
+    let to_json = simple_to_json to_value
+  end
+module ErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module ErrorCode =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorCode"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorCode" j
+    let to_json = simple_to_json to_value
+  end
+module EffectivePolicyValidationError =
+  struct
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option
+        [@ocaml.doc
+          "The error code for the validation error. For example, ELEMENTS_TOO_MANY."];
+      errorMessage: ErrorMessage.t option
+        [@ocaml.doc "The error message for the validation error."];
+      pathToError: PathToError.t option
+        [@ocaml.doc
+          "The path within the effective policy where the validation error occurred."];
+      contributingPolicies: PolicyIds.t option
+        [@ocaml.doc
+          "The individual policies inherited and attached to the account which contributed to the validation error."]}
+    let make ?errorCode =
+      fun ?errorMessage ->
+        fun ?pathToError ->
+          fun ?contributingPolicies ->
+            fun () ->
+              { errorCode; errorMessage; pathToError; contributingPolicies }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("ErrorMessage",
+          (Option.map x.errorMessage ~f:ErrorMessage.to_value));
+        ("PathToError", (Option.map x.pathToError ~f:PathToError.to_value));
+        ("ContributingPolicies",
+          (Option.map x.contributingPolicies ~f:PolicyIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let contributingPolicies =
+        (Option.map ~f:PolicyIds.of_xml)
+          (Xml.child xml_arg0 "ContributingPolicies") in
+      let pathToError =
+        (Option.map ~f:PathToError.of_xml) (Xml.child xml_arg0 "PathToError") in
+      let errorMessage =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?contributingPolicies ?pathToError ?errorMessage ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let contributingPolicies =
+        field_map json__ "ContributingPolicies" PolicyIds.of_json in
+      let pathToError = field_map json__ "PathToError" PathToError.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?contributingPolicies ?pathToError ?errorMessage ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains details about the validation errors that occurred when generating or enforcing an effective policy, such as which policies contributed to the error and location of the error."]
+module EffectivePolicyValidationErrors =
+  struct
+    type nonrec t = EffectivePolicyValidationError.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EffectivePolicyValidationError.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EffectivePolicyValidationError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EffectivePolicyValidationErrors"
+        ~of_json:EffectivePolicyValidationError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module EnableAWSServiceAccessRequest =
   struct
     type nonrec t =
@@ -6217,13 +7454,13 @@ module EnableAWSServiceAccessRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServicePrincipal") in
       make ~servicePrincipal ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let servicePrincipal =
-        field_map_exn json "ServicePrincipal" ServicePrincipal.of_json in
+        field_map_exn json__ "ServicePrincipal" ServicePrincipal.of_json in
       make ~servicePrincipal ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables the integration of an Amazon Web Services service (the service that is specified by ServicePrincipal) with Organizations. When you enable integration, you allow the specified service to create a service-linked role in all the accounts in your organization. This allows the service to perform operations on your behalf in your organization and its accounts. We recommend that you enable integration between Organizations and the specified Amazon Web Services service by using the console or commands that are provided by the specified service. Doing so ensures that the service is aware that it can create the resources that are required for the integration. How the service creates those resources in the organization's accounts depends on that service. For more information, see the documentation for the other Amazon Web Services service. For more information about enabling services to integrate with Organizations, see Integrating Organizations with Other Amazon Web Services Services in the Organizations User Guide. This operation can be called only from the organization's management account and only if the organization has enabled all features."]
+       "Provides an Amazon Web Services service (the service that is specified by ServicePrincipal) with permissions to view the structure of an organization, create a service-linked role in all the accounts in the organization, and allow the service to perform operations on behalf of the organization and its accounts. Establishing these permissions can be a first step in enabling the integration of an Amazon Web Services service with Organizations. We recommend that you enable integration between Organizations and the specified Amazon Web Services service by using the console or commands that are provided by the specified service. Doing so ensures that the service is aware that it can create the resources that are required for the integration. How the service creates those resources in the organization's accounts depends on that service. For more information, see the documentation for the other Amazon Web Services service. For more information about enabling services to integrate with Organizations, see Using Organizations with other Amazon Web Services services in the Organizations User Guide. You can only call this operation from the management account."]
 module EnableAllFeaturesRequest =
   struct
     type nonrec t = unit
@@ -6236,7 +7473,7 @@ module EnableAllFeaturesRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables all features in an organization. This enables the use of organization policies that can restrict the services and actions that can be called in each account. Until you enable all features, you have access only to consolidated billing, and you can't use any of the advanced account administration features that Organizations supports. For more information, see Enabling All Features in Your Organization in the Organizations User Guide. This operation is required only for organizations that were created explicitly with only the consolidated billing features enabled. Calling this operation sends a handshake to every invited account in the organization. The feature set change can be finalized and the additional features enabled only after all administrators in the invited accounts approve the change by accepting the handshake. After you enable all features, you can separately enable or disable individual policy types in a root using EnablePolicyType and DisablePolicyType. To see the status of policy types in a root, use ListRoots. After all invited member accounts accept the handshake, you finalize the feature set change by accepting the handshake that contains \"Action\": \"ENABLE_ALL_FEATURES\". This completes the change. After you enable all features in your organization, the management account in the organization can apply policies on all member accounts. These policies can restrict what users and even administrators in those accounts can do. The management account can apply policies that prevent accounts from leaving the organization. Ensure that your account administrators are aware of this. This operation can be called only from the organization's management account."]
+       "Enables all features in an organization. This enables the use of organization policies that can restrict the services and actions that can be called in each account. Until you enable all features, you have access only to consolidated billing, and you can't use any of the advanced account administration features that Organizations supports. For more information, see Enabling all features in your organization in the Organizations User Guide. This operation is required only for organizations that were created explicitly with only the consolidated billing features enabled. Calling this operation sends a handshake to every invited account in the organization. The feature set change can be finalized and the additional features enabled only after all administrators in the invited accounts approve the change by accepting the handshake. After you enable all features, you can separately enable or disable individual policy types in a root using EnablePolicyType and DisablePolicyType. To see the status of policy types in a root, use ListRoots. After all invited member accounts accept the handshake, you finalize the feature set change by accepting the handshake that contains \"Action\": \"ENABLE_ALL_FEATURES\". This completes the change. After you enable all features in your organization, the management account in the organization can apply policies on all member accounts. These policies can restrict what users and even administrators in those accounts can do. The management account can apply policies that prevent accounts from leaving the organization. Ensure that your account administrators are aware of this. You can only call this operation from the management account."]
 module EnableAllFeaturesResponse =
   struct
     type nonrec t =
@@ -6250,6 +7487,7 @@ module EnableAllFeaturesResponse =
           AWSOrganizationsNotInUseException.t 
       | `AccessDeniedException of AccessDeniedException.t 
       | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `ConstraintViolationException of ConstraintViolationException.t 
       | `HandshakeConstraintViolationException of
           HandshakeConstraintViolationException.t 
       | `InvalidInputException of InvalidInputException.t 
@@ -6267,6 +7505,9 @@ module EnableAllFeaturesResponse =
       | "ConcurrentModificationException" ->
           `ConcurrentModificationException
             (ConcurrentModificationException.of_json json)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_json json)
       | "HandshakeConstraintViolationException" ->
           `HandshakeConstraintViolationException
             (HandshakeConstraintViolationException.of_json json)
@@ -6289,6 +7530,9 @@ module EnableAllFeaturesResponse =
       | "ConcurrentModificationException" ->
           `ConcurrentModificationException
             (ConcurrentModificationException.of_xml xml)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_xml xml)
       | "HandshakeConstraintViolationException" ->
           `HandshakeConstraintViolationException
             (HandshakeConstraintViolationException.of_xml xml)
@@ -6313,6 +7557,10 @@ module EnableAllFeaturesResponse =
           `Assoc
             [("error", (`String "ConcurrentModificationException"));
             ("details", (ConcurrentModificationException.to_json e))]
+      | `ConstraintViolationException e ->
+          `Assoc
+            [("error", (`String "ConstraintViolationException"));
+            ("details", (ConstraintViolationException.to_json e))]
       | `HandshakeConstraintViolationException e ->
           `Assoc
             [("error", (`String "HandshakeConstraintViolationException"));
@@ -6343,22 +7591,22 @@ module EnableAllFeaturesResponse =
         (Option.map ~f:Handshake.of_xml) (Xml.child xml_arg0 "Handshake") in
       make ?handshake ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let handshake = field_map json "Handshake" Handshake.of_json in
+    let of_json json__ =
+      let handshake = field_map json__ "Handshake" Handshake.of_json in
       make ?handshake ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables all features in an organization. This enables the use of organization policies that can restrict the services and actions that can be called in each account. Until you enable all features, you have access only to consolidated billing, and you can't use any of the advanced account administration features that Organizations supports. For more information, see Enabling All Features in Your Organization in the Organizations User Guide. This operation is required only for organizations that were created explicitly with only the consolidated billing features enabled. Calling this operation sends a handshake to every invited account in the organization. The feature set change can be finalized and the additional features enabled only after all administrators in the invited accounts approve the change by accepting the handshake. After you enable all features, you can separately enable or disable individual policy types in a root using EnablePolicyType and DisablePolicyType. To see the status of policy types in a root, use ListRoots. After all invited member accounts accept the handshake, you finalize the feature set change by accepting the handshake that contains \"Action\": \"ENABLE_ALL_FEATURES\". This completes the change. After you enable all features in your organization, the management account in the organization can apply policies on all member accounts. These policies can restrict what users and even administrators in those accounts can do. The management account can apply policies that prevent accounts from leaving the organization. Ensure that your account administrators are aware of this. This operation can be called only from the organization's management account."]
+       "Enables all features in an organization. This enables the use of organization policies that can restrict the services and actions that can be called in each account. Until you enable all features, you have access only to consolidated billing, and you can't use any of the advanced account administration features that Organizations supports. For more information, see Enabling all features in your organization in the Organizations User Guide. This operation is required only for organizations that were created explicitly with only the consolidated billing features enabled. Calling this operation sends a handshake to every invited account in the organization. The feature set change can be finalized and the additional features enabled only after all administrators in the invited accounts approve the change by accepting the handshake. After you enable all features, you can separately enable or disable individual policy types in a root using EnablePolicyType and DisablePolicyType. To see the status of policy types in a root, use ListRoots. After all invited member accounts accept the handshake, you finalize the feature set change by accepting the handshake that contains \"Action\": \"ENABLE_ALL_FEATURES\". This completes the change. After you enable all features in your organization, the management account in the organization can apply policies on all member accounts. These policies can restrict what users and even administrators in those accounts can do. The management account can apply policies that prevent accounts from leaving the organization. Ensure that your account administrators are aware of this. You can only call this operation from the management account."]
 module EnablePolicyTypeRequest =
   struct
     type nonrec t =
       {
       rootId: RootId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the root in which you want to enable a policy type. You can get the ID from the ListRoots operation. The regex pattern for a root ID string requires \"r-\" followed by from 4 to 32 lowercase letters or digits."];
+          "ID for the root in which you want to enable a policy type. You can get the ID from the ListRoots operation. The regex pattern for a root ID string requires \"r-\" followed by from 4 to 32 lowercase letters or digits."];
       policyType: PolicyType.t
         [@ocaml.doc
-          "The policy type that you want to enable. You can specify one of the following values: AISERVICES_OPT_OUT_POLICY BACKUP_POLICY SERVICE_CONTROL_POLICY TAG_POLICY"]}
+          "The policy type that you want to enable. You can specify one of the following values: SERVICE_CONTROL_POLICY RESOURCE_CONTROL_POLICY DECLARATIVE_POLICY_EC2 BACKUP_POLICY TAG_POLICY CHATBOT_POLICY AISERVICES_OPT_OUT_POLICY SECURITYHUB_POLICY UPGRADE_ROLLOUT_POLICY INSPECTOR_POLICY BEDROCK_POLICY S3_POLICY NETWORK_SECURITY_DIRECTOR_POLICY"]}
     let context_ = "EnablePolicyTypeRequest"
     let make ~rootId = fun ~policyType -> fun () -> { rootId; policyType }
     let to_value x =
@@ -6374,13 +7622,13 @@ module EnablePolicyTypeRequest =
         RootId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RootId") in
       make ~policyType ~rootId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyType = field_map_exn json "PolicyType" PolicyType.of_json in
-      let rootId = field_map_exn json "RootId" RootId.of_json in
+    let of_json json__ =
+      let policyType = field_map_exn json__ "PolicyType" PolicyType.of_json in
+      let rootId = field_map_exn json__ "RootId" RootId.of_json in
       make ~policyType ~rootId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables a policy type in a root. After you enable a policy type in a root, you can attach policies of that type to the root, any organizational unit (OU), or account in that root. You can undo this by using the DisablePolicyType operation. This is an asynchronous request that Amazon Web Services performs in the background. Amazon Web Services recommends that you first use ListRoots to see the status of policy types for a specified root, and then use this operation. This operation can be called only from the organization's management account. You can enable a policy type in a root only if that policy type is available in the organization. To view the status of available policy types in the organization, use DescribeOrganization."]
+       "Enables a policy type in a root. After you enable a policy type in a root, you can attach policies of that type to the root, any organizational unit (OU), or account in that root. You can undo this by using the DisablePolicyType operation. This is an asynchronous request that Amazon Web Services performs in the background. Amazon Web Services recommends that you first use ListRoots to see the status of policy types for a specified root, and then use this operation. You can only call this operation from the management account or a member account that is a delegated administrator. You can enable a policy type in a root only if that policy type is available in the organization. To view the status of available policy types in the organization, use ListRoots."]
 module PolicyTypeAlreadyEnabledException =
   struct
     type nonrec t = {
@@ -6396,8 +7644,8 @@ module PolicyTypeAlreadyEnabledException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6563,11 +7811,11 @@ module EnablePolicyTypeResponse =
       let root = (Option.map ~f:Root.of_xml) (Xml.child xml_arg0 "Root") in
       make ?root ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let root = field_map json "Root" Root.of_json in make ?root ()
+    let of_json json__ =
+      let root = field_map json__ "Root" Root.of_json in make ?root ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables a policy type in a root. After you enable a policy type in a root, you can attach policies of that type to the root, any organizational unit (OU), or account in that root. You can undo this by using the DisablePolicyType operation. This is an asynchronous request that Amazon Web Services performs in the background. Amazon Web Services recommends that you first use ListRoots to see the status of policy types for a specified root, and then use this operation. This operation can be called only from the organization's management account. You can enable a policy type in a root only if that policy type is available in the organization. To view the status of available policy types in the organization, use DescribeOrganization."]
+       "Enables a policy type in a root. After you enable a policy type in a root, you can attach policies of that type to the root, any organizational unit (OU), or account in that root. You can undo this by using the DisablePolicyType operation. This is an asynchronous request that Amazon Web Services performs in the background. Amazon Web Services recommends that you first use ListRoots to see the status of policy types for a specified root, and then use this operation. You can only call this operation from the management account or a member account that is a delegated administrator. You can enable a policy type in a root only if that policy type is available in the organization. To view the status of available policy types in the organization, use ListRoots."]
 module EnabledServicePrincipal =
   struct
     type nonrec t =
@@ -6594,10 +7842,10 @@ module EnabledServicePrincipal =
           (Xml.child xml_arg0 "ServicePrincipal") in
       make ?dateEnabled ?servicePrincipal ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dateEnabled = field_map json "DateEnabled" Timestamp.of_json in
+    let of_json json__ =
+      let dateEnabled = field_map json__ "DateEnabled" Timestamp.of_json in
       let servicePrincipal =
-        field_map json "ServicePrincipal" ServicePrincipal.of_json in
+        field_map json__ "ServicePrincipal" ServicePrincipal.of_json in
       make ?dateEnabled ?servicePrincipal ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6606,6 +7854,9 @@ module EnabledServicePrincipals =
   struct
     type nonrec t = EnabledServicePrincipal.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnabledServicePrincipal.to_value)) |>
         (fun x -> `List x)
@@ -6651,10 +7902,10 @@ module HandshakeFilter =
       {
       actionType: ActionType.t option
         [@ocaml.doc
-          "Specifies the type of handshake action. If you specify ActionType, you cannot also specify ParentHandshakeId."];
+          "The type of handshake. If you specify ActionType, you cannot also specify ParentHandshakeId."];
       parentHandshakeId: HandshakeId.t option
         [@ocaml.doc
-          "Specifies the parent handshake. Only used for handshake types that are a child of another type. If you specify ParentHandshakeId, you cannot also specify ActionType. The regex pattern for handshake ID string requires \"h-\" followed by from 8 to 32 lowercase letters or digits."]}
+          "The parent handshake. Only used for handshake types that are a child of another type. If you specify ParentHandshakeId, you cannot also specify ActionType. The regex pattern for handshake ID string requires \"h-\" followed by from 8 to 32 lowercase letters or digits."]}
     let make ?actionType =
       fun ?parentHandshakeId -> fun () -> { actionType; parentHandshakeId }
     let to_value x =
@@ -6671,14 +7922,14 @@ module HandshakeFilter =
         (Option.map ~f:ActionType.of_xml) (Xml.child xml_arg0 "ActionType") in
       make ?parentHandshakeId ?actionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parentHandshakeId =
-        field_map json "ParentHandshakeId" HandshakeId.of_json in
-      let actionType = field_map json "ActionType" ActionType.of_json in
+        field_map json__ "ParentHandshakeId" HandshakeId.of_json in
+      let actionType = field_map json__ "ActionType" ActionType.of_json in
       make ?parentHandshakeId ?actionType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the criteria that are used to select the handshakes for the operation."]
+       "Contains the filter used to select the handshakes for an operation."]
 module HandshakeNotes =
   struct
     type nonrec t = string
@@ -6701,6 +7952,9 @@ module Handshakes =
   struct
     type nonrec t = Handshake.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Handshake.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6721,6 +7975,27 @@ module Handshakes =
       list_of_json ~kind:"Handshakes" ~of_json:Handshake.of_json j
     let to_json v = composed_to_json to_value v
   end
+module InvalidResponsibilityTransferTransitionException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The responsibility transfer can't transition to the requested state because it's not in a valid state for this operation."]
 module InviteAccountToOrganizationRequest =
   struct
     type nonrec t =
@@ -6733,7 +8008,7 @@ module InviteAccountToOrganizationRequest =
           "Additional information that you want to include in the generated email to the recipient account owner."];
       tags: Tags.t option
         [@ocaml.doc
-          "A list of tags that you want to attach to the account when it becomes a member of the organization. For each tag in the list, you must specify both a tag key and a value. You can set the value to an empty string, but you can't set it to null. For more information about tagging, see Tagging Organizations resources in the Organizations User Guide. Any tags in the request are checked for compliance with any applicable tag policies when the request is made. The request is rejected if the tags in the request don't match the requirements of the policy at that time. Tag policy compliance is not checked again when the invitation is accepted and the tags are actually attached to the account. That means that if the tag policy changes between the invitation and the acceptance, then that tags could potentially be non-compliant. If any one of the tags is invalid or if you exceed the allowed number of tags for an account, then the entire request fails and invitations are not sent."]}
+          "A list of tags that you want to attach to the account when it becomes a member of the organization. For each tag in the list, you must specify both a tag key and a value. You can set the value to an empty string, but you can't set it to null. For more information about tagging, see Tagging Organizations resources in the Organizations User Guide. Any tags in the request are checked for compliance with any applicable tag policies when the request is made. The request is rejected if the tags in the request don't match the requirements of the policy at that time. Tag policy compliance is not checked again when the invitation is accepted and the tags are actually attached to the account. That means that if the tag policy changes between the invitation and the acceptance, then that tags could potentially be non-compliant. If any one of the tags is not valid or if you exceed the allowed number of tags for an account, then the entire request fails and invitations are not sent."]}
     let context_ = "InviteAccountToOrganizationRequest"
     let make ?notes =
       fun ?tags -> fun ~target -> fun () -> { notes; tags; target }
@@ -6752,14 +8027,14 @@ module InviteAccountToOrganizationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Target") in
       make ?tags ?notes ~target ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let notes = field_map json "Notes" HandshakeNotes.of_json in
-      let target = field_map_exn json "Target" HandshakeParty.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let notes = field_map json__ "Notes" HandshakeNotes.of_json in
+      let target = field_map_exn json__ "Target" HandshakeParty.of_json in
       make ?tags ?notes ~target ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sends an invitation to another account to join your organization as a member account. Organizations sends email on your behalf to the email address that is associated with the other account's owner. The invitation is implemented as a Handshake whose details are in the response. You can invite Amazon Web Services accounts only from the same seller as the management account. For example, if your organization's management account was created by Amazon Internet Services Pvt. Ltd (AISPL), an Amazon Web Services seller in India, you can invite only other AISPL accounts to your organization. You can't combine accounts from AISPL and Amazon Web Services or from any other Amazon Web Services seller. For more information, see Consolidated Billing in India. If you receive an exception that indicates that you exceeded your account limits for the organization or that the operation failed because your organization is still initializing, wait one hour and then try again. If the error persists after an hour, contact Amazon Web Services Support. If the request includes tags, then the requester must have the organizations:TagResource permission. This operation can be called only from the organization's management account."]
+       "Sends an invitation to another account to join your organization as a member account. Organizations sends email on your behalf to the email address that is associated with the other account's owner. The invitation is implemented as a Handshake whose details are in the response. If you receive an exception that indicates that you exceeded your account limits for the organization or that the operation failed because your organization is still initializing, wait one hour and then try again. If the error persists after an hour, contact Amazon Web Services Support. If the request includes tags, then the requester must have the organizations:TagResource permission. You can only call this operation from the management account."]
 module InviteAccountToOrganizationResponse =
   struct
     type nonrec t =
@@ -6911,12 +8186,226 @@ module InviteAccountToOrganizationResponse =
         (Option.map ~f:Handshake.of_xml) (Xml.child xml_arg0 "Handshake") in
       make ?handshake ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let handshake = field_map json "Handshake" Handshake.of_json in
+    let of_json json__ =
+      let handshake = field_map json__ "Handshake" Handshake.of_json in
       make ?handshake ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sends an invitation to another account to join your organization as a member account. Organizations sends email on your behalf to the email address that is associated with the other account's owner. The invitation is implemented as a Handshake whose details are in the response. You can invite Amazon Web Services accounts only from the same seller as the management account. For example, if your organization's management account was created by Amazon Internet Services Pvt. Ltd (AISPL), an Amazon Web Services seller in India, you can invite only other AISPL accounts to your organization. You can't combine accounts from AISPL and Amazon Web Services or from any other Amazon Web Services seller. For more information, see Consolidated Billing in India. If you receive an exception that indicates that you exceeded your account limits for the organization or that the operation failed because your organization is still initializing, wait one hour and then try again. If the error persists after an hour, contact Amazon Web Services Support. If the request includes tags, then the requester must have the organizations:TagResource permission. This operation can be called only from the organization's management account."]
+       "Sends an invitation to another account to join your organization as a member account. Organizations sends email on your behalf to the email address that is associated with the other account's owner. The invitation is implemented as a Handshake whose details are in the response. If you receive an exception that indicates that you exceeded your account limits for the organization or that the operation failed because your organization is still initializing, wait one hour and then try again. If the error persists after an hour, contact Amazon Web Services Support. If the request includes tags, then the requester must have the organizations:TagResource permission. You can only call this operation from the management account."]
+module InviteOrganizationToTransferResponsibilityRequest =
+  struct
+    type nonrec t =
+      {
+      type_: ResponsibilityTransferType.t
+        [@ocaml.doc
+          "The type of responsibility you want to designate to your organization. Currently, only BILLING is supported."];
+      target: HandshakeParty.t
+        [@ocaml.doc
+          "A HandshakeParty object. Contains details for the account you want to invite. Currently, only ACCOUNT and EMAIL are supported."];
+      notes: HandshakeNotes.t option
+        [@ocaml.doc
+          "Additional information that you want to include in the invitation."];
+      startTimestamp: Timestamp.t
+        [@ocaml.doc
+          "Timestamp when the recipient will begin managing the specified responsibilities."];
+      sourceName: ResponsibilityTransferName.t
+        [@ocaml.doc "Name you want to assign to the transfer."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "A list of tags that you want to attach to the transfer. For each tag in the list, you must specify both a tag key and a value. You can set the value to an empty string, but you can't set it to null. For more information about tagging, see Tagging Organizations resources in the Organizations User Guide. Any tags in the request are checked for compliance with any applicable tag policies when the request is made. The request is rejected if the tags in the request don't match the requirements of the policy at that time. Tag policy compliance is not checked again when the invitation is accepted and the tags are actually attached to the transfer. That means that if the tag policy changes between the invitation and the acceptance, then that tags could potentially be non-compliant. If any one of the tags is not valid or if you exceed the allowed number of tags for a transfer, then the entire request fails and invitations are not sent."]}
+    let context_ = "InviteOrganizationToTransferResponsibilityRequest"
+    let make ?notes =
+      fun ?tags ->
+        fun ~type_ ->
+          fun ~target ->
+            fun ~startTimestamp ->
+              fun ~sourceName ->
+                fun () ->
+                  { notes; tags; type_; target; startTimestamp; sourceName }
+    let to_value x =
+      structure_to_value
+        [("Type", (Some (ResponsibilityTransferType.to_value x.type_)));
+        ("Target", (Some (HandshakeParty.to_value x.target)));
+        ("Notes", (Option.map x.notes ~f:HandshakeNotes.to_value));
+        ("StartTimestamp", (Some (Timestamp.to_value x.startTimestamp)));
+        ("SourceName",
+          (Some (ResponsibilityTransferName.to_value x.sourceName)));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let sourceName =
+        ResponsibilityTransferName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceName") in
+      let startTimestamp =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StartTimestamp") in
+      let notes =
+        (Option.map ~f:HandshakeNotes.of_xml) (Xml.child xml_arg0 "Notes") in
+      let target =
+        HandshakeParty.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Target") in
+      let type_ =
+        ResponsibilityTransferType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      make ?tags ~sourceName ~startTimestamp ?notes ~target ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let sourceName =
+        field_map_exn json__ "SourceName" ResponsibilityTransferName.of_json in
+      let startTimestamp =
+        field_map_exn json__ "StartTimestamp" Timestamp.of_json in
+      let notes = field_map json__ "Notes" HandshakeNotes.of_json in
+      let target = field_map_exn json__ "Target" HandshakeParty.of_json in
+      let type_ =
+        field_map_exn json__ "Type" ResponsibilityTransferType.of_json in
+      make ?tags ~sourceName ~startTimestamp ?notes ~target ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sends an invitation to another organization's management account to designate your account with the specified responsibilities for their organization. The invitation is implemented as a Handshake whose details are in the response. You can only call this operation from the management account."]
+module InviteOrganizationToTransferResponsibilityResponse =
+  struct
+    type nonrec t = {
+      handshake: Handshake.t option }
+    type nonrec error =
+      [
+        `AWSOrganizationsNotInUseException of
+          AWSOrganizationsNotInUseException.t 
+      | `AccessDeniedException of AccessDeniedException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `ConstraintViolationException of ConstraintViolationException.t 
+      | `DuplicateHandshakeException of DuplicateHandshakeException.t 
+      | `HandshakeConstraintViolationException of
+          HandshakeConstraintViolationException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ServiceException of ServiceException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnsupportedAPIEndpointException of UnsupportedAPIEndpointException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?handshake = fun () -> { handshake }
+    let error_of_json name json =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_json json)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_json json)
+      | "DuplicateHandshakeException" ->
+          `DuplicateHandshakeException
+            (DuplicateHandshakeException.of_json json)
+      | "HandshakeConstraintViolationException" ->
+          `HandshakeConstraintViolationException
+            (HandshakeConstraintViolationException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_xml xml)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_xml xml)
+      | "DuplicateHandshakeException" ->
+          `DuplicateHandshakeException
+            (DuplicateHandshakeException.of_xml xml)
+      | "HandshakeConstraintViolationException" ->
+          `HandshakeConstraintViolationException
+            (HandshakeConstraintViolationException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AWSOrganizationsNotInUseException e ->
+          `Assoc
+            [("error", (`String "AWSOrganizationsNotInUseException"));
+            ("details", (AWSOrganizationsNotInUseException.to_json e))]
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `ConstraintViolationException e ->
+          `Assoc
+            [("error", (`String "ConstraintViolationException"));
+            ("details", (ConstraintViolationException.to_json e))]
+      | `DuplicateHandshakeException e ->
+          `Assoc
+            [("error", (`String "DuplicateHandshakeException"));
+            ("details", (DuplicateHandshakeException.to_json e))]
+      | `HandshakeConstraintViolationException e ->
+          `Assoc
+            [("error", (`String "HandshakeConstraintViolationException"));
+            ("details", (HandshakeConstraintViolationException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnsupportedAPIEndpointException e ->
+          `Assoc
+            [("error", (`String "UnsupportedAPIEndpointException"));
+            ("details", (UnsupportedAPIEndpointException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Handshake", (Option.map x.handshake ~f:Handshake.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let handshake =
+        (Option.map ~f:Handshake.of_xml) (Xml.child xml_arg0 "Handshake") in
+      make ?handshake ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let handshake = field_map json__ "Handshake" Handshake.of_json in
+      make ?handshake ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sends an invitation to another organization's management account to designate your account with the specified responsibilities for their organization. The invitation is implemented as a Handshake whose details are in the response. You can only call this operation from the management account."]
 module NextToken =
   struct
     type nonrec t = string
@@ -6962,7 +8451,7 @@ module ListAWSServiceAccessForOrganizationRequest =
           "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the maximum you specify, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that Organizations might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
     let make ?nextToken =
       fun ?maxResults -> fun () -> { nextToken; maxResults }
     let to_value x =
@@ -6977,13 +8466,13 @@ module ListAWSServiceAccessForOrganizationRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the Amazon Web Services services that you enabled to integrate with your organization. After a service on this list creates the resources that it requires for the integration, it can perform operations on your organization and its accounts. For more information about integrating other services with Organizations, including the list of services that currently work with Organizations, see Integrating Organizations with Other Amazon Web Services Services in the Organizations User Guide. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Returns a list of the Amazon Web Services services that you enabled to integrate with your organization. After a service on this list creates the resources that it requires for the integration, it can perform operations on your organization and its accounts. For more information about integrating other services with Organizations, including the list of services that currently work with Organizations, see Using Organizations with other Amazon Web Services services in the Organizations User Guide. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListAWSServiceAccessForOrganizationResponse =
   struct
     type nonrec t =
@@ -7099,15 +8588,15 @@ module ListAWSServiceAccessForOrganizationResponse =
           (Xml.child xml_arg0 "EnabledServicePrincipals") in
       make ?nextToken ?enabledServicePrincipals ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let enabledServicePrincipals =
-        field_map json "EnabledServicePrincipals"
+        field_map json__ "EnabledServicePrincipals"
           EnabledServicePrincipals.of_json in
       make ?nextToken ?enabledServicePrincipals ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the Amazon Web Services services that you enabled to integrate with your organization. After a service on this list creates the resources that it requires for the integration, it can perform operations on your organization and its accounts. For more information about integrating other services with Organizations, including the list of services that currently work with Organizations, see Integrating Organizations with Other Amazon Web Services Services in the Organizations User Guide. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Returns a list of the Amazon Web Services services that you enabled to integrate with your organization. After a service on this list creates the resources that it requires for the integration, it can perform operations on your organization and its accounts. For more information about integrating other services with Organizations, including the list of services that currently work with Organizations, see Using Organizations with other Amazon Web Services services in the Organizations User Guide. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListAccountsForParentRequest =
   struct
     type nonrec t =
@@ -7120,7 +8609,7 @@ module ListAccountsForParentRequest =
           "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the maximum you specify, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that Organizations might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
     let context_ = "ListAccountsForParentRequest"
     let make ?nextToken =
       fun ?maxResults ->
@@ -7140,20 +8629,21 @@ module ListAccountsForParentRequest =
         ParentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ParentId") in
       make ?maxResults ?nextToken ~parentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let parentId = field_map_exn json "ParentId" ParentId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let parentId = field_map_exn json__ "ParentId" ParentId.of_json in
       make ?maxResults ?nextToken ~parentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the accounts in an organization that are contained by the specified target root or organizational unit (OU). If you specify the root, you get a list of all the accounts that aren't in any OU. If you specify an OU, you get a list of all the accounts in only that OU and not in any child OUs. To get a list of all accounts in the organization, use the ListAccounts operation. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists the accounts in an organization that are contained by the specified target root or organizational unit (OU). If you specify the root, you get a list of all the accounts that aren't in any OU. If you specify an OU, you get a list of all the accounts in only that OU and not in any child OUs. To get a list of all accounts in the organization, use the ListAccounts operation. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListAccountsForParentResponse =
   struct
     type nonrec t =
       {
       accounts: Accounts.t option
-        [@ocaml.doc "A list of the accounts in the specified root or OU."];
+        [@ocaml.doc
+          "A list of the accounts in the specified root or OU. The Status parameter in the API response will be retired on September 9, 2026. Although both the account State and account Status parameters are currently available in the Organizations APIs (DescribeAccount, ListAccounts, ListAccountsForParent), we recommend that you update your scripts or other code to use the State parameter instead of Status before September 9, 2026."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."]}
@@ -7245,13 +8735,13 @@ module ListAccountsForParentResponse =
         (Option.map ~f:Accounts.of_xml) (Xml.child xml_arg0 "Accounts") in
       make ?nextToken ?accounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let accounts = field_map json "Accounts" Accounts.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let accounts = field_map json__ "Accounts" Accounts.of_json in
       make ?nextToken ?accounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the accounts in an organization that are contained by the specified target root or organizational unit (OU). If you specify the root, you get a list of all the accounts that aren't in any OU. If you specify an OU, you get a list of all the accounts in only that OU and not in any child OUs. To get a list of all accounts in the organization, use the ListAccounts operation. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists the accounts in an organization that are contained by the specified target root or organizational unit (OU). If you specify the root, you get a list of all the accounts that aren't in any OU. If you specify an OU, you get a list of all the accounts in only that OU and not in any child OUs. To get a list of all accounts in the organization, use the ListAccounts operation. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListAccountsRequest =
   struct
     type nonrec t =
@@ -7261,7 +8751,7 @@ module ListAccountsRequest =
           "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the maximum you specify, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that Organizations might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
     let make ?nextToken =
       fun ?maxResults -> fun () -> { nextToken; maxResults }
     let to_value x =
@@ -7276,19 +8766,20 @@ module ListAccountsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all the accounts in the organization. To request only the accounts in a specified root or organizational unit (OU), use the ListAccountsForParent operation instead. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists all the accounts in the organization. To request only the accounts in a specified root or organizational unit (OU), use the ListAccountsForParent operation instead. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListAccountsResponse =
   struct
     type nonrec t =
       {
       accounts: Accounts.t option
-        [@ocaml.doc "A list of objects in the organization."];
+        [@ocaml.doc
+          "A list of objects in the organization. The Status parameter in the API response will be retired on September 9, 2026. Although both the account State and account Status parameters are currently available in the Organizations APIs (DescribeAccount, ListAccounts, ListAccountsForParent), we recommend that you update your scripts or other code to use the State parameter instead of Status before September 9, 2026."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."]}
@@ -7371,13 +8862,197 @@ module ListAccountsResponse =
         (Option.map ~f:Accounts.of_xml) (Xml.child xml_arg0 "Accounts") in
       make ?nextToken ?accounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let accounts = field_map json "Accounts" Accounts.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let accounts = field_map json__ "Accounts" Accounts.of_json in
       make ?nextToken ?accounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all the accounts in the organization. To request only the accounts in a specified root or organizational unit (OU), use the ListAccountsForParent operation instead. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists all the accounts in the organization. To request only the accounts in a specified root or organizational unit (OU), use the ListAccountsForParent operation instead. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator."]
+module ListAccountsWithInvalidEffectivePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      policyType: EffectivePolicyType.t
+        [@ocaml.doc
+          "The type of policy that you want information about. You can specify one of the following values: DECLARATIVE_POLICY_EC2 BACKUP_POLICY TAG_POLICY CHATBOT_POLICY AISERVICES_OPT_OUT_POLICY SECURITYHUB_POLICY UPGRADE_ROLLOUT_POLICY INSPECTOR_POLICY BEDROCK_POLICY S3_POLICY NETWORK_SECURITY_DIRECTOR_POLICY"];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
+    let context_ = "ListAccountsWithInvalidEffectivePolicyRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~policyType -> fun () -> { nextToken; maxResults; policyType }
+    let to_value x =
+      structure_to_value
+        [("PolicyType", (Some (EffectivePolicyType.to_value x.policyType)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let policyType =
+        EffectivePolicyType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PolicyType") in
+      make ?maxResults ?nextToken ~policyType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let policyType =
+        field_map_exn json__ "PolicyType" EffectivePolicyType.of_json in
+      make ?maxResults ?nextToken ~policyType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the accounts in an organization that have invalid effective policies. An invalid effective policy is an effective policy that fails validation checks, resulting in the effective policy not being fully enforced on all the intended accounts within an organization. You can only call this operation from the management account or a member account that is a delegated administrator."]
+module ListAccountsWithInvalidEffectivePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      accounts: Accounts.t option
+        [@ocaml.doc
+          "The accounts in the organization which have an invalid effective policy for the specified policy type."];
+      policyType: EffectivePolicyType.t option
+        [@ocaml.doc
+          "The specified policy type. One of the following values: DECLARATIVE_POLICY_EC2 BACKUP_POLICY TAG_POLICY CHATBOT_POLICY AISERVICES_OPT_OUT_POLICY SECURITYHUB_POLICY UPGRADE_ROLLOUT_POLICY INSPECTOR_POLICY BEDROCK_POLICY S3_POLICY NETWORK_SECURITY_DIRECTOR_POLICY"];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."]}
+    type nonrec error =
+      [
+        `AWSOrganizationsNotInUseException of
+          AWSOrganizationsNotInUseException.t 
+      | `AccessDeniedException of AccessDeniedException.t 
+      | `ConstraintViolationException of ConstraintViolationException.t 
+      | `EffectivePolicyNotFoundException of
+          EffectivePolicyNotFoundException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ServiceException of ServiceException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnsupportedAPIEndpointException of UnsupportedAPIEndpointException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accounts =
+      fun ?policyType ->
+        fun ?nextToken -> fun () -> { accounts; policyType; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_json json)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_json json)
+      | "EffectivePolicyNotFoundException" ->
+          `EffectivePolicyNotFoundException
+            (EffectivePolicyNotFoundException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_xml xml)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_xml xml)
+      | "EffectivePolicyNotFoundException" ->
+          `EffectivePolicyNotFoundException
+            (EffectivePolicyNotFoundException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AWSOrganizationsNotInUseException e ->
+          `Assoc
+            [("error", (`String "AWSOrganizationsNotInUseException"));
+            ("details", (AWSOrganizationsNotInUseException.to_json e))]
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConstraintViolationException e ->
+          `Assoc
+            [("error", (`String "ConstraintViolationException"));
+            ("details", (ConstraintViolationException.to_json e))]
+      | `EffectivePolicyNotFoundException e ->
+          `Assoc
+            [("error", (`String "EffectivePolicyNotFoundException"));
+            ("details", (EffectivePolicyNotFoundException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnsupportedAPIEndpointException e ->
+          `Assoc
+            [("error", (`String "UnsupportedAPIEndpointException"));
+            ("details", (UnsupportedAPIEndpointException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Accounts", (Option.map x.accounts ~f:Accounts.to_value));
+        ("PolicyType",
+          (Option.map x.policyType ~f:EffectivePolicyType.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let policyType =
+        (Option.map ~f:EffectivePolicyType.of_xml)
+          (Xml.child xml_arg0 "PolicyType") in
+      let accounts =
+        (Option.map ~f:Accounts.of_xml) (Xml.child xml_arg0 "Accounts") in
+      make ?nextToken ?policyType ?accounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let policyType =
+        field_map json__ "PolicyType" EffectivePolicyType.of_json in
+      let accounts = field_map json__ "Accounts" Accounts.of_json in
+      make ?nextToken ?policyType ?accounts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the accounts in an organization that have invalid effective policies. An invalid effective policy is an effective policy that fails validation checks, resulting in the effective policy not being fully enforced on all the intended accounts within an organization. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListChildrenRequest =
   struct
     type nonrec t =
@@ -7393,7 +9068,7 @@ module ListChildrenRequest =
           "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the maximum you specify, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that Organizations might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
     let context_ = "ListChildrenRequest"
     let make ?nextToken =
       fun ?maxResults ->
@@ -7419,15 +9094,15 @@ module ListChildrenRequest =
         ParentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ParentId") in
       make ?maxResults ?nextToken ~childType ~parentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let childType = field_map_exn json "ChildType" ChildType.of_json in
-      let parentId = field_map_exn json "ParentId" ParentId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let childType = field_map_exn json__ "ChildType" ChildType.of_json in
+      let parentId = field_map_exn json__ "ParentId" ParentId.of_json in
       make ?maxResults ?nextToken ~childType ~parentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all of the organizational units (OUs) or accounts that are contained in the specified parent OU or root. This operation, along with ListParents enables you to traverse the tree structure that makes up this root. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists all of the organizational units (OUs) or accounts that are contained in the specified parent OU or root. This operation, along with ListParents enables you to traverse the tree structure that makes up this root. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListChildrenResponse =
   struct
     type nonrec t =
@@ -7526,13 +9201,13 @@ module ListChildrenResponse =
         (Option.map ~f:Children.of_xml) (Xml.child xml_arg0 "Children") in
       make ?nextToken ?children ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let children = field_map json "Children" Children.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let children = field_map json__ "Children" Children.of_json in
       make ?nextToken ?children ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all of the organizational units (OUs) or accounts that are contained in the specified parent OU or root. This operation, along with ListParents enables you to traverse the tree structure that makes up this root. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists all of the organizational units (OUs) or accounts that are contained in the specified parent OU or root. This operation, along with ListParents enables you to traverse the tree structure that makes up this root. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListCreateAccountStatusRequest =
   struct
     type nonrec t =
@@ -7545,7 +9220,7 @@ module ListCreateAccountStatusRequest =
           "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the maximum you specify, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that Organizations might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
     let make ?states =
       fun ?nextToken ->
         fun ?maxResults -> fun () -> { states; nextToken; maxResults }
@@ -7565,14 +9240,14 @@ module ListCreateAccountStatusRequest =
           (Xml.child xml_arg0 "States") in
       make ?maxResults ?nextToken ?states ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let states = field_map json "States" CreateAccountStates.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let states = field_map json__ "States" CreateAccountStates.of_json in
       make ?maxResults ?nextToken ?states ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the account creation requests that match the specified status that is currently being tracked for the organization. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists the account creation requests that match the specified status that is currently being tracked for the organization. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListCreateAccountStatusResponse =
   struct
     type nonrec t =
@@ -7677,14 +9352,15 @@ module ListCreateAccountStatusResponse =
           (Xml.child xml_arg0 "CreateAccountStatuses") in
       make ?nextToken ?createAccountStatuses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let createAccountStatuses =
-        field_map json "CreateAccountStatuses" CreateAccountStatuses.of_json in
+        field_map json__ "CreateAccountStatuses"
+          CreateAccountStatuses.of_json in
       make ?nextToken ?createAccountStatuses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the account creation requests that match the specified status that is currently being tracked for the organization. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists the account creation requests that match the specified status that is currently being tracked for the organization. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListDelegatedAdministratorsRequest =
   struct
     type nonrec t =
@@ -7697,7 +9373,7 @@ module ListDelegatedAdministratorsRequest =
           "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the maximum you specify, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that Organizations might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
     let make ?servicePrincipal =
       fun ?nextToken ->
         fun ?maxResults ->
@@ -7719,15 +9395,15 @@ module ListDelegatedAdministratorsRequest =
           (Xml.child xml_arg0 "ServicePrincipal") in
       make ?maxResults ?nextToken ?servicePrincipal ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let servicePrincipal =
-        field_map json "ServicePrincipal" ServicePrincipal.of_json in
+        field_map json__ "ServicePrincipal" ServicePrincipal.of_json in
       make ?maxResults ?nextToken ?servicePrincipal ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the Amazon Web Services accounts that are designated as delegated administrators in this organization. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists the Amazon Web Services accounts that are designated as delegated administrators in this organization. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListDelegatedAdministratorsResponse =
   struct
     type nonrec t =
@@ -7843,15 +9519,15 @@ module ListDelegatedAdministratorsResponse =
           (Xml.child xml_arg0 "DelegatedAdministrators") in
       make ?nextToken ?delegatedAdministrators ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let delegatedAdministrators =
-        field_map json "DelegatedAdministrators"
+        field_map json__ "DelegatedAdministrators"
           DelegatedAdministrators.of_json in
       make ?nextToken ?delegatedAdministrators ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the Amazon Web Services accounts that are designated as delegated administrators in this organization. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists the Amazon Web Services accounts that are designated as delegated administrators in this organization. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListDelegatedServicesForAccountRequest =
   struct
     type nonrec t =
@@ -7864,7 +9540,7 @@ module ListDelegatedServicesForAccountRequest =
           "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the maximum you specify, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that Organizations might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
     let context_ = "ListDelegatedServicesForAccountRequest"
     let make ?nextToken =
       fun ?maxResults ->
@@ -7885,14 +9561,14 @@ module ListDelegatedServicesForAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ?maxResults ?nextToken ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
       make ?maxResults ?nextToken ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List the Amazon Web Services services for which the specified account is a delegated administrator. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "List the Amazon Web Services services for which the specified account is a delegated administrator. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListDelegatedServicesForAccountResponse =
   struct
     type nonrec t =
@@ -8027,27 +9703,272 @@ module ListDelegatedServicesForAccountResponse =
           (Xml.child xml_arg0 "DelegatedServices") in
       make ?nextToken ?delegatedServices ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let delegatedServices =
-        field_map json "DelegatedServices" DelegatedServices.of_json in
+        field_map json__ "DelegatedServices" DelegatedServices.of_json in
       make ?nextToken ?delegatedServices ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List the Amazon Web Services services for which the specified account is a delegated administrator. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "List the Amazon Web Services services for which the specified account is a delegated administrator. You can only call this operation from the management account or a member account that is a delegated administrator."]
+module ListEffectivePolicyValidationErrorsRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t
+        [@ocaml.doc
+          "The ID of the account that you want details about. Specifying an organization root or organizational unit (OU) as the target is not supported."];
+      policyType: EffectivePolicyType.t
+        [@ocaml.doc
+          "The type of policy that you want information about. You can specify one of the following values: DECLARATIVE_POLICY_EC2 BACKUP_POLICY TAG_POLICY CHATBOT_POLICY AISERVICES_OPT_OUT_POLICY SECURITYHUB_POLICY UPGRADE_ROLLOUT_POLICY INSPECTOR_POLICY BEDROCK_POLICY S3_POLICY NETWORK_SECURITY_DIRECTOR_POLICY"];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
+    let context_ = "ListEffectivePolicyValidationErrorsRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~accountId ->
+          fun ~policyType ->
+            fun () -> { nextToken; maxResults; accountId; policyType }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("PolicyType", (Some (EffectivePolicyType.to_value x.policyType)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let policyType =
+        EffectivePolicyType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PolicyType") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ?maxResults ?nextToken ~policyType ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let policyType =
+        field_map_exn json__ "PolicyType" EffectivePolicyType.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ?maxResults ?nextToken ~policyType ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the validation errors on an effective policy for a specified account and policy type. You can only call this operation from the management account or a member account that is a delegated administrator."]
+module ListEffectivePolicyValidationErrorsResponse =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t option
+        [@ocaml.doc "The ID of the specified account."];
+      policyType: EffectivePolicyType.t option
+        [@ocaml.doc
+          "The specified policy type. One of the following values: DECLARATIVE_POLICY_EC2 BACKUP_POLICY TAG_POLICY CHATBOT_POLICY AISERVICES_OPT_OUT_POLICY SECURITYHUB_POLICY UPGRADE_ROLLOUT_POLICY INSPECTOR_POLICY BEDROCK_POLICY S3_POLICY NETWORK_SECURITY_DIRECTOR_POLICY"];
+      path: Path.t option
+        [@ocaml.doc
+          "The path in the organization where the specified account exists."];
+      evaluationTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The time when the latest effective policy was generated for the specified account."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."];
+      effectivePolicyValidationErrors:
+        EffectivePolicyValidationErrors.t option
+        [@ocaml.doc
+          "The EffectivePolicyValidationError object contains details about the validation errors that occurred when generating or enforcing an effective policy, such as which policies contributed to the error and location of the error."]}
+    type nonrec error =
+      [
+        `AWSOrganizationsNotInUseException of
+          AWSOrganizationsNotInUseException.t 
+      | `AccessDeniedException of AccessDeniedException.t 
+      | `AccountNotFoundException of AccountNotFoundException.t 
+      | `ConstraintViolationException of ConstraintViolationException.t 
+      | `EffectivePolicyNotFoundException of
+          EffectivePolicyNotFoundException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ServiceException of ServiceException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnsupportedAPIEndpointException of UnsupportedAPIEndpointException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accountId =
+      fun ?policyType ->
+        fun ?path ->
+          fun ?evaluationTimestamp ->
+            fun ?nextToken ->
+              fun ?effectivePolicyValidationErrors ->
+                fun () ->
+                  {
+                    accountId;
+                    policyType;
+                    path;
+                    evaluationTimestamp;
+                    nextToken;
+                    effectivePolicyValidationErrors
+                  }
+    let error_of_json name json =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_json json)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AccountNotFoundException" ->
+          `AccountNotFoundException (AccountNotFoundException.of_json json)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_json json)
+      | "EffectivePolicyNotFoundException" ->
+          `EffectivePolicyNotFoundException
+            (EffectivePolicyNotFoundException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_xml xml)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AccountNotFoundException" ->
+          `AccountNotFoundException (AccountNotFoundException.of_xml xml)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_xml xml)
+      | "EffectivePolicyNotFoundException" ->
+          `EffectivePolicyNotFoundException
+            (EffectivePolicyNotFoundException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AWSOrganizationsNotInUseException e ->
+          `Assoc
+            [("error", (`String "AWSOrganizationsNotInUseException"));
+            ("details", (AWSOrganizationsNotInUseException.to_json e))]
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AccountNotFoundException e ->
+          `Assoc
+            [("error", (`String "AccountNotFoundException"));
+            ("details", (AccountNotFoundException.to_json e))]
+      | `ConstraintViolationException e ->
+          `Assoc
+            [("error", (`String "ConstraintViolationException"));
+            ("details", (ConstraintViolationException.to_json e))]
+      | `EffectivePolicyNotFoundException e ->
+          `Assoc
+            [("error", (`String "EffectivePolicyNotFoundException"));
+            ("details", (EffectivePolicyNotFoundException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnsupportedAPIEndpointException e ->
+          `Assoc
+            [("error", (`String "UnsupportedAPIEndpointException"));
+            ("details", (UnsupportedAPIEndpointException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("PolicyType",
+          (Option.map x.policyType ~f:EffectivePolicyType.to_value));
+        ("Path", (Option.map x.path ~f:Path.to_value));
+        ("EvaluationTimestamp",
+          (Option.map x.evaluationTimestamp ~f:Timestamp.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("EffectivePolicyValidationErrors",
+          (Option.map x.effectivePolicyValidationErrors
+             ~f:EffectivePolicyValidationErrors.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let effectivePolicyValidationErrors =
+        (Option.map ~f:EffectivePolicyValidationErrors.of_xml)
+          (Xml.child xml_arg0 "EffectivePolicyValidationErrors") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let evaluationTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "EvaluationTimestamp") in
+      let path = (Option.map ~f:Path.of_xml) (Xml.child xml_arg0 "Path") in
+      let policyType =
+        (Option.map ~f:EffectivePolicyType.of_xml)
+          (Xml.child xml_arg0 "PolicyType") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ?effectivePolicyValidationErrors ?nextToken ?evaluationTimestamp
+        ?path ?policyType ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let effectivePolicyValidationErrors =
+        field_map json__ "EffectivePolicyValidationErrors"
+          EffectivePolicyValidationErrors.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let evaluationTimestamp =
+        field_map json__ "EvaluationTimestamp" Timestamp.of_json in
+      let path = field_map json__ "Path" Path.of_json in
+      let policyType =
+        field_map json__ "PolicyType" EffectivePolicyType.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?effectivePolicyValidationErrors ?nextToken ?evaluationTimestamp
+        ?path ?policyType ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the validation errors on an effective policy for a specified account and policy type. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListHandshakesForAccountRequest =
   struct
     type nonrec t =
       {
       filter: HandshakeFilter.t option
         [@ocaml.doc
-          "Filters the handshakes that you want included in the response. The default is all types. Use the ActionType element to limit the output to only a specified type, such as INVITE, ENABLE_ALL_FEATURES, or APPROVE_ALL_FEATURES. Alternatively, for the ENABLE_ALL_FEATURES handshake that generates a separate child handshake for each member account, you can specify ParentHandshakeId to see only the handshakes that were generated by that parent request."];
+          "A HandshakeFilter object. Contains the filer used to select the handshakes for an operation."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the maximum you specify, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that Organizations might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
     let make ?filter =
       fun ?nextToken ->
         fun ?maxResults -> fun () -> { filter; nextToken; maxResults }
@@ -8066,21 +9987,21 @@ module ListHandshakesForAccountRequest =
         (Option.map ~f:HandshakeFilter.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let filter = field_map json "Filter" HandshakeFilter.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filter = field_map json__ "Filter" HandshakeFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the current handshakes that are associated with the account of the requesting user. Handshakes that are ACCEPTED, DECLINED, CANCELED, or EXPIRED appear in the results of this API for only 30 days after changing to that state. After that, they're deleted and no longer accessible. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called from any account in the organization."]
+       "Lists the recent handshakes that you have received. You can view CANCELED, ACCEPTED, DECLINED, or EXPIRED handshakes in API responses for 30 days before they are deleted. You can call this operation from any account in a organization. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results."]
 module ListHandshakesForAccountResponse =
   struct
     type nonrec t =
       {
       handshakes: Handshakes.t option
         [@ocaml.doc
-          "A list of Handshake objects with details about each of the handshakes that is associated with the specified account."];
+          "An array of Handshakeobjects. Contains details for a handshake."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."]}
@@ -8162,26 +10083,26 @@ module ListHandshakesForAccountResponse =
         (Option.map ~f:Handshakes.of_xml) (Xml.child xml_arg0 "Handshakes") in
       make ?nextToken ?handshakes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let handshakes = field_map json "Handshakes" Handshakes.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let handshakes = field_map json__ "Handshakes" Handshakes.of_json in
       make ?nextToken ?handshakes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the current handshakes that are associated with the account of the requesting user. Handshakes that are ACCEPTED, DECLINED, CANCELED, or EXPIRED appear in the results of this API for only 30 days after changing to that state. After that, they're deleted and no longer accessible. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called from any account in the organization."]
+       "Lists the recent handshakes that you have received. You can view CANCELED, ACCEPTED, DECLINED, or EXPIRED handshakes in API responses for 30 days before they are deleted. You can call this operation from any account in a organization. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results."]
 module ListHandshakesForOrganizationRequest =
   struct
     type nonrec t =
       {
       filter: HandshakeFilter.t option
         [@ocaml.doc
-          "A filter of the handshakes that you want included in the response. The default is all types. Use the ActionType element to limit the output to only a specified type, such as INVITE, ENABLE-ALL-FEATURES, or APPROVE-ALL-FEATURES. Alternatively, for the ENABLE-ALL-FEATURES handshake that generates a separate child handshake for each member account, you can specify the ParentHandshakeId to see only the handshakes that were generated by that parent request."];
+          "A HandshakeFilter object. Contains the filer used to select the handshakes for an operation."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the maximum you specify, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that Organizations might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
     let make ?filter =
       fun ?nextToken ->
         fun ?maxResults -> fun () -> { filter; nextToken; maxResults }
@@ -8200,21 +10121,21 @@ module ListHandshakesForOrganizationRequest =
         (Option.map ~f:HandshakeFilter.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let filter = field_map json "Filter" HandshakeFilter.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filter = field_map json__ "Filter" HandshakeFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the handshakes that are associated with the organization that the requesting user is part of. The ListHandshakesForOrganization operation returns a list of handshake structures. Each structure contains details and status about a handshake. Handshakes that are ACCEPTED, DECLINED, CANCELED, or EXPIRED appear in the results of this API for only 30 days after changing to that state. After that, they're deleted and no longer accessible. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists the recent handshakes that you have sent. You can view CANCELED, ACCEPTED, DECLINED, or EXPIRED handshakes in API responses for 30 days before they are deleted. You can only call this operation from the management account or a member account that is a delegated administrator. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results."]
 module ListHandshakesForOrganizationResponse =
   struct
     type nonrec t =
       {
       handshakes: Handshakes.t option
         [@ocaml.doc
-          "A list of Handshake objects with details about each of the handshakes that are associated with an organization."];
+          "An array of Handshakeobjects. Contains details for a handshake."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."]}
@@ -8309,26 +10230,241 @@ module ListHandshakesForOrganizationResponse =
         (Option.map ~f:Handshakes.of_xml) (Xml.child xml_arg0 "Handshakes") in
       make ?nextToken ?handshakes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let handshakes = field_map json "Handshakes" Handshakes.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let handshakes = field_map json__ "Handshakes" Handshakes.of_json in
       make ?nextToken ?handshakes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the handshakes that are associated with the organization that the requesting user is part of. The ListHandshakesForOrganization operation returns a list of handshake structures. Each structure contains details and status about a handshake. Handshakes that are ACCEPTED, DECLINED, CANCELED, or EXPIRED appear in the results of this API for only 30 days after changing to that state. After that, they're deleted and no longer accessible. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists the recent handshakes that you have sent. You can view CANCELED, ACCEPTED, DECLINED, or EXPIRED handshakes in API responses for 30 days before they are deleted. You can only call this operation from the management account or a member account that is a delegated administrator. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results."]
+module ListInboundResponsibilityTransfersRequest =
+  struct
+    type nonrec t =
+      {
+      type_: ResponsibilityTransferType.t
+        [@ocaml.doc
+          "The type of responsibility. Currently, only BILLING is supported."];
+      id: ResponsibilityTransferId.t option
+        [@ocaml.doc "ID for the transfer."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
+    let context_ = "ListInboundResponsibilityTransfersRequest"
+    let make ?id =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ~type_ -> fun () -> { id; nextToken; maxResults; type_ }
+    let to_value x =
+      structure_to_value
+        [("Type", (Some (ResponsibilityTransferType.to_value x.type_)));
+        ("Id", (Option.map x.id ~f:ResponsibilityTransferId.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let id =
+        (Option.map ~f:ResponsibilityTransferId.of_xml)
+          (Xml.child xml_arg0 "Id") in
+      let type_ =
+        ResponsibilityTransferType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      make ?maxResults ?nextToken ?id ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let id = field_map json__ "Id" ResponsibilityTransferId.of_json in
+      let type_ =
+        field_map_exn json__ "Type" ResponsibilityTransferType.of_json in
+      make ?maxResults ?nextToken ?id ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists transfers that allow you to manage the specified responsibilities for another organization. This operation returns both transfer invitations and transfers. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results."]
+module ResponsibilityTransfers =
+  struct
+    type nonrec t = ResponsibilityTransfer.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResponsibilityTransfer.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResponsibilityTransfer.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResponsibilityTransfers"
+        ~of_json:ResponsibilityTransfer.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListInboundResponsibilityTransfersResponse =
+  struct
+    type nonrec t =
+      {
+      responsibilityTransfers: ResponsibilityTransfers.t option
+        [@ocaml.doc
+          "A ResponsibilityTransfers object. Contains details for a transfer."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."]}
+    type nonrec error =
+      [
+        `AWSOrganizationsNotInUseException of
+          AWSOrganizationsNotInUseException.t 
+      | `AccessDeniedException of AccessDeniedException.t 
+      | `ConstraintViolationException of ConstraintViolationException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResponsibilityTransferNotFoundException of
+          ResponsibilityTransferNotFoundException.t 
+      | `ServiceException of ServiceException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnsupportedAPIEndpointException of UnsupportedAPIEndpointException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?responsibilityTransfers =
+      fun ?nextToken -> fun () -> { responsibilityTransfers; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_json json)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResponsibilityTransferNotFoundException" ->
+          `ResponsibilityTransferNotFoundException
+            (ResponsibilityTransferNotFoundException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_xml xml)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResponsibilityTransferNotFoundException" ->
+          `ResponsibilityTransferNotFoundException
+            (ResponsibilityTransferNotFoundException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AWSOrganizationsNotInUseException e ->
+          `Assoc
+            [("error", (`String "AWSOrganizationsNotInUseException"));
+            ("details", (AWSOrganizationsNotInUseException.to_json e))]
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConstraintViolationException e ->
+          `Assoc
+            [("error", (`String "ConstraintViolationException"));
+            ("details", (ConstraintViolationException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResponsibilityTransferNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResponsibilityTransferNotFoundException"));
+            ("details", (ResponsibilityTransferNotFoundException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnsupportedAPIEndpointException e ->
+          `Assoc
+            [("error", (`String "UnsupportedAPIEndpointException"));
+            ("details", (UnsupportedAPIEndpointException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResponsibilityTransfers",
+           (Option.map x.responsibilityTransfers
+              ~f:ResponsibilityTransfers.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let responsibilityTransfers =
+        (Option.map ~f:ResponsibilityTransfers.of_xml)
+          (Xml.child xml_arg0 "ResponsibilityTransfers") in
+      make ?nextToken ?responsibilityTransfers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let responsibilityTransfers =
+        field_map json__ "ResponsibilityTransfers"
+          ResponsibilityTransfers.of_json in
+      make ?nextToken ?responsibilityTransfers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists transfers that allow you to manage the specified responsibilities for another organization. This operation returns both transfer invitations and transfers. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results."]
 module ListOrganizationalUnitsForParentRequest =
   struct
     type nonrec t =
       {
       parentId: ParentId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the root or OU whose child OUs you want to list. The regex pattern for a parent ID string requires one of the following: Root - A string that begins with \"r-\" followed by from 4 to 32 lowercase letters or digits. Organizational unit (OU) - A string that begins with \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."];
+          "ID for the root or OU whose child OUs you want to list. The regex pattern for a parent ID string requires one of the following: Root - A string that begins with \"r-\" followed by from 4 to 32 lowercase letters or digits. Organizational unit (OU) - A string that begins with \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the maximum you specify, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that Organizations might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
     let context_ = "ListOrganizationalUnitsForParentRequest"
     let make ?nextToken =
       fun ?maxResults ->
@@ -8348,18 +10484,21 @@ module ListOrganizationalUnitsForParentRequest =
         ParentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ParentId") in
       make ?maxResults ?nextToken ~parentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let parentId = field_map_exn json "ParentId" ParentId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let parentId = field_map_exn json__ "ParentId" ParentId.of_json in
       make ?maxResults ?nextToken ~parentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the organizational units (OUs) in a parent organizational unit or root. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists the organizational units (OUs) in a parent organizational unit or root. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module OrganizationalUnits =
   struct
     type nonrec t = OrganizationalUnit.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrganizationalUnit.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8481,27 +10620,193 @@ module ListOrganizationalUnitsForParentResponse =
           (Xml.child xml_arg0 "OrganizationalUnits") in
       make ?nextToken ?organizationalUnits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let organizationalUnits =
-        field_map json "OrganizationalUnits" OrganizationalUnits.of_json in
+        field_map json__ "OrganizationalUnits" OrganizationalUnits.of_json in
       make ?nextToken ?organizationalUnits ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the organizational units (OUs) in a parent organizational unit or root. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists the organizational units (OUs) in a parent organizational unit or root. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator."]
+module ListOutboundResponsibilityTransfersRequest =
+  struct
+    type nonrec t =
+      {
+      type_: ResponsibilityTransferType.t
+        [@ocaml.doc
+          "The type of responsibility. Currently, only BILLING is supported."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
+    let context_ = "ListOutboundResponsibilityTransfersRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~type_ -> fun () -> { nextToken; maxResults; type_ }
+    let to_value x =
+      structure_to_value
+        [("Type", (Some (ResponsibilityTransferType.to_value x.type_)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let type_ =
+        ResponsibilityTransferType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      make ?maxResults ?nextToken ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let type_ =
+        field_map_exn json__ "Type" ResponsibilityTransferType.of_json in
+      make ?maxResults ?nextToken ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists transfers that allow an account outside your organization to manage the specified responsibilities for your organization. This operation returns both transfer invitations and transfers. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results."]
+module ListOutboundResponsibilityTransfersResponse =
+  struct
+    type nonrec t =
+      {
+      responsibilityTransfers: ResponsibilityTransfers.t option
+        [@ocaml.doc
+          "An array of ResponsibilityTransfer objects. Contains details for a transfer."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."]}
+    type nonrec error =
+      [
+        `AWSOrganizationsNotInUseException of
+          AWSOrganizationsNotInUseException.t 
+      | `AccessDeniedException of AccessDeniedException.t 
+      | `ConstraintViolationException of ConstraintViolationException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ServiceException of ServiceException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnsupportedAPIEndpointException of UnsupportedAPIEndpointException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?responsibilityTransfers =
+      fun ?nextToken -> fun () -> { responsibilityTransfers; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_json json)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_xml xml)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AWSOrganizationsNotInUseException e ->
+          `Assoc
+            [("error", (`String "AWSOrganizationsNotInUseException"));
+            ("details", (AWSOrganizationsNotInUseException.to_json e))]
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConstraintViolationException e ->
+          `Assoc
+            [("error", (`String "ConstraintViolationException"));
+            ("details", (ConstraintViolationException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnsupportedAPIEndpointException e ->
+          `Assoc
+            [("error", (`String "UnsupportedAPIEndpointException"));
+            ("details", (UnsupportedAPIEndpointException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResponsibilityTransfers",
+           (Option.map x.responsibilityTransfers
+              ~f:ResponsibilityTransfers.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let responsibilityTransfers =
+        (Option.map ~f:ResponsibilityTransfers.of_xml)
+          (Xml.child xml_arg0 "ResponsibilityTransfers") in
+      make ?nextToken ?responsibilityTransfers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let responsibilityTransfers =
+        field_map json__ "ResponsibilityTransfers"
+          ResponsibilityTransfers.of_json in
+      make ?nextToken ?responsibilityTransfers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists transfers that allow an account outside your organization to manage the specified responsibilities for your organization. This operation returns both transfer invitations and transfers. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results."]
 module ListParentsRequest =
   struct
     type nonrec t =
       {
       childId: ChildId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the OU or account whose parent containers you want to list. Don't specify a root. The regex pattern for a child ID string requires one of the following: Account - A string that consists of exactly 12 digits. Organizational unit (OU) - A string that begins with \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that contains the OU). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."];
+          "ID for the OU or account whose parent containers you want to list. Don't specify a root. The regex pattern for a child ID string requires one of the following: Account - A string that consists of exactly 12 digits. Organizational unit (OU) - A string that begins with \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that contains the OU). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the maximum you specify, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that Organizations might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
     let context_ = "ListParentsRequest"
     let make ?nextToken =
       fun ?maxResults ->
@@ -8521,14 +10826,14 @@ module ListParentsRequest =
         ChildId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ChildId") in
       make ?maxResults ?nextToken ~childId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let childId = field_map_exn json "ChildId" ChildId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let childId = field_map_exn json__ "ChildId" ChildId.of_json in
       make ?maxResults ?nextToken ~childId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the root or organizational units (OUs) that serve as the immediate parent of the specified child OU or account. This operation, along with ListChildren enables you to traverse the tree structure that makes up this root. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service. In the current release, a child can have only a single parent."]
+       "Lists the root or organizational units (OUs) that serve as the immediate parent of the specified child OU or account. This operation, along with ListChildren enables you to traverse the tree structure that makes up this root. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator. In the current release, a child can have only a single parent."]
 module ParentType =
   struct
     type nonrec t =
@@ -8575,9 +10880,9 @@ module Parent =
       let id = (Option.map ~f:ParentId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?type_ ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" ParentType.of_json in
-      let id = field_map json "Id" ParentId.of_json in make ?type_ ?id ()
+    let of_json json__ =
+      let type_ = field_map json__ "Type" ParentType.of_json in
+      let id = field_map json__ "Id" ParentId.of_json in make ?type_ ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about either a root or an organizational unit (OU) that can contain OUs or accounts in an organization."]
@@ -8585,6 +10890,9 @@ module Parents =
   struct
     type nonrec t = Parent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Parent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8702,29 +11010,29 @@ module ListParentsResponse =
         (Option.map ~f:Parents.of_xml) (Xml.child xml_arg0 "Parents") in
       make ?nextToken ?parents ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let parents = field_map json "Parents" Parents.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let parents = field_map json__ "Parents" Parents.of_json in
       make ?nextToken ?parents ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the root or organizational units (OUs) that serve as the immediate parent of the specified child OU or account. This operation, along with ListChildren enables you to traverse the tree structure that makes up this root. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service. In the current release, a child can have only a single parent."]
+       "Lists the root or organizational units (OUs) that serve as the immediate parent of the specified child OU or account. This operation, along with ListChildren enables you to traverse the tree structure that makes up this root. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator. In the current release, a child can have only a single parent."]
 module ListPoliciesForTargetRequest =
   struct
     type nonrec t =
       {
       targetId: PolicyTargetId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the root, organizational unit, or account whose policies you want to list. The regex pattern for a target ID string requires one of the following: Root - A string that begins with \"r-\" followed by from 4 to 32 lowercase letters or digits. Account - A string that consists of exactly 12 digits. Organizational unit (OU) - A string that begins with \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."];
+          "ID for the root, organizational unit, or account whose policies you want to list. The regex pattern for a target ID string requires one of the following: Root - A string that begins with \"r-\" followed by from 4 to 32 lowercase letters or digits. Account - A string that consists of exactly 12 digits. Organizational unit (OU) - A string that begins with \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."];
       filter: PolicyType.t
         [@ocaml.doc
-          "The type of policy that you want to include in the returned list. You must specify one of the following values: AISERVICES_OPT_OUT_POLICY BACKUP_POLICY SERVICE_CONTROL_POLICY TAG_POLICY"];
+          "The type of policy that you want to include in the returned list. You must specify one of the following values: SERVICE_CONTROL_POLICY RESOURCE_CONTROL_POLICY DECLARATIVE_POLICY_EC2 BACKUP_POLICY TAG_POLICY CHATBOT_POLICY AISERVICES_OPT_OUT_POLICY SECURITYHUB_POLICY UPGRADE_ROLLOUT_POLICY INSPECTOR_POLICY BEDROCK_POLICY S3_POLICY NETWORK_SECURITY_DIRECTOR_POLICY"];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the maximum you specify, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that Organizations might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
     let context_ = "ListPoliciesForTargetRequest"
     let make ?nextToken =
       fun ?maxResults ->
@@ -8750,19 +11058,22 @@ module ListPoliciesForTargetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TargetId") in
       make ?maxResults ?nextToken ~filter ~targetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let filter = field_map_exn json "Filter" PolicyType.of_json in
-      let targetId = field_map_exn json "TargetId" PolicyTargetId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filter = field_map_exn json__ "Filter" PolicyType.of_json in
+      let targetId = field_map_exn json__ "TargetId" PolicyTargetId.of_json in
       make ?maxResults ?nextToken ~filter ~targetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the policies that are directly attached to the specified target root, organizational unit (OU), or account. You must specify the policy type that you want included in the returned list. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists the policies that are directly attached to the specified target root, organizational unit (OU), or account. You must specify the policy type that you want included in the returned list. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module Policies =
   struct
     type nonrec t = PolicySummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicySummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8892,26 +11203,26 @@ module ListPoliciesForTargetResponse =
         (Option.map ~f:Policies.of_xml) (Xml.child xml_arg0 "Policies") in
       make ?nextToken ?policies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let policies = field_map json "Policies" Policies.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let policies = field_map json__ "Policies" Policies.of_json in
       make ?nextToken ?policies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the policies that are directly attached to the specified target root, organizational unit (OU), or account. You must specify the policy type that you want included in the returned list. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists the policies that are directly attached to the specified target root, organizational unit (OU), or account. You must specify the policy type that you want included in the returned list. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListPoliciesRequest =
   struct
     type nonrec t =
       {
       filter: PolicyType.t
         [@ocaml.doc
-          "Specifies the type of policy that you want to include in the response. You must specify one of the following values: AISERVICES_OPT_OUT_POLICY BACKUP_POLICY SERVICE_CONTROL_POLICY TAG_POLICY"];
+          "Specifies the type of policy that you want to include in the response. You must specify one of the following values: SERVICE_CONTROL_POLICY RESOURCE_CONTROL_POLICY DECLARATIVE_POLICY_EC2 BACKUP_POLICY TAG_POLICY CHATBOT_POLICY AISERVICES_OPT_OUT_POLICY SECURITYHUB_POLICY UPGRADE_ROLLOUT_POLICY INSPECTOR_POLICY BEDROCK_POLICY S3_POLICY NETWORK_SECURITY_DIRECTOR_POLICY"];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the maximum you specify, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that Organizations might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
     let context_ = "ListPoliciesRequest"
     let make ?nextToken =
       fun ?maxResults ->
@@ -8931,14 +11242,14 @@ module ListPoliciesRequest =
         PolicyType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Filter") in
       make ?maxResults ?nextToken ~filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let filter = field_map_exn json "Filter" PolicyType.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filter = field_map_exn json__ "Filter" PolicyType.of_json in
       make ?maxResults ?nextToken ~filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the list of all policies in an organization of a specified type. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Retrieves the list of all policies in an organization of a specified type. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListPoliciesResponse =
   struct
     type nonrec t =
@@ -9039,13 +11350,13 @@ module ListPoliciesResponse =
         (Option.map ~f:Policies.of_xml) (Xml.child xml_arg0 "Policies") in
       make ?nextToken ?policies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let policies = field_map json "Policies" Policies.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let policies = field_map json__ "Policies" Policies.of_json in
       make ?nextToken ?policies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the list of all policies in an organization of a specified type. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Retrieves the list of all policies in an organization of a specified type. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListRootsRequest =
   struct
     type nonrec t =
@@ -9055,7 +11366,7 @@ module ListRootsRequest =
           "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the maximum you specify, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that Organizations might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
     let make ?nextToken =
       fun ?maxResults -> fun () -> { nextToken; maxResults }
     let to_value x =
@@ -9070,17 +11381,20 @@ module ListRootsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the roots that are defined in the current organization. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service. Policy types can be enabled and disabled in roots. This is distinct from whether they're available in the organization. When you enable all features, you make policy types available for use in that organization. Individual policy types can then be enabled and disabled in a root. To see the availability of a policy type in an organization, use DescribeOrganization."]
+       "Lists the roots that are defined in the current organization. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator. Policy types can be enabled and disabled in roots. This is distinct from whether they're available in the organization. When you enable all features, you make policy types available for use in that organization. Individual policy types can then be enabled and disabled in a root. To see the availability of a policy type in an organization, use DescribeOrganization."]
 module Roots =
   struct
     type nonrec t = Root.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Root.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9187,13 +11501,13 @@ module ListRootsResponse =
       let roots = (Option.map ~f:Roots.of_xml) (Xml.child xml_arg0 "Roots") in
       make ?nextToken ?roots ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let roots = field_map json "Roots" Roots.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let roots = field_map json__ "Roots" Roots.of_json in
       make ?nextToken ?roots ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the roots that are defined in the current organization. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service. Policy types can be enabled and disabled in roots. This is distinct from whether they're available in the organization. When you enable all features, you make policy types available for use in that organization. Individual policy types can then be enabled and disabled in a root. To see the availability of a policy type in an organization, use DescribeOrganization."]
+       "Lists the roots that are defined in the current organization. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator. Policy types can be enabled and disabled in roots. This is distinct from whether they're available in the organization. When you enable all features, you make policy types available for use in that organization. Individual policy types can then be enabled and disabled in a root. To see the availability of a policy type in an organization, use DescribeOrganization."]
 module TaggableResourceId =
   struct
     type nonrec t = string
@@ -9204,7 +11518,7 @@ module TaggableResourceId =
           ((check_string_max i ~max:130) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"^(r-[0-9a-z]{4,32})|(\\d{12})|(ou-[0-9a-z]{4,32}-[a-z0-9]{8,32})|(^p-[0-9a-zA-Z_]{8,128})$"));
+                  ~pattern:"^(r-[0-9a-z]{4,32})|(\\d{12})|(ou-[0-9a-z]{4,32}-[a-z0-9]{8,32})|(^p-[0-9a-zA-Z_]{8,128})|(^rp-[0-9a-zA-Z_]{4,128})|(^rt-[0-9a-zA-Z_]{8,32})$"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -9240,14 +11554,14 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ?nextToken ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" TaggableResourceId.of_json in
+        field_map_exn json__ "ResourceId" TaggableResourceId.of_json in
       make ?nextToken ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists tags that are attached to the specified resource. You can attach tags to the following resources in Organizations. Amazon Web Services account Organization root Organizational unit (OU) Policy (any type) This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists tags that are attached to the specified resource. You can attach tags to the following resources in Organizations. Amazon Web Services account Organization root Organizational unit (OU) Policy (any type) You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -9344,26 +11658,26 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       make ?nextToken ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists tags that are attached to the specified resource. You can attach tags to the following resources in Organizations. Amazon Web Services account Organization root Organizational unit (OU) Policy (any type) This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists tags that are attached to the specified resource. You can attach tags to the following resources in Organizations. Amazon Web Services account Organization root Organizational unit (OU) Policy (any type) You can only call this operation from the management account or a member account that is a delegated administrator."]
 module ListTargetsForPolicyRequest =
   struct
     type nonrec t =
       {
       policyId: PolicyId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the policy whose attachments you want to know. The regex pattern for a policy ID string requires \"p-\" followed by from 8 to 128 lowercase or uppercase letters, digits, or the underscore character (_)."];
+          "ID for the policy whose attachments you want to know. The regex pattern for a policy ID string requires \"p-\" followed by from 8 to 128 lowercase or uppercase letters, digits, or the underscore character (_)."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The parameter for receiving additional results if you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The total number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value that is specific to the operation. If additional items exist beyond the maximum you specify, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. Note that Organizations might return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
+          "The maximum number of items to return in the response. If more results exist than the specified MaxResults value, a token is included in the response so that you can retrieve the remaining results."]}
     let context_ = "ListTargetsForPolicyRequest"
     let make ?nextToken =
       fun ?maxResults ->
@@ -9383,14 +11697,14 @@ module ListTargetsForPolicyRequest =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ?maxResults ?nextToken ~policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let policyId = field_map_exn json__ "PolicyId" PolicyId.of_json in
       make ?maxResults ?nextToken ~policyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all the roots, organizational units (OUs), and accounts that the specified policy is attached to. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
+       "Lists all the roots, organizational units (OUs), and accounts that the specified policy is attached to. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module TargetType =
   struct
     type nonrec t =
@@ -9472,11 +11786,11 @@ module PolicyTargetSummary =
         (Option.map ~f:PolicyTargetId.of_xml) (Xml.child xml_arg0 "TargetId") in
       make ?type_ ?name ?arn ?targetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" TargetType.of_json in
-      let name = field_map json "Name" TargetName.of_json in
-      let arn = field_map json "Arn" GenericArn.of_json in
-      let targetId = field_map json "TargetId" PolicyTargetId.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" TargetType.of_json in
+      let name = field_map json__ "Name" TargetName.of_json in
+      let arn = field_map json__ "Arn" GenericArn.of_json in
+      let targetId = field_map json__ "TargetId" PolicyTargetId.of_json in
       make ?type_ ?name ?arn ?targetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9485,6 +11799,9 @@ module PolicyTargets =
   struct
     type nonrec t = PolicyTargetSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyTargetSummary.to_value)) |>
         (fun x -> `List x)
@@ -9616,47 +11933,26 @@ module ListTargetsForPolicyResponse =
         (Option.map ~f:PolicyTargets.of_xml) (Xml.child xml_arg0 "Targets") in
       make ?nextToken ?targets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let targets = field_map json "Targets" PolicyTargets.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let targets = field_map json__ "Targets" PolicyTargets.of_json in
       make ?nextToken ?targets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all the roots, organizational units (OUs), and accounts that the specified policy is attached to. Always check the NextToken response parameter for a null value when calling a List* operation. These operations can occasionally return an empty set of results even when there are more results available. The NextToken response parameter value is null only when there are no more results to display. This operation can be called only from the organization's management account or by a member account that is a delegated administrator for an Amazon Web Services service."]
-module MasterCannotLeaveOrganizationException =
-  struct
-    type nonrec t = {
-      message: ExceptionMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ExceptionMessage.of_xml)
-          (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "You can't remove a management account from an organization. If you want the management account to become a member account in another organization, you must first delete the current organization of the management account."]
+       "Lists all the roots, organizational units (OUs), and accounts that the specified policy is attached to. When calling List* operations, always check the NextToken response parameter value, even if you receive an empty result set. These operations can occasionally return an empty set of results even when more results are available. Continue making requests until NextToken returns null. A null NextToken value indicates that you have retrieved all available results. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module MoveAccountRequest =
   struct
     type nonrec t =
       {
       accountId: AccountId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the account that you want to move. The regex pattern for an account ID string requires exactly 12 digits."];
+          "ID for the account that you want to move. The regex pattern for an account ID string requires exactly 12 digits."];
       sourceParentId: ParentId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the root or organizational unit that you want to move the account from. The regex pattern for a parent ID string requires one of the following: Root - A string that begins with \"r-\" followed by from 4 to 32 lowercase letters or digits. Organizational unit (OU) - A string that begins with \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."];
+          "ID for the root or organizational unit that you want to move the account from. The regex pattern for a parent ID string requires one of the following: Root - A string that begins with \"r-\" followed by from 4 to 32 lowercase letters or digits. Organizational unit (OU) - A string that begins with \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."];
       destinationParentId: ParentId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the root or organizational unit that you want to move the account to. The regex pattern for a parent ID string requires one of the following: Root - A string that begins with \"r-\" followed by from 4 to 32 lowercase letters or digits. Organizational unit (OU) - A string that begins with \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."]}
+          "ID for the root or organizational unit that you want to move the account to. The regex pattern for a parent ID string requires one of the following: Root - A string that begins with \"r-\" followed by from 4 to 32 lowercase letters or digits. Organizational unit (OU) - A string that begins with \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."]}
     let context_ = "MoveAccountRequest"
     let make ~accountId =
       fun ~sourceParentId ->
@@ -9681,16 +11977,16 @@ module MoveAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~destinationParentId ~sourceParentId ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationParentId =
-        field_map_exn json "DestinationParentId" ParentId.of_json in
+        field_map_exn json__ "DestinationParentId" ParentId.of_json in
       let sourceParentId =
-        field_map_exn json "SourceParentId" ParentId.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
+        field_map_exn json__ "SourceParentId" ParentId.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
       make ~destinationParentId ~sourceParentId ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Moves an account from its current source parent root or organizational unit (OU) to the specified destination parent root or OU. This operation can be called only from the organization's management account."]
+       "Moves an account from its current source parent root or organizational unit (OU) to the specified destination parent root or OU. You can only call this operation from the management account."]
 module OrganizationNotEmptyException =
   struct
     type nonrec t = {
@@ -9706,12 +12002,12 @@ module OrganizationNotEmptyException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The organization isn't empty. To delete an organization, you must first remove all accounts except the management account, delete all OUs, and delete all policies."]
+       "The organization isn't empty. To delete an organization, you must first remove all accounts except the management account."]
 module OrganizationalUnitNotEmptyException =
   struct
     type nonrec t = {
@@ -9727,8 +12023,8 @@ module OrganizationalUnitNotEmptyException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9748,8 +12044,8 @@ module PolicyInUseException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9769,12 +12065,169 @@ module PolicyNotAttachedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The policy isn't attached to the specified target in the specified root."]
+module PutResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      content: ResourcePolicyContent.t
+        [@ocaml.doc
+          "If provided, the new content for the resource policy. The text must be correctly formatted JSON that complies with the syntax for the resource policy's type. For more information, see SCP syntax in the Organizations User Guide."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "A list of tags that you want to attach to the newly created resource policy. For each tag in the list, you must specify both a tag key and a value. You can set the value to an empty string, but you can't set it to null. For more information about tagging, see Tagging Organizations resources in the Organizations User Guide. Calls with tags apply to the initial creation of the resource policy, otherwise an exception is thrown. If any one of the tags is not valid or if you exceed the allowed number of tags for the resource policy, then the entire request fails and the resource policy is not created."]}
+    let context_ = "PutResourcePolicyRequest"
+    let make ?tags = fun ~content -> fun () -> { tags; content }
+    let to_value x =
+      structure_to_value
+        [("Content", (Some (ResourcePolicyContent.to_value x.content)));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let content =
+        ResourcePolicyContent.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Content") in
+      make ?tags ~content ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let content =
+        field_map_exn json__ "Content" ResourcePolicyContent.of_json in
+      make ?tags ~content ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates or updates a resource policy. You can only call this operation from the management account.."]
+module PutResourcePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      resourcePolicy: ResourcePolicy.t option
+        [@ocaml.doc
+          "A structure that contains details about the resource policy."]}
+    type nonrec error =
+      [
+        `AWSOrganizationsNotInUseException of
+          AWSOrganizationsNotInUseException.t 
+      | `AccessDeniedException of AccessDeniedException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `ConstraintViolationException of ConstraintViolationException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ServiceException of ServiceException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnsupportedAPIEndpointException of UnsupportedAPIEndpointException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourcePolicy = fun () -> { resourcePolicy }
+    let error_of_json name json =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_json json)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_xml xml)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AWSOrganizationsNotInUseException e ->
+          `Assoc
+            [("error", (`String "AWSOrganizationsNotInUseException"));
+            ("details", (AWSOrganizationsNotInUseException.to_json e))]
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `ConstraintViolationException e ->
+          `Assoc
+            [("error", (`String "ConstraintViolationException"));
+            ("details", (ConstraintViolationException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnsupportedAPIEndpointException e ->
+          `Assoc
+            [("error", (`String "UnsupportedAPIEndpointException"));
+            ("details", (UnsupportedAPIEndpointException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourcePolicy",
+           (Option.map x.resourcePolicy ~f:ResourcePolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourcePolicy =
+        (Option.map ~f:ResourcePolicy.of_xml)
+          (Xml.child xml_arg0 "ResourcePolicy") in
+      make ?resourcePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourcePolicy =
+        field_map json__ "ResourcePolicy" ResourcePolicy.of_json in
+      make ?resourcePolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates or updates a resource policy. You can only call this operation from the management account.."]
 module RegisterDelegatedAdministratorRequest =
   struct
     type nonrec t =
@@ -9803,21 +12256,21 @@ module RegisterDelegatedAdministratorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~servicePrincipal ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let servicePrincipal =
-        field_map_exn json "ServicePrincipal" ServicePrincipal.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
+        field_map_exn json__ "ServicePrincipal" ServicePrincipal.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
       make ~servicePrincipal ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables the specified member account to administer the Organizations features of the specified Amazon Web Services service. It grants read-only access to Organizations service data. The account still requires IAM permissions to access and administer the Amazon Web Services service. You can run this action only for Amazon Web Services services that support this feature. For a current list of services that support it, see the column Supports Delegated Administrator in the table at Amazon Web Services Services that you can use with Organizations in the Organizations User Guide. This operation can be called only from the organization's management account."]
+       "Enables the specified member account to administer the Organizations features of the specified Amazon Web Services service. It grants read-only access to Organizations service data. The account still requires IAM permissions to access and administer the Amazon Web Services service. You can run this action only for Amazon Web Services services that support this feature. For a current list of services that support it, see the column Supports Delegated Administrator in the table at Amazon Web Services Services that you can use with Organizations in the Organizations User Guide. You can only call this operation from the management account."]
 module RemoveAccountFromOrganizationRequest =
   struct
     type nonrec t =
       {
       accountId: AccountId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the member account that you want to remove from the organization. The regex pattern for an account ID string requires exactly 12 digits."]}
+          "ID for the member account that you want to remove from the organization. The regex pattern for an account ID string requires exactly 12 digits."]}
     let context_ = "RemoveAccountFromOrganizationRequest"
     let make ~accountId = fun () -> { accountId }
     let to_value x =
@@ -9830,12 +12283,33 @@ module RemoveAccountFromOrganizationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
+    let of_json json__ =
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
       make ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specified account from the organization. The removed account becomes a standalone account that isn't a member of any organization. It's no longer subject to any policies and is responsible for its own bill payments. The organization's management account is no longer charged for any expenses accrued by the member account after it's removed from the organization. This operation can be called only from the organization's management account. Member accounts can remove themselves with LeaveOrganization instead. You can remove an account from your organization only if the account is configured with the information required to operate as a standalone account. When you create an account in an organization using the Organizations console, API, or CLI commands, the information required of standalone accounts is not automatically collected. For an account that you want to make standalone, you must choose a support plan, provide and verify the required contact information, and provide a current payment method. Amazon Web Services uses the payment method to charge for any billable (not free tier) Amazon Web Services activity that occurs while the account isn't attached to an organization. To remove an account that doesn't yet have this information, you must sign in as the member account and follow the steps at To leave an organization when all required account information has not yet been provided in the Organizations User Guide. The account that you want to leave must not be a delegated administrator account for any Amazon Web Services service enabled for your organization. If the account is a delegated administrator, you must first change the delegated administrator account to another account that is remaining in the organization. After the account leaves the organization, all tags that were attached to the account object in the organization are deleted. Amazon Web Services accounts outside of an organization do not support tags."]
+       "Removes the specified account from the organization. The removed account becomes a standalone account that isn't a member of any organization. It's no longer subject to any policies and is responsible for its own bill payments. The organization's management account is no longer charged for any expenses accrued by the member account after it's removed from the organization. You can only call this operation from the management account. Member accounts can remove themselves with LeaveOrganization instead. You can remove an account from your organization only if the account is configured with the information required to operate as a standalone account. When you create an account in an organization using the Organizations console, API, or CLI commands, the information required of standalone accounts is not automatically collected. For more information, see Considerations before removing an account from an organization in the Organizations User Guide. The account that you want to leave must not be a delegated administrator account for any Amazon Web Services service enabled for your organization. If the account is a delegated administrator, you must first change the delegated administrator account to another account that is remaining in the organization. After the account leaves the organization, all tags that were attached to the account object in the organization are deleted. Amazon Web Services accounts outside of an organization do not support tags."]
+module ResponsibilityTransferAlreadyInStatusException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The responsibility transfer is already in the status that you specified."]
 module SourceParentNotFoundException =
   struct
     type nonrec t = {
@@ -9851,8 +12325,8 @@ module SourceParentNotFoundException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9861,6 +12335,9 @@ module TagKeys =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9889,7 +12366,7 @@ module TagResourceRequest =
           "The ID of the resource to add a tag to. You can specify any of the following taggable resources. Amazon Web Services account \226\128\147 specify the account ID number. Organizational unit \226\128\147 specify the OU ID that begins with ou- and looks similar to: ou-1a2b-34uvwxyz Root \226\128\147 specify the root ID that begins with r- and looks similar to: r-1a2b Policy \226\128\147 specify the policy ID that begins with p- andlooks similar to: p-12abcdefg3"];
       tags: Tags.t
         [@ocaml.doc
-          "A list of tags to add to the specified resource. For each tag in the list, you must specify both a tag key and a value. The value can be an empty string, but you can't set it to null. If any one of the tags is invalid or if you exceed the maximum allowed number of tags for a resource, then the entire request fails."]}
+          "A list of tags to add to the specified resource. For each tag in the list, you must specify both a tag key and a value. The value can be an empty string, but you can't set it to null. If any one of the tags is not valid or if you exceed the maximum allowed number of tags for a resource, then the entire request fails."]}
     let context_ = "TagResourceRequest"
     let make ~resourceId = fun ~tags -> fun () -> { resourceId; tags }
     let to_value x =
@@ -9905,14 +12382,210 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tags ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" TaggableResourceId.of_json in
+        field_map_exn json__ "ResourceId" TaggableResourceId.of_json in
       make ~tags ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds one or more tags to the specified resource. Currently, you can attach tags to the following resources in Organizations. Amazon Web Services account Organization root Organizational unit (OU) Policy (any type) This operation can be called only from the organization's management account."]
+       "Adds one or more tags to the specified resource. Currently, you can attach tags to the following resources in Organizations. Amazon Web Services account Organization root Organizational unit (OU) Policy (any type) You can only call this operation from the management account or a member account that is a delegated administrator."]
+module TerminateResponsibilityTransferRequest =
+  struct
+    type nonrec t =
+      {
+      id: ResponsibilityTransferId.t [@ocaml.doc "ID for the transfer."];
+      endTimestamp: Timestamp.t option
+        [@ocaml.doc "Timestamp when the responsibility transfer is to end."]}
+    let context_ = "TerminateResponsibilityTransferRequest"
+    let make ?endTimestamp = fun ~id -> fun () -> { endTimestamp; id }
+    let to_value x =
+      structure_to_value
+        [("Id", (Some (ResponsibilityTransferId.to_value x.id)));
+        ("EndTimestamp", (Option.map x.endTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTimestamp =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EndTimestamp") in
+      let id =
+        ResponsibilityTransferId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ?endTimestamp ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTimestamp = field_map json__ "EndTimestamp" Timestamp.of_json in
+      let id = field_map_exn json__ "Id" ResponsibilityTransferId.of_json in
+      make ?endTimestamp ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Ends a transfer. A transfer is an arrangement between two management accounts where one account designates the other with specified responsibilities for their organization."]
+module TerminateResponsibilityTransferResponse =
+  struct
+    type nonrec t =
+      {
+      responsibilityTransfer: ResponsibilityTransfer.t option
+        [@ocaml.doc
+          "A ResponsibilityTransfer object. Contains details for a transfer."]}
+    type nonrec error =
+      [
+        `AWSOrganizationsNotInUseException of
+          AWSOrganizationsNotInUseException.t 
+      | `AccessDeniedException of AccessDeniedException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `ConstraintViolationException of ConstraintViolationException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `InvalidResponsibilityTransferTransitionException of
+          InvalidResponsibilityTransferTransitionException.t 
+      | `ResponsibilityTransferAlreadyInStatusException of
+          ResponsibilityTransferAlreadyInStatusException.t 
+      | `ResponsibilityTransferNotFoundException of
+          ResponsibilityTransferNotFoundException.t 
+      | `ServiceException of ServiceException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnsupportedAPIEndpointException of UnsupportedAPIEndpointException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?responsibilityTransfer = fun () -> { responsibilityTransfer }
+    let error_of_json name json =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_json json)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidResponsibilityTransferTransitionException" ->
+          `InvalidResponsibilityTransferTransitionException
+            (InvalidResponsibilityTransferTransitionException.of_json json)
+      | "ResponsibilityTransferAlreadyInStatusException" ->
+          `ResponsibilityTransferAlreadyInStatusException
+            (ResponsibilityTransferAlreadyInStatusException.of_json json)
+      | "ResponsibilityTransferNotFoundException" ->
+          `ResponsibilityTransferNotFoundException
+            (ResponsibilityTransferNotFoundException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_xml xml)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidResponsibilityTransferTransitionException" ->
+          `InvalidResponsibilityTransferTransitionException
+            (InvalidResponsibilityTransferTransitionException.of_xml xml)
+      | "ResponsibilityTransferAlreadyInStatusException" ->
+          `ResponsibilityTransferAlreadyInStatusException
+            (ResponsibilityTransferAlreadyInStatusException.of_xml xml)
+      | "ResponsibilityTransferNotFoundException" ->
+          `ResponsibilityTransferNotFoundException
+            (ResponsibilityTransferNotFoundException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AWSOrganizationsNotInUseException e ->
+          `Assoc
+            [("error", (`String "AWSOrganizationsNotInUseException"));
+            ("details", (AWSOrganizationsNotInUseException.to_json e))]
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `ConstraintViolationException e ->
+          `Assoc
+            [("error", (`String "ConstraintViolationException"));
+            ("details", (ConstraintViolationException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidResponsibilityTransferTransitionException e ->
+          `Assoc
+            [("error",
+               (`String "InvalidResponsibilityTransferTransitionException"));
+            ("details",
+              (InvalidResponsibilityTransferTransitionException.to_json e))]
+      | `ResponsibilityTransferAlreadyInStatusException e ->
+          `Assoc
+            [("error",
+               (`String "ResponsibilityTransferAlreadyInStatusException"));
+            ("details",
+              (ResponsibilityTransferAlreadyInStatusException.to_json e))]
+      | `ResponsibilityTransferNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResponsibilityTransferNotFoundException"));
+            ("details", (ResponsibilityTransferNotFoundException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnsupportedAPIEndpointException e ->
+          `Assoc
+            [("error", (`String "UnsupportedAPIEndpointException"));
+            ("details", (UnsupportedAPIEndpointException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResponsibilityTransfer",
+           (Option.map x.responsibilityTransfer
+              ~f:ResponsibilityTransfer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let responsibilityTransfer =
+        (Option.map ~f:ResponsibilityTransfer.of_xml)
+          (Xml.child xml_arg0 "ResponsibilityTransfer") in
+      make ?responsibilityTransfer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let responsibilityTransfer =
+        field_map json__ "ResponsibilityTransfer"
+          ResponsibilityTransfer.of_json in
+      make ?responsibilityTransfer ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Ends a transfer. A transfer is an arrangement between two management accounts where one account designates the other with specified responsibilities for their organization."]
 module UntagResourceRequest =
   struct
     type nonrec t =
@@ -9938,21 +12611,21 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagKeys ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeys.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" TaggableResourceId.of_json in
+        field_map_exn json__ "ResourceId" TaggableResourceId.of_json in
       make ~tagKeys ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes any tags with the specified keys from the specified resource. You can attach tags to the following resources in Organizations. Amazon Web Services account Organization root Organizational unit (OU) Policy (any type) This operation can be called only from the organization's management account."]
+       "Removes any tags with the specified keys from the specified resource. You can attach tags to the following resources in Organizations. Amazon Web Services account Organization root Organizational unit (OU) Policy (any type) You can only call this operation from the management account or a member account that is a delegated administrator."]
 module UpdateOrganizationalUnitRequest =
   struct
     type nonrec t =
       {
       organizationalUnitId: OrganizationalUnitId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the OU that you want to rename. You can get the ID from the ListOrganizationalUnitsForParent operation. The regex pattern for an organizational unit ID string requires \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that contains the OU). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."];
+          "ID for the OU that you want to rename. You can get the ID from the ListOrganizationalUnitsForParent operation. The regex pattern for an organizational unit ID string requires \"ou-\" followed by from 4 to 32 lowercase letters or digits (the ID of the root that contains the OU). This string is followed by a second \"-\" dash and from 8 to 32 additional lowercase letters or digits."];
       name: OrganizationalUnitName.t option
         [@ocaml.doc
           "The new name that you want to assign to the OU. The regex pattern that is used to validate this parameter is a string of any of the characters in the ASCII character range."]}
@@ -9974,15 +12647,15 @@ module UpdateOrganizationalUnitRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationalUnitId") in
       make ?name ~organizationalUnitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" OrganizationalUnitName.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" OrganizationalUnitName.of_json in
       let organizationalUnitId =
-        field_map_exn json "OrganizationalUnitId"
+        field_map_exn json__ "OrganizationalUnitId"
           OrganizationalUnitId.of_json in
       make ?name ~organizationalUnitId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Renames the specified organizational unit (OU). The ID and ARN don't change. The child OUs and accounts remain in place, and any attached policies of the OU remain attached. This operation can be called only from the organization's management account."]
+       "Renames the specified organizational unit (OU). The ID and ARN don't change. The child OUs and accounts remain in place, and any attached policies of the OU remain attached. You can only call this operation from the management account."]
 module UpdateOrganizationalUnitResponse =
   struct
     type nonrec t =
@@ -10103,20 +12776,20 @@ module UpdateOrganizationalUnitResponse =
           (Xml.child xml_arg0 "OrganizationalUnit") in
       make ?organizationalUnit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationalUnit =
-        field_map json "OrganizationalUnit" OrganizationalUnit.of_json in
+        field_map json__ "OrganizationalUnit" OrganizationalUnit.of_json in
       make ?organizationalUnit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Renames the specified organizational unit (OU). The ID and ARN don't change. The child OUs and accounts remain in place, and any attached policies of the OU remain attached. This operation can be called only from the organization's management account."]
+       "Renames the specified organizational unit (OU). The ID and ARN don't change. The child OUs and accounts remain in place, and any attached policies of the OU remain attached. You can only call this operation from the management account."]
 module UpdatePolicyRequest =
   struct
     type nonrec t =
       {
       policyId: PolicyId.t
         [@ocaml.doc
-          "The unique identifier (ID) of the policy that you want to update. The regex pattern for a policy ID string requires \"p-\" followed by from 8 to 128 lowercase or uppercase letters, digits, or the underscore character (_)."];
+          "ID for the policy that you want to update. The regex pattern for a policy ID string requires \"p-\" followed by from 8 to 128 lowercase or uppercase letters, digits, or the underscore character (_)."];
       name: PolicyName.t option
         [@ocaml.doc
           "If provided, the new name for the policy. The regex pattern that is used to validate this parameter is a string of any of the characters in the ASCII character range."];
@@ -10124,7 +12797,7 @@ module UpdatePolicyRequest =
         [@ocaml.doc "If provided, the new description for the policy."];
       content: PolicyContent.t option
         [@ocaml.doc
-          "If provided, the new content for the policy. The text must be correctly formatted JSON that complies with the syntax for the policy's type. For more information, see Service Control Policy Syntax in the Organizations User Guide."]}
+          "If provided, the new content for the policy. The text must be correctly formatted JSON that complies with the syntax for the policy's type. For more information, see SCP syntax in the Organizations User Guide. The maximum size of a policy document depends on the policy's type. For more information, see Maximum and minimum values in the Organizations User Guide."]}
     let context_ = "UpdatePolicyRequest"
     let make ?name =
       fun ?description ->
@@ -10150,16 +12823,16 @@ module UpdatePolicyRequest =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ?content ?description ?name ~policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let content = field_map json "Content" PolicyContent.of_json in
+    let of_json json__ =
+      let content = field_map json__ "Content" PolicyContent.of_json in
       let description =
-        field_map json "Description" PolicyDescription.of_json in
-      let name = field_map json "Name" PolicyName.of_json in
-      let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
+        field_map json__ "Description" PolicyDescription.of_json in
+      let name = field_map json__ "Name" PolicyName.of_json in
+      let policyId = field_map_exn json__ "PolicyId" PolicyId.of_json in
       make ?content ?description ?name ~policyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an existing policy with a new name, description, or content. If you don't supply any parameter, that value remains unchanged. You can't change a policy's type. This operation can be called only from the organization's management account."]
+       "Updates an existing policy with a new name, description, or content. If you don't supply any parameter, that value remains unchanged. You can't change a policy's type. You can only call this operation from the management account or a member account that is a delegated administrator."]
 module UpdatePolicyResponse =
   struct
     type nonrec t =
@@ -10318,8 +12991,166 @@ module UpdatePolicyResponse =
         (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" Policy.of_json in make ?policy ()
+    let of_json json__ =
+      let policy = field_map json__ "Policy" Policy.of_json in
+      make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an existing policy with a new name, description, or content. If you don't supply any parameter, that value remains unchanged. You can't change a policy's type. This operation can be called only from the organization's management account."]
+       "Updates an existing policy with a new name, description, or content. If you don't supply any parameter, that value remains unchanged. You can't change a policy's type. You can only call this operation from the management account or a member account that is a delegated administrator."]
+module UpdateResponsibilityTransferRequest =
+  struct
+    type nonrec t =
+      {
+      id: ResponsibilityTransferId.t [@ocaml.doc "ID for the transfer."];
+      name: ResponsibilityTransferName.t
+        [@ocaml.doc "New name you want to assign to the transfer."]}
+    let context_ = "UpdateResponsibilityTransferRequest"
+    let make ~id = fun ~name -> fun () -> { id; name }
+    let to_value x =
+      structure_to_value
+        [("Id", (Some (ResponsibilityTransferId.to_value x.id)));
+        ("Name", (Some (ResponsibilityTransferName.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        ResponsibilityTransferName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let id =
+        ResponsibilityTransferId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ~name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name =
+        field_map_exn json__ "Name" ResponsibilityTransferName.of_json in
+      let id = field_map_exn json__ "Id" ResponsibilityTransferId.of_json in
+      make ~name ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates a transfer. A transfer is the arrangement between two management accounts where one account designates the other with specified responsibilities for their organization. You can update the name assigned to a transfer."]
+module UpdateResponsibilityTransferResponse =
+  struct
+    type nonrec t =
+      {
+      responsibilityTransfer: ResponsibilityTransfer.t option }
+    type nonrec error =
+      [
+        `AWSOrganizationsNotInUseException of
+          AWSOrganizationsNotInUseException.t 
+      | `AccessDeniedException of AccessDeniedException.t 
+      | `ConstraintViolationException of ConstraintViolationException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResponsibilityTransferNotFoundException of
+          ResponsibilityTransferNotFoundException.t 
+      | `ServiceException of ServiceException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnsupportedAPIEndpointException of UnsupportedAPIEndpointException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?responsibilityTransfer = fun () -> { responsibilityTransfer }
+    let error_of_json name json =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_json json)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResponsibilityTransferNotFoundException" ->
+          `ResponsibilityTransferNotFoundException
+            (ResponsibilityTransferNotFoundException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AWSOrganizationsNotInUseException" ->
+          `AWSOrganizationsNotInUseException
+            (AWSOrganizationsNotInUseException.of_xml xml)
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConstraintViolationException" ->
+          `ConstraintViolationException
+            (ConstraintViolationException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResponsibilityTransferNotFoundException" ->
+          `ResponsibilityTransferNotFoundException
+            (ResponsibilityTransferNotFoundException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnsupportedAPIEndpointException" ->
+          `UnsupportedAPIEndpointException
+            (UnsupportedAPIEndpointException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AWSOrganizationsNotInUseException e ->
+          `Assoc
+            [("error", (`String "AWSOrganizationsNotInUseException"));
+            ("details", (AWSOrganizationsNotInUseException.to_json e))]
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConstraintViolationException e ->
+          `Assoc
+            [("error", (`String "ConstraintViolationException"));
+            ("details", (ConstraintViolationException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResponsibilityTransferNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResponsibilityTransferNotFoundException"));
+            ("details", (ResponsibilityTransferNotFoundException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnsupportedAPIEndpointException e ->
+          `Assoc
+            [("error", (`String "UnsupportedAPIEndpointException"));
+            ("details", (UnsupportedAPIEndpointException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResponsibilityTransfer",
+           (Option.map x.responsibilityTransfer
+              ~f:ResponsibilityTransfer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let responsibilityTransfer =
+        (Option.map ~f:ResponsibilityTransfer.of_xml)
+          (Xml.child xml_arg0 "ResponsibilityTransfer") in
+      make ?responsibilityTransfer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let responsibilityTransfer =
+        field_map json__ "ResponsibilityTransfer"
+          ResponsibilityTransfer.of_json in
+      make ?responsibilityTransfer ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates a transfer. A transfer is the arrangement between two management accounts where one account designates the other with specified responsibilities for their organization. You can update the name assigned to a transfer."]

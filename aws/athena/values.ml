@@ -24,81 +24,6 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
-module DatumString =
-  struct
-    type nonrec t = string
-    let context_ = "datumString"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"datumString" j
-    let to_json = simple_to_json to_value
-  end
-module CommentString =
-  struct
-    type nonrec t = string
-    let context_ = "CommentString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:255) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"CommentString" j
-    let to_json = simple_to_json to_value
-  end
-module NameString =
-  struct
-    type nonrec t = string
-    let context_ = "NameString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:128) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NameString" j
-    let to_json = simple_to_json to_value
-  end
-module TypeString =
-  struct
-    type nonrec t = string
-    let context_ = "TypeString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:4096) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TypeString" j
-    let to_json = simple_to_json to_value
-  end
 module S3AclOption =
   struct
     type nonrec t =
@@ -121,86 +46,81 @@ module S3AclOption =
     let of_json j = of_string (string_of_json ~kind:"S3AclOption" j)
     let to_json = simple_to_json to_value
   end
-module EncryptionOption =
+module AclConfiguration =
   struct
     type nonrec t =
-      | SSE_S3 
-      | SSE_KMS 
-      | CSE_KMS 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | SSE_S3 -> "SSE_S3"
-      | SSE_KMS -> "SSE_KMS"
-      | CSE_KMS -> "CSE_KMS"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "SSE_S3" -> SSE_S3
-      | "SSE_KMS" -> SSE_KMS
-      | "CSE_KMS" -> CSE_KMS
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+      {
+      s3AclOption: S3AclOption.t
+        [@ocaml.doc
+          "The Amazon S3 canned ACL that Athena should specify when storing query results, including data files inserted by Athena as the result of statements like CTAS or INSERT INTO. Currently the only supported canned ACL is BUCKET_OWNER_FULL_CONTROL. If a query runs in a workgroup and the workgroup overrides client-side settings, then the Amazon S3 canned ACL specified in the workgroup's settings is used for all queries that run in the workgroup. For more information about Amazon S3 canned ACLs, see Canned ACL in the Amazon S3 User Guide."]}
+    let context_ = "AclConfiguration"
+    let make ~s3AclOption = fun () -> { s3AclOption }
+    let to_value x =
+      structure_to_value
+        [("S3AclOption", (Some (S3AclOption.to_value x.s3AclOption)))]
     let to_query v = to_query to_value v
-    let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration EncryptionOption" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"EncryptionOption" j)
+      let s3AclOption =
+        S3AclOption.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "S3AclOption") in
+      make ~s3AclOption ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3AclOption =
+        field_map_exn json__ "S3AclOption" S3AclOption.of_json in
+      make ~s3AclOption ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates that an Amazon S3 canned ACL should be set to control ownership of stored query results, including data files inserted by Athena as the result of statements like CTAS or INSERT INTO. When Athena stores query results in Amazon S3, the canned ACL is set with the x-amz-acl request header. For more information about S3 Object Ownership, see Object Ownership settings in the Amazon S3 User Guide."]
+module Age =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10080) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Age" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module String_ =
+module AllocatedDpusInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for AllocatedDpusInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module AmazonResourceName =
   struct
     type nonrec t = string
-    let context_ = "String"
-    let make i = i
+    let context_ = "AmazonResourceName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1011) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
-    let to_json = simple_to_json to_value
-  end
-module Boolean =
-  struct
-    type nonrec t = bool
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
-    let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
-    let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
-    let to_json = simple_to_json to_value
-  end
-module ColumnNullable =
-  struct
-    type nonrec t =
-      | NOT_NULL 
-      | NULLABLE 
-      | UNKNOWN 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | NOT_NULL -> "NOT_NULL"
-      | NULLABLE -> "NULLABLE"
-      | UNKNOWN -> "UNKNOWN"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "NOT_NULL" -> NOT_NULL
-      | "NULLABLE" -> NULLABLE
-      | "UNKNOWN" -> UNKNOWN
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration ColumnNullable" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ColumnNullable" j)
+    let of_json j = string_of_json ~kind:"AmazonResourceName" j
     let to_json = simple_to_json to_value
   end
 module Integer =
@@ -216,45 +136,129 @@ module Integer =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module Datum =
+module SupportedDPUSizeList =
   struct
-    type nonrec t =
-      {
-      varCharValue: DatumString.t option
-        [@ocaml.doc "The value of the datum."]}
-    let make ?varCharValue = fun () -> { varCharValue }
-    let to_value x =
-      structure_to_value
-        [("VarCharValue",
-           (Option.map x.varCharValue ~f:DatumString.to_value))]
+    type nonrec t = Integer.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Integer.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let varCharValue =
-        (Option.map ~f:DatumString.of_xml)
-          (Xml.child xml_arg0 "VarCharValue") in
-      make ?varCharValue ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let varCharValue = field_map json "VarCharValue" DatumString.of_json in
-      make ?varCharValue ()
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Integer.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SupportedDPUSizeList" ~of_json:Integer.of_json j
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A piece of data (a field in the table)."]
-module ErrorCategory =
+  end
+module NameString =
   struct
-    type nonrec t = int
+    type nonrec t = string
+    let context_ = "NameString"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:3) >>= (fun () -> check_int_min i ~min:1));
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
         i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NameString" j
+    let to_json = simple_to_json to_value
+  end
+module ApplicationDPUSizes =
+  struct
+    type nonrec t =
+      {
+      applicationRuntimeId: NameString.t option
+        [@ocaml.doc
+          "The name of the supported application runtime (for example, Athena notebook version 1)."];
+      supportedDPUSizes: SupportedDPUSizeList.t option
+        [@ocaml.doc
+          "A list of the supported DPU sizes that the application runtime supports."]}
+    let make ?applicationRuntimeId =
+      fun ?supportedDPUSizes ->
+        fun () -> { applicationRuntimeId; supportedDPUSizes }
+    let to_value x =
+      structure_to_value
+        [("ApplicationRuntimeId",
+           (Option.map x.applicationRuntimeId ~f:NameString.to_value));
+        ("SupportedDPUSizes",
+          (Option.map x.supportedDPUSizes ~f:SupportedDPUSizeList.to_value))]
+    let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for ErrorCategory" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+      let supportedDPUSizes =
+        (Option.map ~f:SupportedDPUSizeList.of_xml)
+          (Xml.child xml_arg0 "SupportedDPUSizes") in
+      let applicationRuntimeId =
+        (Option.map ~f:NameString.of_xml)
+          (Xml.child xml_arg0 "ApplicationRuntimeId") in
+      make ?supportedDPUSizes ?applicationRuntimeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let supportedDPUSizes =
+        field_map json__ "SupportedDPUSizes" SupportedDPUSizeList.of_json in
+      let applicationRuntimeId =
+        field_map json__ "ApplicationRuntimeId" NameString.of_json in
+      make ?supportedDPUSizes ?applicationRuntimeId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the application runtime IDs and their supported DPU sizes."]
+module ApplicationDPUSizesList =
+  struct
+    type nonrec t = ApplicationDPUSizes.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ApplicationDPUSizes.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ApplicationDPUSizes.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ApplicationDPUSizesList"
+        ~of_json:ApplicationDPUSizes.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
 module ErrorType =
@@ -274,393 +278,25 @@ module ErrorType =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module Column =
+module ErrorCategory =
   struct
-    type nonrec t =
-      {
-      name: NameString.t [@ocaml.doc "The name of the column."];
-      type_: TypeString.t option [@ocaml.doc "The data type of the column."];
-      comment: CommentString.t option
-        [@ocaml.doc "Optional information about the column."]}
-    let context_ = "Column"
-    let make ?type_ =
-      fun ?comment -> fun ~name -> fun () -> { type_; comment; name }
-    let to_value x =
-      structure_to_value
-        [("Name", (Some (NameString.to_value x.name)));
-        ("Type", (Option.map x.type_ ~f:TypeString.to_value));
-        ("Comment", (Option.map x.comment ~f:CommentString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let comment =
-        (Option.map ~f:CommentString.of_xml) (Xml.child xml_arg0 "Comment") in
-      let type_ =
-        (Option.map ~f:TypeString.of_xml) (Xml.child xml_arg0 "Type") in
-      let name =
-        NameString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?comment ?type_ ~name ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map json "Comment" CommentString.of_json in
-      let type_ = field_map json "Type" TypeString.of_json in
-      let name = field_map_exn json "Name" NameString.of_json in
-      make ?comment ?type_ ~name ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains metadata for a column in a table."]
-module KeyString =
-  struct
-    type nonrec t = string
-    let context_ = "KeyString"
+    type nonrec t = int
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:255) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*")));
+          ((check_int_max i ~max:3) >>= (fun () -> check_int_min i ~min:1));
         i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string = Int.of_string
+    let to_value x = `Integer x
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"KeyString" j
-    let to_json = simple_to_json to_value
-  end
-module ParametersMapValue =
-  struct
-    type nonrec t = string
-    let context_ = "ParametersMapValue"
-    let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:51200); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ParametersMapValue" j
-    let to_json = simple_to_json to_value
-  end
-module AclConfiguration =
-  struct
-    type nonrec t =
-      {
-      s3AclOption: S3AclOption.t
-        [@ocaml.doc
-          "The Amazon S3 canned ACL that Athena should specify when storing query results. Currently the only supported canned ACL is BUCKET_OWNER_FULL_CONTROL. If a query runs in a workgroup and the workgroup overrides client-side settings, then the Amazon S3 canned ACL specified in the workgroup's settings is used for all queries that run in the workgroup. For more information about Amazon S3 canned ACLs, see Canned ACL in the Amazon S3 User Guide."]}
-    let context_ = "AclConfiguration"
-    let make ~s3AclOption = fun () -> { s3AclOption }
-    let to_value x =
-      structure_to_value
-        [("S3AclOption", (Some (S3AclOption.to_value x.s3AclOption)))]
-    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      let s3AclOption =
-        S3AclOption.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "S3AclOption") in
-      make ~s3AclOption ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3AclOption = field_map_exn json "S3AclOption" S3AclOption.of_json in
-      make ~s3AclOption ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Indicates that an Amazon S3 canned ACL should be set to control ownership of stored query results. When Athena stores query results in Amazon S3, the canned ACL is set with the x-amz-acl request header. For more information about S3 Object Ownership, see Object Ownership settings in the Amazon S3 User Guide."]
-module EncryptionConfiguration =
-  struct
-    type nonrec t =
-      {
-      encryptionOption: EncryptionOption.t
-        [@ocaml.doc
-          "Indicates whether Amazon S3 server-side encryption with Amazon S3-managed keys (SSE-S3), server-side encryption with KMS-managed keys (SSE-KMS), or client-side encryption with KMS-managed keys (CSE-KMS) is used. If a query runs in a workgroup and the workgroup overrides client-side settings, then the workgroup's setting for encryption is used. It specifies whether query results must be encrypted, for all queries that run in this workgroup."];
-      kmsKey: String_.t option
-        [@ocaml.doc
-          "For SSE-KMS and CSE-KMS, this is the KMS key ARN or ID."]}
-    let context_ = "EncryptionConfiguration"
-    let make ?kmsKey =
-      fun ~encryptionOption -> fun () -> { kmsKey; encryptionOption }
-    let to_value x =
-      structure_to_value
-        [("EncryptionOption",
-           (Some (EncryptionOption.to_value x.encryptionOption)));
-        ("KmsKey", (Option.map x.kmsKey ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let kmsKey =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "KmsKey") in
-      let encryptionOption =
-        EncryptionOption.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EncryptionOption") in
-      make ?kmsKey ~encryptionOption ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKey = field_map json "KmsKey" String_.of_json in
-      let encryptionOption =
-        field_map_exn json "EncryptionOption" EncryptionOption.of_json in
-      make ?kmsKey ~encryptionOption ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "If query results are encrypted in Amazon S3, indicates the encryption option used (for example, SSE-KMS or CSE-KMS) and key information."]
-module ColumnInfo =
-  struct
-    type nonrec t =
-      {
-      catalogName: String_.t option
-        [@ocaml.doc "The catalog to which the query results belong."];
-      schemaName: String_.t option
-        [@ocaml.doc
-          "The schema name (database name) to which the query results belong."];
-      tableName: String_.t option
-        [@ocaml.doc "The table name for the query results."];
-      name: String_.t [@ocaml.doc "The name of the column."];
-      label: String_.t option [@ocaml.doc "A column label."];
-      type_: String_.t [@ocaml.doc "The data type of the column."];
-      precision: Integer.t option
-        [@ocaml.doc
-          "For DECIMAL data types, specifies the total number of digits, up to 38. For performance reasons, we recommend up to 18 digits."];
-      scale: Integer.t option
-        [@ocaml.doc
-          "For DECIMAL data types, specifies the total number of digits in the fractional part of the value. Defaults to 0."];
-      nullable: ColumnNullable.t option
-        [@ocaml.doc "Indicates the column's nullable status."];
-      caseSensitive: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether values in the column are case-sensitive."]}
-    let context_ = "ColumnInfo"
-    let make ?catalogName =
-      fun ?schemaName ->
-        fun ?tableName ->
-          fun ?label ->
-            fun ?precision ->
-              fun ?scale ->
-                fun ?nullable ->
-                  fun ?caseSensitive ->
-                    fun ~name ->
-                      fun ~type_ ->
-                        fun () ->
-                          {
-                            catalogName;
-                            schemaName;
-                            tableName;
-                            label;
-                            precision;
-                            scale;
-                            nullable;
-                            caseSensitive;
-                            name;
-                            type_
-                          }
-    let to_value x =
-      structure_to_value
-        [("CatalogName", (Option.map x.catalogName ~f:String_.to_value));
-        ("SchemaName", (Option.map x.schemaName ~f:String_.to_value));
-        ("TableName", (Option.map x.tableName ~f:String_.to_value));
-        ("Name", (Some (String_.to_value x.name)));
-        ("Label", (Option.map x.label ~f:String_.to_value));
-        ("Type", (Some (String_.to_value x.type_)));
-        ("Precision", (Option.map x.precision ~f:Integer.to_value));
-        ("Scale", (Option.map x.scale ~f:Integer.to_value));
-        ("Nullable", (Option.map x.nullable ~f:ColumnNullable.to_value));
-        ("CaseSensitive", (Option.map x.caseSensitive ~f:Boolean.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let caseSensitive =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "CaseSensitive") in
-      let nullable =
-        (Option.map ~f:ColumnNullable.of_xml) (Xml.child xml_arg0 "Nullable") in
-      let scale = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Scale") in
-      let precision =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Precision") in
-      let type_ =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
-      let label = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Label") in
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      let tableName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TableName") in
-      let schemaName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SchemaName") in
-      let catalogName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CatalogName") in
-      make ?caseSensitive ?nullable ?scale ?precision ~type_ ?label ~name
-        ?tableName ?schemaName ?catalogName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let caseSensitive = field_map json "CaseSensitive" Boolean.of_json in
-      let nullable = field_map json "Nullable" ColumnNullable.of_json in
-      let scale = field_map json "Scale" Integer.of_json in
-      let precision = field_map json "Precision" Integer.of_json in
-      let type_ = field_map_exn json "Type" String_.of_json in
-      let label = field_map json "Label" String_.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
-      let tableName = field_map json "TableName" String_.of_json in
-      let schemaName = field_map json "SchemaName" String_.of_json in
-      let catalogName = field_map json "CatalogName" String_.of_json in
-      make ?caseSensitive ?nullable ?scale ?precision ~type_ ?label ~name
-        ?tableName ?schemaName ?catalogName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Information about the columns in a query execution result."]
-module DatumList =
-  struct
-    type nonrec t = Datum.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Datum.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Datum.of_xml)
-    let of_json j = list_of_json ~kind:"datumList" ~of_json:Datum.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module CatalogNameString =
-  struct
-    type nonrec t = string
-    let context_ = "CatalogNameString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:256) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"CatalogNameString" j
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ErrorCategory" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module DatabaseString =
-  struct
-    type nonrec t = string
-    let context_ = "DatabaseString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:255) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DatabaseString" j
-    let to_json = simple_to_json to_value
-  end
-module Long =
-  struct
-    type nonrec t = Int64.t
-    let make i = i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
-    let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
-    let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
-    let to_json = simple_to_json to_value
-  end
-module AthenaError =
-  struct
-    type nonrec t =
-      {
-      errorCategory: ErrorCategory.t option
-        [@ocaml.doc
-          "An integer value that specifies the category of a query failure error. The following list shows the category for each integer value. 1 - System 2 - User 3 - Other"];
-      errorType: ErrorType.t option
-        [@ocaml.doc
-          "An integer value that provides specific information about an Athena query error. For the meaning of specific values, see the Error Type Reference in the Amazon Athena User Guide."]}
-    let make ?errorCategory =
-      fun ?errorType -> fun () -> { errorCategory; errorType }
-    let to_value x =
-      structure_to_value
-        [("ErrorCategory",
-           (Option.map x.errorCategory ~f:ErrorCategory.to_value));
-        ("ErrorType", (Option.map x.errorType ~f:ErrorType.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let errorType =
-        (Option.map ~f:ErrorType.of_xml) (Xml.child xml_arg0 "ErrorType") in
-      let errorCategory =
-        (Option.map ~f:ErrorCategory.of_xml)
-          (Xml.child xml_arg0 "ErrorCategory") in
-      make ?errorType ?errorCategory ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorType = field_map json "ErrorType" ErrorType.of_json in
-      let errorCategory =
-        field_map json "ErrorCategory" ErrorCategory.of_json in
-      make ?errorType ?errorCategory ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Provides information about an Athena query error. The AthenaError feature provides standardized error information to help you understand failed queries and take steps after a query failure occurs. AthenaError includes an ErrorCategory field that specifies whether the cause of the failed query is due to system error, user error, or other error."]
-module Date =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
-  end
-module QueryExecutionState =
-  struct
-    type nonrec t =
-      | QUEUED 
-      | RUNNING 
-      | SUCCEEDED 
-      | FAILED 
-      | CANCELLED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | QUEUED -> "QUEUED"
-      | RUNNING -> "RUNNING"
-      | SUCCEEDED -> "SUCCEEDED"
-      | FAILED -> "FAILED"
-      | CANCELLED -> "CANCELLED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "QUEUED" -> QUEUED
-      | "RUNNING" -> RUNNING
-      | "SUCCEEDED" -> SUCCEEDED
-      | "FAILED" -> FAILED
-      | "CANCELLED" -> CANCELLED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration QueryExecutionState" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"QueryExecutionState" j)
-    let to_json = simple_to_json to_value
-  end
-module BoxedBoolean =
+module Boolean =
   struct
     type nonrec t = bool
     let make i = i
@@ -673,371 +309,146 @@ module BoxedBoolean =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
-module TagKey =
-  struct
-    type nonrec t = string
-    let context_ = "TagKey"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:128) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagKey" j
-    let to_json = simple_to_json to_value
-  end
-module TagValue =
-  struct
-    type nonrec t = string
-    let context_ = "TagValue"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:0));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagValue" j
-    let to_json = simple_to_json to_value
-  end
-module EngineVersion =
+module AthenaError =
   struct
     type nonrec t =
       {
-      selectedEngineVersion: NameString.t option
+      errorCategory: ErrorCategory.t option
         [@ocaml.doc
-          "The engine version requested by the user. Possible values are determined by the output of ListEngineVersions, including Auto. The default is Auto."];
-      effectiveEngineVersion: NameString.t option
+          "An integer value that specifies the category of a query failure error. The following list shows the category for each integer value. 1 - System 2 - User 3 - Other"];
+      errorType: ErrorType.t option
         [@ocaml.doc
-          "Read only. The engine version on which the query runs. If the user requests a valid engine version other than Auto, the effective engine version is the same as the engine version that the user requested. If the user requests Auto, the effective engine version is chosen by Athena. When a request to update the engine version is made by a CreateWorkGroup or UpdateWorkGroup operation, the EffectiveEngineVersion field is ignored."]}
-    let make ?selectedEngineVersion =
-      fun ?effectiveEngineVersion ->
-        fun () -> { selectedEngineVersion; effectiveEngineVersion }
+          "An integer value that provides specific information about an Athena query error. For the meaning of specific values, see the Error Type Reference in the Amazon Athena User Guide."];
+      retryable: Boolean.t option
+        [@ocaml.doc "True if the query might succeed if resubmitted."];
+      errorMessage: String_.t option
+        [@ocaml.doc
+          "Contains a short description of the error that occurred."]}
+    let make ?errorCategory =
+      fun ?errorType ->
+        fun ?retryable ->
+          fun ?errorMessage ->
+            fun () -> { errorCategory; errorType; retryable; errorMessage }
     let to_value x =
       structure_to_value
-        [("SelectedEngineVersion",
-           (Option.map x.selectedEngineVersion ~f:NameString.to_value));
-        ("EffectiveEngineVersion",
-          (Option.map x.effectiveEngineVersion ~f:NameString.to_value))]
+        [("ErrorCategory",
+           (Option.map x.errorCategory ~f:ErrorCategory.to_value));
+        ("ErrorType", (Option.map x.errorType ~f:ErrorType.to_value));
+        ("Retryable", (Option.map x.retryable ~f:Boolean.to_value));
+        ("ErrorMessage", (Option.map x.errorMessage ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let effectiveEngineVersion =
-        (Option.map ~f:NameString.of_xml)
-          (Xml.child xml_arg0 "EffectiveEngineVersion") in
-      let selectedEngineVersion =
-        (Option.map ~f:NameString.of_xml)
-          (Xml.child xml_arg0 "SelectedEngineVersion") in
-      make ?effectiveEngineVersion ?selectedEngineVersion ()
+      let errorMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorMessage") in
+      let retryable =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Retryable") in
+      let errorType =
+        (Option.map ~f:ErrorType.of_xml) (Xml.child xml_arg0 "ErrorType") in
+      let errorCategory =
+        (Option.map ~f:ErrorCategory.of_xml)
+          (Xml.child xml_arg0 "ErrorCategory") in
+      make ?errorMessage ?retryable ?errorType ?errorCategory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let effectiveEngineVersion =
-        field_map json "EffectiveEngineVersion" NameString.of_json in
-      let selectedEngineVersion =
-        field_map json "SelectedEngineVersion" NameString.of_json in
-      make ?effectiveEngineVersion ?selectedEngineVersion ()
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let retryable = field_map json__ "Retryable" Boolean.of_json in
+      let errorType = field_map json__ "ErrorType" ErrorType.of_json in
+      let errorCategory =
+        field_map json__ "ErrorCategory" ErrorCategory.of_json in
+      make ?errorMessage ?retryable ?errorType ?errorCategory ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The Athena engine version for running queries."]
-module WorkGroupDescriptionString =
+  end[@@ocaml.doc
+       "Provides information about an Athena query error. The AthenaError feature provides standardized error information to help you understand failed queries and take steps after a query failure occurs. AthenaError includes an ErrorCategory field that specifies whether the cause of the failed query is due to system error, user error, or other error."]
+module AuthToken =
   struct
     type nonrec t = string
-    let context_ = "WorkGroupDescriptionString"
+    let context_ = "AuthToken"
     let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
-             (fun () -> check_string_min i ~min:0));
-        i
+      let open Result in ok_or_failwith (check_string_max i ~max:2048); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"WorkGroupDescriptionString" j
+    let of_json j = string_of_json ~kind:"AuthToken" j
     let to_json = simple_to_json to_value
   end
-module WorkGroupName =
-  struct
-    type nonrec t = string
-    let context_ = "WorkGroupName"
-    let make i =
-      let open Result in
-        ok_or_failwith (check_pattern i ~pattern:"[a-zA-Z0-9._-]{1,128}"); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"WorkGroupName" j
-    let to_json = simple_to_json to_value
-  end
-module WorkGroupState =
+module AuthenticationType =
   struct
     type nonrec t =
-      | ENABLED 
-      | DISABLED 
+      | DIRECTORY_IDENTITY 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | ENABLED -> "ENABLED"
-      | DISABLED -> "DISABLED"
+      | DIRECTORY_IDENTITY -> "DIRECTORY_IDENTITY"
       | Non_static_id s -> s
     let of_string =
       function
-      | "ENABLED" -> ENABLED
-      | "DISABLED" -> DISABLED
+      | "DIRECTORY_IDENTITY" -> DIRECTORY_IDENTITY
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration WorkGroupState" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"WorkGroupState" j)
+      of_string
+        (string_of_xml ~kind:"enumeration AuthenticationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AuthenticationType" j)
     let to_json = simple_to_json to_value
   end
-module ColumnList =
-  struct
-    type nonrec t = Column.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Column.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Column.of_xml)
-    let of_json j = list_of_json ~kind:"ColumnList" ~of_json:Column.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module ParametersMap =
-  struct
-    type nonrec t = (KeyString.t * ParametersMapValue.t) list
-    let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((KeyString.of_string chopped),
-                              (ParametersMapValue.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (KeyString.to_value x) |>
-                    (fun x ->
-                       (ParametersMapValue.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:KeyString.of_string
-        ~of_json:ParametersMapValue.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module TableTypeString =
+module AwsAccountId =
   struct
     type nonrec t = string
-    let context_ = "TableTypeString"
+    let context_ = "AwsAccountId"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:255); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"^[0-9]+$")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TableTypeString" j
+    let of_json j = string_of_json ~kind:"AwsAccountId" j
     let to_json = simple_to_json to_value
   end
-module Timestamp =
+module NamedQueryId =
   struct
     type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
-  end
-module StatementName =
-  struct
-    type nonrec t = string
-    let context_ = "StatementName"
+    let context_ = "NamedQueryId"
     let make i =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:256) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[a-zA-Z_][a-zA-Z0-9_@:]{1,256}")));
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"\\S+")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"StatementName" j
+    let of_json j = string_of_json ~kind:"NamedQueryId" j
     let to_json = simple_to_json to_value
   end
-module DescriptionString =
+module NamedQueryIdList =
   struct
-    type nonrec t = string
-    let context_ = "DescriptionString"
+    type nonrec t = NamedQueryId.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DescriptionString" j
-    let to_json = simple_to_json to_value
-  end
-module DataCatalogType =
-  struct
-    type nonrec t =
-      | LAMBDA 
-      | GLUE 
-      | HIVE 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | LAMBDA -> "LAMBDA"
-      | GLUE -> "GLUE"
-      | HIVE -> "HIVE"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "LAMBDA" -> LAMBDA
-      | "GLUE" -> GLUE
-      | "HIVE" -> HIVE
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration DataCatalogType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"DataCatalogType" j)
-    let to_json = simple_to_json to_value
-  end
-module BytesScannedCutoffValue =
-  struct
-    type nonrec t = Int64.t
-    let make i =
-      let open Result in ok_or_failwith (check_int64_min i ~min:10000000L); i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
-    let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
-    let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
-    let to_json = simple_to_json to_value
-  end
-module ResultConfiguration =
-  struct
-    type nonrec t =
-      {
-      outputLocation: String_.t option
-        [@ocaml.doc
-          "The location in Amazon S3 where your query results are stored, such as s3://path/to/query/bucket/. To run the query, you must specify the query results location using one of the ways: either for individual queries using either this setting (client-side), or in the workgroup, using WorkGroupConfiguration. If none of them is set, Athena issues an error that no output location is provided. For more information, see Query Results. If workgroup settings override client-side settings, then the query uses the settings specified for the workgroup. See WorkGroupConfiguration$EnforceWorkGroupConfiguration."];
-      encryptionConfiguration: EncryptionConfiguration.t option
-        [@ocaml.doc
-          "If query results are encrypted in Amazon S3, indicates the encryption option used (for example, SSE-KMS or CSE-KMS) and key information. This is a client-side setting. If workgroup settings override client-side settings, then the query uses the encryption configuration that is specified for the workgroup, and also uses the location for storing query results specified in the workgroup. See WorkGroupConfiguration$EnforceWorkGroupConfiguration and Workgroup Settings Override Client-Side Settings."];
-      expectedBucketOwner: String_.t option
-        [@ocaml.doc
-          "The Amazon Web Services account ID that you expect to be the owner of the Amazon S3 bucket specified by ResultConfiguration$OutputLocation. If set, Athena uses the value for ExpectedBucketOwner when it makes Amazon S3 calls to your specified output location. If the ExpectedBucketOwner Amazon Web Services account ID does not match the actual owner of the Amazon S3 bucket, the call fails with a permissions error. This is a client-side setting. If workgroup settings override client-side settings, then the query uses the ExpectedBucketOwner setting that is specified for the workgroup, and also uses the location for storing query results specified in the workgroup. See WorkGroupConfiguration$EnforceWorkGroupConfiguration and Workgroup Settings Override Client-Side Settings."];
-      aclConfiguration: AclConfiguration.t option
-        [@ocaml.doc
-          "Indicates that an Amazon S3 canned ACL should be set to control ownership of stored query results. Currently the only supported canned ACL is BUCKET_OWNER_FULL_CONTROL. This is a client-side setting. If workgroup settings override client-side settings, then the query uses the ACL configuration that is specified for the workgroup, and also uses the location for storing query results specified in the workgroup. For more information, see WorkGroupConfiguration$EnforceWorkGroupConfiguration and Workgroup Settings Override Client-Side Settings."]}
-    let make ?outputLocation =
-      fun ?encryptionConfiguration ->
-        fun ?expectedBucketOwner ->
-          fun ?aclConfiguration ->
-            fun () ->
-              {
-                outputLocation;
-                encryptionConfiguration;
-                expectedBucketOwner;
-                aclConfiguration
-              }
-    let to_value x =
-      structure_to_value
-        [("OutputLocation",
-           (Option.map x.outputLocation ~f:String_.to_value));
-        ("EncryptionConfiguration",
-          (Option.map x.encryptionConfiguration
-             ~f:EncryptionConfiguration.to_value));
-        ("ExpectedBucketOwner",
-          (Option.map x.expectedBucketOwner ~f:String_.to_value));
-        ("AclConfiguration",
-          (Option.map x.aclConfiguration ~f:AclConfiguration.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let aclConfiguration =
-        (Option.map ~f:AclConfiguration.of_xml)
-          (Xml.child xml_arg0 "AclConfiguration") in
-      let expectedBucketOwner =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "ExpectedBucketOwner") in
-      let encryptionConfiguration =
-        (Option.map ~f:EncryptionConfiguration.of_xml)
-          (Xml.child xml_arg0 "EncryptionConfiguration") in
-      let outputLocation =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "OutputLocation") in
-      make ?aclConfiguration ?expectedBucketOwner ?encryptionConfiguration
-        ?outputLocation ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aclConfiguration =
-        field_map json "AclConfiguration" AclConfiguration.of_json in
-      let expectedBucketOwner =
-        field_map json "ExpectedBucketOwner" String_.of_json in
-      let encryptionConfiguration =
-        field_map json "EncryptionConfiguration"
-          EncryptionConfiguration.of_json in
-      let outputLocation = field_map json "OutputLocation" String_.of_json in
-      make ?aclConfiguration ?expectedBucketOwner ?encryptionConfiguration
-        ?outputLocation ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The location in Amazon S3 where query results are stored and the encryption option, if any, used for query results. These are known as \"client-side settings\". If workgroup settings override client-side settings, then the query uses the workgroup settings."]
-module ColumnInfoList =
-  struct
-    type nonrec t = ColumnInfo.t list
-    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:ColumnInfo.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:NamedQueryId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -1051,293 +462,46 @@ module ColumnInfoList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:ColumnInfo.of_xml)
+                     | _ -> true))) ~f:NamedQueryId.of_xml)
     let of_json j =
-      list_of_json ~kind:"ColumnInfoList" ~of_json:ColumnInfo.of_json j
+      list_of_json ~kind:"NamedQueryIdList" ~of_json:NamedQueryId.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Row =
+module BatchGetNamedQueryInput =
   struct
     type nonrec t =
       {
-      data: DatumList.t option
-        [@ocaml.doc "The data that populates a row in a query result table."]}
-    let make ?data = fun () -> { data }
+      namedQueryIds: NamedQueryIdList.t [@ocaml.doc "An array of query IDs."]}
+    let context_ = "BatchGetNamedQueryInput"
+    let make ~namedQueryIds = fun () -> { namedQueryIds }
     let to_value x =
       structure_to_value
-        [("Data", (Option.map x.data ~f:DatumList.to_value))]
+        [("NamedQueryIds",
+           (Some (NamedQueryIdList.to_value x.namedQueryIds)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let data = (Option.map ~f:DatumList.of_xml) (Xml.child xml_arg0 "Data") in
-      make ?data ()
+      let namedQueryIds =
+        NamedQueryIdList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NamedQueryIds") in
+      make ~namedQueryIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let data = field_map json "Data" DatumList.of_json in make ?data ()
+    let of_json json__ =
+      let namedQueryIds =
+        field_map_exn json__ "NamedQueryIds" NamedQueryIdList.of_json in
+      make ~namedQueryIds ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The rows that make up a query result table."]
-module QueryExecutionContext =
-  struct
-    type nonrec t =
-      {
-      database: DatabaseString.t option
-        [@ocaml.doc
-          "The name of the database used in the query execution. The database must exist in the catalog."];
-      catalog: CatalogNameString.t option
-        [@ocaml.doc
-          "The name of the data catalog used in the query execution."]}
-    let make ?database = fun ?catalog -> fun () -> { database; catalog }
-    let to_value x =
-      structure_to_value
-        [("Database", (Option.map x.database ~f:DatabaseString.to_value));
-        ("Catalog", (Option.map x.catalog ~f:CatalogNameString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let catalog =
-        (Option.map ~f:CatalogNameString.of_xml)
-          (Xml.child xml_arg0 "Catalog") in
-      let database =
-        (Option.map ~f:DatabaseString.of_xml) (Xml.child xml_arg0 "Database") in
-      make ?catalog ?database ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let catalog = field_map json "Catalog" CatalogNameString.of_json in
-      let database = field_map json "Database" DatabaseString.of_json in
-      make ?catalog ?database ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The database and data catalog context in which the query execution occurs."]
-module QueryExecutionId =
+  end[@@ocaml.doc "Contains an array of named query IDs."]
+module ErrorMessage =
   struct
     type nonrec t = string
-    let context_ = "QueryExecutionId"
+    let context_ = "ErrorMessage"
     let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"QueryExecutionId" j
-    let to_json = simple_to_json to_value
-  end
-module QueryExecutionStatistics =
-  struct
-    type nonrec t =
-      {
-      engineExecutionTimeInMillis: Long.t option
-        [@ocaml.doc
-          "The number of milliseconds that the query took to execute."];
-      dataScannedInBytes: Long.t option
-        [@ocaml.doc "The number of bytes in the data that was queried."];
-      dataManifestLocation: String_.t option
-        [@ocaml.doc
-          "The location and file name of a data manifest file. The manifest file is saved to the Athena query results location in Amazon S3. The manifest file tracks files that the query wrote to Amazon S3. If the query fails, the manifest file also tracks files that the query intended to write. The manifest is useful for identifying orphaned files resulting from a failed query. For more information, see Working with Query Results, Output Files, and Query History in the Amazon Athena User Guide."];
-      totalExecutionTimeInMillis: Long.t option
-        [@ocaml.doc
-          "The number of milliseconds that Athena took to run the query."];
-      queryQueueTimeInMillis: Long.t option
-        [@ocaml.doc
-          "The number of milliseconds that the query was in your query queue waiting for resources. Note that if transient errors occur, Athena might automatically add the query back to the queue."];
-      queryPlanningTimeInMillis: Long.t option
-        [@ocaml.doc
-          "The number of milliseconds that Athena took to plan the query processing flow. This includes the time spent retrieving table partitions from the data source. Note that because the query engine performs the query planning, query planning time is a subset of engine processing time."];
-      serviceProcessingTimeInMillis: Long.t option
-        [@ocaml.doc
-          "The number of milliseconds that Athena took to finalize and publish the query results after the query engine finished running the query."]}
-    let make ?engineExecutionTimeInMillis =
-      fun ?dataScannedInBytes ->
-        fun ?dataManifestLocation ->
-          fun ?totalExecutionTimeInMillis ->
-            fun ?queryQueueTimeInMillis ->
-              fun ?queryPlanningTimeInMillis ->
-                fun ?serviceProcessingTimeInMillis ->
-                  fun () ->
-                    {
-                      engineExecutionTimeInMillis;
-                      dataScannedInBytes;
-                      dataManifestLocation;
-                      totalExecutionTimeInMillis;
-                      queryQueueTimeInMillis;
-                      queryPlanningTimeInMillis;
-                      serviceProcessingTimeInMillis
-                    }
-    let to_value x =
-      structure_to_value
-        [("EngineExecutionTimeInMillis",
-           (Option.map x.engineExecutionTimeInMillis ~f:Long.to_value));
-        ("DataScannedInBytes",
-          (Option.map x.dataScannedInBytes ~f:Long.to_value));
-        ("DataManifestLocation",
-          (Option.map x.dataManifestLocation ~f:String_.to_value));
-        ("TotalExecutionTimeInMillis",
-          (Option.map x.totalExecutionTimeInMillis ~f:Long.to_value));
-        ("QueryQueueTimeInMillis",
-          (Option.map x.queryQueueTimeInMillis ~f:Long.to_value));
-        ("QueryPlanningTimeInMillis",
-          (Option.map x.queryPlanningTimeInMillis ~f:Long.to_value));
-        ("ServiceProcessingTimeInMillis",
-          (Option.map x.serviceProcessingTimeInMillis ~f:Long.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let serviceProcessingTimeInMillis =
-        (Option.map ~f:Long.of_xml)
-          (Xml.child xml_arg0 "ServiceProcessingTimeInMillis") in
-      let queryPlanningTimeInMillis =
-        (Option.map ~f:Long.of_xml)
-          (Xml.child xml_arg0 "QueryPlanningTimeInMillis") in
-      let queryQueueTimeInMillis =
-        (Option.map ~f:Long.of_xml)
-          (Xml.child xml_arg0 "QueryQueueTimeInMillis") in
-      let totalExecutionTimeInMillis =
-        (Option.map ~f:Long.of_xml)
-          (Xml.child xml_arg0 "TotalExecutionTimeInMillis") in
-      let dataManifestLocation =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "DataManifestLocation") in
-      let dataScannedInBytes =
-        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "DataScannedInBytes") in
-      let engineExecutionTimeInMillis =
-        (Option.map ~f:Long.of_xml)
-          (Xml.child xml_arg0 "EngineExecutionTimeInMillis") in
-      make ?serviceProcessingTimeInMillis ?queryPlanningTimeInMillis
-        ?queryQueueTimeInMillis ?totalExecutionTimeInMillis
-        ?dataManifestLocation ?dataScannedInBytes
-        ?engineExecutionTimeInMillis ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceProcessingTimeInMillis =
-        field_map json "ServiceProcessingTimeInMillis" Long.of_json in
-      let queryPlanningTimeInMillis =
-        field_map json "QueryPlanningTimeInMillis" Long.of_json in
-      let queryQueueTimeInMillis =
-        field_map json "QueryQueueTimeInMillis" Long.of_json in
-      let totalExecutionTimeInMillis =
-        field_map json "TotalExecutionTimeInMillis" Long.of_json in
-      let dataManifestLocation =
-        field_map json "DataManifestLocation" String_.of_json in
-      let dataScannedInBytes =
-        field_map json "DataScannedInBytes" Long.of_json in
-      let engineExecutionTimeInMillis =
-        field_map json "EngineExecutionTimeInMillis" Long.of_json in
-      make ?serviceProcessingTimeInMillis ?queryPlanningTimeInMillis
-        ?queryQueueTimeInMillis ?totalExecutionTimeInMillis
-        ?dataManifestLocation ?dataScannedInBytes
-        ?engineExecutionTimeInMillis ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The amount of data scanned during the query execution and the amount of time that it took to execute, and the type of statement that was run."]
-module QueryExecutionStatus =
-  struct
-    type nonrec t =
-      {
-      state: QueryExecutionState.t option
-        [@ocaml.doc
-          "The state of query execution. QUEUED indicates that the query has been submitted to the service, and Athena will execute the query as soon as resources are available. RUNNING indicates that the query is in execution phase. SUCCEEDED indicates that the query completed without errors. FAILED indicates that the query experienced an error and did not complete processing. CANCELLED indicates that a user input interrupted query execution. Athena automatically retries your queries in cases of certain transient errors. As a result, you may see the query state transition from RUNNING or FAILED to QUEUED."];
-      stateChangeReason: String_.t option
-        [@ocaml.doc "Further detail about the status of the query."];
-      submissionDateTime: Date.t option
-        [@ocaml.doc "The date and time that the query was submitted."];
-      completionDateTime: Date.t option
-        [@ocaml.doc "The date and time that the query completed."];
-      athenaError: AthenaError.t option
-        [@ocaml.doc "Provides information about an Athena query error."]}
-    let make ?state =
-      fun ?stateChangeReason ->
-        fun ?submissionDateTime ->
-          fun ?completionDateTime ->
-            fun ?athenaError ->
-              fun () ->
-                {
-                  state;
-                  stateChangeReason;
-                  submissionDateTime;
-                  completionDateTime;
-                  athenaError
-                }
-    let to_value x =
-      structure_to_value
-        [("State", (Option.map x.state ~f:QueryExecutionState.to_value));
-        ("StateChangeReason",
-          (Option.map x.stateChangeReason ~f:String_.to_value));
-        ("SubmissionDateTime",
-          (Option.map x.submissionDateTime ~f:Date.to_value));
-        ("CompletionDateTime",
-          (Option.map x.completionDateTime ~f:Date.to_value));
-        ("AthenaError", (Option.map x.athenaError ~f:AthenaError.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let athenaError =
-        (Option.map ~f:AthenaError.of_xml) (Xml.child xml_arg0 "AthenaError") in
-      let completionDateTime =
-        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CompletionDateTime") in
-      let submissionDateTime =
-        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "SubmissionDateTime") in
-      let stateChangeReason =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "StateChangeReason") in
-      let state =
-        (Option.map ~f:QueryExecutionState.of_xml)
-          (Xml.child xml_arg0 "State") in
-      make ?athenaError ?completionDateTime ?submissionDateTime
-        ?stateChangeReason ?state ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let athenaError = field_map json "AthenaError" AthenaError.of_json in
-      let completionDateTime =
-        field_map json "CompletionDateTime" Date.of_json in
-      let submissionDateTime =
-        field_map json "SubmissionDateTime" Date.of_json in
-      let stateChangeReason =
-        field_map json "StateChangeReason" String_.of_json in
-      let state = field_map json "State" QueryExecutionState.of_json in
-      make ?athenaError ?completionDateTime ?submissionDateTime
-        ?stateChangeReason ?state ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The completion date, current state, submission time, and state change reason (if applicable) for the query execution."]
-module QueryString =
-  struct
-    type nonrec t = string
-    let context_ = "QueryString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:262144) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"QueryString" j
-    let to_json = simple_to_json to_value
-  end
-module StatementType =
-  struct
-    type nonrec t =
-      | DDL 
-      | DML 
-      | UTILITY 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | DDL -> "DDL"
-      | DML -> "DML"
-      | UTILITY -> "UTILITY"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "DDL" -> DDL
-      | "DML" -> DML
-      | "UTILITY" -> UTILITY
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration StatementType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"StatementType" j)
+    let of_json j = string_of_json ~kind:"ErrorMessage" j
     let to_json = simple_to_json to_value
   end
 module ErrorCode =
@@ -1360,846 +524,6 @@ module ErrorCode =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "The error code returned when the query execution failed to process, or when the processing request for the named query failed."]
-module ErrorMessage =
-  struct
-    type nonrec t = string
-    let context_ = "ErrorMessage"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ErrorMessage" j
-    let to_json = simple_to_json to_value
-  end
-module NamedQueryId =
-  struct
-    type nonrec t = string
-    let context_ = "NamedQueryId"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NamedQueryId" j
-    let to_json = simple_to_json to_value
-  end
-module ResultConfigurationUpdates =
-  struct
-    type nonrec t =
-      {
-      outputLocation: String_.t option
-        [@ocaml.doc
-          "The location in Amazon S3 where your query results are stored, such as s3://path/to/query/bucket/. For more information, see Query Results If workgroup settings override client-side settings, then the query uses the location for the query results and the encryption configuration that are specified for the workgroup. The \"workgroup settings override\" is specified in EnforceWorkGroupConfiguration (true/false) in the WorkGroupConfiguration. See WorkGroupConfiguration$EnforceWorkGroupConfiguration."];
-      removeOutputLocation: BoxedBoolean.t option
-        [@ocaml.doc
-          "If set to \"true\", indicates that the previously-specified query results location (also known as a client-side setting) for queries in this workgroup should be ignored and set to null. If set to \"false\" or not set, and a value is present in the OutputLocation in ResultConfigurationUpdates (the client-side setting), the OutputLocation in the workgroup's ResultConfiguration will be updated with the new value. For more information, see Workgroup Settings Override Client-Side Settings."];
-      encryptionConfiguration: EncryptionConfiguration.t option
-        [@ocaml.doc "The encryption configuration for the query results."];
-      removeEncryptionConfiguration: BoxedBoolean.t option
-        [@ocaml.doc
-          "If set to \"true\", indicates that the previously-specified encryption configuration (also known as the client-side setting) for queries in this workgroup should be ignored and set to null. If set to \"false\" or not set, and a value is present in the EncryptionConfiguration in ResultConfigurationUpdates (the client-side setting), the EncryptionConfiguration in the workgroup's ResultConfiguration will be updated with the new value. For more information, see Workgroup Settings Override Client-Side Settings."];
-      expectedBucketOwner: String_.t option
-        [@ocaml.doc
-          "The Amazon Web Services account ID that you expect to be the owner of the Amazon S3 bucket specified by ResultConfiguration$OutputLocation. If set, Athena uses the value for ExpectedBucketOwner when it makes Amazon S3 calls to your specified output location. If the ExpectedBucketOwner Amazon Web Services account ID does not match the actual owner of the Amazon S3 bucket, the call fails with a permissions error. If workgroup settings override client-side settings, then the query uses the ExpectedBucketOwner setting that is specified for the workgroup, and also uses the location for storing query results specified in the workgroup. See WorkGroupConfiguration$EnforceWorkGroupConfiguration and Workgroup Settings Override Client-Side Settings."];
-      removeExpectedBucketOwner: BoxedBoolean.t option
-        [@ocaml.doc
-          "If set to \"true\", removes the Amazon Web Services account ID previously specified for ResultConfiguration$ExpectedBucketOwner. If set to \"false\" or not set, and a value is present in the ExpectedBucketOwner in ResultConfigurationUpdates (the client-side setting), the ExpectedBucketOwner in the workgroup's ResultConfiguration is updated with the new value. For more information, see Workgroup Settings Override Client-Side Settings."];
-      aclConfiguration: AclConfiguration.t option
-        [@ocaml.doc "The ACL configuration for the query results."];
-      removeAclConfiguration: BoxedBoolean.t option
-        [@ocaml.doc
-          "If set to true, indicates that the previously-specified ACL configuration for queries in this workgroup should be ignored and set to null. If set to false or not set, and a value is present in the AclConfiguration of ResultConfigurationUpdates, the AclConfiguration in the workgroup's ResultConfiguration is updated with the new value. For more information, see Workgroup Settings Override Client-Side Settings."]}
-    let make ?outputLocation =
-      fun ?removeOutputLocation ->
-        fun ?encryptionConfiguration ->
-          fun ?removeEncryptionConfiguration ->
-            fun ?expectedBucketOwner ->
-              fun ?removeExpectedBucketOwner ->
-                fun ?aclConfiguration ->
-                  fun ?removeAclConfiguration ->
-                    fun () ->
-                      {
-                        outputLocation;
-                        removeOutputLocation;
-                        encryptionConfiguration;
-                        removeEncryptionConfiguration;
-                        expectedBucketOwner;
-                        removeExpectedBucketOwner;
-                        aclConfiguration;
-                        removeAclConfiguration
-                      }
-    let to_value x =
-      structure_to_value
-        [("OutputLocation",
-           (Option.map x.outputLocation ~f:String_.to_value));
-        ("RemoveOutputLocation",
-          (Option.map x.removeOutputLocation ~f:BoxedBoolean.to_value));
-        ("EncryptionConfiguration",
-          (Option.map x.encryptionConfiguration
-             ~f:EncryptionConfiguration.to_value));
-        ("RemoveEncryptionConfiguration",
-          (Option.map x.removeEncryptionConfiguration
-             ~f:BoxedBoolean.to_value));
-        ("ExpectedBucketOwner",
-          (Option.map x.expectedBucketOwner ~f:String_.to_value));
-        ("RemoveExpectedBucketOwner",
-          (Option.map x.removeExpectedBucketOwner ~f:BoxedBoolean.to_value));
-        ("AclConfiguration",
-          (Option.map x.aclConfiguration ~f:AclConfiguration.to_value));
-        ("RemoveAclConfiguration",
-          (Option.map x.removeAclConfiguration ~f:BoxedBoolean.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let removeAclConfiguration =
-        (Option.map ~f:BoxedBoolean.of_xml)
-          (Xml.child xml_arg0 "RemoveAclConfiguration") in
-      let aclConfiguration =
-        (Option.map ~f:AclConfiguration.of_xml)
-          (Xml.child xml_arg0 "AclConfiguration") in
-      let removeExpectedBucketOwner =
-        (Option.map ~f:BoxedBoolean.of_xml)
-          (Xml.child xml_arg0 "RemoveExpectedBucketOwner") in
-      let expectedBucketOwner =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "ExpectedBucketOwner") in
-      let removeEncryptionConfiguration =
-        (Option.map ~f:BoxedBoolean.of_xml)
-          (Xml.child xml_arg0 "RemoveEncryptionConfiguration") in
-      let encryptionConfiguration =
-        (Option.map ~f:EncryptionConfiguration.of_xml)
-          (Xml.child xml_arg0 "EncryptionConfiguration") in
-      let removeOutputLocation =
-        (Option.map ~f:BoxedBoolean.of_xml)
-          (Xml.child xml_arg0 "RemoveOutputLocation") in
-      let outputLocation =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "OutputLocation") in
-      make ?removeAclConfiguration ?aclConfiguration
-        ?removeExpectedBucketOwner ?expectedBucketOwner
-        ?removeEncryptionConfiguration ?encryptionConfiguration
-        ?removeOutputLocation ?outputLocation ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let removeAclConfiguration =
-        field_map json "RemoveAclConfiguration" BoxedBoolean.of_json in
-      let aclConfiguration =
-        field_map json "AclConfiguration" AclConfiguration.of_json in
-      let removeExpectedBucketOwner =
-        field_map json "RemoveExpectedBucketOwner" BoxedBoolean.of_json in
-      let expectedBucketOwner =
-        field_map json "ExpectedBucketOwner" String_.of_json in
-      let removeEncryptionConfiguration =
-        field_map json "RemoveEncryptionConfiguration" BoxedBoolean.of_json in
-      let encryptionConfiguration =
-        field_map json "EncryptionConfiguration"
-          EncryptionConfiguration.of_json in
-      let removeOutputLocation =
-        field_map json "RemoveOutputLocation" BoxedBoolean.of_json in
-      let outputLocation = field_map json "OutputLocation" String_.of_json in
-      make ?removeAclConfiguration ?aclConfiguration
-        ?removeExpectedBucketOwner ?expectedBucketOwner
-        ?removeEncryptionConfiguration ?encryptionConfiguration
-        ?removeOutputLocation ?outputLocation ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The information about the updates in the query results, such as output location and encryption configuration for the query results."]
-module AmazonResourceName =
-  struct
-    type nonrec t = string
-    let context_ = "AmazonResourceName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:1011) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AmazonResourceName" j
-    let to_json = simple_to_json to_value
-  end
-module Tag =
-  struct
-    type nonrec t =
-      {
-      key: TagKey.t option
-        [@ocaml.doc
-          "A tag key. The tag key length is from 1 to 128 Unicode characters in UTF-8. You can use letters and numbers representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys are case-sensitive and must be unique per resource."];
-      value: TagValue.t option
-        [@ocaml.doc
-          "A tag value. The tag value length is from 0 to 256 Unicode characters in UTF-8. You can use letters and numbers representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag values are case-sensitive."]}
-    let make ?key = fun ?value -> fun () -> { key; value }
-    let to_value x =
-      structure_to_value
-        [("Key", (Option.map x.key ~f:TagKey.to_value));
-        ("Value", (Option.map x.value ~f:TagValue.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let value =
-        (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
-      let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
-      make ?value ?key ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A label that you assign to a resource. In Athena, a resource can be a workgroup or data catalog. Each tag consists of a key and an optional value, both of which you define. For example, you can use tags to categorize Athena workgroups or data catalogs by purpose, owner, or environment. Use a consistent set of tag keys to make it easier to search and filter workgroups or data catalogs in your account. For best practices, see Tagging Best Practices. Tag keys can be from 1 to 128 UTF-8 Unicode characters, and tag values can be from 0 to 256 UTF-8 Unicode characters. Tags can use letters and numbers representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case-sensitive. Tag keys must be unique per resource. If you specify more than one tag, separate them by commas."]
-module ThrottleReason =
-  struct
-    type nonrec t =
-      | CONCURRENT_QUERY_LIMIT_EXCEEDED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | CONCURRENT_QUERY_LIMIT_EXCEEDED -> "CONCURRENT_QUERY_LIMIT_EXCEEDED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "CONCURRENT_QUERY_LIMIT_EXCEEDED" -> CONCURRENT_QUERY_LIMIT_EXCEEDED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration ThrottleReason" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ThrottleReason" j)
-    let to_json = simple_to_json to_value
-  end
-module WorkGroupSummary =
-  struct
-    type nonrec t =
-      {
-      name: WorkGroupName.t option [@ocaml.doc "The name of the workgroup."];
-      state: WorkGroupState.t option
-        [@ocaml.doc "The state of the workgroup."];
-      description: WorkGroupDescriptionString.t option
-        [@ocaml.doc "The workgroup description."];
-      creationTime: Date.t option
-        [@ocaml.doc "The workgroup creation date and time."];
-      engineVersion: EngineVersion.t option
-        [@ocaml.doc
-          "The engine version setting for all queries on the workgroup. Queries on the AmazonAthenaPreviewFunctionality workgroup run on the preview engine regardless of this setting."]}
-    let make ?name =
-      fun ?state ->
-        fun ?description ->
-          fun ?creationTime ->
-            fun ?engineVersion ->
-              fun () ->
-                { name; state; description; creationTime; engineVersion }
-    let to_value x =
-      structure_to_value
-        [("Name", (Option.map x.name ~f:WorkGroupName.to_value));
-        ("State", (Option.map x.state ~f:WorkGroupState.to_value));
-        ("Description",
-          (Option.map x.description ~f:WorkGroupDescriptionString.to_value));
-        ("CreationTime", (Option.map x.creationTime ~f:Date.to_value));
-        ("EngineVersion",
-          (Option.map x.engineVersion ~f:EngineVersion.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let engineVersion =
-        (Option.map ~f:EngineVersion.of_xml)
-          (Xml.child xml_arg0 "EngineVersion") in
-      let creationTime =
-        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationTime") in
-      let description =
-        (Option.map ~f:WorkGroupDescriptionString.of_xml)
-          (Xml.child xml_arg0 "Description") in
-      let state =
-        (Option.map ~f:WorkGroupState.of_xml) (Xml.child xml_arg0 "State") in
-      let name =
-        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?engineVersion ?creationTime ?description ?state ?name ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let engineVersion =
-        field_map json "EngineVersion" EngineVersion.of_json in
-      let creationTime = field_map json "CreationTime" Date.of_json in
-      let description =
-        field_map json "Description" WorkGroupDescriptionString.of_json in
-      let state = field_map json "State" WorkGroupState.of_json in
-      let name = field_map json "Name" WorkGroupName.of_json in
-      make ?engineVersion ?creationTime ?description ?state ?name ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The summary information for the workgroup, which includes its name, state, description, and the date and time it was created."]
-module TableMetadata =
-  struct
-    type nonrec t =
-      {
-      name: NameString.t [@ocaml.doc "The name of the table."];
-      createTime: Timestamp.t option
-        [@ocaml.doc "The time that the table was created."];
-      lastAccessTime: Timestamp.t option
-        [@ocaml.doc "The last time the table was accessed."];
-      tableType: TableTypeString.t option
-        [@ocaml.doc
-          "The type of table. In Athena, only EXTERNAL_TABLE is supported."];
-      columns: ColumnList.t option
-        [@ocaml.doc "A list of the columns in the table."];
-      partitionKeys: ColumnList.t option
-        [@ocaml.doc "A list of the partition keys in the table."];
-      parameters: ParametersMap.t option
-        [@ocaml.doc "A set of custom key/value pairs for table properties."]}
-    let context_ = "TableMetadata"
-    let make ?createTime =
-      fun ?lastAccessTime ->
-        fun ?tableType ->
-          fun ?columns ->
-            fun ?partitionKeys ->
-              fun ?parameters ->
-                fun ~name ->
-                  fun () ->
-                    {
-                      createTime;
-                      lastAccessTime;
-                      tableType;
-                      columns;
-                      partitionKeys;
-                      parameters;
-                      name
-                    }
-    let to_value x =
-      structure_to_value
-        [("Name", (Some (NameString.to_value x.name)));
-        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
-        ("LastAccessTime",
-          (Option.map x.lastAccessTime ~f:Timestamp.to_value));
-        ("TableType", (Option.map x.tableType ~f:TableTypeString.to_value));
-        ("Columns", (Option.map x.columns ~f:ColumnList.to_value));
-        ("PartitionKeys",
-          (Option.map x.partitionKeys ~f:ColumnList.to_value));
-        ("Parameters", (Option.map x.parameters ~f:ParametersMap.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let parameters =
-        (Option.map ~f:ParametersMap.of_xml)
-          (Xml.child xml_arg0 "Parameters") in
-      let partitionKeys =
-        (Option.map ~f:ColumnList.of_xml)
-          (Xml.child xml_arg0 "PartitionKeys") in
-      let columns =
-        (Option.map ~f:ColumnList.of_xml) (Xml.child xml_arg0 "Columns") in
-      let tableType =
-        (Option.map ~f:TableTypeString.of_xml)
-          (Xml.child xml_arg0 "TableType") in
-      let lastAccessTime =
-        (Option.map ~f:Timestamp.of_xml)
-          (Xml.child xml_arg0 "LastAccessTime") in
-      let createTime =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
-      let name =
-        NameString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?parameters ?partitionKeys ?columns ?tableType ?lastAccessTime
-        ?createTime ~name ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "Parameters" ParametersMap.of_json in
-      let partitionKeys = field_map json "PartitionKeys" ColumnList.of_json in
-      let columns = field_map json "Columns" ColumnList.of_json in
-      let tableType = field_map json "TableType" TableTypeString.of_json in
-      let lastAccessTime = field_map json "LastAccessTime" Timestamp.of_json in
-      let createTime = field_map json "CreateTime" Timestamp.of_json in
-      let name = field_map_exn json "Name" NameString.of_json in
-      make ?parameters ?partitionKeys ?columns ?tableType ?lastAccessTime
-        ?createTime ~name ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains metadata for a table."]
-module PreparedStatementSummary =
-  struct
-    type nonrec t =
-      {
-      statementName: StatementName.t option
-        [@ocaml.doc "The name of the prepared statement."];
-      lastModifiedTime: Date.t option
-        [@ocaml.doc "The last modified time of the prepared statement."]}
-    let make ?statementName =
-      fun ?lastModifiedTime -> fun () -> { statementName; lastModifiedTime }
-    let to_value x =
-      structure_to_value
-        [("StatementName",
-           (Option.map x.statementName ~f:StatementName.to_value));
-        ("LastModifiedTime",
-          (Option.map x.lastModifiedTime ~f:Date.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let lastModifiedTime =
-        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "LastModifiedTime") in
-      let statementName =
-        (Option.map ~f:StatementName.of_xml)
-          (Xml.child xml_arg0 "StatementName") in
-      make ?lastModifiedTime ?statementName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastModifiedTime = field_map json "LastModifiedTime" Date.of_json in
-      let statementName =
-        field_map json "StatementName" StatementName.of_json in
-      make ?lastModifiedTime ?statementName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The name and last modified time of the prepared statement."]
-module Database =
-  struct
-    type nonrec t =
-      {
-      name: NameString.t [@ocaml.doc "The name of the database."];
-      description: DescriptionString.t option
-        [@ocaml.doc "An optional description of the database."];
-      parameters: ParametersMap.t option
-        [@ocaml.doc "A set of custom key/value pairs."]}
-    let context_ = "Database"
-    let make ?description =
-      fun ?parameters ->
-        fun ~name -> fun () -> { description; parameters; name }
-    let to_value x =
-      structure_to_value
-        [("Name", (Some (NameString.to_value x.name)));
-        ("Description",
-          (Option.map x.description ~f:DescriptionString.to_value));
-        ("Parameters", (Option.map x.parameters ~f:ParametersMap.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let parameters =
-        (Option.map ~f:ParametersMap.of_xml)
-          (Xml.child xml_arg0 "Parameters") in
-      let description =
-        (Option.map ~f:DescriptionString.of_xml)
-          (Xml.child xml_arg0 "Description") in
-      let name =
-        NameString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?parameters ?description ~name ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "Parameters" ParametersMap.of_json in
-      let description =
-        field_map json "Description" DescriptionString.of_json in
-      let name = field_map_exn json "Name" NameString.of_json in
-      make ?parameters ?description ~name ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Contains metadata information for a database in a data catalog."]
-module DataCatalogSummary =
-  struct
-    type nonrec t =
-      {
-      catalogName: CatalogNameString.t option
-        [@ocaml.doc
-          "The name of the data catalog. The catalog name is unique for the Amazon Web Services account and can use a maximum of 127 alphanumeric, underscore, at sign, or hyphen characters. The remainder of the length constraint of 256 is reserved for use by Athena."];
-      type_: DataCatalogType.t option [@ocaml.doc "The data catalog type."]}
-    let make ?catalogName = fun ?type_ -> fun () -> { catalogName; type_ }
-    let to_value x =
-      structure_to_value
-        [("CatalogName",
-           (Option.map x.catalogName ~f:CatalogNameString.to_value));
-        ("Type", (Option.map x.type_ ~f:DataCatalogType.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let type_ =
-        (Option.map ~f:DataCatalogType.of_xml) (Xml.child xml_arg0 "Type") in
-      let catalogName =
-        (Option.map ~f:CatalogNameString.of_xml)
-          (Xml.child xml_arg0 "CatalogName") in
-      make ?type_ ?catalogName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" DataCatalogType.of_json in
-      let catalogName =
-        field_map json "CatalogName" CatalogNameString.of_json in
-      make ?type_ ?catalogName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The summary information for the data catalog, which includes its name and type."]
-module WorkGroupConfiguration =
-  struct
-    type nonrec t =
-      {
-      resultConfiguration: ResultConfiguration.t option
-        [@ocaml.doc
-          "The configuration for the workgroup, which includes the location in Amazon S3 where query results are stored and the encryption option, if any, used for query results. To run the query, you must specify the query results location using one of the ways: either in the workgroup using this setting, or for individual queries (client-side), using ResultConfiguration$OutputLocation. If none of them is set, Athena issues an error that no output location is provided. For more information, see Query Results."];
-      enforceWorkGroupConfiguration: BoxedBoolean.t option
-        [@ocaml.doc
-          "If set to \"true\", the settings for the workgroup override client-side settings. If set to \"false\", client-side settings are used. For more information, see Workgroup Settings Override Client-Side Settings."];
-      publishCloudWatchMetricsEnabled: BoxedBoolean.t option
-        [@ocaml.doc
-          "Indicates that the Amazon CloudWatch metrics are enabled for the workgroup."];
-      bytesScannedCutoffPerQuery: BytesScannedCutoffValue.t option
-        [@ocaml.doc
-          "The upper data usage limit (cutoff) for the amount of bytes a single query in a workgroup is allowed to scan."];
-      requesterPaysEnabled: BoxedBoolean.t option
-        [@ocaml.doc
-          "If set to true, allows members assigned to a workgroup to reference Amazon S3 Requester Pays buckets in queries. If set to false, workgroup members cannot query data from Requester Pays buckets, and queries that retrieve data from Requester Pays buckets cause an error. The default is false. For more information about Requester Pays buckets, see Requester Pays Buckets in the Amazon Simple Storage Service Developer Guide."];
-      engineVersion: EngineVersion.t option
-        [@ocaml.doc
-          "The engine version that all queries running on the workgroup use. Queries on the AmazonAthenaPreviewFunctionality workgroup run on the preview engine regardless of this setting."]}
-    let make ?resultConfiguration =
-      fun ?enforceWorkGroupConfiguration ->
-        fun ?publishCloudWatchMetricsEnabled ->
-          fun ?bytesScannedCutoffPerQuery ->
-            fun ?requesterPaysEnabled ->
-              fun ?engineVersion ->
-                fun () ->
-                  {
-                    resultConfiguration;
-                    enforceWorkGroupConfiguration;
-                    publishCloudWatchMetricsEnabled;
-                    bytesScannedCutoffPerQuery;
-                    requesterPaysEnabled;
-                    engineVersion
-                  }
-    let to_value x =
-      structure_to_value
-        [("ResultConfiguration",
-           (Option.map x.resultConfiguration ~f:ResultConfiguration.to_value));
-        ("EnforceWorkGroupConfiguration",
-          (Option.map x.enforceWorkGroupConfiguration
-             ~f:BoxedBoolean.to_value));
-        ("PublishCloudWatchMetricsEnabled",
-          (Option.map x.publishCloudWatchMetricsEnabled
-             ~f:BoxedBoolean.to_value));
-        ("BytesScannedCutoffPerQuery",
-          (Option.map x.bytesScannedCutoffPerQuery
-             ~f:BytesScannedCutoffValue.to_value));
-        ("RequesterPaysEnabled",
-          (Option.map x.requesterPaysEnabled ~f:BoxedBoolean.to_value));
-        ("EngineVersion",
-          (Option.map x.engineVersion ~f:EngineVersion.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let engineVersion =
-        (Option.map ~f:EngineVersion.of_xml)
-          (Xml.child xml_arg0 "EngineVersion") in
-      let requesterPaysEnabled =
-        (Option.map ~f:BoxedBoolean.of_xml)
-          (Xml.child xml_arg0 "RequesterPaysEnabled") in
-      let bytesScannedCutoffPerQuery =
-        (Option.map ~f:BytesScannedCutoffValue.of_xml)
-          (Xml.child xml_arg0 "BytesScannedCutoffPerQuery") in
-      let publishCloudWatchMetricsEnabled =
-        (Option.map ~f:BoxedBoolean.of_xml)
-          (Xml.child xml_arg0 "PublishCloudWatchMetricsEnabled") in
-      let enforceWorkGroupConfiguration =
-        (Option.map ~f:BoxedBoolean.of_xml)
-          (Xml.child xml_arg0 "EnforceWorkGroupConfiguration") in
-      let resultConfiguration =
-        (Option.map ~f:ResultConfiguration.of_xml)
-          (Xml.child xml_arg0 "ResultConfiguration") in
-      make ?engineVersion ?requesterPaysEnabled ?bytesScannedCutoffPerQuery
-        ?publishCloudWatchMetricsEnabled ?enforceWorkGroupConfiguration
-        ?resultConfiguration ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let engineVersion =
-        field_map json "EngineVersion" EngineVersion.of_json in
-      let requesterPaysEnabled =
-        field_map json "RequesterPaysEnabled" BoxedBoolean.of_json in
-      let bytesScannedCutoffPerQuery =
-        field_map json "BytesScannedCutoffPerQuery"
-          BytesScannedCutoffValue.of_json in
-      let publishCloudWatchMetricsEnabled =
-        field_map json "PublishCloudWatchMetricsEnabled" BoxedBoolean.of_json in
-      let enforceWorkGroupConfiguration =
-        field_map json "EnforceWorkGroupConfiguration" BoxedBoolean.of_json in
-      let resultConfiguration =
-        field_map json "ResultConfiguration" ResultConfiguration.of_json in
-      make ?engineVersion ?requesterPaysEnabled ?bytesScannedCutoffPerQuery
-        ?publishCloudWatchMetricsEnabled ?enforceWorkGroupConfiguration
-        ?resultConfiguration ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The configuration of the workgroup, which includes the location in Amazon S3 where query results are stored, the encryption option, if any, used for query results, whether the Amazon CloudWatch Metrics are enabled for the workgroup and whether workgroup settings override query settings, and the data usage limits for the amount of data scanned per query or per workgroup. The workgroup settings override is specified in EnforceWorkGroupConfiguration (true/false) in the WorkGroupConfiguration. See WorkGroupConfiguration$EnforceWorkGroupConfiguration."]
-module ResultSetMetadata =
-  struct
-    type nonrec t =
-      {
-      columnInfo: ColumnInfoList.t option
-        [@ocaml.doc
-          "Information about the columns returned in a query result metadata."]}
-    let make ?columnInfo = fun () -> { columnInfo }
-    let to_value x =
-      structure_to_value
-        [("ColumnInfo", (Option.map x.columnInfo ~f:ColumnInfoList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let columnInfo =
-        (Option.map ~f:ColumnInfoList.of_xml)
-          (Xml.child xml_arg0 "ColumnInfo") in
-      make ?columnInfo ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let columnInfo = field_map json "ColumnInfo" ColumnInfoList.of_json in
-      make ?columnInfo ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The metadata that describes the column structure and data types of a table of query results. To return a ResultSetMetadata object, use GetQueryResults."]
-module RowList =
-  struct
-    type nonrec t = Row.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Row.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Row.of_xml)
-    let of_json j = list_of_json ~kind:"RowList" ~of_json:Row.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module QueryExecution =
-  struct
-    type nonrec t =
-      {
-      queryExecutionId: QueryExecutionId.t option
-        [@ocaml.doc "The unique identifier for each query execution."];
-      query: QueryString.t option
-        [@ocaml.doc
-          "The SQL query statements which the query execution ran."];
-      statementType: StatementType.t option
-        [@ocaml.doc
-          "The type of query statement that was run. DDL indicates DDL query statements. DML indicates DML (Data Manipulation Language) query statements, such as CREATE TABLE AS SELECT. UTILITY indicates query statements other than DDL and DML, such as SHOW CREATE TABLE, or DESCRIBE TABLE."];
-      resultConfiguration: ResultConfiguration.t option
-        [@ocaml.doc
-          "The location in Amazon S3 where query results were stored and the encryption option, if any, used for query results. These are known as \"client-side settings\". If workgroup settings override client-side settings, then the query uses the location for the query results and the encryption configuration that are specified for the workgroup."];
-      queryExecutionContext: QueryExecutionContext.t option
-        [@ocaml.doc "The database in which the query execution occurred."];
-      status: QueryExecutionStatus.t option
-        [@ocaml.doc
-          "The completion date, current state, submission time, and state change reason (if applicable) for the query execution."];
-      statistics: QueryExecutionStatistics.t option
-        [@ocaml.doc
-          "Query execution statistics, such as the amount of data scanned, the amount of time that the query took to process, and the type of statement that was run."];
-      workGroup: WorkGroupName.t option
-        [@ocaml.doc "The name of the workgroup in which the query ran."];
-      engineVersion: EngineVersion.t option
-        [@ocaml.doc "The engine version that executed the query."]}
-    let make ?queryExecutionId =
-      fun ?query ->
-        fun ?statementType ->
-          fun ?resultConfiguration ->
-            fun ?queryExecutionContext ->
-              fun ?status ->
-                fun ?statistics ->
-                  fun ?workGroup ->
-                    fun ?engineVersion ->
-                      fun () ->
-                        {
-                          queryExecutionId;
-                          query;
-                          statementType;
-                          resultConfiguration;
-                          queryExecutionContext;
-                          status;
-                          statistics;
-                          workGroup;
-                          engineVersion
-                        }
-    let to_value x =
-      structure_to_value
-        [("QueryExecutionId",
-           (Option.map x.queryExecutionId ~f:QueryExecutionId.to_value));
-        ("Query", (Option.map x.query ~f:QueryString.to_value));
-        ("StatementType",
-          (Option.map x.statementType ~f:StatementType.to_value));
-        ("ResultConfiguration",
-          (Option.map x.resultConfiguration ~f:ResultConfiguration.to_value));
-        ("QueryExecutionContext",
-          (Option.map x.queryExecutionContext
-             ~f:QueryExecutionContext.to_value));
-        ("Status", (Option.map x.status ~f:QueryExecutionStatus.to_value));
-        ("Statistics",
-          (Option.map x.statistics ~f:QueryExecutionStatistics.to_value));
-        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value));
-        ("EngineVersion",
-          (Option.map x.engineVersion ~f:EngineVersion.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let engineVersion =
-        (Option.map ~f:EngineVersion.of_xml)
-          (Xml.child xml_arg0 "EngineVersion") in
-      let workGroup =
-        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
-      let statistics =
-        (Option.map ~f:QueryExecutionStatistics.of_xml)
-          (Xml.child xml_arg0 "Statistics") in
-      let status =
-        (Option.map ~f:QueryExecutionStatus.of_xml)
-          (Xml.child xml_arg0 "Status") in
-      let queryExecutionContext =
-        (Option.map ~f:QueryExecutionContext.of_xml)
-          (Xml.child xml_arg0 "QueryExecutionContext") in
-      let resultConfiguration =
-        (Option.map ~f:ResultConfiguration.of_xml)
-          (Xml.child xml_arg0 "ResultConfiguration") in
-      let statementType =
-        (Option.map ~f:StatementType.of_xml)
-          (Xml.child xml_arg0 "StatementType") in
-      let query =
-        (Option.map ~f:QueryString.of_xml) (Xml.child xml_arg0 "Query") in
-      let queryExecutionId =
-        (Option.map ~f:QueryExecutionId.of_xml)
-          (Xml.child xml_arg0 "QueryExecutionId") in
-      make ?engineVersion ?workGroup ?statistics ?status
-        ?queryExecutionContext ?resultConfiguration ?statementType ?query
-        ?queryExecutionId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let engineVersion =
-        field_map json "EngineVersion" EngineVersion.of_json in
-      let workGroup = field_map json "WorkGroup" WorkGroupName.of_json in
-      let statistics =
-        field_map json "Statistics" QueryExecutionStatistics.of_json in
-      let status = field_map json "Status" QueryExecutionStatus.of_json in
-      let queryExecutionContext =
-        field_map json "QueryExecutionContext" QueryExecutionContext.of_json in
-      let resultConfiguration =
-        field_map json "ResultConfiguration" ResultConfiguration.of_json in
-      let statementType =
-        field_map json "StatementType" StatementType.of_json in
-      let query = field_map json "Query" QueryString.of_json in
-      let queryExecutionId =
-        field_map json "QueryExecutionId" QueryExecutionId.of_json in
-      make ?engineVersion ?workGroup ?statistics ?status
-        ?queryExecutionContext ?resultConfiguration ?statementType ?query
-        ?queryExecutionId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Information about a single instance of a query execution."]
-module UnprocessedQueryExecutionId =
-  struct
-    type nonrec t =
-      {
-      queryExecutionId: QueryExecutionId.t option
-        [@ocaml.doc "The unique identifier of the query execution."];
-      errorCode: ErrorCode.t option
-        [@ocaml.doc
-          "The error code returned when the query execution failed to process, if applicable."];
-      errorMessage: ErrorMessage.t option
-        [@ocaml.doc
-          "The error message returned when the query execution failed to process, if applicable."]}
-    let make ?queryExecutionId =
-      fun ?errorCode ->
-        fun ?errorMessage ->
-          fun () -> { queryExecutionId; errorCode; errorMessage }
-    let to_value x =
-      structure_to_value
-        [("QueryExecutionId",
-           (Option.map x.queryExecutionId ~f:QueryExecutionId.to_value));
-        ("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
-        ("ErrorMessage",
-          (Option.map x.errorMessage ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let errorMessage =
-        (Option.map ~f:ErrorMessage.of_xml)
-          (Xml.child xml_arg0 "ErrorMessage") in
-      let errorCode =
-        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
-      let queryExecutionId =
-        (Option.map ~f:QueryExecutionId.of_xml)
-          (Xml.child xml_arg0 "QueryExecutionId") in
-      make ?errorMessage ?errorCode ?queryExecutionId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
-      let queryExecutionId =
-        field_map json "QueryExecutionId" QueryExecutionId.of_json in
-      make ?errorMessage ?errorCode ?queryExecutionId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a query execution that failed to process."]
-module NamedQuery =
-  struct
-    type nonrec t =
-      {
-      name: NameString.t [@ocaml.doc "The query name."];
-      description: DescriptionString.t option
-        [@ocaml.doc "The query description."];
-      database: DatabaseString.t
-        [@ocaml.doc "The database to which the query belongs."];
-      queryString: QueryString.t
-        [@ocaml.doc "The SQL statements that make up the query."];
-      namedQueryId: NamedQueryId.t option
-        [@ocaml.doc "The unique identifier of the query."];
-      workGroup: WorkGroupName.t option
-        [@ocaml.doc
-          "The name of the workgroup that contains the named query."]}
-    let context_ = "NamedQuery"
-    let make ?description =
-      fun ?namedQueryId ->
-        fun ?workGroup ->
-          fun ~name ->
-            fun ~database ->
-              fun ~queryString ->
-                fun () ->
-                  {
-                    description;
-                    namedQueryId;
-                    workGroup;
-                    name;
-                    database;
-                    queryString
-                  }
-    let to_value x =
-      structure_to_value
-        [("Name", (Some (NameString.to_value x.name)));
-        ("Description",
-          (Option.map x.description ~f:DescriptionString.to_value));
-        ("Database", (Some (DatabaseString.to_value x.database)));
-        ("QueryString", (Some (QueryString.to_value x.queryString)));
-        ("NamedQueryId",
-          (Option.map x.namedQueryId ~f:NamedQueryId.to_value));
-        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let workGroup =
-        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
-      let namedQueryId =
-        (Option.map ~f:NamedQueryId.of_xml)
-          (Xml.child xml_arg0 "NamedQueryId") in
-      let queryString =
-        QueryString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryString") in
-      let database =
-        DatabaseString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Database") in
-      let description =
-        (Option.map ~f:DescriptionString.of_xml)
-          (Xml.child xml_arg0 "Description") in
-      let name =
-        NameString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?workGroup ?namedQueryId ~queryString ~database ?description ~name
-        ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workGroup = field_map json "WorkGroup" WorkGroupName.of_json in
-      let namedQueryId = field_map json "NamedQueryId" NamedQueryId.of_json in
-      let queryString = field_map_exn json "QueryString" QueryString.of_json in
-      let database = field_map_exn json "Database" DatabaseString.of_json in
-      let description =
-        field_map json "Description" DescriptionString.of_json in
-      let name = field_map_exn json "Name" NameString.of_json in
-      make ?workGroup ?namedQueryId ~queryString ~database ?description ~name
-        ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A query, where QueryString contains the SQL statements that make up the query."]
 module UnprocessedNamedQueryId =
   struct
     type nonrec t =
@@ -2235,34 +559,212 @@ module UnprocessedNamedQueryId =
           (Xml.child xml_arg0 "NamedQueryId") in
       make ?errorMessage ?errorCode ?namedQueryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
-      let namedQueryId = field_map json "NamedQueryId" NamedQueryId.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let namedQueryId = field_map json__ "NamedQueryId" NamedQueryId.of_json in
       make ?errorMessage ?errorCode ?namedQueryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a named query ID that could not be processed."]
-module InternalServerException =
+module UnprocessedNamedQueryIdList =
   struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
+    type nonrec t = UnprocessedNamedQueryId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UnprocessedNamedQueryId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UnprocessedNamedQueryId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UnprocessedNamedQueryIdList"
+        ~of_json:UnprocessedNamedQueryId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WorkGroupName =
+  struct
+    type nonrec t = string
+    let context_ = "WorkGroupName"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"[a-zA-Z0-9._-]{1,128}"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkGroupName" j
+    let to_json = simple_to_json to_value
+  end
+module QueryString =
+  struct
+    type nonrec t = string
+    let context_ = "QueryString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:262144) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QueryString" j
+    let to_json = simple_to_json to_value
+  end
+module DescriptionString =
+  struct
+    type nonrec t = string
+    let context_ = "DescriptionString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DescriptionString" j
+    let to_json = simple_to_json to_value
+  end
+module DatabaseString =
+  struct
+    type nonrec t = string
+    let context_ = "DatabaseString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DatabaseString" j
+    let to_json = simple_to_json to_value
+  end
+module NamedQuery =
+  struct
+    type nonrec t =
+      {
+      name: NameString.t option [@ocaml.doc "The query name."];
+      description: DescriptionString.t option
+        [@ocaml.doc "The query description."];
+      database: DatabaseString.t option
+        [@ocaml.doc "The database to which the query belongs."];
+      queryString: QueryString.t option
+        [@ocaml.doc "The SQL statements that make up the query."];
+      namedQueryId: NamedQueryId.t option
+        [@ocaml.doc "The unique identifier of the query."];
+      workGroup: WorkGroupName.t option
+        [@ocaml.doc
+          "The name of the workgroup that contains the named query."]}
+    let make ?name =
+      fun ?description ->
+        fun ?database ->
+          fun ?queryString ->
+            fun ?namedQueryId ->
+              fun ?workGroup ->
+                fun () ->
+                  {
+                    name;
+                    description;
+                    database;
+                    queryString;
+                    namedQueryId;
+                    workGroup
+                  }
     let to_value x =
       structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+        [("Name", (Option.map x.name ~f:NameString.to_value));
+        ("Description",
+          (Option.map x.description ~f:DescriptionString.to_value));
+        ("Database", (Option.map x.database ~f:DatabaseString.to_value));
+        ("QueryString", (Option.map x.queryString ~f:QueryString.to_value));
+        ("NamedQueryId",
+          (Option.map x.namedQueryId ~f:NamedQueryId.to_value));
+        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
+      let workGroup =
+        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
+      let namedQueryId =
+        (Option.map ~f:NamedQueryId.of_xml)
+          (Xml.child xml_arg0 "NamedQueryId") in
+      let queryString =
+        (Option.map ~f:QueryString.of_xml) (Xml.child xml_arg0 "QueryString") in
+      let database =
+        (Option.map ~f:DatabaseString.of_xml) (Xml.child xml_arg0 "Database") in
+      let description =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        (Option.map ~f:NameString.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?workGroup ?namedQueryId ?queryString ?database ?description ?name
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
+    let of_json json__ =
+      let workGroup = field_map json__ "WorkGroup" WorkGroupName.of_json in
+      let namedQueryId = field_map json__ "NamedQueryId" NamedQueryId.of_json in
+      let queryString = field_map json__ "QueryString" QueryString.of_json in
+      let database = field_map json__ "Database" DatabaseString.of_json in
+      let description =
+        field_map json__ "Description" DescriptionString.of_json in
+      let name = field_map json__ "Name" NameString.of_json in
+      make ?workGroup ?namedQueryId ?queryString ?database ?description ?name
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Indicates a platform issue, which may be due to a transient condition or outage."]
+       "A query, where QueryString contains the SQL statements that make up the query."]
+module NamedQueryList =
+  struct
+    type nonrec t = NamedQuery.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NamedQuery.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NamedQuery.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NamedQueryList" ~of_json:NamedQuery.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module InvalidRequestException =
   struct
     type nonrec t =
@@ -2285,346 +787,15 @@ module InvalidRequestException =
           (Xml.child xml_arg0 "AthenaErrorCode") in
       make ?message ?athenaErrorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       let athenaErrorCode =
-        field_map json "AthenaErrorCode" ErrorCode.of_json in
+        field_map json__ "AthenaErrorCode" ErrorCode.of_json in
       make ?message ?athenaErrorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Indicates that something is wrong with the input to the request. For example, a required parameter may be missing or out of range."]
-module WorkGroupConfigurationUpdates =
-  struct
-    type nonrec t =
-      {
-      enforceWorkGroupConfiguration: BoxedBoolean.t option
-        [@ocaml.doc
-          "If set to \"true\", the settings for the workgroup override client-side settings. If set to \"false\" client-side settings are used. For more information, see Workgroup Settings Override Client-Side Settings."];
-      resultConfigurationUpdates: ResultConfigurationUpdates.t option
-        [@ocaml.doc
-          "The result configuration information about the queries in this workgroup that will be updated. Includes the updated results location and an updated option for encrypting query results."];
-      publishCloudWatchMetricsEnabled: BoxedBoolean.t option
-        [@ocaml.doc
-          "Indicates whether this workgroup enables publishing metrics to Amazon CloudWatch."];
-      bytesScannedCutoffPerQuery: BytesScannedCutoffValue.t option
-        [@ocaml.doc
-          "The upper limit (cutoff) for the amount of bytes a single query in a workgroup is allowed to scan."];
-      removeBytesScannedCutoffPerQuery: BoxedBoolean.t option
-        [@ocaml.doc
-          "Indicates that the data usage control limit per query is removed. WorkGroupConfiguration$BytesScannedCutoffPerQuery"];
-      requesterPaysEnabled: BoxedBoolean.t option
-        [@ocaml.doc
-          "If set to true, allows members assigned to a workgroup to specify Amazon S3 Requester Pays buckets in queries. If set to false, workgroup members cannot query data from Requester Pays buckets, and queries that retrieve data from Requester Pays buckets cause an error. The default is false. For more information about Requester Pays buckets, see Requester Pays Buckets in the Amazon Simple Storage Service Developer Guide."];
-      engineVersion: EngineVersion.t option
-        [@ocaml.doc
-          "The engine version requested when a workgroup is updated. After the update, all queries on the workgroup run on the requested engine version. If no value was previously set, the default is Auto. Queries on the AmazonAthenaPreviewFunctionality workgroup run on the preview engine regardless of this setting."]}
-    let make ?enforceWorkGroupConfiguration =
-      fun ?resultConfigurationUpdates ->
-        fun ?publishCloudWatchMetricsEnabled ->
-          fun ?bytesScannedCutoffPerQuery ->
-            fun ?removeBytesScannedCutoffPerQuery ->
-              fun ?requesterPaysEnabled ->
-                fun ?engineVersion ->
-                  fun () ->
-                    {
-                      enforceWorkGroupConfiguration;
-                      resultConfigurationUpdates;
-                      publishCloudWatchMetricsEnabled;
-                      bytesScannedCutoffPerQuery;
-                      removeBytesScannedCutoffPerQuery;
-                      requesterPaysEnabled;
-                      engineVersion
-                    }
-    let to_value x =
-      structure_to_value
-        [("EnforceWorkGroupConfiguration",
-           (Option.map x.enforceWorkGroupConfiguration
-              ~f:BoxedBoolean.to_value));
-        ("ResultConfigurationUpdates",
-          (Option.map x.resultConfigurationUpdates
-             ~f:ResultConfigurationUpdates.to_value));
-        ("PublishCloudWatchMetricsEnabled",
-          (Option.map x.publishCloudWatchMetricsEnabled
-             ~f:BoxedBoolean.to_value));
-        ("BytesScannedCutoffPerQuery",
-          (Option.map x.bytesScannedCutoffPerQuery
-             ~f:BytesScannedCutoffValue.to_value));
-        ("RemoveBytesScannedCutoffPerQuery",
-          (Option.map x.removeBytesScannedCutoffPerQuery
-             ~f:BoxedBoolean.to_value));
-        ("RequesterPaysEnabled",
-          (Option.map x.requesterPaysEnabled ~f:BoxedBoolean.to_value));
-        ("EngineVersion",
-          (Option.map x.engineVersion ~f:EngineVersion.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let engineVersion =
-        (Option.map ~f:EngineVersion.of_xml)
-          (Xml.child xml_arg0 "EngineVersion") in
-      let requesterPaysEnabled =
-        (Option.map ~f:BoxedBoolean.of_xml)
-          (Xml.child xml_arg0 "RequesterPaysEnabled") in
-      let removeBytesScannedCutoffPerQuery =
-        (Option.map ~f:BoxedBoolean.of_xml)
-          (Xml.child xml_arg0 "RemoveBytesScannedCutoffPerQuery") in
-      let bytesScannedCutoffPerQuery =
-        (Option.map ~f:BytesScannedCutoffValue.of_xml)
-          (Xml.child xml_arg0 "BytesScannedCutoffPerQuery") in
-      let publishCloudWatchMetricsEnabled =
-        (Option.map ~f:BoxedBoolean.of_xml)
-          (Xml.child xml_arg0 "PublishCloudWatchMetricsEnabled") in
-      let resultConfigurationUpdates =
-        (Option.map ~f:ResultConfigurationUpdates.of_xml)
-          (Xml.child xml_arg0 "ResultConfigurationUpdates") in
-      let enforceWorkGroupConfiguration =
-        (Option.map ~f:BoxedBoolean.of_xml)
-          (Xml.child xml_arg0 "EnforceWorkGroupConfiguration") in
-      make ?engineVersion ?requesterPaysEnabled
-        ?removeBytesScannedCutoffPerQuery ?bytesScannedCutoffPerQuery
-        ?publishCloudWatchMetricsEnabled ?resultConfigurationUpdates
-        ?enforceWorkGroupConfiguration ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let engineVersion =
-        field_map json "EngineVersion" EngineVersion.of_json in
-      let requesterPaysEnabled =
-        field_map json "RequesterPaysEnabled" BoxedBoolean.of_json in
-      let removeBytesScannedCutoffPerQuery =
-        field_map json "RemoveBytesScannedCutoffPerQuery"
-          BoxedBoolean.of_json in
-      let bytesScannedCutoffPerQuery =
-        field_map json "BytesScannedCutoffPerQuery"
-          BytesScannedCutoffValue.of_json in
-      let publishCloudWatchMetricsEnabled =
-        field_map json "PublishCloudWatchMetricsEnabled" BoxedBoolean.of_json in
-      let resultConfigurationUpdates =
-        field_map json "ResultConfigurationUpdates"
-          ResultConfigurationUpdates.of_json in
-      let enforceWorkGroupConfiguration =
-        field_map json "EnforceWorkGroupConfiguration" BoxedBoolean.of_json in
-      make ?engineVersion ?requesterPaysEnabled
-        ?removeBytesScannedCutoffPerQuery ?bytesScannedCutoffPerQuery
-        ?publishCloudWatchMetricsEnabled ?resultConfigurationUpdates
-        ?enforceWorkGroupConfiguration ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The configuration information that will be updated for this workgroup, which includes the location in Amazon S3 where query results are stored, the encryption option, if any, used for query results, whether the Amazon CloudWatch Metrics are enabled for the workgroup, whether the workgroup settings override the client-side settings, and the data usage limit for the amount of bytes scanned per query, if it is specified."]
-module ResourceNotFoundException =
-  struct
-    type nonrec t =
-      {
-      message: ErrorMessage.t option ;
-      resourceName: AmazonResourceName.t option }
-    let make ?message =
-      fun ?resourceName -> fun () -> { message; resourceName }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
-        ("ResourceName",
-          (Option.map x.resourceName ~f:AmazonResourceName.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let resourceName =
-        (Option.map ~f:AmazonResourceName.of_xml)
-          (Xml.child xml_arg0 "ResourceName") in
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?resourceName ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName =
-        field_map json "ResourceName" AmazonResourceName.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?resourceName ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A resource, such as a workgroup, was not found."]
-module NamedQueryDescriptionString =
-  struct
-    type nonrec t = string
-    let context_ = "NamedQueryDescriptionString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
-             (fun () -> check_string_min i ~min:0));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NamedQueryDescriptionString" j
-    let to_json = simple_to_json to_value
-  end
-module TagKeyList =
-  struct
-    type nonrec t = TagKey.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:TagKey.of_xml)
-    let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module TagList =
-  struct
-    type nonrec t = Tag.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Tag.of_xml)
-    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module TooManyRequestsException =
-  struct
-    type nonrec t =
-      {
-      message: ErrorMessage.t option ;
-      reason: ThrottleReason.t option }
-    let make ?message = fun ?reason -> fun () -> { message; reason }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
-        ("Reason", (Option.map x.reason ~f:ThrottleReason.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let reason =
-        (Option.map ~f:ThrottleReason.of_xml) (Xml.child xml_arg0 "Reason") in
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?reason ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "Reason" ThrottleReason.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?reason ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Indicates that the request was throttled."]
-module IdempotencyToken =
-  struct
-    type nonrec t = string
-    let context_ = "IdempotencyToken"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:128) >>=
-             (fun () -> check_string_min i ~min:32));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"IdempotencyToken" j
-    let to_json = simple_to_json to_value
-  end
-module Token =
-  struct
-    type nonrec t = string
-    let context_ = "Token"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Token" j
-    let to_json = simple_to_json to_value
-  end
-module WorkGroupsList =
-  struct
-    type nonrec t = WorkGroupSummary.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:WorkGroupSummary.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:WorkGroupSummary.of_xml)
-    let of_json j =
-      list_of_json ~kind:"WorkGroupsList" ~of_json:WorkGroupSummary.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module MaxWorkGroupsCount =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxWorkGroupsCount" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module MaxTagsCount =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in ok_or_failwith (check_int_min i ~min:75); i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxTagsCount" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module MetadataException =
+module InternalServerException =
   struct
     type nonrec t = {
       message: ErrorMessage.t option }
@@ -2638,82 +809,117 @@ module MetadataException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An exception that Athena received when it called a custom metastore. Occurs if the error is not caused by user input (InvalidRequestException) or from the Athena platform (InternalServerException). For example, if a user-created Lambda function is missing permissions, the Lambda 4XX exception is returned in a MetadataException."]
-module TableMetadataList =
+       "Indicates a platform issue, which may be due to a transient condition or outage."]
+module BatchGetNamedQueryOutput =
   struct
-    type nonrec t = TableMetadata.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:TableMetadata.to_value)) |> (fun x -> `List x)
+    type nonrec t =
+      {
+      namedQueries: NamedQueryList.t option
+        [@ocaml.doc "Information about the named query IDs submitted."];
+      unprocessedNamedQueryIds: UnprocessedNamedQueryIdList.t option
+        [@ocaml.doc "Information about provided query IDs."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?namedQueries =
+      fun ?unprocessedNamedQueryIds ->
+        fun () -> { namedQueries; unprocessedNamedQueryIds }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NamedQueries",
+           (Option.map x.namedQueries ~f:NamedQueryList.to_value));
+        ("UnprocessedNamedQueryIds",
+          (Option.map x.unprocessedNamedQueryIds
+             ~f:UnprocessedNamedQueryIdList.to_value))]
     let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:TableMetadata.of_xml)
-    let of_json j =
-      list_of_json ~kind:"TableMetadataList" ~of_json:TableMetadata.of_json j
+    let of_xml xml_arg0 =
+      let unprocessedNamedQueryIds =
+        (Option.map ~f:UnprocessedNamedQueryIdList.of_xml)
+          (Xml.child xml_arg0 "UnprocessedNamedQueryIds") in
+      let namedQueries =
+        (Option.map ~f:NamedQueryList.of_xml)
+          (Xml.child xml_arg0 "NamedQueries") in
+      make ?unprocessedNamedQueryIds ?namedQueries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unprocessedNamedQueryIds =
+        field_map json__ "UnprocessedNamedQueryIds"
+          UnprocessedNamedQueryIdList.of_json in
+      let namedQueries =
+        field_map json__ "NamedQueries" NamedQueryList.of_json in
+      make ?unprocessedNamedQueryIds ?namedQueries ()
     let to_json v = composed_to_json to_value v
-  end
-module ExpressionString =
+  end[@@ocaml.doc
+       "Returns the details of a single named query or a list of up to 50 queries, which you provide as an array of query ID strings. Requires you to have access to the workgroup in which the queries were saved. Use ListNamedQueriesInput to get the list of named query IDs in the specified workgroup. If information could not be retrieved for a submitted query ID, information about the query ID submitted is listed under UnprocessedNamedQueryId. Named queries differ from executed queries. Use BatchGetQueryExecutionInput to get details about each unique query execution, and ListQueryExecutionsInput to get a list of query execution IDs."]
+module StatementName =
   struct
     type nonrec t = string
-    let context_ = "ExpressionString"
+    let context_ = "StatementName"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-zA-Z_][a-zA-Z0-9_@:]{1,256}")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ExpressionString" j
+    let of_json j = string_of_json ~kind:"StatementName" j
     let to_json = simple_to_json to_value
   end
-module MaxTableMetadataCount =
+module PreparedStatementNameList =
   struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxTableMetadataCount" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module QueryExecutionIdList =
-  struct
-    type nonrec t = QueryExecutionId.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
-        i
+    type nonrec t = StatementName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:QueryExecutionId.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:StatementName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -2727,41 +933,103 @@ module QueryExecutionIdList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:QueryExecutionId.of_xml)
+                     | _ -> true))) ~f:StatementName.of_xml)
     let of_json j =
-      list_of_json ~kind:"QueryExecutionIdList"
-        ~of_json:QueryExecutionId.of_json j
+      list_of_json ~kind:"PreparedStatementNameList"
+        ~of_json:StatementName.of_json j
     let to_json v = composed_to_json to_value v
   end
-module MaxQueryExecutionsCount =
+module BatchGetPreparedStatementInput =
   struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:0));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    type nonrec t =
+      {
+      preparedStatementNames: PreparedStatementNameList.t
+        [@ocaml.doc "A list of prepared statement names to return."];
+      workGroup: WorkGroupName.t
+        [@ocaml.doc
+          "The name of the workgroup to which the prepared statements belong."]}
+    let context_ = "BatchGetPreparedStatementInput"
+    let make ~preparedStatementNames =
+      fun ~workGroup -> fun () -> { preparedStatementNames; workGroup }
+    let to_value x =
+      structure_to_value
+        [("PreparedStatementNames",
+           (Some
+              (PreparedStatementNameList.to_value x.preparedStatementNames)));
+        ("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)))]
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxQueryExecutionsCount"
-           xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module PreparedStatementsList =
+      let workGroup =
+        WorkGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
+      let preparedStatementNames =
+        PreparedStatementNameList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PreparedStatementNames") in
+      make ~workGroup ~preparedStatementNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workGroup = field_map_exn json__ "WorkGroup" WorkGroupName.of_json in
+      let preparedStatementNames =
+        field_map_exn json__ "PreparedStatementNames"
+          PreparedStatementNameList.of_json in
+      make ~workGroup ~preparedStatementNames ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the details of a single prepared statement or a list of up to 256 prepared statements for the array of prepared statement names that you provide. Requires you to have access to the workgroup to which the prepared statements belong. If a prepared statement cannot be retrieved for the name specified, the statement is listed in UnprocessedPreparedStatementNames."]
+module UnprocessedPreparedStatementName =
   struct
-    type nonrec t = PreparedStatementSummary.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
-        i
+    type nonrec t =
+      {
+      statementName: StatementName.t option
+        [@ocaml.doc
+          "The name of a prepared statement that could not be returned due to an error."];
+      errorCode: ErrorCode.t option
+        [@ocaml.doc
+          "The error code returned when the request for the prepared statement failed."];
+      errorMessage: ErrorMessage.t option
+        [@ocaml.doc
+          "The error message containing the reason why the prepared statement could not be returned. The following error messages are possible: INVALID_INPUT - The name of the prepared statement that was provided is not valid (for example, the name is too long). STATEMENT_NOT_FOUND - A prepared statement with the name provided could not be found. UNAUTHORIZED - The requester does not have permission to access the workgroup that contains the prepared statement."]}
+    let make ?statementName =
+      fun ?errorCode ->
+        fun ?errorMessage ->
+          fun () -> { statementName; errorCode; errorMessage }
+    let to_value x =
+      structure_to_value
+        [("StatementName",
+           (Option.map x.statementName ~f:StatementName.to_value));
+        ("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("ErrorMessage",
+          (Option.map x.errorMessage ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      let statementName =
+        (Option.map ~f:StatementName.of_xml)
+          (Xml.child xml_arg0 "StatementName") in
+      make ?errorMessage ?errorCode ?statementName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let statementName =
+        field_map json__ "StatementName" StatementName.of_json in
+      make ?errorMessage ?errorCode ?statementName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The name of a prepared statement that could not be returned."]
+module UnprocessedPreparedStatementNameList =
+  struct
+    type nonrec t = UnprocessedPreparedStatementName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:PreparedStatementSummary.to_value)) |>
+      (xs |> (List.map ~f:UnprocessedPreparedStatementName.to_value)) |>
         (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
@@ -2776,316 +1044,23 @@ module PreparedStatementsList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:PreparedStatementSummary.of_xml)
+                     | _ -> true)))
+           ~f:UnprocessedPreparedStatementName.of_xml)
     let of_json j =
-      list_of_json ~kind:"PreparedStatementsList"
-        ~of_json:PreparedStatementSummary.of_json j
+      list_of_json ~kind:"UnprocessedPreparedStatementNameList"
+        ~of_json:UnprocessedPreparedStatementName.of_json j
     let to_json v = composed_to_json to_value v
   end
-module MaxPreparedStatementsCount =
+module Date =
   struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxPreparedStatementsCount"
-           xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module NamedQueryIdList =
-  struct
-    type nonrec t = NamedQueryId.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:NamedQueryId.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:NamedQueryId.of_xml)
-    let of_json j =
-      list_of_json ~kind:"NamedQueryIdList" ~of_json:NamedQueryId.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module MaxNamedQueriesCount =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:0));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxNamedQueriesCount" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module EngineVersionsList =
-  struct
-    type nonrec t = EngineVersion.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:EngineVersion.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:EngineVersion.of_xml)
-    let of_json j =
-      list_of_json ~kind:"EngineVersionsList" ~of_json:EngineVersion.of_json
-        j
-    let to_json v = composed_to_json to_value v
-  end
-module MaxEngineVersionsCount =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:10) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxEngineVersionsCount" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module DatabaseList =
-  struct
-    type nonrec t = Database.t list
+    type nonrec t = string
     let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Database.to_value)) |> (fun x -> `List x)
+    let of_string x = x
+    let to_value x = `Timestamp x
     let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Database.of_xml)
-    let of_json j =
-      list_of_json ~kind:"DatabaseList" ~of_json:Database.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module MaxDatabasesCount =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxDatabasesCount" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module DataCatalogSummaryList =
-  struct
-    type nonrec t = DataCatalogSummary.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:DataCatalogSummary.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:DataCatalogSummary.of_xml)
-    let of_json j =
-      list_of_json ~kind:"DataCatalogSummaryList"
-        ~of_json:DataCatalogSummary.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module MaxDataCatalogsCount =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:2));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxDataCatalogsCount" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module WorkGroup =
-  struct
-    type nonrec t =
-      {
-      name: WorkGroupName.t [@ocaml.doc "The workgroup name."];
-      state: WorkGroupState.t option
-        [@ocaml.doc "The state of the workgroup: ENABLED or DISABLED."];
-      configuration: WorkGroupConfiguration.t option
-        [@ocaml.doc
-          "The configuration of the workgroup, which includes the location in Amazon S3 where query results are stored, the encryption configuration, if any, used for query results; whether the Amazon CloudWatch Metrics are enabled for the workgroup; whether workgroup settings override client-side settings; and the data usage limits for the amount of data scanned per query or per workgroup. The workgroup settings override is specified in EnforceWorkGroupConfiguration (true/false) in the WorkGroupConfiguration. See WorkGroupConfiguration$EnforceWorkGroupConfiguration."];
-      description: WorkGroupDescriptionString.t option
-        [@ocaml.doc "The workgroup description."];
-      creationTime: Date.t option
-        [@ocaml.doc "The date and time the workgroup was created."]}
-    let context_ = "WorkGroup"
-    let make ?state =
-      fun ?configuration ->
-        fun ?description ->
-          fun ?creationTime ->
-            fun ~name ->
-              fun () ->
-                { state; configuration; description; creationTime; name }
-    let to_value x =
-      structure_to_value
-        [("Name", (Some (WorkGroupName.to_value x.name)));
-        ("State", (Option.map x.state ~f:WorkGroupState.to_value));
-        ("Configuration",
-          (Option.map x.configuration ~f:WorkGroupConfiguration.to_value));
-        ("Description",
-          (Option.map x.description ~f:WorkGroupDescriptionString.to_value));
-        ("CreationTime", (Option.map x.creationTime ~f:Date.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let creationTime =
-        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationTime") in
-      let description =
-        (Option.map ~f:WorkGroupDescriptionString.of_xml)
-          (Xml.child xml_arg0 "Description") in
-      let configuration =
-        (Option.map ~f:WorkGroupConfiguration.of_xml)
-          (Xml.child xml_arg0 "Configuration") in
-      let state =
-        (Option.map ~f:WorkGroupState.of_xml) (Xml.child xml_arg0 "State") in
-      let name =
-        WorkGroupName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?creationTime ?description ?configuration ?state ~name ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Date.of_json in
-      let description =
-        field_map json "Description" WorkGroupDescriptionString.of_json in
-      let configuration =
-        field_map json "Configuration" WorkGroupConfiguration.of_json in
-      let state = field_map json "State" WorkGroupState.of_json in
-      let name = field_map_exn json "Name" WorkGroupName.of_json in
-      make ?creationTime ?description ?configuration ?state ~name ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A workgroup, which contains a name, description, creation time, state, and other configuration, listed under WorkGroup$Configuration. Each workgroup enables you to isolate queries for you or your group of users from other queries in the same account, to configure the query results location and the encryption configuration (known as workgroup settings), to enable sending query metrics to Amazon CloudWatch, and to establish per-query data usage control limits for all queries in a workgroup. The workgroup settings override is specified in EnforceWorkGroupConfiguration (true/false) in the WorkGroupConfiguration. See WorkGroupConfiguration$EnforceWorkGroupConfiguration."]
-module ResultSet =
-  struct
-    type nonrec t =
-      {
-      rows: RowList.t option [@ocaml.doc "The rows in the table."];
-      resultSetMetadata: ResultSetMetadata.t option
-        [@ocaml.doc
-          "The metadata that describes the column structure and data types of a table of query results."]}
-    let make ?rows =
-      fun ?resultSetMetadata -> fun () -> { rows; resultSetMetadata }
-    let to_value x =
-      structure_to_value
-        [("Rows", (Option.map x.rows ~f:RowList.to_value));
-        ("ResultSetMetadata",
-          (Option.map x.resultSetMetadata ~f:ResultSetMetadata.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let resultSetMetadata =
-        (Option.map ~f:ResultSetMetadata.of_xml)
-          (Xml.child xml_arg0 "ResultSetMetadata") in
-      let rows = (Option.map ~f:RowList.of_xml) (Xml.child xml_arg0 "Rows") in
-      make ?resultSetMetadata ?rows ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resultSetMetadata =
-        field_map json "ResultSetMetadata" ResultSetMetadata.of_json in
-      let rows = field_map json "Rows" RowList.of_json in
-      make ?resultSetMetadata ?rows ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The metadata and rows that make up a query result set. The metadata describes the column structure and data types. To return a ResultSet object, use GetQueryResults."]
-module MaxQueryResults =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxQueryResults" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
 module PreparedStatement =
@@ -3147,79 +1122,29 @@ module PreparedStatement =
       make ?lastModifiedTime ?description ?workGroupName ?queryStatement
         ?statementName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastModifiedTime = field_map json "LastModifiedTime" Date.of_json in
+    let of_json json__ =
+      let lastModifiedTime = field_map json__ "LastModifiedTime" Date.of_json in
       let description =
-        field_map json "Description" DescriptionString.of_json in
+        field_map json__ "Description" DescriptionString.of_json in
       let workGroupName =
-        field_map json "WorkGroupName" WorkGroupName.of_json in
+        field_map json__ "WorkGroupName" WorkGroupName.of_json in
       let queryStatement =
-        field_map json "QueryStatement" QueryString.of_json in
+        field_map json__ "QueryStatement" QueryString.of_json in
       let statementName =
-        field_map json "StatementName" StatementName.of_json in
+        field_map json__ "StatementName" StatementName.of_json in
       make ?lastModifiedTime ?description ?workGroupName ?queryStatement
         ?statementName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A prepared SQL statement for use with Athena."]
-module DataCatalog =
+module PreparedStatementDetailsList =
   struct
-    type nonrec t =
-      {
-      name: CatalogNameString.t
-        [@ocaml.doc
-          "The name of the data catalog. The catalog name must be unique for the Amazon Web Services account and can use a maximum of 127 alphanumeric, underscore, at sign, or hyphen characters. The remainder of the length constraint of 256 is reserved for use by Athena."];
-      description: DescriptionString.t option
-        [@ocaml.doc "An optional description of the data catalog."];
-      type_: DataCatalogType.t
-        [@ocaml.doc
-          "The type of data catalog to create: LAMBDA for a federated catalog, HIVE for an external hive metastore, or GLUE for an Glue Data Catalog."];
-      parameters: ParametersMap.t option
-        [@ocaml.doc
-          "Specifies the Lambda function or functions to use for the data catalog. This is a mapping whose values depend on the catalog type. For the HIVE data catalog type, use the following syntax. The metadata-function parameter is required. The sdk-version parameter is optional and defaults to the currently supported version. metadata-function=lambda_arn, sdk-version=version_number For the LAMBDA data catalog type, use one of the following sets of required parameters, but not both. If you have one Lambda function that processes metadata and another for reading the actual data, use the following syntax. Both parameters are required. metadata-function=lambda_arn, record-function=lambda_arn If you have a composite Lambda function that processes both metadata and data, use the following syntax to specify your Lambda function. function=lambda_arn The GLUE type takes a catalog ID parameter and is required. The catalog_id is the account ID of the Amazon Web Services account to which the Glue catalog belongs. catalog-id=catalog_id The GLUE data catalog type also applies to the default AwsDataCatalog that already exists in your account, of which you can have only one and cannot modify. Queries that specify a Glue Data Catalog other than the default AwsDataCatalog must be run on Athena engine version 2."]}
-    let context_ = "DataCatalog"
-    let make ?description =
-      fun ?parameters ->
-        fun ~name ->
-          fun ~type_ -> fun () -> { description; parameters; name; type_ }
-    let to_value x =
-      structure_to_value
-        [("Name", (Some (CatalogNameString.to_value x.name)));
-        ("Description",
-          (Option.map x.description ~f:DescriptionString.to_value));
-        ("Type", (Some (DataCatalogType.to_value x.type_)));
-        ("Parameters", (Option.map x.parameters ~f:ParametersMap.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let parameters =
-        (Option.map ~f:ParametersMap.of_xml)
-          (Xml.child xml_arg0 "Parameters") in
-      let type_ =
-        DataCatalogType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
-      let description =
-        (Option.map ~f:DescriptionString.of_xml)
-          (Xml.child xml_arg0 "Description") in
-      let name =
-        CatalogNameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?parameters ~type_ ?description ~name ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "Parameters" ParametersMap.of_json in
-      let type_ = field_map_exn json "Type" DataCatalogType.of_json in
-      let description =
-        field_map json "Description" DescriptionString.of_json in
-      let name = field_map_exn json "Name" CatalogNameString.of_json in
-      make ?parameters ~type_ ?description ~name ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Contains information about a data catalog in an Amazon Web Services account."]
-module QueryExecutionList =
-  struct
-    type nonrec t = QueryExecution.t list
+    type nonrec t = PreparedStatement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:QueryExecution.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:PreparedStatement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -3233,16 +1158,217 @@ module QueryExecutionList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:QueryExecution.of_xml)
+                     | _ -> true))) ~f:PreparedStatement.of_xml)
     let of_json j =
-      list_of_json ~kind:"QueryExecutionList" ~of_json:QueryExecution.of_json
-        j
+      list_of_json ~kind:"PreparedStatementDetailsList"
+        ~of_json:PreparedStatement.of_json j
     let to_json v = composed_to_json to_value v
   end
+module BatchGetPreparedStatementOutput =
+  struct
+    type nonrec t =
+      {
+      preparedStatements: PreparedStatementDetailsList.t option
+        [@ocaml.doc "The list of prepared statements returned."];
+      unprocessedPreparedStatementNames:
+        UnprocessedPreparedStatementNameList.t option
+        [@ocaml.doc
+          "A list of one or more prepared statements that were requested but could not be returned."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?preparedStatements =
+      fun ?unprocessedPreparedStatementNames ->
+        fun () -> { preparedStatements; unprocessedPreparedStatementNames }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PreparedStatements",
+           (Option.map x.preparedStatements
+              ~f:PreparedStatementDetailsList.to_value));
+        ("UnprocessedPreparedStatementNames",
+          (Option.map x.unprocessedPreparedStatementNames
+             ~f:UnprocessedPreparedStatementNameList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unprocessedPreparedStatementNames =
+        (Option.map ~f:UnprocessedPreparedStatementNameList.of_xml)
+          (Xml.child xml_arg0 "UnprocessedPreparedStatementNames") in
+      let preparedStatements =
+        (Option.map ~f:PreparedStatementDetailsList.of_xml)
+          (Xml.child xml_arg0 "PreparedStatements") in
+      make ?unprocessedPreparedStatementNames ?preparedStatements ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unprocessedPreparedStatementNames =
+        field_map json__ "UnprocessedPreparedStatementNames"
+          UnprocessedPreparedStatementNameList.of_json in
+      let preparedStatements =
+        field_map json__ "PreparedStatements"
+          PreparedStatementDetailsList.of_json in
+      make ?unprocessedPreparedStatementNames ?preparedStatements ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the details of a single prepared statement or a list of up to 256 prepared statements for the array of prepared statement names that you provide. Requires you to have access to the workgroup to which the prepared statements belong. If a prepared statement cannot be retrieved for the name specified, the statement is listed in UnprocessedPreparedStatementNames."]
+module QueryExecutionId =
+  struct
+    type nonrec t = string
+    let context_ = "QueryExecutionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"\\S+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QueryExecutionId" j
+    let to_json = simple_to_json to_value
+  end
+module QueryExecutionIdList =
+  struct
+    type nonrec t = QueryExecutionId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QueryExecutionId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QueryExecutionId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QueryExecutionIdList"
+        ~of_json:QueryExecutionId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BatchGetQueryExecutionInput =
+  struct
+    type nonrec t =
+      {
+      queryExecutionIds: QueryExecutionIdList.t
+        [@ocaml.doc "An array of query execution IDs."]}
+    let context_ = "BatchGetQueryExecutionInput"
+    let make ~queryExecutionIds = fun () -> { queryExecutionIds }
+    let to_value x =
+      structure_to_value
+        [("QueryExecutionIds",
+           (Some (QueryExecutionIdList.to_value x.queryExecutionIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queryExecutionIds =
+        QueryExecutionIdList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "QueryExecutionIds") in
+      make ~queryExecutionIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queryExecutionIds =
+        field_map_exn json__ "QueryExecutionIds" QueryExecutionIdList.of_json in
+      make ~queryExecutionIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains an array of query execution IDs."]
+module UnprocessedQueryExecutionId =
+  struct
+    type nonrec t =
+      {
+      queryExecutionId: QueryExecutionId.t option
+        [@ocaml.doc "The unique identifier of the query execution."];
+      errorCode: ErrorCode.t option
+        [@ocaml.doc
+          "The error code returned when the query execution failed to process, if applicable."];
+      errorMessage: ErrorMessage.t option
+        [@ocaml.doc
+          "The error message returned when the query execution failed to process, if applicable."]}
+    let make ?queryExecutionId =
+      fun ?errorCode ->
+        fun ?errorMessage ->
+          fun () -> { queryExecutionId; errorCode; errorMessage }
+    let to_value x =
+      structure_to_value
+        [("QueryExecutionId",
+           (Option.map x.queryExecutionId ~f:QueryExecutionId.to_value));
+        ("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("ErrorMessage",
+          (Option.map x.errorMessage ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      let queryExecutionId =
+        (Option.map ~f:QueryExecutionId.of_xml)
+          (Xml.child xml_arg0 "QueryExecutionId") in
+      make ?errorMessage ?errorCode ?queryExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let queryExecutionId =
+        field_map json__ "QueryExecutionId" QueryExecutionId.of_json in
+      make ?errorMessage ?errorCode ?queryExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a query execution that failed to process."]
 module UnprocessedQueryExecutionIdList =
   struct
     type nonrec t = UnprocessedQueryExecutionId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UnprocessedQueryExecutionId.to_value)) |>
         (fun x -> `List x)
@@ -3265,12 +1391,770 @@ module UnprocessedQueryExecutionIdList =
         ~of_json:UnprocessedQueryExecutionId.of_json j
     let to_json v = composed_to_json to_value v
   end
-module NamedQueryList =
+module StatementType =
   struct
-    type nonrec t = NamedQuery.t list
+    type nonrec t =
+      | DDL 
+      | DML 
+      | UTILITY 
+      | Non_static_id of string 
     let make i = i
+    let to_string =
+      function
+      | DDL -> "DDL"
+      | DML -> "DML"
+      | UTILITY -> "UTILITY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DDL" -> DDL
+      | "DML" -> DML
+      | "UTILITY" -> UTILITY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration StatementType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"StatementType" j)
+    let to_json = simple_to_json to_value
+  end
+module ResultReuseByAgeConfiguration =
+  struct
+    type nonrec t =
+      {
+      enabled: Boolean.t
+        [@ocaml.doc
+          "True if previous query results can be reused when the query is run; otherwise, false. The default is false."];
+      maxAgeInMinutes: Age.t option
+        [@ocaml.doc
+          "Specifies, in minutes, the maximum age of a previous query result that Athena should consider for reuse. The default is 60."]}
+    let context_ = "ResultReuseByAgeConfiguration"
+    let make ?maxAgeInMinutes =
+      fun ~enabled -> fun () -> { maxAgeInMinutes; enabled }
+    let to_value x =
+      structure_to_value
+        [("Enabled", (Some (Boolean.to_value x.enabled)));
+        ("MaxAgeInMinutes", (Option.map x.maxAgeInMinutes ~f:Age.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxAgeInMinutes =
+        (Option.map ~f:Age.of_xml) (Xml.child xml_arg0 "MaxAgeInMinutes") in
+      let enabled =
+        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
+      make ?maxAgeInMinutes ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxAgeInMinutes = field_map json__ "MaxAgeInMinutes" Age.of_json in
+      let enabled = field_map_exn json__ "Enabled" Boolean.of_json in
+      make ?maxAgeInMinutes ~enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies whether previous query results are reused, and if so, their maximum age."]
+module ResultReuseConfiguration =
+  struct
+    type nonrec t =
+      {
+      resultReuseByAgeConfiguration: ResultReuseByAgeConfiguration.t option
+        [@ocaml.doc
+          "Specifies whether previous query results are reused, and if so, their maximum age."]}
+    let make ?resultReuseByAgeConfiguration =
+      fun () -> { resultReuseByAgeConfiguration }
+    let to_value x =
+      structure_to_value
+        [("ResultReuseByAgeConfiguration",
+           (Option.map x.resultReuseByAgeConfiguration
+              ~f:ResultReuseByAgeConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resultReuseByAgeConfiguration =
+        (Option.map ~f:ResultReuseByAgeConfiguration.of_xml)
+          (Xml.child xml_arg0 "ResultReuseByAgeConfiguration") in
+      make ?resultReuseByAgeConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resultReuseByAgeConfiguration =
+        field_map json__ "ResultReuseByAgeConfiguration"
+          ResultReuseByAgeConfiguration.of_json in
+      make ?resultReuseByAgeConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Specifies the query result reuse behavior for the query."]
+module ResultOutputLocation =
+  struct
+    type nonrec t = string
+    let context_ = "ResultOutputLocation"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResultOutputLocation" j
+    let to_json = simple_to_json to_value
+  end
+module EncryptionOption =
+  struct
+    type nonrec t =
+      | SSE_S3 
+      | SSE_KMS 
+      | CSE_KMS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SSE_S3 -> "SSE_S3"
+      | SSE_KMS -> "SSE_KMS"
+      | CSE_KMS -> "CSE_KMS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SSE_S3" -> SSE_S3
+      | "SSE_KMS" -> SSE_KMS
+      | "CSE_KMS" -> CSE_KMS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EncryptionOption" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EncryptionOption" j)
+    let to_json = simple_to_json to_value
+  end
+module EncryptionConfiguration =
+  struct
+    type nonrec t =
+      {
+      encryptionOption: EncryptionOption.t
+        [@ocaml.doc
+          "Indicates whether Amazon S3 server-side encryption with Amazon S3-managed keys (SSE_S3), server-side encryption with KMS-managed keys (SSE_KMS), or client-side encryption with KMS-managed keys (CSE_KMS) is used. If a query runs in a workgroup and the workgroup overrides client-side settings, then the workgroup's setting for encryption is used. It specifies whether query results must be encrypted, for all queries that run in this workgroup."];
+      kmsKey: String_.t option
+        [@ocaml.doc
+          "For SSE_KMS and CSE_KMS, this is the KMS key ARN or ID."]}
+    let context_ = "EncryptionConfiguration"
+    let make ?kmsKey =
+      fun ~encryptionOption -> fun () -> { kmsKey; encryptionOption }
+    let to_value x =
+      structure_to_value
+        [("EncryptionOption",
+           (Some (EncryptionOption.to_value x.encryptionOption)));
+        ("KmsKey", (Option.map x.kmsKey ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kmsKey =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "KmsKey") in
+      let encryptionOption =
+        EncryptionOption.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EncryptionOption") in
+      make ?kmsKey ~encryptionOption ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKey = field_map json__ "KmsKey" String_.of_json in
+      let encryptionOption =
+        field_map_exn json__ "EncryptionOption" EncryptionOption.of_json in
+      make ?kmsKey ~encryptionOption ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "If query and calculation results are encrypted in Amazon S3, indicates the encryption option used (for example, SSE_KMS or CSE_KMS) and key information."]
+module ResultConfiguration =
+  struct
+    type nonrec t =
+      {
+      outputLocation: ResultOutputLocation.t option
+        [@ocaml.doc
+          "The location in Amazon S3 where your query and calculation results are stored, such as s3://path/to/query/bucket/. To run the query, you must specify the query results location using one of the ways: either for individual queries using either this setting (client-side), or in the workgroup, using WorkGroupConfiguration. If none of them is set, Athena issues an error that no output location is provided. If workgroup settings override client-side settings, then the query uses the settings specified for the workgroup. See WorkGroupConfiguration$EnforceWorkGroupConfiguration."];
+      encryptionConfiguration: EncryptionConfiguration.t option
+        [@ocaml.doc
+          "If query and calculation results are encrypted in Amazon S3, indicates the encryption option used (for example, SSE_KMS or CSE_KMS) and key information. This is a client-side setting. If workgroup settings override client-side settings, then the query uses the encryption configuration that is specified for the workgroup, and also uses the location for storing query results specified in the workgroup. See WorkGroupConfiguration$EnforceWorkGroupConfiguration and Workgroup Settings Override Client-Side Settings."];
+      expectedBucketOwner: AwsAccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID that you expect to be the owner of the Amazon S3 bucket specified by ResultConfiguration$OutputLocation. If set, Athena uses the value for ExpectedBucketOwner when it makes Amazon S3 calls to your specified output location. If the ExpectedBucketOwner Amazon Web Services account ID does not match the actual owner of the Amazon S3 bucket, the call fails with a permissions error. This is a client-side setting. If workgroup settings override client-side settings, then the query uses the ExpectedBucketOwner setting that is specified for the workgroup, and also uses the location for storing query results specified in the workgroup. See WorkGroupConfiguration$EnforceWorkGroupConfiguration and Workgroup Settings Override Client-Side Settings."];
+      aclConfiguration: AclConfiguration.t option
+        [@ocaml.doc
+          "Indicates that an Amazon S3 canned ACL should be set to control ownership of stored query results. Currently the only supported canned ACL is BUCKET_OWNER_FULL_CONTROL. This is a client-side setting. If workgroup settings override client-side settings, then the query uses the ACL configuration that is specified for the workgroup, and also uses the location for storing query results specified in the workgroup. For more information, see WorkGroupConfiguration$EnforceWorkGroupConfiguration and Workgroup Settings Override Client-Side Settings."]}
+    let make ?outputLocation =
+      fun ?encryptionConfiguration ->
+        fun ?expectedBucketOwner ->
+          fun ?aclConfiguration ->
+            fun () ->
+              {
+                outputLocation;
+                encryptionConfiguration;
+                expectedBucketOwner;
+                aclConfiguration
+              }
+    let to_value x =
+      structure_to_value
+        [("OutputLocation",
+           (Option.map x.outputLocation ~f:ResultOutputLocation.to_value));
+        ("EncryptionConfiguration",
+          (Option.map x.encryptionConfiguration
+             ~f:EncryptionConfiguration.to_value));
+        ("ExpectedBucketOwner",
+          (Option.map x.expectedBucketOwner ~f:AwsAccountId.to_value));
+        ("AclConfiguration",
+          (Option.map x.aclConfiguration ~f:AclConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aclConfiguration =
+        (Option.map ~f:AclConfiguration.of_xml)
+          (Xml.child xml_arg0 "AclConfiguration") in
+      let expectedBucketOwner =
+        (Option.map ~f:AwsAccountId.of_xml)
+          (Xml.child xml_arg0 "ExpectedBucketOwner") in
+      let encryptionConfiguration =
+        (Option.map ~f:EncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "EncryptionConfiguration") in
+      let outputLocation =
+        (Option.map ~f:ResultOutputLocation.of_xml)
+          (Xml.child xml_arg0 "OutputLocation") in
+      make ?aclConfiguration ?expectedBucketOwner ?encryptionConfiguration
+        ?outputLocation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aclConfiguration =
+        field_map json__ "AclConfiguration" AclConfiguration.of_json in
+      let expectedBucketOwner =
+        field_map json__ "ExpectedBucketOwner" AwsAccountId.of_json in
+      let encryptionConfiguration =
+        field_map json__ "EncryptionConfiguration"
+          EncryptionConfiguration.of_json in
+      let outputLocation =
+        field_map json__ "OutputLocation" ResultOutputLocation.of_json in
+      make ?aclConfiguration ?expectedBucketOwner ?encryptionConfiguration
+        ?outputLocation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The location in Amazon S3 where query and calculation results are stored and the encryption option, if any, used for query and calculation results. These are known as \"client-side settings\". If workgroup settings override client-side settings, then the query uses the workgroup settings."]
+module BoxedBoolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module QueryResultsS3AccessGrantsConfiguration =
+  struct
+    type nonrec t =
+      {
+      enableS3AccessGrants: BoxedBoolean.t
+        [@ocaml.doc
+          "Specifies whether Amazon S3 access grants are enabled for query results."];
+      createUserLevelPrefix: BoxedBoolean.t option
+        [@ocaml.doc
+          "When enabled, appends the user ID as an Amazon S3 path prefix to the query result output location."];
+      authenticationType: AuthenticationType.t
+        [@ocaml.doc
+          "The authentication type used for Amazon S3 access grants. Currently, only DIRECTORY_IDENTITY is supported."]}
+    let context_ = "QueryResultsS3AccessGrantsConfiguration"
+    let make ?createUserLevelPrefix =
+      fun ~enableS3AccessGrants ->
+        fun ~authenticationType ->
+          fun () ->
+            { createUserLevelPrefix; enableS3AccessGrants; authenticationType
+            }
+    let to_value x =
+      structure_to_value
+        [("EnableS3AccessGrants",
+           (Some (BoxedBoolean.to_value x.enableS3AccessGrants)));
+        ("CreateUserLevelPrefix",
+          (Option.map x.createUserLevelPrefix ~f:BoxedBoolean.to_value));
+        ("AuthenticationType",
+          (Some (AuthenticationType.to_value x.authenticationType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let authenticationType =
+        AuthenticationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AuthenticationType") in
+      let createUserLevelPrefix =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "CreateUserLevelPrefix") in
+      let enableS3AccessGrants =
+        BoxedBoolean.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EnableS3AccessGrants") in
+      make ~authenticationType ?createUserLevelPrefix ~enableS3AccessGrants
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let authenticationType =
+        field_map_exn json__ "AuthenticationType" AuthenticationType.of_json in
+      let createUserLevelPrefix =
+        field_map json__ "CreateUserLevelPrefix" BoxedBoolean.of_json in
+      let enableS3AccessGrants =
+        field_map_exn json__ "EnableS3AccessGrants" BoxedBoolean.of_json in
+      make ~authenticationType ?createUserLevelPrefix ~enableS3AccessGrants
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies whether Amazon S3 access grants are enabled for query results."]
+module QueryExecutionState =
+  struct
+    type nonrec t =
+      | QUEUED 
+      | RUNNING 
+      | SUCCEEDED 
+      | FAILED 
+      | CANCELLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | QUEUED -> "QUEUED"
+      | RUNNING -> "RUNNING"
+      | SUCCEEDED -> "SUCCEEDED"
+      | FAILED -> "FAILED"
+      | CANCELLED -> "CANCELLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "QUEUED" -> QUEUED
+      | "RUNNING" -> RUNNING
+      | "SUCCEEDED" -> SUCCEEDED
+      | "FAILED" -> FAILED
+      | "CANCELLED" -> CANCELLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration QueryExecutionState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QueryExecutionState" j)
+    let to_json = simple_to_json to_value
+  end
+module QueryExecutionStatus =
+  struct
+    type nonrec t =
+      {
+      state: QueryExecutionState.t option
+        [@ocaml.doc
+          "The state of query execution. QUEUED indicates that the query has been submitted to the service, and Athena will execute the query as soon as resources are available. RUNNING indicates that the query is in execution phase. SUCCEEDED indicates that the query completed without errors. FAILED indicates that the query experienced an error and did not complete processing. CANCELLED indicates that a user input interrupted query execution. For queries that experience certain transient errors, the state transitions from RUNNING back to QUEUED. The FAILED state is always terminal with no automatic retry."];
+      stateChangeReason: String_.t option
+        [@ocaml.doc "Further detail about the status of the query."];
+      submissionDateTime: Date.t option
+        [@ocaml.doc "The date and time that the query was submitted."];
+      completionDateTime: Date.t option
+        [@ocaml.doc "The date and time that the query completed."];
+      athenaError: AthenaError.t option
+        [@ocaml.doc "Provides information about an Athena query error."]}
+    let make ?state =
+      fun ?stateChangeReason ->
+        fun ?submissionDateTime ->
+          fun ?completionDateTime ->
+            fun ?athenaError ->
+              fun () ->
+                {
+                  state;
+                  stateChangeReason;
+                  submissionDateTime;
+                  completionDateTime;
+                  athenaError
+                }
+    let to_value x =
+      structure_to_value
+        [("State", (Option.map x.state ~f:QueryExecutionState.to_value));
+        ("StateChangeReason",
+          (Option.map x.stateChangeReason ~f:String_.to_value));
+        ("SubmissionDateTime",
+          (Option.map x.submissionDateTime ~f:Date.to_value));
+        ("CompletionDateTime",
+          (Option.map x.completionDateTime ~f:Date.to_value));
+        ("AthenaError", (Option.map x.athenaError ~f:AthenaError.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let athenaError =
+        (Option.map ~f:AthenaError.of_xml) (Xml.child xml_arg0 "AthenaError") in
+      let completionDateTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CompletionDateTime") in
+      let submissionDateTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "SubmissionDateTime") in
+      let stateChangeReason =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "StateChangeReason") in
+      let state =
+        (Option.map ~f:QueryExecutionState.of_xml)
+          (Xml.child xml_arg0 "State") in
+      make ?athenaError ?completionDateTime ?submissionDateTime
+        ?stateChangeReason ?state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let athenaError = field_map json__ "AthenaError" AthenaError.of_json in
+      let completionDateTime =
+        field_map json__ "CompletionDateTime" Date.of_json in
+      let submissionDateTime =
+        field_map json__ "SubmissionDateTime" Date.of_json in
+      let stateChangeReason =
+        field_map json__ "StateChangeReason" String_.of_json in
+      let state = field_map json__ "State" QueryExecutionState.of_json in
+      make ?athenaError ?completionDateTime ?submissionDateTime
+        ?stateChangeReason ?state ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The completion date, current state, submission time, and state change reason (if applicable) for the query execution."]
+module ResultReuseInformation =
+  struct
+    type nonrec t =
+      {
+      reusedPreviousResult: Boolean.t option
+        [@ocaml.doc
+          "True if a previous query result was reused; false if the result was generated from a new run of the query."]}
+    let make ?reusedPreviousResult = fun () -> { reusedPreviousResult }
+    let to_value x =
+      structure_to_value
+        [("ReusedPreviousResult",
+           (Option.map x.reusedPreviousResult ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reusedPreviousResult =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "ReusedPreviousResult") in
+      make ?reusedPreviousResult ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reusedPreviousResult =
+        field_map json__ "ReusedPreviousResult" Boolean.of_json in
+      make ?reusedPreviousResult ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about whether the result of a previous query was reused."]
+module Long =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module DpuCount =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module QueryExecutionStatistics =
+  struct
+    type nonrec t =
+      {
+      engineExecutionTimeInMillis: Long.t option
+        [@ocaml.doc
+          "The number of milliseconds that the query took to execute."];
+      dataScannedInBytes: Long.t option
+        [@ocaml.doc "The number of bytes in the data that was queried."];
+      dataManifestLocation: String_.t option
+        [@ocaml.doc
+          "The location and file name of a data manifest file. The manifest file is saved to the Athena query results location in Amazon S3. The manifest file tracks files that the query wrote to Amazon S3. If the query fails, the manifest file also tracks files that the query intended to write. The manifest is useful for identifying orphaned files resulting from a failed query. For more information, see Working with Query Results, Output Files, and Query History in the Amazon Athena User Guide."];
+      totalExecutionTimeInMillis: Long.t option
+        [@ocaml.doc
+          "The number of milliseconds that Athena took to run the query."];
+      queryQueueTimeInMillis: Long.t option
+        [@ocaml.doc
+          "The number of milliseconds that the query was in your query queue waiting for resources. Note that if transient errors occur, Athena might automatically add the query back to the queue."];
+      servicePreProcessingTimeInMillis: Long.t option
+        [@ocaml.doc
+          "The number of milliseconds that Athena took to preprocess the query before submitting the query to the query engine."];
+      queryPlanningTimeInMillis: Long.t option
+        [@ocaml.doc
+          "The number of milliseconds that Athena took to plan the query processing flow. This includes the time spent retrieving table partitions from the data source. Note that because the query engine performs the query planning, query planning time is a subset of engine processing time."];
+      serviceProcessingTimeInMillis: Long.t option
+        [@ocaml.doc
+          "The number of milliseconds that Athena took to finalize and publish the query results after the query engine finished running the query."];
+      resultReuseInformation: ResultReuseInformation.t option
+        [@ocaml.doc
+          "Contains information about whether previous query results were reused for the query."];
+      dpuCount: DpuCount.t option
+        [@ocaml.doc
+          "The number of Data Processing Units (DPUs) that Athena used to run the query."]}
+    let make ?engineExecutionTimeInMillis =
+      fun ?dataScannedInBytes ->
+        fun ?dataManifestLocation ->
+          fun ?totalExecutionTimeInMillis ->
+            fun ?queryQueueTimeInMillis ->
+              fun ?servicePreProcessingTimeInMillis ->
+                fun ?queryPlanningTimeInMillis ->
+                  fun ?serviceProcessingTimeInMillis ->
+                    fun ?resultReuseInformation ->
+                      fun ?dpuCount ->
+                        fun () ->
+                          {
+                            engineExecutionTimeInMillis;
+                            dataScannedInBytes;
+                            dataManifestLocation;
+                            totalExecutionTimeInMillis;
+                            queryQueueTimeInMillis;
+                            servicePreProcessingTimeInMillis;
+                            queryPlanningTimeInMillis;
+                            serviceProcessingTimeInMillis;
+                            resultReuseInformation;
+                            dpuCount
+                          }
+    let to_value x =
+      structure_to_value
+        [("EngineExecutionTimeInMillis",
+           (Option.map x.engineExecutionTimeInMillis ~f:Long.to_value));
+        ("DataScannedInBytes",
+          (Option.map x.dataScannedInBytes ~f:Long.to_value));
+        ("DataManifestLocation",
+          (Option.map x.dataManifestLocation ~f:String_.to_value));
+        ("TotalExecutionTimeInMillis",
+          (Option.map x.totalExecutionTimeInMillis ~f:Long.to_value));
+        ("QueryQueueTimeInMillis",
+          (Option.map x.queryQueueTimeInMillis ~f:Long.to_value));
+        ("ServicePreProcessingTimeInMillis",
+          (Option.map x.servicePreProcessingTimeInMillis ~f:Long.to_value));
+        ("QueryPlanningTimeInMillis",
+          (Option.map x.queryPlanningTimeInMillis ~f:Long.to_value));
+        ("ServiceProcessingTimeInMillis",
+          (Option.map x.serviceProcessingTimeInMillis ~f:Long.to_value));
+        ("ResultReuseInformation",
+          (Option.map x.resultReuseInformation
+             ~f:ResultReuseInformation.to_value));
+        ("DpuCount", (Option.map x.dpuCount ~f:DpuCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dpuCount =
+        (Option.map ~f:DpuCount.of_xml) (Xml.child xml_arg0 "DpuCount") in
+      let resultReuseInformation =
+        (Option.map ~f:ResultReuseInformation.of_xml)
+          (Xml.child xml_arg0 "ResultReuseInformation") in
+      let serviceProcessingTimeInMillis =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "ServiceProcessingTimeInMillis") in
+      let queryPlanningTimeInMillis =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "QueryPlanningTimeInMillis") in
+      let servicePreProcessingTimeInMillis =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "ServicePreProcessingTimeInMillis") in
+      let queryQueueTimeInMillis =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "QueryQueueTimeInMillis") in
+      let totalExecutionTimeInMillis =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "TotalExecutionTimeInMillis") in
+      let dataManifestLocation =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "DataManifestLocation") in
+      let dataScannedInBytes =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "DataScannedInBytes") in
+      let engineExecutionTimeInMillis =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "EngineExecutionTimeInMillis") in
+      make ?dpuCount ?resultReuseInformation ?serviceProcessingTimeInMillis
+        ?queryPlanningTimeInMillis ?servicePreProcessingTimeInMillis
+        ?queryQueueTimeInMillis ?totalExecutionTimeInMillis
+        ?dataManifestLocation ?dataScannedInBytes
+        ?engineExecutionTimeInMillis ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dpuCount = field_map json__ "DpuCount" DpuCount.of_json in
+      let resultReuseInformation =
+        field_map json__ "ResultReuseInformation"
+          ResultReuseInformation.of_json in
+      let serviceProcessingTimeInMillis =
+        field_map json__ "ServiceProcessingTimeInMillis" Long.of_json in
+      let queryPlanningTimeInMillis =
+        field_map json__ "QueryPlanningTimeInMillis" Long.of_json in
+      let servicePreProcessingTimeInMillis =
+        field_map json__ "ServicePreProcessingTimeInMillis" Long.of_json in
+      let queryQueueTimeInMillis =
+        field_map json__ "QueryQueueTimeInMillis" Long.of_json in
+      let totalExecutionTimeInMillis =
+        field_map json__ "TotalExecutionTimeInMillis" Long.of_json in
+      let dataManifestLocation =
+        field_map json__ "DataManifestLocation" String_.of_json in
+      let dataScannedInBytes =
+        field_map json__ "DataScannedInBytes" Long.of_json in
+      let engineExecutionTimeInMillis =
+        field_map json__ "EngineExecutionTimeInMillis" Long.of_json in
+      make ?dpuCount ?resultReuseInformation ?serviceProcessingTimeInMillis
+        ?queryPlanningTimeInMillis ?servicePreProcessingTimeInMillis
+        ?queryQueueTimeInMillis ?totalExecutionTimeInMillis
+        ?dataManifestLocation ?dataScannedInBytes
+        ?engineExecutionTimeInMillis ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The amount of data scanned during the query execution and the amount of time that it took to execute, and the type of statement that was run."]
+module CatalogNameString =
+  struct
+    type nonrec t = string
+    let context_ = "CatalogNameString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CatalogNameString" j
+    let to_json = simple_to_json to_value
+  end
+module QueryExecutionContext =
+  struct
+    type nonrec t =
+      {
+      database: DatabaseString.t option
+        [@ocaml.doc
+          "The name of the database used in the query execution. The database must exist in the catalog."];
+      catalog: CatalogNameString.t option
+        [@ocaml.doc
+          "The name of the data catalog used in the query execution."]}
+    let make ?database = fun ?catalog -> fun () -> { database; catalog }
+    let to_value x =
+      structure_to_value
+        [("Database", (Option.map x.database ~f:DatabaseString.to_value));
+        ("Catalog", (Option.map x.catalog ~f:CatalogNameString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let catalog =
+        (Option.map ~f:CatalogNameString.of_xml)
+          (Xml.child xml_arg0 "Catalog") in
+      let database =
+        (Option.map ~f:DatabaseString.of_xml) (Xml.child xml_arg0 "Database") in
+      make ?catalog ?database ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let catalog = field_map json__ "Catalog" CatalogNameString.of_json in
+      let database = field_map json__ "Database" DatabaseString.of_json in
+      make ?catalog ?database ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The database and data catalog context in which the query execution occurs."]
+module KmsKey =
+  struct
+    type nonrec t = string
+    let context_ = "KmsKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws[a-z\\-]*:kms:([a-z0-9\\-]+):\\d{12}:key/?[a-zA-Z_0-9+=,.@\\-_/]+$|^arn:aws[a-z\\-]*:kms:([a-z0-9\\-]+):\\d{12}:alias/?[a-zA-Z_0-9+=,.@\\-_/]+$|^alias/[a-zA-Z0-9/_-]+$|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KmsKey" j
+    let to_json = simple_to_json to_value
+  end
+module ManagedQueryResultsEncryptionConfiguration =
+  struct
+    type nonrec t =
+      {
+      kmsKey: KmsKey.t
+        [@ocaml.doc
+          "The ARN of an KMS key for encrypting managed query results."]}
+    let context_ = "ManagedQueryResultsEncryptionConfiguration"
+    let make ~kmsKey = fun () -> { kmsKey }
+    let to_value x =
+      structure_to_value [("KmsKey", (Some (KmsKey.to_value x.kmsKey)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kmsKey =
+        KmsKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KmsKey") in
+      make ~kmsKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKey = field_map_exn json__ "KmsKey" KmsKey.of_json in
+      make ~kmsKey ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "If you encrypt query and calculation results in Athena owned storage, this field indicates the encryption option (for example, SSE_KMS or CSE_KMS) and key information."]
+module ManagedQueryResultsConfiguration =
+  struct
+    type nonrec t =
+      {
+      enabled: Boolean.t
+        [@ocaml.doc
+          "If set to true, allows you to store query results in Athena owned storage. If set to false, workgroup member stores query results in location specified under ResultConfiguration$OutputLocation. The default is false. A workgroup cannot have the ResultConfiguration$OutputLocation parameter when you set this field to true."];
+      encryptionConfiguration:
+        ManagedQueryResultsEncryptionConfiguration.t option
+        [@ocaml.doc
+          "If you encrypt query and calculation results in Athena owned storage, this field indicates the encryption option (for example, SSE_KMS or CSE_KMS) and key information."]}
+    let context_ = "ManagedQueryResultsConfiguration"
+    let make ?encryptionConfiguration =
+      fun ~enabled -> fun () -> { encryptionConfiguration; enabled }
+    let to_value x =
+      structure_to_value
+        [("Enabled", (Some (Boolean.to_value x.enabled)));
+        ("EncryptionConfiguration",
+          (Option.map x.encryptionConfiguration
+             ~f:ManagedQueryResultsEncryptionConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let encryptionConfiguration =
+        (Option.map ~f:ManagedQueryResultsEncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "EncryptionConfiguration") in
+      let enabled =
+        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
+      make ?encryptionConfiguration ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let encryptionConfiguration =
+        field_map json__ "EncryptionConfiguration"
+          ManagedQueryResultsEncryptionConfiguration.of_json in
+      let enabled = field_map_exn json__ "Enabled" Boolean.of_json in
+      make ?encryptionConfiguration ~enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for storing results in Athena owned storage, which includes whether this feature is enabled; whether encryption configuration, if any, is used for encrypting query results."]
+module ExecutionParameter =
+  struct
+    type nonrec t = string
+    let context_ = "ExecutionParameter"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExecutionParameter" j
+    let to_json = simple_to_json to_value
+  end
+module ExecutionParameters =
+  struct
+    type nonrec t = ExecutionParameter.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:NamedQuery.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:ExecutionParameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -3284,17 +2168,1188 @@ module NamedQueryList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:NamedQuery.of_xml)
+                     | _ -> true))) ~f:ExecutionParameter.of_xml)
     let of_json j =
-      list_of_json ~kind:"NamedQueryList" ~of_json:NamedQuery.of_json j
+      list_of_json ~kind:"ExecutionParameters"
+        ~of_json:ExecutionParameter.of_json j
     let to_json v = composed_to_json to_value v
   end
-module UnprocessedNamedQueryIdList =
+module EngineVersion =
   struct
-    type nonrec t = UnprocessedNamedQueryId.t list
+    type nonrec t =
+      {
+      selectedEngineVersion: NameString.t option
+        [@ocaml.doc
+          "The engine version requested by the user. Possible values are determined by the output of ListEngineVersions, including AUTO. The default is AUTO."];
+      effectiveEngineVersion: NameString.t option
+        [@ocaml.doc
+          "Read only. The engine version on which the query runs. If the user requests a valid engine version other than Auto, the effective engine version is the same as the engine version that the user requested. If the user requests Auto, the effective engine version is chosen by Athena. When a request to update the engine version is made by a CreateWorkGroup or UpdateWorkGroup operation, the EffectiveEngineVersion field is ignored."]}
+    let make ?selectedEngineVersion =
+      fun ?effectiveEngineVersion ->
+        fun () -> { selectedEngineVersion; effectiveEngineVersion }
+    let to_value x =
+      structure_to_value
+        [("SelectedEngineVersion",
+           (Option.map x.selectedEngineVersion ~f:NameString.to_value));
+        ("EffectiveEngineVersion",
+          (Option.map x.effectiveEngineVersion ~f:NameString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let effectiveEngineVersion =
+        (Option.map ~f:NameString.of_xml)
+          (Xml.child xml_arg0 "EffectiveEngineVersion") in
+      let selectedEngineVersion =
+        (Option.map ~f:NameString.of_xml)
+          (Xml.child xml_arg0 "SelectedEngineVersion") in
+      make ?effectiveEngineVersion ?selectedEngineVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let effectiveEngineVersion =
+        field_map json__ "EffectiveEngineVersion" NameString.of_json in
+      let selectedEngineVersion =
+        field_map json__ "SelectedEngineVersion" NameString.of_json in
+      make ?effectiveEngineVersion ?selectedEngineVersion ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Athena engine version for running queries, or the PySpark engine version for running sessions."]
+module QueryExecution =
+  struct
+    type nonrec t =
+      {
+      queryExecutionId: QueryExecutionId.t option
+        [@ocaml.doc "The unique identifier for each query execution."];
+      query: QueryString.t option
+        [@ocaml.doc
+          "The SQL query statements which the query execution ran."];
+      statementType: StatementType.t option
+        [@ocaml.doc
+          "The type of query statement that was run. DDL indicates DDL query statements. DML indicates DML (Data Manipulation Language) query statements, such as CREATE TABLE AS SELECT. UTILITY indicates query statements other than DDL and DML, such as SHOW CREATE TABLE, EXPLAIN, DESCRIBE, or SHOW TABLES."];
+      managedQueryResultsConfiguration:
+        ManagedQueryResultsConfiguration.t option
+        [@ocaml.doc
+          "The configuration for storing results in Athena owned storage, which includes whether this feature is enabled; whether encryption configuration, if any, is used for encrypting query results."];
+      resultConfiguration: ResultConfiguration.t option
+        [@ocaml.doc
+          "The location in Amazon S3 where query and calculation results are stored and the encryption option, if any, used for query results. These are known as \"client-side settings\". If workgroup settings override client-side settings, then the query uses the location for the query results and the encryption configuration that are specified for the workgroup."];
+      resultReuseConfiguration: ResultReuseConfiguration.t option
+        [@ocaml.doc
+          "Specifies the query result reuse behavior that was used for the query."];
+      queryExecutionContext: QueryExecutionContext.t option
+        [@ocaml.doc "The database in which the query execution occurred."];
+      status: QueryExecutionStatus.t option
+        [@ocaml.doc
+          "The completion date, current state, submission time, and state change reason (if applicable) for the query execution."];
+      statistics: QueryExecutionStatistics.t option
+        [@ocaml.doc
+          "Query execution statistics, such as the amount of data scanned, the amount of time that the query took to process, and the type of statement that was run."];
+      workGroup: WorkGroupName.t option
+        [@ocaml.doc "The name of the workgroup in which the query ran."];
+      engineVersion: EngineVersion.t option
+        [@ocaml.doc "The engine version that executed the query."];
+      executionParameters: ExecutionParameters.t option
+        [@ocaml.doc
+          "A list of values for the parameters in a query. The values are applied sequentially to the parameters in the query in the order in which the parameters occur. The list of parameters is not returned in the response."];
+      substatementType: String_.t option
+        [@ocaml.doc "The kind of query statement that was run."];
+      queryResultsS3AccessGrantsConfiguration:
+        QueryResultsS3AccessGrantsConfiguration.t option
+        [@ocaml.doc
+          "Specifies whether Amazon S3 access grants are enabled for query results."]}
+    let make ?queryExecutionId =
+      fun ?query ->
+        fun ?statementType ->
+          fun ?managedQueryResultsConfiguration ->
+            fun ?resultConfiguration ->
+              fun ?resultReuseConfiguration ->
+                fun ?queryExecutionContext ->
+                  fun ?status ->
+                    fun ?statistics ->
+                      fun ?workGroup ->
+                        fun ?engineVersion ->
+                          fun ?executionParameters ->
+                            fun ?substatementType ->
+                              fun ?queryResultsS3AccessGrantsConfiguration ->
+                                fun () ->
+                                  {
+                                    queryExecutionId;
+                                    query;
+                                    statementType;
+                                    managedQueryResultsConfiguration;
+                                    resultConfiguration;
+                                    resultReuseConfiguration;
+                                    queryExecutionContext;
+                                    status;
+                                    statistics;
+                                    workGroup;
+                                    engineVersion;
+                                    executionParameters;
+                                    substatementType;
+                                    queryResultsS3AccessGrantsConfiguration
+                                  }
+    let to_value x =
+      structure_to_value
+        [("QueryExecutionId",
+           (Option.map x.queryExecutionId ~f:QueryExecutionId.to_value));
+        ("Query", (Option.map x.query ~f:QueryString.to_value));
+        ("StatementType",
+          (Option.map x.statementType ~f:StatementType.to_value));
+        ("ManagedQueryResultsConfiguration",
+          (Option.map x.managedQueryResultsConfiguration
+             ~f:ManagedQueryResultsConfiguration.to_value));
+        ("ResultConfiguration",
+          (Option.map x.resultConfiguration ~f:ResultConfiguration.to_value));
+        ("ResultReuseConfiguration",
+          (Option.map x.resultReuseConfiguration
+             ~f:ResultReuseConfiguration.to_value));
+        ("QueryExecutionContext",
+          (Option.map x.queryExecutionContext
+             ~f:QueryExecutionContext.to_value));
+        ("Status", (Option.map x.status ~f:QueryExecutionStatus.to_value));
+        ("Statistics",
+          (Option.map x.statistics ~f:QueryExecutionStatistics.to_value));
+        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value));
+        ("EngineVersion",
+          (Option.map x.engineVersion ~f:EngineVersion.to_value));
+        ("ExecutionParameters",
+          (Option.map x.executionParameters ~f:ExecutionParameters.to_value));
+        ("SubstatementType",
+          (Option.map x.substatementType ~f:String_.to_value));
+        ("QueryResultsS3AccessGrantsConfiguration",
+          (Option.map x.queryResultsS3AccessGrantsConfiguration
+             ~f:QueryResultsS3AccessGrantsConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queryResultsS3AccessGrantsConfiguration =
+        (Option.map ~f:QueryResultsS3AccessGrantsConfiguration.of_xml)
+          (Xml.child xml_arg0 "QueryResultsS3AccessGrantsConfiguration") in
+      let substatementType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "SubstatementType") in
+      let executionParameters =
+        (Option.map ~f:ExecutionParameters.of_xml)
+          (Xml.child xml_arg0 "ExecutionParameters") in
+      let engineVersion =
+        (Option.map ~f:EngineVersion.of_xml)
+          (Xml.child xml_arg0 "EngineVersion") in
+      let workGroup =
+        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
+      let statistics =
+        (Option.map ~f:QueryExecutionStatistics.of_xml)
+          (Xml.child xml_arg0 "Statistics") in
+      let status =
+        (Option.map ~f:QueryExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let queryExecutionContext =
+        (Option.map ~f:QueryExecutionContext.of_xml)
+          (Xml.child xml_arg0 "QueryExecutionContext") in
+      let resultReuseConfiguration =
+        (Option.map ~f:ResultReuseConfiguration.of_xml)
+          (Xml.child xml_arg0 "ResultReuseConfiguration") in
+      let resultConfiguration =
+        (Option.map ~f:ResultConfiguration.of_xml)
+          (Xml.child xml_arg0 "ResultConfiguration") in
+      let managedQueryResultsConfiguration =
+        (Option.map ~f:ManagedQueryResultsConfiguration.of_xml)
+          (Xml.child xml_arg0 "ManagedQueryResultsConfiguration") in
+      let statementType =
+        (Option.map ~f:StatementType.of_xml)
+          (Xml.child xml_arg0 "StatementType") in
+      let query =
+        (Option.map ~f:QueryString.of_xml) (Xml.child xml_arg0 "Query") in
+      let queryExecutionId =
+        (Option.map ~f:QueryExecutionId.of_xml)
+          (Xml.child xml_arg0 "QueryExecutionId") in
+      make ?queryResultsS3AccessGrantsConfiguration ?substatementType
+        ?executionParameters ?engineVersion ?workGroup ?statistics ?status
+        ?queryExecutionContext ?resultReuseConfiguration ?resultConfiguration
+        ?managedQueryResultsConfiguration ?statementType ?query
+        ?queryExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queryResultsS3AccessGrantsConfiguration =
+        field_map json__ "QueryResultsS3AccessGrantsConfiguration"
+          QueryResultsS3AccessGrantsConfiguration.of_json in
+      let substatementType =
+        field_map json__ "SubstatementType" String_.of_json in
+      let executionParameters =
+        field_map json__ "ExecutionParameters" ExecutionParameters.of_json in
+      let engineVersion =
+        field_map json__ "EngineVersion" EngineVersion.of_json in
+      let workGroup = field_map json__ "WorkGroup" WorkGroupName.of_json in
+      let statistics =
+        field_map json__ "Statistics" QueryExecutionStatistics.of_json in
+      let status = field_map json__ "Status" QueryExecutionStatus.of_json in
+      let queryExecutionContext =
+        field_map json__ "QueryExecutionContext"
+          QueryExecutionContext.of_json in
+      let resultReuseConfiguration =
+        field_map json__ "ResultReuseConfiguration"
+          ResultReuseConfiguration.of_json in
+      let resultConfiguration =
+        field_map json__ "ResultConfiguration" ResultConfiguration.of_json in
+      let managedQueryResultsConfiguration =
+        field_map json__ "ManagedQueryResultsConfiguration"
+          ManagedQueryResultsConfiguration.of_json in
+      let statementType =
+        field_map json__ "StatementType" StatementType.of_json in
+      let query = field_map json__ "Query" QueryString.of_json in
+      let queryExecutionId =
+        field_map json__ "QueryExecutionId" QueryExecutionId.of_json in
+      make ?queryResultsS3AccessGrantsConfiguration ?substatementType
+        ?executionParameters ?engineVersion ?workGroup ?statistics ?status
+        ?queryExecutionContext ?resultReuseConfiguration ?resultConfiguration
+        ?managedQueryResultsConfiguration ?statementType ?query
+        ?queryExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a single instance of a query execution."]
+module QueryExecutionList =
+  struct
+    type nonrec t = QueryExecution.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:UnprocessedNamedQueryId.to_value)) |>
+      (xs |> (List.map ~f:QueryExecution.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QueryExecution.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QueryExecutionList" ~of_json:QueryExecution.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module BatchGetQueryExecutionOutput =
+  struct
+    type nonrec t =
+      {
+      queryExecutions: QueryExecutionList.t option
+        [@ocaml.doc "Information about a query execution."];
+      unprocessedQueryExecutionIds: UnprocessedQueryExecutionIdList.t option
+        [@ocaml.doc
+          "Information about the query executions that failed to run."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?queryExecutions =
+      fun ?unprocessedQueryExecutionIds ->
+        fun () -> { queryExecutions; unprocessedQueryExecutionIds }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("QueryExecutions",
+           (Option.map x.queryExecutions ~f:QueryExecutionList.to_value));
+        ("UnprocessedQueryExecutionIds",
+          (Option.map x.unprocessedQueryExecutionIds
+             ~f:UnprocessedQueryExecutionIdList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unprocessedQueryExecutionIds =
+        (Option.map ~f:UnprocessedQueryExecutionIdList.of_xml)
+          (Xml.child xml_arg0 "UnprocessedQueryExecutionIds") in
+      let queryExecutions =
+        (Option.map ~f:QueryExecutionList.of_xml)
+          (Xml.child xml_arg0 "QueryExecutions") in
+      make ?unprocessedQueryExecutionIds ?queryExecutions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unprocessedQueryExecutionIds =
+        field_map json__ "UnprocessedQueryExecutionIds"
+          UnprocessedQueryExecutionIdList.of_json in
+      let queryExecutions =
+        field_map json__ "QueryExecutions" QueryExecutionList.of_json in
+      make ?unprocessedQueryExecutionIds ?queryExecutions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the details of a single query execution or a list of up to 50 query executions, which you provide as an array of query execution ID strings. Requires you to have access to the workgroup in which the queries ran. To get a list of query execution IDs, use ListQueryExecutionsInput$WorkGroup. Query executions differ from named (saved) queries. Use BatchGetNamedQueryInput to get details about named queries."]
+module BytesScannedCutoffValue =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:10000000L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module CodeBlock =
+  struct
+    type nonrec t = string
+    let context_ = "CodeBlock"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:68000); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CodeBlock" j
+    let to_json = simple_to_json to_value
+  end
+module CalculationConfiguration =
+  struct
+    type nonrec t =
+      {
+      codeBlock: CodeBlock.t option
+        [@ocaml.doc "A string that contains the code for the calculation."]}
+    let make ?codeBlock = fun () -> { codeBlock }
+    let to_value x =
+      structure_to_value
+        [("CodeBlock", (Option.map x.codeBlock ~f:CodeBlock.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let codeBlock =
+        (Option.map ~f:CodeBlock.of_xml) (Xml.child xml_arg0 "CodeBlock") in
+      make ?codeBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let codeBlock = field_map json__ "CodeBlock" CodeBlock.of_json in
+      make ?codeBlock ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains configuration information for the calculation."]
+module CalculationExecutionId =
+  struct
+    type nonrec t = string
+    let context_ = "CalculationExecutionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:36) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CalculationExecutionId" j
+    let to_json = simple_to_json to_value
+  end
+module CalculationExecutionState =
+  struct
+    type nonrec t =
+      | CREATING 
+      | CREATED 
+      | QUEUED 
+      | RUNNING 
+      | CANCELING 
+      | CANCELED 
+      | COMPLETED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | CREATED -> "CREATED"
+      | QUEUED -> "QUEUED"
+      | RUNNING -> "RUNNING"
+      | CANCELING -> "CANCELING"
+      | CANCELED -> "CANCELED"
+      | COMPLETED -> "COMPLETED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "CREATED" -> CREATED
+      | "QUEUED" -> QUEUED
+      | "RUNNING" -> RUNNING
+      | "CANCELING" -> CANCELING
+      | "CANCELED" -> CANCELED
+      | "COMPLETED" -> COMPLETED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CalculationExecutionState" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CalculationExecutionState" j)
+    let to_json = simple_to_json to_value
+  end
+module S3Uri =
+  struct
+    type nonrec t = string
+    let context_ = "S3Uri"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () ->
+                check_pattern i ~pattern:"^(https|s3|S3)://([^/]+)/?(.*)$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3Uri" j
+    let to_json = simple_to_json to_value
+  end
+module CalculationResultType =
+  struct
+    type nonrec t = string
+    let context_ = "CalculationResultType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"\\w+\\/[-+.\\w]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CalculationResultType" j
+    let to_json = simple_to_json to_value
+  end
+module CalculationResult =
+  struct
+    type nonrec t =
+      {
+      stdOutS3Uri: S3Uri.t option
+        [@ocaml.doc
+          "The Amazon S3 location of the stdout file for the calculation."];
+      stdErrorS3Uri: S3Uri.t option
+        [@ocaml.doc
+          "The Amazon S3 location of the stderr error messages file for the calculation."];
+      resultS3Uri: S3Uri.t option
+        [@ocaml.doc
+          "The Amazon S3 location of the folder for the calculation results."];
+      resultType: CalculationResultType.t option
+        [@ocaml.doc "The data format of the calculation result."]}
+    let make ?stdOutS3Uri =
+      fun ?stdErrorS3Uri ->
+        fun ?resultS3Uri ->
+          fun ?resultType ->
+            fun () -> { stdOutS3Uri; stdErrorS3Uri; resultS3Uri; resultType }
+    let to_value x =
+      structure_to_value
+        [("StdOutS3Uri", (Option.map x.stdOutS3Uri ~f:S3Uri.to_value));
+        ("StdErrorS3Uri", (Option.map x.stdErrorS3Uri ~f:S3Uri.to_value));
+        ("ResultS3Uri", (Option.map x.resultS3Uri ~f:S3Uri.to_value));
+        ("ResultType",
+          (Option.map x.resultType ~f:CalculationResultType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resultType =
+        (Option.map ~f:CalculationResultType.of_xml)
+          (Xml.child xml_arg0 "ResultType") in
+      let resultS3Uri =
+        (Option.map ~f:S3Uri.of_xml) (Xml.child xml_arg0 "ResultS3Uri") in
+      let stdErrorS3Uri =
+        (Option.map ~f:S3Uri.of_xml) (Xml.child xml_arg0 "StdErrorS3Uri") in
+      let stdOutS3Uri =
+        (Option.map ~f:S3Uri.of_xml) (Xml.child xml_arg0 "StdOutS3Uri") in
+      make ?resultType ?resultS3Uri ?stdErrorS3Uri ?stdOutS3Uri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resultType =
+        field_map json__ "ResultType" CalculationResultType.of_json in
+      let resultS3Uri = field_map json__ "ResultS3Uri" S3Uri.of_json in
+      let stdErrorS3Uri = field_map json__ "StdErrorS3Uri" S3Uri.of_json in
+      let stdOutS3Uri = field_map json__ "StdOutS3Uri" S3Uri.of_json in
+      make ?resultType ?resultS3Uri ?stdErrorS3Uri ?stdOutS3Uri ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about an application-specific calculation result."]
+module CalculationStatistics =
+  struct
+    type nonrec t =
+      {
+      dpuExecutionInMillis: Long.t option
+        [@ocaml.doc
+          "The data processing unit execution time in milliseconds for the calculation."];
+      progress: DescriptionString.t option
+        [@ocaml.doc "The progress of the calculation."]}
+    let make ?dpuExecutionInMillis =
+      fun ?progress -> fun () -> { dpuExecutionInMillis; progress }
+    let to_value x =
+      structure_to_value
+        [("DpuExecutionInMillis",
+           (Option.map x.dpuExecutionInMillis ~f:Long.to_value));
+        ("Progress", (Option.map x.progress ~f:DescriptionString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let progress =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "Progress") in
+      let dpuExecutionInMillis =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "DpuExecutionInMillis") in
+      make ?progress ?dpuExecutionInMillis ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let progress = field_map json__ "Progress" DescriptionString.of_json in
+      let dpuExecutionInMillis =
+        field_map json__ "DpuExecutionInMillis" Long.of_json in
+      make ?progress ?dpuExecutionInMillis ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains statistics for a notebook calculation."]
+module CalculationStatus =
+  struct
+    type nonrec t =
+      {
+      submissionDateTime: Date.t option
+        [@ocaml.doc
+          "The date and time the calculation was submitted for processing."];
+      completionDateTime: Date.t option
+        [@ocaml.doc
+          "The date and time the calculation completed processing."];
+      state: CalculationExecutionState.t option
+        [@ocaml.doc
+          "The state of the calculation execution. A description of each state follows. CREATING - The calculation is in the process of being created. CREATED - The calculation has been created and is ready to run. QUEUED - The calculation has been queued for processing. RUNNING - The calculation is running. CANCELING - A request to cancel the calculation has been received and the system is working to stop it. CANCELED - The calculation is no longer running as the result of a cancel request. COMPLETED - The calculation has completed without error. FAILED - The calculation failed and is no longer running."];
+      stateChangeReason: DescriptionString.t option
+        [@ocaml.doc
+          "The reason for the calculation state change (for example, the calculation was canceled because the session was terminated)."]}
+    let make ?submissionDateTime =
+      fun ?completionDateTime ->
+        fun ?state ->
+          fun ?stateChangeReason ->
+            fun () ->
+              {
+                submissionDateTime;
+                completionDateTime;
+                state;
+                stateChangeReason
+              }
+    let to_value x =
+      structure_to_value
+        [("SubmissionDateTime",
+           (Option.map x.submissionDateTime ~f:Date.to_value));
+        ("CompletionDateTime",
+          (Option.map x.completionDateTime ~f:Date.to_value));
+        ("State", (Option.map x.state ~f:CalculationExecutionState.to_value));
+        ("StateChangeReason",
+          (Option.map x.stateChangeReason ~f:DescriptionString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let stateChangeReason =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "StateChangeReason") in
+      let state =
+        (Option.map ~f:CalculationExecutionState.of_xml)
+          (Xml.child xml_arg0 "State") in
+      let completionDateTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CompletionDateTime") in
+      let submissionDateTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "SubmissionDateTime") in
+      make ?stateChangeReason ?state ?completionDateTime ?submissionDateTime
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stateChangeReason =
+        field_map json__ "StateChangeReason" DescriptionString.of_json in
+      let state = field_map json__ "State" CalculationExecutionState.of_json in
+      let completionDateTime =
+        field_map json__ "CompletionDateTime" Date.of_json in
+      let submissionDateTime =
+        field_map json__ "SubmissionDateTime" Date.of_json in
+      make ?stateChangeReason ?state ?completionDateTime ?submissionDateTime
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the status of a notebook calculation."]
+module CalculationSummary =
+  struct
+    type nonrec t =
+      {
+      calculationExecutionId: CalculationExecutionId.t option
+        [@ocaml.doc "The calculation execution UUID."];
+      description: DescriptionString.t option
+        [@ocaml.doc "A description of the calculation."];
+      status: CalculationStatus.t option
+        [@ocaml.doc
+          "Contains information about the status of the calculation."]}
+    let make ?calculationExecutionId =
+      fun ?description ->
+        fun ?status ->
+          fun () -> { calculationExecutionId; description; status }
+    let to_value x =
+      structure_to_value
+        [("CalculationExecutionId",
+           (Option.map x.calculationExecutionId
+              ~f:CalculationExecutionId.to_value));
+        ("Description",
+          (Option.map x.description ~f:DescriptionString.to_value));
+        ("Status", (Option.map x.status ~f:CalculationStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:CalculationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let description =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let calculationExecutionId =
+        (Option.map ~f:CalculationExecutionId.of_xml)
+          (Xml.child xml_arg0 "CalculationExecutionId") in
+      make ?status ?description ?calculationExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" CalculationStatus.of_json in
+      let description =
+        field_map json__ "Description" DescriptionString.of_json in
+      let calculationExecutionId =
+        field_map json__ "CalculationExecutionId"
+          CalculationExecutionId.of_json in
+      make ?status ?description ?calculationExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary information for a notebook calculation."]
+module CalculationsList =
+  struct
+    type nonrec t = CalculationSummary.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CalculationSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CalculationSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CalculationsList"
+        ~of_json:CalculationSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CapacityReservationName =
+  struct
+    type nonrec t = string
+    let context_ = "CapacityReservationName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9._-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CapacityReservationName" j
+    let to_json = simple_to_json to_value
+  end
+module CancelCapacityReservationInput =
+  struct
+    type nonrec t =
+      {
+      name: CapacityReservationName.t
+        [@ocaml.doc "The name of the capacity reservation to cancel."]}
+    let context_ = "CancelCapacityReservationInput"
+    let make ~name = fun () -> { name }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (CapacityReservationName.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        CapacityReservationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" CapacityReservationName.of_json in
+      make ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Cancels the capacity reservation with the specified name. Cancelled reservations remain in your account and will be deleted 45 days after cancellation. During the 45 days, you cannot re-purpose or reuse a reservation that has been cancelled, but you can refer to its tags and view it for historical reference."]
+module CancelCapacityReservationOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Cancels the capacity reservation with the specified name. Cancelled reservations remain in your account and will be deleted 45 days after cancellation. During the 45 days, you cannot re-purpose or reuse a reservation that has been cancelled, but you can refer to its tags and view it for historical reference."]
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module CapacityAllocationStatus =
+  struct
+    type nonrec t =
+      | PENDING 
+      | SUCCEEDED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING -> "PENDING"
+      | SUCCEEDED -> "SUCCEEDED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING" -> PENDING
+      | "SUCCEEDED" -> SUCCEEDED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CapacityAllocationStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CapacityAllocationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module CapacityAllocation =
+  struct
+    type nonrec t =
+      {
+      status: CapacityAllocationStatus.t option
+        [@ocaml.doc "The status of the capacity allocation."];
+      statusMessage: String_.t option
+        [@ocaml.doc "The status message of the capacity allocation."];
+      requestTime: Timestamp.t option
+        [@ocaml.doc "The time when the capacity allocation was requested."];
+      requestCompletionTime: Timestamp.t option
+        [@ocaml.doc
+          "The time when the capacity allocation request was completed."]}
+    let make ?status =
+      fun ?statusMessage ->
+        fun ?requestTime ->
+          fun ?requestCompletionTime ->
+            fun () ->
+              { status; statusMessage; requestTime; requestCompletionTime }
+    let to_value x =
+      structure_to_value
+        [("Status",
+           (Option.map x.status ~f:CapacityAllocationStatus.to_value));
+        ("StatusMessage", (Option.map x.statusMessage ~f:String_.to_value));
+        ("RequestTime", (Option.map x.requestTime ~f:Timestamp.to_value));
+        ("RequestCompletionTime",
+          (Option.map x.requestCompletionTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestCompletionTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "RequestCompletionTime") in
+      let requestTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "RequestTime") in
+      let statusMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StatusMessage") in
+      let status =
+        (Option.map ~f:CapacityAllocationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?requestCompletionTime ?requestTime ?statusMessage ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestCompletionTime =
+        field_map json__ "RequestCompletionTime" Timestamp.of_json in
+      let requestTime = field_map json__ "RequestTime" Timestamp.of_json in
+      let statusMessage = field_map json__ "StatusMessage" String_.of_json in
+      let status = field_map json__ "Status" CapacityAllocationStatus.of_json in
+      make ?requestCompletionTime ?requestTime ?statusMessage ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the submission time of a single allocation request for a capacity reservation and the most recent status of the attempted allocation."]
+module WorkGroupNamesList =
+  struct
+    type nonrec t = WorkGroupName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WorkGroupName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WorkGroupName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WorkGroupNamesList" ~of_json:WorkGroupName.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module CapacityAssignment =
+  struct
+    type nonrec t =
+      {
+      workGroupNames: WorkGroupNamesList.t option
+        [@ocaml.doc
+          "The list of workgroup names for the capacity assignment."]}
+    let make ?workGroupNames = fun () -> { workGroupNames }
+    let to_value x =
+      structure_to_value
+        [("WorkGroupNames",
+           (Option.map x.workGroupNames ~f:WorkGroupNamesList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workGroupNames =
+        (Option.map ~f:WorkGroupNamesList.of_xml)
+          (Xml.child xml_arg0 "WorkGroupNames") in
+      make ?workGroupNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workGroupNames =
+        field_map json__ "WorkGroupNames" WorkGroupNamesList.of_json in
+      make ?workGroupNames ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A mapping between one or more workgroups and a capacity reservation."]
+module CapacityAssignmentsList =
+  struct
+    type nonrec t = CapacityAssignment.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapacityAssignment.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapacityAssignment.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapacityAssignmentsList"
+        ~of_json:CapacityAssignment.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CapacityAssignmentConfiguration =
+  struct
+    type nonrec t =
+      {
+      capacityReservationName: CapacityReservationName.t option
+        [@ocaml.doc
+          "The name of the reservation that the capacity assignment configuration is for."];
+      capacityAssignments: CapacityAssignmentsList.t option
+        [@ocaml.doc
+          "The list of assignments that make up the capacity assignment configuration."]}
+    let make ?capacityReservationName =
+      fun ?capacityAssignments ->
+        fun () -> { capacityReservationName; capacityAssignments }
+    let to_value x =
+      structure_to_value
+        [("CapacityReservationName",
+           (Option.map x.capacityReservationName
+              ~f:CapacityReservationName.to_value));
+        ("CapacityAssignments",
+          (Option.map x.capacityAssignments
+             ~f:CapacityAssignmentsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityAssignments =
+        (Option.map ~f:CapacityAssignmentsList.of_xml)
+          (Xml.child xml_arg0 "CapacityAssignments") in
+      let capacityReservationName =
+        (Option.map ~f:CapacityReservationName.of_xml)
+          (Xml.child xml_arg0 "CapacityReservationName") in
+      make ?capacityAssignments ?capacityReservationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityAssignments =
+        field_map json__ "CapacityAssignments"
+          CapacityAssignmentsList.of_json in
+      let capacityReservationName =
+        field_map json__ "CapacityReservationName"
+          CapacityReservationName.of_json in
+      make ?capacityAssignments ?capacityReservationName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Assigns Athena workgroups (and hence their queries) to capacity reservations. A capacity reservation can have only one capacity assignment configuration, but the capacity assignment configuration can be made up of multiple individual assignments. Each assignment specifies how Athena queries can consume capacity from the capacity reservation that their workgroup is mapped to."]
+module TargetDpusInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:4); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for TargetDpusInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module CapacityReservationStatus =
+  struct
+    type nonrec t =
+      | PENDING 
+      | ACTIVE 
+      | CANCELLING 
+      | CANCELLED 
+      | FAILED 
+      | UPDATE_PENDING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING -> "PENDING"
+      | ACTIVE -> "ACTIVE"
+      | CANCELLING -> "CANCELLING"
+      | CANCELLED -> "CANCELLED"
+      | FAILED -> "FAILED"
+      | UPDATE_PENDING -> "UPDATE_PENDING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING" -> PENDING
+      | "ACTIVE" -> ACTIVE
+      | "CANCELLING" -> CANCELLING
+      | "CANCELLED" -> CANCELLED
+      | "FAILED" -> FAILED
+      | "UPDATE_PENDING" -> UPDATE_PENDING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CapacityReservationStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CapacityReservationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module CapacityReservation =
+  struct
+    type nonrec t =
+      {
+      name: CapacityReservationName.t option
+        [@ocaml.doc "The name of the capacity reservation."];
+      status: CapacityReservationStatus.t option
+        [@ocaml.doc "The status of the capacity reservation."];
+      targetDpus: TargetDpusInteger.t option
+        [@ocaml.doc "The number of data processing units requested."];
+      allocatedDpus: AllocatedDpusInteger.t option
+        [@ocaml.doc
+          "The number of data processing units currently allocated."];
+      lastAllocation: CapacityAllocation.t option ;
+      lastSuccessfulAllocationTime: Timestamp.t option
+        [@ocaml.doc
+          "The time of the most recent capacity allocation that succeeded."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc
+          "The time in UTC epoch millis when the capacity reservation was created."]}
+    let make ?name =
+      fun ?status ->
+        fun ?targetDpus ->
+          fun ?allocatedDpus ->
+            fun ?lastAllocation ->
+              fun ?lastSuccessfulAllocationTime ->
+                fun ?creationTime ->
+                  fun () ->
+                    {
+                      name;
+                      status;
+                      targetDpus;
+                      allocatedDpus;
+                      lastAllocation;
+                      lastSuccessfulAllocationTime;
+                      creationTime
+                    }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:CapacityReservationName.to_value));
+        ("Status",
+          (Option.map x.status ~f:CapacityReservationStatus.to_value));
+        ("TargetDpus",
+          (Option.map x.targetDpus ~f:TargetDpusInteger.to_value));
+        ("AllocatedDpus",
+          (Option.map x.allocatedDpus ~f:AllocatedDpusInteger.to_value));
+        ("LastAllocation",
+          (Option.map x.lastAllocation ~f:CapacityAllocation.to_value));
+        ("LastSuccessfulAllocationTime",
+          (Option.map x.lastSuccessfulAllocationTime ~f:Timestamp.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let lastSuccessfulAllocationTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastSuccessfulAllocationTime") in
+      let lastAllocation =
+        (Option.map ~f:CapacityAllocation.of_xml)
+          (Xml.child xml_arg0 "LastAllocation") in
+      let allocatedDpus =
+        (Option.map ~f:AllocatedDpusInteger.of_xml)
+          (Xml.child xml_arg0 "AllocatedDpus") in
+      let targetDpus =
+        (Option.map ~f:TargetDpusInteger.of_xml)
+          (Xml.child xml_arg0 "TargetDpus") in
+      let status =
+        (Option.map ~f:CapacityReservationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let name =
+        (Option.map ~f:CapacityReservationName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      make ?creationTime ?lastSuccessfulAllocationTime ?lastAllocation
+        ?allocatedDpus ?targetDpus ?status ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let lastSuccessfulAllocationTime =
+        field_map json__ "LastSuccessfulAllocationTime" Timestamp.of_json in
+      let lastAllocation =
+        field_map json__ "LastAllocation" CapacityAllocation.of_json in
+      let allocatedDpus =
+        field_map json__ "AllocatedDpus" AllocatedDpusInteger.of_json in
+      let targetDpus =
+        field_map json__ "TargetDpus" TargetDpusInteger.of_json in
+      let status =
+        field_map json__ "Status" CapacityReservationStatus.of_json in
+      let name = field_map json__ "Name" CapacityReservationName.of_json in
+      make ?creationTime ?lastSuccessfulAllocationTime ?lastAllocation
+        ?allocatedDpus ?targetDpus ?status ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A reservation for a specified number of data processing units (DPUs). When a reservation is initially created, it has no DPUs. Athena allocates DPUs until the allocated amount equals the requested amount."]
+module CapacityReservationsList =
+  struct
+    type nonrec t = CapacityReservation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapacityReservation.to_value)) |>
         (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
@@ -3309,327 +3364,816 @@ module UnprocessedNamedQueryIdList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:UnprocessedNamedQueryId.of_xml)
+                     | _ -> true))) ~f:CapacityReservation.of_xml)
     let of_json j =
-      list_of_json ~kind:"UnprocessedNamedQueryIdList"
-        ~of_json:UnprocessedNamedQueryId.of_json j
+      list_of_json ~kind:"CapacityReservationsList"
+        ~of_json:CapacityReservation.of_json j
     let to_json v = composed_to_json to_value v
   end
-module UpdateWorkGroupOutput =
+module ParametersMapValue =
   struct
-    type nonrec t = unit
-    type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
-      | `InvalidRequestException of InvalidRequestException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
-    let error_of_json name json =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `InvalidRequestException e ->
-          `Assoc
-            [("error", (`String "InvalidRequestException"));
-            ("details", (InvalidRequestException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = string
+    let context_ = "ParametersMapValue"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:51200); i
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ParametersMapValue" j
+    let to_json = simple_to_json to_value
+  end
+module KeyString =
+  struct
+    type nonrec t = string
+    let context_ = "KeyString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KeyString" j
+    let to_json = simple_to_json to_value
+  end
+module ParametersMap =
+  struct
+    type nonrec t = (KeyString.t * ParametersMapValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((KeyString.of_string chopped),
+                              (ParametersMapValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (KeyString.to_value x) |>
+                    (fun x ->
+                       (ParametersMapValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:KeyString.of_string
+        ~of_json:ParametersMapValue.of_json j
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Updates the workgroup with the specified name. The workgroup's name cannot be changed."]
-module UpdateWorkGroupInput =
+  end
+module Classification =
   struct
     type nonrec t =
       {
-      workGroup: WorkGroupName.t
-        [@ocaml.doc "The specified workgroup that will be updated."];
-      description: WorkGroupDescriptionString.t option
-        [@ocaml.doc "The workgroup description."];
-      configurationUpdates: WorkGroupConfigurationUpdates.t option
+      name: NameString.t option
+        [@ocaml.doc "The name of the configuration classification."];
+      properties: ParametersMap.t option
         [@ocaml.doc
-          "The workgroup configuration that will be updated for the given workgroup."];
-      state: WorkGroupState.t option
-        [@ocaml.doc
-          "The workgroup state that will be updated for the given workgroup."]}
-    let context_ = "UpdateWorkGroupInput"
-    let make ?description =
-      fun ?configurationUpdates ->
-        fun ?state ->
-          fun ~workGroup ->
-            fun () -> { description; configurationUpdates; state; workGroup }
+          "A set of properties specified within a configuration classification."]}
+    let make ?name = fun ?properties -> fun () -> { name; properties }
     let to_value x =
       structure_to_value
-        [("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)));
-        ("Description",
-          (Option.map x.description ~f:WorkGroupDescriptionString.to_value));
-        ("ConfigurationUpdates",
-          (Option.map x.configurationUpdates
-             ~f:WorkGroupConfigurationUpdates.to_value));
-        ("State", (Option.map x.state ~f:WorkGroupState.to_value))]
+        [("Name", (Option.map x.name ~f:NameString.to_value));
+        ("Properties", (Option.map x.properties ~f:ParametersMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let state =
-        (Option.map ~f:WorkGroupState.of_xml) (Xml.child xml_arg0 "State") in
-      let configurationUpdates =
-        (Option.map ~f:WorkGroupConfigurationUpdates.of_xml)
-          (Xml.child xml_arg0 "ConfigurationUpdates") in
-      let description =
-        (Option.map ~f:WorkGroupDescriptionString.of_xml)
-          (Xml.child xml_arg0 "Description") in
-      let workGroup =
-        WorkGroupName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
-      make ?state ?configurationUpdates ?description ~workGroup ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" WorkGroupState.of_json in
-      let configurationUpdates =
-        field_map json "ConfigurationUpdates"
-          WorkGroupConfigurationUpdates.of_json in
-      let description =
-        field_map json "Description" WorkGroupDescriptionString.of_json in
-      let workGroup = field_map_exn json "WorkGroup" WorkGroupName.of_json in
-      make ?state ?configurationUpdates ?description ~workGroup ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Updates the workgroup with the specified name. The workgroup's name cannot be changed."]
-module UpdatePreparedStatementOutput =
-  struct
-    type nonrec t = unit
-    type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
-      | `InvalidRequestException of InvalidRequestException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
-    let error_of_json name json =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `InvalidRequestException e ->
-          `Assoc
-            [("error", (`String "InvalidRequestException"));
-            ("details", (InvalidRequestException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates a prepared statement."]
-module UpdatePreparedStatementInput =
-  struct
-    type nonrec t =
-      {
-      statementName: StatementName.t
-        [@ocaml.doc "The name of the prepared statement."];
-      workGroup: WorkGroupName.t
-        [@ocaml.doc "The workgroup for the prepared statement."];
-      queryStatement: QueryString.t
-        [@ocaml.doc "The query string for the prepared statement."];
-      description: DescriptionString.t option
-        [@ocaml.doc "The description of the prepared statement."]}
-    let context_ = "UpdatePreparedStatementInput"
-    let make ?description =
-      fun ~statementName ->
-        fun ~workGroup ->
-          fun ~queryStatement ->
-            fun () ->
-              { description; statementName; workGroup; queryStatement }
-    let to_value x =
-      structure_to_value
-        [("StatementName", (Some (StatementName.to_value x.statementName)));
-        ("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)));
-        ("QueryStatement", (Some (QueryString.to_value x.queryStatement)));
-        ("Description",
-          (Option.map x.description ~f:DescriptionString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let description =
-        (Option.map ~f:DescriptionString.of_xml)
-          (Xml.child xml_arg0 "Description") in
-      let queryStatement =
-        QueryString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryStatement") in
-      let workGroup =
-        WorkGroupName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
-      let statementName =
-        StatementName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StatementName") in
-      make ?description ~queryStatement ~workGroup ~statementName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description =
-        field_map json "Description" DescriptionString.of_json in
-      let queryStatement =
-        field_map_exn json "QueryStatement" QueryString.of_json in
-      let workGroup = field_map_exn json "WorkGroup" WorkGroupName.of_json in
-      let statementName =
-        field_map_exn json "StatementName" StatementName.of_json in
-      make ?description ~queryStatement ~workGroup ~statementName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates a prepared statement."]
-module UpdateNamedQueryOutput =
-  struct
-    type nonrec t = unit
-    type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
-      | `InvalidRequestException of InvalidRequestException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
-    let error_of_json name json =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `InvalidRequestException e ->
-          `Assoc
-            [("error", (`String "InvalidRequestException"));
-            ("details", (InvalidRequestException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Updates a NamedQuery object. The database or workgroup cannot be updated."]
-module UpdateNamedQueryInput =
-  struct
-    type nonrec t =
-      {
-      namedQueryId: NamedQueryId.t
-        [@ocaml.doc "The unique identifier (UUID) of the query."];
-      name: NameString.t [@ocaml.doc "The name of the query."];
-      description: NamedQueryDescriptionString.t option
-        [@ocaml.doc "The query description."];
-      queryString: QueryString.t
-        [@ocaml.doc "The contents of the query with all query statements."]}
-    let context_ = "UpdateNamedQueryInput"
-    let make ?description =
-      fun ~namedQueryId ->
-        fun ~name ->
-          fun ~queryString ->
-            fun () -> { description; namedQueryId; name; queryString }
-    let to_value x =
-      structure_to_value
-        [("NamedQueryId", (Some (NamedQueryId.to_value x.namedQueryId)));
-        ("Name", (Some (NameString.to_value x.name)));
-        ("Description",
-          (Option.map x.description ~f:NamedQueryDescriptionString.to_value));
-        ("QueryString", (Some (QueryString.to_value x.queryString)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let queryString =
-        QueryString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryString") in
-      let description =
-        (Option.map ~f:NamedQueryDescriptionString.of_xml)
-          (Xml.child xml_arg0 "Description") in
+      let properties =
+        (Option.map ~f:ParametersMap.of_xml)
+          (Xml.child xml_arg0 "Properties") in
       let name =
-        NameString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      let namedQueryId =
-        NamedQueryId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "NamedQueryId") in
-      make ~queryString ?description ~name ~namedQueryId ()
+        (Option.map ~f:NameString.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?properties ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryString = field_map_exn json "QueryString" QueryString.of_json in
-      let description =
-        field_map json "Description" NamedQueryDescriptionString.of_json in
-      let name = field_map_exn json "Name" NameString.of_json in
-      let namedQueryId =
-        field_map_exn json "NamedQueryId" NamedQueryId.of_json in
-      make ~queryString ?description ~name ~namedQueryId ()
+    let of_json json__ =
+      let properties = field_map json__ "Properties" ParametersMap.of_json in
+      let name = field_map json__ "Name" NameString.of_json in
+      make ?properties ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates a NamedQuery object. The database or workgroup cannot be updated."]
-module UpdateDataCatalogOutput =
+       "A classification refers to a set of specific configurations."]
+module ClassificationList =
+  struct
+    type nonrec t = Classification.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Classification.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Classification.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ClassificationList" ~of_json:Classification.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ClientRequestToken =
+  struct
+    type nonrec t = string
+    let context_ = "ClientRequestToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientRequestToken" j
+    let to_json = simple_to_json to_value
+  end
+module LogTypeValue =
+  struct
+    type nonrec t = string
+    let context_ = "LogTypeValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LogTypeValue" j
+    let to_json = simple_to_json to_value
+  end
+module LogTypeValuesList =
+  struct
+    type nonrec t = LogTypeValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LogTypeValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LogTypeValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LogTypeValuesList" ~of_json:LogTypeValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LogTypeKey =
+  struct
+    type nonrec t = string
+    let context_ = "LogTypeKey"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LogTypeKey" j
+    let to_json = simple_to_json to_value
+  end
+module LogTypesMap =
+  struct
+    type nonrec t = (LogTypeKey.t * LogTypeValuesList.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types LogTypeKey LogTypeValuesList"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (LogTypeKey.to_value x) |>
+                    (fun x ->
+                       (LogTypeValuesList.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:LogTypeKey.of_string
+        ~of_json:LogTypeValuesList.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LogStreamNamePrefix =
+  struct
+    type nonrec t = string
+    let context_ = "LogStreamNamePrefix"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:"^[^:*]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LogStreamNamePrefix" j
+    let to_json = simple_to_json to_value
+  end
+module LogGroupName =
+  struct
+    type nonrec t = string
+    let context_ = "LogGroupName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9._/-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LogGroupName" j
+    let to_json = simple_to_json to_value
+  end
+module CloudWatchLoggingConfiguration =
+  struct
+    type nonrec t =
+      {
+      enabled: BoxedBoolean.t [@ocaml.doc "Enables CloudWatch logging."];
+      logGroup: LogGroupName.t option
+        [@ocaml.doc
+          "The name of the log group in Amazon CloudWatch Logs where you want to publish your logs."];
+      logStreamNamePrefix: LogStreamNamePrefix.t option
+        [@ocaml.doc "Prefix for the CloudWatch log stream name."];
+      logTypes: LogTypesMap.t option
+        [@ocaml.doc
+          "The types of logs that you want to publish to CloudWatch."]}
+    let context_ = "CloudWatchLoggingConfiguration"
+    let make ?logGroup =
+      fun ?logStreamNamePrefix ->
+        fun ?logTypes ->
+          fun ~enabled ->
+            fun () -> { logGroup; logStreamNamePrefix; logTypes; enabled }
+    let to_value x =
+      structure_to_value
+        [("Enabled", (Some (BoxedBoolean.to_value x.enabled)));
+        ("LogGroup", (Option.map x.logGroup ~f:LogGroupName.to_value));
+        ("LogStreamNamePrefix",
+          (Option.map x.logStreamNamePrefix ~f:LogStreamNamePrefix.to_value));
+        ("LogTypes", (Option.map x.logTypes ~f:LogTypesMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logTypes =
+        (Option.map ~f:LogTypesMap.of_xml) (Xml.child xml_arg0 "LogTypes") in
+      let logStreamNamePrefix =
+        (Option.map ~f:LogStreamNamePrefix.of_xml)
+          (Xml.child xml_arg0 "LogStreamNamePrefix") in
+      let logGroup =
+        (Option.map ~f:LogGroupName.of_xml) (Xml.child xml_arg0 "LogGroup") in
+      let enabled =
+        BoxedBoolean.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
+      make ?logTypes ?logStreamNamePrefix ?logGroup ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logTypes = field_map json__ "LogTypes" LogTypesMap.of_json in
+      let logStreamNamePrefix =
+        field_map json__ "LogStreamNamePrefix" LogStreamNamePrefix.of_json in
+      let logGroup = field_map json__ "LogGroup" LogGroupName.of_json in
+      let enabled = field_map_exn json__ "Enabled" BoxedBoolean.of_json in
+      make ?logTypes ?logStreamNamePrefix ?logGroup ~enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration settings for delivering logs to Amazon CloudWatch log groups."]
+module TypeString =
+  struct
+    type nonrec t = string
+    let context_ = "TypeString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:4096) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TypeString" j
+    let to_json = simple_to_json to_value
+  end
+module CommentString =
+  struct
+    type nonrec t = string
+    let context_ = "CommentString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CommentString" j
+    let to_json = simple_to_json to_value
+  end
+module Column =
+  struct
+    type nonrec t =
+      {
+      name: NameString.t option [@ocaml.doc "The name of the column."];
+      type_: TypeString.t option [@ocaml.doc "The data type of the column."];
+      comment: CommentString.t option
+        [@ocaml.doc "Optional information about the column."]}
+    let make ?name =
+      fun ?type_ -> fun ?comment -> fun () -> { name; type_; comment }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:NameString.to_value));
+        ("Type", (Option.map x.type_ ~f:TypeString.to_value));
+        ("Comment", (Option.map x.comment ~f:CommentString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let comment =
+        (Option.map ~f:CommentString.of_xml) (Xml.child xml_arg0 "Comment") in
+      let type_ =
+        (Option.map ~f:TypeString.of_xml) (Xml.child xml_arg0 "Type") in
+      let name =
+        (Option.map ~f:NameString.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?comment ?type_ ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let comment = field_map json__ "Comment" CommentString.of_json in
+      let type_ = field_map json__ "Type" TypeString.of_json in
+      let name = field_map json__ "Name" NameString.of_json in
+      make ?comment ?type_ ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains metadata for a column in a table."]
+module ColumnNullable =
+  struct
+    type nonrec t =
+      | NOT_NULL 
+      | NULLABLE 
+      | UNKNOWN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NOT_NULL -> "NOT_NULL"
+      | NULLABLE -> "NULLABLE"
+      | UNKNOWN -> "UNKNOWN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NOT_NULL" -> NOT_NULL
+      | "NULLABLE" -> NULLABLE
+      | "UNKNOWN" -> UNKNOWN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ColumnNullable" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ColumnNullable" j)
+    let to_json = simple_to_json to_value
+  end
+module ColumnInfo =
+  struct
+    type nonrec t =
+      {
+      catalogName: String_.t option
+        [@ocaml.doc "The catalog to which the query results belong."];
+      schemaName: String_.t option
+        [@ocaml.doc
+          "The schema name (database name) to which the query results belong."];
+      tableName: String_.t option
+        [@ocaml.doc "The table name for the query results."];
+      name: String_.t option [@ocaml.doc "The name of the column."];
+      label: String_.t option [@ocaml.doc "A column label."];
+      type_: String_.t option [@ocaml.doc "The data type of the column."];
+      precision: Integer.t option
+        [@ocaml.doc
+          "For DECIMAL data types, specifies the total number of digits, up to 38. For performance reasons, we recommend up to 18 digits."];
+      scale: Integer.t option
+        [@ocaml.doc
+          "For DECIMAL data types, specifies the total number of digits in the fractional part of the value. Defaults to 0."];
+      nullable: ColumnNullable.t option
+        [@ocaml.doc
+          "Unsupported constraint. This value always shows as UNKNOWN."];
+      caseSensitive: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether values in the column are case-sensitive."]}
+    let make ?catalogName =
+      fun ?schemaName ->
+        fun ?tableName ->
+          fun ?name ->
+            fun ?label ->
+              fun ?type_ ->
+                fun ?precision ->
+                  fun ?scale ->
+                    fun ?nullable ->
+                      fun ?caseSensitive ->
+                        fun () ->
+                          {
+                            catalogName;
+                            schemaName;
+                            tableName;
+                            name;
+                            label;
+                            type_;
+                            precision;
+                            scale;
+                            nullable;
+                            caseSensitive
+                          }
+    let to_value x =
+      structure_to_value
+        [("CatalogName", (Option.map x.catalogName ~f:String_.to_value));
+        ("SchemaName", (Option.map x.schemaName ~f:String_.to_value));
+        ("TableName", (Option.map x.tableName ~f:String_.to_value));
+        ("Name", (Option.map x.name ~f:String_.to_value));
+        ("Label", (Option.map x.label ~f:String_.to_value));
+        ("Type", (Option.map x.type_ ~f:String_.to_value));
+        ("Precision", (Option.map x.precision ~f:Integer.to_value));
+        ("Scale", (Option.map x.scale ~f:Integer.to_value));
+        ("Nullable", (Option.map x.nullable ~f:ColumnNullable.to_value));
+        ("CaseSensitive", (Option.map x.caseSensitive ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let caseSensitive =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "CaseSensitive") in
+      let nullable =
+        (Option.map ~f:ColumnNullable.of_xml) (Xml.child xml_arg0 "Nullable") in
+      let scale = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Scale") in
+      let precision =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Precision") in
+      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Type") in
+      let label = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Label") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      let tableName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TableName") in
+      let schemaName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SchemaName") in
+      let catalogName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CatalogName") in
+      make ?caseSensitive ?nullable ?scale ?precision ?type_ ?label ?name
+        ?tableName ?schemaName ?catalogName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let caseSensitive = field_map json__ "CaseSensitive" Boolean.of_json in
+      let nullable = field_map json__ "Nullable" ColumnNullable.of_json in
+      let scale = field_map json__ "Scale" Integer.of_json in
+      let precision = field_map json__ "Precision" Integer.of_json in
+      let type_ = field_map json__ "Type" String_.of_json in
+      let label = field_map json__ "Label" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let tableName = field_map json__ "TableName" String_.of_json in
+      let schemaName = field_map json__ "SchemaName" String_.of_json in
+      let catalogName = field_map json__ "CatalogName" String_.of_json in
+      make ?caseSensitive ?nullable ?scale ?precision ?type_ ?label ?name
+        ?tableName ?schemaName ?catalogName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the columns in a query execution result."]
+module ColumnInfoList =
+  struct
+    type nonrec t = ColumnInfo.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ColumnInfo.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ColumnInfo.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ColumnInfoList" ~of_json:ColumnInfo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ColumnList =
+  struct
+    type nonrec t = Column.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Column.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Column.of_xml)
+    let of_json j = list_of_json ~kind:"ColumnList" ~of_json:Column.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ConnectionType =
+  struct
+    type nonrec t =
+      | DYNAMODB 
+      | MYSQL 
+      | POSTGRESQL 
+      | REDSHIFT 
+      | ORACLE 
+      | SYNAPSE 
+      | SQLSERVER 
+      | DB2 
+      | OPENSEARCH 
+      | BIGQUERY 
+      | GOOGLECLOUDSTORAGE 
+      | HBASE 
+      | DOCUMENTDB 
+      | CMDB 
+      | TPCDS 
+      | TIMESTREAM 
+      | SAPHANA 
+      | SNOWFLAKE 
+      | DATALAKEGEN2 
+      | DB2AS400 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DYNAMODB -> "DYNAMODB"
+      | MYSQL -> "MYSQL"
+      | POSTGRESQL -> "POSTGRESQL"
+      | REDSHIFT -> "REDSHIFT"
+      | ORACLE -> "ORACLE"
+      | SYNAPSE -> "SYNAPSE"
+      | SQLSERVER -> "SQLSERVER"
+      | DB2 -> "DB2"
+      | OPENSEARCH -> "OPENSEARCH"
+      | BIGQUERY -> "BIGQUERY"
+      | GOOGLECLOUDSTORAGE -> "GOOGLECLOUDSTORAGE"
+      | HBASE -> "HBASE"
+      | DOCUMENTDB -> "DOCUMENTDB"
+      | CMDB -> "CMDB"
+      | TPCDS -> "TPCDS"
+      | TIMESTREAM -> "TIMESTREAM"
+      | SAPHANA -> "SAPHANA"
+      | SNOWFLAKE -> "SNOWFLAKE"
+      | DATALAKEGEN2 -> "DATALAKEGEN2"
+      | DB2AS400 -> "DB2AS400"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DYNAMODB" -> DYNAMODB
+      | "MYSQL" -> MYSQL
+      | "POSTGRESQL" -> POSTGRESQL
+      | "REDSHIFT" -> REDSHIFT
+      | "ORACLE" -> ORACLE
+      | "SYNAPSE" -> SYNAPSE
+      | "SQLSERVER" -> SQLSERVER
+      | "DB2" -> DB2
+      | "OPENSEARCH" -> OPENSEARCH
+      | "BIGQUERY" -> BIGQUERY
+      | "GOOGLECLOUDSTORAGE" -> GOOGLECLOUDSTORAGE
+      | "HBASE" -> HBASE
+      | "DOCUMENTDB" -> DOCUMENTDB
+      | "CMDB" -> CMDB
+      | "TPCDS" -> TPCDS
+      | "TIMESTREAM" -> TIMESTREAM
+      | "SAPHANA" -> SAPHANA
+      | "SNOWFLAKE" -> SNOWFLAKE
+      | "DATALAKEGEN2" -> DATALAKEGEN2
+      | "DB2AS400" -> DB2AS400
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ConnectionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ConnectionType" j)
+    let to_json = simple_to_json to_value
+  end
+module CoordinatorDpuSize =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for CoordinatorDpuSize" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module Tag =
+  struct
+    type nonrec t =
+      {
+      key: TagKey.t option
+        [@ocaml.doc
+          "A tag key. The tag key length is from 1 to 128 Unicode characters in UTF-8. You can use letters and numbers representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys are case-sensitive and must be unique per resource."];
+      value: TagValue.t option
+        [@ocaml.doc
+          "A tag value. The tag value length is from 0 to 256 Unicode characters in UTF-8. You can use letters and numbers representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag values are case-sensitive."]}
+    let make ?key = fun ?value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Option.map x.key ~f:TagKey.to_value));
+        ("Value", (Option.map x.value ~f:TagValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
+      let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
+      make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map json__ "Key" TagKey.of_json in make ?value ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A label that you assign to a resource. Athena resources include workgroups, data catalogs, and capacity reservations. Each tag consists of a key and an optional value, both of which you define. For example, you can use tags to categorize Athena resources by purpose, owner, or environment. Use a consistent set of tag keys to make it easier to search and filter the resources in your account. For best practices, see Tagging Best Practices. Tag keys can be from 1 to 128 UTF-8 Unicode characters, and tag values can be from 0 to 256 UTF-8 Unicode characters. Tags can use letters and numbers representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case-sensitive. Tag keys must be unique per resource. If you specify more than one tag, separate them by commas."]
+module TagList =
+  struct
+    type nonrec t = Tag.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CreateCapacityReservationInput =
+  struct
+    type nonrec t =
+      {
+      targetDpus: TargetDpusInteger.t
+        [@ocaml.doc "The number of requested data processing units."];
+      name: CapacityReservationName.t
+        [@ocaml.doc "The name of the capacity reservation to create."];
+      tags: TagList.t option
+        [@ocaml.doc "The tags for the capacity reservation."]}
+    let context_ = "CreateCapacityReservationInput"
+    let make ?tags =
+      fun ~targetDpus -> fun ~name -> fun () -> { tags; targetDpus; name }
+    let to_value x =
+      structure_to_value
+        [("TargetDpus", (Some (TargetDpusInteger.to_value x.targetDpus)));
+        ("Name", (Some (CapacityReservationName.to_value x.name)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let name =
+        CapacityReservationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let targetDpus =
+        TargetDpusInteger.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TargetDpus") in
+      make ?tags ~name ~targetDpus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let name = field_map_exn json__ "Name" CapacityReservationName.of_json in
+      let targetDpus =
+        field_map_exn json__ "TargetDpus" TargetDpusInteger.of_json in
+      make ?tags ~name ~targetDpus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a capacity reservation with the specified name and number of requested data processing units."]
+module CreateCapacityReservationOutput =
   struct
     type nonrec t = unit
     type nonrec error =
@@ -3676,36 +4220,75 @@ module UpdateDataCatalogOutput =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates the data catalog that has the specified name."]
-module UpdateDataCatalogInput =
+  end[@@ocaml.doc
+       "Creates a capacity reservation with the specified name and number of requested data processing units."]
+module DataCatalogType =
+  struct
+    type nonrec t =
+      | LAMBDA 
+      | GLUE 
+      | HIVE 
+      | FEDERATED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | LAMBDA -> "LAMBDA"
+      | GLUE -> "GLUE"
+      | HIVE -> "HIVE"
+      | FEDERATED -> "FEDERATED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "LAMBDA" -> LAMBDA
+      | "GLUE" -> GLUE
+      | "HIVE" -> HIVE
+      | "FEDERATED" -> FEDERATED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DataCatalogType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DataCatalogType" j)
+    let to_json = simple_to_json to_value
+  end
+module CreateDataCatalogInput =
   struct
     type nonrec t =
       {
       name: CatalogNameString.t
         [@ocaml.doc
-          "The name of the data catalog to update. The catalog name must be unique for the Amazon Web Services account and can use a maximum of 127 alphanumeric, underscore, at sign, or hyphen characters. The remainder of the length constraint of 256 is reserved for use by Athena."];
+          "The name of the data catalog to create. The catalog name must be unique for the Amazon Web Services account and can use a maximum of 127 alphanumeric, underscore, at sign, or hyphen characters. The remainder of the length constraint of 256 is reserved for use by Athena. For FEDERATED type the catalog name has following considerations and limits: The catalog name allows special characters such as _ , \\@ , \\ , - . These characters are replaced with a hyphen (-) when creating the CFN Stack Name and with an underscore (_) when creating the Lambda Function and Glue Connection Name. The catalog name has a theoretical limit of 128 characters. However, since we use it to create other resources that allow less characters and we prepend a prefix to it, the actual catalog name limit for FEDERATED catalog is 64 - 23 = 41 characters."];
       type_: DataCatalogType.t
         [@ocaml.doc
-          "Specifies the type of data catalog to update. Specify LAMBDA for a federated catalog, HIVE for an external hive metastore, or GLUE for an Glue Data Catalog."];
+          "The type of data catalog to create: LAMBDA for a federated catalog, GLUE for an Glue Data Catalog, and HIVE for an external Apache Hive metastore. FEDERATED is a federated catalog for which Athena creates the connection and the Lambda function for you based on the parameters that you pass. For FEDERATED type, we do not support IAM identity center."];
       description: DescriptionString.t option
-        [@ocaml.doc "New or modified text that describes the data catalog."];
+        [@ocaml.doc "A description of the data catalog to be created."];
       parameters: ParametersMap.t option
         [@ocaml.doc
-          "Specifies the Lambda function or functions to use for updating the data catalog. This is a mapping whose values depend on the catalog type. For the HIVE data catalog type, use the following syntax. The metadata-function parameter is required. The sdk-version parameter is optional and defaults to the currently supported version. metadata-function=lambda_arn, sdk-version=version_number For the LAMBDA data catalog type, use one of the following sets of required parameters, but not both. If you have one Lambda function that processes metadata and another for reading the actual data, use the following syntax. Both parameters are required. metadata-function=lambda_arn, record-function=lambda_arn If you have a composite Lambda function that processes both metadata and data, use the following syntax to specify your Lambda function. function=lambda_arn"]}
-    let context_ = "UpdateDataCatalogInput"
+          "Specifies the Lambda function or functions to use for creating the data catalog. This is a mapping whose values depend on the catalog type. For the HIVE data catalog type, use the following syntax. The metadata-function parameter is required. The sdk-version parameter is optional and defaults to the currently supported version. metadata-function=lambda_arn, sdk-version=version_number For the LAMBDA data catalog type, use one of the following sets of required parameters, but not both. If you have one Lambda function that processes metadata and another for reading the actual data, use the following syntax. Both parameters are required. metadata-function=lambda_arn, record-function=lambda_arn If you have a composite Lambda function that processes both metadata and data, use the following syntax to specify your Lambda function. function=lambda_arn The GLUE type takes a catalog ID parameter and is required. The catalog_id is the account ID of the Amazon Web Services account to which the Glue Data Catalog belongs. catalog-id=catalog_id The GLUE data catalog type also applies to the default AwsDataCatalog that already exists in your account, of which you can have only one and cannot modify. The FEDERATED data catalog type uses one of the following parameters, but not both. Use connection-arn for an existing Glue connection. Use connection-type and connection-properties to specify the configuration setting for a new connection. connection-arn:<glue_connection_arn_to_reuse> lambda-role-arn (optional): The execution role to use for the Lambda function. If not provided, one is created. connection-type:MYSQL|REDSHIFT|...., connection-properties:\"<json_string>\" For <json_string> , use escaped JSON text, as in the following example. \"\\{\\\"spill_bucket\\\":\\\"my_spill\\\",\\\"spill_prefix\\\":\\\"athena-spill\\\",\\\"host\\\":\\\"abc12345.snowflakecomputing.com\\\",\\\"port\\\":\\\"1234\\\",\\\"warehouse\\\":\\\"DEV_WH\\\",\\\"database\\\":\\\"TEST\\\",\\\"schema\\\":\\\"PUBLIC\\\",\\\"SecretArn\\\":\\\"arn:aws:secretsmanager:ap-south-1:111122223333:secret:snowflake-XHb67j\\\"\\}\""];
+      tags: TagList.t option
+        [@ocaml.doc
+          "A list of comma separated tags to add to the data catalog that is created. All the resources that are created by the CreateDataCatalog API operation with FEDERATED type will have the tag federated_athena_datacatalog=\"true\". This includes the CFN Stack, Glue Connection, Athena DataCatalog, and all the resources created as part of the CFN Stack (Lambda Function, IAM policies/roles)."]}
+    let context_ = "CreateDataCatalogInput"
     let make ?description =
       fun ?parameters ->
-        fun ~name ->
-          fun ~type_ -> fun () -> { description; parameters; name; type_ }
+        fun ?tags ->
+          fun ~name ->
+            fun ~type_ ->
+              fun () -> { description; parameters; tags; name; type_ }
     let to_value x =
       structure_to_value
         [("Name", (Some (CatalogNameString.to_value x.name)));
         ("Type", (Some (DataCatalogType.to_value x.type_)));
         ("Description",
           (Option.map x.description ~f:DescriptionString.to_value));
-        ("Parameters", (Option.map x.parameters ~f:ParametersMap.to_value))]
+        ("Parameters", (Option.map x.parameters ~f:ParametersMap.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let parameters =
         (Option.map ~f:ParametersMap.of_xml)
           (Xml.child xml_arg0 "Parameters") in
@@ -3718,209 +4301,167 @@ module UpdateDataCatalogInput =
       let name =
         CatalogNameString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?parameters ?description ~type_ ~name ()
+      make ?tags ?parameters ?description ~type_ ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "Parameters" ParametersMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let parameters = field_map json__ "Parameters" ParametersMap.of_json in
       let description =
-        field_map json "Description" DescriptionString.of_json in
-      let type_ = field_map_exn json "Type" DataCatalogType.of_json in
-      let name = field_map_exn json "Name" CatalogNameString.of_json in
-      make ?parameters ?description ~type_ ~name ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates the data catalog that has the specified name."]
-module UntagResourceOutput =
-  struct
-    type nonrec t = unit
-    type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
-      | `InvalidRequestException of InvalidRequestException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
-    let error_of_json name json =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `InvalidRequestException e ->
-          `Assoc
-            [("error", (`String "InvalidRequestException"));
-            ("details", (InvalidRequestException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+        field_map json__ "Description" DescriptionString.of_json in
+      let type_ = field_map_exn json__ "Type" DataCatalogType.of_json in
+      let name = field_map_exn json__ "Name" CatalogNameString.of_json in
+      make ?tags ?parameters ?description ~type_ ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes one or more tags from a data catalog or workgroup resource."]
-module UntagResourceInput =
+       "Creates (registers) a data catalog with the specified name and properties. Catalogs created are visible to all users of the same Amazon Web Services account. For a FEDERATED catalog, this API operation creates the following resources. CFN Stack Name with a maximum length of 128 characters and prefix athenafederatedcatalog-CATALOG_NAME_SANITIZED with length 23 characters. Lambda Function Name with a maximum length of 64 characters and prefix athenafederatedcatalog_CATALOG_NAME_SANITIZED with length 23 characters. Glue Connection Name with a maximum length of 255 characters and a prefix athenafederatedcatalog_CATALOG_NAME_SANITIZED with length 23 characters."]
+module DataCatalogStatus =
+  struct
+    type nonrec t =
+      | CREATE_IN_PROGRESS 
+      | CREATE_COMPLETE 
+      | CREATE_FAILED 
+      | CREATE_FAILED_CLEANUP_IN_PROGRESS 
+      | CREATE_FAILED_CLEANUP_COMPLETE 
+      | CREATE_FAILED_CLEANUP_FAILED 
+      | DELETE_IN_PROGRESS 
+      | DELETE_COMPLETE 
+      | DELETE_FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATE_IN_PROGRESS -> "CREATE_IN_PROGRESS"
+      | CREATE_COMPLETE -> "CREATE_COMPLETE"
+      | CREATE_FAILED -> "CREATE_FAILED"
+      | CREATE_FAILED_CLEANUP_IN_PROGRESS ->
+          "CREATE_FAILED_CLEANUP_IN_PROGRESS"
+      | CREATE_FAILED_CLEANUP_COMPLETE -> "CREATE_FAILED_CLEANUP_COMPLETE"
+      | CREATE_FAILED_CLEANUP_FAILED -> "CREATE_FAILED_CLEANUP_FAILED"
+      | DELETE_IN_PROGRESS -> "DELETE_IN_PROGRESS"
+      | DELETE_COMPLETE -> "DELETE_COMPLETE"
+      | DELETE_FAILED -> "DELETE_FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATE_IN_PROGRESS" -> CREATE_IN_PROGRESS
+      | "CREATE_COMPLETE" -> CREATE_COMPLETE
+      | "CREATE_FAILED" -> CREATE_FAILED
+      | "CREATE_FAILED_CLEANUP_IN_PROGRESS" ->
+          CREATE_FAILED_CLEANUP_IN_PROGRESS
+      | "CREATE_FAILED_CLEANUP_COMPLETE" -> CREATE_FAILED_CLEANUP_COMPLETE
+      | "CREATE_FAILED_CLEANUP_FAILED" -> CREATE_FAILED_CLEANUP_FAILED
+      | "DELETE_IN_PROGRESS" -> DELETE_IN_PROGRESS
+      | "DELETE_COMPLETE" -> DELETE_COMPLETE
+      | "DELETE_FAILED" -> DELETE_FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DataCatalogStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DataCatalogStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module DataCatalog =
   struct
     type nonrec t =
       {
-      resourceARN: AmazonResourceName.t
+      name: CatalogNameString.t option
         [@ocaml.doc
-          "Specifies the ARN of the resource from which tags are to be removed."];
-      tagKeys: TagKeyList.t
+          "The name of the data catalog. The catalog name must be unique for the Amazon Web Services account and can use a maximum of 127 alphanumeric, underscore, at sign, or hyphen characters. The remainder of the length constraint of 256 is reserved for use by Athena."];
+      description: DescriptionString.t option
+        [@ocaml.doc "An optional description of the data catalog."];
+      type_: DataCatalogType.t option
         [@ocaml.doc
-          "A comma-separated list of one or more tag keys whose tags are to be removed from the specified resource."]}
-    let context_ = "UntagResourceInput"
-    let make ~resourceARN =
-      fun ~tagKeys -> fun () -> { resourceARN; tagKeys }
+          "The type of data catalog to create: LAMBDA for a federated catalog, GLUE for an Glue Data Catalog, and HIVE for an external Apache Hive metastore. FEDERATED is a federated catalog for which Athena creates the connection and the Lambda function for you based on the parameters that you pass."];
+      parameters: ParametersMap.t option
+        [@ocaml.doc
+          "Specifies the Lambda function or functions to use for the data catalog. This is a mapping whose values depend on the catalog type. For the HIVE data catalog type, use the following syntax. The metadata-function parameter is required. The sdk-version parameter is optional and defaults to the currently supported version. metadata-function=lambda_arn, sdk-version=version_number For the LAMBDA data catalog type, use one of the following sets of required parameters, but not both. If you have one Lambda function that processes metadata and another for reading the actual data, use the following syntax. Both parameters are required. metadata-function=lambda_arn, record-function=lambda_arn If you have a composite Lambda function that processes both metadata and data, use the following syntax to specify your Lambda function. function=lambda_arn The GLUE type takes a catalog ID parameter and is required. The catalog_id is the account ID of the Amazon Web Services account to which the Glue catalog belongs. catalog-id=catalog_id The GLUE data catalog type also applies to the default AwsDataCatalog that already exists in your account, of which you can have only one and cannot modify. The FEDERATED data catalog type uses one of the following parameters, but not both. Use connection-arn for an existing Glue connection. Use connection-type and connection-properties to specify the configuration setting for a new connection. connection-arn:<glue_connection_arn_to_reuse> connection-type:MYSQL|REDSHIFT|...., connection-properties:\"<json_string>\" For <json_string> , use escaped JSON text, as in the following example. \"\\{\\\"spill_bucket\\\":\\\"my_spill\\\",\\\"spill_prefix\\\":\\\"athena-spill\\\",\\\"host\\\":\\\"abc12345.snowflakecomputing.com\\\",\\\"port\\\":\\\"1234\\\",\\\"warehouse\\\":\\\"DEV_WH\\\",\\\"database\\\":\\\"TEST\\\",\\\"schema\\\":\\\"PUBLIC\\\",\\\"SecretArn\\\":\\\"arn:aws:secretsmanager:ap-south-1:111122223333:secret:snowflake-XHb67j\\\"\\}\""];
+      status: DataCatalogStatus.t option
+        [@ocaml.doc
+          "The status of the creation or deletion of the data catalog. The LAMBDA, GLUE, and HIVE data catalog types are created synchronously. Their status is either CREATE_COMPLETE or CREATE_FAILED. The FEDERATED data catalog type is created asynchronously. Data catalog creation status: CREATE_IN_PROGRESS: Federated data catalog creation in progress. CREATE_COMPLETE: Data catalog creation complete. CREATE_FAILED: Data catalog could not be created. CREATE_FAILED_CLEANUP_IN_PROGRESS: Federated data catalog creation failed and is being removed. CREATE_FAILED_CLEANUP_COMPLETE: Federated data catalog creation failed and was removed. CREATE_FAILED_CLEANUP_FAILED: Federated data catalog creation failed but could not be removed. Data catalog deletion status: DELETE_IN_PROGRESS: Federated data catalog deletion in progress. DELETE_COMPLETE: Federated data catalog deleted. DELETE_FAILED: Federated data catalog could not be deleted."];
+      connectionType: ConnectionType.t option
+        [@ocaml.doc
+          "The type of connection for a FEDERATED data catalog (for example, REDSHIFT, MYSQL, or SQLSERVER). For information about individual connectors, see Available data source connectors."];
+      error: ErrorMessage.t option
+        [@ocaml.doc
+          "Text of the error that occurred during data catalog creation or deletion."]}
+    let make ?name =
+      fun ?description ->
+        fun ?type_ ->
+          fun ?parameters ->
+            fun ?status ->
+              fun ?connectionType ->
+                fun ?error ->
+                  fun () ->
+                    {
+                      name;
+                      description;
+                      type_;
+                      parameters;
+                      status;
+                      connectionType;
+                      error
+                    }
     let to_value x =
       structure_to_value
-        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
-        ("TagKeys", (Some (TagKeyList.to_value x.tagKeys)))]
+        [("Name", (Option.map x.name ~f:CatalogNameString.to_value));
+        ("Description",
+          (Option.map x.description ~f:DescriptionString.to_value));
+        ("Type", (Option.map x.type_ ~f:DataCatalogType.to_value));
+        ("Parameters", (Option.map x.parameters ~f:ParametersMap.to_value));
+        ("Status", (Option.map x.status ~f:DataCatalogStatus.to_value));
+        ("ConnectionType",
+          (Option.map x.connectionType ~f:ConnectionType.to_value));
+        ("Error", (Option.map x.error ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tagKeys =
-        TagKeyList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TagKeys") in
-      let resourceARN =
-        AmazonResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
-      make ~tagKeys ~resourceARN ()
+      let error =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Error") in
+      let connectionType =
+        (Option.map ~f:ConnectionType.of_xml)
+          (Xml.child xml_arg0 "ConnectionType") in
+      let status =
+        (Option.map ~f:DataCatalogStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let parameters =
+        (Option.map ~f:ParametersMap.of_xml)
+          (Xml.child xml_arg0 "Parameters") in
+      let type_ =
+        (Option.map ~f:DataCatalogType.of_xml) (Xml.child xml_arg0 "Type") in
+      let description =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        (Option.map ~f:CatalogNameString.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?error ?connectionType ?status ?parameters ?type_ ?description
+        ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
-      make ~tagKeys ~resourceARN ()
+    let of_json json__ =
+      let error = field_map json__ "Error" ErrorMessage.of_json in
+      let connectionType =
+        field_map json__ "ConnectionType" ConnectionType.of_json in
+      let status = field_map json__ "Status" DataCatalogStatus.of_json in
+      let parameters = field_map json__ "Parameters" ParametersMap.of_json in
+      let type_ = field_map json__ "Type" DataCatalogType.of_json in
+      let description =
+        field_map json__ "Description" DescriptionString.of_json in
+      let name = field_map json__ "Name" CatalogNameString.of_json in
+      make ?error ?connectionType ?status ?parameters ?type_ ?description
+        ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes one or more tags from a data catalog or workgroup resource."]
-module TagResourceOutput =
+       "Contains information about a data catalog in an Amazon Web Services account. In the Athena console, data catalogs are listed as \"data sources\" on the Data sources page under the Data source name column."]
+module CreateDataCatalogOutput =
   struct
-    type nonrec t = unit
-    type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
-      | `InvalidRequestException of InvalidRequestException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
-    let error_of_json name json =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `InvalidRequestException e ->
-          `Assoc
-            [("error", (`String "InvalidRequestException"));
-            ("details", (InvalidRequestException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Adds one or more tags to an Athena resource. A tag is a label that you assign to a resource. In Athena, a resource can be a workgroup or data catalog. Each tag consists of a key and an optional value, both of which you define. For example, you can use tags to categorize Athena workgroups or data catalogs by purpose, owner, or environment. Use a consistent set of tag keys to make it easier to search and filter workgroups or data catalogs in your account. For best practices, see Tagging Best Practices. Tag keys can be from 1 to 128 UTF-8 Unicode characters, and tag values can be from 0 to 256 UTF-8 Unicode characters. Tags can use letters and numbers representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case-sensitive. Tag keys must be unique per resource. If you specify more than one tag, separate them by commas."]
-module TagResourceInput =
-  struct
-    type nonrec t =
-      {
-      resourceARN: AmazonResourceName.t
-        [@ocaml.doc
-          "Specifies the ARN of the Athena resource (workgroup or data catalog) to which tags are to be added."];
-      tags: TagList.t
-        [@ocaml.doc
-          "A collection of one or more tags, separated by commas, to be added to an Athena workgroup or data catalog resource."]}
-    let context_ = "TagResourceInput"
-    let make ~resourceARN = fun ~tags -> fun () -> { resourceARN; tags }
-    let to_value x =
-      structure_to_value
-        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
-        ("Tags", (Some (TagList.to_value x.tags)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let tags =
-        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
-      let resourceARN =
-        AmazonResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
-      make ~tags ~resourceARN ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
-      make ~tags ~resourceARN ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Adds one or more tags to an Athena resource. A tag is a label that you assign to a resource. In Athena, a resource can be a workgroup or data catalog. Each tag consists of a key and an optional value, both of which you define. For example, you can use tags to categorize Athena workgroups or data catalogs by purpose, owner, or environment. Use a consistent set of tag keys to make it easier to search and filter workgroups or data catalogs in your account. For best practices, see Tagging Best Practices. Tag keys can be from 1 to 128 UTF-8 Unicode characters, and tag values can be from 0 to 256 UTF-8 Unicode characters. Tags can use letters and numbers representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case-sensitive. Tag keys must be unique per resource. If you specify more than one tag, separate them by commas."]
-module StopQueryExecutionOutput =
-  struct
-    type nonrec t = unit
+    type nonrec t = {
+      dataCatalog: DataCatalog.t option }
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
+    let make ?dataCatalog = fun () -> { dataCatalog }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -3953,54 +4494,325 @@ module StopQueryExecutionOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Stops a query execution. Requires you to have access to the workgroup in which the query ran. For code samples using the Amazon Web Services SDK for Java, see Examples and Code Samples in the Amazon Athena User Guide."]
-module StopQueryExecutionInput =
-  struct
-    type nonrec t =
-      {
-      queryExecutionId: QueryExecutionId.t
-        [@ocaml.doc "The unique ID of the query execution to stop."]}
-    let context_ = "StopQueryExecutionInput"
-    let make ~queryExecutionId = fun () -> { queryExecutionId }
     let to_value x =
       structure_to_value
-        [("QueryExecutionId",
-           (Some (QueryExecutionId.to_value x.queryExecutionId)))]
+        [("DataCatalog", (Option.map x.dataCatalog ~f:DataCatalog.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let queryExecutionId =
-        QueryExecutionId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryExecutionId") in
-      make ~queryExecutionId ()
+      let dataCatalog =
+        (Option.map ~f:DataCatalog.of_xml) (Xml.child xml_arg0 "DataCatalog") in
+      make ?dataCatalog ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryExecutionId =
-        field_map_exn json "QueryExecutionId" QueryExecutionId.of_json in
-      make ~queryExecutionId ()
+    let of_json json__ =
+      let dataCatalog = field_map json__ "DataCatalog" DataCatalog.of_json in
+      make ?dataCatalog ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Stops a query execution. Requires you to have access to the workgroup in which the query ran. For code samples using the Amazon Web Services SDK for Java, see Examples and Code Samples in the Amazon Athena User Guide."]
-module StartQueryExecutionOutput =
+       "Creates (registers) a data catalog with the specified name and properties. Catalogs created are visible to all users of the same Amazon Web Services account. For a FEDERATED catalog, this API operation creates the following resources. CFN Stack Name with a maximum length of 128 characters and prefix athenafederatedcatalog-CATALOG_NAME_SANITIZED with length 23 characters. Lambda Function Name with a maximum length of 64 characters and prefix athenafederatedcatalog_CATALOG_NAME_SANITIZED with length 23 characters. Glue Connection Name with a maximum length of 255 characters and a prefix athenafederatedcatalog_CATALOG_NAME_SANITIZED with length 23 characters."]
+module IdempotencyToken =
+  struct
+    type nonrec t = string
+    let context_ = "IdempotencyToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:32));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdempotencyToken" j
+    let to_json = simple_to_json to_value
+  end
+module CreateNamedQueryInput =
   struct
     type nonrec t =
       {
-      queryExecutionId: QueryExecutionId.t option
+      name: NameString.t [@ocaml.doc "The query name."];
+      description: DescriptionString.t option
+        [@ocaml.doc "The query description."];
+      database: DatabaseString.t
+        [@ocaml.doc "The database to which the query belongs."];
+      queryString: QueryString.t
+        [@ocaml.doc "The contents of the query with all query statements."];
+      clientRequestToken: IdempotencyToken.t option
         [@ocaml.doc
-          "The unique ID of the query that ran as a result of this request."]}
+          "A unique case-sensitive string used to ensure the request to create the query is idempotent (executes only once). If another CreateNamedQuery request is received, the same response is returned and another query is not created. If a parameter has changed, for example, the QueryString, an error is returned. This token is listed as not required because Amazon Web Services SDKs (for example the Amazon Web Services SDK for Java) auto-generate the token for users. If you are not using the Amazon Web Services SDK or the Amazon Web Services CLI, you must provide this token or the action will fail."];
+      workGroup: WorkGroupName.t option
+        [@ocaml.doc
+          "The name of the workgroup in which the named query is being created."]}
+    let context_ = "CreateNamedQueryInput"
+    let make ?description =
+      fun ?clientRequestToken ->
+        fun ?workGroup ->
+          fun ~name ->
+            fun ~database ->
+              fun ~queryString ->
+                fun () ->
+                  {
+                    description;
+                    clientRequestToken;
+                    workGroup;
+                    name;
+                    database;
+                    queryString
+                  }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (NameString.to_value x.name)));
+        ("Description",
+          (Option.map x.description ~f:DescriptionString.to_value));
+        ("Database", (Some (DatabaseString.to_value x.database)));
+        ("QueryString", (Some (QueryString.to_value x.queryString)));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:IdempotencyToken.to_value));
+        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workGroup =
+        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
+      let clientRequestToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let queryString =
+        QueryString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "QueryString") in
+      let database =
+        DatabaseString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Database") in
+      let description =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        NameString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?workGroup ?clientRequestToken ~queryString ~database ?description
+        ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workGroup = field_map json__ "WorkGroup" WorkGroupName.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" IdempotencyToken.of_json in
+      let queryString =
+        field_map_exn json__ "QueryString" QueryString.of_json in
+      let database = field_map_exn json__ "Database" DatabaseString.of_json in
+      let description =
+        field_map json__ "Description" DescriptionString.of_json in
+      let name = field_map_exn json__ "Name" NameString.of_json in
+      make ?workGroup ?clientRequestToken ~queryString ~database ?description
+        ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a named query in the specified workgroup. Requires that you have access to the workgroup."]
+module CreateNamedQueryOutput =
+  struct
+    type nonrec t =
+      {
+      namedQueryId: NamedQueryId.t option
+        [@ocaml.doc "The unique ID of the query."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?namedQueryId = fun () -> { namedQueryId }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NamedQueryId",
+           (Option.map x.namedQueryId ~f:NamedQueryId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let namedQueryId =
+        (Option.map ~f:NamedQueryId.of_xml)
+          (Xml.child xml_arg0 "NamedQueryId") in
+      make ?namedQueryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let namedQueryId = field_map json__ "NamedQueryId" NamedQueryId.of_json in
+      make ?namedQueryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a named query in the specified workgroup. Requires that you have access to the workgroup."]
+module NotebookName =
+  struct
+    type nonrec t = string
+    let context_ = "NotebookName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(?!.*[/:\\\\])[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NotebookName" j
+    let to_json = simple_to_json to_value
+  end
+module CreateNotebookInput =
+  struct
+    type nonrec t =
+      {
+      workGroup: WorkGroupName.t
+        [@ocaml.doc
+          "The name of the Spark enabled workgroup in which the notebook will be created."];
+      name: NotebookName.t
+        [@ocaml.doc
+          "The name of the ipynb file to be created in the Spark workgroup, without the .ipynb extension."];
+      clientRequestToken: ClientRequestToken.t option
+        [@ocaml.doc
+          "A unique case-sensitive string used to ensure the request to create the notebook is idempotent (executes only once). This token is listed as not required because Amazon Web Services SDKs (for example the Amazon Web Services SDK for Java) auto-generate the token for you. If you are not using the Amazon Web Services SDK or the Amazon Web Services CLI, you must provide this token or the action will fail."]}
+    let context_ = "CreateNotebookInput"
+    let make ?clientRequestToken =
+      fun ~workGroup ->
+        fun ~name -> fun () -> { clientRequestToken; workGroup; name }
+    let to_value x =
+      structure_to_value
+        [("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)));
+        ("Name", (Some (NotebookName.to_value x.name)));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let name =
+        NotebookName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let workGroup =
+        WorkGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
+      make ?clientRequestToken ~name ~workGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let name = field_map_exn json__ "Name" NotebookName.of_json in
+      let workGroup = field_map_exn json__ "WorkGroup" WorkGroupName.of_json in
+      make ?clientRequestToken ~name ~workGroup ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an empty ipynb file in the specified Apache Spark enabled workgroup. Throws an error if a file in the workgroup with the same name already exists."]
+module ThrottleReason =
+  struct
+    type nonrec t =
+      | CONCURRENT_QUERY_LIMIT_EXCEEDED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CONCURRENT_QUERY_LIMIT_EXCEEDED -> "CONCURRENT_QUERY_LIMIT_EXCEEDED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CONCURRENT_QUERY_LIMIT_EXCEEDED" -> CONCURRENT_QUERY_LIMIT_EXCEEDED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ThrottleReason" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ThrottleReason" j)
+    let to_json = simple_to_json to_value
+  end
+module TooManyRequestsException =
+  struct
+    type nonrec t =
+      {
+      message: ErrorMessage.t option ;
+      reason: ThrottleReason.t option }
+    let make ?message = fun ?reason -> fun () -> { message; reason }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("Reason", (Option.map x.reason ~f:ThrottleReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:ThrottleReason.of_xml) (Xml.child xml_arg0 "Reason") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "Reason" ThrottleReason.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?reason ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Indicates that the request was throttled."]
+module NotebookId =
+  struct
+    type nonrec t = string
+    let context_ = "NotebookId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NotebookId" j
+    let to_json = simple_to_json to_value
+  end
+module CreateNotebookOutput =
+  struct
+    type nonrec t =
+      {
+      notebookId: NotebookId.t option
+        [@ocaml.doc "A unique identifier for the notebook."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?queryExecutionId = fun () -> { queryExecutionId }
+    let make ?notebookId = fun () -> { notebookId }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -4043,113 +4855,82 @@ module StartQueryExecutionOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("QueryExecutionId",
-           (Option.map x.queryExecutionId ~f:QueryExecutionId.to_value))]
+        [("NotebookId", (Option.map x.notebookId ~f:NotebookId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let queryExecutionId =
-        (Option.map ~f:QueryExecutionId.of_xml)
-          (Xml.child xml_arg0 "QueryExecutionId") in
-      make ?queryExecutionId ()
+      let notebookId =
+        (Option.map ~f:NotebookId.of_xml) (Xml.child xml_arg0 "NotebookId") in
+      make ?notebookId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryExecutionId =
-        field_map json "QueryExecutionId" QueryExecutionId.of_json in
-      make ?queryExecutionId ()
+    let of_json json__ =
+      let notebookId = field_map json__ "NotebookId" NotebookId.of_json in
+      make ?notebookId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Runs the SQL query statements contained in the Query. Requires you to have access to the workgroup in which the query ran. Running queries against an external catalog requires GetDataCatalog permission to the catalog. For code samples using the Amazon Web Services SDK for Java, see Examples and Code Samples in the Amazon Athena User Guide."]
-module StartQueryExecutionInput =
+       "Creates an empty ipynb file in the specified Apache Spark enabled workgroup. Throws an error if a file in the workgroup with the same name already exists."]
+module CreatePreparedStatementInput =
   struct
     type nonrec t =
       {
-      queryString: QueryString.t
-        [@ocaml.doc "The SQL query statements to be executed."];
-      clientRequestToken: IdempotencyToken.t option
+      statementName: StatementName.t
+        [@ocaml.doc "The name of the prepared statement."];
+      workGroup: WorkGroupName.t
         [@ocaml.doc
-          "A unique case-sensitive string used to ensure the request to create the query is idempotent (executes only once). If another StartQueryExecution request is received, the same response is returned and another query is not created. If a parameter has changed, for example, the QueryString, an error is returned. This token is listed as not required because Amazon Web Services SDKs (for example the Amazon Web Services SDK for Java) auto-generate the token for users. If you are not using the Amazon Web Services SDK or the Amazon Web Services CLI, you must provide this token or the action will fail."];
-      queryExecutionContext: QueryExecutionContext.t option
-        [@ocaml.doc "The database within which the query executes."];
-      resultConfiguration: ResultConfiguration.t option
-        [@ocaml.doc
-          "Specifies information about where and how to save the results of the query execution. If the query runs in a workgroup, then workgroup's settings may override query settings. This affects the query results location. The workgroup settings override is specified in EnforceWorkGroupConfiguration (true/false) in the WorkGroupConfiguration. See WorkGroupConfiguration$EnforceWorkGroupConfiguration."];
-      workGroup: WorkGroupName.t option
-        [@ocaml.doc
-          "The name of the workgroup in which the query is being started."]}
-    let context_ = "StartQueryExecutionInput"
-    let make ?clientRequestToken =
-      fun ?queryExecutionContext ->
-        fun ?resultConfiguration ->
-          fun ?workGroup ->
-            fun ~queryString ->
-              fun () ->
-                {
-                  clientRequestToken;
-                  queryExecutionContext;
-                  resultConfiguration;
-                  workGroup;
-                  queryString
-                }
+          "The name of the workgroup to which the prepared statement belongs."];
+      queryStatement: QueryString.t
+        [@ocaml.doc "The query string for the prepared statement."];
+      description: DescriptionString.t option
+        [@ocaml.doc "The description of the prepared statement."]}
+    let context_ = "CreatePreparedStatementInput"
+    let make ?description =
+      fun ~statementName ->
+        fun ~workGroup ->
+          fun ~queryStatement ->
+            fun () ->
+              { description; statementName; workGroup; queryStatement }
     let to_value x =
       structure_to_value
-        [("QueryString", (Some (QueryString.to_value x.queryString)));
-        ("ClientRequestToken",
-          (Option.map x.clientRequestToken ~f:IdempotencyToken.to_value));
-        ("QueryExecutionContext",
-          (Option.map x.queryExecutionContext
-             ~f:QueryExecutionContext.to_value));
-        ("ResultConfiguration",
-          (Option.map x.resultConfiguration ~f:ResultConfiguration.to_value));
-        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value))]
+        [("StatementName", (Some (StatementName.to_value x.statementName)));
+        ("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)));
+        ("QueryStatement", (Some (QueryString.to_value x.queryStatement)));
+        ("Description",
+          (Option.map x.description ~f:DescriptionString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workGroup =
-        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
-      let resultConfiguration =
-        (Option.map ~f:ResultConfiguration.of_xml)
-          (Xml.child xml_arg0 "ResultConfiguration") in
-      let queryExecutionContext =
-        (Option.map ~f:QueryExecutionContext.of_xml)
-          (Xml.child xml_arg0 "QueryExecutionContext") in
-      let clientRequestToken =
-        (Option.map ~f:IdempotencyToken.of_xml)
-          (Xml.child xml_arg0 "ClientRequestToken") in
-      let queryString =
+      let description =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let queryStatement =
         QueryString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryString") in
-      make ?workGroup ?resultConfiguration ?queryExecutionContext
-        ?clientRequestToken ~queryString ()
+          (Xml.child_exn ~context:context_ xml_arg0 "QueryStatement") in
+      let workGroup =
+        WorkGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
+      let statementName =
+        StatementName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StatementName") in
+      make ?description ~queryStatement ~workGroup ~statementName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workGroup = field_map json "WorkGroup" WorkGroupName.of_json in
-      let resultConfiguration =
-        field_map json "ResultConfiguration" ResultConfiguration.of_json in
-      let queryExecutionContext =
-        field_map json "QueryExecutionContext" QueryExecutionContext.of_json in
-      let clientRequestToken =
-        field_map json "ClientRequestToken" IdempotencyToken.of_json in
-      let queryString = field_map_exn json "QueryString" QueryString.of_json in
-      make ?workGroup ?resultConfiguration ?queryExecutionContext
-        ?clientRequestToken ~queryString ()
+    let of_json json__ =
+      let description =
+        field_map json__ "Description" DescriptionString.of_json in
+      let queryStatement =
+        field_map_exn json__ "QueryStatement" QueryString.of_json in
+      let workGroup = field_map_exn json__ "WorkGroup" WorkGroupName.of_json in
+      let statementName =
+        field_map_exn json__ "StatementName" StatementName.of_json in
+      make ?description ~queryStatement ~workGroup ~statementName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Runs the SQL query statements contained in the Query. Requires you to have access to the workgroup in which the query ran. Running queries against an external catalog requires GetDataCatalog permission to the catalog. For code samples using the Amazon Web Services SDK for Java, see Examples and Code Samples in the Amazon Athena User Guide."]
-module ListWorkGroupsOutput =
+       "Creates a prepared statement for use with SQL queries in Athena."]
+module CreatePreparedStatementOutput =
   struct
-    type nonrec t =
-      {
-      workGroups: WorkGroupsList.t option
-        [@ocaml.doc
-          "A list of WorkGroupSummary objects that include the names, descriptions, creation times, and states for each workgroup."];
-      nextToken: Token.t option
-        [@ocaml.doc
-          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."]}
+    type nonrec t = unit
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?workGroups =
-      fun ?nextToken -> fun () -> { workGroups; nextToken }
+    let make () = ()
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -4182,73 +4963,106 @@ module ListWorkGroupsOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a prepared statement for use with SQL queries in Athena."]
+module SessionId =
+  struct
+    type nonrec t = string
+    let context_ = "SessionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SessionId" j
+    let to_json = simple_to_json to_value
+  end
+module CreatePresignedNotebookUrlRequest =
+  struct
+    type nonrec t = {
+      sessionId: SessionId.t [@ocaml.doc "The session ID."]}
+    let context_ = "CreatePresignedNotebookUrlRequest"
+    let make ~sessionId = fun () -> { sessionId }
     let to_value x =
       structure_to_value
-        [("WorkGroups", (Option.map x.workGroups ~f:WorkGroupsList.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+        [("SessionId", (Some (SessionId.to_value x.sessionId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let workGroups =
-        (Option.map ~f:WorkGroupsList.of_xml)
-          (Xml.child xml_arg0 "WorkGroups") in
-      make ?nextToken ?workGroups ()
+      let sessionId =
+        SessionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SessionId") in
+      make ~sessionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let workGroups = field_map json "WorkGroups" WorkGroupsList.of_json in
-      make ?nextToken ?workGroups ()
+    let of_json json__ =
+      let sessionId = field_map_exn json__ "SessionId" SessionId.of_json in
+      make ~sessionId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists available workgroups for the account."]
-module ListWorkGroupsInput =
+  end[@@ocaml.doc
+       "Gets an authentication token and the URL at which the notebook can be accessed. During programmatic access, CreatePresignedNotebookUrl must be called every 10 minutes to refresh the authentication token. For information about granting programmatic access, see Grant programmatic access."]
+module ResourceNotFoundException =
   struct
     type nonrec t =
       {
-      nextToken: Token.t option
-        [@ocaml.doc
-          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
-      maxResults: MaxWorkGroupsCount.t option
-        [@ocaml.doc
-          "The maximum number of workgroups to return in this request."]}
-    let make ?nextToken =
-      fun ?maxResults -> fun () -> { nextToken; maxResults }
+      message: ErrorMessage.t option ;
+      resourceName: AmazonResourceName.t option
+        [@ocaml.doc "The name of the Amazon resource."]}
+    let make ?message =
+      fun ?resourceName -> fun () -> { message; resourceName }
     let to_value x =
       structure_to_value
-        [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("MaxResults",
-          (Option.map x.maxResults ~f:MaxWorkGroupsCount.to_value))]
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("ResourceName",
+          (Option.map x.resourceName ~f:AmazonResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let maxResults =
-        (Option.map ~f:MaxWorkGroupsCount.of_xml)
-          (Xml.child xml_arg0 "MaxResults") in
-      let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ?maxResults ?nextToken ()
+      let resourceName =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "ResourceName") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?resourceName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxWorkGroupsCount.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      make ?maxResults ?nextToken ()
+    let of_json json__ =
+      let resourceName =
+        field_map json__ "ResourceName" AmazonResourceName.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?resourceName ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists available workgroups for the account."]
-module ListTagsForResourceOutput =
+  end[@@ocaml.doc "A resource, such as a workgroup, was not found."]
+module CreatePresignedNotebookUrlResponse =
   struct
     type nonrec t =
       {
-      tags: TagList.t option
+      notebookUrl: String_.t option
         [@ocaml.doc
-          "The list of tags associated with the specified resource."];
-      nextToken: Token.t option
+          "The URL of the notebook. The URL includes the authentication token and notebook file name and points directly to the opened notebook."];
+      authToken: AuthToken.t option
+        [@ocaml.doc "The authentication token for the notebook."];
+      authTokenExpirationTime: Long.t option
         [@ocaml.doc
-          "A token to be used by the next request if this request is truncated."]}
+          "The UTC epoch time when the authentication token expires."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?tags = fun ?nextToken -> fun () -> { tags; nextToken }
+    let make ?notebookUrl =
+      fun ?authToken ->
+        fun ?authTokenExpirationTime ->
+          fun () -> { notebookUrl; authToken; authTokenExpirationTime }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -4291,80 +5105,2614 @@ module ListTagsForResourceOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Tags", (Option.map x.tags ~f:TagList.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+        [("NotebookUrl", (Option.map x.notebookUrl ~f:String_.to_value));
+        ("AuthToken", (Option.map x.authToken ~f:AuthToken.to_value));
+        ("AuthTokenExpirationTime",
+          (Option.map x.authTokenExpirationTime ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
-      make ?nextToken ?tags ()
+      let authTokenExpirationTime =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "AuthTokenExpirationTime") in
+      let authToken =
+        (Option.map ~f:AuthToken.of_xml) (Xml.child xml_arg0 "AuthToken") in
+      let notebookUrl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NotebookUrl") in
+      make ?authTokenExpirationTime ?authToken ?notebookUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      make ?nextToken ?tags ()
+    let of_json json__ =
+      let authTokenExpirationTime =
+        field_map json__ "AuthTokenExpirationTime" Long.of_json in
+      let authToken = field_map json__ "AuthToken" AuthToken.of_json in
+      let notebookUrl = field_map json__ "NotebookUrl" String_.of_json in
+      make ?authTokenExpirationTime ?authToken ?notebookUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the tags associated with an Athena workgroup or data catalog resource."]
-module ListTagsForResourceInput =
+       "Gets an authentication token and the URL at which the notebook can be accessed. During programmatic access, CreatePresignedNotebookUrl must be called every 10 minutes to refresh the authentication token. For information about granting programmatic access, see Grant programmatic access."]
+module WorkGroupDescriptionString =
+  struct
+    type nonrec t = string
+    let context_ = "WorkGroupDescriptionString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkGroupDescriptionString" j
+    let to_json = simple_to_json to_value
+  end
+module RoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "RoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws[a-z\\-]*:iam::\\d{12}:role/?[a-zA-Z_0-9+=,.@\\-_/]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module S3OutputLocation =
+  struct
+    type nonrec t = string
+    let context_ = "S3OutputLocation"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^s3://[a-z0-9][a-z0-9\\-]*[a-z0-9](/.*)?$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3OutputLocation" j
+    let to_json = simple_to_json to_value
+  end
+module S3LoggingConfiguration =
   struct
     type nonrec t =
       {
-      resourceARN: AmazonResourceName.t
+      enabled: BoxedBoolean.t [@ocaml.doc "Enables S3 log delivery."];
+      kmsKey: KmsKey.t option
         [@ocaml.doc
-          "Lists the tags for the resource with the specified ARN."];
-      nextToken: Token.t option
-        [@ocaml.doc
-          "The token for the next set of results, or null if there are no additional results for this request, where the request lists the tags for the resource with the specified ARN."];
-      maxResults: MaxTagsCount.t option
-        [@ocaml.doc
-          "The maximum number of results to be returned per request that lists the tags for the resource."]}
-    let context_ = "ListTagsForResourceInput"
-    let make ?nextToken =
-      fun ?maxResults ->
-        fun ~resourceARN -> fun () -> { nextToken; maxResults; resourceARN }
+          "The KMS key ARN to encrypt the logs published to the given Amazon S3 destination."];
+      logLocation: S3OutputLocation.t option
+        [@ocaml.doc "The Amazon S3 destination URI for log publishing."]}
+    let context_ = "S3LoggingConfiguration"
+    let make ?kmsKey =
+      fun ?logLocation ->
+        fun ~enabled -> fun () -> { kmsKey; logLocation; enabled }
     let to_value x =
       structure_to_value
-        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
-        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxTagsCount.to_value))]
+        [("Enabled", (Some (BoxedBoolean.to_value x.enabled)));
+        ("KmsKey", (Option.map x.kmsKey ~f:KmsKey.to_value));
+        ("LogLocation",
+          (Option.map x.logLocation ~f:S3OutputLocation.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let maxResults =
-        (Option.map ~f:MaxTagsCount.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let resourceARN =
-        AmazonResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
-      make ?maxResults ?nextToken ~resourceARN ()
+      let logLocation =
+        (Option.map ~f:S3OutputLocation.of_xml)
+          (Xml.child xml_arg0 "LogLocation") in
+      let kmsKey =
+        (Option.map ~f:KmsKey.of_xml) (Xml.child xml_arg0 "KmsKey") in
+      let enabled =
+        BoxedBoolean.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
+      make ?logLocation ?kmsKey ~enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxTagsCount.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
-      make ?maxResults ?nextToken ~resourceARN ()
+    let of_json json__ =
+      let logLocation =
+        field_map json__ "LogLocation" S3OutputLocation.of_json in
+      let kmsKey = field_map json__ "KmsKey" KmsKey.of_json in
+      let enabled = field_map_exn json__ "Enabled" BoxedBoolean.of_json in
+      make ?logLocation ?kmsKey ~enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the tags associated with an Athena workgroup or data catalog resource."]
-module ListTableMetadataOutput =
+       "Configuration settings for delivering logs to Amazon S3 buckets."]
+module ManagedLoggingConfiguration =
   struct
     type nonrec t =
       {
-      tableMetadataList: TableMetadataList.t option
-        [@ocaml.doc "A list of table metadata."];
-      nextToken: Token.t option
+      enabled: BoxedBoolean.t
+        [@ocaml.doc "Enables mamanged log persistence."];
+      kmsKey: KmsKey.t option
         [@ocaml.doc
-          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."]}
+          "The KMS key ARN to encrypt the logs stored in managed log persistence."]}
+    let context_ = "ManagedLoggingConfiguration"
+    let make ?kmsKey = fun ~enabled -> fun () -> { kmsKey; enabled }
+    let to_value x =
+      structure_to_value
+        [("Enabled", (Some (BoxedBoolean.to_value x.enabled)));
+        ("KmsKey", (Option.map x.kmsKey ~f:KmsKey.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kmsKey =
+        (Option.map ~f:KmsKey.of_xml) (Xml.child xml_arg0 "KmsKey") in
+      let enabled =
+        BoxedBoolean.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
+      make ?kmsKey ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKey = field_map json__ "KmsKey" KmsKey.of_json in
+      let enabled = field_map_exn json__ "Enabled" BoxedBoolean.of_json in
+      make ?kmsKey ~enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration settings for delivering logs to Amazon S3 buckets."]
+module MonitoringConfiguration =
+  struct
+    type nonrec t =
+      {
+      cloudWatchLoggingConfiguration: CloudWatchLoggingConfiguration.t option
+        [@ocaml.doc
+          "Configuration settings for delivering logs to Amazon CloudWatch log groups."];
+      managedLoggingConfiguration: ManagedLoggingConfiguration.t option
+        [@ocaml.doc "Configuration settings for managed log persistence."];
+      s3LoggingConfiguration: S3LoggingConfiguration.t option
+        [@ocaml.doc
+          "Configuration settings for delivering logs to Amazon S3 buckets."]}
+    let make ?cloudWatchLoggingConfiguration =
+      fun ?managedLoggingConfiguration ->
+        fun ?s3LoggingConfiguration ->
+          fun () ->
+            {
+              cloudWatchLoggingConfiguration;
+              managedLoggingConfiguration;
+              s3LoggingConfiguration
+            }
+    let to_value x =
+      structure_to_value
+        [("CloudWatchLoggingConfiguration",
+           (Option.map x.cloudWatchLoggingConfiguration
+              ~f:CloudWatchLoggingConfiguration.to_value));
+        ("ManagedLoggingConfiguration",
+          (Option.map x.managedLoggingConfiguration
+             ~f:ManagedLoggingConfiguration.to_value));
+        ("S3LoggingConfiguration",
+          (Option.map x.s3LoggingConfiguration
+             ~f:S3LoggingConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3LoggingConfiguration =
+        (Option.map ~f:S3LoggingConfiguration.of_xml)
+          (Xml.child xml_arg0 "S3LoggingConfiguration") in
+      let managedLoggingConfiguration =
+        (Option.map ~f:ManagedLoggingConfiguration.of_xml)
+          (Xml.child xml_arg0 "ManagedLoggingConfiguration") in
+      let cloudWatchLoggingConfiguration =
+        (Option.map ~f:CloudWatchLoggingConfiguration.of_xml)
+          (Xml.child xml_arg0 "CloudWatchLoggingConfiguration") in
+      make ?s3LoggingConfiguration ?managedLoggingConfiguration
+        ?cloudWatchLoggingConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3LoggingConfiguration =
+        field_map json__ "S3LoggingConfiguration"
+          S3LoggingConfiguration.of_json in
+      let managedLoggingConfiguration =
+        field_map json__ "ManagedLoggingConfiguration"
+          ManagedLoggingConfiguration.of_json in
+      let cloudWatchLoggingConfiguration =
+        field_map json__ "CloudWatchLoggingConfiguration"
+          CloudWatchLoggingConfiguration.of_json in
+      make ?s3LoggingConfiguration ?managedLoggingConfiguration
+        ?cloudWatchLoggingConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the configuration settings for managed log persistence, delivering logs to Amazon S3 buckets, Amazon CloudWatch log groups etc."]
+module IdentityCenterInstanceArn =
+  struct
+    type nonrec t = string
+    let context_ = "IdentityCenterInstanceArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):sso:::instance/(sso)?ins-[a-zA-Z0-9-.]{16}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdentityCenterInstanceArn" j
+    let to_json = simple_to_json to_value
+  end
+module IdentityCenterConfiguration =
+  struct
+    type nonrec t =
+      {
+      enableIdentityCenter: BoxedBoolean.t option
+        [@ocaml.doc
+          "Specifies whether the workgroup is IAM Identity Center supported."];
+      identityCenterInstanceArn: IdentityCenterInstanceArn.t option
+        [@ocaml.doc
+          "The IAM Identity Center instance ARN that the workgroup associates to."]}
+    let make ?enableIdentityCenter =
+      fun ?identityCenterInstanceArn ->
+        fun () -> { enableIdentityCenter; identityCenterInstanceArn }
+    let to_value x =
+      structure_to_value
+        [("EnableIdentityCenter",
+           (Option.map x.enableIdentityCenter ~f:BoxedBoolean.to_value));
+        ("IdentityCenterInstanceArn",
+          (Option.map x.identityCenterInstanceArn
+             ~f:IdentityCenterInstanceArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identityCenterInstanceArn =
+        (Option.map ~f:IdentityCenterInstanceArn.of_xml)
+          (Xml.child xml_arg0 "IdentityCenterInstanceArn") in
+      let enableIdentityCenter =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "EnableIdentityCenter") in
+      make ?identityCenterInstanceArn ?enableIdentityCenter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identityCenterInstanceArn =
+        field_map json__ "IdentityCenterInstanceArn"
+          IdentityCenterInstanceArn.of_json in
+      let enableIdentityCenter =
+        field_map json__ "EnableIdentityCenter" BoxedBoolean.of_json in
+      make ?identityCenterInstanceArn ?enableIdentityCenter ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies whether the workgroup is IAM Identity Center supported."]
+module MaxConcurrentDpus =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:5000) >>= (fun () -> check_int_min i ~min:2));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxConcurrentDpus" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module DefaultExecutorDpuSize =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for DefaultExecutorDpuSize" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module EngineConfiguration =
+  struct
+    type nonrec t =
+      {
+      coordinatorDpuSize: CoordinatorDpuSize.t option
+        [@ocaml.doc
+          "The number of DPUs to use for the coordinator. A coordinator is a special executor that orchestrates processing work and manages other executors in a notebook session. The default is 1."];
+      maxConcurrentDpus: MaxConcurrentDpus.t option
+        [@ocaml.doc "The maximum number of DPUs that can run concurrently."];
+      defaultExecutorDpuSize: DefaultExecutorDpuSize.t option
+        [@ocaml.doc
+          "The default number of DPUs to use for executors. An executor is the smallest unit of compute that a notebook session can request from Athena. The default is 1."];
+      additionalConfigs: ParametersMap.t option
+        [@ocaml.doc
+          "Contains additional notebook engine MAP<string, string> parameter mappings in the form of key-value pairs. To specify an Athena notebook that the Jupyter server will download and serve, specify a value for the StartSessionRequest$NotebookVersion field, and then add a key named NotebookId to AdditionalConfigs that has the value of the Athena notebook ID."];
+      sparkProperties: ParametersMap.t option
+        [@ocaml.doc
+          "Specifies custom jar files and Spark properties for use cases like cluster encryption, table formats, and general Spark tuning."];
+      classifications: ClassificationList.t option
+        [@ocaml.doc
+          "The configuration classifications that can be specified for the engine."]}
+    let make ?coordinatorDpuSize =
+      fun ?maxConcurrentDpus ->
+        fun ?defaultExecutorDpuSize ->
+          fun ?additionalConfigs ->
+            fun ?sparkProperties ->
+              fun ?classifications ->
+                fun () ->
+                  {
+                    coordinatorDpuSize;
+                    maxConcurrentDpus;
+                    defaultExecutorDpuSize;
+                    additionalConfigs;
+                    sparkProperties;
+                    classifications
+                  }
+    let to_value x =
+      structure_to_value
+        [("CoordinatorDpuSize",
+           (Option.map x.coordinatorDpuSize ~f:CoordinatorDpuSize.to_value));
+        ("MaxConcurrentDpus",
+          (Option.map x.maxConcurrentDpus ~f:MaxConcurrentDpus.to_value));
+        ("DefaultExecutorDpuSize",
+          (Option.map x.defaultExecutorDpuSize
+             ~f:DefaultExecutorDpuSize.to_value));
+        ("AdditionalConfigs",
+          (Option.map x.additionalConfigs ~f:ParametersMap.to_value));
+        ("SparkProperties",
+          (Option.map x.sparkProperties ~f:ParametersMap.to_value));
+        ("Classifications",
+          (Option.map x.classifications ~f:ClassificationList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let classifications =
+        (Option.map ~f:ClassificationList.of_xml)
+          (Xml.child xml_arg0 "Classifications") in
+      let sparkProperties =
+        (Option.map ~f:ParametersMap.of_xml)
+          (Xml.child xml_arg0 "SparkProperties") in
+      let additionalConfigs =
+        (Option.map ~f:ParametersMap.of_xml)
+          (Xml.child xml_arg0 "AdditionalConfigs") in
+      let defaultExecutorDpuSize =
+        (Option.map ~f:DefaultExecutorDpuSize.of_xml)
+          (Xml.child xml_arg0 "DefaultExecutorDpuSize") in
+      let maxConcurrentDpus =
+        (Option.map ~f:MaxConcurrentDpus.of_xml)
+          (Xml.child xml_arg0 "MaxConcurrentDpus") in
+      let coordinatorDpuSize =
+        (Option.map ~f:CoordinatorDpuSize.of_xml)
+          (Xml.child xml_arg0 "CoordinatorDpuSize") in
+      make ?classifications ?sparkProperties ?additionalConfigs
+        ?defaultExecutorDpuSize ?maxConcurrentDpus ?coordinatorDpuSize ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let classifications =
+        field_map json__ "Classifications" ClassificationList.of_json in
+      let sparkProperties =
+        field_map json__ "SparkProperties" ParametersMap.of_json in
+      let additionalConfigs =
+        field_map json__ "AdditionalConfigs" ParametersMap.of_json in
+      let defaultExecutorDpuSize =
+        field_map json__ "DefaultExecutorDpuSize"
+          DefaultExecutorDpuSize.of_json in
+      let maxConcurrentDpus =
+        field_map json__ "MaxConcurrentDpus" MaxConcurrentDpus.of_json in
+      let coordinatorDpuSize =
+        field_map json__ "CoordinatorDpuSize" CoordinatorDpuSize.of_json in
+      make ?classifications ?sparkProperties ?additionalConfigs
+        ?defaultExecutorDpuSize ?maxConcurrentDpus ?coordinatorDpuSize ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The engine configuration for the workgroup, which includes the minimum/maximum number of Data Processing Units (DPU) that queries should use when running in provisioned capacity. If not specified, Athena uses default values (Default value for min is 4 and for max is Minimum of 124 and allocated DPUs). To specify DPU values for PC queries the WG containing EngineConfiguration should have the following values: The name of the Classifications should be athena-query-engine-properties, with the only allowed properties as max-dpu-count and min-dpu-count."]
+module CustomerContentEncryptionConfiguration =
+  struct
+    type nonrec t =
+      {
+      kmsKey: KmsKey.t
+        [@ocaml.doc
+          "The customer managed KMS key that is used to encrypt the user's data stores in Athena."]}
+    let context_ = "CustomerContentEncryptionConfiguration"
+    let make ~kmsKey = fun () -> { kmsKey }
+    let to_value x =
+      structure_to_value [("KmsKey", (Some (KmsKey.to_value x.kmsKey)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kmsKey =
+        KmsKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KmsKey") in
+      make ~kmsKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKey = field_map_exn json__ "KmsKey" KmsKey.of_json in
+      make ~kmsKey ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the customer managed KMS key that is used to encrypt the user's data stores in Athena. When an Amazon Web Services managed key is used, this value is null. This setting does not apply to Athena SQL workgroups."]
+module WorkGroupConfiguration =
+  struct
+    type nonrec t =
+      {
+      resultConfiguration: ResultConfiguration.t option
+        [@ocaml.doc
+          "The configuration for the workgroup, which includes the location in Amazon S3 where query and calculation results are stored and the encryption option, if any, used for query and calculation results. To run the query, you must specify the query results location using one of the ways: either in the workgroup using this setting, or for individual queries (client-side), using ResultConfiguration$OutputLocation. If none of them is set, Athena issues an error that no output location is provided."];
+      managedQueryResultsConfiguration:
+        ManagedQueryResultsConfiguration.t option
+        [@ocaml.doc
+          "The configuration for storing results in Athena owned storage, which includes whether this feature is enabled; whether encryption configuration, if any, is used for encrypting query results."];
+      enforceWorkGroupConfiguration: BoxedBoolean.t option
+        [@ocaml.doc
+          "If set to \"true\", the settings for the workgroup override client-side settings. If set to \"false\", client-side settings are used. This property is not required for Apache Spark enabled workgroups. For more information, see Workgroup Settings Override Client-Side Settings."];
+      publishCloudWatchMetricsEnabled: BoxedBoolean.t option
+        [@ocaml.doc
+          "Indicates that the Amazon CloudWatch metrics are enabled for the workgroup."];
+      bytesScannedCutoffPerQuery: BytesScannedCutoffValue.t option
+        [@ocaml.doc
+          "The upper data usage limit (cutoff) for the amount of bytes a single query in a workgroup is allowed to scan."];
+      requesterPaysEnabled: BoxedBoolean.t option
+        [@ocaml.doc
+          "If set to true, allows members assigned to a workgroup to reference Amazon S3 Requester Pays buckets in queries. If set to false, workgroup members cannot query data from Requester Pays buckets, and queries that retrieve data from Requester Pays buckets cause an error. The default is false. For more information about Requester Pays buckets, see Requester Pays Buckets in the Amazon Simple Storage Service Developer Guide."];
+      engineVersion: EngineVersion.t option
+        [@ocaml.doc
+          "The engine version that all queries running on the workgroup use. Queries on the AmazonAthenaPreviewFunctionality workgroup run on the preview engine regardless of this setting."];
+      additionalConfiguration: NameString.t option
+        [@ocaml.doc
+          "Specifies a user defined JSON string that is passed to the notebook engine."];
+      executionRole: RoleArn.t option
+        [@ocaml.doc
+          "The ARN of the execution role used to access user resources for Spark sessions and IAM Identity Center enabled workgroups. This property applies only to Spark enabled workgroups and IAM Identity Center enabled workgroups. The property is required for IAM Identity Center enabled workgroups."];
+      monitoringConfiguration: MonitoringConfiguration.t option
+        [@ocaml.doc
+          "Contains the configuration settings for managed log persistence, delivering logs to Amazon S3 buckets, Amazon CloudWatch log groups etc."];
+      engineConfiguration: EngineConfiguration.t option ;
+      customerContentEncryptionConfiguration:
+        CustomerContentEncryptionConfiguration.t option
+        [@ocaml.doc
+          "Specifies the KMS key that is used to encrypt the user's data stores in Athena. This setting does not apply to Athena SQL workgroups."];
+      enableMinimumEncryptionConfiguration: BoxedBoolean.t option
+        [@ocaml.doc
+          "Enforces a minimal level of encryption for the workgroup for query and calculation results that are written to Amazon S3. When enabled, workgroup users can set encryption only to the minimum level set by the administrator or higher when they submit queries. The EnforceWorkGroupConfiguration setting takes precedence over the EnableMinimumEncryptionConfiguration flag. This means that if EnforceWorkGroupConfiguration is true, the EnableMinimumEncryptionConfiguration flag is ignored, and the workgroup configuration for encryption is used."];
+      identityCenterConfiguration: IdentityCenterConfiguration.t option
+        [@ocaml.doc
+          "Specifies whether the workgroup is IAM Identity Center supported."];
+      queryResultsS3AccessGrantsConfiguration:
+        QueryResultsS3AccessGrantsConfiguration.t option
+        [@ocaml.doc
+          "Specifies whether Amazon S3 access grants are enabled for query results."]}
+    let make ?resultConfiguration =
+      fun ?managedQueryResultsConfiguration ->
+        fun ?enforceWorkGroupConfiguration ->
+          fun ?publishCloudWatchMetricsEnabled ->
+            fun ?bytesScannedCutoffPerQuery ->
+              fun ?requesterPaysEnabled ->
+                fun ?engineVersion ->
+                  fun ?additionalConfiguration ->
+                    fun ?executionRole ->
+                      fun ?monitoringConfiguration ->
+                        fun ?engineConfiguration ->
+                          fun ?customerContentEncryptionConfiguration ->
+                            fun ?enableMinimumEncryptionConfiguration ->
+                              fun ?identityCenterConfiguration ->
+                                fun ?queryResultsS3AccessGrantsConfiguration
+                                  ->
+                                  fun () ->
+                                    {
+                                      resultConfiguration;
+                                      managedQueryResultsConfiguration;
+                                      enforceWorkGroupConfiguration;
+                                      publishCloudWatchMetricsEnabled;
+                                      bytesScannedCutoffPerQuery;
+                                      requesterPaysEnabled;
+                                      engineVersion;
+                                      additionalConfiguration;
+                                      executionRole;
+                                      monitoringConfiguration;
+                                      engineConfiguration;
+                                      customerContentEncryptionConfiguration;
+                                      enableMinimumEncryptionConfiguration;
+                                      identityCenterConfiguration;
+                                      queryResultsS3AccessGrantsConfiguration
+                                    }
+    let to_value x =
+      structure_to_value
+        [("ResultConfiguration",
+           (Option.map x.resultConfiguration ~f:ResultConfiguration.to_value));
+        ("ManagedQueryResultsConfiguration",
+          (Option.map x.managedQueryResultsConfiguration
+             ~f:ManagedQueryResultsConfiguration.to_value));
+        ("EnforceWorkGroupConfiguration",
+          (Option.map x.enforceWorkGroupConfiguration
+             ~f:BoxedBoolean.to_value));
+        ("PublishCloudWatchMetricsEnabled",
+          (Option.map x.publishCloudWatchMetricsEnabled
+             ~f:BoxedBoolean.to_value));
+        ("BytesScannedCutoffPerQuery",
+          (Option.map x.bytesScannedCutoffPerQuery
+             ~f:BytesScannedCutoffValue.to_value));
+        ("RequesterPaysEnabled",
+          (Option.map x.requesterPaysEnabled ~f:BoxedBoolean.to_value));
+        ("EngineVersion",
+          (Option.map x.engineVersion ~f:EngineVersion.to_value));
+        ("AdditionalConfiguration",
+          (Option.map x.additionalConfiguration ~f:NameString.to_value));
+        ("ExecutionRole", (Option.map x.executionRole ~f:RoleArn.to_value));
+        ("MonitoringConfiguration",
+          (Option.map x.monitoringConfiguration
+             ~f:MonitoringConfiguration.to_value));
+        ("EngineConfiguration",
+          (Option.map x.engineConfiguration ~f:EngineConfiguration.to_value));
+        ("CustomerContentEncryptionConfiguration",
+          (Option.map x.customerContentEncryptionConfiguration
+             ~f:CustomerContentEncryptionConfiguration.to_value));
+        ("EnableMinimumEncryptionConfiguration",
+          (Option.map x.enableMinimumEncryptionConfiguration
+             ~f:BoxedBoolean.to_value));
+        ("IdentityCenterConfiguration",
+          (Option.map x.identityCenterConfiguration
+             ~f:IdentityCenterConfiguration.to_value));
+        ("QueryResultsS3AccessGrantsConfiguration",
+          (Option.map x.queryResultsS3AccessGrantsConfiguration
+             ~f:QueryResultsS3AccessGrantsConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queryResultsS3AccessGrantsConfiguration =
+        (Option.map ~f:QueryResultsS3AccessGrantsConfiguration.of_xml)
+          (Xml.child xml_arg0 "QueryResultsS3AccessGrantsConfiguration") in
+      let identityCenterConfiguration =
+        (Option.map ~f:IdentityCenterConfiguration.of_xml)
+          (Xml.child xml_arg0 "IdentityCenterConfiguration") in
+      let enableMinimumEncryptionConfiguration =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "EnableMinimumEncryptionConfiguration") in
+      let customerContentEncryptionConfiguration =
+        (Option.map ~f:CustomerContentEncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "CustomerContentEncryptionConfiguration") in
+      let engineConfiguration =
+        (Option.map ~f:EngineConfiguration.of_xml)
+          (Xml.child xml_arg0 "EngineConfiguration") in
+      let monitoringConfiguration =
+        (Option.map ~f:MonitoringConfiguration.of_xml)
+          (Xml.child xml_arg0 "MonitoringConfiguration") in
+      let executionRole =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "ExecutionRole") in
+      let additionalConfiguration =
+        (Option.map ~f:NameString.of_xml)
+          (Xml.child xml_arg0 "AdditionalConfiguration") in
+      let engineVersion =
+        (Option.map ~f:EngineVersion.of_xml)
+          (Xml.child xml_arg0 "EngineVersion") in
+      let requesterPaysEnabled =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "RequesterPaysEnabled") in
+      let bytesScannedCutoffPerQuery =
+        (Option.map ~f:BytesScannedCutoffValue.of_xml)
+          (Xml.child xml_arg0 "BytesScannedCutoffPerQuery") in
+      let publishCloudWatchMetricsEnabled =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "PublishCloudWatchMetricsEnabled") in
+      let enforceWorkGroupConfiguration =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "EnforceWorkGroupConfiguration") in
+      let managedQueryResultsConfiguration =
+        (Option.map ~f:ManagedQueryResultsConfiguration.of_xml)
+          (Xml.child xml_arg0 "ManagedQueryResultsConfiguration") in
+      let resultConfiguration =
+        (Option.map ~f:ResultConfiguration.of_xml)
+          (Xml.child xml_arg0 "ResultConfiguration") in
+      make ?queryResultsS3AccessGrantsConfiguration
+        ?identityCenterConfiguration ?enableMinimumEncryptionConfiguration
+        ?customerContentEncryptionConfiguration ?engineConfiguration
+        ?monitoringConfiguration ?executionRole ?additionalConfiguration
+        ?engineVersion ?requesterPaysEnabled ?bytesScannedCutoffPerQuery
+        ?publishCloudWatchMetricsEnabled ?enforceWorkGroupConfiguration
+        ?managedQueryResultsConfiguration ?resultConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queryResultsS3AccessGrantsConfiguration =
+        field_map json__ "QueryResultsS3AccessGrantsConfiguration"
+          QueryResultsS3AccessGrantsConfiguration.of_json in
+      let identityCenterConfiguration =
+        field_map json__ "IdentityCenterConfiguration"
+          IdentityCenterConfiguration.of_json in
+      let enableMinimumEncryptionConfiguration =
+        field_map json__ "EnableMinimumEncryptionConfiguration"
+          BoxedBoolean.of_json in
+      let customerContentEncryptionConfiguration =
+        field_map json__ "CustomerContentEncryptionConfiguration"
+          CustomerContentEncryptionConfiguration.of_json in
+      let engineConfiguration =
+        field_map json__ "EngineConfiguration" EngineConfiguration.of_json in
+      let monitoringConfiguration =
+        field_map json__ "MonitoringConfiguration"
+          MonitoringConfiguration.of_json in
+      let executionRole = field_map json__ "ExecutionRole" RoleArn.of_json in
+      let additionalConfiguration =
+        field_map json__ "AdditionalConfiguration" NameString.of_json in
+      let engineVersion =
+        field_map json__ "EngineVersion" EngineVersion.of_json in
+      let requesterPaysEnabled =
+        field_map json__ "RequesterPaysEnabled" BoxedBoolean.of_json in
+      let bytesScannedCutoffPerQuery =
+        field_map json__ "BytesScannedCutoffPerQuery"
+          BytesScannedCutoffValue.of_json in
+      let publishCloudWatchMetricsEnabled =
+        field_map json__ "PublishCloudWatchMetricsEnabled"
+          BoxedBoolean.of_json in
+      let enforceWorkGroupConfiguration =
+        field_map json__ "EnforceWorkGroupConfiguration" BoxedBoolean.of_json in
+      let managedQueryResultsConfiguration =
+        field_map json__ "ManagedQueryResultsConfiguration"
+          ManagedQueryResultsConfiguration.of_json in
+      let resultConfiguration =
+        field_map json__ "ResultConfiguration" ResultConfiguration.of_json in
+      make ?queryResultsS3AccessGrantsConfiguration
+        ?identityCenterConfiguration ?enableMinimumEncryptionConfiguration
+        ?customerContentEncryptionConfiguration ?engineConfiguration
+        ?monitoringConfiguration ?executionRole ?additionalConfiguration
+        ?engineVersion ?requesterPaysEnabled ?bytesScannedCutoffPerQuery
+        ?publishCloudWatchMetricsEnabled ?enforceWorkGroupConfiguration
+        ?managedQueryResultsConfiguration ?resultConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration of the workgroup, which includes the location in Amazon S3 where query and calculation results are stored, the encryption option, if any, used for query and calculation results, whether the Amazon CloudWatch Metrics are enabled for the workgroup and whether workgroup settings override query settings, and the data usage limits for the amount of data scanned per query or per workgroup. The workgroup settings override is specified in EnforceWorkGroupConfiguration (true/false) in the WorkGroupConfiguration. See WorkGroupConfiguration$EnforceWorkGroupConfiguration."]
+module CreateWorkGroupInput =
+  struct
+    type nonrec t =
+      {
+      name: WorkGroupName.t [@ocaml.doc "The workgroup name."];
+      configuration: WorkGroupConfiguration.t option
+        [@ocaml.doc
+          "Contains configuration information for creating an Athena SQL workgroup or Spark enabled Athena workgroup. Athena SQL workgroup configuration includes the location in Amazon S3 where query and calculation results are stored, the encryption configuration, if any, used for encrypting query results, whether the Amazon CloudWatch Metrics are enabled for the workgroup, the limit for the amount of bytes scanned (cutoff) per query, if it is specified, and whether workgroup's settings (specified with EnforceWorkGroupConfiguration) in the WorkGroupConfiguration override client-side settings. See WorkGroupConfiguration$EnforceWorkGroupConfiguration."];
+      description: WorkGroupDescriptionString.t option
+        [@ocaml.doc "The workgroup description."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "A list of comma separated tags to add to the workgroup that is created."]}
+    let context_ = "CreateWorkGroupInput"
+    let make ?configuration =
+      fun ?description ->
+        fun ?tags ->
+          fun ~name -> fun () -> { configuration; description; tags; name }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (WorkGroupName.to_value x.name)));
+        ("Configuration",
+          (Option.map x.configuration ~f:WorkGroupConfiguration.to_value));
+        ("Description",
+          (Option.map x.description ~f:WorkGroupDescriptionString.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let description =
+        (Option.map ~f:WorkGroupDescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let configuration =
+        (Option.map ~f:WorkGroupConfiguration.of_xml)
+          (Xml.child xml_arg0 "Configuration") in
+      let name =
+        WorkGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?tags ?description ?configuration ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let description =
+        field_map json__ "Description" WorkGroupDescriptionString.of_json in
+      let configuration =
+        field_map json__ "Configuration" WorkGroupConfiguration.of_json in
+      let name = field_map_exn json__ "Name" WorkGroupName.of_json in
+      make ?tags ?description ?configuration ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a workgroup with the specified name. A workgroup can be an Apache Spark enabled workgroup or an Athena SQL workgroup."]
+module CreateWorkGroupOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a workgroup with the specified name. A workgroup can be an Apache Spark enabled workgroup or an Athena SQL workgroup."]
+module DataCatalogSummary =
+  struct
+    type nonrec t =
+      {
+      catalogName: CatalogNameString.t option
+        [@ocaml.doc
+          "The name of the data catalog. The catalog name is unique for the Amazon Web Services account and can use a maximum of 127 alphanumeric, underscore, at sign, or hyphen characters. The remainder of the length constraint of 256 is reserved for use by Athena."];
+      type_: DataCatalogType.t option [@ocaml.doc "The data catalog type."];
+      status: DataCatalogStatus.t option
+        [@ocaml.doc
+          "The status of the creation or deletion of the data catalog. The LAMBDA, GLUE, and HIVE data catalog types are created synchronously. Their status is either CREATE_COMPLETE or CREATE_FAILED. The FEDERATED data catalog type is created asynchronously. Data catalog creation status: CREATE_IN_PROGRESS: Federated data catalog creation in progress. CREATE_COMPLETE: Data catalog creation complete. CREATE_FAILED: Data catalog could not be created. CREATE_FAILED_CLEANUP_IN_PROGRESS: Federated data catalog creation failed and is being removed. CREATE_FAILED_CLEANUP_COMPLETE: Federated data catalog creation failed and was removed. CREATE_FAILED_CLEANUP_FAILED: Federated data catalog creation failed but could not be removed. Data catalog deletion status: DELETE_IN_PROGRESS: Federated data catalog deletion in progress. DELETE_COMPLETE: Federated data catalog deleted. DELETE_FAILED: Federated data catalog could not be deleted."];
+      connectionType: ConnectionType.t option
+        [@ocaml.doc
+          "The type of connection for a FEDERATED data catalog (for example, REDSHIFT, MYSQL, or SQLSERVER). For information about individual connectors, see Available data source connectors."];
+      error: ErrorMessage.t option
+        [@ocaml.doc
+          "Text of the error that occurred during data catalog creation or deletion."]}
+    let make ?catalogName =
+      fun ?type_ ->
+        fun ?status ->
+          fun ?connectionType ->
+            fun ?error ->
+              fun () -> { catalogName; type_; status; connectionType; error }
+    let to_value x =
+      structure_to_value
+        [("CatalogName",
+           (Option.map x.catalogName ~f:CatalogNameString.to_value));
+        ("Type", (Option.map x.type_ ~f:DataCatalogType.to_value));
+        ("Status", (Option.map x.status ~f:DataCatalogStatus.to_value));
+        ("ConnectionType",
+          (Option.map x.connectionType ~f:ConnectionType.to_value));
+        ("Error", (Option.map x.error ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let error =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Error") in
+      let connectionType =
+        (Option.map ~f:ConnectionType.of_xml)
+          (Xml.child xml_arg0 "ConnectionType") in
+      let status =
+        (Option.map ~f:DataCatalogStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let type_ =
+        (Option.map ~f:DataCatalogType.of_xml) (Xml.child xml_arg0 "Type") in
+      let catalogName =
+        (Option.map ~f:CatalogNameString.of_xml)
+          (Xml.child xml_arg0 "CatalogName") in
+      make ?error ?connectionType ?status ?type_ ?catalogName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let error = field_map json__ "Error" ErrorMessage.of_json in
+      let connectionType =
+        field_map json__ "ConnectionType" ConnectionType.of_json in
+      let status = field_map json__ "Status" DataCatalogStatus.of_json in
+      let type_ = field_map json__ "Type" DataCatalogType.of_json in
+      let catalogName =
+        field_map json__ "CatalogName" CatalogNameString.of_json in
+      make ?error ?connectionType ?status ?type_ ?catalogName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The summary information for the data catalog, which includes its name and type."]
+module DataCatalogSummaryList =
+  struct
+    type nonrec t = DataCatalogSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DataCatalogSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DataCatalogSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DataCatalogSummaryList"
+        ~of_json:DataCatalogSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Database =
+  struct
+    type nonrec t =
+      {
+      name: NameString.t option [@ocaml.doc "The name of the database."];
+      description: DescriptionString.t option
+        [@ocaml.doc "An optional description of the database."];
+      parameters: ParametersMap.t option
+        [@ocaml.doc "A set of custom key/value pairs."]}
+    let make ?name =
+      fun ?description ->
+        fun ?parameters -> fun () -> { name; description; parameters }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:NameString.to_value));
+        ("Description",
+          (Option.map x.description ~f:DescriptionString.to_value));
+        ("Parameters", (Option.map x.parameters ~f:ParametersMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let parameters =
+        (Option.map ~f:ParametersMap.of_xml)
+          (Xml.child xml_arg0 "Parameters") in
+      let description =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        (Option.map ~f:NameString.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?parameters ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let parameters = field_map json__ "Parameters" ParametersMap.of_json in
+      let description =
+        field_map json__ "Description" DescriptionString.of_json in
+      let name = field_map json__ "Name" NameString.of_json in
+      make ?parameters ?description ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains metadata information for a database in a data catalog."]
+module DatabaseList =
+  struct
+    type nonrec t = Database.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Database.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Database.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DatabaseList" ~of_json:Database.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DatumString =
+  struct
+    type nonrec t = string
+    let context_ = "datumString"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"datumString" j
+    let to_json = simple_to_json to_value
+  end
+module Datum =
+  struct
+    type nonrec t =
+      {
+      varCharValue: DatumString.t option
+        [@ocaml.doc "The value of the datum."]}
+    let make ?varCharValue = fun () -> { varCharValue }
+    let to_value x =
+      structure_to_value
+        [("VarCharValue",
+           (Option.map x.varCharValue ~f:DatumString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let varCharValue =
+        (Option.map ~f:DatumString.of_xml)
+          (Xml.child xml_arg0 "VarCharValue") in
+      make ?varCharValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let varCharValue = field_map json__ "VarCharValue" DatumString.of_json in
+      make ?varCharValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A piece of data (a field in the table)."]
+module DeleteCapacityReservationInput =
+  struct
+    type nonrec t =
+      {
+      name: CapacityReservationName.t
+        [@ocaml.doc "The name of the capacity reservation to delete."]}
+    let context_ = "DeleteCapacityReservationInput"
+    let make ~name = fun () -> { name }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (CapacityReservationName.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        CapacityReservationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" CapacityReservationName.of_json in
+      make ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a cancelled capacity reservation. A reservation must be cancelled before it can be deleted. A deleted reservation is immediately removed from your account and can no longer be referenced, including by its ARN. A deleted reservation cannot be called by GetCapacityReservation, and deleted reservations do not appear in the output of ListCapacityReservations."]
+module DeleteCapacityReservationOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a cancelled capacity reservation. A reservation must be cancelled before it can be deleted. A deleted reservation is immediately removed from your account and can no longer be referenced, including by its ARN. A deleted reservation cannot be called by GetCapacityReservation, and deleted reservations do not appear in the output of ListCapacityReservations."]
+module DeleteDataCatalogInput =
+  struct
+    type nonrec t =
+      {
+      name: CatalogNameString.t
+        [@ocaml.doc "The name of the data catalog to delete."];
+      deleteCatalogOnly: Boolean.t option
+        [@ocaml.doc
+          "Deletes the Athena Data Catalog. You can only use this with the FEDERATED catalogs. You usually perform this before registering the connector with Glue Data Catalog. After deletion, you will have to manage the Glue Connection and Lambda function."]}
+    let context_ = "DeleteDataCatalogInput"
+    let make ?deleteCatalogOnly =
+      fun ~name -> fun () -> { deleteCatalogOnly; name }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (CatalogNameString.to_value x.name)));
+        ("DeleteCatalogOnly",
+          (Option.map x.deleteCatalogOnly ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deleteCatalogOnly =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "DeleteCatalogOnly") in
+      let name =
+        CatalogNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?deleteCatalogOnly ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deleteCatalogOnly =
+        field_map json__ "DeleteCatalogOnly" Boolean.of_json in
+      let name = field_map_exn json__ "Name" CatalogNameString.of_json in
+      make ?deleteCatalogOnly ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a data catalog."]
+module DeleteDataCatalogOutput =
+  struct
+    type nonrec t = {
+      dataCatalog: DataCatalog.t option }
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dataCatalog = fun () -> { dataCatalog }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DataCatalog", (Option.map x.dataCatalog ~f:DataCatalog.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataCatalog =
+        (Option.map ~f:DataCatalog.of_xml) (Xml.child xml_arg0 "DataCatalog") in
+      make ?dataCatalog ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataCatalog = field_map json__ "DataCatalog" DataCatalog.of_json in
+      make ?dataCatalog ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a data catalog."]
+module DeleteNamedQueryInput =
+  struct
+    type nonrec t =
+      {
+      namedQueryId: NamedQueryId.t
+        [@ocaml.doc "The unique ID of the query to delete."]}
+    let context_ = "DeleteNamedQueryInput"
+    let make ~namedQueryId = fun () -> { namedQueryId }
+    let to_value x =
+      structure_to_value
+        [("NamedQueryId", (Some (NamedQueryId.to_value x.namedQueryId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let namedQueryId =
+        NamedQueryId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NamedQueryId") in
+      make ~namedQueryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let namedQueryId =
+        field_map_exn json__ "NamedQueryId" NamedQueryId.of_json in
+      make ~namedQueryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the named query if you have access to the workgroup in which the query was saved."]
+module DeleteNamedQueryOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the named query if you have access to the workgroup in which the query was saved."]
+module DeleteNotebookInput =
+  struct
+    type nonrec t =
+      {
+      notebookId: NotebookId.t
+        [@ocaml.doc "The ID of the notebook to delete."]}
+    let context_ = "DeleteNotebookInput"
+    let make ~notebookId = fun () -> { notebookId }
+    let to_value x =
+      structure_to_value
+        [("NotebookId", (Some (NotebookId.to_value x.notebookId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let notebookId =
+        NotebookId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NotebookId") in
+      make ~notebookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notebookId = field_map_exn json__ "NotebookId" NotebookId.of_json in
+      make ~notebookId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the specified notebook."]
+module DeleteNotebookOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the specified notebook."]
+module DeletePreparedStatementInput =
+  struct
+    type nonrec t =
+      {
+      statementName: StatementName.t
+        [@ocaml.doc "The name of the prepared statement to delete."];
+      workGroup: WorkGroupName.t
+        [@ocaml.doc
+          "The workgroup to which the statement to be deleted belongs."]}
+    let context_ = "DeletePreparedStatementInput"
+    let make ~statementName =
+      fun ~workGroup -> fun () -> { statementName; workGroup }
+    let to_value x =
+      structure_to_value
+        [("StatementName", (Some (StatementName.to_value x.statementName)));
+        ("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workGroup =
+        WorkGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
+      let statementName =
+        StatementName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StatementName") in
+      make ~workGroup ~statementName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workGroup = field_map_exn json__ "WorkGroup" WorkGroupName.of_json in
+      let statementName =
+        field_map_exn json__ "StatementName" StatementName.of_json in
+      make ~workGroup ~statementName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the prepared statement with the specified name from the specified workgroup."]
+module DeletePreparedStatementOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the prepared statement with the specified name from the specified workgroup."]
+module DeleteWorkGroupInput =
+  struct
+    type nonrec t =
+      {
+      workGroup: WorkGroupName.t
+        [@ocaml.doc "The unique name of the workgroup to delete."];
+      recursiveDeleteOption: BoxedBoolean.t option
+        [@ocaml.doc
+          "The option to delete the workgroup and its contents even if the workgroup contains any named queries, query executions, or notebooks."]}
+    let context_ = "DeleteWorkGroupInput"
+    let make ?recursiveDeleteOption =
+      fun ~workGroup -> fun () -> { recursiveDeleteOption; workGroup }
+    let to_value x =
+      structure_to_value
+        [("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)));
+        ("RecursiveDeleteOption",
+          (Option.map x.recursiveDeleteOption ~f:BoxedBoolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recursiveDeleteOption =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "RecursiveDeleteOption") in
+      let workGroup =
+        WorkGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
+      make ?recursiveDeleteOption ~workGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recursiveDeleteOption =
+        field_map json__ "RecursiveDeleteOption" BoxedBoolean.of_json in
+      let workGroup = field_map_exn json__ "WorkGroup" WorkGroupName.of_json in
+      make ?recursiveDeleteOption ~workGroup ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the workgroup with the specified name. The primary workgroup cannot be deleted."]
+module DeleteWorkGroupOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the workgroup with the specified name. The primary workgroup cannot be deleted."]
+module EngineVersionsList =
+  struct
+    type nonrec t = EngineVersion.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EngineVersion.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EngineVersion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EngineVersionsList" ~of_json:EngineVersion.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ExecutorId =
+  struct
+    type nonrec t = string
+    let context_ = "ExecutorId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100000) >>=
+             (fun () -> check_pattern i ~pattern:".*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExecutorId" j
+    let to_json = simple_to_json to_value
+  end
+module ExecutorState =
+  struct
+    type nonrec t =
+      | CREATING 
+      | CREATED 
+      | REGISTERED 
+      | TERMINATING 
+      | TERMINATED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | CREATED -> "CREATED"
+      | REGISTERED -> "REGISTERED"
+      | TERMINATING -> "TERMINATING"
+      | TERMINATED -> "TERMINATED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "CREATED" -> CREATED
+      | "REGISTERED" -> REGISTERED
+      | "TERMINATING" -> TERMINATING
+      | "TERMINATED" -> TERMINATED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ExecutorState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ExecutorState" j)
+    let to_json = simple_to_json to_value
+  end
+module ExecutorType =
+  struct
+    type nonrec t =
+      | COORDINATOR 
+      | GATEWAY 
+      | WORKER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | COORDINATOR -> "COORDINATOR"
+      | GATEWAY -> "GATEWAY"
+      | WORKER -> "WORKER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "COORDINATOR" -> COORDINATOR
+      | "GATEWAY" -> GATEWAY
+      | "WORKER" -> WORKER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ExecutorType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ExecutorType" j)
+    let to_json = simple_to_json to_value
+  end
+module ExecutorsSummary =
+  struct
+    type nonrec t =
+      {
+      executorId: ExecutorId.t option
+        [@ocaml.doc "The UUID of the executor."];
+      executorType: ExecutorType.t option
+        [@ocaml.doc
+          "The type of executor used for the application (COORDINATOR, GATEWAY, or WORKER)."];
+      startDateTime: Long.t option
+        [@ocaml.doc "The date and time that the executor started."];
+      terminationDateTime: Long.t option
+        [@ocaml.doc "The date and time that the executor was terminated."];
+      executorState: ExecutorState.t option
+        [@ocaml.doc
+          "The processing state of the executor. A description of each state follows. CREATING - The executor is being started, including acquiring resources. CREATED - The executor has been started. REGISTERED - The executor has been registered. TERMINATING - The executor is in the process of shutting down. TERMINATED - The executor is no longer running. FAILED - Due to a failure, the executor is no longer running."];
+      executorSize: Long.t option
+        [@ocaml.doc
+          "The smallest unit of compute that a session can request from Athena. Size is measured in data processing unit (DPU) values, a relative measure of processing power."]}
+    let make ?executorId =
+      fun ?executorType ->
+        fun ?startDateTime ->
+          fun ?terminationDateTime ->
+            fun ?executorState ->
+              fun ?executorSize ->
+                fun () ->
+                  {
+                    executorId;
+                    executorType;
+                    startDateTime;
+                    terminationDateTime;
+                    executorState;
+                    executorSize
+                  }
+    let to_value x =
+      structure_to_value
+        [("ExecutorId", (Option.map x.executorId ~f:ExecutorId.to_value));
+        ("ExecutorType",
+          (Option.map x.executorType ~f:ExecutorType.to_value));
+        ("StartDateTime", (Option.map x.startDateTime ~f:Long.to_value));
+        ("TerminationDateTime",
+          (Option.map x.terminationDateTime ~f:Long.to_value));
+        ("ExecutorState",
+          (Option.map x.executorState ~f:ExecutorState.to_value));
+        ("ExecutorSize", (Option.map x.executorSize ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let executorSize =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "ExecutorSize") in
+      let executorState =
+        (Option.map ~f:ExecutorState.of_xml)
+          (Xml.child xml_arg0 "ExecutorState") in
+      let terminationDateTime =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "TerminationDateTime") in
+      let startDateTime =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "StartDateTime") in
+      let executorType =
+        (Option.map ~f:ExecutorType.of_xml)
+          (Xml.child xml_arg0 "ExecutorType") in
+      let executorId =
+        (Option.map ~f:ExecutorId.of_xml) (Xml.child xml_arg0 "ExecutorId") in
+      make ?executorSize ?executorState ?terminationDateTime ?startDateTime
+        ?executorType ?executorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let executorSize = field_map json__ "ExecutorSize" Long.of_json in
+      let executorState =
+        field_map json__ "ExecutorState" ExecutorState.of_json in
+      let terminationDateTime =
+        field_map json__ "TerminationDateTime" Long.of_json in
+      let startDateTime = field_map json__ "StartDateTime" Long.of_json in
+      let executorType = field_map json__ "ExecutorType" ExecutorType.of_json in
+      let executorId = field_map json__ "ExecutorId" ExecutorId.of_json in
+      make ?executorSize ?executorState ?terminationDateTime ?startDateTime
+        ?executorType ?executorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains summary information about an executor."]
+module ExecutorsSummaryList =
+  struct
+    type nonrec t = ExecutorsSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExecutorsSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExecutorsSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExecutorsSummaryList"
+        ~of_json:ExecutorsSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExportNotebookInput =
+  struct
+    type nonrec t =
+      {
+      notebookId: NotebookId.t
+        [@ocaml.doc "The ID of the notebook to export."]}
+    let context_ = "ExportNotebookInput"
+    let make ~notebookId = fun () -> { notebookId }
+    let to_value x =
+      structure_to_value
+        [("NotebookId", (Some (NotebookId.to_value x.notebookId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let notebookId =
+        NotebookId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NotebookId") in
+      make ~notebookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notebookId = field_map_exn json__ "NotebookId" NotebookId.of_json in
+      make ~notebookId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Exports the specified notebook and its metadata."]
+module Payload =
+  struct
+    type nonrec t = string
+    let context_ = "Payload"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:10485760) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Payload" j
+    let to_json = simple_to_json to_value
+  end
+module NotebookType =
+  struct
+    type nonrec t =
+      | IPYNB 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | IPYNB -> "IPYNB" | Non_static_id s -> s
+    let of_string = function | "IPYNB" -> IPYNB | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration NotebookType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NotebookType" j)
+    let to_json = simple_to_json to_value
+  end
+module NotebookMetadata =
+  struct
+    type nonrec t =
+      {
+      notebookId: NotebookId.t option [@ocaml.doc "The notebook ID."];
+      name: NotebookName.t option [@ocaml.doc "The name of the notebook."];
+      workGroup: WorkGroupName.t option
+        [@ocaml.doc
+          "The name of the Spark enabled workgroup to which the notebook belongs."];
+      creationTime: Date.t option
+        [@ocaml.doc "The time when the notebook was created."];
+      type_: NotebookType.t option
+        [@ocaml.doc
+          "The type of notebook. Currently, the only valid type is IPYNB."];
+      lastModifiedTime: Date.t option
+        [@ocaml.doc "The time when the notebook was last modified."]}
+    let make ?notebookId =
+      fun ?name ->
+        fun ?workGroup ->
+          fun ?creationTime ->
+            fun ?type_ ->
+              fun ?lastModifiedTime ->
+                fun () ->
+                  {
+                    notebookId;
+                    name;
+                    workGroup;
+                    creationTime;
+                    type_;
+                    lastModifiedTime
+                  }
+    let to_value x =
+      structure_to_value
+        [("NotebookId", (Option.map x.notebookId ~f:NotebookId.to_value));
+        ("Name", (Option.map x.name ~f:NotebookName.to_value));
+        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Date.to_value));
+        ("Type", (Option.map x.type_ ~f:NotebookType.to_value));
+        ("LastModifiedTime",
+          (Option.map x.lastModifiedTime ~f:Date.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModifiedTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "LastModifiedTime") in
+      let type_ =
+        (Option.map ~f:NotebookType.of_xml) (Xml.child xml_arg0 "Type") in
+      let creationTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let workGroup =
+        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
+      let name =
+        (Option.map ~f:NotebookName.of_xml) (Xml.child xml_arg0 "Name") in
+      let notebookId =
+        (Option.map ~f:NotebookId.of_xml) (Xml.child xml_arg0 "NotebookId") in
+      make ?lastModifiedTime ?type_ ?creationTime ?workGroup ?name
+        ?notebookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModifiedTime = field_map json__ "LastModifiedTime" Date.of_json in
+      let type_ = field_map json__ "Type" NotebookType.of_json in
+      let creationTime = field_map json__ "CreationTime" Date.of_json in
+      let workGroup = field_map json__ "WorkGroup" WorkGroupName.of_json in
+      let name = field_map json__ "Name" NotebookName.of_json in
+      let notebookId = field_map json__ "NotebookId" NotebookId.of_json in
+      make ?lastModifiedTime ?type_ ?creationTime ?workGroup ?name
+        ?notebookId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains metadata for notebook, including the notebook name, ID, workgroup, and time created."]
+module ExportNotebookOutput =
+  struct
+    type nonrec t =
+      {
+      notebookMetadata: NotebookMetadata.t option
+        [@ocaml.doc
+          "The notebook metadata, including notebook ID, notebook name, and workgroup name."];
+      payload: Payload.t option
+        [@ocaml.doc "The content of the exported notebook."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?notebookMetadata =
+      fun ?payload -> fun () -> { notebookMetadata; payload }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NotebookMetadata",
+           (Option.map x.notebookMetadata ~f:NotebookMetadata.to_value));
+        ("Payload", (Option.map x.payload ~f:Payload.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let payload =
+        (Option.map ~f:Payload.of_xml) (Xml.child xml_arg0 "Payload") in
+      let notebookMetadata =
+        (Option.map ~f:NotebookMetadata.of_xml)
+          (Xml.child xml_arg0 "NotebookMetadata") in
+      make ?payload ?notebookMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let payload = field_map json__ "Payload" Payload.of_json in
+      let notebookMetadata =
+        field_map json__ "NotebookMetadata" NotebookMetadata.of_json in
+      make ?payload ?notebookMetadata ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Exports the specified notebook and its metadata."]
+module ExpressionString =
+  struct
+    type nonrec t = string
+    let context_ = "ExpressionString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExpressionString" j
+    let to_json = simple_to_json to_value
+  end
+module FilterDefinition =
+  struct
+    type nonrec t =
+      {
+      name: NotebookName.t option
+        [@ocaml.doc "The name of the notebook to search for."]}
+    let make ?name = fun () -> { name }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:NotebookName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        (Option.map ~f:NotebookName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "Name" NotebookName.of_json in
+      make ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A string for searching notebook names."]
+module GetCalculationExecutionCodeRequest =
+  struct
+    type nonrec t =
+      {
+      calculationExecutionId: CalculationExecutionId.t
+        [@ocaml.doc "The calculation execution UUID."]}
+    let context_ = "GetCalculationExecutionCodeRequest"
+    let make ~calculationExecutionId = fun () -> { calculationExecutionId }
+    let to_value x =
+      structure_to_value
+        [("CalculationExecutionId",
+           (Some (CalculationExecutionId.to_value x.calculationExecutionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let calculationExecutionId =
+        CalculationExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CalculationExecutionId") in
+      make ~calculationExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let calculationExecutionId =
+        field_map_exn json__ "CalculationExecutionId"
+          CalculationExecutionId.of_json in
+      make ~calculationExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the unencrypted code that was executed for the calculation."]
+module GetCalculationExecutionCodeResponse =
+  struct
+    type nonrec t =
+      {
+      codeBlock: CodeBlock.t option
+        [@ocaml.doc
+          "The unencrypted code that was executed for the calculation."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?codeBlock = fun () -> { codeBlock }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CodeBlock", (Option.map x.codeBlock ~f:CodeBlock.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let codeBlock =
+        (Option.map ~f:CodeBlock.of_xml) (Xml.child xml_arg0 "CodeBlock") in
+      make ?codeBlock ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let codeBlock = field_map json__ "CodeBlock" CodeBlock.of_json in
+      make ?codeBlock ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the unencrypted code that was executed for the calculation."]
+module GetCalculationExecutionRequest =
+  struct
+    type nonrec t =
+      {
+      calculationExecutionId: CalculationExecutionId.t
+        [@ocaml.doc "The calculation execution UUID."]}
+    let context_ = "GetCalculationExecutionRequest"
+    let make ~calculationExecutionId = fun () -> { calculationExecutionId }
+    let to_value x =
+      structure_to_value
+        [("CalculationExecutionId",
+           (Some (CalculationExecutionId.to_value x.calculationExecutionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let calculationExecutionId =
+        CalculationExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CalculationExecutionId") in
+      make ~calculationExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let calculationExecutionId =
+        field_map_exn json__ "CalculationExecutionId"
+          CalculationExecutionId.of_json in
+      make ~calculationExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a previously submitted calculation execution."]
+module GetCalculationExecutionResponse =
+  struct
+    type nonrec t =
+      {
+      calculationExecutionId: CalculationExecutionId.t option
+        [@ocaml.doc "The calculation execution UUID."];
+      sessionId: SessionId.t option
+        [@ocaml.doc "The session ID that the calculation ran in."];
+      description: DescriptionString.t option
+        [@ocaml.doc "The description of the calculation execution."];
+      workingDirectory: S3Uri.t option
+        [@ocaml.doc
+          "The Amazon S3 location in which calculation results are stored."];
+      status: CalculationStatus.t option
+        [@ocaml.doc
+          "Contains information about the status of the calculation."];
+      statistics: CalculationStatistics.t option
+        [@ocaml.doc
+          "Contains information about the data processing unit (DPU) execution time and progress. This field is populated only when statistics are available."];
+      result: CalculationResult.t option
+        [@ocaml.doc
+          "Contains result information. This field is populated only if the calculation is completed."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?calculationExecutionId =
+      fun ?sessionId ->
+        fun ?description ->
+          fun ?workingDirectory ->
+            fun ?status ->
+              fun ?statistics ->
+                fun ?result ->
+                  fun () ->
+                    {
+                      calculationExecutionId;
+                      sessionId;
+                      description;
+                      workingDirectory;
+                      status;
+                      statistics;
+                      result
+                    }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CalculationExecutionId",
+           (Option.map x.calculationExecutionId
+              ~f:CalculationExecutionId.to_value));
+        ("SessionId", (Option.map x.sessionId ~f:SessionId.to_value));
+        ("Description",
+          (Option.map x.description ~f:DescriptionString.to_value));
+        ("WorkingDirectory",
+          (Option.map x.workingDirectory ~f:S3Uri.to_value));
+        ("Status", (Option.map x.status ~f:CalculationStatus.to_value));
+        ("Statistics",
+          (Option.map x.statistics ~f:CalculationStatistics.to_value));
+        ("Result", (Option.map x.result ~f:CalculationResult.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let result =
+        (Option.map ~f:CalculationResult.of_xml)
+          (Xml.child xml_arg0 "Result") in
+      let statistics =
+        (Option.map ~f:CalculationStatistics.of_xml)
+          (Xml.child xml_arg0 "Statistics") in
+      let status =
+        (Option.map ~f:CalculationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let workingDirectory =
+        (Option.map ~f:S3Uri.of_xml) (Xml.child xml_arg0 "WorkingDirectory") in
+      let description =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let sessionId =
+        (Option.map ~f:SessionId.of_xml) (Xml.child xml_arg0 "SessionId") in
+      let calculationExecutionId =
+        (Option.map ~f:CalculationExecutionId.of_xml)
+          (Xml.child xml_arg0 "CalculationExecutionId") in
+      make ?result ?statistics ?status ?workingDirectory ?description
+        ?sessionId ?calculationExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let result = field_map json__ "Result" CalculationResult.of_json in
+      let statistics =
+        field_map json__ "Statistics" CalculationStatistics.of_json in
+      let status = field_map json__ "Status" CalculationStatus.of_json in
+      let workingDirectory =
+        field_map json__ "WorkingDirectory" S3Uri.of_json in
+      let description =
+        field_map json__ "Description" DescriptionString.of_json in
+      let sessionId = field_map json__ "SessionId" SessionId.of_json in
+      let calculationExecutionId =
+        field_map json__ "CalculationExecutionId"
+          CalculationExecutionId.of_json in
+      make ?result ?statistics ?status ?workingDirectory ?description
+        ?sessionId ?calculationExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a previously submitted calculation execution."]
+module GetCalculationExecutionStatusRequest =
+  struct
+    type nonrec t =
+      {
+      calculationExecutionId: CalculationExecutionId.t
+        [@ocaml.doc "The calculation execution UUID."]}
+    let context_ = "GetCalculationExecutionStatusRequest"
+    let make ~calculationExecutionId = fun () -> { calculationExecutionId }
+    let to_value x =
+      structure_to_value
+        [("CalculationExecutionId",
+           (Some (CalculationExecutionId.to_value x.calculationExecutionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let calculationExecutionId =
+        CalculationExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CalculationExecutionId") in
+      make ~calculationExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let calculationExecutionId =
+        field_map_exn json__ "CalculationExecutionId"
+          CalculationExecutionId.of_json in
+      make ~calculationExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets the status of a current calculation."]
+module GetCalculationExecutionStatusResponse =
+  struct
+    type nonrec t =
+      {
+      status: CalculationStatus.t option
+        [@ocaml.doc
+          "Contains information about the calculation execution status."];
+      statistics: CalculationStatistics.t option
+        [@ocaml.doc
+          "Contains information about the DPU execution time and progress."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?status = fun ?statistics -> fun () -> { status; statistics }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:CalculationStatus.to_value));
+        ("Statistics",
+          (Option.map x.statistics ~f:CalculationStatistics.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statistics =
+        (Option.map ~f:CalculationStatistics.of_xml)
+          (Xml.child xml_arg0 "Statistics") in
+      let status =
+        (Option.map ~f:CalculationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?statistics ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statistics =
+        field_map json__ "Statistics" CalculationStatistics.of_json in
+      let status = field_map json__ "Status" CalculationStatus.of_json in
+      make ?statistics ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets the status of a current calculation."]
+module GetCapacityAssignmentConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      capacityReservationName: CapacityReservationName.t
+        [@ocaml.doc
+          "The name of the capacity reservation to retrieve the capacity assignment configuration for."]}
+    let context_ = "GetCapacityAssignmentConfigurationInput"
+    let make ~capacityReservationName = fun () -> { capacityReservationName }
+    let to_value x =
+      structure_to_value
+        [("CapacityReservationName",
+           (Some (CapacityReservationName.to_value x.capacityReservationName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityReservationName =
+        CapacityReservationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CapacityReservationName") in
+      make ~capacityReservationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityReservationName =
+        field_map_exn json__ "CapacityReservationName"
+          CapacityReservationName.of_json in
+      make ~capacityReservationName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the capacity assignment configuration for a capacity reservation, if one exists."]
+module GetCapacityAssignmentConfigurationOutput =
+  struct
+    type nonrec t =
+      {
+      capacityAssignmentConfiguration:
+        CapacityAssignmentConfiguration.t option
+        [@ocaml.doc
+          "The requested capacity assignment configuration for the specified capacity reservation."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?capacityAssignmentConfiguration =
+      fun () -> { capacityAssignmentConfiguration }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CapacityAssignmentConfiguration",
+           (Option.map x.capacityAssignmentConfiguration
+              ~f:CapacityAssignmentConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityAssignmentConfiguration =
+        (Option.map ~f:CapacityAssignmentConfiguration.of_xml)
+          (Xml.child xml_arg0 "CapacityAssignmentConfiguration") in
+      make ?capacityAssignmentConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityAssignmentConfiguration =
+        field_map json__ "CapacityAssignmentConfiguration"
+          CapacityAssignmentConfiguration.of_json in
+      make ?capacityAssignmentConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the capacity assignment configuration for a capacity reservation, if one exists."]
+module GetCapacityReservationInput =
+  struct
+    type nonrec t =
+      {
+      name: CapacityReservationName.t
+        [@ocaml.doc "The name of the capacity reservation."]}
+    let context_ = "GetCapacityReservationInput"
+    let make ~name = fun () -> { name }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (CapacityReservationName.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        CapacityReservationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" CapacityReservationName.of_json in
+      make ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about the capacity reservation with the specified name."]
+module GetCapacityReservationOutput =
+  struct
+    type nonrec t =
+      {
+      capacityReservation: CapacityReservation.t option
+        [@ocaml.doc "The requested capacity reservation structure."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?capacityReservation = fun () -> { capacityReservation }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CapacityReservation",
+           (Option.map x.capacityReservation ~f:CapacityReservation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityReservation =
+        (Option.map ~f:CapacityReservation.of_xml)
+          (Xml.child xml_arg0 "CapacityReservation") in
+      make ?capacityReservation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityReservation =
+        field_map json__ "CapacityReservation" CapacityReservation.of_json in
+      make ?capacityReservation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about the capacity reservation with the specified name."]
+module GetDataCatalogInput =
+  struct
+    type nonrec t =
+      {
+      name: CatalogNameString.t
+        [@ocaml.doc "The name of the data catalog to return."];
+      workGroup: WorkGroupName.t option
+        [@ocaml.doc
+          "The name of the workgroup. Required if making an IAM Identity Center request."]}
+    let context_ = "GetDataCatalogInput"
+    let make ?workGroup = fun ~name -> fun () -> { workGroup; name }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (CatalogNameString.to_value x.name)));
+        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workGroup =
+        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
+      let name =
+        CatalogNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?workGroup ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workGroup = field_map json__ "WorkGroup" WorkGroupName.of_json in
+      let name = field_map_exn json__ "Name" CatalogNameString.of_json in
+      make ?workGroup ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns the specified data catalog."]
+module GetDataCatalogOutput =
+  struct
+    type nonrec t =
+      {
+      dataCatalog: DataCatalog.t option
+        [@ocaml.doc "The data catalog returned."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dataCatalog = fun () -> { dataCatalog }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DataCatalog", (Option.map x.dataCatalog ~f:DataCatalog.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataCatalog =
+        (Option.map ~f:DataCatalog.of_xml) (Xml.child xml_arg0 "DataCatalog") in
+      make ?dataCatalog ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataCatalog = field_map json__ "DataCatalog" DataCatalog.of_json in
+      make ?dataCatalog ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns the specified data catalog."]
+module GetDatabaseInput =
+  struct
+    type nonrec t =
+      {
+      catalogName: CatalogNameString.t
+        [@ocaml.doc
+          "The name of the data catalog that contains the database to return."];
+      databaseName: NameString.t
+        [@ocaml.doc "The name of the database to return."];
+      workGroup: WorkGroupName.t option
+        [@ocaml.doc
+          "The name of the workgroup for which the metadata is being fetched. Required if requesting an IAM Identity Center enabled Glue Data Catalog."]}
+    let context_ = "GetDatabaseInput"
+    let make ?workGroup =
+      fun ~catalogName ->
+        fun ~databaseName ->
+          fun () -> { workGroup; catalogName; databaseName }
+    let to_value x =
+      structure_to_value
+        [("CatalogName", (Some (CatalogNameString.to_value x.catalogName)));
+        ("DatabaseName", (Some (NameString.to_value x.databaseName)));
+        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workGroup =
+        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
+      let databaseName =
+        NameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
+      let catalogName =
+        CatalogNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CatalogName") in
+      make ?workGroup ~databaseName ~catalogName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workGroup = field_map json__ "WorkGroup" WorkGroupName.of_json in
+      let databaseName =
+        field_map_exn json__ "DatabaseName" NameString.of_json in
+      let catalogName =
+        field_map_exn json__ "CatalogName" CatalogNameString.of_json in
+      make ?workGroup ~databaseName ~catalogName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a database object for the specified database and data catalog."]
+module MetadataException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An exception that Athena received when it called a custom metastore. Occurs if the error is not caused by user input (InvalidRequestException) or from the Athena platform (InternalServerException). For example, if a user-created Lambda function is missing permissions, the Lambda 4XX exception is returned in a MetadataException."]
+module GetDatabaseOutput =
+  struct
+    type nonrec t =
+      {
+      database: Database.t option [@ocaml.doc "The database returned."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `MetadataException of MetadataException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?tableMetadataList =
-      fun ?nextToken -> fun () -> { tableMetadataList; nextToken }
+    let make ?database = fun () -> { database }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -4407,119 +7755,2186 @@ module ListTableMetadataOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("TableMetadataList",
-           (Option.map x.tableMetadataList ~f:TableMetadataList.to_value));
+        [("Database", (Option.map x.database ~f:Database.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let database =
+        (Option.map ~f:Database.of_xml) (Xml.child xml_arg0 "Database") in
+      make ?database ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let database = field_map json__ "Database" Database.of_json in
+      make ?database ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a database object for the specified database and data catalog."]
+module GetNamedQueryInput =
+  struct
+    type nonrec t =
+      {
+      namedQueryId: NamedQueryId.t
+        [@ocaml.doc
+          "The unique ID of the query. Use ListNamedQueries to get query IDs."]}
+    let context_ = "GetNamedQueryInput"
+    let make ~namedQueryId = fun () -> { namedQueryId }
+    let to_value x =
+      structure_to_value
+        [("NamedQueryId", (Some (NamedQueryId.to_value x.namedQueryId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let namedQueryId =
+        NamedQueryId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NamedQueryId") in
+      make ~namedQueryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let namedQueryId =
+        field_map_exn json__ "NamedQueryId" NamedQueryId.of_json in
+      make ~namedQueryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about a single query. Requires that you have access to the workgroup in which the query was saved."]
+module GetNamedQueryOutput =
+  struct
+    type nonrec t =
+      {
+      namedQuery: NamedQuery.t option
+        [@ocaml.doc "Information about the query."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?namedQuery = fun () -> { namedQuery }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NamedQuery", (Option.map x.namedQuery ~f:NamedQuery.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let namedQuery =
+        (Option.map ~f:NamedQuery.of_xml) (Xml.child xml_arg0 "NamedQuery") in
+      make ?namedQuery ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let namedQuery = field_map json__ "NamedQuery" NamedQuery.of_json in
+      make ?namedQuery ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about a single query. Requires that you have access to the workgroup in which the query was saved."]
+module GetNotebookMetadataInput =
+  struct
+    type nonrec t =
+      {
+      notebookId: NotebookId.t
+        [@ocaml.doc
+          "The ID of the notebook whose metadata is to be retrieved."]}
+    let context_ = "GetNotebookMetadataInput"
+    let make ~notebookId = fun () -> { notebookId }
+    let to_value x =
+      structure_to_value
+        [("NotebookId", (Some (NotebookId.to_value x.notebookId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let notebookId =
+        NotebookId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NotebookId") in
+      make ~notebookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notebookId = field_map_exn json__ "NotebookId" NotebookId.of_json in
+      make ~notebookId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves notebook metadata for the specified notebook ID."]
+module GetNotebookMetadataOutput =
+  struct
+    type nonrec t =
+      {
+      notebookMetadata: NotebookMetadata.t option
+        [@ocaml.doc
+          "The metadata that is returned for the specified notebook ID."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?notebookMetadata = fun () -> { notebookMetadata }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NotebookMetadata",
+           (Option.map x.notebookMetadata ~f:NotebookMetadata.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let notebookMetadata =
+        (Option.map ~f:NotebookMetadata.of_xml)
+          (Xml.child xml_arg0 "NotebookMetadata") in
+      make ?notebookMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notebookMetadata =
+        field_map json__ "NotebookMetadata" NotebookMetadata.of_json in
+      make ?notebookMetadata ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves notebook metadata for the specified notebook ID."]
+module GetPreparedStatementInput =
+  struct
+    type nonrec t =
+      {
+      statementName: StatementName.t
+        [@ocaml.doc "The name of the prepared statement to retrieve."];
+      workGroup: WorkGroupName.t
+        [@ocaml.doc
+          "The workgroup to which the statement to be retrieved belongs."]}
+    let context_ = "GetPreparedStatementInput"
+    let make ~statementName =
+      fun ~workGroup -> fun () -> { statementName; workGroup }
+    let to_value x =
+      structure_to_value
+        [("StatementName", (Some (StatementName.to_value x.statementName)));
+        ("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workGroup =
+        WorkGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
+      let statementName =
+        StatementName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StatementName") in
+      make ~workGroup ~statementName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workGroup = field_map_exn json__ "WorkGroup" WorkGroupName.of_json in
+      let statementName =
+        field_map_exn json__ "StatementName" StatementName.of_json in
+      make ~workGroup ~statementName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the prepared statement with the specified name from the specified workgroup."]
+module GetPreparedStatementOutput =
+  struct
+    type nonrec t =
+      {
+      preparedStatement: PreparedStatement.t option
+        [@ocaml.doc "The name of the prepared statement that was retrieved."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?preparedStatement = fun () -> { preparedStatement }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PreparedStatement",
+           (Option.map x.preparedStatement ~f:PreparedStatement.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let preparedStatement =
+        (Option.map ~f:PreparedStatement.of_xml)
+          (Xml.child xml_arg0 "PreparedStatement") in
+      make ?preparedStatement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let preparedStatement =
+        field_map json__ "PreparedStatement" PreparedStatement.of_json in
+      make ?preparedStatement ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the prepared statement with the specified name from the specified workgroup."]
+module GetQueryExecutionInput =
+  struct
+    type nonrec t =
+      {
+      queryExecutionId: QueryExecutionId.t
+        [@ocaml.doc "The unique ID of the query execution."]}
+    let context_ = "GetQueryExecutionInput"
+    let make ~queryExecutionId = fun () -> { queryExecutionId }
+    let to_value x =
+      structure_to_value
+        [("QueryExecutionId",
+           (Some (QueryExecutionId.to_value x.queryExecutionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queryExecutionId =
+        QueryExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "QueryExecutionId") in
+      make ~queryExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queryExecutionId =
+        field_map_exn json__ "QueryExecutionId" QueryExecutionId.of_json in
+      make ~queryExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about a single execution of a query if you have access to the workgroup in which the query ran. Each time a query executes, information about the query execution is saved with a unique ID."]
+module GetQueryExecutionOutput =
+  struct
+    type nonrec t =
+      {
+      queryExecution: QueryExecution.t option
+        [@ocaml.doc "Information about the query execution."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?queryExecution = fun () -> { queryExecution }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("QueryExecution",
+           (Option.map x.queryExecution ~f:QueryExecution.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queryExecution =
+        (Option.map ~f:QueryExecution.of_xml)
+          (Xml.child xml_arg0 "QueryExecution") in
+      make ?queryExecution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queryExecution =
+        field_map json__ "QueryExecution" QueryExecution.of_json in
+      make ?queryExecution ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about a single execution of a query if you have access to the workgroup in which the query ran. Each time a query executes, information about the query execution is saved with a unique ID."]
+module Token =
+  struct
+    type nonrec t = string
+    let context_ = "Token"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Token" j
+    let to_json = simple_to_json to_value
+  end
+module QueryResultType =
+  struct
+    type nonrec t =
+      | DATA_MANIFEST 
+      | DATA_ROWS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DATA_MANIFEST -> "DATA_MANIFEST"
+      | DATA_ROWS -> "DATA_ROWS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DATA_MANIFEST" -> DATA_MANIFEST
+      | "DATA_ROWS" -> DATA_ROWS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration QueryResultType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QueryResultType" j)
+    let to_json = simple_to_json to_value
+  end
+module MaxQueryResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxQueryResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module GetQueryResultsInput =
+  struct
+    type nonrec t =
+      {
+      queryExecutionId: QueryExecutionId.t
+        [@ocaml.doc "The unique ID of the query execution."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
+      maxResults: MaxQueryResults.t option
+        [@ocaml.doc
+          "The maximum number of results (rows) to return in this request."];
+      queryResultType: QueryResultType.t option
+        [@ocaml.doc
+          "When you set this to DATA_ROWS or empty, GetQueryResults returns the query results in rows. If set to DATA_MANIFEST, it returns the manifest file in rows. Only the query types CREATE TABLE AS SELECT, UNLOAD, and INSERT can generate a manifest file. If you use DATA_MANIFEST for other query types, the query will fail."]}
+    let context_ = "GetQueryResultsInput"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?queryResultType ->
+          fun ~queryExecutionId ->
+            fun () ->
+              { nextToken; maxResults; queryResultType; queryExecutionId }
+    let to_value x =
+      structure_to_value
+        [("QueryExecutionId",
+           (Some (QueryExecutionId.to_value x.queryExecutionId)));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxQueryResults.to_value));
+        ("QueryResultType",
+          (Option.map x.queryResultType ~f:QueryResultType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queryResultType =
+        (Option.map ~f:QueryResultType.of_xml)
+          (Xml.child xml_arg0 "QueryResultType") in
+      let maxResults =
+        (Option.map ~f:MaxQueryResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let queryExecutionId =
+        QueryExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "QueryExecutionId") in
+      make ?queryResultType ?maxResults ?nextToken ~queryExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queryResultType =
+        field_map json__ "QueryResultType" QueryResultType.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxQueryResults.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let queryExecutionId =
+        field_map_exn json__ "QueryExecutionId" QueryExecutionId.of_json in
+      make ?queryResultType ?maxResults ?nextToken ~queryExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Streams the results of a single query execution specified by QueryExecutionId from the Athena query results location in Amazon S3. For more information, see Working with query results, recent queries, and output files in the Amazon Athena User Guide. This request does not execute the query but returns results. Use StartQueryExecution to run a query. To stream query results successfully, the IAM principal with permission to call GetQueryResults also must have permissions to the Amazon S3 GetObject action for the Athena query results location. IAM principals with permission to the Amazon S3 GetObject action for the query results location are able to retrieve query results from Amazon S3 even if permission to the GetQueryResults action is denied. To restrict user or role access, ensure that Amazon S3 permissions to the Athena query location are denied."]
+module DatumList =
+  struct
+    type nonrec t = Datum.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Datum.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Datum.of_xml)
+    let of_json j = list_of_json ~kind:"datumList" ~of_json:Datum.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Row =
+  struct
+    type nonrec t =
+      {
+      data: DatumList.t option
+        [@ocaml.doc "The data that populates a row in a query result table."]}
+    let make ?data = fun () -> { data }
+    let to_value x =
+      structure_to_value
+        [("Data", (Option.map x.data ~f:DatumList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let data = (Option.map ~f:DatumList.of_xml) (Xml.child xml_arg0 "Data") in
+      make ?data ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let data = field_map json__ "Data" DatumList.of_json in make ?data ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The rows that make up a query result table."]
+module RowList =
+  struct
+    type nonrec t = Row.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Row.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Row.of_xml)
+    let of_json j = list_of_json ~kind:"RowList" ~of_json:Row.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResultSetMetadata =
+  struct
+    type nonrec t =
+      {
+      columnInfo: ColumnInfoList.t option
+        [@ocaml.doc
+          "Information about the columns returned in a query result metadata."]}
+    let make ?columnInfo = fun () -> { columnInfo }
+    let to_value x =
+      structure_to_value
+        [("ColumnInfo", (Option.map x.columnInfo ~f:ColumnInfoList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let columnInfo =
+        (Option.map ~f:ColumnInfoList.of_xml)
+          (Xml.child xml_arg0 "ColumnInfo") in
+      make ?columnInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let columnInfo = field_map json__ "ColumnInfo" ColumnInfoList.of_json in
+      make ?columnInfo ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The metadata that describes the column structure and data types of a table of query results. To return a ResultSetMetadata object, use GetQueryResults."]
+module ResultSet =
+  struct
+    type nonrec t =
+      {
+      rows: RowList.t option [@ocaml.doc "The rows in the table."];
+      resultSetMetadata: ResultSetMetadata.t option
+        [@ocaml.doc
+          "The metadata that describes the column structure and data types of a table of query results."]}
+    let make ?rows =
+      fun ?resultSetMetadata -> fun () -> { rows; resultSetMetadata }
+    let to_value x =
+      structure_to_value
+        [("Rows", (Option.map x.rows ~f:RowList.to_value));
+        ("ResultSetMetadata",
+          (Option.map x.resultSetMetadata ~f:ResultSetMetadata.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resultSetMetadata =
+        (Option.map ~f:ResultSetMetadata.of_xml)
+          (Xml.child xml_arg0 "ResultSetMetadata") in
+      let rows = (Option.map ~f:RowList.of_xml) (Xml.child xml_arg0 "Rows") in
+      make ?resultSetMetadata ?rows ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resultSetMetadata =
+        field_map json__ "ResultSetMetadata" ResultSetMetadata.of_json in
+      let rows = field_map json__ "Rows" RowList.of_json in
+      make ?resultSetMetadata ?rows ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The metadata and rows that make up a query result set. The metadata describes the column structure and data types. To return a ResultSet object, use GetQueryResults."]
+module GetQueryResultsOutput =
+  struct
+    type nonrec t =
+      {
+      updateCount: Long.t option
+        [@ocaml.doc
+          "The number of rows inserted with a CREATE TABLE AS SELECT, INSERT INTO, or UPDATE statement."];
+      resultSet: ResultSet.t option
+        [@ocaml.doc "The results of the query execution."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?updateCount =
+      fun ?resultSet ->
+        fun ?nextToken -> fun () -> { updateCount; resultSet; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("UpdateCount", (Option.map x.updateCount ~f:Long.to_value));
+        ("ResultSet", (Option.map x.resultSet ~f:ResultSet.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let tableMetadataList =
-        (Option.map ~f:TableMetadataList.of_xml)
-          (Xml.child xml_arg0 "TableMetadataList") in
-      make ?nextToken ?tableMetadataList ()
+      let resultSet =
+        (Option.map ~f:ResultSet.of_xml) (Xml.child xml_arg0 "ResultSet") in
+      let updateCount =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "UpdateCount") in
+      make ?nextToken ?resultSet ?updateCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let tableMetadataList =
-        field_map json "TableMetadataList" TableMetadataList.of_json in
-      make ?nextToken ?tableMetadataList ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let resultSet = field_map json__ "ResultSet" ResultSet.of_json in
+      let updateCount = field_map json__ "UpdateCount" Long.of_json in
+      make ?nextToken ?resultSet ?updateCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the metadata for the tables in the specified data catalog database."]
-module ListTableMetadataInput =
+       "Streams the results of a single query execution specified by QueryExecutionId from the Athena query results location in Amazon S3. For more information, see Working with query results, recent queries, and output files in the Amazon Athena User Guide. This request does not execute the query but returns results. Use StartQueryExecution to run a query. To stream query results successfully, the IAM principal with permission to call GetQueryResults also must have permissions to the Amazon S3 GetObject action for the Athena query results location. IAM principals with permission to the Amazon S3 GetObject action for the query results location are able to retrieve query results from Amazon S3 even if permission to the GetQueryResults action is denied. To restrict user or role access, ensure that Amazon S3 permissions to the Athena query location are denied."]
+module GetQueryRuntimeStatisticsInput =
+  struct
+    type nonrec t =
+      {
+      queryExecutionId: QueryExecutionId.t
+        [@ocaml.doc "The unique ID of the query execution."]}
+    let context_ = "GetQueryRuntimeStatisticsInput"
+    let make ~queryExecutionId = fun () -> { queryExecutionId }
+    let to_value x =
+      structure_to_value
+        [("QueryExecutionId",
+           (Some (QueryExecutionId.to_value x.queryExecutionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queryExecutionId =
+        QueryExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "QueryExecutionId") in
+      make ~queryExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queryExecutionId =
+        field_map_exn json__ "QueryExecutionId" QueryExecutionId.of_json in
+      make ~queryExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns query execution runtime statistics related to a single execution of a query if you have access to the workgroup in which the query ran. Statistics from the Timeline section of the response object are available as soon as QueryExecutionStatus$State is in a SUCCEEDED or FAILED state. The remaining non-timeline statistics in the response (like stage-level input and output row count and data size) are updated asynchronously and may not be available immediately after a query completes or, in some cases, may not be returned. The non-timeline statistics are also not included when a query has row-level filters defined in Lake Formation."]
+module StringList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"StringList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module rec
+  QueryStagePlanNode:sig
+                       type nonrec t =
+                         {
+                         name: String_.t option
+                           [@ocaml.doc
+                             "Name of the query stage plan that describes the operation this stage is performing as part of query execution."];
+                         identifier: String_.t option
+                           [@ocaml.doc
+                             "Information about the operation this query stage plan node is performing."];
+                         children: QueryStagePlanNodes.t option
+                           [@ocaml.doc
+                             "Stage plan information such as name, identifier, sub plans, and remote sources of child plan nodes/"];
+                         remoteSources: StringList.t option
+                           [@ocaml.doc "Source plan node IDs."]}
+                       val make :
+                         ?name:String_.t ->
+                           ?identifier:String_.t ->
+                             ?children:QueryStagePlanNodes.t ->
+                               ?remoteSources:StringList.t -> unit -> t
+                       val to_value : t -> Botodata.value
+                       val to_query : t -> Client.Query.t
+                       val of_xml : Xml.t -> t
+                       val of_json : Yojson.Safe.t -> t
+                       val to_json : t -> Yojson.Safe.t
+                     end =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option
+        [@ocaml.doc
+          "Name of the query stage plan that describes the operation this stage is performing as part of query execution."];
+      identifier: String_.t option
+        [@ocaml.doc
+          "Information about the operation this query stage plan node is performing."];
+      children: QueryStagePlanNodes.t option
+        [@ocaml.doc
+          "Stage plan information such as name, identifier, sub plans, and remote sources of child plan nodes/"];
+      remoteSources: StringList.t option [@ocaml.doc "Source plan node IDs."]}
+    let make ?name =
+      fun ?identifier ->
+        fun ?children ->
+          fun ?remoteSources ->
+            fun () -> { name; identifier; children; remoteSources }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:String_.to_value));
+        ("Identifier", (Option.map x.identifier ~f:String_.to_value));
+        ("Children", (Option.map x.children ~f:QueryStagePlanNodes.to_value));
+        ("RemoteSources",
+          (Option.map x.remoteSources ~f:StringList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let remoteSources =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "RemoteSources") in
+      let children =
+        (Option.map ~f:QueryStagePlanNodes.of_xml)
+          (Xml.child xml_arg0 "Children") in
+      let identifier =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Identifier") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?remoteSources ?children ?identifier ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let remoteSources = field_map json__ "RemoteSources" StringList.of_json in
+      let children = field_map json__ "Children" QueryStagePlanNodes.of_json in
+      let identifier = field_map json__ "Identifier" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?remoteSources ?children ?identifier ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Stage plan information such as name, identifier, sub plans, and remote sources."]
+ and
+  QueryStagePlanNodes:sig
+                        type nonrec t = QueryStagePlanNode.t list
+                        val make : QueryStagePlanNode.t list -> t
+                        val to_value : t -> Botodata.value
+                        val to_query : t -> Client.Query.t
+                        val of_xml : Xml.t -> QueryStagePlanNode.t list
+                        val of_json : Yojson.Safe.t -> t
+                        val to_json : t -> Yojson.Safe.t
+                        val to_header : t -> string
+                      end =
+  struct
+    type nonrec t = QueryStagePlanNode.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QueryStagePlanNode.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QueryStagePlanNode.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QueryStagePlanNodes"
+        ~of_json:QueryStagePlanNode.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module rec
+  QueryStage:sig
+               type nonrec t =
+                 {
+                 stageId: Long.t option
+                   [@ocaml.doc "The identifier for a stage."];
+                 state: String_.t option
+                   [@ocaml.doc "State of the stage after query execution."];
+                 outputBytes: Long.t option
+                   [@ocaml.doc
+                     "The number of bytes output from the stage after execution."];
+                 outputRows: Long.t option
+                   [@ocaml.doc
+                     "The number of rows output from the stage after execution."];
+                 inputBytes: Long.t option
+                   [@ocaml.doc
+                     "The number of bytes input into the stage for execution."];
+                 inputRows: Long.t option
+                   [@ocaml.doc
+                     "The number of rows input into the stage for execution."];
+                 executionTime: Long.t option
+                   [@ocaml.doc "Time taken to execute this stage."];
+                 queryStagePlan: QueryStagePlanNode.t option
+                   [@ocaml.doc
+                     "Stage plan information such as name, identifier, sub plans, and source stages."];
+                 subStages: QueryStages.t option
+                   [@ocaml.doc
+                     "List of sub query stages that form this stage execution plan."]}
+               val make :
+                 ?stageId:Long.t ->
+                   ?state:String_.t ->
+                     ?outputBytes:Long.t ->
+                       ?outputRows:Long.t ->
+                         ?inputBytes:Long.t ->
+                           ?inputRows:Long.t ->
+                             ?executionTime:Long.t ->
+                               ?queryStagePlan:QueryStagePlanNode.t ->
+                                 ?subStages:QueryStages.t -> unit -> t
+               val to_value : t -> Botodata.value
+               val to_query : t -> Client.Query.t
+               val of_xml : Xml.t -> t
+               val of_json : Yojson.Safe.t -> t
+               val to_json : t -> Yojson.Safe.t
+             end =
+  struct
+    type nonrec t =
+      {
+      stageId: Long.t option [@ocaml.doc "The identifier for a stage."];
+      state: String_.t option
+        [@ocaml.doc "State of the stage after query execution."];
+      outputBytes: Long.t option
+        [@ocaml.doc
+          "The number of bytes output from the stage after execution."];
+      outputRows: Long.t option
+        [@ocaml.doc
+          "The number of rows output from the stage after execution."];
+      inputBytes: Long.t option
+        [@ocaml.doc
+          "The number of bytes input into the stage for execution."];
+      inputRows: Long.t option
+        [@ocaml.doc "The number of rows input into the stage for execution."];
+      executionTime: Long.t option
+        [@ocaml.doc "Time taken to execute this stage."];
+      queryStagePlan: QueryStagePlanNode.t option
+        [@ocaml.doc
+          "Stage plan information such as name, identifier, sub plans, and source stages."];
+      subStages: QueryStages.t option
+        [@ocaml.doc
+          "List of sub query stages that form this stage execution plan."]}
+    let make ?stageId =
+      fun ?state ->
+        fun ?outputBytes ->
+          fun ?outputRows ->
+            fun ?inputBytes ->
+              fun ?inputRows ->
+                fun ?executionTime ->
+                  fun ?queryStagePlan ->
+                    fun ?subStages ->
+                      fun () ->
+                        {
+                          stageId;
+                          state;
+                          outputBytes;
+                          outputRows;
+                          inputBytes;
+                          inputRows;
+                          executionTime;
+                          queryStagePlan;
+                          subStages
+                        }
+    let to_value x =
+      structure_to_value
+        [("StageId", (Option.map x.stageId ~f:Long.to_value));
+        ("State", (Option.map x.state ~f:String_.to_value));
+        ("OutputBytes", (Option.map x.outputBytes ~f:Long.to_value));
+        ("OutputRows", (Option.map x.outputRows ~f:Long.to_value));
+        ("InputBytes", (Option.map x.inputBytes ~f:Long.to_value));
+        ("InputRows", (Option.map x.inputRows ~f:Long.to_value));
+        ("ExecutionTime", (Option.map x.executionTime ~f:Long.to_value));
+        ("QueryStagePlan",
+          (Option.map x.queryStagePlan ~f:QueryStagePlanNode.to_value));
+        ("SubStages", (Option.map x.subStages ~f:QueryStages.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subStages =
+        (Option.map ~f:QueryStages.of_xml) (Xml.child xml_arg0 "SubStages") in
+      let queryStagePlan =
+        (Option.map ~f:QueryStagePlanNode.of_xml)
+          (Xml.child xml_arg0 "QueryStagePlan") in
+      let executionTime =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "ExecutionTime") in
+      let inputRows =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "InputRows") in
+      let inputBytes =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "InputBytes") in
+      let outputRows =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "OutputRows") in
+      let outputBytes =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "OutputBytes") in
+      let state = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "State") in
+      let stageId =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "StageId") in
+      make ?subStages ?queryStagePlan ?executionTime ?inputRows ?inputBytes
+        ?outputRows ?outputBytes ?state ?stageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subStages = field_map json__ "SubStages" QueryStages.of_json in
+      let queryStagePlan =
+        field_map json__ "QueryStagePlan" QueryStagePlanNode.of_json in
+      let executionTime = field_map json__ "ExecutionTime" Long.of_json in
+      let inputRows = field_map json__ "InputRows" Long.of_json in
+      let inputBytes = field_map json__ "InputBytes" Long.of_json in
+      let outputRows = field_map json__ "OutputRows" Long.of_json in
+      let outputBytes = field_map json__ "OutputBytes" Long.of_json in
+      let state = field_map json__ "State" String_.of_json in
+      let stageId = field_map json__ "StageId" Long.of_json in
+      make ?subStages ?queryStagePlan ?executionTime ?inputRows ?inputBytes
+        ?outputRows ?outputBytes ?state ?stageId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Stage statistics such as input and output rows and bytes, execution time and stage state. This information also includes substages and the query stage plan."]
+ and
+  QueryStages:sig
+                type nonrec t = QueryStage.t list
+                val make : QueryStage.t list -> t
+                val to_value : t -> Botodata.value
+                val to_query : t -> Client.Query.t
+                val of_xml : Xml.t -> QueryStage.t list
+                val of_json : Yojson.Safe.t -> t
+                val to_json : t -> Yojson.Safe.t
+                val to_header : t -> string
+              end =
+  struct
+    type nonrec t = QueryStage.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QueryStage.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QueryStage.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QueryStages" ~of_json:QueryStage.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module QueryRuntimeStatisticsTimeline =
+  struct
+    type nonrec t =
+      {
+      queryQueueTimeInMillis: Long.t option
+        [@ocaml.doc
+          "The number of milliseconds that the query was in your query queue waiting for resources. Note that if transient errors occur, Athena might automatically add the query back to the queue."];
+      servicePreProcessingTimeInMillis: Long.t option
+        [@ocaml.doc
+          "The number of milliseconds that Athena spends on preprocessing before it submits the query to the engine."];
+      queryPlanningTimeInMillis: Long.t option
+        [@ocaml.doc
+          "The number of milliseconds that Athena took to plan the query processing flow. This includes the time spent retrieving table partitions from the data source. Note that because the query engine performs the query planning, query planning time is a subset of engine processing time."];
+      engineExecutionTimeInMillis: Long.t option
+        [@ocaml.doc
+          "The number of milliseconds that the query took to execute."];
+      serviceProcessingTimeInMillis: Long.t option
+        [@ocaml.doc
+          "The number of milliseconds that Athena took to finalize and publish the query results after the query engine finished running the query."];
+      totalExecutionTimeInMillis: Long.t option
+        [@ocaml.doc
+          "The number of milliseconds that Athena took to run the query."]}
+    let make ?queryQueueTimeInMillis =
+      fun ?servicePreProcessingTimeInMillis ->
+        fun ?queryPlanningTimeInMillis ->
+          fun ?engineExecutionTimeInMillis ->
+            fun ?serviceProcessingTimeInMillis ->
+              fun ?totalExecutionTimeInMillis ->
+                fun () ->
+                  {
+                    queryQueueTimeInMillis;
+                    servicePreProcessingTimeInMillis;
+                    queryPlanningTimeInMillis;
+                    engineExecutionTimeInMillis;
+                    serviceProcessingTimeInMillis;
+                    totalExecutionTimeInMillis
+                  }
+    let to_value x =
+      structure_to_value
+        [("QueryQueueTimeInMillis",
+           (Option.map x.queryQueueTimeInMillis ~f:Long.to_value));
+        ("ServicePreProcessingTimeInMillis",
+          (Option.map x.servicePreProcessingTimeInMillis ~f:Long.to_value));
+        ("QueryPlanningTimeInMillis",
+          (Option.map x.queryPlanningTimeInMillis ~f:Long.to_value));
+        ("EngineExecutionTimeInMillis",
+          (Option.map x.engineExecutionTimeInMillis ~f:Long.to_value));
+        ("ServiceProcessingTimeInMillis",
+          (Option.map x.serviceProcessingTimeInMillis ~f:Long.to_value));
+        ("TotalExecutionTimeInMillis",
+          (Option.map x.totalExecutionTimeInMillis ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let totalExecutionTimeInMillis =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "TotalExecutionTimeInMillis") in
+      let serviceProcessingTimeInMillis =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "ServiceProcessingTimeInMillis") in
+      let engineExecutionTimeInMillis =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "EngineExecutionTimeInMillis") in
+      let queryPlanningTimeInMillis =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "QueryPlanningTimeInMillis") in
+      let servicePreProcessingTimeInMillis =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "ServicePreProcessingTimeInMillis") in
+      let queryQueueTimeInMillis =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "QueryQueueTimeInMillis") in
+      make ?totalExecutionTimeInMillis ?serviceProcessingTimeInMillis
+        ?engineExecutionTimeInMillis ?queryPlanningTimeInMillis
+        ?servicePreProcessingTimeInMillis ?queryQueueTimeInMillis ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let totalExecutionTimeInMillis =
+        field_map json__ "TotalExecutionTimeInMillis" Long.of_json in
+      let serviceProcessingTimeInMillis =
+        field_map json__ "ServiceProcessingTimeInMillis" Long.of_json in
+      let engineExecutionTimeInMillis =
+        field_map json__ "EngineExecutionTimeInMillis" Long.of_json in
+      let queryPlanningTimeInMillis =
+        field_map json__ "QueryPlanningTimeInMillis" Long.of_json in
+      let servicePreProcessingTimeInMillis =
+        field_map json__ "ServicePreProcessingTimeInMillis" Long.of_json in
+      let queryQueueTimeInMillis =
+        field_map json__ "QueryQueueTimeInMillis" Long.of_json in
+      make ?totalExecutionTimeInMillis ?serviceProcessingTimeInMillis
+        ?engineExecutionTimeInMillis ?queryPlanningTimeInMillis
+        ?servicePreProcessingTimeInMillis ?queryQueueTimeInMillis ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Timeline statistics such as query queue time, planning time, execution time, service processing time, and total execution time."]
+module QueryRuntimeStatisticsRows =
+  struct
+    type nonrec t =
+      {
+      inputRows: Long.t option
+        [@ocaml.doc "The number of rows read to execute the query."];
+      inputBytes: Long.t option
+        [@ocaml.doc "The number of bytes read to execute the query."];
+      outputBytes: Long.t option
+        [@ocaml.doc "The number of bytes returned by the query."];
+      outputRows: Long.t option
+        [@ocaml.doc "The number of rows returned by the query."]}
+    let make ?inputRows =
+      fun ?inputBytes ->
+        fun ?outputBytes ->
+          fun ?outputRows ->
+            fun () -> { inputRows; inputBytes; outputBytes; outputRows }
+    let to_value x =
+      structure_to_value
+        [("InputRows", (Option.map x.inputRows ~f:Long.to_value));
+        ("InputBytes", (Option.map x.inputBytes ~f:Long.to_value));
+        ("OutputBytes", (Option.map x.outputBytes ~f:Long.to_value));
+        ("OutputRows", (Option.map x.outputRows ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let outputRows =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "OutputRows") in
+      let outputBytes =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "OutputBytes") in
+      let inputBytes =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "InputBytes") in
+      let inputRows =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "InputRows") in
+      make ?outputRows ?outputBytes ?inputBytes ?inputRows ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let outputRows = field_map json__ "OutputRows" Long.of_json in
+      let outputBytes = field_map json__ "OutputBytes" Long.of_json in
+      let inputBytes = field_map json__ "InputBytes" Long.of_json in
+      let inputRows = field_map json__ "InputRows" Long.of_json in
+      make ?outputRows ?outputBytes ?inputBytes ?inputRows ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Statistics such as input rows and bytes read by the query, rows and bytes output by the query, and the number of rows written by the query."]
+module QueryRuntimeStatistics =
+  struct
+    type nonrec t =
+      {
+      timeline: QueryRuntimeStatisticsTimeline.t option ;
+      rows: QueryRuntimeStatisticsRows.t option ;
+      outputStage: QueryStage.t option
+        [@ocaml.doc
+          "Stage statistics such as input and output rows and bytes, execution time, and stage state. This information also includes substages and the query stage plan."]}
+    let make ?timeline =
+      fun ?rows ->
+        fun ?outputStage -> fun () -> { timeline; rows; outputStage }
+    let to_value x =
+      structure_to_value
+        [("Timeline",
+           (Option.map x.timeline ~f:QueryRuntimeStatisticsTimeline.to_value));
+        ("Rows", (Option.map x.rows ~f:QueryRuntimeStatisticsRows.to_value));
+        ("OutputStage", (Option.map x.outputStage ~f:QueryStage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let outputStage =
+        (Option.map ~f:QueryStage.of_xml) (Xml.child xml_arg0 "OutputStage") in
+      let rows =
+        (Option.map ~f:QueryRuntimeStatisticsRows.of_xml)
+          (Xml.child xml_arg0 "Rows") in
+      let timeline =
+        (Option.map ~f:QueryRuntimeStatisticsTimeline.of_xml)
+          (Xml.child xml_arg0 "Timeline") in
+      make ?outputStage ?rows ?timeline ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let outputStage = field_map json__ "OutputStage" QueryStage.of_json in
+      let rows = field_map json__ "Rows" QueryRuntimeStatisticsRows.of_json in
+      let timeline =
+        field_map json__ "Timeline" QueryRuntimeStatisticsTimeline.of_json in
+      make ?outputStage ?rows ?timeline ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The query execution timeline, statistics on input and output rows and bytes, and the different query stages that form the query execution plan."]
+module GetQueryRuntimeStatisticsOutput =
+  struct
+    type nonrec t =
+      {
+      queryRuntimeStatistics: QueryRuntimeStatistics.t option
+        [@ocaml.doc "Runtime statistics about the query execution."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?queryRuntimeStatistics = fun () -> { queryRuntimeStatistics }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("QueryRuntimeStatistics",
+           (Option.map x.queryRuntimeStatistics
+              ~f:QueryRuntimeStatistics.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queryRuntimeStatistics =
+        (Option.map ~f:QueryRuntimeStatistics.of_xml)
+          (Xml.child xml_arg0 "QueryRuntimeStatistics") in
+      make ?queryRuntimeStatistics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queryRuntimeStatistics =
+        field_map json__ "QueryRuntimeStatistics"
+          QueryRuntimeStatistics.of_json in
+      make ?queryRuntimeStatistics ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns query execution runtime statistics related to a single execution of a query if you have access to the workgroup in which the query ran. Statistics from the Timeline section of the response object are available as soon as QueryExecutionStatus$State is in a SUCCEEDED or FAILED state. The remaining non-timeline statistics in the response (like stage-level input and output row count and data size) are updated asynchronously and may not be available immediately after a query completes or, in some cases, may not be returned. The non-timeline statistics are also not included when a query has row-level filters defined in Lake Formation."]
+module GetResourceDashboardRequest =
+  struct
+    type nonrec t =
+      {
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc "The The Amazon Resource Name (ARN) for a session."]}
+    let context_ = "GetResourceDashboardRequest"
+    let make ~resourceARN = fun () -> { resourceARN }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      make ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets the Live UI/Persistence UI for a session."]
+module GetResourceDashboardResponse =
+  struct
+    type nonrec t =
+      {
+      url: String_.t option
+        [@ocaml.doc "The Live UI/Persistence UI url for a session."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?url = fun () -> { url }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("Url", (Option.map x.url ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let url = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Url") in
+      make ?url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let url = field_map json__ "Url" String_.of_json in make ?url ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets the Live UI/Persistence UI for a session."]
+module GetSessionEndpointRequest =
+  struct
+    type nonrec t = {
+      sessionId: SessionId.t [@ocaml.doc "The session ID."]}
+    let context_ = "GetSessionEndpointRequest"
+    let make ~sessionId = fun () -> { sessionId }
+    let to_value x =
+      structure_to_value
+        [("SessionId", (Some (SessionId.to_value x.sessionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sessionId =
+        SessionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SessionId") in
+      make ~sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sessionId = field_map_exn json__ "SessionId" SessionId.of_json in
+      make ~sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets a connection endpoint and authentication token for a given session Id."]
+module GetSessionEndpointResponse =
+  struct
+    type nonrec t =
+      {
+      endpointUrl: String_.t option
+        [@ocaml.doc "The endpoint for connecting to the session."];
+      authToken: String_.t option
+        [@ocaml.doc "Authentication token for the connection"];
+      authTokenExpirationTime: Timestamp.t option
+        [@ocaml.doc "Expiration time of the auth token."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?endpointUrl =
+      fun ?authToken ->
+        fun ?authTokenExpirationTime ->
+          fun () -> { endpointUrl; authToken; authTokenExpirationTime }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("EndpointUrl", (Option.map x.endpointUrl ~f:String_.to_value));
+        ("AuthToken", (Option.map x.authToken ~f:String_.to_value));
+        ("AuthTokenExpirationTime",
+          (Option.map x.authTokenExpirationTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let authTokenExpirationTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "AuthTokenExpirationTime") in
+      let authToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AuthToken") in
+      let endpointUrl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EndpointUrl") in
+      make ?authTokenExpirationTime ?authToken ?endpointUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let authTokenExpirationTime =
+        field_map json__ "AuthTokenExpirationTime" Timestamp.of_json in
+      let authToken = field_map json__ "AuthToken" String_.of_json in
+      let endpointUrl = field_map json__ "EndpointUrl" String_.of_json in
+      make ?authTokenExpirationTime ?authToken ?endpointUrl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets a connection endpoint and authentication token for a given session Id."]
+module GetSessionRequest =
+  struct
+    type nonrec t = {
+      sessionId: SessionId.t [@ocaml.doc "The session ID."]}
+    let context_ = "GetSessionRequest"
+    let make ~sessionId = fun () -> { sessionId }
+    let to_value x =
+      structure_to_value
+        [("SessionId", (Some (SessionId.to_value x.sessionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sessionId =
+        SessionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SessionId") in
+      make ~sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sessionId = field_map_exn json__ "SessionId" SessionId.of_json in
+      make ~sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the full details of a previously created session, including the session status and configuration."]
+module SessionState =
+  struct
+    type nonrec t =
+      | CREATING 
+      | CREATED 
+      | IDLE 
+      | BUSY 
+      | TERMINATING 
+      | TERMINATED 
+      | DEGRADED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | CREATED -> "CREATED"
+      | IDLE -> "IDLE"
+      | BUSY -> "BUSY"
+      | TERMINATING -> "TERMINATING"
+      | TERMINATED -> "TERMINATED"
+      | DEGRADED -> "DEGRADED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "CREATED" -> CREATED
+      | "IDLE" -> IDLE
+      | "BUSY" -> BUSY
+      | "TERMINATING" -> TERMINATING
+      | "TERMINATED" -> TERMINATED
+      | "DEGRADED" -> DEGRADED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SessionState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SessionState" j)
+    let to_json = simple_to_json to_value
+  end
+module SessionStatus =
+  struct
+    type nonrec t =
+      {
+      startDateTime: Date.t option
+        [@ocaml.doc "The date and time that the session started."];
+      lastModifiedDateTime: Date.t option
+        [@ocaml.doc
+          "The most recent date and time that the session was modified."];
+      endDateTime: Date.t option
+        [@ocaml.doc "The date and time that the session ended."];
+      idleSinceDateTime: Date.t option
+        [@ocaml.doc
+          "The date and time starting at which the session became idle. Can be empty if the session is not currently idle."];
+      state: SessionState.t option
+        [@ocaml.doc
+          "The state of the session. A description of each state follows. CREATING - The session is being started, including acquiring resources. CREATED - The session has been started. IDLE - The session is able to accept a calculation. BUSY - The session is processing another task and is unable to accept a calculation. TERMINATING - The session is in the process of shutting down. TERMINATED - The session and its resources are no longer running. DEGRADED - The session has no healthy coordinators. FAILED - Due to a failure, the session and its resources are no longer running."];
+      stateChangeReason: DescriptionString.t option
+        [@ocaml.doc
+          "The reason for the session state change (for example, canceled because the session was terminated)."]}
+    let make ?startDateTime =
+      fun ?lastModifiedDateTime ->
+        fun ?endDateTime ->
+          fun ?idleSinceDateTime ->
+            fun ?state ->
+              fun ?stateChangeReason ->
+                fun () ->
+                  {
+                    startDateTime;
+                    lastModifiedDateTime;
+                    endDateTime;
+                    idleSinceDateTime;
+                    state;
+                    stateChangeReason
+                  }
+    let to_value x =
+      structure_to_value
+        [("StartDateTime", (Option.map x.startDateTime ~f:Date.to_value));
+        ("LastModifiedDateTime",
+          (Option.map x.lastModifiedDateTime ~f:Date.to_value));
+        ("EndDateTime", (Option.map x.endDateTime ~f:Date.to_value));
+        ("IdleSinceDateTime",
+          (Option.map x.idleSinceDateTime ~f:Date.to_value));
+        ("State", (Option.map x.state ~f:SessionState.to_value));
+        ("StateChangeReason",
+          (Option.map x.stateChangeReason ~f:DescriptionString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let stateChangeReason =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "StateChangeReason") in
+      let state =
+        (Option.map ~f:SessionState.of_xml) (Xml.child xml_arg0 "State") in
+      let idleSinceDateTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "IdleSinceDateTime") in
+      let endDateTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "EndDateTime") in
+      let lastModifiedDateTime =
+        (Option.map ~f:Date.of_xml)
+          (Xml.child xml_arg0 "LastModifiedDateTime") in
+      let startDateTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "StartDateTime") in
+      make ?stateChangeReason ?state ?idleSinceDateTime ?endDateTime
+        ?lastModifiedDateTime ?startDateTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stateChangeReason =
+        field_map json__ "StateChangeReason" DescriptionString.of_json in
+      let state = field_map json__ "State" SessionState.of_json in
+      let idleSinceDateTime =
+        field_map json__ "IdleSinceDateTime" Date.of_json in
+      let endDateTime = field_map json__ "EndDateTime" Date.of_json in
+      let lastModifiedDateTime =
+        field_map json__ "LastModifiedDateTime" Date.of_json in
+      let startDateTime = field_map json__ "StartDateTime" Date.of_json in
+      make ?stateChangeReason ?state ?idleSinceDateTime ?endDateTime
+        ?lastModifiedDateTime ?startDateTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains information about the status of a session."]
+module SessionStatistics =
+  struct
+    type nonrec t =
+      {
+      dpuExecutionInMillis: Long.t option
+        [@ocaml.doc
+          "The data processing unit execution time for a session in milliseconds."]}
+    let make ?dpuExecutionInMillis = fun () -> { dpuExecutionInMillis }
+    let to_value x =
+      structure_to_value
+        [("DpuExecutionInMillis",
+           (Option.map x.dpuExecutionInMillis ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dpuExecutionInMillis =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "DpuExecutionInMillis") in
+      make ?dpuExecutionInMillis ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dpuExecutionInMillis =
+        field_map json__ "DpuExecutionInMillis" Long.of_json in
+      make ?dpuExecutionInMillis ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains statistics for a session."]
+module SessionIdleTimeoutInMinutes =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:480) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for SessionIdleTimeoutInMinutes"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SessionConfiguration =
+  struct
+    type nonrec t =
+      {
+      executionRole: RoleArn.t option
+        [@ocaml.doc
+          "The ARN of the execution role used to access user resources for Spark sessions and Identity Center enabled workgroups. This property applies only to Spark enabled workgroups and Identity Center enabled workgroups."];
+      workingDirectory: ResultOutputLocation.t option
+        [@ocaml.doc
+          "The Amazon S3 location that stores information for the notebook."];
+      idleTimeoutSeconds: Long.t option
+        [@ocaml.doc "The idle timeout in seconds for the session."];
+      sessionIdleTimeoutInMinutes: SessionIdleTimeoutInMinutes.t option
+        [@ocaml.doc "The idle timeout in seconds for the session."];
+      encryptionConfiguration: EncryptionConfiguration.t option }
+    let make ?executionRole =
+      fun ?workingDirectory ->
+        fun ?idleTimeoutSeconds ->
+          fun ?sessionIdleTimeoutInMinutes ->
+            fun ?encryptionConfiguration ->
+              fun () ->
+                {
+                  executionRole;
+                  workingDirectory;
+                  idleTimeoutSeconds;
+                  sessionIdleTimeoutInMinutes;
+                  encryptionConfiguration
+                }
+    let to_value x =
+      structure_to_value
+        [("ExecutionRole", (Option.map x.executionRole ~f:RoleArn.to_value));
+        ("WorkingDirectory",
+          (Option.map x.workingDirectory ~f:ResultOutputLocation.to_value));
+        ("IdleTimeoutSeconds",
+          (Option.map x.idleTimeoutSeconds ~f:Long.to_value));
+        ("SessionIdleTimeoutInMinutes",
+          (Option.map x.sessionIdleTimeoutInMinutes
+             ~f:SessionIdleTimeoutInMinutes.to_value));
+        ("EncryptionConfiguration",
+          (Option.map x.encryptionConfiguration
+             ~f:EncryptionConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let encryptionConfiguration =
+        (Option.map ~f:EncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "EncryptionConfiguration") in
+      let sessionIdleTimeoutInMinutes =
+        (Option.map ~f:SessionIdleTimeoutInMinutes.of_xml)
+          (Xml.child xml_arg0 "SessionIdleTimeoutInMinutes") in
+      let idleTimeoutSeconds =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "IdleTimeoutSeconds") in
+      let workingDirectory =
+        (Option.map ~f:ResultOutputLocation.of_xml)
+          (Xml.child xml_arg0 "WorkingDirectory") in
+      let executionRole =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "ExecutionRole") in
+      make ?encryptionConfiguration ?sessionIdleTimeoutInMinutes
+        ?idleTimeoutSeconds ?workingDirectory ?executionRole ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let encryptionConfiguration =
+        field_map json__ "EncryptionConfiguration"
+          EncryptionConfiguration.of_json in
+      let sessionIdleTimeoutInMinutes =
+        field_map json__ "SessionIdleTimeoutInMinutes"
+          SessionIdleTimeoutInMinutes.of_json in
+      let idleTimeoutSeconds =
+        field_map json__ "IdleTimeoutSeconds" Long.of_json in
+      let workingDirectory =
+        field_map json__ "WorkingDirectory" ResultOutputLocation.of_json in
+      let executionRole = field_map json__ "ExecutionRole" RoleArn.of_json in
+      make ?encryptionConfiguration ?sessionIdleTimeoutInMinutes
+        ?idleTimeoutSeconds ?workingDirectory ?executionRole ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains session configuration information."]
+module GetSessionResponse =
+  struct
+    type nonrec t =
+      {
+      sessionId: SessionId.t option [@ocaml.doc "The session ID."];
+      description: DescriptionString.t option
+        [@ocaml.doc "The session description."];
+      workGroup: WorkGroupName.t option
+        [@ocaml.doc "The workgroup to which the session belongs."];
+      engineVersion: NameString.t option
+        [@ocaml.doc
+          "The engine version used by the session (for example, PySpark engine version 3). You can get a list of engine versions by calling ListEngineVersions."];
+      engineConfiguration: EngineConfiguration.t option
+        [@ocaml.doc
+          "Contains engine configuration information like DPU usage."];
+      notebookVersion: NameString.t option
+        [@ocaml.doc "The notebook version."];
+      monitoringConfiguration: MonitoringConfiguration.t option ;
+      sessionConfiguration: SessionConfiguration.t option
+        [@ocaml.doc
+          "Contains the workgroup configuration information used by the session."];
+      status: SessionStatus.t option
+        [@ocaml.doc "Contains information about the status of the session."];
+      statistics: SessionStatistics.t option
+        [@ocaml.doc "Contains the DPU execution time."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sessionId =
+      fun ?description ->
+        fun ?workGroup ->
+          fun ?engineVersion ->
+            fun ?engineConfiguration ->
+              fun ?notebookVersion ->
+                fun ?monitoringConfiguration ->
+                  fun ?sessionConfiguration ->
+                    fun ?status ->
+                      fun ?statistics ->
+                        fun () ->
+                          {
+                            sessionId;
+                            description;
+                            workGroup;
+                            engineVersion;
+                            engineConfiguration;
+                            notebookVersion;
+                            monitoringConfiguration;
+                            sessionConfiguration;
+                            status;
+                            statistics
+                          }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("SessionId", (Option.map x.sessionId ~f:SessionId.to_value));
+        ("Description",
+          (Option.map x.description ~f:DescriptionString.to_value));
+        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value));
+        ("EngineVersion",
+          (Option.map x.engineVersion ~f:NameString.to_value));
+        ("EngineConfiguration",
+          (Option.map x.engineConfiguration ~f:EngineConfiguration.to_value));
+        ("NotebookVersion",
+          (Option.map x.notebookVersion ~f:NameString.to_value));
+        ("MonitoringConfiguration",
+          (Option.map x.monitoringConfiguration
+             ~f:MonitoringConfiguration.to_value));
+        ("SessionConfiguration",
+          (Option.map x.sessionConfiguration ~f:SessionConfiguration.to_value));
+        ("Status", (Option.map x.status ~f:SessionStatus.to_value));
+        ("Statistics",
+          (Option.map x.statistics ~f:SessionStatistics.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statistics =
+        (Option.map ~f:SessionStatistics.of_xml)
+          (Xml.child xml_arg0 "Statistics") in
+      let status =
+        (Option.map ~f:SessionStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let sessionConfiguration =
+        (Option.map ~f:SessionConfiguration.of_xml)
+          (Xml.child xml_arg0 "SessionConfiguration") in
+      let monitoringConfiguration =
+        (Option.map ~f:MonitoringConfiguration.of_xml)
+          (Xml.child xml_arg0 "MonitoringConfiguration") in
+      let notebookVersion =
+        (Option.map ~f:NameString.of_xml)
+          (Xml.child xml_arg0 "NotebookVersion") in
+      let engineConfiguration =
+        (Option.map ~f:EngineConfiguration.of_xml)
+          (Xml.child xml_arg0 "EngineConfiguration") in
+      let engineVersion =
+        (Option.map ~f:NameString.of_xml)
+          (Xml.child xml_arg0 "EngineVersion") in
+      let workGroup =
+        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
+      let description =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let sessionId =
+        (Option.map ~f:SessionId.of_xml) (Xml.child xml_arg0 "SessionId") in
+      make ?statistics ?status ?sessionConfiguration ?monitoringConfiguration
+        ?notebookVersion ?engineConfiguration ?engineVersion ?workGroup
+        ?description ?sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statistics =
+        field_map json__ "Statistics" SessionStatistics.of_json in
+      let status = field_map json__ "Status" SessionStatus.of_json in
+      let sessionConfiguration =
+        field_map json__ "SessionConfiguration" SessionConfiguration.of_json in
+      let monitoringConfiguration =
+        field_map json__ "MonitoringConfiguration"
+          MonitoringConfiguration.of_json in
+      let notebookVersion =
+        field_map json__ "NotebookVersion" NameString.of_json in
+      let engineConfiguration =
+        field_map json__ "EngineConfiguration" EngineConfiguration.of_json in
+      let engineVersion = field_map json__ "EngineVersion" NameString.of_json in
+      let workGroup = field_map json__ "WorkGroup" WorkGroupName.of_json in
+      let description =
+        field_map json__ "Description" DescriptionString.of_json in
+      let sessionId = field_map json__ "SessionId" SessionId.of_json in
+      make ?statistics ?status ?sessionConfiguration ?monitoringConfiguration
+        ?notebookVersion ?engineConfiguration ?engineVersion ?workGroup
+        ?description ?sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the full details of a previously created session, including the session status and configuration."]
+module GetSessionStatusRequest =
+  struct
+    type nonrec t = {
+      sessionId: SessionId.t [@ocaml.doc "The session ID."]}
+    let context_ = "GetSessionStatusRequest"
+    let make ~sessionId = fun () -> { sessionId }
+    let to_value x =
+      structure_to_value
+        [("SessionId", (Some (SessionId.to_value x.sessionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sessionId =
+        SessionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SessionId") in
+      make ~sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sessionId = field_map_exn json__ "SessionId" SessionId.of_json in
+      make ~sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets the current status of a session."]
+module GetSessionStatusResponse =
+  struct
+    type nonrec t =
+      {
+      sessionId: SessionId.t option [@ocaml.doc "The session ID."];
+      status: SessionStatus.t option
+        [@ocaml.doc "Contains information about the status of the session."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sessionId = fun ?status -> fun () -> { sessionId; status }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("SessionId", (Option.map x.sessionId ~f:SessionId.to_value));
+        ("Status", (Option.map x.status ~f:SessionStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:SessionStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let sessionId =
+        (Option.map ~f:SessionId.of_xml) (Xml.child xml_arg0 "SessionId") in
+      make ?status ?sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" SessionStatus.of_json in
+      let sessionId = field_map json__ "SessionId" SessionId.of_json in
+      make ?status ?sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets the current status of a session."]
+module GetTableMetadataInput =
   struct
     type nonrec t =
       {
       catalogName: CatalogNameString.t
         [@ocaml.doc
-          "The name of the data catalog for which table metadata should be returned."];
+          "The name of the data catalog that contains the database and table metadata to return."];
       databaseName: NameString.t
         [@ocaml.doc
-          "The name of the database for which table metadata should be returned."];
-      expression: ExpressionString.t option
+          "The name of the database that contains the table metadata to return."];
+      tableName: NameString.t
+        [@ocaml.doc "The name of the table for which metadata is returned."];
+      workGroup: WorkGroupName.t option
         [@ocaml.doc
-          "A regex filter that pattern-matches table names. If no expression is supplied, metadata for all tables are listed."];
-      nextToken: Token.t option
-        [@ocaml.doc
-          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
-      maxResults: MaxTableMetadataCount.t option
-        [@ocaml.doc "Specifies the maximum number of results to return."]}
-    let context_ = "ListTableMetadataInput"
-    let make ?expression =
-      fun ?nextToken ->
-        fun ?maxResults ->
-          fun ~catalogName ->
-            fun ~databaseName ->
-              fun () ->
-                {
-                  expression;
-                  nextToken;
-                  maxResults;
-                  catalogName;
-                  databaseName
-                }
+          "The name of the workgroup for which the metadata is being fetched. Required if requesting an IAM Identity Center enabled Glue Data Catalog."]}
+    let context_ = "GetTableMetadataInput"
+    let make ?workGroup =
+      fun ~catalogName ->
+        fun ~databaseName ->
+          fun ~tableName ->
+            fun () -> { workGroup; catalogName; databaseName; tableName }
     let to_value x =
       structure_to_value
         [("CatalogName", (Some (CatalogNameString.to_value x.catalogName)));
         ("DatabaseName", (Some (NameString.to_value x.databaseName)));
-        ("Expression",
-          (Option.map x.expression ~f:ExpressionString.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("MaxResults",
-          (Option.map x.maxResults ~f:MaxTableMetadataCount.to_value))]
+        ("TableName", (Some (NameString.to_value x.tableName)));
+        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let maxResults =
-        (Option.map ~f:MaxTableMetadataCount.of_xml)
-          (Xml.child xml_arg0 "MaxResults") in
-      let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let expression =
-        (Option.map ~f:ExpressionString.of_xml)
-          (Xml.child xml_arg0 "Expression") in
+      let workGroup =
+        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
+      let tableName =
+        NameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       let databaseName =
         NameString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       let catalogName =
         CatalogNameString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CatalogName") in
-      make ?maxResults ?nextToken ?expression ~databaseName ~catalogName ()
+      make ?workGroup ~tableName ~databaseName ~catalogName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults =
-        field_map json "MaxResults" MaxTableMetadataCount.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let expression = field_map json "Expression" ExpressionString.of_json in
-      let databaseName = field_map_exn json "DatabaseName" NameString.of_json in
+    let of_json json__ =
+      let workGroup = field_map json__ "WorkGroup" WorkGroupName.of_json in
+      let tableName = field_map_exn json__ "TableName" NameString.of_json in
+      let databaseName =
+        field_map_exn json__ "DatabaseName" NameString.of_json in
       let catalogName =
-        field_map_exn json "CatalogName" CatalogNameString.of_json in
-      make ?maxResults ?nextToken ?expression ~databaseName ~catalogName ()
+        field_map_exn json__ "CatalogName" CatalogNameString.of_json in
+      make ?workGroup ~tableName ~databaseName ~catalogName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the metadata for the tables in the specified data catalog database."]
-module ListQueryExecutionsOutput =
+       "Returns table metadata for the specified catalog, database, and table."]
+module TableTypeString =
+  struct
+    type nonrec t = string
+    let context_ = "TableTypeString"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:255); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TableTypeString" j
+    let to_json = simple_to_json to_value
+  end
+module TableMetadata =
   struct
     type nonrec t =
       {
-      queryExecutionIds: QueryExecutionIdList.t option
+      name: NameString.t option [@ocaml.doc "The name of the table."];
+      createTime: Timestamp.t option
+        [@ocaml.doc "The time that the table was created."];
+      lastAccessTime: Timestamp.t option
+        [@ocaml.doc "The last time the table was accessed."];
+      tableType: TableTypeString.t option
         [@ocaml.doc
-          "The unique IDs of each query execution as an array of strings."];
-      nextToken: Token.t option
-        [@ocaml.doc
-          "A token to be used by the next request if this request is truncated."]}
+          "The type of table. In Athena, only EXTERNAL_TABLE is supported."];
+      columns: ColumnList.t option
+        [@ocaml.doc "A list of the columns in the table."];
+      partitionKeys: ColumnList.t option
+        [@ocaml.doc "A list of the partition keys in the table."];
+      parameters: ParametersMap.t option
+        [@ocaml.doc "A set of custom key/value pairs for table properties."]}
+    let make ?name =
+      fun ?createTime ->
+        fun ?lastAccessTime ->
+          fun ?tableType ->
+            fun ?columns ->
+              fun ?partitionKeys ->
+                fun ?parameters ->
+                  fun () ->
+                    {
+                      name;
+                      createTime;
+                      lastAccessTime;
+                      tableType;
+                      columns;
+                      partitionKeys;
+                      parameters
+                    }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:NameString.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
+        ("LastAccessTime",
+          (Option.map x.lastAccessTime ~f:Timestamp.to_value));
+        ("TableType", (Option.map x.tableType ~f:TableTypeString.to_value));
+        ("Columns", (Option.map x.columns ~f:ColumnList.to_value));
+        ("PartitionKeys",
+          (Option.map x.partitionKeys ~f:ColumnList.to_value));
+        ("Parameters", (Option.map x.parameters ~f:ParametersMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let parameters =
+        (Option.map ~f:ParametersMap.of_xml)
+          (Xml.child xml_arg0 "Parameters") in
+      let partitionKeys =
+        (Option.map ~f:ColumnList.of_xml)
+          (Xml.child xml_arg0 "PartitionKeys") in
+      let columns =
+        (Option.map ~f:ColumnList.of_xml) (Xml.child xml_arg0 "Columns") in
+      let tableType =
+        (Option.map ~f:TableTypeString.of_xml)
+          (Xml.child xml_arg0 "TableType") in
+      let lastAccessTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastAccessTime") in
+      let createTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let name =
+        (Option.map ~f:NameString.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?parameters ?partitionKeys ?columns ?tableType ?lastAccessTime
+        ?createTime ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let parameters = field_map json__ "Parameters" ParametersMap.of_json in
+      let partitionKeys = field_map json__ "PartitionKeys" ColumnList.of_json in
+      let columns = field_map json__ "Columns" ColumnList.of_json in
+      let tableType = field_map json__ "TableType" TableTypeString.of_json in
+      let lastAccessTime =
+        field_map json__ "LastAccessTime" Timestamp.of_json in
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let name = field_map json__ "Name" NameString.of_json in
+      make ?parameters ?partitionKeys ?columns ?tableType ?lastAccessTime
+        ?createTime ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains metadata for a table."]
+module GetTableMetadataOutput =
+  struct
+    type nonrec t =
+      {
+      tableMetadata: TableMetadata.t option
+        [@ocaml.doc "An object that contains table metadata."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
+      | `MetadataException of MetadataException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?queryExecutionIds =
-      fun ?nextToken -> fun () -> { queryExecutionIds; nextToken }
+    let make ?tableMetadata = fun () -> { tableMetadata }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "InvalidRequestException" ->
           `InvalidRequestException (InvalidRequestException.of_json json)
+      | "MetadataException" ->
+          `MetadataException (MetadataException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -4529,6 +9944,8 @@ module ListQueryExecutionsOutput =
           `InternalServerException (InternalServerException.of_xml xml)
       | "InvalidRequestException" ->
           `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "MetadataException" ->
+          `MetadataException (MetadataException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -4541,6 +9958,10 @@ module ListQueryExecutionsOutput =
           `Assoc
             [("error", (`String "InvalidRequestException"));
             ("details", (InvalidRequestException.to_json e))]
+      | `MetadataException e ->
+          `Assoc
+            [("error", (`String "MetadataException"));
+            ("details", (MetadataException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -4548,83 +9969,183 @@ module ListQueryExecutionsOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("QueryExecutionIds",
-           (Option.map x.queryExecutionIds ~f:QueryExecutionIdList.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+        [("TableMetadata",
+           (Option.map x.tableMetadata ~f:TableMetadata.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let queryExecutionIds =
-        (Option.map ~f:QueryExecutionIdList.of_xml)
-          (Xml.child xml_arg0 "QueryExecutionIds") in
-      make ?nextToken ?queryExecutionIds ()
+      let tableMetadata =
+        (Option.map ~f:TableMetadata.of_xml)
+          (Xml.child xml_arg0 "TableMetadata") in
+      make ?tableMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let queryExecutionIds =
-        field_map json "QueryExecutionIds" QueryExecutionIdList.of_json in
-      make ?nextToken ?queryExecutionIds ()
+    let of_json json__ =
+      let tableMetadata =
+        field_map json__ "TableMetadata" TableMetadata.of_json in
+      make ?tableMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides a list of available query execution IDs for the queries in the specified workgroup. If a workgroup is not specified, returns a list of query execution IDs for the primary workgroup. Requires you to have access to the workgroup in which the queries ran. For code samples using the Amazon Web Services SDK for Java, see Examples and Code Samples in the Amazon Athena User Guide."]
-module ListQueryExecutionsInput =
+       "Returns table metadata for the specified catalog, database, and table."]
+module GetWorkGroupInput =
   struct
     type nonrec t =
       {
-      nextToken: Token.t option
-        [@ocaml.doc
-          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
-      maxResults: MaxQueryExecutionsCount.t option
-        [@ocaml.doc
-          "The maximum number of query executions to return in this request."];
-      workGroup: WorkGroupName.t option
-        [@ocaml.doc
-          "The name of the workgroup from which queries are being returned. If a workgroup is not specified, a list of available query execution IDs for the queries in the primary workgroup is returned."]}
-    let make ?nextToken =
-      fun ?maxResults ->
-        fun ?workGroup -> fun () -> { nextToken; maxResults; workGroup }
+      workGroup: WorkGroupName.t [@ocaml.doc "The name of the workgroup."]}
+    let context_ = "GetWorkGroupInput"
+    let make ~workGroup = fun () -> { workGroup }
     let to_value x =
       structure_to_value
-        [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("MaxResults",
-          (Option.map x.maxResults ~f:MaxQueryExecutionsCount.to_value));
-        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value))]
+        [("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workGroup =
-        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
-      let maxResults =
-        (Option.map ~f:MaxQueryExecutionsCount.of_xml)
-          (Xml.child xml_arg0 "MaxResults") in
-      let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ?workGroup ?maxResults ?nextToken ()
+        WorkGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
+      make ~workGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workGroup = field_map json "WorkGroup" WorkGroupName.of_json in
-      let maxResults =
-        field_map json "MaxResults" MaxQueryExecutionsCount.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      make ?workGroup ?maxResults ?nextToken ()
+    let of_json json__ =
+      let workGroup = field_map_exn json__ "WorkGroup" WorkGroupName.of_json in
+      make ~workGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides a list of available query execution IDs for the queries in the specified workgroup. If a workgroup is not specified, returns a list of query execution IDs for the primary workgroup. Requires you to have access to the workgroup in which the queries ran. For code samples using the Amazon Web Services SDK for Java, see Examples and Code Samples in the Amazon Athena User Guide."]
-module ListPreparedStatementsOutput =
+       "Returns information about the workgroup with the specified name."]
+module WorkGroupState =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration WorkGroupState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"WorkGroupState" j)
+    let to_json = simple_to_json to_value
+  end
+module IdentityCenterApplicationArn =
+  struct
+    type nonrec t = string
+    let context_ = "IdentityCenterApplicationArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):sso::\\d{12}:application/(sso)?ins-[a-zA-Z0-9-.]{16}/apl-[a-zA-Z0-9]{16}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdentityCenterApplicationArn" j
+    let to_json = simple_to_json to_value
+  end
+module WorkGroup =
   struct
     type nonrec t =
       {
-      preparedStatements: PreparedStatementsList.t option
-        [@ocaml.doc "The list of prepared statements for the workgroup."];
-      nextToken: Token.t option
+      name: WorkGroupName.t option [@ocaml.doc "The workgroup name."];
+      state: WorkGroupState.t option
+        [@ocaml.doc "The state of the workgroup: ENABLED or DISABLED."];
+      configuration: WorkGroupConfiguration.t option
         [@ocaml.doc
-          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."]}
+          "The configuration of the workgroup, which includes the location in Amazon S3 where query and calculation results are stored, the encryption configuration, if any, used for query and calculation results; whether the Amazon CloudWatch Metrics are enabled for the workgroup; whether workgroup settings override client-side settings; and the data usage limits for the amount of data scanned per query or per workgroup. The workgroup settings override is specified in EnforceWorkGroupConfiguration (true/false) in the WorkGroupConfiguration. See WorkGroupConfiguration$EnforceWorkGroupConfiguration."];
+      description: WorkGroupDescriptionString.t option
+        [@ocaml.doc "The workgroup description."];
+      creationTime: Date.t option
+        [@ocaml.doc "The date and time the workgroup was created."];
+      identityCenterApplicationArn: IdentityCenterApplicationArn.t option
+        [@ocaml.doc
+          "The ARN of the IAM Identity Center enabled application associated with the workgroup."]}
+    let make ?name =
+      fun ?state ->
+        fun ?configuration ->
+          fun ?description ->
+            fun ?creationTime ->
+              fun ?identityCenterApplicationArn ->
+                fun () ->
+                  {
+                    name;
+                    state;
+                    configuration;
+                    description;
+                    creationTime;
+                    identityCenterApplicationArn
+                  }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:WorkGroupName.to_value));
+        ("State", (Option.map x.state ~f:WorkGroupState.to_value));
+        ("Configuration",
+          (Option.map x.configuration ~f:WorkGroupConfiguration.to_value));
+        ("Description",
+          (Option.map x.description ~f:WorkGroupDescriptionString.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Date.to_value));
+        ("IdentityCenterApplicationArn",
+          (Option.map x.identityCenterApplicationArn
+             ~f:IdentityCenterApplicationArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identityCenterApplicationArn =
+        (Option.map ~f:IdentityCenterApplicationArn.of_xml)
+          (Xml.child xml_arg0 "IdentityCenterApplicationArn") in
+      let creationTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let description =
+        (Option.map ~f:WorkGroupDescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let configuration =
+        (Option.map ~f:WorkGroupConfiguration.of_xml)
+          (Xml.child xml_arg0 "Configuration") in
+      let state =
+        (Option.map ~f:WorkGroupState.of_xml) (Xml.child xml_arg0 "State") in
+      let name =
+        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?identityCenterApplicationArn ?creationTime ?description
+        ?configuration ?state ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identityCenterApplicationArn =
+        field_map json__ "IdentityCenterApplicationArn"
+          IdentityCenterApplicationArn.of_json in
+      let creationTime = field_map json__ "CreationTime" Date.of_json in
+      let description =
+        field_map json__ "Description" WorkGroupDescriptionString.of_json in
+      let configuration =
+        field_map json__ "Configuration" WorkGroupConfiguration.of_json in
+      let state = field_map json__ "State" WorkGroupState.of_json in
+      let name = field_map json__ "Name" WorkGroupName.of_json in
+      make ?identityCenterApplicationArn ?creationTime ?description
+        ?configuration ?state ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A workgroup, which contains a name, description, creation time, state, and other configuration, listed under WorkGroup$Configuration. Each workgroup enables you to isolate queries for you or your group of users from other queries in the same account, to configure the query results location and the encryption configuration (known as workgroup settings), to enable sending query metrics to Amazon CloudWatch, and to establish per-query data usage control limits for all queries in a workgroup. The workgroup settings override is specified in EnforceWorkGroupConfiguration (true/false) in the WorkGroupConfiguration. See WorkGroupConfiguration$EnforceWorkGroupConfiguration."]
+module GetWorkGroupOutput =
+  struct
+    type nonrec t =
+      {
+      workGroup: WorkGroup.t option
+        [@ocaml.doc "Information about the workgroup."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?preparedStatements =
-      fun ?nextToken -> fun () -> { preparedStatements; nextToken }
+    let make ?workGroup = fun () -> { workGroup }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -4659,89 +10180,119 @@ module ListPreparedStatementsOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("PreparedStatements",
-           (Option.map x.preparedStatements
-              ~f:PreparedStatementsList.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+        [("WorkGroup", (Option.map x.workGroup ~f:WorkGroup.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let preparedStatements =
-        (Option.map ~f:PreparedStatementsList.of_xml)
-          (Xml.child xml_arg0 "PreparedStatements") in
-      make ?nextToken ?preparedStatements ()
+      let workGroup =
+        (Option.map ~f:WorkGroup.of_xml) (Xml.child xml_arg0 "WorkGroup") in
+      make ?workGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let preparedStatements =
-        field_map json "PreparedStatements" PreparedStatementsList.of_json in
-      make ?nextToken ?preparedStatements ()
+    let of_json json__ =
+      let workGroup = field_map json__ "WorkGroup" WorkGroup.of_json in
+      make ?workGroup ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the prepared statements in the specfied workgroup."]
-module ListPreparedStatementsInput =
+  end[@@ocaml.doc
+       "Returns information about the workgroup with the specified name."]
+module ImportNotebookInput =
   struct
     type nonrec t =
       {
       workGroup: WorkGroupName.t
-        [@ocaml.doc "The workgroup to list the prepared statements for."];
-      nextToken: Token.t option
         [@ocaml.doc
-          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
-      maxResults: MaxPreparedStatementsCount.t option
+          "The name of the Spark enabled workgroup to import the notebook to."];
+      name: NotebookName.t [@ocaml.doc "The name of the notebook to import."];
+      payload: Payload.t option
         [@ocaml.doc
-          "The maximum number of results to return in this request."]}
-    let context_ = "ListPreparedStatementsInput"
-    let make ?nextToken =
-      fun ?maxResults ->
-        fun ~workGroup -> fun () -> { nextToken; maxResults; workGroup }
+          "The notebook content to be imported. The payload must be in ipynb format."];
+      type_: NotebookType.t
+        [@ocaml.doc
+          "The notebook content type. Currently, the only valid type is IPYNB."];
+      notebookS3LocationUri: S3Uri.t option
+        [@ocaml.doc
+          "A URI that specifies the Amazon S3 location of a notebook file in ipynb format."];
+      clientRequestToken: ClientRequestToken.t option
+        [@ocaml.doc
+          "A unique case-sensitive string used to ensure the request to import the notebook is idempotent (executes only once). This token is listed as not required because Amazon Web Services SDKs (for example the Amazon Web Services SDK for Java) auto-generate the token for you. If you are not using the Amazon Web Services SDK or the Amazon Web Services CLI, you must provide this token or the action will fail."]}
+    let context_ = "ImportNotebookInput"
+    let make ?payload =
+      fun ?notebookS3LocationUri ->
+        fun ?clientRequestToken ->
+          fun ~workGroup ->
+            fun ~name ->
+              fun ~type_ ->
+                fun () ->
+                  {
+                    payload;
+                    notebookS3LocationUri;
+                    clientRequestToken;
+                    workGroup;
+                    name;
+                    type_
+                  }
     let to_value x =
       structure_to_value
         [("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)));
-        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("MaxResults",
-          (Option.map x.maxResults ~f:MaxPreparedStatementsCount.to_value))]
+        ("Name", (Some (NotebookName.to_value x.name)));
+        ("Payload", (Option.map x.payload ~f:Payload.to_value));
+        ("Type", (Some (NotebookType.to_value x.type_)));
+        ("NotebookS3LocationUri",
+          (Option.map x.notebookS3LocationUri ~f:S3Uri.to_value));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let maxResults =
-        (Option.map ~f:MaxPreparedStatementsCount.of_xml)
-          (Xml.child xml_arg0 "MaxResults") in
-      let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let notebookS3LocationUri =
+        (Option.map ~f:S3Uri.of_xml)
+          (Xml.child xml_arg0 "NotebookS3LocationUri") in
+      let type_ =
+        NotebookType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      let payload =
+        (Option.map ~f:Payload.of_xml) (Xml.child xml_arg0 "Payload") in
+      let name =
+        NotebookName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       let workGroup =
         WorkGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
-      make ?maxResults ?nextToken ~workGroup ()
+      make ?clientRequestToken ?notebookS3LocationUri ~type_ ?payload ~name
+        ~workGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults =
-        field_map json "MaxResults" MaxPreparedStatementsCount.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let workGroup = field_map_exn json "WorkGroup" WorkGroupName.of_json in
-      make ?maxResults ?nextToken ~workGroup ()
+    let of_json json__ =
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let notebookS3LocationUri =
+        field_map json__ "NotebookS3LocationUri" S3Uri.of_json in
+      let type_ = field_map_exn json__ "Type" NotebookType.of_json in
+      let payload = field_map json__ "Payload" Payload.of_json in
+      let name = field_map_exn json__ "Name" NotebookName.of_json in
+      let workGroup = field_map_exn json__ "WorkGroup" WorkGroupName.of_json in
+      make ?clientRequestToken ?notebookS3LocationUri ~type_ ?payload ~name
+        ~workGroup ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the prepared statements in the specfied workgroup."]
-module ListNamedQueriesOutput =
+  end[@@ocaml.doc
+       "Imports a single ipynb file to a Spark enabled workgroup. To import the notebook, the request must specify a value for either Payload or NoteBookS3LocationUri. If neither is specified or both are specified, an InvalidRequestException occurs. The maximum file size that can be imported is 10 megabytes. If an ipynb file with the same name already exists in the workgroup, throws an error."]
+module ImportNotebookOutput =
   struct
     type nonrec t =
       {
-      namedQueryIds: NamedQueryIdList.t option
-        [@ocaml.doc "The list of unique query IDs."];
-      nextToken: Token.t option
-        [@ocaml.doc
-          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."]}
+      notebookId: NotebookId.t option
+        [@ocaml.doc "The ID assigned to the imported notebook."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?namedQueryIds =
-      fun ?nextToken -> fun () -> { namedQueryIds; nextToken }
+    let make ?notebookId = fun () -> { notebookId }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "InvalidRequestException" ->
           `InvalidRequestException (InvalidRequestException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -4751,6 +10302,8 @@ module ListNamedQueriesOutput =
           `InternalServerException (InternalServerException.of_xml xml)
       | "InvalidRequestException" ->
           `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -4763,6 +10316,10 @@ module ListNamedQueriesOutput =
           `Assoc
             [("error", (`String "InvalidRequestException"));
             ("details", (InvalidRequestException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -4770,90 +10327,96 @@ module ListNamedQueriesOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("NamedQueryIds",
-           (Option.map x.namedQueryIds ~f:NamedQueryIdList.to_value));
+        [("NotebookId", (Option.map x.notebookId ~f:NotebookId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let notebookId =
+        (Option.map ~f:NotebookId.of_xml) (Xml.child xml_arg0 "NotebookId") in
+      make ?notebookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notebookId = field_map json__ "NotebookId" NotebookId.of_json in
+      make ?notebookId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Imports a single ipynb file to a Spark enabled workgroup. To import the notebook, the request must specify a value for either Payload or NoteBookS3LocationUri. If neither is specified or both are specified, an InvalidRequestException occurs. The maximum file size that can be imported is 10 megabytes. If an ipynb file with the same name already exists in the workgroup, throws an error."]
+module MaxApplicationDPUSizesCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxApplicationDPUSizesCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListApplicationDPUSizesInput =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxApplicationDPUSizesCount.t option
+        [@ocaml.doc "Specifies the maximum number of results to return."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("MaxResults",
+           (Option.map x.maxResults ~f:MaxApplicationDPUSizesCount.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let namedQueryIds =
-        (Option.map ~f:NamedQueryIdList.of_xml)
-          (Xml.child xml_arg0 "NamedQueryIds") in
-      make ?nextToken ?namedQueryIds ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let namedQueryIds =
-        field_map json "NamedQueryIds" NamedQueryIdList.of_json in
-      make ?nextToken ?namedQueryIds ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Provides a list of available query IDs only for queries saved in the specified workgroup. Requires that you have access to the specified workgroup. If a workgroup is not specified, lists the saved queries for the primary workgroup. For code samples using the Amazon Web Services SDK for Java, see Examples and Code Samples in the Amazon Athena User Guide."]
-module ListNamedQueriesInput =
-  struct
-    type nonrec t =
-      {
-      nextToken: Token.t option
-        [@ocaml.doc
-          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
-      maxResults: MaxNamedQueriesCount.t option
-        [@ocaml.doc
-          "The maximum number of queries to return in this request."];
-      workGroup: WorkGroupName.t option
-        [@ocaml.doc
-          "The name of the workgroup from which the named queries are being returned. If a workgroup is not specified, the saved queries for the primary workgroup are returned."]}
-    let make ?nextToken =
-      fun ?maxResults ->
-        fun ?workGroup -> fun () -> { nextToken; maxResults; workGroup }
-    let to_value x =
-      structure_to_value
-        [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("MaxResults",
-          (Option.map x.maxResults ~f:MaxNamedQueriesCount.to_value));
-        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let workGroup =
-        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
       let maxResults =
-        (Option.map ~f:MaxNamedQueriesCount.of_xml)
+        (Option.map ~f:MaxApplicationDPUSizesCount.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
-      let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ?workGroup ?maxResults ?nextToken ()
+      make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workGroup = field_map json "WorkGroup" WorkGroupName.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let maxResults =
-        field_map json "MaxResults" MaxNamedQueriesCount.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      make ?workGroup ?maxResults ?nextToken ()
+        field_map json__ "MaxResults" MaxApplicationDPUSizesCount.of_json in
+      make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides a list of available query IDs only for queries saved in the specified workgroup. Requires that you have access to the specified workgroup. If a workgroup is not specified, lists the saved queries for the primary workgroup. For code samples using the Amazon Web Services SDK for Java, see Examples and Code Samples in the Amazon Athena User Guide."]
-module ListEngineVersionsOutput =
+       "Returns the supported DPU sizes for the supported application runtimes (for example, Athena notebook version 1)."]
+module ListApplicationDPUSizesOutput =
   struct
     type nonrec t =
       {
-      engineVersions: EngineVersionsList.t option
+      applicationDPUSizes: ApplicationDPUSizesList.t option
         [@ocaml.doc
-          "A list of engine versions that are available to choose from."];
+          "A list of the supported DPU sizes that the application runtime supports."];
       nextToken: Token.t option
         [@ocaml.doc
           "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?engineVersions =
-      fun ?nextToken -> fun () -> { engineVersions; nextToken }
+    let make ?applicationDPUSizes =
+      fun ?nextToken -> fun () -> { applicationDPUSizes; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "InvalidRequestException" ->
           `InvalidRequestException (InvalidRequestException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -4863,6 +10426,8 @@ module ListEngineVersionsOutput =
           `InternalServerException (InternalServerException.of_xml xml)
       | "InvalidRequestException" ->
           `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -4875,6 +10440,10 @@ module ListEngineVersionsOutput =
           `Assoc
             [("error", (`String "InvalidRequestException"));
             ("details", (InvalidRequestException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -4882,60 +10451,520 @@ module ListEngineVersionsOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("EngineVersions",
-           (Option.map x.engineVersions ~f:EngineVersionsList.to_value));
+        [("ApplicationDPUSizes",
+           (Option.map x.applicationDPUSizes
+              ~f:ApplicationDPUSizesList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let engineVersions =
-        (Option.map ~f:EngineVersionsList.of_xml)
-          (Xml.child xml_arg0 "EngineVersions") in
-      make ?nextToken ?engineVersions ()
+      let applicationDPUSizes =
+        (Option.map ~f:ApplicationDPUSizesList.of_xml)
+          (Xml.child xml_arg0 "ApplicationDPUSizes") in
+      make ?nextToken ?applicationDPUSizes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let engineVersions =
-        field_map json "EngineVersions" EngineVersionsList.of_json in
-      make ?nextToken ?engineVersions ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let applicationDPUSizes =
+        field_map json__ "ApplicationDPUSizes"
+          ApplicationDPUSizesList.of_json in
+      make ?nextToken ?applicationDPUSizes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of engine versions that are available to choose from, including the Auto option."]
-module ListEngineVersionsInput =
+       "Returns the supported DPU sizes for the supported application runtimes (for example, Athena notebook version 1)."]
+module SessionManagerToken =
+  struct
+    type nonrec t = string
+    let context_ = "SessionManagerToken"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:2048); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SessionManagerToken" j
+    let to_json = simple_to_json to_value
+  end
+module MaxCalculationsCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxCalculationsCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListCalculationExecutionsRequest =
+  struct
+    type nonrec t =
+      {
+      sessionId: SessionId.t [@ocaml.doc "The session ID."];
+      stateFilter: CalculationExecutionState.t option
+        [@ocaml.doc
+          "A filter for a specific calculation execution state. A description of each state follows. CREATING - The calculation is in the process of being created. CREATED - The calculation has been created and is ready to run. QUEUED - The calculation has been queued for processing. RUNNING - The calculation is running. CANCELING - A request to cancel the calculation has been received and the system is working to stop it. CANCELED - The calculation is no longer running as the result of a cancel request. COMPLETED - The calculation has completed without error. FAILED - The calculation failed and is no longer running."];
+      maxResults: MaxCalculationsCount.t option
+        [@ocaml.doc
+          "The maximum number of calculation executions to return."];
+      nextToken: SessionManagerToken.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."]}
+    let context_ = "ListCalculationExecutionsRequest"
+    let make ?stateFilter =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~sessionId ->
+            fun () -> { stateFilter; maxResults; nextToken; sessionId }
+    let to_value x =
+      structure_to_value
+        [("SessionId", (Some (SessionId.to_value x.sessionId)));
+        ("StateFilter",
+          (Option.map x.stateFilter ~f:CalculationExecutionState.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxCalculationsCount.to_value));
+        ("NextToken",
+          (Option.map x.nextToken ~f:SessionManagerToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:SessionManagerToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxCalculationsCount.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let stateFilter =
+        (Option.map ~f:CalculationExecutionState.of_xml)
+          (Xml.child xml_arg0 "StateFilter") in
+      let sessionId =
+        SessionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SessionId") in
+      make ?nextToken ?maxResults ?stateFilter ~sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken =
+        field_map json__ "NextToken" SessionManagerToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxCalculationsCount.of_json in
+      let stateFilter =
+        field_map json__ "StateFilter" CalculationExecutionState.of_json in
+      let sessionId = field_map_exn json__ "SessionId" SessionId.of_json in
+      make ?nextToken ?maxResults ?stateFilter ~sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the calculations that have been submitted to a session in descending order. Newer calculations are listed first; older calculations are listed later."]
+module ListCalculationExecutionsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: SessionManagerToken.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
+      calculations: CalculationsList.t option
+        [@ocaml.doc "A list of CalculationSummary objects."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?calculations -> fun () -> { nextToken; calculations }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken",
+           (Option.map x.nextToken ~f:SessionManagerToken.to_value));
+        ("Calculations",
+          (Option.map x.calculations ~f:CalculationsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let calculations =
+        (Option.map ~f:CalculationsList.of_xml)
+          (Xml.child xml_arg0 "Calculations") in
+      let nextToken =
+        (Option.map ~f:SessionManagerToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      make ?calculations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let calculations =
+        field_map json__ "Calculations" CalculationsList.of_json in
+      let nextToken =
+        field_map json__ "NextToken" SessionManagerToken.of_json in
+      make ?calculations ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the calculations that have been submitted to a session in descending order. Newer calculations are listed first; older calculations are listed later."]
+module MaxCapacityReservationsCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxCapacityReservationsCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListCapacityReservationsInput =
   struct
     type nonrec t =
       {
       nextToken: Token.t option
         [@ocaml.doc
-          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
-      maxResults: MaxEngineVersionsCount.t option
-        [@ocaml.doc
-          "The maximum number of engine versions to return in this request."]}
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated."];
+      maxResults: MaxCapacityReservationsCount.t option
+        [@ocaml.doc "Specifies the maximum number of results to return."]}
     let make ?nextToken =
       fun ?maxResults -> fun () -> { nextToken; maxResults }
     let to_value x =
       structure_to_value
         [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
         ("MaxResults",
-          (Option.map x.maxResults ~f:MaxEngineVersionsCount.to_value))]
+          (Option.map x.maxResults ~f:MaxCapacityReservationsCount.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxResults =
-        (Option.map ~f:MaxEngineVersionsCount.of_xml)
+        (Option.map ~f:MaxCapacityReservationsCount.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" MaxEngineVersionsCount.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+        field_map json__ "MaxResults" MaxCapacityReservationsCount.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the capacity reservations for the current account."]
+module ListCapacityReservationsOutput =
+  struct
+    type nonrec t =
+      {
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
+      capacityReservations: CapacityReservationsList.t option
+        [@ocaml.doc "The capacity reservations for the current account."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?capacityReservations ->
+        fun () -> { nextToken; capacityReservations }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("CapacityReservations",
+          (Option.map x.capacityReservations
+             ~f:CapacityReservationsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityReservations =
+        (Option.map ~f:CapacityReservationsList.of_xml)
+          (Xml.child xml_arg0 "CapacityReservations") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?capacityReservations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityReservations =
+        field_map json__ "CapacityReservations"
+          CapacityReservationsList.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      make ?capacityReservations ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the capacity reservations for the current account."]
+module MaxDataCatalogsCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:2));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxDataCatalogsCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListDataCatalogsInput =
+  struct
+    type nonrec t =
+      {
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
+      maxResults: MaxDataCatalogsCount.t option
+        [@ocaml.doc
+          "Specifies the maximum number of data catalogs to return."];
+      workGroup: WorkGroupName.t option
+        [@ocaml.doc
+          "The name of the workgroup. Required if making an IAM Identity Center request."]}
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?workGroup -> fun () -> { nextToken; maxResults; workGroup }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxDataCatalogsCount.to_value));
+        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workGroup =
+        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
+      let maxResults =
+        (Option.map ~f:MaxDataCatalogsCount.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?workGroup ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workGroup = field_map json__ "WorkGroup" WorkGroupName.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxDataCatalogsCount.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      make ?workGroup ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of engine versions that are available to choose from, including the Auto option."]
+       "Lists the data catalogs in the current Amazon Web Services account. In the Athena console, data catalogs are listed as \"data sources\" on the Data sources page under the Data source name column."]
+module ListDataCatalogsOutput =
+  struct
+    type nonrec t =
+      {
+      dataCatalogsSummary: DataCatalogSummaryList.t option
+        [@ocaml.doc "A summary list of data catalogs."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dataCatalogsSummary =
+      fun ?nextToken -> fun () -> { dataCatalogsSummary; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DataCatalogsSummary",
+           (Option.map x.dataCatalogsSummary
+              ~f:DataCatalogSummaryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let dataCatalogsSummary =
+        (Option.map ~f:DataCatalogSummaryList.of_xml)
+          (Xml.child xml_arg0 "DataCatalogsSummary") in
+      make ?nextToken ?dataCatalogsSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let dataCatalogsSummary =
+        field_map json__ "DataCatalogsSummary" DataCatalogSummaryList.of_json in
+      make ?nextToken ?dataCatalogsSummary ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the data catalogs in the current Amazon Web Services account. In the Athena console, data catalogs are listed as \"data sources\" on the Data sources page under the Data source name column."]
+module MaxDatabasesCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxDatabasesCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListDatabasesInput =
+  struct
+    type nonrec t =
+      {
+      catalogName: CatalogNameString.t
+        [@ocaml.doc
+          "The name of the data catalog that contains the databases to return."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
+      maxResults: MaxDatabasesCount.t option
+        [@ocaml.doc "Specifies the maximum number of results to return."];
+      workGroup: WorkGroupName.t option
+        [@ocaml.doc
+          "The name of the workgroup for which the metadata is being fetched. Required if requesting an IAM Identity Center enabled Glue Data Catalog."]}
+    let context_ = "ListDatabasesInput"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?workGroup ->
+          fun ~catalogName ->
+            fun () -> { nextToken; maxResults; workGroup; catalogName }
+    let to_value x =
+      structure_to_value
+        [("CatalogName", (Some (CatalogNameString.to_value x.catalogName)));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxDatabasesCount.to_value));
+        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workGroup =
+        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
+      let maxResults =
+        (Option.map ~f:MaxDatabasesCount.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let catalogName =
+        CatalogNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CatalogName") in
+      make ?workGroup ?maxResults ?nextToken ~catalogName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workGroup = field_map json__ "WorkGroup" WorkGroupName.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxDatabasesCount.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let catalogName =
+        field_map_exn json__ "CatalogName" CatalogNameString.of_json in
+      make ?workGroup ?maxResults ?nextToken ~catalogName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the databases in the specified data catalog."]
 module ListDatabasesOutput =
   struct
     type nonrec t =
@@ -5006,60 +11035,71 @@ module ListDatabasesOutput =
           (Xml.child xml_arg0 "DatabaseList") in
       make ?nextToken ?databaseList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let databaseList = field_map json "DatabaseList" DatabaseList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let databaseList = field_map json__ "DatabaseList" DatabaseList.of_json in
       make ?nextToken ?databaseList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the databases in the specified data catalog."]
-module ListDatabasesInput =
+module MaxEngineVersionsCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxEngineVersionsCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListEngineVersionsInput =
   struct
     type nonrec t =
       {
-      catalogName: CatalogNameString.t
-        [@ocaml.doc
-          "The name of the data catalog that contains the databases to return."];
       nextToken: Token.t option
         [@ocaml.doc
           "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
-      maxResults: MaxDatabasesCount.t option
-        [@ocaml.doc "Specifies the maximum number of results to return."]}
-    let context_ = "ListDatabasesInput"
+      maxResults: MaxEngineVersionsCount.t option
+        [@ocaml.doc
+          "The maximum number of engine versions to return in this request."]}
     let make ?nextToken =
-      fun ?maxResults ->
-        fun ~catalogName -> fun () -> { nextToken; maxResults; catalogName }
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
     let to_value x =
       structure_to_value
-        [("CatalogName", (Some (CatalogNameString.to_value x.catalogName)));
-        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
         ("MaxResults",
-          (Option.map x.maxResults ~f:MaxDatabasesCount.to_value))]
+          (Option.map x.maxResults ~f:MaxEngineVersionsCount.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxResults =
-        (Option.map ~f:MaxDatabasesCount.of_xml)
+        (Option.map ~f:MaxEngineVersionsCount.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let catalogName =
-        CatalogNameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CatalogName") in
-      make ?maxResults ?nextToken ~catalogName ()
+      make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxDatabasesCount.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let catalogName =
-        field_map_exn json "CatalogName" CatalogNameString.of_json in
-      make ?maxResults ?nextToken ~catalogName ()
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxEngineVersionsCount.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the databases in the specified data catalog."]
-module ListDataCatalogsOutput =
+  end[@@ocaml.doc
+       "Returns a list of engine versions that are available to choose from, including the Auto option."]
+module ListEngineVersionsOutput =
   struct
     type nonrec t =
       {
-      dataCatalogsSummary: DataCatalogSummaryList.t option
-        [@ocaml.doc "A summary list of data catalogs."];
+      engineVersions: EngineVersionsList.t option
+        [@ocaml.doc
+          "A list of engine versions that are available to choose from."];
       nextToken: Token.t option
         [@ocaml.doc
           "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."]}
@@ -5067,8 +11107,8 @@ module ListDataCatalogsOutput =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?dataCatalogsSummary =
-      fun ?nextToken -> fun () -> { dataCatalogsSummary; nextToken }
+    let make ?engineVersions =
+      fun ?nextToken -> fun () -> { engineVersions; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -5103,72 +11143,264 @@ module ListDataCatalogsOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("DataCatalogsSummary",
-           (Option.map x.dataCatalogsSummary
-              ~f:DataCatalogSummaryList.to_value));
+        [("EngineVersions",
+           (Option.map x.engineVersions ~f:EngineVersionsList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let dataCatalogsSummary =
-        (Option.map ~f:DataCatalogSummaryList.of_xml)
-          (Xml.child xml_arg0 "DataCatalogsSummary") in
-      make ?nextToken ?dataCatalogsSummary ()
+      let engineVersions =
+        (Option.map ~f:EngineVersionsList.of_xml)
+          (Xml.child xml_arg0 "EngineVersions") in
+      make ?nextToken ?engineVersions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let dataCatalogsSummary =
-        field_map json "DataCatalogsSummary" DataCatalogSummaryList.of_json in
-      make ?nextToken ?dataCatalogsSummary ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let engineVersions =
+        field_map json__ "EngineVersions" EngineVersionsList.of_json in
+      make ?nextToken ?engineVersions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the data catalogs in the current Amazon Web Services account."]
-module ListDataCatalogsInput =
+       "Returns a list of engine versions that are available to choose from, including the Auto option."]
+module MaxListExecutorsCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxListExecutorsCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListExecutorsRequest =
+  struct
+    type nonrec t =
+      {
+      sessionId: SessionId.t [@ocaml.doc "The session ID."];
+      executorStateFilter: ExecutorState.t option
+        [@ocaml.doc
+          "A filter for a specific executor state. A description of each state follows. CREATING - The executor is being started, including acquiring resources. CREATED - The executor has been started. REGISTERED - The executor has been registered. TERMINATING - The executor is in the process of shutting down. TERMINATED - The executor is no longer running. FAILED - Due to a failure, the executor is no longer running."];
+      maxResults: MaxListExecutorsCount.t option
+        [@ocaml.doc "The maximum number of executors to return."];
+      nextToken: SessionManagerToken.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."]}
+    let context_ = "ListExecutorsRequest"
+    let make ?executorStateFilter =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~sessionId ->
+            fun () ->
+              { executorStateFilter; maxResults; nextToken; sessionId }
+    let to_value x =
+      structure_to_value
+        [("SessionId", (Some (SessionId.to_value x.sessionId)));
+        ("ExecutorStateFilter",
+          (Option.map x.executorStateFilter ~f:ExecutorState.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxListExecutorsCount.to_value));
+        ("NextToken",
+          (Option.map x.nextToken ~f:SessionManagerToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:SessionManagerToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxListExecutorsCount.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let executorStateFilter =
+        (Option.map ~f:ExecutorState.of_xml)
+          (Xml.child xml_arg0 "ExecutorStateFilter") in
+      let sessionId =
+        SessionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SessionId") in
+      make ?nextToken ?maxResults ?executorStateFilter ~sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken =
+        field_map json__ "NextToken" SessionManagerToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxListExecutorsCount.of_json in
+      let executorStateFilter =
+        field_map json__ "ExecutorStateFilter" ExecutorState.of_json in
+      let sessionId = field_map_exn json__ "SessionId" SessionId.of_json in
+      make ?nextToken ?maxResults ?executorStateFilter ~sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists, in descending order, the executors that joined a session. Newer executors are listed first; older executors are listed later. The result can be optionally filtered by state."]
+module ListExecutorsResponse =
+  struct
+    type nonrec t =
+      {
+      sessionId: SessionId.t option [@ocaml.doc "The session ID."];
+      nextToken: SessionManagerToken.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
+      executorsSummary: ExecutorsSummaryList.t option
+        [@ocaml.doc "Contains summary information about the executor."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sessionId =
+      fun ?nextToken ->
+        fun ?executorsSummary ->
+          fun () -> { sessionId; nextToken; executorsSummary }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("SessionId", (Option.map x.sessionId ~f:SessionId.to_value));
+        ("NextToken",
+          (Option.map x.nextToken ~f:SessionManagerToken.to_value));
+        ("ExecutorsSummary",
+          (Option.map x.executorsSummary ~f:ExecutorsSummaryList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let executorsSummary =
+        (Option.map ~f:ExecutorsSummaryList.of_xml)
+          (Xml.child xml_arg0 "ExecutorsSummary") in
+      let nextToken =
+        (Option.map ~f:SessionManagerToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let sessionId =
+        (Option.map ~f:SessionId.of_xml) (Xml.child xml_arg0 "SessionId") in
+      make ?executorsSummary ?nextToken ?sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let executorsSummary =
+        field_map json__ "ExecutorsSummary" ExecutorsSummaryList.of_json in
+      let nextToken =
+        field_map json__ "NextToken" SessionManagerToken.of_json in
+      let sessionId = field_map json__ "SessionId" SessionId.of_json in
+      make ?executorsSummary ?nextToken ?sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists, in descending order, the executors that joined a session. Newer executors are listed first; older executors are listed later. The result can be optionally filtered by state."]
+module MaxNamedQueriesCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxNamedQueriesCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListNamedQueriesInput =
   struct
     type nonrec t =
       {
       nextToken: Token.t option
         [@ocaml.doc
           "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
-      maxResults: MaxDataCatalogsCount.t option
+      maxResults: MaxNamedQueriesCount.t option
         [@ocaml.doc
-          "Specifies the maximum number of data catalogs to return."]}
+          "The maximum number of queries to return in this request."];
+      workGroup: WorkGroupName.t option
+        [@ocaml.doc
+          "The name of the workgroup from which the named queries are being returned. If a workgroup is not specified, the saved queries for the primary workgroup are returned."]}
     let make ?nextToken =
-      fun ?maxResults -> fun () -> { nextToken; maxResults }
+      fun ?maxResults ->
+        fun ?workGroup -> fun () -> { nextToken; maxResults; workGroup }
     let to_value x =
       structure_to_value
         [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
         ("MaxResults",
-          (Option.map x.maxResults ~f:MaxDataCatalogsCount.to_value))]
+          (Option.map x.maxResults ~f:MaxNamedQueriesCount.to_value));
+        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let workGroup =
+        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
       let maxResults =
-        (Option.map ~f:MaxDataCatalogsCount.of_xml)
+        (Option.map ~f:MaxNamedQueriesCount.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ?maxResults ?nextToken ()
+      make ?workGroup ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let workGroup = field_map json__ "WorkGroup" WorkGroupName.of_json in
       let maxResults =
-        field_map json "MaxResults" MaxDataCatalogsCount.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      make ?maxResults ?nextToken ()
+        field_map json__ "MaxResults" MaxNamedQueriesCount.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      make ?workGroup ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the data catalogs in the current Amazon Web Services account."]
-module GetWorkGroupOutput =
+       "Provides a list of available query IDs only for queries saved in the specified workgroup. Requires that you have access to the specified workgroup. If a workgroup is not specified, lists the saved queries for the primary workgroup."]
+module ListNamedQueriesOutput =
   struct
     type nonrec t =
       {
-      workGroup: WorkGroup.t option
-        [@ocaml.doc "Information about the workgroup."]}
+      namedQueryIds: NamedQueryIdList.t option
+        [@ocaml.doc "The list of unique query IDs."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?workGroup = fun () -> { workGroup }
+    let make ?namedQueryIds =
+      fun ?nextToken -> fun () -> { namedQueryIds; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -5203,54 +11435,1104 @@ module GetWorkGroupOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("WorkGroup", (Option.map x.workGroup ~f:WorkGroup.to_value))]
+        [("NamedQueryIds",
+           (Option.map x.namedQueryIds ~f:NamedQueryIdList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workGroup =
-        (Option.map ~f:WorkGroup.of_xml) (Xml.child xml_arg0 "WorkGroup") in
-      make ?workGroup ()
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let namedQueryIds =
+        (Option.map ~f:NamedQueryIdList.of_xml)
+          (Xml.child xml_arg0 "NamedQueryIds") in
+      make ?nextToken ?namedQueryIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workGroup = field_map json "WorkGroup" WorkGroup.of_json in
-      make ?workGroup ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let namedQueryIds =
+        field_map json__ "NamedQueryIds" NamedQueryIdList.of_json in
+      make ?nextToken ?namedQueryIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about the workgroup with the specified name."]
-module GetWorkGroupInput =
+       "Provides a list of available query IDs only for queries saved in the specified workgroup. Requires that you have access to the specified workgroup. If a workgroup is not specified, lists the saved queries for the primary workgroup."]
+module MaxNotebooksCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxNotebooksCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListNotebookMetadataInput =
   struct
     type nonrec t =
       {
-      workGroup: WorkGroupName.t [@ocaml.doc "The name of the workgroup."]}
-    let context_ = "GetWorkGroupInput"
-    let make ~workGroup = fun () -> { workGroup }
+      filters: FilterDefinition.t option [@ocaml.doc "Search filter string."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated."];
+      maxResults: MaxNotebooksCount.t option
+        [@ocaml.doc "Specifies the maximum number of results to return."];
+      workGroup: WorkGroupName.t
+        [@ocaml.doc
+          "The name of the Spark enabled workgroup to retrieve notebook metadata for."]}
+    let context_ = "ListNotebookMetadataInput"
+    let make ?filters =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ~workGroup ->
+            fun () -> { filters; nextToken; maxResults; workGroup }
     let to_value x =
       structure_to_value
-        [("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)))]
+        [("Filters", (Option.map x.filters ~f:FilterDefinition.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxNotebooksCount.to_value));
+        ("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workGroup =
         WorkGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
-      make ~workGroup ()
+      let maxResults =
+        (Option.map ~f:MaxNotebooksCount.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let filters =
+        (Option.map ~f:FilterDefinition.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      make ~workGroup ?maxResults ?nextToken ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workGroup = field_map_exn json "WorkGroup" WorkGroupName.of_json in
-      make ~workGroup ()
+    let of_json json__ =
+      let workGroup = field_map_exn json__ "WorkGroup" WorkGroupName.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxNotebooksCount.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let filters = field_map json__ "Filters" FilterDefinition.of_json in
+      make ~workGroup ?maxResults ?nextToken ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about the workgroup with the specified name."]
-module GetTableMetadataOutput =
+       "Displays the notebook files for the specified workgroup in paginated format."]
+module NotebookMetadataArray =
+  struct
+    type nonrec t = NotebookMetadata.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NotebookMetadata.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NotebookMetadata.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NotebookMetadataArray"
+        ~of_json:NotebookMetadata.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListNotebookMetadataOutput =
   struct
     type nonrec t =
       {
-      tableMetadata: TableMetadata.t option
-        [@ocaml.doc "An object that contains table metadata."]}
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
+      notebookMetadataList: NotebookMetadataArray.t option
+        [@ocaml.doc
+          "The list of notebook metadata for the specified workgroup."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?notebookMetadataList ->
+        fun () -> { nextToken; notebookMetadataList }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("NotebookMetadataList",
+          (Option.map x.notebookMetadataList
+             ~f:NotebookMetadataArray.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let notebookMetadataList =
+        (Option.map ~f:NotebookMetadataArray.of_xml)
+          (Xml.child xml_arg0 "NotebookMetadataList") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?notebookMetadataList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notebookMetadataList =
+        field_map json__ "NotebookMetadataList" NotebookMetadataArray.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      make ?notebookMetadataList ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Displays the notebook files for the specified workgroup in paginated format."]
+module MaxSessionsCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxSessionsCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListNotebookSessionsRequest =
+  struct
+    type nonrec t =
+      {
+      notebookId: NotebookId.t
+        [@ocaml.doc "The ID of the notebook to list sessions for."];
+      maxResults: MaxSessionsCount.t option
+        [@ocaml.doc "The maximum number of notebook sessions to return."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."]}
+    let context_ = "ListNotebookSessionsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~notebookId -> fun () -> { maxResults; nextToken; notebookId }
+    let to_value x =
+      structure_to_value
+        [("NotebookId", (Some (NotebookId.to_value x.notebookId)));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxSessionsCount.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxSessionsCount.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let notebookId =
+        NotebookId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NotebookId") in
+      make ?nextToken ?maxResults ~notebookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxSessionsCount.of_json in
+      let notebookId = field_map_exn json__ "NotebookId" NotebookId.of_json in
+      make ?nextToken ?maxResults ~notebookId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists, in descending order, the sessions that have been created in a notebook that are in an active state like CREATING, CREATED, IDLE or BUSY. Newer sessions are listed first; older sessions are listed later."]
+module NotebookSessionSummary =
+  struct
+    type nonrec t =
+      {
+      sessionId: SessionId.t option [@ocaml.doc "The notebook session ID."];
+      creationTime: Date.t option
+        [@ocaml.doc "The time when the notebook session was created."]}
+    let make ?sessionId =
+      fun ?creationTime -> fun () -> { sessionId; creationTime }
+    let to_value x =
+      structure_to_value
+        [("SessionId", (Option.map x.sessionId ~f:SessionId.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Date.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let sessionId =
+        (Option.map ~f:SessionId.of_xml) (Xml.child xml_arg0 "SessionId") in
+      make ?creationTime ?sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationTime = field_map json__ "CreationTime" Date.of_json in
+      let sessionId = field_map json__ "SessionId" SessionId.of_json in
+      make ?creationTime ?sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the notebook session ID and notebook session creation time."]
+module NotebookSessionsList =
+  struct
+    type nonrec t = NotebookSessionSummary.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NotebookSessionSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NotebookSessionSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NotebookSessionsList"
+        ~of_json:NotebookSessionSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListNotebookSessionsResponse =
+  struct
+    type nonrec t =
+      {
+      notebookSessionsList: NotebookSessionsList.t option
+        [@ocaml.doc "A list of the sessions belonging to the notebook."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?notebookSessionsList =
+      fun ?nextToken -> fun () -> { notebookSessionsList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NotebookSessionsList",
+           (Option.map x.notebookSessionsList
+              ~f:NotebookSessionsList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let notebookSessionsList =
+        (Option.map ~f:NotebookSessionsList.of_xml)
+          (Xml.child xml_arg0 "NotebookSessionsList") in
+      make ?nextToken ?notebookSessionsList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let notebookSessionsList =
+        field_map json__ "NotebookSessionsList" NotebookSessionsList.of_json in
+      make ?nextToken ?notebookSessionsList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists, in descending order, the sessions that have been created in a notebook that are in an active state like CREATING, CREATED, IDLE or BUSY. Newer sessions are listed first; older sessions are listed later."]
+module MaxPreparedStatementsCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxPreparedStatementsCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListPreparedStatementsInput =
+  struct
+    type nonrec t =
+      {
+      workGroup: WorkGroupName.t
+        [@ocaml.doc "The workgroup to list the prepared statements for."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
+      maxResults: MaxPreparedStatementsCount.t option
+        [@ocaml.doc
+          "The maximum number of results to return in this request."]}
+    let context_ = "ListPreparedStatementsInput"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~workGroup -> fun () -> { nextToken; maxResults; workGroup }
+    let to_value x =
+      structure_to_value
+        [("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxPreparedStatementsCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxPreparedStatementsCount.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let workGroup =
+        WorkGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
+      make ?maxResults ?nextToken ~workGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxPreparedStatementsCount.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let workGroup = field_map_exn json__ "WorkGroup" WorkGroupName.of_json in
+      make ?maxResults ?nextToken ~workGroup ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the prepared statements in the specified workgroup."]
+module PreparedStatementSummary =
+  struct
+    type nonrec t =
+      {
+      statementName: StatementName.t option
+        [@ocaml.doc "The name of the prepared statement."];
+      lastModifiedTime: Date.t option
+        [@ocaml.doc "The last modified time of the prepared statement."]}
+    let make ?statementName =
+      fun ?lastModifiedTime -> fun () -> { statementName; lastModifiedTime }
+    let to_value x =
+      structure_to_value
+        [("StatementName",
+           (Option.map x.statementName ~f:StatementName.to_value));
+        ("LastModifiedTime",
+          (Option.map x.lastModifiedTime ~f:Date.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModifiedTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "LastModifiedTime") in
+      let statementName =
+        (Option.map ~f:StatementName.of_xml)
+          (Xml.child xml_arg0 "StatementName") in
+      make ?lastModifiedTime ?statementName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModifiedTime = field_map json__ "LastModifiedTime" Date.of_json in
+      let statementName =
+        field_map json__ "StatementName" StatementName.of_json in
+      make ?lastModifiedTime ?statementName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The name and last modified time of the prepared statement."]
+module PreparedStatementsList =
+  struct
+    type nonrec t = PreparedStatementSummary.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PreparedStatementSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PreparedStatementSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PreparedStatementsList"
+        ~of_json:PreparedStatementSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListPreparedStatementsOutput =
+  struct
+    type nonrec t =
+      {
+      preparedStatements: PreparedStatementsList.t option
+        [@ocaml.doc "The list of prepared statements for the workgroup."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?preparedStatements =
+      fun ?nextToken -> fun () -> { preparedStatements; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PreparedStatements",
+           (Option.map x.preparedStatements
+              ~f:PreparedStatementsList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let preparedStatements =
+        (Option.map ~f:PreparedStatementsList.of_xml)
+          (Xml.child xml_arg0 "PreparedStatements") in
+      make ?nextToken ?preparedStatements ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let preparedStatements =
+        field_map json__ "PreparedStatements" PreparedStatementsList.of_json in
+      make ?nextToken ?preparedStatements ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the prepared statements in the specified workgroup."]
+module MaxQueryExecutionsCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxQueryExecutionsCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListQueryExecutionsInput =
+  struct
+    type nonrec t =
+      {
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
+      maxResults: MaxQueryExecutionsCount.t option
+        [@ocaml.doc
+          "The maximum number of query executions to return in this request."];
+      workGroup: WorkGroupName.t option
+        [@ocaml.doc
+          "The name of the workgroup from which queries are being returned. If a workgroup is not specified, a list of available query execution IDs for the queries in the primary workgroup is returned."]}
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?workGroup -> fun () -> { nextToken; maxResults; workGroup }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxQueryExecutionsCount.to_value));
+        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workGroup =
+        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
+      let maxResults =
+        (Option.map ~f:MaxQueryExecutionsCount.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?workGroup ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workGroup = field_map json__ "WorkGroup" WorkGroupName.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxQueryExecutionsCount.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      make ?workGroup ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a list of available query execution IDs for the queries in the specified workgroup. Athena keeps a query history for 45 days. If a workgroup is not specified, returns a list of query execution IDs for the primary workgroup. Requires you to have access to the workgroup in which the queries ran."]
+module ListQueryExecutionsOutput =
+  struct
+    type nonrec t =
+      {
+      queryExecutionIds: QueryExecutionIdList.t option
+        [@ocaml.doc
+          "The unique IDs of each query execution as an array of strings."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token to be used by the next request if this request is truncated."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?queryExecutionIds =
+      fun ?nextToken -> fun () -> { queryExecutionIds; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("QueryExecutionIds",
+           (Option.map x.queryExecutionIds ~f:QueryExecutionIdList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let queryExecutionIds =
+        (Option.map ~f:QueryExecutionIdList.of_xml)
+          (Xml.child xml_arg0 "QueryExecutionIds") in
+      make ?nextToken ?queryExecutionIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let queryExecutionIds =
+        field_map json__ "QueryExecutionIds" QueryExecutionIdList.of_json in
+      make ?nextToken ?queryExecutionIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a list of available query execution IDs for the queries in the specified workgroup. Athena keeps a query history for 45 days. If a workgroup is not specified, returns a list of query execution IDs for the primary workgroup. Requires you to have access to the workgroup in which the queries ran."]
+module ListSessionsRequest =
+  struct
+    type nonrec t =
+      {
+      workGroup: WorkGroupName.t
+        [@ocaml.doc "The workgroup to which the session belongs."];
+      stateFilter: SessionState.t option
+        [@ocaml.doc
+          "A filter for a specific session state. A description of each state follows. CREATING - The session is being started, including acquiring resources. CREATED - The session has been started. IDLE - The session is able to accept a calculation. BUSY - The session is processing another task and is unable to accept a calculation. TERMINATING - The session is in the process of shutting down. TERMINATED - The session and its resources are no longer running. DEGRADED - The session has no healthy coordinators. FAILED - Due to a failure, the session and its resources are no longer running."];
+      maxResults: MaxSessionsCount.t option
+        [@ocaml.doc "The maximum number of sessions to return."];
+      nextToken: SessionManagerToken.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."]}
+    let context_ = "ListSessionsRequest"
+    let make ?stateFilter =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~workGroup ->
+            fun () -> { stateFilter; maxResults; nextToken; workGroup }
+    let to_value x =
+      structure_to_value
+        [("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)));
+        ("StateFilter", (Option.map x.stateFilter ~f:SessionState.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxSessionsCount.to_value));
+        ("NextToken",
+          (Option.map x.nextToken ~f:SessionManagerToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:SessionManagerToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxSessionsCount.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let stateFilter =
+        (Option.map ~f:SessionState.of_xml)
+          (Xml.child xml_arg0 "StateFilter") in
+      let workGroup =
+        WorkGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
+      make ?nextToken ?maxResults ?stateFilter ~workGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken =
+        field_map json__ "NextToken" SessionManagerToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxSessionsCount.of_json in
+      let stateFilter = field_map json__ "StateFilter" SessionState.of_json in
+      let workGroup = field_map_exn json__ "WorkGroup" WorkGroupName.of_json in
+      make ?nextToken ?maxResults ?stateFilter ~workGroup ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the sessions in a workgroup that are in an active state like CREATING, CREATED, IDLE, or BUSY. Newer sessions are listed first; older sessions are listed later."]
+module SessionSummary =
+  struct
+    type nonrec t =
+      {
+      sessionId: SessionId.t option [@ocaml.doc "The session ID."];
+      description: DescriptionString.t option
+        [@ocaml.doc "The session description."];
+      engineVersion: EngineVersion.t option
+        [@ocaml.doc
+          "The engine version used by the session (for example, PySpark engine version 3)."];
+      notebookVersion: NameString.t option
+        [@ocaml.doc "The notebook version."];
+      status: SessionStatus.t option
+        [@ocaml.doc "Contains information about the session status."]}
+    let make ?sessionId =
+      fun ?description ->
+        fun ?engineVersion ->
+          fun ?notebookVersion ->
+            fun ?status ->
+              fun () ->
+                {
+                  sessionId;
+                  description;
+                  engineVersion;
+                  notebookVersion;
+                  status
+                }
+    let to_value x =
+      structure_to_value
+        [("SessionId", (Option.map x.sessionId ~f:SessionId.to_value));
+        ("Description",
+          (Option.map x.description ~f:DescriptionString.to_value));
+        ("EngineVersion",
+          (Option.map x.engineVersion ~f:EngineVersion.to_value));
+        ("NotebookVersion",
+          (Option.map x.notebookVersion ~f:NameString.to_value));
+        ("Status", (Option.map x.status ~f:SessionStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:SessionStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let notebookVersion =
+        (Option.map ~f:NameString.of_xml)
+          (Xml.child xml_arg0 "NotebookVersion") in
+      let engineVersion =
+        (Option.map ~f:EngineVersion.of_xml)
+          (Xml.child xml_arg0 "EngineVersion") in
+      let description =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let sessionId =
+        (Option.map ~f:SessionId.of_xml) (Xml.child xml_arg0 "SessionId") in
+      make ?status ?notebookVersion ?engineVersion ?description ?sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" SessionStatus.of_json in
+      let notebookVersion =
+        field_map json__ "NotebookVersion" NameString.of_json in
+      let engineVersion =
+        field_map json__ "EngineVersion" EngineVersion.of_json in
+      let description =
+        field_map json__ "Description" DescriptionString.of_json in
+      let sessionId = field_map json__ "SessionId" SessionId.of_json in
+      make ?status ?notebookVersion ?engineVersion ?description ?sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains summary information about a session."]
+module SessionsList =
+  struct
+    type nonrec t = SessionSummary.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SessionSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SessionSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SessionsList" ~of_json:SessionSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListSessionsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: SessionManagerToken.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
+      sessions: SessionsList.t option [@ocaml.doc "A list of sessions."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken = fun ?sessions -> fun () -> { nextToken; sessions }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken",
+           (Option.map x.nextToken ~f:SessionManagerToken.to_value));
+        ("Sessions", (Option.map x.sessions ~f:SessionsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sessions =
+        (Option.map ~f:SessionsList.of_xml) (Xml.child xml_arg0 "Sessions") in
+      let nextToken =
+        (Option.map ~f:SessionManagerToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      make ?sessions ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sessions = field_map json__ "Sessions" SessionsList.of_json in
+      let nextToken =
+        field_map json__ "NextToken" SessionManagerToken.of_json in
+      make ?sessions ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the sessions in a workgroup that are in an active state like CREATING, CREATED, IDLE, or BUSY. Newer sessions are listed first; older sessions are listed later."]
+module MaxTableMetadataCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxTableMetadataCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListTableMetadataInput =
+  struct
+    type nonrec t =
+      {
+      catalogName: CatalogNameString.t
+        [@ocaml.doc
+          "The name of the data catalog for which table metadata should be returned."];
+      databaseName: NameString.t
+        [@ocaml.doc
+          "The name of the database for which table metadata should be returned."];
+      expression: ExpressionString.t option
+        [@ocaml.doc
+          "A regex filter that pattern-matches table names. If no expression is supplied, metadata for all tables are listed."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
+      maxResults: MaxTableMetadataCount.t option
+        [@ocaml.doc "Specifies the maximum number of results to return."];
+      workGroup: WorkGroupName.t option
+        [@ocaml.doc
+          "The name of the workgroup for which the metadata is being fetched. Required if requesting an IAM Identity Center enabled Glue Data Catalog."]}
+    let context_ = "ListTableMetadataInput"
+    let make ?expression =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ?workGroup ->
+            fun ~catalogName ->
+              fun ~databaseName ->
+                fun () ->
+                  {
+                    expression;
+                    nextToken;
+                    maxResults;
+                    workGroup;
+                    catalogName;
+                    databaseName
+                  }
+    let to_value x =
+      structure_to_value
+        [("CatalogName", (Some (CatalogNameString.to_value x.catalogName)));
+        ("DatabaseName", (Some (NameString.to_value x.databaseName)));
+        ("Expression",
+          (Option.map x.expression ~f:ExpressionString.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxTableMetadataCount.to_value));
+        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workGroup =
+        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
+      let maxResults =
+        (Option.map ~f:MaxTableMetadataCount.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let expression =
+        (Option.map ~f:ExpressionString.of_xml)
+          (Xml.child xml_arg0 "Expression") in
+      let databaseName =
+        NameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
+      let catalogName =
+        CatalogNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CatalogName") in
+      make ?workGroup ?maxResults ?nextToken ?expression ~databaseName
+        ~catalogName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workGroup = field_map json__ "WorkGroup" WorkGroupName.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxTableMetadataCount.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let expression = field_map json__ "Expression" ExpressionString.of_json in
+      let databaseName =
+        field_map_exn json__ "DatabaseName" NameString.of_json in
+      let catalogName =
+        field_map_exn json__ "CatalogName" CatalogNameString.of_json in
+      make ?workGroup ?maxResults ?nextToken ?expression ~databaseName
+        ~catalogName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the metadata for the tables in the specified data catalog database."]
+module TableMetadataList =
+  struct
+    type nonrec t = TableMetadata.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TableMetadata.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TableMetadata.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TableMetadataList" ~of_json:TableMetadata.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListTableMetadataOutput =
+  struct
+    type nonrec t =
+      {
+      tableMetadataList: TableMetadataList.t option
+        [@ocaml.doc "A list of table metadata."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `MetadataException of MetadataException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?tableMetadata = fun () -> { tableMetadata }
+    let make ?tableMetadataList =
+      fun ?nextToken -> fun () -> { tableMetadataList; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -5293,74 +12575,324 @@ module GetTableMetadataOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("TableMetadata",
-           (Option.map x.tableMetadata ~f:TableMetadata.to_value))]
+        [("TableMetadataList",
+           (Option.map x.tableMetadataList ~f:TableMetadataList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tableMetadata =
-        (Option.map ~f:TableMetadata.of_xml)
-          (Xml.child xml_arg0 "TableMetadata") in
-      make ?tableMetadata ()
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let tableMetadataList =
+        (Option.map ~f:TableMetadataList.of_xml)
+          (Xml.child xml_arg0 "TableMetadataList") in
+      make ?nextToken ?tableMetadataList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableMetadata =
-        field_map json "TableMetadata" TableMetadata.of_json in
-      make ?tableMetadata ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let tableMetadataList =
+        field_map json__ "TableMetadataList" TableMetadataList.of_json in
+      make ?nextToken ?tableMetadataList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns table metadata for the specified catalog, database, and table."]
-module GetTableMetadataInput =
+       "Lists the metadata for the tables in the specified data catalog database."]
+module MaxTagsCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:75); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxTagsCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListTagsForResourceInput =
   struct
     type nonrec t =
       {
-      catalogName: CatalogNameString.t
+      resourceARN: AmazonResourceName.t
         [@ocaml.doc
-          "The name of the data catalog that contains the database and table metadata to return."];
-      databaseName: NameString.t
+          "Lists the tags for the resource with the specified ARN."];
+      nextToken: Token.t option
         [@ocaml.doc
-          "The name of the database that contains the table metadata to return."];
-      tableName: NameString.t
-        [@ocaml.doc "The name of the table for which metadata is returned."]}
-    let context_ = "GetTableMetadataInput"
-    let make ~catalogName =
-      fun ~databaseName ->
-        fun ~tableName -> fun () -> { catalogName; databaseName; tableName }
+          "The token for the next set of results, or null if there are no additional results for this request, where the request lists the tags for the resource with the specified ARN."];
+      maxResults: MaxTagsCount.t option
+        [@ocaml.doc
+          "The maximum number of results to be returned per request that lists the tags for the resource."]}
+    let context_ = "ListTagsForResourceInput"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~resourceARN -> fun () -> { nextToken; maxResults; resourceARN }
     let to_value x =
       structure_to_value
-        [("CatalogName", (Some (CatalogNameString.to_value x.catalogName)));
-        ("DatabaseName", (Some (NameString.to_value x.databaseName)));
-        ("TableName", (Some (NameString.to_value x.tableName)))]
+        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxTagsCount.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tableName =
-        NameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
-      let databaseName =
-        NameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
-      let catalogName =
-        CatalogNameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CatalogName") in
-      make ~tableName ~databaseName ~catalogName ()
+      let maxResults =
+        (Option.map ~f:MaxTagsCount.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ?maxResults ?nextToken ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableName = field_map_exn json "TableName" NameString.of_json in
-      let databaseName = field_map_exn json "DatabaseName" NameString.of_json in
-      let catalogName =
-        field_map_exn json "CatalogName" CatalogNameString.of_json in
-      make ~tableName ~databaseName ~catalogName ()
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxTagsCount.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      make ?maxResults ?nextToken ~resourceARN ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns table metadata for the specified catalog, database, and table."]
-module GetQueryResultsOutput =
+  end[@@ocaml.doc "Lists the tags associated with an Athena resource."]
+module ListTagsForResourceOutput =
   struct
     type nonrec t =
       {
-      updateCount: Long.t option
+      tags: TagList.t option
         [@ocaml.doc
-          "The number of rows inserted with a CREATE TABLE AS SELECT statement."];
-      resultSet: ResultSet.t option
-        [@ocaml.doc "The results of the query execution."];
+          "The list of tags associated with the specified resource."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token to be used by the next request if this request is truncated."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tags = fun ?nextToken -> fun () -> { tags; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?nextToken ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      make ?nextToken ?tags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the tags associated with an Athena resource."]
+module MaxWorkGroupsCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxWorkGroupsCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListWorkGroupsInput =
+  struct
+    type nonrec t =
+      {
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
+      maxResults: MaxWorkGroupsCount.t option
+        [@ocaml.doc
+          "The maximum number of workgroups to return in this request."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxWorkGroupsCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxWorkGroupsCount.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxWorkGroupsCount.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists available workgroups for the account."]
+module WorkGroupSummary =
+  struct
+    type nonrec t =
+      {
+      name: WorkGroupName.t option [@ocaml.doc "The name of the workgroup."];
+      state: WorkGroupState.t option
+        [@ocaml.doc "The state of the workgroup."];
+      description: WorkGroupDescriptionString.t option
+        [@ocaml.doc "The workgroup description."];
+      creationTime: Date.t option
+        [@ocaml.doc "The workgroup creation date and time."];
+      engineVersion: EngineVersion.t option
+        [@ocaml.doc
+          "The engine version setting for all queries on the workgroup. Queries on the AmazonAthenaPreviewFunctionality workgroup run on the preview engine regardless of this setting."];
+      identityCenterApplicationArn: IdentityCenterApplicationArn.t option
+        [@ocaml.doc
+          "The ARN of the IAM Identity Center enabled application associated with the workgroup."]}
+    let make ?name =
+      fun ?state ->
+        fun ?description ->
+          fun ?creationTime ->
+            fun ?engineVersion ->
+              fun ?identityCenterApplicationArn ->
+                fun () ->
+                  {
+                    name;
+                    state;
+                    description;
+                    creationTime;
+                    engineVersion;
+                    identityCenterApplicationArn
+                  }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:WorkGroupName.to_value));
+        ("State", (Option.map x.state ~f:WorkGroupState.to_value));
+        ("Description",
+          (Option.map x.description ~f:WorkGroupDescriptionString.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Date.to_value));
+        ("EngineVersion",
+          (Option.map x.engineVersion ~f:EngineVersion.to_value));
+        ("IdentityCenterApplicationArn",
+          (Option.map x.identityCenterApplicationArn
+             ~f:IdentityCenterApplicationArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identityCenterApplicationArn =
+        (Option.map ~f:IdentityCenterApplicationArn.of_xml)
+          (Xml.child xml_arg0 "IdentityCenterApplicationArn") in
+      let engineVersion =
+        (Option.map ~f:EngineVersion.of_xml)
+          (Xml.child xml_arg0 "EngineVersion") in
+      let creationTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let description =
+        (Option.map ~f:WorkGroupDescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let state =
+        (Option.map ~f:WorkGroupState.of_xml) (Xml.child xml_arg0 "State") in
+      let name =
+        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?identityCenterApplicationArn ?engineVersion ?creationTime
+        ?description ?state ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identityCenterApplicationArn =
+        field_map json__ "IdentityCenterApplicationArn"
+          IdentityCenterApplicationArn.of_json in
+      let engineVersion =
+        field_map json__ "EngineVersion" EngineVersion.of_json in
+      let creationTime = field_map json__ "CreationTime" Date.of_json in
+      let description =
+        field_map json__ "Description" WorkGroupDescriptionString.of_json in
+      let state = field_map json__ "State" WorkGroupState.of_json in
+      let name = field_map json__ "Name" WorkGroupName.of_json in
+      make ?identityCenterApplicationArn ?engineVersion ?creationTime
+        ?description ?state ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The summary information for the workgroup, which includes its name, state, description, and the date and time it was created."]
+module WorkGroupsList =
+  struct
+    type nonrec t = WorkGroupSummary.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WorkGroupSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WorkGroupSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WorkGroupsList" ~of_json:WorkGroupSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListWorkGroupsOutput =
+  struct
+    type nonrec t =
+      {
+      workGroups: WorkGroupsList.t option
+        [@ocaml.doc
+          "A list of WorkGroupSummary objects that include the names, descriptions, creation times, and states for each workgroup."];
       nextToken: Token.t option
         [@ocaml.doc
           "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."]}
@@ -5368,9 +12900,8 @@ module GetQueryResultsOutput =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?updateCount =
-      fun ?resultSet ->
-        fun ?nextToken -> fun () -> { updateCount; resultSet; nextToken }
+    let make ?workGroups =
+      fun ?nextToken -> fun () -> { workGroups; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -5405,82 +12936,143 @@ module GetQueryResultsOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("UpdateCount", (Option.map x.updateCount ~f:Long.to_value));
-        ("ResultSet", (Option.map x.resultSet ~f:ResultSet.to_value));
+        [("WorkGroups", (Option.map x.workGroups ~f:WorkGroupsList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let resultSet =
-        (Option.map ~f:ResultSet.of_xml) (Xml.child xml_arg0 "ResultSet") in
-      let updateCount =
-        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "UpdateCount") in
-      make ?nextToken ?resultSet ?updateCount ()
+      let workGroups =
+        (Option.map ~f:WorkGroupsList.of_xml)
+          (Xml.child xml_arg0 "WorkGroups") in
+      make ?nextToken ?workGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let resultSet = field_map json "ResultSet" ResultSet.of_json in
-      let updateCount = field_map json "UpdateCount" Long.of_json in
-      make ?nextToken ?resultSet ?updateCount ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let workGroups = field_map json__ "WorkGroups" WorkGroupsList.of_json in
+      make ?nextToken ?workGroups ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Streams the results of a single query execution specified by QueryExecutionId from the Athena query results location in Amazon S3. For more information, see Query Results in the Amazon Athena User Guide. This request does not execute the query but returns results. Use StartQueryExecution to run a query. To stream query results successfully, the IAM principal with permission to call GetQueryResults also must have permissions to the Amazon S3 GetObject action for the Athena query results location. IAM principals with permission to the Amazon S3 GetObject action for the query results location are able to retrieve query results from Amazon S3 even if permission to the GetQueryResults action is denied. To restrict user or role access, ensure that Amazon S3 permissions to the Athena query location are denied."]
-module GetQueryResultsInput =
+  end[@@ocaml.doc "Lists available workgroups for the account."]
+module ManagedQueryResultsConfigurationUpdates =
   struct
     type nonrec t =
       {
-      queryExecutionId: QueryExecutionId.t
-        [@ocaml.doc "The unique ID of the query execution."];
-      nextToken: Token.t option
+      enabled: BoxedBoolean.t option
         [@ocaml.doc
-          "A token generated by the Athena service that specifies where to continue pagination if a previous request was truncated. To obtain the next set of pages, pass in the NextToken from the response object of the previous page call."];
-      maxResults: MaxQueryResults.t option
+          "If set to true, specifies that Athena manages query results in Athena owned storage."];
+      encryptionConfiguration:
+        ManagedQueryResultsEncryptionConfiguration.t option
         [@ocaml.doc
-          "The maximum number of results (rows) to return in this request."]}
-    let context_ = "GetQueryResultsInput"
-    let make ?nextToken =
-      fun ?maxResults ->
-        fun ~queryExecutionId ->
-          fun () -> { nextToken; maxResults; queryExecutionId }
+          "If you encrypt query and calculation results in Athena owned storage, this field indicates the encryption option (for example, SSE_KMS or CSE_KMS) and key information."];
+      removeEncryptionConfiguration: BoxedBoolean.t option
+        [@ocaml.doc
+          "If set to true, it removes workgroup from Athena owned storage. The existing query results are cleaned up after 24hrs. You must provide query results in location specified under ResultConfiguration$OutputLocation."]}
+    let make ?enabled =
+      fun ?encryptionConfiguration ->
+        fun ?removeEncryptionConfiguration ->
+          fun () ->
+            { enabled; encryptionConfiguration; removeEncryptionConfiguration
+            }
     let to_value x =
       structure_to_value
-        [("QueryExecutionId",
-           (Some (QueryExecutionId.to_value x.queryExecutionId)));
-        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxQueryResults.to_value))]
+        [("Enabled", (Option.map x.enabled ~f:BoxedBoolean.to_value));
+        ("EncryptionConfiguration",
+          (Option.map x.encryptionConfiguration
+             ~f:ManagedQueryResultsEncryptionConfiguration.to_value));
+        ("RemoveEncryptionConfiguration",
+          (Option.map x.removeEncryptionConfiguration
+             ~f:BoxedBoolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let maxResults =
-        (Option.map ~f:MaxQueryResults.of_xml)
-          (Xml.child xml_arg0 "MaxResults") in
-      let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let queryExecutionId =
-        QueryExecutionId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryExecutionId") in
-      make ?maxResults ?nextToken ~queryExecutionId ()
+      let removeEncryptionConfiguration =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "RemoveEncryptionConfiguration") in
+      let encryptionConfiguration =
+        (Option.map ~f:ManagedQueryResultsEncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "EncryptionConfiguration") in
+      let enabled =
+        (Option.map ~f:BoxedBoolean.of_xml) (Xml.child xml_arg0 "Enabled") in
+      make ?removeEncryptionConfiguration ?encryptionConfiguration ?enabled
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxQueryResults.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let queryExecutionId =
-        field_map_exn json "QueryExecutionId" QueryExecutionId.of_json in
-      make ?maxResults ?nextToken ~queryExecutionId ()
+    let of_json json__ =
+      let removeEncryptionConfiguration =
+        field_map json__ "RemoveEncryptionConfiguration" BoxedBoolean.of_json in
+      let encryptionConfiguration =
+        field_map json__ "EncryptionConfiguration"
+          ManagedQueryResultsEncryptionConfiguration.of_json in
+      let enabled = field_map json__ "Enabled" BoxedBoolean.of_json in
+      make ?removeEncryptionConfiguration ?encryptionConfiguration ?enabled
+        ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Streams the results of a single query execution specified by QueryExecutionId from the Athena query results location in Amazon S3. For more information, see Query Results in the Amazon Athena User Guide. This request does not execute the query but returns results. Use StartQueryExecution to run a query. To stream query results successfully, the IAM principal with permission to call GetQueryResults also must have permissions to the Amazon S3 GetObject action for the Athena query results location. IAM principals with permission to the Amazon S3 GetObject action for the query results location are able to retrieve query results from Amazon S3 even if permission to the GetQueryResults action is denied. To restrict user or role access, ensure that Amazon S3 permissions to the Athena query location are denied."]
-module GetQueryExecutionOutput =
+  end[@@ocaml.doc "Updates the configuration for managed query results."]
+module NamedQueryDescriptionString =
+  struct
+    type nonrec t = string
+    let context_ = "NamedQueryDescriptionString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NamedQueryDescriptionString" j
+    let to_json = simple_to_json to_value
+  end
+module PutCapacityAssignmentConfigurationInput =
   struct
     type nonrec t =
       {
-      queryExecution: QueryExecution.t option
-        [@ocaml.doc "Information about the query execution."]}
+      capacityReservationName: CapacityReservationName.t
+        [@ocaml.doc
+          "The name of the capacity reservation to put a capacity assignment configuration for."];
+      capacityAssignments: CapacityAssignmentsList.t
+        [@ocaml.doc
+          "The list of assignments for the capacity assignment configuration."]}
+    let context_ = "PutCapacityAssignmentConfigurationInput"
+    let make ~capacityReservationName =
+      fun ~capacityAssignments ->
+        fun () -> { capacityReservationName; capacityAssignments }
+    let to_value x =
+      structure_to_value
+        [("CapacityReservationName",
+           (Some (CapacityReservationName.to_value x.capacityReservationName)));
+        ("CapacityAssignments",
+          (Some (CapacityAssignmentsList.to_value x.capacityAssignments)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityAssignments =
+        CapacityAssignmentsList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CapacityAssignments") in
+      let capacityReservationName =
+        CapacityReservationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CapacityReservationName") in
+      make ~capacityAssignments ~capacityReservationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityAssignments =
+        field_map_exn json__ "CapacityAssignments"
+          CapacityAssignmentsList.of_json in
+      let capacityReservationName =
+        field_map_exn json__ "CapacityReservationName"
+          CapacityReservationName.of_json in
+      make ~capacityAssignments ~capacityReservationName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Puts a new capacity assignment configuration for a specified capacity reservation. If a capacity assignment configuration already exists for the capacity reservation, replaces the existing capacity assignment configuration."]
+module PutCapacityAssignmentConfigurationOutput =
+  struct
+    type nonrec t = unit
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?queryExecution = fun () -> { queryExecution }
+    let make () = ()
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -5513,31 +13105,835 @@ module GetQueryExecutionOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("QueryExecution",
-           (Option.map x.queryExecution ~f:QueryExecution.to_value))]
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let queryExecution =
-        (Option.map ~f:QueryExecution.of_xml)
-          (Xml.child xml_arg0 "QueryExecution") in
-      make ?queryExecution ()
+    let of_xml _ = make ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryExecution =
-        field_map json "QueryExecution" QueryExecution.of_json in
-      make ?queryExecution ()
+    let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about a single execution of a query if you have access to the workgroup in which the query ran. Each time a query executes, information about the query execution is saved with a unique ID."]
-module GetQueryExecutionInput =
+       "Puts a new capacity assignment configuration for a specified capacity reservation. If a capacity assignment configuration already exists for the capacity reservation, replaces the existing capacity assignment configuration."]
+module ResultConfigurationUpdates =
+  struct
+    type nonrec t =
+      {
+      outputLocation: ResultOutputLocation.t option
+        [@ocaml.doc
+          "The location in Amazon S3 where your query and calculation results are stored, such as s3://path/to/query/bucket/. If workgroup settings override client-side settings, then the query uses the location for the query results and the encryption configuration that are specified for the workgroup. The \"workgroup settings override\" is specified in EnforceWorkGroupConfiguration (true/false) in the WorkGroupConfiguration. See WorkGroupConfiguration$EnforceWorkGroupConfiguration."];
+      removeOutputLocation: BoxedBoolean.t option
+        [@ocaml.doc
+          "If set to \"true\", indicates that the previously-specified query results location (also known as a client-side setting) for queries in this workgroup should be ignored and set to null. If set to \"false\" or not set, and a value is present in the OutputLocation in ResultConfigurationUpdates (the client-side setting), the OutputLocation in the workgroup's ResultConfiguration will be updated with the new value. For more information, see Workgroup Settings Override Client-Side Settings."];
+      encryptionConfiguration: EncryptionConfiguration.t option
+        [@ocaml.doc
+          "The encryption configuration for query and calculation results."];
+      removeEncryptionConfiguration: BoxedBoolean.t option
+        [@ocaml.doc
+          "If set to \"true\", indicates that the previously-specified encryption configuration (also known as the client-side setting) for queries in this workgroup should be ignored and set to null. If set to \"false\" or not set, and a value is present in the EncryptionConfiguration in ResultConfigurationUpdates (the client-side setting), the EncryptionConfiguration in the workgroup's ResultConfiguration will be updated with the new value. For more information, see Workgroup Settings Override Client-Side Settings."];
+      expectedBucketOwner: AwsAccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID that you expect to be the owner of the Amazon S3 bucket specified by ResultConfiguration$OutputLocation. If set, Athena uses the value for ExpectedBucketOwner when it makes Amazon S3 calls to your specified output location. If the ExpectedBucketOwner Amazon Web Services account ID does not match the actual owner of the Amazon S3 bucket, the call fails with a permissions error. If workgroup settings override client-side settings, then the query uses the ExpectedBucketOwner setting that is specified for the workgroup, and also uses the location for storing query results specified in the workgroup. See WorkGroupConfiguration$EnforceWorkGroupConfiguration and Workgroup Settings Override Client-Side Settings."];
+      removeExpectedBucketOwner: BoxedBoolean.t option
+        [@ocaml.doc
+          "If set to \"true\", removes the Amazon Web Services account ID previously specified for ResultConfiguration$ExpectedBucketOwner. If set to \"false\" or not set, and a value is present in the ExpectedBucketOwner in ResultConfigurationUpdates (the client-side setting), the ExpectedBucketOwner in the workgroup's ResultConfiguration is updated with the new value. For more information, see Workgroup Settings Override Client-Side Settings."];
+      aclConfiguration: AclConfiguration.t option
+        [@ocaml.doc "The ACL configuration for the query results."];
+      removeAclConfiguration: BoxedBoolean.t option
+        [@ocaml.doc
+          "If set to true, indicates that the previously-specified ACL configuration for queries in this workgroup should be ignored and set to null. If set to false or not set, and a value is present in the AclConfiguration of ResultConfigurationUpdates, the AclConfiguration in the workgroup's ResultConfiguration is updated with the new value. For more information, see Workgroup Settings Override Client-Side Settings."]}
+    let make ?outputLocation =
+      fun ?removeOutputLocation ->
+        fun ?encryptionConfiguration ->
+          fun ?removeEncryptionConfiguration ->
+            fun ?expectedBucketOwner ->
+              fun ?removeExpectedBucketOwner ->
+                fun ?aclConfiguration ->
+                  fun ?removeAclConfiguration ->
+                    fun () ->
+                      {
+                        outputLocation;
+                        removeOutputLocation;
+                        encryptionConfiguration;
+                        removeEncryptionConfiguration;
+                        expectedBucketOwner;
+                        removeExpectedBucketOwner;
+                        aclConfiguration;
+                        removeAclConfiguration
+                      }
+    let to_value x =
+      structure_to_value
+        [("OutputLocation",
+           (Option.map x.outputLocation ~f:ResultOutputLocation.to_value));
+        ("RemoveOutputLocation",
+          (Option.map x.removeOutputLocation ~f:BoxedBoolean.to_value));
+        ("EncryptionConfiguration",
+          (Option.map x.encryptionConfiguration
+             ~f:EncryptionConfiguration.to_value));
+        ("RemoveEncryptionConfiguration",
+          (Option.map x.removeEncryptionConfiguration
+             ~f:BoxedBoolean.to_value));
+        ("ExpectedBucketOwner",
+          (Option.map x.expectedBucketOwner ~f:AwsAccountId.to_value));
+        ("RemoveExpectedBucketOwner",
+          (Option.map x.removeExpectedBucketOwner ~f:BoxedBoolean.to_value));
+        ("AclConfiguration",
+          (Option.map x.aclConfiguration ~f:AclConfiguration.to_value));
+        ("RemoveAclConfiguration",
+          (Option.map x.removeAclConfiguration ~f:BoxedBoolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let removeAclConfiguration =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "RemoveAclConfiguration") in
+      let aclConfiguration =
+        (Option.map ~f:AclConfiguration.of_xml)
+          (Xml.child xml_arg0 "AclConfiguration") in
+      let removeExpectedBucketOwner =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "RemoveExpectedBucketOwner") in
+      let expectedBucketOwner =
+        (Option.map ~f:AwsAccountId.of_xml)
+          (Xml.child xml_arg0 "ExpectedBucketOwner") in
+      let removeEncryptionConfiguration =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "RemoveEncryptionConfiguration") in
+      let encryptionConfiguration =
+        (Option.map ~f:EncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "EncryptionConfiguration") in
+      let removeOutputLocation =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "RemoveOutputLocation") in
+      let outputLocation =
+        (Option.map ~f:ResultOutputLocation.of_xml)
+          (Xml.child xml_arg0 "OutputLocation") in
+      make ?removeAclConfiguration ?aclConfiguration
+        ?removeExpectedBucketOwner ?expectedBucketOwner
+        ?removeEncryptionConfiguration ?encryptionConfiguration
+        ?removeOutputLocation ?outputLocation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let removeAclConfiguration =
+        field_map json__ "RemoveAclConfiguration" BoxedBoolean.of_json in
+      let aclConfiguration =
+        field_map json__ "AclConfiguration" AclConfiguration.of_json in
+      let removeExpectedBucketOwner =
+        field_map json__ "RemoveExpectedBucketOwner" BoxedBoolean.of_json in
+      let expectedBucketOwner =
+        field_map json__ "ExpectedBucketOwner" AwsAccountId.of_json in
+      let removeEncryptionConfiguration =
+        field_map json__ "RemoveEncryptionConfiguration" BoxedBoolean.of_json in
+      let encryptionConfiguration =
+        field_map json__ "EncryptionConfiguration"
+          EncryptionConfiguration.of_json in
+      let removeOutputLocation =
+        field_map json__ "RemoveOutputLocation" BoxedBoolean.of_json in
+      let outputLocation =
+        field_map json__ "OutputLocation" ResultOutputLocation.of_json in
+      make ?removeAclConfiguration ?aclConfiguration
+        ?removeExpectedBucketOwner ?expectedBucketOwner
+        ?removeEncryptionConfiguration ?encryptionConfiguration
+        ?removeOutputLocation ?outputLocation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The information about the updates in the query results, such as output location and encryption configuration for the query results."]
+module SessionAlreadyExistsException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified session already exists."]
+module StartCalculationExecutionRequest =
+  struct
+    type nonrec t =
+      {
+      sessionId: SessionId.t [@ocaml.doc "The session ID."];
+      description: DescriptionString.t option
+        [@ocaml.doc "A description of the calculation."];
+      calculationConfiguration: CalculationConfiguration.t option
+        [@ocaml.doc
+          "Contains configuration information for the calculation."];
+      codeBlock: CodeBlock.t option
+        [@ocaml.doc
+          "A string that contains the code of the calculation. Use this parameter instead of CalculationConfiguration$CodeBlock, which is deprecated."];
+      clientRequestToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique case-sensitive string used to ensure the request to create the calculation is idempotent (executes only once). If another StartCalculationExecutionRequest is received, the same response is returned and another calculation is not created. If a parameter has changed, an error is returned. This token is listed as not required because Amazon Web Services SDKs (for example the Amazon Web Services SDK for Java) auto-generate the token for users. If you are not using the Amazon Web Services SDK or the Amazon Web Services CLI, you must provide this token or the action will fail."]}
+    let context_ = "StartCalculationExecutionRequest"
+    let make ?description =
+      fun ?calculationConfiguration ->
+        fun ?codeBlock ->
+          fun ?clientRequestToken ->
+            fun ~sessionId ->
+              fun () ->
+                {
+                  description;
+                  calculationConfiguration;
+                  codeBlock;
+                  clientRequestToken;
+                  sessionId
+                }
+    let to_value x =
+      structure_to_value
+        [("SessionId", (Some (SessionId.to_value x.sessionId)));
+        ("Description",
+          (Option.map x.description ~f:DescriptionString.to_value));
+        ("CalculationConfiguration",
+          (Option.map x.calculationConfiguration
+             ~f:CalculationConfiguration.to_value));
+        ("CodeBlock", (Option.map x.codeBlock ~f:CodeBlock.to_value));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:IdempotencyToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let codeBlock =
+        (Option.map ~f:CodeBlock.of_xml) (Xml.child xml_arg0 "CodeBlock") in
+      let calculationConfiguration =
+        (Option.map ~f:CalculationConfiguration.of_xml)
+          (Xml.child xml_arg0 "CalculationConfiguration") in
+      let description =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let sessionId =
+        SessionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SessionId") in
+      make ?clientRequestToken ?codeBlock ?calculationConfiguration
+        ?description ~sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" IdempotencyToken.of_json in
+      let codeBlock = field_map json__ "CodeBlock" CodeBlock.of_json in
+      let calculationConfiguration =
+        field_map json__ "CalculationConfiguration"
+          CalculationConfiguration.of_json in
+      let description =
+        field_map json__ "Description" DescriptionString.of_json in
+      let sessionId = field_map_exn json__ "SessionId" SessionId.of_json in
+      make ?clientRequestToken ?codeBlock ?calculationConfiguration
+        ?description ~sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Submits calculations for execution within a session. You can supply the code to run as an inline code block within the request. The request syntax requires the StartCalculationExecutionRequest$CodeBlock parameter or the CalculationConfiguration$CodeBlock parameter, but not both. Because CalculationConfiguration$CodeBlock is deprecated, use the StartCalculationExecutionRequest$CodeBlock parameter instead."]
+module StartCalculationExecutionResponse =
+  struct
+    type nonrec t =
+      {
+      calculationExecutionId: CalculationExecutionId.t option
+        [@ocaml.doc "The calculation execution UUID."];
+      state: CalculationExecutionState.t option
+        [@ocaml.doc
+          "CREATING - The calculation is in the process of being created. CREATED - The calculation has been created and is ready to run. QUEUED - The calculation has been queued for processing. RUNNING - The calculation is running. CANCELING - A request to cancel the calculation has been received and the system is working to stop it. CANCELED - The calculation is no longer running as the result of a cancel request. COMPLETED - The calculation has completed without error. FAILED - The calculation failed and is no longer running."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?calculationExecutionId =
+      fun ?state -> fun () -> { calculationExecutionId; state }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CalculationExecutionId",
+           (Option.map x.calculationExecutionId
+              ~f:CalculationExecutionId.to_value));
+        ("State", (Option.map x.state ~f:CalculationExecutionState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:CalculationExecutionState.of_xml)
+          (Xml.child xml_arg0 "State") in
+      let calculationExecutionId =
+        (Option.map ~f:CalculationExecutionId.of_xml)
+          (Xml.child xml_arg0 "CalculationExecutionId") in
+      make ?state ?calculationExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state = field_map json__ "State" CalculationExecutionState.of_json in
+      let calculationExecutionId =
+        field_map json__ "CalculationExecutionId"
+          CalculationExecutionId.of_json in
+      make ?state ?calculationExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Submits calculations for execution within a session. You can supply the code to run as an inline code block within the request. The request syntax requires the StartCalculationExecutionRequest$CodeBlock parameter or the CalculationConfiguration$CodeBlock parameter, but not both. Because CalculationConfiguration$CodeBlock is deprecated, use the StartCalculationExecutionRequest$CodeBlock parameter instead."]
+module StartQueryExecutionInput =
+  struct
+    type nonrec t =
+      {
+      queryString: QueryString.t
+        [@ocaml.doc "The SQL query statements to be executed."];
+      clientRequestToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique case-sensitive string used to ensure the request to create the query is idempotent (executes only once). If another StartQueryExecution request is received, the same response is returned and another query is not created. An error is returned if a parameter, such as QueryString, has changed. A call to StartQueryExecution that uses a previous client request token returns the same QueryExecutionId even if the requester doesn't have permission on the tables specified in QueryString. This token is listed as not required because Amazon Web Services SDKs (for example the Amazon Web Services SDK for Java) auto-generate the token for users. If you are not using the Amazon Web Services SDK or the Amazon Web Services CLI, you must provide this token or the action will fail."];
+      queryExecutionContext: QueryExecutionContext.t option
+        [@ocaml.doc "The database within which the query executes."];
+      resultConfiguration: ResultConfiguration.t option
+        [@ocaml.doc
+          "Specifies information about where and how to save the results of the query execution. If the query runs in a workgroup, then workgroup's settings may override query settings. This affects the query results location. The workgroup settings override is specified in EnforceWorkGroupConfiguration (true/false) in the WorkGroupConfiguration. See WorkGroupConfiguration$EnforceWorkGroupConfiguration."];
+      workGroup: WorkGroupName.t option
+        [@ocaml.doc
+          "The name of the workgroup in which the query is being started."];
+      executionParameters: ExecutionParameters.t option
+        [@ocaml.doc
+          "A list of values for the parameters in a query. The values are applied sequentially to the parameters in the query in the order in which the parameters occur."];
+      resultReuseConfiguration: ResultReuseConfiguration.t option
+        [@ocaml.doc
+          "Specifies the query result reuse behavior for the query."];
+      engineConfiguration: EngineConfiguration.t option
+        [@ocaml.doc
+          "The engine configuration for the workgroup, which includes the minimum/maximum number of Data Processing Units (DPU) that queries should use when running in provisioned capacity. If not specified, Athena uses default values (Default value for min is 4 and for max is Minimum of 124 and allocated DPUs). To specify minimum and maximum DPU values for Capacity Reservations queries, the workgroup containing EngineConfiguration should have the following values: The name of the Classifications should be athena-query-engine-properties, with the only allowed properties as max-dpu-count and min-dpu-count."]}
+    let context_ = "StartQueryExecutionInput"
+    let make ?clientRequestToken =
+      fun ?queryExecutionContext ->
+        fun ?resultConfiguration ->
+          fun ?workGroup ->
+            fun ?executionParameters ->
+              fun ?resultReuseConfiguration ->
+                fun ?engineConfiguration ->
+                  fun ~queryString ->
+                    fun () ->
+                      {
+                        clientRequestToken;
+                        queryExecutionContext;
+                        resultConfiguration;
+                        workGroup;
+                        executionParameters;
+                        resultReuseConfiguration;
+                        engineConfiguration;
+                        queryString
+                      }
+    let to_value x =
+      structure_to_value
+        [("QueryString", (Some (QueryString.to_value x.queryString)));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:IdempotencyToken.to_value));
+        ("QueryExecutionContext",
+          (Option.map x.queryExecutionContext
+             ~f:QueryExecutionContext.to_value));
+        ("ResultConfiguration",
+          (Option.map x.resultConfiguration ~f:ResultConfiguration.to_value));
+        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value));
+        ("ExecutionParameters",
+          (Option.map x.executionParameters ~f:ExecutionParameters.to_value));
+        ("ResultReuseConfiguration",
+          (Option.map x.resultReuseConfiguration
+             ~f:ResultReuseConfiguration.to_value));
+        ("EngineConfiguration",
+          (Option.map x.engineConfiguration ~f:EngineConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let engineConfiguration =
+        (Option.map ~f:EngineConfiguration.of_xml)
+          (Xml.child xml_arg0 "EngineConfiguration") in
+      let resultReuseConfiguration =
+        (Option.map ~f:ResultReuseConfiguration.of_xml)
+          (Xml.child xml_arg0 "ResultReuseConfiguration") in
+      let executionParameters =
+        (Option.map ~f:ExecutionParameters.of_xml)
+          (Xml.child xml_arg0 "ExecutionParameters") in
+      let workGroup =
+        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
+      let resultConfiguration =
+        (Option.map ~f:ResultConfiguration.of_xml)
+          (Xml.child xml_arg0 "ResultConfiguration") in
+      let queryExecutionContext =
+        (Option.map ~f:QueryExecutionContext.of_xml)
+          (Xml.child xml_arg0 "QueryExecutionContext") in
+      let clientRequestToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let queryString =
+        QueryString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "QueryString") in
+      make ?engineConfiguration ?resultReuseConfiguration
+        ?executionParameters ?workGroup ?resultConfiguration
+        ?queryExecutionContext ?clientRequestToken ~queryString ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let engineConfiguration =
+        field_map json__ "EngineConfiguration" EngineConfiguration.of_json in
+      let resultReuseConfiguration =
+        field_map json__ "ResultReuseConfiguration"
+          ResultReuseConfiguration.of_json in
+      let executionParameters =
+        field_map json__ "ExecutionParameters" ExecutionParameters.of_json in
+      let workGroup = field_map json__ "WorkGroup" WorkGroupName.of_json in
+      let resultConfiguration =
+        field_map json__ "ResultConfiguration" ResultConfiguration.of_json in
+      let queryExecutionContext =
+        field_map json__ "QueryExecutionContext"
+          QueryExecutionContext.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" IdempotencyToken.of_json in
+      let queryString =
+        field_map_exn json__ "QueryString" QueryString.of_json in
+      make ?engineConfiguration ?resultReuseConfiguration
+        ?executionParameters ?workGroup ?resultConfiguration
+        ?queryExecutionContext ?clientRequestToken ~queryString ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Runs the SQL query statements contained in the Query. Requires you to have access to the workgroup in which the query ran. Running queries against an external catalog requires GetDataCatalog permission to the catalog. For code samples using the Amazon Web Services SDK for Java, see Examples and Code Samples in the Amazon Athena User Guide."]
+module StartQueryExecutionOutput =
+  struct
+    type nonrec t =
+      {
+      queryExecutionId: QueryExecutionId.t option
+        [@ocaml.doc
+          "The unique ID of the query that ran as a result of this request."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?queryExecutionId = fun () -> { queryExecutionId }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("QueryExecutionId",
+           (Option.map x.queryExecutionId ~f:QueryExecutionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queryExecutionId =
+        (Option.map ~f:QueryExecutionId.of_xml)
+          (Xml.child xml_arg0 "QueryExecutionId") in
+      make ?queryExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queryExecutionId =
+        field_map json__ "QueryExecutionId" QueryExecutionId.of_json in
+      make ?queryExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Runs the SQL query statements contained in the Query. Requires you to have access to the workgroup in which the query ran. Running queries against an external catalog requires GetDataCatalog permission to the catalog. For code samples using the Amazon Web Services SDK for Java, see Examples and Code Samples in the Amazon Athena User Guide."]
+module StartSessionRequest =
+  struct
+    type nonrec t =
+      {
+      description: DescriptionString.t option
+        [@ocaml.doc "The session description."];
+      workGroup: WorkGroupName.t
+        [@ocaml.doc "The workgroup to which the session belongs."];
+      engineConfiguration: EngineConfiguration.t
+        [@ocaml.doc
+          "Contains engine data processing unit (DPU) configuration settings and parameter mappings."];
+      executionRole: RoleArn.t option
+        [@ocaml.doc
+          "The ARN of the execution role used to access user resources for Spark sessions and Identity Center enabled workgroups. This property applies only to Spark enabled workgroups and Identity Center enabled workgroups."];
+      monitoringConfiguration: MonitoringConfiguration.t option
+        [@ocaml.doc
+          "Contains the configuration settings for managed log persistence, delivering logs to Amazon S3 buckets, Amazon CloudWatch log groups etc."];
+      notebookVersion: NameString.t option
+        [@ocaml.doc
+          "The notebook version. This value is supplied automatically for notebook sessions in the Athena console and is not required for programmatic session access. The only valid notebook version is Athena notebook version 1. If you specify a value for NotebookVersion, you must also specify a value for NotebookId. See EngineConfiguration$AdditionalConfigs."];
+      sessionIdleTimeoutInMinutes: SessionIdleTimeoutInMinutes.t option
+        [@ocaml.doc "The idle timeout in minutes for the session."];
+      clientRequestToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique case-sensitive string used to ensure the request to create the session is idempotent (executes only once). If another StartSessionRequest is received, the same response is returned and another session is not created. If a parameter has changed, an error is returned. This token is listed as not required because Amazon Web Services SDKs (for example the Amazon Web Services SDK for Java) auto-generate the token for users. If you are not using the Amazon Web Services SDK or the Amazon Web Services CLI, you must provide this token or the action will fail."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "A list of comma separated tags to add to the session that is created."];
+      copyWorkGroupTags: BoxedBoolean.t option
+        [@ocaml.doc
+          "Copies the tags from the Workgroup to the Session when."]}
+    let context_ = "StartSessionRequest"
+    let make ?description =
+      fun ?executionRole ->
+        fun ?monitoringConfiguration ->
+          fun ?notebookVersion ->
+            fun ?sessionIdleTimeoutInMinutes ->
+              fun ?clientRequestToken ->
+                fun ?tags ->
+                  fun ?copyWorkGroupTags ->
+                    fun ~workGroup ->
+                      fun ~engineConfiguration ->
+                        fun () ->
+                          {
+                            description;
+                            executionRole;
+                            monitoringConfiguration;
+                            notebookVersion;
+                            sessionIdleTimeoutInMinutes;
+                            clientRequestToken;
+                            tags;
+                            copyWorkGroupTags;
+                            workGroup;
+                            engineConfiguration
+                          }
+    let to_value x =
+      structure_to_value
+        [("Description",
+           (Option.map x.description ~f:DescriptionString.to_value));
+        ("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)));
+        ("EngineConfiguration",
+          (Some (EngineConfiguration.to_value x.engineConfiguration)));
+        ("ExecutionRole", (Option.map x.executionRole ~f:RoleArn.to_value));
+        ("MonitoringConfiguration",
+          (Option.map x.monitoringConfiguration
+             ~f:MonitoringConfiguration.to_value));
+        ("NotebookVersion",
+          (Option.map x.notebookVersion ~f:NameString.to_value));
+        ("SessionIdleTimeoutInMinutes",
+          (Option.map x.sessionIdleTimeoutInMinutes
+             ~f:SessionIdleTimeoutInMinutes.to_value));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:IdempotencyToken.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("CopyWorkGroupTags",
+          (Option.map x.copyWorkGroupTags ~f:BoxedBoolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let copyWorkGroupTags =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "CopyWorkGroupTags") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let clientRequestToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let sessionIdleTimeoutInMinutes =
+        (Option.map ~f:SessionIdleTimeoutInMinutes.of_xml)
+          (Xml.child xml_arg0 "SessionIdleTimeoutInMinutes") in
+      let notebookVersion =
+        (Option.map ~f:NameString.of_xml)
+          (Xml.child xml_arg0 "NotebookVersion") in
+      let monitoringConfiguration =
+        (Option.map ~f:MonitoringConfiguration.of_xml)
+          (Xml.child xml_arg0 "MonitoringConfiguration") in
+      let executionRole =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "ExecutionRole") in
+      let engineConfiguration =
+        EngineConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EngineConfiguration") in
+      let workGroup =
+        WorkGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
+      let description =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      make ?copyWorkGroupTags ?tags ?clientRequestToken
+        ?sessionIdleTimeoutInMinutes ?notebookVersion
+        ?monitoringConfiguration ?executionRole ~engineConfiguration
+        ~workGroup ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let copyWorkGroupTags =
+        field_map json__ "CopyWorkGroupTags" BoxedBoolean.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" IdempotencyToken.of_json in
+      let sessionIdleTimeoutInMinutes =
+        field_map json__ "SessionIdleTimeoutInMinutes"
+          SessionIdleTimeoutInMinutes.of_json in
+      let notebookVersion =
+        field_map json__ "NotebookVersion" NameString.of_json in
+      let monitoringConfiguration =
+        field_map json__ "MonitoringConfiguration"
+          MonitoringConfiguration.of_json in
+      let executionRole = field_map json__ "ExecutionRole" RoleArn.of_json in
+      let engineConfiguration =
+        field_map_exn json__ "EngineConfiguration"
+          EngineConfiguration.of_json in
+      let workGroup = field_map_exn json__ "WorkGroup" WorkGroupName.of_json in
+      let description =
+        field_map json__ "Description" DescriptionString.of_json in
+      make ?copyWorkGroupTags ?tags ?clientRequestToken
+        ?sessionIdleTimeoutInMinutes ?notebookVersion
+        ?monitoringConfiguration ?executionRole ~engineConfiguration
+        ~workGroup ?description ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a session for running calculations within a workgroup. The session is ready when it reaches an IDLE state."]
+module StartSessionResponse =
+  struct
+    type nonrec t =
+      {
+      sessionId: SessionId.t option [@ocaml.doc "The session ID."];
+      state: SessionState.t option
+        [@ocaml.doc
+          "The state of the session. A description of each state follows. CREATING - The session is being started, including acquiring resources. CREATED - The session has been started. IDLE - The session is able to accept a calculation. BUSY - The session is processing another task and is unable to accept a calculation. TERMINATING - The session is in the process of shutting down. TERMINATED - The session and its resources are no longer running. DEGRADED - The session has no healthy coordinators. FAILED - Due to a failure, the session and its resources are no longer running."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `SessionAlreadyExistsException of SessionAlreadyExistsException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sessionId = fun ?state -> fun () -> { sessionId; state }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "SessionAlreadyExistsException" ->
+          `SessionAlreadyExistsException
+            (SessionAlreadyExistsException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "SessionAlreadyExistsException" ->
+          `SessionAlreadyExistsException
+            (SessionAlreadyExistsException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `SessionAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "SessionAlreadyExistsException"));
+            ("details", (SessionAlreadyExistsException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("SessionId", (Option.map x.sessionId ~f:SessionId.to_value));
+        ("State", (Option.map x.state ~f:SessionState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:SessionState.of_xml) (Xml.child xml_arg0 "State") in
+      let sessionId =
+        (Option.map ~f:SessionId.of_xml) (Xml.child xml_arg0 "SessionId") in
+      make ?state ?sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state = field_map json__ "State" SessionState.of_json in
+      let sessionId = field_map json__ "SessionId" SessionId.of_json in
+      make ?state ?sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a session for running calculations within a workgroup. The session is ready when it reaches an IDLE state."]
+module StopCalculationExecutionRequest =
+  struct
+    type nonrec t =
+      {
+      calculationExecutionId: CalculationExecutionId.t
+        [@ocaml.doc "The calculation execution UUID."]}
+    let context_ = "StopCalculationExecutionRequest"
+    let make ~calculationExecutionId = fun () -> { calculationExecutionId }
+    let to_value x =
+      structure_to_value
+        [("CalculationExecutionId",
+           (Some (CalculationExecutionId.to_value x.calculationExecutionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let calculationExecutionId =
+        CalculationExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CalculationExecutionId") in
+      make ~calculationExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let calculationExecutionId =
+        field_map_exn json__ "CalculationExecutionId"
+          CalculationExecutionId.of_json in
+      make ~calculationExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Requests the cancellation of a calculation. A StopCalculationExecution call on a calculation that is already in a terminal state (for example, STOPPED, FAILED, or COMPLETED) succeeds but has no effect. Cancelling a calculation is done on a best effort basis. If a calculation cannot be cancelled, you can be charged for its completion. If you are concerned about being charged for a calculation that cannot be cancelled, consider terminating the session in which the calculation is running."]
+module StopCalculationExecutionResponse =
+  struct
+    type nonrec t =
+      {
+      state: CalculationExecutionState.t option
+        [@ocaml.doc
+          "CREATING - The calculation is in the process of being created. CREATED - The calculation has been created and is ready to run. QUEUED - The calculation has been queued for processing. RUNNING - The calculation is running. CANCELING - A request to cancel the calculation has been received and the system is working to stop it. CANCELED - The calculation is no longer running as the result of a cancel request. COMPLETED - The calculation has completed without error. FAILED - The calculation failed and is no longer running."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?state = fun () -> { state }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("State",
+           (Option.map x.state ~f:CalculationExecutionState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:CalculationExecutionState.of_xml)
+          (Xml.child xml_arg0 "State") in
+      make ?state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state = field_map json__ "State" CalculationExecutionState.of_json in
+      make ?state ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Requests the cancellation of a calculation. A StopCalculationExecution call on a calculation that is already in a terminal state (for example, STOPPED, FAILED, or COMPLETED) succeeds but has no effect. Cancelling a calculation is done on a best effort basis. If a calculation cannot be cancelled, you can be charged for its completion. If you are concerned about being charged for a calculation that cannot be cancelled, consider terminating the session in which the calculation is running."]
+module StopQueryExecutionInput =
   struct
     type nonrec t =
       {
       queryExecutionId: QueryExecutionId.t
-        [@ocaml.doc "The unique ID of the query execution."]}
-    let context_ = "GetQueryExecutionInput"
+        [@ocaml.doc "The unique ID of the query execution to stop."]}
+    let context_ = "StopQueryExecutionInput"
     let make ~queryExecutionId = fun () -> { queryExecutionId }
     let to_value x =
       structure_to_value
@@ -5550,382 +13946,14 @@ module GetQueryExecutionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "QueryExecutionId") in
       make ~queryExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let queryExecutionId =
-        field_map_exn json "QueryExecutionId" QueryExecutionId.of_json in
+        field_map_exn json__ "QueryExecutionId" QueryExecutionId.of_json in
       make ~queryExecutionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about a single execution of a query if you have access to the workgroup in which the query ran. Each time a query executes, information about the query execution is saved with a unique ID."]
-module GetPreparedStatementOutput =
-  struct
-    type nonrec t =
-      {
-      preparedStatement: PreparedStatement.t option
-        [@ocaml.doc "The name of the prepared statement that was retrieved."]}
-    type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
-      | `InvalidRequestException of InvalidRequestException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?preparedStatement = fun () -> { preparedStatement }
-    let error_of_json name json =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `InvalidRequestException e ->
-          `Assoc
-            [("error", (`String "InvalidRequestException"));
-            ("details", (InvalidRequestException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("PreparedStatement",
-           (Option.map x.preparedStatement ~f:PreparedStatement.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let preparedStatement =
-        (Option.map ~f:PreparedStatement.of_xml)
-          (Xml.child xml_arg0 "PreparedStatement") in
-      make ?preparedStatement ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let preparedStatement =
-        field_map json "PreparedStatement" PreparedStatement.of_json in
-      make ?preparedStatement ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Retrieves the prepared statement with the specified name from the specified workgroup."]
-module GetPreparedStatementInput =
-  struct
-    type nonrec t =
-      {
-      statementName: StatementName.t
-        [@ocaml.doc "The name of the prepared statement to retrieve."];
-      workGroup: WorkGroupName.t
-        [@ocaml.doc
-          "The workgroup to which the statement to be retrieved belongs."]}
-    let context_ = "GetPreparedStatementInput"
-    let make ~statementName =
-      fun ~workGroup -> fun () -> { statementName; workGroup }
-    let to_value x =
-      structure_to_value
-        [("StatementName", (Some (StatementName.to_value x.statementName)));
-        ("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let workGroup =
-        WorkGroupName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
-      let statementName =
-        StatementName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StatementName") in
-      make ~workGroup ~statementName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workGroup = field_map_exn json "WorkGroup" WorkGroupName.of_json in
-      let statementName =
-        field_map_exn json "StatementName" StatementName.of_json in
-      make ~workGroup ~statementName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Retrieves the prepared statement with the specified name from the specified workgroup."]
-module GetNamedQueryOutput =
-  struct
-    type nonrec t =
-      {
-      namedQuery: NamedQuery.t option
-        [@ocaml.doc "Information about the query."]}
-    type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
-      | `InvalidRequestException of InvalidRequestException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?namedQuery = fun () -> { namedQuery }
-    let error_of_json name json =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `InvalidRequestException e ->
-          `Assoc
-            [("error", (`String "InvalidRequestException"));
-            ("details", (InvalidRequestException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("NamedQuery", (Option.map x.namedQuery ~f:NamedQuery.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let namedQuery =
-        (Option.map ~f:NamedQuery.of_xml) (Xml.child xml_arg0 "NamedQuery") in
-      make ?namedQuery ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let namedQuery = field_map json "NamedQuery" NamedQuery.of_json in
-      make ?namedQuery ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns information about a single query. Requires that you have access to the workgroup in which the query was saved."]
-module GetNamedQueryInput =
-  struct
-    type nonrec t =
-      {
-      namedQueryId: NamedQueryId.t
-        [@ocaml.doc
-          "The unique ID of the query. Use ListNamedQueries to get query IDs."]}
-    let context_ = "GetNamedQueryInput"
-    let make ~namedQueryId = fun () -> { namedQueryId }
-    let to_value x =
-      structure_to_value
-        [("NamedQueryId", (Some (NamedQueryId.to_value x.namedQueryId)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let namedQueryId =
-        NamedQueryId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "NamedQueryId") in
-      make ~namedQueryId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let namedQueryId =
-        field_map_exn json "NamedQueryId" NamedQueryId.of_json in
-      make ~namedQueryId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns information about a single query. Requires that you have access to the workgroup in which the query was saved."]
-module GetDatabaseOutput =
-  struct
-    type nonrec t =
-      {
-      database: Database.t option [@ocaml.doc "The database returned."]}
-    type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
-      | `InvalidRequestException of InvalidRequestException.t 
-      | `MetadataException of MetadataException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?database = fun () -> { database }
-    let error_of_json name json =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_json json)
-      | "MetadataException" ->
-          `MetadataException (MetadataException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_xml xml)
-      | "MetadataException" ->
-          `MetadataException (MetadataException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `InvalidRequestException e ->
-          `Assoc
-            [("error", (`String "InvalidRequestException"));
-            ("details", (InvalidRequestException.to_json e))]
-      | `MetadataException e ->
-          `Assoc
-            [("error", (`String "MetadataException"));
-            ("details", (MetadataException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("Database", (Option.map x.database ~f:Database.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let database =
-        (Option.map ~f:Database.of_xml) (Xml.child xml_arg0 "Database") in
-      make ?database ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let database = field_map json "Database" Database.of_json in
-      make ?database ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns a database object for the specified database and data catalog."]
-module GetDatabaseInput =
-  struct
-    type nonrec t =
-      {
-      catalogName: CatalogNameString.t
-        [@ocaml.doc
-          "The name of the data catalog that contains the database to return."];
-      databaseName: NameString.t
-        [@ocaml.doc "The name of the database to return."]}
-    let context_ = "GetDatabaseInput"
-    let make ~catalogName =
-      fun ~databaseName -> fun () -> { catalogName; databaseName }
-    let to_value x =
-      structure_to_value
-        [("CatalogName", (Some (CatalogNameString.to_value x.catalogName)));
-        ("DatabaseName", (Some (NameString.to_value x.databaseName)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let databaseName =
-        NameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
-      let catalogName =
-        CatalogNameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CatalogName") in
-      make ~databaseName ~catalogName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let databaseName = field_map_exn json "DatabaseName" NameString.of_json in
-      let catalogName =
-        field_map_exn json "CatalogName" CatalogNameString.of_json in
-      make ~databaseName ~catalogName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns a database object for the specified database and data catalog."]
-module GetDataCatalogOutput =
-  struct
-    type nonrec t =
-      {
-      dataCatalog: DataCatalog.t option
-        [@ocaml.doc "The data catalog returned."]}
-    type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
-      | `InvalidRequestException of InvalidRequestException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?dataCatalog = fun () -> { dataCatalog }
-    let error_of_json name json =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `InvalidRequestException e ->
-          `Assoc
-            [("error", (`String "InvalidRequestException"));
-            ("details", (InvalidRequestException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("DataCatalog", (Option.map x.dataCatalog ~f:DataCatalog.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let dataCatalog =
-        (Option.map ~f:DataCatalog.of_xml) (Xml.child xml_arg0 "DataCatalog") in
-      make ?dataCatalog ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataCatalog = field_map json "DataCatalog" DataCatalog.of_json in
-      make ?dataCatalog ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns the specified data catalog."]
-module GetDataCatalogInput =
-  struct
-    type nonrec t =
-      {
-      name: CatalogNameString.t
-        [@ocaml.doc "The name of the data catalog to return."]}
-    let context_ = "GetDataCatalogInput"
-    let make ~name = fun () -> { name }
-    let to_value x =
-      structure_to_value
-        [("Name", (Some (CatalogNameString.to_value x.name)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let name =
-        CatalogNameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" CatalogNameString.of_json in
-      make ~name ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns the specified data catalog."]
-module DeleteWorkGroupOutput =
+       "Stops a query execution. Requires you to have access to the workgroup in which the query ran."]
+module StopQueryExecutionOutput =
   struct
     type nonrec t = unit
     type nonrec error =
@@ -5973,43 +14001,67 @@ module DeleteWorkGroupOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the workgroup with the specified name. The primary workgroup cannot be deleted."]
-module DeleteWorkGroupInput =
+       "Stops a query execution. Requires you to have access to the workgroup in which the query ran."]
+module TagKeyList =
+  struct
+    type nonrec t = TagKey.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TagKey.of_xml)
+    let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TagResourceInput =
   struct
     type nonrec t =
       {
-      workGroup: WorkGroupName.t
-        [@ocaml.doc "The unique name of the workgroup to delete."];
-      recursiveDeleteOption: BoxedBoolean.t option
+      resourceARN: AmazonResourceName.t
         [@ocaml.doc
-          "The option to delete the workgroup and its contents even if the workgroup contains any named queries or query executions."]}
-    let context_ = "DeleteWorkGroupInput"
-    let make ?recursiveDeleteOption =
-      fun ~workGroup -> fun () -> { recursiveDeleteOption; workGroup }
+          "Specifies the ARN of the Athena resource to which tags are to be added."];
+      tags: TagList.t
+        [@ocaml.doc
+          "A collection of one or more tags, separated by commas, to be added to an Athena resource."]}
+    let context_ = "TagResourceInput"
+    let make ~resourceARN = fun ~tags -> fun () -> { resourceARN; tags }
     let to_value x =
       structure_to_value
-        [("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)));
-        ("RecursiveDeleteOption",
-          (Option.map x.recursiveDeleteOption ~f:BoxedBoolean.to_value))]
+        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
+        ("Tags", (Some (TagList.to_value x.tags)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let recursiveDeleteOption =
-        (Option.map ~f:BoxedBoolean.of_xml)
-          (Xml.child xml_arg0 "RecursiveDeleteOption") in
-      let workGroup =
-        WorkGroupName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
-      make ?recursiveDeleteOption ~workGroup ()
+      let tags =
+        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recursiveDeleteOption =
-        field_map json "RecursiveDeleteOption" BoxedBoolean.of_json in
-      let workGroup = field_map_exn json "WorkGroup" WorkGroupName.of_json in
-      make ?recursiveDeleteOption ~workGroup ()
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the workgroup with the specified name. The primary workgroup cannot be deleted."]
-module DeletePreparedStatementOutput =
+       "Adds one or more tags to an Athena resource. A tag is a label that you assign to a resource. Each tag consists of a key and an optional value, both of which you define. For example, you can use tags to categorize Athena workgroups, data catalogs, or capacity reservations by purpose, owner, or environment. Use a consistent set of tag keys to make it easier to search and filter the resources in your account. For best practices, see Tagging Best Practices. Tag keys can be from 1 to 128 UTF-8 Unicode characters, and tag values can be from 0 to 256 UTF-8 Unicode characters. Tags can use letters and numbers representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case-sensitive. Tag keys must be unique per resource. If you specify more than one tag, separate them by commas."]
+module TagResourceOutput =
   struct
     type nonrec t = unit
     type nonrec error =
@@ -6066,55 +14118,50 @@ module DeletePreparedStatementOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the prepared statement with the specified name from the specified workgroup."]
-module DeletePreparedStatementInput =
+       "Adds one or more tags to an Athena resource. A tag is a label that you assign to a resource. Each tag consists of a key and an optional value, both of which you define. For example, you can use tags to categorize Athena workgroups, data catalogs, or capacity reservations by purpose, owner, or environment. Use a consistent set of tag keys to make it easier to search and filter the resources in your account. For best practices, see Tagging Best Practices. Tag keys can be from 1 to 128 UTF-8 Unicode characters, and tag values can be from 0 to 256 UTF-8 Unicode characters. Tags can use letters and numbers representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case-sensitive. Tag keys must be unique per resource. If you specify more than one tag, separate them by commas."]
+module TerminateSessionRequest =
+  struct
+    type nonrec t = {
+      sessionId: SessionId.t [@ocaml.doc "The session ID."]}
+    let context_ = "TerminateSessionRequest"
+    let make ~sessionId = fun () -> { sessionId }
+    let to_value x =
+      structure_to_value
+        [("SessionId", (Some (SessionId.to_value x.sessionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sessionId =
+        SessionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SessionId") in
+      make ~sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sessionId = field_map_exn json__ "SessionId" SessionId.of_json in
+      make ~sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Terminates an active session. A TerminateSession call on a session that is already inactive (for example, in a FAILED, TERMINATED or TERMINATING state) succeeds but has no effect. Calculations running in the session when TerminateSession is called are forcefully stopped, but may display as FAILED instead of STOPPED."]
+module TerminateSessionResponse =
   struct
     type nonrec t =
       {
-      statementName: StatementName.t
-        [@ocaml.doc "The name of the prepared statement to delete."];
-      workGroup: WorkGroupName.t
+      state: SessionState.t option
         [@ocaml.doc
-          "The workgroup to which the statement to be deleted belongs."]}
-    let context_ = "DeletePreparedStatementInput"
-    let make ~statementName =
-      fun ~workGroup -> fun () -> { statementName; workGroup }
-    let to_value x =
-      structure_to_value
-        [("StatementName", (Some (StatementName.to_value x.statementName)));
-        ("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let workGroup =
-        WorkGroupName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
-      let statementName =
-        StatementName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StatementName") in
-      make ~workGroup ~statementName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workGroup = field_map_exn json "WorkGroup" WorkGroupName.of_json in
-      let statementName =
-        field_map_exn json "StatementName" StatementName.of_json in
-      make ~workGroup ~statementName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Deletes the prepared statement with the specified name from the specified workgroup."]
-module DeleteNamedQueryOutput =
-  struct
-    type nonrec t = unit
+          "The state of the session. A description of each state follows. CREATING - The session is being started, including acquiring resources. CREATED - The session has been started. IDLE - The session is able to accept a calculation. BUSY - The session is processing another task and is unable to accept a calculation. TERMINATING - The session is in the process of shutting down. TERMINATED - The session and its resources are no longer running. DEGRADED - The session has no healthy coordinators. FAILED - Due to a failure, the session and its resources are no longer running."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
+    let make ?state = fun () -> { state }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "InvalidRequestException" ->
           `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -6124,6 +14171,8 @@ module DeleteNamedQueryOutput =
           `InternalServerException (InternalServerException.of_xml xml)
       | "InvalidRequestException" ->
           `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -6136,46 +14185,154 @@ module DeleteNamedQueryOutput =
           `Assoc
             [("error", (`String "InvalidRequestException"));
             ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    let to_value x =
+      structure_to_value
+        [("State", (Option.map x.state ~f:SessionState.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:SessionState.of_xml) (Xml.child xml_arg0 "State") in
+      make ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let state = field_map json__ "State" SessionState.of_json in
+      make ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the named query if you have access to the workgroup in which the query was saved. For code samples using the Amazon Web Services SDK for Java, see Examples and Code Samples in the Amazon Athena User Guide."]
-module DeleteNamedQueryInput =
+       "Terminates an active session. A TerminateSession call on a session that is already inactive (for example, in a FAILED, TERMINATED or TERMINATING state) succeeds but has no effect. Calculations running in the session when TerminateSession is called are forcefully stopped, but may display as FAILED instead of STOPPED."]
+module UntagResourceInput =
   struct
     type nonrec t =
       {
-      namedQueryId: NamedQueryId.t
-        [@ocaml.doc "The unique ID of the query to delete."]}
-    let context_ = "DeleteNamedQueryInput"
-    let make ~namedQueryId = fun () -> { namedQueryId }
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc
+          "Specifies the ARN of the resource from which tags are to be removed."];
+      tagKeys: TagKeyList.t
+        [@ocaml.doc
+          "A comma-separated list of one or more tag keys whose tags are to be removed from the specified resource."]}
+    let context_ = "UntagResourceInput"
+    let make ~resourceARN =
+      fun ~tagKeys -> fun () -> { resourceARN; tagKeys }
     let to_value x =
       structure_to_value
-        [("NamedQueryId", (Some (NamedQueryId.to_value x.namedQueryId)))]
+        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
+        ("TagKeys", (Some (TagKeyList.to_value x.tagKeys)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let namedQueryId =
-        NamedQueryId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "NamedQueryId") in
-      make ~namedQueryId ()
+      let tagKeys =
+        TagKeyList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TagKeys") in
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let namedQueryId =
-        field_map_exn json "NamedQueryId" NamedQueryId.of_json in
-      make ~namedQueryId ()
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      make ~tagKeys ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Removes one or more tags from an Athena resource."]
+module UntagResourceOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Removes one or more tags from an Athena resource."]
+module UpdateCapacityReservationInput =
+  struct
+    type nonrec t =
+      {
+      targetDpus: TargetDpusInteger.t
+        [@ocaml.doc "The new number of requested data processing units."];
+      name: CapacityReservationName.t
+        [@ocaml.doc "The name of the capacity reservation."]}
+    let context_ = "UpdateCapacityReservationInput"
+    let make ~targetDpus = fun ~name -> fun () -> { targetDpus; name }
+    let to_value x =
+      structure_to_value
+        [("TargetDpus", (Some (TargetDpusInteger.to_value x.targetDpus)));
+        ("Name", (Some (CapacityReservationName.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        CapacityReservationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let targetDpus =
+        TargetDpusInteger.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TargetDpus") in
+      make ~name ~targetDpus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" CapacityReservationName.of_json in
+      let targetDpus =
+        field_map_exn json__ "TargetDpus" TargetDpusInteger.of_json in
+      make ~name ~targetDpus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the named query if you have access to the workgroup in which the query was saved. For code samples using the Amazon Web Services SDK for Java, see Examples and Code Samples in the Amazon Athena User Guide."]
-module DeleteDataCatalogOutput =
+       "Updates the number of requested data processing units for the capacity reservation with the specified name."]
+module UpdateCapacityReservationOutput =
   struct
     type nonrec t = unit
     type nonrec error =
@@ -6222,129 +14379,160 @@ module DeleteDataCatalogOutput =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a data catalog."]
-module DeleteDataCatalogInput =
+  end[@@ocaml.doc
+       "Updates the number of requested data processing units for the capacity reservation with the specified name."]
+module UpdateDataCatalogInput =
   struct
     type nonrec t =
       {
       name: CatalogNameString.t
-        [@ocaml.doc "The name of the data catalog to delete."]}
-    let context_ = "DeleteDataCatalogInput"
-    let make ~name = fun () -> { name }
+        [@ocaml.doc
+          "The name of the data catalog to update. The catalog name must be unique for the Amazon Web Services account and can use a maximum of 127 alphanumeric, underscore, at sign, or hyphen characters. The remainder of the length constraint of 256 is reserved for use by Athena."];
+      type_: DataCatalogType.t
+        [@ocaml.doc
+          "Specifies the type of data catalog to update. Specify LAMBDA for a federated catalog, HIVE for an external hive metastore, or GLUE for an Glue Data Catalog."];
+      description: DescriptionString.t option
+        [@ocaml.doc "New or modified text that describes the data catalog."];
+      parameters: ParametersMap.t option
+        [@ocaml.doc
+          "Specifies the Lambda function or functions to use for updating the data catalog. This is a mapping whose values depend on the catalog type. For the HIVE data catalog type, use the following syntax. The metadata-function parameter is required. The sdk-version parameter is optional and defaults to the currently supported version. metadata-function=lambda_arn, sdk-version=version_number For the LAMBDA data catalog type, use one of the following sets of required parameters, but not both. If you have one Lambda function that processes metadata and another for reading the actual data, use the following syntax. Both parameters are required. metadata-function=lambda_arn, record-function=lambda_arn If you have a composite Lambda function that processes both metadata and data, use the following syntax to specify your Lambda function. function=lambda_arn"]}
+    let context_ = "UpdateDataCatalogInput"
+    let make ?description =
+      fun ?parameters ->
+        fun ~name ->
+          fun ~type_ -> fun () -> { description; parameters; name; type_ }
     let to_value x =
       structure_to_value
-        [("Name", (Some (CatalogNameString.to_value x.name)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let name =
-        CatalogNameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~name ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" CatalogNameString.of_json in
-      make ~name ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a data catalog."]
-module CreateWorkGroupOutput =
-  struct
-    type nonrec t = unit
-    type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
-      | `InvalidRequestException of InvalidRequestException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
-    let error_of_json name json =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `InvalidRequestException e ->
-          `Assoc
-            [("error", (`String "InvalidRequestException"));
-            ("details", (InvalidRequestException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a workgroup with the specified name."]
-module CreateWorkGroupInput =
-  struct
-    type nonrec t =
-      {
-      name: WorkGroupName.t [@ocaml.doc "The workgroup name."];
-      configuration: WorkGroupConfiguration.t option
-        [@ocaml.doc
-          "The configuration for the workgroup, which includes the location in Amazon S3 where query results are stored, the encryption configuration, if any, used for encrypting query results, whether the Amazon CloudWatch Metrics are enabled for the workgroup, the limit for the amount of bytes scanned (cutoff) per query, if it is specified, and whether workgroup's settings (specified with EnforceWorkGroupConfiguration) in the WorkGroupConfiguration override client-side settings. See WorkGroupConfiguration$EnforceWorkGroupConfiguration."];
-      description: WorkGroupDescriptionString.t option
-        [@ocaml.doc "The workgroup description."];
-      tags: TagList.t option
-        [@ocaml.doc
-          "A list of comma separated tags to add to the workgroup that is created."]}
-    let context_ = "CreateWorkGroupInput"
-    let make ?configuration =
-      fun ?description ->
-        fun ?tags ->
-          fun ~name -> fun () -> { configuration; description; tags; name }
-    let to_value x =
-      structure_to_value
-        [("Name", (Some (WorkGroupName.to_value x.name)));
-        ("Configuration",
-          (Option.map x.configuration ~f:WorkGroupConfiguration.to_value));
+        [("Name", (Some (CatalogNameString.to_value x.name)));
+        ("Type", (Some (DataCatalogType.to_value x.type_)));
         ("Description",
-          (Option.map x.description ~f:WorkGroupDescriptionString.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+          (Option.map x.description ~f:DescriptionString.to_value));
+        ("Parameters", (Option.map x.parameters ~f:ParametersMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let parameters =
+        (Option.map ~f:ParametersMap.of_xml)
+          (Xml.child xml_arg0 "Parameters") in
       let description =
-        (Option.map ~f:WorkGroupDescriptionString.of_xml)
+        (Option.map ~f:DescriptionString.of_xml)
           (Xml.child xml_arg0 "Description") in
-      let configuration =
-        (Option.map ~f:WorkGroupConfiguration.of_xml)
-          (Xml.child xml_arg0 "Configuration") in
+      let type_ =
+        DataCatalogType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       let name =
-        WorkGroupName.of_xml
+        CatalogNameString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?tags ?description ?configuration ~name ()
+      make ?parameters ?description ~type_ ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let parameters = field_map json__ "Parameters" ParametersMap.of_json in
       let description =
-        field_map json "Description" WorkGroupDescriptionString.of_json in
-      let configuration =
-        field_map json "Configuration" WorkGroupConfiguration.of_json in
-      let name = field_map_exn json "Name" WorkGroupName.of_json in
-      make ?tags ?description ?configuration ~name ()
+        field_map json__ "Description" DescriptionString.of_json in
+      let type_ = field_map_exn json__ "Type" DataCatalogType.of_json in
+      let name = field_map_exn json__ "Name" CatalogNameString.of_json in
+      make ?parameters ?description ~type_ ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a workgroup with the specified name."]
-module CreatePreparedStatementOutput =
+  end[@@ocaml.doc "Updates the data catalog that has the specified name."]
+module UpdateDataCatalogOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the data catalog that has the specified name."]
+module UpdateNamedQueryInput =
+  struct
+    type nonrec t =
+      {
+      namedQueryId: NamedQueryId.t
+        [@ocaml.doc "The unique identifier (UUID) of the query."];
+      name: NameString.t [@ocaml.doc "The name of the query."];
+      description: NamedQueryDescriptionString.t option
+        [@ocaml.doc "The query description."];
+      queryString: QueryString.t
+        [@ocaml.doc "The contents of the query with all query statements."]}
+    let context_ = "UpdateNamedQueryInput"
+    let make ?description =
+      fun ~namedQueryId ->
+        fun ~name ->
+          fun ~queryString ->
+            fun () -> { description; namedQueryId; name; queryString }
+    let to_value x =
+      structure_to_value
+        [("NamedQueryId", (Some (NamedQueryId.to_value x.namedQueryId)));
+        ("Name", (Some (NameString.to_value x.name)));
+        ("Description",
+          (Option.map x.description ~f:NamedQueryDescriptionString.to_value));
+        ("QueryString", (Some (QueryString.to_value x.queryString)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queryString =
+        QueryString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "QueryString") in
+      let description =
+        (Option.map ~f:NamedQueryDescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        NameString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let namedQueryId =
+        NamedQueryId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NamedQueryId") in
+      make ~queryString ?description ~name ~namedQueryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queryString =
+        field_map_exn json__ "QueryString" QueryString.of_json in
+      let description =
+        field_map json__ "Description" NamedQueryDescriptionString.of_json in
+      let name = field_map_exn json__ "Name" NameString.of_json in
+      let namedQueryId =
+        field_map_exn json__ "NamedQueryId" NamedQueryId.of_json in
+      make ~queryString ?description ~name ~namedQueryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates a NamedQuery object. The database or workgroup cannot be updated."]
+module UpdateNamedQueryOutput =
   struct
     type nonrec t = unit
     type nonrec error =
@@ -6392,21 +14580,232 @@ module CreatePreparedStatementOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a prepared statement for use with SQL queries in Athena."]
-module CreatePreparedStatementInput =
+       "Updates a NamedQuery object. The database or workgroup cannot be updated."]
+module UpdateNotebookInput =
+  struct
+    type nonrec t =
+      {
+      notebookId: NotebookId.t
+        [@ocaml.doc "The ID of the notebook to update."];
+      payload: Payload.t [@ocaml.doc "The updated content for the notebook."];
+      type_: NotebookType.t
+        [@ocaml.doc
+          "The notebook content type. Currently, the only valid type is IPYNB."];
+      sessionId: SessionId.t option
+        [@ocaml.doc
+          "The active notebook session ID. Required if the notebook has an active session."];
+      clientRequestToken: ClientRequestToken.t option
+        [@ocaml.doc
+          "A unique case-sensitive string used to ensure the request to create the notebook is idempotent (executes only once). This token is listed as not required because Amazon Web Services SDKs (for example the Amazon Web Services SDK for Java) auto-generate the token for you. If you are not using the Amazon Web Services SDK or the Amazon Web Services CLI, you must provide this token or the action will fail."]}
+    let context_ = "UpdateNotebookInput"
+    let make ?sessionId =
+      fun ?clientRequestToken ->
+        fun ~notebookId ->
+          fun ~payload ->
+            fun ~type_ ->
+              fun () ->
+                { sessionId; clientRequestToken; notebookId; payload; type_ }
+    let to_value x =
+      structure_to_value
+        [("NotebookId", (Some (NotebookId.to_value x.notebookId)));
+        ("Payload", (Some (Payload.to_value x.payload)));
+        ("Type", (Some (NotebookType.to_value x.type_)));
+        ("SessionId", (Option.map x.sessionId ~f:SessionId.to_value));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let sessionId =
+        (Option.map ~f:SessionId.of_xml) (Xml.child xml_arg0 "SessionId") in
+      let type_ =
+        NotebookType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      let payload =
+        Payload.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Payload") in
+      let notebookId =
+        NotebookId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NotebookId") in
+      make ?clientRequestToken ?sessionId ~type_ ~payload ~notebookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let sessionId = field_map json__ "SessionId" SessionId.of_json in
+      let type_ = field_map_exn json__ "Type" NotebookType.of_json in
+      let payload = field_map_exn json__ "Payload" Payload.of_json in
+      let notebookId = field_map_exn json__ "NotebookId" NotebookId.of_json in
+      make ?clientRequestToken ?sessionId ~type_ ~payload ~notebookId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the contents of a Spark notebook."]
+module UpdateNotebookMetadataInput =
+  struct
+    type nonrec t =
+      {
+      notebookId: NotebookId.t
+        [@ocaml.doc "The ID of the notebook to update the metadata for."];
+      clientRequestToken: ClientRequestToken.t option
+        [@ocaml.doc
+          "A unique case-sensitive string used to ensure the request to create the notebook is idempotent (executes only once). This token is listed as not required because Amazon Web Services SDKs (for example the Amazon Web Services SDK for Java) auto-generate the token for you. If you are not using the Amazon Web Services SDK or the Amazon Web Services CLI, you must provide this token or the action will fail."];
+      name: NotebookName.t [@ocaml.doc "The name to update the notebook to."]}
+    let context_ = "UpdateNotebookMetadataInput"
+    let make ?clientRequestToken =
+      fun ~notebookId ->
+        fun ~name -> fun () -> { clientRequestToken; notebookId; name }
+    let to_value x =
+      structure_to_value
+        [("NotebookId", (Some (NotebookId.to_value x.notebookId)));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("Name", (Some (NotebookName.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        NotebookName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let notebookId =
+        NotebookId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NotebookId") in
+      make ~name ?clientRequestToken ~notebookId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" NotebookName.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let notebookId = field_map_exn json__ "NotebookId" NotebookId.of_json in
+      make ~name ?clientRequestToken ~notebookId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the metadata for a notebook."]
+module UpdateNotebookMetadataOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the metadata for a notebook."]
+module UpdateNotebookOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the contents of a Spark notebook."]
+module UpdatePreparedStatementInput =
   struct
     type nonrec t =
       {
       statementName: StatementName.t
         [@ocaml.doc "The name of the prepared statement."];
       workGroup: WorkGroupName.t
-        [@ocaml.doc
-          "The name of the workgroup to which the prepared statement belongs."];
+        [@ocaml.doc "The workgroup for the prepared statement."];
       queryStatement: QueryString.t
         [@ocaml.doc "The query string for the prepared statement."];
       description: DescriptionString.t option
         [@ocaml.doc "The description of the prepared statement."]}
-    let context_ = "CreatePreparedStatementInput"
+    let context_ = "UpdatePreparedStatementInput"
     let make ?description =
       fun ~statementName ->
         fun ~workGroup ->
@@ -6436,35 +14835,34 @@ module CreatePreparedStatementInput =
           (Xml.child_exn ~context:context_ xml_arg0 "StatementName") in
       make ?description ~queryStatement ~workGroup ~statementName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" DescriptionString.of_json in
+        field_map json__ "Description" DescriptionString.of_json in
       let queryStatement =
-        field_map_exn json "QueryStatement" QueryString.of_json in
-      let workGroup = field_map_exn json "WorkGroup" WorkGroupName.of_json in
+        field_map_exn json__ "QueryStatement" QueryString.of_json in
+      let workGroup = field_map_exn json__ "WorkGroup" WorkGroupName.of_json in
       let statementName =
-        field_map_exn json "StatementName" StatementName.of_json in
+        field_map_exn json__ "StatementName" StatementName.of_json in
       make ?description ~queryStatement ~workGroup ~statementName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Creates a prepared statement for use with SQL queries in Athena."]
-module CreateNamedQueryOutput =
+  end[@@ocaml.doc "Updates a prepared statement."]
+module UpdatePreparedStatementOutput =
   struct
-    type nonrec t =
-      {
-      namedQueryId: NamedQueryId.t option
-        [@ocaml.doc "The unique ID of the query."]}
+    type nonrec t = unit
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?namedQueryId = fun () -> { namedQueryId }
+    let make () = ()
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "InvalidRequestException" ->
           `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -6474,6 +14872,8 @@ module CreateNamedQueryOutput =
           `InternalServerException (InternalServerException.of_xml xml)
       | "InvalidRequestException" ->
           `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -6486,107 +14886,325 @@ module CreateNamedQueryOutput =
           `Assoc
             [("error", (`String "InvalidRequestException"));
             ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("NamedQueryId",
-           (Option.map x.namedQueryId ~f:NamedQueryId.to_value))]
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let namedQueryId =
-        (Option.map ~f:NamedQueryId.of_xml)
-          (Xml.child xml_arg0 "NamedQueryId") in
-      make ?namedQueryId ()
+    let of_xml _ = make ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let namedQueryId = field_map json "NamedQueryId" NamedQueryId.of_json in
-      make ?namedQueryId ()
+    let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Creates a named query in the specified workgroup. Requires that you have access to the workgroup. For code samples using the Amazon Web Services SDK for Java, see Examples and Code Samples in the Amazon Athena User Guide."]
-module CreateNamedQueryInput =
+  end[@@ocaml.doc "Updates a prepared statement."]
+module WorkGroupConfigurationUpdates =
   struct
     type nonrec t =
       {
-      name: NameString.t [@ocaml.doc "The query name."];
-      description: DescriptionString.t option
-        [@ocaml.doc "The query description."];
-      database: DatabaseString.t
-        [@ocaml.doc "The database to which the query belongs."];
-      queryString: QueryString.t
-        [@ocaml.doc "The contents of the query with all query statements."];
-      clientRequestToken: IdempotencyToken.t option
+      enforceWorkGroupConfiguration: BoxedBoolean.t option
         [@ocaml.doc
-          "A unique case-sensitive string used to ensure the request to create the query is idempotent (executes only once). If another CreateNamedQuery request is received, the same response is returned and another query is not created. If a parameter has changed, for example, the QueryString, an error is returned. This token is listed as not required because Amazon Web Services SDKs (for example the Amazon Web Services SDK for Java) auto-generate the token for users. If you are not using the Amazon Web Services SDK or the Amazon Web Services CLI, you must provide this token or the action will fail."];
-      workGroup: WorkGroupName.t option
+          "If set to \"true\", the settings for the workgroup override client-side settings. If set to \"false\" client-side settings are used. For more information, see Workgroup Settings Override Client-Side Settings."];
+      resultConfigurationUpdates: ResultConfigurationUpdates.t option
         [@ocaml.doc
-          "The name of the workgroup in which the named query is being created."]}
-    let context_ = "CreateNamedQueryInput"
-    let make ?description =
-      fun ?clientRequestToken ->
-        fun ?workGroup ->
-          fun ~name ->
-            fun ~database ->
-              fun ~queryString ->
-                fun () ->
-                  {
-                    description;
-                    clientRequestToken;
-                    workGroup;
-                    name;
-                    database;
-                    queryString
-                  }
+          "The result configuration information about the queries in this workgroup that will be updated. Includes the updated results location and an updated option for encrypting query results."];
+      managedQueryResultsConfigurationUpdates:
+        ManagedQueryResultsConfigurationUpdates.t option
+        [@ocaml.doc
+          "Updates configuration information for managed query results in the workgroup."];
+      publishCloudWatchMetricsEnabled: BoxedBoolean.t option
+        [@ocaml.doc
+          "Indicates whether this workgroup enables publishing metrics to Amazon CloudWatch."];
+      bytesScannedCutoffPerQuery: BytesScannedCutoffValue.t option
+        [@ocaml.doc
+          "The upper limit (cutoff) for the amount of bytes a single query in a workgroup is allowed to scan."];
+      removeBytesScannedCutoffPerQuery: BoxedBoolean.t option
+        [@ocaml.doc
+          "Indicates that the data usage control limit per query is removed. WorkGroupConfiguration$BytesScannedCutoffPerQuery"];
+      requesterPaysEnabled: BoxedBoolean.t option
+        [@ocaml.doc
+          "If set to true, allows members assigned to a workgroup to specify Amazon S3 Requester Pays buckets in queries. If set to false, workgroup members cannot query data from Requester Pays buckets, and queries that retrieve data from Requester Pays buckets cause an error. The default is false. For more information about Requester Pays buckets, see Requester Pays Buckets in the Amazon Simple Storage Service Developer Guide."];
+      engineVersion: EngineVersion.t option
+        [@ocaml.doc
+          "The engine version requested when a workgroup is updated. After the update, all queries on the workgroup run on the requested engine version. If no value was previously set, the default is Auto. Queries on the AmazonAthenaPreviewFunctionality workgroup run on the preview engine regardless of this setting."];
+      removeCustomerContentEncryptionConfiguration: BoxedBoolean.t option
+        [@ocaml.doc
+          "Removes content encryption configuration from an Apache Spark-enabled Athena workgroup."];
+      additionalConfiguration: NameString.t option
+        [@ocaml.doc
+          "Contains a user defined string in JSON format for a Spark-enabled workgroup."];
+      executionRole: RoleArn.t option
+        [@ocaml.doc
+          "The ARN of the execution role used to access user resources for Spark sessions and Identity Center enabled workgroups. This property applies only to Spark enabled workgroups and Identity Center enabled workgroups."];
+      customerContentEncryptionConfiguration:
+        CustomerContentEncryptionConfiguration.t option ;
+      enableMinimumEncryptionConfiguration: BoxedBoolean.t option
+        [@ocaml.doc
+          "Enforces a minimal level of encryption for the workgroup for query and calculation results that are written to Amazon S3. When enabled, workgroup users can set encryption only to the minimum level set by the administrator or higher when they submit queries. This setting does not apply to Spark-enabled workgroups. The EnforceWorkGroupConfiguration setting takes precedence over the EnableMinimumEncryptionConfiguration flag. This means that if EnforceWorkGroupConfiguration is true, the EnableMinimumEncryptionConfiguration flag is ignored, and the workgroup configuration for encryption is used."];
+      queryResultsS3AccessGrantsConfiguration:
+        QueryResultsS3AccessGrantsConfiguration.t option
+        [@ocaml.doc
+          "Specifies whether Amazon S3 access grants are enabled for query results."];
+      monitoringConfiguration: MonitoringConfiguration.t option
+        [@ocaml.doc
+          "Contains the configuration settings for managed log persistence, delivering logs to Amazon S3 buckets, Amazon CloudWatch log groups etc."];
+      engineConfiguration: EngineConfiguration.t option }
+    let make ?enforceWorkGroupConfiguration =
+      fun ?resultConfigurationUpdates ->
+        fun ?managedQueryResultsConfigurationUpdates ->
+          fun ?publishCloudWatchMetricsEnabled ->
+            fun ?bytesScannedCutoffPerQuery ->
+              fun ?removeBytesScannedCutoffPerQuery ->
+                fun ?requesterPaysEnabled ->
+                  fun ?engineVersion ->
+                    fun ?removeCustomerContentEncryptionConfiguration ->
+                      fun ?additionalConfiguration ->
+                        fun ?executionRole ->
+                          fun ?customerContentEncryptionConfiguration ->
+                            fun ?enableMinimumEncryptionConfiguration ->
+                              fun ?queryResultsS3AccessGrantsConfiguration ->
+                                fun ?monitoringConfiguration ->
+                                  fun ?engineConfiguration ->
+                                    fun () ->
+                                      {
+                                        enforceWorkGroupConfiguration;
+                                        resultConfigurationUpdates;
+                                        managedQueryResultsConfigurationUpdates;
+                                        publishCloudWatchMetricsEnabled;
+                                        bytesScannedCutoffPerQuery;
+                                        removeBytesScannedCutoffPerQuery;
+                                        requesterPaysEnabled;
+                                        engineVersion;
+                                        removeCustomerContentEncryptionConfiguration;
+                                        additionalConfiguration;
+                                        executionRole;
+                                        customerContentEncryptionConfiguration;
+                                        enableMinimumEncryptionConfiguration;
+                                        queryResultsS3AccessGrantsConfiguration;
+                                        monitoringConfiguration;
+                                        engineConfiguration
+                                      }
     let to_value x =
       structure_to_value
-        [("Name", (Some (NameString.to_value x.name)));
-        ("Description",
-          (Option.map x.description ~f:DescriptionString.to_value));
-        ("Database", (Some (DatabaseString.to_value x.database)));
-        ("QueryString", (Some (QueryString.to_value x.queryString)));
-        ("ClientRequestToken",
-          (Option.map x.clientRequestToken ~f:IdempotencyToken.to_value));
-        ("WorkGroup", (Option.map x.workGroup ~f:WorkGroupName.to_value))]
+        [("EnforceWorkGroupConfiguration",
+           (Option.map x.enforceWorkGroupConfiguration
+              ~f:BoxedBoolean.to_value));
+        ("ResultConfigurationUpdates",
+          (Option.map x.resultConfigurationUpdates
+             ~f:ResultConfigurationUpdates.to_value));
+        ("ManagedQueryResultsConfigurationUpdates",
+          (Option.map x.managedQueryResultsConfigurationUpdates
+             ~f:ManagedQueryResultsConfigurationUpdates.to_value));
+        ("PublishCloudWatchMetricsEnabled",
+          (Option.map x.publishCloudWatchMetricsEnabled
+             ~f:BoxedBoolean.to_value));
+        ("BytesScannedCutoffPerQuery",
+          (Option.map x.bytesScannedCutoffPerQuery
+             ~f:BytesScannedCutoffValue.to_value));
+        ("RemoveBytesScannedCutoffPerQuery",
+          (Option.map x.removeBytesScannedCutoffPerQuery
+             ~f:BoxedBoolean.to_value));
+        ("RequesterPaysEnabled",
+          (Option.map x.requesterPaysEnabled ~f:BoxedBoolean.to_value));
+        ("EngineVersion",
+          (Option.map x.engineVersion ~f:EngineVersion.to_value));
+        ("RemoveCustomerContentEncryptionConfiguration",
+          (Option.map x.removeCustomerContentEncryptionConfiguration
+             ~f:BoxedBoolean.to_value));
+        ("AdditionalConfiguration",
+          (Option.map x.additionalConfiguration ~f:NameString.to_value));
+        ("ExecutionRole", (Option.map x.executionRole ~f:RoleArn.to_value));
+        ("CustomerContentEncryptionConfiguration",
+          (Option.map x.customerContentEncryptionConfiguration
+             ~f:CustomerContentEncryptionConfiguration.to_value));
+        ("EnableMinimumEncryptionConfiguration",
+          (Option.map x.enableMinimumEncryptionConfiguration
+             ~f:BoxedBoolean.to_value));
+        ("QueryResultsS3AccessGrantsConfiguration",
+          (Option.map x.queryResultsS3AccessGrantsConfiguration
+             ~f:QueryResultsS3AccessGrantsConfiguration.to_value));
+        ("MonitoringConfiguration",
+          (Option.map x.monitoringConfiguration
+             ~f:MonitoringConfiguration.to_value));
+        ("EngineConfiguration",
+          (Option.map x.engineConfiguration ~f:EngineConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workGroup =
-        (Option.map ~f:WorkGroupName.of_xml) (Xml.child xml_arg0 "WorkGroup") in
-      let clientRequestToken =
-        (Option.map ~f:IdempotencyToken.of_xml)
-          (Xml.child xml_arg0 "ClientRequestToken") in
-      let queryString =
-        QueryString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryString") in
-      let database =
-        DatabaseString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Database") in
-      let description =
-        (Option.map ~f:DescriptionString.of_xml)
-          (Xml.child xml_arg0 "Description") in
-      let name =
-        NameString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?workGroup ?clientRequestToken ~queryString ~database ?description
-        ~name ()
+      let engineConfiguration =
+        (Option.map ~f:EngineConfiguration.of_xml)
+          (Xml.child xml_arg0 "EngineConfiguration") in
+      let monitoringConfiguration =
+        (Option.map ~f:MonitoringConfiguration.of_xml)
+          (Xml.child xml_arg0 "MonitoringConfiguration") in
+      let queryResultsS3AccessGrantsConfiguration =
+        (Option.map ~f:QueryResultsS3AccessGrantsConfiguration.of_xml)
+          (Xml.child xml_arg0 "QueryResultsS3AccessGrantsConfiguration") in
+      let enableMinimumEncryptionConfiguration =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "EnableMinimumEncryptionConfiguration") in
+      let customerContentEncryptionConfiguration =
+        (Option.map ~f:CustomerContentEncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "CustomerContentEncryptionConfiguration") in
+      let executionRole =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "ExecutionRole") in
+      let additionalConfiguration =
+        (Option.map ~f:NameString.of_xml)
+          (Xml.child xml_arg0 "AdditionalConfiguration") in
+      let removeCustomerContentEncryptionConfiguration =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "RemoveCustomerContentEncryptionConfiguration") in
+      let engineVersion =
+        (Option.map ~f:EngineVersion.of_xml)
+          (Xml.child xml_arg0 "EngineVersion") in
+      let requesterPaysEnabled =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "RequesterPaysEnabled") in
+      let removeBytesScannedCutoffPerQuery =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "RemoveBytesScannedCutoffPerQuery") in
+      let bytesScannedCutoffPerQuery =
+        (Option.map ~f:BytesScannedCutoffValue.of_xml)
+          (Xml.child xml_arg0 "BytesScannedCutoffPerQuery") in
+      let publishCloudWatchMetricsEnabled =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "PublishCloudWatchMetricsEnabled") in
+      let managedQueryResultsConfigurationUpdates =
+        (Option.map ~f:ManagedQueryResultsConfigurationUpdates.of_xml)
+          (Xml.child xml_arg0 "ManagedQueryResultsConfigurationUpdates") in
+      let resultConfigurationUpdates =
+        (Option.map ~f:ResultConfigurationUpdates.of_xml)
+          (Xml.child xml_arg0 "ResultConfigurationUpdates") in
+      let enforceWorkGroupConfiguration =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "EnforceWorkGroupConfiguration") in
+      make ?engineConfiguration ?monitoringConfiguration
+        ?queryResultsS3AccessGrantsConfiguration
+        ?enableMinimumEncryptionConfiguration
+        ?customerContentEncryptionConfiguration ?executionRole
+        ?additionalConfiguration
+        ?removeCustomerContentEncryptionConfiguration ?engineVersion
+        ?requesterPaysEnabled ?removeBytesScannedCutoffPerQuery
+        ?bytesScannedCutoffPerQuery ?publishCloudWatchMetricsEnabled
+        ?managedQueryResultsConfigurationUpdates ?resultConfigurationUpdates
+        ?enforceWorkGroupConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workGroup = field_map json "WorkGroup" WorkGroupName.of_json in
-      let clientRequestToken =
-        field_map json "ClientRequestToken" IdempotencyToken.of_json in
-      let queryString = field_map_exn json "QueryString" QueryString.of_json in
-      let database = field_map_exn json "Database" DatabaseString.of_json in
-      let description =
-        field_map json "Description" DescriptionString.of_json in
-      let name = field_map_exn json "Name" NameString.of_json in
-      make ?workGroup ?clientRequestToken ~queryString ~database ?description
-        ~name ()
+    let of_json json__ =
+      let engineConfiguration =
+        field_map json__ "EngineConfiguration" EngineConfiguration.of_json in
+      let monitoringConfiguration =
+        field_map json__ "MonitoringConfiguration"
+          MonitoringConfiguration.of_json in
+      let queryResultsS3AccessGrantsConfiguration =
+        field_map json__ "QueryResultsS3AccessGrantsConfiguration"
+          QueryResultsS3AccessGrantsConfiguration.of_json in
+      let enableMinimumEncryptionConfiguration =
+        field_map json__ "EnableMinimumEncryptionConfiguration"
+          BoxedBoolean.of_json in
+      let customerContentEncryptionConfiguration =
+        field_map json__ "CustomerContentEncryptionConfiguration"
+          CustomerContentEncryptionConfiguration.of_json in
+      let executionRole = field_map json__ "ExecutionRole" RoleArn.of_json in
+      let additionalConfiguration =
+        field_map json__ "AdditionalConfiguration" NameString.of_json in
+      let removeCustomerContentEncryptionConfiguration =
+        field_map json__ "RemoveCustomerContentEncryptionConfiguration"
+          BoxedBoolean.of_json in
+      let engineVersion =
+        field_map json__ "EngineVersion" EngineVersion.of_json in
+      let requesterPaysEnabled =
+        field_map json__ "RequesterPaysEnabled" BoxedBoolean.of_json in
+      let removeBytesScannedCutoffPerQuery =
+        field_map json__ "RemoveBytesScannedCutoffPerQuery"
+          BoxedBoolean.of_json in
+      let bytesScannedCutoffPerQuery =
+        field_map json__ "BytesScannedCutoffPerQuery"
+          BytesScannedCutoffValue.of_json in
+      let publishCloudWatchMetricsEnabled =
+        field_map json__ "PublishCloudWatchMetricsEnabled"
+          BoxedBoolean.of_json in
+      let managedQueryResultsConfigurationUpdates =
+        field_map json__ "ManagedQueryResultsConfigurationUpdates"
+          ManagedQueryResultsConfigurationUpdates.of_json in
+      let resultConfigurationUpdates =
+        field_map json__ "ResultConfigurationUpdates"
+          ResultConfigurationUpdates.of_json in
+      let enforceWorkGroupConfiguration =
+        field_map json__ "EnforceWorkGroupConfiguration" BoxedBoolean.of_json in
+      make ?engineConfiguration ?monitoringConfiguration
+        ?queryResultsS3AccessGrantsConfiguration
+        ?enableMinimumEncryptionConfiguration
+        ?customerContentEncryptionConfiguration ?executionRole
+        ?additionalConfiguration
+        ?removeCustomerContentEncryptionConfiguration ?engineVersion
+        ?requesterPaysEnabled ?removeBytesScannedCutoffPerQuery
+        ?bytesScannedCutoffPerQuery ?publishCloudWatchMetricsEnabled
+        ?managedQueryResultsConfigurationUpdates ?resultConfigurationUpdates
+        ?enforceWorkGroupConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a named query in the specified workgroup. Requires that you have access to the workgroup. For code samples using the Amazon Web Services SDK for Java, see Examples and Code Samples in the Amazon Athena User Guide."]
-module CreateDataCatalogOutput =
+       "The configuration information that will be updated for this workgroup, which includes the location in Amazon S3 where query and calculation results are stored, the encryption option, if any, used for query results, whether the Amazon CloudWatch Metrics are enabled for the workgroup, whether the workgroup settings override the client-side settings, and the data usage limit for the amount of bytes scanned per query, if it is specified."]
+module UpdateWorkGroupInput =
+  struct
+    type nonrec t =
+      {
+      workGroup: WorkGroupName.t
+        [@ocaml.doc "The specified workgroup that will be updated."];
+      description: WorkGroupDescriptionString.t option
+        [@ocaml.doc "The workgroup description."];
+      configurationUpdates: WorkGroupConfigurationUpdates.t option
+        [@ocaml.doc
+          "Contains configuration updates for an Athena SQL workgroup."];
+      state: WorkGroupState.t option
+        [@ocaml.doc
+          "The workgroup state that will be updated for the given workgroup."]}
+    let context_ = "UpdateWorkGroupInput"
+    let make ?description =
+      fun ?configurationUpdates ->
+        fun ?state ->
+          fun ~workGroup ->
+            fun () -> { description; configurationUpdates; state; workGroup }
+    let to_value x =
+      structure_to_value
+        [("WorkGroup", (Some (WorkGroupName.to_value x.workGroup)));
+        ("Description",
+          (Option.map x.description ~f:WorkGroupDescriptionString.to_value));
+        ("ConfigurationUpdates",
+          (Option.map x.configurationUpdates
+             ~f:WorkGroupConfigurationUpdates.to_value));
+        ("State", (Option.map x.state ~f:WorkGroupState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:WorkGroupState.of_xml) (Xml.child xml_arg0 "State") in
+      let configurationUpdates =
+        (Option.map ~f:WorkGroupConfigurationUpdates.of_xml)
+          (Xml.child xml_arg0 "ConfigurationUpdates") in
+      let description =
+        (Option.map ~f:WorkGroupDescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let workGroup =
+        WorkGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkGroup") in
+      make ?state ?configurationUpdates ?description ~workGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state = field_map json__ "State" WorkGroupState.of_json in
+      let configurationUpdates =
+        field_map json__ "ConfigurationUpdates"
+          WorkGroupConfigurationUpdates.of_json in
+      let description =
+        field_map json__ "Description" WorkGroupDescriptionString.of_json in
+      let workGroup = field_map_exn json__ "WorkGroup" WorkGroupName.of_json in
+      make ?state ?configurationUpdates ?description ~workGroup ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the workgroup with the specified name. The workgroup's name cannot be changed. Only ConfigurationUpdates can be specified."]
+module UpdateWorkGroupOutput =
   struct
     type nonrec t = unit
     type nonrec error =
@@ -6634,264 +15252,4 @@ module CreateDataCatalogOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates (registers) a data catalog with the specified name and properties. Catalogs created are visible to all users of the same Amazon Web Services account."]
-module CreateDataCatalogInput =
-  struct
-    type nonrec t =
-      {
-      name: CatalogNameString.t
-        [@ocaml.doc
-          "The name of the data catalog to create. The catalog name must be unique for the Amazon Web Services account and can use a maximum of 127 alphanumeric, underscore, at sign, or hyphen characters. The remainder of the length constraint of 256 is reserved for use by Athena."];
-      type_: DataCatalogType.t
-        [@ocaml.doc
-          "The type of data catalog to create: LAMBDA for a federated catalog, HIVE for an external hive metastore, or GLUE for an Glue Data Catalog."];
-      description: DescriptionString.t option
-        [@ocaml.doc "A description of the data catalog to be created."];
-      parameters: ParametersMap.t option
-        [@ocaml.doc
-          "Specifies the Lambda function or functions to use for creating the data catalog. This is a mapping whose values depend on the catalog type. For the HIVE data catalog type, use the following syntax. The metadata-function parameter is required. The sdk-version parameter is optional and defaults to the currently supported version. metadata-function=lambda_arn, sdk-version=version_number For the LAMBDA data catalog type, use one of the following sets of required parameters, but not both. If you have one Lambda function that processes metadata and another for reading the actual data, use the following syntax. Both parameters are required. metadata-function=lambda_arn, record-function=lambda_arn If you have a composite Lambda function that processes both metadata and data, use the following syntax to specify your Lambda function. function=lambda_arn The GLUE type takes a catalog ID parameter and is required. The catalog_id is the account ID of the Amazon Web Services account to which the Glue Data Catalog belongs. catalog-id=catalog_id The GLUE data catalog type also applies to the default AwsDataCatalog that already exists in your account, of which you can have only one and cannot modify. Queries that specify a Glue Data Catalog other than the default AwsDataCatalog must be run on Athena engine version 2. In Regions where Athena engine version 2 is not available, creating new Glue data catalogs results in an INVALID_INPUT error."];
-      tags: TagList.t option
-        [@ocaml.doc
-          "A list of comma separated tags to add to the data catalog that is created."]}
-    let context_ = "CreateDataCatalogInput"
-    let make ?description =
-      fun ?parameters ->
-        fun ?tags ->
-          fun ~name ->
-            fun ~type_ ->
-              fun () -> { description; parameters; tags; name; type_ }
-    let to_value x =
-      structure_to_value
-        [("Name", (Some (CatalogNameString.to_value x.name)));
-        ("Type", (Some (DataCatalogType.to_value x.type_)));
-        ("Description",
-          (Option.map x.description ~f:DescriptionString.to_value));
-        ("Parameters", (Option.map x.parameters ~f:ParametersMap.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
-      let parameters =
-        (Option.map ~f:ParametersMap.of_xml)
-          (Xml.child xml_arg0 "Parameters") in
-      let description =
-        (Option.map ~f:DescriptionString.of_xml)
-          (Xml.child xml_arg0 "Description") in
-      let type_ =
-        DataCatalogType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
-      let name =
-        CatalogNameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?tags ?parameters ?description ~type_ ~name ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let parameters = field_map json "Parameters" ParametersMap.of_json in
-      let description =
-        field_map json "Description" DescriptionString.of_json in
-      let type_ = field_map_exn json "Type" DataCatalogType.of_json in
-      let name = field_map_exn json "Name" CatalogNameString.of_json in
-      make ?tags ?parameters ?description ~type_ ~name ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Creates (registers) a data catalog with the specified name and properties. Catalogs created are visible to all users of the same Amazon Web Services account."]
-module BatchGetQueryExecutionOutput =
-  struct
-    type nonrec t =
-      {
-      queryExecutions: QueryExecutionList.t option
-        [@ocaml.doc "Information about a query execution."];
-      unprocessedQueryExecutionIds: UnprocessedQueryExecutionIdList.t option
-        [@ocaml.doc
-          "Information about the query executions that failed to run."]}
-    type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
-      | `InvalidRequestException of InvalidRequestException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?queryExecutions =
-      fun ?unprocessedQueryExecutionIds ->
-        fun () -> { queryExecutions; unprocessedQueryExecutionIds }
-    let error_of_json name json =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `InvalidRequestException e ->
-          `Assoc
-            [("error", (`String "InvalidRequestException"));
-            ("details", (InvalidRequestException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("QueryExecutions",
-           (Option.map x.queryExecutions ~f:QueryExecutionList.to_value));
-        ("UnprocessedQueryExecutionIds",
-          (Option.map x.unprocessedQueryExecutionIds
-             ~f:UnprocessedQueryExecutionIdList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let unprocessedQueryExecutionIds =
-        (Option.map ~f:UnprocessedQueryExecutionIdList.of_xml)
-          (Xml.child xml_arg0 "UnprocessedQueryExecutionIds") in
-      let queryExecutions =
-        (Option.map ~f:QueryExecutionList.of_xml)
-          (Xml.child xml_arg0 "QueryExecutions") in
-      make ?unprocessedQueryExecutionIds ?queryExecutions ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unprocessedQueryExecutionIds =
-        field_map json "UnprocessedQueryExecutionIds"
-          UnprocessedQueryExecutionIdList.of_json in
-      let queryExecutions =
-        field_map json "QueryExecutions" QueryExecutionList.of_json in
-      make ?unprocessedQueryExecutionIds ?queryExecutions ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns the details of a single query execution or a list of up to 50 query executions, which you provide as an array of query execution ID strings. Requires you to have access to the workgroup in which the queries ran. To get a list of query execution IDs, use ListQueryExecutionsInput$WorkGroup. Query executions differ from named (saved) queries. Use BatchGetNamedQueryInput to get details about named queries."]
-module BatchGetQueryExecutionInput =
-  struct
-    type nonrec t =
-      {
-      queryExecutionIds: QueryExecutionIdList.t
-        [@ocaml.doc "An array of query execution IDs."]}
-    let context_ = "BatchGetQueryExecutionInput"
-    let make ~queryExecutionIds = fun () -> { queryExecutionIds }
-    let to_value x =
-      structure_to_value
-        [("QueryExecutionIds",
-           (Some (QueryExecutionIdList.to_value x.queryExecutionIds)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let queryExecutionIds =
-        QueryExecutionIdList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryExecutionIds") in
-      make ~queryExecutionIds ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryExecutionIds =
-        field_map_exn json "QueryExecutionIds" QueryExecutionIdList.of_json in
-      make ~queryExecutionIds ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns the details of a single query execution or a list of up to 50 query executions, which you provide as an array of query execution ID strings. Requires you to have access to the workgroup in which the queries ran. To get a list of query execution IDs, use ListQueryExecutionsInput$WorkGroup. Query executions differ from named (saved) queries. Use BatchGetNamedQueryInput to get details about named queries."]
-module BatchGetNamedQueryOutput =
-  struct
-    type nonrec t =
-      {
-      namedQueries: NamedQueryList.t option
-        [@ocaml.doc "Information about the named query IDs submitted."];
-      unprocessedNamedQueryIds: UnprocessedNamedQueryIdList.t option
-        [@ocaml.doc "Information about provided query IDs."]}
-    type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
-      | `InvalidRequestException of InvalidRequestException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?namedQueries =
-      fun ?unprocessedNamedQueryIds ->
-        fun () -> { namedQueries; unprocessedNamedQueryIds }
-    let error_of_json name json =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `InvalidRequestException e ->
-          `Assoc
-            [("error", (`String "InvalidRequestException"));
-            ("details", (InvalidRequestException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("NamedQueries",
-           (Option.map x.namedQueries ~f:NamedQueryList.to_value));
-        ("UnprocessedNamedQueryIds",
-          (Option.map x.unprocessedNamedQueryIds
-             ~f:UnprocessedNamedQueryIdList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let unprocessedNamedQueryIds =
-        (Option.map ~f:UnprocessedNamedQueryIdList.of_xml)
-          (Xml.child xml_arg0 "UnprocessedNamedQueryIds") in
-      let namedQueries =
-        (Option.map ~f:NamedQueryList.of_xml)
-          (Xml.child xml_arg0 "NamedQueries") in
-      make ?unprocessedNamedQueryIds ?namedQueries ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unprocessedNamedQueryIds =
-        field_map json "UnprocessedNamedQueryIds"
-          UnprocessedNamedQueryIdList.of_json in
-      let namedQueries = field_map json "NamedQueries" NamedQueryList.of_json in
-      make ?unprocessedNamedQueryIds ?namedQueries ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns the details of a single named query or a list of up to 50 queries, which you provide as an array of query ID strings. Requires you to have access to the workgroup in which the queries were saved. Use ListNamedQueriesInput to get the list of named query IDs in the specified workgroup. If information could not be retrieved for a submitted query ID, information about the query ID submitted is listed under UnprocessedNamedQueryId. Named queries differ from executed queries. Use BatchGetQueryExecutionInput to get details about each unique query execution, and ListQueryExecutionsInput to get a list of query execution IDs."]
-module BatchGetNamedQueryInput =
-  struct
-    type nonrec t =
-      {
-      namedQueryIds: NamedQueryIdList.t [@ocaml.doc "An array of query IDs."]}
-    let context_ = "BatchGetNamedQueryInput"
-    let make ~namedQueryIds = fun () -> { namedQueryIds }
-    let to_value x =
-      structure_to_value
-        [("NamedQueryIds",
-           (Some (NamedQueryIdList.to_value x.namedQueryIds)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let namedQueryIds =
-        NamedQueryIdList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "NamedQueryIds") in
-      make ~namedQueryIds ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let namedQueryIds =
-        field_map_exn json "NamedQueryIds" NamedQueryIdList.of_json in
-      make ~namedQueryIds ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns the details of a single named query or a list of up to 50 queries, which you provide as an array of query ID strings. Requires you to have access to the workgroup in which the queries were saved. Use ListNamedQueriesInput to get the list of named query IDs in the specified workgroup. If information could not be retrieved for a submitted query ID, information about the query ID submitted is listed under UnprocessedNamedQueryId. Named queries differ from executed queries. Use BatchGetQueryExecutionInput to get details about each unique query execution, and ListQueryExecutionsInput to get a list of query execution IDs."]
+       "Updates the workgroup with the specified name. The workgroup's name cannot be changed. Only ConfigurationUpdates can be specified."]

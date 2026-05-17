@@ -6,6 +6,17 @@ val accept_inbound_connection :
       AcceptInboundConnectionRequest.t ->
         (AcceptInboundConnectionResponse.t,
           AcceptInboundConnectionResponse.error) Result.t
+val add_data_source :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AddDataSourceRequest.t ->
+        (AddDataSourceResponse.t, AddDataSourceResponse.error) Result.t
+val add_direct_query_data_source :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AddDirectQueryDataSourceRequest.t ->
+        (AddDirectQueryDataSourceResponse.t,
+          AddDirectQueryDataSourceResponse.error) Result.t
 val add_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> AddTagsRequest.t -> (unit, unit) Result.t
@@ -14,17 +25,46 @@ val associate_package :
     ?cfg:Awso.Cfg.t ->
       AssociatePackageRequest.t ->
         (AssociatePackageResponse.t, AssociatePackageResponse.error) Result.t
+val associate_packages :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AssociatePackagesRequest.t ->
+        (AssociatePackagesResponse.t, AssociatePackagesResponse.error)
+          Result.t
+val authorize_vpc_endpoint_access :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AuthorizeVpcEndpointAccessRequest.t ->
+        (AuthorizeVpcEndpointAccessResponse.t,
+          AuthorizeVpcEndpointAccessResponse.error) Result.t
+val cancel_domain_config_change :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CancelDomainConfigChangeRequest.t ->
+        (CancelDomainConfigChangeResponse.t,
+          CancelDomainConfigChangeResponse.error) Result.t
 val cancel_service_software_update :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelServiceSoftwareUpdateRequest.t ->
         (CancelServiceSoftwareUpdateResponse.t,
           CancelServiceSoftwareUpdateResponse.error) Result.t
+val create_application :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateApplicationRequest.t ->
+        (CreateApplicationResponse.t, CreateApplicationResponse.error)
+          Result.t
 val create_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDomainRequest.t ->
         (CreateDomainResponse.t, CreateDomainResponse.error) Result.t
+val create_index :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateIndexRequest.t ->
+        (CreateIndexResponse.t, CreateIndexResponse.error) Result.t
 val create_outbound_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -36,6 +76,27 @@ val create_package :
     ?cfg:Awso.Cfg.t ->
       CreatePackageRequest.t ->
         (CreatePackageResponse.t, CreatePackageResponse.error) Result.t
+val create_vpc_endpoint :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateVpcEndpointRequest.t ->
+        (CreateVpcEndpointResponse.t, CreateVpcEndpointResponse.error)
+          Result.t
+val delete_application :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteApplicationRequest.t ->
+        (DeleteApplicationResponse.t, DeleteApplicationResponse.error)
+          Result.t
+val delete_data_source :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDataSourceRequest.t ->
+        (DeleteDataSourceResponse.t, DeleteDataSourceResponse.error) Result.t
+val delete_direct_query_data_source :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDirectQueryDataSourceRequest.t -> (unit, unit) Result.t
 val delete_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -47,6 +108,11 @@ val delete_inbound_connection :
       DeleteInboundConnectionRequest.t ->
         (DeleteInboundConnectionResponse.t,
           DeleteInboundConnectionResponse.error) Result.t
+val delete_index :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteIndexRequest.t ->
+        (DeleteIndexResponse.t, DeleteIndexResponse.error) Result.t
 val delete_outbound_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -58,6 +124,18 @@ val delete_package :
     ?cfg:Awso.Cfg.t ->
       DeletePackageRequest.t ->
         (DeletePackageResponse.t, DeletePackageResponse.error) Result.t
+val delete_vpc_endpoint :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteVpcEndpointRequest.t ->
+        (DeleteVpcEndpointResponse.t, DeleteVpcEndpointResponse.error)
+          Result.t
+val deregister_capability :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeregisterCapabilityRequest.t ->
+        (DeregisterCapabilityResponse.t, DeregisterCapabilityResponse.error)
+          Result.t
 val describe_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -81,17 +159,41 @@ val describe_domain_config :
       DescribeDomainConfigRequest.t ->
         (DescribeDomainConfigResponse.t, DescribeDomainConfigResponse.error)
           Result.t
+val describe_domain_health :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDomainHealthRequest.t ->
+        (DescribeDomainHealthResponse.t, DescribeDomainHealthResponse.error)
+          Result.t
+val describe_domain_nodes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDomainNodesRequest.t ->
+        (DescribeDomainNodesResponse.t, DescribeDomainNodesResponse.error)
+          Result.t
 val describe_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDomainsRequest.t ->
         (DescribeDomainsResponse.t, DescribeDomainsResponse.error) Result.t
+val describe_dry_run_progress :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDryRunProgressRequest.t ->
+        (DescribeDryRunProgressResponse.t,
+          DescribeDryRunProgressResponse.error) Result.t
 val describe_inbound_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInboundConnectionsRequest.t ->
         (DescribeInboundConnectionsResponse.t,
           DescribeInboundConnectionsResponse.error) Result.t
+val describe_insight_details :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeInsightDetailsRequest.t ->
+        (DescribeInsightDetailsResponse.t,
+          DescribeInsightDetailsResponse.error) Result.t
 val describe_instance_type_limits :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -121,18 +223,68 @@ val describe_reserved_instances :
       DescribeReservedInstancesRequest.t ->
         (DescribeReservedInstancesResponse.t,
           DescribeReservedInstancesResponse.error) Result.t
+val describe_vpc_endpoints :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeVpcEndpointsRequest.t ->
+        (DescribeVpcEndpointsResponse.t, DescribeVpcEndpointsResponse.error)
+          Result.t
 val dissociate_package :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DissociatePackageRequest.t ->
         (DissociatePackageResponse.t, DissociatePackageResponse.error)
           Result.t
+val dissociate_packages :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DissociatePackagesRequest.t ->
+        (DissociatePackagesResponse.t, DissociatePackagesResponse.error)
+          Result.t
+val get_application :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetApplicationRequest.t ->
+        (GetApplicationResponse.t, GetApplicationResponse.error) Result.t
+val get_capability :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCapabilityRequest.t ->
+        (GetCapabilityResponse.t, GetCapabilityResponse.error) Result.t
 val get_compatible_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCompatibleVersionsRequest.t ->
         (GetCompatibleVersionsResponse.t,
           GetCompatibleVersionsResponse.error) Result.t
+val get_data_source :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDataSourceRequest.t ->
+        (GetDataSourceResponse.t, GetDataSourceResponse.error) Result.t
+val get_default_application_setting :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDefaultApplicationSettingRequest.t ->
+        (GetDefaultApplicationSettingResponse.t,
+          GetDefaultApplicationSettingResponse.error) Result.t
+val get_direct_query_data_source :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDirectQueryDataSourceRequest.t ->
+        (GetDirectQueryDataSourceResponse.t,
+          GetDirectQueryDataSourceResponse.error) Result.t
+val get_domain_maintenance_status :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDomainMaintenanceStatusRequest.t ->
+        (GetDomainMaintenanceStatusResponse.t,
+          GetDomainMaintenanceStatusResponse.error) Result.t
+val get_index :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetIndexRequest.t ->
+        (GetIndexResponse.t, GetIndexResponse.error) Result.t
 val get_package_version_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -150,6 +302,28 @@ val get_upgrade_status :
     ?cfg:Awso.Cfg.t ->
       GetUpgradeStatusRequest.t ->
         (GetUpgradeStatusResponse.t, GetUpgradeStatusResponse.error) Result.t
+val list_applications :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListApplicationsRequest.t ->
+        (ListApplicationsResponse.t, ListApplicationsResponse.error) Result.t
+val list_data_sources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDataSourcesRequest.t ->
+        (ListDataSourcesResponse.t, ListDataSourcesResponse.error) Result.t
+val list_direct_query_data_sources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDirectQueryDataSourcesRequest.t ->
+        (ListDirectQueryDataSourcesResponse.t,
+          ListDirectQueryDataSourcesResponse.error) Result.t
+val list_domain_maintenances :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDomainMaintenancesRequest.t ->
+        (ListDomainMaintenancesResponse.t,
+          ListDomainMaintenancesResponse.error) Result.t
 val list_domain_names :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -161,6 +335,11 @@ val list_domains_for_package :
       ListDomainsForPackageRequest.t ->
         (ListDomainsForPackageResponse.t,
           ListDomainsForPackageResponse.error) Result.t
+val list_insights :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListInsightsRequest.t ->
+        (ListInsightsResponse.t, ListInsightsResponse.error) Result.t
 val list_instance_type_details :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -173,6 +352,12 @@ val list_packages_for_domain :
       ListPackagesForDomainRequest.t ->
         (ListPackagesForDomainResponse.t,
           ListPackagesForDomainResponse.error) Result.t
+val list_scheduled_actions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListScheduledActionsRequest.t ->
+        (ListScheduledActionsResponse.t, ListScheduledActionsResponse.error)
+          Result.t
 val list_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -183,12 +368,41 @@ val list_versions :
     ?cfg:Awso.Cfg.t ->
       ListVersionsRequest.t ->
         (ListVersionsResponse.t, ListVersionsResponse.error) Result.t
+val list_vpc_endpoint_access :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListVpcEndpointAccessRequest.t ->
+        (ListVpcEndpointAccessResponse.t,
+          ListVpcEndpointAccessResponse.error) Result.t
+val list_vpc_endpoints :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListVpcEndpointsRequest.t ->
+        (ListVpcEndpointsResponse.t, ListVpcEndpointsResponse.error) Result.t
+val list_vpc_endpoints_for_domain :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListVpcEndpointsForDomainRequest.t ->
+        (ListVpcEndpointsForDomainResponse.t,
+          ListVpcEndpointsForDomainResponse.error) Result.t
 val purchase_reserved_instance_offering :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PurchaseReservedInstanceOfferingRequest.t ->
         (PurchaseReservedInstanceOfferingResponse.t,
           PurchaseReservedInstanceOfferingResponse.error) Result.t
+val put_default_application_setting :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutDefaultApplicationSettingRequest.t ->
+        (PutDefaultApplicationSettingResponse.t,
+          PutDefaultApplicationSettingResponse.error) Result.t
+val register_capability :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RegisterCapabilityRequest.t ->
+        (RegisterCapabilityResponse.t, RegisterCapabilityResponse.error)
+          Result.t
 val reject_inbound_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -198,23 +412,81 @@ val reject_inbound_connection :
 val remove_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> RemoveTagsRequest.t -> (unit, unit) Result.t
+val revoke_vpc_endpoint_access :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RevokeVpcEndpointAccessRequest.t ->
+        (RevokeVpcEndpointAccessResponse.t,
+          RevokeVpcEndpointAccessResponse.error) Result.t
+val rollback_service_software_update :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RollbackServiceSoftwareUpdateRequest.t ->
+        (RollbackServiceSoftwareUpdateResponse.t,
+          RollbackServiceSoftwareUpdateResponse.error) Result.t
+val start_domain_maintenance :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartDomainMaintenanceRequest.t ->
+        (StartDomainMaintenanceResponse.t,
+          StartDomainMaintenanceResponse.error) Result.t
 val start_service_software_update :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartServiceSoftwareUpdateRequest.t ->
         (StartServiceSoftwareUpdateResponse.t,
           StartServiceSoftwareUpdateResponse.error) Result.t
+val update_application :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateApplicationRequest.t ->
+        (UpdateApplicationResponse.t, UpdateApplicationResponse.error)
+          Result.t
+val update_data_source :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDataSourceRequest.t ->
+        (UpdateDataSourceResponse.t, UpdateDataSourceResponse.error) Result.t
+val update_direct_query_data_source :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDirectQueryDataSourceRequest.t ->
+        (UpdateDirectQueryDataSourceResponse.t,
+          UpdateDirectQueryDataSourceResponse.error) Result.t
 val update_domain_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDomainConfigRequest.t ->
         (UpdateDomainConfigResponse.t, UpdateDomainConfigResponse.error)
           Result.t
+val update_index :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateIndexRequest.t ->
+        (UpdateIndexResponse.t, UpdateIndexResponse.error) Result.t
 val update_package :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePackageRequest.t ->
         (UpdatePackageResponse.t, UpdatePackageResponse.error) Result.t
+val update_package_scope :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdatePackageScopeRequest.t ->
+        (UpdatePackageScopeResponse.t, UpdatePackageScopeResponse.error)
+          Result.t
+val update_scheduled_action :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateScheduledActionRequest.t ->
+        (UpdateScheduledActionResponse.t,
+          UpdateScheduledActionResponse.error) Result.t
+val update_vpc_endpoint :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateVpcEndpointRequest.t ->
+        (UpdateVpcEndpointResponse.t, UpdateVpcEndpointResponse.error)
+          Result.t
 val upgrade_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

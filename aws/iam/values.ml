@@ -176,7 +176,7 @@ module Tag =
           "The key name that can be used to look up or retrieve the associated value. For example, Department or Cost Center are common choices."];
       value: TagValueType.t
         [@ocaml.doc
-          "The value associated with this tag. For example, tags with a key name of Department could have values such as Human Resources, Accounting, and Support. Tags with a key name of Cost Center might have values that consist of the number associated with the different cost centers in your company. Typically, many resources have tags with the same key name but with different values. Amazon Web Services always interprets the tag Value as a single string. If you need to store an array, you can store comma-separated values in the string. However, you must interpret the value in your code."]}
+          "The value associated with this tag. For example, tags with a key name of Department could have values such as Human Resources, Accounting, and Support. Tags with a key name of Cost Center might have values that consist of the number associated with the different cost centers in your company. Typically, many resources have tags with the same key name but with different values."]}
     let context_ = "Tag"
     let make ~key = fun ~value -> fun () -> { key; value }
     let to_value x =
@@ -192,9 +192,9 @@ module Tag =
         TagKeyType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValueType.of_json in
-      let key = field_map_exn json "Key" TagKeyType.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValueType.of_json in
+      let key = field_map_exn json__ "Key" TagKeyType.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -275,13 +275,28 @@ module Position =
         (Option.map ~f:LineNumber.of_xml) (Xml.child xml_arg0 "Line") in
       make ?column ?line ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let column = field_map json "Column" ColumnNumber.of_json in
-      let line = field_map json "Line" LineNumber.of_json in
+    let of_json json__ =
+      let column = field_map json__ "Column" ColumnNumber.of_json in
+      let line = field_map json__ "Line" LineNumber.of_json in
       make ?column ?line ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the row and column of a location of a Statement element in a policy document. This data type is used as a member of the Statement type."]
+module PolicyParameterValueType =
+  struct
+    type nonrec t = string
+    let context_ = "policyParameterValueType"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"[ -~]+"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"policyParameterValueType" j
+    let to_json = simple_to_json to_value
+  end
 module AttachedPermissionsBoundary =
   struct
     type nonrec t =
@@ -312,11 +327,11 @@ module AttachedPermissionsBoundary =
           (Xml.child xml_arg0 "PermissionsBoundaryType") in
       make ?permissionsBoundaryArn ?permissionsBoundaryType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissionsBoundaryArn =
-        field_map json "PermissionsBoundaryArn" ArnType.of_json in
+        field_map json__ "PermissionsBoundaryArn" ArnType.of_json in
       let permissionsBoundaryType =
-        field_map json "PermissionsBoundaryType"
+        field_map json__ "PermissionsBoundaryType"
           PermissionsBoundaryAttachmentType.of_json in
       make ?permissionsBoundaryArn ?permissionsBoundaryType ()
     let to_json v = composed_to_json to_value v
@@ -346,13 +361,13 @@ module RoleLastUsed =
         (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "LastUsedDate") in
       make ?region ?lastUsedDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let region = field_map json "Region" StringType.of_json in
-      let lastUsedDate = field_map json "LastUsedDate" DateType.of_json in
+    let of_json json__ =
+      let region = field_map json__ "Region" StringType.of_json in
+      let lastUsedDate = field_map json__ "LastUsedDate" DateType.of_json in
       make ?region ?lastUsedDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains information about the last time that an IAM role was used. This includes the date and time and the Region in which the role was last used. Activity is only reported for the trailing 400 days. This period can be shorter if your Region began supporting these features within the last year. The role might have been used more than 400 days ago. For more information, see Regions where data is tracked in the IAM User Guide. This data type is returned as a response element in the GetRole and GetAccountAuthorizationDetails operations."]
+       "Contains information about the last time that an IAM role was used. This includes the date and time and the Region in which the role was last used. Activity is only reported for the trailing 400 days. This period can be shorter if your Region began supporting these features within the last year. The role might have been used more than 400 days ago. For more information, see Regions where data is tracked in the IAM user Guide. This data type is returned as a response element in the GetRole and GetAccountAuthorizationDetails operations."]
 module IdType =
   struct
     type nonrec t = string
@@ -385,7 +400,7 @@ module PathType =
                 (check_string_max i ~max:512) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"(\\u002F)|(\\u002F[\\u0021-\\u007F]+\\u002F)")));
+                       ~pattern:"(\\u002F)|(\\u002F[\\u0021-\\u007E]+\\u002F)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -427,7 +442,7 @@ module RoleDescriptionType =
           ((check_string_max i ~max:1000) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"[\\p{L}\\p{M}\\p{Z}\\p{S}\\p{N}\\p{P}]*"));
+                  ~pattern:"[\\u0009\\u000A\\u000D\\u0020-\\u007E\\u00A1-\\u00FF]*"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -482,6 +497,9 @@ module TagListType =
     type nonrec t = Tag.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -625,33 +643,109 @@ module Statement =
           (Xml.child xml_arg0 "SourcePolicyId") in
       make ?endPosition ?startPosition ?sourcePolicyType ?sourcePolicyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endPosition = field_map json "EndPosition" Position.of_json in
-      let startPosition = field_map json "StartPosition" Position.of_json in
+    let of_json json__ =
+      let endPosition = field_map json__ "EndPosition" Position.of_json in
+      let startPosition = field_map json__ "StartPosition" Position.of_json in
       let sourcePolicyType =
-        field_map json "SourcePolicyType" PolicySourceType.of_json in
+        field_map json__ "SourcePolicyType" PolicySourceType.of_json in
       let sourcePolicyId =
-        field_map json "SourcePolicyId" PolicyIdentifierType.of_json in
+        field_map json__ "SourcePolicyId" PolicyIdentifierType.of_json in
       make ?endPosition ?startPosition ?sourcePolicyType ?sourcePolicyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains a reference to a Statement element in a policy document that determines the result of the simulation. This data type is used by the MatchedStatements member of the EvaluationResult type."]
+module PolicyParameterTypeEnum =
+  struct
+    type nonrec t =
+      | String_ 
+      | StringList 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | String_ -> "string"
+      | StringList -> "stringList"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "string" -> String_
+      | "stringList" -> StringList
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PolicyParameterTypeEnum" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PolicyParameterTypeEnum" j)
+    let to_json = simple_to_json to_value
+  end
+module PolicyParameterNameType =
+  struct
+    type nonrec t = string
+    let context_ = "policyParameterNameType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:5) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"[ -~]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"policyParameterNameType" j
+    let to_json = simple_to_json to_value
+  end
+module PolicyParameterValuesListType =
+  struct
+    type nonrec t = PolicyParameterValueType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PolicyParameterValueType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PolicyParameterValueType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"policyParameterValuesListType"
+        ~of_json:PolicyParameterValueType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Role =
   struct
     type nonrec t =
       {
-      path: PathType.t
+      path: PathType.t option
         [@ocaml.doc
           "The path to the role. For more information about paths, see IAM identifiers in the IAM User Guide."];
-      roleName: RoleNameType.t
+      roleName: RoleNameType.t option
         [@ocaml.doc "The friendly name that identifies the role."];
-      roleId: IdType.t
+      roleId: IdType.t option
         [@ocaml.doc
           "The stable and unique string identifying the role. For more information about IDs, see IAM identifiers in the IAM User Guide."];
-      arn: ArnType.t
+      arn: ArnType.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) specifying the role. For more information about ARNs and how to use them in policies, see IAM identifiers in the IAM User Guide guide."];
-      createDate: DateType.t
+      createDate: DateType.t option
         [@ocaml.doc
           "The date and time, in ISO 8601 date-time format, when the role was created."];
       assumeRolePolicyDocument: PolicyDocumentType.t option
@@ -670,40 +764,39 @@ module Role =
           "A list of tags that are attached to the role. For more information about tagging, see Tagging IAM resources in the IAM User Guide."];
       roleLastUsed: RoleLastUsed.t option
         [@ocaml.doc
-          "Contains information about the last time that an IAM role was used. This includes the date and time and the Region in which the role was last used. Activity is only reported for the trailing 400 days. This period can be shorter if your Region began supporting these features within the last year. The role might have been used more than 400 days ago. For more information, see Regions where data is tracked in the IAM User Guide."]}
-    let context_ = "Role"
-    let make ?assumeRolePolicyDocument =
-      fun ?description ->
-        fun ?maxSessionDuration ->
-          fun ?permissionsBoundary ->
-            fun ?tags ->
-              fun ?roleLastUsed ->
-                fun ~path ->
-                  fun ~roleName ->
-                    fun ~roleId ->
-                      fun ~arn ->
-                        fun ~createDate ->
+          "Contains information about the last time that an IAM role was used. This includes the date and time and the Region in which the role was last used. Activity is only reported for the trailing 400 days. This period can be shorter if your Region began supporting these features within the last year. The role might have been used more than 400 days ago. For more information, see Regions where data is tracked in the IAM user Guide."]}
+    let make ?path =
+      fun ?roleName ->
+        fun ?roleId ->
+          fun ?arn ->
+            fun ?createDate ->
+              fun ?assumeRolePolicyDocument ->
+                fun ?description ->
+                  fun ?maxSessionDuration ->
+                    fun ?permissionsBoundary ->
+                      fun ?tags ->
+                        fun ?roleLastUsed ->
                           fun () ->
                             {
+                              path;
+                              roleName;
+                              roleId;
+                              arn;
+                              createDate;
                               assumeRolePolicyDocument;
                               description;
                               maxSessionDuration;
                               permissionsBoundary;
                               tags;
-                              roleLastUsed;
-                              path;
-                              roleName;
-                              roleId;
-                              arn;
-                              createDate
+                              roleLastUsed
                             }
     let to_value x =
       structure_to_value
-        [("Path", (Some (PathType.to_value x.path)));
-        ("RoleName", (Some (RoleNameType.to_value x.roleName)));
-        ("RoleId", (Some (IdType.to_value x.roleId)));
-        ("Arn", (Some (ArnType.to_value x.arn)));
-        ("CreateDate", (Some (DateType.to_value x.createDate)));
+        [("Path", (Option.map x.path ~f:PathType.to_value));
+        ("RoleName", (Option.map x.roleName ~f:RoleNameType.to_value));
+        ("RoleId", (Option.map x.roleId ~f:IdType.to_value));
+        ("Arn", (Option.map x.arn ~f:ArnType.to_value));
+        ("CreateDate", (Option.map x.createDate ~f:DateType.to_value));
         ("AssumeRolePolicyDocument",
           (Option.map x.assumeRolePolicyDocument
              ~f:PolicyDocumentType.to_value));
@@ -738,42 +831,39 @@ module Role =
         (Option.map ~f:PolicyDocumentType.of_xml)
           (Xml.child xml_arg0 "AssumeRolePolicyDocument") in
       let createDate =
-        DateType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateDate") in
-      let arn =
-        ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "CreateDate") in
+      let arn = (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "Arn") in
       let roleId =
-        IdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleId") in
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "RoleId") in
       let roleName =
-        RoleNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
-      let path =
-        PathType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
+        (Option.map ~f:RoleNameType.of_xml) (Xml.child xml_arg0 "RoleName") in
+      let path = (Option.map ~f:PathType.of_xml) (Xml.child xml_arg0 "Path") in
       make ?roleLastUsed ?tags ?permissionsBoundary ?maxSessionDuration
-        ?description ?assumeRolePolicyDocument ~createDate ~arn ~roleId
-        ~roleName ~path ()
+        ?description ?assumeRolePolicyDocument ?createDate ?arn ?roleId
+        ?roleName ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleLastUsed = field_map json "RoleLastUsed" RoleLastUsed.of_json in
-      let tags = field_map json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let roleLastUsed = field_map json__ "RoleLastUsed" RoleLastUsed.of_json in
+      let tags = field_map json__ "Tags" TagListType.of_json in
       let permissionsBoundary =
-        field_map json "PermissionsBoundary"
+        field_map json__ "PermissionsBoundary"
           AttachedPermissionsBoundary.of_json in
       let maxSessionDuration =
-        field_map json "MaxSessionDuration"
+        field_map json__ "MaxSessionDuration"
           RoleMaxSessionDurationType.of_json in
       let description =
-        field_map json "Description" RoleDescriptionType.of_json in
+        field_map json__ "Description" RoleDescriptionType.of_json in
       let assumeRolePolicyDocument =
-        field_map json "AssumeRolePolicyDocument" PolicyDocumentType.of_json in
-      let createDate = field_map_exn json "CreateDate" DateType.of_json in
-      let arn = field_map_exn json "Arn" ArnType.of_json in
-      let roleId = field_map_exn json "RoleId" IdType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
-      let path = field_map_exn json "Path" PathType.of_json in
+        field_map json__ "AssumeRolePolicyDocument"
+          PolicyDocumentType.of_json in
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
+      let arn = field_map json__ "Arn" ArnType.of_json in
+      let roleId = field_map json__ "RoleId" IdType.of_json in
+      let roleName = field_map json__ "RoleName" RoleNameType.of_json in
+      let path = field_map json__ "Path" PathType.of_json in
       make ?roleLastUsed ?tags ?permissionsBoundary ?maxSessionDuration
-        ?description ?assumeRolePolicyDocument ~createDate ~arn ~roleId
-        ~roleName ~path ()
+        ?description ?assumeRolePolicyDocument ?createDate ?arn ?roleId
+        ?roleName ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about an IAM role. This structure is returned as a response element in several API operations that interact with roles."]
@@ -781,6 +871,9 @@ module ContextKeyNamesResultListType =
   struct
     type nonrec t = ContextKeyNameType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ContextKeyNameType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -826,6 +919,8 @@ module EvalDecisionDetailsType =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -853,9 +948,9 @@ module PermissionsBoundaryDecisionDetail =
           (Xml.child xml_arg0 "AllowedByPermissionsBoundary") in
       make ?allowedByPermissionsBoundary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let allowedByPermissionsBoundary =
-        field_map json "AllowedByPermissionsBoundary" BooleanType.of_json in
+        field_map json__ "AllowedByPermissionsBoundary" BooleanType.of_json in
       make ?allowedByPermissionsBoundary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -882,6 +977,9 @@ module StatementListType =
   struct
     type nonrec t = Statement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Statement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -997,6 +1095,46 @@ module PolicyType =
     let of_json j = of_string (string_of_json ~kind:"policyType" j)
     let to_json = simple_to_json to_value
   end
+module PolicyParameter =
+  struct
+    type nonrec t =
+      {
+      name: PolicyParameterNameType.t option
+        [@ocaml.doc "The name of the policy parameter."];
+      values: PolicyParameterValuesListType.t option
+        [@ocaml.doc "The allowed values for the policy parameter."];
+      type_: PolicyParameterTypeEnum.t option
+        [@ocaml.doc "The data type of the policy parameter value."]}
+    let make ?name =
+      fun ?values -> fun ?type_ -> fun () -> { name; values; type_ }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:PolicyParameterNameType.to_value));
+        ("Values",
+          (Option.map x.values ~f:PolicyParameterValuesListType.to_value));
+        ("Type", (Option.map x.type_ ~f:PolicyParameterTypeEnum.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:PolicyParameterTypeEnum.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let values =
+        (Option.map ~f:PolicyParameterValuesListType.of_xml)
+          (Xml.child xml_arg0 "Values") in
+      let name =
+        (Option.map ~f:PolicyParameterNameType.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      make ?type_ ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" PolicyParameterTypeEnum.of_json in
+      let values =
+        field_map json__ "Values" PolicyParameterValuesListType.of_json in
+      let name = field_map json__ "Name" PolicyParameterNameType.of_json in
+      make ?type_ ?values ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about a policy parameter used to customize delegated permissions."]
 module PolicyVersionIdType =
   struct
     type nonrec t = string
@@ -1038,6 +1176,9 @@ module RoleListType =
   struct
     type nonrec t = Role.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Role.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1074,10 +1215,10 @@ module ResourceSpecificResult =
   struct
     type nonrec t =
       {
-      evalResourceName: ResourceNameType.t
+      evalResourceName: ResourceNameType.t option
         [@ocaml.doc
           "The name of the simulated resource, in Amazon Resource Name (ARN) format."];
-      evalResourceDecision: PolicyEvaluationDecisionType.t
+      evalResourceDecision: PolicyEvaluationDecisionType.t option
         [@ocaml.doc
           "The result of the simulation of the simulated API operation on the resource specified in EvalResourceName."];
       matchedStatements: StatementListType.t option
@@ -1093,29 +1234,28 @@ module ResourceSpecificResult =
         PermissionsBoundaryDecisionDetail.t option
         [@ocaml.doc
           "Contains information about the effect that a permissions boundary has on a policy simulation when that boundary is applied to an IAM entity."]}
-    let context_ = "ResourceSpecificResult"
-    let make ?matchedStatements =
-      fun ?missingContextValues ->
-        fun ?evalDecisionDetails ->
-          fun ?permissionsBoundaryDecisionDetail ->
-            fun ~evalResourceName ->
-              fun ~evalResourceDecision ->
+    let make ?evalResourceName =
+      fun ?evalResourceDecision ->
+        fun ?matchedStatements ->
+          fun ?missingContextValues ->
+            fun ?evalDecisionDetails ->
+              fun ?permissionsBoundaryDecisionDetail ->
                 fun () ->
                   {
+                    evalResourceName;
+                    evalResourceDecision;
                     matchedStatements;
                     missingContextValues;
                     evalDecisionDetails;
-                    permissionsBoundaryDecisionDetail;
-                    evalResourceName;
-                    evalResourceDecision
+                    permissionsBoundaryDecisionDetail
                   }
     let to_value x =
       structure_to_value
         [("EvalResourceName",
-           (Some (ResourceNameType.to_value x.evalResourceName)));
+           (Option.map x.evalResourceName ~f:ResourceNameType.to_value));
         ("EvalResourceDecision",
-          (Some
-             (PolicyEvaluationDecisionType.to_value x.evalResourceDecision)));
+          (Option.map x.evalResourceDecision
+             ~f:PolicyEvaluationDecisionType.to_value));
         ("MatchedStatements",
           (Option.map x.matchedStatements ~f:StatementListType.to_value));
         ("MissingContextValues",
@@ -1142,34 +1282,35 @@ module ResourceSpecificResult =
         (Option.map ~f:StatementListType.of_xml)
           (Xml.child xml_arg0 "MatchedStatements") in
       let evalResourceDecision =
-        PolicyEvaluationDecisionType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EvalResourceDecision") in
+        (Option.map ~f:PolicyEvaluationDecisionType.of_xml)
+          (Xml.child xml_arg0 "EvalResourceDecision") in
       let evalResourceName =
-        ResourceNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EvalResourceName") in
+        (Option.map ~f:ResourceNameType.of_xml)
+          (Xml.child xml_arg0 "EvalResourceName") in
       make ?permissionsBoundaryDecisionDetail ?evalDecisionDetails
-        ?missingContextValues ?matchedStatements ~evalResourceDecision
-        ~evalResourceName ()
+        ?missingContextValues ?matchedStatements ?evalResourceDecision
+        ?evalResourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissionsBoundaryDecisionDetail =
-        field_map json "PermissionsBoundaryDecisionDetail"
+        field_map json__ "PermissionsBoundaryDecisionDetail"
           PermissionsBoundaryDecisionDetail.of_json in
       let evalDecisionDetails =
-        field_map json "EvalDecisionDetails" EvalDecisionDetailsType.of_json in
+        field_map json__ "EvalDecisionDetails"
+          EvalDecisionDetailsType.of_json in
       let missingContextValues =
-        field_map json "MissingContextValues"
+        field_map json__ "MissingContextValues"
           ContextKeyNamesResultListType.of_json in
       let matchedStatements =
-        field_map json "MatchedStatements" StatementListType.of_json in
+        field_map json__ "MatchedStatements" StatementListType.of_json in
       let evalResourceDecision =
-        field_map_exn json "EvalResourceDecision"
+        field_map json__ "EvalResourceDecision"
           PolicyEvaluationDecisionType.of_json in
       let evalResourceName =
-        field_map_exn json "EvalResourceName" ResourceNameType.of_json in
+        field_map json__ "EvalResourceName" ResourceNameType.of_json in
       make ?permissionsBoundaryDecisionDetail ?evalDecisionDetails
-        ?missingContextValues ?matchedStatements ~evalResourceDecision
-        ~evalResourceName ()
+        ?missingContextValues ?matchedStatements ?evalResourceDecision
+        ?evalResourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the result of the simulation of a single API operation call on a single resource. This data type is used by a member of the EvaluationResult data type."]
@@ -1197,8 +1338,8 @@ module PolicyGrantingServiceAccess =
   struct
     type nonrec t =
       {
-      policyName: PolicyNameType.t [@ocaml.doc "The policy name."];
-      policyType: PolicyType.t
+      policyName: PolicyNameType.t option [@ocaml.doc "The policy name."];
+      policyType: PolicyType.t option
         [@ocaml.doc
           "The policy type. For more information about these policy types, see Managed policies and inline policies in the IAM User Guide."];
       policyArn: ArnType.t option ;
@@ -1208,18 +1349,17 @@ module PolicyGrantingServiceAccess =
       entityName: EntityNameType.t option
         [@ocaml.doc
           "The name of the entity (user or role) to which the inline policy is attached. This field is null for managed policies. For more information about these policy types, see Managed policies and inline policies in the IAM User Guide."]}
-    let context_ = "PolicyGrantingServiceAccess"
-    let make ?policyArn =
-      fun ?entityType ->
-        fun ?entityName ->
-          fun ~policyName ->
-            fun ~policyType ->
+    let make ?policyName =
+      fun ?policyType ->
+        fun ?policyArn ->
+          fun ?entityType ->
+            fun ?entityName ->
               fun () ->
-                { policyArn; entityType; entityName; policyName; policyType }
+                { policyName; policyType; policyArn; entityType; entityName }
     let to_value x =
       structure_to_value
-        [("PolicyName", (Some (PolicyNameType.to_value x.policyName)));
-        ("PolicyType", (Some (PolicyType.to_value x.policyType)));
+        [("PolicyName", (Option.map x.policyName ~f:PolicyNameType.to_value));
+        ("PolicyType", (Option.map x.policyType ~f:PolicyType.to_value));
         ("PolicyArn", (Option.map x.policyArn ~f:ArnType.to_value));
         ("EntityType",
           (Option.map x.entityType ~f:PolicyOwnerEntityType.to_value));
@@ -1235,28 +1375,59 @@ module PolicyGrantingServiceAccess =
       let policyArn =
         (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "PolicyArn") in
       let policyType =
-        PolicyType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyType") in
+        (Option.map ~f:PolicyType.of_xml) (Xml.child xml_arg0 "PolicyType") in
       let policyName =
-        PolicyNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
-      make ?entityName ?entityType ?policyArn ~policyType ~policyName ()
+        (Option.map ~f:PolicyNameType.of_xml)
+          (Xml.child xml_arg0 "PolicyName") in
+      make ?entityName ?entityType ?policyArn ?policyType ?policyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entityName = field_map json "EntityName" EntityNameType.of_json in
+    let of_json json__ =
+      let entityName = field_map json__ "EntityName" EntityNameType.of_json in
       let entityType =
-        field_map json "EntityType" PolicyOwnerEntityType.of_json in
-      let policyArn = field_map json "PolicyArn" ArnType.of_json in
-      let policyType = field_map_exn json "PolicyType" PolicyType.of_json in
-      let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
-      make ?entityName ?entityType ?policyArn ~policyType ~policyName ()
+        field_map json__ "EntityType" PolicyOwnerEntityType.of_json in
+      let policyArn = field_map json__ "PolicyArn" ArnType.of_json in
+      let policyType = field_map json__ "PolicyType" PolicyType.of_json in
+      let policyName = field_map json__ "PolicyName" PolicyNameType.of_json in
+      make ?entityName ?entityType ?policyArn ?policyType ?policyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about the permissions policies that are attached to the specified identity (user, group, or role). This data type is an element of the ListPoliciesGrantingServiceAccessEntry object."]
+module PolicyParameterListType =
+  struct
+    type nonrec t = PolicyParameter.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PolicyParameter.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PolicyParameter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"policyParameterListType"
+        ~of_json:PolicyParameter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ArnListType =
   struct
     type nonrec t = ArnType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ArnType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1305,10 +1476,10 @@ module TrackedActionLastAccessed =
       lastAccessedEntity: ArnType.t option ;
       lastAccessedTime: DateType.t option
         [@ocaml.doc
-          "The date and time, in\194\160ISO 8601 date-time format, when an authenticated entity most recently attempted to access the tracked service. Amazon Web Services does not report unauthenticated requests. This field is null if no IAM entities attempted to access the service within the reporting period."];
+          "The date and time, in\194\160ISO 8601 date-time format, when an authenticated entity most recently attempted to access the tracked service. Amazon Web Services does not report unauthenticated requests. This field is null if no IAM entities attempted to access the service within the tracking period."];
       lastAccessedRegion: StringType.t option
         [@ocaml.doc
-          "The Region from which the authenticated entity (user or role) last attempted to access the tracked action. Amazon Web Services does not report unauthenticated requests. This field is null if no IAM entities attempted to access the service within the reporting period."]}
+          "The Region from which the authenticated entity (user or role) last attempted to access the tracked action. Amazon Web Services does not report unauthenticated requests. This field is null if no IAM entities attempted to access the service within the tracking period."]}
     let make ?actionName =
       fun ?lastAccessedEntity ->
         fun ?lastAccessedTime ->
@@ -1345,14 +1516,14 @@ module TrackedActionLastAccessed =
       make ?lastAccessedRegion ?lastAccessedTime ?lastAccessedEntity
         ?actionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastAccessedRegion =
-        field_map json "LastAccessedRegion" StringType.of_json in
+        field_map json__ "LastAccessedRegion" StringType.of_json in
       let lastAccessedTime =
-        field_map json "LastAccessedTime" DateType.of_json in
+        field_map json__ "LastAccessedTime" DateType.of_json in
       let lastAccessedEntity =
-        field_map json "LastAccessedEntity" ArnType.of_json in
-      let actionName = field_map json "ActionName" StringType.of_json in
+        field_map json__ "LastAccessedEntity" ArnType.of_json in
+      let actionName = field_map json__ "ActionName" StringType.of_json in
       make ?lastAccessedRegion ?lastAccessedTime ?lastAccessedEntity
         ?actionName ()
     let to_json v = composed_to_json to_value v
@@ -1402,12 +1573,13 @@ module PolicyVersion =
           (Xml.child xml_arg0 "Document") in
       make ?createDate ?isDefaultVersion ?versionId ?document ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createDate = field_map json "CreateDate" DateType.of_json in
+    let of_json json__ =
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
       let isDefaultVersion =
-        field_map json "IsDefaultVersion" BooleanType.of_json in
-      let versionId = field_map json "VersionId" PolicyVersionIdType.of_json in
-      let document = field_map json "Document" PolicyDocumentType.of_json in
+        field_map json__ "IsDefaultVersion" BooleanType.of_json in
+      let versionId =
+        field_map json__ "VersionId" PolicyVersionIdType.of_json in
+      let document = field_map json__ "Document" PolicyDocumentType.of_json in
       make ?createDate ?isDefaultVersion ?versionId ?document ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1434,9 +1606,9 @@ module AttachedPolicy =
           (Xml.child xml_arg0 "PolicyName") in
       make ?policyArn ?policyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyArn = field_map json "PolicyArn" ArnType.of_json in
-      let policyName = field_map json "PolicyName" PolicyNameType.of_json in
+    let of_json json__ =
+      let policyArn = field_map json__ "PolicyArn" ArnType.of_json in
+      let policyName = field_map json__ "PolicyName" PolicyNameType.of_json in
       make ?policyArn ?policyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1466,10 +1638,10 @@ module PolicyDetail =
           (Xml.child xml_arg0 "PolicyName") in
       make ?policyDocument ?policyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyDocument =
-        field_map json "PolicyDocument" PolicyDocumentType.of_json in
-      let policyName = field_map json "PolicyName" PolicyNameType.of_json in
+        field_map json__ "PolicyDocument" PolicyDocumentType.of_json in
+      let policyName = field_map json__ "PolicyName" PolicyNameType.of_json in
       make ?policyDocument ?policyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1478,88 +1650,85 @@ module InstanceProfile =
   struct
     type nonrec t =
       {
-      path: PathType.t
+      path: PathType.t option
         [@ocaml.doc
           "The path to the instance profile. For more information about paths, see IAM identifiers in the IAM User Guide."];
-      instanceProfileName: InstanceProfileNameType.t
+      instanceProfileName: InstanceProfileNameType.t option
         [@ocaml.doc "The name identifying the instance profile."];
-      instanceProfileId: IdType.t
+      instanceProfileId: IdType.t option
         [@ocaml.doc
           "The stable and unique string identifying the instance profile. For more information about IDs, see IAM identifiers in the IAM User Guide."];
-      arn: ArnType.t
+      arn: ArnType.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) specifying the instance profile. For more information about ARNs and how to use them in policies, see IAM identifiers in the IAM User Guide."];
-      createDate: DateType.t
+      createDate: DateType.t option
         [@ocaml.doc "The date when the instance profile was created."];
-      roles: RoleListType.t
+      roles: RoleListType.t option
         [@ocaml.doc "The role associated with the instance profile."];
       tags: TagListType.t option
         [@ocaml.doc
           "A list of tags that are attached to the instance profile. For more information about tagging, see Tagging IAM resources in the IAM User Guide."]}
-    let context_ = "InstanceProfile"
-    let make ?tags =
-      fun ~path ->
-        fun ~instanceProfileName ->
-          fun ~instanceProfileId ->
-            fun ~arn ->
-              fun ~createDate ->
-                fun ~roles ->
+    let make ?path =
+      fun ?instanceProfileName ->
+        fun ?instanceProfileId ->
+          fun ?arn ->
+            fun ?createDate ->
+              fun ?roles ->
+                fun ?tags ->
                   fun () ->
                     {
-                      tags;
                       path;
                       instanceProfileName;
                       instanceProfileId;
                       arn;
                       createDate;
-                      roles
+                      roles;
+                      tags
                     }
     let to_value x =
       structure_to_value
-        [("Path", (Some (PathType.to_value x.path)));
+        [("Path", (Option.map x.path ~f:PathType.to_value));
         ("InstanceProfileName",
-          (Some (InstanceProfileNameType.to_value x.instanceProfileName)));
-        ("InstanceProfileId", (Some (IdType.to_value x.instanceProfileId)));
-        ("Arn", (Some (ArnType.to_value x.arn)));
-        ("CreateDate", (Some (DateType.to_value x.createDate)));
-        ("Roles", (Some (RoleListType.to_value x.roles)));
+          (Option.map x.instanceProfileName
+             ~f:InstanceProfileNameType.to_value));
+        ("InstanceProfileId",
+          (Option.map x.instanceProfileId ~f:IdType.to_value));
+        ("Arn", (Option.map x.arn ~f:ArnType.to_value));
+        ("CreateDate", (Option.map x.createDate ~f:DateType.to_value));
+        ("Roles", (Option.map x.roles ~f:RoleListType.to_value));
         ("Tags", (Option.map x.tags ~f:TagListType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags =
         (Option.map ~f:TagListType.of_xml) (Xml.child xml_arg0 "Tags") in
       let roles =
-        RoleListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Roles") in
+        (Option.map ~f:RoleListType.of_xml) (Xml.child xml_arg0 "Roles") in
       let createDate =
-        DateType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateDate") in
-      let arn =
-        ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "CreateDate") in
+      let arn = (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "Arn") in
       let instanceProfileId =
-        IdType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileId") in
+        (Option.map ~f:IdType.of_xml)
+          (Xml.child xml_arg0 "InstanceProfileId") in
       let instanceProfileName =
-        InstanceProfileNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileName") in
-      let path =
-        PathType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
-      make ?tags ~roles ~createDate ~arn ~instanceProfileId
-        ~instanceProfileName ~path ()
+        (Option.map ~f:InstanceProfileNameType.of_xml)
+          (Xml.child xml_arg0 "InstanceProfileName") in
+      let path = (Option.map ~f:PathType.of_xml) (Xml.child xml_arg0 "Path") in
+      make ?tags ?roles ?createDate ?arn ?instanceProfileId
+        ?instanceProfileName ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
-      let roles = field_map_exn json "Roles" RoleListType.of_json in
-      let createDate = field_map_exn json "CreateDate" DateType.of_json in
-      let arn = field_map_exn json "Arn" ArnType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      let roles = field_map json__ "Roles" RoleListType.of_json in
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
+      let arn = field_map json__ "Arn" ArnType.of_json in
       let instanceProfileId =
-        field_map_exn json "InstanceProfileId" IdType.of_json in
+        field_map json__ "InstanceProfileId" IdType.of_json in
       let instanceProfileName =
-        field_map_exn json "InstanceProfileName"
+        field_map json__ "InstanceProfileName"
           InstanceProfileNameType.of_json in
-      let path = field_map_exn json "Path" PathType.of_json in
-      make ?tags ~roles ~createDate ~arn ~instanceProfileId
-        ~instanceProfileName ~path ()
+      let path = field_map json__ "Path" PathType.of_json in
+      make ?tags ?roles ?createDate ?arn ?instanceProfileId
+        ?instanceProfileName ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about an instance profile. This data type is used as a response element in the following operations: CreateInstanceProfile GetInstanceProfile ListInstanceProfiles ListInstanceProfilesForRole"]
@@ -1643,6 +1812,9 @@ module ContextKeyValueListType =
   struct
     type nonrec t = ContextKeyValueType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ContextKeyValueType.to_value)) |>
         (fun x -> `List x)
@@ -1702,9 +1874,9 @@ module OrganizationsDecisionDetail =
           (Xml.child xml_arg0 "AllowedByOrganizations") in
       make ?allowedByOrganizations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let allowedByOrganizations =
-        field_map json "AllowedByOrganizations" BooleanType.of_json in
+        field_map json__ "AllowedByOrganizations" BooleanType.of_json in
       make ?allowedByOrganizations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1713,6 +1885,9 @@ module ResourceSpecificResultListType =
   struct
     type nonrec t = ResourceSpecificResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceSpecificResult.to_value)) |>
         (fun x -> `List x)
@@ -1751,18 +1926,18 @@ module User =
   struct
     type nonrec t =
       {
-      path: PathType.t
+      path: PathType.t option
         [@ocaml.doc
           "The path to the user. For more information about paths, see IAM identifiers in the IAM User Guide. The ARN of the policy used to set the permissions boundary for the user."];
-      userName: UserNameType.t
+      userName: UserNameType.t option
         [@ocaml.doc "The friendly name identifying the user."];
-      userId: IdType.t
+      userId: IdType.t option
         [@ocaml.doc
           "The stable and unique string identifying the user. For more information about IDs, see IAM identifiers in the IAM User Guide."];
-      arn: ArnType.t
+      arn: ArnType.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) that identifies the user. For more information about ARNs and how to use ARNs in policies, see IAM Identifiers in the IAM User Guide."];
-      createDate: DateType.t
+      createDate: DateType.t option
         [@ocaml.doc
           "The date and time, in ISO 8601 date-time format, when the user was created."];
       passwordLastUsed: DateType.t option
@@ -1774,33 +1949,32 @@ module User =
       tags: TagListType.t option
         [@ocaml.doc
           "A list of tags that are associated with the user. For more information about tagging, see Tagging IAM resources in the IAM User Guide."]}
-    let context_ = "User"
-    let make ?passwordLastUsed =
-      fun ?permissionsBoundary ->
-        fun ?tags ->
-          fun ~path ->
-            fun ~userName ->
-              fun ~userId ->
-                fun ~arn ->
-                  fun ~createDate ->
+    let make ?path =
+      fun ?userName ->
+        fun ?userId ->
+          fun ?arn ->
+            fun ?createDate ->
+              fun ?passwordLastUsed ->
+                fun ?permissionsBoundary ->
+                  fun ?tags ->
                     fun () ->
                       {
-                        passwordLastUsed;
-                        permissionsBoundary;
-                        tags;
                         path;
                         userName;
                         userId;
                         arn;
-                        createDate
+                        createDate;
+                        passwordLastUsed;
+                        permissionsBoundary;
+                        tags
                       }
     let to_value x =
       structure_to_value
-        [("Path", (Some (PathType.to_value x.path)));
-        ("UserName", (Some (UserNameType.to_value x.userName)));
-        ("UserId", (Some (IdType.to_value x.userId)));
-        ("Arn", (Some (ArnType.to_value x.arn)));
-        ("CreateDate", (Some (DateType.to_value x.createDate)));
+        [("Path", (Option.map x.path ~f:PathType.to_value));
+        ("UserName", (Option.map x.userName ~f:UserNameType.to_value));
+        ("UserId", (Option.map x.userId ~f:IdType.to_value));
+        ("Arn", (Option.map x.arn ~f:ArnType.to_value));
+        ("CreateDate", (Option.map x.createDate ~f:DateType.to_value));
         ("PasswordLastUsed",
           (Option.map x.passwordLastUsed ~f:DateType.to_value));
         ("PermissionsBoundary",
@@ -1818,34 +1992,30 @@ module User =
         (Option.map ~f:DateType.of_xml)
           (Xml.child xml_arg0 "PasswordLastUsed") in
       let createDate =
-        DateType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateDate") in
-      let arn =
-        ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "CreateDate") in
+      let arn = (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "Arn") in
       let userId =
-        IdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "UserId") in
       let userName =
-        UserNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
-      let path =
-        PathType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
-      make ?tags ?permissionsBoundary ?passwordLastUsed ~createDate ~arn
-        ~userId ~userName ~path ()
+        (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
+      let path = (Option.map ~f:PathType.of_xml) (Xml.child xml_arg0 "Path") in
+      make ?tags ?permissionsBoundary ?passwordLastUsed ?createDate ?arn
+        ?userId ?userName ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
       let permissionsBoundary =
-        field_map json "PermissionsBoundary"
+        field_map json__ "PermissionsBoundary"
           AttachedPermissionsBoundary.of_json in
       let passwordLastUsed =
-        field_map json "PasswordLastUsed" DateType.of_json in
-      let createDate = field_map_exn json "CreateDate" DateType.of_json in
-      let arn = field_map_exn json "Arn" ArnType.of_json in
-      let userId = field_map_exn json "UserId" IdType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
-      let path = field_map_exn json "Path" PathType.of_json in
-      make ?tags ?permissionsBoundary ?passwordLastUsed ~createDate ~arn
-        ~userId ~userName ~path ()
+        field_map json__ "PasswordLastUsed" DateType.of_json in
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
+      let arn = field_map json__ "Arn" ArnType.of_json in
+      let userId = field_map json__ "UserId" IdType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
+      let path = field_map json__ "Path" PathType.of_json in
+      make ?tags ?permissionsBoundary ?passwordLastUsed ?createDate ?arn
+        ?userId ?userName ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about an IAM user entity. This data type is used as a response element in the following operations: CreateUser GetUser ListUsers"]
@@ -1916,17 +2086,20 @@ module StatusType =
     type nonrec t =
       | Active 
       | Inactive 
+      | Expired 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | Active -> "Active"
       | Inactive -> "Inactive"
+      | Expired -> "Expired"
       | Non_static_id s -> s
     let of_string =
       function
       | "Active" -> Active
       | "Inactive" -> Inactive
+      | "Expired" -> Expired
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1934,6 +2107,26 @@ module StatusType =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration statusType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"statusType" j)
+    let to_json = simple_to_json to_value
+  end
+module ServiceCredentialAlias =
+  struct
+    type nonrec t = string
+    let context_ = "serviceCredentialAlias"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\w+=,.@-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"serviceCredentialAlias" j
     let to_json = simple_to_json to_value
   end
 module ServiceName =
@@ -1976,10 +2169,10 @@ module ServiceUserName =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:17) >>=
+          ((check_string_min i ~min:0) >>=
              (fun () ->
                 (check_string_max i ~max:200) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\w+=,.@-]+")));
+                  (fun () -> check_pattern i ~pattern:"[\\w+=,.@-]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2083,6 +2276,9 @@ module PolicyGrantingServiceAccessListType =
   struct
     type nonrec t = PolicyGrantingServiceAccess.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyGrantingServiceAccess.to_value)) |>
         (fun x -> `List x)
@@ -2123,6 +2319,301 @@ module ServiceNamespaceType =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"serviceNamespaceType" j
+    let to_json = simple_to_json to_value
+  end
+module DelegationPermission =
+  struct
+    type nonrec t =
+      {
+      policyTemplateArn: ArnType.t option
+        [@ocaml.doc
+          "This ARN maps to a pre-registered policy content for this partner. See the partner onboarding documentation to understand how to create a delegation template."];
+      parameters: PolicyParameterListType.t option
+        [@ocaml.doc
+          "A list of policy parameters that define the scope and constraints of the delegated permissions."]}
+    let make ?policyTemplateArn =
+      fun ?parameters -> fun () -> { policyTemplateArn; parameters }
+    let to_value x =
+      structure_to_value
+        [("PolicyTemplateArn",
+           (Option.map x.policyTemplateArn ~f:ArnType.to_value));
+        ("Parameters",
+          (Option.map x.parameters ~f:PolicyParameterListType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let parameters =
+        (Option.map ~f:PolicyParameterListType.of_xml)
+          (Xml.child xml_arg0 "Parameters") in
+      let policyTemplateArn =
+        (Option.map ~f:ArnType.of_xml)
+          (Xml.child xml_arg0 "PolicyTemplateArn") in
+      make ?parameters ?policyTemplateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let parameters =
+        field_map json__ "Parameters" PolicyParameterListType.of_json in
+      let policyTemplateArn =
+        field_map json__ "PolicyTemplateArn" ArnType.of_json in
+      make ?parameters ?policyTemplateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the permissions being delegated in a delegation request."]
+module AccountIdType =
+  struct
+    type nonrec t = string
+    let context_ = "accountIdType"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"\\d{12}"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"accountIdType" j
+    let to_json = simple_to_json to_value
+  end
+module DelegationRequestDescriptionType =
+  struct
+    type nonrec t = string
+    let context_ = "delegationRequestDescriptionType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1000) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"[\\u0009\\u000A\\u000D\\u0020-\\u007E\\u00A1-\\u00FF]*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"delegationRequestDescriptionType" j
+    let to_json = simple_to_json to_value
+  end
+module DelegationRequestIdType =
+  struct
+    type nonrec t = string
+    let context_ = "delegationRequestIdType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:16) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\w-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"delegationRequestIdType" j
+    let to_json = simple_to_json to_value
+  end
+module NotesType =
+  struct
+    type nonrec t = string
+    let context_ = "notesType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:500) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"[\\u0009\\u000A\\u000D\\u0020-\\u007E\\u00A1-\\u00FF]*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"notesType" j
+    let to_json = simple_to_json to_value
+  end
+module OwnerIdType =
+  struct
+    type nonrec t = string
+    let context_ = "ownerIdType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9:/+=,.@_-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ownerIdType" j
+    let to_json = simple_to_json to_value
+  end
+module PermissionType =
+  struct
+    type nonrec t = string
+    let context_ = "permissionType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"permissionType" j
+    let to_json = simple_to_json to_value
+  end
+module RedirectUrlType =
+  struct
+    type nonrec t = string
+    let context_ = "redirectUrlType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^http(s?)://[a-zA-Z0-9._/-]*(\\?[a-zA-Z0-9._=&-]*)?(#[a-zA-Z0-9._/-]*)?$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"redirectUrlType" j
+    let to_json = simple_to_json to_value
+  end
+module RequestMessageType =
+  struct
+    type nonrec t = string
+    let context_ = "requestMessageType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:200) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"[\\u0009\\u000A\\u000D\\u0020-\\u007E\\u00A1-\\u00FF]*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"requestMessageType" j
+    let to_json = simple_to_json to_value
+  end
+module RequestorNameType =
+  struct
+    type nonrec t = string
+    let context_ = "requestorNameType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:30) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"[\\u0009\\u000A\\u000D\\u0020-\\u007E\\u00A1-\\u00FF]*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"requestorNameType" j
+    let to_json = simple_to_json to_value
+  end
+module RolePermissionRestrictionArnListType =
+  struct
+    type nonrec t = ArnType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ArnType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ArnType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"rolePermissionRestrictionArnListType"
+        ~of_json:ArnType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SessionDurationType =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:43200) >>=
+             (fun () -> check_int_min i ~min:300));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for sessionDurationType" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module StateType =
+  struct
+    type nonrec t =
+      | UNASSIGNED 
+      | ASSIGNED 
+      | PENDING_APPROVAL 
+      | FINALIZED 
+      | ACCEPTED 
+      | REJECTED 
+      | EXPIRED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | UNASSIGNED -> "UNASSIGNED"
+      | ASSIGNED -> "ASSIGNED"
+      | PENDING_APPROVAL -> "PENDING_APPROVAL"
+      | FINALIZED -> "FINALIZED"
+      | ACCEPTED -> "ACCEPTED"
+      | REJECTED -> "REJECTED"
+      | EXPIRED -> "EXPIRED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "UNASSIGNED" -> UNASSIGNED
+      | "ASSIGNED" -> ASSIGNED
+      | "PENDING_APPROVAL" -> PENDING_APPROVAL
+      | "FINALIZED" -> FINALIZED
+      | "ACCEPTED" -> ACCEPTED
+      | "REJECTED" -> REJECTED
+      | "EXPIRED" -> EXPIRED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration stateType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"stateType" j)
     let to_json = simple_to_json to_value
   end
 module AccessKeyIdType =
@@ -2168,9 +2659,9 @@ module RoleUsageType =
         (Option.map ~f:RegionNameType.of_xml) (Xml.child xml_arg0 "Region") in
       make ?resources ?region ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resources = field_map json "Resources" ArnListType.of_json in
-      let region = field_map json "Region" RegionNameType.of_json in
+    let of_json json__ =
+      let resources = field_map json__ "Resources" ArnListType.of_json in
+      let region = field_map json__ "Region" RegionNameType.of_json in
       make ?resources ?region ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2179,48 +2670,46 @@ module EntityInfo =
   struct
     type nonrec t =
       {
-      arn: ArnType.t ;
-      name: UserNameType.t
+      arn: ArnType.t option ;
+      name: UserNameType.t option
         [@ocaml.doc "The name of the entity (user or role)."];
-      type_: PolicyOwnerEntityType.t
+      type_: PolicyOwnerEntityType.t option
         [@ocaml.doc "The type of entity (user or role)."];
-      id: IdType.t
+      id: IdType.t option
         [@ocaml.doc "The identifier of the entity (user or role)."];
       path: PathType.t option
         [@ocaml.doc
           "The path to the entity (user or role). For more information about paths, see IAM identifiers in the IAM User Guide."]}
-    let context_ = "EntityInfo"
-    let make ?path =
-      fun ~arn ->
-        fun ~name ->
-          fun ~type_ -> fun ~id -> fun () -> { path; arn; name; type_; id }
+    let make ?arn =
+      fun ?name ->
+        fun ?type_ ->
+          fun ?id -> fun ?path -> fun () -> { arn; name; type_; id; path }
     let to_value x =
       structure_to_value
-        [("Arn", (Some (ArnType.to_value x.arn)));
-        ("Name", (Some (UserNameType.to_value x.name)));
-        ("Type", (Some (PolicyOwnerEntityType.to_value x.type_)));
-        ("Id", (Some (IdType.to_value x.id)));
+        [("Arn", (Option.map x.arn ~f:ArnType.to_value));
+        ("Name", (Option.map x.name ~f:UserNameType.to_value));
+        ("Type", (Option.map x.type_ ~f:PolicyOwnerEntityType.to_value));
+        ("Id", (Option.map x.id ~f:IdType.to_value));
         ("Path", (Option.map x.path ~f:PathType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let path = (Option.map ~f:PathType.of_xml) (Xml.child xml_arg0 "Path") in
-      let id = IdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let id = (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "Id") in
       let type_ =
-        PolicyOwnerEntityType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+        (Option.map ~f:PolicyOwnerEntityType.of_xml)
+          (Xml.child xml_arg0 "Type") in
       let name =
-        UserNameType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      let arn =
-        ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
-      make ?path ~id ~type_ ~name ~arn ()
+        (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "Name") in
+      let arn = (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?path ?id ?type_ ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let path = field_map json "Path" PathType.of_json in
-      let id = field_map_exn json "Id" IdType.of_json in
-      let type_ = field_map_exn json "Type" PolicyOwnerEntityType.of_json in
-      let name = field_map_exn json "Name" UserNameType.of_json in
-      let arn = field_map_exn json "Arn" ArnType.of_json in
-      make ?path ~id ~type_ ~name ~arn ()
+    let of_json json__ =
+      let path = field_map json__ "Path" PathType.of_json in
+      let id = field_map json__ "Id" IdType.of_json in
+      let type_ = field_map json__ "Type" PolicyOwnerEntityType.of_json in
+      let name = field_map json__ "Name" UserNameType.of_json in
+      let arn = field_map json__ "Arn" ArnType.of_json in
+      make ?path ?id ?type_ ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about the specified entity (user or role). This data type is an element of the EntityDetails object."]
@@ -2228,6 +2717,9 @@ module TrackedActionsLastAccessed =
   struct
     type nonrec t = TrackedActionLastAccessed.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrackedActionLastAccessed.to_value)) |>
         (fun x -> `List x)
@@ -2277,6 +2769,26 @@ module ServiceNameType =
     let of_json j = string_of_json ~kind:"serviceNameType" j
     let to_json = simple_to_json to_value
   end
+module PrivateKeyIdType =
+  struct
+    type nonrec t = string
+    let context_ = "privateKeyIdType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:22) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[A-Z0-9]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"privateKeyIdType" j
+    let to_json = simple_to_json to_value
+  end
 module OrganizationsEntityPathType =
   struct
     type nonrec t = string
@@ -2303,6 +2815,9 @@ module PolicyDocumentVersionListType =
   struct
     type nonrec t = PolicyVersion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyVersion.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2328,6 +2843,9 @@ module AttachedPoliciesListType =
   struct
     type nonrec t = AttachedPolicy.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttachedPolicy.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2353,6 +2871,9 @@ module PolicyDetailListType =
   struct
     type nonrec t = PolicyDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2378,6 +2899,9 @@ module InstanceProfileListType =
   struct
     type nonrec t = InstanceProfile.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceProfile.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2403,6 +2927,9 @@ module GroupNameListType =
   struct
     type nonrec t = GroupNameType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroupNameType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2422,6 +2949,19 @@ module GroupNameListType =
     let of_json j =
       list_of_json ~kind:"groupNameListType" ~of_json:GroupNameType.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module ConcurrentModificationMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ConcurrentModificationMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ConcurrentModificationMessage" j
+    let to_json = simple_to_json to_value
   end
 module DuplicateCertificateMessage =
   struct
@@ -2512,19 +3052,6 @@ module ServiceFailureExceptionMessage =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"serviceFailureExceptionMessage" j
-    let to_json = simple_to_json to_value
-  end
-module ConcurrentModificationMessage =
-  struct
-    type nonrec t = string
-    let context_ = "ConcurrentModificationMessage"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ConcurrentModificationMessage" j
     let to_json = simple_to_json to_value
   end
 module InvalidInputMessage =
@@ -2706,13 +3233,13 @@ module ContextEntry =
           (Xml.child xml_arg0 "ContextKeyName") in
       make ?contextKeyType ?contextKeyValues ?contextKeyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let contextKeyType =
-        field_map json "ContextKeyType" ContextKeyTypeEnum.of_json in
+        field_map json__ "ContextKeyType" ContextKeyTypeEnum.of_json in
       let contextKeyValues =
-        field_map json "ContextKeyValues" ContextKeyValueListType.of_json in
+        field_map json__ "ContextKeyValues" ContextKeyValueListType.of_json in
       let contextKeyName =
-        field_map json "ContextKeyName" ContextKeyNameType.of_json in
+        field_map json__ "ContextKeyName" ContextKeyNameType.of_json in
       make ?contextKeyType ?contextKeyValues ?contextKeyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2721,13 +3248,13 @@ module EvaluationResult =
   struct
     type nonrec t =
       {
-      evalActionName: ActionNameType.t
+      evalActionName: ActionNameType.t option
         [@ocaml.doc
           "The name of the API operation tested on the indicated resource."];
       evalResourceName: ResourceNameType.t option
         [@ocaml.doc
           "The ARN of the resource that the indicated API operation was tested on."];
-      evalDecision: PolicyEvaluationDecisionType.t
+      evalDecision: PolicyEvaluationDecisionType.t option
         [@ocaml.doc "The result of the simulation."];
       matchedStatements: StatementListType.t option
         [@ocaml.doc
@@ -2748,36 +3275,35 @@ module EvaluationResult =
       resourceSpecificResults: ResourceSpecificResultListType.t option
         [@ocaml.doc
           "The individual results of the simulation of the API operation specified in EvalActionName on each resource."]}
-    let context_ = "EvaluationResult"
-    let make ?evalResourceName =
-      fun ?matchedStatements ->
-        fun ?missingContextValues ->
-          fun ?organizationsDecisionDetail ->
-            fun ?permissionsBoundaryDecisionDetail ->
-              fun ?evalDecisionDetails ->
-                fun ?resourceSpecificResults ->
-                  fun ~evalActionName ->
-                    fun ~evalDecision ->
+    let make ?evalActionName =
+      fun ?evalResourceName ->
+        fun ?evalDecision ->
+          fun ?matchedStatements ->
+            fun ?missingContextValues ->
+              fun ?organizationsDecisionDetail ->
+                fun ?permissionsBoundaryDecisionDetail ->
+                  fun ?evalDecisionDetails ->
+                    fun ?resourceSpecificResults ->
                       fun () ->
                         {
+                          evalActionName;
                           evalResourceName;
+                          evalDecision;
                           matchedStatements;
                           missingContextValues;
                           organizationsDecisionDetail;
                           permissionsBoundaryDecisionDetail;
                           evalDecisionDetails;
-                          resourceSpecificResults;
-                          evalActionName;
-                          evalDecision
+                          resourceSpecificResults
                         }
     let to_value x =
       structure_to_value
         [("EvalActionName",
-           (Some (ActionNameType.to_value x.evalActionName)));
+           (Option.map x.evalActionName ~f:ActionNameType.to_value));
         ("EvalResourceName",
           (Option.map x.evalResourceName ~f:ResourceNameType.to_value));
         ("EvalDecision",
-          (Some (PolicyEvaluationDecisionType.to_value x.evalDecision)));
+          (Option.map x.evalDecision ~f:PolicyEvaluationDecisionType.to_value));
         ("MatchedStatements",
           (Option.map x.matchedStatements ~f:StatementListType.to_value));
         ("MissingContextValues",
@@ -2816,47 +3342,47 @@ module EvaluationResult =
         (Option.map ~f:StatementListType.of_xml)
           (Xml.child xml_arg0 "MatchedStatements") in
       let evalDecision =
-        PolicyEvaluationDecisionType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EvalDecision") in
+        (Option.map ~f:PolicyEvaluationDecisionType.of_xml)
+          (Xml.child xml_arg0 "EvalDecision") in
       let evalResourceName =
         (Option.map ~f:ResourceNameType.of_xml)
           (Xml.child xml_arg0 "EvalResourceName") in
       let evalActionName =
-        ActionNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EvalActionName") in
+        (Option.map ~f:ActionNameType.of_xml)
+          (Xml.child xml_arg0 "EvalActionName") in
       make ?resourceSpecificResults ?evalDecisionDetails
         ?permissionsBoundaryDecisionDetail ?organizationsDecisionDetail
-        ?missingContextValues ?matchedStatements ~evalDecision
-        ?evalResourceName ~evalActionName ()
+        ?missingContextValues ?matchedStatements ?evalDecision
+        ?evalResourceName ?evalActionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceSpecificResults =
-        field_map json "ResourceSpecificResults"
+        field_map json__ "ResourceSpecificResults"
           ResourceSpecificResultListType.of_json in
       let evalDecisionDetails =
-        field_map json "EvalDecisionDetails" EvalDecisionDetailsType.of_json in
+        field_map json__ "EvalDecisionDetails"
+          EvalDecisionDetailsType.of_json in
       let permissionsBoundaryDecisionDetail =
-        field_map json "PermissionsBoundaryDecisionDetail"
+        field_map json__ "PermissionsBoundaryDecisionDetail"
           PermissionsBoundaryDecisionDetail.of_json in
       let organizationsDecisionDetail =
-        field_map json "OrganizationsDecisionDetail"
+        field_map json__ "OrganizationsDecisionDetail"
           OrganizationsDecisionDetail.of_json in
       let missingContextValues =
-        field_map json "MissingContextValues"
+        field_map json__ "MissingContextValues"
           ContextKeyNamesResultListType.of_json in
       let matchedStatements =
-        field_map json "MatchedStatements" StatementListType.of_json in
+        field_map json__ "MatchedStatements" StatementListType.of_json in
       let evalDecision =
-        field_map_exn json "EvalDecision"
-          PolicyEvaluationDecisionType.of_json in
+        field_map json__ "EvalDecision" PolicyEvaluationDecisionType.of_json in
       let evalResourceName =
-        field_map json "EvalResourceName" ResourceNameType.of_json in
+        field_map json__ "EvalResourceName" ResourceNameType.of_json in
       let evalActionName =
-        field_map_exn json "EvalActionName" ActionNameType.of_json in
+        field_map json__ "EvalActionName" ActionNameType.of_json in
       make ?resourceSpecificResults ?evalDecisionDetails
         ?permissionsBoundaryDecisionDetail ?organizationsDecisionDetail
-        ?missingContextValues ?matchedStatements ~evalDecision
-        ?evalResourceName ~evalActionName ()
+        ?missingContextValues ?matchedStatements ?evalDecision
+        ?evalResourceName ?evalActionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the results of a simulation. This data type is used by the return parameter of SimulateCustomPolicy and SimulatePrincipalPolicy ."]
@@ -2871,6 +3397,19 @@ module PolicyEvaluationErrorMessage =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"policyEvaluationErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module ServiceCredentialSecret =
+  struct
+    type nonrec t = string
+    let context_ = "serviceCredentialSecret"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"serviceCredentialSecret" j
     let to_json = simple_to_json to_value
   end
 module ServicePassword =
@@ -2890,11 +3429,11 @@ module VirtualMFADevice =
   struct
     type nonrec t =
       {
-      serialNumber: SerialNumberType.t
+      serialNumber: SerialNumberType.t option
         [@ocaml.doc "The serial number associated with VirtualMFADevice."];
       base32StringSeed: BootstrapDatum.t option
         [@ocaml.doc
-          "The base32 seed defined as specified in RFC3548. The Base32StringSeed is base64-encoded."];
+          "The base32 seed defined as specified in RFC3548. The Base32StringSeed is base32-encoded."];
       qRCodePNG: BootstrapDatum.t option
         [@ocaml.doc
           "A QR code PNG image that encodes otpauth://totp/$virtualMFADeviceName\\@$AccountName?secret=$Base32String where $virtualMFADeviceName is one of the create call arguments. AccountName is the user name if set (otherwise, the account ID otherwise), and Base32String is the seed in base32 format. The Base32String value is base64-encoded."];
@@ -2906,25 +3445,25 @@ module VirtualMFADevice =
       tags: TagListType.t option
         [@ocaml.doc
           "A list of tags that are attached to the virtual MFA device. For more information about tagging, see Tagging IAM resources in the IAM User Guide."]}
-    let context_ = "VirtualMFADevice"
-    let make ?base32StringSeed =
-      fun ?qRCodePNG ->
-        fun ?user ->
-          fun ?enableDate ->
-            fun ?tags ->
-              fun ~serialNumber ->
+    let make ?serialNumber =
+      fun ?base32StringSeed ->
+        fun ?qRCodePNG ->
+          fun ?user ->
+            fun ?enableDate ->
+              fun ?tags ->
                 fun () ->
                   {
+                    serialNumber;
                     base32StringSeed;
                     qRCodePNG;
                     user;
                     enableDate;
-                    tags;
-                    serialNumber
+                    tags
                   }
     let to_value x =
       structure_to_value
-        [("SerialNumber", (Some (SerialNumberType.to_value x.serialNumber)));
+        [("SerialNumber",
+           (Option.map x.serialNumber ~f:SerialNumberType.to_value));
         ("Base32StringSeed",
           (Option.map x.base32StringSeed ~f:BootstrapDatum.to_value));
         ("QRCodePNG", (Option.map x.qRCodePNG ~f:BootstrapDatum.to_value));
@@ -2945,21 +3484,21 @@ module VirtualMFADevice =
         (Option.map ~f:BootstrapDatum.of_xml)
           (Xml.child xml_arg0 "Base32StringSeed") in
       let serialNumber =
-        SerialNumberType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SerialNumber") in
-      make ?tags ?enableDate ?user ?qRCodePNG ?base32StringSeed ~serialNumber
+        (Option.map ~f:SerialNumberType.of_xml)
+          (Xml.child xml_arg0 "SerialNumber") in
+      make ?tags ?enableDate ?user ?qRCodePNG ?base32StringSeed ?serialNumber
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
-      let enableDate = field_map json "EnableDate" DateType.of_json in
-      let user = field_map json "User" User.of_json in
-      let qRCodePNG = field_map json "QRCodePNG" BootstrapDatum.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      let enableDate = field_map json__ "EnableDate" DateType.of_json in
+      let user = field_map json__ "User" User.of_json in
+      let qRCodePNG = field_map json__ "QRCodePNG" BootstrapDatum.of_json in
       let base32StringSeed =
-        field_map json "Base32StringSeed" BootstrapDatum.of_json in
+        field_map json__ "Base32StringSeed" BootstrapDatum.of_json in
       let serialNumber =
-        field_map_exn json "SerialNumber" SerialNumberType.of_json in
-      make ?tags ?enableDate ?user ?qRCodePNG ?base32StringSeed ~serialNumber
+        field_map json__ "SerialNumber" SerialNumberType.of_json in
+      make ?tags ?enableDate ?user ?qRCodePNG ?base32StringSeed ?serialNumber
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about a virtual MFA device."]
@@ -2967,67 +3506,65 @@ module SigningCertificate =
   struct
     type nonrec t =
       {
-      userName: UserNameType.t
+      userName: UserNameType.t option
         [@ocaml.doc
           "The name of the user the signing certificate is associated with."];
-      certificateId: CertificateIdType.t
+      certificateId: CertificateIdType.t option
         [@ocaml.doc "The ID for the signing certificate."];
-      certificateBody: CertificateBodyType.t
+      certificateBody: CertificateBodyType.t option
         [@ocaml.doc "The contents of the signing certificate."];
-      status: StatusType.t
+      status: StatusType.t option
         [@ocaml.doc
           "The status of the signing certificate. Active means that the key is valid for API calls, while Inactive means it is not."];
       uploadDate: DateType.t option
         [@ocaml.doc "The date when the signing certificate was uploaded."]}
-    let context_ = "SigningCertificate"
-    let make ?uploadDate =
-      fun ~userName ->
-        fun ~certificateId ->
-          fun ~certificateBody ->
-            fun ~status ->
+    let make ?userName =
+      fun ?certificateId ->
+        fun ?certificateBody ->
+          fun ?status ->
+            fun ?uploadDate ->
               fun () ->
                 {
-                  uploadDate;
                   userName;
                   certificateId;
                   certificateBody;
-                  status
+                  status;
+                  uploadDate
                 }
     let to_value x =
       structure_to_value
-        [("UserName", (Some (UserNameType.to_value x.userName)));
+        [("UserName", (Option.map x.userName ~f:UserNameType.to_value));
         ("CertificateId",
-          (Some (CertificateIdType.to_value x.certificateId)));
+          (Option.map x.certificateId ~f:CertificateIdType.to_value));
         ("CertificateBody",
-          (Some (CertificateBodyType.to_value x.certificateBody)));
-        ("Status", (Some (StatusType.to_value x.status)));
+          (Option.map x.certificateBody ~f:CertificateBodyType.to_value));
+        ("Status", (Option.map x.status ~f:StatusType.to_value));
         ("UploadDate", (Option.map x.uploadDate ~f:DateType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let uploadDate =
         (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "UploadDate") in
       let status =
-        StatusType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:StatusType.of_xml) (Xml.child xml_arg0 "Status") in
       let certificateBody =
-        CertificateBodyType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CertificateBody") in
+        (Option.map ~f:CertificateBodyType.of_xml)
+          (Xml.child xml_arg0 "CertificateBody") in
       let certificateId =
-        CertificateIdType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CertificateId") in
+        (Option.map ~f:CertificateIdType.of_xml)
+          (Xml.child xml_arg0 "CertificateId") in
       let userName =
-        UserNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
-      make ?uploadDate ~status ~certificateBody ~certificateId ~userName ()
+        (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
+      make ?uploadDate ?status ?certificateBody ?certificateId ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let uploadDate = field_map json "UploadDate" DateType.of_json in
-      let status = field_map_exn json "Status" StatusType.of_json in
+    let of_json json__ =
+      let uploadDate = field_map json__ "UploadDate" DateType.of_json in
+      let status = field_map json__ "Status" StatusType.of_json in
       let certificateBody =
-        field_map_exn json "CertificateBody" CertificateBodyType.of_json in
+        field_map json__ "CertificateBody" CertificateBodyType.of_json in
       let certificateId =
-        field_map_exn json "CertificateId" CertificateIdType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
-      make ?uploadDate ~status ~certificateBody ~certificateId ~userName ()
+        field_map json__ "CertificateId" CertificateIdType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
+      make ?uploadDate ?status ?certificateBody ?certificateId ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about an X.509 signing certificate. This data type is used as a response element in the UploadSigningCertificate and ListSigningCertificates operations."]
@@ -3048,87 +3585,107 @@ module ServiceSpecificCredentialMetadata =
   struct
     type nonrec t =
       {
-      userName: UserNameType.t
+      userName: UserNameType.t option
         [@ocaml.doc
           "The name of the IAM user associated with the service-specific credential."];
-      status: StatusType.t
+      status: StatusType.t option
         [@ocaml.doc
           "The status of the service-specific credential. Active means that the key is valid for API calls, while Inactive means it is not."];
-      serviceUserName: ServiceUserName.t
+      serviceUserName: ServiceUserName.t option
         [@ocaml.doc
           "The generated user name for the service-specific credential."];
-      createDate: DateType.t
+      serviceCredentialAlias: ServiceCredentialAlias.t option
+        [@ocaml.doc
+          "For Bedrock API keys and CloudWatch Logs API keys, this is the public portion of the credential that includes the IAM user name and a suffix containing version and creation information."];
+      createDate: DateType.t option
         [@ocaml.doc
           "The date and time, in ISO 8601 date-time format, when the service-specific credential were created."];
-      serviceSpecificCredentialId: ServiceSpecificCredentialId.t
+      expirationDate: DateType.t option
+        [@ocaml.doc
+          "The date and time when the service specific credential expires. This field is only present for Bedrock API keys and CloudWatch Logs API keys that were created with an expiration period."];
+      serviceSpecificCredentialId: ServiceSpecificCredentialId.t option
         [@ocaml.doc
           "The unique identifier for the service-specific credential."];
-      serviceName: ServiceName.t
+      serviceName: ServiceName.t option
         [@ocaml.doc
           "The name of the service associated with the service-specific credential."]}
-    let context_ = "ServiceSpecificCredentialMetadata"
-    let make ~userName =
-      fun ~status ->
-        fun ~serviceUserName ->
-          fun ~createDate ->
-            fun ~serviceSpecificCredentialId ->
-              fun ~serviceName ->
-                fun () ->
-                  {
-                    userName;
-                    status;
-                    serviceUserName;
-                    createDate;
-                    serviceSpecificCredentialId;
-                    serviceName
-                  }
+    let make ?userName =
+      fun ?status ->
+        fun ?serviceUserName ->
+          fun ?serviceCredentialAlias ->
+            fun ?createDate ->
+              fun ?expirationDate ->
+                fun ?serviceSpecificCredentialId ->
+                  fun ?serviceName ->
+                    fun () ->
+                      {
+                        userName;
+                        status;
+                        serviceUserName;
+                        serviceCredentialAlias;
+                        createDate;
+                        expirationDate;
+                        serviceSpecificCredentialId;
+                        serviceName
+                      }
     let to_value x =
       structure_to_value
-        [("UserName", (Some (UserNameType.to_value x.userName)));
-        ("Status", (Some (StatusType.to_value x.status)));
+        [("UserName", (Option.map x.userName ~f:UserNameType.to_value));
+        ("Status", (Option.map x.status ~f:StatusType.to_value));
         ("ServiceUserName",
-          (Some (ServiceUserName.to_value x.serviceUserName)));
-        ("CreateDate", (Some (DateType.to_value x.createDate)));
+          (Option.map x.serviceUserName ~f:ServiceUserName.to_value));
+        ("ServiceCredentialAlias",
+          (Option.map x.serviceCredentialAlias
+             ~f:ServiceCredentialAlias.to_value));
+        ("CreateDate", (Option.map x.createDate ~f:DateType.to_value));
+        ("ExpirationDate",
+          (Option.map x.expirationDate ~f:DateType.to_value));
         ("ServiceSpecificCredentialId",
-          (Some
-             (ServiceSpecificCredentialId.to_value
-                x.serviceSpecificCredentialId)));
-        ("ServiceName", (Some (ServiceName.to_value x.serviceName)))]
+          (Option.map x.serviceSpecificCredentialId
+             ~f:ServiceSpecificCredentialId.to_value));
+        ("ServiceName", (Option.map x.serviceName ~f:ServiceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceName =
-        ServiceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceName") in
+        (Option.map ~f:ServiceName.of_xml) (Xml.child xml_arg0 "ServiceName") in
       let serviceSpecificCredentialId =
-        ServiceSpecificCredentialId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ServiceSpecificCredentialId") in
+        (Option.map ~f:ServiceSpecificCredentialId.of_xml)
+          (Xml.child xml_arg0 "ServiceSpecificCredentialId") in
+      let expirationDate =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "ExpirationDate") in
       let createDate =
-        DateType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateDate") in
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "CreateDate") in
+      let serviceCredentialAlias =
+        (Option.map ~f:ServiceCredentialAlias.of_xml)
+          (Xml.child xml_arg0 "ServiceCredentialAlias") in
       let serviceUserName =
-        ServiceUserName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceUserName") in
+        (Option.map ~f:ServiceUserName.of_xml)
+          (Xml.child xml_arg0 "ServiceUserName") in
       let status =
-        StatusType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:StatusType.of_xml) (Xml.child xml_arg0 "Status") in
       let userName =
-        UserNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
-      make ~serviceName ~serviceSpecificCredentialId ~createDate
-        ~serviceUserName ~status ~userName ()
+        (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
+      make ?serviceName ?serviceSpecificCredentialId ?expirationDate
+        ?createDate ?serviceCredentialAlias ?serviceUserName ?status
+        ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map_exn json "ServiceName" ServiceName.of_json in
+    let of_json json__ =
+      let serviceName = field_map json__ "ServiceName" ServiceName.of_json in
       let serviceSpecificCredentialId =
-        field_map_exn json "ServiceSpecificCredentialId"
+        field_map json__ "ServiceSpecificCredentialId"
           ServiceSpecificCredentialId.of_json in
-      let createDate = field_map_exn json "CreateDate" DateType.of_json in
+      let expirationDate = field_map json__ "ExpirationDate" DateType.of_json in
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
+      let serviceCredentialAlias =
+        field_map json__ "ServiceCredentialAlias"
+          ServiceCredentialAlias.of_json in
       let serviceUserName =
-        field_map_exn json "ServiceUserName" ServiceUserName.of_json in
-      let status = field_map_exn json "Status" StatusType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
-      make ~serviceName ~serviceSpecificCredentialId ~createDate
-        ~serviceUserName ~status ~userName ()
+        field_map json__ "ServiceUserName" ServiceUserName.of_json in
+      let status = field_map json__ "Status" StatusType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
+      make ?serviceName ?serviceSpecificCredentialId ?expirationDate
+        ?createDate ?serviceCredentialAlias ?serviceUserName ?status
+        ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains additional details about a service-specific credential."]
@@ -3136,45 +3693,45 @@ module ServerCertificateMetadata =
   struct
     type nonrec t =
       {
-      path: PathType.t
+      path: PathType.t option
         [@ocaml.doc
           "The path to the server certificate. For more information about paths, see IAM identifiers in the IAM User Guide."];
-      serverCertificateName: ServerCertificateNameType.t
+      serverCertificateName: ServerCertificateNameType.t option
         [@ocaml.doc "The name that identifies the server certificate."];
-      serverCertificateId: IdType.t
+      serverCertificateId: IdType.t option
         [@ocaml.doc
           "The stable and unique string identifying the server certificate. For more information about IDs, see IAM identifiers in the IAM User Guide."];
-      arn: ArnType.t
+      arn: ArnType.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) specifying the server certificate. For more information about ARNs and how to use them in policies, see IAM identifiers in the IAM User Guide."];
       uploadDate: DateType.t option
         [@ocaml.doc "The date when the server certificate was uploaded."];
       expiration: DateType.t option
         [@ocaml.doc "The date on which the certificate is set to expire."]}
-    let context_ = "ServerCertificateMetadata"
-    let make ?uploadDate =
-      fun ?expiration ->
-        fun ~path ->
-          fun ~serverCertificateName ->
-            fun ~serverCertificateId ->
-              fun ~arn ->
+    let make ?path =
+      fun ?serverCertificateName ->
+        fun ?serverCertificateId ->
+          fun ?arn ->
+            fun ?uploadDate ->
+              fun ?expiration ->
                 fun () ->
                   {
-                    uploadDate;
-                    expiration;
                     path;
                     serverCertificateName;
                     serverCertificateId;
-                    arn
+                    arn;
+                    uploadDate;
+                    expiration
                   }
     let to_value x =
       structure_to_value
-        [("Path", (Some (PathType.to_value x.path)));
+        [("Path", (Option.map x.path ~f:PathType.to_value));
         ("ServerCertificateName",
-          (Some (ServerCertificateNameType.to_value x.serverCertificateName)));
+          (Option.map x.serverCertificateName
+             ~f:ServerCertificateNameType.to_value));
         ("ServerCertificateId",
-          (Some (IdType.to_value x.serverCertificateId)));
-        ("Arn", (Some (ArnType.to_value x.arn)));
+          (Option.map x.serverCertificateId ~f:IdType.to_value));
+        ("Arn", (Option.map x.arn ~f:ArnType.to_value));
         ("UploadDate", (Option.map x.uploadDate ~f:DateType.to_value));
         ("Expiration", (Option.map x.expiration ~f:DateType.to_value))]
     let to_query v = to_query to_value v
@@ -3183,31 +3740,29 @@ module ServerCertificateMetadata =
         (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "Expiration") in
       let uploadDate =
         (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "UploadDate") in
-      let arn =
-        ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+      let arn = (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "Arn") in
       let serverCertificateId =
-        IdType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServerCertificateId") in
+        (Option.map ~f:IdType.of_xml)
+          (Xml.child xml_arg0 "ServerCertificateId") in
       let serverCertificateName =
-        ServerCertificateNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServerCertificateName") in
-      let path =
-        PathType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
-      make ?expiration ?uploadDate ~arn ~serverCertificateId
-        ~serverCertificateName ~path ()
+        (Option.map ~f:ServerCertificateNameType.of_xml)
+          (Xml.child xml_arg0 "ServerCertificateName") in
+      let path = (Option.map ~f:PathType.of_xml) (Xml.child xml_arg0 "Path") in
+      make ?expiration ?uploadDate ?arn ?serverCertificateId
+        ?serverCertificateName ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expiration = field_map json "Expiration" DateType.of_json in
-      let uploadDate = field_map json "UploadDate" DateType.of_json in
-      let arn = field_map_exn json "Arn" ArnType.of_json in
+    let of_json json__ =
+      let expiration = field_map json__ "Expiration" DateType.of_json in
+      let uploadDate = field_map json__ "UploadDate" DateType.of_json in
+      let arn = field_map json__ "Arn" ArnType.of_json in
       let serverCertificateId =
-        field_map_exn json "ServerCertificateId" IdType.of_json in
+        field_map json__ "ServerCertificateId" IdType.of_json in
       let serverCertificateName =
-        field_map_exn json "ServerCertificateName"
+        field_map json__ "ServerCertificateName"
           ServerCertificateNameType.of_json in
-      let path = field_map_exn json "Path" PathType.of_json in
-      make ?expiration ?uploadDate ~arn ~serverCertificateId
-        ~serverCertificateName ~path ()
+      let path = field_map json__ "Path" PathType.of_json in
+      make ?expiration ?uploadDate ?arn ?serverCertificateId
+        ?serverCertificateName ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about a server certificate without its certificate body, certificate chain, and private key. This data type is used as a response element in the UploadServerCertificate and ListServerCertificates operations."]
@@ -3215,52 +3770,49 @@ module SSHPublicKeyMetadata =
   struct
     type nonrec t =
       {
-      userName: UserNameType.t
+      userName: UserNameType.t option
         [@ocaml.doc
           "The name of the IAM user associated with the SSH public key."];
-      sSHPublicKeyId: PublicKeyIdType.t
+      sSHPublicKeyId: PublicKeyIdType.t option
         [@ocaml.doc "The unique identifier for the SSH public key."];
-      status: StatusType.t
+      status: StatusType.t option
         [@ocaml.doc
           "The status of the SSH public key. Active means that the key can be used for authentication with an CodeCommit repository. Inactive means that the key cannot be used."];
-      uploadDate: DateType.t
+      uploadDate: DateType.t option
         [@ocaml.doc
           "The date and time, in ISO 8601 date-time format, when the SSH public key was uploaded."]}
-    let context_ = "SSHPublicKeyMetadata"
-    let make ~userName =
-      fun ~sSHPublicKeyId ->
-        fun ~status ->
-          fun ~uploadDate ->
+    let make ?userName =
+      fun ?sSHPublicKeyId ->
+        fun ?status ->
+          fun ?uploadDate ->
             fun () -> { userName; sSHPublicKeyId; status; uploadDate }
     let to_value x =
       structure_to_value
-        [("UserName", (Some (UserNameType.to_value x.userName)));
+        [("UserName", (Option.map x.userName ~f:UserNameType.to_value));
         ("SSHPublicKeyId",
-          (Some (PublicKeyIdType.to_value x.sSHPublicKeyId)));
-        ("Status", (Some (StatusType.to_value x.status)));
-        ("UploadDate", (Some (DateType.to_value x.uploadDate)))]
+          (Option.map x.sSHPublicKeyId ~f:PublicKeyIdType.to_value));
+        ("Status", (Option.map x.status ~f:StatusType.to_value));
+        ("UploadDate", (Option.map x.uploadDate ~f:DateType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let uploadDate =
-        DateType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UploadDate") in
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "UploadDate") in
       let status =
-        StatusType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:StatusType.of_xml) (Xml.child xml_arg0 "Status") in
       let sSHPublicKeyId =
-        PublicKeyIdType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SSHPublicKeyId") in
+        (Option.map ~f:PublicKeyIdType.of_xml)
+          (Xml.child xml_arg0 "SSHPublicKeyId") in
       let userName =
-        UserNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
-      make ~uploadDate ~status ~sSHPublicKeyId ~userName ()
+        (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
+      make ?uploadDate ?status ?sSHPublicKeyId ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let uploadDate = field_map_exn json "UploadDate" DateType.of_json in
-      let status = field_map_exn json "Status" StatusType.of_json in
+    let of_json json__ =
+      let uploadDate = field_map json__ "UploadDate" DateType.of_json in
+      let status = field_map json__ "Status" StatusType.of_json in
       let sSHPublicKeyId =
-        field_map_exn json "SSHPublicKeyId" PublicKeyIdType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
-      make ~uploadDate ~status ~sSHPublicKeyId ~userName ()
+        field_map json__ "SSHPublicKeyId" PublicKeyIdType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
+      make ?uploadDate ?status ?sSHPublicKeyId ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about an SSH public key, without the key's body or fingerprint. This data type is used as a response element in the ListSSHPublicKeys operation."]
@@ -3291,10 +3843,10 @@ module SAMLProviderListEntry =
       let arn = (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?createDate ?validUntil ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createDate = field_map json "CreateDate" DateType.of_json in
-      let validUntil = field_map json "ValidUntil" DateType.of_json in
-      let arn = field_map json "Arn" ArnType.of_json in
+    let of_json json__ =
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
+      let validUntil = field_map json__ "ValidUntil" DateType.of_json in
+      let arn = field_map json__ "Arn" ArnType.of_json in
       make ?createDate ?validUntil ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the list of SAML providers for this account."]
@@ -3416,24 +3968,24 @@ module Policy =
         ?permissionsBoundaryUsageCount ?attachmentCount ?defaultVersionId
         ?path ?arn ?policyId ?policyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
-      let updateDate = field_map json "UpdateDate" DateType.of_json in
-      let createDate = field_map json "CreateDate" DateType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      let updateDate = field_map json__ "UpdateDate" DateType.of_json in
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
       let description =
-        field_map json "Description" PolicyDescriptionType.of_json in
-      let isAttachable = field_map json "IsAttachable" BooleanType.of_json in
+        field_map json__ "Description" PolicyDescriptionType.of_json in
+      let isAttachable = field_map json__ "IsAttachable" BooleanType.of_json in
       let permissionsBoundaryUsageCount =
-        field_map json "PermissionsBoundaryUsageCount"
+        field_map json__ "PermissionsBoundaryUsageCount"
           AttachmentCountType.of_json in
       let attachmentCount =
-        field_map json "AttachmentCount" AttachmentCountType.of_json in
+        field_map json__ "AttachmentCount" AttachmentCountType.of_json in
       let defaultVersionId =
-        field_map json "DefaultVersionId" PolicyVersionIdType.of_json in
-      let path = field_map json "Path" PolicyPathType.of_json in
-      let arn = field_map json "Arn" ArnType.of_json in
-      let policyId = field_map json "PolicyId" IdType.of_json in
-      let policyName = field_map json "PolicyName" PolicyNameType.of_json in
+        field_map json__ "DefaultVersionId" PolicyVersionIdType.of_json in
+      let path = field_map json__ "Path" PolicyPathType.of_json in
+      let arn = field_map json__ "Arn" ArnType.of_json in
+      let policyId = field_map json__ "PolicyId" IdType.of_json in
+      let policyName = field_map json__ "PolicyName" PolicyNameType.of_json in
       make ?tags ?updateDate ?createDate ?description ?isAttachable
         ?permissionsBoundaryUsageCount ?attachmentCount ?defaultVersionId
         ?path ?arn ?policyId ?policyName ()
@@ -3469,15 +4021,41 @@ module ListPoliciesGrantingServiceAccessEntry =
           (Xml.child xml_arg0 "ServiceNamespace") in
       make ?policies ?serviceNamespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policies =
-        field_map json "Policies" PolicyGrantingServiceAccessListType.of_json in
+        field_map json__ "Policies"
+          PolicyGrantingServiceAccessListType.of_json in
       let serviceNamespace =
-        field_map json "ServiceNamespace" ServiceNamespaceType.of_json in
+        field_map json__ "ServiceNamespace" ServiceNamespaceType.of_json in
       make ?policies ?serviceNamespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about the permissions policies that are attached to the specified identity (user, group, or role). This data type is used as a response element in the ListPoliciesGrantingServiceAccess operation."]
+module FeatureType =
+  struct
+    type nonrec t =
+      | RootCredentialsManagement 
+      | RootSessions 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RootCredentialsManagement -> "RootCredentialsManagement"
+      | RootSessions -> "RootSessions"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RootCredentialsManagement" -> RootCredentialsManagement
+      | "RootSessions" -> RootSessions
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FeatureType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FeatureType" j)
+    let to_json = simple_to_json to_value
+  end
 module OpenIDConnectProviderListEntry =
   struct
     type nonrec t = {
@@ -3490,8 +4068,8 @@ module OpenIDConnectProviderListEntry =
       let arn = (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" ArnType.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" ArnType.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the Amazon Resource Name (ARN) for an IAM OpenID Connect provider."]
@@ -3499,41 +4077,39 @@ module MFADevice =
   struct
     type nonrec t =
       {
-      userName: UserNameType.t
+      userName: UserNameType.t option
         [@ocaml.doc "The user with whom the MFA device is associated."];
-      serialNumber: SerialNumberType.t
+      serialNumber: SerialNumberType.t option
         [@ocaml.doc
           "The serial number that uniquely identifies the MFA device. For virtual MFA devices, the serial number is the device ARN."];
-      enableDate: DateType.t
+      enableDate: DateType.t option
         [@ocaml.doc "The date when the MFA device was enabled for the user."]}
-    let context_ = "MFADevice"
-    let make ~userName =
-      fun ~serialNumber ->
-        fun ~enableDate -> fun () -> { userName; serialNumber; enableDate }
+    let make ?userName =
+      fun ?serialNumber ->
+        fun ?enableDate -> fun () -> { userName; serialNumber; enableDate }
     let to_value x =
       structure_to_value
-        [("UserName", (Some (UserNameType.to_value x.userName)));
-        ("SerialNumber", (Some (SerialNumberType.to_value x.serialNumber)));
-        ("EnableDate", (Some (DateType.to_value x.enableDate)))]
+        [("UserName", (Option.map x.userName ~f:UserNameType.to_value));
+        ("SerialNumber",
+          (Option.map x.serialNumber ~f:SerialNumberType.to_value));
+        ("EnableDate", (Option.map x.enableDate ~f:DateType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let enableDate =
-        DateType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EnableDate") in
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "EnableDate") in
       let serialNumber =
-        SerialNumberType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SerialNumber") in
+        (Option.map ~f:SerialNumberType.of_xml)
+          (Xml.child xml_arg0 "SerialNumber") in
       let userName =
-        UserNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
-      make ~enableDate ~serialNumber ~userName ()
+        (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
+      make ?enableDate ?serialNumber ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enableDate = field_map_exn json "EnableDate" DateType.of_json in
+    let of_json json__ =
+      let enableDate = field_map json__ "EnableDate" DateType.of_json in
       let serialNumber =
-        field_map_exn json "SerialNumber" SerialNumberType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
-      make ~enableDate ~serialNumber ~userName ()
+        field_map json__ "SerialNumber" SerialNumberType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
+      make ?enableDate ?serialNumber ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about an MFA device. This data type is used as a response element in the ListMFADevices operation."]
@@ -3541,57 +4117,52 @@ module Group =
   struct
     type nonrec t =
       {
-      path: PathType.t
+      path: PathType.t option
         [@ocaml.doc
           "The path to the group. For more information about paths, see IAM identifiers in the IAM User Guide."];
-      groupName: GroupNameType.t
+      groupName: GroupNameType.t option
         [@ocaml.doc "The friendly name that identifies the group."];
-      groupId: IdType.t
+      groupId: IdType.t option
         [@ocaml.doc
           "The stable and unique string identifying the group. For more information about IDs, see IAM identifiers in the IAM User Guide."];
-      arn: ArnType.t
+      arn: ArnType.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) specifying the group. For more information about ARNs and how to use them in policies, see IAM identifiers in the IAM User Guide."];
-      createDate: DateType.t
+      createDate: DateType.t option
         [@ocaml.doc
           "The date and time, in ISO 8601 date-time format, when the group was created."]}
-    let context_ = "Group"
-    let make ~path =
-      fun ~groupName ->
-        fun ~groupId ->
-          fun ~arn ->
-            fun ~createDate ->
+    let make ?path =
+      fun ?groupName ->
+        fun ?groupId ->
+          fun ?arn ->
+            fun ?createDate ->
               fun () -> { path; groupName; groupId; arn; createDate }
     let to_value x =
       structure_to_value
-        [("Path", (Some (PathType.to_value x.path)));
-        ("GroupName", (Some (GroupNameType.to_value x.groupName)));
-        ("GroupId", (Some (IdType.to_value x.groupId)));
-        ("Arn", (Some (ArnType.to_value x.arn)));
-        ("CreateDate", (Some (DateType.to_value x.createDate)))]
+        [("Path", (Option.map x.path ~f:PathType.to_value));
+        ("GroupName", (Option.map x.groupName ~f:GroupNameType.to_value));
+        ("GroupId", (Option.map x.groupId ~f:IdType.to_value));
+        ("Arn", (Option.map x.arn ~f:ArnType.to_value));
+        ("CreateDate", (Option.map x.createDate ~f:DateType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let createDate =
-        DateType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateDate") in
-      let arn =
-        ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "CreateDate") in
+      let arn = (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "Arn") in
       let groupId =
-        IdType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "GroupId") in
       let groupName =
-        GroupNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
-      let path =
-        PathType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
-      make ~createDate ~arn ~groupId ~groupName ~path ()
+        (Option.map ~f:GroupNameType.of_xml) (Xml.child xml_arg0 "GroupName") in
+      let path = (Option.map ~f:PathType.of_xml) (Xml.child xml_arg0 "Path") in
+      make ?createDate ?arn ?groupId ?groupName ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createDate = field_map_exn json "CreateDate" DateType.of_json in
-      let arn = field_map_exn json "Arn" ArnType.of_json in
-      let groupId = field_map_exn json "GroupId" IdType.of_json in
-      let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
-      let path = field_map_exn json "Path" PathType.of_json in
-      make ~createDate ~arn ~groupId ~groupName ~path ()
+    let of_json json__ =
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
+      let arn = field_map json__ "Arn" ArnType.of_json in
+      let groupId = field_map json__ "GroupId" IdType.of_json in
+      let groupName = field_map json__ "GroupName" GroupNameType.of_json in
+      let path = field_map json__ "Path" PathType.of_json in
+      make ?createDate ?arn ?groupId ?groupName ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about an IAM group entity. This data type is used as a response element in the following operations: CreateGroup GetGroup ListGroups"]
@@ -3618,9 +4189,9 @@ module PolicyGroup =
         (Option.map ~f:GroupNameType.of_xml) (Xml.child xml_arg0 "GroupName") in
       make ?groupId ?groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map json "GroupId" IdType.of_json in
-      let groupName = field_map json "GroupName" GroupNameType.of_json in
+    let of_json json__ =
+      let groupId = field_map json__ "GroupId" IdType.of_json in
+      let groupName = field_map json__ "GroupName" GroupNameType.of_json in
       make ?groupId ?groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3648,9 +4219,9 @@ module PolicyRole =
         (Option.map ~f:RoleNameType.of_xml) (Xml.child xml_arg0 "RoleName") in
       make ?roleId ?roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleId = field_map json "RoleId" IdType.of_json in
-      let roleName = field_map json "RoleName" RoleNameType.of_json in
+    let of_json json__ =
+      let roleId = field_map json__ "RoleId" IdType.of_json in
+      let roleName = field_map json__ "RoleName" RoleNameType.of_json in
       make ?roleId ?roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3678,13 +4249,254 @@ module PolicyUser =
         (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
       make ?userId ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map json "UserId" IdType.of_json in
-      let userName = field_map json "UserName" UserNameType.of_json in
+    let of_json json__ =
+      let userId = field_map json__ "UserId" IdType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
       make ?userId ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about a user that a managed policy is attached to. This data type is used as a response element in the ListEntitiesForPolicy operation. For more information about managed policies, refer to Managed policies and inline policies in the IAM User Guide."]
+module DelegationRequest =
+  struct
+    type nonrec t =
+      {
+      delegationRequestId: DelegationRequestIdType.t option
+        [@ocaml.doc "The unique identifier for the delegation request."];
+      ownerAccountId: AccountIdType.t option
+        [@ocaml.doc
+          "Amazon Web Services account ID of the owner of the delegation request."];
+      description: DelegationRequestDescriptionType.t option
+        [@ocaml.doc
+          "Description of the delegation request. This is a message that is provided by the Amazon Web Services partner that filed the delegation request."];
+      requestMessage: RequestMessageType.t option
+        [@ocaml.doc
+          "A custom message that is added to the delegation request by the partner. This element is different from the Description element such that this is a request specific message injected by the partner. The Description is typically a generic explanation of what the delegation request is targeted to do."];
+      permissions: DelegationPermission.t option ;
+      permissionPolicy: PermissionType.t option
+        [@ocaml.doc
+          "JSON content of the associated permission policy of this delegation request."];
+      rolePermissionRestrictionArns:
+        RolePermissionRestrictionArnListType.t option
+        [@ocaml.doc
+          "If the PermissionPolicy includes role creation permissions, this element will include the list of permissions boundary policies associated with the role creation. See Permissions boundaries for IAM entities for more details about IAM permission boundaries."];
+      ownerId: OwnerIdType.t option
+        [@ocaml.doc "ARN of the owner of this delegation request."];
+      approverId: ArnType.t option ;
+      state: StateType.t option
+        [@ocaml.doc
+          "The state of this delegation request. See the Understanding the Request Lifecycle for an explanation of how these states are transitioned."];
+      expirationTime: DateType.t option
+        [@ocaml.doc
+          "The expiry time of this delegation request See the Understanding the Request Lifecycle for details on the life time of a delegation request at each state."];
+      requestorId: AccountIdType.t option
+        [@ocaml.doc
+          "Identity of the requestor of this delegation request. This will be an Amazon Web Services account ID."];
+      requestorName: RequestorNameType.t option
+        [@ocaml.doc "A friendly name of the requestor."];
+      createDate: DateType.t option
+        [@ocaml.doc "Creation date (timestamp) of this delegation request."];
+      sessionDuration: SessionDurationType.t option
+        [@ocaml.doc "The life-time of the requested session credential."];
+      redirectUrl: RedirectUrlType.t option
+        [@ocaml.doc
+          "A URL to be redirected to once the delegation request is approved. Partners provide this URL when creating the delegation request."];
+      notes: NotesType.t option
+        [@ocaml.doc
+          "Notes added to this delegation request, if this request was updated via the UpdateDelegationRequest API."];
+      rejectionReason: NotesType.t option
+        [@ocaml.doc
+          "Reasons for rejecting this delegation request, if this request was rejected. See also RejectDelegationRequest API documentation."];
+      onlySendByOwner: BooleanType.t option
+        [@ocaml.doc
+          "A flag indicating whether the SendDelegationToken must be called by the owner of this delegation request. This is set by the requesting partner."];
+      updatedTime: DateType.t option
+        [@ocaml.doc "Last updated timestamp of the request."]}
+    let make ?delegationRequestId =
+      fun ?ownerAccountId ->
+        fun ?description ->
+          fun ?requestMessage ->
+            fun ?permissions ->
+              fun ?permissionPolicy ->
+                fun ?rolePermissionRestrictionArns ->
+                  fun ?ownerId ->
+                    fun ?approverId ->
+                      fun ?state ->
+                        fun ?expirationTime ->
+                          fun ?requestorId ->
+                            fun ?requestorName ->
+                              fun ?createDate ->
+                                fun ?sessionDuration ->
+                                  fun ?redirectUrl ->
+                                    fun ?notes ->
+                                      fun ?rejectionReason ->
+                                        fun ?onlySendByOwner ->
+                                          fun ?updatedTime ->
+                                            fun () ->
+                                              {
+                                                delegationRequestId;
+                                                ownerAccountId;
+                                                description;
+                                                requestMessage;
+                                                permissions;
+                                                permissionPolicy;
+                                                rolePermissionRestrictionArns;
+                                                ownerId;
+                                                approverId;
+                                                state;
+                                                expirationTime;
+                                                requestorId;
+                                                requestorName;
+                                                createDate;
+                                                sessionDuration;
+                                                redirectUrl;
+                                                notes;
+                                                rejectionReason;
+                                                onlySendByOwner;
+                                                updatedTime
+                                              }
+    let to_value x =
+      structure_to_value
+        [("DelegationRequestId",
+           (Option.map x.delegationRequestId
+              ~f:DelegationRequestIdType.to_value));
+        ("OwnerAccountId",
+          (Option.map x.ownerAccountId ~f:AccountIdType.to_value));
+        ("Description",
+          (Option.map x.description
+             ~f:DelegationRequestDescriptionType.to_value));
+        ("RequestMessage",
+          (Option.map x.requestMessage ~f:RequestMessageType.to_value));
+        ("Permissions",
+          (Option.map x.permissions ~f:DelegationPermission.to_value));
+        ("PermissionPolicy",
+          (Option.map x.permissionPolicy ~f:PermissionType.to_value));
+        ("RolePermissionRestrictionArns",
+          (Option.map x.rolePermissionRestrictionArns
+             ~f:RolePermissionRestrictionArnListType.to_value));
+        ("OwnerId", (Option.map x.ownerId ~f:OwnerIdType.to_value));
+        ("ApproverId", (Option.map x.approverId ~f:ArnType.to_value));
+        ("State", (Option.map x.state ~f:StateType.to_value));
+        ("ExpirationTime",
+          (Option.map x.expirationTime ~f:DateType.to_value));
+        ("RequestorId", (Option.map x.requestorId ~f:AccountIdType.to_value));
+        ("RequestorName",
+          (Option.map x.requestorName ~f:RequestorNameType.to_value));
+        ("CreateDate", (Option.map x.createDate ~f:DateType.to_value));
+        ("SessionDuration",
+          (Option.map x.sessionDuration ~f:SessionDurationType.to_value));
+        ("RedirectUrl",
+          (Option.map x.redirectUrl ~f:RedirectUrlType.to_value));
+        ("Notes", (Option.map x.notes ~f:NotesType.to_value));
+        ("RejectionReason",
+          (Option.map x.rejectionReason ~f:NotesType.to_value));
+        ("OnlySendByOwner",
+          (Option.map x.onlySendByOwner ~f:BooleanType.to_value));
+        ("UpdatedTime", (Option.map x.updatedTime ~f:DateType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedTime =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "UpdatedTime") in
+      let onlySendByOwner =
+        (Option.map ~f:BooleanType.of_xml)
+          (Xml.child xml_arg0 "OnlySendByOwner") in
+      let rejectionReason =
+        (Option.map ~f:NotesType.of_xml)
+          (Xml.child xml_arg0 "RejectionReason") in
+      let notes =
+        (Option.map ~f:NotesType.of_xml) (Xml.child xml_arg0 "Notes") in
+      let redirectUrl =
+        (Option.map ~f:RedirectUrlType.of_xml)
+          (Xml.child xml_arg0 "RedirectUrl") in
+      let sessionDuration =
+        (Option.map ~f:SessionDurationType.of_xml)
+          (Xml.child xml_arg0 "SessionDuration") in
+      let createDate =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "CreateDate") in
+      let requestorName =
+        (Option.map ~f:RequestorNameType.of_xml)
+          (Xml.child xml_arg0 "RequestorName") in
+      let requestorId =
+        (Option.map ~f:AccountIdType.of_xml)
+          (Xml.child xml_arg0 "RequestorId") in
+      let expirationTime =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "ExpirationTime") in
+      let state =
+        (Option.map ~f:StateType.of_xml) (Xml.child xml_arg0 "State") in
+      let approverId =
+        (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "ApproverId") in
+      let ownerId =
+        (Option.map ~f:OwnerIdType.of_xml) (Xml.child xml_arg0 "OwnerId") in
+      let rolePermissionRestrictionArns =
+        (Option.map ~f:RolePermissionRestrictionArnListType.of_xml)
+          (Xml.child xml_arg0 "RolePermissionRestrictionArns") in
+      let permissionPolicy =
+        (Option.map ~f:PermissionType.of_xml)
+          (Xml.child xml_arg0 "PermissionPolicy") in
+      let permissions =
+        (Option.map ~f:DelegationPermission.of_xml)
+          (Xml.child xml_arg0 "Permissions") in
+      let requestMessage =
+        (Option.map ~f:RequestMessageType.of_xml)
+          (Xml.child xml_arg0 "RequestMessage") in
+      let description =
+        (Option.map ~f:DelegationRequestDescriptionType.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let ownerAccountId =
+        (Option.map ~f:AccountIdType.of_xml)
+          (Xml.child xml_arg0 "OwnerAccountId") in
+      let delegationRequestId =
+        (Option.map ~f:DelegationRequestIdType.of_xml)
+          (Xml.child xml_arg0 "DelegationRequestId") in
+      make ?updatedTime ?onlySendByOwner ?rejectionReason ?notes ?redirectUrl
+        ?sessionDuration ?createDate ?requestorName ?requestorId
+        ?expirationTime ?state ?approverId ?ownerId
+        ?rolePermissionRestrictionArns ?permissionPolicy ?permissions
+        ?requestMessage ?description ?ownerAccountId ?delegationRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedTime = field_map json__ "UpdatedTime" DateType.of_json in
+      let onlySendByOwner =
+        field_map json__ "OnlySendByOwner" BooleanType.of_json in
+      let rejectionReason =
+        field_map json__ "RejectionReason" NotesType.of_json in
+      let notes = field_map json__ "Notes" NotesType.of_json in
+      let redirectUrl =
+        field_map json__ "RedirectUrl" RedirectUrlType.of_json in
+      let sessionDuration =
+        field_map json__ "SessionDuration" SessionDurationType.of_json in
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
+      let requestorName =
+        field_map json__ "RequestorName" RequestorNameType.of_json in
+      let requestorId = field_map json__ "RequestorId" AccountIdType.of_json in
+      let expirationTime = field_map json__ "ExpirationTime" DateType.of_json in
+      let state = field_map json__ "State" StateType.of_json in
+      let approverId = field_map json__ "ApproverId" ArnType.of_json in
+      let ownerId = field_map json__ "OwnerId" OwnerIdType.of_json in
+      let rolePermissionRestrictionArns =
+        field_map json__ "RolePermissionRestrictionArns"
+          RolePermissionRestrictionArnListType.of_json in
+      let permissionPolicy =
+        field_map json__ "PermissionPolicy" PermissionType.of_json in
+      let permissions =
+        field_map json__ "Permissions" DelegationPermission.of_json in
+      let requestMessage =
+        field_map json__ "RequestMessage" RequestMessageType.of_json in
+      let description =
+        field_map json__ "Description"
+          DelegationRequestDescriptionType.of_json in
+      let ownerAccountId =
+        field_map json__ "OwnerAccountId" AccountIdType.of_json in
+      let delegationRequestId =
+        field_map json__ "DelegationRequestId"
+          DelegationRequestIdType.of_json in
+      make ?updatedTime ?onlySendByOwner ?rejectionReason ?notes ?redirectUrl
+        ?sessionDuration ?createDate ?requestorName ?requestorId
+        ?expirationTime ?state ?approverId ?ownerId
+        ?rolePermissionRestrictionArns ?permissionPolicy ?permissions
+        ?requestMessage ?description ?ownerAccountId ?delegationRequestId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about a delegation request, including its status, permissions, and associated metadata."]
 module AccountAliasType =
   struct
     type nonrec t = string
@@ -3697,7 +4509,7 @@ module AccountAliasType =
                 (check_string_max i ~max:63) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^[a-z0-9](([a-z0-9]|-(?!-))*[a-z0-9])?$")));
+                       ~pattern:"^[a-z0-9]([a-z0-9]|-(?!-)){1,61}[a-z0-9]$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -3746,11 +4558,12 @@ module AccessKeyMetadata =
         (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
       make ?createDate ?status ?accessKeyId ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createDate = field_map json "CreateDate" DateType.of_json in
-      let status = field_map json "Status" StatusType.of_json in
-      let accessKeyId = field_map json "AccessKeyId" AccessKeyIdType.of_json in
-      let userName = field_map json "UserName" UserNameType.of_json in
+    let of_json json__ =
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
+      let status = field_map json__ "Status" StatusType.of_json in
+      let accessKeyId =
+        field_map json__ "AccessKeyId" AccessKeyIdType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
       make ?createDate ?status ?accessKeyId ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3773,6 +4586,9 @@ module RoleUsageListType =
   struct
     type nonrec t = RoleUsageType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RoleUsageType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3797,18 +4613,17 @@ module EntityDetails =
   struct
     type nonrec t =
       {
-      entityInfo: EntityInfo.t
+      entityInfo: EntityInfo.t option
         [@ocaml.doc
           "The\194\160EntityInfo object that contains details about the entity (user or role)."];
       lastAuthenticated: DateType.t option
         [@ocaml.doc
-          "The date and time, in\194\160ISO 8601 date-time format, when the authenticated entity last attempted to access Amazon Web Services. Amazon Web Services does not report unauthenticated requests. This field is null if no IAM entities attempted to access the service within the reporting period."]}
-    let context_ = "EntityDetails"
-    let make ?lastAuthenticated =
-      fun ~entityInfo -> fun () -> { lastAuthenticated; entityInfo }
+          "The date and time, in\194\160ISO 8601 date-time format, when the authenticated entity last attempted to access Amazon Web Services. Amazon Web Services does not report unauthenticated requests. This field is null if no IAM entities attempted to access the service within the tracking period."]}
+    let make ?entityInfo =
+      fun ?lastAuthenticated -> fun () -> { entityInfo; lastAuthenticated }
     let to_value x =
       structure_to_value
-        [("EntityInfo", (Some (EntityInfo.to_value x.entityInfo)));
+        [("EntityInfo", (Option.map x.entityInfo ~f:EntityInfo.to_value));
         ("LastAuthenticated",
           (Option.map x.lastAuthenticated ~f:DateType.to_value))]
     let to_query v = to_query to_value v
@@ -3817,15 +4632,14 @@ module EntityDetails =
         (Option.map ~f:DateType.of_xml)
           (Xml.child xml_arg0 "LastAuthenticated") in
       let entityInfo =
-        EntityInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EntityInfo") in
-      make ?lastAuthenticated ~entityInfo ()
+        (Option.map ~f:EntityInfo.of_xml) (Xml.child xml_arg0 "EntityInfo") in
+      make ?lastAuthenticated ?entityInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastAuthenticated =
-        field_map json "LastAuthenticated" DateType.of_json in
-      let entityInfo = field_map_exn json "EntityInfo" EntityInfo.of_json in
-      make ?lastAuthenticated ~entityInfo ()
+        field_map json__ "LastAuthenticated" DateType.of_json in
+      let entityInfo = field_map json__ "EntityInfo" EntityInfo.of_json in
+      make ?lastAuthenticated ?entityInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains details about when the IAM entities (users or roles) were last used in an attempt to access the specified Amazon Web Services service. This data type is a response element in the GetServiceLastAccessedDetailsWithEntities operation."]
@@ -3833,51 +4647,51 @@ module ServiceLastAccessed =
   struct
     type nonrec t =
       {
-      serviceName: ServiceNameType.t
+      serviceName: ServiceNameType.t option
         [@ocaml.doc "The name of the service in which access was attempted."];
       lastAuthenticated: DateType.t option
         [@ocaml.doc
-          "The date and time, in\194\160ISO 8601 date-time format, when an authenticated entity most recently attempted to access the service. Amazon Web Services does not report unauthenticated requests. This field is null if no IAM entities attempted to access the service within the reporting period."];
-      serviceNamespace: ServiceNamespaceType.t
+          "The date and time, in\194\160ISO 8601 date-time format, when an authenticated entity most recently attempted to access the service. Amazon Web Services does not report unauthenticated requests. This field is null if no IAM entities attempted to access the service within the tracking period."];
+      serviceNamespace: ServiceNamespaceType.t option
         [@ocaml.doc
           "The namespace of the service in which access was attempted. To learn the service namespace of a service, see Actions, resources, and condition keys for Amazon Web Services services in the Service Authorization Reference. Choose the name of the service to view details for that service. In the first paragraph, find the service prefix. For example, (service prefix: a4b). For more information about service namespaces, see Amazon Web Services Service Namespaces in the\194\160Amazon Web Services General Reference."];
       lastAuthenticatedEntity: ArnType.t option
         [@ocaml.doc
-          "The ARN of the authenticated entity (user or role) that last attempted to access the service. Amazon Web Services does not report unauthenticated requests. This field is null if no IAM entities attempted to access the service within the reporting period."];
+          "The ARN of the authenticated entity (user or role) that last attempted to access the service. Amazon Web Services does not report unauthenticated requests. This field is null if no IAM entities attempted to access the service within the tracking period."];
       lastAuthenticatedRegion: StringType.t option
         [@ocaml.doc
-          "The Region from which the authenticated entity (user or role) last attempted to access the service. Amazon Web Services does not report unauthenticated requests. This field is null if no IAM entities attempted to access the service within the reporting period."];
+          "The Region from which the authenticated entity (user or role) last attempted to access the service. Amazon Web Services does not report unauthenticated requests. This field is null if no IAM entities attempted to access the service within the tracking period."];
       totalAuthenticatedEntities: IntegerType.t option
         [@ocaml.doc
-          "The total number of authenticated principals (root user, IAM users, or IAM roles) that have attempted to access the service. This field is null if no principals attempted to access the service within the reporting period."];
+          "The total number of authenticated principals (root user, IAM users, or IAM roles) that have attempted to access the service. This field is null if no principals attempted to access the service within the tracking period."];
       trackedActionsLastAccessed: TrackedActionsLastAccessed.t option
         [@ocaml.doc
-          "An object that contains details about the most recent attempt to access a tracked action within the service. This field is null if there no tracked actions or if the principal did not use the tracked actions within the reporting period. This field is also null if the report was generated at the service level and not the action level. For more information, see the Granularity field in GenerateServiceLastAccessedDetails."]}
-    let context_ = "ServiceLastAccessed"
-    let make ?lastAuthenticated =
-      fun ?lastAuthenticatedEntity ->
-        fun ?lastAuthenticatedRegion ->
-          fun ?totalAuthenticatedEntities ->
-            fun ?trackedActionsLastAccessed ->
-              fun ~serviceName ->
-                fun ~serviceNamespace ->
+          "An object that contains details about the most recent attempt to access a tracked action within the service. This field is null if there no tracked actions or if the principal did not use the tracked actions within the tracking period. This field is also null if the report was generated at the service level and not the action level. For more information, see the Granularity field in GenerateServiceLastAccessedDetails."]}
+    let make ?serviceName =
+      fun ?lastAuthenticated ->
+        fun ?serviceNamespace ->
+          fun ?lastAuthenticatedEntity ->
+            fun ?lastAuthenticatedRegion ->
+              fun ?totalAuthenticatedEntities ->
+                fun ?trackedActionsLastAccessed ->
                   fun () ->
                     {
+                      serviceName;
                       lastAuthenticated;
+                      serviceNamespace;
                       lastAuthenticatedEntity;
                       lastAuthenticatedRegion;
                       totalAuthenticatedEntities;
-                      trackedActionsLastAccessed;
-                      serviceName;
-                      serviceNamespace
+                      trackedActionsLastAccessed
                     }
     let to_value x =
       structure_to_value
-        [("ServiceName", (Some (ServiceNameType.to_value x.serviceName)));
+        [("ServiceName",
+           (Option.map x.serviceName ~f:ServiceNameType.to_value));
         ("LastAuthenticated",
           (Option.map x.lastAuthenticated ~f:DateType.to_value));
         ("ServiceNamespace",
-          (Some (ServiceNamespaceType.to_value x.serviceNamespace)));
+          (Option.map x.serviceNamespace ~f:ServiceNamespaceType.to_value));
         ("LastAuthenticatedEntity",
           (Option.map x.lastAuthenticatedEntity ~f:ArnType.to_value));
         ("LastAuthenticatedRegion",
@@ -3902,37 +4716,37 @@ module ServiceLastAccessed =
         (Option.map ~f:ArnType.of_xml)
           (Xml.child xml_arg0 "LastAuthenticatedEntity") in
       let serviceNamespace =
-        ServiceNamespaceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceNamespace") in
+        (Option.map ~f:ServiceNamespaceType.of_xml)
+          (Xml.child xml_arg0 "ServiceNamespace") in
       let lastAuthenticated =
         (Option.map ~f:DateType.of_xml)
           (Xml.child xml_arg0 "LastAuthenticated") in
       let serviceName =
-        ServiceNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceName") in
+        (Option.map ~f:ServiceNameType.of_xml)
+          (Xml.child xml_arg0 "ServiceName") in
       make ?trackedActionsLastAccessed ?totalAuthenticatedEntities
-        ?lastAuthenticatedRegion ?lastAuthenticatedEntity ~serviceNamespace
-        ?lastAuthenticated ~serviceName ()
+        ?lastAuthenticatedRegion ?lastAuthenticatedEntity ?serviceNamespace
+        ?lastAuthenticated ?serviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let trackedActionsLastAccessed =
-        field_map json "TrackedActionsLastAccessed"
+        field_map json__ "TrackedActionsLastAccessed"
           TrackedActionsLastAccessed.of_json in
       let totalAuthenticatedEntities =
-        field_map json "TotalAuthenticatedEntities" IntegerType.of_json in
+        field_map json__ "TotalAuthenticatedEntities" IntegerType.of_json in
       let lastAuthenticatedRegion =
-        field_map json "LastAuthenticatedRegion" StringType.of_json in
+        field_map json__ "LastAuthenticatedRegion" StringType.of_json in
       let lastAuthenticatedEntity =
-        field_map json "LastAuthenticatedEntity" ArnType.of_json in
+        field_map json__ "LastAuthenticatedEntity" ArnType.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespaceType.of_json in
+        field_map json__ "ServiceNamespace" ServiceNamespaceType.of_json in
       let lastAuthenticated =
-        field_map json "LastAuthenticated" DateType.of_json in
+        field_map json__ "LastAuthenticated" DateType.of_json in
       let serviceName =
-        field_map_exn json "ServiceName" ServiceNameType.of_json in
+        field_map json__ "ServiceName" ServiceNameType.of_json in
       make ?trackedActionsLastAccessed ?totalAuthenticatedEntities
-        ?lastAuthenticatedRegion ?lastAuthenticatedEntity ~serviceNamespace
-        ?lastAuthenticated ~serviceName ()
+        ?lastAuthenticatedRegion ?lastAuthenticatedEntity ?serviceNamespace
+        ?lastAuthenticated ?serviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about the most recent attempt to access the service. This data type is used as a response element in the GetServiceLastAccessedDetails operation."]
@@ -3958,48 +4772,90 @@ module CertificateChainType =
     let of_json j = string_of_json ~kind:"certificateChainType" j
     let to_json = simple_to_json to_value
   end
+module SAMLPrivateKey =
+  struct
+    type nonrec t =
+      {
+      keyId: PrivateKeyIdType.t option
+        [@ocaml.doc "The unique identifier for the SAML private key."];
+      timestamp: DateType.t option
+        [@ocaml.doc
+          "The date and time, in ISO 8601 date-time format, when the private key was uploaded."]}
+    let make ?keyId = fun ?timestamp -> fun () -> { keyId; timestamp }
+    let to_value x =
+      structure_to_value
+        [("KeyId", (Option.map x.keyId ~f:PrivateKeyIdType.to_value));
+        ("Timestamp", (Option.map x.timestamp ~f:DateType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let timestamp =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "Timestamp") in
+      let keyId =
+        (Option.map ~f:PrivateKeyIdType.of_xml) (Xml.child xml_arg0 "KeyId") in
+      make ?timestamp ?keyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let timestamp = field_map json__ "Timestamp" DateType.of_json in
+      let keyId = field_map json__ "KeyId" PrivateKeyIdType.of_json in
+      make ?timestamp ?keyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the private keys for the SAML provider. This data type is used as a response element in the GetSAMLProvider operation."]
+module FeatureDisabledMessage =
+  struct
+    type nonrec t = string
+    let context_ = "FeatureDisabledMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FeatureDisabledMessage" j
+    let to_json = simple_to_json to_value
+  end
 module AccessDetail =
   struct
     type nonrec t =
       {
-      serviceName: ServiceNameType.t
+      serviceName: ServiceNameType.t option
         [@ocaml.doc "The name of the service in which access was attempted."];
-      serviceNamespace: ServiceNamespaceType.t
+      serviceNamespace: ServiceNamespaceType.t option
         [@ocaml.doc
           "The namespace of the service in which access was attempted. To learn the service namespace of a service, see Actions, resources, and condition keys for Amazon Web Services services in the Service Authorization Reference. Choose the name of the service to view details for that service. In the first paragraph, find the service prefix. For example, (service prefix: a4b). For more information about service namespaces, see Amazon Web Services service namespaces in the\194\160Amazon Web Services General Reference."];
       region: StringType.t option
         [@ocaml.doc
-          "The Region where the last service access attempt occurred. This field is null if no principals in the reported Organizations entity attempted to access the service within the reporting period."];
+          "The Region where the last service access attempt occurred. This field is null if no principals in the reported Organizations entity attempted to access the service within the tracking period."];
       entityPath: OrganizationsEntityPathType.t option
         [@ocaml.doc
-          "The path of the Organizations entity (root, organizational unit, or account) from which an authenticated principal last attempted to access the service. Amazon Web Services does not report unauthenticated requests. This field is null if no principals (IAM users, IAM roles, or root users) in the reported Organizations entity attempted to access the service within the reporting period."];
+          "The path of the Organizations entity (root, organizational unit, or account) from which an authenticated principal last attempted to access the service. Amazon Web Services does not report unauthenticated requests. This field is null if no principals (IAM users, IAM roles, or root user) in the reported Organizations entity attempted to access the service within the tracking period."];
       lastAuthenticatedTime: DateType.t option
         [@ocaml.doc
-          "The date and time, in\194\160ISO 8601 date-time format, when an authenticated principal most recently attempted to access the service. Amazon Web Services does not report unauthenticated requests. This field is null if no principals in the reported Organizations entity attempted to access the service within the reporting period."];
+          "The date and time, in\194\160ISO 8601 date-time format, when an authenticated principal most recently attempted to access the service. Amazon Web Services does not report unauthenticated requests. This field is null if no principals in the reported Organizations entity attempted to access the service within the tracking period."];
       totalAuthenticatedEntities: IntegerType.t option
         [@ocaml.doc
-          "The number of accounts with authenticated principals (root users, IAM users, and IAM roles) that attempted to access the service in the reporting period."]}
-    let context_ = "AccessDetail"
-    let make ?region =
-      fun ?entityPath ->
-        fun ?lastAuthenticatedTime ->
-          fun ?totalAuthenticatedEntities ->
-            fun ~serviceName ->
-              fun ~serviceNamespace ->
+          "The number of accounts with authenticated principals (root user, IAM users, and IAM roles) that attempted to access the service in the tracking period."]}
+    let make ?serviceName =
+      fun ?serviceNamespace ->
+        fun ?region ->
+          fun ?entityPath ->
+            fun ?lastAuthenticatedTime ->
+              fun ?totalAuthenticatedEntities ->
                 fun () ->
                   {
+                    serviceName;
+                    serviceNamespace;
                     region;
                     entityPath;
                     lastAuthenticatedTime;
-                    totalAuthenticatedEntities;
-                    serviceName;
-                    serviceNamespace
+                    totalAuthenticatedEntities
                   }
     let to_value x =
       structure_to_value
-        [("ServiceName", (Some (ServiceNameType.to_value x.serviceName)));
+        [("ServiceName",
+           (Option.map x.serviceName ~f:ServiceNameType.to_value));
         ("ServiceNamespace",
-          (Some (ServiceNamespaceType.to_value x.serviceNamespace)));
+          (Option.map x.serviceNamespace ~f:ServiceNamespaceType.to_value));
         ("Region", (Option.map x.region ~f:StringType.to_value));
         ("EntityPath",
           (Option.map x.entityPath ~f:OrganizationsEntityPathType.to_value));
@@ -4021,28 +4877,28 @@ module AccessDetail =
       let region =
         (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "Region") in
       let serviceNamespace =
-        ServiceNamespaceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceNamespace") in
+        (Option.map ~f:ServiceNamespaceType.of_xml)
+          (Xml.child xml_arg0 "ServiceNamespace") in
       let serviceName =
-        ServiceNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceName") in
+        (Option.map ~f:ServiceNameType.of_xml)
+          (Xml.child xml_arg0 "ServiceName") in
       make ?totalAuthenticatedEntities ?lastAuthenticatedTime ?entityPath
-        ?region ~serviceNamespace ~serviceName ()
+        ?region ?serviceNamespace ?serviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let totalAuthenticatedEntities =
-        field_map json "TotalAuthenticatedEntities" IntegerType.of_json in
+        field_map json__ "TotalAuthenticatedEntities" IntegerType.of_json in
       let lastAuthenticatedTime =
-        field_map json "LastAuthenticatedTime" DateType.of_json in
+        field_map json__ "LastAuthenticatedTime" DateType.of_json in
       let entityPath =
-        field_map json "EntityPath" OrganizationsEntityPathType.of_json in
-      let region = field_map json "Region" StringType.of_json in
+        field_map json__ "EntityPath" OrganizationsEntityPathType.of_json in
+      let region = field_map json__ "Region" StringType.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespaceType.of_json in
+        field_map json__ "ServiceNamespace" ServiceNamespaceType.of_json in
       let serviceName =
-        field_map_exn json "ServiceName" ServiceNameType.of_json in
+        field_map json__ "ServiceName" ServiceNameType.of_json in
       make ?totalAuthenticatedEntities ?lastAuthenticatedTime ?entityPath
-        ?region ~serviceNamespace ~serviceName ()
+        ?region ?serviceNamespace ?serviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains details about when a principal in the reported Organizations entity last attempted to access an Amazon Web Services service. A principal can be an IAM user, an IAM role, or the Amazon Web Services account root user within the reported Organizations entity. This data type is a response element in the GetOrganizationsAccessReport operation."]
@@ -4062,6 +4918,46 @@ module ClientIDType =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"clientIDType" j
+    let to_json = simple_to_json to_value
+  end
+module CertificationKeyType =
+  struct
+    type nonrec t = string
+    let context_ = "CertificationKeyType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\u0020-\\u00FF]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CertificationKeyType" j
+    let to_json = simple_to_json to_value
+  end
+module CertificationValueType =
+  struct
+    type nonrec t = string
+    let context_ = "CertificationValueType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:32) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\u0020-\\u00FF]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CertificationValueType" j
     let to_json = simple_to_json to_value
   end
 module CredentialReportExpiredExceptionMessage =
@@ -4124,6 +5020,7 @@ module SummaryKeyType =
       | MFADevicesInUse 
       | AccountMFAEnabled 
       | AccountAccessKeysPresent 
+      | AccountPasswordPresent 
       | AccountSigningCertificatesPresent 
       | AttachedPoliciesPerGroupQuota 
       | AttachedPoliciesPerRoleQuota 
@@ -4135,6 +5032,13 @@ module SummaryKeyType =
       | PolicyVersionsInUseQuota 
       | VersionsPerPolicyQuota 
       | GlobalEndpointTokenVersion 
+      | AssumeRolePolicySizeQuota 
+      | InstanceProfiles 
+      | InstanceProfilesQuota 
+      | Providers 
+      | RolePolicySizeQuota 
+      | Roles 
+      | RolesQuota 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -4154,6 +5058,7 @@ module SummaryKeyType =
       | MFADevicesInUse -> "MFADevicesInUse"
       | AccountMFAEnabled -> "AccountMFAEnabled"
       | AccountAccessKeysPresent -> "AccountAccessKeysPresent"
+      | AccountPasswordPresent -> "AccountPasswordPresent"
       | AccountSigningCertificatesPresent ->
           "AccountSigningCertificatesPresent"
       | AttachedPoliciesPerGroupQuota -> "AttachedPoliciesPerGroupQuota"
@@ -4166,6 +5071,13 @@ module SummaryKeyType =
       | PolicyVersionsInUseQuota -> "PolicyVersionsInUseQuota"
       | VersionsPerPolicyQuota -> "VersionsPerPolicyQuota"
       | GlobalEndpointTokenVersion -> "GlobalEndpointTokenVersion"
+      | AssumeRolePolicySizeQuota -> "AssumeRolePolicySizeQuota"
+      | InstanceProfiles -> "InstanceProfiles"
+      | InstanceProfilesQuota -> "InstanceProfilesQuota"
+      | Providers -> "Providers"
+      | RolePolicySizeQuota -> "RolePolicySizeQuota"
+      | Roles -> "Roles"
+      | RolesQuota -> "RolesQuota"
       | Non_static_id s -> s
     let of_string =
       function
@@ -4184,6 +5096,7 @@ module SummaryKeyType =
       | "MFADevicesInUse" -> MFADevicesInUse
       | "AccountMFAEnabled" -> AccountMFAEnabled
       | "AccountAccessKeysPresent" -> AccountAccessKeysPresent
+      | "AccountPasswordPresent" -> AccountPasswordPresent
       | "AccountSigningCertificatesPresent" ->
           AccountSigningCertificatesPresent
       | "AttachedPoliciesPerGroupQuota" -> AttachedPoliciesPerGroupQuota
@@ -4196,6 +5109,13 @@ module SummaryKeyType =
       | "PolicyVersionsInUseQuota" -> PolicyVersionsInUseQuota
       | "VersionsPerPolicyQuota" -> VersionsPerPolicyQuota
       | "GlobalEndpointTokenVersion" -> GlobalEndpointTokenVersion
+      | "AssumeRolePolicySizeQuota" -> AssumeRolePolicySizeQuota
+      | "InstanceProfiles" -> InstanceProfiles
+      | "InstanceProfilesQuota" -> InstanceProfilesQuota
+      | "Providers" -> Providers
+      | "RolePolicySizeQuota" -> RolePolicySizeQuota
+      | "Roles" -> Roles
+      | "RolesQuota" -> RolesQuota
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -4408,26 +5328,26 @@ module ManagedPolicyDetail =
         ?isAttachable ?permissionsBoundaryUsageCount ?attachmentCount
         ?defaultVersionId ?path ?arn ?policyId ?policyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyVersionList =
-        field_map json "PolicyVersionList"
+        field_map json__ "PolicyVersionList"
           PolicyDocumentVersionListType.of_json in
-      let updateDate = field_map json "UpdateDate" DateType.of_json in
-      let createDate = field_map json "CreateDate" DateType.of_json in
+      let updateDate = field_map json__ "UpdateDate" DateType.of_json in
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
       let description =
-        field_map json "Description" PolicyDescriptionType.of_json in
-      let isAttachable = field_map json "IsAttachable" BooleanType.of_json in
+        field_map json__ "Description" PolicyDescriptionType.of_json in
+      let isAttachable = field_map json__ "IsAttachable" BooleanType.of_json in
       let permissionsBoundaryUsageCount =
-        field_map json "PermissionsBoundaryUsageCount"
+        field_map json__ "PermissionsBoundaryUsageCount"
           AttachmentCountType.of_json in
       let attachmentCount =
-        field_map json "AttachmentCount" AttachmentCountType.of_json in
+        field_map json__ "AttachmentCount" AttachmentCountType.of_json in
       let defaultVersionId =
-        field_map json "DefaultVersionId" PolicyVersionIdType.of_json in
-      let path = field_map json "Path" PolicyPathType.of_json in
-      let arn = field_map json "Arn" ArnType.of_json in
-      let policyId = field_map json "PolicyId" IdType.of_json in
-      let policyName = field_map json "PolicyName" PolicyNameType.of_json in
+        field_map json__ "DefaultVersionId" PolicyVersionIdType.of_json in
+      let path = field_map json__ "Path" PolicyPathType.of_json in
+      let arn = field_map json__ "Arn" ArnType.of_json in
+      let policyId = field_map json__ "PolicyId" IdType.of_json in
+      let policyName = field_map json__ "PolicyName" PolicyNameType.of_json in
       make ?policyVersionList ?updateDate ?createDate ?description
         ?isAttachable ?permissionsBoundaryUsageCount ?attachmentCount
         ?defaultVersionId ?path ?arn ?policyId ?policyName ()
@@ -4502,17 +5422,17 @@ module GroupDetail =
       make ?attachedManagedPolicies ?groupPolicyList ?createDate ?arn
         ?groupId ?groupName ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attachedManagedPolicies =
-        field_map json "AttachedManagedPolicies"
+        field_map json__ "AttachedManagedPolicies"
           AttachedPoliciesListType.of_json in
       let groupPolicyList =
-        field_map json "GroupPolicyList" PolicyDetailListType.of_json in
-      let createDate = field_map json "CreateDate" DateType.of_json in
-      let arn = field_map json "Arn" ArnType.of_json in
-      let groupId = field_map json "GroupId" IdType.of_json in
-      let groupName = field_map json "GroupName" GroupNameType.of_json in
-      let path = field_map json "Path" PathType.of_json in
+        field_map json__ "GroupPolicyList" PolicyDetailListType.of_json in
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
+      let arn = field_map json__ "Arn" ArnType.of_json in
+      let groupId = field_map json__ "GroupId" IdType.of_json in
+      let groupName = field_map json__ "GroupName" GroupNameType.of_json in
+      let path = field_map json__ "Path" PathType.of_json in
       make ?attachedManagedPolicies ?groupPolicyList ?createDate ?arn
         ?groupId ?groupName ?path ()
     let to_json v = composed_to_json to_value v
@@ -4639,26 +5559,28 @@ module RoleDetail =
         ?rolePolicyList ?instanceProfileList ?assumeRolePolicyDocument
         ?createDate ?arn ?roleId ?roleName ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleLastUsed = field_map json "RoleLastUsed" RoleLastUsed.of_json in
-      let tags = field_map json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let roleLastUsed = field_map json__ "RoleLastUsed" RoleLastUsed.of_json in
+      let tags = field_map json__ "Tags" TagListType.of_json in
       let permissionsBoundary =
-        field_map json "PermissionsBoundary"
+        field_map json__ "PermissionsBoundary"
           AttachedPermissionsBoundary.of_json in
       let attachedManagedPolicies =
-        field_map json "AttachedManagedPolicies"
+        field_map json__ "AttachedManagedPolicies"
           AttachedPoliciesListType.of_json in
       let rolePolicyList =
-        field_map json "RolePolicyList" PolicyDetailListType.of_json in
+        field_map json__ "RolePolicyList" PolicyDetailListType.of_json in
       let instanceProfileList =
-        field_map json "InstanceProfileList" InstanceProfileListType.of_json in
+        field_map json__ "InstanceProfileList"
+          InstanceProfileListType.of_json in
       let assumeRolePolicyDocument =
-        field_map json "AssumeRolePolicyDocument" PolicyDocumentType.of_json in
-      let createDate = field_map json "CreateDate" DateType.of_json in
-      let arn = field_map json "Arn" ArnType.of_json in
-      let roleId = field_map json "RoleId" IdType.of_json in
-      let roleName = field_map json "RoleName" RoleNameType.of_json in
-      let path = field_map json "Path" PathType.of_json in
+        field_map json__ "AssumeRolePolicyDocument"
+          PolicyDocumentType.of_json in
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
+      let arn = field_map json__ "Arn" ArnType.of_json in
+      let roleId = field_map json__ "RoleId" IdType.of_json in
+      let roleName = field_map json__ "RoleName" RoleNameType.of_json in
+      let path = field_map json__ "Path" PathType.of_json in
       make ?roleLastUsed ?tags ?permissionsBoundary ?attachedManagedPolicies
         ?rolePolicyList ?instanceProfileList ?assumeRolePolicyDocument
         ?createDate ?arn ?roleId ?roleName ?path ()
@@ -4760,22 +5682,22 @@ module UserDetail =
       make ?tags ?permissionsBoundary ?attachedManagedPolicies ?groupList
         ?userPolicyList ?createDate ?arn ?userId ?userName ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
       let permissionsBoundary =
-        field_map json "PermissionsBoundary"
+        field_map json__ "PermissionsBoundary"
           AttachedPermissionsBoundary.of_json in
       let attachedManagedPolicies =
-        field_map json "AttachedManagedPolicies"
+        field_map json__ "AttachedManagedPolicies"
           AttachedPoliciesListType.of_json in
-      let groupList = field_map json "GroupList" GroupNameListType.of_json in
+      let groupList = field_map json__ "GroupList" GroupNameListType.of_json in
       let userPolicyList =
-        field_map json "UserPolicyList" PolicyDetailListType.of_json in
-      let createDate = field_map json "CreateDate" DateType.of_json in
-      let arn = field_map json "Arn" ArnType.of_json in
-      let userId = field_map json "UserId" IdType.of_json in
-      let userName = field_map json "UserName" UserNameType.of_json in
-      let path = field_map json "Path" PathType.of_json in
+        field_map json__ "UserPolicyList" PolicyDetailListType.of_json in
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
+      let arn = field_map json__ "Arn" ArnType.of_json in
+      let userId = field_map json__ "UserId" IdType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
+      let path = field_map json__ "Path" PathType.of_json in
       make ?tags ?permissionsBoundary ?attachedManagedPolicies ?groupList
         ?userPolicyList ?createDate ?arn ?userId ?userName ?path ()
     let to_json v = composed_to_json to_value v
@@ -4829,6 +5751,19 @@ module ReportGenerationLimitExceededMessage =
       string_of_json ~kind:"reportGenerationLimitExceededMessage" j
     let to_json = simple_to_json to_value
   end
+module FeatureEnabledMessage =
+  struct
+    type nonrec t = string
+    let context_ = "FeatureEnabledMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FeatureEnabledMessage" j
+    let to_json = simple_to_json to_value
+  end
 module MalformedPolicyDocumentMessage =
   struct
     type nonrec t = string
@@ -4840,6 +5775,20 @@ module MalformedPolicyDocumentMessage =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"malformedPolicyDocumentMessage" j
+    let to_json = simple_to_json to_value
+  end
+module OpenIdIdpCommunicationErrorExceptionMessage =
+  struct
+    type nonrec t = string
+    let context_ = "openIdIdpCommunicationErrorExceptionMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"openIdIdpCommunicationErrorExceptionMessage" j
     let to_json = simple_to_json to_value
   end
 module PasswordPolicyViolationMessage =
@@ -4868,6 +5817,29 @@ module AccessKeySecretType =
     let of_json j = string_of_json ~kind:"accessKeySecretType" j
     let to_json = simple_to_json to_value
   end
+module ConcurrentModificationException =
+  struct
+    type nonrec t = {
+      message: ConcurrentModificationMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message",
+           (Option.map x.message ~f:ConcurrentModificationMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ConcurrentModificationMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message =
+        field_map json__ "message" ConcurrentModificationMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request was rejected because multiple requests to change this object were submitted simultaneously. Wait a few minutes and submit your request again."]
 module DuplicateCertificateException =
   struct
     type nonrec t = {
@@ -4884,9 +5856,9 @@ module DuplicateCertificateException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" DuplicateCertificateMessage.of_json in
+        field_map json__ "message" DuplicateCertificateMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4907,9 +5879,9 @@ module EntityAlreadyExistsException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" EntityAlreadyExistsMessage.of_json in
+        field_map json__ "message" EntityAlreadyExistsMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4930,9 +5902,9 @@ module InvalidCertificateException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" InvalidCertificateMessage.of_json in
+        field_map json__ "message" InvalidCertificateMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4952,8 +5924,8 @@ module LimitExceededException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" LimitExceededMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" LimitExceededMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4974,9 +5946,9 @@ module MalformedCertificateException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" MalformedCertificateMessage.of_json in
+        field_map json__ "message" MalformedCertificateMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4996,8 +5968,8 @@ module NoSuchEntityException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" NoSuchEntityMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" NoSuchEntityMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5018,9 +5990,9 @@ module ServiceFailureException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" ServiceFailureExceptionMessage.of_json in
+        field_map json__ "message" ServiceFailureExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5045,29 +6017,6 @@ module ExistingUserNameType =
     let of_json j = string_of_json ~kind:"existingUserNameType" j
     let to_json = simple_to_json to_value
   end
-module ConcurrentModificationException =
-  struct
-    type nonrec t = {
-      message: ConcurrentModificationMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message",
-           (Option.map x.message ~f:ConcurrentModificationMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ConcurrentModificationMessage.of_xml)
-          (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message =
-        field_map json "message" ConcurrentModificationMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The request was rejected because multiple requests to change this object were submitted simultaneously. Wait a few minutes and submit your request again."]
 module InvalidInputException =
   struct
     type nonrec t = {
@@ -5083,8 +6032,8 @@ module InvalidInputException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" InvalidInputMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" InvalidInputMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5105,8 +6054,8 @@ module KeyPairMismatchException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" KeyPairMismatchMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" KeyPairMismatchMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5149,9 +6098,9 @@ module DuplicateSSHPublicKeyException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" DuplicateSSHPublicKeyMessage.of_json in
+        field_map json__ "message" DuplicateSSHPublicKeyMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5172,8 +6121,9 @@ module InvalidPublicKeyException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" InvalidPublicKeyMessage.of_json in
+    let of_json json__ =
+      let message =
+        field_map json__ "message" InvalidPublicKeyMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5182,81 +6132,79 @@ module SSHPublicKey =
   struct
     type nonrec t =
       {
-      userName: UserNameType.t
+      userName: UserNameType.t option
         [@ocaml.doc
           "The name of the IAM user associated with the SSH public key."];
-      sSHPublicKeyId: PublicKeyIdType.t
+      sSHPublicKeyId: PublicKeyIdType.t option
         [@ocaml.doc "The unique identifier for the SSH public key."];
-      fingerprint: PublicKeyFingerprintType.t
+      fingerprint: PublicKeyFingerprintType.t option
         [@ocaml.doc "The MD5 message digest of the SSH public key."];
-      sSHPublicKeyBody: PublicKeyMaterialType.t
+      sSHPublicKeyBody: PublicKeyMaterialType.t option
         [@ocaml.doc "The SSH public key."];
-      status: StatusType.t
+      status: StatusType.t option
         [@ocaml.doc
           "The status of the SSH public key. Active means that the key can be used for authentication with an CodeCommit repository. Inactive means that the key cannot be used."];
       uploadDate: DateType.t option
         [@ocaml.doc
           "The date and time, in ISO 8601 date-time format, when the SSH public key was uploaded."]}
-    let context_ = "SSHPublicKey"
-    let make ?uploadDate =
-      fun ~userName ->
-        fun ~sSHPublicKeyId ->
-          fun ~fingerprint ->
-            fun ~sSHPublicKeyBody ->
-              fun ~status ->
+    let make ?userName =
+      fun ?sSHPublicKeyId ->
+        fun ?fingerprint ->
+          fun ?sSHPublicKeyBody ->
+            fun ?status ->
+              fun ?uploadDate ->
                 fun () ->
                   {
-                    uploadDate;
                     userName;
                     sSHPublicKeyId;
                     fingerprint;
                     sSHPublicKeyBody;
-                    status
+                    status;
+                    uploadDate
                   }
     let to_value x =
       structure_to_value
-        [("UserName", (Some (UserNameType.to_value x.userName)));
+        [("UserName", (Option.map x.userName ~f:UserNameType.to_value));
         ("SSHPublicKeyId",
-          (Some (PublicKeyIdType.to_value x.sSHPublicKeyId)));
+          (Option.map x.sSHPublicKeyId ~f:PublicKeyIdType.to_value));
         ("Fingerprint",
-          (Some (PublicKeyFingerprintType.to_value x.fingerprint)));
+          (Option.map x.fingerprint ~f:PublicKeyFingerprintType.to_value));
         ("SSHPublicKeyBody",
-          (Some (PublicKeyMaterialType.to_value x.sSHPublicKeyBody)));
-        ("Status", (Some (StatusType.to_value x.status)));
+          (Option.map x.sSHPublicKeyBody ~f:PublicKeyMaterialType.to_value));
+        ("Status", (Option.map x.status ~f:StatusType.to_value));
         ("UploadDate", (Option.map x.uploadDate ~f:DateType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let uploadDate =
         (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "UploadDate") in
       let status =
-        StatusType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:StatusType.of_xml) (Xml.child xml_arg0 "Status") in
       let sSHPublicKeyBody =
-        PublicKeyMaterialType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SSHPublicKeyBody") in
+        (Option.map ~f:PublicKeyMaterialType.of_xml)
+          (Xml.child xml_arg0 "SSHPublicKeyBody") in
       let fingerprint =
-        PublicKeyFingerprintType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Fingerprint") in
+        (Option.map ~f:PublicKeyFingerprintType.of_xml)
+          (Xml.child xml_arg0 "Fingerprint") in
       let sSHPublicKeyId =
-        PublicKeyIdType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SSHPublicKeyId") in
+        (Option.map ~f:PublicKeyIdType.of_xml)
+          (Xml.child xml_arg0 "SSHPublicKeyId") in
       let userName =
-        UserNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
-      make ?uploadDate ~status ~sSHPublicKeyBody ~fingerprint ~sSHPublicKeyId
-        ~userName ()
+        (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
+      make ?uploadDate ?status ?sSHPublicKeyBody ?fingerprint ?sSHPublicKeyId
+        ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let uploadDate = field_map json "UploadDate" DateType.of_json in
-      let status = field_map_exn json "Status" StatusType.of_json in
+    let of_json json__ =
+      let uploadDate = field_map json__ "UploadDate" DateType.of_json in
+      let status = field_map json__ "Status" StatusType.of_json in
       let sSHPublicKeyBody =
-        field_map_exn json "SSHPublicKeyBody" PublicKeyMaterialType.of_json in
+        field_map json__ "SSHPublicKeyBody" PublicKeyMaterialType.of_json in
       let fingerprint =
-        field_map_exn json "Fingerprint" PublicKeyFingerprintType.of_json in
+        field_map json__ "Fingerprint" PublicKeyFingerprintType.of_json in
       let sSHPublicKeyId =
-        field_map_exn json "SSHPublicKeyId" PublicKeyIdType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
-      make ?uploadDate ~status ~sSHPublicKeyBody ~fingerprint ~sSHPublicKeyId
-        ~userName ()
+        field_map json__ "SSHPublicKeyId" PublicKeyIdType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
+      make ?uploadDate ?status ?sSHPublicKeyBody ?fingerprint ?sSHPublicKeyId
+        ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about an SSH public key. This data type is used as a response element in the GetSSHPublicKey and UploadSSHPublicKey operations."]
@@ -5277,9 +6225,10 @@ module UnrecognizedPublicKeyEncodingException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" UnrecognizedPublicKeyEncodingMessage.of_json in
+        field_map json__ "message"
+          UnrecognizedPublicKeyEncodingMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5302,6 +6251,34 @@ module SAMLMetadataDocumentType =
     let of_json j = string_of_json ~kind:"SAMLMetadataDocumentType" j
     let to_json = simple_to_json to_value
   end
+module AssertionEncryptionModeType =
+  struct
+    type nonrec t =
+      | Required 
+      | Allowed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Required -> "Required"
+      | Allowed -> "Allowed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Required" -> Required
+      | "Allowed" -> Allowed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration assertionEncryptionModeType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"assertionEncryptionModeType" j)
+    let to_json = simple_to_json to_value
+  end
 module UnmodifiableEntityException =
   struct
     type nonrec t = {
@@ -5318,17 +6295,20 @@ module UnmodifiableEntityException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" UnmodifiableEntityMessage.of_json in
+        field_map json__ "message" UnmodifiableEntityMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The request was rejected because only the service that depends on the service-linked role can modify or delete the role on your behalf. The error message includes the name of the service that depends on this service-linked role. You must request the change through that service."]
+       "The request was rejected because service-linked roles are protected Amazon Web Services resources. Only the service that depends on the service-linked role can modify or delete the role on your behalf. The error message includes the name of the service that depends on this service-linked role. You must request the change through that service."]
 module ThumbprintListType =
   struct
     type nonrec t = ThumbprintType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ThumbprintType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5377,6 +6357,9 @@ module TagKeyListType =
     type nonrec t = TagKeyType.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKeyType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5401,6 +6384,9 @@ module ActionNameListType =
   struct
     type nonrec t = ActionNameType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ActionNameType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5426,6 +6412,9 @@ module ContextEntryListType =
   struct
     type nonrec t = ContextEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ContextEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5469,6 +6458,9 @@ module ResourceNameListType =
   struct
     type nonrec t = ResourceNameType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceNameType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5494,6 +6486,9 @@ module SimulationPolicyListType =
   struct
     type nonrec t = PolicyDocumentType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyDocumentType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5557,6 +6552,9 @@ module EvaluationResultsListType =
   struct
     type nonrec t = EvaluationResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EvaluationResult.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5594,9 +6592,9 @@ module PolicyEvaluationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" PolicyEvaluationErrorMessage.of_json in
+        field_map json__ "message" PolicyEvaluationErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5666,99 +6664,133 @@ module ServiceSpecificCredential =
   struct
     type nonrec t =
       {
-      createDate: DateType.t
+      createDate: DateType.t option
         [@ocaml.doc
           "The date and time, in ISO 8601 date-time format, when the service-specific credential were created."];
-      serviceName: ServiceName.t
+      expirationDate: DateType.t option
+        [@ocaml.doc
+          "The date and time when the service specific credential expires. This field is only present for Bedrock API keys and CloudWatch Logs API keys that were created with an expiration period."];
+      serviceName: ServiceName.t option
         [@ocaml.doc
           "The name of the service associated with the service-specific credential."];
-      serviceUserName: ServiceUserName.t
+      serviceUserName: ServiceUserName.t option
         [@ocaml.doc
           "The generated user name for the service-specific credential. This value is generated by combining the IAM user's name combined with the ID number of the Amazon Web Services account, as in jane-at-123456789012, for example. This value cannot be configured by the user."];
-      servicePassword: ServicePassword.t
+      servicePassword: ServicePassword.t option
         [@ocaml.doc
           "The generated password for the service-specific credential."];
-      serviceSpecificCredentialId: ServiceSpecificCredentialId.t
+      serviceCredentialAlias: ServiceCredentialAlias.t option
+        [@ocaml.doc
+          "For Bedrock API keys and CloudWatch Logs API keys, this is the public portion of the credential that includes the IAM user name and a suffix containing version and creation information."];
+      serviceCredentialSecret: ServiceCredentialSecret.t option
+        [@ocaml.doc
+          "For Bedrock API keys and CloudWatch Logs API keys, this is the secret portion of the credential that should be used to authenticate API calls. This value is returned only when the credential is created."];
+      serviceSpecificCredentialId: ServiceSpecificCredentialId.t option
         [@ocaml.doc
           "The unique identifier for the service-specific credential."];
-      userName: UserNameType.t
+      userName: UserNameType.t option
         [@ocaml.doc
           "The name of the IAM user associated with the service-specific credential."];
-      status: StatusType.t
+      status: StatusType.t option
         [@ocaml.doc
           "The status of the service-specific credential. Active means that the key is valid for API calls, while Inactive means it is not."]}
-    let context_ = "ServiceSpecificCredential"
-    let make ~createDate =
-      fun ~serviceName ->
-        fun ~serviceUserName ->
-          fun ~servicePassword ->
-            fun ~serviceSpecificCredentialId ->
-              fun ~userName ->
-                fun ~status ->
-                  fun () ->
-                    {
-                      createDate;
-                      serviceName;
-                      serviceUserName;
-                      servicePassword;
-                      serviceSpecificCredentialId;
-                      userName;
-                      status
-                    }
+    let make ?createDate =
+      fun ?expirationDate ->
+        fun ?serviceName ->
+          fun ?serviceUserName ->
+            fun ?servicePassword ->
+              fun ?serviceCredentialAlias ->
+                fun ?serviceCredentialSecret ->
+                  fun ?serviceSpecificCredentialId ->
+                    fun ?userName ->
+                      fun ?status ->
+                        fun () ->
+                          {
+                            createDate;
+                            expirationDate;
+                            serviceName;
+                            serviceUserName;
+                            servicePassword;
+                            serviceCredentialAlias;
+                            serviceCredentialSecret;
+                            serviceSpecificCredentialId;
+                            userName;
+                            status
+                          }
     let to_value x =
       structure_to_value
-        [("CreateDate", (Some (DateType.to_value x.createDate)));
-        ("ServiceName", (Some (ServiceName.to_value x.serviceName)));
+        [("CreateDate", (Option.map x.createDate ~f:DateType.to_value));
+        ("ExpirationDate",
+          (Option.map x.expirationDate ~f:DateType.to_value));
+        ("ServiceName", (Option.map x.serviceName ~f:ServiceName.to_value));
         ("ServiceUserName",
-          (Some (ServiceUserName.to_value x.serviceUserName)));
+          (Option.map x.serviceUserName ~f:ServiceUserName.to_value));
         ("ServicePassword",
-          (Some (ServicePassword.to_value x.servicePassword)));
+          (Option.map x.servicePassword ~f:ServicePassword.to_value));
+        ("ServiceCredentialAlias",
+          (Option.map x.serviceCredentialAlias
+             ~f:ServiceCredentialAlias.to_value));
+        ("ServiceCredentialSecret",
+          (Option.map x.serviceCredentialSecret
+             ~f:ServiceCredentialSecret.to_value));
         ("ServiceSpecificCredentialId",
-          (Some
-             (ServiceSpecificCredentialId.to_value
-                x.serviceSpecificCredentialId)));
-        ("UserName", (Some (UserNameType.to_value x.userName)));
-        ("Status", (Some (StatusType.to_value x.status)))]
+          (Option.map x.serviceSpecificCredentialId
+             ~f:ServiceSpecificCredentialId.to_value));
+        ("UserName", (Option.map x.userName ~f:UserNameType.to_value));
+        ("Status", (Option.map x.status ~f:StatusType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        StatusType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:StatusType.of_xml) (Xml.child xml_arg0 "Status") in
       let userName =
-        UserNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
+        (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
       let serviceSpecificCredentialId =
-        ServiceSpecificCredentialId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ServiceSpecificCredentialId") in
+        (Option.map ~f:ServiceSpecificCredentialId.of_xml)
+          (Xml.child xml_arg0 "ServiceSpecificCredentialId") in
+      let serviceCredentialSecret =
+        (Option.map ~f:ServiceCredentialSecret.of_xml)
+          (Xml.child xml_arg0 "ServiceCredentialSecret") in
+      let serviceCredentialAlias =
+        (Option.map ~f:ServiceCredentialAlias.of_xml)
+          (Xml.child xml_arg0 "ServiceCredentialAlias") in
       let servicePassword =
-        ServicePassword.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServicePassword") in
+        (Option.map ~f:ServicePassword.of_xml)
+          (Xml.child xml_arg0 "ServicePassword") in
       let serviceUserName =
-        ServiceUserName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceUserName") in
+        (Option.map ~f:ServiceUserName.of_xml)
+          (Xml.child xml_arg0 "ServiceUserName") in
       let serviceName =
-        ServiceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceName") in
+        (Option.map ~f:ServiceName.of_xml) (Xml.child xml_arg0 "ServiceName") in
+      let expirationDate =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "ExpirationDate") in
       let createDate =
-        DateType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateDate") in
-      make ~status ~userName ~serviceSpecificCredentialId ~servicePassword
-        ~serviceUserName ~serviceName ~createDate ()
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "CreateDate") in
+      make ?status ?userName ?serviceSpecificCredentialId
+        ?serviceCredentialSecret ?serviceCredentialAlias ?servicePassword
+        ?serviceUserName ?serviceName ?expirationDate ?createDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" StatusType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" StatusType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
       let serviceSpecificCredentialId =
-        field_map_exn json "ServiceSpecificCredentialId"
+        field_map json__ "ServiceSpecificCredentialId"
           ServiceSpecificCredentialId.of_json in
+      let serviceCredentialSecret =
+        field_map json__ "ServiceCredentialSecret"
+          ServiceCredentialSecret.of_json in
+      let serviceCredentialAlias =
+        field_map json__ "ServiceCredentialAlias"
+          ServiceCredentialAlias.of_json in
       let servicePassword =
-        field_map_exn json "ServicePassword" ServicePassword.of_json in
+        field_map json__ "ServicePassword" ServicePassword.of_json in
       let serviceUserName =
-        field_map_exn json "ServiceUserName" ServiceUserName.of_json in
-      let serviceName = field_map_exn json "ServiceName" ServiceName.of_json in
-      let createDate = field_map_exn json "CreateDate" DateType.of_json in
-      make ~status ~userName ~serviceSpecificCredentialId ~servicePassword
-        ~serviceUserName ~serviceName ~createDate ()
+        field_map json__ "ServiceUserName" ServiceUserName.of_json in
+      let serviceName = field_map json__ "ServiceName" ServiceName.of_json in
+      let expirationDate = field_map json__ "ExpirationDate" DateType.of_json in
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
+      make ?status ?userName ?serviceSpecificCredentialId
+        ?serviceCredentialSecret ?serviceCredentialAlias ?servicePassword
+        ?serviceUserName ?serviceName ?expirationDate ?createDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the details of a service-specific credential."]
 module PolicyNotAttachableMessage =
@@ -5778,6 +6810,9 @@ module VirtualMFADeviceListType =
   struct
     type nonrec t = VirtualMFADevice.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VirtualMFADevice.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5832,6 +6867,9 @@ module UserListType =
   struct
     type nonrec t = User.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:User.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5876,6 +6914,9 @@ module PolicyNameListType =
   struct
     type nonrec t = PolicyNameType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyNameType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5901,6 +6942,9 @@ module CertificateListType =
   struct
     type nonrec t = SigningCertificate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SigningCertificate.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5938,9 +6982,9 @@ module ServiceNotSupportedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" ServiceNotSupportedMessage.of_json in
+        field_map json__ "message" ServiceNotSupportedMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5949,6 +6993,9 @@ module ServiceSpecificCredentialsListType =
   struct
     type nonrec t = ServiceSpecificCredentialMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceSpecificCredentialMetadata.to_value)) |>
         (fun x -> `List x)
@@ -5972,10 +7019,26 @@ module ServiceSpecificCredentialsListType =
         ~of_json:ServiceSpecificCredentialMetadata.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AllUsers =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module ServerCertificateMetadataListType =
   struct
     type nonrec t = ServerCertificateMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServerCertificateMetadata.to_value)) |>
         (fun x -> `List x)
@@ -6002,6 +7065,9 @@ module SSHPublicKeyListType =
   struct
     type nonrec t = SSHPublicKeyMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SSHPublicKeyMetadata.to_value)) |>
         (fun x -> `List x)
@@ -6028,6 +7094,9 @@ module SAMLProviderListType =
   struct
     type nonrec t = SAMLProviderListEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SAMLProviderListEntry.to_value)) |>
         (fun x -> `List x)
@@ -6054,6 +7123,9 @@ module PolicyListType =
   struct
     type nonrec t = Policy.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Policy.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6131,6 +7203,9 @@ module ListPolicyGrantingServiceAccessResponseListType =
   struct
     type nonrec t = ListPoliciesGrantingServiceAccessEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListPoliciesGrantingServiceAccessEntry.to_value))
         |> (fun x -> `List x)
@@ -6163,6 +7238,9 @@ module ServiceNamespaceListType =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceNamespaceType.to_value)) |>
         (fun x -> `List x)
@@ -6185,10 +7263,110 @@ module ServiceNamespaceListType =
         ~of_json:ServiceNamespaceType.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AccountNotManagementOrDelegatedAdministratorException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request was rejected because the account making the request is not the management account or delegated administrator account for centralized root access."]
+module FeaturesListType =
+  struct
+    type nonrec t = FeatureType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FeatureType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FeatureType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FeaturesListType" ~of_json:FeatureType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OrganizationIdType =
+  struct
+    type nonrec t = string
+    let context_ = "OrganizationIdType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:34) >>=
+             (fun () -> check_pattern i ~pattern:"^o-[a-z0-9]{10,32}$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OrganizationIdType" j
+    let to_json = simple_to_json to_value
+  end
+module OrganizationNotFoundException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request was rejected because no organization is associated with your account."]
+module OrganizationNotInAllFeaturesModeException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request was rejected because your organization does not have All features enabled. For more information, see Available feature sets in the Organizations User Guide."]
+module ServiceAccessNotEnabledException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request was rejected because trusted access is not enabled for IAM in Organizations. For details, see IAM and Organizations in the Organizations User Guide."]
 module OpenIDConnectProviderListType =
   struct
     type nonrec t = OpenIDConnectProviderListEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpenIDConnectProviderListEntry.to_value)) |>
         (fun x -> `List x)
@@ -6215,6 +7393,9 @@ module MfaDeviceListType =
   struct
     type nonrec t = MFADevice.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MFADevice.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6239,6 +7420,9 @@ module GroupListType =
   struct
     type nonrec t = Group.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Group.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6263,6 +7447,9 @@ module PolicyGroupListType =
   struct
     type nonrec t = PolicyGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6287,6 +7474,9 @@ module PolicyRoleListType =
   struct
     type nonrec t = PolicyRole.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyRole.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6311,6 +7501,9 @@ module PolicyUserListType =
   struct
     type nonrec t = PolicyUser.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyUser.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6331,10 +7524,41 @@ module PolicyUserListType =
       list_of_json ~kind:"PolicyUserListType" ~of_json:PolicyUser.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DelegationRequestsListType =
+  struct
+    type nonrec t = DelegationRequest.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DelegationRequest.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DelegationRequest.of_xml)
+    let of_json j =
+      list_of_json ~kind:"delegationRequestsListType"
+        ~of_json:DelegationRequest.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AccountAliasListType =
   struct
     type nonrec t = AccountAliasType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountAliasType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6360,6 +7584,9 @@ module AccessKeyMetadataListType =
   struct
     type nonrec t = AccessKeyMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccessKeyMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6433,10 +7660,10 @@ module DeletionTaskFailureReasonType =
         (Option.map ~f:ReasonType.of_xml) (Xml.child xml_arg0 "Reason") in
       make ?roleUsageList ?reason ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let roleUsageList =
-        field_map json "RoleUsageList" RoleUsageListType.of_json in
-      let reason = field_map json "Reason" ReasonType.of_json in
+        field_map json__ "RoleUsageList" RoleUsageListType.of_json in
+      let reason = field_map json__ "Reason" ReasonType.of_json in
       make ?roleUsageList ?reason ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6496,30 +7723,28 @@ module ErrorDetails =
   struct
     type nonrec t =
       {
-      message: StringType.t
+      message: StringType.t option
         [@ocaml.doc
           "Detailed information about the reason that the operation failed."];
-      code: StringType.t
+      code: StringType.t option
         [@ocaml.doc "The error code associated with the operation failure."]}
-    let context_ = "ErrorDetails"
-    let make ~message = fun ~code -> fun () -> { message; code }
+    let make ?message = fun ?code -> fun () -> { message; code }
     let to_value x =
       structure_to_value
-        [("Message", (Some (StringType.to_value x.message)));
-        ("Code", (Some (StringType.to_value x.code)))]
+        [("Message", (Option.map x.message ~f:StringType.to_value));
+        ("Code", (Option.map x.code ~f:StringType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let code =
-        StringType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Code") in
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "Code") in
       let message =
-        StringType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~code ~message ()
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map_exn json "Code" StringType.of_json in
-      let message = field_map_exn json "Message" StringType.of_json in
-      make ~code ~message ()
+    let of_json json__ =
+      let code = field_map json__ "Code" StringType.of_json in
+      let message = field_map json__ "Message" StringType.of_json in
+      make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about the reason that the operation failed. This data type is used as a response element in the GetOrganizationsAccessReport, GetServiceLastAccessedDetails, and GetServiceLastAccessedDetailsWithEntities operations."]
@@ -6527,6 +7752,9 @@ module EntityDetailsListType =
   struct
     type nonrec t = EntityDetails.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EntityDetails.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6626,6 +7854,9 @@ module ServicesLastAccessed =
   struct
     type nonrec t = ServiceLastAccessed.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceLastAccessed.to_value)) |>
         (fun x -> `List x)
@@ -6652,35 +7883,34 @@ module ServerCertificate =
   struct
     type nonrec t =
       {
-      serverCertificateMetadata: ServerCertificateMetadata.t
+      serverCertificateMetadata: ServerCertificateMetadata.t option
         [@ocaml.doc
           "The meta information of the server certificate, such as its name, path, ID, and ARN."];
-      certificateBody: CertificateBodyType.t
+      certificateBody: CertificateBodyType.t option
         [@ocaml.doc "The contents of the public key certificate."];
       certificateChain: CertificateChainType.t option
         [@ocaml.doc "The contents of the public key certificate chain."];
       tags: TagListType.t option
         [@ocaml.doc
           "A list of tags that are attached to the server certificate. For more information about tagging, see Tagging IAM resources in the IAM User Guide."]}
-    let context_ = "ServerCertificate"
-    let make ?certificateChain =
-      fun ?tags ->
-        fun ~serverCertificateMetadata ->
-          fun ~certificateBody ->
+    let make ?serverCertificateMetadata =
+      fun ?certificateBody ->
+        fun ?certificateChain ->
+          fun ?tags ->
             fun () ->
               {
-                certificateChain;
-                tags;
                 serverCertificateMetadata;
-                certificateBody
+                certificateBody;
+                certificateChain;
+                tags
               }
     let to_value x =
       structure_to_value
         [("ServerCertificateMetadata",
-           (Some
-              (ServerCertificateMetadata.to_value x.serverCertificateMetadata)));
+           (Option.map x.serverCertificateMetadata
+              ~f:ServerCertificateMetadata.to_value));
         ("CertificateBody",
-          (Some (CertificateBodyType.to_value x.certificateBody)));
+          (Option.map x.certificateBody ~f:CertificateBodyType.to_value));
         ("CertificateChain",
           (Option.map x.certificateChain ~f:CertificateChainType.to_value));
         ("Tags", (Option.map x.tags ~f:TagListType.to_value))]
@@ -6692,26 +7922,25 @@ module ServerCertificate =
         (Option.map ~f:CertificateChainType.of_xml)
           (Xml.child xml_arg0 "CertificateChain") in
       let certificateBody =
-        CertificateBodyType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CertificateBody") in
+        (Option.map ~f:CertificateBodyType.of_xml)
+          (Xml.child xml_arg0 "CertificateBody") in
       let serverCertificateMetadata =
-        ServerCertificateMetadata.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ServerCertificateMetadata") in
-      make ?tags ?certificateChain ~certificateBody
-        ~serverCertificateMetadata ()
+        (Option.map ~f:ServerCertificateMetadata.of_xml)
+          (Xml.child xml_arg0 "ServerCertificateMetadata") in
+      make ?tags ?certificateChain ?certificateBody
+        ?serverCertificateMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
       let certificateChain =
-        field_map json "CertificateChain" CertificateChainType.of_json in
+        field_map json__ "CertificateChain" CertificateChainType.of_json in
       let certificateBody =
-        field_map_exn json "CertificateBody" CertificateBodyType.of_json in
+        field_map json__ "CertificateBody" CertificateBodyType.of_json in
       let serverCertificateMetadata =
-        field_map_exn json "ServerCertificateMetadata"
+        field_map json__ "ServerCertificateMetadata"
           ServerCertificateMetadata.of_json in
-      make ?tags ?certificateChain ~certificateBody
-        ~serverCertificateMetadata ()
+      make ?tags ?certificateChain ?certificateBody
+        ?serverCertificateMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about a server certificate. This data type is used as a response element in the GetServerCertificate operation."]
@@ -6734,10 +7963,63 @@ module EncodingType =
     let of_json j = of_string (string_of_json ~kind:"encodingType" j)
     let to_json = simple_to_json to_value
   end
+module PrivateKeyList =
+  struct
+    type nonrec t = SAMLPrivateKey.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:2); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SAMLPrivateKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SAMLPrivateKey.of_xml)
+    let of_json j =
+      list_of_json ~kind:"privateKeyList" ~of_json:SAMLPrivateKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FeatureDisabledException =
+  struct
+    type nonrec t = {
+      message: FeatureDisabledMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message",
+           (Option.map x.message ~f:FeatureDisabledMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:FeatureDisabledMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" FeatureDisabledMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request failed because outbound identity federation is already disabled for your Amazon Web Services account. You cannot disable the feature multiple times"]
 module AccessDetails =
   struct
     type nonrec t = AccessDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccessDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6817,6 +8099,9 @@ module ClientIDListType =
   struct
     type nonrec t = ClientIDType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClientIDType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6837,27 +8122,58 @@ module ClientIDListType =
       list_of_json ~kind:"clientIDListType" ~of_json:ClientIDType.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CertificationMapType =
+  struct
+    type nonrec t = (CertificationKeyType.t * CertificationValueType.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((CertificationKeyType.of_string chopped),
+                              (CertificationValueType.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (CertificationKeyType.to_value x) |>
+                    (fun x ->
+                       (CertificationValueType.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:CertificationKeyType.of_string
+        ~of_json:CertificationValueType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module LoginProfile =
   struct
     type nonrec t =
       {
-      userName: UserNameType.t
+      userName: UserNameType.t option
         [@ocaml.doc
           "The name of the user, which can be used for signing in to the Amazon Web Services Management Console."];
-      createDate: DateType.t
+      createDate: DateType.t option
         [@ocaml.doc "The date when the password for the user was created."];
       passwordResetRequired: BooleanType.t option
         [@ocaml.doc
           "Specifies whether the user is required to set a new password on next sign-in."]}
-    let context_ = "LoginProfile"
-    let make ?passwordResetRequired =
-      fun ~userName ->
-        fun ~createDate ->
-          fun () -> { passwordResetRequired; userName; createDate }
+    let make ?userName =
+      fun ?createDate ->
+        fun ?passwordResetRequired ->
+          fun () -> { userName; createDate; passwordResetRequired }
     let to_value x =
       structure_to_value
-        [("UserName", (Some (UserNameType.to_value x.userName)));
-        ("CreateDate", (Some (DateType.to_value x.createDate)));
+        [("UserName", (Option.map x.userName ~f:UserNameType.to_value));
+        ("CreateDate", (Option.map x.createDate ~f:DateType.to_value));
         ("PasswordResetRequired",
           (Option.map x.passwordResetRequired ~f:BooleanType.to_value))]
     let to_query v = to_query to_value v
@@ -6866,22 +8182,147 @@ module LoginProfile =
         (Option.map ~f:BooleanType.of_xml)
           (Xml.child xml_arg0 "PasswordResetRequired") in
       let createDate =
-        DateType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateDate") in
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "CreateDate") in
       let userName =
-        UserNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
-      make ?passwordResetRequired ~createDate ~userName ()
+        (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
+      make ?passwordResetRequired ?createDate ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let passwordResetRequired =
-        field_map json "PasswordResetRequired" BooleanType.of_json in
-      let createDate = field_map_exn json "CreateDate" DateType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
-      make ?passwordResetRequired ~createDate ~userName ()
+        field_map json__ "PasswordResetRequired" BooleanType.of_json in
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
+      make ?passwordResetRequired ?createDate ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the user name and password create date for a user. This data type is used as a response element in the CreateLoginProfile and GetLoginProfile operations."]
+module LocaleType =
+  struct
+    type nonrec t = string
+    let context_ = "localeType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:12) >>=
+             (fun () -> check_string_min i ~min:2));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"localeType" j
+    let to_json = simple_to_json to_value
+  end
+module SummaryContentType =
+  struct
+    type nonrec t = string
+    let context_ = "summaryContentType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:10000) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"summaryContentType" j
+    let to_json = simple_to_json to_value
+  end
+module SummaryStateType =
+  struct
+    type nonrec t =
+      | AVAILABLE 
+      | NOT_AVAILABLE 
+      | NOT_SUPPORTED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AVAILABLE -> "AVAILABLE"
+      | NOT_AVAILABLE -> "NOT_AVAILABLE"
+      | NOT_SUPPORTED -> "NOT_SUPPORTED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AVAILABLE" -> AVAILABLE
+      | "NOT_AVAILABLE" -> NOT_AVAILABLE
+      | "NOT_SUPPORTED" -> NOT_SUPPORTED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration summaryStateType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"summaryStateType" j)
+    let to_json = simple_to_json to_value
+  end
+module PermissionCheckResultType =
+  struct
+    type nonrec t =
+      | ALLOWED 
+      | DENIED 
+      | UNSURE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ALLOWED -> "ALLOWED"
+      | DENIED -> "DENIED"
+      | UNSURE -> "UNSURE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ALLOWED" -> ALLOWED
+      | "DENIED" -> DENIED
+      | "UNSURE" -> UNSURE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration permissionCheckResultType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"permissionCheckResultType" j)
+    let to_json = simple_to_json to_value
+  end
+module PermissionCheckStatusType =
+  struct
+    type nonrec t =
+      | COMPLETE 
+      | IN_PROGRESS 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | COMPLETE -> "COMPLETE"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "COMPLETE" -> COMPLETE
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration permissionCheckStatusType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"permissionCheckStatusType" j)
+    let to_json = simple_to_json to_value
+  end
 module CredentialReportExpiredException =
   struct
     type nonrec t =
@@ -6900,9 +8341,9 @@ module CredentialReportExpiredException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message"
+        field_map json__ "message"
           CredentialReportExpiredExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
@@ -6926,9 +8367,9 @@ module CredentialReportNotPresentException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message"
+        field_map json__ "message"
           CredentialReportNotPresentExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
@@ -6952,9 +8393,9 @@ module CredentialReportNotReadyException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message"
+        field_map json__ "message"
           CredentialReportNotReadyExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
@@ -7010,6 +8451,8 @@ module SummaryMapType =
                        (SummaryValueType.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -7133,27 +8576,28 @@ module PasswordPolicy =
         ?requireLowercaseCharacters ?requireUppercaseCharacters
         ?requireNumbers ?requireSymbols ?minimumPasswordLength ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hardExpiry = field_map json "HardExpiry" BooleanObjectType.of_json in
+    let of_json json__ =
+      let hardExpiry =
+        field_map json__ "HardExpiry" BooleanObjectType.of_json in
       let passwordReusePrevention =
-        field_map json "PasswordReusePrevention"
+        field_map json__ "PasswordReusePrevention"
           PasswordReusePreventionType.of_json in
       let maxPasswordAge =
-        field_map json "MaxPasswordAge" MaxPasswordAgeType.of_json in
+        field_map json__ "MaxPasswordAge" MaxPasswordAgeType.of_json in
       let expirePasswords =
-        field_map json "ExpirePasswords" BooleanType.of_json in
+        field_map json__ "ExpirePasswords" BooleanType.of_json in
       let allowUsersToChangePassword =
-        field_map json "AllowUsersToChangePassword" BooleanType.of_json in
+        field_map json__ "AllowUsersToChangePassword" BooleanType.of_json in
       let requireLowercaseCharacters =
-        field_map json "RequireLowercaseCharacters" BooleanType.of_json in
+        field_map json__ "RequireLowercaseCharacters" BooleanType.of_json in
       let requireUppercaseCharacters =
-        field_map json "RequireUppercaseCharacters" BooleanType.of_json in
+        field_map json__ "RequireUppercaseCharacters" BooleanType.of_json in
       let requireNumbers =
-        field_map json "RequireNumbers" BooleanType.of_json in
+        field_map json__ "RequireNumbers" BooleanType.of_json in
       let requireSymbols =
-        field_map json "RequireSymbols" BooleanType.of_json in
+        field_map json__ "RequireSymbols" BooleanType.of_json in
       let minimumPasswordLength =
-        field_map json "MinimumPasswordLength"
+        field_map json__ "MinimumPasswordLength"
           MinimumPasswordLengthType.of_json in
       make ?hardExpiry ?passwordReusePrevention ?maxPasswordAge
         ?expirePasswords ?allowUsersToChangePassword
@@ -7166,6 +8610,9 @@ module ManagedPolicyDetailListType =
   struct
     type nonrec t = ManagedPolicyDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ManagedPolicyDetail.to_value)) |>
         (fun x -> `List x)
@@ -7192,6 +8639,9 @@ module GroupDetailListType =
   struct
     type nonrec t = GroupDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroupDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7216,6 +8666,9 @@ module RoleDetailListType =
   struct
     type nonrec t = RoleDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RoleDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7240,6 +8693,9 @@ module UserDetailListType =
   struct
     type nonrec t = UserDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UserDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7264,6 +8720,9 @@ module EntityListType =
   struct
     type nonrec t = EntityType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EntityType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7288,41 +8747,38 @@ module AccessKeyLastUsed =
   struct
     type nonrec t =
       {
-      lastUsedDate: DateType.t
+      lastUsedDate: DateType.t option
         [@ocaml.doc
           "The date and time, in ISO 8601 date-time format, when the access key was most recently used. This field is null in the following situations: The user does not have an access key. An access key exists but has not been used since IAM began tracking this information. There is no sign-in data associated with the user."];
-      serviceName: StringType.t
+      serviceName: StringType.t option
         [@ocaml.doc
           "The name of the Amazon Web Services service with which this access key was most recently used. The value of this field is \"N/A\" in the following situations: The user does not have an access key. An access key exists but has not been used since IAM started tracking this information. There is no sign-in data associated with the user."];
-      region: StringType.t
+      region: StringType.t option
         [@ocaml.doc
           "The Amazon Web Services Region where this access key was most recently used. The value for this field is \"N/A\" in the following situations: The user does not have an access key. An access key exists but has not been used since IAM began tracking this information. There is no sign-in data associated with the user. For more information about Amazon Web Services Regions, see Regions and endpoints in the Amazon Web Services General Reference."]}
-    let context_ = "AccessKeyLastUsed"
-    let make ~lastUsedDate =
-      fun ~serviceName ->
-        fun ~region -> fun () -> { lastUsedDate; serviceName; region }
+    let make ?lastUsedDate =
+      fun ?serviceName ->
+        fun ?region -> fun () -> { lastUsedDate; serviceName; region }
     let to_value x =
       structure_to_value
-        [("LastUsedDate", (Some (DateType.to_value x.lastUsedDate)));
-        ("ServiceName", (Some (StringType.to_value x.serviceName)));
-        ("Region", (Some (StringType.to_value x.region)))]
+        [("LastUsedDate", (Option.map x.lastUsedDate ~f:DateType.to_value));
+        ("ServiceName", (Option.map x.serviceName ~f:StringType.to_value));
+        ("Region", (Option.map x.region ~f:StringType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let region =
-        StringType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Region") in
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "Region") in
       let serviceName =
-        StringType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceName") in
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "ServiceName") in
       let lastUsedDate =
-        DateType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LastUsedDate") in
-      make ~region ~serviceName ~lastUsedDate ()
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "LastUsedDate") in
+      make ?region ?serviceName ?lastUsedDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let region = field_map_exn json "Region" StringType.of_json in
-      let serviceName = field_map_exn json "ServiceName" StringType.of_json in
-      let lastUsedDate = field_map_exn json "LastUsedDate" DateType.of_json in
-      make ~region ~serviceName ~lastUsedDate ()
+    let of_json json__ =
+      let region = field_map json__ "Region" StringType.of_json in
+      let serviceName = field_map json__ "ServiceName" StringType.of_json in
+      let lastUsedDate = field_map json__ "LastUsedDate" DateType.of_json in
+      make ?region ?serviceName ?lastUsedDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about the last time an Amazon Web Services access key was used since IAM began tracking this information on April 22, 2015. This data type is used as a response element in the GetAccessKeyLastUsed operation."]
@@ -7343,9 +8799,10 @@ module ReportGenerationLimitExceededException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" ReportGenerationLimitExceededMessage.of_json in
+        field_map json__ "message"
+          ReportGenerationLimitExceededMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7421,6 +8878,41 @@ module EntityTemporarilyUnmodifiableMessage =
       string_of_json ~kind:"entityTemporarilyUnmodifiableMessage" j
     let to_json = simple_to_json to_value
   end
+module FeatureEnabledException =
+  struct
+    type nonrec t = {
+      message: FeatureEnabledMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message",
+           (Option.map x.message ~f:FeatureEnabledMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:FeatureEnabledMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" FeatureEnabledMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request failed because outbound identity federation is already enabled for your Amazon Web Services account. You cannot enable the feature multiple times. To fetch the current configuration (including the unique issuer URL), use the GetOutboundWebIdentityFederationInfo operation."]
+module CallerIsNotManagementAccountException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request was rejected because the account making the request is not the management account for the organization."]
 module DeleteConflictMessage =
   struct
     type nonrec t = string
@@ -7450,6 +8942,25 @@ module VirtualMFADeviceName =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"virtualMFADeviceName" j
+    let to_json = simple_to_json to_value
+  end
+module CredentialAgeDays =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:36600) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for credentialAgeDays" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module CustomSuffixType =
@@ -7508,13 +9019,39 @@ module MalformedPolicyDocumentException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" MalformedPolicyDocumentMessage.of_json in
+        field_map json__ "message" MalformedPolicyDocumentMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request was rejected because the policy document was malformed. The error message describes the specific error."]
+module OpenIdIdpCommunicationErrorException =
+  struct
+    type nonrec t =
+      {
+      message: OpenIdIdpCommunicationErrorExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message",
+           (Option.map x.message
+              ~f:OpenIdIdpCommunicationErrorExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:OpenIdIdpCommunicationErrorExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message =
+        field_map json__ "message"
+          OpenIdIdpCommunicationErrorExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request failed because IAM cannot connect to the OpenID Connect identity provider URL."]
 module PasswordPolicyViolationException =
   struct
     type nonrec t = {
@@ -7531,72 +9068,131 @@ module PasswordPolicyViolationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" PasswordPolicyViolationMessage.of_json in
+        field_map json__ "message" PasswordPolicyViolationMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request was rejected because the provided password did not meet the requirements imposed by the account password policy."]
+module ConsoleDeepLinkType =
+  struct
+    type nonrec t = string
+    let context_ = "consoleDeepLinkType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"consoleDeepLinkType" j
+    let to_json = simple_to_json to_value
+  end
+module NotificationChannelType =
+  struct
+    type nonrec t = string
+    let context_ = "notificationChannelType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:2) >>=
+             (fun () ->
+                (check_string_max i ~max:400) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9:_.-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"notificationChannelType" j
+    let to_json = simple_to_json to_value
+  end
+module RequestorWorkflowIdType =
+  struct
+    type nonrec t = string
+    let context_ = "requestorWorkflowIdType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:5) >>=
+             (fun () ->
+                (check_string_max i ~max:400) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0009\\u000A\\u000D\\u0020-\\u007E\\u00A1-\\u00FF]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"requestorWorkflowIdType" j
+    let to_json = simple_to_json to_value
+  end
 module AccessKey =
   struct
     type nonrec t =
       {
-      userName: UserNameType.t
+      userName: UserNameType.t option
         [@ocaml.doc
           "The name of the IAM user that the access key is associated with."];
-      accessKeyId: AccessKeyIdType.t
+      accessKeyId: AccessKeyIdType.t option
         [@ocaml.doc "The ID for this access key."];
-      status: StatusType.t
+      status: StatusType.t option
         [@ocaml.doc
           "The status of the access key. Active means that the key is valid for API calls, while Inactive means it is not."];
-      secretAccessKey: AccessKeySecretType.t
+      secretAccessKey: AccessKeySecretType.t option
         [@ocaml.doc "The secret key used to sign requests."];
       createDate: DateType.t option
         [@ocaml.doc "The date when the access key was created."]}
-    let context_ = "AccessKey"
-    let make ?createDate =
-      fun ~userName ->
-        fun ~accessKeyId ->
-          fun ~status ->
-            fun ~secretAccessKey ->
+    let make ?userName =
+      fun ?accessKeyId ->
+        fun ?status ->
+          fun ?secretAccessKey ->
+            fun ?createDate ->
               fun () ->
-                { createDate; userName; accessKeyId; status; secretAccessKey
+                { userName; accessKeyId; status; secretAccessKey; createDate
                 }
     let to_value x =
       structure_to_value
-        [("UserName", (Some (UserNameType.to_value x.userName)));
-        ("AccessKeyId", (Some (AccessKeyIdType.to_value x.accessKeyId)));
-        ("Status", (Some (StatusType.to_value x.status)));
+        [("UserName", (Option.map x.userName ~f:UserNameType.to_value));
+        ("AccessKeyId",
+          (Option.map x.accessKeyId ~f:AccessKeyIdType.to_value));
+        ("Status", (Option.map x.status ~f:StatusType.to_value));
         ("SecretAccessKey",
-          (Some (AccessKeySecretType.to_value x.secretAccessKey)));
+          (Option.map x.secretAccessKey ~f:AccessKeySecretType.to_value));
         ("CreateDate", (Option.map x.createDate ~f:DateType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let createDate =
         (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "CreateDate") in
       let secretAccessKey =
-        AccessKeySecretType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SecretAccessKey") in
+        (Option.map ~f:AccessKeySecretType.of_xml)
+          (Xml.child xml_arg0 "SecretAccessKey") in
       let status =
-        StatusType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:StatusType.of_xml) (Xml.child xml_arg0 "Status") in
       let accessKeyId =
-        AccessKeyIdType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccessKeyId") in
+        (Option.map ~f:AccessKeyIdType.of_xml)
+          (Xml.child xml_arg0 "AccessKeyId") in
       let userName =
-        UserNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
-      make ?createDate ~secretAccessKey ~status ~accessKeyId ~userName ()
+        (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
+      make ?createDate ?secretAccessKey ?status ?accessKeyId ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createDate = field_map json "CreateDate" DateType.of_json in
+    let of_json json__ =
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
       let secretAccessKey =
-        field_map_exn json "SecretAccessKey" AccessKeySecretType.of_json in
-      let status = field_map_exn json "Status" StatusType.of_json in
+        field_map json__ "SecretAccessKey" AccessKeySecretType.of_json in
+      let status = field_map json__ "Status" StatusType.of_json in
       let accessKeyId =
-        field_map_exn json "AccessKeyId" AccessKeyIdType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
-      make ?createDate ~secretAccessKey ~status ~accessKeyId ~userName ()
+        field_map json__ "AccessKeyId" AccessKeyIdType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
+      make ?createDate ?secretAccessKey ?status ?accessKeyId ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about an Amazon Web Services access key. This data type is used as a response element in the CreateAccessKey and ListAccessKeys operations. The SecretAccessKey value is returned only in response to CreateAccessKey. You can get a secret access key only when you first create an access key; you cannot recover the secret access key later. If you lose a secret access key, you must create a new access key."]
@@ -7604,7 +9200,7 @@ module UploadSigningCertificateResponse =
   struct
     type uploadSigningCertificateResult =
       {
-      certificate: SigningCertificate.t
+      certificate: SigningCertificate.t option
         [@ocaml.doc "Information about the certificate."]}
     and responseMetaData = unit
     and t =
@@ -7612,7 +9208,9 @@ module UploadSigningCertificateResponse =
       uploadSigningCertificateResult: uploadSigningCertificateResult ;
       responseMetaData: responseMetaData }
     type error =
-      [ `DuplicateCertificateException of DuplicateCertificateException.t 
+      [
+        `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `DuplicateCertificateException of DuplicateCertificateException.t 
       | `EntityAlreadyExistsException of EntityAlreadyExistsException.t 
       | `InvalidCertificateException of InvalidCertificateException.t 
       | `LimitExceededException of LimitExceededException.t 
@@ -7621,7 +9219,7 @@ module UploadSigningCertificateResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "UploadSigningCertificateResponse"
-    let make ~certificate =
+    let make ?certificate =
       fun () ->
         {
           uploadSigningCertificateResult = { certificate };
@@ -7629,6 +9227,9 @@ module UploadSigningCertificateResponse =
         }
     let error_of_json name json =
       match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
       | "DuplicateCertificateException" ->
           `DuplicateCertificateException
             (DuplicateCertificateException.of_json json)
@@ -7652,6 +9253,9 @@ module UploadSigningCertificateResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
       | "DuplicateCertificateException" ->
           `DuplicateCertificateException
             (DuplicateCertificateException.of_xml xml)
@@ -7674,6 +9278,10 @@ module UploadSigningCertificateResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
       | `DuplicateCertificateException e ->
           `Assoc
             [("error", (`String "DuplicateCertificateException"));
@@ -7710,7 +9318,8 @@ module UploadSigningCertificateResponse =
     let to_value t =
       let x = t.uploadSigningCertificateResult in
       structure_to_wrapped_value
-        [("Certificate", (Some (SigningCertificate.to_value x.certificate)))]
+        [("Certificate",
+           (Option.map x.certificate ~f:SigningCertificate.to_value))]
         ~wrapper:"UploadSigningCertificateResult"
         ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
@@ -7718,14 +9327,14 @@ module UploadSigningCertificateResponse =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "UploadSigningCertificateResult" in
       let certificate =
-        SigningCertificate.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Certificate") in
-      make ~certificate ()
+        (Option.map ~f:SigningCertificate.of_xml)
+          (Xml.child xml_arg0 "Certificate") in
+      make ?certificate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificate =
-        field_map_exn json "Certificate" SigningCertificate.of_json in
-      make ~certificate ()
+        field_map json__ "Certificate" SigningCertificate.of_json in
+      make ?certificate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful UploadSigningCertificate request."]
@@ -7758,10 +9367,10 @@ module UploadSigningCertificateRequest =
           (Xml.child xml_arg0 "UserName") in
       make ~certificateBody ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateBody =
-        field_map_exn json "CertificateBody" CertificateBodyType.of_json in
-      let userName = field_map json "UserName" ExistingUserNameType.of_json in
+        field_map_exn json__ "CertificateBody" CertificateBodyType.of_json in
+      let userName = field_map json__ "UserName" ExistingUserNameType.of_json in
       make ~certificateBody ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7897,10 +9506,10 @@ module UploadServerCertificateResponse =
           (Xml.child xml_arg0 "ServerCertificateMetadata") in
       make ?tags ?serverCertificateMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
       let serverCertificateMetadata =
-        field_map json "ServerCertificateMetadata"
+        field_map json__ "ServerCertificateMetadata"
           ServerCertificateMetadata.of_json in
       make ?tags ?serverCertificateMetadata ()
     let to_json v = composed_to_json to_value v
@@ -7975,17 +9584,18 @@ module UploadServerCertificateRequest =
       make ?tags ?certificateChain ~privateKey ~certificateBody
         ~serverCertificateName ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
       let certificateChain =
-        field_map json "CertificateChain" CertificateChainType.of_json in
-      let privateKey = field_map_exn json "PrivateKey" PrivateKeyType.of_json in
+        field_map json__ "CertificateChain" CertificateChainType.of_json in
+      let privateKey =
+        field_map_exn json__ "PrivateKey" PrivateKeyType.of_json in
       let certificateBody =
-        field_map_exn json "CertificateBody" CertificateBodyType.of_json in
+        field_map_exn json__ "CertificateBody" CertificateBodyType.of_json in
       let serverCertificateName =
-        field_map_exn json "ServerCertificateName"
+        field_map_exn json__ "ServerCertificateName"
           ServerCertificateNameType.of_json in
-      let path = field_map json "Path" PathType.of_json in
+      let path = field_map json__ "Path" PathType.of_json in
       make ?tags ?certificateChain ~privateKey ~certificateBody
         ~serverCertificateName ?path ()
     let to_json v = composed_to_json to_value v
@@ -8090,8 +9700,8 @@ module UploadSSHPublicKeyResponse =
           (Xml.child xml_arg0 "SSHPublicKey") in
       make ?sSHPublicKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sSHPublicKey = field_map json "SSHPublicKey" SSHPublicKey.of_json in
+    let of_json json__ =
+      let sSHPublicKey = field_map json__ "SSHPublicKey" SSHPublicKey.of_json in
       make ?sSHPublicKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8124,10 +9734,10 @@ module UploadSSHPublicKeyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~sSHPublicKeyBody ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sSHPublicKeyBody =
-        field_map_exn json "SSHPublicKeyBody" PublicKeyMaterialType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
+        field_map_exn json__ "SSHPublicKeyBody" PublicKeyMaterialType.of_json in
+      let userName = field_map_exn json__ "UserName" UserNameType.of_json in
       make ~sSHPublicKeyBody ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8166,11 +9776,11 @@ module UpdateUserRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?newUserName ?newPath ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let newUserName = field_map json "NewUserName" UserNameType.of_json in
-      let newPath = field_map json "NewPath" PathType.of_json in
+    let of_json json__ =
+      let newUserName = field_map json__ "NewUserName" UserNameType.of_json in
+      let newPath = field_map json__ "NewPath" PathType.of_json in
       let userName =
-        field_map_exn json "UserName" ExistingUserNameType.of_json in
+        field_map_exn json__ "UserName" ExistingUserNameType.of_json in
       make ?newUserName ?newPath ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8211,11 +9821,11 @@ module UpdateSigningCertificateRequest =
           (Xml.child xml_arg0 "UserName") in
       make ~status ~certificateId ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" StatusType.of_json in
+    let of_json json__ =
+      let status = field_map_exn json__ "Status" StatusType.of_json in
       let certificateId =
-        field_map_exn json "CertificateId" CertificateIdType.of_json in
-      let userName = field_map json "UserName" ExistingUserNameType.of_json in
+        field_map_exn json__ "CertificateId" CertificateIdType.of_json in
+      let userName = field_map json__ "UserName" ExistingUserNameType.of_json in
       make ~status ~certificateId ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8258,12 +9868,12 @@ module UpdateServiceSpecificCredentialRequest =
         (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
       make ~status ~serviceSpecificCredentialId ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" StatusType.of_json in
+    let of_json json__ =
+      let status = field_map_exn json__ "Status" StatusType.of_json in
       let serviceSpecificCredentialId =
-        field_map_exn json "ServiceSpecificCredentialId"
+        field_map_exn json__ "ServiceSpecificCredentialId"
           ServiceSpecificCredentialId.of_json in
-      let userName = field_map json "UserName" UserNameType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
       make ~status ~serviceSpecificCredentialId ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8307,13 +9917,13 @@ module UpdateServerCertificateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServerCertificateName") in
       make ?newServerCertificateName ?newPath ~serverCertificateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let newServerCertificateName =
-        field_map json "NewServerCertificateName"
+        field_map json__ "NewServerCertificateName"
           ServerCertificateNameType.of_json in
-      let newPath = field_map json "NewPath" PathType.of_json in
+      let newPath = field_map json__ "NewPath" PathType.of_json in
       let serverCertificateName =
-        field_map_exn json "ServerCertificateName"
+        field_map_exn json__ "ServerCertificateName"
           ServerCertificateNameType.of_json in
       make ?newServerCertificateName ?newPath ~serverCertificateName ()
     let to_json v = composed_to_json to_value v
@@ -8354,11 +9964,11 @@ module UpdateSSHPublicKeyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~status ~sSHPublicKeyId ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" StatusType.of_json in
+    let of_json json__ =
+      let status = field_map_exn json__ "Status" StatusType.of_json in
       let sSHPublicKeyId =
-        field_map_exn json "SSHPublicKeyId" PublicKeyIdType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
+        field_map_exn json__ "SSHPublicKeyId" PublicKeyIdType.of_json in
+      let userName = field_map_exn json__ "UserName" UserNameType.of_json in
       make ~status ~sSHPublicKeyId ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8376,7 +9986,9 @@ module UpdateSAMLProviderResponse =
       updateSAMLProviderResult: updateSAMLProviderResult ;
       responseMetaData: responseMetaData }
     type error =
-      [ `InvalidInputException of InvalidInputException.t 
+      [
+        `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `InvalidInputException of InvalidInputException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `NoSuchEntityException of NoSuchEntityException.t 
       | `ServiceFailureException of ServiceFailureException.t 
@@ -8390,6 +10002,9 @@ module UpdateSAMLProviderResponse =
         }
     let error_of_json name json =
       match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
       | "InvalidInputException" ->
           `InvalidInputException (InvalidInputException.of_json json)
       | "LimitExceededException" ->
@@ -8403,6 +10018,9 @@ module UpdateSAMLProviderResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
       | "InvalidInputException" ->
           `InvalidInputException (InvalidInputException.of_xml xml)
       | "LimitExceededException" ->
@@ -8415,6 +10033,10 @@ module UpdateSAMLProviderResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
       | `InvalidInputException e ->
           `Assoc
             [("error", (`String "InvalidInputException"));
@@ -8450,8 +10072,9 @@ module UpdateSAMLProviderResponse =
         (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "SAMLProviderArn") in
       make ?sAMLProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sAMLProviderArn = field_map json "SAMLProviderArn" ArnType.of_json in
+    let of_json json__ =
+      let sAMLProviderArn =
+        field_map json__ "SAMLProviderArn" ArnType.of_json in
       make ?sAMLProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8460,41 +10083,85 @@ module UpdateSAMLProviderRequest =
   struct
     type nonrec t =
       {
-      sAMLMetadataDocument: SAMLMetadataDocumentType.t
+      sAMLMetadataDocument: SAMLMetadataDocumentType.t option
         [@ocaml.doc
-          "An XML document generated by an identity provider (IdP) that supports SAML 2.0. The document includes the issuer's name, expiration information, and keys that can be used to validate the SAML authentication response (assertions) that are received from the IdP. You must generate the metadata document using the identity management software that is used as your organization's IdP."];
+          "An XML document generated by an identity provider (IdP) that supports SAML 2.0. The document includes the issuer's name, expiration information, and keys that can be used to validate the SAML authentication response (assertions) that are received from the IdP. You must generate the metadata document using the identity management software that is used as your IdP."];
       sAMLProviderArn: ArnType.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the SAML provider to update. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."]}
+          "The Amazon Resource Name (ARN) of the SAML provider to update. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."];
+      assertionEncryptionMode: AssertionEncryptionModeType.t option
+        [@ocaml.doc
+          "Specifies the encryption setting for the SAML provider."];
+      addPrivateKey: PrivateKeyType.t option
+        [@ocaml.doc
+          "Specifies the new private key from your external identity provider. The private key must be a .pem file that uses AES-GCM or AES-CBC encryption algorithm to decrypt SAML assertions."];
+      removePrivateKey: PrivateKeyIdType.t option
+        [@ocaml.doc "The Key ID of the private key to remove."]}
     let context_ = "UpdateSAMLProviderRequest"
-    let make ~sAMLMetadataDocument =
-      fun ~sAMLProviderArn ->
-        fun () -> { sAMLMetadataDocument; sAMLProviderArn }
+    let make ?sAMLMetadataDocument =
+      fun ?assertionEncryptionMode ->
+        fun ?addPrivateKey ->
+          fun ?removePrivateKey ->
+            fun ~sAMLProviderArn ->
+              fun () ->
+                {
+                  sAMLMetadataDocument;
+                  assertionEncryptionMode;
+                  addPrivateKey;
+                  removePrivateKey;
+                  sAMLProviderArn
+                }
     let to_value x =
       structure_to_value
         [("SAMLMetadataDocument",
-           (Some (SAMLMetadataDocumentType.to_value x.sAMLMetadataDocument)));
-        ("SAMLProviderArn", (Some (ArnType.to_value x.sAMLProviderArn)))]
+           (Option.map x.sAMLMetadataDocument
+              ~f:SAMLMetadataDocumentType.to_value));
+        ("SAMLProviderArn", (Some (ArnType.to_value x.sAMLProviderArn)));
+        ("AssertionEncryptionMode",
+          (Option.map x.assertionEncryptionMode
+             ~f:AssertionEncryptionModeType.to_value));
+        ("AddPrivateKey",
+          (Option.map x.addPrivateKey ~f:PrivateKeyType.to_value));
+        ("RemovePrivateKey",
+          (Option.map x.removePrivateKey ~f:PrivateKeyIdType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let removePrivateKey =
+        (Option.map ~f:PrivateKeyIdType.of_xml)
+          (Xml.child xml_arg0 "RemovePrivateKey") in
+      let addPrivateKey =
+        (Option.map ~f:PrivateKeyType.of_xml)
+          (Xml.child xml_arg0 "AddPrivateKey") in
+      let assertionEncryptionMode =
+        (Option.map ~f:AssertionEncryptionModeType.of_xml)
+          (Xml.child xml_arg0 "AssertionEncryptionMode") in
       let sAMLProviderArn =
         ArnType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SAMLProviderArn") in
       let sAMLMetadataDocument =
-        SAMLMetadataDocumentType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SAMLMetadataDocument") in
-      make ~sAMLProviderArn ~sAMLMetadataDocument ()
+        (Option.map ~f:SAMLMetadataDocumentType.of_xml)
+          (Xml.child xml_arg0 "SAMLMetadataDocument") in
+      make ?removePrivateKey ?addPrivateKey ?assertionEncryptionMode
+        ~sAMLProviderArn ?sAMLMetadataDocument ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let removePrivateKey =
+        field_map json__ "RemovePrivateKey" PrivateKeyIdType.of_json in
+      let addPrivateKey =
+        field_map json__ "AddPrivateKey" PrivateKeyType.of_json in
+      let assertionEncryptionMode =
+        field_map json__ "AssertionEncryptionMode"
+          AssertionEncryptionModeType.of_json in
       let sAMLProviderArn =
-        field_map_exn json "SAMLProviderArn" ArnType.of_json in
+        field_map_exn json__ "SAMLProviderArn" ArnType.of_json in
       let sAMLMetadataDocument =
-        field_map_exn json "SAMLMetadataDocument"
+        field_map json__ "SAMLMetadataDocument"
           SAMLMetadataDocumentType.of_json in
-      make ~sAMLProviderArn ~sAMLMetadataDocument ()
+      make ?removePrivateKey ?addPrivateKey ?assertionEncryptionMode
+        ~sAMLProviderArn ?sAMLMetadataDocument ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the metadata document for an existing SAML provider resource object. This operation requires Signature Version 4."]
+       "Updates the metadata document, SAML encryption settings, and private keys for an existing SAML provider. To rotate private keys, add your new private key and then remove the old key in a separate request."]
 module UpdateRoleResponse =
   struct
     type updateRoleResult = unit
@@ -8571,7 +10238,7 @@ module UpdateRoleRequest =
           "The new description that you want to apply to the specified role."];
       maxSessionDuration: RoleMaxSessionDurationType.t option
         [@ocaml.doc
-          "The maximum session duration (in seconds) that you want to set for the specified role. If you do not specify a value for this setting, the default maximum of one hour is applied. This setting can have a value from 1 hour to 12 hours. Anyone who assumes the role from the CLI or API can use the DurationSeconds API parameter or the duration-seconds CLI parameter to request a longer session. The MaxSessionDuration setting determines the maximum duration that can be requested using the DurationSeconds parameter. If users don't specify a value for the DurationSeconds parameter, their security credentials are valid for one hour by default. This applies when you use the AssumeRole* API operations or the assume-role* CLI operations but does not apply when you use those operations to create a console URL. For more information, see Using IAM roles in the IAM User Guide."]}
+          "The maximum session duration (in seconds) that you want to set for the specified role. If you do not specify a value for this setting, the default value of one hour is applied. This setting can have a value from 1 hour to 12 hours. Anyone who assumes the role from the CLI or API can use the DurationSeconds API parameter or the duration-seconds CLI parameter to request a longer session. The MaxSessionDuration setting determines the maximum duration that can be requested using the DurationSeconds parameter. If users don't specify a value for the DurationSeconds parameter, their security credentials are valid for one hour by default. This applies when you use the AssumeRole* API operations or the assume-role* CLI operations but does not apply when you use those operations to create a console URL. For more information, see Using IAM roles in the IAM User Guide. IAM role credentials provided by Amazon EC2 instances assigned to the role are not subject to the specified maximum session duration."]}
     let context_ = "UpdateRoleRequest"
     let make ?description =
       fun ?maxSessionDuration ->
@@ -8598,13 +10265,13 @@ module UpdateRoleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ?maxSessionDuration ?description ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxSessionDuration =
-        field_map json "MaxSessionDuration"
+        field_map json__ "MaxSessionDuration"
           RoleMaxSessionDurationType.of_json in
       let description =
-        field_map json "Description" RoleDescriptionType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+        field_map json__ "Description" RoleDescriptionType.of_json in
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ?maxSessionDuration ?description ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8684,8 +10351,8 @@ module UpdateRoleDescriptionResponse =
       let role = (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "Role") in
       make ?role ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let role = field_map json "Role" Role.of_json in make ?role ()
+    let of_json json__ =
+      let role = field_map json__ "Role" Role.of_json in make ?role ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Use UpdateRole instead. Modifies only the description of a role. This operation performs the same function as the Description parameter in the UpdateRole operation."]
@@ -8715,10 +10382,10 @@ module UpdateRoleDescriptionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~description ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map_exn json "Description" RoleDescriptionType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+        field_map_exn json__ "Description" RoleDescriptionType.of_json in
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ~description ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8754,15 +10421,15 @@ module UpdateOpenIDConnectProviderThumbprintRequest =
              "OpenIDConnectProviderArn") in
       make ~thumbprintList ~openIDConnectProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let thumbprintList =
-        field_map_exn json "ThumbprintList" ThumbprintListType.of_json in
+        field_map_exn json__ "ThumbprintList" ThumbprintListType.of_json in
       let openIDConnectProviderArn =
-        field_map_exn json "OpenIDConnectProviderArn" ArnType.of_json in
+        field_map_exn json__ "OpenIDConnectProviderArn" ArnType.of_json in
       make ~thumbprintList ~openIDConnectProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Replaces the existing list of server certificate thumbprints associated with an OpenID Connect (OIDC) provider resource object with a new list of thumbprints. The list that you pass with this operation completely replaces the existing list of thumbprints. (The lists are not merged.) Typically, you need to update a thumbprint only when the identity provider certificate changes, which occurs rarely. However, if the provider's certificate does change, any attempt to assume an IAM role that specifies the OIDC provider as a principal fails until the certificate thumbprint is updated. Amazon Web Services secures communication with some OIDC identity providers (IdPs) through our library of trusted certificate authorities (CAs) instead of using a certificate thumbprint to verify your IdP server certificate. These OIDC IdPs include Google, and those that use an Amazon S3 bucket to host a JSON Web Key Set (JWKS) endpoint. In these cases, your legacy thumbprint remains in your configuration, but is no longer used for validation. Trust for the OIDC provider is derived from the provider certificate and is validated by the thumbprint. Therefore, it is best to limit access to the UpdateOpenIDConnectProviderThumbprint operation to highly privileged users."]
+       "Replaces the existing list of server certificate thumbprints associated with an OpenID Connect (OIDC) provider resource object with a new list of thumbprints. The list that you pass with this operation completely replaces the existing list of thumbprints. (The lists are not merged.) Typically, you need to update a thumbprint only when the identity provider certificate changes, which occurs rarely. However, if the provider's certificate does change, any attempt to assume an IAM role that specifies the OIDC provider as a principal fails until the certificate thumbprint is updated. Amazon Web Services secures communication with OIDC identity providers (IdPs) using our library of trusted root certificate authorities (CAs) to verify the JSON Web Key Set (JWKS) endpoint's TLS certificate. If your OIDC IdP relies on a certificate that is not signed by one of these trusted CAs, only then we secure communication using the thumbprints set in the IdP's configuration. Trust for the OIDC provider is derived from the provider certificate and is validated by the thumbprint. Therefore, it is best to limit access to the UpdateOpenIDConnectProviderThumbprint operation to highly privileged users."]
 module UpdateLoginProfileRequest =
   struct
     type nonrec t =
@@ -8799,11 +10466,11 @@ module UpdateLoginProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?passwordResetRequired ?password ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let passwordResetRequired =
-        field_map json "PasswordResetRequired" BooleanObjectType.of_json in
-      let password = field_map json "Password" PasswordType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
+        field_map json__ "PasswordResetRequired" BooleanObjectType.of_json in
+      let password = field_map json__ "Password" PasswordType.of_json in
+      let userName = field_map_exn json__ "UserName" UserNameType.of_json in
       make ?passwordResetRequired ?password ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8843,14 +10510,51 @@ module UpdateGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ?newGroupName ?newPath ~groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let newGroupName = field_map json "NewGroupName" GroupNameType.of_json in
-      let newPath = field_map json "NewPath" PathType.of_json in
-      let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
+    let of_json json__ =
+      let newGroupName =
+        field_map json__ "NewGroupName" GroupNameType.of_json in
+      let newPath = field_map json__ "NewPath" PathType.of_json in
+      let groupName = field_map_exn json__ "GroupName" GroupNameType.of_json in
       make ?newGroupName ?newPath ~groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the name and/or the path of the specified IAM group. You should understand the implications of changing a group's path or name. For more information, see Renaming users and groups in the IAM User Guide. The person making the request (the principal), must have permission to change the role group with the old name and the new name. For example, to change the group named Managers to MGRs, the principal must have a policy that allows them to update both groups. If the principal has permission to update the Managers group, but not the MGRs group, then the update fails. For more information about permissions, see Access management."]
+module UpdateDelegationRequestRequest =
+  struct
+    type nonrec t =
+      {
+      delegationRequestId: DelegationRequestIdType.t
+        [@ocaml.doc
+          "The unique identifier of the delegation request to update."];
+      notes: NotesType.t option
+        [@ocaml.doc
+          "Additional notes or comments to add to the delegation request."]}
+    let context_ = "UpdateDelegationRequestRequest"
+    let make ?notes =
+      fun ~delegationRequestId -> fun () -> { notes; delegationRequestId }
+    let to_value x =
+      structure_to_value
+        [("DelegationRequestId",
+           (Some (DelegationRequestIdType.to_value x.delegationRequestId)));
+        ("Notes", (Option.map x.notes ~f:NotesType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let notes =
+        (Option.map ~f:NotesType.of_xml) (Xml.child xml_arg0 "Notes") in
+      let delegationRequestId =
+        DelegationRequestIdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DelegationRequestId") in
+      make ?notes ~delegationRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notes = field_map json__ "Notes" NotesType.of_json in
+      let delegationRequestId =
+        field_map_exn json__ "DelegationRequestId"
+          DelegationRequestIdType.of_json in
+      make ?notes ~delegationRequestId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an existing delegation request with additional information. When the delegation request is updated, it reaches the PENDING_APPROVAL state. Once a delegation request has an owner, that owner gets a default permission to update the delegation request. For more details, see Managing Permissions for Delegation Requests."]
 module UpdateAssumeRolePolicyRequest =
   struct
     type nonrec t =
@@ -8879,10 +10583,10 @@ module UpdateAssumeRolePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~policyDocument ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyDocument =
-        field_map_exn json "PolicyDocument" PolicyDocumentType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+        field_map_exn json__ "PolicyDocument" PolicyDocumentType.of_json in
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ~policyDocument ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8995,25 +10699,26 @@ module UpdateAccountPasswordPolicyRequest =
         ?requireUppercaseCharacters ?requireNumbers ?requireSymbols
         ?minimumPasswordLength ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hardExpiry = field_map json "HardExpiry" BooleanObjectType.of_json in
+    let of_json json__ =
+      let hardExpiry =
+        field_map json__ "HardExpiry" BooleanObjectType.of_json in
       let passwordReusePrevention =
-        field_map json "PasswordReusePrevention"
+        field_map json__ "PasswordReusePrevention"
           PasswordReusePreventionType.of_json in
       let maxPasswordAge =
-        field_map json "MaxPasswordAge" MaxPasswordAgeType.of_json in
+        field_map json__ "MaxPasswordAge" MaxPasswordAgeType.of_json in
       let allowUsersToChangePassword =
-        field_map json "AllowUsersToChangePassword" BooleanType.of_json in
+        field_map json__ "AllowUsersToChangePassword" BooleanType.of_json in
       let requireLowercaseCharacters =
-        field_map json "RequireLowercaseCharacters" BooleanType.of_json in
+        field_map json__ "RequireLowercaseCharacters" BooleanType.of_json in
       let requireUppercaseCharacters =
-        field_map json "RequireUppercaseCharacters" BooleanType.of_json in
+        field_map json__ "RequireUppercaseCharacters" BooleanType.of_json in
       let requireNumbers =
-        field_map json "RequireNumbers" BooleanType.of_json in
+        field_map json__ "RequireNumbers" BooleanType.of_json in
       let requireSymbols =
-        field_map json "RequireSymbols" BooleanType.of_json in
+        field_map json__ "RequireSymbols" BooleanType.of_json in
       let minimumPasswordLength =
-        field_map json "MinimumPasswordLength"
+        field_map json__ "MinimumPasswordLength"
           MinimumPasswordLengthType.of_json in
       make ?hardExpiry ?passwordReusePrevention ?maxPasswordAge
         ?allowUsersToChangePassword ?requireLowercaseCharacters
@@ -9057,15 +10762,15 @@ module UpdateAccessKeyRequest =
           (Xml.child xml_arg0 "UserName") in
       make ~status ~accessKeyId ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" StatusType.of_json in
+    let of_json json__ =
+      let status = field_map_exn json__ "Status" StatusType.of_json in
       let accessKeyId =
-        field_map_exn json "AccessKeyId" AccessKeyIdType.of_json in
-      let userName = field_map json "UserName" ExistingUserNameType.of_json in
+        field_map_exn json__ "AccessKeyId" AccessKeyIdType.of_json in
+      let userName = field_map json__ "UserName" ExistingUserNameType.of_json in
       make ~status ~accessKeyId ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Changes the status of the specified access key from Active to Inactive, or vice versa. This operation can be used to disable a user's key as part of a key rotation workflow. If the UserName is not specified, the user name is determined implicitly based on the Amazon Web Services access key ID used to sign the request. This operation works for access keys under the Amazon Web Services account. Consequently, you can use this operation to manage Amazon Web Services account root user credentials even if the Amazon Web Services account has no associated users. For information about rotating keys, see Managing keys and certificates in the IAM User Guide."]
+       "Changes the status of the specified access key from Active to Inactive, or vice versa. This operation can be used to disable a user's key as part of a key rotation workflow. If the UserName is not specified, the user name is determined implicitly based on the Amazon Web Services access key ID used to sign the request. If a temporary access key is used, then UserName is required. If a long-term key is assigned to the user, then UserName is not required. This operation works for access keys under the Amazon Web Services account. Consequently, you can use this operation to manage Amazon Web Services account root user credentials even if the Amazon Web Services account has no associated users. For information about rotating keys, see Managing keys and certificates in the IAM User Guide."]
 module UntagUserRequest =
   struct
     type nonrec t =
@@ -9092,10 +10797,10 @@ module UntagUserRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~tagKeys ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyListType.of_json in
       let userName =
-        field_map_exn json "UserName" ExistingUserNameType.of_json in
+        field_map_exn json__ "UserName" ExistingUserNameType.of_json in
       make ~tagKeys ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9128,10 +10833,10 @@ module UntagServerCertificateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServerCertificateName") in
       make ~tagKeys ~serverCertificateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyListType.of_json in
       let serverCertificateName =
-        field_map_exn json "ServerCertificateName"
+        field_map_exn json__ "ServerCertificateName"
           ServerCertificateNameType.of_json in
       make ~tagKeys ~serverCertificateName ()
     let to_json v = composed_to_json to_value v
@@ -9164,10 +10869,10 @@ module UntagSAMLProviderRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SAMLProviderArn") in
       make ~tagKeys ~sAMLProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyListType.of_json in
       let sAMLProviderArn =
-        field_map_exn json "SAMLProviderArn" ArnType.of_json in
+        field_map_exn json__ "SAMLProviderArn" ArnType.of_json in
       make ~tagKeys ~sAMLProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9198,9 +10903,9 @@ module UntagRoleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~tagKeys ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyListType.of_json in
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ~tagKeys ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9230,9 +10935,9 @@ module UntagPolicyRequest =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ~tagKeys ~policyArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
-      let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyListType.of_json in
+      let policyArn = field_map_exn json__ "PolicyArn" ArnType.of_json in
       make ~tagKeys ~policyArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9266,10 +10971,10 @@ module UntagOpenIDConnectProviderRequest =
              "OpenIDConnectProviderArn") in
       make ~tagKeys ~openIDConnectProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyListType.of_json in
       let openIDConnectProviderArn =
-        field_map_exn json "OpenIDConnectProviderArn" ArnType.of_json in
+        field_map_exn json__ "OpenIDConnectProviderArn" ArnType.of_json in
       make ~tagKeys ~openIDConnectProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9301,10 +11006,10 @@ module UntagMFADeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SerialNumber") in
       make ~tagKeys ~serialNumber ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyListType.of_json in
       let serialNumber =
-        field_map_exn json "SerialNumber" SerialNumberType.of_json in
+        field_map_exn json__ "SerialNumber" SerialNumberType.of_json in
       make ~tagKeys ~serialNumber ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9337,10 +11042,10 @@ module UntagInstanceProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileName") in
       make ~tagKeys ~instanceProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyListType.of_json in
       let instanceProfileName =
-        field_map_exn json "InstanceProfileName"
+        field_map_exn json__ "InstanceProfileName"
           InstanceProfileNameType.of_json in
       make ~tagKeys ~instanceProfileName ()
     let to_json v = composed_to_json to_value v
@@ -9371,14 +11076,14 @@ module TagUserRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~tags ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagListType.of_json in
       let userName =
-        field_map_exn json "UserName" ExistingUserNameType.of_json in
+        field_map_exn json__ "UserName" ExistingUserNameType.of_json in
       make ~tags ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds one or more tags to an IAM user. If a tag with the same key name already exists, then that tag is overwritten with the new value. A tag consists of a key name and an associated value. By assigning tags to your resources, you can do the following: Administrative grouping and discovery - Attach tags to resources to aid in organization and search. For example, you could search for all resources with the key name Project and the value MyImportantProject. Or search for all resources with the key name Cost Center and the value 41200. Access control - Include tags in IAM user-based and resource-based policies. You can use tags to restrict access to only an IAM requesting user that has a specified tag attached. You can also restrict access to only those resources that have a certain tag attached. For examples of policies that show how to use tags to control access, see Control access using IAM tags in the IAM User Guide. Cost allocation - Use tags to help track which individuals and teams are using which Amazon Web Services resources. If any one of the tags is invalid or if you exceed the allowed maximum number of tags, then the entire request fails and the resource is not created. For more information about tagging, see Tagging IAM resources in the IAM User Guide. Amazon Web Services always interprets the tag Value as a single string. If you need to store an array, you can store comma-separated values in the string. However, you must interpret the value in your code. For more information about tagging, see Tagging IAM identities in the IAM User Guide."]
+       "Adds one or more tags to an IAM user. If a tag with the same key name already exists, then that tag is overwritten with the new value. A tag consists of a key name and an associated value. By assigning tags to your resources, you can do the following: Administrative grouping and discovery - Attach tags to resources to aid in organization and search. For example, you could search for all resources with the key name Project and the value MyImportantProject. Or search for all resources with the key name Cost Center and the value 41200. Access control - Include tags in IAM identity-based and resource-based policies. You can use tags to restrict access to only an IAM requesting user that has a specified tag attached. You can also restrict access to only those resources that have a certain tag attached. For examples of policies that show how to use tags to control access, see Control access using IAM tags in the IAM User Guide. Cost allocation - Use tags to help track which individuals and teams are using which Amazon Web Services resources. If any one of the tags is invalid or if you exceed the allowed maximum number of tags, then the entire request fails and the resource is not created. For more information about tagging, see Tagging IAM resources in the IAM User Guide. Amazon Web Services always interprets the tag Value as a single string. If you need to store an array, you can store comma-separated values in the string. However, you must interpret the value in your code. For more information about tagging, see Tagging IAM identities in the IAM User Guide."]
 module TagServerCertificateRequest =
   struct
     type nonrec t =
@@ -9406,10 +11111,10 @@ module TagServerCertificateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServerCertificateName") in
       make ~tags ~serverCertificateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagListType.of_json in
       let serverCertificateName =
-        field_map_exn json "ServerCertificateName"
+        field_map_exn json__ "ServerCertificateName"
           ServerCertificateNameType.of_json in
       make ~tags ~serverCertificateName ()
     let to_json v = composed_to_json to_value v
@@ -9441,10 +11146,10 @@ module TagSAMLProviderRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SAMLProviderArn") in
       make ~tags ~sAMLProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagListType.of_json in
       let sAMLProviderArn =
-        field_map_exn json "SAMLProviderArn" ArnType.of_json in
+        field_map_exn json__ "SAMLProviderArn" ArnType.of_json in
       make ~tags ~sAMLProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9474,9 +11179,9 @@ module TagRoleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~tags ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagListType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagListType.of_json in
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ~tags ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9505,9 +11210,9 @@ module TagPolicyRequest =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ~tags ~policyArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagListType.of_json in
-      let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagListType.of_json in
+      let policyArn = field_map_exn json__ "PolicyArn" ArnType.of_json in
       make ~tags ~policyArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9540,14 +11245,14 @@ module TagOpenIDConnectProviderRequest =
              "OpenIDConnectProviderArn") in
       make ~tags ~openIDConnectProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagListType.of_json in
       let openIDConnectProviderArn =
-        field_map_exn json "OpenIDConnectProviderArn" ArnType.of_json in
+        field_map_exn json__ "OpenIDConnectProviderArn" ArnType.of_json in
       make ~tags ~openIDConnectProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds one or more tags to an OpenID Connect (OIDC)-compatible identity provider. For more information about these providers, see About web identity federation. If a tag with the same key name already exists, then that tag is overwritten with the new value. A tag consists of a key name and an associated value. By assigning tags to your resources, you can do the following: Administrative grouping and discovery - Attach tags to resources to aid in organization and search. For example, you could search for all resources with the key name Project and the value MyImportantProject. Or search for all resources with the key name Cost Center and the value 41200. Access control - Include tags in IAM user-based and resource-based policies. You can use tags to restrict access to only an OIDC provider that has a specified tag attached. For examples of policies that show how to use tags to control access, see Control access using IAM tags in the IAM User Guide. If any one of the tags is invalid or if you exceed the allowed maximum number of tags, then the entire request fails and the resource is not created. For more information about tagging, see Tagging IAM resources in the IAM User Guide. Amazon Web Services always interprets the tag Value as a single string. If you need to store an array, you can store comma-separated values in the string. However, you must interpret the value in your code."]
+       "Adds one or more tags to an OpenID Connect (OIDC)-compatible identity provider. For more information about these providers, see About web identity federation. If a tag with the same key name already exists, then that tag is overwritten with the new value. A tag consists of a key name and an associated value. By assigning tags to your resources, you can do the following: Administrative grouping and discovery - Attach tags to resources to aid in organization and search. For example, you could search for all resources with the key name Project and the value MyImportantProject. Or search for all resources with the key name Cost Center and the value 41200. Access control - Include tags in IAM identity-based and resource-based policies. You can use tags to restrict access to only an OIDC provider that has a specified tag attached. For examples of policies that show how to use tags to control access, see Control access using IAM tags in the IAM User Guide. If any one of the tags is invalid or if you exceed the allowed maximum number of tags, then the entire request fails and the resource is not created. For more information about tagging, see Tagging IAM resources in the IAM User Guide. Amazon Web Services always interprets the tag Value as a single string. If you need to store an array, you can store comma-separated values in the string. However, you must interpret the value in your code."]
 module TagMFADeviceRequest =
   struct
     type nonrec t =
@@ -9573,10 +11278,10 @@ module TagMFADeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SerialNumber") in
       make ~tags ~serialNumber ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagListType.of_json in
       let serialNumber =
-        field_map_exn json "SerialNumber" SerialNumberType.of_json in
+        field_map_exn json__ "SerialNumber" SerialNumberType.of_json in
       make ~tags ~serialNumber ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9608,10 +11313,10 @@ module TagInstanceProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileName") in
       make ~tags ~instanceProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagListType.of_json in
       let instanceProfileName =
-        field_map_exn json "InstanceProfileName"
+        field_map_exn json__ "InstanceProfileName"
           InstanceProfileNameType.of_json in
       make ~tags ~instanceProfileName ()
     let to_json v = composed_to_json to_value v
@@ -9635,10 +11340,10 @@ module SimulatePrincipalPolicyRequest =
           "A list of names of API operations to evaluate in the simulation. Each operation is evaluated for each resource. Each operation must include the service identifier, such as iam:CreateUser."];
       resourceArns: ResourceNameListType.t option
         [@ocaml.doc
-          "A list of ARNs of Amazon Web Services resources to include in the simulation. If this parameter is not provided, then the value defaults to * (all resources). Each API in the ActionNames parameter is evaluated for each resource in this list. The simulation determines the access result (allowed or denied) of each combination and reports it in the response. You can simulate resources that don't exist in your account. The simulation does not automatically retrieve policies for the specified resources. If you want to include a resource policy in the simulation, then you must include the policy as a string in the ResourcePolicy parameter. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."];
+          "A list of ARNs of Amazon Web Services resources to include in the simulation. If this parameter is not provided, then the value defaults to * (all resources). Each API in the ActionNames parameter is evaluated for each resource in this list. The simulation determines the access result (allowed or denied) of each combination and reports it in the response. You can simulate resources that don't exist in your account. The simulation does not automatically retrieve policies for the specified resources. If you want to include a resource policy in the simulation, then you must include the policy as a string in the ResourcePolicy parameter. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference. Simulation of resource-based policies isn't supported for IAM roles."];
       resourcePolicy: PolicyDocumentType.t option
         [@ocaml.doc
-          "A resource-based policy to include in the simulation provided as a string. Each resource in the simulation is treated as if it had this policy attached. You can include only one resource-based policy in a simulation. The maximum length of the policy document that you can pass in this operation, including whitespace, is listed below. To view the maximum character counts of a managed policy with no whitespaces, see IAM and STS character quotas. The regex pattern used to validate this parameter is a string of characters consisting of the following: Any printable ASCII character ranging from the space character (\\u0020) through the end of the ASCII character range The printable characters in the Basic Latin and Latin-1 Supplement character set (through \\u00FF) The special characters tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D)"];
+          "A resource-based policy to include in the simulation provided as a string. Each resource in the simulation is treated as if it had this policy attached. You can include only one resource-based policy in a simulation. The maximum length of the policy document that you can pass in this operation, including whitespace, is listed below. To view the maximum character counts of a managed policy with no whitespaces, see IAM and STS character quotas. The regex pattern used to validate this parameter is a string of characters consisting of the following: Any printable ASCII character ranging from the space character (\\u0020) through the end of the ASCII character range The printable characters in the Basic Latin and Latin-1 Supplement character set (through \\u00FF) The special characters tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D) Simulation of resource-based policies isn't supported for IAM roles."];
       resourceOwner: ResourceNameType.t option
         [@ocaml.doc
           "An Amazon Web Services account ID that specifies the owner of any simulated resource that does not identify its owner in the resource ARN. Examples of resource ARNs include an S3 bucket or object. If ResourceOwner is specified, it is also used as the account owner of any ResourcePolicy included in the simulation. If the ResourceOwner parameter is not specified, then the owner of the resources and the resource policy defaults to the account of the identity provided in CallerArn. This parameter is required only if you specify a resource-based policy and account that owns the resource is different from the account that owns the simulated calling user CallerArn."];
@@ -9650,7 +11355,7 @@ module SimulatePrincipalPolicyRequest =
           "A list of context keys and corresponding values for the simulation to use. Whenever a context key is evaluated in one of the simulated IAM permissions policies, the corresponding value is supplied."];
       resourceHandlingOption: ResourceHandlingOptionType.t option
         [@ocaml.doc
-          "Specifies the type of simulation to run. Different API operations that support resource-based policies require different combinations of resources. By specifying the type of simulation to run, you enable the policy simulator to enforce the presence of the required resources to ensure reliable simulation results. If your simulation does not match one of the following scenarios, then you can omit this parameter. The following list shows each of the supported scenario values and the resources that you must define to run the simulation. Each of the EC2 scenarios requires that you specify instance, image, and security group resources. If your scenario includes an EBS volume, then you must specify that volume as a resource. If the EC2 scenario includes VPC, then you must supply the network interface resource. If it includes an IP subnet, then you must specify the subnet resource. For more information on the EC2 scenario options, see Supported platforms in the Amazon EC2 User Guide. EC2-Classic-InstanceStore instance, image, security group EC2-Classic-EBS instance, image, security group, volume EC2-VPC-InstanceStore instance, image, security group, network interface EC2-VPC-InstanceStore-Subnet instance, image, security group, network interface, subnet EC2-VPC-EBS instance, image, security group, network interface, volume EC2-VPC-EBS-Subnet instance, image, security group, network interface, subnet, volume"];
+          "Specifies the type of simulation to run. Different API operations that support resource-based policies require different combinations of resources. By specifying the type of simulation to run, you enable the policy simulator to enforce the presence of the required resources to ensure reliable simulation results. If your simulation does not match one of the following scenarios, then you can omit this parameter. The following list shows each of the supported scenario values and the resources that you must define to run the simulation. Each of the Amazon EC2 scenarios requires that you specify instance, image, and security group resources. If your scenario includes an EBS volume, then you must specify that volume as a resource. If the Amazon EC2 scenario includes VPC, then you must supply the network interface resource. If it includes an IP subnet, then you must specify the subnet resource. For more information on the Amazon EC2 scenario options, see Supported platforms in the Amazon EC2 User Guide. EC2-VPC-InstanceStore instance, image, security group, network interface EC2-VPC-InstanceStore-Subnet instance, image, security group, network interface, subnet EC2-VPC-EBS instance, image, security group, network interface, volume EC2-VPC-EBS-Subnet instance, image, security group, network interface, subnet, volume"];
       maxItems: MaxItemsType.t option
         [@ocaml.doc
           "Use this only when paginating results to indicate the maximum number of items you want in the response. If additional items exist beyond the maximum you specify, the IsTruncated response element is true. If you do not include this parameter, the number of items defaults to 100. Note that IAM might return fewer results, even when there are more results available. In that case, the IsTruncated response element returns true, and Marker contains a value to include in the subsequent call that tells the service where to continue from."];
@@ -9749,37 +11454,37 @@ module SimulatePrincipalPolicyRequest =
         ?permissionsBoundaryPolicyInputList ?policyInputList ~policySourceArn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
       let resourceHandlingOption =
-        field_map json "ResourceHandlingOption"
+        field_map json__ "ResourceHandlingOption"
           ResourceHandlingOptionType.of_json in
       let contextEntries =
-        field_map json "ContextEntries" ContextEntryListType.of_json in
-      let callerArn = field_map json "CallerArn" ResourceNameType.of_json in
+        field_map json__ "ContextEntries" ContextEntryListType.of_json in
+      let callerArn = field_map json__ "CallerArn" ResourceNameType.of_json in
       let resourceOwner =
-        field_map json "ResourceOwner" ResourceNameType.of_json in
+        field_map json__ "ResourceOwner" ResourceNameType.of_json in
       let resourcePolicy =
-        field_map json "ResourcePolicy" PolicyDocumentType.of_json in
+        field_map json__ "ResourcePolicy" PolicyDocumentType.of_json in
       let resourceArns =
-        field_map json "ResourceArns" ResourceNameListType.of_json in
+        field_map json__ "ResourceArns" ResourceNameListType.of_json in
       let actionNames =
-        field_map_exn json "ActionNames" ActionNameListType.of_json in
+        field_map_exn json__ "ActionNames" ActionNameListType.of_json in
       let permissionsBoundaryPolicyInputList =
-        field_map json "PermissionsBoundaryPolicyInputList"
+        field_map json__ "PermissionsBoundaryPolicyInputList"
           SimulationPolicyListType.of_json in
       let policyInputList =
-        field_map json "PolicyInputList" SimulationPolicyListType.of_json in
+        field_map json__ "PolicyInputList" SimulationPolicyListType.of_json in
       let policySourceArn =
-        field_map_exn json "PolicySourceArn" ArnType.of_json in
+        field_map_exn json__ "PolicySourceArn" ArnType.of_json in
       make ?marker ?maxItems ?resourceHandlingOption ?contextEntries
         ?callerArn ?resourceOwner ?resourcePolicy ?resourceArns ~actionNames
         ?permissionsBoundaryPolicyInputList ?policyInputList ~policySourceArn
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Simulate how a set of IAM policies attached to an IAM entity works with a list of API operations and Amazon Web Services resources to determine the policies' effective permissions. The entity can be an IAM user, group, or role. If you specify a user, then the simulation also includes all of the policies that are attached to groups that the user belongs to. You can simulate resources that don't exist in your account. You can optionally include a list of one or more additional policies specified as strings to include in the simulation. If you want to simulate only policies specified as strings, use SimulateCustomPolicy instead. You can also optionally include one resource-based policy to be evaluated with each of the resources included in the simulation. The simulation does not perform the API operations; it only checks the authorization to determine if the simulated policies allow or deny the operations. Note: This operation discloses information about the permissions granted to other users. If you do not want users to see other user's permissions, then consider allowing them to use SimulateCustomPolicy instead. Context keys are variables maintained by Amazon Web Services and its services that provide details about the context of an API query request. You can use the Condition element of an IAM policy to evaluate context keys. To get the list of context keys that the policies require for correct simulation, use GetContextKeysForPrincipalPolicy. If the output is long, you can use the MaxItems and Marker parameters to paginate the results. For more information about using the policy simulator, see Testing IAM policies with the IAM policy simulator in the IAM User Guide."]
+       "Simulate how a set of IAM policies attached to an IAM entity works with a list of API operations and Amazon Web Services resources to determine the policies' effective permissions. The entity can be an IAM user, group, or role. If you specify a user, then the simulation also includes all of the policies that are attached to groups that the user belongs to. You can simulate resources that don't exist in your account. You can optionally include a list of one or more additional policies specified as strings to include in the simulation. If you want to simulate only policies specified as strings, use SimulateCustomPolicy instead. You can also optionally include one resource-based policy to be evaluated with each of the resources included in the simulation for IAM users only. The simulation does not perform the API operations; it only checks the authorization to determine if the simulated policies allow or deny the operations. Note: This operation discloses information about the permissions granted to other users. If you do not want users to see other user's permissions, then consider allowing them to use SimulateCustomPolicy instead. Context keys are variables maintained by Amazon Web Services and its services that provide details about the context of an API query request. You can use the Condition element of an IAM policy to evaluate context keys. To get the list of context keys that the policies require for correct simulation, use GetContextKeysForPrincipalPolicy. If the output is long, you can use the MaxItems and Marker parameters to paginate the results. The IAM policy simulator evaluates statements in the identity-based policy and the inputs that you provide during simulation. The policy simulator results can differ from your live Amazon Web Services environment. We recommend that you check your policies against your live Amazon Web Services environment after testing using the policy simulator to confirm that you have the desired results. For more information about using the policy simulator, see Testing IAM policies with the IAM policy simulator in the IAM User Guide."]
 module SimulatePolicyResponse =
   struct
     type simulateCustomPolicyResult =
@@ -9866,11 +11571,12 @@ module SimulatePolicyResponse =
           (Xml.child xml_arg0 "EvaluationResults") in
       make ?marker ?isTruncated ?evaluationResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let evaluationResults =
-        field_map json "EvaluationResults" EvaluationResultsListType.of_json in
+        field_map json__ "EvaluationResults"
+          EvaluationResultsListType.of_json in
       make ?marker ?isTruncated ?evaluationResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9890,10 +11596,10 @@ module SimulateCustomPolicyRequest =
           "A list of names of API operations to evaluate in the simulation. Each operation is evaluated against each resource. Each operation must include the service identifier, such as iam:CreateUser. This operation does not support using wildcards (*) in an action name."];
       resourceArns: ResourceNameListType.t option
         [@ocaml.doc
-          "A list of ARNs of Amazon Web Services resources to include in the simulation. If this parameter is not provided, then the value defaults to * (all resources). Each API in the ActionNames parameter is evaluated for each resource in this list. The simulation determines the access result (allowed or denied) of each combination and reports it in the response. You can simulate resources that don't exist in your account. The simulation does not automatically retrieve policies for the specified resources. If you want to include a resource policy in the simulation, then you must include the policy as a string in the ResourcePolicy parameter. If you include a ResourcePolicy, then it must be applicable to all of the resources included in the simulation or you receive an invalid input error. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."];
+          "A list of ARNs of Amazon Web Services resources to include in the simulation. If this parameter is not provided, then the value defaults to * (all resources). Each API in the ActionNames parameter is evaluated for each resource in this list. The simulation determines the access result (allowed or denied) of each combination and reports it in the response. You can simulate resources that don't exist in your account. The simulation does not automatically retrieve policies for the specified resources. If you want to include a resource policy in the simulation, then you must include the policy as a string in the ResourcePolicy parameter. If you include a ResourcePolicy, then it must be applicable to all of the resources included in the simulation or you receive an invalid input error. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference. Simulation of resource-based policies isn't supported for IAM roles."];
       resourcePolicy: PolicyDocumentType.t option
         [@ocaml.doc
-          "A resource-based policy to include in the simulation provided as a string. Each resource in the simulation is treated as if it had this policy attached. You can include only one resource-based policy in a simulation. The maximum length of the policy document that you can pass in this operation, including whitespace, is listed below. To view the maximum character counts of a managed policy with no whitespaces, see IAM and STS character quotas. The regex pattern used to validate this parameter is a string of characters consisting of the following: Any printable ASCII character ranging from the space character (\\u0020) through the end of the ASCII character range The printable characters in the Basic Latin and Latin-1 Supplement character set (through \\u00FF) The special characters tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D)"];
+          "A resource-based policy to include in the simulation provided as a string. Each resource in the simulation is treated as if it had this policy attached. You can include only one resource-based policy in a simulation. The maximum length of the policy document that you can pass in this operation, including whitespace, is listed below. To view the maximum character counts of a managed policy with no whitespaces, see IAM and STS character quotas. The regex pattern used to validate this parameter is a string of characters consisting of the following: Any printable ASCII character ranging from the space character (\\u0020) through the end of the ASCII character range The printable characters in the Basic Latin and Latin-1 Supplement character set (through \\u00FF) The special characters tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D) Simulation of resource-based policies isn't supported for IAM roles."];
       resourceOwner: ResourceNameType.t option
         [@ocaml.doc
           "An ARN representing the Amazon Web Services account ID that specifies the owner of any simulated resource that does not identify its owner in the resource ARN. Examples of resource ARNs include an S3 bucket or object. If ResourceOwner is specified, it is also used as the account owner of any ResourcePolicy included in the simulation. If the ResourceOwner parameter is not specified, then the owner of the resources and the resource policy defaults to the account of the identity provided in CallerArn. This parameter is required only if you specify a resource-based policy and account that owns the resource is different from the account that owns the simulated calling user CallerArn. The ARN for an account uses the following syntax: arn:aws:iam::AWS-account-ID:root. For example, to represent the account with the 112233445566 ID, use the following ARN: arn:aws:iam::112233445566-ID:root."];
@@ -9905,7 +11611,7 @@ module SimulateCustomPolicyRequest =
           "A list of context keys and corresponding values for the simulation to use. Whenever a context key is evaluated in one of the simulated IAM permissions policies, the corresponding value is supplied."];
       resourceHandlingOption: ResourceHandlingOptionType.t option
         [@ocaml.doc
-          "Specifies the type of simulation to run. Different API operations that support resource-based policies require different combinations of resources. By specifying the type of simulation to run, you enable the policy simulator to enforce the presence of the required resources to ensure reliable simulation results. If your simulation does not match one of the following scenarios, then you can omit this parameter. The following list shows each of the supported scenario values and the resources that you must define to run the simulation. Each of the EC2 scenarios requires that you specify instance, image, and security-group resources. If your scenario includes an EBS volume, then you must specify that volume as a resource. If the EC2 scenario includes VPC, then you must supply the network-interface resource. If it includes an IP subnet, then you must specify the subnet resource. For more information on the EC2 scenario options, see Supported platforms in the Amazon EC2 User Guide. EC2-Classic-InstanceStore instance, image, security-group EC2-Classic-EBS instance, image, security-group, volume EC2-VPC-InstanceStore instance, image, security-group, network-interface EC2-VPC-InstanceStore-Subnet instance, image, security-group, network-interface, subnet EC2-VPC-EBS instance, image, security-group, network-interface, volume EC2-VPC-EBS-Subnet instance, image, security-group, network-interface, subnet, volume"];
+          "Specifies the type of simulation to run. Different API operations that support resource-based policies require different combinations of resources. By specifying the type of simulation to run, you enable the policy simulator to enforce the presence of the required resources to ensure reliable simulation results. If your simulation does not match one of the following scenarios, then you can omit this parameter. The following list shows each of the supported scenario values and the resources that you must define to run the simulation. Each of the Amazon EC2 scenarios requires that you specify instance, image, and security group resources. If your scenario includes an EBS volume, then you must specify that volume as a resource. If the Amazon EC2 scenario includes VPC, then you must supply the network interface resource. If it includes an IP subnet, then you must specify the subnet resource. For more information on the Amazon EC2 scenario options, see Supported platforms in the Amazon EC2 User Guide. EC2-VPC-InstanceStore instance, image, security group, network interface EC2-VPC-InstanceStore-Subnet instance, image, security group, network interface, subnet EC2-VPC-EBS instance, image, security group, network interface, volume EC2-VPC-EBS-Subnet instance, image, security group, network interface, subnet, volume"];
       maxItems: MaxItemsType.t option
         [@ocaml.doc
           "Use this only when paginating results to indicate the maximum number of items you want in the response. If additional items exist beyond the maximum you specify, the IsTruncated response element is true. If you do not include this parameter, the number of items defaults to 100. Note that IAM might return fewer results, even when there are more results available. In that case, the IsTruncated response element returns true, and Marker contains a value to include in the subsequent call that tells the service where to continue from."];
@@ -9997,34 +11703,35 @@ module SimulateCustomPolicyRequest =
         ?callerArn ?resourceOwner ?resourcePolicy ?resourceArns ~actionNames
         ?permissionsBoundaryPolicyInputList ~policyInputList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
       let resourceHandlingOption =
-        field_map json "ResourceHandlingOption"
+        field_map json__ "ResourceHandlingOption"
           ResourceHandlingOptionType.of_json in
       let contextEntries =
-        field_map json "ContextEntries" ContextEntryListType.of_json in
-      let callerArn = field_map json "CallerArn" ResourceNameType.of_json in
+        field_map json__ "ContextEntries" ContextEntryListType.of_json in
+      let callerArn = field_map json__ "CallerArn" ResourceNameType.of_json in
       let resourceOwner =
-        field_map json "ResourceOwner" ResourceNameType.of_json in
+        field_map json__ "ResourceOwner" ResourceNameType.of_json in
       let resourcePolicy =
-        field_map json "ResourcePolicy" PolicyDocumentType.of_json in
+        field_map json__ "ResourcePolicy" PolicyDocumentType.of_json in
       let resourceArns =
-        field_map json "ResourceArns" ResourceNameListType.of_json in
+        field_map json__ "ResourceArns" ResourceNameListType.of_json in
       let actionNames =
-        field_map_exn json "ActionNames" ActionNameListType.of_json in
+        field_map_exn json__ "ActionNames" ActionNameListType.of_json in
       let permissionsBoundaryPolicyInputList =
-        field_map json "PermissionsBoundaryPolicyInputList"
+        field_map json__ "PermissionsBoundaryPolicyInputList"
           SimulationPolicyListType.of_json in
       let policyInputList =
-        field_map_exn json "PolicyInputList" SimulationPolicyListType.of_json in
+        field_map_exn json__ "PolicyInputList"
+          SimulationPolicyListType.of_json in
       make ?marker ?maxItems ?resourceHandlingOption ?contextEntries
         ?callerArn ?resourceOwner ?resourcePolicy ?resourceArns ~actionNames
         ?permissionsBoundaryPolicyInputList ~policyInputList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Simulate how a set of IAM policies and optionally a resource-based policy works with a list of API operations and Amazon Web Services resources to determine the policies' effective permissions. The policies are provided as strings. The simulation does not perform the API operations; it only checks the authorization to determine if the simulated policies allow or deny the operations. You can simulate resources that don't exist in your account. If you want to simulate existing policies that are attached to an IAM user, group, or role, use SimulatePrincipalPolicy instead. Context keys are variables that are maintained by Amazon Web Services and its services and which provide details about the context of an API query request. You can use the Condition element of an IAM policy to evaluate context keys. To get the list of context keys that the policies require for correct simulation, use GetContextKeysForCustomPolicy. If the output is long, you can use MaxItems and Marker parameters to paginate the results. For more information about using the policy simulator, see Testing IAM policies with the IAM policy simulator in the IAM User Guide."]
+       "Simulate how a set of IAM policies and optionally a resource-based policy works with a list of API operations and Amazon Web Services resources to determine the policies' effective permissions. The policies are provided as strings. The simulation does not perform the API operations; it only checks the authorization to determine if the simulated policies allow or deny the operations. You can simulate resources that don't exist in your account. If you want to simulate existing policies that are attached to an IAM user, group, or role, use SimulatePrincipalPolicy instead. Context keys are variables that are maintained by Amazon Web Services and its services and which provide details about the context of an API query request. You can use the Condition element of an IAM policy to evaluate context keys. To get the list of context keys that the policies require for correct simulation, use GetContextKeysForCustomPolicy. If the output is long, you can use MaxItems and Marker parameters to paginate the results. The IAM policy simulator evaluates statements in the identity-based policy and the inputs that you provide during simulation. The policy simulator results can differ from your live Amazon Web Services environment. We recommend that you check your policies against your live Amazon Web Services environment after testing using the policy simulator to confirm that you have the desired results. For more information about using the policy simulator, see Testing IAM policies with the IAM policy simulator in the IAM User Guide."]
 module SetSecurityTokenServicePreferencesRequest =
   struct
     type nonrec t =
@@ -10049,9 +11756,9 @@ module SetSecurityTokenServicePreferencesRequest =
              "GlobalEndpointTokenVersion") in
       make ~globalEndpointTokenVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalEndpointTokenVersion =
-        field_map_exn json "GlobalEndpointTokenVersion"
+        field_map_exn json__ "GlobalEndpointTokenVersion"
           GlobalEndpointTokenVersion.of_json in
       make ~globalEndpointTokenVersion ()
     let to_json v = composed_to_json to_value v
@@ -10083,14 +11790,42 @@ module SetDefaultPolicyVersionRequest =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ~versionId ~policyArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionId =
-        field_map_exn json "VersionId" PolicyVersionIdType.of_json in
-      let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
+        field_map_exn json__ "VersionId" PolicyVersionIdType.of_json in
+      let policyArn = field_map_exn json__ "PolicyArn" ArnType.of_json in
       make ~versionId ~policyArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Sets the specified version of the specified policy as the policy's default (operative) version. This operation affects all users, groups, and roles that the policy is attached to. To list the users, groups, and roles that the policy is attached to, use ListEntitiesForPolicy. For information about managed policies, see Managed policies and inline policies in the IAM User Guide."]
+module SendDelegationTokenRequest =
+  struct
+    type nonrec t =
+      {
+      delegationRequestId: DelegationRequestIdType.t
+        [@ocaml.doc
+          "The unique identifier of the delegation request for which to send the token."]}
+    let context_ = "SendDelegationTokenRequest"
+    let make ~delegationRequestId = fun () -> { delegationRequestId }
+    let to_value x =
+      structure_to_value
+        [("DelegationRequestId",
+           (Some (DelegationRequestIdType.to_value x.delegationRequestId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let delegationRequestId =
+        DelegationRequestIdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DelegationRequestId") in
+      make ~delegationRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let delegationRequestId =
+        field_map_exn json__ "DelegationRequestId"
+          DelegationRequestIdType.of_json in
+      make ~delegationRequestId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sends the exchange token for an accepted delegation request. The exchange token is sent to the partner via an asynchronous notification channel, established by the partner. The delegation request must be in the ACCEPTED state when calling this API. After the SendDelegationToken API call is successful, the request transitions to a FINALIZED state and cannot be rolled back. However, a user may reject an accepted request before the SendDelegationToken API is called. For more details, see Managing Permissions for Delegation Requests."]
 module ResyncMFADeviceRequest =
   struct
     type nonrec t =
@@ -10144,17 +11879,17 @@ module ResyncMFADeviceRequest =
       make ~authenticationCode2 ~authenticationCode1 ~serialNumber ~userName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationCode2 =
-        field_map_exn json "AuthenticationCode2"
+        field_map_exn json__ "AuthenticationCode2"
           AuthenticationCodeType.of_json in
       let authenticationCode1 =
-        field_map_exn json "AuthenticationCode1"
+        field_map_exn json__ "AuthenticationCode1"
           AuthenticationCodeType.of_json in
       let serialNumber =
-        field_map_exn json "SerialNumber" SerialNumberType.of_json in
+        field_map_exn json__ "SerialNumber" SerialNumberType.of_json in
       let userName =
-        field_map_exn json "UserName" ExistingUserNameType.of_json in
+        field_map_exn json__ "UserName" ExistingUserNameType.of_json in
       make ~authenticationCode2 ~authenticationCode1 ~serialNumber ~userName
         ()
     let to_json v = composed_to_json to_value v
@@ -10226,9 +11961,9 @@ module ResetServiceSpecificCredentialResponse =
           (Xml.child xml_arg0 "ServiceSpecificCredential") in
       make ?serviceSpecificCredential ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceSpecificCredential =
-        field_map json "ServiceSpecificCredential"
+        field_map json__ "ServiceSpecificCredential"
           ServiceSpecificCredential.of_json in
       make ?serviceSpecificCredential ()
     let to_json v = composed_to_json to_value v
@@ -10265,11 +12000,11 @@ module ResetServiceSpecificCredentialRequest =
         (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
       make ~serviceSpecificCredentialId ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceSpecificCredentialId =
-        field_map_exn json "ServiceSpecificCredentialId"
+        field_map_exn json__ "ServiceSpecificCredentialId"
           ServiceSpecificCredentialId.of_json in
-      let userName = field_map json "UserName" UserNameType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
       make ~serviceSpecificCredentialId ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10300,10 +12035,10 @@ module RemoveUserFromGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~userName ~groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userName =
-        field_map_exn json "UserName" ExistingUserNameType.of_json in
-      let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
+        field_map_exn json__ "UserName" ExistingUserNameType.of_json in
+      let groupName = field_map_exn json__ "GroupName" GroupNameType.of_json in
       make ~userName ~groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the specified user from the specified group."]
@@ -10335,15 +12070,15 @@ module RemoveRoleFromInstanceProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileName") in
       make ~roleName ~instanceProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+    let of_json json__ =
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       let instanceProfileName =
-        field_map_exn json "InstanceProfileName"
+        field_map_exn json__ "InstanceProfileName"
           InstanceProfileNameType.of_json in
       make ~roleName ~instanceProfileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specified IAM role from the specified EC2 instance profile. Make sure that you do not have any Amazon EC2 instances running with the role you are about to remove from the instance profile. Removing a role from an instance profile that is associated with a running instance might break any applications running on the instance. For more information about IAM roles, see Working with roles. For more information about instance profiles, see About instance profiles."]
+       "Removes the specified IAM role from the specified Amazon EC2 instance profile. Make sure that you do not have any Amazon EC2 instances running with the role you are about to remove from the instance profile. Removing a role from an instance profile that is associated with a running instance might break any applications running on the instance. For more information about roles, see IAM roles in the IAM User Guide. For more information about instance profiles, see Using instance profiles in the IAM User Guide."]
 module RemoveClientIDFromOpenIDConnectProviderRequest =
   struct
     type nonrec t =
@@ -10373,14 +12108,50 @@ module RemoveClientIDFromOpenIDConnectProviderRequest =
              "OpenIDConnectProviderArn") in
       make ~clientID ~openIDConnectProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientID = field_map_exn json "ClientID" ClientIDType.of_json in
+    let of_json json__ =
+      let clientID = field_map_exn json__ "ClientID" ClientIDType.of_json in
       let openIDConnectProviderArn =
-        field_map_exn json "OpenIDConnectProviderArn" ArnType.of_json in
+        field_map_exn json__ "OpenIDConnectProviderArn" ArnType.of_json in
       make ~clientID ~openIDConnectProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Removes the specified client ID (also known as audience) from the list of client IDs registered for the specified IAM OpenID Connect (OIDC) provider resource object. This operation is idempotent; it does not fail or return an error if you try to remove a client ID that does not exist."]
+module RejectDelegationRequestRequest =
+  struct
+    type nonrec t =
+      {
+      delegationRequestId: DelegationRequestIdType.t
+        [@ocaml.doc
+          "The unique identifier of the delegation request to reject."];
+      notes: NotesType.t option
+        [@ocaml.doc
+          "Optional notes explaining the reason for rejecting the delegation request."]}
+    let context_ = "RejectDelegationRequestRequest"
+    let make ?notes =
+      fun ~delegationRequestId -> fun () -> { notes; delegationRequestId }
+    let to_value x =
+      structure_to_value
+        [("DelegationRequestId",
+           (Some (DelegationRequestIdType.to_value x.delegationRequestId)));
+        ("Notes", (Option.map x.notes ~f:NotesType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let notes =
+        (Option.map ~f:NotesType.of_xml) (Xml.child xml_arg0 "Notes") in
+      let delegationRequestId =
+        DelegationRequestIdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DelegationRequestId") in
+      make ?notes ~delegationRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notes = field_map json__ "Notes" NotesType.of_json in
+      let delegationRequestId =
+        field_map_exn json__ "DelegationRequestId"
+          DelegationRequestIdType.of_json in
+      make ?notes ~delegationRequestId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Rejects a delegation request, denying the requested temporary access. Once a request is rejected, it cannot be accepted or updated later. Rejected requests expire after 7 days. When rejecting a request, an optional explanation can be added using the Notes request parameter. For more details, see Managing Permissions for Delegation Requests."]
 module PutUserPolicyRequest =
   struct
     type nonrec t =
@@ -10418,16 +12189,17 @@ module PutUserPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~policyDocument ~policyName ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyDocument =
-        field_map_exn json "PolicyDocument" PolicyDocumentType.of_json in
-      let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
+        field_map_exn json__ "PolicyDocument" PolicyDocumentType.of_json in
+      let policyName =
+        field_map_exn json__ "PolicyName" PolicyNameType.of_json in
       let userName =
-        field_map_exn json "UserName" ExistingUserNameType.of_json in
+        field_map_exn json__ "UserName" ExistingUserNameType.of_json in
       make ~policyDocument ~policyName ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates an inline policy document that is embedded in the specified IAM user. An IAM user can also have a managed policy attached to it. To attach a managed policy to a user, use AttachUserPolicy. To create a new managed policy, use CreatePolicy. For information about policies, see Managed policies and inline policies in the IAM User Guide. For information about the maximum number of inline policies that you can embed in a user, see IAM and STS quotas in the IAM User Guide. Because policy documents can be large, you should use POST rather than GET when calling PutUserPolicy. For general information about using the Query API with IAM, see Making query requests in the IAM User Guide."]
+       "Adds or updates an inline policy document that is embedded in the specified IAM user. An IAM user can also have a managed policy attached to it. To attach a managed policy to a user, use AttachUserPolicy . To create a new managed policy, use CreatePolicy . For information about policies, see Managed policies and inline policies in the IAM User Guide. For information about the maximum number of inline policies that you can embed in a user, see IAM and STS quotas in the IAM User Guide. Because policy documents can be large, you should use POST rather than GET when calling PutUserPolicy. For general information about using the Query API with IAM, see Making query requests in the IAM User Guide."]
 module PutUserPermissionsBoundaryRequest =
   struct
     type nonrec t =
@@ -10437,7 +12209,7 @@ module PutUserPermissionsBoundaryRequest =
           "The name (friendly name, not ARN) of the IAM user for which you want to set the permissions boundary."];
       permissionsBoundary: ArnType.t
         [@ocaml.doc
-          "The ARN of the policy that is used to set the permissions boundary for the user."]}
+          "The ARN of the managed policy that is used to set the permissions boundary for the user. A permissions boundary policy defines the maximum permissions that identity-based policies can grant to an entity, but does not grant permissions. Permissions boundaries do not define the maximum permissions that a resource-based policy can grant to an entity. To learn more, see Permissions boundaries for IAM entities in the IAM User Guide. For more information about policy types, see Policy types in the IAM User Guide."]}
     let context_ = "PutUserPermissionsBoundaryRequest"
     let make ~userName =
       fun ~permissionsBoundary -> fun () -> { userName; permissionsBoundary }
@@ -10456,10 +12228,10 @@ module PutUserPermissionsBoundaryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~permissionsBoundary ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissionsBoundary =
-        field_map_exn json "PermissionsBoundary" ArnType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
+        field_map_exn json__ "PermissionsBoundary" ArnType.of_json in
+      let userName = field_map_exn json__ "UserName" UserNameType.of_json in
       make ~permissionsBoundary ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10501,15 +12273,16 @@ module PutRolePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~policyDocument ~policyName ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyDocument =
-        field_map_exn json "PolicyDocument" PolicyDocumentType.of_json in
-      let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+        field_map_exn json__ "PolicyDocument" PolicyDocumentType.of_json in
+      let policyName =
+        field_map_exn json__ "PolicyName" PolicyNameType.of_json in
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ~policyDocument ~policyName ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates an inline policy document that is embedded in the specified IAM role. When you embed an inline policy in a role, the inline policy is used as part of the role's access (permissions) policy. The role's trust policy is created at the same time as the role, using CreateRole. You can update a role's trust policy using UpdateAssumeRolePolicy. For more information about IAM roles, see Using roles to delegate permissions and federate identities. A role can also have a managed policy attached to it. To attach a managed policy to a role, use AttachRolePolicy. To create a new managed policy, use CreatePolicy. For information about policies, see Managed policies and inline policies in the IAM User Guide. For information about the maximum number of inline policies that you can embed with a role, see IAM and STS quotas in the IAM User Guide. Because policy documents can be large, you should use POST rather than GET when calling PutRolePolicy. For general information about using the Query API with IAM, see Making query requests in the IAM User Guide."]
+       "Adds or updates an inline policy document that is embedded in the specified IAM role. When you embed an inline policy in a role, the inline policy is used as part of the role's access (permissions) policy. The role's trust policy is created at the same time as the role, using CreateRole . You can update a role's trust policy using UpdateAssumeRolePolicy . For more information about roles, see IAM roles in the IAM User Guide. A role can also have a managed policy attached to it. To attach a managed policy to a role, use AttachRolePolicy . To create a new managed policy, use CreatePolicy . For information about policies, see Managed policies and inline policies in the IAM User Guide. For information about the maximum number of inline policies that you can embed with a role, see IAM and STS quotas in the IAM User Guide. Because policy documents can be large, you should use POST rather than GET when calling PutRolePolicy. For general information about using the Query API with IAM, see Making query requests in the IAM User Guide."]
 module PutRolePermissionsBoundaryRequest =
   struct
     type nonrec t =
@@ -10519,7 +12292,7 @@ module PutRolePermissionsBoundaryRequest =
           "The name (friendly name, not ARN) of the IAM role for which you want to set the permissions boundary."];
       permissionsBoundary: ArnType.t
         [@ocaml.doc
-          "The ARN of the policy that is used to set the permissions boundary for the role."]}
+          "The ARN of the managed policy that is used to set the permissions boundary for the role. A permissions boundary policy defines the maximum permissions that identity-based policies can grant to an entity, but does not grant permissions. Permissions boundaries do not define the maximum permissions that a resource-based policy can grant to an entity. To learn more, see Permissions boundaries for IAM entities in the IAM User Guide. For more information about policy types, see Policy types in the IAM User Guide."]}
     let context_ = "PutRolePermissionsBoundaryRequest"
     let make ~roleName =
       fun ~permissionsBoundary -> fun () -> { roleName; permissionsBoundary }
@@ -10538,10 +12311,10 @@ module PutRolePermissionsBoundaryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~permissionsBoundary ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissionsBoundary =
-        field_map_exn json "PermissionsBoundary" ArnType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+        field_map_exn json__ "PermissionsBoundary" ArnType.of_json in
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ~permissionsBoundary ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10558,7 +12331,7 @@ module PutGroupPolicyRequest =
           "The name of the policy document. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyDocument: PolicyDocumentType.t
         [@ocaml.doc
-          "The policy document. You must provide policies in JSON format in IAM. However, for CloudFormation templates formatted in YAML, you can provide the policy in JSON or YAML format. CloudFormation always converts a YAML policy to JSON format before submitting it to = IAM. The regex pattern used to validate this parameter is a string of characters consisting of the following: Any printable ASCII character ranging from the space character (\\u0020) through the end of the ASCII character range The printable characters in the Basic Latin and Latin-1 Supplement character set (through \\u00FF) The special characters tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D)"]}
+          "The policy document. You must provide policies in JSON format in IAM. However, for CloudFormation templates formatted in YAML, you can provide the policy in JSON or YAML format. CloudFormation always converts a YAML policy to JSON format before submitting it to IAM. The regex pattern used to validate this parameter is a string of characters consisting of the following: Any printable ASCII character ranging from the space character (\\u0020) through the end of the ASCII character range The printable characters in the Basic Latin and Latin-1 Supplement character set (through \\u00FF) The special characters tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D)"]}
     let context_ = "PutGroupPolicyRequest"
     let make ~groupName =
       fun ~policyName ->
@@ -10583,15 +12356,16 @@ module PutGroupPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~policyDocument ~policyName ~groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyDocument =
-        field_map_exn json "PolicyDocument" PolicyDocumentType.of_json in
-      let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
-      let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
+        field_map_exn json__ "PolicyDocument" PolicyDocumentType.of_json in
+      let policyName =
+        field_map_exn json__ "PolicyName" PolicyNameType.of_json in
+      let groupName = field_map_exn json__ "GroupName" GroupNameType.of_json in
       make ~policyDocument ~policyName ~groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates an inline policy document that is embedded in the specified IAM group. A user can also have managed policies attached to it. To attach a managed policy to a group, use AttachGroupPolicy. To create a new managed policy, use CreatePolicy. For information about policies, see Managed policies and inline policies in the IAM User Guide. For information about the maximum number of inline policies that you can embed in a group, see IAM and STS quotas in the IAM User Guide. Because policy documents can be large, you should use POST rather than GET when calling PutGroupPolicy. For general information about using the Query API with IAM, see Making query requests in the IAM User Guide."]
+       "Adds or updates an inline policy document that is embedded in the specified IAM group. A user can also have managed policies attached to it. To attach a managed policy to a group, use AttachGroupPolicy . To create a new managed policy, use CreatePolicy . For information about policies, see Managed policies and inline policies in the IAM User Guide. For information about the maximum number of inline policies that you can embed in a group, see IAM and STS quotas in the IAM User Guide. Because policy documents can be large, you should use POST rather than GET when calling PutGroupPolicy. For general information about using the Query API with IAM, see Making query requests in the IAM User Guide."]
 module PolicyNotAttachableException =
   struct
     type nonrec t = {
@@ -10608,9 +12382,9 @@ module PolicyNotAttachableException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" PolicyNotAttachableMessage.of_json in
+        field_map json__ "message" PolicyNotAttachableMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10619,7 +12393,7 @@ module ListVirtualMFADevicesResponse =
   struct
     type listVirtualMFADevicesResult =
       {
-      virtualMFADevices: VirtualMFADeviceListType.t
+      virtualMFADevices: VirtualMFADeviceListType.t option
         [@ocaml.doc
           "The list of virtual MFA devices in the current account that match the AssignmentStatus value that was passed in the request."];
       isTruncated: BooleanType.t option
@@ -10635,13 +12409,13 @@ module ListVirtualMFADevicesResponse =
       responseMetaData: responseMetaData }
     type error = [ `Unknown_operation_error of (string * string option) ]
     let context_ = "ListVirtualMFADevicesResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~virtualMFADevices ->
+    let make ?virtualMFADevices =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
               listVirtualMFADevicesResult =
-                { isTruncated; marker; virtualMFADevices };
+                { virtualMFADevices; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -10664,7 +12438,8 @@ module ListVirtualMFADevicesResponse =
       let x = t.listVirtualMFADevicesResult in
       structure_to_wrapped_value
         [("VirtualMFADevices",
-           (Some (VirtualMFADeviceListType.to_value x.virtualMFADevices)));
+           (Option.map x.virtualMFADevices
+              ~f:VirtualMFADeviceListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListVirtualMFADevicesResult" ~response:"ResponseMetaData"
@@ -10678,17 +12453,16 @@ module ListVirtualMFADevicesResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let virtualMFADevices =
-        VirtualMFADeviceListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VirtualMFADevices") in
-      make ?marker ?isTruncated ~virtualMFADevices ()
+        (Option.map ~f:VirtualMFADeviceListType.of_xml)
+          (Xml.child xml_arg0 "VirtualMFADevices") in
+      make ?marker ?isTruncated ?virtualMFADevices ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let virtualMFADevices =
-        field_map_exn json "VirtualMFADevices"
-          VirtualMFADeviceListType.of_json in
-      make ?marker ?isTruncated ~virtualMFADevices ()
+        field_map json__ "VirtualMFADevices" VirtualMFADeviceListType.of_json in
+      make ?marker ?isTruncated ?virtualMFADevices ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful ListVirtualMFADevices request."]
@@ -10725,11 +12499,11 @@ module ListVirtualMFADevicesRequest =
           (Xml.child xml_arg0 "AssignmentStatus") in
       make ?maxItems ?marker ?assignmentStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
       let assignmentStatus =
-        field_map json "AssignmentStatus" AssignmentStatusType.of_json in
+        field_map json__ "AssignmentStatus" AssignmentStatusType.of_json in
       make ?maxItems ?marker ?assignmentStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10738,7 +12512,7 @@ module ListUsersResponse =
   struct
     type listUsersResult =
       {
-      users: UserListType.t [@ocaml.doc "A list of users."];
+      users: UserListType.t option [@ocaml.doc "A list of users."];
       isTruncated: BooleanType.t option
         [@ocaml.doc
           "A flag that indicates whether there are more items to return. If your results were truncated, you can make a subsequent pagination request using the Marker request parameter to retrieve more items. Note that IAM might return fewer than the MaxItems number of results even when there are more results available. We recommend that you check IsTruncated after every call to ensure that you receive all your results."];
@@ -10754,12 +12528,12 @@ module ListUsersResponse =
       [ `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListUsersResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~users ->
+    let make ?users =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
-              listUsersResult = { isTruncated; marker; users };
+              listUsersResult = { users; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -10789,7 +12563,7 @@ module ListUsersResponse =
     let to_value t =
       let x = t.listUsersResult in
       structure_to_wrapped_value
-        [("Users", (Some (UserListType.to_value x.users)));
+        [("Users", (Option.map x.users ~f:UserListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListUsersResult" ~response:"ResponseMetaData"
@@ -10802,15 +12576,14 @@ module ListUsersResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let users =
-        UserListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Users") in
-      make ?marker ?isTruncated ~users ()
+        (Option.map ~f:UserListType.of_xml) (Xml.child xml_arg0 "Users") in
+      make ?marker ?isTruncated ?users ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
-      let users = field_map_exn json "Users" UserListType.of_json in
-      make ?marker ?isTruncated ~users ()
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
+      let users = field_map json__ "Users" UserListType.of_json in
+      make ?marker ?isTruncated ?users ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the response to a successful ListUsers request."]
 module ListUsersRequest =
@@ -10845,19 +12618,19 @@ module ListUsersRequest =
           (Xml.child xml_arg0 "PathPrefix") in
       make ?maxItems ?marker ?pathPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let pathPrefix = field_map json "PathPrefix" PathPrefixType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let pathPrefix = field_map json__ "PathPrefix" PathPrefixType.of_json in
       make ?maxItems ?marker ?pathPrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the IAM users that have the specified path prefix. If no path prefix is specified, the operation returns all users in the Amazon Web Services account. If there are none, the operation returns an empty list. IAM resource-listing operations return a subset of the available attributes for the resource. For example, this operation does not return tags, even though they are an attribute of the returned object. To view all of the information for a user, see GetUser. You can paginate the results using the MaxItems and Marker parameters."]
+       "Lists the IAM users that have the specified path prefix. If no path prefix is specified, the operation returns all users in the Amazon Web Services account. If there are none, the operation returns an empty list. IAM resource-listing operations return a subset of the available attributes for the resource. This operation does not return the following attributes, even though they are an attribute of the returned object: PermissionsBoundary Tags To view all of the information for a user, see GetUser. You can paginate the results using the MaxItems and Marker parameters."]
 module ListUserTagsResponse =
   struct
     type listUserTagsResult =
       {
-      tags: TagListType.t
+      tags: TagListType.t option
         [@ocaml.doc
           "The list of tags that are currently attached to the user. Each tag consists of a key name and an associated value. If no tags are attached to the specified resource, the response contains an empty list."];
       isTruncated: BooleanType.t option
@@ -10876,12 +12649,12 @@ module ListUserTagsResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListUserTagsResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~tags ->
+    let make ?tags =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
-              listUserTagsResult = { isTruncated; marker; tags };
+              listUserTagsResult = { tags; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -10919,7 +12692,7 @@ module ListUserTagsResponse =
     let to_value t =
       let x = t.listUserTagsResult in
       structure_to_wrapped_value
-        [("Tags", (Some (TagListType.to_value x.tags)));
+        [("Tags", (Option.map x.tags ~f:TagListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListUserTagsResult" ~response:"ResponseMetaData"
@@ -10932,14 +12705,14 @@ module ListUserTagsResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let tags =
-        TagListType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
-      make ?marker ?isTruncated ~tags ()
+        (Option.map ~f:TagListType.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?marker ?isTruncated ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
-      let tags = field_map_exn json "Tags" TagListType.of_json in
-      make ?marker ?isTruncated ~tags ()
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      make ?marker ?isTruncated ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the tags that are attached to the specified IAM user. The returned list of tags is sorted by tag key. For more information about tagging, see Tagging IAM resources in the IAM User Guide."]
@@ -10976,11 +12749,11 @@ module ListUserTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?maxItems ?marker ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
       let userName =
-        field_map_exn json "UserName" ExistingUserNameType.of_json in
+        field_map_exn json__ "UserName" ExistingUserNameType.of_json in
       make ?maxItems ?marker ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10989,7 +12762,7 @@ module ListUserPoliciesResponse =
   struct
     type listUserPoliciesResult =
       {
-      policyNames: PolicyNameListType.t
+      policyNames: PolicyNameListType.t option
         [@ocaml.doc "A list of policy names."];
       isTruncated: BooleanType.t option
         [@ocaml.doc
@@ -11007,12 +12780,12 @@ module ListUserPoliciesResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListUserPoliciesResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~policyNames ->
+    let make ?policyNames =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
-              listUserPoliciesResult = { isTruncated; marker; policyNames };
+              listUserPoliciesResult = { policyNames; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -11050,7 +12823,8 @@ module ListUserPoliciesResponse =
     let to_value t =
       let x = t.listUserPoliciesResult in
       structure_to_wrapped_value
-        [("PolicyNames", (Some (PolicyNameListType.to_value x.policyNames)));
+        [("PolicyNames",
+           (Option.map x.policyNames ~f:PolicyNameListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListUserPoliciesResult" ~response:"ResponseMetaData"
@@ -11064,16 +12838,16 @@ module ListUserPoliciesResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let policyNames =
-        PolicyNameListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyNames") in
-      make ?marker ?isTruncated ~policyNames ()
+        (Option.map ~f:PolicyNameListType.of_xml)
+          (Xml.child xml_arg0 "PolicyNames") in
+      make ?marker ?isTruncated ?policyNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let policyNames =
-        field_map_exn json "PolicyNames" PolicyNameListType.of_json in
-      make ?marker ?isTruncated ~policyNames ()
+        field_map json__ "PolicyNames" PolicyNameListType.of_json in
+      make ?marker ?isTruncated ?policyNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful ListUserPolicies request."]
@@ -11110,11 +12884,11 @@ module ListUserPoliciesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?maxItems ?marker ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
       let userName =
-        field_map_exn json "UserName" ExistingUserNameType.of_json in
+        field_map_exn json__ "UserName" ExistingUserNameType.of_json in
       make ?maxItems ?marker ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11123,7 +12897,7 @@ module ListSigningCertificatesResponse =
   struct
     type listSigningCertificatesResult =
       {
-      certificates: CertificateListType.t
+      certificates: CertificateListType.t option
         [@ocaml.doc "A list of the user's signing certificate information."];
       isTruncated: BooleanType.t option
         [@ocaml.doc
@@ -11141,13 +12915,13 @@ module ListSigningCertificatesResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListSigningCertificatesResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~certificates ->
+    let make ?certificates =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
               listSigningCertificatesResult =
-                { isTruncated; marker; certificates };
+                { certificates; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -11186,7 +12960,7 @@ module ListSigningCertificatesResponse =
       let x = t.listSigningCertificatesResult in
       structure_to_wrapped_value
         [("Certificates",
-           (Some (CertificateListType.to_value x.certificates)));
+           (Option.map x.certificates ~f:CertificateListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListSigningCertificatesResult" ~response:"ResponseMetaData"
@@ -11200,16 +12974,16 @@ module ListSigningCertificatesResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let certificates =
-        CertificateListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Certificates") in
-      make ?marker ?isTruncated ~certificates ()
+        (Option.map ~f:CertificateListType.of_xml)
+          (Xml.child xml_arg0 "Certificates") in
+      make ?marker ?isTruncated ?certificates ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let certificates =
-        field_map_exn json "Certificates" CertificateListType.of_json in
-      make ?marker ?isTruncated ~certificates ()
+        field_map json__ "Certificates" CertificateListType.of_json in
+      make ?marker ?isTruncated ?certificates ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful ListSigningCertificates request."]
@@ -11246,10 +13020,10 @@ module ListSigningCertificatesRequest =
           (Xml.child xml_arg0 "UserName") in
       make ?maxItems ?marker ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let userName = field_map json "UserName" ExistingUserNameType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let userName = field_map json__ "UserName" ExistingUserNameType.of_json in
       make ?maxItems ?marker ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11260,7 +13034,13 @@ module ListServiceSpecificCredentialsResponse =
       {
       serviceSpecificCredentials: ServiceSpecificCredentialsListType.t option
         [@ocaml.doc
-          "A list of structures that each contain details about a service-specific credential."]}
+          "A list of structures that each contain details about a service-specific credential."];
+      marker: ResponseMarkerType.t option
+        [@ocaml.doc
+          "When IsTruncated is true, this element is present and contains the value to use for the Marker parameter in a subsequent pagination request."];
+      isTruncated: BooleanType.t option
+        [@ocaml.doc
+          "A flag that indicates whether there are more items to return. If your results were truncated, you can make a subsequent pagination request using the Marker request parameter to retrieve more items."]}
     and responseMetaData = unit
     and t =
       {
@@ -11273,12 +13053,14 @@ module ListServiceSpecificCredentialsResponse =
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListServiceSpecificCredentialsResponse"
     let make ?serviceSpecificCredentials =
-      fun () ->
-        {
-          listServiceSpecificCredentialsResult =
-            { serviceSpecificCredentials };
-          responseMetaData = ()
-        }
+      fun ?marker ->
+        fun ?isTruncated ->
+          fun () ->
+            {
+              listServiceSpecificCredentialsResult =
+                { serviceSpecificCredentials; marker; isTruncated };
+              responseMetaData = ()
+            }
     let error_of_json name json =
       match name with
       | "NoSuchEntityException" ->
@@ -11318,7 +13100,9 @@ module ListServiceSpecificCredentialsResponse =
       structure_to_wrapped_value
         [("ServiceSpecificCredentials",
            (Option.map x.serviceSpecificCredentials
-              ~f:ServiceSpecificCredentialsListType.to_value))]
+              ~f:ServiceSpecificCredentialsListType.to_value));
+        ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value));
+        ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value))]
         ~wrapper:"ListServiceSpecificCredentialsResult"
         ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
@@ -11326,16 +13110,23 @@ module ListServiceSpecificCredentialsResponse =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t
           "ListServiceSpecificCredentialsResult" in
+      let isTruncated =
+        (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
+      let marker =
+        (Option.map ~f:ResponseMarkerType.of_xml)
+          (Xml.child xml_arg0 "Marker") in
       let serviceSpecificCredentials =
         (Option.map ~f:ServiceSpecificCredentialsListType.of_xml)
           (Xml.child xml_arg0 "ServiceSpecificCredentials") in
-      make ?serviceSpecificCredentials ()
+      make ?isTruncated ?marker ?serviceSpecificCredentials ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
       let serviceSpecificCredentials =
-        field_map json "ServiceSpecificCredentials"
+        field_map json__ "ServiceSpecificCredentials"
           ServiceSpecificCredentialsListType.of_json in
-      make ?serviceSpecificCredentials ()
+      make ?isTruncated ?marker ?serviceSpecificCredentials ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about the service-specific credentials associated with the specified IAM user. If none exists, the operation returns an empty list. The service-specific credentials returned by this operation are used only for authenticating the IAM user to a specific service. For more information about using service-specific credentials to authenticate to an Amazon Web Services service, see Set up service-specific credentials in the CodeCommit User Guide."]
@@ -11348,25 +13139,50 @@ module ListServiceSpecificCredentialsRequest =
           "The name of the user whose service-specific credentials you want information about. If this value is not specified, then the operation assumes the user whose credentials are used to call the operation. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       serviceName: ServiceName.t option
         [@ocaml.doc
-          "Filters the returned results to only those for the specified Amazon Web Services service. If not specified, then Amazon Web Services returns service-specific credentials for all services."]}
+          "Filters the returned results to only those for the specified Amazon Web Services service. If not specified, then Amazon Web Services returns service-specific credentials for all services."];
+      allUsers: AllUsers.t option
+        [@ocaml.doc
+          "A flag indicating whether to list service specific credentials for all users. This parameter cannot be specified together with UserName. When true, returns all credentials associated with the specified service."];
+      marker: MarkerType.t option
+        [@ocaml.doc
+          "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker from the response that you received to indicate where the next call should start."];
+      maxItems: MaxItemsType.t option
+        [@ocaml.doc
+          "Use this only when paginating results to indicate the maximum number of items you want in the response. If additional items exist beyond the maximum you specify, the IsTruncated response element is true."]}
     let make ?userName =
-      fun ?serviceName -> fun () -> { userName; serviceName }
+      fun ?serviceName ->
+        fun ?allUsers ->
+          fun ?marker ->
+            fun ?maxItems ->
+              fun () -> { userName; serviceName; allUsers; marker; maxItems }
     let to_value x =
       structure_to_value
         [("UserName", (Option.map x.userName ~f:UserNameType.to_value));
-        ("ServiceName", (Option.map x.serviceName ~f:ServiceName.to_value))]
+        ("ServiceName", (Option.map x.serviceName ~f:ServiceName.to_value));
+        ("AllUsers", (Option.map x.allUsers ~f:AllUsers.to_value));
+        ("Marker", (Option.map x.marker ~f:MarkerType.to_value));
+        ("MaxItems", (Option.map x.maxItems ~f:MaxItemsType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxItems =
+        (Option.map ~f:MaxItemsType.of_xml) (Xml.child xml_arg0 "MaxItems") in
+      let marker =
+        (Option.map ~f:MarkerType.of_xml) (Xml.child xml_arg0 "Marker") in
+      let allUsers =
+        (Option.map ~f:AllUsers.of_xml) (Xml.child xml_arg0 "AllUsers") in
       let serviceName =
         (Option.map ~f:ServiceName.of_xml) (Xml.child xml_arg0 "ServiceName") in
       let userName =
         (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
-      make ?serviceName ?userName ()
+      make ?maxItems ?marker ?allUsers ?serviceName ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map json "ServiceName" ServiceName.of_json in
-      let userName = field_map json "UserName" UserNameType.of_json in
-      make ?serviceName ?userName ()
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let allUsers = field_map json__ "AllUsers" AllUsers.of_json in
+      let serviceName = field_map json__ "ServiceName" ServiceName.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
+      make ?maxItems ?marker ?allUsers ?serviceName ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about the service-specific credentials associated with the specified IAM user. If none exists, the operation returns an empty list. The service-specific credentials returned by this operation are used only for authenticating the IAM user to a specific service. For more information about using service-specific credentials to authenticate to an Amazon Web Services service, see Set up service-specific credentials in the CodeCommit User Guide."]
@@ -11374,7 +13190,8 @@ module ListServerCertificatesResponse =
   struct
     type listServerCertificatesResult =
       {
-      serverCertificateMetadataList: ServerCertificateMetadataListType.t
+      serverCertificateMetadataList:
+        ServerCertificateMetadataListType.t option
         [@ocaml.doc "A list of server certificates."];
       isTruncated: BooleanType.t option
         [@ocaml.doc
@@ -11391,13 +13208,13 @@ module ListServerCertificatesResponse =
       [ `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListServerCertificatesResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~serverCertificateMetadataList ->
+    let make ?serverCertificateMetadataList =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
               listServerCertificatesResult =
-                { isTruncated; marker; serverCertificateMetadataList };
+                { serverCertificateMetadataList; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -11428,9 +13245,8 @@ module ListServerCertificatesResponse =
       let x = t.listServerCertificatesResult in
       structure_to_wrapped_value
         [("ServerCertificateMetadataList",
-           (Some
-              (ServerCertificateMetadataListType.to_value
-                 x.serverCertificateMetadataList)));
+           (Option.map x.serverCertificateMetadataList
+              ~f:ServerCertificateMetadataListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListServerCertificatesResult" ~response:"ResponseMetaData"
@@ -11444,18 +13260,17 @@ module ListServerCertificatesResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let serverCertificateMetadataList =
-        ServerCertificateMetadataListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ServerCertificateMetadataList") in
-      make ?marker ?isTruncated ~serverCertificateMetadataList ()
+        (Option.map ~f:ServerCertificateMetadataListType.of_xml)
+          (Xml.child xml_arg0 "ServerCertificateMetadataList") in
+      make ?marker ?isTruncated ?serverCertificateMetadataList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let serverCertificateMetadataList =
-        field_map_exn json "ServerCertificateMetadataList"
+        field_map json__ "ServerCertificateMetadataList"
           ServerCertificateMetadataListType.of_json in
-      make ?marker ?isTruncated ~serverCertificateMetadataList ()
+      make ?marker ?isTruncated ?serverCertificateMetadataList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful ListServerCertificates request."]
@@ -11491,10 +13306,10 @@ module ListServerCertificatesRequest =
           (Xml.child xml_arg0 "PathPrefix") in
       make ?maxItems ?marker ?pathPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let pathPrefix = field_map json "PathPrefix" PathPrefixType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let pathPrefix = field_map json__ "PathPrefix" PathPrefixType.of_json in
       make ?maxItems ?marker ?pathPrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11503,7 +13318,7 @@ module ListServerCertificateTagsResponse =
   struct
     type listServerCertificateTagsResult =
       {
-      tags: TagListType.t
+      tags: TagListType.t option
         [@ocaml.doc
           "The list of tags that are currently attached to the IAM server certificate. Each tag consists of a key name and an associated value. If no tags are attached to the specified resource, the response contains an empty list."];
       isTruncated: BooleanType.t option
@@ -11522,12 +13337,12 @@ module ListServerCertificateTagsResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListServerCertificateTagsResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~tags ->
+    let make ?tags =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
-              listServerCertificateTagsResult = { isTruncated; marker; tags };
+              listServerCertificateTagsResult = { tags; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -11565,7 +13380,7 @@ module ListServerCertificateTagsResponse =
     let to_value t =
       let x = t.listServerCertificateTagsResult in
       structure_to_wrapped_value
-        [("Tags", (Some (TagListType.to_value x.tags)));
+        [("Tags", (Option.map x.tags ~f:TagListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListServerCertificateTagsResult"
@@ -11580,14 +13395,14 @@ module ListServerCertificateTagsResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let tags =
-        TagListType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
-      make ?marker ?isTruncated ~tags ()
+        (Option.map ~f:TagListType.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?marker ?isTruncated ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
-      let tags = field_map_exn json "Tags" TagListType.of_json in
-      make ?marker ?isTruncated ~tags ()
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      make ?marker ?isTruncated ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the tags that are attached to the specified IAM server certificate. The returned list of tags is sorted by tag key. For more information about tagging, see Tagging IAM resources in the IAM User Guide. For certificates in a Region supported by Certificate Manager (ACM), we recommend that you don't use IAM server certificates. Instead, use ACM to provision, manage, and deploy your server certificates. For more information about IAM server certificates, Working with server certificates in the IAM User Guide."]
@@ -11626,11 +13441,11 @@ module ListServerCertificateTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServerCertificateName") in
       make ?maxItems ?marker ~serverCertificateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
       let serverCertificateName =
-        field_map_exn json "ServerCertificateName"
+        field_map_exn json__ "ServerCertificateName"
           ServerCertificateNameType.of_json in
       make ?maxItems ?marker ~serverCertificateName ()
     let to_json v = composed_to_json to_value v
@@ -11712,11 +13527,11 @@ module ListSSHPublicKeysResponse =
           (Xml.child xml_arg0 "SSHPublicKeys") in
       make ?marker ?isTruncated ?sSHPublicKeys ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let sSHPublicKeys =
-        field_map json "SSHPublicKeys" SSHPublicKeyListType.of_json in
+        field_map json__ "SSHPublicKeys" SSHPublicKeyListType.of_json in
       make ?marker ?isTruncated ?sSHPublicKeys ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11752,10 +13567,10 @@ module ListSSHPublicKeysRequest =
         (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
       make ?maxItems ?marker ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let userName = field_map json "UserName" UserNameType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
       make ?maxItems ?marker ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11821,9 +13636,9 @@ module ListSAMLProvidersResponse =
           (Xml.child xml_arg0 "SAMLProviderList") in
       make ?sAMLProviderList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sAMLProviderList =
-        field_map json "SAMLProviderList" SAMLProviderListType.of_json in
+        field_map json__ "SAMLProviderList" SAMLProviderListType.of_json in
       make ?sAMLProviderList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11845,7 +13660,7 @@ module ListSAMLProviderTagsResponse =
   struct
     type listSAMLProviderTagsResult =
       {
-      tags: TagListType.t
+      tags: TagListType.t option
         [@ocaml.doc
           "The list of tags that are currently attached to the Security Assertion Markup Language (SAML) identity provider. Each tag consists of a key name and an associated value. If no tags are attached to the specified resource, the response contains an empty list."];
       isTruncated: BooleanType.t option
@@ -11865,12 +13680,12 @@ module ListSAMLProviderTagsResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListSAMLProviderTagsResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~tags ->
+    let make ?tags =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
-              listSAMLProviderTagsResult = { isTruncated; marker; tags };
+              listSAMLProviderTagsResult = { tags; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -11916,7 +13731,7 @@ module ListSAMLProviderTagsResponse =
     let to_value t =
       let x = t.listSAMLProviderTagsResult in
       structure_to_wrapped_value
-        [("Tags", (Some (TagListType.to_value x.tags)));
+        [("Tags", (Option.map x.tags ~f:TagListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListSAMLProviderTagsResult" ~response:"ResponseMetaData"
@@ -11930,14 +13745,14 @@ module ListSAMLProviderTagsResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let tags =
-        TagListType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
-      make ?marker ?isTruncated ~tags ()
+        (Option.map ~f:TagListType.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?marker ?isTruncated ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
-      let tags = field_map_exn json "Tags" TagListType.of_json in
-      make ?marker ?isTruncated ~tags ()
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      make ?marker ?isTruncated ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the tags that are attached to the specified Security Assertion Markup Language (SAML) identity provider. The returned list of tags is sorted by tag key. For more information, see About SAML 2.0-based federation. For more information about tagging, see Tagging IAM resources in the IAM User Guide."]
@@ -11975,11 +13790,11 @@ module ListSAMLProviderTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SAMLProviderArn") in
       make ?maxItems ?marker ~sAMLProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
       let sAMLProviderArn =
-        field_map_exn json "SAMLProviderArn" ArnType.of_json in
+        field_map_exn json__ "SAMLProviderArn" ArnType.of_json in
       make ?maxItems ?marker ~sAMLProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11988,7 +13803,7 @@ module ListRolesResponse =
   struct
     type listRolesResult =
       {
-      roles: RoleListType.t [@ocaml.doc "A list of roles."];
+      roles: RoleListType.t option [@ocaml.doc "A list of roles."];
       isTruncated: BooleanType.t option
         [@ocaml.doc
           "A flag that indicates whether there are more items to return. If your results were truncated, you can make a subsequent pagination request using the Marker request parameter to retrieve more items. Note that IAM might return fewer than the MaxItems number of results even when there are more results available. We recommend that you check IsTruncated after every call to ensure that you receive all your results."];
@@ -12004,12 +13819,12 @@ module ListRolesResponse =
       [ `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListRolesResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~roles ->
+    let make ?roles =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
-              listRolesResult = { isTruncated; marker; roles };
+              listRolesResult = { roles; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -12039,7 +13854,7 @@ module ListRolesResponse =
     let to_value t =
       let x = t.listRolesResult in
       structure_to_wrapped_value
-        [("Roles", (Some (RoleListType.to_value x.roles)));
+        [("Roles", (Option.map x.roles ~f:RoleListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListRolesResult" ~response:"ResponseMetaData"
@@ -12052,15 +13867,14 @@ module ListRolesResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let roles =
-        RoleListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Roles") in
-      make ?marker ?isTruncated ~roles ()
+        (Option.map ~f:RoleListType.of_xml) (Xml.child xml_arg0 "Roles") in
+      make ?marker ?isTruncated ?roles ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
-      let roles = field_map_exn json "Roles" RoleListType.of_json in
-      make ?marker ?isTruncated ~roles ()
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
+      let roles = field_map json__ "Roles" RoleListType.of_json in
+      make ?marker ?isTruncated ?roles ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the response to a successful ListRoles request."]
 module ListRolesRequest =
@@ -12095,19 +13909,19 @@ module ListRolesRequest =
           (Xml.child xml_arg0 "PathPrefix") in
       make ?maxItems ?marker ?pathPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let pathPrefix = field_map json "PathPrefix" PathPrefixType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let pathPrefix = field_map json__ "PathPrefix" PathPrefixType.of_json in
       make ?maxItems ?marker ?pathPrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the IAM roles that have the specified path prefix. If there are none, the operation returns an empty list. For more information about roles, see Working with roles. IAM resource-listing operations return a subset of the available attributes for the resource. For example, this operation does not return tags, even though they are an attribute of the returned object. To view all of the information for a role, see GetRole. You can paginate the results using the MaxItems and Marker parameters."]
+       "Lists the IAM roles that have the specified path prefix. If there are none, the operation returns an empty list. For more information about roles, see IAM roles in the IAM User Guide. IAM resource-listing operations return a subset of the available attributes for the resource. This operation does not return the following attributes, even though they are an attribute of the returned object: PermissionsBoundary RoleLastUsed Tags To view all of the information for a role, see GetRole. You can paginate the results using the MaxItems and Marker parameters."]
 module ListRoleTagsResponse =
   struct
     type listRoleTagsResult =
       {
-      tags: TagListType.t
+      tags: TagListType.t option
         [@ocaml.doc
           "The list of tags that are currently attached to the role. Each tag consists of a key name and an associated value. If no tags are attached to the specified resource, the response contains an empty list."];
       isTruncated: BooleanType.t option
@@ -12126,12 +13940,12 @@ module ListRoleTagsResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListRoleTagsResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~tags ->
+    let make ?tags =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
-              listRoleTagsResult = { isTruncated; marker; tags };
+              listRoleTagsResult = { tags; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -12169,7 +13983,7 @@ module ListRoleTagsResponse =
     let to_value t =
       let x = t.listRoleTagsResult in
       structure_to_wrapped_value
-        [("Tags", (Some (TagListType.to_value x.tags)));
+        [("Tags", (Option.map x.tags ~f:TagListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListRoleTagsResult" ~response:"ResponseMetaData"
@@ -12182,14 +13996,14 @@ module ListRoleTagsResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let tags =
-        TagListType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
-      make ?marker ?isTruncated ~tags ()
+        (Option.map ~f:TagListType.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?marker ?isTruncated ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
-      let tags = field_map_exn json "Tags" TagListType.of_json in
-      make ?marker ?isTruncated ~tags ()
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      make ?marker ?isTruncated ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the tags that are attached to the specified role. The returned list of tags is sorted by tag key. For more information about tagging, see Tagging IAM resources in the IAM User Guide."]
@@ -12226,10 +14040,10 @@ module ListRoleTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ?maxItems ?marker ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ?maxItems ?marker ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12238,7 +14052,7 @@ module ListRolePoliciesResponse =
   struct
     type listRolePoliciesResult =
       {
-      policyNames: PolicyNameListType.t
+      policyNames: PolicyNameListType.t option
         [@ocaml.doc "A list of policy names."];
       isTruncated: BooleanType.t option
         [@ocaml.doc
@@ -12256,12 +14070,12 @@ module ListRolePoliciesResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListRolePoliciesResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~policyNames ->
+    let make ?policyNames =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
-              listRolePoliciesResult = { isTruncated; marker; policyNames };
+              listRolePoliciesResult = { policyNames; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -12299,7 +14113,8 @@ module ListRolePoliciesResponse =
     let to_value t =
       let x = t.listRolePoliciesResult in
       structure_to_wrapped_value
-        [("PolicyNames", (Some (PolicyNameListType.to_value x.policyNames)));
+        [("PolicyNames",
+           (Option.map x.policyNames ~f:PolicyNameListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListRolePoliciesResult" ~response:"ResponseMetaData"
@@ -12313,16 +14128,16 @@ module ListRolePoliciesResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let policyNames =
-        PolicyNameListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyNames") in
-      make ?marker ?isTruncated ~policyNames ()
+        (Option.map ~f:PolicyNameListType.of_xml)
+          (Xml.child xml_arg0 "PolicyNames") in
+      make ?marker ?isTruncated ?policyNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let policyNames =
-        field_map_exn json "PolicyNames" PolicyNameListType.of_json in
-      make ?marker ?isTruncated ~policyNames ()
+        field_map json__ "PolicyNames" PolicyNameListType.of_json in
+      make ?marker ?isTruncated ?policyNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful ListRolePolicies request."]
@@ -12359,10 +14174,10 @@ module ListRolePoliciesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ?maxItems ?marker ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ?maxItems ?marker ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12461,11 +14276,11 @@ module ListPolicyVersionsResponse =
           (Xml.child xml_arg0 "Versions") in
       make ?marker ?isTruncated ?versions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let versions =
-        field_map json "Versions" PolicyDocumentVersionListType.of_json in
+        field_map json__ "Versions" PolicyDocumentVersionListType.of_json in
       make ?marker ?isTruncated ?versions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12502,10 +14317,10 @@ module ListPolicyVersionsRequest =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ?maxItems ?marker ~policyArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let policyArn = field_map_exn json__ "PolicyArn" ArnType.of_json in
       make ?maxItems ?marker ~policyArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12514,7 +14329,7 @@ module ListPolicyTagsResponse =
   struct
     type listPolicyTagsResult =
       {
-      tags: TagListType.t
+      tags: TagListType.t option
         [@ocaml.doc
           "The list of tags that are currently attached to the IAM customer managed policy. Each tag consists of a key name and an associated value. If no tags are attached to the specified resource, the response contains an empty list."];
       isTruncated: BooleanType.t option
@@ -12534,12 +14349,12 @@ module ListPolicyTagsResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListPolicyTagsResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~tags ->
+    let make ?tags =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
-              listPolicyTagsResult = { isTruncated; marker; tags };
+              listPolicyTagsResult = { tags; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -12585,7 +14400,7 @@ module ListPolicyTagsResponse =
     let to_value t =
       let x = t.listPolicyTagsResult in
       structure_to_wrapped_value
-        [("Tags", (Some (TagListType.to_value x.tags)));
+        [("Tags", (Option.map x.tags ~f:TagListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListPolicyTagsResult" ~response:"ResponseMetaData"
@@ -12598,14 +14413,14 @@ module ListPolicyTagsResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let tags =
-        TagListType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
-      make ?marker ?isTruncated ~tags ()
+        (Option.map ~f:TagListType.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?marker ?isTruncated ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
-      let tags = field_map_exn json "Tags" TagListType.of_json in
-      make ?marker ?isTruncated ~tags ()
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      make ?marker ?isTruncated ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the tags that are attached to the specified IAM customer managed policy. The returned list of tags is sorted by tag key. For more information about tagging, see Tagging IAM resources in the IAM User Guide."]
@@ -12641,10 +14456,10 @@ module ListPolicyTagsRequest =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ?maxItems ?marker ~policyArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let policyArn = field_map_exn json__ "PolicyArn" ArnType.of_json in
       make ?maxItems ?marker ~policyArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12720,10 +14535,10 @@ module ListPoliciesResponse =
         (Option.map ~f:PolicyListType.of_xml) (Xml.child xml_arg0 "Policies") in
       make ?marker ?isTruncated ?policies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
-      let policies = field_map json "Policies" PolicyListType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
+      let policies = field_map json__ "Policies" PolicyListType.of_json in
       make ?marker ?isTruncated ?policies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12743,7 +14558,7 @@ module ListPoliciesRequest =
           "The path prefix for filtering the results. This parameter is optional. If it is not included, it defaults to a slash (/), listing all policies. This parameter allows (through its regex pattern) a string of characters consisting of either a forward slash (/) by itself or a string that must begin and end with forward slashes. In addition, it can contain any ASCII character from the ! (\\u0021) through the DEL character (\\u007F), including most punctuation characters, digits, and upper and lowercased letters."];
       policyUsageFilter: PolicyUsageType.t option
         [@ocaml.doc
-          "The policy usage method to use for filtering the results. To list only permissions policies, set\194\160PolicyUsageFilter\194\160to\194\160PermissionsPolicy. To list only the policies used to set permissions boundaries, set\194\160the value to\194\160PermissionsBoundary. This parameter is optional. If it is not included, all policies are returned."];
+          "The policy usage method to use for filtering the results. To list only permissions policies, set PolicyUsageFilter to PermissionsPolicy. To list only the policies used to set permissions boundaries, set the value to PermissionsBoundary. This parameter is optional. If it is not included, all policies are returned."];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -12794,14 +14609,14 @@ module ListPoliciesRequest =
       make ?maxItems ?marker ?policyUsageFilter ?pathPrefix ?onlyAttached
         ?scope ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
       let policyUsageFilter =
-        field_map json "PolicyUsageFilter" PolicyUsageType.of_json in
-      let pathPrefix = field_map json "PathPrefix" PolicyPathType.of_json in
-      let onlyAttached = field_map json "OnlyAttached" BooleanType.of_json in
-      let scope = field_map json "Scope" PolicyScopeType.of_json in
+        field_map json__ "PolicyUsageFilter" PolicyUsageType.of_json in
+      let pathPrefix = field_map json__ "PathPrefix" PolicyPathType.of_json in
+      let onlyAttached = field_map json__ "OnlyAttached" BooleanType.of_json in
+      let scope = field_map json__ "Scope" PolicyScopeType.of_json in
       make ?maxItems ?marker ?policyUsageFilter ?pathPrefix ?onlyAttached
         ?scope ()
     let to_json v = composed_to_json to_value v
@@ -12812,9 +14627,9 @@ module ListPoliciesGrantingServiceAccessResponse =
     type listPoliciesGrantingServiceAccessResult =
       {
       policiesGrantingServiceAccess:
-        ListPolicyGrantingServiceAccessResponseListType.t
+        ListPolicyGrantingServiceAccessResponseListType.t option
         [@ocaml.doc
-          "A\194\160ListPoliciesGrantingServiceAccess object that contains details about the permissions policies attached to the specified identity (user, group, or role)."];
+          "A ListPoliciesGrantingServiceAccess object that contains details about the permissions policies attached to the specified identity (user, group, or role)."];
       isTruncated: BooleanType.t option
         [@ocaml.doc
           "A flag that indicates whether there are more items to return. If your results were truncated, you can make a subsequent pagination request using the Marker request parameter to retrieve more items. We recommend that you check IsTruncated after every call to ensure that you receive all your results."];
@@ -12832,13 +14647,13 @@ module ListPoliciesGrantingServiceAccessResponse =
       | `NoSuchEntityException of NoSuchEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListPoliciesGrantingServiceAccessResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~policiesGrantingServiceAccess ->
+    let make ?policiesGrantingServiceAccess =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
               listPoliciesGrantingServiceAccessResult =
-                { isTruncated; marker; policiesGrantingServiceAccess };
+                { policiesGrantingServiceAccess; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -12877,9 +14692,8 @@ module ListPoliciesGrantingServiceAccessResponse =
       let x = t.listPoliciesGrantingServiceAccessResult in
       structure_to_wrapped_value
         [("PoliciesGrantingServiceAccess",
-           (Some
-              (ListPolicyGrantingServiceAccessResponseListType.to_value
-                 x.policiesGrantingServiceAccess)));
+           (Option.map x.policiesGrantingServiceAccess
+              ~f:ListPolicyGrantingServiceAccessResponseListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListPoliciesGrantingServiceAccessResult"
@@ -12895,18 +14709,17 @@ module ListPoliciesGrantingServiceAccessResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let policiesGrantingServiceAccess =
-        ListPolicyGrantingServiceAccessResponseListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "PoliciesGrantingServiceAccess") in
-      make ?marker ?isTruncated ~policiesGrantingServiceAccess ()
+        (Option.map ~f:ListPolicyGrantingServiceAccessResponseListType.of_xml)
+          (Xml.child xml_arg0 "PoliciesGrantingServiceAccess") in
+      make ?marker ?isTruncated ?policiesGrantingServiceAccess ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let policiesGrantingServiceAccess =
-        field_map_exn json "PoliciesGrantingServiceAccess"
+        field_map json__ "PoliciesGrantingServiceAccess"
           ListPolicyGrantingServiceAccessResponseListType.of_json in
-      make ?marker ?isTruncated ~policiesGrantingServiceAccess ()
+      make ?marker ?isTruncated ?policiesGrantingServiceAccess ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of policies that the IAM identity (user, group, or role) can use to access each specified service. This operation does not use other policy types when determining whether a resource could access a service. These other policy types include resource-based policies, access control lists, Organizations policies, IAM permissions boundaries, and STS assume role policies. It only applies permissions policy logic. For more about the evaluation of policy types, see Evaluating policies in the IAM User Guide. The list of policies returned by the operation depends on the ARN of the identity that you provide. User \226\128\147 The list of policies includes the managed and inline policies that are attached to the user directly. The list also includes any additional managed and inline policies that are attached to the group to which the user belongs. Group \226\128\147 The list of policies includes only the managed and inline policies that are attached to the group directly. Policies that are attached to the group\226\128\153s user are not included. Role \226\128\147 The list of policies includes only the managed and inline policies that are attached to the role. For each managed policy, this operation returns the ARN and policy name. For each inline policy, it returns the policy name and the entity to which it is attached. Inline policies do not have an ARN. For more information about these policy types, see Managed policies and inline policies in the IAM User Guide. Policies that are attached to users and roles as permissions boundaries are not returned. To view which managed policy is currently used to set the permissions boundary for a user or role, use the GetUser or GetRole operations."]
@@ -12922,7 +14735,7 @@ module ListPoliciesGrantingServiceAccessRequest =
           "The ARN of the IAM identity (user, group, or role) whose policies you want to list."];
       serviceNamespaces: ServiceNamespaceListType.t
         [@ocaml.doc
-          "The service namespace for the Amazon Web Services services whose policies you want to list. To learn the service namespace for a service, see Actions, resources, and condition keys for Amazon Web Services services in the IAM User Guide. Choose the name of the service to view details for that service. In the first paragraph, find the service prefix. For example, (service prefix: a4b). For more information about service namespaces, see Amazon Web Services service namespaces in the\194\160Amazon Web Services General Reference."]}
+          "The service namespace for the Amazon Web Services services whose policies you want to list. To learn the service namespace for a service, see Actions, resources, and condition keys for Amazon Web Services services in the IAM User Guide. Choose the name of the service to view details for that service. In the first paragraph, find the service prefix. For example, (service prefix: a4b). For more information about service namespaces, see Amazon Web Services service namespaces in the Amazon Web Services General Reference."]}
     let context_ = "ListPoliciesGrantingServiceAccessRequest"
     let make ?marker =
       fun ~arn ->
@@ -12945,16 +14758,154 @@ module ListPoliciesGrantingServiceAccessRequest =
         (Option.map ~f:MarkerType.of_xml) (Xml.child xml_arg0 "Marker") in
       make ~serviceNamespaces ~arn ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceNamespaces =
-        field_map_exn json "ServiceNamespaces"
+        field_map_exn json__ "ServiceNamespaces"
           ServiceNamespaceListType.of_json in
-      let arn = field_map_exn json "Arn" ArnType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
+      let arn = field_map_exn json__ "Arn" ArnType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
       make ~serviceNamespaces ~arn ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of policies that the IAM identity (user, group, or role) can use to access each specified service. This operation does not use other policy types when determining whether a resource could access a service. These other policy types include resource-based policies, access control lists, Organizations policies, IAM permissions boundaries, and STS assume role policies. It only applies permissions policy logic. For more about the evaluation of policy types, see Evaluating policies in the IAM User Guide. The list of policies returned by the operation depends on the ARN of the identity that you provide. User \226\128\147 The list of policies includes the managed and inline policies that are attached to the user directly. The list also includes any additional managed and inline policies that are attached to the group to which the user belongs. Group \226\128\147 The list of policies includes only the managed and inline policies that are attached to the group directly. Policies that are attached to the group\226\128\153s user are not included. Role \226\128\147 The list of policies includes only the managed and inline policies that are attached to the role. For each managed policy, this operation returns the ARN and policy name. For each inline policy, it returns the policy name and the entity to which it is attached. Inline policies do not have an ARN. For more information about these policy types, see Managed policies and inline policies in the IAM User Guide. Policies that are attached to users and roles as permissions boundaries are not returned. To view which managed policy is currently used to set the permissions boundary for a user or role, use the GetUser or GetRole operations."]
+module ListOrganizationsFeaturesResponse =
+  struct
+    type listOrganizationsFeaturesResult =
+      {
+      organizationId: OrganizationIdType.t option
+        [@ocaml.doc "The unique identifier (ID) of an organization."];
+      enabledFeatures: FeaturesListType.t option
+        [@ocaml.doc
+          "Specifies the features that are currently available in your organization."]}
+    and responseMetaData = unit
+    and t =
+      {
+      listOrganizationsFeaturesResult: listOrganizationsFeaturesResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `AccountNotManagementOrDelegatedAdministratorException of
+          AccountNotManagementOrDelegatedAdministratorException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationNotInAllFeaturesModeException of
+          OrganizationNotInAllFeaturesModeException.t 
+      | `ServiceAccessNotEnabledException of
+          ServiceAccessNotEnabledException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "ListOrganizationsFeaturesResponse"
+    let make ?organizationId =
+      fun ?enabledFeatures ->
+        fun () ->
+          {
+            listOrganizationsFeaturesResult =
+              { organizationId; enabledFeatures };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "AccountNotManagementOrDelegatedAdministratorException" ->
+          `AccountNotManagementOrDelegatedAdministratorException
+            (AccountNotManagementOrDelegatedAdministratorException.of_json
+               json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_json json)
+      | "ServiceAccessNotEnabledException" ->
+          `ServiceAccessNotEnabledException
+            (ServiceAccessNotEnabledException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccountNotManagementOrDelegatedAdministratorException" ->
+          `AccountNotManagementOrDelegatedAdministratorException
+            (AccountNotManagementOrDelegatedAdministratorException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_xml xml)
+      | "ServiceAccessNotEnabledException" ->
+          `ServiceAccessNotEnabledException
+            (ServiceAccessNotEnabledException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccountNotManagementOrDelegatedAdministratorException e ->
+          `Assoc
+            [("error",
+               (`String
+                  "AccountNotManagementOrDelegatedAdministratorException"));
+            ("details",
+              (AccountNotManagementOrDelegatedAdministratorException.to_json
+                 e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationNotInAllFeaturesModeException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotInAllFeaturesModeException"));
+            ("details",
+              (OrganizationNotInAllFeaturesModeException.to_json e))]
+      | `ServiceAccessNotEnabledException e ->
+          `Assoc
+            [("error", (`String "ServiceAccessNotEnabledException"));
+            ("details", (ServiceAccessNotEnabledException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.listOrganizationsFeaturesResult in
+      structure_to_wrapped_value
+        [("OrganizationId",
+           (Option.map x.organizationId ~f:OrganizationIdType.to_value));
+        ("EnabledFeatures",
+          (Option.map x.enabledFeatures ~f:FeaturesListType.to_value))]
+        ~wrapper:"ListOrganizationsFeaturesResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "ListOrganizationsFeaturesResult" in
+      let enabledFeatures =
+        (Option.map ~f:FeaturesListType.of_xml)
+          (Xml.child xml_arg0 "EnabledFeatures") in
+      let organizationId =
+        (Option.map ~f:OrganizationIdType.of_xml)
+          (Xml.child xml_arg0 "OrganizationId") in
+      make ?enabledFeatures ?organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enabledFeatures =
+        field_map json__ "EnabledFeatures" FeaturesListType.of_json in
+      let organizationId =
+        field_map json__ "OrganizationId" OrganizationIdType.of_json in
+      make ?enabledFeatures ?organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the centralized root access features enabled for your organization. For more information, see Centrally manage root access for member accounts."]
+module ListOrganizationsFeaturesRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the centralized root access features enabled for your organization. For more information, see Centrally manage root access for member accounts."]
 module ListOpenIDConnectProvidersResponse =
   struct
     type listOpenIDConnectProvidersResult =
@@ -13018,9 +14969,9 @@ module ListOpenIDConnectProvidersResponse =
           (Xml.child xml_arg0 "OpenIDConnectProviderList") in
       make ?openIDConnectProviderList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let openIDConnectProviderList =
-        field_map json "OpenIDConnectProviderList"
+        field_map json__ "OpenIDConnectProviderList"
           OpenIDConnectProviderListType.of_json in
       make ?openIDConnectProviderList ()
     let to_json v = composed_to_json to_value v
@@ -13043,7 +14994,7 @@ module ListOpenIDConnectProviderTagsResponse =
   struct
     type listOpenIDConnectProviderTagsResult =
       {
-      tags: TagListType.t
+      tags: TagListType.t option
         [@ocaml.doc
           "The list of tags that are currently attached to the OpenID Connect (OIDC) identity provider. Each tag consists of a key name and an associated value. If no tags are attached to the specified resource, the response contains an empty list."];
       isTruncated: BooleanType.t option
@@ -13064,13 +15015,13 @@ module ListOpenIDConnectProviderTagsResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListOpenIDConnectProviderTagsResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~tags ->
+    let make ?tags =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
               listOpenIDConnectProviderTagsResult =
-                { isTruncated; marker; tags };
+                { tags; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -13116,7 +15067,7 @@ module ListOpenIDConnectProviderTagsResponse =
     let to_value t =
       let x = t.listOpenIDConnectProviderTagsResult in
       structure_to_wrapped_value
-        [("Tags", (Some (TagListType.to_value x.tags)));
+        [("Tags", (Option.map x.tags ~f:TagListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListOpenIDConnectProviderTagsResult"
@@ -13132,14 +15083,14 @@ module ListOpenIDConnectProviderTagsResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let tags =
-        TagListType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
-      make ?marker ?isTruncated ~tags ()
+        (Option.map ~f:TagListType.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?marker ?isTruncated ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
-      let tags = field_map_exn json "Tags" TagListType.of_json in
-      make ?marker ?isTruncated ~tags ()
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      make ?marker ?isTruncated ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the tags that are attached to the specified OpenID Connect (OIDC)-compatible identity provider. The returned list of tags is sorted by tag key. For more information, see About web identity federation. For more information about tagging, see Tagging IAM resources in the IAM User Guide."]
@@ -13179,11 +15130,11 @@ module ListOpenIDConnectProviderTagsRequest =
              "OpenIDConnectProviderArn") in
       make ?maxItems ?marker ~openIDConnectProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
       let openIDConnectProviderArn =
-        field_map_exn json "OpenIDConnectProviderArn" ArnType.of_json in
+        field_map_exn json__ "OpenIDConnectProviderArn" ArnType.of_json in
       make ?maxItems ?marker ~openIDConnectProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13192,7 +15143,8 @@ module ListMFADevicesResponse =
   struct
     type listMFADevicesResult =
       {
-      mFADevices: MfaDeviceListType.t [@ocaml.doc "A list of MFA devices."];
+      mFADevices: MfaDeviceListType.t option
+        [@ocaml.doc "A list of MFA devices."];
       isTruncated: BooleanType.t option
         [@ocaml.doc
           "A flag that indicates whether there are more items to return. If your results were truncated, you can make a subsequent pagination request using the Marker request parameter to retrieve more items. Note that IAM might return fewer than the MaxItems number of results even when there are more results available. We recommend that you check IsTruncated after every call to ensure that you receive all your results."];
@@ -13209,12 +15161,12 @@ module ListMFADevicesResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListMFADevicesResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~mFADevices ->
+    let make ?mFADevices =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
-              listMFADevicesResult = { isTruncated; marker; mFADevices };
+              listMFADevicesResult = { mFADevices; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -13252,7 +15204,8 @@ module ListMFADevicesResponse =
     let to_value t =
       let x = t.listMFADevicesResult in
       structure_to_wrapped_value
-        [("MFADevices", (Some (MfaDeviceListType.to_value x.mFADevices)));
+        [("MFADevices",
+           (Option.map x.mFADevices ~f:MfaDeviceListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListMFADevicesResult" ~response:"ResponseMetaData"
@@ -13265,16 +15218,16 @@ module ListMFADevicesResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let mFADevices =
-        MfaDeviceListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MFADevices") in
-      make ?marker ?isTruncated ~mFADevices ()
+        (Option.map ~f:MfaDeviceListType.of_xml)
+          (Xml.child xml_arg0 "MFADevices") in
+      make ?marker ?isTruncated ?mFADevices ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let mFADevices =
-        field_map_exn json "MFADevices" MfaDeviceListType.of_json in
-      make ?marker ?isTruncated ~mFADevices ()
+        field_map json__ "MFADevices" MfaDeviceListType.of_json in
+      make ?marker ?isTruncated ?mFADevices ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful ListMFADevices request."]
@@ -13311,10 +15264,10 @@ module ListMFADevicesRequest =
           (Xml.child xml_arg0 "UserName") in
       make ?maxItems ?marker ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let userName = field_map json "UserName" ExistingUserNameType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let userName = field_map json__ "UserName" ExistingUserNameType.of_json in
       make ?maxItems ?marker ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13323,7 +15276,7 @@ module ListMFADeviceTagsResponse =
   struct
     type listMFADeviceTagsResult =
       {
-      tags: TagListType.t
+      tags: TagListType.t option
         [@ocaml.doc
           "The list of tags that are currently attached to the virtual MFA device. Each tag consists of a key name and an associated value. If no tags are attached to the specified resource, the response contains an empty list."];
       isTruncated: BooleanType.t option
@@ -13343,12 +15296,12 @@ module ListMFADeviceTagsResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListMFADeviceTagsResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~tags ->
+    let make ?tags =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
-              listMFADeviceTagsResult = { isTruncated; marker; tags };
+              listMFADeviceTagsResult = { tags; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -13394,7 +15347,7 @@ module ListMFADeviceTagsResponse =
     let to_value t =
       let x = t.listMFADeviceTagsResult in
       structure_to_wrapped_value
-        [("Tags", (Some (TagListType.to_value x.tags)));
+        [("Tags", (Option.map x.tags ~f:TagListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListMFADeviceTagsResult" ~response:"ResponseMetaData"
@@ -13408,14 +15361,14 @@ module ListMFADeviceTagsResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let tags =
-        TagListType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
-      make ?marker ?isTruncated ~tags ()
+        (Option.map ~f:TagListType.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?marker ?isTruncated ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
-      let tags = field_map_exn json "Tags" TagListType.of_json in
-      make ?marker ?isTruncated ~tags ()
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      make ?marker ?isTruncated ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the tags that are attached to the specified IAM virtual multi-factor authentication (MFA) device. The returned list of tags is sorted by tag key. For more information about tagging, see Tagging IAM resources in the IAM User Guide."]
@@ -13452,11 +15405,11 @@ module ListMFADeviceTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SerialNumber") in
       make ?maxItems ?marker ~serialNumber ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
       let serialNumber =
-        field_map_exn json "SerialNumber" SerialNumberType.of_json in
+        field_map_exn json__ "SerialNumber" SerialNumberType.of_json in
       make ?maxItems ?marker ~serialNumber ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13465,7 +15418,7 @@ module ListInstanceProfilesResponse =
   struct
     type listInstanceProfilesResult =
       {
-      instanceProfiles: InstanceProfileListType.t
+      instanceProfiles: InstanceProfileListType.t option
         [@ocaml.doc "A list of instance profiles."];
       isTruncated: BooleanType.t option
         [@ocaml.doc
@@ -13482,13 +15435,13 @@ module ListInstanceProfilesResponse =
       [ `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListInstanceProfilesResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~instanceProfiles ->
+    let make ?instanceProfiles =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
               listInstanceProfilesResult =
-                { isTruncated; marker; instanceProfiles };
+                { instanceProfiles; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -13519,7 +15472,7 @@ module ListInstanceProfilesResponse =
       let x = t.listInstanceProfilesResult in
       structure_to_wrapped_value
         [("InstanceProfiles",
-           (Some (InstanceProfileListType.to_value x.instanceProfiles)));
+           (Option.map x.instanceProfiles ~f:InstanceProfileListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListInstanceProfilesResult" ~response:"ResponseMetaData"
@@ -13533,16 +15486,16 @@ module ListInstanceProfilesResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let instanceProfiles =
-        InstanceProfileListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfiles") in
-      make ?marker ?isTruncated ~instanceProfiles ()
+        (Option.map ~f:InstanceProfileListType.of_xml)
+          (Xml.child xml_arg0 "InstanceProfiles") in
+      make ?marker ?isTruncated ?instanceProfiles ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let instanceProfiles =
-        field_map_exn json "InstanceProfiles" InstanceProfileListType.of_json in
-      make ?marker ?isTruncated ~instanceProfiles ()
+        field_map json__ "InstanceProfiles" InstanceProfileListType.of_json in
+      make ?marker ?isTruncated ?instanceProfiles ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful ListInstanceProfiles request."]
@@ -13578,19 +15531,19 @@ module ListInstanceProfilesRequest =
           (Xml.child xml_arg0 "PathPrefix") in
       make ?maxItems ?marker ?pathPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let pathPrefix = field_map json "PathPrefix" PathPrefixType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let pathPrefix = field_map json__ "PathPrefix" PathPrefixType.of_json in
       make ?maxItems ?marker ?pathPrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the instance profiles that have the specified path prefix. If there are none, the operation returns an empty list. For more information about instance profiles, see About instance profiles. IAM resource-listing operations return a subset of the available attributes for the resource. For example, this operation does not return tags, even though they are an attribute of the returned object. To view all of the information for an instance profile, see GetInstanceProfile. You can paginate the results using the MaxItems and Marker parameters."]
+       "Lists the instance profiles that have the specified path prefix. If there are none, the operation returns an empty list. For more information about instance profiles, see Using instance profiles in the IAM User Guide. IAM resource-listing operations return a subset of the available attributes for the resource. For example, this operation does not return tags, even though they are an attribute of the returned object. To view all of the information for an instance profile, see GetInstanceProfile. You can paginate the results using the MaxItems and Marker parameters."]
 module ListInstanceProfilesForRoleResponse =
   struct
     type listInstanceProfilesForRoleResult =
       {
-      instanceProfiles: InstanceProfileListType.t
+      instanceProfiles: InstanceProfileListType.t option
         [@ocaml.doc "A list of instance profiles."];
       isTruncated: BooleanType.t option
         [@ocaml.doc
@@ -13608,13 +15561,13 @@ module ListInstanceProfilesForRoleResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListInstanceProfilesForRoleResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~instanceProfiles ->
+    let make ?instanceProfiles =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
               listInstanceProfilesForRoleResult =
-                { isTruncated; marker; instanceProfiles };
+                { instanceProfiles; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -13653,7 +15606,7 @@ module ListInstanceProfilesForRoleResponse =
       let x = t.listInstanceProfilesForRoleResult in
       structure_to_wrapped_value
         [("InstanceProfiles",
-           (Some (InstanceProfileListType.to_value x.instanceProfiles)));
+           (Option.map x.instanceProfiles ~f:InstanceProfileListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListInstanceProfilesForRoleResult"
@@ -13668,16 +15621,16 @@ module ListInstanceProfilesForRoleResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let instanceProfiles =
-        InstanceProfileListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfiles") in
-      make ?marker ?isTruncated ~instanceProfiles ()
+        (Option.map ~f:InstanceProfileListType.of_xml)
+          (Xml.child xml_arg0 "InstanceProfiles") in
+      make ?marker ?isTruncated ?instanceProfiles ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let instanceProfiles =
-        field_map_exn json "InstanceProfiles" InstanceProfileListType.of_json in
-      make ?marker ?isTruncated ~instanceProfiles ()
+        field_map json__ "InstanceProfiles" InstanceProfileListType.of_json in
+      make ?marker ?isTruncated ?instanceProfiles ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful ListInstanceProfilesForRole request."]
@@ -13714,19 +15667,19 @@ module ListInstanceProfilesForRoleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ?maxItems ?marker ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ?maxItems ?marker ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the instance profiles that have the specified associated IAM role. If there are none, the operation returns an empty list. For more information about instance profiles, go to About instance profiles. You can paginate the results using the MaxItems and Marker parameters."]
+       "Lists the instance profiles that have the specified associated IAM role. If there are none, the operation returns an empty list. For more information about instance profiles, go to Using instance profiles in the IAM User Guide. You can paginate the results using the MaxItems and Marker parameters."]
 module ListInstanceProfileTagsResponse =
   struct
     type listInstanceProfileTagsResult =
       {
-      tags: TagListType.t
+      tags: TagListType.t option
         [@ocaml.doc
           "The list of tags that are currently attached to the IAM instance profile. Each tag consists of a key name and an associated value. If no tags are attached to the specified resource, the response contains an empty list."];
       isTruncated: BooleanType.t option
@@ -13745,12 +15698,12 @@ module ListInstanceProfileTagsResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListInstanceProfileTagsResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~tags ->
+    let make ?tags =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
-              listInstanceProfileTagsResult = { isTruncated; marker; tags };
+              listInstanceProfileTagsResult = { tags; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -13788,7 +15741,7 @@ module ListInstanceProfileTagsResponse =
     let to_value t =
       let x = t.listInstanceProfileTagsResult in
       structure_to_wrapped_value
-        [("Tags", (Some (TagListType.to_value x.tags)));
+        [("Tags", (Option.map x.tags ~f:TagListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListInstanceProfileTagsResult" ~response:"ResponseMetaData"
@@ -13802,14 +15755,14 @@ module ListInstanceProfileTagsResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let tags =
-        TagListType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
-      make ?marker ?isTruncated ~tags ()
+        (Option.map ~f:TagListType.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?marker ?isTruncated ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
-      let tags = field_map_exn json "Tags" TagListType.of_json in
-      make ?marker ?isTruncated ~tags ()
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      make ?marker ?isTruncated ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the tags that are attached to the specified IAM instance profile. The returned list of tags is sorted by tag key. For more information about tagging, see Tagging IAM resources in the IAM User Guide."]
@@ -13848,11 +15801,11 @@ module ListInstanceProfileTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileName") in
       make ?maxItems ?marker ~instanceProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
       let instanceProfileName =
-        field_map_exn json "InstanceProfileName"
+        field_map_exn json__ "InstanceProfileName"
           InstanceProfileNameType.of_json in
       make ?maxItems ?marker ~instanceProfileName ()
     let to_json v = composed_to_json to_value v
@@ -13862,7 +15815,7 @@ module ListGroupsResponse =
   struct
     type listGroupsResult =
       {
-      groups: GroupListType.t [@ocaml.doc "A list of groups."];
+      groups: GroupListType.t option [@ocaml.doc "A list of groups."];
       isTruncated: BooleanType.t option
         [@ocaml.doc
           "A flag that indicates whether there are more items to return. If your results were truncated, you can make a subsequent pagination request using the Marker request parameter to retrieve more items. Note that IAM might return fewer than the MaxItems number of results even when there are more results available. We recommend that you check IsTruncated after every call to ensure that you receive all your results."];
@@ -13878,12 +15831,12 @@ module ListGroupsResponse =
       [ `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListGroupsResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~groups ->
+    let make ?groups =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
-              listGroupsResult = { isTruncated; marker; groups };
+              listGroupsResult = { groups; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -13913,7 +15866,7 @@ module ListGroupsResponse =
     let to_value t =
       let x = t.listGroupsResult in
       structure_to_wrapped_value
-        [("Groups", (Some (GroupListType.to_value x.groups)));
+        [("Groups", (Option.map x.groups ~f:GroupListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListGroupsResult" ~response:"ResponseMetaData"
@@ -13926,15 +15879,14 @@ module ListGroupsResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let groups =
-        GroupListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Groups") in
-      make ?marker ?isTruncated ~groups ()
+        (Option.map ~f:GroupListType.of_xml) (Xml.child xml_arg0 "Groups") in
+      make ?marker ?isTruncated ?groups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
-      let groups = field_map_exn json "Groups" GroupListType.of_json in
-      make ?marker ?isTruncated ~groups ()
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
+      let groups = field_map json__ "Groups" GroupListType.of_json in
+      make ?marker ?isTruncated ?groups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful ListGroups request."]
@@ -13970,10 +15922,10 @@ module ListGroupsRequest =
           (Xml.child xml_arg0 "PathPrefix") in
       make ?maxItems ?marker ?pathPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let pathPrefix = field_map json "PathPrefix" PathPrefixType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let pathPrefix = field_map json__ "PathPrefix" PathPrefixType.of_json in
       make ?maxItems ?marker ?pathPrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13982,7 +15934,7 @@ module ListGroupsForUserResponse =
   struct
     type listGroupsForUserResult =
       {
-      groups: GroupListType.t [@ocaml.doc "A list of groups."];
+      groups: GroupListType.t option [@ocaml.doc "A list of groups."];
       isTruncated: BooleanType.t option
         [@ocaml.doc
           "A flag that indicates whether there are more items to return. If your results were truncated, you can make a subsequent pagination request using the Marker request parameter to retrieve more items. Note that IAM might return fewer than the MaxItems number of results even when there are more results available. We recommend that you check IsTruncated after every call to ensure that you receive all your results."];
@@ -13999,12 +15951,12 @@ module ListGroupsForUserResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListGroupsForUserResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~groups ->
+    let make ?groups =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
-              listGroupsForUserResult = { isTruncated; marker; groups };
+              listGroupsForUserResult = { groups; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -14042,7 +15994,7 @@ module ListGroupsForUserResponse =
     let to_value t =
       let x = t.listGroupsForUserResult in
       structure_to_wrapped_value
-        [("Groups", (Some (GroupListType.to_value x.groups)));
+        [("Groups", (Option.map x.groups ~f:GroupListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListGroupsForUserResult" ~response:"ResponseMetaData"
@@ -14056,15 +16008,14 @@ module ListGroupsForUserResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let groups =
-        GroupListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Groups") in
-      make ?marker ?isTruncated ~groups ()
+        (Option.map ~f:GroupListType.of_xml) (Xml.child xml_arg0 "Groups") in
+      make ?marker ?isTruncated ?groups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
-      let groups = field_map_exn json "Groups" GroupListType.of_json in
-      make ?marker ?isTruncated ~groups ()
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
+      let groups = field_map json__ "Groups" GroupListType.of_json in
+      make ?marker ?isTruncated ?groups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful ListGroupsForUser request."]
@@ -14101,11 +16052,11 @@ module ListGroupsForUserRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?maxItems ?marker ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
       let userName =
-        field_map_exn json "UserName" ExistingUserNameType.of_json in
+        field_map_exn json__ "UserName" ExistingUserNameType.of_json in
       make ?maxItems ?marker ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14114,7 +16065,7 @@ module ListGroupPoliciesResponse =
   struct
     type listGroupPoliciesResult =
       {
-      policyNames: PolicyNameListType.t
+      policyNames: PolicyNameListType.t option
         [@ocaml.doc
           "A list of policy names. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       isTruncated: BooleanType.t option
@@ -14133,12 +16084,12 @@ module ListGroupPoliciesResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListGroupPoliciesResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~policyNames ->
+    let make ?policyNames =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
-              listGroupPoliciesResult = { isTruncated; marker; policyNames };
+              listGroupPoliciesResult = { policyNames; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -14176,7 +16127,8 @@ module ListGroupPoliciesResponse =
     let to_value t =
       let x = t.listGroupPoliciesResult in
       structure_to_wrapped_value
-        [("PolicyNames", (Some (PolicyNameListType.to_value x.policyNames)));
+        [("PolicyNames",
+           (Option.map x.policyNames ~f:PolicyNameListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListGroupPoliciesResult" ~response:"ResponseMetaData"
@@ -14190,16 +16142,16 @@ module ListGroupPoliciesResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let policyNames =
-        PolicyNameListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyNames") in
-      make ?marker ?isTruncated ~policyNames ()
+        (Option.map ~f:PolicyNameListType.of_xml)
+          (Xml.child xml_arg0 "PolicyNames") in
+      make ?marker ?isTruncated ?policyNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let policyNames =
-        field_map_exn json "PolicyNames" PolicyNameListType.of_json in
-      make ?marker ?isTruncated ~policyNames ()
+        field_map json__ "PolicyNames" PolicyNameListType.of_json in
+      make ?marker ?isTruncated ?policyNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful ListGroupPolicies request."]
@@ -14236,10 +16188,10 @@ module ListGroupPoliciesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ?maxItems ?marker ~groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let groupName = field_map_exn json__ "GroupName" GroupNameType.of_json in
       make ?maxItems ?marker ~groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14360,15 +16312,15 @@ module ListEntitiesForPolicyResponse =
           (Xml.child xml_arg0 "PolicyGroups") in
       make ?marker ?isTruncated ?policyRoles ?policyUsers ?policyGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let policyRoles =
-        field_map json "PolicyRoles" PolicyRoleListType.of_json in
+        field_map json__ "PolicyRoles" PolicyRoleListType.of_json in
       let policyUsers =
-        field_map json "PolicyUsers" PolicyUserListType.of_json in
+        field_map json__ "PolicyUsers" PolicyUserListType.of_json in
       let policyGroups =
-        field_map json "PolicyGroups" PolicyGroupListType.of_json in
+        field_map json__ "PolicyGroups" PolicyGroupListType.of_json in
       make ?marker ?isTruncated ?policyRoles ?policyUsers ?policyGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14388,7 +16340,7 @@ module ListEntitiesForPolicyRequest =
           "The path prefix for filtering the results. This parameter is optional. If it is not included, it defaults to a slash (/), listing all entities. This parameter allows (through its regex pattern) a string of characters consisting of either a forward slash (/) by itself or a string that must begin and end with forward slashes. In addition, it can contain any ASCII character from the ! (\\u0021) through the DEL character (\\u007F), including most punctuation characters, digits, and upper and lowercased letters."];
       policyUsageFilter: PolicyUsageType.t option
         [@ocaml.doc
-          "The policy usage method to use for filtering the results. To list only permissions policies, set\194\160PolicyUsageFilter\194\160to\194\160PermissionsPolicy. To list only the policies used to set permissions boundaries, set\194\160the value to\194\160PermissionsBoundary. This parameter is optional. If it is not included, all policies are returned."];
+          "The policy usage method to use for filtering the results. To list only permissions policies, set PolicyUsageFilter to PermissionsPolicy. To list only the policies used to set permissions boundaries, set the value to PermissionsBoundary. This parameter is optional. If it is not included, all policies are returned."];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -14438,19 +16390,161 @@ module ListEntitiesForPolicyRequest =
       make ?maxItems ?marker ?policyUsageFilter ?pathPrefix ?entityFilter
         ~policyArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
       let policyUsageFilter =
-        field_map json "PolicyUsageFilter" PolicyUsageType.of_json in
-      let pathPrefix = field_map json "PathPrefix" PathType.of_json in
-      let entityFilter = field_map json "EntityFilter" EntityType.of_json in
-      let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
+        field_map json__ "PolicyUsageFilter" PolicyUsageType.of_json in
+      let pathPrefix = field_map json__ "PathPrefix" PathType.of_json in
+      let entityFilter = field_map json__ "EntityFilter" EntityType.of_json in
+      let policyArn = field_map_exn json__ "PolicyArn" ArnType.of_json in
       make ?maxItems ?marker ?policyUsageFilter ?pathPrefix ?entityFilter
         ~policyArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all IAM users, groups, and roles that the specified managed policy is attached to. You can use the optional EntityFilter parameter to limit the results to a particular type of entity (users, groups, or roles). For example, to list only the roles that are attached to the specified policy, set EntityFilter to Role. You can paginate the results using the MaxItems and Marker parameters."]
+module ListDelegationRequestsResponse =
+  struct
+    type listDelegationRequestsResult =
+      {
+      delegationRequests: DelegationRequestsListType.t option
+        [@ocaml.doc
+          "A list of delegation requests that match the specified criteria."];
+      marker: MarkerType.t option
+        [@ocaml.doc
+          "When isTruncated is true, this element is present and contains the value to use for the Marker parameter in a subsequent pagination request."];
+      isTruncated: BooleanType.t option
+        [@ocaml.doc
+          "A flag that indicates whether there are more items to return. If your results were truncated, you can make a subsequent pagination request using the Marker request parameter to retrieve more items."]}
+    and responseMetaData = unit
+    and t =
+      {
+      listDelegationRequestsResult: listDelegationRequestsResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `NoSuchEntityException of NoSuchEntityException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "ListDelegationRequestsResponse"
+    let make ?delegationRequests =
+      fun ?marker ->
+        fun ?isTruncated ->
+          fun () ->
+            {
+              listDelegationRequestsResult =
+                { delegationRequests; marker; isTruncated };
+              responseMetaData = ()
+            }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "NoSuchEntityException" ->
+          `NoSuchEntityException (NoSuchEntityException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "NoSuchEntityException" ->
+          `NoSuchEntityException (NoSuchEntityException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `NoSuchEntityException e ->
+          `Assoc
+            [("error", (`String "NoSuchEntityException"));
+            ("details", (NoSuchEntityException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.listDelegationRequestsResult in
+      structure_to_wrapped_value
+        [("DelegationRequests",
+           (Option.map x.delegationRequests
+              ~f:DelegationRequestsListType.to_value));
+        ("Marker", (Option.map x.marker ~f:MarkerType.to_value));
+        ("isTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value))]
+        ~wrapper:"ListDelegationRequestsResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "ListDelegationRequestsResult" in
+      let isTruncated =
+        (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
+      let marker =
+        (Option.map ~f:MarkerType.of_xml) (Xml.child xml_arg0 "Marker") in
+      let delegationRequests =
+        (Option.map ~f:DelegationRequestsListType.of_xml)
+          (Xml.child xml_arg0 "DelegationRequests") in
+      make ?isTruncated ?marker ?delegationRequests ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let isTruncated = field_map json__ "isTruncated" BooleanType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let delegationRequests =
+        field_map json__ "DelegationRequests"
+          DelegationRequestsListType.of_json in
+      make ?isTruncated ?marker ?delegationRequests ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists delegation requests based on the specified criteria. If a delegation request has no owner, even if it is assigned to a specific account, it will not be part of the ListDelegationRequests output for that account. For more details, see Managing Permissions for Delegation Requests."]
+module ListDelegationRequestsRequest =
+  struct
+    type nonrec t =
+      {
+      ownerId: OwnerIdType.t option
+        [@ocaml.doc "The owner ID to filter delegation requests by."];
+      marker: MarkerType.t option
+        [@ocaml.doc
+          "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
+      maxItems: MaxItemsType.t option
+        [@ocaml.doc
+          "Use this only when paginating results to indicate the maximum number of items you want in the response. If additional items exist beyond the maximum you specify, the IsTruncated response element is true. If you do not include this parameter, the number of items defaults to 100. Note that IAM may return fewer results, even when there are more results available. In that case, the IsTruncated response element returns true, and Marker contains a value to include in the subsequent call that tells the service where to continue from."]}
+    let make ?ownerId =
+      fun ?marker -> fun ?maxItems -> fun () -> { ownerId; marker; maxItems }
+    let to_value x =
+      structure_to_value
+        [("OwnerId", (Option.map x.ownerId ~f:OwnerIdType.to_value));
+        ("Marker", (Option.map x.marker ~f:MarkerType.to_value));
+        ("MaxItems", (Option.map x.maxItems ~f:MaxItemsType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxItems =
+        (Option.map ~f:MaxItemsType.of_xml) (Xml.child xml_arg0 "MaxItems") in
+      let marker =
+        (Option.map ~f:MarkerType.of_xml) (Xml.child xml_arg0 "Marker") in
+      let ownerId =
+        (Option.map ~f:OwnerIdType.of_xml) (Xml.child xml_arg0 "OwnerId") in
+      make ?maxItems ?marker ?ownerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let ownerId = field_map json__ "OwnerId" OwnerIdType.of_json in
+      make ?maxItems ?marker ?ownerId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists delegation requests based on the specified criteria. If a delegation request has no owner, even if it is assigned to a specific account, it will not be part of the ListDelegationRequests output for that account. For more details, see Managing Permissions for Delegation Requests."]
 module ListAttachedUserPoliciesResponse =
   struct
     type listAttachedUserPoliciesResult =
@@ -14547,11 +16641,11 @@ module ListAttachedUserPoliciesResponse =
           (Xml.child xml_arg0 "AttachedPolicies") in
       make ?marker ?isTruncated ?attachedPolicies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let attachedPolicies =
-        field_map json "AttachedPolicies" AttachedPoliciesListType.of_json in
+        field_map json__ "AttachedPolicies" AttachedPoliciesListType.of_json in
       make ?marker ?isTruncated ?attachedPolicies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14598,11 +16692,11 @@ module ListAttachedUserPoliciesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ?maxItems ?marker ?pathPrefix ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let pathPrefix = field_map json "PathPrefix" PolicyPathType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let pathPrefix = field_map json__ "PathPrefix" PolicyPathType.of_json in
+      let userName = field_map_exn json__ "UserName" UserNameType.of_json in
       make ?maxItems ?marker ?pathPrefix ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14703,11 +16797,11 @@ module ListAttachedRolePoliciesResponse =
           (Xml.child xml_arg0 "AttachedPolicies") in
       make ?marker ?isTruncated ?attachedPolicies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let attachedPolicies =
-        field_map json "AttachedPolicies" AttachedPoliciesListType.of_json in
+        field_map json__ "AttachedPolicies" AttachedPoliciesListType.of_json in
       make ?marker ?isTruncated ?attachedPolicies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14754,11 +16848,11 @@ module ListAttachedRolePoliciesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ?maxItems ?marker ?pathPrefix ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let pathPrefix = field_map json "PathPrefix" PolicyPathType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let pathPrefix = field_map json__ "PathPrefix" PolicyPathType.of_json in
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ?maxItems ?marker ?pathPrefix ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14859,11 +16953,11 @@ module ListAttachedGroupPoliciesResponse =
           (Xml.child xml_arg0 "AttachedPolicies") in
       make ?marker ?isTruncated ?attachedPolicies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let attachedPolicies =
-        field_map json "AttachedPolicies" AttachedPoliciesListType.of_json in
+        field_map json__ "AttachedPolicies" AttachedPoliciesListType.of_json in
       make ?marker ?isTruncated ?attachedPolicies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14910,11 +17004,11 @@ module ListAttachedGroupPoliciesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ?maxItems ?marker ?pathPrefix ~groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let pathPrefix = field_map json "PathPrefix" PolicyPathType.of_json in
-      let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let pathPrefix = field_map json__ "PathPrefix" PolicyPathType.of_json in
+      let groupName = field_map_exn json__ "GroupName" GroupNameType.of_json in
       make ?maxItems ?marker ?pathPrefix ~groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14923,7 +17017,7 @@ module ListAccountAliasesResponse =
   struct
     type listAccountAliasesResult =
       {
-      accountAliases: AccountAliasListType.t
+      accountAliases: AccountAliasListType.t option
         [@ocaml.doc
           "A list of aliases associated with the account. Amazon Web Services supports only one alias per account."];
       isTruncated: BooleanType.t option
@@ -14941,13 +17035,13 @@ module ListAccountAliasesResponse =
       [ `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListAccountAliasesResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~accountAliases ->
+    let make ?accountAliases =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
               listAccountAliasesResult =
-                { isTruncated; marker; accountAliases };
+                { accountAliases; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -14978,7 +17072,7 @@ module ListAccountAliasesResponse =
       let x = t.listAccountAliasesResult in
       structure_to_wrapped_value
         [("AccountAliases",
-           (Some (AccountAliasListType.to_value x.accountAliases)));
+           (Option.map x.accountAliases ~f:AccountAliasListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListAccountAliasesResult" ~response:"ResponseMetaData"
@@ -14992,16 +17086,16 @@ module ListAccountAliasesResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let accountAliases =
-        AccountAliasListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountAliases") in
-      make ?marker ?isTruncated ~accountAliases ()
+        (Option.map ~f:AccountAliasListType.of_xml)
+          (Xml.child xml_arg0 "AccountAliases") in
+      make ?marker ?isTruncated ?accountAliases ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let accountAliases =
-        field_map_exn json "AccountAliases" AccountAliasListType.of_json in
-      make ?marker ?isTruncated ~accountAliases ()
+        field_map json__ "AccountAliases" AccountAliasListType.of_json in
+      make ?marker ?isTruncated ?accountAliases ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful ListAccountAliases request."]
@@ -15028,18 +17122,18 @@ module ListAccountAliasesRequest =
         (Option.map ~f:MarkerType.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?maxItems ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
       make ?maxItems ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the account alias associated with the Amazon Web Services account (Note: you can have only one). For information about using an Amazon Web Services account alias, see Using an alias for your Amazon Web Services account ID in the IAM User Guide."]
+       "Lists the account alias associated with the Amazon Web Services account (Note: you can have only one). For information about using an Amazon Web Services account alias, see Creating, deleting, and listing an Amazon Web Services account alias in the IAM User Guide."]
 module ListAccessKeysResponse =
   struct
     type listAccessKeysResult =
       {
-      accessKeyMetadata: AccessKeyMetadataListType.t
+      accessKeyMetadata: AccessKeyMetadataListType.t option
         [@ocaml.doc
           "A list of objects containing metadata about the access keys."];
       isTruncated: BooleanType.t option
@@ -15058,13 +17152,13 @@ module ListAccessKeysResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListAccessKeysResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~accessKeyMetadata ->
+    let make ?accessKeyMetadata =
+      fun ?isTruncated ->
+        fun ?marker ->
           fun () ->
             {
               listAccessKeysResult =
-                { isTruncated; marker; accessKeyMetadata };
+                { accessKeyMetadata; isTruncated; marker };
               responseMetaData = ()
             }
     let error_of_json name json =
@@ -15103,7 +17197,8 @@ module ListAccessKeysResponse =
       let x = t.listAccessKeysResult in
       structure_to_wrapped_value
         [("AccessKeyMetadata",
-           (Some (AccessKeyMetadataListType.to_value x.accessKeyMetadata)));
+           (Option.map x.accessKeyMetadata
+              ~f:AccessKeyMetadataListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"ListAccessKeysResult" ~response:"ResponseMetaData"
@@ -15116,17 +17211,17 @@ module ListAccessKeysResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let accessKeyMetadata =
-        AccessKeyMetadataListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccessKeyMetadata") in
-      make ?marker ?isTruncated ~accessKeyMetadata ()
+        (Option.map ~f:AccessKeyMetadataListType.of_xml)
+          (Xml.child xml_arg0 "AccessKeyMetadata") in
+      make ?marker ?isTruncated ?accessKeyMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let accessKeyMetadata =
-        field_map_exn json "AccessKeyMetadata"
+        field_map json__ "AccessKeyMetadata"
           AccessKeyMetadataListType.of_json in
-      make ?marker ?isTruncated ~accessKeyMetadata ()
+      make ?marker ?isTruncated ?accessKeyMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful ListAccessKeys request."]
@@ -15163,14 +17258,14 @@ module ListAccessKeysRequest =
           (Xml.child xml_arg0 "UserName") in
       make ?maxItems ?marker ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let userName = field_map json "UserName" ExistingUserNameType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let userName = field_map json__ "UserName" ExistingUserNameType.of_json in
       make ?maxItems ?marker ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about the access key IDs associated with the specified IAM user. If there is none, the operation returns an empty list. Although each user is limited to a small number of keys, you can still paginate the results using the MaxItems and Marker parameters. If the UserName field is not specified, the user name is determined implicitly based on the Amazon Web Services access key ID used to sign the request. This operation works for access keys under the Amazon Web Services account. Consequently, you can use this operation to manage Amazon Web Services account root user credentials even if the Amazon Web Services account has no associated users. To ensure the security of your Amazon Web Services account, the secret access key is accessible only during key and user creation."]
+       "Returns information about the access key IDs associated with the specified IAM user. If there is none, the operation returns an empty list. Although each user is limited to a small number of keys, you can still paginate the results using the MaxItems and Marker parameters. If the UserName is not specified, the user name is determined implicitly based on the Amazon Web Services access key ID used to sign the request. If a temporary access key is used, then UserName is required. If a long-term key is assigned to the user, then UserName is not required. This operation works for access keys under the Amazon Web Services account. If the Amazon Web Services account has no associated users, the root user returns it's own access key IDs by running this command. To ensure the security of your Amazon Web Services account, the secret access key is accessible only during key and user creation."]
 module InvalidUserTypeException =
   struct
     type nonrec t = {
@@ -15187,8 +17282,8 @@ module InvalidUserTypeException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" InvalidUserTypeMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" InvalidUserTypeMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15209,9 +17304,9 @@ module InvalidAuthenticationCodeException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" InvalidAuthenticationCodeMessage.of_json in
+        field_map json__ "message" InvalidAuthenticationCodeMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15220,7 +17315,7 @@ module GetUserResponse =
   struct
     type getUserResult =
       {
-      user: User.t
+      user: User.t option
         [@ocaml.doc
           "A structure containing details about the IAM user. Due to a service issue, password last used data does not include password use from May 3, 2018 22:50 PDT to May 23, 2018 14:08 PDT. This affects last sign-in dates shown in the IAM console and password last used dates in the IAM credential report, and returned by this operation. If users signed in during the affected time, the password last used date that is returned is the date the user last signed in before May 3, 2018. For users that signed in after May 23, 2018 14:08 PDT, the returned password last used date is accurate. You can use password last used information to identify unused credentials for deletion. For example, you might delete users who did not sign in to Amazon Web Services in the last 90 days. In cases like this, we recommend that you adjust your evaluation window to include dates after May 23, 2018. Alternatively, if your users use access keys to access Amazon Web Services programmatically you can refer to access key last used information because it is accurate for all dates."]}
     and responseMetaData = unit
@@ -15233,7 +17328,7 @@ module GetUserResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "GetUserResponse"
-    let make ~user =
+    let make ?user =
       fun () -> { getUserResult = { user }; responseMetaData = () }
     let error_of_json name json =
       match name with
@@ -15269,17 +17364,17 @@ module GetUserResponse =
               | Some m -> [("message", (`String m))])))
     let to_value t =
       let x = t.getUserResult in
-      structure_to_wrapped_value [("User", (Some (User.to_value x.user)))]
+      structure_to_wrapped_value
+        [("User", (Option.map x.user ~f:User.to_value))]
         ~wrapper:"GetUserResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 = Xml.child_exn ~context:context_ t "GetUserResult" in
-      let user =
-        User.of_xml (Xml.child_exn ~context:context_ xml_arg0 "User") in
-      make ~user ()
+      let user = (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "User") in
+      make ?user ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let user = field_map_exn json "User" User.of_json in make ~user ()
+    let of_json json__ =
+      let user = field_map json__ "User" User.of_json in make ?user ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the response to a successful GetUser request."]
 module GetUserRequest =
@@ -15301,8 +17396,8 @@ module GetUserRequest =
           (Xml.child xml_arg0 "UserName") in
       make ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map json "UserName" ExistingUserNameType.of_json in
+    let of_json json__ =
+      let userName = field_map json__ "UserName" ExistingUserNameType.of_json in
       make ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15311,10 +17406,11 @@ module GetUserPolicyResponse =
   struct
     type getUserPolicyResult =
       {
-      userName: ExistingUserNameType.t
+      userName: ExistingUserNameType.t option
         [@ocaml.doc "The user the policy is associated with."];
-      policyName: PolicyNameType.t [@ocaml.doc "The name of the policy."];
-      policyDocument: PolicyDocumentType.t
+      policyName: PolicyNameType.t option
+        [@ocaml.doc "The name of the policy."];
+      policyDocument: PolicyDocumentType.t option
         [@ocaml.doc
           "The policy document. IAM stores policies in JSON format. However, resources that were created using CloudFormation templates can be formatted in YAML. CloudFormation always converts a YAML policy to JSON format before submitting it to IAM."]}
     and responseMetaData = unit
@@ -15327,9 +17423,9 @@ module GetUserPolicyResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "GetUserPolicyResponse"
-    let make ~userName =
-      fun ~policyName ->
-        fun ~policyDocument ->
+    let make ?userName =
+      fun ?policyName ->
+        fun ?policyDocument ->
           fun () ->
             {
               getUserPolicyResult = { userName; policyName; policyDocument };
@@ -15370,32 +17466,32 @@ module GetUserPolicyResponse =
     let to_value t =
       let x = t.getUserPolicyResult in
       structure_to_wrapped_value
-        [("UserName", (Some (ExistingUserNameType.to_value x.userName)));
-        ("PolicyName", (Some (PolicyNameType.to_value x.policyName)));
+        [("UserName",
+           (Option.map x.userName ~f:ExistingUserNameType.to_value));
+        ("PolicyName", (Option.map x.policyName ~f:PolicyNameType.to_value));
         ("PolicyDocument",
-          (Some (PolicyDocumentType.to_value x.policyDocument)))]
+          (Option.map x.policyDocument ~f:PolicyDocumentType.to_value))]
         ~wrapper:"GetUserPolicyResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 = Xml.child_exn ~context:context_ t "GetUserPolicyResult" in
       let policyDocument =
-        PolicyDocumentType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyDocument") in
+        (Option.map ~f:PolicyDocumentType.of_xml)
+          (Xml.child xml_arg0 "PolicyDocument") in
       let policyName =
-        PolicyNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
+        (Option.map ~f:PolicyNameType.of_xml)
+          (Xml.child xml_arg0 "PolicyName") in
       let userName =
-        ExistingUserNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
-      make ~policyDocument ~policyName ~userName ()
+        (Option.map ~f:ExistingUserNameType.of_xml)
+          (Xml.child xml_arg0 "UserName") in
+      make ?policyDocument ?policyName ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyDocument =
-        field_map_exn json "PolicyDocument" PolicyDocumentType.of_json in
-      let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
-      let userName =
-        field_map_exn json "UserName" ExistingUserNameType.of_json in
-      make ~policyDocument ~policyName ~userName ()
+        field_map json__ "PolicyDocument" PolicyDocumentType.of_json in
+      let policyName = field_map json__ "PolicyName" PolicyNameType.of_json in
+      let userName = field_map json__ "UserName" ExistingUserNameType.of_json in
+      make ?policyDocument ?policyName ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful GetUserPolicy request."]
@@ -15426,19 +17522,20 @@ module GetUserPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~policyName ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
+    let of_json json__ =
+      let policyName =
+        field_map_exn json__ "PolicyName" PolicyNameType.of_json in
       let userName =
-        field_map_exn json "UserName" ExistingUserNameType.of_json in
+        field_map_exn json__ "UserName" ExistingUserNameType.of_json in
       make ~policyName ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the specified inline policy document that is embedded in the specified IAM user. Policies returned by this operation are URL-encoded compliant with RFC 3986. You can use a URL decoding method to convert the policy back to plain JSON text. For example, if you use Java, you can use the decode method of the java.net.URLDecoder utility class in the Java SDK. Other languages and SDKs provide similar functionality. An IAM user can also have managed policies attached to it. To retrieve a managed policy document that is attached to a user, use GetPolicy to determine the policy's default version. Then use GetPolicyVersion to retrieve the policy document. For more information about policies, see Managed policies and inline policies in the IAM User Guide."]
+       "Retrieves the specified inline policy document that is embedded in the specified IAM user. Policies returned by this operation are URL-encoded compliant with RFC 3986. You can use a URL decoding method to convert the policy back to plain JSON text. For example, if you use Java, you can use the decode method of the java.net.URLDecoder utility class in the Java SDK. Other languages and SDKs provide similar functionality, and some SDKs do this decoding automatically. An IAM user can also have managed policies attached to it. To retrieve a managed policy document that is attached to a user, use GetPolicy to determine the policy's default version. Then use GetPolicyVersion to retrieve the policy document. For more information about policies, see Managed policies and inline policies in the IAM User Guide."]
 module GetServiceLinkedRoleDeletionStatusResponse =
   struct
     type getServiceLinkedRoleDeletionStatusResult =
       {
-      status: DeletionTaskStatusType.t
+      status: DeletionTaskStatusType.t option
         [@ocaml.doc "The status of the deletion."];
       reason: DeletionTaskFailureReasonType.t option
         [@ocaml.doc
@@ -15455,11 +17552,11 @@ module GetServiceLinkedRoleDeletionStatusResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "GetServiceLinkedRoleDeletionStatusResponse"
-    let make ?reason =
-      fun ~status ->
+    let make ?status =
+      fun ?reason ->
         fun () ->
           {
-            getServiceLinkedRoleDeletionStatusResult = { reason; status };
+            getServiceLinkedRoleDeletionStatusResult = { status; reason };
             responseMetaData = ()
           }
     let error_of_json name json =
@@ -15505,7 +17602,7 @@ module GetServiceLinkedRoleDeletionStatusResponse =
     let to_value t =
       let x = t.getServiceLinkedRoleDeletionStatusResult in
       structure_to_wrapped_value
-        [("Status", (Some (DeletionTaskStatusType.to_value x.status)));
+        [("Status", (Option.map x.status ~f:DeletionTaskStatusType.to_value));
         ("Reason",
           (Option.map x.reason ~f:DeletionTaskFailureReasonType.to_value))]
         ~wrapper:"GetServiceLinkedRoleDeletionStatusResult"
@@ -15519,15 +17616,15 @@ module GetServiceLinkedRoleDeletionStatusResponse =
         (Option.map ~f:DeletionTaskFailureReasonType.of_xml)
           (Xml.child xml_arg0 "Reason") in
       let status =
-        DeletionTaskStatusType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
-      make ?reason ~status ()
+        (Option.map ~f:DeletionTaskStatusType.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?reason ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reason =
-        field_map json "Reason" DeletionTaskFailureReasonType.of_json in
-      let status = field_map_exn json "Status" DeletionTaskStatusType.of_json in
-      make ?reason ~status ()
+        field_map json__ "Reason" DeletionTaskFailureReasonType.of_json in
+      let status = field_map json__ "Status" DeletionTaskStatusType.of_json in
+      make ?reason ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the status of your service-linked role deletion. After you use DeleteServiceLinkedRole to submit a service-linked role for deletion, you can use the DeletionTaskId parameter in GetServiceLinkedRoleDeletionStatus to check the status of the deletion. If the deletion fails, this operation returns the reason that it failed, if that information is returned by the service."]
@@ -15551,9 +17648,9 @@ module GetServiceLinkedRoleDeletionStatusRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DeletionTaskId") in
       make ~deletionTaskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deletionTaskId =
-        field_map_exn json "DeletionTaskId" DeletionTaskIdType.of_json in
+        field_map_exn json__ "DeletionTaskId" DeletionTaskIdType.of_json in
       make ~deletionTaskId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15562,16 +17659,16 @@ module GetServiceLastAccessedDetailsWithEntitiesResponse =
   struct
     type getServiceLastAccessedDetailsWithEntitiesResult =
       {
-      jobStatus: JobStatusType.t [@ocaml.doc "The status of the job."];
-      jobCreationDate: DateType.t
+      jobStatus: JobStatusType.t option [@ocaml.doc "The status of the job."];
+      jobCreationDate: DateType.t option
         [@ocaml.doc
-          "The date and time, in\194\160ISO 8601 date-time format, when the report job was created."];
-      jobCompletionDate: DateType.t
+          "The date and time, in ISO 8601 date-time format, when the report job was created."];
+      jobCompletionDate: DateType.t option
         [@ocaml.doc
-          "The date and time, in\194\160ISO 8601 date-time format, when the generated report job was completed or failed. This field is null if the job is still in progress, as indicated by a job status value of IN_PROGRESS."];
-      entityDetailsList: EntityDetailsListType.t
+          "The date and time, in ISO 8601 date-time format, when the generated report job was completed or failed. This field is null if the job is still in progress, as indicated by a job status value of IN_PROGRESS."];
+      entityDetailsList: EntityDetailsListType.t option
         [@ocaml.doc
-          "An\194\160EntityDetailsList object that contains details about when an IAM entity (user or role) used group or policy permissions in an attempt to access the specified Amazon Web Services service."];
+          "An EntityDetailsList object that contains details about when an IAM entity (user or role) used group or policy permissions in an attempt to access the specified Amazon Web Services service."];
       isTruncated: BooleanType.t option
         [@ocaml.doc
           "A flag that indicates whether there are more items to return. If your results were truncated, you can make a subsequent pagination request using the Marker request parameter to retrieve more items. Note that IAM might return fewer than the MaxItems number of results even when there are more results available. We recommend that you check IsTruncated after every call to ensure that you receive all your results."];
@@ -15592,24 +17689,24 @@ module GetServiceLastAccessedDetailsWithEntitiesResponse =
       | `NoSuchEntityException of NoSuchEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "GetServiceLastAccessedDetailsWithEntitiesResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ?error ->
-          fun ~jobStatus ->
-            fun ~jobCreationDate ->
-              fun ~jobCompletionDate ->
-                fun ~entityDetailsList ->
+    let make ?jobStatus =
+      fun ?jobCreationDate ->
+        fun ?jobCompletionDate ->
+          fun ?entityDetailsList ->
+            fun ?isTruncated ->
+              fun ?marker ->
+                fun ?error ->
                   fun () ->
                     {
                       getServiceLastAccessedDetailsWithEntitiesResult =
                         {
-                          isTruncated;
-                          marker;
-                          error;
                           jobStatus;
                           jobCreationDate;
                           jobCompletionDate;
-                          entityDetailsList
+                          entityDetailsList;
+                          isTruncated;
+                          marker;
+                          error
                         };
                       responseMetaData = ()
                     }
@@ -15648,11 +17745,13 @@ module GetServiceLastAccessedDetailsWithEntitiesResponse =
     let to_value t =
       let x = t.getServiceLastAccessedDetailsWithEntitiesResult in
       structure_to_wrapped_value
-        [("JobStatus", (Some (JobStatusType.to_value x.jobStatus)));
-        ("JobCreationDate", (Some (DateType.to_value x.jobCreationDate)));
-        ("JobCompletionDate", (Some (DateType.to_value x.jobCompletionDate)));
+        [("JobStatus", (Option.map x.jobStatus ~f:JobStatusType.to_value));
+        ("JobCreationDate",
+          (Option.map x.jobCreationDate ~f:DateType.to_value));
+        ("JobCompletionDate",
+          (Option.map x.jobCompletionDate ~f:DateType.to_value));
         ("EntityDetailsList",
-          (Some (EntityDetailsListType.to_value x.entityDetailsList)));
+          (Option.map x.entityDetailsList ~f:EntityDetailsListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value));
         ("Error", (Option.map x.error ~f:ErrorDetails.to_value))]
@@ -15671,33 +17770,32 @@ module GetServiceLastAccessedDetailsWithEntitiesResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let entityDetailsList =
-        EntityDetailsListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EntityDetailsList") in
+        (Option.map ~f:EntityDetailsListType.of_xml)
+          (Xml.child xml_arg0 "EntityDetailsList") in
       let jobCompletionDate =
-        DateType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "JobCompletionDate") in
+        (Option.map ~f:DateType.of_xml)
+          (Xml.child xml_arg0 "JobCompletionDate") in
       let jobCreationDate =
-        DateType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "JobCreationDate") in
+        (Option.map ~f:DateType.of_xml)
+          (Xml.child xml_arg0 "JobCreationDate") in
       let jobStatus =
-        JobStatusType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "JobStatus") in
-      make ?error ?marker ?isTruncated ~entityDetailsList ~jobCompletionDate
-        ~jobCreationDate ~jobStatus ()
+        (Option.map ~f:JobStatusType.of_xml) (Xml.child xml_arg0 "JobStatus") in
+      make ?error ?marker ?isTruncated ?entityDetailsList ?jobCompletionDate
+        ?jobCreationDate ?jobStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map json "Error" ErrorDetails.of_json in
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let error = field_map json__ "Error" ErrorDetails.of_json in
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let entityDetailsList =
-        field_map_exn json "EntityDetailsList" EntityDetailsListType.of_json in
+        field_map json__ "EntityDetailsList" EntityDetailsListType.of_json in
       let jobCompletionDate =
-        field_map_exn json "JobCompletionDate" DateType.of_json in
+        field_map json__ "JobCompletionDate" DateType.of_json in
       let jobCreationDate =
-        field_map_exn json "JobCreationDate" DateType.of_json in
-      let jobStatus = field_map_exn json "JobStatus" JobStatusType.of_json in
-      make ?error ?marker ?isTruncated ~entityDetailsList ~jobCompletionDate
-        ~jobCreationDate ~jobStatus ()
+        field_map json__ "JobCreationDate" DateType.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatusType.of_json in
+      make ?error ?marker ?isTruncated ?entityDetailsList ?jobCompletionDate
+        ?jobCreationDate ?jobStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "After you generate a group or policy report using the GenerateServiceLastAccessedDetails operation, you can use the JobId parameter in GetServiceLastAccessedDetailsWithEntities. This operation retrieves the status of your report job and a list of entities that could have used group or policy permissions to access the specified service. Group \226\128\147 For a group report, this operation returns a list of users in the group that could have used the group\226\128\153s policies in an attempt to access the service. Policy \226\128\147 For a policy report, this operation returns a list of entities (users or roles) that could have used the policy in an attempt to access the service. You can also use this operation for user or role reports to retrieve details about those entities. If the operation fails, the GetServiceLastAccessedDetailsWithEntities operation returns the reason that it failed. By default, the list of associated entities is sorted by date, with the most recent access listed first."]
@@ -15710,7 +17808,7 @@ module GetServiceLastAccessedDetailsWithEntitiesRequest =
           "The ID of the request generated by the GenerateServiceLastAccessedDetails operation."];
       serviceNamespace: ServiceNamespaceType.t
         [@ocaml.doc
-          "The service namespace for an Amazon Web Services service. Provide the service namespace to learn when the IAM entity last attempted to access the specified service. To learn the service namespace for a service, see Actions, resources, and condition keys for Amazon Web Services services in the IAM User Guide. Choose the name of the service to view details for that service. In the first paragraph, find the service prefix. For example, (service prefix: a4b). For more information about service namespaces, see Amazon Web Services service namespaces in the\194\160Amazon Web Services General Reference."];
+          "The service namespace for an Amazon Web Services service. Provide the service namespace to learn when the IAM entity last attempted to access the specified service. To learn the service namespace for a service, see Actions, resources, and condition keys for Amazon Web Services services in the IAM User Guide. Choose the name of the service to view details for that service. In the first paragraph, find the service prefix. For example, (service prefix: a4b). For more information about service namespaces, see Amazon Web Services service namespaces in the Amazon Web Services General Reference."];
       maxItems: MaxItemsType.t option
         [@ocaml.doc
           "Use this only when paginating results to indicate the maximum number of items you want in the response. If additional items exist beyond the maximum you specify, the IsTruncated response element is true. If you do not include this parameter, the number of items defaults to 100. Note that IAM might return fewer results, even when there are more results available. In that case, the IsTruncated response element returns true, and Marker contains a value to include in the subsequent call that tells the service where to continue from."];
@@ -15743,12 +17841,12 @@ module GetServiceLastAccessedDetailsWithEntitiesRequest =
         JobIDType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?marker ?maxItems ~serviceNamespace ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespaceType.of_json in
-      let jobId = field_map_exn json "JobId" JobIDType.of_json in
+        field_map_exn json__ "ServiceNamespace" ServiceNamespaceType.of_json in
+      let jobId = field_map_exn json__ "JobId" JobIDType.of_json in
       make ?marker ?maxItems ~serviceNamespace ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15757,19 +17855,19 @@ module GetServiceLastAccessedDetailsResponse =
   struct
     type getServiceLastAccessedDetailsResult =
       {
-      jobStatus: JobStatusType.t [@ocaml.doc "The status of the job."];
+      jobStatus: JobStatusType.t option [@ocaml.doc "The status of the job."];
       jobType: AccessAdvisorUsageGranularityType.t option
         [@ocaml.doc
           "The type of job. Service jobs return information about when each service was last accessed. Action jobs also include information about when tracked actions within the service were last accessed."];
-      jobCreationDate: DateType.t
+      jobCreationDate: DateType.t option
         [@ocaml.doc
-          "The date and time, in\194\160ISO 8601 date-time format, when the report job was created."];
-      servicesLastAccessed: ServicesLastAccessed.t
+          "The date and time, in ISO 8601 date-time format, when the report job was created."];
+      servicesLastAccessed: ServicesLastAccessed.t option
         [@ocaml.doc
-          "A\194\160ServiceLastAccessed object that contains details about the most recent attempt to access the service."];
-      jobCompletionDate: DateType.t
+          "A ServiceLastAccessed object that contains details about the most recent attempt to access the service."];
+      jobCompletionDate: DateType.t option
         [@ocaml.doc
-          "The date and time, in\194\160ISO 8601 date-time format, when the generated report job was completed or failed. This field is null if the job is still in progress, as indicated by a job status value of IN_PROGRESS."];
+          "The date and time, in ISO 8601 date-time format, when the generated report job was completed or failed. This field is null if the job is still in progress, as indicated by a job status value of IN_PROGRESS."];
       isTruncated: BooleanType.t option
         [@ocaml.doc
           "A flag that indicates whether there are more items to return. If your results were truncated, you can make a subsequent pagination request using the Marker request parameter to retrieve more items. Note that IAM might return fewer than the MaxItems number of results even when there are more results available. We recommend that you check IsTruncated after every call to ensure that you receive all your results."];
@@ -15790,26 +17888,26 @@ module GetServiceLastAccessedDetailsResponse =
       | `NoSuchEntityException of NoSuchEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "GetServiceLastAccessedDetailsResponse"
-    let make ?jobType =
-      fun ?isTruncated ->
-        fun ?marker ->
-          fun ?error ->
-            fun ~jobStatus ->
-              fun ~jobCreationDate ->
-                fun ~servicesLastAccessed ->
-                  fun ~jobCompletionDate ->
+    let make ?jobStatus =
+      fun ?jobType ->
+        fun ?jobCreationDate ->
+          fun ?servicesLastAccessed ->
+            fun ?jobCompletionDate ->
+              fun ?isTruncated ->
+                fun ?marker ->
+                  fun ?error ->
                     fun () ->
                       {
                         getServiceLastAccessedDetailsResult =
                           {
-                            jobType;
-                            isTruncated;
-                            marker;
-                            error;
                             jobStatus;
+                            jobType;
                             jobCreationDate;
                             servicesLastAccessed;
-                            jobCompletionDate
+                            jobCompletionDate;
+                            isTruncated;
+                            marker;
+                            error
                           };
                         responseMetaData = ()
                       }
@@ -15848,13 +17946,15 @@ module GetServiceLastAccessedDetailsResponse =
     let to_value t =
       let x = t.getServiceLastAccessedDetailsResult in
       structure_to_wrapped_value
-        [("JobStatus", (Some (JobStatusType.to_value x.jobStatus)));
+        [("JobStatus", (Option.map x.jobStatus ~f:JobStatusType.to_value));
         ("JobType",
           (Option.map x.jobType ~f:AccessAdvisorUsageGranularityType.to_value));
-        ("JobCreationDate", (Some (DateType.to_value x.jobCreationDate)));
+        ("JobCreationDate",
+          (Option.map x.jobCreationDate ~f:DateType.to_value));
         ("ServicesLastAccessed",
-          (Some (ServicesLastAccessed.to_value x.servicesLastAccessed)));
-        ("JobCompletionDate", (Some (DateType.to_value x.jobCompletionDate)));
+          (Option.map x.servicesLastAccessed ~f:ServicesLastAccessed.to_value));
+        ("JobCompletionDate",
+          (Option.map x.jobCompletionDate ~f:DateType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value));
         ("Error", (Option.map x.error ~f:ErrorDetails.to_value))]
@@ -15873,39 +17973,37 @@ module GetServiceLastAccessedDetailsResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let jobCompletionDate =
-        DateType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "JobCompletionDate") in
+        (Option.map ~f:DateType.of_xml)
+          (Xml.child xml_arg0 "JobCompletionDate") in
       let servicesLastAccessed =
-        ServicesLastAccessed.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServicesLastAccessed") in
+        (Option.map ~f:ServicesLastAccessed.of_xml)
+          (Xml.child xml_arg0 "ServicesLastAccessed") in
       let jobCreationDate =
-        DateType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "JobCreationDate") in
+        (Option.map ~f:DateType.of_xml)
+          (Xml.child xml_arg0 "JobCreationDate") in
       let jobType =
         (Option.map ~f:AccessAdvisorUsageGranularityType.of_xml)
           (Xml.child xml_arg0 "JobType") in
       let jobStatus =
-        JobStatusType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "JobStatus") in
-      make ?error ?marker ?isTruncated ~jobCompletionDate
-        ~servicesLastAccessed ~jobCreationDate ?jobType ~jobStatus ()
+        (Option.map ~f:JobStatusType.of_xml) (Xml.child xml_arg0 "JobStatus") in
+      make ?error ?marker ?isTruncated ?jobCompletionDate
+        ?servicesLastAccessed ?jobCreationDate ?jobType ?jobStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map json "Error" ErrorDetails.of_json in
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let error = field_map json__ "Error" ErrorDetails.of_json in
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let jobCompletionDate =
-        field_map_exn json "JobCompletionDate" DateType.of_json in
+        field_map json__ "JobCompletionDate" DateType.of_json in
       let servicesLastAccessed =
-        field_map_exn json "ServicesLastAccessed"
-          ServicesLastAccessed.of_json in
+        field_map json__ "ServicesLastAccessed" ServicesLastAccessed.of_json in
       let jobCreationDate =
-        field_map_exn json "JobCreationDate" DateType.of_json in
+        field_map json__ "JobCreationDate" DateType.of_json in
       let jobType =
-        field_map json "JobType" AccessAdvisorUsageGranularityType.of_json in
-      let jobStatus = field_map_exn json "JobStatus" JobStatusType.of_json in
-      make ?error ?marker ?isTruncated ~jobCompletionDate
-        ~servicesLastAccessed ~jobCreationDate ?jobType ~jobStatus ()
+        field_map json__ "JobType" AccessAdvisorUsageGranularityType.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatusType.of_json in
+      make ?error ?marker ?isTruncated ?jobCompletionDate
+        ?servicesLastAccessed ?jobCreationDate ?jobType ?jobStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a service last accessed report that was created using the GenerateServiceLastAccessedDetails operation. You can use the JobId parameter in GetServiceLastAccessedDetails to retrieve the status of your report job. When the report is complete, you can retrieve the generated report. The report includes a list of Amazon Web Services services that the resource (user, group, role, or managed policy) can access. Service last accessed data does not use other policy types when determining whether a resource could access a service. These other policy types include resource-based policies, access control lists, Organizations policies, IAM permissions boundaries, and STS assume role policies. It only applies permissions policy logic. For more about the evaluation of policy types, see Evaluating policies in the IAM User Guide. For each service that the resource could access using permissions policies, the operation returns details about the most recent access attempt. If there was no attempt, the service is listed without details about the most recent attempt to access the service. If the operation fails, the GetServiceLastAccessedDetails operation returns the reason that it failed. The GetServiceLastAccessedDetails operation returns a list of services. This list includes the number of entities that have attempted to access the service and the date and time of the last attempt. It also returns the ARN of the following entity, depending on the resource ARN that you used to generate the report: User \226\128\147 Returns the user ARN that you used to generate the report Group \226\128\147 Returns the ARN of the group member (user) that last attempted to access the service Role \226\128\147 Returns the role ARN that you used to generate the report Policy \226\128\147 Returns the ARN of the user or role that last used the policy to attempt to access the service By default, the list is sorted by service namespace. If you specified ACTION_LEVEL granularity when you generated the report, this operation returns service and action last accessed data. This includes the most recent access attempt for each tracked action within a service. Otherwise, this operation returns only service data. For more information about service and action last accessed data, see Reducing permissions using service last accessed data in the IAM User Guide."]
@@ -15940,10 +18038,10 @@ module GetServiceLastAccessedDetailsRequest =
         JobIDType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?marker ?maxItems ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let jobId = field_map_exn json "JobId" JobIDType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let jobId = field_map_exn json__ "JobId" JobIDType.of_json in
       make ?marker ?maxItems ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15952,7 +18050,7 @@ module GetServerCertificateResponse =
   struct
     type getServerCertificateResult =
       {
-      serverCertificate: ServerCertificate.t
+      serverCertificate: ServerCertificate.t option
         [@ocaml.doc
           "A structure containing details about the server certificate."]}
     and responseMetaData = unit
@@ -15965,7 +18063,7 @@ module GetServerCertificateResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "GetServerCertificateResponse"
-    let make ~serverCertificate =
+    let make ?serverCertificate =
       fun () ->
         {
           getServerCertificateResult = { serverCertificate };
@@ -16007,21 +18105,21 @@ module GetServerCertificateResponse =
       let x = t.getServerCertificateResult in
       structure_to_wrapped_value
         [("ServerCertificate",
-           (Some (ServerCertificate.to_value x.serverCertificate)))]
+           (Option.map x.serverCertificate ~f:ServerCertificate.to_value))]
         ~wrapper:"GetServerCertificateResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "GetServerCertificateResult" in
       let serverCertificate =
-        ServerCertificate.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServerCertificate") in
-      make ~serverCertificate ()
+        (Option.map ~f:ServerCertificate.of_xml)
+          (Xml.child xml_arg0 "ServerCertificate") in
+      make ?serverCertificate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serverCertificate =
-        field_map_exn json "ServerCertificate" ServerCertificate.of_json in
-      make ~serverCertificate ()
+        field_map json__ "ServerCertificate" ServerCertificate.of_json in
+      make ?serverCertificate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful GetServerCertificate request."]
@@ -16045,9 +18143,9 @@ module GetServerCertificateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServerCertificateName") in
       make ~serverCertificateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serverCertificateName =
-        field_map_exn json "ServerCertificateName"
+        field_map_exn json__ "ServerCertificateName"
           ServerCertificateNameType.of_json in
       make ~serverCertificateName ()
     let to_json v = composed_to_json to_value v
@@ -16123,8 +18221,8 @@ module GetSSHPublicKeyResponse =
           (Xml.child xml_arg0 "SSHPublicKey") in
       make ?sSHPublicKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sSHPublicKey = field_map json "SSHPublicKey" SSHPublicKey.of_json in
+    let of_json json__ =
+      let sSHPublicKey = field_map json__ "SSHPublicKey" SSHPublicKey.of_json in
       make ?sSHPublicKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16165,11 +18263,11 @@ module GetSSHPublicKeyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~encoding ~sSHPublicKeyId ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let encoding = field_map_exn json "Encoding" EncodingType.of_json in
+    let of_json json__ =
+      let encoding = field_map_exn json__ "Encoding" EncodingType.of_json in
       let sSHPublicKeyId =
-        field_map_exn json "SSHPublicKeyId" PublicKeyIdType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
+        field_map_exn json__ "SSHPublicKeyId" PublicKeyIdType.of_json in
+      let userName = field_map_exn json__ "UserName" UserNameType.of_json in
       make ~encoding ~sSHPublicKeyId ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16178,6 +18276,8 @@ module GetSAMLProviderResponse =
   struct
     type getSAMLProviderResult =
       {
+      sAMLProviderUUID: PrivateKeyIdType.t option
+        [@ocaml.doc "The unique identifier assigned to the SAML provider."];
       sAMLMetadataDocument: SAMLMetadataDocumentType.t option
         [@ocaml.doc
           "The XML metadata document that includes information about an identity provider."];
@@ -16187,7 +18287,12 @@ module GetSAMLProviderResponse =
         [@ocaml.doc "The expiration date and time for the SAML provider."];
       tags: TagListType.t option
         [@ocaml.doc
-          "A list of tags that are attached to the specified IAM SAML provider. The returned list of tags is sorted by tag key. For more information about tagging, see Tagging IAM resources in the IAM User Guide."]}
+          "A list of tags that are attached to the specified IAM SAML provider. The returned list of tags is sorted by tag key. For more information about tagging, see Tagging IAM resources in the IAM User Guide."];
+      assertionEncryptionMode: AssertionEncryptionModeType.t option
+        [@ocaml.doc
+          "Specifies the encryption setting for the SAML provider."];
+      privateKeyList: PrivateKeyList.t option
+        [@ocaml.doc "The private key metadata for the SAML provider."]}
     and responseMetaData = unit
     and t =
       {
@@ -16199,16 +18304,27 @@ module GetSAMLProviderResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "GetSAMLProviderResponse"
-    let make ?sAMLMetadataDocument =
-      fun ?createDate ->
-        fun ?validUntil ->
-          fun ?tags ->
-            fun () ->
-              {
-                getSAMLProviderResult =
-                  { sAMLMetadataDocument; createDate; validUntil; tags };
-                responseMetaData = ()
-              }
+    let make ?sAMLProviderUUID =
+      fun ?sAMLMetadataDocument ->
+        fun ?createDate ->
+          fun ?validUntil ->
+            fun ?tags ->
+              fun ?assertionEncryptionMode ->
+                fun ?privateKeyList ->
+                  fun () ->
+                    {
+                      getSAMLProviderResult =
+                        {
+                          sAMLProviderUUID;
+                          sAMLMetadataDocument;
+                          createDate;
+                          validUntil;
+                          tags;
+                          assertionEncryptionMode;
+                          privateKeyList
+                        };
+                      responseMetaData = ()
+                    }
     let error_of_json name json =
       match name with
       | "InvalidInputException" ->
@@ -16252,17 +18368,30 @@ module GetSAMLProviderResponse =
     let to_value t =
       let x = t.getSAMLProviderResult in
       structure_to_wrapped_value
-        [("SAMLMetadataDocument",
-           (Option.map x.sAMLMetadataDocument
-              ~f:SAMLMetadataDocumentType.to_value));
+        [("SAMLProviderUUID",
+           (Option.map x.sAMLProviderUUID ~f:PrivateKeyIdType.to_value));
+        ("SAMLMetadataDocument",
+          (Option.map x.sAMLMetadataDocument
+             ~f:SAMLMetadataDocumentType.to_value));
         ("CreateDate", (Option.map x.createDate ~f:DateType.to_value));
         ("ValidUntil", (Option.map x.validUntil ~f:DateType.to_value));
-        ("Tags", (Option.map x.tags ~f:TagListType.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagListType.to_value));
+        ("AssertionEncryptionMode",
+          (Option.map x.assertionEncryptionMode
+             ~f:AssertionEncryptionModeType.to_value));
+        ("PrivateKeyList",
+          (Option.map x.privateKeyList ~f:PrivateKeyList.to_value))]
         ~wrapper:"GetSAMLProviderResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "GetSAMLProviderResult" in
+      let privateKeyList =
+        (Option.map ~f:PrivateKeyList.of_xml)
+          (Xml.child xml_arg0 "PrivateKeyList") in
+      let assertionEncryptionMode =
+        (Option.map ~f:AssertionEncryptionModeType.of_xml)
+          (Xml.child xml_arg0 "AssertionEncryptionMode") in
       let tags =
         (Option.map ~f:TagListType.of_xml) (Xml.child xml_arg0 "Tags") in
       let validUntil =
@@ -16272,16 +18401,28 @@ module GetSAMLProviderResponse =
       let sAMLMetadataDocument =
         (Option.map ~f:SAMLMetadataDocumentType.of_xml)
           (Xml.child xml_arg0 "SAMLMetadataDocument") in
-      make ?tags ?validUntil ?createDate ?sAMLMetadataDocument ()
+      let sAMLProviderUUID =
+        (Option.map ~f:PrivateKeyIdType.of_xml)
+          (Xml.child xml_arg0 "SAMLProviderUUID") in
+      make ?privateKeyList ?assertionEncryptionMode ?tags ?validUntil
+        ?createDate ?sAMLMetadataDocument ?sAMLProviderUUID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
-      let validUntil = field_map json "ValidUntil" DateType.of_json in
-      let createDate = field_map json "CreateDate" DateType.of_json in
+    let of_json json__ =
+      let privateKeyList =
+        field_map json__ "PrivateKeyList" PrivateKeyList.of_json in
+      let assertionEncryptionMode =
+        field_map json__ "AssertionEncryptionMode"
+          AssertionEncryptionModeType.of_json in
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      let validUntil = field_map json__ "ValidUntil" DateType.of_json in
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
       let sAMLMetadataDocument =
-        field_map json "SAMLMetadataDocument"
+        field_map json__ "SAMLMetadataDocument"
           SAMLMetadataDocumentType.of_json in
-      make ?tags ?validUntil ?createDate ?sAMLMetadataDocument ()
+      let sAMLProviderUUID =
+        field_map json__ "SAMLProviderUUID" PrivateKeyIdType.of_json in
+      make ?privateKeyList ?assertionEncryptionMode ?tags ?validUntil
+        ?createDate ?sAMLMetadataDocument ?sAMLProviderUUID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful GetSAMLProvider request."]
@@ -16304,9 +18445,9 @@ module GetSAMLProviderRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SAMLProviderArn") in
       make ~sAMLProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sAMLProviderArn =
-        field_map_exn json "SAMLProviderArn" ArnType.of_json in
+        field_map_exn json__ "SAMLProviderArn" ArnType.of_json in
       make ~sAMLProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16315,7 +18456,7 @@ module GetRoleResponse =
   struct
     type getRoleResult =
       {
-      role: Role.t
+      role: Role.t option
         [@ocaml.doc "A structure containing details about the IAM role."]}
     and responseMetaData = unit
     and t =
@@ -16327,7 +18468,7 @@ module GetRoleResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "GetRoleResponse"
-    let make ~role =
+    let make ?role =
       fun () -> { getRoleResult = { role }; responseMetaData = () }
     let error_of_json name json =
       match name with
@@ -16363,17 +18504,17 @@ module GetRoleResponse =
               | Some m -> [("message", (`String m))])))
     let to_value t =
       let x = t.getRoleResult in
-      structure_to_wrapped_value [("Role", (Some (Role.to_value x.role)))]
+      structure_to_wrapped_value
+        [("Role", (Option.map x.role ~f:Role.to_value))]
         ~wrapper:"GetRoleResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 = Xml.child_exn ~context:context_ t "GetRoleResult" in
-      let role =
-        Role.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Role") in
-      make ~role ()
+      let role = (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "Role") in
+      make ?role ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let role = field_map_exn json "Role" Role.of_json in make ~role ()
+    let of_json json__ =
+      let role = field_map json__ "Role" Role.of_json in make ?role ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the response to a successful GetRole request."]
 module GetRoleRequest =
@@ -16395,20 +18536,21 @@ module GetRoleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+    let of_json json__ =
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information about the specified role, including the role's path, GUID, ARN, and the role's trust policy that grants permission to assume the role. For more information about roles, see Working with roles. Policies returned by this operation are URL-encoded compliant with RFC 3986. You can use a URL decoding method to convert the policy back to plain JSON text. For example, if you use Java, you can use the decode method of the java.net.URLDecoder utility class in the Java SDK. Other languages and SDKs provide similar functionality."]
+       "Retrieves information about the specified role, including the role's path, GUID, ARN, and the role's trust policy that grants permission to assume the role. For more information about roles, see IAM roles in the IAM User Guide. Policies returned by this operation are URL-encoded compliant with RFC 3986. You can use a URL decoding method to convert the policy back to plain JSON text. For example, if you use Java, you can use the decode method of the java.net.URLDecoder utility class in the Java SDK. Other languages and SDKs provide similar functionality, and some SDKs do this decoding automatically."]
 module GetRolePolicyResponse =
   struct
     type getRolePolicyResult =
       {
-      roleName: RoleNameType.t
+      roleName: RoleNameType.t option
         [@ocaml.doc "The role the policy is associated with."];
-      policyName: PolicyNameType.t [@ocaml.doc "The name of the policy."];
-      policyDocument: PolicyDocumentType.t
+      policyName: PolicyNameType.t option
+        [@ocaml.doc "The name of the policy."];
+      policyDocument: PolicyDocumentType.t option
         [@ocaml.doc
           "The policy document. IAM stores policies in JSON format. However, resources that were created using CloudFormation templates can be formatted in YAML. CloudFormation always converts a YAML policy to JSON format before submitting it to IAM."]}
     and responseMetaData = unit
@@ -16421,9 +18563,9 @@ module GetRolePolicyResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "GetRolePolicyResponse"
-    let make ~roleName =
-      fun ~policyName ->
-        fun ~policyDocument ->
+    let make ?roleName =
+      fun ?policyName ->
+        fun ?policyDocument ->
           fun () ->
             {
               getRolePolicyResult = { roleName; policyName; policyDocument };
@@ -16464,31 +18606,30 @@ module GetRolePolicyResponse =
     let to_value t =
       let x = t.getRolePolicyResult in
       structure_to_wrapped_value
-        [("RoleName", (Some (RoleNameType.to_value x.roleName)));
-        ("PolicyName", (Some (PolicyNameType.to_value x.policyName)));
+        [("RoleName", (Option.map x.roleName ~f:RoleNameType.to_value));
+        ("PolicyName", (Option.map x.policyName ~f:PolicyNameType.to_value));
         ("PolicyDocument",
-          (Some (PolicyDocumentType.to_value x.policyDocument)))]
+          (Option.map x.policyDocument ~f:PolicyDocumentType.to_value))]
         ~wrapper:"GetRolePolicyResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 = Xml.child_exn ~context:context_ t "GetRolePolicyResult" in
       let policyDocument =
-        PolicyDocumentType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyDocument") in
+        (Option.map ~f:PolicyDocumentType.of_xml)
+          (Xml.child xml_arg0 "PolicyDocument") in
       let policyName =
-        PolicyNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
+        (Option.map ~f:PolicyNameType.of_xml)
+          (Xml.child xml_arg0 "PolicyName") in
       let roleName =
-        RoleNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
-      make ~policyDocument ~policyName ~roleName ()
+        (Option.map ~f:RoleNameType.of_xml) (Xml.child xml_arg0 "RoleName") in
+      make ?policyDocument ?policyName ?roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyDocument =
-        field_map_exn json "PolicyDocument" PolicyDocumentType.of_json in
-      let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
-      make ~policyDocument ~policyName ~roleName ()
+        field_map json__ "PolicyDocument" PolicyDocumentType.of_json in
+      let policyName = field_map json__ "PolicyName" PolicyNameType.of_json in
+      let roleName = field_map json__ "RoleName" RoleNameType.of_json in
+      make ?policyDocument ?policyName ?roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful GetRolePolicy request."]
@@ -16519,13 +18660,14 @@ module GetRolePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~policyName ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+    let of_json json__ =
+      let policyName =
+        field_map_exn json__ "PolicyName" PolicyNameType.of_json in
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ~policyName ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the specified inline policy document that is embedded with the specified IAM role. Policies returned by this operation are URL-encoded compliant with RFC 3986. You can use a URL decoding method to convert the policy back to plain JSON text. For example, if you use Java, you can use the decode method of the java.net.URLDecoder utility class in the Java SDK. Other languages and SDKs provide similar functionality. An IAM role can also have managed policies attached to it. To retrieve a managed policy document that is attached to a role, use GetPolicy to determine the policy's default version, then use GetPolicyVersion to retrieve the policy document. For more information about policies, see Managed policies and inline policies in the IAM User Guide. For more information about roles, see Using roles to delegate permissions and federate identities."]
+       "Retrieves the specified inline policy document that is embedded with the specified IAM role. Policies returned by this operation are URL-encoded compliant with RFC 3986. You can use a URL decoding method to convert the policy back to plain JSON text. For example, if you use Java, you can use the decode method of the java.net.URLDecoder utility class in the Java SDK. Other languages and SDKs provide similar functionality, and some SDKs do this decoding automatically. An IAM role can also have managed policies attached to it. To retrieve a managed policy document that is attached to a role, use GetPolicy to determine the policy's default version, then use GetPolicyVersion to retrieve the policy document. For more information about policies, see Managed policies and inline policies in the IAM User Guide. For more information about roles, see IAM roles in the IAM User Guide."]
 module GetPolicyVersionResponse =
   struct
     type getPolicyVersionResult =
@@ -16602,9 +18744,9 @@ module GetPolicyVersionResponse =
           (Xml.child xml_arg0 "PolicyVersion") in
       make ?policyVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyVersion =
-        field_map json "PolicyVersion" PolicyVersion.of_json in
+        field_map json__ "PolicyVersion" PolicyVersion.of_json in
       make ?policyVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16635,14 +18777,14 @@ module GetPolicyVersionRequest =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ~versionId ~policyArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionId =
-        field_map_exn json "VersionId" PolicyVersionIdType.of_json in
-      let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
+        field_map_exn json__ "VersionId" PolicyVersionIdType.of_json in
+      let policyArn = field_map_exn json__ "PolicyArn" ArnType.of_json in
       make ~versionId ~policyArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information about the specified version of the specified managed policy, including the policy document. Policies returned by this operation are URL-encoded compliant with RFC 3986. You can use a URL decoding method to convert the policy back to plain JSON text. For example, if you use Java, you can use the decode method of the java.net.URLDecoder utility class in the Java SDK. Other languages and SDKs provide similar functionality. To list the available versions for a policy, use ListPolicyVersions. This operation retrieves information about managed policies. To retrieve information about an inline policy that is embedded in a user, group, or role, use GetUserPolicy, GetGroupPolicy, or GetRolePolicy. For more information about the types of policies, see Managed policies and inline policies in the IAM User Guide. For more information about managed policy versions, see Versioning for managed policies in the IAM User Guide."]
+       "Retrieves information about the specified version of the specified managed policy, including the policy document. Policies returned by this operation are URL-encoded compliant with RFC 3986. You can use a URL decoding method to convert the policy back to plain JSON text. For example, if you use Java, you can use the decode method of the java.net.URLDecoder utility class in the Java SDK. Other languages and SDKs provide similar functionality, and some SDKs do this decoding automatically. To list the available versions for a policy, use ListPolicyVersions. This operation retrieves information about managed policies. To retrieve information about an inline policy that is embedded in a user, group, or role, use GetUserPolicy, GetGroupPolicy, or GetRolePolicy. For more information about the types of policies, see Managed policies and inline policies in the IAM User Guide. For more information about managed policy versions, see Versioning for managed policies in the IAM User Guide."]
 module GetPolicyResponse =
   struct
     type getPolicyResult =
@@ -16714,8 +18856,9 @@ module GetPolicyResponse =
         (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" Policy.of_json in make ?policy ()
+    let of_json json__ =
+      let policy = field_map json__ "Policy" Policy.of_json in
+      make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the response to a successful GetPolicy request."]
 module GetPolicyRequest =
@@ -16736,23 +18879,106 @@ module GetPolicyRequest =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ~policyArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
+    let of_json json__ =
+      let policyArn = field_map_exn json__ "PolicyArn" ArnType.of_json in
       make ~policyArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves information about the specified managed policy, including the policy's default version and the total number of IAM users, groups, and roles to which the policy is attached. To retrieve the list of the specific users, groups, and roles that the policy is attached to, use ListEntitiesForPolicy. This operation returns metadata about the policy. To retrieve the actual policy document for a specific version of the policy, use GetPolicyVersion. This operation retrieves information about managed policies. To retrieve information about an inline policy that is embedded with an IAM user, group, or role, use GetUserPolicy, GetGroupPolicy, or GetRolePolicy. For more information about policies, see Managed policies and inline policies in the IAM User Guide."]
+module GetOutboundWebIdentityFederationInfoResponse =
+  struct
+    type getOutboundWebIdentityFederationInfoResult =
+      {
+      issuerIdentifier: StringType.t option
+        [@ocaml.doc
+          "A unique issuer URL for your Amazon Web Services account that hosts the OpenID Connect (OIDC) discovery endpoints at /.well-known/openid-configuration and /.well-known/jwks.json. The OpenID Connect (OIDC) discovery endpoints contain verification keys and metadata necessary for token verification."];
+      jwtVendingEnabled: BooleanType.t option
+        [@ocaml.doc
+          "Indicates whether outbound identity federation is currently enabled for your Amazon Web Services account. When true, IAM principals in the account can call the GetWebIdentityToken API to obtain JSON Web Tokens (JWTs) for authentication with external services."]}
+    and responseMetaData = unit
+    and t =
+      {
+      getOutboundWebIdentityFederationInfoResult:
+        getOutboundWebIdentityFederationInfoResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `FeatureDisabledException of FeatureDisabledException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "GetOutboundWebIdentityFederationInfoResponse"
+    let make ?issuerIdentifier =
+      fun ?jwtVendingEnabled ->
+        fun () ->
+          {
+            getOutboundWebIdentityFederationInfoResult =
+              { issuerIdentifier; jwtVendingEnabled };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "FeatureDisabledException" ->
+          `FeatureDisabledException (FeatureDisabledException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "FeatureDisabledException" ->
+          `FeatureDisabledException (FeatureDisabledException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `FeatureDisabledException e ->
+          `Assoc
+            [("error", (`String "FeatureDisabledException"));
+            ("details", (FeatureDisabledException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.getOutboundWebIdentityFederationInfoResult in
+      structure_to_wrapped_value
+        [("IssuerIdentifier",
+           (Option.map x.issuerIdentifier ~f:StringType.to_value));
+        ("JwtVendingEnabled",
+          (Option.map x.jwtVendingEnabled ~f:BooleanType.to_value))]
+        ~wrapper:"GetOutboundWebIdentityFederationInfoResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "GetOutboundWebIdentityFederationInfoResult" in
+      let jwtVendingEnabled =
+        (Option.map ~f:BooleanType.of_xml)
+          (Xml.child xml_arg0 "JwtVendingEnabled") in
+      let issuerIdentifier =
+        (Option.map ~f:StringType.of_xml)
+          (Xml.child xml_arg0 "IssuerIdentifier") in
+      make ?jwtVendingEnabled ?issuerIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jwtVendingEnabled =
+        field_map json__ "JwtVendingEnabled" BooleanType.of_json in
+      let issuerIdentifier =
+        field_map json__ "IssuerIdentifier" StringType.of_json in
+      make ?jwtVendingEnabled ?issuerIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the configuration information for the outbound identity federation feature in your Amazon Web Services account. The response includes the unique issuer URL for your Amazon Web Services account and the current enabled/disabled status of the feature. Use this operation to obtain the issuer URL that you need to configure trust relationships with external services."]
 module GetOrganizationsAccessReportResponse =
   struct
     type getOrganizationsAccessReportResult =
       {
-      jobStatus: JobStatusType.t [@ocaml.doc "The status of the job."];
-      jobCreationDate: DateType.t
+      jobStatus: JobStatusType.t option [@ocaml.doc "The status of the job."];
+      jobCreationDate: DateType.t option
         [@ocaml.doc
-          "The date and time, in\194\160ISO 8601 date-time format, when the report job was created."];
+          "The date and time, in ISO 8601 date-time format, when the report job was created."];
       jobCompletionDate: DateType.t option
         [@ocaml.doc
-          "The date and time, in\194\160ISO 8601 date-time format, when the generated report job was completed or failed. This field is null if the job is still in progress, as indicated by a job status value of IN_PROGRESS."];
+          "The date and time, in ISO 8601 date-time format, when the generated report job was completed or failed. This field is null if the job is still in progress, as indicated by a job status value of IN_PROGRESS."];
       numberOfServicesAccessible: IntegerType.t option
         [@ocaml.doc
           "The number of services that the applicable SCPs allow account principals to access."];
@@ -16761,7 +18987,7 @@ module GetOrganizationsAccessReportResponse =
           "The number of services that account principals are allowed but did not attempt to access."];
       accessDetails: AccessDetails.t option
         [@ocaml.doc
-          "An\194\160object that contains details about the most recent attempt to access the service."];
+          "An object that contains details about the most recent attempt to access the service."];
       isTruncated: BooleanType.t option
         [@ocaml.doc
           "A flag that indicates whether there are more items to return. If your results were truncated, you can make a subsequent pagination request using the Marker request parameter to retrieve more items. Note that IAM might return fewer than the MaxItems number of results even when there are more results available. We recommend that you check IsTruncated after every call to ensure that you receive all your results."];
@@ -16778,28 +19004,28 @@ module GetOrganizationsAccessReportResponse =
       [ `NoSuchEntityException of NoSuchEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "GetOrganizationsAccessReportResponse"
-    let make ?jobCompletionDate =
-      fun ?numberOfServicesAccessible ->
-        fun ?numberOfServicesNotAccessed ->
-          fun ?accessDetails ->
-            fun ?isTruncated ->
-              fun ?marker ->
-                fun ?errorDetails ->
-                  fun ~jobStatus ->
-                    fun ~jobCreationDate ->
+    let make ?jobStatus =
+      fun ?jobCreationDate ->
+        fun ?jobCompletionDate ->
+          fun ?numberOfServicesAccessible ->
+            fun ?numberOfServicesNotAccessed ->
+              fun ?accessDetails ->
+                fun ?isTruncated ->
+                  fun ?marker ->
+                    fun ?errorDetails ->
                       fun () ->
                         {
                           getOrganizationsAccessReportResult =
                             {
+                              jobStatus;
+                              jobCreationDate;
                               jobCompletionDate;
                               numberOfServicesAccessible;
                               numberOfServicesNotAccessed;
                               accessDetails;
                               isTruncated;
                               marker;
-                              errorDetails;
-                              jobStatus;
-                              jobCreationDate
+                              errorDetails
                             };
                           responseMetaData = ()
                         }
@@ -16830,8 +19056,9 @@ module GetOrganizationsAccessReportResponse =
     let to_value t =
       let x = t.getOrganizationsAccessReportResult in
       structure_to_wrapped_value
-        [("JobStatus", (Some (JobStatusType.to_value x.jobStatus)));
-        ("JobCreationDate", (Some (DateType.to_value x.jobCreationDate)));
+        [("JobStatus", (Option.map x.jobStatus ~f:JobStatusType.to_value));
+        ("JobCreationDate",
+          (Option.map x.jobCreationDate ~f:DateType.to_value));
         ("JobCompletionDate",
           (Option.map x.jobCompletionDate ~f:DateType.to_value));
         ("NumberOfServicesAccessible",
@@ -16871,36 +19098,35 @@ module GetOrganizationsAccessReportResponse =
         (Option.map ~f:DateType.of_xml)
           (Xml.child xml_arg0 "JobCompletionDate") in
       let jobCreationDate =
-        DateType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "JobCreationDate") in
+        (Option.map ~f:DateType.of_xml)
+          (Xml.child xml_arg0 "JobCreationDate") in
       let jobStatus =
-        JobStatusType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "JobStatus") in
+        (Option.map ~f:JobStatusType.of_xml) (Xml.child xml_arg0 "JobStatus") in
       make ?errorDetails ?marker ?isTruncated ?accessDetails
         ?numberOfServicesNotAccessed ?numberOfServicesAccessible
-        ?jobCompletionDate ~jobCreationDate ~jobStatus ()
+        ?jobCompletionDate ?jobCreationDate ?jobStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorDetails = field_map json "ErrorDetails" ErrorDetails.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let errorDetails = field_map json__ "ErrorDetails" ErrorDetails.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let accessDetails =
-        field_map json "AccessDetails" AccessDetails.of_json in
+        field_map json__ "AccessDetails" AccessDetails.of_json in
       let numberOfServicesNotAccessed =
-        field_map json "NumberOfServicesNotAccessed" IntegerType.of_json in
+        field_map json__ "NumberOfServicesNotAccessed" IntegerType.of_json in
       let numberOfServicesAccessible =
-        field_map json "NumberOfServicesAccessible" IntegerType.of_json in
+        field_map json__ "NumberOfServicesAccessible" IntegerType.of_json in
       let jobCompletionDate =
-        field_map json "JobCompletionDate" DateType.of_json in
+        field_map json__ "JobCompletionDate" DateType.of_json in
       let jobCreationDate =
-        field_map_exn json "JobCreationDate" DateType.of_json in
-      let jobStatus = field_map_exn json "JobStatus" JobStatusType.of_json in
+        field_map json__ "JobCreationDate" DateType.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatusType.of_json in
       make ?errorDetails ?marker ?isTruncated ?accessDetails
         ?numberOfServicesNotAccessed ?numberOfServicesAccessible
-        ?jobCompletionDate ~jobCreationDate ~jobStatus ()
+        ?jobCompletionDate ?jobCreationDate ?jobStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the service last accessed data report for Organizations that was previously generated using the GenerateOrganizationsAccessReport operation. This operation retrieves the status of your report job and the report contents. Depending on the parameters that you passed when you generated the report, the data returned could include different information. For details, see GenerateOrganizationsAccessReport. To call this operation, you must be signed in to the management account in your organization. SCPs must be enabled for your organization root. You must have permissions to perform this operation. For more information, see Refining permissions using service last accessed data in the IAM User Guide. For each service that principals in an account (root users, IAM users, or IAM roles) could access using SCPs, the operation returns details about the most recent access attempt. If there was no attempt, the service is listed without details about the most recent attempt to access the service. If the operation fails, it returns the reason that it failed. By default, the list is sorted by service namespace."]
+       "Retrieves the service last accessed data report for Organizations that was previously generated using the GenerateOrganizationsAccessReport operation. This operation retrieves the status of your report job and the report contents. Depending on the parameters that you passed when you generated the report, the data returned could include different information. For details, see GenerateOrganizationsAccessReport. To call this operation, you must be signed in to the management account in your organization. SCPs must be enabled for your organization root. You must have permissions to perform this operation. For more information, see Refining permissions using service last accessed data in the IAM User Guide. For each service that principals in an account (root user, IAM users, or IAM roles) could access using SCPs, the operation returns details about the most recent access attempt. If there was no attempt, the service is listed without details about the most recent attempt to access the service. If the operation fails, it returns the reason that it failed. By default, the list is sorted by service namespace."]
 module GetOrganizationsAccessReportRequest =
   struct
     type nonrec t =
@@ -16940,15 +19166,15 @@ module GetOrganizationsAccessReportRequest =
         JobIDType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?sortKey ?marker ?maxItems ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortKey = field_map json "SortKey" SortKeyType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let jobId = field_map_exn json "JobId" JobIDType.of_json in
+    let of_json json__ =
+      let sortKey = field_map json__ "SortKey" SortKeyType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let jobId = field_map_exn json__ "JobId" JobIDType.of_json in
       make ?sortKey ?marker ?maxItems ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the service last accessed data report for Organizations that was previously generated using the GenerateOrganizationsAccessReport operation. This operation retrieves the status of your report job and the report contents. Depending on the parameters that you passed when you generated the report, the data returned could include different information. For details, see GenerateOrganizationsAccessReport. To call this operation, you must be signed in to the management account in your organization. SCPs must be enabled for your organization root. You must have permissions to perform this operation. For more information, see Refining permissions using service last accessed data in the IAM User Guide. For each service that principals in an account (root users, IAM users, or IAM roles) could access using SCPs, the operation returns details about the most recent access attempt. If there was no attempt, the service is listed without details about the most recent attempt to access the service. If the operation fails, it returns the reason that it failed. By default, the list is sorted by service namespace."]
+       "Retrieves the service last accessed data report for Organizations that was previously generated using the GenerateOrganizationsAccessReport operation. This operation retrieves the status of your report job and the report contents. Depending on the parameters that you passed when you generated the report, the data returned could include different information. For details, see GenerateOrganizationsAccessReport. To call this operation, you must be signed in to the management account in your organization. SCPs must be enabled for your organization root. You must have permissions to perform this operation. For more information, see Refining permissions using service last accessed data in the IAM User Guide. For each service that principals in an account (root user, IAM users, or IAM roles) could access using SCPs, the operation returns details about the most recent access attempt. If there was no attempt, the service is listed without details about the most recent attempt to access the service. If the operation fails, it returns the reason that it failed. By default, the list is sorted by service namespace."]
 module GetOpenIDConnectProviderResponse =
   struct
     type getOpenIDConnectProviderResult =
@@ -17061,14 +19287,14 @@ module GetOpenIDConnectProviderResponse =
           (Xml.child xml_arg0 "Url") in
       make ?tags ?createDate ?thumbprintList ?clientIDList ?url ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
-      let createDate = field_map json "CreateDate" DateType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      let createDate = field_map json__ "CreateDate" DateType.of_json in
       let thumbprintList =
-        field_map json "ThumbprintList" ThumbprintListType.of_json in
+        field_map json__ "ThumbprintList" ThumbprintListType.of_json in
       let clientIDList =
-        field_map json "ClientIDList" ClientIDListType.of_json in
-      let url = field_map json "Url" OpenIDConnectProviderUrlType.of_json in
+        field_map json__ "ClientIDList" ClientIDListType.of_json in
+      let url = field_map json__ "Url" OpenIDConnectProviderUrlType.of_json in
       make ?tags ?createDate ?thumbprintList ?clientIDList ?url ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17095,18 +19321,154 @@ module GetOpenIDConnectProviderRequest =
              "OpenIDConnectProviderArn") in
       make ~openIDConnectProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let openIDConnectProviderArn =
-        field_map_exn json "OpenIDConnectProviderArn" ArnType.of_json in
+        field_map_exn json__ "OpenIDConnectProviderArn" ArnType.of_json in
       make ~openIDConnectProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about the specified OpenID Connect (OIDC) provider resource object in IAM."]
+module GetMFADeviceResponse =
+  struct
+    type getMFADeviceResult =
+      {
+      userName: UserNameType.t option
+        [@ocaml.doc "The friendly name identifying the user."];
+      serialNumber: SerialNumberType.t option
+        [@ocaml.doc
+          "Serial number that uniquely identifies the MFA device. For this API, we only accept FIDO security key ARNs."];
+      enableDate: DateType.t option
+        [@ocaml.doc
+          "The date that a specified user's MFA device was first enabled."];
+      certifications: CertificationMapType.t option
+        [@ocaml.doc
+          "The certifications of a specified user's MFA device. We currently provide FIPS-140-2, FIPS-140-3, and FIDO certification levels obtained from FIDO Alliance Metadata Service (MDS)."]}
+    and responseMetaData = unit
+    and t =
+      {
+      getMFADeviceResult: getMFADeviceResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `NoSuchEntityException of NoSuchEntityException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "GetMFADeviceResponse"
+    let make ?userName =
+      fun ?serialNumber ->
+        fun ?enableDate ->
+          fun ?certifications ->
+            fun () ->
+              {
+                getMFADeviceResult =
+                  { userName; serialNumber; enableDate; certifications };
+                responseMetaData = ()
+              }
+    let error_of_json name json =
+      match name with
+      | "NoSuchEntityException" ->
+          `NoSuchEntityException (NoSuchEntityException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "NoSuchEntityException" ->
+          `NoSuchEntityException (NoSuchEntityException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `NoSuchEntityException e ->
+          `Assoc
+            [("error", (`String "NoSuchEntityException"));
+            ("details", (NoSuchEntityException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.getMFADeviceResult in
+      structure_to_wrapped_value
+        [("UserName", (Option.map x.userName ~f:UserNameType.to_value));
+        ("SerialNumber",
+          (Option.map x.serialNumber ~f:SerialNumberType.to_value));
+        ("EnableDate", (Option.map x.enableDate ~f:DateType.to_value));
+        ("Certifications",
+          (Option.map x.certifications ~f:CertificationMapType.to_value))]
+        ~wrapper:"GetMFADeviceResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 = Xml.child_exn ~context:context_ t "GetMFADeviceResult" in
+      let certifications =
+        (Option.map ~f:CertificationMapType.of_xml)
+          (Xml.child xml_arg0 "Certifications") in
+      let enableDate =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "EnableDate") in
+      let serialNumber =
+        (Option.map ~f:SerialNumberType.of_xml)
+          (Xml.child xml_arg0 "SerialNumber") in
+      let userName =
+        (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
+      make ?certifications ?enableDate ?serialNumber ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certifications =
+        field_map json__ "Certifications" CertificationMapType.of_json in
+      let enableDate = field_map json__ "EnableDate" DateType.of_json in
+      let serialNumber =
+        field_map json__ "SerialNumber" SerialNumberType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
+      make ?certifications ?enableDate ?serialNumber ?userName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about an MFA device for a specified user."]
+module GetMFADeviceRequest =
+  struct
+    type nonrec t =
+      {
+      serialNumber: SerialNumberType.t
+        [@ocaml.doc
+          "Serial number that uniquely identifies the MFA device. For this API, we only accept FIDO security key ARNs."];
+      userName: UserNameType.t option
+        [@ocaml.doc "The friendly name identifying the user."]}
+    let context_ = "GetMFADeviceRequest"
+    let make ?userName =
+      fun ~serialNumber -> fun () -> { userName; serialNumber }
+    let to_value x =
+      structure_to_value
+        [("SerialNumber", (Some (SerialNumberType.to_value x.serialNumber)));
+        ("UserName", (Option.map x.userName ~f:UserNameType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userName =
+        (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
+      let serialNumber =
+        SerialNumberType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SerialNumber") in
+      make ?userName ~serialNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userName = field_map json__ "UserName" UserNameType.of_json in
+      let serialNumber =
+        field_map_exn json__ "SerialNumber" SerialNumberType.of_json in
+      make ?userName ~serialNumber ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about an MFA device for a specified user."]
 module GetLoginProfileResponse =
   struct
     type getLoginProfileResult =
       {
-      loginProfile: LoginProfile.t
+      loginProfile: LoginProfile.t option
         [@ocaml.doc
           "A structure containing the user name and the profile creation date for the user."]}
     and responseMetaData = unit
@@ -17119,7 +19481,7 @@ module GetLoginProfileResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "GetLoginProfileResponse"
-    let make ~loginProfile =
+    let make ?loginProfile =
       fun () ->
         { getLoginProfileResult = { loginProfile }; responseMetaData = () }
     let error_of_json name json =
@@ -17157,21 +19519,21 @@ module GetLoginProfileResponse =
     let to_value t =
       let x = t.getLoginProfileResult in
       structure_to_wrapped_value
-        [("LoginProfile", (Some (LoginProfile.to_value x.loginProfile)))]
+        [("LoginProfile",
+           (Option.map x.loginProfile ~f:LoginProfile.to_value))]
         ~wrapper:"GetLoginProfileResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "GetLoginProfileResult" in
       let loginProfile =
-        LoginProfile.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LoginProfile") in
-      make ~loginProfile ()
+        (Option.map ~f:LoginProfile.of_xml)
+          (Xml.child xml_arg0 "LoginProfile") in
+      make ?loginProfile ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let loginProfile =
-        field_map_exn json "LoginProfile" LoginProfile.of_json in
-      make ~loginProfile ()
+    let of_json json__ =
+      let loginProfile = field_map json__ "LoginProfile" LoginProfile.of_json in
+      make ?loginProfile ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful GetLoginProfile request."]
@@ -17179,24 +19541,22 @@ module GetLoginProfileRequest =
   struct
     type nonrec t =
       {
-      userName: UserNameType.t
+      userName: UserNameType.t option
         [@ocaml.doc
-          "The name of the user whose login profile you want to retrieve. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
-    let context_ = "GetLoginProfileRequest"
-    let make ~userName = fun () -> { userName }
+          "The name of the user whose login profile you want to retrieve. This parameter is optional. If no user name is included, it defaults to the principal making the request. When you make this request with root user credentials, you must use an AssumeRoot session to omit the user name. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
+    let make ?userName = fun () -> { userName }
     let to_value x =
       structure_to_value
-        [("UserName", (Some (UserNameType.to_value x.userName)))]
+        [("UserName", (Option.map x.userName ~f:UserNameType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let userName =
-        UserNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
-      make ~userName ()
+        (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
+      make ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
-      make ~userName ()
+    let of_json json__ =
+      let userName = field_map json__ "UserName" UserNameType.of_json in
+      make ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the user name for the specified IAM user. A login profile is created when you create a password for the user to access the Amazon Web Services Management Console. If the user does not exist or does not have a password, the operation returns a 404 (NoSuchEntity) error. If you create an IAM user with access to the console, the CreateDate reflects the date you created the initial password for the user. If you create an IAM user with programmatic access, and then later add a password for the user to access the Amazon Web Services Management Console, the CreateDate reflects the initial password creation date. A user with programmatic access does not have a login profile unless you create a password for the user to access the Amazon Web Services Management Console."]
@@ -17204,7 +19564,7 @@ module GetInstanceProfileResponse =
   struct
     type getInstanceProfileResult =
       {
-      instanceProfile: InstanceProfile.t
+      instanceProfile: InstanceProfile.t option
         [@ocaml.doc
           "A structure containing details about the instance profile."]}
     and responseMetaData = unit
@@ -17217,7 +19577,7 @@ module GetInstanceProfileResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "GetInstanceProfileResponse"
-    let make ~instanceProfile =
+    let make ?instanceProfile =
       fun () ->
         {
           getInstanceProfileResult = { instanceProfile };
@@ -17259,21 +19619,21 @@ module GetInstanceProfileResponse =
       let x = t.getInstanceProfileResult in
       structure_to_wrapped_value
         [("InstanceProfile",
-           (Some (InstanceProfile.to_value x.instanceProfile)))]
+           (Option.map x.instanceProfile ~f:InstanceProfile.to_value))]
         ~wrapper:"GetInstanceProfileResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "GetInstanceProfileResult" in
       let instanceProfile =
-        InstanceProfile.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfile") in
-      make ~instanceProfile ()
+        (Option.map ~f:InstanceProfile.of_xml)
+          (Xml.child xml_arg0 "InstanceProfile") in
+      make ?instanceProfile ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceProfile =
-        field_map_exn json "InstanceProfile" InstanceProfile.of_json in
-      make ~instanceProfile ()
+        field_map json__ "InstanceProfile" InstanceProfile.of_json in
+      make ?instanceProfile ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful GetInstanceProfile request."]
@@ -17297,21 +19657,159 @@ module GetInstanceProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileName") in
       make ~instanceProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceProfileName =
-        field_map_exn json "InstanceProfileName"
+        field_map_exn json__ "InstanceProfileName"
           InstanceProfileNameType.of_json in
       make ~instanceProfileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information about the specified instance profile, including the instance profile's path, GUID, ARN, and role. For more information about instance profiles, see About instance profiles in the IAM User Guide."]
+       "Retrieves information about the specified instance profile, including the instance profile's path, GUID, ARN, and role. For more information about instance profiles, see Using instance profiles in the IAM User Guide."]
+module GetHumanReadableSummaryResponse =
+  struct
+    type getHumanReadableSummaryResult =
+      {
+      summaryContent: SummaryContentType.t option
+        [@ocaml.doc
+          "Summary content in the specified locale. Summary content is non-empty only if the SummaryState is AVAILABLE."];
+      locale: LocaleType.t option
+        [@ocaml.doc
+          "The locale that this response was generated for. This maps to the input locale."];
+      summaryState: SummaryStateType.t option
+        [@ocaml.doc
+          "State of summary generation. This generation process is asynchronous and this attribute indicates the state of the generation process."]}
+    and responseMetaData = unit
+    and t =
+      {
+      getHumanReadableSummaryResult: getHumanReadableSummaryResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `NoSuchEntityException of NoSuchEntityException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "GetHumanReadableSummaryResponse"
+    let make ?summaryContent =
+      fun ?locale ->
+        fun ?summaryState ->
+          fun () ->
+            {
+              getHumanReadableSummaryResult =
+                { summaryContent; locale; summaryState };
+              responseMetaData = ()
+            }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "NoSuchEntityException" ->
+          `NoSuchEntityException (NoSuchEntityException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "NoSuchEntityException" ->
+          `NoSuchEntityException (NoSuchEntityException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `NoSuchEntityException e ->
+          `Assoc
+            [("error", (`String "NoSuchEntityException"));
+            ("details", (NoSuchEntityException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.getHumanReadableSummaryResult in
+      structure_to_wrapped_value
+        [("SummaryContent",
+           (Option.map x.summaryContent ~f:SummaryContentType.to_value));
+        ("Locale", (Option.map x.locale ~f:LocaleType.to_value));
+        ("SummaryState",
+          (Option.map x.summaryState ~f:SummaryStateType.to_value))]
+        ~wrapper:"GetHumanReadableSummaryResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "GetHumanReadableSummaryResult" in
+      let summaryState =
+        (Option.map ~f:SummaryStateType.of_xml)
+          (Xml.child xml_arg0 "SummaryState") in
+      let locale =
+        (Option.map ~f:LocaleType.of_xml) (Xml.child xml_arg0 "Locale") in
+      let summaryContent =
+        (Option.map ~f:SummaryContentType.of_xml)
+          (Xml.child xml_arg0 "SummaryContent") in
+      make ?summaryState ?locale ?summaryContent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let summaryState =
+        field_map json__ "SummaryState" SummaryStateType.of_json in
+      let locale = field_map json__ "Locale" LocaleType.of_json in
+      let summaryContent =
+        field_map json__ "SummaryContent" SummaryContentType.of_json in
+      make ?summaryState ?locale ?summaryContent ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a human readable summary for a given entity. At this time, the only supported entity type is delegation-request This method uses a Large Language Model (LLM) to generate the summary. If a delegation request has no owner or owner account, GetHumanReadableSummary for that delegation request can be called by any account. If the owner account is assigned but there is no owner id, only identities within that owner account can call GetHumanReadableSummary for the delegation request to retrieve a summary of that request. Once the delegation request is fully owned, the owner of the request gets a default permission to get that delegation request. For more details, read default permissions granted to delegation requests. These rules are identical to GetDelegationRequest API behavior, such that a party who has permissions to call GetDelegationRequest for a given delegation request will always be able to retrieve the human readable summary for that request."]
+module GetHumanReadableSummaryRequest =
+  struct
+    type nonrec t =
+      {
+      entityArn: ArnType.t
+        [@ocaml.doc
+          "Arn of the entity to be summarized. At this time, the only supported entity type is delegation-request"];
+      locale: LocaleType.t option
+        [@ocaml.doc
+          "A string representing the locale to use for the summary generation. The supported locale strings are based on the Supported languages of the Amazon Web Services Management Console ."]}
+    let context_ = "GetHumanReadableSummaryRequest"
+    let make ?locale = fun ~entityArn -> fun () -> { locale; entityArn }
+    let to_value x =
+      structure_to_value
+        [("EntityArn", (Some (ArnType.to_value x.entityArn)));
+        ("Locale", (Option.map x.locale ~f:LocaleType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let locale =
+        (Option.map ~f:LocaleType.of_xml) (Xml.child xml_arg0 "Locale") in
+      let entityArn =
+        ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "EntityArn") in
+      make ?locale ~entityArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let locale = field_map json__ "Locale" LocaleType.of_json in
+      let entityArn = field_map_exn json__ "EntityArn" ArnType.of_json in
+      make ?locale ~entityArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a human readable summary for a given entity. At this time, the only supported entity type is delegation-request This method uses a Large Language Model (LLM) to generate the summary. If a delegation request has no owner or owner account, GetHumanReadableSummary for that delegation request can be called by any account. If the owner account is assigned but there is no owner id, only identities within that owner account can call GetHumanReadableSummary for the delegation request to retrieve a summary of that request. Once the delegation request is fully owned, the owner of the request gets a default permission to get that delegation request. For more details, read default permissions granted to delegation requests. These rules are identical to GetDelegationRequest API behavior, such that a party who has permissions to call GetDelegationRequest for a given delegation request will always be able to retrieve the human readable summary for that request."]
 module GetGroupResponse =
   struct
     type getGroupResult =
       {
-      group: Group.t
+      group: Group.t option
         [@ocaml.doc "A structure that contains details about the group."];
-      users: UserListType.t [@ocaml.doc "A list of users in the group."];
+      users: UserListType.t option
+        [@ocaml.doc "A list of users in the group."];
       isTruncated: BooleanType.t option
         [@ocaml.doc
           "A flag that indicates whether there are more items to return. If your results were truncated, you can make a subsequent pagination request using the Marker request parameter to retrieve more items. Note that IAM might return fewer than the MaxItems number of results even when there are more results available. We recommend that you check IsTruncated after every call to ensure that you receive all your results."];
@@ -17328,13 +19826,13 @@ module GetGroupResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "GetGroupResponse"
-    let make ?isTruncated =
-      fun ?marker ->
-        fun ~group ->
-          fun ~users ->
+    let make ?group =
+      fun ?users ->
+        fun ?isTruncated ->
+          fun ?marker ->
             fun () ->
               {
-                getGroupResult = { isTruncated; marker; group; users };
+                getGroupResult = { group; users; isTruncated; marker };
                 responseMetaData = ()
               }
     let error_of_json name json =
@@ -17372,8 +19870,8 @@ module GetGroupResponse =
     let to_value t =
       let x = t.getGroupResult in
       structure_to_wrapped_value
-        [("Group", (Some (Group.to_value x.group)));
-        ("Users", (Some (UserListType.to_value x.users)));
+        [("Group", (Option.map x.group ~f:Group.to_value));
+        ("Users", (Option.map x.users ~f:UserListType.to_value));
         ("IsTruncated", (Option.map x.isTruncated ~f:BooleanType.to_value));
         ("Marker", (Option.map x.marker ~f:ResponseMarkerType.to_value))]
         ~wrapper:"GetGroupResult" ~response:"ResponseMetaData"
@@ -17386,18 +19884,16 @@ module GetGroupResponse =
       let isTruncated =
         (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "IsTruncated") in
       let users =
-        UserListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Users") in
-      let group =
-        Group.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Group") in
-      make ?marker ?isTruncated ~users ~group ()
+        (Option.map ~f:UserListType.of_xml) (Xml.child xml_arg0 "Users") in
+      let group = (Option.map ~f:Group.of_xml) (Xml.child xml_arg0 "Group") in
+      make ?marker ?isTruncated ?users ?group ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
-      let users = field_map_exn json "Users" UserListType.of_json in
-      let group = field_map_exn json "Group" Group.of_json in
-      make ?marker ?isTruncated ~users ~group ()
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
+      let users = field_map json__ "Users" UserListType.of_json in
+      let group = field_map json__ "Group" Group.of_json in
+      make ?marker ?isTruncated ?users ?group ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the response to a successful GetGroup request."]
 module GetGroupRequest =
@@ -17433,10 +19929,10 @@ module GetGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ?maxItems ?marker ~groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let groupName = field_map_exn json__ "GroupName" GroupNameType.of_json in
       make ?maxItems ?marker ~groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17445,10 +19941,11 @@ module GetGroupPolicyResponse =
   struct
     type getGroupPolicyResult =
       {
-      groupName: GroupNameType.t
+      groupName: GroupNameType.t option
         [@ocaml.doc "The group the policy is associated with."];
-      policyName: PolicyNameType.t [@ocaml.doc "The name of the policy."];
-      policyDocument: PolicyDocumentType.t
+      policyName: PolicyNameType.t option
+        [@ocaml.doc "The name of the policy."];
+      policyDocument: PolicyDocumentType.t option
         [@ocaml.doc
           "The policy document. IAM stores policies in JSON format. However, resources that were created using CloudFormation templates can be formatted in YAML. CloudFormation always converts a YAML policy to JSON format before submitting it to IAM."]}
     and responseMetaData = unit
@@ -17461,9 +19958,9 @@ module GetGroupPolicyResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "GetGroupPolicyResponse"
-    let make ~groupName =
-      fun ~policyName ->
-        fun ~policyDocument ->
+    let make ?groupName =
+      fun ?policyName ->
+        fun ?policyDocument ->
           fun () ->
             {
               getGroupPolicyResult =
@@ -17505,31 +20002,30 @@ module GetGroupPolicyResponse =
     let to_value t =
       let x = t.getGroupPolicyResult in
       structure_to_wrapped_value
-        [("GroupName", (Some (GroupNameType.to_value x.groupName)));
-        ("PolicyName", (Some (PolicyNameType.to_value x.policyName)));
+        [("GroupName", (Option.map x.groupName ~f:GroupNameType.to_value));
+        ("PolicyName", (Option.map x.policyName ~f:PolicyNameType.to_value));
         ("PolicyDocument",
-          (Some (PolicyDocumentType.to_value x.policyDocument)))]
+          (Option.map x.policyDocument ~f:PolicyDocumentType.to_value))]
         ~wrapper:"GetGroupPolicyResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 = Xml.child_exn ~context:context_ t "GetGroupPolicyResult" in
       let policyDocument =
-        PolicyDocumentType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyDocument") in
+        (Option.map ~f:PolicyDocumentType.of_xml)
+          (Xml.child xml_arg0 "PolicyDocument") in
       let policyName =
-        PolicyNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
+        (Option.map ~f:PolicyNameType.of_xml)
+          (Xml.child xml_arg0 "PolicyName") in
       let groupName =
-        GroupNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
-      make ~policyDocument ~policyName ~groupName ()
+        (Option.map ~f:GroupNameType.of_xml) (Xml.child xml_arg0 "GroupName") in
+      make ?policyDocument ?policyName ?groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyDocument =
-        field_map_exn json "PolicyDocument" PolicyDocumentType.of_json in
-      let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
-      let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
-      make ~policyDocument ~policyName ~groupName ()
+        field_map json__ "PolicyDocument" PolicyDocumentType.of_json in
+      let policyName = field_map json__ "PolicyName" PolicyNameType.of_json in
+      let groupName = field_map json__ "GroupName" GroupNameType.of_json in
+      make ?policyDocument ?policyName ?groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful GetGroupPolicy request."]
@@ -17560,13 +20056,164 @@ module GetGroupPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~policyName ~groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
-      let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
+    let of_json json__ =
+      let policyName =
+        field_map_exn json__ "PolicyName" PolicyNameType.of_json in
+      let groupName = field_map_exn json__ "GroupName" GroupNameType.of_json in
       make ~policyName ~groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the specified inline policy document that is embedded in the specified IAM group. Policies returned by this operation are URL-encoded compliant with RFC 3986. You can use a URL decoding method to convert the policy back to plain JSON text. For example, if you use Java, you can use the decode method of the java.net.URLDecoder utility class in the Java SDK. Other languages and SDKs provide similar functionality. An IAM group can also have managed policies attached to it. To retrieve a managed policy document that is attached to a group, use GetPolicy to determine the policy's default version, then use GetPolicyVersion to retrieve the policy document. For more information about policies, see Managed policies and inline policies in the IAM User Guide."]
+       "Retrieves the specified inline policy document that is embedded in the specified IAM group. Policies returned by this operation are URL-encoded compliant with RFC 3986. You can use a URL decoding method to convert the policy back to plain JSON text. For example, if you use Java, you can use the decode method of the java.net.URLDecoder utility class in the Java SDK. Other languages and SDKs provide similar functionality, and some SDKs do this decoding automatically. An IAM group can also have managed policies attached to it. To retrieve a managed policy document that is attached to a group, use GetPolicy to determine the policy's default version, then use GetPolicyVersion to retrieve the policy document. For more information about policies, see Managed policies and inline policies in the IAM User Guide."]
+module GetDelegationRequestResponse =
+  struct
+    type getDelegationRequestResult =
+      {
+      delegationRequest: DelegationRequest.t option
+        [@ocaml.doc
+          "The delegation request object containing all details about the request."];
+      permissionCheckStatus: PermissionCheckStatusType.t option
+        [@ocaml.doc
+          "The status of the permission check for the delegation request. This value indicates the status of the process to check whether the caller has sufficient permissions to cover the requested actions in the delegation request. Since this is an asynchronous process, there are three potential values: IN_PROGRESS : The permission check process has started. COMPLETED : The permission check process has completed. The PermissionCheckResult will include the result. FAILED : The permission check process has failed."];
+      permissionCheckResult: PermissionCheckResultType.t option
+        [@ocaml.doc
+          "The result of the permission check, indicating whether the caller has sufficient permissions to cover the requested permissions. This is an approximate result. ALLOWED : The caller has sufficient permissions cover all the requested permissions. DENIED : The caller does not have sufficient permissions to cover all the requested permissions. UNSURE : It is not possible to determine whether the caller has all the permissions needed. This output is most likely for cases when the caller has permissions with conditions."]}
+    and responseMetaData = unit
+    and t =
+      {
+      getDelegationRequestResult: getDelegationRequestResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `NoSuchEntityException of NoSuchEntityException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "GetDelegationRequestResponse"
+    let make ?delegationRequest =
+      fun ?permissionCheckStatus ->
+        fun ?permissionCheckResult ->
+          fun () ->
+            {
+              getDelegationRequestResult =
+                {
+                  delegationRequest;
+                  permissionCheckStatus;
+                  permissionCheckResult
+                };
+              responseMetaData = ()
+            }
+    let error_of_json name json =
+      match name with
+      | "NoSuchEntityException" ->
+          `NoSuchEntityException (NoSuchEntityException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "NoSuchEntityException" ->
+          `NoSuchEntityException (NoSuchEntityException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `NoSuchEntityException e ->
+          `Assoc
+            [("error", (`String "NoSuchEntityException"));
+            ("details", (NoSuchEntityException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.getDelegationRequestResult in
+      structure_to_wrapped_value
+        [("DelegationRequest",
+           (Option.map x.delegationRequest ~f:DelegationRequest.to_value));
+        ("PermissionCheckStatus",
+          (Option.map x.permissionCheckStatus
+             ~f:PermissionCheckStatusType.to_value));
+        ("PermissionCheckResult",
+          (Option.map x.permissionCheckResult
+             ~f:PermissionCheckResultType.to_value))]
+        ~wrapper:"GetDelegationRequestResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "GetDelegationRequestResult" in
+      let permissionCheckResult =
+        (Option.map ~f:PermissionCheckResultType.of_xml)
+          (Xml.child xml_arg0 "PermissionCheckResult") in
+      let permissionCheckStatus =
+        (Option.map ~f:PermissionCheckStatusType.of_xml)
+          (Xml.child xml_arg0 "PermissionCheckStatus") in
+      let delegationRequest =
+        (Option.map ~f:DelegationRequest.of_xml)
+          (Xml.child xml_arg0 "DelegationRequest") in
+      make ?permissionCheckResult ?permissionCheckStatus ?delegationRequest
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let permissionCheckResult =
+        field_map json__ "PermissionCheckResult"
+          PermissionCheckResultType.of_json in
+      let permissionCheckStatus =
+        field_map json__ "PermissionCheckStatus"
+          PermissionCheckStatusType.of_json in
+      let delegationRequest =
+        field_map json__ "DelegationRequest" DelegationRequest.of_json in
+      make ?permissionCheckResult ?permissionCheckStatus ?delegationRequest
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about a specific delegation request. If a delegation request has no owner or owner account, GetDelegationRequest for that delegation request can be called by any account. If the owner account is assigned but there is no owner id, only identities within that owner account can call GetDelegationRequest for the delegation request. Once the delegation request is fully owned, the owner of the request gets a default permission to get that delegation request. For more details, see Managing Permissions for Delegation Requests."]
+module GetDelegationRequestRequest =
+  struct
+    type nonrec t =
+      {
+      delegationRequestId: DelegationRequestIdType.t
+        [@ocaml.doc
+          "The unique identifier of the delegation request to retrieve."];
+      delegationPermissionCheck: BooleanType.t option
+        [@ocaml.doc
+          "Specifies whether to perform a permission check for the delegation request. If set to true, the GetDelegationRequest API call will start a permission check process. This process calculates whether the caller has sufficient permissions to cover the asks from this delegation request. Setting this parameter to true does not guarantee an answer in the response. See the PermissionCheckStatus and the PermissionCheckResult response attributes for further details."]}
+    let context_ = "GetDelegationRequestRequest"
+    let make ?delegationPermissionCheck =
+      fun ~delegationRequestId ->
+        fun () -> { delegationPermissionCheck; delegationRequestId }
+    let to_value x =
+      structure_to_value
+        [("DelegationRequestId",
+           (Some (DelegationRequestIdType.to_value x.delegationRequestId)));
+        ("DelegationPermissionCheck",
+          (Option.map x.delegationPermissionCheck ~f:BooleanType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let delegationPermissionCheck =
+        (Option.map ~f:BooleanType.of_xml)
+          (Xml.child xml_arg0 "DelegationPermissionCheck") in
+      let delegationRequestId =
+        DelegationRequestIdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DelegationRequestId") in
+      make ?delegationPermissionCheck ~delegationRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let delegationPermissionCheck =
+        field_map json__ "DelegationPermissionCheck" BooleanType.of_json in
+      let delegationRequestId =
+        field_map_exn json__ "DelegationRequestId"
+          DelegationRequestIdType.of_json in
+      make ?delegationPermissionCheck ~delegationRequestId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about a specific delegation request. If a delegation request has no owner or owner account, GetDelegationRequest for that delegation request can be called by any account. If the owner account is assigned but there is no owner id, only identities within that owner account can call GetDelegationRequest for the delegation request. Once the delegation request is fully owned, the owner of the request gets a default permission to get that delegation request. For more details, see Managing Permissions for Delegation Requests."]
 module GetCredentialReportResponse =
   struct
     type getCredentialReportResult =
@@ -17680,11 +20327,11 @@ module GetCredentialReportResponse =
           (Xml.child xml_arg0 "Content") in
       make ?generatedTime ?reportFormat ?content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let generatedTime = field_map json "GeneratedTime" DateType.of_json in
+    let of_json json__ =
+      let generatedTime = field_map json__ "GeneratedTime" DateType.of_json in
       let reportFormat =
-        field_map json "ReportFormat" ReportFormatType.of_json in
-      let content = field_map json "Content" ReportContentType.of_json in
+        field_map json__ "ReportFormat" ReportFormatType.of_json in
+      let content = field_map json__ "Content" ReportContentType.of_json in
       make ?generatedTime ?reportFormat ?content ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17717,11 +20364,11 @@ module GetContextKeysForPrincipalPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PolicySourceArn") in
       make ?policyInputList ~policySourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyInputList =
-        field_map json "PolicyInputList" SimulationPolicyListType.of_json in
+        field_map json__ "PolicyInputList" SimulationPolicyListType.of_json in
       let policySourceArn =
-        field_map_exn json "PolicySourceArn" ArnType.of_json in
+        field_map_exn json__ "PolicySourceArn" ArnType.of_json in
       make ?policyInputList ~policySourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17791,9 +20438,9 @@ module GetContextKeysForPolicyResponse =
           (Xml.child xml_arg0 "ContextKeyNames") in
       make ?contextKeyNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let contextKeyNames =
-        field_map json "ContextKeyNames"
+        field_map json__ "ContextKeyNames"
           ContextKeyNamesResultListType.of_json in
       make ?contextKeyNames ()
     let to_json v = composed_to_json to_value v
@@ -17819,9 +20466,10 @@ module GetContextKeysForCustomPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyInputList") in
       make ~policyInputList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyInputList =
-        field_map_exn json "PolicyInputList" SimulationPolicyListType.of_json in
+        field_map_exn json__ "PolicyInputList"
+          SimulationPolicyListType.of_json in
       make ~policyInputList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17883,8 +20531,8 @@ module GetAccountSummaryResponse =
           (Xml.child xml_arg0 "SummaryMap") in
       make ?summaryMap ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let summaryMap = field_map json "SummaryMap" SummaryMapType.of_json in
+    let of_json json__ =
+      let summaryMap = field_map json__ "SummaryMap" SummaryMapType.of_json in
       make ?summaryMap ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17893,7 +20541,7 @@ module GetAccountPasswordPolicyResponse =
   struct
     type getAccountPasswordPolicyResult =
       {
-      passwordPolicy: PasswordPolicy.t
+      passwordPolicy: PasswordPolicy.t option
         [@ocaml.doc
           "A structure that contains details about the account's password policy."]}
     and responseMetaData = unit
@@ -17906,7 +20554,7 @@ module GetAccountPasswordPolicyResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "GetAccountPasswordPolicyResponse"
-    let make ~passwordPolicy =
+    let make ?passwordPolicy =
       fun () ->
         {
           getAccountPasswordPolicyResult = { passwordPolicy };
@@ -17948,7 +20596,7 @@ module GetAccountPasswordPolicyResponse =
       let x = t.getAccountPasswordPolicyResult in
       structure_to_wrapped_value
         [("PasswordPolicy",
-           (Some (PasswordPolicy.to_value x.passwordPolicy)))]
+           (Option.map x.passwordPolicy ~f:PasswordPolicy.to_value))]
         ~wrapper:"GetAccountPasswordPolicyResult"
         ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
@@ -17956,14 +20604,14 @@ module GetAccountPasswordPolicyResponse =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "GetAccountPasswordPolicyResult" in
       let passwordPolicy =
-        PasswordPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PasswordPolicy") in
-      make ~passwordPolicy ()
+        (Option.map ~f:PasswordPolicy.of_xml)
+          (Xml.child xml_arg0 "PasswordPolicy") in
+      make ?passwordPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let passwordPolicy =
-        field_map_exn json "PasswordPolicy" PasswordPolicy.of_json in
-      make ~passwordPolicy ()
+        field_map json__ "PasswordPolicy" PasswordPolicy.of_json in
+      make ?passwordPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful GetAccountPasswordPolicy request."]
@@ -18078,17 +20726,17 @@ module GetAccountAuthorizationDetailsResponse =
       make ?marker ?isTruncated ?policies ?roleDetailList ?groupDetailList
         ?userDetailList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" ResponseMarkerType.of_json in
-      let isTruncated = field_map json "IsTruncated" BooleanType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" ResponseMarkerType.of_json in
+      let isTruncated = field_map json__ "IsTruncated" BooleanType.of_json in
       let policies =
-        field_map json "Policies" ManagedPolicyDetailListType.of_json in
+        field_map json__ "Policies" ManagedPolicyDetailListType.of_json in
       let roleDetailList =
-        field_map json "RoleDetailList" RoleDetailListType.of_json in
+        field_map json__ "RoleDetailList" RoleDetailListType.of_json in
       let groupDetailList =
-        field_map json "GroupDetailList" GroupDetailListType.of_json in
+        field_map json__ "GroupDetailList" GroupDetailListType.of_json in
       let userDetailList =
-        field_map json "UserDetailList" UserDetailListType.of_json in
+        field_map json__ "UserDetailList" UserDetailListType.of_json in
       make ?marker ?isTruncated ?policies ?roleDetailList ?groupDetailList
         ?userDetailList ()
     let to_json v = composed_to_json to_value v
@@ -18124,14 +20772,14 @@ module GetAccountAuthorizationDetailsRequest =
         (Option.map ~f:EntityListType.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?marker ?maxItems ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" MarkerType.of_json in
-      let maxItems = field_map json "MaxItems" MaxItemsType.of_json in
-      let filter = field_map json "Filter" EntityListType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" MarkerType.of_json in
+      let maxItems = field_map json__ "MaxItems" MaxItemsType.of_json in
+      let filter = field_map json__ "Filter" EntityListType.of_json in
       make ?marker ?maxItems ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information about all IAM users, groups, roles, and policies in your Amazon Web Services account, including their relationships to one another. Use this operation to obtain a snapshot of the configuration of IAM permissions (users, groups, roles, and policies) in your account. Policies returned by this operation are URL-encoded compliant with RFC 3986. You can use a URL decoding method to convert the policy back to plain JSON text. For example, if you use Java, you can use the decode method of the java.net.URLDecoder utility class in the Java SDK. Other languages and SDKs provide similar functionality. You can optionally filter the results using the Filter parameter. You can paginate the results using the MaxItems and Marker parameters."]
+       "Retrieves information about all IAM users, groups, roles, and policies in your Amazon Web Services account, including their relationships to one another. Use this operation to obtain a snapshot of the configuration of IAM permissions (users, groups, roles, and policies) in your account. Policies returned by this operation are URL-encoded compliant with RFC 3986. You can use a URL decoding method to convert the policy back to plain JSON text. For example, if you use Java, you can use the decode method of the java.net.URLDecoder utility class in the Java SDK. Other languages and SDKs provide similar functionality, and some SDKs do this decoding automatically. You can optionally filter the results using the Filter parameter. You can paginate the results using the MaxItems and Marker parameters."]
 module GetAccessKeyLastUsedResponse =
   struct
     type getAccessKeyLastUsedResult =
@@ -18146,9 +20794,7 @@ module GetAccessKeyLastUsedResponse =
       {
       getAccessKeyLastUsedResult: getAccessKeyLastUsedResult ;
       responseMetaData: responseMetaData }
-    type error =
-      [ `NoSuchEntityException of NoSuchEntityException.t 
-      | `Unknown_operation_error of (string * string option) ]
+    type error = [ `Unknown_operation_error of (string * string option) ]
     let context_ = "GetAccessKeyLastUsedResponse"
     let make ?userName =
       fun ?accessKeyLastUsed ->
@@ -18159,23 +20805,15 @@ module GetAccessKeyLastUsedResponse =
           }
     let error_of_json name json =
       match name with
-      | "NoSuchEntityException" ->
-          `NoSuchEntityException (NoSuchEntityException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
-      | "NoSuchEntityException" ->
-          `NoSuchEntityException (NoSuchEntityException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
-      | `NoSuchEntityException e ->
-          `Assoc
-            [("error", (`String "NoSuchEntityException"));
-            ("details", (NoSuchEntityException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -18201,10 +20839,10 @@ module GetAccessKeyLastUsedResponse =
           (Xml.child xml_arg0 "UserName") in
       make ?accessKeyLastUsed ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessKeyLastUsed =
-        field_map json "AccessKeyLastUsed" AccessKeyLastUsed.of_json in
-      let userName = field_map json "UserName" ExistingUserNameType.of_json in
+        field_map json__ "AccessKeyLastUsed" AccessKeyLastUsed.of_json in
+      let userName = field_map json__ "UserName" ExistingUserNameType.of_json in
       make ?accessKeyLastUsed ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18228,9 +20866,9 @@ module GetAccessKeyLastUsedRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AccessKeyId") in
       make ~accessKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessKeyId =
-        field_map_exn json "AccessKeyId" AccessKeyIdType.of_json in
+        field_map_exn json__ "AccessKeyId" AccessKeyIdType.of_json in
       make ~accessKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18306,11 +20944,12 @@ module GenerateServiceLastAccessedDetailsResponse =
         (Option.map ~f:JobIDType.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobIDType.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobIDType.of_json in
+      make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generates a report that includes details about when an IAM resource (user, group, role, or policy) was last used in an attempt to access Amazon Web Services services. Recent activity usually appears within four hours. IAM reports activity for at least the last 400 days, or less if your Region began supporting this feature within the last year. For more information, see Regions where data is tracked. The service last accessed data includes\194\160all\194\160attempts to access an Amazon Web Services API, not just the successful ones. This includes all attempts that were made using the Amazon Web Services Management Console, the Amazon Web Services API through any of the SDKs, or any of the command line tools. An unexpected entry in the service last accessed data does not mean that your account has been compromised, because the request might have been denied. Refer to your CloudTrail logs as the authoritative source for information about all API calls and whether they were successful or denied access. For more information, see\194\160Logging IAM events with CloudTrail in the IAM User Guide. The GenerateServiceLastAccessedDetails operation returns a JobId. Use this parameter in the following operations to retrieve the following details from your report: GetServiceLastAccessedDetails \226\128\147 Use this operation for users, groups, roles, or policies to list every Amazon Web Services service that the resource could access using permissions policies. For each service, the response includes information about the most recent access attempt. The JobId returned by GenerateServiceLastAccessedDetail must be used by the same role within a session, or by the same user when used to call GetServiceLastAccessedDetail. GetServiceLastAccessedDetailsWithEntities \226\128\147 Use this operation for groups and policies to list information about the associated entities (users or roles) that attempted to access a specific Amazon Web Services service. To check the status of the GenerateServiceLastAccessedDetails request, use the JobId parameter in the same operations and test the JobStatus response parameter. For additional information about the permissions policies that allow an identity (user, group, or role) to access specific services, use the ListPoliciesGrantingServiceAccess operation. Service last accessed data does not use other policy types when determining whether a resource could access a service. These other policy types include resource-based policies, access control lists, Organizations policies, IAM permissions boundaries, and STS assume role policies. It only applies permissions policy logic. For more about the evaluation of policy types, see Evaluating policies in the IAM User Guide. For more information about service and action last accessed data, see Reducing permissions using service last accessed data in the IAM User Guide."]
+       "Generates a report that includes details about when an IAM resource (user, group, role, or policy) was last used in an attempt to access Amazon Web Services services. Recent activity usually appears within four hours. IAM reports activity for at least the last 400 days, or less if your Region began supporting this feature within the last year. For more information, see Regions where data is tracked. For more information about services and actions for which action last accessed information is displayed, see IAM action last accessed information services and actions. The service last accessed data includes all attempts to access an Amazon Web Services API, not just the successful ones. This includes all attempts that were made using the Amazon Web Services Management Console, the Amazon Web Services API through any of the SDKs, or any of the command line tools. An unexpected entry in the service last accessed data does not mean that your account has been compromised, because the request might have been denied. Refer to your CloudTrail logs as the authoritative source for information about all API calls and whether they were successful or denied access. For more information, see Logging IAM events with CloudTrail in the IAM User Guide. The GenerateServiceLastAccessedDetails operation returns a JobId. Use this parameter in the following operations to retrieve the following details from your report: GetServiceLastAccessedDetails \226\128\147 Use this operation for users, groups, roles, or policies to list every Amazon Web Services service that the resource could access using permissions policies. For each service, the response includes information about the most recent access attempt. The JobId returned by GenerateServiceLastAccessedDetail must be used by the same role within a session, or by the same user when used to call GetServiceLastAccessedDetail. GetServiceLastAccessedDetailsWithEntities \226\128\147 Use this operation for groups and policies to list information about the associated entities (users or roles) that attempted to access a specific Amazon Web Services service. To check the status of the GenerateServiceLastAccessedDetails request, use the JobId parameter in the same operations and test the JobStatus response parameter. For additional information about the permissions policies that allow an identity (user, group, or role) to access specific services, use the ListPoliciesGrantingServiceAccess operation. Service last accessed data does not use other policy types when determining whether a resource could access a service. These other policy types include resource-based policies, access control lists, Organizations policies, IAM permissions boundaries, and STS assume role policies. It only applies permissions policy logic. For more about the evaluation of policy types, see Evaluating policies in the IAM User Guide. For more information about service and action last accessed data, see Reducing permissions using service last accessed data in the IAM User Guide."]
 module GenerateServiceLastAccessedDetailsRequest =
   struct
     type nonrec t =
@@ -18338,15 +20977,15 @@ module GenerateServiceLastAccessedDetailsRequest =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?granularity ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let granularity =
-        field_map json "Granularity"
+        field_map json__ "Granularity"
           AccessAdvisorUsageGranularityType.of_json in
-      let arn = field_map_exn json "Arn" ArnType.of_json in
+      let arn = field_map_exn json__ "Arn" ArnType.of_json in
       make ?granularity ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generates a report that includes details about when an IAM resource (user, group, role, or policy) was last used in an attempt to access Amazon Web Services services. Recent activity usually appears within four hours. IAM reports activity for at least the last 400 days, or less if your Region began supporting this feature within the last year. For more information, see Regions where data is tracked. The service last accessed data includes\194\160all\194\160attempts to access an Amazon Web Services API, not just the successful ones. This includes all attempts that were made using the Amazon Web Services Management Console, the Amazon Web Services API through any of the SDKs, or any of the command line tools. An unexpected entry in the service last accessed data does not mean that your account has been compromised, because the request might have been denied. Refer to your CloudTrail logs as the authoritative source for information about all API calls and whether they were successful or denied access. For more information, see\194\160Logging IAM events with CloudTrail in the IAM User Guide. The GenerateServiceLastAccessedDetails operation returns a JobId. Use this parameter in the following operations to retrieve the following details from your report: GetServiceLastAccessedDetails \226\128\147 Use this operation for users, groups, roles, or policies to list every Amazon Web Services service that the resource could access using permissions policies. For each service, the response includes information about the most recent access attempt. The JobId returned by GenerateServiceLastAccessedDetail must be used by the same role within a session, or by the same user when used to call GetServiceLastAccessedDetail. GetServiceLastAccessedDetailsWithEntities \226\128\147 Use this operation for groups and policies to list information about the associated entities (users or roles) that attempted to access a specific Amazon Web Services service. To check the status of the GenerateServiceLastAccessedDetails request, use the JobId parameter in the same operations and test the JobStatus response parameter. For additional information about the permissions policies that allow an identity (user, group, or role) to access specific services, use the ListPoliciesGrantingServiceAccess operation. Service last accessed data does not use other policy types when determining whether a resource could access a service. These other policy types include resource-based policies, access control lists, Organizations policies, IAM permissions boundaries, and STS assume role policies. It only applies permissions policy logic. For more about the evaluation of policy types, see Evaluating policies in the IAM User Guide. For more information about service and action last accessed data, see Reducing permissions using service last accessed data in the IAM User Guide."]
+       "Generates a report that includes details about when an IAM resource (user, group, role, or policy) was last used in an attempt to access Amazon Web Services services. Recent activity usually appears within four hours. IAM reports activity for at least the last 400 days, or less if your Region began supporting this feature within the last year. For more information, see Regions where data is tracked. For more information about services and actions for which action last accessed information is displayed, see IAM action last accessed information services and actions. The service last accessed data includes all attempts to access an Amazon Web Services API, not just the successful ones. This includes all attempts that were made using the Amazon Web Services Management Console, the Amazon Web Services API through any of the SDKs, or any of the command line tools. An unexpected entry in the service last accessed data does not mean that your account has been compromised, because the request might have been denied. Refer to your CloudTrail logs as the authoritative source for information about all API calls and whether they were successful or denied access. For more information, see Logging IAM events with CloudTrail in the IAM User Guide. The GenerateServiceLastAccessedDetails operation returns a JobId. Use this parameter in the following operations to retrieve the following details from your report: GetServiceLastAccessedDetails \226\128\147 Use this operation for users, groups, roles, or policies to list every Amazon Web Services service that the resource could access using permissions policies. For each service, the response includes information about the most recent access attempt. The JobId returned by GenerateServiceLastAccessedDetail must be used by the same role within a session, or by the same user when used to call GetServiceLastAccessedDetail. GetServiceLastAccessedDetailsWithEntities \226\128\147 Use this operation for groups and policies to list information about the associated entities (users or roles) that attempted to access a specific Amazon Web Services service. To check the status of the GenerateServiceLastAccessedDetails request, use the JobId parameter in the same operations and test the JobStatus response parameter. For additional information about the permissions policies that allow an identity (user, group, or role) to access specific services, use the ListPoliciesGrantingServiceAccess operation. Service last accessed data does not use other policy types when determining whether a resource could access a service. These other policy types include resource-based policies, access control lists, Organizations policies, IAM permissions boundaries, and STS assume role policies. It only applies permissions policy logic. For more about the evaluation of policy types, see Evaluating policies in the IAM User Guide. For more information about service and action last accessed data, see Reducing permissions using service last accessed data in the IAM User Guide."]
 module GenerateOrganizationsAccessReportResponse =
   struct
     type generateOrganizationsAccessReportResult =
@@ -18413,11 +21052,12 @@ module GenerateOrganizationsAccessReportResponse =
         (Option.map ~f:JobIDType.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobIDType.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobIDType.of_json in
+      make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generates a report for service last accessed data for Organizations. You can generate a report for any entities (organization root, organizational unit, or account) or policies in your organization. To call this operation, you must be signed in using your Organizations management account credentials. You can use your long-term IAM user or root user credentials, or temporary credentials from assuming an IAM role. SCPs must be enabled for your organization root. You must have the required IAM and Organizations permissions. For more information, see Refining permissions using service last accessed data in the IAM User Guide. You can generate a service last accessed data report for entities by specifying only the entity's path. This data includes a list of services that are allowed by any service control policies (SCPs) that apply to the entity. You can generate a service last accessed data report for a policy by specifying an entity's path and an optional Organizations policy ID. This data includes a list of services that are allowed by the specified SCP. For each service in both report types, the data includes the most recent account activity that the policy allows to account principals in the entity or the entity's children. For important information about the data, reporting period, permissions required, troubleshooting, and supported Regions see Reducing permissions using service last accessed data in the IAM User Guide. The data includes\194\160all\194\160attempts to access Amazon Web Services, not just the successful ones. This includes all attempts that were made using the Amazon Web Services Management Console, the Amazon Web Services API through any of the SDKs, or any of the command line tools. An unexpected entry in the service last accessed data does not mean that an account has been compromised, because the request might have been denied. Refer to your CloudTrail logs as the authoritative source for information about all API calls and whether they were successful or denied access. For more information, see\194\160Logging IAM events with CloudTrail in the IAM User Guide. This operation returns a JobId. Use this parameter in the GetOrganizationsAccessReport operation to check the status of the report generation. To check the status of this request, use the JobId parameter in the GetOrganizationsAccessReport operation and test the JobStatus response parameter. When the job is complete, you can retrieve the report. To generate a service last accessed data report for entities, specify an entity path without specifying the optional Organizations policy ID. The type of entity that you specify determines the data returned in the report. Root \226\128\147 When you specify the organizations root as the entity, the resulting report lists all of the services allowed by SCPs that are attached to your root. For each service, the report includes data for all accounts in your organization except the management account, because the management account is not limited by SCPs. OU \226\128\147 When you specify an organizational unit (OU) as the entity, the resulting report lists all of the services allowed by SCPs that are attached to the OU and its parents. For each service, the report includes data for all accounts in the OU or its children. This data excludes the management account, because the management account is not limited by SCPs. management account \226\128\147 When you specify the management account, the resulting report lists all Amazon Web Services services, because the management account is not limited by SCPs. For each service, the report includes data for only the management account. Account \226\128\147 When you specify another account as the entity, the resulting report lists all of the services allowed by SCPs that are attached to the account and its parents. For each service, the report includes data for only the specified account. To generate a service last accessed data report for policies, specify an entity path and the optional Organizations policy ID. The type of entity that you specify determines the data returned for each service. Root \226\128\147 When you specify the root entity and a policy ID, the resulting report lists all of the services that are allowed by the specified SCP. For each service, the report includes data for all accounts in your organization to which the SCP applies. This data excludes the management account, because the management account is not limited by SCPs. If the SCP is not attached to any entities in the organization, then the report will return a list of services with no data. OU \226\128\147 When you specify an OU entity and a policy ID, the resulting report lists all of the services that are allowed by the specified SCP. For each service, the report includes data for all accounts in the OU or its children to which the SCP applies. This means that other accounts outside the OU that are affected by the SCP might not be included in the data. This data excludes the management account, because the management account is not limited by SCPs. If the SCP is not attached to the OU or one of its children, the report will return a list of services with no data. management account \226\128\147 When you specify the management account, the resulting report lists all Amazon Web Services services, because the management account is not limited by SCPs. If you specify a policy ID in the CLI or API, the policy is ignored. For each service, the report includes data for only the management account. Account \226\128\147 When you specify another account entity and a policy ID, the resulting report lists all of the services that are allowed by the specified SCP. For each service, the report includes data for only the specified account. This means that other accounts in the organization that are affected by the SCP might not be included in the data. If the SCP is not attached to the account, the report will return a list of services with no data. Service last accessed data does not use other policy types when determining whether a principal could access a service. These other policy types include identity-based policies, resource-based policies, access control lists, IAM permissions boundaries, and STS assume role policies. It only applies SCP logic. For more about the evaluation of policy types, see Evaluating policies in the IAM User Guide. For more information about service last accessed data, see Reducing policy scope by viewing user activity in the IAM User Guide."]
+       "Generates a report for service last accessed data for Organizations. You can generate a report for any entities (organization root, organizational unit, or account) or policies in your organization. To call this operation, you must be signed in using your Organizations management account credentials. You can use your long-term IAM user or root user credentials, or temporary credentials from assuming an IAM role. SCPs must be enabled for your organization root. You must have the required IAM and Organizations permissions. For more information, see Refining permissions using service last accessed data in the IAM User Guide. You can generate a service last accessed data report for entities by specifying only the entity's path. This data includes a list of services that are allowed by any service control policies (SCPs) that apply to the entity. You can generate a service last accessed data report for a policy by specifying an entity's path and an optional Organizations policy ID. This data includes a list of services that are allowed by the specified SCP. For each service in both report types, the data includes the most recent account activity that the policy allows to account principals in the entity or the entity's children. For important information about the data, reporting period, permissions required, troubleshooting, and supported Regions see Reducing permissions using service last accessed data in the IAM User Guide. The data includes all attempts to access Amazon Web Services, not just the successful ones. This includes all attempts that were made using the Amazon Web Services Management Console, the Amazon Web Services API through any of the SDKs, or any of the command line tools. An unexpected entry in the service last accessed data does not mean that an account has been compromised, because the request might have been denied. Refer to your CloudTrail logs as the authoritative source for information about all API calls and whether they were successful or denied access. For more information, see Logging IAM events with CloudTrail in the IAM User Guide. This operation returns a JobId. Use this parameter in the GetOrganizationsAccessReport operation to check the status of the report generation. To check the status of this request, use the JobId parameter in the GetOrganizationsAccessReport operation and test the JobStatus response parameter. When the job is complete, you can retrieve the report. To generate a service last accessed data report for entities, specify an entity path without specifying the optional Organizations policy ID. The type of entity that you specify determines the data returned in the report. Root \226\128\147 When you specify the organizations root as the entity, the resulting report lists all of the services allowed by SCPs that are attached to your root. For each service, the report includes data for all accounts in your organization except the management account, because the management account is not limited by SCPs. OU \226\128\147 When you specify an organizational unit (OU) as the entity, the resulting report lists all of the services allowed by SCPs that are attached to the OU and its parents. For each service, the report includes data for all accounts in the OU or its children. This data excludes the management account, because the management account is not limited by SCPs. management account \226\128\147 When you specify the management account, the resulting report lists all Amazon Web Services services, because the management account is not limited by SCPs. For each service, the report includes data for only the management account. Account \226\128\147 When you specify another account as the entity, the resulting report lists all of the services allowed by SCPs that are attached to the account and its parents. For each service, the report includes data for only the specified account. To generate a service last accessed data report for policies, specify an entity path and the optional Organizations policy ID. The type of entity that you specify determines the data returned for each service. Root \226\128\147 When you specify the root entity and a policy ID, the resulting report lists all of the services that are allowed by the specified SCP. For each service, the report includes data for all accounts in your organization to which the SCP applies. This data excludes the management account, because the management account is not limited by SCPs. If the SCP is not attached to any entities in the organization, then the report will return a list of services with no data. OU \226\128\147 When you specify an OU entity and a policy ID, the resulting report lists all of the services that are allowed by the specified SCP. For each service, the report includes data for all accounts in the OU or its children to which the SCP applies. This means that other accounts outside the OU that are affected by the SCP might not be included in the data. This data excludes the management account, because the management account is not limited by SCPs. If the SCP is not attached to the OU or one of its children, the report will return a list of services with no data. management account \226\128\147 When you specify the management account, the resulting report lists all Amazon Web Services services, because the management account is not limited by SCPs. If you specify a policy ID in the CLI or API, the policy is ignored. For each service, the report includes data for only the management account. Account \226\128\147 When you specify another account entity and a policy ID, the resulting report lists all of the services that are allowed by the specified SCP. For each service, the report includes data for only the specified account. This means that other accounts in the organization that are affected by the SCP might not be included in the data. If the SCP is not attached to the account, the report will return a list of services with no data. Service last accessed data does not use other policy types when determining whether a principal could access a service. These other policy types include identity-based policies, resource-based policies, access control lists, IAM permissions boundaries, and STS assume role policies. It only applies SCP logic. For more about the evaluation of policy types, see Evaluating policies in the IAM User Guide. For more information about service last accessed data, see Reducing policy scope by viewing user activity in the IAM User Guide."]
 module GenerateOrganizationsAccessReportRequest =
   struct
     type nonrec t =
@@ -18448,16 +21088,16 @@ module GenerateOrganizationsAccessReportRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EntityPath") in
       make ?organizationsPolicyId ~entityPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationsPolicyId =
-        field_map json "OrganizationsPolicyId"
+        field_map json__ "OrganizationsPolicyId"
           OrganizationsPolicyIdType.of_json in
       let entityPath =
-        field_map_exn json "EntityPath" OrganizationsEntityPathType.of_json in
+        field_map_exn json__ "EntityPath" OrganizationsEntityPathType.of_json in
       make ?organizationsPolicyId ~entityPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generates a report for service last accessed data for Organizations. You can generate a report for any entities (organization root, organizational unit, or account) or policies in your organization. To call this operation, you must be signed in using your Organizations management account credentials. You can use your long-term IAM user or root user credentials, or temporary credentials from assuming an IAM role. SCPs must be enabled for your organization root. You must have the required IAM and Organizations permissions. For more information, see Refining permissions using service last accessed data in the IAM User Guide. You can generate a service last accessed data report for entities by specifying only the entity's path. This data includes a list of services that are allowed by any service control policies (SCPs) that apply to the entity. You can generate a service last accessed data report for a policy by specifying an entity's path and an optional Organizations policy ID. This data includes a list of services that are allowed by the specified SCP. For each service in both report types, the data includes the most recent account activity that the policy allows to account principals in the entity or the entity's children. For important information about the data, reporting period, permissions required, troubleshooting, and supported Regions see Reducing permissions using service last accessed data in the IAM User Guide. The data includes\194\160all\194\160attempts to access Amazon Web Services, not just the successful ones. This includes all attempts that were made using the Amazon Web Services Management Console, the Amazon Web Services API through any of the SDKs, or any of the command line tools. An unexpected entry in the service last accessed data does not mean that an account has been compromised, because the request might have been denied. Refer to your CloudTrail logs as the authoritative source for information about all API calls and whether they were successful or denied access. For more information, see\194\160Logging IAM events with CloudTrail in the IAM User Guide. This operation returns a JobId. Use this parameter in the GetOrganizationsAccessReport operation to check the status of the report generation. To check the status of this request, use the JobId parameter in the GetOrganizationsAccessReport operation and test the JobStatus response parameter. When the job is complete, you can retrieve the report. To generate a service last accessed data report for entities, specify an entity path without specifying the optional Organizations policy ID. The type of entity that you specify determines the data returned in the report. Root \226\128\147 When you specify the organizations root as the entity, the resulting report lists all of the services allowed by SCPs that are attached to your root. For each service, the report includes data for all accounts in your organization except the management account, because the management account is not limited by SCPs. OU \226\128\147 When you specify an organizational unit (OU) as the entity, the resulting report lists all of the services allowed by SCPs that are attached to the OU and its parents. For each service, the report includes data for all accounts in the OU or its children. This data excludes the management account, because the management account is not limited by SCPs. management account \226\128\147 When you specify the management account, the resulting report lists all Amazon Web Services services, because the management account is not limited by SCPs. For each service, the report includes data for only the management account. Account \226\128\147 When you specify another account as the entity, the resulting report lists all of the services allowed by SCPs that are attached to the account and its parents. For each service, the report includes data for only the specified account. To generate a service last accessed data report for policies, specify an entity path and the optional Organizations policy ID. The type of entity that you specify determines the data returned for each service. Root \226\128\147 When you specify the root entity and a policy ID, the resulting report lists all of the services that are allowed by the specified SCP. For each service, the report includes data for all accounts in your organization to which the SCP applies. This data excludes the management account, because the management account is not limited by SCPs. If the SCP is not attached to any entities in the organization, then the report will return a list of services with no data. OU \226\128\147 When you specify an OU entity and a policy ID, the resulting report lists all of the services that are allowed by the specified SCP. For each service, the report includes data for all accounts in the OU or its children to which the SCP applies. This means that other accounts outside the OU that are affected by the SCP might not be included in the data. This data excludes the management account, because the management account is not limited by SCPs. If the SCP is not attached to the OU or one of its children, the report will return a list of services with no data. management account \226\128\147 When you specify the management account, the resulting report lists all Amazon Web Services services, because the management account is not limited by SCPs. If you specify a policy ID in the CLI or API, the policy is ignored. For each service, the report includes data for only the management account. Account \226\128\147 When you specify another account entity and a policy ID, the resulting report lists all of the services that are allowed by the specified SCP. For each service, the report includes data for only the specified account. This means that other accounts in the organization that are affected by the SCP might not be included in the data. If the SCP is not attached to the account, the report will return a list of services with no data. Service last accessed data does not use other policy types when determining whether a principal could access a service. These other policy types include identity-based policies, resource-based policies, access control lists, IAM permissions boundaries, and STS assume role policies. It only applies SCP logic. For more about the evaluation of policy types, see Evaluating policies in the IAM User Guide. For more information about service last accessed data, see Reducing policy scope by viewing user activity in the IAM User Guide."]
+       "Generates a report for service last accessed data for Organizations. You can generate a report for any entities (organization root, organizational unit, or account) or policies in your organization. To call this operation, you must be signed in using your Organizations management account credentials. You can use your long-term IAM user or root user credentials, or temporary credentials from assuming an IAM role. SCPs must be enabled for your organization root. You must have the required IAM and Organizations permissions. For more information, see Refining permissions using service last accessed data in the IAM User Guide. You can generate a service last accessed data report for entities by specifying only the entity's path. This data includes a list of services that are allowed by any service control policies (SCPs) that apply to the entity. You can generate a service last accessed data report for a policy by specifying an entity's path and an optional Organizations policy ID. This data includes a list of services that are allowed by the specified SCP. For each service in both report types, the data includes the most recent account activity that the policy allows to account principals in the entity or the entity's children. For important information about the data, reporting period, permissions required, troubleshooting, and supported Regions see Reducing permissions using service last accessed data in the IAM User Guide. The data includes all attempts to access Amazon Web Services, not just the successful ones. This includes all attempts that were made using the Amazon Web Services Management Console, the Amazon Web Services API through any of the SDKs, or any of the command line tools. An unexpected entry in the service last accessed data does not mean that an account has been compromised, because the request might have been denied. Refer to your CloudTrail logs as the authoritative source for information about all API calls and whether they were successful or denied access. For more information, see Logging IAM events with CloudTrail in the IAM User Guide. This operation returns a JobId. Use this parameter in the GetOrganizationsAccessReport operation to check the status of the report generation. To check the status of this request, use the JobId parameter in the GetOrganizationsAccessReport operation and test the JobStatus response parameter. When the job is complete, you can retrieve the report. To generate a service last accessed data report for entities, specify an entity path without specifying the optional Organizations policy ID. The type of entity that you specify determines the data returned in the report. Root \226\128\147 When you specify the organizations root as the entity, the resulting report lists all of the services allowed by SCPs that are attached to your root. For each service, the report includes data for all accounts in your organization except the management account, because the management account is not limited by SCPs. OU \226\128\147 When you specify an organizational unit (OU) as the entity, the resulting report lists all of the services allowed by SCPs that are attached to the OU and its parents. For each service, the report includes data for all accounts in the OU or its children. This data excludes the management account, because the management account is not limited by SCPs. management account \226\128\147 When you specify the management account, the resulting report lists all Amazon Web Services services, because the management account is not limited by SCPs. For each service, the report includes data for only the management account. Account \226\128\147 When you specify another account as the entity, the resulting report lists all of the services allowed by SCPs that are attached to the account and its parents. For each service, the report includes data for only the specified account. To generate a service last accessed data report for policies, specify an entity path and the optional Organizations policy ID. The type of entity that you specify determines the data returned for each service. Root \226\128\147 When you specify the root entity and a policy ID, the resulting report lists all of the services that are allowed by the specified SCP. For each service, the report includes data for all accounts in your organization to which the SCP applies. This data excludes the management account, because the management account is not limited by SCPs. If the SCP is not attached to any entities in the organization, then the report will return a list of services with no data. OU \226\128\147 When you specify an OU entity and a policy ID, the resulting report lists all of the services that are allowed by the specified SCP. For each service, the report includes data for all accounts in the OU or its children to which the SCP applies. This means that other accounts outside the OU that are affected by the SCP might not be included in the data. This data excludes the management account, because the management account is not limited by SCPs. If the SCP is not attached to the OU or one of its children, the report will return a list of services with no data. management account \226\128\147 When you specify the management account, the resulting report lists all Amazon Web Services services, because the management account is not limited by SCPs. If you specify a policy ID in the CLI or API, the policy is ignored. For each service, the report includes data for only the management account. Account \226\128\147 When you specify another account entity and a policy ID, the resulting report lists all of the services that are allowed by the specified SCP. For each service, the report includes data for only the specified account. This means that other accounts in the organization that are affected by the SCP might not be included in the data. If the SCP is not attached to the account, the report will return a list of services with no data. Service last accessed data does not use other policy types when determining whether a principal could access a service. These other policy types include identity-based policies, resource-based policies, access control lists, IAM permissions boundaries, and STS assume role policies. It only applies SCP logic. For more about the evaluation of policy types, see Evaluating policies in the IAM User Guide. For more information about service last accessed data, see Reducing policy scope by viewing user activity in the IAM User Guide."]
 module GenerateCredentialReportResponse =
   struct
     type generateCredentialReportResult =
@@ -18534,10 +21174,10 @@ module GenerateCredentialReportResponse =
         (Option.map ~f:ReportStateType.of_xml) (Xml.child xml_arg0 "State") in
       make ?description ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" ReportStateDescriptionType.of_json in
-      let state = field_map json "State" ReportStateType.of_json in
+        field_map json__ "Description" ReportStateDescriptionType.of_json in
+      let state = field_map json__ "State" ReportStateType.of_json in
       make ?description ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18559,13 +21199,389 @@ module EntityTemporarilyUnmodifiableException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" EntityTemporarilyUnmodifiableMessage.of_json in
+        field_map json__ "message"
+          EntityTemporarilyUnmodifiableMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request was rejected because it referenced an entity that is temporarily unmodifiable, such as a user name that was deleted and then recreated. The error indicates that the request is likely to succeed if you try again after waiting several minutes. The error message describes the entity."]
+module EnableOutboundWebIdentityFederationResponse =
+  struct
+    type enableOutboundWebIdentityFederationResult =
+      {
+      issuerIdentifier: StringType.t option
+        [@ocaml.doc
+          "A unique issuer URL for your Amazon Web Services account that hosts the OpenID Connect (OIDC) discovery endpoints at /.well-known/openid-configuration and /.well-known/jwks.json. The OpenID Connect (OIDC) discovery endpoints contain verification keys and metadata necessary for token verification."]}
+    and responseMetaData = unit
+    and t =
+      {
+      enableOutboundWebIdentityFederationResult:
+        enableOutboundWebIdentityFederationResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `FeatureEnabledException of FeatureEnabledException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "EnableOutboundWebIdentityFederationResponse"
+    let make ?issuerIdentifier =
+      fun () ->
+        {
+          enableOutboundWebIdentityFederationResult = { issuerIdentifier };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "FeatureEnabledException" ->
+          `FeatureEnabledException (FeatureEnabledException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "FeatureEnabledException" ->
+          `FeatureEnabledException (FeatureEnabledException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `FeatureEnabledException e ->
+          `Assoc
+            [("error", (`String "FeatureEnabledException"));
+            ("details", (FeatureEnabledException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.enableOutboundWebIdentityFederationResult in
+      structure_to_wrapped_value
+        [("IssuerIdentifier",
+           (Option.map x.issuerIdentifier ~f:StringType.to_value))]
+        ~wrapper:"EnableOutboundWebIdentityFederationResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "EnableOutboundWebIdentityFederationResult" in
+      let issuerIdentifier =
+        (Option.map ~f:StringType.of_xml)
+          (Xml.child xml_arg0 "IssuerIdentifier") in
+      make ?issuerIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let issuerIdentifier =
+        field_map json__ "IssuerIdentifier" StringType.of_json in
+      make ?issuerIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enables the outbound identity federation feature for your Amazon Web Services account. When enabled, IAM principals in your account can use the GetWebIdentityToken API to obtain JSON Web Tokens (JWTs) for secure authentication with external services. This operation also generates a unique issuer URL for your Amazon Web Services account."]
+module EnableOrganizationsRootSessionsResponse =
+  struct
+    type enableOrganizationsRootSessionsResult =
+      {
+      organizationId: OrganizationIdType.t option
+        [@ocaml.doc "The unique identifier (ID) of an organization."];
+      enabledFeatures: FeaturesListType.t option
+        [@ocaml.doc
+          "The features you have enabled for centralized root access."]}
+    and responseMetaData = unit
+    and t =
+      {
+      enableOrganizationsRootSessionsResult:
+        enableOrganizationsRootSessionsResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `AccountNotManagementOrDelegatedAdministratorException of
+          AccountNotManagementOrDelegatedAdministratorException.t 
+      | `CallerIsNotManagementAccountException of
+          CallerIsNotManagementAccountException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationNotInAllFeaturesModeException of
+          OrganizationNotInAllFeaturesModeException.t 
+      | `ServiceAccessNotEnabledException of
+          ServiceAccessNotEnabledException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "EnableOrganizationsRootSessionsResponse"
+    let make ?organizationId =
+      fun ?enabledFeatures ->
+        fun () ->
+          {
+            enableOrganizationsRootSessionsResult =
+              { organizationId; enabledFeatures };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "AccountNotManagementOrDelegatedAdministratorException" ->
+          `AccountNotManagementOrDelegatedAdministratorException
+            (AccountNotManagementOrDelegatedAdministratorException.of_json
+               json)
+      | "CallerIsNotManagementAccountException" ->
+          `CallerIsNotManagementAccountException
+            (CallerIsNotManagementAccountException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_json json)
+      | "ServiceAccessNotEnabledException" ->
+          `ServiceAccessNotEnabledException
+            (ServiceAccessNotEnabledException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccountNotManagementOrDelegatedAdministratorException" ->
+          `AccountNotManagementOrDelegatedAdministratorException
+            (AccountNotManagementOrDelegatedAdministratorException.of_xml xml)
+      | "CallerIsNotManagementAccountException" ->
+          `CallerIsNotManagementAccountException
+            (CallerIsNotManagementAccountException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_xml xml)
+      | "ServiceAccessNotEnabledException" ->
+          `ServiceAccessNotEnabledException
+            (ServiceAccessNotEnabledException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccountNotManagementOrDelegatedAdministratorException e ->
+          `Assoc
+            [("error",
+               (`String
+                  "AccountNotManagementOrDelegatedAdministratorException"));
+            ("details",
+              (AccountNotManagementOrDelegatedAdministratorException.to_json
+                 e))]
+      | `CallerIsNotManagementAccountException e ->
+          `Assoc
+            [("error", (`String "CallerIsNotManagementAccountException"));
+            ("details", (CallerIsNotManagementAccountException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationNotInAllFeaturesModeException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotInAllFeaturesModeException"));
+            ("details",
+              (OrganizationNotInAllFeaturesModeException.to_json e))]
+      | `ServiceAccessNotEnabledException e ->
+          `Assoc
+            [("error", (`String "ServiceAccessNotEnabledException"));
+            ("details", (ServiceAccessNotEnabledException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.enableOrganizationsRootSessionsResult in
+      structure_to_wrapped_value
+        [("OrganizationId",
+           (Option.map x.organizationId ~f:OrganizationIdType.to_value));
+        ("EnabledFeatures",
+          (Option.map x.enabledFeatures ~f:FeaturesListType.to_value))]
+        ~wrapper:"EnableOrganizationsRootSessionsResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "EnableOrganizationsRootSessionsResult" in
+      let enabledFeatures =
+        (Option.map ~f:FeaturesListType.of_xml)
+          (Xml.child xml_arg0 "EnabledFeatures") in
+      let organizationId =
+        (Option.map ~f:OrganizationIdType.of_xml)
+          (Xml.child xml_arg0 "OrganizationId") in
+      make ?enabledFeatures ?organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enabledFeatures =
+        field_map json__ "EnabledFeatures" FeaturesListType.of_json in
+      let organizationId =
+        field_map json__ "OrganizationId" OrganizationIdType.of_json in
+      make ?enabledFeatures ?organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows the management account or delegated administrator to perform privileged tasks on member accounts in your organization. For more information, see Centrally manage root access for member accounts in the Identity and Access Management User Guide. Before you enable this feature, you must have an account configured with the following settings: You must manage your Amazon Web Services accounts in Organizations. Enable trusted access for Identity and Access Management in Organizations. For details, see IAM and Organizations in the Organizations User Guide."]
+module EnableOrganizationsRootSessionsRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows the management account or delegated administrator to perform privileged tasks on member accounts in your organization. For more information, see Centrally manage root access for member accounts in the Identity and Access Management User Guide. Before you enable this feature, you must have an account configured with the following settings: You must manage your Amazon Web Services accounts in Organizations. Enable trusted access for Identity and Access Management in Organizations. For details, see IAM and Organizations in the Organizations User Guide."]
+module EnableOrganizationsRootCredentialsManagementResponse =
+  struct
+    type enableOrganizationsRootCredentialsManagementResult =
+      {
+      organizationId: OrganizationIdType.t option
+        [@ocaml.doc "The unique identifier (ID) of an organization."];
+      enabledFeatures: FeaturesListType.t option
+        [@ocaml.doc
+          "The features you have enabled for centralized root access."]}
+    and responseMetaData = unit
+    and t =
+      {
+      enableOrganizationsRootCredentialsManagementResult:
+        enableOrganizationsRootCredentialsManagementResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `AccountNotManagementOrDelegatedAdministratorException of
+          AccountNotManagementOrDelegatedAdministratorException.t 
+      | `CallerIsNotManagementAccountException of
+          CallerIsNotManagementAccountException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationNotInAllFeaturesModeException of
+          OrganizationNotInAllFeaturesModeException.t 
+      | `ServiceAccessNotEnabledException of
+          ServiceAccessNotEnabledException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "EnableOrganizationsRootCredentialsManagementResponse"
+    let make ?organizationId =
+      fun ?enabledFeatures ->
+        fun () ->
+          {
+            enableOrganizationsRootCredentialsManagementResult =
+              { organizationId; enabledFeatures };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "AccountNotManagementOrDelegatedAdministratorException" ->
+          `AccountNotManagementOrDelegatedAdministratorException
+            (AccountNotManagementOrDelegatedAdministratorException.of_json
+               json)
+      | "CallerIsNotManagementAccountException" ->
+          `CallerIsNotManagementAccountException
+            (CallerIsNotManagementAccountException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_json json)
+      | "ServiceAccessNotEnabledException" ->
+          `ServiceAccessNotEnabledException
+            (ServiceAccessNotEnabledException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccountNotManagementOrDelegatedAdministratorException" ->
+          `AccountNotManagementOrDelegatedAdministratorException
+            (AccountNotManagementOrDelegatedAdministratorException.of_xml xml)
+      | "CallerIsNotManagementAccountException" ->
+          `CallerIsNotManagementAccountException
+            (CallerIsNotManagementAccountException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_xml xml)
+      | "ServiceAccessNotEnabledException" ->
+          `ServiceAccessNotEnabledException
+            (ServiceAccessNotEnabledException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccountNotManagementOrDelegatedAdministratorException e ->
+          `Assoc
+            [("error",
+               (`String
+                  "AccountNotManagementOrDelegatedAdministratorException"));
+            ("details",
+              (AccountNotManagementOrDelegatedAdministratorException.to_json
+                 e))]
+      | `CallerIsNotManagementAccountException e ->
+          `Assoc
+            [("error", (`String "CallerIsNotManagementAccountException"));
+            ("details", (CallerIsNotManagementAccountException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationNotInAllFeaturesModeException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotInAllFeaturesModeException"));
+            ("details",
+              (OrganizationNotInAllFeaturesModeException.to_json e))]
+      | `ServiceAccessNotEnabledException e ->
+          `Assoc
+            [("error", (`String "ServiceAccessNotEnabledException"));
+            ("details", (ServiceAccessNotEnabledException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.enableOrganizationsRootCredentialsManagementResult in
+      structure_to_wrapped_value
+        [("OrganizationId",
+           (Option.map x.organizationId ~f:OrganizationIdType.to_value));
+        ("EnabledFeatures",
+          (Option.map x.enabledFeatures ~f:FeaturesListType.to_value))]
+        ~wrapper:"EnableOrganizationsRootCredentialsManagementResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "EnableOrganizationsRootCredentialsManagementResult" in
+      let enabledFeatures =
+        (Option.map ~f:FeaturesListType.of_xml)
+          (Xml.child xml_arg0 "EnabledFeatures") in
+      let organizationId =
+        (Option.map ~f:OrganizationIdType.of_xml)
+          (Xml.child xml_arg0 "OrganizationId") in
+      make ?enabledFeatures ?organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enabledFeatures =
+        field_map json__ "EnabledFeatures" FeaturesListType.of_json in
+      let organizationId =
+        field_map json__ "OrganizationId" OrganizationIdType.of_json in
+      make ?enabledFeatures ?organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enables the management of privileged root user credentials across member accounts in your organization. When you enable root credentials management for centralized root access, the management account and the delegated administrator for IAM can manage root user credentials for member accounts in your organization. Before you enable centralized root access, you must have an account configured with the following settings: You must manage your Amazon Web Services accounts in Organizations. Enable trusted access for Identity and Access Management in Organizations. For details, see IAM and Organizations in the Organizations User Guide."]
+module EnableOrganizationsRootCredentialsManagementRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enables the management of privileged root user credentials across member accounts in your organization. When you enable root credentials management for centralized root access, the management account and the delegated administrator for IAM can manage root user credentials for member accounts in your organization. Before you enable centralized root access, you must have an account configured with the following settings: You must manage your Amazon Web Services accounts in Organizations. Enable trusted access for Identity and Access Management in Organizations. For details, see IAM and Organizations in the Organizations User Guide."]
 module EnableMFADeviceRequest =
   struct
     type nonrec t =
@@ -18619,22 +21635,302 @@ module EnableMFADeviceRequest =
       make ~authenticationCode2 ~authenticationCode1 ~serialNumber ~userName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationCode2 =
-        field_map_exn json "AuthenticationCode2"
+        field_map_exn json__ "AuthenticationCode2"
           AuthenticationCodeType.of_json in
       let authenticationCode1 =
-        field_map_exn json "AuthenticationCode1"
+        field_map_exn json__ "AuthenticationCode1"
           AuthenticationCodeType.of_json in
       let serialNumber =
-        field_map_exn json "SerialNumber" SerialNumberType.of_json in
+        field_map_exn json__ "SerialNumber" SerialNumberType.of_json in
       let userName =
-        field_map_exn json "UserName" ExistingUserNameType.of_json in
+        field_map_exn json__ "UserName" ExistingUserNameType.of_json in
       make ~authenticationCode2 ~authenticationCode1 ~serialNumber ~userName
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Enables the specified MFA device and associates it with the specified IAM user. When enabled, the MFA device is required for every subsequent login by the IAM user associated with the device."]
+module DisableOrganizationsRootSessionsResponse =
+  struct
+    type disableOrganizationsRootSessionsResult =
+      {
+      organizationId: OrganizationIdType.t option
+        [@ocaml.doc "The unique identifier (ID) of an organization."];
+      enabledFeatures: FeaturesListType.t option
+        [@ocaml.doc
+          "The features you have enabled for centralized root access of member accounts in your organization."]}
+    and responseMetaData = unit
+    and t =
+      {
+      disableOrganizationsRootSessionsResult:
+        disableOrganizationsRootSessionsResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `AccountNotManagementOrDelegatedAdministratorException of
+          AccountNotManagementOrDelegatedAdministratorException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationNotInAllFeaturesModeException of
+          OrganizationNotInAllFeaturesModeException.t 
+      | `ServiceAccessNotEnabledException of
+          ServiceAccessNotEnabledException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "DisableOrganizationsRootSessionsResponse"
+    let make ?organizationId =
+      fun ?enabledFeatures ->
+        fun () ->
+          {
+            disableOrganizationsRootSessionsResult =
+              { organizationId; enabledFeatures };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "AccountNotManagementOrDelegatedAdministratorException" ->
+          `AccountNotManagementOrDelegatedAdministratorException
+            (AccountNotManagementOrDelegatedAdministratorException.of_json
+               json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_json json)
+      | "ServiceAccessNotEnabledException" ->
+          `ServiceAccessNotEnabledException
+            (ServiceAccessNotEnabledException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccountNotManagementOrDelegatedAdministratorException" ->
+          `AccountNotManagementOrDelegatedAdministratorException
+            (AccountNotManagementOrDelegatedAdministratorException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_xml xml)
+      | "ServiceAccessNotEnabledException" ->
+          `ServiceAccessNotEnabledException
+            (ServiceAccessNotEnabledException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccountNotManagementOrDelegatedAdministratorException e ->
+          `Assoc
+            [("error",
+               (`String
+                  "AccountNotManagementOrDelegatedAdministratorException"));
+            ("details",
+              (AccountNotManagementOrDelegatedAdministratorException.to_json
+                 e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationNotInAllFeaturesModeException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotInAllFeaturesModeException"));
+            ("details",
+              (OrganizationNotInAllFeaturesModeException.to_json e))]
+      | `ServiceAccessNotEnabledException e ->
+          `Assoc
+            [("error", (`String "ServiceAccessNotEnabledException"));
+            ("details", (ServiceAccessNotEnabledException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.disableOrganizationsRootSessionsResult in
+      structure_to_wrapped_value
+        [("OrganizationId",
+           (Option.map x.organizationId ~f:OrganizationIdType.to_value));
+        ("EnabledFeatures",
+          (Option.map x.enabledFeatures ~f:FeaturesListType.to_value))]
+        ~wrapper:"DisableOrganizationsRootSessionsResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "DisableOrganizationsRootSessionsResult" in
+      let enabledFeatures =
+        (Option.map ~f:FeaturesListType.of_xml)
+          (Xml.child xml_arg0 "EnabledFeatures") in
+      let organizationId =
+        (Option.map ~f:OrganizationIdType.of_xml)
+          (Xml.child xml_arg0 "OrganizationId") in
+      make ?enabledFeatures ?organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enabledFeatures =
+        field_map json__ "EnabledFeatures" FeaturesListType.of_json in
+      let organizationId =
+        field_map json__ "OrganizationId" OrganizationIdType.of_json in
+      make ?enabledFeatures ?organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disables root user sessions for privileged tasks across member accounts in your organization. When you disable this feature, the management account and the delegated administrator for IAM can no longer perform privileged tasks on member accounts in your organization."]
+module DisableOrganizationsRootSessionsRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disables root user sessions for privileged tasks across member accounts in your organization. When you disable this feature, the management account and the delegated administrator for IAM can no longer perform privileged tasks on member accounts in your organization."]
+module DisableOrganizationsRootCredentialsManagementResponse =
+  struct
+    type disableOrganizationsRootCredentialsManagementResult =
+      {
+      organizationId: OrganizationIdType.t option
+        [@ocaml.doc "The unique identifier (ID) of an organization."];
+      enabledFeatures: FeaturesListType.t option
+        [@ocaml.doc
+          "The features enabled for centralized root access for member accounts in your organization."]}
+    and responseMetaData = unit
+    and t =
+      {
+      disableOrganizationsRootCredentialsManagementResult:
+        disableOrganizationsRootCredentialsManagementResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `AccountNotManagementOrDelegatedAdministratorException of
+          AccountNotManagementOrDelegatedAdministratorException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationNotInAllFeaturesModeException of
+          OrganizationNotInAllFeaturesModeException.t 
+      | `ServiceAccessNotEnabledException of
+          ServiceAccessNotEnabledException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "DisableOrganizationsRootCredentialsManagementResponse"
+    let make ?organizationId =
+      fun ?enabledFeatures ->
+        fun () ->
+          {
+            disableOrganizationsRootCredentialsManagementResult =
+              { organizationId; enabledFeatures };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "AccountNotManagementOrDelegatedAdministratorException" ->
+          `AccountNotManagementOrDelegatedAdministratorException
+            (AccountNotManagementOrDelegatedAdministratorException.of_json
+               json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_json json)
+      | "ServiceAccessNotEnabledException" ->
+          `ServiceAccessNotEnabledException
+            (ServiceAccessNotEnabledException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccountNotManagementOrDelegatedAdministratorException" ->
+          `AccountNotManagementOrDelegatedAdministratorException
+            (AccountNotManagementOrDelegatedAdministratorException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationNotInAllFeaturesModeException" ->
+          `OrganizationNotInAllFeaturesModeException
+            (OrganizationNotInAllFeaturesModeException.of_xml xml)
+      | "ServiceAccessNotEnabledException" ->
+          `ServiceAccessNotEnabledException
+            (ServiceAccessNotEnabledException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccountNotManagementOrDelegatedAdministratorException e ->
+          `Assoc
+            [("error",
+               (`String
+                  "AccountNotManagementOrDelegatedAdministratorException"));
+            ("details",
+              (AccountNotManagementOrDelegatedAdministratorException.to_json
+                 e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationNotInAllFeaturesModeException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotInAllFeaturesModeException"));
+            ("details",
+              (OrganizationNotInAllFeaturesModeException.to_json e))]
+      | `ServiceAccessNotEnabledException e ->
+          `Assoc
+            [("error", (`String "ServiceAccessNotEnabledException"));
+            ("details", (ServiceAccessNotEnabledException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.disableOrganizationsRootCredentialsManagementResult in
+      structure_to_wrapped_value
+        [("OrganizationId",
+           (Option.map x.organizationId ~f:OrganizationIdType.to_value));
+        ("EnabledFeatures",
+          (Option.map x.enabledFeatures ~f:FeaturesListType.to_value))]
+        ~wrapper:"DisableOrganizationsRootCredentialsManagementResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "DisableOrganizationsRootCredentialsManagementResult" in
+      let enabledFeatures =
+        (Option.map ~f:FeaturesListType.of_xml)
+          (Xml.child xml_arg0 "EnabledFeatures") in
+      let organizationId =
+        (Option.map ~f:OrganizationIdType.of_xml)
+          (Xml.child xml_arg0 "OrganizationId") in
+      make ?enabledFeatures ?organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enabledFeatures =
+        field_map json__ "EnabledFeatures" FeaturesListType.of_json in
+      let organizationId =
+        field_map json__ "OrganizationId" OrganizationIdType.of_json in
+      make ?enabledFeatures ?organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disables the management of privileged root user credentials across member accounts in your organization. When you disable this feature, the management account and the delegated administrator for IAM can no longer manage root user credentials for member accounts in your organization."]
+module DisableOrganizationsRootCredentialsManagementRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disables the management of privileged root user credentials across member accounts in your organization. When you disable this feature, the management account and the delegated administrator for IAM can no longer manage root user credentials for member accounts in your organization."]
 module DetachUserPolicyRequest =
   struct
     type nonrec t =
@@ -18660,9 +21956,9 @@ module DetachUserPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~policyArn ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
+    let of_json json__ =
+      let policyArn = field_map_exn json__ "PolicyArn" ArnType.of_json in
+      let userName = field_map_exn json__ "UserName" UserNameType.of_json in
       make ~policyArn ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18692,9 +21988,9 @@ module DetachRolePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~policyArn ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+    let of_json json__ =
+      let policyArn = field_map_exn json__ "PolicyArn" ArnType.of_json in
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ~policyArn ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18725,9 +22021,9 @@ module DetachGroupPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~policyArn ~groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
-      let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
+    let of_json json__ =
+      let policyArn = field_map_exn json__ "PolicyArn" ArnType.of_json in
+      let groupName = field_map_exn json__ "GroupName" GroupNameType.of_json in
       make ~policyArn ~groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18751,9 +22047,9 @@ module DeleteVirtualMFADeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SerialNumber") in
       make ~serialNumber ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serialNumber =
-        field_map_exn json "SerialNumber" SerialNumberType.of_json in
+        field_map_exn json__ "SerialNumber" SerialNumberType.of_json in
       make ~serialNumber ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18777,9 +22073,9 @@ module DeleteUserRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userName =
-        field_map_exn json "UserName" ExistingUserNameType.of_json in
+        field_map_exn json__ "UserName" ExistingUserNameType.of_json in
       make ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18811,10 +22107,11 @@ module DeleteUserPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~policyName ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
+    let of_json json__ =
+      let policyName =
+        field_map_exn json__ "PolicyName" PolicyNameType.of_json in
       let userName =
-        field_map_exn json "UserName" ExistingUserNameType.of_json in
+        field_map_exn json__ "UserName" ExistingUserNameType.of_json in
       make ~policyName ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18838,8 +22135,8 @@ module DeleteUserPermissionsBoundaryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
+    let of_json json__ =
+      let userName = field_map_exn json__ "UserName" UserNameType.of_json in
       make ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18873,10 +22170,10 @@ module DeleteSigningCertificateRequest =
           (Xml.child xml_arg0 "UserName") in
       make ~certificateId ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateId =
-        field_map_exn json "CertificateId" CertificateIdType.of_json in
-      let userName = field_map json "UserName" ExistingUserNameType.of_json in
+        field_map_exn json__ "CertificateId" CertificateIdType.of_json in
+      let userName = field_map json__ "UserName" ExistingUserNameType.of_json in
       make ~certificateId ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18912,11 +22209,11 @@ module DeleteServiceSpecificCredentialRequest =
         (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
       make ~serviceSpecificCredentialId ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceSpecificCredentialId =
-        field_map_exn json "ServiceSpecificCredentialId"
+        field_map_exn json__ "ServiceSpecificCredentialId"
           ServiceSpecificCredentialId.of_json in
-      let userName = field_map json "UserName" UserNameType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
       make ~serviceSpecificCredentialId ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified service-specific credential."]
@@ -18924,7 +22221,7 @@ module DeleteServiceLinkedRoleResponse =
   struct
     type deleteServiceLinkedRoleResult =
       {
-      deletionTaskId: DeletionTaskIdType.t
+      deletionTaskId: DeletionTaskIdType.t option
         [@ocaml.doc
           "The deletion task identifier that you can use to check the status of the deletion. This identifier is returned in the format task/aws-service-role/<service-principal-name>/<role-name>/<task-uuid>."]}
     and responseMetaData = unit
@@ -18938,7 +22235,7 @@ module DeleteServiceLinkedRoleResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "DeleteServiceLinkedRoleResponse"
-    let make ~deletionTaskId =
+    let make ?deletionTaskId =
       fun () ->
         {
           deleteServiceLinkedRoleResult = { deletionTaskId };
@@ -18988,21 +22285,21 @@ module DeleteServiceLinkedRoleResponse =
       let x = t.deleteServiceLinkedRoleResult in
       structure_to_wrapped_value
         [("DeletionTaskId",
-           (Some (DeletionTaskIdType.to_value x.deletionTaskId)))]
+           (Option.map x.deletionTaskId ~f:DeletionTaskIdType.to_value))]
         ~wrapper:"DeleteServiceLinkedRoleResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "DeleteServiceLinkedRoleResult" in
       let deletionTaskId =
-        DeletionTaskIdType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DeletionTaskId") in
-      make ~deletionTaskId ()
+        (Option.map ~f:DeletionTaskIdType.of_xml)
+          (Xml.child xml_arg0 "DeletionTaskId") in
+      make ?deletionTaskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deletionTaskId =
-        field_map_exn json "DeletionTaskId" DeletionTaskIdType.of_json in
-      make ~deletionTaskId ()
+        field_map json__ "DeletionTaskId" DeletionTaskIdType.of_json in
+      make ?deletionTaskId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Submits a service-linked role deletion request and returns a DeletionTaskId, which you can use to check the status of the deletion. Before you call this operation, confirm that the role has no active sessions and that any resources used by the role in the linked service are deleted. If you call this operation more than once for the same service-linked role and an earlier deletion task is not complete, then the DeletionTaskId of the earlier request is returned. If you submit a deletion request for a service-linked role whose linked service is still accessing a resource, then the deletion task fails. If it fails, the GetServiceLinkedRoleDeletionStatus operation returns the reason for the failure, usually including the resources that must be deleted. To delete the service-linked role, you must first remove those resources from the linked service and then submit the deletion request again. Resources are specific to the service that is linked to the role. For more information about removing resources from a service, see the Amazon Web Services documentation for your service. For more information about service-linked roles, see Roles terms and concepts: Amazon Web Services service-linked role in the IAM User Guide."]
@@ -19024,8 +22321,8 @@ module DeleteServiceLinkedRoleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+    let of_json json__ =
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19050,9 +22347,9 @@ module DeleteServerCertificateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServerCertificateName") in
       make ~serverCertificateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serverCertificateName =
-        field_map_exn json "ServerCertificateName"
+        field_map_exn json__ "ServerCertificateName"
           ServerCertificateNameType.of_json in
       make ~serverCertificateName ()
     let to_json v = composed_to_json to_value v
@@ -19086,10 +22383,10 @@ module DeleteSSHPublicKeyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~sSHPublicKeyId ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sSHPublicKeyId =
-        field_map_exn json "SSHPublicKeyId" PublicKeyIdType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
+        field_map_exn json__ "SSHPublicKeyId" PublicKeyIdType.of_json in
+      let userName = field_map_exn json__ "UserName" UserNameType.of_json in
       make ~sSHPublicKeyId ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19113,9 +22410,9 @@ module DeleteSAMLProviderRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SAMLProviderArn") in
       make ~sAMLProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sAMLProviderArn =
-        field_map_exn json "SAMLProviderArn" ArnType.of_json in
+        field_map_exn json__ "SAMLProviderArn" ArnType.of_json in
       make ~sAMLProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19139,12 +22436,12 @@ module DeleteRoleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+    let of_json json__ =
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified role. The role must not have any policies attached. For more information about roles, see Working with roles. Make sure that you do not have any Amazon EC2 instances running with the role you are about to delete. Deleting a role or instance profile that is associated with a running instance will break any applications running on the instance."]
+       "Deletes the specified role. Unlike the Amazon Web Services Management Console, when you delete a role programmatically, you must delete the items attached to the role manually, or the deletion fails. For more information, see Deleting an IAM role. Before attempting to delete a role, remove the following attached items: Inline policies (DeleteRolePolicy) Attached managed policies (DetachRolePolicy) Instance profile (RemoveRoleFromInstanceProfile) Optional \226\128\147 Delete instance profile after detaching from role for resource clean up (DeleteInstanceProfile) Make sure that you do not have any Amazon EC2 instances running with the role you are about to delete. Deleting a role or instance profile that is associated with a running instance will break any applications running on the instance."]
 module DeleteRolePolicyRequest =
   struct
     type nonrec t =
@@ -19172,9 +22469,10 @@ module DeleteRolePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~policyName ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+    let of_json json__ =
+      let policyName =
+        field_map_exn json__ "PolicyName" PolicyNameType.of_json in
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ~policyName ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19198,12 +22496,12 @@ module DeleteRolePermissionsBoundaryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+    let of_json json__ =
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the permissions boundary for the specified IAM role. Deleting the permissions boundary for a role might increase its permissions. For example, it might allow anyone who assumes the role to perform all the actions granted in its permissions policies."]
+       "Deletes the permissions boundary for the specified IAM role. You cannot set the boundary for a service-linked role. Deleting the permissions boundary for a role might increase its permissions. For example, it might allow anyone who assumes the role to perform all the actions granted in its permissions policies."]
 module DeletePolicyVersionRequest =
   struct
     type nonrec t =
@@ -19230,10 +22528,10 @@ module DeletePolicyVersionRequest =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ~versionId ~policyArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionId =
-        field_map_exn json "VersionId" PolicyVersionIdType.of_json in
-      let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
+        field_map_exn json__ "VersionId" PolicyVersionIdType.of_json in
+      let policyArn = field_map_exn json__ "PolicyArn" ArnType.of_json in
       make ~versionId ~policyArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19256,8 +22554,8 @@ module DeletePolicyRequest =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ~policyArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
+    let of_json json__ =
+      let policyArn = field_map_exn json__ "PolicyArn" ArnType.of_json in
       make ~policyArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19284,9 +22582,9 @@ module DeleteOpenIDConnectProviderRequest =
              "OpenIDConnectProviderArn") in
       make ~openIDConnectProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let openIDConnectProviderArn =
-        field_map_exn json "OpenIDConnectProviderArn" ArnType.of_json in
+        field_map_exn json__ "OpenIDConnectProviderArn" ArnType.of_json in
       make ~openIDConnectProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19295,27 +22593,25 @@ module DeleteLoginProfileRequest =
   struct
     type nonrec t =
       {
-      userName: UserNameType.t
+      userName: UserNameType.t option
         [@ocaml.doc
-          "The name of the user whose password you want to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
-    let context_ = "DeleteLoginProfileRequest"
-    let make ~userName = fun () -> { userName }
+          "The name of the user whose password you want to delete. This parameter is optional. If no user name is included, it defaults to the principal making the request. When you make this request with root user credentials, you must use an AssumeRoot session to omit the user name. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
+    let make ?userName = fun () -> { userName }
     let to_value x =
       structure_to_value
-        [("UserName", (Some (UserNameType.to_value x.userName)))]
+        [("UserName", (Option.map x.userName ~f:UserNameType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let userName =
-        UserNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
-      make ~userName ()
+        (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
+      make ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
-      make ~userName ()
+    let of_json json__ =
+      let userName = field_map json__ "UserName" UserNameType.of_json in
+      make ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the password for the specified IAM user, which terminates the user's ability to access Amazon Web Services services through the Amazon Web Services Management Console. You can use the CLI, the Amazon Web Services API, or the Users page in the IAM console to delete a password for any IAM user. You can use ChangePassword to update, but not delete, your own password in the My Security Credentials page in the Amazon Web Services Management Console. Deleting a user's password does not prevent a user from accessing Amazon Web Services through the command line interface or the API. To prevent all user access, you must also either make any access keys inactive or delete them. For more information about making keys inactive or deleting them, see UpdateAccessKey and DeleteAccessKey."]
+       "Deletes the password for the specified IAM user or root user, For more information, see Managing passwords for IAM users. You can use the CLI, the Amazon Web Services API, or the Users page in the IAM console to delete a password for any IAM user. You can use ChangePassword to update, but not delete, your own password in the My Security Credentials page in the Amazon Web Services Management Console. Deleting a user's password does not prevent a user from accessing Amazon Web Services through the command line interface or the API. To prevent all user access, you must also either make any access keys inactive or delete them. For more information about making keys inactive or deleting them, see UpdateAccessKey and DeleteAccessKey."]
 module DeleteInstanceProfileRequest =
   struct
     type nonrec t =
@@ -19336,14 +22632,14 @@ module DeleteInstanceProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileName") in
       make ~instanceProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceProfileName =
-        field_map_exn json "InstanceProfileName"
+        field_map_exn json__ "InstanceProfileName"
           InstanceProfileNameType.of_json in
       make ~instanceProfileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified instance profile. The instance profile must not have an associated role. Make sure that you do not have any Amazon EC2 instances running with the instance profile you are about to delete. Deleting a role or instance profile that is associated with a running instance will break any applications running on the instance. For more information about instance profiles, see About instance profiles."]
+       "Deletes the specified instance profile. The instance profile must not have an associated role. Make sure that you do not have any Amazon EC2 instances running with the instance profile you are about to delete. Deleting a role or instance profile that is associated with a running instance will break any applications running on the instance. For more information about instance profiles, see Using instance profiles in the IAM User Guide."]
 module DeleteGroupRequest =
   struct
     type nonrec t =
@@ -19363,8 +22659,8 @@ module DeleteGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
+    let of_json json__ =
+      let groupName = field_map_exn json__ "GroupName" GroupNameType.of_json in
       make ~groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19396,9 +22692,10 @@ module DeleteGroupPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~policyName ~groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
-      let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
+    let of_json json__ =
+      let policyName =
+        field_map_exn json__ "PolicyName" PolicyNameType.of_json in
+      let groupName = field_map_exn json__ "GroupName" GroupNameType.of_json in
       make ~policyName ~groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19419,8 +22716,8 @@ module DeleteConflictException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" DeleteConflictMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" DeleteConflictMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19444,13 +22741,13 @@ module DeleteAccountAliasRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AccountAlias") in
       make ~accountAlias ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accountAlias =
-        field_map_exn json "AccountAlias" AccountAliasType.of_json in
+        field_map_exn json__ "AccountAlias" AccountAliasType.of_json in
       make ~accountAlias ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified Amazon Web Services account alias. For information about using an Amazon Web Services account alias, see Using an alias for your Amazon Web Services account ID in the IAM User Guide."]
+       "Deletes the specified Amazon Web Services account alias. For information about using an Amazon Web Services account alias, see Creating, deleting, and listing an Amazon Web Services account alias in the Amazon Web Services Sign-In User Guide."]
 module DeleteAccessKeyRequest =
   struct
     type nonrec t =
@@ -19479,10 +22776,10 @@ module DeleteAccessKeyRequest =
           (Xml.child xml_arg0 "UserName") in
       make ~accessKeyId ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessKeyId =
-        field_map_exn json "AccessKeyId" AccessKeyIdType.of_json in
-      let userName = field_map json "UserName" ExistingUserNameType.of_json in
+        field_map_exn json__ "AccessKeyId" AccessKeyIdType.of_json in
+      let userName = field_map json__ "UserName" ExistingUserNameType.of_json in
       make ~accessKeyId ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19491,18 +22788,19 @@ module DeactivateMFADeviceRequest =
   struct
     type nonrec t =
       {
-      userName: ExistingUserNameType.t
+      userName: ExistingUserNameType.t option
         [@ocaml.doc
-          "The name of the user whose MFA device you want to deactivate. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
+          "The name of the user whose MFA device you want to deactivate. This parameter is optional. If no user name is included, it defaults to the principal making the request. When you make this request with root user credentials, you must use an AssumeRoot session to omit the user name. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       serialNumber: SerialNumberType.t
         [@ocaml.doc
           "The serial number that uniquely identifies the MFA device. For virtual MFA devices, the serial number is the device ARN. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.\\@:/-"]}
     let context_ = "DeactivateMFADeviceRequest"
-    let make ~userName =
+    let make ?userName =
       fun ~serialNumber -> fun () -> { userName; serialNumber }
     let to_value x =
       structure_to_value
-        [("UserName", (Some (ExistingUserNameType.to_value x.userName)));
+        [("UserName",
+           (Option.map x.userName ~f:ExistingUserNameType.to_value));
         ("SerialNumber", (Some (SerialNumberType.to_value x.serialNumber)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -19510,16 +22808,15 @@ module DeactivateMFADeviceRequest =
         SerialNumberType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SerialNumber") in
       let userName =
-        ExistingUserNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
-      make ~serialNumber ~userName ()
+        (Option.map ~f:ExistingUserNameType.of_xml)
+          (Xml.child xml_arg0 "UserName") in
+      make ~serialNumber ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serialNumber =
-        field_map_exn json "SerialNumber" SerialNumberType.of_json in
-      let userName =
-        field_map_exn json "UserName" ExistingUserNameType.of_json in
-      make ~serialNumber ~userName ()
+        field_map_exn json__ "SerialNumber" SerialNumberType.of_json in
+      let userName = field_map json__ "UserName" ExistingUserNameType.of_json in
+      make ~serialNumber ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deactivates the specified MFA device and removes it from association with the user name for which it was originally enabled. For more information about creating and working with virtual MFA devices, see Enabling a virtual multi-factor authentication (MFA) device in the IAM User Guide."]
@@ -19527,7 +22824,7 @@ module CreateVirtualMFADeviceResponse =
   struct
     type createVirtualMFADeviceResult =
       {
-      virtualMFADevice: VirtualMFADevice.t
+      virtualMFADevice: VirtualMFADevice.t option
         [@ocaml.doc
           "A structure containing details about the new virtual MFA device."]}
     and responseMetaData = unit
@@ -19544,7 +22841,7 @@ module CreateVirtualMFADeviceResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "CreateVirtualMFADeviceResponse"
-    let make ~virtualMFADevice =
+    let make ?virtualMFADevice =
       fun () ->
         {
           createVirtualMFADeviceResult = { virtualMFADevice };
@@ -19614,21 +22911,21 @@ module CreateVirtualMFADeviceResponse =
       let x = t.createVirtualMFADeviceResult in
       structure_to_wrapped_value
         [("VirtualMFADevice",
-           (Some (VirtualMFADevice.to_value x.virtualMFADevice)))]
+           (Option.map x.virtualMFADevice ~f:VirtualMFADevice.to_value))]
         ~wrapper:"CreateVirtualMFADeviceResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "CreateVirtualMFADeviceResult" in
       let virtualMFADevice =
-        VirtualMFADevice.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VirtualMFADevice") in
-      make ~virtualMFADevice ()
+        (Option.map ~f:VirtualMFADevice.of_xml)
+          (Xml.child xml_arg0 "VirtualMFADevice") in
+      make ?virtualMFADevice ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualMFADevice =
-        field_map_exn json "VirtualMFADevice" VirtualMFADevice.of_json in
-      make ~virtualMFADevice ()
+        field_map json__ "VirtualMFADevice" VirtualMFADevice.of_json in
+      make ?virtualMFADevice ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful CreateVirtualMFADevice request."]
@@ -19641,7 +22938,7 @@ module CreateVirtualMFADeviceRequest =
           "The path for the virtual MFA device. For more information about paths, see IAM identifiers in the IAM User Guide. This parameter is optional. If it is not included, it defaults to a slash (/). This parameter allows (through its regex pattern) a string of characters consisting of either a forward slash (/) by itself or a string that must begin and end with forward slashes. In addition, it can contain any ASCII character from the ! (\\u0021) through the DEL character (\\u007F), including most punctuation characters, digits, and upper and lowercased letters."];
       virtualMFADeviceName: VirtualMFADeviceName.t
         [@ocaml.doc
-          "The name of the virtual MFA device. Use with path to uniquely identify a virtual MFA device. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
+          "The name of the virtual MFA device, which must be unique. Use with path to uniquely identify a virtual MFA device. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tags: TagListType.t option
         [@ocaml.doc
           "A list of tags that you want to attach to the new IAM virtual MFA device. Each tag consists of a key name and an associated value. For more information about tagging, see Tagging IAM resources in the IAM User Guide. If any one of the tags is invalid or if you exceed the allowed maximum number of tags, then the entire request fails and the resource is not created."]}
@@ -19666,12 +22963,12 @@ module CreateVirtualMFADeviceRequest =
       let path = (Option.map ~f:PathType.of_xml) (Xml.child xml_arg0 "Path") in
       make ?tags ~virtualMFADeviceName ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
       let virtualMFADeviceName =
-        field_map_exn json "VirtualMFADeviceName"
+        field_map_exn json__ "VirtualMFADeviceName"
           VirtualMFADeviceName.of_json in
-      let path = field_map json "Path" PathType.of_json in
+      let path = field_map json__ "Path" PathType.of_json in
       make ?tags ~virtualMFADeviceName ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19778,8 +23075,8 @@ module CreateUserResponse =
       let user = (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "User") in
       make ?user ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let user = field_map json "User" User.of_json in make ?user ()
+    let of_json json__ =
+      let user = field_map json__ "User" User.of_json in make ?user ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful CreateUser request."]
@@ -19795,7 +23092,7 @@ module CreateUserRequest =
           "The name of the user to create. IAM user, group, role, and policy names must be unique within the account. Names are not distinguished by case. For example, you cannot create resources named both \"MyResource\" and \"myresource\"."];
       permissionsBoundary: ArnType.t option
         [@ocaml.doc
-          "The ARN of the policy that is used to set the permissions boundary for the user."];
+          "The ARN of the managed policy that is used to set the permissions boundary for the user. A permissions boundary policy defines the maximum permissions that identity-based policies can grant to an entity, but does not grant permissions. Permissions boundaries do not define the maximum permissions that a resource-based policy can grant to an entity. To learn more, see Permissions boundaries for IAM entities in the IAM User Guide. For more information about policy types, see Policy types in the IAM User Guide."];
       tags: TagListType.t option
         [@ocaml.doc
           "A list of tags that you want to attach to the new user. Each tag consists of a key name and an associated value. For more information about tagging, see Tagging IAM resources in the IAM User Guide. If any one of the tags is invalid or if you exceed the allowed maximum number of tags, then the entire request fails and the resource is not created."]}
@@ -19825,12 +23122,12 @@ module CreateUserRequest =
       let path = (Option.map ~f:PathType.of_xml) (Xml.child xml_arg0 "Path") in
       make ?tags ?permissionsBoundary ~userName ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
       let permissionsBoundary =
-        field_map json "PermissionsBoundary" ArnType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
-      let path = field_map json "Path" PathType.of_json in
+        field_map json__ "PermissionsBoundary" ArnType.of_json in
+      let userName = field_map_exn json__ "UserName" UserNameType.of_json in
+      let path = field_map json__ "Path" PathType.of_json in
       make ?tags ?permissionsBoundary ~userName ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19921,14 +23218,14 @@ module CreateServiceSpecificCredentialResponse =
           (Xml.child xml_arg0 "ServiceSpecificCredential") in
       make ?serviceSpecificCredential ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceSpecificCredential =
-        field_map json "ServiceSpecificCredential"
+        field_map json__ "ServiceSpecificCredential"
           ServiceSpecificCredential.of_json in
       make ?serviceSpecificCredential ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generates a set of credentials consisting of a user name and password that can be used to access the service specified in the request. These credentials are generated by IAM, and can be used only for the specified service. You can have a maximum of two sets of service-specific credentials for each supported service per user. You can create service-specific credentials for CodeCommit and Amazon Keyspaces (for Apache Cassandra). You can reset the password to a new service-generated value by calling ResetServiceSpecificCredential. For more information about service-specific credentials, see Using IAM with CodeCommit: Git credentials, SSH keys, and Amazon Web Services access keys in the IAM User Guide."]
+       "Generates a set of credentials consisting of a user name and password that can be used to access the service specified in the request. These credentials are generated by IAM, and can be used only for the specified service. You can have a maximum of two sets of service-specific credentials for each supported service per user. You can create service-specific credentials for Amazon Bedrock, Amazon CloudWatch Logs, CodeCommit and Amazon Keyspaces (for Apache Cassandra). You can reset the password to a new service-generated value by calling ResetServiceSpecificCredential. For more information about service-specific credentials, see Service-specific credentials for IAM users in the IAM User Guide."]
 module CreateServiceSpecificCredentialRequest =
   struct
     type nonrec t =
@@ -19938,31 +23235,44 @@ module CreateServiceSpecificCredentialRequest =
           "The name of the IAM user that is to be associated with the credentials. The new service-specific credentials have the same permissions as the associated user except that they can be used only to access the specified service. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       serviceName: ServiceName.t
         [@ocaml.doc
-          "The name of the Amazon Web Services service that is to be associated with the credentials. The service you specify here is the only service that can be accessed using these credentials."]}
+          "The name of the Amazon Web Services service that is to be associated with the credentials. The service you specify here is the only service that can be accessed using these credentials."];
+      credentialAgeDays: CredentialAgeDays.t option
+        [@ocaml.doc
+          "The number of days until the service specific credential expires. This field is only valid for Bedrock and CloudWatch Logs API keys and must be a positive integer. When not specified, the credential will not expire."]}
     let context_ = "CreateServiceSpecificCredentialRequest"
-    let make ~userName =
-      fun ~serviceName -> fun () -> { userName; serviceName }
+    let make ?credentialAgeDays =
+      fun ~userName ->
+        fun ~serviceName ->
+          fun () -> { credentialAgeDays; userName; serviceName }
     let to_value x =
       structure_to_value
         [("UserName", (Some (UserNameType.to_value x.userName)));
-        ("ServiceName", (Some (ServiceName.to_value x.serviceName)))]
+        ("ServiceName", (Some (ServiceName.to_value x.serviceName)));
+        ("CredentialAgeDays",
+          (Option.map x.credentialAgeDays ~f:CredentialAgeDays.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let credentialAgeDays =
+        (Option.map ~f:CredentialAgeDays.of_xml)
+          (Xml.child xml_arg0 "CredentialAgeDays") in
       let serviceName =
         ServiceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceName") in
       let userName =
         UserNameType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
-      make ~serviceName ~userName ()
+      make ?credentialAgeDays ~serviceName ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map_exn json "ServiceName" ServiceName.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
-      make ~serviceName ~userName ()
+    let of_json json__ =
+      let credentialAgeDays =
+        field_map json__ "CredentialAgeDays" CredentialAgeDays.of_json in
+      let serviceName =
+        field_map_exn json__ "ServiceName" ServiceName.of_json in
+      let userName = field_map_exn json__ "UserName" UserNameType.of_json in
+      make ?credentialAgeDays ~serviceName ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generates a set of credentials consisting of a user name and password that can be used to access the service specified in the request. These credentials are generated by IAM, and can be used only for the specified service. You can have a maximum of two sets of service-specific credentials for each supported service per user. You can create service-specific credentials for CodeCommit and Amazon Keyspaces (for Apache Cassandra). You can reset the password to a new service-generated value by calling ResetServiceSpecificCredential. For more information about service-specific credentials, see Using IAM with CodeCommit: Git credentials, SSH keys, and Amazon Web Services access keys in the IAM User Guide."]
+       "Generates a set of credentials consisting of a user name and password that can be used to access the service specified in the request. These credentials are generated by IAM, and can be used only for the specified service. You can have a maximum of two sets of service-specific credentials for each supported service per user. You can create service-specific credentials for Amazon Bedrock, Amazon CloudWatch Logs, CodeCommit and Amazon Keyspaces (for Apache Cassandra). You can reset the password to a new service-generated value by calling ResetServiceSpecificCredential. For more information about service-specific credentials, see Service-specific credentials for IAM users in the IAM User Guide."]
 module CreateServiceLinkedRoleResponse =
   struct
     type createServiceLinkedRoleResult =
@@ -20045,8 +23355,8 @@ module CreateServiceLinkedRoleResponse =
       let role = (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "Role") in
       make ?role ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let role = field_map json "Role" Role.of_json in make ?role ()
+    let of_json json__ =
+      let role = field_map json__ "Role" Role.of_json in make ?role ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an IAM role that is linked to a specific Amazon Web Services service. The service controls the attached policies and when the role can be deleted. This helps ensure that the service is not broken by an unexpectedly changed or deleted role, which could put your Amazon Web Services resources into an unknown state. Allowing the service to control the role helps improve service stability and proper cleanup when a service and its role are no longer needed. For more information, see Using service-linked roles in the IAM User Guide. To attach a policy to this service-linked role, you must make the request using the Amazon Web Services service that depends on this role."]
@@ -20087,13 +23397,13 @@ module CreateServiceLinkedRoleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AWSServiceName") in
       make ?customSuffix ?description ~aWSServiceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customSuffix =
-        field_map json "CustomSuffix" CustomSuffixType.of_json in
+        field_map json__ "CustomSuffix" CustomSuffixType.of_json in
       let description =
-        field_map json "Description" RoleDescriptionType.of_json in
+        field_map json__ "Description" RoleDescriptionType.of_json in
       let aWSServiceName =
-        field_map_exn json "AWSServiceName" GroupNameType.of_json in
+        field_map_exn json__ "AWSServiceName" GroupNameType.of_json in
       make ?customSuffix ?description ~aWSServiceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20206,9 +23516,10 @@ module CreateSAMLProviderResponse =
         (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "SAMLProviderArn") in
       make ?tags ?sAMLProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
-      let sAMLProviderArn = field_map json "SAMLProviderArn" ArnType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      let sAMLProviderArn =
+        field_map json__ "SAMLProviderArn" ArnType.of_json in
       make ?tags ?sAMLProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20225,19 +23536,46 @@ module CreateSAMLProviderRequest =
           "The name of the provider to create. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tags: TagListType.t option
         [@ocaml.doc
-          "A list of tags that you want to attach to the new IAM SAML provider. Each tag consists of a key name and an associated value. For more information about tagging, see Tagging IAM resources in the IAM User Guide. If any one of the tags is invalid or if you exceed the allowed maximum number of tags, then the entire request fails and the resource is not created."]}
+          "A list of tags that you want to attach to the new IAM SAML provider. Each tag consists of a key name and an associated value. For more information about tagging, see Tagging IAM resources in the IAM User Guide. If any one of the tags is invalid or if you exceed the allowed maximum number of tags, then the entire request fails and the resource is not created."];
+      assertionEncryptionMode: AssertionEncryptionModeType.t option
+        [@ocaml.doc
+          "Specifies the encryption setting for the SAML provider."];
+      addPrivateKey: PrivateKeyType.t option
+        [@ocaml.doc
+          "The private key generated from your external identity provider. The private key must be a .pem file that uses AES-GCM or AES-CBC encryption algorithm to decrypt SAML assertions."]}
     let context_ = "CreateSAMLProviderRequest"
     let make ?tags =
-      fun ~sAMLMetadataDocument ->
-        fun ~name -> fun () -> { tags; sAMLMetadataDocument; name }
+      fun ?assertionEncryptionMode ->
+        fun ?addPrivateKey ->
+          fun ~sAMLMetadataDocument ->
+            fun ~name ->
+              fun () ->
+                {
+                  tags;
+                  assertionEncryptionMode;
+                  addPrivateKey;
+                  sAMLMetadataDocument;
+                  name
+                }
     let to_value x =
       structure_to_value
         [("SAMLMetadataDocument",
            (Some (SAMLMetadataDocumentType.to_value x.sAMLMetadataDocument)));
         ("Name", (Some (SAMLProviderNameType.to_value x.name)));
-        ("Tags", (Option.map x.tags ~f:TagListType.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagListType.to_value));
+        ("AssertionEncryptionMode",
+          (Option.map x.assertionEncryptionMode
+             ~f:AssertionEncryptionModeType.to_value));
+        ("AddPrivateKey",
+          (Option.map x.addPrivateKey ~f:PrivateKeyType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let addPrivateKey =
+        (Option.map ~f:PrivateKeyType.of_xml)
+          (Xml.child xml_arg0 "AddPrivateKey") in
+      let assertionEncryptionMode =
+        (Option.map ~f:AssertionEncryptionModeType.of_xml)
+          (Xml.child xml_arg0 "AssertionEncryptionMode") in
       let tags =
         (Option.map ~f:TagListType.of_xml) (Xml.child xml_arg0 "Tags") in
       let name =
@@ -20246,15 +23584,22 @@ module CreateSAMLProviderRequest =
       let sAMLMetadataDocument =
         SAMLMetadataDocumentType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SAMLMetadataDocument") in
-      make ?tags ~name ~sAMLMetadataDocument ()
+      make ?addPrivateKey ?assertionEncryptionMode ?tags ~name
+        ~sAMLMetadataDocument ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
-      let name = field_map_exn json "Name" SAMLProviderNameType.of_json in
+    let of_json json__ =
+      let addPrivateKey =
+        field_map json__ "AddPrivateKey" PrivateKeyType.of_json in
+      let assertionEncryptionMode =
+        field_map json__ "AssertionEncryptionMode"
+          AssertionEncryptionModeType.of_json in
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      let name = field_map_exn json__ "Name" SAMLProviderNameType.of_json in
       let sAMLMetadataDocument =
-        field_map_exn json "SAMLMetadataDocument"
+        field_map_exn json__ "SAMLMetadataDocument"
           SAMLMetadataDocumentType.of_json in
-      make ?tags ~name ~sAMLMetadataDocument ()
+      make ?addPrivateKey ?assertionEncryptionMode ?tags ~name
+        ~sAMLMetadataDocument ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an IAM resource that describes an identity provider (IdP) that supports SAML 2.0. The SAML provider resource that you create with this operation can be used as a principal in an IAM role's trust policy. Such a policy can enable federated users who sign in using the SAML IdP to assume the role. You can create an IAM role that supports Web-based single sign-on (SSO) to the Amazon Web Services Management Console or one that supports API access to Amazon Web Services. When you create the SAML provider resource, you upload a SAML metadata document that you get from your IdP. That document includes the issuer's name, expiration information, and keys that can be used to validate the SAML authentication response (assertions) that the IdP sends. You must generate the metadata document using the identity management software that is used as your organization's IdP. This operation requires Signature Version 4. For more information, see Enabling SAML 2.0 federated users to access the Amazon Web Services Management Console and About SAML 2.0-based federation in the IAM User Guide."]
@@ -20262,7 +23607,7 @@ module CreateRoleResponse =
   struct
     type createRoleResult =
       {
-      role: Role.t
+      role: Role.t option
         [@ocaml.doc "A structure containing details about the new role."]}
     and responseMetaData = unit
     and t =
@@ -20280,7 +23625,7 @@ module CreateRoleResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "CreateRoleResponse"
-    let make ~role =
+    let make ?role =
       fun () -> { createRoleResult = { role }; responseMetaData = () }
     let error_of_json name json =
       match name with
@@ -20354,17 +23699,17 @@ module CreateRoleResponse =
               | Some m -> [("message", (`String m))])))
     let to_value t =
       let x = t.createRoleResult in
-      structure_to_wrapped_value [("Role", (Some (Role.to_value x.role)))]
+      structure_to_wrapped_value
+        [("Role", (Option.map x.role ~f:Role.to_value))]
         ~wrapper:"CreateRoleResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 = Xml.child_exn ~context:context_ t "CreateRoleResult" in
-      let role =
-        Role.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Role") in
-      make ~role ()
+      let role = (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "Role") in
+      make ?role ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let role = field_map_exn json "Role" Role.of_json in make ~role ()
+    let of_json json__ =
+      let role = field_map json__ "Role" Role.of_json in make ?role ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful CreateRole request."]
@@ -20377,7 +23722,7 @@ module CreateRoleRequest =
           "The path to the role. For more information about paths, see IAM Identifiers in the IAM User Guide. This parameter is optional. If it is not included, it defaults to a slash (/). This parameter allows (through its regex pattern) a string of characters consisting of either a forward slash (/) by itself or a string that must begin and end with forward slashes. In addition, it can contain any ASCII character from the ! (\\u0021) through the DEL character (\\u007F), including most punctuation characters, digits, and upper and lowercased letters."];
       roleName: RoleNameType.t
         [@ocaml.doc
-          "The name of the role to create. IAM user, group, role, and policy names must be unique within the account. Names are not distinguished by case. For example, you cannot create resources named both \"MyResource\" and \"myresource\"."];
+          "The name of the role to create. IAM user, group, role, and policy names must be unique within the account. Names are not distinguished by case. For example, you cannot create resources named both \"MyResource\" and \"myresource\". This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       assumeRolePolicyDocument: PolicyDocumentType.t
         [@ocaml.doc
           "The trust relationship policy document that grants an entity permission to assume the role. In IAM, you must provide a JSON policy that has been converted to a string. However, for CloudFormation templates formatted in YAML, you can provide the policy in JSON or YAML format. CloudFormation always converts a YAML policy to JSON format before submitting it to IAM. The regex pattern used to validate this parameter is a string of characters consisting of the following: Any printable ASCII character ranging from the space character (\\u0020) through the end of the ASCII character range The printable characters in the Basic Latin and Latin-1 Supplement character set (through \\u00FF) The special characters tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D) Upon success, the response includes the same trust policy in JSON format."];
@@ -20385,10 +23730,10 @@ module CreateRoleRequest =
         [@ocaml.doc "A description of the role."];
       maxSessionDuration: RoleMaxSessionDurationType.t option
         [@ocaml.doc
-          "The maximum session duration (in seconds) that you want to set for the specified role. If you do not specify a value for this setting, the default maximum of one hour is applied. This setting can have a value from 1 hour to 12 hours. Anyone who assumes the role from the or API can use the DurationSeconds API parameter or the duration-seconds CLI parameter to request a longer session. The MaxSessionDuration setting determines the maximum duration that can be requested using the DurationSeconds parameter. If users don't specify a value for the DurationSeconds parameter, their security credentials are valid for one hour by default. This applies when you use the AssumeRole* API operations or the assume-role* CLI operations but does not apply when you use those operations to create a console URL. For more information, see Using IAM roles in the IAM User Guide."];
+          "The maximum session duration (in seconds) that you want to set for the specified role. If you do not specify a value for this setting, the default value of one hour is applied. This setting can have a value from 1 hour to 12 hours. Anyone who assumes the role from the CLI or API can use the DurationSeconds API parameter or the duration-seconds CLI parameter to request a longer session. The MaxSessionDuration setting determines the maximum duration that can be requested using the DurationSeconds parameter. If users don't specify a value for the DurationSeconds parameter, their security credentials are valid for one hour by default. This applies when you use the AssumeRole* API operations or the assume-role* CLI operations but does not apply when you use those operations to create a console URL. For more information, see Using IAM roles in the IAM User Guide."];
       permissionsBoundary: ArnType.t option
         [@ocaml.doc
-          "The ARN of the policy that is used to set the permissions boundary for the role."];
+          "The ARN of the managed policy that is used to set the permissions boundary for the role. A permissions boundary policy defines the maximum permissions that identity-based policies can grant to an entity, but does not grant permissions. Permissions boundaries do not define the maximum permissions that a resource-based policy can grant to an entity. To learn more, see Permissions boundaries for IAM entities in the IAM User Guide. For more information about policy types, see Policy types in the IAM User Guide."];
       tags: TagListType.t option
         [@ocaml.doc
           "A list of tags that you want to attach to the new role. Each tag consists of a key name and an associated value. For more information about tagging, see Tagging IAM resources in the IAM User Guide. If any one of the tags is invalid or if you exceed the allowed maximum number of tags, then the entire request fails and the resource is not created."]}
@@ -20448,25 +23793,25 @@ module CreateRoleRequest =
       make ?tags ?permissionsBoundary ?maxSessionDuration ?description
         ~assumeRolePolicyDocument ~roleName ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
       let permissionsBoundary =
-        field_map json "PermissionsBoundary" ArnType.of_json in
+        field_map json__ "PermissionsBoundary" ArnType.of_json in
       let maxSessionDuration =
-        field_map json "MaxSessionDuration"
+        field_map json__ "MaxSessionDuration"
           RoleMaxSessionDurationType.of_json in
       let description =
-        field_map json "Description" RoleDescriptionType.of_json in
+        field_map json__ "Description" RoleDescriptionType.of_json in
       let assumeRolePolicyDocument =
-        field_map_exn json "AssumeRolePolicyDocument"
+        field_map_exn json__ "AssumeRolePolicyDocument"
           PolicyDocumentType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
-      let path = field_map json "Path" PathType.of_json in
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
+      let path = field_map json__ "Path" PathType.of_json in
       make ?tags ?permissionsBoundary ?maxSessionDuration ?description
         ~assumeRolePolicyDocument ~roleName ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new role for your Amazon Web Services account. For more information about roles, see IAM roles. For information about quotas for role names and the number of roles you can create, see IAM and STS quotas in the IAM User Guide."]
+       "Creates a new role for your Amazon Web Services account. For more information about roles, see IAM roles in the IAM User Guide. For information about quotas for role names and the number of roles you can create, see IAM and STS quotas in the IAM User Guide."]
 module CreatePolicyVersionResponse =
   struct
     type createPolicyVersionResult =
@@ -20567,9 +23912,9 @@ module CreatePolicyVersionResponse =
           (Xml.child xml_arg0 "PolicyVersion") in
       make ?policyVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyVersion =
-        field_map json "PolicyVersion" PolicyVersion.of_json in
+        field_map json__ "PolicyVersion" PolicyVersion.of_json in
       make ?policyVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20610,11 +23955,11 @@ module CreatePolicyVersionRequest =
         ArnType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ?setAsDefault ~policyDocument ~policyArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let setAsDefault = field_map json "SetAsDefault" BooleanType.of_json in
+    let of_json json__ =
+      let setAsDefault = field_map json__ "SetAsDefault" BooleanType.of_json in
       let policyDocument =
-        field_map_exn json "PolicyDocument" PolicyDocumentType.of_json in
-      let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
+        field_map_exn json__ "PolicyDocument" PolicyDocumentType.of_json in
+      let policyArn = field_map_exn json__ "PolicyArn" ArnType.of_json in
       make ?setAsDefault ~policyDocument ~policyArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20725,8 +24070,9 @@ module CreatePolicyResponse =
         (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" Policy.of_json in make ?policy ()
+    let of_json json__ =
+      let policy = field_map json__ "Policy" Policy.of_json in
+      make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful CreatePolicy request."]
@@ -20783,14 +24129,15 @@ module CreatePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
       make ?tags ?description ~policyDocument ?path ~policyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
       let description =
-        field_map json "Description" PolicyDescriptionType.of_json in
+        field_map json__ "Description" PolicyDescriptionType.of_json in
       let policyDocument =
-        field_map_exn json "PolicyDocument" PolicyDocumentType.of_json in
-      let path = field_map json "Path" PolicyPathType.of_json in
-      let policyName = field_map_exn json "PolicyName" PolicyNameType.of_json in
+        field_map_exn json__ "PolicyDocument" PolicyDocumentType.of_json in
+      let path = field_map json__ "Path" PolicyPathType.of_json in
+      let policyName =
+        field_map_exn json__ "PolicyName" PolicyNameType.of_json in
       make ?tags ?description ~policyDocument ?path ~policyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20816,6 +24163,8 @@ module CreateOpenIDConnectProviderResponse =
       | `EntityAlreadyExistsException of EntityAlreadyExistsException.t 
       | `InvalidInputException of InvalidInputException.t 
       | `LimitExceededException of LimitExceededException.t 
+      | `OpenIdIdpCommunicationErrorException of
+          OpenIdIdpCommunicationErrorException.t 
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "CreateOpenIDConnectProviderResponse"
@@ -20839,6 +24188,9 @@ module CreateOpenIDConnectProviderResponse =
           `InvalidInputException (InvalidInputException.of_json json)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_json json)
+      | "OpenIdIdpCommunicationErrorException" ->
+          `OpenIdIdpCommunicationErrorException
+            (OpenIdIdpCommunicationErrorException.of_json json)
       | "ServiceFailureException" ->
           `ServiceFailureException (ServiceFailureException.of_json json)
       | name ->
@@ -20856,6 +24208,9 @@ module CreateOpenIDConnectProviderResponse =
           `InvalidInputException (InvalidInputException.of_xml xml)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_xml xml)
+      | "OpenIdIdpCommunicationErrorException" ->
+          `OpenIdIdpCommunicationErrorException
+            (OpenIdIdpCommunicationErrorException.of_xml xml)
       | "ServiceFailureException" ->
           `ServiceFailureException (ServiceFailureException.of_xml xml)
       | name ->
@@ -20878,6 +24233,10 @@ module CreateOpenIDConnectProviderResponse =
           `Assoc
             [("error", (`String "LimitExceededException"));
             ("details", (LimitExceededException.to_json e))]
+      | `OpenIdIdpCommunicationErrorException e ->
+          `Assoc
+            [("error", (`String "OpenIdIdpCommunicationErrorException"));
+            ("details", (OpenIdIdpCommunicationErrorException.to_json e))]
       | `ServiceFailureException e ->
           `Assoc
             [("error", (`String "ServiceFailureException"));
@@ -20906,10 +24265,10 @@ module CreateOpenIDConnectProviderResponse =
           (Xml.child xml_arg0 "OpenIDConnectProviderArn") in
       make ?tags ?openIDConnectProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
       let openIDConnectProviderArn =
-        field_map json "OpenIDConnectProviderArn" ArnType.of_json in
+        field_map json__ "OpenIDConnectProviderArn" ArnType.of_json in
       make ?tags ?openIDConnectProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20924,57 +24283,57 @@ module CreateOpenIDConnectProviderRequest =
       clientIDList: ClientIDListType.t option
         [@ocaml.doc
           "Provides a list of client IDs, also known as audiences. When a mobile or web app registers with an OpenID Connect provider, they establish a value that identifies the application. This is the value that's sent as the client_id parameter on OAuth requests. You can register multiple client IDs with the same provider. For example, you might have multiple applications that use the same OIDC provider. You cannot register more than 100 client IDs with a single IAM OIDC provider. There is no defined format for a client ID. The CreateOpenIDConnectProviderRequest operation accepts client IDs up to 255 characters long."];
-      thumbprintList: ThumbprintListType.t
+      thumbprintList: ThumbprintListType.t option
         [@ocaml.doc
-          "A list of server certificate thumbprints for the OpenID Connect (OIDC) identity provider's server certificates. Typically this list includes only one entry. However, IAM lets you have up to five thumbprints for an OIDC provider. This lets you maintain multiple thumbprints if the identity provider is rotating certificates. The server certificate thumbprint is the hex-encoded SHA-1 hash value of the X.509 certificate used by the domain where the OpenID Connect provider makes its keys available. It is always a 40-character string. You must provide at least one thumbprint when creating an IAM OIDC provider. For example, assume that the OIDC provider is server.example.com and the provider stores its keys at https://keys.server.example.com/openid-connect. In that case, the thumbprint string would be the hex-encoded SHA-1 hash value of the certificate used by https://keys.server.example.com. For more information about obtaining the OIDC provider thumbprint, see Obtaining the thumbprint for an OpenID Connect provider in the IAM User Guide."];
+          "A list of server certificate thumbprints for the OpenID Connect (OIDC) identity provider's server certificates. Typically this list includes only one entry. However, IAM lets you have up to five thumbprints for an OIDC provider. This lets you maintain multiple thumbprints if the identity provider is rotating certificates. This parameter is optional. If it is not included, IAM will retrieve and use the top intermediate certificate authority (CA) thumbprint of the OpenID Connect identity provider server certificate. The server certificate thumbprint is the hex-encoded SHA-1 hash value of the X.509 certificate used by the domain where the OpenID Connect provider makes its keys available. It is always a 40-character string. For example, assume that the OIDC provider is server.example.com and the provider stores its keys at https://keys.server.example.com/openid-connect. In that case, the thumbprint string would be the hex-encoded SHA-1 hash value of the certificate used by https://keys.server.example.com. For more information about obtaining the OIDC provider thumbprint, see Obtaining the thumbprint for an OpenID Connect provider in the IAM user Guide. If your OIDC provider's discovery endpoint and JWKS endpoint (jwks_uri) use different certificates or hosts, include the thumbprints for both endpoints in this list."];
       tags: TagListType.t option
         [@ocaml.doc
           "A list of tags that you want to attach to the new IAM OpenID Connect (OIDC) provider. Each tag consists of a key name and an associated value. For more information about tagging, see Tagging IAM resources in the IAM User Guide. If any one of the tags is invalid or if you exceed the allowed maximum number of tags, then the entire request fails and the resource is not created."]}
     let context_ = "CreateOpenIDConnectProviderRequest"
     let make ?clientIDList =
-      fun ?tags ->
-        fun ~url ->
-          fun ~thumbprintList ->
-            fun () -> { clientIDList; tags; url; thumbprintList }
+      fun ?thumbprintList ->
+        fun ?tags ->
+          fun ~url -> fun () -> { clientIDList; thumbprintList; tags; url }
     let to_value x =
       structure_to_value
         [("Url", (Some (OpenIDConnectProviderUrlType.to_value x.url)));
         ("ClientIDList",
           (Option.map x.clientIDList ~f:ClientIDListType.to_value));
         ("ThumbprintList",
-          (Some (ThumbprintListType.to_value x.thumbprintList)));
+          (Option.map x.thumbprintList ~f:ThumbprintListType.to_value));
         ("Tags", (Option.map x.tags ~f:TagListType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags =
         (Option.map ~f:TagListType.of_xml) (Xml.child xml_arg0 "Tags") in
       let thumbprintList =
-        ThumbprintListType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ThumbprintList") in
+        (Option.map ~f:ThumbprintListType.of_xml)
+          (Xml.child xml_arg0 "ThumbprintList") in
       let clientIDList =
         (Option.map ~f:ClientIDListType.of_xml)
           (Xml.child xml_arg0 "ClientIDList") in
       let url =
         OpenIDConnectProviderUrlType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Url") in
-      make ?tags ~thumbprintList ?clientIDList ~url ()
+      make ?tags ?thumbprintList ?clientIDList ~url ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
       let thumbprintList =
-        field_map_exn json "ThumbprintList" ThumbprintListType.of_json in
+        field_map json__ "ThumbprintList" ThumbprintListType.of_json in
       let clientIDList =
-        field_map json "ClientIDList" ClientIDListType.of_json in
-      let url = field_map_exn json "Url" OpenIDConnectProviderUrlType.of_json in
-      make ?tags ~thumbprintList ?clientIDList ~url ()
+        field_map json__ "ClientIDList" ClientIDListType.of_json in
+      let url =
+        field_map_exn json__ "Url" OpenIDConnectProviderUrlType.of_json in
+      make ?tags ?thumbprintList ?clientIDList ~url ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an IAM entity to describe an identity provider (IdP) that supports OpenID Connect (OIDC). The OIDC provider that you create with this operation can be used as a principal in a role's trust policy. Such a policy establishes a trust relationship between Amazon Web Services and the OIDC provider. If you are using an OIDC identity provider from Google, Facebook, or Amazon Cognito, you don't need to create a separate IAM identity provider. These OIDC identity providers are already built-in to Amazon Web Services and are available for your use. Instead, you can move directly to creating new roles using your identity provider. To learn more, see Creating a role for web identity or OpenID connect federation in the IAM User Guide. When you create the IAM OIDC provider, you specify the following: The URL of the OIDC identity provider (IdP) to trust A list of client IDs (also known as audiences) that identify the application or applications allowed to authenticate using the OIDC provider A list of thumbprints of one or more server certificates that the IdP uses You get all of this information from the OIDC IdP you want to use to access Amazon Web Services. Amazon Web Services secures communication with some OIDC identity providers (IdPs) through our library of trusted certificate authorities (CAs) instead of using a certificate thumbprint to verify your IdP server certificate. These OIDC IdPs include Google, and those that use an Amazon S3 bucket to host a JSON Web Key Set (JWKS) endpoint. In these cases, your legacy thumbprint remains in your configuration, but is no longer used for validation. The trust for the OIDC provider is derived from the IAM provider that this operation creates. Therefore, it is best to limit access to the CreateOpenIDConnectProvider operation to highly privileged users."]
+       "Creates an IAM entity to describe an identity provider (IdP) that supports OpenID Connect (OIDC). The OIDC provider that you create with this operation can be used as a principal in a role's trust policy. Such a policy establishes a trust relationship between Amazon Web Services and the OIDC provider. If you are using an OIDC identity provider from Google, Facebook, or Amazon Cognito, you don't need to create a separate IAM identity provider. These OIDC identity providers are already built-in to Amazon Web Services and are available for your use. Instead, you can move directly to creating new roles using your identity provider. To learn more, see Creating a role for web identity or OpenID connect federation in the IAM User Guide. When you create the IAM OIDC provider, you specify the following: The URL of the OIDC identity provider (IdP) to trust A list of client IDs (also known as audiences) that identify the application or applications allowed to authenticate using the OIDC provider A list of tags that are attached to the specified IAM OIDC provider A list of thumbprints of one or more server certificates that the IdP uses You get all of this information from the OIDC IdP you want to use to access Amazon Web Services. Amazon Web Services secures communication with OIDC identity providers (IdPs) using our library of trusted root certificate authorities (CAs) to verify the JSON Web Key Set (JWKS) endpoint's TLS certificate. If your OIDC IdP relies on a certificate that is not signed by one of these trusted CAs, only then we secure communication using the thumbprints set in the IdP's configuration. The trust for the OIDC provider is derived from the IAM provider that this operation creates. Therefore, it is best to limit access to the CreateOpenIDConnectProvider operation to highly privileged users."]
 module CreateLoginProfileResponse =
   struct
     type createLoginProfileResult =
       {
-      loginProfile: LoginProfile.t
+      loginProfile: LoginProfile.t option
         [@ocaml.doc
           "A structure containing the user name and password create date."]}
     and responseMetaData = unit
@@ -20991,7 +24350,7 @@ module CreateLoginProfileResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "CreateLoginProfileResponse"
-    let make ~loginProfile =
+    let make ?loginProfile =
       fun () ->
         { createLoginProfileResult = { loginProfile }; responseMetaData = ()
         }
@@ -21058,21 +24417,21 @@ module CreateLoginProfileResponse =
     let to_value t =
       let x = t.createLoginProfileResult in
       structure_to_wrapped_value
-        [("LoginProfile", (Some (LoginProfile.to_value x.loginProfile)))]
+        [("LoginProfile",
+           (Option.map x.loginProfile ~f:LoginProfile.to_value))]
         ~wrapper:"CreateLoginProfileResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "CreateLoginProfileResult" in
       let loginProfile =
-        LoginProfile.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LoginProfile") in
-      make ~loginProfile ()
+        (Option.map ~f:LoginProfile.of_xml)
+          (Xml.child xml_arg0 "LoginProfile") in
+      make ?loginProfile ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let loginProfile =
-        field_map_exn json "LoginProfile" LoginProfile.of_json in
-      make ~loginProfile ()
+    let of_json json__ =
+      let loginProfile = field_map json__ "LoginProfile" LoginProfile.of_json in
+      make ?loginProfile ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful CreateLoginProfile request."]
@@ -21080,24 +24439,23 @@ module CreateLoginProfileRequest =
   struct
     type nonrec t =
       {
-      userName: UserNameType.t
+      userName: UserNameType.t option
         [@ocaml.doc
-          "The name of the IAM user to create a password for. The user must already exist. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
-      password: PasswordType.t
+          "The name of the IAM user to create a password for. The user must already exist. This parameter is optional. If no user name is included, it defaults to the principal making the request. When you make this request with root user credentials, you must use an AssumeRoot session to omit the user name. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
+      password: PasswordType.t option
         [@ocaml.doc
-          "The new password for the user. The regex pattern that is used to validate this parameter is a string of characters. That string can include almost any printable ASCII character from the space (\\u0020) through the end of the ASCII character range (\\u00FF). You can also include the tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D) characters. Any of these characters are valid in a password. However, many tools, such as the Amazon Web Services Management Console, might restrict the ability to type certain characters because they have special meaning within that tool."];
+          "The new password for the user. This parameter must be omitted when you make the request with an AssumeRoot session. It is required in all other cases. The regex pattern that is used to validate this parameter is a string of characters. That string can include almost any printable ASCII character from the space (\\u0020) through the end of the ASCII character range (\\u00FF). You can also include the tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D) characters. Any of these characters are valid in a password. However, many tools, such as the Amazon Web Services Management Console, might restrict the ability to type certain characters because they have special meaning within that tool."];
       passwordResetRequired: BooleanType.t option
         [@ocaml.doc
           "Specifies whether the user is required to set a new password on next sign-in."]}
-    let context_ = "CreateLoginProfileRequest"
-    let make ?passwordResetRequired =
-      fun ~userName ->
-        fun ~password ->
-          fun () -> { passwordResetRequired; userName; password }
+    let make ?userName =
+      fun ?password ->
+        fun ?passwordResetRequired ->
+          fun () -> { userName; password; passwordResetRequired }
     let to_value x =
       structure_to_value
-        [("UserName", (Some (UserNameType.to_value x.userName)));
-        ("Password", (Some (PasswordType.to_value x.password)));
+        [("UserName", (Option.map x.userName ~f:UserNameType.to_value));
+        ("Password", (Option.map x.password ~f:PasswordType.to_value));
         ("PasswordResetRequired",
           (Option.map x.passwordResetRequired ~f:BooleanType.to_value))]
     let to_query v = to_query to_value v
@@ -21106,19 +24464,17 @@ module CreateLoginProfileRequest =
         (Option.map ~f:BooleanType.of_xml)
           (Xml.child xml_arg0 "PasswordResetRequired") in
       let password =
-        PasswordType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Password") in
+        (Option.map ~f:PasswordType.of_xml) (Xml.child xml_arg0 "Password") in
       let userName =
-        UserNameType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
-      make ?passwordResetRequired ~password ~userName ()
+        (Option.map ~f:UserNameType.of_xml) (Xml.child xml_arg0 "UserName") in
+      make ?passwordResetRequired ?password ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let passwordResetRequired =
-        field_map json "PasswordResetRequired" BooleanType.of_json in
-      let password = field_map_exn json "Password" PasswordType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
-      make ?passwordResetRequired ~password ~userName ()
+        field_map json__ "PasswordResetRequired" BooleanType.of_json in
+      let password = field_map json__ "Password" PasswordType.of_json in
+      let userName = field_map json__ "UserName" UserNameType.of_json in
+      make ?passwordResetRequired ?password ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a password for the specified IAM user. A password allows an IAM user to access Amazon Web Services services through the Amazon Web Services Management Console. You can use the CLI, the Amazon Web Services API, or the Users page in the IAM console to create a password for any IAM user. Use ChangePassword to update your own existing password in the My Security Credentials page in the Amazon Web Services Management Console. For more information about managing passwords, see Managing passwords in the IAM User Guide."]
@@ -21126,7 +24482,7 @@ module CreateInstanceProfileResponse =
   struct
     type createInstanceProfileResult =
       {
-      instanceProfile: InstanceProfile.t
+      instanceProfile: InstanceProfile.t option
         [@ocaml.doc
           "A structure containing details about the new instance profile."]}
     and responseMetaData = unit
@@ -21143,7 +24499,7 @@ module CreateInstanceProfileResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "CreateInstanceProfileResponse"
-    let make ~instanceProfile =
+    let make ?instanceProfile =
       fun () ->
         {
           createInstanceProfileResult = { instanceProfile };
@@ -21213,21 +24569,21 @@ module CreateInstanceProfileResponse =
       let x = t.createInstanceProfileResult in
       structure_to_wrapped_value
         [("InstanceProfile",
-           (Some (InstanceProfile.to_value x.instanceProfile)))]
+           (Option.map x.instanceProfile ~f:InstanceProfile.to_value))]
         ~wrapper:"CreateInstanceProfileResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "CreateInstanceProfileResult" in
       let instanceProfile =
-        InstanceProfile.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfile") in
-      make ~instanceProfile ()
+        (Option.map ~f:InstanceProfile.of_xml)
+          (Xml.child xml_arg0 "InstanceProfile") in
+      make ?instanceProfile ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceProfile =
-        field_map_exn json "InstanceProfile" InstanceProfile.of_json in
-      make ~instanceProfile ()
+        field_map json__ "InstanceProfile" InstanceProfile.of_json in
+      make ?instanceProfile ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful CreateInstanceProfile request."]
@@ -21265,11 +24621,11 @@ module CreateInstanceProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileName") in
       make ?tags ?path ~instanceProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagListType.of_json in
-      let path = field_map json "Path" PathType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      let path = field_map json__ "Path" PathType.of_json in
       let instanceProfileName =
-        field_map_exn json "InstanceProfileName"
+        field_map_exn json__ "InstanceProfileName"
           InstanceProfileNameType.of_json in
       make ?tags ?path ~instanceProfileName ()
     let to_json v = composed_to_json to_value v
@@ -21279,7 +24635,7 @@ module CreateGroupResponse =
   struct
     type createGroupResult =
       {
-      group: Group.t
+      group: Group.t option
         [@ocaml.doc "A structure containing details about the new group."]}
     and responseMetaData = unit
     and t =
@@ -21293,7 +24649,7 @@ module CreateGroupResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "CreateGroupResponse"
-    let make ~group =
+    let make ?group =
       fun () -> { createGroupResult = { group }; responseMetaData = () }
     let error_of_json name json =
       match name with
@@ -21347,17 +24703,17 @@ module CreateGroupResponse =
               | Some m -> [("message", (`String m))])))
     let to_value t =
       let x = t.createGroupResult in
-      structure_to_wrapped_value [("Group", (Some (Group.to_value x.group)))]
+      structure_to_wrapped_value
+        [("Group", (Option.map x.group ~f:Group.to_value))]
         ~wrapper:"CreateGroupResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 = Xml.child_exn ~context:context_ t "CreateGroupResult" in
-      let group =
-        Group.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Group") in
-      make ~group ()
+      let group = (Option.map ~f:Group.of_xml) (Xml.child xml_arg0 "Group") in
+      make ?group ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let group = field_map_exn json "Group" Group.of_json in make ~group ()
+    let of_json json__ =
+      let group = field_map json__ "Group" Group.of_json in make ?group ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful CreateGroup request."]
@@ -21385,13 +24741,268 @@ module CreateGroupRequest =
       let path = (Option.map ~f:PathType.of_xml) (Xml.child xml_arg0 "Path") in
       make ~groupName ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
-      let path = field_map json "Path" PathType.of_json in
+    let of_json json__ =
+      let groupName = field_map_exn json__ "GroupName" GroupNameType.of_json in
+      let path = field_map json__ "Path" PathType.of_json in
       make ~groupName ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new group. For information about the number of groups you can create, see IAM and STS quotas in the IAM User Guide."]
+module CreateDelegationRequestResponse =
+  struct
+    type createDelegationRequestResult =
+      {
+      consoleDeepLink: ConsoleDeepLinkType.t option
+        [@ocaml.doc
+          "A deep link URL to the Amazon Web Services Management Console for managing the delegation request. For a console based workflow, partners should redirect the customer to this URL. If the customer is not logged in to any Amazon Web Services account, the Amazon Web Services workflow will automatically direct the customer to log in and then display the delegation request approval page."];
+      delegationRequestId: DelegationRequestIdType.t option
+        [@ocaml.doc
+          "The unique identifier for the created delegation request."]}
+    and responseMetaData = unit
+    and t =
+      {
+      createDelegationRequestResult: createDelegationRequestResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `EntityAlreadyExistsException of EntityAlreadyExistsException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "CreateDelegationRequestResponse"
+    let make ?consoleDeepLink =
+      fun ?delegationRequestId ->
+        fun () ->
+          {
+            createDelegationRequestResult =
+              { consoleDeepLink; delegationRequestId };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "EntityAlreadyExistsException" ->
+          `EntityAlreadyExistsException
+            (EntityAlreadyExistsException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "EntityAlreadyExistsException" ->
+          `EntityAlreadyExistsException
+            (EntityAlreadyExistsException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `EntityAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "EntityAlreadyExistsException"));
+            ("details", (EntityAlreadyExistsException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.createDelegationRequestResult in
+      structure_to_wrapped_value
+        [("ConsoleDeepLink",
+           (Option.map x.consoleDeepLink ~f:ConsoleDeepLinkType.to_value));
+        ("DelegationRequestId",
+          (Option.map x.delegationRequestId
+             ~f:DelegationRequestIdType.to_value))]
+        ~wrapper:"CreateDelegationRequestResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "CreateDelegationRequestResult" in
+      let delegationRequestId =
+        (Option.map ~f:DelegationRequestIdType.of_xml)
+          (Xml.child xml_arg0 "DelegationRequestId") in
+      let consoleDeepLink =
+        (Option.map ~f:ConsoleDeepLinkType.of_xml)
+          (Xml.child xml_arg0 "ConsoleDeepLink") in
+      make ?delegationRequestId ?consoleDeepLink ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let delegationRequestId =
+        field_map json__ "DelegationRequestId"
+          DelegationRequestIdType.of_json in
+      let consoleDeepLink =
+        field_map json__ "ConsoleDeepLink" ConsoleDeepLinkType.of_json in
+      make ?delegationRequestId ?consoleDeepLink ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an IAM delegation request for temporary access delegation. This API is not available for general use. In order to use this API, a caller first need to go through an onboarding process described in the partner onboarding documentation."]
+module CreateDelegationRequestRequest =
+  struct
+    type nonrec t =
+      {
+      ownerAccountId: AccountIdType.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID this delegation request is targeted to. If the account ID is not known, this parameter can be omitted, resulting in a request that can be associated by any account. If the account ID passed, then the created delegation request can only be associated with an identity of that target account."];
+      description: DelegationRequestDescriptionType.t
+        [@ocaml.doc "A description of the delegation request."];
+      permissions: DelegationPermission.t
+        [@ocaml.doc
+          "The permissions to be delegated in this delegation request."];
+      requestMessage: RequestMessageType.t option
+        [@ocaml.doc
+          "A message explaining the reason for the delegation request. Requesters can utilize this field to add a custom note to the delegation request. This field is different from the description such that this is to be utilized for a custom messaging on a case-by-case basis. For example, if the current delegation request is in response to a previous request being rejected, this explanation can be added to the request via this field."];
+      requestorWorkflowId: RequestorWorkflowIdType.t
+        [@ocaml.doc
+          "The workflow ID associated with the requestor. This is the unique identifier on the partner side that can be used to track the progress of the request. IAM maintains a uniqueness check on this workflow id for each request - if a workflow id for an existing request is passed, this API call will fail."];
+      redirectUrl: RedirectUrlType.t option
+        [@ocaml.doc
+          "The URL to redirect to after the delegation request is processed. This URL is used by the IAM console to show a link to the customer to re-load the partner workflow."];
+      notificationChannel: NotificationChannelType.t
+        [@ocaml.doc
+          "The notification channel for updates about the delegation request. At this time,only SNS topic ARNs are accepted for notification. This topic ARN must have a resource policy granting SNS:Publish permission to the IAM service principal (iam.amazonaws.com). See partner onboarding documentation for more details."];
+      sessionDuration: SessionDurationType.t
+        [@ocaml.doc
+          "The duration for which the delegated session should remain active, in seconds. The active time window for the session starts when the customer calls the SendDelegationToken API."];
+      onlySendByOwner: BooleanType.t option
+        [@ocaml.doc
+          "Specifies whether the delegation token should only be sent by the owner. This flag prevents any party other than the owner from calling SendDelegationToken API for this delegation request. This behavior becomes useful when the delegation request owner needs to be present for subsequent partner interactions, but the delegation request was sent to a more privileged user for approval due to the owner lacking sufficient delegation permissions."]}
+    let context_ = "CreateDelegationRequestRequest"
+    let make ?ownerAccountId =
+      fun ?requestMessage ->
+        fun ?redirectUrl ->
+          fun ?onlySendByOwner ->
+            fun ~description ->
+              fun ~permissions ->
+                fun ~requestorWorkflowId ->
+                  fun ~notificationChannel ->
+                    fun ~sessionDuration ->
+                      fun () ->
+                        {
+                          ownerAccountId;
+                          requestMessage;
+                          redirectUrl;
+                          onlySendByOwner;
+                          description;
+                          permissions;
+                          requestorWorkflowId;
+                          notificationChannel;
+                          sessionDuration
+                        }
+    let to_value x =
+      structure_to_value
+        [("OwnerAccountId",
+           (Option.map x.ownerAccountId ~f:AccountIdType.to_value));
+        ("Description",
+          (Some (DelegationRequestDescriptionType.to_value x.description)));
+        ("Permissions", (Some (DelegationPermission.to_value x.permissions)));
+        ("RequestMessage",
+          (Option.map x.requestMessage ~f:RequestMessageType.to_value));
+        ("RequestorWorkflowId",
+          (Some (RequestorWorkflowIdType.to_value x.requestorWorkflowId)));
+        ("RedirectUrl",
+          (Option.map x.redirectUrl ~f:RedirectUrlType.to_value));
+        ("NotificationChannel",
+          (Some (NotificationChannelType.to_value x.notificationChannel)));
+        ("SessionDuration",
+          (Some (SessionDurationType.to_value x.sessionDuration)));
+        ("OnlySendByOwner",
+          (Option.map x.onlySendByOwner ~f:BooleanType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let onlySendByOwner =
+        (Option.map ~f:BooleanType.of_xml)
+          (Xml.child xml_arg0 "OnlySendByOwner") in
+      let sessionDuration =
+        SessionDurationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SessionDuration") in
+      let notificationChannel =
+        NotificationChannelType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NotificationChannel") in
+      let redirectUrl =
+        (Option.map ~f:RedirectUrlType.of_xml)
+          (Xml.child xml_arg0 "RedirectUrl") in
+      let requestorWorkflowId =
+        RequestorWorkflowIdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RequestorWorkflowId") in
+      let requestMessage =
+        (Option.map ~f:RequestMessageType.of_xml)
+          (Xml.child xml_arg0 "RequestMessage") in
+      let permissions =
+        DelegationPermission.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Permissions") in
+      let description =
+        DelegationRequestDescriptionType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Description") in
+      let ownerAccountId =
+        (Option.map ~f:AccountIdType.of_xml)
+          (Xml.child xml_arg0 "OwnerAccountId") in
+      make ?onlySendByOwner ~sessionDuration ~notificationChannel
+        ?redirectUrl ~requestorWorkflowId ?requestMessage ~permissions
+        ~description ?ownerAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let onlySendByOwner =
+        field_map json__ "OnlySendByOwner" BooleanType.of_json in
+      let sessionDuration =
+        field_map_exn json__ "SessionDuration" SessionDurationType.of_json in
+      let notificationChannel =
+        field_map_exn json__ "NotificationChannel"
+          NotificationChannelType.of_json in
+      let redirectUrl =
+        field_map json__ "RedirectUrl" RedirectUrlType.of_json in
+      let requestorWorkflowId =
+        field_map_exn json__ "RequestorWorkflowId"
+          RequestorWorkflowIdType.of_json in
+      let requestMessage =
+        field_map json__ "RequestMessage" RequestMessageType.of_json in
+      let permissions =
+        field_map_exn json__ "Permissions" DelegationPermission.of_json in
+      let description =
+        field_map_exn json__ "Description"
+          DelegationRequestDescriptionType.of_json in
+      let ownerAccountId =
+        field_map json__ "OwnerAccountId" AccountIdType.of_json in
+      make ?onlySendByOwner ~sessionDuration ~notificationChannel
+        ?redirectUrl ~requestorWorkflowId ?requestMessage ~permissions
+        ~description ?ownerAccountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an IAM delegation request for temporary access delegation. This API is not available for general use. In order to use this API, a caller first need to go through an onboarding process described in the partner onboarding documentation."]
 module CreateAccountAliasRequest =
   struct
     type nonrec t =
@@ -21411,18 +25022,18 @@ module CreateAccountAliasRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AccountAlias") in
       make ~accountAlias ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accountAlias =
-        field_map_exn json "AccountAlias" AccountAliasType.of_json in
+        field_map_exn json__ "AccountAlias" AccountAliasType.of_json in
       make ~accountAlias ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an alias for your Amazon Web Services account. For information about using an Amazon Web Services account alias, see Using an alias for your Amazon Web Services account ID in the IAM User Guide."]
+       "Creates an alias for your Amazon Web Services account. For information about using an Amazon Web Services account alias, see Creating, deleting, and listing an Amazon Web Services account alias in the Amazon Web Services Sign-In User Guide."]
 module CreateAccessKeyResponse =
   struct
     type createAccessKeyResult =
       {
-      accessKey: AccessKey.t
+      accessKey: AccessKey.t option
         [@ocaml.doc "A structure with details about the access key."]}
     and responseMetaData = unit
     and t =
@@ -21435,7 +25046,7 @@ module CreateAccessKeyResponse =
       | `ServiceFailureException of ServiceFailureException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "CreateAccessKeyResponse"
-    let make ~accessKey =
+    let make ?accessKey =
       fun () ->
         { createAccessKeyResult = { accessKey }; responseMetaData = () }
     let error_of_json name json =
@@ -21481,20 +25092,19 @@ module CreateAccessKeyResponse =
     let to_value t =
       let x = t.createAccessKeyResult in
       structure_to_wrapped_value
-        [("AccessKey", (Some (AccessKey.to_value x.accessKey)))]
+        [("AccessKey", (Option.map x.accessKey ~f:AccessKey.to_value))]
         ~wrapper:"CreateAccessKeyResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "CreateAccessKeyResult" in
       let accessKey =
-        AccessKey.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccessKey") in
-      make ~accessKey ()
+        (Option.map ~f:AccessKey.of_xml) (Xml.child xml_arg0 "AccessKey") in
+      make ?accessKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accessKey = field_map_exn json "AccessKey" AccessKey.of_json in
-      make ~accessKey ()
+    let of_json json__ =
+      let accessKey = field_map json__ "AccessKey" AccessKey.of_json in
+      make ?accessKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the response to a successful CreateAccessKey request."]
@@ -21517,8 +25127,8 @@ module CreateAccessKeyRequest =
           (Xml.child xml_arg0 "UserName") in
       make ?userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map json "UserName" ExistingUserNameType.of_json in
+    let of_json json__ =
+      let userName = field_map json__ "UserName" ExistingUserNameType.of_json in
       make ?userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21549,9 +25159,11 @@ module ChangePasswordRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OldPassword") in
       make ~newPassword ~oldPassword ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let newPassword = field_map_exn json "NewPassword" PasswordType.of_json in
-      let oldPassword = field_map_exn json "OldPassword" PasswordType.of_json in
+    let of_json json__ =
+      let newPassword =
+        field_map_exn json__ "NewPassword" PasswordType.of_json in
+      let oldPassword =
+        field_map_exn json__ "OldPassword" PasswordType.of_json in
       make ~newPassword ~oldPassword ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21581,13 +25193,13 @@ module AttachUserPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       make ~policyArn ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
-      let userName = field_map_exn json "UserName" UserNameType.of_json in
+    let of_json json__ =
+      let policyArn = field_map_exn json__ "PolicyArn" ArnType.of_json in
+      let userName = field_map_exn json__ "UserName" UserNameType.of_json in
       make ~policyArn ~userName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attaches the specified managed policy to the specified user. You use this operation to attach a managed policy to a user. To embed an inline policy in a user, use PutUserPolicy. As a best practice, you can validate your IAM policies. To learn more, see Validating IAM policies in the IAM User Guide. For more information about policies, see Managed policies and inline policies in the IAM User Guide."]
+       "Attaches the specified managed policy to the specified user. You use this operation to attach a managed policy to a user. To embed an inline policy in a user, use PutUserPolicy . As a best practice, you can validate your IAM policies. To learn more, see Validating IAM policies in the IAM User Guide. For more information about policies, see Managed policies and inline policies in the IAM User Guide."]
 module AttachRolePolicyRequest =
   struct
     type nonrec t =
@@ -21613,13 +25225,13 @@ module AttachRolePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleName") in
       make ~policyArn ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+    let of_json json__ =
+      let policyArn = field_map_exn json__ "PolicyArn" ArnType.of_json in
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       make ~policyArn ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attaches the specified managed policy to the specified IAM role. When you attach a managed policy to a role, the managed policy becomes part of the role's permission (access) policy. You cannot use a managed policy as the role's trust policy. The role's trust policy is created at the same time as the role, using CreateRole. You can update a role's trust policy using UpdateAssumeRolePolicy. Use this operation to attach a managed policy to a role. To embed an inline policy in a role, use PutRolePolicy. For more information about policies, see Managed policies and inline policies in the IAM User Guide. As a best practice, you can validate your IAM policies. To learn more, see Validating IAM policies in the IAM User Guide."]
+       "Attaches the specified managed policy to the specified IAM role. When you attach a managed policy to a role, the managed policy becomes part of the role's permission (access) policy. You cannot use a managed policy as the role's trust policy. The role's trust policy is created at the same time as the role, using CreateRole . You can update a role's trust policy using UpdateAssumerolePolicy . Use this operation to attach a managed policy to a role. To embed an inline policy in a role, use PutRolePolicy . For more information about policies, see Managed policies and inline policies in the IAM User Guide. As a best practice, you can validate your IAM policies. To learn more, see Validating IAM policies in the IAM User Guide."]
 module AttachGroupPolicyRequest =
   struct
     type nonrec t =
@@ -21646,13 +25258,41 @@ module AttachGroupPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~policyArn ~groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyArn = field_map_exn json "PolicyArn" ArnType.of_json in
-      let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
+    let of_json json__ =
+      let policyArn = field_map_exn json__ "PolicyArn" ArnType.of_json in
+      let groupName = field_map_exn json__ "GroupName" GroupNameType.of_json in
       make ~policyArn ~groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attaches the specified managed policy to the specified IAM group. You use this operation to attach a managed policy to a group. To embed an inline policy in a group, use PutGroupPolicy. As a best practice, you can validate your IAM policies. To learn more, see Validating IAM policies in the IAM User Guide. For more information about policies, see Managed policies and inline policies in the IAM User Guide."]
+       "Attaches the specified managed policy to the specified IAM group. You use this operation to attach a managed policy to a group. To embed an inline policy in a group, use PutGroupPolicy . As a best practice, you can validate your IAM policies. To learn more, see Validating IAM policies in the IAM User Guide. For more information about policies, see Managed policies and inline policies in the IAM User Guide."]
+module AssociateDelegationRequestRequest =
+  struct
+    type nonrec t =
+      {
+      delegationRequestId: DelegationRequestIdType.t
+        [@ocaml.doc
+          "The unique identifier of the delegation request to associate."]}
+    let context_ = "AssociateDelegationRequestRequest"
+    let make ~delegationRequestId = fun () -> { delegationRequestId }
+    let to_value x =
+      structure_to_value
+        [("DelegationRequestId",
+           (Some (DelegationRequestIdType.to_value x.delegationRequestId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let delegationRequestId =
+        DelegationRequestIdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DelegationRequestId") in
+      make ~delegationRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let delegationRequestId =
+        field_map_exn json__ "DelegationRequestId"
+          DelegationRequestIdType.of_json in
+      make ~delegationRequestId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates a delegation request with the current identity. If the partner that created the delegation request has specified the owner account during creation, only an identity from that owner account can call the AssociateDelegationRequest API for the specified delegation request. Once the AssociateDelegationRequest API call is successful, the ARN of the current calling identity will be stored as the ownerId of the request. If the partner that created the delegation request has not specified the owner account during creation, any caller from any account can call the AssociateDelegationRequest API for the delegation request. Once this API call is successful, the ARN of the current calling identity will be stored as the ownerId and the Amazon Web Services account ID of the current calling identity will be stored as the ownerAccount of the request. For more details, see Managing Permissions for Delegation Requests."]
 module AddUserToGroupRequest =
   struct
     type nonrec t =
@@ -21679,10 +25319,10 @@ module AddUserToGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
       make ~userName ~groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userName =
-        field_map_exn json "UserName" ExistingUserNameType.of_json in
-      let groupName = field_map_exn json "GroupName" GroupNameType.of_json in
+        field_map_exn json__ "UserName" ExistingUserNameType.of_json in
+      let groupName = field_map_exn json__ "GroupName" GroupNameType.of_json in
       make ~userName ~groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds the specified user to the specified group."]
@@ -21714,15 +25354,15 @@ module AddRoleToInstanceProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceProfileName") in
       make ~roleName ~instanceProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleName = field_map_exn json "RoleName" RoleNameType.of_json in
+    let of_json json__ =
+      let roleName = field_map_exn json__ "RoleName" RoleNameType.of_json in
       let instanceProfileName =
-        field_map_exn json "InstanceProfileName"
+        field_map_exn json__ "InstanceProfileName"
           InstanceProfileNameType.of_json in
       make ~roleName ~instanceProfileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the specified IAM role to the specified instance profile. An instance profile can contain only one role, and this quota cannot be increased. You can remove the existing role and then add a different role to an instance profile. You must then wait for the change to appear across all of Amazon Web Services because of eventual consistency. To force the change, you must disassociate the instance profile and then associate the instance profile, or you can stop your instance and then restart it. The caller of this operation must be granted the PassRole permission on the IAM role by a permissions policy. For more information about roles, see Working with roles. For more information about instance profiles, see About instance profiles."]
+       "Adds the specified IAM role to the specified instance profile. An instance profile can contain only one role, and this quota cannot be increased. You can remove the existing role and then add a different role to an instance profile. You must then wait for the change to appear across all of Amazon Web Services because of eventual consistency. To force the change, you must disassociate the instance profile and then associate the instance profile, or you can stop your instance and then restart it. The caller of this operation must be granted the PassRole permission on the IAM role by a permissions policy. When using the iam:AssociatedResourceArn condition in a policy to restrict the PassRole IAM action, special considerations apply if the policy is intended to define access for the AddRoleToInstanceProfile action. In this case, you cannot specify a Region or instance ID in the EC2 instance ARN. The ARN value must be arn:aws:ec2:*:CallerAccountId:instance/*. Using any other ARN value may lead to unexpected evaluation results. For more information about roles, see IAM roles in the IAM User Guide. For more information about instance profiles, see Using instance profiles in the IAM User Guide."]
 module AddClientIDToOpenIDConnectProviderRequest =
   struct
     type nonrec t =
@@ -21752,11 +25392,39 @@ module AddClientIDToOpenIDConnectProviderRequest =
              "OpenIDConnectProviderArn") in
       make ~clientID ~openIDConnectProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientID = field_map_exn json "ClientID" ClientIDType.of_json in
+    let of_json json__ =
+      let clientID = field_map_exn json__ "ClientID" ClientIDType.of_json in
       let openIDConnectProviderArn =
-        field_map_exn json "OpenIDConnectProviderArn" ArnType.of_json in
+        field_map_exn json__ "OpenIDConnectProviderArn" ArnType.of_json in
       make ~clientID ~openIDConnectProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Adds a new client ID (also known as audience) to the list of client IDs already registered for the specified IAM OpenID Connect (OIDC) provider resource. This operation is idempotent; it does not fail or return an error if you add an existing client ID to the provider."]
+module AcceptDelegationRequestRequest =
+  struct
+    type nonrec t =
+      {
+      delegationRequestId: DelegationRequestIdType.t
+        [@ocaml.doc
+          "The unique identifier of the delegation request to accept."]}
+    let context_ = "AcceptDelegationRequestRequest"
+    let make ~delegationRequestId = fun () -> { delegationRequestId }
+    let to_value x =
+      structure_to_value
+        [("DelegationRequestId",
+           (Some (DelegationRequestIdType.to_value x.delegationRequestId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let delegationRequestId =
+        DelegationRequestIdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DelegationRequestId") in
+      make ~delegationRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let delegationRequestId =
+        field_map_exn json__ "DelegationRequestId"
+          DelegationRequestIdType.of_json in
+      make ~delegationRequestId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Accepts a delegation request, granting the requested temporary access. Once the delegation request is accepted, it is eligible to send the exchange token to the partner. The SendDelegationToken API has to be explicitly called to send the delegation token. At the time of acceptance, IAM records the details and the state of the identity that called this API. This is the identity that gets mapped to the delegated credential. An accepted request may be rejected before the exchange token is sent to the partner."]

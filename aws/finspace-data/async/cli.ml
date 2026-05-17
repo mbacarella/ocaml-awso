@@ -28,6 +28,29 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let associate_user_to_permission_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and permissionGroupId =
+         flag "permission-group-id" (required string)
+           ~doc:"STRING PermissionGroupId"
+       and userId = flag "user-id" (required string) ~doc:"STRING UserId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_user_to_permission_group
+           (Values.AssociateUserToPermissionGroupRequest.make ?clientToken
+              ~permissionGroupId ~userId ())
+           (Some Values.AssociateUserToPermissionGroupResponse.to_json)
+           (Some Values.AssociateUserToPermissionGroupResponse.error_to_json)])
 let create_changeset =
   Command.async ~summary:""
     ([%map_open.Command
@@ -261,6 +284,30 @@ let disable_user =
            (Values.DisableUserRequest.make ?clientToken ~userId ())
            (Some Values.DisableUserResponse.to_json)
            (Some Values.DisableUserResponse.error_to_json)])
+let disassociate_user_from_permission_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and permissionGroupId =
+         flag "permission-group-id" (required string)
+           ~doc:"STRING PermissionGroupId"
+       and userId = flag "user-id" (required string) ~doc:"STRING UserId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_user_from_permission_group
+           (Values.DisassociateUserFromPermissionGroupRequest.make
+              ?clientToken ~permissionGroupId ~userId ())
+           (Some Values.DisassociateUserFromPermissionGroupResponse.to_json)
+           (Some
+              Values.DisassociateUserFromPermissionGroupResponse.error_to_json)])
 let enable_user =
   Command.async ~summary:""
     ([%map_open.Command
@@ -338,6 +385,47 @@ let get_dataset =
            Io.get_dataset (Values.GetDatasetRequest.make ~datasetId ())
            (Some Values.GetDatasetResponse.to_json)
            (Some Values.GetDatasetResponse.error_to_json)])
+let get_external_data_view_access_details =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataViewId =
+         flag "data-view-id" (required string) ~doc:"STRING DataViewId"
+       and datasetId =
+         flag "dataset-id" (required string) ~doc:"STRING DatasetId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_external_data_view_access_details
+           (Values.GetExternalDataViewAccessDetailsRequest.make ~dataViewId
+              ~datasetId ())
+           (Some Values.GetExternalDataViewAccessDetailsResponse.to_json)
+           (Some
+              Values.GetExternalDataViewAccessDetailsResponse.error_to_json)])
+let get_permission_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and permissionGroupId =
+         flag "permission-group-id" (required string)
+           ~doc:"STRING PermissionGroupId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_permission_group
+           (Values.GetPermissionGroupRequest.make ~permissionGroupId ())
+           (Some Values.GetPermissionGroupResponse.to_json)
+           (Some Values.GetPermissionGroupResponse.error_to_json)])
 let get_programmatic_access_credentials =
   Command.async ~summary:""
     ([%map_open.Command
@@ -483,6 +571,28 @@ let list_permission_groups =
            (Values.ListPermissionGroupsRequest.make ?nextToken ~maxResults ())
            (Some Values.ListPermissionGroupsResponse.to_json)
            (Some Values.ListPermissionGroupsResponse.error_to_json)])
+let list_permission_groups_by_user =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and userId = flag "user-id" (required string) ~doc:"STRING UserId"
+       and maxResults =
+         flag "max-results" (required int) ~doc:"INT ResultLimit" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_permission_groups_by_user
+           (Values.ListPermissionGroupsByUserRequest.make ?nextToken ~userId
+              ~maxResults ())
+           (Some Values.ListPermissionGroupsByUserResponse.to_json)
+           (Some Values.ListPermissionGroupsByUserResponse.error_to_json)])
 let list_users =
   Command.async ~summary:""
     ([%map_open.Command
@@ -503,6 +613,30 @@ let list_users =
            (Values.ListUsersRequest.make ?nextToken ~maxResults ())
            (Some Values.ListUsersResponse.to_json)
            (Some Values.ListUsersResponse.error_to_json)])
+let list_users_by_permission_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and permissionGroupId =
+         flag "permission-group-id" (required string)
+           ~doc:"STRING PermissionGroupId"
+       and maxResults =
+         flag "max-results" (required int) ~doc:"INT ResultLimit" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_users_by_permission_group
+           (Values.ListUsersByPermissionGroupRequest.make ?nextToken
+              ~permissionGroupId ~maxResults ())
+           (Some Values.ListUsersByPermissionGroupResponse.to_json)
+           (Some Values.ListUsersByPermissionGroupResponse.error_to_json)])
 let reset_user_password =
   Command.async ~summary:""
     ([%map_open.Command
@@ -653,7 +787,9 @@ let update_user =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("create-changeset", create_changeset);
+    [("associate-user-to-permission-group",
+       associate_user_to_permission_group);
+    ("create-changeset", create_changeset);
     ("create-data-view", create_data_view);
     ("create-dataset", create_dataset);
     ("create-permission-group", create_permission_group);
@@ -661,10 +797,15 @@ let main =
     ("delete-dataset", delete_dataset);
     ("delete-permission-group", delete_permission_group);
     ("disable-user", disable_user);
+    ("disassociate-user-from-permission-group",
+      disassociate_user_from_permission_group);
     ("enable-user", enable_user);
     ("get-changeset", get_changeset);
     ("get-data-view", get_data_view);
     ("get-dataset", get_dataset);
+    ("get-external-data-view-access-details",
+      get_external_data_view_access_details);
+    ("get-permission-group", get_permission_group);
     ("get-programmatic-access-credentials",
       get_programmatic_access_credentials);
     ("get-user", get_user);
@@ -673,7 +814,9 @@ let main =
     ("list-data-views", list_data_views);
     ("list-datasets", list_datasets);
     ("list-permission-groups", list_permission_groups);
+    ("list-permission-groups-by-user", list_permission_groups_by_user);
     ("list-users", list_users);
+    ("list-users-by-permission-group", list_users_by_permission_group);
     ("reset-user-password", reset_user_password);
     ("update-changeset", update_changeset);
     ("update-dataset", update_dataset);

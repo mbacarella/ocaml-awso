@@ -127,6 +127,95 @@ let disassociate_gateway_from_server =
            (Values.DisassociateGatewayFromServerInput.make ~gatewayArn ())
            (Some Values.DisassociateGatewayFromServerOutput.to_json)
            (Some Values.DisassociateGatewayFromServerOutput.error_to_json)])
+let get_bandwidth_rate_limit_schedule =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and gatewayArn =
+         flag "gateway-arn" (required string) ~doc:"STRING GatewayArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_bandwidth_rate_limit_schedule
+           (Values.GetBandwidthRateLimitScheduleInput.make ~gatewayArn ())
+           (Some Values.GetBandwidthRateLimitScheduleOutput.to_json)
+           (Some Values.GetBandwidthRateLimitScheduleOutput.error_to_json)])
+let get_gateway =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and gatewayArn =
+         flag "gateway-arn" (required string) ~doc:"STRING GatewayArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_gateway (Values.GetGatewayInput.make ~gatewayArn ())
+           (Some Values.GetGatewayOutput.to_json)
+           (Some Values.GetGatewayOutput.error_to_json)])
+let get_hypervisor =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and hypervisorArn =
+         flag "hypervisor-arn" (required string) ~doc:"STRING ServerArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_hypervisor
+           (Values.GetHypervisorInput.make ~hypervisorArn ())
+           (Some Values.GetHypervisorOutput.to_json)
+           (Some Values.GetHypervisorOutput.error_to_json)])
+let get_hypervisor_property_mappings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and hypervisorArn =
+         flag "hypervisor-arn" (required string) ~doc:"STRING ServerArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_hypervisor_property_mappings
+           (Values.GetHypervisorPropertyMappingsInput.make ~hypervisorArn ())
+           (Some Values.GetHypervisorPropertyMappingsOutput.to_json)
+           (Some Values.GetHypervisorPropertyMappingsOutput.error_to_json)])
+let get_virtual_machine =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_virtual_machine
+           (Values.GetVirtualMachineInput.make ~resourceArn ())
+           (Some Values.GetVirtualMachineOutput.to_json)
+           (Some Values.GetVirtualMachineOutput.error_to_json)])
 let import_hypervisor_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -137,21 +226,21 @@ let import_hypervisor_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and kmsKeyArn =
-         flag "kms-key-arn" (optional string) ~doc:"STRING KmsKeyArn"
-       and password =
-         flag "password" (optional string) ~doc:"STRING Password"
-       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
        and username =
          flag "username" (optional string) ~doc:"STRING Username"
-       and host = flag "host" (required string) ~doc:"STRING Host"
-       and name = flag "name" (required string) ~doc:"STRING Name" in
+       and password =
+         flag "password" (optional string) ~doc:"STRING Password"
+       and kmsKeyArn =
+         flag "kms-key-arn" (optional string) ~doc:"STRING KmsKeyArn"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and name = flag "name" (required string) ~doc:"STRING Name"
+       and host = flag "host" (required string) ~doc:"STRING Host" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.import_hypervisor_configuration
-           (Values.ImportHypervisorConfigurationInput.make ?kmsKeyArn
-              ?password ?tags:(Option.map ~f:Values.Tags.of_json tags)
-              ?username ~host ~name ())
+           (Values.ImportHypervisorConfigurationInput.make ?username
+              ?password ?kmsKeyArn
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~name ~host ())
            (Some Values.ImportHypervisorConfigurationOutput.to_json)
            (Some Values.ImportHypervisorConfigurationOutput.error_to_json)])
 let list_gateways =
@@ -222,6 +311,8 @@ let list_virtual_machines =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and hypervisorArn =
+         flag "hypervisor-arn" (optional string) ~doc:"STRING ServerArn"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
@@ -229,9 +320,57 @@ let list_virtual_machines =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_virtual_machines
-           (Values.ListVirtualMachinesInput.make ?maxResults ?nextToken ())
-           (Some Values.ListVirtualMachinesOutput.to_json)
+           (Values.ListVirtualMachinesInput.make ?hypervisorArn ?maxResults
+              ?nextToken ()) (Some Values.ListVirtualMachinesOutput.to_json)
            (Some Values.ListVirtualMachinesOutput.error_to_json)])
+let put_bandwidth_rate_limit_schedule =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and gatewayArn =
+         flag "gateway-arn" (required string) ~doc:"STRING GatewayArn"
+       and bandwidthRateLimitIntervals =
+         flag "bandwidth-rate-limit-intervals" (required json_arg)
+           ~doc:"JSON BandwidthRateLimitIntervals" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_bandwidth_rate_limit_schedule
+           (Values.PutBandwidthRateLimitScheduleInput.make ~gatewayArn
+              ~bandwidthRateLimitIntervals:(Values.BandwidthRateLimitIntervals.of_json
+                                              bandwidthRateLimitIntervals) ())
+           (Some Values.PutBandwidthRateLimitScheduleOutput.to_json)
+           (Some Values.PutBandwidthRateLimitScheduleOutput.error_to_json)])
+let put_hypervisor_property_mappings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and hypervisorArn =
+         flag "hypervisor-arn" (required string) ~doc:"STRING ServerArn"
+       and vmwareToAwsTagMappings =
+         flag "vmware-to-aws-tag-mappings" (required json_arg)
+           ~doc:"JSON VmwareToAwsTagMappings"
+       and iamRoleArn =
+         flag "iam-role-arn" (required string) ~doc:"STRING IamRoleArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_hypervisor_property_mappings
+           (Values.PutHypervisorPropertyMappingsInput.make ~hypervisorArn
+              ~vmwareToAwsTagMappings:(Values.VmwareToAwsTagMappings.of_json
+                                         vmwareToAwsTagMappings) ~iamRoleArn
+              ()) (Some Values.PutHypervisorPropertyMappingsOutput.to_json)
+           (Some Values.PutHypervisorPropertyMappingsOutput.error_to_json)])
 let put_maintenance_start_time =
   Command.async ~summary:""
     ([%map_open.Command
@@ -242,9 +381,9 @@ let put_maintenance_start_time =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and dayOfWeek = flag "day-of-week" (optional int) ~doc:"INT DayOfWeek"
        and dayOfMonth =
          flag "day-of-month" (optional int) ~doc:"INT DayOfMonth"
-       and dayOfWeek = flag "day-of-week" (optional int) ~doc:"INT DayOfWeek"
        and gatewayArn =
          flag "gateway-arn" (required string) ~doc:"STRING GatewayArn"
        and hourOfDay = flag "hour-of-day" (required int) ~doc:"INT HourOfDay"
@@ -253,10 +392,29 @@ let put_maintenance_start_time =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_maintenance_start_time
-           (Values.PutMaintenanceStartTimeInput.make ?dayOfMonth ?dayOfWeek
+           (Values.PutMaintenanceStartTimeInput.make ?dayOfWeek ?dayOfMonth
               ~gatewayArn ~hourOfDay ~minuteOfHour ())
            (Some Values.PutMaintenanceStartTimeOutput.to_json)
            (Some Values.PutMaintenanceStartTimeOutput.error_to_json)])
+let start_virtual_machines_metadata_sync =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and hypervisorArn =
+         flag "hypervisor-arn" (required string) ~doc:"STRING ServerArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_virtual_machines_metadata_sync
+           (Values.StartVirtualMachinesMetadataSyncInput.make ~hypervisorArn
+              ())
+           (Some Values.StartVirtualMachinesMetadataSyncOutput.to_json)
+           (Some Values.StartVirtualMachinesMetadataSyncOutput.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -287,17 +445,17 @@ let test_hypervisor_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and password =
-         flag "password" (optional string) ~doc:"STRING Password"
        and username =
          flag "username" (optional string) ~doc:"STRING Username"
+       and password =
+         flag "password" (optional string) ~doc:"STRING Password"
        and gatewayArn =
          flag "gateway-arn" (required string) ~doc:"STRING GatewayArn"
        and host = flag "host" (required string) ~doc:"STRING Host" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.test_hypervisor_configuration
-           (Values.TestHypervisorConfigurationInput.make ?password ?username
+           (Values.TestHypervisorConfigurationInput.make ?username ?password
               ~gatewayArn ~host ())
            (Some Values.TestHypervisorConfigurationOutput.to_json)
            (Some Values.TestHypervisorConfigurationOutput.error_to_json)])
@@ -342,6 +500,24 @@ let update_gateway_information =
               ~gatewayArn ())
            (Some Values.UpdateGatewayInformationOutput.to_json)
            (Some Values.UpdateGatewayInformationOutput.error_to_json)])
+let update_gateway_software_now =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and gatewayArn =
+         flag "gateway-arn" (required string) ~doc:"STRING GatewayArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_gateway_software_now
+           (Values.UpdateGatewaySoftwareNowInput.make ~gatewayArn ())
+           (Some Values.UpdateGatewaySoftwareNowOutput.to_json)
+           (Some Values.UpdateGatewaySoftwareNowOutput.error_to_json)])
 let update_hypervisor =
   Command.async ~summary:""
     ([%map_open.Command
@@ -353,17 +529,21 @@ let update_hypervisor =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and host = flag "host" (optional string) ~doc:"STRING Host"
-       and password =
-         flag "password" (optional string) ~doc:"STRING Password"
        and username =
          flag "username" (optional string) ~doc:"STRING Username"
+       and password =
+         flag "password" (optional string) ~doc:"STRING Password"
+       and name = flag "name" (optional string) ~doc:"STRING Name"
+       and logGroupArn =
+         flag "log-group-arn" (optional string) ~doc:"STRING LogGroupArn"
        and hypervisorArn =
          flag "hypervisor-arn" (required string) ~doc:"STRING ServerArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_hypervisor
-           (Values.UpdateHypervisorInput.make ?host ?password ?username
-              ~hypervisorArn ()) (Some Values.UpdateHypervisorOutput.to_json)
+           (Values.UpdateHypervisorInput.make ?host ?username ?password ?name
+              ?logGroupArn ~hypervisorArn ())
+           (Some Values.UpdateHypervisorOutput.to_json)
            (Some Values.UpdateHypervisorOutput.error_to_json)])
 let main =
   Command.group
@@ -373,14 +553,24 @@ let main =
     ("delete-gateway", delete_gateway);
     ("delete-hypervisor", delete_hypervisor);
     ("disassociate-gateway-from-server", disassociate_gateway_from_server);
+    ("get-bandwidth-rate-limit-schedule", get_bandwidth_rate_limit_schedule);
+    ("get-gateway", get_gateway);
+    ("get-hypervisor", get_hypervisor);
+    ("get-hypervisor-property-mappings", get_hypervisor_property_mappings);
+    ("get-virtual-machine", get_virtual_machine);
     ("import-hypervisor-configuration", import_hypervisor_configuration);
     ("list-gateways", list_gateways);
     ("list-hypervisors", list_hypervisors);
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-virtual-machines", list_virtual_machines);
+    ("put-bandwidth-rate-limit-schedule", put_bandwidth_rate_limit_schedule);
+    ("put-hypervisor-property-mappings", put_hypervisor_property_mappings);
     ("put-maintenance-start-time", put_maintenance_start_time);
+    ("start-virtual-machines-metadata-sync",
+      start_virtual_machines_metadata_sync);
     ("tag-resource", tag_resource);
     ("test-hypervisor-configuration", test_hypervisor_configuration);
     ("untag-resource", untag_resource);
     ("update-gateway-information", update_gateway_information);
+    ("update-gateway-software-now", update_gateway_software_now);
     ("update-hypervisor", update_hypervisor)]

@@ -50,6 +50,9 @@ let create_f_h_i_r_datastore =
          flag "client-token" (optional string)
            ~doc:"STRING ClientTokenString"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and identityProviderConfiguration =
+         flag "identity-provider-configuration" (optional json_arg)
+           ~doc:"JSON IdentityProviderConfiguration"
        and datastoreTypeVersion =
          flag "datastore-type-version" (required json_arg)
            ~doc:"JSON FHIRVersion" in
@@ -64,6 +67,9 @@ let create_f_h_i_r_datastore =
                                     ~f:Values.PreloadDataConfig.of_json
                                     preloadDataConfig) ?clientToken
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?identityProviderConfiguration:(Option.map
+                                                ~f:Values.IdentityProviderConfiguration.of_json
+                                                identityProviderConfiguration)
               ~datastoreTypeVersion:(Values.FHIRVersion.of_json
                                        datastoreTypeVersion) ())
            (Some Values.CreateFHIRDatastoreResponse.to_json)
@@ -79,11 +85,11 @@ let delete_f_h_i_r_datastore =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and datastoreId =
-         flag "datastore-id" (optional string) ~doc:"STRING DatastoreId" in
+         flag "datastore-id" (required string) ~doc:"STRING DatastoreId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_f_h_i_r_datastore
-           (Values.DeleteFHIRDatastoreRequest.make ?datastoreId ())
+           (Values.DeleteFHIRDatastoreRequest.make ~datastoreId ())
            (Some Values.DeleteFHIRDatastoreResponse.to_json)
            (Some Values.DeleteFHIRDatastoreResponse.error_to_json)])
 let describe_f_h_i_r_datastore =
@@ -97,11 +103,11 @@ let describe_f_h_i_r_datastore =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and datastoreId =
-         flag "datastore-id" (optional string) ~doc:"STRING DatastoreId" in
+         flag "datastore-id" (required string) ~doc:"STRING DatastoreId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_f_h_i_r_datastore
-           (Values.DescribeFHIRDatastoreRequest.make ?datastoreId ())
+           (Values.DescribeFHIRDatastoreRequest.make ~datastoreId ())
            (Some Values.DescribeFHIRDatastoreResponse.to_json)
            (Some Values.DescribeFHIRDatastoreResponse.error_to_json)])
 let describe_f_h_i_r_export_job =
@@ -266,6 +272,9 @@ let start_f_h_i_r_export_job =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and jobName = flag "job-name" (optional string) ~doc:"STRING JobName"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING ClientTokenString"
        and outputDataConfig =
          flag "output-data-config" (required json_arg)
            ~doc:"JSON OutputDataConfig"
@@ -273,17 +282,14 @@ let start_f_h_i_r_export_job =
          flag "datastore-id" (required string) ~doc:"STRING DatastoreId"
        and dataAccessRoleArn =
          flag "data-access-role-arn" (required string)
-           ~doc:"STRING IamRoleArn"
-       and clientToken =
-         flag "client-token" (required string)
-           ~doc:"STRING ClientTokenString" in
+           ~doc:"STRING IamRoleArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_f_h_i_r_export_job
-           (Values.StartFHIRExportJobRequest.make ?jobName
+           (Values.StartFHIRExportJobRequest.make ?jobName ?clientToken
               ~outputDataConfig:(Values.OutputDataConfig.of_json
                                    outputDataConfig) ~datastoreId
-              ~dataAccessRoleArn ~clientToken ())
+              ~dataAccessRoleArn ())
            (Some Values.StartFHIRExportJobResponse.to_json)
            (Some Values.StartFHIRExportJobResponse.error_to_json)])
 let start_f_h_i_r_import_job =
@@ -297,6 +303,12 @@ let start_f_h_i_r_import_job =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and jobName = flag "job-name" (optional string) ~doc:"STRING JobName"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING ClientTokenString"
+       and validationLevel =
+         flag "validation-level" (optional json_arg)
+           ~doc:"JSON ValidationLevel"
        and inputDataConfig =
          flag "input-data-config" (required json_arg)
            ~doc:"JSON InputDataConfig"
@@ -307,19 +319,18 @@ let start_f_h_i_r_import_job =
          flag "datastore-id" (required string) ~doc:"STRING DatastoreId"
        and dataAccessRoleArn =
          flag "data-access-role-arn" (required string)
-           ~doc:"STRING IamRoleArn"
-       and clientToken =
-         flag "client-token" (required string)
-           ~doc:"STRING ClientTokenString" in
+           ~doc:"STRING IamRoleArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_f_h_i_r_import_job
-           (Values.StartFHIRImportJobRequest.make ?jobName
+           (Values.StartFHIRImportJobRequest.make ?jobName ?clientToken
+              ?validationLevel:(Option.map ~f:Values.ValidationLevel.of_json
+                                  validationLevel)
               ~inputDataConfig:(Values.InputDataConfig.of_json
                                   inputDataConfig)
               ~jobOutputDataConfig:(Values.OutputDataConfig.of_json
                                       jobOutputDataConfig) ~datastoreId
-              ~dataAccessRoleArn ~clientToken ())
+              ~dataAccessRoleArn ())
            (Some Values.StartFHIRImportJobResponse.to_json)
            (Some Values.StartFHIRImportJobResponse.error_to_json)])
 let tag_resource =

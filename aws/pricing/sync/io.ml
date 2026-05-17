@@ -15,5 +15,9 @@ let describe_services ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeServices input
 let get_attribute_values ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAttributeValues input
+let get_price_list_file_url ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetPriceListFileUrl input
 let get_products ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetProducts input
+let list_price_lists ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPriceLists input

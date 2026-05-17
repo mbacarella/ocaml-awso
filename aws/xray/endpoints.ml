@@ -4,12 +4,16 @@ open Values
 type ('i, 'o, 'e) t =
   | BatchGetTraces: (BatchGetTracesRequest.t, BatchGetTracesResult.t,
   BatchGetTracesResult.error) t 
+  | CancelTraceRetrieval: (CancelTraceRetrievalRequest.t,
+  CancelTraceRetrievalResult.t, CancelTraceRetrievalResult.error) t 
   | CreateGroup: (CreateGroupRequest.t, CreateGroupResult.t,
   CreateGroupResult.error) t 
   | CreateSamplingRule: (CreateSamplingRuleRequest.t,
   CreateSamplingRuleResult.t, CreateSamplingRuleResult.error) t 
   | DeleteGroup: (DeleteGroupRequest.t, DeleteGroupResult.t,
   DeleteGroupResult.error) t 
+  | DeleteResourcePolicy: (DeleteResourcePolicyRequest.t,
+  DeleteResourcePolicyResult.t, DeleteResourcePolicyResult.error) t 
   | DeleteSamplingRule: (DeleteSamplingRuleRequest.t,
   DeleteSamplingRuleResult.t, DeleteSamplingRuleResult.error) t 
   | GetEncryptionConfig: (GetEncryptionConfigRequest.t,
@@ -17,6 +21,8 @@ type ('i, 'o, 'e) t =
   | GetGroup: (GetGroupRequest.t, GetGroupResult.t, GetGroupResult.error) t 
   | GetGroups: (GetGroupsRequest.t, GetGroupsResult.t, GetGroupsResult.error)
   t 
+  | GetIndexingRules: (GetIndexingRulesRequest.t, GetIndexingRulesResult.t,
+  GetIndexingRulesResult.error) t 
   | GetInsight: (GetInsightRequest.t, GetInsightResult.t,
   GetInsightResult.error) t 
   | GetInsightEvents: (GetInsightEventsRequest.t, GetInsightEventsResult.t,
@@ -25,6 +31,8 @@ type ('i, 'o, 'e) t =
   GetInsightImpactGraphResult.t, GetInsightImpactGraphResult.error) t 
   | GetInsightSummaries: (GetInsightSummariesRequest.t,
   GetInsightSummariesResult.t, GetInsightSummariesResult.error) t 
+  | GetRetrievedTracesGraph: (GetRetrievedTracesGraphRequest.t,
+  GetRetrievedTracesGraphResult.t, GetRetrievedTracesGraphResult.error) t 
   | GetSamplingRules: (GetSamplingRulesRequest.t, GetSamplingRulesResult.t,
   GetSamplingRulesResult.error) t 
   | GetSamplingStatisticSummaries: (GetSamplingStatisticSummariesRequest.t,
@@ -39,73 +47,108 @@ type ('i, 'o, 'e) t =
   GetTimeSeriesServiceStatisticsResult.error) t 
   | GetTraceGraph: (GetTraceGraphRequest.t, GetTraceGraphResult.t,
   GetTraceGraphResult.error) t 
+  | GetTraceSegmentDestination: (GetTraceSegmentDestinationRequest.t,
+  GetTraceSegmentDestinationResult.t, GetTraceSegmentDestinationResult.error)
+  t 
   | GetTraceSummaries: (GetTraceSummariesRequest.t,
   GetTraceSummariesResult.t, GetTraceSummariesResult.error) t 
+  | ListResourcePolicies: (ListResourcePoliciesRequest.t,
+  ListResourcePoliciesResult.t, ListResourcePoliciesResult.error) t 
+  | ListRetrievedTraces: (ListRetrievedTracesRequest.t,
+  ListRetrievedTracesResult.t, ListRetrievedTracesResult.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | PutEncryptionConfig: (PutEncryptionConfigRequest.t,
   PutEncryptionConfigResult.t, PutEncryptionConfigResult.error) t 
+  | PutResourcePolicy: (PutResourcePolicyRequest.t,
+  PutResourcePolicyResult.t, PutResourcePolicyResult.error) t 
   | PutTelemetryRecords: (PutTelemetryRecordsRequest.t,
   PutTelemetryRecordsResult.t, PutTelemetryRecordsResult.error) t 
   | PutTraceSegments: (PutTraceSegmentsRequest.t, PutTraceSegmentsResult.t,
   PutTraceSegmentsResult.error) t 
+  | StartTraceRetrieval: (StartTraceRetrievalRequest.t,
+  StartTraceRetrievalResult.t, StartTraceRetrievalResult.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
   | UpdateGroup: (UpdateGroupRequest.t, UpdateGroupResult.t,
   UpdateGroupResult.error) t 
+  | UpdateIndexingRule: (UpdateIndexingRuleRequest.t,
+  UpdateIndexingRuleResult.t, UpdateIndexingRuleResult.error) t 
   | UpdateSamplingRule: (UpdateSamplingRuleRequest.t,
   UpdateSamplingRuleResult.t, UpdateSamplingRuleResult.error) t 
+  | UpdateTraceSegmentDestination: (UpdateTraceSegmentDestinationRequest.t,
+  UpdateTraceSegmentDestinationResult.t,
+  UpdateTraceSegmentDestinationResult.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | BatchGetTraces -> `POST
+  | CancelTraceRetrieval -> `POST
   | CreateGroup -> `POST
   | CreateSamplingRule -> `POST
   | DeleteGroup -> `POST
+  | DeleteResourcePolicy -> `POST
   | DeleteSamplingRule -> `POST
   | GetEncryptionConfig -> `POST
   | GetGroup -> `POST
   | GetGroups -> `POST
+  | GetIndexingRules -> `POST
   | GetInsight -> `POST
   | GetInsightEvents -> `POST
   | GetInsightImpactGraph -> `POST
   | GetInsightSummaries -> `POST
+  | GetRetrievedTracesGraph -> `POST
   | GetSamplingRules -> `POST
   | GetSamplingStatisticSummaries -> `POST
   | GetSamplingTargets -> `POST
   | GetServiceGraph -> `POST
   | GetTimeSeriesServiceStatistics -> `POST
   | GetTraceGraph -> `POST
+  | GetTraceSegmentDestination -> `POST
   | GetTraceSummaries -> `POST
+  | ListResourcePolicies -> `POST
+  | ListRetrievedTraces -> `POST
   | ListTagsForResource -> `POST
   | PutEncryptionConfig -> `POST
+  | PutResourcePolicy -> `POST
   | PutTelemetryRecords -> `POST
   | PutTraceSegments -> `POST
+  | StartTraceRetrieval -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateGroup -> `POST
+  | UpdateIndexingRule -> `POST
   | UpdateSamplingRule -> `POST
+  | UpdateTraceSegmentDestination -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | BatchGetTraces -> (Format.kasprintf Uri.of_string) "/Traces"
+      | CancelTraceRetrieval ->
+          (Format.kasprintf Uri.of_string) "/CancelTraceRetrieval"
       | CreateGroup -> (Format.kasprintf Uri.of_string) "/CreateGroup"
       | CreateSamplingRule ->
           (Format.kasprintf Uri.of_string) "/CreateSamplingRule"
       | DeleteGroup -> (Format.kasprintf Uri.of_string) "/DeleteGroup"
+      | DeleteResourcePolicy ->
+          (Format.kasprintf Uri.of_string) "/DeleteResourcePolicy"
       | DeleteSamplingRule ->
           (Format.kasprintf Uri.of_string) "/DeleteSamplingRule"
       | GetEncryptionConfig ->
           (Format.kasprintf Uri.of_string) "/EncryptionConfig"
       | GetGroup -> (Format.kasprintf Uri.of_string) "/GetGroup"
       | GetGroups -> (Format.kasprintf Uri.of_string) "/Groups"
+      | GetIndexingRules ->
+          (Format.kasprintf Uri.of_string) "/GetIndexingRules"
       | GetInsight -> (Format.kasprintf Uri.of_string) "/Insight"
       | GetInsightEvents -> (Format.kasprintf Uri.of_string) "/InsightEvents"
       | GetInsightImpactGraph ->
           (Format.kasprintf Uri.of_string) "/InsightImpactGraph"
       | GetInsightSummaries ->
           (Format.kasprintf Uri.of_string) "/InsightSummaries"
+      | GetRetrievedTracesGraph ->
+          (Format.kasprintf Uri.of_string) "/GetRetrievedTracesGraph"
       | GetSamplingRules ->
           (Format.kasprintf Uri.of_string) "/GetSamplingRules"
       | GetSamplingStatisticSummaries ->
@@ -116,20 +159,34 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetTimeSeriesServiceStatistics ->
           (Format.kasprintf Uri.of_string) "/TimeSeriesServiceStatistics"
       | GetTraceGraph -> (Format.kasprintf Uri.of_string) "/TraceGraph"
+      | GetTraceSegmentDestination ->
+          (Format.kasprintf Uri.of_string) "/GetTraceSegmentDestination"
       | GetTraceSummaries ->
           (Format.kasprintf Uri.of_string) "/TraceSummaries"
+      | ListResourcePolicies ->
+          (Format.kasprintf Uri.of_string) "/ListResourcePolicies"
+      | ListRetrievedTraces ->
+          (Format.kasprintf Uri.of_string) "/ListRetrievedTraces"
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/ListTagsForResource"
       | PutEncryptionConfig ->
           (Format.kasprintf Uri.of_string) "/PutEncryptionConfig"
+      | PutResourcePolicy ->
+          (Format.kasprintf Uri.of_string) "/PutResourcePolicy"
       | PutTelemetryRecords ->
           (Format.kasprintf Uri.of_string) "/TelemetryRecords"
       | PutTraceSegments -> (Format.kasprintf Uri.of_string) "/TraceSegments"
+      | StartTraceRetrieval ->
+          (Format.kasprintf Uri.of_string) "/StartTraceRetrieval"
       | TagResource -> (Format.kasprintf Uri.of_string) "/TagResource"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/UntagResource"
       | UpdateGroup -> (Format.kasprintf Uri.of_string) "/UpdateGroup"
+      | UpdateIndexingRule ->
+          (Format.kasprintf Uri.of_string) "/UpdateIndexingRule"
       | UpdateSamplingRule ->
-          (Format.kasprintf Uri.of_string) "/UpdateSamplingRule")
+          (Format.kasprintf Uri.of_string) "/UpdateSamplingRule"
+      | UpdateTraceSegmentDestination ->
+          (Format.kasprintf Uri.of_string) "/UpdateTraceSegmentDestination")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -149,6 +206,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               req.BatchGetTracesRequest.traceIds));
                       Option.map req.BatchGetTracesRequest.nextToken
                         ~f:(fun x -> ("NextToken", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CancelTraceRetrieval ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("RetrievalToken",
+                           (RetrievalToken.to_value
+                              req.CancelTraceRetrievalRequest.retrievalToken))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -228,6 +305,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteResourcePolicy ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("PolicyName",
+                           (PolicyName.to_value
+                              req.DeleteResourcePolicyRequest.policyName));
+                      Option.map
+                        req.DeleteResourcePolicyRequest.policyRevisionId
+                        ~f:(fun x ->
+                              ("PolicyRevisionId",
+                                (PolicyRevisionId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteSamplingRule ->
       let (headers, body) =
         let headers =
@@ -283,6 +385,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Option.map req.GetGroupsRequest.nextToken
                          ~f:(fun x ->
                                ("NextToken", (GetGroupsNextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetIndexingRules ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.GetIndexingRulesRequest.nextToken
+                         ~f:(fun x -> ("NextToken", (String_.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -403,6 +523,28 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetRetrievedTracesGraph ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("RetrievalToken",
+                           (RetrievalToken.to_value
+                              req.GetRetrievedTracesGraphRequest.retrievalToken));
+                      Option.map req.GetRetrievedTracesGraphRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetSamplingRules ->
       let (headers, body) =
         let headers =
@@ -452,7 +594,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("SamplingStatisticsDocuments",
                            (SamplingStatisticsDocumentList.to_value
-                              req.GetSamplingTargetsRequest.samplingStatisticsDocuments))])
+                              req.GetSamplingTargetsRequest.samplingStatisticsDocuments));
+                      Option.map
+                        req.GetSamplingTargetsRequest.samplingBoostStatisticsDocuments
+                        ~f:(fun x ->
+                              ("SamplingBoostStatisticsDocuments",
+                                (SamplingBoostStatisticsDocumentList.to_value
+                                   x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -558,6 +706,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetTraceSegmentDestination ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetTraceSummaries ->
       let (headers, body) =
         let headers =
@@ -592,6 +743,51 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("FilterExpression",
                                 (FilterExpression.to_value x)));
                       Option.map req.GetTraceSummariesRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListResourcePolicies ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListResourcePoliciesRequest.nextToken
+                         ~f:(fun x ->
+                               ("NextToken",
+                                 (ResourcePolicyNextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRetrievedTraces ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("RetrievalToken",
+                           (RetrievalToken.to_value
+                              req.ListRetrievedTracesRequest.retrievalToken));
+                      Option.map req.ListRetrievedTracesRequest.traceFormat
+                        ~f:(fun x ->
+                              ("TraceFormat", (TraceFormatType.to_value x)));
+                      Option.map req.ListRetrievedTracesRequest.nextToken
                         ~f:(fun x -> ("NextToken", (String_.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -644,6 +840,40 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutResourcePolicy ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("PolicyName",
+                           (PolicyName.to_value
+                              req.PutResourcePolicyRequest.policyName));
+                      Some
+                        ("PolicyDocument",
+                          (PolicyDocument.to_value
+                             req.PutResourcePolicyRequest.policyDocument));
+                      Option.map
+                        req.PutResourcePolicyRequest.policyRevisionId
+                        ~f:(fun x ->
+                              ("PolicyRevisionId",
+                                (PolicyRevisionId.to_value x)));
+                      Option.map
+                        req.PutResourcePolicyRequest.bypassPolicyLockoutCheck
+                        ~f:(fun x ->
+                              ("BypassPolicyLockoutCheck",
+                                (Boolean.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | PutTelemetryRecords ->
       let (headers, body) =
         let headers =
@@ -685,6 +915,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("TraceSegmentDocuments",
                            (TraceSegmentDocumentList.to_value
                               req.PutTraceSegmentsRequest.traceSegmentDocuments))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartTraceRetrieval ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("TraceIds",
+                           (TraceIdListForRetrieval.to_value
+                              req.StartTraceRetrievalRequest.traceIds));
+                      Some
+                        ("StartTime",
+                          (Timestamp.to_value
+                             req.StartTraceRetrievalRequest.startTime));
+                      Some
+                        ("EndTime",
+                          (Timestamp.to_value
+                             req.StartTraceRetrievalRequest.endTime))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -767,6 +1025,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateIndexingRule ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Name",
+                           (String_.to_value
+                              req.UpdateIndexingRuleRequest.name));
+                      Some
+                        ("Rule",
+                          (IndexingRuleValueUpdate.to_value
+                             req.UpdateIndexingRuleRequest.rule))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateSamplingRule ->
       let (headers, body) =
         let headers =
@@ -780,6 +1062,27 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("SamplingRuleUpdate",
                            (SamplingRuleUpdate.to_value
                               req.UpdateSamplingRuleRequest.samplingRuleUpdate))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateTraceSegmentDestination ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateTraceSegmentDestinationRequest.destination
+                         ~f:(fun x ->
+                               ("Destination",
+                                 (TraceSegmentDestination.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -839,6 +1142,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (BatchGetTracesResult.of_json (response_to_json resp))
       else Error (parse_aws_error (Some BatchGetTracesResult.error_of_json))
+  | CancelTraceRetrieval ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CancelTraceRetrievalResult.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some CancelTraceRetrievalResult.error_of_json))
   | CreateGroup ->
       if is_success
       then Ok (CreateGroupResult.of_json (response_to_json resp))
@@ -855,6 +1167,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DeleteGroupResult.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some DeleteGroupResult.error_of_json))
+  | DeleteResourcePolicy ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteResourcePolicyResult.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteResourcePolicyResult.error_of_json))
   | DeleteSamplingRule ->
       if is_success
       then Ok (DeleteSamplingRuleResult.of_json (response_to_json resp))
@@ -874,6 +1195,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetGroupsResult.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetGroupsResult.error_of_json))
+  | GetIndexingRules ->
+      if is_success
+      then Ok (GetIndexingRulesResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetIndexingRulesResult.error_of_json))
   | GetInsight ->
       if is_success
       then Ok (GetInsightResult.of_json (response_to_json resp))
@@ -895,6 +1221,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetInsightSummariesResult.error_of_json))
+  | GetRetrievedTracesGraph ->
+      if is_success
+      then Ok (GetRetrievedTracesGraphResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetRetrievedTracesGraphResult.error_of_json))
   | GetSamplingRules ->
       if is_success
       then Ok (GetSamplingRulesResult.of_json (response_to_json resp))
@@ -933,11 +1265,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetTraceGraphResult.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetTraceGraphResult.error_of_json))
+  | GetTraceSegmentDestination ->
+      if is_success
+      then
+        Ok (GetTraceSegmentDestinationResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetTraceSegmentDestinationResult.error_of_json))
   | GetTraceSummaries ->
       if is_success
       then Ok (GetTraceSummariesResult.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some GetTraceSummariesResult.error_of_json))
+  | ListResourcePolicies ->
+      if is_success
+      then Ok (ListResourcePoliciesResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListResourcePoliciesResult.error_of_json))
+  | ListRetrievedTraces ->
+      if is_success
+      then Ok (ListRetrievedTracesResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListRetrievedTracesResult.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
@@ -950,6 +1302,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some PutEncryptionConfigResult.error_of_json))
+  | PutResourcePolicy ->
+      if is_success
+      then Ok (PutResourcePolicyResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some PutResourcePolicyResult.error_of_json))
   | PutTelemetryRecords ->
       if is_success
       then
@@ -964,6 +1321,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (PutTraceSegmentsResult.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some PutTraceSegmentsResult.error_of_json))
+  | StartTraceRetrieval ->
+      if is_success
+      then Ok (StartTraceRetrievalResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartTraceRetrievalResult.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -982,8 +1345,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (UpdateGroupResult.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UpdateGroupResult.error_of_json))
+  | UpdateIndexingRule ->
+      if is_success
+      then Ok (UpdateIndexingRuleResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateIndexingRuleResult.error_of_json))
   | UpdateSamplingRule ->
       if is_success
       then Ok (UpdateSamplingRuleResult.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some UpdateSamplingRuleResult.error_of_json))
+  | UpdateTraceSegmentDestination ->
+      if is_success
+      then
+        Ok
+          (UpdateTraceSegmentDestinationResult.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateTraceSegmentDestinationResult.error_of_json))

@@ -251,6 +251,8 @@ module PerformanceMetricsProperties =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -337,11 +339,12 @@ module RDSDatabase =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceIdentifier") in
       make ~databaseName ~instanceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let databaseName =
-        field_map_exn json "DatabaseName" RDSDatabaseName.of_json in
+        field_map_exn json__ "DatabaseName" RDSDatabaseName.of_json in
       let instanceIdentifier =
-        field_map_exn json "InstanceIdentifier" RDSInstanceIdentifier.of_json in
+        field_map_exn json__ "InstanceIdentifier"
+          RDSInstanceIdentifier.of_json in
       make ~databaseName ~instanceIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The database details of an Amazon RDS database."]
@@ -410,12 +413,12 @@ module RedshiftDatabase =
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ~clusterIdentifier ~databaseName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier"
+        field_map_exn json__ "ClusterIdentifier"
           RedshiftClusterIdentifier.of_json in
       let databaseName =
-        field_map_exn json "DatabaseName" RedshiftDatabaseName.of_json in
+        field_map_exn json__ "DatabaseName" RedshiftDatabaseName.of_json in
       make ~clusterIdentifier ~databaseName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -776,13 +779,13 @@ module RealtimeEndpointInfo =
           (Xml.child xml_arg0 "PeakRequestsPerSecond") in
       make ?endpointStatus ?endpointUrl ?createdAt ?peakRequestsPerSecond ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointStatus =
-        field_map json "EndpointStatus" RealtimeEndpointStatus.of_json in
-      let endpointUrl = field_map json "EndpointUrl" VipURL.of_json in
-      let createdAt = field_map json "CreatedAt" EpochTime.of_json in
+        field_map json__ "EndpointStatus" RealtimeEndpointStatus.of_json in
+      let endpointUrl = field_map json__ "EndpointUrl" VipURL.of_json in
+      let createdAt = field_map json__ "CreatedAt" EpochTime.of_json in
       let peakRequestsPerSecond =
-        field_map json "PeakRequestsPerSecond" IntegerType.of_json in
+        field_map json__ "PeakRequestsPerSecond" IntegerType.of_json in
       make ?endpointStatus ?endpointUrl ?createdAt ?peakRequestsPerSecond ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -841,6 +844,8 @@ module TrainingParameters =
                     (fun x -> (StringType.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -884,9 +889,9 @@ module PerformanceMetrics =
           (Xml.child xml_arg0 "Properties") in
       make ?properties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let properties =
-        field_map json "Properties" PerformanceMetricsProperties.of_json in
+        field_map json__ "Properties" PerformanceMetricsProperties.of_json in
       make ?properties ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -987,17 +992,17 @@ module RDSMetadata =
       make ?dataPipelineId ?serviceRole ?resourceRole ?selectSqlQuery
         ?databaseUserName ?database ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataPipelineId =
-        field_map json "DataPipelineId" EDPPipelineId.of_json in
-      let serviceRole = field_map json "ServiceRole" EDPServiceRole.of_json in
+        field_map json__ "DataPipelineId" EDPPipelineId.of_json in
+      let serviceRole = field_map json__ "ServiceRole" EDPServiceRole.of_json in
       let resourceRole =
-        field_map json "ResourceRole" EDPResourceRole.of_json in
+        field_map json__ "ResourceRole" EDPResourceRole.of_json in
       let selectSqlQuery =
-        field_map json "SelectSqlQuery" RDSSelectSqlQuery.of_json in
+        field_map json__ "SelectSqlQuery" RDSSelectSqlQuery.of_json in
       let databaseUserName =
-        field_map json "DatabaseUserName" RDSDatabaseUsername.of_json in
-      let database = field_map json "Database" RDSDatabase.of_json in
+        field_map json__ "DatabaseUserName" RDSDatabaseUsername.of_json in
+      let database = field_map json__ "Database" RDSDatabase.of_json in
       make ?dataPipelineId ?serviceRole ?resourceRole ?selectSqlQuery
         ?databaseUserName ?database ()
     let to_json v = composed_to_json to_value v
@@ -1036,13 +1041,13 @@ module RedshiftMetadata =
           (Xml.child xml_arg0 "RedshiftDatabase") in
       make ?selectSqlQuery ?databaseUserName ?redshiftDatabase ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let selectSqlQuery =
-        field_map json "SelectSqlQuery" RedshiftSelectSqlQuery.of_json in
+        field_map json__ "SelectSqlQuery" RedshiftSelectSqlQuery.of_json in
       let databaseUserName =
-        field_map json "DatabaseUserName" RedshiftDatabaseUsername.of_json in
+        field_map json__ "DatabaseUserName" RedshiftDatabaseUsername.of_json in
       let redshiftDatabase =
-        field_map json "RedshiftDatabase" RedshiftDatabase.of_json in
+        field_map json__ "RedshiftDatabase" RedshiftDatabase.of_json in
       make ?selectSqlQuery ?databaseUserName ?redshiftDatabase ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1173,6 +1178,8 @@ module DetailsMap =
                     (fun x -> (DetailsValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1201,6 +1208,8 @@ module ScoreValuePerLabelMap =
                     (fun x -> (ScoreValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1273,9 +1282,9 @@ module Tag =
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map json__ "Key" TagKey.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A custom key-value pair associated with an ML object, such as an ML model."]
@@ -1449,33 +1458,33 @@ module MLModel =
         ?status ?name ?lastUpdatedAt ?createdAt ?createdByIamUser
         ?trainingDataSourceId ?mLModelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startedAt = field_map json "StartedAt" EpochTime.of_json in
-      let finishedAt = field_map json "FinishedAt" EpochTime.of_json in
-      let computeTime = field_map json "ComputeTime" LongType.of_json in
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let startedAt = field_map json__ "StartedAt" EpochTime.of_json in
+      let finishedAt = field_map json__ "FinishedAt" EpochTime.of_json in
+      let computeTime = field_map json__ "ComputeTime" LongType.of_json in
+      let message = field_map json__ "Message" Message.of_json in
       let scoreThresholdLastUpdatedAt =
-        field_map json "ScoreThresholdLastUpdatedAt" EpochTime.of_json in
+        field_map json__ "ScoreThresholdLastUpdatedAt" EpochTime.of_json in
       let scoreThreshold =
-        field_map json "ScoreThreshold" ScoreThreshold.of_json in
-      let mLModelType = field_map json "MLModelType" MLModelType.of_json in
-      let algorithm = field_map json "Algorithm" Algorithm.of_json in
+        field_map json__ "ScoreThreshold" ScoreThreshold.of_json in
+      let mLModelType = field_map json__ "MLModelType" MLModelType.of_json in
+      let algorithm = field_map json__ "Algorithm" Algorithm.of_json in
       let inputDataLocationS3 =
-        field_map json "InputDataLocationS3" S3Url.of_json in
+        field_map json__ "InputDataLocationS3" S3Url.of_json in
       let trainingParameters =
-        field_map json "TrainingParameters" TrainingParameters.of_json in
+        field_map json__ "TrainingParameters" TrainingParameters.of_json in
       let endpointInfo =
-        field_map json "EndpointInfo" RealtimeEndpointInfo.of_json in
-      let sizeInBytes = field_map json "SizeInBytes" LongType.of_json in
-      let status = field_map json "Status" EntityStatus.of_json in
-      let name = field_map json "Name" MLModelName.of_json in
-      let lastUpdatedAt = field_map json "LastUpdatedAt" EpochTime.of_json in
-      let createdAt = field_map json "CreatedAt" EpochTime.of_json in
+        field_map json__ "EndpointInfo" RealtimeEndpointInfo.of_json in
+      let sizeInBytes = field_map json__ "SizeInBytes" LongType.of_json in
+      let status = field_map json__ "Status" EntityStatus.of_json in
+      let name = field_map json__ "Name" MLModelName.of_json in
+      let lastUpdatedAt = field_map json__ "LastUpdatedAt" EpochTime.of_json in
+      let createdAt = field_map json__ "CreatedAt" EpochTime.of_json in
       let createdByIamUser =
-        field_map json "CreatedByIamUser" AwsUserArn.of_json in
+        field_map json__ "CreatedByIamUser" AwsUserArn.of_json in
       let trainingDataSourceId =
-        field_map json "TrainingDataSourceId" EntityId.of_json in
-      let mLModelId = field_map json "MLModelId" EntityId.of_json in
+        field_map json__ "TrainingDataSourceId" EntityId.of_json in
+      let mLModelId = field_map json__ "MLModelId" EntityId.of_json in
       make ?startedAt ?finishedAt ?computeTime ?message
         ?scoreThresholdLastUpdatedAt ?scoreThreshold ?mLModelType ?algorithm
         ?inputDataLocationS3 ?trainingParameters ?endpointInfo ?sizeInBytes
@@ -1612,25 +1621,25 @@ module Evaluation =
         ?inputDataLocationS3 ?evaluationDataSourceId ?mLModelId ?evaluationId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startedAt = field_map json "StartedAt" EpochTime.of_json in
-      let finishedAt = field_map json "FinishedAt" EpochTime.of_json in
-      let computeTime = field_map json "ComputeTime" LongType.of_json in
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let startedAt = field_map json__ "StartedAt" EpochTime.of_json in
+      let finishedAt = field_map json__ "FinishedAt" EpochTime.of_json in
+      let computeTime = field_map json__ "ComputeTime" LongType.of_json in
+      let message = field_map json__ "Message" Message.of_json in
       let performanceMetrics =
-        field_map json "PerformanceMetrics" PerformanceMetrics.of_json in
-      let status = field_map json "Status" EntityStatus.of_json in
-      let name = field_map json "Name" EntityName.of_json in
-      let lastUpdatedAt = field_map json "LastUpdatedAt" EpochTime.of_json in
-      let createdAt = field_map json "CreatedAt" EpochTime.of_json in
+        field_map json__ "PerformanceMetrics" PerformanceMetrics.of_json in
+      let status = field_map json__ "Status" EntityStatus.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
+      let lastUpdatedAt = field_map json__ "LastUpdatedAt" EpochTime.of_json in
+      let createdAt = field_map json__ "CreatedAt" EpochTime.of_json in
       let createdByIamUser =
-        field_map json "CreatedByIamUser" AwsUserArn.of_json in
+        field_map json__ "CreatedByIamUser" AwsUserArn.of_json in
       let inputDataLocationS3 =
-        field_map json "InputDataLocationS3" S3Url.of_json in
+        field_map json__ "InputDataLocationS3" S3Url.of_json in
       let evaluationDataSourceId =
-        field_map json "EvaluationDataSourceId" EntityId.of_json in
-      let mLModelId = field_map json "MLModelId" EntityId.of_json in
-      let evaluationId = field_map json "EvaluationId" EntityId.of_json in
+        field_map json__ "EvaluationDataSourceId" EntityId.of_json in
+      let mLModelId = field_map json__ "MLModelId" EntityId.of_json in
+      let evaluationId = field_map json__ "EvaluationId" EntityId.of_json in
       make ?startedAt ?finishedAt ?computeTime ?message ?performanceMetrics
         ?status ?name ?lastUpdatedAt ?createdAt ?createdByIamUser
         ?inputDataLocationS3 ?evaluationDataSourceId ?mLModelId ?evaluationId
@@ -1794,29 +1803,30 @@ module DataSource =
         ?dataSizeInBytes ?lastUpdatedAt ?createdAt ?createdByIamUser
         ?dataRearrangement ?dataLocationS3 ?dataSourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startedAt = field_map json "StartedAt" EpochTime.of_json in
-      let finishedAt = field_map json "FinishedAt" EpochTime.of_json in
-      let computeTime = field_map json "ComputeTime" LongType.of_json in
+    let of_json json__ =
+      let startedAt = field_map json__ "StartedAt" EpochTime.of_json in
+      let finishedAt = field_map json__ "FinishedAt" EpochTime.of_json in
+      let computeTime = field_map json__ "ComputeTime" LongType.of_json in
       let computeStatistics =
-        field_map json "ComputeStatistics" ComputeStatistics.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let rDSMetadata = field_map json "RDSMetadata" RDSMetadata.of_json in
+        field_map json__ "ComputeStatistics" ComputeStatistics.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let rDSMetadata = field_map json__ "RDSMetadata" RDSMetadata.of_json in
       let redshiftMetadata =
-        field_map json "RedshiftMetadata" RedshiftMetadata.of_json in
-      let message = field_map json "Message" Message.of_json in
-      let status = field_map json "Status" EntityStatus.of_json in
-      let name = field_map json "Name" EntityName.of_json in
-      let numberOfFiles = field_map json "NumberOfFiles" LongType.of_json in
-      let dataSizeInBytes = field_map json "DataSizeInBytes" LongType.of_json in
-      let lastUpdatedAt = field_map json "LastUpdatedAt" EpochTime.of_json in
-      let createdAt = field_map json "CreatedAt" EpochTime.of_json in
+        field_map json__ "RedshiftMetadata" RedshiftMetadata.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let status = field_map json__ "Status" EntityStatus.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
+      let numberOfFiles = field_map json__ "NumberOfFiles" LongType.of_json in
+      let dataSizeInBytes =
+        field_map json__ "DataSizeInBytes" LongType.of_json in
+      let lastUpdatedAt = field_map json__ "LastUpdatedAt" EpochTime.of_json in
+      let createdAt = field_map json__ "CreatedAt" EpochTime.of_json in
       let createdByIamUser =
-        field_map json "CreatedByIamUser" AwsUserArn.of_json in
+        field_map json__ "CreatedByIamUser" AwsUserArn.of_json in
       let dataRearrangement =
-        field_map json "DataRearrangement" DataRearrangement.of_json in
-      let dataLocationS3 = field_map json "DataLocationS3" S3Url.of_json in
-      let dataSourceId = field_map json "DataSourceId" EntityId.of_json in
+        field_map json__ "DataRearrangement" DataRearrangement.of_json in
+      let dataLocationS3 = field_map json__ "DataLocationS3" S3Url.of_json in
+      let dataSourceId = field_map json__ "DataSourceId" EntityId.of_json in
       make ?startedAt ?finishedAt ?computeTime ?computeStatistics ?roleARN
         ?rDSMetadata ?redshiftMetadata ?message ?status ?name ?numberOfFiles
         ?dataSizeInBytes ?lastUpdatedAt ?createdAt ?createdByIamUser
@@ -1970,29 +1980,29 @@ module BatchPrediction =
         ?createdAt ?createdByIamUser ?inputDataLocationS3
         ?batchPredictionDataSourceId ?mLModelId ?batchPredictionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let invalidRecordCount =
-        field_map json "InvalidRecordCount" LongType.of_json in
+        field_map json__ "InvalidRecordCount" LongType.of_json in
       let totalRecordCount =
-        field_map json "TotalRecordCount" LongType.of_json in
-      let startedAt = field_map json "StartedAt" EpochTime.of_json in
-      let finishedAt = field_map json "FinishedAt" EpochTime.of_json in
-      let computeTime = field_map json "ComputeTime" LongType.of_json in
-      let message = field_map json "Message" Message.of_json in
-      let outputUri = field_map json "OutputUri" S3Url.of_json in
-      let status = field_map json "Status" EntityStatus.of_json in
-      let name = field_map json "Name" EntityName.of_json in
-      let lastUpdatedAt = field_map json "LastUpdatedAt" EpochTime.of_json in
-      let createdAt = field_map json "CreatedAt" EpochTime.of_json in
+        field_map json__ "TotalRecordCount" LongType.of_json in
+      let startedAt = field_map json__ "StartedAt" EpochTime.of_json in
+      let finishedAt = field_map json__ "FinishedAt" EpochTime.of_json in
+      let computeTime = field_map json__ "ComputeTime" LongType.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let outputUri = field_map json__ "OutputUri" S3Url.of_json in
+      let status = field_map json__ "Status" EntityStatus.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
+      let lastUpdatedAt = field_map json__ "LastUpdatedAt" EpochTime.of_json in
+      let createdAt = field_map json__ "CreatedAt" EpochTime.of_json in
       let createdByIamUser =
-        field_map json "CreatedByIamUser" AwsUserArn.of_json in
+        field_map json__ "CreatedByIamUser" AwsUserArn.of_json in
       let inputDataLocationS3 =
-        field_map json "InputDataLocationS3" S3Url.of_json in
+        field_map json__ "InputDataLocationS3" S3Url.of_json in
       let batchPredictionDataSourceId =
-        field_map json "BatchPredictionDataSourceId" EntityId.of_json in
-      let mLModelId = field_map json "MLModelId" EntityId.of_json in
+        field_map json__ "BatchPredictionDataSourceId" EntityId.of_json in
+      let mLModelId = field_map json__ "MLModelId" EntityId.of_json in
       let batchPredictionId =
-        field_map json "BatchPredictionId" EntityId.of_json in
+        field_map json__ "BatchPredictionId" EntityId.of_json in
       make ?invalidRecordCount ?totalRecordCount ?startedAt ?finishedAt
         ?computeTime ?message ?outputUri ?status ?name ?lastUpdatedAt
         ?createdAt ?createdByIamUser ?inputDataLocationS3
@@ -2038,11 +2048,11 @@ module RedshiftDatabaseCredentials =
           (Xml.child_exn ~context:context_ xml_arg0 "Username") in
       make ~password ~username ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let password =
-        field_map_exn json "Password" RedshiftDatabasePassword.of_json in
+        field_map_exn json__ "Password" RedshiftDatabasePassword.of_json in
       let username =
-        field_map_exn json "Username" RedshiftDatabaseUsername.of_json in
+        field_map_exn json__ "Username" RedshiftDatabaseUsername.of_json in
       make ~password ~username ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2051,6 +2061,9 @@ module EDPSecurityGroupIds =
   struct
     type nonrec t = EDPSecurityGroupId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EDPSecurityGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2112,11 +2125,11 @@ module RDSDatabaseCredentials =
           (Xml.child_exn ~context:context_ xml_arg0 "Username") in
       make ~password ~username ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let password =
-        field_map_exn json "Password" RDSDatabasePassword.of_json in
+        field_map_exn json__ "Password" RDSDatabasePassword.of_json in
       let username =
-        field_map_exn json "Username" RDSDatabaseUsername.of_json in
+        field_map_exn json__ "Username" RDSDatabaseUsername.of_json in
       make ~password ~username ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2139,9 +2152,9 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "code" ErrorCode.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let code = field_map json__ "code" ErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2164,9 +2177,9 @@ module InvalidInputException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "code" ErrorCode.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let code = field_map json__ "code" ErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2189,9 +2202,9 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "code" ErrorCode.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let code = field_map json__ "code" ErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A specified resource cannot be located."]
@@ -2213,9 +2226,9 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "code" ErrorCode.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let code = field_map json__ "code" ErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2259,12 +2272,13 @@ module Prediction =
         (Option.map ~f:Label.of_xml) (Xml.child xml_arg0 "predictedLabel") in
       make ?details ?predictedScores ?predictedValue ?predictedLabel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let details = field_map json "details" DetailsMap.of_json in
+    let of_json json__ =
+      let details = field_map json__ "details" DetailsMap.of_json in
       let predictedScores =
-        field_map json "predictedScores" ScoreValuePerLabelMap.of_json in
-      let predictedValue = field_map json "predictedValue" FloatLabel.of_json in
-      let predictedLabel = field_map json "predictedLabel" Label.of_json in
+        field_map json__ "predictedScores" ScoreValuePerLabelMap.of_json in
+      let predictedValue =
+        field_map json__ "predictedValue" FloatLabel.of_json in
+      let predictedLabel = field_map json__ "predictedLabel" Label.of_json in
       make ?details ?predictedScores ?predictedValue ?predictedLabel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2283,8 +2297,8 @@ module PredictorNotMountedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2310,6 +2324,8 @@ module Record =
                     (fun x -> (VariableValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2364,6 +2380,9 @@ module TagList =
     type nonrec t = Tag.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2419,6 +2438,9 @@ module MLModels =
   struct
     type nonrec t = MLModel.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MLModel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2549,6 +2571,9 @@ module Evaluations =
   struct
     type nonrec t = Evaluation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Evaluation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2618,6 +2643,9 @@ module DataSources =
   struct
     type nonrec t = DataSource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataSource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2681,6 +2709,9 @@ module BatchPredictions =
   struct
     type nonrec t = BatchPrediction.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchPrediction.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2762,8 +2793,8 @@ module InvalidTagException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end
@@ -2772,6 +2803,9 @@ module TagKeyList =
     type nonrec t = TagKey.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2809,9 +2843,9 @@ module IdempotentParameterMismatchException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "code" ErrorCode.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let code = field_map json__ "code" ErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2868,13 +2902,14 @@ module S3DataSpec =
       make ?dataSchemaLocationS3 ?dataSchema ?dataRearrangement
         ~dataLocationS3 ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataSchemaLocationS3 =
-        field_map json "DataSchemaLocationS3" S3Url.of_json in
-      let dataSchema = field_map json "DataSchema" DataSchema.of_json in
+        field_map json__ "DataSchemaLocationS3" S3Url.of_json in
+      let dataSchema = field_map json__ "DataSchema" DataSchema.of_json in
       let dataRearrangement =
-        field_map json "DataRearrangement" DataRearrangement.of_json in
-      let dataLocationS3 = field_map_exn json "DataLocationS3" S3Url.of_json in
+        field_map json__ "DataRearrangement" DataRearrangement.of_json in
+      let dataLocationS3 =
+        field_map_exn json__ "DataLocationS3" S3Url.of_json in
       make ?dataSchemaLocationS3 ?dataSchema ?dataRearrangement
         ~dataLocationS3 ()
     let to_json v = composed_to_json to_value v
@@ -2959,20 +2994,20 @@ module RedshiftDataSpec =
       make ?dataSchemaUri ?dataSchema ?dataRearrangement ~s3StagingLocation
         ~databaseCredentials ~selectSqlQuery ~databaseInformation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataSchemaUri = field_map json "DataSchemaUri" S3Url.of_json in
-      let dataSchema = field_map json "DataSchema" DataSchema.of_json in
+    let of_json json__ =
+      let dataSchemaUri = field_map json__ "DataSchemaUri" S3Url.of_json in
+      let dataSchema = field_map json__ "DataSchema" DataSchema.of_json in
       let dataRearrangement =
-        field_map json "DataRearrangement" DataRearrangement.of_json in
+        field_map json__ "DataRearrangement" DataRearrangement.of_json in
       let s3StagingLocation =
-        field_map_exn json "S3StagingLocation" S3Url.of_json in
+        field_map_exn json__ "S3StagingLocation" S3Url.of_json in
       let databaseCredentials =
-        field_map_exn json "DatabaseCredentials"
+        field_map_exn json__ "DatabaseCredentials"
           RedshiftDatabaseCredentials.of_json in
       let selectSqlQuery =
-        field_map_exn json "SelectSqlQuery" RedshiftSelectSqlQuery.of_json in
+        field_map_exn json__ "SelectSqlQuery" RedshiftSelectSqlQuery.of_json in
       let databaseInformation =
-        field_map_exn json "DatabaseInformation" RedshiftDatabase.of_json in
+        field_map_exn json__ "DatabaseInformation" RedshiftDatabase.of_json in
       make ?dataSchemaUri ?dataSchema ?dataRearrangement ~s3StagingLocation
         ~databaseCredentials ~selectSqlQuery ~databaseInformation ()
     let to_json v = composed_to_json to_value v
@@ -3095,27 +3130,27 @@ module RDSDataSpec =
         ?dataSchemaUri ?dataSchema ?dataRearrangement ~s3StagingLocation
         ~databaseCredentials ~selectSqlQuery ~databaseInformation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroupIds =
-        field_map_exn json "SecurityGroupIds" EDPSecurityGroupIds.of_json in
-      let subnetId = field_map_exn json "SubnetId" EDPSubnetId.of_json in
+        field_map_exn json__ "SecurityGroupIds" EDPSecurityGroupIds.of_json in
+      let subnetId = field_map_exn json__ "SubnetId" EDPSubnetId.of_json in
       let serviceRole =
-        field_map_exn json "ServiceRole" EDPServiceRole.of_json in
+        field_map_exn json__ "ServiceRole" EDPServiceRole.of_json in
       let resourceRole =
-        field_map_exn json "ResourceRole" EDPResourceRole.of_json in
-      let dataSchemaUri = field_map json "DataSchemaUri" S3Url.of_json in
-      let dataSchema = field_map json "DataSchema" DataSchema.of_json in
+        field_map_exn json__ "ResourceRole" EDPResourceRole.of_json in
+      let dataSchemaUri = field_map json__ "DataSchemaUri" S3Url.of_json in
+      let dataSchema = field_map json__ "DataSchema" DataSchema.of_json in
       let dataRearrangement =
-        field_map json "DataRearrangement" DataRearrangement.of_json in
+        field_map json__ "DataRearrangement" DataRearrangement.of_json in
       let s3StagingLocation =
-        field_map_exn json "S3StagingLocation" S3Url.of_json in
+        field_map_exn json__ "S3StagingLocation" S3Url.of_json in
       let databaseCredentials =
-        field_map_exn json "DatabaseCredentials"
+        field_map_exn json__ "DatabaseCredentials"
           RDSDatabaseCredentials.of_json in
       let selectSqlQuery =
-        field_map_exn json "SelectSqlQuery" RDSSelectSqlQuery.of_json in
+        field_map_exn json__ "SelectSqlQuery" RDSSelectSqlQuery.of_json in
       let databaseInformation =
-        field_map_exn json "DatabaseInformation" RDSDatabase.of_json in
+        field_map_exn json__ "DatabaseInformation" RDSDatabase.of_json in
       make ~securityGroupIds ~subnetId ~serviceRole ~resourceRole
         ?dataSchemaUri ?dataSchema ?dataRearrangement ~s3StagingLocation
         ~databaseCredentials ~selectSqlQuery ~databaseInformation ()
@@ -3136,8 +3171,8 @@ module TagLimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end
@@ -3203,8 +3238,8 @@ module UpdateMLModelOutput =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "MLModelId") in
       make ?mLModelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mLModelId = field_map json "MLModelId" EntityId.of_json in
+    let of_json json__ =
+      let mLModelId = field_map json__ "MLModelId" EntityId.of_json in
       make ?mLModelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3243,11 +3278,11 @@ module UpdateMLModelInput =
           (Xml.child_exn ~context:context_ xml_arg0 "MLModelId") in
       make ?scoreThreshold ?mLModelName ~mLModelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scoreThreshold =
-        field_map json "ScoreThreshold" ScoreThreshold.of_json in
-      let mLModelName = field_map json "MLModelName" EntityName.of_json in
-      let mLModelId = field_map_exn json "MLModelId" EntityId.of_json in
+        field_map json__ "ScoreThreshold" ScoreThreshold.of_json in
+      let mLModelName = field_map json__ "MLModelName" EntityName.of_json in
+      let mLModelId = field_map_exn json__ "MLModelId" EntityId.of_json in
       make ?scoreThreshold ?mLModelName ~mLModelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3314,8 +3349,8 @@ module UpdateEvaluationOutput =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "EvaluationId") in
       make ?evaluationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let evaluationId = field_map json "EvaluationId" EntityId.of_json in
+    let of_json json__ =
+      let evaluationId = field_map json__ "EvaluationId" EntityId.of_json in
       make ?evaluationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3346,10 +3381,10 @@ module UpdateEvaluationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "EvaluationId") in
       make ~evaluationName ~evaluationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let evaluationName =
-        field_map_exn json "EvaluationName" EntityName.of_json in
-      let evaluationId = field_map_exn json "EvaluationId" EntityId.of_json in
+        field_map_exn json__ "EvaluationName" EntityName.of_json in
+      let evaluationId = field_map_exn json__ "EvaluationId" EntityId.of_json in
       make ~evaluationName ~evaluationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3416,8 +3451,8 @@ module UpdateDataSourceOutput =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "DataSourceId") in
       make ?dataSourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataSourceId = field_map json "DataSourceId" EntityId.of_json in
+    let of_json json__ =
+      let dataSourceId = field_map json__ "DataSourceId" EntityId.of_json in
       make ?dataSourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3448,10 +3483,10 @@ module UpdateDataSourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "DataSourceId") in
       make ~dataSourceName ~dataSourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataSourceName =
-        field_map_exn json "DataSourceName" EntityName.of_json in
-      let dataSourceId = field_map_exn json "DataSourceId" EntityId.of_json in
+        field_map_exn json__ "DataSourceName" EntityName.of_json in
+      let dataSourceId = field_map_exn json__ "DataSourceId" EntityId.of_json in
       make ~dataSourceName ~dataSourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3520,9 +3555,9 @@ module UpdateBatchPredictionOutput =
           (Xml.child xml_arg0 "BatchPredictionId") in
       make ?batchPredictionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchPredictionId =
-        field_map json "BatchPredictionId" EntityId.of_json in
+        field_map json__ "BatchPredictionId" EntityId.of_json in
       make ?batchPredictionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3557,11 +3592,11 @@ module UpdateBatchPredictionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "BatchPredictionId") in
       make ~batchPredictionName ~batchPredictionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchPredictionName =
-        field_map_exn json "BatchPredictionName" EntityName.of_json in
+        field_map_exn json__ "BatchPredictionName" EntityName.of_json in
       let batchPredictionId =
-        field_map_exn json "BatchPredictionId" EntityId.of_json in
+        field_map_exn json__ "BatchPredictionId" EntityId.of_json in
       make ~batchPredictionName ~batchPredictionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3645,8 +3680,8 @@ module PredictOutput =
         (Option.map ~f:Prediction.of_xml) (Xml.child xml_arg0 "Prediction") in
       make ?prediction ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let prediction = field_map json "Prediction" Prediction.of_json in
+    let of_json json__ =
+      let prediction = field_map json__ "Prediction" Prediction.of_json in
       make ?prediction ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3681,11 +3716,11 @@ module PredictInput =
           (Xml.child_exn ~context:context_ xml_arg0 "MLModelId") in
       make ~predictEndpoint ~record ~mLModelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let predictEndpoint =
-        field_map_exn json "PredictEndpoint" VipURL.of_json in
-      let record = field_map_exn json "Record" Record.of_json in
-      let mLModelId = field_map_exn json "MLModelId" EntityId.of_json in
+        field_map_exn json__ "PredictEndpoint" VipURL.of_json in
+      let record = field_map_exn json__ "Record" Record.of_json in
+      let mLModelId = field_map_exn json__ "MLModelId" EntityId.of_json in
       make ~predictEndpoint ~record ~mLModelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3929,35 +3964,35 @@ module GetMLModelOutput =
         ?status ?name ?lastUpdatedAt ?createdAt ?createdByIamUser
         ?trainingDataSourceId ?mLModelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schema = field_map json "Schema" DataSchema.of_json in
-      let recipe = field_map json "Recipe" Recipe.of_json in
-      let startedAt = field_map json "StartedAt" EpochTime.of_json in
-      let finishedAt = field_map json "FinishedAt" EpochTime.of_json in
-      let computeTime = field_map json "ComputeTime" LongType.of_json in
-      let message = field_map json "Message" Message.of_json in
-      let logUri = field_map json "LogUri" PresignedS3Url.of_json in
+    let of_json json__ =
+      let schema = field_map json__ "Schema" DataSchema.of_json in
+      let recipe = field_map json__ "Recipe" Recipe.of_json in
+      let startedAt = field_map json__ "StartedAt" EpochTime.of_json in
+      let finishedAt = field_map json__ "FinishedAt" EpochTime.of_json in
+      let computeTime = field_map json__ "ComputeTime" LongType.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let logUri = field_map json__ "LogUri" PresignedS3Url.of_json in
       let scoreThresholdLastUpdatedAt =
-        field_map json "ScoreThresholdLastUpdatedAt" EpochTime.of_json in
+        field_map json__ "ScoreThresholdLastUpdatedAt" EpochTime.of_json in
       let scoreThreshold =
-        field_map json "ScoreThreshold" ScoreThreshold.of_json in
-      let mLModelType = field_map json "MLModelType" MLModelType.of_json in
+        field_map json__ "ScoreThreshold" ScoreThreshold.of_json in
+      let mLModelType = field_map json__ "MLModelType" MLModelType.of_json in
       let inputDataLocationS3 =
-        field_map json "InputDataLocationS3" S3Url.of_json in
+        field_map json__ "InputDataLocationS3" S3Url.of_json in
       let trainingParameters =
-        field_map json "TrainingParameters" TrainingParameters.of_json in
+        field_map json__ "TrainingParameters" TrainingParameters.of_json in
       let endpointInfo =
-        field_map json "EndpointInfo" RealtimeEndpointInfo.of_json in
-      let sizeInBytes = field_map json "SizeInBytes" LongType.of_json in
-      let status = field_map json "Status" EntityStatus.of_json in
-      let name = field_map json "Name" MLModelName.of_json in
-      let lastUpdatedAt = field_map json "LastUpdatedAt" EpochTime.of_json in
-      let createdAt = field_map json "CreatedAt" EpochTime.of_json in
+        field_map json__ "EndpointInfo" RealtimeEndpointInfo.of_json in
+      let sizeInBytes = field_map json__ "SizeInBytes" LongType.of_json in
+      let status = field_map json__ "Status" EntityStatus.of_json in
+      let name = field_map json__ "Name" MLModelName.of_json in
+      let lastUpdatedAt = field_map json__ "LastUpdatedAt" EpochTime.of_json in
+      let createdAt = field_map json__ "CreatedAt" EpochTime.of_json in
       let createdByIamUser =
-        field_map json "CreatedByIamUser" AwsUserArn.of_json in
+        field_map json__ "CreatedByIamUser" AwsUserArn.of_json in
       let trainingDataSourceId =
-        field_map json "TrainingDataSourceId" EntityId.of_json in
-      let mLModelId = field_map json "MLModelId" EntityId.of_json in
+        field_map json__ "TrainingDataSourceId" EntityId.of_json in
+      let mLModelId = field_map json__ "MLModelId" EntityId.of_json in
       make ?schema ?recipe ?startedAt ?finishedAt ?computeTime ?message
         ?logUri ?scoreThresholdLastUpdatedAt ?scoreThreshold ?mLModelType
         ?inputDataLocationS3 ?trainingParameters ?endpointInfo ?sizeInBytes
@@ -3990,9 +4025,9 @@ module GetMLModelInput =
           (Xml.child_exn ~context:context_ xml_arg0 "MLModelId") in
       make ?verbose ~mLModelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let verbose = field_map json "Verbose" Verbose.of_json in
-      let mLModelId = field_map_exn json "MLModelId" EntityId.of_json in
+    let of_json json__ =
+      let verbose = field_map json__ "Verbose" Verbose.of_json in
+      let mLModelId = field_map_exn json__ "MLModelId" EntityId.of_json in
       make ?verbose ~mLModelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4184,26 +4219,26 @@ module GetEvaluationOutput =
         ?createdByIamUser ?inputDataLocationS3 ?evaluationDataSourceId
         ?mLModelId ?evaluationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startedAt = field_map json "StartedAt" EpochTime.of_json in
-      let finishedAt = field_map json "FinishedAt" EpochTime.of_json in
-      let computeTime = field_map json "ComputeTime" LongType.of_json in
-      let message = field_map json "Message" Message.of_json in
-      let logUri = field_map json "LogUri" PresignedS3Url.of_json in
+    let of_json json__ =
+      let startedAt = field_map json__ "StartedAt" EpochTime.of_json in
+      let finishedAt = field_map json__ "FinishedAt" EpochTime.of_json in
+      let computeTime = field_map json__ "ComputeTime" LongType.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let logUri = field_map json__ "LogUri" PresignedS3Url.of_json in
       let performanceMetrics =
-        field_map json "PerformanceMetrics" PerformanceMetrics.of_json in
-      let status = field_map json "Status" EntityStatus.of_json in
-      let name = field_map json "Name" EntityName.of_json in
-      let lastUpdatedAt = field_map json "LastUpdatedAt" EpochTime.of_json in
-      let createdAt = field_map json "CreatedAt" EpochTime.of_json in
+        field_map json__ "PerformanceMetrics" PerformanceMetrics.of_json in
+      let status = field_map json__ "Status" EntityStatus.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
+      let lastUpdatedAt = field_map json__ "LastUpdatedAt" EpochTime.of_json in
+      let createdAt = field_map json__ "CreatedAt" EpochTime.of_json in
       let createdByIamUser =
-        field_map json "CreatedByIamUser" AwsUserArn.of_json in
+        field_map json__ "CreatedByIamUser" AwsUserArn.of_json in
       let inputDataLocationS3 =
-        field_map json "InputDataLocationS3" S3Url.of_json in
+        field_map json__ "InputDataLocationS3" S3Url.of_json in
       let evaluationDataSourceId =
-        field_map json "EvaluationDataSourceId" EntityId.of_json in
-      let mLModelId = field_map json "MLModelId" EntityId.of_json in
-      let evaluationId = field_map json "EvaluationId" EntityId.of_json in
+        field_map json__ "EvaluationDataSourceId" EntityId.of_json in
+      let mLModelId = field_map json__ "MLModelId" EntityId.of_json in
+      let evaluationId = field_map json__ "EvaluationId" EntityId.of_json in
       make ?startedAt ?finishedAt ?computeTime ?message ?logUri
         ?performanceMetrics ?status ?name ?lastUpdatedAt ?createdAt
         ?createdByIamUser ?inputDataLocationS3 ?evaluationDataSourceId
@@ -4230,8 +4265,8 @@ module GetEvaluationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "EvaluationId") in
       make ~evaluationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let evaluationId = field_map_exn json "EvaluationId" EntityId.of_json in
+    let of_json json__ =
+      let evaluationId = field_map_exn json__ "EvaluationId" EntityId.of_json in
       make ~evaluationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4461,32 +4496,33 @@ module GetDataSourceOutput =
         ?createdAt ?createdByIamUser ?dataRearrangement ?dataLocationS3
         ?dataSourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataSourceSchema =
-        field_map json "DataSourceSchema" DataSchema.of_json in
-      let startedAt = field_map json "StartedAt" EpochTime.of_json in
-      let finishedAt = field_map json "FinishedAt" EpochTime.of_json in
-      let computeTime = field_map json "ComputeTime" LongType.of_json in
+        field_map json__ "DataSourceSchema" DataSchema.of_json in
+      let startedAt = field_map json__ "StartedAt" EpochTime.of_json in
+      let finishedAt = field_map json__ "FinishedAt" EpochTime.of_json in
+      let computeTime = field_map json__ "ComputeTime" LongType.of_json in
       let computeStatistics =
-        field_map json "ComputeStatistics" ComputeStatistics.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let rDSMetadata = field_map json "RDSMetadata" RDSMetadata.of_json in
+        field_map json__ "ComputeStatistics" ComputeStatistics.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let rDSMetadata = field_map json__ "RDSMetadata" RDSMetadata.of_json in
       let redshiftMetadata =
-        field_map json "RedshiftMetadata" RedshiftMetadata.of_json in
-      let message = field_map json "Message" Message.of_json in
-      let logUri = field_map json "LogUri" PresignedS3Url.of_json in
-      let status = field_map json "Status" EntityStatus.of_json in
-      let name = field_map json "Name" EntityName.of_json in
-      let numberOfFiles = field_map json "NumberOfFiles" LongType.of_json in
-      let dataSizeInBytes = field_map json "DataSizeInBytes" LongType.of_json in
-      let lastUpdatedAt = field_map json "LastUpdatedAt" EpochTime.of_json in
-      let createdAt = field_map json "CreatedAt" EpochTime.of_json in
+        field_map json__ "RedshiftMetadata" RedshiftMetadata.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let logUri = field_map json__ "LogUri" PresignedS3Url.of_json in
+      let status = field_map json__ "Status" EntityStatus.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
+      let numberOfFiles = field_map json__ "NumberOfFiles" LongType.of_json in
+      let dataSizeInBytes =
+        field_map json__ "DataSizeInBytes" LongType.of_json in
+      let lastUpdatedAt = field_map json__ "LastUpdatedAt" EpochTime.of_json in
+      let createdAt = field_map json__ "CreatedAt" EpochTime.of_json in
       let createdByIamUser =
-        field_map json "CreatedByIamUser" AwsUserArn.of_json in
+        field_map json__ "CreatedByIamUser" AwsUserArn.of_json in
       let dataRearrangement =
-        field_map json "DataRearrangement" DataRearrangement.of_json in
-      let dataLocationS3 = field_map json "DataLocationS3" S3Url.of_json in
-      let dataSourceId = field_map json "DataSourceId" EntityId.of_json in
+        field_map json__ "DataRearrangement" DataRearrangement.of_json in
+      let dataLocationS3 = field_map json__ "DataLocationS3" S3Url.of_json in
+      let dataSourceId = field_map json__ "DataSourceId" EntityId.of_json in
       make ?dataSourceSchema ?startedAt ?finishedAt ?computeTime
         ?computeStatistics ?roleARN ?rDSMetadata ?redshiftMetadata ?message
         ?logUri ?status ?name ?numberOfFiles ?dataSizeInBytes ?lastUpdatedAt
@@ -4520,9 +4556,9 @@ module GetDataSourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "DataSourceId") in
       make ?verbose ~dataSourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let verbose = field_map json "Verbose" Verbose.of_json in
-      let dataSourceId = field_map_exn json "DataSourceId" EntityId.of_json in
+    let of_json json__ =
+      let verbose = field_map json__ "Verbose" Verbose.of_json in
+      let dataSourceId = field_map_exn json__ "DataSourceId" EntityId.of_json in
       make ?verbose ~dataSourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4736,30 +4772,30 @@ module GetBatchPredictionOutput =
         ?createdAt ?createdByIamUser ?inputDataLocationS3
         ?batchPredictionDataSourceId ?mLModelId ?batchPredictionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let invalidRecordCount =
-        field_map json "InvalidRecordCount" LongType.of_json in
+        field_map json__ "InvalidRecordCount" LongType.of_json in
       let totalRecordCount =
-        field_map json "TotalRecordCount" LongType.of_json in
-      let startedAt = field_map json "StartedAt" EpochTime.of_json in
-      let finishedAt = field_map json "FinishedAt" EpochTime.of_json in
-      let computeTime = field_map json "ComputeTime" LongType.of_json in
-      let message = field_map json "Message" Message.of_json in
-      let logUri = field_map json "LogUri" PresignedS3Url.of_json in
-      let outputUri = field_map json "OutputUri" S3Url.of_json in
-      let status = field_map json "Status" EntityStatus.of_json in
-      let name = field_map json "Name" EntityName.of_json in
-      let lastUpdatedAt = field_map json "LastUpdatedAt" EpochTime.of_json in
-      let createdAt = field_map json "CreatedAt" EpochTime.of_json in
+        field_map json__ "TotalRecordCount" LongType.of_json in
+      let startedAt = field_map json__ "StartedAt" EpochTime.of_json in
+      let finishedAt = field_map json__ "FinishedAt" EpochTime.of_json in
+      let computeTime = field_map json__ "ComputeTime" LongType.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let logUri = field_map json__ "LogUri" PresignedS3Url.of_json in
+      let outputUri = field_map json__ "OutputUri" S3Url.of_json in
+      let status = field_map json__ "Status" EntityStatus.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
+      let lastUpdatedAt = field_map json__ "LastUpdatedAt" EpochTime.of_json in
+      let createdAt = field_map json__ "CreatedAt" EpochTime.of_json in
       let createdByIamUser =
-        field_map json "CreatedByIamUser" AwsUserArn.of_json in
+        field_map json__ "CreatedByIamUser" AwsUserArn.of_json in
       let inputDataLocationS3 =
-        field_map json "InputDataLocationS3" S3Url.of_json in
+        field_map json__ "InputDataLocationS3" S3Url.of_json in
       let batchPredictionDataSourceId =
-        field_map json "BatchPredictionDataSourceId" EntityId.of_json in
-      let mLModelId = field_map json "MLModelId" EntityId.of_json in
+        field_map json__ "BatchPredictionDataSourceId" EntityId.of_json in
+      let mLModelId = field_map json__ "MLModelId" EntityId.of_json in
       let batchPredictionId =
-        field_map json "BatchPredictionId" EntityId.of_json in
+        field_map json__ "BatchPredictionId" EntityId.of_json in
       make ?invalidRecordCount ?totalRecordCount ?startedAt ?finishedAt
         ?computeTime ?message ?logUri ?outputUri ?status ?name ?lastUpdatedAt
         ?createdAt ?createdByIamUser ?inputDataLocationS3
@@ -4786,9 +4822,9 @@ module GetBatchPredictionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "BatchPredictionId") in
       make ~batchPredictionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchPredictionId =
-        field_map_exn json "BatchPredictionId" EntityId.of_json in
+        field_map_exn json__ "BatchPredictionId" EntityId.of_json in
       make ~batchPredictionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4867,11 +4903,11 @@ module DescribeTagsOutput =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "ResourceId") in
       make ?tags ?resourceType ?resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let resourceType =
-        field_map json "ResourceType" TaggableResourceType.of_json in
-      let resourceId = field_map json "ResourceId" EntityId.of_json in
+        field_map json__ "ResourceType" TaggableResourceType.of_json in
+      let resourceId = field_map json__ "ResourceId" EntityId.of_json in
       make ?tags ?resourceType ?resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Amazon ML returns the following elements."]
@@ -4901,10 +4937,10 @@ module DescribeTagsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~resourceType ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map_exn json "ResourceType" TaggableResourceType.of_json in
-      let resourceId = field_map_exn json "ResourceId" EntityId.of_json in
+        field_map_exn json__ "ResourceType" TaggableResourceType.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" EntityId.of_json in
       make ~resourceType ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4967,9 +5003,9 @@ module DescribeMLModelsOutput =
         (Option.map ~f:MLModels.of_xml) (Xml.child xml_arg0 "Results") in
       make ?nextToken ?results ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" StringType.of_json in
-      let results = field_map json "Results" MLModels.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" StringType.of_json in
+      let results = field_map json__ "Results" MLModels.of_json in
       make ?nextToken ?results ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5077,19 +5113,19 @@ module DescribeMLModelsInput =
       make ?limit ?nextToken ?sortOrder ?prefix ?nE ?lE ?gE ?lT ?gT ?eQ
         ?filterVariable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PageLimit.of_json in
-      let nextToken = field_map json "NextToken" StringType.of_json in
-      let sortOrder = field_map json "SortOrder" SortOrder.of_json in
-      let prefix = field_map json "Prefix" ComparatorValue.of_json in
-      let nE = field_map json "NE" ComparatorValue.of_json in
-      let lE = field_map json "LE" ComparatorValue.of_json in
-      let gE = field_map json "GE" ComparatorValue.of_json in
-      let lT = field_map json "LT" ComparatorValue.of_json in
-      let gT = field_map json "GT" ComparatorValue.of_json in
-      let eQ = field_map json "EQ" ComparatorValue.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PageLimit.of_json in
+      let nextToken = field_map json__ "NextToken" StringType.of_json in
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let prefix = field_map json__ "Prefix" ComparatorValue.of_json in
+      let nE = field_map json__ "NE" ComparatorValue.of_json in
+      let lE = field_map json__ "LE" ComparatorValue.of_json in
+      let gE = field_map json__ "GE" ComparatorValue.of_json in
+      let lT = field_map json__ "LT" ComparatorValue.of_json in
+      let gT = field_map json__ "GT" ComparatorValue.of_json in
+      let eQ = field_map json__ "EQ" ComparatorValue.of_json in
       let filterVariable =
-        field_map json "FilterVariable" MLModelFilterVariable.of_json in
+        field_map json__ "FilterVariable" MLModelFilterVariable.of_json in
       make ?limit ?nextToken ?sortOrder ?prefix ?nE ?lE ?gE ?lT ?gT ?eQ
         ?filterVariable ()
     let to_json v = composed_to_json to_value v
@@ -5153,9 +5189,9 @@ module DescribeEvaluationsOutput =
         (Option.map ~f:Evaluations.of_xml) (Xml.child xml_arg0 "Results") in
       make ?nextToken ?results ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" StringType.of_json in
-      let results = field_map json "Results" Evaluations.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" StringType.of_json in
+      let results = field_map json__ "Results" Evaluations.of_json in
       make ?nextToken ?results ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5263,19 +5299,19 @@ module DescribeEvaluationsInput =
       make ?limit ?nextToken ?sortOrder ?prefix ?nE ?lE ?gE ?lT ?gT ?eQ
         ?filterVariable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PageLimit.of_json in
-      let nextToken = field_map json "NextToken" StringType.of_json in
-      let sortOrder = field_map json "SortOrder" SortOrder.of_json in
-      let prefix = field_map json "Prefix" ComparatorValue.of_json in
-      let nE = field_map json "NE" ComparatorValue.of_json in
-      let lE = field_map json "LE" ComparatorValue.of_json in
-      let gE = field_map json "GE" ComparatorValue.of_json in
-      let lT = field_map json "LT" ComparatorValue.of_json in
-      let gT = field_map json "GT" ComparatorValue.of_json in
-      let eQ = field_map json "EQ" ComparatorValue.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PageLimit.of_json in
+      let nextToken = field_map json__ "NextToken" StringType.of_json in
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let prefix = field_map json__ "Prefix" ComparatorValue.of_json in
+      let nE = field_map json__ "NE" ComparatorValue.of_json in
+      let lE = field_map json__ "LE" ComparatorValue.of_json in
+      let gE = field_map json__ "GE" ComparatorValue.of_json in
+      let lT = field_map json__ "LT" ComparatorValue.of_json in
+      let gT = field_map json__ "GT" ComparatorValue.of_json in
+      let eQ = field_map json__ "EQ" ComparatorValue.of_json in
       let filterVariable =
-        field_map json "FilterVariable" EvaluationFilterVariable.of_json in
+        field_map json__ "FilterVariable" EvaluationFilterVariable.of_json in
       make ?limit ?nextToken ?sortOrder ?prefix ?nE ?lE ?gE ?lT ?gT ?eQ
         ?filterVariable ()
     let to_json v = composed_to_json to_value v
@@ -5339,9 +5375,9 @@ module DescribeDataSourcesOutput =
         (Option.map ~f:DataSources.of_xml) (Xml.child xml_arg0 "Results") in
       make ?nextToken ?results ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" StringType.of_json in
-      let results = field_map json "Results" DataSources.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" StringType.of_json in
+      let results = field_map json__ "Results" DataSources.of_json in
       make ?nextToken ?results ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5449,19 +5485,19 @@ module DescribeDataSourcesInput =
       make ?limit ?nextToken ?sortOrder ?prefix ?nE ?lE ?gE ?lT ?gT ?eQ
         ?filterVariable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PageLimit.of_json in
-      let nextToken = field_map json "NextToken" StringType.of_json in
-      let sortOrder = field_map json "SortOrder" SortOrder.of_json in
-      let prefix = field_map json "Prefix" ComparatorValue.of_json in
-      let nE = field_map json "NE" ComparatorValue.of_json in
-      let lE = field_map json "LE" ComparatorValue.of_json in
-      let gE = field_map json "GE" ComparatorValue.of_json in
-      let lT = field_map json "LT" ComparatorValue.of_json in
-      let gT = field_map json "GT" ComparatorValue.of_json in
-      let eQ = field_map json "EQ" ComparatorValue.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PageLimit.of_json in
+      let nextToken = field_map json__ "NextToken" StringType.of_json in
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let prefix = field_map json__ "Prefix" ComparatorValue.of_json in
+      let nE = field_map json__ "NE" ComparatorValue.of_json in
+      let lE = field_map json__ "LE" ComparatorValue.of_json in
+      let gE = field_map json__ "GE" ComparatorValue.of_json in
+      let lT = field_map json__ "LT" ComparatorValue.of_json in
+      let gT = field_map json__ "GT" ComparatorValue.of_json in
+      let eQ = field_map json__ "EQ" ComparatorValue.of_json in
       let filterVariable =
-        field_map json "FilterVariable" DataSourceFilterVariable.of_json in
+        field_map json__ "FilterVariable" DataSourceFilterVariable.of_json in
       make ?limit ?nextToken ?sortOrder ?prefix ?nE ?lE ?gE ?lT ?gT ?eQ
         ?filterVariable ()
     let to_json v = composed_to_json to_value v
@@ -5527,9 +5563,9 @@ module DescribeBatchPredictionsOutput =
           (Xml.child xml_arg0 "Results") in
       make ?nextToken ?results ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" StringType.of_json in
-      let results = field_map json "Results" BatchPredictions.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" StringType.of_json in
+      let results = field_map json__ "Results" BatchPredictions.of_json in
       make ?nextToken ?results ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5638,19 +5674,20 @@ module DescribeBatchPredictionsInput =
       make ?limit ?nextToken ?sortOrder ?prefix ?nE ?lE ?gE ?lT ?gT ?eQ
         ?filterVariable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PageLimit.of_json in
-      let nextToken = field_map json "NextToken" StringType.of_json in
-      let sortOrder = field_map json "SortOrder" SortOrder.of_json in
-      let prefix = field_map json "Prefix" ComparatorValue.of_json in
-      let nE = field_map json "NE" ComparatorValue.of_json in
-      let lE = field_map json "LE" ComparatorValue.of_json in
-      let gE = field_map json "GE" ComparatorValue.of_json in
-      let lT = field_map json "LT" ComparatorValue.of_json in
-      let gT = field_map json "GT" ComparatorValue.of_json in
-      let eQ = field_map json "EQ" ComparatorValue.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PageLimit.of_json in
+      let nextToken = field_map json__ "NextToken" StringType.of_json in
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let prefix = field_map json__ "Prefix" ComparatorValue.of_json in
+      let nE = field_map json__ "NE" ComparatorValue.of_json in
+      let lE = field_map json__ "LE" ComparatorValue.of_json in
+      let gE = field_map json__ "GE" ComparatorValue.of_json in
+      let lT = field_map json__ "LT" ComparatorValue.of_json in
+      let gT = field_map json__ "GT" ComparatorValue.of_json in
+      let eQ = field_map json__ "EQ" ComparatorValue.of_json in
       let filterVariable =
-        field_map json "FilterVariable" BatchPredictionFilterVariable.of_json in
+        field_map json__ "FilterVariable"
+          BatchPredictionFilterVariable.of_json in
       make ?limit ?nextToken ?sortOrder ?prefix ?nE ?lE ?gE ?lT ?gT ?eQ
         ?filterVariable ()
     let to_json v = composed_to_json to_value v
@@ -5735,10 +5772,10 @@ module DeleteTagsOutput =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "ResourceId") in
       make ?resourceType ?resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map json "ResourceType" TaggableResourceType.of_json in
-      let resourceId = field_map json "ResourceId" EntityId.of_json in
+        field_map json__ "ResourceType" TaggableResourceType.of_json in
+      let resourceId = field_map json__ "ResourceId" EntityId.of_json in
       make ?resourceType ?resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Amazon ML returns the following elements."]
@@ -5775,11 +5812,11 @@ module DeleteTagsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "TagKeys") in
       make ~resourceType ~resourceId ~tagKeys ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map_exn json "ResourceType" TaggableResourceType.of_json in
-      let resourceId = field_map_exn json "ResourceId" EntityId.of_json in
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+        field_map_exn json__ "ResourceType" TaggableResourceType.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" EntityId.of_json in
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       make ~resourceType ~resourceId ~tagKeys ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5855,10 +5892,10 @@ module DeleteRealtimeEndpointOutput =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "MLModelId") in
       make ?realtimeEndpointInfo ?mLModelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let realtimeEndpointInfo =
-        field_map json "RealtimeEndpointInfo" RealtimeEndpointInfo.of_json in
-      let mLModelId = field_map json "MLModelId" EntityId.of_json in
+        field_map json__ "RealtimeEndpointInfo" RealtimeEndpointInfo.of_json in
+      let mLModelId = field_map json__ "MLModelId" EntityId.of_json in
       make ?realtimeEndpointInfo ?mLModelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5881,8 +5918,8 @@ module DeleteRealtimeEndpointInput =
           (Xml.child_exn ~context:context_ xml_arg0 "MLModelId") in
       make ~mLModelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mLModelId = field_map_exn json "MLModelId" EntityId.of_json in
+    let of_json json__ =
+      let mLModelId = field_map_exn json__ "MLModelId" EntityId.of_json in
       make ~mLModelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a real time endpoint of an MLModel."]
@@ -5948,8 +5985,8 @@ module DeleteMLModelOutput =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "MLModelId") in
       make ?mLModelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mLModelId = field_map json "MLModelId" EntityId.of_json in
+    let of_json json__ =
+      let mLModelId = field_map json__ "MLModelId" EntityId.of_json in
       make ?mLModelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5973,8 +6010,8 @@ module DeleteMLModelInput =
           (Xml.child_exn ~context:context_ xml_arg0 "MLModelId") in
       make ~mLModelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mLModelId = field_map_exn json "MLModelId" EntityId.of_json in
+    let of_json json__ =
+      let mLModelId = field_map_exn json__ "MLModelId" EntityId.of_json in
       make ~mLModelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6041,8 +6078,8 @@ module DeleteEvaluationOutput =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "EvaluationId") in
       make ?evaluationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let evaluationId = field_map json "EvaluationId" EntityId.of_json in
+    let of_json json__ =
+      let evaluationId = field_map json__ "EvaluationId" EntityId.of_json in
       make ?evaluationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6066,8 +6103,8 @@ module DeleteEvaluationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "EvaluationId") in
       make ~evaluationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let evaluationId = field_map_exn json "EvaluationId" EntityId.of_json in
+    let of_json json__ =
+      let evaluationId = field_map_exn json__ "EvaluationId" EntityId.of_json in
       make ~evaluationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6134,8 +6171,8 @@ module DeleteDataSourceOutput =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "DataSourceId") in
       make ?dataSourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataSourceId = field_map json "DataSourceId" EntityId.of_json in
+    let of_json json__ =
+      let dataSourceId = field_map json__ "DataSourceId" EntityId.of_json in
       make ?dataSourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a DeleteDataSource operation."]
@@ -6158,8 +6195,8 @@ module DeleteDataSourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "DataSourceId") in
       make ~dataSourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataSourceId = field_map_exn json "DataSourceId" EntityId.of_json in
+    let of_json json__ =
+      let dataSourceId = field_map_exn json__ "DataSourceId" EntityId.of_json in
       make ~dataSourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6228,9 +6265,9 @@ module DeleteBatchPredictionOutput =
           (Xml.child xml_arg0 "BatchPredictionId") in
       make ?batchPredictionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchPredictionId =
-        field_map json "BatchPredictionId" EntityId.of_json in
+        field_map json__ "BatchPredictionId" EntityId.of_json in
       make ?batchPredictionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6255,9 +6292,9 @@ module DeleteBatchPredictionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "BatchPredictionId") in
       make ~batchPredictionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchPredictionId =
-        field_map_exn json "BatchPredictionId" EntityId.of_json in
+        field_map_exn json__ "BatchPredictionId" EntityId.of_json in
       make ~batchPredictionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6333,10 +6370,10 @@ module CreateRealtimeEndpointOutput =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "MLModelId") in
       make ?realtimeEndpointInfo ?mLModelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let realtimeEndpointInfo =
-        field_map json "RealtimeEndpointInfo" RealtimeEndpointInfo.of_json in
-      let mLModelId = field_map json "MLModelId" EntityId.of_json in
+        field_map json__ "RealtimeEndpointInfo" RealtimeEndpointInfo.of_json in
+      let mLModelId = field_map json__ "MLModelId" EntityId.of_json in
       make ?realtimeEndpointInfo ?mLModelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6359,8 +6396,8 @@ module CreateRealtimeEndpointInput =
           (Xml.child_exn ~context:context_ xml_arg0 "MLModelId") in
       make ~mLModelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mLModelId = field_map_exn json "MLModelId" EntityId.of_json in
+    let of_json json__ =
+      let mLModelId = field_map_exn json__ "MLModelId" EntityId.of_json in
       make ~mLModelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6431,8 +6468,8 @@ module CreateMLModelOutput =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "MLModelId") in
       make ?mLModelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mLModelId = field_map json "MLModelId" EntityId.of_json in
+    let of_json json__ =
+      let mLModelId = field_map json__ "MLModelId" EntityId.of_json in
       make ?mLModelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6512,15 +6549,17 @@ module CreateMLModelInput =
       make ?recipeUri ?recipe ~trainingDataSourceId ?parameters ~mLModelType
         ?mLModelName ~mLModelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recipeUri = field_map json "RecipeUri" S3Url.of_json in
-      let recipe = field_map json "Recipe" Recipe.of_json in
+    let of_json json__ =
+      let recipeUri = field_map json__ "RecipeUri" S3Url.of_json in
+      let recipe = field_map json__ "Recipe" Recipe.of_json in
       let trainingDataSourceId =
-        field_map_exn json "TrainingDataSourceId" EntityId.of_json in
-      let parameters = field_map json "Parameters" TrainingParameters.of_json in
-      let mLModelType = field_map_exn json "MLModelType" MLModelType.of_json in
-      let mLModelName = field_map json "MLModelName" EntityName.of_json in
-      let mLModelId = field_map_exn json "MLModelId" EntityId.of_json in
+        field_map_exn json__ "TrainingDataSourceId" EntityId.of_json in
+      let parameters =
+        field_map json__ "Parameters" TrainingParameters.of_json in
+      let mLModelType =
+        field_map_exn json__ "MLModelType" MLModelType.of_json in
+      let mLModelName = field_map json__ "MLModelName" EntityName.of_json in
+      let mLModelId = field_map_exn json__ "MLModelId" EntityId.of_json in
       make ?recipeUri ?recipe ~trainingDataSourceId ?parameters ~mLModelType
         ?mLModelName ~mLModelId ()
     let to_json v = composed_to_json to_value v
@@ -6592,8 +6631,8 @@ module CreateEvaluationOutput =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "EvaluationId") in
       make ?evaluationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let evaluationId = field_map json "EvaluationId" EntityId.of_json in
+    let of_json json__ =
+      let evaluationId = field_map json__ "EvaluationId" EntityId.of_json in
       make ?evaluationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6650,12 +6689,13 @@ module CreateEvaluationInput =
       make ~evaluationDataSourceId ~mLModelId ?evaluationName ~evaluationId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let evaluationDataSourceId =
-        field_map_exn json "EvaluationDataSourceId" EntityId.of_json in
-      let mLModelId = field_map_exn json "MLModelId" EntityId.of_json in
-      let evaluationName = field_map json "EvaluationName" EntityName.of_json in
-      let evaluationId = field_map_exn json "EvaluationId" EntityId.of_json in
+        field_map_exn json__ "EvaluationDataSourceId" EntityId.of_json in
+      let mLModelId = field_map_exn json__ "MLModelId" EntityId.of_json in
+      let evaluationName =
+        field_map json__ "EvaluationName" EntityName.of_json in
+      let evaluationId = field_map_exn json__ "EvaluationId" EntityId.of_json in
       make ~evaluationDataSourceId ~mLModelId ?evaluationName ~evaluationId
         ()
     let to_json v = composed_to_json to_value v
@@ -6727,8 +6767,8 @@ module CreateDataSourceFromS3Output =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "DataSourceId") in
       make ?dataSourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataSourceId = field_map json "DataSourceId" EntityId.of_json in
+    let of_json json__ =
+      let dataSourceId = field_map json__ "DataSourceId" EntityId.of_json in
       make ?dataSourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6779,12 +6819,13 @@ module CreateDataSourceFromS3Input =
           (Xml.child_exn ~context:context_ xml_arg0 "DataSourceId") in
       make ?computeStatistics ~dataSpec ?dataSourceName ~dataSourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let computeStatistics =
-        field_map json "ComputeStatistics" ComputeStatistics.of_json in
-      let dataSpec = field_map_exn json "DataSpec" S3DataSpec.of_json in
-      let dataSourceName = field_map json "DataSourceName" EntityName.of_json in
-      let dataSourceId = field_map_exn json "DataSourceId" EntityId.of_json in
+        field_map json__ "ComputeStatistics" ComputeStatistics.of_json in
+      let dataSpec = field_map_exn json__ "DataSpec" S3DataSpec.of_json in
+      let dataSourceName =
+        field_map json__ "DataSourceName" EntityName.of_json in
+      let dataSourceId = field_map_exn json__ "DataSourceId" EntityId.of_json in
       make ?computeStatistics ~dataSpec ?dataSourceName ~dataSourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6855,8 +6896,8 @@ module CreateDataSourceFromRedshiftOutput =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "DataSourceId") in
       make ?dataSourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataSourceId = field_map json "DataSourceId" EntityId.of_json in
+    let of_json json__ =
+      let dataSourceId = field_map json__ "DataSourceId" EntityId.of_json in
       make ?dataSourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6921,13 +6962,14 @@ module CreateDataSourceFromRedshiftInput =
       make ?computeStatistics ~roleARN ~dataSpec ?dataSourceName
         ~dataSourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let computeStatistics =
-        field_map json "ComputeStatistics" ComputeStatistics.of_json in
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      let dataSpec = field_map_exn json "DataSpec" RedshiftDataSpec.of_json in
-      let dataSourceName = field_map json "DataSourceName" EntityName.of_json in
-      let dataSourceId = field_map_exn json "DataSourceId" EntityId.of_json in
+        field_map json__ "ComputeStatistics" ComputeStatistics.of_json in
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
+      let dataSpec = field_map_exn json__ "DataSpec" RedshiftDataSpec.of_json in
+      let dataSourceName =
+        field_map json__ "DataSourceName" EntityName.of_json in
+      let dataSourceId = field_map_exn json__ "DataSourceId" EntityId.of_json in
       make ?computeStatistics ~roleARN ~dataSpec ?dataSourceName
         ~dataSourceId ()
     let to_json v = composed_to_json to_value v
@@ -6999,8 +7041,8 @@ module CreateDataSourceFromRDSOutput =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "DataSourceId") in
       make ?dataSourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataSourceId = field_map json "DataSourceId" EntityId.of_json in
+    let of_json json__ =
+      let dataSourceId = field_map json__ "DataSourceId" EntityId.of_json in
       make ?dataSourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7065,13 +7107,14 @@ module CreateDataSourceFromRDSInput =
       make ?computeStatistics ~roleARN ~rDSData ?dataSourceName ~dataSourceId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let computeStatistics =
-        field_map json "ComputeStatistics" ComputeStatistics.of_json in
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      let rDSData = field_map_exn json "RDSData" RDSDataSpec.of_json in
-      let dataSourceName = field_map json "DataSourceName" EntityName.of_json in
-      let dataSourceId = field_map_exn json "DataSourceId" EntityId.of_json in
+        field_map json__ "ComputeStatistics" ComputeStatistics.of_json in
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
+      let rDSData = field_map_exn json__ "RDSData" RDSDataSpec.of_json in
+      let dataSourceName =
+        field_map json__ "DataSourceName" EntityName.of_json in
+      let dataSourceId = field_map_exn json__ "DataSourceId" EntityId.of_json in
       make ?computeStatistics ~roleARN ~rDSData ?dataSourceName ~dataSourceId
         ()
     let to_json v = composed_to_json to_value v
@@ -7145,9 +7188,9 @@ module CreateBatchPredictionOutput =
           (Xml.child xml_arg0 "BatchPredictionId") in
       make ?batchPredictionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchPredictionId =
-        field_map json "BatchPredictionId" EntityId.of_json in
+        field_map json__ "BatchPredictionId" EntityId.of_json in
       make ?batchPredictionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7215,15 +7258,15 @@ module CreateBatchPredictionInput =
       make ~outputUri ~batchPredictionDataSourceId ~mLModelId
         ?batchPredictionName ~batchPredictionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outputUri = field_map_exn json "OutputUri" S3Url.of_json in
+    let of_json json__ =
+      let outputUri = field_map_exn json__ "OutputUri" S3Url.of_json in
       let batchPredictionDataSourceId =
-        field_map_exn json "BatchPredictionDataSourceId" EntityId.of_json in
-      let mLModelId = field_map_exn json "MLModelId" EntityId.of_json in
+        field_map_exn json__ "BatchPredictionDataSourceId" EntityId.of_json in
+      let mLModelId = field_map_exn json__ "MLModelId" EntityId.of_json in
       let batchPredictionName =
-        field_map json "BatchPredictionName" EntityName.of_json in
+        field_map json__ "BatchPredictionName" EntityName.of_json in
       let batchPredictionId =
-        field_map_exn json "BatchPredictionId" EntityId.of_json in
+        field_map_exn json__ "BatchPredictionId" EntityId.of_json in
       make ~outputUri ~batchPredictionDataSourceId ~mLModelId
         ?batchPredictionName ~batchPredictionId ()
     let to_json v = composed_to_json to_value v
@@ -7316,10 +7359,10 @@ module AddTagsOutput =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "ResourceId") in
       make ?resourceType ?resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map json "ResourceType" TaggableResourceType.of_json in
-      let resourceId = field_map json "ResourceId" EntityId.of_json in
+        field_map json__ "ResourceType" TaggableResourceType.of_json in
+      let resourceId = field_map json__ "ResourceId" EntityId.of_json in
       make ?resourceType ?resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Amazon ML returns the following elements."]
@@ -7357,11 +7400,11 @@ module AddTagsInput =
         TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ~resourceType ~resourceId ~tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map_exn json "ResourceType" TaggableResourceType.of_json in
-      let resourceId = field_map_exn json "ResourceId" EntityId.of_json in
-      let tags = field_map_exn json "Tags" TagList.of_json in
+        field_map_exn json__ "ResourceType" TaggableResourceType.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" EntityId.of_json in
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       make ~resourceType ~resourceId ~tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

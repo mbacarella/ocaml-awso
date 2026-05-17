@@ -19,6 +19,8 @@ let create_a_c_l ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateACL input
 let create_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCluster input
+let create_multi_region_cluster ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateMultiRegionCluster input
 let create_parameter_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateParameterGroup input
 let create_snapshot ?endpoint_url ?cfg input =
@@ -31,6 +33,8 @@ let delete_a_c_l ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteACL input
 let delete_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCluster input
+let delete_multi_region_cluster ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteMultiRegionCluster input
 let delete_parameter_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteParameterGroup input
 let delete_snapshot ?endpoint_url ?cfg input =
@@ -47,10 +51,20 @@ let describe_engine_versions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeEngineVersions input
 let describe_events ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeEvents input
+let describe_multi_region_clusters ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeMultiRegionClusters input
+let describe_multi_region_parameter_groups ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeMultiRegionParameterGroups input
+let describe_multi_region_parameters ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeMultiRegionParameters input
 let describe_parameter_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeParameterGroups input
 let describe_parameters ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeParameters input
+let describe_reserved_nodes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeReservedNodes input
+let describe_reserved_nodes_offerings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeReservedNodesOfferings input
 let describe_service_updates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeServiceUpdates input
 let describe_snapshots ?endpoint_url ?cfg input =
@@ -61,10 +75,15 @@ let describe_users ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeUsers input
 let failover_shard ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.FailoverShard input
+let list_allowed_multi_region_cluster_updates ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAllowedMultiRegionClusterUpdates
+    input
 let list_allowed_node_type_updates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAllowedNodeTypeUpdates input
 let list_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTags input
+let purchase_reserved_nodes_offering ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PurchaseReservedNodesOffering input
 let reset_parameter_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ResetParameterGroup input
 let tag_resource ?endpoint_url ?cfg input =
@@ -75,6 +94,8 @@ let update_a_c_l ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateACL input
 let update_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateCluster input
+let update_multi_region_cluster ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateMultiRegionCluster input
 let update_parameter_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateParameterGroup input
 let update_subnet_group ?endpoint_url ?cfg input =

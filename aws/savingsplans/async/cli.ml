@@ -307,6 +307,26 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let return_savings_plan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and savingsPlanId =
+         flag "savings-plan-id" (required string) ~doc:"STRING SavingsPlanId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.return_savings_plan
+           (Values.ReturnSavingsPlanRequest.make ?clientToken ~savingsPlanId
+              ()) (Some Values.ReturnSavingsPlanResponse.to_json)
+           (Some Values.ReturnSavingsPlanResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -359,5 +379,6 @@ let main =
       describe_savings_plans_offering_rates);
     ("describe-savings-plans-offerings", describe_savings_plans_offerings);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("return-savings-plan", return_savings_plan);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource)]

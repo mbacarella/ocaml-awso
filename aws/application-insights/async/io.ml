@@ -11,6 +11,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let add_workload ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AddWorkload input
 let create_application ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateApplication input
 let create_component ?endpoint_url ?cfg input =
@@ -41,6 +43,8 @@ let describe_problem ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeProblem input
 let describe_problem_observations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeProblemObservations input
+let describe_workload ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeWorkload input
 let list_applications ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListApplications input
 let list_components ?endpoint_url ?cfg input =
@@ -55,6 +59,10 @@ let list_problems ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListProblems input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let list_workloads ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListWorkloads input
+let remove_workload ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RemoveWorkload input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
@@ -67,3 +75,7 @@ let update_component_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateComponentConfiguration input
 let update_log_pattern ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateLogPattern input
+let update_problem ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateProblem input
+let update_workload ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateWorkload input

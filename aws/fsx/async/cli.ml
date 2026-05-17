@@ -100,6 +100,87 @@ let copy_backup =
               ?tags:(Option.map ~f:Values.Tags.of_json tags) ~sourceBackupId
               ()) (Some Values.CopyBackupResponse.to_json)
            (Some Values.CopyBackupResponse.error_to_json)])
+let copy_snapshot_and_update_volume =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and copyStrategy =
+         flag "copy-strategy" (optional json_arg)
+           ~doc:"JSON OpenZFSCopyStrategy"
+       and options =
+         flag "options" (optional json_arg)
+           ~doc:"JSON UpdateOpenZFSVolumeOptions"
+       and volumeId =
+         flag "volume-id" (required string) ~doc:"STRING VolumeId"
+       and sourceSnapshotARN =
+         flag "source-snapshot-a-r-n" (required string)
+           ~doc:"STRING ResourceARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.copy_snapshot_and_update_volume
+           (Values.CopySnapshotAndUpdateVolumeRequest.make
+              ?clientRequestToken
+              ?copyStrategy:(Option.map ~f:Values.OpenZFSCopyStrategy.of_json
+                               copyStrategy)
+              ?options:(Option.map
+                          ~f:Values.UpdateOpenZFSVolumeOptions.of_json
+                          options) ~volumeId ~sourceSnapshotARN ())
+           (Some Values.CopySnapshotAndUpdateVolumeResponse.to_json)
+           (Some Values.CopySnapshotAndUpdateVolumeResponse.error_to_json)])
+let create_and_attach_s3_access_point =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and openZFSConfiguration =
+         flag "open-z-f-s-configuration" (optional json_arg)
+           ~doc:"JSON CreateAndAttachS3AccessPointOpenZFSConfiguration"
+       and ontapConfiguration =
+         flag "ontap-configuration" (optional json_arg)
+           ~doc:"JSON CreateAndAttachS3AccessPointOntapConfiguration"
+       and s3AccessPoint =
+         flag "s3-access-point" (optional json_arg)
+           ~doc:"JSON CreateAndAttachS3AccessPointS3Configuration"
+       and name =
+         flag "name" (required string)
+           ~doc:"STRING S3AccessPointAttachmentName"
+       and type_ =
+         flag "type-" (required json_arg)
+           ~doc:"JSON S3AccessPointAttachmentType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_and_attach_s3_access_point
+           (Values.CreateAndAttachS3AccessPointRequest.make
+              ?clientRequestToken
+              ?openZFSConfiguration:(Option.map
+                                       ~f:Values.CreateAndAttachS3AccessPointOpenZFSConfiguration.of_json
+                                       openZFSConfiguration)
+              ?ontapConfiguration:(Option.map
+                                     ~f:Values.CreateAndAttachS3AccessPointOntapConfiguration.of_json
+                                     ontapConfiguration)
+              ?s3AccessPoint:(Option.map
+                                ~f:Values.CreateAndAttachS3AccessPointS3Configuration.of_json
+                                s3AccessPoint) ~name
+              ~type_:(Values.S3AccessPointAttachmentType.of_json type_) ())
+           (Some Values.CreateAndAttachS3AccessPointResponse.to_json)
+           (Some Values.CreateAndAttachS3AccessPointResponse.error_to_json)])
 let create_backup =
   Command.async ~summary:""
     ([%map_open.Command
@@ -135,6 +216,8 @@ let create_data_repository_association =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and fileSystemPath =
+         flag "file-system-path" (optional string) ~doc:"STRING Namespace"
        and batchImportMetaDataOnCreate =
          flag "batch-import-meta-data-on-create" (optional bool)
            ~doc:"BOOL BatchImportMetaDataOnCreate"
@@ -149,8 +232,6 @@ let create_data_repository_association =
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
        and fileSystemId =
          flag "file-system-id" (required string) ~doc:"STRING FileSystemId"
-       and fileSystemPath =
-         flag "file-system-path" (required string) ~doc:"STRING Namespace"
        and dataRepositoryPath =
          flag "data-repository-path" (required string)
            ~doc:"STRING ArchivePath" in
@@ -158,11 +239,12 @@ let create_data_repository_association =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_data_repository_association
            (Values.CreateDataRepositoryAssociationRequest.make
-              ?batchImportMetaDataOnCreate ?importedFileChunkSize
+              ?fileSystemPath ?batchImportMetaDataOnCreate
+              ?importedFileChunkSize
               ?s3:(Option.map ~f:Values.S3DataRepositoryConfiguration.of_json
                      s3) ?clientRequestToken
               ?tags:(Option.map ~f:Values.Tags.of_json tags) ~fileSystemId
-              ~fileSystemPath ~dataRepositoryPath ())
+              ~dataRepositoryPath ())
            (Some Values.CreateDataRepositoryAssociationResponse.to_json)
            (Some Values.CreateDataRepositoryAssociationResponse.error_to_json)])
 let create_data_repository_task =
@@ -181,6 +263,12 @@ let create_data_repository_task =
          flag "client-request-token" (optional string)
            ~doc:"STRING ClientRequestToken"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and capacityToRelease =
+         flag "capacity-to-release" (optional json_arg)
+           ~doc:"JSON CapacityToRelease"
+       and releaseConfiguration =
+         flag "release-configuration" (optional json_arg)
+           ~doc:"JSON ReleaseConfiguration"
        and type_ =
          flag "type-" (required json_arg) ~doc:"JSON DataRepositoryTaskType"
        and fileSystemId =
@@ -194,10 +282,73 @@ let create_data_repository_task =
               ?paths:(Option.map ~f:Values.DataRepositoryTaskPaths.of_json
                         paths) ?clientRequestToken
               ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?capacityToRelease:(Option.map
+                                    ~f:Values.CapacityToRelease.of_json
+                                    capacityToRelease)
+              ?releaseConfiguration:(Option.map
+                                       ~f:Values.ReleaseConfiguration.of_json
+                                       releaseConfiguration)
               ~type_:(Values.DataRepositoryTaskType.of_json type_)
               ~fileSystemId ~report:(Values.CompletionReport.of_json report)
               ()) (Some Values.CreateDataRepositoryTaskResponse.to_json)
            (Some Values.CreateDataRepositoryTaskResponse.error_to_json)])
+let create_file_cache =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and securityGroupIds =
+         flag "security-group-ids" (optional json_arg)
+           ~doc:"JSON SecurityGroupIds"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and copyTagsToDataRepositoryAssociations =
+         flag "copy-tags-to-data-repository-associations" (optional bool)
+           ~doc:"BOOL CopyTagsToDataRepositoryAssociations"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING KmsKeyId"
+       and lustreConfiguration =
+         flag "lustre-configuration" (optional json_arg)
+           ~doc:"JSON CreateFileCacheLustreConfiguration"
+       and dataRepositoryAssociations =
+         flag "data-repository-associations" (optional json_arg)
+           ~doc:"JSON CreateFileCacheDataRepositoryAssociations"
+       and fileCacheType =
+         flag "file-cache-type" (required json_arg) ~doc:"JSON FileCacheType"
+       and fileCacheTypeVersion =
+         flag "file-cache-type-version" (required string)
+           ~doc:"STRING FileSystemTypeVersion"
+       and storageCapacity =
+         flag "storage-capacity" (required int) ~doc:"INT StorageCapacity"
+       and subnetIds =
+         flag "subnet-ids" (required json_arg) ~doc:"JSON SubnetIds" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_file_cache
+           (Values.CreateFileCacheRequest.make ?clientRequestToken
+              ?securityGroupIds:(Option.map
+                                   ~f:Values.SecurityGroupIds.of_json
+                                   securityGroupIds)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?copyTagsToDataRepositoryAssociations ?kmsKeyId
+              ?lustreConfiguration:(Option.map
+                                      ~f:Values.CreateFileCacheLustreConfiguration.of_json
+                                      lustreConfiguration)
+              ?dataRepositoryAssociations:(Option.map
+                                             ~f:Values.CreateFileCacheDataRepositoryAssociations.of_json
+                                             dataRepositoryAssociations)
+              ~fileCacheType:(Values.FileCacheType.of_json fileCacheType)
+              ~fileCacheTypeVersion ~storageCapacity
+              ~subnetIds:(Values.SubnetIds.of_json subnetIds) ())
+           (Some Values.CreateFileCacheResponse.to_json)
+           (Some Values.CreateFileCacheResponse.error_to_json)])
 let create_file_system =
   Command.async ~summary:""
     ([%map_open.Command
@@ -211,6 +362,8 @@ let create_file_system =
        and clientRequestToken =
          flag "client-request-token" (optional string)
            ~doc:"STRING ClientRequestToken"
+       and storageCapacity =
+         flag "storage-capacity" (optional int) ~doc:"INT StorageCapacity"
        and storageType =
          flag "storage-type" (optional json_arg) ~doc:"JSON StorageType"
        and securityGroupIds =
@@ -234,17 +387,18 @@ let create_file_system =
        and openZFSConfiguration =
          flag "open-z-f-s-configuration" (optional json_arg)
            ~doc:"JSON CreateFileSystemOpenZFSConfiguration"
+       and networkType =
+         flag "network-type" (optional json_arg) ~doc:"JSON NetworkType"
        and fileSystemType =
          flag "file-system-type" (required json_arg)
            ~doc:"JSON FileSystemType"
-       and storageCapacity =
-         flag "storage-capacity" (required int) ~doc:"INT StorageCapacity"
        and subnetIds =
          flag "subnet-ids" (required json_arg) ~doc:"JSON SubnetIds" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_file_system
            (Values.CreateFileSystemRequest.make ?clientRequestToken
+              ?storageCapacity
               ?storageType:(Option.map ~f:Values.StorageType.of_json
                               storageType)
               ?securityGroupIds:(Option.map
@@ -264,8 +418,9 @@ let create_file_system =
               ?openZFSConfiguration:(Option.map
                                        ~f:Values.CreateFileSystemOpenZFSConfiguration.of_json
                                        openZFSConfiguration)
+              ?networkType:(Option.map ~f:Values.NetworkType.of_json
+                              networkType)
               ~fileSystemType:(Values.FileSystemType.of_json fileSystemType)
-              ~storageCapacity
               ~subnetIds:(Values.SubnetIds.of_json subnetIds) ())
            (Some Values.CreateFileSystemResponse.to_json)
            (Some Values.CreateFileSystemResponse.error_to_json)])
@@ -302,6 +457,10 @@ let create_file_system_from_backup =
        and openZFSConfiguration =
          flag "open-z-f-s-configuration" (optional json_arg)
            ~doc:"JSON CreateFileSystemOpenZFSConfiguration"
+       and storageCapacity =
+         flag "storage-capacity" (optional int) ~doc:"INT StorageCapacity"
+       and networkType =
+         flag "network-type" (optional json_arg) ~doc:"JSON NetworkType"
        and backupId =
          flag "backup-id" (required string) ~doc:"STRING BackupId"
        and subnetIds =
@@ -324,7 +483,9 @@ let create_file_system_from_backup =
                               storageType) ?kmsKeyId ?fileSystemTypeVersion
               ?openZFSConfiguration:(Option.map
                                        ~f:Values.CreateFileSystemOpenZFSConfiguration.of_json
-                                       openZFSConfiguration) ~backupId
+                                       openZFSConfiguration) ?storageCapacity
+              ?networkType:(Option.map ~f:Values.NetworkType.of_json
+                              networkType) ~backupId
               ~subnetIds:(Values.SubnetIds.of_json subnetIds) ())
            (Some Values.CreateFileSystemFromBackupResponse.to_json)
            (Some Values.CreateFileSystemFromBackupResponse.error_to_json)])
@@ -496,19 +657,40 @@ let delete_data_repository_association =
        and clientRequestToken =
          flag "client-request-token" (optional string)
            ~doc:"STRING ClientRequestToken"
+       and deleteDataInFileSystem =
+         flag "delete-data-in-file-system" (optional bool)
+           ~doc:"BOOL DeleteDataInFileSystem"
        and associationId =
          flag "association-id" (required string)
-           ~doc:"STRING DataRepositoryAssociationId"
-       and deleteDataInFileSystem =
-         flag "delete-data-in-file-system" (required bool)
-           ~doc:"BOOL DeleteDataInFileSystem" in
+           ~doc:"STRING DataRepositoryAssociationId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_data_repository_association
            (Values.DeleteDataRepositoryAssociationRequest.make
-              ?clientRequestToken ~associationId ~deleteDataInFileSystem ())
+              ?clientRequestToken ?deleteDataInFileSystem ~associationId ())
            (Some Values.DeleteDataRepositoryAssociationResponse.to_json)
            (Some Values.DeleteDataRepositoryAssociationResponse.error_to_json)])
+let delete_file_cache =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and fileCacheId =
+         flag "file-cache-id" (required string) ~doc:"STRING FileCacheId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_file_cache
+           (Values.DeleteFileCacheRequest.make ?clientRequestToken
+              ~fileCacheId ()) (Some Values.DeleteFileCacheResponse.to_json)
+           (Some Values.DeleteFileCacheResponse.error_to_json)])
 let delete_file_system =
   Command.async ~summary:""
     ([%map_open.Command
@@ -709,6 +891,30 @@ let describe_data_repository_tasks =
               ?maxResults ?nextToken ())
            (Some Values.DescribeDataRepositoryTasksResponse.to_json)
            (Some Values.DescribeDataRepositoryTasksResponse.error_to_json)])
+let describe_file_caches =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and fileCacheIds =
+         flag "file-cache-ids" (optional json_arg) ~doc:"JSON FileCacheIds"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_file_caches
+           (Values.DescribeFileCachesRequest.make
+              ?fileCacheIds:(Option.map ~f:Values.FileCacheIds.of_json
+                               fileCacheIds) ?maxResults ?nextToken ())
+           (Some Values.DescribeFileCachesResponse.to_json)
+           (Some Values.DescribeFileCachesResponse.error_to_json)])
 let describe_file_system_aliases =
   Command.async ~summary:""
     ([%map_open.Command
@@ -759,6 +965,55 @@ let describe_file_systems =
                                 fileSystemIds) ?maxResults ?nextToken ())
            (Some Values.DescribeFileSystemsResponse.to_json)
            (Some Values.DescribeFileSystemsResponse.error_to_json)])
+let describe_s3_access_point_attachments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and names =
+         flag "names" (optional json_arg)
+           ~doc:"JSON S3AccessPointAttachmentNames"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON S3AccessPointAttachmentsFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_s3_access_point_attachments
+           (Values.DescribeS3AccessPointAttachmentsRequest.make
+              ?names:(Option.map
+                        ~f:Values.S3AccessPointAttachmentNames.of_json names)
+              ?filters:(Option.map
+                          ~f:Values.S3AccessPointAttachmentsFilters.of_json
+                          filters) ?maxResults ?nextToken ())
+           (Some Values.DescribeS3AccessPointAttachmentsResponse.to_json)
+           (Some
+              Values.DescribeS3AccessPointAttachmentsResponse.error_to_json)])
+let describe_shared_vpc_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_shared_vpc_configuration
+           (Values.DescribeSharedVpcConfigurationRequest.make ())
+           (Some Values.DescribeSharedVpcConfigurationResponse.to_json)
+           (Some Values.DescribeSharedVpcConfigurationResponse.error_to_json)])
 let describe_snapshots =
   Command.async ~summary:""
     ([%map_open.Command
@@ -776,7 +1031,9 @@ let describe_snapshots =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and includeShared =
+         flag "include-shared" (optional bool) ~doc:"BOOL IncludeShared" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_snapshots
@@ -784,7 +1041,7 @@ let describe_snapshots =
               ?snapshotIds:(Option.map ~f:Values.SnapshotIds.of_json
                               snapshotIds)
               ?filters:(Option.map ~f:Values.SnapshotFilters.of_json filters)
-              ?maxResults ?nextToken ())
+              ?maxResults ?nextToken ?includeShared ())
            (Some Values.DescribeSnapshotsResponse.to_json)
            (Some Values.DescribeSnapshotsResponse.error_to_json)])
 let describe_storage_virtual_machines =
@@ -846,6 +1103,29 @@ let describe_volumes =
               ?maxResults ?nextToken ())
            (Some Values.DescribeVolumesResponse.to_json)
            (Some Values.DescribeVolumesResponse.error_to_json)])
+let detach_and_delete_s3_access_point =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and name =
+         flag "name" (required string)
+           ~doc:"STRING S3AccessPointAttachmentName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.detach_and_delete_s3_access_point
+           (Values.DetachAndDeleteS3AccessPointRequest.make
+              ?clientRequestToken ~name ())
+           (Some Values.DetachAndDeleteS3AccessPointResponse.to_json)
+           (Some Values.DetachAndDeleteS3AccessPointResponse.error_to_json)])
 let disassociate_file_system_aliases =
   Command.async ~summary:""
     ([%map_open.Command
@@ -945,6 +1225,28 @@ let restore_volume_from_snapshot =
                           options) ~volumeId ~snapshotId ())
            (Some Values.RestoreVolumeFromSnapshotResponse.to_json)
            (Some Values.RestoreVolumeFromSnapshotResponse.error_to_json)])
+let start_misconfigured_state_recovery =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and fileSystemId =
+         flag "file-system-id" (required string) ~doc:"STRING FileSystemId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_misconfigured_state_recovery
+           (Values.StartMisconfiguredStateRecoveryRequest.make
+              ?clientRequestToken ~fileSystemId ())
+           (Some Values.StartMisconfiguredStateRecoveryResponse.to_json)
+           (Some Values.StartMisconfiguredStateRecoveryResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1015,6 +1317,33 @@ let update_data_repository_association =
                      s3) ~associationId ())
            (Some Values.UpdateDataRepositoryAssociationResponse.to_json)
            (Some Values.UpdateDataRepositoryAssociationResponse.error_to_json)])
+let update_file_cache =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and lustreConfiguration =
+         flag "lustre-configuration" (optional json_arg)
+           ~doc:"JSON UpdateFileCacheLustreConfiguration"
+       and fileCacheId =
+         flag "file-cache-id" (required string) ~doc:"STRING FileCacheId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_file_cache
+           (Values.UpdateFileCacheRequest.make ?clientRequestToken
+              ?lustreConfiguration:(Option.map
+                                      ~f:Values.UpdateFileCacheLustreConfiguration.of_json
+                                      lustreConfiguration) ~fileCacheId ())
+           (Some Values.UpdateFileCacheResponse.to_json)
+           (Some Values.UpdateFileCacheResponse.error_to_json)])
 let update_file_system =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1042,6 +1371,13 @@ let update_file_system =
        and openZFSConfiguration =
          flag "open-z-f-s-configuration" (optional json_arg)
            ~doc:"JSON UpdateFileSystemOpenZFSConfiguration"
+       and storageType =
+         flag "storage-type" (optional json_arg) ~doc:"JSON StorageType"
+       and fileSystemTypeVersion =
+         flag "file-system-type-version" (optional string)
+           ~doc:"STRING FileSystemTypeVersion"
+       and networkType =
+         flag "network-type" (optional json_arg) ~doc:"JSON NetworkType"
        and fileSystemId =
          flag "file-system-id" (required string) ~doc:"STRING FileSystemId" in
        fun () ->
@@ -1060,9 +1396,37 @@ let update_file_system =
                                      ontapConfiguration)
               ?openZFSConfiguration:(Option.map
                                        ~f:Values.UpdateFileSystemOpenZFSConfiguration.of_json
-                                       openZFSConfiguration) ~fileSystemId ())
+                                       openZFSConfiguration)
+              ?storageType:(Option.map ~f:Values.StorageType.of_json
+                              storageType) ?fileSystemTypeVersion
+              ?networkType:(Option.map ~f:Values.NetworkType.of_json
+                              networkType) ~fileSystemId ())
            (Some Values.UpdateFileSystemResponse.to_json)
            (Some Values.UpdateFileSystemResponse.error_to_json)])
+let update_shared_vpc_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and enableFsxRouteTableUpdatesFromParticipantAccounts =
+         flag "enable-fsx-route-table-updates-from-participant-accounts"
+           (optional string) ~doc:"STRING VerboseFlag"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_shared_vpc_configuration
+           (Values.UpdateSharedVpcConfigurationRequest.make
+              ?enableFsxRouteTableUpdatesFromParticipantAccounts
+              ?clientRequestToken ())
+           (Some Values.UpdateSharedVpcConfigurationResponse.to_json)
+           (Some Values.UpdateSharedVpcConfigurationResponse.error_to_json)])
 let update_snapshot =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1157,10 +1521,13 @@ let main =
     [("associate-file-system-aliases", associate_file_system_aliases);
     ("cancel-data-repository-task", cancel_data_repository_task);
     ("copy-backup", copy_backup);
+    ("copy-snapshot-and-update-volume", copy_snapshot_and_update_volume);
+    ("create-and-attach-s3-access-point", create_and_attach_s3_access_point);
     ("create-backup", create_backup);
     ("create-data-repository-association",
       create_data_repository_association);
     ("create-data-repository-task", create_data_repository_task);
+    ("create-file-cache", create_file_cache);
     ("create-file-system", create_file_system);
     ("create-file-system-from-backup", create_file_system_from_backup);
     ("create-snapshot", create_snapshot);
@@ -1170,6 +1537,7 @@ let main =
     ("delete-backup", delete_backup);
     ("delete-data-repository-association",
       delete_data_repository_association);
+    ("delete-file-cache", delete_file_cache);
     ("delete-file-system", delete_file_system);
     ("delete-snapshot", delete_snapshot);
     ("delete-storage-virtual-machine", delete_storage_virtual_machine);
@@ -1178,20 +1546,29 @@ let main =
     ("describe-data-repository-associations",
       describe_data_repository_associations);
     ("describe-data-repository-tasks", describe_data_repository_tasks);
+    ("describe-file-caches", describe_file_caches);
     ("describe-file-system-aliases", describe_file_system_aliases);
     ("describe-file-systems", describe_file_systems);
+    ("describe-s3-access-point-attachments",
+      describe_s3_access_point_attachments);
+    ("describe-shared-vpc-configuration", describe_shared_vpc_configuration);
     ("describe-snapshots", describe_snapshots);
     ("describe-storage-virtual-machines", describe_storage_virtual_machines);
     ("describe-volumes", describe_volumes);
+    ("detach-and-delete-s3-access-point", detach_and_delete_s3_access_point);
     ("disassociate-file-system-aliases", disassociate_file_system_aliases);
     ("list-tags-for-resource", list_tags_for_resource);
     ("release-file-system-nfs-v3-locks", release_file_system_nfs_v3_locks);
     ("restore-volume-from-snapshot", restore_volume_from_snapshot);
+    ("start-misconfigured-state-recovery",
+      start_misconfigured_state_recovery);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-data-repository-association",
       update_data_repository_association);
+    ("update-file-cache", update_file_cache);
     ("update-file-system", update_file_system);
+    ("update-shared-vpc-configuration", update_shared_vpc_configuration);
     ("update-snapshot", update_snapshot);
     ("update-storage-virtual-machine", update_storage_virtual_machine);
     ("update-volume", update_volume)]

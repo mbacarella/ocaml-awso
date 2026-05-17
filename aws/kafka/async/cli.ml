@@ -60,6 +60,8 @@ let create_cluster =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and rebalancing =
+         flag "rebalancing" (optional json_arg) ~doc:"JSON Rebalancing"
        and clientAuthentication =
          flag "client-authentication" (optional json_arg)
            ~doc:"JSON ClientAuthentication"
@@ -78,6 +80,8 @@ let create_cluster =
        and loggingInfo =
          flag "logging-info" (optional json_arg) ~doc:"JSON LoggingInfo"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON __mapOf__string"
+       and storageMode =
+         flag "storage-mode" (optional json_arg) ~doc:"JSON StorageMode"
        and brokerNodeGroupInfo =
          flag "broker-node-group-info" (required json_arg)
            ~doc:"JSON BrokerNodeGroupInfo"
@@ -94,6 +98,8 @@ let create_cluster =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_cluster
            (Values.CreateClusterRequest.make
+              ?rebalancing:(Option.map ~f:Values.Rebalancing.of_json
+                              rebalancing)
               ?clientAuthentication:(Option.map
                                        ~f:Values.ClientAuthentication.of_json
                                        clientAuthentication)
@@ -111,6 +117,8 @@ let create_cluster =
               ?loggingInfo:(Option.map ~f:Values.LoggingInfo.of_json
                               loggingInfo)
               ?tags:(Option.map ~f:Values.Zz__mapOf__string.of_json tags)
+              ?storageMode:(Option.map ~f:Values.StorageMode.of_json
+                              storageMode)
               ~brokerNodeGroupInfo:(Values.BrokerNodeGroupInfo.of_json
                                       brokerNodeGroupInfo) ~clusterName
               ~kafkaVersion ~numberOfBrokerNodes ())
@@ -173,6 +181,106 @@ let create_configuration =
               ~serverProperties:(Values.Zz__blob.of_json serverProperties) ())
            (Some Values.CreateConfigurationResponse.to_json)
            (Some Values.CreateConfigurationResponse.error_to_json)])
+let create_replicator =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING __stringMax1024"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON __mapOf__string"
+       and logDelivery =
+         flag "log-delivery" (optional json_arg) ~doc:"JSON LogDelivery"
+       and kafkaClusters =
+         flag "kafka-clusters" (required json_arg)
+           ~doc:"JSON __listOfKafkaCluster"
+       and replicationInfoList =
+         flag "replication-info-list" (required json_arg)
+           ~doc:"JSON __listOfReplicationInfo"
+       and replicatorName =
+         flag "replicator-name" (required string)
+           ~doc:"STRING __stringMin1Max128Pattern09AZaZ09AZaZ0"
+       and serviceExecutionRoleArn =
+         flag "service-execution-role-arn" (required string)
+           ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_replicator
+           (Values.CreateReplicatorRequest.make ?description
+              ?tags:(Option.map ~f:Values.Zz__mapOf__string.of_json tags)
+              ?logDelivery:(Option.map ~f:Values.LogDelivery.of_json
+                              logDelivery)
+              ~kafkaClusters:(Values.Zz__listOfKafkaCluster.of_json
+                                kafkaClusters)
+              ~replicationInfoList:(Values.Zz__listOfReplicationInfo.of_json
+                                      replicationInfoList) ~replicatorName
+              ~serviceExecutionRoleArn ())
+           (Some Values.CreateReplicatorResponse.to_json)
+           (Some Values.CreateReplicatorResponse.error_to_json)])
+let create_topic =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and configs = flag "configs" (optional string) ~doc:"STRING __string"
+       and clusterArn =
+         flag "cluster-arn" (required string) ~doc:"STRING __string"
+       and topicName =
+         flag "topic-name" (required string) ~doc:"STRING __string"
+       and partitionCount =
+         flag "partition-count" (required int) ~doc:"INT __integerMin1"
+       and replicationFactor =
+         flag "replication-factor" (required int) ~doc:"INT __integerMin1" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_topic
+           (Values.CreateTopicRequest.make ?configs ~clusterArn ~topicName
+              ~partitionCount ~replicationFactor ())
+           (Some Values.CreateTopicResponse.to_json)
+           (Some Values.CreateTopicResponse.error_to_json)])
+let create_vpc_connection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON __mapOf__string"
+       and targetClusterArn =
+         flag "target-cluster-arn" (required string) ~doc:"STRING __string"
+       and authentication =
+         flag "authentication" (required string) ~doc:"STRING __string"
+       and vpcId = flag "vpc-id" (required string) ~doc:"STRING __string"
+       and clientSubnets =
+         flag "client-subnets" (required json_arg)
+           ~doc:"JSON __listOf__string"
+       and securityGroups =
+         flag "security-groups" (required json_arg)
+           ~doc:"JSON __listOf__string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_vpc_connection
+           (Values.CreateVpcConnectionRequest.make
+              ?tags:(Option.map ~f:Values.Zz__mapOf__string.of_json tags)
+              ~targetClusterArn ~authentication ~vpcId
+              ~clientSubnets:(Values.Zz__listOf__string.of_json clientSubnets)
+              ~securityGroups:(Values.Zz__listOf__string.of_json
+                                 securityGroups) ())
+           (Some Values.CreateVpcConnectionResponse.to_json)
+           (Some Values.CreateVpcConnectionResponse.error_to_json)])
 let delete_cluster =
   Command.async ~summary:""
     ([%map_open.Command
@@ -193,6 +301,24 @@ let delete_cluster =
            (Values.DeleteClusterRequest.make ?currentVersion ~clusterArn ())
            (Some Values.DeleteClusterResponse.to_json)
            (Some Values.DeleteClusterResponse.error_to_json)])
+let delete_cluster_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterArn =
+         flag "cluster-arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_cluster_policy
+           (Values.DeleteClusterPolicyRequest.make ~clusterArn ())
+           (Some Values.DeleteClusterPolicyResponse.to_json)
+           (Some Values.DeleteClusterPolicyResponse.error_to_json)])
 let delete_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -210,6 +336,64 @@ let delete_configuration =
            (Values.DeleteConfigurationRequest.make ~arn ())
            (Some Values.DeleteConfigurationResponse.to_json)
            (Some Values.DeleteConfigurationResponse.error_to_json)])
+let delete_replicator =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and currentVersion =
+         flag "current-version" (optional string) ~doc:"STRING __string"
+       and replicatorArn =
+         flag "replicator-arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_replicator
+           (Values.DeleteReplicatorRequest.make ?currentVersion
+              ~replicatorArn ())
+           (Some Values.DeleteReplicatorResponse.to_json)
+           (Some Values.DeleteReplicatorResponse.error_to_json)])
+let delete_topic =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterArn =
+         flag "cluster-arn" (required string) ~doc:"STRING __string"
+       and topicName =
+         flag "topic-name" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_topic
+           (Values.DeleteTopicRequest.make ~clusterArn ~topicName ())
+           (Some Values.DeleteTopicResponse.to_json)
+           (Some Values.DeleteTopicResponse.error_to_json)])
+let delete_vpc_connection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and arn = flag "arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_vpc_connection
+           (Values.DeleteVpcConnectionRequest.make ~arn ())
+           (Some Values.DeleteVpcConnectionResponse.to_json)
+           (Some Values.DeleteVpcConnectionResponse.error_to_json)])
 let describe_cluster =
   Command.async ~summary:""
     ([%map_open.Command
@@ -265,6 +449,26 @@ let describe_cluster_operation =
            (Values.DescribeClusterOperationRequest.make ~clusterOperationArn
               ()) (Some Values.DescribeClusterOperationResponse.to_json)
            (Some Values.DescribeClusterOperationResponse.error_to_json)])
+let describe_cluster_operation_v2 =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterOperationArn =
+         flag "cluster-operation-arn" (required string)
+           ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_cluster_operation_v2
+           (Values.DescribeClusterOperationV2Request.make
+              ~clusterOperationArn ())
+           (Some Values.DescribeClusterOperationV2Response.to_json)
+           (Some Values.DescribeClusterOperationV2Response.error_to_json)])
 let describe_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -301,6 +505,86 @@ let describe_configuration_revision =
               ~revision:(Values.Zz__long.of_json revision) ())
            (Some Values.DescribeConfigurationRevisionResponse.to_json)
            (Some Values.DescribeConfigurationRevisionResponse.error_to_json)])
+let describe_replicator =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and replicatorArn =
+         flag "replicator-arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_replicator
+           (Values.DescribeReplicatorRequest.make ~replicatorArn ())
+           (Some Values.DescribeReplicatorResponse.to_json)
+           (Some Values.DescribeReplicatorResponse.error_to_json)])
+let describe_topic =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterArn =
+         flag "cluster-arn" (required string) ~doc:"STRING __string"
+       and topicName =
+         flag "topic-name" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_topic
+           (Values.DescribeTopicRequest.make ~clusterArn ~topicName ())
+           (Some Values.DescribeTopicResponse.to_json)
+           (Some Values.DescribeTopicResponse.error_to_json)])
+let describe_topic_partitions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string"
+       and clusterArn =
+         flag "cluster-arn" (required string) ~doc:"STRING __string"
+       and topicName =
+         flag "topic-name" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_topic_partitions
+           (Values.DescribeTopicPartitionsRequest.make ?maxResults ?nextToken
+              ~clusterArn ~topicName ())
+           (Some Values.DescribeTopicPartitionsResponse.to_json)
+           (Some Values.DescribeTopicPartitionsResponse.error_to_json)])
+let describe_vpc_connection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and arn = flag "arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_vpc_connection
+           (Values.DescribeVpcConnectionRequest.make ~arn ())
+           (Some Values.DescribeVpcConnectionResponse.to_json)
+           (Some Values.DescribeVpcConnectionResponse.error_to_json)])
 let batch_disassociate_scram_secret =
   Command.async ~summary:""
     ([%map_open.Command
@@ -359,6 +643,24 @@ let get_compatible_kafka_versions =
            (Values.GetCompatibleKafkaVersionsRequest.make ?clusterArn ())
            (Some Values.GetCompatibleKafkaVersionsResponse.to_json)
            (Some Values.GetCompatibleKafkaVersionsResponse.error_to_json)])
+let get_cluster_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterArn =
+         flag "cluster-arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_cluster_policy
+           (Values.GetClusterPolicyRequest.make ~clusterArn ())
+           (Some Values.GetClusterPolicyResponse.to_json)
+           (Some Values.GetClusterPolicyResponse.error_to_json)])
 let list_cluster_operations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -382,6 +684,29 @@ let list_cluster_operations =
               ~clusterArn ())
            (Some Values.ListClusterOperationsResponse.to_json)
            (Some Values.ListClusterOperationsResponse.error_to_json)])
+let list_cluster_operations_v2 =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string"
+       and clusterArn =
+         flag "cluster-arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cluster_operations_v2
+           (Values.ListClusterOperationsV2Request.make ?maxResults ?nextToken
+              ~clusterArn ())
+           (Some Values.ListClusterOperationsV2Response.to_json)
+           (Some Values.ListClusterOperationsV2Response.error_to_json)])
 let list_clusters =
   Command.async ~summary:""
     ([%map_open.Command
@@ -513,6 +838,30 @@ let list_nodes =
            (Values.ListNodesRequest.make ?maxResults ?nextToken ~clusterArn
               ()) (Some Values.ListNodesResponse.to_json)
            (Some Values.ListNodesResponse.error_to_json)])
+let list_replicators =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string"
+       and replicatorNameFilter =
+         flag "replicator-name-filter" (optional string)
+           ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_replicators
+           (Values.ListReplicatorsRequest.make ?maxResults ?nextToken
+              ?replicatorNameFilter ())
+           (Some Values.ListReplicatorsResponse.to_json)
+           (Some Values.ListReplicatorsResponse.error_to_json)])
 let list_scram_secrets =
   Command.async ~summary:""
     ([%map_open.Command
@@ -553,6 +902,116 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_client_vpc_connections =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string"
+       and clusterArn =
+         flag "cluster-arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_client_vpc_connections
+           (Values.ListClientVpcConnectionsRequest.make ?maxResults
+              ?nextToken ~clusterArn ())
+           (Some Values.ListClientVpcConnectionsResponse.to_json)
+           (Some Values.ListClientVpcConnectionsResponse.error_to_json)])
+let list_topics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string"
+       and topicNameFilter =
+         flag "topic-name-filter" (optional string) ~doc:"STRING __string"
+       and clusterArn =
+         flag "cluster-arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_topics
+           (Values.ListTopicsRequest.make ?maxResults ?nextToken
+              ?topicNameFilter ~clusterArn ())
+           (Some Values.ListTopicsResponse.to_json)
+           (Some Values.ListTopicsResponse.error_to_json)])
+let list_vpc_connections =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_vpc_connections
+           (Values.ListVpcConnectionsRequest.make ?maxResults ?nextToken ())
+           (Some Values.ListVpcConnectionsResponse.to_json)
+           (Some Values.ListVpcConnectionsResponse.error_to_json)])
+let reject_client_vpc_connection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterArn =
+         flag "cluster-arn" (required string) ~doc:"STRING __string"
+       and vpcConnectionArn =
+         flag "vpc-connection-arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.reject_client_vpc_connection
+           (Values.RejectClientVpcConnectionRequest.make ~clusterArn
+              ~vpcConnectionArn ())
+           (Some Values.RejectClientVpcConnectionResponse.to_json)
+           (Some Values.RejectClientVpcConnectionResponse.error_to_json)])
+let put_cluster_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and currentVersion =
+         flag "current-version" (optional string) ~doc:"STRING __string"
+       and clusterArn =
+         flag "cluster-arn" (required string) ~doc:"STRING __string"
+       and policy = flag "policy" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_cluster_policy
+           (Values.PutClusterPolicyRequest.make ?currentVersion ~clusterArn
+              ~policy ()) (Some Values.PutClusterPolicyResponse.to_json)
+           (Some Values.PutClusterPolicyResponse.error_to_json)])
 let reboot_broker =
   Command.async ~summary:""
     ([%map_open.Command
@@ -717,19 +1176,26 @@ let update_connectivity =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and connectivityInfo =
+         flag "connectivity-info" (optional json_arg)
+           ~doc:"JSON ConnectivityInfo"
+       and zookeeperAccess =
+         flag "zookeeper-access" (optional json_arg)
+           ~doc:"JSON ZookeeperAccess"
        and clusterArn =
          flag "cluster-arn" (required string) ~doc:"STRING __string"
-       and connectivityInfo =
-         flag "connectivity-info" (required json_arg)
-           ~doc:"JSON ConnectivityInfo"
        and currentVersion =
          flag "current-version" (required string) ~doc:"STRING __string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_connectivity
-           (Values.UpdateConnectivityRequest.make ~clusterArn
-              ~connectivityInfo:(Values.ConnectivityInfo.of_json
-                                   connectivityInfo) ~currentVersion ())
+           (Values.UpdateConnectivityRequest.make
+              ?connectivityInfo:(Option.map
+                                   ~f:Values.ConnectivityInfo.of_json
+                                   connectivityInfo)
+              ?zookeeperAccess:(Option.map ~f:Values.ZookeeperAccess.of_json
+                                  zookeeperAccess) ~clusterArn
+              ~currentVersion ())
            (Some Values.UpdateConnectivityResponse.to_json)
            (Some Values.UpdateConnectivityResponse.error_to_json)])
 let update_cluster_configuration =
@@ -822,6 +1288,79 @@ let update_monitoring =
                               loggingInfo) ~clusterArn ~currentVersion ())
            (Some Values.UpdateMonitoringResponse.to_json)
            (Some Values.UpdateMonitoringResponse.error_to_json)])
+let update_rebalancing =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterArn =
+         flag "cluster-arn" (required string) ~doc:"STRING __string"
+       and currentVersion =
+         flag "current-version" (required string) ~doc:"STRING __string"
+       and rebalancing =
+         flag "rebalancing" (required json_arg) ~doc:"JSON Rebalancing" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_rebalancing
+           (Values.UpdateRebalancingRequest.make ~clusterArn ~currentVersion
+              ~rebalancing:(Values.Rebalancing.of_json rebalancing) ())
+           (Some Values.UpdateRebalancingResponse.to_json)
+           (Some Values.UpdateRebalancingResponse.error_to_json)])
+let update_replication_info =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and consumerGroupReplication =
+         flag "consumer-group-replication" (optional json_arg)
+           ~doc:"JSON ConsumerGroupReplicationUpdate"
+       and sourceKafkaClusterArn =
+         flag "source-kafka-cluster-arn" (optional string)
+           ~doc:"STRING __string"
+       and sourceKafkaClusterId =
+         flag "source-kafka-cluster-id" (optional string)
+           ~doc:"STRING __string"
+       and targetKafkaClusterArn =
+         flag "target-kafka-cluster-arn" (optional string)
+           ~doc:"STRING __string"
+       and targetKafkaClusterId =
+         flag "target-kafka-cluster-id" (optional string)
+           ~doc:"STRING __string"
+       and topicReplication =
+         flag "topic-replication" (optional json_arg)
+           ~doc:"JSON TopicReplicationUpdate"
+       and logDelivery =
+         flag "log-delivery" (optional json_arg) ~doc:"JSON LogDelivery"
+       and currentVersion =
+         flag "current-version" (required string) ~doc:"STRING __string"
+       and replicatorArn =
+         flag "replicator-arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_replication_info
+           (Values.UpdateReplicationInfoRequest.make
+              ?consumerGroupReplication:(Option.map
+                                           ~f:Values.ConsumerGroupReplicationUpdate.of_json
+                                           consumerGroupReplication)
+              ?sourceKafkaClusterArn ?sourceKafkaClusterId
+              ?targetKafkaClusterArn ?targetKafkaClusterId
+              ?topicReplication:(Option.map
+                                   ~f:Values.TopicReplicationUpdate.of_json
+                                   topicReplication)
+              ?logDelivery:(Option.map ~f:Values.LogDelivery.of_json
+                              logDelivery) ~currentVersion ~replicatorArn ())
+           (Some Values.UpdateReplicationInfoResponse.to_json)
+           (Some Values.UpdateReplicationInfoResponse.error_to_json)])
 let update_security =
   Command.async ~summary:""
     ([%map_open.Command
@@ -853,6 +1392,62 @@ let update_security =
                                  encryptionInfo) ~clusterArn ~currentVersion
               ()) (Some Values.UpdateSecurityResponse.to_json)
            (Some Values.UpdateSecurityResponse.error_to_json)])
+let update_storage =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and provisionedThroughput =
+         flag "provisioned-throughput" (optional json_arg)
+           ~doc:"JSON ProvisionedThroughput"
+       and storageMode =
+         flag "storage-mode" (optional json_arg) ~doc:"JSON StorageMode"
+       and volumeSizeGB =
+         flag "volume-size-g-b" (optional int) ~doc:"INT __integer"
+       and clusterArn =
+         flag "cluster-arn" (required string) ~doc:"STRING __string"
+       and currentVersion =
+         flag "current-version" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_storage
+           (Values.UpdateStorageRequest.make
+              ?provisionedThroughput:(Option.map
+                                        ~f:Values.ProvisionedThroughput.of_json
+                                        provisionedThroughput)
+              ?storageMode:(Option.map ~f:Values.StorageMode.of_json
+                              storageMode) ?volumeSizeGB ~clusterArn
+              ~currentVersion ()) (Some Values.UpdateStorageResponse.to_json)
+           (Some Values.UpdateStorageResponse.error_to_json)])
+let update_topic =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and configs = flag "configs" (optional string) ~doc:"STRING __string"
+       and partitionCount =
+         flag "partition-count" (optional int) ~doc:"INT __integer"
+       and clusterArn =
+         flag "cluster-arn" (required string) ~doc:"STRING __string"
+       and topicName =
+         flag "topic-name" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_topic
+           (Values.UpdateTopicRequest.make ?configs ?partitionCount
+              ~clusterArn ~topicName ())
+           (Some Values.UpdateTopicResponse.to_json)
+           (Some Values.UpdateTopicResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -860,25 +1455,45 @@ let main =
     ("create-cluster", create_cluster);
     ("create-cluster-v2", create_cluster_v2);
     ("create-configuration", create_configuration);
+    ("create-replicator", create_replicator);
+    ("create-topic", create_topic);
+    ("create-vpc-connection", create_vpc_connection);
     ("delete-cluster", delete_cluster);
+    ("delete-cluster-policy", delete_cluster_policy);
     ("delete-configuration", delete_configuration);
+    ("delete-replicator", delete_replicator);
+    ("delete-topic", delete_topic);
+    ("delete-vpc-connection", delete_vpc_connection);
     ("describe-cluster", describe_cluster);
     ("describe-cluster-v2", describe_cluster_v2);
     ("describe-cluster-operation", describe_cluster_operation);
+    ("describe-cluster-operation-v2", describe_cluster_operation_v2);
     ("describe-configuration", describe_configuration);
     ("describe-configuration-revision", describe_configuration_revision);
+    ("describe-replicator", describe_replicator);
+    ("describe-topic", describe_topic);
+    ("describe-topic-partitions", describe_topic_partitions);
+    ("describe-vpc-connection", describe_vpc_connection);
     ("batch-disassociate-scram-secret", batch_disassociate_scram_secret);
     ("get-bootstrap-brokers", get_bootstrap_brokers);
     ("get-compatible-kafka-versions", get_compatible_kafka_versions);
+    ("get-cluster-policy", get_cluster_policy);
     ("list-cluster-operations", list_cluster_operations);
+    ("list-cluster-operations-v2", list_cluster_operations_v2);
     ("list-clusters", list_clusters);
     ("list-clusters-v2", list_clusters_v2);
     ("list-configuration-revisions", list_configuration_revisions);
     ("list-configurations", list_configurations);
     ("list-kafka-versions", list_kafka_versions);
     ("list-nodes", list_nodes);
+    ("list-replicators", list_replicators);
     ("list-scram-secrets", list_scram_secrets);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-client-vpc-connections", list_client_vpc_connections);
+    ("list-topics", list_topics);
+    ("list-vpc-connections", list_vpc_connections);
+    ("reject-client-vpc-connection", reject_client_vpc_connection);
+    ("put-cluster-policy", put_cluster_policy);
     ("reboot-broker", reboot_broker);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
@@ -890,4 +1505,8 @@ let main =
     ("update-cluster-configuration", update_cluster_configuration);
     ("update-cluster-kafka-version", update_cluster_kafka_version);
     ("update-monitoring", update_monitoring);
-    ("update-security", update_security)]
+    ("update-rebalancing", update_rebalancing);
+    ("update-replication-info", update_replication_info);
+    ("update-security", update_security);
+    ("update-storage", update_storage);
+    ("update-topic", update_topic)]

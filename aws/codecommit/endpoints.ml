@@ -109,6 +109,8 @@ type ('i, 'o, 'e) t =
   ListAssociatedApprovalRuleTemplatesForRepositoryOutput.error) t 
   | ListBranches: (ListBranchesInput.t, ListBranchesOutput.t,
   ListBranchesOutput.error) t 
+  | ListFileCommitHistory: (ListFileCommitHistoryRequest.t,
+  ListFileCommitHistoryResponse.t, ListFileCommitHistoryResponse.error) t 
   | ListPullRequests: (ListPullRequestsInput.t, ListPullRequestsOutput.t,
   ListPullRequestsOutput.error) t 
   | ListRepositories: (ListRepositoriesInput.t, ListRepositoriesOutput.t,
@@ -181,6 +183,9 @@ type ('i, 'o, 'e) t =
   UpdatePullRequestTitleOutput.t, UpdatePullRequestTitleOutput.error) t 
   | UpdateRepositoryDescription: (UpdateRepositoryDescriptionInput.t, 
   unit, unit) t 
+  | UpdateRepositoryEncryptionKey: (UpdateRepositoryEncryptionKeyInput.t,
+  UpdateRepositoryEncryptionKeyOutput.t,
+  UpdateRepositoryEncryptionKeyOutput.error) t 
   | UpdateRepositoryName: (UpdateRepositoryNameInput.t, unit, unit) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
@@ -229,6 +234,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListApprovalRuleTemplates -> `POST
   | ListAssociatedApprovalRuleTemplatesForRepository -> `POST
   | ListBranches -> `POST
+  | ListFileCommitHistory -> `POST
   | ListPullRequests -> `POST
   | ListRepositories -> `POST
   | ListRepositoriesForApprovalRuleTemplate -> `POST
@@ -260,6 +266,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdatePullRequestStatus -> `POST
   | UpdatePullRequestTitle -> `POST
   | UpdateRepositoryDescription -> `POST
+  | UpdateRepositoryEncryptionKey -> `POST
   | UpdateRepositoryName -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
@@ -315,6 +322,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListAssociatedApprovalRuleTemplatesForRepository ->
           (Format.kasprintf Uri.of_string) "/"
       | ListBranches -> (Format.kasprintf Uri.of_string) "/"
+      | ListFileCommitHistory -> (Format.kasprintf Uri.of_string) "/"
       | ListPullRequests -> (Format.kasprintf Uri.of_string) "/"
       | ListRepositories -> (Format.kasprintf Uri.of_string) "/"
       | ListRepositoriesForApprovalRuleTemplate ->
@@ -353,6 +361,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdatePullRequestStatus -> (Format.kasprintf Uri.of_string) "/"
       | UpdatePullRequestTitle -> (Format.kasprintf Uri.of_string) "/"
       | UpdateRepositoryDescription -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateRepositoryEncryptionKey -> (Format.kasprintf Uri.of_string) "/"
       | UpdateRepositoryName -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
@@ -733,6 +742,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "CodeCommit_20150413.ListBranches")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListFileCommitHistory ->
+      let json = ListFileCommitHistoryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CodeCommit_20150413.ListFileCommitHistory")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListPullRequests ->
       let json = ListPullRequestsInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -990,6 +1007,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "CodeCommit_20150413.UpdateRepositoryDescription")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateRepositoryEncryptionKey ->
+      let json = UpdateRepositoryEncryptionKeyInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "CodeCommit_20150413.UpdateRepositoryEncryptionKey")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateRepositoryName ->
       let json = UpdateRepositoryNameInput.to_json req in
@@ -1353,6 +1379,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListBranchesOutput.of_json json)
       else Error (parse_aws_error (Some ListBranchesOutput.error_of_json))
+  | ListFileCommitHistory ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListFileCommitHistoryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListFileCommitHistoryResponse.error_of_json))
   | ListPullRequests ->
       if is_success
       then
@@ -1564,5 +1598,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error (Some UpdatePullRequestTitleOutput.error_of_json))
   | UpdateRepositoryDescription ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateRepositoryEncryptionKey ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateRepositoryEncryptionKeyOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateRepositoryEncryptionKeyOutput.error_of_json))
   | UpdateRepositoryName ->
       if is_success then Ok () else Error (parse_aws_error None)

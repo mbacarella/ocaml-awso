@@ -11,8 +11,18 @@ type ('i, 'o, 'e) t =
   (AssociateResourceSharePermissionRequest.t,
   AssociateResourceSharePermissionResponse.t,
   AssociateResourceSharePermissionResponse.error) t 
+  | CreatePermission: (CreatePermissionRequest.t, CreatePermissionResponse.t,
+  CreatePermissionResponse.error) t 
+  | CreatePermissionVersion: (CreatePermissionVersionRequest.t,
+  CreatePermissionVersionResponse.t, CreatePermissionVersionResponse.error) t
+  
   | CreateResourceShare: (CreateResourceShareRequest.t,
   CreateResourceShareResponse.t, CreateResourceShareResponse.error) t 
+  | DeletePermission: (DeletePermissionRequest.t, DeletePermissionResponse.t,
+  DeletePermissionResponse.error) t 
+  | DeletePermissionVersion: (DeletePermissionVersionRequest.t,
+  DeletePermissionVersionResponse.t, DeletePermissionVersionResponse.error) t
+  
   | DeleteResourceShare: (DeleteResourceShareRequest.t,
   DeleteResourceShareResponse.t, DeleteResourceShareResponse.error) t 
   | DisassociateResourceShare: (DisassociateResourceShareRequest.t,
@@ -41,12 +51,19 @@ type ('i, 'o, 'e) t =
   | ListPendingInvitationResources: (ListPendingInvitationResourcesRequest.t,
   ListPendingInvitationResourcesResponse.t,
   ListPendingInvitationResourcesResponse.error) t 
+  | ListPermissionAssociations: (ListPermissionAssociationsRequest.t,
+  ListPermissionAssociationsResponse.t,
+  ListPermissionAssociationsResponse.error) t 
   | ListPermissionVersions: (ListPermissionVersionsRequest.t,
   ListPermissionVersionsResponse.t, ListPermissionVersionsResponse.error) t 
   | ListPermissions: (ListPermissionsRequest.t, ListPermissionsResponse.t,
   ListPermissionsResponse.error) t 
   | ListPrincipals: (ListPrincipalsRequest.t, ListPrincipalsResponse.t,
   ListPrincipalsResponse.error) t 
+  | ListReplacePermissionAssociationsWork:
+  (ListReplacePermissionAssociationsWorkRequest.t,
+  ListReplacePermissionAssociationsWorkResponse.t,
+  ListReplacePermissionAssociationsWorkResponse.error) t 
   | ListResourceSharePermissions: (ListResourceSharePermissionsRequest.t,
   ListResourceSharePermissionsResponse.t,
   ListResourceSharePermissionsResponse.error) t 
@@ -54,6 +71,12 @@ type ('i, 'o, 'e) t =
   ListResourceTypesResponse.t, ListResourceTypesResponse.error) t 
   | ListResources: (ListResourcesRequest.t, ListResourcesResponse.t,
   ListResourcesResponse.error) t 
+  | ListSourceAssociations: (ListSourceAssociationsRequest.t,
+  ListSourceAssociationsResponse.t, ListSourceAssociationsResponse.error) t 
+  | PromotePermissionCreatedFromPolicy:
+  (PromotePermissionCreatedFromPolicyRequest.t,
+  PromotePermissionCreatedFromPolicyResponse.t,
+  PromotePermissionCreatedFromPolicyResponse.error) t 
   | PromoteResourceShareCreatedFromPolicy:
   (PromoteResourceShareCreatedFromPolicyRequest.t,
   PromoteResourceShareCreatedFromPolicyResponse.t,
@@ -61,6 +84,12 @@ type ('i, 'o, 'e) t =
   | RejectResourceShareInvitation: (RejectResourceShareInvitationRequest.t,
   RejectResourceShareInvitationResponse.t,
   RejectResourceShareInvitationResponse.error) t 
+  | ReplacePermissionAssociations: (ReplacePermissionAssociationsRequest.t,
+  ReplacePermissionAssociationsResponse.t,
+  ReplacePermissionAssociationsResponse.error) t 
+  | SetDefaultPermissionVersion: (SetDefaultPermissionVersionRequest.t,
+  SetDefaultPermissionVersionResponse.t,
+  SetDefaultPermissionVersionResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
@@ -72,7 +101,11 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | AcceptResourceShareInvitation -> `POST
   | AssociateResourceShare -> `POST
   | AssociateResourceSharePermission -> `POST
+  | CreatePermission -> `POST
+  | CreatePermissionVersion -> `POST
   | CreateResourceShare -> `POST
+  | DeletePermission -> `DELETE
+  | DeletePermissionVersion -> `DELETE
   | DeleteResourceShare -> `DELETE
   | DisassociateResourceShare -> `POST
   | DisassociateResourceSharePermission -> `POST
@@ -83,14 +116,20 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetResourceShareInvitations -> `POST
   | GetResourceShares -> `POST
   | ListPendingInvitationResources -> `POST
+  | ListPermissionAssociations -> `POST
   | ListPermissionVersions -> `POST
   | ListPermissions -> `POST
   | ListPrincipals -> `POST
+  | ListReplacePermissionAssociationsWork -> `POST
   | ListResourceSharePermissions -> `POST
   | ListResourceTypes -> `POST
   | ListResources -> `POST
+  | ListSourceAssociations -> `POST
+  | PromotePermissionCreatedFromPolicy -> `POST
   | PromoteResourceShareCreatedFromPolicy -> `POST
   | RejectResourceShareInvitation -> `POST
+  | ReplacePermissionAssociations -> `POST
+  | SetDefaultPermissionVersion -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateResourceShare -> `POST
@@ -104,8 +143,31 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | AssociateResourceSharePermission ->
           (Format.kasprintf Uri.of_string)
             "/associateresourcesharepermission"
+      | CreatePermission ->
+          (Format.kasprintf Uri.of_string) "/createpermission"
+      | CreatePermissionVersion ->
+          (Format.kasprintf Uri.of_string) "/createpermissionversion"
       | CreateResourceShare ->
           (Format.kasprintf Uri.of_string) "/createresourceshare"
+      | DeletePermission ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/deletepermission")
+            (List.filter_opt
+               [Some ("permissionArn", (String_.to_header x.permissionArn));
+               Option.map
+                 ~f:(fun v -> ("clientToken", (String_.to_header v)))
+                 x.clientToken])
+      | DeletePermissionVersion ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/deletepermissionversion")
+            (List.filter_opt
+               [Some ("permissionArn", (String_.to_header x.permissionArn));
+               Some
+                 ("permissionVersion",
+                   (Integer.to_header x.permissionVersion));
+               Option.map
+                 ~f:(fun v -> ("clientToken", (String_.to_header v)))
+                 x.clientToken])
       | DeleteResourceShare ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/deleteresourceshare")
@@ -135,16 +197,26 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/getresourceshares"
       | ListPendingInvitationResources ->
           (Format.kasprintf Uri.of_string) "/listpendinginvitationresources"
+      | ListPermissionAssociations ->
+          (Format.kasprintf Uri.of_string) "/listpermissionassociations"
       | ListPermissionVersions ->
           (Format.kasprintf Uri.of_string) "/listpermissionversions"
       | ListPermissions ->
           (Format.kasprintf Uri.of_string) "/listpermissions"
       | ListPrincipals -> (Format.kasprintf Uri.of_string) "/listprincipals"
+      | ListReplacePermissionAssociationsWork ->
+          (Format.kasprintf Uri.of_string)
+            "/listreplacepermissionassociationswork"
       | ListResourceSharePermissions ->
           (Format.kasprintf Uri.of_string) "/listresourcesharepermissions"
       | ListResourceTypes ->
           (Format.kasprintf Uri.of_string) "/listresourcetypes"
       | ListResources -> (Format.kasprintf Uri.of_string) "/listresources"
+      | ListSourceAssociations ->
+          (Format.kasprintf Uri.of_string) "/listsourceassociations"
+      | PromotePermissionCreatedFromPolicy ->
+          (Format.kasprintf Uri.of_string)
+            "/promotepermissioncreatedfrompolicy"
       | PromoteResourceShareCreatedFromPolicy ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -155,6 +227,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                     (String_.to_header x.resourceShareArn))])
       | RejectResourceShareInvitation ->
           (Format.kasprintf Uri.of_string) "/rejectresourceshareinvitation"
+      | ReplacePermissionAssociations ->
+          (Format.kasprintf Uri.of_string) "/replacepermissionassociations"
+      | SetDefaultPermissionVersion ->
+          (Format.kasprintf Uri.of_string) "/setdefaultpermissionversion"
       | TagResource -> (Format.kasprintf Uri.of_string) "/tagresource"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/untagresource"
       | UpdateResourceShare ->
@@ -209,7 +285,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                                 (PrincipalArnOrIdList.to_value x)));
                       Option.map
                         req.AssociateResourceShareRequest.clientToken
-                        ~f:(fun x -> ("clientToken", (String_.to_value x)))])
+                        ~f:(fun x -> ("clientToken", (String_.to_value x)));
+                      Option.map req.AssociateResourceShareRequest.sources
+                        ~f:(fun x ->
+                              ("sources",
+                                (SourceArnOrAccountList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -251,6 +331,65 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreatePermission ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("name",
+                           (PermissionName.to_value
+                              req.CreatePermissionRequest.name));
+                      Some
+                        ("resourceType",
+                          (String_.to_value
+                             req.CreatePermissionRequest.resourceType));
+                      Some
+                        ("policyTemplate",
+                          (Policy.to_value
+                             req.CreatePermissionRequest.policyTemplate));
+                      Option.map req.CreatePermissionRequest.clientToken
+                        ~f:(fun x -> ("clientToken", (String_.to_value x)));
+                      Option.map req.CreatePermissionRequest.tags
+                        ~f:(fun x -> ("tags", (TagList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreatePermissionVersion ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("permissionArn",
+                           (String_.to_value
+                              req.CreatePermissionVersionRequest.permissionArn));
+                      Some
+                        ("policyTemplate",
+                          (Policy.to_value
+                             req.CreatePermissionVersionRequest.policyTemplate));
+                      Option.map
+                        req.CreatePermissionVersionRequest.clientToken
+                        ~f:(fun x -> ("clientToken", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateResourceShare ->
       let (headers, body) =
         let headers =
@@ -284,7 +423,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.CreateResourceShareRequest.permissionArns
                         ~f:(fun x ->
                               ("permissionArns",
-                                (PermissionArnList.to_value x)))])
+                                (PermissionArnList.to_value x)));
+                      Option.map req.CreateResourceShareRequest.sources
+                        ~f:(fun x ->
+                              ("sources",
+                                (SourceArnOrAccountList.to_value x)));
+                      Option.map
+                        req.CreateResourceShareRequest.resourceShareConfiguration
+                        ~f:(fun x ->
+                              ("resourceShareConfiguration",
+                                (ResourceShareConfiguration.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -292,6 +440,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeletePermission -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeletePermissionVersion ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteResourceShare -> Awso.Http.Request.make (method_of_endpoint endp)
   | DisassociateResourceShare ->
       let (headers, body) =
@@ -317,7 +468,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                                 (PrincipalArnOrIdList.to_value x)));
                       Option.map
                         req.DisassociateResourceShareRequest.clientToken
-                        ~f:(fun x -> ("clientToken", (String_.to_value x)))])
+                        ~f:(fun x -> ("clientToken", (String_.to_value x)));
+                      Option.map req.DisassociateResourceShareRequest.sources
+                        ~f:(fun x ->
+                              ("sources",
+                                (SourceArnOrAccountList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -510,7 +665,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.GetResourceSharesRequest.maxResults
                         ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
                       Option.map req.GetResourceSharesRequest.permissionArn
-                        ~f:(fun x -> ("permissionArn", (String_.to_value x)))])
+                        ~f:(fun x -> ("permissionArn", (String_.to_value x)));
+                      Option.map
+                        req.GetResourceSharesRequest.permissionVersion
+                        ~f:(fun x ->
+                              ("permissionVersion", (Integer.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -542,6 +701,51 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("resourceRegionScope",
                                 (ResourceRegionScopeFilter.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListPermissionAssociations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListPermissionAssociationsRequest.permissionArn
+                         ~f:(fun x -> ("permissionArn", (String_.to_value x)));
+                      Option.map
+                        req.ListPermissionAssociationsRequest.permissionVersion
+                        ~f:(fun x ->
+                              ("permissionVersion", (Integer.to_value x)));
+                      Option.map
+                        req.ListPermissionAssociationsRequest.associationStatus
+                        ~f:(fun x ->
+                              ("associationStatus",
+                                (ResourceShareAssociationStatus.to_value x)));
+                      Option.map
+                        req.ListPermissionAssociationsRequest.resourceType
+                        ~f:(fun x -> ("resourceType", (String_.to_value x)));
+                      Option.map
+                        req.ListPermissionAssociationsRequest.featureSet
+                        ~f:(fun x ->
+                              ("featureSet",
+                                (PermissionFeatureSet.to_value x)));
+                      Option.map
+                        req.ListPermissionAssociationsRequest.defaultVersion
+                        ~f:(fun x -> ("defaultVersion", (Boolean.to_value x)));
+                      Option.map
+                        req.ListPermissionAssociationsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (String_.to_value x)));
+                      Option.map
+                        req.ListPermissionAssociationsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -587,7 +791,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.ListPermissionsRequest.nextToken
                         ~f:(fun x -> ("nextToken", (String_.to_value x)));
                       Option.map req.ListPermissionsRequest.maxResults
-                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)))])
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map req.ListPermissionsRequest.permissionType
+                        ~f:(fun x ->
+                              ("permissionType",
+                                (PermissionTypeFilter.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -623,6 +831,40 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.ListPrincipalsRequest.nextToken
                         ~f:(fun x -> ("nextToken", (String_.to_value x)));
                       Option.map req.ListPrincipalsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListReplacePermissionAssociationsWork ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListReplacePermissionAssociationsWorkRequest.workIds
+                         ~f:(fun x ->
+                               ("workIds",
+                                 (ReplacePermissionAssociationsWorkIdList.to_value
+                                    x)));
+                      Option.map
+                        req.ListReplacePermissionAssociationsWorkRequest.status
+                        ~f:(fun x ->
+                              ("status",
+                                (ReplacePermissionAssociationsWorkStatus.to_value
+                                   x)));
+                      Option.map
+                        req.ListReplacePermissionAssociationsWorkRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (String_.to_value x)));
+                      Option.map
+                        req.ListReplacePermissionAssociationsWorkRequest.maxResults
                         ~f:(fun x -> ("maxResults", (MaxResults.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -721,6 +963,67 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListSourceAssociations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListSourceAssociationsRequest.resourceShareArns
+                         ~f:(fun x ->
+                               ("resourceShareArns",
+                                 (ResourceShareArnList.to_value x)));
+                      Option.map req.ListSourceAssociationsRequest.sourceId
+                        ~f:(fun x -> ("sourceId", (String_.to_value x)));
+                      Option.map req.ListSourceAssociationsRequest.sourceType
+                        ~f:(fun x -> ("sourceType", (String_.to_value x)));
+                      Option.map
+                        req.ListSourceAssociationsRequest.associationStatus
+                        ~f:(fun x ->
+                              ("associationStatus",
+                                (ResourceShareAssociationStatus.to_value x)));
+                      Option.map req.ListSourceAssociationsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (String_.to_value x)));
+                      Option.map req.ListSourceAssociationsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PromotePermissionCreatedFromPolicy ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("permissionArn",
+                           (String_.to_value
+                              req.PromotePermissionCreatedFromPolicyRequest.permissionArn));
+                      Some
+                        ("name",
+                          (String_.to_value
+                             req.PromotePermissionCreatedFromPolicyRequest.name));
+                      Option.map
+                        req.PromotePermissionCreatedFromPolicyRequest.clientToken
+                        ~f:(fun x -> ("clientToken", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | PromoteResourceShareCreatedFromPolicy ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -747,7 +1050,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | TagResource ->
+  | ReplacePermissionAssociations ->
       let (headers, body) =
         let headers =
           Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
@@ -757,12 +1060,71 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Some
-                         ("resourceShareArn",
+                         ("fromPermissionArn",
                            (String_.to_value
-                              req.TagResourceRequest.resourceShareArn));
+                              req.ReplacePermissionAssociationsRequest.fromPermissionArn));
+                      Option.map
+                        req.ReplacePermissionAssociationsRequest.fromPermissionVersion
+                        ~f:(fun x ->
+                              ("fromPermissionVersion", (Integer.to_value x)));
+                      Some
+                        ("toPermissionArn",
+                          (String_.to_value
+                             req.ReplacePermissionAssociationsRequest.toPermissionArn));
+                      Option.map
+                        req.ReplacePermissionAssociationsRequest.clientToken
+                        ~f:(fun x -> ("clientToken", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SetDefaultPermissionVersion ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("permissionArn",
+                           (String_.to_value
+                              req.SetDefaultPermissionVersionRequest.permissionArn));
+                      Some
+                        ("permissionVersion",
+                          (Integer.to_value
+                             req.SetDefaultPermissionVersionRequest.permissionVersion));
+                      Option.map
+                        req.SetDefaultPermissionVersionRequest.clientToken
+                        ~f:(fun x -> ("clientToken", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | TagResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.TagResourceRequest.resourceShareArn
+                         ~f:(fun x ->
+                               ("resourceShareArn", (String_.to_value x)));
                       Some
                         ("tags",
-                          (TagList.to_value req.TagResourceRequest.tags))])
+                          (TagList.to_value req.TagResourceRequest.tags));
+                      Option.map req.TagResourceRequest.resourceArn
+                        ~f:(fun x -> ("resourceArn", (String_.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -779,14 +1141,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("resourceShareArn",
-                           (String_.to_value
-                              req.UntagResourceRequest.resourceShareArn));
+                      [Option.map req.UntagResourceRequest.resourceShareArn
+                         ~f:(fun x ->
+                               ("resourceShareArn", (String_.to_value x)));
                       Some
                         ("tagKeys",
                           (TagKeyList.to_value
-                             req.UntagResourceRequest.tagKeys))])
+                             req.UntagResourceRequest.tagKeys));
+                      Option.map req.UntagResourceRequest.resourceArn
+                        ~f:(fun x -> ("resourceArn", (String_.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -899,12 +1262,38 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AssociateResourceSharePermissionResponse.error_of_json))
+  | CreatePermission ->
+      if is_success
+      then Ok (CreatePermissionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreatePermissionResponse.error_of_json))
+  | CreatePermissionVersion ->
+      if is_success
+      then
+        Ok (CreatePermissionVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreatePermissionVersionResponse.error_of_json))
   | CreateResourceShare ->
       if is_success
       then Ok (CreateResourceShareResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some CreateResourceShareResponse.error_of_json))
+  | DeletePermission ->
+      if is_success
+      then Ok (DeletePermissionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeletePermissionResponse.error_of_json))
+  | DeletePermissionVersion ->
+      if is_success
+      then
+        Ok (DeletePermissionVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeletePermissionVersionResponse.error_of_json))
   | DeleteResourceShare ->
       if is_success
       then Ok (DeleteResourceShareResponse.of_json (response_to_json resp))
@@ -986,6 +1375,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListPendingInvitationResourcesResponse.error_of_json))
+  | ListPermissionAssociations ->
+      if is_success
+      then
+        Ok
+          (ListPermissionAssociationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListPermissionAssociationsResponse.error_of_json))
   | ListPermissionVersions ->
       if is_success
       then
@@ -1004,6 +1402,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (ListPrincipalsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListPrincipalsResponse.error_of_json))
+  | ListReplacePermissionAssociationsWork ->
+      if is_success
+      then
+        Ok
+          (ListReplacePermissionAssociationsWorkResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListReplacePermissionAssociationsWorkResponse.error_of_json))
   | ListResourceSharePermissions ->
       if is_success
       then
@@ -1024,6 +1433,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListResourcesResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListResourcesResponse.error_of_json))
+  | ListSourceAssociations ->
+      if is_success
+      then
+        Ok (ListSourceAssociationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListSourceAssociationsResponse.error_of_json))
+  | PromotePermissionCreatedFromPolicy ->
+      if is_success
+      then
+        Ok
+          (PromotePermissionCreatedFromPolicyResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PromotePermissionCreatedFromPolicyResponse.error_of_json))
   | PromoteResourceShareCreatedFromPolicy ->
       if is_success
       then
@@ -1045,6 +1472,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some RejectResourceShareInvitationResponse.error_of_json))
+  | ReplacePermissionAssociations ->
+      if is_success
+      then
+        Ok
+          (ReplacePermissionAssociationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ReplacePermissionAssociationsResponse.error_of_json))
+  | SetDefaultPermissionVersion ->
+      if is_success
+      then
+        Ok
+          (SetDefaultPermissionVersionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SetDefaultPermissionVersionResponse.error_of_json))
   | TagResource ->
       if is_success
       then

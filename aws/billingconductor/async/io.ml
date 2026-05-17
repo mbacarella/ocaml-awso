@@ -42,12 +42,16 @@ let disassociate_accounts ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateAccounts input
 let disassociate_pricing_rules ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociatePricingRules input
+let get_billing_group_cost_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetBillingGroupCostReport input
 let list_account_associations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAccountAssociations input
 let list_billing_group_cost_reports ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBillingGroupCostReports input
 let list_billing_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBillingGroups input
+let list_custom_line_item_versions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCustomLineItemVersions input
 let list_custom_line_items ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCustomLineItems input
 let list_pricing_plans ?endpoint_url ?cfg input =

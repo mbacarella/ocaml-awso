@@ -11,12 +11,16 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let accept_delegation_request ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AcceptDelegationRequest input
 let add_client_i_d_to_open_i_d_connect_provider ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AddClientIDToOpenIDConnectProvider input
 let add_role_to_instance_profile ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AddRoleToInstanceProfile input
 let add_user_to_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AddUserToGroup input
+let associate_delegation_request ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateDelegationRequest input
 let attach_group_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AttachGroupPolicy input
 let attach_role_policy ?endpoint_url ?cfg input =
@@ -29,6 +33,8 @@ let create_access_key ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAccessKey input
 let create_account_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAccountAlias input
+let create_delegation_request ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateDelegationRequest input
 let create_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateGroup input
 let create_instance_profile ?endpoint_url ?cfg input =
@@ -107,8 +113,25 @@ let detach_role_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DetachRolePolicy input
 let detach_user_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DetachUserPolicy input
+let disable_organizations_root_credentials_management ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.DisableOrganizationsRootCredentialsManagement input
+let disable_organizations_root_sessions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisableOrganizationsRootSessions input
+let disable_outbound_web_identity_federation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisableOutboundWebIdentityFederation
+    input
 let enable_m_f_a_device ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableMFADevice input
+let enable_organizations_root_credentials_management ?endpoint_url ?cfg input
+  =
+  eval ?endpoint_url ?cfg
+    Endpoints.EnableOrganizationsRootCredentialsManagement input
+let enable_organizations_root_sessions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.EnableOrganizationsRootSessions input
+let enable_outbound_web_identity_federation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.EnableOutboundWebIdentityFederation input
 let generate_credential_report ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GenerateCredentialReport input
 let generate_organizations_access_report ?endpoint_url ?cfg input =
@@ -129,18 +152,27 @@ let get_context_keys_for_principal_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetContextKeysForPrincipalPolicy input
 let get_credential_report ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCredentialReport input
+let get_delegation_request ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDelegationRequest input
 let get_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetGroup input
 let get_group_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetGroupPolicy input
+let get_human_readable_summary ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetHumanReadableSummary input
 let get_instance_profile ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetInstanceProfile input
 let get_login_profile ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLoginProfile input
+let get_m_f_a_device ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetMFADevice input
 let get_open_i_d_connect_provider ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetOpenIDConnectProvider input
 let get_organizations_access_report ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetOrganizationsAccessReport input
+let get_outbound_web_identity_federation_info ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetOutboundWebIdentityFederationInfo
+    input
 let get_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPolicy input
 let get_policy_version ?endpoint_url ?cfg input =
@@ -177,6 +209,8 @@ let list_attached_role_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAttachedRolePolicies input
 let list_attached_user_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAttachedUserPolicies input
+let list_delegation_requests ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDelegationRequests input
 let list_entities_for_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListEntitiesForPolicy input
 let list_group_policies ?endpoint_url ?cfg input =
@@ -199,6 +233,8 @@ let list_open_i_d_connect_provider_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListOpenIDConnectProviderTags input
 let list_open_i_d_connect_providers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListOpenIDConnectProviders input
+let list_organizations_features ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListOrganizationsFeatures input
 let list_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPolicies input
 let list_policies_granting_service_access ?endpoint_url ?cfg input =
@@ -245,6 +281,8 @@ let put_user_permissions_boundary ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutUserPermissionsBoundary input
 let put_user_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutUserPolicy input
+let reject_delegation_request ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RejectDelegationRequest input
 let remove_client_i_d_from_open_i_d_connect_provider ?endpoint_url ?cfg input
   =
   eval ?endpoint_url ?cfg Endpoints.RemoveClientIDFromOpenIDConnectProvider
@@ -257,6 +295,8 @@ let reset_service_specific_credential ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ResetServiceSpecificCredential input
 let resync_m_f_a_device ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ResyncMFADevice input
+let send_delegation_token ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SendDelegationToken input
 let set_default_policy_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SetDefaultPolicyVersion input
 let set_security_token_service_preferences ?endpoint_url ?cfg input =
@@ -303,6 +343,8 @@ let update_account_password_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAccountPasswordPolicy input
 let update_assume_role_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAssumeRolePolicy input
+let update_delegation_request ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateDelegationRequest input
 let update_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateGroup input
 let update_login_profile ?endpoint_url ?cfg input =

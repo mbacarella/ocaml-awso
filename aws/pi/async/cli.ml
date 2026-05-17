@@ -28,6 +28,60 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let create_performance_analysis_report =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and serviceType =
+         flag "service-type" (required json_arg) ~doc:"JSON ServiceType"
+       and identifier =
+         flag "identifier" (required string) ~doc:"STRING IdentifierString"
+       and startTime =
+         flag "start-time" (required json_arg) ~doc:"JSON ISOTimestamp"
+       and endTime =
+         flag "end-time" (required json_arg) ~doc:"JSON ISOTimestamp" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_performance_analysis_report
+           (Values.CreatePerformanceAnalysisReportRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~serviceType:(Values.ServiceType.of_json serviceType)
+              ~identifier ~startTime:(Values.ISOTimestamp.of_json startTime)
+              ~endTime:(Values.ISOTimestamp.of_json endTime) ())
+           (Some Values.CreatePerformanceAnalysisReportResponse.to_json)
+           (Some Values.CreatePerformanceAnalysisReportResponse.error_to_json)])
+let delete_performance_analysis_report =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceType =
+         flag "service-type" (required json_arg) ~doc:"JSON ServiceType"
+       and identifier =
+         flag "identifier" (required string) ~doc:"STRING IdentifierString"
+       and analysisReportId =
+         flag "analysis-report-id" (required string)
+           ~doc:"STRING AnalysisReportId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_performance_analysis_report
+           (Values.DeletePerformanceAnalysisReportRequest.make
+              ~serviceType:(Values.ServiceType.of_json serviceType)
+              ~identifier ~analysisReportId ())
+           (Some Values.DeletePerformanceAnalysisReportResponse.to_json)
+           (Some Values.DeletePerformanceAnalysisReportResponse.error_to_json)])
 let describe_dimension_keys =
   Command.async ~summary:""
     ([%map_open.Command
@@ -54,7 +108,7 @@ let describe_dimension_keys =
        and serviceType =
          flag "service-type" (required json_arg) ~doc:"JSON ServiceType"
        and identifier =
-         flag "identifier" (required string) ~doc:"STRING RequestString"
+         flag "identifier" (required string) ~doc:"STRING IdentifierString"
        and startTime =
          flag "start-time" (required json_arg) ~doc:"JSON ISOTimestamp"
        and endTime =
@@ -112,6 +166,39 @@ let get_dimension_key_details =
               ~identifier ~group ~groupIdentifier ())
            (Some Values.GetDimensionKeyDetailsResponse.to_json)
            (Some Values.GetDimensionKeyDetailsResponse.error_to_json)])
+let get_performance_analysis_report =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and textFormat =
+         flag "text-format" (optional json_arg) ~doc:"JSON TextFormat"
+       and acceptLanguage =
+         flag "accept-language" (optional json_arg)
+           ~doc:"JSON AcceptLanguage"
+       and serviceType =
+         flag "service-type" (required json_arg) ~doc:"JSON ServiceType"
+       and identifier =
+         flag "identifier" (required string) ~doc:"STRING IdentifierString"
+       and analysisReportId =
+         flag "analysis-report-id" (required string)
+           ~doc:"STRING AnalysisReportId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_performance_analysis_report
+           (Values.GetPerformanceAnalysisReportRequest.make
+              ?textFormat:(Option.map ~f:Values.TextFormat.of_json textFormat)
+              ?acceptLanguage:(Option.map ~f:Values.AcceptLanguage.of_json
+                                 acceptLanguage)
+              ~serviceType:(Values.ServiceType.of_json serviceType)
+              ~identifier ~analysisReportId ())
+           (Some Values.GetPerformanceAnalysisReportResponse.to_json)
+           (Some Values.GetPerformanceAnalysisReportResponse.error_to_json)])
 let get_resource_metadata =
   Command.async ~summary:""
     ([%map_open.Command
@@ -125,7 +212,7 @@ let get_resource_metadata =
        and serviceType =
          flag "service-type" (required json_arg) ~doc:"JSON ServiceType"
        and identifier =
-         flag "identifier" (required string) ~doc:"STRING RequestString" in
+         flag "identifier" (required string) ~doc:"STRING IdentifierString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_resource_metadata
@@ -150,10 +237,13 @@ let get_resource_metrics =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and periodAlignment =
+         flag "period-alignment" (optional json_arg)
+           ~doc:"JSON PeriodAlignment"
        and serviceType =
          flag "service-type" (required json_arg) ~doc:"JSON ServiceType"
        and identifier =
-         flag "identifier" (required string) ~doc:"STRING RequestString"
+         flag "identifier" (required string) ~doc:"STRING IdentifierString"
        and metricQueries =
          flag "metric-queries" (required json_arg)
            ~doc:"JSON MetricQueryList"
@@ -166,6 +256,8 @@ let get_resource_metrics =
            Io.get_resource_metrics
            (Values.GetResourceMetricsRequest.make ?periodInSeconds
               ?maxResults ?nextToken
+              ?periodAlignment:(Option.map ~f:Values.PeriodAlignment.of_json
+                                  periodAlignment)
               ~serviceType:(Values.ServiceType.of_json serviceType)
               ~identifier
               ~metricQueries:(Values.MetricQueryList.of_json metricQueries)
@@ -187,10 +279,13 @@ let list_available_resource_dimensions =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and authorizedActions =
+         flag "authorized-actions" (optional json_arg)
+           ~doc:"JSON AuthorizedActionsList"
        and serviceType =
          flag "service-type" (required json_arg) ~doc:"JSON ServiceType"
        and identifier =
-         flag "identifier" (required string) ~doc:"STRING RequestString"
+         flag "identifier" (required string) ~doc:"STRING IdentifierString"
        and metrics =
          flag "metrics" (required json_arg) ~doc:"JSON DimensionsMetricList" in
        fun () ->
@@ -198,6 +293,9 @@ let list_available_resource_dimensions =
            Io.list_available_resource_dimensions
            (Values.ListAvailableResourceDimensionsRequest.make ?maxResults
               ?nextToken
+              ?authorizedActions:(Option.map
+                                    ~f:Values.AuthorizedActionsList.of_json
+                                    authorizedActions)
               ~serviceType:(Values.ServiceType.of_json serviceType)
               ~identifier
               ~metrics:(Values.DimensionsMetricList.of_json metrics) ())
@@ -220,7 +318,7 @@ let list_available_resource_metrics =
        and serviceType =
          flag "service-type" (required json_arg) ~doc:"JSON ServiceType"
        and identifier =
-         flag "identifier" (required string) ~doc:"STRING RequestString"
+         flag "identifier" (required string) ~doc:"STRING IdentifierString"
        and metricTypes =
          flag "metric-types" (required json_arg) ~doc:"JSON MetricTypeList" in
        fun () ->
@@ -233,13 +331,122 @@ let list_available_resource_metrics =
               ~metricTypes:(Values.MetricTypeList.of_json metricTypes) ())
            (Some Values.ListAvailableResourceMetricsResponse.to_json)
            (Some Values.ListAvailableResourceMetricsResponse.error_to_json)])
+let list_performance_analysis_reports =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and listTags = flag "list-tags" (optional bool) ~doc:"BOOL Boolean"
+       and serviceType =
+         flag "service-type" (required json_arg) ~doc:"JSON ServiceType"
+       and identifier =
+         flag "identifier" (required string) ~doc:"STRING IdentifierString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_performance_analysis_reports
+           (Values.ListPerformanceAnalysisReportsRequest.make ?nextToken
+              ?maxResults ?listTags
+              ~serviceType:(Values.ServiceType.of_json serviceType)
+              ~identifier ())
+           (Some Values.ListPerformanceAnalysisReportsResponse.to_json)
+           (Some Values.ListPerformanceAnalysisReportsResponse.error_to_json)])
+let list_tags_for_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceType =
+         flag "service-type" (required json_arg) ~doc:"JSON ServiceType"
+       and resourceARN =
+         flag "resource-a-r-n" (required string)
+           ~doc:"STRING AmazonResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_tags_for_resource
+           (Values.ListTagsForResourceRequest.make
+              ~serviceType:(Values.ServiceType.of_json serviceType)
+              ~resourceARN ())
+           (Some Values.ListTagsForResourceResponse.to_json)
+           (Some Values.ListTagsForResourceResponse.error_to_json)])
+let tag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceType =
+         flag "service-type" (required json_arg) ~doc:"JSON ServiceType"
+       and resourceARN =
+         flag "resource-a-r-n" (required string)
+           ~doc:"STRING AmazonResourceName"
+       and tags = flag "tags" (required json_arg) ~doc:"JSON TagList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.tag_resource
+           (Values.TagResourceRequest.make
+              ~serviceType:(Values.ServiceType.of_json serviceType)
+              ~resourceARN ~tags:(Values.TagList.of_json tags) ())
+           (Some Values.TagResourceResponse.to_json)
+           (Some Values.TagResourceResponse.error_to_json)])
+let untag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceType =
+         flag "service-type" (required json_arg) ~doc:"JSON ServiceType"
+       and resourceARN =
+         flag "resource-a-r-n" (required string)
+           ~doc:"STRING AmazonResourceName"
+       and tagKeys =
+         flag "tag-keys" (required json_arg) ~doc:"JSON TagKeyList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.untag_resource
+           (Values.UntagResourceRequest.make
+              ~serviceType:(Values.ServiceType.of_json serviceType)
+              ~resourceARN ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
+           (Some Values.UntagResourceResponse.to_json)
+           (Some Values.UntagResourceResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("describe-dimension-keys", describe_dimension_keys);
+    [("create-performance-analysis-report",
+       create_performance_analysis_report);
+    ("delete-performance-analysis-report",
+      delete_performance_analysis_report);
+    ("describe-dimension-keys", describe_dimension_keys);
     ("get-dimension-key-details", get_dimension_key_details);
+    ("get-performance-analysis-report", get_performance_analysis_report);
     ("get-resource-metadata", get_resource_metadata);
     ("get-resource-metrics", get_resource_metrics);
     ("list-available-resource-dimensions",
       list_available_resource_dimensions);
-    ("list-available-resource-metrics", list_available_resource_metrics)]
+    ("list-available-resource-metrics", list_available_resource_metrics);
+    ("list-performance-analysis-reports", list_performance_analysis_reports);
+    ("list-tags-for-resource", list_tags_for_resource);
+    ("tag-resource", tag_resource);
+    ("untag-resource", untag_resource)]

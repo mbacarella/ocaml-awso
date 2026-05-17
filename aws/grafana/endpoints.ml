@@ -6,20 +6,50 @@ type ('i, 'o, 'e) t =
   AssociateLicenseResponse.error) t 
   | CreateWorkspace: (CreateWorkspaceRequest.t, CreateWorkspaceResponse.t,
   CreateWorkspaceResponse.error) t 
+  | CreateWorkspaceApiKey: (CreateWorkspaceApiKeyRequest.t,
+  CreateWorkspaceApiKeyResponse.t, CreateWorkspaceApiKeyResponse.error) t 
+  | CreateWorkspaceServiceAccount: (CreateWorkspaceServiceAccountRequest.t,
+  CreateWorkspaceServiceAccountResponse.t,
+  CreateWorkspaceServiceAccountResponse.error) t 
+  | CreateWorkspaceServiceAccountToken:
+  (CreateWorkspaceServiceAccountTokenRequest.t,
+  CreateWorkspaceServiceAccountTokenResponse.t,
+  CreateWorkspaceServiceAccountTokenResponse.error) t 
   | DeleteWorkspace: (DeleteWorkspaceRequest.t, DeleteWorkspaceResponse.t,
   DeleteWorkspaceResponse.error) t 
+  | DeleteWorkspaceApiKey: (DeleteWorkspaceApiKeyRequest.t,
+  DeleteWorkspaceApiKeyResponse.t, DeleteWorkspaceApiKeyResponse.error) t 
+  | DeleteWorkspaceServiceAccount: (DeleteWorkspaceServiceAccountRequest.t,
+  DeleteWorkspaceServiceAccountResponse.t,
+  DeleteWorkspaceServiceAccountResponse.error) t 
+  | DeleteWorkspaceServiceAccountToken:
+  (DeleteWorkspaceServiceAccountTokenRequest.t,
+  DeleteWorkspaceServiceAccountTokenResponse.t,
+  DeleteWorkspaceServiceAccountTokenResponse.error) t 
   | DescribeWorkspace: (DescribeWorkspaceRequest.t,
   DescribeWorkspaceResponse.t, DescribeWorkspaceResponse.error) t 
   | DescribeWorkspaceAuthentication:
   (DescribeWorkspaceAuthenticationRequest.t,
   DescribeWorkspaceAuthenticationResponse.t,
   DescribeWorkspaceAuthenticationResponse.error) t 
+  | DescribeWorkspaceConfiguration: (DescribeWorkspaceConfigurationRequest.t,
+  DescribeWorkspaceConfigurationResponse.t,
+  DescribeWorkspaceConfigurationResponse.error) t 
   | DisassociateLicense: (DisassociateLicenseRequest.t,
   DisassociateLicenseResponse.t, DisassociateLicenseResponse.error) t 
   | ListPermissions: (ListPermissionsRequest.t, ListPermissionsResponse.t,
   ListPermissionsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListVersions: (ListVersionsRequest.t, ListVersionsResponse.t,
+  ListVersionsResponse.error) t 
+  | ListWorkspaceServiceAccountTokens:
+  (ListWorkspaceServiceAccountTokensRequest.t,
+  ListWorkspaceServiceAccountTokensResponse.t,
+  ListWorkspaceServiceAccountTokensResponse.error) t 
+  | ListWorkspaceServiceAccounts: (ListWorkspaceServiceAccountsRequest.t,
+  ListWorkspaceServiceAccountsResponse.t,
+  ListWorkspaceServiceAccountsResponse.error) t 
   | ListWorkspaces: (ListWorkspacesRequest.t, ListWorkspacesResponse.t,
   ListWorkspacesResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
@@ -33,22 +63,36 @@ type ('i, 'o, 'e) t =
   | UpdateWorkspaceAuthentication: (UpdateWorkspaceAuthenticationRequest.t,
   UpdateWorkspaceAuthenticationResponse.t,
   UpdateWorkspaceAuthenticationResponse.error) t 
+  | UpdateWorkspaceConfiguration: (UpdateWorkspaceConfigurationRequest.t,
+  UpdateWorkspaceConfigurationResponse.t,
+  UpdateWorkspaceConfigurationResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AssociateLicense -> `POST
   | CreateWorkspace -> `POST
+  | CreateWorkspaceApiKey -> `POST
+  | CreateWorkspaceServiceAccount -> `POST
+  | CreateWorkspaceServiceAccountToken -> `POST
   | DeleteWorkspace -> `DELETE
+  | DeleteWorkspaceApiKey -> `DELETE
+  | DeleteWorkspaceServiceAccount -> `DELETE
+  | DeleteWorkspaceServiceAccountToken -> `DELETE
   | DescribeWorkspace -> `GET
   | DescribeWorkspaceAuthentication -> `GET
+  | DescribeWorkspaceConfiguration -> `GET
   | DisassociateLicense -> `DELETE
   | ListPermissions -> `GET
   | ListTagsForResource -> `GET
+  | ListVersions -> `GET
+  | ListWorkspaceServiceAccountTokens -> `GET
+  | ListWorkspaceServiceAccounts -> `GET
   | ListWorkspaces -> `GET
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdatePermissions -> `PATCH
   | UpdateWorkspace -> `PUT
   | UpdateWorkspaceAuthentication -> `POST
+  | UpdateWorkspaceConfiguration -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -57,9 +101,43 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (WorkspaceId.to_header x.AssociateLicenseRequest.workspaceId)
             (LicenseType.to_header x.AssociateLicenseRequest.licenseType)
       | CreateWorkspace -> (Format.kasprintf Uri.of_string) "/workspaces"
+      | CreateWorkspaceApiKey ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/apikeys"
+            (WorkspaceId.to_header x.CreateWorkspaceApiKeyRequest.workspaceId)
+      | CreateWorkspaceServiceAccount ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/serviceaccounts"
+            (WorkspaceId.to_header
+               x.CreateWorkspaceServiceAccountRequest.workspaceId)
+      | CreateWorkspaceServiceAccountToken ->
+          (Format.kasprintf Uri.of_string)
+            "/workspaces/%s/serviceaccounts/%s/tokens"
+            (WorkspaceId.to_header
+               x.CreateWorkspaceServiceAccountTokenRequest.workspaceId)
+            (String_.to_header
+               x.CreateWorkspaceServiceAccountTokenRequest.serviceAccountId)
       | DeleteWorkspace ->
           (Format.kasprintf Uri.of_string) "/workspaces/%s"
             (WorkspaceId.to_header x.DeleteWorkspaceRequest.workspaceId)
+      | DeleteWorkspaceApiKey ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/apikeys/%s"
+            (WorkspaceId.to_header x.DeleteWorkspaceApiKeyRequest.workspaceId)
+            (ApiKeyName.to_header x.DeleteWorkspaceApiKeyRequest.keyName)
+      | DeleteWorkspaceServiceAccount ->
+          (Format.kasprintf Uri.of_string)
+            "/workspaces/%s/serviceaccounts/%s"
+            (WorkspaceId.to_header
+               x.DeleteWorkspaceServiceAccountRequest.workspaceId)
+            (String_.to_header
+               x.DeleteWorkspaceServiceAccountRequest.serviceAccountId)
+      | DeleteWorkspaceServiceAccountToken ->
+          (Format.kasprintf Uri.of_string)
+            "/workspaces/%s/serviceaccounts/%s/tokens/%s"
+            (WorkspaceId.to_header
+               x.DeleteWorkspaceServiceAccountTokenRequest.workspaceId)
+            (String_.to_header
+               x.DeleteWorkspaceServiceAccountTokenRequest.serviceAccountId)
+            (String_.to_header
+               x.DeleteWorkspaceServiceAccountTokenRequest.tokenId)
       | DescribeWorkspace ->
           (Format.kasprintf Uri.of_string) "/workspaces/%s"
             (WorkspaceId.to_header x.DescribeWorkspaceRequest.workspaceId)
@@ -67,6 +145,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/workspaces/%s/authentication"
             (WorkspaceId.to_header
                x.DescribeWorkspaceAuthenticationRequest.workspaceId)
+      | DescribeWorkspaceConfiguration ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/configuration"
+            (WorkspaceId.to_header
+               x.DescribeWorkspaceConfigurationRequest.workspaceId)
       | DisassociateLicense ->
           (Format.kasprintf Uri.of_string) "/workspaces/%s/licenses/%s"
             (WorkspaceId.to_header x.DisassociateLicenseRequest.workspaceId)
@@ -76,23 +158,70 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             ((Format.kasprintf Uri.of_string) "/workspaces/%s/permissions"
                (WorkspaceId.to_header x.ListPermissionsRequest.workspaceId))
             (List.filter_opt
-               [Option.map ~f:(fun v -> ("groupId", (SsoId.to_header v)))
-                  x.groupId;
-               Option.map
-                 ~f:(fun v ->
-                       ("maxResults",
-                         (ListPermissionsRequestMaxResultsInteger.to_header v)))
-                 x.maxResults;
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults",
+                          (ListPermissionsRequestMaxResultsInteger.to_header
+                             v))) x.maxResults;
                Option.map
                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
                  x.nextToken;
+               Option.map ~f:(fun v -> ("userType", (UserType.to_header v)))
+                 x.userType;
                Option.map ~f:(fun v -> ("userId", (SsoId.to_header v)))
                  x.userId;
-               Option.map ~f:(fun v -> ("userType", (UserType.to_header v)))
-                 x.userType])
+               Option.map ~f:(fun v -> ("groupId", (SsoId.to_header v)))
+                 x.groupId])
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (String_.to_header x.ListTagsForResourceRequest.resourceArn)
+      | ListVersions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/versions")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults",
+                          (ListVersionsRequestMaxResultsInteger.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("workspace-id", (WorkspaceId.to_header v)))
+                 x.workspaceId])
+      | ListWorkspaceServiceAccountTokens ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/workspaces/%s/serviceaccounts/%s/tokens"
+               (WorkspaceId.to_header
+                  x.ListWorkspaceServiceAccountTokensRequest.workspaceId)
+               (String_.to_header
+                  x.ListWorkspaceServiceAccountTokensRequest.serviceAccountId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults",
+                          (ListWorkspaceServiceAccountTokensRequestMaxResultsInteger.to_header
+                             v))) x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                 x.nextToken])
+      | ListWorkspaceServiceAccounts ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/workspaces/%s/serviceaccounts"
+               (WorkspaceId.to_header
+                  x.ListWorkspaceServiceAccountsRequest.workspaceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults",
+                          (ListWorkspaceServiceAccountsRequestMaxResultsInteger.to_header
+                             v))) x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                 x.nextToken])
       | ListWorkspaces ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/workspaces")
@@ -123,13 +252,33 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateWorkspaceAuthentication ->
           (Format.kasprintf Uri.of_string) "/workspaces/%s/authentication"
             (WorkspaceId.to_header
-               x.UpdateWorkspaceAuthenticationRequest.workspaceId))
+               x.UpdateWorkspaceAuthenticationRequest.workspaceId)
+      | UpdateWorkspaceConfiguration ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/configuration"
+            (WorkspaceId.to_header
+               x.UpdateWorkspaceConfigurationRequest.workspaceId))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
   | AssociateLicense ->
-      let (headers, body) = (None, None) in
+      let (headers, body) =
+        let headers =
+          Some
+            ((List.filter_opt
+                [Option.map req.AssociateLicenseRequest.grafanaToken
+                   ~f:(fun x -> ("Grafana-Token", (GrafanaToken.to_header x)))])
+               |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map (List.filter_opt [])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateWorkspace ->
       let (headers, body) =
@@ -144,10 +293,6 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("accountAccessType",
                            (AccountAccessType.to_value
                               req.CreateWorkspaceRequest.accountAccessType));
-                      Some
-                        ("authenticationProviders",
-                          (AuthenticationProviders.to_value
-                             req.CreateWorkspaceRequest.authenticationProviders));
                       Option.map req.CreateWorkspaceRequest.clientToken
                         ~f:(fun x ->
                               ("clientToken", (ClientToken.to_value x)));
@@ -163,8 +308,6 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.CreateWorkspaceRequest.stackSetName
                         ~f:(fun x ->
                               ("stackSetName", (StackSetName.to_value x)));
-                      Option.map req.CreateWorkspaceRequest.tags
-                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
                       Option.map
                         req.CreateWorkspaceRequest.workspaceDataSources
                         ~f:(fun x ->
@@ -190,7 +333,110 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                                 (OrganizationalUnitList.to_value x)));
                       Option.map req.CreateWorkspaceRequest.workspaceRoleArn
                         ~f:(fun x ->
-                              ("workspaceRoleArn", (IamRoleArn.to_value x)))])
+                              ("workspaceRoleArn", (IamRoleArn.to_value x)));
+                      Some
+                        ("authenticationProviders",
+                          (AuthenticationProviders.to_value
+                             req.CreateWorkspaceRequest.authenticationProviders));
+                      Option.map req.CreateWorkspaceRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map req.CreateWorkspaceRequest.vpcConfiguration
+                        ~f:(fun x ->
+                              ("vpcConfiguration",
+                                (VpcConfiguration.to_value x)));
+                      Option.map req.CreateWorkspaceRequest.configuration
+                        ~f:(fun x ->
+                              ("configuration",
+                                (OverridableConfigurationJson.to_value x)));
+                      Option.map
+                        req.CreateWorkspaceRequest.networkAccessControl
+                        ~f:(fun x ->
+                              ("networkAccessControl",
+                                (NetworkAccessConfiguration.to_value x)));
+                      Option.map req.CreateWorkspaceRequest.grafanaVersion
+                        ~f:(fun x ->
+                              ("grafanaVersion", (GrafanaVersion.to_value x)));
+                      Option.map req.CreateWorkspaceRequest.ipAddressType
+                        ~f:(fun x ->
+                              ("ipAddressType", (IPAddressType.to_value x)));
+                      Option.map req.CreateWorkspaceRequest.kmsKeyId
+                        ~f:(fun x -> ("kmsKeyId", (KmsKeyId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateWorkspaceApiKey ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("keyName",
+                           (ApiKeyName.to_value
+                              req.CreateWorkspaceApiKeyRequest.keyName));
+                      Some
+                        ("keyRole",
+                          (String_.to_value
+                             req.CreateWorkspaceApiKeyRequest.keyRole));
+                      Some
+                        ("secondsToLive",
+                          (CreateWorkspaceApiKeyRequestSecondsToLiveInteger.to_value
+                             req.CreateWorkspaceApiKeyRequest.secondsToLive))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateWorkspaceServiceAccount ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("name",
+                           (ServiceAccountName.to_value
+                              req.CreateWorkspaceServiceAccountRequest.name));
+                      Some
+                        ("grafanaRole",
+                          (Role.to_value
+                             req.CreateWorkspaceServiceAccountRequest.grafanaRole))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateWorkspaceServiceAccountToken ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("name",
+                           (ServiceAccountTokenName.to_value
+                              req.CreateWorkspaceServiceAccountTokenRequest.name));
+                      Some
+                        ("secondsToLive",
+                          (CreateWorkspaceServiceAccountTokenRequestSecondsToLiveInteger.to_value
+                             req.CreateWorkspaceServiceAccountTokenRequest.secondsToLive))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -199,10 +445,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteWorkspace -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteWorkspaceApiKey -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteWorkspaceServiceAccount ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteWorkspaceServiceAccountToken ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeWorkspace ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeWorkspaceAuthentication ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeWorkspaceConfiguration ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DisassociateLicense -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -210,6 +464,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListVersions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListWorkspaceServiceAccountTokens ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListWorkspaceServiceAccounts ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListWorkspaces ->
@@ -262,6 +525,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateWorkspaceConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -320,11 +585,63 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (CreateWorkspaceResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some CreateWorkspaceResponse.error_of_json))
+  | CreateWorkspaceApiKey ->
+      if is_success
+      then Ok (CreateWorkspaceApiKeyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateWorkspaceApiKeyResponse.error_of_json))
+  | CreateWorkspaceServiceAccount ->
+      if is_success
+      then
+        Ok
+          (CreateWorkspaceServiceAccountResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateWorkspaceServiceAccountResponse.error_of_json))
+  | CreateWorkspaceServiceAccountToken ->
+      if is_success
+      then
+        Ok
+          (CreateWorkspaceServiceAccountTokenResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateWorkspaceServiceAccountTokenResponse.error_of_json))
   | DeleteWorkspace ->
       if is_success
       then Ok (DeleteWorkspaceResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DeleteWorkspaceResponse.error_of_json))
+  | DeleteWorkspaceApiKey ->
+      if is_success
+      then Ok (DeleteWorkspaceApiKeyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteWorkspaceApiKeyResponse.error_of_json))
+  | DeleteWorkspaceServiceAccount ->
+      if is_success
+      then
+        Ok
+          (DeleteWorkspaceServiceAccountResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteWorkspaceServiceAccountResponse.error_of_json))
+  | DeleteWorkspaceServiceAccountToken ->
+      if is_success
+      then
+        Ok
+          (DeleteWorkspaceServiceAccountTokenResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteWorkspaceServiceAccountTokenResponse.error_of_json))
   | DescribeWorkspace ->
       if is_success
       then Ok (DescribeWorkspaceResponse.of_json (response_to_json resp))
@@ -341,6 +658,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeWorkspaceAuthenticationResponse.error_of_json))
+  | DescribeWorkspaceConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeWorkspaceConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeWorkspaceConfigurationResponse.error_of_json))
   | DisassociateLicense ->
       if is_success
       then Ok (DisassociateLicenseResponse.of_json (response_to_json resp))
@@ -358,6 +685,30 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListVersions ->
+      if is_success
+      then Ok (ListVersionsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListVersionsResponse.error_of_json))
+  | ListWorkspaceServiceAccountTokens ->
+      if is_success
+      then
+        Ok
+          (ListWorkspaceServiceAccountTokensResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListWorkspaceServiceAccountTokensResponse.error_of_json))
+  | ListWorkspaceServiceAccounts ->
+      if is_success
+      then
+        Ok
+          (ListWorkspaceServiceAccountsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListWorkspaceServiceAccountsResponse.error_of_json))
   | ListWorkspaces ->
       if is_success
       then Ok (ListWorkspacesResponse.of_json (response_to_json resp))
@@ -398,3 +749,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateWorkspaceAuthenticationResponse.error_of_json))
+  | UpdateWorkspaceConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateWorkspaceConfigurationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateWorkspaceConfigurationResponse.error_of_json))

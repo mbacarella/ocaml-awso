@@ -50,6 +50,66 @@ module ErrorDescription =
     let of_json j = string_of_json ~kind:"ErrorDescription" j
     let to_json = simple_to_json to_value
   end
+module InvalidRequestExceptionReason =
+  struct
+    type nonrec t =
+      | KMS_NotFoundException 
+      | KMS_InvalidKeyUsageException 
+      | KMS_InvalidStateException 
+      | KMS_DisabledException 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | KMS_NotFoundException -> "KMS_NotFoundException"
+      | KMS_InvalidKeyUsageException -> "KMS_InvalidKeyUsageException"
+      | KMS_InvalidStateException -> "KMS_InvalidStateException"
+      | KMS_DisabledException -> "KMS_DisabledException"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "KMS_NotFoundException" -> KMS_NotFoundException
+      | "KMS_InvalidKeyUsageException" -> KMS_InvalidKeyUsageException
+      | "KMS_InvalidStateException" -> KMS_InvalidStateException
+      | "KMS_DisabledException" -> KMS_DisabledException
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InvalidRequestExceptionReason"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"InvalidRequestExceptionReason" j)
+    let to_json = simple_to_json to_value
+  end
+module GrantType =
+  struct
+    type nonrec t = string
+    let context_ = "GrantType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GrantType" j
+    let to_json = simple_to_json to_value
+  end
+module URI =
+  struct
+    type nonrec t = string
+    let context_ = "URI"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"URI" j
+    let to_json = simple_to_json to_value
+  end
 module Scope =
   struct
     type nonrec t = string
@@ -61,6 +121,70 @@ module Scope =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"Scope" j
+    let to_json = simple_to_json to_value
+  end
+module AccessDeniedExceptionReason =
+  struct
+    type nonrec t =
+      | KMS_AccessDeniedException 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | KMS_AccessDeniedException -> "KMS_AccessDeniedException"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "KMS_AccessDeniedException" -> KMS_AccessDeniedException
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AccessDeniedExceptionReason"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AccessDeniedExceptionReason" j)
+    let to_json = simple_to_json to_value
+  end
+module IdentityContext =
+  struct
+    type nonrec t = string
+    let context_ = "IdentityContext"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdentityContext" j
+    let to_json = simple_to_json to_value
+  end
+module Location =
+  struct
+    type nonrec t = string
+    let context_ = "Location"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Location" j
+    let to_json = simple_to_json to_value
+  end
+module Region =
+  struct
+    type nonrec t = string
+    let context_ = "Region"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Region" j
     let to_json = simple_to_json to_value
   end
 module DeviceCode =
@@ -94,8 +218,12 @@ module InternalServerException =
   struct
     type nonrec t =
       {
-      error: Error.t option ;
-      error_description: ErrorDescription.t option }
+      error: Error.t option
+        [@ocaml.doc
+          "Single error code. For this exception the value will be server_error."];
+      error_description: ErrorDescription.t option
+        [@ocaml.doc
+          "Human-readable text providing additional information, used to assist the client developer in understanding the error that occurred."]}
     let make ?error =
       fun ?error_description -> fun () -> { error; error_description }
     let to_value x =
@@ -111,10 +239,10 @@ module InternalServerException =
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let error_description =
-        field_map json "error_description" ErrorDescription.of_json in
-      let error = field_map json "error" Error.of_json in
+        field_map json__ "error_description" ErrorDescription.of_json in
+      let error = field_map json__ "error" Error.of_json in
       make ?error_description ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -137,8 +265,12 @@ module InvalidClientException =
   struct
     type nonrec t =
       {
-      error: Error.t option ;
-      error_description: ErrorDescription.t option }
+      error: Error.t option
+        [@ocaml.doc
+          "Single error code. For this exception the value will be invalid_client."];
+      error_description: ErrorDescription.t option
+        [@ocaml.doc
+          "Human-readable text providing additional information, used to assist the client developer in understanding the error that occurred."]}
     let make ?error =
       fun ?error_description -> fun () -> { error; error_description }
     let to_value x =
@@ -154,10 +286,10 @@ module InvalidClientException =
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let error_description =
-        field_map json "error_description" ErrorDescription.of_json in
-      let error = field_map json "error" Error.of_json in
+        field_map json__ "error_description" ErrorDescription.of_json in
+      let error = field_map json__ "error" Error.of_json in
       make ?error_description ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -166,13 +298,24 @@ module InvalidRequestException =
   struct
     type nonrec t =
       {
-      error: Error.t option ;
-      error_description: ErrorDescription.t option }
+      error: Error.t option
+        [@ocaml.doc
+          "Single error code. For this exception the value will be invalid_request."];
+      reason: InvalidRequestExceptionReason.t option
+        [@ocaml.doc
+          "A string that uniquely identifies a reason for the error."];
+      error_description: ErrorDescription.t option
+        [@ocaml.doc
+          "Human-readable text providing additional information, used to assist the client developer in understanding the error that occurred."]}
     let make ?error =
-      fun ?error_description -> fun () -> { error; error_description }
+      fun ?reason ->
+        fun ?error_description ->
+          fun () -> { error; reason; error_description }
     let to_value x =
       structure_to_value
         [("error", (Option.map x.error ~f:Error.to_value));
+        ("reason",
+          (Option.map x.reason ~f:InvalidRequestExceptionReason.to_value));
         ("error_description",
           (Option.map x.error_description ~f:ErrorDescription.to_value))]
     let to_query v = to_query to_value v
@@ -180,14 +323,19 @@ module InvalidRequestException =
       let error_description =
         (Option.map ~f:ErrorDescription.of_xml)
           (Xml.child xml_arg0 "error_description") in
+      let reason =
+        (Option.map ~f:InvalidRequestExceptionReason.of_xml)
+          (Xml.child xml_arg0 "reason") in
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
-      make ?error_description ?error ()
+      make ?error_description ?reason ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let error_description =
-        field_map json "error_description" ErrorDescription.of_json in
-      let error = field_map json "error" Error.of_json in
-      make ?error_description ?error ()
+        field_map json__ "error_description" ErrorDescription.of_json in
+      let reason =
+        field_map json__ "reason" InvalidRequestExceptionReason.of_json in
+      let error = field_map json__ "error" Error.of_json in
+      make ?error_description ?reason ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Indicates that something is wrong with the input to the request. For example, a required parameter might be missing or out of range."]
@@ -195,8 +343,12 @@ module SlowDownException =
   struct
     type nonrec t =
       {
-      error: Error.t option ;
-      error_description: ErrorDescription.t option }
+      error: Error.t option
+        [@ocaml.doc
+          "Single error code. For this exception the value will be slow_down."];
+      error_description: ErrorDescription.t option
+        [@ocaml.doc
+          "Human-readable text providing additional information, used to assist the client developer in understanding the error that occurred."]}
     let make ?error =
       fun ?error_description -> fun () -> { error; error_description }
     let to_value x =
@@ -212,33 +364,24 @@ module SlowDownException =
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let error_description =
-        field_map json "error_description" ErrorDescription.of_json in
-      let error = field_map json "error" Error.of_json in
+        field_map json__ "error_description" ErrorDescription.of_json in
+      let error = field_map json__ "error" Error.of_json in
       make ?error_description ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Indicates that the client is making the request too frequently and is more than the service can handle."]
-module URI =
-  struct
-    type nonrec t = string
-    let context_ = "URI"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"URI" j
-    let to_json = simple_to_json to_value
-  end
 module UnauthorizedClientException =
   struct
     type nonrec t =
       {
-      error: Error.t option ;
-      error_description: ErrorDescription.t option }
+      error: Error.t option
+        [@ocaml.doc
+          "Single error code. For this exception the value will be unauthorized_client."];
+      error_description: ErrorDescription.t option
+        [@ocaml.doc
+          "Human-readable text providing additional information, used to assist the client developer in understanding the error that occurred."]}
     let make ?error =
       fun ?error_description -> fun () -> { error; error_description }
     let to_value x =
@@ -254,10 +397,10 @@ module UnauthorizedClientException =
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let error_description =
-        field_map json "error_description" ErrorDescription.of_json in
-      let error = field_map json "error" Error.of_json in
+        field_map json__ "error_description" ErrorDescription.of_json in
+      let error = field_map json__ "error" Error.of_json in
       make ?error_description ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -305,8 +448,12 @@ module InvalidClientMetadataException =
   struct
     type nonrec t =
       {
-      error: Error.t option ;
-      error_description: ErrorDescription.t option }
+      error: Error.t option
+        [@ocaml.doc
+          "Single error code. For this exception the value will be invalid_client_metadata."];
+      error_description: ErrorDescription.t option
+        [@ocaml.doc
+          "Human-readable text providing additional information, used to assist the client developer in understanding the error that occurred."]}
     let make ?error =
       fun ?error_description -> fun () -> { error; error_description }
     let to_value x =
@@ -322,20 +469,24 @@ module InvalidClientMetadataException =
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let error_description =
-        field_map json "error_description" ErrorDescription.of_json in
-      let error = field_map json "error" Error.of_json in
+        field_map json__ "error_description" ErrorDescription.of_json in
+      let error = field_map json__ "error" Error.of_json in
       make ?error_description ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Indicates that the client information sent in the request during registration is invalid."]
-module InvalidScopeException =
+module InvalidRedirectUriException =
   struct
     type nonrec t =
       {
-      error: Error.t option ;
-      error_description: ErrorDescription.t option }
+      error: Error.t option
+        [@ocaml.doc
+          "Single error code. For this exception the value will be invalid_redirect_uri."];
+      error_description: ErrorDescription.t option
+        [@ocaml.doc
+          "Human-readable text providing additional information, used to assist the client developer in understanding the error that occurred."]}
     let make ?error =
       fun ?error_description -> fun () -> { error; error_description }
     let to_value x =
@@ -351,10 +502,43 @@ module InvalidScopeException =
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let error_description =
-        field_map json "error_description" ErrorDescription.of_json in
-      let error = field_map json "error" Error.of_json in
+        field_map json__ "error_description" ErrorDescription.of_json in
+      let error = field_map json__ "error" Error.of_json in
+      make ?error_description ?error ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates that one or more redirect URI in the request is not supported for this operation."]
+module InvalidScopeException =
+  struct
+    type nonrec t =
+      {
+      error: Error.t option
+        [@ocaml.doc
+          "Single error code. For this exception the value will be invalid_scope."];
+      error_description: ErrorDescription.t option
+        [@ocaml.doc
+          "Human-readable text providing additional information, used to assist the client developer in understanding the error that occurred."]}
+    let make ?error =
+      fun ?error_description -> fun () -> { error; error_description }
+    let to_value x =
+      structure_to_value
+        [("error", (Option.map x.error ~f:Error.to_value));
+        ("error_description",
+          (Option.map x.error_description ~f:ErrorDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let error_description =
+        (Option.map ~f:ErrorDescription.of_xml)
+          (Xml.child xml_arg0 "error_description") in
+      let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
+      make ?error_description ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let error_description =
+        field_map json__ "error_description" ErrorDescription.of_json in
+      let error = field_map json__ "error" Error.of_json in
       make ?error_description ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -370,6 +554,52 @@ module LongTimeStampType =
     let of_xml xml_arg0 =
       Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module UnsupportedGrantTypeException =
+  struct
+    type nonrec t =
+      {
+      error: Error.t option
+        [@ocaml.doc
+          "Single error code. For this exception the value will be unsupported_grant_type."];
+      error_description: ErrorDescription.t option
+        [@ocaml.doc
+          "Human-readable text providing additional information, used to assist the client developer in understanding the error that occurred."]}
+    let make ?error =
+      fun ?error_description -> fun () -> { error; error_description }
+    let to_value x =
+      structure_to_value
+        [("error", (Option.map x.error ~f:Error.to_value));
+        ("error_description",
+          (Option.map x.error_description ~f:ErrorDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let error_description =
+        (Option.map ~f:ErrorDescription.of_xml)
+          (Xml.child xml_arg0 "error_description") in
+      let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
+      make ?error_description ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let error_description =
+        field_map json__ "error_description" ErrorDescription.of_json in
+      let error = field_map json__ "error" Error.of_json in
+      make ?error_description ?error ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates that the grant type in the request is not supported by the service."]
+module ArnType =
+  struct
+    type nonrec t = string
+    let context_ = "ArnType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ArnType" j
     let to_json = simple_to_json to_value
   end
 module ClientName =
@@ -398,10 +628,66 @@ module ClientType =
     let of_json j = string_of_json ~kind:"ClientType" j
     let to_json = simple_to_json to_value
   end
+module GrantTypes =
+  struct
+    type nonrec t = GrantType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GrantType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GrantType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GrantTypes" ~of_json:GrantType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RedirectUris =
+  struct
+    type nonrec t = URI.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:URI.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:URI.of_xml)
+    let of_json j = list_of_json ~kind:"RedirectUris" ~of_json:URI.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Scopes =
   struct
     type nonrec t = Scope.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Scope.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -425,13 +711,24 @@ module AccessDeniedException =
   struct
     type nonrec t =
       {
-      error: Error.t option ;
-      error_description: ErrorDescription.t option }
+      error: Error.t option
+        [@ocaml.doc
+          "Single error code. For this exception the value will be access_denied."];
+      reason: AccessDeniedExceptionReason.t option
+        [@ocaml.doc
+          "A string that uniquely identifies a reason for the error."];
+      error_description: ErrorDescription.t option
+        [@ocaml.doc
+          "Human-readable text providing additional information, used to assist the client developer in understanding the error that occurred."]}
     let make ?error =
-      fun ?error_description -> fun () -> { error; error_description }
+      fun ?reason ->
+        fun ?error_description ->
+          fun () -> { error; reason; error_description }
     let to_value x =
       structure_to_value
         [("error", (Option.map x.error ~f:Error.to_value));
+        ("reason",
+          (Option.map x.reason ~f:AccessDeniedExceptionReason.to_value));
         ("error_description",
           (Option.map x.error_description ~f:ErrorDescription.to_value))]
     let to_query v = to_query to_value v
@@ -439,14 +736,19 @@ module AccessDeniedException =
       let error_description =
         (Option.map ~f:ErrorDescription.of_xml)
           (Xml.child xml_arg0 "error_description") in
+      let reason =
+        (Option.map ~f:AccessDeniedExceptionReason.of_xml)
+          (Xml.child xml_arg0 "reason") in
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
-      make ?error_description ?error ()
+      make ?error_description ?reason ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let error_description =
-        field_map json "error_description" ErrorDescription.of_json in
-      let error = field_map json "error" Error.of_json in
-      make ?error_description ?error ()
+        field_map json__ "error_description" ErrorDescription.of_json in
+      let reason =
+        field_map json__ "reason" AccessDeniedExceptionReason.of_json in
+      let error = field_map json__ "error" Error.of_json in
+      make ?error_description ?reason ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You do not have sufficient access to perform this action."]
@@ -467,8 +769,12 @@ module AuthorizationPendingException =
   struct
     type nonrec t =
       {
-      error: Error.t option ;
-      error_description: ErrorDescription.t option }
+      error: Error.t option
+        [@ocaml.doc
+          "Single error code. For this exception the value will be authorization_pending."];
+      error_description: ErrorDescription.t option
+        [@ocaml.doc
+          "Human-readable text providing additional information, used to assist the client developer in understanding the error that occurred."]}
     let make ?error =
       fun ?error_description -> fun () -> { error; error_description }
     let to_value x =
@@ -484,20 +790,50 @@ module AuthorizationPendingException =
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let error_description =
-        field_map json "error_description" ErrorDescription.of_json in
-      let error = field_map json "error" Error.of_json in
+        field_map json__ "error_description" ErrorDescription.of_json in
+      let error = field_map json__ "error" Error.of_json in
       make ?error_description ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Indicates that a request to authorize a client with an access user session token is pending."]
+module AwsAdditionalDetails =
+  struct
+    type nonrec t =
+      {
+      identityContext: IdentityContext.t option
+        [@ocaml.doc
+          "The trusted context assertion is signed and encrypted by STS. It provides access to sts:identity_context claim in the idToken without JWT parsing Identity context comprises information that Amazon Web Services services use to make authorization decisions when they receive requests."]}
+    let make ?identityContext = fun () -> { identityContext }
+    let to_value x =
+      structure_to_value
+        [("identityContext",
+           (Option.map x.identityContext ~f:IdentityContext.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identityContext =
+        (Option.map ~f:IdentityContext.of_xml)
+          (Xml.child xml_arg0 "identityContext") in
+      make ?identityContext ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identityContext =
+        field_map json__ "identityContext" IdentityContext.of_json in
+      make ?identityContext ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This structure contains Amazon Web Services-specific parameter extensions and the identity context."]
 module ExpiredTokenException =
   struct
     type nonrec t =
       {
-      error: Error.t option ;
-      error_description: ErrorDescription.t option }
+      error: Error.t option
+        [@ocaml.doc
+          "Single error code. For this exception the value will be expired_token."];
+      error_description: ErrorDescription.t option
+        [@ocaml.doc
+          "Human-readable text providing additional information, used to assist the client developer in understanding the error that occurred."]}
     let make ?error =
       fun ?error_description -> fun () -> { error; error_description }
     let to_value x =
@@ -513,10 +849,10 @@ module ExpiredTokenException =
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let error_description =
-        field_map json "error_description" ErrorDescription.of_json in
-      let error = field_map json "error" Error.of_json in
+        field_map json__ "error_description" ErrorDescription.of_json in
+      let error = field_map json__ "error" Error.of_json in
       make ?error_description ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -538,8 +874,12 @@ module InvalidGrantException =
   struct
     type nonrec t =
       {
-      error: Error.t option ;
-      error_description: ErrorDescription.t option }
+      error: Error.t option
+        [@ocaml.doc
+          "Single error code. For this exception the value will be invalid_grant."];
+      error_description: ErrorDescription.t option
+        [@ocaml.doc
+          "Human-readable text providing additional information, used to assist the client developer in understanding the error that occurred."]}
     let make ?error =
       fun ?error_description -> fun () -> { error; error_description }
     let to_value x =
@@ -555,14 +895,64 @@ module InvalidGrantException =
       let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
       make ?error_description ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let error_description =
-        field_map json "error_description" ErrorDescription.of_json in
-      let error = field_map json "error" Error.of_json in
+        field_map json__ "error_description" ErrorDescription.of_json in
+      let error = field_map json__ "error" Error.of_json in
       make ?error_description ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Indicates that a request contains an invalid grant. This can occur if a client makes a CreateToken request with an invalid grant type."]
+module InvalidRequestRegionException =
+  struct
+    type nonrec t =
+      {
+      error: Error.t option
+        [@ocaml.doc
+          "Single error code. For this exception the value will be invalid_request."];
+      error_description: ErrorDescription.t option
+        [@ocaml.doc
+          "Human-readable text providing additional information, used to assist the client developer in understanding the error that occurred."];
+      endpoint: Location.t option
+        [@ocaml.doc
+          "Indicates the IAM Identity Center endpoint which the requester may call with this token."];
+      region: Region.t option
+        [@ocaml.doc
+          "Indicates the region which the requester may call with this token."]}
+    let make ?error =
+      fun ?error_description ->
+        fun ?endpoint ->
+          fun ?region ->
+            fun () -> { error; error_description; endpoint; region }
+    let to_value x =
+      structure_to_value
+        [("error", (Option.map x.error ~f:Error.to_value));
+        ("error_description",
+          (Option.map x.error_description ~f:ErrorDescription.to_value));
+        ("endpoint", (Option.map x.endpoint ~f:Location.to_value));
+        ("region", (Option.map x.region ~f:Region.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let region =
+        (Option.map ~f:Region.of_xml) (Xml.child xml_arg0 "region") in
+      let endpoint =
+        (Option.map ~f:Location.of_xml) (Xml.child xml_arg0 "endpoint") in
+      let error_description =
+        (Option.map ~f:ErrorDescription.of_xml)
+          (Xml.child xml_arg0 "error_description") in
+      let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
+      make ?region ?endpoint ?error_description ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let region = field_map json__ "region" Region.of_json in
+      let endpoint = field_map json__ "endpoint" Location.of_json in
+      let error_description =
+        field_map json__ "error_description" ErrorDescription.of_json in
+      let error = field_map json__ "error" Error.of_json in
+      make ?region ?endpoint ?error_description ?error ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates that a token provided as input to the request was issued by and is only usable by calling IAM Identity Center endpoints in another region."]
 module RefreshToken =
   struct
     type nonrec t = string
@@ -589,35 +979,32 @@ module TokenType =
     let of_json j = string_of_json ~kind:"TokenType" j
     let to_json = simple_to_json to_value
   end
-module UnsupportedGrantTypeException =
+module TokenTypeURI =
   struct
-    type nonrec t =
-      {
-      error: Error.t option ;
-      error_description: ErrorDescription.t option }
-    let make ?error =
-      fun ?error_description -> fun () -> { error; error_description }
-    let to_value x =
-      structure_to_value
-        [("error", (Option.map x.error ~f:Error.to_value));
-        ("error_description",
-          (Option.map x.error_description ~f:ErrorDescription.to_value))]
+    type nonrec t = string
+    let context_ = "TokenTypeURI"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let error_description =
-        (Option.map ~f:ErrorDescription.of_xml)
-          (Xml.child xml_arg0 "error_description") in
-      let error = (Option.map ~f:Error.of_xml) (Xml.child xml_arg0 "error") in
-      make ?error_description ?error ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error_description =
-        field_map json "error_description" ErrorDescription.of_json in
-      let error = field_map json "error" Error.of_json in
-      make ?error_description ?error ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Indicates that the grant type in the request is not supported by the service."]
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TokenTypeURI" j
+    let to_json = simple_to_json to_value
+  end
+module Assertion =
+  struct
+    type nonrec t = string
+    let context_ = "Assertion"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Assertion" j
+    let to_json = simple_to_json to_value
+  end
 module AuthCode =
   struct
     type nonrec t = string
@@ -631,17 +1018,30 @@ module AuthCode =
     let of_json j = string_of_json ~kind:"AuthCode" j
     let to_json = simple_to_json to_value
   end
-module GrantType =
+module CodeVerifier =
   struct
     type nonrec t = string
-    let context_ = "GrantType"
+    let context_ = "CodeVerifier"
     let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"GrantType" j
+    let of_json j = string_of_json ~kind:"CodeVerifier" j
+    let to_json = simple_to_json to_value
+  end
+module SubjectToken =
+  struct
+    type nonrec t = string
+    let context_ = "SubjectToken"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SubjectToken" j
     let to_json = simple_to_json to_value
   end
 module StartDeviceAuthorizationResponse =
@@ -776,14 +1176,15 @@ module StartDeviceAuthorizationResponse =
       make ?interval ?expiresIn ?verificationUriComplete ?verificationUri
         ?userCode ?deviceCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let interval = field_map json "interval" IntervalInSeconds.of_json in
-      let expiresIn = field_map json "expiresIn" ExpirationInSeconds.of_json in
+    let of_json json__ =
+      let interval = field_map json__ "interval" IntervalInSeconds.of_json in
+      let expiresIn =
+        field_map json__ "expiresIn" ExpirationInSeconds.of_json in
       let verificationUriComplete =
-        field_map json "verificationUriComplete" URI.of_json in
-      let verificationUri = field_map json "verificationUri" URI.of_json in
-      let userCode = field_map json "userCode" UserCode.of_json in
-      let deviceCode = field_map json "deviceCode" DeviceCode.of_json in
+        field_map json__ "verificationUriComplete" URI.of_json in
+      let verificationUri = field_map json__ "verificationUri" URI.of_json in
+      let userCode = field_map json__ "userCode" UserCode.of_json in
+      let deviceCode = field_map json__ "deviceCode" DeviceCode.of_json in
       make ?interval ?expiresIn ?verificationUriComplete ?verificationUri
         ?userCode ?deviceCode ()
     let to_json v = composed_to_json to_value v
@@ -795,13 +1196,13 @@ module StartDeviceAuthorizationRequest =
       {
       clientId: ClientId.t
         [@ocaml.doc
-          "The unique identifier string for the client that is registered with AWS SSO. This value should come from the persisted result of the RegisterClient API operation."];
+          "The unique identifier string for the client that is registered with IAM Identity Center. This value should come from the persisted result of the RegisterClient API operation."];
       clientSecret: ClientSecret.t
         [@ocaml.doc
           "A secret string that is generated for the client. This value should come from the persisted result of the RegisterClient API operation."];
       startUrl: URI.t
         [@ocaml.doc
-          "The URL for the AWS SSO user portal. For more information, see Using the User Portal in the AWS Single Sign-On User Guide."]}
+          "The URL for the Amazon Web Services access portal. For more information, see Using the Amazon Web Services access portal in the IAM Identity Center User Guide."]}
     let context_ = "StartDeviceAuthorizationRequest"
     let make ~clientId =
       fun ~clientSecret ->
@@ -822,11 +1223,11 @@ module StartDeviceAuthorizationRequest =
         ClientId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "clientId") in
       make ~startUrl ~clientSecret ~clientId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startUrl = field_map_exn json "startUrl" URI.of_json in
+    let of_json json__ =
+      let startUrl = field_map_exn json__ "startUrl" URI.of_json in
       let clientSecret =
-        field_map_exn json "clientSecret" ClientSecret.of_json in
-      let clientId = field_map_exn json "clientId" ClientId.of_json in
+        field_map_exn json__ "clientSecret" ClientSecret.of_json in
+      let clientId = field_map_exn json__ "clientId" ClientId.of_json in
       make ~startUrl ~clientSecret ~clientId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -849,14 +1250,17 @@ module RegisterClientResponse =
           "Indicates the time at which the clientId and clientSecret will become invalid."];
       authorizationEndpoint: URI.t option
         [@ocaml.doc
-          "The endpoint where the client can request authorization."];
+          "An endpoint that the client can use to request authorization."];
       tokenEndpoint: URI.t option
-        [@ocaml.doc "The endpoint where the client can get an access token."]}
+        [@ocaml.doc "An endpoint that the client can use to create tokens."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidClientMetadataException of InvalidClientMetadataException.t 
+      | `InvalidRedirectUriException of InvalidRedirectUriException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `InvalidScopeException of InvalidScopeException.t 
+      | `SlowDownException of SlowDownException.t 
+      | `UnsupportedGrantTypeException of UnsupportedGrantTypeException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?clientId =
       fun ?clientSecret ->
@@ -880,10 +1284,18 @@ module RegisterClientResponse =
       | "InvalidClientMetadataException" ->
           `InvalidClientMetadataException
             (InvalidClientMetadataException.of_json json)
+      | "InvalidRedirectUriException" ->
+          `InvalidRedirectUriException
+            (InvalidRedirectUriException.of_json json)
       | "InvalidRequestException" ->
           `InvalidRequestException (InvalidRequestException.of_json json)
       | "InvalidScopeException" ->
           `InvalidScopeException (InvalidScopeException.of_json json)
+      | "SlowDownException" ->
+          `SlowDownException (SlowDownException.of_json json)
+      | "UnsupportedGrantTypeException" ->
+          `UnsupportedGrantTypeException
+            (UnsupportedGrantTypeException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -894,10 +1306,18 @@ module RegisterClientResponse =
       | "InvalidClientMetadataException" ->
           `InvalidClientMetadataException
             (InvalidClientMetadataException.of_xml xml)
+      | "InvalidRedirectUriException" ->
+          `InvalidRedirectUriException
+            (InvalidRedirectUriException.of_xml xml)
       | "InvalidRequestException" ->
           `InvalidRequestException (InvalidRequestException.of_xml xml)
       | "InvalidScopeException" ->
           `InvalidScopeException (InvalidScopeException.of_xml xml)
+      | "SlowDownException" ->
+          `SlowDownException (SlowDownException.of_xml xml)
+      | "UnsupportedGrantTypeException" ->
+          `UnsupportedGrantTypeException
+            (UnsupportedGrantTypeException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -910,6 +1330,10 @@ module RegisterClientResponse =
           `Assoc
             [("error", (`String "InvalidClientMetadataException"));
             ("details", (InvalidClientMetadataException.to_json e))]
+      | `InvalidRedirectUriException e ->
+          `Assoc
+            [("error", (`String "InvalidRedirectUriException"));
+            ("details", (InvalidRedirectUriException.to_json e))]
       | `InvalidRequestException e ->
           `Assoc
             [("error", (`String "InvalidRequestException"));
@@ -918,6 +1342,14 @@ module RegisterClientResponse =
           `Assoc
             [("error", (`String "InvalidScopeException"));
             ("details", (InvalidScopeException.to_json e))]
+      | `SlowDownException e ->
+          `Assoc
+            [("error", (`String "SlowDownException"));
+            ("details", (SlowDownException.to_json e))]
+      | `UnsupportedGrantTypeException e ->
+          `Assoc
+            [("error", (`String "UnsupportedGrantTypeException"));
+            ("details", (UnsupportedGrantTypeException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -956,21 +1388,21 @@ module RegisterClientResponse =
       make ?tokenEndpoint ?authorizationEndpoint ?clientSecretExpiresAt
         ?clientIdIssuedAt ?clientSecret ?clientId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tokenEndpoint = field_map json "tokenEndpoint" URI.of_json in
+    let of_json json__ =
+      let tokenEndpoint = field_map json__ "tokenEndpoint" URI.of_json in
       let authorizationEndpoint =
-        field_map json "authorizationEndpoint" URI.of_json in
+        field_map json__ "authorizationEndpoint" URI.of_json in
       let clientSecretExpiresAt =
-        field_map json "clientSecretExpiresAt" LongTimeStampType.of_json in
+        field_map json__ "clientSecretExpiresAt" LongTimeStampType.of_json in
       let clientIdIssuedAt =
-        field_map json "clientIdIssuedAt" LongTimeStampType.of_json in
-      let clientSecret = field_map json "clientSecret" ClientSecret.of_json in
-      let clientId = field_map json "clientId" ClientId.of_json in
+        field_map json__ "clientIdIssuedAt" LongTimeStampType.of_json in
+      let clientSecret = field_map json__ "clientSecret" ClientSecret.of_json in
+      let clientId = field_map json__ "clientId" ClientId.of_json in
       make ?tokenEndpoint ?authorizationEndpoint ?clientSecretExpiresAt
         ?clientIdIssuedAt ?clientSecret ?clientId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers a client with AWS SSO. This allows clients to initiate device authorization. The output should be persisted for reuse through many authentication requests."]
+       "Registers a public\194\160client with IAM Identity Center. This allows clients to\194\160perform authorization using the\194\160authorization code\194\160grant\194\160with Proof Key for Code Exchange (PKCE) or\194\160the\194\160device code\194\160grant."]
 module RegisterClientRequest =
   struct
     type nonrec t =
@@ -982,18 +1414,60 @@ module RegisterClientRequest =
           "The type of client. The service supports only public as a client type. Anything other than public will be rejected by the service."];
       scopes: Scopes.t option
         [@ocaml.doc
-          "The list of scopes that are defined by the client. Upon authorization, this list is used to restrict permissions when granting an access token."]}
+          "The list of scopes that are defined by the client. Upon authorization, this list is used to restrict permissions when granting an access token."];
+      redirectUris: RedirectUris.t option
+        [@ocaml.doc
+          "The list of redirect URI that are defined by the client. At completion of authorization, this list is used to restrict what locations the user agent can be redirected back to."];
+      grantTypes: GrantTypes.t option
+        [@ocaml.doc
+          "The list of OAuth 2.0 grant types that are defined by the client. This list is used to restrict the token granting flows available to the client. Supports the following OAuth 2.0 grant types: Authorization Code, Device Code, and Refresh Token. * Authorization Code - authorization_code * Device Code - urn:ietf:params:oauth:grant-type:device_code * Refresh Token - refresh_token"];
+      issuerUrl: URI.t option
+        [@ocaml.doc
+          "The IAM Identity Center Issuer URL associated with an instance of IAM Identity Center. This value is needed for user access to resources through the client."];
+      entitledApplicationArn: ArnType.t option
+        [@ocaml.doc
+          "This IAM Identity Center application ARN is used to define administrator-managed configuration for public client access to resources. At authorization, the scopes, grants, and redirect URI available to this client will be restricted by this application resource."]}
     let context_ = "RegisterClientRequest"
     let make ?scopes =
-      fun ~clientName ->
-        fun ~clientType -> fun () -> { scopes; clientName; clientType }
+      fun ?redirectUris ->
+        fun ?grantTypes ->
+          fun ?issuerUrl ->
+            fun ?entitledApplicationArn ->
+              fun ~clientName ->
+                fun ~clientType ->
+                  fun () ->
+                    {
+                      scopes;
+                      redirectUris;
+                      grantTypes;
+                      issuerUrl;
+                      entitledApplicationArn;
+                      clientName;
+                      clientType
+                    }
     let to_value x =
       structure_to_value
         [("clientName", (Some (ClientName.to_value x.clientName)));
         ("clientType", (Some (ClientType.to_value x.clientType)));
-        ("scopes", (Option.map x.scopes ~f:Scopes.to_value))]
+        ("scopes", (Option.map x.scopes ~f:Scopes.to_value));
+        ("redirectUris",
+          (Option.map x.redirectUris ~f:RedirectUris.to_value));
+        ("grantTypes", (Option.map x.grantTypes ~f:GrantTypes.to_value));
+        ("issuerUrl", (Option.map x.issuerUrl ~f:URI.to_value));
+        ("entitledApplicationArn",
+          (Option.map x.entitledApplicationArn ~f:ArnType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let entitledApplicationArn =
+        (Option.map ~f:ArnType.of_xml)
+          (Xml.child xml_arg0 "entitledApplicationArn") in
+      let issuerUrl =
+        (Option.map ~f:URI.of_xml) (Xml.child xml_arg0 "issuerUrl") in
+      let grantTypes =
+        (Option.map ~f:GrantTypes.of_xml) (Xml.child xml_arg0 "grantTypes") in
+      let redirectUris =
+        (Option.map ~f:RedirectUris.of_xml)
+          (Xml.child xml_arg0 "redirectUris") in
       let scopes =
         (Option.map ~f:Scopes.of_xml) (Xml.child xml_arg0 "scopes") in
       let clientType =
@@ -1002,35 +1476,411 @@ module RegisterClientRequest =
       let clientName =
         ClientName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientName") in
-      make ?scopes ~clientType ~clientName ()
+      make ?entitledApplicationArn ?issuerUrl ?grantTypes ?redirectUris
+        ?scopes ~clientType ~clientName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let scopes = field_map json "scopes" Scopes.of_json in
-      let clientType = field_map_exn json "clientType" ClientType.of_json in
-      let clientName = field_map_exn json "clientName" ClientName.of_json in
-      make ?scopes ~clientType ~clientName ()
+    let of_json json__ =
+      let entitledApplicationArn =
+        field_map json__ "entitledApplicationArn" ArnType.of_json in
+      let issuerUrl = field_map json__ "issuerUrl" URI.of_json in
+      let grantTypes = field_map json__ "grantTypes" GrantTypes.of_json in
+      let redirectUris = field_map json__ "redirectUris" RedirectUris.of_json in
+      let scopes = field_map json__ "scopes" Scopes.of_json in
+      let clientType = field_map_exn json__ "clientType" ClientType.of_json in
+      let clientName = field_map_exn json__ "clientName" ClientName.of_json in
+      make ?entitledApplicationArn ?issuerUrl ?grantTypes ?redirectUris
+        ?scopes ~clientType ~clientName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers a client with AWS SSO. This allows clients to initiate device authorization. The output should be persisted for reuse through many authentication requests."]
+       "Registers a public\194\160client with IAM Identity Center. This allows clients to\194\160perform authorization using the\194\160authorization code\194\160grant\194\160with Proof Key for Code Exchange (PKCE) or\194\160the\194\160device code\194\160grant."]
+module CreateTokenWithIAMResponse =
+  struct
+    type nonrec t =
+      {
+      accessToken: AccessToken.t option
+        [@ocaml.doc
+          "A bearer token to access Amazon Web Services accounts and applications assigned to a user."];
+      tokenType: TokenType.t option
+        [@ocaml.doc
+          "Used to notify the requester that the returned token is an access token. The supported token type is Bearer."];
+      expiresIn: ExpirationInSeconds.t option
+        [@ocaml.doc
+          "Indicates the time in seconds when an access token will expire."];
+      refreshToken: RefreshToken.t option
+        [@ocaml.doc
+          "A token that, if present, can be used to refresh a previously issued access token that might have expired. For more information about the features and limitations of the current IAM Identity Center OIDC implementation, see Considerations for Using this Guide in the IAM Identity Center OIDC API Reference."];
+      idToken: IdToken.t option
+        [@ocaml.doc
+          "A JSON Web Token (JWT) that identifies the user associated with the issued access token."];
+      issuedTokenType: TokenTypeURI.t option
+        [@ocaml.doc
+          "Indicates the type of tokens that are issued by IAM Identity Center. The following values are supported: * Access Token - urn:ietf:params:oauth:token-type:access_token * Refresh Token - urn:ietf:params:oauth:token-type:refresh_token"];
+      scope: Scopes.t option
+        [@ocaml.doc
+          "The list of scopes for which authorization is granted. The access token that is issued is limited to the scopes that are granted."];
+      awsAdditionalDetails: AwsAdditionalDetails.t option
+        [@ocaml.doc
+          "A structure containing information from IAM Identity Center managed user and group information."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AuthorizationPendingException of AuthorizationPendingException.t 
+      | `ExpiredTokenException of ExpiredTokenException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidClientException of InvalidClientException.t 
+      | `InvalidGrantException of InvalidGrantException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `InvalidRequestRegionException of InvalidRequestRegionException.t 
+      | `InvalidScopeException of InvalidScopeException.t 
+      | `SlowDownException of SlowDownException.t 
+      | `UnauthorizedClientException of UnauthorizedClientException.t 
+      | `UnsupportedGrantTypeException of UnsupportedGrantTypeException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accessToken =
+      fun ?tokenType ->
+        fun ?expiresIn ->
+          fun ?refreshToken ->
+            fun ?idToken ->
+              fun ?issuedTokenType ->
+                fun ?scope ->
+                  fun ?awsAdditionalDetails ->
+                    fun () ->
+                      {
+                        accessToken;
+                        tokenType;
+                        expiresIn;
+                        refreshToken;
+                        idToken;
+                        issuedTokenType;
+                        scope;
+                        awsAdditionalDetails
+                      }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AuthorizationPendingException" ->
+          `AuthorizationPendingException
+            (AuthorizationPendingException.of_json json)
+      | "ExpiredTokenException" ->
+          `ExpiredTokenException (ExpiredTokenException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidClientException" ->
+          `InvalidClientException (InvalidClientException.of_json json)
+      | "InvalidGrantException" ->
+          `InvalidGrantException (InvalidGrantException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "InvalidRequestRegionException" ->
+          `InvalidRequestRegionException
+            (InvalidRequestRegionException.of_json json)
+      | "InvalidScopeException" ->
+          `InvalidScopeException (InvalidScopeException.of_json json)
+      | "SlowDownException" ->
+          `SlowDownException (SlowDownException.of_json json)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_json json)
+      | "UnsupportedGrantTypeException" ->
+          `UnsupportedGrantTypeException
+            (UnsupportedGrantTypeException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AuthorizationPendingException" ->
+          `AuthorizationPendingException
+            (AuthorizationPendingException.of_xml xml)
+      | "ExpiredTokenException" ->
+          `ExpiredTokenException (ExpiredTokenException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidClientException" ->
+          `InvalidClientException (InvalidClientException.of_xml xml)
+      | "InvalidGrantException" ->
+          `InvalidGrantException (InvalidGrantException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "InvalidRequestRegionException" ->
+          `InvalidRequestRegionException
+            (InvalidRequestRegionException.of_xml xml)
+      | "InvalidScopeException" ->
+          `InvalidScopeException (InvalidScopeException.of_xml xml)
+      | "SlowDownException" ->
+          `SlowDownException (SlowDownException.of_xml xml)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_xml xml)
+      | "UnsupportedGrantTypeException" ->
+          `UnsupportedGrantTypeException
+            (UnsupportedGrantTypeException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AuthorizationPendingException e ->
+          `Assoc
+            [("error", (`String "AuthorizationPendingException"));
+            ("details", (AuthorizationPendingException.to_json e))]
+      | `ExpiredTokenException e ->
+          `Assoc
+            [("error", (`String "ExpiredTokenException"));
+            ("details", (ExpiredTokenException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidClientException e ->
+          `Assoc
+            [("error", (`String "InvalidClientException"));
+            ("details", (InvalidClientException.to_json e))]
+      | `InvalidGrantException e ->
+          `Assoc
+            [("error", (`String "InvalidGrantException"));
+            ("details", (InvalidGrantException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `InvalidRequestRegionException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestRegionException"));
+            ("details", (InvalidRequestRegionException.to_json e))]
+      | `InvalidScopeException e ->
+          `Assoc
+            [("error", (`String "InvalidScopeException"));
+            ("details", (InvalidScopeException.to_json e))]
+      | `SlowDownException e ->
+          `Assoc
+            [("error", (`String "SlowDownException"));
+            ("details", (SlowDownException.to_json e))]
+      | `UnauthorizedClientException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedClientException"));
+            ("details", (UnauthorizedClientException.to_json e))]
+      | `UnsupportedGrantTypeException e ->
+          `Assoc
+            [("error", (`String "UnsupportedGrantTypeException"));
+            ("details", (UnsupportedGrantTypeException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("accessToken", (Option.map x.accessToken ~f:AccessToken.to_value));
+        ("tokenType", (Option.map x.tokenType ~f:TokenType.to_value));
+        ("expiresIn",
+          (Option.map x.expiresIn ~f:ExpirationInSeconds.to_value));
+        ("refreshToken",
+          (Option.map x.refreshToken ~f:RefreshToken.to_value));
+        ("idToken", (Option.map x.idToken ~f:IdToken.to_value));
+        ("issuedTokenType",
+          (Option.map x.issuedTokenType ~f:TokenTypeURI.to_value));
+        ("scope", (Option.map x.scope ~f:Scopes.to_value));
+        ("awsAdditionalDetails",
+          (Option.map x.awsAdditionalDetails ~f:AwsAdditionalDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let awsAdditionalDetails =
+        (Option.map ~f:AwsAdditionalDetails.of_xml)
+          (Xml.child xml_arg0 "awsAdditionalDetails") in
+      let scope = (Option.map ~f:Scopes.of_xml) (Xml.child xml_arg0 "scope") in
+      let issuedTokenType =
+        (Option.map ~f:TokenTypeURI.of_xml)
+          (Xml.child xml_arg0 "issuedTokenType") in
+      let idToken =
+        (Option.map ~f:IdToken.of_xml) (Xml.child xml_arg0 "idToken") in
+      let refreshToken =
+        (Option.map ~f:RefreshToken.of_xml)
+          (Xml.child xml_arg0 "refreshToken") in
+      let expiresIn =
+        (Option.map ~f:ExpirationInSeconds.of_xml)
+          (Xml.child xml_arg0 "expiresIn") in
+      let tokenType =
+        (Option.map ~f:TokenType.of_xml) (Xml.child xml_arg0 "tokenType") in
+      let accessToken =
+        (Option.map ~f:AccessToken.of_xml) (Xml.child xml_arg0 "accessToken") in
+      make ?awsAdditionalDetails ?scope ?issuedTokenType ?idToken
+        ?refreshToken ?expiresIn ?tokenType ?accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let awsAdditionalDetails =
+        field_map json__ "awsAdditionalDetails" AwsAdditionalDetails.of_json in
+      let scope = field_map json__ "scope" Scopes.of_json in
+      let issuedTokenType =
+        field_map json__ "issuedTokenType" TokenTypeURI.of_json in
+      let idToken = field_map json__ "idToken" IdToken.of_json in
+      let refreshToken = field_map json__ "refreshToken" RefreshToken.of_json in
+      let expiresIn =
+        field_map json__ "expiresIn" ExpirationInSeconds.of_json in
+      let tokenType = field_map json__ "tokenType" TokenType.of_json in
+      let accessToken = field_map json__ "accessToken" AccessToken.of_json in
+      make ?awsAdditionalDetails ?scope ?issuedTokenType ?idToken
+        ?refreshToken ?expiresIn ?tokenType ?accessToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates and returns access and refresh tokens for authorized client applications that are authenticated using any IAM entity, such as a service role or user. These tokens might contain defined scopes that specify permissions such as read:profile or write:data. Through downscoping, you can use the scopes parameter to request tokens with reduced permissions compared to the original client application's permissions or, if applicable, the refresh token's scopes. The access token can be used to fetch short-lived credentials for the assigned Amazon Web Services accounts or to access application APIs using bearer authentication. This API is used with Signature Version 4. For more information, see Amazon Web Services Signature Version 4 for API Requests."]
+module CreateTokenWithIAMRequest =
+  struct
+    type nonrec t =
+      {
+      clientId: ClientId.t
+        [@ocaml.doc
+          "The unique identifier string for the client or application. This value is an application ARN that has OAuth grants configured."];
+      grantType: GrantType.t
+        [@ocaml.doc
+          "Supports the following OAuth grant types: Authorization Code, Refresh Token, JWT Bearer, and Token Exchange. Specify one of the following values, depending on the grant type that you want: * Authorization Code - authorization_code * Refresh Token - refresh_token * JWT Bearer - urn:ietf:params:oauth:grant-type:jwt-bearer * Token Exchange - urn:ietf:params:oauth:grant-type:token-exchange"];
+      code: AuthCode.t option
+        [@ocaml.doc
+          "Used only when calling this API for the Authorization Code grant type. This short-lived code is used to identify this authorization request. The code is obtained through a redirect from IAM Identity Center to a redirect URI persisted in the Authorization Code GrantOptions for the application."];
+      refreshToken: RefreshToken.t option
+        [@ocaml.doc
+          "Used only when calling this API for the Refresh Token grant type. This token is used to refresh short-lived tokens, such as the access token, that might expire. For more information about the features and limitations of the current IAM Identity Center OIDC implementation, see Considerations for Using this Guide in the IAM Identity Center OIDC API Reference."];
+      assertion: Assertion.t option
+        [@ocaml.doc
+          "Used only when calling this API for the JWT Bearer grant type. This value specifies the JSON Web Token (JWT) issued by a trusted token issuer. To authorize a trusted token issuer, configure the JWT Bearer GrantOptions for the application."];
+      scope: Scopes.t option
+        [@ocaml.doc
+          "The list of scopes for which authorization is requested. The access token that is issued is limited to the scopes that are granted. If the value is not specified, IAM Identity Center authorizes all scopes configured for the application, including the following default scopes: openid, aws, sts:identity_context."];
+      redirectUri: URI.t option
+        [@ocaml.doc
+          "Used only when calling this API for the Authorization Code grant type. This value specifies the location of the client or application that has registered to receive the authorization code."];
+      subjectToken: SubjectToken.t option
+        [@ocaml.doc
+          "Used only when calling this API for the Token Exchange grant type. This value specifies the subject of the exchange. The value of the subject token must be an access token issued by IAM Identity Center to a different client or application. The access token must have authorized scopes that indicate the requested application as a target audience."];
+      subjectTokenType: TokenTypeURI.t option
+        [@ocaml.doc
+          "Used only when calling this API for the Token Exchange grant type. This value specifies the type of token that is passed as the subject of the exchange. The following value is supported: * Access Token - urn:ietf:params:oauth:token-type:access_token"];
+      requestedTokenType: TokenTypeURI.t option
+        [@ocaml.doc
+          "Used only when calling this API for the Token Exchange grant type. This value specifies the type of token that the requester can receive. The following values are supported: * Access Token - urn:ietf:params:oauth:token-type:access_token * Refresh Token - urn:ietf:params:oauth:token-type:refresh_token"];
+      codeVerifier: CodeVerifier.t option
+        [@ocaml.doc
+          "Used only when calling this API for the Authorization Code grant type. This value is generated by the client and presented to validate the original code challenge value the client passed at authorization time."]}
+    let context_ = "CreateTokenWithIAMRequest"
+    let make ?code =
+      fun ?refreshToken ->
+        fun ?assertion ->
+          fun ?scope ->
+            fun ?redirectUri ->
+              fun ?subjectToken ->
+                fun ?subjectTokenType ->
+                  fun ?requestedTokenType ->
+                    fun ?codeVerifier ->
+                      fun ~clientId ->
+                        fun ~grantType ->
+                          fun () ->
+                            {
+                              code;
+                              refreshToken;
+                              assertion;
+                              scope;
+                              redirectUri;
+                              subjectToken;
+                              subjectTokenType;
+                              requestedTokenType;
+                              codeVerifier;
+                              clientId;
+                              grantType
+                            }
+    let to_value x =
+      structure_to_value
+        [("clientId", (Some (ClientId.to_value x.clientId)));
+        ("grantType", (Some (GrantType.to_value x.grantType)));
+        ("code", (Option.map x.code ~f:AuthCode.to_value));
+        ("refreshToken",
+          (Option.map x.refreshToken ~f:RefreshToken.to_value));
+        ("assertion", (Option.map x.assertion ~f:Assertion.to_value));
+        ("scope", (Option.map x.scope ~f:Scopes.to_value));
+        ("redirectUri", (Option.map x.redirectUri ~f:URI.to_value));
+        ("subjectToken",
+          (Option.map x.subjectToken ~f:SubjectToken.to_value));
+        ("subjectTokenType",
+          (Option.map x.subjectTokenType ~f:TokenTypeURI.to_value));
+        ("requestedTokenType",
+          (Option.map x.requestedTokenType ~f:TokenTypeURI.to_value));
+        ("codeVerifier",
+          (Option.map x.codeVerifier ~f:CodeVerifier.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let codeVerifier =
+        (Option.map ~f:CodeVerifier.of_xml)
+          (Xml.child xml_arg0 "codeVerifier") in
+      let requestedTokenType =
+        (Option.map ~f:TokenTypeURI.of_xml)
+          (Xml.child xml_arg0 "requestedTokenType") in
+      let subjectTokenType =
+        (Option.map ~f:TokenTypeURI.of_xml)
+          (Xml.child xml_arg0 "subjectTokenType") in
+      let subjectToken =
+        (Option.map ~f:SubjectToken.of_xml)
+          (Xml.child xml_arg0 "subjectToken") in
+      let redirectUri =
+        (Option.map ~f:URI.of_xml) (Xml.child xml_arg0 "redirectUri") in
+      let scope = (Option.map ~f:Scopes.of_xml) (Xml.child xml_arg0 "scope") in
+      let assertion =
+        (Option.map ~f:Assertion.of_xml) (Xml.child xml_arg0 "assertion") in
+      let refreshToken =
+        (Option.map ~f:RefreshToken.of_xml)
+          (Xml.child xml_arg0 "refreshToken") in
+      let code = (Option.map ~f:AuthCode.of_xml) (Xml.child xml_arg0 "code") in
+      let grantType =
+        GrantType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "grantType") in
+      let clientId =
+        ClientId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "clientId") in
+      make ?codeVerifier ?requestedTokenType ?subjectTokenType ?subjectToken
+        ?redirectUri ?scope ?assertion ?refreshToken ?code ~grantType
+        ~clientId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let codeVerifier = field_map json__ "codeVerifier" CodeVerifier.of_json in
+      let requestedTokenType =
+        field_map json__ "requestedTokenType" TokenTypeURI.of_json in
+      let subjectTokenType =
+        field_map json__ "subjectTokenType" TokenTypeURI.of_json in
+      let subjectToken = field_map json__ "subjectToken" SubjectToken.of_json in
+      let redirectUri = field_map json__ "redirectUri" URI.of_json in
+      let scope = field_map json__ "scope" Scopes.of_json in
+      let assertion = field_map json__ "assertion" Assertion.of_json in
+      let refreshToken = field_map json__ "refreshToken" RefreshToken.of_json in
+      let code = field_map json__ "code" AuthCode.of_json in
+      let grantType = field_map_exn json__ "grantType" GrantType.of_json in
+      let clientId = field_map_exn json__ "clientId" ClientId.of_json in
+      make ?codeVerifier ?requestedTokenType ?subjectTokenType ?subjectToken
+        ?redirectUri ?scope ?assertion ?refreshToken ?code ~grantType
+        ~clientId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates and returns access and refresh tokens for authorized client applications that are authenticated using any IAM entity, such as a service role or user. These tokens might contain defined scopes that specify permissions such as read:profile or write:data. Through downscoping, you can use the scopes parameter to request tokens with reduced permissions compared to the original client application's permissions or, if applicable, the refresh token's scopes. The access token can be used to fetch short-lived credentials for the assigned Amazon Web Services accounts or to access application APIs using bearer authentication. This API is used with Signature Version 4. For more information, see Amazon Web Services Signature Version 4 for API Requests."]
 module CreateTokenResponse =
   struct
     type nonrec t =
       {
       accessToken: AccessToken.t option
         [@ocaml.doc
-          "An opaque token to access AWS SSO resources assigned to a user."];
+          "A bearer token to access Amazon Web Services accounts and applications assigned to a user."];
       tokenType: TokenType.t option
         [@ocaml.doc
-          "Used to notify the client that the returned token is an access token. The supported type is BearerToken."];
+          "Used to notify the client that the returned token is an access token. The supported token type is Bearer."];
       expiresIn: ExpirationInSeconds.t option
         [@ocaml.doc
           "Indicates the time in seconds when an access token will expire."];
       refreshToken: RefreshToken.t option
         [@ocaml.doc
-          "A token that, if present, can be used to refresh a previously issued access token that might have expired."];
+          "A token that, if present, can be used to refresh a previously issued access token that might have expired. For more information about the features and limitations of the current IAM Identity Center OIDC implementation, see Considerations for Using this Guide in the IAM Identity Center OIDC API Reference."];
       idToken: IdToken.t option
         [@ocaml.doc
-          "The identifier of the user that associated with the access token, if present."]}
+          "The idToken is not implemented or supported. For more information about the features and limitations of the current IAM Identity Center OIDC implementation, see Considerations for Using this Guide in the IAM Identity Center OIDC API Reference. A JSON Web Token (JWT) that identifies who is associated with the issued access token."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `AuthorizationPendingException of AuthorizationPendingException.t 
@@ -1186,77 +2036,88 @@ module CreateTokenResponse =
         (Option.map ~f:AccessToken.of_xml) (Xml.child xml_arg0 "accessToken") in
       make ?idToken ?refreshToken ?expiresIn ?tokenType ?accessToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let idToken = field_map json "idToken" IdToken.of_json in
-      let refreshToken = field_map json "refreshToken" RefreshToken.of_json in
-      let expiresIn = field_map json "expiresIn" ExpirationInSeconds.of_json in
-      let tokenType = field_map json "tokenType" TokenType.of_json in
-      let accessToken = field_map json "accessToken" AccessToken.of_json in
+    let of_json json__ =
+      let idToken = field_map json__ "idToken" IdToken.of_json in
+      let refreshToken = field_map json__ "refreshToken" RefreshToken.of_json in
+      let expiresIn =
+        field_map json__ "expiresIn" ExpirationInSeconds.of_json in
+      let tokenType = field_map json__ "tokenType" TokenType.of_json in
+      let accessToken = field_map json__ "accessToken" AccessToken.of_json in
       make ?idToken ?refreshToken ?expiresIn ?tokenType ?accessToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates and returns an access token for the authorized client. The access token issued will be used to fetch short-term credentials for the assigned roles in the AWS account."]
+       "Creates and returns access and refresh tokens for clients that are authenticated using client secrets. The access token can be used to fetch short-lived credentials for the assigned AWS accounts or to access application APIs using bearer authentication."]
 module CreateTokenRequest =
   struct
     type nonrec t =
       {
       clientId: ClientId.t
         [@ocaml.doc
-          "The unique identifier string for each client. This value should come from the persisted result of the RegisterClient API."];
+          "The unique identifier string for the client or application. This value comes from the result of the RegisterClient API."];
       clientSecret: ClientSecret.t
         [@ocaml.doc
           "A secret string generated for the client. This value should come from the persisted result of the RegisterClient API."];
       grantType: GrantType.t
         [@ocaml.doc
-          "Supports grant types for authorization code, refresh token, and device code request."];
-      deviceCode: DeviceCode.t
+          "Supports the following OAuth grant types: Authorization Code, Device Code, and Refresh Token. Specify one of the following values, depending on the grant type that you want: * Authorization Code - authorization_code * Device Code - urn:ietf:params:oauth:grant-type:device_code * Refresh Token - refresh_token"];
+      deviceCode: DeviceCode.t option
         [@ocaml.doc
-          "Used only when calling this API for the device code grant type. This short-term code is used to identify this authentication attempt. This should come from an in-memory reference to the result of the StartDeviceAuthorization API."];
+          "Used only when calling this API for the Device Code grant type. This short-lived code is used to identify this authorization request. This comes from the result of the StartDeviceAuthorization API."];
       code: AuthCode.t option
         [@ocaml.doc
-          "The authorization code received from the authorization service. This parameter is required to perform an authorization grant request to get access to a token."];
+          "Used only when calling this API for the Authorization Code grant type. The short-lived code is used to identify this authorization request."];
       refreshToken: RefreshToken.t option
         [@ocaml.doc
-          "The token used to obtain an access token in the event that the access token is invalid or expired. This token is not issued by the service."];
+          "Used only when calling this API for the Refresh Token grant type. This token is used to refresh short-lived tokens, such as the access token, that might expire. For more information about the features and limitations of the current IAM Identity Center OIDC implementation, see Considerations for Using this Guide in the IAM Identity Center OIDC API Reference."];
       scope: Scopes.t option
         [@ocaml.doc
-          "The list of scopes that is defined by the client. Upon authorization, this list is used to restrict permissions when granting an access token."];
+          "The list of scopes for which authorization is requested. This parameter has no effect; the access token will always include all scopes configured during client registration."];
       redirectUri: URI.t option
         [@ocaml.doc
-          "The location of the application that will receive the authorization code. Users authorize the service to send the request to this location."]}
+          "Used only when calling this API for the Authorization Code grant type. This value specifies the location of the client or application that has registered to receive the authorization code."];
+      codeVerifier: CodeVerifier.t option
+        [@ocaml.doc
+          "Used only when calling this API for the Authorization Code grant type. This value is generated by the client and presented to validate the original code challenge value the client passed at authorization time."]}
     let context_ = "CreateTokenRequest"
-    let make ?code =
-      fun ?refreshToken ->
-        fun ?scope ->
-          fun ?redirectUri ->
-            fun ~clientId ->
-              fun ~clientSecret ->
-                fun ~grantType ->
-                  fun ~deviceCode ->
-                    fun () ->
-                      {
-                        code;
-                        refreshToken;
-                        scope;
-                        redirectUri;
-                        clientId;
-                        clientSecret;
-                        grantType;
-                        deviceCode
-                      }
+    let make ?deviceCode =
+      fun ?code ->
+        fun ?refreshToken ->
+          fun ?scope ->
+            fun ?redirectUri ->
+              fun ?codeVerifier ->
+                fun ~clientId ->
+                  fun ~clientSecret ->
+                    fun ~grantType ->
+                      fun () ->
+                        {
+                          deviceCode;
+                          code;
+                          refreshToken;
+                          scope;
+                          redirectUri;
+                          codeVerifier;
+                          clientId;
+                          clientSecret;
+                          grantType
+                        }
     let to_value x =
       structure_to_value
         [("clientId", (Some (ClientId.to_value x.clientId)));
         ("clientSecret", (Some (ClientSecret.to_value x.clientSecret)));
         ("grantType", (Some (GrantType.to_value x.grantType)));
-        ("deviceCode", (Some (DeviceCode.to_value x.deviceCode)));
+        ("deviceCode", (Option.map x.deviceCode ~f:DeviceCode.to_value));
         ("code", (Option.map x.code ~f:AuthCode.to_value));
         ("refreshToken",
           (Option.map x.refreshToken ~f:RefreshToken.to_value));
         ("scope", (Option.map x.scope ~f:Scopes.to_value));
-        ("redirectUri", (Option.map x.redirectUri ~f:URI.to_value))]
+        ("redirectUri", (Option.map x.redirectUri ~f:URI.to_value));
+        ("codeVerifier",
+          (Option.map x.codeVerifier ~f:CodeVerifier.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let codeVerifier =
+        (Option.map ~f:CodeVerifier.of_xml)
+          (Xml.child xml_arg0 "codeVerifier") in
       let redirectUri =
         (Option.map ~f:URI.of_xml) (Xml.child xml_arg0 "redirectUri") in
       let scope = (Option.map ~f:Scopes.of_xml) (Xml.child xml_arg0 "scope") in
@@ -1265,8 +2126,7 @@ module CreateTokenRequest =
           (Xml.child xml_arg0 "refreshToken") in
       let code = (Option.map ~f:AuthCode.of_xml) (Xml.child xml_arg0 "code") in
       let deviceCode =
-        DeviceCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deviceCode") in
+        (Option.map ~f:DeviceCode.of_xml) (Xml.child xml_arg0 "deviceCode") in
       let grantType =
         GrantType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "grantType") in
@@ -1275,21 +2135,22 @@ module CreateTokenRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "clientSecret") in
       let clientId =
         ClientId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "clientId") in
-      make ?redirectUri ?scope ?refreshToken ?code ~deviceCode ~grantType
-        ~clientSecret ~clientId ()
+      make ?codeVerifier ?redirectUri ?scope ?refreshToken ?code ?deviceCode
+        ~grantType ~clientSecret ~clientId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let redirectUri = field_map json "redirectUri" URI.of_json in
-      let scope = field_map json "scope" Scopes.of_json in
-      let refreshToken = field_map json "refreshToken" RefreshToken.of_json in
-      let code = field_map json "code" AuthCode.of_json in
-      let deviceCode = field_map_exn json "deviceCode" DeviceCode.of_json in
-      let grantType = field_map_exn json "grantType" GrantType.of_json in
+    let of_json json__ =
+      let codeVerifier = field_map json__ "codeVerifier" CodeVerifier.of_json in
+      let redirectUri = field_map json__ "redirectUri" URI.of_json in
+      let scope = field_map json__ "scope" Scopes.of_json in
+      let refreshToken = field_map json__ "refreshToken" RefreshToken.of_json in
+      let code = field_map json__ "code" AuthCode.of_json in
+      let deviceCode = field_map json__ "deviceCode" DeviceCode.of_json in
+      let grantType = field_map_exn json__ "grantType" GrantType.of_json in
       let clientSecret =
-        field_map_exn json "clientSecret" ClientSecret.of_json in
-      let clientId = field_map_exn json "clientId" ClientId.of_json in
-      make ?redirectUri ?scope ?refreshToken ?code ~deviceCode ~grantType
-        ~clientSecret ~clientId ()
+        field_map_exn json__ "clientSecret" ClientSecret.of_json in
+      let clientId = field_map_exn json__ "clientId" ClientId.of_json in
+      make ?codeVerifier ?redirectUri ?scope ?refreshToken ?code ?deviceCode
+        ~grantType ~clientSecret ~clientId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates and returns an access token for the authorized client. The access token issued will be used to fetch short-term credentials for the assigned roles in the AWS account."]
+       "Creates and returns access and refresh tokens for clients that are authenticated using client secrets. The access token can be used to fetch short-lived credentials for the assigned AWS accounts or to access application APIs using bearer authentication."]

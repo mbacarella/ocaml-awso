@@ -13,13 +13,29 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let associate_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateAlias input
+let associate_distribution_tenant_web_a_c_l ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateDistributionTenantWebACL input
+let associate_distribution_web_a_c_l ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateDistributionWebACL input
+let copy_distribution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CopyDistribution input
+let create_anycast_ip_list ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAnycastIpList input
 let create_cache_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCachePolicy input
 let create_cloud_front_origin_access_identity ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCloudFrontOriginAccessIdentity
     input
+let create_connection_function ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateConnectionFunction input
+let create_connection_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateConnectionGroup input
+let create_continuous_deployment_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateContinuousDeploymentPolicy input
 let create_distribution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDistribution input
+let create_distribution_tenant ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateDistributionTenant input
 let create_distribution_with_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDistributionWithTags input
 let create_field_level_encryption_config ?endpoint_url ?cfg input =
@@ -30,10 +46,17 @@ let create_function ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFunction input
 let create_invalidation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateInvalidation input
+let create_invalidation_for_distribution_tenant ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateInvalidationForDistributionTenant
+    input
 let create_key_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateKeyGroup input
+let create_key_value_store ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateKeyValueStore input
 let create_monitoring_subscription ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateMonitoringSubscription input
+let create_origin_access_control ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateOriginAccessControl input
 let create_origin_request_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateOriginRequestPolicy input
 let create_public_key ?endpoint_url ?cfg input =
@@ -46,13 +69,27 @@ let create_streaming_distribution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateStreamingDistribution input
 let create_streaming_distribution_with_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateStreamingDistributionWithTags input
+let create_trust_store ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTrustStore input
+let create_vpc_origin ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateVpcOrigin input
+let delete_anycast_ip_list ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAnycastIpList input
 let delete_cache_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCachePolicy input
 let delete_cloud_front_origin_access_identity ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCloudFrontOriginAccessIdentity
     input
+let delete_connection_function ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteConnectionFunction input
+let delete_connection_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteConnectionGroup input
+let delete_continuous_deployment_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteContinuousDeploymentPolicy input
 let delete_distribution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDistribution input
+let delete_distribution_tenant ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDistributionTenant input
 let delete_field_level_encryption_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFieldLevelEncryptionConfig input
 let delete_field_level_encryption_profile ?endpoint_url ?cfg input =
@@ -61,20 +98,41 @@ let delete_function ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFunction input
 let delete_key_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteKeyGroup input
+let delete_key_value_store ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteKeyValueStore input
 let delete_monitoring_subscription ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteMonitoringSubscription input
+let delete_origin_access_control ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteOriginAccessControl input
 let delete_origin_request_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteOriginRequestPolicy input
 let delete_public_key ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeletePublicKey input
 let delete_realtime_log_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteRealtimeLogConfig input
+let delete_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteResourcePolicy input
 let delete_response_headers_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteResponseHeadersPolicy input
 let delete_streaming_distribution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteStreamingDistribution input
+let delete_trust_store ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTrustStore input
+let delete_vpc_origin ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteVpcOrigin input
+let describe_connection_function ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeConnectionFunction input
 let describe_function ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeFunction input
+let describe_key_value_store ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeKeyValueStore input
+let disassociate_distribution_tenant_web_a_c_l ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateDistributionTenantWebACL
+    input
+let disassociate_distribution_web_a_c_l ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateDistributionWebACL input
+let get_anycast_ip_list ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAnycastIpList input
 let get_cache_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCachePolicy input
 let get_cache_policy_config ?endpoint_url ?cfg input =
@@ -84,10 +142,24 @@ let get_cloud_front_origin_access_identity ?endpoint_url ?cfg input =
 let get_cloud_front_origin_access_identity_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCloudFrontOriginAccessIdentityConfig
     input
+let get_connection_function ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetConnectionFunction input
+let get_connection_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetConnectionGroup input
+let get_connection_group_by_routing_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetConnectionGroupByRoutingEndpoint input
+let get_continuous_deployment_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetContinuousDeploymentPolicy input
+let get_continuous_deployment_policy_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetContinuousDeploymentPolicyConfig input
 let get_distribution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDistribution input
 let get_distribution_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDistributionConfig input
+let get_distribution_tenant ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDistributionTenant input
+let get_distribution_tenant_by_domain ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDistributionTenantByDomain input
 let get_field_level_encryption ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetFieldLevelEncryption input
 let get_field_level_encryption_config ?endpoint_url ?cfg input =
@@ -101,12 +173,21 @@ let get_function ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetFunction input
 let get_invalidation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetInvalidation input
+let get_invalidation_for_distribution_tenant ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetInvalidationForDistributionTenant
+    input
 let get_key_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetKeyGroup input
 let get_key_group_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetKeyGroupConfig input
+let get_managed_certificate_details ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetManagedCertificateDetails input
 let get_monitoring_subscription ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMonitoringSubscription input
+let get_origin_access_control ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetOriginAccessControl input
+let get_origin_access_control_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetOriginAccessControlConfig input
 let get_origin_request_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetOriginRequestPolicy input
 let get_origin_request_policy_config ?endpoint_url ?cfg input =
@@ -117,6 +198,8 @@ let get_public_key_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPublicKeyConfig input
 let get_realtime_log_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRealtimeLogConfig input
+let get_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetResourcePolicy input
 let get_response_headers_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetResponseHeadersPolicy input
 let get_response_headers_policy_config ?endpoint_url ?cfg input =
@@ -125,6 +208,12 @@ let get_streaming_distribution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetStreamingDistribution input
 let get_streaming_distribution_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetStreamingDistributionConfig input
+let get_trust_store ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTrustStore input
+let get_vpc_origin ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetVpcOrigin input
+let list_anycast_ip_lists ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAnycastIpLists input
 let list_cache_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCachePolicies input
 let list_cloud_front_origin_access_identities ?endpoint_url ?cfg input =
@@ -132,15 +221,35 @@ let list_cloud_front_origin_access_identities ?endpoint_url ?cfg input =
     input
 let list_conflicting_aliases ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListConflictingAliases input
+let list_connection_functions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListConnectionFunctions input
+let list_connection_groups ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListConnectionGroups input
+let list_continuous_deployment_policies ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListContinuousDeploymentPolicies input
+let list_distribution_tenants ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDistributionTenants input
+let list_distribution_tenants_by_customization ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDistributionTenantsByCustomization
+    input
 let list_distributions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDistributions input
+let list_distributions_by_anycast_ip_list_id ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDistributionsByAnycastIpListId input
 let list_distributions_by_cache_policy_id ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDistributionsByCachePolicyId input
+let list_distributions_by_connection_function ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDistributionsByConnectionFunction
+    input
+let list_distributions_by_connection_mode ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDistributionsByConnectionMode input
 let list_distributions_by_key_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDistributionsByKeyGroup input
 let list_distributions_by_origin_request_policy_id ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDistributionsByOriginRequestPolicyId
     input
+let list_distributions_by_owned_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDistributionsByOwnedResource input
 let list_distributions_by_realtime_log_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDistributionsByRealtimeLogConfig
     input
@@ -148,8 +257,14 @@ let list_distributions_by_response_headers_policy_id ?endpoint_url ?cfg input
   =
   eval ?endpoint_url ?cfg
     Endpoints.ListDistributionsByResponseHeadersPolicyId input
+let list_distributions_by_trust_store ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDistributionsByTrustStore input
+let list_distributions_by_vpc_origin_id ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDistributionsByVpcOriginId input
 let list_distributions_by_web_a_c_l_id ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDistributionsByWebACLId input
+let list_domain_conflicts ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDomainConflicts input
 let list_field_level_encryption_configs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFieldLevelEncryptionConfigs input
 let list_field_level_encryption_profiles ?endpoint_url ?cfg input =
@@ -158,8 +273,15 @@ let list_functions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFunctions input
 let list_invalidations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListInvalidations input
+let list_invalidations_for_distribution_tenant ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListInvalidationsForDistributionTenant
+    input
 let list_key_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListKeyGroups input
+let list_key_value_stores ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListKeyValueStores input
+let list_origin_access_controls ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListOriginAccessControls input
 let list_origin_request_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListOriginRequestPolicies input
 let list_public_keys ?endpoint_url ?cfg input =
@@ -172,21 +294,45 @@ let list_streaming_distributions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListStreamingDistributions input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let list_trust_stores ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTrustStores input
+let list_vpc_origins ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListVpcOrigins input
+let publish_connection_function ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PublishConnectionFunction input
 let publish_function ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PublishFunction input
+let put_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutResourcePolicy input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
+let test_connection_function ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TestConnectionFunction input
 let test_function ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TestFunction input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_anycast_ip_list ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAnycastIpList input
 let update_cache_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateCachePolicy input
 let update_cloud_front_origin_access_identity ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateCloudFrontOriginAccessIdentity
     input
+let update_connection_function ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateConnectionFunction input
+let update_connection_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateConnectionGroup input
+let update_continuous_deployment_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateContinuousDeploymentPolicy input
 let update_distribution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDistribution input
+let update_distribution_tenant ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateDistributionTenant input
+let update_distribution_with_staging_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateDistributionWithStagingConfig input
+let update_domain_association ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateDomainAssociation input
 let update_field_level_encryption_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateFieldLevelEncryptionConfig input
 let update_field_level_encryption_profile ?endpoint_url ?cfg input =
@@ -195,6 +341,10 @@ let update_function ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateFunction input
 let update_key_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateKeyGroup input
+let update_key_value_store ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateKeyValueStore input
+let update_origin_access_control ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateOriginAccessControl input
 let update_origin_request_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateOriginRequestPolicy input
 let update_public_key ?endpoint_url ?cfg input =
@@ -205,3 +355,9 @@ let update_response_headers_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateResponseHeadersPolicy input
 let update_streaming_distribution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateStreamingDistribution input
+let update_trust_store ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateTrustStore input
+let update_vpc_origin ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateVpcOrigin input
+let verify_dns_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.VerifyDnsConfiguration input

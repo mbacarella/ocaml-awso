@@ -117,11 +117,12 @@ module AccountInfo =
         (Option.map ~f:AccountIdType.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?emailAddress ?accountName ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let emailAddress =
-        field_map json "emailAddress" EmailAddressType.of_json in
-      let accountName = field_map json "accountName" AccountNameType.of_json in
-      let accountId = field_map json "accountId" AccountIdType.of_json in
+        field_map json__ "emailAddress" EmailAddressType.of_json in
+      let accountName =
+        field_map json__ "accountName" AccountNameType.of_json in
+      let accountId = field_map json__ "accountId" AccountIdType.of_json in
       make ?emailAddress ?accountName ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides information about your AWS account."]
@@ -161,9 +162,9 @@ module RoleInfo =
         (Option.map ~f:RoleNameType.of_xml) (Xml.child xml_arg0 "roleName") in
       make ?accountId ?roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map json "accountId" AccountIdType.of_json in
-      let roleName = field_map json "roleName" RoleNameType.of_json in
+    let of_json json__ =
+      let accountId = field_map json__ "accountId" AccountIdType.of_json in
+      let roleName = field_map json__ "roleName" RoleNameType.of_json in
       make ?accountId ?roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -237,6 +238,9 @@ module AccountListType =
   struct
     type nonrec t = AccountInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -272,8 +276,8 @@ module InvalidRequestException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorDescription.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorDescription.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -306,8 +310,8 @@ module ResourceNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorDescription.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorDescription.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource doesn't exist."]
@@ -326,8 +330,8 @@ module TooManyRequestsException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorDescription.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorDescription.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -347,8 +351,8 @@ module UnauthorizedException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorDescription.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorDescription.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -375,6 +379,9 @@ module RoleListType =
   struct
     type nonrec t = RoleInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RoleInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -443,14 +450,14 @@ module RoleCredentials =
           (Xml.child xml_arg0 "accessKeyId") in
       make ?expiration ?sessionToken ?secretAccessKey ?accessKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let expiration =
-        field_map json "expiration" ExpirationTimestampType.of_json in
+        field_map json__ "expiration" ExpirationTimestampType.of_json in
       let sessionToken =
-        field_map json "sessionToken" SessionTokenType.of_json in
+        field_map json__ "sessionToken" SessionTokenType.of_json in
       let secretAccessKey =
-        field_map json "secretAccessKey" SecretAccessKeyType.of_json in
-      let accessKeyId = field_map json "accessKeyId" AccessKeyType.of_json in
+        field_map json__ "secretAccessKey" SecretAccessKeyType.of_json in
+      let accessKeyId = field_map json__ "accessKeyId" AccessKeyType.of_json in
       make ?expiration ?sessionToken ?secretAccessKey ?accessKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -461,7 +468,7 @@ module LogoutRequest =
       {
       accessToken: AccessTokenType.t
         [@ocaml.doc
-          "The token issued by the CreateToken API call. For more information, see CreateToken in the AWS SSO OIDC API Reference Guide."]}
+          "The token issued by the CreateToken API call. For more information, see CreateToken in the IAM Identity Center OIDC API Reference Guide."]}
     let context_ = "LogoutRequest"
     let make ~accessToken = fun () -> { accessToken }
     let of_header_and_body =
@@ -483,13 +490,13 @@ module LogoutRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-sso_bearer_token") in
       make ~accessToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessToken =
-        field_map_exn json "accessToken" AccessTokenType.of_json in
+        field_map_exn json__ "accessToken" AccessTokenType.of_json in
       make ~accessToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the client- and server-side session that is associated with the user."]
+       "Removes the locally stored SSO tokens from the client-side cache and sends an API call to the IAM Identity Center service to invalidate the corresponding server-side IAM Identity Center sign in session. If a user uses IAM Identity Center to access the AWS CLI, the user\226\128\153s IAM Identity Center sign in session is used to obtain an IAM session, as specified in the corresponding IAM Identity Center permission set. More specifically, IAM Identity Center assumes an IAM role in the target account on behalf of the user, and the corresponding temporary AWS credentials are returned to the client. After user logout, any existing IAM role sessions that were created by using IAM Identity Center permission sets continue based on the duration configured in the permission set. For more information, see User authentications in the IAM Identity Center User Guide."]
 module ListAccountsResponse =
   struct
     type nonrec t =
@@ -570,13 +577,14 @@ module ListAccountsResponse =
         (Option.map ~f:NextTokenType.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?accountList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountList = field_map json "accountList" AccountListType.of_json in
-      let nextToken = field_map json "nextToken" NextTokenType.of_json in
+    let of_json json__ =
+      let accountList =
+        field_map json__ "accountList" AccountListType.of_json in
+      let nextToken = field_map json__ "nextToken" NextTokenType.of_json in
       make ?accountList ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all AWS accounts assigned to the user. These AWS accounts are assigned by the administrator of the account. For more information, see Assign User Access in the AWS SSO User Guide. This operation returns a paginated response."]
+       "Lists all AWS accounts assigned to the user. These AWS accounts are assigned by the administrator of the account. For more information, see Assign User Access in the IAM Identity Center User Guide. This operation returns a paginated response."]
 module ListAccountsRequest =
   struct
     type nonrec t =
@@ -589,7 +597,7 @@ module ListAccountsRequest =
           "This is the number of items clients can request per page."];
       accessToken: AccessTokenType.t
         [@ocaml.doc
-          "The token issued by the CreateToken API call. For more information, see CreateToken in the AWS SSO OIDC API Reference Guide."]}
+          "The token issued by the CreateToken API call. For more information, see CreateToken in the IAM Identity Center OIDC API Reference Guide."]}
     let context_ = "ListAccountsRequest"
     let make ?nextToken =
       fun ?maxResults ->
@@ -613,15 +621,15 @@ module ListAccountsRequest =
           (Xml.child xml_arg0 "next_token") in
       make ~accessToken ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessToken =
-        field_map_exn json "accessToken" AccessTokenType.of_json in
-      let maxResults = field_map json "maxResults" MaxResultType.of_json in
-      let nextToken = field_map json "nextToken" NextTokenType.of_json in
+        field_map_exn json__ "accessToken" AccessTokenType.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResultType.of_json in
+      let nextToken = field_map json__ "nextToken" NextTokenType.of_json in
       make ~accessToken ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all AWS accounts assigned to the user. These AWS accounts are assigned by the administrator of the account. For more information, see Assign User Access in the AWS SSO User Guide. This operation returns a paginated response."]
+       "Lists all AWS accounts assigned to the user. These AWS accounts are assigned by the administrator of the account. For more information, see Assign User Access in the IAM Identity Center User Guide. This operation returns a paginated response."]
 module ListAccountRolesResponse =
   struct
     type nonrec t =
@@ -699,9 +707,9 @@ module ListAccountRolesResponse =
         (Option.map ~f:NextTokenType.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?roleList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleList = field_map json "roleList" RoleListType.of_json in
-      let nextToken = field_map json "nextToken" NextTokenType.of_json in
+    let of_json json__ =
+      let roleList = field_map json__ "roleList" RoleListType.of_json in
+      let nextToken = field_map json__ "nextToken" NextTokenType.of_json in
       make ?roleList ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -717,7 +725,7 @@ module ListAccountRolesRequest =
         [@ocaml.doc "The number of items that clients can request per page."];
       accessToken: AccessTokenType.t
         [@ocaml.doc
-          "The token issued by the CreateToken API call. For more information, see CreateToken in the AWS SSO OIDC API Reference Guide."];
+          "The token issued by the CreateToken API call. For more information, see CreateToken in the IAM Identity Center OIDC API Reference Guide."];
       accountId: AccountIdType.t
         [@ocaml.doc
           "The identifier for the AWS account that is assigned to the user."]}
@@ -750,12 +758,12 @@ module ListAccountRolesRequest =
           (Xml.child xml_arg0 "next_token") in
       make ~accountId ~accessToken ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map_exn json "accountId" AccountIdType.of_json in
+    let of_json json__ =
+      let accountId = field_map_exn json__ "accountId" AccountIdType.of_json in
       let accessToken =
-        field_map_exn json "accessToken" AccessTokenType.of_json in
-      let maxResults = field_map json "maxResults" MaxResultType.of_json in
-      let nextToken = field_map json "nextToken" NextTokenType.of_json in
+        field_map_exn json__ "accessToken" AccessTokenType.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResultType.of_json in
+      let nextToken = field_map json__ "nextToken" NextTokenType.of_json in
       make ~accountId ~accessToken ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -833,9 +841,9 @@ module GetRoleCredentialsResponse =
           (Xml.child xml_arg0 "roleCredentials") in
       make ?roleCredentials ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let roleCredentials =
-        field_map json "roleCredentials" RoleCredentials.of_json in
+        field_map json__ "roleCredentials" RoleCredentials.of_json in
       make ?roleCredentials ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -852,7 +860,7 @@ module GetRoleCredentialsRequest =
           "The identifier for the AWS account that is assigned to the user."];
       accessToken: AccessTokenType.t
         [@ocaml.doc
-          "The token issued by the CreateToken API call. For more information, see CreateToken in the AWS SSO OIDC API Reference Guide."]}
+          "The token issued by the CreateToken API call. For more information, see CreateToken in the IAM Identity Center OIDC API Reference Guide."]}
     let context_ = "GetRoleCredentialsRequest"
     let make ~roleName =
       fun ~accountId ->
@@ -876,11 +884,11 @@ module GetRoleCredentialsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "role_name") in
       make ~accessToken ~accountId ~roleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessToken =
-        field_map_exn json "accessToken" AccessTokenType.of_json in
-      let accountId = field_map_exn json "accountId" AccountIdType.of_json in
-      let roleName = field_map_exn json "roleName" RoleNameType.of_json in
+        field_map_exn json__ "accessToken" AccessTokenType.of_json in
+      let accountId = field_map_exn json__ "accountId" AccountIdType.of_json in
+      let roleName = field_map_exn json__ "roleName" RoleNameType.of_json in
       make ~accessToken ~accountId ~roleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

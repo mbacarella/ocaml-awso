@@ -23,6 +23,8 @@ let create_preset ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreatePreset input
 let create_queue ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateQueue input
+let create_resource_share ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateResourceShare input
 let delete_job_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteJobTemplate input
 let delete_policy ?endpoint_url ?cfg input =
@@ -39,6 +41,8 @@ let get_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetJob input
 let get_job_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetJobTemplate input
+let get_jobs_query_results ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetJobsQueryResults input
 let get_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPolicy input
 let get_preset ?endpoint_url ?cfg input =
@@ -55,8 +59,16 @@ let list_queues ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListQueues input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let list_versions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListVersions input
+let probe ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.Probe input
 let put_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutPolicy input
+let search_jobs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SearchJobs input
+let start_jobs_query ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartJobsQuery input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =

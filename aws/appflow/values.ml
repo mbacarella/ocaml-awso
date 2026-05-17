@@ -41,6 +41,31 @@ module ConnectorSuppliedValue =
     let of_json j = string_of_json ~kind:"ConnectorSuppliedValue" j
     let to_json = simple_to_json to_value
   end
+module PathPrefix =
+  struct
+    type nonrec t =
+      | EXECUTION_ID 
+      | SCHEMA_VERSION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EXECUTION_ID -> "EXECUTION_ID"
+      | SCHEMA_VERSION -> "SCHEMA_VERSION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EXECUTION_ID" -> EXECUTION_ID
+      | "SCHEMA_VERSION" -> SCHEMA_VERSION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PathPrefix" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PathPrefix" j)
+    let to_json = simple_to_json to_value
+  end
 module Boolean =
   struct
     type nonrec t = bool
@@ -58,6 +83,9 @@ module ConnectorSuppliedValueList =
   struct
     type nonrec t = ConnectorSuppliedValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectorSuppliedValue.to_value)) |>
         (fun x -> `List x)
@@ -158,6 +186,46 @@ module AggregationType =
       of_string (string_of_xml ~kind:"enumeration AggregationType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"AggregationType" j)
     let to_json = simple_to_json to_value
+  end
+module Long =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module PathPrefixHierarchy =
+  struct
+    type nonrec t = PathPrefix.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PathPrefix.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PathPrefix.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PathPrefixHierarchy" ~of_json:PathPrefix.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module PrefixFormat =
   struct
@@ -284,36 +352,44 @@ module AuthParameter =
       make ?connectorSuppliedValues ?isSensitiveField ?description ?label
         ?isRequired ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectorSuppliedValues =
-        field_map json "connectorSuppliedValues"
+        field_map json__ "connectorSuppliedValues"
           ConnectorSuppliedValueList.of_json in
       let isSensitiveField =
-        field_map json "isSensitiveField" Boolean.of_json in
-      let description = field_map json "description" Description.of_json in
-      let label = field_map json "label" Label.of_json in
-      let isRequired = field_map json "isRequired" Boolean.of_json in
-      let key = field_map json "key" Key.of_json in
+        field_map json__ "isSensitiveField" Boolean.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let label = field_map json__ "label" Label.of_json in
+      let isRequired = field_map json__ "isRequired" Boolean.of_json in
+      let key = field_map json__ "key" Key.of_json in
       make ?connectorSuppliedValues ?isSensitiveField ?description ?label
         ?isRequired ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about required authentication parameters."]
-module OAuthScope =
+module OAuth2CustomPropType =
   struct
-    type nonrec t = string
-    let context_ = "OAuthScope"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:128) >>=
-             (fun () -> check_pattern i ~pattern:"\\S+"));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      | TOKEN_URL 
+      | AUTH_URL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TOKEN_URL -> "TOKEN_URL"
+      | AUTH_URL -> "AUTH_URL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TOKEN_URL" -> TOKEN_URL
+      | "AUTH_URL" -> AUTH_URL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"OAuthScope" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration OAuth2CustomPropType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OAuth2CustomPropType" j)
     let to_json = simple_to_json to_value
   end
 module CustomPropertyKey =
@@ -352,6 +428,24 @@ module CustomPropertyValue =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"CustomPropertyValue" j
+    let to_json = simple_to_json to_value
+  end
+module OAuthScope =
+  struct
+    type nonrec t = string
+    let context_ = "OAuthScope"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_pattern i ~pattern:"\\S+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OAuthScope" j
     let to_json = simple_to_json to_value
   end
 module BucketName =
@@ -416,23 +510,31 @@ module AggregationConfig =
       {
       aggregationType: AggregationType.t option
         [@ocaml.doc
-          "Specifies whether Amazon AppFlow aggregates the flow records into a single file, or leave them unaggregated."]}
-    let make ?aggregationType = fun () -> { aggregationType }
+          "Specifies whether Amazon AppFlow aggregates the flow records into a single file, or leave them unaggregated."];
+      targetFileSize: Long.t option
+        [@ocaml.doc
+          "The desired file size, in MB, for each output file that Amazon AppFlow writes to the flow destination. For each file, Amazon AppFlow attempts to achieve the size that you specify. The actual file sizes might differ from this target based on the number and size of the records that each file contains."]}
+    let make ?aggregationType =
+      fun ?targetFileSize -> fun () -> { aggregationType; targetFileSize }
     let to_value x =
       structure_to_value
         [("aggregationType",
-           (Option.map x.aggregationType ~f:AggregationType.to_value))]
+           (Option.map x.aggregationType ~f:AggregationType.to_value));
+        ("targetFileSize", (Option.map x.targetFileSize ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let targetFileSize =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "targetFileSize") in
       let aggregationType =
         (Option.map ~f:AggregationType.of_xml)
           (Xml.child xml_arg0 "aggregationType") in
-      make ?aggregationType ()
+      make ?targetFileSize ?aggregationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let targetFileSize = field_map json__ "targetFileSize" Long.of_json in
       let aggregationType =
-        field_map json "aggregationType" AggregationType.of_json in
-      make ?aggregationType ()
+        field_map json__ "aggregationType" AggregationType.of_json in
+      make ?targetFileSize ?aggregationType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The aggregation settings that you can use to customize the output format of your flow data."]
@@ -464,6 +566,19 @@ module FileType =
     let of_json j = of_string (string_of_json ~kind:"FileType" j)
     let to_json = simple_to_json to_value
   end
+module JavaBoolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module PrefixConfig =
   struct
     type nonrec t =
@@ -473,30 +588,42 @@ module PrefixConfig =
           "Determines the format of the prefix, and whether it applies to the file name, file path, or both."];
       prefixFormat: PrefixFormat.t option
         [@ocaml.doc
-          "Determines the level of granularity that's included in the prefix."]}
+          "Determines the level of granularity for the date and time that's included in the prefix."];
+      pathPrefixHierarchy: PathPrefixHierarchy.t option
+        [@ocaml.doc
+          "Specifies whether the destination file path includes either or both of the following elements: EXECUTION_ID The ID that Amazon AppFlow assigns to the flow run. SCHEMA_VERSION The version number of your data schema. Amazon AppFlow assigns this version number. The version number increases by one when you change any of the following settings in your flow configuration: Source-to-destination field mappings Field data types Partition keys"]}
     let make ?prefixType =
-      fun ?prefixFormat -> fun () -> { prefixType; prefixFormat }
+      fun ?prefixFormat ->
+        fun ?pathPrefixHierarchy ->
+          fun () -> { prefixType; prefixFormat; pathPrefixHierarchy }
     let to_value x =
       structure_to_value
         [("prefixType", (Option.map x.prefixType ~f:PrefixType.to_value));
         ("prefixFormat",
-          (Option.map x.prefixFormat ~f:PrefixFormat.to_value))]
+          (Option.map x.prefixFormat ~f:PrefixFormat.to_value));
+        ("pathPrefixHierarchy",
+          (Option.map x.pathPrefixHierarchy ~f:PathPrefixHierarchy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let pathPrefixHierarchy =
+        (Option.map ~f:PathPrefixHierarchy.of_xml)
+          (Xml.child xml_arg0 "pathPrefixHierarchy") in
       let prefixFormat =
         (Option.map ~f:PrefixFormat.of_xml)
           (Xml.child xml_arg0 "prefixFormat") in
       let prefixType =
         (Option.map ~f:PrefixType.of_xml) (Xml.child xml_arg0 "prefixType") in
-      make ?prefixFormat ?prefixType ()
+      make ?pathPrefixHierarchy ?prefixFormat ?prefixType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let prefixFormat = field_map json "prefixFormat" PrefixFormat.of_json in
-      let prefixType = field_map json "prefixType" PrefixType.of_json in
-      make ?prefixFormat ?prefixType ()
+    let of_json json__ =
+      let pathPrefixHierarchy =
+        field_map json__ "pathPrefixHierarchy" PathPrefixHierarchy.of_json in
+      let prefixFormat = field_map json__ "prefixFormat" PrefixFormat.of_json in
+      let prefixType = field_map json__ "prefixType" PrefixType.of_json in
+      make ?pathPrefixHierarchy ?prefixFormat ?prefixType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Determines the prefix that Amazon AppFlow applies to the destination folder name. You can name your destination folders according to the flow frequency and date."]
+       "Specifies elements that Amazon AppFlow includes in the file and folder names in the flow destination."]
 module CredentialsMapKey =
   struct
     type nonrec t = string
@@ -542,7 +669,7 @@ module AuthCode =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:512) >>=
+          ((check_string_max i ~max:4096) >>=
              (fun () -> check_pattern i ~pattern:"\\S+"));
         i
     let of_string x = x
@@ -571,10 +698,65 @@ module RedirectUri =
     let of_json j = string_of_json ~kind:"RedirectUri" j
     let to_json = simple_to_json to_value
   end
+module ExecutionStatus =
+  struct
+    type nonrec t =
+      | InProgress 
+      | Successful 
+      | Error 
+      | CancelStarted 
+      | Canceled 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | InProgress -> "InProgress"
+      | Successful -> "Successful"
+      | Error -> "Error"
+      | CancelStarted -> "CancelStarted"
+      | Canceled -> "Canceled"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "InProgress" -> InProgress
+      | "Successful" -> Successful
+      | "Error" -> Error
+      | "CancelStarted" -> CancelStarted
+      | "Canceled" -> Canceled
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ExecutionStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ExecutionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_pattern i ~pattern:".*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
 module AuthParameterList =
   struct
     type nonrec t = AuthParameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AuthParameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -633,22 +815,114 @@ module AuthCodeUrl =
     let of_json j = string_of_json ~kind:"AuthCodeUrl" j
     let to_json = simple_to_json to_value
   end
+module OAuth2CustomParameter =
+  struct
+    type nonrec t =
+      {
+      key: Key.t option
+        [@ocaml.doc
+          "The key of the custom parameter required for OAuth 2.0 authentication."];
+      isRequired: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the custom parameter for OAuth 2.0 authentication is required."];
+      label: Label.t option
+        [@ocaml.doc
+          "The label of the custom parameter used for OAuth 2.0 authentication."];
+      description: Description.t option
+        [@ocaml.doc
+          "A description about the custom parameter used for OAuth 2.0 authentication."];
+      isSensitiveField: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether this authentication custom parameter is a sensitive field."];
+      connectorSuppliedValues: ConnectorSuppliedValueList.t option
+        [@ocaml.doc
+          "Contains default values for this authentication parameter that are supplied by the connector."];
+      type_: OAuth2CustomPropType.t option
+        [@ocaml.doc
+          "Indicates whether custom parameter is used with TokenUrl or AuthUrl."]}
+    let make ?key =
+      fun ?isRequired ->
+        fun ?label ->
+          fun ?description ->
+            fun ?isSensitiveField ->
+              fun ?connectorSuppliedValues ->
+                fun ?type_ ->
+                  fun () ->
+                    {
+                      key;
+                      isRequired;
+                      label;
+                      description;
+                      isSensitiveField;
+                      connectorSuppliedValues;
+                      type_
+                    }
+    let to_value x =
+      structure_to_value
+        [("key", (Option.map x.key ~f:Key.to_value));
+        ("isRequired", (Option.map x.isRequired ~f:Boolean.to_value));
+        ("label", (Option.map x.label ~f:Label.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("isSensitiveField",
+          (Option.map x.isSensitiveField ~f:Boolean.to_value));
+        ("connectorSuppliedValues",
+          (Option.map x.connectorSuppliedValues
+             ~f:ConnectorSuppliedValueList.to_value));
+        ("type", (Option.map x.type_ ~f:OAuth2CustomPropType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:OAuth2CustomPropType.of_xml)
+          (Xml.child xml_arg0 "type") in
+      let connectorSuppliedValues =
+        (Option.map ~f:ConnectorSuppliedValueList.of_xml)
+          (Xml.child xml_arg0 "connectorSuppliedValues") in
+      let isSensitiveField =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "isSensitiveField") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let label = (Option.map ~f:Label.of_xml) (Xml.child xml_arg0 "label") in
+      let isRequired =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isRequired") in
+      let key = (Option.map ~f:Key.of_xml) (Xml.child xml_arg0 "key") in
+      make ?type_ ?connectorSuppliedValues ?isSensitiveField ?description
+        ?label ?isRequired ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "type" OAuth2CustomPropType.of_json in
+      let connectorSuppliedValues =
+        field_map json__ "connectorSuppliedValues"
+          ConnectorSuppliedValueList.of_json in
+      let isSensitiveField =
+        field_map json__ "isSensitiveField" Boolean.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let label = field_map json__ "label" Label.of_json in
+      let isRequired = field_map json__ "isRequired" Boolean.of_json in
+      let key = field_map json__ "key" Key.of_json in
+      make ?type_ ?connectorSuppliedValues ?isSensitiveField ?description
+        ?label ?isRequired ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Custom parameter required for OAuth 2.0 authentication."]
 module OAuth2GrantType =
   struct
     type nonrec t =
       | CLIENT_CREDENTIALS 
       | AUTHORIZATION_CODE 
+      | JWT_BEARER 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | CLIENT_CREDENTIALS -> "CLIENT_CREDENTIALS"
       | AUTHORIZATION_CODE -> "AUTHORIZATION_CODE"
+      | JWT_BEARER -> "JWT_BEARER"
       | Non_static_id s -> s
     let of_string =
       function
       | "CLIENT_CREDENTIALS" -> CLIENT_CREDENTIALS
       | "AUTHORIZATION_CODE" -> AUTHORIZATION_CODE
+      | "JWT_BEARER" -> JWT_BEARER
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -678,6 +952,36 @@ module TokenUrl =
     let of_json j = string_of_json ~kind:"TokenUrl" j
     let to_json = simple_to_json to_value
   end
+module SalesforceDataTransferApi =
+  struct
+    type nonrec t =
+      | AUTOMATIC 
+      | BULKV2 
+      | REST_SYNC 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AUTOMATIC -> "AUTOMATIC"
+      | BULKV2 -> "BULKV2"
+      | REST_SYNC -> "REST_SYNC"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AUTOMATIC" -> AUTOMATIC
+      | "BULKV2" -> BULKV2
+      | "REST_SYNC" -> REST_SYNC
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SalesforceDataTransferApi" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SalesforceDataTransferApi" j)
+    let to_json = simple_to_json to_value
+  end
 module Region =
   struct
     type nonrec t = string
@@ -695,6 +999,41 @@ module Region =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"Region" j
     let to_json = simple_to_json to_value
+  end
+module TokenUrlCustomProperties =
+  struct
+    type nonrec t = (CustomPropertyKey.t * CustomPropertyValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((CustomPropertyKey.of_string chopped),
+                              (CustomPropertyValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (CustomPropertyKey.to_value x) |>
+                    (fun x ->
+                       (CustomPropertyValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:CustomPropertyKey.of_string
+        ~of_json:CustomPropertyValue.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module ProfilePropertyKey =
   struct
@@ -738,6 +1077,9 @@ module OAuthScopeList =
   struct
     type nonrec t = OAuthScope.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OAuthScope.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -897,6 +1239,8 @@ module CustomProperties =
                        (CustomPropertyValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -956,11 +1300,11 @@ module ErrorHandlingConfig =
           (Xml.child xml_arg0 "failOnFirstDestinationError") in
       make ?bucketName ?bucketPrefix ?failOnFirstDestinationError ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let bucketName = field_map json "bucketName" BucketName.of_json in
-      let bucketPrefix = field_map json "bucketPrefix" BucketPrefix.of_json in
+    let of_json json__ =
+      let bucketName = field_map json__ "bucketName" BucketName.of_json in
+      let bucketPrefix = field_map json__ "bucketPrefix" BucketPrefix.of_json in
       let failOnFirstDestinationError =
-        field_map json "failOnFirstDestinationError" Boolean.of_json in
+        field_map json__ "failOnFirstDestinationError" Boolean.of_json in
       make ?bucketName ?bucketPrefix ?failOnFirstDestinationError ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -970,6 +1314,9 @@ module IdFieldNameList =
     type nonrec t = Name.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:0); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Name.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1086,20 +1433,35 @@ module S3OutputFormatConfig =
       prefixConfig: PrefixConfig.t option
         [@ocaml.doc
           "Determines the prefix that Amazon AppFlow applies to the folder name in the Amazon S3 bucket. You can name folders according to the flow frequency and date."];
-      aggregationConfig: AggregationConfig.t option }
+      aggregationConfig: AggregationConfig.t option ;
+      preserveSourceDataTyping: JavaBoolean.t option
+        [@ocaml.doc
+          "If your file output format is Parquet, use this parameter to set whether Amazon AppFlow preserves the data types in your source data when it writes the output to Amazon S3. true: Amazon AppFlow preserves the data types when it writes to Amazon S3. For example, an integer or 1 in your source data is still an integer in your output. false: Amazon AppFlow converts all of the source data into strings when it writes to Amazon S3. For example, an integer of 1 in your source data becomes the string \"1\" in the output."]}
     let make ?fileType =
       fun ?prefixConfig ->
         fun ?aggregationConfig ->
-          fun () -> { fileType; prefixConfig; aggregationConfig }
+          fun ?preserveSourceDataTyping ->
+            fun () ->
+              {
+                fileType;
+                prefixConfig;
+                aggregationConfig;
+                preserveSourceDataTyping
+              }
     let to_value x =
       structure_to_value
         [("fileType", (Option.map x.fileType ~f:FileType.to_value));
         ("prefixConfig",
           (Option.map x.prefixConfig ~f:PrefixConfig.to_value));
         ("aggregationConfig",
-          (Option.map x.aggregationConfig ~f:AggregationConfig.to_value))]
+          (Option.map x.aggregationConfig ~f:AggregationConfig.to_value));
+        ("preserveSourceDataTyping",
+          (Option.map x.preserveSourceDataTyping ~f:JavaBoolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let preserveSourceDataTyping =
+        (Option.map ~f:JavaBoolean.of_xml)
+          (Xml.child xml_arg0 "preserveSourceDataTyping") in
       let aggregationConfig =
         (Option.map ~f:AggregationConfig.of_xml)
           (Xml.child xml_arg0 "aggregationConfig") in
@@ -1108,14 +1470,18 @@ module S3OutputFormatConfig =
           (Xml.child xml_arg0 "prefixConfig") in
       let fileType =
         (Option.map ~f:FileType.of_xml) (Xml.child xml_arg0 "fileType") in
-      make ?aggregationConfig ?prefixConfig ?fileType ()
+      make ?preserveSourceDataTyping ?aggregationConfig ?prefixConfig
+        ?fileType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let preserveSourceDataTyping =
+        field_map json__ "preserveSourceDataTyping" JavaBoolean.of_json in
       let aggregationConfig =
-        field_map json "aggregationConfig" AggregationConfig.of_json in
-      let prefixConfig = field_map json "prefixConfig" PrefixConfig.of_json in
-      let fileType = field_map json "fileType" FileType.of_json in
-      make ?aggregationConfig ?prefixConfig ?fileType ()
+        field_map json__ "aggregationConfig" AggregationConfig.of_json in
+      let prefixConfig = field_map json__ "prefixConfig" PrefixConfig.of_json in
+      let fileType = field_map json__ "fileType" FileType.of_json in
+      make ?preserveSourceDataTyping ?aggregationConfig ?prefixConfig
+        ?fileType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration that determines how Amazon AppFlow should format the flow output data when Amazon S3 is used as the destination."]
@@ -1143,9 +1509,9 @@ module SuccessResponseHandlingConfig =
           (Xml.child xml_arg0 "bucketPrefix") in
       make ?bucketName ?bucketPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let bucketName = field_map json "bucketName" BucketName.of_json in
-      let bucketPrefix = field_map json "bucketPrefix" BucketPrefix.of_json in
+    let of_json json__ =
+      let bucketName = field_map json__ "bucketName" BucketName.of_json in
+      let bucketPrefix = field_map json__ "bucketPrefix" BucketPrefix.of_json in
       make ?bucketName ?bucketPrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1203,16 +1569,63 @@ module UpsolverS3OutputFormatConfig =
         (Option.map ~f:FileType.of_xml) (Xml.child xml_arg0 "fileType") in
       make ?aggregationConfig ~prefixConfig ?fileType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let aggregationConfig =
-        field_map json "aggregationConfig" AggregationConfig.of_json in
+        field_map json__ "aggregationConfig" AggregationConfig.of_json in
       let prefixConfig =
-        field_map_exn json "prefixConfig" PrefixConfig.of_json in
-      let fileType = field_map json "fileType" FileType.of_json in
+        field_map_exn json__ "prefixConfig" PrefixConfig.of_json in
+      let fileType = field_map json__ "fileType" FileType.of_json in
       make ?aggregationConfig ~prefixConfig ?fileType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration that determines how Amazon AppFlow formats the flow output data when Upsolver is used as the destination."]
+module DataTransferApiType =
+  struct
+    type nonrec t =
+      | SYNC 
+      | ASYNC 
+      | AUTOMATIC 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SYNC -> "SYNC"
+      | ASYNC -> "ASYNC"
+      | AUTOMATIC -> "AUTOMATIC"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SYNC" -> SYNC
+      | "ASYNC" -> ASYNC
+      | "AUTOMATIC" -> AUTOMATIC
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DataTransferApiType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DataTransferApiType" j)
+    let to_json = simple_to_json to_value
+  end
+module DataTransferApiTypeName =
+  struct
+    type nonrec t = string
+    let context_ = "DataTransferApiTypeName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_pattern i ~pattern:"[\\w/-]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DataTransferApiTypeName" j
+    let to_json = simple_to_json to_value
+  end
 module S3InputFileType =
   struct
     type nonrec t =
@@ -1230,6 +1643,43 @@ module S3InputFileType =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration S3InputFileType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"S3InputFileType" j)
+    let to_json = simple_to_json to_value
+  end
+module SAPODataMaxPageSize =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10000) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for SAPODataMaxPageSize" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SAPODataMaxParallelism =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for SAPODataMaxParallelism" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module ApiKey =
@@ -1330,6 +1780,8 @@ module CredentialsMap =
                        (CredentialsMapValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1344,7 +1796,7 @@ module AccessToken =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:2048) >>=
+          ((check_string_max i ~max:4096) >>=
              (fun () -> check_pattern i ~pattern:"\\S+"));
         i
     let of_string x = x
@@ -1415,9 +1867,9 @@ module ConnectorOAuthRequest =
         (Option.map ~f:AuthCode.of_xml) (Xml.child xml_arg0 "authCode") in
       make ?redirectUri ?authCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let redirectUri = field_map json "redirectUri" RedirectUri.of_json in
-      let authCode = field_map json "authCode" AuthCode.of_json in
+    let of_json json__ =
+      let redirectUri = field_map json__ "redirectUri" RedirectUri.of_json in
+      let authCode = field_map json__ "authCode" AuthCode.of_json in
       make ?redirectUri ?authCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1429,7 +1881,7 @@ module RefreshToken =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
+          ((check_string_max i ~max:4096) >>=
              (fun () -> check_pattern i ~pattern:"\\S+"));
         i
     let of_string x = x
@@ -1458,19 +1910,60 @@ module ExecutionMessage =
     let of_json j = string_of_json ~kind:"ExecutionMessage" j
     let to_json = simple_to_json to_value
   end
-module Long =
+module CatalogType =
   struct
-    type nonrec t = Int64.t
+    type nonrec t =
+      | GLUE 
+      | Non_static_id of string 
     let make i = i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
+    let to_string = function | GLUE -> "GLUE" | Non_static_id s -> s
+    let of_string = function | "GLUE" -> GLUE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
+    let to_header x = to_string x
     let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+      of_string (string_of_xml ~kind:"enumeration CatalogType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CatalogType" j)
     let to_json = simple_to_json to_value
   end
+module RegistrationOutput =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc
+          "Explains the status of the registration attempt from Amazon AppFlow. If the attempt fails, the message explains why."];
+      result: String_.t option
+        [@ocaml.doc
+          "Indicates the number of resources that Amazon AppFlow created or updated. Possible resources include metadata tables and data partitions."];
+      status: ExecutionStatus.t option
+        [@ocaml.doc
+          "Indicates the status of the registration attempt from Amazon AppFlow."]}
+    let make ?message =
+      fun ?result -> fun ?status -> fun () -> { message; result; status }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("result", (Option.map x.result ~f:String_.to_value));
+        ("status", (Option.map x.status ~f:ExecutionStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:ExecutionStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let result =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "result") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?status ?result ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "status" ExecutionStatus.of_json in
+      let result = field_map json__ "result" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?status ?result ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the status of an attempt from Amazon AppFlow to register a resource. When you run a flow that you've configured to use a metadata catalog, Amazon AppFlow registers a metadata table and data partitions with that catalog. This operation provides the status of that registration attempt. The operation also indicates how many related resources Amazon AppFlow created or updated."]
 module CustomAuthConfig =
   struct
     type nonrec t =
@@ -1501,11 +1994,11 @@ module CustomAuthConfig =
           (Xml.child xml_arg0 "customAuthenticationType") in
       make ?authParameters ?customAuthenticationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authParameters =
-        field_map json "authParameters" AuthParameterList.of_json in
+        field_map json__ "authParameters" AuthParameterList.of_json in
       let customAuthenticationType =
-        field_map json "customAuthenticationType"
+        field_map json__ "customAuthenticationType"
           CustomAuthenticationType.of_json in
       make ?authParameters ?customAuthenticationType ()
     let to_json v = composed_to_json to_value v
@@ -1515,6 +2008,9 @@ module AuthCodeUrlList =
   struct
     type nonrec t = AuthCodeUrl.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AuthCodeUrl.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1535,10 +2031,42 @@ module AuthCodeUrlList =
       list_of_json ~kind:"AuthCodeUrlList" ~of_json:AuthCodeUrl.of_json j
     let to_json v = composed_to_json to_value v
   end
+module OAuth2CustomPropertiesList =
+  struct
+    type nonrec t = OAuth2CustomParameter.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OAuth2CustomParameter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OAuth2CustomParameter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OAuth2CustomPropertiesList"
+        ~of_json:OAuth2CustomParameter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module OAuth2GrantTypeSupportedList =
   struct
     type nonrec t = OAuth2GrantType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OAuth2GrantType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1564,6 +2092,9 @@ module TokenUrlList =
   struct
     type nonrec t = TokenUrl.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TokenUrl.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1584,10 +2115,42 @@ module TokenUrlList =
       list_of_json ~kind:"TokenUrlList" ~of_json:TokenUrl.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SalesforceDataTransferApiList =
+  struct
+    type nonrec t = SalesforceDataTransferApi.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SalesforceDataTransferApi.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SalesforceDataTransferApi.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SalesforceDataTransferApiList"
+        ~of_json:SalesforceDataTransferApi.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module RegionList =
   struct
     type nonrec t = Region.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Region.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1665,6 +2228,9 @@ module ConnectorSuppliedValueOptionList =
   struct
     type nonrec t = ConnectorSuppliedValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectorSuppliedValue.to_value)) |>
         (fun x -> `List x)
@@ -1695,29 +2261,43 @@ module OAuth2Properties =
         [@ocaml.doc "The token URL required for OAuth 2.0 authentication."];
       oAuth2GrantType: OAuth2GrantType.t
         [@ocaml.doc
-          "The OAuth 2.0 grant type used by connector for OAuth 2.0 authentication."]}
+          "The OAuth 2.0 grant type used by connector for OAuth 2.0 authentication."];
+      tokenUrlCustomProperties: TokenUrlCustomProperties.t option
+        [@ocaml.doc
+          "Associates your token URL with a map of properties that you define. Use this parameter to provide any additional details that the connector requires to authenticate your request."]}
     let context_ = "OAuth2Properties"
-    let make ~tokenUrl =
-      fun ~oAuth2GrantType -> fun () -> { tokenUrl; oAuth2GrantType }
+    let make ?tokenUrlCustomProperties =
+      fun ~tokenUrl ->
+        fun ~oAuth2GrantType ->
+          fun () -> { tokenUrlCustomProperties; tokenUrl; oAuth2GrantType }
     let to_value x =
       structure_to_value
         [("tokenUrl", (Some (TokenUrl.to_value x.tokenUrl)));
         ("oAuth2GrantType",
-          (Some (OAuth2GrantType.to_value x.oAuth2GrantType)))]
+          (Some (OAuth2GrantType.to_value x.oAuth2GrantType)));
+        ("tokenUrlCustomProperties",
+          (Option.map x.tokenUrlCustomProperties
+             ~f:TokenUrlCustomProperties.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tokenUrlCustomProperties =
+        (Option.map ~f:TokenUrlCustomProperties.of_xml)
+          (Xml.child xml_arg0 "tokenUrlCustomProperties") in
       let oAuth2GrantType =
         OAuth2GrantType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "oAuth2GrantType") in
       let tokenUrl =
         TokenUrl.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tokenUrl") in
-      make ~oAuth2GrantType ~tokenUrl ()
+      make ?tokenUrlCustomProperties ~oAuth2GrantType ~tokenUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tokenUrlCustomProperties =
+        field_map json__ "tokenUrlCustomProperties"
+          TokenUrlCustomProperties.of_json in
       let oAuth2GrantType =
-        field_map_exn json "oAuth2GrantType" OAuth2GrantType.of_json in
-      let tokenUrl = field_map_exn json "tokenUrl" TokenUrl.of_json in
-      make ~oAuth2GrantType ~tokenUrl ()
+        field_map_exn json__ "oAuth2GrantType" OAuth2GrantType.of_json in
+      let tokenUrl = field_map_exn json__ "tokenUrl" TokenUrl.of_json in
+      make ?tokenUrlCustomProperties ~oAuth2GrantType ~tokenUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The OAuth 2.0 properties required for OAuth 2.0 authentication."]
@@ -1747,6 +2327,8 @@ module ProfilePropertiesMap =
                        (ProfilePropertyValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1770,6 +2352,78 @@ module InstanceUrl =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"InstanceUrl" j
+    let to_json = simple_to_json to_value
+  end
+module BusinessUnitId =
+  struct
+    type nonrec t = string
+    let context_ = "BusinessUnitId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:18) >>=
+             (fun () -> check_pattern i ~pattern:"\\S+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"BusinessUnitId" j
+    let to_json = simple_to_json to_value
+  end
+module ClusterIdentifier =
+  struct
+    type nonrec t = string
+    let context_ = "ClusterIdentifier"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_pattern i ~pattern:"\\S+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClusterIdentifier" j
+    let to_json = simple_to_json to_value
+  end
+module DataApiRoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "DataApiRoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_pattern i ~pattern:"arn:aws:iam:.*:[0-9]+:.*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DataApiRoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module DatabaseName =
+  struct
+    type nonrec t = string
+    let context_ = "DatabaseName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_pattern i ~pattern:"\\S+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DatabaseName" j
     let to_json = simple_to_json to_value
   end
 module DatabaseUrl =
@@ -1806,6 +2460,24 @@ module RoleArn =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"RoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module WorkgroupName =
+  struct
+    type nonrec t = string
+    let context_ = "WorkgroupName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_pattern i ~pattern:"\\S+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkgroupName" j
     let to_json = simple_to_json to_value
   end
 module ApplicationHostUrl =
@@ -1918,11 +2590,12 @@ module OAuthProperties =
         TokenUrl.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tokenUrl") in
       make ~oAuthScopes ~authCodeUrl ~tokenUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let oAuthScopes =
-        field_map_exn json "oAuthScopes" OAuthScopeList.of_json in
-      let authCodeUrl = field_map_exn json "authCodeUrl" AuthCodeUrl.of_json in
-      let tokenUrl = field_map_exn json "tokenUrl" TokenUrl.of_json in
+        field_map_exn json__ "oAuthScopes" OAuthScopeList.of_json in
+      let authCodeUrl =
+        field_map_exn json__ "authCodeUrl" AuthCodeUrl.of_json in
+      let tokenUrl = field_map_exn json__ "tokenUrl" TokenUrl.of_json in
       make ~oAuthScopes ~authCodeUrl ~tokenUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2037,6 +2710,9 @@ module FilterOperatorList =
   struct
     type nonrec t = Operator.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Operator.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2078,34 +2754,19 @@ module Range =
         (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "maximum") in
       make ?minimum ?maximum ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let minimum = field_map json "minimum" Double.of_json in
-      let maximum = field_map json "maximum" Double.of_json in
+    let of_json json__ =
+      let minimum = field_map json__ "minimum" Double.of_json in
+      let maximum = field_map json__ "maximum" Double.of_json in
       make ?minimum ?maximum ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The range of values that the property supports."]
-module String_ =
-  struct
-    type nonrec t = string
-    let context_ = "String"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:2048) >>=
-             (fun () -> check_pattern i ~pattern:".*"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
-    let to_json = simple_to_json to_value
-  end
 module SupportedValueList =
   struct
     type nonrec t = Value.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Value.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2190,16 +2851,16 @@ module CustomConnectorDestinationProperties =
       make ?customProperties ?idFieldNames ?writeOperationType
         ?errorHandlingConfig ~entityName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customProperties =
-        field_map json "customProperties" CustomProperties.of_json in
+        field_map json__ "customProperties" CustomProperties.of_json in
       let idFieldNames =
-        field_map json "idFieldNames" IdFieldNameList.of_json in
+        field_map json__ "idFieldNames" IdFieldNameList.of_json in
       let writeOperationType =
-        field_map json "writeOperationType" WriteOperationType.of_json in
+        field_map json__ "writeOperationType" WriteOperationType.of_json in
       let errorHandlingConfig =
-        field_map json "errorHandlingConfig" ErrorHandlingConfig.of_json in
-      let entityName = field_map_exn json "entityName" EntityName.of_json in
+        field_map json__ "errorHandlingConfig" ErrorHandlingConfig.of_json in
+      let entityName = field_map_exn json__ "entityName" EntityName.of_json in
       make ?customProperties ?idFieldNames ?writeOperationType
         ?errorHandlingConfig ~entityName ()
     let to_json v = composed_to_json to_value v
@@ -2233,10 +2894,10 @@ module CustomerProfilesDestinationProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "domainName") in
       make ?objectTypeName ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectTypeName =
-        field_map json "objectTypeName" ObjectTypeName.of_json in
-      let domainName = field_map_exn json "domainName" DomainName.of_json in
+        field_map json__ "objectTypeName" ObjectTypeName.of_json in
+      let domainName = field_map_exn json__ "domainName" DomainName.of_json in
       make ?objectTypeName ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2266,10 +2927,10 @@ module EventBridgeDestinationProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ?errorHandlingConfig ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorHandlingConfig =
-        field_map json "errorHandlingConfig" ErrorHandlingConfig.of_json in
-      let object_ = field_map_exn json "object" Object.of_json in
+        field_map json__ "errorHandlingConfig" ErrorHandlingConfig.of_json in
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ?errorHandlingConfig ~object_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2299,10 +2960,10 @@ module HoneycodeDestinationProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ?errorHandlingConfig ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorHandlingConfig =
-        field_map json "errorHandlingConfig" ErrorHandlingConfig.of_json in
-      let object_ = field_map_exn json "object" Object.of_json in
+        field_map json__ "errorHandlingConfig" ErrorHandlingConfig.of_json in
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ?errorHandlingConfig ~object_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2344,10 +3005,10 @@ module MarketoDestinationProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ?errorHandlingConfig ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorHandlingConfig =
-        field_map json "errorHandlingConfig" ErrorHandlingConfig.of_json in
-      let object_ = field_map_exn json "object" Object.of_json in
+        field_map json__ "errorHandlingConfig" ErrorHandlingConfig.of_json in
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ?errorHandlingConfig ~object_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2405,13 +3066,13 @@ module RedshiftDestinationProperties =
       make ?errorHandlingConfig ?bucketPrefix ~intermediateBucketName
         ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorHandlingConfig =
-        field_map json "errorHandlingConfig" ErrorHandlingConfig.of_json in
-      let bucketPrefix = field_map json "bucketPrefix" BucketPrefix.of_json in
+        field_map json__ "errorHandlingConfig" ErrorHandlingConfig.of_json in
+      let bucketPrefix = field_map json__ "bucketPrefix" BucketPrefix.of_json in
       let intermediateBucketName =
-        field_map_exn json "intermediateBucketName" BucketName.of_json in
-      let object_ = field_map_exn json "object" Object.of_json in
+        field_map_exn json__ "intermediateBucketName" BucketName.of_json in
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ?errorHandlingConfig ?bucketPrefix ~intermediateBucketName
         ~object_ ()
     let to_json v = composed_to_json to_value v
@@ -2453,11 +3114,11 @@ module S3DestinationProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       make ?s3OutputFormatConfig ?bucketPrefix ~bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3OutputFormatConfig =
-        field_map json "s3OutputFormatConfig" S3OutputFormatConfig.of_json in
-      let bucketPrefix = field_map json "bucketPrefix" BucketPrefix.of_json in
-      let bucketName = field_map_exn json "bucketName" BucketName.of_json in
+        field_map json__ "s3OutputFormatConfig" S3OutputFormatConfig.of_json in
+      let bucketPrefix = field_map json__ "bucketPrefix" BucketPrefix.of_json in
+      let bucketName = field_map_exn json__ "bucketName" BucketName.of_json in
       make ?s3OutputFormatConfig ?bucketPrefix ~bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2520,17 +3181,17 @@ module SAPODataDestinationProperties =
       make ?writeOperationType ?errorHandlingConfig ?idFieldNames
         ?successResponseHandlingConfig ~objectPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let writeOperationType =
-        field_map json "writeOperationType" WriteOperationType.of_json in
+        field_map json__ "writeOperationType" WriteOperationType.of_json in
       let errorHandlingConfig =
-        field_map json "errorHandlingConfig" ErrorHandlingConfig.of_json in
+        field_map json__ "errorHandlingConfig" ErrorHandlingConfig.of_json in
       let idFieldNames =
-        field_map json "idFieldNames" IdFieldNameList.of_json in
+        field_map json__ "idFieldNames" IdFieldNameList.of_json in
       let successResponseHandlingConfig =
-        field_map json "successResponseHandlingConfig"
+        field_map json__ "successResponseHandlingConfig"
           SuccessResponseHandlingConfig.of_json in
-      let objectPath = field_map_exn json "objectPath" Object.of_json in
+      let objectPath = field_map_exn json__ "objectPath" Object.of_json in
       make ?writeOperationType ?errorHandlingConfig ?idFieldNames
         ?successResponseHandlingConfig ~objectPath ()
     let to_json v = composed_to_json to_value v
@@ -2551,19 +3212,24 @@ module SalesforceDestinationProperties =
           "The settings that determine how Amazon AppFlow handles an error when placing data in the Salesforce destination. For example, this setting would determine if the flow should fail after one insertion error, or continue and attempt to insert every record regardless of the initial failure. ErrorHandlingConfig is a part of the destination connector details."];
       writeOperationType: WriteOperationType.t option
         [@ocaml.doc
-          "This specifies the type of write operation to be performed in Salesforce. When the value is UPSERT, then idFieldNames is required."]}
+          "This specifies the type of write operation to be performed in Salesforce. When the value is UPSERT, then idFieldNames is required."];
+      dataTransferApi: SalesforceDataTransferApi.t option
+        [@ocaml.doc
+          "Specifies which Salesforce API is used by Amazon AppFlow when your flow transfers data to Salesforce. AUTOMATIC The default. Amazon AppFlow selects which API to use based on the number of records that your flow transfers to Salesforce. If your flow transfers fewer than 1,000 records, Amazon AppFlow uses Salesforce REST API. If your flow transfers 1,000 records or more, Amazon AppFlow uses Salesforce Bulk API 2.0. Each of these Salesforce APIs structures data differently. If Amazon AppFlow selects the API automatically, be aware that, for recurring flows, the data output might vary from one flow run to the next. For example, if a flow runs daily, it might use REST API on one day to transfer 900 records, and it might use Bulk API 2.0 on the next day to transfer 1,100 records. For each of these flow runs, the respective Salesforce API formats the data differently. Some of the differences include how dates are formatted and null values are represented. Also, Bulk API 2.0 doesn't transfer Salesforce compound fields. By choosing this option, you optimize flow performance for both small and large data transfers, but the tradeoff is inconsistent formatting in the output. BULKV2 Amazon AppFlow uses only Salesforce Bulk API 2.0. This API runs asynchronous data transfers, and it's optimal for large sets of data. By choosing this option, you ensure that your flow writes consistent output, but you optimize performance only for large data transfers. Note that Bulk API 2.0 does not transfer Salesforce compound fields. REST_SYNC Amazon AppFlow uses only Salesforce REST API. By choosing this option, you ensure that your flow writes consistent output, but you decrease performance for large data transfers that are better suited for Bulk API 2.0. In some cases, if your flow attempts to transfer a vary large set of data, it might fail with a timed out error."]}
     let context_ = "SalesforceDestinationProperties"
     let make ?idFieldNames =
       fun ?errorHandlingConfig ->
         fun ?writeOperationType ->
-          fun ~object_ ->
-            fun () ->
-              {
-                idFieldNames;
-                errorHandlingConfig;
-                writeOperationType;
-                object_
-              }
+          fun ?dataTransferApi ->
+            fun ~object_ ->
+              fun () ->
+                {
+                  idFieldNames;
+                  errorHandlingConfig;
+                  writeOperationType;
+                  dataTransferApi;
+                  object_
+                }
     let to_value x =
       structure_to_value
         [("object", (Some (Object.to_value x.object_)));
@@ -2572,9 +3238,14 @@ module SalesforceDestinationProperties =
         ("errorHandlingConfig",
           (Option.map x.errorHandlingConfig ~f:ErrorHandlingConfig.to_value));
         ("writeOperationType",
-          (Option.map x.writeOperationType ~f:WriteOperationType.to_value))]
+          (Option.map x.writeOperationType ~f:WriteOperationType.to_value));
+        ("dataTransferApi",
+          (Option.map x.dataTransferApi ~f:SalesforceDataTransferApi.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dataTransferApi =
+        (Option.map ~f:SalesforceDataTransferApi.of_xml)
+          (Xml.child xml_arg0 "dataTransferApi") in
       let writeOperationType =
         (Option.map ~f:WriteOperationType.of_xml)
           (Xml.child xml_arg0 "writeOperationType") in
@@ -2586,17 +3257,21 @@ module SalesforceDestinationProperties =
           (Xml.child xml_arg0 "idFieldNames") in
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
-      make ?writeOperationType ?errorHandlingConfig ?idFieldNames ~object_ ()
+      make ?dataTransferApi ?writeOperationType ?errorHandlingConfig
+        ?idFieldNames ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let dataTransferApi =
+        field_map json__ "dataTransferApi" SalesforceDataTransferApi.of_json in
       let writeOperationType =
-        field_map json "writeOperationType" WriteOperationType.of_json in
+        field_map json__ "writeOperationType" WriteOperationType.of_json in
       let errorHandlingConfig =
-        field_map json "errorHandlingConfig" ErrorHandlingConfig.of_json in
+        field_map json__ "errorHandlingConfig" ErrorHandlingConfig.of_json in
       let idFieldNames =
-        field_map json "idFieldNames" IdFieldNameList.of_json in
-      let object_ = field_map_exn json "object" Object.of_json in
-      make ?writeOperationType ?errorHandlingConfig ?idFieldNames ~object_ ()
+        field_map json__ "idFieldNames" IdFieldNameList.of_json in
+      let object_ = field_map_exn json__ "object" Object.of_json in
+      make ?dataTransferApi ?writeOperationType ?errorHandlingConfig
+        ?idFieldNames ~object_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The properties that are applied when Salesforce is being used as a destination."]
@@ -2653,13 +3328,13 @@ module SnowflakeDestinationProperties =
       make ?errorHandlingConfig ?bucketPrefix ~intermediateBucketName
         ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorHandlingConfig =
-        field_map json "errorHandlingConfig" ErrorHandlingConfig.of_json in
-      let bucketPrefix = field_map json "bucketPrefix" BucketPrefix.of_json in
+        field_map json__ "errorHandlingConfig" ErrorHandlingConfig.of_json in
+      let bucketPrefix = field_map json__ "bucketPrefix" BucketPrefix.of_json in
       let intermediateBucketName =
-        field_map_exn json "intermediateBucketName" BucketName.of_json in
-      let object_ = field_map_exn json "object" Object.of_json in
+        field_map_exn json__ "intermediateBucketName" BucketName.of_json in
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ?errorHandlingConfig ?bucketPrefix ~intermediateBucketName
         ~object_ ()
     let to_json v = composed_to_json to_value v
@@ -2704,13 +3379,13 @@ module UpsolverDestinationProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       make ~s3OutputFormatConfig ?bucketPrefix ~bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3OutputFormatConfig =
-        field_map_exn json "s3OutputFormatConfig"
+        field_map_exn json__ "s3OutputFormatConfig"
           UpsolverS3OutputFormatConfig.of_json in
-      let bucketPrefix = field_map json "bucketPrefix" BucketPrefix.of_json in
+      let bucketPrefix = field_map json__ "bucketPrefix" BucketPrefix.of_json in
       let bucketName =
-        field_map_exn json "bucketName" UpsolverBucketName.of_json in
+        field_map_exn json__ "bucketName" UpsolverBucketName.of_json in
       make ~s3OutputFormatConfig ?bucketPrefix ~bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2760,18 +3435,49 @@ module ZendeskDestinationProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ?writeOperationType ?errorHandlingConfig ?idFieldNames ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let writeOperationType =
-        field_map json "writeOperationType" WriteOperationType.of_json in
+        field_map json__ "writeOperationType" WriteOperationType.of_json in
       let errorHandlingConfig =
-        field_map json "errorHandlingConfig" ErrorHandlingConfig.of_json in
+        field_map json__ "errorHandlingConfig" ErrorHandlingConfig.of_json in
       let idFieldNames =
-        field_map json "idFieldNames" IdFieldNameList.of_json in
-      let object_ = field_map_exn json "object" Object.of_json in
+        field_map json__ "idFieldNames" IdFieldNameList.of_json in
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ?writeOperationType ?errorHandlingConfig ?idFieldNames ~object_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The properties that are applied when Zendesk is used as a destination."]
+module DataTransferApi =
+  struct
+    type nonrec t =
+      {
+      name: DataTransferApiTypeName.t option
+        [@ocaml.doc "The name of the connector application API."];
+      type_: DataTransferApiType.t option
+        [@ocaml.doc
+          "You can specify one of the following types: AUTOMATIC The default. Optimizes a flow for datasets that fluctuate in size from small to large. For each flow run, Amazon AppFlow chooses to use the SYNC or ASYNC API type based on the amount of data that the run transfers. SYNC A synchronous API. This type of API optimizes a flow for small to medium-sized datasets. ASYNC An asynchronous API. This type of API optimizes a flow for large datasets."]}
+    let make ?name = fun ?type_ -> fun () -> { name; type_ }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:DataTransferApiTypeName.to_value));
+        ("Type", (Option.map x.type_ ~f:DataTransferApiType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:DataTransferApiType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let name =
+        (Option.map ~f:DataTransferApiTypeName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      make ?type_ ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" DataTransferApiType.of_json in
+      let name = field_map json__ "Name" DataTransferApiTypeName.of_json in
+      make ?type_ ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The API of the connector application that Amazon AppFlow uses to transfer your data."]
 module S3InputFormatConfig =
   struct
     type nonrec t =
@@ -2791,13 +3497,66 @@ module S3InputFormatConfig =
           (Xml.child xml_arg0 "s3InputFileType") in
       make ?s3InputFileType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3InputFileType =
-        field_map json "s3InputFileType" S3InputFileType.of_json in
+        field_map json__ "s3InputFileType" S3InputFileType.of_json in
       make ?s3InputFileType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "When you use Amazon S3 as the source, the configuration format that you provide the flow input data."]
+module SAPODataPaginationConfig =
+  struct
+    type nonrec t =
+      {
+      maxPageSize: SAPODataMaxPageSize.t
+        [@ocaml.doc
+          "The maximum number of records that Amazon AppFlow receives in each page of the response from your SAP application. For transfers of OData records, the maximum page size is 3,000. For transfers of data that comes from an ODP provider, the maximum page size is 10,000."]}
+    let context_ = "SAPODataPaginationConfig"
+    let make ~maxPageSize = fun () -> { maxPageSize }
+    let to_value x =
+      structure_to_value
+        [("maxPageSize", (Some (SAPODataMaxPageSize.to_value x.maxPageSize)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxPageSize =
+        SAPODataMaxPageSize.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "maxPageSize") in
+      make ~maxPageSize ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxPageSize =
+        field_map_exn json__ "maxPageSize" SAPODataMaxPageSize.of_json in
+      make ~maxPageSize ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sets the page size for each concurrent process that transfers OData records from your SAP instance. A concurrent process is query that retrieves a batch of records as part of a flow run. Amazon AppFlow can run multiple concurrent processes in parallel to transfer data faster."]
+module SAPODataParallelismConfig =
+  struct
+    type nonrec t =
+      {
+      maxParallelism: SAPODataMaxParallelism.t
+        [@ocaml.doc
+          "The maximum number of processes that Amazon AppFlow runs at the same time when it retrieves your data from your SAP application."]}
+    let context_ = "SAPODataParallelismConfig"
+    let make ~maxParallelism = fun () -> { maxParallelism }
+    let to_value x =
+      structure_to_value
+        [("maxParallelism",
+           (Some (SAPODataMaxParallelism.to_value x.maxParallelism)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxParallelism =
+        SAPODataMaxParallelism.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "maxParallelism") in
+      make ~maxParallelism ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxParallelism =
+        field_map_exn json__ "maxParallelism" SAPODataMaxParallelism.of_json in
+      make ~maxParallelism ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sets the number of concurrent processes that transfer OData records from your SAP instance. A concurrent process is query that retrieves a batch of records as part of a flow run. Amazon AppFlow can run multiple concurrent processes in parallel to transfer data faster."]
 module DocumentType =
   struct
     type nonrec t = string
@@ -3130,6 +3889,69 @@ module MarketoConnectorOperator =
         (string_of_xml ~kind:"enumeration MarketoConnectorOperator" xml_arg0)
     let of_json j =
       of_string (string_of_json ~kind:"MarketoConnectorOperator" j)
+    let to_json = simple_to_json to_value
+  end
+module PardotConnectorOperator =
+  struct
+    type nonrec t =
+      | PROJECTION 
+      | EQUAL_TO 
+      | NO_OP 
+      | ADDITION 
+      | MULTIPLICATION 
+      | DIVISION 
+      | SUBTRACTION 
+      | MASK_ALL 
+      | MASK_FIRST_N 
+      | MASK_LAST_N 
+      | VALIDATE_NON_NULL 
+      | VALIDATE_NON_ZERO 
+      | VALIDATE_NON_NEGATIVE 
+      | VALIDATE_NUMERIC 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PROJECTION -> "PROJECTION"
+      | EQUAL_TO -> "EQUAL_TO"
+      | NO_OP -> "NO_OP"
+      | ADDITION -> "ADDITION"
+      | MULTIPLICATION -> "MULTIPLICATION"
+      | DIVISION -> "DIVISION"
+      | SUBTRACTION -> "SUBTRACTION"
+      | MASK_ALL -> "MASK_ALL"
+      | MASK_FIRST_N -> "MASK_FIRST_N"
+      | MASK_LAST_N -> "MASK_LAST_N"
+      | VALIDATE_NON_NULL -> "VALIDATE_NON_NULL"
+      | VALIDATE_NON_ZERO -> "VALIDATE_NON_ZERO"
+      | VALIDATE_NON_NEGATIVE -> "VALIDATE_NON_NEGATIVE"
+      | VALIDATE_NUMERIC -> "VALIDATE_NUMERIC"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PROJECTION" -> PROJECTION
+      | "EQUAL_TO" -> EQUAL_TO
+      | "NO_OP" -> NO_OP
+      | "ADDITION" -> ADDITION
+      | "MULTIPLICATION" -> MULTIPLICATION
+      | "DIVISION" -> DIVISION
+      | "SUBTRACTION" -> SUBTRACTION
+      | "MASK_ALL" -> MASK_ALL
+      | "MASK_FIRST_N" -> MASK_FIRST_N
+      | "MASK_LAST_N" -> MASK_LAST_N
+      | "VALIDATE_NON_NULL" -> VALIDATE_NON_NULL
+      | "VALIDATE_NON_ZERO" -> VALIDATE_NON_ZERO
+      | "VALIDATE_NON_NEGATIVE" -> VALIDATE_NON_NEGATIVE
+      | "VALIDATE_NUMERIC" -> VALIDATE_NUMERIC
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PardotConnectorOperator" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PardotConnectorOperator" j)
     let to_json = simple_to_json to_value
   end
 module S3ConnectorOperator =
@@ -3836,6 +4658,8 @@ module OperatorPropertiesKeys =
       | CONCAT_FORMAT 
       | SUBFIELD_CATEGORY_MAP 
       | EXCLUDE_SOURCE_FIELDS_LIST 
+      | INCLUDE_NEW_FIELDS 
+      | ORDERED_PARTITION_KEYS_LIST 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -3855,6 +4679,8 @@ module OperatorPropertiesKeys =
       | CONCAT_FORMAT -> "CONCAT_FORMAT"
       | SUBFIELD_CATEGORY_MAP -> "SUBFIELD_CATEGORY_MAP"
       | EXCLUDE_SOURCE_FIELDS_LIST -> "EXCLUDE_SOURCE_FIELDS_LIST"
+      | INCLUDE_NEW_FIELDS -> "INCLUDE_NEW_FIELDS"
+      | ORDERED_PARTITION_KEYS_LIST -> "ORDERED_PARTITION_KEYS_LIST"
       | Non_static_id s -> s
     let of_string =
       function
@@ -3873,6 +4699,8 @@ module OperatorPropertiesKeys =
       | "CONCAT_FORMAT" -> CONCAT_FORMAT
       | "SUBFIELD_CATEGORY_MAP" -> SUBFIELD_CATEGORY_MAP
       | "EXCLUDE_SOURCE_FIELDS_LIST" -> EXCLUDE_SOURCE_FIELDS_LIST
+      | "INCLUDE_NEW_FIELDS" -> INCLUDE_NEW_FIELDS
+      | "ORDERED_PARTITION_KEYS_LIST" -> ORDERED_PARTITION_KEYS_LIST
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3937,6 +4765,25 @@ module Date =
     let to_header x = x
     let of_xml = string_of_xml ~kind:"a timestamp"
     let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module FlowErrorDeactivationThreshold =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for FlowErrorDeactivationThreshold"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module ScheduleExpression =
@@ -4037,9 +4884,9 @@ module ApiKeyCredentials =
         ApiKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "apiKey") in
       make ?apiSecretKey ~apiKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let apiSecretKey = field_map json "apiSecretKey" ApiSecretKey.of_json in
-      let apiKey = field_map_exn json "apiKey" ApiKey.of_json in
+    let of_json json__ =
+      let apiSecretKey = field_map json__ "apiSecretKey" ApiSecretKey.of_json in
+      let apiKey = field_map_exn json__ "apiKey" ApiKey.of_json in
       make ?apiSecretKey ~apiKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4098,9 +4945,9 @@ module BasicAuthCredentials =
         Username.of_xml (Xml.child_exn ~context:context_ xml_arg0 "username") in
       make ~password ~username ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let password = field_map_exn json "password" Password.of_json in
-      let username = field_map_exn json "username" Username.of_json in
+    let of_json json__ =
+      let password = field_map_exn json__ "password" Password.of_json in
+      let username = field_map_exn json__ "username" Username.of_json in
       make ~password ~username ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4136,11 +4983,11 @@ module CustomAuthCredentials =
              "customAuthenticationType") in
       make ?credentialsMap ~customAuthenticationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let credentialsMap =
-        field_map json "credentialsMap" CredentialsMap.of_json in
+        field_map json__ "credentialsMap" CredentialsMap.of_json in
       let customAuthenticationType =
-        field_map_exn json "customAuthenticationType"
+        field_map_exn json__ "customAuthenticationType"
           CustomAuthenticationType.of_json in
       make ?credentialsMap ~customAuthenticationType ()
     let to_json v = composed_to_json to_value v
@@ -4203,13 +5050,13 @@ module OAuth2Credentials =
       make ?oAuthRequest ?refreshToken ?accessToken ?clientSecret ?clientId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let oAuthRequest =
-        field_map json "oAuthRequest" ConnectorOAuthRequest.of_json in
-      let refreshToken = field_map json "refreshToken" RefreshToken.of_json in
-      let accessToken = field_map json "accessToken" AccessToken.of_json in
-      let clientSecret = field_map json "clientSecret" ClientSecret.of_json in
-      let clientId = field_map json "clientId" ClientId.of_json in
+        field_map json__ "oAuthRequest" ConnectorOAuthRequest.of_json in
+      let refreshToken = field_map json__ "refreshToken" RefreshToken.of_json in
+      let accessToken = field_map json__ "accessToken" AccessToken.of_json in
+      let clientSecret = field_map json__ "clientSecret" ClientSecret.of_json in
+      let clientId = field_map json__ "clientId" ClientId.of_json in
       make ?oAuthRequest ?refreshToken ?accessToken ?clientSecret ?clientId
         ()
     let to_json v = composed_to_json to_value v
@@ -4267,6 +5114,28 @@ module AccessKeyId =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"AccessKeyId" j
+    let to_json = simple_to_json to_value
+  end
+module ClientCredentialsArn =
+  struct
+    type nonrec t = string
+    let context_ = "ClientCredentialsArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws:secretsmanager:.*:[0-9]+:.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientCredentialsArn" j
     let to_json = simple_to_json to_value
   end
 module OAuthCredentials =
@@ -4328,67 +5197,37 @@ module OAuthCredentials =
       make ?oAuthRequest ?refreshToken ?accessToken ~clientSecret ~clientId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let oAuthRequest =
-        field_map json "oAuthRequest" ConnectorOAuthRequest.of_json in
-      let refreshToken = field_map json "refreshToken" RefreshToken.of_json in
-      let accessToken = field_map json "accessToken" AccessToken.of_json in
+        field_map json__ "oAuthRequest" ConnectorOAuthRequest.of_json in
+      let refreshToken = field_map json__ "refreshToken" RefreshToken.of_json in
+      let accessToken = field_map json__ "accessToken" AccessToken.of_json in
       let clientSecret =
-        field_map_exn json "clientSecret" ClientSecret.of_json in
-      let clientId = field_map_exn json "clientId" ClientId.of_json in
+        field_map_exn json__ "clientSecret" ClientSecret.of_json in
+      let clientId = field_map_exn json__ "clientId" ClientId.of_json in
       make ?oAuthRequest ?refreshToken ?accessToken ~clientSecret ~clientId
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The OAuth credentials required for OAuth type authentication."]
-module ClientCredentialsArn =
+module JwtToken =
   struct
     type nonrec t = string
-    let context_ = "ClientCredentialsArn"
+    let context_ = "JwtToken"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:20) >>=
+          ((check_string_max i ~max:8000) >>=
              (fun () ->
-                (check_string_max i ~max:2048) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"arn:aws:secretsmanager:.*:[0-9]+:.*")));
+                check_pattern i
+                  ~pattern:"^([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_\\-\\+\\/=]*)"));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ClientCredentialsArn" j
-    let to_json = simple_to_json to_value
-  end
-module ExecutionStatus =
-  struct
-    type nonrec t =
-      | InProgress 
-      | Successful 
-      | Error 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | InProgress -> "InProgress"
-      | Successful -> "Successful"
-      | Error -> "Error"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "InProgress" -> InProgress
-      | "Successful" -> Successful
-      | "Error" -> Error
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration ExecutionStatus" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ExecutionStatus" j)
+    let of_json j = string_of_json ~kind:"JwtToken" j
     let to_json = simple_to_json to_value
   end
 module MostRecentExecutionMessage =
@@ -4466,6 +5305,27 @@ module ConnectorMode =
     let of_json j = string_of_json ~kind:"ConnectorMode" j
     let to_json = simple_to_json to_value
   end
+module SupportedDataTransferType =
+  struct
+    type nonrec t =
+      | RECORD 
+      | FILE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | RECORD -> "RECORD" | FILE -> "FILE" | Non_static_id s -> s
+    let of_string =
+      function | "RECORD" -> RECORD | "FILE" -> FILE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SupportedDataTransferType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SupportedDataTransferType" j)
+    let to_json = simple_to_json to_value
+  end
 module ErrorInfo =
   struct
     type nonrec t =
@@ -4493,18 +5353,86 @@ module ErrorInfo =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "putFailuresCount") in
       make ?executionMessage ?putFailuresCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let executionMessage =
-        field_map json "executionMessage" ExecutionMessage.of_json in
-      let putFailuresCount = field_map json "putFailuresCount" Long.of_json in
+        field_map json__ "executionMessage" ExecutionMessage.of_json in
+      let putFailuresCount = field_map json__ "putFailuresCount" Long.of_json in
       make ?executionMessage ?putFailuresCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides details in the event of a failed flow, including the failure count and the related error messages."]
+module MetadataCatalogDetail =
+  struct
+    type nonrec t =
+      {
+      catalogType: CatalogType.t option
+        [@ocaml.doc
+          "The type of metadata catalog that Amazon AppFlow used for the associated flow run. This parameter returns the following value: GLUE The metadata catalog is provided by the Glue Data Catalog. Glue includes the Glue Data Catalog as a component."];
+      tableName: String_.t option
+        [@ocaml.doc
+          "The name of the table that stores the metadata for the associated flow run. The table stores metadata that represents the data that the flow transferred. Amazon AppFlow stores the table in the metadata catalog."];
+      tableRegistrationOutput: RegistrationOutput.t option
+        [@ocaml.doc
+          "Describes the status of the attempt from Amazon AppFlow to register the metadata table with the metadata catalog. Amazon AppFlow creates or updates this table for the associated flow run."];
+      partitionRegistrationOutput: RegistrationOutput.t option
+        [@ocaml.doc
+          "Describes the status of the attempt from Amazon AppFlow to register the data partitions with the metadata catalog. The data partitions organize the flow output into a hierarchical path, such as a folder path in an S3 bucket. Amazon AppFlow creates the partitions (if they don't already exist) based on your flow configuration."]}
+    let make ?catalogType =
+      fun ?tableName ->
+        fun ?tableRegistrationOutput ->
+          fun ?partitionRegistrationOutput ->
+            fun () ->
+              {
+                catalogType;
+                tableName;
+                tableRegistrationOutput;
+                partitionRegistrationOutput
+              }
+    let to_value x =
+      structure_to_value
+        [("catalogType", (Option.map x.catalogType ~f:CatalogType.to_value));
+        ("tableName", (Option.map x.tableName ~f:String_.to_value));
+        ("tableRegistrationOutput",
+          (Option.map x.tableRegistrationOutput
+             ~f:RegistrationOutput.to_value));
+        ("partitionRegistrationOutput",
+          (Option.map x.partitionRegistrationOutput
+             ~f:RegistrationOutput.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let partitionRegistrationOutput =
+        (Option.map ~f:RegistrationOutput.of_xml)
+          (Xml.child xml_arg0 "partitionRegistrationOutput") in
+      let tableRegistrationOutput =
+        (Option.map ~f:RegistrationOutput.of_xml)
+          (Xml.child xml_arg0 "tableRegistrationOutput") in
+      let tableName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "tableName") in
+      let catalogType =
+        (Option.map ~f:CatalogType.of_xml) (Xml.child xml_arg0 "catalogType") in
+      make ?partitionRegistrationOutput ?tableRegistrationOutput ?tableName
+        ?catalogType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let partitionRegistrationOutput =
+        field_map json__ "partitionRegistrationOutput"
+          RegistrationOutput.of_json in
+      let tableRegistrationOutput =
+        field_map json__ "tableRegistrationOutput" RegistrationOutput.of_json in
+      let tableName = field_map json__ "tableName" String_.of_json in
+      let catalogType = field_map json__ "catalogType" CatalogType.of_json in
+      make ?partitionRegistrationOutput ?tableRegistrationOutput ?tableName
+        ?catalogType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the metadata catalog, metadata table, and data partitions that Amazon AppFlow used for the associated flow run."]
 module CustomAuthConfigList =
   struct
     type nonrec t = CustomAuthConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomAuthConfig.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4539,18 +5467,23 @@ module OAuth2Defaults =
         [@ocaml.doc
           "Auth code URLs that can be used for OAuth 2.0 authentication."];
       oauth2GrantTypesSupported: OAuth2GrantTypeSupportedList.t option
-        [@ocaml.doc "OAuth 2.0 grant types supported by the connector."]}
+        [@ocaml.doc "OAuth 2.0 grant types supported by the connector."];
+      oauth2CustomProperties: OAuth2CustomPropertiesList.t option
+        [@ocaml.doc
+          "List of custom parameters required for OAuth 2.0 authentication."]}
     let make ?oauthScopes =
       fun ?tokenUrls ->
         fun ?authCodeUrls ->
           fun ?oauth2GrantTypesSupported ->
-            fun () ->
-              {
-                oauthScopes;
-                tokenUrls;
-                authCodeUrls;
-                oauth2GrantTypesSupported
-              }
+            fun ?oauth2CustomProperties ->
+              fun () ->
+                {
+                  oauthScopes;
+                  tokenUrls;
+                  authCodeUrls;
+                  oauth2GrantTypesSupported;
+                  oauth2CustomProperties
+                }
     let to_value x =
       structure_to_value
         [("oauthScopes",
@@ -4560,9 +5493,15 @@ module OAuth2Defaults =
           (Option.map x.authCodeUrls ~f:AuthCodeUrlList.to_value));
         ("oauth2GrantTypesSupported",
           (Option.map x.oauth2GrantTypesSupported
-             ~f:OAuth2GrantTypeSupportedList.to_value))]
+             ~f:OAuth2GrantTypeSupportedList.to_value));
+        ("oauth2CustomProperties",
+          (Option.map x.oauth2CustomProperties
+             ~f:OAuth2CustomPropertiesList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let oauth2CustomProperties =
+        (Option.map ~f:OAuth2CustomPropertiesList.of_xml)
+          (Xml.child xml_arg0 "oauth2CustomProperties") in
       let oauth2GrantTypesSupported =
         (Option.map ~f:OAuth2GrantTypeSupportedList.of_xml)
           (Xml.child xml_arg0 "oauth2GrantTypesSupported") in
@@ -4574,19 +5513,22 @@ module OAuth2Defaults =
       let oauthScopes =
         (Option.map ~f:OAuthScopeList.of_xml)
           (Xml.child xml_arg0 "oauthScopes") in
-      make ?oauth2GrantTypesSupported ?authCodeUrls ?tokenUrls ?oauthScopes
-        ()
+      make ?oauth2CustomProperties ?oauth2GrantTypesSupported ?authCodeUrls
+        ?tokenUrls ?oauthScopes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let oauth2CustomProperties =
+        field_map json__ "oauth2CustomProperties"
+          OAuth2CustomPropertiesList.of_json in
       let oauth2GrantTypesSupported =
-        field_map json "oauth2GrantTypesSupported"
+        field_map json__ "oauth2GrantTypesSupported"
           OAuth2GrantTypeSupportedList.of_json in
       let authCodeUrls =
-        field_map json "authCodeUrls" AuthCodeUrlList.of_json in
-      let tokenUrls = field_map json "tokenUrls" TokenUrlList.of_json in
-      let oauthScopes = field_map json "oauthScopes" OAuthScopeList.of_json in
-      make ?oauth2GrantTypesSupported ?authCodeUrls ?tokenUrls ?oauthScopes
-        ()
+        field_map json__ "authCodeUrls" AuthCodeUrlList.of_json in
+      let tokenUrls = field_map json__ "tokenUrls" TokenUrlList.of_json in
+      let oauthScopes = field_map json__ "oauthScopes" OAuthScopeList.of_json in
+      make ?oauth2CustomProperties ?oauth2GrantTypesSupported ?authCodeUrls
+        ?tokenUrls ?oauthScopes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the default values required for OAuth 2.0 authentication."]
@@ -4670,8 +5612,8 @@ module GoogleAnalyticsMetadata =
           (Xml.child xml_arg0 "oAuthScopes") in
       make ?oAuthScopes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let oAuthScopes = field_map json "oAuthScopes" OAuthScopeList.of_json in
+    let of_json json__ =
+      let oAuthScopes = field_map json__ "oAuthScopes" OAuthScopeList.of_json in
       make ?oAuthScopes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Google Analytics."]
@@ -4694,8 +5636,8 @@ module HoneycodeMetadata =
           (Xml.child xml_arg0 "oAuthScopes") in
       make ?oAuthScopes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let oAuthScopes = field_map json "oAuthScopes" OAuthScopeList.of_json in
+    let of_json json__ =
+      let oAuthScopes = field_map json__ "oAuthScopes" OAuthScopeList.of_json in
       make ?oAuthScopes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Amazon Honeycode."]
@@ -4723,6 +5665,18 @@ module MarketoMetadata =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Marketo."]
+module PardotMetadata =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The connector metadata specific to Salesforce Pardot."]
 module RedshiftMetadata =
   struct
     type nonrec t = unit
@@ -4765,22 +5719,50 @@ module SalesforceMetadata =
       {
       oAuthScopes: OAuthScopeList.t option
         [@ocaml.doc
-          "The desired authorization scope for the Salesforce account."]}
-    let make ?oAuthScopes = fun () -> { oAuthScopes }
+          "The desired authorization scope for the Salesforce account."];
+      dataTransferApis: SalesforceDataTransferApiList.t option
+        [@ocaml.doc
+          "The Salesforce APIs that you can have Amazon AppFlow use when your flows transfers data to or from Salesforce."];
+      oauth2GrantTypesSupported: OAuth2GrantTypeSupportedList.t option
+        [@ocaml.doc
+          "The OAuth 2.0 grant types that Amazon AppFlow can use when it requests an access token from Salesforce. Amazon AppFlow requires an access token each time it attempts to access your Salesforce records. AUTHORIZATION_CODE Amazon AppFlow passes an authorization code when it requests the access token from Salesforce. Amazon AppFlow receives the authorization code from Salesforce after you log in to your Salesforce account and authorize Amazon AppFlow to access your records. JWT_BEARER Amazon AppFlow passes a JSON web token (JWT) when it requests the access token from Salesforce. You provide the JWT to Amazon AppFlow when you define the connection to your Salesforce account. When you use this grant type, you don't need to log in to your Salesforce account to authorize Amazon AppFlow to access your records. The CLIENT_CREDENTIALS value is not supported for Salesforce."]}
+    let make ?oAuthScopes =
+      fun ?dataTransferApis ->
+        fun ?oauth2GrantTypesSupported ->
+          fun () ->
+            { oAuthScopes; dataTransferApis; oauth2GrantTypesSupported }
     let to_value x =
       structure_to_value
         [("oAuthScopes",
-           (Option.map x.oAuthScopes ~f:OAuthScopeList.to_value))]
+           (Option.map x.oAuthScopes ~f:OAuthScopeList.to_value));
+        ("dataTransferApis",
+          (Option.map x.dataTransferApis
+             ~f:SalesforceDataTransferApiList.to_value));
+        ("oauth2GrantTypesSupported",
+          (Option.map x.oauth2GrantTypesSupported
+             ~f:OAuth2GrantTypeSupportedList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let oauth2GrantTypesSupported =
+        (Option.map ~f:OAuth2GrantTypeSupportedList.of_xml)
+          (Xml.child xml_arg0 "oauth2GrantTypesSupported") in
+      let dataTransferApis =
+        (Option.map ~f:SalesforceDataTransferApiList.of_xml)
+          (Xml.child xml_arg0 "dataTransferApis") in
       let oAuthScopes =
         (Option.map ~f:OAuthScopeList.of_xml)
           (Xml.child xml_arg0 "oAuthScopes") in
-      make ?oAuthScopes ()
+      make ?oauth2GrantTypesSupported ?dataTransferApis ?oAuthScopes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let oAuthScopes = field_map json "oAuthScopes" OAuthScopeList.of_json in
-      make ?oAuthScopes ()
+    let of_json json__ =
+      let oauth2GrantTypesSupported =
+        field_map json__ "oauth2GrantTypesSupported"
+          OAuth2GrantTypeSupportedList.of_json in
+      let dataTransferApis =
+        field_map json__ "dataTransferApis"
+          SalesforceDataTransferApiList.of_json in
+      let oAuthScopes = field_map json__ "oAuthScopes" OAuthScopeList.of_json in
+      make ?oauth2GrantTypesSupported ?dataTransferApis ?oAuthScopes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Salesforce."]
 module ServiceNowMetadata =
@@ -4825,8 +5807,8 @@ module SlackMetadata =
           (Xml.child xml_arg0 "oAuthScopes") in
       make ?oAuthScopes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let oAuthScopes = field_map json "oAuthScopes" OAuthScopeList.of_json in
+    let of_json json__ =
+      let oAuthScopes = field_map json__ "oAuthScopes" OAuthScopeList.of_json in
       make ?oAuthScopes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Slack."]
@@ -4849,9 +5831,9 @@ module SnowflakeMetadata =
           (Xml.child xml_arg0 "supportedRegions") in
       make ?supportedRegions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let supportedRegions =
-        field_map json "supportedRegions" RegionList.of_json in
+        field_map json__ "supportedRegions" RegionList.of_json in
       make ?supportedRegions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Snowflake."]
@@ -4910,8 +5892,8 @@ module ZendeskMetadata =
           (Xml.child xml_arg0 "oAuthScopes") in
       make ?oAuthScopes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let oAuthScopes = field_map json "oAuthScopes" OAuthScopeList.of_json in
+    let of_json json__ =
+      let oAuthScopes = field_map json__ "oAuthScopes" OAuthScopeList.of_json in
       make ?oAuthScopes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector metadata specific to Zendesk."]
@@ -4931,8 +5913,8 @@ module LambdaConnectorProvisioningConfig =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "lambdaArn") in
       make ~lambdaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lambdaArn = field_map_exn json "lambdaArn" ARN.of_json in
+    let of_json json__ =
+      let lambdaArn = field_map_exn json__ "lambdaArn" ARN.of_json in
       make ~lambdaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5009,17 +5991,18 @@ module ConnectorRuntimeSetting =
       make ?connectorSuppliedValueOptions ?scope ?description ?label
         ?isRequired ?dataType ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectorSuppliedValueOptions =
-        field_map json "connectorSuppliedValueOptions"
+        field_map json__ "connectorSuppliedValueOptions"
           ConnectorSuppliedValueOptionList.of_json in
-      let scope = field_map json "scope" ConnectorRuntimeSettingScope.of_json in
-      let description = field_map json "description" Description.of_json in
-      let label = field_map json "label" Label.of_json in
-      let isRequired = field_map json "isRequired" Boolean.of_json in
+      let scope =
+        field_map json__ "scope" ConnectorRuntimeSettingScope.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let label = field_map json__ "label" Label.of_json in
+      let isRequired = field_map json__ "isRequired" Boolean.of_json in
       let dataType =
-        field_map json "dataType" ConnectorRuntimeSettingDataType.of_json in
-      let key = field_map json "key" Key.of_json in
+        field_map json__ "dataType" ConnectorRuntimeSettingDataType.of_json in
+      let key = field_map json__ "key" Key.of_json in
       make ?connectorSuppliedValueOptions ?scope ?description ?label
         ?isRequired ?dataType ?key ()
     let to_json v = composed_to_json to_value v
@@ -5051,6 +6034,7 @@ module ConnectorType =
       | CustomerProfiles 
       | SAPOData 
       | CustomConnector 
+      | Pardot 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -5078,6 +6062,7 @@ module ConnectorType =
       | CustomerProfiles -> "CustomerProfiles"
       | SAPOData -> "SAPOData"
       | CustomConnector -> "CustomConnector"
+      | Pardot -> "Pardot"
       | Non_static_id s -> s
     let of_string =
       function
@@ -5104,6 +6089,7 @@ module ConnectorType =
       | "CustomerProfiles" -> CustomerProfiles
       | "SAPOData" -> SAPOData
       | "CustomConnector" -> CustomConnector
+      | "Pardot" -> Pardot
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -5320,11 +6306,11 @@ module CustomConnectorProfileProperties =
           (Xml.child xml_arg0 "profileProperties") in
       make ?oAuth2Properties ?profileProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let oAuth2Properties =
-        field_map json "oAuth2Properties" OAuth2Properties.of_json in
+        field_map json__ "oAuth2Properties" OAuth2Properties.of_json in
       let profileProperties =
-        field_map json "profileProperties" ProfilePropertiesMap.of_json in
+        field_map json__ "profileProperties" ProfilePropertiesMap.of_json in
       make ?oAuth2Properties ?profileProperties ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The profile properties required by the custom connector."]
@@ -5346,8 +6332,9 @@ module DatadogConnectorProfileProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "instanceUrl") in
       make ~instanceUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceUrl = field_map_exn json "instanceUrl" InstanceUrl.of_json in
+    let of_json json__ =
+      let instanceUrl =
+        field_map_exn json__ "instanceUrl" InstanceUrl.of_json in
       make ~instanceUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5370,8 +6357,9 @@ module DynatraceConnectorProfileProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "instanceUrl") in
       make ~instanceUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceUrl = field_map_exn json "instanceUrl" InstanceUrl.of_json in
+    let of_json json__ =
+      let instanceUrl =
+        field_map_exn json__ "instanceUrl" InstanceUrl.of_json in
       make ~instanceUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5420,8 +6408,9 @@ module InforNexusConnectorProfileProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "instanceUrl") in
       make ~instanceUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceUrl = field_map_exn json "instanceUrl" InstanceUrl.of_json in
+    let of_json json__ =
+      let instanceUrl =
+        field_map_exn json__ "instanceUrl" InstanceUrl.of_json in
       make ~instanceUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5444,17 +6433,62 @@ module MarketoConnectorProfileProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "instanceUrl") in
       make ~instanceUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceUrl = field_map_exn json "instanceUrl" InstanceUrl.of_json in
+    let of_json json__ =
+      let instanceUrl =
+        field_map_exn json__ "instanceUrl" InstanceUrl.of_json in
       make ~instanceUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The connector-specific profile properties required when using Marketo."]
+module PardotConnectorProfileProperties =
+  struct
+    type nonrec t =
+      {
+      instanceUrl: InstanceUrl.t option
+        [@ocaml.doc "The location of the Salesforce Pardot resource."];
+      isSandboxEnvironment: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the connector profile applies to a sandbox or production environment."];
+      businessUnitId: BusinessUnitId.t option
+        [@ocaml.doc "The business unit id of Salesforce Pardot instance."]}
+    let make ?instanceUrl =
+      fun ?isSandboxEnvironment ->
+        fun ?businessUnitId ->
+          fun () -> { instanceUrl; isSandboxEnvironment; businessUnitId }
+    let to_value x =
+      structure_to_value
+        [("instanceUrl", (Option.map x.instanceUrl ~f:InstanceUrl.to_value));
+        ("isSandboxEnvironment",
+          (Option.map x.isSandboxEnvironment ~f:Boolean.to_value));
+        ("businessUnitId",
+          (Option.map x.businessUnitId ~f:BusinessUnitId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let businessUnitId =
+        (Option.map ~f:BusinessUnitId.of_xml)
+          (Xml.child xml_arg0 "businessUnitId") in
+      let isSandboxEnvironment =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "isSandboxEnvironment") in
+      let instanceUrl =
+        (Option.map ~f:InstanceUrl.of_xml) (Xml.child xml_arg0 "instanceUrl") in
+      make ?businessUnitId ?isSandboxEnvironment ?instanceUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let businessUnitId =
+        field_map json__ "businessUnitId" BusinessUnitId.of_json in
+      let isSandboxEnvironment =
+        field_map json__ "isSandboxEnvironment" Boolean.of_json in
+      let instanceUrl = field_map json__ "instanceUrl" InstanceUrl.of_json in
+      make ?businessUnitId ?isSandboxEnvironment ?instanceUrl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The connector-specific profile properties required when using Salesforce Pardot."]
 module RedshiftConnectorProfileProperties =
   struct
     type nonrec t =
       {
-      databaseUrl: DatabaseUrl.t
+      databaseUrl: DatabaseUrl.t option
         [@ocaml.doc "The JDBC URL of the Amazon Redshift cluster."];
       bucketName: BucketName.t
         [@ocaml.doc "A name for the associated Amazon S3 bucket."];
@@ -5462,22 +6496,77 @@ module RedshiftConnectorProfileProperties =
         [@ocaml.doc
           "The object key for the destination bucket in which Amazon AppFlow places the files."];
       roleArn: RoleArn.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the IAM role."]}
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of IAM role that grants Amazon Redshift read-only access to Amazon S3. For more information, and for the polices that you attach to this role, see Allow Amazon Redshift to access your Amazon AppFlow data in Amazon S3."];
+      dataApiRoleArn: DataApiRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM role that permits Amazon AppFlow to access your Amazon Redshift database through the Data API. For more information, and for the polices that you attach to this role, see Allow Amazon AppFlow to access Amazon Redshift databases with the Data API."];
+      isRedshiftServerless: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the connector profile defines a connection to an Amazon Redshift Serverless data warehouse."];
+      clusterIdentifier: ClusterIdentifier.t option
+        [@ocaml.doc
+          "The unique ID that's assigned to an Amazon Redshift cluster."];
+      workgroupName: WorkgroupName.t option
+        [@ocaml.doc "The name of an Amazon Redshift workgroup."];
+      databaseName: DatabaseName.t option
+        [@ocaml.doc "The name of an Amazon Redshift database."]}
     let context_ = "RedshiftConnectorProfileProperties"
-    let make ?bucketPrefix =
-      fun ~databaseUrl ->
-        fun ~bucketName ->
-          fun ~roleArn ->
-            fun () -> { bucketPrefix; databaseUrl; bucketName; roleArn }
+    let make ?databaseUrl =
+      fun ?bucketPrefix ->
+        fun ?dataApiRoleArn ->
+          fun ?isRedshiftServerless ->
+            fun ?clusterIdentifier ->
+              fun ?workgroupName ->
+                fun ?databaseName ->
+                  fun ~bucketName ->
+                    fun ~roleArn ->
+                      fun () ->
+                        {
+                          databaseUrl;
+                          bucketPrefix;
+                          dataApiRoleArn;
+                          isRedshiftServerless;
+                          clusterIdentifier;
+                          workgroupName;
+                          databaseName;
+                          bucketName;
+                          roleArn
+                        }
     let to_value x =
       structure_to_value
-        [("databaseUrl", (Some (DatabaseUrl.to_value x.databaseUrl)));
+        [("databaseUrl", (Option.map x.databaseUrl ~f:DatabaseUrl.to_value));
         ("bucketName", (Some (BucketName.to_value x.bucketName)));
         ("bucketPrefix",
           (Option.map x.bucketPrefix ~f:BucketPrefix.to_value));
-        ("roleArn", (Some (RoleArn.to_value x.roleArn)))]
+        ("roleArn", (Some (RoleArn.to_value x.roleArn)));
+        ("dataApiRoleArn",
+          (Option.map x.dataApiRoleArn ~f:DataApiRoleArn.to_value));
+        ("isRedshiftServerless",
+          (Option.map x.isRedshiftServerless ~f:Boolean.to_value));
+        ("clusterIdentifier",
+          (Option.map x.clusterIdentifier ~f:ClusterIdentifier.to_value));
+        ("workgroupName",
+          (Option.map x.workgroupName ~f:WorkgroupName.to_value));
+        ("databaseName",
+          (Option.map x.databaseName ~f:DatabaseName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let databaseName =
+        (Option.map ~f:DatabaseName.of_xml)
+          (Xml.child xml_arg0 "databaseName") in
+      let workgroupName =
+        (Option.map ~f:WorkgroupName.of_xml)
+          (Xml.child xml_arg0 "workgroupName") in
+      let clusterIdentifier =
+        (Option.map ~f:ClusterIdentifier.of_xml)
+          (Xml.child xml_arg0 "clusterIdentifier") in
+      let isRedshiftServerless =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "isRedshiftServerless") in
+      let dataApiRoleArn =
+        (Option.map ~f:DataApiRoleArn.of_xml)
+          (Xml.child xml_arg0 "dataApiRoleArn") in
       let roleArn =
         RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       let bucketPrefix =
@@ -5487,16 +6576,28 @@ module RedshiftConnectorProfileProperties =
         BucketName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       let databaseUrl =
-        DatabaseUrl.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "databaseUrl") in
-      make ~roleArn ?bucketPrefix ~bucketName ~databaseUrl ()
+        (Option.map ~f:DatabaseUrl.of_xml) (Xml.child xml_arg0 "databaseUrl") in
+      make ?databaseName ?workgroupName ?clusterIdentifier
+        ?isRedshiftServerless ?dataApiRoleArn ~roleArn ?bucketPrefix
+        ~bucketName ?databaseUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map_exn json "roleArn" RoleArn.of_json in
-      let bucketPrefix = field_map json "bucketPrefix" BucketPrefix.of_json in
-      let bucketName = field_map_exn json "bucketName" BucketName.of_json in
-      let databaseUrl = field_map_exn json "databaseUrl" DatabaseUrl.of_json in
-      make ~roleArn ?bucketPrefix ~bucketName ~databaseUrl ()
+    let of_json json__ =
+      let databaseName = field_map json__ "databaseName" DatabaseName.of_json in
+      let workgroupName =
+        field_map json__ "workgroupName" WorkgroupName.of_json in
+      let clusterIdentifier =
+        field_map json__ "clusterIdentifier" ClusterIdentifier.of_json in
+      let isRedshiftServerless =
+        field_map json__ "isRedshiftServerless" Boolean.of_json in
+      let dataApiRoleArn =
+        field_map json__ "dataApiRoleArn" DataApiRoleArn.of_json in
+      let roleArn = field_map_exn json__ "roleArn" RoleArn.of_json in
+      let bucketPrefix = field_map json__ "bucketPrefix" BucketPrefix.of_json in
+      let bucketName = field_map_exn json__ "bucketName" BucketName.of_json in
+      let databaseUrl = field_map json__ "databaseUrl" DatabaseUrl.of_json in
+      make ?databaseName ?workgroupName ?clusterIdentifier
+        ?isRedshiftServerless ?dataApiRoleArn ~roleArn ?bucketPrefix
+        ~bucketName ?databaseUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The connector-specific profile properties when using Amazon Redshift."]
@@ -5520,25 +6621,30 @@ module SAPODataConnectorProfileProperties =
           "The SAPOData Private Link service name to be used for private data transfers."];
       oAuthProperties: OAuthProperties.t option
         [@ocaml.doc
-          "The SAPOData OAuth properties required for OAuth type authentication."]}
+          "The SAPOData OAuth properties required for OAuth type authentication."];
+      disableSSO: Boolean.t option
+        [@ocaml.doc
+          "If you set this parameter to true, Amazon AppFlow bypasses the single sign-on (SSO) settings in your SAP account when it accesses your SAP OData instance. Whether you need this option depends on the types of credentials that you applied to your SAP OData connection profile. If your profile uses basic authentication credentials, SAP SSO can prevent Amazon AppFlow from connecting to your account with your username and password. In this case, bypassing SSO makes it possible for Amazon AppFlow to connect successfully. However, if your profile uses OAuth credentials, this parameter has no affect."]}
     let context_ = "SAPODataConnectorProfileProperties"
     let make ?logonLanguage =
       fun ?privateLinkServiceName ->
         fun ?oAuthProperties ->
-          fun ~applicationHostUrl ->
-            fun ~applicationServicePath ->
-              fun ~portNumber ->
-                fun ~clientNumber ->
-                  fun () ->
-                    {
-                      logonLanguage;
-                      privateLinkServiceName;
-                      oAuthProperties;
-                      applicationHostUrl;
-                      applicationServicePath;
-                      portNumber;
-                      clientNumber
-                    }
+          fun ?disableSSO ->
+            fun ~applicationHostUrl ->
+              fun ~applicationServicePath ->
+                fun ~portNumber ->
+                  fun ~clientNumber ->
+                    fun () ->
+                      {
+                        logonLanguage;
+                        privateLinkServiceName;
+                        oAuthProperties;
+                        disableSSO;
+                        applicationHostUrl;
+                        applicationServicePath;
+                        portNumber;
+                        clientNumber
+                      }
     let to_value x =
       structure_to_value
         [("applicationHostUrl",
@@ -5553,9 +6659,12 @@ module SAPODataConnectorProfileProperties =
           (Option.map x.privateLinkServiceName
              ~f:PrivateLinkServiceName.to_value));
         ("oAuthProperties",
-          (Option.map x.oAuthProperties ~f:OAuthProperties.to_value))]
+          (Option.map x.oAuthProperties ~f:OAuthProperties.to_value));
+        ("disableSSO", (Option.map x.disableSSO ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let disableSSO =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "disableSSO") in
       let oAuthProperties =
         (Option.map ~f:OAuthProperties.of_xml)
           (Xml.child xml_arg0 "oAuthProperties") in
@@ -5577,29 +6686,30 @@ module SAPODataConnectorProfileProperties =
       let applicationHostUrl =
         ApplicationHostUrl.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationHostUrl") in
-      make ?oAuthProperties ?privateLinkServiceName ?logonLanguage
-        ~clientNumber ~portNumber ~applicationServicePath ~applicationHostUrl
-        ()
+      make ?disableSSO ?oAuthProperties ?privateLinkServiceName
+        ?logonLanguage ~clientNumber ~portNumber ~applicationServicePath
+        ~applicationHostUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let disableSSO = field_map json__ "disableSSO" Boolean.of_json in
       let oAuthProperties =
-        field_map json "oAuthProperties" OAuthProperties.of_json in
+        field_map json__ "oAuthProperties" OAuthProperties.of_json in
       let privateLinkServiceName =
-        field_map json "privateLinkServiceName"
+        field_map json__ "privateLinkServiceName"
           PrivateLinkServiceName.of_json in
       let logonLanguage =
-        field_map json "logonLanguage" LogonLanguage.of_json in
+        field_map json__ "logonLanguage" LogonLanguage.of_json in
       let clientNumber =
-        field_map_exn json "clientNumber" ClientNumber.of_json in
-      let portNumber = field_map_exn json "portNumber" PortNumber.of_json in
+        field_map_exn json__ "clientNumber" ClientNumber.of_json in
+      let portNumber = field_map_exn json__ "portNumber" PortNumber.of_json in
       let applicationServicePath =
-        field_map_exn json "applicationServicePath"
+        field_map_exn json__ "applicationServicePath"
           ApplicationServicePath.of_json in
       let applicationHostUrl =
-        field_map_exn json "applicationHostUrl" ApplicationHostUrl.of_json in
-      make ?oAuthProperties ?privateLinkServiceName ?logonLanguage
-        ~clientNumber ~portNumber ~applicationServicePath ~applicationHostUrl
-        ()
+        field_map_exn json__ "applicationHostUrl" ApplicationHostUrl.of_json in
+      make ?disableSSO ?oAuthProperties ?privateLinkServiceName
+        ?logonLanguage ~clientNumber ~portNumber ~applicationServicePath
+        ~applicationHostUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The connector-specific profile properties required when using SAPOData."]
@@ -5611,29 +6721,49 @@ module SalesforceConnectorProfileProperties =
         [@ocaml.doc "The location of the Salesforce resource."];
       isSandboxEnvironment: Boolean.t option
         [@ocaml.doc
-          "Indicates whether the connector profile applies to a sandbox or production environment."]}
+          "Indicates whether the connector profile applies to a sandbox or production environment."];
+      usePrivateLinkForMetadataAndAuthorization: Boolean.t option
+        [@ocaml.doc
+          "If the connection mode for the connector profile is private, this parameter sets whether Amazon AppFlow uses the private network to send metadata and authorization calls to Salesforce. Amazon AppFlow sends private calls through Amazon Web Services PrivateLink. These calls travel through Amazon Web Services infrastructure without being exposed to the public internet. Set either of the following values: true Amazon AppFlow sends all calls to Salesforce over the private network. These private calls are: Calls to get metadata about your Salesforce records. This metadata describes your Salesforce objects and their fields. Calls to get or refresh access tokens that allow Amazon AppFlow to access your Salesforce records. Calls to transfer your Salesforce records as part of a flow run. false The default value. Amazon AppFlow sends some calls to Salesforce privately and other calls over the public internet. The public calls are: Calls to get metadata about your Salesforce records. Calls to get or refresh access tokens. The private calls are: Calls to transfer your Salesforce records as part of a flow run."]}
     let make ?instanceUrl =
       fun ?isSandboxEnvironment ->
-        fun () -> { instanceUrl; isSandboxEnvironment }
+        fun ?usePrivateLinkForMetadataAndAuthorization ->
+          fun () ->
+            {
+              instanceUrl;
+              isSandboxEnvironment;
+              usePrivateLinkForMetadataAndAuthorization
+            }
     let to_value x =
       structure_to_value
         [("instanceUrl", (Option.map x.instanceUrl ~f:InstanceUrl.to_value));
         ("isSandboxEnvironment",
-          (Option.map x.isSandboxEnvironment ~f:Boolean.to_value))]
+          (Option.map x.isSandboxEnvironment ~f:Boolean.to_value));
+        ("usePrivateLinkForMetadataAndAuthorization",
+          (Option.map x.usePrivateLinkForMetadataAndAuthorization
+             ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let usePrivateLinkForMetadataAndAuthorization =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "usePrivateLinkForMetadataAndAuthorization") in
       let isSandboxEnvironment =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "isSandboxEnvironment") in
       let instanceUrl =
         (Option.map ~f:InstanceUrl.of_xml) (Xml.child xml_arg0 "instanceUrl") in
-      make ?isSandboxEnvironment ?instanceUrl ()
+      make ?usePrivateLinkForMetadataAndAuthorization ?isSandboxEnvironment
+        ?instanceUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let usePrivateLinkForMetadataAndAuthorization =
+        field_map json__ "usePrivateLinkForMetadataAndAuthorization"
+          Boolean.of_json in
       let isSandboxEnvironment =
-        field_map json "isSandboxEnvironment" Boolean.of_json in
-      let instanceUrl = field_map json "instanceUrl" InstanceUrl.of_json in
-      make ?isSandboxEnvironment ?instanceUrl ()
+        field_map json__ "isSandboxEnvironment" Boolean.of_json in
+      let instanceUrl = field_map json__ "instanceUrl" InstanceUrl.of_json in
+      make ?usePrivateLinkForMetadataAndAuthorization ?isSandboxEnvironment
+        ?instanceUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The connector-specific profile properties required when using Salesforce."]
@@ -5655,8 +6785,9 @@ module ServiceNowConnectorProfileProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "instanceUrl") in
       make ~instanceUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceUrl = field_map_exn json "instanceUrl" InstanceUrl.of_json in
+    let of_json json__ =
+      let instanceUrl =
+        field_map_exn json__ "instanceUrl" InstanceUrl.of_json in
       make ~instanceUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5692,8 +6823,9 @@ module SlackConnectorProfileProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "instanceUrl") in
       make ~instanceUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceUrl = field_map_exn json "instanceUrl" InstanceUrl.of_json in
+    let of_json json__ =
+      let instanceUrl =
+        field_map_exn json__ "instanceUrl" InstanceUrl.of_json in
       make ~instanceUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5774,16 +6906,16 @@ module SnowflakeConnectorProfileProperties =
       make ?region ?accountName ?privateLinkServiceName ?bucketPrefix
         ~bucketName ~stage ~warehouse ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let region = field_map json "region" Region.of_json in
-      let accountName = field_map json "accountName" AccountName.of_json in
+    let of_json json__ =
+      let region = field_map json__ "region" Region.of_json in
+      let accountName = field_map json__ "accountName" AccountName.of_json in
       let privateLinkServiceName =
-        field_map json "privateLinkServiceName"
+        field_map json__ "privateLinkServiceName"
           PrivateLinkServiceName.of_json in
-      let bucketPrefix = field_map json "bucketPrefix" BucketPrefix.of_json in
-      let bucketName = field_map_exn json "bucketName" BucketName.of_json in
-      let stage = field_map_exn json "stage" Stage.of_json in
-      let warehouse = field_map_exn json "warehouse" Warehouse.of_json in
+      let bucketPrefix = field_map json__ "bucketPrefix" BucketPrefix.of_json in
+      let bucketName = field_map_exn json__ "bucketName" BucketName.of_json in
+      let stage = field_map_exn json__ "stage" Stage.of_json in
+      let warehouse = field_map_exn json__ "warehouse" Warehouse.of_json in
       make ?region ?accountName ?privateLinkServiceName ?bucketPrefix
         ~bucketName ~stage ~warehouse ()
     let to_json v = composed_to_json to_value v
@@ -5820,8 +6952,9 @@ module VeevaConnectorProfileProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "instanceUrl") in
       make ~instanceUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceUrl = field_map_exn json "instanceUrl" InstanceUrl.of_json in
+    let of_json json__ =
+      let instanceUrl =
+        field_map_exn json__ "instanceUrl" InstanceUrl.of_json in
       make ~instanceUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5844,8 +6977,9 @@ module ZendeskConnectorProfileProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "instanceUrl") in
       make ~instanceUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceUrl = field_map_exn json "instanceUrl" InstanceUrl.of_json in
+    let of_json json__ =
+      let instanceUrl =
+        field_map_exn json__ "instanceUrl" InstanceUrl.of_json in
       make ~instanceUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5944,6 +7078,9 @@ module SupportedWriteOperationList =
   struct
     type nonrec t = WriteOperationType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WriteOperationType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5969,10 +7106,10 @@ module FieldTypeDetails =
   struct
     type nonrec t =
       {
-      fieldType: FieldType.t
+      fieldType: FieldType.t option
         [@ocaml.doc
           "The type of field, such as string, integer, date, and so on."];
-      filterOperators: FilterOperatorList.t
+      filterOperators: FilterOperatorList.t option
         [@ocaml.doc "The list of operators supported by a field."];
       supportedValues: SupportedValueList.t option
         [@ocaml.doc
@@ -5986,29 +7123,28 @@ module FieldTypeDetails =
       fieldLengthRange: Range.t option
         [@ocaml.doc
           "This is the allowable length range for this field's value."]}
-    let context_ = "FieldTypeDetails"
-    let make ?supportedValues =
-      fun ?valueRegexPattern ->
-        fun ?supportedDateFormat ->
-          fun ?fieldValueRange ->
-            fun ?fieldLengthRange ->
-              fun ~fieldType ->
-                fun ~filterOperators ->
+    let make ?fieldType =
+      fun ?filterOperators ->
+        fun ?supportedValues ->
+          fun ?valueRegexPattern ->
+            fun ?supportedDateFormat ->
+              fun ?fieldValueRange ->
+                fun ?fieldLengthRange ->
                   fun () ->
                     {
+                      fieldType;
+                      filterOperators;
                       supportedValues;
                       valueRegexPattern;
                       supportedDateFormat;
                       fieldValueRange;
-                      fieldLengthRange;
-                      fieldType;
-                      filterOperators
+                      fieldLengthRange
                     }
     let to_value x =
       structure_to_value
-        [("fieldType", (Some (FieldType.to_value x.fieldType)));
+        [("fieldType", (Option.map x.fieldType ~f:FieldType.to_value));
         ("filterOperators",
-          (Some (FilterOperatorList.to_value x.filterOperators)));
+          (Option.map x.filterOperators ~f:FilterOperatorList.to_value));
         ("supportedValues",
           (Option.map x.supportedValues ~f:SupportedValueList.to_value));
         ("valueRegexPattern",
@@ -6034,28 +7170,28 @@ module FieldTypeDetails =
         (Option.map ~f:SupportedValueList.of_xml)
           (Xml.child xml_arg0 "supportedValues") in
       let filterOperators =
-        FilterOperatorList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "filterOperators") in
+        (Option.map ~f:FilterOperatorList.of_xml)
+          (Xml.child xml_arg0 "filterOperators") in
       let fieldType =
-        FieldType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "fieldType") in
+        (Option.map ~f:FieldType.of_xml) (Xml.child xml_arg0 "fieldType") in
       make ?fieldLengthRange ?fieldValueRange ?supportedDateFormat
-        ?valueRegexPattern ?supportedValues ~filterOperators ~fieldType ()
+        ?valueRegexPattern ?supportedValues ?filterOperators ?fieldType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fieldLengthRange = field_map json "fieldLengthRange" Range.of_json in
-      let fieldValueRange = field_map json "fieldValueRange" Range.of_json in
+    let of_json json__ =
+      let fieldLengthRange =
+        field_map json__ "fieldLengthRange" Range.of_json in
+      let fieldValueRange = field_map json__ "fieldValueRange" Range.of_json in
       let supportedDateFormat =
-        field_map json "supportedDateFormat" String_.of_json in
+        field_map json__ "supportedDateFormat" String_.of_json in
       let valueRegexPattern =
-        field_map json "valueRegexPattern" String_.of_json in
+        field_map json__ "valueRegexPattern" String_.of_json in
       let supportedValues =
-        field_map json "supportedValues" SupportedValueList.of_json in
+        field_map json__ "supportedValues" SupportedValueList.of_json in
       let filterOperators =
-        field_map_exn json "filterOperators" FilterOperatorList.of_json in
-      let fieldType = field_map_exn json "fieldType" FieldType.of_json in
+        field_map json__ "filterOperators" FilterOperatorList.of_json in
+      let fieldType = field_map json__ "fieldType" FieldType.of_json in
       make ?fieldLengthRange ?fieldValueRange ?supportedDateFormat
-        ?valueRegexPattern ?supportedValues ~filterOperators ~fieldType ()
+        ?valueRegexPattern ?supportedValues ?filterOperators ?fieldType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details regarding the supported field type and the operators that can be applied for filtering."]
@@ -6234,41 +7370,100 @@ module DestinationConnectorProperties =
         ?honeycode ?upsolver ?lookoutMetrics ?eventBridge ?snowflake
         ?salesforce ?s3 ?redshift ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sAPOData =
-        field_map json "SAPOData" SAPODataDestinationProperties.of_json in
+        field_map json__ "SAPOData" SAPODataDestinationProperties.of_json in
       let customConnector =
-        field_map json "CustomConnector"
+        field_map json__ "CustomConnector"
           CustomConnectorDestinationProperties.of_json in
       let marketo =
-        field_map json "Marketo" MarketoDestinationProperties.of_json in
+        field_map json__ "Marketo" MarketoDestinationProperties.of_json in
       let zendesk =
-        field_map json "Zendesk" ZendeskDestinationProperties.of_json in
+        field_map json__ "Zendesk" ZendeskDestinationProperties.of_json in
       let customerProfiles =
-        field_map json "CustomerProfiles"
+        field_map json__ "CustomerProfiles"
           CustomerProfilesDestinationProperties.of_json in
       let honeycode =
-        field_map json "Honeycode" HoneycodeDestinationProperties.of_json in
+        field_map json__ "Honeycode" HoneycodeDestinationProperties.of_json in
       let upsolver =
-        field_map json "Upsolver" UpsolverDestinationProperties.of_json in
+        field_map json__ "Upsolver" UpsolverDestinationProperties.of_json in
       let lookoutMetrics =
-        field_map json "LookoutMetrics"
+        field_map json__ "LookoutMetrics"
           LookoutMetricsDestinationProperties.of_json in
       let eventBridge =
-        field_map json "EventBridge" EventBridgeDestinationProperties.of_json in
+        field_map json__ "EventBridge"
+          EventBridgeDestinationProperties.of_json in
       let snowflake =
-        field_map json "Snowflake" SnowflakeDestinationProperties.of_json in
+        field_map json__ "Snowflake" SnowflakeDestinationProperties.of_json in
       let salesforce =
-        field_map json "Salesforce" SalesforceDestinationProperties.of_json in
-      let s3 = field_map json "S3" S3DestinationProperties.of_json in
+        field_map json__ "Salesforce" SalesforceDestinationProperties.of_json in
+      let s3 = field_map json__ "S3" S3DestinationProperties.of_json in
       let redshift =
-        field_map json "Redshift" RedshiftDestinationProperties.of_json in
+        field_map json__ "Redshift" RedshiftDestinationProperties.of_json in
       make ?sAPOData ?customConnector ?marketo ?zendesk ?customerProfiles
         ?honeycode ?upsolver ?lookoutMetrics ?eventBridge ?snowflake
         ?salesforce ?s3 ?redshift ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This stores the information that is required to query a particular connector."]
+module GlueDataCatalogDatabaseName =
+  struct
+    type nonrec t = string
+    let context_ = "GlueDataCatalogDatabaseName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GlueDataCatalogDatabaseName" j
+    let to_json = simple_to_json to_value
+  end
+module GlueDataCatalogIAMRole =
+  struct
+    type nonrec t = string
+    let context_ = "GlueDataCatalogIAMRole"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_pattern i ~pattern:"arn:aws:iam:.*:[0-9]+:.*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GlueDataCatalogIAMRole" j
+    let to_json = simple_to_json to_value
+  end
+module GlueDataCatalogTablePrefix =
+  struct
+    type nonrec t = string
+    let context_ = "GlueDataCatalogTablePrefix"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GlueDataCatalogTablePrefix" j
+    let to_json = simple_to_json to_value
+  end
 module DatetimeTypeFieldName =
   struct
     type nonrec t = string
@@ -6303,8 +7498,8 @@ module AmplitudeSourceProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let object_ = field_map_exn json "object" Object.of_json in
+    let of_json json__ =
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ~object_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6318,30 +7513,42 @@ module CustomConnectorSourceProperties =
           "The entity specified in the custom connector as a source in the flow."];
       customProperties: CustomProperties.t option
         [@ocaml.doc
-          "Custom properties that are required to use the custom connector as a source."]}
+          "Custom properties that are required to use the custom connector as a source."];
+      dataTransferApi: DataTransferApi.t option
+        [@ocaml.doc
+          "The API of the connector application that Amazon AppFlow uses to transfer your data."]}
     let context_ = "CustomConnectorSourceProperties"
     let make ?customProperties =
-      fun ~entityName -> fun () -> { customProperties; entityName }
+      fun ?dataTransferApi ->
+        fun ~entityName ->
+          fun () -> { customProperties; dataTransferApi; entityName }
     let to_value x =
       structure_to_value
         [("entityName", (Some (EntityName.to_value x.entityName)));
         ("customProperties",
-          (Option.map x.customProperties ~f:CustomProperties.to_value))]
+          (Option.map x.customProperties ~f:CustomProperties.to_value));
+        ("dataTransferApi",
+          (Option.map x.dataTransferApi ~f:DataTransferApi.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dataTransferApi =
+        (Option.map ~f:DataTransferApi.of_xml)
+          (Xml.child xml_arg0 "dataTransferApi") in
       let customProperties =
         (Option.map ~f:CustomProperties.of_xml)
           (Xml.child xml_arg0 "customProperties") in
       let entityName =
         EntityName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "entityName") in
-      make ?customProperties ~entityName ()
+      make ?dataTransferApi ?customProperties ~entityName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let dataTransferApi =
+        field_map json__ "dataTransferApi" DataTransferApi.of_json in
       let customProperties =
-        field_map json "customProperties" CustomProperties.of_json in
-      let entityName = field_map_exn json "entityName" EntityName.of_json in
-      make ?customProperties ~entityName ()
+        field_map json__ "customProperties" CustomProperties.of_json in
+      let entityName = field_map_exn json__ "entityName" EntityName.of_json in
+      make ?dataTransferApi ?customProperties ~entityName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The properties that are applied when the custom connector is being used as a source."]
@@ -6361,8 +7568,8 @@ module DatadogSourceProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let object_ = field_map_exn json "object" Object.of_json in
+    let of_json json__ =
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ~object_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6383,8 +7590,8 @@ module DynatraceSourceProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let object_ = field_map_exn json "object" Object.of_json in
+    let of_json json__ =
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ~object_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6406,8 +7613,8 @@ module GoogleAnalyticsSourceProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let object_ = field_map_exn json "object" Object.of_json in
+    let of_json json__ =
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ~object_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6428,8 +7635,8 @@ module InforNexusSourceProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let object_ = field_map_exn json "object" Object.of_json in
+    let of_json json__ =
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ~object_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6450,12 +7657,35 @@ module MarketoSourceProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let object_ = field_map_exn json "object" Object.of_json in
+    let of_json json__ =
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ~object_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The properties that are applied when Marketo is being used as a source."]
+module PardotSourceProperties =
+  struct
+    type nonrec t =
+      {
+      object_: Object.t
+        [@ocaml.doc
+          "The object specified in the Salesforce Pardot flow source."]}
+    let context_ = "PardotSourceProperties"
+    let make ~object_ = fun () -> { object_ }
+    let to_value x =
+      structure_to_value [("object", (Some (Object.to_value x.object_)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let object_ =
+        Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
+      make ~object_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let object_ = field_map_exn json__ "object" Object.of_json in
+      make ~object_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The properties that are applied when Salesforce Pardot is being used as a source."]
 module S3SourceProperties =
   struct
     type nonrec t =
@@ -6492,11 +7722,11 @@ module S3SourceProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       make ?s3InputFormatConfig ?bucketPrefix ~bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3InputFormatConfig =
-        field_map json "s3InputFormatConfig" S3InputFormatConfig.of_json in
-      let bucketPrefix = field_map json "bucketPrefix" BucketPrefix.of_json in
-      let bucketName = field_map_exn json "bucketName" BucketName.of_json in
+        field_map json__ "s3InputFormatConfig" S3InputFormatConfig.of_json in
+      let bucketPrefix = field_map json__ "bucketPrefix" BucketPrefix.of_json in
+      let bucketName = field_map_exn json__ "bucketName" BucketName.of_json in
       make ?s3InputFormatConfig ?bucketPrefix ~bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6506,20 +7736,45 @@ module SAPODataSourceProperties =
     type nonrec t =
       {
       objectPath: Object.t option
-        [@ocaml.doc "The object path specified in the SAPOData flow source."]}
-    let make ?objectPath = fun () -> { objectPath }
+        [@ocaml.doc "The object path specified in the SAPOData flow source."];
+      parallelismConfig: SAPODataParallelismConfig.t option
+        [@ocaml.doc
+          "Sets the number of concurrent processes that transfers OData records from your SAP instance."];
+      paginationConfig: SAPODataPaginationConfig.t option
+        [@ocaml.doc
+          "Sets the page size for each concurrent process that transfers OData records from your SAP instance."]}
+    let make ?objectPath =
+      fun ?parallelismConfig ->
+        fun ?paginationConfig ->
+          fun () -> { objectPath; parallelismConfig; paginationConfig }
     let to_value x =
       structure_to_value
-        [("objectPath", (Option.map x.objectPath ~f:Object.to_value))]
+        [("objectPath", (Option.map x.objectPath ~f:Object.to_value));
+        ("parallelismConfig",
+          (Option.map x.parallelismConfig
+             ~f:SAPODataParallelismConfig.to_value));
+        ("paginationConfig",
+          (Option.map x.paginationConfig ~f:SAPODataPaginationConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let paginationConfig =
+        (Option.map ~f:SAPODataPaginationConfig.of_xml)
+          (Xml.child xml_arg0 "paginationConfig") in
+      let parallelismConfig =
+        (Option.map ~f:SAPODataParallelismConfig.of_xml)
+          (Xml.child xml_arg0 "parallelismConfig") in
       let objectPath =
         (Option.map ~f:Object.of_xml) (Xml.child xml_arg0 "objectPath") in
-      make ?objectPath ()
+      make ?paginationConfig ?parallelismConfig ?objectPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let objectPath = field_map json "objectPath" Object.of_json in
-      make ?objectPath ()
+    let of_json json__ =
+      let paginationConfig =
+        field_map json__ "paginationConfig" SAPODataPaginationConfig.of_json in
+      let parallelismConfig =
+        field_map json__ "parallelismConfig"
+          SAPODataParallelismConfig.of_json in
+      let objectPath = field_map json__ "objectPath" Object.of_json in
+      make ?paginationConfig ?parallelismConfig ?objectPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The properties that are applied when using SAPOData as a flow source."]
@@ -6534,22 +7789,36 @@ module SalesforceSourceProperties =
           "The flag that enables dynamic fetching of new (recently added) fields in the Salesforce objects while running a flow."];
       includeDeletedRecords: Boolean.t option
         [@ocaml.doc
-          "Indicates whether Amazon AppFlow includes deleted files in the flow run."]}
+          "Indicates whether Amazon AppFlow includes deleted files in the flow run."];
+      dataTransferApi: SalesforceDataTransferApi.t option
+        [@ocaml.doc
+          "Specifies which Salesforce API is used by Amazon AppFlow when your flow transfers data from Salesforce. AUTOMATIC The default. Amazon AppFlow selects which API to use based on the number of records that your flow transfers from Salesforce. If your flow transfers fewer than 1,000,000 records, Amazon AppFlow uses Salesforce REST API. If your flow transfers 1,000,000 records or more, Amazon AppFlow uses Salesforce Bulk API 2.0. Each of these Salesforce APIs structures data differently. If Amazon AppFlow selects the API automatically, be aware that, for recurring flows, the data output might vary from one flow run to the next. For example, if a flow runs daily, it might use REST API on one day to transfer 900,000 records, and it might use Bulk API 2.0 on the next day to transfer 1,100,000 records. For each of these flow runs, the respective Salesforce API formats the data differently. Some of the differences include how dates are formatted and null values are represented. Also, Bulk API 2.0 doesn't transfer Salesforce compound fields. By choosing this option, you optimize flow performance for both small and large data transfers, but the tradeoff is inconsistent formatting in the output. BULKV2 Amazon AppFlow uses only Salesforce Bulk API 2.0. This API runs asynchronous data transfers, and it's optimal for large sets of data. By choosing this option, you ensure that your flow writes consistent output, but you optimize performance only for large data transfers. Note that Bulk API 2.0 does not transfer Salesforce compound fields. REST_SYNC Amazon AppFlow uses only Salesforce REST API. By choosing this option, you ensure that your flow writes consistent output, but you decrease performance for large data transfers that are better suited for Bulk API 2.0. In some cases, if your flow attempts to transfer a vary large set of data, it might fail wituh a timed out error."]}
     let context_ = "SalesforceSourceProperties"
     let make ?enableDynamicFieldUpdate =
       fun ?includeDeletedRecords ->
-        fun ~object_ ->
-          fun () ->
-            { enableDynamicFieldUpdate; includeDeletedRecords; object_ }
+        fun ?dataTransferApi ->
+          fun ~object_ ->
+            fun () ->
+              {
+                enableDynamicFieldUpdate;
+                includeDeletedRecords;
+                dataTransferApi;
+                object_
+              }
     let to_value x =
       structure_to_value
         [("object", (Some (Object.to_value x.object_)));
         ("enableDynamicFieldUpdate",
           (Option.map x.enableDynamicFieldUpdate ~f:Boolean.to_value));
         ("includeDeletedRecords",
-          (Option.map x.includeDeletedRecords ~f:Boolean.to_value))]
+          (Option.map x.includeDeletedRecords ~f:Boolean.to_value));
+        ("dataTransferApi",
+          (Option.map x.dataTransferApi ~f:SalesforceDataTransferApi.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dataTransferApi =
+        (Option.map ~f:SalesforceDataTransferApi.of_xml)
+          (Xml.child xml_arg0 "dataTransferApi") in
       let includeDeletedRecords =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "includeDeletedRecords") in
@@ -6558,15 +7827,19 @@ module SalesforceSourceProperties =
           (Xml.child xml_arg0 "enableDynamicFieldUpdate") in
       let object_ =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
-      make ?includeDeletedRecords ?enableDynamicFieldUpdate ~object_ ()
+      make ?dataTransferApi ?includeDeletedRecords ?enableDynamicFieldUpdate
+        ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let dataTransferApi =
+        field_map json__ "dataTransferApi" SalesforceDataTransferApi.of_json in
       let includeDeletedRecords =
-        field_map json "includeDeletedRecords" Boolean.of_json in
+        field_map json__ "includeDeletedRecords" Boolean.of_json in
       let enableDynamicFieldUpdate =
-        field_map json "enableDynamicFieldUpdate" Boolean.of_json in
-      let object_ = field_map_exn json "object" Object.of_json in
-      make ?includeDeletedRecords ?enableDynamicFieldUpdate ~object_ ()
+        field_map json__ "enableDynamicFieldUpdate" Boolean.of_json in
+      let object_ = field_map_exn json__ "object" Object.of_json in
+      make ?dataTransferApi ?includeDeletedRecords ?enableDynamicFieldUpdate
+        ~object_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The properties that are applied when Salesforce is being used as a source."]
@@ -6586,8 +7859,8 @@ module ServiceNowSourceProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let object_ = field_map_exn json "object" Object.of_json in
+    let of_json json__ =
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ~object_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6608,8 +7881,8 @@ module SingularSourceProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let object_ = field_map_exn json "object" Object.of_json in
+    let of_json json__ =
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ~object_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6630,8 +7903,8 @@ module SlackSourceProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let object_ = field_map_exn json "object" Object.of_json in
+    let of_json json__ =
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ~object_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6652,8 +7925,8 @@ module TrendmicroSourceProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let object_ = field_map_exn json "object" Object.of_json in
+    let of_json json__ =
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ~object_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6720,15 +7993,15 @@ module VeevaSourceProperties =
       make ?includeAllVersions ?includeRenditions ?includeSourceFiles
         ?documentType ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeAllVersions =
-        field_map json "includeAllVersions" Boolean.of_json in
+        field_map json__ "includeAllVersions" Boolean.of_json in
       let includeRenditions =
-        field_map json "includeRenditions" Boolean.of_json in
+        field_map json__ "includeRenditions" Boolean.of_json in
       let includeSourceFiles =
-        field_map json "includeSourceFiles" Boolean.of_json in
-      let documentType = field_map json "documentType" DocumentType.of_json in
-      let object_ = field_map_exn json "object" Object.of_json in
+        field_map json__ "includeSourceFiles" Boolean.of_json in
+      let documentType = field_map json__ "documentType" DocumentType.of_json in
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ?includeAllVersions ?includeRenditions ?includeSourceFiles
         ?documentType ~object_ ()
     let to_json v = composed_to_json to_value v
@@ -6750,8 +8023,8 @@ module ZendeskSourceProperties =
         Object.of_xml (Xml.child_exn ~context:context_ xml_arg0 "object") in
       make ~object_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let object_ = field_map_exn json "object" Object.of_json in
+    let of_json json__ =
+      let object_ = field_map_exn json__ "object" Object.of_json in
       make ~object_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6806,7 +8079,10 @@ module ConnectorOperator =
         [@ocaml.doc
           "The operation to be performed on the provided SAPOData source fields."];
       customConnector: Operator.t option
-        [@ocaml.doc "Operators supported by the custom connector."]}
+        [@ocaml.doc "Operators supported by the custom connector."];
+      pardot: PardotConnectorOperator.t option
+        [@ocaml.doc
+          "The operation to be performed on the provided Salesforce Pardot source fields."]}
     let make ?amplitude =
       fun ?datadog ->
         fun ?dynatrace ->
@@ -6823,25 +8099,27 @@ module ConnectorOperator =
                               fun ?zendesk ->
                                 fun ?sAPOData ->
                                   fun ?customConnector ->
-                                    fun () ->
-                                      {
-                                        amplitude;
-                                        datadog;
-                                        dynatrace;
-                                        googleAnalytics;
-                                        inforNexus;
-                                        marketo;
-                                        s3;
-                                        salesforce;
-                                        serviceNow;
-                                        singular;
-                                        slack;
-                                        trendmicro;
-                                        veeva;
-                                        zendesk;
-                                        sAPOData;
-                                        customConnector
-                                      }
+                                    fun ?pardot ->
+                                      fun () ->
+                                        {
+                                          amplitude;
+                                          datadog;
+                                          dynatrace;
+                                          googleAnalytics;
+                                          inforNexus;
+                                          marketo;
+                                          s3;
+                                          salesforce;
+                                          serviceNow;
+                                          singular;
+                                          slack;
+                                          trendmicro;
+                                          veeva;
+                                          zendesk;
+                                          sAPOData;
+                                          customConnector;
+                                          pardot
+                                        }
     let to_value x =
       structure_to_value
         [("Amplitude",
@@ -6873,9 +8151,13 @@ module ConnectorOperator =
         ("SAPOData",
           (Option.map x.sAPOData ~f:SAPODataConnectorOperator.to_value));
         ("CustomConnector",
-          (Option.map x.customConnector ~f:Operator.to_value))]
+          (Option.map x.customConnector ~f:Operator.to_value));
+        ("Pardot", (Option.map x.pardot ~f:PardotConnectorOperator.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let pardot =
+        (Option.map ~f:PardotConnectorOperator.of_xml)
+          (Xml.child xml_arg0 "Pardot") in
       let customConnector =
         (Option.map ~f:Operator.of_xml)
           (Xml.child xml_arg0 "CustomConnector") in
@@ -6923,39 +8205,44 @@ module ConnectorOperator =
       let amplitude =
         (Option.map ~f:AmplitudeConnectorOperator.of_xml)
           (Xml.child xml_arg0 "Amplitude") in
-      make ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro ?slack
-        ?singular ?serviceNow ?salesforce ?s3 ?marketo ?inforNexus
+      make ?pardot ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro
+        ?slack ?singular ?serviceNow ?salesforce ?s3 ?marketo ?inforNexus
         ?googleAnalytics ?dynatrace ?datadog ?amplitude ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let customConnector = field_map json "CustomConnector" Operator.of_json in
+    let of_json json__ =
+      let pardot = field_map json__ "Pardot" PardotConnectorOperator.of_json in
+      let customConnector =
+        field_map json__ "CustomConnector" Operator.of_json in
       let sAPOData =
-        field_map json "SAPOData" SAPODataConnectorOperator.of_json in
-      let zendesk = field_map json "Zendesk" ZendeskConnectorOperator.of_json in
-      let veeva = field_map json "Veeva" VeevaConnectorOperator.of_json in
+        field_map json__ "SAPOData" SAPODataConnectorOperator.of_json in
+      let zendesk =
+        field_map json__ "Zendesk" ZendeskConnectorOperator.of_json in
+      let veeva = field_map json__ "Veeva" VeevaConnectorOperator.of_json in
       let trendmicro =
-        field_map json "Trendmicro" TrendmicroConnectorOperator.of_json in
-      let slack = field_map json "Slack" SlackConnectorOperator.of_json in
+        field_map json__ "Trendmicro" TrendmicroConnectorOperator.of_json in
+      let slack = field_map json__ "Slack" SlackConnectorOperator.of_json in
       let singular =
-        field_map json "Singular" SingularConnectorOperator.of_json in
+        field_map json__ "Singular" SingularConnectorOperator.of_json in
       let serviceNow =
-        field_map json "ServiceNow" ServiceNowConnectorOperator.of_json in
+        field_map json__ "ServiceNow" ServiceNowConnectorOperator.of_json in
       let salesforce =
-        field_map json "Salesforce" SalesforceConnectorOperator.of_json in
-      let s3 = field_map json "S3" S3ConnectorOperator.of_json in
-      let marketo = field_map json "Marketo" MarketoConnectorOperator.of_json in
+        field_map json__ "Salesforce" SalesforceConnectorOperator.of_json in
+      let s3 = field_map json__ "S3" S3ConnectorOperator.of_json in
+      let marketo =
+        field_map json__ "Marketo" MarketoConnectorOperator.of_json in
       let inforNexus =
-        field_map json "InforNexus" InforNexusConnectorOperator.of_json in
+        field_map json__ "InforNexus" InforNexusConnectorOperator.of_json in
       let googleAnalytics =
-        field_map json "GoogleAnalytics"
+        field_map json__ "GoogleAnalytics"
           GoogleAnalyticsConnectorOperator.of_json in
       let dynatrace =
-        field_map json "Dynatrace" DynatraceConnectorOperator.of_json in
-      let datadog = field_map json "Datadog" DatadogConnectorOperator.of_json in
+        field_map json__ "Dynatrace" DynatraceConnectorOperator.of_json in
+      let datadog =
+        field_map json__ "Datadog" DatadogConnectorOperator.of_json in
       let amplitude =
-        field_map json "Amplitude" AmplitudeConnectorOperator.of_json in
-      make ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro ?slack
-        ?singular ?serviceNow ?salesforce ?s3 ?marketo ?inforNexus
+        field_map json__ "Amplitude" AmplitudeConnectorOperator.of_json in
+      make ?pardot ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro
+        ?slack ?singular ?serviceNow ?salesforce ?s3 ?marketo ?inforNexus
         ?googleAnalytics ?dynatrace ?datadog ?amplitude ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6982,6 +8269,9 @@ module SourceFields =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7023,6 +8313,8 @@ module TaskPropertiesMap =
                     (fun x -> (Property.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -7042,6 +8334,7 @@ module TaskType =
       | Passthrough 
       | Truncate 
       | Validate 
+      | Partition 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -7055,6 +8348,7 @@ module TaskType =
       | Passthrough -> "Passthrough"
       | Truncate -> "Truncate"
       | Validate -> "Validate"
+      | Partition -> "Partition"
       | Non_static_id s -> s
     let of_string =
       function
@@ -7067,6 +8361,7 @@ module TaskType =
       | "Passthrough" -> Passthrough
       | "Truncate" -> Truncate
       | "Validate" -> Validate
+      | "Partition" -> Partition
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -7088,19 +8383,22 @@ module ScheduledTriggerProperties =
           "Specifies whether a scheduled flow has an incremental data transfer or a complete data transfer for each flow run."];
       scheduleStartTime: Date.t option
         [@ocaml.doc
-          "Specifies the scheduled start time for a schedule-triggered flow."];
+          "The time at which the scheduled flow starts. The time is formatted as a timestamp that follows the ISO 8601 standard, such as 2022-04-26T13:00:00-07:00."];
       scheduleEndTime: Date.t option
         [@ocaml.doc
-          "Specifies the scheduled end time for a schedule-triggered flow."];
+          "The time at which the scheduled flow ends. The time is formatted as a timestamp that follows the ISO 8601 standard, such as 2022-04-27T13:00:00-07:00."];
       timezone: Timezone.t option
         [@ocaml.doc
-          "Specifies the time zone used when referring to the date and time of a scheduled-triggered flow, such as America/New_York."];
+          "Specifies the time zone used when referring to the dates and times of a scheduled flow, such as America/New_York. This time zone is only a descriptive label. It doesn't affect how Amazon AppFlow interprets the timestamps that you specify to schedule the flow. If you want to schedule a flow by using times in a particular time zone, indicate the time zone as a UTC offset in your timestamps. For example, the UTC offsets for the America/New_York timezone are -04:00 EDT and -05:00 EST."];
       scheduleOffset: ScheduleOffset.t option
         [@ocaml.doc
           "Specifies the optional offset that is added to the time interval for a schedule-triggered flow."];
       firstExecutionFrom: Date.t option
         [@ocaml.doc
-          "Specifies the date range for the records to import from the connector in the first flow run."]}
+          "Specifies the date range for the records to import from the connector in the first flow run."];
+      flowErrorDeactivationThreshold: FlowErrorDeactivationThreshold.t option
+        [@ocaml.doc
+          "Defines how many times a scheduled flow fails consecutively before Amazon AppFlow deactivates it."]}
     let context_ = "ScheduledTriggerProperties"
     let make ?dataPullMode =
       fun ?scheduleStartTime ->
@@ -7108,17 +8406,19 @@ module ScheduledTriggerProperties =
           fun ?timezone ->
             fun ?scheduleOffset ->
               fun ?firstExecutionFrom ->
-                fun ~scheduleExpression ->
-                  fun () ->
-                    {
-                      dataPullMode;
-                      scheduleStartTime;
-                      scheduleEndTime;
-                      timezone;
-                      scheduleOffset;
-                      firstExecutionFrom;
-                      scheduleExpression
-                    }
+                fun ?flowErrorDeactivationThreshold ->
+                  fun ~scheduleExpression ->
+                    fun () ->
+                      {
+                        dataPullMode;
+                        scheduleStartTime;
+                        scheduleEndTime;
+                        timezone;
+                        scheduleOffset;
+                        firstExecutionFrom;
+                        flowErrorDeactivationThreshold;
+                        scheduleExpression
+                      }
     let to_value x =
       structure_to_value
         [("scheduleExpression",
@@ -7132,9 +8432,15 @@ module ScheduledTriggerProperties =
         ("scheduleOffset",
           (Option.map x.scheduleOffset ~f:ScheduleOffset.to_value));
         ("firstExecutionFrom",
-          (Option.map x.firstExecutionFrom ~f:Date.to_value))]
+          (Option.map x.firstExecutionFrom ~f:Date.to_value));
+        ("flowErrorDeactivationThreshold",
+          (Option.map x.flowErrorDeactivationThreshold
+             ~f:FlowErrorDeactivationThreshold.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let flowErrorDeactivationThreshold =
+        (Option.map ~f:FlowErrorDeactivationThreshold.of_xml)
+          (Xml.child xml_arg0 "flowErrorDeactivationThreshold") in
       let firstExecutionFrom =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "firstExecutionFrom") in
       let scheduleOffset =
@@ -7152,22 +8458,28 @@ module ScheduledTriggerProperties =
       let scheduleExpression =
         ScheduleExpression.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "scheduleExpression") in
-      make ?firstExecutionFrom ?scheduleOffset ?timezone ?scheduleEndTime
-        ?scheduleStartTime ?dataPullMode ~scheduleExpression ()
+      make ?flowErrorDeactivationThreshold ?firstExecutionFrom
+        ?scheduleOffset ?timezone ?scheduleEndTime ?scheduleStartTime
+        ?dataPullMode ~scheduleExpression ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let flowErrorDeactivationThreshold =
+        field_map json__ "flowErrorDeactivationThreshold"
+          FlowErrorDeactivationThreshold.of_json in
       let firstExecutionFrom =
-        field_map json "firstExecutionFrom" Date.of_json in
+        field_map json__ "firstExecutionFrom" Date.of_json in
       let scheduleOffset =
-        field_map json "scheduleOffset" ScheduleOffset.of_json in
-      let timezone = field_map json "timezone" Timezone.of_json in
-      let scheduleEndTime = field_map json "scheduleEndTime" Date.of_json in
-      let scheduleStartTime = field_map json "scheduleStartTime" Date.of_json in
-      let dataPullMode = field_map json "dataPullMode" DataPullMode.of_json in
+        field_map json__ "scheduleOffset" ScheduleOffset.of_json in
+      let timezone = field_map json__ "timezone" Timezone.of_json in
+      let scheduleEndTime = field_map json__ "scheduleEndTime" Date.of_json in
+      let scheduleStartTime =
+        field_map json__ "scheduleStartTime" Date.of_json in
+      let dataPullMode = field_map json__ "dataPullMode" DataPullMode.of_json in
       let scheduleExpression =
-        field_map_exn json "scheduleExpression" ScheduleExpression.of_json in
-      make ?firstExecutionFrom ?scheduleOffset ?timezone ?scheduleEndTime
-        ?scheduleStartTime ?dataPullMode ~scheduleExpression ()
+        field_map_exn json__ "scheduleExpression" ScheduleExpression.of_json in
+      make ?flowErrorDeactivationThreshold ?firstExecutionFrom
+        ?scheduleOffset ?timezone ?scheduleEndTime ?scheduleStartTime
+        ?dataPullMode ~scheduleExpression ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the configuration details of a schedule-triggered flow as defined by the user. Currently, these settings only apply to the Scheduled trigger type."]
@@ -7195,9 +8507,9 @@ module AmplitudeConnectorProfileCredentials =
         ApiKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "apiKey") in
       make ~secretKey ~apiKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretKey = field_map_exn json "secretKey" SecretKey.of_json in
-      let apiKey = field_map_exn json "apiKey" ApiKey.of_json in
+    let of_json json__ =
+      let secretKey = field_map_exn json__ "secretKey" SecretKey.of_json in
+      let apiKey = field_map_exn json__ "apiKey" ApiKey.of_json in
       make ~secretKey ~apiKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7255,13 +8567,13 @@ module CustomConnectorProfileCredentials =
           (Xml.child_exn ~context:context_ xml_arg0 "authenticationType") in
       make ?custom ?apiKey ?oauth2 ?basic ~authenticationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let custom = field_map json "custom" CustomAuthCredentials.of_json in
-      let apiKey = field_map json "apiKey" ApiKeyCredentials.of_json in
-      let oauth2 = field_map json "oauth2" OAuth2Credentials.of_json in
-      let basic = field_map json "basic" BasicAuthCredentials.of_json in
+    let of_json json__ =
+      let custom = field_map json__ "custom" CustomAuthCredentials.of_json in
+      let apiKey = field_map json__ "apiKey" ApiKeyCredentials.of_json in
+      let oauth2 = field_map json__ "oauth2" OAuth2Credentials.of_json in
+      let basic = field_map json__ "basic" BasicAuthCredentials.of_json in
       let authenticationType =
-        field_map_exn json "authenticationType" AuthenticationType.of_json in
+        field_map_exn json__ "authenticationType" AuthenticationType.of_json in
       make ?custom ?apiKey ?oauth2 ?basic ~authenticationType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7292,10 +8604,10 @@ module DatadogConnectorProfileCredentials =
         ApiKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "apiKey") in
       make ~applicationKey ~apiKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationKey =
-        field_map_exn json "applicationKey" ApplicationKey.of_json in
-      let apiKey = field_map_exn json "apiKey" ApiKey.of_json in
+        field_map_exn json__ "applicationKey" ApplicationKey.of_json in
+      let apiKey = field_map_exn json__ "apiKey" ApiKey.of_json in
       make ~applicationKey ~apiKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connector-specific credentials required by Datadog."]
@@ -7317,8 +8629,8 @@ module DynatraceConnectorProfileCredentials =
         ApiToken.of_xml (Xml.child_exn ~context:context_ xml_arg0 "apiToken") in
       make ~apiToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let apiToken = field_map_exn json "apiToken" ApiToken.of_json in
+    let of_json json__ =
+      let apiToken = field_map_exn json__ "apiToken" ApiToken.of_json in
       make ~apiToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7382,14 +8694,14 @@ module GoogleAnalyticsConnectorProfileCredentials =
       make ?oAuthRequest ?refreshToken ?accessToken ~clientSecret ~clientId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let oAuthRequest =
-        field_map json "oAuthRequest" ConnectorOAuthRequest.of_json in
-      let refreshToken = field_map json "refreshToken" RefreshToken.of_json in
-      let accessToken = field_map json "accessToken" AccessToken.of_json in
+        field_map json__ "oAuthRequest" ConnectorOAuthRequest.of_json in
+      let refreshToken = field_map json__ "refreshToken" RefreshToken.of_json in
+      let accessToken = field_map json__ "accessToken" AccessToken.of_json in
       let clientSecret =
-        field_map_exn json "clientSecret" ClientSecret.of_json in
-      let clientId = field_map_exn json "clientId" ClientId.of_json in
+        field_map_exn json__ "clientSecret" ClientSecret.of_json in
+      let clientId = field_map_exn json__ "clientId" ClientId.of_json in
       make ?oAuthRequest ?refreshToken ?accessToken ~clientSecret ~clientId
         ()
     let to_json v = composed_to_json to_value v
@@ -7428,11 +8740,11 @@ module HoneycodeConnectorProfileCredentials =
         (Option.map ~f:AccessToken.of_xml) (Xml.child xml_arg0 "accessToken") in
       make ?oAuthRequest ?refreshToken ?accessToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let oAuthRequest =
-        field_map json "oAuthRequest" ConnectorOAuthRequest.of_json in
-      let refreshToken = field_map json "refreshToken" RefreshToken.of_json in
-      let accessToken = field_map json "accessToken" AccessToken.of_json in
+        field_map json__ "oAuthRequest" ConnectorOAuthRequest.of_json in
+      let refreshToken = field_map json__ "refreshToken" RefreshToken.of_json in
+      let accessToken = field_map json__ "accessToken" AccessToken.of_json in
       make ?oAuthRequest ?refreshToken ?accessToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7473,11 +8785,13 @@ module InforNexusConnectorProfileCredentials =
           (Xml.child_exn ~context:context_ xml_arg0 "accessKeyId") in
       make ~datakey ~secretAccessKey ~userId ~accessKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datakey = field_map_exn json "datakey" Key.of_json in
-      let secretAccessKey = field_map_exn json "secretAccessKey" Key.of_json in
-      let userId = field_map_exn json "userId" Username.of_json in
-      let accessKeyId = field_map_exn json "accessKeyId" AccessKeyId.of_json in
+    let of_json json__ =
+      let datakey = field_map_exn json__ "datakey" Key.of_json in
+      let secretAccessKey =
+        field_map_exn json__ "secretAccessKey" Key.of_json in
+      let userId = field_map_exn json__ "userId" Username.of_json in
+      let accessKeyId =
+        field_map_exn json__ "accessKeyId" AccessKeyId.of_json in
       make ~datakey ~secretAccessKey ~userId ~accessKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7524,94 +8838,27 @@ module MarketoConnectorProfileCredentials =
         ClientId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "clientId") in
       make ?oAuthRequest ?accessToken ~clientSecret ~clientId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let oAuthRequest =
-        field_map json "oAuthRequest" ConnectorOAuthRequest.of_json in
-      let accessToken = field_map json "accessToken" AccessToken.of_json in
+        field_map json__ "oAuthRequest" ConnectorOAuthRequest.of_json in
+      let accessToken = field_map json__ "accessToken" AccessToken.of_json in
       let clientSecret =
-        field_map_exn json "clientSecret" ClientSecret.of_json in
-      let clientId = field_map_exn json "clientId" ClientId.of_json in
+        field_map_exn json__ "clientSecret" ClientSecret.of_json in
+      let clientId = field_map_exn json__ "clientId" ClientId.of_json in
       make ?oAuthRequest ?accessToken ~clientSecret ~clientId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The connector-specific profile credentials required by Marketo."]
-module RedshiftConnectorProfileCredentials =
-  struct
-    type nonrec t =
-      {
-      username: Username.t [@ocaml.doc "The name of the user."];
-      password: Password.t
-        [@ocaml.doc "The password that corresponds to the user name."]}
-    let context_ = "RedshiftConnectorProfileCredentials"
-    let make ~username = fun ~password -> fun () -> { username; password }
-    let to_value x =
-      structure_to_value
-        [("username", (Some (Username.to_value x.username)));
-        ("password", (Some (Password.to_value x.password)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let password =
-        Password.of_xml (Xml.child_exn ~context:context_ xml_arg0 "password") in
-      let username =
-        Username.of_xml (Xml.child_exn ~context:context_ xml_arg0 "username") in
-      make ~password ~username ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let password = field_map_exn json "password" Password.of_json in
-      let username = field_map_exn json "username" Username.of_json in
-      make ~password ~username ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The connector-specific profile credentials required when using Amazon Redshift."]
-module SAPODataConnectorProfileCredentials =
-  struct
-    type nonrec t =
-      {
-      basicAuthCredentials: BasicAuthCredentials.t option
-        [@ocaml.doc "The SAPOData basic authentication credentials."];
-      oAuthCredentials: OAuthCredentials.t option
-        [@ocaml.doc "The SAPOData OAuth type authentication credentials."]}
-    let make ?basicAuthCredentials =
-      fun ?oAuthCredentials ->
-        fun () -> { basicAuthCredentials; oAuthCredentials }
-    let to_value x =
-      structure_to_value
-        [("basicAuthCredentials",
-           (Option.map x.basicAuthCredentials
-              ~f:BasicAuthCredentials.to_value));
-        ("oAuthCredentials",
-          (Option.map x.oAuthCredentials ~f:OAuthCredentials.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let oAuthCredentials =
-        (Option.map ~f:OAuthCredentials.of_xml)
-          (Xml.child xml_arg0 "oAuthCredentials") in
-      let basicAuthCredentials =
-        (Option.map ~f:BasicAuthCredentials.of_xml)
-          (Xml.child xml_arg0 "basicAuthCredentials") in
-      make ?oAuthCredentials ?basicAuthCredentials ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let oAuthCredentials =
-        field_map json "oAuthCredentials" OAuthCredentials.of_json in
-      let basicAuthCredentials =
-        field_map json "basicAuthCredentials" BasicAuthCredentials.of_json in
-      make ?oAuthCredentials ?basicAuthCredentials ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The connector-specific profile credentials required when using SAPOData."]
-module SalesforceConnectorProfileCredentials =
+module PardotConnectorProfileCredentials =
   struct
     type nonrec t =
       {
       accessToken: AccessToken.t option
         [@ocaml.doc
-          "The credentials used to access protected Salesforce resources."];
+          "The credentials used to access protected Salesforce Pardot resources."];
       refreshToken: RefreshToken.t option
         [@ocaml.doc "The credentials used to acquire new access tokens."];
-      oAuthRequest: ConnectorOAuthRequest.t option
-        [@ocaml.doc
-          "The OAuth requirement needed to request security tokens from the connector endpoint."];
+      oAuthRequest: ConnectorOAuthRequest.t option ;
       clientCredentialsArn: ClientCredentialsArn.t option
         [@ocaml.doc
           "The secret manager ARN, which contains the client ID and client secret of the connected app."]}
@@ -7646,14 +8893,162 @@ module SalesforceConnectorProfileCredentials =
         (Option.map ~f:AccessToken.of_xml) (Xml.child xml_arg0 "accessToken") in
       make ?clientCredentialsArn ?oAuthRequest ?refreshToken ?accessToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientCredentialsArn =
-        field_map json "clientCredentialsArn" ClientCredentialsArn.of_json in
+        field_map json__ "clientCredentialsArn" ClientCredentialsArn.of_json in
       let oAuthRequest =
-        field_map json "oAuthRequest" ConnectorOAuthRequest.of_json in
-      let refreshToken = field_map json "refreshToken" RefreshToken.of_json in
-      let accessToken = field_map json "accessToken" AccessToken.of_json in
+        field_map json__ "oAuthRequest" ConnectorOAuthRequest.of_json in
+      let refreshToken = field_map json__ "refreshToken" RefreshToken.of_json in
+      let accessToken = field_map json__ "accessToken" AccessToken.of_json in
       make ?clientCredentialsArn ?oAuthRequest ?refreshToken ?accessToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The connector-specific profile credentials required when using Salesforce Pardot."]
+module RedshiftConnectorProfileCredentials =
+  struct
+    type nonrec t =
+      {
+      username: String_.t option [@ocaml.doc "The name of the user."];
+      password: Password.t option
+        [@ocaml.doc "The password that corresponds to the user name."]}
+    let make ?username = fun ?password -> fun () -> { username; password }
+    let to_value x =
+      structure_to_value
+        [("username", (Option.map x.username ~f:String_.to_value));
+        ("password", (Option.map x.password ~f:Password.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let password =
+        (Option.map ~f:Password.of_xml) (Xml.child xml_arg0 "password") in
+      let username =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "username") in
+      make ?password ?username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let password = field_map json__ "password" Password.of_json in
+      let username = field_map json__ "username" String_.of_json in
+      make ?password ?username ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The connector-specific profile credentials required when using Amazon Redshift."]
+module SAPODataConnectorProfileCredentials =
+  struct
+    type nonrec t =
+      {
+      basicAuthCredentials: BasicAuthCredentials.t option
+        [@ocaml.doc "The SAPOData basic authentication credentials."];
+      oAuthCredentials: OAuthCredentials.t option
+        [@ocaml.doc "The SAPOData OAuth type authentication credentials."]}
+    let make ?basicAuthCredentials =
+      fun ?oAuthCredentials ->
+        fun () -> { basicAuthCredentials; oAuthCredentials }
+    let to_value x =
+      structure_to_value
+        [("basicAuthCredentials",
+           (Option.map x.basicAuthCredentials
+              ~f:BasicAuthCredentials.to_value));
+        ("oAuthCredentials",
+          (Option.map x.oAuthCredentials ~f:OAuthCredentials.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let oAuthCredentials =
+        (Option.map ~f:OAuthCredentials.of_xml)
+          (Xml.child xml_arg0 "oAuthCredentials") in
+      let basicAuthCredentials =
+        (Option.map ~f:BasicAuthCredentials.of_xml)
+          (Xml.child xml_arg0 "basicAuthCredentials") in
+      make ?oAuthCredentials ?basicAuthCredentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let oAuthCredentials =
+        field_map json__ "oAuthCredentials" OAuthCredentials.of_json in
+      let basicAuthCredentials =
+        field_map json__ "basicAuthCredentials" BasicAuthCredentials.of_json in
+      make ?oAuthCredentials ?basicAuthCredentials ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The connector-specific profile credentials required when using SAPOData."]
+module SalesforceConnectorProfileCredentials =
+  struct
+    type nonrec t =
+      {
+      accessToken: AccessToken.t option
+        [@ocaml.doc
+          "The credentials used to access protected Salesforce resources."];
+      refreshToken: RefreshToken.t option
+        [@ocaml.doc "The credentials used to acquire new access tokens."];
+      oAuthRequest: ConnectorOAuthRequest.t option
+        [@ocaml.doc
+          "The OAuth requirement needed to request security tokens from the connector endpoint."];
+      clientCredentialsArn: ClientCredentialsArn.t option
+        [@ocaml.doc
+          "The secret manager ARN, which contains the client ID and client secret of the connected app."];
+      oAuth2GrantType: OAuth2GrantType.t option
+        [@ocaml.doc
+          "Specifies the OAuth 2.0 grant type that Amazon AppFlow uses when it requests an access token from Salesforce. Amazon AppFlow requires an access token each time it attempts to access your Salesforce records. You can specify one of the following values: AUTHORIZATION_CODE Amazon AppFlow passes an authorization code when it requests the access token from Salesforce. Amazon AppFlow receives the authorization code from Salesforce after you log in to your Salesforce account and authorize Amazon AppFlow to access your records. JWT_BEARER Amazon AppFlow passes a JSON web token (JWT) when it requests the access token from Salesforce. You provide the JWT to Amazon AppFlow when you define the connection to your Salesforce account. When you use this grant type, you don't need to log in to your Salesforce account to authorize Amazon AppFlow to access your records. The CLIENT_CREDENTIALS value is not supported for Salesforce."];
+      jwtToken: JwtToken.t option
+        [@ocaml.doc
+          "A JSON web token (JWT) that authorizes Amazon AppFlow to access your Salesforce records."]}
+    let make ?accessToken =
+      fun ?refreshToken ->
+        fun ?oAuthRequest ->
+          fun ?clientCredentialsArn ->
+            fun ?oAuth2GrantType ->
+              fun ?jwtToken ->
+                fun () ->
+                  {
+                    accessToken;
+                    refreshToken;
+                    oAuthRequest;
+                    clientCredentialsArn;
+                    oAuth2GrantType;
+                    jwtToken
+                  }
+    let to_value x =
+      structure_to_value
+        [("accessToken", (Option.map x.accessToken ~f:AccessToken.to_value));
+        ("refreshToken",
+          (Option.map x.refreshToken ~f:RefreshToken.to_value));
+        ("oAuthRequest",
+          (Option.map x.oAuthRequest ~f:ConnectorOAuthRequest.to_value));
+        ("clientCredentialsArn",
+          (Option.map x.clientCredentialsArn ~f:ClientCredentialsArn.to_value));
+        ("oAuth2GrantType",
+          (Option.map x.oAuth2GrantType ~f:OAuth2GrantType.to_value));
+        ("jwtToken", (Option.map x.jwtToken ~f:JwtToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jwtToken =
+        (Option.map ~f:JwtToken.of_xml) (Xml.child xml_arg0 "jwtToken") in
+      let oAuth2GrantType =
+        (Option.map ~f:OAuth2GrantType.of_xml)
+          (Xml.child xml_arg0 "oAuth2GrantType") in
+      let clientCredentialsArn =
+        (Option.map ~f:ClientCredentialsArn.of_xml)
+          (Xml.child xml_arg0 "clientCredentialsArn") in
+      let oAuthRequest =
+        (Option.map ~f:ConnectorOAuthRequest.of_xml)
+          (Xml.child xml_arg0 "oAuthRequest") in
+      let refreshToken =
+        (Option.map ~f:RefreshToken.of_xml)
+          (Xml.child xml_arg0 "refreshToken") in
+      let accessToken =
+        (Option.map ~f:AccessToken.of_xml) (Xml.child xml_arg0 "accessToken") in
+      make ?jwtToken ?oAuth2GrantType ?clientCredentialsArn ?oAuthRequest
+        ?refreshToken ?accessToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jwtToken = field_map json__ "jwtToken" JwtToken.of_json in
+      let oAuth2GrantType =
+        field_map json__ "oAuth2GrantType" OAuth2GrantType.of_json in
+      let clientCredentialsArn =
+        field_map json__ "clientCredentialsArn" ClientCredentialsArn.of_json in
+      let oAuthRequest =
+        field_map json__ "oAuthRequest" ConnectorOAuthRequest.of_json in
+      let refreshToken = field_map json__ "refreshToken" RefreshToken.of_json in
+      let accessToken = field_map json__ "accessToken" AccessToken.of_json in
+      make ?jwtToken ?oAuth2GrantType ?clientCredentialsArn ?oAuthRequest
+        ?refreshToken ?accessToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The connector-specific profile credentials required when using Salesforce."]
@@ -7661,27 +9056,39 @@ module ServiceNowConnectorProfileCredentials =
   struct
     type nonrec t =
       {
-      username: Username.t [@ocaml.doc "The name of the user."];
-      password: Password.t
-        [@ocaml.doc "The password that corresponds to the user name."]}
-    let context_ = "ServiceNowConnectorProfileCredentials"
-    let make ~username = fun ~password -> fun () -> { username; password }
+      username: Username.t option [@ocaml.doc "The name of the user."];
+      password: Password.t option
+        [@ocaml.doc "The password that corresponds to the user name."];
+      oAuth2Credentials: OAuth2Credentials.t option
+        [@ocaml.doc
+          "The OAuth 2.0 credentials required to authenticate the user."]}
+    let make ?username =
+      fun ?password ->
+        fun ?oAuth2Credentials ->
+          fun () -> { username; password; oAuth2Credentials }
     let to_value x =
       structure_to_value
-        [("username", (Some (Username.to_value x.username)));
-        ("password", (Some (Password.to_value x.password)))]
+        [("username", (Option.map x.username ~f:Username.to_value));
+        ("password", (Option.map x.password ~f:Password.to_value));
+        ("oAuth2Credentials",
+          (Option.map x.oAuth2Credentials ~f:OAuth2Credentials.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let oAuth2Credentials =
+        (Option.map ~f:OAuth2Credentials.of_xml)
+          (Xml.child xml_arg0 "oAuth2Credentials") in
       let password =
-        Password.of_xml (Xml.child_exn ~context:context_ xml_arg0 "password") in
+        (Option.map ~f:Password.of_xml) (Xml.child xml_arg0 "password") in
       let username =
-        Username.of_xml (Xml.child_exn ~context:context_ xml_arg0 "username") in
-      make ~password ~username ()
+        (Option.map ~f:Username.of_xml) (Xml.child xml_arg0 "username") in
+      make ?oAuth2Credentials ?password ?username ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let password = field_map_exn json "password" Password.of_json in
-      let username = field_map_exn json "username" Username.of_json in
-      make ~password ~username ()
+    let of_json json__ =
+      let oAuth2Credentials =
+        field_map json__ "oAuth2Credentials" OAuth2Credentials.of_json in
+      let password = field_map json__ "password" Password.of_json in
+      let username = field_map json__ "username" Username.of_json in
+      make ?oAuth2Credentials ?password ?username ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The connector-specific profile credentials required when using ServiceNow."]
@@ -7702,8 +9109,8 @@ module SingularConnectorProfileCredentials =
         ApiKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "apiKey") in
       make ~apiKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let apiKey = field_map_exn json "apiKey" ApiKey.of_json in
+    let of_json json__ =
+      let apiKey = field_map_exn json__ "apiKey" ApiKey.of_json in
       make ~apiKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7749,13 +9156,13 @@ module SlackConnectorProfileCredentials =
         ClientId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "clientId") in
       make ?oAuthRequest ?accessToken ~clientSecret ~clientId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let oAuthRequest =
-        field_map json "oAuthRequest" ConnectorOAuthRequest.of_json in
-      let accessToken = field_map json "accessToken" AccessToken.of_json in
+        field_map json__ "oAuthRequest" ConnectorOAuthRequest.of_json in
+      let accessToken = field_map json__ "accessToken" AccessToken.of_json in
       let clientSecret =
-        field_map_exn json "clientSecret" ClientSecret.of_json in
-      let clientId = field_map_exn json "clientId" ClientId.of_json in
+        field_map_exn json__ "clientSecret" ClientSecret.of_json in
+      let clientId = field_map_exn json__ "clientId" ClientId.of_json in
       make ?oAuthRequest ?accessToken ~clientSecret ~clientId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7781,9 +9188,9 @@ module SnowflakeConnectorProfileCredentials =
         Username.of_xml (Xml.child_exn ~context:context_ xml_arg0 "username") in
       make ~password ~username ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let password = field_map_exn json "password" Password.of_json in
-      let username = field_map_exn json "username" Username.of_json in
+    let of_json json__ =
+      let password = field_map_exn json__ "password" Password.of_json in
+      let username = field_map_exn json__ "username" Username.of_json in
       make ~password ~username ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7806,9 +9213,9 @@ module TrendmicroConnectorProfileCredentials =
           (Xml.child_exn ~context:context_ xml_arg0 "apiSecretKey") in
       make ~apiSecretKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let apiSecretKey =
-        field_map_exn json "apiSecretKey" ApiSecretKey.of_json in
+        field_map_exn json__ "apiSecretKey" ApiSecretKey.of_json in
       make ~apiSecretKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7834,9 +9241,9 @@ module VeevaConnectorProfileCredentials =
         Username.of_xml (Xml.child_exn ~context:context_ xml_arg0 "username") in
       make ~password ~username ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let password = field_map_exn json "password" Password.of_json in
-      let username = field_map_exn json "username" Username.of_json in
+    let of_json json__ =
+      let password = field_map_exn json__ "password" Password.of_json in
+      let username = field_map_exn json__ "username" Username.of_json in
       make ~password ~username ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7883,13 +9290,13 @@ module ZendeskConnectorProfileCredentials =
         ClientId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "clientId") in
       make ?oAuthRequest ?accessToken ~clientSecret ~clientId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let oAuthRequest =
-        field_map json "oAuthRequest" ConnectorOAuthRequest.of_json in
-      let accessToken = field_map json "accessToken" AccessToken.of_json in
+        field_map json__ "oAuthRequest" ConnectorOAuthRequest.of_json in
+      let accessToken = field_map json__ "accessToken" AccessToken.of_json in
       let clientSecret =
-        field_map_exn json "clientSecret" ClientSecret.of_json in
-      let clientId = field_map_exn json "clientId" ClientId.of_json in
+        field_map_exn json__ "clientSecret" ClientSecret.of_json in
+      let clientId = field_map_exn json__ "clientId" ClientId.of_json in
       make ?oAuthRequest ?accessToken ~clientSecret ~clientId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7972,13 +9379,13 @@ module ExecutionDetails =
       make ?mostRecentExecutionStatus ?mostRecentExecutionTime
         ?mostRecentExecutionMessage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mostRecentExecutionStatus =
-        field_map json "mostRecentExecutionStatus" ExecutionStatus.of_json in
+        field_map json__ "mostRecentExecutionStatus" ExecutionStatus.of_json in
       let mostRecentExecutionTime =
-        field_map json "mostRecentExecutionTime" Date.of_json in
+        field_map json__ "mostRecentExecutionTime" Date.of_json in
       let mostRecentExecutionMessage =
-        field_map json "mostRecentExecutionMessage"
+        field_map json__ "mostRecentExecutionMessage"
           MostRecentExecutionMessage.of_json in
       make ?mostRecentExecutionStatus ?mostRecentExecutionTime
         ?mostRecentExecutionMessage ()
@@ -8102,6 +9509,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -8167,6 +9576,9 @@ module ConnectorModeList =
   struct
     type nonrec t = ConnectorMode.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectorMode.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8277,23 +9689,52 @@ module RegisteredBy =
     let of_json j = string_of_json ~kind:"RegisteredBy" j
     let to_json = simple_to_json to_value
   end
+module SupportedDataTransferTypeList =
+  struct
+    type nonrec t = SupportedDataTransferType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SupportedDataTransferType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SupportedDataTransferType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SupportedDataTransferTypeList"
+        ~of_json:SupportedDataTransferType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ConnectorEntity =
   struct
     type nonrec t =
       {
-      name: Name.t [@ocaml.doc "The name of the connector entity."];
+      name: Name.t option [@ocaml.doc "The name of the connector entity."];
       label: Label.t option
         [@ocaml.doc "The label applied to the connector entity."];
       hasNestedEntities: Boolean.t option
         [@ocaml.doc
           "Specifies whether the connector entity is a parent or a category and has more entities nested underneath it. If another call is made with entitiesPath = \"the_current_entity_name_with_hasNestedEntities_true\", then it returns the nested entities underneath it. This provides a way to retrieve all supported entities in a recursive fashion."]}
-    let context_ = "ConnectorEntity"
-    let make ?label =
-      fun ?hasNestedEntities ->
-        fun ~name -> fun () -> { label; hasNestedEntities; name }
+    let make ?name =
+      fun ?label ->
+        fun ?hasNestedEntities ->
+          fun () -> { name; label; hasNestedEntities }
     let to_value x =
       structure_to_value
-        [("name", (Some (Name.to_value x.name)));
+        [("name", (Option.map x.name ~f:Name.to_value));
         ("label", (Option.map x.label ~f:Label.to_value));
         ("hasNestedEntities",
           (Option.map x.hasNestedEntities ~f:Boolean.to_value))]
@@ -8303,16 +9744,15 @@ module ConnectorEntity =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "hasNestedEntities") in
       let label = (Option.map ~f:Label.of_xml) (Xml.child xml_arg0 "label") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?hasNestedEntities ?label ~name ()
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
+      make ?hasNestedEntities ?label ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hasNestedEntities =
-        field_map json "hasNestedEntities" Boolean.of_json in
-      let label = field_map json "label" Label.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      make ?hasNestedEntities ?label ~name ()
+        field_map json__ "hasNestedEntities" Boolean.of_json in
+      let label = field_map json__ "label" Label.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      make ?hasNestedEntities ?label ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The high-level entity that can be queried in Amazon AppFlow. For example, a Salesforce entity might be an Account or Opportunity, whereas a ServiceNow entity might be an Incident."]
@@ -8347,22 +9787,45 @@ module ExecutionResult =
         [@ocaml.doc
           "The total number of bytes written as a result of the flow run."];
       recordsProcessed: Long.t option
-        [@ocaml.doc "The number of records processed in the flow run."]}
+        [@ocaml.doc "The number of records processed in the flow run."];
+      numParallelProcesses: Long.t option
+        [@ocaml.doc
+          "The number of processes that Amazon AppFlow ran at the same time when it retrieved your data."];
+      maxPageSize: Long.t option
+        [@ocaml.doc
+          "The maximum number of records that Amazon AppFlow receives in each page of the response from your SAP application."]}
     let make ?errorInfo =
       fun ?bytesProcessed ->
         fun ?bytesWritten ->
           fun ?recordsProcessed ->
-            fun () ->
-              { errorInfo; bytesProcessed; bytesWritten; recordsProcessed }
+            fun ?numParallelProcesses ->
+              fun ?maxPageSize ->
+                fun () ->
+                  {
+                    errorInfo;
+                    bytesProcessed;
+                    bytesWritten;
+                    recordsProcessed;
+                    numParallelProcesses;
+                    maxPageSize
+                  }
     let to_value x =
       structure_to_value
         [("errorInfo", (Option.map x.errorInfo ~f:ErrorInfo.to_value));
         ("bytesProcessed", (Option.map x.bytesProcessed ~f:Long.to_value));
         ("bytesWritten", (Option.map x.bytesWritten ~f:Long.to_value));
         ("recordsProcessed",
-          (Option.map x.recordsProcessed ~f:Long.to_value))]
+          (Option.map x.recordsProcessed ~f:Long.to_value));
+        ("numParallelProcesses",
+          (Option.map x.numParallelProcesses ~f:Long.to_value));
+        ("maxPageSize", (Option.map x.maxPageSize ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxPageSize =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "maxPageSize") in
+      let numParallelProcesses =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "numParallelProcesses") in
       let recordsProcessed =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "recordsProcessed") in
       let bytesWritten =
@@ -8371,16 +9834,50 @@ module ExecutionResult =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "bytesProcessed") in
       let errorInfo =
         (Option.map ~f:ErrorInfo.of_xml) (Xml.child xml_arg0 "errorInfo") in
-      make ?recordsProcessed ?bytesWritten ?bytesProcessed ?errorInfo ()
+      make ?maxPageSize ?numParallelProcesses ?recordsProcessed ?bytesWritten
+        ?bytesProcessed ?errorInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recordsProcessed = field_map json "recordsProcessed" Long.of_json in
-      let bytesWritten = field_map json "bytesWritten" Long.of_json in
-      let bytesProcessed = field_map json "bytesProcessed" Long.of_json in
-      let errorInfo = field_map json "errorInfo" ErrorInfo.of_json in
-      make ?recordsProcessed ?bytesWritten ?bytesProcessed ?errorInfo ()
+    let of_json json__ =
+      let maxPageSize = field_map json__ "maxPageSize" Long.of_json in
+      let numParallelProcesses =
+        field_map json__ "numParallelProcesses" Long.of_json in
+      let recordsProcessed = field_map json__ "recordsProcessed" Long.of_json in
+      let bytesWritten = field_map json__ "bytesWritten" Long.of_json in
+      let bytesProcessed = field_map json__ "bytesProcessed" Long.of_json in
+      let errorInfo = field_map json__ "errorInfo" ErrorInfo.of_json in
+      make ?maxPageSize ?numParallelProcesses ?recordsProcessed ?bytesWritten
+        ?bytesProcessed ?errorInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies the end result of the flow run."]
+module MetadataCatalogDetails =
+  struct
+    type nonrec t = MetadataCatalogDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetadataCatalogDetail.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetadataCatalogDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetadataCatalogDetails"
+        ~of_json:MetadataCatalogDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AuthenticationConfig =
   struct
     type nonrec t =
@@ -8455,19 +9952,19 @@ module AuthenticationConfig =
       make ?customAuthConfigs ?oAuth2Defaults ?isCustomAuthSupported
         ?isOAuth2Supported ?isApiKeyAuthSupported ?isBasicAuthSupported ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customAuthConfigs =
-        field_map json "customAuthConfigs" CustomAuthConfigList.of_json in
+        field_map json__ "customAuthConfigs" CustomAuthConfigList.of_json in
       let oAuth2Defaults =
-        field_map json "oAuth2Defaults" OAuth2Defaults.of_json in
+        field_map json__ "oAuth2Defaults" OAuth2Defaults.of_json in
       let isCustomAuthSupported =
-        field_map json "isCustomAuthSupported" Boolean.of_json in
+        field_map json__ "isCustomAuthSupported" Boolean.of_json in
       let isOAuth2Supported =
-        field_map json "isOAuth2Supported" Boolean.of_json in
+        field_map json__ "isOAuth2Supported" Boolean.of_json in
       let isApiKeyAuthSupported =
-        field_map json "isApiKeyAuthSupported" Boolean.of_json in
+        field_map json__ "isApiKeyAuthSupported" Boolean.of_json in
       let isBasicAuthSupported =
-        field_map json "isBasicAuthSupported" Boolean.of_json in
+        field_map json__ "isBasicAuthSupported" Boolean.of_json in
       make ?customAuthConfigs ?oAuth2Defaults ?isCustomAuthSupported
         ?isOAuth2Supported ?isApiKeyAuthSupported ?isBasicAuthSupported ()
     let to_json v = composed_to_json to_value v
@@ -8518,7 +10015,9 @@ module ConnectorMetadata =
           "The connector metadata specific to Amazon Connect Customer Profiles."];
       honeycode: HoneycodeMetadata.t option
         [@ocaml.doc "The connector metadata specific to Amazon Honeycode."];
-      sAPOData: SAPODataMetadata.t option }
+      sAPOData: SAPODataMetadata.t option ;
+      pardot: PardotMetadata.t option
+        [@ocaml.doc "The connector metadata specific to Salesforce Pardot."]}
     let make ?amplitude =
       fun ?datadog ->
         fun ?dynatrace ->
@@ -8540,30 +10039,32 @@ module ConnectorMetadata =
                                         fun ?customerProfiles ->
                                           fun ?honeycode ->
                                             fun ?sAPOData ->
-                                              fun () ->
-                                                {
-                                                  amplitude;
-                                                  datadog;
-                                                  dynatrace;
-                                                  googleAnalytics;
-                                                  inforNexus;
-                                                  marketo;
-                                                  redshift;
-                                                  s3;
-                                                  salesforce;
-                                                  serviceNow;
-                                                  singular;
-                                                  slack;
-                                                  snowflake;
-                                                  trendmicro;
-                                                  veeva;
-                                                  zendesk;
-                                                  eventBridge;
-                                                  upsolver;
-                                                  customerProfiles;
-                                                  honeycode;
-                                                  sAPOData
-                                                }
+                                              fun ?pardot ->
+                                                fun () ->
+                                                  {
+                                                    amplitude;
+                                                    datadog;
+                                                    dynatrace;
+                                                    googleAnalytics;
+                                                    inforNexus;
+                                                    marketo;
+                                                    redshift;
+                                                    s3;
+                                                    salesforce;
+                                                    serviceNow;
+                                                    singular;
+                                                    slack;
+                                                    snowflake;
+                                                    trendmicro;
+                                                    veeva;
+                                                    zendesk;
+                                                    eventBridge;
+                                                    upsolver;
+                                                    customerProfiles;
+                                                    honeycode;
+                                                    sAPOData;
+                                                    pardot
+                                                  }
     let to_value x =
       structure_to_value
         [("Amplitude",
@@ -8594,9 +10095,12 @@ module ConnectorMetadata =
         ("CustomerProfiles",
           (Option.map x.customerProfiles ~f:CustomerProfilesMetadata.to_value));
         ("Honeycode", (Option.map x.honeycode ~f:HoneycodeMetadata.to_value));
-        ("SAPOData", (Option.map x.sAPOData ~f:SAPODataMetadata.to_value))]
+        ("SAPOData", (Option.map x.sAPOData ~f:SAPODataMetadata.to_value));
+        ("Pardot", (Option.map x.pardot ~f:PardotMetadata.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let pardot =
+        (Option.map ~f:PardotMetadata.of_xml) (Xml.child xml_arg0 "Pardot") in
       let sAPOData =
         (Option.map ~f:SAPODataMetadata.of_xml)
           (Xml.child xml_arg0 "SAPOData") in
@@ -8653,40 +10157,45 @@ module ConnectorMetadata =
       let amplitude =
         (Option.map ~f:AmplitudeMetadata.of_xml)
           (Xml.child xml_arg0 "Amplitude") in
-      make ?sAPOData ?honeycode ?customerProfiles ?upsolver ?eventBridge
-        ?zendesk ?veeva ?trendmicro ?snowflake ?slack ?singular ?serviceNow
-        ?salesforce ?s3 ?redshift ?marketo ?inforNexus ?googleAnalytics
-        ?dynatrace ?datadog ?amplitude ()
+      make ?pardot ?sAPOData ?honeycode ?customerProfiles ?upsolver
+        ?eventBridge ?zendesk ?veeva ?trendmicro ?snowflake ?slack ?singular
+        ?serviceNow ?salesforce ?s3 ?redshift ?marketo ?inforNexus
+        ?googleAnalytics ?dynatrace ?datadog ?amplitude ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sAPOData = field_map json "SAPOData" SAPODataMetadata.of_json in
-      let honeycode = field_map json "Honeycode" HoneycodeMetadata.of_json in
+    let of_json json__ =
+      let pardot = field_map json__ "Pardot" PardotMetadata.of_json in
+      let sAPOData = field_map json__ "SAPOData" SAPODataMetadata.of_json in
+      let honeycode = field_map json__ "Honeycode" HoneycodeMetadata.of_json in
       let customerProfiles =
-        field_map json "CustomerProfiles" CustomerProfilesMetadata.of_json in
-      let upsolver = field_map json "Upsolver" UpsolverMetadata.of_json in
+        field_map json__ "CustomerProfiles" CustomerProfilesMetadata.of_json in
+      let upsolver = field_map json__ "Upsolver" UpsolverMetadata.of_json in
       let eventBridge =
-        field_map json "EventBridge" EventBridgeMetadata.of_json in
-      let zendesk = field_map json "Zendesk" ZendeskMetadata.of_json in
-      let veeva = field_map json "Veeva" VeevaMetadata.of_json in
-      let trendmicro = field_map json "Trendmicro" TrendmicroMetadata.of_json in
-      let snowflake = field_map json "Snowflake" SnowflakeMetadata.of_json in
-      let slack = field_map json "Slack" SlackMetadata.of_json in
-      let singular = field_map json "Singular" SingularMetadata.of_json in
-      let serviceNow = field_map json "ServiceNow" ServiceNowMetadata.of_json in
-      let salesforce = field_map json "Salesforce" SalesforceMetadata.of_json in
-      let s3 = field_map json "S3" S3Metadata.of_json in
-      let redshift = field_map json "Redshift" RedshiftMetadata.of_json in
-      let marketo = field_map json "Marketo" MarketoMetadata.of_json in
-      let inforNexus = field_map json "InforNexus" InforNexusMetadata.of_json in
+        field_map json__ "EventBridge" EventBridgeMetadata.of_json in
+      let zendesk = field_map json__ "Zendesk" ZendeskMetadata.of_json in
+      let veeva = field_map json__ "Veeva" VeevaMetadata.of_json in
+      let trendmicro =
+        field_map json__ "Trendmicro" TrendmicroMetadata.of_json in
+      let snowflake = field_map json__ "Snowflake" SnowflakeMetadata.of_json in
+      let slack = field_map json__ "Slack" SlackMetadata.of_json in
+      let singular = field_map json__ "Singular" SingularMetadata.of_json in
+      let serviceNow =
+        field_map json__ "ServiceNow" ServiceNowMetadata.of_json in
+      let salesforce =
+        field_map json__ "Salesforce" SalesforceMetadata.of_json in
+      let s3 = field_map json__ "S3" S3Metadata.of_json in
+      let redshift = field_map json__ "Redshift" RedshiftMetadata.of_json in
+      let marketo = field_map json__ "Marketo" MarketoMetadata.of_json in
+      let inforNexus =
+        field_map json__ "InforNexus" InforNexusMetadata.of_json in
       let googleAnalytics =
-        field_map json "GoogleAnalytics" GoogleAnalyticsMetadata.of_json in
-      let dynatrace = field_map json "Dynatrace" DynatraceMetadata.of_json in
-      let datadog = field_map json "Datadog" DatadogMetadata.of_json in
-      let amplitude = field_map json "Amplitude" AmplitudeMetadata.of_json in
-      make ?sAPOData ?honeycode ?customerProfiles ?upsolver ?eventBridge
-        ?zendesk ?veeva ?trendmicro ?snowflake ?slack ?singular ?serviceNow
-        ?salesforce ?s3 ?redshift ?marketo ?inforNexus ?googleAnalytics
-        ?dynatrace ?datadog ?amplitude ()
+        field_map json__ "GoogleAnalytics" GoogleAnalyticsMetadata.of_json in
+      let dynatrace = field_map json__ "Dynatrace" DynatraceMetadata.of_json in
+      let datadog = field_map json__ "Datadog" DatadogMetadata.of_json in
+      let amplitude = field_map json__ "Amplitude" AmplitudeMetadata.of_json in
+      make ?pardot ?sAPOData ?honeycode ?customerProfiles ?upsolver
+        ?eventBridge ?zendesk ?veeva ?trendmicro ?snowflake ?slack ?singular
+        ?serviceNow ?salesforce ?s3 ?redshift ?marketo ?inforNexus
+        ?googleAnalytics ?dynatrace ?datadog ?amplitude ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure to specify connector-specific metadata such as oAuthScopes, supportedRegions, privateLinkServiceUrl, and so on."]
@@ -8709,9 +10218,9 @@ module ConnectorProvisioningConfig =
           (Xml.child xml_arg0 "lambda") in
       make ?lambda ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lambda =
-        field_map json "lambda" LambdaConnectorProvisioningConfig.of_json in
+        field_map json__ "lambda" LambdaConnectorProvisioningConfig.of_json in
       make ?lambda ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8720,6 +10229,9 @@ module ConnectorRuntimeSettingList =
   struct
     type nonrec t = ConnectorRuntimeSetting.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectorRuntimeSetting.to_value)) |>
         (fun x -> `List x)
@@ -8751,6 +10263,9 @@ module ConnectorTypeList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectorType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8795,6 +10310,9 @@ module SchedulingFrequencyTypeList =
   struct
     type nonrec t = ScheduleFrequencyType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScheduleFrequencyType.to_value)) |>
         (fun x -> `List x)
@@ -8821,6 +10339,9 @@ module SupportedApiVersionList =
   struct
     type nonrec t = SupportedApiVersion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SupportedApiVersion.to_value)) |>
         (fun x -> `List x)
@@ -8843,10 +10364,41 @@ module SupportedApiVersionList =
         ~of_json:SupportedApiVersion.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SupportedDataTransferApis =
+  struct
+    type nonrec t = DataTransferApi.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DataTransferApi.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DataTransferApi.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SupportedDataTransferApis"
+        ~of_json:DataTransferApi.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module SupportedOperatorList =
   struct
     type nonrec t = Operators.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Operators.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8871,6 +10423,9 @@ module TriggerTypeList =
   struct
     type nonrec t = TriggerType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TriggerType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8984,7 +10539,10 @@ module ConnectorProfileProperties =
         [@ocaml.doc "The connector-specific properties required by Zendesk."];
       sAPOData: SAPODataConnectorProfileProperties.t option ;
       customConnector: CustomConnectorProfileProperties.t option
-        [@ocaml.doc "The properties required by the custom connector."]}
+        [@ocaml.doc "The properties required by the custom connector."];
+      pardot: PardotConnectorProfileProperties.t option
+        [@ocaml.doc
+          "The connector-specific properties required by Salesforce Pardot."]}
     let make ?amplitude =
       fun ?datadog ->
         fun ?dynatrace ->
@@ -9003,27 +10561,29 @@ module ConnectorProfileProperties =
                                   fun ?zendesk ->
                                     fun ?sAPOData ->
                                       fun ?customConnector ->
-                                        fun () ->
-                                          {
-                                            amplitude;
-                                            datadog;
-                                            dynatrace;
-                                            googleAnalytics;
-                                            honeycode;
-                                            inforNexus;
-                                            marketo;
-                                            redshift;
-                                            salesforce;
-                                            serviceNow;
-                                            singular;
-                                            slack;
-                                            snowflake;
-                                            trendmicro;
-                                            veeva;
-                                            zendesk;
-                                            sAPOData;
-                                            customConnector
-                                          }
+                                        fun ?pardot ->
+                                          fun () ->
+                                            {
+                                              amplitude;
+                                              datadog;
+                                              dynatrace;
+                                              googleAnalytics;
+                                              honeycode;
+                                              inforNexus;
+                                              marketo;
+                                              redshift;
+                                              salesforce;
+                                              serviceNow;
+                                              singular;
+                                              slack;
+                                              snowflake;
+                                              trendmicro;
+                                              veeva;
+                                              zendesk;
+                                              sAPOData;
+                                              customConnector;
+                                              pardot
+                                            }
     let to_value x =
       structure_to_value
         [("Amplitude",
@@ -9074,9 +10634,14 @@ module ConnectorProfileProperties =
              ~f:SAPODataConnectorProfileProperties.to_value));
         ("CustomConnector",
           (Option.map x.customConnector
-             ~f:CustomConnectorProfileProperties.to_value))]
+             ~f:CustomConnectorProfileProperties.to_value));
+        ("Pardot",
+          (Option.map x.pardot ~f:PardotConnectorProfileProperties.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let pardot =
+        (Option.map ~f:PardotConnectorProfileProperties.of_xml)
+          (Xml.child xml_arg0 "Pardot") in
       let customConnector =
         (Option.map ~f:CustomConnectorProfileProperties.of_xml)
           (Xml.child xml_arg0 "CustomConnector") in
@@ -9131,61 +10696,66 @@ module ConnectorProfileProperties =
       let amplitude =
         (Option.map ~f:AmplitudeConnectorProfileProperties.of_xml)
           (Xml.child xml_arg0 "Amplitude") in
-      make ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro ?snowflake
-        ?slack ?singular ?serviceNow ?salesforce ?redshift ?marketo
-        ?inforNexus ?honeycode ?googleAnalytics ?dynatrace ?datadog
+      make ?pardot ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro
+        ?snowflake ?slack ?singular ?serviceNow ?salesforce ?redshift
+        ?marketo ?inforNexus ?honeycode ?googleAnalytics ?dynatrace ?datadog
         ?amplitude ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let pardot =
+        field_map json__ "Pardot" PardotConnectorProfileProperties.of_json in
       let customConnector =
-        field_map json "CustomConnector"
+        field_map json__ "CustomConnector"
           CustomConnectorProfileProperties.of_json in
       let sAPOData =
-        field_map json "SAPOData" SAPODataConnectorProfileProperties.of_json in
+        field_map json__ "SAPOData"
+          SAPODataConnectorProfileProperties.of_json in
       let zendesk =
-        field_map json "Zendesk" ZendeskConnectorProfileProperties.of_json in
+        field_map json__ "Zendesk" ZendeskConnectorProfileProperties.of_json in
       let veeva =
-        field_map json "Veeva" VeevaConnectorProfileProperties.of_json in
+        field_map json__ "Veeva" VeevaConnectorProfileProperties.of_json in
       let trendmicro =
-        field_map json "Trendmicro"
+        field_map json__ "Trendmicro"
           TrendmicroConnectorProfileProperties.of_json in
       let snowflake =
-        field_map json "Snowflake"
+        field_map json__ "Snowflake"
           SnowflakeConnectorProfileProperties.of_json in
       let slack =
-        field_map json "Slack" SlackConnectorProfileProperties.of_json in
+        field_map json__ "Slack" SlackConnectorProfileProperties.of_json in
       let singular =
-        field_map json "Singular" SingularConnectorProfileProperties.of_json in
+        field_map json__ "Singular"
+          SingularConnectorProfileProperties.of_json in
       let serviceNow =
-        field_map json "ServiceNow"
+        field_map json__ "ServiceNow"
           ServiceNowConnectorProfileProperties.of_json in
       let salesforce =
-        field_map json "Salesforce"
+        field_map json__ "Salesforce"
           SalesforceConnectorProfileProperties.of_json in
       let redshift =
-        field_map json "Redshift" RedshiftConnectorProfileProperties.of_json in
+        field_map json__ "Redshift"
+          RedshiftConnectorProfileProperties.of_json in
       let marketo =
-        field_map json "Marketo" MarketoConnectorProfileProperties.of_json in
+        field_map json__ "Marketo" MarketoConnectorProfileProperties.of_json in
       let inforNexus =
-        field_map json "InforNexus"
+        field_map json__ "InforNexus"
           InforNexusConnectorProfileProperties.of_json in
       let honeycode =
-        field_map json "Honeycode"
+        field_map json__ "Honeycode"
           HoneycodeConnectorProfileProperties.of_json in
       let googleAnalytics =
-        field_map json "GoogleAnalytics"
+        field_map json__ "GoogleAnalytics"
           GoogleAnalyticsConnectorProfileProperties.of_json in
       let dynatrace =
-        field_map json "Dynatrace"
+        field_map json__ "Dynatrace"
           DynatraceConnectorProfileProperties.of_json in
       let datadog =
-        field_map json "Datadog" DatadogConnectorProfileProperties.of_json in
+        field_map json__ "Datadog" DatadogConnectorProfileProperties.of_json in
       let amplitude =
-        field_map json "Amplitude"
+        field_map json__ "Amplitude"
           AmplitudeConnectorProfileProperties.of_json in
-      make ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro ?snowflake
-        ?slack ?singular ?serviceNow ?salesforce ?redshift ?marketo
-        ?inforNexus ?honeycode ?googleAnalytics ?dynatrace ?datadog
+      make ?pardot ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro
+        ?snowflake ?slack ?singular ?serviceNow ?salesforce ?redshift
+        ?marketo ?inforNexus ?honeycode ?googleAnalytics ?dynatrace ?datadog
         ?amplitude ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9230,15 +10800,15 @@ module PrivateConnectionProvisioningState =
           (Xml.child xml_arg0 "status") in
       make ?failureCause ?failureMessage ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureCause =
-        field_map json "failureCause"
+        field_map json__ "failureCause"
           PrivateConnectionProvisioningFailureCause.of_json in
       let failureMessage =
-        field_map json "failureMessage"
+        field_map json__ "failureMessage"
           PrivateConnectionProvisioningFailureMessage.of_json in
       let status =
-        field_map json "status" PrivateConnectionProvisioningStatus.of_json in
+        field_map json__ "status" PrivateConnectionProvisioningStatus.of_json in
       make ?failureCause ?failureMessage ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies the private connection provisioning state."]
@@ -9309,16 +10879,16 @@ module DestinationFieldProperties =
       make ?supportedWriteOperations ?isDefaultedOnCreate ?isUpdatable
         ?isUpsertable ?isNullable ?isCreatable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let supportedWriteOperations =
-        field_map json "supportedWriteOperations"
+        field_map json__ "supportedWriteOperations"
           SupportedWriteOperationList.of_json in
       let isDefaultedOnCreate =
-        field_map json "isDefaultedOnCreate" Boolean.of_json in
-      let isUpdatable = field_map json "isUpdatable" Boolean.of_json in
-      let isUpsertable = field_map json "isUpsertable" Boolean.of_json in
-      let isNullable = field_map json "isNullable" Boolean.of_json in
-      let isCreatable = field_map json "isCreatable" Boolean.of_json in
+        field_map json__ "isDefaultedOnCreate" Boolean.of_json in
+      let isUpdatable = field_map json__ "isUpdatable" Boolean.of_json in
+      let isUpsertable = field_map json__ "isUpsertable" Boolean.of_json in
+      let isNullable = field_map json__ "isNullable" Boolean.of_json in
+      let isCreatable = field_map json__ "isCreatable" Boolean.of_json in
       make ?supportedWriteOperations ?isDefaultedOnCreate ?isUpdatable
         ?isUpsertable ?isNullable ?isCreatable ()
     let to_json v = composed_to_json to_value v
@@ -9382,12 +10952,12 @@ module SourceFieldProperties =
       make ?isTimestampFieldForIncrementalQueries ?isQueryable ?isRetrievable
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let isTimestampFieldForIncrementalQueries =
-        field_map json "isTimestampFieldForIncrementalQueries"
+        field_map json__ "isTimestampFieldForIncrementalQueries"
           Boolean.of_json in
-      let isQueryable = field_map json "isQueryable" Boolean.of_json in
-      let isRetrievable = field_map json "isRetrievable" Boolean.of_json in
+      let isQueryable = field_map json__ "isQueryable" Boolean.of_json in
+      let isRetrievable = field_map json__ "isRetrievable" Boolean.of_json in
       make ?isTimestampFieldForIncrementalQueries ?isQueryable ?isRetrievable
         ()
     let to_json v = composed_to_json to_value v
@@ -9397,23 +10967,21 @@ module SupportedFieldTypeDetails =
   struct
     type nonrec t =
       {
-      v1: FieldTypeDetails.t
+      v1: FieldTypeDetails.t option
         [@ocaml.doc
           "The initial supported version for fieldType. If this is later changed to a different version, v2 will be introduced."]}
-    let context_ = "SupportedFieldTypeDetails"
-    let make ~v1 = fun () -> { v1 }
+    let make ?v1 = fun () -> { v1 }
     let to_value x =
-      structure_to_value [("v1", (Some (FieldTypeDetails.to_value x.v1)))]
+      structure_to_value
+        [("v1", (Option.map x.v1 ~f:FieldTypeDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let v1 =
-        FieldTypeDetails.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "v1") in
-      make ~v1 ()
+        (Option.map ~f:FieldTypeDetails.of_xml) (Xml.child xml_arg0 "v1") in
+      make ?v1 ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let v1 = field_map_exn json "v1" FieldTypeDetails.of_json in
-      make ~v1 ()
+    let of_json json__ =
+      let v1 = field_map json__ "v1" FieldTypeDetails.of_json in make ?v1 ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details regarding all the supported FieldTypes and their corresponding filterOperators and supportedValues."]
@@ -9489,20 +11057,69 @@ module DestinationFlowConfig =
       make ~destinationConnectorProperties ?connectorProfileName ?apiVersion
         ~connectorType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationConnectorProperties =
-        field_map_exn json "destinationConnectorProperties"
+        field_map_exn json__ "destinationConnectorProperties"
           DestinationConnectorProperties.of_json in
       let connectorProfileName =
-        field_map json "connectorProfileName" ConnectorProfileName.of_json in
-      let apiVersion = field_map json "apiVersion" ApiVersion.of_json in
+        field_map json__ "connectorProfileName" ConnectorProfileName.of_json in
+      let apiVersion = field_map json__ "apiVersion" ApiVersion.of_json in
       let connectorType =
-        field_map_exn json "connectorType" ConnectorType.of_json in
+        field_map_exn json__ "connectorType" ConnectorType.of_json in
       make ~destinationConnectorProperties ?connectorProfileName ?apiVersion
         ~connectorType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about the configuration of destination connectors present in the flow."]
+module GlueDataCatalogConfig =
+  struct
+    type nonrec t =
+      {
+      roleArn: GlueDataCatalogIAMRole.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM role that grants Amazon AppFlow the permissions it needs to create Data Catalog tables, databases, and partitions. For an example IAM policy that has the required permissions, see Identity-based policy examples for Amazon AppFlow."];
+      databaseName: GlueDataCatalogDatabaseName.t
+        [@ocaml.doc
+          "The name of the Data Catalog database that stores the metadata tables that Amazon AppFlow creates in your Amazon Web Services account. These tables contain metadata for the data that's transferred by the flow that you configure with this parameter. When you configure a new flow with this parameter, you must specify an existing database."];
+      tablePrefix: GlueDataCatalogTablePrefix.t
+        [@ocaml.doc
+          "A naming prefix for each Data Catalog table that Amazon AppFlow creates for the flow that you configure with this setting. Amazon AppFlow adds the prefix to the beginning of the each table name."]}
+    let context_ = "GlueDataCatalogConfig"
+    let make ~roleArn =
+      fun ~databaseName ->
+        fun ~tablePrefix -> fun () -> { roleArn; databaseName; tablePrefix }
+    let to_value x =
+      structure_to_value
+        [("roleArn", (Some (GlueDataCatalogIAMRole.to_value x.roleArn)));
+        ("databaseName",
+          (Some (GlueDataCatalogDatabaseName.to_value x.databaseName)));
+        ("tablePrefix",
+          (Some (GlueDataCatalogTablePrefix.to_value x.tablePrefix)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tablePrefix =
+        GlueDataCatalogTablePrefix.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "tablePrefix") in
+      let databaseName =
+        GlueDataCatalogDatabaseName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "databaseName") in
+      let roleArn =
+        GlueDataCatalogIAMRole.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
+      make ~tablePrefix ~databaseName ~roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tablePrefix =
+        field_map_exn json__ "tablePrefix" GlueDataCatalogTablePrefix.of_json in
+      let databaseName =
+        field_map_exn json__ "databaseName"
+          GlueDataCatalogDatabaseName.of_json in
+      let roleArn =
+        field_map_exn json__ "roleArn" GlueDataCatalogIAMRole.of_json in
+      make ~tablePrefix ~databaseName ~roleArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the configuration that Amazon AppFlow uses when it catalogs your data with the Glue Data Catalog. When Amazon AppFlow catalogs your data, it stores metadata in Data Catalog tables. This metadata represents the data that's transferred by the flow that you configure with these settings. You can configure a flow with these settings only when the flow destination is Amazon S3."]
 module IncrementalPullConfig =
   struct
     type nonrec t =
@@ -9523,9 +11140,10 @@ module IncrementalPullConfig =
           (Xml.child xml_arg0 "datetimeTypeFieldName") in
       make ?datetimeTypeFieldName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datetimeTypeFieldName =
-        field_map json "datetimeTypeFieldName" DatetimeTypeFieldName.of_json in
+        field_map json__ "datetimeTypeFieldName"
+          DatetimeTypeFieldName.of_json in
       make ?datetimeTypeFieldName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9577,7 +11195,10 @@ module SourceConnectorProperties =
         [@ocaml.doc
           "Specifies the information that is required for querying Zendesk."];
       sAPOData: SAPODataSourceProperties.t option ;
-      customConnector: CustomConnectorSourceProperties.t option }
+      customConnector: CustomConnectorSourceProperties.t option ;
+      pardot: PardotSourceProperties.t option
+        [@ocaml.doc
+          "Specifies the information that is required for querying Salesforce Pardot."]}
     let make ?amplitude =
       fun ?datadog ->
         fun ?dynatrace ->
@@ -9594,25 +11215,27 @@ module SourceConnectorProperties =
                               fun ?zendesk ->
                                 fun ?sAPOData ->
                                   fun ?customConnector ->
-                                    fun () ->
-                                      {
-                                        amplitude;
-                                        datadog;
-                                        dynatrace;
-                                        googleAnalytics;
-                                        inforNexus;
-                                        marketo;
-                                        s3;
-                                        salesforce;
-                                        serviceNow;
-                                        singular;
-                                        slack;
-                                        trendmicro;
-                                        veeva;
-                                        zendesk;
-                                        sAPOData;
-                                        customConnector
-                                      }
+                                    fun ?pardot ->
+                                      fun () ->
+                                        {
+                                          amplitude;
+                                          datadog;
+                                          dynatrace;
+                                          googleAnalytics;
+                                          inforNexus;
+                                          marketo;
+                                          s3;
+                                          salesforce;
+                                          serviceNow;
+                                          singular;
+                                          slack;
+                                          trendmicro;
+                                          veeva;
+                                          zendesk;
+                                          sAPOData;
+                                          customConnector;
+                                          pardot
+                                        }
     let to_value x =
       structure_to_value
         [("Amplitude",
@@ -9645,9 +11268,13 @@ module SourceConnectorProperties =
           (Option.map x.sAPOData ~f:SAPODataSourceProperties.to_value));
         ("CustomConnector",
           (Option.map x.customConnector
-             ~f:CustomConnectorSourceProperties.to_value))]
+             ~f:CustomConnectorSourceProperties.to_value));
+        ("Pardot", (Option.map x.pardot ~f:PardotSourceProperties.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let pardot =
+        (Option.map ~f:PardotSourceProperties.of_xml)
+          (Xml.child xml_arg0 "Pardot") in
       let customConnector =
         (Option.map ~f:CustomConnectorSourceProperties.of_xml)
           (Xml.child xml_arg0 "CustomConnector") in
@@ -9695,41 +11322,45 @@ module SourceConnectorProperties =
       let amplitude =
         (Option.map ~f:AmplitudeSourceProperties.of_xml)
           (Xml.child xml_arg0 "Amplitude") in
-      make ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro ?slack
-        ?singular ?serviceNow ?salesforce ?s3 ?marketo ?inforNexus
+      make ?pardot ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro
+        ?slack ?singular ?serviceNow ?salesforce ?s3 ?marketo ?inforNexus
         ?googleAnalytics ?dynatrace ?datadog ?amplitude ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let pardot = field_map json__ "Pardot" PardotSourceProperties.of_json in
       let customConnector =
-        field_map json "CustomConnector"
+        field_map json__ "CustomConnector"
           CustomConnectorSourceProperties.of_json in
       let sAPOData =
-        field_map json "SAPOData" SAPODataSourceProperties.of_json in
-      let zendesk = field_map json "Zendesk" ZendeskSourceProperties.of_json in
-      let veeva = field_map json "Veeva" VeevaSourceProperties.of_json in
+        field_map json__ "SAPOData" SAPODataSourceProperties.of_json in
+      let zendesk =
+        field_map json__ "Zendesk" ZendeskSourceProperties.of_json in
+      let veeva = field_map json__ "Veeva" VeevaSourceProperties.of_json in
       let trendmicro =
-        field_map json "Trendmicro" TrendmicroSourceProperties.of_json in
-      let slack = field_map json "Slack" SlackSourceProperties.of_json in
+        field_map json__ "Trendmicro" TrendmicroSourceProperties.of_json in
+      let slack = field_map json__ "Slack" SlackSourceProperties.of_json in
       let singular =
-        field_map json "Singular" SingularSourceProperties.of_json in
+        field_map json__ "Singular" SingularSourceProperties.of_json in
       let serviceNow =
-        field_map json "ServiceNow" ServiceNowSourceProperties.of_json in
+        field_map json__ "ServiceNow" ServiceNowSourceProperties.of_json in
       let salesforce =
-        field_map json "Salesforce" SalesforceSourceProperties.of_json in
-      let s3 = field_map json "S3" S3SourceProperties.of_json in
-      let marketo = field_map json "Marketo" MarketoSourceProperties.of_json in
+        field_map json__ "Salesforce" SalesforceSourceProperties.of_json in
+      let s3 = field_map json__ "S3" S3SourceProperties.of_json in
+      let marketo =
+        field_map json__ "Marketo" MarketoSourceProperties.of_json in
       let inforNexus =
-        field_map json "InforNexus" InforNexusSourceProperties.of_json in
+        field_map json__ "InforNexus" InforNexusSourceProperties.of_json in
       let googleAnalytics =
-        field_map json "GoogleAnalytics"
+        field_map json__ "GoogleAnalytics"
           GoogleAnalyticsSourceProperties.of_json in
       let dynatrace =
-        field_map json "Dynatrace" DynatraceSourceProperties.of_json in
-      let datadog = field_map json "Datadog" DatadogSourceProperties.of_json in
+        field_map json__ "Dynatrace" DynatraceSourceProperties.of_json in
+      let datadog =
+        field_map json__ "Datadog" DatadogSourceProperties.of_json in
       let amplitude =
-        field_map json "Amplitude" AmplitudeSourceProperties.of_json in
-      make ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro ?slack
-        ?singular ?serviceNow ?salesforce ?s3 ?marketo ?inforNexus
+        field_map json__ "Amplitude" AmplitudeSourceProperties.of_json in
+      make ?pardot ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro
+        ?slack ?singular ?serviceNow ?salesforce ?s3 ?marketo ?inforNexus
         ?googleAnalytics ?dynatrace ?datadog ?amplitude ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9796,16 +11427,16 @@ module Task =
       make ?taskProperties ~taskType ?destinationField ?connectorOperator
         ~sourceFields ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let taskProperties =
-        field_map json "taskProperties" TaskPropertiesMap.of_json in
-      let taskType = field_map_exn json "taskType" TaskType.of_json in
+        field_map json__ "taskProperties" TaskPropertiesMap.of_json in
+      let taskType = field_map_exn json__ "taskType" TaskType.of_json in
       let destinationField =
-        field_map json "destinationField" DestinationField.of_json in
+        field_map json__ "destinationField" DestinationField.of_json in
       let connectorOperator =
-        field_map json "connectorOperator" ConnectorOperator.of_json in
+        field_map json__ "connectorOperator" ConnectorOperator.of_json in
       let sourceFields =
-        field_map_exn json "sourceFields" SourceFields.of_json in
+        field_map_exn json__ "sourceFields" SourceFields.of_json in
       make ?taskProperties ~taskType ?destinationField ?connectorOperator
         ~sourceFields ()
     let to_json v = composed_to_json to_value v
@@ -9830,9 +11461,9 @@ module TriggerProperties =
           (Xml.child xml_arg0 "Scheduled") in
       make ?scheduled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduled =
-        field_map json "Scheduled" ScheduledTriggerProperties.of_json in
+        field_map json__ "Scheduled" ScheduledTriggerProperties.of_json in
       make ?scheduled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9890,7 +11521,10 @@ module ConnectorProfileCredentials =
         [@ocaml.doc
           "The connector-specific credentials required when using Zendesk."];
       sAPOData: SAPODataConnectorProfileCredentials.t option ;
-      customConnector: CustomConnectorProfileCredentials.t option }
+      customConnector: CustomConnectorProfileCredentials.t option ;
+      pardot: PardotConnectorProfileCredentials.t option
+        [@ocaml.doc
+          "The connector-specific credentials required when using Salesforce Pardot."]}
     let make ?amplitude =
       fun ?datadog ->
         fun ?dynatrace ->
@@ -9909,27 +11543,29 @@ module ConnectorProfileCredentials =
                                   fun ?zendesk ->
                                     fun ?sAPOData ->
                                       fun ?customConnector ->
-                                        fun () ->
-                                          {
-                                            amplitude;
-                                            datadog;
-                                            dynatrace;
-                                            googleAnalytics;
-                                            honeycode;
-                                            inforNexus;
-                                            marketo;
-                                            redshift;
-                                            salesforce;
-                                            serviceNow;
-                                            singular;
-                                            slack;
-                                            snowflake;
-                                            trendmicro;
-                                            veeva;
-                                            zendesk;
-                                            sAPOData;
-                                            customConnector
-                                          }
+                                        fun ?pardot ->
+                                          fun () ->
+                                            {
+                                              amplitude;
+                                              datadog;
+                                              dynatrace;
+                                              googleAnalytics;
+                                              honeycode;
+                                              inforNexus;
+                                              marketo;
+                                              redshift;
+                                              salesforce;
+                                              serviceNow;
+                                              singular;
+                                              slack;
+                                              snowflake;
+                                              trendmicro;
+                                              veeva;
+                                              zendesk;
+                                              sAPOData;
+                                              customConnector;
+                                              pardot
+                                            }
     let to_value x =
       structure_to_value
         [("Amplitude",
@@ -9983,9 +11619,14 @@ module ConnectorProfileCredentials =
              ~f:SAPODataConnectorProfileCredentials.to_value));
         ("CustomConnector",
           (Option.map x.customConnector
-             ~f:CustomConnectorProfileCredentials.to_value))]
+             ~f:CustomConnectorProfileCredentials.to_value));
+        ("Pardot",
+          (Option.map x.pardot ~f:PardotConnectorProfileCredentials.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let pardot =
+        (Option.map ~f:PardotConnectorProfileCredentials.of_xml)
+          (Xml.child xml_arg0 "Pardot") in
       let customConnector =
         (Option.map ~f:CustomConnectorProfileCredentials.of_xml)
           (Xml.child xml_arg0 "CustomConnector") in
@@ -10040,61 +11681,66 @@ module ConnectorProfileCredentials =
       let amplitude =
         (Option.map ~f:AmplitudeConnectorProfileCredentials.of_xml)
           (Xml.child xml_arg0 "Amplitude") in
-      make ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro ?snowflake
-        ?slack ?singular ?serviceNow ?salesforce ?redshift ?marketo
-        ?inforNexus ?honeycode ?googleAnalytics ?dynatrace ?datadog
+      make ?pardot ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro
+        ?snowflake ?slack ?singular ?serviceNow ?salesforce ?redshift
+        ?marketo ?inforNexus ?honeycode ?googleAnalytics ?dynatrace ?datadog
         ?amplitude ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let pardot =
+        field_map json__ "Pardot" PardotConnectorProfileCredentials.of_json in
       let customConnector =
-        field_map json "CustomConnector"
+        field_map json__ "CustomConnector"
           CustomConnectorProfileCredentials.of_json in
       let sAPOData =
-        field_map json "SAPOData" SAPODataConnectorProfileCredentials.of_json in
+        field_map json__ "SAPOData"
+          SAPODataConnectorProfileCredentials.of_json in
       let zendesk =
-        field_map json "Zendesk" ZendeskConnectorProfileCredentials.of_json in
+        field_map json__ "Zendesk" ZendeskConnectorProfileCredentials.of_json in
       let veeva =
-        field_map json "Veeva" VeevaConnectorProfileCredentials.of_json in
+        field_map json__ "Veeva" VeevaConnectorProfileCredentials.of_json in
       let trendmicro =
-        field_map json "Trendmicro"
+        field_map json__ "Trendmicro"
           TrendmicroConnectorProfileCredentials.of_json in
       let snowflake =
-        field_map json "Snowflake"
+        field_map json__ "Snowflake"
           SnowflakeConnectorProfileCredentials.of_json in
       let slack =
-        field_map json "Slack" SlackConnectorProfileCredentials.of_json in
+        field_map json__ "Slack" SlackConnectorProfileCredentials.of_json in
       let singular =
-        field_map json "Singular" SingularConnectorProfileCredentials.of_json in
+        field_map json__ "Singular"
+          SingularConnectorProfileCredentials.of_json in
       let serviceNow =
-        field_map json "ServiceNow"
+        field_map json__ "ServiceNow"
           ServiceNowConnectorProfileCredentials.of_json in
       let salesforce =
-        field_map json "Salesforce"
+        field_map json__ "Salesforce"
           SalesforceConnectorProfileCredentials.of_json in
       let redshift =
-        field_map json "Redshift" RedshiftConnectorProfileCredentials.of_json in
+        field_map json__ "Redshift"
+          RedshiftConnectorProfileCredentials.of_json in
       let marketo =
-        field_map json "Marketo" MarketoConnectorProfileCredentials.of_json in
+        field_map json__ "Marketo" MarketoConnectorProfileCredentials.of_json in
       let inforNexus =
-        field_map json "InforNexus"
+        field_map json__ "InforNexus"
           InforNexusConnectorProfileCredentials.of_json in
       let honeycode =
-        field_map json "Honeycode"
+        field_map json__ "Honeycode"
           HoneycodeConnectorProfileCredentials.of_json in
       let googleAnalytics =
-        field_map json "GoogleAnalytics"
+        field_map json__ "GoogleAnalytics"
           GoogleAnalyticsConnectorProfileCredentials.of_json in
       let dynatrace =
-        field_map json "Dynatrace"
+        field_map json__ "Dynatrace"
           DynatraceConnectorProfileCredentials.of_json in
       let datadog =
-        field_map json "Datadog" DatadogConnectorProfileCredentials.of_json in
+        field_map json__ "Datadog" DatadogConnectorProfileCredentials.of_json in
       let amplitude =
-        field_map json "Amplitude"
+        field_map json__ "Amplitude"
           AmplitudeConnectorProfileCredentials.of_json in
-      make ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro ?snowflake
-        ?slack ?singular ?serviceNow ?salesforce ?redshift ?marketo
-        ?inforNexus ?honeycode ?googleAnalytics ?dynatrace ?datadog
+      make ?pardot ?customConnector ?sAPOData ?zendesk ?veeva ?trendmicro
+        ?snowflake ?slack ?singular ?serviceNow ?salesforce ?redshift
+        ?marketo ?inforNexus ?honeycode ?googleAnalytics ?dynatrace ?datadog
         ?amplitude ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10237,27 +11883,28 @@ module FlowDefinition =
         ?destinationConnectorType ?sourceConnectorLabel ?sourceConnectorType
         ?flowStatus ?flowName ?description ?flowArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastRunExecutionDetails =
-        field_map json "lastRunExecutionDetails" ExecutionDetails.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let lastUpdatedBy = field_map json "lastUpdatedBy" UpdatedBy.of_json in
-      let createdBy = field_map json "createdBy" CreatedBy.of_json in
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Date.of_json in
-      let createdAt = field_map json "createdAt" Date.of_json in
-      let triggerType = field_map json "triggerType" TriggerType.of_json in
+        field_map json__ "lastRunExecutionDetails" ExecutionDetails.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let lastUpdatedBy = field_map json__ "lastUpdatedBy" UpdatedBy.of_json in
+      let createdBy = field_map json__ "createdBy" CreatedBy.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Date.of_json in
+      let createdAt = field_map json__ "createdAt" Date.of_json in
+      let triggerType = field_map json__ "triggerType" TriggerType.of_json in
       let destinationConnectorLabel =
-        field_map json "destinationConnectorLabel" ConnectorLabel.of_json in
+        field_map json__ "destinationConnectorLabel" ConnectorLabel.of_json in
       let destinationConnectorType =
-        field_map json "destinationConnectorType" ConnectorType.of_json in
+        field_map json__ "destinationConnectorType" ConnectorType.of_json in
       let sourceConnectorLabel =
-        field_map json "sourceConnectorLabel" ConnectorLabel.of_json in
+        field_map json__ "sourceConnectorLabel" ConnectorLabel.of_json in
       let sourceConnectorType =
-        field_map json "sourceConnectorType" ConnectorType.of_json in
-      let flowStatus = field_map json "flowStatus" FlowStatus.of_json in
-      let flowName = field_map json "flowName" FlowName.of_json in
-      let description = field_map json "description" FlowDescription.of_json in
-      let flowArn = field_map json "flowArn" FlowArn.of_json in
+        field_map json__ "sourceConnectorType" ConnectorType.of_json in
+      let flowStatus = field_map json__ "flowStatus" FlowStatus.of_json in
+      let flowName = field_map json__ "flowName" FlowName.of_json in
+      let description =
+        field_map json__ "description" FlowDescription.of_json in
+      let flowArn = field_map json__ "flowArn" FlowArn.of_json in
       make ?lastRunExecutionDetails ?tags ?lastUpdatedBy ?createdBy
         ?lastUpdatedAt ?createdAt ?triggerType ?destinationConnectorLabel
         ?destinationConnectorType ?sourceConnectorLabel ?sourceConnectorType
@@ -10290,7 +11937,10 @@ module ConnectorDetail =
       connectorProvisioningType: ConnectorProvisioningType.t option
         [@ocaml.doc "The provisioning type that the connector uses."];
       connectorModes: ConnectorModeList.t option
-        [@ocaml.doc "The connection mode that the connector supports."]}
+        [@ocaml.doc "The connection mode that the connector supports."];
+      supportedDataTransferTypes: SupportedDataTransferTypeList.t option
+        [@ocaml.doc
+          "The data transfer types that the connector supports. RECORD Structured records. FILE Files or binary data."]}
     let make ?connectorDescription =
       fun ?connectorName ->
         fun ?connectorOwner ->
@@ -10302,20 +11952,22 @@ module ConnectorDetail =
                     fun ?registeredBy ->
                       fun ?connectorProvisioningType ->
                         fun ?connectorModes ->
-                          fun () ->
-                            {
-                              connectorDescription;
-                              connectorName;
-                              connectorOwner;
-                              connectorVersion;
-                              applicationType;
-                              connectorType;
-                              connectorLabel;
-                              registeredAt;
-                              registeredBy;
-                              connectorProvisioningType;
-                              connectorModes
-                            }
+                          fun ?supportedDataTransferTypes ->
+                            fun () ->
+                              {
+                                connectorDescription;
+                                connectorName;
+                                connectorOwner;
+                                connectorVersion;
+                                applicationType;
+                                connectorType;
+                                connectorLabel;
+                                registeredAt;
+                                registeredBy;
+                                connectorProvisioningType;
+                                connectorModes;
+                                supportedDataTransferTypes
+                              }
     let to_value x =
       structure_to_value
         [("connectorDescription",
@@ -10340,9 +11992,15 @@ module ConnectorDetail =
           (Option.map x.connectorProvisioningType
              ~f:ConnectorProvisioningType.to_value));
         ("connectorModes",
-          (Option.map x.connectorModes ~f:ConnectorModeList.to_value))]
+          (Option.map x.connectorModes ~f:ConnectorModeList.to_value));
+        ("supportedDataTransferTypes",
+          (Option.map x.supportedDataTransferTypes
+             ~f:SupportedDataTransferTypeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let supportedDataTransferTypes =
+        (Option.map ~f:SupportedDataTransferTypeList.of_xml)
+          (Xml.child xml_arg0 "supportedDataTransferTypes") in
       let connectorModes =
         (Option.map ~f:ConnectorModeList.of_xml)
           (Xml.child xml_arg0 "connectorModes") in
@@ -10375,43 +12033,49 @@ module ConnectorDetail =
       let connectorDescription =
         (Option.map ~f:ConnectorDescription.of_xml)
           (Xml.child xml_arg0 "connectorDescription") in
-      make ?connectorModes ?connectorProvisioningType ?registeredBy
-        ?registeredAt ?connectorLabel ?connectorType ?applicationType
-        ?connectorVersion ?connectorOwner ?connectorName
-        ?connectorDescription ()
+      make ?supportedDataTransferTypes ?connectorModes
+        ?connectorProvisioningType ?registeredBy ?registeredAt
+        ?connectorLabel ?connectorType ?applicationType ?connectorVersion
+        ?connectorOwner ?connectorName ?connectorDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let supportedDataTransferTypes =
+        field_map json__ "supportedDataTransferTypes"
+          SupportedDataTransferTypeList.of_json in
       let connectorModes =
-        field_map json "connectorModes" ConnectorModeList.of_json in
+        field_map json__ "connectorModes" ConnectorModeList.of_json in
       let connectorProvisioningType =
-        field_map json "connectorProvisioningType"
+        field_map json__ "connectorProvisioningType"
           ConnectorProvisioningType.of_json in
-      let registeredBy = field_map json "registeredBy" RegisteredBy.of_json in
-      let registeredAt = field_map json "registeredAt" Date.of_json in
+      let registeredBy = field_map json__ "registeredBy" RegisteredBy.of_json in
+      let registeredAt = field_map json__ "registeredAt" Date.of_json in
       let connectorLabel =
-        field_map json "connectorLabel" ConnectorLabel.of_json in
+        field_map json__ "connectorLabel" ConnectorLabel.of_json in
       let connectorType =
-        field_map json "connectorType" ConnectorType.of_json in
+        field_map json__ "connectorType" ConnectorType.of_json in
       let applicationType =
-        field_map json "applicationType" ApplicationType.of_json in
+        field_map json__ "applicationType" ApplicationType.of_json in
       let connectorVersion =
-        field_map json "connectorVersion" ConnectorVersion.of_json in
+        field_map json__ "connectorVersion" ConnectorVersion.of_json in
       let connectorOwner =
-        field_map json "connectorOwner" ConnectorOwner.of_json in
+        field_map json__ "connectorOwner" ConnectorOwner.of_json in
       let connectorName =
-        field_map json "connectorName" ConnectorName.of_json in
+        field_map json__ "connectorName" ConnectorName.of_json in
       let connectorDescription =
-        field_map json "connectorDescription" ConnectorDescription.of_json in
-      make ?connectorModes ?connectorProvisioningType ?registeredBy
-        ?registeredAt ?connectorLabel ?connectorType ?applicationType
-        ?connectorVersion ?connectorOwner ?connectorName
-        ?connectorDescription ()
+        field_map json__ "connectorDescription" ConnectorDescription.of_json in
+      make ?supportedDataTransferTypes ?connectorModes
+        ?connectorProvisioningType ?registeredBy ?registeredAt
+        ?connectorLabel ?connectorType ?applicationType ?connectorVersion
+        ?connectorOwner ?connectorName ?connectorDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the registered connector."]
 module ConnectorEntityList =
   struct
     type nonrec t = ConnectorEntity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectorEntity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10471,7 +12135,10 @@ module ExecutionRecord =
           "The timestamp that determines the first new or updated record to be transferred in the flow run."];
       dataPullEndTime: Date.t option
         [@ocaml.doc
-          "The timestamp that indicates the last new or updated record to be transferred in the flow run."]}
+          "The timestamp that indicates the last new or updated record to be transferred in the flow run."];
+      metadataCatalogDetails: MetadataCatalogDetails.t option
+        [@ocaml.doc
+          "Describes the metadata catalog, metadata table, and data partitions that Amazon AppFlow used for the associated flow run."]}
     let make ?executionId =
       fun ?executionStatus ->
         fun ?executionResult ->
@@ -10479,16 +12146,18 @@ module ExecutionRecord =
             fun ?lastUpdatedAt ->
               fun ?dataPullStartTime ->
                 fun ?dataPullEndTime ->
-                  fun () ->
-                    {
-                      executionId;
-                      executionStatus;
-                      executionResult;
-                      startedAt;
-                      lastUpdatedAt;
-                      dataPullStartTime;
-                      dataPullEndTime
-                    }
+                  fun ?metadataCatalogDetails ->
+                    fun () ->
+                      {
+                        executionId;
+                        executionStatus;
+                        executionResult;
+                        startedAt;
+                        lastUpdatedAt;
+                        dataPullStartTime;
+                        dataPullEndTime;
+                        metadataCatalogDetails
+                      }
     let to_value x =
       structure_to_value
         [("executionId", (Option.map x.executionId ~f:ExecutionId.to_value));
@@ -10500,9 +12169,15 @@ module ExecutionRecord =
         ("lastUpdatedAt", (Option.map x.lastUpdatedAt ~f:Date.to_value));
         ("dataPullStartTime",
           (Option.map x.dataPullStartTime ~f:Date.to_value));
-        ("dataPullEndTime", (Option.map x.dataPullEndTime ~f:Date.to_value))]
+        ("dataPullEndTime", (Option.map x.dataPullEndTime ~f:Date.to_value));
+        ("metadataCatalogDetails",
+          (Option.map x.metadataCatalogDetails
+             ~f:MetadataCatalogDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let metadataCatalogDetails =
+        (Option.map ~f:MetadataCatalogDetails.of_xml)
+          (Xml.child xml_arg0 "metadataCatalogDetails") in
       let dataPullEndTime =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "dataPullEndTime") in
       let dataPullStartTime =
@@ -10519,21 +12194,27 @@ module ExecutionRecord =
           (Xml.child xml_arg0 "executionStatus") in
       let executionId =
         (Option.map ~f:ExecutionId.of_xml) (Xml.child xml_arg0 "executionId") in
-      make ?dataPullEndTime ?dataPullStartTime ?lastUpdatedAt ?startedAt
-        ?executionResult ?executionStatus ?executionId ()
+      make ?metadataCatalogDetails ?dataPullEndTime ?dataPullStartTime
+        ?lastUpdatedAt ?startedAt ?executionResult ?executionStatus
+        ?executionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataPullEndTime = field_map json "dataPullEndTime" Date.of_json in
-      let dataPullStartTime = field_map json "dataPullStartTime" Date.of_json in
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Date.of_json in
-      let startedAt = field_map json "startedAt" Date.of_json in
+    let of_json json__ =
+      let metadataCatalogDetails =
+        field_map json__ "metadataCatalogDetails"
+          MetadataCatalogDetails.of_json in
+      let dataPullEndTime = field_map json__ "dataPullEndTime" Date.of_json in
+      let dataPullStartTime =
+        field_map json__ "dataPullStartTime" Date.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Date.of_json in
+      let startedAt = field_map json__ "startedAt" Date.of_json in
       let executionResult =
-        field_map json "executionResult" ExecutionResult.of_json in
+        field_map json__ "executionResult" ExecutionResult.of_json in
       let executionStatus =
-        field_map json "executionStatus" ExecutionStatus.of_json in
-      let executionId = field_map json "executionId" ExecutionId.of_json in
-      make ?dataPullEndTime ?dataPullStartTime ?lastUpdatedAt ?startedAt
-        ?executionResult ?executionStatus ?executionId ()
+        field_map json__ "executionStatus" ExecutionStatus.of_json in
+      let executionId = field_map json__ "executionId" ExecutionId.of_json in
+      make ?metadataCatalogDetails ?dataPullEndTime ?dataPullStartTime
+        ?lastUpdatedAt ?startedAt ?executionResult ?executionStatus
+        ?executionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies information about the past flow run instances for a given flow."]
@@ -10600,7 +12281,13 @@ module ConnectorConfiguration =
       registeredAt: Date.t option
         [@ocaml.doc "The date on which the connector was registered."];
       registeredBy: RegisteredBy.t option
-        [@ocaml.doc "Information about who registered the connector."]}
+        [@ocaml.doc "Information about who registered the connector."];
+      supportedDataTransferTypes: SupportedDataTransferTypeList.t option
+        [@ocaml.doc
+          "The data transfer types that the connector supports. RECORD Structured records. FILE Files or binary data."];
+      supportedDataTransferApis: SupportedDataTransferApis.t option
+        [@ocaml.doc
+          "The APIs of the connector application that Amazon AppFlow can use to transfer your data."]}
     let make ?canUseAsSource =
       fun ?canUseAsDestination ->
         fun ?supportedDestinationConnectors ->
@@ -10630,35 +12317,43 @@ module ConnectorConfiguration =
                                                   fun ?logoURL ->
                                                     fun ?registeredAt ->
                                                       fun ?registeredBy ->
-                                                        fun () ->
-                                                          {
-                                                            canUseAsSource;
-                                                            canUseAsDestination;
-                                                            supportedDestinationConnectors;
-                                                            supportedSchedulingFrequencies;
-                                                            isPrivateLinkEnabled;
-                                                            isPrivateLinkEndpointUrlRequired;
-                                                            supportedTriggerTypes;
-                                                            connectorMetadata;
-                                                            connectorType;
-                                                            connectorLabel;
-                                                            connectorDescription;
-                                                            connectorOwner;
-                                                            connectorName;
-                                                            connectorVersion;
-                                                            connectorArn;
-                                                            connectorModes;
-                                                            authenticationConfig;
-                                                            connectorRuntimeSettings;
-                                                            supportedApiVersions;
-                                                            supportedOperators;
-                                                            supportedWriteOperations;
-                                                            connectorProvisioningType;
-                                                            connectorProvisioningConfig;
-                                                            logoURL;
-                                                            registeredAt;
-                                                            registeredBy
-                                                          }
+                                                        fun
+                                                          ?supportedDataTransferTypes
+                                                          ->
+                                                          fun
+                                                            ?supportedDataTransferApis
+                                                            ->
+                                                            fun () ->
+                                                              {
+                                                                canUseAsSource;
+                                                                canUseAsDestination;
+                                                                supportedDestinationConnectors;
+                                                                supportedSchedulingFrequencies;
+                                                                isPrivateLinkEnabled;
+                                                                isPrivateLinkEndpointUrlRequired;
+                                                                supportedTriggerTypes;
+                                                                connectorMetadata;
+                                                                connectorType;
+                                                                connectorLabel;
+                                                                connectorDescription;
+                                                                connectorOwner;
+                                                                connectorName;
+                                                                connectorVersion;
+                                                                connectorArn;
+                                                                connectorModes;
+                                                                authenticationConfig;
+                                                                connectorRuntimeSettings;
+                                                                supportedApiVersions;
+                                                                supportedOperators;
+                                                                supportedWriteOperations;
+                                                                connectorProvisioningType;
+                                                                connectorProvisioningConfig;
+                                                                logoURL;
+                                                                registeredAt;
+                                                                registeredBy;
+                                                                supportedDataTransferTypes;
+                                                                supportedDataTransferApis
+                                                              }
     let to_value x =
       structure_to_value
         [("canUseAsSource",
@@ -10716,9 +12411,21 @@ module ConnectorConfiguration =
         ("logoURL", (Option.map x.logoURL ~f:LogoURL.to_value));
         ("registeredAt", (Option.map x.registeredAt ~f:Date.to_value));
         ("registeredBy",
-          (Option.map x.registeredBy ~f:RegisteredBy.to_value))]
+          (Option.map x.registeredBy ~f:RegisteredBy.to_value));
+        ("supportedDataTransferTypes",
+          (Option.map x.supportedDataTransferTypes
+             ~f:SupportedDataTransferTypeList.to_value));
+        ("supportedDataTransferApis",
+          (Option.map x.supportedDataTransferApis
+             ~f:SupportedDataTransferApis.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let supportedDataTransferApis =
+        (Option.map ~f:SupportedDataTransferApis.of_xml)
+          (Xml.child xml_arg0 "supportedDataTransferApis") in
+      let supportedDataTransferTypes =
+        (Option.map ~f:SupportedDataTransferTypeList.of_xml)
+          (Xml.child xml_arg0 "supportedDataTransferTypes") in
       let registeredBy =
         (Option.map ~f:RegisteredBy.of_xml)
           (Xml.child xml_arg0 "registeredBy") in
@@ -10793,7 +12500,8 @@ module ConnectorConfiguration =
           (Xml.child xml_arg0 "canUseAsDestination") in
       let canUseAsSource =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "canUseAsSource") in
-      make ?registeredBy ?registeredAt ?logoURL ?connectorProvisioningConfig
+      make ?supportedDataTransferApis ?supportedDataTransferTypes
+        ?registeredBy ?registeredAt ?logoURL ?connectorProvisioningConfig
         ?connectorProvisioningType ?supportedWriteOperations
         ?supportedOperators ?supportedApiVersions ?connectorRuntimeSettings
         ?authenticationConfig ?connectorModes ?connectorArn ?connectorVersion
@@ -10803,61 +12511,69 @@ module ConnectorConfiguration =
         ?supportedSchedulingFrequencies ?supportedDestinationConnectors
         ?canUseAsDestination ?canUseAsSource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let registeredBy = field_map json "registeredBy" RegisteredBy.of_json in
-      let registeredAt = field_map json "registeredAt" Date.of_json in
-      let logoURL = field_map json "logoURL" LogoURL.of_json in
+    let of_json json__ =
+      let supportedDataTransferApis =
+        field_map json__ "supportedDataTransferApis"
+          SupportedDataTransferApis.of_json in
+      let supportedDataTransferTypes =
+        field_map json__ "supportedDataTransferTypes"
+          SupportedDataTransferTypeList.of_json in
+      let registeredBy = field_map json__ "registeredBy" RegisteredBy.of_json in
+      let registeredAt = field_map json__ "registeredAt" Date.of_json in
+      let logoURL = field_map json__ "logoURL" LogoURL.of_json in
       let connectorProvisioningConfig =
-        field_map json "connectorProvisioningConfig"
+        field_map json__ "connectorProvisioningConfig"
           ConnectorProvisioningConfig.of_json in
       let connectorProvisioningType =
-        field_map json "connectorProvisioningType"
+        field_map json__ "connectorProvisioningType"
           ConnectorProvisioningType.of_json in
       let supportedWriteOperations =
-        field_map json "supportedWriteOperations"
+        field_map json__ "supportedWriteOperations"
           SupportedWriteOperationList.of_json in
       let supportedOperators =
-        field_map json "supportedOperators" SupportedOperatorList.of_json in
+        field_map json__ "supportedOperators" SupportedOperatorList.of_json in
       let supportedApiVersions =
-        field_map json "supportedApiVersions" SupportedApiVersionList.of_json in
+        field_map json__ "supportedApiVersions"
+          SupportedApiVersionList.of_json in
       let connectorRuntimeSettings =
-        field_map json "connectorRuntimeSettings"
+        field_map json__ "connectorRuntimeSettings"
           ConnectorRuntimeSettingList.of_json in
       let authenticationConfig =
-        field_map json "authenticationConfig" AuthenticationConfig.of_json in
+        field_map json__ "authenticationConfig" AuthenticationConfig.of_json in
       let connectorModes =
-        field_map json "connectorModes" ConnectorModeList.of_json in
-      let connectorArn = field_map json "connectorArn" ARN.of_json in
+        field_map json__ "connectorModes" ConnectorModeList.of_json in
+      let connectorArn = field_map json__ "connectorArn" ARN.of_json in
       let connectorVersion =
-        field_map json "connectorVersion" ConnectorVersion.of_json in
+        field_map json__ "connectorVersion" ConnectorVersion.of_json in
       let connectorName =
-        field_map json "connectorName" ConnectorName.of_json in
+        field_map json__ "connectorName" ConnectorName.of_json in
       let connectorOwner =
-        field_map json "connectorOwner" ConnectorOwner.of_json in
+        field_map json__ "connectorOwner" ConnectorOwner.of_json in
       let connectorDescription =
-        field_map json "connectorDescription" ConnectorDescription.of_json in
+        field_map json__ "connectorDescription" ConnectorDescription.of_json in
       let connectorLabel =
-        field_map json "connectorLabel" ConnectorLabel.of_json in
+        field_map json__ "connectorLabel" ConnectorLabel.of_json in
       let connectorType =
-        field_map json "connectorType" ConnectorType.of_json in
+        field_map json__ "connectorType" ConnectorType.of_json in
       let connectorMetadata =
-        field_map json "connectorMetadata" ConnectorMetadata.of_json in
+        field_map json__ "connectorMetadata" ConnectorMetadata.of_json in
       let supportedTriggerTypes =
-        field_map json "supportedTriggerTypes" TriggerTypeList.of_json in
+        field_map json__ "supportedTriggerTypes" TriggerTypeList.of_json in
       let isPrivateLinkEndpointUrlRequired =
-        field_map json "isPrivateLinkEndpointUrlRequired" Boolean.of_json in
+        field_map json__ "isPrivateLinkEndpointUrlRequired" Boolean.of_json in
       let isPrivateLinkEnabled =
-        field_map json "isPrivateLinkEnabled" Boolean.of_json in
+        field_map json__ "isPrivateLinkEnabled" Boolean.of_json in
       let supportedSchedulingFrequencies =
-        field_map json "supportedSchedulingFrequencies"
+        field_map json__ "supportedSchedulingFrequencies"
           SchedulingFrequencyTypeList.of_json in
       let supportedDestinationConnectors =
-        field_map json "supportedDestinationConnectors"
+        field_map json__ "supportedDestinationConnectors"
           ConnectorTypeList.of_json in
       let canUseAsDestination =
-        field_map json "canUseAsDestination" Boolean.of_json in
-      let canUseAsSource = field_map json "canUseAsSource" Boolean.of_json in
-      make ?registeredBy ?registeredAt ?logoURL ?connectorProvisioningConfig
+        field_map json__ "canUseAsDestination" Boolean.of_json in
+      let canUseAsSource = field_map json__ "canUseAsSource" Boolean.of_json in
+      make ?supportedDataTransferApis ?supportedDataTransferTypes
+        ?registeredBy ?registeredAt ?logoURL ?connectorProvisioningConfig
         ?connectorProvisioningType ?supportedWriteOperations
         ?supportedOperators ?supportedApiVersions ?connectorRuntimeSettings
         ?authenticationConfig ?connectorModes ?connectorArn ?connectorVersion
@@ -10977,26 +12693,26 @@ module ConnectorProfile =
         ?connectorLabel ?connectorType ?connectorProfileName
         ?connectorProfileArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let privateConnectionProvisioningState =
-        field_map json "privateConnectionProvisioningState"
+        field_map json__ "privateConnectionProvisioningState"
           PrivateConnectionProvisioningState.of_json in
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Date.of_json in
-      let createdAt = field_map json "createdAt" Date.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Date.of_json in
+      let createdAt = field_map json__ "createdAt" Date.of_json in
       let connectorProfileProperties =
-        field_map json "connectorProfileProperties"
+        field_map json__ "connectorProfileProperties"
           ConnectorProfileProperties.of_json in
-      let credentialsArn = field_map json "credentialsArn" ARN.of_json in
+      let credentialsArn = field_map json__ "credentialsArn" ARN.of_json in
       let connectionMode =
-        field_map json "connectionMode" ConnectionMode.of_json in
+        field_map json__ "connectionMode" ConnectionMode.of_json in
       let connectorLabel =
-        field_map json "connectorLabel" ConnectorLabel.of_json in
+        field_map json__ "connectorLabel" ConnectorLabel.of_json in
       let connectorType =
-        field_map json "connectorType" ConnectorType.of_json in
+        field_map json__ "connectorType" ConnectorType.of_json in
       let connectorProfileName =
-        field_map json "connectorProfileName" ConnectorProfileName.of_json in
+        field_map json__ "connectorProfileName" ConnectorProfileName.of_json in
       let connectorProfileArn =
-        field_map json "connectorProfileArn" ConnectorProfileArn.of_json in
+        field_map json__ "connectorProfileArn" ConnectorProfileArn.of_json in
       make ?privateConnectionProvisioningState ?lastUpdatedAt ?createdAt
         ?connectorProfileProperties ?credentialsArn ?connectionMode
         ?connectorLabel ?connectorType ?connectorProfileName
@@ -11008,7 +12724,7 @@ module ConnectorEntityField =
   struct
     type nonrec t =
       {
-      identifier: Identifier.t
+      identifier: Identifier.t option
         [@ocaml.doc "The unique identifier of the connector field."];
       parentIdentifier: Identifier.t option
         [@ocaml.doc "The parent identifier of the connector field."];
@@ -11036,20 +12752,20 @@ module ConnectorEntityField =
       customProperties: CustomProperties.t option
         [@ocaml.doc
           "A map that has specific properties related to the ConnectorEntityField."]}
-    let context_ = "ConnectorEntityField"
-    let make ?parentIdentifier =
-      fun ?label ->
-        fun ?isPrimaryKey ->
-          fun ?defaultValue ->
-            fun ?isDeprecated ->
-              fun ?supportedFieldTypeDetails ->
-                fun ?description ->
-                  fun ?sourceProperties ->
-                    fun ?destinationProperties ->
-                      fun ?customProperties ->
-                        fun ~identifier ->
+    let make ?identifier =
+      fun ?parentIdentifier ->
+        fun ?label ->
+          fun ?isPrimaryKey ->
+            fun ?defaultValue ->
+              fun ?isDeprecated ->
+                fun ?supportedFieldTypeDetails ->
+                  fun ?description ->
+                    fun ?sourceProperties ->
+                      fun ?destinationProperties ->
+                        fun ?customProperties ->
                           fun () ->
                             {
+                              identifier;
                               parentIdentifier;
                               label;
                               isPrimaryKey;
@@ -11059,12 +12775,11 @@ module ConnectorEntityField =
                               description;
                               sourceProperties;
                               destinationProperties;
-                              customProperties;
-                              identifier
+                              customProperties
                             }
     let to_value x =
       structure_to_value
-        [("identifier", (Some (Identifier.to_value x.identifier)));
+        [("identifier", (Option.map x.identifier ~f:Identifier.to_value));
         ("parentIdentifier",
           (Option.map x.parentIdentifier ~f:Identifier.to_value));
         ("label", (Option.map x.label ~f:Label.to_value));
@@ -11109,37 +12824,55 @@ module ConnectorEntityField =
         (Option.map ~f:Identifier.of_xml)
           (Xml.child xml_arg0 "parentIdentifier") in
       let identifier =
-        Identifier.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "identifier") in
+        (Option.map ~f:Identifier.of_xml) (Xml.child xml_arg0 "identifier") in
       make ?customProperties ?destinationProperties ?sourceProperties
         ?description ?supportedFieldTypeDetails ?isDeprecated ?defaultValue
-        ?isPrimaryKey ?label ?parentIdentifier ~identifier ()
+        ?isPrimaryKey ?label ?parentIdentifier ?identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customProperties =
-        field_map json "customProperties" CustomProperties.of_json in
+        field_map json__ "customProperties" CustomProperties.of_json in
       let destinationProperties =
-        field_map json "destinationProperties"
+        field_map json__ "destinationProperties"
           DestinationFieldProperties.of_json in
       let sourceProperties =
-        field_map json "sourceProperties" SourceFieldProperties.of_json in
-      let description = field_map json "description" Description.of_json in
+        field_map json__ "sourceProperties" SourceFieldProperties.of_json in
+      let description = field_map json__ "description" Description.of_json in
       let supportedFieldTypeDetails =
-        field_map json "supportedFieldTypeDetails"
+        field_map json__ "supportedFieldTypeDetails"
           SupportedFieldTypeDetails.of_json in
-      let isDeprecated = field_map json "isDeprecated" Boolean.of_json in
-      let defaultValue = field_map json "defaultValue" String_.of_json in
-      let isPrimaryKey = field_map json "isPrimaryKey" Boolean.of_json in
-      let label = field_map json "label" Label.of_json in
+      let isDeprecated = field_map json__ "isDeprecated" Boolean.of_json in
+      let defaultValue = field_map json__ "defaultValue" String_.of_json in
+      let isPrimaryKey = field_map json__ "isPrimaryKey" Boolean.of_json in
+      let label = field_map json__ "label" Label.of_json in
       let parentIdentifier =
-        field_map json "parentIdentifier" Identifier.of_json in
-      let identifier = field_map_exn json "identifier" Identifier.of_json in
+        field_map json__ "parentIdentifier" Identifier.of_json in
+      let identifier = field_map json__ "identifier" Identifier.of_json in
       make ?customProperties ?destinationProperties ?sourceProperties
         ?description ?supportedFieldTypeDetails ?isDeprecated ?defaultValue
-        ?isPrimaryKey ?label ?parentIdentifier ~identifier ()
+        ?isPrimaryKey ?label ?parentIdentifier ?identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the data model of a connector field. For example, for an account entity, the fields would be account name, account ID, and so on."]
+module AccessDeniedException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "AppFlow/Requester has invalid or missing permissions."]
 module ConflictException =
   struct
     type nonrec t = {
@@ -11154,8 +12887,8 @@ module ConflictException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11174,8 +12907,8 @@ module ConnectorAuthenticationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11194,8 +12927,8 @@ module ConnectorServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11214,8 +12947,8 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11234,8 +12967,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11254,8 +12987,8 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11274,15 +13007,38 @@ module ValidationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request has invalid or missing parameters."]
+module ClientToken =
+  struct
+    type nonrec t = string
+    let context_ = "ClientToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"[ -~]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientToken" j
+    let to_json = simple_to_json to_value
+  end
 module DestinationFlowConfigList =
   struct
     type nonrec t = DestinationFlowConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DestinationFlowConfig.to_value)) |>
         (fun x -> `List x)
@@ -11305,6 +13061,32 @@ module DestinationFlowConfigList =
         ~of_json:DestinationFlowConfig.of_json j
     let to_json v = composed_to_json to_value v
   end
+module MetadataCatalogConfig =
+  struct
+    type nonrec t =
+      {
+      glueDataCatalog: GlueDataCatalogConfig.t option
+        [@ocaml.doc
+          "Specifies the configuration that Amazon AppFlow uses when it catalogs your data with the Glue Data Catalog."]}
+    let make ?glueDataCatalog = fun () -> { glueDataCatalog }
+    let to_value x =
+      structure_to_value
+        [("glueDataCatalog",
+           (Option.map x.glueDataCatalog ~f:GlueDataCatalogConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let glueDataCatalog =
+        (Option.map ~f:GlueDataCatalogConfig.of_xml)
+          (Xml.child xml_arg0 "glueDataCatalog") in
+      make ?glueDataCatalog ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let glueDataCatalog =
+        field_map json__ "glueDataCatalog" GlueDataCatalogConfig.of_json in
+      make ?glueDataCatalog ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the configuration that Amazon AppFlow uses when it catalogs your data. When Amazon AppFlow catalogs your data, it stores metadata in a data catalog."]
 module SourceFlowConfig =
   struct
     type nonrec t =
@@ -11370,17 +13152,18 @@ module SourceFlowConfig =
       make ?incrementalPullConfig ~sourceConnectorProperties
         ?connectorProfileName ?apiVersion ~connectorType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let incrementalPullConfig =
-        field_map json "incrementalPullConfig" IncrementalPullConfig.of_json in
+        field_map json__ "incrementalPullConfig"
+          IncrementalPullConfig.of_json in
       let sourceConnectorProperties =
-        field_map_exn json "sourceConnectorProperties"
+        field_map_exn json__ "sourceConnectorProperties"
           SourceConnectorProperties.of_json in
       let connectorProfileName =
-        field_map json "connectorProfileName" ConnectorProfileName.of_json in
-      let apiVersion = field_map json "apiVersion" ApiVersion.of_json in
+        field_map json__ "connectorProfileName" ConnectorProfileName.of_json in
+      let apiVersion = field_map json__ "apiVersion" ApiVersion.of_json in
       let connectorType =
-        field_map_exn json "connectorType" ConnectorType.of_json in
+        field_map_exn json__ "connectorType" ConnectorType.of_json in
       make ?incrementalPullConfig ~sourceConnectorProperties
         ?connectorProfileName ?apiVersion ~connectorType ()
     let to_json v = composed_to_json to_value v
@@ -11390,6 +13173,9 @@ module Tasks =
   struct
     type nonrec t = Task.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Task.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11437,14 +13223,35 @@ module TriggerConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "triggerType") in
       make ?triggerProperties ~triggerType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let triggerProperties =
-        field_map json "triggerProperties" TriggerProperties.of_json in
-      let triggerType = field_map_exn json "triggerType" TriggerType.of_json in
+        field_map json__ "triggerProperties" TriggerProperties.of_json in
+      let triggerType =
+        field_map_exn json__ "triggerType" TriggerType.of_json in
       make ?triggerProperties ~triggerType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The trigger settings that determine how and when Amazon AppFlow runs the specified flow."]
+module ThrottlingException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "API calls have exceeded the maximum allowed API request rate per account and per Region."]
 module ConnectorProfileConfig =
   struct
     type nonrec t =
@@ -11452,13 +13259,13 @@ module ConnectorProfileConfig =
       connectorProfileProperties: ConnectorProfileProperties.t
         [@ocaml.doc
           "The connector-specific properties of the profile configuration."];
-      connectorProfileCredentials: ConnectorProfileCredentials.t
+      connectorProfileCredentials: ConnectorProfileCredentials.t option
         [@ocaml.doc
           "The connector-specific credentials required by each connector."]}
     let context_ = "ConnectorProfileConfig"
-    let make ~connectorProfileProperties =
-      fun ~connectorProfileCredentials ->
-        fun () -> { connectorProfileProperties; connectorProfileCredentials }
+    let make ?connectorProfileCredentials =
+      fun ~connectorProfileProperties ->
+        fun () -> { connectorProfileCredentials; connectorProfileProperties }
     let to_value x =
       structure_to_value
         [("connectorProfileProperties",
@@ -11466,29 +13273,27 @@ module ConnectorProfileConfig =
               (ConnectorProfileProperties.to_value
                  x.connectorProfileProperties)));
         ("connectorProfileCredentials",
-          (Some
-             (ConnectorProfileCredentials.to_value
-                x.connectorProfileCredentials)))]
+          (Option.map x.connectorProfileCredentials
+             ~f:ConnectorProfileCredentials.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let connectorProfileCredentials =
-        ConnectorProfileCredentials.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "connectorProfileCredentials") in
+        (Option.map ~f:ConnectorProfileCredentials.of_xml)
+          (Xml.child xml_arg0 "connectorProfileCredentials") in
       let connectorProfileProperties =
         ConnectorProfileProperties.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
              "connectorProfileProperties") in
-      make ~connectorProfileCredentials ~connectorProfileProperties ()
+      make ?connectorProfileCredentials ~connectorProfileProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectorProfileCredentials =
-        field_map_exn json "connectorProfileCredentials"
+        field_map json__ "connectorProfileCredentials"
           ConnectorProfileCredentials.of_json in
       let connectorProfileProperties =
-        field_map_exn json "connectorProfileProperties"
+        field_map_exn json__ "connectorProfileProperties"
           ConnectorProfileProperties.of_json in
-      make ~connectorProfileCredentials ~connectorProfileProperties ()
+      make ?connectorProfileCredentials ~connectorProfileProperties ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Defines the connector-specific configuration and credentials for the connector profile."]
@@ -11500,6 +13305,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11533,55 +13341,37 @@ module UnsupportedOperationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The requested operation is not supported for the current flow."]
-module AccessDeniedException =
+module EntitiesPath =
   struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    type nonrec t = string
+    let context_ = "EntitiesPath"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_pattern i ~pattern:"[\\s\\w/!@#+=,.-]*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "AppFlow/Requester has invalid or missing permissions."]
-module ThrottlingException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "API calls have exceeded the maximum allowed API request rate per account and per Region."]
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EntitiesPath" j
+    let to_json = simple_to_json to_value
+  end
 module FlowList =
   struct
     type nonrec t = FlowDefinition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FlowDefinition.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11642,6 +13432,9 @@ module ConnectorList =
   struct
     type nonrec t = ConnectorDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectorDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11686,6 +13479,8 @@ module ConnectorEntityMap =
                        (ConnectorEntityList.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -11693,22 +13488,23 @@ module ConnectorEntityMap =
         ~of_json:ConnectorEntityList.of_json j
     let to_json v = composed_to_json to_value v
   end
-module EntitiesPath =
+module ListEntitiesMaxResults =
   struct
-    type nonrec t = string
-    let context_ = "EntitiesPath"
+    type nonrec t = int
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_pattern i ~pattern:"[\\s\\w/!@#+=.-]*"));
+          ((check_int_max i ~max:10000) >>=
+             (fun () -> check_int_min i ~min:1));
         i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string = Int.of_string
+    let to_value x = `Integer x
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"EntitiesPath" j
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ListEntitiesMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module FlowStatusMessage =
@@ -11754,6 +13550,9 @@ module FlowExecutionList =
   struct
     type nonrec t = ExecutionRecord.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExecutionRecord.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11800,6 +13599,8 @@ module ConnectorConfigurationsMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -11811,6 +13612,9 @@ module ConnectorProfileDetailList =
   struct
     type nonrec t = ConnectorProfile.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectorProfile.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11841,6 +13645,9 @@ module ConnectorProfileNameList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectorProfileName.to_value)) |>
         (fun x -> `List x)
@@ -11867,6 +13674,9 @@ module ConnectorEntityFieldList =
   struct
     type nonrec t = ConnectorEntityField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectorEntityField.to_value)) |>
         (fun x -> `List x)
@@ -11889,6 +13699,38 @@ module ConnectorEntityFieldList =
         ~of_json:ConnectorEntityField.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ExecutionIds =
+  struct
+    type nonrec t = ExecutionId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExecutionId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExecutionId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExecutionIds" ~of_json:ExecutionId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module UpdateFlowResponse =
   struct
     type nonrec t =
@@ -11896,7 +13738,8 @@ module UpdateFlowResponse =
       flowStatus: FlowStatus.t option
         [@ocaml.doc "Indicates the current status of the flow."]}
     type nonrec error =
-      [ `ConflictException of ConflictException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
       | `ConnectorAuthenticationException of
           ConnectorAuthenticationException.t 
       | `ConnectorServerException of ConnectorServerException.t 
@@ -11908,6 +13751,8 @@ module UpdateFlowResponse =
     let make ?flowStatus = fun () -> { flowStatus }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_json json)
       | "ConnectorAuthenticationException" ->
@@ -11929,6 +13774,8 @@ module UpdateFlowResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_xml xml)
       | "ConnectorAuthenticationException" ->
@@ -11949,6 +13796,10 @@ module UpdateFlowResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `ConflictException e ->
           `Assoc
             [("error", (`String "ConflictException"));
@@ -11991,8 +13842,8 @@ module UpdateFlowResponse =
         (Option.map ~f:FlowStatus.of_xml) (Xml.child xml_arg0 "flowStatus") in
       make ?flowStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let flowStatus = field_map json "flowStatus" FlowStatus.of_json in
+    let of_json json__ =
+      let flowStatus = field_map json__ "flowStatus" FlowStatus.of_json in
       make ?flowStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing flow."]
@@ -12014,23 +13865,33 @@ module UpdateFlowRequest =
           "The configuration that controls how Amazon AppFlow transfers data to the destination connector."];
       tasks: Tasks.t
         [@ocaml.doc
-          "A list of tasks that Amazon AppFlow performs while transferring the data in the flow run."]}
+          "A list of tasks that Amazon AppFlow performs while transferring the data in the flow run."];
+      metadataCatalogConfig: MetadataCatalogConfig.t option
+        [@ocaml.doc
+          "Specifies the configuration that Amazon AppFlow uses when it catalogs the data that's transferred by the associated flow. When Amazon AppFlow catalogs the data from a flow, it stores metadata in a data catalog."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "The clientToken parameter is an idempotency token. It ensures that your UpdateFlow request completes only once. You choose the value to pass. For example, if you don't receive a response from your request, you can safely retry the request with the same clientToken parameter value. If you omit a clientToken value, the Amazon Web Services SDK that you are using inserts a value for you. This way, the SDK can safely retry requests multiple times after a network error. You must provide your own value for other use cases. If you specify input parameters that differ from your first request, an error occurs. If you use a different value for clientToken, Amazon AppFlow considers it a new call to UpdateFlow. The token is active for 8 hours."]}
     let context_ = "UpdateFlowRequest"
     let make ?description =
-      fun ~flowName ->
-        fun ~triggerConfig ->
-          fun ~sourceFlowConfig ->
-            fun ~destinationFlowConfigList ->
-              fun ~tasks ->
-                fun () ->
-                  {
-                    description;
-                    flowName;
-                    triggerConfig;
-                    sourceFlowConfig;
-                    destinationFlowConfigList;
-                    tasks
-                  }
+      fun ?metadataCatalogConfig ->
+        fun ?clientToken ->
+          fun ~flowName ->
+            fun ~triggerConfig ->
+              fun ~sourceFlowConfig ->
+                fun ~destinationFlowConfigList ->
+                  fun ~tasks ->
+                    fun () ->
+                      {
+                        description;
+                        metadataCatalogConfig;
+                        clientToken;
+                        flowName;
+                        triggerConfig;
+                        sourceFlowConfig;
+                        destinationFlowConfigList;
+                        tasks
+                      }
     let to_value x =
       structure_to_value
         [("flowName", (Some (FlowName.to_value x.flowName)));
@@ -12042,9 +13903,18 @@ module UpdateFlowRequest =
         ("destinationFlowConfigList",
           (Some
              (DestinationFlowConfigList.to_value x.destinationFlowConfigList)));
-        ("tasks", (Some (Tasks.to_value x.tasks)))]
+        ("tasks", (Some (Tasks.to_value x.tasks)));
+        ("metadataCatalogConfig",
+          (Option.map x.metadataCatalogConfig
+             ~f:MetadataCatalogConfig.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let metadataCatalogConfig =
+        (Option.map ~f:MetadataCatalogConfig.of_xml)
+          (Xml.child xml_arg0 "metadataCatalogConfig") in
       let tasks =
         Tasks.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tasks") in
       let destinationFlowConfigList =
@@ -12062,24 +13932,220 @@ module UpdateFlowRequest =
           (Xml.child xml_arg0 "description") in
       let flowName =
         FlowName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "flowName") in
-      make ~tasks ~destinationFlowConfigList ~sourceFlowConfig ~triggerConfig
+      make ?clientToken ?metadataCatalogConfig ~tasks
+        ~destinationFlowConfigList ~sourceFlowConfig ~triggerConfig
         ?description ~flowName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tasks = field_map_exn json "tasks" Tasks.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let metadataCatalogConfig =
+        field_map json__ "metadataCatalogConfig"
+          MetadataCatalogConfig.of_json in
+      let tasks = field_map_exn json__ "tasks" Tasks.of_json in
       let destinationFlowConfigList =
-        field_map_exn json "destinationFlowConfigList"
+        field_map_exn json__ "destinationFlowConfigList"
           DestinationFlowConfigList.of_json in
       let sourceFlowConfig =
-        field_map_exn json "sourceFlowConfig" SourceFlowConfig.of_json in
+        field_map_exn json__ "sourceFlowConfig" SourceFlowConfig.of_json in
       let triggerConfig =
-        field_map_exn json "triggerConfig" TriggerConfig.of_json in
-      let description = field_map json "description" FlowDescription.of_json in
-      let flowName = field_map_exn json "flowName" FlowName.of_json in
-      make ~tasks ~destinationFlowConfigList ~sourceFlowConfig ~triggerConfig
+        field_map_exn json__ "triggerConfig" TriggerConfig.of_json in
+      let description =
+        field_map json__ "description" FlowDescription.of_json in
+      let flowName = field_map_exn json__ "flowName" FlowName.of_json in
+      make ?clientToken ?metadataCatalogConfig ~tasks
+        ~destinationFlowConfigList ~sourceFlowConfig ~triggerConfig
         ?description ~flowName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing flow."]
+module UpdateConnectorRegistrationResponse =
+  struct
+    type nonrec t =
+      {
+      connectorArn: ARN.t option
+        [@ocaml.doc "The ARN of the connector being updated."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `ConnectorAuthenticationException of
+          ConnectorAuthenticationException.t 
+      | `ConnectorServerException of ConnectorServerException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?connectorArn = fun () -> { connectorArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ConnectorAuthenticationException" ->
+          `ConnectorAuthenticationException
+            (ConnectorAuthenticationException.of_json json)
+      | "ConnectorServerException" ->
+          `ConnectorServerException (ConnectorServerException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ConnectorAuthenticationException" ->
+          `ConnectorAuthenticationException
+            (ConnectorAuthenticationException.of_xml xml)
+      | "ConnectorServerException" ->
+          `ConnectorServerException (ConnectorServerException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ConnectorAuthenticationException e ->
+          `Assoc
+            [("error", (`String "ConnectorAuthenticationException"));
+            ("details", (ConnectorAuthenticationException.to_json e))]
+      | `ConnectorServerException e ->
+          `Assoc
+            [("error", (`String "ConnectorServerException"));
+            ("details", (ConnectorServerException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("connectorArn", (Option.map x.connectorArn ~f:ARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connectorArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "connectorArn") in
+      make ?connectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connectorArn = field_map json__ "connectorArn" ARN.of_json in
+      make ?connectorArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates a custom connector that you've previously registered. This operation updates the connector with one of the following: The latest version of the AWS Lambda function that's assigned to the connector A new AWS Lambda function that you specify"]
+module UpdateConnectorRegistrationRequest =
+  struct
+    type nonrec t =
+      {
+      connectorLabel: ConnectorLabel.t
+        [@ocaml.doc
+          "The name of the connector. The name is unique for each connector registration in your AWS account."];
+      description: Description.t option
+        [@ocaml.doc
+          "A description about the update that you're applying to the connector."];
+      connectorProvisioningConfig: ConnectorProvisioningConfig.t option ;
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "The clientToken parameter is an idempotency token. It ensures that your UpdateConnectorRegistration request completes only once. You choose the value to pass. For example, if you don't receive a response from your request, you can safely retry the request with the same clientToken parameter value. If you omit a clientToken value, the Amazon Web Services SDK that you are using inserts a value for you. This way, the SDK can safely retry requests multiple times after a network error. You must provide your own value for other use cases. If you specify input parameters that differ from your first request, an error occurs. If you use a different value for clientToken, Amazon AppFlow considers it a new call to UpdateConnectorRegistration. The token is active for 8 hours."]}
+    let context_ = "UpdateConnectorRegistrationRequest"
+    let make ?description =
+      fun ?connectorProvisioningConfig ->
+        fun ?clientToken ->
+          fun ~connectorLabel ->
+            fun () ->
+              {
+                description;
+                connectorProvisioningConfig;
+                clientToken;
+                connectorLabel
+              }
+    let to_value x =
+      structure_to_value
+        [("connectorLabel",
+           (Some (ConnectorLabel.to_value x.connectorLabel)));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("connectorProvisioningConfig",
+          (Option.map x.connectorProvisioningConfig
+             ~f:ConnectorProvisioningConfig.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let connectorProvisioningConfig =
+        (Option.map ~f:ConnectorProvisioningConfig.of_xml)
+          (Xml.child xml_arg0 "connectorProvisioningConfig") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let connectorLabel =
+        ConnectorLabel.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "connectorLabel") in
+      make ?clientToken ?connectorProvisioningConfig ?description
+        ~connectorLabel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let connectorProvisioningConfig =
+        field_map json__ "connectorProvisioningConfig"
+          ConnectorProvisioningConfig.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let connectorLabel =
+        field_map_exn json__ "connectorLabel" ConnectorLabel.of_json in
+      make ?clientToken ?connectorProvisioningConfig ?description
+        ~connectorLabel ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates a custom connector that you've previously registered. This operation updates the connector with one of the following: The latest version of the AWS Lambda function that's assigned to the connector A new AWS Lambda function that you specify"]
 module UpdateConnectorProfileResponse =
   struct
     type nonrec t =
@@ -12165,9 +14231,9 @@ module UpdateConnectorProfileResponse =
           (Xml.child xml_arg0 "connectorProfileArn") in
       make ?connectorProfileArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectorProfileArn =
-        field_map json "connectorProfileArn" ConnectorProfileArn.of_json in
+        field_map json__ "connectorProfileArn" ConnectorProfileArn.of_json in
       make ?connectorProfileArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12184,22 +14250,34 @@ module UpdateConnectorProfileRequest =
           "Indicates the connection mode and if it is public or private."];
       connectorProfileConfig: ConnectorProfileConfig.t
         [@ocaml.doc
-          "Defines the connector-specific profile configuration and credentials."]}
+          "Defines the connector-specific profile configuration and credentials."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "The clientToken parameter is an idempotency token. It ensures that your UpdateConnectorProfile request completes only once. You choose the value to pass. For example, if you don't receive a response from your request, you can safely retry the request with the same clientToken parameter value. If you omit a clientToken value, the Amazon Web Services SDK that you are using inserts a value for you. This way, the SDK can safely retry requests multiple times after a network error. You must provide your own value for other use cases. If you specify input parameters that differ from your first request, an error occurs. If you use a different value for clientToken, Amazon AppFlow considers it a new call to UpdateConnectorProfile. The token is active for 8 hours."]}
     let context_ = "UpdateConnectorProfileRequest"
-    let make ~connectorProfileName =
-      fun ~connectionMode ->
-        fun ~connectorProfileConfig ->
-          fun () ->
-            { connectorProfileName; connectionMode; connectorProfileConfig }
+    let make ?clientToken =
+      fun ~connectorProfileName ->
+        fun ~connectionMode ->
+          fun ~connectorProfileConfig ->
+            fun () ->
+              {
+                clientToken;
+                connectorProfileName;
+                connectionMode;
+                connectorProfileConfig
+              }
     let to_value x =
       structure_to_value
         [("connectorProfileName",
            (Some (ConnectorProfileName.to_value x.connectorProfileName)));
         ("connectionMode", (Some (ConnectionMode.to_value x.connectionMode)));
         ("connectorProfileConfig",
-          (Some (ConnectorProfileConfig.to_value x.connectorProfileConfig)))]
+          (Some (ConnectorProfileConfig.to_value x.connectorProfileConfig)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       let connectorProfileConfig =
         ConnectorProfileConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectorProfileConfig") in
@@ -12209,18 +14287,21 @@ module UpdateConnectorProfileRequest =
       let connectorProfileName =
         ConnectorProfileName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectorProfileName") in
-      make ~connectorProfileConfig ~connectionMode ~connectorProfileName ()
+      make ?clientToken ~connectorProfileConfig ~connectionMode
+        ~connectorProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let connectorProfileConfig =
-        field_map_exn json "connectorProfileConfig"
+        field_map_exn json__ "connectorProfileConfig"
           ConnectorProfileConfig.of_json in
       let connectionMode =
-        field_map_exn json "connectionMode" ConnectionMode.of_json in
+        field_map_exn json__ "connectionMode" ConnectionMode.of_json in
       let connectorProfileName =
-        field_map_exn json "connectorProfileName"
+        field_map_exn json__ "connectorProfileName"
           ConnectorProfileName.of_json in
-      make ~connectorProfileConfig ~connectionMode ~connectorProfileName ()
+      make ?clientToken ~connectorProfileConfig ~connectionMode
+        ~connectorProfileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates a given connector profile associated with your account."]
@@ -12307,9 +14388,9 @@ module UntagResourceRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" ARN.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from the specified flow."]
@@ -12370,7 +14451,7 @@ module UnregisterConnectorResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Unregisters the custom connector registered in your account that matches the connectorLabel provided in the request."]
+       "Unregisters the custom connector registered in your account that matches the connector label provided in the request."]
 module UnregisterConnectorRequest =
   struct
     type nonrec t =
@@ -12398,14 +14479,14 @@ module UnregisterConnectorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectorLabel") in
       make ?forceDelete ~connectorLabel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let forceDelete = field_map json "forceDelete" Boolean.of_json in
+    let of_json json__ =
+      let forceDelete = field_map json__ "forceDelete" Boolean.of_json in
       let connectorLabel =
-        field_map_exn json "connectorLabel" ConnectorLabel.of_json in
+        field_map_exn json__ "connectorLabel" ConnectorLabel.of_json in
       make ?forceDelete ~connectorLabel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Unregisters the custom connector registered in your account that matches the connectorLabel provided in the request."]
+       "Unregisters the custom connector registered in your account that matches the connector label provided in the request."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -12487,9 +14568,9 @@ module TagResourceRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" ARN.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Applies a tag to the specified flow."]
@@ -12570,9 +14651,9 @@ module StopFlowResponse =
         (Option.map ~f:FlowArn.of_xml) (Xml.child xml_arg0 "flowArn") in
       make ?flowStatus ?flowArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let flowStatus = field_map json "flowStatus" FlowStatus.of_json in
-      let flowArn = field_map json "flowArn" FlowArn.of_json in
+    let of_json json__ =
+      let flowStatus = field_map json__ "flowStatus" FlowStatus.of_json in
+      let flowArn = field_map json__ "flowArn" FlowArn.of_json in
       make ?flowStatus ?flowArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12595,8 +14676,8 @@ module StopFlowRequest =
         FlowName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "flowName") in
       make ~flowName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let flowName = field_map_exn json "flowName" FlowName.of_json in
+    let of_json json__ =
+      let flowName = field_map_exn json__ "flowName" FlowName.of_json in
       make ~flowName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12686,10 +14767,10 @@ module StartFlowResponse =
         (Option.map ~f:FlowArn.of_xml) (Xml.child xml_arg0 "flowArn") in
       make ?executionId ?flowStatus ?flowArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let executionId = field_map json "executionId" ExecutionId.of_json in
-      let flowStatus = field_map json "flowStatus" FlowStatus.of_json in
-      let flowArn = field_map json "flowArn" FlowArn.of_json in
+    let of_json json__ =
+      let executionId = field_map json__ "executionId" ExecutionId.of_json in
+      let flowStatus = field_map json__ "flowStatus" FlowStatus.of_json in
+      let flowArn = field_map json__ "flowArn" FlowArn.of_json in
       make ?executionId ?flowStatus ?flowArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12700,24 +14781,176 @@ module StartFlowRequest =
       {
       flowName: FlowName.t
         [@ocaml.doc
-          "The specified name of the flow. Spaces are not allowed. Use underscores (_) or hyphens (-) only."]}
+          "The specified name of the flow. Spaces are not allowed. Use underscores (_) or hyphens (-) only."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "The clientToken parameter is an idempotency token. It ensures that your StartFlow request completes only once. You choose the value to pass. For example, if you don't receive a response from your request, you can safely retry the request with the same clientToken parameter value. If you omit a clientToken value, the Amazon Web Services SDK that you are using inserts a value for you. This way, the SDK can safely retry requests multiple times after a network error. You must provide your own value for other use cases. If you specify input parameters that differ from your first request, an error occurs for flows that run on a schedule or based on an event. However, the error doesn't occur for flows that run on demand. You set the conditions that initiate your flow for the triggerConfig parameter. If you use a different value for clientToken, Amazon AppFlow considers it a new call to StartFlow. The token is active for 8 hours."]}
     let context_ = "StartFlowRequest"
-    let make ~flowName = fun () -> { flowName }
+    let make ?clientToken =
+      fun ~flowName -> fun () -> { clientToken; flowName }
     let to_value x =
       structure_to_value
-        [("flowName", (Some (FlowName.to_value x.flowName)))]
+        [("flowName", (Some (FlowName.to_value x.flowName)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       let flowName =
         FlowName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "flowName") in
-      make ~flowName ()
+      make ?clientToken ~flowName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let flowName = field_map_exn json "flowName" FlowName.of_json in
-      make ~flowName ()
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let flowName = field_map_exn json__ "flowName" FlowName.of_json in
+      make ?clientToken ~flowName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Activates an existing flow. For on-demand flows, this operation runs the flow immediately. For schedule and event-triggered flows, this operation activates the flow."]
+module ResetConnectorMetadataCacheResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Resets metadata about your connector entities that Amazon AppFlow stored in its cache. Use this action when you want Amazon AppFlow to return the latest information about the data that you have in a source application. Amazon AppFlow returns metadata about your entities when you use the ListConnectorEntities or DescribeConnectorEntities actions. Following these actions, Amazon AppFlow caches the metadata to reduce the number of API requests that it must send to the source application. Amazon AppFlow automatically resets the cache once every hour, but you can use this action when you want to get the latest metadata right away."]
+module ResetConnectorMetadataCacheRequest =
+  struct
+    type nonrec t =
+      {
+      connectorProfileName: ConnectorProfileName.t option
+        [@ocaml.doc
+          "The name of the connector profile that you want to reset cached metadata for. You can omit this parameter if you're resetting the cache for any of the following connectors: Amazon Connect, Amazon EventBridge, Amazon Lookout for Metrics, Amazon S3, or Upsolver. If you're resetting the cache for any other connector, you must include this parameter in your request."];
+      connectorType: ConnectorType.t option
+        [@ocaml.doc
+          "The type of connector to reset cached metadata for. You must include this parameter in your request if you're resetting the cache for any of the following connectors: Amazon Connect, Amazon EventBridge, Amazon Lookout for Metrics, Amazon S3, or Upsolver. If you're resetting the cache for any other connector, you can omit this parameter from your request."];
+      connectorEntityName: EntityName.t option
+        [@ocaml.doc
+          "Use this parameter if you want to reset cached metadata about the details for an individual entity. If you don't include this parameter in your request, Amazon AppFlow only resets cached metadata about entity names, not entity details."];
+      entitiesPath: EntitiesPath.t option
+        [@ocaml.doc
+          "Use this parameter only if you\226\128\153re resetting the cached metadata about a nested entity. Only some connectors support nested entities. A nested entity is one that has another entity as a parent. To use this parameter, specify the name of the parent entity. To look up the parent-child relationship of entities, you can send a ListConnectorEntities request that omits the entitiesPath parameter. Amazon AppFlow will return a list of top-level entities. For each one, it indicates whether the entity has nested entities. Then, in a subsequent ListConnectorEntities request, you can specify a parent entity name for the entitiesPath parameter. Amazon AppFlow will return a list of the child entities for that parent."];
+      apiVersion: ApiVersion.t option
+        [@ocaml.doc
+          "The API version that you specified in the connector profile that you\226\128\153re resetting cached metadata for. You must use this parameter only if the connector supports multiple API versions or if the connector type is CustomConnector. To look up how many versions a connector supports, use the DescribeConnectors action. In the response, find the value that Amazon AppFlow returns for the connectorVersion parameter. To look up the connector type, use the DescribeConnectorProfiles action. In the response, find the value that Amazon AppFlow returns for the connectorType parameter. To look up the API version that you specified in a connector profile, use the DescribeConnectorProfiles action."]}
+    let make ?connectorProfileName =
+      fun ?connectorType ->
+        fun ?connectorEntityName ->
+          fun ?entitiesPath ->
+            fun ?apiVersion ->
+              fun () ->
+                {
+                  connectorProfileName;
+                  connectorType;
+                  connectorEntityName;
+                  entitiesPath;
+                  apiVersion
+                }
+    let to_value x =
+      structure_to_value
+        [("connectorProfileName",
+           (Option.map x.connectorProfileName
+              ~f:ConnectorProfileName.to_value));
+        ("connectorType",
+          (Option.map x.connectorType ~f:ConnectorType.to_value));
+        ("connectorEntityName",
+          (Option.map x.connectorEntityName ~f:EntityName.to_value));
+        ("entitiesPath",
+          (Option.map x.entitiesPath ~f:EntitiesPath.to_value));
+        ("apiVersion", (Option.map x.apiVersion ~f:ApiVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let apiVersion =
+        (Option.map ~f:ApiVersion.of_xml) (Xml.child xml_arg0 "apiVersion") in
+      let entitiesPath =
+        (Option.map ~f:EntitiesPath.of_xml)
+          (Xml.child xml_arg0 "entitiesPath") in
+      let connectorEntityName =
+        (Option.map ~f:EntityName.of_xml)
+          (Xml.child xml_arg0 "connectorEntityName") in
+      let connectorType =
+        (Option.map ~f:ConnectorType.of_xml)
+          (Xml.child xml_arg0 "connectorType") in
+      let connectorProfileName =
+        (Option.map ~f:ConnectorProfileName.of_xml)
+          (Xml.child xml_arg0 "connectorProfileName") in
+      make ?apiVersion ?entitiesPath ?connectorEntityName ?connectorType
+        ?connectorProfileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let apiVersion = field_map json__ "apiVersion" ApiVersion.of_json in
+      let entitiesPath = field_map json__ "entitiesPath" EntitiesPath.of_json in
+      let connectorEntityName =
+        field_map json__ "connectorEntityName" EntityName.of_json in
+      let connectorType =
+        field_map json__ "connectorType" ConnectorType.of_json in
+      let connectorProfileName =
+        field_map json__ "connectorProfileName" ConnectorProfileName.of_json in
+      make ?apiVersion ?entitiesPath ?connectorEntityName ?connectorType
+        ?connectorProfileName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Resets metadata about your connector entities that Amazon AppFlow stored in its cache. Use this action when you want Amazon AppFlow to return the latest information about the data that you have in a source application. Amazon AppFlow returns metadata about your entities when you use the ListConnectorEntities or DescribeConnectorEntities actions. Following these actions, Amazon AppFlow caches the metadata to reduce the number of API requests that it must send to the source application. Amazon AppFlow automatically resets the cache once every hour, but you can use this action when you want to get the latest metadata right away."]
 module RegisterConnectorResponse =
   struct
     type nonrec t =
@@ -12838,12 +15071,12 @@ module RegisterConnectorResponse =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "connectorArn") in
       make ?connectorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connectorArn = field_map json "connectorArn" ARN.of_json in
+    let of_json json__ =
+      let connectorArn = field_map json__ "connectorArn" ARN.of_json in
       make ?connectorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers a new connector with your Amazon Web Services account. Before you can register the connector, you must deploy lambda in your account."]
+       "Registers a new custom connector with your Amazon Web Services account. Before you can register the connector, you must deploy the associated AWS lambda function in your account."]
 module RegisterConnectorRequest =
   struct
     type nonrec t =
@@ -12859,18 +15092,23 @@ module RegisterConnectorRequest =
           "The provisioning type of the connector. Currently the only supported value is LAMBDA."];
       connectorProvisioningConfig: ConnectorProvisioningConfig.t option
         [@ocaml.doc
-          "The provisioning type of the connector. Currently the only supported value is LAMBDA."]}
+          "The provisioning type of the connector. Currently the only supported value is LAMBDA."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "The clientToken parameter is an idempotency token. It ensures that your RegisterConnector request completes only once. You choose the value to pass. For example, if you don't receive a response from your request, you can safely retry the request with the same clientToken parameter value. If you omit a clientToken value, the Amazon Web Services SDK that you are using inserts a value for you. This way, the SDK can safely retry requests multiple times after a network error. You must provide your own value for other use cases. If you specify input parameters that differ from your first request, an error occurs. If you use a different value for clientToken, Amazon AppFlow considers it a new call to RegisterConnector. The token is active for 8 hours."]}
     let make ?connectorLabel =
       fun ?description ->
         fun ?connectorProvisioningType ->
           fun ?connectorProvisioningConfig ->
-            fun () ->
-              {
-                connectorLabel;
-                description;
-                connectorProvisioningType;
-                connectorProvisioningConfig
-              }
+            fun ?clientToken ->
+              fun () ->
+                {
+                  connectorLabel;
+                  description;
+                  connectorProvisioningType;
+                  connectorProvisioningConfig;
+                  clientToken
+                }
     let to_value x =
       structure_to_value
         [("connectorLabel",
@@ -12881,9 +15119,12 @@ module RegisterConnectorRequest =
              ~f:ConnectorProvisioningType.to_value));
         ("connectorProvisioningConfig",
           (Option.map x.connectorProvisioningConfig
-             ~f:ConnectorProvisioningConfig.to_value))]
+             ~f:ConnectorProvisioningConfig.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       let connectorProvisioningConfig =
         (Option.map ~f:ConnectorProvisioningConfig.of_xml)
           (Xml.child xml_arg0 "connectorProvisioningConfig") in
@@ -12895,24 +15136,25 @@ module RegisterConnectorRequest =
       let connectorLabel =
         (Option.map ~f:ConnectorLabel.of_xml)
           (Xml.child xml_arg0 "connectorLabel") in
-      make ?connectorProvisioningConfig ?connectorProvisioningType
-        ?description ?connectorLabel ()
+      make ?clientToken ?connectorProvisioningConfig
+        ?connectorProvisioningType ?description ?connectorLabel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let connectorProvisioningConfig =
-        field_map json "connectorProvisioningConfig"
+        field_map json__ "connectorProvisioningConfig"
           ConnectorProvisioningConfig.of_json in
       let connectorProvisioningType =
-        field_map json "connectorProvisioningType"
+        field_map json__ "connectorProvisioningType"
           ConnectorProvisioningType.of_json in
-      let description = field_map json "description" Description.of_json in
+      let description = field_map json__ "description" Description.of_json in
       let connectorLabel =
-        field_map json "connectorLabel" ConnectorLabel.of_json in
-      make ?connectorProvisioningConfig ?connectorProvisioningType
-        ?description ?connectorLabel ()
+        field_map json__ "connectorLabel" ConnectorLabel.of_json in
+      make ?clientToken ?connectorProvisioningConfig
+        ?connectorProvisioningType ?description ?connectorLabel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers a new connector with your Amazon Web Services account. Before you can register the connector, you must deploy lambda in your account."]
+       "Registers a new custom connector with your Amazon Web Services account. Before you can register the connector, you must deploy the associated AWS lambda function in your account."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -12973,8 +15215,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the tags that are associated with a specified flow."]
@@ -12995,8 +15237,8 @@ module ListTagsForResourceRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" ARN.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13058,9 +15300,9 @@ module ListFlowsResponse =
         (Option.map ~f:FlowList.of_xml) (Xml.child xml_arg0 "flows") in
       make ?nextToken ?flows ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let flows = field_map json "flows" FlowList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let flows = field_map json__ "flows" FlowList.of_json in
       make ?nextToken ?flows ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all of the flows associated with your account."]
@@ -13087,9 +15329,9 @@ module ListFlowsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all of the flows associated with your account."]
@@ -13154,9 +15396,9 @@ module ListConnectorsResponse =
           (Xml.child xml_arg0 "connectors") in
       make ?nextToken ?connectors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let connectors = field_map json "connectors" ConnectorList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let connectors = field_map json__ "connectors" ConnectorList.of_json in
       make ?nextToken ?connectors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13184,9 +15426,9 @@ module ListConnectorsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13195,9 +15437,12 @@ module ListConnectorEntitiesResponse =
   struct
     type nonrec t =
       {
-      connectorEntityMap: ConnectorEntityMap.t
+      connectorEntityMap: ConnectorEntityMap.t option
         [@ocaml.doc
-          "The response of ListConnectorEntities lists entities grouped by category. This map's key represents the group name, and its value contains the list of entities belonging to that group."]}
+          "The response of ListConnectorEntities lists entities grouped by category. This map's key represents the group name, and its value contains the list of entities belonging to that group."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token that you specify in your next ListConnectorEntities operation to get the next page of results in paginated response. The ListConnectorEntities operation provides this token if the response is too big for the page size."]}
     type nonrec error =
       [
         `ConnectorAuthenticationException of
@@ -13207,8 +15452,8 @@ module ListConnectorEntitiesResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListConnectorEntitiesResponse"
-    let make ~connectorEntityMap = fun () -> { connectorEntityMap }
+    let make ?connectorEntityMap =
+      fun ?nextToken -> fun () -> { connectorEntityMap; nextToken }
     let error_of_json name json =
       match name with
       | "ConnectorAuthenticationException" ->
@@ -13270,18 +15515,22 @@ module ListConnectorEntitiesResponse =
     let to_value x =
       structure_to_value
         [("connectorEntityMap",
-           (Some (ConnectorEntityMap.to_value x.connectorEntityMap)))]
+           (Option.map x.connectorEntityMap ~f:ConnectorEntityMap.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let connectorEntityMap =
-        ConnectorEntityMap.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "connectorEntityMap") in
-      make ~connectorEntityMap ()
+        (Option.map ~f:ConnectorEntityMap.of_xml)
+          (Xml.child xml_arg0 "connectorEntityMap") in
+      make ?nextToken ?connectorEntityMap ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let connectorEntityMap =
-        field_map_exn json "connectorEntityMap" ConnectorEntityMap.of_json in
-      make ~connectorEntityMap ()
+        field_map json__ "connectorEntityMap" ConnectorEntityMap.of_json in
+      make ?nextToken ?connectorEntityMap ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the list of available connector entities supported by Amazon AppFlow. For example, you can query Salesforce for Account and Opportunity entities, or query ServiceNow for the Incident entity."]
@@ -13299,14 +15548,28 @@ module ListConnectorEntitiesRequest =
         [@ocaml.doc
           "This optional parameter is specific to connector implementation. Some connectors support multiple levels or categories of entities. You can find out the list of roots for such providers by sending a request without the entitiesPath parameter. If the connector supports entities at different roots, this initial request returns the list of roots. Otherwise, this request returns all entities supported by the provider."];
       apiVersion: ApiVersion.t option
-        [@ocaml.doc "The version of the API that's used by the connector."]}
+        [@ocaml.doc "The version of the API that's used by the connector."];
+      maxResults: ListEntitiesMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items that the operation returns in the response."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token that was provided by your prior ListConnectorEntities operation if the response was too big for the page size. You specify this token to get the next page of results in paginated response."]}
     let make ?connectorProfileName =
       fun ?connectorType ->
         fun ?entitiesPath ->
           fun ?apiVersion ->
-            fun () ->
-              { connectorProfileName; connectorType; entitiesPath; apiVersion
-              }
+            fun ?maxResults ->
+              fun ?nextToken ->
+                fun () ->
+                  {
+                    connectorProfileName;
+                    connectorType;
+                    entitiesPath;
+                    apiVersion;
+                    maxResults;
+                    nextToken
+                  }
     let to_value x =
       structure_to_value
         [("connectorProfileName",
@@ -13316,9 +15579,17 @@ module ListConnectorEntitiesRequest =
           (Option.map x.connectorType ~f:ConnectorType.to_value));
         ("entitiesPath",
           (Option.map x.entitiesPath ~f:EntitiesPath.to_value));
-        ("apiVersion", (Option.map x.apiVersion ~f:ApiVersion.to_value))]
+        ("apiVersion", (Option.map x.apiVersion ~f:ApiVersion.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:ListEntitiesMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:ListEntitiesMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
       let apiVersion =
         (Option.map ~f:ApiVersion.of_xml) (Xml.child xml_arg0 "apiVersion") in
       let entitiesPath =
@@ -13330,16 +15601,21 @@ module ListConnectorEntitiesRequest =
       let connectorProfileName =
         (Option.map ~f:ConnectorProfileName.of_xml)
           (Xml.child xml_arg0 "connectorProfileName") in
-      make ?apiVersion ?entitiesPath ?connectorType ?connectorProfileName ()
+      make ?nextToken ?maxResults ?apiVersion ?entitiesPath ?connectorType
+        ?connectorProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let apiVersion = field_map json "apiVersion" ApiVersion.of_json in
-      let entitiesPath = field_map json "entitiesPath" EntitiesPath.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" ListEntitiesMaxResults.of_json in
+      let apiVersion = field_map json__ "apiVersion" ApiVersion.of_json in
+      let entitiesPath = field_map json__ "entitiesPath" EntitiesPath.of_json in
       let connectorType =
-        field_map json "connectorType" ConnectorType.of_json in
+        field_map json__ "connectorType" ConnectorType.of_json in
       let connectorProfileName =
-        field_map json "connectorProfileName" ConnectorProfileName.of_json in
-      make ?apiVersion ?entitiesPath ?connectorType ?connectorProfileName ()
+        field_map json__ "connectorProfileName" ConnectorProfileName.of_json in
+      make ?nextToken ?maxResults ?apiVersion ?entitiesPath ?connectorType
+        ?connectorProfileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the list of available connector entities supported by Amazon AppFlow. For example, you can query Salesforce for Account and Opportunity entities, or query ServiceNow for the Incident entity."]
@@ -13387,7 +15663,16 @@ module DescribeFlowResponse =
           "Specifies the user name of the account that performed the most recent update."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The tags used to organize, track, or control access for your flow."]}
+          "The tags used to organize, track, or control access for your flow."];
+      metadataCatalogConfig: MetadataCatalogConfig.t option
+        [@ocaml.doc
+          "Specifies the configuration that Amazon AppFlow uses when it catalogs the data that's transferred by the associated flow. When Amazon AppFlow catalogs the data from a flow, it stores metadata in a data catalog."];
+      lastRunMetadataCatalogDetails: MetadataCatalogDetails.t option
+        [@ocaml.doc
+          "Describes the metadata catalog, metadata table, and data partitions that Amazon AppFlow used for the associated flow run."];
+      schemaVersion: Long.t option
+        [@ocaml.doc
+          "The version number of your data schema. Amazon AppFlow assigns this version number. The version number increases by one when you change any of the following settings in your flow configuration: Source-to-destination field mappings Field data types Partition keys"]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -13408,25 +15693,31 @@ module DescribeFlowResponse =
                               fun ?createdBy ->
                                 fun ?lastUpdatedBy ->
                                   fun ?tags ->
-                                    fun () ->
-                                      {
-                                        flowArn;
-                                        description;
-                                        flowName;
-                                        kmsArn;
-                                        flowStatus;
-                                        flowStatusMessage;
-                                        sourceFlowConfig;
-                                        destinationFlowConfigList;
-                                        lastRunExecutionDetails;
-                                        triggerConfig;
-                                        tasks;
-                                        createdAt;
-                                        lastUpdatedAt;
-                                        createdBy;
-                                        lastUpdatedBy;
-                                        tags
-                                      }
+                                    fun ?metadataCatalogConfig ->
+                                      fun ?lastRunMetadataCatalogDetails ->
+                                        fun ?schemaVersion ->
+                                          fun () ->
+                                            {
+                                              flowArn;
+                                              description;
+                                              flowName;
+                                              kmsArn;
+                                              flowStatus;
+                                              flowStatusMessage;
+                                              sourceFlowConfig;
+                                              destinationFlowConfigList;
+                                              lastRunExecutionDetails;
+                                              triggerConfig;
+                                              tasks;
+                                              createdAt;
+                                              lastUpdatedAt;
+                                              createdBy;
+                                              lastUpdatedBy;
+                                              tags;
+                                              metadataCatalogConfig;
+                                              lastRunMetadataCatalogDetails;
+                                              schemaVersion
+                                            }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -13483,9 +15774,24 @@ module DescribeFlowResponse =
         ("lastUpdatedAt", (Option.map x.lastUpdatedAt ~f:Date.to_value));
         ("createdBy", (Option.map x.createdBy ~f:CreatedBy.to_value));
         ("lastUpdatedBy", (Option.map x.lastUpdatedBy ~f:UpdatedBy.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("metadataCatalogConfig",
+          (Option.map x.metadataCatalogConfig
+             ~f:MetadataCatalogConfig.to_value));
+        ("lastRunMetadataCatalogDetails",
+          (Option.map x.lastRunMetadataCatalogDetails
+             ~f:MetadataCatalogDetails.to_value));
+        ("schemaVersion", (Option.map x.schemaVersion ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let schemaVersion =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "schemaVersion") in
+      let lastRunMetadataCatalogDetails =
+        (Option.map ~f:MetadataCatalogDetails.of_xml)
+          (Xml.child xml_arg0 "lastRunMetadataCatalogDetails") in
+      let metadataCatalogConfig =
+        (Option.map ~f:MetadataCatalogConfig.of_xml)
+          (Xml.child xml_arg0 "metadataCatalogConfig") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let lastUpdatedBy =
         (Option.map ~f:UpdatedBy.of_xml) (Xml.child xml_arg0 "lastUpdatedBy") in
@@ -13522,38 +15828,48 @@ module DescribeFlowResponse =
           (Xml.child xml_arg0 "description") in
       let flowArn =
         (Option.map ~f:FlowArn.of_xml) (Xml.child xml_arg0 "flowArn") in
-      make ?tags ?lastUpdatedBy ?createdBy ?lastUpdatedAt ?createdAt ?tasks
-        ?triggerConfig ?lastRunExecutionDetails ?destinationFlowConfigList
-        ?sourceFlowConfig ?flowStatusMessage ?flowStatus ?kmsArn ?flowName
-        ?description ?flowArn ()
+      make ?schemaVersion ?lastRunMetadataCatalogDetails
+        ?metadataCatalogConfig ?tags ?lastUpdatedBy ?createdBy ?lastUpdatedAt
+        ?createdAt ?tasks ?triggerConfig ?lastRunExecutionDetails
+        ?destinationFlowConfigList ?sourceFlowConfig ?flowStatusMessage
+        ?flowStatus ?kmsArn ?flowName ?description ?flowArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let lastUpdatedBy = field_map json "lastUpdatedBy" UpdatedBy.of_json in
-      let createdBy = field_map json "createdBy" CreatedBy.of_json in
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Date.of_json in
-      let createdAt = field_map json "createdAt" Date.of_json in
-      let tasks = field_map json "tasks" Tasks.of_json in
+    let of_json json__ =
+      let schemaVersion = field_map json__ "schemaVersion" Long.of_json in
+      let lastRunMetadataCatalogDetails =
+        field_map json__ "lastRunMetadataCatalogDetails"
+          MetadataCatalogDetails.of_json in
+      let metadataCatalogConfig =
+        field_map json__ "metadataCatalogConfig"
+          MetadataCatalogConfig.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let lastUpdatedBy = field_map json__ "lastUpdatedBy" UpdatedBy.of_json in
+      let createdBy = field_map json__ "createdBy" CreatedBy.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Date.of_json in
+      let createdAt = field_map json__ "createdAt" Date.of_json in
+      let tasks = field_map json__ "tasks" Tasks.of_json in
       let triggerConfig =
-        field_map json "triggerConfig" TriggerConfig.of_json in
+        field_map json__ "triggerConfig" TriggerConfig.of_json in
       let lastRunExecutionDetails =
-        field_map json "lastRunExecutionDetails" ExecutionDetails.of_json in
+        field_map json__ "lastRunExecutionDetails" ExecutionDetails.of_json in
       let destinationFlowConfigList =
-        field_map json "destinationFlowConfigList"
+        field_map json__ "destinationFlowConfigList"
           DestinationFlowConfigList.of_json in
       let sourceFlowConfig =
-        field_map json "sourceFlowConfig" SourceFlowConfig.of_json in
+        field_map json__ "sourceFlowConfig" SourceFlowConfig.of_json in
       let flowStatusMessage =
-        field_map json "flowStatusMessage" FlowStatusMessage.of_json in
-      let flowStatus = field_map json "flowStatus" FlowStatus.of_json in
-      let kmsArn = field_map json "kmsArn" KMSArn.of_json in
-      let flowName = field_map json "flowName" FlowName.of_json in
-      let description = field_map json "description" FlowDescription.of_json in
-      let flowArn = field_map json "flowArn" FlowArn.of_json in
-      make ?tags ?lastUpdatedBy ?createdBy ?lastUpdatedAt ?createdAt ?tasks
-        ?triggerConfig ?lastRunExecutionDetails ?destinationFlowConfigList
-        ?sourceFlowConfig ?flowStatusMessage ?flowStatus ?kmsArn ?flowName
-        ?description ?flowArn ()
+        field_map json__ "flowStatusMessage" FlowStatusMessage.of_json in
+      let flowStatus = field_map json__ "flowStatus" FlowStatus.of_json in
+      let kmsArn = field_map json__ "kmsArn" KMSArn.of_json in
+      let flowName = field_map json__ "flowName" FlowName.of_json in
+      let description =
+        field_map json__ "description" FlowDescription.of_json in
+      let flowArn = field_map json__ "flowArn" FlowArn.of_json in
+      make ?schemaVersion ?lastRunMetadataCatalogDetails
+        ?metadataCatalogConfig ?tags ?lastUpdatedBy ?createdBy ?lastUpdatedAt
+        ?createdAt ?tasks ?triggerConfig ?lastRunExecutionDetails
+        ?destinationFlowConfigList ?sourceFlowConfig ?flowStatusMessage
+        ?flowStatus ?kmsArn ?flowName ?description ?flowArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides a description of the specified flow."]
 module DescribeFlowRequest =
@@ -13574,8 +15890,8 @@ module DescribeFlowRequest =
         FlowName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "flowName") in
       make ~flowName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let flowName = field_map_exn json "flowName" FlowName.of_json in
+    let of_json json__ =
+      let flowName = field_map_exn json__ "flowName" FlowName.of_json in
       make ~flowName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides a description of the specified flow."]
@@ -13649,10 +15965,10 @@ module DescribeFlowExecutionRecordsResponse =
           (Xml.child xml_arg0 "flowExecutions") in
       make ?nextToken ?flowExecutions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let flowExecutions =
-        field_map json "flowExecutions" FlowExecutionList.of_json in
+        field_map json__ "flowExecutions" FlowExecutionList.of_json in
       make ?nextToken ?flowExecutions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Fetches the execution history of the flow."]
@@ -13687,10 +16003,10 @@ module DescribeFlowExecutionRecordsRequest =
         FlowName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "flowName") in
       make ?nextToken ?maxResults ~flowName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let flowName = field_map_exn json "flowName" FlowName.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let flowName = field_map_exn json__ "flowName" FlowName.of_json in
       make ?nextToken ?maxResults ~flowName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Fetches the execution history of the flow."]
@@ -13765,11 +16081,11 @@ module DescribeConnectorsResponse =
           (Xml.child xml_arg0 "connectorConfigurations") in
       make ?nextToken ?connectors ?connectorConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let connectors = field_map json "connectors" ConnectorList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let connectors = field_map json__ "connectors" ConnectorList.of_json in
       let connectorConfigurations =
-        field_map json "connectorConfigurations"
+        field_map json__ "connectorConfigurations"
           ConnectorConfigurationsMap.of_json in
       make ?nextToken ?connectors ?connectorConfigurations ()
     let to_json v = composed_to_json to_value v
@@ -13807,11 +16123,11 @@ module DescribeConnectorsRequest =
           (Xml.child xml_arg0 "connectorTypes") in
       make ?nextToken ?maxResults ?connectorTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       let connectorTypes =
-        field_map json "connectorTypes" ConnectorTypeList.of_json in
+        field_map json__ "connectorTypes" ConnectorTypeList.of_json in
       make ?nextToken ?maxResults ?connectorTypes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13881,9 +16197,9 @@ module DescribeConnectorResponse =
           (Xml.child xml_arg0 "connectorConfiguration") in
       make ?connectorConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectorConfiguration =
-        field_map json "connectorConfiguration"
+        field_map json__ "connectorConfiguration"
           ConnectorConfiguration.of_json in
       make ?connectorConfiguration ()
     let to_json v = composed_to_json to_value v
@@ -13917,11 +16233,11 @@ module DescribeConnectorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectorType") in
       make ?connectorLabel ~connectorType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectorLabel =
-        field_map json "connectorLabel" ConnectorLabel.of_json in
+        field_map json__ "connectorLabel" ConnectorLabel.of_json in
       let connectorType =
-        field_map_exn json "connectorType" ConnectorType.of_json in
+        field_map_exn json__ "connectorType" ConnectorType.of_json in
       make ?connectorLabel ~connectorType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13989,10 +16305,10 @@ module DescribeConnectorProfilesResponse =
           (Xml.child xml_arg0 "connectorProfileDetails") in
       make ?nextToken ?connectorProfileDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let connectorProfileDetails =
-        field_map json "connectorProfileDetails"
+        field_map json__ "connectorProfileDetails"
           ConnectorProfileDetailList.of_json in
       make ?nextToken ?connectorProfileDetails ()
     let to_json v = composed_to_json to_value v
@@ -14058,15 +16374,15 @@ module DescribeConnectorProfilesRequest =
       make ?nextToken ?maxResults ?connectorLabel ?connectorType
         ?connectorProfileNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       let connectorLabel =
-        field_map json "connectorLabel" ConnectorLabel.of_json in
+        field_map json__ "connectorLabel" ConnectorLabel.of_json in
       let connectorType =
-        field_map json "connectorType" ConnectorType.of_json in
+        field_map json__ "connectorType" ConnectorType.of_json in
       let connectorProfileNames =
-        field_map json "connectorProfileNames"
+        field_map json__ "connectorProfileNames"
           ConnectorProfileNameList.of_json in
       make ?nextToken ?maxResults ?connectorLabel ?connectorType
         ?connectorProfileNames ()
@@ -14077,7 +16393,7 @@ module DescribeConnectorEntityResponse =
   struct
     type nonrec t =
       {
-      connectorEntityFields: ConnectorEntityFieldList.t
+      connectorEntityFields: ConnectorEntityFieldList.t option
         [@ocaml.doc
           "Describes the fields for that connector entity. For example, for an account entity, the fields would be account name, account ID, and so on."]}
     type nonrec error =
@@ -14089,8 +16405,7 @@ module DescribeConnectorEntityResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeConnectorEntityResponse"
-    let make ~connectorEntityFields = fun () -> { connectorEntityFields }
+    let make ?connectorEntityFields = fun () -> { connectorEntityFields }
     let error_of_json name json =
       match name with
       | "ConnectorAuthenticationException" ->
@@ -14152,22 +16467,23 @@ module DescribeConnectorEntityResponse =
     let to_value x =
       structure_to_value
         [("connectorEntityFields",
-           (Some (ConnectorEntityFieldList.to_value x.connectorEntityFields)))]
+           (Option.map x.connectorEntityFields
+              ~f:ConnectorEntityFieldList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let connectorEntityFields =
-        ConnectorEntityFieldList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "connectorEntityFields") in
-      make ~connectorEntityFields ()
+        (Option.map ~f:ConnectorEntityFieldList.of_xml)
+          (Xml.child xml_arg0 "connectorEntityFields") in
+      make ?connectorEntityFields ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectorEntityFields =
-        field_map_exn json "connectorEntityFields"
+        field_map json__ "connectorEntityFields"
           ConnectorEntityFieldList.of_json in
-      make ~connectorEntityFields ()
+      make ?connectorEntityFields ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides details regarding the entity used with the connector, with a description of the data model for each entity."]
+       "Provides details regarding the entity used with the connector, with a description of the data model for each field in that entity."]
 module DescribeConnectorEntityRequest =
   struct
     type nonrec t =
@@ -14219,19 +16535,19 @@ module DescribeConnectorEntityRequest =
       make ?apiVersion ?connectorProfileName ?connectorType
         ~connectorEntityName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let apiVersion = field_map json "apiVersion" ApiVersion.of_json in
+    let of_json json__ =
+      let apiVersion = field_map json__ "apiVersion" ApiVersion.of_json in
       let connectorProfileName =
-        field_map json "connectorProfileName" ConnectorProfileName.of_json in
+        field_map json__ "connectorProfileName" ConnectorProfileName.of_json in
       let connectorType =
-        field_map json "connectorType" ConnectorType.of_json in
+        field_map json__ "connectorType" ConnectorType.of_json in
       let connectorEntityName =
-        field_map_exn json "connectorEntityName" EntityName.of_json in
+        field_map_exn json__ "connectorEntityName" EntityName.of_json in
       make ?apiVersion ?connectorProfileName ?connectorType
         ~connectorEntityName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides details regarding the entity used with the connector, with a description of the data model for each entity."]
+       "Provides details regarding the entity used with the connector, with a description of the data model for each field in that entity."]
 module DeleteFlowResponse =
   struct
     type nonrec t = unit
@@ -14315,9 +16631,9 @@ module DeleteFlowRequest =
         FlowName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "flowName") in
       make ?forceDelete ~flowName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let forceDelete = field_map json "forceDelete" Boolean.of_json in
-      let flowName = field_map_exn json "flowName" FlowName.of_json in
+    let of_json json__ =
+      let forceDelete = field_map json__ "forceDelete" Boolean.of_json in
+      let flowName = field_map_exn json__ "flowName" FlowName.of_json in
       make ?forceDelete ~flowName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14407,10 +16723,10 @@ module DeleteConnectorProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectorProfileName") in
       make ?forceDelete ~connectorProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let forceDelete = field_map json "forceDelete" Boolean.of_json in
+    let of_json json__ =
+      let forceDelete = field_map json__ "forceDelete" Boolean.of_json in
       let connectorProfileName =
-        field_map_exn json "connectorProfileName"
+        field_map_exn json__ "connectorProfileName"
           ConnectorProfileName.of_json in
       make ?forceDelete ~connectorProfileName ()
     let to_json v = composed_to_json to_value v
@@ -14424,7 +16740,8 @@ module CreateFlowResponse =
       flowStatus: FlowStatus.t option
         [@ocaml.doc "Indicates the current status of the flow."]}
     type nonrec error =
-      [ `ConflictException of ConflictException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
       | `ConnectorAuthenticationException of
           ConnectorAuthenticationException.t 
       | `ConnectorServerException of ConnectorServerException.t 
@@ -14436,6 +16753,8 @@ module CreateFlowResponse =
     let make ?flowArn = fun ?flowStatus -> fun () -> { flowArn; flowStatus }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_json json)
       | "ConnectorAuthenticationException" ->
@@ -14457,6 +16776,8 @@ module CreateFlowResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_xml xml)
       | "ConnectorAuthenticationException" ->
@@ -14477,6 +16798,10 @@ module CreateFlowResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `ConflictException e ->
           `Assoc
             [("error", (`String "ConflictException"));
@@ -14522,9 +16847,9 @@ module CreateFlowResponse =
         (Option.map ~f:FlowArn.of_xml) (Xml.child xml_arg0 "flowArn") in
       make ?flowStatus ?flowArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let flowStatus = field_map json "flowStatus" FlowStatus.of_json in
-      let flowArn = field_map json "flowArn" FlowArn.of_json in
+    let of_json json__ =
+      let flowStatus = field_map json__ "flowStatus" FlowStatus.of_json in
+      let flowArn = field_map json__ "flowArn" FlowArn.of_json in
       make ?flowStatus ?flowArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14555,27 +16880,37 @@ module CreateFlowRequest =
           "A list of tasks that Amazon AppFlow performs while transferring the data in the flow run."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The tags used to organize, track, or control access for your flow."]}
+          "The tags used to organize, track, or control access for your flow."];
+      metadataCatalogConfig: MetadataCatalogConfig.t option
+        [@ocaml.doc
+          "Specifies the configuration that Amazon AppFlow uses when it catalogs the data that's transferred by the associated flow. When Amazon AppFlow catalogs the data from a flow, it stores metadata in a data catalog."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "The clientToken parameter is an idempotency token. It ensures that your CreateFlow request completes only once. You choose the value to pass. For example, if you don't receive a response from your request, you can safely retry the request with the same clientToken parameter value. If you omit a clientToken value, the Amazon Web Services SDK that you are using inserts a value for you. This way, the SDK can safely retry requests multiple times after a network error. You must provide your own value for other use cases. If you specify input parameters that differ from your first request, an error occurs. If you use a different value for clientToken, Amazon AppFlow considers it a new call to CreateFlow. The token is active for 8 hours."]}
     let context_ = "CreateFlowRequest"
     let make ?description =
       fun ?kmsArn ->
         fun ?tags ->
-          fun ~flowName ->
-            fun ~triggerConfig ->
-              fun ~sourceFlowConfig ->
-                fun ~destinationFlowConfigList ->
-                  fun ~tasks ->
-                    fun () ->
-                      {
-                        description;
-                        kmsArn;
-                        tags;
-                        flowName;
-                        triggerConfig;
-                        sourceFlowConfig;
-                        destinationFlowConfigList;
-                        tasks
-                      }
+          fun ?metadataCatalogConfig ->
+            fun ?clientToken ->
+              fun ~flowName ->
+                fun ~triggerConfig ->
+                  fun ~sourceFlowConfig ->
+                    fun ~destinationFlowConfigList ->
+                      fun ~tasks ->
+                        fun () ->
+                          {
+                            description;
+                            kmsArn;
+                            tags;
+                            metadataCatalogConfig;
+                            clientToken;
+                            flowName;
+                            triggerConfig;
+                            sourceFlowConfig;
+                            destinationFlowConfigList;
+                            tasks
+                          }
     let to_value x =
       structure_to_value
         [("flowName", (Some (FlowName.to_value x.flowName)));
@@ -14589,9 +16924,18 @@ module CreateFlowRequest =
           (Some
              (DestinationFlowConfigList.to_value x.destinationFlowConfigList)));
         ("tasks", (Some (Tasks.to_value x.tasks)));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("metadataCatalogConfig",
+          (Option.map x.metadataCatalogConfig
+             ~f:MetadataCatalogConfig.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let metadataCatalogConfig =
+        (Option.map ~f:MetadataCatalogConfig.of_xml)
+          (Xml.child xml_arg0 "metadataCatalogConfig") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let tasks =
         Tasks.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tasks") in
@@ -14612,24 +16956,31 @@ module CreateFlowRequest =
           (Xml.child xml_arg0 "description") in
       let flowName =
         FlowName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "flowName") in
-      make ?tags ~tasks ~destinationFlowConfigList ~sourceFlowConfig
-        ~triggerConfig ?kmsArn ?description ~flowName ()
+      make ?clientToken ?metadataCatalogConfig ?tags ~tasks
+        ~destinationFlowConfigList ~sourceFlowConfig ~triggerConfig ?kmsArn
+        ?description ~flowName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let tasks = field_map_exn json "tasks" Tasks.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let metadataCatalogConfig =
+        field_map json__ "metadataCatalogConfig"
+          MetadataCatalogConfig.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let tasks = field_map_exn json__ "tasks" Tasks.of_json in
       let destinationFlowConfigList =
-        field_map_exn json "destinationFlowConfigList"
+        field_map_exn json__ "destinationFlowConfigList"
           DestinationFlowConfigList.of_json in
       let sourceFlowConfig =
-        field_map_exn json "sourceFlowConfig" SourceFlowConfig.of_json in
+        field_map_exn json__ "sourceFlowConfig" SourceFlowConfig.of_json in
       let triggerConfig =
-        field_map_exn json "triggerConfig" TriggerConfig.of_json in
-      let kmsArn = field_map json "kmsArn" KMSArn.of_json in
-      let description = field_map json "description" FlowDescription.of_json in
-      let flowName = field_map_exn json "flowName" FlowName.of_json in
-      make ?tags ~tasks ~destinationFlowConfigList ~sourceFlowConfig
-        ~triggerConfig ?kmsArn ?description ~flowName ()
+        field_map_exn json__ "triggerConfig" TriggerConfig.of_json in
+      let kmsArn = field_map json__ "kmsArn" KMSArn.of_json in
+      let description =
+        field_map json__ "description" FlowDescription.of_json in
+      let flowName = field_map_exn json__ "flowName" FlowName.of_json in
+      make ?clientToken ?metadataCatalogConfig ?tags ~tasks
+        ~destinationFlowConfigList ~sourceFlowConfig ~triggerConfig ?kmsArn
+        ?description ~flowName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Enables your application to create a new flow using Amazon AppFlow. You must create a connector profile before calling this API. Please note that the Request Syntax below shows syntax for multiple destinations, however, you can only transfer data to one item in this list at a time. Amazon AppFlow does not currently support flows to multiple destinations at once."]
@@ -14720,13 +17071,13 @@ module CreateConnectorProfileResponse =
           (Xml.child xml_arg0 "connectorProfileArn") in
       make ?connectorProfileArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectorProfileArn =
-        field_map json "connectorProfileArn" ConnectorProfileArn.of_json in
+        field_map json__ "connectorProfileArn" ConnectorProfileArn.of_json in
       make ?connectorProfileArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new connector profile associated with your Amazon Web Services account. There is a soft quota of 100 connector profiles per Amazon Web Services account. If you need more connector profiles than this quota allows, you can submit a request to the Amazon AppFlow team through the Amazon AppFlow support channel."]
+       "Creates a new connector profile associated with your Amazon Web Services account. There is a soft quota of 100 connector profiles per Amazon Web Services account. If you need more connector profiles than this quota allows, you can submit a request to the Amazon AppFlow team through the Amazon AppFlow support channel. In each connector profile that you create, you can provide the credentials and properties for only one connector."]
 module CreateConnectorProfileRequest =
   struct
     type nonrec t =
@@ -14748,23 +17099,28 @@ module CreateConnectorProfileRequest =
           "Indicates the connection mode and specifies whether it is public or private. Private flows use Amazon Web Services PrivateLink to route data over Amazon Web Services infrastructure without exposing it to the public internet."];
       connectorProfileConfig: ConnectorProfileConfig.t
         [@ocaml.doc
-          "Defines the connector-specific configuration and credentials."]}
+          "Defines the connector-specific configuration and credentials."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "The clientToken parameter is an idempotency token. It ensures that your CreateConnectorProfile request completes only once. You choose the value to pass. For example, if you don't receive a response from your request, you can safely retry the request with the same clientToken parameter value. If you omit a clientToken value, the Amazon Web Services SDK that you are using inserts a value for you. This way, the SDK can safely retry requests multiple times after a network error. You must provide your own value for other use cases. If you specify input parameters that differ from your first request, an error occurs. If you use a different value for clientToken, Amazon AppFlow considers it a new call to CreateConnectorProfile. The token is active for 8 hours."]}
     let context_ = "CreateConnectorProfileRequest"
     let make ?kmsArn =
       fun ?connectorLabel ->
-        fun ~connectorProfileName ->
-          fun ~connectorType ->
-            fun ~connectionMode ->
-              fun ~connectorProfileConfig ->
-                fun () ->
-                  {
-                    kmsArn;
-                    connectorLabel;
-                    connectorProfileName;
-                    connectorType;
-                    connectionMode;
-                    connectorProfileConfig
-                  }
+        fun ?clientToken ->
+          fun ~connectorProfileName ->
+            fun ~connectorType ->
+              fun ~connectionMode ->
+                fun ~connectorProfileConfig ->
+                  fun () ->
+                    {
+                      kmsArn;
+                      connectorLabel;
+                      clientToken;
+                      connectorProfileName;
+                      connectorType;
+                      connectionMode;
+                      connectorProfileConfig
+                    }
     let to_value x =
       structure_to_value
         [("connectorProfileName",
@@ -14775,9 +17131,12 @@ module CreateConnectorProfileRequest =
           (Option.map x.connectorLabel ~f:ConnectorLabel.to_value));
         ("connectionMode", (Some (ConnectionMode.to_value x.connectionMode)));
         ("connectorProfileConfig",
-          (Some (ConnectorProfileConfig.to_value x.connectorProfileConfig)))]
+          (Some (ConnectorProfileConfig.to_value x.connectorProfileConfig)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       let connectorProfileConfig =
         ConnectorProfileConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectorProfileConfig") in
@@ -14795,25 +17154,149 @@ module CreateConnectorProfileRequest =
       let connectorProfileName =
         ConnectorProfileName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectorProfileName") in
-      make ~connectorProfileConfig ~connectionMode ?connectorLabel
-        ~connectorType ?kmsArn ~connectorProfileName ()
+      make ?clientToken ~connectorProfileConfig ~connectionMode
+        ?connectorLabel ~connectorType ?kmsArn ~connectorProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let connectorProfileConfig =
-        field_map_exn json "connectorProfileConfig"
+        field_map_exn json__ "connectorProfileConfig"
           ConnectorProfileConfig.of_json in
       let connectionMode =
-        field_map_exn json "connectionMode" ConnectionMode.of_json in
+        field_map_exn json__ "connectionMode" ConnectionMode.of_json in
       let connectorLabel =
-        field_map json "connectorLabel" ConnectorLabel.of_json in
+        field_map json__ "connectorLabel" ConnectorLabel.of_json in
       let connectorType =
-        field_map_exn json "connectorType" ConnectorType.of_json in
-      let kmsArn = field_map json "kmsArn" KMSArn.of_json in
+        field_map_exn json__ "connectorType" ConnectorType.of_json in
+      let kmsArn = field_map json__ "kmsArn" KMSArn.of_json in
       let connectorProfileName =
-        field_map_exn json "connectorProfileName"
+        field_map_exn json__ "connectorProfileName"
           ConnectorProfileName.of_json in
-      make ~connectorProfileConfig ~connectionMode ?connectorLabel
-        ~connectorType ?kmsArn ~connectorProfileName ()
+      make ?clientToken ~connectorProfileConfig ~connectionMode
+        ?connectorLabel ~connectorType ?kmsArn ~connectorProfileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new connector profile associated with your Amazon Web Services account. There is a soft quota of 100 connector profiles per Amazon Web Services account. If you need more connector profiles than this quota allows, you can submit a request to the Amazon AppFlow team through the Amazon AppFlow support channel."]
+       "Creates a new connector profile associated with your Amazon Web Services account. There is a soft quota of 100 connector profiles per Amazon Web Services account. If you need more connector profiles than this quota allows, you can submit a request to the Amazon AppFlow team through the Amazon AppFlow support channel. In each connector profile that you create, you can provide the credentials and properties for only one connector."]
+module CancelFlowExecutionsResponse =
+  struct
+    type nonrec t =
+      {
+      invalidExecutions: ExecutionIds.t option
+        [@ocaml.doc
+          "The IDs of runs that Amazon AppFlow couldn't cancel. These runs might be ineligible for canceling because they haven't started yet or have already completed."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?invalidExecutions = fun () -> { invalidExecutions }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("invalidExecutions",
+           (Option.map x.invalidExecutions ~f:ExecutionIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let invalidExecutions =
+        (Option.map ~f:ExecutionIds.of_xml)
+          (Xml.child xml_arg0 "invalidExecutions") in
+      make ?invalidExecutions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let invalidExecutions =
+        field_map json__ "invalidExecutions" ExecutionIds.of_json in
+      make ?invalidExecutions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Cancels active runs for a flow. You can cancel all of the active runs for a flow, or you can cancel specific runs by providing their IDs. You can cancel a flow run only when the run is in progress. You can't cancel a run that has already completed or failed. You also can't cancel a run that's scheduled to occur but hasn't started yet. To prevent a scheduled run, you can deactivate the flow with the StopFlow action. You cannot resume a run after you cancel it. When you send your request, the status for each run becomes CancelStarted. When the cancellation completes, the status becomes Canceled. When you cancel a run, you still incur charges for any data that the run already processed before the cancellation. If the run had already written some data to the flow destination, then that data remains in the destination. If you configured the flow to use a batch API (such as the Salesforce Bulk API 2.0), then the run will finish reading or writing its entire batch of data after the cancellation. For these operations, the data processing charges for Amazon AppFlow apply. For the pricing information, see Amazon AppFlow pricing."]
+module CancelFlowExecutionsRequest =
+  struct
+    type nonrec t =
+      {
+      flowName: FlowName.t
+        [@ocaml.doc
+          "The name of a flow with active runs that you want to cancel."];
+      executionIds: ExecutionIds.t option
+        [@ocaml.doc
+          "The ID of each active run to cancel. These runs must belong to the flow you specify in your request. If you omit this parameter, your request ends all active runs that belong to the flow."]}
+    let context_ = "CancelFlowExecutionsRequest"
+    let make ?executionIds =
+      fun ~flowName -> fun () -> { executionIds; flowName }
+    let to_value x =
+      structure_to_value
+        [("flowName", (Some (FlowName.to_value x.flowName)));
+        ("executionIds",
+          (Option.map x.executionIds ~f:ExecutionIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let executionIds =
+        (Option.map ~f:ExecutionIds.of_xml)
+          (Xml.child xml_arg0 "executionIds") in
+      let flowName =
+        FlowName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "flowName") in
+      make ?executionIds ~flowName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let executionIds = field_map json__ "executionIds" ExecutionIds.of_json in
+      let flowName = field_map_exn json__ "flowName" FlowName.of_json in
+      make ?executionIds ~flowName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Cancels active runs for a flow. You can cancel all of the active runs for a flow, or you can cancel specific runs by providing their IDs. You can cancel a flow run only when the run is in progress. You can't cancel a run that has already completed or failed. You also can't cancel a run that's scheduled to occur but hasn't started yet. To prevent a scheduled run, you can deactivate the flow with the StopFlow action. You cannot resume a run after you cancel it. When you send your request, the status for each run becomes CancelStarted. When the cancellation completes, the status becomes Canceled. When you cancel a run, you still incur charges for any data that the run already processed before the cancellation. If the run had already written some data to the flow destination, then that data remains in the destination. If you configured the flow to use a batch API (such as the Salesforce Bulk API 2.0), then the run will finish reading or writing its entire batch of data after the cancellation. For these operations, the data processing charges for Amazon AppFlow apply. For the pricing information, see Amazon AppFlow pricing."]

@@ -2,6 +2,8 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | CreateAccessor: (CreateAccessorInput.t, CreateAccessorOutput.t,
+  CreateAccessorOutput.error) t 
   | CreateMember: (CreateMemberInput.t, CreateMemberOutput.t,
   CreateMemberOutput.error) t 
   | CreateNetwork: (CreateNetworkInput.t, CreateNetworkOutput.t,
@@ -10,10 +12,14 @@ type ('i, 'o, 'e) t =
   CreateNodeOutput.error) t 
   | CreateProposal: (CreateProposalInput.t, CreateProposalOutput.t,
   CreateProposalOutput.error) t 
+  | DeleteAccessor: (DeleteAccessorInput.t, DeleteAccessorOutput.t,
+  DeleteAccessorOutput.error) t 
   | DeleteMember: (DeleteMemberInput.t, DeleteMemberOutput.t,
   DeleteMemberOutput.error) t 
   | DeleteNode: (DeleteNodeInput.t, DeleteNodeOutput.t,
   DeleteNodeOutput.error) t 
+  | GetAccessor: (GetAccessorInput.t, GetAccessorOutput.t,
+  GetAccessorOutput.error) t 
   | GetMember: (GetMemberInput.t, GetMemberOutput.t, GetMemberOutput.error) t
   
   | GetNetwork: (GetNetworkInput.t, GetNetworkOutput.t,
@@ -21,6 +27,8 @@ type ('i, 'o, 'e) t =
   | GetNode: (GetNodeInput.t, GetNodeOutput.t, GetNodeOutput.error) t 
   | GetProposal: (GetProposalInput.t, GetProposalOutput.t,
   GetProposalOutput.error) t 
+  | ListAccessors: (ListAccessorsInput.t, ListAccessorsOutput.t,
+  ListAccessorsOutput.error) t 
   | ListInvitations: (ListInvitationsInput.t, ListInvitationsOutput.t,
   ListInvitationsOutput.error) t 
   | ListMembers: (ListMembersInput.t, ListMembersOutput.t,
@@ -49,16 +57,20 @@ type ('i, 'o, 'e) t =
   VoteOnProposalOutput.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | CreateAccessor -> `POST
   | CreateMember -> `POST
   | CreateNetwork -> `POST
   | CreateNode -> `POST
   | CreateProposal -> `POST
+  | DeleteAccessor -> `DELETE
   | DeleteMember -> `DELETE
   | DeleteNode -> `DELETE
+  | GetAccessor -> `GET
   | GetMember -> `GET
   | GetNetwork -> `GET
   | GetNode -> `GET
   | GetProposal -> `GET
+  | ListAccessors -> `GET
   | ListInvitations -> `GET
   | ListMembers -> `GET
   | ListNetworks -> `GET
@@ -75,6 +87,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | CreateAccessor -> (Format.kasprintf Uri.of_string) "/accessors"
       | CreateMember ->
           (Format.kasprintf Uri.of_string) "/networks/%s/members"
             (ResourceIdString.to_header x.CreateMemberInput.networkId)
@@ -85,6 +98,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateProposal ->
           (Format.kasprintf Uri.of_string) "/networks/%s/proposals"
             (ResourceIdString.to_header x.CreateProposalInput.networkId)
+      | DeleteAccessor ->
+          (Format.kasprintf Uri.of_string) "/accessors/%s"
+            (ResourceIdString.to_header x.DeleteAccessorInput.accessorId)
       | DeleteMember ->
           (Format.kasprintf Uri.of_string) "/networks/%s/members/%s"
             (ResourceIdString.to_header x.DeleteMemberInput.networkId)
@@ -98,6 +114,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("memberId", (ResourceIdString.to_header v)))
                   x.memberId])
+      | GetAccessor ->
+          (Format.kasprintf Uri.of_string) "/accessors/%s"
+            (ResourceIdString.to_header x.GetAccessorInput.accessorId)
       | GetMember ->
           (Format.kasprintf Uri.of_string) "/networks/%s/members/%s"
             (ResourceIdString.to_header x.GetMemberInput.networkId)
@@ -118,6 +137,21 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/networks/%s/proposals/%s"
             (ResourceIdString.to_header x.GetProposalInput.networkId)
             (ResourceIdString.to_header x.GetProposalInput.proposalId)
+      | ListAccessors ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/accessors")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults", (AccessorListMaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("networkType", (AccessorNetworkType.to_header v)))
+                 x.networkType])
       | ListInvitations ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/invitations")
@@ -242,6 +276,36 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | CreateAccessor ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ClientRequestToken",
+                           (ClientRequestTokenString.to_value
+                              req.CreateAccessorInput.clientRequestToken));
+                      Some
+                        ("AccessorType",
+                          (AccessorType.to_value
+                             req.CreateAccessorInput.accessorType));
+                      Option.map req.CreateAccessorInput.tags
+                        ~f:(fun x -> ("Tags", (InputTagMap.to_value x)));
+                      Option.map req.CreateAccessorInput.networkType
+                        ~f:(fun x ->
+                              ("NetworkType",
+                                (AccessorNetworkType.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateMember ->
       let (headers, body) =
         let headers =
@@ -381,8 +445,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteAccessor -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteMember -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteNode -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetAccessor ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetMember ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -393,6 +461,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetProposal ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAccessors ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListInvitations ->
@@ -510,6 +581,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | CreateAccessor ->
+      if is_success
+      then Ok (CreateAccessorOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateAccessorOutput.error_of_json))
   | CreateMember ->
       if is_success
       then Ok (CreateMemberOutput.of_json (response_to_json resp))
@@ -526,6 +601,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (CreateProposalOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateProposalOutput.error_of_json))
+  | DeleteAccessor ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteAccessorOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteAccessorOutput.error_of_json))
   | DeleteMember ->
       if is_success
       then
@@ -540,6 +622,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DeleteNodeOutput.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some DeleteNodeOutput.error_of_json))
+  | GetAccessor ->
+      if is_success
+      then Ok (GetAccessorOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetAccessorOutput.error_of_json))
   | GetMember ->
       if is_success
       then Ok (GetMemberOutput.of_json (response_to_json resp))
@@ -556,6 +642,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetProposalOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetProposalOutput.error_of_json))
+  | ListAccessors ->
+      if is_success
+      then Ok (ListAccessorsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListAccessorsOutput.error_of_json))
   | ListInvitations ->
       if is_success
       then Ok (ListInvitationsOutput.of_json (response_to_json resp))

@@ -37,7 +37,7 @@ module CustomObjectIdentifier =
                 (check_string_max i ~max:64) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^([0-2])\\.([0-9]|([0-3][0-9]))((\\.([0-9]+)){0,126})$")));
+                       ~pattern:"([0-2])\\.([0-9]|([0-3][0-9]))((\\.([0-9]+)){0,126})")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -93,10 +93,11 @@ module CustomAttribute =
           (Xml.child_exn ~context:context_ xml_arg0 "ObjectIdentifier") in
       make ~value ~objectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" String1To256.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" String1To256.of_json in
       let objectIdentifier =
-        field_map_exn json "ObjectIdentifier" CustomObjectIdentifier.of_json in
+        field_map_exn json__ "ObjectIdentifier"
+          CustomObjectIdentifier.of_json in
       make ~value ~objectIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Defines the X.500 relative distinguished name (RDN)."]
@@ -147,8 +148,12 @@ module CustomAttributeList =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:150) >>=
+             (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -469,28 +474,28 @@ module ASN1Subject =
         ?distinguishedNameQualifier ?organizationalUnit ?organization
         ?country ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customAttributes =
-        field_map json "CustomAttributes" CustomAttributeList.of_json in
+        field_map json__ "CustomAttributes" CustomAttributeList.of_json in
       let generationQualifier =
-        field_map json "GenerationQualifier" String3.of_json in
-      let pseudonym = field_map json "Pseudonym" String128.of_json in
-      let initials = field_map json "Initials" String5.of_json in
-      let givenName = field_map json "GivenName" String16.of_json in
-      let surname = field_map json "Surname" String40.of_json in
-      let title = field_map json "Title" String64.of_json in
-      let locality = field_map json "Locality" String128.of_json in
+        field_map json__ "GenerationQualifier" String3.of_json in
+      let pseudonym = field_map json__ "Pseudonym" String128.of_json in
+      let initials = field_map json__ "Initials" String5.of_json in
+      let givenName = field_map json__ "GivenName" String16.of_json in
+      let surname = field_map json__ "Surname" String40.of_json in
+      let title = field_map json__ "Title" String64.of_json in
+      let locality = field_map json__ "Locality" String128.of_json in
       let serialNumber =
-        field_map json "SerialNumber" ASN1PrintableString64.of_json in
-      let commonName = field_map json "CommonName" String64.of_json in
-      let state = field_map json "State" String128.of_json in
+        field_map json__ "SerialNumber" ASN1PrintableString64.of_json in
+      let commonName = field_map json__ "CommonName" String64.of_json in
+      let state = field_map json__ "State" String128.of_json in
       let distinguishedNameQualifier =
-        field_map json "DistinguishedNameQualifier"
+        field_map json__ "DistinguishedNameQualifier"
           ASN1PrintableString64.of_json in
       let organizationalUnit =
-        field_map json "OrganizationalUnit" String64.of_json in
-      let organization = field_map json "Organization" String64.of_json in
-      let country = field_map json "Country" CountryCodeString.of_json in
+        field_map json__ "OrganizationalUnit" String64.of_json in
+      let organization = field_map json__ "Organization" String64.of_json in
+      let country = field_map json__ "Country" CountryCodeString.of_json in
       make ?customAttributes ?generationQualifier ?pseudonym ?initials
         ?givenName ?surname ?title ?locality ?serialNumber ?commonName ?state
         ?distinguishedNameQualifier ?organizationalUnit ?organization
@@ -521,9 +526,9 @@ module EdiPartyName =
           (Xml.child_exn ~context:context_ xml_arg0 "PartyName") in
       make ?nameAssigner ~partyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nameAssigner = field_map json "NameAssigner" String256.of_json in
-      let partyName = field_map_exn json "PartyName" String256.of_json in
+    let of_json json__ =
+      let nameAssigner = field_map json__ "NameAssigner" String256.of_json in
+      let partyName = field_map_exn json__ "PartyName" String256.of_json in
       make ?nameAssigner ~partyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -549,9 +554,10 @@ module OtherName =
           (Xml.child_exn ~context:context_ xml_arg0 "TypeId") in
       make ~value ~typeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" String256.of_json in
-      let typeId = field_map_exn json "TypeId" CustomObjectIdentifier.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" String256.of_json in
+      let typeId =
+        field_map_exn json__ "TypeId" CustomObjectIdentifier.of_json in
       make ~value ~typeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -621,11 +627,11 @@ module AccessMethod =
           (Xml.child xml_arg0 "CustomObjectIdentifier") in
       make ?accessMethodType ?customObjectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessMethodType =
-        field_map json "AccessMethodType" AccessMethodType.of_json in
+        field_map json__ "AccessMethodType" AccessMethodType.of_json in
       let customObjectIdentifier =
-        field_map json "CustomObjectIdentifier"
+        field_map json__ "CustomObjectIdentifier"
           CustomObjectIdentifier.of_json in
       make ?accessMethodType ?customObjectIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -708,17 +714,18 @@ module GeneralName =
       make ?registeredId ?ipAddress ?uniformResourceIdentifier ?ediPartyName
         ?directoryName ?dnsName ?rfc822Name ?otherName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let registeredId =
-        field_map json "RegisteredId" CustomObjectIdentifier.of_json in
-      let ipAddress = field_map json "IpAddress" String39.of_json in
+        field_map json__ "RegisteredId" CustomObjectIdentifier.of_json in
+      let ipAddress = field_map json__ "IpAddress" String39.of_json in
       let uniformResourceIdentifier =
-        field_map json "UniformResourceIdentifier" String253.of_json in
-      let ediPartyName = field_map json "EdiPartyName" EdiPartyName.of_json in
-      let directoryName = field_map json "DirectoryName" ASN1Subject.of_json in
-      let dnsName = field_map json "DnsName" String253.of_json in
-      let rfc822Name = field_map json "Rfc822Name" String256.of_json in
-      let otherName = field_map json "OtherName" OtherName.of_json in
+        field_map json__ "UniformResourceIdentifier" String253.of_json in
+      let ediPartyName = field_map json__ "EdiPartyName" EdiPartyName.of_json in
+      let directoryName =
+        field_map json__ "DirectoryName" ASN1Subject.of_json in
+      let dnsName = field_map json__ "DnsName" String253.of_json in
+      let rfc822Name = field_map json__ "Rfc822Name" String256.of_json in
+      let otherName = field_map json__ "OtherName" OtherName.of_json in
       make ?registeredId ?ipAddress ?uniformResourceIdentifier ?ediPartyName
         ?directoryName ?dnsName ?rfc822Name ?otherName ()
     let to_json v = composed_to_json to_value v
@@ -758,12 +765,12 @@ module Qualifier =
         String256.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CpsUri") in
       make ~cpsUri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cpsUri = field_map_exn json "CpsUri" String256.of_json in
+    let of_json json__ =
+      let cpsUri = field_map_exn json__ "CpsUri" String256.of_json in
       make ~cpsUri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Defines a PolicyInformation qualifier. ACM Private CA supports the certification practice statement (CPS) qualifier defined in RFC 5280."]
+       "Defines a PolicyInformation qualifier. Amazon Web Services Private CA supports the certification practice statement (CPS) qualifier defined in RFC 5280."]
 module AccessDescription =
   struct
     type nonrec t =
@@ -789,11 +796,11 @@ module AccessDescription =
           (Xml.child_exn ~context:context_ xml_arg0 "AccessMethod") in
       make ~accessLocation ~accessMethod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessLocation =
-        field_map_exn json "AccessLocation" GeneralName.of_json in
+        field_map_exn json__ "AccessLocation" GeneralName.of_json in
       let accessMethod =
-        field_map_exn json "AccessMethod" AccessMethod.of_json in
+        field_map_exn json__ "AccessMethod" AccessMethod.of_json in
       make ~accessLocation ~accessMethod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -819,7 +826,7 @@ module PolicyQualifierInfo =
         [@ocaml.doc "Identifies the qualifier modifying a CertPolicyId."];
       qualifier: Qualifier.t
         [@ocaml.doc
-          "Defines the qualifier type. ACM Private CA supports the use of a URI for a CPS qualifier in this field."]}
+          "Defines the qualifier type. Amazon Web Services Private CA supports the use of a URI for a CPS qualifier in this field."]}
     let context_ = "PolicyQualifierInfo"
     let make ~policyQualifierId =
       fun ~qualifier -> fun () -> { policyQualifierId; qualifier }
@@ -838,18 +845,21 @@ module PolicyQualifierInfo =
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyQualifierId") in
       make ~qualifier ~policyQualifierId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let qualifier = field_map_exn json "Qualifier" Qualifier.of_json in
+    let of_json json__ =
+      let qualifier = field_map_exn json__ "Qualifier" Qualifier.of_json in
       let policyQualifierId =
-        field_map_exn json "PolicyQualifierId" PolicyQualifierId.of_json in
+        field_map_exn json__ "PolicyQualifierId" PolicyQualifierId.of_json in
       make ~qualifier ~policyQualifierId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Modifies the CertPolicyId of a PolicyInformation object with a qualifier. ACM Private CA supports the certification practice statement (CPS) qualifier."]
+       "Modifies the CertPolicyId of a PolicyInformation object with a qualifier. Amazon Web Services Private CA supports the certification practice statement (CPS) qualifier."]
 module AccessDescriptionList =
   struct
     type nonrec t = AccessDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccessDescription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -953,24 +963,120 @@ module KeyUsage =
         ?dataEncipherment ?keyEncipherment ?nonRepudiation ?digitalSignature
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let decipherOnly = field_map json "DecipherOnly" Boolean.of_json in
-      let encipherOnly = field_map json "EncipherOnly" Boolean.of_json in
-      let cRLSign = field_map json "CRLSign" Boolean.of_json in
-      let keyCertSign = field_map json "KeyCertSign" Boolean.of_json in
-      let keyAgreement = field_map json "KeyAgreement" Boolean.of_json in
+    let of_json json__ =
+      let decipherOnly = field_map json__ "DecipherOnly" Boolean.of_json in
+      let encipherOnly = field_map json__ "EncipherOnly" Boolean.of_json in
+      let cRLSign = field_map json__ "CRLSign" Boolean.of_json in
+      let keyCertSign = field_map json__ "KeyCertSign" Boolean.of_json in
+      let keyAgreement = field_map json__ "KeyAgreement" Boolean.of_json in
       let dataEncipherment =
-        field_map json "DataEncipherment" Boolean.of_json in
-      let keyEncipherment = field_map json "KeyEncipherment" Boolean.of_json in
-      let nonRepudiation = field_map json "NonRepudiation" Boolean.of_json in
+        field_map json__ "DataEncipherment" Boolean.of_json in
+      let keyEncipherment =
+        field_map json__ "KeyEncipherment" Boolean.of_json in
+      let nonRepudiation = field_map json__ "NonRepudiation" Boolean.of_json in
       let digitalSignature =
-        field_map json "DigitalSignature" Boolean.of_json in
+        field_map json__ "DigitalSignature" Boolean.of_json in
       make ?decipherOnly ?encipherOnly ?cRLSign ?keyCertSign ?keyAgreement
         ?dataEncipherment ?keyEncipherment ?nonRepudiation ?digitalSignature
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Defines one or more purposes for which the key contained in the certificate can be used. Default value for each option is false."]
+module CnameString =
+  struct
+    type nonrec t = string
+    let context_ = "CnameString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:253) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[-a-zA-Z0-9;/?:@&=+$,%_.!~*()']*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CnameString" j
+    let to_json = simple_to_json to_value
+  end
+module CrlDistributionPointExtensionConfiguration =
+  struct
+    type nonrec t =
+      {
+      omitExtension: Boolean.t
+        [@ocaml.doc
+          "Configures whether the CRL Distribution Point extension should be populated with the default URL to the CRL. If set to true, then the CDP extension will not be present in any certificates issued by that CA unless otherwise specified through CSR or API passthrough. Only set this if you have another way to distribute the CRL Distribution Points ffor certificates issued by your CA, such as the Matter Distributed Compliance Ledger This configuration cannot be enabled with a custom CNAME set."]}
+    let context_ = "CrlDistributionPointExtensionConfiguration"
+    let make ~omitExtension = fun () -> { omitExtension }
+    let to_value x =
+      structure_to_value
+        [("OmitExtension", (Some (Boolean.to_value x.omitExtension)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let omitExtension =
+        Boolean.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OmitExtension") in
+      make ~omitExtension ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let omitExtension =
+        field_map_exn json__ "OmitExtension" Boolean.of_json in
+      make ~omitExtension ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains configuration information for the default behavior of the CRL Distribution Point (CDP) extension in certificates issued by your CA. This extension contains a link to download the CRL, so you can check whether a certificate has been revoked. To choose whether you want this extension omitted or not in certificates issued by your CA, you can set the OmitExtension parameter."]
+module CrlPathString =
+  struct
+    type nonrec t = string
+    let context_ = "CrlPathString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:253) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[-a-zA-Z0-9;?:@&=+$,%_.!~*()']+(/[-a-zA-Z0-9;?:@&=+$,%_.!~*()']+)*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CrlPathString" j
+    let to_json = simple_to_json to_value
+  end
+module CrlType =
+  struct
+    type nonrec t =
+      | COMPLETE 
+      | PARTITIONED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | COMPLETE -> "COMPLETE"
+      | PARTITIONED -> "PARTITIONED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "COMPLETE" -> COMPLETE
+      | "PARTITIONED" -> PARTITIONED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration CrlType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CrlType" j)
+    let to_json = simple_to_json to_value
+  end
 module Integer1To5000 =
   struct
     type nonrec t = int
@@ -987,6 +1093,26 @@ module Integer1To5000 =
       Int.of_string
         (string_of_xml ~kind:"an integer for Integer1To5000" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module S3BucketName3To255 =
+  struct
+    type nonrec t = string
+    let context_ = "S3BucketName3To255"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"[-a-zA-Z0-9._/]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3BucketName3To255" j
     let to_json = simple_to_json to_value
   end
 module S3ObjectAcl =
@@ -1014,24 +1140,6 @@ module S3ObjectAcl =
     let of_json j = of_string (string_of_json ~kind:"S3ObjectAcl" j)
     let to_json = simple_to_json to_value
   end
-module String3To255 =
-  struct
-    type nonrec t = string
-    let context_ = "String3To255"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:255) >>=
-             (fun () -> check_string_min i ~min:3));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String3To255" j
-    let to_json = simple_to_json to_value
-  end
 module PolicyQualifierInfoList =
   struct
     type nonrec t = PolicyQualifierInfo.t list
@@ -1040,6 +1148,9 @@ module PolicyQualifierInfoList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyQualifierInfo.to_value)) |>
         (fun x -> `List x)
@@ -1074,7 +1185,7 @@ module Base64String1To4096 =
                 (check_string_max i ~max:4096) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$")));
+                       ~pattern:"(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1187,11 +1298,11 @@ module CsrExtensions =
         (Option.map ~f:KeyUsage.of_xml) (Xml.child xml_arg0 "KeyUsage") in
       make ?subjectInformationAccess ?keyUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subjectInformationAccess =
-        field_map json "SubjectInformationAccess"
+        field_map json__ "SubjectInformationAccess"
           AccessDescriptionList.of_json in
-      let keyUsage = field_map json "KeyUsage" KeyUsage.of_json in
+      let keyUsage = field_map json__ "KeyUsage" KeyUsage.of_json in
       make ?subjectInformationAccess ?keyUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1200,24 +1311,42 @@ module KeyAlgorithm =
   struct
     type nonrec t =
       | RSA_2048 
+      | RSA_3072 
       | RSA_4096 
       | EC_prime256v1 
       | EC_secp384r1 
+      | EC_secp521r1 
+      | ML_DSA_44 
+      | ML_DSA_65 
+      | ML_DSA_87 
+      | SM2 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | RSA_2048 -> "RSA_2048"
+      | RSA_3072 -> "RSA_3072"
       | RSA_4096 -> "RSA_4096"
       | EC_prime256v1 -> "EC_prime256v1"
       | EC_secp384r1 -> "EC_secp384r1"
+      | EC_secp521r1 -> "EC_secp521r1"
+      | ML_DSA_44 -> "ML_DSA_44"
+      | ML_DSA_65 -> "ML_DSA_65"
+      | ML_DSA_87 -> "ML_DSA_87"
+      | SM2 -> "SM2"
       | Non_static_id s -> s
     let of_string =
       function
       | "RSA_2048" -> RSA_2048
+      | "RSA_3072" -> RSA_3072
       | "RSA_4096" -> RSA_4096
       | "EC_prime256v1" -> EC_prime256v1
       | "EC_secp384r1" -> EC_secp384r1
+      | "EC_secp521r1" -> EC_secp521r1
+      | "ML_DSA_44" -> ML_DSA_44
+      | "ML_DSA_65" -> ML_DSA_65
+      | "ML_DSA_87" -> ML_DSA_87
+      | "SM2" -> SM2
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1236,6 +1365,10 @@ module SigningAlgorithm =
       | SHA256WITHRSA 
       | SHA384WITHRSA 
       | SHA512WITHRSA 
+      | SM3WITHSM2 
+      | ML_DSA_44 
+      | ML_DSA_65 
+      | ML_DSA_87 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1246,6 +1379,10 @@ module SigningAlgorithm =
       | SHA256WITHRSA -> "SHA256WITHRSA"
       | SHA384WITHRSA -> "SHA384WITHRSA"
       | SHA512WITHRSA -> "SHA512WITHRSA"
+      | SM3WITHSM2 -> "SM3WITHSM2"
+      | ML_DSA_44 -> "ML_DSA_44"
+      | ML_DSA_65 -> "ML_DSA_65"
+      | ML_DSA_87 -> "ML_DSA_87"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1255,6 +1392,10 @@ module SigningAlgorithm =
       | "SHA256WITHRSA" -> SHA256WITHRSA
       | "SHA384WITHRSA" -> SHA384WITHRSA
       | "SHA512WITHRSA" -> SHA512WITHRSA
+      | "SM3WITHSM2" -> SM3WITHSM2
+      | "ML_DSA_44" -> ML_DSA_44
+      | "ML_DSA_65" -> ML_DSA_65
+      | "ML_DSA_87" -> ML_DSA_87
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1273,67 +1414,102 @@ module CrlConfiguration =
           "Boolean value that specifies whether certificate revocation lists (CRLs) are enabled. You can use this value to enable certificate revocation for a new CA when you call the CreateCertificateAuthority action or for an existing CA when you call the UpdateCertificateAuthority action."];
       expirationInDays: Integer1To5000.t option
         [@ocaml.doc "Validity period of the CRL in days."];
-      customCname: String253.t option
+      customCname: CnameString.t option
         [@ocaml.doc
-          "Name inserted into the certificate CRL Distribution Points extension that enables the use of an alias for the CRL distribution point. Use this value if you don't want the name of your S3 bucket to be public."];
-      s3BucketName: String3To255.t option
+          "Name inserted into the certificate CRL Distribution Points extension that enables the use of an alias for the CRL distribution point. Use this value if you don't want the name of your S3 bucket to be public. The content of a Canonical Name (CNAME) record must conform to RFC2396 restrictions on the use of special characters in URIs. Additionally, the value of the CNAME must not include a protocol prefix such as \"http://\" or \"https://\"."];
+      s3BucketName: S3BucketName3To255.t option
         [@ocaml.doc
-          "Name of the S3 bucket that contains the CRL. If you do not provide a value for the CustomCname argument, the name of your S3 bucket is placed into the CRL Distribution Points extension of the issued certificate. You can change the name of your bucket by calling the UpdateCertificateAuthority operation. You must specify a bucket policy that allows ACM Private CA to write the CRL to your bucket."];
+          "Name of the S3 bucket that contains the CRL. If you do not provide a value for the CustomCname argument, the name of your S3 bucket is placed into the CRL Distribution Points extension of the issued certificate. You can change the name of your bucket by calling the UpdateCertificateAuthority operation. You must specify a bucket policy that allows Amazon Web Services Private CA to write the CRL to your bucket. The S3BucketName parameter must conform to the S3 bucket naming rules."];
       s3ObjectAcl: S3ObjectAcl.t option
         [@ocaml.doc
-          "Determines whether the CRL will be publicly readable or privately held in the CRL Amazon S3 bucket. If you choose PUBLIC_READ, the CRL will be accessible over the public internet. If you choose BUCKET_OWNER_FULL_CONTROL, only the owner of the CRL S3 bucket can access the CRL, and your PKI clients may need an alternative method of access. If no value is specified, the default is PUBLIC_READ. Note: This default can cause CA creation to fail in some circumstances. If you have have enabled the Block Public Access (BPA) feature in your S3 account, then you must specify the value of this parameter as BUCKET_OWNER_FULL_CONTROL, and not doing so results in an error. If you have disabled BPA in S3, then you can specify either BUCKET_OWNER_FULL_CONTROL or PUBLIC_READ as the value. For more information, see Blocking public access to the S3 bucket."]}
+          "Determines whether the CRL will be publicly readable or privately held in the CRL Amazon S3 bucket. If you choose PUBLIC_READ, the CRL will be accessible over the public internet. If you choose BUCKET_OWNER_FULL_CONTROL, only the owner of the CRL S3 bucket can access the CRL, and your PKI clients may need an alternative method of access. If no value is specified, the default is PUBLIC_READ. Note: This default can cause CA creation to fail in some circumstances. If you have have enabled the Block Public Access (BPA) feature in your S3 account, then you must specify the value of this parameter as BUCKET_OWNER_FULL_CONTROL, and not doing so results in an error. If you have disabled BPA in S3, then you can specify either BUCKET_OWNER_FULL_CONTROL or PUBLIC_READ as the value. For more information, see Blocking public access to the S3 bucket."];
+      crlDistributionPointExtensionConfiguration:
+        CrlDistributionPointExtensionConfiguration.t option
+        [@ocaml.doc
+          "Configures the behavior of the CRL Distribution Point extension for certificates issued by your certificate authority. If this field is not provided, then the CRl Distribution Point Extension will be present and contain the default CRL URL."];
+      crlType: CrlType.t option
+        [@ocaml.doc
+          "Specifies whether to create a complete or partitioned CRL. This setting determines the maximum number of certificates that the certificate authority can issue and revoke. For more information, see Amazon Web Services Private CA quotas. COMPLETE - The default setting. Amazon Web Services Private CA maintains a single CRL \239\172\129le for all unexpired certi\239\172\129cates issued by a CA that have been revoked for any reason. Each certi\239\172\129cate that Amazon Web Services Private CA issues is bound to a speci\239\172\129c CRL through its CRL distribution point (CDP) extension, de\239\172\129ned in RFC 5280. PARTITIONED - Compared to complete CRLs, partitioned CRLs dramatically increase the number of certi\239\172\129cates your private CA can issue. When using partitioned CRLs, you must validate that the CRL's associated issuing distribution point (IDP) URI matches the certi\239\172\129cate's CDP URI to ensure the right CRL has been fetched. Amazon Web Services Private CA marks the IDP extension as critical, which your client must be able to process."];
+      customPath: CrlPathString.t option
+        [@ocaml.doc
+          "Designates a custom \239\172\129le path in S3 for CRL(s). For example, http://<CustomName>/ <CustomPath>/<CrlPartition_GUID>.crl."]}
     let context_ = "CrlConfiguration"
     let make ?expirationInDays =
       fun ?customCname ->
         fun ?s3BucketName ->
           fun ?s3ObjectAcl ->
-            fun ~enabled ->
-              fun () ->
-                {
-                  expirationInDays;
-                  customCname;
-                  s3BucketName;
-                  s3ObjectAcl;
-                  enabled
-                }
+            fun ?crlDistributionPointExtensionConfiguration ->
+              fun ?crlType ->
+                fun ?customPath ->
+                  fun ~enabled ->
+                    fun () ->
+                      {
+                        expirationInDays;
+                        customCname;
+                        s3BucketName;
+                        s3ObjectAcl;
+                        crlDistributionPointExtensionConfiguration;
+                        crlType;
+                        customPath;
+                        enabled
+                      }
     let to_value x =
       structure_to_value
         [("Enabled", (Some (Boolean.to_value x.enabled)));
         ("ExpirationInDays",
           (Option.map x.expirationInDays ~f:Integer1To5000.to_value));
-        ("CustomCname", (Option.map x.customCname ~f:String253.to_value));
+        ("CustomCname", (Option.map x.customCname ~f:CnameString.to_value));
         ("S3BucketName",
-          (Option.map x.s3BucketName ~f:String3To255.to_value));
-        ("S3ObjectAcl", (Option.map x.s3ObjectAcl ~f:S3ObjectAcl.to_value))]
+          (Option.map x.s3BucketName ~f:S3BucketName3To255.to_value));
+        ("S3ObjectAcl", (Option.map x.s3ObjectAcl ~f:S3ObjectAcl.to_value));
+        ("CrlDistributionPointExtensionConfiguration",
+          (Option.map x.crlDistributionPointExtensionConfiguration
+             ~f:CrlDistributionPointExtensionConfiguration.to_value));
+        ("CrlType", (Option.map x.crlType ~f:CrlType.to_value));
+        ("CustomPath", (Option.map x.customPath ~f:CrlPathString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let customPath =
+        (Option.map ~f:CrlPathString.of_xml)
+          (Xml.child xml_arg0 "CustomPath") in
+      let crlType =
+        (Option.map ~f:CrlType.of_xml) (Xml.child xml_arg0 "CrlType") in
+      let crlDistributionPointExtensionConfiguration =
+        (Option.map ~f:CrlDistributionPointExtensionConfiguration.of_xml)
+          (Xml.child xml_arg0 "CrlDistributionPointExtensionConfiguration") in
       let s3ObjectAcl =
         (Option.map ~f:S3ObjectAcl.of_xml) (Xml.child xml_arg0 "S3ObjectAcl") in
       let s3BucketName =
-        (Option.map ~f:String3To255.of_xml)
+        (Option.map ~f:S3BucketName3To255.of_xml)
           (Xml.child xml_arg0 "S3BucketName") in
       let customCname =
-        (Option.map ~f:String253.of_xml) (Xml.child xml_arg0 "CustomCname") in
+        (Option.map ~f:CnameString.of_xml) (Xml.child xml_arg0 "CustomCname") in
       let expirationInDays =
         (Option.map ~f:Integer1To5000.of_xml)
           (Xml.child xml_arg0 "ExpirationInDays") in
       let enabled =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
-      make ?s3ObjectAcl ?s3BucketName ?customCname ?expirationInDays ~enabled
-        ()
+      make ?customPath ?crlType ?crlDistributionPointExtensionConfiguration
+        ?s3ObjectAcl ?s3BucketName ?customCname ?expirationInDays ~enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3ObjectAcl = field_map json "S3ObjectAcl" S3ObjectAcl.of_json in
-      let s3BucketName = field_map json "S3BucketName" String3To255.of_json in
-      let customCname = field_map json "CustomCname" String253.of_json in
+    let of_json json__ =
+      let customPath = field_map json__ "CustomPath" CrlPathString.of_json in
+      let crlType = field_map json__ "CrlType" CrlType.of_json in
+      let crlDistributionPointExtensionConfiguration =
+        field_map json__ "CrlDistributionPointExtensionConfiguration"
+          CrlDistributionPointExtensionConfiguration.of_json in
+      let s3ObjectAcl = field_map json__ "S3ObjectAcl" S3ObjectAcl.of_json in
+      let s3BucketName =
+        field_map json__ "S3BucketName" S3BucketName3To255.of_json in
+      let customCname = field_map json__ "CustomCname" CnameString.of_json in
       let expirationInDays =
-        field_map json "ExpirationInDays" Integer1To5000.of_json in
-      let enabled = field_map_exn json "Enabled" Boolean.of_json in
-      make ?s3ObjectAcl ?s3BucketName ?customCname ?expirationInDays ~enabled
-        ()
+        field_map json__ "ExpirationInDays" Integer1To5000.of_json in
+      let enabled = field_map_exn json__ "Enabled" Boolean.of_json in
+      make ?customPath ?crlType ?crlDistributionPointExtensionConfiguration
+        ?s3ObjectAcl ?s3BucketName ?customCname ?expirationInDays ~enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains configuration information for a certificate revocation list (CRL). Your private certificate authority (CA) creates base CRLs. Delta CRLs are not supported. You can enable CRLs for your new or an existing private CA by setting the Enabled parameter to true. Your private CA writes CRLs to an S3 bucket that you specify in the S3BucketName parameter. You can hide the name of your bucket by specifying a value for the CustomCname parameter. Your private CA copies the CNAME or the S3 bucket name to the CRL Distribution Points extension of each certificate it issues. Your S3 bucket policy must give write permission to ACM Private CA. ACM Private CA assets that are stored in Amazon S3 can be protected with encryption. For more information, see Encrypting Your CRLs. Your private CA uses the value in the ExpirationInDays parameter to calculate the nextUpdate field in the CRL. The CRL is refreshed prior to a certificate's expiration date or when a certificate is revoked. When a certificate is revoked, it appears in the CRL until the certificate expires, and then in one additional CRL after expiration, and it always appears in the audit report. A CRL is typically updated approximately 30 minutes after a certificate is revoked. If for any reason a CRL update fails, ACM Private CA makes further attempts every 15 minutes. CRLs contain the following fields: Version: The current version number defined in RFC 5280 is V2. The integer value is 0x1. Signature Algorithm: The name of the algorithm used to sign the CRL. Issuer: The X.500 distinguished name of your private CA that issued the CRL. Last Update: The issue date and time of this CRL. Next Update: The day and time by which the next CRL will be issued. Revoked Certificates: List of revoked certificates. Each list item contains the following information. Serial Number: The serial number, in hexadecimal format, of the revoked certificate. Revocation Date: Date and time the certificate was revoked. CRL Entry Extensions: Optional extensions for the CRL entry. X509v3 CRL Reason Code: Reason the certificate was revoked. CRL Extensions: Optional extensions for the CRL. X509v3 Authority Key Identifier: Identifies the public key associated with the private key used to sign the certificate. X509v3 CRL Number:: Decimal sequence number for the CRL. Signature Algorithm: Algorithm used by your private CA to sign the CRL. Signature Value: Signature computed over the CRL. Certificate revocation lists created by ACM Private CA are DER-encoded. You can use the following OpenSSL command to list a CRL. openssl crl -inform DER -text -in crl_path -noout For more information, see Planning a certificate revocation list (CRL) in the Certificate Manager Private Certificate Authority (PCA) User Guide"]
+       "Contains configuration information for a certificate revocation list (CRL). Your private certificate authority (CA) creates base CRLs. Delta CRLs are not supported. You can enable CRLs for your new or an existing private CA by setting the Enabled parameter to true. Your private CA writes CRLs to an S3 bucket that you specify in the S3BucketName parameter. You can hide the name of your bucket by specifying a value for the CustomCname parameter. Your private CA by default copies the CNAME or the S3 bucket name to the CRL Distribution Points extension of each certificate it issues. If you want to configure this default behavior to be something different, you can set the CrlDistributionPointExtensionConfiguration parameter. Your S3 bucket policy must give write permission to Amazon Web Services Private CA. Amazon Web Services Private CA assets that are stored in Amazon S3 can be protected with encryption. For more information, see Encrypting Your CRLs. Your private CA uses the value in the ExpirationInDays parameter to calculate the nextUpdate field in the CRL. The CRL is refreshed prior to a certificate's expiration date or when a certificate is revoked. When a certificate is revoked, it appears in the CRL until the certificate expires, and then in one additional CRL after expiration, and it always appears in the audit report. A CRL is typically updated approximately 30 minutes after a certificate is revoked. If for any reason a CRL update fails, Amazon Web Services Private CA makes further attempts every 15 minutes. CRLs contain the following fields: Version: The current version number defined in RFC 5280 is V2. The integer value is 0x1. Signature Algorithm: The name of the algorithm used to sign the CRL. Issuer: The X.500 distinguished name of your private CA that issued the CRL. Last Update: The issue date and time of this CRL. Next Update: The day and time by which the next CRL will be issued. Revoked Certificates: List of revoked certificates. Each list item contains the following information. Serial Number: The serial number, in hexadecimal format, of the revoked certificate. Revocation Date: Date and time the certificate was revoked. CRL Entry Extensions: Optional extensions for the CRL entry. X509v3 CRL Reason Code: Reason the certificate was revoked. CRL Extensions: Optional extensions for the CRL. X509v3 Authority Key Identifier: Identifies the public key associated with the private key used to sign the certificate. X509v3 CRL Number:: Decimal sequence number for the CRL. Signature Algorithm: Algorithm used by your private CA to sign the CRL. Signature Value: Signature computed over the CRL. Certificate revocation lists created by Amazon Web Services Private CA are DER-encoded. You can use the following OpenSSL command to list a CRL. openssl crl -inform DER -text -in crl_path -noout For more information, see Planning a certificate revocation list (CRL) in the Amazon Web Services Private Certificate Authority User Guide"]
 module OcspConfiguration =
   struct
     type nonrec t =
@@ -1341,9 +1517,9 @@ module OcspConfiguration =
       enabled: Boolean.t
         [@ocaml.doc
           "Flag enabling use of the Online Certificate Status Protocol (OCSP) for validating certificate revocation status."];
-      ocspCustomCname: String253.t option
+      ocspCustomCname: CnameString.t option
         [@ocaml.doc
-          "By default, ACM Private CA injects an Amazon Web Services domain into certificates being validated by the Online Certificate Status Protocol (OCSP). A customer can alternatively use this object to define a CNAME specifying a customized OCSP domain. Note: The value of the CNAME must not include a protocol prefix such as \"http://\" or \"https://\". For more information, see Customizing Online Certificate Status Protocol (OCSP) in the Certificate Manager Private Certificate Authority (PCA) User Guide."]}
+          "By default, Amazon Web Services Private CA injects an Amazon Web Services domain into certificates being validated by the Online Certificate Status Protocol (OCSP). A customer can alternatively use this object to define a CNAME specifying a customized OCSP domain. The content of a Canonical Name (CNAME) record must conform to RFC2396 restrictions on the use of special characters in URIs. Additionally, the value of the CNAME must not include a protocol prefix such as \"http://\" or \"https://\". For more information, see Customizing Online Certificate Status Protocol (OCSP) in the Amazon Web Services Private Certificate Authority User Guide."]}
     let context_ = "OcspConfiguration"
     let make ?ocspCustomCname =
       fun ~enabled -> fun () -> { ocspCustomCname; enabled }
@@ -1351,20 +1527,20 @@ module OcspConfiguration =
       structure_to_value
         [("Enabled", (Some (Boolean.to_value x.enabled)));
         ("OcspCustomCname",
-          (Option.map x.ocspCustomCname ~f:String253.to_value))]
+          (Option.map x.ocspCustomCname ~f:CnameString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let ocspCustomCname =
-        (Option.map ~f:String253.of_xml)
+        (Option.map ~f:CnameString.of_xml)
           (Xml.child xml_arg0 "OcspCustomCname") in
       let enabled =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ?ocspCustomCname ~enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ocspCustomCname =
-        field_map json "OcspCustomCname" String253.of_json in
-      let enabled = field_map_exn json "Enabled" Boolean.of_json in
+        field_map json__ "OcspCustomCname" CnameString.of_json in
+      let enabled = field_map_exn json__ "Enabled" Boolean.of_json in
       make ?ocspCustomCname ~enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1378,7 +1554,7 @@ module PolicyInformation =
           "Specifies the object identifier (OID) of the certificate policy under which the certificate was issued. For more information, see NIST's definition of Object Identifier (OID)."];
       policyQualifiers: PolicyQualifierInfoList.t option
         [@ocaml.doc
-          "Modifies the given CertPolicyId with a qualifier. ACM Private CA supports the certification practice statement (CPS) qualifier."]}
+          "Modifies the given CertPolicyId with a qualifier. Amazon Web Services Private CA supports the certification practice statement (CPS) qualifier."]}
     let context_ = "PolicyInformation"
     let make ?policyQualifiers =
       fun ~certPolicyId -> fun () -> { policyQualifiers; certPolicyId }
@@ -1398,11 +1574,11 @@ module PolicyInformation =
           (Xml.child_exn ~context:context_ xml_arg0 "CertPolicyId") in
       make ?policyQualifiers ~certPolicyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyQualifiers =
-        field_map json "PolicyQualifiers" PolicyQualifierInfoList.of_json in
+        field_map json__ "PolicyQualifiers" PolicyQualifierInfoList.of_json in
       let certPolicyId =
-        field_map_exn json "CertPolicyId" CustomObjectIdentifier.of_json in
+        field_map_exn json__ "CertPolicyId" CustomObjectIdentifier.of_json in
       make ?policyQualifiers ~certPolicyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Defines the X.509 CertificatePolicies extension."]
@@ -1440,11 +1616,12 @@ module CustomExtension =
           (Xml.child_exn ~context:context_ xml_arg0 "ObjectIdentifier") in
       make ?critical ~value ~objectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let critical = field_map json "Critical" Boolean.of_json in
-      let value = field_map_exn json "Value" Base64String1To4096.of_json in
+    let of_json json__ =
+      let critical = field_map json__ "Critical" Boolean.of_json in
+      let value = field_map_exn json__ "Value" Base64String1To4096.of_json in
       let objectIdentifier =
-        field_map_exn json "ObjectIdentifier" CustomObjectIdentifier.of_json in
+        field_map_exn json__ "ObjectIdentifier"
+          CustomObjectIdentifier.of_json in
       make ?critical ~value ~objectIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1480,12 +1657,12 @@ module ExtendedKeyUsage =
           (Xml.child xml_arg0 "ExtendedKeyUsageType") in
       make ?extendedKeyUsageObjectIdentifier ?extendedKeyUsageType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let extendedKeyUsageObjectIdentifier =
-        field_map json "ExtendedKeyUsageObjectIdentifier"
+        field_map json__ "ExtendedKeyUsageObjectIdentifier"
           CustomObjectIdentifier.of_json in
       let extendedKeyUsageType =
-        field_map json "ExtendedKeyUsageType" ExtendedKeyUsageType.of_json in
+        field_map json__ "ExtendedKeyUsageType" ExtendedKeyUsageType.of_json in
       make ?extendedKeyUsageObjectIdentifier ?extendedKeyUsageType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1502,7 +1679,7 @@ module TagKey =
                 (check_string_max i ~max:128) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+                       ~pattern:"([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1524,7 +1701,7 @@ module TagValue =
                 (check_string_max i ~max:256) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+                       ~pattern:"([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1543,7 +1720,7 @@ module AWSPolicy =
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:20480) >>=
+                (check_string_max i ~max:81920) >>=
                   (fun () ->
                      check_pattern i
                        ~pattern:"[\\u0009\\u000A\\u000D\\u0020-\\u00FF]+")));
@@ -1584,6 +1761,9 @@ module ActionList =
         ok_or_failwith
           ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ActionType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1616,7 +1796,7 @@ module Arn =
                 (check_string_max i ~max:200) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"arn:[\\w+=/,.@-]+:[\\w+=/,.@-]+:[\\w+=/,.@-]*:[0-9]*:[\\w+=,.@-]+(/[\\w+=,.@-]+)*")));
+                       ~pattern:"arn:[\\w+=/,.@-]+:acm-pca:[\\w+=/,.@-]*:[0-9]*:[\\w+=,.@-]+(/[\\w+=,.@-]+)*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1636,7 +1816,7 @@ module Principal =
           ((check_string_min i ~min:0) >>=
              (fun () ->
                 (check_string_max i ~max:128) >>=
-                  (fun () -> check_pattern i ~pattern:"^[^*]+$")));
+                  (fun () -> check_pattern i ~pattern:"[^*]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1705,14 +1885,14 @@ module CertificateAuthorityConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "KeyAlgorithm") in
       make ?csrExtensions ~subject ~signingAlgorithm ~keyAlgorithm ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let csrExtensions =
-        field_map json "CsrExtensions" CsrExtensions.of_json in
-      let subject = field_map_exn json "Subject" ASN1Subject.of_json in
+        field_map json__ "CsrExtensions" CsrExtensions.of_json in
+      let subject = field_map_exn json__ "Subject" ASN1Subject.of_json in
       let signingAlgorithm =
-        field_map_exn json "SigningAlgorithm" SigningAlgorithm.of_json in
+        field_map_exn json__ "SigningAlgorithm" SigningAlgorithm.of_json in
       let keyAlgorithm =
-        field_map_exn json "KeyAlgorithm" KeyAlgorithm.of_json in
+        field_map_exn json__ "KeyAlgorithm" KeyAlgorithm.of_json in
       make ?csrExtensions ~subject ~signingAlgorithm ~keyAlgorithm ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1787,6 +1967,34 @@ module CertificateAuthorityType =
       of_string (string_of_json ~kind:"CertificateAuthorityType" j)
     let to_json = simple_to_json to_value
   end
+module CertificateAuthorityUsageMode =
+  struct
+    type nonrec t =
+      | GENERAL_PURPOSE 
+      | SHORT_LIVED_CERTIFICATE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | GENERAL_PURPOSE -> "GENERAL_PURPOSE"
+      | SHORT_LIVED_CERTIFICATE -> "SHORT_LIVED_CERTIFICATE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "GENERAL_PURPOSE" -> GENERAL_PURPOSE
+      | "SHORT_LIVED_CERTIFICATE" -> SHORT_LIVED_CERTIFICATE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CertificateAuthorityUsageMode"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CertificateAuthorityUsageMode" j)
+    let to_json = simple_to_json to_value
+  end
 module FailureReason =
   struct
     type nonrec t =
@@ -1820,17 +2028,20 @@ module KeyStorageSecurityStandard =
     type nonrec t =
       | FIPS_140_2_LEVEL_2_OR_HIGHER 
       | FIPS_140_2_LEVEL_3_OR_HIGHER 
+      | CCPC_LEVEL_1_OR_HIGHER 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | FIPS_140_2_LEVEL_2_OR_HIGHER -> "FIPS_140_2_LEVEL_2_OR_HIGHER"
       | FIPS_140_2_LEVEL_3_OR_HIGHER -> "FIPS_140_2_LEVEL_3_OR_HIGHER"
+      | CCPC_LEVEL_1_OR_HIGHER -> "CCPC_LEVEL_1_OR_HIGHER"
       | Non_static_id s -> s
     let of_string =
       function
       | "FIPS_140_2_LEVEL_2_OR_HIGHER" -> FIPS_140_2_LEVEL_2_OR_HIGHER
       | "FIPS_140_2_LEVEL_3_OR_HIGHER" -> FIPS_140_2_LEVEL_3_OR_HIGHER
+      | "CCPC_LEVEL_1_OR_HIGHER" -> CCPC_LEVEL_1_OR_HIGHER
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1849,7 +2060,7 @@ module RevocationConfiguration =
       {
       crlConfiguration: CrlConfiguration.t option
         [@ocaml.doc
-          "Configuration of the certificate revocation list (CRL), if any, maintained by your private CA. A CRL is typically updated approximately 30 minutes after a certificate is revoked. If for any reason a CRL update fails, ACM Private CA makes further attempts every 15 minutes."];
+          "Configuration of the certificate revocation list (CRL), if any, maintained by your private CA. A CRL is typically updated approximately 30 minutes after a certificate is revoked. If for any reason a CRL update fails, Amazon Web Services Private CA makes further attempts every 15 minutes."];
       ocspConfiguration: OcspConfiguration.t option
         [@ocaml.doc
           "Configuration of Online Certificate Status Protocol (OCSP) support, if any, maintained by your private CA. When you revoke a certificate, OCSP responses may take up to 60 minutes to reflect the new status."]}
@@ -1872,15 +2083,15 @@ module RevocationConfiguration =
           (Xml.child xml_arg0 "CrlConfiguration") in
       make ?ocspConfiguration ?crlConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ocspConfiguration =
-        field_map json "OcspConfiguration" OcspConfiguration.of_json in
+        field_map json__ "OcspConfiguration" OcspConfiguration.of_json in
       let crlConfiguration =
-        field_map json "CrlConfiguration" CrlConfiguration.of_json in
+        field_map json__ "CrlConfiguration" CrlConfiguration.of_json in
       make ?ocspConfiguration ?crlConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Certificate revocation information used by the CreateCertificateAuthority and UpdateCertificateAuthority actions. Your private certificate authority (CA) can configure Online Certificate Status Protocol (OCSP) support and/or maintain a certificate revocation list (CRL). OCSP returns validation information about certificates as requested by clients, and a CRL contains an updated list of certificates revoked by your CA. For more information, see RevokeCertificate and Setting up a certificate revocation method in the Certificate Manager Private Certificate Authority (PCA) User Guide."]
+       "Certificate revocation information used by the CreateCertificateAuthority and UpdateCertificateAuthority actions. Your private certificate authority (CA) can configure Online Certificate Status Protocol (OCSP) support and/or maintain a certificate revocation list (CRL). OCSP returns validation information about certificates as requested by clients, and a CRL contains an updated list of certificates revoked by your CA. For more information, see RevokeCertificate and Setting up a certificate revocation method in the Amazon Web Services Private Certificate Authority User Guide."]
 module String_ =
   struct
     type nonrec t = string
@@ -1902,6 +2113,9 @@ module CertificatePolicyList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyInformation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1929,8 +2143,12 @@ module CustomExtensionList =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:150) >>=
+             (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomExtension.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1960,6 +2178,9 @@ module ExtendedKeyUsageList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExtendedKeyUsage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1987,8 +2208,12 @@ module GeneralNameList =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:150) >>=
+             (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GeneralName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2029,9 +2254,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2098,14 +2323,14 @@ module Permission =
       make ?policy ?actions ?sourceAccount ?principal ?createdAt
         ?certificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" AWSPolicy.of_json in
-      let actions = field_map json "Actions" ActionList.of_json in
-      let sourceAccount = field_map json "SourceAccount" AccountId.of_json in
-      let principal = field_map json "Principal" Principal.of_json in
-      let createdAt = field_map json "CreatedAt" TStamp.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "Policy" AWSPolicy.of_json in
+      let actions = field_map json__ "Actions" ActionList.of_json in
+      let sourceAccount = field_map json__ "SourceAccount" AccountId.of_json in
+      let principal = field_map json__ "Principal" Principal.of_json in
+      let createdAt = field_map json__ "CreatedAt" TStamp.of_json in
       let certificateAuthorityArn =
-        field_map json "CertificateAuthorityArn" Arn.of_json in
+        field_map json__ "CertificateAuthorityArn" Arn.of_json in
       make ?policy ?actions ?sourceAccount ?principal ?createdAt
         ?certificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
@@ -2151,7 +2376,10 @@ module CertificateAuthority =
           "The period during which a deleted CA can be restored. For more information, see the PermanentDeletionTimeInDays parameter of the DeleteCertificateAuthorityRequest action."];
       keyStorageSecurityStandard: KeyStorageSecurityStandard.t option
         [@ocaml.doc
-          "Defines a cryptographic key management compliance standard used for handling CA keys. Default: FIPS_140_2_LEVEL_3_OR_HIGHER Note: Amazon Web Services Region ap-northeast-3 supports only FIPS_140_2_LEVEL_2_OR_HIGHER. You must explicitly specify this parameter and value when creating a CA in that Region. Specifying a different value (or no value) results in an InvalidArgsException with the message \"A certificate authority cannot be created in this region with the specified security standard.\""]}
+          "Defines a cryptographic key management compliance standard for handling and protecting CA keys. Default: FIPS_140_2_LEVEL_3_OR_HIGHER Starting January 26, 2023, Amazon Web Services Private CA protects all CA private keys in non-China regions using hardware security modules (HSMs) that comply with FIPS PUB 140-2 Level 3. For information about security standard support in different Amazon Web Services Regions, see Storage and security compliance of Amazon Web Services Private CA private keys."];
+      usageMode: CertificateAuthorityUsageMode.t option
+        [@ocaml.doc
+          "Specifies whether the CA issues general-purpose certificates that typically require a revocation mechanism, or short-lived certificates that may optionally omit revocation because they expire quickly. Short-lived certificate validity is limited to seven days. The default value is GENERAL_PURPOSE."]}
     let make ?arn =
       fun ?ownerAccount ->
         fun ?createdAt ->
@@ -2166,23 +2394,25 @@ module CertificateAuthority =
                           fun ?revocationConfiguration ->
                             fun ?restorableUntil ->
                               fun ?keyStorageSecurityStandard ->
-                                fun () ->
-                                  {
-                                    arn;
-                                    ownerAccount;
-                                    createdAt;
-                                    lastStateChangeAt;
-                                    type_;
-                                    serial;
-                                    status;
-                                    notBefore;
-                                    notAfter;
-                                    failureReason;
-                                    certificateAuthorityConfiguration;
-                                    revocationConfiguration;
-                                    restorableUntil;
-                                    keyStorageSecurityStandard
-                                  }
+                                fun ?usageMode ->
+                                  fun () ->
+                                    {
+                                      arn;
+                                      ownerAccount;
+                                      createdAt;
+                                      lastStateChangeAt;
+                                      type_;
+                                      serial;
+                                      status;
+                                      notBefore;
+                                      notAfter;
+                                      failureReason;
+                                      certificateAuthorityConfiguration;
+                                      revocationConfiguration;
+                                      restorableUntil;
+                                      keyStorageSecurityStandard;
+                                      usageMode
+                                    }
     let to_value x =
       structure_to_value
         [("Arn", (Option.map x.arn ~f:Arn.to_value));
@@ -2208,9 +2438,14 @@ module CertificateAuthority =
           (Option.map x.restorableUntil ~f:TStamp.to_value));
         ("KeyStorageSecurityStandard",
           (Option.map x.keyStorageSecurityStandard
-             ~f:KeyStorageSecurityStandard.to_value))]
+             ~f:KeyStorageSecurityStandard.to_value));
+        ("UsageMode",
+          (Option.map x.usageMode ~f:CertificateAuthorityUsageMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let usageMode =
+        (Option.map ~f:CertificateAuthorityUsageMode.of_xml)
+          (Xml.child xml_arg0 "UsageMode") in
       let keyStorageSecurityStandard =
         (Option.map ~f:KeyStorageSecurityStandard.of_xml)
           (Xml.child xml_arg0 "KeyStorageSecurityStandard") in
@@ -2245,41 +2480,44 @@ module CertificateAuthority =
       let ownerAccount =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "OwnerAccount") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?keyStorageSecurityStandard ?restorableUntil
+      make ?usageMode ?keyStorageSecurityStandard ?restorableUntil
         ?revocationConfiguration ?certificateAuthorityConfiguration
         ?failureReason ?notAfter ?notBefore ?status ?serial ?type_
         ?lastStateChangeAt ?createdAt ?ownerAccount ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let usageMode =
+        field_map json__ "UsageMode" CertificateAuthorityUsageMode.of_json in
       let keyStorageSecurityStandard =
-        field_map json "KeyStorageSecurityStandard"
+        field_map json__ "KeyStorageSecurityStandard"
           KeyStorageSecurityStandard.of_json in
-      let restorableUntil = field_map json "RestorableUntil" TStamp.of_json in
+      let restorableUntil = field_map json__ "RestorableUntil" TStamp.of_json in
       let revocationConfiguration =
-        field_map json "RevocationConfiguration"
+        field_map json__ "RevocationConfiguration"
           RevocationConfiguration.of_json in
       let certificateAuthorityConfiguration =
-        field_map json "CertificateAuthorityConfiguration"
+        field_map json__ "CertificateAuthorityConfiguration"
           CertificateAuthorityConfiguration.of_json in
       let failureReason =
-        field_map json "FailureReason" FailureReason.of_json in
-      let notAfter = field_map json "NotAfter" TStamp.of_json in
-      let notBefore = field_map json "NotBefore" TStamp.of_json in
-      let status = field_map json "Status" CertificateAuthorityStatus.of_json in
-      let serial = field_map json "Serial" String_.of_json in
-      let type_ = field_map json "Type" CertificateAuthorityType.of_json in
+        field_map json__ "FailureReason" FailureReason.of_json in
+      let notAfter = field_map json__ "NotAfter" TStamp.of_json in
+      let notBefore = field_map json__ "NotBefore" TStamp.of_json in
+      let status =
+        field_map json__ "Status" CertificateAuthorityStatus.of_json in
+      let serial = field_map json__ "Serial" String_.of_json in
+      let type_ = field_map json__ "Type" CertificateAuthorityType.of_json in
       let lastStateChangeAt =
-        field_map json "LastStateChangeAt" TStamp.of_json in
-      let createdAt = field_map json "CreatedAt" TStamp.of_json in
-      let ownerAccount = field_map json "OwnerAccount" AccountId.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
-      make ?keyStorageSecurityStandard ?restorableUntil
+        field_map json__ "LastStateChangeAt" TStamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" TStamp.of_json in
+      let ownerAccount = field_map json__ "OwnerAccount" AccountId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?usageMode ?keyStorageSecurityStandard ?restorableUntil
         ?revocationConfiguration ?certificateAuthorityConfiguration
         ?failureReason ?notAfter ?notBefore ?status ?serial ?type_
         ?lastStateChangeAt ?createdAt ?ownerAccount ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains information about your private certificate authority (CA). Your private CA can issue and revoke X.509 digital certificates. Digital certificates verify that the entity named in the certificate Subject field owns or controls the public key contained in the Subject Public Key Info field. Call the CreateCertificateAuthority action to create your private CA. You must then call the GetCertificateAuthorityCertificate action to retrieve a private CA certificate signing request (CSR). Sign the CSR with your ACM Private CA-hosted or on-premises root or subordinate CA certificate. Call the ImportCertificateAuthorityCertificate action to import the signed certificate into Certificate Manager (ACM)."]
+       "Contains information about your private certificate authority (CA). Your private CA can issue and revoke X.509 digital certificates. Digital certificates verify that the entity named in the certificate Subject field owns or controls the public key contained in the Subject Public Key Info field. Call the CreateCertificateAuthority action to create your private CA. You must then call the GetCertificateAuthorityCertificate action to retrieve a private CA certificate signing request (CSR). Sign the CSR with your Amazon Web Services Private CA-hosted or on-premises root or subordinate CA certificate. Call the ImportCertificateAuthorityCertificate action to import the signed certificate into Certificate Manager (ACM)."]
 module Extensions =
   struct
     type nonrec t =
@@ -2296,7 +2534,7 @@ module Extensions =
           "The subject alternative name extension allows identities to be bound to the subject of the certificate. These identities may be included in addition to or in place of the identity in the subject field of the certificate."];
       customExtensions: CustomExtensionList.t option
         [@ocaml.doc
-          "Contains a sequence of one or more X.509 extensions, each of which consists of an object identifier (OID), a base64-encoded value, and the critical flag. For more information, see the Global OID reference database. The OID value of a CustomExtension must not match the OID of a predefined extension."]}
+          "Contains a sequence of one or more X.509 extensions, each of which consists of an object identifier (OID), a base64-encoded value, and the critical flag. For more information, see the Global OID reference database."]}
     let make ?certificatePolicies =
       fun ?extendedKeyUsage ->
         fun ?keyUsage ->
@@ -2341,16 +2579,16 @@ module Extensions =
       make ?customExtensions ?subjectAlternativeNames ?keyUsage
         ?extendedKeyUsage ?certificatePolicies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customExtensions =
-        field_map json "CustomExtensions" CustomExtensionList.of_json in
+        field_map json__ "CustomExtensions" CustomExtensionList.of_json in
       let subjectAlternativeNames =
-        field_map json "SubjectAlternativeNames" GeneralNameList.of_json in
-      let keyUsage = field_map json "KeyUsage" KeyUsage.of_json in
+        field_map json__ "SubjectAlternativeNames" GeneralNameList.of_json in
+      let keyUsage = field_map json__ "KeyUsage" KeyUsage.of_json in
       let extendedKeyUsage =
-        field_map json "ExtendedKeyUsage" ExtendedKeyUsageList.of_json in
+        field_map json__ "ExtendedKeyUsage" ExtendedKeyUsageList.of_json in
       let certificatePolicies =
-        field_map json "CertificatePolicies" CertificatePolicyList.of_json in
+        field_map json__ "CertificatePolicies" CertificatePolicyList.of_json in
       make ?customExtensions ?subjectAlternativeNames ?keyUsage
         ?extendedKeyUsage ?certificatePolicies ()
     let to_json v = composed_to_json to_value v
@@ -2412,6 +2650,9 @@ module TagList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2490,8 +2731,8 @@ module InvalidArnException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2510,8 +2751,8 @@ module InvalidStateException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2523,7 +2764,7 @@ module NextToken =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:500) >>=
+          ((check_string_max i ~max:43739) >>=
              (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
@@ -2534,6 +2775,25 @@ module NextToken =
     let of_json j = string_of_json ~kind:"NextToken" j
     let to_json = simple_to_json to_value
   end
+module RequestFailedException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request has failed for an unspecified reason."]
 module ResourceNotFoundException =
   struct
     type nonrec t = {
@@ -2548,8 +2808,8 @@ module ResourceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2586,8 +2846,8 @@ module InvalidNextTokenException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2597,6 +2857,9 @@ module PermissionList =
     type nonrec t = Permission.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:0); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Permission.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2617,29 +2880,13 @@ module PermissionList =
       list_of_json ~kind:"PermissionList" ~of_json:Permission.of_json j
     let to_json v = composed_to_json to_value v
   end
-module RequestFailedException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The request has failed for an unspecified reason."]
 module CertificateAuthorities =
   struct
     type nonrec t = CertificateAuthority.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CertificateAuthority.to_value)) |>
         (fun x -> `List x)
@@ -2701,8 +2948,8 @@ module InvalidArgsException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more of the specified arguments was not valid."]
@@ -2720,12 +2967,12 @@ module LimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An ACM Private CA quota has been exceeded. See the exception message returned to determine the quota that was exceeded."]
+       "An Amazon Web Services Private CA quota has been exceeded. See the exception message returned to determine the quota that was exceeded."]
 module MalformedCSRException =
   struct
     type nonrec t = {
@@ -2740,8 +2987,8 @@ module MalformedCSRException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The certificate signing request is invalid."]
@@ -2766,13 +3013,13 @@ module ApiPassthrough =
         (Option.map ~f:Extensions.of_xml) (Xml.child xml_arg0 "Extensions") in
       make ?subject ?extensions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subject = field_map json "Subject" ASN1Subject.of_json in
-      let extensions = field_map json "Extensions" Extensions.of_json in
+    let of_json json__ =
+      let subject = field_map json__ "Subject" ASN1Subject.of_json in
+      let extensions = field_map json__ "Extensions" Extensions.of_json in
       make ?subject ?extensions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains X.509 certificate information to be placed in an issued certificate. An APIPassthrough or APICSRPassthrough template variant must be selected, or else this parameter is ignored. If conflicting or duplicate certificate information is supplied from other sources, ACM Private CA applies order of operation rules to determine what information is used."]
+       "Contains X.509 certificate information to be placed in an issued certificate. An APIPassthrough or APICSRPassthrough template variant must be selected, or else this parameter is ignored. If conflicting or duplicate certificate information is supplied from other sources, Amazon Web Services Private CA applies order of operation rules to determine what information is used."]
 module CsrBlob =
   struct
     type nonrec t = string
@@ -2816,7 +3063,7 @@ module Validity =
           "A long integer interpreted according to the value of Type, below."];
       type_: ValidityPeriodType.t
         [@ocaml.doc
-          "Determines how ACM Private CA interprets the Value parameter, an integer. Supported validity types include those listed below. Type definitions with values include a sample input value and the resulting output. END_DATE: The specific date and time when the certificate will expire, expressed using UTCTime (YYMMDDHHMMSS) or GeneralizedTime (YYYYMMDDHHMMSS) format. When UTCTime is used, if the year field (YY) is greater than or equal to 50, the year is interpreted as 19YY. If the year field is less than 50, the year is interpreted as 20YY. Sample input value: 491231235959 (UTCTime format) Output expiration date/time: 12/31/2049 23:59:59 ABSOLUTE: The specific date and time when the validity of a certificate will start or expire, expressed in seconds since the Unix Epoch. Sample input value: 2524608000 Output expiration date/time: 01/01/2050 00:00:00 DAYS, MONTHS, YEARS: The relative time from the moment of issuance until the certificate will expire, expressed in days, months, or years. Example if DAYS, issued on 10/12/2020 at 12:34:54 UTC: Sample input value: 90 Output expiration date: 01/10/2020 12:34:54 UTC The minimum validity duration for a certificate using relative time (DAYS) is one day. The minimum validity for a certificate using absolute time (ABSOLUTE or END_DATE) is one second."]}
+          "Determines how Amazon Web Services Private CA interprets the Value parameter, an integer. Supported validity types include those listed below. Type definitions with values include a sample input value and the resulting output. END_DATE: The specific date and time when the certificate will expire, expressed using UTCTime (YYMMDDHHMMSS) or GeneralizedTime (YYYYMMDDHHMMSS) format. When UTCTime is used, if the year field (YY) is greater than or equal to 50, the year is interpreted as 19YY. If the year field is less than 50, the year is interpreted as 20YY. Sample input value: 491231235959 (UTCTime format) Output expiration date/time: 12/31/2049 23:59:59 ABSOLUTE: The specific date and time when the validity of a certificate will start or expire, expressed in seconds since the Unix Epoch. Sample input value: 2524608000 Output expiration date/time: 01/01/2050 00:00:00 DAYS, MONTHS, YEARS: The relative time from the moment of issuance until the certificate will expire, expressed in days, months, or years. Example if DAYS, issued on 10/12/2020 at 12:34:54 UTC: Sample input value: 90 Output expiration date: 01/10/2020 12:34:54 UTC The minimum validity duration for a certificate using relative time (DAYS) is one day. The minimum validity for a certificate using absolute time (ABSOLUTE or END_DATE) is one second."]}
     let context_ = "Validity"
     let make ~value = fun ~type_ -> fun () -> { value; type_ }
     let to_value x =
@@ -2833,13 +3080,13 @@ module Validity =
           (Xml.child_exn ~context:context_ xml_arg0 "Value") in
       make ~type_ ~value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" ValidityPeriodType.of_json in
-      let value = field_map_exn json "Value" PositiveLong.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" ValidityPeriodType.of_json in
+      let value = field_map_exn json__ "Value" PositiveLong.of_json in
       make ~type_ ~value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Validity specifies the period of time during which a certificate is valid. Validity can be expressed as an explicit date and time when the validity of a certificate starts or expires, or as a span of time after issuance, stated in days, months, or years. For more information, see Validity in RFC 5280. ACM Private CA API consumes the Validity data type differently in two distinct parameters of the IssueCertificate action. The required parameter IssueCertificate:Validity specifies the end of a certificate's validity period. The optional parameter IssueCertificate:ValidityNotBefore specifies a customized starting time for the validity period."]
+       "Validity specifies the period of time during which a certificate is valid. Validity can be expressed as an explicit date and time when the validity of a certificate starts or expires, or as a span of time after issuance, stated in days, months, or years. For more information, see Validity in RFC 5280. Amazon Web Services Private CA API consumes the Validity data type differently in two distinct parameters of the IssueCertificate action. The required parameter IssueCertificate:Validity specifies the end of a certificate's validity period. The optional parameter IssueCertificate:ValidityNotBefore specifies a customized starting time for the validity period."]
 module CertificateBodyBlob =
   struct
     type nonrec t = string
@@ -2904,8 +3151,8 @@ module RequestInProgressException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Your request is already in progress."]
@@ -2974,7 +3221,11 @@ module S3Key =
     type nonrec t = string
     let context_ = "S3Key"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:1024); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -3038,8 +3289,8 @@ module InvalidPolicyException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3058,8 +3309,8 @@ module InvalidTagException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3094,7 +3345,7 @@ module UpdateCertificateAuthorityRequest =
           "Amazon Resource Name (ARN) of the private CA that issued the certificate to be revoked. This must be of the form: arn:aws:acm-pca:region:account:certificate-authority/12345678-1234-1234-1234-123456789012"];
       revocationConfiguration: RevocationConfiguration.t option
         [@ocaml.doc
-          "Contains information to enable Online Certificate Status Protocol (OCSP) support, to enable a certificate revocation list (CRL), to enable both, or to enable neither. If this parameter is not supplied, existing capibilites remain unchanged. For more information, see the OcspConfiguration and CrlConfiguration types."];
+          "Contains information to enable support for Online Certificate Status Protocol (OCSP), certificate revocation list (CRL), both protocols, or neither. If you don't supply this parameter, existing capibilites remain unchanged. For more information, see the OcspConfiguration and CrlConfiguration types. The following requirements apply to revocation configurations. A configuration disabling CRLs or OCSP must contain only the Enabled=False parameter, and will fail if other parameters such as CustomCname or ExpirationInDays are included. In a CRL configuration, the S3BucketName parameter must conform to Amazon S3 bucket naming rules. A configuration containing a custom Canonical Name (CNAME) parameter for CRLs or OCSP must conform to RFC2396 restrictions on the use of special characters in a CNAME. In a CRL or OCSP configuration, the value of a CNAME parameter must not include a protocol prefix such as \"http://\" or \"https://\". If you update the S3BucketName of CrlConfiguration, you can break revocation for existing certificates. In other words, if you call UpdateCertificateAuthority to update the CRL configuration's S3 bucket name, Amazon Web Services Private CA only writes CRLs to the new S3 bucket. Certificates issued prior to this point will have the old S3 bucket name in your CRL Distribution Point (CDP) extension, essentially breaking revocation. If you must update the S3 bucket, you'll need to reissue old certificates to keep the revocation working. Alternatively, you can use a CustomCname in your CRL configuration if you might need to change the S3 bucket name in the future."];
       status: CertificateAuthorityStatus.t option
         [@ocaml.doc "Status of your private CA."]}
     let context_ = "UpdateCertificateAuthorityRequest"
@@ -3125,17 +3376,18 @@ module UpdateCertificateAuthorityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ?status ?revocationConfiguration ~certificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" CertificateAuthorityStatus.of_json in
+    let of_json json__ =
+      let status =
+        field_map json__ "Status" CertificateAuthorityStatus.of_json in
       let revocationConfiguration =
-        field_map json "RevocationConfiguration"
+        field_map json__ "RevocationConfiguration"
           RevocationConfiguration.of_json in
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
       make ?status ?revocationConfiguration ~certificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the status or configuration of a private certificate authority (CA). Your private CA must be in the ACTIVE or DISABLED state before you can update it. You can disable a private CA that is in the ACTIVE state or make a CA that is in the DISABLED state active again. Both PCA and the IAM principal must have permission to write to the S3 bucket that you specify. If the IAM principal making the call does not have permission to write to the bucket, then an exception is thrown. For more information, see Access policies for CRLs in Amazon S3."]
+       "Updates the status or configuration of a private certificate authority (CA). Your private CA must be in the ACTIVE or DISABLED state before you can update it. You can disable a private CA that is in the ACTIVE state or make a CA that is in the DISABLED state active again. Both Amazon Web Services Private CA and the IAM principal must have permission to write to the S3 bucket that you specify. If the IAM principal making the call does not have permission to write to the bucket, then an exception is thrown. For more information, see Access policies for CRLs in Amazon S3."]
 module UntagCertificateAuthorityRequest =
   struct
     type nonrec t =
@@ -3161,10 +3413,10 @@ module UntagCertificateAuthorityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~tags ~certificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
       make ~tags ~certificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3183,8 +3435,8 @@ module TooManyTagsException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3215,14 +3467,14 @@ module TagCertificateAuthorityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~tags ~certificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
       make ~tags ~certificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds one or more tags to your private CA. Tags are labels that you can use to identify and organize your Amazon Web Services resources. Each tag consists of a key and an optional value. You specify the private CA on input by its Amazon Resource Name (ARN). You specify the tag by using a key-value pair. You can apply a tag to just one private CA if you want to identify a specific characteristic of that CA, or you can apply the same tag to multiple private CAs if you want to filter for a common relationship among those CAs. To remove one or more tags, use the UntagCertificateAuthority action. Call the ListTags action to see what tags are associated with your CA."]
+       "Adds one or more tags to your private CA. Tags are labels that you can use to identify and organize your Amazon Web Services resources. Each tag consists of a key and an optional value. You specify the private CA on input by its Amazon Resource Name (ARN). You specify the tag by using a key-value pair. You can apply a tag to just one private CA if you want to identify a specific characteristic of that CA, or you can apply the same tag to multiple private CAs if you want to filter for a common relationship among those CAs. To remove one or more tags, use the UntagCertificateAuthority action. Call the ListTags action to see what tags are associated with your CA. To attach tags to a private CA during the creation procedure, a CA administrator must first associate an inline IAM policy with the CreateCertificateAuthority action and explicitly allow tagging. For more information, see Attaching tags to a CA at the time of creation."]
 module RevokeCertificateRequest =
   struct
     type nonrec t =
@@ -3262,17 +3514,17 @@ module RevokeCertificateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~revocationReason ~certificateSerial ~certificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let revocationReason =
-        field_map_exn json "RevocationReason" RevocationReason.of_json in
+        field_map_exn json__ "RevocationReason" RevocationReason.of_json in
       let certificateSerial =
-        field_map_exn json "CertificateSerial" String128.of_json in
+        field_map_exn json__ "CertificateSerial" String128.of_json in
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
       make ~revocationReason ~certificateSerial ~certificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Revokes a certificate that was issued inside ACM Private CA. If you enable a certificate revocation list (CRL) when you create or update your private CA, information about the revoked certificates will be included in the CRL. ACM Private CA writes the CRL to an S3 bucket that you specify. A CRL is typically updated approximately 30 minutes after a certificate is revoked. If for any reason the CRL update fails, ACM Private CA attempts makes further attempts every 15 minutes. With Amazon CloudWatch, you can create alarms for the metrics CRLGenerated and MisconfiguredCRLBucket. For more information, see Supported CloudWatch Metrics. Both PCA and the IAM principal must have permission to write to the S3 bucket that you specify. If the IAM principal making the call does not have permission to write to the bucket, then an exception is thrown. For more information, see Access policies for CRLs in Amazon S3. ACM Private CA also writes revocation information to the audit report. For more information, see CreateCertificateAuthorityAuditReport. You cannot revoke a root CA self-signed certificate."]
+       "Revokes a certificate that was issued inside Amazon Web Services Private CA. If you enable a certificate revocation list (CRL) when you create or update your private CA, information about the revoked certificates will be included in the CRL. Amazon Web Services Private CA writes the CRL to an S3 bucket that you specify. A CRL is typically updated approximately 30 minutes after a certificate is revoked. If for any reason the CRL update fails, Amazon Web Services Private CA attempts makes further attempts every 15 minutes. With Amazon CloudWatch, you can create alarms for the metrics CRLGenerated and MisconfiguredCRLBucket. For more information, see Supported CloudWatch Metrics. Both Amazon Web Services Private CA and the IAM principal must have permission to write to the S3 bucket that you specify. If the IAM principal making the call does not have permission to write to the bucket, then an exception is thrown. For more information, see Access policies for CRLs in Amazon S3. Amazon Web Services Private CA also writes revocation information to the audit report. For more information, see CreateCertificateAuthorityAuditReport. You cannot revoke a root CA self-signed certificate."]
 module RestoreCertificateAuthorityRequest =
   struct
     type nonrec t =
@@ -3293,9 +3545,9 @@ module RestoreCertificateAuthorityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~certificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
       make ~certificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3314,8 +3566,8 @@ module RequestAlreadyProcessedException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Your request has already been completed."]
@@ -3343,13 +3595,13 @@ module PutPolicyRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~policy ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map_exn json "Policy" AWSPolicy.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let policy = field_map_exn json__ "Policy" AWSPolicy.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~policy ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attaches a resource-based policy to a private CA. A policy can also be applied by sharing a private CA through Amazon Web Services Resource Access Manager (RAM). For more information, see Attach a Policy for Cross-Account Access. The policy can be displayed with GetPolicy and removed with DeletePolicy. About Policies A policy grants access on a private CA to an Amazon Web Services customer account, to Amazon Web Services Organizations, or to an Amazon Web Services Organizations unit. Policies are under the control of a CA administrator. For more information, see Using a Resource Based Policy with ACM Private CA. A policy permits a user of Certificate Manager (ACM) to issue ACM certificates signed by a CA in another account. For ACM to manage automatic renewal of these certificates, the ACM user must configure a Service Linked Role (SLR). The SLR allows the ACM service to assume the identity of the user, subject to confirmation against the ACM Private CA policy. For more information, see Using a Service Linked Role with ACM. Updates made in Amazon Web Services Resource Manager (RAM) are reflected in policies. For more information, see Attach a Policy for Cross-Account Access."]
+       "Attaches a resource-based policy to a private CA. A policy can also be applied by sharing a private CA through Amazon Web Services Resource Access Manager (RAM). For more information, see Attach a Policy for Cross-Account Access. The policy can be displayed with GetPolicy and removed with DeletePolicy. About Policies A policy grants access on a private CA to an Amazon Web Services customer account, to Amazon Web Services Organizations, or to an Amazon Web Services Organizations unit. Policies are under the control of a CA administrator. For more information, see Using a Resource Based Policy with Amazon Web Services Private CA. A policy permits a user of Certificate Manager (ACM) to issue ACM certificates signed by a CA in another account. For ACM to manage automatic renewal of these certificates, the ACM user must configure a Service Linked Role (SLR). The SLR allows the ACM service to assume the identity of the user, subject to confirmation against the Amazon Web Services Private CA policy. For more information, see Using a Service Linked Role with ACM. Updates made in Amazon Web Services Resource Manager (RAM) are reflected in policies. For more information, see Attach a Policy for Cross-Account Access."]
 module PermissionAlreadyExistsException =
   struct
     type nonrec t = {
@@ -3364,8 +3616,8 @@ module PermissionAlreadyExistsException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3384,8 +3636,8 @@ module MalformedCertificateException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more fields in the certificate are invalid."]
@@ -3403,8 +3655,8 @@ module LockoutPreventedException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3413,23 +3665,26 @@ module ListTagsResponse =
   struct
     type nonrec t =
       {
-      tags: TagList.t option
-        [@ocaml.doc "The tags associated with your private CA."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "When the list is truncated, this value is present and should be used for the NextToken parameter in a subsequent pagination request."]}
+          "When the list is truncated, this value is present and should be used for the NextToken parameter in a subsequent pagination request."];
+      tags: TagList.t option
+        [@ocaml.doc "The tags associated with your private CA."]}
     type nonrec error =
       [ `InvalidArnException of InvalidArnException.t 
       | `InvalidStateException of InvalidStateException.t 
+      | `RequestFailedException of RequestFailedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?tags = fun ?nextToken -> fun () -> { tags; nextToken }
+    let make ?nextToken = fun ?tags -> fun () -> { nextToken; tags }
     let error_of_json name json =
       match name with
       | "InvalidArnException" ->
           `InvalidArnException (InvalidArnException.of_json json)
       | "InvalidStateException" ->
           `InvalidStateException (InvalidStateException.of_json json)
+      | "RequestFailedException" ->
+          `RequestFailedException (RequestFailedException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | name ->
@@ -3441,6 +3696,8 @@ module ListTagsResponse =
           `InvalidArnException (InvalidArnException.of_xml xml)
       | "InvalidStateException" ->
           `InvalidStateException (InvalidStateException.of_xml xml)
+      | "RequestFailedException" ->
+          `RequestFailedException (RequestFailedException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | name ->
@@ -3455,6 +3712,10 @@ module ListTagsResponse =
           `Assoc
             [("error", (`String "InvalidStateException"));
             ("details", (InvalidStateException.to_json e))]
+      | `RequestFailedException e ->
+          `Assoc
+            [("error", (`String "RequestFailedException"));
+            ("details", (RequestFailedException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -3466,19 +3727,19 @@ module ListTagsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Tags", (Option.map x.tags ~f:TagList.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
-      make ?nextToken ?tags ()
+      make ?tags ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      make ?nextToken ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?tags ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the tags, if any, that are associated with your private CA or one that has been shared with you. Tags are labels that you can use to identify and organize your CAs. Each tag consists of a key and an optional value. Call the TagCertificateAuthority action to add one or more tags to your CA. Call the UntagCertificateAuthority action to remove tags."]
@@ -3486,43 +3747,43 @@ module ListTagsRequest =
   struct
     type nonrec t =
       {
-      certificateAuthorityArn: Arn.t
+      maxResults: MaxResults.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that was returned when you called the CreateCertificateAuthority action. This must be of the form: arn:aws:acm-pca:region:account:certificate-authority/12345678-1234-1234-1234-123456789012"];
+          "Use this parameter when paginating results to specify the maximum number of items to return in the response. If additional items exist beyond the number you specify, the NextToken element is sent in the response. Use this NextToken value in a subsequent request to retrieve additional items."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "Use this parameter when paginating results in a subsequent request after you receive a response with truncated results. Set it to the value of NextToken from the response you just received."];
-      maxResults: MaxResults.t option
+      certificateAuthorityArn: Arn.t
         [@ocaml.doc
-          "Use this parameter when paginating results to specify the maximum number of items to return in the response. If additional items exist beyond the number you specify, the NextToken element is sent in the response. Use this NextToken value in a subsequent request to retrieve additional items."]}
+          "The Amazon Resource Name (ARN) that was returned when you called the CreateCertificateAuthority action. This must be of the form: arn:aws:acm-pca:region:account:certificate-authority/12345678-1234-1234-1234-123456789012"]}
     let context_ = "ListTagsRequest"
-    let make ?nextToken =
-      fun ?maxResults ->
+    let make ?maxResults =
+      fun ?nextToken ->
         fun ~certificateAuthorityArn ->
-          fun () -> { nextToken; maxResults; certificateAuthorityArn }
+          fun () -> { maxResults; nextToken; certificateAuthorityArn }
     let to_value x =
       structure_to_value
-        [("CertificateAuthorityArn",
-           (Some (Arn.to_value x.certificateAuthorityArn)));
+        [("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+        ("CertificateAuthorityArn",
+          (Some (Arn.to_value x.certificateAuthorityArn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let certificateAuthorityArn =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
-      make ?maxResults ?nextToken ~certificateAuthorityArn ()
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      make ~certificateAuthorityArn ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
-      make ?maxResults ?nextToken ~certificateAuthorityArn ()
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ~certificateAuthorityArn ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the tags, if any, that are associated with your private CA or one that has been shared with you. Tags are labels that you can use to identify and organize your CAs. Each tag consists of a key and an optional value. Call the TagCertificateAuthority action to add one or more tags to your CA. Call the UntagCertificateAuthority action to remove tags."]
@@ -3530,12 +3791,12 @@ module ListPermissionsResponse =
   struct
     type nonrec t =
       {
-      permissions: PermissionList.t option
-        [@ocaml.doc
-          "Summary information about each permission assigned by the specified private CA, including the action enabled, the policy provided, and the time of creation."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "When the list is truncated, this value is present and should be used for the NextToken parameter in a subsequent pagination request."]}
+          "When the list is truncated, this value is present and should be used for the NextToken parameter in a subsequent pagination request."];
+      permissions: PermissionList.t option
+        [@ocaml.doc
+          "Summary information about each permission assigned by the specified private CA, including the action enabled, the policy provided, and the time of creation."]}
     type nonrec error =
       [ `InvalidArnException of InvalidArnException.t 
       | `InvalidNextTokenException of InvalidNextTokenException.t 
@@ -3543,8 +3804,8 @@ module ListPermissionsResponse =
       | `RequestFailedException of RequestFailedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?permissions =
-      fun ?nextToken -> fun () -> { permissions; nextToken }
+    let make ?nextToken =
+      fun ?permissions -> fun () -> { nextToken; permissions }
     let error_of_json name json =
       match name with
       | "InvalidArnException" ->
@@ -3603,84 +3864,85 @@ module ListPermissionsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Permissions",
-           (Option.map x.permissions ~f:PermissionList.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("Permissions",
+          (Option.map x.permissions ~f:PermissionList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let permissions =
         (Option.map ~f:PermissionList.of_xml)
           (Xml.child xml_arg0 "Permissions") in
-      make ?nextToken ?permissions ()
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?permissions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let permissions = field_map json "Permissions" PermissionList.of_json in
-      make ?nextToken ?permissions ()
+    let of_json json__ =
+      let permissions = field_map json__ "Permissions" PermissionList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?permissions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List all permissions on a private CA, if any, granted to the Certificate Manager (ACM) service principal (acm.amazonaws.com). These permissions allow ACM to issue and renew ACM certificates that reside in the same Amazon Web Services account as the CA. Permissions can be granted with the CreatePermission action and revoked with the DeletePermission action. About Permissions If the private CA and the certificates it issues reside in the same account, you can use CreatePermission to grant permissions for ACM to carry out automatic certificate renewals. For automatic certificate renewal to succeed, the ACM service principal needs permissions to create, retrieve, and list certificates. If the private CA and the ACM certificates reside in different accounts, then permissions cannot be used to enable automatic renewals. Instead, the ACM certificate owner must set up a resource-based policy to enable cross-account issuance and renewals. For more information, see Using a Resource Based Policy with ACM Private CA."]
+       "List all permissions on a private CA, if any, granted to the Certificate Manager (ACM) service principal (acm.amazonaws.com). These permissions allow ACM to issue and renew ACM certificates that reside in the same Amazon Web Services account as the CA. Permissions can be granted with the CreatePermission action and revoked with the DeletePermission action. About Permissions If the private CA and the certificates it issues reside in the same account, you can use CreatePermission to grant permissions for ACM to carry out automatic certificate renewals. For automatic certificate renewal to succeed, the ACM service principal needs permissions to create, retrieve, and list certificates. If the private CA and the ACM certificates reside in different accounts, then permissions cannot be used to enable automatic renewals. Instead, the ACM certificate owner must set up a resource-based policy to enable cross-account issuance and renewals. For more information, see Using a Resource Based Policy with Amazon Web Services Private CA."]
 module ListPermissionsRequest =
   struct
     type nonrec t =
       {
-      certificateAuthorityArn: Arn.t
+      maxResults: MaxResults.t option
         [@ocaml.doc
-          "The Amazon Resource Number (ARN) of the private CA to inspect. You can find the ARN by calling the ListCertificateAuthorities action. This must be of the form: arn:aws:acm-pca:region:account:certificate-authority/12345678-1234-1234-1234-123456789012 You can get a private CA's ARN by running the ListCertificateAuthorities action."];
+          "When paginating results, use this parameter to specify the maximum number of items to return in the response. If additional items exist beyond the number you specify, the NextToken element is sent in the response. Use this NextToken value in a subsequent request to retrieve additional items."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "When paginating results, use this parameter in a subsequent request after you receive a response with truncated results. Set it to the value of NextToken from the response you just received."];
-      maxResults: MaxResults.t option
+      certificateAuthorityArn: Arn.t
         [@ocaml.doc
-          "When paginating results, use this parameter to specify the maximum number of items to return in the response. If additional items exist beyond the number you specify, the NextToken element is sent in the response. Use this NextToken value in a subsequent request to retrieve additional items."]}
+          "The Amazon Resource Number (ARN) of the private CA to inspect. You can find the ARN by calling the ListCertificateAuthorities action. This must be of the form: arn:aws:acm-pca:region:account:certificate-authority/12345678-1234-1234-1234-123456789012 You can get a private CA's ARN by running the ListCertificateAuthorities action."]}
     let context_ = "ListPermissionsRequest"
-    let make ?nextToken =
-      fun ?maxResults ->
+    let make ?maxResults =
+      fun ?nextToken ->
         fun ~certificateAuthorityArn ->
-          fun () -> { nextToken; maxResults; certificateAuthorityArn }
+          fun () -> { maxResults; nextToken; certificateAuthorityArn }
     let to_value x =
       structure_to_value
-        [("CertificateAuthorityArn",
-           (Some (Arn.to_value x.certificateAuthorityArn)));
+        [("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+        ("CertificateAuthorityArn",
+          (Some (Arn.to_value x.certificateAuthorityArn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let certificateAuthorityArn =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
-      make ?maxResults ?nextToken ~certificateAuthorityArn ()
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      make ~certificateAuthorityArn ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
-      make ?maxResults ?nextToken ~certificateAuthorityArn ()
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ~certificateAuthorityArn ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List all permissions on a private CA, if any, granted to the Certificate Manager (ACM) service principal (acm.amazonaws.com). These permissions allow ACM to issue and renew ACM certificates that reside in the same Amazon Web Services account as the CA. Permissions can be granted with the CreatePermission action and revoked with the DeletePermission action. About Permissions If the private CA and the certificates it issues reside in the same account, you can use CreatePermission to grant permissions for ACM to carry out automatic certificate renewals. For automatic certificate renewal to succeed, the ACM service principal needs permissions to create, retrieve, and list certificates. If the private CA and the ACM certificates reside in different accounts, then permissions cannot be used to enable automatic renewals. Instead, the ACM certificate owner must set up a resource-based policy to enable cross-account issuance and renewals. For more information, see Using a Resource Based Policy with ACM Private CA."]
+       "List all permissions on a private CA, if any, granted to the Certificate Manager (ACM) service principal (acm.amazonaws.com). These permissions allow ACM to issue and renew ACM certificates that reside in the same Amazon Web Services account as the CA. Permissions can be granted with the CreatePermission action and revoked with the DeletePermission action. About Permissions If the private CA and the certificates it issues reside in the same account, you can use CreatePermission to grant permissions for ACM to carry out automatic certificate renewals. For automatic certificate renewal to succeed, the ACM service principal needs permissions to create, retrieve, and list certificates. If the private CA and the ACM certificates reside in different accounts, then permissions cannot be used to enable automatic renewals. Instead, the ACM certificate owner must set up a resource-based policy to enable cross-account issuance and renewals. For more information, see Using a Resource Based Policy with Amazon Web Services Private CA."]
 module ListCertificateAuthoritiesResponse =
   struct
     type nonrec t =
       {
-      certificateAuthorities: CertificateAuthorities.t option
-        [@ocaml.doc
-          "Summary information about each certificate authority you have created."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "When the list is truncated, this value is present and should be used for the NextToken parameter in a subsequent pagination request."]}
+          "When the list is truncated, this value is present and should be used for the NextToken parameter in a subsequent pagination request."];
+      certificateAuthorities: CertificateAuthorities.t option
+        [@ocaml.doc
+          "Summary information about each certificate authority you have created."]}
     type nonrec error =
       [ `InvalidNextTokenException of InvalidNextTokenException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?certificateAuthorities =
-      fun ?nextToken -> fun () -> { certificateAuthorities; nextToken }
+    let make ?nextToken =
+      fun ?certificateAuthorities ->
+        fun () -> { nextToken; certificateAuthorities }
     let error_of_json name json =
       match name with
       | "InvalidNextTokenException" ->
@@ -3707,25 +3969,25 @@ module ListCertificateAuthoritiesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("CertificateAuthorities",
-           (Option.map x.certificateAuthorities
-              ~f:CertificateAuthorities.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("CertificateAuthorities",
+          (Option.map x.certificateAuthorities
+             ~f:CertificateAuthorities.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let certificateAuthorities =
         (Option.map ~f:CertificateAuthorities.of_xml)
           (Xml.child xml_arg0 "CertificateAuthorities") in
-      make ?nextToken ?certificateAuthorities ()
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?certificateAuthorities ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
       let certificateAuthorities =
-        field_map json "CertificateAuthorities"
+        field_map json__ "CertificateAuthorities"
           CertificateAuthorities.of_json in
-      make ?nextToken ?certificateAuthorities ()
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?certificateAuthorities ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the private certificate authorities that you created by using the CreateCertificateAuthority action."]
@@ -3733,23 +3995,23 @@ module ListCertificateAuthoritiesRequest =
   struct
     type nonrec t =
       {
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "Use this parameter when paginating results to specify the maximum number of items to return in the response on each page. If additional items exist beyond the number you specify, the NextToken element is sent in the response. Use this NextToken value in a subsequent request to retrieve additional items. Although the maximum value is 1000, the action only returns a maximum of 100 items."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "Use this parameter when paginating results in a subsequent request after you receive a response with truncated results. Set it to the value of the NextToken parameter from the response you just received."];
-      maxResults: MaxResults.t option
-        [@ocaml.doc
-          "Use this parameter when paginating results to specify the maximum number of items to return in the response on each page. If additional items exist beyond the number you specify, the NextToken element is sent in the response. Use this NextToken value in a subsequent request to retrieve additional items."];
       resourceOwner: ResourceOwner.t option
         [@ocaml.doc
           "Use this parameter to filter the returned set of certificate authorities based on their owner. The default is SELF."]}
-    let make ?nextToken =
-      fun ?maxResults ->
+    let make ?maxResults =
+      fun ?nextToken ->
         fun ?resourceOwner ->
-          fun () -> { nextToken; maxResults; resourceOwner }
+          fun () -> { maxResults; nextToken; resourceOwner }
     let to_value x =
       structure_to_value
-        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        [("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("ResourceOwner",
           (Option.map x.resourceOwner ~f:ResourceOwner.to_value))]
     let to_query v = to_query to_value v
@@ -3757,18 +4019,18 @@ module ListCertificateAuthoritiesRequest =
       let resourceOwner =
         (Option.map ~f:ResourceOwner.of_xml)
           (Xml.child xml_arg0 "ResourceOwner") in
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ?resourceOwner ?maxResults ?nextToken ()
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      make ?resourceOwner ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceOwner =
-        field_map json "ResourceOwner" ResourceOwner.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      make ?resourceOwner ?maxResults ?nextToken ()
+        field_map json__ "ResourceOwner" ResourceOwner.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ?resourceOwner ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the private certificate authorities that you created by using the CreateCertificateAuthority action."]
@@ -3861,19 +4123,19 @@ module IssueCertificateResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CertificateArn") in
       make ?certificateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let certificateArn = field_map json "CertificateArn" Arn.of_json in
+    let of_json json__ =
+      let certificateArn = field_map json__ "CertificateArn" Arn.of_json in
       make ?certificateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Uses your private certificate authority (CA), or one that has been shared with you, to issue a client certificate. This action returns the Amazon Resource Name (ARN) of the certificate. You can retrieve the certificate by calling the GetCertificate action and specifying the ARN. You cannot use the ACM ListCertificateAuthorities action to retrieve the ARNs of the certificates that you issue by using ACM Private CA."]
+       "Uses your private certificate authority (CA), or one that has been shared with you, to issue a client certificate. This action returns the Amazon Resource Name (ARN) of the certificate. You can retrieve the certificate by calling the GetCertificate action and specifying the ARN. You cannot use the ACM ListCertificateAuthorities action to retrieve the ARNs of the certificates that you issue by using Amazon Web Services Private CA."]
 module IssueCertificateRequest =
   struct
     type nonrec t =
       {
       apiPassthrough: ApiPassthrough.t option
         [@ocaml.doc
-          "Specifies X.509 certificate information to be included in the issued certificate. An APIPassthrough or APICSRPassthrough template variant must be selected, or else this parameter is ignored. For more information about using these templates, see Understanding Certificate Templates. If conflicting or duplicate certificate information is supplied during certificate issuance, ACM Private CA applies order of operation rules to determine what information is used."];
+          "Specifies X.509 certificate information to be included in the issued certificate. An APIPassthrough or APICSRPassthrough template variant must be selected, or else this parameter is ignored. For more information about using these templates, see Understanding Certificate Templates. If conflicting or duplicate certificate information is supplied during certificate issuance, Amazon Web Services Private CA applies order of operation rules to determine what information is used."];
       certificateAuthorityArn: Arn.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) that was returned when you called CreateCertificateAuthority. This must be of the form: arn:aws:acm-pca:region:account:certificate-authority/12345678-1234-1234-1234-123456789012"];
@@ -3882,19 +4144,19 @@ module IssueCertificateRequest =
           "The certificate signing request (CSR) for the certificate you want to issue. As an example, you can use the following OpenSSL command to create the CSR and a 2048 bit RSA private key. openssl req -new -newkey rsa:2048 -days 365 -keyout private/test_cert_priv_key.pem -out csr/test_cert_.csr If you have a configuration file, you can then use the following OpenSSL command. The usr_cert block in the configuration file contains your X509 version 3 extensions. openssl req -new -config openssl_rsa.cnf -extensions usr_cert -newkey rsa:2048 -days 365 -keyout private/test_cert_priv_key.pem -out csr/test_cert_.csr Note: A CSR must provide either a subject name or a subject alternative name or the request will be rejected."];
       signingAlgorithm: SigningAlgorithm.t
         [@ocaml.doc
-          "The name of the algorithm that will be used to sign the certificate to be issued. This parameter should not be confused with the SigningAlgorithm parameter used to sign a CSR in the CreateCertificateAuthority action. The specified signing algorithm family (RSA or ECDSA) much match the algorithm family of the CA's secret key."];
+          "The name of the algorithm that will be used to sign the certificate to be issued. This parameter should not be confused with the SigningAlgorithm parameter used to sign a CSR in the CreateCertificateAuthority action. The specified signing algorithm family (RSA or ECDSA) must match the algorithm family of the CA's secret key."];
       templateArn: Arn.t option
         [@ocaml.doc
-          "Specifies a custom configuration template to use when issuing a certificate. If this parameter is not provided, ACM Private CA defaults to the EndEntityCertificate/V1 template. For CA certificates, you should choose the shortest path length that meets your needs. The path length is indicated by the PathLenN portion of the ARN, where N is the CA depth. Note: The CA depth configured on a subordinate CA certificate must not exceed the limit set by its parents in the CA hierarchy. For a list of TemplateArn values supported by ACM Private CA, see Understanding Certificate Templates."];
+          "Specifies a custom configuration template to use when issuing a certificate. If this parameter is not provided, Amazon Web Services Private CA defaults to the EndEntityCertificate/V1 template. For CA certificates, you should choose the shortest path length that meets your needs. The path length is indicated by the PathLenN portion of the ARN, where N is the CA depth. Note: The CA depth configured on a subordinate CA certificate must not exceed the limit set by its parents in the CA hierarchy. For a list of TemplateArn values supported by Amazon Web Services Private CA, see Understanding Certificate Templates."];
       validity: Validity.t
         [@ocaml.doc
           "Information describing the end of the validity period of the certificate. This parameter sets the \226\128\156Not After\226\128\157 date for the certificate. Certificate validity is the period of time during which a certificate is valid. Validity can be expressed as an explicit date and time when the certificate expires, or as a span of time after issuance, stated in days, months, or years. For more information, see Validity in RFC 5280. This value is unaffected when ValidityNotBefore is also specified. For example, if Validity is set to 20 days in the future, the certificate will expire 20 days from issuance time regardless of the ValidityNotBefore value. The end of the validity period configured on a certificate must not exceed the limit set on its parents in the CA hierarchy."];
       validityNotBefore: Validity.t option
         [@ocaml.doc
-          "Information describing the start of the validity period of the certificate. This parameter sets the \226\128\156Not Before\" date for the certificate. By default, when issuing a certificate, ACM Private CA sets the \"Not Before\" date to the issuance time minus 60 minutes. This compensates for clock inconsistencies across computer systems. The ValidityNotBefore parameter can be used to customize the \226\128\156Not Before\226\128\157 value. Unlike the Validity parameter, the ValidityNotBefore parameter is optional. The ValidityNotBefore value is expressed as an explicit date and time, using the Validity type value ABSOLUTE. For more information, see Validity in this API reference and Validity in RFC 5280."];
+          "Information describing the start of the validity period of the certificate. This parameter sets the \226\128\156Not Before\" date for the certificate. By default, when issuing a certificate, Amazon Web Services Private CA sets the \"Not Before\" date to the issuance time minus 60 minutes. This compensates for clock inconsistencies across computer systems. The ValidityNotBefore parameter can be used to customize the \226\128\156Not Before\226\128\157 value. Unlike the Validity parameter, the ValidityNotBefore parameter is optional. The ValidityNotBefore value is expressed as an explicit date and time, using the Validity type value ABSOLUTE. For more information, see Validity in this API reference and Validity in RFC 5280."];
       idempotencyToken: IdempotencyToken.t option
         [@ocaml.doc
-          "Alphanumeric string that can be used to distinguish between calls to the IssueCertificate action. Idempotency tokens for IssueCertificate time out after one minute. Therefore, if you call IssueCertificate multiple times with the same idempotency token within one minute, ACM Private CA recognizes that you are requesting only one certificate and will issue only one. If you change the idempotency token for each call, PCA recognizes that you are requesting multiple certificates."]}
+          "Alphanumeric string that can be used to distinguish between calls to the IssueCertificate action. Idempotency tokens for IssueCertificate time out after five minutes. Therefore, if you call IssueCertificate multiple times with the same idempotency token within five minutes, Amazon Web Services Private CA recognizes that you are requesting only one certificate and will issue only one. If you change the idempotency token for each call, Amazon Web Services Private CA recognizes that you are requesting multiple certificates."]}
     let context_ = "IssueCertificateRequest"
     let make ?apiPassthrough =
       fun ?templateArn ->
@@ -3956,25 +4218,25 @@ module IssueCertificateRequest =
       make ?idempotencyToken ?validityNotBefore ~validity ?templateArn
         ~signingAlgorithm ~csr ~certificateAuthorityArn ?apiPassthrough ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let idempotencyToken =
-        field_map json "IdempotencyToken" IdempotencyToken.of_json in
+        field_map json__ "IdempotencyToken" IdempotencyToken.of_json in
       let validityNotBefore =
-        field_map json "ValidityNotBefore" Validity.of_json in
-      let validity = field_map_exn json "Validity" Validity.of_json in
-      let templateArn = field_map json "TemplateArn" Arn.of_json in
+        field_map json__ "ValidityNotBefore" Validity.of_json in
+      let validity = field_map_exn json__ "Validity" Validity.of_json in
+      let templateArn = field_map json__ "TemplateArn" Arn.of_json in
       let signingAlgorithm =
-        field_map_exn json "SigningAlgorithm" SigningAlgorithm.of_json in
-      let csr = field_map_exn json "Csr" CsrBlob.of_json in
+        field_map_exn json__ "SigningAlgorithm" SigningAlgorithm.of_json in
+      let csr = field_map_exn json__ "Csr" CsrBlob.of_json in
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
       let apiPassthrough =
-        field_map json "ApiPassthrough" ApiPassthrough.of_json in
+        field_map json__ "ApiPassthrough" ApiPassthrough.of_json in
       make ?idempotencyToken ?validityNotBefore ~validity ?templateArn
         ~signingAlgorithm ~csr ~certificateAuthorityArn ?apiPassthrough ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Uses your private certificate authority (CA), or one that has been shared with you, to issue a client certificate. This action returns the Amazon Resource Name (ARN) of the certificate. You can retrieve the certificate by calling the GetCertificate action and specifying the ARN. You cannot use the ACM ListCertificateAuthorities action to retrieve the ARNs of the certificates that you issue by using ACM Private CA."]
+       "Uses your private certificate authority (CA), or one that has been shared with you, to issue a client certificate. This action returns the Amazon Resource Name (ARN) of the certificate. You can retrieve the certificate by calling the GetCertificate action and specifying the ARN. You cannot use the ACM ListCertificateAuthorities action to retrieve the ARNs of the certificates that you issue by using Amazon Web Services Private CA."]
 module InvalidRequestException =
   struct
     type nonrec t = {
@@ -3989,8 +4251,8 @@ module InvalidRequestException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request action cannot be performed or is prohibited."]
@@ -4006,7 +4268,7 @@ module ImportCertificateAuthorityCertificateRequest =
           "The PEM-encoded certificate for a private CA. This may be a self-signed certificate in the case of a root CA, or it may be signed by another CA that you control."];
       certificateChain: CertificateChainBlob.t option
         [@ocaml.doc
-          "A PEM-encoded file that contains all of your certificates, other than the certificate you're importing, chaining up to your root CA. Your ACM Private CA-hosted or on-premises root certificate is the last in the chain, and each certificate in the chain signs the one preceding. This parameter must be supplied when you import a subordinate CA. When you import a root CA, there is no chain."]}
+          "A PEM-encoded file that contains all of your certificates, other than the certificate you're importing, chaining up to your root CA. Your Amazon Web Services Private CA-hosted or on-premises root certificate is the last in the chain, and each certificate in the chain signs the one preceding. This parameter must be supplied when you import a subordinate CA. When you import a root CA, there is no chain."]}
     let context_ = "ImportCertificateAuthorityCertificateRequest"
     let make ?certificateChain =
       fun ~certificateAuthorityArn ->
@@ -4033,17 +4295,17 @@ module ImportCertificateAuthorityCertificateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ?certificateChain ~certificate ~certificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateChain =
-        field_map json "CertificateChain" CertificateChainBlob.of_json in
+        field_map json__ "CertificateChain" CertificateChainBlob.of_json in
       let certificate =
-        field_map_exn json "Certificate" CertificateBodyBlob.of_json in
+        field_map_exn json__ "Certificate" CertificateBodyBlob.of_json in
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
       make ?certificateChain ~certificate ~certificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Imports a signed private CA certificate into ACM Private CA. This action is used when you are using a chain of trust whose root is located outside ACM Private CA. Before you can call this action, the following preparations must in place: In ACM Private CA, call the CreateCertificateAuthority action to create the private CA that you plan to back with the imported certificate. Call the GetCertificateAuthorityCsr action to generate a certificate signing request (CSR). Sign the CSR using a root or intermediate CA hosted by either an on-premises PKI hierarchy or by a commercial CA. Create a certificate chain and copy the signed certificate and the certificate chain to your working directory. ACM Private CA supports three scenarios for installing a CA certificate: Installing a certificate for a root CA hosted by ACM Private CA. Installing a subordinate CA certificate whose parent authority is hosted by ACM Private CA. Installing a subordinate CA certificate whose parent authority is externally hosted. The following additional requirements apply when you import a CA certificate. Only a self-signed certificate can be imported as a root CA. A self-signed certificate cannot be imported as a subordinate CA. Your certificate chain must not include the private CA certificate that you are importing. Your root CA must be the last certificate in your chain. The subordinate certificate, if any, that your root CA signed must be next to last. The subordinate certificate signed by the preceding subordinate CA must come next, and so on until your chain is built. The chain must be PEM-encoded. The maximum allowed size of a certificate is 32 KB. The maximum allowed size of a certificate chain is 2 MB. Enforcement of Critical Constraints ACM Private CA allows the following extensions to be marked critical in the imported CA certificate or chain. Basic constraints (must be marked critical) Subject alternative names Key usage Extended key usage Authority key identifier Subject key identifier Issuer alternative name Subject directory attributes Subject information access Certificate policies Policy mappings Inhibit anyPolicy ACM Private CA rejects the following extensions when they are marked critical in an imported CA certificate or chain. Name constraints Policy constraints CRL distribution points Authority information access Freshest CRL Any other extension"]
+       "Imports a signed private CA certificate into Amazon Web Services Private CA. This action is used when you are using a chain of trust whose root is located outside Amazon Web Services Private CA. Before you can call this action, the following preparations must in place: In Amazon Web Services Private CA, call the CreateCertificateAuthority action to create the private CA that you plan to back with the imported certificate. Call the GetCertificateAuthorityCsr action to generate a certificate signing request (CSR). Sign the CSR using a root or intermediate CA hosted by either an on-premises PKI hierarchy or by a commercial CA. Create a certificate chain and copy the signed certificate and the certificate chain to your working directory. Amazon Web Services Private CA supports three scenarios for installing a CA certificate: Installing a certificate for a root CA hosted by Amazon Web Services Private CA. Installing a subordinate CA certificate whose parent authority is hosted by Amazon Web Services Private CA. Installing a subordinate CA certificate whose parent authority is externally hosted. The following additional requirements apply when you import a CA certificate. Only a self-signed certificate can be imported as a root CA. A self-signed certificate cannot be imported as a subordinate CA. Your certificate chain must not include the private CA certificate that you are importing. Your root CA must be the last certificate in your chain. The subordinate certificate, if any, that your root CA signed must be next to last. The subordinate certificate signed by the preceding subordinate CA must come next, and so on until your chain is built. The chain must be PEM-encoded. The maximum allowed size of a certificate is 32 KB. The maximum allowed size of a certificate chain is 2 MB. Enforcement of Critical Constraints Amazon Web Services Private CA allows the following extensions to be marked critical in the imported CA certificate or chain. Authority key identifier Basic constraints (must be marked critical) Certificate policies Extended key usage Inhibit anyPolicy Issuer alternative name Key usage Name constraints Policy mappings Subject alternative name Subject directory attributes Subject key identifier Subject information access Amazon Web Services Private CA rejects the following extensions when they are marked critical in an imported CA certificate or chain. Authority information access CRL distribution points Freshest CRL Policy constraints Amazon Web Services Private Certificate Authority will also reject any other extension marked as critical not contained on the preceding list of allowed extensions."]
 module GetPolicyResponse =
   struct
     type nonrec t =
@@ -4115,12 +4377,12 @@ module GetPolicyResponse =
         (Option.map ~f:AWSPolicy.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" AWSPolicy.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "Policy" AWSPolicy.of_json in
       make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the resource-based policy attached to a private CA. If either the private CA resource or the policy cannot be found, this action returns a ResourceNotFoundException. The policy can be attached or updated with PutPolicy and removed with DeletePolicy. About Policies A policy grants access on a private CA to an Amazon Web Services customer account, to Amazon Web Services Organizations, or to an Amazon Web Services Organizations unit. Policies are under the control of a CA administrator. For more information, see Using a Resource Based Policy with ACM Private CA. A policy permits a user of Certificate Manager (ACM) to issue ACM certificates signed by a CA in another account. For ACM to manage automatic renewal of these certificates, the ACM user must configure a Service Linked Role (SLR). The SLR allows the ACM service to assume the identity of the user, subject to confirmation against the ACM Private CA policy. For more information, see Using a Service Linked Role with ACM. Updates made in Amazon Web Services Resource Manager (RAM) are reflected in policies. For more information, see Attach a Policy for Cross-Account Access."]
+       "Retrieves the resource-based policy attached to a private CA. If either the private CA resource or the policy cannot be found, this action returns a ResourceNotFoundException. The policy can be attached or updated with PutPolicy and removed with DeletePolicy. About Policies A policy grants access on a private CA to an Amazon Web Services customer account, to Amazon Web Services Organizations, or to an Amazon Web Services Organizations unit. Policies are under the control of a CA administrator. For more information, see Using a Resource Based Policy with Amazon Web Services Private CA. A policy permits a user of Certificate Manager (ACM) to issue ACM certificates signed by a CA in another account. For ACM to manage automatic renewal of these certificates, the ACM user must configure a Service Linked Role (SLR). The SLR allows the ACM service to assume the identity of the user, subject to confirmation against the Amazon Web Services Private CA policy. For more information, see Using a Service Linked Role with ACM. Updates made in Amazon Web Services Resource Manager (RAM) are reflected in policies. For more information, see Attach a Policy for Cross-Account Access."]
 module GetPolicyRequest =
   struct
     type nonrec t =
@@ -4139,12 +4401,12 @@ module GetPolicyRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the resource-based policy attached to a private CA. If either the private CA resource or the policy cannot be found, this action returns a ResourceNotFoundException. The policy can be attached or updated with PutPolicy and removed with DeletePolicy. About Policies A policy grants access on a private CA to an Amazon Web Services customer account, to Amazon Web Services Organizations, or to an Amazon Web Services Organizations unit. Policies are under the control of a CA administrator. For more information, see Using a Resource Based Policy with ACM Private CA. A policy permits a user of Certificate Manager (ACM) to issue ACM certificates signed by a CA in another account. For ACM to manage automatic renewal of these certificates, the ACM user must configure a Service Linked Role (SLR). The SLR allows the ACM service to assume the identity of the user, subject to confirmation against the ACM Private CA policy. For more information, see Using a Service Linked Role with ACM. Updates made in Amazon Web Services Resource Manager (RAM) are reflected in policies. For more information, see Attach a Policy for Cross-Account Access."]
+       "Retrieves the resource-based policy attached to a private CA. If either the private CA resource or the policy cannot be found, this action returns a ResourceNotFoundException. The policy can be attached or updated with PutPolicy and removed with DeletePolicy. About Policies A policy grants access on a private CA to an Amazon Web Services customer account, to Amazon Web Services Organizations, or to an Amazon Web Services Organizations unit. Policies are under the control of a CA administrator. For more information, see Using a Resource Based Policy with Amazon Web Services Private CA. A policy permits a user of Certificate Manager (ACM) to issue ACM certificates signed by a CA in another account. For ACM to manage automatic renewal of these certificates, the ACM user must configure a Service Linked Role (SLR). The SLR allows the ACM service to assume the identity of the user, subject to confirmation against the Amazon Web Services Private CA policy. For more information, see Using a Service Linked Role with ACM. Updates made in Amazon Web Services Resource Manager (RAM) are reflected in policies. For more information, see Attach a Policy for Cross-Account Access."]
 module GetCertificateResponse =
   struct
     type nonrec t =
@@ -4237,14 +4499,15 @@ module GetCertificateResponse =
           (Xml.child xml_arg0 "Certificate") in
       make ?certificateChain ?certificate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateChain =
-        field_map json "CertificateChain" CertificateChain.of_json in
-      let certificate = field_map json "Certificate" CertificateBody.of_json in
+        field_map json__ "CertificateChain" CertificateChain.of_json in
+      let certificate =
+        field_map json__ "Certificate" CertificateBody.of_json in
       make ?certificateChain ?certificate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a certificate from your private CA or one that has been shared with you. The ARN of the certificate is returned when you call the IssueCertificate action. You must specify both the ARN of your private CA and the ARN of the issued certificate when calling the GetCertificate action. You can retrieve the certificate if it is in the ISSUED state. You can call the CreateCertificateAuthorityAuditReport action to create a report that contains information about all of the certificates issued and revoked by your private CA."]
+       "Retrieves a certificate from your private CA or one that has been shared with you. The ARN of the certificate is returned when you call the IssueCertificate action. You must specify both the ARN of your private CA and the ARN of the issued certificate when calling the GetCertificate action. You can retrieve the certificate if it is in the ISSUED, EXPIRED, or REVOKED state. You can call the CreateCertificateAuthorityAuditReport action to create a report that contains information about all of the certificates issued and revoked by your private CA."]
 module GetCertificateRequest =
   struct
     type nonrec t =
@@ -4274,14 +4537,14 @@ module GetCertificateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~certificateArn ~certificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let certificateArn = field_map_exn json "CertificateArn" Arn.of_json in
+    let of_json json__ =
+      let certificateArn = field_map_exn json__ "CertificateArn" Arn.of_json in
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
       make ~certificateArn ~certificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a certificate from your private CA or one that has been shared with you. The ARN of the certificate is returned when you call the IssueCertificate action. You must specify both the ARN of your private CA and the ARN of the issued certificate when calling the GetCertificate action. You can retrieve the certificate if it is in the ISSUED state. You can call the CreateCertificateAuthorityAuditReport action to create a report that contains information about all of the certificates issued and revoked by your private CA."]
+       "Retrieves a certificate from your private CA or one that has been shared with you. The ARN of the certificate is returned when you call the IssueCertificate action. You must specify both the ARN of your private CA and the ARN of the issued certificate when calling the GetCertificate action. You can retrieve the certificate if it is in the ISSUED, EXPIRED, or REVOKED state. You can call the CreateCertificateAuthorityAuditReport action to create a report that contains information about all of the certificates issued and revoked by your private CA."]
 module GetCertificateAuthorityCsrResponse =
   struct
     type nonrec t =
@@ -4361,11 +4624,11 @@ module GetCertificateAuthorityCsrResponse =
       let csr = (Option.map ~f:CsrBody.of_xml) (Xml.child xml_arg0 "Csr") in
       make ?csr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let csr = field_map json "Csr" CsrBody.of_json in make ?csr ()
+    let of_json json__ =
+      let csr = field_map json__ "Csr" CsrBody.of_json in make ?csr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the certificate signing request (CSR) for your private certificate authority (CA). The CSR is created when you call the CreateCertificateAuthority action. Sign the CSR with your ACM Private CA-hosted or on-premises root or subordinate CA. Then import the signed certificate back into ACM Private CA by calling the ImportCertificateAuthorityCertificate action. The CSR is returned as a base64 PEM-encoded string."]
+       "Retrieves the certificate signing request (CSR) for your private certificate authority (CA). The CSR is created when you call the CreateCertificateAuthority action. Sign the CSR with your Amazon Web Services Private CA-hosted or on-premises root or subordinate CA. Then import the signed certificate back into Amazon Web Services Private CA by calling the ImportCertificateAuthorityCertificate action. The CSR is returned as a base64 PEM-encoded string."]
 module GetCertificateAuthorityCsrRequest =
   struct
     type nonrec t =
@@ -4386,13 +4649,13 @@ module GetCertificateAuthorityCsrRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~certificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
       make ~certificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the certificate signing request (CSR) for your private certificate authority (CA). The CSR is created when you call the CreateCertificateAuthority action. Sign the CSR with your ACM Private CA-hosted or on-premises root or subordinate CA. Then import the signed certificate back into ACM Private CA by calling the ImportCertificateAuthorityCertificate action. The CSR is returned as a base64 PEM-encoded string."]
+       "Retrieves the certificate signing request (CSR) for your private certificate authority (CA). The CSR is created when you call the CreateCertificateAuthority action. Sign the CSR with your Amazon Web Services Private CA-hosted or on-premises root or subordinate CA. Then import the signed certificate back into Amazon Web Services Private CA by calling the ImportCertificateAuthorityCertificate action. The CSR is returned as a base64 PEM-encoded string."]
 module GetCertificateAuthorityCertificateResponse =
   struct
     type nonrec t =
@@ -4465,10 +4728,11 @@ module GetCertificateAuthorityCertificateResponse =
           (Xml.child xml_arg0 "Certificate") in
       make ?certificateChain ?certificate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateChain =
-        field_map json "CertificateChain" CertificateChain.of_json in
-      let certificate = field_map json "Certificate" CertificateBody.of_json in
+        field_map json__ "CertificateChain" CertificateChain.of_json in
+      let certificate =
+        field_map json__ "Certificate" CertificateBody.of_json in
       make ?certificateChain ?certificate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4493,9 +4757,9 @@ module GetCertificateAuthorityCertificateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~certificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
       make ~certificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4556,13 +4820,13 @@ module DescribeCertificateAuthorityResponse =
           (Xml.child xml_arg0 "CertificateAuthority") in
       make ?certificateAuthority ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateAuthority =
-        field_map json "CertificateAuthority" CertificateAuthority.of_json in
+        field_map json__ "CertificateAuthority" CertificateAuthority.of_json in
       make ?certificateAuthority ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists information about your private certificate authority (CA) or one that has been shared with you. You specify the private CA on input by its ARN (Amazon Resource Name). The output contains the status of your CA. This can be any of the following: CREATING - ACM Private CA is creating your private certificate authority. PENDING_CERTIFICATE - The certificate is pending. You must use your ACM Private CA-hosted or on-premises root or subordinate CA to sign your private CA CSR and then import it into PCA. ACTIVE - Your private CA is active. DISABLED - Your private CA has been disabled. EXPIRED - Your private CA certificate has expired. FAILED - Your private CA has failed. Your CA can fail because of problems such a network outage or back-end Amazon Web Services failure or other errors. A failed CA can never return to the pending state. You must create a new CA. DELETED - Your private CA is within the restoration period, after which it is permanently deleted. The length of time remaining in the CA's restoration period is also included in this action's output."]
+       "Lists information about your private certificate authority (CA) or one that has been shared with you. You specify the private CA on input by its ARN (Amazon Resource Name). The output contains the status of your CA. This can be any of the following: CREATING - Amazon Web Services Private CA is creating your private certificate authority. PENDING_CERTIFICATE - The certificate is pending. You must use your Amazon Web Services Private CA-hosted or on-premises root or subordinate CA to sign your private CA CSR and then import it into Amazon Web Services Private CA. ACTIVE - Your private CA is active. DISABLED - Your private CA has been disabled. EXPIRED - Your private CA certificate has expired. FAILED - Your private CA has failed. Your CA can fail because of problems such a network outage or back-end Amazon Web Services failure or other errors. A failed CA can never return to the pending state. You must create a new CA. DELETED - Your private CA is within the restoration period, after which it is permanently deleted. The length of time remaining in the CA's restoration period is also included in this action's output."]
 module DescribeCertificateAuthorityRequest =
   struct
     type nonrec t =
@@ -4583,13 +4847,13 @@ module DescribeCertificateAuthorityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~certificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
       make ~certificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists information about your private certificate authority (CA) or one that has been shared with you. You specify the private CA on input by its ARN (Amazon Resource Name). The output contains the status of your CA. This can be any of the following: CREATING - ACM Private CA is creating your private certificate authority. PENDING_CERTIFICATE - The certificate is pending. You must use your ACM Private CA-hosted or on-premises root or subordinate CA to sign your private CA CSR and then import it into PCA. ACTIVE - Your private CA is active. DISABLED - Your private CA has been disabled. EXPIRED - Your private CA certificate has expired. FAILED - Your private CA has failed. Your CA can fail because of problems such a network outage or back-end Amazon Web Services failure or other errors. A failed CA can never return to the pending state. You must create a new CA. DELETED - Your private CA is within the restoration period, after which it is permanently deleted. The length of time remaining in the CA's restoration period is also included in this action's output."]
+       "Lists information about your private certificate authority (CA) or one that has been shared with you. You specify the private CA on input by its ARN (Amazon Resource Name). The output contains the status of your CA. This can be any of the following: CREATING - Amazon Web Services Private CA is creating your private certificate authority. PENDING_CERTIFICATE - The certificate is pending. You must use your Amazon Web Services Private CA-hosted or on-premises root or subordinate CA to sign your private CA CSR and then import it into Amazon Web Services Private CA. ACTIVE - Your private CA is active. DISABLED - Your private CA has been disabled. EXPIRED - Your private CA certificate has expired. FAILED - Your private CA has failed. Your CA can fail because of problems such a network outage or back-end Amazon Web Services failure or other errors. A failed CA can never return to the pending state. You must create a new CA. DELETED - Your private CA is within the restoration period, after which it is permanently deleted. The length of time remaining in the CA's restoration period is also included in this action's output."]
 module DescribeCertificateAuthorityAuditReportResponse =
   struct
     type nonrec t =
@@ -4675,12 +4939,12 @@ module DescribeCertificateAuthorityAuditReportResponse =
           (Xml.child xml_arg0 "AuditReportStatus") in
       make ?createdAt ?s3Key ?s3BucketName ?auditReportStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdAt = field_map json "CreatedAt" TStamp.of_json in
-      let s3Key = field_map json "S3Key" S3Key.of_json in
-      let s3BucketName = field_map json "S3BucketName" S3BucketName.of_json in
+    let of_json json__ =
+      let createdAt = field_map json__ "CreatedAt" TStamp.of_json in
+      let s3Key = field_map json__ "S3Key" S3Key.of_json in
+      let s3BucketName = field_map json__ "S3BucketName" S3BucketName.of_json in
       let auditReportStatus =
-        field_map json "AuditReportStatus" AuditReportStatus.of_json in
+        field_map json__ "AuditReportStatus" AuditReportStatus.of_json in
       make ?createdAt ?s3Key ?s3BucketName ?auditReportStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4714,11 +4978,11 @@ module DescribeCertificateAuthorityAuditReportRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~auditReportId ~certificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let auditReportId =
-        field_map_exn json "AuditReportId" AuditReportId.of_json in
+        field_map_exn json__ "AuditReportId" AuditReportId.of_json in
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
       make ~auditReportId ~certificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4741,12 +5005,12 @@ module DeletePolicyRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the resource-based policy attached to a private CA. Deletion will remove any access that the policy has granted. If there is no policy attached to the private CA, this action will return successful. If you delete a policy that was applied through Amazon Web Services Resource Access Manager (RAM), the CA will be removed from all shares in which it was included. The Certificate Manager Service Linked Role that the policy supports is not affected when you delete the policy. The current policy can be shown with GetPolicy and updated with PutPolicy. About Policies A policy grants access on a private CA to an Amazon Web Services customer account, to Amazon Web Services Organizations, or to an Amazon Web Services Organizations unit. Policies are under the control of a CA administrator. For more information, see Using a Resource Based Policy with ACM Private CA. A policy permits a user of Certificate Manager (ACM) to issue ACM certificates signed by a CA in another account. For ACM to manage automatic renewal of these certificates, the ACM user must configure a Service Linked Role (SLR). The SLR allows the ACM service to assume the identity of the user, subject to confirmation against the ACM Private CA policy. For more information, see Using a Service Linked Role with ACM. Updates made in Amazon Web Services Resource Manager (RAM) are reflected in policies. For more information, see Attach a Policy for Cross-Account Access."]
+       "Deletes the resource-based policy attached to a private CA. Deletion will remove any access that the policy has granted. If there is no policy attached to the private CA, this action will return successful. If you delete a policy that was applied through Amazon Web Services Resource Access Manager (RAM), the CA will be removed from all shares in which it was included. The Certificate Manager Service Linked Role that the policy supports is not affected when you delete the policy. The current policy can be shown with GetPolicy and updated with PutPolicy. About Policies A policy grants access on a private CA to an Amazon Web Services customer account, to Amazon Web Services Organizations, or to an Amazon Web Services Organizations unit. Policies are under the control of a CA administrator. For more information, see Using a Resource Based Policy with Amazon Web Services Private CA. A policy permits a user of Certificate Manager (ACM) to issue ACM certificates signed by a CA in another account. For ACM to manage automatic renewal of these certificates, the ACM user must configure a Service Linked Role (SLR). The SLR allows the ACM service to assume the identity of the user, subject to confirmation against the Amazon Web Services Private CA policy. For more information, see Using a Service Linked Role with ACM. Updates made in Amazon Web Services Resource Manager (RAM) are reflected in policies. For more information, see Attach a Policy for Cross-Account Access."]
 module DeletePermissionRequest =
   struct
     type nonrec t =
@@ -4783,15 +5047,15 @@ module DeletePermissionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ?sourceAccount ~principal ~certificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceAccount = field_map json "SourceAccount" AccountId.of_json in
-      let principal = field_map_exn json "Principal" Principal.of_json in
+    let of_json json__ =
+      let sourceAccount = field_map json__ "SourceAccount" AccountId.of_json in
+      let principal = field_map_exn json__ "Principal" Principal.of_json in
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
       make ?sourceAccount ~principal ~certificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Revokes permissions on a private CA granted to the Certificate Manager (ACM) service principal (acm.amazonaws.com). These permissions allow ACM to issue and renew ACM certificates that reside in the same Amazon Web Services account as the CA. If you revoke these permissions, ACM will no longer renew the affected certificates automatically. Permissions can be granted with the CreatePermission action and listed with the ListPermissions action. About Permissions If the private CA and the certificates it issues reside in the same account, you can use CreatePermission to grant permissions for ACM to carry out automatic certificate renewals. For automatic certificate renewal to succeed, the ACM service principal needs permissions to create, retrieve, and list certificates. If the private CA and the ACM certificates reside in different accounts, then permissions cannot be used to enable automatic renewals. Instead, the ACM certificate owner must set up a resource-based policy to enable cross-account issuance and renewals. For more information, see Using a Resource Based Policy with ACM Private CA."]
+       "Revokes permissions on a private CA granted to the Certificate Manager (ACM) service principal (acm.amazonaws.com). These permissions allow ACM to issue and renew ACM certificates that reside in the same Amazon Web Services account as the CA. If you revoke these permissions, ACM will no longer renew the affected certificates automatically. Permissions can be granted with the CreatePermission action and listed with the ListPermissions action. About Permissions If the private CA and the certificates it issues reside in the same account, you can use CreatePermission to grant permissions for ACM to carry out automatic certificate renewals. For automatic certificate renewal to succeed, the ACM service principal needs permissions to create, retrieve, and list certificates. If the private CA and the ACM certificates reside in different accounts, then permissions cannot be used to enable automatic renewals. Instead, the ACM certificate owner must set up a resource-based policy to enable cross-account issuance and renewals. For more information, see Using a Resource Based Policy with Amazon Web Services Private CA."]
 module DeleteCertificateAuthorityRequest =
   struct
     type nonrec t =
@@ -4823,16 +5087,16 @@ module DeleteCertificateAuthorityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ?permanentDeletionTimeInDays ~certificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permanentDeletionTimeInDays =
-        field_map json "PermanentDeletionTimeInDays"
+        field_map json__ "PermanentDeletionTimeInDays"
           PermanentDeletionTimeInDays.of_json in
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
       make ?permanentDeletionTimeInDays ~certificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a private certificate authority (CA). You must provide the Amazon Resource Name (ARN) of the private CA that you want to delete. You can find the ARN by calling the ListCertificateAuthorities action. Deleting a CA will invalidate other CAs and certificates below it in your CA hierarchy. Before you can delete a CA that you have created and activated, you must disable it. To do this, call the UpdateCertificateAuthority action and set the CertificateAuthorityStatus parameter to DISABLED. Additionally, you can delete a CA if you are waiting for it to be created (that is, the status of the CA is CREATING). You can also delete it if the CA has been created but you haven't yet imported the signed certificate into ACM Private CA (that is, the status of the CA is PENDING_CERTIFICATE). When you successfully call DeleteCertificateAuthority, the CA's status changes to DELETED. However, the CA won't be permanently deleted until the restoration period has passed. By default, if you do not set the PermanentDeletionTimeInDays parameter, the CA remains restorable for 30 days. You can set the parameter from 7 to 30 days. The DescribeCertificateAuthority action returns the time remaining in the restoration window of a private CA in the DELETED state. To restore an eligible CA, call the RestoreCertificateAuthority action."]
+       "Deletes a private certificate authority (CA). You must provide the Amazon Resource Name (ARN) of the private CA that you want to delete. You can find the ARN by calling the ListCertificateAuthorities action. Deleting a CA will invalidate other CAs and certificates below it in your CA hierarchy. Before you can delete a CA that you have created and activated, you must disable it. To do this, call the UpdateCertificateAuthority action and set the CertificateAuthorityStatus parameter to DISABLED. Additionally, you can delete a CA if you are waiting for it to be created (that is, the status of the CA is CREATING). You can also delete it if the CA has been created but you haven't yet imported the signed certificate into Amazon Web Services Private CA (that is, the status of the CA is PENDING_CERTIFICATE). When you successfully call DeleteCertificateAuthority, the CA's status changes to DELETED. However, the CA won't be permanently deleted until the restoration period has passed. By default, if you do not set the PermanentDeletionTimeInDays parameter, the CA remains restorable for 30 days. You can set the parameter from 7 to 30 days. The DescribeCertificateAuthority action returns the time remaining in the restoration window of a private CA in the DELETED state. To restore an eligible CA, call the RestoreCertificateAuthority action. A private CA can be deleted if it is in the PENDING_CERTIFICATE, CREATING, EXPIRED, DISABLED, or FAILED state. To delete a CA in the ACTIVE state, you must first disable it, or else the delete request results in an exception. If you are deleting a private CA in the PENDING_CERTIFICATE or DISABLED state, you can set the length of its restoration period to 7-30 days. The default is 30. During this time, the status is set to DELETED and the CA can be restored. A private CA deleted in the CREATING or FAILED state has no assigned restoration period and cannot be restored."]
 module CreatePermissionRequest =
   struct
     type nonrec t =
@@ -4877,16 +5141,16 @@ module CreatePermissionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityArn") in
       make ~actions ?sourceAccount ~principal ~certificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let actions = field_map_exn json "Actions" ActionList.of_json in
-      let sourceAccount = field_map json "SourceAccount" AccountId.of_json in
-      let principal = field_map_exn json "Principal" Principal.of_json in
+    let of_json json__ =
+      let actions = field_map_exn json__ "Actions" ActionList.of_json in
+      let sourceAccount = field_map json__ "SourceAccount" AccountId.of_json in
+      let principal = field_map_exn json__ "Principal" Principal.of_json in
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
       make ~actions ?sourceAccount ~principal ~certificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Grants one or more permissions on a private CA to the Certificate Manager (ACM) service principal (acm.amazonaws.com). These permissions allow ACM to issue and renew ACM certificates that reside in the same Amazon Web Services account as the CA. You can list current permissions with the ListPermissions action and revoke them with the DeletePermission action. About Permissions If the private CA and the certificates it issues reside in the same account, you can use CreatePermission to grant permissions for ACM to carry out automatic certificate renewals. For automatic certificate renewal to succeed, the ACM service principal needs permissions to create, retrieve, and list certificates. If the private CA and the ACM certificates reside in different accounts, then permissions cannot be used to enable automatic renewals. Instead, the ACM certificate owner must set up a resource-based policy to enable cross-account issuance and renewals. For more information, see Using a Resource Based Policy with ACM Private CA."]
+       "Grants one or more permissions on a private CA to the Certificate Manager (ACM) service principal (acm.amazonaws.com). These permissions allow ACM to issue and renew ACM certificates that reside in the same Amazon Web Services account as the CA. You can list current permissions with the ListPermissions action and revoke them with the DeletePermission action. About Permissions If the private CA and the certificates it issues reside in the same account, you can use CreatePermission to grant permissions for ACM to carry out automatic certificate renewals. For automatic certificate renewal to succeed, the ACM service principal needs permissions to create, retrieve, and list certificates. If the private CA and the ACM certificates reside in different accounts, then permissions cannot be used to enable automatic renewals. Instead, the ACM certificate owner must set up a resource-based policy to enable cross-account issuance and renewals. For more information, see Using a Resource Based Policy with Amazon Web Services Private CA."]
 module CreateCertificateAuthorityResponse =
   struct
     type nonrec t =
@@ -4960,13 +5224,13 @@ module CreateCertificateAuthorityResponse =
           (Xml.child xml_arg0 "CertificateAuthorityArn") in
       make ?certificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateAuthorityArn =
-        field_map json "CertificateAuthorityArn" Arn.of_json in
+        field_map json__ "CertificateAuthorityArn" Arn.of_json in
       make ?certificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a root or subordinate private certificate authority (CA). You must specify the CA configuration, an optional configuration for Online Certificate Status Protocol (OCSP) and/or a certificate revocation list (CRL), the CA type, and an optional idempotency token to avoid accidental creation of multiple CAs. The CA configuration specifies the name of the algorithm and key size to be used to create the CA private key, the type of signing algorithm that the CA uses, and X.500 subject information. The OCSP configuration can optionally specify a custom URL for the OCSP responder. The CRL configuration specifies the CRL expiration period in days (the validity period of the CRL), the Amazon S3 bucket that will contain the CRL, and a CNAME alias for the S3 bucket that is included in certificates issued by the CA. If successful, this action returns the Amazon Resource Name (ARN) of the CA. ACM Private CA assets that are stored in Amazon S3 can be protected with encryption. For more information, see Encrypting Your CRLs. Both PCA and the IAM principal must have permission to write to the S3 bucket that you specify. If the IAM principal making the call does not have permission to write to the bucket, then an exception is thrown. For more information, see Access policies for CRLs in Amazon S3."]
+       "Creates a root or subordinate private certificate authority (CA). You must specify the CA configuration, an optional configuration for Online Certificate Status Protocol (OCSP) and/or a certificate revocation list (CRL), the CA type, and an optional idempotency token to avoid accidental creation of multiple CAs. The CA configuration specifies the name of the algorithm and key size to be used to create the CA private key, the type of signing algorithm that the CA uses, and X.500 subject information. The OCSP configuration can optionally specify a custom URL for the OCSP responder. The CRL configuration specifies the CRL expiration period in days (the validity period of the CRL), the Amazon S3 bucket that will contain the CRL, and a CNAME alias for the S3 bucket that is included in certificates issued by the CA. If successful, this action returns the Amazon Resource Name (ARN) of the CA. Both Amazon Web Services Private CA and the IAM principal must have permission to write to the S3 bucket that you specify. If the IAM principal making the call does not have permission to write to the bucket, then an exception is thrown. For more information, see Access policies for CRLs in Amazon S3. Amazon Web Services Private CA assets that are stored in Amazon S3 can be protected with encryption. For more information, see Encrypting Your CRLs."]
 module CreateCertificateAuthorityRequest =
   struct
     type nonrec t =
@@ -4976,34 +5240,39 @@ module CreateCertificateAuthorityRequest =
           "Name and bit size of the private key algorithm, the name of the signing algorithm, and X.500 certificate subject information."];
       revocationConfiguration: RevocationConfiguration.t option
         [@ocaml.doc
-          "Contains information to enable Online Certificate Status Protocol (OCSP) support, to enable a certificate revocation list (CRL), to enable both, or to enable neither. The default is for both certificate validation mechanisms to be disabled. For more information, see the OcspConfiguration and CrlConfiguration types."];
+          "Contains information to enable support for Online Certificate Status Protocol (OCSP), certificate revocation list (CRL), both protocols, or neither. By default, both certificate validation mechanisms are disabled. The following requirements apply to revocation configurations. A configuration disabling CRLs or OCSP must contain only the Enabled=False parameter, and will fail if other parameters such as CustomCname or ExpirationInDays are included. In a CRL configuration, the S3BucketName parameter must conform to Amazon S3 bucket naming rules. A configuration containing a custom Canonical Name (CNAME) parameter for CRLs or OCSP must conform to RFC2396 restrictions on the use of special characters in a CNAME. In a CRL or OCSP configuration, the value of a CNAME parameter must not include a protocol prefix such as \"http://\" or \"https://\". For more information, see the OcspConfiguration and CrlConfiguration types."];
       certificateAuthorityType: CertificateAuthorityType.t
         [@ocaml.doc "The type of the certificate authority."];
       idempotencyToken: IdempotencyToken.t option
         [@ocaml.doc
-          "Custom string that can be used to distinguish between calls to the CreateCertificateAuthority action. Idempotency tokens for CreateCertificateAuthority time out after five minutes. Therefore, if you call CreateCertificateAuthority multiple times with the same idempotency token within five minutes, ACM Private CA recognizes that you are requesting only certificate authority and will issue only one. If you change the idempotency token for each call, PCA recognizes that you are requesting multiple certificate authorities."];
+          "Custom string that can be used to distinguish between calls to the CreateCertificateAuthority action. Idempotency tokens for CreateCertificateAuthority time out after five minutes. Therefore, if you call CreateCertificateAuthority multiple times with the same idempotency token within five minutes, Amazon Web Services Private CA recognizes that you are requesting only certificate authority and will issue only one. If you change the idempotency token for each call, Amazon Web Services Private CA recognizes that you are requesting multiple certificate authorities."];
       keyStorageSecurityStandard: KeyStorageSecurityStandard.t option
         [@ocaml.doc
-          "Specifies a cryptographic key management compliance standard used for handling CA keys. Default: FIPS_140_2_LEVEL_3_OR_HIGHER Note: FIPS_140_2_LEVEL_3_OR_HIGHER is not supported in Region ap-northeast-3. When creating a CA in the ap-northeast-3, you must provide FIPS_140_2_LEVEL_2_OR_HIGHER as the argument for KeyStorageSecurityStandard. Failure to do this results in an InvalidArgsException with the message, \"A certificate authority cannot be created in this region with the specified security standard.\""];
+          "Specifies a cryptographic key management compliance standard for handling and protecting CA keys. Default: FIPS_140_2_LEVEL_3_OR_HIGHER Some Amazon Web Services Regions don't support the default value. When you create a CA in these Regions, you must use CCPC_LEVEL_1_OR_HIGHER for the KeyStorageSecurityStandard parameter. If you don't, the operation returns an InvalidArgsException with this message: \"A certificate authority cannot be created in this region with the specified security standard.\" For information about security standard support in different Amazon Web Services Regions, see Storage and security compliance of Amazon Web Services Private CA private keys."];
       tags: TagList.t option
         [@ocaml.doc
-          "Key-value pairs that will be attached to the new private CA. You can associate up to 50 tags with a private CA. For information using tags with IAM to manage permissions, see Controlling Access Using IAM Tags."]}
+          "Key-value pairs that will be attached to the new private CA. You can associate up to 50 tags with a private CA. For information using tags with IAM to manage permissions, see Controlling Access Using IAM Tags."];
+      usageMode: CertificateAuthorityUsageMode.t option
+        [@ocaml.doc
+          "Specifies whether the CA issues general-purpose certificates that typically require a revocation mechanism, or short-lived certificates that may optionally omit revocation because they expire quickly. Short-lived certificate validity is limited to seven days. The default value is GENERAL_PURPOSE."]}
     let context_ = "CreateCertificateAuthorityRequest"
     let make ?revocationConfiguration =
       fun ?idempotencyToken ->
         fun ?keyStorageSecurityStandard ->
           fun ?tags ->
-            fun ~certificateAuthorityConfiguration ->
-              fun ~certificateAuthorityType ->
-                fun () ->
-                  {
-                    revocationConfiguration;
-                    idempotencyToken;
-                    keyStorageSecurityStandard;
-                    tags;
-                    certificateAuthorityConfiguration;
-                    certificateAuthorityType
-                  }
+            fun ?usageMode ->
+              fun ~certificateAuthorityConfiguration ->
+                fun ~certificateAuthorityType ->
+                  fun () ->
+                    {
+                      revocationConfiguration;
+                      idempotencyToken;
+                      keyStorageSecurityStandard;
+                      tags;
+                      usageMode;
+                      certificateAuthorityConfiguration;
+                      certificateAuthorityType
+                    }
     let to_value x =
       structure_to_value
         [("CertificateAuthorityConfiguration",
@@ -5021,9 +5290,14 @@ module CreateCertificateAuthorityRequest =
         ("KeyStorageSecurityStandard",
           (Option.map x.keyStorageSecurityStandard
              ~f:KeyStorageSecurityStandard.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("UsageMode",
+          (Option.map x.usageMode ~f:CertificateAuthorityUsageMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let usageMode =
+        (Option.map ~f:CertificateAuthorityUsageMode.of_xml)
+          (Xml.child xml_arg0 "UsageMode") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let keyStorageSecurityStandard =
         (Option.map ~f:KeyStorageSecurityStandard.of_xml)
@@ -5042,32 +5316,34 @@ module CreateCertificateAuthorityRequest =
         CertificateAuthorityConfiguration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
              "CertificateAuthorityConfiguration") in
-      make ?tags ?keyStorageSecurityStandard ?idempotencyToken
+      make ?usageMode ?tags ?keyStorageSecurityStandard ?idempotencyToken
         ~certificateAuthorityType ?revocationConfiguration
         ~certificateAuthorityConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let usageMode =
+        field_map json__ "UsageMode" CertificateAuthorityUsageMode.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let keyStorageSecurityStandard =
-        field_map json "KeyStorageSecurityStandard"
+        field_map json__ "KeyStorageSecurityStandard"
           KeyStorageSecurityStandard.of_json in
       let idempotencyToken =
-        field_map json "IdempotencyToken" IdempotencyToken.of_json in
+        field_map json__ "IdempotencyToken" IdempotencyToken.of_json in
       let certificateAuthorityType =
-        field_map_exn json "CertificateAuthorityType"
+        field_map_exn json__ "CertificateAuthorityType"
           CertificateAuthorityType.of_json in
       let revocationConfiguration =
-        field_map json "RevocationConfiguration"
+        field_map json__ "RevocationConfiguration"
           RevocationConfiguration.of_json in
       let certificateAuthorityConfiguration =
-        field_map_exn json "CertificateAuthorityConfiguration"
+        field_map_exn json__ "CertificateAuthorityConfiguration"
           CertificateAuthorityConfiguration.of_json in
-      make ?tags ?keyStorageSecurityStandard ?idempotencyToken
+      make ?usageMode ?tags ?keyStorageSecurityStandard ?idempotencyToken
         ~certificateAuthorityType ?revocationConfiguration
         ~certificateAuthorityConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a root or subordinate private certificate authority (CA). You must specify the CA configuration, an optional configuration for Online Certificate Status Protocol (OCSP) and/or a certificate revocation list (CRL), the CA type, and an optional idempotency token to avoid accidental creation of multiple CAs. The CA configuration specifies the name of the algorithm and key size to be used to create the CA private key, the type of signing algorithm that the CA uses, and X.500 subject information. The OCSP configuration can optionally specify a custom URL for the OCSP responder. The CRL configuration specifies the CRL expiration period in days (the validity period of the CRL), the Amazon S3 bucket that will contain the CRL, and a CNAME alias for the S3 bucket that is included in certificates issued by the CA. If successful, this action returns the Amazon Resource Name (ARN) of the CA. ACM Private CA assets that are stored in Amazon S3 can be protected with encryption. For more information, see Encrypting Your CRLs. Both PCA and the IAM principal must have permission to write to the S3 bucket that you specify. If the IAM principal making the call does not have permission to write to the bucket, then an exception is thrown. For more information, see Access policies for CRLs in Amazon S3."]
+       "Creates a root or subordinate private certificate authority (CA). You must specify the CA configuration, an optional configuration for Online Certificate Status Protocol (OCSP) and/or a certificate revocation list (CRL), the CA type, and an optional idempotency token to avoid accidental creation of multiple CAs. The CA configuration specifies the name of the algorithm and key size to be used to create the CA private key, the type of signing algorithm that the CA uses, and X.500 subject information. The OCSP configuration can optionally specify a custom URL for the OCSP responder. The CRL configuration specifies the CRL expiration period in days (the validity period of the CRL), the Amazon S3 bucket that will contain the CRL, and a CNAME alias for the S3 bucket that is included in certificates issued by the CA. If successful, this action returns the Amazon Resource Name (ARN) of the CA. Both Amazon Web Services Private CA and the IAM principal must have permission to write to the S3 bucket that you specify. If the IAM principal making the call does not have permission to write to the bucket, then an exception is thrown. For more information, see Access policies for CRLs in Amazon S3. Amazon Web Services Private CA assets that are stored in Amazon S3 can be protected with encryption. For more information, see Encrypting Your CRLs."]
 module CreateCertificateAuthorityAuditReportResponse =
   struct
     type nonrec t =
@@ -5166,14 +5442,14 @@ module CreateCertificateAuthorityAuditReportResponse =
           (Xml.child xml_arg0 "AuditReportId") in
       make ?s3Key ?auditReportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Key = field_map json "S3Key" S3Key.of_json in
+    let of_json json__ =
+      let s3Key = field_map json__ "S3Key" S3Key.of_json in
       let auditReportId =
-        field_map json "AuditReportId" AuditReportId.of_json in
+        field_map json__ "AuditReportId" AuditReportId.of_json in
       make ?s3Key ?auditReportId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an audit report that lists every time that your CA private key is used. The report is saved in the Amazon S3 bucket that you specify on input. The IssueCertificate and RevokeCertificate actions use the private key. Both PCA and the IAM principal must have permission to write to the S3 bucket that you specify. If the IAM principal making the call does not have permission to write to the bucket, then an exception is thrown. For more information, see Access policies for CRLs in Amazon S3. ACM Private CA assets that are stored in Amazon S3 can be protected with encryption. For more information, see Encrypting Your Audit Reports. You can generate a maximum of one report every 30 minutes."]
+       "Creates an audit report that lists every time that your CA private key is used to issue a certificate. The IssueCertificate and RevokeCertificate actions use the private key. To save the audit report to your designated Amazon S3 bucket, you must create a bucket policy that grants Amazon Web Services Private CA permission to access and write to it. For an example policy, see Prepare an Amazon S3 bucket for audit reports. Amazon Web Services Private CA assets that are stored in Amazon S3 can be protected with encryption. For more information, see Encrypting Your Audit Reports. You can generate a maximum of one report every 30 minutes."]
 module CreateCertificateAuthorityAuditReportRequest =
   struct
     type nonrec t =
@@ -5220,19 +5496,19 @@ module CreateCertificateAuthorityAuditReportRequest =
       make ~auditReportResponseFormat ~s3BucketName ~certificateAuthorityArn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let auditReportResponseFormat =
-        field_map_exn json "AuditReportResponseFormat"
+        field_map_exn json__ "AuditReportResponseFormat"
           AuditReportResponseFormat.of_json in
       let s3BucketName =
-        field_map_exn json "S3BucketName" S3BucketName.of_json in
+        field_map_exn json__ "S3BucketName" S3BucketName.of_json in
       let certificateAuthorityArn =
-        field_map_exn json "CertificateAuthorityArn" Arn.of_json in
+        field_map_exn json__ "CertificateAuthorityArn" Arn.of_json in
       make ~auditReportResponseFormat ~s3BucketName ~certificateAuthorityArn
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an audit report that lists every time that your CA private key is used. The report is saved in the Amazon S3 bucket that you specify on input. The IssueCertificate and RevokeCertificate actions use the private key. Both PCA and the IAM principal must have permission to write to the S3 bucket that you specify. If the IAM principal making the call does not have permission to write to the bucket, then an exception is thrown. For more information, see Access policies for CRLs in Amazon S3. ACM Private CA assets that are stored in Amazon S3 can be protected with encryption. For more information, see Encrypting Your Audit Reports. You can generate a maximum of one report every 30 minutes."]
+       "Creates an audit report that lists every time that your CA private key is used to issue a certificate. The IssueCertificate and RevokeCertificate actions use the private key. To save the audit report to your designated Amazon S3 bucket, you must create a bucket policy that grants Amazon Web Services Private CA permission to access and write to it. For an example policy, see Prepare an Amazon S3 bucket for audit reports. Amazon Web Services Private CA assets that are stored in Amazon S3 can be protected with encryption. For more information, see Encrypting Your Audit Reports. You can generate a maximum of one report every 30 minutes."]
 module ConcurrentModificationException =
   struct
     type nonrec t = {
@@ -5247,8 +5523,8 @@ module ConcurrentModificationException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A previous update to your private CA is still ongoing."]
@@ -5266,8 +5542,8 @@ module CertificateMismatchException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

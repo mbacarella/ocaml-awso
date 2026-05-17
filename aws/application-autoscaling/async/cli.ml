@@ -179,6 +179,9 @@ let describe_scaling_activities =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING XmlString"
+       and includeNotScaledActivities =
+         flag "include-not-scaled-activities" (optional bool)
+           ~doc:"BOOL IncludeNotScaledActivities"
        and serviceNamespace =
          flag "service-namespace" (required json_arg)
            ~doc:"JSON ServiceNamespace" in
@@ -189,6 +192,7 @@ let describe_scaling_activities =
               ?scalableDimension:(Option.map
                                     ~f:Values.ScalableDimension.of_json
                                     scalableDimension) ?maxResults ?nextToken
+              ?includeNotScaledActivities
               ~serviceNamespace:(Values.ServiceNamespace.of_json
                                    serviceNamespace) ())
            (Some Values.DescribeScalingActivitiesResponse.to_json)
@@ -273,6 +277,62 @@ let describe_scheduled_actions =
                                    serviceNamespace) ())
            (Some Values.DescribeScheduledActionsResponse.to_json)
            (Some Values.DescribeScheduledActionsResponse.error_to_json)])
+let get_predictive_scaling_forecast =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceNamespace =
+         flag "service-namespace" (required json_arg)
+           ~doc:"JSON ServiceNamespace"
+       and resourceId =
+         flag "resource-id" (required string)
+           ~doc:"STRING ResourceIdMaxLen1600"
+       and scalableDimension =
+         flag "scalable-dimension" (required json_arg)
+           ~doc:"JSON ScalableDimension"
+       and policyName =
+         flag "policy-name" (required string) ~doc:"STRING PolicyName"
+       and startTime =
+         flag "start-time" (required json_arg) ~doc:"JSON TimestampType"
+       and endTime =
+         flag "end-time" (required json_arg) ~doc:"JSON TimestampType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_predictive_scaling_forecast
+           (Values.GetPredictiveScalingForecastRequest.make
+              ~serviceNamespace:(Values.ServiceNamespace.of_json
+                                   serviceNamespace) ~resourceId
+              ~scalableDimension:(Values.ScalableDimension.of_json
+                                    scalableDimension) ~policyName
+              ~startTime:(Values.TimestampType.of_json startTime)
+              ~endTime:(Values.TimestampType.of_json endTime) ())
+           (Some Values.GetPredictiveScalingForecastResponse.to_json)
+           (Some Values.GetPredictiveScalingForecastResponse.error_to_json)])
+let list_tags_for_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceARN =
+         flag "resource-a-r-n" (required string)
+           ~doc:"STRING AmazonResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_tags_for_resource
+           (Values.ListTagsForResourceRequest.make ~resourceARN ())
+           (Some Values.ListTagsForResourceResponse.to_json)
+           (Some Values.ListTagsForResourceResponse.error_to_json)])
 let put_scaling_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -292,6 +352,9 @@ let put_scaling_policy =
          flag "target-tracking-scaling-policy-configuration"
            (optional json_arg)
            ~doc:"JSON TargetTrackingScalingPolicyConfiguration"
+       and predictiveScalingPolicyConfiguration =
+         flag "predictive-scaling-policy-configuration" (optional json_arg)
+           ~doc:"JSON PredictiveScalingPolicyConfiguration"
        and policyName =
          flag "policy-name" (required string) ~doc:"STRING PolicyName"
        and serviceNamespace =
@@ -314,6 +377,9 @@ let put_scaling_policy =
               ?targetTrackingScalingPolicyConfiguration:(Option.map
                                                            ~f:Values.TargetTrackingScalingPolicyConfiguration.of_json
                                                            targetTrackingScalingPolicyConfiguration)
+              ?predictiveScalingPolicyConfiguration:(Option.map
+                                                       ~f:Values.PredictiveScalingPolicyConfiguration.of_json
+                                                       predictiveScalingPolicyConfiguration)
               ~policyName
               ~serviceNamespace:(Values.ServiceNamespace.of_json
                                    serviceNamespace) ~resourceId
@@ -391,6 +457,7 @@ let register_scalable_target =
        and suspendedState =
          flag "suspended-state" (optional json_arg)
            ~doc:"JSON SuspendedState"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and serviceNamespace =
          flag "service-namespace" (required json_arg)
            ~doc:"JSON ServiceNamespace"
@@ -407,12 +474,56 @@ let register_scalable_target =
               ?maxCapacity ?roleARN
               ?suspendedState:(Option.map ~f:Values.SuspendedState.of_json
                                  suspendedState)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
               ~serviceNamespace:(Values.ServiceNamespace.of_json
                                    serviceNamespace) ~resourceId
               ~scalableDimension:(Values.ScalableDimension.of_json
                                     scalableDimension) ())
            (Some Values.RegisterScalableTargetResponse.to_json)
            (Some Values.RegisterScalableTargetResponse.error_to_json)])
+let tag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceARN =
+         flag "resource-a-r-n" (required string)
+           ~doc:"STRING AmazonResourceName"
+       and tags = flag "tags" (required json_arg) ~doc:"JSON TagMap" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.tag_resource
+           (Values.TagResourceRequest.make ~resourceARN
+              ~tags:(Values.TagMap.of_json tags) ())
+           (Some Values.TagResourceResponse.to_json)
+           (Some Values.TagResourceResponse.error_to_json)])
+let untag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceARN =
+         flag "resource-a-r-n" (required string)
+           ~doc:"STRING AmazonResourceName"
+       and tagKeys =
+         flag "tag-keys" (required json_arg) ~doc:"JSON TagKeyList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.untag_resource
+           (Values.UntagResourceRequest.make ~resourceARN
+              ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
+           (Some Values.UntagResourceResponse.to_json)
+           (Some Values.UntagResourceResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -423,6 +534,10 @@ let main =
     ("describe-scaling-activities", describe_scaling_activities);
     ("describe-scaling-policies", describe_scaling_policies);
     ("describe-scheduled-actions", describe_scheduled_actions);
+    ("get-predictive-scaling-forecast", get_predictive_scaling_forecast);
+    ("list-tags-for-resource", list_tags_for_resource);
     ("put-scaling-policy", put_scaling_policy);
     ("put-scheduled-action", put_scheduled_action);
-    ("register-scalable-target", register_scalable_target)]
+    ("register-scalable-target", register_scalable_target);
+    ("tag-resource", tag_resource);
+    ("untag-resource", untag_resource)]

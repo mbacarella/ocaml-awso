@@ -78,15 +78,21 @@ module KeywordInputType =
   struct
     type nonrec t =
       | SELECT_FROM_LIST 
+      | UPLOAD_FILE 
+      | INPUT_TEXT 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | SELECT_FROM_LIST -> "SELECT_FROM_LIST"
+      | UPLOAD_FILE -> "UPLOAD_FILE"
+      | INPUT_TEXT -> "INPUT_TEXT"
       | Non_static_id s -> s
     let of_string =
       function
       | "SELECT_FROM_LIST" -> SELECT_FROM_LIST
+      | "UPLOAD_FILE" -> UPLOAD_FILE
+      | "INPUT_TEXT" -> INPUT_TEXT
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -107,7 +113,7 @@ module KeywordValue =
              (fun () ->
                 (check_string_max i ~max:100) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"^[a-zA-Z_0-9-\\s().]+$")));
+                     check_pattern i ~pattern:"^[a-zA-Z_0-9-\\s().:\\/]+$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -147,11 +153,11 @@ module ControlComment =
         (Option.map ~f:Username.of_xml) (Xml.child xml_arg0 "authorName") in
       make ?postedDate ?commentBody ?authorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let postedDate = field_map json "postedDate" Timestamp.of_json in
+    let of_json json__ =
+      let postedDate = field_map json__ "postedDate" Timestamp.of_json in
       let commentBody =
-        field_map json "commentBody" ControlCommentBody.of_json in
-      let authorName = field_map json "authorName" Username.of_json in
+        field_map json__ "commentBody" ControlCommentBody.of_json in
+      let authorName = field_map json__ "authorName" Username.of_json in
       make ?postedDate ?commentBody ?authorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -227,10 +233,11 @@ module SourceKeyword =
     type nonrec t =
       {
       keywordInputType: KeywordInputType.t option
-        [@ocaml.doc "The method of input for the keyword."];
+        [@ocaml.doc
+          "The input method for the keyword. SELECT_FROM_LIST is used when mapping a data source for automated evidence. When keywordInputType is SELECT_FROM_LIST, a keyword must be selected to collect automated evidence. For example, this keyword can be a CloudTrail event name, a rule name for Config, a Security Hub control, or the name of an Amazon Web Services API call. UPLOAD_FILE and INPUT_TEXT are only used when mapping a data source for manual evidence. When keywordInputType is UPLOAD_FILE, a file must be uploaded as manual evidence. When keywordInputType is INPUT_TEXT, text must be entered as manual evidence."];
       keywordValue: KeywordValue.t option
         [@ocaml.doc
-          "The value of the keyword that's used to search CloudTrail logs, Config rules, Security Hub checks, and Amazon Web Services API names when mapping a control data source."]}
+          "The value of the keyword that's used when mapping a control data source. For example, this can be a CloudTrail event name, a rule name for Config, a Security Hub control, or the name of an Amazon Web Services API call. If you\226\128\153re mapping a data source to a rule in Config, the keywordValue that you specify depends on the type of rule: For managed rules, you can use the rule identifier as the keywordValue. You can find the rule identifier from the list of Config managed rules. For some rules, the rule identifier is different from the rule name. For example, the rule name restricted-ssh has the following rule identifier: INCOMING_SSH_DISABLED. Make sure to use the rule identifier, not the rule name. Keyword example for managed rules: Managed rule name: s3-bucket-acl-prohibited keywordValue: S3_BUCKET_ACL_PROHIBITED For custom rules, you form the keywordValue by adding the Custom_ prefix to the rule name. This prefix distinguishes the custom rule from a managed rule. Keyword example for custom rules: Custom rule name: my-custom-config-rule keywordValue: Custom_my-custom-config-rule For service-linked rules, you form the keywordValue by adding the Custom_ prefix to the rule name. In addition, you remove the suffix ID that appears at the end of the rule name. Keyword examples for service-linked rules: Service-linked rule name: CustomRuleForAccount-conformance-pack-szsm1uv0w keywordValue: Custom_CustomRuleForAccount-conformance-pack Service-linked rule name: OrgConfigRule-s3-bucket-versioning-enabled-dbgzf8ba keywordValue: Custom_OrgConfigRule-s3-bucket-versioning-enabled The keywordValue is case sensitive. If you enter a value incorrectly, Audit Manager might not recognize the data source mapping. As a result, you might not successfully collect evidence from that data source as intended. Keep in mind the following requirements, depending on the data source type that you're using. For Config: For managed rules, make sure that the keywordValue is the rule identifier in ALL_CAPS_WITH_UNDERSCORES. For example, CLOUDWATCH_LOG_GROUP_ENCRYPTED. For accuracy, we recommend that you reference the list of supported Config managed rules. For custom rules, make sure that the keywordValue has the Custom_ prefix followed by the custom rule name. The format of the custom rule name itself may vary. For accuracy, we recommend that you visit the Config console to verify your custom rule name. For Security Hub: The format varies for Security Hub control names. For accuracy, we recommend that you reference the list of supported Security Hub controls. For Amazon Web Services API calls: Make sure that the keywordValue is written as serviceprefix_ActionName. For example, iam_ListGroups. For accuracy, we recommend that you reference the list of supported API calls. For CloudTrail: Make sure that the keywordValue is written as serviceprefix_ActionName. For example, cloudtrail_StartLogging. For accuracy, we recommend that you review the Amazon Web Services service prefix and action names in the Service Authorization Reference."]}
     let make ?keywordInputType =
       fun ?keywordValue -> fun () -> { keywordInputType; keywordValue }
     let to_value x =
@@ -249,14 +256,14 @@ module SourceKeyword =
           (Xml.child xml_arg0 "keywordInputType") in
       make ?keywordValue ?keywordInputType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keywordValue = field_map json "keywordValue" KeywordValue.of_json in
+    let of_json json__ =
+      let keywordValue = field_map json__ "keywordValue" KeywordValue.of_json in
       let keywordInputType =
-        field_map json "keywordInputType" KeywordInputType.of_json in
+        field_map json__ "keywordInputType" KeywordInputType.of_json in
       make ?keywordValue ?keywordInputType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The keyword to search for in CloudTrail logs, Config rules, Security Hub checks, and Amazon Web Services API names."]
+       "A keyword that relates to the control data source. For manual evidence, this keyword indicates if the manual evidence is a file or text. For automated evidence, this keyword identifies a specific CloudTrail event, Config rule, Security Hub control, or Amazon Web Services API name. To learn more about the supported keywords that you can use when mapping a control data source, see the following pages in the Audit Manager User Guide: Config rules supported by Audit Manager Security Hub controls supported by Audit Manager API calls supported by Audit Manager CloudTrail event names supported by Audit Manager"]
 module SourceName =
   struct
     type nonrec t = string
@@ -264,7 +271,7 @@ module SourceName =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:100) >>=
+          ((check_string_max i ~max:300) >>=
              (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
@@ -309,6 +316,8 @@ module SourceType =
       | AWS_Security_Hub 
       | AWS_API_Call 
       | MANUAL 
+      | Common_Control 
+      | Core_Control 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -318,6 +327,8 @@ module SourceType =
       | AWS_Security_Hub -> "AWS_Security_Hub"
       | AWS_API_Call -> "AWS_API_Call"
       | MANUAL -> "MANUAL"
+      | Common_Control -> "Common_Control"
+      | Core_Control -> "Core_Control"
       | Non_static_id s -> s
     let of_string =
       function
@@ -326,6 +337,8 @@ module SourceType =
       | "AWS_Security_Hub" -> AWS_Security_Hub
       | "AWS_API_Call" -> AWS_API_Call
       | "MANUAL" -> MANUAL
+      | "Common_Control" -> Common_Control
+      | "Core_Control" -> Core_Control
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -379,6 +392,9 @@ module ControlComments =
   struct
     type nonrec t = ControlComment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ControlComment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -500,6 +516,9 @@ module EvidenceSources =
   struct
     type nonrec t = NonEmptyString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -696,14 +715,14 @@ module ControlMappingSource =
         [@ocaml.doc "The description of the source."];
       sourceSetUpOption: SourceSetUpOption.t option
         [@ocaml.doc
-          "The setup option for the data source. This option reflects if the evidence collection is automated or manual."];
+          "The setup option for the data source. This option reflects if the evidence collection method is automated or manual. If you don\226\128\153t provide a value for sourceSetUpOption, Audit Manager automatically infers and populates the correct value based on the sourceType that you specify."];
       sourceType: SourceType.t option
         [@ocaml.doc
-          "Specifies one of the five types of data sources for evidence collection."];
+          "Specifies which type of data source is used to collect evidence. The source can be an individual data source type, such as AWS_Cloudtrail, AWS_Config, AWS_Security_Hub, AWS_API_Call, or MANUAL. The source can also be a managed grouping of data sources, such as a Core_Control or a Common_Control."];
       sourceKeyword: SourceKeyword.t option ;
       sourceFrequency: SourceFrequency.t option
         [@ocaml.doc
-          "The frequency of evidence collection for the control mapping source."];
+          "Specifies how often evidence is collected from the control mapping source."];
       troubleshootingText: TroubleshootingText.t option
         [@ocaml.doc "The instructions for troubleshooting the control."]}
     let make ?sourceId =
@@ -766,20 +785,20 @@ module ControlMappingSource =
       make ?troubleshootingText ?sourceFrequency ?sourceKeyword ?sourceType
         ?sourceSetUpOption ?sourceDescription ?sourceName ?sourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let troubleshootingText =
-        field_map json "troubleshootingText" TroubleshootingText.of_json in
+        field_map json__ "troubleshootingText" TroubleshootingText.of_json in
       let sourceFrequency =
-        field_map json "sourceFrequency" SourceFrequency.of_json in
+        field_map json__ "sourceFrequency" SourceFrequency.of_json in
       let sourceKeyword =
-        field_map json "sourceKeyword" SourceKeyword.of_json in
-      let sourceType = field_map json "sourceType" SourceType.of_json in
+        field_map json__ "sourceKeyword" SourceKeyword.of_json in
+      let sourceType = field_map json__ "sourceType" SourceType.of_json in
       let sourceSetUpOption =
-        field_map json "sourceSetUpOption" SourceSetUpOption.of_json in
+        field_map json__ "sourceSetUpOption" SourceSetUpOption.of_json in
       let sourceDescription =
-        field_map json "sourceDescription" SourceDescription.of_json in
-      let sourceName = field_map json "sourceName" SourceName.of_json in
-      let sourceId = field_map json "sourceId" UUID.of_json in
+        field_map json__ "sourceDescription" SourceDescription.of_json in
+      let sourceName = field_map json__ "sourceName" SourceName.of_json in
+      let sourceId = field_map json__ "sourceId" UUID.of_json in
       make ?troubleshootingText ?sourceFrequency ?sourceKeyword ?sourceType
         ?sourceSetUpOption ?sourceDescription ?sourceName ?sourceId ()
     let to_json v = composed_to_json to_value v
@@ -844,7 +863,7 @@ module AssessmentControl =
         [@ocaml.doc "The list of data sources for the evidence."];
       evidenceCount: Integer.t option
         [@ocaml.doc
-          "The amount of evidence that's generated for the control."];
+          "The amount of evidence that's collected for the control."];
       assessmentReportEvidenceCount: Integer.t option
         [@ocaml.doc "The amount of evidence in the assessment report."]}
     let make ?id =
@@ -909,19 +928,19 @@ module AssessmentControl =
       make ?assessmentReportEvidenceCount ?evidenceCount ?evidenceSources
         ?comments ?response ?status ?description ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentReportEvidenceCount =
-        field_map json "assessmentReportEvidenceCount" Integer.of_json in
-      let evidenceCount = field_map json "evidenceCount" Integer.of_json in
+        field_map json__ "assessmentReportEvidenceCount" Integer.of_json in
+      let evidenceCount = field_map json__ "evidenceCount" Integer.of_json in
       let evidenceSources =
-        field_map json "evidenceSources" EvidenceSources.of_json in
-      let comments = field_map json "comments" ControlComments.of_json in
-      let response = field_map json "response" ControlResponse.of_json in
-      let status = field_map json "status" ControlStatus.of_json in
+        field_map json__ "evidenceSources" EvidenceSources.of_json in
+      let comments = field_map json__ "comments" ControlComments.of_json in
+      let response = field_map json__ "response" ControlResponse.of_json in
+      let status = field_map json__ "status" ControlStatus.of_json in
       let description =
-        field_map json "description" ControlDescription.of_json in
-      let name = field_map json "name" ControlName.of_json in
-      let id = field_map json "id" UUID.of_json in
+        field_map json__ "description" ControlDescription.of_json in
+      let name = field_map json__ "name" ControlName.of_json in
+      let id = field_map json__ "id" UUID.of_json in
       make ?assessmentReportEvidenceCount ?evidenceCount ?evidenceSources
         ?comments ?response ?status ?description ?name ?id ()
     let to_json v = composed_to_json to_value v
@@ -956,7 +975,7 @@ module Delegation =
       comment: DelegationComment.t option
         [@ocaml.doc "The comment that's related to the delegation."];
       createdBy: CreatedBy.t option
-        [@ocaml.doc "The IAM user or role that created the delegation."]}
+        [@ocaml.doc "The user or role that created the delegation."]}
     let make ?id =
       fun ?assessmentName ->
         fun ?assessmentId ->
@@ -1026,19 +1045,19 @@ module Delegation =
       make ?createdBy ?comment ?controlSetId ?lastUpdated ?creationTime
         ?roleType ?roleArn ?status ?assessmentId ?assessmentName ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdBy = field_map json "createdBy" CreatedBy.of_json in
-      let comment = field_map json "comment" DelegationComment.of_json in
-      let controlSetId = field_map json "controlSetId" ControlSetId.of_json in
-      let lastUpdated = field_map json "lastUpdated" Timestamp.of_json in
-      let creationTime = field_map json "creationTime" Timestamp.of_json in
-      let roleType = field_map json "roleType" RoleType.of_json in
-      let roleArn = field_map json "roleArn" IamArn.of_json in
-      let status = field_map json "status" DelegationStatus.of_json in
-      let assessmentId = field_map json "assessmentId" UUID.of_json in
+    let of_json json__ =
+      let createdBy = field_map json__ "createdBy" CreatedBy.of_json in
+      let comment = field_map json__ "comment" DelegationComment.of_json in
+      let controlSetId = field_map json__ "controlSetId" ControlSetId.of_json in
+      let lastUpdated = field_map json__ "lastUpdated" Timestamp.of_json in
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let roleType = field_map json__ "roleType" RoleType.of_json in
+      let roleArn = field_map json__ "roleArn" IamArn.of_json in
+      let status = field_map json__ "status" DelegationStatus.of_json in
+      let assessmentId = field_map json__ "assessmentId" UUID.of_json in
       let assessmentName =
-        field_map json "assessmentName" AssessmentName.of_json in
-      let id = field_map json "id" UUID.of_json in
+        field_map json__ "assessmentName" AssessmentName.of_json in
+      let id = field_map json__ "id" UUID.of_json in
       make ?createdBy ?comment ?controlSetId ?lastUpdated ?creationTime
         ?roleType ?roleArn ?status ?assessmentId ?assessmentName ?id ()
     let to_json v = composed_to_json to_value v
@@ -1048,28 +1067,29 @@ module Role =
   struct
     type nonrec t =
       {
-      roleType: RoleType.t option
+      roleType: RoleType.t
         [@ocaml.doc
           "The type of customer persona. In CreateAssessment, roleType can only be PROCESS_OWNER. In UpdateSettings, roleType can only be PROCESS_OWNER. In BatchCreateDelegationByAssessment, roleType can only be RESOURCE_OWNER."];
-      roleArn: IamArn.t option
+      roleArn: IamArn.t
         [@ocaml.doc "The Amazon Resource Name (ARN) of the IAM role."]}
-    let make ?roleType = fun ?roleArn -> fun () -> { roleType; roleArn }
+    let context_ = "Role"
+    let make ~roleType = fun ~roleArn -> fun () -> { roleType; roleArn }
     let to_value x =
       structure_to_value
-        [("roleType", (Option.map x.roleType ~f:RoleType.to_value));
-        ("roleArn", (Option.map x.roleArn ~f:IamArn.to_value))]
+        [("roleType", (Some (RoleType.to_value x.roleType)));
+        ("roleArn", (Some (IamArn.to_value x.roleArn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let roleArn =
-        (Option.map ~f:IamArn.of_xml) (Xml.child xml_arg0 "roleArn") in
+        IamArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       let roleType =
-        (Option.map ~f:RoleType.of_xml) (Xml.child xml_arg0 "roleType") in
-      make ?roleArn ?roleType ()
+        RoleType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleType") in
+      make ~roleArn ~roleType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "roleArn" IamArn.of_json in
-      let roleType = field_map json "roleType" RoleType.of_json in
-      make ?roleArn ?roleType ()
+    let of_json json__ =
+      let roleArn = field_map_exn json__ "roleArn" IamArn.of_json in
+      let roleType = field_map_exn json__ "roleType" RoleType.of_json in
+      make ~roleArn ~roleType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The wrapper that contains the Audit Manager role information of the current user. This includes the role type and IAM Amazon Resource Name (ARN)."]
@@ -1215,6 +1235,9 @@ module ControlMappingSources =
     type nonrec t = ControlMappingSource.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ControlMappingSource.to_value)) |>
         (fun x -> `List x)
@@ -1257,22 +1280,50 @@ module ControlSources =
     let of_json j = string_of_json ~kind:"ControlSources" j
     let to_json = simple_to_json to_value
   end
+module ControlState =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | END_OF_SUPPORT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | END_OF_SUPPORT -> "END_OF_SUPPORT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "END_OF_SUPPORT" -> END_OF_SUPPORT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ControlState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ControlState" j)
+    let to_json = simple_to_json to_value
+  end
 module ControlType =
   struct
     type nonrec t =
       | Standard 
       | Custom 
+      | Core_ 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | Standard -> "Standard"
       | Custom -> "Custom"
+      | Core_ -> "Core"
       | Non_static_id s -> s
     let of_string =
       function
       | "Standard" -> Standard
       | "Custom" -> Custom
+      | "Core" -> Core_
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1328,6 +1379,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1357,6 +1410,9 @@ module AssessmentControls =
   struct
     type nonrec t = AssessmentControl.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssessmentControl.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1410,6 +1466,9 @@ module Delegations =
   struct
     type nonrec t = Delegation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Delegation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1434,6 +1493,9 @@ module Roles =
   struct
     type nonrec t = Role.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Role.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1482,10 +1544,10 @@ module AWSAccount =
       let id = (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "id") in
       make ?name ?emailAddress ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" AccountName.of_json in
-      let emailAddress = field_map json "emailAddress" EmailAddress.of_json in
-      let id = field_map json "id" AccountId.of_json in
+    let of_json json__ =
+      let name = field_map json__ "name" AccountName.of_json in
+      let emailAddress = field_map json__ "emailAddress" EmailAddress.of_json in
+      let id = field_map json__ "id" AccountId.of_json in
       make ?name ?emailAddress ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1495,7 +1557,7 @@ module AWSService =
     type nonrec t =
       {
       serviceName: AWSServiceName.t option
-        [@ocaml.doc "The name of the Amazon Web Service."]}
+        [@ocaml.doc "The name of the Amazon Web Services service."]}
     let make ?serviceName = fun () -> { serviceName }
     let to_value x =
       structure_to_value
@@ -1508,11 +1570,12 @@ module AWSService =
           (Xml.child xml_arg0 "serviceName") in
       make ?serviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map json "serviceName" AWSServiceName.of_json in
+    let of_json json__ =
+      let serviceName = field_map json__ "serviceName" AWSServiceName.of_json in
       make ?serviceName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An Amazon Web Service such as Amazon S3 or CloudTrail."]
+  end[@@ocaml.doc
+       "An Amazon Web Services service such as Amazon S3 or CloudTrail. For an example of how to find an Amazon Web Services service name and how to define it in your assessment scope, see the following: Finding an Amazon Web Services service name to use in your assessment scope Defining an Amazon Web Services service name in your assessment scope"]
 module Control =
   struct
     type nonrec t =
@@ -1522,7 +1585,7 @@ module Control =
       id: UUID.t option [@ocaml.doc "The unique identifier for the control."];
       type_: ControlType.t option
         [@ocaml.doc
-          "The type of control, such as a custom control or a standard control."];
+          "Specifies whether the control is a standard control or a custom control."];
       name: ControlName.t option [@ocaml.doc "The name of the control."];
       description: ControlDescription.t option
         [@ocaml.doc "The description of the control."];
@@ -1537,20 +1600,23 @@ module Control =
           "The recommended actions to carry out if the control isn't fulfilled."];
       controlSources: ControlSources.t option
         [@ocaml.doc
-          "The data source that determines where Audit Manager collects evidence from for the control."];
+          "The data source types that determine where Audit Manager collects evidence from for the control."];
       controlMappingSources: ControlMappingSources.t option
         [@ocaml.doc "The data mapping sources for the control."];
       createdAt: Timestamp.t option
-        [@ocaml.doc "Specifies when the control was created."];
+        [@ocaml.doc "The time when the control was created."];
       lastUpdatedAt: Timestamp.t option
-        [@ocaml.doc "Specifies when the control was most recently updated."];
+        [@ocaml.doc "The time when the control was most recently updated."];
       createdBy: CreatedBy.t option
-        [@ocaml.doc "The IAM user or role that created the control."];
+        [@ocaml.doc "The user or role that created the control."];
       lastUpdatedBy: LastUpdatedBy.t option
         [@ocaml.doc
-          "The IAM user or role that most recently updated the control."];
+          "The user or role that most recently updated the control."];
       tags: TagMap.t option
-        [@ocaml.doc "The tags associated with the control."]}
+        [@ocaml.doc "The tags associated with the control."];
+      state: ControlState.t option
+        [@ocaml.doc
+          "The state of the control. The END_OF_SUPPORT state is applicable to standard controls only. This state indicates that the standard control can still be used to collect evidence, but Audit Manager is no longer updating or maintaining that control."]}
     let make ?arn =
       fun ?id ->
         fun ?type_ ->
@@ -1566,24 +1632,26 @@ module Control =
                             fun ?createdBy ->
                               fun ?lastUpdatedBy ->
                                 fun ?tags ->
-                                  fun () ->
-                                    {
-                                      arn;
-                                      id;
-                                      type_;
-                                      name;
-                                      description;
-                                      testingInformation;
-                                      actionPlanTitle;
-                                      actionPlanInstructions;
-                                      controlSources;
-                                      controlMappingSources;
-                                      createdAt;
-                                      lastUpdatedAt;
-                                      createdBy;
-                                      lastUpdatedBy;
-                                      tags
-                                    }
+                                  fun ?state ->
+                                    fun () ->
+                                      {
+                                        arn;
+                                        id;
+                                        type_;
+                                        name;
+                                        description;
+                                        testingInformation;
+                                        actionPlanTitle;
+                                        actionPlanInstructions;
+                                        controlSources;
+                                        controlMappingSources;
+                                        createdAt;
+                                        lastUpdatedAt;
+                                        createdBy;
+                                        lastUpdatedBy;
+                                        tags;
+                                        state
+                                      }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:AuditManagerArn.to_value));
@@ -1609,9 +1677,12 @@ module Control =
         ("createdBy", (Option.map x.createdBy ~f:CreatedBy.to_value));
         ("lastUpdatedBy",
           (Option.map x.lastUpdatedBy ~f:LastUpdatedBy.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("state", (Option.map x.state ~f:ControlState.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:ControlState.of_xml) (Xml.child xml_arg0 "state") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let lastUpdatedBy =
         (Option.map ~f:LastUpdatedBy.of_xml)
@@ -1647,36 +1718,38 @@ module Control =
       let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "id") in
       let arn =
         (Option.map ~f:AuditManagerArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?tags ?lastUpdatedBy ?createdBy ?lastUpdatedAt ?createdAt
+      make ?state ?tags ?lastUpdatedBy ?createdBy ?lastUpdatedAt ?createdAt
         ?controlMappingSources ?controlSources ?actionPlanInstructions
         ?actionPlanTitle ?testingInformation ?description ?name ?type_ ?id
         ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let state = field_map json__ "state" ControlState.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let lastUpdatedBy =
-        field_map json "lastUpdatedBy" LastUpdatedBy.of_json in
-      let createdBy = field_map json "createdBy" CreatedBy.of_json in
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
+        field_map json__ "lastUpdatedBy" LastUpdatedBy.of_json in
+      let createdBy = field_map json__ "createdBy" CreatedBy.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let controlMappingSources =
-        field_map json "controlMappingSources" ControlMappingSources.of_json in
+        field_map json__ "controlMappingSources"
+          ControlMappingSources.of_json in
       let controlSources =
-        field_map json "controlSources" ControlSources.of_json in
+        field_map json__ "controlSources" ControlSources.of_json in
       let actionPlanInstructions =
-        field_map json "actionPlanInstructions"
+        field_map json__ "actionPlanInstructions"
           ActionPlanInstructions.of_json in
       let actionPlanTitle =
-        field_map json "actionPlanTitle" ActionPlanTitle.of_json in
+        field_map json__ "actionPlanTitle" ActionPlanTitle.of_json in
       let testingInformation =
-        field_map json "testingInformation" TestingInformation.of_json in
+        field_map json__ "testingInformation" TestingInformation.of_json in
       let description =
-        field_map json "description" ControlDescription.of_json in
-      let name = field_map json "name" ControlName.of_json in
-      let type_ = field_map json "type" ControlType.of_json in
-      let id = field_map json "id" UUID.of_json in
-      let arn = field_map json "arn" AuditManagerArn.of_json in
-      make ?tags ?lastUpdatedBy ?createdBy ?lastUpdatedAt ?createdAt
+        field_map json__ "description" ControlDescription.of_json in
+      let name = field_map json__ "name" ControlName.of_json in
+      let type_ = field_map json__ "type" ControlType.of_json in
+      let id = field_map json__ "id" UUID.of_json in
+      let arn = field_map json__ "arn" AuditManagerArn.of_json in
+      make ?state ?tags ?lastUpdatedBy ?createdBy ?lastUpdatedAt ?createdAt
         ?controlMappingSources ?controlSources ?actionPlanInstructions
         ?actionPlanTitle ?testingInformation ?description ?name ?type_ ?id
         ?arn ()
@@ -1732,7 +1805,7 @@ module AssessmentControlSet =
       description: NonEmptyString.t option
         [@ocaml.doc "The description for the control set."];
       status: ControlSetStatus.t option
-        [@ocaml.doc "Specifies the current status of the control set."];
+        [@ocaml.doc "The current status of the control set."];
       roles: Roles.t option
         [@ocaml.doc "The roles that are associated with the control set."];
       controls: AssessmentControls.t option
@@ -1802,17 +1875,17 @@ module AssessmentControlSet =
       make ?manualEvidenceCount ?systemEvidenceCount ?delegations ?controls
         ?roles ?status ?description ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let manualEvidenceCount =
-        field_map json "manualEvidenceCount" Integer.of_json in
+        field_map json__ "manualEvidenceCount" Integer.of_json in
       let systemEvidenceCount =
-        field_map json "systemEvidenceCount" Integer.of_json in
-      let delegations = field_map json "delegations" Delegations.of_json in
-      let controls = field_map json "controls" AssessmentControls.of_json in
-      let roles = field_map json "roles" Roles.of_json in
-      let status = field_map json "status" ControlSetStatus.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let id = field_map json "id" ControlSetId.of_json in
+        field_map json__ "systemEvidenceCount" Integer.of_json in
+      let delegations = field_map json__ "delegations" Delegations.of_json in
+      let controls = field_map json__ "controls" AssessmentControls.of_json in
+      let roles = field_map json__ "roles" Roles.of_json in
+      let status = field_map json__ "status" ControlSetStatus.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let id = field_map json__ "id" ControlSetId.of_json in
       make ?manualEvidenceCount ?systemEvidenceCount ?delegations ?controls
         ?roles ?status ?description ?id ()
     let to_json v = composed_to_json to_value v
@@ -1908,7 +1981,7 @@ module S3Url =
                 (check_string_max i ~max:1024) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^(S|s)3:\\/\\/[a-zA-Z0-9\\-\\.\\(\\)\\'\\*\\_\\!\\/]+$")));
+                       ~pattern:"^(S|s)3:\\/\\/[a-zA-Z0-9\\-\\.\\(\\)\\'\\*\\_\\!\\=\\+\\@\\:\\s\\,\\?\\/]+$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1921,7 +1994,15 @@ module S3Url =
 module AWSAccounts =
   struct
     type nonrec t = AWSAccount.t list
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AWSAccount.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1946,6 +2027,9 @@ module AWSServices =
   struct
     type nonrec t = AWSService.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AWSService.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1991,6 +2075,9 @@ module Controls =
     type nonrec t = Control.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Control.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2023,8 +2110,8 @@ module CreateAssessmentFrameworkControl =
       let id = UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" UUID.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "id" UUID.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The control entity attributes that uniquely identify an existing control to be added to a framework in Audit Manager."]
@@ -2084,56 +2171,248 @@ module Resource =
       {
       arn: GenericArn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) for the resource."];
-      value: String_.t option [@ocaml.doc "The value of the resource."]}
-    let make ?arn = fun ?value -> fun () -> { arn; value }
+      value: String_.t option [@ocaml.doc "The value of the resource."];
+      complianceCheck: String_.t option
+        [@ocaml.doc
+          "The evaluation status for a resource that was assessed when collecting compliance check evidence. Audit Manager classes the resource as non-compliant if Security Hub reports a Fail result, or if Config reports a Non-compliant result. Audit Manager classes the resource as compliant if Security Hub reports a Pass result, or if Config reports a Compliant result. If a compliance check isn't available or applicable, then no compliance evaluation can be made for that resource. This is the case if a resource assessment uses Config or Security Hub as the underlying data source type, but those services aren't enabled. This is also the case if the resource assessment uses an underlying data source type that doesn't support compliance checks (such as manual evidence, Amazon Web Services API calls, or CloudTrail)."]}
+    let make ?arn =
+      fun ?value ->
+        fun ?complianceCheck -> fun () -> { arn; value; complianceCheck }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:GenericArn.to_value));
-        ("value", (Option.map x.value ~f:String_.to_value))]
+        ("value", (Option.map x.value ~f:String_.to_value));
+        ("complianceCheck",
+          (Option.map x.complianceCheck ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let complianceCheck =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "complianceCheck") in
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
       let arn = (Option.map ~f:GenericArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?value ?arn ()
+      make ?complianceCheck ?value ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" String_.of_json in
-      let arn = field_map json "arn" GenericArn.of_json in
-      make ?value ?arn ()
+    let of_json json__ =
+      let complianceCheck =
+        field_map json__ "complianceCheck" String_.of_json in
+      let value = field_map json__ "value" String_.of_json in
+      let arn = field_map json__ "arn" GenericArn.of_json in
+      make ?complianceCheck ?value ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A system asset that's evaluated in an Audit Manager assessment."]
+module ManualEvidenceLocalFileName =
+  struct
+    type nonrec t = string
+    let context_ = "ManualEvidenceLocalFileName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:300) >>=
+                  (fun () -> check_pattern i ~pattern:"[^\\/]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ManualEvidenceLocalFileName" j
+    let to_json = simple_to_json to_value
+  end
+module ManualEvidenceTextResponse =
+  struct
+    type nonrec t = string
+    let context_ = "ManualEvidenceTextResponse"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:"^[\\w\\W\\s\\S]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ManualEvidenceTextResponse" j
+    let to_json = simple_to_json to_value
+  end
 module ValidationExceptionField =
   struct
     type nonrec t =
       {
-      name: String_.t [@ocaml.doc "The name of the validation error."];
-      message: String_.t [@ocaml.doc "The body of the error message."]}
-    let context_ = "ValidationExceptionField"
-    let make ~name = fun ~message -> fun () -> { name; message }
+      name: String_.t option [@ocaml.doc "The name of the validation error."];
+      message: String_.t option [@ocaml.doc "The body of the error message."]}
+    let make ?name = fun ?message -> fun () -> { name; message }
     let to_value x =
       structure_to_value
-        [("name", (Some (String_.to_value x.name)));
-        ("message", (Some (String_.to_value x.message)))]
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~message ~name ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?message ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      let name = field_map_exn json "name" String_.of_json in
-      make ~message ~name ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?message ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Indicates that the request has invalid or missing parameters for the field."]
+module ExportDestinationType =
+  struct
+    type nonrec t =
+      | S3 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | S3 -> "S3" | Non_static_id s -> s
+    let of_string = function | "S3" -> S3 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ExportDestinationType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ExportDestinationType" j)
+    let to_json = simple_to_json to_value
+  end
+module DeleteResources =
+  struct
+    type nonrec t =
+      | ALL 
+      | DEFAULT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ALL -> "ALL" | DEFAULT -> "DEFAULT" | Non_static_id s -> s
+    let of_string =
+      function | "ALL" -> ALL | "DEFAULT" -> DEFAULT | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DeleteResources" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DeleteResources" j)
+    let to_json = simple_to_json to_value
+  end
+module CloudTrailArn =
+  struct
+    type nonrec t = string
+    let context_ = "CloudTrailArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:"^arn:.*:cloudtrail:.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CloudTrailArn" j
+    let to_json = simple_to_json to_value
+  end
+module ErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorMessage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:300) >>=
+             (fun () -> check_pattern i ~pattern:"^[\\w\\W\\s\\S]*$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module EvidenceFinderBackfillStatus =
+  struct
+    type nonrec t =
+      | NOT_STARTED 
+      | IN_PROGRESS 
+      | COMPLETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NOT_STARTED -> "NOT_STARTED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | COMPLETED -> "COMPLETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NOT_STARTED" -> NOT_STARTED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "COMPLETED" -> COMPLETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EvidenceFinderBackfillStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EvidenceFinderBackfillStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module EvidenceFinderEnablementStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | ENABLE_IN_PROGRESS 
+      | DISABLE_IN_PROGRESS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | ENABLE_IN_PROGRESS -> "ENABLE_IN_PROGRESS"
+      | DISABLE_IN_PROGRESS -> "DISABLE_IN_PROGRESS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | "ENABLE_IN_PROGRESS" -> ENABLE_IN_PROGRESS
+      | "DISABLE_IN_PROGRESS" -> DISABLE_IN_PROGRESS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EvidenceFinderEnablementStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EvidenceFinderEnablementStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module AssessmentControlSets =
   struct
     type nonrec t = AssessmentControlSet.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssessmentControlSet.to_value)) |>
         (fun x -> `List x)
@@ -2195,13 +2474,13 @@ module FrameworkMetadata =
         (Option.map ~f:AssessmentName.of_xml) (Xml.child xml_arg0 "name") in
       make ?complianceType ?logo ?description ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let complianceType =
-        field_map json "complianceType" ComplianceType.of_json in
-      let logo = field_map json "logo" Filename.of_json in
+        field_map json__ "complianceType" ComplianceType.of_json in
+      let logo = field_map json__ "logo" Filename.of_json in
       let description =
-        field_map json "description" AssessmentFrameworkDescription.of_json in
-      let name = field_map json "name" AssessmentName.of_json in
+        field_map json__ "description" AssessmentFrameworkDescription.of_json in
+      let name = field_map json__ "name" AssessmentName.of_json in
       make ?complianceType ?logo ?description ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2231,7 +2510,8 @@ module AssessmentReportsDestination =
       destinationType: AssessmentReportDestinationType.t option
         [@ocaml.doc "The destination type, such as Amazon S3."];
       destination: S3Url.t option
-        [@ocaml.doc "The destination of the assessment report."]}
+        [@ocaml.doc
+          "The destination bucket where Audit Manager stores assessment reports."]}
     let make ?destinationType =
       fun ?destination -> fun () -> { destinationType; destination }
     let to_value x =
@@ -2249,10 +2529,10 @@ module AssessmentReportsDestination =
           (Xml.child xml_arg0 "destinationType") in
       make ?destination ?destinationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let destination = field_map json "destination" S3Url.of_json in
+    let of_json json__ =
+      let destination = field_map json__ "destination" S3Url.of_json in
       let destinationType =
-        field_map json "destinationType"
+        field_map json__ "destinationType"
           AssessmentReportDestinationType.of_json in
       make ?destination ?destinationType ()
     let to_json v = composed_to_json to_value v
@@ -2292,7 +2572,7 @@ module Scope =
           "The Amazon Web Services accounts that are included in the scope of the assessment."];
       awsServices: AWSServices.t option
         [@ocaml.doc
-          "The Amazon Web Services services that are included in the scope of the assessment."]}
+          "The Amazon Web Services services that are included in the scope of the assessment. This API parameter is no longer supported. If you use this parameter to specify one or more Amazon Web Services services, Audit Manager ignores this input. Instead, the value for awsServices will show as empty."]}
     let make ?awsAccounts =
       fun ?awsServices -> fun () -> { awsAccounts; awsServices }
     let to_value x =
@@ -2307,13 +2587,13 @@ module Scope =
         (Option.map ~f:AWSAccounts.of_xml) (Xml.child xml_arg0 "awsAccounts") in
       make ?awsServices ?awsAccounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let awsServices = field_map json "awsServices" AWSServices.of_json in
-      let awsAccounts = field_map json "awsAccounts" AWSAccounts.of_json in
+    let of_json json__ =
+      let awsServices = field_map json__ "awsServices" AWSServices.of_json in
+      let awsAccounts = field_map json__ "awsAccounts" AWSAccounts.of_json in
       make ?awsServices ?awsAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The wrapper that contains the Amazon Web Services accounts and services that are in scope for the assessment."]
+       "The wrapper that contains the Amazon Web Services accounts that are in scope for the assessment. You no longer need to specify which Amazon Web Services services are in scope when you create or update an assessment. Audit Manager infers the services in scope by examining your assessment controls and their data sources, and then mapping this information to the relevant Amazon Web Services services. If an underlying data source changes for your assessment, we automatically update the services scope as needed to reflect the correct Amazon Web Services services. This ensures that your assessment collects accurate and comprehensive evidence about all of the relevant services in your AWS environment."]
 module ControlSet =
   struct
     type nonrec t =
@@ -2341,10 +2621,10 @@ module ControlSet =
       let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "id") in
       make ?controls ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let controls = field_map json "controls" Controls.of_json in
-      let name = field_map json "name" ControlSetName.of_json in
-      let id = field_map json "id" UUID.of_json in
+    let of_json json__ =
+      let controls = field_map json__ "controls" Controls.of_json in
+      let name = field_map json__ "name" ControlSetName.of_json in
+      let id = field_map json__ "id" UUID.of_json in
       make ?controls ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A set of controls in Audit Manager."]
@@ -2353,6 +2633,9 @@ module CreateAssessmentFrameworkControls =
     type nonrec t = CreateAssessmentFrameworkControl.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CreateAssessmentFrameworkControl.to_value)) |>
         (fun x -> `List x)
@@ -2396,6 +2679,28 @@ module TimestampUUID =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TimestampUUID" j
+    let to_json = simple_to_json to_value
+  end
+module ControlDomainId =
+  struct
+    type nonrec t = string
+    let context_ = "ControlDomainId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:13) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:.*:controlcatalog:.*:.*:domain/.*|UNCATEGORIZED|^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ControlDomainId" j
     let to_json = simple_to_json to_value
   end
 module EvidenceInsights =
@@ -2443,13 +2748,13 @@ module EvidenceInsights =
       make ?inconclusiveEvidenceCount ?compliantEvidenceCount
         ?noncompliantEvidenceCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inconclusiveEvidenceCount =
-        field_map json "inconclusiveEvidenceCount" NullableInteger.of_json in
+        field_map json__ "inconclusiveEvidenceCount" NullableInteger.of_json in
       let compliantEvidenceCount =
-        field_map json "compliantEvidenceCount" NullableInteger.of_json in
+        field_map json__ "compliantEvidenceCount" NullableInteger.of_json in
       let noncompliantEvidenceCount =
-        field_map json "noncompliantEvidenceCount" NullableInteger.of_json in
+        field_map json__ "noncompliantEvidenceCount" NullableInteger.of_json in
       make ?inconclusiveEvidenceCount ?compliantEvidenceCount
         ?noncompliantEvidenceCount ()
     let to_json v = composed_to_json to_value v
@@ -2756,6 +3061,8 @@ module EvidenceAttributes =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2767,6 +3074,9 @@ module Resources =
   struct
     type nonrec t = Resource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Resource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2884,46 +3194,54 @@ module ErrorCode =
     let of_json j = string_of_json ~kind:"ErrorCode" j
     let to_json = simple_to_json to_value
   end
-module ErrorMessage =
-  struct
-    type nonrec t = string
-    let context_ = "ErrorMessage"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:300) >>=
-             (fun () -> check_pattern i ~pattern:"^[\\w\\W\\s\\S]*$"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ErrorMessage" j
-    let to_json = simple_to_json to_value
-  end
 module ManualEvidence =
   struct
     type nonrec t =
       {
       s3ResourcePath: S3Url.t option
         [@ocaml.doc
-          "The Amazon S3 URL that points to a manual evidence object."]}
-    let make ?s3ResourcePath = fun () -> { s3ResourcePath }
+          "The S3 URL of the object that's imported as manual evidence."];
+      textResponse: ManualEvidenceTextResponse.t option
+        [@ocaml.doc
+          "The plain text response that's entered and saved as manual evidence."];
+      evidenceFileName: ManualEvidenceLocalFileName.t option
+        [@ocaml.doc
+          "The name of the file that's uploaded as manual evidence. This name is populated using the evidenceFileName value from the GetEvidenceFileUploadUrl API response."]}
+    let make ?s3ResourcePath =
+      fun ?textResponse ->
+        fun ?evidenceFileName ->
+          fun () -> { s3ResourcePath; textResponse; evidenceFileName }
     let to_value x =
       structure_to_value
-        [("s3ResourcePath", (Option.map x.s3ResourcePath ~f:S3Url.to_value))]
+        [("s3ResourcePath", (Option.map x.s3ResourcePath ~f:S3Url.to_value));
+        ("textResponse",
+          (Option.map x.textResponse ~f:ManualEvidenceTextResponse.to_value));
+        ("evidenceFileName",
+          (Option.map x.evidenceFileName
+             ~f:ManualEvidenceLocalFileName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let evidenceFileName =
+        (Option.map ~f:ManualEvidenceLocalFileName.of_xml)
+          (Xml.child xml_arg0 "evidenceFileName") in
+      let textResponse =
+        (Option.map ~f:ManualEvidenceTextResponse.of_xml)
+          (Xml.child xml_arg0 "textResponse") in
       let s3ResourcePath =
         (Option.map ~f:S3Url.of_xml) (Xml.child xml_arg0 "s3ResourcePath") in
-      make ?s3ResourcePath ()
+      make ?evidenceFileName ?textResponse ?s3ResourcePath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3ResourcePath = field_map json "s3ResourcePath" S3Url.of_json in
-      make ?s3ResourcePath ()
+    let of_json json__ =
+      let evidenceFileName =
+        field_map json__ "evidenceFileName"
+          ManualEvidenceLocalFileName.of_json in
+      let textResponse =
+        field_map json__ "textResponse" ManualEvidenceTextResponse.of_json in
+      let s3ResourcePath = field_map json__ "s3ResourcePath" S3Url.of_json in
+      make ?evidenceFileName ?textResponse ?s3ResourcePath ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Evidence that's uploaded to Audit Manager manually."]
+  end[@@ocaml.doc
+       "Evidence that's manually added to a control in Audit Manager. manualEvidence can be one of the following: evidenceFileName, s3ResourcePath, or textResponse."]
 module CreateDelegationRequest =
   struct
     type nonrec t =
@@ -2963,11 +3281,11 @@ module CreateDelegationRequest =
           (Xml.child xml_arg0 "comment") in
       make ?roleType ?roleArn ?controlSetId ?comment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleType = field_map json "roleType" RoleType.of_json in
-      let roleArn = field_map json "roleArn" IamArn.of_json in
-      let controlSetId = field_map json "controlSetId" ControlSetId.of_json in
-      let comment = field_map json "comment" DelegationComment.of_json in
+    let of_json json__ =
+      let roleType = field_map json__ "roleType" RoleType.of_json in
+      let roleArn = field_map json__ "roleArn" IamArn.of_json in
+      let controlSetId = field_map json__ "controlSetId" ControlSetId.of_json in
+      let comment = field_map json__ "comment" DelegationComment.of_json in
       make ?roleType ?roleArn ?controlSetId ?comment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2976,6 +3294,9 @@ module ValidationExceptionFieldList =
   struct
     type nonrec t = ValidationExceptionField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationExceptionField.to_value)) |>
         (fun x -> `List x)
@@ -3044,6 +3365,127 @@ module Boolean =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module DefaultExportDestination =
+  struct
+    type nonrec t =
+      {
+      destinationType: ExportDestinationType.t option
+        [@ocaml.doc "The destination type, such as Amazon S3."];
+      destination: S3Url.t option
+        [@ocaml.doc
+          "The destination bucket where Audit Manager stores exported files."]}
+    let make ?destinationType =
+      fun ?destination -> fun () -> { destinationType; destination }
+    let to_value x =
+      structure_to_value
+        [("destinationType",
+           (Option.map x.destinationType ~f:ExportDestinationType.to_value));
+        ("destination", (Option.map x.destination ~f:S3Url.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let destination =
+        (Option.map ~f:S3Url.of_xml) (Xml.child xml_arg0 "destination") in
+      let destinationType =
+        (Option.map ~f:ExportDestinationType.of_xml)
+          (Xml.child xml_arg0 "destinationType") in
+      make ?destination ?destinationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let destination = field_map json__ "destination" S3Url.of_json in
+      let destinationType =
+        field_map json__ "destinationType" ExportDestinationType.of_json in
+      make ?destination ?destinationType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The default s3 bucket where Audit Manager saves the files that you export from evidence finder."]
+module DeregistrationPolicy =
+  struct
+    type nonrec t =
+      {
+      deleteResources: DeleteResources.t option
+        [@ocaml.doc
+          "Specifies which Audit Manager data will be deleted when you deregister Audit Manager. If you set the value to ALL, all of your data is deleted within seven days of deregistration. If you set the value to DEFAULT, none of your data is deleted at the time of deregistration. However, keep in mind that the Audit Manager data retention policy still applies. As a result, any evidence data will be deleted two years after its creation date. Your other Audit Manager resources will continue to exist indefinitely."]}
+    let make ?deleteResources = fun () -> { deleteResources }
+    let to_value x =
+      structure_to_value
+        [("deleteResources",
+           (Option.map x.deleteResources ~f:DeleteResources.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deleteResources =
+        (Option.map ~f:DeleteResources.of_xml)
+          (Xml.child xml_arg0 "deleteResources") in
+      make ?deleteResources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deleteResources =
+        field_map json__ "deleteResources" DeleteResources.of_json in
+      make ?deleteResources ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The deregistration policy for the data that's stored in Audit Manager. You can use this attribute to determine how your data is handled when you deregister Audit Manager. By default, Audit Manager retains evidence data for two years from the time of its creation. Other Audit Manager resources (including assessments, custom controls, and custom frameworks) remain in Audit Manager indefinitely, and are available if you re-register Audit Manager in the future. For more information about data retention, see Data Protection in the Audit Manager User Guide. If you choose to delete all data, this action permanently deletes all evidence data in your account within seven days. It also deletes all of the Audit Manager resources that you created, including assessments, custom controls, and custom frameworks. Your data will not be available if you re-register Audit Manager in the future."]
+module EvidenceFinderEnablement =
+  struct
+    type nonrec t =
+      {
+      eventDataStoreArn: CloudTrailArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the CloudTrail Lake event data store that\226\128\153s used by evidence finder. The event data store is the lake of evidence data that evidence finder runs queries against."];
+      enablementStatus: EvidenceFinderEnablementStatus.t option
+        [@ocaml.doc
+          "The current status of the evidence finder feature and the related event data store. ENABLE_IN_PROGRESS means that you requested to enable evidence finder. An event data store is currently being created to support evidence finder queries. ENABLED means that an event data store was successfully created and evidence finder is enabled. We recommend that you wait 7 days until the event data store is backfilled with your past two years\226\128\153 worth of evidence data. You can use evidence finder in the meantime, but not all data might be available until the backfill is complete. DISABLE_IN_PROGRESS means that you requested to disable evidence finder, and your request is pending the deletion of the event data store. DISABLED means that you have permanently disabled evidence finder and the event data store has been deleted. You can't re-enable evidence finder after this point."];
+      backfillStatus: EvidenceFinderBackfillStatus.t option
+        [@ocaml.doc
+          "The current status of the evidence data backfill process. The backfill starts after you enable evidence finder. During this task, Audit Manager populates an event data store with your past two years\226\128\153 worth of evidence data so that your evidence can be queried. NOT_STARTED means that the backfill hasn\226\128\153t started yet. IN_PROGRESS means that the backfill is in progress. This can take up to 7 days to complete, depending on the amount of evidence data. COMPLETED means that the backfill is complete. All of your past evidence is now queryable."];
+      error: ErrorMessage.t option
+        [@ocaml.doc
+          "Represents any errors that occurred when enabling or disabling evidence finder."]}
+    let make ?eventDataStoreArn =
+      fun ?enablementStatus ->
+        fun ?backfillStatus ->
+          fun ?error ->
+            fun () ->
+              { eventDataStoreArn; enablementStatus; backfillStatus; error }
+    let to_value x =
+      structure_to_value
+        [("eventDataStoreArn",
+           (Option.map x.eventDataStoreArn ~f:CloudTrailArn.to_value));
+        ("enablementStatus",
+          (Option.map x.enablementStatus
+             ~f:EvidenceFinderEnablementStatus.to_value));
+        ("backfillStatus",
+          (Option.map x.backfillStatus
+             ~f:EvidenceFinderBackfillStatus.to_value));
+        ("error", (Option.map x.error ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let error =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "error") in
+      let backfillStatus =
+        (Option.map ~f:EvidenceFinderBackfillStatus.of_xml)
+          (Xml.child xml_arg0 "backfillStatus") in
+      let enablementStatus =
+        (Option.map ~f:EvidenceFinderEnablementStatus.of_xml)
+          (Xml.child xml_arg0 "enablementStatus") in
+      let eventDataStoreArn =
+        (Option.map ~f:CloudTrailArn.of_xml)
+          (Xml.child xml_arg0 "eventDataStoreArn") in
+      make ?error ?backfillStatus ?enablementStatus ?eventDataStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let error = field_map json__ "error" ErrorMessage.of_json in
+      let backfillStatus =
+        field_map json__ "backfillStatus"
+          EvidenceFinderBackfillStatus.of_json in
+      let enablementStatus =
+        field_map json__ "enablementStatus"
+          EvidenceFinderEnablementStatus.of_json in
+      let eventDataStoreArn =
+        field_map json__ "eventDataStoreArn" CloudTrailArn.of_json in
+      make ?error ?backfillStatus ?enablementStatus ?eventDataStoreArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The settings object that specifies whether evidence finder is enabled. This object also describes the related event data store, and the backfill status for populating the event data store with evidence data."]
 module KmsKey =
   struct
     type nonrec t = string
@@ -3122,12 +3564,12 @@ module AssessmentFramework =
       let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "id") in
       make ?controlSets ?metadata ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let controlSets =
-        field_map json "controlSets" AssessmentControlSets.of_json in
-      let metadata = field_map json "metadata" FrameworkMetadata.of_json in
-      let arn = field_map json "arn" AuditManagerArn.of_json in
-      let id = field_map json "id" UUID.of_json in
+        field_map json__ "controlSets" AssessmentControlSets.of_json in
+      let metadata = field_map json__ "metadata" FrameworkMetadata.of_json in
+      let arn = field_map json__ "arn" AuditManagerArn.of_json in
+      let id = field_map json__ "id" UUID.of_json in
       make ?controlSets ?metadata ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3232,22 +3674,22 @@ module AssessmentMetadata =
         ?assessmentReportsDestination ?status ?complianceType ?description
         ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdated = field_map json "lastUpdated" Timestamp.of_json in
-      let creationTime = field_map json "creationTime" Timestamp.of_json in
-      let delegations = field_map json "delegations" Delegations.of_json in
-      let roles = field_map json "roles" Roles.of_json in
-      let scope = field_map json "scope" Scope.of_json in
+    let of_json json__ =
+      let lastUpdated = field_map json__ "lastUpdated" Timestamp.of_json in
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let delegations = field_map json__ "delegations" Delegations.of_json in
+      let roles = field_map json__ "roles" Roles.of_json in
+      let scope = field_map json__ "scope" Scope.of_json in
       let assessmentReportsDestination =
-        field_map json "assessmentReportsDestination"
+        field_map json__ "assessmentReportsDestination"
           AssessmentReportsDestination.of_json in
-      let status = field_map json "status" AssessmentStatus.of_json in
+      let status = field_map json__ "status" AssessmentStatus.of_json in
       let complianceType =
-        field_map json "complianceType" ComplianceType.of_json in
+        field_map json__ "complianceType" ComplianceType.of_json in
       let description =
-        field_map json "description" AssessmentDescription.of_json in
-      let id = field_map json "id" UUID.of_json in
-      let name = field_map json "name" AssessmentName.of_json in
+        field_map json__ "description" AssessmentDescription.of_json in
+      let id = field_map json__ "id" UUID.of_json in
+      let name = field_map json__ "name" AssessmentName.of_json in
       make ?lastUpdated ?creationTime ?delegations ?roles ?scope
         ?assessmentReportsDestination ?status ?complianceType ?description
         ?id ?name ()
@@ -3259,6 +3701,9 @@ module ControlSets =
     type nonrec t = ControlSet.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ControlSet.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3310,12 +3755,12 @@ module UpdateAssessmentFrameworkControlSet =
         (Option.map ~f:ControlSetName.of_xml) (Xml.child xml_arg0 "id") in
       make ~controls ~name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let controls =
-        field_map_exn json "controls"
+        field_map_exn json__ "controls"
           CreateAssessmentFrameworkControls.of_json in
-      let name = field_map_exn json "name" ControlSetName.of_json in
-      let id = field_map json "id" ControlSetName.of_json in
+      let name = field_map_exn json__ "name" ControlSetName.of_json in
+      let id = field_map json__ "id" ControlSetName.of_json in
       make ~controls ~name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3398,17 +3843,17 @@ module Notification =
       make ?source ?eventTime ?description ?controlSetName ?controlSetId
         ?assessmentName ?assessmentId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let source = field_map json "source" NonEmptyString.of_json in
-      let eventTime = field_map json "eventTime" Timestamp.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
+    let of_json json__ =
+      let source = field_map json__ "source" NonEmptyString.of_json in
+      let eventTime = field_map json__ "eventTime" Timestamp.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
       let controlSetName =
-        field_map json "controlSetName" NonEmptyString.of_json in
-      let controlSetId = field_map json "controlSetId" ControlSetId.of_json in
+        field_map json__ "controlSetName" NonEmptyString.of_json in
+      let controlSetId = field_map json__ "controlSetId" ControlSetId.of_json in
       let assessmentName =
-        field_map json "assessmentName" AssessmentName.of_json in
-      let assessmentId = field_map json "assessmentId" UUID.of_json in
-      let id = field_map json "id" TimestampUUID.of_json in
+        field_map json__ "assessmentName" AssessmentName.of_json in
+      let assessmentId = field_map json__ "assessmentId" UUID.of_json in
+      let id = field_map json__ "id" TimestampUUID.of_json in
       make ?source ?eventTime ?description ?controlSetName ?controlSetId
         ?assessmentName ?assessmentId ?id ()
     let to_json v = composed_to_json to_value v
@@ -3426,9 +3871,9 @@ module ControlMetadata =
         [@ocaml.doc
           "The data source that determines where Audit Manager collects evidence from for the control."];
       createdAt: Timestamp.t option
-        [@ocaml.doc "Specifies when the control was created."];
+        [@ocaml.doc "The time when the control was created."];
       lastUpdatedAt: Timestamp.t option
-        [@ocaml.doc "Specifies when the control was most recently updated."]}
+        [@ocaml.doc "The time when the control was most recently updated."]}
     let make ?arn =
       fun ?id ->
         fun ?name ->
@@ -3462,14 +3907,14 @@ module ControlMetadata =
         (Option.map ~f:AuditManagerArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?lastUpdatedAt ?createdAt ?controlSources ?name ?id ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
+    let of_json json__ =
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let controlSources =
-        field_map json "controlSources" ControlSources.of_json in
-      let name = field_map json "name" ControlName.of_json in
-      let id = field_map json "id" UUID.of_json in
-      let arn = field_map json "arn" AuditManagerArn.of_json in
+        field_map json__ "controlSources" ControlSources.of_json in
+      let name = field_map json__ "name" ControlName.of_json in
+      let id = field_map json__ "id" UUID.of_json in
+      let arn = field_map json__ "arn" AuditManagerArn.of_json in
       make ?lastUpdatedAt ?createdAt ?controlSources ?name ?id ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3478,8 +3923,9 @@ module ControlInsightsMetadataItem =
   struct
     type nonrec t =
       {
-      name: NonEmptyString.t option [@ocaml.doc "The name of the control."];
-      id: UUID.t option [@ocaml.doc "The unique identifier for the control."];
+      name: String_.t option [@ocaml.doc "The name of the control."];
+      id: ControlDomainId.t option
+        [@ocaml.doc "The unique identifier for the control."];
       evidenceInsights: EvidenceInsights.t option
         [@ocaml.doc
           "A breakdown of the compliance check status for the evidence that\226\128\153s associated with the control."];
@@ -3492,8 +3938,8 @@ module ControlInsightsMetadataItem =
             fun () -> { name; id; evidenceInsights; lastUpdated }
     let to_value x =
       structure_to_value
-        [("name", (Option.map x.name ~f:NonEmptyString.to_value));
-        ("id", (Option.map x.id ~f:UUID.to_value));
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("id", (Option.map x.id ~f:ControlDomainId.to_value));
         ("evidenceInsights",
           (Option.map x.evidenceInsights ~f:EvidenceInsights.to_value));
         ("lastUpdated", (Option.map x.lastUpdated ~f:Timestamp.to_value))]
@@ -3504,17 +3950,17 @@ module ControlInsightsMetadataItem =
       let evidenceInsights =
         (Option.map ~f:EvidenceInsights.of_xml)
           (Xml.child xml_arg0 "evidenceInsights") in
-      let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "id") in
-      let name =
-        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "name") in
+      let id =
+        (Option.map ~f:ControlDomainId.of_xml) (Xml.child xml_arg0 "id") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?lastUpdated ?evidenceInsights ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdated = field_map json "lastUpdated" Timestamp.of_json in
+    let of_json json__ =
+      let lastUpdated = field_map json__ "lastUpdated" Timestamp.of_json in
       let evidenceInsights =
-        field_map json "evidenceInsights" EvidenceInsights.of_json in
-      let id = field_map json "id" UUID.of_json in
-      let name = field_map json "name" NonEmptyString.of_json in
+        field_map json__ "evidenceInsights" EvidenceInsights.of_json in
+      let id = field_map json__ "id" ControlDomainId.of_json in
+      let name = field_map json__ "name" String_.of_json in
       make ?lastUpdated ?evidenceInsights ?id ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3523,10 +3969,10 @@ module ControlDomainInsights =
   struct
     type nonrec t =
       {
-      name: NonEmptyString.t option
-        [@ocaml.doc "The name of the control domain."];
-      id: UUID.t option
-        [@ocaml.doc "The unique identifier for the control domain."];
+      name: String_.t option [@ocaml.doc "The name of the control domain."];
+      id: ControlDomainId.t option
+        [@ocaml.doc
+          "The unique identifier for the control domain. Audit Manager supports the control domains that are provided by Amazon Web Services Control Catalog. For information about how to find a list of available control domains, see ListDomains in the Amazon Web Services Control Catalog API Reference."];
       controlsCountByNoncompliantEvidence: NullableInteger.t option
         [@ocaml.doc
           "The number of controls in the control domain that collected non-compliant evidence on the lastUpdated date."];
@@ -3555,8 +4001,8 @@ module ControlDomainInsights =
                   }
     let to_value x =
       structure_to_value
-        [("name", (Option.map x.name ~f:NonEmptyString.to_value));
-        ("id", (Option.map x.id ~f:UUID.to_value));
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("id", (Option.map x.id ~f:ControlDomainId.to_value));
         ("controlsCountByNoncompliantEvidence",
           (Option.map x.controlsCountByNoncompliantEvidence
              ~f:NullableInteger.to_value));
@@ -3578,23 +4024,23 @@ module ControlDomainInsights =
       let controlsCountByNoncompliantEvidence =
         (Option.map ~f:NullableInteger.of_xml)
           (Xml.child xml_arg0 "controlsCountByNoncompliantEvidence") in
-      let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "id") in
-      let name =
-        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "name") in
+      let id =
+        (Option.map ~f:ControlDomainId.of_xml) (Xml.child xml_arg0 "id") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?lastUpdated ?evidenceInsights ?totalControlsCount
         ?controlsCountByNoncompliantEvidence ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdated = field_map json "lastUpdated" Timestamp.of_json in
+    let of_json json__ =
+      let lastUpdated = field_map json__ "lastUpdated" Timestamp.of_json in
       let evidenceInsights =
-        field_map json "evidenceInsights" EvidenceInsights.of_json in
+        field_map json__ "evidenceInsights" EvidenceInsights.of_json in
       let totalControlsCount =
-        field_map json "totalControlsCount" NullableInteger.of_json in
+        field_map json__ "totalControlsCount" NullableInteger.of_json in
       let controlsCountByNoncompliantEvidence =
-        field_map json "controlsCountByNoncompliantEvidence"
+        field_map json__ "controlsCountByNoncompliantEvidence"
           NullableInteger.of_json in
-      let id = field_map json "id" UUID.of_json in
-      let name = field_map json "name" NonEmptyString.of_json in
+      let id = field_map json__ "id" ControlDomainId.of_json in
+      let name = field_map json__ "name" String_.of_json in
       make ?lastUpdated ?evidenceInsights ?totalControlsCount
         ?controlsCountByNoncompliantEvidence ?id ?name ()
     let to_json v = composed_to_json to_value v
@@ -3672,16 +4118,16 @@ module AssessmentMetadataItem =
       make ?lastUpdated ?creationTime ?delegations ?roles ?status
         ?complianceType ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdated = field_map json "lastUpdated" Timestamp.of_json in
-      let creationTime = field_map json "creationTime" Timestamp.of_json in
-      let delegations = field_map json "delegations" Delegations.of_json in
-      let roles = field_map json "roles" Roles.of_json in
-      let status = field_map json "status" AssessmentStatus.of_json in
+    let of_json json__ =
+      let lastUpdated = field_map json__ "lastUpdated" Timestamp.of_json in
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let delegations = field_map json__ "delegations" Delegations.of_json in
+      let roles = field_map json__ "roles" Roles.of_json in
+      let status = field_map json__ "status" AssessmentStatus.of_json in
       let complianceType =
-        field_map json "complianceType" ComplianceType.of_json in
-      let id = field_map json "id" UUID.of_json in
-      let name = field_map json "name" AssessmentName.of_json in
+        field_map json__ "complianceType" ComplianceType.of_json in
+      let id = field_map json__ "id" UUID.of_json in
+      let name = field_map json__ "name" AssessmentName.of_json in
       make ?lastUpdated ?creationTime ?delegations ?roles ?status
         ?complianceType ?id ?name ()
     let to_json v = composed_to_json to_value v
@@ -3763,17 +4209,17 @@ module AssessmentReportMetadata =
       make ?creationTime ?status ?author ?assessmentName ?assessmentId
         ?description ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "creationTime" Timestamp.of_json in
-      let status = field_map json "status" AssessmentReportStatus.of_json in
-      let author = field_map json "author" Username.of_json in
+    let of_json json__ =
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let status = field_map json__ "status" AssessmentReportStatus.of_json in
+      let author = field_map json__ "author" Username.of_json in
       let assessmentName =
-        field_map json "assessmentName" AssessmentName.of_json in
-      let assessmentId = field_map json "assessmentId" UUID.of_json in
+        field_map json__ "assessmentName" AssessmentName.of_json in
+      let assessmentId = field_map json__ "assessmentId" UUID.of_json in
       let description =
-        field_map json "description" AssessmentReportDescription.of_json in
-      let name = field_map json "name" AssessmentReportName.of_json in
-      let id = field_map json "id" UUID.of_json in
+        field_map json__ "description" AssessmentReportDescription.of_json in
+      let name = field_map json__ "name" AssessmentReportName.of_json in
+      let id = field_map json__ "id" UUID.of_json in
       make ?creationTime ?status ?author ?assessmentName ?assessmentId
         ?description ?name ?id ()
     let to_json v = composed_to_json to_value v
@@ -3805,10 +4251,9 @@ module AssessmentFrameworkMetadata =
         [@ocaml.doc
           "The number of control sets that are associated with the framework."];
       createdAt: Timestamp.t option
-        [@ocaml.doc "Specifies when the framework was created."];
+        [@ocaml.doc "The time when the framework was created."];
       lastUpdatedAt: Timestamp.t option
-        [@ocaml.doc
-          "Specifies when the framework was most recently updated."]}
+        [@ocaml.doc "The time when the framework was most recently updated."]}
     let make ?arn =
       fun ?id ->
         fun ?type_ ->
@@ -3880,22 +4325,22 @@ module AssessmentFrameworkMetadata =
       make ?lastUpdatedAt ?createdAt ?controlSetsCount ?controlsCount
         ?complianceType ?logo ?description ?name ?type_ ?id ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
+    let of_json json__ =
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let controlSetsCount =
-        field_map json "controlSetsCount" ControlSetsCount.of_json in
+        field_map json__ "controlSetsCount" ControlSetsCount.of_json in
       let controlsCount =
-        field_map json "controlsCount" ControlsCount.of_json in
+        field_map json__ "controlsCount" ControlsCount.of_json in
       let complianceType =
-        field_map json "complianceType" ComplianceType.of_json in
-      let logo = field_map json "logo" Filename.of_json in
+        field_map json__ "complianceType" ComplianceType.of_json in
+      let logo = field_map json__ "logo" Filename.of_json in
       let description =
-        field_map json "description" FrameworkDescription.of_json in
-      let name = field_map json "name" FrameworkName.of_json in
-      let type_ = field_map json "type" FrameworkType.of_json in
-      let id = field_map json "id" UUID.of_json in
-      let arn = field_map json "arn" AuditManagerArn.of_json in
+        field_map json__ "description" FrameworkDescription.of_json in
+      let name = field_map json__ "name" FrameworkName.of_json in
+      let type_ = field_map json__ "type" FrameworkType.of_json in
+      let id = field_map json__ "id" UUID.of_json in
+      let arn = field_map json__ "arn" AuditManagerArn.of_json in
       make ?lastUpdatedAt ?createdAt ?controlSetsCount ?controlsCount
         ?complianceType ?logo ?description ?name ?type_ ?id ?arn ()
     let to_json v = composed_to_json to_value v
@@ -4044,29 +4489,30 @@ module AssessmentFrameworkShareRequest =
         ?destinationRegion ?destinationAccount ?sourceAccount ?status
         ?frameworkDescription ?frameworkName ?frameworkId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let complianceType =
-        field_map json "complianceType" ComplianceType.of_json in
+        field_map json__ "complianceType" ComplianceType.of_json in
       let customControlsCount =
-        field_map json "customControlsCount" NullableInteger.of_json in
+        field_map json__ "customControlsCount" NullableInteger.of_json in
       let standardControlsCount =
-        field_map json "standardControlsCount" NullableInteger.of_json in
-      let comment = field_map json "comment" ShareRequestComment.of_json in
-      let lastUpdated = field_map json "lastUpdated" Timestamp.of_json in
-      let creationTime = field_map json "creationTime" Timestamp.of_json in
-      let expirationTime = field_map json "expirationTime" Timestamp.of_json in
+        field_map json__ "standardControlsCount" NullableInteger.of_json in
+      let comment = field_map json__ "comment" ShareRequestComment.of_json in
+      let lastUpdated = field_map json__ "lastUpdated" Timestamp.of_json in
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let expirationTime =
+        field_map json__ "expirationTime" Timestamp.of_json in
       let destinationRegion =
-        field_map json "destinationRegion" Region.of_json in
+        field_map json__ "destinationRegion" Region.of_json in
       let destinationAccount =
-        field_map json "destinationAccount" AccountId.of_json in
-      let sourceAccount = field_map json "sourceAccount" AccountId.of_json in
-      let status = field_map json "status" ShareRequestStatus.of_json in
+        field_map json__ "destinationAccount" AccountId.of_json in
+      let sourceAccount = field_map json__ "sourceAccount" AccountId.of_json in
+      let status = field_map json__ "status" ShareRequestStatus.of_json in
       let frameworkDescription =
-        field_map json "frameworkDescription" FrameworkDescription.of_json in
+        field_map json__ "frameworkDescription" FrameworkDescription.of_json in
       let frameworkName =
-        field_map json "frameworkName" FrameworkName.of_json in
-      let frameworkId = field_map json "frameworkId" UUID.of_json in
-      let id = field_map json "id" UUID.of_json in
+        field_map json__ "frameworkName" FrameworkName.of_json in
+      let frameworkId = field_map json__ "frameworkId" UUID.of_json in
+      let id = field_map json__ "id" UUID.of_json in
       make ?complianceType ?customControlsCount ?standardControlsCount
         ?comment ?lastUpdated ?creationTime ?expirationTime
         ?destinationRegion ?destinationAccount ?sourceAccount ?status
@@ -4078,9 +4524,9 @@ module ControlInsightsMetadataByAssessmentItem =
   struct
     type nonrec t =
       {
-      name: NonEmptyString.t option
+      name: String_.t option
         [@ocaml.doc "The name of the assessment control."];
-      id: UUID.t option
+      id: ControlDomainId.t option
         [@ocaml.doc "The unique identifier for the assessment control."];
       evidenceInsights: EvidenceInsights.t option
         [@ocaml.doc
@@ -4100,8 +4546,8 @@ module ControlInsightsMetadataByAssessmentItem =
                 { name; id; evidenceInsights; controlSetName; lastUpdated }
     let to_value x =
       structure_to_value
-        [("name", (Option.map x.name ~f:NonEmptyString.to_value));
-        ("id", (Option.map x.id ~f:UUID.to_value));
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("id", (Option.map x.id ~f:ControlDomainId.to_value));
         ("evidenceInsights",
           (Option.map x.evidenceInsights ~f:EvidenceInsights.to_value));
         ("controlSetName",
@@ -4117,19 +4563,19 @@ module ControlInsightsMetadataByAssessmentItem =
       let evidenceInsights =
         (Option.map ~f:EvidenceInsights.of_xml)
           (Xml.child xml_arg0 "evidenceInsights") in
-      let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "id") in
-      let name =
-        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "name") in
+      let id =
+        (Option.map ~f:ControlDomainId.of_xml) (Xml.child xml_arg0 "id") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?lastUpdated ?controlSetName ?evidenceInsights ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdated = field_map json "lastUpdated" Timestamp.of_json in
+    let of_json json__ =
+      let lastUpdated = field_map json__ "lastUpdated" Timestamp.of_json in
       let controlSetName =
-        field_map json "controlSetName" NonEmptyString.of_json in
+        field_map json__ "controlSetName" NonEmptyString.of_json in
       let evidenceInsights =
-        field_map json "evidenceInsights" EvidenceInsights.of_json in
-      let id = field_map json "id" UUID.of_json in
-      let name = field_map json "name" NonEmptyString.of_json in
+        field_map json__ "evidenceInsights" EvidenceInsights.of_json in
+      let id = field_map json__ "id" ControlDomainId.of_json in
+      let name = field_map json__ "name" String_.of_json in
       make ?lastUpdated ?controlSetName ?evidenceInsights ?id ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4139,14 +4585,14 @@ module ServiceMetadata =
     type nonrec t =
       {
       name: AWSServiceName.t option
-        [@ocaml.doc "The name of the Amazon Web Service."];
+        [@ocaml.doc "The name of the Amazon Web Services service."];
       displayName: NonEmptyString.t option
-        [@ocaml.doc "The display name of the Amazon Web Service."];
+        [@ocaml.doc "The display name of the Amazon Web Services service."];
       description: NonEmptyString.t option
-        [@ocaml.doc "The description of the Amazon Web Service."];
+        [@ocaml.doc "The description of the Amazon Web Services service."];
       category: NonEmptyString.t option
         [@ocaml.doc
-          "The category that the Amazon Web Service belongs to, such as compute, storage, or database."]}
+          "The category that the Amazon Web Services service belongs to, such as compute, storage, or database."]}
     let make ?name =
       fun ?displayName ->
         fun ?description ->
@@ -4174,15 +4620,15 @@ module ServiceMetadata =
         (Option.map ~f:AWSServiceName.of_xml) (Xml.child xml_arg0 "name") in
       make ?category ?description ?displayName ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let category = field_map json "category" NonEmptyString.of_json in
-      let description = field_map json "description" NonEmptyString.of_json in
-      let displayName = field_map json "displayName" NonEmptyString.of_json in
-      let name = field_map json "name" AWSServiceName.of_json in
+    let of_json json__ =
+      let category = field_map json__ "category" NonEmptyString.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
+      let displayName = field_map json__ "displayName" NonEmptyString.of_json in
+      let name = field_map json__ "name" AWSServiceName.of_json in
       make ?category ?description ?displayName ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The metadata that's associated with the Amazon Web Service."]
+       "The metadata that's associated with the Amazon Web Services service."]
 module AssessmentEvidenceFolder =
   struct
     type nonrec t =
@@ -4203,7 +4649,7 @@ module AssessmentEvidenceFolder =
           "The identifier for the folder that the evidence is stored in."];
       dataSource: String_.t option
         [@ocaml.doc
-          "The Amazon Web Service that the evidence was collected from."];
+          "The Amazon Web Services service that the evidence was collected from."];
       author: String_.t option
         [@ocaml.doc "The name of the user who created the evidence folder."];
       totalEvidence: Integer.t option
@@ -4361,34 +4807,35 @@ module AssessmentEvidenceFolder =
         ?controlName ?assessmentReportSelectionCount ?totalEvidence ?author
         ?dataSource ?id ?controlId ?controlSetId ?assessmentId ?date ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let evidenceAwsServiceSourceCount =
-        field_map json "evidenceAwsServiceSourceCount" Integer.of_json in
+        field_map json__ "evidenceAwsServiceSourceCount" Integer.of_json in
       let evidenceByTypeUserActivityCount =
-        field_map json "evidenceByTypeUserActivityCount" Integer.of_json in
+        field_map json__ "evidenceByTypeUserActivityCount" Integer.of_json in
       let evidenceByTypeComplianceCheckIssuesCount =
-        field_map json "evidenceByTypeComplianceCheckIssuesCount"
+        field_map json__ "evidenceByTypeComplianceCheckIssuesCount"
           Integer.of_json in
       let evidenceByTypeComplianceCheckCount =
-        field_map json "evidenceByTypeComplianceCheckCount" Integer.of_json in
+        field_map json__ "evidenceByTypeComplianceCheckCount" Integer.of_json in
       let evidenceByTypeManualCount =
-        field_map json "evidenceByTypeManualCount" Integer.of_json in
+        field_map json__ "evidenceByTypeManualCount" Integer.of_json in
       let evidenceByTypeConfigurationDataCount =
-        field_map json "evidenceByTypeConfigurationDataCount" Integer.of_json in
+        field_map json__ "evidenceByTypeConfigurationDataCount"
+          Integer.of_json in
       let evidenceResourcesIncludedCount =
-        field_map json "evidenceResourcesIncludedCount" Integer.of_json in
-      let controlName = field_map json "controlName" ControlName.of_json in
+        field_map json__ "evidenceResourcesIncludedCount" Integer.of_json in
+      let controlName = field_map json__ "controlName" ControlName.of_json in
       let assessmentReportSelectionCount =
-        field_map json "assessmentReportSelectionCount" Integer.of_json in
-      let totalEvidence = field_map json "totalEvidence" Integer.of_json in
-      let author = field_map json "author" String_.of_json in
-      let dataSource = field_map json "dataSource" String_.of_json in
-      let id = field_map json "id" UUID.of_json in
-      let controlId = field_map json "controlId" UUID.of_json in
-      let controlSetId = field_map json "controlSetId" ControlSetId.of_json in
-      let assessmentId = field_map json "assessmentId" UUID.of_json in
-      let date = field_map json "date" Timestamp.of_json in
-      let name = field_map json "name" AssessmentEvidenceFolderName.of_json in
+        field_map json__ "assessmentReportSelectionCount" Integer.of_json in
+      let totalEvidence = field_map json__ "totalEvidence" Integer.of_json in
+      let author = field_map json__ "author" String_.of_json in
+      let dataSource = field_map json__ "dataSource" String_.of_json in
+      let id = field_map json__ "id" UUID.of_json in
+      let controlId = field_map json__ "controlId" UUID.of_json in
+      let controlSetId = field_map json__ "controlSetId" ControlSetId.of_json in
+      let assessmentId = field_map json__ "assessmentId" UUID.of_json in
+      let date = field_map json__ "date" Timestamp.of_json in
+      let name = field_map json__ "name" AssessmentEvidenceFolderName.of_json in
       make ?evidenceAwsServiceSourceCount ?evidenceByTypeUserActivityCount
         ?evidenceByTypeComplianceCheckIssuesCount
         ?evidenceByTypeComplianceCheckCount ?evidenceByTypeManualCount
@@ -4411,7 +4858,7 @@ module Evidence =
           "The timestamp that represents when the evidence was collected."];
       eventSource: AWSServiceName.t option
         [@ocaml.doc
-          "The Amazon Web Service that the evidence is collected from."];
+          "The Amazon Web Services service that the evidence is collected from."];
       eventName: EventName.t option
         [@ocaml.doc "The name of the evidence event."];
       evidenceByType: String_.t option
@@ -4424,10 +4871,10 @@ module Evidence =
           "The names and values that are used by the evidence event. This includes an attribute name (such as allowUsersToChangePassword) and value (such as true or false)."];
       iamId: IamArn.t option
         [@ocaml.doc
-          "The unique identifier for the IAM user or role that's associated with the evidence."];
+          "The unique identifier for the user or role that's associated with the evidence."];
       complianceCheck: String_.t option
         [@ocaml.doc
-          "The evaluation status for evidence that falls under the compliance check category. For evidence collected from Security Hub, a Pass or Fail result is shown. For evidence collected from Config, a Compliant or Noncompliant result is shown."];
+          "The evaluation status for automated evidence that falls under the compliance check category. Audit Manager classes evidence as non-compliant if Security Hub reports a Fail result, or if Config reports a Non-compliant result. Audit Manager classes evidence as compliant if Security Hub reports a Pass result, or if Config reports a Compliant result. If a compliance check isn't available or applicable, then no compliance evaluation can be made for that evidence. This is the case if the evidence uses Config or Security Hub as the underlying data source type, but those services aren't enabled. This is also the case if the evidence uses an underlying data source type that doesn't support compliance checks (such as manual evidence, Amazon Web Services API calls, or CloudTrail)."];
       awsOrganization: String_.t option
         [@ocaml.doc
           "The Amazon Web Services account that the evidence is collected from, and its organization path."];
@@ -4537,32 +4984,35 @@ module Evidence =
         ?resourcesIncluded ?evidenceByType ?eventName ?eventSource ?time
         ?evidenceAwsAccountId ?dataSource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentReportSelection =
-        field_map json "assessmentReportSelection" String_.of_json in
-      let id = field_map json "id" UUID.of_json in
-      let evidenceFolderId = field_map json "evidenceFolderId" UUID.of_json in
-      let awsAccountId = field_map json "awsAccountId" AccountId.of_json in
-      let awsOrganization = field_map json "awsOrganization" String_.of_json in
-      let complianceCheck = field_map json "complianceCheck" String_.of_json in
-      let iamId = field_map json "iamId" IamArn.of_json in
-      let attributes = field_map json "attributes" EvidenceAttributes.of_json in
+        field_map json__ "assessmentReportSelection" String_.of_json in
+      let id = field_map json__ "id" UUID.of_json in
+      let evidenceFolderId = field_map json__ "evidenceFolderId" UUID.of_json in
+      let awsAccountId = field_map json__ "awsAccountId" AccountId.of_json in
+      let awsOrganization =
+        field_map json__ "awsOrganization" String_.of_json in
+      let complianceCheck =
+        field_map json__ "complianceCheck" String_.of_json in
+      let iamId = field_map json__ "iamId" IamArn.of_json in
+      let attributes =
+        field_map json__ "attributes" EvidenceAttributes.of_json in
       let resourcesIncluded =
-        field_map json "resourcesIncluded" Resources.of_json in
-      let evidenceByType = field_map json "evidenceByType" String_.of_json in
-      let eventName = field_map json "eventName" EventName.of_json in
-      let eventSource = field_map json "eventSource" AWSServiceName.of_json in
-      let time = field_map json "time" Timestamp.of_json in
+        field_map json__ "resourcesIncluded" Resources.of_json in
+      let evidenceByType = field_map json__ "evidenceByType" String_.of_json in
+      let eventName = field_map json__ "eventName" EventName.of_json in
+      let eventSource = field_map json__ "eventSource" AWSServiceName.of_json in
+      let time = field_map json__ "time" Timestamp.of_json in
       let evidenceAwsAccountId =
-        field_map json "evidenceAwsAccountId" AccountId.of_json in
-      let dataSource = field_map json "dataSource" String_.of_json in
+        field_map json__ "evidenceAwsAccountId" AccountId.of_json in
+      let dataSource = field_map json__ "dataSource" String_.of_json in
       make ?assessmentReportSelection ?id ?evidenceFolderId ?awsAccountId
         ?awsOrganization ?complianceCheck ?iamId ?attributes
         ?resourcesIncluded ?evidenceByType ?eventName ?eventSource ?time
         ?evidenceAwsAccountId ?dataSource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A record that contains the information needed to demonstrate compliance with the requirements specified by a control. Examples of evidence include change activity triggered by a user, or a system configuration snapshot."]
+       "A record that contains the information needed to demonstrate compliance with the requirements specified by a control. Examples of evidence include change activity invoked by a user, or a system configuration snapshot."]
 module DelegationMetadata =
   struct
     type nonrec t =
@@ -4630,16 +5080,16 @@ module DelegationMetadata =
       make ?controlSetName ?creationTime ?roleArn ?status ?assessmentId
         ?assessmentName ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let controlSetName =
-        field_map json "controlSetName" NonEmptyString.of_json in
-      let creationTime = field_map json "creationTime" Timestamp.of_json in
-      let roleArn = field_map json "roleArn" IamArn.of_json in
-      let status = field_map json "status" DelegationStatus.of_json in
-      let assessmentId = field_map json "assessmentId" UUID.of_json in
+        field_map json__ "controlSetName" NonEmptyString.of_json in
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let roleArn = field_map json__ "roleArn" IamArn.of_json in
+      let status = field_map json__ "status" DelegationStatus.of_json in
+      let assessmentId = field_map json__ "assessmentId" UUID.of_json in
       let assessmentName =
-        field_map json "assessmentName" AssessmentName.of_json in
-      let id = field_map json "id" UUID.of_json in
+        field_map json__ "assessmentName" AssessmentName.of_json in
+      let id = field_map json__ "id" UUID.of_json in
       make ?controlSetName ?creationTime ?roleArn ?status ?assessmentId
         ?assessmentName ?id ()
     let to_json v = composed_to_json to_value v
@@ -4660,7 +5110,7 @@ module ChangeLog =
         [@ocaml.doc
           "The time when the action was performed and the changelog record was created."];
       createdBy: IamArn.t option
-        [@ocaml.doc "The IAM user or role that performed the action."]}
+        [@ocaml.doc "The user or role that performed the action."]}
     let make ?objectType =
       fun ?objectName ->
         fun ?action ->
@@ -4691,12 +5141,12 @@ module ChangeLog =
           (Xml.child xml_arg0 "objectType") in
       make ?createdBy ?createdAt ?action ?objectName ?objectType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdBy = field_map json "createdBy" IamArn.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
-      let action = field_map json "action" ActionEnum.of_json in
-      let objectName = field_map json "objectName" NonEmptyString.of_json in
-      let objectType = field_map json "objectType" ObjectTypeEnum.of_json in
+    let of_json json__ =
+      let createdBy = field_map json__ "createdBy" IamArn.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let action = field_map json__ "action" ActionEnum.of_json in
+      let objectName = field_map json__ "objectName" NonEmptyString.of_json in
+      let objectType = field_map json__ "objectType" ObjectTypeEnum.of_json in
       make ?createdBy ?createdAt ?action ?objectName ?objectType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4754,14 +5204,14 @@ module CreateControlMappingSource =
           "The description of the data source that determines where Audit Manager collects evidence from for the control."];
       sourceSetUpOption: SourceSetUpOption.t option
         [@ocaml.doc
-          "The setup option for the data source, which reflects if the evidence collection is automated or manual."];
+          "The setup option for the data source. This option reflects if the evidence collection method is automated or manual. If you don\226\128\153t provide a value for sourceSetUpOption, Audit Manager automatically infers and populates the correct value based on the sourceType that you specify."];
       sourceType: SourceType.t option
         [@ocaml.doc
-          "Specifies one of the five types of data sources for evidence collection."];
+          "Specifies which type of data source is used to collect evidence. The source can be an individual data source type, such as AWS_Cloudtrail, AWS_Config, AWS_Security_Hub, AWS_API_Call, or MANUAL. The source can also be a managed grouping of data sources, such as a Core_Control or a Common_Control."];
       sourceKeyword: SourceKeyword.t option ;
       sourceFrequency: SourceFrequency.t option
         [@ocaml.doc
-          "The frequency of evidence collection for the control mapping source."];
+          "Specifies how often evidence is collected from the control mapping source."];
       troubleshootingText: TroubleshootingText.t option
         [@ocaml.doc "The instructions for troubleshooting the control."]}
     let make ?sourceName =
@@ -4819,24 +5269,24 @@ module CreateControlMappingSource =
       make ?troubleshootingText ?sourceFrequency ?sourceKeyword ?sourceType
         ?sourceSetUpOption ?sourceDescription ?sourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let troubleshootingText =
-        field_map json "troubleshootingText" TroubleshootingText.of_json in
+        field_map json__ "troubleshootingText" TroubleshootingText.of_json in
       let sourceFrequency =
-        field_map json "sourceFrequency" SourceFrequency.of_json in
+        field_map json__ "sourceFrequency" SourceFrequency.of_json in
       let sourceKeyword =
-        field_map json "sourceKeyword" SourceKeyword.of_json in
-      let sourceType = field_map json "sourceType" SourceType.of_json in
+        field_map json__ "sourceKeyword" SourceKeyword.of_json in
+      let sourceType = field_map json__ "sourceType" SourceType.of_json in
       let sourceSetUpOption =
-        field_map json "sourceSetUpOption" SourceSetUpOption.of_json in
+        field_map json__ "sourceSetUpOption" SourceSetUpOption.of_json in
       let sourceDescription =
-        field_map json "sourceDescription" SourceDescription.of_json in
-      let sourceName = field_map json "sourceName" SourceName.of_json in
+        field_map json__ "sourceDescription" SourceDescription.of_json in
+      let sourceName = field_map json__ "sourceName" SourceName.of_json in
       make ?troubleshootingText ?sourceFrequency ?sourceKeyword ?sourceType
         ?sourceSetUpOption ?sourceDescription ?sourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The control mapping fields that represent the source for evidence collection, along with related parameters and metadata. This doesn't contain mappingID."]
+       "The mapping attributes that determine the evidence source for a given control, along with related parameters and metadata. This doesn't contain mappingID."]
 module CreateAssessmentFrameworkControlSet =
   struct
     type nonrec t =
@@ -4863,10 +5313,10 @@ module CreateAssessmentFrameworkControlSet =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?controls ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let controls =
-        field_map json "controls" CreateAssessmentFrameworkControls.of_json in
-      let name = field_map_exn json "name" ControlSetName.of_json in
+        field_map json__ "controls" CreateAssessmentFrameworkControls.of_json in
+      let name = field_map_exn json__ "name" ControlSetName.of_json in
       make ?controls ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4907,11 +5357,11 @@ module BatchImportEvidenceToAssessmentControlError =
           (Xml.child xml_arg0 "manualEvidence") in
       make ?errorMessage ?errorCode ?manualEvidence ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "errorCode" ErrorCode.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "errorCode" ErrorCode.of_json in
       let manualEvidence =
-        field_map json "manualEvidence" ManualEvidence.of_json in
+        field_map json__ "manualEvidence" ManualEvidence.of_json in
       make ?errorMessage ?errorCode ?manualEvidence ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4923,11 +5373,9 @@ module AssessmentReportEvidenceError =
       evidenceId: UUID.t option
         [@ocaml.doc "The identifier for the evidence."];
       errorCode: ErrorCode.t option
-        [@ocaml.doc
-          "The error code that the AssessmentReportEvidence API returned."];
+        [@ocaml.doc "The error code that was returned."];
       errorMessage: ErrorMessage.t option
-        [@ocaml.doc
-          "The error message that the AssessmentReportEvidence API returned."]}
+        [@ocaml.doc "The error message that was returned."]}
     let make ?evidenceId =
       fun ?errorCode ->
         fun ?errorMessage ->
@@ -4949,14 +5397,14 @@ module AssessmentReportEvidenceError =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "evidenceId") in
       make ?errorMessage ?errorCode ?evidenceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "errorCode" ErrorCode.of_json in
-      let evidenceId = field_map json "evidenceId" UUID.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "errorCode" ErrorCode.of_json in
+      let evidenceId = field_map json__ "evidenceId" UUID.of_json in
       make ?errorMessage ?errorCode ?evidenceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An error entity for the AssessmentReportEvidence API. This is used to provide more meaningful errors than a simple string message."]
+       "An error entity for assessment report evidence errors. This is used to provide more meaningful errors than a simple string message."]
 module BatchDeleteDelegationByAssessmentError =
   struct
     type nonrec t =
@@ -4990,10 +5438,10 @@ module BatchDeleteDelegationByAssessmentError =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "delegationId") in
       make ?errorMessage ?errorCode ?delegationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "errorCode" ErrorCode.of_json in
-      let delegationId = field_map json "delegationId" UUID.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "errorCode" ErrorCode.of_json in
+      let delegationId = field_map json__ "delegationId" UUID.of_json in
       make ?errorMessage ?errorCode ?delegationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5035,11 +5483,11 @@ module BatchCreateDelegationByAssessmentError =
           (Xml.child xml_arg0 "createDelegationRequest") in
       make ?errorMessage ?errorCode ?createDelegationRequest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "errorCode" ErrorCode.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "errorCode" ErrorCode.of_json in
       let createDelegationRequest =
-        field_map json "createDelegationRequest"
+        field_map json__ "createDelegationRequest"
           CreateDelegationRequest.of_json in
       make ?errorMessage ?errorCode ?createDelegationRequest ()
     let to_json v = composed_to_json to_value v
@@ -5048,40 +5496,40 @@ module BatchCreateDelegationByAssessmentError =
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Your account isn't registered with Audit Manager. Check the delegated administrator setup on the Audit Manager settings page, and try again."]
 module InternalServerException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "InternalServerException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An internal service error occurred during the processing of your request. Try again later."]
@@ -5089,37 +5537,34 @@ module ResourceNotFoundException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
-      resourceId: String_.t
+      message: String_.t option ;
+      resourceId: String_.t option
         [@ocaml.doc "The unique identifier for the resource."];
-      resourceType: String_.t
+      resourceType: String_.t option
         [@ocaml.doc "The type of resource that's affected by the error."]}
-    let context_ = "ResourceNotFoundException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("resourceId", (Some (String_.to_value x.resourceId)));
-        ("resourceType", (Some (String_.to_value x.resourceType)))]
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
       let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "resourceType" String_.of_json in
-      let resourceId = field_map_exn json "resourceId" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~resourceType ~resourceId ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The resource that's specified in the request can't be found."]
@@ -5127,6 +5572,9 @@ module ValidationErrors =
   struct
     type nonrec t = NonEmptyString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5151,17 +5599,16 @@ module ValidationException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       reason: ValidationExceptionReason.t option
         [@ocaml.doc "The reason the request failed validation."];
       fields: ValidationExceptionFieldList.t option
         [@ocaml.doc "The fields that caused the error, if applicable."]}
-    let context_ = "ValidationException"
-    let make ?reason =
-      fun ?fields -> fun ~message -> fun () -> { reason; fields; message }
+    let make ?message =
+      fun ?reason -> fun ?fields -> fun () -> { message; reason; fields }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("reason",
           (Option.map x.reason ~f:ValidationExceptionReason.to_value));
         ("fields",
@@ -5175,15 +5622,16 @@ module ValidationException =
         (Option.map ~f:ValidationExceptionReason.of_xml)
           (Xml.child xml_arg0 "reason") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?fields ?reason ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?fields ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fields =
-        field_map json "fields" ValidationExceptionFieldList.of_json in
-      let reason = field_map json "reason" ValidationExceptionReason.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?fields ?reason ~message ()
+        field_map json__ "fields" ValidationExceptionFieldList.of_json in
+      let reason =
+        field_map json__ "reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?fields ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request has invalid or missing parameters."]
 module Settings =
@@ -5198,23 +5646,38 @@ module Settings =
       defaultAssessmentReportsDestination:
         AssessmentReportsDestination.t option
         [@ocaml.doc
-          "The default storage destination for assessment reports."];
+          "The default S3 destination bucket for storing assessment reports."];
       defaultProcessOwners: Roles.t option
         [@ocaml.doc "The designated default audit owners."];
-      kmsKey: KmsKey.t option [@ocaml.doc "The KMS key details."]}
+      kmsKey: KmsKey.t option [@ocaml.doc "The KMS key details."];
+      evidenceFinderEnablement: EvidenceFinderEnablement.t option
+        [@ocaml.doc
+          "The current evidence finder status and event data store details."];
+      deregistrationPolicy: DeregistrationPolicy.t option
+        [@ocaml.doc
+          "The deregistration policy for your Audit Manager data. You can use this attribute to determine how your data is handled when you deregister Audit Manager."];
+      defaultExportDestination: DefaultExportDestination.t option
+        [@ocaml.doc
+          "The default S3 destination bucket for storing evidence finder exports."]}
     let make ?isAwsOrgEnabled =
       fun ?snsTopic ->
         fun ?defaultAssessmentReportsDestination ->
           fun ?defaultProcessOwners ->
             fun ?kmsKey ->
-              fun () ->
-                {
-                  isAwsOrgEnabled;
-                  snsTopic;
-                  defaultAssessmentReportsDestination;
-                  defaultProcessOwners;
-                  kmsKey
-                }
+              fun ?evidenceFinderEnablement ->
+                fun ?deregistrationPolicy ->
+                  fun ?defaultExportDestination ->
+                    fun () ->
+                      {
+                        isAwsOrgEnabled;
+                        snsTopic;
+                        defaultAssessmentReportsDestination;
+                        defaultProcessOwners;
+                        kmsKey;
+                        evidenceFinderEnablement;
+                        deregistrationPolicy;
+                        defaultExportDestination
+                      }
     let to_value x =
       structure_to_value
         [("isAwsOrgEnabled",
@@ -5225,9 +5688,26 @@ module Settings =
              ~f:AssessmentReportsDestination.to_value));
         ("defaultProcessOwners",
           (Option.map x.defaultProcessOwners ~f:Roles.to_value));
-        ("kmsKey", (Option.map x.kmsKey ~f:KmsKey.to_value))]
+        ("kmsKey", (Option.map x.kmsKey ~f:KmsKey.to_value));
+        ("evidenceFinderEnablement",
+          (Option.map x.evidenceFinderEnablement
+             ~f:EvidenceFinderEnablement.to_value));
+        ("deregistrationPolicy",
+          (Option.map x.deregistrationPolicy ~f:DeregistrationPolicy.to_value));
+        ("defaultExportDestination",
+          (Option.map x.defaultExportDestination
+             ~f:DefaultExportDestination.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let defaultExportDestination =
+        (Option.map ~f:DefaultExportDestination.of_xml)
+          (Xml.child xml_arg0 "defaultExportDestination") in
+      let deregistrationPolicy =
+        (Option.map ~f:DeregistrationPolicy.of_xml)
+          (Xml.child xml_arg0 "deregistrationPolicy") in
+      let evidenceFinderEnablement =
+        (Option.map ~f:EvidenceFinderEnablement.of_xml)
+          (Xml.child xml_arg0 "evidenceFinderEnablement") in
       let kmsKey =
         (Option.map ~f:KmsKey.of_xml) (Xml.child xml_arg0 "kmsKey") in
       let defaultProcessOwners =
@@ -5240,20 +5720,31 @@ module Settings =
         (Option.map ~f:SNSTopic.of_xml) (Xml.child xml_arg0 "snsTopic") in
       let isAwsOrgEnabled =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isAwsOrgEnabled") in
-      make ?kmsKey ?defaultProcessOwners ?defaultAssessmentReportsDestination
-        ?snsTopic ?isAwsOrgEnabled ()
+      make ?defaultExportDestination ?deregistrationPolicy
+        ?evidenceFinderEnablement ?kmsKey ?defaultProcessOwners
+        ?defaultAssessmentReportsDestination ?snsTopic ?isAwsOrgEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKey = field_map json "kmsKey" KmsKey.of_json in
+    let of_json json__ =
+      let defaultExportDestination =
+        field_map json__ "defaultExportDestination"
+          DefaultExportDestination.of_json in
+      let deregistrationPolicy =
+        field_map json__ "deregistrationPolicy" DeregistrationPolicy.of_json in
+      let evidenceFinderEnablement =
+        field_map json__ "evidenceFinderEnablement"
+          EvidenceFinderEnablement.of_json in
+      let kmsKey = field_map json__ "kmsKey" KmsKey.of_json in
       let defaultProcessOwners =
-        field_map json "defaultProcessOwners" Roles.of_json in
+        field_map json__ "defaultProcessOwners" Roles.of_json in
       let defaultAssessmentReportsDestination =
-        field_map json "defaultAssessmentReportsDestination"
+        field_map json__ "defaultAssessmentReportsDestination"
           AssessmentReportsDestination.of_json in
-      let snsTopic = field_map json "snsTopic" SNSTopic.of_json in
-      let isAwsOrgEnabled = field_map json "isAwsOrgEnabled" Boolean.of_json in
-      make ?kmsKey ?defaultProcessOwners ?defaultAssessmentReportsDestination
-        ?snsTopic ?isAwsOrgEnabled ()
+      let snsTopic = field_map json__ "snsTopic" SNSTopic.of_json in
+      let isAwsOrgEnabled =
+        field_map json__ "isAwsOrgEnabled" Boolean.of_json in
+      make ?defaultExportDestination ?deregistrationPolicy
+        ?evidenceFinderEnablement ?kmsKey ?defaultProcessOwners
+        ?defaultAssessmentReportsDestination ?snsTopic ?isAwsOrgEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The settings object that holds all supported Audit Manager settings."]
@@ -5321,16 +5812,56 @@ module Assessment =
         (Option.map ~f:AuditManagerArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?framework ?metadata ?awsAccount ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let framework = field_map json "framework" AssessmentFramework.of_json in
-      let metadata = field_map json "metadata" AssessmentMetadata.of_json in
-      let awsAccount = field_map json "awsAccount" AWSAccount.of_json in
-      let arn = field_map json "arn" AuditManagerArn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let framework =
+        field_map json__ "framework" AssessmentFramework.of_json in
+      let metadata = field_map json__ "metadata" AssessmentMetadata.of_json in
+      let awsAccount = field_map json__ "awsAccount" AWSAccount.of_json in
+      let arn = field_map json__ "arn" AuditManagerArn.of_json in
       make ?tags ?framework ?metadata ?awsAccount ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An entity that defines the scope of audit evidence collected by Audit Manager. An Audit Manager assessment is an implementation of an Audit Manager framework."]
+module ServiceQuotaExceededException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You've reached your account quota for this resource type. To perform the requested action, delete some existing resources or request a quota increase from the Service Quotas console. For a list of Audit Manager service quotas, see Quotas and restrictions for Audit Manager."]
+module ThrottlingException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request was denied due to request throttling."]
 module ShareRequestAction =
   struct
     type nonrec t =
@@ -5396,30 +5927,29 @@ module Framework =
       name: FrameworkName.t option [@ocaml.doc "The name of the framework."];
       type_: FrameworkType.t option
         [@ocaml.doc
-          "The framework type, such as a custom framework or a standard framework."];
+          "Specifies whether the framework is a standard framework or a custom framework."];
       complianceType: ComplianceType.t option
         [@ocaml.doc
-          "The compliance type that the new custom framework supports, such as CIS or HIPAA."];
+          "The compliance type that the framework supports, such as CIS or HIPAA."];
       description: FrameworkDescription.t option
         [@ocaml.doc "The description of the framework."];
       logo: Filename.t option
         [@ocaml.doc "The logo that's associated with the framework."];
       controlSources: ControlSources.t option
         [@ocaml.doc
-          "The sources that Audit Manager collects evidence from for the control."];
+          "The control data sources where Audit Manager collects evidence from. This API parameter is no longer supported."];
       controlSets: ControlSets.t option
         [@ocaml.doc
-          "The control sets that are associated with the framework."];
+          "The control sets that are associated with the framework. The Controls object returns a partial response when called through Framework APIs. For a complete Controls object, use GetControl."];
       createdAt: Timestamp.t option
-        [@ocaml.doc "Specifies when the framework was created."];
+        [@ocaml.doc "The time when the framework was created."];
       lastUpdatedAt: Timestamp.t option
-        [@ocaml.doc
-          "Specifies when the framework was most recently updated."];
+        [@ocaml.doc "The time when the framework was most recently updated."];
       createdBy: CreatedBy.t option
-        [@ocaml.doc "The IAM user or role that created the framework."];
+        [@ocaml.doc "The user or role that created the framework."];
       lastUpdatedBy: LastUpdatedBy.t option
         [@ocaml.doc
-          "The IAM user or role that most recently updated the framework."];
+          "The user or role that most recently updated the framework."];
       tags: TagMap.t option
         [@ocaml.doc "The tags that are associated with the framework."]}
     let make ?arn =
@@ -5508,25 +6038,25 @@ module Framework =
         ?controlSets ?controlSources ?logo ?description ?complianceType
         ?type_ ?name ?id ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
       let lastUpdatedBy =
-        field_map json "lastUpdatedBy" LastUpdatedBy.of_json in
-      let createdBy = field_map json "createdBy" CreatedBy.of_json in
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
-      let controlSets = field_map json "controlSets" ControlSets.of_json in
+        field_map json__ "lastUpdatedBy" LastUpdatedBy.of_json in
+      let createdBy = field_map json__ "createdBy" CreatedBy.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let controlSets = field_map json__ "controlSets" ControlSets.of_json in
       let controlSources =
-        field_map json "controlSources" ControlSources.of_json in
-      let logo = field_map json "logo" Filename.of_json in
+        field_map json__ "controlSources" ControlSources.of_json in
+      let logo = field_map json__ "logo" Filename.of_json in
       let description =
-        field_map json "description" FrameworkDescription.of_json in
+        field_map json__ "description" FrameworkDescription.of_json in
       let complianceType =
-        field_map json "complianceType" ComplianceType.of_json in
-      let type_ = field_map json "type" FrameworkType.of_json in
-      let name = field_map json "name" FrameworkName.of_json in
-      let id = field_map json "id" UUID.of_json in
-      let arn = field_map json "arn" AuditManagerArn.of_json in
+        field_map json__ "complianceType" ComplianceType.of_json in
+      let type_ = field_map json__ "type" FrameworkType.of_json in
+      let name = field_map json__ "name" FrameworkName.of_json in
+      let id = field_map json__ "id" UUID.of_json in
+      let arn = field_map json__ "arn" AuditManagerArn.of_json in
       make ?tags ?lastUpdatedBy ?createdBy ?lastUpdatedAt ?createdAt
         ?controlSets ?controlSources ?logo ?description ?complianceType
         ?type_ ?name ?id ?arn ()
@@ -5538,6 +6068,9 @@ module UpdateAssessmentFrameworkControlSets =
     type nonrec t = UpdateAssessmentFrameworkControlSet.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpdateAssessmentFrameworkControlSet.to_value)) |>
         (fun x -> `List x)
@@ -5569,6 +6102,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5640,6 +6176,9 @@ module Notifications =
   struct
     type nonrec t = Notification.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Notification.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5702,6 +6241,9 @@ module Keywords =
   struct
     type nonrec t = KeywordValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KeywordValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5722,10 +6264,47 @@ module Keywords =
       list_of_json ~kind:"Keywords" ~of_json:KeywordValue.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DataSourceType =
+  struct
+    type nonrec t =
+      | AWS_Cloudtrail 
+      | AWS_Config 
+      | AWS_Security_Hub 
+      | AWS_API_Call 
+      | MANUAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AWS_Cloudtrail -> "AWS_Cloudtrail"
+      | AWS_Config -> "AWS_Config"
+      | AWS_Security_Hub -> "AWS_Security_Hub"
+      | AWS_API_Call -> "AWS_API_Call"
+      | MANUAL -> "MANUAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AWS_Cloudtrail" -> AWS_Cloudtrail
+      | "AWS_Config" -> AWS_Config
+      | "AWS_Security_Hub" -> AWS_Security_Hub
+      | "AWS_API_Call" -> AWS_API_Call
+      | "MANUAL" -> MANUAL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DataSourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DataSourceType" j)
+    let to_json = simple_to_json to_value
+  end
 module ControlMetadataList =
   struct
     type nonrec t = ControlMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ControlMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5747,10 +6326,35 @@ module ControlMetadataList =
         ~of_json:ControlMetadata.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ControlCatalogId =
+  struct
+    type nonrec t = string
+    let context_ = "ControlCatalogId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:13) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:.*:controlcatalog:.*|UNCATEGORIZED")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ControlCatalogId" j
+    let to_json = simple_to_json to_value
+  end
 module ControlInsightsMetadata =
   struct
     type nonrec t = ControlInsightsMetadataItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ControlInsightsMetadataItem.to_value)) |>
         (fun x -> `List x)
@@ -5777,6 +6381,9 @@ module ControlDomainInsightsList =
   struct
     type nonrec t = ControlDomainInsights.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ControlDomainInsights.to_value)) |>
         (fun x -> `List x)
@@ -5803,6 +6410,9 @@ module ListAssessmentMetadata =
   struct
     type nonrec t = AssessmentMetadataItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssessmentMetadataItem.to_value)) |>
         (fun x -> `List x)
@@ -5829,6 +6439,9 @@ module AssessmentReportsMetadata =
   struct
     type nonrec t = AssessmentReportMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssessmentReportMetadata.to_value)) |>
         (fun x -> `List x)
@@ -5855,6 +6468,9 @@ module FrameworkMetadataList =
   struct
     type nonrec t = AssessmentFrameworkMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssessmentFrameworkMetadata.to_value)) |>
         (fun x -> `List x)
@@ -5881,6 +6497,9 @@ module AssessmentFrameworkShareRequestList =
   struct
     type nonrec t = AssessmentFrameworkShareRequest.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssessmentFrameworkShareRequest.to_value)) |>
         (fun x -> `List x)
@@ -5907,6 +6526,9 @@ module ControlInsightsMetadataByAssessment =
   struct
     type nonrec t = ControlInsightsMetadataByAssessmentItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ControlInsightsMetadataByAssessmentItem.to_value))
         |> (fun x -> `List x)
@@ -5938,6 +6560,9 @@ module SettingAttribute =
       | SNS_TOPIC 
       | DEFAULT_ASSESSMENT_REPORTS_DESTINATION 
       | DEFAULT_PROCESS_OWNERS 
+      | EVIDENCE_FINDER_ENABLEMENT 
+      | DEREGISTRATION_POLICY 
+      | DEFAULT_EXPORT_DESTINATION 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -5948,6 +6573,9 @@ module SettingAttribute =
       | DEFAULT_ASSESSMENT_REPORTS_DESTINATION ->
           "DEFAULT_ASSESSMENT_REPORTS_DESTINATION"
       | DEFAULT_PROCESS_OWNERS -> "DEFAULT_PROCESS_OWNERS"
+      | EVIDENCE_FINDER_ENABLEMENT -> "EVIDENCE_FINDER_ENABLEMENT"
+      | DEREGISTRATION_POLICY -> "DEREGISTRATION_POLICY"
+      | DEFAULT_EXPORT_DESTINATION -> "DEFAULT_EXPORT_DESTINATION"
       | Non_static_id s -> s
     let of_string =
       function
@@ -5957,6 +6585,9 @@ module SettingAttribute =
       | "DEFAULT_ASSESSMENT_REPORTS_DESTINATION" ->
           DEFAULT_ASSESSMENT_REPORTS_DESTINATION
       | "DEFAULT_PROCESS_OWNERS" -> DEFAULT_PROCESS_OWNERS
+      | "EVIDENCE_FINDER_ENABLEMENT" -> EVIDENCE_FINDER_ENABLEMENT
+      | "DEREGISTRATION_POLICY" -> DEREGISTRATION_POLICY
+      | "DEFAULT_EXPORT_DESTINATION" -> DEFAULT_EXPORT_DESTINATION
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -5970,6 +6601,9 @@ module ServiceMetadataList =
   struct
     type nonrec t = ServiceMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6076,21 +6710,22 @@ module Insights =
         ?inconclusiveEvidenceCount ?compliantEvidenceCount
         ?noncompliantEvidenceCount ?activeAssessmentsCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdated = field_map json "lastUpdated" Timestamp.of_json in
+    let of_json json__ =
+      let lastUpdated = field_map json__ "lastUpdated" Timestamp.of_json in
       let totalAssessmentControlsCount =
-        field_map json "totalAssessmentControlsCount" NullableInteger.of_json in
+        field_map json__ "totalAssessmentControlsCount"
+          NullableInteger.of_json in
       let assessmentControlsCountByNoncompliantEvidence =
-        field_map json "assessmentControlsCountByNoncompliantEvidence"
+        field_map json__ "assessmentControlsCountByNoncompliantEvidence"
           NullableInteger.of_json in
       let inconclusiveEvidenceCount =
-        field_map json "inconclusiveEvidenceCount" NullableInteger.of_json in
+        field_map json__ "inconclusiveEvidenceCount" NullableInteger.of_json in
       let compliantEvidenceCount =
-        field_map json "compliantEvidenceCount" NullableInteger.of_json in
+        field_map json__ "compliantEvidenceCount" NullableInteger.of_json in
       let noncompliantEvidenceCount =
-        field_map json "noncompliantEvidenceCount" NullableInteger.of_json in
+        field_map json__ "noncompliantEvidenceCount" NullableInteger.of_json in
       let activeAssessmentsCount =
-        field_map json "activeAssessmentsCount" NullableInteger.of_json in
+        field_map json__ "activeAssessmentsCount" NullableInteger.of_json in
       make ?lastUpdated ?totalAssessmentControlsCount
         ?assessmentControlsCountByNoncompliantEvidence
         ?inconclusiveEvidenceCount ?compliantEvidenceCount
@@ -6174,19 +6809,20 @@ module InsightsByAssessment =
         ?inconclusiveEvidenceCount ?compliantEvidenceCount
         ?noncompliantEvidenceCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdated = field_map json "lastUpdated" Timestamp.of_json in
+    let of_json json__ =
+      let lastUpdated = field_map json__ "lastUpdated" Timestamp.of_json in
       let totalAssessmentControlsCount =
-        field_map json "totalAssessmentControlsCount" NullableInteger.of_json in
+        field_map json__ "totalAssessmentControlsCount"
+          NullableInteger.of_json in
       let assessmentControlsCountByNoncompliantEvidence =
-        field_map json "assessmentControlsCountByNoncompliantEvidence"
+        field_map json__ "assessmentControlsCountByNoncompliantEvidence"
           NullableInteger.of_json in
       let inconclusiveEvidenceCount =
-        field_map json "inconclusiveEvidenceCount" NullableInteger.of_json in
+        field_map json__ "inconclusiveEvidenceCount" NullableInteger.of_json in
       let compliantEvidenceCount =
-        field_map json "compliantEvidenceCount" NullableInteger.of_json in
+        field_map json__ "compliantEvidenceCount" NullableInteger.of_json in
       let noncompliantEvidenceCount =
-        field_map json "noncompliantEvidenceCount" NullableInteger.of_json in
+        field_map json__ "noncompliantEvidenceCount" NullableInteger.of_json in
       make ?lastUpdated ?totalAssessmentControlsCount
         ?assessmentControlsCountByNoncompliantEvidence
         ?inconclusiveEvidenceCount ?compliantEvidenceCount
@@ -6198,6 +6834,9 @@ module AssessmentEvidenceFolders =
   struct
     type nonrec t = AssessmentEvidenceFolder.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssessmentEvidenceFolder.to_value)) |>
         (fun x -> `List x)
@@ -6224,6 +6863,9 @@ module EvidenceList =
   struct
     type nonrec t = Evidence.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Evidence.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6248,6 +6890,9 @@ module DelegationMetadataList =
   struct
     type nonrec t = DelegationMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DelegationMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6273,6 +6918,9 @@ module ChangeLogs =
   struct
     type nonrec t = ChangeLog.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChangeLog.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6316,10 +6964,10 @@ module URL =
           (Xml.child xml_arg0 "hyperlinkName") in
       make ?link ?hyperlinkName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let link = field_map json "link" UrlLink.of_json in
+    let of_json json__ =
+      let link = field_map json__ "link" UrlLink.of_json in
       let hyperlinkName =
-        field_map json "hyperlinkName" HyperlinkName.of_json in
+        field_map json__ "hyperlinkName" HyperlinkName.of_json in
       make ?link ?hyperlinkName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6329,6 +6977,9 @@ module CreateControlMappingSources =
     type nonrec t = CreateControlMappingSource.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CreateControlMappingSource.to_value)) |>
         (fun x -> `List x)
@@ -6435,28 +7086,51 @@ module AssessmentReport =
       make ?creationTime ?status ?author ?assessmentName ?assessmentId
         ?awsAccountId ?description ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "creationTime" Timestamp.of_json in
-      let status = field_map json "status" AssessmentReportStatus.of_json in
-      let author = field_map json "author" Username.of_json in
+    let of_json json__ =
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let status = field_map json__ "status" AssessmentReportStatus.of_json in
+      let author = field_map json__ "author" Username.of_json in
       let assessmentName =
-        field_map json "assessmentName" AssessmentName.of_json in
-      let assessmentId = field_map json "assessmentId" UUID.of_json in
-      let awsAccountId = field_map json "awsAccountId" AccountId.of_json in
+        field_map json__ "assessmentName" AssessmentName.of_json in
+      let assessmentId = field_map json__ "assessmentId" UUID.of_json in
+      let awsAccountId = field_map json__ "awsAccountId" AccountId.of_json in
       let description =
-        field_map json "description" AssessmentReportDescription.of_json in
-      let name = field_map json "name" AssessmentReportName.of_json in
-      let id = field_map json "id" UUID.of_json in
+        field_map json__ "description" AssessmentReportDescription.of_json in
+      let name = field_map json__ "name" AssessmentReportName.of_json in
+      let id = field_map json__ "id" UUID.of_json in
       make ?creationTime ?status ?author ?assessmentName ?assessmentId
         ?awsAccountId ?description ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A finalized document that's generated from an Audit Manager assessment. These reports summarize the relevant evidence that was collected for your audit, and link to the relevant evidence folders. These evidence folders are named and organized according to the controls that are specified in your assessment."]
+module QueryStatement =
+  struct
+    type nonrec t = string
+    let context_ = "QueryStatement"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:10000) >>=
+                  (fun () -> check_pattern i ~pattern:"(?s).*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QueryStatement" j
+    let to_json = simple_to_json to_value
+  end
 module CreateAssessmentFrameworkControlSets =
   struct
     type nonrec t = CreateAssessmentFrameworkControlSet.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CreateAssessmentFrameworkControlSet.to_value)) |>
         (fun x -> `List x)
@@ -6484,6 +7158,9 @@ module BatchImportEvidenceToAssessmentControlErrors =
   struct
     type nonrec t = BatchImportEvidenceToAssessmentControlError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map ~f:BatchImportEvidenceToAssessmentControlError.to_value))
@@ -6516,6 +7193,9 @@ module ManualEvidenceList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ManualEvidence.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6541,6 +7221,9 @@ module AssessmentReportEvidenceErrors =
   struct
     type nonrec t = AssessmentReportEvidenceError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssessmentReportEvidenceError.to_value)) |>
         (fun x -> `List x)
@@ -6571,6 +7254,9 @@ module EvidenceIds =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UUID.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6594,6 +7280,9 @@ module BatchDeleteDelegationByAssessmentErrors =
   struct
     type nonrec t = BatchDeleteDelegationByAssessmentError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchDeleteDelegationByAssessmentError.to_value))
         |> (fun x -> `List x)
@@ -6625,6 +7314,9 @@ module DelegationIds =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UUID.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6649,6 +7341,9 @@ module BatchCreateDelegationByAssessmentErrors =
   struct
     type nonrec t = BatchCreateDelegationByAssessmentError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchCreateDelegationByAssessmentError.to_value))
         |> (fun x -> `List x)
@@ -6680,6 +7375,9 @@ module CreateDelegationRequests =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CreateDelegationRequest.to_value)) |>
         (fun x -> `List x)
@@ -6816,15 +7514,15 @@ module ValidateAssessmentReportIntegrityResponse =
       make ?validationErrors ?signatureKeyId ?signatureDateTime
         ?signatureAlgorithm ?signatureValid ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let validationErrors =
-        field_map json "validationErrors" ValidationErrors.of_json in
-      let signatureKeyId = field_map json "signatureKeyId" String_.of_json in
+        field_map json__ "validationErrors" ValidationErrors.of_json in
+      let signatureKeyId = field_map json__ "signatureKeyId" String_.of_json in
       let signatureDateTime =
-        field_map json "signatureDateTime" String_.of_json in
+        field_map json__ "signatureDateTime" String_.of_json in
       let signatureAlgorithm =
-        field_map json "signatureAlgorithm" String_.of_json in
-      let signatureValid = field_map json "signatureValid" Boolean.of_json in
+        field_map json__ "signatureAlgorithm" String_.of_json in
+      let signatureValid = field_map json__ "signatureValid" Boolean.of_json in
       make ?validationErrors ?signatureKeyId ?signatureDateTime
         ?signatureAlgorithm ?signatureValid ()
     let to_json v = composed_to_json to_value v
@@ -6849,8 +7547,9 @@ module ValidateAssessmentReportIntegrityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "s3RelativePath") in
       make ~s3RelativePath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3RelativePath = field_map_exn json "s3RelativePath" S3Url.of_json in
+    let of_json json__ =
+      let s3RelativePath =
+        field_map_exn json__ "s3RelativePath" S3Url.of_json in
       make ~s3RelativePath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6916,12 +7615,11 @@ module UpdateSettingsResponse =
         (Option.map ~f:Settings.of_xml) (Xml.child xml_arg0 "settings") in
       make ?settings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let settings = field_map json "settings" Settings.of_json in
+    let of_json json__ =
+      let settings = field_map json__ "settings" Settings.of_json in
       make ?settings ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Updates Audit Manager settings for the current user account."]
+  end[@@ocaml.doc "Updates Audit Manager settings for the current account."]
 module UpdateSettingsRequest =
   struct
     type nonrec t =
@@ -6932,21 +7630,36 @@ module UpdateSettingsRequest =
       defaultAssessmentReportsDestination:
         AssessmentReportsDestination.t option
         [@ocaml.doc
-          "The default storage destination for assessment reports."];
+          "The default S3 destination bucket for storing assessment reports."];
       defaultProcessOwners: Roles.t option
         [@ocaml.doc "A list of the default audit owners."];
-      kmsKey: KmsKey.t option [@ocaml.doc "The KMS key details."]}
+      kmsKey: KmsKey.t option [@ocaml.doc "The KMS key details."];
+      evidenceFinderEnabled: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the evidence finder feature is enabled. Change this attribute to enable or disable evidence finder. When you use this attribute to disable evidence finder, Audit Manager deletes the event data store that\226\128\153s used to query your evidence data. As a result, you can\226\128\153t re-enable evidence finder and use the feature again. Your only alternative is to deregister and then re-register Audit Manager."];
+      deregistrationPolicy: DeregistrationPolicy.t option
+        [@ocaml.doc
+          "The deregistration policy for your Audit Manager data. You can use this attribute to determine how your data is handled when you deregister Audit Manager."];
+      defaultExportDestination: DefaultExportDestination.t option
+        [@ocaml.doc
+          "The default S3 destination bucket for storing evidence finder exports."]}
     let make ?snsTopic =
       fun ?defaultAssessmentReportsDestination ->
         fun ?defaultProcessOwners ->
           fun ?kmsKey ->
-            fun () ->
-              {
-                snsTopic;
-                defaultAssessmentReportsDestination;
-                defaultProcessOwners;
-                kmsKey
-              }
+            fun ?evidenceFinderEnabled ->
+              fun ?deregistrationPolicy ->
+                fun ?defaultExportDestination ->
+                  fun () ->
+                    {
+                      snsTopic;
+                      defaultAssessmentReportsDestination;
+                      defaultProcessOwners;
+                      kmsKey;
+                      evidenceFinderEnabled;
+                      deregistrationPolicy;
+                      defaultExportDestination
+                    }
     let to_value x =
       structure_to_value
         [("snsTopic", (Option.map x.snsTopic ~f:SnsArn.to_value));
@@ -6955,9 +7668,25 @@ module UpdateSettingsRequest =
              ~f:AssessmentReportsDestination.to_value));
         ("defaultProcessOwners",
           (Option.map x.defaultProcessOwners ~f:Roles.to_value));
-        ("kmsKey", (Option.map x.kmsKey ~f:KmsKey.to_value))]
+        ("kmsKey", (Option.map x.kmsKey ~f:KmsKey.to_value));
+        ("evidenceFinderEnabled",
+          (Option.map x.evidenceFinderEnabled ~f:Boolean.to_value));
+        ("deregistrationPolicy",
+          (Option.map x.deregistrationPolicy ~f:DeregistrationPolicy.to_value));
+        ("defaultExportDestination",
+          (Option.map x.defaultExportDestination
+             ~f:DefaultExportDestination.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let defaultExportDestination =
+        (Option.map ~f:DefaultExportDestination.of_xml)
+          (Xml.child xml_arg0 "defaultExportDestination") in
+      let deregistrationPolicy =
+        (Option.map ~f:DeregistrationPolicy.of_xml)
+          (Xml.child xml_arg0 "deregistrationPolicy") in
+      let evidenceFinderEnabled =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "evidenceFinderEnabled") in
       let kmsKey =
         (Option.map ~f:KmsKey.of_xml) (Xml.child xml_arg0 "kmsKey") in
       let defaultProcessOwners =
@@ -6968,22 +7697,30 @@ module UpdateSettingsRequest =
           (Xml.child xml_arg0 "defaultAssessmentReportsDestination") in
       let snsTopic =
         (Option.map ~f:SnsArn.of_xml) (Xml.child xml_arg0 "snsTopic") in
-      make ?kmsKey ?defaultProcessOwners ?defaultAssessmentReportsDestination
-        ?snsTopic ()
+      make ?defaultExportDestination ?deregistrationPolicy
+        ?evidenceFinderEnabled ?kmsKey ?defaultProcessOwners
+        ?defaultAssessmentReportsDestination ?snsTopic ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKey = field_map json "kmsKey" KmsKey.of_json in
+    let of_json json__ =
+      let defaultExportDestination =
+        field_map json__ "defaultExportDestination"
+          DefaultExportDestination.of_json in
+      let deregistrationPolicy =
+        field_map json__ "deregistrationPolicy" DeregistrationPolicy.of_json in
+      let evidenceFinderEnabled =
+        field_map json__ "evidenceFinderEnabled" Boolean.of_json in
+      let kmsKey = field_map json__ "kmsKey" KmsKey.of_json in
       let defaultProcessOwners =
-        field_map json "defaultProcessOwners" Roles.of_json in
+        field_map json__ "defaultProcessOwners" Roles.of_json in
       let defaultAssessmentReportsDestination =
-        field_map json "defaultAssessmentReportsDestination"
+        field_map json__ "defaultAssessmentReportsDestination"
           AssessmentReportsDestination.of_json in
-      let snsTopic = field_map json "snsTopic" SnsArn.of_json in
-      make ?kmsKey ?defaultProcessOwners ?defaultAssessmentReportsDestination
-        ?snsTopic ()
+      let snsTopic = field_map json__ "snsTopic" SnsArn.of_json in
+      make ?defaultExportDestination ?deregistrationPolicy
+        ?evidenceFinderEnabled ?kmsKey ?defaultProcessOwners
+        ?defaultAssessmentReportsDestination ?snsTopic ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Updates Audit Manager settings for the current user account."]
+  end[@@ocaml.doc "Updates Audit Manager settings for the current account."]
 module UpdateControlResponse =
   struct
     type nonrec t =
@@ -7055,8 +7792,8 @@ module UpdateControlResponse =
         (Option.map ~f:Control.of_xml) (Xml.child xml_arg0 "control") in
       make ?control ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let control = field_map json "control" Control.of_json in
+    let of_json json__ =
+      let control = field_map json__ "control" Control.of_json in
       make ?control ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a custom control in Audit Manager."]
@@ -7136,21 +7873,21 @@ module UpdateControlRequest =
       make ~controlMappingSources ?actionPlanInstructions ?actionPlanTitle
         ?testingInformation ?description ~name ~controlId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let controlMappingSources =
-        field_map_exn json "controlMappingSources"
+        field_map_exn json__ "controlMappingSources"
           ControlMappingSources.of_json in
       let actionPlanInstructions =
-        field_map json "actionPlanInstructions"
+        field_map json__ "actionPlanInstructions"
           ActionPlanInstructions.of_json in
       let actionPlanTitle =
-        field_map json "actionPlanTitle" ActionPlanTitle.of_json in
+        field_map json__ "actionPlanTitle" ActionPlanTitle.of_json in
       let testingInformation =
-        field_map json "testingInformation" TestingInformation.of_json in
+        field_map json__ "testingInformation" TestingInformation.of_json in
       let description =
-        field_map json "description" ControlDescription.of_json in
-      let name = field_map_exn json "name" ControlName.of_json in
-      let controlId = field_map_exn json "controlId" UUID.of_json in
+        field_map json__ "description" ControlDescription.of_json in
+      let name = field_map_exn json__ "name" ControlName.of_json in
+      let controlId = field_map_exn json__ "controlId" UUID.of_json in
       make ~controlMappingSources ?actionPlanInstructions ?actionPlanTitle
         ?testingInformation ?description ~name ~controlId ()
     let to_json v = composed_to_json to_value v
@@ -7166,6 +7903,7 @@ module UpdateAssessmentStatusResponse =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?assessment = fun () -> { assessment }
@@ -7177,6 +7915,9 @@ module UpdateAssessmentStatusResponse =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -7190,6 +7931,9 @@ module UpdateAssessmentStatusResponse =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -7208,6 +7952,10 @@ module UpdateAssessmentStatusResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -7226,8 +7974,8 @@ module UpdateAssessmentStatusResponse =
         (Option.map ~f:Assessment.of_xml) (Xml.child xml_arg0 "assessment") in
       make ?assessment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assessment = field_map json "assessment" Assessment.of_json in
+    let of_json json__ =
+      let assessment = field_map json__ "assessment" Assessment.of_json in
       make ?assessment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the status of an assessment in Audit Manager."]
@@ -7255,9 +8003,9 @@ module UpdateAssessmentStatusRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ~status ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" AssessmentStatus.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+    let of_json json__ =
+      let status = field_map_exn json__ "status" AssessmentStatus.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ~status ~assessmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the status of an assessment in Audit Manager."]
@@ -7267,11 +8015,13 @@ module UpdateAssessmentResponse =
       {
       assessment: Assessment.t option
         [@ocaml.doc
-          "The response object for the UpdateAssessmentRequest API. This is the name of the updated assessment."]}
+          "The response object for the UpdateAssessment API. This is the name of the updated assessment."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?assessment = fun () -> { assessment }
@@ -7283,6 +8033,11 @@ module UpdateAssessmentResponse =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -7296,6 +8051,11 @@ module UpdateAssessmentResponse =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -7314,6 +8074,14 @@ module UpdateAssessmentResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -7332,8 +8100,8 @@ module UpdateAssessmentResponse =
         (Option.map ~f:Assessment.of_xml) (Xml.child xml_arg0 "assessment") in
       make ?assessment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assessment = field_map json "assessment" Assessment.of_json in
+    let of_json json__ =
+      let assessment = field_map json__ "assessment" Assessment.of_json in
       make ?assessment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Edits an Audit Manager assessment."]
@@ -7401,17 +8169,18 @@ module UpdateAssessmentRequest =
       make ?roles ?assessmentReportsDestination ~scope ?assessmentDescription
         ?assessmentName ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roles = field_map json "roles" Roles.of_json in
+    let of_json json__ =
+      let roles = field_map json__ "roles" Roles.of_json in
       let assessmentReportsDestination =
-        field_map json "assessmentReportsDestination"
+        field_map json__ "assessmentReportsDestination"
           AssessmentReportsDestination.of_json in
-      let scope = field_map_exn json "scope" Scope.of_json in
+      let scope = field_map_exn json__ "scope" Scope.of_json in
       let assessmentDescription =
-        field_map json "assessmentDescription" AssessmentDescription.of_json in
+        field_map json__ "assessmentDescription"
+          AssessmentDescription.of_json in
       let assessmentName =
-        field_map json "assessmentName" AssessmentName.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+        field_map json__ "assessmentName" AssessmentName.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ?roles ?assessmentReportsDestination ~scope ?assessmentDescription
         ?assessmentName ~assessmentId ()
     let to_json v = composed_to_json to_value v
@@ -7428,6 +8197,7 @@ module UpdateAssessmentFrameworkShareResponse =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?assessmentFrameworkShareRequest =
@@ -7440,6 +8210,9 @@ module UpdateAssessmentFrameworkShareResponse =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -7453,6 +8226,9 @@ module UpdateAssessmentFrameworkShareResponse =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -7471,6 +8247,10 @@ module UpdateAssessmentFrameworkShareResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -7492,9 +8272,9 @@ module UpdateAssessmentFrameworkShareResponse =
           (Xml.child xml_arg0 "assessmentFrameworkShareRequest") in
       make ?assessmentFrameworkShareRequest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentFrameworkShareRequest =
-        field_map json "assessmentFrameworkShareRequest"
+        field_map json__ "assessmentFrameworkShareRequest"
           AssessmentFrameworkShareRequest.of_json in
       make ?assessmentFrameworkShareRequest ()
     let to_json v = composed_to_json to_value v
@@ -7532,11 +8312,11 @@ module UpdateAssessmentFrameworkShareRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "requestId") in
       make ~action ~requestType ~requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let action = field_map_exn json "action" ShareRequestAction.of_json in
+    let of_json json__ =
+      let action = field_map_exn json__ "action" ShareRequestAction.of_json in
       let requestType =
-        field_map_exn json "requestType" ShareRequestType.of_json in
-      let requestId = field_map_exn json "requestId" UUID.of_json in
+        field_map_exn json__ "requestType" ShareRequestType.of_json in
+      let requestId = field_map_exn json__ "requestId" UUID.of_json in
       make ~action ~requestType ~requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7545,11 +8325,12 @@ module UpdateAssessmentFrameworkResponse =
   struct
     type nonrec t =
       {
-      framework: Framework.t option [@ocaml.doc "The name of the framework."]}
+      framework: Framework.t option [@ocaml.doc "The framework object."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?framework = fun () -> { framework }
@@ -7561,6 +8342,9 @@ module UpdateAssessmentFrameworkResponse =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -7574,6 +8358,9 @@ module UpdateAssessmentFrameworkResponse =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -7592,6 +8379,10 @@ module UpdateAssessmentFrameworkResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -7610,8 +8401,8 @@ module UpdateAssessmentFrameworkResponse =
         (Option.map ~f:Framework.of_xml) (Xml.child xml_arg0 "framework") in
       make ?framework ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let framework = field_map json "framework" Framework.of_json in
+    let of_json json__ =
+      let framework = field_map json__ "framework" Framework.of_json in
       make ?framework ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a custom framework in Audit Manager."]
@@ -7630,7 +8421,7 @@ module UpdateAssessmentFrameworkRequest =
           "The compliance type that the new custom framework supports, such as CIS or HIPAA."];
       controlSets: UpdateAssessmentFrameworkControlSets.t
         [@ocaml.doc
-          "The control sets that are associated with the framework."]}
+          "The control sets that are associated with the framework. The Controls object returns a partial response when called through Framework APIs. For a complete Controls object, use GetControl."]}
     let context_ = "UpdateAssessmentFrameworkRequest"
     let make ?description =
       fun ?complianceType ->
@@ -7668,16 +8459,16 @@ module UpdateAssessmentFrameworkRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "frameworkId") in
       make ~controlSets ?complianceType ?description ~name ~frameworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let controlSets =
-        field_map_exn json "controlSets"
+        field_map_exn json__ "controlSets"
           UpdateAssessmentFrameworkControlSets.of_json in
       let complianceType =
-        field_map json "complianceType" ComplianceType.of_json in
+        field_map json__ "complianceType" ComplianceType.of_json in
       let description =
-        field_map json "description" FrameworkDescription.of_json in
-      let name = field_map_exn json "name" FrameworkName.of_json in
-      let frameworkId = field_map_exn json "frameworkId" UUID.of_json in
+        field_map json__ "description" FrameworkDescription.of_json in
+      let name = field_map_exn json__ "name" FrameworkName.of_json in
+      let frameworkId = field_map_exn json__ "frameworkId" UUID.of_json in
       make ~controlSets ?complianceType ?description ~name ~frameworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a custom framework in Audit Manager."]
@@ -7754,9 +8545,9 @@ module UpdateAssessmentControlSetStatusResponse =
           (Xml.child xml_arg0 "controlSet") in
       make ?controlSet ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let controlSet =
-        field_map json "controlSet" AssessmentControlSet.of_json in
+        field_map json__ "controlSet" AssessmentControlSet.of_json in
       make ?controlSet ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7800,11 +8591,11 @@ module UpdateAssessmentControlSetStatusRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ~comment ~status ~controlSetId ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map_exn json "comment" DelegationComment.of_json in
-      let status = field_map_exn json "status" ControlSetStatus.of_json in
-      let controlSetId = field_map_exn json "controlSetId" String_.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+    let of_json json__ =
+      let comment = field_map_exn json__ "comment" DelegationComment.of_json in
+      let status = field_map_exn json__ "status" ControlSetStatus.of_json in
+      let controlSetId = field_map_exn json__ "controlSetId" String_.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ~comment ~status ~controlSetId ~assessmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7881,8 +8672,8 @@ module UpdateAssessmentControlResponse =
           (Xml.child xml_arg0 "control") in
       make ?control ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let control = field_map json "control" AssessmentControl.of_json in
+    let of_json json__ =
+      let control = field_map json__ "control" AssessmentControl.of_json in
       make ?control ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a control within an assessment in Audit Manager."]
@@ -7940,15 +8731,15 @@ module UpdateAssessmentControlRequest =
       make ?commentBody ?controlStatus ~controlId ~controlSetId ~assessmentId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let commentBody =
-        field_map json "commentBody" ControlCommentBody.of_json in
+        field_map json__ "commentBody" ControlCommentBody.of_json in
       let controlStatus =
-        field_map json "controlStatus" ControlStatus.of_json in
-      let controlId = field_map_exn json "controlId" UUID.of_json in
+        field_map json__ "controlStatus" ControlStatus.of_json in
+      let controlId = field_map_exn json__ "controlId" UUID.of_json in
       let controlSetId =
-        field_map_exn json "controlSetId" ControlSetId.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+        field_map_exn json__ "controlSetId" ControlSetId.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ?commentBody ?controlStatus ~controlId ~controlSetId ~assessmentId
         ()
     let to_json v = composed_to_json to_value v
@@ -8035,10 +8826,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "resourceArn" AuditManagerArn.of_json in
+        field_map_exn json__ "resourceArn" AuditManagerArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from a resource in Audit Manager."]
@@ -8122,10 +8913,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
       let resourceArn =
-        field_map_exn json "resourceArn" AuditManagerArn.of_json in
+        field_map_exn json__ "resourceArn" AuditManagerArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Tags the specified resource in Audit Manager."]
@@ -8205,14 +8996,14 @@ module StartAssessmentFrameworkShareResponse =
           (Xml.child xml_arg0 "assessmentFrameworkShareRequest") in
       make ?assessmentFrameworkShareRequest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentFrameworkShareRequest =
-        field_map json "assessmentFrameworkShareRequest"
+        field_map json__ "assessmentFrameworkShareRequest"
           AssessmentFrameworkShareRequest.of_json in
       make ?assessmentFrameworkShareRequest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a share request for a custom framework in Audit Manager. The share request specifies a recipient and notifies them that a custom framework is available. Recipients have 120 days to accept or decline the request. If no action is taken, the share request expires. When you invoke the StartAssessmentFrameworkShare API, you are about to share a custom framework with another Amazon Web Services account. You may not share a custom framework that is derived from a standard framework if the standard framework is designated as not eligible for sharing by Amazon Web Services, unless you have obtained permission to do so from the owner of the standard framework. To learn more about which standard frameworks are eligible for sharing, see Framework sharing eligibility in the Audit Manager User Guide."]
+       "Creates a share request for a custom framework in Audit Manager. The share request specifies a recipient and notifies them that a custom framework is available. Recipients have 120 days to accept or decline the request. If no action is taken, the share request expires. When you create a share request, Audit Manager stores a snapshot of your custom framework in the US East (N. Virginia) Amazon Web Services Region. Audit Manager also stores a backup of the same snapshot in the US West (Oregon) Amazon Web Services Region. Audit Manager deletes the snapshot and the backup snapshot when one of the following events occurs: The sender revokes the share request. The recipient declines the share request. The recipient encounters an error and doesn't successfully accept the share request. The share request expires before the recipient responds to the request. When a sender resends a share request, the snapshot is replaced with an updated version that corresponds with the latest version of the custom framework. When a recipient accepts a share request, the snapshot is replicated into their Amazon Web Services account under the Amazon Web Services Region that was specified in the share request. When you invoke the StartAssessmentFrameworkShare API, you are about to share a custom framework with another Amazon Web Services account. You may not share a custom framework that is derived from a standard framework if the standard framework is designated as not eligible for sharing by Amazon Web Services, unless you have obtained permission to do so from the owner of the standard framework. To learn more about which standard frameworks are eligible for sharing, see Framework sharing eligibility in the Audit Manager User Guide."]
 module StartAssessmentFrameworkShareRequest =
   struct
     type nonrec t =
@@ -8256,17 +9047,17 @@ module StartAssessmentFrameworkShareRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "frameworkId") in
       make ?comment ~destinationRegion ~destinationAccount ~frameworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map json "comment" ShareRequestComment.of_json in
+    let of_json json__ =
+      let comment = field_map json__ "comment" ShareRequestComment.of_json in
       let destinationRegion =
-        field_map_exn json "destinationRegion" Region.of_json in
+        field_map_exn json__ "destinationRegion" Region.of_json in
       let destinationAccount =
-        field_map_exn json "destinationAccount" AccountId.of_json in
-      let frameworkId = field_map_exn json "frameworkId" UUID.of_json in
+        field_map_exn json__ "destinationAccount" AccountId.of_json in
+      let frameworkId = field_map_exn json__ "frameworkId" UUID.of_json in
       make ?comment ~destinationRegion ~destinationAccount ~frameworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a share request for a custom framework in Audit Manager. The share request specifies a recipient and notifies them that a custom framework is available. Recipients have 120 days to accept or decline the request. If no action is taken, the share request expires. When you invoke the StartAssessmentFrameworkShare API, you are about to share a custom framework with another Amazon Web Services account. You may not share a custom framework that is derived from a standard framework if the standard framework is designated as not eligible for sharing by Amazon Web Services, unless you have obtained permission to do so from the owner of the standard framework. To learn more about which standard frameworks are eligible for sharing, see Framework sharing eligibility in the Audit Manager User Guide."]
+       "Creates a share request for a custom framework in Audit Manager. The share request specifies a recipient and notifies them that a custom framework is available. Recipients have 120 days to accept or decline the request. If no action is taken, the share request expires. When you create a share request, Audit Manager stores a snapshot of your custom framework in the US East (N. Virginia) Amazon Web Services Region. Audit Manager also stores a backup of the same snapshot in the US West (Oregon) Amazon Web Services Region. Audit Manager deletes the snapshot and the backup snapshot when one of the following events occurs: The sender revokes the share request. The recipient declines the share request. The recipient encounters an error and doesn't successfully accept the share request. The share request expires before the recipient responds to the request. When a sender resends a share request, the snapshot is replaced with an updated version that corresponds with the latest version of the custom framework. When a recipient accepts a share request, the snapshot is replicated into their Amazon Web Services account under the Amazon Web Services Region that was specified in the share request. When you invoke the StartAssessmentFrameworkShare API, you are about to share a custom framework with another Amazon Web Services account. You may not share a custom framework that is derived from a standard framework if the standard framework is designated as not eligible for sharing by Amazon Web Services, unless you have obtained permission to do so from the owner of the standard framework. To learn more about which standard frameworks are eligible for sharing, see Framework sharing eligibility in the Audit Manager User Guide."]
 module RegisterOrganizationAdminAccountResponse =
   struct
     type nonrec t =
@@ -8280,6 +9071,7 @@ module RegisterOrganizationAdminAccountResponse =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?adminAccountId =
@@ -8292,6 +9084,8 @@ module RegisterOrganizationAdminAccountResponse =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -8305,6 +9099,8 @@ module RegisterOrganizationAdminAccountResponse =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -8323,6 +9119,10 @@ module RegisterOrganizationAdminAccountResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -8348,10 +9148,11 @@ module RegisterOrganizationAdminAccountResponse =
           (Xml.child xml_arg0 "adminAccountId") in
       make ?organizationId ?adminAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationId =
-        field_map json "organizationId" OrganizationId.of_json in
-      let adminAccountId = field_map json "adminAccountId" AccountId.of_json in
+        field_map json__ "organizationId" OrganizationId.of_json in
+      let adminAccountId =
+        field_map json__ "adminAccountId" AccountId.of_json in
       make ?organizationId ?adminAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8375,9 +9176,9 @@ module RegisterOrganizationAdminAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "adminAccountId") in
       make ~adminAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let adminAccountId =
-        field_map_exn json "adminAccountId" AccountId.of_json in
+        field_map_exn json__ "adminAccountId" AccountId.of_json in
       make ~adminAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8392,6 +9193,7 @@ module RegisterAccountResponse =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?status = fun () -> { status }
@@ -8403,6 +9205,8 @@ module RegisterAccountResponse =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -8416,6 +9220,8 @@ module RegisterAccountResponse =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -8434,6 +9240,10 @@ module RegisterAccountResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -8452,8 +9262,8 @@ module RegisterAccountResponse =
         (Option.map ~f:AccountStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" AccountStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" AccountStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8482,10 +9292,10 @@ module RegisterAccountRequest =
         (Option.map ~f:KmsKey.of_xml) (Xml.child xml_arg0 "kmsKey") in
       make ?delegatedAdminAccount ?kmsKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let delegatedAdminAccount =
-        field_map json "delegatedAdminAccount" AccountId.of_json in
-      let kmsKey = field_map json "kmsKey" KmsKey.of_json in
+        field_map json__ "delegatedAdminAccount" AccountId.of_json in
+      let kmsKey = field_map json__ "kmsKey" KmsKey.of_json in
       make ?delegatedAdminAccount ?kmsKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8550,8 +9360,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of tags for the specified resource in Audit Manager."]
@@ -8573,9 +9383,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "resourceArn" AuditManagerArn.of_json in
+        field_map_exn json__ "resourceArn" AuditManagerArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8650,10 +9460,10 @@ module ListNotificationsResponse =
           (Xml.child xml_arg0 "notifications") in
       make ?nextToken ?notifications ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let notifications =
-        field_map json "notifications" Notifications.of_json in
+        field_map json__ "notifications" Notifications.of_json in
       make ?nextToken ?notifications ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of all Audit Manager notifications."]
@@ -8681,9 +9491,9 @@ module ListNotificationsRequest =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of all Audit Manager notifications."]
@@ -8692,7 +9502,7 @@ module ListKeywordsForDataSourceResponse =
     type nonrec t =
       {
       keywords: Keywords.t option
-        [@ocaml.doc "The list of keywords for the event mapping source."];
+        [@ocaml.doc "The list of keywords for the control mapping source."];
       nextToken: Token.t option
         [@ocaml.doc
           "The pagination token that's used to fetch the next set of results."]}
@@ -8754,9 +9564,9 @@ module ListKeywordsForDataSourceResponse =
         (Option.map ~f:Keywords.of_xml) (Xml.child xml_arg0 "keywords") in
       make ?nextToken ?keywords ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let keywords = field_map json "keywords" Keywords.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let keywords = field_map json__ "keywords" Keywords.of_json in
       make ?nextToken ?keywords ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8765,7 +9575,7 @@ module ListKeywordsForDataSourceRequest =
   struct
     type nonrec t =
       {
-      source: SourceType.t
+      source: DataSourceType.t
         [@ocaml.doc
           "The control mapping data source that the keywords apply to."];
       nextToken: Token.t option
@@ -8780,7 +9590,7 @@ module ListKeywordsForDataSourceRequest =
         fun ~source -> fun () -> { nextToken; maxResults; source }
     let to_value x =
       structure_to_value
-        [("source", (Some (SourceType.to_value x.source)));
+        [("source", (Some (DataSourceType.to_value x.source)));
         ("nextToken", (Option.map x.nextToken ~f:Token.to_value));
         ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
     let to_query v = to_query to_value v
@@ -8790,13 +9600,14 @@ module ListKeywordsForDataSourceRequest =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let source =
-        SourceType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "source") in
+        DataSourceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "source") in
       make ?maxResults ?nextToken ~source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let source = field_map_exn json "source" SourceType.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let source = field_map_exn json__ "source" DataSourceType.of_json in
       make ?maxResults ?nextToken ~source ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8807,7 +9618,7 @@ module ListControlsResponse =
       {
       controlMetadataList: ControlMetadataList.t option
         [@ocaml.doc
-          "The list of control metadata objects that the ListControls API returned."];
+          "A list of metadata that the ListControls API returns for each control."];
       nextToken: Token.t option
         [@ocaml.doc
           "The pagination token that's used to fetch the next set of results."]}
@@ -8872,10 +9683,10 @@ module ListControlsResponse =
           (Xml.child xml_arg0 "controlMetadataList") in
       make ?nextToken ?controlMetadataList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let controlMetadataList =
-        field_map json "controlMetadataList" ControlMetadataList.of_json in
+        field_map json__ "controlMetadataList" ControlMetadataList.of_json in
       make ?nextToken ?controlMetadataList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of controls from Audit Manager."]
@@ -8885,24 +9696,35 @@ module ListControlsRequest =
       {
       controlType: ControlType.t
         [@ocaml.doc
-          "The type of control, such as a standard control or a custom control."];
+          "A filter that narrows the list of controls to a specific type."];
       nextToken: Token.t option
         [@ocaml.doc
           "The pagination token that's used to fetch the next set of results."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "Represents the maximum number of results on a page or for an API request call."]}
+          "The maximum number of results on a page or for an API request call."];
+      controlCatalogId: ControlCatalogId.t option
+        [@ocaml.doc
+          "A filter that narrows the list of controls to a specific resource from the Amazon Web Services Control Catalog. To use this parameter, specify the ARN of the Control Catalog resource. You can specify either a control domain, a control objective, or a common control. For information about how to find the ARNs for these resources, see ListDomains , ListObjectives , and ListCommonControls . You can only filter by one Control Catalog resource at a time. Specifying multiple resource ARNs isn\226\128\153t currently supported. If you want to filter by more than one ARN, we recommend that you run the ListControls operation separately for each ARN. Alternatively, specify UNCATEGORIZED to list controls that aren't mapped to a Control Catalog resource. For example, this operation might return a list of custom controls that don't belong to any control domain or control objective."]}
     let context_ = "ListControlsRequest"
     let make ?nextToken =
       fun ?maxResults ->
-        fun ~controlType -> fun () -> { nextToken; maxResults; controlType }
+        fun ?controlCatalogId ->
+          fun ~controlType ->
+            fun () ->
+              { nextToken; maxResults; controlCatalogId; controlType }
     let to_value x =
       structure_to_value
         [("controlType", (Some (ControlType.to_value x.controlType)));
         ("nextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("controlCatalogId",
+          (Option.map x.controlCatalogId ~f:ControlCatalogId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let controlCatalogId =
+        (Option.map ~f:ControlCatalogId.of_xml)
+          (Xml.child xml_arg0 "controlCatalogId") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       let nextToken =
@@ -8910,13 +9732,16 @@ module ListControlsRequest =
       let controlType =
         ControlType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "controlType") in
-      make ?maxResults ?nextToken ~controlType ()
+      make ?controlCatalogId ?maxResults ?nextToken ~controlType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let controlType = field_map_exn json "controlType" ControlType.of_json in
-      make ?maxResults ?nextToken ~controlType ()
+    let of_json json__ =
+      let controlCatalogId =
+        field_map json__ "controlCatalogId" ControlCatalogId.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let controlType =
+        field_map_exn json__ "controlType" ControlType.of_json in
+      make ?controlCatalogId ?maxResults ?nextToken ~controlType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of controls from Audit Manager."]
 module ListControlInsightsByControlDomainResponse =
@@ -9000,10 +9825,10 @@ module ListControlInsightsByControlDomainResponse =
           (Xml.child xml_arg0 "controlInsightsMetadata") in
       make ?nextToken ?controlInsightsMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let controlInsightsMetadata =
-        field_map json "controlInsightsMetadata"
+        field_map json__ "controlInsightsMetadata"
           ControlInsightsMetadata.of_json in
       make ?nextToken ?controlInsightsMetadata ()
     let to_json v = composed_to_json to_value v
@@ -9013,8 +9838,9 @@ module ListControlInsightsByControlDomainRequest =
   struct
     type nonrec t =
       {
-      controlDomainId: UUID.t
-        [@ocaml.doc "The unique identifier for the control domain."];
+      controlDomainId: ControlDomainId.t
+        [@ocaml.doc
+          "The unique identifier for the control domain. Audit Manager supports the control domains that are provided by Amazon Web Services Control Catalog. For information about how to find a list of available control domains, see ListDomains in the Amazon Web Services Control Catalog API Reference."];
       nextToken: Token.t option
         [@ocaml.doc
           "The pagination token that's used to fetch the next set of results."];
@@ -9028,7 +9854,8 @@ module ListControlInsightsByControlDomainRequest =
           fun () -> { nextToken; maxResults; controlDomainId }
     let to_value x =
       structure_to_value
-        [("controlDomainId", (Some (UUID.to_value x.controlDomainId)));
+        [("controlDomainId",
+           (Some (ControlDomainId.to_value x.controlDomainId)));
         ("nextToken", (Option.map x.nextToken ~f:Token.to_value));
         ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
     let to_query v = to_query to_value v
@@ -9038,14 +9865,15 @@ module ListControlInsightsByControlDomainRequest =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let controlDomainId =
-        UUID.of_xml
+        ControlDomainId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "controlDomainId") in
       make ?maxResults ?nextToken ~controlDomainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let controlDomainId = field_map_exn json "controlDomainId" UUID.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let controlDomainId =
+        field_map_exn json__ "controlDomainId" ControlDomainId.of_json in
       make ?maxResults ?nextToken ~controlDomainId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9131,15 +9959,15 @@ module ListControlDomainInsightsResponse =
           (Xml.child xml_arg0 "controlDomainInsights") in
       make ?nextToken ?controlDomainInsights ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let controlDomainInsights =
-        field_map json "controlDomainInsights"
+        field_map json__ "controlDomainInsights"
           ControlDomainInsightsList.of_json in
       make ?nextToken ?controlDomainInsights ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the latest analytics data for control domains across all of your active assessments. A control domain is listed only if at least one of the controls within that domain collected evidence on the lastUpdated date of controlDomainInsights. If this condition isn\226\128\153t met, no data is listed for that control domain."]
+       "Lists the latest analytics data for control domains across all of your active assessments. Audit Manager supports the control domains that are provided by Amazon Web Services Control Catalog. For information about how to find a list of available control domains, see ListDomains in the Amazon Web Services Control Catalog API Reference. A control domain is listed only if at least one of the controls within that domain collected evidence on the lastUpdated date of controlDomainInsights. If this condition isn\226\128\153t met, no data is listed for that control domain."]
 module ListControlDomainInsightsRequest =
   struct
     type nonrec t =
@@ -9164,13 +9992,13 @@ module ListControlDomainInsightsRequest =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the latest analytics data for control domains across all of your active assessments. A control domain is listed only if at least one of the controls within that domain collected evidence on the lastUpdated date of controlDomainInsights. If this condition isn\226\128\153t met, no data is listed for that control domain."]
+       "Lists the latest analytics data for control domains across all of your active assessments. Audit Manager supports the control domains that are provided by Amazon Web Services Control Catalog. For information about how to find a list of available control domains, see ListDomains in the Amazon Web Services Control Catalog API Reference. A control domain is listed only if at least one of the controls within that domain collected evidence on the lastUpdated date of controlDomainInsights. If this condition isn\226\128\153t met, no data is listed for that control domain."]
 module ListControlDomainInsightsByAssessmentResponse =
   struct
     type nonrec t =
@@ -9252,15 +10080,15 @@ module ListControlDomainInsightsByAssessmentResponse =
           (Xml.child xml_arg0 "controlDomainInsights") in
       make ?nextToken ?controlDomainInsights ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let controlDomainInsights =
-        field_map json "controlDomainInsights"
+        field_map json__ "controlDomainInsights"
           ControlDomainInsightsList.of_json in
       make ?nextToken ?controlDomainInsights ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists analytics data for control domains within a specified active assessment. A control domain is listed only if at least one of the controls within that domain collected evidence on the lastUpdated date of controlDomainInsights. If this condition isn\226\128\153t met, no data is listed for that domain."]
+       "Lists analytics data for control domains within a specified active assessment. Audit Manager supports the control domains that are provided by Amazon Web Services Control Catalog. For information about how to find a list of available control domains, see ListDomains in the Amazon Web Services Control Catalog API Reference. A control domain is listed only if at least one of the controls within that domain collected evidence on the lastUpdated date of controlDomainInsights. If this condition isn\226\128\153t met, no data is listed for that domain."]
 module ListControlDomainInsightsByAssessmentRequest =
   struct
     type nonrec t =
@@ -9293,20 +10121,21 @@ module ListControlDomainInsightsByAssessmentRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ?maxResults ?nextToken ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ?maxResults ?nextToken ~assessmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists analytics data for control domains within a specified active assessment. A control domain is listed only if at least one of the controls within that domain collected evidence on the lastUpdated date of controlDomainInsights. If this condition isn\226\128\153t met, no data is listed for that domain."]
+       "Lists analytics data for control domains within a specified active assessment. Audit Manager supports the control domains that are provided by Amazon Web Services Control Catalog. For information about how to find a list of available control domains, see ListDomains in the Amazon Web Services Control Catalog API Reference. A control domain is listed only if at least one of the controls within that domain collected evidence on the lastUpdated date of controlDomainInsights. If this condition isn\226\128\153t met, no data is listed for that domain."]
 module ListAssessmentsResponse =
   struct
     type nonrec t =
       {
       assessmentMetadata: ListAssessmentMetadata.t option
-        [@ocaml.doc "The metadata that's associated with the assessment."];
+        [@ocaml.doc
+          "The metadata that the ListAssessments API returns for each assessment."];
       nextToken: Token.t option
         [@ocaml.doc
           "The pagination token that's used to fetch the next set of results."]}
@@ -9372,10 +10201,10 @@ module ListAssessmentsResponse =
           (Xml.child xml_arg0 "assessmentMetadata") in
       make ?nextToken ?assessmentMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let assessmentMetadata =
-        field_map json "assessmentMetadata" ListAssessmentMetadata.of_json in
+        field_map json__ "assessmentMetadata" ListAssessmentMetadata.of_json in
       make ?nextToken ?assessmentMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9410,10 +10239,10 @@ module ListAssessmentsRequest =
         (Option.map ~f:AssessmentStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?maxResults ?nextToken ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let status = field_map json "status" AssessmentStatus.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let status = field_map json__ "status" AssessmentStatus.of_json in
       make ?maxResults ?nextToken ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9490,10 +10319,11 @@ module ListAssessmentReportsResponse =
           (Xml.child xml_arg0 "assessmentReports") in
       make ?nextToken ?assessmentReports ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let assessmentReports =
-        field_map json "assessmentReports" AssessmentReportsMetadata.of_json in
+        field_map json__ "assessmentReports"
+          AssessmentReportsMetadata.of_json in
       make ?nextToken ?assessmentReports ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9522,9 +10352,9 @@ module ListAssessmentReportsRequest =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9534,7 +10364,8 @@ module ListAssessmentFrameworksResponse =
     type nonrec t =
       {
       frameworkMetadataList: FrameworkMetadataList.t option
-        [@ocaml.doc "The list of metadata objects for the framework."];
+        [@ocaml.doc
+          "A list of metadata that the ListAssessmentFrameworks API returns for each framework."];
       nextToken: Token.t option
         [@ocaml.doc
           "The pagination token that's used to fetch the next set of results."]}
@@ -9600,10 +10431,11 @@ module ListAssessmentFrameworksResponse =
           (Xml.child xml_arg0 "frameworkMetadataList") in
       make ?nextToken ?frameworkMetadataList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let frameworkMetadataList =
-        field_map json "frameworkMetadataList" FrameworkMetadataList.of_json in
+        field_map json__ "frameworkMetadataList"
+          FrameworkMetadataList.of_json in
       make ?nextToken ?frameworkMetadataList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9642,11 +10474,11 @@ module ListAssessmentFrameworksRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "frameworkType") in
       make ?maxResults ?nextToken ~frameworkType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let frameworkType =
-        field_map_exn json "frameworkType" FrameworkType.of_json in
+        field_map_exn json__ "frameworkType" FrameworkType.of_json in
       make ?maxResults ?nextToken ~frameworkType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9725,10 +10557,10 @@ module ListAssessmentFrameworkShareRequestsResponse =
           (Xml.child xml_arg0 "assessmentFrameworkShareRequests") in
       make ?nextToken ?assessmentFrameworkShareRequests ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let assessmentFrameworkShareRequests =
-        field_map json "assessmentFrameworkShareRequests"
+        field_map json__ "assessmentFrameworkShareRequests"
           AssessmentFrameworkShareRequestList.of_json in
       make ?nextToken ?assessmentFrameworkShareRequests ()
     let to_json v = composed_to_json to_value v
@@ -9767,11 +10599,11 @@ module ListAssessmentFrameworkShareRequestsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "requestType") in
       make ?maxResults ?nextToken ~requestType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let requestType =
-        field_map_exn json "requestType" ShareRequestType.of_json in
+        field_map_exn json__ "requestType" ShareRequestType.of_json in
       make ?maxResults ?nextToken ~requestType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9858,10 +10690,10 @@ module ListAssessmentControlInsightsByControlDomainResponse =
           (Xml.child xml_arg0 "controlInsightsByAssessment") in
       make ?nextToken ?controlInsightsByAssessment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let controlInsightsByAssessment =
-        field_map json "controlInsightsByAssessment"
+        field_map json__ "controlInsightsByAssessment"
           ControlInsightsMetadataByAssessment.of_json in
       make ?nextToken ?controlInsightsByAssessment ()
     let to_json v = composed_to_json to_value v
@@ -9871,8 +10703,9 @@ module ListAssessmentControlInsightsByControlDomainRequest =
   struct
     type nonrec t =
       {
-      controlDomainId: UUID.t
-        [@ocaml.doc "The unique identifier for the control domain."];
+      controlDomainId: ControlDomainId.t
+        [@ocaml.doc
+          "The unique identifier for the control domain. Audit Manager supports the control domains that are provided by Amazon Web Services Control Catalog. For information about how to find a list of available control domains, see ListDomains in the Amazon Web Services Control Catalog API Reference."];
       assessmentId: UUID.t
         [@ocaml.doc "The unique identifier for the active assessment."];
       nextToken: Token.t option
@@ -9890,7 +10723,8 @@ module ListAssessmentControlInsightsByControlDomainRequest =
               { nextToken; maxResults; controlDomainId; assessmentId }
     let to_value x =
       structure_to_value
-        [("controlDomainId", (Some (UUID.to_value x.controlDomainId)));
+        [("controlDomainId",
+           (Some (ControlDomainId.to_value x.controlDomainId)));
         ("assessmentId", (Some (UUID.to_value x.assessmentId)));
         ("nextToken", (Option.map x.nextToken ~f:Token.to_value));
         ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
@@ -9903,15 +10737,16 @@ module ListAssessmentControlInsightsByControlDomainRequest =
       let assessmentId =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       let controlDomainId =
-        UUID.of_xml
+        ControlDomainId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "controlDomainId") in
       make ?maxResults ?nextToken ~assessmentId ~controlDomainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
-      let controlDomainId = field_map_exn json "controlDomainId" UUID.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
+      let controlDomainId =
+        field_map_exn json__ "controlDomainId" ControlDomainId.of_json in
       make ?maxResults ?nextToken ~assessmentId ~controlDomainId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9969,18 +10804,18 @@ module GetSettingsResponse =
         (Option.map ~f:Settings.of_xml) (Xml.child xml_arg0 "settings") in
       make ?settings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let settings = field_map json "settings" Settings.of_json in
+    let of_json json__ =
+      let settings = field_map json__ "settings" Settings.of_json in
       make ?settings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the settings for the specified Amazon Web Services account."]
+       "Gets the settings for a specified Amazon Web Services account."]
 module GetSettingsRequest =
   struct
     type nonrec t =
       {
       attribute: SettingAttribute.t
-        [@ocaml.doc "The list of SettingAttribute enum values."]}
+        [@ocaml.doc "The list of setting attribute enum values."]}
     let context_ = "GetSettingsRequest"
     let make ~attribute = fun () -> { attribute }
     let to_value x =
@@ -9993,19 +10828,20 @@ module GetSettingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "attribute") in
       make ~attribute ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attribute = field_map_exn json "attribute" SettingAttribute.of_json in
+    let of_json json__ =
+      let attribute =
+        field_map_exn json__ "attribute" SettingAttribute.of_json in
       make ~attribute ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the settings for the specified Amazon Web Services account."]
+       "Gets the settings for a specified Amazon Web Services account."]
 module GetServicesInScopeResponse =
   struct
     type nonrec t =
       {
       serviceMetadata: ServiceMetadataList.t option
         [@ocaml.doc
-          "The metadata that's associated with the Amazon Web Service."]}
+          "The metadata that's associated with the Amazon Web Services service."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -10063,13 +10899,13 @@ module GetServicesInScopeResponse =
           (Xml.child xml_arg0 "serviceMetadata") in
       make ?serviceMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceMetadata =
-        field_map json "serviceMetadata" ServiceMetadataList.of_json in
+        field_map json__ "serviceMetadata" ServiceMetadataList.of_json in
       make ?serviceMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the in-scope Amazon Web Services services for the specified assessment."]
+       "Gets a list of the Amazon Web Services services from which Audit Manager can collect evidence. Audit Manager defines which Amazon Web Services services are in scope for an assessment. Audit Manager infers this scope by examining the assessment\226\128\153s controls and their data sources, and then mapping this information to one or more of the corresponding Amazon Web Services services that are in this list. For information about why it's no longer possible to specify services in scope manually, see I can't edit the services in scope for my assessment in the Troubleshooting section of the Audit Manager user guide."]
 module GetServicesInScopeRequest =
   struct
     type nonrec t = unit
@@ -10082,7 +10918,7 @@ module GetServicesInScopeRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the in-scope Amazon Web Services services for the specified assessment."]
+       "Gets a list of the Amazon Web Services services from which Audit Manager can collect evidence. Audit Manager defines which Amazon Web Services services are in scope for an assessment. Audit Manager infers this scope by examining the assessment\226\128\153s controls and their data sources, and then mapping this information to one or more of the corresponding Amazon Web Services services that are in this list. For information about why it's no longer possible to specify services in scope manually, see I can't edit the services in scope for my assessment in the Troubleshooting section of the Audit Manager user guide."]
 module GetOrganizationAdminAccountResponse =
   struct
     type nonrec t =
@@ -10163,14 +10999,15 @@ module GetOrganizationAdminAccountResponse =
           (Xml.child xml_arg0 "adminAccountId") in
       make ?organizationId ?adminAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationId =
-        field_map json "organizationId" OrganizationId.of_json in
-      let adminAccountId = field_map json "adminAccountId" AccountId.of_json in
+        field_map json__ "organizationId" OrganizationId.of_json in
+      let adminAccountId =
+        field_map json__ "adminAccountId" AccountId.of_json in
       make ?organizationId ?adminAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the name of the delegated Amazon Web Services administrator account for the organization."]
+       "Gets the name of the delegated Amazon Web Services administrator account for a specified organization."]
 module GetOrganizationAdminAccountRequest =
   struct
     type nonrec t = unit
@@ -10183,7 +11020,7 @@ module GetOrganizationAdminAccountRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the name of the delegated Amazon Web Services administrator account for the organization."]
+       "Gets the name of the delegated Amazon Web Services administrator account for a specified organization."]
 module GetInsightsResponse =
   struct
     type nonrec t =
@@ -10236,8 +11073,8 @@ module GetInsightsResponse =
         (Option.map ~f:Insights.of_xml) (Xml.child xml_arg0 "insights") in
       make ?insights ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let insights = field_map json "insights" Insights.of_json in
+    let of_json json__ =
+      let insights = field_map json__ "insights" Insights.of_json in
       make ?insights ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10328,8 +11165,8 @@ module GetInsightsByAssessmentResponse =
           (Xml.child xml_arg0 "insights") in
       make ?insights ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let insights = field_map json "insights" InsightsByAssessment.of_json in
+    let of_json json__ =
+      let insights = field_map json__ "insights" InsightsByAssessment.of_json in
       make ?insights ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10351,8 +11188,8 @@ module GetInsightsByAssessmentRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+    let of_json json__ =
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ~assessmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10362,8 +11199,7 @@ module GetEvidenceResponse =
     type nonrec t =
       {
       evidence: Evidence.t option
-        [@ocaml.doc
-          "The evidence that the GetEvidenceResponse API returned."]}
+        [@ocaml.doc "The evidence that the GetEvidence API returned."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -10428,11 +11264,11 @@ module GetEvidenceResponse =
         (Option.map ~f:Evidence.of_xml) (Xml.child xml_arg0 "evidence") in
       make ?evidence ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let evidence = field_map json "evidence" Evidence.of_json in
+    let of_json json__ =
+      let evidence = field_map json__ "evidence" Evidence.of_json in
       make ?evidence ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns evidence from Audit Manager."]
+  end[@@ocaml.doc "Gets information about a specified evidence item."]
 module GetEvidenceRequest =
   struct
     type nonrec t =
@@ -10473,16 +11309,16 @@ module GetEvidenceRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ~evidenceId ~evidenceFolderId ~controlSetId ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let evidenceId = field_map_exn json "evidenceId" UUID.of_json in
+    let of_json json__ =
+      let evidenceId = field_map_exn json__ "evidenceId" UUID.of_json in
       let evidenceFolderId =
-        field_map_exn json "evidenceFolderId" UUID.of_json in
+        field_map_exn json__ "evidenceFolderId" UUID.of_json in
       let controlSetId =
-        field_map_exn json "controlSetId" ControlSetId.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+        field_map_exn json__ "controlSetId" ControlSetId.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ~evidenceId ~evidenceFolderId ~controlSetId ~assessmentId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns evidence from Audit Manager."]
+  end[@@ocaml.doc "Gets information about a specified evidence item."]
 module GetEvidenceFoldersByAssessmentResponse =
   struct
     type nonrec t =
@@ -10564,14 +11400,14 @@ module GetEvidenceFoldersByAssessmentResponse =
           (Xml.child xml_arg0 "evidenceFolders") in
       make ?nextToken ?evidenceFolders ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let evidenceFolders =
-        field_map json "evidenceFolders" AssessmentEvidenceFolders.of_json in
+        field_map json__ "evidenceFolders" AssessmentEvidenceFolders.of_json in
       make ?nextToken ?evidenceFolders ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the evidence folders from a specified assessment in Audit Manager."]
+       "Gets the evidence folders from a specified assessment in Audit Manager."]
 module GetEvidenceFoldersByAssessmentRequest =
   struct
     type nonrec t =
@@ -10604,14 +11440,14 @@ module GetEvidenceFoldersByAssessmentRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ?maxResults ?nextToken ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ?maxResults ?nextToken ~assessmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the evidence folders from a specified assessment in Audit Manager."]
+       "Gets the evidence folders from a specified assessment in Audit Manager."]
 module GetEvidenceFoldersByAssessmentControlResponse =
   struct
     type nonrec t =
@@ -10693,14 +11529,14 @@ module GetEvidenceFoldersByAssessmentControlResponse =
           (Xml.child xml_arg0 "evidenceFolders") in
       make ?nextToken ?evidenceFolders ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let evidenceFolders =
-        field_map json "evidenceFolders" AssessmentEvidenceFolders.of_json in
+        field_map json__ "evidenceFolders" AssessmentEvidenceFolders.of_json in
       make ?nextToken ?evidenceFolders ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of evidence folders that are associated with a specified control of an assessment in Audit Manager."]
+       "Gets a list of evidence folders that are associated with a specified control in an Audit Manager assessment."]
 module GetEvidenceFoldersByAssessmentControlRequest =
   struct
     type nonrec t =
@@ -10751,17 +11587,17 @@ module GetEvidenceFoldersByAssessmentControlRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ?maxResults ?nextToken ~controlId ~controlSetId ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let controlId = field_map_exn json "controlId" UUID.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let controlId = field_map_exn json__ "controlId" UUID.of_json in
       let controlSetId =
-        field_map_exn json "controlSetId" ControlSetId.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+        field_map_exn json__ "controlSetId" ControlSetId.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ?maxResults ?nextToken ~controlId ~controlSetId ~assessmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of evidence folders that are associated with a specified control of an assessment in Audit Manager."]
+       "Gets a list of evidence folders that are associated with a specified control in an Audit Manager assessment."]
 module GetEvidenceFolderResponse =
   struct
     type nonrec t =
@@ -10834,13 +11670,13 @@ module GetEvidenceFolderResponse =
           (Xml.child xml_arg0 "evidenceFolder") in
       make ?evidenceFolder ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let evidenceFolder =
-        field_map json "evidenceFolder" AssessmentEvidenceFolder.of_json in
+        field_map json__ "evidenceFolder" AssessmentEvidenceFolder.of_json in
       make ?evidenceFolder ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns an evidence folder from the specified assessment in Audit Manager."]
+       "Gets an evidence folder from a specified assessment in Audit Manager."]
 module GetEvidenceFolderRequest =
   struct
     type nonrec t =
@@ -10874,16 +11710,131 @@ module GetEvidenceFolderRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ~evidenceFolderId ~controlSetId ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let evidenceFolderId =
-        field_map_exn json "evidenceFolderId" UUID.of_json in
+        field_map_exn json__ "evidenceFolderId" UUID.of_json in
       let controlSetId =
-        field_map_exn json "controlSetId" ControlSetId.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+        field_map_exn json__ "controlSetId" ControlSetId.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ~evidenceFolderId ~controlSetId ~assessmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns an evidence folder from the specified assessment in Audit Manager."]
+       "Gets an evidence folder from a specified assessment in Audit Manager."]
+module GetEvidenceFileUploadUrlResponse =
+  struct
+    type nonrec t =
+      {
+      evidenceFileName: NonEmptyString.t option
+        [@ocaml.doc
+          "The name of the uploaded manual evidence file that the presigned URL was generated for."];
+      uploadUrl: NonEmptyString.t option
+        [@ocaml.doc "The presigned URL that was generated."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?evidenceFileName =
+      fun ?uploadUrl -> fun () -> { evidenceFileName; uploadUrl }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("evidenceFileName",
+           (Option.map x.evidenceFileName ~f:NonEmptyString.to_value));
+        ("uploadUrl", (Option.map x.uploadUrl ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let uploadUrl =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "uploadUrl") in
+      let evidenceFileName =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "evidenceFileName") in
+      make ?uploadUrl ?evidenceFileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let uploadUrl = field_map json__ "uploadUrl" NonEmptyString.of_json in
+      let evidenceFileName =
+        field_map json__ "evidenceFileName" NonEmptyString.of_json in
+      make ?uploadUrl ?evidenceFileName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a presigned Amazon S3 URL that can be used to upload a file as manual evidence. For instructions on how to use this operation, see Upload a file from your browser in the Audit Manager User Guide. The following restrictions apply to this operation: Maximum size of an individual evidence file: 100 MB Number of daily manual evidence uploads per control: 100 Supported file formats: See Supported file types for manual evidence in the Audit Manager User Guide For more information about Audit Manager service restrictions, see Quotas and restrictions for Audit Manager."]
+module GetEvidenceFileUploadUrlRequest =
+  struct
+    type nonrec t =
+      {
+      fileName: ManualEvidenceLocalFileName.t
+        [@ocaml.doc
+          "The file that you want to upload. For a list of supported file formats, see Supported file types for manual evidence in the Audit Manager User Guide."]}
+    let context_ = "GetEvidenceFileUploadUrlRequest"
+    let make ~fileName = fun () -> { fileName }
+    let to_value x =
+      structure_to_value
+        [("fileName",
+           (Some (ManualEvidenceLocalFileName.to_value x.fileName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fileName =
+        ManualEvidenceLocalFileName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "fileName") in
+      make ~fileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fileName =
+        field_map_exn json__ "fileName" ManualEvidenceLocalFileName.of_json in
+      make ~fileName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a presigned Amazon S3 URL that can be used to upload a file as manual evidence. For instructions on how to use this operation, see Upload a file from your browser in the Audit Manager User Guide. The following restrictions apply to this operation: Maximum size of an individual evidence file: 100 MB Number of daily manual evidence uploads per control: 100 Supported file formats: See Supported file types for manual evidence in the Audit Manager User Guide For more information about Audit Manager service restrictions, see Quotas and restrictions for Audit Manager."]
 module GetEvidenceByEvidenceFolderResponse =
   struct
     type nonrec t =
@@ -10961,13 +11912,13 @@ module GetEvidenceByEvidenceFolderResponse =
         (Option.map ~f:EvidenceList.of_xml) (Xml.child xml_arg0 "evidence") in
       make ?nextToken ?evidence ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let evidence = field_map json "evidence" EvidenceList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let evidence = field_map json__ "evidence" EvidenceList.of_json in
       make ?nextToken ?evidence ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns all evidence from a specified evidence folder in Audit Manager."]
+       "Gets all evidence from a specified evidence folder in Audit Manager."]
 module GetEvidenceByEvidenceFolderRequest =
   struct
     type nonrec t =
@@ -11022,19 +11973,19 @@ module GetEvidenceByEvidenceFolderRequest =
       make ?maxResults ?nextToken ~evidenceFolderId ~controlSetId
         ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let evidenceFolderId =
-        field_map_exn json "evidenceFolderId" UUID.of_json in
+        field_map_exn json__ "evidenceFolderId" UUID.of_json in
       let controlSetId =
-        field_map_exn json "controlSetId" ControlSetId.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+        field_map_exn json__ "controlSetId" ControlSetId.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ?maxResults ?nextToken ~evidenceFolderId ~controlSetId
         ~assessmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns all evidence from a specified evidence folder in Audit Manager."]
+       "Gets all evidence from a specified evidence folder in Audit Manager."]
 module GetDelegationsResponse =
   struct
     type nonrec t =
@@ -11106,14 +12057,14 @@ module GetDelegationsResponse =
           (Xml.child xml_arg0 "delegations") in
       make ?nextToken ?delegations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let delegations =
-        field_map json "delegations" DelegationMetadataList.of_json in
+        field_map json__ "delegations" DelegationMetadataList.of_json in
       make ?nextToken ?delegations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of delegations from an audit owner to a delegate."]
+       "Gets a list of delegations from an audit owner to a delegate."]
 module GetDelegationsRequest =
   struct
     type nonrec t =
@@ -11138,20 +12089,20 @@ module GetDelegationsRequest =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of delegations from an audit owner to a delegate."]
+       "Gets a list of delegations from an audit owner to a delegate."]
 module GetControlResponse =
   struct
     type nonrec t =
       {
       control: Control.t option
         [@ocaml.doc
-          "The name of the control that the GetControl API returned."]}
+          "The details of the control that the GetControl API returned."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -11216,11 +12167,11 @@ module GetControlResponse =
         (Option.map ~f:Control.of_xml) (Xml.child xml_arg0 "control") in
       make ?control ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let control = field_map json "control" Control.of_json in
+    let of_json json__ =
+      let control = field_map json__ "control" Control.of_json in
       make ?control ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns a control from Audit Manager."]
+  end[@@ocaml.doc "Gets information about a specified control."]
 module GetControlRequest =
   struct
     type nonrec t =
@@ -11236,11 +12187,11 @@ module GetControlRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "controlId") in
       make ~controlId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let controlId = field_map_exn json "controlId" UUID.of_json in
+    let of_json json__ =
+      let controlId = field_map_exn json__ "controlId" UUID.of_json in
       make ~controlId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns a control from Audit Manager."]
+  end[@@ocaml.doc "Gets information about a specified control."]
 module GetChangeLogsResponse =
   struct
     type nonrec t =
@@ -11318,12 +12269,12 @@ module GetChangeLogsResponse =
         (Option.map ~f:ChangeLogs.of_xml) (Xml.child xml_arg0 "changeLogs") in
       make ?nextToken ?changeLogs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let changeLogs = field_map json "changeLogs" ChangeLogs.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let changeLogs = field_map json__ "changeLogs" ChangeLogs.of_json in
       make ?nextToken ?changeLogs ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns a list of changelogs from Audit Manager."]
+  end[@@ocaml.doc "Gets a list of changelogs from Audit Manager."]
 module GetChangeLogsRequest =
   struct
     type nonrec t =
@@ -11377,15 +12328,15 @@ module GetChangeLogsRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ?maxResults ?nextToken ?controlId ?controlSetId ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let controlId = field_map json "controlId" UUID.of_json in
-      let controlSetId = field_map json "controlSetId" ControlSetId.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let controlId = field_map json__ "controlId" UUID.of_json in
+      let controlSetId = field_map json__ "controlSetId" ControlSetId.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ?maxResults ?nextToken ?controlId ?controlSetId ~assessmentId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns a list of changelogs from Audit Manager."]
+  end[@@ocaml.doc "Gets a list of changelogs from Audit Manager."]
 module GetAssessmentResponse =
   struct
     type nonrec t =
@@ -11460,12 +12411,12 @@ module GetAssessmentResponse =
         (Option.map ~f:Assessment.of_xml) (Xml.child xml_arg0 "assessment") in
       make ?userRole ?assessment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userRole = field_map json "userRole" Role.of_json in
-      let assessment = field_map json "assessment" Assessment.of_json in
+    let of_json json__ =
+      let userRole = field_map json__ "userRole" Role.of_json in
+      let assessment = field_map json__ "assessment" Assessment.of_json in
       make ?userRole ?assessment ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns an assessment from Audit Manager."]
+  end[@@ocaml.doc "Gets information about a specified assessment."]
 module GetAssessmentRequest =
   struct
     type nonrec t =
@@ -11483,11 +12434,11 @@ module GetAssessmentRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+    let of_json json__ =
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ~assessmentId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns an assessment from Audit Manager."]
+  end[@@ocaml.doc "Gets information about a specified assessment."]
 module GetAssessmentReportUrlResponse =
   struct
     type nonrec t = {
@@ -11556,12 +12507,11 @@ module GetAssessmentReportUrlResponse =
         (Option.map ~f:URL.of_xml) (Xml.child xml_arg0 "preSignedUrl") in
       make ?preSignedUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let preSignedUrl = field_map json "preSignedUrl" URL.of_json in
+    let of_json json__ =
+      let preSignedUrl = field_map json__ "preSignedUrl" URL.of_json in
       make ?preSignedUrl ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns the URL of an assessment report in Audit Manager."]
+  end[@@ocaml.doc "Gets the URL of an assessment report in Audit Manager."]
 module GetAssessmentReportUrlRequest =
   struct
     type nonrec t =
@@ -11586,21 +12536,20 @@ module GetAssessmentReportUrlRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentReportId") in
       make ~assessmentId ~assessmentReportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+    let of_json json__ =
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       let assessmentReportId =
-        field_map_exn json "assessmentReportId" UUID.of_json in
+        field_map_exn json__ "assessmentReportId" UUID.of_json in
       make ~assessmentId ~assessmentReportId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns the URL of an assessment report in Audit Manager."]
+  end[@@ocaml.doc "Gets the URL of an assessment report in Audit Manager."]
 module GetAssessmentFrameworkResponse =
   struct
     type nonrec t =
       {
       framework: Framework.t option
         [@ocaml.doc
-          "The framework that the GetAssessmentFramework API returned."]}
+          "The framework that the GetAssessmentFramework API returned. The Controls object returns a partial response when called through Framework APIs. For a complete Controls object, use GetControl."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -11665,11 +12614,11 @@ module GetAssessmentFrameworkResponse =
         (Option.map ~f:Framework.of_xml) (Xml.child xml_arg0 "framework") in
       make ?framework ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let framework = field_map json "framework" Framework.of_json in
+    let of_json json__ =
+      let framework = field_map json__ "framework" Framework.of_json in
       make ?framework ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns a framework from Audit Manager."]
+  end[@@ocaml.doc "Gets information about a specified framework."]
 module GetAssessmentFrameworkRequest =
   struct
     type nonrec t =
@@ -11686,11 +12635,11 @@ module GetAssessmentFrameworkRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "frameworkId") in
       make ~frameworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let frameworkId = field_map_exn json "frameworkId" UUID.of_json in
+    let of_json json__ =
+      let frameworkId = field_map_exn json__ "frameworkId" UUID.of_json in
       make ~frameworkId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns a framework from Audit Manager."]
+  end[@@ocaml.doc "Gets information about a specified framework."]
 module GetAccountStatusResponse =
   struct
     type nonrec t =
@@ -11734,12 +12683,12 @@ module GetAccountStatusResponse =
         (Option.map ~f:AccountStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" AccountStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" AccountStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the registration status of an account in Audit Manager."]
+       "Gets the registration status of an account in Audit Manager."]
 module GetAccountStatusRequest =
   struct
     type nonrec t = unit
@@ -11752,7 +12701,7 @@ module GetAccountStatusRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the registration status of an account in Audit Manager."]
+       "Gets the registration status of an account in Audit Manager."]
 module DisassociateAssessmentReportEvidenceFolderResponse =
   struct
     type nonrec t = unit
@@ -11845,10 +12794,10 @@ module DisassociateAssessmentReportEvidenceFolderRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ~evidenceFolderId ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let evidenceFolderId =
-        field_map_exn json "evidenceFolderId" UUID.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+        field_map_exn json__ "evidenceFolderId" UUID.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ~evidenceFolderId ~assessmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11919,7 +12868,7 @@ module DeregisterOrganizationAdminAccountResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specified Amazon Web Services account as a delegated administrator for Audit Manager. When you remove a delegated administrator from your Audit Manager settings, you continue to have access to the evidence that you previously collected under that account. This is also the case when you deregister a delegated administrator from Organizations. However, Audit Manager will stop collecting and attaching evidence to that delegated administrator account moving forward. When you deregister a delegated administrator account for Audit Manager, the data for that account isn\226\128\153t deleted. If you want to delete resource data for a delegated administrator account, you must perform that task separately before you deregister the account. Either, you can do this in the Audit Manager console. Or, you can use one of the delete API operations that are provided by Audit Manager. To delete your Audit Manager resource data, see the following instructions: DeleteAssessment (see also: Deleting an assessment in the Audit Manager User Guide) DeleteAssessmentFramework (see also: Deleting a custom framework in the Audit Manager User Guide) DeleteAssessmentFrameworkShare (see also: Deleting a share request in the Audit Manager User Guide) DeleteAssessmentReport (see also: Deleting an assessment report in the Audit Manager User Guide) DeleteControl (see also: Deleting a custom control in the Audit Manager User Guide) At this time, Audit Manager doesn't provide an option to delete evidence. All available delete operations are listed above."]
+       "Removes the specified Amazon Web Services account as a delegated administrator for Audit Manager. When you remove a delegated administrator from your Audit Manager settings, you continue to have access to the evidence that you previously collected under that account. This is also the case when you deregister a delegated administrator from Organizations. However, Audit Manager stops collecting and attaching evidence to that delegated administrator account moving forward. Keep in mind the following cleanup task if you use evidence finder: Before you use your management account to remove a delegated administrator, make sure that the current delegated administrator account signs in to Audit Manager and disables evidence finder first. Disabling evidence finder automatically deletes the event data store that was created in their account when they enabled evidence finder. If this task isn\226\128\153t completed, the event data store remains in their account. In this case, we recommend that the original delegated administrator goes to CloudTrail Lake and manually deletes the event data store. This cleanup task is necessary to ensure that you don't end up with multiple event data stores. Audit Manager ignores an unused event data store after you remove or change a delegated administrator account. However, the unused event data store continues to incur storage costs from CloudTrail Lake if you don't delete it. When you deregister a delegated administrator account for Audit Manager, the data for that account isn\226\128\153t deleted. If you want to delete resource data for a delegated administrator account, you must perform that task separately before you deregister the account. Either, you can do this in the Audit Manager console. Or, you can use one of the delete API operations that are provided by Audit Manager. To delete your Audit Manager resource data, see the following instructions: DeleteAssessment (see also: Deleting an assessment in the Audit Manager User Guide) DeleteAssessmentFramework (see also: Deleting a custom framework in the Audit Manager User Guide) DeleteAssessmentFrameworkShare (see also: Deleting a share request in the Audit Manager User Guide) DeleteAssessmentReport (see also: Deleting an assessment report in the Audit Manager User Guide) DeleteControl (see also: Deleting a custom control in the Audit Manager User Guide) At this time, Audit Manager doesn't provide an option to delete evidence for a specific delegated administrator. Instead, when your management account deregisters Audit Manager, we perform a cleanup for the current delegated administrator account at the time of deregistration."]
 module DeregisterOrganizationAdminAccountRequest =
   struct
     type nonrec t =
@@ -11938,12 +12887,13 @@ module DeregisterOrganizationAdminAccountRequest =
           (Xml.child xml_arg0 "adminAccountId") in
       make ?adminAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let adminAccountId = field_map json "adminAccountId" AccountId.of_json in
+    let of_json json__ =
+      let adminAccountId =
+        field_map json__ "adminAccountId" AccountId.of_json in
       make ?adminAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specified Amazon Web Services account as a delegated administrator for Audit Manager. When you remove a delegated administrator from your Audit Manager settings, you continue to have access to the evidence that you previously collected under that account. This is also the case when you deregister a delegated administrator from Organizations. However, Audit Manager will stop collecting and attaching evidence to that delegated administrator account moving forward. When you deregister a delegated administrator account for Audit Manager, the data for that account isn\226\128\153t deleted. If you want to delete resource data for a delegated administrator account, you must perform that task separately before you deregister the account. Either, you can do this in the Audit Manager console. Or, you can use one of the delete API operations that are provided by Audit Manager. To delete your Audit Manager resource data, see the following instructions: DeleteAssessment (see also: Deleting an assessment in the Audit Manager User Guide) DeleteAssessmentFramework (see also: Deleting a custom framework in the Audit Manager User Guide) DeleteAssessmentFrameworkShare (see also: Deleting a share request in the Audit Manager User Guide) DeleteAssessmentReport (see also: Deleting an assessment report in the Audit Manager User Guide) DeleteControl (see also: Deleting a custom control in the Audit Manager User Guide) At this time, Audit Manager doesn't provide an option to delete evidence. All available delete operations are listed above."]
+       "Removes the specified Amazon Web Services account as a delegated administrator for Audit Manager. When you remove a delegated administrator from your Audit Manager settings, you continue to have access to the evidence that you previously collected under that account. This is also the case when you deregister a delegated administrator from Organizations. However, Audit Manager stops collecting and attaching evidence to that delegated administrator account moving forward. Keep in mind the following cleanup task if you use evidence finder: Before you use your management account to remove a delegated administrator, make sure that the current delegated administrator account signs in to Audit Manager and disables evidence finder first. Disabling evidence finder automatically deletes the event data store that was created in their account when they enabled evidence finder. If this task isn\226\128\153t completed, the event data store remains in their account. In this case, we recommend that the original delegated administrator goes to CloudTrail Lake and manually deletes the event data store. This cleanup task is necessary to ensure that you don't end up with multiple event data stores. Audit Manager ignores an unused event data store after you remove or change a delegated administrator account. However, the unused event data store continues to incur storage costs from CloudTrail Lake if you don't delete it. When you deregister a delegated administrator account for Audit Manager, the data for that account isn\226\128\153t deleted. If you want to delete resource data for a delegated administrator account, you must perform that task separately before you deregister the account. Either, you can do this in the Audit Manager console. Or, you can use one of the delete API operations that are provided by Audit Manager. To delete your Audit Manager resource data, see the following instructions: DeleteAssessment (see also: Deleting an assessment in the Audit Manager User Guide) DeleteAssessmentFramework (see also: Deleting a custom framework in the Audit Manager User Guide) DeleteAssessmentFrameworkShare (see also: Deleting a share request in the Audit Manager User Guide) DeleteAssessmentReport (see also: Deleting an assessment report in the Audit Manager User Guide) DeleteControl (see also: Deleting a custom control in the Audit Manager User Guide) At this time, Audit Manager doesn't provide an option to delete evidence for a specific delegated administrator. Instead, when your management account deregisters Audit Manager, we perform a cleanup for the current delegated administrator account at the time of deregistration."]
 module DeregisterAccountResponse =
   struct
     type nonrec t =
@@ -12014,12 +12964,12 @@ module DeregisterAccountResponse =
         (Option.map ~f:AccountStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" AccountStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" AccountStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deregisters an account in Audit Manager. When you deregister your account from Audit Manager, your data isn\226\128\153t deleted. If you want to delete your resource data, you must perform that task separately before you deregister your account. Either, you can do this in the Audit Manager console. Or, you can use one of the delete API operations that are provided by Audit Manager. To delete your Audit Manager resource data, see the following instructions: DeleteAssessment (see also: Deleting an assessment in the Audit Manager User Guide) DeleteAssessmentFramework (see also: Deleting a custom framework in the Audit Manager User Guide) DeleteAssessmentFrameworkShare (see also: Deleting a share request in the Audit Manager User Guide) DeleteAssessmentReport (see also: Deleting an assessment report in the Audit Manager User Guide) DeleteControl (see also: Deleting a custom control in the Audit Manager User Guide) At this time, Audit Manager doesn't provide an option to delete evidence. All available delete operations are listed above."]
+       "Deregisters an account in Audit Manager. Before you deregister, you can use the UpdateSettings API operation to set your preferred data retention policy. By default, Audit Manager retains your data. If you want to delete your data, you can use the DeregistrationPolicy attribute to request the deletion of your data. For more information about data retention, see Data Protection in the Audit Manager User Guide."]
 module DeregisterAccountRequest =
   struct
     type nonrec t = unit
@@ -12032,7 +12982,7 @@ module DeregisterAccountRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deregisters an account in Audit Manager. When you deregister your account from Audit Manager, your data isn\226\128\153t deleted. If you want to delete your resource data, you must perform that task separately before you deregister your account. Either, you can do this in the Audit Manager console. Or, you can use one of the delete API operations that are provided by Audit Manager. To delete your Audit Manager resource data, see the following instructions: DeleteAssessment (see also: Deleting an assessment in the Audit Manager User Guide) DeleteAssessmentFramework (see also: Deleting a custom framework in the Audit Manager User Guide) DeleteAssessmentFrameworkShare (see also: Deleting a share request in the Audit Manager User Guide) DeleteAssessmentReport (see also: Deleting an assessment report in the Audit Manager User Guide) DeleteControl (see also: Deleting a custom control in the Audit Manager User Guide) At this time, Audit Manager doesn't provide an option to delete evidence. All available delete operations are listed above."]
+       "Deregisters an account in Audit Manager. Before you deregister, you can use the UpdateSettings API operation to set your preferred data retention policy. By default, Audit Manager retains your data. If you want to delete your data, you can use the DeregistrationPolicy attribute to request the deletion of your data. For more information about data retention, see Data Protection in the Audit Manager User Guide."]
 module DeleteControlResponse =
   struct
     type nonrec t = unit
@@ -12098,7 +13048,8 @@ module DeleteControlResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a custom control in Audit Manager."]
+  end[@@ocaml.doc
+       "Deletes a custom control in Audit Manager. When you invoke this operation, the custom control is deleted from any frameworks or assessments that it\226\128\153s currently part of. As a result, Audit Manager will stop collecting evidence for that custom control in all of your assessments. This includes assessments that you previously created before you deleted the custom control."]
 module DeleteControlRequest =
   struct
     type nonrec t =
@@ -12114,11 +13065,12 @@ module DeleteControlRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "controlId") in
       make ~controlId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let controlId = field_map_exn json "controlId" UUID.of_json in
+    let of_json json__ =
+      let controlId = field_map_exn json__ "controlId" UUID.of_json in
       make ~controlId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a custom control in Audit Manager."]
+  end[@@ocaml.doc
+       "Deletes a custom control in Audit Manager. When you invoke this operation, the custom control is deleted from any frameworks or assessments that it\226\128\153s currently part of. As a result, Audit Manager will stop collecting evidence for that custom control in all of your assessments. This includes assessments that you previously created before you deleted the custom control."]
 module DeleteAssessmentResponse =
   struct
     type nonrec t = unit
@@ -12201,8 +13153,8 @@ module DeleteAssessmentRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+    let of_json json__ =
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ~assessmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an assessment in Audit Manager."]
@@ -12272,7 +13224,7 @@ module DeleteAssessmentReportResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an assessment report from an assessment in Audit Manager."]
+       "Deletes an assessment report in Audit Manager. When you run the DeleteAssessmentReport operation, Audit Manager attempts to delete the following data: The specified assessment report that\226\128\153s stored in your S3 bucket The associated metadata that\226\128\153s stored in Audit Manager If Audit Manager can\226\128\153t access the assessment report in your S3 bucket, the report isn\226\128\153t deleted. In this event, the DeleteAssessmentReport operation doesn\226\128\153t fail. Instead, it proceeds to delete the associated metadata only. You must then delete the assessment report from the S3 bucket yourself. This scenario happens when Audit Manager receives a 403 (Forbidden) or 404 (Not Found) error from Amazon S3. To avoid this, make sure that your S3 bucket is available, and that you configured the correct permissions for Audit Manager to delete resources in your S3 bucket. For an example permissions policy that you can use, see Assessment report destination permissions in the Audit Manager User Guide. For information about the issues that could cause a 403 (Forbidden) or 404 (Not Found) error from Amazon S3, see List of Error Codes in the Amazon Simple Storage Service API Reference."]
 module DeleteAssessmentReportRequest =
   struct
     type nonrec t =
@@ -12298,14 +13250,14 @@ module DeleteAssessmentReportRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ~assessmentReportId ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentReportId =
-        field_map_exn json "assessmentReportId" UUID.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+        field_map_exn json__ "assessmentReportId" UUID.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ~assessmentReportId ~assessmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an assessment report from an assessment in Audit Manager."]
+       "Deletes an assessment report in Audit Manager. When you run the DeleteAssessmentReport operation, Audit Manager attempts to delete the following data: The specified assessment report that\226\128\153s stored in your S3 bucket The associated metadata that\226\128\153s stored in Audit Manager If Audit Manager can\226\128\153t access the assessment report in your S3 bucket, the report isn\226\128\153t deleted. In this event, the DeleteAssessmentReport operation doesn\226\128\153t fail. Instead, it proceeds to delete the associated metadata only. You must then delete the assessment report from the S3 bucket yourself. This scenario happens when Audit Manager receives a 403 (Forbidden) or 404 (Not Found) error from Amazon S3. To avoid this, make sure that your S3 bucket is available, and that you configured the correct permissions for Audit Manager to delete resources in your S3 bucket. For an example permissions policy that you can use, see Assessment report destination permissions in the Audit Manager User Guide. For information about the issues that could cause a 403 (Forbidden) or 404 (Not Found) error from Amazon S3, see List of Error Codes in the Amazon Simple Storage Service API Reference."]
 module DeleteAssessmentFrameworkShareResponse =
   struct
     type nonrec t = unit
@@ -12399,10 +13351,10 @@ module DeleteAssessmentFrameworkShareRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "requestId") in
       make ~requestType ~requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requestType =
-        field_map_exn json "requestType" ShareRequestType.of_json in
-      let requestId = field_map_exn json "requestId" UUID.of_json in
+        field_map_exn json__ "requestType" ShareRequestType.of_json in
+      let requestId = field_map_exn json__ "requestId" UUID.of_json in
       make ~requestType ~requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12490,8 +13442,8 @@ module DeleteAssessmentFrameworkRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "frameworkId") in
       make ~frameworkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let frameworkId = field_map_exn json "frameworkId" UUID.of_json in
+    let of_json json__ =
+      let frameworkId = field_map_exn json__ "frameworkId" UUID.of_json in
       make ~frameworkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a custom framework in Audit Manager."]
@@ -12505,6 +13457,7 @@ module CreateControlResponse =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?control = fun () -> { control }
@@ -12516,6 +13469,9 @@ module CreateControlResponse =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -12529,6 +13485,9 @@ module CreateControlResponse =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -12547,6 +13506,10 @@ module CreateControlResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -12565,8 +13528,8 @@ module CreateControlResponse =
         (Option.map ~f:Control.of_xml) (Xml.child xml_arg0 "control") in
       make ?control ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let control = field_map json "control" Control.of_json in
+    let of_json json__ =
+      let control = field_map json__ "control" Control.of_json in
       make ?control ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new custom control in Audit Manager."]
@@ -12647,21 +13610,21 @@ module CreateControlRequest =
       make ?tags ~controlMappingSources ?actionPlanInstructions
         ?actionPlanTitle ?testingInformation ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
       let controlMappingSources =
-        field_map_exn json "controlMappingSources"
+        field_map_exn json__ "controlMappingSources"
           CreateControlMappingSources.of_json in
       let actionPlanInstructions =
-        field_map json "actionPlanInstructions"
+        field_map json__ "actionPlanInstructions"
           ActionPlanInstructions.of_json in
       let actionPlanTitle =
-        field_map json "actionPlanTitle" ActionPlanTitle.of_json in
+        field_map json__ "actionPlanTitle" ActionPlanTitle.of_json in
       let testingInformation =
-        field_map json "testingInformation" TestingInformation.of_json in
+        field_map json__ "testingInformation" TestingInformation.of_json in
       let description =
-        field_map json "description" ControlDescription.of_json in
-      let name = field_map_exn json "name" ControlName.of_json in
+        field_map json__ "description" ControlDescription.of_json in
+      let name = field_map_exn json__ "name" ControlName.of_json in
       make ?tags ~controlMappingSources ?actionPlanInstructions
         ?actionPlanTitle ?testingInformation ?description ~name ()
     let to_json v = composed_to_json to_value v
@@ -12674,6 +13637,8 @@ module CreateAssessmentResponse =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?assessment = fun () -> { assessment }
@@ -12685,6 +13650,11 @@ module CreateAssessmentResponse =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -12698,6 +13668,11 @@ module CreateAssessmentResponse =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -12716,6 +13691,14 @@ module CreateAssessmentResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -12734,8 +13717,8 @@ module CreateAssessmentResponse =
         (Option.map ~f:Assessment.of_xml) (Xml.child xml_arg0 "assessment") in
       make ?assessment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assessment = field_map json "assessment" Assessment.of_json in
+    let of_json json__ =
+      let assessment = field_map json__ "assessment" Assessment.of_json in
       make ?assessment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an assessment in Audit Manager."]
@@ -12811,17 +13794,17 @@ module CreateAssessmentRequest =
       make ?tags ~frameworkId ~roles ~scope ~assessmentReportsDestination
         ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let frameworkId = field_map_exn json "frameworkId" UUID.of_json in
-      let roles = field_map_exn json "roles" Roles.of_json in
-      let scope = field_map_exn json "scope" Scope.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let frameworkId = field_map_exn json__ "frameworkId" UUID.of_json in
+      let roles = field_map_exn json__ "roles" Roles.of_json in
+      let scope = field_map_exn json__ "scope" Scope.of_json in
       let assessmentReportsDestination =
-        field_map_exn json "assessmentReportsDestination"
+        field_map_exn json__ "assessmentReportsDestination"
           AssessmentReportsDestination.of_json in
       let description =
-        field_map json "description" AssessmentDescription.of_json in
-      let name = field_map_exn json "name" AssessmentName.of_json in
+        field_map json__ "description" AssessmentDescription.of_json in
+      let name = field_map_exn json__ "name" AssessmentName.of_json in
       make ?tags ~frameworkId ~roles ~scope ~assessmentReportsDestination
         ?description ~name ()
     let to_json v = composed_to_json to_value v
@@ -12899,9 +13882,9 @@ module CreateAssessmentReportResponse =
           (Xml.child xml_arg0 "assessmentReport") in
       make ?assessmentReport ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentReport =
-        field_map json "assessmentReport" AssessmentReport.of_json in
+        field_map json__ "assessmentReport" AssessmentReport.of_json in
       make ?assessmentReport ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12914,19 +13897,29 @@ module CreateAssessmentReportRequest =
         [@ocaml.doc "The name of the new assessment report."];
       description: AssessmentReportDescription.t option
         [@ocaml.doc "The description of the assessment report."];
-      assessmentId: UUID.t [@ocaml.doc "The identifier for the assessment."]}
+      assessmentId: UUID.t [@ocaml.doc "The identifier for the assessment."];
+      queryStatement: QueryStatement.t option
+        [@ocaml.doc
+          "A SQL statement that represents an evidence finder query. Provide this parameter when you want to generate an assessment report from the results of an evidence finder search query. When you use this parameter, Audit Manager generates a one-time report using only the evidence from the query output. This report does not include any assessment evidence that was manually added to a report using the console, or associated with a report using the API. To use this parameter, the enablementStatus of evidence finder must be ENABLED. For examples and help resolving queryStatement validation exceptions, see Troubleshooting evidence finder issues in the Audit Manager User Guide."]}
     let context_ = "CreateAssessmentReportRequest"
     let make ?description =
-      fun ~name ->
-        fun ~assessmentId -> fun () -> { description; name; assessmentId }
+      fun ?queryStatement ->
+        fun ~name ->
+          fun ~assessmentId ->
+            fun () -> { description; queryStatement; name; assessmentId }
     let to_value x =
       structure_to_value
         [("name", (Some (AssessmentReportName.to_value x.name)));
         ("description",
           (Option.map x.description ~f:AssessmentReportDescription.to_value));
-        ("assessmentId", (Some (UUID.to_value x.assessmentId)))]
+        ("assessmentId", (Some (UUID.to_value x.assessmentId)));
+        ("queryStatement",
+          (Option.map x.queryStatement ~f:QueryStatement.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let queryStatement =
+        (Option.map ~f:QueryStatement.of_xml)
+          (Xml.child xml_arg0 "queryStatement") in
       let assessmentId =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       let description =
@@ -12935,14 +13928,16 @@ module CreateAssessmentReportRequest =
       let name =
         AssessmentReportName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~assessmentId ?description ~name ()
+      make ?queryStatement ~assessmentId ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+    let of_json json__ =
+      let queryStatement =
+        field_map json__ "queryStatement" QueryStatement.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       let description =
-        field_map json "description" AssessmentReportDescription.of_json in
-      let name = field_map_exn json "name" AssessmentReportName.of_json in
-      make ~assessmentId ?description ~name ()
+        field_map json__ "description" AssessmentReportDescription.of_json in
+      let name = field_map_exn json__ "name" AssessmentReportName.of_json in
+      make ?queryStatement ~assessmentId ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an assessment report for the specified assessment."]
@@ -12952,11 +13947,12 @@ module CreateAssessmentFrameworkResponse =
       {
       framework: Framework.t option
         [@ocaml.doc
-          "The name of the new framework that the CreateAssessmentFramework API returned."]}
+          "The new framework object that the CreateAssessmentFramework API returned."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?framework = fun () -> { framework }
@@ -12968,6 +13964,9 @@ module CreateAssessmentFrameworkResponse =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -12981,6 +13980,9 @@ module CreateAssessmentFrameworkResponse =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -12999,6 +14001,10 @@ module CreateAssessmentFrameworkResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -13017,8 +14023,8 @@ module CreateAssessmentFrameworkResponse =
         (Option.map ~f:Framework.of_xml) (Xml.child xml_arg0 "framework") in
       make ?framework ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let framework = field_map json "framework" Framework.of_json in
+    let of_json json__ =
+      let framework = field_map json__ "framework" Framework.of_json in
       make ?framework ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a custom framework in Audit Manager."]
@@ -13035,7 +14041,7 @@ module CreateAssessmentFrameworkRequest =
           "The compliance type that the new custom framework supports, such as CIS or HIPAA."];
       controlSets: CreateAssessmentFrameworkControlSets.t
         [@ocaml.doc
-          "The control sets that are associated with the framework."];
+          "The control sets that are associated with the framework. The Controls object returns a partial response when called through Framework APIs. For a complete Controls object, use GetControl."];
       tags: TagMap.t option
         [@ocaml.doc "The tags that are associated with the framework."]}
     let context_ = "CreateAssessmentFrameworkRequest"
@@ -13073,16 +14079,16 @@ module CreateAssessmentFrameworkRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ~controlSets ?complianceType ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
       let controlSets =
-        field_map_exn json "controlSets"
+        field_map_exn json__ "controlSets"
           CreateAssessmentFrameworkControlSets.of_json in
       let complianceType =
-        field_map json "complianceType" ComplianceType.of_json in
+        field_map json__ "complianceType" ComplianceType.of_json in
       let description =
-        field_map json "description" FrameworkDescription.of_json in
-      let name = field_map_exn json "name" FrameworkName.of_json in
+        field_map json__ "description" FrameworkDescription.of_json in
+      let name = field_map_exn json__ "name" FrameworkName.of_json in
       make ?tags ~controlSets ?complianceType ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a custom framework in Audit Manager."]
@@ -13097,6 +14103,7 @@ module BatchImportEvidenceToAssessmentControlResponse =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?errors = fun () -> { errors }
@@ -13108,6 +14115,8 @@ module BatchImportEvidenceToAssessmentControlResponse =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -13121,6 +14130,8 @@ module BatchImportEvidenceToAssessmentControlResponse =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -13139,6 +14150,10 @@ module BatchImportEvidenceToAssessmentControlResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -13160,14 +14175,14 @@ module BatchImportEvidenceToAssessmentControlResponse =
           (Xml.child xml_arg0 "errors") in
       make ?errors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errors =
-        field_map json "errors"
+        field_map json__ "errors"
           BatchImportEvidenceToAssessmentControlErrors.of_json in
       make ?errors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Uploads one or more pieces of evidence to a control in an Audit Manager assessment."]
+       "Adds one or more pieces of evidence to a control in an Audit Manager assessment. You can import manual evidence from any S3 bucket by specifying the S3 URI of the object. You can also upload a file from your browser, or enter plain text in response to a risk assessment question. The following restrictions apply to this action: manualEvidence can be only one of the following: evidenceFileName, s3ResourcePath, or textResponse Maximum size of an individual evidence file: 100 MB Number of daily manual evidence uploads per control: 100 Supported file formats: See Supported file types for manual evidence in the Audit Manager User Guide For more information about Audit Manager service restrictions, see Quotas and restrictions for Audit Manager."]
 module BatchImportEvidenceToAssessmentControlRequest =
   struct
     type nonrec t =
@@ -13206,17 +14221,17 @@ module BatchImportEvidenceToAssessmentControlRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ~manualEvidence ~controlId ~controlSetId ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let manualEvidence =
-        field_map_exn json "manualEvidence" ManualEvidenceList.of_json in
-      let controlId = field_map_exn json "controlId" UUID.of_json in
+        field_map_exn json__ "manualEvidence" ManualEvidenceList.of_json in
+      let controlId = field_map_exn json__ "controlId" UUID.of_json in
       let controlSetId =
-        field_map_exn json "controlSetId" ControlSetId.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+        field_map_exn json__ "controlSetId" ControlSetId.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ~manualEvidence ~controlId ~controlSetId ~assessmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Uploads one or more pieces of evidence to a control in an Audit Manager assessment."]
+       "Adds one or more pieces of evidence to a control in an Audit Manager assessment. You can import manual evidence from any S3 bucket by specifying the S3 URI of the object. You can also upload a file from your browser, or enter plain text in response to a risk assessment question. The following restrictions apply to this action: manualEvidence can be only one of the following: evidenceFileName, s3ResourcePath, or textResponse Maximum size of an individual evidence file: 100 MB Number of daily manual evidence uploads per control: 100 Supported file formats: See Supported file types for manual evidence in the Audit Manager User Guide For more information about Audit Manager service restrictions, see Quotas and restrictions for Audit Manager."]
 module BatchDisassociateAssessmentReportEvidenceResponse =
   struct
     type nonrec t =
@@ -13295,10 +14310,10 @@ module BatchDisassociateAssessmentReportEvidenceResponse =
         (Option.map ~f:EvidenceIds.of_xml) (Xml.child xml_arg0 "evidenceIds") in
       make ?errors ?evidenceIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errors =
-        field_map json "errors" AssessmentReportEvidenceErrors.of_json in
-      let evidenceIds = field_map json "evidenceIds" EvidenceIds.of_json in
+        field_map json__ "errors" AssessmentReportEvidenceErrors.of_json in
+      let evidenceIds = field_map json__ "evidenceIds" EvidenceIds.of_json in
       make ?errors ?evidenceIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13335,11 +14350,12 @@ module BatchDisassociateAssessmentReportEvidenceRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ~evidenceIds ~evidenceFolderId ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let evidenceIds = field_map_exn json "evidenceIds" EvidenceIds.of_json in
+    let of_json json__ =
+      let evidenceIds =
+        field_map_exn json__ "evidenceIds" EvidenceIds.of_json in
       let evidenceFolderId =
-        field_map_exn json "evidenceFolderId" UUID.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+        field_map_exn json__ "evidenceFolderId" UUID.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ~evidenceIds ~evidenceFolderId ~assessmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13418,9 +14434,9 @@ module BatchDeleteDelegationByAssessmentResponse =
           (Xml.child xml_arg0 "errors") in
       make ?errors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errors =
-        field_map json "errors"
+        field_map json__ "errors"
           BatchDeleteDelegationByAssessmentErrors.of_json in
       make ?errors ()
     let to_json v = composed_to_json to_value v
@@ -13449,10 +14465,10 @@ module BatchDeleteDelegationByAssessmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "delegationIds") in
       make ~assessmentId ~delegationIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+    let of_json json__ =
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       let delegationIds =
-        field_map_exn json "delegationIds" DelegationIds.of_json in
+        field_map_exn json__ "delegationIds" DelegationIds.of_json in
       make ~assessmentId ~delegationIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13537,11 +14553,11 @@ module BatchCreateDelegationByAssessmentResponse =
         (Option.map ~f:Delegations.of_xml) (Xml.child xml_arg0 "delegations") in
       make ?errors ?delegations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errors =
-        field_map json "errors"
+        field_map json__ "errors"
           BatchCreateDelegationByAssessmentErrors.of_json in
-      let delegations = field_map json "delegations" Delegations.of_json in
+      let delegations = field_map json__ "delegations" Delegations.of_json in
       make ?errors ?delegations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13574,10 +14590,10 @@ module BatchCreateDelegationByAssessmentRequest =
              "createDelegationRequests") in
       make ~assessmentId ~createDelegationRequests ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+    let of_json json__ =
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       let createDelegationRequests =
-        field_map_exn json "createDelegationRequests"
+        field_map_exn json__ "createDelegationRequests"
           CreateDelegationRequests.of_json in
       make ~assessmentId ~createDelegationRequests ()
     let to_json v = composed_to_json to_value v
@@ -13661,10 +14677,10 @@ module BatchAssociateAssessmentReportEvidenceResponse =
         (Option.map ~f:EvidenceIds.of_xml) (Xml.child xml_arg0 "evidenceIds") in
       make ?errors ?evidenceIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errors =
-        field_map json "errors" AssessmentReportEvidenceErrors.of_json in
-      let evidenceIds = field_map json "evidenceIds" EvidenceIds.of_json in
+        field_map json__ "errors" AssessmentReportEvidenceErrors.of_json in
+      let evidenceIds = field_map json__ "evidenceIds" EvidenceIds.of_json in
       make ?errors ?evidenceIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13701,11 +14717,12 @@ module BatchAssociateAssessmentReportEvidenceRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ~evidenceIds ~evidenceFolderId ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let evidenceIds = field_map_exn json "evidenceIds" EvidenceIds.of_json in
+    let of_json json__ =
+      let evidenceIds =
+        field_map_exn json__ "evidenceIds" EvidenceIds.of_json in
       let evidenceFolderId =
-        field_map_exn json "evidenceFolderId" UUID.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+        field_map_exn json__ "evidenceFolderId" UUID.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ~evidenceIds ~evidenceFolderId ~assessmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13776,7 +14793,7 @@ module AssociateAssessmentReportEvidenceFolderResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates an evidence folder to an assessment report in a Audit Manager assessment."]
+       "Associates an evidence folder to an assessment report in an Audit Manager assessment."]
 module AssociateAssessmentReportEvidenceFolderRequest =
   struct
     type nonrec t =
@@ -13801,11 +14818,11 @@ module AssociateAssessmentReportEvidenceFolderRequest =
         UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assessmentId") in
       make ~evidenceFolderId ~assessmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let evidenceFolderId =
-        field_map_exn json "evidenceFolderId" UUID.of_json in
-      let assessmentId = field_map_exn json "assessmentId" UUID.of_json in
+        field_map_exn json__ "evidenceFolderId" UUID.of_json in
+      let assessmentId = field_map_exn json__ "assessmentId" UUID.of_json in
       make ~evidenceFolderId ~assessmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates an evidence folder to an assessment report in a Audit Manager assessment."]
+       "Associates an evidence folder to an assessment report in an Audit Manager assessment."]

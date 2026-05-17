@@ -20,7 +20,7 @@ let dispatch_exn ~name ~error_to_json ~f =
 module List_buckets = struct
   let pp_created_at ppf s = Format.fprintf ppf " (created at %s)" s
 
-  let pp_bucket_line ppf { Bucket.name; creationDate } =
+  let pp_bucket_line ppf { Bucket.name; creationDate; _ } =
     Format.fprintf
       ppf
       "- %a%a\n"
@@ -36,7 +36,7 @@ module List_buckets = struct
       Option.value owner.displayName ~default:"<no displayname>"
   ;;
 
-  let pp_out ppf { ListBucketsOutput.owner; buckets } =
+  let pp_out ppf { ListBucketsOutput.owner; buckets; _ } =
     let owner = owner_opt_to_string owner in
     Format.fprintf
       ppf
@@ -53,7 +53,7 @@ module List_buckets = struct
       ~name:"list_buckets"
       ~error_to_json:ListBucketsOutput.error_to_json
       ~f:(fun () ->
-      Io.list_buckets ~cfg ())
+      Io.list_buckets ~cfg (ListBucketsRequest.make ()))
     >>| fun v -> Format.printf "%a" pp_out v
   ;;
 
@@ -66,7 +66,7 @@ module List_buckets = struct
 end
 
 module List_objects = struct
-  let pp_size ppf n = Format.fprintf ppf ", %d bytes" n
+  let pp_size ppf n = Format.fprintf ppf ", %Ld bytes" n
   let pp_last_modified ppf s = Format.fprintf ppf ", last modified %s" s
 
   let pp_object ppf { Object.key; size; lastModified; _ } =

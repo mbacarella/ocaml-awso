@@ -3,29 +3,90 @@ open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
   | AssociateKmsKey: (AssociateKmsKeyRequest.t, unit, unit) t 
+  | AssociateSourceToS3TableIntegration:
+  (AssociateSourceToS3TableIntegrationRequest.t,
+  AssociateSourceToS3TableIntegrationResponse.t,
+  AssociateSourceToS3TableIntegrationResponse.error) t 
   | CancelExportTask: (CancelExportTaskRequest.t, unit, unit) t 
+  | CancelImportTask: (CancelImportTaskRequest.t, CancelImportTaskResponse.t,
+  CancelImportTaskResponse.error) t 
+  | CreateDelivery: (CreateDeliveryRequest.t, CreateDeliveryResponse.t,
+  CreateDeliveryResponse.error) t 
   | CreateExportTask: (CreateExportTaskRequest.t, CreateExportTaskResponse.t,
   CreateExportTaskResponse.error) t 
+  | CreateImportTask: (CreateImportTaskRequest.t, CreateImportTaskResponse.t,
+  CreateImportTaskResponse.error) t 
+  | CreateLogAnomalyDetector: (CreateLogAnomalyDetectorRequest.t,
+  CreateLogAnomalyDetectorResponse.t, CreateLogAnomalyDetectorResponse.error)
+  t 
   | CreateLogGroup: (CreateLogGroupRequest.t, unit, unit) t 
   | CreateLogStream: (CreateLogStreamRequest.t, unit, unit) t 
+  | CreateLookupTable: (CreateLookupTableRequest.t,
+  CreateLookupTableResponse.t, CreateLookupTableResponse.error) t 
+  | CreateScheduledQuery: (CreateScheduledQueryRequest.t,
+  CreateScheduledQueryResponse.t, CreateScheduledQueryResponse.error) t 
+  | DeleteAccountPolicy: (DeleteAccountPolicyRequest.t, unit, unit) t 
+  | DeleteDataProtectionPolicy: (DeleteDataProtectionPolicyRequest.t, 
+  unit, unit) t 
+  | DeleteDelivery: (DeleteDeliveryRequest.t, unit, unit) t 
+  | DeleteDeliveryDestination: (DeleteDeliveryDestinationRequest.t, unit,
+  unit) t 
+  | DeleteDeliveryDestinationPolicy:
+  (DeleteDeliveryDestinationPolicyRequest.t, unit, unit) t 
+  | DeleteDeliverySource: (DeleteDeliverySourceRequest.t, unit, unit) t 
   | DeleteDestination: (DeleteDestinationRequest.t, unit, unit) t 
+  | DeleteIndexPolicy: (DeleteIndexPolicyRequest.t,
+  DeleteIndexPolicyResponse.t, DeleteIndexPolicyResponse.error) t 
+  | DeleteIntegration: (DeleteIntegrationRequest.t,
+  DeleteIntegrationResponse.t, DeleteIntegrationResponse.error) t 
+  | DeleteLogAnomalyDetector: (DeleteLogAnomalyDetectorRequest.t, unit, 
+  unit) t 
   | DeleteLogGroup: (DeleteLogGroupRequest.t, unit, unit) t 
   | DeleteLogStream: (DeleteLogStreamRequest.t, unit, unit) t 
+  | DeleteLookupTable: (DeleteLookupTableRequest.t, unit, unit) t 
   | DeleteMetricFilter: (DeleteMetricFilterRequest.t, unit, unit) t 
   | DeleteQueryDefinition: (DeleteQueryDefinitionRequest.t,
   DeleteQueryDefinitionResponse.t, DeleteQueryDefinitionResponse.error) t 
   | DeleteResourcePolicy: (DeleteResourcePolicyRequest.t, unit, unit) t 
   | DeleteRetentionPolicy: (DeleteRetentionPolicyRequest.t, unit, unit) t 
+  | DeleteScheduledQuery: (DeleteScheduledQueryRequest.t,
+  DeleteScheduledQueryResponse.t, DeleteScheduledQueryResponse.error) t 
   | DeleteSubscriptionFilter: (DeleteSubscriptionFilterRequest.t, unit, 
   unit) t 
+  | DeleteTransformer: (DeleteTransformerRequest.t, unit, unit) t 
+  | DescribeAccountPolicies: (DescribeAccountPoliciesRequest.t,
+  DescribeAccountPoliciesResponse.t, DescribeAccountPoliciesResponse.error) t
+  
+  | DescribeConfigurationTemplates: (DescribeConfigurationTemplatesRequest.t,
+  DescribeConfigurationTemplatesResponse.t,
+  DescribeConfigurationTemplatesResponse.error) t 
+  | DescribeDeliveries: (DescribeDeliveriesRequest.t,
+  DescribeDeliveriesResponse.t, DescribeDeliveriesResponse.error) t 
+  | DescribeDeliveryDestinations: (DescribeDeliveryDestinationsRequest.t,
+  DescribeDeliveryDestinationsResponse.t,
+  DescribeDeliveryDestinationsResponse.error) t 
+  | DescribeDeliverySources: (DescribeDeliverySourcesRequest.t,
+  DescribeDeliverySourcesResponse.t, DescribeDeliverySourcesResponse.error) t
+  
   | DescribeDestinations: (DescribeDestinationsRequest.t,
   DescribeDestinationsResponse.t, DescribeDestinationsResponse.error) t 
   | DescribeExportTasks: (DescribeExportTasksRequest.t,
   DescribeExportTasksResponse.t, DescribeExportTasksResponse.error) t 
+  | DescribeFieldIndexes: (DescribeFieldIndexesRequest.t,
+  DescribeFieldIndexesResponse.t, DescribeFieldIndexesResponse.error) t 
+  | DescribeImportTaskBatches: (DescribeImportTaskBatchesRequest.t,
+  DescribeImportTaskBatchesResponse.t,
+  DescribeImportTaskBatchesResponse.error) t 
+  | DescribeImportTasks: (DescribeImportTasksRequest.t,
+  DescribeImportTasksResponse.t, DescribeImportTasksResponse.error) t 
+  | DescribeIndexPolicies: (DescribeIndexPoliciesRequest.t,
+  DescribeIndexPoliciesResponse.t, DescribeIndexPoliciesResponse.error) t 
   | DescribeLogGroups: (DescribeLogGroupsRequest.t,
   DescribeLogGroupsResponse.t, DescribeLogGroupsResponse.error) t 
   | DescribeLogStreams: (DescribeLogStreamsRequest.t,
   DescribeLogStreamsResponse.t, DescribeLogStreamsResponse.error) t 
+  | DescribeLookupTables: (DescribeLookupTablesRequest.t,
+  DescribeLookupTablesResponse.t, DescribeLookupTablesResponse.error) t 
   | DescribeMetricFilters: (DescribeMetricFiltersRequest.t,
   DescribeMetricFiltersResponse.t, DescribeMetricFiltersResponse.error) t 
   | DescribeQueries: (DescribeQueriesRequest.t, DescribeQueriesResponse.t,
@@ -40,23 +101,98 @@ type ('i, 'o, 'e) t =
   DescribeSubscriptionFiltersResponse.t,
   DescribeSubscriptionFiltersResponse.error) t 
   | DisassociateKmsKey: (DisassociateKmsKeyRequest.t, unit, unit) t 
+  | DisassociateSourceFromS3TableIntegration:
+  (DisassociateSourceFromS3TableIntegrationRequest.t,
+  DisassociateSourceFromS3TableIntegrationResponse.t,
+  DisassociateSourceFromS3TableIntegrationResponse.error) t 
   | FilterLogEvents: (FilterLogEventsRequest.t, FilterLogEventsResponse.t,
   FilterLogEventsResponse.error) t 
+  | GetDataProtectionPolicy: (GetDataProtectionPolicyRequest.t,
+  GetDataProtectionPolicyResponse.t, GetDataProtectionPolicyResponse.error) t
+  
+  | GetDelivery: (GetDeliveryRequest.t, GetDeliveryResponse.t,
+  GetDeliveryResponse.error) t 
+  | GetDeliveryDestination: (GetDeliveryDestinationRequest.t,
+  GetDeliveryDestinationResponse.t, GetDeliveryDestinationResponse.error) t 
+  | GetDeliveryDestinationPolicy: (GetDeliveryDestinationPolicyRequest.t,
+  GetDeliveryDestinationPolicyResponse.t,
+  GetDeliveryDestinationPolicyResponse.error) t 
+  | GetDeliverySource: (GetDeliverySourceRequest.t,
+  GetDeliverySourceResponse.t, GetDeliverySourceResponse.error) t 
+  | GetIntegration: (GetIntegrationRequest.t, GetIntegrationResponse.t,
+  GetIntegrationResponse.error) t 
+  | GetLogAnomalyDetector: (GetLogAnomalyDetectorRequest.t,
+  GetLogAnomalyDetectorResponse.t, GetLogAnomalyDetectorResponse.error) t 
   | GetLogEvents: (GetLogEventsRequest.t, GetLogEventsResponse.t,
   GetLogEventsResponse.error) t 
+  | GetLogFields: (GetLogFieldsRequest.t, GetLogFieldsResponse.t,
+  GetLogFieldsResponse.error) t 
   | GetLogGroupFields: (GetLogGroupFieldsRequest.t,
   GetLogGroupFieldsResponse.t, GetLogGroupFieldsResponse.error) t 
+  | GetLogObject: (GetLogObjectRequest.t, GetLogObjectResponse.t,
+  GetLogObjectResponse.error) t 
   | GetLogRecord: (GetLogRecordRequest.t, GetLogRecordResponse.t,
   GetLogRecordResponse.error) t 
+  | GetLookupTable: (GetLookupTableRequest.t, GetLookupTableResponse.t,
+  GetLookupTableResponse.error) t 
   | GetQueryResults: (GetQueryResultsRequest.t, GetQueryResultsResponse.t,
   GetQueryResultsResponse.error) t 
+  | GetScheduledQuery: (GetScheduledQueryRequest.t,
+  GetScheduledQueryResponse.t, GetScheduledQueryResponse.error) t 
+  | GetScheduledQueryHistory: (GetScheduledQueryHistoryRequest.t,
+  GetScheduledQueryHistoryResponse.t, GetScheduledQueryHistoryResponse.error)
+  t 
+  | GetTransformer: (GetTransformerRequest.t, GetTransformerResponse.t,
+  GetTransformerResponse.error) t 
+  | ListAggregateLogGroupSummaries: (ListAggregateLogGroupSummariesRequest.t,
+  ListAggregateLogGroupSummariesResponse.t,
+  ListAggregateLogGroupSummariesResponse.error) t 
+  | ListAnomalies: (ListAnomaliesRequest.t, ListAnomaliesResponse.t,
+  ListAnomaliesResponse.error) t 
+  | ListIntegrations: (ListIntegrationsRequest.t, ListIntegrationsResponse.t,
+  ListIntegrationsResponse.error) t 
+  | ListLogAnomalyDetectors: (ListLogAnomalyDetectorsRequest.t,
+  ListLogAnomalyDetectorsResponse.t, ListLogAnomalyDetectorsResponse.error) t
+  
+  | ListLogGroups: (ListLogGroupsRequest.t, ListLogGroupsResponse.t,
+  ListLogGroupsResponse.error) t 
+  | ListLogGroupsForQuery: (ListLogGroupsForQueryRequest.t,
+  ListLogGroupsForQueryResponse.t, ListLogGroupsForQueryResponse.error) t 
+  | ListScheduledQueries: (ListScheduledQueriesRequest.t,
+  ListScheduledQueriesResponse.t, ListScheduledQueriesResponse.error) t 
+  | ListSourcesForS3TableIntegration:
+  (ListSourcesForS3TableIntegrationRequest.t,
+  ListSourcesForS3TableIntegrationResponse.t,
+  ListSourcesForS3TableIntegrationResponse.error) t 
+  | ListTagsForResource: (ListTagsForResourceRequest.t,
+  ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ListTagsLogGroup: (ListTagsLogGroupRequest.t, ListTagsLogGroupResponse.t,
   ListTagsLogGroupResponse.error) t 
+  | PutAccountPolicy: (PutAccountPolicyRequest.t, PutAccountPolicyResponse.t,
+  PutAccountPolicyResponse.error) t 
+  | PutBearerTokenAuthentication: (PutBearerTokenAuthenticationRequest.t,
+  unit, unit) t 
+  | PutDataProtectionPolicy: (PutDataProtectionPolicyRequest.t,
+  PutDataProtectionPolicyResponse.t, PutDataProtectionPolicyResponse.error) t
+  
+  | PutDeliveryDestination: (PutDeliveryDestinationRequest.t,
+  PutDeliveryDestinationResponse.t, PutDeliveryDestinationResponse.error) t 
+  | PutDeliveryDestinationPolicy: (PutDeliveryDestinationPolicyRequest.t,
+  PutDeliveryDestinationPolicyResponse.t,
+  PutDeliveryDestinationPolicyResponse.error) t 
+  | PutDeliverySource: (PutDeliverySourceRequest.t,
+  PutDeliverySourceResponse.t, PutDeliverySourceResponse.error) t 
   | PutDestination: (PutDestinationRequest.t, PutDestinationResponse.t,
   PutDestinationResponse.error) t 
   | PutDestinationPolicy: (PutDestinationPolicyRequest.t, unit, unit) t 
+  | PutIndexPolicy: (PutIndexPolicyRequest.t, PutIndexPolicyResponse.t,
+  PutIndexPolicyResponse.error) t 
+  | PutIntegration: (PutIntegrationRequest.t, PutIntegrationResponse.t,
+  PutIntegrationResponse.error) t 
   | PutLogEvents: (PutLogEventsRequest.t, PutLogEventsResponse.t,
   PutLogEventsResponse.error) t 
+  | PutLogGroupDeletionProtection: (PutLogGroupDeletionProtectionRequest.t,
+  unit, unit) t 
   | PutMetricFilter: (PutMetricFilterRequest.t, unit, unit) t 
   | PutQueryDefinition: (PutQueryDefinitionRequest.t,
   PutQueryDefinitionResponse.t, PutQueryDefinitionResponse.error) t 
@@ -64,103 +200,268 @@ type ('i, 'o, 'e) t =
   PutResourcePolicyResponse.t, PutResourcePolicyResponse.error) t 
   | PutRetentionPolicy: (PutRetentionPolicyRequest.t, unit, unit) t 
   | PutSubscriptionFilter: (PutSubscriptionFilterRequest.t, unit, unit) t 
+  | PutTransformer: (PutTransformerRequest.t, unit, unit) t 
+  | StartLiveTail: (StartLiveTailRequest.t, StartLiveTailResponse.t,
+  StartLiveTailResponse.error) t 
   | StartQuery: (StartQueryRequest.t, StartQueryResponse.t,
   StartQueryResponse.error) t 
   | StopQuery: (StopQueryRequest.t, StopQueryResponse.t,
   StopQueryResponse.error) t 
   | TagLogGroup: (TagLogGroupRequest.t, unit, unit) t 
+  | TagResource: (TagResourceRequest.t, unit, unit) t 
   | TestMetricFilter: (TestMetricFilterRequest.t, TestMetricFilterResponse.t,
   TestMetricFilterResponse.error) t 
+  | TestTransformer: (TestTransformerRequest.t, TestTransformerResponse.t,
+  TestTransformerResponse.error) t 
   | UntagLogGroup: (UntagLogGroupRequest.t, unit, unit) t 
+  | UntagResource: (UntagResourceRequest.t, unit, unit) t 
+  | UpdateAnomaly: (UpdateAnomalyRequest.t, unit, unit) t 
+  | UpdateDeliveryConfiguration: (UpdateDeliveryConfigurationRequest.t,
+  UpdateDeliveryConfigurationResponse.t,
+  UpdateDeliveryConfigurationResponse.error) t 
+  | UpdateLogAnomalyDetector: (UpdateLogAnomalyDetectorRequest.t, unit, 
+  unit) t 
+  | UpdateLookupTable: (UpdateLookupTableRequest.t,
+  UpdateLookupTableResponse.t, UpdateLookupTableResponse.error) t 
+  | UpdateScheduledQuery: (UpdateScheduledQueryRequest.t,
+  UpdateScheduledQueryResponse.t, UpdateScheduledQueryResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AssociateKmsKey -> `POST
+  | AssociateSourceToS3TableIntegration -> `POST
   | CancelExportTask -> `POST
+  | CancelImportTask -> `POST
+  | CreateDelivery -> `POST
   | CreateExportTask -> `POST
+  | CreateImportTask -> `POST
+  | CreateLogAnomalyDetector -> `POST
   | CreateLogGroup -> `POST
   | CreateLogStream -> `POST
+  | CreateLookupTable -> `POST
+  | CreateScheduledQuery -> `POST
+  | DeleteAccountPolicy -> `POST
+  | DeleteDataProtectionPolicy -> `POST
+  | DeleteDelivery -> `POST
+  | DeleteDeliveryDestination -> `POST
+  | DeleteDeliveryDestinationPolicy -> `POST
+  | DeleteDeliverySource -> `POST
   | DeleteDestination -> `POST
+  | DeleteIndexPolicy -> `POST
+  | DeleteIntegration -> `POST
+  | DeleteLogAnomalyDetector -> `POST
   | DeleteLogGroup -> `POST
   | DeleteLogStream -> `POST
+  | DeleteLookupTable -> `POST
   | DeleteMetricFilter -> `POST
   | DeleteQueryDefinition -> `POST
   | DeleteResourcePolicy -> `POST
   | DeleteRetentionPolicy -> `POST
+  | DeleteScheduledQuery -> `POST
   | DeleteSubscriptionFilter -> `POST
+  | DeleteTransformer -> `POST
+  | DescribeAccountPolicies -> `POST
+  | DescribeConfigurationTemplates -> `POST
+  | DescribeDeliveries -> `POST
+  | DescribeDeliveryDestinations -> `POST
+  | DescribeDeliverySources -> `POST
   | DescribeDestinations -> `POST
   | DescribeExportTasks -> `POST
+  | DescribeFieldIndexes -> `POST
+  | DescribeImportTaskBatches -> `POST
+  | DescribeImportTasks -> `POST
+  | DescribeIndexPolicies -> `POST
   | DescribeLogGroups -> `POST
   | DescribeLogStreams -> `POST
+  | DescribeLookupTables -> `POST
   | DescribeMetricFilters -> `POST
   | DescribeQueries -> `POST
   | DescribeQueryDefinitions -> `POST
   | DescribeResourcePolicies -> `POST
   | DescribeSubscriptionFilters -> `POST
   | DisassociateKmsKey -> `POST
+  | DisassociateSourceFromS3TableIntegration -> `POST
   | FilterLogEvents -> `POST
+  | GetDataProtectionPolicy -> `POST
+  | GetDelivery -> `POST
+  | GetDeliveryDestination -> `POST
+  | GetDeliveryDestinationPolicy -> `POST
+  | GetDeliverySource -> `POST
+  | GetIntegration -> `POST
+  | GetLogAnomalyDetector -> `POST
   | GetLogEvents -> `POST
+  | GetLogFields -> `POST
   | GetLogGroupFields -> `POST
+  | GetLogObject -> `POST
   | GetLogRecord -> `POST
+  | GetLookupTable -> `POST
   | GetQueryResults -> `POST
+  | GetScheduledQuery -> `POST
+  | GetScheduledQueryHistory -> `POST
+  | GetTransformer -> `POST
+  | ListAggregateLogGroupSummaries -> `POST
+  | ListAnomalies -> `POST
+  | ListIntegrations -> `POST
+  | ListLogAnomalyDetectors -> `POST
+  | ListLogGroups -> `POST
+  | ListLogGroupsForQuery -> `POST
+  | ListScheduledQueries -> `POST
+  | ListSourcesForS3TableIntegration -> `POST
+  | ListTagsForResource -> `POST
   | ListTagsLogGroup -> `POST
+  | PutAccountPolicy -> `POST
+  | PutBearerTokenAuthentication -> `POST
+  | PutDataProtectionPolicy -> `POST
+  | PutDeliveryDestination -> `POST
+  | PutDeliveryDestinationPolicy -> `POST
+  | PutDeliverySource -> `POST
   | PutDestination -> `POST
   | PutDestinationPolicy -> `POST
+  | PutIndexPolicy -> `POST
+  | PutIntegration -> `POST
   | PutLogEvents -> `POST
+  | PutLogGroupDeletionProtection -> `POST
   | PutMetricFilter -> `POST
   | PutQueryDefinition -> `POST
   | PutResourcePolicy -> `POST
   | PutRetentionPolicy -> `POST
   | PutSubscriptionFilter -> `POST
+  | PutTransformer -> `POST
+  | StartLiveTail -> `POST
   | StartQuery -> `POST
   | StopQuery -> `POST
   | TagLogGroup -> `POST
+  | TagResource -> `POST
   | TestMetricFilter -> `POST
+  | TestTransformer -> `POST
   | UntagLogGroup -> `POST
+  | UntagResource -> `POST
+  | UpdateAnomaly -> `POST
+  | UpdateDeliveryConfiguration -> `POST
+  | UpdateLogAnomalyDetector -> `POST
+  | UpdateLookupTable -> `POST
+  | UpdateScheduledQuery -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | AssociateKmsKey -> (Format.kasprintf Uri.of_string) "/"
+      | AssociateSourceToS3TableIntegration ->
+          (Format.kasprintf Uri.of_string) "/"
       | CancelExportTask -> (Format.kasprintf Uri.of_string) "/"
+      | CancelImportTask -> (Format.kasprintf Uri.of_string) "/"
+      | CreateDelivery -> (Format.kasprintf Uri.of_string) "/"
       | CreateExportTask -> (Format.kasprintf Uri.of_string) "/"
+      | CreateImportTask -> (Format.kasprintf Uri.of_string) "/"
+      | CreateLogAnomalyDetector -> (Format.kasprintf Uri.of_string) "/"
       | CreateLogGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateLogStream -> (Format.kasprintf Uri.of_string) "/"
+      | CreateLookupTable -> (Format.kasprintf Uri.of_string) "/"
+      | CreateScheduledQuery -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteAccountPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteDataProtectionPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteDelivery -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteDeliveryDestination -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteDeliveryDestinationPolicy ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteDeliverySource -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDestination -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteIndexPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteIntegration -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteLogAnomalyDetector -> (Format.kasprintf Uri.of_string) "/"
       | DeleteLogGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteLogStream -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteLookupTable -> (Format.kasprintf Uri.of_string) "/"
       | DeleteMetricFilter -> (Format.kasprintf Uri.of_string) "/"
       | DeleteQueryDefinition -> (Format.kasprintf Uri.of_string) "/"
       | DeleteResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | DeleteRetentionPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteScheduledQuery -> (Format.kasprintf Uri.of_string) "/"
       | DeleteSubscriptionFilter -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteTransformer -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeAccountPolicies -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeConfigurationTemplates ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeDeliveries -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeDeliveryDestinations -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeDeliverySources -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDestinations -> (Format.kasprintf Uri.of_string) "/"
       | DescribeExportTasks -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeFieldIndexes -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeImportTaskBatches -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeImportTasks -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeIndexPolicies -> (Format.kasprintf Uri.of_string) "/"
       | DescribeLogGroups -> (Format.kasprintf Uri.of_string) "/"
       | DescribeLogStreams -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeLookupTables -> (Format.kasprintf Uri.of_string) "/"
       | DescribeMetricFilters -> (Format.kasprintf Uri.of_string) "/"
       | DescribeQueries -> (Format.kasprintf Uri.of_string) "/"
       | DescribeQueryDefinitions -> (Format.kasprintf Uri.of_string) "/"
       | DescribeResourcePolicies -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSubscriptionFilters -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateKmsKey -> (Format.kasprintf Uri.of_string) "/"
+      | DisassociateSourceFromS3TableIntegration ->
+          (Format.kasprintf Uri.of_string) "/"
       | FilterLogEvents -> (Format.kasprintf Uri.of_string) "/"
+      | GetDataProtectionPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | GetDelivery -> (Format.kasprintf Uri.of_string) "/"
+      | GetDeliveryDestination -> (Format.kasprintf Uri.of_string) "/"
+      | GetDeliveryDestinationPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | GetDeliverySource -> (Format.kasprintf Uri.of_string) "/"
+      | GetIntegration -> (Format.kasprintf Uri.of_string) "/"
+      | GetLogAnomalyDetector -> (Format.kasprintf Uri.of_string) "/"
       | GetLogEvents -> (Format.kasprintf Uri.of_string) "/"
+      | GetLogFields -> (Format.kasprintf Uri.of_string) "/"
       | GetLogGroupFields -> (Format.kasprintf Uri.of_string) "/"
+      | GetLogObject -> (Format.kasprintf Uri.of_string) "/"
       | GetLogRecord -> (Format.kasprintf Uri.of_string) "/"
+      | GetLookupTable -> (Format.kasprintf Uri.of_string) "/"
       | GetQueryResults -> (Format.kasprintf Uri.of_string) "/"
+      | GetScheduledQuery -> (Format.kasprintf Uri.of_string) "/"
+      | GetScheduledQueryHistory -> (Format.kasprintf Uri.of_string) "/"
+      | GetTransformer -> (Format.kasprintf Uri.of_string) "/"
+      | ListAggregateLogGroupSummaries ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListAnomalies -> (Format.kasprintf Uri.of_string) "/"
+      | ListIntegrations -> (Format.kasprintf Uri.of_string) "/"
+      | ListLogAnomalyDetectors -> (Format.kasprintf Uri.of_string) "/"
+      | ListLogGroups -> (Format.kasprintf Uri.of_string) "/"
+      | ListLogGroupsForQuery -> (Format.kasprintf Uri.of_string) "/"
+      | ListScheduledQueries -> (Format.kasprintf Uri.of_string) "/"
+      | ListSourcesForS3TableIntegration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsLogGroup -> (Format.kasprintf Uri.of_string) "/"
+      | PutAccountPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | PutBearerTokenAuthentication -> (Format.kasprintf Uri.of_string) "/"
+      | PutDataProtectionPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | PutDeliveryDestination -> (Format.kasprintf Uri.of_string) "/"
+      | PutDeliveryDestinationPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | PutDeliverySource -> (Format.kasprintf Uri.of_string) "/"
       | PutDestination -> (Format.kasprintf Uri.of_string) "/"
       | PutDestinationPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | PutIndexPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | PutIntegration -> (Format.kasprintf Uri.of_string) "/"
       | PutLogEvents -> (Format.kasprintf Uri.of_string) "/"
+      | PutLogGroupDeletionProtection -> (Format.kasprintf Uri.of_string) "/"
       | PutMetricFilter -> (Format.kasprintf Uri.of_string) "/"
       | PutQueryDefinition -> (Format.kasprintf Uri.of_string) "/"
       | PutResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | PutRetentionPolicy -> (Format.kasprintf Uri.of_string) "/"
       | PutSubscriptionFilter -> (Format.kasprintf Uri.of_string) "/"
+      | PutTransformer -> (Format.kasprintf Uri.of_string) "/"
+      | StartLiveTail -> (Format.kasprintf Uri.of_string) "/"
       | StartQuery -> (Format.kasprintf Uri.of_string) "/"
       | StopQuery -> (Format.kasprintf Uri.of_string) "/"
       | TagLogGroup -> (Format.kasprintf Uri.of_string) "/"
+      | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | TestMetricFilter -> (Format.kasprintf Uri.of_string) "/"
-      | UntagLogGroup -> (Format.kasprintf Uri.of_string) "/")
+      | TestTransformer -> (Format.kasprintf Uri.of_string) "/"
+      | UntagLogGroup -> (Format.kasprintf Uri.of_string) "/"
+      | UntagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateAnomaly -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateDeliveryConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateLogAnomalyDetector -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateLookupTable -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateScheduledQuery -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -172,6 +473,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.AssociateKmsKey")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | AssociateSourceToS3TableIntegration ->
+      let json = AssociateSourceToS3TableIntegrationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "Logs_20140328.AssociateSourceToS3TableIntegration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CancelExportTask ->
       let json = CancelExportTaskRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -180,6 +490,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.CancelExportTask")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CancelImportTask ->
+      let json = CancelImportTaskRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.CancelImportTask")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateDelivery ->
+      let json = CreateDeliveryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.CreateDelivery")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateExportTask ->
       let json = CreateExportTaskRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -187,6 +513,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.CreateExportTask")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateImportTask ->
+      let json = CreateImportTaskRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.CreateImportTask")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateLogAnomalyDetector ->
+      let json = CreateLogAnomalyDetectorRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.CreateLogAnomalyDetector")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateLogGroup ->
       let json = CreateLogGroupRequest.to_json req in
@@ -204,6 +546,70 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.CreateLogStream")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateLookupTable ->
+      let json = CreateLookupTableRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.CreateLookupTable")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateScheduledQuery ->
+      let json = CreateScheduledQueryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.CreateScheduledQuery")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteAccountPolicy ->
+      let json = DeleteAccountPolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DeleteAccountPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteDataProtectionPolicy ->
+      let json = DeleteDataProtectionPolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DeleteDataProtectionPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteDelivery ->
+      let json = DeleteDeliveryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DeleteDelivery")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteDeliveryDestination ->
+      let json = DeleteDeliveryDestinationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DeleteDeliveryDestination")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteDeliveryDestinationPolicy ->
+      let json = DeleteDeliveryDestinationPolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DeleteDeliveryDestinationPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteDeliverySource ->
+      let json = DeleteDeliverySourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DeleteDeliverySource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteDestination ->
       let json = DeleteDestinationRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -211,6 +617,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.DeleteDestination")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteIndexPolicy ->
+      let json = DeleteIndexPolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DeleteIndexPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteIntegration ->
+      let json = DeleteIntegrationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DeleteIntegration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteLogAnomalyDetector ->
+      let json = DeleteLogAnomalyDetectorRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DeleteLogAnomalyDetector")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteLogGroup ->
       let json = DeleteLogGroupRequest.to_json req in
@@ -227,6 +657,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.DeleteLogStream")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteLookupTable ->
+      let json = DeleteLookupTableRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DeleteLookupTable")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteMetricFilter ->
       let json = DeleteMetricFilterRequest.to_json req in
@@ -260,6 +698,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.DeleteRetentionPolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteScheduledQuery ->
+      let json = DeleteScheduledQueryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DeleteScheduledQuery")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteSubscriptionFilter ->
       let json = DeleteSubscriptionFilterRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -267,6 +713,54 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.DeleteSubscriptionFilter")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteTransformer ->
+      let json = DeleteTransformerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DeleteTransformer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeAccountPolicies ->
+      let json = DescribeAccountPoliciesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DescribeAccountPolicies")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeConfigurationTemplates ->
+      let json = DescribeConfigurationTemplatesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DescribeConfigurationTemplates")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeDeliveries ->
+      let json = DescribeDeliveriesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DescribeDeliveries")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeDeliveryDestinations ->
+      let json = DescribeDeliveryDestinationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DescribeDeliveryDestinations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeDeliverySources ->
+      let json = DescribeDeliverySourcesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DescribeDeliverySources")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeDestinations ->
       let json = DescribeDestinationsRequest.to_json req in
@@ -284,6 +778,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.DescribeExportTasks")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeFieldIndexes ->
+      let json = DescribeFieldIndexesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DescribeFieldIndexes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeImportTaskBatches ->
+      let json = DescribeImportTaskBatchesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DescribeImportTaskBatches")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeImportTasks ->
+      let json = DescribeImportTasksRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DescribeImportTasks")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeIndexPolicies ->
+      let json = DescribeIndexPoliciesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DescribeIndexPolicies")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeLogGroups ->
       let json = DescribeLogGroupsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -299,6 +825,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.DescribeLogStreams")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeLookupTables ->
+      let json = DescribeLookupTablesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.DescribeLookupTables")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeMetricFilters ->
       let json = DescribeMetricFiltersRequest.to_json req in
@@ -348,6 +882,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.DisassociateKmsKey")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DisassociateSourceFromS3TableIntegration ->
+      let json = DisassociateSourceFromS3TableIntegrationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "Logs_20140328.DisassociateSourceFromS3TableIntegration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | FilterLogEvents ->
       let json = FilterLogEventsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -355,6 +898,62 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.FilterLogEvents")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetDataProtectionPolicy ->
+      let json = GetDataProtectionPolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.GetDataProtectionPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetDelivery ->
+      let json = GetDeliveryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.GetDelivery")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetDeliveryDestination ->
+      let json = GetDeliveryDestinationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.GetDeliveryDestination")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetDeliveryDestinationPolicy ->
+      let json = GetDeliveryDestinationPolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.GetDeliveryDestinationPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetDeliverySource ->
+      let json = GetDeliverySourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.GetDeliverySource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetIntegration ->
+      let json = GetIntegrationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.GetIntegration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetLogAnomalyDetector ->
+      let json = GetLogAnomalyDetectorRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.GetLogAnomalyDetector")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetLogEvents ->
       let json = GetLogEventsRequest.to_json req in
@@ -364,6 +963,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.GetLogEvents")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetLogFields ->
+      let json = GetLogFieldsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.GetLogFields")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetLogGroupFields ->
       let json = GetLogGroupFieldsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -371,6 +978,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.GetLogGroupFields")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetLogObject ->
+      let json = GetLogObjectRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.GetLogObject")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetLogRecord ->
       let json = GetLogRecordRequest.to_json req in
@@ -380,6 +995,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.GetLogRecord")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetLookupTable ->
+      let json = GetLookupTableRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.GetLookupTable")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetQueryResults ->
       let json = GetQueryResultsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -388,6 +1011,102 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.GetQueryResults")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetScheduledQuery ->
+      let json = GetScheduledQueryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.GetScheduledQuery")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetScheduledQueryHistory ->
+      let json = GetScheduledQueryHistoryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.GetScheduledQueryHistory")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetTransformer ->
+      let json = GetTransformerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.GetTransformer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAggregateLogGroupSummaries ->
+      let json = ListAggregateLogGroupSummariesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.ListAggregateLogGroupSummaries")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAnomalies ->
+      let json = ListAnomaliesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.ListAnomalies")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListIntegrations ->
+      let json = ListIntegrationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.ListIntegrations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListLogAnomalyDetectors ->
+      let json = ListLogAnomalyDetectorsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.ListLogAnomalyDetectors")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListLogGroups ->
+      let json = ListLogGroupsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.ListLogGroups")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListLogGroupsForQuery ->
+      let json = ListLogGroupsForQueryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.ListLogGroupsForQuery")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListScheduledQueries ->
+      let json = ListScheduledQueriesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.ListScheduledQueries")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListSourcesForS3TableIntegration ->
+      let json = ListSourcesForS3TableIntegrationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.ListSourcesForS3TableIntegration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListTagsForResource ->
+      let json = ListTagsForResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.ListTagsForResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTagsLogGroup ->
       let json = ListTagsLogGroupRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -395,6 +1114,54 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.ListTagsLogGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutAccountPolicy ->
+      let json = PutAccountPolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.PutAccountPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutBearerTokenAuthentication ->
+      let json = PutBearerTokenAuthenticationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.PutBearerTokenAuthentication")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutDataProtectionPolicy ->
+      let json = PutDataProtectionPolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.PutDataProtectionPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutDeliveryDestination ->
+      let json = PutDeliveryDestinationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.PutDeliveryDestination")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutDeliveryDestinationPolicy ->
+      let json = PutDeliveryDestinationPolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.PutDeliveryDestinationPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutDeliverySource ->
+      let json = PutDeliverySourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.PutDeliverySource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PutDestination ->
       let json = PutDestinationRequest.to_json req in
@@ -412,6 +1179,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.PutDestinationPolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutIndexPolicy ->
+      let json = PutIndexPolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.PutIndexPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutIntegration ->
+      let json = PutIntegrationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.PutIntegration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PutLogEvents ->
       let json = PutLogEventsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -419,6 +1202,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.PutLogEvents")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutLogGroupDeletionProtection ->
+      let json = PutLogGroupDeletionProtectionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.PutLogGroupDeletionProtection")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PutMetricFilter ->
       let json = PutMetricFilterRequest.to_json req in
@@ -460,6 +1251,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.PutSubscriptionFilter")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutTransformer ->
+      let json = PutTransformerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.PutTransformer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartLiveTail ->
+      let json = StartLiveTailRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.StartLiveTail")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartQuery ->
       let json = StartQueryRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -484,6 +1291,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.TagLogGroup")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TagResource ->
+      let json = TagResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.TagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TestMetricFilter ->
       let json = TestMetricFilterRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -492,6 +1307,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.TestMetricFilter")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TestTransformer ->
+      let json = TestTransformerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.TestTransformer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UntagLogGroup ->
       let json = UntagLogGroupRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -499,6 +1322,54 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Logs_20140328.UntagLogGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UntagResource ->
+      let json = UntagResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.UntagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateAnomaly ->
+      let json = UpdateAnomalyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.UpdateAnomaly")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateDeliveryConfiguration ->
+      let json = UpdateDeliveryConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.UpdateDeliveryConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateLogAnomalyDetector ->
+      let json = UpdateLogAnomalyDetectorRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.UpdateLogAnomalyDetector")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateLookupTable ->
+      let json = UpdateLookupTableRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.UpdateLookupTable")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateScheduledQuery ->
+      let json = UpdateScheduledQueryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Logs_20140328.UpdateScheduledQuery")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -525,8 +1396,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   match endpoint with
   | AssociateKmsKey ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | AssociateSourceToS3TableIntegration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AssociateSourceToS3TableIntegrationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateSourceToS3TableIntegrationResponse.error_of_json))
   | CancelExportTask ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | CancelImportTask ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CancelImportTaskResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CancelImportTaskResponse.error_of_json))
+  | CreateDelivery ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateDeliveryResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateDeliveryResponse.error_of_json))
   | CreateExportTask ->
       if is_success
       then
@@ -534,15 +1428,79 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateExportTaskResponse.of_json json)
       else
         Error (parse_aws_error (Some CreateExportTaskResponse.error_of_json))
+  | CreateImportTask ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateImportTaskResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateImportTaskResponse.error_of_json))
+  | CreateLogAnomalyDetector ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateLogAnomalyDetectorResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateLogAnomalyDetectorResponse.error_of_json))
   | CreateLogGroup ->
       if is_success then Ok () else Error (parse_aws_error None)
   | CreateLogStream ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | CreateLookupTable ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateLookupTableResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateLookupTableResponse.error_of_json))
+  | CreateScheduledQuery ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateScheduledQueryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateScheduledQueryResponse.error_of_json))
+  | DeleteAccountPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteDataProtectionPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteDelivery ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteDeliveryDestination ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteDeliveryDestinationPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteDeliverySource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteDestination ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteIndexPolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteIndexPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteIndexPolicyResponse.error_of_json))
+  | DeleteIntegration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteIntegrationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteIntegrationResponse.error_of_json))
+  | DeleteLogAnomalyDetector ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteLogGroup ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteLogStream ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteLookupTable ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteMetricFilter ->
       if is_success then Ok () else Error (parse_aws_error None)
@@ -558,8 +1516,62 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteRetentionPolicy ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteScheduledQuery ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteScheduledQueryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteScheduledQueryResponse.error_of_json))
   | DeleteSubscriptionFilter ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteTransformer ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DescribeAccountPolicies ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAccountPoliciesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAccountPoliciesResponse.error_of_json))
+  | DescribeConfigurationTemplates ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeConfigurationTemplatesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeConfigurationTemplatesResponse.error_of_json))
+  | DescribeDeliveries ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDeliveriesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeDeliveriesResponse.error_of_json))
+  | DescribeDeliveryDestinations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDeliveryDestinationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDeliveryDestinationsResponse.error_of_json))
+  | DescribeDeliverySources ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDeliverySourcesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDeliverySourcesResponse.error_of_json))
   | DescribeDestinations ->
       if is_success
       then
@@ -576,6 +1588,39 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeExportTasksResponse.error_of_json))
+  | DescribeFieldIndexes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeFieldIndexesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeFieldIndexesResponse.error_of_json))
+  | DescribeImportTaskBatches ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeImportTaskBatchesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeImportTaskBatchesResponse.error_of_json))
+  | DescribeImportTasks ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeImportTasksResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeImportTasksResponse.error_of_json))
+  | DescribeIndexPolicies ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeIndexPoliciesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeIndexPoliciesResponse.error_of_json))
   | DescribeLogGroups ->
       if is_success
       then
@@ -592,6 +1637,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeLogStreamsResponse.error_of_json))
+  | DescribeLookupTables ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeLookupTablesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeLookupTablesResponse.error_of_json))
   | DescribeMetricFilters ->
       if is_success
       then
@@ -636,6 +1689,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
              (Some DescribeSubscriptionFiltersResponse.error_of_json))
   | DisassociateKmsKey ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DisassociateSourceFromS3TableIntegration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisassociateSourceFromS3TableIntegrationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DisassociateSourceFromS3TableIntegrationResponse.error_of_json))
   | FilterLogEvents ->
       if is_success
       then
@@ -643,12 +1706,74 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (FilterLogEventsResponse.of_json json)
       else
         Error (parse_aws_error (Some FilterLogEventsResponse.error_of_json))
+  | GetDataProtectionPolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDataProtectionPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetDataProtectionPolicyResponse.error_of_json))
+  | GetDelivery ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDeliveryResponse.of_json json)
+      else Error (parse_aws_error (Some GetDeliveryResponse.error_of_json))
+  | GetDeliveryDestination ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDeliveryDestinationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetDeliveryDestinationResponse.error_of_json))
+  | GetDeliveryDestinationPolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDeliveryDestinationPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetDeliveryDestinationPolicyResponse.error_of_json))
+  | GetDeliverySource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDeliverySourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetDeliverySourceResponse.error_of_json))
+  | GetIntegration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetIntegrationResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetIntegrationResponse.error_of_json))
+  | GetLogAnomalyDetector ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLogAnomalyDetectorResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetLogAnomalyDetectorResponse.error_of_json))
   | GetLogEvents ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetLogEventsResponse.of_json json)
       else Error (parse_aws_error (Some GetLogEventsResponse.error_of_json))
+  | GetLogFields ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLogFieldsResponse.of_json json)
+      else Error (parse_aws_error (Some GetLogFieldsResponse.error_of_json))
   | GetLogGroupFields ->
       if is_success
       then
@@ -657,12 +1782,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetLogGroupFieldsResponse.error_of_json))
+  | GetLogObject ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLogObjectResponse.of_json json)
+      else Error (parse_aws_error (Some GetLogObjectResponse.error_of_json))
   | GetLogRecord ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetLogRecordResponse.of_json json)
       else Error (parse_aws_error (Some GetLogRecordResponse.error_of_json))
+  | GetLookupTable ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLookupTableResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetLookupTableResponse.error_of_json))
   | GetQueryResults ->
       if is_success
       then
@@ -670,6 +1808,100 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetQueryResultsResponse.of_json json)
       else
         Error (parse_aws_error (Some GetQueryResultsResponse.error_of_json))
+  | GetScheduledQuery ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetScheduledQueryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetScheduledQueryResponse.error_of_json))
+  | GetScheduledQueryHistory ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetScheduledQueryHistoryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetScheduledQueryHistoryResponse.error_of_json))
+  | GetTransformer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetTransformerResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetTransformerResponse.error_of_json))
+  | ListAggregateLogGroupSummaries ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAggregateLogGroupSummariesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAggregateLogGroupSummariesResponse.error_of_json))
+  | ListAnomalies ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAnomaliesResponse.of_json json)
+      else Error (parse_aws_error (Some ListAnomaliesResponse.error_of_json))
+  | ListIntegrations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListIntegrationsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListIntegrationsResponse.error_of_json))
+  | ListLogAnomalyDetectors ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLogAnomalyDetectorsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListLogAnomalyDetectorsResponse.error_of_json))
+  | ListLogGroups ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLogGroupsResponse.of_json json)
+      else Error (parse_aws_error (Some ListLogGroupsResponse.error_of_json))
+  | ListLogGroupsForQuery ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLogGroupsForQueryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListLogGroupsForQueryResponse.error_of_json))
+  | ListScheduledQueries ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListScheduledQueriesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListScheduledQueriesResponse.error_of_json))
+  | ListSourcesForS3TableIntegration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListSourcesForS3TableIntegrationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListSourcesForS3TableIntegrationResponse.error_of_json))
+  | ListTagsForResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListTagsLogGroup ->
       if is_success
       then
@@ -677,6 +1909,50 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListTagsLogGroupResponse.of_json json)
       else
         Error (parse_aws_error (Some ListTagsLogGroupResponse.error_of_json))
+  | PutAccountPolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutAccountPolicyResponse.of_json json)
+      else
+        Error (parse_aws_error (Some PutAccountPolicyResponse.error_of_json))
+  | PutBearerTokenAuthentication ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutDataProtectionPolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutDataProtectionPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutDataProtectionPolicyResponse.error_of_json))
+  | PutDeliveryDestination ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutDeliveryDestinationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutDeliveryDestinationResponse.error_of_json))
+  | PutDeliveryDestinationPolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutDeliveryDestinationPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutDeliveryDestinationPolicyResponse.error_of_json))
+  | PutDeliverySource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutDeliverySourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutDeliverySourceResponse.error_of_json))
   | PutDestination ->
       if is_success
       then
@@ -686,12 +1962,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error (parse_aws_error (Some PutDestinationResponse.error_of_json))
   | PutDestinationPolicy ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | PutIndexPolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutIndexPolicyResponse.of_json json)
+      else
+        Error (parse_aws_error (Some PutIndexPolicyResponse.error_of_json))
+  | PutIntegration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutIntegrationResponse.of_json json)
+      else
+        Error (parse_aws_error (Some PutIntegrationResponse.error_of_json))
   | PutLogEvents ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (PutLogEventsResponse.of_json json)
       else Error (parse_aws_error (Some PutLogEventsResponse.error_of_json))
+  | PutLogGroupDeletionProtection ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | PutMetricFilter ->
       if is_success then Ok () else Error (parse_aws_error None)
   | PutQueryDefinition ->
@@ -714,6 +2006,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | PutSubscriptionFilter ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | PutTransformer ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | StartLiveTail ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartLiveTailResponse.of_json json)
+      else Error (parse_aws_error (Some StartLiveTailResponse.error_of_json))
   | StartQuery ->
       if is_success
       then
@@ -727,6 +2027,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (StopQueryResponse.of_json json)
       else Error (parse_aws_error (Some StopQueryResponse.error_of_json))
   | TagLogGroup -> if is_success then Ok () else Error (parse_aws_error None)
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
   | TestMetricFilter ->
       if is_success
       then
@@ -734,5 +2035,43 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (TestMetricFilterResponse.of_json json)
       else
         Error (parse_aws_error (Some TestMetricFilterResponse.error_of_json))
+  | TestTransformer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TestTransformerResponse.of_json json)
+      else
+        Error (parse_aws_error (Some TestTransformerResponse.error_of_json))
   | UntagLogGroup ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateAnomaly ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateDeliveryConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateDeliveryConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDeliveryConfigurationResponse.error_of_json))
+  | UpdateLogAnomalyDetector ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateLookupTable ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateLookupTableResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateLookupTableResponse.error_of_json))
+  | UpdateScheduledQuery ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateScheduledQueryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateScheduledQueryResponse.error_of_json))

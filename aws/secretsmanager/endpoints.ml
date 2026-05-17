@@ -2,6 +2,8 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | BatchGetSecretValue: (BatchGetSecretValueRequest.t,
+  BatchGetSecretValueResponse.t, BatchGetSecretValueResponse.error) t 
   | CancelRotateSecret: (CancelRotateSecretRequest.t,
   CancelRotateSecretResponse.t, CancelRotateSecretResponse.error) t 
   | CreateSecret: (CreateSecretRequest.t, CreateSecretResponse.t,
@@ -50,6 +52,7 @@ type ('i, 'o, 'e) t =
   ValidateResourcePolicyResponse.t, ValidateResourcePolicyResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | BatchGetSecretValue -> `POST
   | CancelRotateSecret -> `POST
   | CreateSecret -> `POST
   | DeleteResourcePolicy -> `POST
@@ -75,6 +78,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | BatchGetSecretValue -> (Format.kasprintf Uri.of_string) "/"
       | CancelRotateSecret -> (Format.kasprintf Uri.of_string) "/"
       | CreateSecret -> (Format.kasprintf Uri.of_string) "/"
       | DeleteResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
@@ -100,6 +104,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
+  | BatchGetSecretValue ->
+      let json = BatchGetSecretValueRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "secretsmanager.BatchGetSecretValue")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CancelRotateSecret ->
       let json = CancelRotateSecretRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -299,6 +311,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = parse_aws_error in
   let _ = resp in
   match endpoint with
+  | BatchGetSecretValue ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchGetSecretValueResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some BatchGetSecretValueResponse.error_of_json))
   | CancelRotateSecret ->
       if is_success
       then

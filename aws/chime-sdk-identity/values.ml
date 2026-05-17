@@ -23,6 +23,56 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module StandardMessages =
+  struct
+    type nonrec t =
+      | AUTO 
+      | ALL 
+      | MENTIONS 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AUTO -> "AUTO"
+      | ALL -> "ALL"
+      | MENTIONS -> "MENTIONS"
+      | NONE -> "NONE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AUTO" -> AUTO
+      | "ALL" -> ALL
+      | "MENTIONS" -> MENTIONS
+      | "NONE" -> NONE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration StandardMessages" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"StandardMessages" j)
+    let to_json = simple_to_json to_value
+  end
+module TargetedMessages =
+  struct
+    type nonrec t =
+      | ALL 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ALL -> "ALL" | NONE -> "NONE" | Non_static_id s -> s
+    let of_string =
+      function | "ALL" -> ALL | "NONE" -> NONE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TargetedMessages" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TargetedMessages" j)
+    let to_json = simple_to_json to_value
+  end
 module EndpointStatus =
   struct
     type nonrec t =
@@ -116,6 +166,121 @@ module ResourceName =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ResourceName" j
+    let to_json = simple_to_json to_value
+  end
+module InvokedBy =
+  struct
+    type nonrec t =
+      {
+      standardMessages: StandardMessages.t
+        [@ocaml.doc
+          "Sets standard messages as the bot trigger. For standard messages: ALL: The bot processes all standard messages. AUTO: The bot responds to ALL messages when the channel has one other non-hidden member, and responds to MENTIONS when the channel has more than one other non-hidden member. MENTIONS: The bot processes all standard messages that have a message attribute with CHIME.mentions and a value of the bot ARN. NONE: The bot processes no standard messages."];
+      targetedMessages: TargetedMessages.t
+        [@ocaml.doc
+          "Sets targeted messages as the bot trigger. For targeted messages: ALL: The bot processes all TargetedMessages sent to it. The bot then responds with a targeted message back to the sender. NONE: The bot processes no targeted messages."]}
+    let context_ = "InvokedBy"
+    let make ~standardMessages =
+      fun ~targetedMessages ->
+        fun () -> { standardMessages; targetedMessages }
+    let to_value x =
+      structure_to_value
+        [("StandardMessages",
+           (Some (StandardMessages.to_value x.standardMessages)));
+        ("TargetedMessages",
+          (Some (TargetedMessages.to_value x.targetedMessages)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetedMessages =
+        TargetedMessages.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TargetedMessages") in
+      let standardMessages =
+        StandardMessages.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StandardMessages") in
+      make ~targetedMessages ~standardMessages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetedMessages =
+        field_map_exn json__ "TargetedMessages" TargetedMessages.of_json in
+      let standardMessages =
+        field_map_exn json__ "StandardMessages" StandardMessages.of_json in
+      make ~targetedMessages ~standardMessages ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Specifies the type of message that triggers a bot."]
+module LexBotAliasArn =
+  struct
+    type nonrec t = string
+    let context_ = "LexBotAliasArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:15) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws:lex:[a-z]{2}-[a-z]+-\\d{1}:\\d{12}:bot-alias/[A-Z0-9]{10}/[A-Z0-9]{10}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LexBotAliasArn" j
+    let to_json = simple_to_json to_value
+  end
+module LexIntentName =
+  struct
+    type nonrec t = string
+    let context_ = "LexIntentName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () -> check_pattern i ~pattern:"^([A-Za-z]_?)+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LexIntentName" j
+    let to_json = simple_to_json to_value
+  end
+module RespondsTo =
+  struct
+    type nonrec t =
+      | STANDARD_MESSAGES 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | STANDARD_MESSAGES -> "STANDARD_MESSAGES"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "STANDARD_MESSAGES" -> STANDARD_MESSAGES
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RespondsTo" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RespondsTo" j)
+    let to_json = simple_to_json to_value
+  end
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
 module TagKey =
@@ -288,17 +453,16 @@ module EndpointState =
   struct
     type nonrec t =
       {
-      status: EndpointStatus.t
+      status: EndpointStatus.t option
         [@ocaml.doc
           "Enum that indicates the Status of an AppInstanceUserEndpoint."];
       statusReason: EndpointStatusReason.t option
         [@ocaml.doc "The reason for the EndpointStatus."]}
-    let context_ = "EndpointState"
-    let make ?statusReason =
-      fun ~status -> fun () -> { statusReason; status }
+    let make ?status =
+      fun ?statusReason -> fun () -> { status; statusReason }
     let to_value x =
       structure_to_value
-        [("Status", (Some (EndpointStatus.to_value x.status)));
+        [("Status", (Option.map x.status ~f:EndpointStatus.to_value));
         ("StatusReason",
           (Option.map x.statusReason ~f:EndpointStatusReason.to_value))]
     let to_query v = to_query to_value v
@@ -307,40 +471,17 @@ module EndpointState =
         (Option.map ~f:EndpointStatusReason.of_xml)
           (Xml.child xml_arg0 "StatusReason") in
       let status =
-        EndpointStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
-      make ?statusReason ~status ()
+        (Option.map ~f:EndpointStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      make ?statusReason ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusReason =
-        field_map json "StatusReason" EndpointStatusReason.of_json in
-      let status = field_map_exn json "Status" EndpointStatus.of_json in
-      make ?statusReason ~status ()
+        field_map json__ "StatusReason" EndpointStatusReason.of_json in
+      let status = field_map json__ "Status" EndpointStatus.of_json in
+      make ?statusReason ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A read-only field that represents the state of an AppInstanceUserEndpoint. Supported values: ACTIVE: The AppInstanceUserEndpoint is active and able to receive messages. When ACTIVE, the EndpointStatusReason remains empty. INACTIVE: The AppInstanceUserEndpoint is inactive and can't receive message. When INACTIVE, the corresponding reason will be conveyed through EndpointStatusReason. INVALID_DEVICE_TOKEN indicates that an AppInstanceUserEndpoint is INACTIVE due to invalid device token INVALID_PINPOINT_ARN indicates that an AppInstanceUserEndpoint is INACTIVE due to an invalid pinpoint ARN that was input through the ResourceArn field."]
-module SensitiveChimeArn =
-  struct
-    type nonrec t = string
-    let context_ = "SensitiveChimeArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:5) >>=
-             (fun () ->
-                (check_string_max i ~max:1600) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SensitiveChimeArn" j
-    let to_json = simple_to_json to_value
-  end
 module SensitiveString1600 =
   struct
     type nonrec t = string
@@ -361,10 +502,10 @@ module SensitiveString1600 =
     let of_json j = string_of_json ~kind:"SensitiveString1600" j
     let to_json = simple_to_json to_value
   end
-module SensitiveString64 =
+module String64 =
   struct
     type nonrec t = string
-    let context_ = "SensitiveString64"
+    let context_ = "String64"
     let make i =
       let open Result in
         ok_or_failwith
@@ -378,7 +519,7 @@ module SensitiveString64 =
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SensitiveString64" j
+    let of_json j = string_of_json ~kind:"String64" j
     let to_json = simple_to_json to_value
   end
 module Identity =
@@ -399,11 +540,52 @@ module Identity =
       let arn = (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" ResourceName.of_json in
-      let arn = field_map json "Arn" ChimeArn.of_json in make ?name ?arn ()
+    let of_json json__ =
+      let name = field_map json__ "Name" ResourceName.of_json in
+      let arn = field_map json__ "Arn" ChimeArn.of_json in make ?name ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The details of a user."]
+  end[@@ocaml.doc "The details of a user or bot."]
+module ExpirationCriterion =
+  struct
+    type nonrec t =
+      | CREATED_TIMESTAMP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATED_TIMESTAMP -> "CREATED_TIMESTAMP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATED_TIMESTAMP" -> CREATED_TIMESTAMP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ExpirationCriterion" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ExpirationCriterion" j)
+    let to_json = simple_to_json to_value
+  end
+module ExpirationDays =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:5475) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ExpirationDays" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module NonEmptySensitiveString1600 =
   struct
     type nonrec t = string
@@ -424,6 +606,73 @@ module NonEmptySensitiveString1600 =
     let of_json j = string_of_json ~kind:"NonEmptySensitiveString1600" j
     let to_json = simple_to_json to_value
   end
+module LexConfiguration =
+  struct
+    type nonrec t =
+      {
+      respondsTo: RespondsTo.t option
+        [@ocaml.doc
+          "Deprecated. Use InvokedBy instead. Determines whether the Amazon Lex V2 bot responds to all standard messages. Control messages are not supported."];
+      invokedBy: InvokedBy.t option
+        [@ocaml.doc "Specifies the type of message that triggers a bot."];
+      lexBotAliasArn: LexBotAliasArn.t
+        [@ocaml.doc
+          "The ARN of the Amazon Lex V2 bot's alias. The ARN uses this format: arn:aws:lex:REGION:ACCOUNT:bot-alias/MYBOTID/MYBOTALIAS"];
+      localeId: String_.t
+        [@ocaml.doc
+          "Identifies the Amazon Lex V2 bot's language and locale. The string must match one of the supported locales in Amazon Lex V2. All of the intents, slot types, and slots used in the bot must have the same locale. For more information, see Supported languages in the Amazon Lex V2 Developer Guide."];
+      welcomeIntent: LexIntentName.t option
+        [@ocaml.doc
+          "The name of the welcome intent configured in the Amazon Lex V2 bot."]}
+    let context_ = "LexConfiguration"
+    let make ?respondsTo =
+      fun ?invokedBy ->
+        fun ?welcomeIntent ->
+          fun ~lexBotAliasArn ->
+            fun ~localeId ->
+              fun () ->
+                {
+                  respondsTo;
+                  invokedBy;
+                  welcomeIntent;
+                  lexBotAliasArn;
+                  localeId
+                }
+    let to_value x =
+      structure_to_value
+        [("RespondsTo", (Option.map x.respondsTo ~f:RespondsTo.to_value));
+        ("InvokedBy", (Option.map x.invokedBy ~f:InvokedBy.to_value));
+        ("LexBotAliasArn", (Some (LexBotAliasArn.to_value x.lexBotAliasArn)));
+        ("LocaleId", (Some (String_.to_value x.localeId)));
+        ("WelcomeIntent",
+          (Option.map x.welcomeIntent ~f:LexIntentName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let welcomeIntent =
+        (Option.map ~f:LexIntentName.of_xml)
+          (Xml.child xml_arg0 "WelcomeIntent") in
+      let localeId =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LocaleId") in
+      let lexBotAliasArn =
+        LexBotAliasArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LexBotAliasArn") in
+      let invokedBy =
+        (Option.map ~f:InvokedBy.of_xml) (Xml.child xml_arg0 "InvokedBy") in
+      let respondsTo =
+        (Option.map ~f:RespondsTo.of_xml) (Xml.child xml_arg0 "RespondsTo") in
+      make ?welcomeIntent ~localeId ~lexBotAliasArn ?invokedBy ?respondsTo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let welcomeIntent =
+        field_map json__ "WelcomeIntent" LexIntentName.of_json in
+      let localeId = field_map_exn json__ "LocaleId" String_.of_json in
+      let lexBotAliasArn =
+        field_map_exn json__ "LexBotAliasArn" LexBotAliasArn.of_json in
+      let invokedBy = field_map json__ "InvokedBy" InvokedBy.of_json in
+      let respondsTo = field_map json__ "RespondsTo" RespondsTo.of_json in
+      make ?welcomeIntent ~localeId ~lexBotAliasArn ?invokedBy ?respondsTo ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration for an Amazon Lex V2 bot."]
 module ErrorCode =
   struct
     type nonrec t =
@@ -490,19 +739,6 @@ module ErrorCode =
     let of_json j = of_string (string_of_json ~kind:"ErrorCode" j)
     let to_json = simple_to_json to_value
   end
-module String_ =
-  struct
-    type nonrec t = string
-    let context_ = "String"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
-    let to_json = simple_to_json to_value
-  end
 module Tag =
   struct
     type nonrec t =
@@ -523,9 +759,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A tag object containing a key-value pair."]
@@ -547,9 +783,9 @@ module ChannelRetentionSettings =
           (Xml.child xml_arg0 "RetentionDays") in
       make ?retentionDays ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retentionDays =
-        field_map json "RetentionDays" RetentionDays.of_json in
+        field_map json__ "RetentionDays" RetentionDays.of_json in
       make ?retentionDays ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of the retention settings for a channel."]
@@ -582,10 +818,10 @@ module AppInstanceSummary =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "AppInstanceArn") in
       make ?metadata ?name ?appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metadata = field_map json "Metadata" Metadata.of_json in
-      let name = field_map json "Name" NonEmptyResourceName.of_json in
-      let appInstanceArn = field_map json "AppInstanceArn" ChimeArn.of_json in
+    let of_json json__ =
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
+      let name = field_map json__ "Name" NonEmptyResourceName.of_json in
+      let appInstanceArn = field_map json__ "AppInstanceArn" ChimeArn.of_json in
       make ?metadata ?name ?appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary of the data for an AppInstance."]
@@ -617,11 +853,11 @@ module AppInstanceUserSummary =
           (Xml.child xml_arg0 "AppInstanceUserArn") in
       make ?metadata ?name ?appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metadata = field_map json "Metadata" Metadata.of_json in
-      let name = field_map json "Name" UserName.of_json in
+    let of_json json__ =
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
+      let name = field_map json__ "Name" UserName.of_json in
       let appInstanceUserArn =
-        field_map json "AppInstanceUserArn" ChimeArn.of_json in
+        field_map json__ "AppInstanceUserArn" ChimeArn.of_json in
       make ?metadata ?name ?appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary of the details of an AppInstanceUser."]
@@ -629,9 +865,9 @@ module AppInstanceUserEndpointSummary =
   struct
     type nonrec t =
       {
-      appInstanceUserArn: SensitiveChimeArn.t option
+      appInstanceUserArn: ChimeArn.t option
         [@ocaml.doc "The ARN of the AppInstanceUser."];
-      endpointId: SensitiveString64.t option
+      endpointId: String64.t option
         [@ocaml.doc "The unique identifier of the AppInstanceUserEndpoint."];
       name: SensitiveString1600.t option
         [@ocaml.doc "The name of the AppInstanceUserEndpoint."];
@@ -661,9 +897,8 @@ module AppInstanceUserEndpointSummary =
     let to_value x =
       structure_to_value
         [("AppInstanceUserArn",
-           (Option.map x.appInstanceUserArn ~f:SensitiveChimeArn.to_value));
-        ("EndpointId",
-          (Option.map x.endpointId ~f:SensitiveString64.to_value));
+           (Option.map x.appInstanceUserArn ~f:ChimeArn.to_value));
+        ("EndpointId", (Option.map x.endpointId ~f:String64.to_value));
         ("Name", (Option.map x.name ~f:SensitiveString1600.to_value));
         ("Type",
           (Option.map x.type_ ~f:AppInstanceUserEndpointType.to_value));
@@ -686,28 +921,65 @@ module AppInstanceUserEndpointSummary =
         (Option.map ~f:SensitiveString1600.of_xml)
           (Xml.child xml_arg0 "Name") in
       let endpointId =
-        (Option.map ~f:SensitiveString64.of_xml)
-          (Xml.child xml_arg0 "EndpointId") in
+        (Option.map ~f:String64.of_xml) (Xml.child xml_arg0 "EndpointId") in
       let appInstanceUserArn =
-        (Option.map ~f:SensitiveChimeArn.of_xml)
+        (Option.map ~f:ChimeArn.of_xml)
           (Xml.child xml_arg0 "AppInstanceUserArn") in
       make ?endpointState ?allowMessages ?type_ ?name ?endpointId
         ?appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointState =
-        field_map json "EndpointState" EndpointState.of_json in
+        field_map json__ "EndpointState" EndpointState.of_json in
       let allowMessages =
-        field_map json "AllowMessages" AllowMessages.of_json in
-      let type_ = field_map json "Type" AppInstanceUserEndpointType.of_json in
-      let name = field_map json "Name" SensitiveString1600.of_json in
-      let endpointId = field_map json "EndpointId" SensitiveString64.of_json in
+        field_map json__ "AllowMessages" AllowMessages.of_json in
+      let type_ = field_map json__ "Type" AppInstanceUserEndpointType.of_json in
+      let name = field_map json__ "Name" SensitiveString1600.of_json in
+      let endpointId = field_map json__ "EndpointId" String64.of_json in
       let appInstanceUserArn =
-        field_map json "AppInstanceUserArn" SensitiveChimeArn.of_json in
+        field_map json__ "AppInstanceUserArn" ChimeArn.of_json in
       make ?endpointState ?allowMessages ?type_ ?name ?endpointId
         ?appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary of the details of an AppInstanceUserEndpoint."]
+module AppInstanceBotSummary =
+  struct
+    type nonrec t =
+      {
+      appInstanceBotArn: ChimeArn.t option
+        [@ocaml.doc "The ARN of the AppInstanceBot."];
+      name: ResourceName.t option
+        [@ocaml.doc "The name of the AppInstanceBox."];
+      metadata: Metadata.t option
+        [@ocaml.doc "The metadata of the AppInstanceBot."]}
+    let make ?appInstanceBotArn =
+      fun ?name ->
+        fun ?metadata -> fun () -> { appInstanceBotArn; name; metadata }
+    let to_value x =
+      structure_to_value
+        [("AppInstanceBotArn",
+           (Option.map x.appInstanceBotArn ~f:ChimeArn.to_value));
+        ("Name", (Option.map x.name ~f:ResourceName.to_value));
+        ("Metadata", (Option.map x.metadata ~f:Metadata.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metadata =
+        (Option.map ~f:Metadata.of_xml) (Xml.child xml_arg0 "Metadata") in
+      let name =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
+      let appInstanceBotArn =
+        (Option.map ~f:ChimeArn.of_xml)
+          (Xml.child xml_arg0 "AppInstanceBotArn") in
+      make ?metadata ?name ?appInstanceBotArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
+      let name = field_map json__ "Name" ResourceName.of_json in
+      let appInstanceBotArn =
+        field_map json__ "AppInstanceBotArn" ChimeArn.of_json in
+      make ?metadata ?name ?appInstanceBotArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "High-level information about an AppInstanceBot."]
 module AppInstanceAdminSummary =
   struct
     type nonrec t =
@@ -724,10 +996,50 @@ module AppInstanceAdminSummary =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "Admin") in
       make ?admin ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let admin = field_map json "Admin" Identity.of_json in make ?admin ()
+    let of_json json__ =
+      let admin = field_map json__ "Admin" Identity.of_json in make ?admin ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary of the details of an AppInstanceAdmin."]
+module ExpirationSettings =
+  struct
+    type nonrec t =
+      {
+      expirationDays: ExpirationDays.t
+        [@ocaml.doc
+          "The period in days after which an AppInstanceUser will be automatically deleted."];
+      expirationCriterion: ExpirationCriterion.t
+        [@ocaml.doc
+          "Specifies the conditions under which an AppInstanceUser will expire."]}
+    let context_ = "ExpirationSettings"
+    let make ~expirationDays =
+      fun ~expirationCriterion ->
+        fun () -> { expirationDays; expirationCriterion }
+    let to_value x =
+      structure_to_value
+        [("ExpirationDays",
+           (Some (ExpirationDays.to_value x.expirationDays)));
+        ("ExpirationCriterion",
+          (Some (ExpirationCriterion.to_value x.expirationCriterion)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expirationCriterion =
+        ExpirationCriterion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ExpirationCriterion") in
+      let expirationDays =
+        ExpirationDays.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ExpirationDays") in
+      make ~expirationCriterion ~expirationDays ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expirationCriterion =
+        field_map_exn json__ "ExpirationCriterion"
+          ExpirationCriterion.of_json in
+      let expirationDays =
+        field_map_exn json__ "ExpirationDays" ExpirationDays.of_json in
+      make ~expirationCriterion ~expirationDays ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Determines the interval after which an AppInstanceUser is automatically deleted."]
 module Timestamp =
   struct
     type nonrec t = string
@@ -770,14 +1082,38 @@ module EndpointAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "DeviceToken") in
       make ?voipDeviceToken ~deviceToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let voipDeviceToken =
-        field_map json "VoipDeviceToken" NonEmptySensitiveString1600.of_json in
+        field_map json__ "VoipDeviceToken"
+          NonEmptySensitiveString1600.of_json in
       let deviceToken =
-        field_map_exn json "DeviceToken" NonEmptySensitiveString1600.of_json in
+        field_map_exn json__ "DeviceToken"
+          NonEmptySensitiveString1600.of_json in
       make ?voipDeviceToken ~deviceToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The attributes of an Endpoint."]
+module Configuration =
+  struct
+    type nonrec t =
+      {
+      lex: LexConfiguration.t
+        [@ocaml.doc "The configuration for an Amazon Lex V2 bot."]}
+    let context_ = "Configuration"
+    let make ~lex = fun () -> { lex }
+    let to_value x =
+      structure_to_value [("Lex", (Some (LexConfiguration.to_value x.lex)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lex =
+        LexConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Lex") in
+      make ~lex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lex = field_map_exn json__ "Lex" LexConfiguration.of_json in
+      make ~lex ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A structure that contains configuration data."]
 module BadRequestException =
   struct
     type nonrec t = {
@@ -795,9 +1131,9 @@ module BadRequestException =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -819,9 +1155,9 @@ module ConflictException =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -843,9 +1179,9 @@ module ForbiddenException =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -867,9 +1203,9 @@ module ResourceLimitExceededException =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request exceeds the resource limit."]
@@ -890,9 +1226,9 @@ module ServiceFailureException =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service encountered an unexpected error."]
@@ -913,9 +1249,9 @@ module ServiceUnavailableException =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service is currently unavailable."]
@@ -936,9 +1272,9 @@ module ThrottledClientException =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The client exceeded its request rate limit."]
@@ -959,9 +1295,9 @@ module UnauthorizedClientException =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -974,6 +1310,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1001,6 +1340,9 @@ module TagList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1040,6 +1382,28 @@ module ClientRequestToken =
     let of_json j = string_of_json ~kind:"ClientRequestToken" j
     let to_json = simple_to_json to_value
   end
+module SensitiveChimeArn =
+  struct
+    type nonrec t = string
+    let context_ = "SensitiveChimeArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:5) >>=
+             (fun () ->
+                (check_string_max i ~max:1600) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SensitiveChimeArn" j
+    let to_json = simple_to_json to_value
+  end
 module AppInstanceRetentionSettings =
   struct
     type nonrec t =
@@ -1061,9 +1425,9 @@ module AppInstanceRetentionSettings =
           (Xml.child xml_arg0 "ChannelRetentionSettings") in
       make ?channelRetentionSettings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let channelRetentionSettings =
-        field_map json "ChannelRetentionSettings"
+        field_map json__ "ChannelRetentionSettings"
           ChannelRetentionSettings.of_json in
       make ?channelRetentionSettings ()
     let to_json v = composed_to_json to_value v
@@ -1073,6 +1437,9 @@ module AppInstanceList =
   struct
     type nonrec t = AppInstanceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AppInstanceSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1136,6 +1503,9 @@ module AppInstanceUserList =
   struct
     type nonrec t = AppInstanceUserSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AppInstanceUserSummary.to_value)) |>
         (fun x -> `List x)
@@ -1162,6 +1532,9 @@ module AppInstanceUserEndpointSummaryList =
   struct
     type nonrec t = AppInstanceUserEndpointSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AppInstanceUserEndpointSummary.to_value)) |>
         (fun x -> `List x)
@@ -1184,10 +1557,42 @@ module AppInstanceUserEndpointSummaryList =
         ~of_json:AppInstanceUserEndpointSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AppInstanceBotList =
+  struct
+    type nonrec t = AppInstanceBotSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AppInstanceBotSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AppInstanceBotSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AppInstanceBotList"
+        ~of_json:AppInstanceBotSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AppInstanceAdminList =
   struct
     type nonrec t = AppInstanceAdminSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AppInstanceAdminSummary.to_value)) |>
         (fun x -> `List x)
@@ -1223,20 +1628,25 @@ module AppInstanceUser =
         [@ocaml.doc "The time at which the AppInstanceUser was created."];
       lastUpdatedTimestamp: Timestamp.t option
         [@ocaml.doc
-          "The time at which the AppInstanceUser was last updated."]}
+          "The time at which the AppInstanceUser was last updated."];
+      expirationSettings: ExpirationSettings.t option
+        [@ocaml.doc
+          "The interval after which an AppInstanceUser is automatically deleted."]}
     let make ?appInstanceUserArn =
       fun ?name ->
         fun ?metadata ->
           fun ?createdTimestamp ->
             fun ?lastUpdatedTimestamp ->
-              fun () ->
-                {
-                  appInstanceUserArn;
-                  name;
-                  metadata;
-                  createdTimestamp;
-                  lastUpdatedTimestamp
-                }
+              fun ?expirationSettings ->
+                fun () ->
+                  {
+                    appInstanceUserArn;
+                    name;
+                    metadata;
+                    createdTimestamp;
+                    lastUpdatedTimestamp;
+                    expirationSettings
+                  }
     let to_value x =
       structure_to_value
         [("AppInstanceUserArn",
@@ -1246,9 +1656,14 @@ module AppInstanceUser =
         ("CreatedTimestamp",
           (Option.map x.createdTimestamp ~f:Timestamp.to_value));
         ("LastUpdatedTimestamp",
-          (Option.map x.lastUpdatedTimestamp ~f:Timestamp.to_value))]
+          (Option.map x.lastUpdatedTimestamp ~f:Timestamp.to_value));
+        ("ExpirationSettings",
+          (Option.map x.expirationSettings ~f:ExpirationSettings.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let expirationSettings =
+        (Option.map ~f:ExpirationSettings.of_xml)
+          (Xml.child xml_arg0 "ExpirationSettings") in
       let lastUpdatedTimestamp =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "LastUpdatedTimestamp") in
@@ -1261,35 +1676,37 @@ module AppInstanceUser =
       let appInstanceUserArn =
         (Option.map ~f:ChimeArn.of_xml)
           (Xml.child xml_arg0 "AppInstanceUserArn") in
-      make ?lastUpdatedTimestamp ?createdTimestamp ?metadata ?name
-        ?appInstanceUserArn ()
+      make ?expirationSettings ?lastUpdatedTimestamp ?createdTimestamp
+        ?metadata ?name ?appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let expirationSettings =
+        field_map json__ "ExpirationSettings" ExpirationSettings.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Timestamp.of_json in
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
-      let metadata = field_map json "Metadata" Metadata.of_json in
-      let name = field_map json "Name" UserName.of_json in
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
+      let name = field_map json__ "Name" UserName.of_json in
       let appInstanceUserArn =
-        field_map json "AppInstanceUserArn" ChimeArn.of_json in
-      make ?lastUpdatedTimestamp ?createdTimestamp ?metadata ?name
-        ?appInstanceUserArn ()
+        field_map json__ "AppInstanceUserArn" ChimeArn.of_json in
+      make ?expirationSettings ?lastUpdatedTimestamp ?createdTimestamp
+        ?metadata ?name ?appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of an AppInstanceUser."]
 module AppInstanceUserEndpoint =
   struct
     type nonrec t =
       {
-      appInstanceUserArn: SensitiveChimeArn.t option
+      appInstanceUserArn: ChimeArn.t option
         [@ocaml.doc "The ARN of the AppInstanceUser."];
-      endpointId: SensitiveString64.t option
+      endpointId: String64.t option
         [@ocaml.doc "The unique identifier of the AppInstanceUserEndpoint."];
       name: SensitiveString1600.t option
         [@ocaml.doc "The name of the AppInstanceUserEndpoint."];
       type_: AppInstanceUserEndpointType.t option
         [@ocaml.doc "The type of the AppInstanceUserEndpoint."];
-      resourceArn: SensitiveChimeArn.t option
+      resourceArn: ChimeArn.t option
         [@ocaml.doc "The ARN of the resource to which the endpoint belongs."];
       endpointAttributes: EndpointAttributes.t option
         [@ocaml.doc "The attributes of an Endpoint."];
@@ -1331,14 +1748,12 @@ module AppInstanceUserEndpoint =
     let to_value x =
       structure_to_value
         [("AppInstanceUserArn",
-           (Option.map x.appInstanceUserArn ~f:SensitiveChimeArn.to_value));
-        ("EndpointId",
-          (Option.map x.endpointId ~f:SensitiveString64.to_value));
+           (Option.map x.appInstanceUserArn ~f:ChimeArn.to_value));
+        ("EndpointId", (Option.map x.endpointId ~f:String64.to_value));
         ("Name", (Option.map x.name ~f:SensitiveString1600.to_value));
         ("Type",
           (Option.map x.type_ ~f:AppInstanceUserEndpointType.to_value));
-        ("ResourceArn",
-          (Option.map x.resourceArn ~f:SensitiveChimeArn.to_value));
+        ("ResourceArn", (Option.map x.resourceArn ~f:ChimeArn.to_value));
         ("EndpointAttributes",
           (Option.map x.endpointAttributes ~f:EndpointAttributes.to_value));
         ("CreatedTimestamp",
@@ -1367,8 +1782,7 @@ module AppInstanceUserEndpoint =
         (Option.map ~f:EndpointAttributes.of_xml)
           (Xml.child xml_arg0 "EndpointAttributes") in
       let resourceArn =
-        (Option.map ~f:SensitiveChimeArn.of_xml)
-          (Xml.child xml_arg0 "ResourceArn") in
+        (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       let type_ =
         (Option.map ~f:AppInstanceUserEndpointType.of_xml)
           (Xml.child xml_arg0 "Type") in
@@ -1376,39 +1790,57 @@ module AppInstanceUserEndpoint =
         (Option.map ~f:SensitiveString1600.of_xml)
           (Xml.child xml_arg0 "Name") in
       let endpointId =
-        (Option.map ~f:SensitiveString64.of_xml)
-          (Xml.child xml_arg0 "EndpointId") in
+        (Option.map ~f:String64.of_xml) (Xml.child xml_arg0 "EndpointId") in
       let appInstanceUserArn =
-        (Option.map ~f:SensitiveChimeArn.of_xml)
+        (Option.map ~f:ChimeArn.of_xml)
           (Xml.child xml_arg0 "AppInstanceUserArn") in
       make ?endpointState ?allowMessages ?lastUpdatedTimestamp
         ?createdTimestamp ?endpointAttributes ?resourceArn ?type_ ?name
         ?endpointId ?appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointState =
-        field_map json "EndpointState" EndpointState.of_json in
+        field_map json__ "EndpointState" EndpointState.of_json in
       let allowMessages =
-        field_map json "AllowMessages" AllowMessages.of_json in
+        field_map json__ "AllowMessages" AllowMessages.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Timestamp.of_json in
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
       let endpointAttributes =
-        field_map json "EndpointAttributes" EndpointAttributes.of_json in
-      let resourceArn =
-        field_map json "ResourceArn" SensitiveChimeArn.of_json in
-      let type_ = field_map json "Type" AppInstanceUserEndpointType.of_json in
-      let name = field_map json "Name" SensitiveString1600.of_json in
-      let endpointId = field_map json "EndpointId" SensitiveString64.of_json in
+        field_map json__ "EndpointAttributes" EndpointAttributes.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ChimeArn.of_json in
+      let type_ = field_map json__ "Type" AppInstanceUserEndpointType.of_json in
+      let name = field_map json__ "Name" SensitiveString1600.of_json in
+      let endpointId = field_map json__ "EndpointId" String64.of_json in
       let appInstanceUserArn =
-        field_map json "AppInstanceUserArn" SensitiveChimeArn.of_json in
+        field_map json__ "AppInstanceUserArn" ChimeArn.of_json in
       make ?endpointState ?allowMessages ?lastUpdatedTimestamp
         ?createdTimestamp ?endpointAttributes ?resourceArn ?type_ ?name
         ?endpointId ?appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An endpoint under an Amazon Chime AppInstanceUser that receives messages for a user. For push notifications, the endpoint is a mobile device used to receive mobile push notifications for a user."]
+module String1600 =
+  struct
+    type nonrec t = string
+    let context_ = "String1600"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1600) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String1600" j
+    let to_json = simple_to_json to_value
+  end
 module AppInstance =
   struct
     type nonrec t =
@@ -1466,19 +1898,123 @@ module AppInstance =
       make ?metadata ?lastUpdatedTimestamp ?createdTimestamp ?name
         ?appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metadata = field_map json "Metadata" Metadata.of_json in
+    let of_json json__ =
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Timestamp.of_json in
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
-      let name = field_map json "Name" NonEmptyResourceName.of_json in
-      let appInstanceArn = field_map json "AppInstanceArn" ChimeArn.of_json in
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let name = field_map json__ "Name" NonEmptyResourceName.of_json in
+      let appInstanceArn = field_map json__ "AppInstanceArn" ChimeArn.of_json in
       make ?metadata ?lastUpdatedTimestamp ?createdTimestamp ?name
         ?appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The details of an AppInstance, an instance of an Amazon Chime SDK messaging application."]
+module AppInstanceBot =
+  struct
+    type nonrec t =
+      {
+      appInstanceBotArn: ChimeArn.t option
+        [@ocaml.doc "The ARN of the AppInstanceBot."];
+      name: ResourceName.t option
+        [@ocaml.doc "The name of the AppInstanceBot."];
+      configuration: Configuration.t option
+        [@ocaml.doc
+          "The data processing instructions for an AppInstanceBot."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc "The time at which the AppInstanceBot was created."];
+      lastUpdatedTimestamp: Timestamp.t option
+        [@ocaml.doc "The time at which the AppInstanceBot was last updated."];
+      metadata: Metadata.t option
+        [@ocaml.doc "The metadata for an AppInstanceBot."]}
+    let make ?appInstanceBotArn =
+      fun ?name ->
+        fun ?configuration ->
+          fun ?createdTimestamp ->
+            fun ?lastUpdatedTimestamp ->
+              fun ?metadata ->
+                fun () ->
+                  {
+                    appInstanceBotArn;
+                    name;
+                    configuration;
+                    createdTimestamp;
+                    lastUpdatedTimestamp;
+                    metadata
+                  }
+    let to_value x =
+      structure_to_value
+        [("AppInstanceBotArn",
+           (Option.map x.appInstanceBotArn ~f:ChimeArn.to_value));
+        ("Name", (Option.map x.name ~f:ResourceName.to_value));
+        ("Configuration",
+          (Option.map x.configuration ~f:Configuration.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("LastUpdatedTimestamp",
+          (Option.map x.lastUpdatedTimestamp ~f:Timestamp.to_value));
+        ("Metadata", (Option.map x.metadata ~f:Metadata.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metadata =
+        (Option.map ~f:Metadata.of_xml) (Xml.child xml_arg0 "Metadata") in
+      let lastUpdatedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreatedTimestamp") in
+      let configuration =
+        (Option.map ~f:Configuration.of_xml)
+          (Xml.child xml_arg0 "Configuration") in
+      let name =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
+      let appInstanceBotArn =
+        (Option.map ~f:ChimeArn.of_xml)
+          (Xml.child xml_arg0 "AppInstanceBotArn") in
+      make ?metadata ?lastUpdatedTimestamp ?createdTimestamp ?configuration
+        ?name ?appInstanceBotArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
+      let lastUpdatedTimestamp =
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
+      let createdTimestamp =
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let configuration =
+        field_map json__ "Configuration" Configuration.of_json in
+      let name = field_map json__ "Name" ResourceName.of_json in
+      let appInstanceBotArn =
+        field_map json__ "AppInstanceBotArn" ChimeArn.of_json in
+      make ?metadata ?lastUpdatedTimestamp ?createdTimestamp ?configuration
+        ?name ?appInstanceBotArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An Amazon Lex V2 chat bot created under an AppInstance."]
+module NotFoundException =
+  struct
+    type nonrec t = {
+      code: ErrorCode.t option ;
+      message: String_.t option }
+    let make ?code = fun ?message -> fun () -> { code; message }
+    let to_value x =
+      structure_to_value
+        [("Code", (Option.map x.code ~f:ErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
+      make ?message ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "One or more of the resources in the request does not exist in the system."]
 module AppInstanceAdmin =
   struct
     type nonrec t =
@@ -1511,14 +2047,14 @@ module AppInstanceAdmin =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "Admin") in
       make ?createdTimestamp ?appInstanceArn ?admin ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
-      let appInstanceArn = field_map json "AppInstanceArn" ChimeArn.of_json in
-      let admin = field_map json "Admin" Identity.of_json in
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let appInstanceArn = field_map json__ "AppInstanceArn" ChimeArn.of_json in
+      let admin = field_map json__ "Admin" Identity.of_json in
       make ?createdTimestamp ?appInstanceArn ?admin ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The details of an AppInstanceAdmin."]
+  end[@@ocaml.doc "The name and ARN of the admin for the AppInstance."]
 module UserId =
   struct
     type nonrec t = string
@@ -1655,9 +2191,9 @@ module UpdateAppInstanceUserResponse =
           (Xml.child xml_arg0 "AppInstanceUserArn") in
       make ?appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appInstanceUserArn =
-        field_map json "AppInstanceUserArn" ChimeArn.of_json in
+        field_map json__ "AppInstanceUserArn" ChimeArn.of_json in
       make ?appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1692,11 +2228,11 @@ module UpdateAppInstanceUserRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "appInstanceUserArn") in
       make ~metadata ~name ~appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metadata = field_map_exn json "Metadata" Metadata.of_json in
-      let name = field_map_exn json "Name" UserName.of_json in
+    let of_json json__ =
+      let metadata = field_map_exn json__ "Metadata" Metadata.of_json in
+      let name = field_map_exn json__ "Name" UserName.of_json in
       let appInstanceUserArn =
-        field_map_exn json "AppInstanceUserArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceUserArn" ChimeArn.of_json in
       make ~metadata ~name ~appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1705,9 +2241,9 @@ module UpdateAppInstanceUserEndpointResponse =
   struct
     type nonrec t =
       {
-      appInstanceUserArn: SensitiveChimeArn.t option
+      appInstanceUserArn: ChimeArn.t option
         [@ocaml.doc "The ARN of the AppInstanceUser."];
-      endpointId: SensitiveString64.t option
+      endpointId: String64.t option
         [@ocaml.doc "The unique identifier of the AppInstanceUserEndpoint."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
@@ -1799,23 +2335,21 @@ module UpdateAppInstanceUserEndpointResponse =
     let to_value x =
       structure_to_value
         [("AppInstanceUserArn",
-           (Option.map x.appInstanceUserArn ~f:SensitiveChimeArn.to_value));
-        ("EndpointId",
-          (Option.map x.endpointId ~f:SensitiveString64.to_value))]
+           (Option.map x.appInstanceUserArn ~f:ChimeArn.to_value));
+        ("EndpointId", (Option.map x.endpointId ~f:String64.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let endpointId =
-        (Option.map ~f:SensitiveString64.of_xml)
-          (Xml.child xml_arg0 "EndpointId") in
+        (Option.map ~f:String64.of_xml) (Xml.child xml_arg0 "EndpointId") in
       let appInstanceUserArn =
-        (Option.map ~f:SensitiveChimeArn.of_xml)
+        (Option.map ~f:ChimeArn.of_xml)
           (Xml.child xml_arg0 "AppInstanceUserArn") in
       make ?endpointId ?appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpointId = field_map json "EndpointId" SensitiveString64.of_json in
+    let of_json json__ =
+      let endpointId = field_map json__ "EndpointId" String64.of_json in
       let appInstanceUserArn =
-        field_map json "AppInstanceUserArn" SensitiveChimeArn.of_json in
+        field_map json__ "AppInstanceUserArn" ChimeArn.of_json in
       make ?endpointId ?appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1824,9 +2358,9 @@ module UpdateAppInstanceUserEndpointRequest =
   struct
     type nonrec t =
       {
-      appInstanceUserArn: SensitiveChimeArn.t
+      appInstanceUserArn: ChimeArn.t
         [@ocaml.doc "The ARN of the AppInstanceUser."];
-      endpointId: SensitiveString64.t
+      endpointId: String64.t
         [@ocaml.doc "The unique identifier of the AppInstanceUserEndpoint."];
       name: SensitiveString1600.t option
         [@ocaml.doc "The name of the AppInstanceUserEndpoint."];
@@ -1842,8 +2376,8 @@ module UpdateAppInstanceUserEndpointRequest =
     let to_value x =
       structure_to_value
         [("appInstanceUserArn",
-           (Some (SensitiveChimeArn.to_value x.appInstanceUserArn)));
-        ("endpointId", (Some (SensitiveString64.to_value x.endpointId)));
+           (Some (ChimeArn.to_value x.appInstanceUserArn)));
+        ("endpointId", (Some (String64.to_value x.endpointId)));
         ("Name", (Option.map x.name ~f:SensitiveString1600.to_value));
         ("AllowMessages",
           (Option.map x.allowMessages ~f:AllowMessages.to_value))]
@@ -1856,21 +2390,20 @@ module UpdateAppInstanceUserEndpointRequest =
         (Option.map ~f:SensitiveString1600.of_xml)
           (Xml.child xml_arg0 "Name") in
       let endpointId =
-        SensitiveString64.of_xml
+        String64.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "endpointId") in
       let appInstanceUserArn =
-        SensitiveChimeArn.of_xml
+        ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "appInstanceUserArn") in
       make ?allowMessages ?name ~endpointId ~appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let allowMessages =
-        field_map json "AllowMessages" AllowMessages.of_json in
-      let name = field_map json "Name" SensitiveString1600.of_json in
-      let endpointId =
-        field_map_exn json "EndpointId" SensitiveString64.of_json in
+        field_map json__ "AllowMessages" AllowMessages.of_json in
+      let name = field_map json__ "Name" SensitiveString1600.of_json in
+      let endpointId = field_map_exn json__ "EndpointId" String64.of_json in
       let appInstanceUserArn =
-        field_map_exn json "AppInstanceUserArn" SensitiveChimeArn.of_json in
+        field_map_exn json__ "AppInstanceUserArn" ChimeArn.of_json in
       make ?allowMessages ?name ~endpointId ~appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1977,8 +2510,8 @@ module UpdateAppInstanceResponse =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "AppInstanceArn") in
       make ?appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appInstanceArn = field_map json "AppInstanceArn" ChimeArn.of_json in
+    let of_json json__ =
+      let appInstanceArn = field_map json__ "AppInstanceArn" ChimeArn.of_json in
       make ?appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates AppInstance metadata."]
@@ -2012,14 +2545,182 @@ module UpdateAppInstanceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "appInstanceArn") in
       make ~metadata ~name ~appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metadata = field_map_exn json "Metadata" Metadata.of_json in
-      let name = field_map_exn json "Name" NonEmptyResourceName.of_json in
+    let of_json json__ =
+      let metadata = field_map_exn json__ "Metadata" Metadata.of_json in
+      let name = field_map_exn json__ "Name" NonEmptyResourceName.of_json in
       let appInstanceArn =
-        field_map_exn json "AppInstanceArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
       make ~metadata ~name ~appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates AppInstance metadata."]
+module UpdateAppInstanceBotResponse =
+  struct
+    type nonrec t =
+      {
+      appInstanceBotArn: ChimeArn.t option
+        [@ocaml.doc "The ARN of the AppInstanceBot."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `ResourceLimitExceededException of ResourceLimitExceededException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottledClientException of ThrottledClientException.t 
+      | `UnauthorizedClientException of UnauthorizedClientException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appInstanceBotArn = fun () -> { appInstanceBotArn }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_json json)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_xml xml)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `ResourceLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceLimitExceededException"));
+            ("details", (ResourceLimitExceededException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottledClientException e ->
+          `Assoc
+            [("error", (`String "ThrottledClientException"));
+            ("details", (ThrottledClientException.to_json e))]
+      | `UnauthorizedClientException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedClientException"));
+            ("details", (UnauthorizedClientException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AppInstanceBotArn",
+           (Option.map x.appInstanceBotArn ~f:ChimeArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appInstanceBotArn =
+        (Option.map ~f:ChimeArn.of_xml)
+          (Xml.child xml_arg0 "AppInstanceBotArn") in
+      make ?appInstanceBotArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appInstanceBotArn =
+        field_map json__ "AppInstanceBotArn" ChimeArn.of_json in
+      make ?appInstanceBotArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the name and metadata of an AppInstanceBot."]
+module UpdateAppInstanceBotRequest =
+  struct
+    type nonrec t =
+      {
+      appInstanceBotArn: ChimeArn.t
+        [@ocaml.doc "The ARN of the AppInstanceBot."];
+      name: ResourceName.t [@ocaml.doc "The name of the AppInstanceBot."];
+      metadata: Metadata.t [@ocaml.doc "The metadata of the AppInstanceBot."];
+      configuration: Configuration.t option
+        [@ocaml.doc "The configuration for the bot update."]}
+    let context_ = "UpdateAppInstanceBotRequest"
+    let make ?configuration =
+      fun ~appInstanceBotArn ->
+        fun ~name ->
+          fun ~metadata ->
+            fun () -> { configuration; appInstanceBotArn; name; metadata }
+    let to_value x =
+      structure_to_value
+        [("appInstanceBotArn",
+           (Some (ChimeArn.to_value x.appInstanceBotArn)));
+        ("Name", (Some (ResourceName.to_value x.name)));
+        ("Metadata", (Some (Metadata.to_value x.metadata)));
+        ("Configuration",
+          (Option.map x.configuration ~f:Configuration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let configuration =
+        (Option.map ~f:Configuration.of_xml)
+          (Xml.child xml_arg0 "Configuration") in
+      let metadata =
+        Metadata.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Metadata") in
+      let name =
+        ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let appInstanceBotArn =
+        ChimeArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "appInstanceBotArn") in
+      make ?configuration ~metadata ~name ~appInstanceBotArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let configuration =
+        field_map json__ "Configuration" Configuration.of_json in
+      let metadata = field_map_exn json__ "Metadata" Metadata.of_json in
+      let name = field_map_exn json__ "Name" ResourceName.of_json in
+      let appInstanceBotArn =
+        field_map_exn json__ "AppInstanceBotArn" ChimeArn.of_json in
+      make ?configuration ~metadata ~name ~appInstanceBotArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the name and metadata of an AppInstanceBot."]
 module UntagResourceRequest =
   struct
     type nonrec t =
@@ -2043,9 +2744,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ChimeArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceARN = field_map_exn json__ "ResourceARN" ChimeArn.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2071,9 +2772,9 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ChimeArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceARN = field_map_exn json__ "ResourceARN" ChimeArn.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2082,9 +2783,9 @@ module RegisterAppInstanceUserEndpointResponse =
   struct
     type nonrec t =
       {
-      appInstanceUserArn: SensitiveChimeArn.t option
+      appInstanceUserArn: ChimeArn.t option
         [@ocaml.doc "The ARN of the AppInstanceUser."];
-      endpointId: SensitiveString64.t option
+      endpointId: String64.t option
         [@ocaml.doc "The unique identifier of the AppInstanceUserEndpoint."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
@@ -2187,23 +2888,21 @@ module RegisterAppInstanceUserEndpointResponse =
     let to_value x =
       structure_to_value
         [("AppInstanceUserArn",
-           (Option.map x.appInstanceUserArn ~f:SensitiveChimeArn.to_value));
-        ("EndpointId",
-          (Option.map x.endpointId ~f:SensitiveString64.to_value))]
+           (Option.map x.appInstanceUserArn ~f:ChimeArn.to_value));
+        ("EndpointId", (Option.map x.endpointId ~f:String64.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let endpointId =
-        (Option.map ~f:SensitiveString64.of_xml)
-          (Xml.child xml_arg0 "EndpointId") in
+        (Option.map ~f:String64.of_xml) (Xml.child xml_arg0 "EndpointId") in
       let appInstanceUserArn =
-        (Option.map ~f:SensitiveChimeArn.of_xml)
+        (Option.map ~f:ChimeArn.of_xml)
           (Xml.child xml_arg0 "AppInstanceUserArn") in
       make ?endpointId ?appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpointId = field_map json "EndpointId" SensitiveString64.of_json in
+    let of_json json__ =
+      let endpointId = field_map json__ "EndpointId" String64.of_json in
       let appInstanceUserArn =
-        field_map json "AppInstanceUserArn" SensitiveChimeArn.of_json in
+        field_map json__ "AppInstanceUserArn" ChimeArn.of_json in
       make ?endpointId ?appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2219,12 +2918,13 @@ module RegisterAppInstanceUserEndpointRequest =
       type_: AppInstanceUserEndpointType.t
         [@ocaml.doc
           "The type of the AppInstanceUserEndpoint. Supported types: APNS: The mobile notification service for an Apple device. APNS_SANDBOX: The sandbox environment of the mobile notification service for an Apple device. GCM: The mobile notification service for an Android device. Populate the ResourceArn value of each type as PinpointAppArn."];
-      resourceArn: SensitiveChimeArn.t
+      resourceArn: ChimeArn.t
         [@ocaml.doc "The ARN of the resource to which the endpoint belongs."];
       endpointAttributes: EndpointAttributes.t
         [@ocaml.doc "The attributes of an Endpoint."];
       clientRequestToken: ClientRequestToken.t
-        [@ocaml.doc "The idempotency token for each client request."];
+        [@ocaml.doc
+          "The unique ID assigned to the request. Use different tokens to register other endpoints."];
       allowMessages: AllowMessages.t option
         [@ocaml.doc
           "Boolean that controls whether the AppInstanceUserEndpoint is opted in to receive messages. ALL indicates the endpoint receives all messages. NONE indicates the endpoint receives no messages."]}
@@ -2252,7 +2952,7 @@ module RegisterAppInstanceUserEndpointRequest =
            (Some (SensitiveChimeArn.to_value x.appInstanceUserArn)));
         ("Name", (Option.map x.name ~f:SensitiveString1600.to_value));
         ("Type", (Some (AppInstanceUserEndpointType.to_value x.type_)));
-        ("ResourceArn", (Some (SensitiveChimeArn.to_value x.resourceArn)));
+        ("ResourceArn", (Some (ChimeArn.to_value x.resourceArn)));
         ("EndpointAttributes",
           (Some (EndpointAttributes.to_value x.endpointAttributes)));
         ("ClientRequestToken",
@@ -2271,7 +2971,7 @@ module RegisterAppInstanceUserEndpointRequest =
         EndpointAttributes.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointAttributes") in
       let resourceArn =
-        SensitiveChimeArn.of_xml
+        ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       let type_ =
         AppInstanceUserEndpointType.of_xml
@@ -2285,25 +2985,184 @@ module RegisterAppInstanceUserEndpointRequest =
       make ?allowMessages ~clientRequestToken ~endpointAttributes
         ~resourceArn ~type_ ?name ~appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let allowMessages =
-        field_map json "AllowMessages" AllowMessages.of_json in
+        field_map json__ "AllowMessages" AllowMessages.of_json in
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
       let endpointAttributes =
-        field_map_exn json "EndpointAttributes" EndpointAttributes.of_json in
-      let resourceArn =
-        field_map_exn json "ResourceArn" SensitiveChimeArn.of_json in
+        field_map_exn json__ "EndpointAttributes" EndpointAttributes.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" ChimeArn.of_json in
       let type_ =
-        field_map_exn json "Type" AppInstanceUserEndpointType.of_json in
-      let name = field_map json "Name" SensitiveString1600.of_json in
+        field_map_exn json__ "Type" AppInstanceUserEndpointType.of_json in
+      let name = field_map json__ "Name" SensitiveString1600.of_json in
       let appInstanceUserArn =
-        field_map_exn json "AppInstanceUserArn" SensitiveChimeArn.of_json in
+        field_map_exn json__ "AppInstanceUserArn" SensitiveChimeArn.of_json in
       make ?allowMessages ~clientRequestToken ~endpointAttributes
         ~resourceArn ~type_ ?name ~appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Registers an endpoint under an Amazon Chime AppInstanceUser. The endpoint receives messages for a user. For push notifications, the endpoint is a mobile device used to receive mobile push notifications for a user."]
+module PutAppInstanceUserExpirationSettingsResponse =
+  struct
+    type nonrec t =
+      {
+      appInstanceUserArn: ChimeArn.t option
+        [@ocaml.doc "The ARN of the AppInstanceUser."];
+      expirationSettings: ExpirationSettings.t option
+        [@ocaml.doc
+          "Settings that control the interval after which an AppInstanceUser is automatically deleted."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottledClientException of ThrottledClientException.t 
+      | `UnauthorizedClientException of UnauthorizedClientException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appInstanceUserArn =
+      fun ?expirationSettings ->
+        fun () -> { appInstanceUserArn; expirationSettings }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_json json)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_xml xml)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottledClientException e ->
+          `Assoc
+            [("error", (`String "ThrottledClientException"));
+            ("details", (ThrottledClientException.to_json e))]
+      | `UnauthorizedClientException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedClientException"));
+            ("details", (UnauthorizedClientException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AppInstanceUserArn",
+           (Option.map x.appInstanceUserArn ~f:ChimeArn.to_value));
+        ("ExpirationSettings",
+          (Option.map x.expirationSettings ~f:ExpirationSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expirationSettings =
+        (Option.map ~f:ExpirationSettings.of_xml)
+          (Xml.child xml_arg0 "ExpirationSettings") in
+      let appInstanceUserArn =
+        (Option.map ~f:ChimeArn.of_xml)
+          (Xml.child xml_arg0 "AppInstanceUserArn") in
+      make ?expirationSettings ?appInstanceUserArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expirationSettings =
+        field_map json__ "ExpirationSettings" ExpirationSettings.of_json in
+      let appInstanceUserArn =
+        field_map json__ "AppInstanceUserArn" ChimeArn.of_json in
+      make ?expirationSettings ?appInstanceUserArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sets the number of days before the AppInstanceUser is automatically deleted. A background process deletes expired AppInstanceUsers within 6 hours of expiration. Actual deletion times may vary. Expired AppInstanceUsers that have not yet been deleted appear as active, and you can update their expiration settings. The system honors the new settings."]
+module PutAppInstanceUserExpirationSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      appInstanceUserArn: ChimeArn.t
+        [@ocaml.doc "The ARN of the AppInstanceUser."];
+      expirationSettings: ExpirationSettings.t option
+        [@ocaml.doc
+          "Settings that control the interval after which an AppInstanceUser is automatically deleted."]}
+    let context_ = "PutAppInstanceUserExpirationSettingsRequest"
+    let make ?expirationSettings =
+      fun ~appInstanceUserArn ->
+        fun () -> { expirationSettings; appInstanceUserArn }
+    let to_value x =
+      structure_to_value
+        [("appInstanceUserArn",
+           (Some (ChimeArn.to_value x.appInstanceUserArn)));
+        ("ExpirationSettings",
+          (Option.map x.expirationSettings ~f:ExpirationSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expirationSettings =
+        (Option.map ~f:ExpirationSettings.of_xml)
+          (Xml.child xml_arg0 "ExpirationSettings") in
+      let appInstanceUserArn =
+        ChimeArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "appInstanceUserArn") in
+      make ?expirationSettings ~appInstanceUserArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expirationSettings =
+        field_map json__ "ExpirationSettings" ExpirationSettings.of_json in
+      let appInstanceUserArn =
+        field_map_exn json__ "AppInstanceUserArn" ChimeArn.of_json in
+      make ?expirationSettings ~appInstanceUserArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sets the number of days before the AppInstanceUser is automatically deleted. A background process deletes expired AppInstanceUsers within 6 hours of expiration. Actual deletion times may vary. Expired AppInstanceUsers that have not yet been deleted appear as active, and you can update their expiration settings. The system honors the new settings."]
 module PutAppInstanceRetentionSettingsResponse =
   struct
     type nonrec t =
@@ -2408,11 +3267,11 @@ module PutAppInstanceRetentionSettingsResponse =
           (Xml.child xml_arg0 "AppInstanceRetentionSettings") in
       make ?initiateDeletionTimestamp ?appInstanceRetentionSettings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let initiateDeletionTimestamp =
-        field_map json "InitiateDeletionTimestamp" Timestamp.of_json in
+        field_map json__ "InitiateDeletionTimestamp" Timestamp.of_json in
       let appInstanceRetentionSettings =
-        field_map json "AppInstanceRetentionSettings"
+        field_map json__ "AppInstanceRetentionSettings"
           AppInstanceRetentionSettings.of_json in
       make ?initiateDeletionTimestamp ?appInstanceRetentionSettings ()
     let to_json v = composed_to_json to_value v
@@ -2447,12 +3306,12 @@ module PutAppInstanceRetentionSettingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "appInstanceArn") in
       make ~appInstanceRetentionSettings ~appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appInstanceRetentionSettings =
-        field_map_exn json "AppInstanceRetentionSettings"
+        field_map_exn json__ "AppInstanceRetentionSettings"
           AppInstanceRetentionSettings.of_json in
       let appInstanceArn =
-        field_map_exn json "AppInstanceArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
       make ~appInstanceRetentionSettings ~appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2546,8 +3405,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the tags applied to an Amazon Chime SDK identity resource."]
@@ -2566,8 +3425,8 @@ module ListTagsForResourceRequest =
         ChimeArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceARN = field_map_exn json "ResourceARN" ChimeArn.of_json in
+    let of_json json__ =
+      let resourceARN = field_map_exn json__ "ResourceARN" ChimeArn.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2673,10 +3532,10 @@ module ListAppInstancesResponse =
           (Xml.child xml_arg0 "AppInstances") in
       make ?nextToken ?appInstances ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let appInstances =
-        field_map json "AppInstances" AppInstanceList.of_json in
+        field_map json__ "AppInstances" AppInstanceList.of_json in
       make ?nextToken ?appInstances ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2705,9 +3564,9 @@ module ListAppInstancesRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "max-results") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2821,11 +3680,11 @@ module ListAppInstanceUsersResponse =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "AppInstanceArn") in
       make ?nextToken ?appInstanceUsers ?appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let appInstanceUsers =
-        field_map json "AppInstanceUsers" AppInstanceUserList.of_json in
-      let appInstanceArn = field_map json "AppInstanceArn" ChimeArn.of_json in
+        field_map json__ "AppInstanceUsers" AppInstanceUserList.of_json in
+      let appInstanceArn = field_map json__ "AppInstanceArn" ChimeArn.of_json in
       make ?nextToken ?appInstanceUsers ?appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2861,11 +3720,11 @@ module ListAppInstanceUsersRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "app-instance-arn") in
       make ?nextToken ?maxResults ~appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let appInstanceArn =
-        field_map_exn json "AppInstanceArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
       make ?nextToken ?maxResults ~appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2973,10 +3832,10 @@ module ListAppInstanceUserEndpointsResponse =
           (Xml.child xml_arg0 "AppInstanceUserEndpoints") in
       make ?nextToken ?appInstanceUserEndpoints ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let appInstanceUserEndpoints =
-        field_map json "AppInstanceUserEndpoints"
+        field_map json__ "AppInstanceUserEndpoints"
           AppInstanceUserEndpointSummaryList.of_json in
       make ?nextToken ?appInstanceUserEndpoints ()
     let to_json v = composed_to_json to_value v
@@ -3016,15 +3875,184 @@ module ListAppInstanceUserEndpointsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "appInstanceUserArn") in
       make ?nextToken ?maxResults ~appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let appInstanceUserArn =
-        field_map_exn json "AppInstanceUserArn" SensitiveChimeArn.of_json in
+        field_map_exn json__ "AppInstanceUserArn" SensitiveChimeArn.of_json in
       make ?nextToken ?maxResults ~appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all the AppInstanceUserEndpoints created under a single AppInstanceUser."]
+module ListAppInstanceBotsResponse =
+  struct
+    type nonrec t =
+      {
+      appInstanceArn: ChimeArn.t option
+        [@ocaml.doc "The ARN of the AppInstance."];
+      appInstanceBots: AppInstanceBotList.t option
+        [@ocaml.doc "The information for each requested AppInstanceBot."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token passed by previous API calls until all requested bots are returned."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `ResourceLimitExceededException of ResourceLimitExceededException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottledClientException of ThrottledClientException.t 
+      | `UnauthorizedClientException of UnauthorizedClientException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appInstanceArn =
+      fun ?appInstanceBots ->
+        fun ?nextToken ->
+          fun () -> { appInstanceArn; appInstanceBots; nextToken }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_json json)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_xml xml)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `ResourceLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceLimitExceededException"));
+            ("details", (ResourceLimitExceededException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottledClientException e ->
+          `Assoc
+            [("error", (`String "ThrottledClientException"));
+            ("details", (ThrottledClientException.to_json e))]
+      | `UnauthorizedClientException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedClientException"));
+            ("details", (UnauthorizedClientException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AppInstanceArn",
+           (Option.map x.appInstanceArn ~f:ChimeArn.to_value));
+        ("AppInstanceBots",
+          (Option.map x.appInstanceBots ~f:AppInstanceBotList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let appInstanceBots =
+        (Option.map ~f:AppInstanceBotList.of_xml)
+          (Xml.child xml_arg0 "AppInstanceBots") in
+      let appInstanceArn =
+        (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "AppInstanceArn") in
+      make ?nextToken ?appInstanceBots ?appInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let appInstanceBots =
+        field_map json__ "AppInstanceBots" AppInstanceBotList.of_json in
+      let appInstanceArn = field_map json__ "AppInstanceArn" ChimeArn.of_json in
+      make ?nextToken ?appInstanceBots ?appInstanceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all AppInstanceBots created under a single AppInstance."]
+module ListAppInstanceBotsRequest =
+  struct
+    type nonrec t =
+      {
+      appInstanceArn: ChimeArn.t [@ocaml.doc "The ARN of the AppInstance."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of requests to return."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token passed by previous API calls until all requested bots are returned."]}
+    let context_ = "ListAppInstanceBotsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~appInstanceArn ->
+          fun () -> { maxResults; nextToken; appInstanceArn }
+    let to_value x =
+      structure_to_value
+        [("app-instance-arn", (Some (ChimeArn.to_value x.appInstanceArn)));
+        ("max-results", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("next-token", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "next-token") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "max-results") in
+      let appInstanceArn =
+        ChimeArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "app-instance-arn") in
+      make ?nextToken ?maxResults ~appInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let appInstanceArn =
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
+      make ?nextToken ?maxResults ~appInstanceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all AppInstanceBots created under a single AppInstance."]
 module ListAppInstanceAdminsResponse =
   struct
     type nonrec t =
@@ -3145,11 +4173,11 @@ module ListAppInstanceAdminsResponse =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "AppInstanceArn") in
       make ?nextToken ?appInstanceAdmins ?appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let appInstanceAdmins =
-        field_map json "AppInstanceAdmins" AppInstanceAdminList.of_json in
-      let appInstanceArn = field_map json "AppInstanceArn" ChimeArn.of_json in
+        field_map json__ "AppInstanceAdmins" AppInstanceAdminList.of_json in
+      let appInstanceArn = field_map json__ "AppInstanceArn" ChimeArn.of_json in
       make ?nextToken ?appInstanceAdmins ?appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of the administrators in the AppInstance."]
@@ -3185,11 +4213,11 @@ module ListAppInstanceAdminsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "appInstanceArn") in
       make ?nextToken ?maxResults ~appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let appInstanceArn =
-        field_map_exn json "AppInstanceArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
       make ?nextToken ?maxResults ~appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of the administrators in the AppInstance."]
@@ -3298,11 +4326,11 @@ module GetAppInstanceRetentionSettingsResponse =
           (Xml.child xml_arg0 "AppInstanceRetentionSettings") in
       make ?initiateDeletionTimestamp ?appInstanceRetentionSettings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let initiateDeletionTimestamp =
-        field_map json "InitiateDeletionTimestamp" Timestamp.of_json in
+        field_map json__ "InitiateDeletionTimestamp" Timestamp.of_json in
       let appInstanceRetentionSettings =
-        field_map json "AppInstanceRetentionSettings"
+        field_map json__ "AppInstanceRetentionSettings"
           AppInstanceRetentionSettings.of_json in
       make ?initiateDeletionTimestamp ?appInstanceRetentionSettings ()
     let to_json v = composed_to_json to_value v
@@ -3324,9 +4352,9 @@ module GetAppInstanceRetentionSettingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "appInstanceArn") in
       make ~appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appInstanceArn =
-        field_map_exn json "AppInstanceArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
       make ~appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the retention settings for an AppInstance."]
@@ -3424,9 +4452,9 @@ module DescribeAppInstanceUserResponse =
           (Xml.child xml_arg0 "AppInstanceUser") in
       make ?appInstanceUser ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appInstanceUser =
-        field_map json "AppInstanceUser" AppInstanceUser.of_json in
+        field_map json__ "AppInstanceUser" AppInstanceUser.of_json in
       make ?appInstanceUser ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the full details of an AppInstanceUser."]
@@ -3449,9 +4477,9 @@ module DescribeAppInstanceUserRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "appInstanceUserArn") in
       make ~appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appInstanceUserArn =
-        field_map_exn json "AppInstanceUserArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceUserArn" ChimeArn.of_json in
       make ~appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the full details of an AppInstanceUser."]
@@ -3551,9 +4579,9 @@ module DescribeAppInstanceUserEndpointResponse =
           (Xml.child xml_arg0 "AppInstanceUserEndpoint") in
       make ?appInstanceUserEndpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appInstanceUserEndpoint =
-        field_map json "AppInstanceUserEndpoint"
+        field_map json__ "AppInstanceUserEndpoint"
           AppInstanceUserEndpoint.of_json in
       make ?appInstanceUserEndpoint ()
     let to_json v = composed_to_json to_value v
@@ -3562,9 +4590,9 @@ module DescribeAppInstanceUserEndpointRequest =
   struct
     type nonrec t =
       {
-      appInstanceUserArn: SensitiveString1600.t
+      appInstanceUserArn: String1600.t
         [@ocaml.doc "The ARN of the AppInstanceUser."];
-      endpointId: SensitiveString64.t
+      endpointId: String64.t
         [@ocaml.doc "The unique identifier of the AppInstanceUserEndpoint."]}
     let context_ = "DescribeAppInstanceUserEndpointRequest"
     let make ~appInstanceUserArn =
@@ -3572,23 +4600,22 @@ module DescribeAppInstanceUserEndpointRequest =
     let to_value x =
       structure_to_value
         [("appInstanceUserArn",
-           (Some (SensitiveString1600.to_value x.appInstanceUserArn)));
-        ("endpointId", (Some (SensitiveString64.to_value x.endpointId)))]
+           (Some (String1600.to_value x.appInstanceUserArn)));
+        ("endpointId", (Some (String64.to_value x.endpointId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let endpointId =
-        SensitiveString64.of_xml
+        String64.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "endpointId") in
       let appInstanceUserArn =
-        SensitiveString1600.of_xml
+        String1600.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "appInstanceUserArn") in
       make ~endpointId ~appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpointId =
-        field_map_exn json "EndpointId" SensitiveString64.of_json in
+    let of_json json__ =
+      let endpointId = field_map_exn json__ "EndpointId" String64.of_json in
       let appInstanceUserArn =
-        field_map_exn json "AppInstanceUserArn" SensitiveString1600.of_json in
+        field_map_exn json__ "AppInstanceUserArn" String1600.of_json in
       make ~endpointId ~appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the full details of an AppInstanceUserEndpoint."]
@@ -3685,8 +4712,8 @@ module DescribeAppInstanceResponse =
         (Option.map ~f:AppInstance.of_xml) (Xml.child xml_arg0 "AppInstance") in
       make ?appInstance ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appInstance = field_map json "AppInstance" AppInstance.of_json in
+    let of_json json__ =
+      let appInstance = field_map json__ "AppInstance" AppInstance.of_json in
       make ?appInstance ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the full details of an AppInstance."]
@@ -3707,12 +4734,146 @@ module DescribeAppInstanceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "appInstanceArn") in
       make ~appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appInstanceArn =
-        field_map_exn json "AppInstanceArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
       make ~appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the full details of an AppInstance."]
+module DescribeAppInstanceBotResponse =
+  struct
+    type nonrec t =
+      {
+      appInstanceBot: AppInstanceBot.t option
+        [@ocaml.doc "The detials of the AppInstanceBot."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottledClientException of ThrottledClientException.t 
+      | `UnauthorizedClientException of UnauthorizedClientException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appInstanceBot = fun () -> { appInstanceBot }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_json json)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_xml xml)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottledClientException e ->
+          `Assoc
+            [("error", (`String "ThrottledClientException"));
+            ("details", (ThrottledClientException.to_json e))]
+      | `UnauthorizedClientException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedClientException"));
+            ("details", (UnauthorizedClientException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AppInstanceBot",
+           (Option.map x.appInstanceBot ~f:AppInstanceBot.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appInstanceBot =
+        (Option.map ~f:AppInstanceBot.of_xml)
+          (Xml.child xml_arg0 "AppInstanceBot") in
+      make ?appInstanceBot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appInstanceBot =
+        field_map json__ "AppInstanceBot" AppInstanceBot.of_json in
+      make ?appInstanceBot ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The AppInstanceBot's information."]
+module DescribeAppInstanceBotRequest =
+  struct
+    type nonrec t =
+      {
+      appInstanceBotArn: ChimeArn.t
+        [@ocaml.doc "The ARN of the AppInstanceBot."]}
+    let context_ = "DescribeAppInstanceBotRequest"
+    let make ~appInstanceBotArn = fun () -> { appInstanceBotArn }
+    let to_value x =
+      structure_to_value
+        [("appInstanceBotArn",
+           (Some (ChimeArn.to_value x.appInstanceBotArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appInstanceBotArn =
+        ChimeArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "appInstanceBotArn") in
+      make ~appInstanceBotArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appInstanceBotArn =
+        field_map_exn json__ "AppInstanceBotArn" ChimeArn.of_json in
+      make ~appInstanceBotArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The AppInstanceBot's information."]
 module DescribeAppInstanceAdminResponse =
   struct
     type nonrec t =
@@ -3808,9 +4969,9 @@ module DescribeAppInstanceAdminResponse =
           (Xml.child xml_arg0 "AppInstanceAdmin") in
       make ?appInstanceAdmin ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appInstanceAdmin =
-        field_map json "AppInstanceAdmin" AppInstanceAdmin.of_json in
+        field_map json__ "AppInstanceAdmin" AppInstanceAdmin.of_json in
       make ?appInstanceAdmin ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the full details of an AppInstanceAdmin."]
@@ -3840,11 +5001,11 @@ module DescribeAppInstanceAdminRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "appInstanceAdminArn") in
       make ~appInstanceArn ~appInstanceAdminArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appInstanceArn =
-        field_map_exn json "AppInstanceArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
       let appInstanceAdminArn =
-        field_map_exn json "AppInstanceAdminArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceAdminArn" ChimeArn.of_json in
       make ~appInstanceArn ~appInstanceAdminArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the full details of an AppInstanceAdmin."]
@@ -3852,9 +5013,9 @@ module DeregisterAppInstanceUserEndpointRequest =
   struct
     type nonrec t =
       {
-      appInstanceUserArn: SensitiveChimeArn.t
+      appInstanceUserArn: ChimeArn.t
         [@ocaml.doc "The ARN of the AppInstanceUser."];
-      endpointId: SensitiveString64.t
+      endpointId: String64.t
         [@ocaml.doc "The unique identifier of the AppInstanceUserEndpoint."]}
     let context_ = "DeregisterAppInstanceUserEndpointRequest"
     let make ~appInstanceUserArn =
@@ -3862,23 +5023,22 @@ module DeregisterAppInstanceUserEndpointRequest =
     let to_value x =
       structure_to_value
         [("appInstanceUserArn",
-           (Some (SensitiveChimeArn.to_value x.appInstanceUserArn)));
-        ("endpointId", (Some (SensitiveString64.to_value x.endpointId)))]
+           (Some (ChimeArn.to_value x.appInstanceUserArn)));
+        ("endpointId", (Some (String64.to_value x.endpointId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let endpointId =
-        SensitiveString64.of_xml
+        String64.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "endpointId") in
       let appInstanceUserArn =
-        SensitiveChimeArn.of_xml
+        ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "appInstanceUserArn") in
       make ~endpointId ~appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpointId =
-        field_map_exn json "EndpointId" SensitiveString64.of_json in
+    let of_json json__ =
+      let endpointId = field_map_exn json__ "EndpointId" String64.of_json in
       let appInstanceUserArn =
-        field_map_exn json "AppInstanceUserArn" SensitiveChimeArn.of_json in
+        field_map_exn json__ "AppInstanceUserArn" ChimeArn.of_json in
       make ~endpointId ~appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deregisters an AppInstanceUserEndpoint."]
@@ -3901,9 +5061,9 @@ module DeleteAppInstanceUserRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "appInstanceUserArn") in
       make ~appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appInstanceUserArn =
-        field_map_exn json "AppInstanceUserArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceUserArn" ChimeArn.of_json in
       make ~appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an AppInstanceUser."]
@@ -3924,13 +5084,38 @@ module DeleteAppInstanceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "appInstanceArn") in
       make ~appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appInstanceArn =
-        field_map_exn json "AppInstanceArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
       make ~appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes an AppInstance and all associated data asynchronously."]
+module DeleteAppInstanceBotRequest =
+  struct
+    type nonrec t =
+      {
+      appInstanceBotArn: ChimeArn.t
+        [@ocaml.doc "The ARN of the AppInstanceBot being deleted."]}
+    let context_ = "DeleteAppInstanceBotRequest"
+    let make ~appInstanceBotArn = fun () -> { appInstanceBotArn }
+    let to_value x =
+      structure_to_value
+        [("appInstanceBotArn",
+           (Some (ChimeArn.to_value x.appInstanceBotArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appInstanceBotArn =
+        ChimeArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "appInstanceBotArn") in
+      make ~appInstanceBotArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appInstanceBotArn =
+        field_map_exn json__ "AppInstanceBotArn" ChimeArn.of_json in
+      make ~appInstanceBotArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes an AppInstanceBot."]
 module DeleteAppInstanceAdminRequest =
   struct
     type nonrec t =
@@ -3957,15 +5142,15 @@ module DeleteAppInstanceAdminRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "appInstanceAdminArn") in
       make ~appInstanceArn ~appInstanceAdminArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appInstanceArn =
-        field_map_exn json "AppInstanceArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
       let appInstanceAdminArn =
-        field_map_exn json "AppInstanceAdminArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceAdminArn" ChimeArn.of_json in
       make ~appInstanceArn ~appInstanceAdminArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Demotes an AppInstanceAdmin to an AppInstanceUser. This action does not delete the user."]
+       "Demotes an AppInstanceAdmin to an AppInstanceUser or AppInstanceBot. This action does not delete the user."]
 module CreateAppInstanceUserResponse =
   struct
     type nonrec t =
@@ -4079,9 +5264,9 @@ module CreateAppInstanceUserResponse =
           (Xml.child xml_arg0 "AppInstanceUserArn") in
       make ?appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appInstanceUserArn =
-        field_map json "AppInstanceUserArn" ChimeArn.of_json in
+        field_map json__ "AppInstanceUserArn" ChimeArn.of_json in
       make ?appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4100,25 +5285,30 @@ module CreateAppInstanceUserRequest =
           "The request's metadata. Limited to a 1KB string in UTF-8."];
       clientRequestToken: ClientRequestToken.t
         [@ocaml.doc
-          "The token assigned to the user requesting an AppInstance."];
+          "The unique ID of the request. Use different tokens to request additional AppInstances."];
       tags: TagList.t option
-        [@ocaml.doc "Tags assigned to the AppInstanceUser."]}
+        [@ocaml.doc "Tags assigned to the AppInstanceUser."];
+      expirationSettings: ExpirationSettings.t option
+        [@ocaml.doc
+          "Settings that control the interval after which the AppInstanceUser is automatically deleted."]}
     let context_ = "CreateAppInstanceUserRequest"
     let make ?metadata =
       fun ?tags ->
-        fun ~appInstanceArn ->
-          fun ~appInstanceUserId ->
-            fun ~name ->
-              fun ~clientRequestToken ->
-                fun () ->
-                  {
-                    metadata;
-                    tags;
-                    appInstanceArn;
-                    appInstanceUserId;
-                    name;
-                    clientRequestToken
-                  }
+        fun ?expirationSettings ->
+          fun ~appInstanceArn ->
+            fun ~appInstanceUserId ->
+              fun ~name ->
+                fun ~clientRequestToken ->
+                  fun () ->
+                    {
+                      metadata;
+                      tags;
+                      expirationSettings;
+                      appInstanceArn;
+                      appInstanceUserId;
+                      name;
+                      clientRequestToken
+                    }
     let to_value x =
       structure_to_value
         [("AppInstanceArn", (Some (ChimeArn.to_value x.appInstanceArn)));
@@ -4127,9 +5317,14 @@ module CreateAppInstanceUserRequest =
         ("Metadata", (Option.map x.metadata ~f:Metadata.to_value));
         ("ClientRequestToken",
           (Some (ClientRequestToken.to_value x.clientRequestToken)));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("ExpirationSettings",
+          (Option.map x.expirationSettings ~f:ExpirationSettings.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let expirationSettings =
+        (Option.map ~f:ExpirationSettings.of_xml)
+          (Xml.child xml_arg0 "ExpirationSettings") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let clientRequestToken =
         ClientRequestToken.of_xml
@@ -4144,21 +5339,23 @@ module CreateAppInstanceUserRequest =
       let appInstanceArn =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AppInstanceArn") in
-      make ?tags ~clientRequestToken ?metadata ~name ~appInstanceUserId
-        ~appInstanceArn ()
+      make ?expirationSettings ?tags ~clientRequestToken ?metadata ~name
+        ~appInstanceUserId ~appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let expirationSettings =
+        field_map json__ "ExpirationSettings" ExpirationSettings.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
-      let metadata = field_map json "Metadata" Metadata.of_json in
-      let name = field_map_exn json "Name" UserName.of_json in
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
+      let name = field_map_exn json__ "Name" UserName.of_json in
       let appInstanceUserId =
-        field_map_exn json "AppInstanceUserId" UserId.of_json in
+        field_map_exn json__ "AppInstanceUserId" UserId.of_json in
       let appInstanceArn =
-        field_map_exn json "AppInstanceArn" ChimeArn.of_json in
-      make ?tags ~clientRequestToken ?metadata ~name ~appInstanceUserId
-        ~appInstanceArn ()
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
+      make ?expirationSettings ?tags ~clientRequestToken ?metadata ~name
+        ~appInstanceUserId ~appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a user under an Amazon Chime AppInstance. The request consists of a unique appInstanceUserId and Name for that user."]
@@ -4275,8 +5472,8 @@ module CreateAppInstanceResponse =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "AppInstanceArn") in
       make ?appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appInstanceArn = field_map json "AppInstanceArn" ChimeArn.of_json in
+    let of_json json__ =
+      let appInstanceArn = field_map json__ "AppInstanceArn" ChimeArn.of_json in
       make ?appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4291,9 +5488,9 @@ module CreateAppInstanceRequest =
         [@ocaml.doc
           "The metadata of the AppInstance. Limited to a 1KB string in UTF-8."];
       clientRequestToken: ClientRequestToken.t
-        [@ocaml.doc "The ClientRequestToken of the AppInstance."];
-      tags: TagList.t option
-        [@ocaml.doc "Tags assigned to the AppInstanceUser."]}
+        [@ocaml.doc
+          "The unique ID of the request. Use different tokens to create different AppInstances."];
+      tags: TagList.t option [@ocaml.doc "Tags assigned to the AppInstance."]}
     let context_ = "CreateAppInstanceRequest"
     let make ?metadata =
       fun ?tags ->
@@ -4320,22 +5517,221 @@ module CreateAppInstanceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~clientRequestToken ?metadata ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
-      let metadata = field_map json "Metadata" Metadata.of_json in
-      let name = field_map_exn json "Name" NonEmptyResourceName.of_json in
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
+      let name = field_map_exn json__ "Name" NonEmptyResourceName.of_json in
       make ?tags ~clientRequestToken ?metadata ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an Amazon Chime SDK messaging AppInstance under an AWS account. Only SDK messaging customers use this API. CreateAppInstance supports idempotency behavior as described in the AWS API Standard. identity"]
+module CreateAppInstanceBotResponse =
+  struct
+    type nonrec t =
+      {
+      appInstanceBotArn: ChimeArn.t option
+        [@ocaml.doc "The ARN of the AppinstanceBot."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `ResourceLimitExceededException of ResourceLimitExceededException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottledClientException of ThrottledClientException.t 
+      | `UnauthorizedClientException of UnauthorizedClientException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?appInstanceBotArn = fun () -> { appInstanceBotArn }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_json json)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_xml xml)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `ResourceLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceLimitExceededException"));
+            ("details", (ResourceLimitExceededException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottledClientException e ->
+          `Assoc
+            [("error", (`String "ThrottledClientException"));
+            ("details", (ThrottledClientException.to_json e))]
+      | `UnauthorizedClientException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedClientException"));
+            ("details", (UnauthorizedClientException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AppInstanceBotArn",
+           (Option.map x.appInstanceBotArn ~f:ChimeArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appInstanceBotArn =
+        (Option.map ~f:ChimeArn.of_xml)
+          (Xml.child xml_arg0 "AppInstanceBotArn") in
+      make ?appInstanceBotArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appInstanceBotArn =
+        field_map json__ "AppInstanceBotArn" ChimeArn.of_json in
+      make ?appInstanceBotArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a bot under an Amazon Chime AppInstance. The request consists of a unique Configuration and Name for that bot."]
+module CreateAppInstanceBotRequest =
+  struct
+    type nonrec t =
+      {
+      appInstanceArn: ChimeArn.t
+        [@ocaml.doc "The ARN of the AppInstance request."];
+      name: ResourceName.t option [@ocaml.doc "The user's name."];
+      metadata: Metadata.t option
+        [@ocaml.doc
+          "The request metadata. Limited to a 1KB string in UTF-8."];
+      clientRequestToken: ClientRequestToken.t
+        [@ocaml.doc
+          "The unique ID for the client making the request. Use different tokens for different AppInstanceBots."];
+      tags: TagList.t option
+        [@ocaml.doc "The tags assigned to the AppInstanceBot."];
+      configuration: Configuration.t
+        [@ocaml.doc
+          "Configuration information about the Amazon Lex V2 V2 bot."]}
+    let context_ = "CreateAppInstanceBotRequest"
+    let make ?name =
+      fun ?metadata ->
+        fun ?tags ->
+          fun ~appInstanceArn ->
+            fun ~clientRequestToken ->
+              fun ~configuration ->
+                fun () ->
+                  {
+                    name;
+                    metadata;
+                    tags;
+                    appInstanceArn;
+                    clientRequestToken;
+                    configuration
+                  }
+    let to_value x =
+      structure_to_value
+        [("AppInstanceArn", (Some (ChimeArn.to_value x.appInstanceArn)));
+        ("Name", (Option.map x.name ~f:ResourceName.to_value));
+        ("Metadata", (Option.map x.metadata ~f:Metadata.to_value));
+        ("ClientRequestToken",
+          (Some (ClientRequestToken.to_value x.clientRequestToken)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("Configuration", (Some (Configuration.to_value x.configuration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let configuration =
+        Configuration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Configuration") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let clientRequestToken =
+        ClientRequestToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
+      let metadata =
+        (Option.map ~f:Metadata.of_xml) (Xml.child xml_arg0 "Metadata") in
+      let name =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
+      let appInstanceArn =
+        ChimeArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AppInstanceArn") in
+      make ~configuration ?tags ~clientRequestToken ?metadata ?name
+        ~appInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let configuration =
+        field_map_exn json__ "Configuration" Configuration.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let clientRequestToken =
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
+      let name = field_map json__ "Name" ResourceName.of_json in
+      let appInstanceArn =
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
+      make ~configuration ?tags ~clientRequestToken ?metadata ?name
+        ~appInstanceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a bot under an Amazon Chime AppInstance. The request consists of a unique Configuration and Name for that bot."]
 module CreateAppInstanceAdminResponse =
   struct
     type nonrec t =
       {
       appInstanceAdmin: Identity.t option
-        [@ocaml.doc "The name and ARN of the admin for the AppInstance."];
+        [@ocaml.doc
+          "The ARN and name of the administrator, the ARN of the AppInstance, and the created and last-updated timestamps. All timestamps use epoch milliseconds."];
       appInstanceArn: ChimeArn.t option
         [@ocaml.doc "The ARN of the of the admin for the AppInstance."]}
     type nonrec error =
@@ -4451,14 +5847,14 @@ module CreateAppInstanceAdminResponse =
           (Xml.child xml_arg0 "AppInstanceAdmin") in
       make ?appInstanceArn ?appInstanceAdmin ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appInstanceArn = field_map json "AppInstanceArn" ChimeArn.of_json in
+    let of_json json__ =
+      let appInstanceArn = field_map json__ "AppInstanceArn" ChimeArn.of_json in
       let appInstanceAdmin =
-        field_map json "AppInstanceAdmin" Identity.of_json in
+        field_map json__ "AppInstanceAdmin" Identity.of_json in
       make ?appInstanceArn ?appInstanceAdmin ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Promotes an AppInstanceUser to an AppInstanceAdmin. The promoted user can perform the following actions. ChannelModerator actions across all channels in the AppInstance. DeleteChannelMessage actions. Only an AppInstanceUser can be promoted to an AppInstanceAdmin role."]
+       "Promotes an AppInstanceUser or AppInstanceBot to an AppInstanceAdmin. The promoted entity can perform the following actions. ChannelModerator actions across all channels in the AppInstance. DeleteChannelMessage actions. Only an AppInstanceUser and AppInstanceBot can be promoted to an AppInstanceAdmin role."]
 module CreateAppInstanceAdminRequest =
   struct
     type nonrec t =
@@ -4486,12 +5882,12 @@ module CreateAppInstanceAdminRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AppInstanceAdminArn") in
       make ~appInstanceArn ~appInstanceAdminArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appInstanceArn =
-        field_map_exn json "AppInstanceArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
       let appInstanceAdminArn =
-        field_map_exn json "AppInstanceAdminArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceAdminArn" ChimeArn.of_json in
       make ~appInstanceArn ~appInstanceAdminArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Promotes an AppInstanceUser to an AppInstanceAdmin. The promoted user can perform the following actions. ChannelModerator actions across all channels in the AppInstance. DeleteChannelMessage actions. Only an AppInstanceUser can be promoted to an AppInstanceAdmin role."]
+       "Promotes an AppInstanceUser or AppInstanceBot to an AppInstanceAdmin. The promoted entity can perform the following actions. ChannelModerator actions across all channels in the AppInstance. DeleteChannelMessage actions. Only an AppInstanceUser and AppInstanceBot can be promoted to an AppInstanceAdmin role."]

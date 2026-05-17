@@ -26,6 +26,7 @@ type ('i, 'o, 'e) t =
   | DeleteCustomMetadata: (DeleteCustomMetadataRequest.t,
   DeleteCustomMetadataResponse.t, DeleteCustomMetadataResponse.error) t 
   | DeleteDocument: (DeleteDocumentRequest.t, unit, unit) t 
+  | DeleteDocumentVersion: (DeleteDocumentVersionRequest.t, unit, unit) t 
   | DeleteFolder: (DeleteFolderRequest.t, unit, unit) t 
   | DeleteFolderContents: (DeleteFolderContentsRequest.t, unit, unit) t 
   | DeleteLabels: (DeleteLabelsRequest.t, DeleteLabelsResponse.t,
@@ -76,6 +77,10 @@ type ('i, 'o, 'e) t =
   unit, unit) t 
   | RemoveResourcePermission: (RemoveResourcePermissionRequest.t, unit, 
   unit) t 
+  | RestoreDocumentVersions: (RestoreDocumentVersionsRequest.t, unit, 
+  unit) t 
+  | SearchResources: (SearchResourcesRequest.t, SearchResourcesResponse.t,
+  SearchResourcesResponse.error) t 
   | UpdateDocument: (UpdateDocumentRequest.t, unit, unit) t 
   | UpdateDocumentVersion: (UpdateDocumentVersionRequest.t, unit, unit) t 
   | UpdateFolder: (UpdateFolderRequest.t, unit, unit) t 
@@ -96,6 +101,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteComment -> `DELETE
   | DeleteCustomMetadata -> `DELETE
   | DeleteDocument -> `DELETE
+  | DeleteDocumentVersion -> `DELETE
   | DeleteFolder -> `DELETE
   | DeleteFolderContents -> `DELETE
   | DeleteLabels -> `DELETE
@@ -120,6 +126,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | InitiateDocumentVersionUpload -> `POST
   | RemoveAllResourcePermissions -> `DELETE
   | RemoveResourcePermission -> `DELETE
+  | RestoreDocumentVersions -> `POST
+  | SearchResources -> `POST
   | UpdateDocument -> `PATCH
   | UpdateDocumentVersion -> `PATCH
   | UpdateFolder -> `PATCH
@@ -195,6 +203,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteDocument ->
           (Format.kasprintf Uri.of_string) "/api/v1/documents/%s"
             (ResourceIdType.to_header x.DeleteDocumentRequest.documentId)
+      | DeleteDocumentVersion ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/api/v1/documentVersions/%s/versions/%s"
+               (ResourceIdType.to_header
+                  x.DeleteDocumentVersionRequest.documentId)
+               (DocumentVersionIdType.to_header
+                  x.DeleteDocumentVersionRequest.versionId))
+            (List.filter_opt
+               [Some
+                  ("deletePriorVersions",
+                    (BooleanType.to_header x.deletePriorVersions))])
       | DeleteFolder ->
           (Format.kasprintf Uri.of_string) "/api/v1/folders/%s"
             (ResourceIdType.to_header x.DeleteFolderRequest.folderId)
@@ -251,7 +271,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.includeIndirectActivities;
                Option.map ~f:(fun v -> ("limit", (LimitType.to_header v)))
                  x.limit;
-               Option.map ~f:(fun v -> ("marker", (MarkerType.to_header v)))
+               Option.map
+                 ~f:(fun v -> ("marker", (SearchMarkerType.to_header v)))
                  x.marker])
       | DescribeComments ->
           Uri.add_query_params'
@@ -477,6 +498,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("type", (PrincipalType.to_header v)))
                   x.principalType])
+      | RestoreDocumentVersions ->
+          (Format.kasprintf Uri.of_string)
+            "/api/v1/documentVersions/restore/%s"
+            (ResourceIdType.to_header
+               x.RestoreDocumentVersionsRequest.documentId)
+      | SearchResources -> (Format.kasprintf Uri.of_string) "/api/v1/search"
       | UpdateDocument ->
           (Format.kasprintf Uri.of_string) "/api/v1/documents/%s"
             (ResourceIdType.to_header x.UpdateDocumentRequest.documentId)
@@ -701,6 +728,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteComment -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteCustomMetadata -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteDocument -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteDocumentVersion -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteFolder -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteFolderContents -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteLabels -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -1068,10 +1096,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.InitiateDocumentVersionUploadRequest.documentSizeInBytes
                         ~f:(fun x ->
                               ("DocumentSizeInBytes", (SizeType.to_value x)));
-                      Some
-                        ("ParentFolderId",
-                          (ResourceIdType.to_value
-                             req.InitiateDocumentVersionUploadRequest.parentFolderId))])
+                      Option.map
+                        req.InitiateDocumentVersionUploadRequest.parentFolderId
+                        ~f:(fun x ->
+                              ("ParentFolderId", (ResourceIdType.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1083,6 +1111,74 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make (method_of_endpoint endp)
   | RemoveResourcePermission ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | RestoreDocumentVersions ->
+      let (headers, body) =
+        let headers =
+          Some
+            ((List.filter_opt
+                [Option.map
+                   req.RestoreDocumentVersionsRequest.authenticationToken
+                   ~f:(fun x ->
+                         ("Authentication",
+                           (AuthenticationHeaderType.to_header x)))])
+               |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map (List.filter_opt [])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchResources ->
+      let (headers, body) =
+        let headers =
+          Some
+            ((List.filter_opt
+                [Option.map req.SearchResourcesRequest.authenticationToken
+                   ~f:(fun x ->
+                         ("Authentication",
+                           (AuthenticationHeaderType.to_header x)))])
+               |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.SearchResourcesRequest.queryText
+                         ~f:(fun x ->
+                               ("QueryText", (SearchQueryType.to_value x)));
+                      Option.map req.SearchResourcesRequest.queryScopes
+                        ~f:(fun x ->
+                              ("QueryScopes",
+                                (SearchQueryScopeTypeList.to_value x)));
+                      Option.map req.SearchResourcesRequest.organizationId
+                        ~f:(fun x -> ("OrganizationId", (IdType.to_value x)));
+                      Option.map
+                        req.SearchResourcesRequest.additionalResponseFields
+                        ~f:(fun x ->
+                              ("AdditionalResponseFields",
+                                (AdditionalResponseFieldsList.to_value x)));
+                      Option.map req.SearchResourcesRequest.filters
+                        ~f:(fun x -> ("Filters", (Filters.to_value x)));
+                      Option.map req.SearchResourcesRequest.orderBy
+                        ~f:(fun x ->
+                              ("OrderBy", (SearchResultSortList.to_value x)));
+                      Option.map req.SearchResourcesRequest.limit
+                        ~f:(fun x ->
+                              ("Limit", (SearchResultsLimitType.to_value x)));
+                      Option.map req.SearchResourcesRequest.marker
+                        ~f:(fun x -> ("Marker", (NextMarkerType.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateDocument -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateDocumentVersion -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateFolder -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -1201,6 +1297,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error (Some DeleteCustomMetadataResponse.error_of_json))
   | DeleteDocument ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteDocumentVersion ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteFolder ->
       if is_success then Ok () else Error (parse_aws_error None)
@@ -1324,6 +1422,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | RemoveResourcePermission ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | RestoreDocumentVersions ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | SearchResources ->
+      if is_success
+      then Ok (SearchResourcesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some SearchResourcesResponse.error_of_json))
   | UpdateDocument ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateDocumentVersion ->

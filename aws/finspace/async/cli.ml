@@ -72,6 +72,345 @@ let create_environment =
                               dataBundles) ~name ())
            (Some Values.CreateEnvironmentResponse.to_json)
            (Some Values.CreateEnvironmentResponse.error_to_json)])
+let create_kx_changeset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING EnvironmentId"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING DatabaseName"
+       and changeRequests =
+         flag "change-requests" (required json_arg)
+           ~doc:"JSON ChangeRequests"
+       and clientToken =
+         flag "client-token" (required string)
+           ~doc:"STRING ClientTokenString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_kx_changeset
+           (Values.CreateKxChangesetRequest.make ~environmentId ~databaseName
+              ~changeRequests:(Values.ChangeRequests.of_json changeRequests)
+              ~clientToken ())
+           (Some Values.CreateKxChangesetResponse.to_json)
+           (Some Values.CreateKxChangesetResponse.error_to_json)])
+let create_kx_cluster =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and tickerplantLogConfiguration =
+         flag "tickerplant-log-configuration" (optional json_arg)
+           ~doc:"JSON TickerplantLogConfiguration"
+       and databases =
+         flag "databases" (optional json_arg)
+           ~doc:"JSON KxDatabaseConfigurations"
+       and cacheStorageConfigurations =
+         flag "cache-storage-configurations" (optional json_arg)
+           ~doc:"JSON KxCacheStorageConfigurations"
+       and autoScalingConfiguration =
+         flag "auto-scaling-configuration" (optional json_arg)
+           ~doc:"JSON AutoScalingConfiguration"
+       and clusterDescription =
+         flag "cluster-description" (optional string)
+           ~doc:"STRING KxClusterDescription"
+       and capacityConfiguration =
+         flag "capacity-configuration" (optional json_arg)
+           ~doc:"JSON CapacityConfiguration"
+       and initializationScript =
+         flag "initialization-script" (optional string)
+           ~doc:"STRING InitializationScriptFilePath"
+       and commandLineArguments =
+         flag "command-line-arguments" (optional json_arg)
+           ~doc:"JSON KxCommandLineArguments"
+       and code =
+         flag "code" (optional json_arg) ~doc:"JSON CodeConfiguration"
+       and executionRole =
+         flag "execution-role" (optional string)
+           ~doc:"STRING ExecutionRoleArn"
+       and savedownStorageConfiguration =
+         flag "savedown-storage-configuration" (optional json_arg)
+           ~doc:"JSON KxSavedownStorageConfiguration"
+       and availabilityZoneId =
+         flag "availability-zone-id" (optional string)
+           ~doc:"STRING AvailabilityZoneId"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and scalingGroupConfiguration =
+         flag "scaling-group-configuration" (optional json_arg)
+           ~doc:"JSON KxScalingGroupConfiguration"
+       and environmentId =
+         flag "environment-id" (required string)
+           ~doc:"STRING KxEnvironmentId"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING KxClusterName"
+       and clusterType =
+         flag "cluster-type" (required json_arg) ~doc:"JSON KxClusterType"
+       and releaseLabel =
+         flag "release-label" (required string) ~doc:"STRING ReleaseLabel"
+       and vpcConfiguration =
+         flag "vpc-configuration" (required json_arg)
+           ~doc:"JSON VpcConfiguration"
+       and azMode = flag "az-mode" (required json_arg) ~doc:"JSON KxAzMode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_kx_cluster
+           (Values.CreateKxClusterRequest.make ?clientToken
+              ?tickerplantLogConfiguration:(Option.map
+                                              ~f:Values.TickerplantLogConfiguration.of_json
+                                              tickerplantLogConfiguration)
+              ?databases:(Option.map
+                            ~f:Values.KxDatabaseConfigurations.of_json
+                            databases)
+              ?cacheStorageConfigurations:(Option.map
+                                             ~f:Values.KxCacheStorageConfigurations.of_json
+                                             cacheStorageConfigurations)
+              ?autoScalingConfiguration:(Option.map
+                                           ~f:Values.AutoScalingConfiguration.of_json
+                                           autoScalingConfiguration)
+              ?clusterDescription
+              ?capacityConfiguration:(Option.map
+                                        ~f:Values.CapacityConfiguration.of_json
+                                        capacityConfiguration)
+              ?initializationScript
+              ?commandLineArguments:(Option.map
+                                       ~f:Values.KxCommandLineArguments.of_json
+                                       commandLineArguments)
+              ?code:(Option.map ~f:Values.CodeConfiguration.of_json code)
+              ?executionRole
+              ?savedownStorageConfiguration:(Option.map
+                                               ~f:Values.KxSavedownStorageConfiguration.of_json
+                                               savedownStorageConfiguration)
+              ?availabilityZoneId
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?scalingGroupConfiguration:(Option.map
+                                            ~f:Values.KxScalingGroupConfiguration.of_json
+                                            scalingGroupConfiguration)
+              ~environmentId ~clusterName
+              ~clusterType:(Values.KxClusterType.of_json clusterType)
+              ~releaseLabel
+              ~vpcConfiguration:(Values.VpcConfiguration.of_json
+                                   vpcConfiguration)
+              ~azMode:(Values.KxAzMode.of_json azMode) ())
+           (Some Values.CreateKxClusterResponse.to_json)
+           (Some Values.CreateKxClusterResponse.error_to_json)])
+let create_kx_database =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING EnvironmentId"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING DatabaseName"
+       and clientToken =
+         flag "client-token" (required string)
+           ~doc:"STRING ClientTokenString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_kx_database
+           (Values.CreateKxDatabaseRequest.make ?description
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~environmentId
+              ~databaseName ~clientToken ())
+           (Some Values.CreateKxDatabaseResponse.to_json)
+           (Some Values.CreateKxDatabaseResponse.error_to_json)])
+let create_kx_dataview =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and availabilityZoneId =
+         flag "availability-zone-id" (optional string)
+           ~doc:"STRING AvailabilityZoneId"
+       and changesetId =
+         flag "changeset-id" (optional string) ~doc:"STRING ChangesetId"
+       and segmentConfigurations =
+         flag "segment-configurations" (optional json_arg)
+           ~doc:"JSON KxDataviewSegmentConfigurationList"
+       and autoUpdate =
+         flag "auto-update" (optional bool) ~doc:"BOOL booleanValue"
+       and readWrite =
+         flag "read-write" (optional bool) ~doc:"BOOL booleanValue"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING EnvironmentId"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING DatabaseName"
+       and dataviewName =
+         flag "dataview-name" (required string) ~doc:"STRING KxDataviewName"
+       and azMode = flag "az-mode" (required json_arg) ~doc:"JSON KxAzMode"
+       and clientToken =
+         flag "client-token" (required string)
+           ~doc:"STRING ClientTokenString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_kx_dataview
+           (Values.CreateKxDataviewRequest.make ?availabilityZoneId
+              ?changesetId
+              ?segmentConfigurations:(Option.map
+                                        ~f:Values.KxDataviewSegmentConfigurationList.of_json
+                                        segmentConfigurations) ?autoUpdate
+              ?readWrite ?description
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~environmentId
+              ~databaseName ~dataviewName
+              ~azMode:(Values.KxAzMode.of_json azMode) ~clientToken ())
+           (Some Values.CreateKxDataviewResponse.to_json)
+           (Some Values.CreateKxDataviewResponse.error_to_json)])
+let create_kx_environment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and name =
+         flag "name" (required string) ~doc:"STRING KxEnvironmentName"
+       and kmsKeyId =
+         flag "kms-key-id" (required string) ~doc:"STRING KmsKeyARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_kx_environment
+           (Values.CreateKxEnvironmentRequest.make ?description
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ?clientToken
+              ~name ~kmsKeyId ())
+           (Some Values.CreateKxEnvironmentResponse.to_json)
+           (Some Values.CreateKxEnvironmentResponse.error_to_json)])
+let create_kx_scaling_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING ClientToken"
+       and environmentId =
+         flag "environment-id" (required string)
+           ~doc:"STRING KxEnvironmentId"
+       and scalingGroupName =
+         flag "scaling-group-name" (required string)
+           ~doc:"STRING KxScalingGroupName"
+       and hostType =
+         flag "host-type" (required string) ~doc:"STRING KxHostType"
+       and availabilityZoneId =
+         flag "availability-zone-id" (required string)
+           ~doc:"STRING AvailabilityZoneId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_kx_scaling_group
+           (Values.CreateKxScalingGroupRequest.make
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~clientToken
+              ~environmentId ~scalingGroupName ~hostType ~availabilityZoneId
+              ()) (Some Values.CreateKxScalingGroupResponse.to_json)
+           (Some Values.CreateKxScalingGroupResponse.error_to_json)])
+let create_kx_user =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING IdType"
+       and userName =
+         flag "user-name" (required string) ~doc:"STRING KxUserNameString"
+       and iamRole = flag "iam-role" (required string) ~doc:"STRING RoleArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_kx_user
+           (Values.CreateKxUserRequest.make
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ?clientToken
+              ~environmentId ~userName ~iamRole ())
+           (Some Values.CreateKxUserResponse.to_json)
+           (Some Values.CreateKxUserResponse.error_to_json)])
+let create_kx_volume =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and nas1Configuration =
+         flag "nas1-configuration" (optional json_arg)
+           ~doc:"JSON KxNAS1Configuration"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and environmentId =
+         flag "environment-id" (required string)
+           ~doc:"STRING KxEnvironmentId"
+       and volumeType =
+         flag "volume-type" (required json_arg) ~doc:"JSON KxVolumeType"
+       and volumeName =
+         flag "volume-name" (required string) ~doc:"STRING KxVolumeName"
+       and azMode = flag "az-mode" (required json_arg) ~doc:"JSON KxAzMode"
+       and availabilityZoneIds =
+         flag "availability-zone-ids" (required json_arg)
+           ~doc:"JSON AvailabilityZoneIds" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_kx_volume
+           (Values.CreateKxVolumeRequest.make ?clientToken ?description
+              ?nas1Configuration:(Option.map
+                                    ~f:Values.KxNAS1Configuration.of_json
+                                    nas1Configuration)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~environmentId
+              ~volumeType:(Values.KxVolumeType.of_json volumeType)
+              ~volumeName ~azMode:(Values.KxAzMode.of_json azMode)
+              ~availabilityZoneIds:(Values.AvailabilityZoneIds.of_json
+                                      availabilityZoneIds) ())
+           (Some Values.CreateKxVolumeResponse.to_json)
+           (Some Values.CreateKxVolumeResponse.error_to_json)])
 let delete_environment =
   Command.async ~summary:""
     ([%map_open.Command
@@ -90,6 +429,196 @@ let delete_environment =
            (Values.DeleteEnvironmentRequest.make ~environmentId ())
            (Some Values.DeleteEnvironmentResponse.to_json)
            (Some Values.DeleteEnvironmentResponse.error_to_json)])
+let delete_kx_cluster =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING ClientTokenString"
+       and environmentId =
+         flag "environment-id" (required string)
+           ~doc:"STRING KxEnvironmentId"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING KxClusterName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_kx_cluster
+           (Values.DeleteKxClusterRequest.make ?clientToken ~environmentId
+              ~clusterName ()) (Some Values.DeleteKxClusterResponse.to_json)
+           (Some Values.DeleteKxClusterResponse.error_to_json)])
+let delete_kx_cluster_node =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and environmentId =
+         flag "environment-id" (required string)
+           ~doc:"STRING KxEnvironmentId"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING KxClusterName"
+       and nodeId =
+         flag "node-id" (required string) ~doc:"STRING KxClusterNodeIdString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_kx_cluster_node
+           (Values.DeleteKxClusterNodeRequest.make ~environmentId
+              ~clusterName ~nodeId ())
+           (Some Values.DeleteKxClusterNodeResponse.to_json)
+           (Some Values.DeleteKxClusterNodeResponse.error_to_json)])
+let delete_kx_database =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING EnvironmentId"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING DatabaseName"
+       and clientToken =
+         flag "client-token" (required string)
+           ~doc:"STRING ClientTokenString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_kx_database
+           (Values.DeleteKxDatabaseRequest.make ~environmentId ~databaseName
+              ~clientToken ()) (Some Values.DeleteKxDatabaseResponse.to_json)
+           (Some Values.DeleteKxDatabaseResponse.error_to_json)])
+let delete_kx_dataview =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING EnvironmentId"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING DatabaseName"
+       and dataviewName =
+         flag "dataview-name" (required string) ~doc:"STRING KxDataviewName"
+       and clientToken =
+         flag "client-token" (required string)
+           ~doc:"STRING ClientTokenString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_kx_dataview
+           (Values.DeleteKxDataviewRequest.make ~environmentId ~databaseName
+              ~dataviewName ~clientToken ())
+           (Some Values.DeleteKxDataviewResponse.to_json)
+           (Some Values.DeleteKxDataviewResponse.error_to_json)])
+let delete_kx_environment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING IdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_kx_environment
+           (Values.DeleteKxEnvironmentRequest.make ?clientToken
+              ~environmentId ())
+           (Some Values.DeleteKxEnvironmentResponse.to_json)
+           (Some Values.DeleteKxEnvironmentResponse.error_to_json)])
+let delete_kx_scaling_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING ClientTokenString"
+       and environmentId =
+         flag "environment-id" (required string)
+           ~doc:"STRING KxEnvironmentId"
+       and scalingGroupName =
+         flag "scaling-group-name" (required string)
+           ~doc:"STRING KxScalingGroupName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_kx_scaling_group
+           (Values.DeleteKxScalingGroupRequest.make ?clientToken
+              ~environmentId ~scalingGroupName ())
+           (Some Values.DeleteKxScalingGroupResponse.to_json)
+           (Some Values.DeleteKxScalingGroupResponse.error_to_json)])
+let delete_kx_user =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and userName =
+         flag "user-name" (required string) ~doc:"STRING KxUserNameString"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING IdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_kx_user
+           (Values.DeleteKxUserRequest.make ?clientToken ~userName
+              ~environmentId ()) (Some Values.DeleteKxUserResponse.to_json)
+           (Some Values.DeleteKxUserResponse.error_to_json)])
+let delete_kx_volume =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING ClientTokenString"
+       and environmentId =
+         flag "environment-id" (required string)
+           ~doc:"STRING KxEnvironmentId"
+       and volumeName =
+         flag "volume-name" (required string) ~doc:"STRING KxVolumeName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_kx_volume
+           (Values.DeleteKxVolumeRequest.make ?clientToken ~environmentId
+              ~volumeName ()) (Some Values.DeleteKxVolumeResponse.to_json)
+           (Some Values.DeleteKxVolumeResponse.error_to_json)])
 let get_environment =
   Command.async ~summary:""
     ([%map_open.Command
@@ -108,6 +637,196 @@ let get_environment =
            (Values.GetEnvironmentRequest.make ~environmentId ())
            (Some Values.GetEnvironmentResponse.to_json)
            (Some Values.GetEnvironmentResponse.error_to_json)])
+let get_kx_changeset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING EnvironmentId"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING DatabaseName"
+       and changesetId =
+         flag "changeset-id" (required string) ~doc:"STRING ChangesetId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_kx_changeset
+           (Values.GetKxChangesetRequest.make ~environmentId ~databaseName
+              ~changesetId ()) (Some Values.GetKxChangesetResponse.to_json)
+           (Some Values.GetKxChangesetResponse.error_to_json)])
+let get_kx_cluster =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and environmentId =
+         flag "environment-id" (required string)
+           ~doc:"STRING KxEnvironmentId"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING KxClusterName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_kx_cluster
+           (Values.GetKxClusterRequest.make ~environmentId ~clusterName ())
+           (Some Values.GetKxClusterResponse.to_json)
+           (Some Values.GetKxClusterResponse.error_to_json)])
+let get_kx_connection_string =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and userArn =
+         flag "user-arn" (required string) ~doc:"STRING KxUserArn"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING IdType"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING KxClusterName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_kx_connection_string
+           (Values.GetKxConnectionStringRequest.make ~userArn ~environmentId
+              ~clusterName ())
+           (Some Values.GetKxConnectionStringResponse.to_json)
+           (Some Values.GetKxConnectionStringResponse.error_to_json)])
+let get_kx_database =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING EnvironmentId"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING DatabaseName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_kx_database
+           (Values.GetKxDatabaseRequest.make ~environmentId ~databaseName ())
+           (Some Values.GetKxDatabaseResponse.to_json)
+           (Some Values.GetKxDatabaseResponse.error_to_json)])
+let get_kx_dataview =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING EnvironmentId"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING DatabaseName"
+       and dataviewName =
+         flag "dataview-name" (required string) ~doc:"STRING KxDataviewName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_kx_dataview
+           (Values.GetKxDataviewRequest.make ~environmentId ~databaseName
+              ~dataviewName ()) (Some Values.GetKxDataviewResponse.to_json)
+           (Some Values.GetKxDataviewResponse.error_to_json)])
+let get_kx_environment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING IdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_kx_environment
+           (Values.GetKxEnvironmentRequest.make ~environmentId ())
+           (Some Values.GetKxEnvironmentResponse.to_json)
+           (Some Values.GetKxEnvironmentResponse.error_to_json)])
+let get_kx_scaling_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and environmentId =
+         flag "environment-id" (required string)
+           ~doc:"STRING KxEnvironmentId"
+       and scalingGroupName =
+         flag "scaling-group-name" (required string)
+           ~doc:"STRING KxScalingGroupName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_kx_scaling_group
+           (Values.GetKxScalingGroupRequest.make ~environmentId
+              ~scalingGroupName ())
+           (Some Values.GetKxScalingGroupResponse.to_json)
+           (Some Values.GetKxScalingGroupResponse.error_to_json)])
+let get_kx_user =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and userName =
+         flag "user-name" (required string) ~doc:"STRING KxUserNameString"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING IdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_kx_user
+           (Values.GetKxUserRequest.make ~userName ~environmentId ())
+           (Some Values.GetKxUserResponse.to_json)
+           (Some Values.GetKxUserResponse.error_to_json)])
+let get_kx_volume =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and environmentId =
+         flag "environment-id" (required string)
+           ~doc:"STRING KxEnvironmentId"
+       and volumeName =
+         flag "volume-name" (required string) ~doc:"STRING KxVolumeName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_kx_volume
+           (Values.GetKxVolumeRequest.make ~environmentId ~volumeName ())
+           (Some Values.GetKxVolumeResponse.to_json)
+           (Some Values.GetKxVolumeResponse.error_to_json)])
 let list_environments =
   Command.async ~summary:""
     ([%map_open.Command
@@ -128,6 +847,225 @@ let list_environments =
            (Values.ListEnvironmentsRequest.make ?nextToken ?maxResults ())
            (Some Values.ListEnvironmentsResponse.to_json)
            (Some Values.ListEnvironmentsResponse.error_to_json)])
+let list_kx_changesets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING EnvironmentId"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING DatabaseName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_kx_changesets
+           (Values.ListKxChangesetsRequest.make ?nextToken ?maxResults
+              ~environmentId ~databaseName ())
+           (Some Values.ListKxChangesetsResponse.to_json)
+           (Some Values.ListKxChangesetsResponse.error_to_json)])
+let list_kx_cluster_nodes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ResultLimit"
+       and environmentId =
+         flag "environment-id" (required string)
+           ~doc:"STRING KxEnvironmentId"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING KxClusterName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_kx_cluster_nodes
+           (Values.ListKxClusterNodesRequest.make ?nextToken ?maxResults
+              ~environmentId ~clusterName ())
+           (Some Values.ListKxClusterNodesResponse.to_json)
+           (Some Values.ListKxClusterNodesResponse.error_to_json)])
+let list_kx_clusters =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterType =
+         flag "cluster-type" (optional json_arg) ~doc:"JSON KxClusterType"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and environmentId =
+         flag "environment-id" (required string)
+           ~doc:"STRING KxEnvironmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_kx_clusters
+           (Values.ListKxClustersRequest.make
+              ?clusterType:(Option.map ~f:Values.KxClusterType.of_json
+                              clusterType) ?maxResults ?nextToken
+              ~environmentId ()) (Some Values.ListKxClustersResponse.to_json)
+           (Some Values.ListKxClustersResponse.error_to_json)])
+let list_kx_databases =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING EnvironmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_kx_databases
+           (Values.ListKxDatabasesRequest.make ?nextToken ?maxResults
+              ~environmentId ())
+           (Some Values.ListKxDatabasesResponse.to_json)
+           (Some Values.ListKxDatabasesResponse.error_to_json)])
+let list_kx_dataviews =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING EnvironmentId"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING DatabaseName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_kx_dataviews
+           (Values.ListKxDataviewsRequest.make ?nextToken ?maxResults
+              ~environmentId ~databaseName ())
+           (Some Values.ListKxDataviewsResponse.to_json)
+           (Some Values.ListKxDataviewsResponse.error_to_json)])
+let list_kx_environments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT BoxedInteger" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_kx_environments
+           (Values.ListKxEnvironmentsRequest.make ?nextToken ?maxResults ())
+           (Some Values.ListKxEnvironmentsResponse.to_json)
+           (Some Values.ListKxEnvironmentsResponse.error_to_json)])
+let list_kx_scaling_groups =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and environmentId =
+         flag "environment-id" (required string)
+           ~doc:"STRING KxEnvironmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_kx_scaling_groups
+           (Values.ListKxScalingGroupsRequest.make ?maxResults ?nextToken
+              ~environmentId ())
+           (Some Values.ListKxScalingGroupsResponse.to_json)
+           (Some Values.ListKxScalingGroupsResponse.error_to_json)])
+let list_kx_users =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ResultLimit"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING IdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_kx_users
+           (Values.ListKxUsersRequest.make ?nextToken ?maxResults
+              ~environmentId ()) (Some Values.ListKxUsersResponse.to_json)
+           (Some Values.ListKxUsersResponse.error_to_json)])
+let list_kx_volumes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and volumeType =
+         flag "volume-type" (optional json_arg) ~doc:"JSON KxVolumeType"
+       and environmentId =
+         flag "environment-id" (required string)
+           ~doc:"STRING KxEnvironmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_kx_volumes
+           (Values.ListKxVolumesRequest.make ?maxResults ?nextToken
+              ?volumeType:(Option.map ~f:Values.KxVolumeType.of_json
+                             volumeType) ~environmentId ())
+           (Some Values.ListKxVolumesResponse.to_json)
+           (Some Values.ListKxVolumesResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -139,7 +1077,8 @@ let list_tags_for_resource =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and resourceArn =
-         flag "resource-arn" (required string) ~doc:"STRING EnvironmentArn" in
+         flag "resource-arn" (required string)
+           ~doc:"STRING FinSpaceTaggableArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_tags_for_resource
@@ -157,7 +1096,8 @@ let tag_resource =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and resourceArn =
-         flag "resource-arn" (required string) ~doc:"STRING EnvironmentArn"
+         flag "resource-arn" (required string)
+           ~doc:"STRING FinSpaceTaggableArn"
        and tags = flag "tags" (required json_arg) ~doc:"JSON TagMap" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -177,7 +1117,8 @@ let untag_resource =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and resourceArn =
-         flag "resource-arn" (required string) ~doc:"STRING EnvironmentArn"
+         flag "resource-arn" (required string)
+           ~doc:"STRING FinSpaceTaggableArn"
        and tagKeys =
          flag "tag-keys" (required json_arg) ~doc:"JSON TagKeyList" in
        fun () ->
@@ -219,14 +1160,313 @@ let update_environment =
                                        federationParameters) ~environmentId
               ()) (Some Values.UpdateEnvironmentResponse.to_json)
            (Some Values.UpdateEnvironmentResponse.error_to_json)])
+let update_kx_cluster_code_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING ClientTokenString"
+       and initializationScript =
+         flag "initialization-script" (optional string)
+           ~doc:"STRING InitializationScriptFilePath"
+       and commandLineArguments =
+         flag "command-line-arguments" (optional json_arg)
+           ~doc:"JSON KxCommandLineArguments"
+       and deploymentConfiguration =
+         flag "deployment-configuration" (optional json_arg)
+           ~doc:"JSON KxClusterCodeDeploymentConfiguration"
+       and environmentId =
+         flag "environment-id" (required string)
+           ~doc:"STRING KxEnvironmentId"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING KxClusterName"
+       and code =
+         flag "code" (required json_arg) ~doc:"JSON CodeConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_kx_cluster_code_configuration
+           (Values.UpdateKxClusterCodeConfigurationRequest.make ?clientToken
+              ?initializationScript
+              ?commandLineArguments:(Option.map
+                                       ~f:Values.KxCommandLineArguments.of_json
+                                       commandLineArguments)
+              ?deploymentConfiguration:(Option.map
+                                          ~f:Values.KxClusterCodeDeploymentConfiguration.of_json
+                                          deploymentConfiguration)
+              ~environmentId ~clusterName
+              ~code:(Values.CodeConfiguration.of_json code) ())
+           (Some Values.UpdateKxClusterCodeConfigurationResponse.to_json)
+           (Some
+              Values.UpdateKxClusterCodeConfigurationResponse.error_to_json)])
+let update_kx_cluster_databases =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING ClientTokenString"
+       and deploymentConfiguration =
+         flag "deployment-configuration" (optional json_arg)
+           ~doc:"JSON KxDeploymentConfiguration"
+       and environmentId =
+         flag "environment-id" (required string)
+           ~doc:"STRING KxEnvironmentId"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING KxClusterName"
+       and databases =
+         flag "databases" (required json_arg)
+           ~doc:"JSON KxDatabaseConfigurations" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_kx_cluster_databases
+           (Values.UpdateKxClusterDatabasesRequest.make ?clientToken
+              ?deploymentConfiguration:(Option.map
+                                          ~f:Values.KxDeploymentConfiguration.of_json
+                                          deploymentConfiguration)
+              ~environmentId ~clusterName
+              ~databases:(Values.KxDatabaseConfigurations.of_json databases)
+              ()) (Some Values.UpdateKxClusterDatabasesResponse.to_json)
+           (Some Values.UpdateKxClusterDatabasesResponse.error_to_json)])
+let update_kx_database =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING EnvironmentId"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING DatabaseName"
+       and clientToken =
+         flag "client-token" (required string)
+           ~doc:"STRING ClientTokenString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_kx_database
+           (Values.UpdateKxDatabaseRequest.make ?description ~environmentId
+              ~databaseName ~clientToken ())
+           (Some Values.UpdateKxDatabaseResponse.to_json)
+           (Some Values.UpdateKxDatabaseResponse.error_to_json)])
+let update_kx_dataview =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and changesetId =
+         flag "changeset-id" (optional string) ~doc:"STRING ChangesetId"
+       and segmentConfigurations =
+         flag "segment-configurations" (optional json_arg)
+           ~doc:"JSON KxDataviewSegmentConfigurationList"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING EnvironmentId"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING DatabaseName"
+       and dataviewName =
+         flag "dataview-name" (required string) ~doc:"STRING KxDataviewName"
+       and clientToken =
+         flag "client-token" (required string)
+           ~doc:"STRING ClientTokenString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_kx_dataview
+           (Values.UpdateKxDataviewRequest.make ?description ?changesetId
+              ?segmentConfigurations:(Option.map
+                                        ~f:Values.KxDataviewSegmentConfigurationList.of_json
+                                        segmentConfigurations) ~environmentId
+              ~databaseName ~dataviewName ~clientToken ())
+           (Some Values.UpdateKxDataviewResponse.to_json)
+           (Some Values.UpdateKxDataviewResponse.error_to_json)])
+let update_kx_environment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (optional string) ~doc:"STRING KxEnvironmentName"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING IdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_kx_environment
+           (Values.UpdateKxEnvironmentRequest.make ?name ?description
+              ?clientToken ~environmentId ())
+           (Some Values.UpdateKxEnvironmentResponse.to_json)
+           (Some Values.UpdateKxEnvironmentResponse.error_to_json)])
+let update_kx_environment_network =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and transitGatewayConfiguration =
+         flag "transit-gateway-configuration" (optional json_arg)
+           ~doc:"JSON TransitGatewayConfiguration"
+       and customDNSConfiguration =
+         flag "custom-d-n-s-configuration" (optional json_arg)
+           ~doc:"JSON CustomDNSConfiguration"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING IdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_kx_environment_network
+           (Values.UpdateKxEnvironmentNetworkRequest.make
+              ?transitGatewayConfiguration:(Option.map
+                                              ~f:Values.TransitGatewayConfiguration.of_json
+                                              transitGatewayConfiguration)
+              ?customDNSConfiguration:(Option.map
+                                         ~f:Values.CustomDNSConfiguration.of_json
+                                         customDNSConfiguration) ?clientToken
+              ~environmentId ())
+           (Some Values.UpdateKxEnvironmentNetworkResponse.to_json)
+           (Some Values.UpdateKxEnvironmentNetworkResponse.error_to_json)])
+let update_kx_user =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and environmentId =
+         flag "environment-id" (required string) ~doc:"STRING IdType"
+       and userName =
+         flag "user-name" (required string) ~doc:"STRING KxUserNameString"
+       and iamRole = flag "iam-role" (required string) ~doc:"STRING RoleArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_kx_user
+           (Values.UpdateKxUserRequest.make ?clientToken ~environmentId
+              ~userName ~iamRole ())
+           (Some Values.UpdateKxUserResponse.to_json)
+           (Some Values.UpdateKxUserResponse.error_to_json)])
+let update_kx_volume =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING ClientTokenString"
+       and nas1Configuration =
+         flag "nas1-configuration" (optional json_arg)
+           ~doc:"JSON KxNAS1Configuration"
+       and environmentId =
+         flag "environment-id" (required string)
+           ~doc:"STRING KxEnvironmentId"
+       and volumeName =
+         flag "volume-name" (required string) ~doc:"STRING KxVolumeName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_kx_volume
+           (Values.UpdateKxVolumeRequest.make ?description ?clientToken
+              ?nas1Configuration:(Option.map
+                                    ~f:Values.KxNAS1Configuration.of_json
+                                    nas1Configuration) ~environmentId
+              ~volumeName ()) (Some Values.UpdateKxVolumeResponse.to_json)
+           (Some Values.UpdateKxVolumeResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-environment", create_environment);
+    ("create-kx-changeset", create_kx_changeset);
+    ("create-kx-cluster", create_kx_cluster);
+    ("create-kx-database", create_kx_database);
+    ("create-kx-dataview", create_kx_dataview);
+    ("create-kx-environment", create_kx_environment);
+    ("create-kx-scaling-group", create_kx_scaling_group);
+    ("create-kx-user", create_kx_user);
+    ("create-kx-volume", create_kx_volume);
     ("delete-environment", delete_environment);
+    ("delete-kx-cluster", delete_kx_cluster);
+    ("delete-kx-cluster-node", delete_kx_cluster_node);
+    ("delete-kx-database", delete_kx_database);
+    ("delete-kx-dataview", delete_kx_dataview);
+    ("delete-kx-environment", delete_kx_environment);
+    ("delete-kx-scaling-group", delete_kx_scaling_group);
+    ("delete-kx-user", delete_kx_user);
+    ("delete-kx-volume", delete_kx_volume);
     ("get-environment", get_environment);
+    ("get-kx-changeset", get_kx_changeset);
+    ("get-kx-cluster", get_kx_cluster);
+    ("get-kx-connection-string", get_kx_connection_string);
+    ("get-kx-database", get_kx_database);
+    ("get-kx-dataview", get_kx_dataview);
+    ("get-kx-environment", get_kx_environment);
+    ("get-kx-scaling-group", get_kx_scaling_group);
+    ("get-kx-user", get_kx_user);
+    ("get-kx-volume", get_kx_volume);
     ("list-environments", list_environments);
+    ("list-kx-changesets", list_kx_changesets);
+    ("list-kx-cluster-nodes", list_kx_cluster_nodes);
+    ("list-kx-clusters", list_kx_clusters);
+    ("list-kx-databases", list_kx_databases);
+    ("list-kx-dataviews", list_kx_dataviews);
+    ("list-kx-environments", list_kx_environments);
+    ("list-kx-scaling-groups", list_kx_scaling_groups);
+    ("list-kx-users", list_kx_users);
+    ("list-kx-volumes", list_kx_volumes);
     ("list-tags-for-resource", list_tags_for_resource);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
-    ("update-environment", update_environment)]
+    ("update-environment", update_environment);
+    ("update-kx-cluster-code-configuration",
+      update_kx_cluster_code_configuration);
+    ("update-kx-cluster-databases", update_kx_cluster_databases);
+    ("update-kx-database", update_kx_database);
+    ("update-kx-dataview", update_kx_dataview);
+    ("update-kx-environment", update_kx_environment);
+    ("update-kx-environment-network", update_kx_environment_network);
+    ("update-kx-user", update_kx_user);
+    ("update-kx-volume", update_kx_volume)]

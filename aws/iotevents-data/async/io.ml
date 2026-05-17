@@ -13,6 +13,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let batch_acknowledge_alarm ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchAcknowledgeAlarm input
+let batch_delete_detector ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchDeleteDetector input
 let batch_disable_alarm ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchDisableAlarm input
 let batch_enable_alarm ?endpoint_url ?cfg input =

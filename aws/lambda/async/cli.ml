@@ -82,7 +82,8 @@ let add_permission =
          flag "event-source-token" (optional string)
            ~doc:"STRING EventSourceToken"
        and qualifier =
-         flag "qualifier" (optional string) ~doc:"STRING Qualifier"
+         flag "qualifier" (optional string)
+           ~doc:"STRING NumericLatestPublishedOrAliasQualifier"
        and revisionId =
          flag "revision-id" (optional string) ~doc:"STRING String"
        and principalOrgID =
@@ -91,8 +92,12 @@ let add_permission =
        and functionUrlAuthType =
          flag "function-url-auth-type" (optional json_arg)
            ~doc:"JSON FunctionUrlAuthType"
+       and invokedViaFunctionUrl =
+         flag "invoked-via-function-url" (optional bool)
+           ~doc:"BOOL InvokedViaFunctionUrl"
        and functionName =
-         flag "function-name" (required string) ~doc:"STRING FunctionName"
+         flag "function-name" (required string)
+           ~doc:"STRING NamespacedFunctionName"
        and statementId =
          flag "statement-id" (required string) ~doc:"STRING StatementId"
        and action = flag "action" (required string) ~doc:"STRING Action"
@@ -105,10 +110,38 @@ let add_permission =
               ?eventSourceToken ?qualifier ?revisionId ?principalOrgID
               ?functionUrlAuthType:(Option.map
                                       ~f:Values.FunctionUrlAuthType.of_json
-                                      functionUrlAuthType) ~functionName
-              ~statementId ~action ~principal ())
-           (Some Values.AddPermissionResponse.to_json)
+                                      functionUrlAuthType)
+              ?invokedViaFunctionUrl ~functionName ~statementId ~action
+              ~principal ()) (Some Values.AddPermissionResponse.to_json)
            (Some Values.AddPermissionResponse.error_to_json)])
+let checkpoint_durable_execution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and updates =
+         flag "updates" (optional json_arg) ~doc:"JSON OperationUpdates"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and durableExecutionArn =
+         flag "durable-execution-arn" (required string)
+           ~doc:"STRING DurableExecutionArn"
+       and checkpointToken =
+         flag "checkpoint-token" (required string)
+           ~doc:"STRING CheckpointToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.checkpoint_durable_execution
+           (Values.CheckpointDurableExecutionRequest.make
+              ?updates:(Option.map ~f:Values.OperationUpdates.of_json updates)
+              ?clientToken ~durableExecutionArn ~checkpointToken ())
+           (Some Values.CheckpointDurableExecutionResponse.to_json)
+           (Some Values.CheckpointDurableExecutionResponse.error_to_json)])
 let create_alias =
   Command.async ~summary:""
     ([%map_open.Command
@@ -128,7 +161,8 @@ let create_alias =
          flag "function-name" (required string) ~doc:"STRING FunctionName"
        and name = flag "name" (required string) ~doc:"STRING Alias"
        and functionVersion =
-         flag "function-version" (required string) ~doc:"STRING Version" in
+         flag "function-version" (required string)
+           ~doc:"STRING VersionWithLatestPublished" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_alias
@@ -138,6 +172,51 @@ let create_alias =
                                 routingConfig) ~functionName ~name
               ~functionVersion ()) (Some Values.AliasConfiguration.to_json)
            (Some Values.AliasConfiguration.error_to_json)])
+let create_capacity_provider =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceRequirements =
+         flag "instance-requirements" (optional json_arg)
+           ~doc:"JSON InstanceRequirements"
+       and capacityProviderScalingConfig =
+         flag "capacity-provider-scaling-config" (optional json_arg)
+           ~doc:"JSON CapacityProviderScalingConfig"
+       and kmsKeyArn =
+         flag "kms-key-arn" (optional string) ~doc:"STRING KMSKeyArnNonEmpty"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and capacityProviderName =
+         flag "capacity-provider-name" (required string)
+           ~doc:"STRING CapacityProviderName"
+       and vpcConfig =
+         flag "vpc-config" (required json_arg)
+           ~doc:"JSON CapacityProviderVpcConfig"
+       and permissionsConfig =
+         flag "permissions-config" (required json_arg)
+           ~doc:"JSON CapacityProviderPermissionsConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_capacity_provider
+           (Values.CreateCapacityProviderRequest.make
+              ?instanceRequirements:(Option.map
+                                       ~f:Values.InstanceRequirements.of_json
+                                       instanceRequirements)
+              ?capacityProviderScalingConfig:(Option.map
+                                                ~f:Values.CapacityProviderScalingConfig.of_json
+                                                capacityProviderScalingConfig)
+              ?kmsKeyArn ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ~capacityProviderName
+              ~vpcConfig:(Values.CapacityProviderVpcConfig.of_json vpcConfig)
+              ~permissionsConfig:(Values.CapacityProviderPermissionsConfig.of_json
+                                    permissionsConfig) ())
+           (Some Values.CreateCapacityProviderResponse.to_json)
+           (Some Values.CreateCapacityProviderResponse.error_to_json)])
 let create_code_signing_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -153,6 +232,7 @@ let create_code_signing_config =
        and codeSigningPolicies =
          flag "code-signing-policies" (optional json_arg)
            ~doc:"JSON CodeSigningPolicies"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
        and allowedPublishers =
          flag "allowed-publishers" (required json_arg)
            ~doc:"JSON AllowedPublishers" in
@@ -163,6 +243,7 @@ let create_code_signing_config =
               ?codeSigningPolicies:(Option.map
                                       ~f:Values.CodeSigningPolicies.of_json
                                       codeSigningPolicies)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
               ~allowedPublishers:(Values.AllowedPublishers.of_json
                                     allowedPublishers) ())
            (Some Values.CreateCodeSigningConfigResponse.to_json)
@@ -208,6 +289,7 @@ let create_event_source_mapping =
        and maximumRetryAttempts =
          flag "maximum-retry-attempts" (optional int)
            ~doc:"INT MaximumRetryAttemptsEventSourceMapping"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
        and tumblingWindowInSeconds =
          flag "tumbling-window-in-seconds" (optional int)
            ~doc:"INT TumblingWindowInSeconds"
@@ -222,8 +304,31 @@ let create_event_source_mapping =
        and functionResponseTypes =
          flag "function-response-types" (optional json_arg)
            ~doc:"JSON FunctionResponseTypeList"
+       and amazonManagedKafkaEventSourceConfig =
+         flag "amazon-managed-kafka-event-source-config" (optional json_arg)
+           ~doc:"JSON AmazonManagedKafkaEventSourceConfig"
+       and selfManagedKafkaEventSourceConfig =
+         flag "self-managed-kafka-event-source-config" (optional json_arg)
+           ~doc:"JSON SelfManagedKafkaEventSourceConfig"
+       and scalingConfig =
+         flag "scaling-config" (optional json_arg) ~doc:"JSON ScalingConfig"
+       and documentDBEventSourceConfig =
+         flag "document-d-b-event-source-config" (optional json_arg)
+           ~doc:"JSON DocumentDBEventSourceConfig"
+       and kMSKeyArn =
+         flag "k-m-s-key-arn" (optional string) ~doc:"STRING KMSKeyArn"
+       and metricsConfig =
+         flag "metrics-config" (optional json_arg)
+           ~doc:"JSON EventSourceMappingMetricsConfig"
+       and loggingConfig =
+         flag "logging-config" (optional json_arg)
+           ~doc:"JSON EventSourceMappingLoggingConfig"
+       and provisionedPollerConfig =
+         flag "provisioned-poller-config" (optional json_arg)
+           ~doc:"JSON ProvisionedPollerConfig"
        and functionName =
-         flag "function-name" (required string) ~doc:"STRING FunctionName" in
+         flag "function-name" (required string)
+           ~doc:"STRING NamespacedFunctionName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_event_source_mapping
@@ -241,7 +346,9 @@ let create_event_source_mapping =
                                     ~f:Values.DestinationConfig.of_json
                                     destinationConfig)
               ?maximumRecordAgeInSeconds ?bisectBatchOnFunctionError
-              ?maximumRetryAttempts ?tumblingWindowInSeconds
+              ?maximumRetryAttempts
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?tumblingWindowInSeconds
               ?topics:(Option.map ~f:Values.Topics.of_json topics)
               ?queues:(Option.map ~f:Values.Queues.of_json queues)
               ?sourceAccessConfigurations:(Option.map
@@ -252,8 +359,30 @@ let create_event_source_mapping =
                                          selfManagedEventSource)
               ?functionResponseTypes:(Option.map
                                         ~f:Values.FunctionResponseTypeList.of_json
-                                        functionResponseTypes) ~functionName
-              ()) (Some Values.EventSourceMappingConfiguration.to_json)
+                                        functionResponseTypes)
+              ?amazonManagedKafkaEventSourceConfig:(Option.map
+                                                      ~f:Values.AmazonManagedKafkaEventSourceConfig.of_json
+                                                      amazonManagedKafkaEventSourceConfig)
+              ?selfManagedKafkaEventSourceConfig:(Option.map
+                                                    ~f:Values.SelfManagedKafkaEventSourceConfig.of_json
+                                                    selfManagedKafkaEventSourceConfig)
+              ?scalingConfig:(Option.map ~f:Values.ScalingConfig.of_json
+                                scalingConfig)
+              ?documentDBEventSourceConfig:(Option.map
+                                              ~f:Values.DocumentDBEventSourceConfig.of_json
+                                              documentDBEventSourceConfig)
+              ?kMSKeyArn
+              ?metricsConfig:(Option.map
+                                ~f:Values.EventSourceMappingMetricsConfig.of_json
+                                metricsConfig)
+              ?loggingConfig:(Option.map
+                                ~f:Values.EventSourceMappingLoggingConfig.of_json
+                                loggingConfig)
+              ?provisionedPollerConfig:(Option.map
+                                          ~f:Values.ProvisionedPollerConfig.of_json
+                                          provisionedPollerConfig)
+              ~functionName ())
+           (Some Values.EventSourceMappingConfiguration.to_json)
            (Some Values.EventSourceMappingConfiguration.error_to_json)])
 let create_function =
   Command.async ~summary:""
@@ -302,6 +431,20 @@ let create_function =
        and ephemeralStorage =
          flag "ephemeral-storage" (optional json_arg)
            ~doc:"JSON EphemeralStorage"
+       and snapStart =
+         flag "snap-start" (optional json_arg) ~doc:"JSON SnapStart"
+       and loggingConfig =
+         flag "logging-config" (optional json_arg) ~doc:"JSON LoggingConfig"
+       and capacityProviderConfig =
+         flag "capacity-provider-config" (optional json_arg)
+           ~doc:"JSON CapacityProviderConfig"
+       and publishTo =
+         flag "publish-to" (optional json_arg)
+           ~doc:"JSON FunctionVersionLatestPublished"
+       and durableConfig =
+         flag "durable-config" (optional json_arg) ~doc:"JSON DurableConfig"
+       and tenancyConfig =
+         flag "tenancy-config" (optional json_arg) ~doc:"JSON TenancyConfig"
        and functionName =
          flag "function-name" (required string) ~doc:"STRING FunctionName"
        and role = flag "role" (required string) ~doc:"STRING RoleArn"
@@ -333,7 +476,20 @@ let create_function =
                                 architectures)
               ?ephemeralStorage:(Option.map
                                    ~f:Values.EphemeralStorage.of_json
-                                   ephemeralStorage) ~functionName ~role
+                                   ephemeralStorage)
+              ?snapStart:(Option.map ~f:Values.SnapStart.of_json snapStart)
+              ?loggingConfig:(Option.map ~f:Values.LoggingConfig.of_json
+                                loggingConfig)
+              ?capacityProviderConfig:(Option.map
+                                         ~f:Values.CapacityProviderConfig.of_json
+                                         capacityProviderConfig)
+              ?publishTo:(Option.map
+                            ~f:Values.FunctionVersionLatestPublished.of_json
+                            publishTo)
+              ?durableConfig:(Option.map ~f:Values.DurableConfig.of_json
+                                durableConfig)
+              ?tenancyConfig:(Option.map ~f:Values.TenancyConfig.of_json
+                                tenancyConfig) ~functionName ~role
               ~code:(Values.FunctionCode.of_json code) ())
            (Some Values.FunctionConfiguration.to_json)
            (Some Values.FunctionConfiguration.error_to_json)])
@@ -351,6 +507,8 @@ let create_function_url_config =
          flag "qualifier" (optional string)
            ~doc:"STRING FunctionUrlQualifier"
        and cors = flag "cors" (optional json_arg) ~doc:"JSON Cors"
+       and invokeMode =
+         flag "invoke-mode" (optional json_arg) ~doc:"JSON InvokeMode"
        and functionName =
          flag "function-name" (required string) ~doc:"STRING FunctionName"
        and authType =
@@ -359,7 +517,9 @@ let create_function_url_config =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_function_url_config
            (Values.CreateFunctionUrlConfigRequest.make ?qualifier
-              ?cors:(Option.map ~f:Values.Cors.of_json cors) ~functionName
+              ?cors:(Option.map ~f:Values.Cors.of_json cors)
+              ?invokeMode:(Option.map ~f:Values.InvokeMode.of_json invokeMode)
+              ~functionName
               ~authType:(Values.FunctionUrlAuthType.of_json authType) ())
            (Some Values.CreateFunctionUrlConfigResponse.to_json)
            (Some Values.CreateFunctionUrlConfigResponse.error_to_json)])
@@ -380,6 +540,25 @@ let delete_alias =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_alias
            (Values.DeleteAliasRequest.make ~functionName ~name ()) None None])
+let delete_capacity_provider =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and capacityProviderName =
+         flag "capacity-provider-name" (required string)
+           ~doc:"STRING CapacityProviderName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_capacity_provider
+           (Values.DeleteCapacityProviderRequest.make ~capacityProviderName
+              ()) (Some Values.DeleteCapacityProviderResponse.to_json)
+           (Some Values.DeleteCapacityProviderResponse.error_to_json)])
 let delete_code_signing_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -427,14 +606,17 @@ let delete_function =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and qualifier =
-         flag "qualifier" (optional string) ~doc:"STRING Qualifier"
+         flag "qualifier" (optional string)
+           ~doc:"STRING NumericLatestPublishedOrAliasQualifier"
        and functionName =
-         flag "function-name" (required string) ~doc:"STRING FunctionName" in
+         flag "function-name" (required string)
+           ~doc:"STRING NamespacedFunctionName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_function
            (Values.DeleteFunctionRequest.make ?qualifier ~functionName ())
-           None None])
+           (Some Values.DeleteFunctionResponse.to_json)
+           (Some Values.DeleteFunctionResponse.error_to_json)])
 let delete_function_code_signing_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -446,7 +628,8 @@ let delete_function_code_signing_config =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and functionName =
-         flag "function-name" (required string) ~doc:"STRING FunctionName" in
+         flag "function-name" (required string)
+           ~doc:"STRING NamespacedFunctionName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_function_code_signing_config
@@ -480,9 +663,11 @@ let delete_function_event_invoke_config =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and qualifier =
-         flag "qualifier" (optional string) ~doc:"STRING Qualifier"
+         flag "qualifier" (optional string)
+           ~doc:"STRING NumericLatestPublishedOrAliasQualifier"
        and functionName =
-         flag "function-name" (required string) ~doc:"STRING FunctionName" in
+         flag "function-name" (required string)
+           ~doc:"STRING NamespacedFunctionName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_function_event_invoke_config
@@ -582,6 +767,25 @@ let get_alias =
            Io.get_alias (Values.GetAliasRequest.make ~functionName ~name ())
            (Some Values.AliasConfiguration.to_json)
            (Some Values.AliasConfiguration.error_to_json)])
+let get_capacity_provider =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and capacityProviderName =
+         flag "capacity-provider-name" (required string)
+           ~doc:"STRING CapacityProviderName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_capacity_provider
+           (Values.GetCapacityProviderRequest.make ~capacityProviderName ())
+           (Some Values.GetCapacityProviderResponse.to_json)
+           (Some Values.GetCapacityProviderResponse.error_to_json)])
 let get_code_signing_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -601,6 +805,78 @@ let get_code_signing_config =
            (Values.GetCodeSigningConfigRequest.make ~codeSigningConfigArn ())
            (Some Values.GetCodeSigningConfigResponse.to_json)
            (Some Values.GetCodeSigningConfigResponse.error_to_json)])
+let get_durable_execution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and durableExecutionArn =
+         flag "durable-execution-arn" (required string)
+           ~doc:"STRING DurableExecutionArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_durable_execution
+           (Values.GetDurableExecutionRequest.make ~durableExecutionArn ())
+           (Some Values.GetDurableExecutionResponse.to_json)
+           (Some Values.GetDurableExecutionResponse.error_to_json)])
+let get_durable_execution_history =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and includeExecutionData =
+         flag "include-execution-data" (optional bool)
+           ~doc:"BOOL IncludeExecutionData"
+       and maxItems = flag "max-items" (optional int) ~doc:"INT ItemCount"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and reverseOrder =
+         flag "reverse-order" (optional bool) ~doc:"BOOL ReverseOrder"
+       and durableExecutionArn =
+         flag "durable-execution-arn" (required string)
+           ~doc:"STRING DurableExecutionArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_durable_execution_history
+           (Values.GetDurableExecutionHistoryRequest.make
+              ?includeExecutionData ?maxItems ?marker ?reverseOrder
+              ~durableExecutionArn ())
+           (Some Values.GetDurableExecutionHistoryResponse.to_json)
+           (Some Values.GetDurableExecutionHistoryResponse.error_to_json)])
+let get_durable_execution_state =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and maxItems = flag "max-items" (optional int) ~doc:"INT ItemCount"
+       and durableExecutionArn =
+         flag "durable-execution-arn" (required string)
+           ~doc:"STRING DurableExecutionArn"
+       and checkpointToken =
+         flag "checkpoint-token" (required string)
+           ~doc:"STRING CheckpointToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_durable_execution_state
+           (Values.GetDurableExecutionStateRequest.make ?marker ?maxItems
+              ~durableExecutionArn ~checkpointToken ())
+           (Some Values.GetDurableExecutionStateResponse.to_json)
+           (Some Values.GetDurableExecutionStateResponse.error_to_json)])
 let get_event_source_mapping =
   Command.async ~summary:""
     ([%map_open.Command
@@ -629,7 +905,8 @@ let get_function =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and qualifier =
-         flag "qualifier" (optional string) ~doc:"STRING Qualifier"
+         flag "qualifier" (optional string)
+           ~doc:"STRING NumericLatestPublishedOrAliasQualifier"
        and functionName =
          flag "function-name" (required string)
            ~doc:"STRING NamespacedFunctionName" in
@@ -650,7 +927,8 @@ let get_function_code_signing_config =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and functionName =
-         flag "function-name" (required string) ~doc:"STRING FunctionName" in
+         flag "function-name" (required string)
+           ~doc:"STRING NamespacedFunctionName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_function_code_signing_config
@@ -686,7 +964,8 @@ let get_function_configuration =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and qualifier =
-         flag "qualifier" (optional string) ~doc:"STRING Qualifier"
+         flag "qualifier" (optional string)
+           ~doc:"STRING NumericLatestPublishedOrAliasQualifier"
        and functionName =
          flag "function-name" (required string)
            ~doc:"STRING NamespacedFunctionName" in
@@ -707,9 +986,11 @@ let get_function_event_invoke_config =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and qualifier =
-         flag "qualifier" (optional string) ~doc:"STRING Qualifier"
+         flag "qualifier" (optional string)
+           ~doc:"STRING NumericLatestPublishedOrAliasQualifier"
        and functionName =
-         flag "function-name" (required string) ~doc:"STRING FunctionName" in
+         flag "function-name" (required string)
+           ~doc:"STRING NamespacedFunctionName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_function_event_invoke_config
@@ -717,6 +998,48 @@ let get_function_event_invoke_config =
               ~functionName ())
            (Some Values.FunctionEventInvokeConfig.to_json)
            (Some Values.FunctionEventInvokeConfig.error_to_json)])
+let get_function_recursion_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and functionName =
+         flag "function-name" (required string)
+           ~doc:"STRING UnqualifiedFunctionName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_function_recursion_config
+           (Values.GetFunctionRecursionConfigRequest.make ~functionName ())
+           (Some Values.GetFunctionRecursionConfigResponse.to_json)
+           (Some Values.GetFunctionRecursionConfigResponse.error_to_json)])
+let get_function_scaling_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and functionName =
+         flag "function-name" (required string)
+           ~doc:"STRING UnqualifiedFunctionName"
+       and qualifier =
+         flag "qualifier" (required string)
+           ~doc:"STRING PublishedFunctionQualifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_function_scaling_config
+           (Values.GetFunctionScalingConfigRequest.make ~functionName
+              ~qualifier ())
+           (Some Values.GetFunctionScalingConfigResponse.to_json)
+           (Some Values.GetFunctionScalingConfigResponse.error_to_json)])
 let get_function_url_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -810,7 +1133,8 @@ let get_policy =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and qualifier =
-         flag "qualifier" (optional string) ~doc:"STRING Qualifier"
+         flag "qualifier" (optional string)
+           ~doc:"STRING NumericLatestPublishedOrAliasQualifier"
        and functionName =
          flag "function-name" (required string)
            ~doc:"STRING NamespacedFunctionName" in
@@ -841,6 +1165,29 @@ let get_provisioned_concurrency_config =
               ~qualifier ())
            (Some Values.GetProvisionedConcurrencyConfigResponse.to_json)
            (Some Values.GetProvisionedConcurrencyConfigResponse.error_to_json)])
+let get_runtime_management_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and qualifier =
+         flag "qualifier" (optional string)
+           ~doc:"STRING NumericLatestPublishedOrAliasQualifier"
+       and functionName =
+         flag "function-name" (required string)
+           ~doc:"STRING NamespacedFunctionName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_runtime_management_config
+           (Values.GetRuntimeManagementConfigRequest.make ?qualifier
+              ~functionName ())
+           (Some Values.GetRuntimeManagementConfigResponse.to_json)
+           (Some Values.GetRuntimeManagementConfigResponse.error_to_json)])
 let invoke =
   Command.async ~summary:""
     ([%map_open.Command
@@ -857,9 +1204,15 @@ let invoke =
        and logType = flag "log-type" (optional json_arg) ~doc:"JSON LogType"
        and clientContext =
          flag "client-context" (optional string) ~doc:"STRING String"
+       and durableExecutionName =
+         flag "durable-execution-name" (optional string)
+           ~doc:"STRING DurableExecutionName"
        and payload = flag "payload" (optional json_arg) ~doc:"JSON Blob"
        and qualifier =
-         flag "qualifier" (optional string) ~doc:"STRING Qualifier"
+         flag "qualifier" (optional string)
+           ~doc:"STRING NumericLatestPublishedOrAliasQualifier"
+       and tenantId =
+         flag "tenant-id" (optional string) ~doc:"STRING TenantId"
        and functionName =
          flag "function-name" (required string)
            ~doc:"STRING NamespacedFunctionName" in
@@ -869,9 +1222,10 @@ let invoke =
               ?invocationType:(Option.map ~f:Values.InvocationType.of_json
                                  invocationType)
               ?logType:(Option.map ~f:Values.LogType.of_json logType)
-              ?clientContext
+              ?clientContext ?durableExecutionName
               ?payload:(Option.map ~f:Values.Blob.of_json payload) ?qualifier
-              ~functionName ()) (Some Values.InvocationResponse.to_json)
+              ?tenantId ~functionName ())
+           (Some Values.InvocationResponse.to_json)
            (Some Values.InvocationResponse.error_to_json)])
 let invoke_async =
   Command.async ~summary:""
@@ -895,6 +1249,44 @@ let invoke_async =
               ~invokeArgs:(Values.BlobStream.of_json invokeArgs) ())
            (Some Values.InvokeAsyncResponse.to_json)
            (Some Values.InvokeAsyncResponse.error_to_json)])
+let invoke_with_response_stream =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and invocationType =
+         flag "invocation-type" (optional json_arg)
+           ~doc:"JSON ResponseStreamingInvocationType"
+       and logType = flag "log-type" (optional json_arg) ~doc:"JSON LogType"
+       and clientContext =
+         flag "client-context" (optional string) ~doc:"STRING String"
+       and qualifier =
+         flag "qualifier" (optional string)
+           ~doc:"STRING NumericLatestPublishedOrAliasQualifier"
+       and payload = flag "payload" (optional json_arg) ~doc:"JSON Blob"
+       and tenantId =
+         flag "tenant-id" (optional string) ~doc:"STRING TenantId"
+       and functionName =
+         flag "function-name" (required string)
+           ~doc:"STRING NamespacedFunctionName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.invoke_with_response_stream
+           (Values.InvokeWithResponseStreamRequest.make
+              ?invocationType:(Option.map
+                                 ~f:Values.ResponseStreamingInvocationType.of_json
+                                 invocationType)
+              ?logType:(Option.map ~f:Values.LogType.of_json logType)
+              ?clientContext ?qualifier
+              ?payload:(Option.map ~f:Values.Blob.of_json payload) ?tenantId
+              ~functionName ())
+           (Some Values.InvokeWithResponseStreamResponse.to_json)
+           (Some Values.InvokeWithResponseStreamResponse.error_to_json)])
 let list_aliases =
   Command.async ~summary:""
     ([%map_open.Command
@@ -906,7 +1298,8 @@ let list_aliases =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and functionVersion =
-         flag "function-version" (optional string) ~doc:"STRING Version"
+         flag "function-version" (optional string)
+           ~doc:"STRING VersionWithLatestPublished"
        and marker = flag "marker" (optional string) ~doc:"STRING String"
        and maxItems = flag "max-items" (optional int) ~doc:"INT MaxListItems"
        and functionName =
@@ -917,6 +1310,29 @@ let list_aliases =
            (Values.ListAliasesRequest.make ?functionVersion ?marker ?maxItems
               ~functionName ()) (Some Values.ListAliasesResponse.to_json)
            (Some Values.ListAliasesResponse.error_to_json)])
+let list_capacity_providers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and state =
+         flag "state" (optional json_arg) ~doc:"JSON CapacityProviderState"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and maxItems =
+         flag "max-items" (optional int) ~doc:"INT MaxFiftyListItems" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_capacity_providers
+           (Values.ListCapacityProvidersRequest.make
+              ?state:(Option.map ~f:Values.CapacityProviderState.of_json
+                        state) ?marker ?maxItems ())
+           (Some Values.ListCapacityProvidersResponse.to_json)
+           (Some Values.ListCapacityProvidersResponse.error_to_json)])
 let list_code_signing_configs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -935,6 +1351,51 @@ let list_code_signing_configs =
            (Values.ListCodeSigningConfigsRequest.make ?marker ?maxItems ())
            (Some Values.ListCodeSigningConfigsResponse.to_json)
            (Some Values.ListCodeSigningConfigsResponse.error_to_json)])
+let list_durable_executions_by_function =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and qualifier =
+         flag "qualifier" (optional string)
+           ~doc:"STRING NumericLatestPublishedOrAliasQualifier"
+       and durableExecutionName =
+         flag "durable-execution-name" (optional string)
+           ~doc:"STRING DurableExecutionName"
+       and statuses =
+         flag "statuses" (optional json_arg) ~doc:"JSON ExecutionStatusList"
+       and startedAfter =
+         flag "started-after" (optional json_arg)
+           ~doc:"JSON ExecutionTimestamp"
+       and startedBefore =
+         flag "started-before" (optional json_arg)
+           ~doc:"JSON ExecutionTimestamp"
+       and reverseOrder =
+         flag "reverse-order" (optional bool) ~doc:"BOOL ReverseOrder"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and maxItems = flag "max-items" (optional int) ~doc:"INT ItemCount"
+       and functionName =
+         flag "function-name" (required string)
+           ~doc:"STRING NamespacedFunctionName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_durable_executions_by_function
+           (Values.ListDurableExecutionsByFunctionRequest.make ?qualifier
+              ?durableExecutionName
+              ?statuses:(Option.map ~f:Values.ExecutionStatusList.of_json
+                           statuses)
+              ?startedAfter:(Option.map ~f:Values.ExecutionTimestamp.of_json
+                               startedAfter)
+              ?startedBefore:(Option.map ~f:Values.ExecutionTimestamp.of_json
+                                startedBefore) ?reverseOrder ?marker
+              ?maxItems ~functionName ())
+           (Some Values.ListDurableExecutionsByFunctionResponse.to_json)
+           (Some Values.ListDurableExecutionsByFunctionResponse.error_to_json)])
 let list_event_source_mappings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -948,7 +1409,8 @@ let list_event_source_mappings =
        and eventSourceArn =
          flag "event-source-arn" (optional string) ~doc:"STRING Arn"
        and functionName =
-         flag "function-name" (optional string) ~doc:"STRING FunctionName"
+         flag "function-name" (optional string)
+           ~doc:"STRING NamespacedFunctionName"
        and marker = flag "marker" (optional string) ~doc:"STRING String"
        and maxItems = flag "max-items" (optional int) ~doc:"INT MaxListItems" in
        fun () ->
@@ -973,7 +1435,8 @@ let list_function_event_invoke_configs =
          flag "max-items" (optional int)
            ~doc:"INT MaxFunctionEventInvokeConfigListItems"
        and functionName =
-         flag "function-name" (required string) ~doc:"STRING FunctionName" in
+         flag "function-name" (required string)
+           ~doc:"STRING NamespacedFunctionName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_function_event_invoke_configs
@@ -1002,6 +1465,31 @@ let list_function_url_configs =
               ~functionName ())
            (Some Values.ListFunctionUrlConfigsResponse.to_json)
            (Some Values.ListFunctionUrlConfigsResponse.error_to_json)])
+let list_function_versions_by_capacity_provider =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and maxItems =
+         flag "max-items" (optional int) ~doc:"INT MaxFiftyListItems"
+       and capacityProviderName =
+         flag "capacity-provider-name" (required string)
+           ~doc:"STRING CapacityProviderName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_function_versions_by_capacity_provider
+           (Values.ListFunctionVersionsByCapacityProviderRequest.make ?marker
+              ?maxItems ~capacityProviderName ())
+           (Some
+              Values.ListFunctionVersionsByCapacityProviderResponse.to_json)
+           (Some
+              Values.ListFunctionVersionsByCapacityProviderResponse.error_to_json)])
 let list_functions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1145,7 +1633,7 @@ let list_tags =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and resource =
-         flag "resource" (required string) ~doc:"STRING FunctionArn" in
+         flag "resource" (required string) ~doc:"STRING TaggableResource" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_tags (Values.ListTagsRequest.make ~resource ())
@@ -1227,13 +1715,19 @@ let publish_version =
          flag "description" (optional string) ~doc:"STRING Description"
        and revisionId =
          flag "revision-id" (optional string) ~doc:"STRING String"
+       and publishTo =
+         flag "publish-to" (optional json_arg)
+           ~doc:"JSON FunctionVersionLatestPublished"
        and functionName =
          flag "function-name" (required string) ~doc:"STRING FunctionName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.publish_version
            (Values.PublishVersionRequest.make ?codeSha256 ?description
-              ?revisionId ~functionName ())
+              ?revisionId
+              ?publishTo:(Option.map
+                            ~f:Values.FunctionVersionLatestPublished.of_json
+                            publishTo) ~functionName ())
            (Some Values.FunctionConfiguration.to_json)
            (Some Values.FunctionConfiguration.error_to_json)])
 let put_function_code_signing_config =
@@ -1250,7 +1744,8 @@ let put_function_code_signing_config =
          flag "code-signing-config-arn" (required string)
            ~doc:"STRING CodeSigningConfigArn"
        and functionName =
-         flag "function-name" (required string) ~doc:"STRING FunctionName" in
+         flag "function-name" (required string)
+           ~doc:"STRING NamespacedFunctionName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_function_code_signing_config
@@ -1291,7 +1786,8 @@ let put_function_event_invoke_config =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and qualifier =
-         flag "qualifier" (optional string) ~doc:"STRING Qualifier"
+         flag "qualifier" (optional string)
+           ~doc:"STRING NumericLatestPublishedOrAliasQualifier"
        and maximumRetryAttempts =
          flag "maximum-retry-attempts" (optional int)
            ~doc:"INT MaximumRetryAttempts"
@@ -1302,7 +1798,8 @@ let put_function_event_invoke_config =
          flag "destination-config" (optional json_arg)
            ~doc:"JSON DestinationConfig"
        and functionName =
-         flag "function-name" (required string) ~doc:"STRING FunctionName" in
+         flag "function-name" (required string)
+           ~doc:"STRING NamespacedFunctionName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_function_event_invoke_config
@@ -1313,6 +1810,57 @@ let put_function_event_invoke_config =
                                     destinationConfig) ~functionName ())
            (Some Values.FunctionEventInvokeConfig.to_json)
            (Some Values.FunctionEventInvokeConfig.error_to_json)])
+let put_function_recursion_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and functionName =
+         flag "function-name" (required string)
+           ~doc:"STRING UnqualifiedFunctionName"
+       and recursiveLoop =
+         flag "recursive-loop" (required json_arg) ~doc:"JSON RecursiveLoop" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_function_recursion_config
+           (Values.PutFunctionRecursionConfigRequest.make ~functionName
+              ~recursiveLoop:(Values.RecursiveLoop.of_json recursiveLoop) ())
+           (Some Values.PutFunctionRecursionConfigResponse.to_json)
+           (Some Values.PutFunctionRecursionConfigResponse.error_to_json)])
+let put_function_scaling_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and functionScalingConfig =
+         flag "function-scaling-config" (optional json_arg)
+           ~doc:"JSON FunctionScalingConfig"
+       and functionName =
+         flag "function-name" (required string)
+           ~doc:"STRING UnqualifiedFunctionName"
+       and qualifier =
+         flag "qualifier" (required string)
+           ~doc:"STRING PublishedFunctionQualifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_function_scaling_config
+           (Values.PutFunctionScalingConfigRequest.make
+              ?functionScalingConfig:(Option.map
+                                        ~f:Values.FunctionScalingConfig.of_json
+                                        functionScalingConfig) ~functionName
+              ~qualifier ())
+           (Some Values.PutFunctionScalingConfigResponse.to_json)
+           (Some Values.PutFunctionScalingConfigResponse.error_to_json)])
 let put_provisioned_concurrency_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1337,6 +1885,37 @@ let put_provisioned_concurrency_config =
               ~qualifier ~provisionedConcurrentExecutions ())
            (Some Values.PutProvisionedConcurrencyConfigResponse.to_json)
            (Some Values.PutProvisionedConcurrencyConfigResponse.error_to_json)])
+let put_runtime_management_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and qualifier =
+         flag "qualifier" (optional string)
+           ~doc:"STRING NumericLatestPublishedOrAliasQualifier"
+       and runtimeVersionArn =
+         flag "runtime-version-arn" (optional string)
+           ~doc:"STRING RuntimeVersionArn"
+       and functionName =
+         flag "function-name" (required string)
+           ~doc:"STRING NamespacedFunctionName"
+       and updateRuntimeOn =
+         flag "update-runtime-on" (required json_arg)
+           ~doc:"JSON UpdateRuntimeOn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_runtime_management_config
+           (Values.PutRuntimeManagementConfigRequest.make ?qualifier
+              ?runtimeVersionArn ~functionName
+              ~updateRuntimeOn:(Values.UpdateRuntimeOn.of_json
+                                  updateRuntimeOn) ())
+           (Some Values.PutRuntimeManagementConfigResponse.to_json)
+           (Some Values.PutRuntimeManagementConfigResponse.error_to_json)])
 let remove_layer_version_permission =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1374,11 +1953,13 @@ let remove_permission =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and qualifier =
-         flag "qualifier" (optional string) ~doc:"STRING Qualifier"
+         flag "qualifier" (optional string)
+           ~doc:"STRING NumericLatestPublishedOrAliasQualifier"
        and revisionId =
          flag "revision-id" (optional string) ~doc:"STRING String"
        and functionName =
-         flag "function-name" (required string) ~doc:"STRING FunctionName"
+         flag "function-name" (required string)
+           ~doc:"STRING NamespacedFunctionName"
        and statementId =
          flag "statement-id" (required string)
            ~doc:"STRING NamespacedStatementId" in
@@ -1387,6 +1968,93 @@ let remove_permission =
            Io.remove_permission
            (Values.RemovePermissionRequest.make ?qualifier ?revisionId
               ~functionName ~statementId ()) None None])
+let send_durable_execution_callback_failure =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and error = flag "error" (optional json_arg) ~doc:"JSON ErrorObject"
+       and callbackId =
+         flag "callback-id" (required string) ~doc:"STRING CallbackId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.send_durable_execution_callback_failure
+           (Values.SendDurableExecutionCallbackFailureRequest.make
+              ?error:(Option.map ~f:Values.ErrorObject.of_json error)
+              ~callbackId ())
+           (Some Values.SendDurableExecutionCallbackFailureResponse.to_json)
+           (Some
+              Values.SendDurableExecutionCallbackFailureResponse.error_to_json)])
+let send_durable_execution_callback_heartbeat =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and callbackId =
+         flag "callback-id" (required string) ~doc:"STRING CallbackId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.send_durable_execution_callback_heartbeat
+           (Values.SendDurableExecutionCallbackHeartbeatRequest.make
+              ~callbackId ())
+           (Some Values.SendDurableExecutionCallbackHeartbeatResponse.to_json)
+           (Some
+              Values.SendDurableExecutionCallbackHeartbeatResponse.error_to_json)])
+let send_durable_execution_callback_success =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and result =
+         flag "result" (optional json_arg) ~doc:"JSON BinaryOperationPayload"
+       and callbackId =
+         flag "callback-id" (required string) ~doc:"STRING CallbackId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.send_durable_execution_callback_success
+           (Values.SendDurableExecutionCallbackSuccessRequest.make
+              ?result:(Option.map ~f:Values.BinaryOperationPayload.of_json
+                         result) ~callbackId ())
+           (Some Values.SendDurableExecutionCallbackSuccessResponse.to_json)
+           (Some
+              Values.SendDurableExecutionCallbackSuccessResponse.error_to_json)])
+let stop_durable_execution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and error = flag "error" (optional json_arg) ~doc:"JSON ErrorObject"
+       and durableExecutionArn =
+         flag "durable-execution-arn" (required string)
+           ~doc:"STRING DurableExecutionArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_durable_execution
+           (Values.StopDurableExecutionRequest.make
+              ?error:(Option.map ~f:Values.ErrorObject.of_json error)
+              ~durableExecutionArn ())
+           (Some Values.StopDurableExecutionResponse.to_json)
+           (Some Values.StopDurableExecutionResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1398,7 +2066,7 @@ let tag_resource =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and resource =
-         flag "resource" (required string) ~doc:"STRING FunctionArn"
+         flag "resource" (required string) ~doc:"STRING TaggableResource"
        and tags = flag "tags" (required json_arg) ~doc:"JSON Tags" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1416,7 +2084,7 @@ let untag_resource =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and resource =
-         flag "resource" (required string) ~doc:"STRING FunctionArn"
+         flag "resource" (required string) ~doc:"STRING TaggableResource"
        and tagKeys =
          flag "tag-keys" (required json_arg) ~doc:"JSON TagKeyList" in
        fun () ->
@@ -1435,7 +2103,8 @@ let update_alias =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and functionVersion =
-         flag "function-version" (optional string) ~doc:"STRING Version"
+         flag "function-version" (optional string)
+           ~doc:"STRING VersionWithLatestPublished"
        and description =
          flag "description" (optional string) ~doc:"STRING Description"
        and routingConfig =
@@ -1455,6 +2124,32 @@ let update_alias =
                                 routingConfig) ?revisionId ~functionName
               ~name ()) (Some Values.AliasConfiguration.to_json)
            (Some Values.AliasConfiguration.error_to_json)])
+let update_capacity_provider =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and capacityProviderScalingConfig =
+         flag "capacity-provider-scaling-config" (optional json_arg)
+           ~doc:"JSON CapacityProviderScalingConfig"
+       and capacityProviderName =
+         flag "capacity-provider-name" (required string)
+           ~doc:"STRING CapacityProviderName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_capacity_provider
+           (Values.UpdateCapacityProviderRequest.make
+              ?capacityProviderScalingConfig:(Option.map
+                                                ~f:Values.CapacityProviderScalingConfig.of_json
+                                                capacityProviderScalingConfig)
+              ~capacityProviderName ())
+           (Some Values.UpdateCapacityProviderResponse.to_json)
+           (Some Values.UpdateCapacityProviderResponse.error_to_json)])
 let update_code_signing_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1500,7 +2195,8 @@ let update_event_source_mapping =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and functionName =
-         flag "function-name" (optional string) ~doc:"STRING FunctionName"
+         flag "function-name" (optional string)
+           ~doc:"STRING NamespacedFunctionName"
        and enabled = flag "enabled" (optional bool) ~doc:"BOOL Enabled"
        and batchSize = flag "batch-size" (optional int) ~doc:"INT BatchSize"
        and filterCriteria =
@@ -1533,6 +2229,28 @@ let update_event_source_mapping =
        and functionResponseTypes =
          flag "function-response-types" (optional json_arg)
            ~doc:"JSON FunctionResponseTypeList"
+       and scalingConfig =
+         flag "scaling-config" (optional json_arg) ~doc:"JSON ScalingConfig"
+       and amazonManagedKafkaEventSourceConfig =
+         flag "amazon-managed-kafka-event-source-config" (optional json_arg)
+           ~doc:"JSON AmazonManagedKafkaEventSourceConfig"
+       and selfManagedKafkaEventSourceConfig =
+         flag "self-managed-kafka-event-source-config" (optional json_arg)
+           ~doc:"JSON SelfManagedKafkaEventSourceConfig"
+       and documentDBEventSourceConfig =
+         flag "document-d-b-event-source-config" (optional json_arg)
+           ~doc:"JSON DocumentDBEventSourceConfig"
+       and kMSKeyArn =
+         flag "k-m-s-key-arn" (optional string) ~doc:"STRING KMSKeyArn"
+       and metricsConfig =
+         flag "metrics-config" (optional json_arg)
+           ~doc:"JSON EventSourceMappingMetricsConfig"
+       and loggingConfig =
+         flag "logging-config" (optional json_arg)
+           ~doc:"JSON EventSourceMappingLoggingConfig"
+       and provisionedPollerConfig =
+         flag "provisioned-poller-config" (optional json_arg)
+           ~doc:"JSON ProvisionedPollerConfig"
        and uUID = flag "u-u-i-d" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1553,7 +2271,28 @@ let update_event_source_mapping =
               ?tumblingWindowInSeconds
               ?functionResponseTypes:(Option.map
                                         ~f:Values.FunctionResponseTypeList.of_json
-                                        functionResponseTypes) ~uUID ())
+                                        functionResponseTypes)
+              ?scalingConfig:(Option.map ~f:Values.ScalingConfig.of_json
+                                scalingConfig)
+              ?amazonManagedKafkaEventSourceConfig:(Option.map
+                                                      ~f:Values.AmazonManagedKafkaEventSourceConfig.of_json
+                                                      amazonManagedKafkaEventSourceConfig)
+              ?selfManagedKafkaEventSourceConfig:(Option.map
+                                                    ~f:Values.SelfManagedKafkaEventSourceConfig.of_json
+                                                    selfManagedKafkaEventSourceConfig)
+              ?documentDBEventSourceConfig:(Option.map
+                                              ~f:Values.DocumentDBEventSourceConfig.of_json
+                                              documentDBEventSourceConfig)
+              ?kMSKeyArn
+              ?metricsConfig:(Option.map
+                                ~f:Values.EventSourceMappingMetricsConfig.of_json
+                                metricsConfig)
+              ?loggingConfig:(Option.map
+                                ~f:Values.EventSourceMappingLoggingConfig.of_json
+                                loggingConfig)
+              ?provisionedPollerConfig:(Option.map
+                                          ~f:Values.ProvisionedPollerConfig.of_json
+                                          provisionedPollerConfig) ~uUID ())
            (Some Values.EventSourceMappingConfiguration.to_json)
            (Some Values.EventSourceMappingConfiguration.error_to_json)])
 let update_function_code =
@@ -1581,6 +2320,12 @@ let update_function_code =
        and architectures =
          flag "architectures" (optional json_arg)
            ~doc:"JSON ArchitecturesList"
+       and sourceKMSKeyArn =
+         flag "source-k-m-s-key-arn" (optional string)
+           ~doc:"STRING KMSKeyArn"
+       and publishTo =
+         flag "publish-to" (optional json_arg)
+           ~doc:"JSON FunctionVersionLatestPublished"
        and functionName =
          flag "function-name" (required string) ~doc:"STRING FunctionName" in
        fun () ->
@@ -1590,7 +2335,10 @@ let update_function_code =
               ?zipFile:(Option.map ~f:Values.Blob.of_json zipFile) ?s3Bucket
               ?s3Key ?s3ObjectVersion ?imageUri ?publish ?dryRun ?revisionId
               ?architectures:(Option.map ~f:Values.ArchitecturesList.of_json
-                                architectures) ~functionName ())
+                                architectures) ?sourceKMSKeyArn
+              ?publishTo:(Option.map
+                            ~f:Values.FunctionVersionLatestPublished.of_json
+                            publishTo) ~functionName ())
            (Some Values.FunctionConfiguration.to_json)
            (Some Values.FunctionConfiguration.error_to_json)])
 let update_function_configuration =
@@ -1633,6 +2381,15 @@ let update_function_configuration =
        and ephemeralStorage =
          flag "ephemeral-storage" (optional json_arg)
            ~doc:"JSON EphemeralStorage"
+       and snapStart =
+         flag "snap-start" (optional json_arg) ~doc:"JSON SnapStart"
+       and loggingConfig =
+         flag "logging-config" (optional json_arg) ~doc:"JSON LoggingConfig"
+       and capacityProviderConfig =
+         flag "capacity-provider-config" (optional json_arg)
+           ~doc:"JSON CapacityProviderConfig"
+       and durableConfig =
+         flag "durable-config" (optional json_arg) ~doc:"JSON DurableConfig"
        and functionName =
          flag "function-name" (required string) ~doc:"STRING FunctionName" in
        fun () ->
@@ -1657,7 +2414,15 @@ let update_function_configuration =
                               imageConfig)
               ?ephemeralStorage:(Option.map
                                    ~f:Values.EphemeralStorage.of_json
-                                   ephemeralStorage) ~functionName ())
+                                   ephemeralStorage)
+              ?snapStart:(Option.map ~f:Values.SnapStart.of_json snapStart)
+              ?loggingConfig:(Option.map ~f:Values.LoggingConfig.of_json
+                                loggingConfig)
+              ?capacityProviderConfig:(Option.map
+                                         ~f:Values.CapacityProviderConfig.of_json
+                                         capacityProviderConfig)
+              ?durableConfig:(Option.map ~f:Values.DurableConfig.of_json
+                                durableConfig) ~functionName ())
            (Some Values.FunctionConfiguration.to_json)
            (Some Values.FunctionConfiguration.error_to_json)])
 let update_function_event_invoke_config =
@@ -1671,7 +2436,8 @@ let update_function_event_invoke_config =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and qualifier =
-         flag "qualifier" (optional string) ~doc:"STRING Qualifier"
+         flag "qualifier" (optional string)
+           ~doc:"STRING NumericLatestPublishedOrAliasQualifier"
        and maximumRetryAttempts =
          flag "maximum-retry-attempts" (optional int)
            ~doc:"INT MaximumRetryAttempts"
@@ -1682,7 +2448,8 @@ let update_function_event_invoke_config =
          flag "destination-config" (optional json_arg)
            ~doc:"JSON DestinationConfig"
        and functionName =
-         flag "function-name" (required string) ~doc:"STRING FunctionName" in
+         flag "function-name" (required string)
+           ~doc:"STRING NamespacedFunctionName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_function_event_invoke_config
@@ -1709,6 +2476,8 @@ let update_function_url_config =
        and authType =
          flag "auth-type" (optional json_arg) ~doc:"JSON FunctionUrlAuthType"
        and cors = flag "cors" (optional json_arg) ~doc:"JSON Cors"
+       and invokeMode =
+         flag "invoke-mode" (optional json_arg) ~doc:"JSON InvokeMode"
        and functionName =
          flag "function-name" (required string) ~doc:"STRING FunctionName" in
        fun () ->
@@ -1717,7 +2486,9 @@ let update_function_url_config =
            (Values.UpdateFunctionUrlConfigRequest.make ?qualifier
               ?authType:(Option.map ~f:Values.FunctionUrlAuthType.of_json
                            authType)
-              ?cors:(Option.map ~f:Values.Cors.of_json cors) ~functionName ())
+              ?cors:(Option.map ~f:Values.Cors.of_json cors)
+              ?invokeMode:(Option.map ~f:Values.InvokeMode.of_json invokeMode)
+              ~functionName ())
            (Some Values.UpdateFunctionUrlConfigResponse.to_json)
            (Some Values.UpdateFunctionUrlConfigResponse.error_to_json)])
 let main =
@@ -1725,12 +2496,15 @@ let main =
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-layer-version-permission", add_layer_version_permission);
     ("add-permission", add_permission);
+    ("checkpoint-durable-execution", checkpoint_durable_execution);
     ("create-alias", create_alias);
+    ("create-capacity-provider", create_capacity_provider);
     ("create-code-signing-config", create_code_signing_config);
     ("create-event-source-mapping", create_event_source_mapping);
     ("create-function", create_function);
     ("create-function-url-config", create_function_url_config);
     ("delete-alias", delete_alias);
+    ("delete-capacity-provider", delete_capacity_provider);
     ("delete-code-signing-config", delete_code_signing_config);
     ("delete-event-source-mapping", delete_event_source_mapping);
     ("delete-function", delete_function);
@@ -1745,13 +2519,19 @@ let main =
       delete_provisioned_concurrency_config);
     ("get-account-settings", get_account_settings);
     ("get-alias", get_alias);
+    ("get-capacity-provider", get_capacity_provider);
     ("get-code-signing-config", get_code_signing_config);
+    ("get-durable-execution", get_durable_execution);
+    ("get-durable-execution-history", get_durable_execution_history);
+    ("get-durable-execution-state", get_durable_execution_state);
     ("get-event-source-mapping", get_event_source_mapping);
     ("get-function", get_function);
     ("get-function-code-signing-config", get_function_code_signing_config);
     ("get-function-concurrency", get_function_concurrency);
     ("get-function-configuration", get_function_configuration);
     ("get-function-event-invoke-config", get_function_event_invoke_config);
+    ("get-function-recursion-config", get_function_recursion_config);
+    ("get-function-scaling-config", get_function_scaling_config);
     ("get-function-url-config", get_function_url_config);
     ("get-layer-version", get_layer_version);
     ("get-layer-version-by-arn", get_layer_version_by_arn);
@@ -1759,14 +2539,21 @@ let main =
     ("get-policy", get_policy);
     ("get-provisioned-concurrency-config",
       get_provisioned_concurrency_config);
+    ("get-runtime-management-config", get_runtime_management_config);
     ("invoke", invoke);
     ("invoke-async", invoke_async);
+    ("invoke-with-response-stream", invoke_with_response_stream);
     ("list-aliases", list_aliases);
+    ("list-capacity-providers", list_capacity_providers);
     ("list-code-signing-configs", list_code_signing_configs);
+    ("list-durable-executions-by-function",
+      list_durable_executions_by_function);
     ("list-event-source-mappings", list_event_source_mappings);
     ("list-function-event-invoke-configs",
       list_function_event_invoke_configs);
     ("list-function-url-configs", list_function_url_configs);
+    ("list-function-versions-by-capacity-provider",
+      list_function_versions_by_capacity_provider);
     ("list-functions", list_functions);
     ("list-functions-by-code-signing-config",
       list_functions_by_code_signing_config);
@@ -1781,13 +2568,24 @@ let main =
     ("put-function-code-signing-config", put_function_code_signing_config);
     ("put-function-concurrency", put_function_concurrency);
     ("put-function-event-invoke-config", put_function_event_invoke_config);
+    ("put-function-recursion-config", put_function_recursion_config);
+    ("put-function-scaling-config", put_function_scaling_config);
     ("put-provisioned-concurrency-config",
       put_provisioned_concurrency_config);
+    ("put-runtime-management-config", put_runtime_management_config);
     ("remove-layer-version-permission", remove_layer_version_permission);
     ("remove-permission", remove_permission);
+    ("send-durable-execution-callback-failure",
+      send_durable_execution_callback_failure);
+    ("send-durable-execution-callback-heartbeat",
+      send_durable_execution_callback_heartbeat);
+    ("send-durable-execution-callback-success",
+      send_durable_execution_callback_success);
+    ("stop-durable-execution", stop_durable_execution);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-alias", update_alias);
+    ("update-capacity-provider", update_capacity_provider);
     ("update-code-signing-config", update_code_signing_config);
     ("update-event-source-mapping", update_event_source_mapping);
     ("update-function-code", update_function_code);

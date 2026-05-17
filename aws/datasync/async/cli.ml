@@ -82,6 +82,62 @@ let create_agent =
                                     securityGroupArns) ~activationKey ())
            (Some Values.CreateAgentResponse.to_json)
            (Some Values.CreateAgentResponse.error_to_json)])
+let create_location_azure_blob =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sasConfiguration =
+         flag "sas-configuration" (optional json_arg)
+           ~doc:"JSON AzureBlobSasConfiguration"
+       and blobType =
+         flag "blob-type" (optional json_arg) ~doc:"JSON AzureBlobType"
+       and accessTier =
+         flag "access-tier" (optional json_arg) ~doc:"JSON AzureAccessTier"
+       and subdirectory =
+         flag "subdirectory" (optional string)
+           ~doc:"STRING AzureBlobSubdirectory"
+       and agentArns =
+         flag "agent-arns" (optional json_arg) ~doc:"JSON AgentArnList"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON InputTagList"
+       and cmkSecretConfig =
+         flag "cmk-secret-config" (optional json_arg)
+           ~doc:"JSON CmkSecretConfig"
+       and customSecretConfig =
+         flag "custom-secret-config" (optional json_arg)
+           ~doc:"JSON CustomSecretConfig"
+       and containerUrl =
+         flag "container-url" (required string)
+           ~doc:"STRING AzureBlobContainerUrl"
+       and authenticationType =
+         flag "authentication-type" (required json_arg)
+           ~doc:"JSON AzureBlobAuthenticationType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_location_azure_blob
+           (Values.CreateLocationAzureBlobRequest.make
+              ?sasConfiguration:(Option.map
+                                   ~f:Values.AzureBlobSasConfiguration.of_json
+                                   sasConfiguration)
+              ?blobType:(Option.map ~f:Values.AzureBlobType.of_json blobType)
+              ?accessTier:(Option.map ~f:Values.AzureAccessTier.of_json
+                             accessTier) ?subdirectory
+              ?agentArns:(Option.map ~f:Values.AgentArnList.of_json agentArns)
+              ?tags:(Option.map ~f:Values.InputTagList.of_json tags)
+              ?cmkSecretConfig:(Option.map ~f:Values.CmkSecretConfig.of_json
+                                  cmkSecretConfig)
+              ?customSecretConfig:(Option.map
+                                     ~f:Values.CustomSecretConfig.of_json
+                                     customSecretConfig) ~containerUrl
+              ~authenticationType:(Values.AzureBlobAuthenticationType.of_json
+                                     authenticationType) ())
+           (Some Values.CreateLocationAzureBlobResponse.to_json)
+           (Some Values.CreateLocationAzureBlobResponse.error_to_json)])
 let create_location_efs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -95,6 +151,15 @@ let create_location_efs =
        and subdirectory =
          flag "subdirectory" (optional string) ~doc:"STRING EfsSubdirectory"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON InputTagList"
+       and accessPointArn =
+         flag "access-point-arn" (optional string)
+           ~doc:"STRING EfsAccessPointArn"
+       and fileSystemAccessRoleArn =
+         flag "file-system-access-role-arn" (optional string)
+           ~doc:"STRING IamRoleArn"
+       and inTransitEncryption =
+         flag "in-transit-encryption" (optional json_arg)
+           ~doc:"JSON EfsInTransitEncryption"
        and efsFilesystemArn =
          flag "efs-filesystem-arn" (required string)
            ~doc:"STRING EfsFilesystemArn"
@@ -105,7 +170,10 @@ let create_location_efs =
            Io.create_location_efs
            (Values.CreateLocationEfsRequest.make ?subdirectory
               ?tags:(Option.map ~f:Values.InputTagList.of_json tags)
-              ~efsFilesystemArn
+              ?accessPointArn ?fileSystemAccessRoleArn
+              ?inTransitEncryption:(Option.map
+                                      ~f:Values.EfsInTransitEncryption.of_json
+                                      inTransitEncryption) ~efsFilesystemArn
               ~ec2Config:(Values.Ec2Config.of_json ec2Config) ())
            (Some Values.CreateLocationEfsResponse.to_json)
            (Some Values.CreateLocationEfsResponse.error_to_json)])
@@ -139,6 +207,39 @@ let create_location_fsx_lustre =
                                     securityGroupArns) ())
            (Some Values.CreateLocationFsxLustreResponse.to_json)
            (Some Values.CreateLocationFsxLustreResponse.error_to_json)])
+let create_location_fsx_ontap =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and subdirectory =
+         flag "subdirectory" (optional string)
+           ~doc:"STRING FsxOntapSubdirectory"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON InputTagList"
+       and protocol =
+         flag "protocol" (required json_arg) ~doc:"JSON FsxProtocol"
+       and securityGroupArns =
+         flag "security-group-arns" (required json_arg)
+           ~doc:"JSON Ec2SecurityGroupArnList"
+       and storageVirtualMachineArn =
+         flag "storage-virtual-machine-arn" (required string)
+           ~doc:"STRING StorageVirtualMachineArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_location_fsx_ontap
+           (Values.CreateLocationFsxOntapRequest.make ?subdirectory
+              ?tags:(Option.map ~f:Values.InputTagList.of_json tags)
+              ~protocol:(Values.FsxProtocol.of_json protocol)
+              ~securityGroupArns:(Values.Ec2SecurityGroupArnList.of_json
+                                    securityGroupArns)
+              ~storageVirtualMachineArn ())
+           (Some Values.CreateLocationFsxOntapResponse.to_json)
+           (Some Values.CreateLocationFsxOntapResponse.error_to_json)])
 let create_location_fsx_open_zfs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -187,23 +288,34 @@ let create_location_fsx_windows =
            ~doc:"STRING FsxWindowsSubdirectory"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON InputTagList"
        and domain = flag "domain" (optional string) ~doc:"STRING SmbDomain"
+       and password =
+         flag "password" (optional string) ~doc:"STRING SmbPassword"
+       and cmkSecretConfig =
+         flag "cmk-secret-config" (optional json_arg)
+           ~doc:"JSON CmkSecretConfig"
+       and customSecretConfig =
+         flag "custom-secret-config" (optional json_arg)
+           ~doc:"JSON CustomSecretConfig"
        and fsxFilesystemArn =
          flag "fsx-filesystem-arn" (required string)
            ~doc:"STRING FsxFilesystemArn"
        and securityGroupArns =
          flag "security-group-arns" (required json_arg)
            ~doc:"JSON Ec2SecurityGroupArnList"
-       and user = flag "user" (required string) ~doc:"STRING SmbUser"
-       and password =
-         flag "password" (required string) ~doc:"STRING SmbPassword" in
+       and user = flag "user" (required string) ~doc:"STRING SmbUser" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_location_fsx_windows
            (Values.CreateLocationFsxWindowsRequest.make ?subdirectory
               ?tags:(Option.map ~f:Values.InputTagList.of_json tags) ?domain
-              ~fsxFilesystemArn
+              ?password
+              ?cmkSecretConfig:(Option.map ~f:Values.CmkSecretConfig.of_json
+                                  cmkSecretConfig)
+              ?customSecretConfig:(Option.map
+                                     ~f:Values.CustomSecretConfig.of_json
+                                     customSecretConfig) ~fsxFilesystemArn
               ~securityGroupArns:(Values.Ec2SecurityGroupArnList.of_json
-                                    securityGroupArns) ~user ~password ())
+                                    securityGroupArns) ~user ())
            (Some Values.CreateLocationFsxWindowsResponse.to_json)
            (Some Values.CreateLocationFsxWindowsResponse.error_to_json)])
 let create_location_hdfs =
@@ -241,6 +353,12 @@ let create_location_hdfs =
          flag "kerberos-krb5-conf" (optional json_arg)
            ~doc:"JSON KerberosKrb5ConfFile"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON InputTagList"
+       and cmkSecretConfig =
+         flag "cmk-secret-config" (optional json_arg)
+           ~doc:"JSON CmkSecretConfig"
+       and customSecretConfig =
+         flag "custom-secret-config" (optional json_arg)
+           ~doc:"JSON CustomSecretConfig"
        and nameNodes =
          flag "name-nodes" (required json_arg) ~doc:"JSON HdfsNameNodeList"
        and authenticationType =
@@ -264,6 +382,11 @@ let create_location_hdfs =
                                    ~f:Values.KerberosKrb5ConfFile.of_json
                                    kerberosKrb5Conf)
               ?tags:(Option.map ~f:Values.InputTagList.of_json tags)
+              ?cmkSecretConfig:(Option.map ~f:Values.CmkSecretConfig.of_json
+                                  cmkSecretConfig)
+              ?customSecretConfig:(Option.map
+                                     ~f:Values.CustomSecretConfig.of_json
+                                     customSecretConfig)
               ~nameNodes:(Values.HdfsNameNodeList.of_json nameNodes)
               ~authenticationType:(Values.HdfsAuthenticationType.of_json
                                      authenticationType)
@@ -324,15 +447,24 @@ let create_location_object_storage =
        and secretKey =
          flag "secret-key" (optional string)
            ~doc:"STRING ObjectStorageSecretKey"
+       and agentArns =
+         flag "agent-arns" (optional json_arg) ~doc:"JSON AgentArnList"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON InputTagList"
+       and serverCertificate =
+         flag "server-certificate" (optional json_arg)
+           ~doc:"JSON ObjectStorageCertificate"
+       and cmkSecretConfig =
+         flag "cmk-secret-config" (optional json_arg)
+           ~doc:"JSON CmkSecretConfig"
+       and customSecretConfig =
+         flag "custom-secret-config" (optional json_arg)
+           ~doc:"JSON CustomSecretConfig"
        and serverHostname =
          flag "server-hostname" (required string)
            ~doc:"STRING ServerHostname"
        and bucketName =
          flag "bucket-name" (required string)
-           ~doc:"STRING ObjectStorageBucketName"
-       and agentArns =
-         flag "agent-arns" (required json_arg) ~doc:"JSON AgentArnList" in
+           ~doc:"STRING ObjectStorageBucketName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_location_object_storage
@@ -341,9 +473,17 @@ let create_location_object_storage =
                                  ~f:Values.ObjectStorageServerProtocol.of_json
                                  serverProtocol) ?subdirectory ?accessKey
               ?secretKey
+              ?agentArns:(Option.map ~f:Values.AgentArnList.of_json agentArns)
               ?tags:(Option.map ~f:Values.InputTagList.of_json tags)
-              ~serverHostname ~bucketName
-              ~agentArns:(Values.AgentArnList.of_json agentArns) ())
+              ?serverCertificate:(Option.map
+                                    ~f:Values.ObjectStorageCertificate.of_json
+                                    serverCertificate)
+              ?cmkSecretConfig:(Option.map ~f:Values.CmkSecretConfig.of_json
+                                  cmkSecretConfig)
+              ?customSecretConfig:(Option.map
+                                     ~f:Values.CustomSecretConfig.of_json
+                                     customSecretConfig) ~serverHostname
+              ~bucketName ())
            (Some Values.CreateLocationObjectStorageResponse.to_json)
            (Some Values.CreateLocationObjectStorageResponse.error_to_json)])
 let create_location_s3 =
@@ -389,28 +529,64 @@ let create_location_smb =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and user = flag "user" (optional string) ~doc:"STRING SmbUser"
        and domain = flag "domain" (optional string) ~doc:"STRING SmbDomain"
+       and password =
+         flag "password" (optional string) ~doc:"STRING SmbPassword"
+       and cmkSecretConfig =
+         flag "cmk-secret-config" (optional json_arg)
+           ~doc:"JSON CmkSecretConfig"
+       and customSecretConfig =
+         flag "custom-secret-config" (optional json_arg)
+           ~doc:"JSON CustomSecretConfig"
        and mountOptions =
          flag "mount-options" (optional json_arg) ~doc:"JSON SmbMountOptions"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON InputTagList"
+       and authenticationType =
+         flag "authentication-type" (optional json_arg)
+           ~doc:"JSON SmbAuthenticationType"
+       and dnsIpAddresses =
+         flag "dns-ip-addresses" (optional json_arg) ~doc:"JSON DnsIpList"
+       and kerberosPrincipal =
+         flag "kerberos-principal" (optional string)
+           ~doc:"STRING KerberosPrincipal"
+       and kerberosKeytab =
+         flag "kerberos-keytab" (optional json_arg)
+           ~doc:"JSON KerberosKeytabFile"
+       and kerberosKrb5Conf =
+         flag "kerberos-krb5-conf" (optional json_arg)
+           ~doc:"JSON KerberosKrb5ConfFile"
        and subdirectory =
          flag "subdirectory" (required string) ~doc:"STRING SmbSubdirectory"
        and serverHostname =
          flag "server-hostname" (required string)
            ~doc:"STRING ServerHostname"
-       and user = flag "user" (required string) ~doc:"STRING SmbUser"
-       and password =
-         flag "password" (required string) ~doc:"STRING SmbPassword"
        and agentArns =
          flag "agent-arns" (required json_arg) ~doc:"JSON AgentArnList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_location_smb
-           (Values.CreateLocationSmbRequest.make ?domain
+           (Values.CreateLocationSmbRequest.make ?user ?domain ?password
+              ?cmkSecretConfig:(Option.map ~f:Values.CmkSecretConfig.of_json
+                                  cmkSecretConfig)
+              ?customSecretConfig:(Option.map
+                                     ~f:Values.CustomSecretConfig.of_json
+                                     customSecretConfig)
               ?mountOptions:(Option.map ~f:Values.SmbMountOptions.of_json
                                mountOptions)
               ?tags:(Option.map ~f:Values.InputTagList.of_json tags)
-              ~subdirectory ~serverHostname ~user ~password
+              ?authenticationType:(Option.map
+                                     ~f:Values.SmbAuthenticationType.of_json
+                                     authenticationType)
+              ?dnsIpAddresses:(Option.map ~f:Values.DnsIpList.of_json
+                                 dnsIpAddresses) ?kerberosPrincipal
+              ?kerberosKeytab:(Option.map
+                                 ~f:Values.KerberosKeytabFile.of_json
+                                 kerberosKeytab)
+              ?kerberosKrb5Conf:(Option.map
+                                   ~f:Values.KerberosKrb5ConfFile.of_json
+                                   kerberosKrb5Conf) ~subdirectory
+              ~serverHostname
               ~agentArns:(Values.AgentArnList.of_json agentArns) ())
            (Some Values.CreateLocationSmbResponse.to_json)
            (Some Values.CreateLocationSmbResponse.error_to_json)])
@@ -436,6 +612,14 @@ let create_task =
        and tags = flag "tags" (optional json_arg) ~doc:"JSON InputTagList"
        and includes =
          flag "includes" (optional json_arg) ~doc:"JSON FilterList"
+       and manifestConfig =
+         flag "manifest-config" (optional json_arg)
+           ~doc:"JSON ManifestConfig"
+       and taskReportConfig =
+         flag "task-report-config" (optional json_arg)
+           ~doc:"JSON TaskReportConfig"
+       and taskMode =
+         flag "task-mode" (optional json_arg) ~doc:"JSON TaskMode"
        and sourceLocationArn =
          flag "source-location-arn" (required string)
            ~doc:"STRING LocationArn"
@@ -451,6 +635,12 @@ let create_task =
               ?schedule:(Option.map ~f:Values.TaskSchedule.of_json schedule)
               ?tags:(Option.map ~f:Values.InputTagList.of_json tags)
               ?includes:(Option.map ~f:Values.FilterList.of_json includes)
+              ?manifestConfig:(Option.map ~f:Values.ManifestConfig.of_json
+                                 manifestConfig)
+              ?taskReportConfig:(Option.map
+                                   ~f:Values.TaskReportConfig.of_json
+                                   taskReportConfig)
+              ?taskMode:(Option.map ~f:Values.TaskMode.of_json taskMode)
               ~sourceLocationArn ~destinationLocationArn ())
            (Some Values.CreateTaskResponse.to_json)
            (Some Values.CreateTaskResponse.error_to_json)])
@@ -522,6 +712,24 @@ let describe_agent =
            Io.describe_agent (Values.DescribeAgentRequest.make ~agentArn ())
            (Some Values.DescribeAgentResponse.to_json)
            (Some Values.DescribeAgentResponse.error_to_json)])
+let describe_location_azure_blob =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and locationArn =
+         flag "location-arn" (required string) ~doc:"STRING LocationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_location_azure_blob
+           (Values.DescribeLocationAzureBlobRequest.make ~locationArn ())
+           (Some Values.DescribeLocationAzureBlobResponse.to_json)
+           (Some Values.DescribeLocationAzureBlobResponse.error_to_json)])
 let describe_location_efs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -558,6 +766,24 @@ let describe_location_fsx_lustre =
            (Values.DescribeLocationFsxLustreRequest.make ~locationArn ())
            (Some Values.DescribeLocationFsxLustreResponse.to_json)
            (Some Values.DescribeLocationFsxLustreResponse.error_to_json)])
+let describe_location_fsx_ontap =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and locationArn =
+         flag "location-arn" (required string) ~doc:"STRING LocationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_location_fsx_ontap
+           (Values.DescribeLocationFsxOntapRequest.make ~locationArn ())
+           (Some Values.DescribeLocationFsxOntapResponse.to_json)
+           (Some Values.DescribeLocationFsxOntapResponse.error_to_json)])
 let describe_location_fsx_open_zfs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -846,6 +1072,13 @@ let start_task_execution =
          flag "includes" (optional json_arg) ~doc:"JSON FilterList"
        and excludes =
          flag "excludes" (optional json_arg) ~doc:"JSON FilterList"
+       and manifestConfig =
+         flag "manifest-config" (optional json_arg)
+           ~doc:"JSON ManifestConfig"
+       and taskReportConfig =
+         flag "task-report-config" (optional json_arg)
+           ~doc:"JSON TaskReportConfig"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON InputTagList"
        and taskArn = flag "task-arn" (required string) ~doc:"STRING TaskArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -855,7 +1088,13 @@ let start_task_execution =
                                   overrideOptions)
               ?includes:(Option.map ~f:Values.FilterList.of_json includes)
               ?excludes:(Option.map ~f:Values.FilterList.of_json excludes)
-              ~taskArn ()) (Some Values.StartTaskExecutionResponse.to_json)
+              ?manifestConfig:(Option.map ~f:Values.ManifestConfig.of_json
+                                 manifestConfig)
+              ?taskReportConfig:(Option.map
+                                   ~f:Values.TaskReportConfig.of_json
+                                   taskReportConfig)
+              ?tags:(Option.map ~f:Values.InputTagList.of_json tags) ~taskArn
+              ()) (Some Values.StartTaskExecutionResponse.to_json)
            (Some Values.StartTaskExecutionResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
@@ -918,6 +1157,201 @@ let update_agent =
            (Values.UpdateAgentRequest.make ?name ~agentArn ())
            (Some Values.UpdateAgentResponse.to_json)
            (Some Values.UpdateAgentResponse.error_to_json)])
+let update_location_azure_blob =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and subdirectory =
+         flag "subdirectory" (optional string)
+           ~doc:"STRING AzureBlobSubdirectory"
+       and authenticationType =
+         flag "authentication-type" (optional json_arg)
+           ~doc:"JSON AzureBlobAuthenticationType"
+       and sasConfiguration =
+         flag "sas-configuration" (optional json_arg)
+           ~doc:"JSON AzureBlobSasConfiguration"
+       and blobType =
+         flag "blob-type" (optional json_arg) ~doc:"JSON AzureBlobType"
+       and accessTier =
+         flag "access-tier" (optional json_arg) ~doc:"JSON AzureAccessTier"
+       and agentArns =
+         flag "agent-arns" (optional json_arg) ~doc:"JSON AgentArnList"
+       and cmkSecretConfig =
+         flag "cmk-secret-config" (optional json_arg)
+           ~doc:"JSON CmkSecretConfig"
+       and customSecretConfig =
+         flag "custom-secret-config" (optional json_arg)
+           ~doc:"JSON CustomSecretConfig"
+       and locationArn =
+         flag "location-arn" (required string) ~doc:"STRING LocationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_location_azure_blob
+           (Values.UpdateLocationAzureBlobRequest.make ?subdirectory
+              ?authenticationType:(Option.map
+                                     ~f:Values.AzureBlobAuthenticationType.of_json
+                                     authenticationType)
+              ?sasConfiguration:(Option.map
+                                   ~f:Values.AzureBlobSasConfiguration.of_json
+                                   sasConfiguration)
+              ?blobType:(Option.map ~f:Values.AzureBlobType.of_json blobType)
+              ?accessTier:(Option.map ~f:Values.AzureAccessTier.of_json
+                             accessTier)
+              ?agentArns:(Option.map ~f:Values.AgentArnList.of_json agentArns)
+              ?cmkSecretConfig:(Option.map ~f:Values.CmkSecretConfig.of_json
+                                  cmkSecretConfig)
+              ?customSecretConfig:(Option.map
+                                     ~f:Values.CustomSecretConfig.of_json
+                                     customSecretConfig) ~locationArn ())
+           (Some Values.UpdateLocationAzureBlobResponse.to_json)
+           (Some Values.UpdateLocationAzureBlobResponse.error_to_json)])
+let update_location_efs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and subdirectory =
+         flag "subdirectory" (optional string) ~doc:"STRING EfsSubdirectory"
+       and accessPointArn =
+         flag "access-point-arn" (optional string)
+           ~doc:"STRING UpdatedEfsAccessPointArn"
+       and fileSystemAccessRoleArn =
+         flag "file-system-access-role-arn" (optional string)
+           ~doc:"STRING UpdatedEfsIamRoleArn"
+       and inTransitEncryption =
+         flag "in-transit-encryption" (optional json_arg)
+           ~doc:"JSON EfsInTransitEncryption"
+       and locationArn =
+         flag "location-arn" (required string) ~doc:"STRING LocationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_location_efs
+           (Values.UpdateLocationEfsRequest.make ?subdirectory
+              ?accessPointArn ?fileSystemAccessRoleArn
+              ?inTransitEncryption:(Option.map
+                                      ~f:Values.EfsInTransitEncryption.of_json
+                                      inTransitEncryption) ~locationArn ())
+           (Some Values.UpdateLocationEfsResponse.to_json)
+           (Some Values.UpdateLocationEfsResponse.error_to_json)])
+let update_location_fsx_lustre =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and subdirectory =
+         flag "subdirectory" (optional string) ~doc:"STRING SmbSubdirectory"
+       and locationArn =
+         flag "location-arn" (required string) ~doc:"STRING LocationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_location_fsx_lustre
+           (Values.UpdateLocationFsxLustreRequest.make ?subdirectory
+              ~locationArn ())
+           (Some Values.UpdateLocationFsxLustreResponse.to_json)
+           (Some Values.UpdateLocationFsxLustreResponse.error_to_json)])
+let update_location_fsx_ontap =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and protocol =
+         flag "protocol" (optional json_arg) ~doc:"JSON FsxUpdateProtocol"
+       and subdirectory =
+         flag "subdirectory" (optional string)
+           ~doc:"STRING FsxOntapSubdirectory"
+       and locationArn =
+         flag "location-arn" (required string) ~doc:"STRING LocationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_location_fsx_ontap
+           (Values.UpdateLocationFsxOntapRequest.make
+              ?protocol:(Option.map ~f:Values.FsxUpdateProtocol.of_json
+                           protocol) ?subdirectory ~locationArn ())
+           (Some Values.UpdateLocationFsxOntapResponse.to_json)
+           (Some Values.UpdateLocationFsxOntapResponse.error_to_json)])
+let update_location_fsx_open_zfs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and protocol =
+         flag "protocol" (optional json_arg) ~doc:"JSON FsxProtocol"
+       and subdirectory =
+         flag "subdirectory" (optional string) ~doc:"STRING SmbSubdirectory"
+       and locationArn =
+         flag "location-arn" (required string) ~doc:"STRING LocationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_location_fsx_open_zfs
+           (Values.UpdateLocationFsxOpenZfsRequest.make
+              ?protocol:(Option.map ~f:Values.FsxProtocol.of_json protocol)
+              ?subdirectory ~locationArn ())
+           (Some Values.UpdateLocationFsxOpenZfsResponse.to_json)
+           (Some Values.UpdateLocationFsxOpenZfsResponse.error_to_json)])
+let update_location_fsx_windows =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and subdirectory =
+         flag "subdirectory" (optional string)
+           ~doc:"STRING FsxWindowsSubdirectory"
+       and domain =
+         flag "domain" (optional string) ~doc:"STRING UpdateSmbDomain"
+       and user = flag "user" (optional string) ~doc:"STRING SmbUser"
+       and password =
+         flag "password" (optional string) ~doc:"STRING SmbPassword"
+       and cmkSecretConfig =
+         flag "cmk-secret-config" (optional json_arg)
+           ~doc:"JSON CmkSecretConfig"
+       and customSecretConfig =
+         flag "custom-secret-config" (optional json_arg)
+           ~doc:"JSON CustomSecretConfig"
+       and locationArn =
+         flag "location-arn" (required string) ~doc:"STRING LocationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_location_fsx_windows
+           (Values.UpdateLocationFsxWindowsRequest.make ?subdirectory ?domain
+              ?user ?password
+              ?cmkSecretConfig:(Option.map ~f:Values.CmkSecretConfig.of_json
+                                  cmkSecretConfig)
+              ?customSecretConfig:(Option.map
+                                     ~f:Values.CustomSecretConfig.of_json
+                                     customSecretConfig) ~locationArn ())
+           (Some Values.UpdateLocationFsxWindowsResponse.to_json)
+           (Some Values.UpdateLocationFsxWindowsResponse.error_to_json)])
 let update_location_hdfs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -959,6 +1393,12 @@ let update_location_hdfs =
            ~doc:"JSON KerberosKrb5ConfFile"
        and agentArns =
          flag "agent-arns" (optional json_arg) ~doc:"JSON AgentArnList"
+       and cmkSecretConfig =
+         flag "cmk-secret-config" (optional json_arg)
+           ~doc:"JSON CmkSecretConfig"
+       and customSecretConfig =
+         flag "custom-secret-config" (optional json_arg)
+           ~doc:"JSON CustomSecretConfig"
        and locationArn =
          flag "location-arn" (required string) ~doc:"STRING LocationArn" in
        fun () ->
@@ -982,7 +1422,11 @@ let update_location_hdfs =
                                    ~f:Values.KerberosKrb5ConfFile.of_json
                                    kerberosKrb5Conf)
               ?agentArns:(Option.map ~f:Values.AgentArnList.of_json agentArns)
-              ~locationArn ())
+              ?cmkSecretConfig:(Option.map ~f:Values.CmkSecretConfig.of_json
+                                  cmkSecretConfig)
+              ?customSecretConfig:(Option.map
+                                     ~f:Values.CustomSecretConfig.of_json
+                                     customSecretConfig) ~locationArn ())
            (Some Values.UpdateLocationHdfsResponse.to_json)
            (Some Values.UpdateLocationHdfsResponse.error_to_json)])
 let update_location_nfs =
@@ -997,6 +1441,9 @@ let update_location_nfs =
            ~doc:"URL override endpoint url"
        and subdirectory =
          flag "subdirectory" (optional string) ~doc:"STRING NfsSubdirectory"
+       and serverHostname =
+         flag "server-hostname" (optional string)
+           ~doc:"STRING ServerHostname"
        and onPremConfig =
          flag "on-prem-config" (optional json_arg) ~doc:"JSON OnPremConfig"
        and mountOptions =
@@ -1007,6 +1454,7 @@ let update_location_nfs =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_location_nfs
            (Values.UpdateLocationNfsRequest.make ?subdirectory
+              ?serverHostname
               ?onPremConfig:(Option.map ~f:Values.OnPremConfig.of_json
                                onPremConfig)
               ?mountOptions:(Option.map ~f:Values.NfsMountOptions.of_json
@@ -1030,6 +1478,9 @@ let update_location_object_storage =
            ~doc:"JSON ObjectStorageServerProtocol"
        and subdirectory =
          flag "subdirectory" (optional string) ~doc:"STRING S3Subdirectory"
+       and serverHostname =
+         flag "server-hostname" (optional string)
+           ~doc:"STRING ServerHostname"
        and accessKey =
          flag "access-key" (optional string)
            ~doc:"STRING ObjectStorageAccessKey"
@@ -1038,6 +1489,15 @@ let update_location_object_storage =
            ~doc:"STRING ObjectStorageSecretKey"
        and agentArns =
          flag "agent-arns" (optional json_arg) ~doc:"JSON AgentArnList"
+       and serverCertificate =
+         flag "server-certificate" (optional json_arg)
+           ~doc:"JSON ObjectStorageCertificate"
+       and cmkSecretConfig =
+         flag "cmk-secret-config" (optional json_arg)
+           ~doc:"JSON CmkSecretConfig"
+       and customSecretConfig =
+         flag "custom-secret-config" (optional json_arg)
+           ~doc:"JSON CustomSecretConfig"
        and locationArn =
          flag "location-arn" (required string) ~doc:"STRING LocationArn" in
        fun () ->
@@ -1046,12 +1506,47 @@ let update_location_object_storage =
            (Values.UpdateLocationObjectStorageRequest.make ?serverPort
               ?serverProtocol:(Option.map
                                  ~f:Values.ObjectStorageServerProtocol.of_json
-                                 serverProtocol) ?subdirectory ?accessKey
-              ?secretKey
+                                 serverProtocol) ?subdirectory
+              ?serverHostname ?accessKey ?secretKey
               ?agentArns:(Option.map ~f:Values.AgentArnList.of_json agentArns)
-              ~locationArn ())
+              ?serverCertificate:(Option.map
+                                    ~f:Values.ObjectStorageCertificate.of_json
+                                    serverCertificate)
+              ?cmkSecretConfig:(Option.map ~f:Values.CmkSecretConfig.of_json
+                                  cmkSecretConfig)
+              ?customSecretConfig:(Option.map
+                                     ~f:Values.CustomSecretConfig.of_json
+                                     customSecretConfig) ~locationArn ())
            (Some Values.UpdateLocationObjectStorageResponse.to_json)
            (Some Values.UpdateLocationObjectStorageResponse.error_to_json)])
+let update_location_s3 =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and subdirectory =
+         flag "subdirectory" (optional string) ~doc:"STRING S3Subdirectory"
+       and s3StorageClass =
+         flag "s3-storage-class" (optional json_arg)
+           ~doc:"JSON S3StorageClass"
+       and s3Config =
+         flag "s3-config" (optional json_arg) ~doc:"JSON S3Config"
+       and locationArn =
+         flag "location-arn" (required string) ~doc:"STRING LocationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_location_s3
+           (Values.UpdateLocationS3Request.make ?subdirectory
+              ?s3StorageClass:(Option.map ~f:Values.S3StorageClass.of_json
+                                 s3StorageClass)
+              ?s3Config:(Option.map ~f:Values.S3Config.of_json s3Config)
+              ~locationArn ()) (Some Values.UpdateLocationS3Response.to_json)
+           (Some Values.UpdateLocationS3Response.error_to_json)])
 let update_location_smb =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1064,24 +1559,63 @@ let update_location_smb =
            ~doc:"URL override endpoint url"
        and subdirectory =
          flag "subdirectory" (optional string) ~doc:"STRING SmbSubdirectory"
+       and serverHostname =
+         flag "server-hostname" (optional string)
+           ~doc:"STRING ServerHostname"
        and user = flag "user" (optional string) ~doc:"STRING SmbUser"
        and domain = flag "domain" (optional string) ~doc:"STRING SmbDomain"
        and password =
          flag "password" (optional string) ~doc:"STRING SmbPassword"
+       and cmkSecretConfig =
+         flag "cmk-secret-config" (optional json_arg)
+           ~doc:"JSON CmkSecretConfig"
+       and customSecretConfig =
+         flag "custom-secret-config" (optional json_arg)
+           ~doc:"JSON CustomSecretConfig"
        and agentArns =
          flag "agent-arns" (optional json_arg) ~doc:"JSON AgentArnList"
        and mountOptions =
          flag "mount-options" (optional json_arg) ~doc:"JSON SmbMountOptions"
+       and authenticationType =
+         flag "authentication-type" (optional json_arg)
+           ~doc:"JSON SmbAuthenticationType"
+       and dnsIpAddresses =
+         flag "dns-ip-addresses" (optional json_arg) ~doc:"JSON DnsIpList"
+       and kerberosPrincipal =
+         flag "kerberos-principal" (optional string)
+           ~doc:"STRING KerberosPrincipal"
+       and kerberosKeytab =
+         flag "kerberos-keytab" (optional json_arg)
+           ~doc:"JSON KerberosKeytabFile"
+       and kerberosKrb5Conf =
+         flag "kerberos-krb5-conf" (optional json_arg)
+           ~doc:"JSON KerberosKrb5ConfFile"
        and locationArn =
          flag "location-arn" (required string) ~doc:"STRING LocationArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_location_smb
-           (Values.UpdateLocationSmbRequest.make ?subdirectory ?user ?domain
-              ?password
+           (Values.UpdateLocationSmbRequest.make ?subdirectory
+              ?serverHostname ?user ?domain ?password
+              ?cmkSecretConfig:(Option.map ~f:Values.CmkSecretConfig.of_json
+                                  cmkSecretConfig)
+              ?customSecretConfig:(Option.map
+                                     ~f:Values.CustomSecretConfig.of_json
+                                     customSecretConfig)
               ?agentArns:(Option.map ~f:Values.AgentArnList.of_json agentArns)
               ?mountOptions:(Option.map ~f:Values.SmbMountOptions.of_json
-                               mountOptions) ~locationArn ())
+                               mountOptions)
+              ?authenticationType:(Option.map
+                                     ~f:Values.SmbAuthenticationType.of_json
+                                     authenticationType)
+              ?dnsIpAddresses:(Option.map ~f:Values.DnsIpList.of_json
+                                 dnsIpAddresses) ?kerberosPrincipal
+              ?kerberosKeytab:(Option.map
+                                 ~f:Values.KerberosKeytabFile.of_json
+                                 kerberosKeytab)
+              ?kerberosKrb5Conf:(Option.map
+                                   ~f:Values.KerberosKrb5ConfFile.of_json
+                                   kerberosKrb5Conf) ~locationArn ())
            (Some Values.UpdateLocationSmbResponse.to_json)
            (Some Values.UpdateLocationSmbResponse.error_to_json)])
 let update_task =
@@ -1105,6 +1639,12 @@ let update_task =
            ~doc:"STRING LogGroupArn"
        and includes =
          flag "includes" (optional json_arg) ~doc:"JSON FilterList"
+       and manifestConfig =
+         flag "manifest-config" (optional json_arg)
+           ~doc:"JSON ManifestConfig"
+       and taskReportConfig =
+         flag "task-report-config" (optional json_arg)
+           ~doc:"JSON TaskReportConfig"
        and taskArn = flag "task-arn" (required string) ~doc:"STRING TaskArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1115,7 +1655,12 @@ let update_task =
               ?schedule:(Option.map ~f:Values.TaskSchedule.of_json schedule)
               ?name ?cloudWatchLogGroupArn
               ?includes:(Option.map ~f:Values.FilterList.of_json includes)
-              ~taskArn ()) (Some Values.UpdateTaskResponse.to_json)
+              ?manifestConfig:(Option.map ~f:Values.ManifestConfig.of_json
+                                 manifestConfig)
+              ?taskReportConfig:(Option.map
+                                   ~f:Values.TaskReportConfig.of_json
+                                   taskReportConfig) ~taskArn ())
+           (Some Values.UpdateTaskResponse.to_json)
            (Some Values.UpdateTaskResponse.error_to_json)])
 let update_task_execution =
   Command.async ~summary:""
@@ -1143,8 +1688,10 @@ let main =
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-task-execution", cancel_task_execution);
     ("create-agent", create_agent);
+    ("create-location-azure-blob", create_location_azure_blob);
     ("create-location-efs", create_location_efs);
     ("create-location-fsx-lustre", create_location_fsx_lustre);
+    ("create-location-fsx-ontap", create_location_fsx_ontap);
     ("create-location-fsx-open-zfs", create_location_fsx_open_zfs);
     ("create-location-fsx-windows", create_location_fsx_windows);
     ("create-location-hdfs", create_location_hdfs);
@@ -1157,8 +1704,10 @@ let main =
     ("delete-location", delete_location);
     ("delete-task", delete_task);
     ("describe-agent", describe_agent);
+    ("describe-location-azure-blob", describe_location_azure_blob);
     ("describe-location-efs", describe_location_efs);
     ("describe-location-fsx-lustre", describe_location_fsx_lustre);
+    ("describe-location-fsx-ontap", describe_location_fsx_ontap);
     ("describe-location-fsx-open-zfs", describe_location_fsx_open_zfs);
     ("describe-location-fsx-windows", describe_location_fsx_windows);
     ("describe-location-hdfs", describe_location_hdfs);
@@ -1177,9 +1726,16 @@ let main =
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-agent", update_agent);
+    ("update-location-azure-blob", update_location_azure_blob);
+    ("update-location-efs", update_location_efs);
+    ("update-location-fsx-lustre", update_location_fsx_lustre);
+    ("update-location-fsx-ontap", update_location_fsx_ontap);
+    ("update-location-fsx-open-zfs", update_location_fsx_open_zfs);
+    ("update-location-fsx-windows", update_location_fsx_windows);
     ("update-location-hdfs", update_location_hdfs);
     ("update-location-nfs", update_location_nfs);
     ("update-location-object-storage", update_location_object_storage);
+    ("update-location-s3", update_location_s3);
     ("update-location-smb", update_location_smb);
     ("update-task", update_task);
     ("update-task-execution", update_task_execution)]

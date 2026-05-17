@@ -119,6 +119,8 @@ module MetricDimensionsMapDefinition =
                        (MetricDimensionValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -170,6 +172,58 @@ module Statistic =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"Statistic" j
+    let to_json = simple_to_json to_value
+  end
+module QuotaContextId =
+  struct
+    type nonrec t = string
+    let context_ = "QuotaContextId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QuotaContextId" j
+    let to_json = simple_to_json to_value
+  end
+module QuotaContextScope =
+  struct
+    type nonrec t =
+      | RESOURCE 
+      | ACCOUNT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RESOURCE -> "RESOURCE"
+      | ACCOUNT -> "ACCOUNT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RESOURCE" -> RESOURCE
+      | "ACCOUNT" -> ACCOUNT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration QuotaContextScope" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QuotaContextScope" j)
+    let to_json = simple_to_json to_value
+  end
+module QuotaContextScopeType =
+  struct
+    type nonrec t = string
+    let context_ = "QuotaContextScopeType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QuotaContextScopeType" j
     let to_json = simple_to_json to_value
   end
 module PeriodUnit =
@@ -224,6 +278,61 @@ module PeriodValue =
       Int.of_string
         (string_of_xml ~kind:"an integer for PeriodValue" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module QuotaCode =
+  struct
+    type nonrec t = string
+    let context_ = "QuotaCode"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[a-zA-Z][a-zA-Z0-9-]{1,128}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QuotaCode" j
+    let to_json = simple_to_json to_value
+  end
+module QuotaName =
+  struct
+    type nonrec t = string
+    let context_ = "QuotaName"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QuotaName" j
+    let to_json = simple_to_json to_value
+  end
+module ExcludedLimit =
+  struct
+    type nonrec t = string
+    let context_ = "ExcludedLimit"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[A-Za-z0-9-_ /]{1,128}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExcludedLimit" j
     let to_json = simple_to_json to_value
   end
 module TagKey =
@@ -304,13 +413,41 @@ module ServiceName =
     let of_json j = string_of_json ~kind:"ServiceName" j
     let to_json = simple_to_json to_value
   end
+module AppliedLevelEnum =
+  struct
+    type nonrec t =
+      | ACCOUNT 
+      | RESOURCE 
+      | ALL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACCOUNT -> "ACCOUNT"
+      | RESOURCE -> "RESOURCE"
+      | ALL -> "ALL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACCOUNT" -> ACCOUNT
+      | "RESOURCE" -> RESOURCE
+      | "ALL" -> ALL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AppliedLevelEnum" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AppliedLevelEnum" j)
+    let to_json = simple_to_json to_value
+  end
 module ErrorReason =
   struct
     type nonrec t =
       {
       errorCode: ErrorCode.t option
         [@ocaml.doc
-          "Service Quotas returns the following error values: DEPENDENCY_ACCESS_DENIED_ERROR - The caller does not have the required permissions to complete the action. To resolve the error, you must have permission to access the service or quota. DEPENDENCY_THROTTLING_ERROR - The service is throttling Service Quotas. DEPENDENCY_SERVICE_ERROR - The service is not available. SERVICE_QUOTA_NOT_AVAILABLE_ERROR - There was an error in Service Quotas."];
+          "Service Quotas returns the following error values: DEPENDENCY_ACCESS_DENIED_ERROR - The caller does not have the required permissions to complete the action. To resolve the error, you must have permission to access the Amazon Web Services service or quota. DEPENDENCY_THROTTLING_ERROR - The Amazon Web Services service is throttling Service Quotas. DEPENDENCY_SERVICE_ERROR - The Amazon Web Services service is not available. SERVICE_QUOTA_NOT_AVAILABLE_ERROR - There was an error in Service Quotas."];
       errorMessage: ErrorMessage.t option [@ocaml.doc "The error message."]}
     let make ?errorCode =
       fun ?errorMessage -> fun () -> { errorCode; errorMessage }
@@ -328,9 +465,9 @@ module ErrorReason =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?errorMessage ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
       make ?errorMessage ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An error that explains why an action did not succeed."]
@@ -399,15 +536,15 @@ module MetricInfo =
       make ?metricStatisticRecommendation ?metricDimensions ?metricName
         ?metricNamespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metricStatisticRecommendation =
-        field_map json "MetricStatisticRecommendation" Statistic.of_json in
+        field_map json__ "MetricStatisticRecommendation" Statistic.of_json in
       let metricDimensions =
-        field_map json "MetricDimensions"
+        field_map json__ "MetricDimensions"
           MetricDimensionsMapDefinition.of_json in
-      let metricName = field_map json "MetricName" QuotaMetricName.of_json in
+      let metricName = field_map json__ "MetricName" QuotaMetricName.of_json in
       let metricNamespace =
-        field_map json "MetricNamespace" QuotaMetricNamespace.of_json in
+        field_map json__ "MetricNamespace" QuotaMetricNamespace.of_json in
       make ?metricStatisticRecommendation ?metricDimensions ?metricName
         ?metricNamespace ()
     let to_json v = composed_to_json to_value v
@@ -439,45 +576,79 @@ module QuotaArn =
     let of_json j = string_of_json ~kind:"QuotaArn" j
     let to_json = simple_to_json to_value
   end
-module QuotaCode =
+module QuotaContextInfo =
+  struct
+    type nonrec t =
+      {
+      contextScope: QuotaContextScope.t option
+        [@ocaml.doc
+          "Specifies the scope to which the quota value is applied. If the scope is RESOURCE, the quota value is applied to each resource in the Amazon Web Services account. If the scope is ACCOUNT, the quota value is applied to the Amazon Web Services account."];
+      contextScopeType: QuotaContextScopeType.t option
+        [@ocaml.doc
+          "Specifies the resource type to which the quota can be applied."];
+      contextId: QuotaContextId.t option
+        [@ocaml.doc
+          "Specifies the resource, or resources, to which the quota applies. The value for this field is either an Amazon Resource Name (ARN) or *. If the value is an ARN, the quota value applies to that resource. If the value is *, then the quota value applies to all resources listed in the ContextScopeType field. The quota value applies to all resources for which you haven\226\128\153t previously applied a quota value, and any new resources you create in your Amazon Web Services account."]}
+    let make ?contextScope =
+      fun ?contextScopeType ->
+        fun ?contextId ->
+          fun () -> { contextScope; contextScopeType; contextId }
+    let to_value x =
+      structure_to_value
+        [("ContextScope",
+           (Option.map x.contextScope ~f:QuotaContextScope.to_value));
+        ("ContextScopeType",
+          (Option.map x.contextScopeType ~f:QuotaContextScopeType.to_value));
+        ("ContextId", (Option.map x.contextId ~f:QuotaContextId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let contextId =
+        (Option.map ~f:QuotaContextId.of_xml)
+          (Xml.child xml_arg0 "ContextId") in
+      let contextScopeType =
+        (Option.map ~f:QuotaContextScopeType.of_xml)
+          (Xml.child xml_arg0 "ContextScopeType") in
+      let contextScope =
+        (Option.map ~f:QuotaContextScope.of_xml)
+          (Xml.child xml_arg0 "ContextScope") in
+      make ?contextId ?contextScopeType ?contextScope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let contextId = field_map json__ "ContextId" QuotaContextId.of_json in
+      let contextScopeType =
+        field_map json__ "ContextScopeType" QuotaContextScopeType.of_json in
+      let contextScope =
+        field_map json__ "ContextScope" QuotaContextScope.of_json in
+      make ?contextId ?contextScopeType ?contextScope ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that describes the context for a resource-level quota. For resource-level quotas, such as Instances per OpenSearch Service Domain, you can apply the quota value at the resource-level for each OpenSearch Service Domain in your Amazon Web Services account. Together the attributes of this structure help you understand how the quota is implemented by Amazon Web Services and how you can manage it. For quotas such as Amazon OpenSearch Service Domains which can be managed at the account-level for each Amazon Web Services Region, the QuotaContext field is absent. See the attribute descriptions below to further understand how to use them."]
+module QuotaDescription =
   struct
     type nonrec t = string
-    let context_ = "QuotaCode"
+    let context_ = "QuotaDescription"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
+          ((check_string_min i ~min:0) >>=
              (fun () ->
-                (check_string_max i ~max:128) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"[a-zA-Z][a-zA-Z0-9-]{1,128}")));
+                (check_string_max i ~max:350) >>=
+                  (fun () -> check_pattern i ~pattern:"^.{0,350}$")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"QuotaCode" j
-    let to_json = simple_to_json to_value
-  end
-module QuotaName =
-  struct
-    type nonrec t = string
-    let context_ = "QuotaName"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"QuotaName" j
+    let of_json j = string_of_json ~kind:"QuotaDescription" j
     let to_json = simple_to_json to_value
   end
 module QuotaPeriod =
   struct
     type nonrec t =
       {
-      periodValue: PeriodValue.t option [@ocaml.doc "The value."];
+      periodValue: PeriodValue.t option
+        [@ocaml.doc "The value associated with the reported PeriodUnit."];
       periodUnit: PeriodUnit.t option [@ocaml.doc "The time unit."]}
     let make ?periodValue =
       fun ?periodUnit -> fun () -> { periodValue; periodUnit }
@@ -493,9 +664,9 @@ module QuotaPeriod =
         (Option.map ~f:PeriodValue.of_xml) (Xml.child xml_arg0 "PeriodValue") in
       make ?periodUnit ?periodValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let periodUnit = field_map json "PeriodUnit" PeriodUnit.of_json in
-      let periodValue = field_map json "PeriodValue" PeriodValue.of_json in
+    let of_json json__ =
+      let periodUnit = field_map json__ "PeriodUnit" PeriodUnit.of_json in
+      let periodValue = field_map json__ "PeriodValue" PeriodValue.of_json in
       make ?periodUnit ?periodValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the quota period."]
@@ -606,6 +777,8 @@ module RequestStatus =
       | APPROVED 
       | DENIED 
       | CASE_CLOSED 
+      | NOT_APPROVED 
+      | INVALID_REQUEST 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -615,6 +788,8 @@ module RequestStatus =
       | APPROVED -> "APPROVED"
       | DENIED -> "DENIED"
       | CASE_CLOSED -> "CASE_CLOSED"
+      | NOT_APPROVED -> "NOT_APPROVED"
+      | INVALID_REQUEST -> "INVALID_REQUEST"
       | Non_static_id s -> s
     let of_string =
       function
@@ -623,6 +798,8 @@ module RequestStatus =
       | "APPROVED" -> APPROVED
       | "DENIED" -> DENIED
       | "CASE_CLOSED" -> CASE_CLOSED
+      | "NOT_APPROVED" -> NOT_APPROVED
+      | "INVALID_REQUEST" -> INVALID_REQUEST
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -630,6 +807,28 @@ module RequestStatus =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration RequestStatus" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"RequestStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module RequestType =
+  struct
+    type nonrec t =
+      | AutomaticManagement 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AutomaticManagement -> "AutomaticManagement"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AutomaticManagement" -> AutomaticManagement
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RequestType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RequestType" j)
     let to_json = simple_to_json to_value
   end
 module Requester =
@@ -645,6 +844,86 @@ module Requester =
     let of_json j = string_of_json ~kind:"Requester" j
     let to_json = simple_to_json to_value
   end
+module AppliedValue =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:10000000000.) >>=
+             (fun () -> check_float_min i ~min:0.));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module DefaultValue =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:10000000000.) >>=
+             (fun () -> check_float_min i ~min:0.));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module UtilizationPct =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module QuotaInfo =
+  struct
+    type nonrec t =
+      {
+      quotaCode: QuotaCode.t option
+        [@ocaml.doc
+          "The Service Quotas code for the Amazon Web Services service monitored with Automatic Management."];
+      quotaName: QuotaName.t option
+        [@ocaml.doc
+          "The Service Quotas name for the Amazon Web Services service monitored with Automatic Management."]}
+    let make ?quotaCode =
+      fun ?quotaName -> fun () -> { quotaCode; quotaName }
+    let to_value x =
+      structure_to_value
+        [("QuotaCode", (Option.map x.quotaCode ~f:QuotaCode.to_value));
+        ("QuotaName", (Option.map x.quotaName ~f:QuotaName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quotaName =
+        (Option.map ~f:QuotaName.of_xml) (Xml.child xml_arg0 "QuotaName") in
+      let quotaCode =
+        (Option.map ~f:QuotaCode.of_xml) (Xml.child xml_arg0 "QuotaCode") in
+      make ?quotaName ?quotaCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quotaName = field_map json__ "QuotaName" QuotaName.of_json in
+      let quotaCode = field_map json__ "QuotaCode" QuotaCode.of_json in
+      make ?quotaName ?quotaCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information on your Service Quotas for Service Quotas Automatic Management. Automatic Management monitors your Service Quotas utilization and notifies you before you run out of your allocated quotas."]
 module ExceptionMessage =
   struct
     type nonrec t = string
@@ -656,6 +935,54 @@ module ExceptionMessage =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ExceptionMessage" j
+    let to_json = simple_to_json to_value
+  end
+module ExcludedQuotaList =
+  struct
+    type nonrec t = ExcludedLimit.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExcludedLimit.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExcludedLimit.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExcludedQuotaList" ~of_json:ExcludedLimit.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExcludedService =
+  struct
+    type nonrec t = string
+    let context_ = "ExcludedService"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[A-Za-z0-9-_ /]{1,128}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExcludedService" j
     let to_json = simple_to_json to_value
   end
 module Tag =
@@ -682,9 +1009,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -694,8 +1021,10 @@ module ServiceInfo =
     type nonrec t =
       {
       serviceCode: ServiceCode.t option
-        [@ocaml.doc "The service identifier."];
-      serviceName: ServiceName.t option [@ocaml.doc "The service name."]}
+        [@ocaml.doc
+          "Specifies the service identifier. To find the service code value for an Amazon Web Services service, use the ListServices operation."];
+      serviceName: ServiceName.t option
+        [@ocaml.doc "Specifies the service name."]}
     let make ?serviceCode =
       fun ?serviceName -> fun () -> { serviceCode; serviceName }
     let to_value x =
@@ -710,23 +1039,27 @@ module ServiceInfo =
         (Option.map ~f:ServiceCode.of_xml) (Xml.child xml_arg0 "ServiceCode") in
       make ?serviceName ?serviceCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map json "ServiceName" ServiceName.of_json in
-      let serviceCode = field_map json "ServiceCode" ServiceCode.of_json in
+    let of_json json__ =
+      let serviceName = field_map json__ "ServiceName" ServiceName.of_json in
+      let serviceCode = field_map json__ "ServiceCode" ServiceCode.of_json in
       make ?serviceName ?serviceCode ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about a service."]
+  end[@@ocaml.doc "Information about an Amazon Web Services service."]
 module ServiceQuota =
   struct
     type nonrec t =
       {
       serviceCode: ServiceCode.t option
-        [@ocaml.doc "The service identifier."];
-      serviceName: ServiceName.t option [@ocaml.doc "The service name."];
+        [@ocaml.doc
+          "Specifies the service identifier. To find the service code value for an Amazon Web Services service, use the ListServices operation."];
+      serviceName: ServiceName.t option
+        [@ocaml.doc "Specifies the service name."];
       quotaArn: QuotaArn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the quota."];
-      quotaCode: QuotaCode.t option [@ocaml.doc "The quota identifier."];
-      quotaName: QuotaName.t option [@ocaml.doc "The quota name."];
+      quotaCode: QuotaCode.t option
+        [@ocaml.doc
+          "Specifies the quota identifier. To find the quota code for a specific quota, use the ListServiceQuotas operation, and look for the QuotaCode response in the output for the quota you want."];
+      quotaName: QuotaName.t option [@ocaml.doc "Specifies the quota name."];
       value: QuotaValue.t option [@ocaml.doc "The quota value."];
       unit: QuotaUnit.t option [@ocaml.doc "The unit of measurement."];
       adjustable: QuotaAdjustable.t option
@@ -737,7 +1070,14 @@ module ServiceQuota =
         [@ocaml.doc "Information about the measurement."];
       period: QuotaPeriod.t option [@ocaml.doc "The period of time."];
       errorReason: ErrorReason.t option
-        [@ocaml.doc "The error code and error reason."]}
+        [@ocaml.doc "The error code and error reason."];
+      quotaAppliedAtLevel: AppliedLevelEnum.t option
+        [@ocaml.doc
+          "Filters the response to return applied quota values for the ACCOUNT, RESOURCE, or ALL levels. ACCOUNT is the default."];
+      quotaContext: QuotaContextInfo.t option
+        [@ocaml.doc "The context for this service quota."];
+      description: QuotaDescription.t option
+        [@ocaml.doc "The quota description."]}
     let make ?serviceCode =
       fun ?serviceName ->
         fun ?quotaArn ->
@@ -750,21 +1090,27 @@ module ServiceQuota =
                       fun ?usageMetric ->
                         fun ?period ->
                           fun ?errorReason ->
-                            fun () ->
-                              {
-                                serviceCode;
-                                serviceName;
-                                quotaArn;
-                                quotaCode;
-                                quotaName;
-                                value;
-                                unit;
-                                adjustable;
-                                globalQuota;
-                                usageMetric;
-                                period;
-                                errorReason
-                              }
+                            fun ?quotaAppliedAtLevel ->
+                              fun ?quotaContext ->
+                                fun ?description ->
+                                  fun () ->
+                                    {
+                                      serviceCode;
+                                      serviceName;
+                                      quotaArn;
+                                      quotaCode;
+                                      quotaName;
+                                      value;
+                                      unit;
+                                      adjustable;
+                                      globalQuota;
+                                      usageMetric;
+                                      period;
+                                      errorReason;
+                                      quotaAppliedAtLevel;
+                                      quotaContext;
+                                      description
+                                    }
     let to_value x =
       structure_to_value
         [("ServiceCode", (Option.map x.serviceCode ~f:ServiceCode.to_value));
@@ -778,9 +1124,24 @@ module ServiceQuota =
         ("GlobalQuota", (Option.map x.globalQuota ~f:GlobalQuota.to_value));
         ("UsageMetric", (Option.map x.usageMetric ~f:MetricInfo.to_value));
         ("Period", (Option.map x.period ~f:QuotaPeriod.to_value));
-        ("ErrorReason", (Option.map x.errorReason ~f:ErrorReason.to_value))]
+        ("ErrorReason", (Option.map x.errorReason ~f:ErrorReason.to_value));
+        ("QuotaAppliedAtLevel",
+          (Option.map x.quotaAppliedAtLevel ~f:AppliedLevelEnum.to_value));
+        ("QuotaContext",
+          (Option.map x.quotaContext ~f:QuotaContextInfo.to_value));
+        ("Description",
+          (Option.map x.description ~f:QuotaDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:QuotaDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let quotaContext =
+        (Option.map ~f:QuotaContextInfo.of_xml)
+          (Xml.child xml_arg0 "QuotaContext") in
+      let quotaAppliedAtLevel =
+        (Option.map ~f:AppliedLevelEnum.of_xml)
+          (Xml.child xml_arg0 "QuotaAppliedAtLevel") in
       let errorReason =
         (Option.map ~f:ErrorReason.of_xml) (Xml.child xml_arg0 "ErrorReason") in
       let period =
@@ -805,24 +1166,32 @@ module ServiceQuota =
         (Option.map ~f:ServiceName.of_xml) (Xml.child xml_arg0 "ServiceName") in
       let serviceCode =
         (Option.map ~f:ServiceCode.of_xml) (Xml.child xml_arg0 "ServiceCode") in
-      make ?errorReason ?period ?usageMetric ?globalQuota ?adjustable ?unit
-        ?value ?quotaName ?quotaCode ?quotaArn ?serviceName ?serviceCode ()
+      make ?description ?quotaContext ?quotaAppliedAtLevel ?errorReason
+        ?period ?usageMetric ?globalQuota ?adjustable ?unit ?value ?quotaName
+        ?quotaCode ?quotaArn ?serviceName ?serviceCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorReason = field_map json "ErrorReason" ErrorReason.of_json in
-      let period = field_map json "Period" QuotaPeriod.of_json in
-      let usageMetric = field_map json "UsageMetric" MetricInfo.of_json in
-      let globalQuota = field_map json "GlobalQuota" GlobalQuota.of_json in
-      let adjustable = field_map json "Adjustable" QuotaAdjustable.of_json in
-      let unit = field_map json "Unit" QuotaUnit.of_json in
-      let value = field_map json "Value" QuotaValue.of_json in
-      let quotaName = field_map json "QuotaName" QuotaName.of_json in
-      let quotaCode = field_map json "QuotaCode" QuotaCode.of_json in
-      let quotaArn = field_map json "QuotaArn" QuotaArn.of_json in
-      let serviceName = field_map json "ServiceName" ServiceName.of_json in
-      let serviceCode = field_map json "ServiceCode" ServiceCode.of_json in
-      make ?errorReason ?period ?usageMetric ?globalQuota ?adjustable ?unit
-        ?value ?quotaName ?quotaCode ?quotaArn ?serviceName ?serviceCode ()
+    let of_json json__ =
+      let description =
+        field_map json__ "Description" QuotaDescription.of_json in
+      let quotaContext =
+        field_map json__ "QuotaContext" QuotaContextInfo.of_json in
+      let quotaAppliedAtLevel =
+        field_map json__ "QuotaAppliedAtLevel" AppliedLevelEnum.of_json in
+      let errorReason = field_map json__ "ErrorReason" ErrorReason.of_json in
+      let period = field_map json__ "Period" QuotaPeriod.of_json in
+      let usageMetric = field_map json__ "UsageMetric" MetricInfo.of_json in
+      let globalQuota = field_map json__ "GlobalQuota" GlobalQuota.of_json in
+      let adjustable = field_map json__ "Adjustable" QuotaAdjustable.of_json in
+      let unit = field_map json__ "Unit" QuotaUnit.of_json in
+      let value = field_map json__ "Value" QuotaValue.of_json in
+      let quotaName = field_map json__ "QuotaName" QuotaName.of_json in
+      let quotaCode = field_map json__ "QuotaCode" QuotaCode.of_json in
+      let quotaArn = field_map json__ "QuotaArn" QuotaArn.of_json in
+      let serviceName = field_map json__ "ServiceName" ServiceName.of_json in
+      let serviceCode = field_map json__ "ServiceCode" ServiceCode.of_json in
+      make ?description ?quotaContext ?quotaAppliedAtLevel ?errorReason
+        ?period ?usageMetric ?globalQuota ?adjustable ?unit ?value ?quotaName
+        ?quotaCode ?quotaArn ?serviceName ?serviceCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a quota."]
 module ServiceQuotaIncreaseRequestInTemplate =
@@ -830,13 +1199,18 @@ module ServiceQuotaIncreaseRequestInTemplate =
     type nonrec t =
       {
       serviceCode: ServiceCode.t option
-        [@ocaml.doc "The service identifier."];
-      serviceName: ServiceName.t option [@ocaml.doc "The service name."];
-      quotaCode: QuotaCode.t option [@ocaml.doc "The quota identifier."];
-      quotaName: QuotaName.t option [@ocaml.doc "The quota name."];
+        [@ocaml.doc
+          "Specifies the service identifier. To find the service code value for an Amazon Web Services service, use the ListServices operation."];
+      serviceName: ServiceName.t option
+        [@ocaml.doc "Specifies the service name."];
+      quotaCode: QuotaCode.t option
+        [@ocaml.doc
+          "Specifies the quota identifier. To find the quota code for a specific quota, use the ListServiceQuotas operation, and look for the QuotaCode response in the output for the quota you want."];
+      quotaName: QuotaName.t option [@ocaml.doc "Specifies the quota name."];
       desiredValue: QuotaValue.t option
         [@ocaml.doc "The new, increased value of the quota."];
-      awsRegion: AwsRegion.t option [@ocaml.doc "The AWS Region."];
+      awsRegion: AwsRegion.t option
+        [@ocaml.doc "The Amazon Web Services Region."];
       unit: QuotaUnit.t option [@ocaml.doc "The unit of measurement."];
       globalQuota: GlobalQuota.t option
         [@ocaml.doc "Indicates whether the quota is global."]}
@@ -889,15 +1263,15 @@ module ServiceQuotaIncreaseRequestInTemplate =
       make ?globalQuota ?unit ?awsRegion ?desiredValue ?quotaName ?quotaCode
         ?serviceName ?serviceCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let globalQuota = field_map json "GlobalQuota" GlobalQuota.of_json in
-      let unit = field_map json "Unit" QuotaUnit.of_json in
-      let awsRegion = field_map json "AwsRegion" AwsRegion.of_json in
-      let desiredValue = field_map json "DesiredValue" QuotaValue.of_json in
-      let quotaName = field_map json "QuotaName" QuotaName.of_json in
-      let quotaCode = field_map json "QuotaCode" QuotaCode.of_json in
-      let serviceName = field_map json "ServiceName" ServiceName.of_json in
-      let serviceCode = field_map json "ServiceCode" ServiceCode.of_json in
+    let of_json json__ =
+      let globalQuota = field_map json__ "GlobalQuota" GlobalQuota.of_json in
+      let unit = field_map json__ "Unit" QuotaUnit.of_json in
+      let awsRegion = field_map json__ "AwsRegion" AwsRegion.of_json in
+      let desiredValue = field_map json__ "DesiredValue" QuotaValue.of_json in
+      let quotaName = field_map json__ "QuotaName" QuotaName.of_json in
+      let quotaCode = field_map json__ "QuotaCode" QuotaCode.of_json in
+      let serviceName = field_map json__ "ServiceName" ServiceName.of_json in
+      let serviceCode = field_map json__ "ServiceCode" ServiceCode.of_json in
       make ?globalQuota ?unit ?awsRegion ?desiredValue ?quotaName ?quotaCode
         ?serviceName ?serviceCode ()
     let to_json v = composed_to_json to_value v
@@ -907,17 +1281,25 @@ module RequestedServiceQuotaChange =
     type nonrec t =
       {
       id: RequestId.t option [@ocaml.doc "The unique identifier."];
+      requestType: RequestType.t option
+        [@ocaml.doc
+          "The type of quota increase request. Possible values include: AutomaticManagement - The request was automatically created by Service Quotas Automatic Management when quota utilization approached the limit. If this field is not present, the request was manually created by a user."];
       caseId: CustomerServiceEngagementId.t option
         [@ocaml.doc "The case ID."];
       serviceCode: ServiceCode.t option
-        [@ocaml.doc "The service identifier."];
-      serviceName: ServiceName.t option [@ocaml.doc "The service name."];
-      quotaCode: QuotaCode.t option [@ocaml.doc "The quota identifier."];
-      quotaName: QuotaName.t option [@ocaml.doc "The quota name."];
+        [@ocaml.doc
+          "Specifies the service identifier. To find the service code value for an Amazon Web Services service, use the ListServices operation."];
+      serviceName: ServiceName.t option
+        [@ocaml.doc "Specifies the service name."];
+      quotaCode: QuotaCode.t option
+        [@ocaml.doc
+          "Specifies the quota identifier. To find the quota code for a specific quota, use the ListServiceQuotas operation, and look for the QuotaCode response in the output for the quota you want."];
+      quotaName: QuotaName.t option [@ocaml.doc "Specifies the quota name."];
       desiredValue: QuotaValue.t option
         [@ocaml.doc "The new, increased value for the quota."];
       status: RequestStatus.t option
-        [@ocaml.doc "The state of the quota increase request."];
+        [@ocaml.doc
+          "The state of the quota increase request. PENDING: The quota increase request is under review by Amazon Web Services. CASE_OPENED: Service Quotas opened a support case to process the quota increase request. Follow-up on the support case for more information. APPROVED: The quota increase request is approved. DENIED: The quota increase request can't be approved by Service Quotas. Contact Amazon Web Services Support for more details. NOT APPROVED: The quota increase request can't be approved by Service Quotas. Contact Amazon Web Services Support for more details. CASE_CLOSED: The support case associated with this quota increase request was closed. Check the support case correspondence for the outcome of your quota request. INVALID_REQUEST: Service Quotas couldn't process your resource-level quota increase request because the Amazon Resource Name (ARN) specified as part of the ContextId is invalid."];
       created: DateTime.t option
         [@ocaml.doc
           "The date and time when the quota increase request was received and the case ID was created."];
@@ -929,41 +1311,53 @@ module RequestedServiceQuotaChange =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the quota."];
       globalQuota: GlobalQuota.t option
         [@ocaml.doc "Indicates whether the quota is global."];
-      unit: QuotaUnit.t option [@ocaml.doc "The unit of measurement."]}
+      unit: QuotaUnit.t option [@ocaml.doc "The unit of measurement."];
+      quotaRequestedAtLevel: AppliedLevelEnum.t option
+        [@ocaml.doc
+          "Filters the response to return quota requests for the ACCOUNT, RESOURCE, or ALL levels. ACCOUNT is the default."];
+      quotaContext: QuotaContextInfo.t option
+        [@ocaml.doc "The context for this service quota."]}
     let make ?id =
-      fun ?caseId ->
-        fun ?serviceCode ->
-          fun ?serviceName ->
-            fun ?quotaCode ->
-              fun ?quotaName ->
-                fun ?desiredValue ->
-                  fun ?status ->
-                    fun ?created ->
-                      fun ?lastUpdated ->
-                        fun ?requester ->
-                          fun ?quotaArn ->
-                            fun ?globalQuota ->
-                              fun ?unit ->
-                                fun () ->
-                                  {
-                                    id;
-                                    caseId;
-                                    serviceCode;
-                                    serviceName;
-                                    quotaCode;
-                                    quotaName;
-                                    desiredValue;
-                                    status;
-                                    created;
-                                    lastUpdated;
-                                    requester;
-                                    quotaArn;
-                                    globalQuota;
-                                    unit
-                                  }
+      fun ?requestType ->
+        fun ?caseId ->
+          fun ?serviceCode ->
+            fun ?serviceName ->
+              fun ?quotaCode ->
+                fun ?quotaName ->
+                  fun ?desiredValue ->
+                    fun ?status ->
+                      fun ?created ->
+                        fun ?lastUpdated ->
+                          fun ?requester ->
+                            fun ?quotaArn ->
+                              fun ?globalQuota ->
+                                fun ?unit ->
+                                  fun ?quotaRequestedAtLevel ->
+                                    fun ?quotaContext ->
+                                      fun () ->
+                                        {
+                                          id;
+                                          requestType;
+                                          caseId;
+                                          serviceCode;
+                                          serviceName;
+                                          quotaCode;
+                                          quotaName;
+                                          desiredValue;
+                                          status;
+                                          created;
+                                          lastUpdated;
+                                          requester;
+                                          quotaArn;
+                                          globalQuota;
+                                          unit;
+                                          quotaRequestedAtLevel;
+                                          quotaContext
+                                        }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:RequestId.to_value));
+        ("RequestType", (Option.map x.requestType ~f:RequestType.to_value));
         ("CaseId",
           (Option.map x.caseId ~f:CustomerServiceEngagementId.to_value));
         ("ServiceCode", (Option.map x.serviceCode ~f:ServiceCode.to_value));
@@ -977,9 +1371,19 @@ module RequestedServiceQuotaChange =
         ("Requester", (Option.map x.requester ~f:Requester.to_value));
         ("QuotaArn", (Option.map x.quotaArn ~f:QuotaArn.to_value));
         ("GlobalQuota", (Option.map x.globalQuota ~f:GlobalQuota.to_value));
-        ("Unit", (Option.map x.unit ~f:QuotaUnit.to_value))]
+        ("Unit", (Option.map x.unit ~f:QuotaUnit.to_value));
+        ("QuotaRequestedAtLevel",
+          (Option.map x.quotaRequestedAtLevel ~f:AppliedLevelEnum.to_value));
+        ("QuotaContext",
+          (Option.map x.quotaContext ~f:QuotaContextInfo.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let quotaContext =
+        (Option.map ~f:QuotaContextInfo.of_xml)
+          (Xml.child xml_arg0 "QuotaContext") in
+      let quotaRequestedAtLevel =
+        (Option.map ~f:AppliedLevelEnum.of_xml)
+          (Xml.child xml_arg0 "QuotaRequestedAtLevel") in
       let unit = (Option.map ~f:QuotaUnit.of_xml) (Xml.child xml_arg0 "Unit") in
       let globalQuota =
         (Option.map ~f:GlobalQuota.of_xml) (Xml.child xml_arg0 "GlobalQuota") in
@@ -1006,32 +1410,167 @@ module RequestedServiceQuotaChange =
       let caseId =
         (Option.map ~f:CustomerServiceEngagementId.of_xml)
           (Xml.child xml_arg0 "CaseId") in
+      let requestType =
+        (Option.map ~f:RequestType.of_xml) (Xml.child xml_arg0 "RequestType") in
       let id = (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?unit ?globalQuota ?quotaArn ?requester ?lastUpdated ?created
-        ?status ?desiredValue ?quotaName ?quotaCode ?serviceName ?serviceCode
-        ?caseId ?id ()
+      make ?quotaContext ?quotaRequestedAtLevel ?unit ?globalQuota ?quotaArn
+        ?requester ?lastUpdated ?created ?status ?desiredValue ?quotaName
+        ?quotaCode ?serviceName ?serviceCode ?caseId ?requestType ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map json "Unit" QuotaUnit.of_json in
-      let globalQuota = field_map json "GlobalQuota" GlobalQuota.of_json in
-      let quotaArn = field_map json "QuotaArn" QuotaArn.of_json in
-      let requester = field_map json "Requester" Requester.of_json in
-      let lastUpdated = field_map json "LastUpdated" DateTime.of_json in
-      let created = field_map json "Created" DateTime.of_json in
-      let status = field_map json "Status" RequestStatus.of_json in
-      let desiredValue = field_map json "DesiredValue" QuotaValue.of_json in
-      let quotaName = field_map json "QuotaName" QuotaName.of_json in
-      let quotaCode = field_map json "QuotaCode" QuotaCode.of_json in
-      let serviceName = field_map json "ServiceName" ServiceName.of_json in
-      let serviceCode = field_map json "ServiceCode" ServiceCode.of_json in
+    let of_json json__ =
+      let quotaContext =
+        field_map json__ "QuotaContext" QuotaContextInfo.of_json in
+      let quotaRequestedAtLevel =
+        field_map json__ "QuotaRequestedAtLevel" AppliedLevelEnum.of_json in
+      let unit = field_map json__ "Unit" QuotaUnit.of_json in
+      let globalQuota = field_map json__ "GlobalQuota" GlobalQuota.of_json in
+      let quotaArn = field_map json__ "QuotaArn" QuotaArn.of_json in
+      let requester = field_map json__ "Requester" Requester.of_json in
+      let lastUpdated = field_map json__ "LastUpdated" DateTime.of_json in
+      let created = field_map json__ "Created" DateTime.of_json in
+      let status = field_map json__ "Status" RequestStatus.of_json in
+      let desiredValue = field_map json__ "DesiredValue" QuotaValue.of_json in
+      let quotaName = field_map json__ "QuotaName" QuotaName.of_json in
+      let quotaCode = field_map json__ "QuotaCode" QuotaCode.of_json in
+      let serviceName = field_map json__ "ServiceName" ServiceName.of_json in
+      let serviceCode = field_map json__ "ServiceCode" ServiceCode.of_json in
       let caseId =
-        field_map json "CaseId" CustomerServiceEngagementId.of_json in
-      let id = field_map json "Id" RequestId.of_json in
-      make ?unit ?globalQuota ?quotaArn ?requester ?lastUpdated ?created
-        ?status ?desiredValue ?quotaName ?quotaCode ?serviceName ?serviceCode
-        ?caseId ?id ()
+        field_map json__ "CaseId" CustomerServiceEngagementId.of_json in
+      let requestType = field_map json__ "RequestType" RequestType.of_json in
+      let id = field_map json__ "Id" RequestId.of_json in
+      make ?quotaContext ?quotaRequestedAtLevel ?unit ?globalQuota ?quotaArn
+        ?requester ?lastUpdated ?created ?status ?desiredValue ?quotaName
+        ?quotaCode ?serviceName ?serviceCode ?caseId ?requestType ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a quota increase request."]
+module QuotaUtilizationInfo =
+  struct
+    type nonrec t =
+      {
+      quotaCode: QuotaCode.t option [@ocaml.doc "The quota identifier."];
+      serviceCode: ServiceCode.t option
+        [@ocaml.doc "The service identifier."];
+      quotaName: QuotaName.t option [@ocaml.doc "The quota name."];
+      namespace: QuotaMetricNamespace.t option
+        [@ocaml.doc "The namespace of the metric used to track quota usage."];
+      utilization: UtilizationPct.t option
+        [@ocaml.doc
+          "The utilization percentage of the quota, calculated as (current usage / applied value) \195\151 100. Values range from 0.0 to 100.0 or higher if usage exceeds the quota limit."];
+      defaultValue: DefaultValue.t option
+        [@ocaml.doc "The default value of the quota."];
+      appliedValue: AppliedValue.t option
+        [@ocaml.doc
+          "The applied value of the quota, which may be higher than the default value if a quota increase has been requested and approved."];
+      serviceName: ServiceName.t option [@ocaml.doc "The service name."];
+      adjustable: QuotaAdjustable.t option
+        [@ocaml.doc "Indicates whether the quota value can be increased."]}
+    let make ?quotaCode =
+      fun ?serviceCode ->
+        fun ?quotaName ->
+          fun ?namespace ->
+            fun ?utilization ->
+              fun ?defaultValue ->
+                fun ?appliedValue ->
+                  fun ?serviceName ->
+                    fun ?adjustable ->
+                      fun () ->
+                        {
+                          quotaCode;
+                          serviceCode;
+                          quotaName;
+                          namespace;
+                          utilization;
+                          defaultValue;
+                          appliedValue;
+                          serviceName;
+                          adjustable
+                        }
+    let to_value x =
+      structure_to_value
+        [("QuotaCode", (Option.map x.quotaCode ~f:QuotaCode.to_value));
+        ("ServiceCode", (Option.map x.serviceCode ~f:ServiceCode.to_value));
+        ("QuotaName", (Option.map x.quotaName ~f:QuotaName.to_value));
+        ("Namespace",
+          (Option.map x.namespace ~f:QuotaMetricNamespace.to_value));
+        ("Utilization",
+          (Option.map x.utilization ~f:UtilizationPct.to_value));
+        ("DefaultValue",
+          (Option.map x.defaultValue ~f:DefaultValue.to_value));
+        ("AppliedValue",
+          (Option.map x.appliedValue ~f:AppliedValue.to_value));
+        ("ServiceName", (Option.map x.serviceName ~f:ServiceName.to_value));
+        ("Adjustable", (Option.map x.adjustable ~f:QuotaAdjustable.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let adjustable =
+        (Option.map ~f:QuotaAdjustable.of_xml)
+          (Xml.child xml_arg0 "Adjustable") in
+      let serviceName =
+        (Option.map ~f:ServiceName.of_xml) (Xml.child xml_arg0 "ServiceName") in
+      let appliedValue =
+        (Option.map ~f:AppliedValue.of_xml)
+          (Xml.child xml_arg0 "AppliedValue") in
+      let defaultValue =
+        (Option.map ~f:DefaultValue.of_xml)
+          (Xml.child xml_arg0 "DefaultValue") in
+      let utilization =
+        (Option.map ~f:UtilizationPct.of_xml)
+          (Xml.child xml_arg0 "Utilization") in
+      let namespace =
+        (Option.map ~f:QuotaMetricNamespace.of_xml)
+          (Xml.child xml_arg0 "Namespace") in
+      let quotaName =
+        (Option.map ~f:QuotaName.of_xml) (Xml.child xml_arg0 "QuotaName") in
+      let serviceCode =
+        (Option.map ~f:ServiceCode.of_xml) (Xml.child xml_arg0 "ServiceCode") in
+      let quotaCode =
+        (Option.map ~f:QuotaCode.of_xml) (Xml.child xml_arg0 "QuotaCode") in
+      make ?adjustable ?serviceName ?appliedValue ?defaultValue ?utilization
+        ?namespace ?quotaName ?serviceCode ?quotaCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let adjustable = field_map json__ "Adjustable" QuotaAdjustable.of_json in
+      let serviceName = field_map json__ "ServiceName" ServiceName.of_json in
+      let appliedValue = field_map json__ "AppliedValue" AppliedValue.of_json in
+      let defaultValue = field_map json__ "DefaultValue" DefaultValue.of_json in
+      let utilization = field_map json__ "Utilization" UtilizationPct.of_json in
+      let namespace =
+        field_map json__ "Namespace" QuotaMetricNamespace.of_json in
+      let quotaName = field_map json__ "QuotaName" QuotaName.of_json in
+      let serviceCode = field_map json__ "ServiceCode" ServiceCode.of_json in
+      let quotaCode = field_map json__ "QuotaCode" QuotaCode.of_json in
+      make ?adjustable ?serviceName ?appliedValue ?defaultValue ?utilization
+        ?namespace ?quotaName ?serviceCode ?quotaCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a quota's utilization, including the quota code, service information, current usage, and applied limits."]
+module QuotaInfoList =
+  struct
+    type nonrec t = QuotaInfo.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QuotaInfo.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QuotaInfo.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QuotaInfoList" ~of_json:QuotaInfo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AccessDeniedException =
   struct
     type nonrec t = {
@@ -1047,8 +1586,8 @@ module AccessDeniedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1068,8 +1607,8 @@ module IllegalArgumentException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Invalid input was provided."]
@@ -1088,8 +1627,8 @@ module NoSuchResourceException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource does not exist."]
@@ -1108,8 +1647,8 @@ module ServiceException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Something went wrong."]
@@ -1128,8 +1667,8 @@ module TooManyRequestsException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1156,10 +1695,71 @@ module AmazonResourceName =
     let of_json j = string_of_json ~kind:"AmazonResourceName" j
     let to_json = simple_to_json to_value
   end
+module ExclusionList =
+  struct
+    type nonrec t = (ExcludedService.t * ExcludedQuotaList.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types ExcludedService ExcludedQuotaList"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ExcludedService.to_value x) |>
+                    (fun x ->
+                       (ExcludedQuotaList.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ExcludedService.of_string
+        ~of_json:ExcludedQuotaList.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OptInType =
+  struct
+    type nonrec t =
+      | NotifyOnly 
+      | NotifyAndAdjust 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NotifyOnly -> "NotifyOnly"
+      | NotifyAndAdjust -> "NotifyAndAdjust"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NotifyOnly" -> NotifyOnly
+      | "NotifyAndAdjust" -> NotifyAndAdjust
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration OptInType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OptInType" j)
+    let to_json = simple_to_json to_value
+  end
 module InputTagKeys =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1195,8 +1795,8 @@ module TagPolicyViolationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified tag is a reserved word and cannot be used."]
@@ -1215,8 +1815,8 @@ module TooManyTagsException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1226,6 +1826,9 @@ module InputTags =
     type nonrec t = Tag.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1245,6 +1848,115 @@ module InputTags =
     let of_json j = list_of_json ~kind:"InputTags" ~of_json:Tag.of_json j
     let to_json v = composed_to_json to_value v
   end
+module InvalidPaginationTokenException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Invalid input was provided."]
+module ReportId =
+  struct
+    type nonrec t = string
+    let context_ = "ReportId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[0-9a-zA-Z][a-zA-Z0-9-]{1,128}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ReportId" j
+    let to_json = simple_to_json to_value
+  end
+module ReportMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ReportMessage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:350) >>=
+                  (fun () -> check_pattern i ~pattern:"^.{0,350}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ReportMessage" j
+    let to_json = simple_to_json to_value
+  end
+module ReportStatus =
+  struct
+    type nonrec t =
+      | PENDING 
+      | IN_PROGRESS 
+      | COMPLETED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING -> "PENDING"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | COMPLETED -> "COMPLETED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING" -> PENDING
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "COMPLETED" -> COMPLETED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ReportStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ReportStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module OptInLevel =
+  struct
+    type nonrec t =
+      | ACCOUNT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | ACCOUNT -> "ACCOUNT" | Non_static_id s -> s
+    let of_string = function | "ACCOUNT" -> ACCOUNT | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration OptInLevel" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OptInLevel" j)
+    let to_json = simple_to_json to_value
+  end
 module DependencyAccessDeniedException =
   struct
     type nonrec t = {
@@ -1260,8 +1972,8 @@ module DependencyAccessDeniedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1281,8 +1993,8 @@ module InvalidResourceStateException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource is in an invalid state."]
@@ -1301,8 +2013,8 @@ module QuotaExceededException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1322,11 +2034,24 @@ module ResourceAlreadyExistsException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource already exists."]
+module SupportCaseAllowed =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module AWSServiceAccessNotEnabledException =
   struct
     type nonrec t = {
@@ -1342,8 +2067,8 @@ module AWSServiceAccessNotEnabledException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1363,12 +2088,12 @@ module NoAvailableOrganizationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The account making this call is not a member of an organization."]
+       "The Amazon Web Services account making this call is not a member of an organization."]
 module TemplatesNotAvailableInRegionException =
   struct
     type nonrec t = {
@@ -1384,17 +2109,20 @@ module TemplatesNotAvailableInRegionException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The Service Quotas template is not available in this AWS Region."]
+       "The Service Quotas template is not available in this Amazon Web Services Region."]
 module OutputTags =
   struct
     type nonrec t = Tag.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:200); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1414,26 +2142,6 @@ module OutputTags =
     let of_json j = list_of_json ~kind:"OutputTags" ~of_json:Tag.of_json j
     let to_json v = composed_to_json to_value v
   end
-module InvalidPaginationTokenException =
-  struct
-    type nonrec t = {
-      message: ExceptionMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ExceptionMessage.of_xml)
-          (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Invalid input was provided."]
 module NextToken =
   struct
     type nonrec t = string
@@ -1456,6 +2164,9 @@ module ServiceInfoListDefinition =
   struct
     type nonrec t = ServiceInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1499,6 +2210,9 @@ module ServiceQuotaListDefinition =
   struct
     type nonrec t = ServiceQuota.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceQuota.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1524,6 +2238,9 @@ module ServiceQuotaIncreaseRequestInTemplateList =
   struct
     type nonrec t = ServiceQuotaIncreaseRequestInTemplate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceQuotaIncreaseRequestInTemplate.to_value)) |>
         (fun x -> `List x)
@@ -1551,6 +2268,9 @@ module RequestedServiceQuotaChangeHistoryListDefinition =
   struct
     type nonrec t = RequestedServiceQuotaChange.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RequestedServiceQuotaChange.to_value)) |>
         (fun x -> `List x)
@@ -1572,6 +2292,170 @@ module RequestedServiceQuotaChangeHistoryListDefinition =
       list_of_json ~kind:"RequestedServiceQuotaChangeHistoryListDefinition"
         ~of_json:RequestedServiceQuotaChange.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module QuotaUtilizationInfoList =
+  struct
+    type nonrec t = QuotaUtilizationInfo.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1000); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QuotaUtilizationInfo.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QuotaUtilizationInfo.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QuotaUtilizationInfoList"
+        ~of_json:QuotaUtilizationInfo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ReportErrorCode =
+  struct
+    type nonrec t = string
+    let context_ = "ReportErrorCode"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z][a-zA-Z0-9]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ReportErrorCode" j
+    let to_json = simple_to_json to_value
+  end
+module ReportErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ReportErrorMessage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"^.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ReportErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module TotalCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:2147483647) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for TotalCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MaxResultsUtilization =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResultsUtilization" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ExclusionQuotaList =
+  struct
+    type nonrec t = (ExcludedService.t * QuotaInfoList.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types ExcludedService QuotaInfoList"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ExcludedService.to_value x) |>
+                    (fun x -> (QuotaInfoList.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ExcludedService.of_string
+        ~of_json:QuotaInfoList.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OptInStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration OptInStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OptInStatus" j)
+    let to_json = simple_to_json to_value
   end
 module ServiceQuotaTemplateAssociationStatus =
   struct
@@ -1617,8 +2501,8 @@ module ServiceQuotaTemplateNotInUseException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1638,12 +2522,133 @@ module OrganizationNotInAllFeaturesModeException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The organization that your account belongs to is not in All Features mode."]
+       "The organization that your Amazon Web Services account belongs to is not in All Features mode."]
+module UpdateAutoManagementResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `IllegalArgumentException of IllegalArgumentException.t 
+      | `NoSuchResourceException of NoSuchResourceException.t 
+      | `ServiceException of ServiceException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "IllegalArgumentException" ->
+          `IllegalArgumentException (IllegalArgumentException.of_json json)
+      | "NoSuchResourceException" ->
+          `NoSuchResourceException (NoSuchResourceException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "IllegalArgumentException" ->
+          `IllegalArgumentException (IllegalArgumentException.of_xml xml)
+      | "NoSuchResourceException" ->
+          `NoSuchResourceException (NoSuchResourceException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `IllegalArgumentException e ->
+          `Assoc
+            [("error", (`String "IllegalArgumentException"));
+            ("details", (IllegalArgumentException.to_json e))]
+      | `NoSuchResourceException e ->
+          `Assoc
+            [("error", (`String "NoSuchResourceException"));
+            ("details", (NoSuchResourceException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates your Service Quotas Automatic Management configuration, including notification preferences and excluded quotas. Automatic Management monitors your Service Quotas utilization and notifies you before you run out of your allocated quotas."]
+module UpdateAutoManagementRequest =
+  struct
+    type nonrec t =
+      {
+      optInType: OptInType.t option
+        [@ocaml.doc
+          "Information on the opt-in type for your Automatic Management configuration. There are two modes: Notify only and Notify and Auto-Adjust. Currently, only NotifyOnly is available."];
+      notificationArn: AmazonResourceName.t option
+        [@ocaml.doc
+          "The User Notifications Amazon Resource Name (ARN) for Automatic Management notifications you want to update."];
+      exclusionList: ExclusionList.t option
+        [@ocaml.doc
+          "List of Amazon Web Services services you want to exclude from Automatic Management. You won't be notified of Service Quotas utilization for Amazon Web Services services added to the Automatic Management exclusion list."]}
+    let make ?optInType =
+      fun ?notificationArn ->
+        fun ?exclusionList ->
+          fun () -> { optInType; notificationArn; exclusionList }
+    let to_value x =
+      structure_to_value
+        [("OptInType", (Option.map x.optInType ~f:OptInType.to_value));
+        ("NotificationArn",
+          (Option.map x.notificationArn ~f:AmazonResourceName.to_value));
+        ("ExclusionList",
+          (Option.map x.exclusionList ~f:ExclusionList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let exclusionList =
+        (Option.map ~f:ExclusionList.of_xml)
+          (Xml.child xml_arg0 "ExclusionList") in
+      let notificationArn =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "NotificationArn") in
+      let optInType =
+        (Option.map ~f:OptInType.of_xml) (Xml.child xml_arg0 "OptInType") in
+      make ?exclusionList ?notificationArn ?optInType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let exclusionList =
+        field_map json__ "ExclusionList" ExclusionList.of_json in
+      let notificationArn =
+        field_map json__ "NotificationArn" AmazonResourceName.of_json in
+      let optInType = field_map json__ "OptInType" OptInType.of_json in
+      make ?exclusionList ?notificationArn ?optInType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates your Service Quotas Automatic Management configuration, including notification preferences and excluded quotas. Automatic Management monitors your Service Quotas utilization and notifies you before you run out of your allocated quotas."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -1725,7 +2730,7 @@ module UntagResourceRequest =
       {
       resourceARN: AmazonResourceName.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the applied quota that you want to untag. You can get this information by using the Service Quotas console, or by listing the quotas using the list-service-quotas AWS CLI command or the ListServiceQuotas AWS API operation."];
+          "The Amazon Resource Name (ARN) for the applied quota that you want to untag. You can get this information by using the Service Quotas console, or by listing the quotas using the list-service-quotas CLI command or the ListServiceQuotas Amazon Web Services API operation."];
       tagKeys: InputTagKeys.t
         [@ocaml.doc
           "The keys of the tags that you want to remove from the resource."]}
@@ -1746,10 +2751,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" InputTagKeys.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" InputTagKeys.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1855,7 +2860,7 @@ module TagResourceRequest =
       {
       resourceARN: AmazonResourceName.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the applied quota. You can get this information by using the Service Quotas console, or by listing the quotas using the list-service-quotas AWS CLI command or the ListServiceQuotas AWS API operation."];
+          "The Amazon Resource Name (ARN) for the applied quota. You can get this information by using the Service Quotas console, or by listing the quotas using the list-service-quotas CLI command or the ListServiceQuotas Amazon Web Services API operation."];
       tags: InputTags.t
         [@ocaml.doc "The tags that you want to add to the resource."]}
     let context_ = "TagResourceRequest"
@@ -1873,14 +2878,359 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" InputTags.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" InputTags.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Adds tags to the specified applied quota. You can include one or more tags to add to the quota."]
+module StopAutoManagementResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `IllegalArgumentException of IllegalArgumentException.t 
+      | `NoSuchResourceException of NoSuchResourceException.t 
+      | `ServiceException of ServiceException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "IllegalArgumentException" ->
+          `IllegalArgumentException (IllegalArgumentException.of_json json)
+      | "NoSuchResourceException" ->
+          `NoSuchResourceException (NoSuchResourceException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "IllegalArgumentException" ->
+          `IllegalArgumentException (IllegalArgumentException.of_xml xml)
+      | "NoSuchResourceException" ->
+          `NoSuchResourceException (NoSuchResourceException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `IllegalArgumentException e ->
+          `Assoc
+            [("error", (`String "IllegalArgumentException"));
+            ("details", (IllegalArgumentException.to_json e))]
+      | `NoSuchResourceException e ->
+          `Assoc
+            [("error", (`String "NoSuchResourceException"));
+            ("details", (NoSuchResourceException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Stops Service Quotas Automatic Management for an Amazon Web Services account and removes all associated configurations. Automatic Management monitors your Service Quotas utilization and notifies you before you run out of your allocated quotas."]
+module StopAutoManagementRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Stops Service Quotas Automatic Management for an Amazon Web Services account and removes all associated configurations. Automatic Management monitors your Service Quotas utilization and notifies you before you run out of your allocated quotas."]
+module StartQuotaUtilizationReportResponse =
+  struct
+    type nonrec t =
+      {
+      reportId: ReportId.t option
+        [@ocaml.doc
+          "A unique identifier for the quota utilization report. Use this identifier with the GetQuotaUtilizationReport operation to retrieve the report results."];
+      status: ReportStatus.t option
+        [@ocaml.doc
+          "The current status of the report generation. The status will be PENDING when the report is first initiated."];
+      message: ReportMessage.t option
+        [@ocaml.doc
+          "An optional message providing additional information about the report generation status. This field may contain details about the report initiation or indicate if an existing recent report is being reused."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `IllegalArgumentException of IllegalArgumentException.t 
+      | `InvalidPaginationTokenException of InvalidPaginationTokenException.t 
+      | `NoSuchResourceException of NoSuchResourceException.t 
+      | `ServiceException of ServiceException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?reportId =
+      fun ?status -> fun ?message -> fun () -> { reportId; status; message }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "IllegalArgumentException" ->
+          `IllegalArgumentException (IllegalArgumentException.of_json json)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_json json)
+      | "NoSuchResourceException" ->
+          `NoSuchResourceException (NoSuchResourceException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "IllegalArgumentException" ->
+          `IllegalArgumentException (IllegalArgumentException.of_xml xml)
+      | "InvalidPaginationTokenException" ->
+          `InvalidPaginationTokenException
+            (InvalidPaginationTokenException.of_xml xml)
+      | "NoSuchResourceException" ->
+          `NoSuchResourceException (NoSuchResourceException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `IllegalArgumentException e ->
+          `Assoc
+            [("error", (`String "IllegalArgumentException"));
+            ("details", (IllegalArgumentException.to_json e))]
+      | `InvalidPaginationTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidPaginationTokenException"));
+            ("details", (InvalidPaginationTokenException.to_json e))]
+      | `NoSuchResourceException e ->
+          `Assoc
+            [("error", (`String "NoSuchResourceException"));
+            ("details", (NoSuchResourceException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ReportId", (Option.map x.reportId ~f:ReportId.to_value));
+        ("Status", (Option.map x.status ~f:ReportStatus.to_value));
+        ("Message", (Option.map x.message ~f:ReportMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ReportMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let status =
+        (Option.map ~f:ReportStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let reportId =
+        (Option.map ~f:ReportId.of_xml) (Xml.child xml_arg0 "ReportId") in
+      make ?message ?status ?reportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ReportMessage.of_json in
+      let status = field_map json__ "Status" ReportStatus.of_json in
+      let reportId = field_map json__ "ReportId" ReportId.of_json in
+      make ?message ?status ?reportId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Initiates the generation of a quota utilization report for your Amazon Web Services account. This asynchronous operation analyzes your quota usage across all Amazon Web Services services and returns a unique report identifier that you can use to retrieve the results. The report generation process may take several seconds to complete, depending on the number of quotas in your account. Use the GetQuotaUtilizationReport operation to check the status and retrieve the results when the report is ready."]
+module StartQuotaUtilizationReportRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Initiates the generation of a quota utilization report for your Amazon Web Services account. This asynchronous operation analyzes your quota usage across all Amazon Web Services services and returns a unique report identifier that you can use to retrieve the results. The report generation process may take several seconds to complete, depending on the number of quotas in your account. Use the GetQuotaUtilizationReport operation to check the status and retrieve the results when the report is ready."]
+module StartAutoManagementResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `IllegalArgumentException of IllegalArgumentException.t 
+      | `NoSuchResourceException of NoSuchResourceException.t 
+      | `ServiceException of ServiceException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "IllegalArgumentException" ->
+          `IllegalArgumentException (IllegalArgumentException.of_json json)
+      | "NoSuchResourceException" ->
+          `NoSuchResourceException (NoSuchResourceException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "IllegalArgumentException" ->
+          `IllegalArgumentException (IllegalArgumentException.of_xml xml)
+      | "NoSuchResourceException" ->
+          `NoSuchResourceException (NoSuchResourceException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `IllegalArgumentException e ->
+          `Assoc
+            [("error", (`String "IllegalArgumentException"));
+            ("details", (IllegalArgumentException.to_json e))]
+      | `NoSuchResourceException e ->
+          `Assoc
+            [("error", (`String "NoSuchResourceException"));
+            ("details", (NoSuchResourceException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts Service Quotas Automatic Management for an Amazon Web Services account, including notification preferences and excluded quotas configurations. Automatic Management monitors your Service Quotas utilization and notifies you before you run out of your allocated quotas."]
+module StartAutoManagementRequest =
+  struct
+    type nonrec t =
+      {
+      optInLevel: OptInLevel.t
+        [@ocaml.doc
+          "Sets the opt-in level for Automatic Management. Only Amazon Web Services account level is supported."];
+      optInType: OptInType.t
+        [@ocaml.doc
+          "Sets the opt-in type for Automatic Management. There are two modes: Notify only and Notify and Auto-Adjust. Currently, only NotifyOnly is available."];
+      notificationArn: AmazonResourceName.t option
+        [@ocaml.doc
+          "The User Notifications Amazon Resource Name (ARN) for Automatic Management notifications."];
+      exclusionList: ExclusionList.t option
+        [@ocaml.doc
+          "List of Amazon Web Services services excluded from Automatic Management. You won't be notified of Service Quotas utilization for Amazon Web Services services added to the Automatic Management exclusion list."]}
+    let context_ = "StartAutoManagementRequest"
+    let make ?notificationArn =
+      fun ?exclusionList ->
+        fun ~optInLevel ->
+          fun ~optInType ->
+            fun () ->
+              { notificationArn; exclusionList; optInLevel; optInType }
+    let to_value x =
+      structure_to_value
+        [("OptInLevel", (Some (OptInLevel.to_value x.optInLevel)));
+        ("OptInType", (Some (OptInType.to_value x.optInType)));
+        ("NotificationArn",
+          (Option.map x.notificationArn ~f:AmazonResourceName.to_value));
+        ("ExclusionList",
+          (Option.map x.exclusionList ~f:ExclusionList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let exclusionList =
+        (Option.map ~f:ExclusionList.of_xml)
+          (Xml.child xml_arg0 "ExclusionList") in
+      let notificationArn =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "NotificationArn") in
+      let optInType =
+        OptInType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OptInType") in
+      let optInLevel =
+        OptInLevel.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OptInLevel") in
+      make ?exclusionList ?notificationArn ~optInType ~optInLevel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let exclusionList =
+        field_map json__ "ExclusionList" ExclusionList.of_json in
+      let notificationArn =
+        field_map json__ "NotificationArn" AmazonResourceName.of_json in
+      let optInType = field_map_exn json__ "OptInType" OptInType.of_json in
+      let optInLevel = field_map_exn json__ "OptInLevel" OptInLevel.of_json in
+      make ?exclusionList ?notificationArn ~optInType ~optInLevel ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts Service Quotas Automatic Management for an Amazon Web Services account, including notification preferences and excluded quotas configurations. Automatic Management monitors your Service Quotas utilization and notifies you before you run out of your allocated quotas."]
 module RequestServiceQuotaIncreaseResponse =
   struct
     type nonrec t =
@@ -2004,33 +3354,61 @@ module RequestServiceQuotaIncreaseResponse =
           (Xml.child xml_arg0 "RequestedQuota") in
       make ?requestedQuota ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requestedQuota =
-        field_map json "RequestedQuota" RequestedServiceQuotaChange.of_json in
+        field_map json__ "RequestedQuota" RequestedServiceQuotaChange.of_json in
       make ?requestedQuota ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Submits a quota increase request for the specified quota."]
+       "Submits a quota increase request for the specified quota at the account or resource level."]
 module RequestServiceQuotaIncreaseRequest =
   struct
     type nonrec t =
       {
-      serviceCode: ServiceCode.t [@ocaml.doc "The service identifier."];
-      quotaCode: QuotaCode.t [@ocaml.doc "The quota identifier."];
+      serviceCode: ServiceCode.t
+        [@ocaml.doc
+          "Specifies the service identifier. To find the service code value for an Amazon Web Services service, use the ListServices operation."];
+      quotaCode: QuotaCode.t
+        [@ocaml.doc
+          "Specifies the quota identifier. To find the quota code for a specific quota, use the ListServiceQuotas operation, and look for the QuotaCode response in the output for the quota you want."];
       desiredValue: QuotaValue.t
-        [@ocaml.doc "The new, increased value for the quota."]}
+        [@ocaml.doc "Specifies the new, increased value for the quota."];
+      contextId: QuotaContextId.t option
+        [@ocaml.doc
+          "Specifies the resource with an Amazon Resource Name (ARN)."];
+      supportCaseAllowed: SupportCaseAllowed.t option
+        [@ocaml.doc
+          "Specifies if an Amazon Web Services Support case can be opened for the quota increase request. This parameter is optional. By default, this flag is set to True and Amazon Web Services may create a support case for some quota increase requests. You can set this flag to False if you do not want a support case created when you request a quota increase. If you set the flag to False, Amazon Web Services does not open a support case and updates the request status to Not approved."]}
     let context_ = "RequestServiceQuotaIncreaseRequest"
-    let make ~serviceCode =
-      fun ~quotaCode ->
-        fun ~desiredValue ->
-          fun () -> { serviceCode; quotaCode; desiredValue }
+    let make ?contextId =
+      fun ?supportCaseAllowed ->
+        fun ~serviceCode ->
+          fun ~quotaCode ->
+            fun ~desiredValue ->
+              fun () ->
+                {
+                  contextId;
+                  supportCaseAllowed;
+                  serviceCode;
+                  quotaCode;
+                  desiredValue
+                }
     let to_value x =
       structure_to_value
         [("ServiceCode", (Some (ServiceCode.to_value x.serviceCode)));
         ("QuotaCode", (Some (QuotaCode.to_value x.quotaCode)));
-        ("DesiredValue", (Some (QuotaValue.to_value x.desiredValue)))]
+        ("DesiredValue", (Some (QuotaValue.to_value x.desiredValue)));
+        ("ContextId", (Option.map x.contextId ~f:QuotaContextId.to_value));
+        ("SupportCaseAllowed",
+          (Option.map x.supportCaseAllowed ~f:SupportCaseAllowed.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let supportCaseAllowed =
+        (Option.map ~f:SupportCaseAllowed.of_xml)
+          (Xml.child xml_arg0 "SupportCaseAllowed") in
+      let contextId =
+        (Option.map ~f:QuotaContextId.of_xml)
+          (Xml.child xml_arg0 "ContextId") in
       let desiredValue =
         QuotaValue.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DesiredValue") in
@@ -2040,16 +3418,23 @@ module RequestServiceQuotaIncreaseRequest =
       let serviceCode =
         ServiceCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
-      make ~desiredValue ~quotaCode ~serviceCode ()
+      make ?supportCaseAllowed ?contextId ~desiredValue ~quotaCode
+        ~serviceCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let desiredValue = field_map_exn json "DesiredValue" QuotaValue.of_json in
-      let quotaCode = field_map_exn json "QuotaCode" QuotaCode.of_json in
-      let serviceCode = field_map_exn json "ServiceCode" ServiceCode.of_json in
-      make ~desiredValue ~quotaCode ~serviceCode ()
+    let of_json json__ =
+      let supportCaseAllowed =
+        field_map json__ "SupportCaseAllowed" SupportCaseAllowed.of_json in
+      let contextId = field_map json__ "ContextId" QuotaContextId.of_json in
+      let desiredValue =
+        field_map_exn json__ "DesiredValue" QuotaValue.of_json in
+      let quotaCode = field_map_exn json__ "QuotaCode" QuotaCode.of_json in
+      let serviceCode =
+        field_map_exn json__ "ServiceCode" ServiceCode.of_json in
+      make ?supportCaseAllowed ?contextId ~desiredValue ~quotaCode
+        ~serviceCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Submits a quota increase request for the specified quota."]
+       "Submits a quota increase request for the specified quota at the account or resource level."]
 module PutServiceQuotaIncreaseRequestIntoTemplateResponse =
   struct
     type nonrec t =
@@ -2190,9 +3575,9 @@ module PutServiceQuotaIncreaseRequestIntoTemplateResponse =
           (Xml.child xml_arg0 "ServiceQuotaIncreaseRequestInTemplate") in
       make ?serviceQuotaIncreaseRequestInTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceQuotaIncreaseRequestInTemplate =
-        field_map json "ServiceQuotaIncreaseRequestInTemplate"
+        field_map json__ "ServiceQuotaIncreaseRequestInTemplate"
           ServiceQuotaIncreaseRequestInTemplate.of_json in
       make ?serviceQuotaIncreaseRequestInTemplate ()
     let to_json v = composed_to_json to_value v
@@ -2202,11 +3587,17 @@ module PutServiceQuotaIncreaseRequestIntoTemplateRequest =
   struct
     type nonrec t =
       {
-      quotaCode: QuotaCode.t [@ocaml.doc "The quota identifier."];
-      serviceCode: ServiceCode.t [@ocaml.doc "The service identifier."];
-      awsRegion: AwsRegion.t [@ocaml.doc "The AWS Region."];
+      quotaCode: QuotaCode.t
+        [@ocaml.doc
+          "Specifies the quota identifier. To find the quota code for a specific quota, use the ListServiceQuotas operation, and look for the QuotaCode response in the output for the quota you want."];
+      serviceCode: ServiceCode.t
+        [@ocaml.doc
+          "Specifies the service identifier. To find the service code value for an Amazon Web Services service, use the ListServices operation."];
+      awsRegion: AwsRegion.t
+        [@ocaml.doc
+          "Specifies the Amazon Web Services Region to which the template applies."];
       desiredValue: QuotaValue.t
-        [@ocaml.doc "The new, increased value for the quota."]}
+        [@ocaml.doc "Specifies the new, increased value for the quota."]}
     let context_ = "PutServiceQuotaIncreaseRequestIntoTemplateRequest"
     let make ~quotaCode =
       fun ~serviceCode ->
@@ -2235,11 +3626,13 @@ module PutServiceQuotaIncreaseRequestIntoTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "QuotaCode") in
       make ~desiredValue ~awsRegion ~serviceCode ~quotaCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let desiredValue = field_map_exn json "DesiredValue" QuotaValue.of_json in
-      let awsRegion = field_map_exn json "AwsRegion" AwsRegion.of_json in
-      let serviceCode = field_map_exn json "ServiceCode" ServiceCode.of_json in
-      let quotaCode = field_map_exn json "QuotaCode" QuotaCode.of_json in
+    let of_json json__ =
+      let desiredValue =
+        field_map_exn json__ "DesiredValue" QuotaValue.of_json in
+      let awsRegion = field_map_exn json__ "AwsRegion" AwsRegion.of_json in
+      let serviceCode =
+        field_map_exn json__ "ServiceCode" ServiceCode.of_json in
+      let quotaCode = field_map_exn json__ "QuotaCode" QuotaCode.of_json in
       make ~desiredValue ~awsRegion ~serviceCode ~quotaCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2323,8 +3716,8 @@ module ListTagsForResourceResponse =
         (Option.map ~f:OutputTags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" OutputTags.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" OutputTags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of the tags assigned to the specified applied quota."]
@@ -2334,7 +3727,7 @@ module ListTagsForResourceRequest =
       {
       resourceARN: AmazonResourceName.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the applied quota for which you want to list tags. You can get this information by using the Service Quotas console, or by listing the quotas using the list-service-quotas AWS CLI command or the ListServiceQuotas AWS API operation."]}
+          "The Amazon Resource Name (ARN) for the applied quota for which you want to list tags. You can get this information by using the Service Quotas console, or by listing the quotas using the list-service-quotas CLI command or the ListServiceQuotas Amazon Web Services API operation."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceARN = fun () -> { resourceARN }
     let to_value x =
@@ -2347,9 +3740,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2360,9 +3753,10 @@ module ListServicesResponse =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token to use to retrieve the next page of results. This value is null when there are no more results to return."];
+          "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."];
       services: ServiceInfoListDefinition.t option
-        [@ocaml.doc "Information about the services."]}
+        [@ocaml.doc
+          "The list of the Amazon Web Services service names and service codes."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `IllegalArgumentException of IllegalArgumentException.t 
@@ -2442,23 +3836,24 @@ module ListServicesResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?services ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let services =
-        field_map json "Services" ServiceInfoListDefinition.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "Services" ServiceInfoListDefinition.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?services ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the names and codes for the services integrated with Service Quotas."]
+       "Lists the names and codes for the Amazon Web Services services integrated with Service Quotas."]
 module ListServicesRequest =
   struct
     type nonrec t =
       {
       nextToken: NextToken.t option
-        [@ocaml.doc "The token for the next page of results."];
+        [@ocaml.doc
+          "Specifies a value for receiving additional results after you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to return with a single call. To retrieve the remaining results, if any, make another call with the token returned from this call."]}
+          "Specifies the maximum number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value appropriate to the operation. If additional items exist beyond those included in the current response, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. An API operation can return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
     let make ?nextToken =
       fun ?maxResults -> fun () -> { nextToken; maxResults }
     let to_value x =
@@ -2473,20 +3868,20 @@ module ListServicesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the names and codes for the services integrated with Service Quotas."]
+       "Lists the names and codes for the Amazon Web Services services integrated with Service Quotas."]
 module ListServiceQuotasResponse =
   struct
     type nonrec t =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token to use to retrieve the next page of results. This value is null when there are no more results to return."];
+          "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."];
       quotas: ServiceQuotaListDefinition.t option
         [@ocaml.doc "Information about the quotas."]}
     type nonrec error =
@@ -2577,34 +3972,62 @@ module ListServiceQuotasResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?quotas ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let quotas = field_map json "Quotas" ServiceQuotaListDefinition.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let quotas =
+        field_map json__ "Quotas" ServiceQuotaListDefinition.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?quotas ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the applied quota values for the specified AWS service. For some quotas, only the default values are available. If the applied quota value is not available for a quota, the quota is not retrieved."]
+       "Lists the applied quota values for the specified Amazon Web Services service. For some quotas, only the default values are available. If the applied quota value is not available for a quota, the quota is not retrieved. Filter responses to return applied quota values at either the account level, resource level, or all levels."]
 module ListServiceQuotasRequest =
   struct
     type nonrec t =
       {
-      serviceCode: ServiceCode.t [@ocaml.doc "The service identifier."];
+      serviceCode: ServiceCode.t
+        [@ocaml.doc
+          "Specifies the service identifier. To find the service code value for an Amazon Web Services service, use the ListServices operation."];
       nextToken: NextToken.t option
-        [@ocaml.doc "The token for the next page of results."];
+        [@ocaml.doc
+          "Specifies a value for receiving additional results after you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to return with a single call. To retrieve the remaining results, if any, make another call with the token returned from this call."]}
+          "Specifies the maximum number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value appropriate to the operation. If additional items exist beyond those included in the current response, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. An API operation can return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."];
+      quotaCode: QuotaCode.t option
+        [@ocaml.doc
+          "Specifies the quota identifier. To find the quota code for a specific quota, use the ListServiceQuotas operation, and look for the QuotaCode response in the output for the quota you want."];
+      quotaAppliedAtLevel: AppliedLevelEnum.t option
+        [@ocaml.doc
+          "Filters the response to return applied quota values for the ACCOUNT, RESOURCE, or ALL levels. ACCOUNT is the default."]}
     let context_ = "ListServiceQuotasRequest"
     let make ?nextToken =
       fun ?maxResults ->
-        fun ~serviceCode -> fun () -> { nextToken; maxResults; serviceCode }
+        fun ?quotaCode ->
+          fun ?quotaAppliedAtLevel ->
+            fun ~serviceCode ->
+              fun () ->
+                {
+                  nextToken;
+                  maxResults;
+                  quotaCode;
+                  quotaAppliedAtLevel;
+                  serviceCode
+                }
     let to_value x =
       structure_to_value
         [("ServiceCode", (Some (ServiceCode.to_value x.serviceCode)));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("QuotaCode", (Option.map x.quotaCode ~f:QuotaCode.to_value));
+        ("QuotaAppliedAtLevel",
+          (Option.map x.quotaAppliedAtLevel ~f:AppliedLevelEnum.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let quotaAppliedAtLevel =
+        (Option.map ~f:AppliedLevelEnum.of_xml)
+          (Xml.child xml_arg0 "QuotaAppliedAtLevel") in
+      let quotaCode =
+        (Option.map ~f:QuotaCode.of_xml) (Xml.child xml_arg0 "QuotaCode") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
@@ -2612,16 +4035,22 @@ module ListServiceQuotasRequest =
       let serviceCode =
         ServiceCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
-      make ?maxResults ?nextToken ~serviceCode ()
+      make ?quotaAppliedAtLevel ?quotaCode ?maxResults ?nextToken
+        ~serviceCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let serviceCode = field_map_exn json "ServiceCode" ServiceCode.of_json in
-      make ?maxResults ?nextToken ~serviceCode ()
+    let of_json json__ =
+      let quotaAppliedAtLevel =
+        field_map json__ "QuotaAppliedAtLevel" AppliedLevelEnum.of_json in
+      let quotaCode = field_map json__ "QuotaCode" QuotaCode.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let serviceCode =
+        field_map_exn json__ "ServiceCode" ServiceCode.of_json in
+      make ?quotaAppliedAtLevel ?quotaCode ?maxResults ?nextToken
+        ~serviceCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the applied quota values for the specified AWS service. For some quotas, only the default values are available. If the applied quota value is not available for a quota, the quota is not retrieved."]
+       "Lists the applied quota values for the specified Amazon Web Services service. For some quotas, only the default values are available. If the applied quota value is not available for a quota, the quota is not retrieved. Filter responses to return applied quota values at either the account level, resource level, or all levels."]
 module ListServiceQuotaIncreaseRequestsInTemplateResponse =
   struct
     type nonrec t =
@@ -2631,7 +4060,7 @@ module ListServiceQuotaIncreaseRequestsInTemplateResponse =
         [@ocaml.doc "Information about the quota increase requests."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token to use to retrieve the next page of results. This value is null when there are no more results to return."]}
+          "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."]}
     type nonrec error =
       [
         `AWSServiceAccessNotEnabledException of
@@ -2751,10 +4180,10 @@ module ListServiceQuotaIncreaseRequestsInTemplateResponse =
           (Xml.child xml_arg0 "ServiceQuotaIncreaseRequestInTemplateList") in
       make ?nextToken ?serviceQuotaIncreaseRequestInTemplateList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let serviceQuotaIncreaseRequestInTemplateList =
-        field_map json "ServiceQuotaIncreaseRequestInTemplateList"
+        field_map json__ "ServiceQuotaIncreaseRequestInTemplateList"
           ServiceQuotaIncreaseRequestInTemplateList.of_json in
       make ?nextToken ?serviceQuotaIncreaseRequestInTemplateList ()
     let to_json v = composed_to_json to_value v
@@ -2765,13 +4194,17 @@ module ListServiceQuotaIncreaseRequestsInTemplateRequest =
     type nonrec t =
       {
       serviceCode: ServiceCode.t option
-        [@ocaml.doc "The service identifier."];
-      awsRegion: AwsRegion.t option [@ocaml.doc "The AWS Region."];
+        [@ocaml.doc
+          "Specifies the service identifier. To find the service code value for an Amazon Web Services service, use the ListServices operation."];
+      awsRegion: AwsRegion.t option
+        [@ocaml.doc
+          "Specifies the Amazon Web Services Region for which you made the request."];
       nextToken: NextToken.t option
-        [@ocaml.doc "The token for the next page of results."];
+        [@ocaml.doc
+          "Specifies a value for receiving additional results after you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to return with a single call. To retrieve the remaining results, if any, make another call with the token returned from this call."]}
+          "Specifies the maximum number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value appropriate to the operation. If additional items exist beyond those included in the current response, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. An API operation can return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
     let make ?serviceCode =
       fun ?awsRegion ->
         fun ?nextToken ->
@@ -2795,11 +4228,11 @@ module ListServiceQuotaIncreaseRequestsInTemplateRequest =
         (Option.map ~f:ServiceCode.of_xml) (Xml.child xml_arg0 "ServiceCode") in
       make ?maxResults ?nextToken ?awsRegion ?serviceCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let awsRegion = field_map json "AwsRegion" AwsRegion.of_json in
-      let serviceCode = field_map json "ServiceCode" ServiceCode.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let awsRegion = field_map json__ "AwsRegion" AwsRegion.of_json in
+      let serviceCode = field_map json__ "ServiceCode" ServiceCode.of_json in
       make ?maxResults ?nextToken ?awsRegion ?serviceCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2810,7 +4243,7 @@ module ListRequestedServiceQuotaChangeHistoryResponse =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token to use to retrieve the next page of results. This value is null when there are no more results to return."];
+          "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."];
       requestedQuotas:
         RequestedServiceQuotaChangeHistoryListDefinition.t option
         [@ocaml.doc "Information about the quota increase requests."]}
@@ -2905,41 +4338,60 @@ module ListRequestedServiceQuotaChangeHistoryResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?requestedQuotas ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requestedQuotas =
-        field_map json "RequestedQuotas"
+        field_map json__ "RequestedQuotas"
           RequestedServiceQuotaChangeHistoryListDefinition.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?requestedQuotas ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the quota increase requests for the specified service."]
+       "Retrieves the quota increase requests for the specified Amazon Web Services service. Filter responses to return quota requests at either the account level, resource level, or all levels. Responses include any open or closed requests within 90 days."]
 module ListRequestedServiceQuotaChangeHistoryRequest =
   struct
     type nonrec t =
       {
       serviceCode: ServiceCode.t option
-        [@ocaml.doc "The service identifier."];
+        [@ocaml.doc
+          "Specifies the service identifier. To find the service code value for an Amazon Web Services service, use the ListServices operation."];
       status: RequestStatus.t option
-        [@ocaml.doc "The status of the quota increase request."];
+        [@ocaml.doc
+          "Specifies that you want to filter the results to only the requests with the matching status."];
       nextToken: NextToken.t option
-        [@ocaml.doc "The token for the next page of results."];
+        [@ocaml.doc
+          "Specifies a value for receiving additional results after you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to return with a single call. To retrieve the remaining results, if any, make another call with the token returned from this call."]}
+          "Specifies the maximum number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value appropriate to the operation. If additional items exist beyond those included in the current response, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. An API operation can return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."];
+      quotaRequestedAtLevel: AppliedLevelEnum.t option
+        [@ocaml.doc
+          "Filters the response to return quota requests for the ACCOUNT, RESOURCE, or ALL levels. ACCOUNT is the default."]}
     let make ?serviceCode =
       fun ?status ->
         fun ?nextToken ->
           fun ?maxResults ->
-            fun () -> { serviceCode; status; nextToken; maxResults }
+            fun ?quotaRequestedAtLevel ->
+              fun () ->
+                {
+                  serviceCode;
+                  status;
+                  nextToken;
+                  maxResults;
+                  quotaRequestedAtLevel
+                }
     let to_value x =
       structure_to_value
         [("ServiceCode", (Option.map x.serviceCode ~f:ServiceCode.to_value));
         ("Status", (Option.map x.status ~f:RequestStatus.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("QuotaRequestedAtLevel",
+          (Option.map x.quotaRequestedAtLevel ~f:AppliedLevelEnum.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let quotaRequestedAtLevel =
+        (Option.map ~f:AppliedLevelEnum.of_xml)
+          (Xml.child xml_arg0 "QuotaRequestedAtLevel") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
@@ -2948,24 +4400,28 @@ module ListRequestedServiceQuotaChangeHistoryRequest =
         (Option.map ~f:RequestStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let serviceCode =
         (Option.map ~f:ServiceCode.of_xml) (Xml.child xml_arg0 "ServiceCode") in
-      make ?maxResults ?nextToken ?status ?serviceCode ()
+      make ?quotaRequestedAtLevel ?maxResults ?nextToken ?status ?serviceCode
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let status = field_map json "Status" RequestStatus.of_json in
-      let serviceCode = field_map json "ServiceCode" ServiceCode.of_json in
-      make ?maxResults ?nextToken ?status ?serviceCode ()
+    let of_json json__ =
+      let quotaRequestedAtLevel =
+        field_map json__ "QuotaRequestedAtLevel" AppliedLevelEnum.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let status = field_map json__ "Status" RequestStatus.of_json in
+      let serviceCode = field_map json__ "ServiceCode" ServiceCode.of_json in
+      make ?quotaRequestedAtLevel ?maxResults ?nextToken ?status ?serviceCode
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the quota increase requests for the specified service."]
+       "Retrieves the quota increase requests for the specified Amazon Web Services service. Filter responses to return quota requests at either the account level, resource level, or all levels. Responses include any open or closed requests within 90 days."]
 module ListRequestedServiceQuotaChangeHistoryByQuotaResponse =
   struct
     type nonrec t =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token to use to retrieve the next page of results. This value is null when there are no more results to return."];
+          "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."];
       requestedQuotas:
         RequestedServiceQuotaChangeHistoryListDefinition.t option
         [@ocaml.doc "Information about the quota increase requests."]}
@@ -3060,45 +4516,67 @@ module ListRequestedServiceQuotaChangeHistoryByQuotaResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?requestedQuotas ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requestedQuotas =
-        field_map json "RequestedQuotas"
+        field_map json__ "RequestedQuotas"
           RequestedServiceQuotaChangeHistoryListDefinition.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?requestedQuotas ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the quota increase requests for the specified quota."]
+       "Retrieves the quota increase requests for the specified quota. Filter responses to return quota requests at either the account level, resource level, or all levels."]
 module ListRequestedServiceQuotaChangeHistoryByQuotaRequest =
   struct
     type nonrec t =
       {
-      serviceCode: ServiceCode.t [@ocaml.doc "The service identifier."];
-      quotaCode: QuotaCode.t [@ocaml.doc "The quota identifier."];
+      serviceCode: ServiceCode.t
+        [@ocaml.doc
+          "Specifies the service identifier. To find the service code value for an Amazon Web Services service, use the ListServices operation."];
+      quotaCode: QuotaCode.t
+        [@ocaml.doc
+          "Specifies the quota identifier. To find the quota code for a specific quota, use the ListServiceQuotas operation, and look for the QuotaCode response in the output for the quota you want."];
       status: RequestStatus.t option
-        [@ocaml.doc "The status value of the quota increase request."];
+        [@ocaml.doc
+          "Specifies that you want to filter the results to only the requests with the matching status."];
       nextToken: NextToken.t option
-        [@ocaml.doc "The token for the next page of results."];
+        [@ocaml.doc
+          "Specifies a value for receiving additional results after you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to return with a single call. To retrieve the remaining results, if any, make another call with the token returned from this call."]}
+          "Specifies the maximum number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value appropriate to the operation. If additional items exist beyond those included in the current response, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. An API operation can return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."];
+      quotaRequestedAtLevel: AppliedLevelEnum.t option
+        [@ocaml.doc
+          "Filters the response to return quota requests for the ACCOUNT, RESOURCE, or ALL levels. ACCOUNT is the default."]}
     let context_ = "ListRequestedServiceQuotaChangeHistoryByQuotaRequest"
     let make ?status =
       fun ?nextToken ->
         fun ?maxResults ->
-          fun ~serviceCode ->
-            fun ~quotaCode ->
-              fun () ->
-                { status; nextToken; maxResults; serviceCode; quotaCode }
+          fun ?quotaRequestedAtLevel ->
+            fun ~serviceCode ->
+              fun ~quotaCode ->
+                fun () ->
+                  {
+                    status;
+                    nextToken;
+                    maxResults;
+                    quotaRequestedAtLevel;
+                    serviceCode;
+                    quotaCode
+                  }
     let to_value x =
       structure_to_value
         [("ServiceCode", (Some (ServiceCode.to_value x.serviceCode)));
         ("QuotaCode", (Some (QuotaCode.to_value x.quotaCode)));
         ("Status", (Option.map x.status ~f:RequestStatus.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("QuotaRequestedAtLevel",
+          (Option.map x.quotaRequestedAtLevel ~f:AppliedLevelEnum.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let quotaRequestedAtLevel =
+        (Option.map ~f:AppliedLevelEnum.of_xml)
+          (Xml.child xml_arg0 "QuotaRequestedAtLevel") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
@@ -3111,25 +4589,30 @@ module ListRequestedServiceQuotaChangeHistoryByQuotaRequest =
       let serviceCode =
         ServiceCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
-      make ?maxResults ?nextToken ?status ~quotaCode ~serviceCode ()
+      make ?quotaRequestedAtLevel ?maxResults ?nextToken ?status ~quotaCode
+        ~serviceCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let status = field_map json "Status" RequestStatus.of_json in
-      let quotaCode = field_map_exn json "QuotaCode" QuotaCode.of_json in
-      let serviceCode = field_map_exn json "ServiceCode" ServiceCode.of_json in
-      make ?maxResults ?nextToken ?status ~quotaCode ~serviceCode ()
+    let of_json json__ =
+      let quotaRequestedAtLevel =
+        field_map json__ "QuotaRequestedAtLevel" AppliedLevelEnum.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let status = field_map json__ "Status" RequestStatus.of_json in
+      let quotaCode = field_map_exn json__ "QuotaCode" QuotaCode.of_json in
+      let serviceCode =
+        field_map_exn json__ "ServiceCode" ServiceCode.of_json in
+      make ?quotaRequestedAtLevel ?maxResults ?nextToken ?status ~quotaCode
+        ~serviceCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the quota increase requests for the specified quota."]
+       "Retrieves the quota increase requests for the specified quota. Filter responses to return quota requests at either the account level, resource level, or all levels."]
 module ListAWSDefaultServiceQuotasResponse =
   struct
     type nonrec t =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token to use to retrieve the next page of results. This value is null when there are no more results to return."];
+          "If present, indicates that more output is available than is included in the current response. Use this value in the NextToken request parameter in a subsequent call to the operation to get the next part of the output. You should repeat this until the NextToken response element comes back as null."];
       quotas: ServiceQuotaListDefinition.t option
         [@ocaml.doc "Information about the quotas."]}
     type nonrec error =
@@ -3220,23 +4703,27 @@ module ListAWSDefaultServiceQuotasResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?quotas ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let quotas = field_map json "Quotas" ServiceQuotaListDefinition.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let quotas =
+        field_map json__ "Quotas" ServiceQuotaListDefinition.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?quotas ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the default values for the quotas for the specified AWS service. A default value does not reflect any quota increases."]
+       "Lists the default values for the quotas for the specified Amazon Web Services service. A default value does not reflect any quota increases."]
 module ListAWSDefaultServiceQuotasRequest =
   struct
     type nonrec t =
       {
-      serviceCode: ServiceCode.t [@ocaml.doc "The service identifier."];
+      serviceCode: ServiceCode.t
+        [@ocaml.doc
+          "Specifies the service identifier. To find the service code value for an Amazon Web Services service, use the ListServices operation."];
       nextToken: NextToken.t option
-        [@ocaml.doc "The token for the next page of results."];
+        [@ocaml.doc
+          "Specifies a value for receiving additional results after you receive a NextToken response in a previous request. A NextToken response indicates that more output is available. Set this parameter to the value of the previous call's NextToken response to indicate where the output should continue from."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to return with a single call. To retrieve the remaining results, if any, make another call with the token returned from this call."]}
+          "Specifies the maximum number of results that you want included on each page of the response. If you do not include this parameter, it defaults to a value appropriate to the operation. If additional items exist beyond those included in the current response, the NextToken response element is present and has a value (is not null). Include that value as the NextToken request parameter in the next call to the operation to get the next part of the results. An API operation can return fewer results than the maximum even when there are more results available. You should check NextToken after every operation to ensure that you receive all of the results."]}
     let context_ = "ListAWSDefaultServiceQuotasRequest"
     let make ?nextToken =
       fun ?maxResults ->
@@ -3257,14 +4744,15 @@ module ListAWSDefaultServiceQuotasRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
       make ?maxResults ?nextToken ~serviceCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let serviceCode = field_map_exn json "ServiceCode" ServiceCode.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let serviceCode =
+        field_map_exn json__ "ServiceCode" ServiceCode.of_json in
       make ?maxResults ?nextToken ~serviceCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the default values for the quotas for the specified AWS service. A default value does not reflect any quota increases."]
+       "Lists the default values for the quotas for the specified Amazon Web Services service. A default value does not reflect any quota increases."]
 module GetServiceQuotaResponse =
   struct
     type nonrec t =
@@ -3343,42 +4831,56 @@ module GetServiceQuotaResponse =
         (Option.map ~f:ServiceQuota.of_xml) (Xml.child xml_arg0 "Quota") in
       make ?quota ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let quota = field_map json "Quota" ServiceQuota.of_json in
+    let of_json json__ =
+      let quota = field_map json__ "Quota" ServiceQuota.of_json in
       make ?quota ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the applied quota value for the specified quota. For some quotas, only the default values are available. If the applied quota value is not available for a quota, the quota is not retrieved."]
+       "Retrieves the applied quota value for the specified account-level or resource-level quota. For some quotas, only the default values are available. If the applied quota value is not available for a quota, the quota is not retrieved."]
 module GetServiceQuotaRequest =
   struct
     type nonrec t =
       {
-      serviceCode: ServiceCode.t [@ocaml.doc "The service identifier."];
-      quotaCode: QuotaCode.t [@ocaml.doc "The quota identifier."]}
+      serviceCode: ServiceCode.t
+        [@ocaml.doc
+          "Specifies the service identifier. To find the service code value for an Amazon Web Services service, use the ListServices operation."];
+      quotaCode: QuotaCode.t
+        [@ocaml.doc
+          "Specifies the quota identifier. To find the quota code for a specific quota, use the ListServiceQuotas operation, and look for the QuotaCode response in the output for the quota you want."];
+      contextId: QuotaContextId.t option
+        [@ocaml.doc
+          "Specifies the resource with an Amazon Resource Name (ARN)."]}
     let context_ = "GetServiceQuotaRequest"
-    let make ~serviceCode =
-      fun ~quotaCode -> fun () -> { serviceCode; quotaCode }
+    let make ?contextId =
+      fun ~serviceCode ->
+        fun ~quotaCode -> fun () -> { contextId; serviceCode; quotaCode }
     let to_value x =
       structure_to_value
         [("ServiceCode", (Some (ServiceCode.to_value x.serviceCode)));
-        ("QuotaCode", (Some (QuotaCode.to_value x.quotaCode)))]
+        ("QuotaCode", (Some (QuotaCode.to_value x.quotaCode)));
+        ("ContextId", (Option.map x.contextId ~f:QuotaContextId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let contextId =
+        (Option.map ~f:QuotaContextId.of_xml)
+          (Xml.child xml_arg0 "ContextId") in
       let quotaCode =
         QuotaCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QuotaCode") in
       let serviceCode =
         ServiceCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
-      make ~quotaCode ~serviceCode ()
+      make ?contextId ~quotaCode ~serviceCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let quotaCode = field_map_exn json "QuotaCode" QuotaCode.of_json in
-      let serviceCode = field_map_exn json "ServiceCode" ServiceCode.of_json in
-      make ~quotaCode ~serviceCode ()
+    let of_json json__ =
+      let contextId = field_map json__ "ContextId" QuotaContextId.of_json in
+      let quotaCode = field_map_exn json__ "QuotaCode" QuotaCode.of_json in
+      let serviceCode =
+        field_map_exn json__ "ServiceCode" ServiceCode.of_json in
+      make ?contextId ~quotaCode ~serviceCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the applied quota value for the specified quota. For some quotas, only the default values are available. If the applied quota value is not available for a quota, the quota is not retrieved."]
+       "Retrieves the applied quota value for the specified account-level or resource-level quota. For some quotas, only the default values are available. If the applied quota value is not available for a quota, the quota is not retrieved."]
 module GetServiceQuotaIncreaseRequestFromTemplateResponse =
   struct
     type nonrec t =
@@ -3510,9 +5012,9 @@ module GetServiceQuotaIncreaseRequestFromTemplateResponse =
           (Xml.child xml_arg0 "ServiceQuotaIncreaseRequestInTemplate") in
       make ?serviceQuotaIncreaseRequestInTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceQuotaIncreaseRequestInTemplate =
-        field_map json "ServiceQuotaIncreaseRequestInTemplate"
+        field_map json__ "ServiceQuotaIncreaseRequestInTemplate"
           ServiceQuotaIncreaseRequestInTemplate.of_json in
       make ?serviceQuotaIncreaseRequestInTemplate ()
     let to_json v = composed_to_json to_value v
@@ -3522,9 +5024,15 @@ module GetServiceQuotaIncreaseRequestFromTemplateRequest =
   struct
     type nonrec t =
       {
-      serviceCode: ServiceCode.t [@ocaml.doc "The service identifier."];
-      quotaCode: QuotaCode.t [@ocaml.doc "The quota identifier."];
-      awsRegion: AwsRegion.t [@ocaml.doc "The AWS Region."]}
+      serviceCode: ServiceCode.t
+        [@ocaml.doc
+          "Specifies the service identifier. To find the service code value for an Amazon Web Services service, use the ListServices operation."];
+      quotaCode: QuotaCode.t
+        [@ocaml.doc
+          "Specifies the quota identifier. To find the quota code for a specific quota, use the ListServiceQuotas operation, and look for the QuotaCode response in the output for the quota you want."];
+      awsRegion: AwsRegion.t
+        [@ocaml.doc
+          "Specifies the Amazon Web Services Region for which you made the request."]}
     let context_ = "GetServiceQuotaIncreaseRequestFromTemplateRequest"
     let make ~serviceCode =
       fun ~quotaCode ->
@@ -3547,10 +5055,11 @@ module GetServiceQuotaIncreaseRequestFromTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
       make ~awsRegion ~quotaCode ~serviceCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let awsRegion = field_map_exn json "AwsRegion" AwsRegion.of_json in
-      let quotaCode = field_map_exn json "QuotaCode" QuotaCode.of_json in
-      let serviceCode = field_map_exn json "ServiceCode" ServiceCode.of_json in
+    let of_json json__ =
+      let awsRegion = field_map_exn json__ "AwsRegion" AwsRegion.of_json in
+      let quotaCode = field_map_exn json__ "QuotaCode" QuotaCode.of_json in
+      let serviceCode =
+        field_map_exn json__ "ServiceCode" ServiceCode.of_json in
       make ~awsRegion ~quotaCode ~serviceCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3636,9 +5145,9 @@ module GetRequestedServiceQuotaChangeResponse =
           (Xml.child xml_arg0 "RequestedQuota") in
       make ?requestedQuota ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requestedQuota =
-        field_map json "RequestedQuota" RequestedServiceQuotaChange.of_json in
+        field_map json__ "RequestedQuota" RequestedServiceQuotaChange.of_json in
       make ?requestedQuota ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3648,7 +5157,7 @@ module GetRequestedServiceQuotaChangeRequest =
     type nonrec t =
       {
       requestId: RequestId.t
-        [@ocaml.doc "The ID of the quota increase request."]}
+        [@ocaml.doc "Specifies the ID of the quota increase request."]}
     let context_ = "GetRequestedServiceQuotaChangeRequest"
     let make ~requestId = fun () -> { requestId }
     let to_value x =
@@ -3661,12 +5170,361 @@ module GetRequestedServiceQuotaChangeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RequestId") in
       make ~requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map_exn json "RequestId" RequestId.of_json in
+    let of_json json__ =
+      let requestId = field_map_exn json__ "RequestId" RequestId.of_json in
       make ~requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves information about the specified quota increase request."]
+module GetQuotaUtilizationReportResponse =
+  struct
+    type nonrec t =
+      {
+      reportId: ReportId.t option
+        [@ocaml.doc
+          "The unique identifier for the quota utilization report."];
+      status: ReportStatus.t option
+        [@ocaml.doc
+          "The current status of the report generation. Possible values are: PENDING - The report generation is in progress. Retry this operation after a few seconds. IN_PROGRESS - The report is being processed. Continue polling until the status changes to COMPLETED. COMPLETED - The report is ready and quota utilization data is available in the response. FAILED - The report generation failed. Check the ErrorCode and ErrorMessage fields for details."];
+      generatedAt: DateTime.t option
+        [@ocaml.doc
+          "The timestamp when the report was generated, in ISO 8601 format."];
+      totalCount: TotalCount.t option
+        [@ocaml.doc
+          "The total number of quotas included in the report across all pages."];
+      quotas: QuotaUtilizationInfoList.t option
+        [@ocaml.doc
+          "A list of quota utilization records, sorted by utilization percentage in descending order. Each record includes the quota code, service code, service name, quota name, namespace, utilization percentage, default value, applied value, and whether the quota is adjustable. Up to 1,000 records are returned per page."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token that indicates more results are available. Include this token in the next request to retrieve the next page of results. If this field is not present, you have retrieved all available results."];
+      errorCode: ReportErrorCode.t option
+        [@ocaml.doc
+          "An error code indicating the reason for failure when the report status is FAILED. This field is only present when the status is FAILED."];
+      errorMessage: ReportErrorMessage.t option
+        [@ocaml.doc
+          "A detailed error message describing the failure when the report status is FAILED. This field is only present when the status is FAILED."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `IllegalArgumentException of IllegalArgumentException.t 
+      | `NoSuchResourceException of NoSuchResourceException.t 
+      | `ServiceException of ServiceException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?reportId =
+      fun ?status ->
+        fun ?generatedAt ->
+          fun ?totalCount ->
+            fun ?quotas ->
+              fun ?nextToken ->
+                fun ?errorCode ->
+                  fun ?errorMessage ->
+                    fun () ->
+                      {
+                        reportId;
+                        status;
+                        generatedAt;
+                        totalCount;
+                        quotas;
+                        nextToken;
+                        errorCode;
+                        errorMessage
+                      }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "IllegalArgumentException" ->
+          `IllegalArgumentException (IllegalArgumentException.of_json json)
+      | "NoSuchResourceException" ->
+          `NoSuchResourceException (NoSuchResourceException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "IllegalArgumentException" ->
+          `IllegalArgumentException (IllegalArgumentException.of_xml xml)
+      | "NoSuchResourceException" ->
+          `NoSuchResourceException (NoSuchResourceException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `IllegalArgumentException e ->
+          `Assoc
+            [("error", (`String "IllegalArgumentException"));
+            ("details", (IllegalArgumentException.to_json e))]
+      | `NoSuchResourceException e ->
+          `Assoc
+            [("error", (`String "NoSuchResourceException"));
+            ("details", (NoSuchResourceException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ReportId", (Option.map x.reportId ~f:ReportId.to_value));
+        ("Status", (Option.map x.status ~f:ReportStatus.to_value));
+        ("GeneratedAt", (Option.map x.generatedAt ~f:DateTime.to_value));
+        ("TotalCount", (Option.map x.totalCount ~f:TotalCount.to_value));
+        ("Quotas",
+          (Option.map x.quotas ~f:QuotaUtilizationInfoList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("ErrorCode", (Option.map x.errorCode ~f:ReportErrorCode.to_value));
+        ("ErrorMessage",
+          (Option.map x.errorMessage ~f:ReportErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:ReportErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage") in
+      let errorCode =
+        (Option.map ~f:ReportErrorCode.of_xml)
+          (Xml.child xml_arg0 "ErrorCode") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let quotas =
+        (Option.map ~f:QuotaUtilizationInfoList.of_xml)
+          (Xml.child xml_arg0 "Quotas") in
+      let totalCount =
+        (Option.map ~f:TotalCount.of_xml) (Xml.child xml_arg0 "TotalCount") in
+      let generatedAt =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "GeneratedAt") in
+      let status =
+        (Option.map ~f:ReportStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let reportId =
+        (Option.map ~f:ReportId.of_xml) (Xml.child xml_arg0 "ReportId") in
+      make ?errorMessage ?errorCode ?nextToken ?quotas ?totalCount
+        ?generatedAt ?status ?reportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage =
+        field_map json__ "ErrorMessage" ReportErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ReportErrorCode.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let quotas = field_map json__ "Quotas" QuotaUtilizationInfoList.of_json in
+      let totalCount = field_map json__ "TotalCount" TotalCount.of_json in
+      let generatedAt = field_map json__ "GeneratedAt" DateTime.of_json in
+      let status = field_map json__ "Status" ReportStatus.of_json in
+      let reportId = field_map json__ "ReportId" ReportId.of_json in
+      make ?errorMessage ?errorCode ?nextToken ?quotas ?totalCount
+        ?generatedAt ?status ?reportId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the quota utilization report for your Amazon Web Services account. This operation returns paginated results showing your quota usage across all Amazon Web Services services, sorted by utilization percentage in descending order (highest utilization first). You must first initiate a report using the StartQuotaUtilizationReport operation. The report generation process is asynchronous and may take several seconds to complete. Poll this operation periodically to check the status and retrieve results when the report is ready. Each report contains up to 1,000 quota records per page. Use the NextToken parameter to retrieve additional pages of results. Reports are automatically deleted after 15 minutes."]
+module GetQuotaUtilizationReportRequest =
+  struct
+    type nonrec t =
+      {
+      reportId: ReportId.t
+        [@ocaml.doc
+          "The unique identifier for the quota utilization report. This identifier is returned by the StartQuotaUtilizationReport operation."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token that indicates the next page of results to retrieve. This token is returned in the response when there are more results available. Omit this parameter for the first request."];
+      maxResults: MaxResultsUtilization.t option
+        [@ocaml.doc
+          "The maximum number of results to return per page. The default value is 1,000 and the maximum allowed value is 1,000."]}
+    let context_ = "GetQuotaUtilizationReportRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~reportId -> fun () -> { nextToken; maxResults; reportId }
+    let to_value x =
+      structure_to_value
+        [("ReportId", (Some (ReportId.to_value x.reportId)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxResultsUtilization.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResultsUtilization.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let reportId =
+        ReportId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ReportId") in
+      make ?maxResults ?nextToken ~reportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsUtilization.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let reportId = field_map_exn json__ "ReportId" ReportId.of_json in
+      make ?maxResults ?nextToken ~reportId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the quota utilization report for your Amazon Web Services account. This operation returns paginated results showing your quota usage across all Amazon Web Services services, sorted by utilization percentage in descending order (highest utilization first). You must first initiate a report using the StartQuotaUtilizationReport operation. The report generation process is asynchronous and may take several seconds to complete. Poll this operation periodically to check the status and retrieve results when the report is ready. Each report contains up to 1,000 quota records per page. Use the NextToken parameter to retrieve additional pages of results. Reports are automatically deleted after 15 minutes."]
+module GetAutoManagementConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      optInLevel: OptInLevel.t option
+        [@ocaml.doc
+          "Information on the opt-in level for Automatic Management. Only Amazon Web Services account level is supported."];
+      optInType: OptInType.t option
+        [@ocaml.doc
+          "Information on the opt-in type for Automatic Management. There are two modes: Notify only and Notify and Auto-Adjust. Currently, only NotifyOnly is available."];
+      notificationArn: AmazonResourceName.t option
+        [@ocaml.doc
+          "The User Notifications Amazon Resource Name (ARN) for Automatic Management notifications."];
+      optInStatus: OptInStatus.t option
+        [@ocaml.doc
+          "Status on whether Automatic Management is started or stopped."];
+      exclusionList: ExclusionQuotaList.t option
+        [@ocaml.doc
+          "List of Amazon Web Services services excluded from Automatic Management. You won't be notified of Service Quotas utilization for Amazon Web Services services added to the Automatic Management exclusion list."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `IllegalArgumentException of IllegalArgumentException.t 
+      | `NoSuchResourceException of NoSuchResourceException.t 
+      | `ServiceException of ServiceException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?optInLevel =
+      fun ?optInType ->
+        fun ?notificationArn ->
+          fun ?optInStatus ->
+            fun ?exclusionList ->
+              fun () ->
+                {
+                  optInLevel;
+                  optInType;
+                  notificationArn;
+                  optInStatus;
+                  exclusionList
+                }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "IllegalArgumentException" ->
+          `IllegalArgumentException (IllegalArgumentException.of_json json)
+      | "NoSuchResourceException" ->
+          `NoSuchResourceException (NoSuchResourceException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "IllegalArgumentException" ->
+          `IllegalArgumentException (IllegalArgumentException.of_xml xml)
+      | "NoSuchResourceException" ->
+          `NoSuchResourceException (NoSuchResourceException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `IllegalArgumentException e ->
+          `Assoc
+            [("error", (`String "IllegalArgumentException"));
+            ("details", (IllegalArgumentException.to_json e))]
+      | `NoSuchResourceException e ->
+          `Assoc
+            [("error", (`String "NoSuchResourceException"));
+            ("details", (NoSuchResourceException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("OptInLevel", (Option.map x.optInLevel ~f:OptInLevel.to_value));
+        ("OptInType", (Option.map x.optInType ~f:OptInType.to_value));
+        ("NotificationArn",
+          (Option.map x.notificationArn ~f:AmazonResourceName.to_value));
+        ("OptInStatus", (Option.map x.optInStatus ~f:OptInStatus.to_value));
+        ("ExclusionList",
+          (Option.map x.exclusionList ~f:ExclusionQuotaList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let exclusionList =
+        (Option.map ~f:ExclusionQuotaList.of_xml)
+          (Xml.child xml_arg0 "ExclusionList") in
+      let optInStatus =
+        (Option.map ~f:OptInStatus.of_xml) (Xml.child xml_arg0 "OptInStatus") in
+      let notificationArn =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "NotificationArn") in
+      let optInType =
+        (Option.map ~f:OptInType.of_xml) (Xml.child xml_arg0 "OptInType") in
+      let optInLevel =
+        (Option.map ~f:OptInLevel.of_xml) (Xml.child xml_arg0 "OptInLevel") in
+      make ?exclusionList ?optInStatus ?notificationArn ?optInType
+        ?optInLevel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let exclusionList =
+        field_map json__ "ExclusionList" ExclusionQuotaList.of_json in
+      let optInStatus = field_map json__ "OptInStatus" OptInStatus.of_json in
+      let notificationArn =
+        field_map json__ "NotificationArn" AmazonResourceName.of_json in
+      let optInType = field_map json__ "OptInType" OptInType.of_json in
+      let optInLevel = field_map json__ "OptInLevel" OptInLevel.of_json in
+      make ?exclusionList ?optInStatus ?notificationArn ?optInType
+        ?optInLevel ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about your Service Quotas Automatic Management configuration. Automatic Management monitors your Service Quotas utilization and notifies you before you run out of your allocated quotas."]
+module GetAutoManagementConfigurationRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about your Service Quotas Automatic Management configuration. Automatic Management monitors your Service Quotas utilization and notifies you before you run out of your allocated quotas."]
 module GetAssociationForServiceQuotaTemplateResponse =
   struct
     type nonrec t =
@@ -3674,7 +5532,7 @@ module GetAssociationForServiceQuotaTemplateResponse =
       serviceQuotaTemplateAssociationStatus:
         ServiceQuotaTemplateAssociationStatus.t option
         [@ocaml.doc
-          "The association status. If the status is ASSOCIATED, the quota increase requests in the template are automatically applied to new accounts in your organization."]}
+          "The association status. If the status is ASSOCIATED, the quota increase requests in the template are automatically applied to new Amazon Web Services accounts in your organization."]}
     type nonrec error =
       [
         `AWSServiceAccessNotEnabledException of
@@ -3793,9 +5651,9 @@ module GetAssociationForServiceQuotaTemplateResponse =
           (Xml.child xml_arg0 "ServiceQuotaTemplateAssociationStatus") in
       make ?serviceQuotaTemplateAssociationStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceQuotaTemplateAssociationStatus =
-        field_map json "ServiceQuotaTemplateAssociationStatus"
+        field_map json__ "ServiceQuotaTemplateAssociationStatus"
           ServiceQuotaTemplateAssociationStatus.of_json in
       make ?serviceQuotaTemplateAssociationStatus ()
     let to_json v = composed_to_json to_value v
@@ -3892,8 +5750,8 @@ module GetAWSDefaultServiceQuotaResponse =
         (Option.map ~f:ServiceQuota.of_xml) (Xml.child xml_arg0 "Quota") in
       make ?quota ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let quota = field_map json "Quota" ServiceQuota.of_json in
+    let of_json json__ =
+      let quota = field_map json__ "Quota" ServiceQuota.of_json in
       make ?quota ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3902,8 +5760,12 @@ module GetAWSDefaultServiceQuotaRequest =
   struct
     type nonrec t =
       {
-      serviceCode: ServiceCode.t [@ocaml.doc "The service identifier."];
-      quotaCode: QuotaCode.t [@ocaml.doc "The quota identifier."]}
+      serviceCode: ServiceCode.t
+        [@ocaml.doc
+          "Specifies the service identifier. To find the service code value for an Amazon Web Services service, use the ListServices operation."];
+      quotaCode: QuotaCode.t
+        [@ocaml.doc
+          "Specifies the quota identifier. To find the quota code for a specific quota, use the ListServiceQuotas operation, and look for the QuotaCode response in the output for the quota you want."]}
     let context_ = "GetAWSDefaultServiceQuotaRequest"
     let make ~serviceCode =
       fun ~quotaCode -> fun () -> { serviceCode; quotaCode }
@@ -3921,9 +5783,10 @@ module GetAWSDefaultServiceQuotaRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
       make ~quotaCode ~serviceCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let quotaCode = field_map_exn json "QuotaCode" QuotaCode.of_json in
-      let serviceCode = field_map_exn json "ServiceCode" ServiceCode.of_json in
+    let of_json json__ =
+      let quotaCode = field_map_exn json__ "QuotaCode" QuotaCode.of_json in
+      let serviceCode =
+        field_map_exn json__ "ServiceCode" ServiceCode.of_json in
       make ~quotaCode ~serviceCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4044,7 +5907,7 @@ module DisassociateServiceQuotaTemplateResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disables your quota request template. After a template is disabled, the quota increase requests in the template are not applied to new accounts in your organization. Disabling a quota request template does not apply its quota increase requests."]
+       "Disables your quota request template. After a template is disabled, the quota increase requests in the template are not applied to new Amazon Web Services accounts in your organization. Disabling a quota request template does not apply its quota increase requests."]
 module DisassociateServiceQuotaTemplateRequest =
   struct
     type nonrec t = unit
@@ -4057,7 +5920,7 @@ module DisassociateServiceQuotaTemplateRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disables your quota request template. After a template is disabled, the quota increase requests in the template are not applied to new accounts in your organization. Disabling a quota request template does not apply its quota increase requests."]
+       "Disables your quota request template. After a template is disabled, the quota increase requests in the template are not applied to new Amazon Web Services accounts in your organization. Disabling a quota request template does not apply its quota increase requests."]
 module DeleteServiceQuotaIncreaseRequestFromTemplateResponse =
   struct
     type nonrec t = unit
@@ -4185,9 +6048,15 @@ module DeleteServiceQuotaIncreaseRequestFromTemplateRequest =
   struct
     type nonrec t =
       {
-      serviceCode: ServiceCode.t [@ocaml.doc "The service identifier."];
-      quotaCode: QuotaCode.t [@ocaml.doc "The quota identifier."];
-      awsRegion: AwsRegion.t [@ocaml.doc "The AWS Region."]}
+      serviceCode: ServiceCode.t
+        [@ocaml.doc
+          "Specifies the service identifier. To find the service code value for an Amazon Web Services service, use the ListServices operation."];
+      quotaCode: QuotaCode.t
+        [@ocaml.doc
+          "Specifies the quota identifier. To find the quota code for a specific quota, use the ListServiceQuotas operation, and look for the QuotaCode response in the output for the quota you want."];
+      awsRegion: AwsRegion.t
+        [@ocaml.doc
+          "Specifies the Amazon Web Services Region for which the request was made."]}
     let context_ = "DeleteServiceQuotaIncreaseRequestFromTemplateRequest"
     let make ~serviceCode =
       fun ~quotaCode ->
@@ -4210,14 +6079,148 @@ module DeleteServiceQuotaIncreaseRequestFromTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
       make ~awsRegion ~quotaCode ~serviceCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let awsRegion = field_map_exn json "AwsRegion" AwsRegion.of_json in
-      let quotaCode = field_map_exn json "QuotaCode" QuotaCode.of_json in
-      let serviceCode = field_map_exn json "ServiceCode" ServiceCode.of_json in
+    let of_json json__ =
+      let awsRegion = field_map_exn json__ "AwsRegion" AwsRegion.of_json in
+      let quotaCode = field_map_exn json__ "QuotaCode" QuotaCode.of_json in
+      let serviceCode =
+        field_map_exn json__ "ServiceCode" ServiceCode.of_json in
       make ~awsRegion ~quotaCode ~serviceCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the quota increase request for the specified quota from your quota request template."]
+module CreateSupportCaseResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `DependencyAccessDeniedException of DependencyAccessDeniedException.t 
+      | `IllegalArgumentException of IllegalArgumentException.t 
+      | `InvalidResourceStateException of InvalidResourceStateException.t 
+      | `NoSuchResourceException of NoSuchResourceException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ServiceException of ServiceException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "DependencyAccessDeniedException" ->
+          `DependencyAccessDeniedException
+            (DependencyAccessDeniedException.of_json json)
+      | "IllegalArgumentException" ->
+          `IllegalArgumentException (IllegalArgumentException.of_json json)
+      | "InvalidResourceStateException" ->
+          `InvalidResourceStateException
+            (InvalidResourceStateException.of_json json)
+      | "NoSuchResourceException" ->
+          `NoSuchResourceException (NoSuchResourceException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "DependencyAccessDeniedException" ->
+          `DependencyAccessDeniedException
+            (DependencyAccessDeniedException.of_xml xml)
+      | "IllegalArgumentException" ->
+          `IllegalArgumentException (IllegalArgumentException.of_xml xml)
+      | "InvalidResourceStateException" ->
+          `InvalidResourceStateException
+            (InvalidResourceStateException.of_xml xml)
+      | "NoSuchResourceException" ->
+          `NoSuchResourceException (NoSuchResourceException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `DependencyAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "DependencyAccessDeniedException"));
+            ("details", (DependencyAccessDeniedException.to_json e))]
+      | `IllegalArgumentException e ->
+          `Assoc
+            [("error", (`String "IllegalArgumentException"));
+            ("details", (IllegalArgumentException.to_json e))]
+      | `InvalidResourceStateException e ->
+          `Assoc
+            [("error", (`String "InvalidResourceStateException"));
+            ("details", (InvalidResourceStateException.to_json e))]
+      | `NoSuchResourceException e ->
+          `Assoc
+            [("error", (`String "NoSuchResourceException"));
+            ("details", (NoSuchResourceException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a Support case for an existing quota increase request. This call only creates a Support case if the request has a Pending status."]
+module CreateSupportCaseRequest =
+  struct
+    type nonrec t =
+      {
+      requestId: RequestId.t
+        [@ocaml.doc
+          "The ID of the pending quota increase request for which you want to open a Support case."]}
+    let context_ = "CreateSupportCaseRequest"
+    let make ~requestId = fun () -> { requestId }
+    let to_value x =
+      structure_to_value
+        [("RequestId", (Some (RequestId.to_value x.requestId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestId =
+        RequestId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RequestId") in
+      make ~requestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestId = field_map_exn json__ "RequestId" RequestId.of_json in
+      make ~requestId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a Support case for an existing quota increase request. This call only creates a Support case if the request has a Pending status."]
 module AssociateServiceQuotaTemplateResponse =
   struct
     type nonrec t = unit
@@ -4335,7 +6338,7 @@ module AssociateServiceQuotaTemplateResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates your quota request template with your organization. When a new account is created in your organization, the quota increase requests in the template are automatically applied to the account. You can add a quota increase request for any adjustable quota to your template."]
+       "Associates your quota request template with your organization. When a new Amazon Web Services account is created in your organization, the quota increase requests in the template are automatically applied to the account. You can add a quota increase request for any adjustable quota to your template."]
 module AssociateServiceQuotaTemplateRequest =
   struct
     type nonrec t = unit
@@ -4348,4 +6351,4 @@ module AssociateServiceQuotaTemplateRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates your quota request template with your organization. When a new account is created in your organization, the quota increase requests in the template are automatically applied to the account. You can add a quota increase request for any adjustable quota to your template."]
+       "Associates your quota request template with your organization. When a new Amazon Web Services account is created in your organization, the quota increase requests in the template are automatically applied to the account. You can add a quota increase request for any adjustable quota to your template."]

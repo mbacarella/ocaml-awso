@@ -23,28 +23,6 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
-module FeatureName =
-  struct
-    type nonrec t = string
-    let context_ = "FeatureName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:64) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^[a-zA-Z0-9]([-_]*[a-zA-Z0-9])*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"FeatureName" j
-    let to_json = simple_to_json to_value
-  end
 module ValueAsString =
   struct
     type nonrec t = string
@@ -63,6 +41,60 @@ module ValueAsString =
     let of_json j = string_of_json ~kind:"ValueAsString" j
     let to_json = simple_to_json to_value
   end
+module FeatureName =
+  struct
+    type nonrec t = string
+    let context_ = "FeatureName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9]([-_]*[a-zA-Z0-9]){0,63}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FeatureName" j
+    let to_json = simple_to_json to_value
+  end
+module ValueAsStringList =
+  struct
+    type nonrec t = ValueAsString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:358400) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ValueAsString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ValueAsString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ValueAsStringList" ~of_json:ValueAsString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module FeatureValue =
   struct
     type nonrec t =
@@ -70,31 +102,45 @@ module FeatureValue =
       featureName: FeatureName.t
         [@ocaml.doc
           "The name of a feature that a feature value corresponds to."];
-      valueAsString: ValueAsString.t
+      valueAsString: ValueAsString.t option
         [@ocaml.doc
-          "The value associated with a feature, in string format. Note that features types can be String, Integral, or Fractional. This value represents all three types as a string."]}
+          "The value in string format associated with a feature. Used when your CollectionType is None. Note that features types can be String, Integral, or Fractional. This value represents all three types as a string."];
+      valueAsStringList: ValueAsStringList.t option
+        [@ocaml.doc
+          "The list of values in string format associated with a feature. Used when your CollectionType is a List, Set, or Vector. Note that features types can be String, Integral, or Fractional. These values represents all three types as a string."]}
     let context_ = "FeatureValue"
-    let make ~featureName =
-      fun ~valueAsString -> fun () -> { featureName; valueAsString }
+    let make ?valueAsString =
+      fun ?valueAsStringList ->
+        fun ~featureName ->
+          fun () -> { valueAsString; valueAsStringList; featureName }
     let to_value x =
       structure_to_value
         [("FeatureName", (Some (FeatureName.to_value x.featureName)));
-        ("ValueAsString", (Some (ValueAsString.to_value x.valueAsString)))]
+        ("ValueAsString",
+          (Option.map x.valueAsString ~f:ValueAsString.to_value));
+        ("ValueAsStringList",
+          (Option.map x.valueAsStringList ~f:ValueAsStringList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let valueAsStringList =
+        (Option.map ~f:ValueAsStringList.of_xml)
+          (Xml.child xml_arg0 "ValueAsStringList") in
       let valueAsString =
-        ValueAsString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ValueAsString") in
+        (Option.map ~f:ValueAsString.of_xml)
+          (Xml.child xml_arg0 "ValueAsString") in
       let featureName =
         FeatureName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FeatureName") in
-      make ~valueAsString ~featureName ()
+      make ?valueAsStringList ?valueAsString ~featureName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let valueAsStringList =
+        field_map json__ "ValueAsStringList" ValueAsStringList.of_json in
       let valueAsString =
-        field_map_exn json "ValueAsString" ValueAsString.of_json in
-      let featureName = field_map_exn json "FeatureName" FeatureName.of_json in
-      make ~valueAsString ~featureName ()
+        field_map json__ "ValueAsString" ValueAsString.of_json in
+      let featureName =
+        field_map_exn json__ "FeatureName" FeatureName.of_json in
+      make ?valueAsStringList ?valueAsString ~featureName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The value associated with a feature."]
 module Message =
@@ -111,11 +157,27 @@ module Message =
     let of_json j = string_of_json ~kind:"Message" j
     let to_json = simple_to_json to_value
   end
+module ExpiresAt =
+  struct
+    type nonrec t = string
+    let context_ = "ExpiresAt"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExpiresAt" j
+    let to_json = simple_to_json to_value
+  end
 module Record =
   struct
     type nonrec t = FeatureValue.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FeatureValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -136,25 +198,26 @@ module Record =
       list_of_json ~kind:"Record" ~of_json:FeatureValue.of_json j
     let to_json v = composed_to_json to_value v
   end
-module FeatureGroupName =
+module FeatureGroupNameOrArn =
   struct
     type nonrec t = string
-    let context_ = "FeatureGroupName"
+    let context_ = "FeatureGroupNameOrArn"
     let make i =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:64) >>=
+                (check_string_max i ~max:150) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"^[a-zA-Z0-9](-*[a-zA-Z0-9])*")));
+                     check_pattern i
+                       ~pattern:"(arn:aws[a-z\\-]*:sagemaker:[a-z0-9\\-]*:[0-9]{12}:feature-group/)?([a-zA-Z0-9]([-_]*[a-zA-Z0-9]){0,63})")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"FeatureGroupName" j
+    let of_json j = string_of_json ~kind:"FeatureGroupNameOrArn" j
     let to_json = simple_to_json to_value
   end
 module FeatureNames =
@@ -162,6 +225,9 @@ module FeatureNames =
     type nonrec t = FeatureName.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FeatureName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -191,6 +257,9 @@ module RecordIdentifiers =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValueAsString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -211,27 +280,100 @@ module RecordIdentifiers =
       list_of_json ~kind:"RecordIdentifiers" ~of_json:ValueAsString.of_json j
     let to_json v = composed_to_json to_value v
   end
+module TargetStore =
+  struct
+    type nonrec t =
+      | OnlineStore 
+      | OfflineStore 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | OnlineStore -> "OnlineStore"
+      | OfflineStore -> "OfflineStore"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "OnlineStore" -> OnlineStore
+      | "OfflineStore" -> OfflineStore
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TargetStore" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TargetStore" j)
+    let to_json = simple_to_json to_value
+  end
+module TtlDurationUnit =
+  struct
+    type nonrec t =
+      | Seconds 
+      | Minutes 
+      | Hours 
+      | Days 
+      | Weeks 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Seconds -> "Seconds"
+      | Minutes -> "Minutes"
+      | Hours -> "Hours"
+      | Days -> "Days"
+      | Weeks -> "Weeks"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Seconds" -> Seconds
+      | "Minutes" -> Minutes
+      | "Hours" -> Hours
+      | "Days" -> Days
+      | "Weeks" -> Weeks
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TtlDurationUnit" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TtlDurationUnit" j)
+    let to_json = simple_to_json to_value
+  end
+module TtlDurationValue =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for TtlDurationValue" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module BatchGetRecordError =
   struct
     type nonrec t =
       {
-      featureGroupName: ValueAsString.t
+      featureGroupName: ValueAsString.t option
         [@ocaml.doc
           "The name of the feature group that the record belongs to."];
-      recordIdentifierValueAsString: ValueAsString.t
+      recordIdentifierValueAsString: ValueAsString.t option
         [@ocaml.doc
           "The value for the RecordIdentifier in string format of a Record from a FeatureGroup that is causing an error when attempting to be retrieved."];
-      errorCode: ValueAsString.t
+      errorCode: ValueAsString.t option
         [@ocaml.doc
-          "The error code of an error that has occured when attempting to retrieve a batch of Records. For more information on errors, see Errors."];
-      errorMessage: Message.t
+          "The error code of an error that has occurred when attempting to retrieve a batch of Records. For more information on errors, see Errors."];
+      errorMessage: Message.t option
         [@ocaml.doc
-          "The error message of an error that has occured when attempting to retrieve a record in the batch."]}
-    let context_ = "BatchGetRecordError"
-    let make ~featureGroupName =
-      fun ~recordIdentifierValueAsString ->
-        fun ~errorCode ->
-          fun ~errorMessage ->
+          "The error message of an error that has occurred when attempting to retrieve a record in the batch."]}
+    let make ?featureGroupName =
+      fun ?recordIdentifierValueAsString ->
+        fun ?errorCode ->
+          fun ?errorMessage ->
             fun () ->
               {
                 featureGroupName;
@@ -242,39 +384,37 @@ module BatchGetRecordError =
     let to_value x =
       structure_to_value
         [("FeatureGroupName",
-           (Some (ValueAsString.to_value x.featureGroupName)));
+           (Option.map x.featureGroupName ~f:ValueAsString.to_value));
         ("RecordIdentifierValueAsString",
-          (Some (ValueAsString.to_value x.recordIdentifierValueAsString)));
-        ("ErrorCode", (Some (ValueAsString.to_value x.errorCode)));
-        ("ErrorMessage", (Some (Message.to_value x.errorMessage)))]
+          (Option.map x.recordIdentifierValueAsString
+             ~f:ValueAsString.to_value));
+        ("ErrorCode", (Option.map x.errorCode ~f:ValueAsString.to_value));
+        ("ErrorMessage", (Option.map x.errorMessage ~f:Message.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let errorMessage =
-        Message.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorMessage") in
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "ErrorMessage") in
       let errorCode =
-        ValueAsString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
+        (Option.map ~f:ValueAsString.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       let recordIdentifierValueAsString =
-        ValueAsString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "RecordIdentifierValueAsString") in
+        (Option.map ~f:ValueAsString.of_xml)
+          (Xml.child xml_arg0 "RecordIdentifierValueAsString") in
       let featureGroupName =
-        ValueAsString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "FeatureGroupName") in
-      make ~errorMessage ~errorCode ~recordIdentifierValueAsString
-        ~featureGroupName ()
+        (Option.map ~f:ValueAsString.of_xml)
+          (Xml.child xml_arg0 "FeatureGroupName") in
+      make ?errorMessage ?errorCode ?recordIdentifierValueAsString
+        ?featureGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map_exn json "ErrorMessage" Message.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ValueAsString.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" Message.of_json in
+      let errorCode = field_map json__ "ErrorCode" ValueAsString.of_json in
       let recordIdentifierValueAsString =
-        field_map_exn json "RecordIdentifierValueAsString"
+        field_map json__ "RecordIdentifierValueAsString"
           ValueAsString.of_json in
       let featureGroupName =
-        field_map_exn json "FeatureGroupName" ValueAsString.of_json in
-      make ~errorMessage ~errorCode ~recordIdentifierValueAsString
-        ~featureGroupName ()
+        field_map json__ "FeatureGroupName" ValueAsString.of_json in
+      make ?errorMessage ?errorCode ?recordIdentifierValueAsString
+        ?featureGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The error that has occurred when attempting to retrieve a batch of Records."]
@@ -282,56 +422,69 @@ module BatchGetRecordResultDetail =
   struct
     type nonrec t =
       {
-      featureGroupName: ValueAsString.t
+      featureGroupName: ValueAsString.t option
         [@ocaml.doc
           "The FeatureGroupName containing Records you retrieved in a batch."];
-      recordIdentifierValueAsString: ValueAsString.t
-        [@ocaml.doc "The value of the record identifer in string format."];
-      record: Record.t [@ocaml.doc "The Record retrieved."]}
-    let context_ = "BatchGetRecordResultDetail"
-    let make ~featureGroupName =
-      fun ~recordIdentifierValueAsString ->
-        fun ~record ->
-          fun () ->
-            { featureGroupName; recordIdentifierValueAsString; record }
+      recordIdentifierValueAsString: ValueAsString.t option
+        [@ocaml.doc "The value of the record identifier in string format."];
+      record: Record.t option [@ocaml.doc "The Record retrieved."];
+      expiresAt: ExpiresAt.t option
+        [@ocaml.doc "The ExpiresAt ISO string of the requested record."]}
+    let make ?featureGroupName =
+      fun ?recordIdentifierValueAsString ->
+        fun ?record ->
+          fun ?expiresAt ->
+            fun () ->
+              {
+                featureGroupName;
+                recordIdentifierValueAsString;
+                record;
+                expiresAt
+              }
     let to_value x =
       structure_to_value
         [("FeatureGroupName",
-           (Some (ValueAsString.to_value x.featureGroupName)));
+           (Option.map x.featureGroupName ~f:ValueAsString.to_value));
         ("RecordIdentifierValueAsString",
-          (Some (ValueAsString.to_value x.recordIdentifierValueAsString)));
-        ("Record", (Some (Record.to_value x.record)))]
+          (Option.map x.recordIdentifierValueAsString
+             ~f:ValueAsString.to_value));
+        ("Record", (Option.map x.record ~f:Record.to_value));
+        ("ExpiresAt", (Option.map x.expiresAt ~f:ExpiresAt.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let expiresAt =
+        (Option.map ~f:ExpiresAt.of_xml) (Xml.child xml_arg0 "ExpiresAt") in
       let record =
-        Record.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Record") in
+        (Option.map ~f:Record.of_xml) (Xml.child xml_arg0 "Record") in
       let recordIdentifierValueAsString =
-        ValueAsString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "RecordIdentifierValueAsString") in
+        (Option.map ~f:ValueAsString.of_xml)
+          (Xml.child xml_arg0 "RecordIdentifierValueAsString") in
       let featureGroupName =
-        ValueAsString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "FeatureGroupName") in
-      make ~record ~recordIdentifierValueAsString ~featureGroupName ()
+        (Option.map ~f:ValueAsString.of_xml)
+          (Xml.child xml_arg0 "FeatureGroupName") in
+      make ?expiresAt ?record ?recordIdentifierValueAsString
+        ?featureGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let record = field_map_exn json "Record" Record.of_json in
+    let of_json json__ =
+      let expiresAt = field_map json__ "ExpiresAt" ExpiresAt.of_json in
+      let record = field_map json__ "Record" Record.of_json in
       let recordIdentifierValueAsString =
-        field_map_exn json "RecordIdentifierValueAsString"
+        field_map json__ "RecordIdentifierValueAsString"
           ValueAsString.of_json in
       let featureGroupName =
-        field_map_exn json "FeatureGroupName" ValueAsString.of_json in
-      make ~record ~recordIdentifierValueAsString ~featureGroupName ()
+        field_map json__ "FeatureGroupName" ValueAsString.of_json in
+      make ?expiresAt ?record ?recordIdentifierValueAsString
+        ?featureGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The output of Records that have been retrieved in a batch."]
+       "The output of records that have been retrieved in a batch."]
 module BatchGetRecordIdentifier =
   struct
     type nonrec t =
       {
-      featureGroupName: FeatureGroupName.t
+      featureGroupName: FeatureGroupNameOrArn.t
         [@ocaml.doc
-          "A FeatureGroupName containing Records you are retrieving in a batch."];
+          "The name or Amazon Resource Name (ARN) of the FeatureGroup containing the records you are retrieving in a batch."];
       recordIdentifiersValueAsString: RecordIdentifiers.t
         [@ocaml.doc
           "The value for a list of record identifiers in string format."];
@@ -348,7 +501,7 @@ module BatchGetRecordIdentifier =
     let to_value x =
       structure_to_value
         [("FeatureGroupName",
-           (Some (FeatureGroupName.to_value x.featureGroupName)));
+           (Some (FeatureGroupNameOrArn.to_value x.featureGroupName)));
         ("RecordIdentifiersValueAsString",
           (Some (RecordIdentifiers.to_value x.recordIdentifiersValueAsString)));
         ("FeatureNames",
@@ -363,21 +516,81 @@ module BatchGetRecordIdentifier =
           (Xml.child_exn ~context:context_ xml_arg0
              "RecordIdentifiersValueAsString") in
       let featureGroupName =
-        FeatureGroupName.of_xml
+        FeatureGroupNameOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FeatureGroupName") in
       make ?featureNames ~recordIdentifiersValueAsString ~featureGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let featureNames = field_map json "FeatureNames" FeatureNames.of_json in
+    let of_json json__ =
+      let featureNames = field_map json__ "FeatureNames" FeatureNames.of_json in
       let recordIdentifiersValueAsString =
-        field_map_exn json "RecordIdentifiersValueAsString"
+        field_map_exn json__ "RecordIdentifiersValueAsString"
           RecordIdentifiers.of_json in
       let featureGroupName =
-        field_map_exn json "FeatureGroupName" FeatureGroupName.of_json in
+        field_map_exn json__ "FeatureGroupName" FeatureGroupNameOrArn.of_json in
       make ?featureNames ~recordIdentifiersValueAsString ~featureGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The identifier that identifies the batch of Records you are retrieving in a batch."]
+module TargetStores =
+  struct
+    type nonrec t = TargetStore.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TargetStore.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TargetStore.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TargetStores" ~of_json:TargetStore.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TtlDuration =
+  struct
+    type nonrec t =
+      {
+      unit: TtlDurationUnit.t [@ocaml.doc "TtlDuration time unit."];
+      value: TtlDurationValue.t [@ocaml.doc "TtlDuration time value."]}
+    let context_ = "TtlDuration"
+    let make ~unit = fun ~value -> fun () -> { unit; value }
+    let to_value x =
+      structure_to_value
+        [("Unit", (Some (TtlDurationUnit.to_value x.unit)));
+        ("Value", (Some (TtlDurationValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        TtlDurationValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let unit =
+        TtlDurationUnit.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Unit") in
+      make ~value ~unit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TtlDurationValue.of_json in
+      let unit = field_map_exn json__ "Unit" TtlDurationUnit.of_json in
+      make ~value ~unit ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Time to live duration, where the record is hard deleted after the expiration time is reached; ExpiresAt = EventTime + TtlDuration. For information on HardDelete, see the DeleteRecord API in the Amazon SageMaker API Reference guide."]
 module AccessForbidden =
   struct
     type nonrec t = {
@@ -392,8 +605,8 @@ module AccessForbidden =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You do not have permission to perform an action."]
@@ -411,12 +624,12 @@ module InternalFailure =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An internal failure occurred. Try your request again. If the problem persists, contact AWS customer support."]
+       "An internal failure occurred. Try your request again. If the problem persists, contact Amazon Web Services customer support."]
 module ResourceNotFound =
   struct
     type nonrec t = {
@@ -431,8 +644,8 @@ module ResourceNotFound =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -451,8 +664,8 @@ module ServiceUnavailable =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service is currently unavailable."]
@@ -470,16 +683,71 @@ module ValidationError =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "There was an error validating your request."]
+module ExpirationTimeResponse =
+  struct
+    type nonrec t =
+      | Enabled 
+      | Disabled 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Enabled -> "Enabled"
+      | Disabled -> "Disabled"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Enabled" -> Enabled
+      | "Disabled" -> Disabled
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ExpirationTimeResponse" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ExpirationTimeResponse" j)
+    let to_json = simple_to_json to_value
+  end
+module DeletionMode =
+  struct
+    type nonrec t =
+      | SoftDelete 
+      | HardDelete 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SoftDelete -> "SoftDelete"
+      | HardDelete -> "HardDelete"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SoftDelete" -> SoftDelete
+      | "HardDelete" -> HardDelete
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DeletionMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DeletionMode" j)
+    let to_json = simple_to_json to_value
+  end
 module BatchGetRecordErrors =
   struct
     type nonrec t = BatchGetRecordError.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:0); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchGetRecordError.to_value)) |>
         (fun x -> `List x)
@@ -507,6 +775,9 @@ module BatchGetRecordResultDetails =
     type nonrec t = BatchGetRecordResultDetail.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:0); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchGetRecordResultDetail.to_value)) |>
         (fun x -> `List x)
@@ -534,6 +805,9 @@ module UnprocessedIdentifiers =
     type nonrec t = BatchGetRecordIdentifier.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:0); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchGetRecordIdentifier.to_value)) |>
         (fun x -> `List x)
@@ -562,8 +836,12 @@ module BatchGetRecordIdentifiers =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchGetRecordIdentifier.to_value)) |>
         (fun x -> `List x)
@@ -590,43 +868,64 @@ module PutRecordRequest =
   struct
     type nonrec t =
       {
-      featureGroupName: FeatureGroupName.t
+      featureGroupName: FeatureGroupNameOrArn.t
         [@ocaml.doc
-          "The name of the feature group that you want to insert the record into."];
+          "The name or Amazon Resource Name (ARN) of the feature group that you want to insert the record into."];
       record: Record.t
         [@ocaml.doc
-          "List of FeatureValues to be inserted. This will be a full over-write. If you only want to update few of the feature values, do the following: Use GetRecord to retrieve the latest record. Update the record returned from GetRecord. Use PutRecord to update feature values."]}
+          "List of FeatureValues to be inserted. This will be a full over-write. If you only want to update few of the feature values, do the following: Use GetRecord to retrieve the latest record. Update the record returned from GetRecord. Use PutRecord to update feature values."];
+      targetStores: TargetStores.t option
+        [@ocaml.doc
+          "A list of stores to which you're adding the record. By default, Feature Store adds the record to all of the stores that you're using for the FeatureGroup."];
+      ttlDuration: TtlDuration.t option
+        [@ocaml.doc
+          "Time to live duration, where the record is hard deleted after the expiration time is reached; ExpiresAt = EventTime + TtlDuration. For information on HardDelete, see the DeleteRecord API in the Amazon SageMaker API Reference guide."]}
     let context_ = "PutRecordRequest"
-    let make ~featureGroupName =
-      fun ~record -> fun () -> { featureGroupName; record }
+    let make ?targetStores =
+      fun ?ttlDuration ->
+        fun ~featureGroupName ->
+          fun ~record ->
+            fun () -> { targetStores; ttlDuration; featureGroupName; record }
     let to_value x =
       structure_to_value
         [("FeatureGroupName",
-           (Some (FeatureGroupName.to_value x.featureGroupName)));
-        ("Record", (Some (Record.to_value x.record)))]
+           (Some (FeatureGroupNameOrArn.to_value x.featureGroupName)));
+        ("Record", (Some (Record.to_value x.record)));
+        ("TargetStores",
+          (Option.map x.targetStores ~f:TargetStores.to_value));
+        ("TtlDuration", (Option.map x.ttlDuration ~f:TtlDuration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ttlDuration =
+        (Option.map ~f:TtlDuration.of_xml) (Xml.child xml_arg0 "TtlDuration") in
+      let targetStores =
+        (Option.map ~f:TargetStores.of_xml)
+          (Xml.child xml_arg0 "TargetStores") in
       let record =
         Record.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Record") in
       let featureGroupName =
-        FeatureGroupName.of_xml
+        FeatureGroupNameOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FeatureGroupName") in
-      make ~record ~featureGroupName ()
+      make ?ttlDuration ?targetStores ~record ~featureGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let record = field_map_exn json "Record" Record.of_json in
+    let of_json json__ =
+      let ttlDuration = field_map json__ "TtlDuration" TtlDuration.of_json in
+      let targetStores = field_map json__ "TargetStores" TargetStores.of_json in
+      let record = field_map_exn json__ "Record" Record.of_json in
       let featureGroupName =
-        field_map_exn json "FeatureGroupName" FeatureGroupName.of_json in
-      make ~record ~featureGroupName ()
+        field_map_exn json__ "FeatureGroupName" FeatureGroupNameOrArn.of_json in
+      make ?ttlDuration ?targetStores ~record ~featureGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Used for data ingestion into the FeatureStore. The PutRecord API writes to both the OnlineStore and OfflineStore. If the record is the latest record for the recordIdentifier, the record is written to both the OnlineStore and OfflineStore. If the record is a historic record, it is written only to the OfflineStore."]
+       "The PutRecord API is used to ingest a list of Records into your feature group. If a new record\226\128\153s EventTime is greater, the new record is written to both the OnlineStore and OfflineStore. Otherwise, the record is a historic record and it is written only to the OfflineStore. You can specify the ingestion to be applied to the OnlineStore, OfflineStore, or both by using the TargetStores request parameter. You can set the ingested record to expire at a given time to live (TTL) duration after the record\226\128\153s event time, ExpiresAt = EventTime + TtlDuration, by specifying the TtlDuration parameter. A record level TtlDuration is set when specifying the TtlDuration parameter using the PutRecord API call. If the input TtlDuration is null or unspecified, TtlDuration is set to the default feature group level TtlDuration. A record level TtlDuration supersedes the group level TtlDuration."]
 module GetRecordResponse =
   struct
     type nonrec t =
       {
       record: Record.t option
-        [@ocaml.doc "The record you requested. A list of FeatureValues."]}
+        [@ocaml.doc "The record you requested. A list of FeatureValues."];
+      expiresAt: ExpiresAt.t option
+        [@ocaml.doc "The ExpiresAt ISO string of the requested record."]}
     type nonrec error =
       [ `AccessForbidden of AccessForbidden.t 
       | `InternalFailure of InternalFailure.t 
@@ -634,7 +933,7 @@ module GetRecordResponse =
       | `ServiceUnavailable of ServiceUnavailable.t 
       | `ValidationError of ValidationError.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?record = fun () -> { record }
+    let make ?record = fun ?expiresAt -> fun () -> { record; expiresAt }
     let error_of_json name json =
       match name with
       | "AccessForbidden" -> `AccessForbidden (AccessForbidden.of_json json)
@@ -686,15 +985,20 @@ module GetRecordResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Record", (Option.map x.record ~f:Record.to_value))]
+        [("Record", (Option.map x.record ~f:Record.to_value));
+        ("ExpiresAt", (Option.map x.expiresAt ~f:ExpiresAt.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let expiresAt =
+        (Option.map ~f:ExpiresAt.of_xml) (Xml.child xml_arg0 "ExpiresAt") in
       let record =
         (Option.map ~f:Record.of_xml) (Xml.child xml_arg0 "Record") in
-      make ?record ()
+      make ?expiresAt ?record ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let record = field_map json "Record" Record.of_json in make ?record ()
+    let of_json json__ =
+      let expiresAt = field_map json__ "ExpiresAt" ExpiresAt.of_json in
+      let record = field_map json__ "Record" Record.of_json in
+      make ?expiresAt ?record ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Use for OnlineStore serving from a FeatureStore. Only the latest records stored in the OnlineStore can be retrieved. If no Record with RecordIdentifierValue is found, then an empty result is returned."]
@@ -702,30 +1006,45 @@ module GetRecordRequest =
   struct
     type nonrec t =
       {
-      featureGroupName: FeatureGroupName.t
+      featureGroupName: FeatureGroupNameOrArn.t
         [@ocaml.doc
-          "The name of the feature group in which you want to put the records."];
+          "The name or Amazon Resource Name (ARN) of the feature group from which you want to retrieve a record."];
       recordIdentifierValueAsString: ValueAsString.t
         [@ocaml.doc
           "The value that corresponds to RecordIdentifier type and uniquely identifies the record in the FeatureGroup."];
       featureNames: FeatureNames.t option
         [@ocaml.doc
-          "List of names of Features to be retrieved. If not specified, the latest value for all the Features are returned."]}
+          "List of names of Features to be retrieved. If not specified, the latest value for all the Features are returned."];
+      expirationTimeResponse: ExpirationTimeResponse.t option
+        [@ocaml.doc
+          "Parameter to request ExpiresAt in response. If Enabled, GetRecord will return the value of ExpiresAt, if it is not null. If Disabled and null, GetRecord will return null."]}
     let context_ = "GetRecordRequest"
     let make ?featureNames =
-      fun ~featureGroupName ->
-        fun ~recordIdentifierValueAsString ->
-          fun () ->
-            { featureNames; featureGroupName; recordIdentifierValueAsString }
+      fun ?expirationTimeResponse ->
+        fun ~featureGroupName ->
+          fun ~recordIdentifierValueAsString ->
+            fun () ->
+              {
+                featureNames;
+                expirationTimeResponse;
+                featureGroupName;
+                recordIdentifierValueAsString
+              }
     let to_value x =
       structure_to_value
         [("FeatureGroupName",
-           (Some (FeatureGroupName.to_value x.featureGroupName)));
+           (Some (FeatureGroupNameOrArn.to_value x.featureGroupName)));
         ("RecordIdentifierValueAsString",
           (Some (ValueAsString.to_value x.recordIdentifierValueAsString)));
-        ("FeatureName", (Option.map x.featureNames ~f:FeatureNames.to_value))]
+        ("FeatureName", (Option.map x.featureNames ~f:FeatureNames.to_value));
+        ("ExpirationTimeResponse",
+          (Option.map x.expirationTimeResponse
+             ~f:ExpirationTimeResponse.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let expirationTimeResponse =
+        (Option.map ~f:ExpirationTimeResponse.of_xml)
+          (Xml.child xml_arg0 "ExpirationTimeResponse") in
       let featureNames =
         (Option.map ~f:FeatureNames.of_xml)
           (Xml.child xml_arg0 "FeatureName") in
@@ -734,18 +1053,23 @@ module GetRecordRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "RecordIdentifierValueAsString") in
       let featureGroupName =
-        FeatureGroupName.of_xml
+        FeatureGroupNameOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FeatureGroupName") in
-      make ?featureNames ~recordIdentifierValueAsString ~featureGroupName ()
+      make ?expirationTimeResponse ?featureNames
+        ~recordIdentifierValueAsString ~featureGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let featureNames = field_map json "FeatureNames" FeatureNames.of_json in
+    let of_json json__ =
+      let expirationTimeResponse =
+        field_map json__ "ExpirationTimeResponse"
+          ExpirationTimeResponse.of_json in
+      let featureNames = field_map json__ "FeatureNames" FeatureNames.of_json in
       let recordIdentifierValueAsString =
-        field_map_exn json "RecordIdentifierValueAsString"
+        field_map_exn json__ "RecordIdentifierValueAsString"
           ValueAsString.of_json in
       let featureGroupName =
-        field_map_exn json "FeatureGroupName" FeatureGroupName.of_json in
-      make ?featureNames ~recordIdentifierValueAsString ~featureGroupName ()
+        field_map_exn json__ "FeatureGroupName" FeatureGroupNameOrArn.of_json in
+      make ?expirationTimeResponse ?featureNames
+        ~recordIdentifierValueAsString ~featureGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Use for OnlineStore serving from a FeatureStore. Only the latest records stored in the OnlineStore can be retrieved. If no Record with RecordIdentifierValue is found, then an empty result is returned."]
@@ -753,30 +1077,54 @@ module DeleteRecordRequest =
   struct
     type nonrec t =
       {
-      featureGroupName: FeatureGroupName.t
+      featureGroupName: FeatureGroupNameOrArn.t
         [@ocaml.doc
-          "The name of the feature group to delete the record from."];
+          "The name or Amazon Resource Name (ARN) of the feature group to delete the record from."];
       recordIdentifierValueAsString: ValueAsString.t
         [@ocaml.doc
           "The value for the RecordIdentifier that uniquely identifies the record, in string format."];
       eventTime: ValueAsString.t
         [@ocaml.doc
-          "Timestamp indicating when the deletion event occurred. EventTime can be used to query data at a certain point in time."]}
+          "Timestamp indicating when the deletion event occurred. EventTime can be used to query data at a certain point in time."];
+      targetStores: TargetStores.t option
+        [@ocaml.doc
+          "A list of stores from which you're deleting the record. By default, Feature Store deletes the record from all of the stores that you're using for the FeatureGroup."];
+      deletionMode: DeletionMode.t option
+        [@ocaml.doc
+          "The name of the deletion mode for deleting the record. By default, the deletion mode is set to SoftDelete."]}
     let context_ = "DeleteRecordRequest"
-    let make ~featureGroupName =
-      fun ~recordIdentifierValueAsString ->
-        fun ~eventTime ->
-          fun () ->
-            { featureGroupName; recordIdentifierValueAsString; eventTime }
+    let make ?targetStores =
+      fun ?deletionMode ->
+        fun ~featureGroupName ->
+          fun ~recordIdentifierValueAsString ->
+            fun ~eventTime ->
+              fun () ->
+                {
+                  targetStores;
+                  deletionMode;
+                  featureGroupName;
+                  recordIdentifierValueAsString;
+                  eventTime
+                }
     let to_value x =
       structure_to_value
         [("FeatureGroupName",
-           (Some (FeatureGroupName.to_value x.featureGroupName)));
+           (Some (FeatureGroupNameOrArn.to_value x.featureGroupName)));
         ("RecordIdentifierValueAsString",
           (Some (ValueAsString.to_value x.recordIdentifierValueAsString)));
-        ("EventTime", (Some (ValueAsString.to_value x.eventTime)))]
+        ("EventTime", (Some (ValueAsString.to_value x.eventTime)));
+        ("TargetStores",
+          (Option.map x.targetStores ~f:TargetStores.to_value));
+        ("DeletionMode",
+          (Option.map x.deletionMode ~f:DeletionMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let deletionMode =
+        (Option.map ~f:DeletionMode.of_xml)
+          (Xml.child xml_arg0 "DeletionMode") in
+      let targetStores =
+        (Option.map ~f:TargetStores.of_xml)
+          (Xml.child xml_arg0 "TargetStores") in
       let eventTime =
         ValueAsString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EventTime") in
@@ -785,32 +1133,36 @@ module DeleteRecordRequest =
           (Xml.child_exn ~context:context_ xml_arg0
              "RecordIdentifierValueAsString") in
       let featureGroupName =
-        FeatureGroupName.of_xml
+        FeatureGroupNameOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FeatureGroupName") in
-      make ~eventTime ~recordIdentifierValueAsString ~featureGroupName ()
+      make ?deletionMode ?targetStores ~eventTime
+        ~recordIdentifierValueAsString ~featureGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let eventTime = field_map_exn json "EventTime" ValueAsString.of_json in
+    let of_json json__ =
+      let deletionMode = field_map json__ "DeletionMode" DeletionMode.of_json in
+      let targetStores = field_map json__ "TargetStores" TargetStores.of_json in
+      let eventTime = field_map_exn json__ "EventTime" ValueAsString.of_json in
       let recordIdentifierValueAsString =
-        field_map_exn json "RecordIdentifierValueAsString"
+        field_map_exn json__ "RecordIdentifierValueAsString"
           ValueAsString.of_json in
       let featureGroupName =
-        field_map_exn json "FeatureGroupName" FeatureGroupName.of_json in
-      make ~eventTime ~recordIdentifierValueAsString ~featureGroupName ()
+        field_map_exn json__ "FeatureGroupName" FeatureGroupNameOrArn.of_json in
+      make ?deletionMode ?targetStores ~eventTime
+        ~recordIdentifierValueAsString ~featureGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a Record from a FeatureGroup. A new record will show up in the OfflineStore when the DeleteRecord API is called. This record will have a value of True in the is_deleted column."]
+       "Deletes a Record from a FeatureGroup in the OnlineStore. Feature Store supports both SoftDelete and HardDelete. For SoftDelete (default), feature columns are set to null and the record is no longer retrievable by GetRecord or BatchGetRecord. For HardDelete, the complete Record is removed from the OnlineStore. In both cases, Feature Store appends the deleted record marker to the OfflineStore. The deleted record marker is a record with the same RecordIdentifer as the original, but with is_deleted value set to True, EventTime set to the delete input EventTime, and other feature values set to null. Note that the EventTime specified in DeleteRecord should be set later than the EventTime of the existing record in the OnlineStore for that RecordIdentifer. If it is not, the deletion does not occur: For SoftDelete, the existing (not deleted) record remains in the OnlineStore, though the delete record marker is still written to the OfflineStore. HardDelete returns EventTime: 400 ValidationException to indicate that the delete operation failed. No delete record marker is written to the OfflineStore. When a record is deleted from the OnlineStore, the deleted record marker is appended to the OfflineStore. If you have the Iceberg table format enabled for your OfflineStore, you can remove all history of a record from the OfflineStore using Amazon Athena or Apache Spark. For information on how to hard delete a record from the OfflineStore with the Iceberg table format enabled, see Delete records from the offline store."]
 module BatchGetRecordResponse =
   struct
     type nonrec t =
       {
-      records: BatchGetRecordResultDetails.t
+      records: BatchGetRecordResultDetails.t option
         [@ocaml.doc
           "A list of Records you requested to be retrieved in batch."];
-      errors: BatchGetRecordErrors.t
+      errors: BatchGetRecordErrors.t option
         [@ocaml.doc
-          "A list of errors that have occured when retrieving a batch of Records."];
-      unprocessedIdentifiers: UnprocessedIdentifiers.t
+          "A list of errors that have occurred when retrieving a batch of Records."];
+      unprocessedIdentifiers: UnprocessedIdentifiers.t option
         [@ocaml.doc
           "A unprocessed list of FeatureGroup names, with their corresponding RecordIdentifier value, and Feature name."]}
     type nonrec error =
@@ -819,10 +1171,9 @@ module BatchGetRecordResponse =
       | `ServiceUnavailable of ServiceUnavailable.t 
       | `ValidationError of ValidationError.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "BatchGetRecordResponse"
-    let make ~records =
-      fun ~errors ->
-        fun ~unprocessedIdentifiers ->
+    let make ?records =
+      fun ?errors ->
+        fun ?unprocessedIdentifiers ->
           fun () -> { records; errors; unprocessedIdentifiers }
     let error_of_json name json =
       match name with
@@ -868,31 +1219,33 @@ module BatchGetRecordResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Records", (Some (BatchGetRecordResultDetails.to_value x.records)));
-        ("Errors", (Some (BatchGetRecordErrors.to_value x.errors)));
+        [("Records",
+           (Option.map x.records ~f:BatchGetRecordResultDetails.to_value));
+        ("Errors", (Option.map x.errors ~f:BatchGetRecordErrors.to_value));
         ("UnprocessedIdentifiers",
-          (Some (UnprocessedIdentifiers.to_value x.unprocessedIdentifiers)))]
+          (Option.map x.unprocessedIdentifiers
+             ~f:UnprocessedIdentifiers.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let unprocessedIdentifiers =
-        UnprocessedIdentifiers.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UnprocessedIdentifiers") in
+        (Option.map ~f:UnprocessedIdentifiers.of_xml)
+          (Xml.child xml_arg0 "UnprocessedIdentifiers") in
       let errors =
-        BatchGetRecordErrors.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Errors") in
+        (Option.map ~f:BatchGetRecordErrors.of_xml)
+          (Xml.child xml_arg0 "Errors") in
       let records =
-        BatchGetRecordResultDetails.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Records") in
-      make ~unprocessedIdentifiers ~errors ~records ()
+        (Option.map ~f:BatchGetRecordResultDetails.of_xml)
+          (Xml.child xml_arg0 "Records") in
+      make ?unprocessedIdentifiers ?errors ?records ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unprocessedIdentifiers =
-        field_map_exn json "UnprocessedIdentifiers"
+        field_map json__ "UnprocessedIdentifiers"
           UnprocessedIdentifiers.of_json in
-      let errors = field_map_exn json "Errors" BatchGetRecordErrors.of_json in
+      let errors = field_map json__ "Errors" BatchGetRecordErrors.of_json in
       let records =
-        field_map_exn json "Records" BatchGetRecordResultDetails.of_json in
-      make ~unprocessedIdentifiers ~errors ~records ()
+        field_map json__ "Records" BatchGetRecordResultDetails.of_json in
+      make ?unprocessedIdentifiers ?errors ?records ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a batch of Records from a FeatureGroup."]
 module BatchGetRecordRequest =
@@ -901,23 +1254,36 @@ module BatchGetRecordRequest =
       {
       identifiers: BatchGetRecordIdentifiers.t
         [@ocaml.doc
-          "A list of FeatureGroup names, with their corresponding RecordIdentifier value, and Feature name that have been requested to be retrieved in batch."]}
+          "A list containing the name or Amazon Resource Name (ARN) of the FeatureGroup, the list of names of Features to be retrieved, and the corresponding RecordIdentifier values as strings."];
+      expirationTimeResponse: ExpirationTimeResponse.t option
+        [@ocaml.doc
+          "Parameter to request ExpiresAt in response. If Enabled, BatchGetRecord will return the value of ExpiresAt, if it is not null. If Disabled and null, BatchGetRecord will return null."]}
     let context_ = "BatchGetRecordRequest"
-    let make ~identifiers = fun () -> { identifiers }
+    let make ?expirationTimeResponse =
+      fun ~identifiers -> fun () -> { expirationTimeResponse; identifiers }
     let to_value x =
       structure_to_value
         [("Identifiers",
-           (Some (BatchGetRecordIdentifiers.to_value x.identifiers)))]
+           (Some (BatchGetRecordIdentifiers.to_value x.identifiers)));
+        ("ExpirationTimeResponse",
+          (Option.map x.expirationTimeResponse
+             ~f:ExpirationTimeResponse.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let expirationTimeResponse =
+        (Option.map ~f:ExpirationTimeResponse.of_xml)
+          (Xml.child xml_arg0 "ExpirationTimeResponse") in
       let identifiers =
         BatchGetRecordIdentifiers.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identifiers") in
-      make ~identifiers ()
+      make ?expirationTimeResponse ~identifiers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let expirationTimeResponse =
+        field_map json__ "ExpirationTimeResponse"
+          ExpirationTimeResponse.of_json in
       let identifiers =
-        field_map_exn json "Identifiers" BatchGetRecordIdentifiers.of_json in
-      make ~identifiers ()
+        field_map_exn json__ "Identifiers" BatchGetRecordIdentifiers.of_json in
+      make ?expirationTimeResponse ~identifiers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a batch of Records from a FeatureGroup."]

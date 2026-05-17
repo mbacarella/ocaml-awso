@@ -34,6 +34,12 @@ val delete_service :
     ?cfg:Awso.Cfg.t ->
       DeleteServiceRequest.t ->
         (DeleteServiceResponse.t, DeleteServiceResponse.error) Result.t Lwt.t
+val delete_service_attributes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteServiceAttributesRequest.t ->
+        (DeleteServiceAttributesResponse.t,
+          DeleteServiceAttributesResponse.error) Result.t Lwt.t
 val deregister_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -46,6 +52,12 @@ val discover_instances :
       DiscoverInstancesRequest.t ->
         (DiscoverInstancesResponse.t, DiscoverInstancesResponse.error)
           Result.t Lwt.t
+val discover_instances_revision :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DiscoverInstancesRevisionRequest.t ->
+        (DiscoverInstancesRevisionResponse.t,
+          DiscoverInstancesRevisionResponse.error) Result.t Lwt.t
 val get_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -72,6 +84,12 @@ val get_service :
     ?cfg:Awso.Cfg.t ->
       GetServiceRequest.t ->
         (GetServiceResponse.t, GetServiceResponse.error) Result.t Lwt.t
+val get_service_attributes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetServiceAttributesRequest.t ->
+        (GetServiceAttributesResponse.t, GetServiceAttributesResponse.error)
+          Result.t Lwt.t
 val list_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -144,3 +162,9 @@ val update_service :
     ?cfg:Awso.Cfg.t ->
       UpdateServiceRequest.t ->
         (UpdateServiceResponse.t, UpdateServiceResponse.error) Result.t Lwt.t
+val update_service_attributes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateServiceAttributesRequest.t ->
+        (UpdateServiceAttributesResponse.t,
+          UpdateServiceAttributesResponse.error) Result.t Lwt.t

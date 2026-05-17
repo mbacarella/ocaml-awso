@@ -19,6 +19,12 @@ let batch_associate_project_assets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchAssociateProjectAssets input
 let batch_disassociate_project_assets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchDisassociateProjectAssets input
+let batch_get_asset_property_aggregates ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetAssetPropertyAggregates input
+let batch_get_asset_property_value ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetAssetPropertyValue input
+let batch_get_asset_property_value_history ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetAssetPropertyValueHistory input
 let batch_put_asset_property_value ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchPutAssetPropertyValue input
 let create_access_policy ?endpoint_url ?cfg input =
@@ -27,8 +33,16 @@ let create_asset ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAsset input
 let create_asset_model ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAssetModel input
+let create_asset_model_composite_model ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAssetModelCompositeModel input
+let create_bulk_import_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateBulkImportJob input
+let create_computation_model ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateComputationModel input
 let create_dashboard ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDashboard input
+let create_dataset ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateDataset input
 let create_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateGateway input
 let create_portal ?endpoint_url ?cfg input =
@@ -41,8 +55,17 @@ let delete_asset ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAsset input
 let delete_asset_model ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAssetModel input
+let delete_asset_model_composite_model ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAssetModelCompositeModel input
+let delete_asset_model_interface_relationship ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAssetModelInterfaceRelationship
+    input
+let delete_computation_model ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteComputationModel input
 let delete_dashboard ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDashboard input
+let delete_dataset ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDataset input
 let delete_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteGateway input
 let delete_portal ?endpoint_url ?cfg input =
@@ -53,17 +76,37 @@ let delete_time_series ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTimeSeries input
 let describe_access_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAccessPolicy input
+let describe_action ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAction input
 let describe_asset ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAsset input
+let describe_asset_composite_model ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAssetCompositeModel input
 let describe_asset_model ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAssetModel input
+let describe_asset_model_composite_model ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAssetModelCompositeModel input
+let describe_asset_model_interface_relationship ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAssetModelInterfaceRelationship
+    input
 let describe_asset_property ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAssetProperty input
+let describe_bulk_import_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeBulkImportJob input
+let describe_computation_model ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeComputationModel input
+let describe_computation_model_execution_summary ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeComputationModelExecutionSummary
+    input
 let describe_dashboard ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDashboard input
+let describe_dataset ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeDataset input
 let describe_default_encryption_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDefaultEncryptionConfiguration
     input
+let describe_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeExecution input
 let describe_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeGateway input
 let describe_gateway_capability_configuration ?endpoint_url ?cfg input =
@@ -84,6 +127,10 @@ let disassociate_assets ?endpoint_url ?cfg input =
 let disassociate_time_series_from_asset_property ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateTimeSeriesFromAssetProperty
     input
+let execute_action ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ExecuteAction input
+let execute_query ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ExecuteQuery input
 let get_asset_property_aggregates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAssetPropertyAggregates input
 let get_asset_property_value ?endpoint_url ?cfg input =
@@ -92,20 +139,48 @@ let get_asset_property_value_history ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAssetPropertyValueHistory input
 let get_interpolated_asset_property_values ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetInterpolatedAssetPropertyValues input
+let invoke_assistant ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.InvokeAssistant input
 let list_access_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAccessPolicies input
+let list_actions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListActions input
+let list_asset_model_composite_models ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAssetModelCompositeModels input
+let list_asset_model_properties ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAssetModelProperties input
 let list_asset_models ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAssetModels input
+let list_asset_properties ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAssetProperties input
 let list_asset_relationships ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAssetRelationships input
 let list_assets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAssets input
 let list_associated_assets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAssociatedAssets input
+let list_bulk_import_jobs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListBulkImportJobs input
+let list_composition_relationships ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCompositionRelationships input
+let list_computation_model_data_binding_usages ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListComputationModelDataBindingUsages
+    input
+let list_computation_model_resolve_to_resources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListComputationModelResolveToResources
+    input
+let list_computation_models ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListComputationModels input
 let list_dashboards ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDashboards input
+let list_datasets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDatasets input
+let list_executions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListExecutions input
 let list_gateways ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListGateways input
+let list_interface_relationships ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListInterfaceRelationships input
 let list_portals ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPortals input
 let list_project_assets ?endpoint_url ?cfg input =
@@ -116,6 +191,8 @@ let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let list_time_series ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTimeSeries input
+let put_asset_model_interface_relationship ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutAssetModelInterfaceRelationship input
 let put_default_encryption_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutDefaultEncryptionConfiguration input
 let put_logging_options ?endpoint_url ?cfg input =
@@ -132,10 +209,16 @@ let update_asset ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAsset input
 let update_asset_model ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAssetModel input
+let update_asset_model_composite_model ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAssetModelCompositeModel input
 let update_asset_property ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAssetProperty input
+let update_computation_model ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateComputationModel input
 let update_dashboard ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDashboard input
+let update_dataset ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateDataset input
 let update_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateGateway input
 let update_gateway_capability_configuration ?endpoint_url ?cfg input =

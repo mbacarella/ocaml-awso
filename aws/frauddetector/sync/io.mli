@@ -41,6 +41,11 @@ val create_detector_version :
       CreateDetectorVersionRequest.t ->
         (CreateDetectorVersionResult.t, CreateDetectorVersionResult.error)
           Result.t
+val create_list :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateListRequest.t ->
+        (CreateListResult.t, CreateListResult.error) Result.t
 val create_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -116,6 +121,11 @@ val delete_label :
     ?cfg:Awso.Cfg.t ->
       DeleteLabelRequest.t ->
         (DeleteLabelResult.t, DeleteLabelResult.error) Result.t
+val delete_list :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteListRequest.t ->
+        (DeleteListResult.t, DeleteListResult.error) Result.t
 val delete_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -220,6 +230,16 @@ val get_labels :
     ?cfg:Awso.Cfg.t ->
       GetLabelsRequest.t ->
         (GetLabelsResult.t, GetLabelsResult.error) Result.t
+val get_list_elements :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetListElementsRequest.t ->
+        (GetListElementsResult.t, GetListElementsResult.error) Result.t
+val get_lists_metadata :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetListsMetadataRequest.t ->
+        (GetListsMetadataResult.t, GetListsMetadataResult.error) Result.t
 val get_model_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -329,6 +349,11 @@ val update_event_label :
     ?cfg:Awso.Cfg.t ->
       UpdateEventLabelRequest.t ->
         (UpdateEventLabelResult.t, UpdateEventLabelResult.error) Result.t
+val update_list :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateListRequest.t ->
+        (UpdateListResult.t, UpdateListResult.error) Result.t
 val update_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

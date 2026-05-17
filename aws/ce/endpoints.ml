@@ -28,13 +28,25 @@ type ('i, 'o, 'e) t =
   | GetAnomalySubscriptions: (GetAnomalySubscriptionsRequest.t,
   GetAnomalySubscriptionsResponse.t, GetAnomalySubscriptionsResponse.error) t
   
+  | GetApproximateUsageRecords: (GetApproximateUsageRecordsRequest.t,
+  GetApproximateUsageRecordsResponse.t,
+  GetApproximateUsageRecordsResponse.error) t 
+  | GetCommitmentPurchaseAnalysis: (GetCommitmentPurchaseAnalysisRequest.t,
+  GetCommitmentPurchaseAnalysisResponse.t,
+  GetCommitmentPurchaseAnalysisResponse.error) t 
   | GetCostAndUsage: (GetCostAndUsageRequest.t, GetCostAndUsageResponse.t,
   GetCostAndUsageResponse.error) t 
+  | GetCostAndUsageComparisons: (GetCostAndUsageComparisonsRequest.t,
+  GetCostAndUsageComparisonsResponse.t,
+  GetCostAndUsageComparisonsResponse.error) t 
   | GetCostAndUsageWithResources: (GetCostAndUsageWithResourcesRequest.t,
   GetCostAndUsageWithResourcesResponse.t,
   GetCostAndUsageWithResourcesResponse.error) t 
   | GetCostCategories: (GetCostCategoriesRequest.t,
   GetCostCategoriesResponse.t, GetCostCategoriesResponse.error) t 
+  | GetCostComparisonDrivers: (GetCostComparisonDriversRequest.t,
+  GetCostComparisonDriversResponse.t, GetCostComparisonDriversResponse.error)
+  t 
   | GetCostForecast: (GetCostForecastRequest.t, GetCostForecastResponse.t,
   GetCostForecastResponse.error) t 
   | GetDimensionValues: (GetDimensionValuesRequest.t,
@@ -51,6 +63,10 @@ type ('i, 'o, 'e) t =
   | GetRightsizingRecommendation: (GetRightsizingRecommendationRequest.t,
   GetRightsizingRecommendationResponse.t,
   GetRightsizingRecommendationResponse.error) t 
+  | GetSavingsPlanPurchaseRecommendationDetails:
+  (GetSavingsPlanPurchaseRecommendationDetailsRequest.t,
+  GetSavingsPlanPurchaseRecommendationDetailsResponse.t,
+  GetSavingsPlanPurchaseRecommendationDetailsResponse.error) t 
   | GetSavingsPlansCoverage: (GetSavingsPlansCoverageRequest.t,
   GetSavingsPlansCoverageResponse.t, GetSavingsPlansCoverageResponse.error) t
   
@@ -68,13 +84,41 @@ type ('i, 'o, 'e) t =
   | GetTags: (GetTagsRequest.t, GetTagsResponse.t, GetTagsResponse.error) t 
   | GetUsageForecast: (GetUsageForecastRequest.t, GetUsageForecastResponse.t,
   GetUsageForecastResponse.error) t 
+  | ListCommitmentPurchaseAnalyses: (ListCommitmentPurchaseAnalysesRequest.t,
+  ListCommitmentPurchaseAnalysesResponse.t,
+  ListCommitmentPurchaseAnalysesResponse.error) t 
+  | ListCostAllocationTagBackfillHistory:
+  (ListCostAllocationTagBackfillHistoryRequest.t,
+  ListCostAllocationTagBackfillHistoryResponse.t,
+  ListCostAllocationTagBackfillHistoryResponse.error) t 
+  | ListCostAllocationTags: (ListCostAllocationTagsRequest.t,
+  ListCostAllocationTagsResponse.t, ListCostAllocationTagsResponse.error) t 
   | ListCostCategoryDefinitions: (ListCostCategoryDefinitionsRequest.t,
   ListCostCategoryDefinitionsResponse.t,
   ListCostCategoryDefinitionsResponse.error) t 
+  | ListCostCategoryResourceAssociations:
+  (ListCostCategoryResourceAssociationsRequest.t,
+  ListCostCategoryResourceAssociationsResponse.t,
+  ListCostCategoryResourceAssociationsResponse.error) t 
+  | ListSavingsPlansPurchaseRecommendationGeneration:
+  (ListSavingsPlansPurchaseRecommendationGenerationRequest.t,
+  ListSavingsPlansPurchaseRecommendationGenerationResponse.t,
+  ListSavingsPlansPurchaseRecommendationGenerationResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ProvideAnomalyFeedback: (ProvideAnomalyFeedbackRequest.t,
   ProvideAnomalyFeedbackResponse.t, ProvideAnomalyFeedbackResponse.error) t 
+  | StartCommitmentPurchaseAnalysis:
+  (StartCommitmentPurchaseAnalysisRequest.t,
+  StartCommitmentPurchaseAnalysisResponse.t,
+  StartCommitmentPurchaseAnalysisResponse.error) t 
+  | StartCostAllocationTagBackfill: (StartCostAllocationTagBackfillRequest.t,
+  StartCostAllocationTagBackfillResponse.t,
+  StartCostAllocationTagBackfillResponse.error) t 
+  | StartSavingsPlansPurchaseRecommendationGeneration:
+  (StartSavingsPlansPurchaseRecommendationGenerationRequest.t,
+  StartSavingsPlansPurchaseRecommendationGenerationResponse.t,
+  StartSavingsPlansPurchaseRecommendationGenerationResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
@@ -84,6 +128,9 @@ type ('i, 'o, 'e) t =
   | UpdateAnomalySubscription: (UpdateAnomalySubscriptionRequest.t,
   UpdateAnomalySubscriptionResponse.t,
   UpdateAnomalySubscriptionResponse.error) t 
+  | UpdateCostAllocationTagsStatus: (UpdateCostAllocationTagsStatusRequest.t,
+  UpdateCostAllocationTagsStatusResponse.t,
+  UpdateCostAllocationTagsStatusResponse.error) t 
   | UpdateCostCategoryDefinition: (UpdateCostCategoryDefinitionRequest.t,
   UpdateCostCategoryDefinitionResponse.t,
   UpdateCostCategoryDefinitionResponse.error) t 
@@ -99,28 +146,42 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetAnomalies -> `POST
   | GetAnomalyMonitors -> `POST
   | GetAnomalySubscriptions -> `POST
+  | GetApproximateUsageRecords -> `POST
+  | GetCommitmentPurchaseAnalysis -> `POST
   | GetCostAndUsage -> `POST
+  | GetCostAndUsageComparisons -> `POST
   | GetCostAndUsageWithResources -> `POST
   | GetCostCategories -> `POST
+  | GetCostComparisonDrivers -> `POST
   | GetCostForecast -> `POST
   | GetDimensionValues -> `POST
   | GetReservationCoverage -> `POST
   | GetReservationPurchaseRecommendation -> `POST
   | GetReservationUtilization -> `POST
   | GetRightsizingRecommendation -> `POST
+  | GetSavingsPlanPurchaseRecommendationDetails -> `POST
   | GetSavingsPlansCoverage -> `POST
   | GetSavingsPlansPurchaseRecommendation -> `POST
   | GetSavingsPlansUtilization -> `POST
   | GetSavingsPlansUtilizationDetails -> `POST
   | GetTags -> `POST
   | GetUsageForecast -> `POST
+  | ListCommitmentPurchaseAnalyses -> `POST
+  | ListCostAllocationTagBackfillHistory -> `POST
+  | ListCostAllocationTags -> `POST
   | ListCostCategoryDefinitions -> `POST
+  | ListCostCategoryResourceAssociations -> `POST
+  | ListSavingsPlansPurchaseRecommendationGeneration -> `POST
   | ListTagsForResource -> `POST
   | ProvideAnomalyFeedback -> `POST
+  | StartCommitmentPurchaseAnalysis -> `POST
+  | StartCostAllocationTagBackfill -> `POST
+  | StartSavingsPlansPurchaseRecommendationGeneration -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateAnomalyMonitor -> `POST
   | UpdateAnomalySubscription -> `POST
+  | UpdateCostAllocationTagsStatus -> `POST
   | UpdateCostCategoryDefinition -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
@@ -136,9 +197,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetAnomalies -> (Format.kasprintf Uri.of_string) "/"
       | GetAnomalyMonitors -> (Format.kasprintf Uri.of_string) "/"
       | GetAnomalySubscriptions -> (Format.kasprintf Uri.of_string) "/"
+      | GetApproximateUsageRecords -> (Format.kasprintf Uri.of_string) "/"
+      | GetCommitmentPurchaseAnalysis -> (Format.kasprintf Uri.of_string) "/"
       | GetCostAndUsage -> (Format.kasprintf Uri.of_string) "/"
+      | GetCostAndUsageComparisons -> (Format.kasprintf Uri.of_string) "/"
       | GetCostAndUsageWithResources -> (Format.kasprintf Uri.of_string) "/"
       | GetCostCategories -> (Format.kasprintf Uri.of_string) "/"
+      | GetCostComparisonDrivers -> (Format.kasprintf Uri.of_string) "/"
       | GetCostForecast -> (Format.kasprintf Uri.of_string) "/"
       | GetDimensionValues -> (Format.kasprintf Uri.of_string) "/"
       | GetReservationCoverage -> (Format.kasprintf Uri.of_string) "/"
@@ -146,6 +211,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | GetReservationUtilization -> (Format.kasprintf Uri.of_string) "/"
       | GetRightsizingRecommendation -> (Format.kasprintf Uri.of_string) "/"
+      | GetSavingsPlanPurchaseRecommendationDetails ->
+          (Format.kasprintf Uri.of_string) "/"
       | GetSavingsPlansCoverage -> (Format.kasprintf Uri.of_string) "/"
       | GetSavingsPlansPurchaseRecommendation ->
           (Format.kasprintf Uri.of_string) "/"
@@ -154,13 +221,30 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | GetTags -> (Format.kasprintf Uri.of_string) "/"
       | GetUsageForecast -> (Format.kasprintf Uri.of_string) "/"
+      | ListCommitmentPurchaseAnalyses ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListCostAllocationTagBackfillHistory ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListCostAllocationTags -> (Format.kasprintf Uri.of_string) "/"
       | ListCostCategoryDefinitions -> (Format.kasprintf Uri.of_string) "/"
+      | ListCostCategoryResourceAssociations ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListSavingsPlansPurchaseRecommendationGeneration ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ProvideAnomalyFeedback -> (Format.kasprintf Uri.of_string) "/"
+      | StartCommitmentPurchaseAnalysis ->
+          (Format.kasprintf Uri.of_string) "/"
+      | StartCostAllocationTagBackfill ->
+          (Format.kasprintf Uri.of_string) "/"
+      | StartSavingsPlansPurchaseRecommendationGeneration ->
+          (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateAnomalyMonitor -> (Format.kasprintf Uri.of_string) "/"
       | UpdateAnomalySubscription -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateCostAllocationTagsStatus ->
+          (Format.kasprintf Uri.of_string) "/"
       | UpdateCostCategoryDefinition -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
@@ -250,6 +334,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSInsightsIndexService.GetAnomalySubscriptions")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetApproximateUsageRecords ->
+      let json = GetApproximateUsageRecordsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSInsightsIndexService.GetApproximateUsageRecords")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetCommitmentPurchaseAnalysis ->
+      let json = GetCommitmentPurchaseAnalysisRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSInsightsIndexService.GetCommitmentPurchaseAnalysis")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetCostAndUsage ->
       let json = GetCostAndUsageRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -257,6 +359,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSInsightsIndexService.GetCostAndUsage")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetCostAndUsageComparisons ->
+      let json = GetCostAndUsageComparisonsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSInsightsIndexService.GetCostAndUsageComparisons")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetCostAndUsageWithResources ->
       let json = GetCostAndUsageWithResourcesRequest.to_json req in
@@ -274,6 +385,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSInsightsIndexService.GetCostCategories")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetCostComparisonDrivers ->
+      let json = GetCostComparisonDriversRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSInsightsIndexService.GetCostComparisonDrivers")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetCostForecast ->
       let json = GetCostForecastRequest.to_json req in
@@ -326,6 +446,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSInsightsIndexService.GetRightsizingRecommendation")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetSavingsPlanPurchaseRecommendationDetails ->
+      let json =
+        GetSavingsPlanPurchaseRecommendationDetailsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSInsightsIndexService.GetSavingsPlanPurchaseRecommendationDetails")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetSavingsPlansCoverage ->
       let json = GetSavingsPlansCoverageRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -377,6 +507,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSInsightsIndexService.GetUsageForecast")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListCommitmentPurchaseAnalyses ->
+      let json = ListCommitmentPurchaseAnalysesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSInsightsIndexService.ListCommitmentPurchaseAnalyses")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListCostAllocationTagBackfillHistory ->
+      let json = ListCostAllocationTagBackfillHistoryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSInsightsIndexService.ListCostAllocationTagBackfillHistory")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListCostAllocationTags ->
+      let json = ListCostAllocationTagsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSInsightsIndexService.ListCostAllocationTags")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListCostCategoryDefinitions ->
       let json = ListCostCategoryDefinitionsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -385,6 +541,25 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSInsightsIndexService.ListCostCategoryDefinitions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListCostCategoryResourceAssociations ->
+      let json = ListCostCategoryResourceAssociationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSInsightsIndexService.ListCostCategoryResourceAssociations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListSavingsPlansPurchaseRecommendationGeneration ->
+      let json =
+        ListSavingsPlansPurchaseRecommendationGenerationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSInsightsIndexService.ListSavingsPlansPurchaseRecommendationGeneration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTagsForResource ->
       let json = ListTagsForResourceRequest.to_json req in
@@ -401,6 +576,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSInsightsIndexService.ProvideAnomalyFeedback")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartCommitmentPurchaseAnalysis ->
+      let json = StartCommitmentPurchaseAnalysisRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSInsightsIndexService.StartCommitmentPurchaseAnalysis")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartCostAllocationTagBackfill ->
+      let json = StartCostAllocationTagBackfillRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSInsightsIndexService.StartCostAllocationTagBackfill")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartSavingsPlansPurchaseRecommendationGeneration ->
+      let json =
+        StartSavingsPlansPurchaseRecommendationGenerationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSInsightsIndexService.StartSavingsPlansPurchaseRecommendationGeneration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TagResource ->
       let json = TagResourceRequest.to_json req in
@@ -434,6 +637,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSInsightsIndexService.UpdateAnomalySubscription")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateCostAllocationTagsStatus ->
+      let json = UpdateCostAllocationTagsStatusRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSInsightsIndexService.UpdateCostAllocationTagsStatus")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateCostCategoryDefinition ->
       let json = UpdateCostCategoryDefinitionRequest.to_json req in
@@ -551,6 +763,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetAnomalySubscriptionsResponse.error_of_json))
+  | GetApproximateUsageRecords ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetApproximateUsageRecordsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetApproximateUsageRecordsResponse.error_of_json))
+  | GetCommitmentPurchaseAnalysis ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCommitmentPurchaseAnalysisResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetCommitmentPurchaseAnalysisResponse.error_of_json))
   | GetCostAndUsage ->
       if is_success
       then
@@ -558,6 +788,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetCostAndUsageResponse.of_json json)
       else
         Error (parse_aws_error (Some GetCostAndUsageResponse.error_of_json))
+  | GetCostAndUsageComparisons ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCostAndUsageComparisonsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetCostAndUsageComparisonsResponse.error_of_json))
   | GetCostAndUsageWithResources ->
       if is_success
       then
@@ -575,6 +814,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetCostCategoriesResponse.error_of_json))
+  | GetCostComparisonDrivers ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCostComparisonDriversResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetCostComparisonDriversResponse.error_of_json))
   | GetCostForecast ->
       if is_success
       then
@@ -626,6 +874,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetRightsizingRecommendationResponse.error_of_json))
+  | GetSavingsPlanPurchaseRecommendationDetails ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetSavingsPlanPurchaseRecommendationDetailsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                GetSavingsPlanPurchaseRecommendationDetailsResponse.error_of_json))
   | GetSavingsPlansCoverage ->
       if is_success
       then
@@ -676,6 +934,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetUsageForecastResponse.of_json json)
       else
         Error (parse_aws_error (Some GetUsageForecastResponse.error_of_json))
+  | ListCommitmentPurchaseAnalyses ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCommitmentPurchaseAnalysesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListCommitmentPurchaseAnalysesResponse.error_of_json))
+  | ListCostAllocationTagBackfillHistory ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCostAllocationTagBackfillHistoryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListCostAllocationTagBackfillHistoryResponse.error_of_json))
+  | ListCostAllocationTags ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCostAllocationTagsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListCostAllocationTagsResponse.error_of_json))
   | ListCostCategoryDefinitions ->
       if is_success
       then
@@ -685,6 +970,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListCostCategoryDefinitionsResponse.error_of_json))
+  | ListCostCategoryResourceAssociations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCostCategoryResourceAssociationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListCostCategoryResourceAssociationsResponse.error_of_json))
+  | ListSavingsPlansPurchaseRecommendationGeneration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (ListSavingsPlansPurchaseRecommendationGenerationResponse.of_json
+             json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListSavingsPlansPurchaseRecommendationGenerationResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then
@@ -702,6 +1008,36 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ProvideAnomalyFeedbackResponse.error_of_json))
+  | StartCommitmentPurchaseAnalysis ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartCommitmentPurchaseAnalysisResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartCommitmentPurchaseAnalysisResponse.error_of_json))
+  | StartCostAllocationTagBackfill ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartCostAllocationTagBackfillResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartCostAllocationTagBackfillResponse.error_of_json))
+  | StartSavingsPlansPurchaseRecommendationGeneration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (StartSavingsPlansPurchaseRecommendationGenerationResponse.of_json
+             json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                StartSavingsPlansPurchaseRecommendationGenerationResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -731,6 +1067,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateAnomalySubscriptionResponse.error_of_json))
+  | UpdateCostAllocationTagsStatus ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateCostAllocationTagsStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateCostAllocationTagsStatusResponse.error_of_json))
   | UpdateCostCategoryDefinition ->
       if is_success
       then

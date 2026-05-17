@@ -5,6 +5,8 @@ type ('i, 'o, 'e) t =
   | AddListenerCertificates: (AddListenerCertificatesInput.t,
   AddListenerCertificatesOutput.t, AddListenerCertificatesOutput.error) t 
   | AddTags: (AddTagsInput.t, AddTagsOutput.t, AddTagsOutput.error) t 
+  | AddTrustStoreRevocations: (AddTrustStoreRevocationsInput.t,
+  AddTrustStoreRevocationsOutput.t, AddTrustStoreRevocationsOutput.error) t 
   | CreateListener: (CreateListenerInput.t, CreateListenerOutput.t,
   CreateListenerOutput.error) t 
   | CreateLoadBalancer: (CreateLoadBalancerInput.t,
@@ -13,18 +15,32 @@ type ('i, 'o, 'e) t =
   CreateRuleOutput.error) t 
   | CreateTargetGroup: (CreateTargetGroupInput.t, CreateTargetGroupOutput.t,
   CreateTargetGroupOutput.error) t 
+  | CreateTrustStore: (CreateTrustStoreInput.t, CreateTrustStoreOutput.t,
+  CreateTrustStoreOutput.error) t 
   | DeleteListener: (DeleteListenerInput.t, DeleteListenerOutput.t,
   DeleteListenerOutput.error) t 
   | DeleteLoadBalancer: (DeleteLoadBalancerInput.t,
   DeleteLoadBalancerOutput.t, DeleteLoadBalancerOutput.error) t 
   | DeleteRule: (DeleteRuleInput.t, DeleteRuleOutput.t,
   DeleteRuleOutput.error) t 
+  | DeleteSharedTrustStoreAssociation:
+  (DeleteSharedTrustStoreAssociationInput.t,
+  DeleteSharedTrustStoreAssociationOutput.t,
+  DeleteSharedTrustStoreAssociationOutput.error) t 
   | DeleteTargetGroup: (DeleteTargetGroupInput.t, DeleteTargetGroupOutput.t,
   DeleteTargetGroupOutput.error) t 
+  | DeleteTrustStore: (DeleteTrustStoreInput.t, DeleteTrustStoreOutput.t,
+  DeleteTrustStoreOutput.error) t 
   | DeregisterTargets: (DeregisterTargetsInput.t, DeregisterTargetsOutput.t,
   DeregisterTargetsOutput.error) t 
   | DescribeAccountLimits: (DescribeAccountLimitsInput.t,
   DescribeAccountLimitsOutput.t, DescribeAccountLimitsOutput.error) t 
+  | DescribeCapacityReservation: (DescribeCapacityReservationInput.t,
+  DescribeCapacityReservationOutput.t,
+  DescribeCapacityReservationOutput.error) t 
+  | DescribeListenerAttributes: (DescribeListenerAttributesInput.t,
+  DescribeListenerAttributesOutput.t, DescribeListenerAttributesOutput.error)
+  t 
   | DescribeListenerCertificates: (DescribeListenerCertificatesInput.t,
   DescribeListenerCertificatesOutput.t,
   DescribeListenerCertificatesOutput.error) t 
@@ -48,8 +64,32 @@ type ('i, 'o, 'e) t =
   DescribeTargetGroupsOutput.t, DescribeTargetGroupsOutput.error) t 
   | DescribeTargetHealth: (DescribeTargetHealthInput.t,
   DescribeTargetHealthOutput.t, DescribeTargetHealthOutput.error) t 
+  | DescribeTrustStoreAssociations: (DescribeTrustStoreAssociationsInput.t,
+  DescribeTrustStoreAssociationsOutput.t,
+  DescribeTrustStoreAssociationsOutput.error) t 
+  | DescribeTrustStoreRevocations: (DescribeTrustStoreRevocationsInput.t,
+  DescribeTrustStoreRevocationsOutput.t,
+  DescribeTrustStoreRevocationsOutput.error) t 
+  | DescribeTrustStores: (DescribeTrustStoresInput.t,
+  DescribeTrustStoresOutput.t, DescribeTrustStoresOutput.error) t 
+  | GetResourcePolicy: (GetResourcePolicyInput.t, GetResourcePolicyOutput.t,
+  GetResourcePolicyOutput.error) t 
+  | GetTrustStoreCaCertificatesBundle:
+  (GetTrustStoreCaCertificatesBundleInput.t,
+  GetTrustStoreCaCertificatesBundleOutput.t,
+  GetTrustStoreCaCertificatesBundleOutput.error) t 
+  | GetTrustStoreRevocationContent: (GetTrustStoreRevocationContentInput.t,
+  GetTrustStoreRevocationContentOutput.t,
+  GetTrustStoreRevocationContentOutput.error) t 
+  | ModifyCapacityReservation: (ModifyCapacityReservationInput.t,
+  ModifyCapacityReservationOutput.t, ModifyCapacityReservationOutput.error) t
+  
+  | ModifyIpPools: (ModifyIpPoolsInput.t, ModifyIpPoolsOutput.t,
+  ModifyIpPoolsOutput.error) t 
   | ModifyListener: (ModifyListenerInput.t, ModifyListenerOutput.t,
   ModifyListenerOutput.error) t 
+  | ModifyListenerAttributes: (ModifyListenerAttributesInput.t,
+  ModifyListenerAttributesOutput.t, ModifyListenerAttributesOutput.error) t 
   | ModifyLoadBalancerAttributes: (ModifyLoadBalancerAttributesInput.t,
   ModifyLoadBalancerAttributesOutput.t,
   ModifyLoadBalancerAttributesOutput.error) t 
@@ -60,6 +100,8 @@ type ('i, 'o, 'e) t =
   | ModifyTargetGroupAttributes: (ModifyTargetGroupAttributesInput.t,
   ModifyTargetGroupAttributesOutput.t,
   ModifyTargetGroupAttributesOutput.error) t 
+  | ModifyTrustStore: (ModifyTrustStoreInput.t, ModifyTrustStoreOutput.t,
+  ModifyTrustStoreOutput.error) t 
   | RegisterTargets: (RegisterTargetsInput.t, RegisterTargetsOutput.t,
   RegisterTargetsOutput.error) t 
   | RemoveListenerCertificates: (RemoveListenerCertificatesInput.t,
@@ -67,6 +109,9 @@ type ('i, 'o, 'e) t =
   t 
   | RemoveTags: (RemoveTagsInput.t, RemoveTagsOutput.t,
   RemoveTagsOutput.error) t 
+  | RemoveTrustStoreRevocations: (RemoveTrustStoreRevocationsInput.t,
+  RemoveTrustStoreRevocationsOutput.t,
+  RemoveTrustStoreRevocationsOutput.error) t 
   | SetIpAddressType: (SetIpAddressTypeInput.t, SetIpAddressTypeOutput.t,
   SetIpAddressTypeOutput.error) t 
   | SetRulePriorities: (SetRulePrioritiesInput.t, SetRulePrioritiesOutput.t,
@@ -79,16 +124,22 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AddListenerCertificates -> `POST
   | AddTags -> `POST
+  | AddTrustStoreRevocations -> `POST
   | CreateListener -> `POST
   | CreateLoadBalancer -> `POST
   | CreateRule -> `POST
   | CreateTargetGroup -> `POST
+  | CreateTrustStore -> `POST
   | DeleteListener -> `POST
   | DeleteLoadBalancer -> `POST
   | DeleteRule -> `POST
+  | DeleteSharedTrustStoreAssociation -> `POST
   | DeleteTargetGroup -> `POST
+  | DeleteTrustStore -> `POST
   | DeregisterTargets -> `POST
   | DescribeAccountLimits -> `POST
+  | DescribeCapacityReservation -> `POST
+  | DescribeListenerAttributes -> `POST
   | DescribeListenerCertificates -> `POST
   | DescribeListeners -> `POST
   | DescribeLoadBalancerAttributes -> `POST
@@ -99,14 +150,25 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeTargetGroupAttributes -> `POST
   | DescribeTargetGroups -> `POST
   | DescribeTargetHealth -> `POST
+  | DescribeTrustStoreAssociations -> `POST
+  | DescribeTrustStoreRevocations -> `POST
+  | DescribeTrustStores -> `POST
+  | GetResourcePolicy -> `POST
+  | GetTrustStoreCaCertificatesBundle -> `POST
+  | GetTrustStoreRevocationContent -> `POST
+  | ModifyCapacityReservation -> `POST
+  | ModifyIpPools -> `POST
   | ModifyListener -> `POST
+  | ModifyListenerAttributes -> `POST
   | ModifyLoadBalancerAttributes -> `POST
   | ModifyRule -> `POST
   | ModifyTargetGroup -> `POST
   | ModifyTargetGroupAttributes -> `POST
+  | ModifyTrustStore -> `POST
   | RegisterTargets -> `POST
   | RemoveListenerCertificates -> `POST
   | RemoveTags -> `POST
+  | RemoveTrustStoreRevocations -> `POST
   | SetIpAddressType -> `POST
   | SetRulePriorities -> `POST
   | SetSecurityGroups -> `POST
@@ -116,16 +178,23 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       match endpoint with
       | AddListenerCertificates -> (Format.kasprintf Uri.of_string) "/"
       | AddTags -> (Format.kasprintf Uri.of_string) "/"
+      | AddTrustStoreRevocations -> (Format.kasprintf Uri.of_string) "/"
       | CreateListener -> (Format.kasprintf Uri.of_string) "/"
       | CreateLoadBalancer -> (Format.kasprintf Uri.of_string) "/"
       | CreateRule -> (Format.kasprintf Uri.of_string) "/"
       | CreateTargetGroup -> (Format.kasprintf Uri.of_string) "/"
+      | CreateTrustStore -> (Format.kasprintf Uri.of_string) "/"
       | DeleteListener -> (Format.kasprintf Uri.of_string) "/"
       | DeleteLoadBalancer -> (Format.kasprintf Uri.of_string) "/"
       | DeleteRule -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteSharedTrustStoreAssociation ->
+          (Format.kasprintf Uri.of_string) "/"
       | DeleteTargetGroup -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteTrustStore -> (Format.kasprintf Uri.of_string) "/"
       | DeregisterTargets -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAccountLimits -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeCapacityReservation -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeListenerAttributes -> (Format.kasprintf Uri.of_string) "/"
       | DescribeListenerCertificates -> (Format.kasprintf Uri.of_string) "/"
       | DescribeListeners -> (Format.kasprintf Uri.of_string) "/"
       | DescribeLoadBalancerAttributes ->
@@ -137,14 +206,28 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeTargetGroupAttributes -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTargetGroups -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTargetHealth -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeTrustStoreAssociations ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeTrustStoreRevocations -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeTrustStores -> (Format.kasprintf Uri.of_string) "/"
+      | GetResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
+      | GetTrustStoreCaCertificatesBundle ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetTrustStoreRevocationContent ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ModifyCapacityReservation -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyIpPools -> (Format.kasprintf Uri.of_string) "/"
       | ModifyListener -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyListenerAttributes -> (Format.kasprintf Uri.of_string) "/"
       | ModifyLoadBalancerAttributes -> (Format.kasprintf Uri.of_string) "/"
       | ModifyRule -> (Format.kasprintf Uri.of_string) "/"
       | ModifyTargetGroup -> (Format.kasprintf Uri.of_string) "/"
       | ModifyTargetGroupAttributes -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyTrustStore -> (Format.kasprintf Uri.of_string) "/"
       | RegisterTargets -> (Format.kasprintf Uri.of_string) "/"
       | RemoveListenerCertificates -> (Format.kasprintf Uri.of_string) "/"
       | RemoveTags -> (Format.kasprintf Uri.of_string) "/"
+      | RemoveTrustStoreRevocations -> (Format.kasprintf Uri.of_string) "/"
       | SetIpAddressType -> (Format.kasprintf Uri.of_string) "/"
       | SetRulePriorities -> (Format.kasprintf Uri.of_string) "/"
       | SetSecurityGroups -> (Format.kasprintf Uri.of_string) "/"
@@ -175,6 +258,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let body =
         let meta = [("Action", ["AddTags"]); ("Version", [apiVersion])] in
         let query = (AddTagsInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | AddTrustStoreRevocations ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["AddTrustStoreRevocations"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (AddTrustStoreRevocationsInput.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateListener ->
@@ -224,6 +321,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (CreateTargetGroupInput.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateTrustStore ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateTrustStore"]); ("Version", [apiVersion])] in
+        let query =
+          (CreateTrustStoreInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteListener ->
       let headers =
         Awso.Http.Headers.of_list
@@ -259,6 +368,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (DeleteRuleInput.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteSharedTrustStoreAssociation ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteSharedTrustStoreAssociation"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteSharedTrustStoreAssociationInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteTargetGroup ->
       let headers =
         Awso.Http.Headers.of_list
@@ -269,6 +392,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DeleteTargetGroup"]); ("Version", [apiVersion])] in
         let query =
           (DeleteTargetGroupInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteTrustStore ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteTrustStore"]); ("Version", [apiVersion])] in
+        let query =
+          (DeleteTrustStoreInput.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeregisterTargets ->
@@ -293,6 +428,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DescribeAccountLimits"]); ("Version", [apiVersion])] in
         let query =
           (DescribeAccountLimitsInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeCapacityReservation ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeCapacityReservation"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeCapacityReservationInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeListenerAttributes ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeListenerAttributes"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeListenerAttributesInput.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -423,6 +586,111 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeTrustStoreAssociations ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeTrustStoreAssociations"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeTrustStoreAssociationsInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeTrustStoreRevocations ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeTrustStoreRevocations"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeTrustStoreRevocationsInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeTrustStores ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeTrustStores"]); ("Version", [apiVersion])] in
+        let query =
+          (DescribeTrustStoresInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetResourcePolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetResourcePolicy"]); ("Version", [apiVersion])] in
+        let query =
+          (GetResourcePolicyInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetTrustStoreCaCertificatesBundle ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetTrustStoreCaCertificatesBundle"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetTrustStoreCaCertificatesBundleInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetTrustStoreRevocationContent ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetTrustStoreRevocationContent"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetTrustStoreRevocationContentInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyCapacityReservation ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyCapacityReservation"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyCapacityReservationInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyIpPools ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta = [("Action", ["ModifyIpPools"]); ("Version", [apiVersion])] in
+        let query =
+          (ModifyIpPoolsInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ModifyListener ->
       let headers =
         Awso.Http.Headers.of_list
@@ -433,6 +701,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["ModifyListener"]); ("Version", [apiVersion])] in
         let query =
           (ModifyListenerInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyListenerAttributes ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyListenerAttributes"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyListenerAttributesInput.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ModifyLoadBalancerAttributes ->
@@ -486,6 +768,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyTrustStore ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyTrustStore"]); ("Version", [apiVersion])] in
+        let query =
+          (ModifyTrustStoreInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | RegisterTargets ->
       let headers =
         Awso.Http.Headers.of_list
@@ -521,6 +815,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let meta = [("Action", ["RemoveTags"]); ("Version", [apiVersion])] in
         let query =
           (RemoveTagsInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | RemoveTrustStoreRevocations ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["RemoveTrustStoreRevocations"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (RemoveTrustStoreRevocationsInput.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | SetIpAddressType ->
@@ -615,6 +923,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (AddTagsOutput.of_xml xml)
       else Error (parse_aws_error (Some AddTagsOutput.error_of_xml))
+  | AddTrustStoreRevocations ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (AddTrustStoreRevocationsOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some AddTrustStoreRevocationsOutput.error_of_xml))
   | CreateListener ->
       if is_success
       then
@@ -641,6 +957,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateTargetGroupOutput.of_xml xml)
       else
         Error (parse_aws_error (Some CreateTargetGroupOutput.error_of_xml))
+  | CreateTrustStore ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateTrustStoreOutput.of_xml xml)
+      else Error (parse_aws_error (Some CreateTrustStoreOutput.error_of_xml))
   | DeleteListener ->
       if is_success
       then
@@ -660,6 +982,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (DeleteRuleOutput.of_xml xml)
       else Error (parse_aws_error (Some DeleteRuleOutput.error_of_xml))
+  | DeleteSharedTrustStoreAssociation ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteSharedTrustStoreAssociationOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteSharedTrustStoreAssociationOutput.error_of_xml))
   | DeleteTargetGroup ->
       if is_success
       then
@@ -667,6 +998,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteTargetGroupOutput.of_xml xml)
       else
         Error (parse_aws_error (Some DeleteTargetGroupOutput.error_of_xml))
+  | DeleteTrustStore ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteTrustStoreOutput.of_xml xml)
+      else Error (parse_aws_error (Some DeleteTrustStoreOutput.error_of_xml))
   | DeregisterTargets ->
       if is_success
       then
@@ -680,6 +1017,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (DescribeAccountLimitsOutput.of_xml xml)
       else Error (parse_aws_error None)
+  | DescribeCapacityReservation ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeCapacityReservationOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeCapacityReservationOutput.error_of_xml))
+  | DescribeListenerAttributes ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeListenerAttributesOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeListenerAttributesOutput.error_of_xml))
   | DescribeListenerCertificates ->
       if is_success
       then
@@ -757,12 +1112,85 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeTargetHealthOutput.error_of_xml))
+  | DescribeTrustStoreAssociations ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeTrustStoreAssociationsOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeTrustStoreAssociationsOutput.error_of_xml))
+  | DescribeTrustStoreRevocations ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeTrustStoreRevocationsOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeTrustStoreRevocationsOutput.error_of_xml))
+  | DescribeTrustStores ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeTrustStoresOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some DescribeTrustStoresOutput.error_of_xml))
+  | GetResourcePolicy ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetResourcePolicyOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some GetResourcePolicyOutput.error_of_xml))
+  | GetTrustStoreCaCertificatesBundle ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetTrustStoreCaCertificatesBundleOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetTrustStoreCaCertificatesBundleOutput.error_of_xml))
+  | GetTrustStoreRevocationContent ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetTrustStoreRevocationContentOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetTrustStoreRevocationContentOutput.error_of_xml))
+  | ModifyCapacityReservation ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyCapacityReservationOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ModifyCapacityReservationOutput.error_of_xml))
+  | ModifyIpPools ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyIpPoolsOutput.of_xml xml)
+      else Error (parse_aws_error (Some ModifyIpPoolsOutput.error_of_xml))
   | ModifyListener ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (ModifyListenerOutput.of_xml xml)
       else Error (parse_aws_error (Some ModifyListenerOutput.error_of_xml))
+  | ModifyListenerAttributes ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyListenerAttributesOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ModifyListenerAttributesOutput.error_of_xml))
   | ModifyLoadBalancerAttributes ->
       if is_success
       then
@@ -794,6 +1222,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ModifyTargetGroupAttributesOutput.error_of_xml))
+  | ModifyTrustStore ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyTrustStoreOutput.of_xml xml)
+      else Error (parse_aws_error (Some ModifyTrustStoreOutput.error_of_xml))
   | RegisterTargets ->
       if is_success
       then
@@ -815,6 +1249,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (RemoveTagsOutput.of_xml xml)
       else Error (parse_aws_error (Some RemoveTagsOutput.error_of_xml))
+  | RemoveTrustStoreRevocations ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RemoveTrustStoreRevocationsOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some RemoveTrustStoreRevocationsOutput.error_of_xml))
   | SetIpAddressType ->
       if is_success
       then

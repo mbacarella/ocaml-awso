@@ -258,6 +258,25 @@ let cancel_archival =
            (Values.CancelArchivalInput.make ~gatewayARN ~tapeARN ())
            (Some Values.CancelArchivalOutput.to_json)
            (Some Values.CancelArchivalOutput.error_to_json)])
+let cancel_cache_report =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and cacheReportARN =
+         flag "cache-report-a-r-n" (required string)
+           ~doc:"STRING CacheReportARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_cache_report
+           (Values.CancelCacheReportInput.make ~cacheReportARN ())
+           (Some Values.CancelCacheReportOutput.to_json)
+           (Some Values.CancelCacheReportOutput.error_to_json)])
 let cancel_retrieval =
   Command.async ~summary:""
     ([%map_open.Command
@@ -330,6 +349,9 @@ let create_n_f_s_file_share =
        and nFSFileShareDefaults =
          flag "n-f-s-file-share-defaults" (optional json_arg)
            ~doc:"JSON NFSFileShareDefaults"
+       and encryptionType =
+         flag "encryption-type" (optional json_arg)
+           ~doc:"JSON EncryptionType"
        and kMSEncrypted =
          flag "k-m-s-encrypted" (optional bool) ~doc:"BOOL Boolean"
        and kMSKey = flag "k-m-s-key" (optional string) ~doc:"STRING KMSKey"
@@ -378,8 +400,10 @@ let create_n_f_s_file_share =
            (Values.CreateNFSFileShareInput.make
               ?nFSFileShareDefaults:(Option.map
                                        ~f:Values.NFSFileShareDefaults.of_json
-                                       nFSFileShareDefaults) ?kMSEncrypted
-              ?kMSKey ?defaultStorageClass
+                                       nFSFileShareDefaults)
+              ?encryptionType:(Option.map ~f:Values.EncryptionType.of_json
+                                 encryptionType) ?kMSEncrypted ?kMSKey
+              ?defaultStorageClass
               ?objectACL:(Option.map ~f:Values.ObjectACL.of_json objectACL)
               ?clientList:(Option.map ~f:Values.FileShareClientList.of_json
                              clientList) ?squash ?readOnly
@@ -401,6 +425,9 @@ let create_s_m_b_file_share =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and encryptionType =
+         flag "encryption-type" (optional json_arg)
+           ~doc:"JSON EncryptionType"
        and kMSEncrypted =
          flag "k-m-s-encrypted" (optional bool) ~doc:"BOOL Boolean"
        and kMSKey = flag "k-m-s-key" (optional string) ~doc:"STRING KMSKey"
@@ -459,7 +486,9 @@ let create_s_m_b_file_share =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_s_m_b_file_share
-           (Values.CreateSMBFileShareInput.make ?kMSEncrypted ?kMSKey
+           (Values.CreateSMBFileShareInput.make
+              ?encryptionType:(Option.map ~f:Values.EncryptionType.of_json
+                                 encryptionType) ?kMSEncrypted ?kMSKey
               ?defaultStorageClass
               ?objectACL:(Option.map ~f:Values.ObjectACL.of_json objectACL)
               ?readOnly ?guessMIMETypeEnabled ?requesterPays ?sMBACLEnabled
@@ -707,6 +736,25 @@ let delete_bandwidth_rate_limit =
               ~bandwidthType ())
            (Some Values.DeleteBandwidthRateLimitOutput.to_json)
            (Some Values.DeleteBandwidthRateLimitOutput.error_to_json)])
+let delete_cache_report =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and cacheReportARN =
+         flag "cache-report-a-r-n" (required string)
+           ~doc:"STRING CacheReportARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_cache_report
+           (Values.DeleteCacheReportInput.make ~cacheReportARN ())
+           (Some Values.DeleteCacheReportOutput.to_json)
+           (Some Values.DeleteCacheReportOutput.error_to_json)])
 let delete_chap_credentials =
   Command.async ~summary:""
     ([%map_open.Command
@@ -933,6 +981,25 @@ let describe_cache =
            Io.describe_cache (Values.DescribeCacheInput.make ~gatewayARN ())
            (Some Values.DescribeCacheOutput.to_json)
            (Some Values.DescribeCacheOutput.error_to_json)])
+let describe_cache_report =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and cacheReportARN =
+         flag "cache-report-a-r-n" (required string)
+           ~doc:"STRING CacheReportARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_cache_report
+           (Values.DescribeCacheReportInput.make ~cacheReportARN ())
+           (Some Values.DescribeCacheReportOutput.to_json)
+           (Some Values.DescribeCacheReportOutput.error_to_json)])
 let describe_cachedi_s_c_s_i_volumes =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1312,6 +1379,27 @@ let disassociate_file_system =
               ~fileSystemAssociationARN ())
            (Some Values.DisassociateFileSystemOutput.to_json)
            (Some Values.DisassociateFileSystemOutput.error_to_json)])
+let evict_files_failing_upload =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and forceRemove =
+         flag "force-remove" (optional bool) ~doc:"BOOL Boolean__lc1"
+       and fileShareARN =
+         flag "file-share-a-r-n" (required string) ~doc:"STRING FileShareARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.evict_files_failing_upload
+           (Values.EvictFilesFailingUploadInput.make ?forceRemove
+              ~fileShareARN ())
+           (Some Values.EvictFilesFailingUploadOutput.to_json)
+           (Some Values.EvictFilesFailingUploadOutput.error_to_json)])
 let join_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1364,6 +1452,23 @@ let list_automatic_tape_creation_policies =
            (Values.ListAutomaticTapeCreationPoliciesInput.make ?gatewayARN ())
            (Some Values.ListAutomaticTapeCreationPoliciesOutput.to_json)
            (Some Values.ListAutomaticTapeCreationPoliciesOutput.error_to_json)])
+let list_cache_reports =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING Marker" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cache_reports
+           (Values.ListCacheReportsInput.make ?marker ())
+           (Some Values.ListCacheReportsOutput.to_json)
+           (Some Values.ListCacheReportsOutput.error_to_json)])
 let list_file_shares =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1754,6 +1859,49 @@ let start_availability_monitor_test =
            (Values.StartAvailabilityMonitorTestInput.make ~gatewayARN ())
            (Some Values.StartAvailabilityMonitorTestOutput.to_json)
            (Some Values.StartAvailabilityMonitorTestOutput.error_to_json)])
+let start_cache_report =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and vPCEndpointDNSName =
+         flag "v-p-c-endpoint-d-n-s-name" (optional string)
+           ~doc:"STRING DNSHostName"
+       and inclusionFilters =
+         flag "inclusion-filters" (optional json_arg)
+           ~doc:"JSON CacheReportFilterList"
+       and exclusionFilters =
+         flag "exclusion-filters" (optional json_arg)
+           ~doc:"JSON CacheReportFilterList"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and fileShareARN =
+         flag "file-share-a-r-n" (required string) ~doc:"STRING FileShareARN"
+       and role = flag "role" (required string) ~doc:"STRING Role"
+       and locationARN =
+         flag "location-a-r-n" (required string) ~doc:"STRING LocationARN"
+       and bucketRegion =
+         flag "bucket-region" (required string) ~doc:"STRING RegionId"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING ClientToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_cache_report
+           (Values.StartCacheReportInput.make ?vPCEndpointDNSName
+              ?inclusionFilters:(Option.map
+                                   ~f:Values.CacheReportFilterList.of_json
+                                   inclusionFilters)
+              ?exclusionFilters:(Option.map
+                                   ~f:Values.CacheReportFilterList.of_json
+                                   exclusionFilters)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~fileShareARN
+              ~role ~locationARN ~bucketRegion ~clientToken ())
+           (Some Values.StartCacheReportOutput.to_json)
+           (Some Values.StartCacheReportOutput.error_to_json)])
 let start_gateway =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1969,19 +2117,26 @@ let update_maintenance_start_time =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and hourOfDay = flag "hour-of-day" (optional int) ~doc:"INT HourOfDay"
+       and minuteOfHour =
+         flag "minute-of-hour" (optional int) ~doc:"INT MinuteOfHour"
        and dayOfWeek = flag "day-of-week" (optional int) ~doc:"INT DayOfWeek"
        and dayOfMonth =
          flag "day-of-month" (optional int) ~doc:"INT DayOfMonth"
+       and softwareUpdatePreferences =
+         flag "software-update-preferences" (optional json_arg)
+           ~doc:"JSON SoftwareUpdatePreferences"
        and gatewayARN =
-         flag "gateway-a-r-n" (required string) ~doc:"STRING GatewayARN"
-       and hourOfDay = flag "hour-of-day" (required int) ~doc:"INT HourOfDay"
-       and minuteOfHour =
-         flag "minute-of-hour" (required int) ~doc:"INT MinuteOfHour" in
+         flag "gateway-a-r-n" (required string) ~doc:"STRING GatewayARN" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_maintenance_start_time
-           (Values.UpdateMaintenanceStartTimeInput.make ?dayOfWeek
-              ?dayOfMonth ~gatewayARN ~hourOfDay ~minuteOfHour ())
+           (Values.UpdateMaintenanceStartTimeInput.make ?hourOfDay
+              ?minuteOfHour ?dayOfWeek ?dayOfMonth
+              ?softwareUpdatePreferences:(Option.map
+                                            ~f:Values.SoftwareUpdatePreferences.of_json
+                                            softwareUpdatePreferences)
+              ~gatewayARN ())
            (Some Values.UpdateMaintenanceStartTimeOutput.to_json)
            (Some Values.UpdateMaintenanceStartTimeOutput.error_to_json)])
 let update_n_f_s_file_share =
@@ -1994,6 +2149,9 @@ let update_n_f_s_file_share =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and encryptionType =
+         flag "encryption-type" (optional json_arg)
+           ~doc:"JSON EncryptionType"
        and kMSEncrypted =
          flag "k-m-s-encrypted" (optional bool) ~doc:"BOOL Boolean"
        and kMSKey = flag "k-m-s-key" (optional string) ~doc:"STRING KMSKey"
@@ -2031,7 +2189,9 @@ let update_n_f_s_file_share =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_n_f_s_file_share
-           (Values.UpdateNFSFileShareInput.make ?kMSEncrypted ?kMSKey
+           (Values.UpdateNFSFileShareInput.make
+              ?encryptionType:(Option.map ~f:Values.EncryptionType.of_json
+                                 encryptionType) ?kMSEncrypted ?kMSKey
               ?nFSFileShareDefaults:(Option.map
                                        ~f:Values.NFSFileShareDefaults.of_json
                                        nFSFileShareDefaults)
@@ -2055,6 +2215,9 @@ let update_s_m_b_file_share =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and encryptionType =
+         flag "encryption-type" (optional json_arg)
+           ~doc:"JSON EncryptionType"
        and kMSEncrypted =
          flag "k-m-s-encrypted" (optional bool) ~doc:"BOOL Boolean"
        and kMSKey = flag "k-m-s-key" (optional string) ~doc:"STRING KMSKey"
@@ -2100,7 +2263,9 @@ let update_s_m_b_file_share =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_s_m_b_file_share
-           (Values.UpdateSMBFileShareInput.make ?kMSEncrypted ?kMSKey
+           (Values.UpdateSMBFileShareInput.make
+              ?encryptionType:(Option.map ~f:Values.EncryptionType.of_json
+                                 encryptionType) ?kMSEncrypted ?kMSKey
               ?defaultStorageClass
               ?objectACL:(Option.map ~f:Values.ObjectACL.of_json objectACL)
               ?readOnly ?guessMIMETypeEnabled ?requesterPays ?sMBACLEnabled
@@ -2244,6 +2409,7 @@ let main =
     ("associate-file-system", associate_file_system);
     ("attach-volume", attach_volume);
     ("cancel-archival", cancel_archival);
+    ("cancel-cache-report", cancel_cache_report);
     ("cancel-retrieval", cancel_retrieval);
     ("create-cachedi-s-c-s-i-volume", create_cachedi_s_c_s_i_volume);
     ("create-n-f-s-file-share", create_n_f_s_file_share);
@@ -2258,6 +2424,7 @@ let main =
     ("delete-automatic-tape-creation-policy",
       delete_automatic_tape_creation_policy);
     ("delete-bandwidth-rate-limit", delete_bandwidth_rate_limit);
+    ("delete-cache-report", delete_cache_report);
     ("delete-chap-credentials", delete_chap_credentials);
     ("delete-file-share", delete_file_share);
     ("delete-gateway", delete_gateway);
@@ -2272,6 +2439,7 @@ let main =
     ("describe-bandwidth-rate-limit-schedule",
       describe_bandwidth_rate_limit_schedule);
     ("describe-cache", describe_cache);
+    ("describe-cache-report", describe_cache_report);
     ("describe-cachedi-s-c-s-i-volumes", describe_cachedi_s_c_s_i_volumes);
     ("describe-chap-credentials", describe_chap_credentials);
     ("describe-file-system-associations", describe_file_system_associations);
@@ -2291,9 +2459,11 @@ let main =
     ("detach-volume", detach_volume);
     ("disable-gateway", disable_gateway);
     ("disassociate-file-system", disassociate_file_system);
+    ("evict-files-failing-upload", evict_files_failing_upload);
     ("join-domain", join_domain);
     ("list-automatic-tape-creation-policies",
       list_automatic_tape_creation_policies);
+    ("list-cache-reports", list_cache_reports);
     ("list-file-shares", list_file_shares);
     ("list-file-system-associations", list_file_system_associations);
     ("list-gateways", list_gateways);
@@ -2314,6 +2484,7 @@ let main =
     ("set-s-m-b-guest-password", set_s_m_b_guest_password);
     ("shutdown-gateway", shutdown_gateway);
     ("start-availability-monitor-test", start_availability_monitor_test);
+    ("start-cache-report", start_cache_report);
     ("start-gateway", start_gateway);
     ("update-automatic-tape-creation-policy",
       update_automatic_tape_creation_policy);

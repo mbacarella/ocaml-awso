@@ -15,47 +15,89 @@ let cancel_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelJob input
 let create_compute_environment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateComputeEnvironment input
+let create_consumable_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateConsumableResource input
 let create_job_queue ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateJobQueue input
+let create_quota_share ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateQuotaShare input
 let create_scheduling_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateSchedulingPolicy input
+let create_service_environment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateServiceEnvironment input
 let delete_compute_environment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteComputeEnvironment input
+let delete_consumable_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteConsumableResource input
 let delete_job_queue ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteJobQueue input
+let delete_quota_share ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteQuotaShare input
 let delete_scheduling_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteSchedulingPolicy input
+let delete_service_environment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteServiceEnvironment input
 let deregister_job_definition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeregisterJobDefinition input
 let describe_compute_environments ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeComputeEnvironments input
+let describe_consumable_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeConsumableResource input
 let describe_job_definitions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeJobDefinitions input
 let describe_job_queues ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeJobQueues input
 let describe_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeJobs input
+let describe_quota_share ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeQuotaShare input
 let describe_scheduling_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSchedulingPolicies input
+let describe_service_environments ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeServiceEnvironments input
+let describe_service_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeServiceJob input
+let get_job_queue_snapshot ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetJobQueueSnapshot input
+let list_consumable_resources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListConsumableResources input
 let list_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListJobs input
+let list_jobs_by_consumable_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListJobsByConsumableResource input
+let list_quota_shares ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListQuotaShares input
 let list_scheduling_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListSchedulingPolicies input
+let list_service_jobs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListServiceJobs input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let register_job_definition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterJobDefinition input
 let submit_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SubmitJob input
+let submit_service_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SubmitServiceJob input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let terminate_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TerminateJob input
+let terminate_service_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TerminateServiceJob input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_compute_environment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateComputeEnvironment input
+let update_consumable_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateConsumableResource input
 let update_job_queue ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateJobQueue input
+let update_quota_share ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateQuotaShare input
 let update_scheduling_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateSchedulingPolicy input
+let update_service_environment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateServiceEnvironment input
+let update_service_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateServiceJob input

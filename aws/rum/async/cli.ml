@@ -28,6 +28,98 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let batch_create_rum_metric_definitions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and destinationArn =
+         flag "destination-arn" (optional string)
+           ~doc:"STRING DestinationArn"
+       and appMonitorName =
+         flag "app-monitor-name" (required string)
+           ~doc:"STRING AppMonitorName"
+       and destination =
+         flag "destination" (required json_arg) ~doc:"JSON MetricDestination"
+       and metricDefinitions =
+         flag "metric-definitions" (required json_arg)
+           ~doc:"JSON MetricDefinitionsRequest" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_create_rum_metric_definitions
+           (Values.BatchCreateRumMetricDefinitionsRequest.make
+              ?destinationArn ~appMonitorName
+              ~destination:(Values.MetricDestination.of_json destination)
+              ~metricDefinitions:(Values.MetricDefinitionsRequest.of_json
+                                    metricDefinitions) ())
+           (Some Values.BatchCreateRumMetricDefinitionsResponse.to_json)
+           (Some Values.BatchCreateRumMetricDefinitionsResponse.error_to_json)])
+let batch_delete_rum_metric_definitions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and destinationArn =
+         flag "destination-arn" (optional string)
+           ~doc:"STRING DestinationArn"
+       and appMonitorName =
+         flag "app-monitor-name" (required string)
+           ~doc:"STRING AppMonitorName"
+       and destination =
+         flag "destination" (required json_arg) ~doc:"JSON MetricDestination"
+       and metricDefinitionIds =
+         flag "metric-definition-ids" (required json_arg)
+           ~doc:"JSON MetricDefinitionIds" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_delete_rum_metric_definitions
+           (Values.BatchDeleteRumMetricDefinitionsRequest.make
+              ?destinationArn ~appMonitorName
+              ~destination:(Values.MetricDestination.of_json destination)
+              ~metricDefinitionIds:(Values.MetricDefinitionIds.of_json
+                                      metricDefinitionIds) ())
+           (Some Values.BatchDeleteRumMetricDefinitionsResponse.to_json)
+           (Some Values.BatchDeleteRumMetricDefinitionsResponse.error_to_json)])
+let batch_get_rum_metric_definitions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and destinationArn =
+         flag "destination-arn" (optional string)
+           ~doc:"STRING DestinationArn"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and appMonitorName =
+         flag "app-monitor-name" (required string)
+           ~doc:"STRING AppMonitorName"
+       and destination =
+         flag "destination" (required json_arg) ~doc:"JSON MetricDestination" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_rum_metric_definitions
+           (Values.BatchGetRumMetricDefinitionsRequest.make ?destinationArn
+              ?maxResults ?nextToken ~appMonitorName
+              ~destination:(Values.MetricDestination.of_json destination) ())
+           (Some Values.BatchGetRumMetricDefinitionsResponse.to_json)
+           (Some Values.BatchGetRumMetricDefinitionsResponse.error_to_json)])
 let create_app_monitor =
   Command.async ~summary:""
     ([%map_open.Command
@@ -38,24 +130,43 @@ let create_app_monitor =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and domain =
+         flag "domain" (optional string) ~doc:"STRING AppMonitorDomain"
+       and domainList =
+         flag "domain-list" (optional json_arg)
+           ~doc:"JSON AppMonitorDomainList"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and appMonitorConfiguration =
          flag "app-monitor-configuration" (optional json_arg)
            ~doc:"JSON AppMonitorConfiguration"
        and cwLogEnabled =
          flag "cw-log-enabled" (optional bool) ~doc:"BOOL Boolean"
-       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
-       and domain =
-         flag "domain" (required string) ~doc:"STRING AppMonitorDomain"
+       and customEvents =
+         flag "custom-events" (optional json_arg) ~doc:"JSON CustomEvents"
+       and deobfuscationConfiguration =
+         flag "deobfuscation-configuration" (optional json_arg)
+           ~doc:"JSON DeobfuscationConfiguration"
+       and platform =
+         flag "platform" (optional json_arg) ~doc:"JSON AppMonitorPlatform"
        and name = flag "name" (required string) ~doc:"STRING AppMonitorName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_app_monitor
-           (Values.CreateAppMonitorRequest.make
+           (Values.CreateAppMonitorRequest.make ?domain
+              ?domainList:(Option.map ~f:Values.AppMonitorDomainList.of_json
+                             domainList)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
               ?appMonitorConfiguration:(Option.map
                                           ~f:Values.AppMonitorConfiguration.of_json
                                           appMonitorConfiguration)
-              ?cwLogEnabled ?tags:(Option.map ~f:Values.TagMap.of_json tags)
-              ~domain ~name ())
+              ?cwLogEnabled
+              ?customEvents:(Option.map ~f:Values.CustomEvents.of_json
+                               customEvents)
+              ?deobfuscationConfiguration:(Option.map
+                                             ~f:Values.DeobfuscationConfiguration.of_json
+                                             deobfuscationConfiguration)
+              ?platform:(Option.map ~f:Values.AppMonitorPlatform.of_json
+                           platform) ~name ())
            (Some Values.CreateAppMonitorResponse.to_json)
            (Some Values.CreateAppMonitorResponse.error_to_json)])
 let delete_app_monitor =
@@ -75,6 +186,52 @@ let delete_app_monitor =
            (Values.DeleteAppMonitorRequest.make ~name ())
            (Some Values.DeleteAppMonitorResponse.to_json)
            (Some Values.DeleteAppMonitorResponse.error_to_json)])
+let delete_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and policyRevisionId =
+         flag "policy-revision-id" (optional string)
+           ~doc:"STRING PolicyRevisionId"
+       and name = flag "name" (required string) ~doc:"STRING AppMonitorName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_resource_policy
+           (Values.DeleteResourcePolicyRequest.make ?policyRevisionId ~name
+              ()) (Some Values.DeleteResourcePolicyResponse.to_json)
+           (Some Values.DeleteResourcePolicyResponse.error_to_json)])
+let delete_rum_metrics_destination =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and destinationArn =
+         flag "destination-arn" (optional string)
+           ~doc:"STRING DestinationArn"
+       and appMonitorName =
+         flag "app-monitor-name" (required string)
+           ~doc:"STRING AppMonitorName"
+       and destination =
+         flag "destination" (required json_arg) ~doc:"JSON MetricDestination" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_rum_metrics_destination
+           (Values.DeleteRumMetricsDestinationRequest.make ?destinationArn
+              ~appMonitorName
+              ~destination:(Values.MetricDestination.of_json destination) ())
+           (Some Values.DeleteRumMetricsDestinationResponse.to_json)
+           (Some Values.DeleteRumMetricsDestinationResponse.error_to_json)])
 let get_app_monitor =
   Command.async ~summary:""
     ([%map_open.Command
@@ -119,6 +276,23 @@ let get_app_monitor_data =
               ~timeRange:(Values.TimeRange.of_json timeRange) ())
            (Some Values.GetAppMonitorDataResponse.to_json)
            (Some Values.GetAppMonitorDataResponse.error_to_json)])
+let get_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (required string) ~doc:"STRING AppMonitorName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resource_policy
+           (Values.GetResourcePolicyRequest.make ~name ())
+           (Some Values.GetResourcePolicyResponse.to_json)
+           (Some Values.GetResourcePolicyResponse.error_to_json)])
 let list_app_monitors =
   Command.async ~summary:""
     ([%map_open.Command
@@ -129,7 +303,8 @@ let list_app_monitors =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsInteger"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING String" in
        fun () ->
@@ -138,6 +313,30 @@ let list_app_monitors =
            (Values.ListAppMonitorsRequest.make ?maxResults ?nextToken ())
            (Some Values.ListAppMonitorsResponse.to_json)
            (Some Values.ListAppMonitorsResponse.error_to_json)])
+let list_rum_metrics_destinations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and appMonitorName =
+         flag "app-monitor-name" (required string)
+           ~doc:"STRING AppMonitorName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_rum_metrics_destinations
+           (Values.ListRumMetricsDestinationsRequest.make ?maxResults
+              ?nextToken ~appMonitorName ())
+           (Some Values.ListRumMetricsDestinationsResponse.to_json)
+           (Some Values.ListRumMetricsDestinationsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -156,6 +355,29 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let put_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and policyRevisionId =
+         flag "policy-revision-id" (optional string)
+           ~doc:"STRING PolicyRevisionId"
+       and name = flag "name" (required string) ~doc:"STRING AppMonitorName"
+       and policyDocument =
+         flag "policy-document" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_resource_policy
+           (Values.PutResourcePolicyRequest.make ?policyRevisionId ~name
+              ~policyDocument ())
+           (Some Values.PutResourcePolicyResponse.to_json)
+           (Some Values.PutResourcePolicyResponse.error_to_json)])
 let put_rum_events =
   Command.async ~summary:""
     ([%map_open.Command
@@ -166,25 +388,58 @@ let put_rum_events =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and alias = flag "alias" (optional string) ~doc:"STRING Alias"
+       and id =
+         flag "id" (required string)
+           ~doc:"STRING PutRumEventsRequestIdString"
+       and batchId =
+         flag "batch-id" (required string)
+           ~doc:"STRING PutRumEventsRequestBatchIdString"
        and appMonitorDetails =
          flag "app-monitor-details" (required json_arg)
            ~doc:"JSON AppMonitorDetails"
-       and batchId = flag "batch-id" (required string) ~doc:"STRING String"
-       and id = flag "id" (required string) ~doc:"STRING AppMonitorId"
-       and rumEvents =
-         flag "rum-events" (required json_arg) ~doc:"JSON RumEventList"
        and userDetails =
-         flag "user-details" (required json_arg) ~doc:"JSON UserDetails" in
+         flag "user-details" (required json_arg) ~doc:"JSON UserDetails"
+       and rumEvents =
+         flag "rum-events" (required json_arg) ~doc:"JSON RumEventList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_rum_events
-           (Values.PutRumEventsRequest.make
+           (Values.PutRumEventsRequest.make ?alias ~id ~batchId
               ~appMonitorDetails:(Values.AppMonitorDetails.of_json
-                                    appMonitorDetails) ~batchId ~id
-              ~rumEvents:(Values.RumEventList.of_json rumEvents)
-              ~userDetails:(Values.UserDetails.of_json userDetails) ())
+                                    appMonitorDetails)
+              ~userDetails:(Values.UserDetails.of_json userDetails)
+              ~rumEvents:(Values.RumEventList.of_json rumEvents) ())
            (Some Values.PutRumEventsResponse.to_json)
            (Some Values.PutRumEventsResponse.error_to_json)])
+let put_rum_metrics_destination =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and destinationArn =
+         flag "destination-arn" (optional string)
+           ~doc:"STRING DestinationArn"
+       and iamRoleArn =
+         flag "iam-role-arn" (optional string) ~doc:"STRING IamRoleArn"
+       and appMonitorName =
+         flag "app-monitor-name" (required string)
+           ~doc:"STRING AppMonitorName"
+       and destination =
+         flag "destination" (required json_arg) ~doc:"JSON MetricDestination" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_rum_metrics_destination
+           (Values.PutRumMetricsDestinationRequest.make ?destinationArn
+              ?iamRoleArn ~appMonitorName
+              ~destination:(Values.MetricDestination.of_json destination) ())
+           (Some Values.PutRumMetricsDestinationResponse.to_json)
+           (Some Values.PutRumMetricsDestinationResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -236,34 +491,95 @@ let update_app_monitor =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and domain =
+         flag "domain" (optional string) ~doc:"STRING AppMonitorDomain"
+       and domainList =
+         flag "domain-list" (optional json_arg)
+           ~doc:"JSON AppMonitorDomainList"
        and appMonitorConfiguration =
          flag "app-monitor-configuration" (optional json_arg)
            ~doc:"JSON AppMonitorConfiguration"
        and cwLogEnabled =
          flag "cw-log-enabled" (optional bool) ~doc:"BOOL Boolean"
-       and domain =
-         flag "domain" (optional string) ~doc:"STRING AppMonitorDomain"
+       and customEvents =
+         flag "custom-events" (optional json_arg) ~doc:"JSON CustomEvents"
+       and deobfuscationConfiguration =
+         flag "deobfuscation-configuration" (optional json_arg)
+           ~doc:"JSON DeobfuscationConfiguration"
        and name = flag "name" (required string) ~doc:"STRING AppMonitorName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_app_monitor
-           (Values.UpdateAppMonitorRequest.make
+           (Values.UpdateAppMonitorRequest.make ?domain
+              ?domainList:(Option.map ~f:Values.AppMonitorDomainList.of_json
+                             domainList)
               ?appMonitorConfiguration:(Option.map
                                           ~f:Values.AppMonitorConfiguration.of_json
                                           appMonitorConfiguration)
-              ?cwLogEnabled ?domain ~name ())
-           (Some Values.UpdateAppMonitorResponse.to_json)
+              ?cwLogEnabled
+              ?customEvents:(Option.map ~f:Values.CustomEvents.of_json
+                               customEvents)
+              ?deobfuscationConfiguration:(Option.map
+                                             ~f:Values.DeobfuscationConfiguration.of_json
+                                             deobfuscationConfiguration)
+              ~name ()) (Some Values.UpdateAppMonitorResponse.to_json)
            (Some Values.UpdateAppMonitorResponse.error_to_json)])
+let update_rum_metric_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and destinationArn =
+         flag "destination-arn" (optional string)
+           ~doc:"STRING DestinationArn"
+       and appMonitorName =
+         flag "app-monitor-name" (required string)
+           ~doc:"STRING AppMonitorName"
+       and destination =
+         flag "destination" (required json_arg) ~doc:"JSON MetricDestination"
+       and metricDefinition =
+         flag "metric-definition" (required json_arg)
+           ~doc:"JSON MetricDefinitionRequest"
+       and metricDefinitionId =
+         flag "metric-definition-id" (required string)
+           ~doc:"STRING MetricDefinitionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_rum_metric_definition
+           (Values.UpdateRumMetricDefinitionRequest.make ?destinationArn
+              ~appMonitorName
+              ~destination:(Values.MetricDestination.of_json destination)
+              ~metricDefinition:(Values.MetricDefinitionRequest.of_json
+                                   metricDefinition) ~metricDefinitionId ())
+           (Some Values.UpdateRumMetricDefinitionResponse.to_json)
+           (Some Values.UpdateRumMetricDefinitionResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("create-app-monitor", create_app_monitor);
+    [("batch-create-rum-metric-definitions",
+       batch_create_rum_metric_definitions);
+    ("batch-delete-rum-metric-definitions",
+      batch_delete_rum_metric_definitions);
+    ("batch-get-rum-metric-definitions", batch_get_rum_metric_definitions);
+    ("create-app-monitor", create_app_monitor);
     ("delete-app-monitor", delete_app_monitor);
+    ("delete-resource-policy", delete_resource_policy);
+    ("delete-rum-metrics-destination", delete_rum_metrics_destination);
     ("get-app-monitor", get_app_monitor);
     ("get-app-monitor-data", get_app_monitor_data);
+    ("get-resource-policy", get_resource_policy);
     ("list-app-monitors", list_app_monitors);
+    ("list-rum-metrics-destinations", list_rum_metrics_destinations);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("put-resource-policy", put_resource_policy);
     ("put-rum-events", put_rum_events);
+    ("put-rum-metrics-destination", put_rum_metrics_destination);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
-    ("update-app-monitor", update_app_monitor)]
+    ("update-app-monitor", update_app_monitor);
+    ("update-rum-metric-definition", update_rum_metric_definition)]

@@ -6,18 +6,42 @@ val associate_browser_settings :
       AssociateBrowserSettingsRequest.t ->
         (AssociateBrowserSettingsResponse.t,
           AssociateBrowserSettingsResponse.error) Result.t Lwt.t
+val associate_data_protection_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AssociateDataProtectionSettingsRequest.t ->
+        (AssociateDataProtectionSettingsResponse.t,
+          AssociateDataProtectionSettingsResponse.error) Result.t Lwt.t
+val associate_ip_access_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AssociateIpAccessSettingsRequest.t ->
+        (AssociateIpAccessSettingsResponse.t,
+          AssociateIpAccessSettingsResponse.error) Result.t Lwt.t
 val associate_network_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateNetworkSettingsRequest.t ->
         (AssociateNetworkSettingsResponse.t,
           AssociateNetworkSettingsResponse.error) Result.t Lwt.t
+val associate_session_logger :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AssociateSessionLoggerRequest.t ->
+        (AssociateSessionLoggerResponse.t,
+          AssociateSessionLoggerResponse.error) Result.t Lwt.t
 val associate_trust_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateTrustStoreRequest.t ->
         (AssociateTrustStoreResponse.t, AssociateTrustStoreResponse.error)
           Result.t Lwt.t
+val associate_user_access_logging_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AssociateUserAccessLoggingSettingsRequest.t ->
+        (AssociateUserAccessLoggingSettingsResponse.t,
+          AssociateUserAccessLoggingSettingsResponse.error) Result.t Lwt.t
 val associate_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -30,12 +54,24 @@ val create_browser_settings :
       CreateBrowserSettingsRequest.t ->
         (CreateBrowserSettingsResponse.t,
           CreateBrowserSettingsResponse.error) Result.t Lwt.t
+val create_data_protection_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateDataProtectionSettingsRequest.t ->
+        (CreateDataProtectionSettingsResponse.t,
+          CreateDataProtectionSettingsResponse.error) Result.t Lwt.t
 val create_identity_provider :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateIdentityProviderRequest.t ->
         (CreateIdentityProviderResponse.t,
           CreateIdentityProviderResponse.error) Result.t Lwt.t
+val create_ip_access_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateIpAccessSettingsRequest.t ->
+        (CreateIpAccessSettingsResponse.t,
+          CreateIpAccessSettingsResponse.error) Result.t Lwt.t
 val create_network_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -47,12 +83,24 @@ val create_portal :
     ?cfg:Awso.Cfg.t ->
       CreatePortalRequest.t ->
         (CreatePortalResponse.t, CreatePortalResponse.error) Result.t Lwt.t
+val create_session_logger :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateSessionLoggerRequest.t ->
+        (CreateSessionLoggerResponse.t, CreateSessionLoggerResponse.error)
+          Result.t Lwt.t
 val create_trust_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTrustStoreRequest.t ->
         (CreateTrustStoreResponse.t, CreateTrustStoreResponse.error) Result.t
           Lwt.t
+val create_user_access_logging_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateUserAccessLoggingSettingsRequest.t ->
+        (CreateUserAccessLoggingSettingsResponse.t,
+          CreateUserAccessLoggingSettingsResponse.error) Result.t Lwt.t
 val create_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -65,12 +113,24 @@ val delete_browser_settings :
       DeleteBrowserSettingsRequest.t ->
         (DeleteBrowserSettingsResponse.t,
           DeleteBrowserSettingsResponse.error) Result.t Lwt.t
+val delete_data_protection_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDataProtectionSettingsRequest.t ->
+        (DeleteDataProtectionSettingsResponse.t,
+          DeleteDataProtectionSettingsResponse.error) Result.t Lwt.t
 val delete_identity_provider :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteIdentityProviderRequest.t ->
         (DeleteIdentityProviderResponse.t,
           DeleteIdentityProviderResponse.error) Result.t Lwt.t
+val delete_ip_access_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteIpAccessSettingsRequest.t ->
+        (DeleteIpAccessSettingsResponse.t,
+          DeleteIpAccessSettingsResponse.error) Result.t Lwt.t
 val delete_network_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -82,12 +142,24 @@ val delete_portal :
     ?cfg:Awso.Cfg.t ->
       DeletePortalRequest.t ->
         (DeletePortalResponse.t, DeletePortalResponse.error) Result.t Lwt.t
+val delete_session_logger :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteSessionLoggerRequest.t ->
+        (DeleteSessionLoggerResponse.t, DeleteSessionLoggerResponse.error)
+          Result.t Lwt.t
 val delete_trust_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTrustStoreRequest.t ->
         (DeleteTrustStoreResponse.t, DeleteTrustStoreResponse.error) Result.t
           Lwt.t
+val delete_user_access_logging_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteUserAccessLoggingSettingsRequest.t ->
+        (DeleteUserAccessLoggingSettingsResponse.t,
+          DeleteUserAccessLoggingSettingsResponse.error) Result.t Lwt.t
 val delete_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -100,35 +172,76 @@ val disassociate_browser_settings :
       DisassociateBrowserSettingsRequest.t ->
         (DisassociateBrowserSettingsResponse.t,
           DisassociateBrowserSettingsResponse.error) Result.t Lwt.t
+val disassociate_data_protection_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DisassociateDataProtectionSettingsRequest.t ->
+        (DisassociateDataProtectionSettingsResponse.t,
+          DisassociateDataProtectionSettingsResponse.error) Result.t Lwt.t
+val disassociate_ip_access_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DisassociateIpAccessSettingsRequest.t ->
+        (DisassociateIpAccessSettingsResponse.t,
+          DisassociateIpAccessSettingsResponse.error) Result.t Lwt.t
 val disassociate_network_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateNetworkSettingsRequest.t ->
         (DisassociateNetworkSettingsResponse.t,
           DisassociateNetworkSettingsResponse.error) Result.t Lwt.t
+val disassociate_session_logger :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DisassociateSessionLoggerRequest.t ->
+        (DisassociateSessionLoggerResponse.t,
+          DisassociateSessionLoggerResponse.error) Result.t Lwt.t
 val disassociate_trust_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateTrustStoreRequest.t ->
         (DisassociateTrustStoreResponse.t,
           DisassociateTrustStoreResponse.error) Result.t Lwt.t
+val disassociate_user_access_logging_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DisassociateUserAccessLoggingSettingsRequest.t ->
+        (DisassociateUserAccessLoggingSettingsResponse.t,
+          DisassociateUserAccessLoggingSettingsResponse.error) Result.t Lwt.t
 val disassociate_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateUserSettingsRequest.t ->
         (DisassociateUserSettingsResponse.t,
           DisassociateUserSettingsResponse.error) Result.t Lwt.t
+val expire_session :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ExpireSessionRequest.t ->
+        (ExpireSessionResponse.t, ExpireSessionResponse.error) Result.t Lwt.t
 val get_browser_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBrowserSettingsRequest.t ->
         (GetBrowserSettingsResponse.t, GetBrowserSettingsResponse.error)
           Result.t Lwt.t
+val get_data_protection_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDataProtectionSettingsRequest.t ->
+        (GetDataProtectionSettingsResponse.t,
+          GetDataProtectionSettingsResponse.error) Result.t Lwt.t
 val get_identity_provider :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIdentityProviderRequest.t ->
         (GetIdentityProviderResponse.t, GetIdentityProviderResponse.error)
+          Result.t Lwt.t
+val get_ip_access_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetIpAccessSettingsRequest.t ->
+        (GetIpAccessSettingsResponse.t, GetIpAccessSettingsResponse.error)
           Result.t Lwt.t
 val get_network_settings :
   ?endpoint_url:string ->
@@ -147,6 +260,17 @@ val get_portal_service_provider_metadata :
       GetPortalServiceProviderMetadataRequest.t ->
         (GetPortalServiceProviderMetadataResponse.t,
           GetPortalServiceProviderMetadataResponse.error) Result.t Lwt.t
+val get_session :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSessionRequest.t ->
+        (GetSessionResponse.t, GetSessionResponse.error) Result.t Lwt.t
+val get_session_logger :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSessionLoggerRequest.t ->
+        (GetSessionLoggerResponse.t, GetSessionLoggerResponse.error) Result.t
+          Lwt.t
 val get_trust_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -158,6 +282,12 @@ val get_trust_store_certificate :
       GetTrustStoreCertificateRequest.t ->
         (GetTrustStoreCertificateResponse.t,
           GetTrustStoreCertificateResponse.error) Result.t Lwt.t
+val get_user_access_logging_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetUserAccessLoggingSettingsRequest.t ->
+        (GetUserAccessLoggingSettingsResponse.t,
+          GetUserAccessLoggingSettingsResponse.error) Result.t Lwt.t
 val get_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -170,12 +300,24 @@ val list_browser_settings :
       ListBrowserSettingsRequest.t ->
         (ListBrowserSettingsResponse.t, ListBrowserSettingsResponse.error)
           Result.t Lwt.t
+val list_data_protection_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDataProtectionSettingsRequest.t ->
+        (ListDataProtectionSettingsResponse.t,
+          ListDataProtectionSettingsResponse.error) Result.t Lwt.t
 val list_identity_providers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListIdentityProvidersRequest.t ->
         (ListIdentityProvidersResponse.t,
           ListIdentityProvidersResponse.error) Result.t Lwt.t
+val list_ip_access_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListIpAccessSettingsRequest.t ->
+        (ListIpAccessSettingsResponse.t, ListIpAccessSettingsResponse.error)
+          Result.t Lwt.t
 val list_network_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -187,6 +329,17 @@ val list_portals :
     ?cfg:Awso.Cfg.t ->
       ListPortalsRequest.t ->
         (ListPortalsResponse.t, ListPortalsResponse.error) Result.t Lwt.t
+val list_session_loggers :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSessionLoggersRequest.t ->
+        (ListSessionLoggersResponse.t, ListSessionLoggersResponse.error)
+          Result.t Lwt.t
+val list_sessions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSessionsRequest.t ->
+        (ListSessionsResponse.t, ListSessionsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -205,6 +358,12 @@ val list_trust_stores :
       ListTrustStoresRequest.t ->
         (ListTrustStoresResponse.t, ListTrustStoresResponse.error) Result.t
           Lwt.t
+val list_user_access_logging_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListUserAccessLoggingSettingsRequest.t ->
+        (ListUserAccessLoggingSettingsResponse.t,
+          ListUserAccessLoggingSettingsResponse.error) Result.t Lwt.t
 val list_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -227,12 +386,24 @@ val update_browser_settings :
       UpdateBrowserSettingsRequest.t ->
         (UpdateBrowserSettingsResponse.t,
           UpdateBrowserSettingsResponse.error) Result.t Lwt.t
+val update_data_protection_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDataProtectionSettingsRequest.t ->
+        (UpdateDataProtectionSettingsResponse.t,
+          UpdateDataProtectionSettingsResponse.error) Result.t Lwt.t
 val update_identity_provider :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateIdentityProviderRequest.t ->
         (UpdateIdentityProviderResponse.t,
           UpdateIdentityProviderResponse.error) Result.t Lwt.t
+val update_ip_access_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateIpAccessSettingsRequest.t ->
+        (UpdateIpAccessSettingsResponse.t,
+          UpdateIpAccessSettingsResponse.error) Result.t Lwt.t
 val update_network_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -244,12 +415,24 @@ val update_portal :
     ?cfg:Awso.Cfg.t ->
       UpdatePortalRequest.t ->
         (UpdatePortalResponse.t, UpdatePortalResponse.error) Result.t Lwt.t
+val update_session_logger :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateSessionLoggerRequest.t ->
+        (UpdateSessionLoggerResponse.t, UpdateSessionLoggerResponse.error)
+          Result.t Lwt.t
 val update_trust_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTrustStoreRequest.t ->
         (UpdateTrustStoreResponse.t, UpdateTrustStoreResponse.error) Result.t
           Lwt.t
+val update_user_access_logging_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateUserAccessLoggingSettingsRequest.t ->
+        (UpdateUserAccessLoggingSettingsResponse.t,
+          UpdateUserAccessLoggingSettingsResponse.error) Result.t Lwt.t
 val update_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

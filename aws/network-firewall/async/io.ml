@@ -11,56 +11,152 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let accept_network_firewall_transit_gateway_attachment ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.AcceptNetworkFirewallTransitGatewayAttachment input
+let associate_availability_zones ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateAvailabilityZones input
 let associate_firewall_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateFirewallPolicy input
 let associate_subnets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateSubnets input
+let attach_rule_groups_to_proxy_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AttachRuleGroupsToProxyConfiguration
+    input
 let create_firewall ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFirewall input
 let create_firewall_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFirewallPolicy input
+let create_proxy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateProxy input
+let create_proxy_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateProxyConfiguration input
+let create_proxy_rule_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateProxyRuleGroup input
+let create_proxy_rules ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateProxyRules input
 let create_rule_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateRuleGroup input
+let create_t_l_s_inspection_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTLSInspectionConfiguration input
+let create_vpc_endpoint_association ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateVpcEndpointAssociation input
 let delete_firewall ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFirewall input
 let delete_firewall_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFirewallPolicy input
+let delete_network_firewall_transit_gateway_attachment ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.DeleteNetworkFirewallTransitGatewayAttachment input
+let delete_proxy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteProxy input
+let delete_proxy_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteProxyConfiguration input
+let delete_proxy_rule_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteProxyRuleGroup input
+let delete_proxy_rules ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteProxyRules input
 let delete_resource_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteResourcePolicy input
 let delete_rule_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteRuleGroup input
+let delete_t_l_s_inspection_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTLSInspectionConfiguration input
+let delete_vpc_endpoint_association ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteVpcEndpointAssociation input
 let describe_firewall ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeFirewall input
+let describe_firewall_metadata ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeFirewallMetadata input
 let describe_firewall_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeFirewallPolicy input
+let describe_flow_operation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeFlowOperation input
 let describe_logging_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeLoggingConfiguration input
+let describe_proxy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeProxy input
+let describe_proxy_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeProxyConfiguration input
+let describe_proxy_rule ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeProxyRule input
+let describe_proxy_rule_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeProxyRuleGroup input
 let describe_resource_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeResourcePolicy input
 let describe_rule_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeRuleGroup input
 let describe_rule_group_metadata ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeRuleGroupMetadata input
+let describe_rule_group_summary ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeRuleGroupSummary input
+let describe_t_l_s_inspection_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTLSInspectionConfiguration input
+let describe_vpc_endpoint_association ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeVpcEndpointAssociation input
+let detach_rule_groups_from_proxy_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DetachRuleGroupsFromProxyConfiguration
+    input
+let disassociate_availability_zones ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateAvailabilityZones input
 let disassociate_subnets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateSubnets input
+let get_analysis_report_results ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAnalysisReportResults input
+let list_analysis_reports ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAnalysisReports input
 let list_firewall_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFirewallPolicies input
 let list_firewalls ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFirewalls input
+let list_flow_operation_results ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListFlowOperationResults input
+let list_flow_operations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListFlowOperations input
+let list_proxies ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListProxies input
+let list_proxy_configurations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListProxyConfigurations input
+let list_proxy_rule_groups ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListProxyRuleGroups input
 let list_rule_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListRuleGroups input
+let list_t_l_s_inspection_configurations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTLSInspectionConfigurations input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let list_vpc_endpoint_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListVpcEndpointAssociations input
 let put_resource_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutResourcePolicy input
+let reject_network_firewall_transit_gateway_attachment ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.RejectNetworkFirewallTransitGatewayAttachment input
+let start_analysis_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartAnalysisReport input
+let start_flow_capture ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartFlowCapture input
+let start_flow_flush ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartFlowFlush input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_availability_zone_change_protection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAvailabilityZoneChangeProtection
+    input
+let update_firewall_analysis_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateFirewallAnalysisSettings input
 let update_firewall_delete_protection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateFirewallDeleteProtection input
 let update_firewall_description ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateFirewallDescription input
+let update_firewall_encryption_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateFirewallEncryptionConfiguration
+    input
 let update_firewall_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateFirewallPolicy input
 let update_firewall_policy_change_protection ?endpoint_url ?cfg input =
@@ -68,7 +164,19 @@ let update_firewall_policy_change_protection ?endpoint_url ?cfg input =
     input
 let update_logging_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateLoggingConfiguration input
+let update_proxy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateProxy input
+let update_proxy_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateProxyConfiguration input
+let update_proxy_rule ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateProxyRule input
+let update_proxy_rule_group_priorities ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateProxyRuleGroupPriorities input
+let update_proxy_rule_priorities ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateProxyRulePriorities input
 let update_rule_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateRuleGroup input
 let update_subnet_change_protection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateSubnetChangeProtection input
+let update_t_l_s_inspection_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateTLSInspectionConfiguration input

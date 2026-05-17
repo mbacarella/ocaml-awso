@@ -294,6 +294,20 @@ let delete_policy =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_policy (Values.DeletePolicyRequest.make ~policyId ())
            None None])
+let delete_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_resource_policy (Fn.id ()) None None])
 let deregister_delegated_administrator =
   Command.async ~summary:""
     ([%map_open.Command
@@ -446,6 +460,40 @@ let describe_policy =
            (Values.DescribePolicyRequest.make ~policyId ())
            (Some Values.DescribePolicyResponse.to_json)
            (Some Values.DescribePolicyResponse.error_to_json)])
+let describe_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_resource_policy (Fn.id ())
+           (Some Values.DescribeResourcePolicyResponse.to_json)
+           (Some Values.DescribeResourcePolicyResponse.error_to_json)])
+let describe_responsibility_transfer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id =
+         flag "id" (required string) ~doc:"STRING ResponsibilityTransferId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_responsibility_transfer
+           (Values.DescribeResponsibilityTransferRequest.make ~id ())
+           (Some Values.DescribeResponsibilityTransferResponse.to_json)
+           (Some Values.DescribeResponsibilityTransferResponse.error_to_json)])
 let detach_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -579,6 +627,42 @@ let invite_account_to_organization =
               ~target:(Values.HandshakeParty.of_json target) ())
            (Some Values.InviteAccountToOrganizationResponse.to_json)
            (Some Values.InviteAccountToOrganizationResponse.error_to_json)])
+let invite_organization_to_transfer_responsibility =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and notes =
+         flag "notes" (optional string) ~doc:"STRING HandshakeNotes"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and type_ =
+         flag "type-" (required json_arg)
+           ~doc:"JSON ResponsibilityTransferType"
+       and target =
+         flag "target" (required json_arg) ~doc:"JSON HandshakeParty"
+       and startTimestamp =
+         flag "start-timestamp" (required json_arg) ~doc:"JSON Timestamp"
+       and sourceName =
+         flag "source-name" (required string)
+           ~doc:"STRING ResponsibilityTransferName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.invite_organization_to_transfer_responsibility
+           (Values.InviteOrganizationToTransferResponsibilityRequest.make
+              ?notes ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ~type_:(Values.ResponsibilityTransferType.of_json type_)
+              ~target:(Values.HandshakeParty.of_json target)
+              ~startTimestamp:(Values.Timestamp.of_json startTimestamp)
+              ~sourceName ())
+           (Some
+              Values.InviteOrganizationToTransferResponsibilityResponse.to_json)
+           (Some
+              Values.InviteOrganizationToTransferResponsibilityResponse.error_to_json)])
 let leave_organization =
   Command.async ~summary:""
     ([%map_open.Command
@@ -658,6 +742,33 @@ let list_accounts_for_parent =
               ~parentId ())
            (Some Values.ListAccountsForParentResponse.to_json)
            (Some Values.ListAccountsForParentResponse.error_to_json)])
+let list_accounts_with_invalid_effective_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and policyType =
+         flag "policy-type" (required json_arg)
+           ~doc:"JSON EffectivePolicyType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_accounts_with_invalid_effective_policy
+           (Values.ListAccountsWithInvalidEffectivePolicyRequest.make
+              ?nextToken ?maxResults
+              ~policyType:(Values.EffectivePolicyType.of_json policyType) ())
+           (Some
+              Values.ListAccountsWithInvalidEffectivePolicyResponse.to_json)
+           (Some
+              Values.ListAccountsWithInvalidEffectivePolicyResponse.error_to_json)])
 let list_children =
   Command.async ~summary:""
     ([%map_open.Command
@@ -754,6 +865,34 @@ let list_delegated_services_for_account =
               ?maxResults ~accountId ())
            (Some Values.ListDelegatedServicesForAccountResponse.to_json)
            (Some Values.ListDelegatedServicesForAccountResponse.error_to_json)])
+let list_effective_policy_validation_errors =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and accountId =
+         flag "account-id" (required string) ~doc:"STRING AccountId"
+       and policyType =
+         flag "policy-type" (required json_arg)
+           ~doc:"JSON EffectivePolicyType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_effective_policy_validation_errors
+           (Values.ListEffectivePolicyValidationErrorsRequest.make ?nextToken
+              ?maxResults ~accountId
+              ~policyType:(Values.EffectivePolicyType.of_json policyType) ())
+           (Some Values.ListEffectivePolicyValidationErrorsResponse.to_json)
+           (Some
+              Values.ListEffectivePolicyValidationErrorsResponse.error_to_json)])
 let list_handshakes_for_account =
   Command.async ~summary:""
     ([%map_open.Command
@@ -802,6 +941,34 @@ let list_handshakes_for_organization =
               ?nextToken ?maxResults ())
            (Some Values.ListHandshakesForOrganizationResponse.to_json)
            (Some Values.ListHandshakesForOrganizationResponse.error_to_json)])
+let list_inbound_responsibility_transfers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id =
+         flag "id" (optional string) ~doc:"STRING ResponsibilityTransferId"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and type_ =
+         flag "type-" (required json_arg)
+           ~doc:"JSON ResponsibilityTransferType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_inbound_responsibility_transfers
+           (Values.ListInboundResponsibilityTransfersRequest.make ?id
+              ?nextToken ?maxResults
+              ~type_:(Values.ResponsibilityTransferType.of_json type_) ())
+           (Some Values.ListInboundResponsibilityTransfersResponse.to_json)
+           (Some
+              Values.ListInboundResponsibilityTransfersResponse.error_to_json)])
 let list_organizational_units_for_parent =
   Command.async ~summary:""
     ([%map_open.Command
@@ -826,6 +993,32 @@ let list_organizational_units_for_parent =
            (Some Values.ListOrganizationalUnitsForParentResponse.to_json)
            (Some
               Values.ListOrganizationalUnitsForParentResponse.error_to_json)])
+let list_outbound_responsibility_transfers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and type_ =
+         flag "type-" (required json_arg)
+           ~doc:"JSON ResponsibilityTransferType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_outbound_responsibility_transfers
+           (Values.ListOutboundResponsibilityTransfersRequest.make ?nextToken
+              ?maxResults
+              ~type_:(Values.ResponsibilityTransferType.of_json type_) ())
+           (Some Values.ListOutboundResponsibilityTransfersResponse.to_json)
+           (Some
+              Values.ListOutboundResponsibilityTransfersResponse.error_to_json)])
 let list_parents =
   Command.async ~summary:""
     ([%map_open.Command
@@ -979,6 +1172,26 @@ let move_account =
            Io.move_account
            (Values.MoveAccountRequest.make ~accountId ~sourceParentId
               ~destinationParentId ()) None None])
+let put_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and content =
+         flag "content" (required string) ~doc:"STRING ResourcePolicyContent" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_resource_policy
+           (Values.PutResourcePolicyRequest.make
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~content ())
+           (Some Values.PutResourcePolicyResponse.to_json)
+           (Some Values.PutResourcePolicyResponse.error_to_json)])
 let register_delegated_administrator =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1035,6 +1248,28 @@ let tag_resource =
            Io.tag_resource
            (Values.TagResourceRequest.make ~resourceId
               ~tags:(Values.Tags.of_json tags) ()) None None])
+let terminate_responsibility_transfer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and endTimestamp =
+         flag "end-timestamp" (optional json_arg) ~doc:"JSON Timestamp"
+       and id =
+         flag "id" (required string) ~doc:"STRING ResponsibilityTransferId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.terminate_responsibility_transfer
+           (Values.TerminateResponsibilityTransferRequest.make
+              ?endTimestamp:(Option.map ~f:Values.Timestamp.of_json
+                               endTimestamp) ~id ())
+           (Some Values.TerminateResponsibilityTransferResponse.to_json)
+           (Some Values.TerminateResponsibilityTransferResponse.error_to_json)])
 let untag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1099,6 +1334,27 @@ let update_policy =
            (Values.UpdatePolicyRequest.make ?name ?description ?content
               ~policyId ()) (Some Values.UpdatePolicyResponse.to_json)
            (Some Values.UpdatePolicyResponse.error_to_json)])
+let update_responsibility_transfer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id =
+         flag "id" (required string) ~doc:"STRING ResponsibilityTransferId"
+       and name =
+         flag "name" (required string)
+           ~doc:"STRING ResponsibilityTransferName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_responsibility_transfer
+           (Values.UpdateResponsibilityTransferRequest.make ~id ~name ())
+           (Some Values.UpdateResponsibilityTransferResponse.to_json)
+           (Some Values.UpdateResponsibilityTransferResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -1115,6 +1371,7 @@ let main =
     ("delete-organization", delete_organization);
     ("delete-organizational-unit", delete_organizational_unit);
     ("delete-policy", delete_policy);
+    ("delete-resource-policy", delete_resource_policy);
     ("deregister-delegated-administrator",
       deregister_delegated_administrator);
     ("describe-account", describe_account);
@@ -1124,6 +1381,8 @@ let main =
     ("describe-organization", describe_organization);
     ("describe-organizational-unit", describe_organizational_unit);
     ("describe-policy", describe_policy);
+    ("describe-resource-policy", describe_resource_policy);
+    ("describe-responsibility-transfer", describe_responsibility_transfer);
     ("detach-policy", detach_policy);
     ("disable-a-w-s-service-access", disable_a_w_s_service_access);
     ("disable-policy-type", disable_policy_type);
@@ -1131,20 +1390,30 @@ let main =
     ("enable-all-features", enable_all_features);
     ("enable-policy-type", enable_policy_type);
     ("invite-account-to-organization", invite_account_to_organization);
+    ("invite-organization-to-transfer-responsibility",
+      invite_organization_to_transfer_responsibility);
     ("leave-organization", leave_organization);
     ("list-a-w-s-service-access-for-organization",
       list_a_w_s_service_access_for_organization);
     ("list-accounts", list_accounts);
     ("list-accounts-for-parent", list_accounts_for_parent);
+    ("list-accounts-with-invalid-effective-policy",
+      list_accounts_with_invalid_effective_policy);
     ("list-children", list_children);
     ("list-create-account-status", list_create_account_status);
     ("list-delegated-administrators", list_delegated_administrators);
     ("list-delegated-services-for-account",
       list_delegated_services_for_account);
+    ("list-effective-policy-validation-errors",
+      list_effective_policy_validation_errors);
     ("list-handshakes-for-account", list_handshakes_for_account);
     ("list-handshakes-for-organization", list_handshakes_for_organization);
+    ("list-inbound-responsibility-transfers",
+      list_inbound_responsibility_transfers);
     ("list-organizational-units-for-parent",
       list_organizational_units_for_parent);
+    ("list-outbound-responsibility-transfers",
+      list_outbound_responsibility_transfers);
     ("list-parents", list_parents);
     ("list-policies", list_policies);
     ("list-policies-for-target", list_policies_for_target);
@@ -1152,9 +1421,12 @@ let main =
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-targets-for-policy", list_targets_for_policy);
     ("move-account", move_account);
+    ("put-resource-policy", put_resource_policy);
     ("register-delegated-administrator", register_delegated_administrator);
     ("remove-account-from-organization", remove_account_from_organization);
     ("tag-resource", tag_resource);
+    ("terminate-responsibility-transfer", terminate_responsibility_transfer);
     ("untag-resource", untag_resource);
     ("update-organizational-unit", update_organizational_unit);
-    ("update-policy", update_policy)]
+    ("update-policy", update_policy);
+    ("update-responsibility-transfer", update_responsibility_transfer)]

@@ -17,6 +17,18 @@ val associate_package :
       AssociatePackageRequest.t ->
         (AssociatePackageResponse.t, AssociatePackageResponse.error) Result.t
           Async.Deferred.t
+val authorize_vpc_endpoint_access :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AuthorizeVpcEndpointAccessRequest.t ->
+        (AuthorizeVpcEndpointAccessResponse.t,
+          AuthorizeVpcEndpointAccessResponse.error) Result.t Async.Deferred.t
+val cancel_domain_config_change :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CancelDomainConfigChangeRequest.t ->
+        (CancelDomainConfigChangeResponse.t,
+          CancelDomainConfigChangeResponse.error) Result.t Async.Deferred.t
 val cancel_elasticsearch_service_software_update :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -43,6 +55,12 @@ val create_package :
       CreatePackageRequest.t ->
         (CreatePackageResponse.t, CreatePackageResponse.error) Result.t
           Async.Deferred.t
+val create_vpc_endpoint :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateVpcEndpointRequest.t ->
+        (CreateVpcEndpointResponse.t, CreateVpcEndpointResponse.error)
+          Result.t Async.Deferred.t
 val delete_elasticsearch_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -72,6 +90,12 @@ val delete_package :
       DeletePackageRequest.t ->
         (DeletePackageResponse.t, DeletePackageResponse.error) Result.t
           Async.Deferred.t
+val delete_vpc_endpoint :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteVpcEndpointRequest.t ->
+        (DeleteVpcEndpointResponse.t, DeleteVpcEndpointResponse.error)
+          Result.t Async.Deferred.t
 val describe_domain_auto_tunes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -147,6 +171,12 @@ val describe_reserved_elasticsearch_instances :
         (DescribeReservedElasticsearchInstancesResponse.t,
           DescribeReservedElasticsearchInstancesResponse.error) Result.t
           Async.Deferred.t
+val describe_vpc_endpoints :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeVpcEndpointsRequest.t ->
+        (DescribeVpcEndpointsResponse.t, DescribeVpcEndpointsResponse.error)
+          Result.t Async.Deferred.t
 val dissociate_package :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -215,6 +245,24 @@ val list_tags :
       ListTagsRequest.t ->
         (ListTagsResponse.t, ListTagsResponse.error) Result.t
           Async.Deferred.t
+val list_vpc_endpoint_access :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListVpcEndpointAccessRequest.t ->
+        (ListVpcEndpointAccessResponse.t,
+          ListVpcEndpointAccessResponse.error) Result.t Async.Deferred.t
+val list_vpc_endpoints :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListVpcEndpointsRequest.t ->
+        (ListVpcEndpointsResponse.t, ListVpcEndpointsResponse.error) Result.t
+          Async.Deferred.t
+val list_vpc_endpoints_for_domain :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListVpcEndpointsForDomainRequest.t ->
+        (ListVpcEndpointsForDomainResponse.t,
+          ListVpcEndpointsForDomainResponse.error) Result.t Async.Deferred.t
 val purchase_reserved_elasticsearch_instance_offering :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -233,6 +281,12 @@ val remove_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveTagsRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val revoke_vpc_endpoint_access :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RevokeVpcEndpointAccessRequest.t ->
+        (RevokeVpcEndpointAccessResponse.t,
+          RevokeVpcEndpointAccessResponse.error) Result.t Async.Deferred.t
 val start_elasticsearch_service_software_update :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -253,6 +307,12 @@ val update_package :
       UpdatePackageRequest.t ->
         (UpdatePackageResponse.t, UpdatePackageResponse.error) Result.t
           Async.Deferred.t
+val update_vpc_endpoint :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateVpcEndpointRequest.t ->
+        (UpdateVpcEndpointResponse.t, UpdateVpcEndpointResponse.error)
+          Result.t Async.Deferred.t
 val upgrade_elasticsearch_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

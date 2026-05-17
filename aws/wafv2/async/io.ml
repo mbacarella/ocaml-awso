@@ -15,6 +15,8 @@ let associate_web_a_c_l ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateWebACL input
 let check_capacity ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CheckCapacity input
+let create_a_p_i_key ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAPIKey input
 let create_i_p_set ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateIPSet input
 let create_regex_pattern_set ?endpoint_url ?cfg input =
@@ -23,6 +25,8 @@ let create_rule_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateRuleGroup input
 let create_web_a_c_l ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateWebACL input
+let delete_a_p_i_key ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAPIKey input
 let delete_firewall_manager_rule_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFirewallManagerRuleGroups input
 let delete_i_p_set ?endpoint_url ?cfg input =
@@ -37,12 +41,18 @@ let delete_rule_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteRuleGroup input
 let delete_web_a_c_l ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteWebACL input
+let describe_all_managed_products ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAllManagedProducts input
+let describe_managed_products_by_vendor ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeManagedProductsByVendor input
 let describe_managed_rule_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeManagedRuleGroup input
 let disassociate_web_a_c_l ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateWebACL input
 let generate_mobile_sdk_release_url ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GenerateMobileSdkReleaseUrl input
+let get_decrypted_a_p_i_key ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDecryptedAPIKey input
 let get_i_p_set ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetIPSet input
 let get_logging_configuration ?endpoint_url ?cfg input =
@@ -61,10 +71,14 @@ let get_rule_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRuleGroup input
 let get_sampled_requests ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetSampledRequests input
+let get_top_path_statistics_by_traffic ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTopPathStatisticsByTraffic input
 let get_web_a_c_l ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetWebACL input
 let get_web_a_c_l_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetWebACLForResource input
+let list_a_p_i_keys ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAPIKeys input
 let list_available_managed_rule_group_versions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAvailableManagedRuleGroupVersions
     input

@@ -41,19 +41,45 @@ let create_component =
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING String"
        and appId = flag "app-id" (required string) ~doc:"STRING String"
+       and environmentName =
+         flag "environment-name" (required string) ~doc:"STRING String"
        and componentToCreate =
          flag "component-to-create" (required json_arg)
-           ~doc:"JSON CreateComponentData"
-       and environmentName =
-         flag "environment-name" (required string) ~doc:"STRING String" in
+           ~doc:"JSON CreateComponentData" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_component
            (Values.CreateComponentRequest.make ?clientToken ~appId
+              ~environmentName
               ~componentToCreate:(Values.CreateComponentData.of_json
-                                    componentToCreate) ~environmentName ())
+                                    componentToCreate) ())
            (Some Values.CreateComponentResponse.to_json)
            (Some Values.CreateComponentResponse.error_to_json)])
+let create_form =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and appId = flag "app-id" (required string) ~doc:"STRING String"
+       and environmentName =
+         flag "environment-name" (required string) ~doc:"STRING String"
+       and formToCreate =
+         flag "form-to-create" (required json_arg) ~doc:"JSON CreateFormData" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_form
+           (Values.CreateFormRequest.make ?clientToken ~appId
+              ~environmentName
+              ~formToCreate:(Values.CreateFormData.of_json formToCreate) ())
+           (Some Values.CreateFormResponse.to_json)
+           (Some Values.CreateFormResponse.error_to_json)])
 let create_theme =
   Command.async ~summary:""
     ([%map_open.Command
@@ -98,6 +124,25 @@ let delete_component =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_component
            (Values.DeleteComponentRequest.make ~appId ~environmentName ~id ())
+           None None])
+let delete_form =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appId = flag "app-id" (required string) ~doc:"STRING String"
+       and environmentName =
+         flag "environment-name" (required string) ~doc:"STRING String"
+       and id = flag "id" (required string) ~doc:"STRING Uuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_form
+           (Values.DeleteFormRequest.make ~appId ~environmentName ~id ())
            None None])
 let delete_theme =
   Command.async ~summary:""
@@ -164,6 +209,27 @@ let export_components =
               ~environmentName ())
            (Some Values.ExportComponentsResponse.to_json)
            (Some Values.ExportComponentsResponse.error_to_json)])
+let export_forms =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and appId = flag "app-id" (required string) ~doc:"STRING String"
+       and environmentName =
+         flag "environment-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.export_forms
+           (Values.ExportFormsRequest.make ?nextToken ~appId ~environmentName
+              ()) (Some Values.ExportFormsResponse.to_json)
+           (Some Values.ExportFormsResponse.error_to_json)])
 let export_themes =
   Command.async ~summary:""
     ([%map_open.Command
@@ -185,6 +251,26 @@ let export_themes =
            (Values.ExportThemesRequest.make ?nextToken ~appId
               ~environmentName ()) (Some Values.ExportThemesResponse.to_json)
            (Some Values.ExportThemesResponse.error_to_json)])
+let get_codegen_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appId = flag "app-id" (required string) ~doc:"STRING AppId"
+       and environmentName =
+         flag "environment-name" (required string) ~doc:"STRING String"
+       and id = flag "id" (required string) ~doc:"STRING Uuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_codegen_job
+           (Values.GetCodegenJobRequest.make ~appId ~environmentName ~id ())
+           (Some Values.GetCodegenJobResponse.to_json)
+           (Some Values.GetCodegenJobResponse.error_to_json)])
 let get_component =
   Command.async ~summary:""
     ([%map_open.Command
@@ -205,6 +291,45 @@ let get_component =
            (Values.GetComponentRequest.make ~appId ~environmentName ~id ())
            (Some Values.GetComponentResponse.to_json)
            (Some Values.GetComponentResponse.error_to_json)])
+let get_form =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appId = flag "app-id" (required string) ~doc:"STRING String"
+       and environmentName =
+         flag "environment-name" (required string) ~doc:"STRING String"
+       and id = flag "id" (required string) ~doc:"STRING Uuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_form
+           (Values.GetFormRequest.make ~appId ~environmentName ~id ())
+           (Some Values.GetFormResponse.to_json)
+           (Some Values.GetFormResponse.error_to_json)])
+let get_metadata =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appId = flag "app-id" (required string) ~doc:"STRING String"
+       and environmentName =
+         flag "environment-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_metadata
+           (Values.GetMetadataRequest.make ~appId ~environmentName ())
+           (Some Values.GetMetadataResponse.to_json)
+           (Some Values.GetMetadataResponse.error_to_json)])
 let get_theme =
   Command.async ~summary:""
     ([%map_open.Command
@@ -225,6 +350,30 @@ let get_theme =
            (Values.GetThemeRequest.make ~appId ~environmentName ~id ())
            (Some Values.GetThemeResponse.to_json)
            (Some Values.GetThemeResponse.error_to_json)])
+let list_codegen_jobs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ListCodegenJobsLimit"
+       and appId = flag "app-id" (required string) ~doc:"STRING AppId"
+       and environmentName =
+         flag "environment-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_codegen_jobs
+           (Values.ListCodegenJobsRequest.make ?nextToken ?maxResults ~appId
+              ~environmentName ())
+           (Some Values.ListCodegenJobsResponse.to_json)
+           (Some Values.ListCodegenJobsResponse.error_to_json)])
 let list_components =
   Command.async ~summary:""
     ([%map_open.Command
@@ -235,20 +384,61 @@ let list_components =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT ListComponentsLimit"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ListEntityLimit"
        and appId = flag "app-id" (required string) ~doc:"STRING String"
        and environmentName =
          flag "environment-name" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_components
-           (Values.ListComponentsRequest.make ?maxResults ?nextToken ~appId
+           (Values.ListComponentsRequest.make ?nextToken ?maxResults ~appId
               ~environmentName ())
            (Some Values.ListComponentsResponse.to_json)
            (Some Values.ListComponentsResponse.error_to_json)])
+let list_forms =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ListEntityLimit"
+       and appId = flag "app-id" (required string) ~doc:"STRING String"
+       and environmentName =
+         flag "environment-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_forms
+           (Values.ListFormsRequest.make ?nextToken ?maxResults ~appId
+              ~environmentName ()) (Some Values.ListFormsResponse.to_json)
+           (Some Values.ListFormsResponse.error_to_json)])
+let list_tags_for_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_tags_for_resource
+           (Values.ListTagsForResourceRequest.make ~resourceArn ())
+           (Some Values.ListTagsForResourceResponse.to_json)
+           (Some Values.ListTagsForResourceResponse.error_to_json)])
 let list_themes =
   Command.async ~summary:""
     ([%map_open.Command
@@ -259,19 +449,42 @@ let list_themes =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT ListThemesLimit"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ListEntityLimit"
        and appId = flag "app-id" (required string) ~doc:"STRING String"
        and environmentName =
          flag "environment-name" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_themes
-           (Values.ListThemesRequest.make ?maxResults ?nextToken ~appId
+           (Values.ListThemesRequest.make ?nextToken ?maxResults ~appId
               ~environmentName ()) (Some Values.ListThemesResponse.to_json)
            (Some Values.ListThemesResponse.error_to_json)])
+let put_metadata_flag =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appId = flag "app-id" (required string) ~doc:"STRING String"
+       and environmentName =
+         flag "environment-name" (required string) ~doc:"STRING String"
+       and featureName =
+         flag "feature-name" (required string) ~doc:"STRING String"
+       and body =
+         flag "body" (required json_arg) ~doc:"JSON PutMetadataFlagBody" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_metadata_flag
+           (Values.PutMetadataFlagRequest.make ~appId ~environmentName
+              ~featureName ~body:(Values.PutMetadataFlagBody.of_json body) ())
+           None None])
 let refresh_token =
   Command.async ~summary:""
     ([%map_open.Command
@@ -296,6 +509,74 @@ let refresh_token =
                                    refreshTokenBody) ())
            (Some Values.RefreshTokenResponse.to_json)
            (Some Values.RefreshTokenResponse.error_to_json)])
+let start_codegen_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and appId = flag "app-id" (required string) ~doc:"STRING AppId"
+       and environmentName =
+         flag "environment-name" (required string) ~doc:"STRING String"
+       and codegenJobToCreate =
+         flag "codegen-job-to-create" (required json_arg)
+           ~doc:"JSON StartCodegenJobData" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_codegen_job
+           (Values.StartCodegenJobRequest.make ?clientToken ~appId
+              ~environmentName
+              ~codegenJobToCreate:(Values.StartCodegenJobData.of_json
+                                     codegenJobToCreate) ())
+           (Some Values.StartCodegenJobResponse.to_json)
+           (Some Values.StartCodegenJobResponse.error_to_json)])
+let tag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING String"
+       and tags = flag "tags" (required json_arg) ~doc:"JSON Tags" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.tag_resource
+           (Values.TagResourceRequest.make ~resourceArn
+              ~tags:(Values.Tags.of_json tags) ())
+           (Some Values.TagResourceResponse.to_json)
+           (Some Values.TagResourceResponse.error_to_json)])
+let untag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING String"
+       and tagKeys =
+         flag "tag-keys" (required json_arg) ~doc:"JSON TagKeyList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.untag_resource
+           (Values.UntagResourceRequest.make ~resourceArn
+              ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
+           (Some Values.UntagResourceResponse.to_json)
+           (Some Values.UntagResourceResponse.error_to_json)])
 let update_component =
   Command.async ~summary:""
     ([%map_open.Command
@@ -324,6 +605,32 @@ let update_component =
                                    updatedComponent) ())
            (Some Values.UpdateComponentResponse.to_json)
            (Some Values.UpdateComponentResponse.error_to_json)])
+let update_form =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and appId = flag "app-id" (required string) ~doc:"STRING String"
+       and environmentName =
+         flag "environment-name" (required string) ~doc:"STRING String"
+       and id = flag "id" (required string) ~doc:"STRING Uuid"
+       and updatedForm =
+         flag "updated-form" (required json_arg) ~doc:"JSON UpdateFormData" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_form
+           (Values.UpdateFormRequest.make ?clientToken ~appId
+              ~environmentName ~id
+              ~updatedForm:(Values.UpdateFormData.of_json updatedForm) ())
+           (Some Values.UpdateFormResponse.to_json)
+           (Some Values.UpdateFormResponse.error_to_json)])
 let update_theme =
   Command.async ~summary:""
     ([%map_open.Command
@@ -354,16 +661,30 @@ let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-component", create_component);
+    ("create-form", create_form);
     ("create-theme", create_theme);
     ("delete-component", delete_component);
+    ("delete-form", delete_form);
     ("delete-theme", delete_theme);
     ("exchange-code-for-token", exchange_code_for_token);
     ("export-components", export_components);
+    ("export-forms", export_forms);
     ("export-themes", export_themes);
+    ("get-codegen-job", get_codegen_job);
     ("get-component", get_component);
+    ("get-form", get_form);
+    ("get-metadata", get_metadata);
     ("get-theme", get_theme);
+    ("list-codegen-jobs", list_codegen_jobs);
     ("list-components", list_components);
+    ("list-forms", list_forms);
+    ("list-tags-for-resource", list_tags_for_resource);
     ("list-themes", list_themes);
+    ("put-metadata-flag", put_metadata_flag);
     ("refresh-token", refresh_token);
+    ("start-codegen-job", start_codegen_job);
+    ("tag-resource", tag_resource);
+    ("untag-resource", untag_resource);
     ("update-component", update_component);
+    ("update-form", update_form);
     ("update-theme", update_theme)]

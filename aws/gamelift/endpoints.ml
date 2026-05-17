@@ -10,6 +10,11 @@ type ('i, 'o, 'e) t =
   CreateAliasOutput.error) t 
   | CreateBuild: (CreateBuildInput.t, CreateBuildOutput.t,
   CreateBuildOutput.error) t 
+  | CreateContainerFleet: (CreateContainerFleetInput.t,
+  CreateContainerFleetOutput.t, CreateContainerFleetOutput.error) t 
+  | CreateContainerGroupDefinition: (CreateContainerGroupDefinitionInput.t,
+  CreateContainerGroupDefinitionOutput.t,
+  CreateContainerGroupDefinitionOutput.error) t 
   | CreateFleet: (CreateFleetInput.t, CreateFleetOutput.t,
   CreateFleetOutput.error) t 
   | CreateFleetLocations: (CreateFleetLocationsInput.t,
@@ -20,6 +25,8 @@ type ('i, 'o, 'e) t =
   CreateGameSessionOutput.error) t 
   | CreateGameSessionQueue: (CreateGameSessionQueueInput.t,
   CreateGameSessionQueueOutput.t, CreateGameSessionQueueOutput.error) t 
+  | CreateLocation: (CreateLocationInput.t, CreateLocationOutput.t,
+  CreateLocationOutput.error) t 
   | CreateMatchmakingConfiguration: (CreateMatchmakingConfigurationInput.t,
   CreateMatchmakingConfigurationOutput.t,
   CreateMatchmakingConfigurationOutput.error) t 
@@ -39,6 +46,11 @@ type ('i, 'o, 'e) t =
   t 
   | DeleteAlias: (DeleteAliasInput.t, unit, unit) t 
   | DeleteBuild: (DeleteBuildInput.t, unit, unit) t 
+  | DeleteContainerFleet: (DeleteContainerFleetInput.t,
+  DeleteContainerFleetOutput.t, DeleteContainerFleetOutput.error) t 
+  | DeleteContainerGroupDefinition: (DeleteContainerGroupDefinitionInput.t,
+  DeleteContainerGroupDefinitionOutput.t,
+  DeleteContainerGroupDefinitionOutput.error) t 
   | DeleteFleet: (DeleteFleetInput.t, unit, unit) t 
   | DeleteFleetLocations: (DeleteFleetLocationsInput.t,
   DeleteFleetLocationsOutput.t, DeleteFleetLocationsOutput.error) t 
@@ -46,6 +58,8 @@ type ('i, 'o, 'e) t =
   DeleteGameServerGroupOutput.t, DeleteGameServerGroupOutput.error) t 
   | DeleteGameSessionQueue: (DeleteGameSessionQueueInput.t,
   DeleteGameSessionQueueOutput.t, DeleteGameSessionQueueOutput.error) t 
+  | DeleteLocation: (DeleteLocationInput.t, DeleteLocationOutput.t,
+  DeleteLocationOutput.error) t 
   | DeleteMatchmakingConfiguration: (DeleteMatchmakingConfigurationInput.t,
   DeleteMatchmakingConfigurationOutput.t,
   DeleteMatchmakingConfigurationOutput.error) t 
@@ -59,11 +73,25 @@ type ('i, 'o, 'e) t =
   | DeleteVpcPeeringConnection: (DeleteVpcPeeringConnectionInput.t,
   DeleteVpcPeeringConnectionOutput.t, DeleteVpcPeeringConnectionOutput.error)
   t 
+  | DeregisterCompute: (DeregisterComputeInput.t, DeregisterComputeOutput.t,
+  DeregisterComputeOutput.error) t 
   | DeregisterGameServer: (DeregisterGameServerInput.t, unit, unit) t 
   | DescribeAlias: (DescribeAliasInput.t, DescribeAliasOutput.t,
   DescribeAliasOutput.error) t 
   | DescribeBuild: (DescribeBuildInput.t, DescribeBuildOutput.t,
   DescribeBuildOutput.error) t 
+  | DescribeCompute: (DescribeComputeInput.t, DescribeComputeOutput.t,
+  DescribeComputeOutput.error) t 
+  | DescribeContainerFleet: (DescribeContainerFleetInput.t,
+  DescribeContainerFleetOutput.t, DescribeContainerFleetOutput.error) t 
+  | DescribeContainerGroupDefinition:
+  (DescribeContainerGroupDefinitionInput.t,
+  DescribeContainerGroupDefinitionOutput.t,
+  DescribeContainerGroupDefinitionOutput.error) t 
+  | DescribeContainerGroupPortMappings:
+  (DescribeContainerGroupPortMappingsInput.t,
+  DescribeContainerGroupPortMappingsOutput.t,
+  DescribeContainerGroupPortMappingsOutput.error) t 
   | DescribeEC2InstanceLimits: (DescribeEC2InstanceLimitsInput.t,
   DescribeEC2InstanceLimitsOutput.t, DescribeEC2InstanceLimitsOutput.error) t
   
@@ -71,6 +99,8 @@ type ('i, 'o, 'e) t =
   DescribeFleetAttributesOutput.t, DescribeFleetAttributesOutput.error) t 
   | DescribeFleetCapacity: (DescribeFleetCapacityInput.t,
   DescribeFleetCapacityOutput.t, DescribeFleetCapacityOutput.error) t 
+  | DescribeFleetDeployment: (DescribeFleetDeploymentInput.t,
+  DescribeFleetDeploymentOutput.t, DescribeFleetDeploymentOutput.error) t 
   | DescribeFleetEvents: (DescribeFleetEventsInput.t,
   DescribeFleetEventsOutput.t, DescribeFleetEventsOutput.error) t 
   | DescribeFleetLocationAttributes: (DescribeFleetLocationAttributesInput.t,
@@ -133,26 +163,50 @@ type ('i, 'o, 'e) t =
   | DescribeVpcPeeringConnections: (DescribeVpcPeeringConnectionsInput.t,
   DescribeVpcPeeringConnectionsOutput.t,
   DescribeVpcPeeringConnectionsOutput.error) t 
+  | GetComputeAccess: (GetComputeAccessInput.t, GetComputeAccessOutput.t,
+  GetComputeAccessOutput.error) t 
+  | GetComputeAuthToken: (GetComputeAuthTokenInput.t,
+  GetComputeAuthTokenOutput.t, GetComputeAuthTokenOutput.error) t 
   | GetGameSessionLogUrl: (GetGameSessionLogUrlInput.t,
   GetGameSessionLogUrlOutput.t, GetGameSessionLogUrlOutput.error) t 
   | GetInstanceAccess: (GetInstanceAccessInput.t, GetInstanceAccessOutput.t,
   GetInstanceAccessOutput.error) t 
+  | GetPlayerConnectionDetails: (GetPlayerConnectionDetailsInput.t,
+  GetPlayerConnectionDetailsOutput.t, GetPlayerConnectionDetailsOutput.error)
+  t 
   | ListAliases: (ListAliasesInput.t, ListAliasesOutput.t,
   ListAliasesOutput.error) t 
   | ListBuilds: (ListBuildsInput.t, ListBuildsOutput.t,
   ListBuildsOutput.error) t 
+  | ListCompute: (ListComputeInput.t, ListComputeOutput.t,
+  ListComputeOutput.error) t 
+  | ListContainerFleets: (ListContainerFleetsInput.t,
+  ListContainerFleetsOutput.t, ListContainerFleetsOutput.error) t 
+  | ListContainerGroupDefinitionVersions:
+  (ListContainerGroupDefinitionVersionsInput.t,
+  ListContainerGroupDefinitionVersionsOutput.t,
+  ListContainerGroupDefinitionVersionsOutput.error) t 
+  | ListContainerGroupDefinitions: (ListContainerGroupDefinitionsInput.t,
+  ListContainerGroupDefinitionsOutput.t,
+  ListContainerGroupDefinitionsOutput.error) t 
+  | ListFleetDeployments: (ListFleetDeploymentsInput.t,
+  ListFleetDeploymentsOutput.t, ListFleetDeploymentsOutput.error) t 
   | ListFleets: (ListFleetsInput.t, ListFleetsOutput.t,
   ListFleetsOutput.error) t 
   | ListGameServerGroups: (ListGameServerGroupsInput.t,
   ListGameServerGroupsOutput.t, ListGameServerGroupsOutput.error) t 
   | ListGameServers: (ListGameServersInput.t, ListGameServersOutput.t,
   ListGameServersOutput.error) t 
+  | ListLocations: (ListLocationsInput.t, ListLocationsOutput.t,
+  ListLocationsOutput.error) t 
   | ListScripts: (ListScriptsInput.t, ListScriptsOutput.t,
   ListScriptsOutput.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | PutScalingPolicy: (PutScalingPolicyInput.t, PutScalingPolicyOutput.t,
   PutScalingPolicyOutput.error) t 
+  | RegisterCompute: (RegisterComputeInput.t, RegisterComputeOutput.t,
+  RegisterComputeOutput.error) t 
   | RegisterGameServer: (RegisterGameServerInput.t,
   RegisterGameServerOutput.t, RegisterGameServerOutput.error) t 
   | RequestUploadCredentials: (RequestUploadCredentialsInput.t,
@@ -182,12 +236,19 @@ type ('i, 'o, 'e) t =
   SuspendGameServerGroupOutput.t, SuspendGameServerGroupOutput.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
+  | TerminateGameSession: (TerminateGameSessionInput.t,
+  TerminateGameSessionOutput.t, TerminateGameSessionOutput.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
   | UpdateAlias: (UpdateAliasInput.t, UpdateAliasOutput.t,
   UpdateAliasOutput.error) t 
   | UpdateBuild: (UpdateBuildInput.t, UpdateBuildOutput.t,
   UpdateBuildOutput.error) t 
+  | UpdateContainerFleet: (UpdateContainerFleetInput.t,
+  UpdateContainerFleetOutput.t, UpdateContainerFleetOutput.error) t 
+  | UpdateContainerGroupDefinition: (UpdateContainerGroupDefinitionInput.t,
+  UpdateContainerGroupDefinitionOutput.t,
+  UpdateContainerGroupDefinitionOutput.error) t 
   | UpdateFleetAttributes: (UpdateFleetAttributesInput.t,
   UpdateFleetAttributesOutput.t, UpdateFleetAttributesOutput.error) t 
   | UpdateFleetCapacity: (UpdateFleetCapacityInput.t,
@@ -219,11 +280,14 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ClaimGameServer -> `POST
   | CreateAlias -> `POST
   | CreateBuild -> `POST
+  | CreateContainerFleet -> `POST
+  | CreateContainerGroupDefinition -> `POST
   | CreateFleet -> `POST
   | CreateFleetLocations -> `POST
   | CreateGameServerGroup -> `POST
   | CreateGameSession -> `POST
   | CreateGameSessionQueue -> `POST
+  | CreateLocation -> `POST
   | CreateMatchmakingConfiguration -> `POST
   | CreateMatchmakingRuleSet -> `POST
   | CreatePlayerSession -> `POST
@@ -233,22 +297,31 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateVpcPeeringConnection -> `POST
   | DeleteAlias -> `POST
   | DeleteBuild -> `POST
+  | DeleteContainerFleet -> `POST
+  | DeleteContainerGroupDefinition -> `POST
   | DeleteFleet -> `POST
   | DeleteFleetLocations -> `POST
   | DeleteGameServerGroup -> `POST
   | DeleteGameSessionQueue -> `POST
+  | DeleteLocation -> `POST
   | DeleteMatchmakingConfiguration -> `POST
   | DeleteMatchmakingRuleSet -> `POST
   | DeleteScalingPolicy -> `POST
   | DeleteScript -> `POST
   | DeleteVpcPeeringAuthorization -> `POST
   | DeleteVpcPeeringConnection -> `POST
+  | DeregisterCompute -> `POST
   | DeregisterGameServer -> `POST
   | DescribeAlias -> `POST
   | DescribeBuild -> `POST
+  | DescribeCompute -> `POST
+  | DescribeContainerFleet -> `POST
+  | DescribeContainerGroupDefinition -> `POST
+  | DescribeContainerGroupPortMappings -> `POST
   | DescribeEC2InstanceLimits -> `POST
   | DescribeFleetAttributes -> `POST
   | DescribeFleetCapacity -> `POST
+  | DescribeFleetDeployment -> `POST
   | DescribeFleetEvents -> `POST
   | DescribeFleetLocationAttributes -> `POST
   | DescribeFleetLocationCapacity -> `POST
@@ -272,16 +345,26 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeScript -> `POST
   | DescribeVpcPeeringAuthorizations -> `POST
   | DescribeVpcPeeringConnections -> `POST
+  | GetComputeAccess -> `POST
+  | GetComputeAuthToken -> `POST
   | GetGameSessionLogUrl -> `POST
   | GetInstanceAccess -> `POST
+  | GetPlayerConnectionDetails -> `POST
   | ListAliases -> `POST
   | ListBuilds -> `POST
+  | ListCompute -> `POST
+  | ListContainerFleets -> `POST
+  | ListContainerGroupDefinitionVersions -> `POST
+  | ListContainerGroupDefinitions -> `POST
+  | ListFleetDeployments -> `POST
   | ListFleets -> `POST
   | ListGameServerGroups -> `POST
   | ListGameServers -> `POST
+  | ListLocations -> `POST
   | ListScripts -> `POST
   | ListTagsForResource -> `POST
   | PutScalingPolicy -> `POST
+  | RegisterCompute -> `POST
   | RegisterGameServer -> `POST
   | RequestUploadCredentials -> `POST
   | ResolveAlias -> `POST
@@ -296,9 +379,12 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | StopMatchmaking -> `POST
   | SuspendGameServerGroup -> `POST
   | TagResource -> `POST
+  | TerminateGameSession -> `POST
   | UntagResource -> `POST
   | UpdateAlias -> `POST
   | UpdateBuild -> `POST
+  | UpdateContainerFleet -> `POST
+  | UpdateContainerGroupDefinition -> `POST
   | UpdateFleetAttributes -> `POST
   | UpdateFleetCapacity -> `POST
   | UpdateFleetPortSettings -> `POST
@@ -317,11 +403,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ClaimGameServer -> (Format.kasprintf Uri.of_string) "/"
       | CreateAlias -> (Format.kasprintf Uri.of_string) "/"
       | CreateBuild -> (Format.kasprintf Uri.of_string) "/"
+      | CreateContainerFleet -> (Format.kasprintf Uri.of_string) "/"
+      | CreateContainerGroupDefinition ->
+          (Format.kasprintf Uri.of_string) "/"
       | CreateFleet -> (Format.kasprintf Uri.of_string) "/"
       | CreateFleetLocations -> (Format.kasprintf Uri.of_string) "/"
       | CreateGameServerGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateGameSession -> (Format.kasprintf Uri.of_string) "/"
       | CreateGameSessionQueue -> (Format.kasprintf Uri.of_string) "/"
+      | CreateLocation -> (Format.kasprintf Uri.of_string) "/"
       | CreateMatchmakingConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
       | CreateMatchmakingRuleSet -> (Format.kasprintf Uri.of_string) "/"
@@ -332,10 +422,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateVpcPeeringConnection -> (Format.kasprintf Uri.of_string) "/"
       | DeleteAlias -> (Format.kasprintf Uri.of_string) "/"
       | DeleteBuild -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteContainerFleet -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteContainerGroupDefinition ->
+          (Format.kasprintf Uri.of_string) "/"
       | DeleteFleet -> (Format.kasprintf Uri.of_string) "/"
       | DeleteFleetLocations -> (Format.kasprintf Uri.of_string) "/"
       | DeleteGameServerGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteGameSessionQueue -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteLocation -> (Format.kasprintf Uri.of_string) "/"
       | DeleteMatchmakingConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteMatchmakingRuleSet -> (Format.kasprintf Uri.of_string) "/"
@@ -343,12 +437,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteScript -> (Format.kasprintf Uri.of_string) "/"
       | DeleteVpcPeeringAuthorization -> (Format.kasprintf Uri.of_string) "/"
       | DeleteVpcPeeringConnection -> (Format.kasprintf Uri.of_string) "/"
+      | DeregisterCompute -> (Format.kasprintf Uri.of_string) "/"
       | DeregisterGameServer -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAlias -> (Format.kasprintf Uri.of_string) "/"
       | DescribeBuild -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeCompute -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeContainerFleet -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeContainerGroupDefinition ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeContainerGroupPortMappings ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeEC2InstanceLimits -> (Format.kasprintf Uri.of_string) "/"
       | DescribeFleetAttributes -> (Format.kasprintf Uri.of_string) "/"
       | DescribeFleetCapacity -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeFleetDeployment -> (Format.kasprintf Uri.of_string) "/"
       | DescribeFleetEvents -> (Format.kasprintf Uri.of_string) "/"
       | DescribeFleetLocationAttributes ->
           (Format.kasprintf Uri.of_string) "/"
@@ -376,16 +478,27 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeVpcPeeringAuthorizations ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeVpcPeeringConnections -> (Format.kasprintf Uri.of_string) "/"
+      | GetComputeAccess -> (Format.kasprintf Uri.of_string) "/"
+      | GetComputeAuthToken -> (Format.kasprintf Uri.of_string) "/"
       | GetGameSessionLogUrl -> (Format.kasprintf Uri.of_string) "/"
       | GetInstanceAccess -> (Format.kasprintf Uri.of_string) "/"
+      | GetPlayerConnectionDetails -> (Format.kasprintf Uri.of_string) "/"
       | ListAliases -> (Format.kasprintf Uri.of_string) "/"
       | ListBuilds -> (Format.kasprintf Uri.of_string) "/"
+      | ListCompute -> (Format.kasprintf Uri.of_string) "/"
+      | ListContainerFleets -> (Format.kasprintf Uri.of_string) "/"
+      | ListContainerGroupDefinitionVersions ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListContainerGroupDefinitions -> (Format.kasprintf Uri.of_string) "/"
+      | ListFleetDeployments -> (Format.kasprintf Uri.of_string) "/"
       | ListFleets -> (Format.kasprintf Uri.of_string) "/"
       | ListGameServerGroups -> (Format.kasprintf Uri.of_string) "/"
       | ListGameServers -> (Format.kasprintf Uri.of_string) "/"
+      | ListLocations -> (Format.kasprintf Uri.of_string) "/"
       | ListScripts -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | PutScalingPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | RegisterCompute -> (Format.kasprintf Uri.of_string) "/"
       | RegisterGameServer -> (Format.kasprintf Uri.of_string) "/"
       | RequestUploadCredentials -> (Format.kasprintf Uri.of_string) "/"
       | ResolveAlias -> (Format.kasprintf Uri.of_string) "/"
@@ -400,9 +513,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | StopMatchmaking -> (Format.kasprintf Uri.of_string) "/"
       | SuspendGameServerGroup -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
+      | TerminateGameSession -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateAlias -> (Format.kasprintf Uri.of_string) "/"
       | UpdateBuild -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateContainerFleet -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateContainerGroupDefinition ->
+          (Format.kasprintf Uri.of_string) "/"
       | UpdateFleetAttributes -> (Format.kasprintf Uri.of_string) "/"
       | UpdateFleetCapacity -> (Format.kasprintf Uri.of_string) "/"
       | UpdateFleetPortSettings -> (Format.kasprintf Uri.of_string) "/"
@@ -450,6 +567,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "GameLift.CreateBuild")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateContainerFleet ->
+      let json = CreateContainerFleetInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.CreateContainerFleet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateContainerGroupDefinition ->
+      let json = CreateContainerGroupDefinitionInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.CreateContainerGroupDefinition")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateFleet ->
       let json = CreateFleetInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -489,6 +622,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "GameLift.CreateGameSessionQueue")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateLocation ->
+      let json = CreateLocationInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.CreateLocation")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateMatchmakingConfiguration ->
       let json = CreateMatchmakingConfigurationInput.to_json req in
@@ -562,6 +703,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "GameLift.DeleteBuild")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteContainerFleet ->
+      let json = DeleteContainerFleetInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.DeleteContainerFleet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteContainerGroupDefinition ->
+      let json = DeleteContainerGroupDefinitionInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.DeleteContainerGroupDefinition")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteFleet ->
       let json = DeleteFleetInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -593,6 +750,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "GameLift.DeleteGameSessionQueue")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteLocation ->
+      let json = DeleteLocationInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.DeleteLocation")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteMatchmakingConfiguration ->
       let json = DeleteMatchmakingConfigurationInput.to_json req in
@@ -642,6 +807,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "GameLift.DeleteVpcPeeringConnection")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeregisterCompute ->
+      let json = DeregisterComputeInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.DeregisterCompute")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeregisterGameServer ->
       let json = DeregisterGameServerInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -666,6 +839,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "GameLift.DescribeBuild")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeCompute ->
+      let json = DescribeComputeInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.DescribeCompute")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeContainerFleet ->
+      let json = DescribeContainerFleetInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.DescribeContainerFleet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeContainerGroupDefinition ->
+      let json = DescribeContainerGroupDefinitionInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.DescribeContainerGroupDefinition")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeContainerGroupPortMappings ->
+      let json = DescribeContainerGroupPortMappingsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.DescribeContainerGroupPortMappings")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeEC2InstanceLimits ->
       let json = DescribeEC2InstanceLimitsInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -689,6 +894,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "GameLift.DescribeFleetCapacity")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeFleetDeployment ->
+      let json = DescribeFleetDeploymentInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.DescribeFleetDeployment")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeFleetEvents ->
       let json = DescribeFleetEventsInput.to_json req in
@@ -874,6 +1087,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "GameLift.DescribeVpcPeeringConnections")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetComputeAccess ->
+      let json = GetComputeAccessInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.GetComputeAccess")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetComputeAuthToken ->
+      let json = GetComputeAuthTokenInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.GetComputeAuthToken")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetGameSessionLogUrl ->
       let json = GetGameSessionLogUrlInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -890,6 +1119,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "GameLift.GetInstanceAccess")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetPlayerConnectionDetails ->
+      let json = GetPlayerConnectionDetailsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.GetPlayerConnectionDetails")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListAliases ->
       let json = ListAliasesInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -905,6 +1142,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "GameLift.ListBuilds")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListCompute ->
+      let json = ListComputeInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.ListCompute")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListContainerFleets ->
+      let json = ListContainerFleetsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.ListContainerFleets")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListContainerGroupDefinitionVersions ->
+      let json = ListContainerGroupDefinitionVersionsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.ListContainerGroupDefinitionVersions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListContainerGroupDefinitions ->
+      let json = ListContainerGroupDefinitionsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.ListContainerGroupDefinitions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListFleetDeployments ->
+      let json = ListFleetDeploymentsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.ListFleetDeployments")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListFleets ->
       let json = ListFleetsInput.to_json req in
@@ -930,6 +1207,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "GameLift.ListGameServers")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListLocations ->
+      let json = ListLocationsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.ListLocations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListScripts ->
       let json = ListScriptsInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -953,6 +1238,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "GameLift.PutScalingPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | RegisterCompute ->
+      let json = RegisterComputeInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.RegisterCompute")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | RegisterGameServer ->
       let json = RegisterGameServerInput.to_json req in
@@ -1066,6 +1359,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "GameLift.TagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TerminateGameSession ->
+      let json = TerminateGameSessionInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.TerminateGameSession")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UntagResource ->
       let json = UntagResourceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1089,6 +1390,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "GameLift.UpdateBuild")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateContainerFleet ->
+      let json = UpdateContainerFleetInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.UpdateContainerFleet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateContainerGroupDefinition ->
+      let json = UpdateContainerGroupDefinitionInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GameLift.UpdateContainerGroupDefinition")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateFleetAttributes ->
       let json = UpdateFleetAttributesInput.to_json req in
@@ -1225,6 +1542,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateBuildOutput.of_json json)
       else Error (parse_aws_error (Some CreateBuildOutput.error_of_json))
+  | CreateContainerFleet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateContainerFleetOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateContainerFleetOutput.error_of_json))
+  | CreateContainerGroupDefinition ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateContainerGroupDefinitionOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateContainerGroupDefinitionOutput.error_of_json))
   | CreateFleet ->
       if is_success
       then
@@ -1262,6 +1596,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateGameSessionQueueOutput.error_of_json))
+  | CreateLocation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateLocationOutput.of_json json)
+      else Error (parse_aws_error (Some CreateLocationOutput.error_of_json))
   | CreateMatchmakingConfiguration ->
       if is_success
       then
@@ -1322,6 +1662,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
              (Some CreateVpcPeeringConnectionOutput.error_of_json))
   | DeleteAlias -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteBuild -> if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteContainerFleet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteContainerFleetOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteContainerFleetOutput.error_of_json))
+  | DeleteContainerGroupDefinition ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteContainerGroupDefinitionOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteContainerGroupDefinitionOutput.error_of_json))
   | DeleteFleet -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteFleetLocations ->
       if is_success
@@ -1347,6 +1704,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteGameSessionQueueOutput.error_of_json))
+  | DeleteLocation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteLocationOutput.of_json json)
+      else Error (parse_aws_error (Some DeleteLocationOutput.error_of_json))
   | DeleteMatchmakingConfiguration ->
       if is_success
       then
@@ -1387,6 +1750,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteVpcPeeringConnectionOutput.error_of_json))
+  | DeregisterCompute ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeregisterComputeOutput.of_json json)
+      else
+        Error (parse_aws_error (Some DeregisterComputeOutput.error_of_json))
   | DeregisterGameServer ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DescribeAlias ->
@@ -1401,6 +1771,38 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeBuildOutput.of_json json)
       else Error (parse_aws_error (Some DescribeBuildOutput.error_of_json))
+  | DescribeCompute ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeComputeOutput.of_json json)
+      else Error (parse_aws_error (Some DescribeComputeOutput.error_of_json))
+  | DescribeContainerFleet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeContainerFleetOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeContainerFleetOutput.error_of_json))
+  | DescribeContainerGroupDefinition ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeContainerGroupDefinitionOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeContainerGroupDefinitionOutput.error_of_json))
+  | DescribeContainerGroupPortMappings ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeContainerGroupPortMappingsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeContainerGroupPortMappingsOutput.error_of_json))
   | DescribeEC2InstanceLimits ->
       if is_success
       then
@@ -1426,6 +1828,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeFleetCapacityOutput.error_of_json))
+  | DescribeFleetDeployment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeFleetDeploymentOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeFleetDeploymentOutput.error_of_json))
   | DescribeFleetEvents ->
       if is_success
       then
@@ -1620,6 +2030,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeVpcPeeringConnectionsOutput.error_of_json))
+  | GetComputeAccess ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetComputeAccessOutput.of_json json)
+      else
+        Error (parse_aws_error (Some GetComputeAccessOutput.error_of_json))
+  | GetComputeAuthToken ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetComputeAuthTokenOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetComputeAuthTokenOutput.error_of_json))
   | GetGameSessionLogUrl ->
       if is_success
       then
@@ -1635,6 +2060,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetInstanceAccessOutput.of_json json)
       else
         Error (parse_aws_error (Some GetInstanceAccessOutput.error_of_json))
+  | GetPlayerConnectionDetails ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetPlayerConnectionDetailsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetPlayerConnectionDetailsOutput.error_of_json))
   | ListAliases ->
       if is_success
       then
@@ -1647,6 +2081,46 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListBuildsOutput.of_json json)
       else Error (parse_aws_error (Some ListBuildsOutput.error_of_json))
+  | ListCompute ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListComputeOutput.of_json json)
+      else Error (parse_aws_error (Some ListComputeOutput.error_of_json))
+  | ListContainerFleets ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListContainerFleetsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListContainerFleetsOutput.error_of_json))
+  | ListContainerGroupDefinitionVersions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListContainerGroupDefinitionVersionsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListContainerGroupDefinitionVersionsOutput.error_of_json))
+  | ListContainerGroupDefinitions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListContainerGroupDefinitionsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListContainerGroupDefinitionsOutput.error_of_json))
+  | ListFleetDeployments ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListFleetDeploymentsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListFleetDeploymentsOutput.error_of_json))
   | ListFleets ->
       if is_success
       then
@@ -1667,6 +2141,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListGameServersOutput.of_json json)
       else Error (parse_aws_error (Some ListGameServersOutput.error_of_json))
+  | ListLocations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLocationsOutput.of_json json)
+      else Error (parse_aws_error (Some ListLocationsOutput.error_of_json))
   | ListScripts ->
       if is_success
       then
@@ -1688,6 +2168,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (PutScalingPolicyOutput.of_json json)
       else
         Error (parse_aws_error (Some PutScalingPolicyOutput.error_of_json))
+  | RegisterCompute ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RegisterComputeOutput.of_json json)
+      else Error (parse_aws_error (Some RegisterComputeOutput.error_of_json))
   | RegisterGameServer ->
       if is_success
       then
@@ -1791,6 +2277,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (TagResourceResponse.of_json json)
       else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
+  | TerminateGameSession ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TerminateGameSessionOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some TerminateGameSessionOutput.error_of_json))
   | UntagResource ->
       if is_success
       then
@@ -1809,6 +2303,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateBuildOutput.of_json json)
       else Error (parse_aws_error (Some UpdateBuildOutput.error_of_json))
+  | UpdateContainerFleet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateContainerFleetOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateContainerFleetOutput.error_of_json))
+  | UpdateContainerGroupDefinition ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateContainerGroupDefinitionOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateContainerGroupDefinitionOutput.error_of_json))
   | UpdateFleetAttributes ->
       if is_success
       then

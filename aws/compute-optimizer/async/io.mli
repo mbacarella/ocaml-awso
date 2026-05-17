@@ -35,12 +35,39 @@ val export_e_c2_instance_recommendations :
         (ExportEC2InstanceRecommendationsResponse.t,
           ExportEC2InstanceRecommendationsResponse.error) Result.t
           Async.Deferred.t
+val export_e_c_s_service_recommendations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ExportECSServiceRecommendationsRequest.t ->
+        (ExportECSServiceRecommendationsResponse.t,
+          ExportECSServiceRecommendationsResponse.error) Result.t
+          Async.Deferred.t
+val export_idle_recommendations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ExportIdleRecommendationsRequest.t ->
+        (ExportIdleRecommendationsResponse.t,
+          ExportIdleRecommendationsResponse.error) Result.t Async.Deferred.t
 val export_lambda_function_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportLambdaFunctionRecommendationsRequest.t ->
         (ExportLambdaFunctionRecommendationsResponse.t,
           ExportLambdaFunctionRecommendationsResponse.error) Result.t
+          Async.Deferred.t
+val export_license_recommendations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ExportLicenseRecommendationsRequest.t ->
+        (ExportLicenseRecommendationsResponse.t,
+          ExportLicenseRecommendationsResponse.error) Result.t
+          Async.Deferred.t
+val export_r_d_s_database_recommendations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ExportRDSDatabaseRecommendationsRequest.t ->
+        (ExportRDSDatabaseRecommendationsResponse.t,
+          ExportRDSDatabaseRecommendationsResponse.error) Result.t
           Async.Deferred.t
 val get_auto_scaling_group_recommendations :
   ?endpoint_url:string ->
@@ -70,6 +97,20 @@ val get_e_c2_recommendation_projected_metrics :
         (GetEC2RecommendationProjectedMetricsResponse.t,
           GetEC2RecommendationProjectedMetricsResponse.error) Result.t
           Async.Deferred.t
+val get_e_c_s_service_recommendation_projected_metrics :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetECSServiceRecommendationProjectedMetricsRequest.t ->
+        (GetECSServiceRecommendationProjectedMetricsResponse.t,
+          GetECSServiceRecommendationProjectedMetricsResponse.error) Result.t
+          Async.Deferred.t
+val get_e_c_s_service_recommendations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetECSServiceRecommendationsRequest.t ->
+        (GetECSServiceRecommendationsResponse.t,
+          GetECSServiceRecommendationsResponse.error) Result.t
+          Async.Deferred.t
 val get_effective_recommendation_preferences :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -90,12 +131,38 @@ val get_enrollment_statuses_for_organization :
         (GetEnrollmentStatusesForOrganizationResponse.t,
           GetEnrollmentStatusesForOrganizationResponse.error) Result.t
           Async.Deferred.t
+val get_idle_recommendations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetIdleRecommendationsRequest.t ->
+        (GetIdleRecommendationsResponse.t,
+          GetIdleRecommendationsResponse.error) Result.t Async.Deferred.t
 val get_lambda_function_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLambdaFunctionRecommendationsRequest.t ->
         (GetLambdaFunctionRecommendationsResponse.t,
           GetLambdaFunctionRecommendationsResponse.error) Result.t
+          Async.Deferred.t
+val get_license_recommendations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetLicenseRecommendationsRequest.t ->
+        (GetLicenseRecommendationsResponse.t,
+          GetLicenseRecommendationsResponse.error) Result.t Async.Deferred.t
+val get_r_d_s_database_recommendation_projected_metrics :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetRDSDatabaseRecommendationProjectedMetricsRequest.t ->
+        (GetRDSDatabaseRecommendationProjectedMetricsResponse.t,
+          GetRDSDatabaseRecommendationProjectedMetricsResponse.error)
+          Result.t Async.Deferred.t
+val get_r_d_s_database_recommendations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetRDSDatabaseRecommendationsRequest.t ->
+        (GetRDSDatabaseRecommendationsResponse.t,
+          GetRDSDatabaseRecommendationsResponse.error) Result.t
           Async.Deferred.t
 val get_recommendation_preferences :
   ?endpoint_url:string ->

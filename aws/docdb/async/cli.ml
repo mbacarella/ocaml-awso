@@ -205,6 +205,19 @@ let create_d_b_cluster =
        and globalClusterIdentifier =
          flag "global-cluster-identifier" (optional string)
            ~doc:"STRING GlobalClusterIdentifier"
+       and storageType =
+         flag "storage-type" (optional string) ~doc:"STRING String"
+       and serverlessV2ScalingConfiguration =
+         flag "serverless-v2-scaling-configuration" (optional json_arg)
+           ~doc:"JSON ServerlessV2ScalingConfiguration"
+       and manageMasterUserPassword =
+         flag "manage-master-user-password" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and masterUserSecretKmsKeyId =
+         flag "master-user-secret-kms-key-id" (optional string)
+           ~doc:"STRING String"
+       and networkType =
+         flag "network-type" (optional string) ~doc:"STRING String"
        and dBClusterIdentifier =
          flag "d-b-cluster-identifier" (required string) ~doc:"STRING String"
        and engine = flag "engine" (required string) ~doc:"STRING String" in
@@ -226,8 +239,12 @@ let create_d_b_cluster =
               ?enableCloudwatchLogsExports:(Option.map
                                               ~f:Values.LogTypeList.of_json
                                               enableCloudwatchLogsExports)
-              ?deletionProtection ?globalClusterIdentifier
-              ~dBClusterIdentifier ~engine ())
+              ?deletionProtection ?globalClusterIdentifier ?storageType
+              ?serverlessV2ScalingConfiguration:(Option.map
+                                                   ~f:Values.ServerlessV2ScalingConfiguration.of_json
+                                                   serverlessV2ScalingConfiguration)
+              ?manageMasterUserPassword ?masterUserSecretKmsKeyId
+              ?networkType ~dBClusterIdentifier ~engine ())
            (Some Values.CreateDBClusterResult.to_json)
            (Some Values.CreateDBClusterResult.error_to_json)])
 let create_d_b_cluster_parameter_group =
@@ -301,6 +318,9 @@ let create_d_b_instance =
          flag "auto-minor-version-upgrade" (optional bool)
            ~doc:"BOOL BooleanOptional"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and copyTagsToSnapshot =
+         flag "copy-tags-to-snapshot" (optional bool)
+           ~doc:"BOOL BooleanOptional"
        and promotionTier =
          flag "promotion-tier" (optional int) ~doc:"INT IntegerOptional"
        and enablePerformanceInsights =
@@ -308,6 +328,9 @@ let create_d_b_instance =
            ~doc:"BOOL BooleanOptional"
        and performanceInsightsKMSKeyId =
          flag "performance-insights-k-m-s-key-id" (optional string)
+           ~doc:"STRING String"
+       and cACertificateIdentifier =
+         flag "c-a-certificate-identifier" (optional string)
            ~doc:"STRING String"
        and dBInstanceIdentifier =
          flag "d-b-instance-identifier" (required string)
@@ -323,9 +346,10 @@ let create_d_b_instance =
            (Values.CreateDBInstanceMessage.make ?availabilityZone
               ?preferredMaintenanceWindow ?autoMinorVersionUpgrade
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ?promotionTier ?enablePerformanceInsights
-              ?performanceInsightsKMSKeyId ~dBInstanceIdentifier
-              ~dBInstanceClass ~engine ~dBClusterIdentifier ())
+              ?copyTagsToSnapshot ?promotionTier ?enablePerformanceInsights
+              ?performanceInsightsKMSKeyId ?cACertificateIdentifier
+              ~dBInstanceIdentifier ~dBInstanceClass ~engine
+              ~dBClusterIdentifier ())
            (Some Values.CreateDBInstanceResult.to_json)
            (Some Values.CreateDBInstanceResult.error_to_json)])
 let create_d_b_subnet_group =
@@ -1031,6 +1055,33 @@ let failover_d_b_cluster =
               ?targetDBInstanceIdentifier ())
            (Some Values.FailoverDBClusterResult.to_json)
            (Some Values.FailoverDBClusterResult.error_to_json)])
+let failover_global_cluster =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and allowDataLoss =
+         flag "allow-data-loss" (optional bool) ~doc:"BOOL BooleanOptional"
+       and switchover =
+         flag "switchover" (optional bool) ~doc:"BOOL BooleanOptional"
+       and globalClusterIdentifier =
+         flag "global-cluster-identifier" (required string)
+           ~doc:"STRING GlobalClusterIdentifier"
+       and targetDbClusterIdentifier =
+         flag "target-db-cluster-identifier" (required string)
+           ~doc:"STRING DBClusterIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.failover_global_cluster
+           (Values.FailoverGlobalClusterMessage.make ?allowDataLoss
+              ?switchover ~globalClusterIdentifier ~targetDbClusterIdentifier
+              ()) (Some Values.FailoverGlobalClusterResult.to_json)
+           (Some Values.FailoverGlobalClusterResult.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1090,9 +1141,28 @@ let modify_d_b_cluster =
            ~doc:"JSON CloudwatchLogsExportConfiguration"
        and engineVersion =
          flag "engine-version" (optional string) ~doc:"STRING String"
+       and allowMajorVersionUpgrade =
+         flag "allow-major-version-upgrade" (optional bool)
+           ~doc:"BOOL Boolean"
        and deletionProtection =
          flag "deletion-protection" (optional bool)
            ~doc:"BOOL BooleanOptional"
+       and storageType =
+         flag "storage-type" (optional string) ~doc:"STRING String"
+       and serverlessV2ScalingConfiguration =
+         flag "serverless-v2-scaling-configuration" (optional json_arg)
+           ~doc:"JSON ServerlessV2ScalingConfiguration"
+       and manageMasterUserPassword =
+         flag "manage-master-user-password" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and masterUserSecretKmsKeyId =
+         flag "master-user-secret-kms-key-id" (optional string)
+           ~doc:"STRING String"
+       and rotateMasterUserPassword =
+         flag "rotate-master-user-password" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and networkType =
+         flag "network-type" (optional string) ~doc:"STRING String"
        and dBClusterIdentifier =
          flag "d-b-cluster-identifier" (required string) ~doc:"STRING String" in
        fun () ->
@@ -1109,7 +1179,13 @@ let modify_d_b_cluster =
               ?cloudwatchLogsExportConfiguration:(Option.map
                                                     ~f:Values.CloudwatchLogsExportConfiguration.of_json
                                                     cloudwatchLogsExportConfiguration)
-              ?engineVersion ?deletionProtection ~dBClusterIdentifier ())
+              ?engineVersion ?allowMajorVersionUpgrade ?deletionProtection
+              ?storageType
+              ?serverlessV2ScalingConfiguration:(Option.map
+                                                   ~f:Values.ServerlessV2ScalingConfiguration.of_json
+                                                   serverlessV2ScalingConfiguration)
+              ?manageMasterUserPassword ?masterUserSecretKmsKeyId
+              ?rotateMasterUserPassword ?networkType ~dBClusterIdentifier ())
            (Some Values.ModifyDBClusterResult.to_json)
            (Some Values.ModifyDBClusterResult.error_to_json)])
 let modify_d_b_cluster_parameter_group =
@@ -1194,6 +1270,9 @@ let modify_d_b_instance =
        and cACertificateIdentifier =
          flag "c-a-certificate-identifier" (optional string)
            ~doc:"STRING String"
+       and copyTagsToSnapshot =
+         flag "copy-tags-to-snapshot" (optional bool)
+           ~doc:"BOOL BooleanOptional"
        and promotionTier =
          flag "promotion-tier" (optional int) ~doc:"INT IntegerOptional"
        and enablePerformanceInsights =
@@ -1202,6 +1281,9 @@ let modify_d_b_instance =
        and performanceInsightsKMSKeyId =
          flag "performance-insights-k-m-s-key-id" (optional string)
            ~doc:"STRING String"
+       and certificateRotationRestart =
+         flag "certificate-rotation-restart" (optional bool)
+           ~doc:"BOOL BooleanOptional"
        and dBInstanceIdentifier =
          flag "d-b-instance-identifier" (required string)
            ~doc:"STRING String" in
@@ -1211,9 +1293,9 @@ let modify_d_b_instance =
            (Values.ModifyDBInstanceMessage.make ?dBInstanceClass
               ?applyImmediately ?preferredMaintenanceWindow
               ?autoMinorVersionUpgrade ?newDBInstanceIdentifier
-              ?cACertificateIdentifier ?promotionTier
+              ?cACertificateIdentifier ?copyTagsToSnapshot ?promotionTier
               ?enablePerformanceInsights ?performanceInsightsKMSKeyId
-              ~dBInstanceIdentifier ())
+              ?certificateRotationRestart ~dBInstanceIdentifier ())
            (Some Values.ModifyDBInstanceResult.to_json)
            (Some Values.ModifyDBInstanceResult.error_to_json)])
 let modify_d_b_subnet_group =
@@ -1440,6 +1522,16 @@ let restore_d_b_cluster_from_snapshot =
        and deletionProtection =
          flag "deletion-protection" (optional bool)
            ~doc:"BOOL BooleanOptional"
+       and dBClusterParameterGroupName =
+         flag "d-b-cluster-parameter-group-name" (optional string)
+           ~doc:"STRING String"
+       and serverlessV2ScalingConfiguration =
+         flag "serverless-v2-scaling-configuration" (optional json_arg)
+           ~doc:"JSON ServerlessV2ScalingConfiguration"
+       and storageType =
+         flag "storage-type" (optional string) ~doc:"STRING String"
+       and networkType =
+         flag "network-type" (optional string) ~doc:"STRING String"
        and dBClusterIdentifier =
          flag "d-b-cluster-identifier" (required string) ~doc:"STRING String"
        and snapshotIdentifier =
@@ -1460,8 +1552,12 @@ let restore_d_b_cluster_from_snapshot =
               ?enableCloudwatchLogsExports:(Option.map
                                               ~f:Values.LogTypeList.of_json
                                               enableCloudwatchLogsExports)
-              ?deletionProtection ~dBClusterIdentifier ~snapshotIdentifier
-              ~engine ())
+              ?deletionProtection ?dBClusterParameterGroupName
+              ?serverlessV2ScalingConfiguration:(Option.map
+                                                   ~f:Values.ServerlessV2ScalingConfiguration.of_json
+                                                   serverlessV2ScalingConfiguration)
+              ?storageType ?networkType ~dBClusterIdentifier
+              ~snapshotIdentifier ~engine ())
            (Some Values.RestoreDBClusterFromSnapshotResult.to_json)
            (Some Values.RestoreDBClusterFromSnapshotResult.error_to_json)])
 let restore_d_b_cluster_to_point_in_time =
@@ -1474,6 +1570,8 @@ let restore_d_b_cluster_to_point_in_time =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and restoreType =
+         flag "restore-type" (optional string) ~doc:"STRING String"
        and restoreToTime =
          flag "restore-to-time" (optional json_arg) ~doc:"JSON TStamp"
        and useLatestRestorableTime =
@@ -1494,6 +1592,13 @@ let restore_d_b_cluster_to_point_in_time =
        and deletionProtection =
          flag "deletion-protection" (optional bool)
            ~doc:"BOOL BooleanOptional"
+       and serverlessV2ScalingConfiguration =
+         flag "serverless-v2-scaling-configuration" (optional json_arg)
+           ~doc:"JSON ServerlessV2ScalingConfiguration"
+       and storageType =
+         flag "storage-type" (optional string) ~doc:"STRING String"
+       and networkType =
+         flag "network-type" (optional string) ~doc:"STRING String"
        and dBClusterIdentifier =
          flag "d-b-cluster-identifier" (required string) ~doc:"STRING String"
        and sourceDBClusterIdentifier =
@@ -1502,7 +1607,7 @@ let restore_d_b_cluster_to_point_in_time =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.restore_d_b_cluster_to_point_in_time
-           (Values.RestoreDBClusterToPointInTimeMessage.make
+           (Values.RestoreDBClusterToPointInTimeMessage.make ?restoreType
               ?restoreToTime:(Option.map ~f:Values.TStamp.of_json
                                 restoreToTime) ?useLatestRestorableTime ?port
               ?dBSubnetGroupName
@@ -1513,7 +1618,11 @@ let restore_d_b_cluster_to_point_in_time =
               ?enableCloudwatchLogsExports:(Option.map
                                               ~f:Values.LogTypeList.of_json
                                               enableCloudwatchLogsExports)
-              ?deletionProtection ~dBClusterIdentifier
+              ?deletionProtection
+              ?serverlessV2ScalingConfiguration:(Option.map
+                                                   ~f:Values.ServerlessV2ScalingConfiguration.of_json
+                                                   serverlessV2ScalingConfiguration)
+              ?storageType ?networkType ~dBClusterIdentifier
               ~sourceDBClusterIdentifier ())
            (Some Values.RestoreDBClusterToPointInTimeResult.to_json)
            (Some Values.RestoreDBClusterToPointInTimeResult.error_to_json)])
@@ -1553,6 +1662,29 @@ let stop_d_b_cluster =
            (Values.StopDBClusterMessage.make ~dBClusterIdentifier ())
            (Some Values.StopDBClusterResult.to_json)
            (Some Values.StopDBClusterResult.error_to_json)])
+let switchover_global_cluster =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and globalClusterIdentifier =
+         flag "global-cluster-identifier" (required string)
+           ~doc:"STRING GlobalClusterIdentifier"
+       and targetDbClusterIdentifier =
+         flag "target-db-cluster-identifier" (required string)
+           ~doc:"STRING DBClusterIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.switchover_global_cluster
+           (Values.SwitchoverGlobalClusterMessage.make
+              ~globalClusterIdentifier ~targetDbClusterIdentifier ())
+           (Some Values.SwitchoverGlobalClusterResult.to_json)
+           (Some Values.SwitchoverGlobalClusterResult.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -1600,6 +1732,7 @@ let main =
     ("describe-pending-maintenance-actions",
       describe_pending_maintenance_actions);
     ("failover-d-b-cluster", failover_d_b_cluster);
+    ("failover-global-cluster", failover_global_cluster);
     ("list-tags-for-resource", list_tags_for_resource);
     ("modify-d-b-cluster", modify_d_b_cluster);
     ("modify-d-b-cluster-parameter-group",
@@ -1620,4 +1753,5 @@ let main =
     ("restore-d-b-cluster-to-point-in-time",
       restore_d_b_cluster_to_point_in_time);
     ("start-d-b-cluster", start_d_b_cluster);
-    ("stop-d-b-cluster", stop_d_b_cluster)]
+    ("stop-d-b-cluster", stop_d_b_cluster);
+    ("switchover-global-cluster", switchover_global_cluster)]

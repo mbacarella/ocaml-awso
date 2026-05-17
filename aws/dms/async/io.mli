@@ -13,6 +13,26 @@ val apply_pending_maintenance_action :
         (ApplyPendingMaintenanceActionResponse.t,
           ApplyPendingMaintenanceActionResponse.error) Result.t
           Async.Deferred.t
+val batch_start_recommendations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchStartRecommendationsRequest.t ->
+        (BatchStartRecommendationsResponse.t,
+          BatchStartRecommendationsResponse.error) Result.t Async.Deferred.t
+val cancel_metadata_model_conversion :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CancelMetadataModelConversionMessage.t ->
+        (CancelMetadataModelConversionResponse.t,
+          CancelMetadataModelConversionResponse.error) Result.t
+          Async.Deferred.t
+val cancel_metadata_model_creation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CancelMetadataModelCreationMessage.t ->
+        (CancelMetadataModelCreationResponse.t,
+          CancelMetadataModelCreationResponse.error) Result.t
+          Async.Deferred.t
 val cancel_replication_task_assessment_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -20,6 +40,18 @@ val cancel_replication_task_assessment_run :
         (CancelReplicationTaskAssessmentRunResponse.t,
           CancelReplicationTaskAssessmentRunResponse.error) Result.t
           Async.Deferred.t
+val create_data_migration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateDataMigrationMessage.t ->
+        (CreateDataMigrationResponse.t, CreateDataMigrationResponse.error)
+          Result.t Async.Deferred.t
+val create_data_provider :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateDataProviderMessage.t ->
+        (CreateDataProviderResponse.t, CreateDataProviderResponse.error)
+          Result.t Async.Deferred.t
 val create_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -32,6 +64,31 @@ val create_event_subscription :
       CreateEventSubscriptionMessage.t ->
         (CreateEventSubscriptionResponse.t,
           CreateEventSubscriptionResponse.error) Result.t Async.Deferred.t
+val create_fleet_advisor_collector :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateFleetAdvisorCollectorRequest.t ->
+        (CreateFleetAdvisorCollectorResponse.t,
+          CreateFleetAdvisorCollectorResponse.error) Result.t
+          Async.Deferred.t
+val create_instance_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateInstanceProfileMessage.t ->
+        (CreateInstanceProfileResponse.t,
+          CreateInstanceProfileResponse.error) Result.t Async.Deferred.t
+val create_migration_project :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateMigrationProjectMessage.t ->
+        (CreateMigrationProjectResponse.t,
+          CreateMigrationProjectResponse.error) Result.t Async.Deferred.t
+val create_replication_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateReplicationConfigMessage.t ->
+        (CreateReplicationConfigResponse.t,
+          CreateReplicationConfigResponse.error) Result.t Async.Deferred.t
 val create_replication_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -63,6 +120,18 @@ val delete_connection :
       DeleteConnectionMessage.t ->
         (DeleteConnectionResponse.t, DeleteConnectionResponse.error) Result.t
           Async.Deferred.t
+val delete_data_migration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDataMigrationMessage.t ->
+        (DeleteDataMigrationResponse.t, DeleteDataMigrationResponse.error)
+          Result.t Async.Deferred.t
+val delete_data_provider :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDataProviderMessage.t ->
+        (DeleteDataProviderResponse.t, DeleteDataProviderResponse.error)
+          Result.t Async.Deferred.t
 val delete_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -75,6 +144,35 @@ val delete_event_subscription :
       DeleteEventSubscriptionMessage.t ->
         (DeleteEventSubscriptionResponse.t,
           DeleteEventSubscriptionResponse.error) Result.t Async.Deferred.t
+val delete_fleet_advisor_collector :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCollectorRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_fleet_advisor_databases :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteFleetAdvisorDatabasesRequest.t ->
+        (DeleteFleetAdvisorDatabasesResponse.t,
+          DeleteFleetAdvisorDatabasesResponse.error) Result.t
+          Async.Deferred.t
+val delete_instance_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteInstanceProfileMessage.t ->
+        (DeleteInstanceProfileResponse.t,
+          DeleteInstanceProfileResponse.error) Result.t Async.Deferred.t
+val delete_migration_project :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteMigrationProjectMessage.t ->
+        (DeleteMigrationProjectResponse.t,
+          DeleteMigrationProjectResponse.error) Result.t Async.Deferred.t
+val delete_replication_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteReplicationConfigMessage.t ->
+        (DeleteReplicationConfigResponse.t,
+          DeleteReplicationConfigResponse.error) Result.t Async.Deferred.t
 val delete_replication_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -126,6 +224,25 @@ val describe_connections :
       DescribeConnectionsMessage.t ->
         (DescribeConnectionsResponse.t, DescribeConnectionsResponse.error)
           Result.t Async.Deferred.t
+val describe_conversion_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeConversionConfigurationMessage.t ->
+        (DescribeConversionConfigurationResponse.t,
+          DescribeConversionConfigurationResponse.error) Result.t
+          Async.Deferred.t
+val describe_data_migrations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDataMigrationsMessage.t ->
+        (DescribeDataMigrationsResponse.t,
+          DescribeDataMigrationsResponse.error) Result.t Async.Deferred.t
+val describe_data_providers :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDataProvidersMessage.t ->
+        (DescribeDataProvidersResponse.t,
+          DescribeDataProvidersResponse.error) Result.t Async.Deferred.t
 val describe_endpoint_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -144,6 +261,12 @@ val describe_endpoints :
       DescribeEndpointsMessage.t ->
         (DescribeEndpointsResponse.t, DescribeEndpointsResponse.error)
           Result.t Async.Deferred.t
+val describe_engine_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeEngineVersionsMessage.t ->
+        (DescribeEngineVersionsResponse.t,
+          DescribeEngineVersionsResponse.error) Result.t Async.Deferred.t
 val describe_event_categories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -162,6 +285,115 @@ val describe_events :
       DescribeEventsMessage.t ->
         (DescribeEventsResponse.t, DescribeEventsResponse.error) Result.t
           Async.Deferred.t
+val describe_extension_pack_associations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeExtensionPackAssociationsMessage.t ->
+        (DescribeExtensionPackAssociationsResponse.t,
+          DescribeExtensionPackAssociationsResponse.error) Result.t
+          Async.Deferred.t
+val describe_fleet_advisor_collectors :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeFleetAdvisorCollectorsRequest.t ->
+        (DescribeFleetAdvisorCollectorsResponse.t,
+          DescribeFleetAdvisorCollectorsResponse.error) Result.t
+          Async.Deferred.t
+val describe_fleet_advisor_databases :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeFleetAdvisorDatabasesRequest.t ->
+        (DescribeFleetAdvisorDatabasesResponse.t,
+          DescribeFleetAdvisorDatabasesResponse.error) Result.t
+          Async.Deferred.t
+val describe_fleet_advisor_lsa_analysis :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeFleetAdvisorLsaAnalysisRequest.t ->
+        (DescribeFleetAdvisorLsaAnalysisResponse.t,
+          DescribeFleetAdvisorLsaAnalysisResponse.error) Result.t
+          Async.Deferred.t
+val describe_fleet_advisor_schema_object_summary :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeFleetAdvisorSchemaObjectSummaryRequest.t ->
+        (DescribeFleetAdvisorSchemaObjectSummaryResponse.t,
+          DescribeFleetAdvisorSchemaObjectSummaryResponse.error) Result.t
+          Async.Deferred.t
+val describe_fleet_advisor_schemas :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeFleetAdvisorSchemasRequest.t ->
+        (DescribeFleetAdvisorSchemasResponse.t,
+          DescribeFleetAdvisorSchemasResponse.error) Result.t
+          Async.Deferred.t
+val describe_instance_profiles :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeInstanceProfilesMessage.t ->
+        (DescribeInstanceProfilesResponse.t,
+          DescribeInstanceProfilesResponse.error) Result.t Async.Deferred.t
+val describe_metadata_model :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMetadataModelMessage.t ->
+        (DescribeMetadataModelResponse.t,
+          DescribeMetadataModelResponse.error) Result.t Async.Deferred.t
+val describe_metadata_model_assessments :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMetadataModelAssessmentsMessage.t ->
+        (DescribeMetadataModelAssessmentsResponse.t,
+          DescribeMetadataModelAssessmentsResponse.error) Result.t
+          Async.Deferred.t
+val describe_metadata_model_children :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMetadataModelChildrenMessage.t ->
+        (DescribeMetadataModelChildrenResponse.t,
+          DescribeMetadataModelChildrenResponse.error) Result.t
+          Async.Deferred.t
+val describe_metadata_model_conversions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMetadataModelConversionsMessage.t ->
+        (DescribeMetadataModelConversionsResponse.t,
+          DescribeMetadataModelConversionsResponse.error) Result.t
+          Async.Deferred.t
+val describe_metadata_model_creations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMetadataModelCreationsMessage.t ->
+        (DescribeMetadataModelCreationsResponse.t,
+          DescribeMetadataModelCreationsResponse.error) Result.t
+          Async.Deferred.t
+val describe_metadata_model_exports_as_script :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMetadataModelExportsAsScriptMessage.t ->
+        (DescribeMetadataModelExportsAsScriptResponse.t,
+          DescribeMetadataModelExportsAsScriptResponse.error) Result.t
+          Async.Deferred.t
+val describe_metadata_model_exports_to_target :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMetadataModelExportsToTargetMessage.t ->
+        (DescribeMetadataModelExportsToTargetResponse.t,
+          DescribeMetadataModelExportsToTargetResponse.error) Result.t
+          Async.Deferred.t
+val describe_metadata_model_imports :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMetadataModelImportsMessage.t ->
+        (DescribeMetadataModelImportsResponse.t,
+          DescribeMetadataModelImportsResponse.error) Result.t
+          Async.Deferred.t
+val describe_migration_projects :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMigrationProjectsMessage.t ->
+        (DescribeMigrationProjectsResponse.t,
+          DescribeMigrationProjectsResponse.error) Result.t Async.Deferred.t
 val describe_orderable_replication_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -176,6 +408,19 @@ val describe_pending_maintenance_actions :
         (DescribePendingMaintenanceActionsResponse.t,
           DescribePendingMaintenanceActionsResponse.error) Result.t
           Async.Deferred.t
+val describe_recommendation_limitations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeRecommendationLimitationsRequest.t ->
+        (DescribeRecommendationLimitationsResponse.t,
+          DescribeRecommendationLimitationsResponse.error) Result.t
+          Async.Deferred.t
+val describe_recommendations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeRecommendationsRequest.t ->
+        (DescribeRecommendationsResponse.t,
+          DescribeRecommendationsResponse.error) Result.t Async.Deferred.t
 val describe_refresh_schemas_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -183,6 +428,12 @@ val describe_refresh_schemas_status :
         (DescribeRefreshSchemasStatusResponse.t,
           DescribeRefreshSchemasStatusResponse.error) Result.t
           Async.Deferred.t
+val describe_replication_configs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeReplicationConfigsMessage.t ->
+        (DescribeReplicationConfigsResponse.t,
+          DescribeReplicationConfigsResponse.error) Result.t Async.Deferred.t
 val describe_replication_instance_task_logs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -203,6 +454,13 @@ val describe_replication_subnet_groups :
       DescribeReplicationSubnetGroupsMessage.t ->
         (DescribeReplicationSubnetGroupsResponse.t,
           DescribeReplicationSubnetGroupsResponse.error) Result.t
+          Async.Deferred.t
+val describe_replication_table_statistics :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeReplicationTableStatisticsMessage.t ->
+        (DescribeReplicationTableStatisticsResponse.t,
+          DescribeReplicationTableStatisticsResponse.error) Result.t
           Async.Deferred.t
 val describe_replication_task_assessment_results :
   ?endpoint_url:string ->
@@ -231,6 +489,12 @@ val describe_replication_tasks :
       DescribeReplicationTasksMessage.t ->
         (DescribeReplicationTasksResponse.t,
           DescribeReplicationTasksResponse.error) Result.t Async.Deferred.t
+val describe_replications :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeReplicationsMessage.t ->
+        (DescribeReplicationsResponse.t, DescribeReplicationsResponse.error)
+          Result.t Async.Deferred.t
 val describe_schemas :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -243,6 +507,19 @@ val describe_table_statistics :
       DescribeTableStatisticsMessage.t ->
         (DescribeTableStatisticsResponse.t,
           DescribeTableStatisticsResponse.error) Result.t Async.Deferred.t
+val export_metadata_model_assessment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ExportMetadataModelAssessmentMessage.t ->
+        (ExportMetadataModelAssessmentResponse.t,
+          ExportMetadataModelAssessmentResponse.error) Result.t
+          Async.Deferred.t
+val get_target_selection_rules :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetTargetSelectionRulesMessage.t ->
+        (GetTargetSelectionRulesResponse.t,
+          GetTargetSelectionRulesResponse.error) Result.t Async.Deferred.t
 val import_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -254,6 +531,25 @@ val list_tags_for_resource :
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceMessage.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
+val modify_conversion_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyConversionConfigurationMessage.t ->
+        (ModifyConversionConfigurationResponse.t,
+          ModifyConversionConfigurationResponse.error) Result.t
+          Async.Deferred.t
+val modify_data_migration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyDataMigrationMessage.t ->
+        (ModifyDataMigrationResponse.t, ModifyDataMigrationResponse.error)
+          Result.t Async.Deferred.t
+val modify_data_provider :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyDataProviderMessage.t ->
+        (ModifyDataProviderResponse.t, ModifyDataProviderResponse.error)
           Result.t Async.Deferred.t
 val modify_endpoint :
   ?endpoint_url:string ->
@@ -267,6 +563,24 @@ val modify_event_subscription :
       ModifyEventSubscriptionMessage.t ->
         (ModifyEventSubscriptionResponse.t,
           ModifyEventSubscriptionResponse.error) Result.t Async.Deferred.t
+val modify_instance_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyInstanceProfileMessage.t ->
+        (ModifyInstanceProfileResponse.t,
+          ModifyInstanceProfileResponse.error) Result.t Async.Deferred.t
+val modify_migration_project :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyMigrationProjectMessage.t ->
+        (ModifyMigrationProjectResponse.t,
+          ModifyMigrationProjectResponse.error) Result.t Async.Deferred.t
+val modify_replication_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyReplicationConfigMessage.t ->
+        (ModifyReplicationConfigResponse.t,
+          ModifyReplicationConfigResponse.error) Result.t Async.Deferred.t
 val modify_replication_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -304,6 +618,12 @@ val refresh_schemas :
       RefreshSchemasMessage.t ->
         (RefreshSchemasResponse.t, RefreshSchemasResponse.error) Result.t
           Async.Deferred.t
+val reload_replication_tables :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ReloadReplicationTablesMessage.t ->
+        (ReloadReplicationTablesResponse.t,
+          ReloadReplicationTablesResponse.error) Result.t Async.Deferred.t
 val reload_tables :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -316,6 +636,75 @@ val remove_tags_from_resource :
       RemoveTagsFromResourceMessage.t ->
         (RemoveTagsFromResourceResponse.t,
           RemoveTagsFromResourceResponse.error) Result.t Async.Deferred.t
+val run_fleet_advisor_lsa_analysis :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      unit ->
+        (RunFleetAdvisorLsaAnalysisResponse.t,
+          RunFleetAdvisorLsaAnalysisResponse.error) Result.t Async.Deferred.t
+val start_data_migration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartDataMigrationMessage.t ->
+        (StartDataMigrationResponse.t, StartDataMigrationResponse.error)
+          Result.t Async.Deferred.t
+val start_extension_pack_association :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartExtensionPackAssociationMessage.t ->
+        (StartExtensionPackAssociationResponse.t,
+          StartExtensionPackAssociationResponse.error) Result.t
+          Async.Deferred.t
+val start_metadata_model_assessment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartMetadataModelAssessmentMessage.t ->
+        (StartMetadataModelAssessmentResponse.t,
+          StartMetadataModelAssessmentResponse.error) Result.t
+          Async.Deferred.t
+val start_metadata_model_conversion :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartMetadataModelConversionMessage.t ->
+        (StartMetadataModelConversionResponse.t,
+          StartMetadataModelConversionResponse.error) Result.t
+          Async.Deferred.t
+val start_metadata_model_creation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartMetadataModelCreationMessage.t ->
+        (StartMetadataModelCreationResponse.t,
+          StartMetadataModelCreationResponse.error) Result.t Async.Deferred.t
+val start_metadata_model_export_as_script :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartMetadataModelExportAsScriptMessage.t ->
+        (StartMetadataModelExportAsScriptResponse.t,
+          StartMetadataModelExportAsScriptResponse.error) Result.t
+          Async.Deferred.t
+val start_metadata_model_export_to_target :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartMetadataModelExportToTargetMessage.t ->
+        (StartMetadataModelExportToTargetResponse.t,
+          StartMetadataModelExportToTargetResponse.error) Result.t
+          Async.Deferred.t
+val start_metadata_model_import :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartMetadataModelImportMessage.t ->
+        (StartMetadataModelImportResponse.t,
+          StartMetadataModelImportResponse.error) Result.t Async.Deferred.t
+val start_recommendations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartRecommendationsRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val start_replication :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartReplicationMessage.t ->
+        (StartReplicationResponse.t, StartReplicationResponse.error) Result.t
+          Async.Deferred.t
 val start_replication_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -336,6 +725,18 @@ val start_replication_task_assessment_run :
         (StartReplicationTaskAssessmentRunResponse.t,
           StartReplicationTaskAssessmentRunResponse.error) Result.t
           Async.Deferred.t
+val stop_data_migration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopDataMigrationMessage.t ->
+        (StopDataMigrationResponse.t, StopDataMigrationResponse.error)
+          Result.t Async.Deferred.t
+val stop_replication :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopReplicationMessage.t ->
+        (StopReplicationResponse.t, StopReplicationResponse.error) Result.t
+          Async.Deferred.t
 val stop_replication_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -347,4 +748,11 @@ val test_connection :
     ?cfg:Awso.Cfg.t ->
       TestConnectionMessage.t ->
         (TestConnectionResponse.t, TestConnectionResponse.error) Result.t
+          Async.Deferred.t
+val update_subscriptions_to_event_bridge :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateSubscriptionsToEventBridgeMessage.t ->
+        (UpdateSubscriptionsToEventBridgeResponse.t,
+          UpdateSubscriptionsToEventBridgeResponse.error) Result.t
           Async.Deferred.t

@@ -16,10 +16,16 @@ type ('i, 'o, 'e) t =
   DeleteNamespaceResponse.error) t 
   | DeleteService: (DeleteServiceRequest.t, DeleteServiceResponse.t,
   DeleteServiceResponse.error) t 
+  | DeleteServiceAttributes: (DeleteServiceAttributesRequest.t,
+  DeleteServiceAttributesResponse.t, DeleteServiceAttributesResponse.error) t
+  
   | DeregisterInstance: (DeregisterInstanceRequest.t,
   DeregisterInstanceResponse.t, DeregisterInstanceResponse.error) t 
   | DiscoverInstances: (DiscoverInstancesRequest.t,
   DiscoverInstancesResponse.t, DiscoverInstancesResponse.error) t 
+  | DiscoverInstancesRevision: (DiscoverInstancesRevisionRequest.t,
+  DiscoverInstancesRevisionResponse.t,
+  DiscoverInstancesRevisionResponse.error) t 
   | GetInstance: (GetInstanceRequest.t, GetInstanceResponse.t,
   GetInstanceResponse.error) t 
   | GetInstancesHealthStatus: (GetInstancesHealthStatusRequest.t,
@@ -31,6 +37,8 @@ type ('i, 'o, 'e) t =
   GetOperationResponse.error) t 
   | GetService: (GetServiceRequest.t, GetServiceResponse.t,
   GetServiceResponse.error) t 
+  | GetServiceAttributes: (GetServiceAttributesRequest.t,
+  GetServiceAttributesResponse.t, GetServiceAttributesResponse.error) t 
   | ListInstances: (ListInstancesRequest.t, ListInstancesResponse.t,
   ListInstancesResponse.error) t 
   | ListNamespaces: (ListNamespacesRequest.t, ListNamespacesResponse.t,
@@ -59,6 +67,8 @@ type ('i, 'o, 'e) t =
   t 
   | UpdateService: (UpdateServiceRequest.t, UpdateServiceResponse.t,
   UpdateServiceResponse.error) t 
+  | UpdateServiceAttributes: (UpdateServiceAttributesRequest.t,
+  UpdateServiceAttributesResponse.t, UpdateServiceAttributesResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateHttpNamespace -> `POST
@@ -67,13 +77,16 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateService -> `POST
   | DeleteNamespace -> `POST
   | DeleteService -> `POST
+  | DeleteServiceAttributes -> `POST
   | DeregisterInstance -> `POST
   | DiscoverInstances -> `POST
+  | DiscoverInstancesRevision -> `POST
   | GetInstance -> `POST
   | GetInstancesHealthStatus -> `POST
   | GetNamespace -> `POST
   | GetOperation -> `POST
   | GetService -> `POST
+  | GetServiceAttributes -> `POST
   | ListInstances -> `POST
   | ListNamespaces -> `POST
   | ListOperations -> `POST
@@ -87,6 +100,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdatePrivateDnsNamespace -> `POST
   | UpdatePublicDnsNamespace -> `POST
   | UpdateService -> `POST
+  | UpdateServiceAttributes -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -96,13 +110,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateService -> (Format.kasprintf Uri.of_string) "/"
       | DeleteNamespace -> (Format.kasprintf Uri.of_string) "/"
       | DeleteService -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteServiceAttributes -> (Format.kasprintf Uri.of_string) "/"
       | DeregisterInstance -> (Format.kasprintf Uri.of_string) "/"
       | DiscoverInstances -> (Format.kasprintf Uri.of_string) "/"
+      | DiscoverInstancesRevision -> (Format.kasprintf Uri.of_string) "/"
       | GetInstance -> (Format.kasprintf Uri.of_string) "/"
       | GetInstancesHealthStatus -> (Format.kasprintf Uri.of_string) "/"
       | GetNamespace -> (Format.kasprintf Uri.of_string) "/"
       | GetOperation -> (Format.kasprintf Uri.of_string) "/"
       | GetService -> (Format.kasprintf Uri.of_string) "/"
+      | GetServiceAttributes -> (Format.kasprintf Uri.of_string) "/"
       | ListInstances -> (Format.kasprintf Uri.of_string) "/"
       | ListNamespaces -> (Format.kasprintf Uri.of_string) "/"
       | ListOperations -> (Format.kasprintf Uri.of_string) "/"
@@ -116,7 +133,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | UpdatePrivateDnsNamespace -> (Format.kasprintf Uri.of_string) "/"
       | UpdatePublicDnsNamespace -> (Format.kasprintf Uri.of_string) "/"
-      | UpdateService -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateService -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateServiceAttributes -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -170,6 +188,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Route53AutoNaming_v20170314.DeleteService")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteServiceAttributes ->
+      let json = DeleteServiceAttributesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "Route53AutoNaming_v20170314.DeleteServiceAttributes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeregisterInstance ->
       let json = DeregisterInstanceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -185,6 +212,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Route53AutoNaming_v20170314.DiscoverInstances")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DiscoverInstancesRevision ->
+      let json = DiscoverInstancesRevisionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "Route53AutoNaming_v20170314.DiscoverInstancesRevision")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetInstance ->
       let json = GetInstanceRequest.to_json req in
@@ -226,6 +262,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Route53AutoNaming_v20170314.GetService")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetServiceAttributes ->
+      let json = GetServiceAttributesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "Route53AutoNaming_v20170314.GetServiceAttributes")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListInstances ->
       let json = ListInstancesRequest.to_json req in
@@ -334,6 +379,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Route53AutoNaming_v20170314.UpdateService")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateServiceAttributes ->
+      let json = UpdateServiceAttributesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "Route53AutoNaming_v20170314.UpdateServiceAttributes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -402,6 +456,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteServiceResponse.of_json json)
       else Error (parse_aws_error (Some DeleteServiceResponse.error_of_json))
+  | DeleteServiceAttributes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteServiceAttributesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteServiceAttributesResponse.error_of_json))
   | DeregisterInstance ->
       if is_success
       then
@@ -418,6 +481,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DiscoverInstancesResponse.error_of_json))
+  | DiscoverInstancesRevision ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DiscoverInstancesRevisionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DiscoverInstancesRevisionResponse.error_of_json))
   | GetInstance ->
       if is_success
       then
@@ -451,6 +523,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetServiceResponse.of_json json)
       else Error (parse_aws_error (Some GetServiceResponse.error_of_json))
+  | GetServiceAttributes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetServiceAttributesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetServiceAttributesResponse.error_of_json))
   | ListInstances ->
       if is_success
       then
@@ -538,3 +618,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateServiceResponse.of_json json)
       else Error (parse_aws_error (Some UpdateServiceResponse.error_of_json))
+  | UpdateServiceAttributes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateServiceAttributesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateServiceAttributesResponse.error_of_json))

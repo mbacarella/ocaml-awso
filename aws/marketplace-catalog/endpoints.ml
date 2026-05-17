@@ -2,35 +2,63 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | BatchDescribeEntities: (BatchDescribeEntitiesRequest.t,
+  BatchDescribeEntitiesResponse.t, BatchDescribeEntitiesResponse.error) t 
   | CancelChangeSet: (CancelChangeSetRequest.t, CancelChangeSetResponse.t,
   CancelChangeSetResponse.error) t 
+  | DeleteResourcePolicy: (DeleteResourcePolicyRequest.t,
+  DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error) t 
   | DescribeChangeSet: (DescribeChangeSetRequest.t,
   DescribeChangeSetResponse.t, DescribeChangeSetResponse.error) t 
   | DescribeEntity: (DescribeEntityRequest.t, DescribeEntityResponse.t,
   DescribeEntityResponse.error) t 
+  | GetResourcePolicy: (GetResourcePolicyRequest.t,
+  GetResourcePolicyResponse.t, GetResourcePolicyResponse.error) t 
   | ListChangeSets: (ListChangeSetsRequest.t, ListChangeSetsResponse.t,
   ListChangeSetsResponse.error) t 
   | ListEntities: (ListEntitiesRequest.t, ListEntitiesResponse.t,
   ListEntitiesResponse.error) t 
+  | ListTagsForResource: (ListTagsForResourceRequest.t,
+  ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | PutResourcePolicy: (PutResourcePolicyRequest.t,
+  PutResourcePolicyResponse.t, PutResourcePolicyResponse.error) t 
   | StartChangeSet: (StartChangeSetRequest.t, StartChangeSetResponse.t,
   StartChangeSetResponse.error) t 
+  | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
+  TagResourceResponse.error) t 
+  | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
+  UntagResourceResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | BatchDescribeEntities -> `POST
   | CancelChangeSet -> `PATCH
+  | DeleteResourcePolicy -> `DELETE
   | DescribeChangeSet -> `GET
   | DescribeEntity -> `GET
+  | GetResourcePolicy -> `GET
   | ListChangeSets -> `POST
   | ListEntities -> `POST
+  | ListTagsForResource -> `POST
+  | PutResourcePolicy -> `POST
   | StartChangeSet -> `POST
+  | TagResource -> `POST
+  | UntagResource -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | BatchDescribeEntities ->
+          (Format.kasprintf Uri.of_string) "/BatchDescribeEntities"
       | CancelChangeSet ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/CancelChangeSet")
             (List.filter_opt
                [Some ("catalog", (Catalog.to_header x.catalog));
                Some ("changeSetId", (ResourceId.to_header x.changeSetId))])
+      | DeleteResourcePolicy ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/DeleteResourcePolicy")
+            (List.filter_opt
+               [Some ("resourceArn", (ResourceARN.to_header x.resourceArn))])
       | DescribeChangeSet ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/DescribeChangeSet")
@@ -43,18 +71,53 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (List.filter_opt
                [Some ("catalog", (Catalog.to_header x.catalog));
                Some ("entityId", (ResourceId.to_header x.entityId))])
+      | GetResourcePolicy ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/GetResourcePolicy")
+            (List.filter_opt
+               [Some ("resourceArn", (ResourceARN.to_header x.resourceArn))])
       | ListChangeSets -> (Format.kasprintf Uri.of_string) "/ListChangeSets"
       | ListEntities -> (Format.kasprintf Uri.of_string) "/ListEntities"
-      | StartChangeSet -> (Format.kasprintf Uri.of_string) "/StartChangeSet")
+      | ListTagsForResource ->
+          (Format.kasprintf Uri.of_string) "/ListTagsForResource"
+      | PutResourcePolicy ->
+          (Format.kasprintf Uri.of_string) "/PutResourcePolicy"
+      | StartChangeSet -> (Format.kasprintf Uri.of_string) "/StartChangeSet"
+      | TagResource -> (Format.kasprintf Uri.of_string) "/TagResource"
+      | UntagResource -> (Format.kasprintf Uri.of_string) "/UntagResource")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | BatchDescribeEntities ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("EntityRequestList",
+                           (EntityRequestList.to_value
+                              req.BatchDescribeEntitiesRequest.entityRequestList))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CancelChangeSet -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteResourcePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeChangeSet ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeEntity ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetResourcePolicy ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListChangeSets ->
@@ -76,7 +139,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x -> ("Sort", (Sort.to_value x)));
                       Option.map req.ListChangeSetsRequest.maxResults
                         ~f:(fun x ->
-                              ("MaxResults", (MaxResultInteger.to_value x)));
+                              ("MaxResults",
+                                (ListChangeSetsMaxResultInteger.to_value x)));
                       Option.map req.ListChangeSetsRequest.nextToken
                         ~f:(fun x -> ("NextToken", (NextToken.to_value x)))])
                    ~f:(fun (x, y) ->
@@ -110,7 +174,62 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
                       Option.map req.ListEntitiesRequest.maxResults
                         ~f:(fun x ->
-                              ("MaxResults", (MaxResultInteger.to_value x)))])
+                              ("MaxResults",
+                                (ListEntitiesMaxResultInteger.to_value x)));
+                      Option.map req.ListEntitiesRequest.ownershipType
+                        ~f:(fun x ->
+                              ("OwnershipType", (OwnershipType.to_value x)));
+                      Option.map req.ListEntitiesRequest.entityTypeFilters
+                        ~f:(fun x ->
+                              ("EntityTypeFilters",
+                                (EntityTypeFilters.to_value x)));
+                      Option.map req.ListEntitiesRequest.entityTypeSort
+                        ~f:(fun x ->
+                              ("EntityTypeSort", (EntityTypeSort.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTagsForResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ResourceArn",
+                           (ResourceARN.to_value
+                              req.ListTagsForResourceRequest.resourceArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutResourcePolicy ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ResourceArn",
+                           (ResourceARN.to_value
+                              req.PutResourcePolicyRequest.resourceArn));
+                      Some
+                        ("Policy",
+                          (ResourcePolicyJson.to_value
+                             req.PutResourcePolicyRequest.policy))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -141,7 +260,58 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.StartChangeSetRequest.clientRequestToken
                         ~f:(fun x ->
                               ("ClientRequestToken",
-                                (ClientRequestToken.to_value x)))])
+                                (ClientRequestToken.to_value x)));
+                      Option.map req.StartChangeSetRequest.changeSetTags
+                        ~f:(fun x -> ("ChangeSetTags", (TagList.to_value x)));
+                      Option.map req.StartChangeSetRequest.intent
+                        ~f:(fun x -> ("Intent", (Intent.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | TagResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ResourceArn",
+                           (ResourceARN.to_value
+                              req.TagResourceRequest.resourceArn));
+                      Some
+                        ("Tags",
+                          (TagList.to_value req.TagResourceRequest.tags))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UntagResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ResourceArn",
+                           (ResourceARN.to_value
+                              req.UntagResourceRequest.resourceArn));
+                      Some
+                        ("TagKeys",
+                          (TagKeyList.to_value
+                             req.UntagResourceRequest.tagKeys))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -197,11 +367,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | BatchDescribeEntities ->
+      if is_success
+      then Ok (BatchDescribeEntitiesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some BatchDescribeEntitiesResponse.error_of_json))
   | CancelChangeSet ->
       if is_success
       then Ok (CancelChangeSetResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some CancelChangeSetResponse.error_of_json))
+  | DeleteResourcePolicy ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteResourcePolicyResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteResourcePolicyResponse.error_of_json))
   | DescribeChangeSet ->
       if is_success
       then Ok (DescribeChangeSetResponse.of_json (response_to_json resp))
@@ -213,6 +398,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (DescribeEntityResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DescribeEntityResponse.error_of_json))
+  | GetResourcePolicy ->
+      if is_success
+      then Ok (GetResourcePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetResourcePolicyResponse.error_of_json))
   | ListChangeSets ->
       if is_success
       then Ok (ListChangeSetsResponse.of_json (response_to_json resp))
@@ -222,8 +413,37 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListEntitiesResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListEntitiesResponse.error_of_json))
+  | ListTagsForResource ->
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | PutResourcePolicy ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutResourcePolicyResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some PutResourcePolicyResponse.error_of_json))
   | StartChangeSet ->
       if is_success
       then Ok (StartChangeSetResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some StartChangeSetResponse.error_of_json))
+  | TagResource ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
+  | UntagResource ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))

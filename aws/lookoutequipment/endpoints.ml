@@ -7,12 +7,24 @@ type ('i, 'o, 'e) t =
   | CreateInferenceScheduler: (CreateInferenceSchedulerRequest.t,
   CreateInferenceSchedulerResponse.t, CreateInferenceSchedulerResponse.error)
   t 
+  | CreateLabel: (CreateLabelRequest.t, CreateLabelResponse.t,
+  CreateLabelResponse.error) t 
+  | CreateLabelGroup: (CreateLabelGroupRequest.t, CreateLabelGroupResponse.t,
+  CreateLabelGroupResponse.error) t 
   | CreateModel: (CreateModelRequest.t, CreateModelResponse.t,
   CreateModelResponse.error) t 
+  | CreateRetrainingScheduler: (CreateRetrainingSchedulerRequest.t,
+  CreateRetrainingSchedulerResponse.t,
+  CreateRetrainingSchedulerResponse.error) t 
   | DeleteDataset: (DeleteDatasetRequest.t, unit, unit) t 
   | DeleteInferenceScheduler: (DeleteInferenceSchedulerRequest.t, unit, 
   unit) t 
+  | DeleteLabel: (DeleteLabelRequest.t, unit, unit) t 
+  | DeleteLabelGroup: (DeleteLabelGroupRequest.t, unit, unit) t 
   | DeleteModel: (DeleteModelRequest.t, unit, unit) t 
+  | DeleteResourcePolicy: (DeleteResourcePolicyRequest.t, unit, unit) t 
+  | DeleteRetrainingScheduler: (DeleteRetrainingSchedulerRequest.t, unit,
+  unit) t 
   | DescribeDataIngestionJob: (DescribeDataIngestionJobRequest.t,
   DescribeDataIngestionJobResponse.t, DescribeDataIngestionJobResponse.error)
   t 
@@ -21,84 +33,181 @@ type ('i, 'o, 'e) t =
   | DescribeInferenceScheduler: (DescribeInferenceSchedulerRequest.t,
   DescribeInferenceSchedulerResponse.t,
   DescribeInferenceSchedulerResponse.error) t 
+  | DescribeLabel: (DescribeLabelRequest.t, DescribeLabelResponse.t,
+  DescribeLabelResponse.error) t 
+  | DescribeLabelGroup: (DescribeLabelGroupRequest.t,
+  DescribeLabelGroupResponse.t, DescribeLabelGroupResponse.error) t 
   | DescribeModel: (DescribeModelRequest.t, DescribeModelResponse.t,
   DescribeModelResponse.error) t 
+  | DescribeModelVersion: (DescribeModelVersionRequest.t,
+  DescribeModelVersionResponse.t, DescribeModelVersionResponse.error) t 
+  | DescribeResourcePolicy: (DescribeResourcePolicyRequest.t,
+  DescribeResourcePolicyResponse.t, DescribeResourcePolicyResponse.error) t 
+  | DescribeRetrainingScheduler: (DescribeRetrainingSchedulerRequest.t,
+  DescribeRetrainingSchedulerResponse.t,
+  DescribeRetrainingSchedulerResponse.error) t 
+  | ImportDataset: (ImportDatasetRequest.t, ImportDatasetResponse.t,
+  ImportDatasetResponse.error) t 
+  | ImportModelVersion: (ImportModelVersionRequest.t,
+  ImportModelVersionResponse.t, ImportModelVersionResponse.error) t 
   | ListDataIngestionJobs: (ListDataIngestionJobsRequest.t,
   ListDataIngestionJobsResponse.t, ListDataIngestionJobsResponse.error) t 
   | ListDatasets: (ListDatasetsRequest.t, ListDatasetsResponse.t,
   ListDatasetsResponse.error) t 
+  | ListInferenceEvents: (ListInferenceEventsRequest.t,
+  ListInferenceEventsResponse.t, ListInferenceEventsResponse.error) t 
   | ListInferenceExecutions: (ListInferenceExecutionsRequest.t,
   ListInferenceExecutionsResponse.t, ListInferenceExecutionsResponse.error) t
   
   | ListInferenceSchedulers: (ListInferenceSchedulersRequest.t,
   ListInferenceSchedulersResponse.t, ListInferenceSchedulersResponse.error) t
   
+  | ListLabelGroups: (ListLabelGroupsRequest.t, ListLabelGroupsResponse.t,
+  ListLabelGroupsResponse.error) t 
+  | ListLabels: (ListLabelsRequest.t, ListLabelsResponse.t,
+  ListLabelsResponse.error) t 
+  | ListModelVersions: (ListModelVersionsRequest.t,
+  ListModelVersionsResponse.t, ListModelVersionsResponse.error) t 
   | ListModels: (ListModelsRequest.t, ListModelsResponse.t,
   ListModelsResponse.error) t 
+  | ListRetrainingSchedulers: (ListRetrainingSchedulersRequest.t,
+  ListRetrainingSchedulersResponse.t, ListRetrainingSchedulersResponse.error)
+  t 
+  | ListSensorStatistics: (ListSensorStatisticsRequest.t,
+  ListSensorStatisticsResponse.t, ListSensorStatisticsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | PutResourcePolicy: (PutResourcePolicyRequest.t,
+  PutResourcePolicyResponse.t, PutResourcePolicyResponse.error) t 
   | StartDataIngestionJob: (StartDataIngestionJobRequest.t,
   StartDataIngestionJobResponse.t, StartDataIngestionJobResponse.error) t 
   | StartInferenceScheduler: (StartInferenceSchedulerRequest.t,
   StartInferenceSchedulerResponse.t, StartInferenceSchedulerResponse.error) t
   
+  | StartRetrainingScheduler: (StartRetrainingSchedulerRequest.t,
+  StartRetrainingSchedulerResponse.t, StartRetrainingSchedulerResponse.error)
+  t 
   | StopInferenceScheduler: (StopInferenceSchedulerRequest.t,
   StopInferenceSchedulerResponse.t, StopInferenceSchedulerResponse.error) t 
+  | StopRetrainingScheduler: (StopRetrainingSchedulerRequest.t,
+  StopRetrainingSchedulerResponse.t, StopRetrainingSchedulerResponse.error) t
+  
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateActiveModelVersion: (UpdateActiveModelVersionRequest.t,
+  UpdateActiveModelVersionResponse.t, UpdateActiveModelVersionResponse.error)
+  t 
   | UpdateInferenceScheduler: (UpdateInferenceSchedulerRequest.t, unit, 
+  unit) t 
+  | UpdateLabelGroup: (UpdateLabelGroupRequest.t, unit, unit) t 
+  | UpdateModel: (UpdateModelRequest.t, unit, unit) t 
+  | UpdateRetrainingScheduler: (UpdateRetrainingSchedulerRequest.t, unit,
   unit) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateDataset -> `POST
   | CreateInferenceScheduler -> `POST
+  | CreateLabel -> `POST
+  | CreateLabelGroup -> `POST
   | CreateModel -> `POST
+  | CreateRetrainingScheduler -> `POST
   | DeleteDataset -> `POST
   | DeleteInferenceScheduler -> `POST
+  | DeleteLabel -> `POST
+  | DeleteLabelGroup -> `POST
   | DeleteModel -> `POST
+  | DeleteResourcePolicy -> `POST
+  | DeleteRetrainingScheduler -> `POST
   | DescribeDataIngestionJob -> `POST
   | DescribeDataset -> `POST
   | DescribeInferenceScheduler -> `POST
+  | DescribeLabel -> `POST
+  | DescribeLabelGroup -> `POST
   | DescribeModel -> `POST
+  | DescribeModelVersion -> `POST
+  | DescribeResourcePolicy -> `POST
+  | DescribeRetrainingScheduler -> `POST
+  | ImportDataset -> `POST
+  | ImportModelVersion -> `POST
   | ListDataIngestionJobs -> `POST
   | ListDatasets -> `POST
+  | ListInferenceEvents -> `POST
   | ListInferenceExecutions -> `POST
   | ListInferenceSchedulers -> `POST
+  | ListLabelGroups -> `POST
+  | ListLabels -> `POST
+  | ListModelVersions -> `POST
   | ListModels -> `POST
+  | ListRetrainingSchedulers -> `POST
+  | ListSensorStatistics -> `POST
   | ListTagsForResource -> `POST
+  | PutResourcePolicy -> `POST
   | StartDataIngestionJob -> `POST
   | StartInferenceScheduler -> `POST
+  | StartRetrainingScheduler -> `POST
   | StopInferenceScheduler -> `POST
+  | StopRetrainingScheduler -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
+  | UpdateActiveModelVersion -> `POST
   | UpdateInferenceScheduler -> `POST
+  | UpdateLabelGroup -> `POST
+  | UpdateModel -> `POST
+  | UpdateRetrainingScheduler -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | CreateDataset -> (Format.kasprintf Uri.of_string) "/"
       | CreateInferenceScheduler -> (Format.kasprintf Uri.of_string) "/"
+      | CreateLabel -> (Format.kasprintf Uri.of_string) "/"
+      | CreateLabelGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateModel -> (Format.kasprintf Uri.of_string) "/"
+      | CreateRetrainingScheduler -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDataset -> (Format.kasprintf Uri.of_string) "/"
       | DeleteInferenceScheduler -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteLabel -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteLabelGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteModel -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteRetrainingScheduler -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDataIngestionJob -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDataset -> (Format.kasprintf Uri.of_string) "/"
       | DescribeInferenceScheduler -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeLabel -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeLabelGroup -> (Format.kasprintf Uri.of_string) "/"
       | DescribeModel -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeModelVersion -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeRetrainingScheduler -> (Format.kasprintf Uri.of_string) "/"
+      | ImportDataset -> (Format.kasprintf Uri.of_string) "/"
+      | ImportModelVersion -> (Format.kasprintf Uri.of_string) "/"
       | ListDataIngestionJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListDatasets -> (Format.kasprintf Uri.of_string) "/"
+      | ListInferenceEvents -> (Format.kasprintf Uri.of_string) "/"
       | ListInferenceExecutions -> (Format.kasprintf Uri.of_string) "/"
       | ListInferenceSchedulers -> (Format.kasprintf Uri.of_string) "/"
+      | ListLabelGroups -> (Format.kasprintf Uri.of_string) "/"
+      | ListLabels -> (Format.kasprintf Uri.of_string) "/"
+      | ListModelVersions -> (Format.kasprintf Uri.of_string) "/"
       | ListModels -> (Format.kasprintf Uri.of_string) "/"
+      | ListRetrainingSchedulers -> (Format.kasprintf Uri.of_string) "/"
+      | ListSensorStatistics -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | PutResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | StartDataIngestionJob -> (Format.kasprintf Uri.of_string) "/"
       | StartInferenceScheduler -> (Format.kasprintf Uri.of_string) "/"
+      | StartRetrainingScheduler -> (Format.kasprintf Uri.of_string) "/"
       | StopInferenceScheduler -> (Format.kasprintf Uri.of_string) "/"
+      | StopRetrainingScheduler -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
-      | UpdateInferenceScheduler -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateActiveModelVersion -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateInferenceScheduler -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateLabelGroup -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateModel -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateRetrainingScheduler -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -120,6 +229,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSLookoutEquipmentFrontendService.CreateInferenceScheduler")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateLabel ->
+      let json = CreateLabelRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSLookoutEquipmentFrontendService.CreateLabel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateLabelGroup ->
+      let json = CreateLabelGroupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.CreateLabelGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateModel ->
       let json = CreateModelRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -127,6 +253,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AWSLookoutEquipmentFrontendService.CreateModel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateRetrainingScheduler ->
+      let json = CreateRetrainingSchedulerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.CreateRetrainingScheduler")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteDataset ->
       let json = DeleteDatasetRequest.to_json req in
@@ -146,6 +281,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSLookoutEquipmentFrontendService.DeleteInferenceScheduler")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteLabel ->
+      let json = DeleteLabelRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSLookoutEquipmentFrontendService.DeleteLabel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteLabelGroup ->
+      let json = DeleteLabelGroupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.DeleteLabelGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteModel ->
       let json = DeleteModelRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -153,6 +305,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AWSLookoutEquipmentFrontendService.DeleteModel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteResourcePolicy ->
+      let json = DeleteResourcePolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.DeleteResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteRetrainingScheduler ->
+      let json = DeleteRetrainingSchedulerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.DeleteRetrainingScheduler")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeDataIngestionJob ->
       let json = DescribeDataIngestionJobRequest.to_json req in
@@ -181,6 +351,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSLookoutEquipmentFrontendService.DescribeInferenceScheduler")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeLabel ->
+      let json = DescribeLabelRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.DescribeLabel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeLabelGroup ->
+      let json = DescribeLabelGroupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.DescribeLabelGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeModel ->
       let json = DescribeModelRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -189,6 +377,51 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "AWSLookoutEquipmentFrontendService.DescribeModel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeModelVersion ->
+      let json = DescribeModelVersionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.DescribeModelVersion")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeResourcePolicy ->
+      let json = DescribeResourcePolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.DescribeResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeRetrainingScheduler ->
+      let json = DescribeRetrainingSchedulerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.DescribeRetrainingScheduler")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ImportDataset ->
+      let json = ImportDatasetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.ImportDataset")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ImportModelVersion ->
+      let json = ImportModelVersionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.ImportModelVersion")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListDataIngestionJobs ->
       let json = ListDataIngestionJobsRequest.to_json req in
@@ -206,6 +439,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AWSLookoutEquipmentFrontendService.ListDatasets")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListInferenceEvents ->
+      let json = ListInferenceEventsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.ListInferenceEvents")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListInferenceExecutions ->
       let json = ListInferenceExecutionsRequest.to_json req in
@@ -225,6 +467,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSLookoutEquipmentFrontendService.ListInferenceSchedulers")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListLabelGroups ->
+      let json = ListLabelGroupsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.ListLabelGroups")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListLabels ->
+      let json = ListLabelsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSLookoutEquipmentFrontendService.ListLabels")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListModelVersions ->
+      let json = ListModelVersionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.ListModelVersions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListModels ->
       let json = ListModelsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -232,6 +500,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AWSLookoutEquipmentFrontendService.ListModels")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListRetrainingSchedulers ->
+      let json = ListRetrainingSchedulersRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.ListRetrainingSchedulers")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListSensorStatistics ->
+      let json = ListSensorStatisticsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.ListSensorStatistics")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTagsForResource ->
       let json = ListTagsForResourceRequest.to_json req in
@@ -241,6 +527,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "AWSLookoutEquipmentFrontendService.ListTagsForResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutResourcePolicy ->
+      let json = PutResourcePolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.PutResourcePolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartDataIngestionJob ->
       let json = StartDataIngestionJobRequest.to_json req in
@@ -260,6 +555,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSLookoutEquipmentFrontendService.StartInferenceScheduler")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartRetrainingScheduler ->
+      let json = StartRetrainingSchedulerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.StartRetrainingScheduler")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopInferenceScheduler ->
       let json = StopInferenceSchedulerRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -268,6 +572,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "AWSLookoutEquipmentFrontendService.StopInferenceScheduler")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopRetrainingScheduler ->
+      let json = StopRetrainingSchedulerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.StopRetrainingScheduler")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TagResource ->
       let json = TagResourceRequest.to_json req in
@@ -286,6 +599,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSLookoutEquipmentFrontendService.UntagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateActiveModelVersion ->
+      let json = UpdateActiveModelVersionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.UpdateActiveModelVersion")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateInferenceScheduler ->
       let json = UpdateInferenceSchedulerRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -294,6 +616,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "AWSLookoutEquipmentFrontendService.UpdateInferenceScheduler")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateLabelGroup ->
+      let json = UpdateLabelGroupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.UpdateLabelGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateModel ->
+      let json = UpdateModelRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSLookoutEquipmentFrontendService.UpdateModel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateRetrainingScheduler ->
+      let json = UpdateRetrainingSchedulerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AWSLookoutEquipmentFrontendService.UpdateRetrainingScheduler")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -333,17 +681,46 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateInferenceSchedulerResponse.error_of_json))
+  | CreateLabel ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateLabelResponse.of_json json)
+      else Error (parse_aws_error (Some CreateLabelResponse.error_of_json))
+  | CreateLabelGroup ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateLabelGroupResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateLabelGroupResponse.error_of_json))
   | CreateModel ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateModelResponse.of_json json)
       else Error (parse_aws_error (Some CreateModelResponse.error_of_json))
+  | CreateRetrainingScheduler ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateRetrainingSchedulerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateRetrainingSchedulerResponse.error_of_json))
   | DeleteDataset ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteInferenceScheduler ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteLabel -> if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteLabelGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteModel -> if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteResourcePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteRetrainingScheduler ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeDataIngestionJob ->
       if is_success
       then
@@ -369,12 +746,66 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeInferenceSchedulerResponse.error_of_json))
+  | DescribeLabel ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeLabelResponse.of_json json)
+      else Error (parse_aws_error (Some DescribeLabelResponse.error_of_json))
+  | DescribeLabelGroup ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeLabelGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeLabelGroupResponse.error_of_json))
   | DescribeModel ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeModelResponse.of_json json)
       else Error (parse_aws_error (Some DescribeModelResponse.error_of_json))
+  | DescribeModelVersion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeModelVersionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeModelVersionResponse.error_of_json))
+  | DescribeResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeResourcePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeResourcePolicyResponse.error_of_json))
+  | DescribeRetrainingScheduler ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRetrainingSchedulerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRetrainingSchedulerResponse.error_of_json))
+  | ImportDataset ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ImportDatasetResponse.of_json json)
+      else Error (parse_aws_error (Some ImportDatasetResponse.error_of_json))
+  | ImportModelVersion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ImportModelVersionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ImportModelVersionResponse.error_of_json))
   | ListDataIngestionJobs ->
       if is_success
       then
@@ -389,6 +820,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListDatasetsResponse.of_json json)
       else Error (parse_aws_error (Some ListDatasetsResponse.error_of_json))
+  | ListInferenceEvents ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListInferenceEventsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListInferenceEventsResponse.error_of_json))
   | ListInferenceExecutions ->
       if is_success
       then
@@ -407,12 +846,50 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListInferenceSchedulersResponse.error_of_json))
+  | ListLabelGroups ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLabelGroupsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListLabelGroupsResponse.error_of_json))
+  | ListLabels ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLabelsResponse.of_json json)
+      else Error (parse_aws_error (Some ListLabelsResponse.error_of_json))
+  | ListModelVersions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListModelVersionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListModelVersionsResponse.error_of_json))
   | ListModels ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListModelsResponse.of_json json)
       else Error (parse_aws_error (Some ListModelsResponse.error_of_json))
+  | ListRetrainingSchedulers ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRetrainingSchedulersResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListRetrainingSchedulersResponse.error_of_json))
+  | ListSensorStatistics ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListSensorStatisticsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListSensorStatisticsResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then
@@ -421,6 +898,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | PutResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutResourcePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutResourcePolicyResponse.error_of_json))
   | StartDataIngestionJob ->
       if is_success
       then
@@ -438,6 +923,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some StartInferenceSchedulerResponse.error_of_json))
+  | StartRetrainingScheduler ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartRetrainingSchedulerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartRetrainingSchedulerResponse.error_of_json))
   | StopInferenceScheduler ->
       if is_success
       then
@@ -447,6 +941,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some StopInferenceSchedulerResponse.error_of_json))
+  | StopRetrainingScheduler ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopRetrainingSchedulerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StopRetrainingSchedulerResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -459,5 +962,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UntagResourceResponse.of_json json)
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateActiveModelVersion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateActiveModelVersionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateActiveModelVersionResponse.error_of_json))
   | UpdateInferenceScheduler ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateLabelGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateModel -> if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateRetrainingScheduler ->
       if is_success then Ok () else Error (parse_aws_error None)

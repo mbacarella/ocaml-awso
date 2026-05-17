@@ -13,40 +13,92 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let create_access ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAccess input
+let create_agreement ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAgreement input
+let create_connector ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateConnector input
+let create_profile ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateProfile input
 let create_server ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateServer input
 let create_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateUser input
+let create_web_app ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateWebApp input
 let create_workflow ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateWorkflow input
 let delete_access ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAccess input
+let delete_agreement ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAgreement input
+let delete_certificate ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCertificate input
+let delete_connector ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteConnector input
+let delete_host_key ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteHostKey input
+let delete_profile ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteProfile input
 let delete_server ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteServer input
 let delete_ssh_public_key ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteSshPublicKey input
 let delete_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteUser input
+let delete_web_app ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteWebApp input
+let delete_web_app_customization ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteWebAppCustomization input
 let delete_workflow ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteWorkflow input
 let describe_access ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAccess input
+let describe_agreement ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAgreement input
+let describe_certificate ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCertificate input
+let describe_connector ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeConnector input
 let describe_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeExecution input
+let describe_host_key ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeHostKey input
+let describe_profile ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeProfile input
 let describe_security_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSecurityPolicy input
 let describe_server ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeServer input
 let describe_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeUser input
+let describe_web_app ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeWebApp input
+let describe_web_app_customization ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeWebAppCustomization input
 let describe_workflow ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeWorkflow input
+let import_certificate ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ImportCertificate input
+let import_host_key ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ImportHostKey input
 let import_ssh_public_key ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ImportSshPublicKey input
 let list_accesses ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAccesses input
+let list_agreements ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAgreements input
+let list_certificates ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCertificates input
+let list_connectors ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListConnectors input
 let list_executions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListExecutions input
+let list_file_transfer_results ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListFileTransferResults input
+let list_host_keys ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListHostKeys input
+let list_profiles ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListProfiles input
 let list_security_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListSecurityPolicies input
 let list_servers ?endpoint_url ?cfg input =
@@ -55,23 +107,49 @@ let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let list_users ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListUsers input
+let list_web_apps ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListWebApps input
 let list_workflows ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListWorkflows input
 let send_workflow_step_state ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SendWorkflowStepState input
+let start_directory_listing ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartDirectoryListing input
+let start_file_transfer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartFileTransfer input
+let start_remote_delete ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartRemoteDelete input
+let start_remote_move ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartRemoteMove input
 let start_server ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartServer input
 let stop_server ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopServer input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
+let test_connection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TestConnection input
 let test_identity_provider ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TestIdentityProvider input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_access ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAccess input
+let update_agreement ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAgreement input
+let update_certificate ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateCertificate input
+let update_connector ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateConnector input
+let update_host_key ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateHostKey input
+let update_profile ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateProfile input
 let update_server ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateServer input
 let update_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateUser input
+let update_web_app ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateWebApp input
+let update_web_app_customization ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateWebAppCustomization input

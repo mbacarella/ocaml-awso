@@ -161,6 +161,9 @@ let create_firewall_rule =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and firewallDomainListId =
+         flag "firewall-domain-list-id" (optional string)
+           ~doc:"STRING ResourceId"
        and blockResponse =
          flag "block-response" (optional json_arg) ~doc:"JSON BlockResponse"
        and blockOverrideDomain =
@@ -171,14 +174,21 @@ let create_firewall_rule =
            ~doc:"JSON BlockOverrideDnsType"
        and blockOverrideTtl =
          flag "block-override-ttl" (optional int) ~doc:"INT BlockOverrideTtl"
+       and firewallDomainRedirectionAction =
+         flag "firewall-domain-redirection-action" (optional json_arg)
+           ~doc:"JSON FirewallDomainRedirectionAction"
+       and qtype = flag "qtype" (optional string) ~doc:"STRING Qtype"
+       and dnsThreatProtection =
+         flag "dns-threat-protection" (optional json_arg)
+           ~doc:"JSON DnsThreatProtection"
+       and confidenceThreshold =
+         flag "confidence-threshold" (optional json_arg)
+           ~doc:"JSON ConfidenceThreshold"
        and creatorRequestId =
          flag "creator-request-id" (required string)
            ~doc:"STRING CreatorRequestId"
        and firewallRuleGroupId =
          flag "firewall-rule-group-id" (required string)
-           ~doc:"STRING ResourceId"
-       and firewallDomainListId =
-         flag "firewall-domain-list-id" (required string)
            ~doc:"STRING ResourceId"
        and priority = flag "priority" (required int) ~doc:"INT Priority"
        and action = flag "action" (required json_arg) ~doc:"JSON Action"
@@ -186,14 +196,24 @@ let create_firewall_rule =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_firewall_rule
-           (Values.CreateFirewallRuleRequest.make
+           (Values.CreateFirewallRuleRequest.make ?firewallDomainListId
               ?blockResponse:(Option.map ~f:Values.BlockResponse.of_json
                                 blockResponse) ?blockOverrideDomain
               ?blockOverrideDnsType:(Option.map
                                        ~f:Values.BlockOverrideDnsType.of_json
                                        blockOverrideDnsType)
-              ?blockOverrideTtl ~creatorRequestId ~firewallRuleGroupId
-              ~firewallDomainListId ~priority
+              ?blockOverrideTtl
+              ?firewallDomainRedirectionAction:(Option.map
+                                                  ~f:Values.FirewallDomainRedirectionAction.of_json
+                                                  firewallDomainRedirectionAction)
+              ?qtype
+              ?dnsThreatProtection:(Option.map
+                                      ~f:Values.DnsThreatProtection.of_json
+                                      dnsThreatProtection)
+              ?confidenceThreshold:(Option.map
+                                      ~f:Values.ConfidenceThreshold.of_json
+                                      confidenceThreshold) ~creatorRequestId
+              ~firewallRuleGroupId ~priority
               ~action:(Values.Action.of_json action) ~name ())
            (Some Values.CreateFirewallRuleResponse.to_json)
            (Some Values.CreateFirewallRuleResponse.error_to_json)])
@@ -220,6 +240,37 @@ let create_firewall_rule_group =
               ~creatorRequestId ~name ())
            (Some Values.CreateFirewallRuleGroupResponse.to_json)
            (Some Values.CreateFirewallRuleGroupResponse.error_to_json)])
+let create_outpost_resolver =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceCount =
+         flag "instance-count" (optional int) ~doc:"INT InstanceCount"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and creatorRequestId =
+         flag "creator-request-id" (required string)
+           ~doc:"STRING CreatorRequestId"
+       and name =
+         flag "name" (required string) ~doc:"STRING OutpostResolverName"
+       and preferredInstanceType =
+         flag "preferred-instance-type" (required string)
+           ~doc:"STRING OutpostInstanceType"
+       and outpostArn =
+         flag "outpost-arn" (required string) ~doc:"STRING OutpostArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_outpost_resolver
+           (Values.CreateOutpostResolverRequest.make ?instanceCount
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~creatorRequestId ~name ~preferredInstanceType ~outpostArn ())
+           (Some Values.CreateOutpostResolverResponse.to_json)
+           (Some Values.CreateOutpostResolverResponse.error_to_json)])
 let create_resolver_endpoint =
   Command.async ~summary:""
     ([%map_open.Command
@@ -231,7 +282,28 @@ let create_resolver_endpoint =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and name = flag "name" (optional string) ~doc:"STRING Name"
+       and outpostArn =
+         flag "outpost-arn" (optional string) ~doc:"STRING OutpostArn"
+       and preferredInstanceType =
+         flag "preferred-instance-type" (optional string)
+           ~doc:"STRING OutpostInstanceType"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and resolverEndpointType =
+         flag "resolver-endpoint-type" (optional json_arg)
+           ~doc:"JSON ResolverEndpointType"
+       and protocols =
+         flag "protocols" (optional json_arg) ~doc:"JSON ProtocolList"
+       and rniEnhancedMetricsEnabled =
+         flag "rni-enhanced-metrics-enabled" (optional bool)
+           ~doc:"BOOL RniEnhancedMetricsEnabled"
+       and targetNameServerMetricsEnabled =
+         flag "target-name-server-metrics-enabled" (optional bool)
+           ~doc:"BOOL TargetNameServerMetricsEnabled"
+       and dns64Enabled =
+         flag "dns64-enabled" (optional bool) ~doc:"BOOL Dns64Enabled"
+       and ipv6InternetAccessEnabled =
+         flag "ipv6-internet-access-enabled" (optional bool)
+           ~doc:"BOOL Ipv6InternetAccessEnabled"
        and creatorRequestId =
          flag "creator-request-id" (required string)
            ~doc:"STRING CreatorRequestId"
@@ -247,9 +319,15 @@ let create_resolver_endpoint =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_resolver_endpoint
-           (Values.CreateResolverEndpointRequest.make ?name
+           (Values.CreateResolverEndpointRequest.make ?name ?outpostArn
+              ?preferredInstanceType
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ~creatorRequestId
+              ?resolverEndpointType:(Option.map
+                                       ~f:Values.ResolverEndpointType.of_json
+                                       resolverEndpointType)
+              ?protocols:(Option.map ~f:Values.ProtocolList.of_json protocols)
+              ?rniEnhancedMetricsEnabled ?targetNameServerMetricsEnabled
+              ?dns64Enabled ?ipv6InternetAccessEnabled ~creatorRequestId
               ~securityGroupIds:(Values.SecurityGroupIds.of_json
                                    securityGroupIds)
               ~direction:(Values.ResolverEndpointDirection.of_json direction)
@@ -295,29 +373,32 @@ let create_resolver_rule =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and name = flag "name" (optional string) ~doc:"STRING Name"
+       and domainName =
+         flag "domain-name" (optional string) ~doc:"STRING DomainName"
        and targetIps =
          flag "target-ips" (optional json_arg) ~doc:"JSON TargetList"
        and resolverEndpointId =
          flag "resolver-endpoint-id" (optional string)
            ~doc:"STRING ResourceId"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and delegationRecord =
+         flag "delegation-record" (optional string)
+           ~doc:"STRING DelegationRecord"
        and creatorRequestId =
          flag "creator-request-id" (required string)
            ~doc:"STRING CreatorRequestId"
        and ruleType =
-         flag "rule-type" (required json_arg) ~doc:"JSON RuleTypeOption"
-       and domainName =
-         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+         flag "rule-type" (required json_arg) ~doc:"JSON RuleTypeOption" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_resolver_rule
-           (Values.CreateResolverRuleRequest.make ?name
+           (Values.CreateResolverRuleRequest.make ?name ?domainName
               ?targetIps:(Option.map ~f:Values.TargetList.of_json targetIps)
               ?resolverEndpointId
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ~creatorRequestId
-              ~ruleType:(Values.RuleTypeOption.of_json ruleType) ~domainName
-              ()) (Some Values.CreateResolverRuleResponse.to_json)
+              ?delegationRecord ~creatorRequestId
+              ~ruleType:(Values.RuleTypeOption.of_json ruleType) ())
+           (Some Values.CreateResolverRuleResponse.to_json)
            (Some Values.CreateResolverRuleResponse.error_to_json)])
 let delete_firewall_domain_list =
   Command.async ~summary:""
@@ -348,17 +429,21 @@ let delete_firewall_rule =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and firewallDomainListId =
+         flag "firewall-domain-list-id" (optional string)
+           ~doc:"STRING ResourceId"
+       and firewallThreatProtectionId =
+         flag "firewall-threat-protection-id" (optional string)
+           ~doc:"STRING ResourceId"
+       and qtype = flag "qtype" (optional string) ~doc:"STRING Qtype"
        and firewallRuleGroupId =
          flag "firewall-rule-group-id" (required string)
-           ~doc:"STRING ResourceId"
-       and firewallDomainListId =
-         flag "firewall-domain-list-id" (required string)
            ~doc:"STRING ResourceId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_firewall_rule
-           (Values.DeleteFirewallRuleRequest.make ~firewallRuleGroupId
-              ~firewallDomainListId ())
+           (Values.DeleteFirewallRuleRequest.make ?firewallDomainListId
+              ?firewallThreatProtectionId ?qtype ~firewallRuleGroupId ())
            (Some Values.DeleteFirewallRuleResponse.to_json)
            (Some Values.DeleteFirewallRuleResponse.error_to_json)])
 let delete_firewall_rule_group =
@@ -380,6 +465,23 @@ let delete_firewall_rule_group =
            (Values.DeleteFirewallRuleGroupRequest.make ~firewallRuleGroupId
               ()) (Some Values.DeleteFirewallRuleGroupResponse.to_json)
            (Some Values.DeleteFirewallRuleGroupResponse.error_to_json)])
+let delete_outpost_resolver =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING ResourceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_outpost_resolver
+           (Values.DeleteOutpostResolverRequest.make ~id ())
+           (Some Values.DeleteOutpostResolverResponse.to_json)
+           (Some Values.DeleteOutpostResolverResponse.error_to_json)])
 let delete_resolver_endpoint =
   Command.async ~summary:""
     ([%map_open.Command
@@ -617,6 +719,23 @@ let get_firewall_rule_group_policy =
            (Values.GetFirewallRuleGroupPolicyRequest.make ~arn ())
            (Some Values.GetFirewallRuleGroupPolicyResponse.to_json)
            (Some Values.GetFirewallRuleGroupPolicyResponse.error_to_json)])
+let get_outpost_resolver =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING ResourceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_outpost_resolver
+           (Values.GetOutpostResolverRequest.make ~id ())
+           (Some Values.GetOutpostResolverResponse.to_json)
+           (Some Values.GetOutpostResolverResponse.error_to_json)])
 let get_resolver_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -957,6 +1076,29 @@ let list_firewall_rules =
               ?maxResults ?nextToken ~firewallRuleGroupId ())
            (Some Values.ListFirewallRulesResponse.to_json)
            (Some Values.ListFirewallRulesResponse.error_to_json)])
+let list_outpost_resolvers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and outpostArn =
+         flag "outpost-arn" (optional string) ~doc:"STRING OutpostArn"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_outpost_resolvers
+           (Values.ListOutpostResolversRequest.make ?outpostArn ?maxResults
+              ?nextToken ())
+           (Some Values.ListOutpostResolversResponse.to_json)
+           (Some Values.ListOutpostResolversResponse.error_to_json)])
 let list_resolver_configs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1335,6 +1477,12 @@ let update_firewall_rule =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and firewallDomainListId =
+         flag "firewall-domain-list-id" (optional string)
+           ~doc:"STRING ResourceId"
+       and firewallThreatProtectionId =
+         flag "firewall-threat-protection-id" (optional string)
+           ~doc:"STRING ResourceId"
        and priority = flag "priority" (optional int) ~doc:"INT Priority"
        and action = flag "action" (optional json_arg) ~doc:"JSON Action"
        and blockResponse =
@@ -1348,24 +1496,42 @@ let update_firewall_rule =
        and blockOverrideTtl =
          flag "block-override-ttl" (optional int) ~doc:"INT BlockOverrideTtl"
        and name = flag "name" (optional string) ~doc:"STRING Name"
+       and firewallDomainRedirectionAction =
+         flag "firewall-domain-redirection-action" (optional json_arg)
+           ~doc:"JSON FirewallDomainRedirectionAction"
+       and qtype = flag "qtype" (optional string) ~doc:"STRING Qtype"
+       and dnsThreatProtection =
+         flag "dns-threat-protection" (optional json_arg)
+           ~doc:"JSON DnsThreatProtection"
+       and confidenceThreshold =
+         flag "confidence-threshold" (optional json_arg)
+           ~doc:"JSON ConfidenceThreshold"
        and firewallRuleGroupId =
          flag "firewall-rule-group-id" (required string)
-           ~doc:"STRING ResourceId"
-       and firewallDomainListId =
-         flag "firewall-domain-list-id" (required string)
            ~doc:"STRING ResourceId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_firewall_rule
-           (Values.UpdateFirewallRuleRequest.make ?priority
+           (Values.UpdateFirewallRuleRequest.make ?firewallDomainListId
+              ?firewallThreatProtectionId ?priority
               ?action:(Option.map ~f:Values.Action.of_json action)
               ?blockResponse:(Option.map ~f:Values.BlockResponse.of_json
                                 blockResponse) ?blockOverrideDomain
               ?blockOverrideDnsType:(Option.map
                                        ~f:Values.BlockOverrideDnsType.of_json
                                        blockOverrideDnsType)
-              ?blockOverrideTtl ?name ~firewallRuleGroupId
-              ~firewallDomainListId ())
+              ?blockOverrideTtl ?name
+              ?firewallDomainRedirectionAction:(Option.map
+                                                  ~f:Values.FirewallDomainRedirectionAction.of_json
+                                                  firewallDomainRedirectionAction)
+              ?qtype
+              ?dnsThreatProtection:(Option.map
+                                      ~f:Values.DnsThreatProtection.of_json
+                                      dnsThreatProtection)
+              ?confidenceThreshold:(Option.map
+                                      ~f:Values.ConfidenceThreshold.of_json
+                                      confidenceThreshold)
+              ~firewallRuleGroupId ())
            (Some Values.UpdateFirewallRuleResponse.to_json)
            (Some Values.UpdateFirewallRuleResponse.error_to_json)])
 let update_firewall_rule_group_association =
@@ -1397,6 +1563,31 @@ let update_firewall_rule_group_association =
            (Some Values.UpdateFirewallRuleGroupAssociationResponse.to_json)
            (Some
               Values.UpdateFirewallRuleGroupAssociationResponse.error_to_json)])
+let update_outpost_resolver =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (optional string) ~doc:"STRING OutpostResolverName"
+       and instanceCount =
+         flag "instance-count" (optional int) ~doc:"INT InstanceCount"
+       and preferredInstanceType =
+         flag "preferred-instance-type" (optional string)
+           ~doc:"STRING OutpostInstanceType"
+       and id = flag "id" (required string) ~doc:"STRING ResourceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_outpost_resolver
+           (Values.UpdateOutpostResolverRequest.make ?name ?instanceCount
+              ?preferredInstanceType ~id ())
+           (Some Values.UpdateOutpostResolverResponse.to_json)
+           (Some Values.UpdateOutpostResolverResponse.error_to_json)])
 let update_resolver_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1452,6 +1643,25 @@ let update_resolver_endpoint =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and name = flag "name" (optional string) ~doc:"STRING Name"
+       and resolverEndpointType =
+         flag "resolver-endpoint-type" (optional json_arg)
+           ~doc:"JSON ResolverEndpointType"
+       and updateIpAddresses =
+         flag "update-ip-addresses" (optional json_arg)
+           ~doc:"JSON UpdateIpAddresses"
+       and protocols =
+         flag "protocols" (optional json_arg) ~doc:"JSON ProtocolList"
+       and rniEnhancedMetricsEnabled =
+         flag "rni-enhanced-metrics-enabled" (optional bool)
+           ~doc:"BOOL RniEnhancedMetricsEnabled"
+       and targetNameServerMetricsEnabled =
+         flag "target-name-server-metrics-enabled" (optional bool)
+           ~doc:"BOOL TargetNameServerMetricsEnabled"
+       and dns64Enabled =
+         flag "dns64-enabled" (optional bool) ~doc:"BOOL Dns64Enabled"
+       and ipv6InternetAccessEnabled =
+         flag "ipv6-internet-access-enabled" (optional bool)
+           ~doc:"BOOL Ipv6InternetAccessEnabled"
        and resolverEndpointId =
          flag "resolver-endpoint-id" (required string)
            ~doc:"STRING ResourceId" in
@@ -1459,7 +1669,15 @@ let update_resolver_endpoint =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_resolver_endpoint
            (Values.UpdateResolverEndpointRequest.make ?name
-              ~resolverEndpointId ())
+              ?resolverEndpointType:(Option.map
+                                       ~f:Values.ResolverEndpointType.of_json
+                                       resolverEndpointType)
+              ?updateIpAddresses:(Option.map
+                                    ~f:Values.UpdateIpAddresses.of_json
+                                    updateIpAddresses)
+              ?protocols:(Option.map ~f:Values.ProtocolList.of_json protocols)
+              ?rniEnhancedMetricsEnabled ?targetNameServerMetricsEnabled
+              ?dns64Enabled ?ipv6InternetAccessEnabled ~resolverEndpointId ())
            (Some Values.UpdateResolverEndpointResponse.to_json)
            (Some Values.UpdateResolverEndpointResponse.error_to_json)])
 let update_resolver_rule =
@@ -1495,12 +1713,14 @@ let main =
     ("create-firewall-domain-list", create_firewall_domain_list);
     ("create-firewall-rule", create_firewall_rule);
     ("create-firewall-rule-group", create_firewall_rule_group);
+    ("create-outpost-resolver", create_outpost_resolver);
     ("create-resolver-endpoint", create_resolver_endpoint);
     ("create-resolver-query-log-config", create_resolver_query_log_config);
     ("create-resolver-rule", create_resolver_rule);
     ("delete-firewall-domain-list", delete_firewall_domain_list);
     ("delete-firewall-rule", delete_firewall_rule);
     ("delete-firewall-rule-group", delete_firewall_rule_group);
+    ("delete-outpost-resolver", delete_outpost_resolver);
     ("delete-resolver-endpoint", delete_resolver_endpoint);
     ("delete-resolver-query-log-config", delete_resolver_query_log_config);
     ("delete-resolver-rule", delete_resolver_rule);
@@ -1516,6 +1736,7 @@ let main =
     ("get-firewall-rule-group-association",
       get_firewall_rule_group_association);
     ("get-firewall-rule-group-policy", get_firewall_rule_group_policy);
+    ("get-outpost-resolver", get_outpost_resolver);
     ("get-resolver-config", get_resolver_config);
     ("get-resolver-dnssec-config", get_resolver_dnssec_config);
     ("get-resolver-endpoint", get_resolver_endpoint);
@@ -1535,6 +1756,7 @@ let main =
       list_firewall_rule_group_associations);
     ("list-firewall-rule-groups", list_firewall_rule_groups);
     ("list-firewall-rules", list_firewall_rules);
+    ("list-outpost-resolvers", list_outpost_resolvers);
     ("list-resolver-configs", list_resolver_configs);
     ("list-resolver-dnssec-configs", list_resolver_dnssec_configs);
     ("list-resolver-endpoint-ip-addresses",
@@ -1557,6 +1779,7 @@ let main =
     ("update-firewall-rule", update_firewall_rule);
     ("update-firewall-rule-group-association",
       update_firewall_rule_group_association);
+    ("update-outpost-resolver", update_outpost_resolver);
     ("update-resolver-config", update_resolver_config);
     ("update-resolver-dnssec-config", update_resolver_dnssec_config);
     ("update-resolver-endpoint", update_resolver_endpoint);

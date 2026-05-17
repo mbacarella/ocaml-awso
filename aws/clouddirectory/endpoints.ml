@@ -1084,7 +1084,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.ListObjectParentsRequest.includeAllLinksToEachParent
                         ~f:(fun x ->
                               ("IncludeAllLinksToEachParent",
-                                (Bool.to_value x)))])
+                                (Bool_.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in

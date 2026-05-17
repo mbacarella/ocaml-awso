@@ -38,15 +38,15 @@ let associate_tracker_consumer =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and consumerArn =
-         flag "consumer-arn" (required string) ~doc:"STRING Arn"
        and trackerName =
-         flag "tracker-name" (required string) ~doc:"STRING ResourceName" in
+         flag "tracker-name" (required string) ~doc:"STRING ResourceName"
+       and consumerArn =
+         flag "consumer-arn" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.associate_tracker_consumer
-           (Values.AssociateTrackerConsumerRequest.make ~consumerArn
-              ~trackerName ())
+           (Values.AssociateTrackerConsumerRequest.make ~trackerName
+              ~consumerArn ())
            (Some Values.AssociateTrackerConsumerResponse.to_json)
            (Some Values.AssociateTrackerConsumerResponse.error_to_json)])
 let batch_delete_device_position_history =
@@ -59,17 +59,17 @@ let batch_delete_device_position_history =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and trackerName =
+         flag "tracker-name" (required string) ~doc:"STRING ResourceName"
        and deviceIds =
          flag "device-ids" (required json_arg)
-           ~doc:"JSON BatchDeleteDevicePositionHistoryRequestDeviceIdsList"
-       and trackerName =
-         flag "tracker-name" (required string) ~doc:"STRING ResourceName" in
+           ~doc:"JSON BatchDeleteDevicePositionHistoryRequestDeviceIdsList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.batch_delete_device_position_history
-           (Values.BatchDeleteDevicePositionHistoryRequest.make
+           (Values.BatchDeleteDevicePositionHistoryRequest.make ~trackerName
               ~deviceIds:(Values.BatchDeleteDevicePositionHistoryRequestDeviceIdsList.of_json
-                            deviceIds) ~trackerName ())
+                            deviceIds) ())
            (Some Values.BatchDeleteDevicePositionHistoryResponse.to_json)
            (Some
               Values.BatchDeleteDevicePositionHistoryResponse.error_to_json)])
@@ -129,18 +129,18 @@ let batch_get_device_position =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and deviceIds =
-         flag "device-ids" (required json_arg)
-           ~doc:"JSON BatchGetDevicePositionRequestDeviceIdsList"
        and trackerName =
          flag "tracker-name" (required string)
-           ~doc:"STRING BatchGetDevicePositionRequestTrackerNameString" in
+           ~doc:"STRING BatchGetDevicePositionRequestTrackerNameString"
+       and deviceIds =
+         flag "device-ids" (required json_arg)
+           ~doc:"JSON BatchGetDevicePositionRequestDeviceIdsList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.batch_get_device_position
-           (Values.BatchGetDevicePositionRequest.make
+           (Values.BatchGetDevicePositionRequest.make ~trackerName
               ~deviceIds:(Values.BatchGetDevicePositionRequestDeviceIdsList.of_json
-                            deviceIds) ~trackerName ())
+                            deviceIds) ())
            (Some Values.BatchGetDevicePositionResponse.to_json)
            (Some Values.BatchGetDevicePositionResponse.error_to_json)])
 let batch_put_geofence =
@@ -199,24 +199,31 @@ let calculate_route =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and carModeOptions =
-         flag "car-mode-options" (optional json_arg)
-           ~doc:"JSON CalculateRouteCarModeOptions"
-       and departNow = flag "depart-now" (optional bool) ~doc:"BOOL Boolean"
-       and departureTime =
-         flag "departure-time" (optional json_arg) ~doc:"JSON Timestamp"
-       and distanceUnit =
-         flag "distance-unit" (optional json_arg) ~doc:"JSON DistanceUnit"
-       and includeLegGeometry =
-         flag "include-leg-geometry" (optional bool) ~doc:"BOOL Boolean"
-       and travelMode =
-         flag "travel-mode" (optional json_arg) ~doc:"JSON TravelMode"
-       and truckModeOptions =
-         flag "truck-mode-options" (optional json_arg)
-           ~doc:"JSON CalculateRouteTruckModeOptions"
        and waypointPositions =
          flag "waypoint-positions" (optional json_arg)
            ~doc:"JSON CalculateRouteRequestWaypointPositionsList"
+       and travelMode =
+         flag "travel-mode" (optional json_arg) ~doc:"JSON TravelMode"
+       and departureTime =
+         flag "departure-time" (optional json_arg) ~doc:"JSON Timestamp"
+       and departNow =
+         flag "depart-now" (optional bool) ~doc:"BOOL SensitiveBoolean"
+       and distanceUnit =
+         flag "distance-unit" (optional json_arg) ~doc:"JSON DistanceUnit"
+       and includeLegGeometry =
+         flag "include-leg-geometry" (optional bool)
+           ~doc:"BOOL SensitiveBoolean"
+       and carModeOptions =
+         flag "car-mode-options" (optional json_arg)
+           ~doc:"JSON CalculateRouteCarModeOptions"
+       and truckModeOptions =
+         flag "truck-mode-options" (optional json_arg)
+           ~doc:"JSON CalculateRouteTruckModeOptions"
+       and arrivalTime =
+         flag "arrival-time" (optional json_arg) ~doc:"JSON Timestamp"
+       and optimizeFor =
+         flag "optimize-for" (optional json_arg) ~doc:"JSON OptimizationMode"
+       and key = flag "key" (optional string) ~doc:"STRING ApiKey"
        and calculatorName =
          flag "calculator-name" (required string) ~doc:"STRING ResourceName"
        and departurePosition =
@@ -227,20 +234,24 @@ let calculate_route =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.calculate_route
            (Values.CalculateRouteRequest.make
-              ?carModeOptions:(Option.map
-                                 ~f:Values.CalculateRouteCarModeOptions.of_json
-                                 carModeOptions) ?departNow
+              ?waypointPositions:(Option.map
+                                    ~f:Values.CalculateRouteRequestWaypointPositionsList.of_json
+                                    waypointPositions)
+              ?travelMode:(Option.map ~f:Values.TravelMode.of_json travelMode)
               ?departureTime:(Option.map ~f:Values.Timestamp.of_json
-                                departureTime)
+                                departureTime) ?departNow
               ?distanceUnit:(Option.map ~f:Values.DistanceUnit.of_json
                                distanceUnit) ?includeLegGeometry
-              ?travelMode:(Option.map ~f:Values.TravelMode.of_json travelMode)
+              ?carModeOptions:(Option.map
+                                 ~f:Values.CalculateRouteCarModeOptions.of_json
+                                 carModeOptions)
               ?truckModeOptions:(Option.map
                                    ~f:Values.CalculateRouteTruckModeOptions.of_json
                                    truckModeOptions)
-              ?waypointPositions:(Option.map
-                                    ~f:Values.CalculateRouteRequestWaypointPositionsList.of_json
-                                    waypointPositions) ~calculatorName
+              ?arrivalTime:(Option.map ~f:Values.Timestamp.of_json
+                              arrivalTime)
+              ?optimizeFor:(Option.map ~f:Values.OptimizationMode.of_json
+                              optimizeFor) ?key ~calculatorName
               ~departurePosition:(Values.Position.of_json departurePosition)
               ~destinationPosition:(Values.Position.of_json
                                       destinationPosition) ())
@@ -256,19 +267,21 @@ let calculate_route_matrix =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and travelMode =
+         flag "travel-mode" (optional json_arg) ~doc:"JSON TravelMode"
+       and departureTime =
+         flag "departure-time" (optional json_arg) ~doc:"JSON Timestamp"
+       and departNow =
+         flag "depart-now" (optional bool) ~doc:"BOOL SensitiveBoolean"
+       and distanceUnit =
+         flag "distance-unit" (optional json_arg) ~doc:"JSON DistanceUnit"
        and carModeOptions =
          flag "car-mode-options" (optional json_arg)
            ~doc:"JSON CalculateRouteCarModeOptions"
-       and departNow = flag "depart-now" (optional bool) ~doc:"BOOL Boolean"
-       and departureTime =
-         flag "departure-time" (optional json_arg) ~doc:"JSON Timestamp"
-       and distanceUnit =
-         flag "distance-unit" (optional json_arg) ~doc:"JSON DistanceUnit"
-       and travelMode =
-         flag "travel-mode" (optional json_arg) ~doc:"JSON TravelMode"
        and truckModeOptions =
          flag "truck-mode-options" (optional json_arg)
            ~doc:"JSON CalculateRouteTruckModeOptions"
+       and key = flag "key" (optional string) ~doc:"STRING ApiKey"
        and calculatorName =
          flag "calculator-name" (required string) ~doc:"STRING ResourceName"
        and departurePositions =
@@ -281,23 +294,39 @@ let calculate_route_matrix =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.calculate_route_matrix
            (Values.CalculateRouteMatrixRequest.make
-              ?carModeOptions:(Option.map
-                                 ~f:Values.CalculateRouteCarModeOptions.of_json
-                                 carModeOptions) ?departNow
+              ?travelMode:(Option.map ~f:Values.TravelMode.of_json travelMode)
               ?departureTime:(Option.map ~f:Values.Timestamp.of_json
-                                departureTime)
+                                departureTime) ?departNow
               ?distanceUnit:(Option.map ~f:Values.DistanceUnit.of_json
                                distanceUnit)
-              ?travelMode:(Option.map ~f:Values.TravelMode.of_json travelMode)
+              ?carModeOptions:(Option.map
+                                 ~f:Values.CalculateRouteCarModeOptions.of_json
+                                 carModeOptions)
               ?truckModeOptions:(Option.map
                                    ~f:Values.CalculateRouteTruckModeOptions.of_json
-                                   truckModeOptions) ~calculatorName
+                                   truckModeOptions) ?key ~calculatorName
               ~departurePositions:(Values.CalculateRouteMatrixRequestDeparturePositionsList.of_json
                                      departurePositions)
               ~destinationPositions:(Values.CalculateRouteMatrixRequestDestinationPositionsList.of_json
                                        destinationPositions) ())
            (Some Values.CalculateRouteMatrixResponse.to_json)
            (Some Values.CalculateRouteMatrixResponse.error_to_json)])
+let cancel_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and jobId = flag "job-id" (required string) ~doc:"STRING JobId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_job (Values.CancelJobRequest.make ~jobId ())
+           (Some Values.CancelJobResponse.to_json)
+           (Some Values.CancelJobResponse.error_to_json)])
 let create_geofence_collection =
   Command.async ~summary:""
     ([%map_open.Command
@@ -308,31 +337,30 @@ let create_geofence_collection =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and description =
-         flag "description" (optional string)
-           ~doc:"STRING ResourceDescription"
-       and kmsKeyId =
-         flag "kms-key-id" (optional string) ~doc:"STRING KmsKeyId"
        and pricingPlan =
          flag "pricing-plan" (optional json_arg) ~doc:"JSON PricingPlan"
        and pricingPlanDataSource =
          flag "pricing-plan-data-source" (optional string)
            ~doc:"STRING String"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING ResourceDescription"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING KmsKeyId"
        and collectionName =
          flag "collection-name" (required string) ~doc:"STRING ResourceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_geofence_collection
-           (Values.CreateGeofenceCollectionRequest.make ?description
-              ?kmsKeyId
+           (Values.CreateGeofenceCollectionRequest.make
               ?pricingPlan:(Option.map ~f:Values.PricingPlan.of_json
                               pricingPlan) ?pricingPlanDataSource
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
-              ~collectionName ())
+              ?description ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?kmsKeyId ~collectionName ())
            (Some Values.CreateGeofenceCollectionResponse.to_json)
            (Some Values.CreateGeofenceCollectionResponse.error_to_json)])
-let create_map =
+let create_key =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -345,23 +373,55 @@ let create_map =
        and description =
          flag "description" (optional string)
            ~doc:"STRING ResourceDescription"
+       and expireTime =
+         flag "expire-time" (optional json_arg) ~doc:"JSON Timestamp"
+       and noExpiry = flag "no-expiry" (optional bool) ~doc:"BOOL Boolean"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and keyName =
+         flag "key-name" (required string) ~doc:"STRING ResourceName"
+       and restrictions =
+         flag "restrictions" (required json_arg)
+           ~doc:"JSON ApiKeyRestrictions" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_key
+           (Values.CreateKeyRequest.make ?description
+              ?expireTime:(Option.map ~f:Values.Timestamp.of_json expireTime)
+              ?noExpiry ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ~keyName
+              ~restrictions:(Values.ApiKeyRestrictions.of_json restrictions)
+              ()) (Some Values.CreateKeyResponse.to_json)
+           (Some Values.CreateKeyResponse.error_to_json)])
+let create_map =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
        and pricingPlan =
          flag "pricing-plan" (optional json_arg) ~doc:"JSON PricingPlan"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING ResourceDescription"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and mapName =
+         flag "map-name" (required string) ~doc:"STRING ResourceName"
        and configuration =
          flag "configuration" (required json_arg)
-           ~doc:"JSON MapConfiguration"
-       and mapName =
-         flag "map-name" (required string) ~doc:"STRING ResourceName" in
+           ~doc:"JSON MapConfiguration" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_map
-           (Values.CreateMapRequest.make ?description
+           (Values.CreateMapRequest.make
               ?pricingPlan:(Option.map ~f:Values.PricingPlan.of_json
-                              pricingPlan)
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+                              pricingPlan) ?description
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~mapName
               ~configuration:(Values.MapConfiguration.of_json configuration)
-              ~mapName ()) (Some Values.CreateMapResponse.to_json)
+              ()) (Some Values.CreateMapResponse.to_json)
            (Some Values.CreateMapResponse.error_to_json)])
 let create_place_index =
   Command.async ~summary:""
@@ -373,31 +433,30 @@ let create_place_index =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and dataSourceConfiguration =
-         flag "data-source-configuration" (optional json_arg)
-           ~doc:"JSON DataSourceConfiguration"
+       and pricingPlan =
+         flag "pricing-plan" (optional json_arg) ~doc:"JSON PricingPlan"
        and description =
          flag "description" (optional string)
            ~doc:"STRING ResourceDescription"
-       and pricingPlan =
-         flag "pricing-plan" (optional json_arg) ~doc:"JSON PricingPlan"
+       and dataSourceConfiguration =
+         flag "data-source-configuration" (optional json_arg)
+           ~doc:"JSON DataSourceConfiguration"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
-       and dataSource =
-         flag "data-source" (required string) ~doc:"STRING String"
        and indexName =
-         flag "index-name" (required string) ~doc:"STRING ResourceName" in
+         flag "index-name" (required string) ~doc:"STRING ResourceName"
+       and dataSource =
+         flag "data-source" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_place_index
            (Values.CreatePlaceIndexRequest.make
+              ?pricingPlan:(Option.map ~f:Values.PricingPlan.of_json
+                              pricingPlan) ?description
               ?dataSourceConfiguration:(Option.map
                                           ~f:Values.DataSourceConfiguration.of_json
                                           dataSourceConfiguration)
-              ?description
-              ?pricingPlan:(Option.map ~f:Values.PricingPlan.of_json
-                              pricingPlan)
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~dataSource
-              ~indexName ()) (Some Values.CreatePlaceIndexResponse.to_json)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~indexName
+              ~dataSource ()) (Some Values.CreatePlaceIndexResponse.to_json)
            (Some Values.CreatePlaceIndexResponse.error_to_json)])
 let create_route_calculator =
   Command.async ~summary:""
@@ -409,11 +468,11 @@ let create_route_calculator =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and pricingPlan =
+         flag "pricing-plan" (optional json_arg) ~doc:"JSON PricingPlan"
        and description =
          flag "description" (optional string)
            ~doc:"STRING ResourceDescription"
-       and pricingPlan =
-         flag "pricing-plan" (optional json_arg) ~doc:"JSON PricingPlan"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and calculatorName =
          flag "calculator-name" (required string) ~doc:"STRING ResourceName"
@@ -422,9 +481,9 @@ let create_route_calculator =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_route_calculator
-           (Values.CreateRouteCalculatorRequest.make ?description
+           (Values.CreateRouteCalculatorRequest.make
               ?pricingPlan:(Option.map ~f:Values.PricingPlan.of_json
-                              pricingPlan)
+                              pricingPlan) ?description
               ?tags:(Option.map ~f:Values.TagMap.of_json tags)
               ~calculatorName ~dataSource ())
            (Some Values.CreateRouteCalculatorResponse.to_json)
@@ -439,33 +498,39 @@ let create_tracker =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and description =
-         flag "description" (optional string)
-           ~doc:"STRING ResourceDescription"
-       and kmsKeyId =
-         flag "kms-key-id" (optional string) ~doc:"STRING KmsKeyId"
-       and positionFiltering =
-         flag "position-filtering" (optional json_arg)
-           ~doc:"JSON PositionFiltering"
        and pricingPlan =
          flag "pricing-plan" (optional json_arg) ~doc:"JSON PricingPlan"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING KmsKeyId"
        and pricingPlanDataSource =
          flag "pricing-plan-data-source" (optional string)
            ~doc:"STRING String"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING ResourceDescription"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and positionFiltering =
+         flag "position-filtering" (optional json_arg)
+           ~doc:"JSON PositionFiltering"
+       and eventBridgeEnabled =
+         flag "event-bridge-enabled" (optional bool) ~doc:"BOOL Boolean"
+       and kmsKeyEnableGeospatialQueries =
+         flag "kms-key-enable-geospatial-queries" (optional bool)
+           ~doc:"BOOL Boolean"
        and trackerName =
          flag "tracker-name" (required string) ~doc:"STRING ResourceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_tracker
-           (Values.CreateTrackerRequest.make ?description ?kmsKeyId
+           (Values.CreateTrackerRequest.make
+              ?pricingPlan:(Option.map ~f:Values.PricingPlan.of_json
+                              pricingPlan) ?kmsKeyId ?pricingPlanDataSource
+              ?description ?tags:(Option.map ~f:Values.TagMap.of_json tags)
               ?positionFiltering:(Option.map
                                     ~f:Values.PositionFiltering.of_json
-                                    positionFiltering)
-              ?pricingPlan:(Option.map ~f:Values.PricingPlan.of_json
-                              pricingPlan) ?pricingPlanDataSource
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~trackerName
-              ()) (Some Values.CreateTrackerResponse.to_json)
+                                    positionFiltering) ?eventBridgeEnabled
+              ?kmsKeyEnableGeospatialQueries ~trackerName ())
+           (Some Values.CreateTrackerResponse.to_json)
            (Some Values.CreateTrackerResponse.error_to_json)])
 let delete_geofence_collection =
   Command.async ~summary:""
@@ -485,6 +550,26 @@ let delete_geofence_collection =
            (Values.DeleteGeofenceCollectionRequest.make ~collectionName ())
            (Some Values.DeleteGeofenceCollectionResponse.to_json)
            (Some Values.DeleteGeofenceCollectionResponse.error_to_json)])
+let delete_key =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and forceDelete =
+         flag "force-delete" (optional bool) ~doc:"BOOL Boolean"
+       and keyName =
+         flag "key-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_key
+           (Values.DeleteKeyRequest.make ?forceDelete ~keyName ())
+           (Some Values.DeleteKeyResponse.to_json)
+           (Some Values.DeleteKeyResponse.error_to_json)])
 let delete_map =
   Command.async ~summary:""
     ([%map_open.Command
@@ -574,6 +659,23 @@ let describe_geofence_collection =
            (Values.DescribeGeofenceCollectionRequest.make ~collectionName ())
            (Some Values.DescribeGeofenceCollectionResponse.to_json)
            (Some Values.DescribeGeofenceCollectionResponse.error_to_json)])
+let describe_key =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and keyName =
+         flag "key-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_key (Values.DescribeKeyRequest.make ~keyName ())
+           (Some Values.DescribeKeyResponse.to_json)
+           (Some Values.DescribeKeyResponse.error_to_json)])
 let describe_map =
   Command.async ~summary:""
     ([%map_open.Command
@@ -655,17 +757,56 @@ let disassociate_tracker_consumer =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and consumerArn =
-         flag "consumer-arn" (required string) ~doc:"STRING Arn"
        and trackerName =
-         flag "tracker-name" (required string) ~doc:"STRING ResourceName" in
+         flag "tracker-name" (required string) ~doc:"STRING ResourceName"
+       and consumerArn =
+         flag "consumer-arn" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.disassociate_tracker_consumer
-           (Values.DisassociateTrackerConsumerRequest.make ~consumerArn
-              ~trackerName ())
+           (Values.DisassociateTrackerConsumerRequest.make ~trackerName
+              ~consumerArn ())
            (Some Values.DisassociateTrackerConsumerResponse.to_json)
            (Some Values.DisassociateTrackerConsumerResponse.error_to_json)])
+let forecast_geofence_events =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and timeHorizonMinutes =
+         flag "time-horizon-minutes" (optional float)
+           ~doc:"FLOAT ForecastGeofenceEventsRequestTimeHorizonMinutesDouble"
+       and distanceUnit =
+         flag "distance-unit" (optional json_arg) ~doc:"JSON DistanceUnit"
+       and speedUnit =
+         flag "speed-unit" (optional json_arg) ~doc:"JSON SpeedUnit"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING LargeToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ForecastGeofenceEventsRequestMaxResultsInteger"
+       and collectionName =
+         flag "collection-name" (required string) ~doc:"STRING ResourceName"
+       and deviceState =
+         flag "device-state" (required json_arg)
+           ~doc:"JSON ForecastGeofenceEventsDeviceState" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.forecast_geofence_events
+           (Values.ForecastGeofenceEventsRequest.make ?timeHorizonMinutes
+              ?distanceUnit:(Option.map ~f:Values.DistanceUnit.of_json
+                               distanceUnit)
+              ?speedUnit:(Option.map ~f:Values.SpeedUnit.of_json speedUnit)
+              ?nextToken ?maxResults ~collectionName
+              ~deviceState:(Values.ForecastGeofenceEventsDeviceState.of_json
+                              deviceState) ())
+           (Some Values.ForecastGeofenceEventsResponse.to_json)
+           (Some Values.ForecastGeofenceEventsResponse.error_to_json)])
 let get_device_position =
   Command.async ~summary:""
     ([%map_open.Command
@@ -676,13 +817,13 @@ let get_device_position =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and deviceId = flag "device-id" (required string) ~doc:"STRING Id"
        and trackerName =
-         flag "tracker-name" (required string) ~doc:"STRING ResourceName" in
+         flag "tracker-name" (required string) ~doc:"STRING ResourceName"
+       and deviceId = flag "device-id" (required string) ~doc:"STRING Id" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_device_position
-           (Values.GetDevicePositionRequest.make ~deviceId ~trackerName ())
+           (Values.GetDevicePositionRequest.make ~trackerName ~deviceId ())
            (Some Values.GetDevicePositionResponse.to_json)
            (Some Values.GetDevicePositionResponse.error_to_json)])
 let get_device_position_history =
@@ -695,28 +836,28 @@ let get_device_position_history =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and endTimeExclusive =
-         flag "end-time-exclusive" (optional json_arg) ~doc:"JSON Timestamp"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT GetDevicePositionHistoryRequestMaxResultsInteger"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING Token"
        and startTimeInclusive =
          flag "start-time-inclusive" (optional json_arg)
            ~doc:"JSON Timestamp"
-       and deviceId = flag "device-id" (required string) ~doc:"STRING Id"
+       and endTimeExclusive =
+         flag "end-time-exclusive" (optional json_arg) ~doc:"JSON Timestamp"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT GetDevicePositionHistoryRequestMaxResultsInteger"
        and trackerName =
-         flag "tracker-name" (required string) ~doc:"STRING ResourceName" in
+         flag "tracker-name" (required string) ~doc:"STRING ResourceName"
+       and deviceId = flag "device-id" (required string) ~doc:"STRING Id" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_device_position_history
-           (Values.GetDevicePositionHistoryRequest.make
-              ?endTimeExclusive:(Option.map ~f:Values.Timestamp.of_json
-                                   endTimeExclusive) ?maxResults ?nextToken
+           (Values.GetDevicePositionHistoryRequest.make ?nextToken
               ?startTimeInclusive:(Option.map ~f:Values.Timestamp.of_json
-                                     startTimeInclusive) ~deviceId
-              ~trackerName ())
+                                     startTimeInclusive)
+              ?endTimeExclusive:(Option.map ~f:Values.Timestamp.of_json
+                                   endTimeExclusive) ?maxResults ~trackerName
+              ~deviceId ())
            (Some Values.GetDevicePositionHistoryResponse.to_json)
            (Some Values.GetDevicePositionHistoryResponse.error_to_json)])
 let get_geofence =
@@ -738,6 +879,22 @@ let get_geofence =
            (Values.GetGeofenceRequest.make ~collectionName ~geofenceId ())
            (Some Values.GetGeofenceResponse.to_json)
            (Some Values.GetGeofenceResponse.error_to_json)])
+let get_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and jobId = flag "job-id" (required string) ~doc:"STRING JobId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_job (Values.GetJobRequest.make ~jobId ())
+           (Some Values.GetJobResponse.to_json)
+           (Some Values.GetJobResponse.error_to_json)])
 let get_map_glyphs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -748,18 +905,20 @@ let get_map_glyphs =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and key = flag "key" (optional string) ~doc:"STRING ApiKey"
+       and mapName =
+         flag "map-name" (required string) ~doc:"STRING ResourceName"
        and fontStack =
          flag "font-stack" (required string) ~doc:"STRING String"
        and fontUnicodeRange =
          flag "font-unicode-range" (required string)
-           ~doc:"STRING GetMapGlyphsRequestFontUnicodeRangeString"
-       and mapName =
-         flag "map-name" (required string) ~doc:"STRING ResourceName" in
+           ~doc:"STRING GetMapGlyphsRequestFontUnicodeRangeString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_map_glyphs
-           (Values.GetMapGlyphsRequest.make ~fontStack ~fontUnicodeRange
-              ~mapName ()) (Some Values.GetMapGlyphsResponse.to_json)
+           (Values.GetMapGlyphsRequest.make ?key ~mapName ~fontStack
+              ~fontUnicodeRange ())
+           (Some Values.GetMapGlyphsResponse.to_json)
            (Some Values.GetMapGlyphsResponse.error_to_json)])
 let get_map_sprites =
   Command.async ~summary:""
@@ -771,15 +930,16 @@ let get_map_sprites =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and key = flag "key" (optional string) ~doc:"STRING ApiKey"
+       and mapName =
+         flag "map-name" (required string) ~doc:"STRING ResourceName"
        and fileName =
          flag "file-name" (required string)
-           ~doc:"STRING GetMapSpritesRequestFileNameString"
-       and mapName =
-         flag "map-name" (required string) ~doc:"STRING ResourceName" in
+           ~doc:"STRING GetMapSpritesRequestFileNameString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_map_sprites
-           (Values.GetMapSpritesRequest.make ~fileName ~mapName ())
+           (Values.GetMapSpritesRequest.make ?key ~mapName ~fileName ())
            (Some Values.GetMapSpritesResponse.to_json)
            (Some Values.GetMapSpritesResponse.error_to_json)])
 let get_map_style_descriptor =
@@ -792,12 +952,13 @@ let get_map_style_descriptor =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and key = flag "key" (optional string) ~doc:"STRING ApiKey"
        and mapName =
          flag "map-name" (required string) ~doc:"STRING ResourceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_map_style_descriptor
-           (Values.GetMapStyleDescriptorRequest.make ~mapName ())
+           (Values.GetMapStyleDescriptorRequest.make ?key ~mapName ())
            (Some Values.GetMapStyleDescriptorResponse.to_json)
            (Some Values.GetMapStyleDescriptorResponse.error_to_json)])
 let get_map_tile =
@@ -810,20 +971,43 @@ let get_map_tile =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and key = flag "key" (optional string) ~doc:"STRING ApiKey"
        and mapName =
          flag "map-name" (required string) ~doc:"STRING ResourceName"
+       and z =
+         flag "z" (required string) ~doc:"STRING GetMapTileRequestZString"
        and x =
          flag "x" (required string) ~doc:"STRING GetMapTileRequestXString"
        and y =
-         flag "y" (required string) ~doc:"STRING GetMapTileRequestYString"
-       and z =
-         flag "z" (required string) ~doc:"STRING GetMapTileRequestZString" in
+         flag "y" (required string) ~doc:"STRING GetMapTileRequestYString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_map_tile
-           (Values.GetMapTileRequest.make ~mapName ~x ~y ~z ())
+           (Values.GetMapTileRequest.make ?key ~mapName ~z ~x ~y ())
            (Some Values.GetMapTileResponse.to_json)
            (Some Values.GetMapTileResponse.error_to_json)])
+let get_place =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and language =
+         flag "language" (optional string) ~doc:"STRING LanguageTag"
+       and key = flag "key" (optional string) ~doc:"STRING ApiKey"
+       and indexName =
+         flag "index-name" (required string) ~doc:"STRING ResourceName"
+       and placeId = flag "place-id" (required string) ~doc:"STRING PlaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_place
+           (Values.GetPlaceRequest.make ?language ?key ~indexName ~placeId ())
+           (Some Values.GetPlaceResponse.to_json)
+           (Some Values.GetPlaceResponse.error_to_json)])
 let list_device_positions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -839,13 +1023,18 @@ let list_device_positions =
            ~doc:"INT ListDevicePositionsRequestMaxResultsInteger"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING Token"
+       and filterGeometry =
+         flag "filter-geometry" (optional json_arg)
+           ~doc:"JSON TrackingFilterGeometry"
        and trackerName =
          flag "tracker-name" (required string) ~doc:"STRING ResourceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_device_positions
            (Values.ListDevicePositionsRequest.make ?maxResults ?nextToken
-              ~trackerName ())
+              ?filterGeometry:(Option.map
+                                 ~f:Values.TrackingFilterGeometry.of_json
+                                 filterGeometry) ~trackerName ())
            (Some Values.ListDevicePositionsResponse.to_json)
            (Some Values.ListDevicePositionsResponse.error_to_json)])
 let list_geofence_collections =
@@ -880,15 +1069,66 @@ let list_geofences =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING Token"
+         flag "next-token" (optional string) ~doc:"STRING LargeToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListGeofencesRequestMaxResultsInteger"
        and collectionName =
          flag "collection-name" (required string) ~doc:"STRING ResourceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_geofences
-           (Values.ListGeofencesRequest.make ?nextToken ~collectionName ())
-           (Some Values.ListGeofencesResponse.to_json)
+           (Values.ListGeofencesRequest.make ?nextToken ?maxResults
+              ~collectionName ()) (Some Values.ListGeofencesResponse.to_json)
            (Some Values.ListGeofencesResponse.error_to_json)])
+let list_jobs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filter = flag "filter" (optional json_arg) ~doc:"JSON JobsFilter"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListJobsRequestMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING LargeToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_jobs
+           (Values.ListJobsRequest.make
+              ?filter:(Option.map ~f:Values.JobsFilter.of_json filter)
+              ?maxResults ?nextToken ())
+           (Some Values.ListJobsResponse.to_json)
+           (Some Values.ListJobsResponse.error_to_json)])
+let list_keys =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListKeysRequestMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and filter =
+         flag "filter" (optional json_arg) ~doc:"JSON ApiKeyFilter" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_keys
+           (Values.ListKeysRequest.make ?maxResults ?nextToken
+              ?filter:(Option.map ~f:Values.ApiKeyFilter.of_json filter) ())
+           (Some Values.ListKeysResponse.to_json)
+           (Some Values.ListKeysResponse.error_to_json)])
 let list_maps =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1025,6 +1265,9 @@ let put_geofence =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and geofenceProperties =
+         flag "geofence-properties" (optional json_arg)
+           ~doc:"JSON PropertyMap"
        and collectionName =
          flag "collection-name" (required string) ~doc:"STRING ResourceName"
        and geofenceId = flag "geofence-id" (required string) ~doc:"STRING Id"
@@ -1033,7 +1276,10 @@ let put_geofence =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_geofence
-           (Values.PutGeofenceRequest.make ~collectionName ~geofenceId
+           (Values.PutGeofenceRequest.make
+              ?geofenceProperties:(Option.map ~f:Values.PropertyMap.of_json
+                                     geofenceProperties) ~collectionName
+              ~geofenceId
               ~geometry:(Values.GeofenceGeometry.of_json geometry) ())
            (Some Values.PutGeofenceResponse.to_json)
            (Some Values.PutGeofenceResponse.error_to_json)])
@@ -1047,11 +1293,12 @@ let search_place_index_for_position =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and language =
-         flag "language" (optional string) ~doc:"STRING LanguageTag"
        and maxResults =
          flag "max-results" (optional int)
            ~doc:"INT PlaceIndexSearchResultLimit"
+       and language =
+         flag "language" (optional string) ~doc:"STRING LanguageTag"
+       and key = flag "key" (optional string) ~doc:"STRING ApiKey"
        and indexName =
          flag "index-name" (required string) ~doc:"STRING ResourceName"
        and position =
@@ -1059,8 +1306,8 @@ let search_place_index_for_position =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.search_place_index_for_position
-           (Values.SearchPlaceIndexForPositionRequest.make ?language
-              ?maxResults ~indexName
+           (Values.SearchPlaceIndexForPositionRequest.make ?maxResults
+              ?language ?key ~indexName
               ~position:(Values.Position.of_json position) ())
            (Some Values.SearchPlaceIndexForPositionResponse.to_json)
            (Some Values.SearchPlaceIndexForPositionResponse.error_to_json)])
@@ -1081,16 +1328,20 @@ let search_place_index_for_suggestions =
        and filterCountries =
          flag "filter-countries" (optional json_arg)
            ~doc:"JSON CountryCodeList"
-       and language =
-         flag "language" (optional string) ~doc:"STRING LanguageTag"
        and maxResults =
          flag "max-results" (optional int)
            ~doc:"INT SearchPlaceIndexForSuggestionsRequestMaxResultsInteger"
+       and language =
+         flag "language" (optional string) ~doc:"STRING LanguageTag"
+       and filterCategories =
+         flag "filter-categories" (optional json_arg)
+           ~doc:"JSON FilterPlaceCategoryList"
+       and key = flag "key" (optional string) ~doc:"STRING ApiKey"
        and indexName =
          flag "index-name" (required string) ~doc:"STRING ResourceName"
        and text =
          flag "text" (required string)
-           ~doc:"STRING SyntheticSearchPlaceIndexForSuggestionsRequestString" in
+           ~doc:"STRING SearchPlaceIndexForSuggestionsRequestTextString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.search_place_index_for_suggestions
@@ -1100,8 +1351,10 @@ let search_place_index_for_suggestions =
               ?filterBBox:(Option.map ~f:Values.BoundingBox.of_json
                              filterBBox)
               ?filterCountries:(Option.map ~f:Values.CountryCodeList.of_json
-                                  filterCountries) ?language ?maxResults
-              ~indexName ~text ())
+                                  filterCountries) ?maxResults ?language
+              ?filterCategories:(Option.map
+                                   ~f:Values.FilterPlaceCategoryList.of_json
+                                   filterCategories) ?key ~indexName ~text ())
            (Some Values.SearchPlaceIndexForSuggestionsResponse.to_json)
            (Some Values.SearchPlaceIndexForSuggestionsResponse.error_to_json)])
 let search_place_index_for_text =
@@ -1121,16 +1374,20 @@ let search_place_index_for_text =
        and filterCountries =
          flag "filter-countries" (optional json_arg)
            ~doc:"JSON CountryCodeList"
-       and language =
-         flag "language" (optional string) ~doc:"STRING LanguageTag"
        and maxResults =
          flag "max-results" (optional int)
            ~doc:"INT PlaceIndexSearchResultLimit"
+       and language =
+         flag "language" (optional string) ~doc:"STRING LanguageTag"
+       and filterCategories =
+         flag "filter-categories" (optional json_arg)
+           ~doc:"JSON FilterPlaceCategoryList"
+       and key = flag "key" (optional string) ~doc:"STRING ApiKey"
        and indexName =
          flag "index-name" (required string) ~doc:"STRING ResourceName"
        and text =
          flag "text" (required string)
-           ~doc:"STRING SyntheticSearchPlaceIndexForTextRequestString" in
+           ~doc:"STRING SearchPlaceIndexForTextRequestTextString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.search_place_index_for_text
@@ -1140,10 +1397,49 @@ let search_place_index_for_text =
               ?filterBBox:(Option.map ~f:Values.BoundingBox.of_json
                              filterBBox)
               ?filterCountries:(Option.map ~f:Values.CountryCodeList.of_json
-                                  filterCountries) ?language ?maxResults
-              ~indexName ~text ())
+                                  filterCountries) ?maxResults ?language
+              ?filterCategories:(Option.map
+                                   ~f:Values.FilterPlaceCategoryList.of_json
+                                   filterCategories) ?key ~indexName ~text ())
            (Some Values.SearchPlaceIndexForTextResponse.to_json)
            (Some Values.SearchPlaceIndexForTextResponse.error_to_json)])
+let start_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and actionOptions =
+         flag "action-options" (optional json_arg)
+           ~doc:"JSON JobActionOptions"
+       and name = flag "name" (optional string) ~doc:"STRING ResourceName"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and action = flag "action" (required json_arg) ~doc:"JSON JobAction"
+       and executionRoleArn =
+         flag "execution-role-arn" (required string) ~doc:"STRING IamRoleArn"
+       and inputOptions =
+         flag "input-options" (required json_arg) ~doc:"JSON JobInputOptions"
+       and outputOptions =
+         flag "output-options" (required json_arg)
+           ~doc:"JSON JobOutputOptions" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_job
+           (Values.StartJobRequest.make ?clientToken
+              ?actionOptions:(Option.map ~f:Values.JobActionOptions.of_json
+                                actionOptions) ?name
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ~action:(Values.JobAction.of_json action) ~executionRoleArn
+              ~inputOptions:(Values.JobInputOptions.of_json inputOptions)
+              ~outputOptions:(Values.JobOutputOptions.of_json outputOptions)
+              ()) (Some Values.StartJobResponse.to_json)
+           (Some Values.StartJobResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1194,26 +1490,26 @@ let update_geofence_collection =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and description =
-         flag "description" (optional string)
-           ~doc:"STRING ResourceDescription"
        and pricingPlan =
          flag "pricing-plan" (optional json_arg) ~doc:"JSON PricingPlan"
        and pricingPlanDataSource =
          flag "pricing-plan-data-source" (optional string)
            ~doc:"STRING String"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING ResourceDescription"
        and collectionName =
          flag "collection-name" (required string) ~doc:"STRING ResourceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_geofence_collection
-           (Values.UpdateGeofenceCollectionRequest.make ?description
+           (Values.UpdateGeofenceCollectionRequest.make
               ?pricingPlan:(Option.map ~f:Values.PricingPlan.of_json
                               pricingPlan) ?pricingPlanDataSource
-              ~collectionName ())
+              ?description ~collectionName ())
            (Some Values.UpdateGeofenceCollectionResponse.to_json)
            (Some Values.UpdateGeofenceCollectionResponse.error_to_json)])
-let update_map =
+let update_key =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1226,16 +1522,55 @@ let update_map =
        and description =
          flag "description" (optional string)
            ~doc:"STRING ResourceDescription"
+       and expireTime =
+         flag "expire-time" (optional json_arg) ~doc:"JSON Timestamp"
+       and noExpiry = flag "no-expiry" (optional bool) ~doc:"BOOL Boolean"
+       and forceUpdate =
+         flag "force-update" (optional bool) ~doc:"BOOL Boolean"
+       and restrictions =
+         flag "restrictions" (optional json_arg)
+           ~doc:"JSON ApiKeyRestrictions"
+       and keyName =
+         flag "key-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_key
+           (Values.UpdateKeyRequest.make ?description
+              ?expireTime:(Option.map ~f:Values.Timestamp.of_json expireTime)
+              ?noExpiry ?forceUpdate
+              ?restrictions:(Option.map ~f:Values.ApiKeyRestrictions.of_json
+                               restrictions) ~keyName ())
+           (Some Values.UpdateKeyResponse.to_json)
+           (Some Values.UpdateKeyResponse.error_to_json)])
+let update_map =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
        and pricingPlan =
          flag "pricing-plan" (optional json_arg) ~doc:"JSON PricingPlan"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING ResourceDescription"
+       and configurationUpdate =
+         flag "configuration-update" (optional json_arg)
+           ~doc:"JSON MapConfigurationUpdate"
        and mapName =
          flag "map-name" (required string) ~doc:"STRING ResourceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_map
-           (Values.UpdateMapRequest.make ?description
+           (Values.UpdateMapRequest.make
               ?pricingPlan:(Option.map ~f:Values.PricingPlan.of_json
-                              pricingPlan) ~mapName ())
+                              pricingPlan) ?description
+              ?configurationUpdate:(Option.map
+                                      ~f:Values.MapConfigurationUpdate.of_json
+                                      configurationUpdate) ~mapName ())
            (Some Values.UpdateMapResponse.to_json)
            (Some Values.UpdateMapResponse.error_to_json)])
 let update_place_index =
@@ -1248,27 +1583,26 @@ let update_place_index =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and dataSourceConfiguration =
-         flag "data-source-configuration" (optional json_arg)
-           ~doc:"JSON DataSourceConfiguration"
+       and pricingPlan =
+         flag "pricing-plan" (optional json_arg) ~doc:"JSON PricingPlan"
        and description =
          flag "description" (optional string)
            ~doc:"STRING ResourceDescription"
-       and pricingPlan =
-         flag "pricing-plan" (optional json_arg) ~doc:"JSON PricingPlan"
+       and dataSourceConfiguration =
+         flag "data-source-configuration" (optional json_arg)
+           ~doc:"JSON DataSourceConfiguration"
        and indexName =
          flag "index-name" (required string) ~doc:"STRING ResourceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_place_index
            (Values.UpdatePlaceIndexRequest.make
+              ?pricingPlan:(Option.map ~f:Values.PricingPlan.of_json
+                              pricingPlan) ?description
               ?dataSourceConfiguration:(Option.map
                                           ~f:Values.DataSourceConfiguration.of_json
-                                          dataSourceConfiguration)
-              ?description
-              ?pricingPlan:(Option.map ~f:Values.PricingPlan.of_json
-                              pricingPlan) ~indexName ())
-           (Some Values.UpdatePlaceIndexResponse.to_json)
+                                          dataSourceConfiguration) ~indexName
+              ()) (Some Values.UpdatePlaceIndexResponse.to_json)
            (Some Values.UpdatePlaceIndexResponse.error_to_json)])
 let update_route_calculator =
   Command.async ~summary:""
@@ -1280,19 +1614,19 @@ let update_route_calculator =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and pricingPlan =
+         flag "pricing-plan" (optional json_arg) ~doc:"JSON PricingPlan"
        and description =
          flag "description" (optional string)
            ~doc:"STRING ResourceDescription"
-       and pricingPlan =
-         flag "pricing-plan" (optional json_arg) ~doc:"JSON PricingPlan"
        and calculatorName =
          flag "calculator-name" (required string) ~doc:"STRING ResourceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_route_calculator
-           (Values.UpdateRouteCalculatorRequest.make ?description
+           (Values.UpdateRouteCalculatorRequest.make
               ?pricingPlan:(Option.map ~f:Values.PricingPlan.of_json
-                              pricingPlan) ~calculatorName ())
+                              pricingPlan) ?description ~calculatorName ())
            (Some Values.UpdateRouteCalculatorResponse.to_json)
            (Some Values.UpdateRouteCalculatorResponse.error_to_json)])
 let update_tracker =
@@ -1305,30 +1639,62 @@ let update_tracker =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and pricingPlan =
+         flag "pricing-plan" (optional json_arg) ~doc:"JSON PricingPlan"
+       and pricingPlanDataSource =
+         flag "pricing-plan-data-source" (optional string)
+           ~doc:"STRING String"
        and description =
          flag "description" (optional string)
            ~doc:"STRING ResourceDescription"
        and positionFiltering =
          flag "position-filtering" (optional json_arg)
            ~doc:"JSON PositionFiltering"
-       and pricingPlan =
-         flag "pricing-plan" (optional json_arg) ~doc:"JSON PricingPlan"
-       and pricingPlanDataSource =
-         flag "pricing-plan-data-source" (optional string)
-           ~doc:"STRING String"
+       and eventBridgeEnabled =
+         flag "event-bridge-enabled" (optional bool) ~doc:"BOOL Boolean"
+       and kmsKeyEnableGeospatialQueries =
+         flag "kms-key-enable-geospatial-queries" (optional bool)
+           ~doc:"BOOL Boolean"
        and trackerName =
          flag "tracker-name" (required string) ~doc:"STRING ResourceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_tracker
-           (Values.UpdateTrackerRequest.make ?description
-              ?positionFiltering:(Option.map
-                                    ~f:Values.PositionFiltering.of_json
-                                    positionFiltering)
+           (Values.UpdateTrackerRequest.make
               ?pricingPlan:(Option.map ~f:Values.PricingPlan.of_json
                               pricingPlan) ?pricingPlanDataSource
-              ~trackerName ()) (Some Values.UpdateTrackerResponse.to_json)
+              ?description
+              ?positionFiltering:(Option.map
+                                    ~f:Values.PositionFiltering.of_json
+                                    positionFiltering) ?eventBridgeEnabled
+              ?kmsKeyEnableGeospatialQueries ~trackerName ())
+           (Some Values.UpdateTrackerResponse.to_json)
            (Some Values.UpdateTrackerResponse.error_to_json)])
+let verify_device_position =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and distanceUnit =
+         flag "distance-unit" (optional json_arg) ~doc:"JSON DistanceUnit"
+       and trackerName =
+         flag "tracker-name" (required string) ~doc:"STRING ResourceName"
+       and deviceState =
+         flag "device-state" (required json_arg) ~doc:"JSON DeviceState" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.verify_device_position
+           (Values.VerifyDevicePositionRequest.make
+              ?distanceUnit:(Option.map ~f:Values.DistanceUnit.of_json
+                               distanceUnit) ~trackerName
+              ~deviceState:(Values.DeviceState.of_json deviceState) ())
+           (Some Values.VerifyDevicePositionResponse.to_json)
+           (Some Values.VerifyDevicePositionResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -1342,32 +1708,41 @@ let main =
     ("batch-update-device-position", batch_update_device_position);
     ("calculate-route", calculate_route);
     ("calculate-route-matrix", calculate_route_matrix);
+    ("cancel-job", cancel_job);
     ("create-geofence-collection", create_geofence_collection);
+    ("create-key", create_key);
     ("create-map", create_map);
     ("create-place-index", create_place_index);
     ("create-route-calculator", create_route_calculator);
     ("create-tracker", create_tracker);
     ("delete-geofence-collection", delete_geofence_collection);
+    ("delete-key", delete_key);
     ("delete-map", delete_map);
     ("delete-place-index", delete_place_index);
     ("delete-route-calculator", delete_route_calculator);
     ("delete-tracker", delete_tracker);
     ("describe-geofence-collection", describe_geofence_collection);
+    ("describe-key", describe_key);
     ("describe-map", describe_map);
     ("describe-place-index", describe_place_index);
     ("describe-route-calculator", describe_route_calculator);
     ("describe-tracker", describe_tracker);
     ("disassociate-tracker-consumer", disassociate_tracker_consumer);
+    ("forecast-geofence-events", forecast_geofence_events);
     ("get-device-position", get_device_position);
     ("get-device-position-history", get_device_position_history);
     ("get-geofence", get_geofence);
+    ("get-job", get_job);
     ("get-map-glyphs", get_map_glyphs);
     ("get-map-sprites", get_map_sprites);
     ("get-map-style-descriptor", get_map_style_descriptor);
     ("get-map-tile", get_map_tile);
+    ("get-place", get_place);
     ("list-device-positions", list_device_positions);
     ("list-geofence-collections", list_geofence_collections);
     ("list-geofences", list_geofences);
+    ("list-jobs", list_jobs);
+    ("list-keys", list_keys);
     ("list-maps", list_maps);
     ("list-place-indexes", list_place_indexes);
     ("list-route-calculators", list_route_calculators);
@@ -1379,10 +1754,13 @@ let main =
     ("search-place-index-for-suggestions",
       search_place_index_for_suggestions);
     ("search-place-index-for-text", search_place_index_for_text);
+    ("start-job", start_job);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-geofence-collection", update_geofence_collection);
+    ("update-key", update_key);
     ("update-map", update_map);
     ("update-place-index", update_place_index);
     ("update-route-calculator", update_route_calculator);
-    ("update-tracker", update_tracker)]
+    ("update-tracker", update_tracker);
+    ("verify-device-position", verify_device_position)]

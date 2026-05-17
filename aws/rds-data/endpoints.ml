@@ -48,19 +48,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.BatchExecuteStatementRequest.database
-                         ~f:(fun x -> ("database", (DbName.to_value x)));
-                      Option.map
-                        req.BatchExecuteStatementRequest.parameterSets
-                        ~f:(fun x ->
-                              ("parameterSets",
-                                (SqlParameterSets.to_value x)));
-                      Some
-                        ("resourceArn",
-                          (Arn.to_value
-                             req.BatchExecuteStatementRequest.resourceArn));
-                      Option.map req.BatchExecuteStatementRequest.schema
-                        ~f:(fun x -> ("schema", (DbName.to_value x)));
+                      [Some
+                         ("resourceArn",
+                           (Arn.to_value
+                              req.BatchExecuteStatementRequest.resourceArn));
                       Some
                         ("secretArn",
                           (Arn.to_value
@@ -69,6 +60,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("sql",
                           (SqlStatement.to_value
                              req.BatchExecuteStatementRequest.sql));
+                      Option.map req.BatchExecuteStatementRequest.database
+                        ~f:(fun x -> ("database", (DbName.to_value x)));
+                      Option.map req.BatchExecuteStatementRequest.schema
+                        ~f:(fun x -> ("schema", (DbName.to_value x)));
+                      Option.map
+                        req.BatchExecuteStatementRequest.parameterSets
+                        ~f:(fun x ->
+                              ("parameterSets",
+                                (SqlParameterSets.to_value x)));
                       Option.map
                         req.BatchExecuteStatementRequest.transactionId
                         ~f:(fun x -> ("transactionId", (Id.to_value x)))])
@@ -88,17 +88,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.BeginTransactionRequest.database
-                         ~f:(fun x -> ("database", (DbName.to_value x)));
-                      Some
-                        ("resourceArn",
-                          (Arn.to_value
-                             req.BeginTransactionRequest.resourceArn));
-                      Option.map req.BeginTransactionRequest.schema
-                        ~f:(fun x -> ("schema", (DbName.to_value x)));
+                      [Some
+                         ("resourceArn",
+                           (Arn.to_value
+                              req.BeginTransactionRequest.resourceArn));
                       Some
                         ("secretArn",
-                          (Arn.to_value req.BeginTransactionRequest.secretArn))])
+                          (Arn.to_value req.BeginTransactionRequest.secretArn));
+                      Option.map req.BeginTransactionRequest.database
+                        ~f:(fun x -> ("database", (DbName.to_value x)));
+                      Option.map req.BeginTransactionRequest.schema
+                        ~f:(fun x -> ("schema", (DbName.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -144,21 +144,21 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Some
-                         ("awsSecretStoreArn",
+                         ("dbClusterOrInstanceArn",
                            (Arn.to_value
-                              req.ExecuteSqlRequest.awsSecretStoreArn));
-                      Option.map req.ExecuteSqlRequest.database
-                        ~f:(fun x -> ("database", (DbName.to_value x)));
+                              req.ExecuteSqlRequest.dbClusterOrInstanceArn));
                       Some
-                        ("dbClusterOrInstanceArn",
+                        ("awsSecretStoreArn",
                           (Arn.to_value
-                             req.ExecuteSqlRequest.dbClusterOrInstanceArn));
-                      Option.map req.ExecuteSqlRequest.schema
-                        ~f:(fun x -> ("schema", (DbName.to_value x)));
+                             req.ExecuteSqlRequest.awsSecretStoreArn));
                       Some
                         ("sqlStatements",
                           (SqlStatement.to_value
-                             req.ExecuteSqlRequest.sqlStatements))])
+                             req.ExecuteSqlRequest.sqlStatements));
+                      Option.map req.ExecuteSqlRequest.database
+                        ~f:(fun x -> ("database", (DbName.to_value x)));
+                      Option.map req.ExecuteSqlRequest.schema
+                        ~f:(fun x -> ("schema", (DbName.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -175,29 +175,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.ExecuteStatementRequest.continueAfterTimeout
-                         ~f:(fun x ->
-                               ("continueAfterTimeout", (Boolean.to_value x)));
-                      Option.map req.ExecuteStatementRequest.database
-                        ~f:(fun x -> ("database", (DbName.to_value x)));
-                      Option.map
-                        req.ExecuteStatementRequest.includeResultMetadata
-                        ~f:(fun x ->
-                              ("includeResultMetadata", (Boolean.to_value x)));
-                      Option.map req.ExecuteStatementRequest.parameters
-                        ~f:(fun x ->
-                              ("parameters", (SqlParametersList.to_value x)));
-                      Some
-                        ("resourceArn",
-                          (Arn.to_value
-                             req.ExecuteStatementRequest.resourceArn));
-                      Option.map req.ExecuteStatementRequest.resultSetOptions
-                        ~f:(fun x ->
-                              ("resultSetOptions",
-                                (ResultSetOptions.to_value x)));
-                      Option.map req.ExecuteStatementRequest.schema
-                        ~f:(fun x -> ("schema", (DbName.to_value x)));
+                      [Some
+                         ("resourceArn",
+                           (Arn.to_value
+                              req.ExecuteStatementRequest.resourceArn));
                       Some
                         ("secretArn",
                           (Arn.to_value req.ExecuteStatementRequest.secretArn));
@@ -205,8 +186,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("sql",
                           (SqlStatement.to_value
                              req.ExecuteStatementRequest.sql));
+                      Option.map req.ExecuteStatementRequest.database
+                        ~f:(fun x -> ("database", (DbName.to_value x)));
+                      Option.map req.ExecuteStatementRequest.schema
+                        ~f:(fun x -> ("schema", (DbName.to_value x)));
+                      Option.map req.ExecuteStatementRequest.parameters
+                        ~f:(fun x ->
+                              ("parameters", (SqlParametersList.to_value x)));
                       Option.map req.ExecuteStatementRequest.transactionId
-                        ~f:(fun x -> ("transactionId", (Id.to_value x)))])
+                        ~f:(fun x -> ("transactionId", (Id.to_value x)));
+                      Option.map
+                        req.ExecuteStatementRequest.includeResultMetadata
+                        ~f:(fun x ->
+                              ("includeResultMetadata", (Boolean.to_value x)));
+                      Option.map
+                        req.ExecuteStatementRequest.continueAfterTimeout
+                        ~f:(fun x ->
+                              ("continueAfterTimeout", (Boolean.to_value x)));
+                      Option.map req.ExecuteStatementRequest.resultSetOptions
+                        ~f:(fun x ->
+                              ("resultSetOptions",
+                                (ResultSetOptions.to_value x)));
+                      Option.map req.ExecuteStatementRequest.formatRecordsAs
+                        ~f:(fun x ->
+                              ("formatRecordsAs",
+                                (RecordsFormatType.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in

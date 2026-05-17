@@ -15,6 +15,8 @@ let add_listener_certificates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AddListenerCertificates input
 let add_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AddTags input
+let add_trust_store_revocations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AddTrustStoreRevocations input
 let create_listener ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateListener input
 let create_load_balancer ?endpoint_url ?cfg input =
@@ -23,18 +25,28 @@ let create_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateRule input
 let create_target_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTargetGroup input
+let create_trust_store ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTrustStore input
 let delete_listener ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteListener input
 let delete_load_balancer ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteLoadBalancer input
 let delete_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteRule input
+let delete_shared_trust_store_association ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteSharedTrustStoreAssociation input
 let delete_target_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTargetGroup input
+let delete_trust_store ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTrustStore input
 let deregister_targets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeregisterTargets input
 let describe_account_limits ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAccountLimits input
+let describe_capacity_reservation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCapacityReservation input
+let describe_listener_attributes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeListenerAttributes input
 let describe_listener_certificates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeListenerCertificates input
 let describe_listeners ?endpoint_url ?cfg input =
@@ -55,8 +67,26 @@ let describe_target_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTargetGroups input
 let describe_target_health ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTargetHealth input
+let describe_trust_store_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTrustStoreAssociations input
+let describe_trust_store_revocations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTrustStoreRevocations input
+let describe_trust_stores ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTrustStores input
+let get_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetResourcePolicy input
+let get_trust_store_ca_certificates_bundle ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTrustStoreCaCertificatesBundle input
+let get_trust_store_revocation_content ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTrustStoreRevocationContent input
+let modify_capacity_reservation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyCapacityReservation input
+let modify_ip_pools ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyIpPools input
 let modify_listener ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyListener input
+let modify_listener_attributes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyListenerAttributes input
 let modify_load_balancer_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyLoadBalancerAttributes input
 let modify_rule ?endpoint_url ?cfg input =
@@ -65,12 +95,16 @@ let modify_target_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyTargetGroup input
 let modify_target_group_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyTargetGroupAttributes input
+let modify_trust_store ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyTrustStore input
 let register_targets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterTargets input
 let remove_listener_certificates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RemoveListenerCertificates input
 let remove_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RemoveTags input
+let remove_trust_store_revocations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RemoveTrustStoreRevocations input
 let set_ip_address_type ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SetIpAddressType input
 let set_rule_priorities ?endpoint_url ?cfg input =

@@ -37,6 +37,32 @@ module NetworkInterfaceId =
     let of_json j = string_of_json ~kind:"NetworkInterfaceId" j
     let to_json = simple_to_json to_value
   end
+module ErrorCode =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorCode"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorCode" j
+    let to_json = simple_to_json to_value
+  end
+module Message =
+  struct
+    type nonrec t = string
+    let context_ = "Message"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Message" j
+    let to_json = simple_to_json to_value
+  end
 module NetworkInterface =
   struct
     type nonrec t =
@@ -55,9 +81,9 @@ module NetworkInterface =
           (Xml.child xml_arg0 "NetworkInterfaceId") in
       make ?networkInterfaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let networkInterfaceId =
-        field_map json "NetworkInterfaceId" NetworkInterfaceId.of_json in
+        field_map json__ "NetworkInterfaceId" NetworkInterfaceId.of_json in
       make ?networkInterfaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The container for the network interface."]
@@ -153,6 +179,8 @@ module EndpointStatus =
       | Pending 
       | Available 
       | Deleting 
+      | Create_Failed 
+      | Delete_Failed 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -160,12 +188,16 @@ module EndpointStatus =
       | Pending -> "Pending"
       | Available -> "Available"
       | Deleting -> "Deleting"
+      | Create_Failed -> "Create_Failed"
+      | Delete_Failed -> "Delete_Failed"
       | Non_static_id s -> s
     let of_string =
       function
       | "Pending" -> Pending
       | "Available" -> Available
       | "Deleting" -> Deleting
+      | "Create_Failed" -> Create_Failed
+      | "Delete_Failed" -> Delete_Failed
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -175,10 +207,43 @@ module EndpointStatus =
     let of_json j = of_string (string_of_json ~kind:"EndpointStatus" j)
     let to_json = simple_to_json to_value
   end
+module FailedReason =
+  struct
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option
+        [@ocaml.doc
+          "The failure code, if any, for a create or delete endpoint operation."];
+      message: Message.t option
+        [@ocaml.doc
+          "Additional error details describing the endpoint failure and recommended action."]}
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The failure reason, if any, for a create or delete endpoint operation."]
 module NetworkInterfaces =
   struct
     type nonrec t = NetworkInterface.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInterface.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -264,6 +329,70 @@ module VpcId =
     let of_json j = string_of_json ~kind:"VpcId" j
     let to_json = simple_to_json to_value
   end
+module AwsAccountId =
+  struct
+    type nonrec t = string
+    let context_ = "AwsAccountId"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^\\d{12}$"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AwsAccountId" j
+    let to_json = simple_to_json to_value
+  end
+module CapacityInBytes =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module OutpostArn =
+  struct
+    type nonrec t = string
+    let context_ = "OutpostArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-iso|aws-iso-b):outposts:[a-z\\-0-9]*:[0-9]{12}:outpost/(op-[a-f0-9]{17}|ec2)$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OutpostArn" j
+    let to_json = simple_to_json to_value
+  end
+module S3OutpostArn =
+  struct
+    type nonrec t = string
+    let context_ = "S3OutpostArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^arn:(aws|aws-cn|aws-us-gov|aws-iso|aws-iso-b):s3-outposts:[a-z\\-0-9]*:[0-9]{12}:outpost/(op-[a-f0-9]{17}|\\d{12})/s3$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3OutpostArn" j
+    let to_json = simple_to_json to_value
+  end
 module ErrorMessage =
   struct
     type nonrec t = string
@@ -303,7 +432,10 @@ module Endpoint =
           "The type of connectivity used to access the Amazon S3 on Outposts endpoint."];
       customerOwnedIpv4Pool: CustomerOwnedIpv4Pool.t option
         [@ocaml.doc
-          "The ID of the customer-owned IPv4 address pool used for the endpoint."]}
+          "The ID of the customer-owned IPv4 address pool used for the endpoint."];
+      failedReason: FailedReason.t option
+        [@ocaml.doc
+          "The failure reason, if any, for a create or delete endpoint operation."]}
     let make ?endpointArn =
       fun ?outpostsId ->
         fun ?cidrBlock ->
@@ -315,20 +447,22 @@ module Endpoint =
                     fun ?securityGroupId ->
                       fun ?accessType ->
                         fun ?customerOwnedIpv4Pool ->
-                          fun () ->
-                            {
-                              endpointArn;
-                              outpostsId;
-                              cidrBlock;
-                              status;
-                              creationTime;
-                              networkInterfaces;
-                              vpcId;
-                              subnetId;
-                              securityGroupId;
-                              accessType;
-                              customerOwnedIpv4Pool
-                            }
+                          fun ?failedReason ->
+                            fun () ->
+                              {
+                                endpointArn;
+                                outpostsId;
+                                cidrBlock;
+                                status;
+                                creationTime;
+                                networkInterfaces;
+                                vpcId;
+                                subnetId;
+                                securityGroupId;
+                                accessType;
+                                customerOwnedIpv4Pool;
+                                failedReason
+                              }
     let to_value x =
       structure_to_value
         [("EndpointArn", (Option.map x.endpointArn ~f:EndpointArn.to_value));
@@ -347,9 +481,14 @@ module Endpoint =
           (Option.map x.accessType ~f:EndpointAccessType.to_value));
         ("CustomerOwnedIpv4Pool",
           (Option.map x.customerOwnedIpv4Pool
-             ~f:CustomerOwnedIpv4Pool.to_value))]
+             ~f:CustomerOwnedIpv4Pool.to_value));
+        ("FailedReason",
+          (Option.map x.failedReason ~f:FailedReason.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let failedReason =
+        (Option.map ~f:FailedReason.of_xml)
+          (Xml.child xml_arg0 "FailedReason") in
       let customerOwnedIpv4Pool =
         (Option.map ~f:CustomerOwnedIpv4Pool.of_xml)
           (Xml.child xml_arg0 "CustomerOwnedIpv4Pool") in
@@ -376,31 +515,99 @@ module Endpoint =
         (Option.map ~f:OutpostId.of_xml) (Xml.child xml_arg0 "OutpostsId") in
       let endpointArn =
         (Option.map ~f:EndpointArn.of_xml) (Xml.child xml_arg0 "EndpointArn") in
-      make ?customerOwnedIpv4Pool ?accessType ?securityGroupId ?subnetId
-        ?vpcId ?networkInterfaces ?creationTime ?status ?cidrBlock
+      make ?failedReason ?customerOwnedIpv4Pool ?accessType ?securityGroupId
+        ?subnetId ?vpcId ?networkInterfaces ?creationTime ?status ?cidrBlock
         ?outpostsId ?endpointArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let failedReason = field_map json__ "FailedReason" FailedReason.of_json in
       let customerOwnedIpv4Pool =
-        field_map json "CustomerOwnedIpv4Pool" CustomerOwnedIpv4Pool.of_json in
-      let accessType = field_map json "AccessType" EndpointAccessType.of_json in
+        field_map json__ "CustomerOwnedIpv4Pool"
+          CustomerOwnedIpv4Pool.of_json in
+      let accessType =
+        field_map json__ "AccessType" EndpointAccessType.of_json in
       let securityGroupId =
-        field_map json "SecurityGroupId" SecurityGroupId.of_json in
-      let subnetId = field_map json "SubnetId" SubnetId.of_json in
-      let vpcId = field_map json "VpcId" VpcId.of_json in
+        field_map json__ "SecurityGroupId" SecurityGroupId.of_json in
+      let subnetId = field_map json__ "SubnetId" SubnetId.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
       let networkInterfaces =
-        field_map json "NetworkInterfaces" NetworkInterfaces.of_json in
-      let creationTime = field_map json "CreationTime" CreationTime.of_json in
-      let status = field_map json "Status" EndpointStatus.of_json in
-      let cidrBlock = field_map json "CidrBlock" CidrBlock.of_json in
-      let outpostsId = field_map json "OutpostsId" OutpostId.of_json in
-      let endpointArn = field_map json "EndpointArn" EndpointArn.of_json in
-      make ?customerOwnedIpv4Pool ?accessType ?securityGroupId ?subnetId
-        ?vpcId ?networkInterfaces ?creationTime ?status ?cidrBlock
+        field_map json__ "NetworkInterfaces" NetworkInterfaces.of_json in
+      let creationTime = field_map json__ "CreationTime" CreationTime.of_json in
+      let status = field_map json__ "Status" EndpointStatus.of_json in
+      let cidrBlock = field_map json__ "CidrBlock" CidrBlock.of_json in
+      let outpostsId = field_map json__ "OutpostsId" OutpostId.of_json in
+      let endpointArn = field_map json__ "EndpointArn" EndpointArn.of_json in
+      make ?failedReason ?customerOwnedIpv4Pool ?accessType ?securityGroupId
+        ?subnetId ?vpcId ?networkInterfaces ?creationTime ?status ?cidrBlock
         ?outpostsId ?endpointArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Amazon S3 on Outposts Access Points simplify managing data access at scale for shared datasets in S3 on Outposts. S3 on Outposts uses endpoints to connect to Outposts buckets so that you can perform actions within your virtual private cloud (VPC). For more information, see Accessing S3 on Outposts using VPC-only access points in the Amazon Simple Storage Service User Guide."]
+module Outpost =
+  struct
+    type nonrec t =
+      {
+      outpostArn: OutpostArn.t option
+        [@ocaml.doc
+          "Specifies the unique Amazon Resource Name (ARN) for the outpost."];
+      s3OutpostArn: S3OutpostArn.t option
+        [@ocaml.doc
+          "Specifies the unique S3 on Outposts ARN for use with Resource Access Manager (RAM)."];
+      outpostId: OutpostId.t option
+        [@ocaml.doc "Specifies the unique identifier for the outpost."];
+      ownerId: AwsAccountId.t option
+        [@ocaml.doc
+          "Returns the Amazon Web Services account ID of the outpost owner. Useful for comparing owned versus shared outposts."];
+      capacityInBytes: CapacityInBytes.t option
+        [@ocaml.doc "The Amazon S3 capacity of the outpost in bytes."]}
+    let make ?outpostArn =
+      fun ?s3OutpostArn ->
+        fun ?outpostId ->
+          fun ?ownerId ->
+            fun ?capacityInBytes ->
+              fun () ->
+                {
+                  outpostArn;
+                  s3OutpostArn;
+                  outpostId;
+                  ownerId;
+                  capacityInBytes
+                }
+    let to_value x =
+      structure_to_value
+        [("OutpostArn", (Option.map x.outpostArn ~f:OutpostArn.to_value));
+        ("S3OutpostArn",
+          (Option.map x.s3OutpostArn ~f:S3OutpostArn.to_value));
+        ("OutpostId", (Option.map x.outpostId ~f:OutpostId.to_value));
+        ("OwnerId", (Option.map x.ownerId ~f:AwsAccountId.to_value));
+        ("CapacityInBytes",
+          (Option.map x.capacityInBytes ~f:CapacityInBytes.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityInBytes =
+        (Option.map ~f:CapacityInBytes.of_xml)
+          (Xml.child xml_arg0 "CapacityInBytes") in
+      let ownerId =
+        (Option.map ~f:AwsAccountId.of_xml) (Xml.child xml_arg0 "OwnerId") in
+      let outpostId =
+        (Option.map ~f:OutpostId.of_xml) (Xml.child xml_arg0 "OutpostId") in
+      let s3OutpostArn =
+        (Option.map ~f:S3OutpostArn.of_xml)
+          (Xml.child xml_arg0 "S3OutpostArn") in
+      let outpostArn =
+        (Option.map ~f:OutpostArn.of_xml) (Xml.child xml_arg0 "OutpostArn") in
+      make ?capacityInBytes ?ownerId ?outpostId ?s3OutpostArn ?outpostArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityInBytes =
+        field_map json__ "CapacityInBytes" CapacityInBytes.of_json in
+      let ownerId = field_map json__ "OwnerId" AwsAccountId.of_json in
+      let outpostId = field_map json__ "OutpostId" OutpostId.of_json in
+      let s3OutpostArn = field_map json__ "S3OutpostArn" S3OutpostArn.of_json in
+      let outpostArn = field_map json__ "OutpostArn" OutpostArn.of_json in
+      make ?capacityInBytes ?ownerId ?outpostId ?s3OutpostArn ?outpostArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains the details for the Outpost object."]
 module AccessDeniedException =
   struct
     type nonrec t = {
@@ -415,8 +622,8 @@ module AccessDeniedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Access was denied for this action."]
@@ -424,6 +631,9 @@ module Endpoints =
   struct
     type nonrec t = Endpoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Endpoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -458,8 +668,8 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "There was an exception with the internal server."]
@@ -499,11 +709,30 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The requested resource was not found."]
+module ThrottlingException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request was denied due to request throttling."]
 module ValidationException =
   struct
     type nonrec t = {
@@ -518,8 +747,8 @@ module ValidationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "There was an exception validating this data."]
@@ -540,6 +769,32 @@ module MaxResults =
         (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
+  end
+module Outposts =
+  struct
+    type nonrec t = Outpost.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Outpost.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Outpost.of_xml)
+    let of_json j = list_of_json ~kind:"Outposts" ~of_json:Outpost.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module EndpointId =
   struct
@@ -570,12 +825,32 @@ module ConflictException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "There was a conflict with this action, and it could not be completed."]
+module OutpostOfflineException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The service link connection to your Outposts home Region is down. Check your connection and try again."]
 module ListSharedEndpointsResult =
   struct
     type nonrec t =
@@ -590,6 +865,7 @@ module ListSharedEndpointsResult =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?endpoints =
@@ -602,6 +878,8 @@ module ListSharedEndpointsResult =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -615,6 +893,8 @@ module ListSharedEndpointsResult =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -633,6 +913,10 @@ module ListSharedEndpointsResult =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -654,9 +938,9 @@ module ListSharedEndpointsResult =
         (Option.map ~f:Endpoints.of_xml) (Xml.child xml_arg0 "Endpoints") in
       make ?nextToken ?endpoints ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let endpoints = field_map json "Endpoints" Endpoints.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let endpoints = field_map json__ "Endpoints" Endpoints.of_json in
       make ?nextToken ?endpoints ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -693,14 +977,129 @@ module ListSharedEndpointsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~outpostId ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outpostId = field_map_exn json "OutpostId" OutpostId.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let outpostId = field_map_exn json__ "OutpostId" OutpostId.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ~outpostId ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all endpoints associated with an Outpost that has been shared by Amazon Web Services Resource Access Manager (RAM). Related actions include: CreateEndpoint DeleteEndpoint"]
+module ListOutpostsWithS3Result =
+  struct
+    type nonrec t =
+      {
+      outposts: Outposts.t option
+        [@ocaml.doc
+          "Returns the list of Outposts that have the following characteristics: outposts that have S3 provisioned outposts that are Active (not pending any provisioning nor decommissioned) outposts to which the the calling Amazon Web Services account has access"];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Returns a token that you can use to call ListOutpostsWithS3 again and receive additional results, if there are any."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?outposts = fun ?nextToken -> fun () -> { outposts; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Outposts", (Option.map x.outposts ~f:Outposts.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let outposts =
+        (Option.map ~f:Outposts.of_xml) (Xml.child xml_arg0 "Outposts") in
+      make ?nextToken ?outposts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let outposts = field_map json__ "Outposts" Outposts.of_json in
+      make ?nextToken ?outposts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the Outposts with S3 on Outposts capacity for your Amazon Web Services account. Includes S3 on Outposts that you have access to as the Outposts owner, or as a shared user from Resource Access Manager (RAM)."]
+module ListOutpostsWithS3Request =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "When you can get additional results from the ListOutpostsWithS3 call, a NextToken parameter is returned in the output. You can then pass in a subsequent command to the NextToken parameter to continue listing additional Outposts."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of Outposts to return. The limit is 100."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the Outposts with S3 on Outposts capacity for your Amazon Web Services account. Includes S3 on Outposts that you have access to as the Outposts owner, or as a shared user from Resource Access Manager (RAM)."]
 module ListEndpointsResult =
   struct
     type nonrec t =
@@ -715,6 +1114,7 @@ module ListEndpointsResult =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?endpoints =
@@ -727,6 +1127,8 @@ module ListEndpointsResult =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -740,6 +1142,8 @@ module ListEndpointsResult =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -758,6 +1162,10 @@ module ListEndpointsResult =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -779,9 +1187,9 @@ module ListEndpointsResult =
         (Option.map ~f:Endpoints.of_xml) (Xml.child xml_arg0 "Endpoints") in
       make ?nextToken ?endpoints ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let endpoints = field_map json "Endpoints" Endpoints.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let endpoints = field_map json__ "Endpoints" Endpoints.of_json in
       make ?nextToken ?endpoints ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -810,9 +1218,9 @@ module ListEndpointsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -840,9 +1248,9 @@ module DeleteEndpointRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "endpointId") in
       make ~outpostId ~endpointId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outpostId = field_map_exn json "OutpostId" OutpostId.of_json in
-      let endpointId = field_map_exn json "EndpointId" EndpointId.of_json in
+    let of_json json__ =
+      let outpostId = field_map_exn json__ "OutpostId" OutpostId.of_json in
+      let endpointId = field_map_exn json__ "EndpointId" EndpointId.of_json in
       make ~outpostId ~endpointId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -857,7 +1265,9 @@ module CreateEndpointResult =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
+      | `OutpostOfflineException of OutpostOfflineException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?endpointArn = fun () -> { endpointArn }
@@ -869,8 +1279,12 @@ module CreateEndpointResult =
           `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "OutpostOfflineException" ->
+          `OutpostOfflineException (OutpostOfflineException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -884,8 +1298,12 @@ module CreateEndpointResult =
           `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "OutpostOfflineException" ->
+          `OutpostOfflineException (OutpostOfflineException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -904,10 +1322,18 @@ module CreateEndpointResult =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `OutpostOfflineException e ->
+          `Assoc
+            [("error", (`String "OutpostOfflineException"));
+            ("details", (OutpostOfflineException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -926,8 +1352,8 @@ module CreateEndpointResult =
         (Option.map ~f:EndpointArn.of_xml) (Xml.child xml_arg0 "EndpointArn") in
       make ?endpointArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpointArn = field_map json "EndpointArn" EndpointArn.of_json in
+    let of_json json__ =
+      let endpointArn = field_map json__ "EndpointArn" EndpointArn.of_json in
       make ?endpointArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -992,14 +1418,16 @@ module CreateEndpointRequest =
       make ?customerOwnedIpv4Pool ?accessType ~securityGroupId ~subnetId
         ~outpostId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customerOwnedIpv4Pool =
-        field_map json "CustomerOwnedIpv4Pool" CustomerOwnedIpv4Pool.of_json in
-      let accessType = field_map json "AccessType" EndpointAccessType.of_json in
+        field_map json__ "CustomerOwnedIpv4Pool"
+          CustomerOwnedIpv4Pool.of_json in
+      let accessType =
+        field_map json__ "AccessType" EndpointAccessType.of_json in
       let securityGroupId =
-        field_map_exn json "SecurityGroupId" SecurityGroupId.of_json in
-      let subnetId = field_map_exn json "SubnetId" SubnetId.of_json in
-      let outpostId = field_map_exn json "OutpostId" OutpostId.of_json in
+        field_map_exn json__ "SecurityGroupId" SecurityGroupId.of_json in
+      let subnetId = field_map_exn json__ "SubnetId" SubnetId.of_json in
+      let outpostId = field_map_exn json__ "OutpostId" OutpostId.of_json in
       make ?customerOwnedIpv4Pool ?accessType ~securityGroupId ~subnetId
         ~outpostId ()
     let to_json v = composed_to_json to_value v

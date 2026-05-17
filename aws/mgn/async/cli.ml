@@ -28,6 +28,93 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let archive_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and applicationID =
+         flag "application-i-d" (required string) ~doc:"STRING ApplicationID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.archive_application
+           (Values.ArchiveApplicationRequest.make ?accountID ~applicationID
+              ()) (Some Values.Application.to_json)
+           (Some Values.Application.error_to_json)])
+let archive_wave =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and waveID = flag "wave-i-d" (required string) ~doc:"STRING WaveID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.archive_wave
+           (Values.ArchiveWaveRequest.make ?accountID ~waveID ())
+           (Some Values.Wave.to_json) (Some Values.Wave.error_to_json)])
+let associate_applications =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and waveID = flag "wave-i-d" (required string) ~doc:"STRING WaveID"
+       and applicationIDs =
+         flag "application-i-ds" (required json_arg)
+           ~doc:"JSON ApplicationIDs" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_applications
+           (Values.AssociateApplicationsRequest.make ?accountID ~waveID
+              ~applicationIDs:(Values.ApplicationIDs.of_json applicationIDs)
+              ()) (Some Values.AssociateApplicationsResponse.to_json)
+           (Some Values.AssociateApplicationsResponse.error_to_json)])
+let associate_source_servers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and applicationID =
+         flag "application-i-d" (required string) ~doc:"STRING ApplicationID"
+       and sourceServerIDs =
+         flag "source-server-i-ds" (required json_arg)
+           ~doc:"JSON AssociateSourceServersRequestSourceServerIDs" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_source_servers
+           (Values.AssociateSourceServersRequest.make ?accountID
+              ~applicationID
+              ~sourceServerIDs:(Values.AssociateSourceServersRequestSourceServerIDs.of_json
+                                  sourceServerIDs) ())
+           (Some Values.AssociateSourceServersResponse.to_json)
+           (Some Values.AssociateSourceServersResponse.error_to_json)])
 let change_server_life_cycle_state =
   Command.async ~summary:""
     ([%map_open.Command
@@ -38,20 +125,202 @@ let change_server_life_cycle_state =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and lifeCycle =
-         flag "life-cycle" (required json_arg)
-           ~doc:"JSON ChangeServerLifeCycleStateSourceServerLifecycle"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
        and sourceServerID =
          flag "source-server-i-d" (required string)
-           ~doc:"STRING SourceServerID" in
+           ~doc:"STRING SourceServerID"
+       and lifeCycle =
+         flag "life-cycle" (required json_arg)
+           ~doc:"JSON ChangeServerLifeCycleStateSourceServerLifecycle" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.change_server_life_cycle_state
-           (Values.ChangeServerLifeCycleStateRequest.make
+           (Values.ChangeServerLifeCycleStateRequest.make ?accountID
+              ~sourceServerID
               ~lifeCycle:(Values.ChangeServerLifeCycleStateSourceServerLifecycle.of_json
-                            lifeCycle) ~sourceServerID ())
-           (Some Values.SourceServer.to_json)
+                            lifeCycle) ()) (Some Values.SourceServer.to_json)
            (Some Values.SourceServer.error_to_json)])
+let create_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING ApplicationDescription"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and name = flag "name" (required string) ~doc:"STRING ApplicationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_application
+           (Values.CreateApplicationRequest.make ?description
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ?accountID
+              ~name ()) (Some Values.Application.to_json)
+           (Some Values.Application.error_to_json)])
+let create_connector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and ssmCommandConfig =
+         flag "ssm-command-config" (optional json_arg)
+           ~doc:"JSON ConnectorSsmCommandConfig"
+       and name = flag "name" (required string) ~doc:"STRING ConnectorName"
+       and ssmInstanceID =
+         flag "ssm-instance-i-d" (required string)
+           ~doc:"STRING SsmInstanceID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_connector
+           (Values.CreateConnectorRequest.make
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ?ssmCommandConfig:(Option.map
+                                   ~f:Values.ConnectorSsmCommandConfig.of_json
+                                   ssmCommandConfig) ~name ~ssmInstanceID ())
+           (Some Values.Connector.to_json)
+           (Some Values.Connector.error_to_json)])
+let create_launch_configuration_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and postLaunchActions =
+         flag "post-launch-actions" (optional json_arg)
+           ~doc:"JSON PostLaunchActions"
+       and enableMapAutoTagging =
+         flag "enable-map-auto-tagging" (optional bool) ~doc:"BOOL Boolean"
+       and mapAutoTaggingMpeID =
+         flag "map-auto-tagging-mpe-i-d" (optional string)
+           ~doc:"STRING TagValue"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and launchDisposition =
+         flag "launch-disposition" (optional json_arg)
+           ~doc:"JSON LaunchDisposition"
+       and targetInstanceTypeRightSizingMethod =
+         flag "target-instance-type-right-sizing-method" (optional json_arg)
+           ~doc:"JSON TargetInstanceTypeRightSizingMethod"
+       and copyPrivateIp =
+         flag "copy-private-ip" (optional bool) ~doc:"BOOL Boolean"
+       and associatePublicIpAddress =
+         flag "associate-public-ip-address" (optional bool)
+           ~doc:"BOOL Boolean"
+       and copyTags = flag "copy-tags" (optional bool) ~doc:"BOOL Boolean"
+       and licensing =
+         flag "licensing" (optional json_arg) ~doc:"JSON Licensing"
+       and bootMode =
+         flag "boot-mode" (optional json_arg) ~doc:"JSON BootMode"
+       and smallVolumeMaxSize =
+         flag "small-volume-max-size" (optional json_arg)
+           ~doc:"JSON PositiveInteger"
+       and smallVolumeConf =
+         flag "small-volume-conf" (optional json_arg)
+           ~doc:"JSON LaunchTemplateDiskConf"
+       and largeVolumeConf =
+         flag "large-volume-conf" (optional json_arg)
+           ~doc:"JSON LaunchTemplateDiskConf"
+       and enableParametersEncryption =
+         flag "enable-parameters-encryption" (optional bool)
+           ~doc:"BOOL Boolean"
+       and parametersEncryptionKey =
+         flag "parameters-encryption-key" (optional string)
+           ~doc:"STRING KmsKeyArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_launch_configuration_template
+           (Values.CreateLaunchConfigurationTemplateRequest.make
+              ?postLaunchActions:(Option.map
+                                    ~f:Values.PostLaunchActions.of_json
+                                    postLaunchActions) ?enableMapAutoTagging
+              ?mapAutoTaggingMpeID
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ?launchDisposition:(Option.map
+                                    ~f:Values.LaunchDisposition.of_json
+                                    launchDisposition)
+              ?targetInstanceTypeRightSizingMethod:(Option.map
+                                                      ~f:Values.TargetInstanceTypeRightSizingMethod.of_json
+                                                      targetInstanceTypeRightSizingMethod)
+              ?copyPrivateIp ?associatePublicIpAddress ?copyTags
+              ?licensing:(Option.map ~f:Values.Licensing.of_json licensing)
+              ?bootMode:(Option.map ~f:Values.BootMode.of_json bootMode)
+              ?smallVolumeMaxSize:(Option.map
+                                     ~f:Values.PositiveInteger.of_json
+                                     smallVolumeMaxSize)
+              ?smallVolumeConf:(Option.map
+                                  ~f:Values.LaunchTemplateDiskConf.of_json
+                                  smallVolumeConf)
+              ?largeVolumeConf:(Option.map
+                                  ~f:Values.LaunchTemplateDiskConf.of_json
+                                  largeVolumeConf)
+              ?enableParametersEncryption ?parametersEncryptionKey ())
+           (Some Values.LaunchConfigurationTemplate.to_json)
+           (Some Values.LaunchConfigurationTemplate.error_to_json)])
+let create_network_migration_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING NetworkMigrationDefinitionDescription"
+       and sourceConfigurations =
+         flag "source-configurations" (optional json_arg)
+           ~doc:"JSON SourceConfigurationList"
+       and targetDeployment =
+         flag "target-deployment" (optional json_arg)
+           ~doc:"JSON TargetDeployment"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and scopeTags =
+         flag "scope-tags" (optional json_arg) ~doc:"JSON ScopeTagsMap"
+       and name =
+         flag "name" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionName"
+       and targetS3Configuration =
+         flag "target-s3-configuration" (required json_arg)
+           ~doc:"JSON TargetS3Configuration"
+       and targetNetwork =
+         flag "target-network" (required json_arg) ~doc:"JSON TargetNetwork" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_network_migration_definition
+           (Values.CreateNetworkMigrationDefinitionRequest.make ?description
+              ?sourceConfigurations:(Option.map
+                                       ~f:Values.SourceConfigurationList.of_json
+                                       sourceConfigurations)
+              ?targetDeployment:(Option.map
+                                   ~f:Values.TargetDeployment.of_json
+                                   targetDeployment)
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ?scopeTags:(Option.map ~f:Values.ScopeTagsMap.of_json scopeTags)
+              ~name
+              ~targetS3Configuration:(Values.TargetS3Configuration.of_json
+                                        targetS3Configuration)
+              ~targetNetwork:(Values.TargetNetwork.of_json targetNetwork) ())
+           (Some Values.NetworkMigrationDefinition.to_json)
+           (Some Values.NetworkMigrationDefinition.error_to_json)])
 let create_replication_configuration_template =
   Command.async ~summary:""
     ([%map_open.Command
@@ -64,60 +333,130 @@ let create_replication_configuration_template =
            ~doc:"URL override endpoint url"
        and ebsEncryptionKeyArn =
          flag "ebs-encryption-key-arn" (optional string) ~doc:"STRING ARN"
+       and useFipsEndpoint =
+         flag "use-fips-endpoint" (optional bool) ~doc:"BOOL Boolean"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and internetProtocol =
+         flag "internet-protocol" (optional json_arg)
+           ~doc:"JSON InternetProtocol"
+       and storeSnapshotOnLocalZone =
+         flag "store-snapshot-on-local-zone" (optional bool)
+           ~doc:"BOOL Boolean"
+       and stagingAreaSubnetId =
+         flag "staging-area-subnet-id" (required string)
+           ~doc:"STRING SubnetID"
        and associateDefaultSecurityGroup =
          flag "associate-default-security-group" (required bool)
            ~doc:"BOOL Boolean"
-       and bandwidthThrottling =
-         flag "bandwidth-throttling" (required json_arg)
-           ~doc:"JSON PositiveInteger"
-       and createPublicIP =
-         flag "create-public-i-p" (required bool) ~doc:"BOOL Boolean"
-       and dataPlaneRouting =
-         flag "data-plane-routing" (required json_arg)
-           ~doc:"JSON ReplicationConfigurationDataPlaneRouting"
+       and replicationServersSecurityGroupsIDs =
+         flag "replication-servers-security-groups-i-ds" (required json_arg)
+           ~doc:"JSON ReplicationServersSecurityGroupsIDs"
+       and replicationServerInstanceType =
+         flag "replication-server-instance-type" (required string)
+           ~doc:"STRING EC2InstanceType"
+       and useDedicatedReplicationServer =
+         flag "use-dedicated-replication-server" (required bool)
+           ~doc:"BOOL Boolean"
        and defaultLargeStagingDiskType =
          flag "default-large-staging-disk-type" (required json_arg)
            ~doc:"JSON ReplicationConfigurationDefaultLargeStagingDiskType"
        and ebsEncryption =
          flag "ebs-encryption" (required json_arg)
            ~doc:"JSON ReplicationConfigurationEbsEncryption"
-       and replicationServerInstanceType =
-         flag "replication-server-instance-type" (required string)
-           ~doc:"STRING EC2InstanceType"
-       and replicationServersSecurityGroupsIDs =
-         flag "replication-servers-security-groups-i-ds" (required json_arg)
-           ~doc:"JSON ReplicationServersSecurityGroupsIDs"
-       and stagingAreaSubnetId =
-         flag "staging-area-subnet-id" (required string)
-           ~doc:"STRING SubnetID"
+       and bandwidthThrottling =
+         flag "bandwidth-throttling" (required json_arg)
+           ~doc:"JSON BandwidthThrottling"
+       and dataPlaneRouting =
+         flag "data-plane-routing" (required json_arg)
+           ~doc:"JSON ReplicationConfigurationDataPlaneRouting"
+       and createPublicIP =
+         flag "create-public-i-p" (required bool) ~doc:"BOOL Boolean"
        and stagingAreaTags =
-         flag "staging-area-tags" (required json_arg) ~doc:"JSON TagsMap"
-       and useDedicatedReplicationServer =
-         flag "use-dedicated-replication-server" (required bool)
-           ~doc:"BOOL Boolean" in
+         flag "staging-area-tags" (required json_arg) ~doc:"JSON TagsMap" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_replication_configuration_template
            (Values.CreateReplicationConfigurationTemplateRequest.make
-              ?ebsEncryptionKeyArn
+              ?ebsEncryptionKeyArn ?useFipsEndpoint
               ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ?internetProtocol:(Option.map
+                                   ~f:Values.InternetProtocol.of_json
+                                   internetProtocol)
+              ?storeSnapshotOnLocalZone ~stagingAreaSubnetId
               ~associateDefaultSecurityGroup
-              ~bandwidthThrottling:(Values.PositiveInteger.of_json
-                                      bandwidthThrottling) ~createPublicIP
-              ~dataPlaneRouting:(Values.ReplicationConfigurationDataPlaneRouting.of_json
-                                   dataPlaneRouting)
+              ~replicationServersSecurityGroupsIDs:(Values.ReplicationServersSecurityGroupsIDs.of_json
+                                                      replicationServersSecurityGroupsIDs)
+              ~replicationServerInstanceType ~useDedicatedReplicationServer
               ~defaultLargeStagingDiskType:(Values.ReplicationConfigurationDefaultLargeStagingDiskType.of_json
                                               defaultLargeStagingDiskType)
               ~ebsEncryption:(Values.ReplicationConfigurationEbsEncryption.of_json
-                                ebsEncryption) ~replicationServerInstanceType
-              ~replicationServersSecurityGroupsIDs:(Values.ReplicationServersSecurityGroupsIDs.of_json
-                                                      replicationServersSecurityGroupsIDs)
-              ~stagingAreaSubnetId
-              ~stagingAreaTags:(Values.TagsMap.of_json stagingAreaTags)
-              ~useDedicatedReplicationServer ())
+                                ebsEncryption)
+              ~bandwidthThrottling:(Values.BandwidthThrottling.of_json
+                                      bandwidthThrottling)
+              ~dataPlaneRouting:(Values.ReplicationConfigurationDataPlaneRouting.of_json
+                                   dataPlaneRouting) ~createPublicIP
+              ~stagingAreaTags:(Values.TagsMap.of_json stagingAreaTags) ())
            (Some Values.ReplicationConfigurationTemplate.to_json)
            (Some Values.ReplicationConfigurationTemplate.error_to_json)])
+let create_wave =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING WaveDescription"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and name = flag "name" (required string) ~doc:"STRING WaveName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_wave
+           (Values.CreateWaveRequest.make ?description
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ?accountID
+              ~name ()) (Some Values.Wave.to_json)
+           (Some Values.Wave.error_to_json)])
+let delete_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and applicationID =
+         flag "application-i-d" (required string) ~doc:"STRING ApplicationID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_application
+           (Values.DeleteApplicationRequest.make ?accountID ~applicationID ())
+           (Some Values.DeleteApplicationResponse.to_json)
+           (Some Values.DeleteApplicationResponse.error_to_json)])
+let delete_connector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and connectorID =
+         flag "connector-i-d" (required string) ~doc:"STRING ConnectorID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_connector
+           (Values.DeleteConnectorRequest.make ~connectorID ()) None None])
 let delete_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -128,12 +467,56 @@ let delete_job =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
        and jobID = flag "job-i-d" (required string) ~doc:"STRING JobID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.delete_job (Values.DeleteJobRequest.make ~jobID ())
+           Io.delete_job (Values.DeleteJobRequest.make ?accountID ~jobID ())
            (Some Values.DeleteJobResponse.to_json)
            (Some Values.DeleteJobResponse.error_to_json)])
+let delete_launch_configuration_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and launchConfigurationTemplateID =
+         flag "launch-configuration-template-i-d" (required string)
+           ~doc:"STRING LaunchConfigurationTemplateID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_launch_configuration_template
+           (Values.DeleteLaunchConfigurationTemplateRequest.make
+              ~launchConfigurationTemplateID ())
+           (Some Values.DeleteLaunchConfigurationTemplateResponse.to_json)
+           (Some
+              Values.DeleteLaunchConfigurationTemplateResponse.error_to_json)])
+let delete_network_migration_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_network_migration_definition
+           (Values.DeleteNetworkMigrationDefinitionRequest.make
+              ~networkMigrationDefinitionID ())
+           (Some Values.DeleteNetworkMigrationDefinitionResponse.to_json)
+           (Some
+              Values.DeleteNetworkMigrationDefinitionResponse.error_to_json)])
 let delete_replication_configuration_template =
   Command.async ~summary:""
     ([%map_open.Command
@@ -166,14 +549,16 @@ let delete_source_server =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
        and sourceServerID =
          flag "source-server-i-d" (required string)
            ~doc:"STRING SourceServerID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_source_server
-           (Values.DeleteSourceServerRequest.make ~sourceServerID ())
-           (Some Values.DeleteSourceServerResponse.to_json)
+           (Values.DeleteSourceServerRequest.make ?accountID ~sourceServerID
+              ()) (Some Values.DeleteSourceServerResponse.to_json)
            (Some Values.DeleteSourceServerResponse.error_to_json)])
 let delete_vcenter_client =
   Command.async ~summary:""
@@ -193,6 +578,25 @@ let delete_vcenter_client =
            Io.delete_vcenter_client
            (Values.DeleteVcenterClientRequest.make ~vcenterClientID ()) None
            None])
+let delete_wave =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and waveID = flag "wave-i-d" (required string) ~doc:"STRING WaveID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_wave
+           (Values.DeleteWaveRequest.make ?accountID ~waveID ())
+           (Some Values.DeleteWaveResponse.to_json)
+           (Some Values.DeleteWaveResponse.error_to_json)])
 let describe_job_log_items =
   Command.async ~summary:""
     ([%map_open.Command
@@ -204,15 +608,18 @@ let describe_job_log_items =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT StrictlyPositiveInteger"
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
        and jobID = flag "job-i-d" (required string) ~doc:"STRING JobID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_job_log_items
            (Values.DescribeJobLogItemsRequest.make ?maxResults ?nextToken
-              ~jobID ()) (Some Values.DescribeJobLogItemsResponse.to_json)
+              ?accountID ~jobID ())
+           (Some Values.DescribeJobLogItemsResponse.to_json)
            (Some Values.DescribeJobLogItemsResponse.error_to_json)])
 let describe_jobs =
   Command.async ~summary:""
@@ -224,20 +631,52 @@ let describe_jobs =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON DescribeJobsRequestFilters"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT StrictlyPositiveInteger"
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
-       and filters =
-         flag "filters" (required json_arg)
-           ~doc:"JSON DescribeJobsRequestFilters" in
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_jobs
-           (Values.DescribeJobsRequest.make ?maxResults ?nextToken
-              ~filters:(Values.DescribeJobsRequestFilters.of_json filters) ())
+           (Values.DescribeJobsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.DescribeJobsRequestFilters.of_json
+                          filters) ?maxResults ?nextToken ?accountID ())
            (Some Values.DescribeJobsResponse.to_json)
            (Some Values.DescribeJobsResponse.error_to_json)])
+let describe_launch_configuration_templates =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and launchConfigurationTemplateIDs =
+         flag "launch-configuration-template-i-ds" (optional json_arg)
+           ~doc:"JSON LaunchConfigurationTemplateIDs"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_launch_configuration_templates
+           (Values.DescribeLaunchConfigurationTemplatesRequest.make
+              ?launchConfigurationTemplateIDs:(Option.map
+                                                 ~f:Values.LaunchConfigurationTemplateIDs.of_json
+                                                 launchConfigurationTemplateIDs)
+              ?maxResults ?nextToken ())
+           (Some Values.DescribeLaunchConfigurationTemplatesResponse.to_json)
+           (Some
+              Values.DescribeLaunchConfigurationTemplatesResponse.error_to_json)])
 let describe_replication_configuration_templates =
   Command.async ~summary:""
     ([%map_open.Command
@@ -248,21 +687,21 @@ let describe_replication_configuration_templates =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT StrictlyPositiveInteger"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
        and replicationConfigurationTemplateIDs =
-         flag "replication-configuration-template-i-ds" (required json_arg)
-           ~doc:"JSON ReplicationConfigurationTemplateIDs" in
+         flag "replication-configuration-template-i-ds" (optional json_arg)
+           ~doc:"JSON ReplicationConfigurationTemplateIDs"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_replication_configuration_templates
            (Values.DescribeReplicationConfigurationTemplatesRequest.make
-              ?maxResults ?nextToken
-              ~replicationConfigurationTemplateIDs:(Values.ReplicationConfigurationTemplateIDs.of_json
+              ?replicationConfigurationTemplateIDs:(Option.map
+                                                      ~f:Values.ReplicationConfigurationTemplateIDs.of_json
                                                       replicationConfigurationTemplateIDs)
-              ())
+              ?maxResults ?nextToken ())
            (Some
               Values.DescribeReplicationConfigurationTemplatesResponse.to_json)
            (Some
@@ -277,19 +716,22 @@ let describe_source_servers =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON DescribeSourceServersRequestFilters"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT StrictlyPositiveInteger"
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
-       and filters =
-         flag "filters" (required json_arg)
-           ~doc:"JSON DescribeSourceServersRequestFilters" in
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_source_servers
-           (Values.DescribeSourceServersRequest.make ?maxResults ?nextToken
-              ~filters:(Values.DescribeSourceServersRequestFilters.of_json
-                          filters) ())
+           (Values.DescribeSourceServersRequest.make
+              ?filters:(Option.map
+                          ~f:Values.DescribeSourceServersRequestFilters.of_json
+                          filters) ?maxResults ?nextToken ?accountID ())
            (Some Values.DescribeSourceServersResponse.to_json)
            (Some Values.DescribeSourceServersResponse.error_to_json)])
 let describe_vcenter_clients =
@@ -303,7 +745,7 @@ let describe_vcenter_clients =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT StrictlyPositiveInteger"
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
@@ -312,6 +754,55 @@ let describe_vcenter_clients =
            (Values.DescribeVcenterClientsRequest.make ?maxResults ?nextToken
               ()) (Some Values.DescribeVcenterClientsResponse.to_json)
            (Some Values.DescribeVcenterClientsResponse.error_to_json)])
+let disassociate_applications =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and waveID = flag "wave-i-d" (required string) ~doc:"STRING WaveID"
+       and applicationIDs =
+         flag "application-i-ds" (required json_arg)
+           ~doc:"JSON ApplicationIDs" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_applications
+           (Values.DisassociateApplicationsRequest.make ?accountID ~waveID
+              ~applicationIDs:(Values.ApplicationIDs.of_json applicationIDs)
+              ()) (Some Values.DisassociateApplicationsResponse.to_json)
+           (Some Values.DisassociateApplicationsResponse.error_to_json)])
+let disassociate_source_servers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and applicationID =
+         flag "application-i-d" (required string) ~doc:"STRING ApplicationID"
+       and sourceServerIDs =
+         flag "source-server-i-ds" (required json_arg)
+           ~doc:"JSON DisassociateSourceServersRequestSourceServerIDs" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_source_servers
+           (Values.DisassociateSourceServersRequest.make ?accountID
+              ~applicationID
+              ~sourceServerIDs:(Values.DisassociateSourceServersRequestSourceServerIDs.of_json
+                                  sourceServerIDs) ())
+           (Some Values.DisassociateSourceServersResponse.to_json)
+           (Some Values.DisassociateSourceServersResponse.error_to_json)])
 let disconnect_from_service =
   Command.async ~summary:""
     ([%map_open.Command
@@ -322,14 +813,16 @@ let disconnect_from_service =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
        and sourceServerID =
          flag "source-server-i-d" (required string)
            ~doc:"STRING SourceServerID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.disconnect_from_service
-           (Values.DisconnectFromServiceRequest.make ~sourceServerID ())
-           (Some Values.SourceServer.to_json)
+           (Values.DisconnectFromServiceRequest.make ?accountID
+              ~sourceServerID ()) (Some Values.SourceServer.to_json)
            (Some Values.SourceServer.error_to_json)])
 let finalize_cutover =
   Command.async ~summary:""
@@ -341,13 +834,15 @@ let finalize_cutover =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
        and sourceServerID =
          flag "source-server-i-d" (required string)
            ~doc:"STRING SourceServerID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.finalize_cutover
-           (Values.FinalizeCutoverRequest.make ~sourceServerID ())
+           (Values.FinalizeCutoverRequest.make ?accountID ~sourceServerID ())
            (Some Values.SourceServer.to_json)
            (Some Values.SourceServer.error_to_json)])
 let get_launch_configuration =
@@ -360,15 +855,67 @@ let get_launch_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
        and sourceServerID =
          flag "source-server-i-d" (required string)
            ~doc:"STRING SourceServerID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_launch_configuration
-           (Values.GetLaunchConfigurationRequest.make ~sourceServerID ())
-           (Some Values.LaunchConfiguration.to_json)
+           (Values.GetLaunchConfigurationRequest.make ?accountID
+              ~sourceServerID ()) (Some Values.LaunchConfiguration.to_json)
            (Some Values.LaunchConfiguration.error_to_json)])
+let get_network_migration_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_network_migration_definition
+           (Values.GetNetworkMigrationDefinitionRequest.make
+              ~networkMigrationDefinitionID ())
+           (Some Values.NetworkMigrationDefinition.to_json)
+           (Some Values.NetworkMigrationDefinition.error_to_json)])
+let get_network_migration_mapper_segment_construct =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID"
+       and networkMigrationExecutionID =
+         flag "network-migration-execution-i-d" (required string)
+           ~doc:"STRING NetworkMigrationExecutionID"
+       and segmentID =
+         flag "segment-i-d" (required string) ~doc:"STRING SegmentID"
+       and constructID =
+         flag "construct-i-d" (required string) ~doc:"STRING ConstructID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_network_migration_mapper_segment_construct
+           (Values.GetNetworkMigrationMapperSegmentConstructRequest.make
+              ~networkMigrationDefinitionID ~networkMigrationExecutionID
+              ~segmentID ~constructID ())
+           (Some
+              Values.GetNetworkMigrationMapperSegmentConstructResponse.to_json)
+           (Some
+              Values.GetNetworkMigrationMapperSegmentConstructResponse.error_to_json)])
 let get_replication_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -379,13 +926,16 @@ let get_replication_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
        and sourceServerID =
          flag "source-server-i-d" (required string)
            ~doc:"STRING SourceServerID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_replication_configuration
-           (Values.GetReplicationConfigurationRequest.make ~sourceServerID ())
+           (Values.GetReplicationConfigurationRequest.make ?accountID
+              ~sourceServerID ())
            (Some Values.ReplicationConfiguration.to_json)
            (Some Values.ReplicationConfiguration.error_to_json)])
 let initialize_service =
@@ -404,6 +954,627 @@ let initialize_service =
            Io.initialize_service (Values.InitializeServiceRequest.make ())
            (Some Values.InitializeServiceResponse.to_json)
            (Some Values.InitializeServiceResponse.error_to_json)])
+let list_applications =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListApplicationsRequestFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_applications
+           (Values.ListApplicationsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListApplicationsRequestFilters.of_json
+                          filters) ?maxResults ?nextToken ?accountID ())
+           (Some Values.ListApplicationsResponse.to_json)
+           (Some Values.ListApplicationsResponse.error_to_json)])
+let list_connectors =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListConnectorsRequestFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_connectors
+           (Values.ListConnectorsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListConnectorsRequestFilters.of_json
+                          filters) ?maxResults ?nextToken ())
+           (Some Values.ListConnectorsResponse.to_json)
+           (Some Values.ListConnectorsResponse.error_to_json)])
+let list_export_errors =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and exportID =
+         flag "export-i-d" (required string) ~doc:"STRING ExportID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_export_errors
+           (Values.ListExportErrorsRequest.make ?maxResults ?nextToken
+              ~exportID ()) (Some Values.ListExportErrorsResponse.to_json)
+           (Some Values.ListExportErrorsResponse.error_to_json)])
+let list_exports =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListExportsRequestFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_exports
+           (Values.ListExportsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListExportsRequestFilters.of_json filters)
+              ?maxResults ?nextToken ())
+           (Some Values.ListExportsResponse.to_json)
+           (Some Values.ListExportsResponse.error_to_json)])
+let list_import_errors =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and importID =
+         flag "import-i-d" (required string) ~doc:"STRING ImportID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_import_errors
+           (Values.ListImportErrorsRequest.make ?maxResults ?nextToken
+              ~importID ()) (Some Values.ListImportErrorsResponse.to_json)
+           (Some Values.ListImportErrorsResponse.error_to_json)])
+let list_import_file_enrichments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListImportFileEnrichmentsFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_import_file_enrichments
+           (Values.ListImportFileEnrichmentsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListImportFileEnrichmentsFilters.of_json
+                          filters) ?maxResults ?nextToken ())
+           (Some Values.ListImportFileEnrichmentsResponse.to_json)
+           (Some Values.ListImportFileEnrichmentsResponse.error_to_json)])
+let list_imports =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListImportsRequestFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_imports
+           (Values.ListImportsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListImportsRequestFilters.of_json filters)
+              ?maxResults ?nextToken ())
+           (Some Values.ListImportsResponse.to_json)
+           (Some Values.ListImportsResponse.error_to_json)])
+let list_managed_accounts =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_managed_accounts
+           (Values.ListManagedAccountsRequest.make ?maxResults ?nextToken ())
+           (Some Values.ListManagedAccountsResponse.to_json)
+           (Some Values.ListManagedAccountsResponse.error_to_json)])
+let list_network_migration_analyses =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListNetworkMigrationAnalysesFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and networkMigrationExecutionID =
+         flag "network-migration-execution-i-d" (required string)
+           ~doc:"STRING NetworkMigrationExecutionID"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_network_migration_analyses
+           (Values.ListNetworkMigrationAnalysesRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListNetworkMigrationAnalysesFilters.of_json
+                          filters) ?maxResults ?nextToken
+              ~networkMigrationExecutionID ~networkMigrationDefinitionID ())
+           (Some Values.ListNetworkMigrationAnalysesResponse.to_json)
+           (Some Values.ListNetworkMigrationAnalysesResponse.error_to_json)])
+let list_network_migration_analysis_results =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListNetworkMigrationAnalysisResultsFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and networkMigrationExecutionID =
+         flag "network-migration-execution-i-d" (required string)
+           ~doc:"STRING NetworkMigrationExecutionID"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_network_migration_analysis_results
+           (Values.ListNetworkMigrationAnalysisResultsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListNetworkMigrationAnalysisResultsFilters.of_json
+                          filters) ?maxResults ?nextToken
+              ~networkMigrationExecutionID ~networkMigrationDefinitionID ())
+           (Some Values.ListNetworkMigrationAnalysisResultsResponse.to_json)
+           (Some
+              Values.ListNetworkMigrationAnalysisResultsResponse.error_to_json)])
+let list_network_migration_code_generation_segments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListNetworkMigrationCodeGenerationSegmentsFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and networkMigrationExecutionID =
+         flag "network-migration-execution-i-d" (required string)
+           ~doc:"STRING NetworkMigrationExecutionID"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_network_migration_code_generation_segments
+           (Values.ListNetworkMigrationCodeGenerationSegmentsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListNetworkMigrationCodeGenerationSegmentsFilters.of_json
+                          filters) ?maxResults ?nextToken
+              ~networkMigrationExecutionID ~networkMigrationDefinitionID ())
+           (Some
+              Values.ListNetworkMigrationCodeGenerationSegmentsResponse.to_json)
+           (Some
+              Values.ListNetworkMigrationCodeGenerationSegmentsResponse.error_to_json)])
+let list_network_migration_code_generations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListNetworkMigrationCodeGenerationsFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and networkMigrationExecutionID =
+         flag "network-migration-execution-i-d" (required string)
+           ~doc:"STRING NetworkMigrationExecutionID"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_network_migration_code_generations
+           (Values.ListNetworkMigrationCodeGenerationsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListNetworkMigrationCodeGenerationsFilters.of_json
+                          filters) ?maxResults ?nextToken
+              ~networkMigrationExecutionID ~networkMigrationDefinitionID ())
+           (Some Values.ListNetworkMigrationCodeGenerationsResponse.to_json)
+           (Some
+              Values.ListNetworkMigrationCodeGenerationsResponse.error_to_json)])
+let list_network_migration_definitions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListNetworkMigrationDefinitionsRequestFilters"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_network_migration_definitions
+           (Values.ListNetworkMigrationDefinitionsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListNetworkMigrationDefinitionsRequestFilters.of_json
+                          filters) ?nextToken ?maxResults ())
+           (Some Values.ListNetworkMigrationDefinitionsResponse.to_json)
+           (Some Values.ListNetworkMigrationDefinitionsResponse.error_to_json)])
+let list_network_migration_deployed_stacks =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and networkMigrationExecutionID =
+         flag "network-migration-execution-i-d" (required string)
+           ~doc:"STRING NetworkMigrationExecutionID"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_network_migration_deployed_stacks
+           (Values.ListNetworkMigrationDeployedStacksRequest.make ?maxResults
+              ?nextToken ~networkMigrationExecutionID
+              ~networkMigrationDefinitionID ())
+           (Some Values.ListNetworkMigrationDeployedStacksResponse.to_json)
+           (Some
+              Values.ListNetworkMigrationDeployedStacksResponse.error_to_json)])
+let list_network_migration_deployments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListNetworkMigrationDeployerJobFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and networkMigrationExecutionID =
+         flag "network-migration-execution-i-d" (required string)
+           ~doc:"STRING NetworkMigrationExecutionID"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_network_migration_deployments
+           (Values.ListNetworkMigrationDeploymentsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListNetworkMigrationDeployerJobFilters.of_json
+                          filters) ?maxResults ?nextToken
+              ~networkMigrationExecutionID ~networkMigrationDefinitionID ())
+           (Some Values.ListNetworkMigrationDeployerJobResponse.to_json)
+           (Some Values.ListNetworkMigrationDeployerJobResponse.error_to_json)])
+let list_network_migration_executions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListNetworkMigrationExecutionRequestFilters"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_network_migration_executions
+           (Values.ListNetworkMigrationExecutionsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListNetworkMigrationExecutionRequestFilters.of_json
+                          filters) ?nextToken ?maxResults
+              ~networkMigrationDefinitionID ())
+           (Some Values.ListNetworkMigrationExecutionsResponse.to_json)
+           (Some Values.ListNetworkMigrationExecutionsResponse.error_to_json)])
+let list_network_migration_mapper_segment_constructs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListNetworkMigrationMapperSegmentConstructsFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and networkMigrationExecutionID =
+         flag "network-migration-execution-i-d" (required string)
+           ~doc:"STRING NetworkMigrationExecutionID"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID"
+       and segmentID =
+         flag "segment-i-d" (required string) ~doc:"STRING SegmentID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_network_migration_mapper_segment_constructs
+           (Values.ListNetworkMigrationMapperSegmentConstructsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListNetworkMigrationMapperSegmentConstructsFilters.of_json
+                          filters) ?maxResults ?nextToken
+              ~networkMigrationExecutionID ~networkMigrationDefinitionID
+              ~segmentID ())
+           (Some
+              Values.ListNetworkMigrationMapperSegmentConstructsResponse.to_json)
+           (Some
+              Values.ListNetworkMigrationMapperSegmentConstructsResponse.error_to_json)])
+let list_network_migration_mapper_segments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListNetworkMigrationMapperSegmentsFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and networkMigrationExecutionID =
+         flag "network-migration-execution-i-d" (required string)
+           ~doc:"STRING NetworkMigrationExecutionID"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_network_migration_mapper_segments
+           (Values.ListNetworkMigrationMapperSegmentsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListNetworkMigrationMapperSegmentsFilters.of_json
+                          filters) ?maxResults ?nextToken
+              ~networkMigrationExecutionID ~networkMigrationDefinitionID ())
+           (Some Values.ListNetworkMigrationMapperSegmentsResponse.to_json)
+           (Some
+              Values.ListNetworkMigrationMapperSegmentsResponse.error_to_json)])
+let list_network_migration_mapping_updates =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListNetworkMigrationMappingUpdatesFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and networkMigrationExecutionID =
+         flag "network-migration-execution-i-d" (required string)
+           ~doc:"STRING NetworkMigrationExecutionID"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_network_migration_mapping_updates
+           (Values.ListNetworkMigrationMappingUpdatesRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListNetworkMigrationMappingUpdatesFilters.of_json
+                          filters) ?maxResults ?nextToken
+              ~networkMigrationExecutionID ~networkMigrationDefinitionID ())
+           (Some Values.ListNetworkMigrationMappingUpdatesResponse.to_json)
+           (Some
+              Values.ListNetworkMigrationMappingUpdatesResponse.error_to_json)])
+let list_network_migration_mappings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListNetworkMigrationMappingsFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and networkMigrationExecutionID =
+         flag "network-migration-execution-i-d" (required string)
+           ~doc:"STRING NetworkMigrationExecutionID"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_network_migration_mappings
+           (Values.ListNetworkMigrationMappingsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListNetworkMigrationMappingsFilters.of_json
+                          filters) ?maxResults ?nextToken
+              ~networkMigrationExecutionID ~networkMigrationDefinitionID ())
+           (Some Values.ListNetworkMigrationMappingsResponse.to_json)
+           (Some Values.ListNetworkMigrationMappingsResponse.error_to_json)])
+let list_source_server_actions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON SourceServerActionsRequestFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and sourceServerID =
+         flag "source-server-i-d" (required string)
+           ~doc:"STRING SourceServerID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_source_server_actions
+           (Values.ListSourceServerActionsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.SourceServerActionsRequestFilters.of_json
+                          filters) ?maxResults ?nextToken ?accountID
+              ~sourceServerID ())
+           (Some Values.ListSourceServerActionsResponse.to_json)
+           (Some Values.ListSourceServerActionsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -422,6 +1593,63 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_template_actions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON TemplateActionsRequestFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and launchConfigurationTemplateID =
+         flag "launch-configuration-template-i-d" (required string)
+           ~doc:"STRING LaunchConfigurationTemplateID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_template_actions
+           (Values.ListTemplateActionsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.TemplateActionsRequestFilters.of_json
+                          filters) ?maxResults ?nextToken
+              ~launchConfigurationTemplateID ())
+           (Some Values.ListTemplateActionsResponse.to_json)
+           (Some Values.ListTemplateActionsResponse.error_to_json)])
+let list_waves =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListWavesRequestFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_waves
+           (Values.ListWavesRequest.make
+              ?filters:(Option.map ~f:Values.ListWavesRequestFilters.of_json
+                          filters) ?maxResults ?nextToken ?accountID ())
+           (Some Values.ListWavesResponse.to_json)
+           (Some Values.ListWavesResponse.error_to_json)])
 let mark_as_archived =
   Command.async ~summary:""
     ([%map_open.Command
@@ -432,14 +1660,219 @@ let mark_as_archived =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
        and sourceServerID =
          flag "source-server-i-d" (required string)
            ~doc:"STRING SourceServerID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.mark_as_archived
-           (Values.MarkAsArchivedRequest.make ~sourceServerID ())
+           (Values.MarkAsArchivedRequest.make ?accountID ~sourceServerID ())
            (Some Values.SourceServer.to_json)
+           (Some Values.SourceServer.error_to_json)])
+let pause_replication =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and sourceServerID =
+         flag "source-server-i-d" (required string)
+           ~doc:"STRING SourceServerID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.pause_replication
+           (Values.PauseReplicationRequest.make ?accountID ~sourceServerID ())
+           (Some Values.SourceServer.to_json)
+           (Some Values.SourceServer.error_to_json)])
+let put_source_server_action =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and documentVersion =
+         flag "document-version" (optional string)
+           ~doc:"STRING DocumentVersion"
+       and active = flag "active" (optional bool) ~doc:"BOOL Boolean"
+       and timeoutSeconds =
+         flag "timeout-seconds" (optional int)
+           ~doc:"INT StrictlyPositiveInteger"
+       and mustSucceedForCutover =
+         flag "must-succeed-for-cutover" (optional bool) ~doc:"BOOL Boolean"
+       and parameters =
+         flag "parameters" (optional json_arg)
+           ~doc:"JSON SsmDocumentParameters"
+       and externalParameters =
+         flag "external-parameters" (optional json_arg)
+           ~doc:"JSON SsmDocumentExternalParameters"
+       and description =
+         flag "description" (optional string) ~doc:"STRING ActionDescription"
+       and category =
+         flag "category" (optional json_arg) ~doc:"JSON ActionCategory"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and sourceServerID =
+         flag "source-server-i-d" (required string)
+           ~doc:"STRING SourceServerID"
+       and actionName =
+         flag "action-name" (required string) ~doc:"STRING ActionName"
+       and documentIdentifier =
+         flag "document-identifier" (required string)
+           ~doc:"STRING BoundedString"
+       and order = flag "order" (required int) ~doc:"INT OrderType"
+       and actionID =
+         flag "action-i-d" (required string) ~doc:"STRING ActionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_source_server_action
+           (Values.PutSourceServerActionRequest.make ?documentVersion ?active
+              ?timeoutSeconds ?mustSucceedForCutover
+              ?parameters:(Option.map ~f:Values.SsmDocumentParameters.of_json
+                             parameters)
+              ?externalParameters:(Option.map
+                                     ~f:Values.SsmDocumentExternalParameters.of_json
+                                     externalParameters) ?description
+              ?category:(Option.map ~f:Values.ActionCategory.of_json category)
+              ?accountID ~sourceServerID ~actionName ~documentIdentifier
+              ~order ~actionID ())
+           (Some Values.SourceServerActionDocument.to_json)
+           (Some Values.SourceServerActionDocument.error_to_json)])
+let put_template_action =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and documentVersion =
+         flag "document-version" (optional string)
+           ~doc:"STRING DocumentVersion"
+       and active = flag "active" (optional bool) ~doc:"BOOL Boolean"
+       and timeoutSeconds =
+         flag "timeout-seconds" (optional int)
+           ~doc:"INT StrictlyPositiveInteger"
+       and mustSucceedForCutover =
+         flag "must-succeed-for-cutover" (optional bool) ~doc:"BOOL Boolean"
+       and parameters =
+         flag "parameters" (optional json_arg)
+           ~doc:"JSON SsmDocumentParameters"
+       and operatingSystem =
+         flag "operating-system" (optional string)
+           ~doc:"STRING OperatingSystemString"
+       and externalParameters =
+         flag "external-parameters" (optional json_arg)
+           ~doc:"JSON SsmDocumentExternalParameters"
+       and description =
+         flag "description" (optional string) ~doc:"STRING ActionDescription"
+       and category =
+         flag "category" (optional json_arg) ~doc:"JSON ActionCategory"
+       and launchConfigurationTemplateID =
+         flag "launch-configuration-template-i-d" (required string)
+           ~doc:"STRING LaunchConfigurationTemplateID"
+       and actionName =
+         flag "action-name" (required string) ~doc:"STRING BoundedString"
+       and documentIdentifier =
+         flag "document-identifier" (required string)
+           ~doc:"STRING BoundedString"
+       and order = flag "order" (required int) ~doc:"INT OrderType"
+       and actionID =
+         flag "action-i-d" (required string) ~doc:"STRING ActionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_template_action
+           (Values.PutTemplateActionRequest.make ?documentVersion ?active
+              ?timeoutSeconds ?mustSucceedForCutover
+              ?parameters:(Option.map ~f:Values.SsmDocumentParameters.of_json
+                             parameters) ?operatingSystem
+              ?externalParameters:(Option.map
+                                     ~f:Values.SsmDocumentExternalParameters.of_json
+                                     externalParameters) ?description
+              ?category:(Option.map ~f:Values.ActionCategory.of_json category)
+              ~launchConfigurationTemplateID ~actionName ~documentIdentifier
+              ~order ~actionID ())
+           (Some Values.TemplateActionDocument.to_json)
+           (Some Values.TemplateActionDocument.error_to_json)])
+let remove_source_server_action =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and sourceServerID =
+         flag "source-server-i-d" (required string)
+           ~doc:"STRING SourceServerID"
+       and actionID =
+         flag "action-i-d" (required string) ~doc:"STRING ActionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.remove_source_server_action
+           (Values.RemoveSourceServerActionRequest.make ?accountID
+              ~sourceServerID ~actionID ())
+           (Some Values.RemoveSourceServerActionResponse.to_json)
+           (Some Values.RemoveSourceServerActionResponse.error_to_json)])
+let remove_template_action =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and launchConfigurationTemplateID =
+         flag "launch-configuration-template-i-d" (required string)
+           ~doc:"STRING LaunchConfigurationTemplateID"
+       and actionID =
+         flag "action-i-d" (required string) ~doc:"STRING ActionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.remove_template_action
+           (Values.RemoveTemplateActionRequest.make
+              ~launchConfigurationTemplateID ~actionID ())
+           (Some Values.RemoveTemplateActionResponse.to_json)
+           (Some Values.RemoveTemplateActionResponse.error_to_json)])
+let resume_replication =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and sourceServerID =
+         flag "source-server-i-d" (required string)
+           ~doc:"STRING SourceServerID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.resume_replication
+           (Values.ResumeReplicationRequest.make ?accountID ~sourceServerID
+              ()) (Some Values.SourceServer.to_json)
            (Some Values.SourceServer.error_to_json)])
 let retry_data_replication =
   Command.async ~summary:""
@@ -451,14 +1884,16 @@ let retry_data_replication =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
        and sourceServerID =
          flag "source-server-i-d" (required string)
            ~doc:"STRING SourceServerID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.retry_data_replication
-           (Values.RetryDataReplicationRequest.make ~sourceServerID ())
-           (Some Values.SourceServer.to_json)
+           (Values.RetryDataReplicationRequest.make ?accountID
+              ~sourceServerID ()) (Some Values.SourceServer.to_json)
            (Some Values.SourceServer.error_to_json)])
 let start_cutover =
   Command.async ~summary:""
@@ -471,6 +1906,8 @@ let start_cutover =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
        and sourceServerIDs =
          flag "source-server-i-ds" (required json_arg)
            ~doc:"JSON StartCutoverRequestSourceServerIDs" in
@@ -478,11 +1915,236 @@ let start_cutover =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_cutover
            (Values.StartCutoverRequest.make
-              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ?accountID
               ~sourceServerIDs:(Values.StartCutoverRequestSourceServerIDs.of_json
                                   sourceServerIDs) ())
            (Some Values.StartCutoverResponse.to_json)
            (Some Values.StartCutoverResponse.error_to_json)])
+let start_export =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and s3BucketOwner =
+         flag "s3-bucket-owner" (optional string) ~doc:"STRING AccountID"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and s3Bucket =
+         flag "s3-bucket" (required string) ~doc:"STRING S3BucketName"
+       and s3Key = flag "s3-key" (required string) ~doc:"STRING S3Key" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_export
+           (Values.StartExportRequest.make ?s3BucketOwner
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ~s3Bucket
+              ~s3Key ()) (Some Values.StartExportResponse.to_json)
+           (Some Values.StartExportResponse.error_to_json)])
+let start_import =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING ClientIdempotencyToken"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and s3BucketSource =
+         flag "s3-bucket-source" (required json_arg)
+           ~doc:"JSON S3BucketSource" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_import
+           (Values.StartImportRequest.make ?clientToken
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ~s3BucketSource:(Values.S3BucketSource.of_json s3BucketSource)
+              ()) (Some Values.StartImportResponse.to_json)
+           (Some Values.StartImportResponse.error_to_json)])
+let start_import_file_enrichment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING ClientIdempotencyToken"
+       and ipAssignmentStrategy =
+         flag "ip-assignment-strategy" (optional json_arg)
+           ~doc:"JSON IpAssignmentStrategy"
+       and s3BucketSource =
+         flag "s3-bucket-source" (required json_arg)
+           ~doc:"JSON EnrichmentSourceS3Configuration"
+       and s3BucketTarget =
+         flag "s3-bucket-target" (required json_arg)
+           ~doc:"JSON EnrichmentTargetS3Configuration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_import_file_enrichment
+           (Values.StartImportFileEnrichmentRequest.make ?clientToken
+              ?ipAssignmentStrategy:(Option.map
+                                       ~f:Values.IpAssignmentStrategy.of_json
+                                       ipAssignmentStrategy)
+              ~s3BucketSource:(Values.EnrichmentSourceS3Configuration.of_json
+                                 s3BucketSource)
+              ~s3BucketTarget:(Values.EnrichmentTargetS3Configuration.of_json
+                                 s3BucketTarget) ())
+           (Some Values.StartImportFileEnrichmentResponse.to_json)
+           (Some Values.StartImportFileEnrichmentResponse.error_to_json)])
+let start_network_migration_analysis =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and networkMigrationExecutionID =
+         flag "network-migration-execution-i-d" (required string)
+           ~doc:"STRING NetworkMigrationExecutionID"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_network_migration_analysis
+           (Values.StartNetworkMigrationAnalysisRequest.make
+              ~networkMigrationExecutionID ~networkMigrationDefinitionID ())
+           (Some Values.StartNetworkMigrationAnalysisResponse.to_json)
+           (Some Values.StartNetworkMigrationAnalysisResponse.error_to_json)])
+let start_network_migration_code_generation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and codeGenerationOutputFormatTypes =
+         flag "code-generation-output-format-types" (optional json_arg)
+           ~doc:"JSON CodeGenerationOutputFormatTypes"
+       and networkMigrationExecutionID =
+         flag "network-migration-execution-i-d" (required string)
+           ~doc:"STRING NetworkMigrationExecutionID"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_network_migration_code_generation
+           (Values.StartNetworkMigrationCodeGenerationRequest.make
+              ?codeGenerationOutputFormatTypes:(Option.map
+                                                  ~f:Values.CodeGenerationOutputFormatTypes.of_json
+                                                  codeGenerationOutputFormatTypes)
+              ~networkMigrationExecutionID ~networkMigrationDefinitionID ())
+           (Some Values.StartNetworkMigrationCodeGenerationResponse.to_json)
+           (Some
+              Values.StartNetworkMigrationCodeGenerationResponse.error_to_json)])
+let start_network_migration_deployment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and networkMigrationExecutionID =
+         flag "network-migration-execution-i-d" (required string)
+           ~doc:"STRING NetworkMigrationExecutionID"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_network_migration_deployment
+           (Values.StartNetworkMigrationDeploymentRequest.make
+              ~networkMigrationExecutionID ~networkMigrationDefinitionID ())
+           (Some Values.StartNetworkMigrationDeployerJobResponse.to_json)
+           (Some
+              Values.StartNetworkMigrationDeployerJobResponse.error_to_json)])
+let start_network_migration_mapping =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and securityGroupMappingStrategy =
+         flag "security-group-mapping-strategy" (optional json_arg)
+           ~doc:"JSON SecurityGroupMappingStrategy"
+       and networkMigrationExecutionID =
+         flag "network-migration-execution-i-d" (required string)
+           ~doc:"STRING NetworkMigrationExecutionID"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_network_migration_mapping
+           (Values.StartNetworkMigrationMappingRequest.make
+              ?securityGroupMappingStrategy:(Option.map
+                                               ~f:Values.SecurityGroupMappingStrategy.of_json
+                                               securityGroupMappingStrategy)
+              ~networkMigrationExecutionID ~networkMigrationDefinitionID ())
+           (Some Values.StartNetworkMigrationMappingResponse.to_json)
+           (Some Values.StartNetworkMigrationMappingResponse.error_to_json)])
+let start_network_migration_mapping_update =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and constructs =
+         flag "constructs" (optional json_arg)
+           ~doc:"JSON StartNetworkMigrationMappingUpdateConstructs"
+       and segments =
+         flag "segments" (optional json_arg)
+           ~doc:"JSON StartNetworkMigrationMappingUpdateSegments"
+       and networkMigrationExecutionID =
+         flag "network-migration-execution-i-d" (required string)
+           ~doc:"STRING NetworkMigrationExecutionID"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_network_migration_mapping_update
+           (Values.StartNetworkMigrationMappingUpdateRequest.make
+              ?constructs:(Option.map
+                             ~f:Values.StartNetworkMigrationMappingUpdateConstructs.of_json
+                             constructs)
+              ?segments:(Option.map
+                           ~f:Values.StartNetworkMigrationMappingUpdateSegments.of_json
+                           segments) ~networkMigrationExecutionID
+              ~networkMigrationDefinitionID ())
+           (Some Values.StartNetworkMigrationMappingUpdateResponse.to_json)
+           (Some
+              Values.StartNetworkMigrationMappingUpdateResponse.error_to_json)])
 let start_replication =
   Command.async ~summary:""
     ([%map_open.Command
@@ -493,13 +2155,15 @@ let start_replication =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
        and sourceServerID =
          flag "source-server-i-d" (required string)
            ~doc:"STRING SourceServerID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_replication
-           (Values.StartReplicationRequest.make ~sourceServerID ())
+           (Values.StartReplicationRequest.make ?accountID ~sourceServerID ())
            (Some Values.SourceServer.to_json)
            (Some Values.SourceServer.error_to_json)])
 let start_test =
@@ -513,6 +2177,8 @@ let start_test =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
        and sourceServerIDs =
          flag "source-server-i-ds" (required json_arg)
            ~doc:"JSON StartTestRequestSourceServerIDs" in
@@ -520,11 +2186,32 @@ let start_test =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_test
            (Values.StartTestRequest.make
-              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ?accountID
               ~sourceServerIDs:(Values.StartTestRequestSourceServerIDs.of_json
                                   sourceServerIDs) ())
            (Some Values.StartTestResponse.to_json)
            (Some Values.StartTestResponse.error_to_json)])
+let stop_replication =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and sourceServerID =
+         flag "source-server-i-d" (required string)
+           ~doc:"STRING SourceServerID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_replication
+           (Values.StopReplicationRequest.make ?accountID ~sourceServerID ())
+           (Some Values.SourceServer.to_json)
+           (Some Values.SourceServer.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -554,6 +2241,8 @@ let terminate_target_instances =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
        and sourceServerIDs =
          flag "source-server-i-ds" (required json_arg)
            ~doc:"JSON TerminateTargetInstancesRequestSourceServerIDs" in
@@ -561,11 +2250,49 @@ let terminate_target_instances =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.terminate_target_instances
            (Values.TerminateTargetInstancesRequest.make
-              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ?accountID
               ~sourceServerIDs:(Values.TerminateTargetInstancesRequestSourceServerIDs.of_json
                                   sourceServerIDs) ())
            (Some Values.TerminateTargetInstancesResponse.to_json)
            (Some Values.TerminateTargetInstancesResponse.error_to_json)])
+let unarchive_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and applicationID =
+         flag "application-i-d" (required string) ~doc:"STRING ApplicationID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.unarchive_application
+           (Values.UnarchiveApplicationRequest.make ?accountID ~applicationID
+              ()) (Some Values.Application.to_json)
+           (Some Values.Application.error_to_json)])
+let unarchive_wave =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and waveID = flag "wave-i-d" (required string) ~doc:"STRING WaveID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.unarchive_wave
+           (Values.UnarchiveWaveRequest.make ?accountID ~waveID ())
+           (Some Values.Wave.to_json) (Some Values.Wave.error_to_json)])
 let untag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -584,6 +2311,55 @@ let untag_resource =
            Io.untag_resource
            (Values.UntagResourceRequest.make ~resourceArn
               ~tagKeys:(Values.TagKeys.of_json tagKeys) ()) None None])
+let update_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (optional string) ~doc:"STRING ApplicationName"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING ApplicationDescription"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and applicationID =
+         flag "application-i-d" (required string) ~doc:"STRING ApplicationID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_application
+           (Values.UpdateApplicationRequest.make ?name ?description
+              ?accountID ~applicationID ()) (Some Values.Application.to_json)
+           (Some Values.Application.error_to_json)])
+let update_connector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (optional string) ~doc:"STRING ConnectorName"
+       and ssmCommandConfig =
+         flag "ssm-command-config" (optional json_arg)
+           ~doc:"JSON ConnectorSsmCommandConfig"
+       and connectorID =
+         flag "connector-i-d" (required string) ~doc:"STRING ConnectorID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_connector
+           (Values.UpdateConnectorRequest.make ?name
+              ?ssmCommandConfig:(Option.map
+                                   ~f:Values.ConnectorSsmCommandConfig.of_json
+                                   ssmCommandConfig) ~connectorID ())
+           (Some Values.Connector.to_json)
+           (Some Values.Connector.error_to_json)])
 let update_launch_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -594,40 +2370,217 @@ let update_launch_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and bootMode =
-         flag "boot-mode" (optional json_arg) ~doc:"JSON BootMode"
-       and copyPrivateIp =
-         flag "copy-private-ip" (optional bool) ~doc:"BOOL Boolean"
-       and copyTags = flag "copy-tags" (optional bool) ~doc:"BOOL Boolean"
+       and name =
+         flag "name" (optional string) ~doc:"STRING SmallBoundedString"
        and launchDisposition =
          flag "launch-disposition" (optional json_arg)
            ~doc:"JSON LaunchDisposition"
-       and licensing =
-         flag "licensing" (optional json_arg) ~doc:"JSON Licensing"
-       and name =
-         flag "name" (optional string) ~doc:"STRING SmallBoundedString"
        and targetInstanceTypeRightSizingMethod =
          flag "target-instance-type-right-sizing-method" (optional json_arg)
            ~doc:"JSON TargetInstanceTypeRightSizingMethod"
+       and copyPrivateIp =
+         flag "copy-private-ip" (optional bool) ~doc:"BOOL Boolean"
+       and copyTags = flag "copy-tags" (optional bool) ~doc:"BOOL Boolean"
+       and licensing =
+         flag "licensing" (optional json_arg) ~doc:"JSON Licensing"
+       and bootMode =
+         flag "boot-mode" (optional json_arg) ~doc:"JSON BootMode"
+       and postLaunchActions =
+         flag "post-launch-actions" (optional json_arg)
+           ~doc:"JSON PostLaunchActions"
+       and enableMapAutoTagging =
+         flag "enable-map-auto-tagging" (optional bool) ~doc:"BOOL Boolean"
+       and mapAutoTaggingMpeID =
+         flag "map-auto-tagging-mpe-i-d" (optional string)
+           ~doc:"STRING TagValue"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
        and sourceServerID =
          flag "source-server-i-d" (required string)
            ~doc:"STRING SourceServerID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_launch_configuration
-           (Values.UpdateLaunchConfigurationRequest.make
-              ?bootMode:(Option.map ~f:Values.BootMode.of_json bootMode)
-              ?copyPrivateIp ?copyTags
+           (Values.UpdateLaunchConfigurationRequest.make ?name
               ?launchDisposition:(Option.map
                                     ~f:Values.LaunchDisposition.of_json
                                     launchDisposition)
-              ?licensing:(Option.map ~f:Values.Licensing.of_json licensing)
-              ?name
               ?targetInstanceTypeRightSizingMethod:(Option.map
                                                       ~f:Values.TargetInstanceTypeRightSizingMethod.of_json
                                                       targetInstanceTypeRightSizingMethod)
-              ~sourceServerID ()) (Some Values.LaunchConfiguration.to_json)
+              ?copyPrivateIp ?copyTags
+              ?licensing:(Option.map ~f:Values.Licensing.of_json licensing)
+              ?bootMode:(Option.map ~f:Values.BootMode.of_json bootMode)
+              ?postLaunchActions:(Option.map
+                                    ~f:Values.PostLaunchActions.of_json
+                                    postLaunchActions) ?enableMapAutoTagging
+              ?mapAutoTaggingMpeID ?accountID ~sourceServerID ())
+           (Some Values.LaunchConfiguration.to_json)
            (Some Values.LaunchConfiguration.error_to_json)])
+let update_launch_configuration_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and postLaunchActions =
+         flag "post-launch-actions" (optional json_arg)
+           ~doc:"JSON PostLaunchActions"
+       and enableMapAutoTagging =
+         flag "enable-map-auto-tagging" (optional bool) ~doc:"BOOL Boolean"
+       and mapAutoTaggingMpeID =
+         flag "map-auto-tagging-mpe-i-d" (optional string)
+           ~doc:"STRING TagValue"
+       and launchDisposition =
+         flag "launch-disposition" (optional json_arg)
+           ~doc:"JSON LaunchDisposition"
+       and targetInstanceTypeRightSizingMethod =
+         flag "target-instance-type-right-sizing-method" (optional json_arg)
+           ~doc:"JSON TargetInstanceTypeRightSizingMethod"
+       and copyPrivateIp =
+         flag "copy-private-ip" (optional bool) ~doc:"BOOL Boolean"
+       and associatePublicIpAddress =
+         flag "associate-public-ip-address" (optional bool)
+           ~doc:"BOOL Boolean"
+       and copyTags = flag "copy-tags" (optional bool) ~doc:"BOOL Boolean"
+       and licensing =
+         flag "licensing" (optional json_arg) ~doc:"JSON Licensing"
+       and bootMode =
+         flag "boot-mode" (optional json_arg) ~doc:"JSON BootMode"
+       and smallVolumeMaxSize =
+         flag "small-volume-max-size" (optional json_arg)
+           ~doc:"JSON PositiveInteger"
+       and smallVolumeConf =
+         flag "small-volume-conf" (optional json_arg)
+           ~doc:"JSON LaunchTemplateDiskConf"
+       and largeVolumeConf =
+         flag "large-volume-conf" (optional json_arg)
+           ~doc:"JSON LaunchTemplateDiskConf"
+       and enableParametersEncryption =
+         flag "enable-parameters-encryption" (optional bool)
+           ~doc:"BOOL Boolean"
+       and parametersEncryptionKey =
+         flag "parameters-encryption-key" (optional string) ~doc:"STRING ARN"
+       and launchConfigurationTemplateID =
+         flag "launch-configuration-template-i-d" (required string)
+           ~doc:"STRING LaunchConfigurationTemplateID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_launch_configuration_template
+           (Values.UpdateLaunchConfigurationTemplateRequest.make
+              ?postLaunchActions:(Option.map
+                                    ~f:Values.PostLaunchActions.of_json
+                                    postLaunchActions) ?enableMapAutoTagging
+              ?mapAutoTaggingMpeID
+              ?launchDisposition:(Option.map
+                                    ~f:Values.LaunchDisposition.of_json
+                                    launchDisposition)
+              ?targetInstanceTypeRightSizingMethod:(Option.map
+                                                      ~f:Values.TargetInstanceTypeRightSizingMethod.of_json
+                                                      targetInstanceTypeRightSizingMethod)
+              ?copyPrivateIp ?associatePublicIpAddress ?copyTags
+              ?licensing:(Option.map ~f:Values.Licensing.of_json licensing)
+              ?bootMode:(Option.map ~f:Values.BootMode.of_json bootMode)
+              ?smallVolumeMaxSize:(Option.map
+                                     ~f:Values.PositiveInteger.of_json
+                                     smallVolumeMaxSize)
+              ?smallVolumeConf:(Option.map
+                                  ~f:Values.LaunchTemplateDiskConf.of_json
+                                  smallVolumeConf)
+              ?largeVolumeConf:(Option.map
+                                  ~f:Values.LaunchTemplateDiskConf.of_json
+                                  largeVolumeConf)
+              ?enableParametersEncryption ?parametersEncryptionKey
+              ~launchConfigurationTemplateID ())
+           (Some Values.LaunchConfigurationTemplate.to_json)
+           (Some Values.LaunchConfigurationTemplate.error_to_json)])
+let update_network_migration_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (optional string)
+           ~doc:"STRING NetworkMigrationDefinitionName"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING NetworkMigrationDefinitionDescription"
+       and sourceConfigurations =
+         flag "source-configurations" (optional json_arg)
+           ~doc:"JSON SourceConfigurationList"
+       and targetS3Configuration =
+         flag "target-s3-configuration" (optional json_arg)
+           ~doc:"JSON TargetS3ConfigurationUpdate"
+       and targetNetwork =
+         flag "target-network" (optional json_arg)
+           ~doc:"JSON TargetNetworkUpdate"
+       and targetDeployment =
+         flag "target-deployment" (optional json_arg)
+           ~doc:"JSON TargetDeployment"
+       and scopeTags =
+         flag "scope-tags" (optional json_arg) ~doc:"JSON ScopeTagsMap"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_network_migration_definition
+           (Values.UpdateNetworkMigrationDefinitionRequest.make ?name
+              ?description
+              ?sourceConfigurations:(Option.map
+                                       ~f:Values.SourceConfigurationList.of_json
+                                       sourceConfigurations)
+              ?targetS3Configuration:(Option.map
+                                        ~f:Values.TargetS3ConfigurationUpdate.of_json
+                                        targetS3Configuration)
+              ?targetNetwork:(Option.map
+                                ~f:Values.TargetNetworkUpdate.of_json
+                                targetNetwork)
+              ?targetDeployment:(Option.map
+                                   ~f:Values.TargetDeployment.of_json
+                                   targetDeployment)
+              ?scopeTags:(Option.map ~f:Values.ScopeTagsMap.of_json scopeTags)
+              ~networkMigrationDefinitionID ())
+           (Some Values.NetworkMigrationDefinition.to_json)
+           (Some Values.NetworkMigrationDefinition.error_to_json)])
+let update_network_migration_mapper_segment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scopeTags =
+         flag "scope-tags" (optional json_arg) ~doc:"JSON ScopeTagsMap"
+       and networkMigrationDefinitionID =
+         flag "network-migration-definition-i-d" (required string)
+           ~doc:"STRING NetworkMigrationDefinitionID"
+       and networkMigrationExecutionID =
+         flag "network-migration-execution-i-d" (required string)
+           ~doc:"STRING NetworkMigrationExecutionID"
+       and segmentID =
+         flag "segment-i-d" (required string) ~doc:"STRING SegmentID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_network_migration_mapper_segment
+           (Values.UpdateNetworkMigrationMapperSegmentRequest.make
+              ?scopeTags:(Option.map ~f:Values.ScopeTagsMap.of_json scopeTags)
+              ~networkMigrationDefinitionID ~networkMigrationExecutionID
+              ~segmentID ())
+           (Some Values.NetworkMigrationMapperSegment.to_json)
+           (Some Values.NetworkMigrationMapperSegment.error_to_json)])
 let update_replication_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -638,43 +2591,53 @@ let update_replication_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (optional string) ~doc:"STRING SmallBoundedString"
+       and stagingAreaSubnetId =
+         flag "staging-area-subnet-id" (optional string)
+           ~doc:"STRING SubnetID"
        and associateDefaultSecurityGroup =
          flag "associate-default-security-group" (optional bool)
            ~doc:"BOOL Boolean"
-       and bandwidthThrottling =
-         flag "bandwidth-throttling" (optional json_arg)
-           ~doc:"JSON PositiveInteger"
-       and createPublicIP =
-         flag "create-public-i-p" (optional bool) ~doc:"BOOL Boolean"
-       and dataPlaneRouting =
-         flag "data-plane-routing" (optional json_arg)
-           ~doc:"JSON ReplicationConfigurationDataPlaneRouting"
+       and replicationServersSecurityGroupsIDs =
+         flag "replication-servers-security-groups-i-ds" (optional json_arg)
+           ~doc:"JSON ReplicationServersSecurityGroupsIDs"
+       and replicationServerInstanceType =
+         flag "replication-server-instance-type" (optional string)
+           ~doc:"STRING EC2InstanceType"
+       and useDedicatedReplicationServer =
+         flag "use-dedicated-replication-server" (optional bool)
+           ~doc:"BOOL Boolean"
        and defaultLargeStagingDiskType =
          flag "default-large-staging-disk-type" (optional json_arg)
            ~doc:"JSON ReplicationConfigurationDefaultLargeStagingDiskType"
+       and replicatedDisks =
+         flag "replicated-disks" (optional json_arg)
+           ~doc:"JSON ReplicationConfigurationReplicatedDisks"
        and ebsEncryption =
          flag "ebs-encryption" (optional json_arg)
            ~doc:"JSON ReplicationConfigurationEbsEncryption"
        and ebsEncryptionKeyArn =
          flag "ebs-encryption-key-arn" (optional string) ~doc:"STRING ARN"
-       and name =
-         flag "name" (optional string) ~doc:"STRING SmallBoundedString"
-       and replicatedDisks =
-         flag "replicated-disks" (optional json_arg)
-           ~doc:"JSON ReplicationConfigurationReplicatedDisks"
-       and replicationServerInstanceType =
-         flag "replication-server-instance-type" (optional string)
-           ~doc:"STRING EC2InstanceType"
-       and replicationServersSecurityGroupsIDs =
-         flag "replication-servers-security-groups-i-ds" (optional json_arg)
-           ~doc:"JSON ReplicationServersSecurityGroupsIDs"
-       and stagingAreaSubnetId =
-         flag "staging-area-subnet-id" (optional string)
-           ~doc:"STRING SubnetID"
+       and bandwidthThrottling =
+         flag "bandwidth-throttling" (optional json_arg)
+           ~doc:"JSON BandwidthThrottling"
+       and dataPlaneRouting =
+         flag "data-plane-routing" (optional json_arg)
+           ~doc:"JSON ReplicationConfigurationDataPlaneRouting"
+       and createPublicIP =
+         flag "create-public-i-p" (optional bool) ~doc:"BOOL Boolean"
        and stagingAreaTags =
          flag "staging-area-tags" (optional json_arg) ~doc:"JSON TagsMap"
-       and useDedicatedReplicationServer =
-         flag "use-dedicated-replication-server" (optional bool)
+       and useFipsEndpoint =
+         flag "use-fips-endpoint" (optional bool) ~doc:"BOOL Boolean"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and internetProtocol =
+         flag "internet-protocol" (optional json_arg)
+           ~doc:"JSON InternetProtocol"
+       and storeSnapshotOnLocalZone =
+         flag "store-snapshot-on-local-zone" (optional bool)
            ~doc:"BOOL Boolean"
        and sourceServerID =
          flag "source-server-i-d" (required string)
@@ -682,31 +2645,34 @@ let update_replication_configuration =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_replication_configuration
-           (Values.UpdateReplicationConfigurationRequest.make
-              ?associateDefaultSecurityGroup
-              ?bandwidthThrottling:(Option.map
-                                      ~f:Values.PositiveInteger.of_json
-                                      bandwidthThrottling) ?createPublicIP
-              ?dataPlaneRouting:(Option.map
-                                   ~f:Values.ReplicationConfigurationDataPlaneRouting.of_json
-                                   dataPlaneRouting)
-              ?defaultLargeStagingDiskType:(Option.map
-                                              ~f:Values.ReplicationConfigurationDefaultLargeStagingDiskType.of_json
-                                              defaultLargeStagingDiskType)
-              ?ebsEncryption:(Option.map
-                                ~f:Values.ReplicationConfigurationEbsEncryption.of_json
-                                ebsEncryption) ?ebsEncryptionKeyArn ?name
-              ?replicatedDisks:(Option.map
-                                  ~f:Values.ReplicationConfigurationReplicatedDisks.of_json
-                                  replicatedDisks)
-              ?replicationServerInstanceType
+           (Values.UpdateReplicationConfigurationRequest.make ?name
+              ?stagingAreaSubnetId ?associateDefaultSecurityGroup
               ?replicationServersSecurityGroupsIDs:(Option.map
                                                       ~f:Values.ReplicationServersSecurityGroupsIDs.of_json
                                                       replicationServersSecurityGroupsIDs)
-              ?stagingAreaSubnetId
+              ?replicationServerInstanceType ?useDedicatedReplicationServer
+              ?defaultLargeStagingDiskType:(Option.map
+                                              ~f:Values.ReplicationConfigurationDefaultLargeStagingDiskType.of_json
+                                              defaultLargeStagingDiskType)
+              ?replicatedDisks:(Option.map
+                                  ~f:Values.ReplicationConfigurationReplicatedDisks.of_json
+                                  replicatedDisks)
+              ?ebsEncryption:(Option.map
+                                ~f:Values.ReplicationConfigurationEbsEncryption.of_json
+                                ebsEncryption) ?ebsEncryptionKeyArn
+              ?bandwidthThrottling:(Option.map
+                                      ~f:Values.BandwidthThrottling.of_json
+                                      bandwidthThrottling)
+              ?dataPlaneRouting:(Option.map
+                                   ~f:Values.ReplicationConfigurationDataPlaneRouting.of_json
+                                   dataPlaneRouting) ?createPublicIP
               ?stagingAreaTags:(Option.map ~f:Values.TagsMap.of_json
-                                  stagingAreaTags)
-              ?useDedicatedReplicationServer ~sourceServerID ())
+                                  stagingAreaTags) ?useFipsEndpoint
+              ?accountID
+              ?internetProtocol:(Option.map
+                                   ~f:Values.InternetProtocol.of_json
+                                   internetProtocol)
+              ?storeSnapshotOnLocalZone ~sourceServerID ())
            (Some Values.ReplicationConfiguration.to_json)
            (Some Values.ReplicationConfiguration.error_to_json)])
 let update_replication_configuration_template =
@@ -720,17 +2686,21 @@ let update_replication_configuration_template =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and arn = flag "arn" (optional string) ~doc:"STRING ARN"
+       and stagingAreaSubnetId =
+         flag "staging-area-subnet-id" (optional string)
+           ~doc:"STRING SubnetID"
        and associateDefaultSecurityGroup =
          flag "associate-default-security-group" (optional bool)
            ~doc:"BOOL Boolean"
-       and bandwidthThrottling =
-         flag "bandwidth-throttling" (optional json_arg)
-           ~doc:"JSON PositiveInteger"
-       and createPublicIP =
-         flag "create-public-i-p" (optional bool) ~doc:"BOOL Boolean"
-       and dataPlaneRouting =
-         flag "data-plane-routing" (optional json_arg)
-           ~doc:"JSON ReplicationConfigurationDataPlaneRouting"
+       and replicationServersSecurityGroupsIDs =
+         flag "replication-servers-security-groups-i-ds" (optional json_arg)
+           ~doc:"JSON ReplicationServersSecurityGroupsIDs"
+       and replicationServerInstanceType =
+         flag "replication-server-instance-type" (optional string)
+           ~doc:"STRING EC2InstanceType"
+       and useDedicatedReplicationServer =
+         flag "use-dedicated-replication-server" (optional bool)
+           ~doc:"BOOL Boolean"
        and defaultLargeStagingDiskType =
          flag "default-large-staging-disk-type" (optional json_arg)
            ~doc:"JSON ReplicationConfigurationDefaultLargeStagingDiskType"
@@ -739,19 +2709,23 @@ let update_replication_configuration_template =
            ~doc:"JSON ReplicationConfigurationEbsEncryption"
        and ebsEncryptionKeyArn =
          flag "ebs-encryption-key-arn" (optional string) ~doc:"STRING ARN"
-       and replicationServerInstanceType =
-         flag "replication-server-instance-type" (optional string)
-           ~doc:"STRING EC2InstanceType"
-       and replicationServersSecurityGroupsIDs =
-         flag "replication-servers-security-groups-i-ds" (optional json_arg)
-           ~doc:"JSON ReplicationServersSecurityGroupsIDs"
-       and stagingAreaSubnetId =
-         flag "staging-area-subnet-id" (optional string)
-           ~doc:"STRING SubnetID"
+       and bandwidthThrottling =
+         flag "bandwidth-throttling" (optional json_arg)
+           ~doc:"JSON BandwidthThrottling"
+       and dataPlaneRouting =
+         flag "data-plane-routing" (optional json_arg)
+           ~doc:"JSON ReplicationConfigurationDataPlaneRouting"
+       and createPublicIP =
+         flag "create-public-i-p" (optional bool) ~doc:"BOOL Boolean"
        and stagingAreaTags =
          flag "staging-area-tags" (optional json_arg) ~doc:"JSON TagsMap"
-       and useDedicatedReplicationServer =
-         flag "use-dedicated-replication-server" (optional bool)
+       and useFipsEndpoint =
+         flag "use-fips-endpoint" (optional bool) ~doc:"BOOL Boolean"
+       and internetProtocol =
+         flag "internet-protocol" (optional json_arg)
+           ~doc:"JSON InternetProtocol"
+       and storeSnapshotOnLocalZone =
+         flag "store-snapshot-on-local-zone" (optional bool)
            ~doc:"BOOL Boolean"
        and replicationConfigurationTemplateID =
          flag "replication-configuration-template-i-d" (required string)
@@ -760,30 +2734,58 @@ let update_replication_configuration_template =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_replication_configuration_template
            (Values.UpdateReplicationConfigurationTemplateRequest.make ?arn
-              ?associateDefaultSecurityGroup
-              ?bandwidthThrottling:(Option.map
-                                      ~f:Values.PositiveInteger.of_json
-                                      bandwidthThrottling) ?createPublicIP
-              ?dataPlaneRouting:(Option.map
-                                   ~f:Values.ReplicationConfigurationDataPlaneRouting.of_json
-                                   dataPlaneRouting)
+              ?stagingAreaSubnetId ?associateDefaultSecurityGroup
+              ?replicationServersSecurityGroupsIDs:(Option.map
+                                                      ~f:Values.ReplicationServersSecurityGroupsIDs.of_json
+                                                      replicationServersSecurityGroupsIDs)
+              ?replicationServerInstanceType ?useDedicatedReplicationServer
               ?defaultLargeStagingDiskType:(Option.map
                                               ~f:Values.ReplicationConfigurationDefaultLargeStagingDiskType.of_json
                                               defaultLargeStagingDiskType)
               ?ebsEncryption:(Option.map
                                 ~f:Values.ReplicationConfigurationEbsEncryption.of_json
                                 ebsEncryption) ?ebsEncryptionKeyArn
-              ?replicationServerInstanceType
-              ?replicationServersSecurityGroupsIDs:(Option.map
-                                                      ~f:Values.ReplicationServersSecurityGroupsIDs.of_json
-                                                      replicationServersSecurityGroupsIDs)
-              ?stagingAreaSubnetId
+              ?bandwidthThrottling:(Option.map
+                                      ~f:Values.BandwidthThrottling.of_json
+                                      bandwidthThrottling)
+              ?dataPlaneRouting:(Option.map
+                                   ~f:Values.ReplicationConfigurationDataPlaneRouting.of_json
+                                   dataPlaneRouting) ?createPublicIP
               ?stagingAreaTags:(Option.map ~f:Values.TagsMap.of_json
-                                  stagingAreaTags)
-              ?useDedicatedReplicationServer
-              ~replicationConfigurationTemplateID ())
-           (Some Values.ReplicationConfigurationTemplate.to_json)
+                                  stagingAreaTags) ?useFipsEndpoint
+              ?internetProtocol:(Option.map
+                                   ~f:Values.InternetProtocol.of_json
+                                   internetProtocol)
+              ?storeSnapshotOnLocalZone ~replicationConfigurationTemplateID
+              ()) (Some Values.ReplicationConfigurationTemplate.to_json)
            (Some Values.ReplicationConfigurationTemplate.error_to_json)])
+let update_source_server =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and connectorAction =
+         flag "connector-action" (optional json_arg)
+           ~doc:"JSON SourceServerConnectorAction"
+       and sourceServerID =
+         flag "source-server-i-d" (required string)
+           ~doc:"STRING SourceServerID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_source_server
+           (Values.UpdateSourceServerRequest.make ?accountID
+              ?connectorAction:(Option.map
+                                  ~f:Values.SourceServerConnectorAction.of_json
+                                  connectorAction) ~sourceServerID ())
+           (Some Values.SourceServer.to_json)
+           (Some Values.SourceServer.error_to_json)])
 let update_source_server_replication_type =
   Command.async ~summary:""
     ([%map_open.Command
@@ -794,54 +2796,166 @@ let update_source_server_replication_type =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and replicationType =
-         flag "replication-type" (required json_arg)
-           ~doc:"JSON ReplicationType"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
        and sourceServerID =
          flag "source-server-i-d" (required string)
-           ~doc:"STRING SourceServerID" in
+           ~doc:"STRING SourceServerID"
+       and replicationType =
+         flag "replication-type" (required json_arg)
+           ~doc:"JSON ReplicationType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_source_server_replication_type
-           (Values.UpdateSourceServerReplicationTypeRequest.make
+           (Values.UpdateSourceServerReplicationTypeRequest.make ?accountID
+              ~sourceServerID
               ~replicationType:(Values.ReplicationType.of_json
-                                  replicationType) ~sourceServerID ())
+                                  replicationType) ())
            (Some Values.SourceServer.to_json)
            (Some Values.SourceServer.error_to_json)])
+let update_wave =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (optional string) ~doc:"STRING WaveName"
+       and description =
+         flag "description" (optional string) ~doc:"STRING WaveDescription"
+       and accountID =
+         flag "account-i-d" (optional string) ~doc:"STRING AccountID"
+       and waveID = flag "wave-i-d" (required string) ~doc:"STRING WaveID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_wave
+           (Values.UpdateWaveRequest.make ?name ?description ?accountID
+              ~waveID ()) (Some Values.Wave.to_json)
+           (Some Values.Wave.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("change-server-life-cycle-state", change_server_life_cycle_state);
+    [("archive-application", archive_application);
+    ("archive-wave", archive_wave);
+    ("associate-applications", associate_applications);
+    ("associate-source-servers", associate_source_servers);
+    ("change-server-life-cycle-state", change_server_life_cycle_state);
+    ("create-application", create_application);
+    ("create-connector", create_connector);
+    ("create-launch-configuration-template",
+      create_launch_configuration_template);
+    ("create-network-migration-definition",
+      create_network_migration_definition);
     ("create-replication-configuration-template",
       create_replication_configuration_template);
+    ("create-wave", create_wave);
+    ("delete-application", delete_application);
+    ("delete-connector", delete_connector);
     ("delete-job", delete_job);
+    ("delete-launch-configuration-template",
+      delete_launch_configuration_template);
+    ("delete-network-migration-definition",
+      delete_network_migration_definition);
     ("delete-replication-configuration-template",
       delete_replication_configuration_template);
     ("delete-source-server", delete_source_server);
     ("delete-vcenter-client", delete_vcenter_client);
+    ("delete-wave", delete_wave);
     ("describe-job-log-items", describe_job_log_items);
     ("describe-jobs", describe_jobs);
+    ("describe-launch-configuration-templates",
+      describe_launch_configuration_templates);
     ("describe-replication-configuration-templates",
       describe_replication_configuration_templates);
     ("describe-source-servers", describe_source_servers);
     ("describe-vcenter-clients", describe_vcenter_clients);
+    ("disassociate-applications", disassociate_applications);
+    ("disassociate-source-servers", disassociate_source_servers);
     ("disconnect-from-service", disconnect_from_service);
     ("finalize-cutover", finalize_cutover);
     ("get-launch-configuration", get_launch_configuration);
+    ("get-network-migration-definition", get_network_migration_definition);
+    ("get-network-migration-mapper-segment-construct",
+      get_network_migration_mapper_segment_construct);
     ("get-replication-configuration", get_replication_configuration);
     ("initialize-service", initialize_service);
+    ("list-applications", list_applications);
+    ("list-connectors", list_connectors);
+    ("list-export-errors", list_export_errors);
+    ("list-exports", list_exports);
+    ("list-import-errors", list_import_errors);
+    ("list-import-file-enrichments", list_import_file_enrichments);
+    ("list-imports", list_imports);
+    ("list-managed-accounts", list_managed_accounts);
+    ("list-network-migration-analyses", list_network_migration_analyses);
+    ("list-network-migration-analysis-results",
+      list_network_migration_analysis_results);
+    ("list-network-migration-code-generation-segments",
+      list_network_migration_code_generation_segments);
+    ("list-network-migration-code-generations",
+      list_network_migration_code_generations);
+    ("list-network-migration-definitions",
+      list_network_migration_definitions);
+    ("list-network-migration-deployed-stacks",
+      list_network_migration_deployed_stacks);
+    ("list-network-migration-deployments",
+      list_network_migration_deployments);
+    ("list-network-migration-executions", list_network_migration_executions);
+    ("list-network-migration-mapper-segment-constructs",
+      list_network_migration_mapper_segment_constructs);
+    ("list-network-migration-mapper-segments",
+      list_network_migration_mapper_segments);
+    ("list-network-migration-mapping-updates",
+      list_network_migration_mapping_updates);
+    ("list-network-migration-mappings", list_network_migration_mappings);
+    ("list-source-server-actions", list_source_server_actions);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-template-actions", list_template_actions);
+    ("list-waves", list_waves);
     ("mark-as-archived", mark_as_archived);
+    ("pause-replication", pause_replication);
+    ("put-source-server-action", put_source_server_action);
+    ("put-template-action", put_template_action);
+    ("remove-source-server-action", remove_source_server_action);
+    ("remove-template-action", remove_template_action);
+    ("resume-replication", resume_replication);
     ("retry-data-replication", retry_data_replication);
     ("start-cutover", start_cutover);
+    ("start-export", start_export);
+    ("start-import", start_import);
+    ("start-import-file-enrichment", start_import_file_enrichment);
+    ("start-network-migration-analysis", start_network_migration_analysis);
+    ("start-network-migration-code-generation",
+      start_network_migration_code_generation);
+    ("start-network-migration-deployment",
+      start_network_migration_deployment);
+    ("start-network-migration-mapping", start_network_migration_mapping);
+    ("start-network-migration-mapping-update",
+      start_network_migration_mapping_update);
     ("start-replication", start_replication);
     ("start-test", start_test);
+    ("stop-replication", stop_replication);
     ("tag-resource", tag_resource);
     ("terminate-target-instances", terminate_target_instances);
+    ("unarchive-application", unarchive_application);
+    ("unarchive-wave", unarchive_wave);
     ("untag-resource", untag_resource);
+    ("update-application", update_application);
+    ("update-connector", update_connector);
     ("update-launch-configuration", update_launch_configuration);
+    ("update-launch-configuration-template",
+      update_launch_configuration_template);
+    ("update-network-migration-definition",
+      update_network_migration_definition);
+    ("update-network-migration-mapper-segment",
+      update_network_migration_mapper_segment);
     ("update-replication-configuration", update_replication_configuration);
     ("update-replication-configuration-template",
       update_replication_configuration_template);
+    ("update-source-server", update_source_server);
     ("update-source-server-replication-type",
-      update_source_server_replication_type)]
+      update_source_server_replication_type);
+    ("update-wave", update_wave)]

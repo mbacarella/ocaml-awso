@@ -70,6 +70,9 @@ module StaticParameterValues =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StringWithCharLimit256.to_value)) |>
         (fun x -> `List x)
@@ -127,8 +130,8 @@ module ResourceValue =
           (Xml.child_exn ~context:context_ xml_arg0 "Value") in
       make ~value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" ResourceValueType.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" ResourceValueType.of_json in
       make ~value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The dynamic value of the resource."]
@@ -151,11 +154,1928 @@ module StaticValue =
           (Xml.child_exn ~context:context_ xml_arg0 "Values") in
       make ~values ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map_exn json "Values" StaticParameterValues.of_json in
+    let of_json json__ =
+      let values =
+        field_map_exn json__ "Values" StaticParameterValues.of_json in
       make ~values ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The static value of the resource."]
+module ResourceType =
+  struct
+    type nonrec t =
+      | AWS__EC2__CustomerGateway 
+      | AWS__EC2__EIP 
+      | AWS__EC2__Host 
+      | AWS__EC2__Instance 
+      | AWS__EC2__InternetGateway 
+      | AWS__EC2__NetworkAcl 
+      | AWS__EC2__NetworkInterface 
+      | AWS__EC2__RouteTable 
+      | AWS__EC2__SecurityGroup 
+      | AWS__EC2__Subnet 
+      | AWS__CloudTrail__Trail 
+      | AWS__EC2__Volume 
+      | AWS__EC2__VPC 
+      | AWS__EC2__VPNConnection 
+      | AWS__EC2__VPNGateway 
+      | AWS__EC2__RegisteredHAInstance 
+      | AWS__EC2__NatGateway 
+      | AWS__EC2__EgressOnlyInternetGateway 
+      | AWS__EC2__VPCEndpoint 
+      | AWS__EC2__VPCEndpointService 
+      | AWS__EC2__FlowLog 
+      | AWS__EC2__VPCPeeringConnection 
+      | AWS__Elasticsearch__Domain 
+      | AWS__IAM__Group 
+      | AWS__IAM__Policy 
+      | AWS__IAM__Role 
+      | AWS__IAM__User 
+      | AWS__ElasticLoadBalancingV2__LoadBalancer 
+      | AWS__ACM__Certificate 
+      | AWS__RDS__DBInstance 
+      | AWS__RDS__DBSubnetGroup 
+      | AWS__RDS__DBSecurityGroup 
+      | AWS__RDS__DBSnapshot 
+      | AWS__RDS__DBCluster 
+      | AWS__RDS__DBClusterSnapshot 
+      | AWS__RDS__EventSubscription 
+      | AWS__S3__Bucket 
+      | AWS__S3__AccountPublicAccessBlock 
+      | AWS__Redshift__Cluster 
+      | AWS__Redshift__ClusterSnapshot 
+      | AWS__Redshift__ClusterParameterGroup 
+      | AWS__Redshift__ClusterSecurityGroup 
+      | AWS__Redshift__ClusterSubnetGroup 
+      | AWS__Redshift__EventSubscription 
+      | AWS__SSM__ManagedInstanceInventory 
+      | AWS__CloudWatch__Alarm 
+      | AWS__CloudFormation__Stack 
+      | AWS__ElasticLoadBalancing__LoadBalancer 
+      | AWS__AutoScaling__AutoScalingGroup 
+      | AWS__AutoScaling__LaunchConfiguration 
+      | AWS__AutoScaling__ScalingPolicy 
+      | AWS__AutoScaling__ScheduledAction 
+      | AWS__DynamoDB__Table 
+      | AWS__CodeBuild__Project 
+      | AWS__WAF__RateBasedRule 
+      | AWS__WAF__Rule 
+      | AWS__WAF__RuleGroup 
+      | AWS__WAF__WebACL 
+      | AWS__WAFRegional__RateBasedRule 
+      | AWS__WAFRegional__Rule 
+      | AWS__WAFRegional__RuleGroup 
+      | AWS__WAFRegional__WebACL 
+      | AWS__CloudFront__Distribution 
+      | AWS__CloudFront__StreamingDistribution 
+      | AWS__Lambda__Function 
+      | AWS__NetworkFirewall__Firewall 
+      | AWS__NetworkFirewall__FirewallPolicy 
+      | AWS__NetworkFirewall__RuleGroup 
+      | AWS__ElasticBeanstalk__Application 
+      | AWS__ElasticBeanstalk__ApplicationVersion 
+      | AWS__ElasticBeanstalk__Environment 
+      | AWS__WAFv2__WebACL 
+      | AWS__WAFv2__RuleGroup 
+      | AWS__WAFv2__IPSet 
+      | AWS__WAFv2__RegexPatternSet 
+      | AWS__WAFv2__ManagedRuleSet 
+      | AWS__XRay__EncryptionConfig 
+      | AWS__SSM__AssociationCompliance 
+      | AWS__SSM__PatchCompliance 
+      | AWS__Shield__Protection 
+      | AWS__ShieldRegional__Protection 
+      | AWS__Config__ConformancePackCompliance 
+      | AWS__Config__ResourceCompliance 
+      | AWS__ApiGateway__Stage 
+      | AWS__ApiGateway__RestApi 
+      | AWS__ApiGatewayV2__Stage 
+      | AWS__ApiGatewayV2__Api 
+      | AWS__CodePipeline__Pipeline 
+      | AWS__ServiceCatalog__CloudFormationProvisionedProduct 
+      | AWS__ServiceCatalog__CloudFormationProduct 
+      | AWS__ServiceCatalog__Portfolio 
+      | AWS__SQS__Queue 
+      | AWS__KMS__Key 
+      | AWS__QLDB__Ledger 
+      | AWS__SecretsManager__Secret 
+      | AWS__SNS__Topic 
+      | AWS__SSM__FileData 
+      | AWS__Backup__BackupPlan 
+      | AWS__Backup__BackupSelection 
+      | AWS__Backup__BackupVault 
+      | AWS__Backup__RecoveryPoint 
+      | AWS__ECR__Repository 
+      | AWS__ECS__Cluster 
+      | AWS__ECS__Service 
+      | AWS__ECS__TaskDefinition 
+      | AWS__EFS__AccessPoint 
+      | AWS__EFS__FileSystem 
+      | AWS__EKS__Cluster 
+      | AWS__OpenSearch__Domain 
+      | AWS__EC2__TransitGateway 
+      | AWS__Kinesis__Stream 
+      | AWS__Kinesis__StreamConsumer 
+      | AWS__CodeDeploy__Application 
+      | AWS__CodeDeploy__DeploymentConfig 
+      | AWS__CodeDeploy__DeploymentGroup 
+      | AWS__EC2__LaunchTemplate 
+      | AWS__ECR__PublicRepository 
+      | AWS__GuardDuty__Detector 
+      | AWS__EMR__SecurityConfiguration 
+      | AWS__SageMaker__CodeRepository 
+      | AWS__Route53Resolver__ResolverEndpoint 
+      | AWS__Route53Resolver__ResolverRule 
+      | AWS__Route53Resolver__ResolverRuleAssociation 
+      | AWS__DMS__ReplicationSubnetGroup 
+      | AWS__DMS__EventSubscription 
+      | AWS__MSK__Cluster 
+      | AWS__StepFunctions__Activity 
+      | AWS__WorkSpaces__Workspace 
+      | AWS__WorkSpaces__ConnectionAlias 
+      | AWS__SageMaker__Model 
+      | AWS__ElasticLoadBalancingV2__Listener 
+      | AWS__StepFunctions__StateMachine 
+      | AWS__Batch__JobQueue 
+      | AWS__Batch__ComputeEnvironment 
+      | AWS__AccessAnalyzer__Analyzer 
+      | AWS__Athena__WorkGroup 
+      | AWS__Athena__DataCatalog 
+      | AWS__Detective__Graph 
+      | AWS__GlobalAccelerator__Accelerator 
+      | AWS__GlobalAccelerator__EndpointGroup 
+      | AWS__GlobalAccelerator__Listener 
+      | AWS__EC2__TransitGatewayAttachment 
+      | AWS__EC2__TransitGatewayRouteTable 
+      | AWS__DMS__Certificate 
+      | AWS__AppConfig__Application 
+      | AWS__AppSync__GraphQLApi 
+      | AWS__DataSync__LocationSMB 
+      | AWS__DataSync__LocationFSxLustre 
+      | AWS__DataSync__LocationS3 
+      | AWS__DataSync__LocationEFS 
+      | AWS__DataSync__Task 
+      | AWS__DataSync__LocationNFS 
+      | AWS__EC2__NetworkInsightsAccessScopeAnalysis 
+      | AWS__EKS__FargateProfile 
+      | AWS__Glue__Job 
+      | AWS__GuardDuty__ThreatIntelSet 
+      | AWS__GuardDuty__IPSet 
+      | AWS__SageMaker__Workteam 
+      | AWS__SageMaker__NotebookInstanceLifecycleConfig 
+      | AWS__ServiceDiscovery__Service 
+      | AWS__ServiceDiscovery__PublicDnsNamespace 
+      | AWS__SES__ContactList 
+      | AWS__SES__ConfigurationSet 
+      | AWS__Route53__HostedZone 
+      | AWS__IoTEvents__Input 
+      | AWS__IoTEvents__DetectorModel 
+      | AWS__IoTEvents__AlarmModel 
+      | AWS__ServiceDiscovery__HttpNamespace 
+      | AWS__Events__EventBus 
+      | AWS__ImageBuilder__ContainerRecipe 
+      | AWS__ImageBuilder__DistributionConfiguration 
+      | AWS__ImageBuilder__InfrastructureConfiguration 
+      | AWS__DataSync__LocationObjectStorage 
+      | AWS__DataSync__LocationHDFS 
+      | AWS__Glue__Classifier 
+      | AWS__Route53RecoveryReadiness__Cell 
+      | AWS__Route53RecoveryReadiness__ReadinessCheck 
+      | AWS__ECR__RegistryPolicy 
+      | AWS__Backup__ReportPlan 
+      | AWS__Lightsail__Certificate 
+      | AWS__RUM__AppMonitor 
+      | AWS__Events__Endpoint 
+      | AWS__SES__ReceiptRuleSet 
+      | AWS__Events__Archive 
+      | AWS__Events__ApiDestination 
+      | AWS__Lightsail__Disk 
+      | AWS__FIS__ExperimentTemplate 
+      | AWS__DataSync__LocationFSxWindows 
+      | AWS__SES__ReceiptFilter 
+      | AWS__GuardDuty__Filter 
+      | AWS__SES__Template 
+      | AWS__AmazonMQ__Broker 
+      | AWS__AppConfig__Environment 
+      | AWS__AppConfig__ConfigurationProfile 
+      | AWS__Cloud9__EnvironmentEC2 
+      | AWS__EventSchemas__Registry 
+      | AWS__EventSchemas__RegistryPolicy 
+      | AWS__EventSchemas__Discoverer 
+      | AWS__FraudDetector__Label 
+      | AWS__FraudDetector__EntityType 
+      | AWS__FraudDetector__Variable 
+      | AWS__FraudDetector__Outcome 
+      | AWS__IoT__Authorizer 
+      | AWS__IoT__SecurityProfile 
+      | AWS__IoT__RoleAlias 
+      | AWS__IoT__Dimension 
+      | AWS__IoTAnalytics__Datastore 
+      | AWS__Lightsail__Bucket 
+      | AWS__Lightsail__StaticIp 
+      | AWS__MediaPackage__PackagingGroup 
+      | AWS__Route53RecoveryReadiness__RecoveryGroup 
+      | AWS__ResilienceHub__ResiliencyPolicy 
+      | AWS__Transfer__Workflow 
+      | AWS__EKS__IdentityProviderConfig 
+      | AWS__EKS__Addon 
+      | AWS__Glue__MLTransform 
+      | AWS__IoT__Policy 
+      | AWS__IoT__MitigationAction 
+      | AWS__IoTTwinMaker__Workspace 
+      | AWS__IoTTwinMaker__Entity 
+      | AWS__IoTAnalytics__Dataset 
+      | AWS__IoTAnalytics__Pipeline 
+      | AWS__IoTAnalytics__Channel 
+      | AWS__IoTSiteWise__Dashboard 
+      | AWS__IoTSiteWise__Project 
+      | AWS__IoTSiteWise__Portal 
+      | AWS__IoTSiteWise__AssetModel 
+      | AWS__IVS__Channel 
+      | AWS__IVS__RecordingConfiguration 
+      | AWS__IVS__PlaybackKeyPair 
+      | AWS__KinesisAnalyticsV2__Application 
+      | AWS__RDS__GlobalCluster 
+      | AWS__S3__MultiRegionAccessPoint 
+      | AWS__DeviceFarm__TestGridProject 
+      | AWS__Budgets__BudgetsAction 
+      | AWS__Lex__Bot 
+      | AWS__CodeGuruReviewer__RepositoryAssociation 
+      | AWS__IoT__CustomMetric 
+      | AWS__Route53Resolver__FirewallDomainList 
+      | AWS__RoboMaker__RobotApplicationVersion 
+      | AWS__EC2__TrafficMirrorSession 
+      | AWS__IoTSiteWise__Gateway 
+      | AWS__Lex__BotAlias 
+      | AWS__LookoutMetrics__Alert 
+      | AWS__IoT__AccountAuditConfiguration 
+      | AWS__EC2__TrafficMirrorTarget 
+      | AWS__S3__StorageLens 
+      | AWS__IoT__ScheduledAudit 
+      | AWS__Events__Connection 
+      | AWS__EventSchemas__Schema 
+      | AWS__MediaPackage__PackagingConfiguration 
+      | AWS__KinesisVideo__SignalingChannel 
+      | AWS__AppStream__DirectoryConfig 
+      | AWS__LookoutVision__Project 
+      | AWS__Route53RecoveryControl__Cluster 
+      | AWS__Route53RecoveryControl__SafetyRule 
+      | AWS__Route53RecoveryControl__ControlPanel 
+      | AWS__Route53RecoveryControl__RoutingControl 
+      | AWS__Route53RecoveryReadiness__ResourceSet 
+      | AWS__RoboMaker__SimulationApplication 
+      | AWS__RoboMaker__RobotApplication 
+      | AWS__HealthLake__FHIRDatastore 
+      | AWS__Pinpoint__Segment 
+      | AWS__Pinpoint__ApplicationSettings 
+      | AWS__Events__Rule 
+      | AWS__EC2__DHCPOptions 
+      | AWS__EC2__NetworkInsightsPath 
+      | AWS__EC2__TrafficMirrorFilter 
+      | AWS__EC2__IPAM 
+      | AWS__IoTTwinMaker__Scene 
+      | AWS__NetworkManager__TransitGatewayRegistration 
+      | AWS__CustomerProfiles__Domain 
+      | AWS__AutoScaling__WarmPool 
+      | AWS__Connect__PhoneNumber 
+      | AWS__AppConfig__DeploymentStrategy 
+      | AWS__AppFlow__Flow 
+      | AWS__AuditManager__Assessment 
+      | AWS__CloudWatch__MetricStream 
+      | AWS__DeviceFarm__InstanceProfile 
+      | AWS__DeviceFarm__Project 
+      | AWS__EC2__EC2Fleet 
+      | AWS__EC2__SubnetRouteTableAssociation 
+      | AWS__ECR__PullThroughCacheRule 
+      | AWS__GroundStation__Config 
+      | AWS__ImageBuilder__ImagePipeline 
+      | AWS__IoT__FleetMetric 
+      | AWS__IoTWireless__ServiceProfile 
+      | AWS__NetworkManager__Device 
+      | AWS__NetworkManager__GlobalNetwork 
+      | AWS__NetworkManager__Link 
+      | AWS__NetworkManager__Site 
+      | AWS__Panorama__Package 
+      | AWS__Pinpoint__App 
+      | AWS__Redshift__ScheduledAction 
+      | AWS__Route53Resolver__FirewallRuleGroupAssociation 
+      | AWS__SageMaker__AppImageConfig 
+      | AWS__SageMaker__Image 
+      | AWS__ECS__TaskSet 
+      | AWS__Cassandra__Keyspace 
+      | AWS__Signer__SigningProfile 
+      | AWS__Amplify__App 
+      | AWS__AppMesh__VirtualNode 
+      | AWS__AppMesh__VirtualService 
+      | AWS__AppRunner__VpcConnector 
+      | AWS__AppStream__Application 
+      | AWS__CodeArtifact__Repository 
+      | AWS__EC2__PrefixList 
+      | AWS__EC2__SpotFleet 
+      | AWS__Evidently__Project 
+      | AWS__Forecast__Dataset 
+      | AWS__IAM__SAMLProvider 
+      | AWS__IAM__ServerCertificate 
+      | AWS__Pinpoint__Campaign 
+      | AWS__Pinpoint__InAppTemplate 
+      | AWS__SageMaker__Domain 
+      | AWS__Transfer__Agreement 
+      | AWS__Transfer__Connector 
+      | AWS__KinesisFirehose__DeliveryStream 
+      | AWS__Amplify__Branch 
+      | AWS__AppIntegrations__EventIntegration 
+      | AWS__AppMesh__Route 
+      | AWS__Athena__PreparedStatement 
+      | AWS__EC2__IPAMScope 
+      | AWS__Evidently__Launch 
+      | AWS__Forecast__DatasetGroup 
+      | AWS__GreengrassV2__ComponentVersion 
+      | AWS__GroundStation__MissionProfile 
+      | AWS__MediaConnect__FlowEntitlement 
+      | AWS__MediaConnect__FlowVpcInterface 
+      | AWS__MediaTailor__PlaybackConfiguration 
+      | AWS__MSK__Configuration 
+      | AWS__Personalize__Dataset 
+      | AWS__Personalize__Schema 
+      | AWS__Personalize__Solution 
+      | AWS__Pinpoint__EmailTemplate 
+      | AWS__Pinpoint__EventStream 
+      | AWS__ResilienceHub__App 
+      | AWS__ACMPCA__CertificateAuthority 
+      | AWS__AppConfig__HostedConfigurationVersion 
+      | AWS__AppMesh__VirtualGateway 
+      | AWS__AppMesh__VirtualRouter 
+      | AWS__AppRunner__Service 
+      | AWS__CustomerProfiles__ObjectType 
+      | AWS__DMS__Endpoint 
+      | AWS__EC2__CapacityReservation 
+      | AWS__EC2__ClientVpnEndpoint 
+      | AWS__Kendra__Index 
+      | AWS__KinesisVideo__Stream 
+      | AWS__Logs__Destination 
+      | AWS__Pinpoint__EmailChannel 
+      | AWS__S3__AccessPoint 
+      | AWS__NetworkManager__CustomerGatewayAssociation 
+      | AWS__NetworkManager__LinkAssociation 
+      | AWS__IoTWireless__MulticastGroup 
+      | AWS__Personalize__DatasetGroup 
+      | AWS__IoTTwinMaker__ComponentType 
+      | AWS__CodeBuild__ReportGroup 
+      | AWS__SageMaker__FeatureGroup 
+      | AWS__MSK__BatchScramSecret 
+      | AWS__AppStream__Stack 
+      | AWS__IoT__JobTemplate 
+      | AWS__IoTWireless__FuotaTask 
+      | AWS__IoT__ProvisioningTemplate 
+      | AWS__InspectorV2__Filter 
+      | AWS__Route53Resolver__ResolverQueryLoggingConfigAssociation 
+      | AWS__ServiceDiscovery__Instance 
+      | AWS__Transfer__Certificate 
+      | AWS__MediaConnect__FlowSource 
+      | AWS__APS__RuleGroupsNamespace 
+      | AWS__CodeGuruProfiler__ProfilingGroup 
+      | AWS__Route53Resolver__ResolverQueryLoggingConfig 
+      | AWS__Batch__SchedulingPolicy 
+      | AWS__ACMPCA__CertificateAuthorityActivation 
+      | AWS__AppMesh__GatewayRoute 
+      | AWS__AppMesh__Mesh 
+      | AWS__Connect__Instance 
+      | AWS__Connect__QuickConnect 
+      | AWS__EC2__CarrierGateway 
+      | AWS__EC2__IPAMPool 
+      | AWS__EC2__TransitGatewayConnect 
+      | AWS__EC2__TransitGatewayMulticastDomain 
+      | AWS__ECS__CapacityProvider 
+      | AWS__IAM__InstanceProfile 
+      | AWS__IoT__CACertificate 
+      | AWS__IoTTwinMaker__SyncJob 
+      | AWS__KafkaConnect__Connector 
+      | AWS__Lambda__CodeSigningConfig 
+      | AWS__NetworkManager__ConnectPeer 
+      | AWS__ResourceExplorer2__Index 
+      | AWS__AppStream__Fleet 
+      | AWS__Cognito__UserPool 
+      | AWS__Cognito__UserPoolClient 
+      | AWS__Cognito__UserPoolGroup 
+      | AWS__EC2__NetworkInsightsAccessScope 
+      | AWS__EC2__NetworkInsightsAnalysis 
+      | AWS__Grafana__Workspace 
+      | AWS__GroundStation__DataflowEndpointGroup 
+      | AWS__ImageBuilder__ImageRecipe 
+      | AWS__KMS__Alias 
+      | AWS__M2__Environment 
+      | AWS__QuickSight__DataSource 
+      | AWS__QuickSight__Template 
+      | AWS__QuickSight__Theme 
+      | AWS__RDS__OptionGroup 
+      | AWS__Redshift__EndpointAccess 
+      | AWS__Route53Resolver__FirewallRuleGroup 
+      | AWS__SSM__Document 
+      | AWS__AppConfig__ExtensionAssociation 
+      | AWS__AppIntegrations__Application 
+      | AWS__AppSync__ApiCache 
+      | AWS__Bedrock__Guardrail 
+      | AWS__Bedrock__KnowledgeBase 
+      | AWS__Cognito__IdentityPool 
+      | AWS__Connect__Rule 
+      | AWS__Connect__User 
+      | AWS__EC2__ClientVpnTargetNetworkAssociation 
+      | AWS__EC2__EIPAssociation 
+      | AWS__EC2__IPAMResourceDiscovery 
+      | AWS__EC2__IPAMResourceDiscoveryAssociation 
+      | AWS__EC2__InstanceConnectEndpoint 
+      | AWS__EC2__SnapshotBlockPublicAccess 
+      | AWS__EC2__VPCBlockPublicAccessExclusion 
+      | AWS__EC2__VPCBlockPublicAccessOptions 
+      | AWS__EC2__VPCEndpointConnectionNotification 
+      | AWS__EC2__VPNConnectionRoute 
+      | AWS__Evidently__Segment 
+      | AWS__IAM__OIDCProvider 
+      | AWS__InspectorV2__Activation 
+      | AWS__MSK__ClusterPolicy 
+      | AWS__MSK__VpcConnection 
+      | AWS__MediaConnect__Gateway 
+      | AWS__MemoryDB__SubnetGroup 
+      | AWS__OpenSearchServerless__Collection 
+      | AWS__OpenSearchServerless__VpcEndpoint 
+      | AWS__Redshift__EndpointAuthorization 
+      | AWS__Route53Profiles__Profile 
+      | AWS__S3__StorageLensGroup 
+      | AWS__S3Express__BucketPolicy 
+      | AWS__S3Express__DirectoryBucket 
+      | AWS__SageMaker__InferenceExperiment 
+      | AWS__SecurityHub__Standard 
+      | AWS__Transfer__Profile 
+      | AWS__CloudFormation__StackSet 
+      | AWS__MediaPackageV2__Channel 
+      | AWS__S3__AccessGrantsLocation 
+      | AWS__S3__AccessGrant 
+      | AWS__S3__AccessGrantsInstance 
+      | AWS__EMRServerless__Application 
+      | AWS__Config__AggregationAuthorization 
+      | AWS__Bedrock__ApplicationInferenceProfile 
+      | AWS__ApiGatewayV2__Integration 
+      | AWS__SageMaker__MlflowTrackingServer 
+      | AWS__SageMaker__ModelBiasJobDefinition 
+      | AWS__SecretsManager__RotationSchedule 
+      | AWS__Deadline__QueueFleetAssociation 
+      | AWS__ECR__RepositoryCreationTemplate 
+      | AWS__CloudFormation__LambdaHook 
+      | AWS__EC2__SubnetNetworkAclAssociation 
+      | AWS__ApiGateway__UsagePlan 
+      | AWS__AppConfig__Extension 
+      | AWS__Deadline__Fleet 
+      | AWS__EMR__Studio 
+      | AWS__S3Tables__TableBucket 
+      | AWS__CloudFront__RealtimeLogConfig 
+      | AWS__BackupGateway__Hypervisor 
+      | AWS__BCMDataExports__Export 
+      | AWS__CloudFormation__GuardHook 
+      | AWS__CloudFront__PublicKey 
+      | AWS__CloudTrail__EventDataStore 
+      | AWS__EntityResolution__IdMappingWorkflow 
+      | AWS__EntityResolution__SchemaMapping 
+      | AWS__IoT__DomainConfiguration 
+      | AWS__PCAConnectorAD__DirectoryRegistration 
+      | AWS__RDS__Integration 
+      | AWS__Config__ConformancePack 
+      | AWS__RolesAnywhere__Profile 
+      | AWS__CodeArtifact__Domain 
+      | AWS__Backup__RestoreTestingPlan 
+      | AWS__Config__StoredQuery 
+      | AWS__SageMaker__DataQualityJobDefinition 
+      | AWS__SageMaker__ModelExplainabilityJobDefinition 
+      | AWS__SageMaker__ModelQualityJobDefinition 
+      | AWS__SageMaker__StudioLifecycleConfig 
+      | AWS__SES__DedicatedIpPool 
+      | AWS__SES__MailManagerTrafficPolicy 
+      | AWS__SSM__ResourceDataSync 
+      | AWS__BedrockAgentCore__Runtime 
+      | AWS__BedrockAgentCore__BrowserCustom 
+      | AWS__ElasticLoadBalancingV2__TargetGroup 
+      | AWS__EMRContainers__VirtualCluster 
+      | AWS__EntityResolution__MatchingWorkflow 
+      | AWS__IoTCoreDeviceAdvisor__SuiteDefinition 
+      | AWS__EC2__SecurityGroupVpcAssociation 
+      | AWS__EC2__VerifiedAccessInstance 
+      | AWS__KafkaConnect__CustomPlugin 
+      | AWS__NetworkManager__TransitGatewayPeering 
+      | AWS__OpenSearchServerless__SecurityConfig 
+      | AWS__Redshift__Integration 
+      | AWS__RolesAnywhere__TrustAnchor 
+      | AWS__Route53Profiles__ProfileAssociation 
+      | AWS__SSMIncidents__ResponsePlan 
+      | AWS__Transfer__Server 
+      | AWS__Glue__Database 
+      | AWS__Organizations__OrganizationalUnit 
+      | AWS__EC2__IPAMPoolCidr 
+      | AWS__EC2__VPCGatewayAttachment 
+      | AWS__Bedrock__Prompt 
+      | AWS__Comprehend__Flywheel 
+      | AWS__DataSync__Agent 
+      | AWS__MediaTailor__LiveSource 
+      | AWS__MSK__ServerlessCluster 
+      | AWS__IoTSiteWise__Asset 
+      | AWS__B2BI__Capability 
+      | AWS__CloudFront__KeyValueStore 
+      | AWS__Deadline__Monitor 
+      | AWS__GuardDuty__MalwareProtectionPlan 
+      | AWS__Location__APIKey 
+      | AWS__MediaPackageV2__OriginEndpoint 
+      | AWS__PCAConnectorAD__Connector 
+      | AWS__S3Tables__TableBucketPolicy 
+      | AWS__SecretsManager__ResourcePolicy 
+      | AWS__SSMContacts__Contact 
+      | AWS__IoT__ThingGroup 
+      | AWS__ImageBuilder__LifecyclePolicy 
+      | AWS__GameLift__Build 
+      | AWS__ECR__ReplicationConfiguration 
+      | AWS__EC2__SubnetCidrBlock 
+      | AWS__Connect__SecurityProfile 
+      | AWS__CleanRoomsML__TrainingDataset 
+      | AWS__AppStream__AppBlockBuilder 
+      | AWS__Route53__DNSSEC 
+      | AWS__SageMaker__UserProfile 
+      | AWS__ApiGateway__Method 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AWS__EC2__CustomerGateway -> "AWS::EC2::CustomerGateway"
+      | AWS__EC2__EIP -> "AWS::EC2::EIP"
+      | AWS__EC2__Host -> "AWS::EC2::Host"
+      | AWS__EC2__Instance -> "AWS::EC2::Instance"
+      | AWS__EC2__InternetGateway -> "AWS::EC2::InternetGateway"
+      | AWS__EC2__NetworkAcl -> "AWS::EC2::NetworkAcl"
+      | AWS__EC2__NetworkInterface -> "AWS::EC2::NetworkInterface"
+      | AWS__EC2__RouteTable -> "AWS::EC2::RouteTable"
+      | AWS__EC2__SecurityGroup -> "AWS::EC2::SecurityGroup"
+      | AWS__EC2__Subnet -> "AWS::EC2::Subnet"
+      | AWS__CloudTrail__Trail -> "AWS::CloudTrail::Trail"
+      | AWS__EC2__Volume -> "AWS::EC2::Volume"
+      | AWS__EC2__VPC -> "AWS::EC2::VPC"
+      | AWS__EC2__VPNConnection -> "AWS::EC2::VPNConnection"
+      | AWS__EC2__VPNGateway -> "AWS::EC2::VPNGateway"
+      | AWS__EC2__RegisteredHAInstance -> "AWS::EC2::RegisteredHAInstance"
+      | AWS__EC2__NatGateway -> "AWS::EC2::NatGateway"
+      | AWS__EC2__EgressOnlyInternetGateway ->
+          "AWS::EC2::EgressOnlyInternetGateway"
+      | AWS__EC2__VPCEndpoint -> "AWS::EC2::VPCEndpoint"
+      | AWS__EC2__VPCEndpointService -> "AWS::EC2::VPCEndpointService"
+      | AWS__EC2__FlowLog -> "AWS::EC2::FlowLog"
+      | AWS__EC2__VPCPeeringConnection -> "AWS::EC2::VPCPeeringConnection"
+      | AWS__Elasticsearch__Domain -> "AWS::Elasticsearch::Domain"
+      | AWS__IAM__Group -> "AWS::IAM::Group"
+      | AWS__IAM__Policy -> "AWS::IAM::Policy"
+      | AWS__IAM__Role -> "AWS::IAM::Role"
+      | AWS__IAM__User -> "AWS::IAM::User"
+      | AWS__ElasticLoadBalancingV2__LoadBalancer ->
+          "AWS::ElasticLoadBalancingV2::LoadBalancer"
+      | AWS__ACM__Certificate -> "AWS::ACM::Certificate"
+      | AWS__RDS__DBInstance -> "AWS::RDS::DBInstance"
+      | AWS__RDS__DBSubnetGroup -> "AWS::RDS::DBSubnetGroup"
+      | AWS__RDS__DBSecurityGroup -> "AWS::RDS::DBSecurityGroup"
+      | AWS__RDS__DBSnapshot -> "AWS::RDS::DBSnapshot"
+      | AWS__RDS__DBCluster -> "AWS::RDS::DBCluster"
+      | AWS__RDS__DBClusterSnapshot -> "AWS::RDS::DBClusterSnapshot"
+      | AWS__RDS__EventSubscription -> "AWS::RDS::EventSubscription"
+      | AWS__S3__Bucket -> "AWS::S3::Bucket"
+      | AWS__S3__AccountPublicAccessBlock ->
+          "AWS::S3::AccountPublicAccessBlock"
+      | AWS__Redshift__Cluster -> "AWS::Redshift::Cluster"
+      | AWS__Redshift__ClusterSnapshot -> "AWS::Redshift::ClusterSnapshot"
+      | AWS__Redshift__ClusterParameterGroup ->
+          "AWS::Redshift::ClusterParameterGroup"
+      | AWS__Redshift__ClusterSecurityGroup ->
+          "AWS::Redshift::ClusterSecurityGroup"
+      | AWS__Redshift__ClusterSubnetGroup ->
+          "AWS::Redshift::ClusterSubnetGroup"
+      | AWS__Redshift__EventSubscription ->
+          "AWS::Redshift::EventSubscription"
+      | AWS__SSM__ManagedInstanceInventory ->
+          "AWS::SSM::ManagedInstanceInventory"
+      | AWS__CloudWatch__Alarm -> "AWS::CloudWatch::Alarm"
+      | AWS__CloudFormation__Stack -> "AWS::CloudFormation::Stack"
+      | AWS__ElasticLoadBalancing__LoadBalancer ->
+          "AWS::ElasticLoadBalancing::LoadBalancer"
+      | AWS__AutoScaling__AutoScalingGroup ->
+          "AWS::AutoScaling::AutoScalingGroup"
+      | AWS__AutoScaling__LaunchConfiguration ->
+          "AWS::AutoScaling::LaunchConfiguration"
+      | AWS__AutoScaling__ScalingPolicy -> "AWS::AutoScaling::ScalingPolicy"
+      | AWS__AutoScaling__ScheduledAction ->
+          "AWS::AutoScaling::ScheduledAction"
+      | AWS__DynamoDB__Table -> "AWS::DynamoDB::Table"
+      | AWS__CodeBuild__Project -> "AWS::CodeBuild::Project"
+      | AWS__WAF__RateBasedRule -> "AWS::WAF::RateBasedRule"
+      | AWS__WAF__Rule -> "AWS::WAF::Rule"
+      | AWS__WAF__RuleGroup -> "AWS::WAF::RuleGroup"
+      | AWS__WAF__WebACL -> "AWS::WAF::WebACL"
+      | AWS__WAFRegional__RateBasedRule -> "AWS::WAFRegional::RateBasedRule"
+      | AWS__WAFRegional__Rule -> "AWS::WAFRegional::Rule"
+      | AWS__WAFRegional__RuleGroup -> "AWS::WAFRegional::RuleGroup"
+      | AWS__WAFRegional__WebACL -> "AWS::WAFRegional::WebACL"
+      | AWS__CloudFront__Distribution -> "AWS::CloudFront::Distribution"
+      | AWS__CloudFront__StreamingDistribution ->
+          "AWS::CloudFront::StreamingDistribution"
+      | AWS__Lambda__Function -> "AWS::Lambda::Function"
+      | AWS__NetworkFirewall__Firewall -> "AWS::NetworkFirewall::Firewall"
+      | AWS__NetworkFirewall__FirewallPolicy ->
+          "AWS::NetworkFirewall::FirewallPolicy"
+      | AWS__NetworkFirewall__RuleGroup -> "AWS::NetworkFirewall::RuleGroup"
+      | AWS__ElasticBeanstalk__Application ->
+          "AWS::ElasticBeanstalk::Application"
+      | AWS__ElasticBeanstalk__ApplicationVersion ->
+          "AWS::ElasticBeanstalk::ApplicationVersion"
+      | AWS__ElasticBeanstalk__Environment ->
+          "AWS::ElasticBeanstalk::Environment"
+      | AWS__WAFv2__WebACL -> "AWS::WAFv2::WebACL"
+      | AWS__WAFv2__RuleGroup -> "AWS::WAFv2::RuleGroup"
+      | AWS__WAFv2__IPSet -> "AWS::WAFv2::IPSet"
+      | AWS__WAFv2__RegexPatternSet -> "AWS::WAFv2::RegexPatternSet"
+      | AWS__WAFv2__ManagedRuleSet -> "AWS::WAFv2::ManagedRuleSet"
+      | AWS__XRay__EncryptionConfig -> "AWS::XRay::EncryptionConfig"
+      | AWS__SSM__AssociationCompliance -> "AWS::SSM::AssociationCompliance"
+      | AWS__SSM__PatchCompliance -> "AWS::SSM::PatchCompliance"
+      | AWS__Shield__Protection -> "AWS::Shield::Protection"
+      | AWS__ShieldRegional__Protection -> "AWS::ShieldRegional::Protection"
+      | AWS__Config__ConformancePackCompliance ->
+          "AWS::Config::ConformancePackCompliance"
+      | AWS__Config__ResourceCompliance -> "AWS::Config::ResourceCompliance"
+      | AWS__ApiGateway__Stage -> "AWS::ApiGateway::Stage"
+      | AWS__ApiGateway__RestApi -> "AWS::ApiGateway::RestApi"
+      | AWS__ApiGatewayV2__Stage -> "AWS::ApiGatewayV2::Stage"
+      | AWS__ApiGatewayV2__Api -> "AWS::ApiGatewayV2::Api"
+      | AWS__CodePipeline__Pipeline -> "AWS::CodePipeline::Pipeline"
+      | AWS__ServiceCatalog__CloudFormationProvisionedProduct ->
+          "AWS::ServiceCatalog::CloudFormationProvisionedProduct"
+      | AWS__ServiceCatalog__CloudFormationProduct ->
+          "AWS::ServiceCatalog::CloudFormationProduct"
+      | AWS__ServiceCatalog__Portfolio -> "AWS::ServiceCatalog::Portfolio"
+      | AWS__SQS__Queue -> "AWS::SQS::Queue"
+      | AWS__KMS__Key -> "AWS::KMS::Key"
+      | AWS__QLDB__Ledger -> "AWS::QLDB::Ledger"
+      | AWS__SecretsManager__Secret -> "AWS::SecretsManager::Secret"
+      | AWS__SNS__Topic -> "AWS::SNS::Topic"
+      | AWS__SSM__FileData -> "AWS::SSM::FileData"
+      | AWS__Backup__BackupPlan -> "AWS::Backup::BackupPlan"
+      | AWS__Backup__BackupSelection -> "AWS::Backup::BackupSelection"
+      | AWS__Backup__BackupVault -> "AWS::Backup::BackupVault"
+      | AWS__Backup__RecoveryPoint -> "AWS::Backup::RecoveryPoint"
+      | AWS__ECR__Repository -> "AWS::ECR::Repository"
+      | AWS__ECS__Cluster -> "AWS::ECS::Cluster"
+      | AWS__ECS__Service -> "AWS::ECS::Service"
+      | AWS__ECS__TaskDefinition -> "AWS::ECS::TaskDefinition"
+      | AWS__EFS__AccessPoint -> "AWS::EFS::AccessPoint"
+      | AWS__EFS__FileSystem -> "AWS::EFS::FileSystem"
+      | AWS__EKS__Cluster -> "AWS::EKS::Cluster"
+      | AWS__OpenSearch__Domain -> "AWS::OpenSearch::Domain"
+      | AWS__EC2__TransitGateway -> "AWS::EC2::TransitGateway"
+      | AWS__Kinesis__Stream -> "AWS::Kinesis::Stream"
+      | AWS__Kinesis__StreamConsumer -> "AWS::Kinesis::StreamConsumer"
+      | AWS__CodeDeploy__Application -> "AWS::CodeDeploy::Application"
+      | AWS__CodeDeploy__DeploymentConfig ->
+          "AWS::CodeDeploy::DeploymentConfig"
+      | AWS__CodeDeploy__DeploymentGroup ->
+          "AWS::CodeDeploy::DeploymentGroup"
+      | AWS__EC2__LaunchTemplate -> "AWS::EC2::LaunchTemplate"
+      | AWS__ECR__PublicRepository -> "AWS::ECR::PublicRepository"
+      | AWS__GuardDuty__Detector -> "AWS::GuardDuty::Detector"
+      | AWS__EMR__SecurityConfiguration -> "AWS::EMR::SecurityConfiguration"
+      | AWS__SageMaker__CodeRepository -> "AWS::SageMaker::CodeRepository"
+      | AWS__Route53Resolver__ResolverEndpoint ->
+          "AWS::Route53Resolver::ResolverEndpoint"
+      | AWS__Route53Resolver__ResolverRule ->
+          "AWS::Route53Resolver::ResolverRule"
+      | AWS__Route53Resolver__ResolverRuleAssociation ->
+          "AWS::Route53Resolver::ResolverRuleAssociation"
+      | AWS__DMS__ReplicationSubnetGroup ->
+          "AWS::DMS::ReplicationSubnetGroup"
+      | AWS__DMS__EventSubscription -> "AWS::DMS::EventSubscription"
+      | AWS__MSK__Cluster -> "AWS::MSK::Cluster"
+      | AWS__StepFunctions__Activity -> "AWS::StepFunctions::Activity"
+      | AWS__WorkSpaces__Workspace -> "AWS::WorkSpaces::Workspace"
+      | AWS__WorkSpaces__ConnectionAlias ->
+          "AWS::WorkSpaces::ConnectionAlias"
+      | AWS__SageMaker__Model -> "AWS::SageMaker::Model"
+      | AWS__ElasticLoadBalancingV2__Listener ->
+          "AWS::ElasticLoadBalancingV2::Listener"
+      | AWS__StepFunctions__StateMachine ->
+          "AWS::StepFunctions::StateMachine"
+      | AWS__Batch__JobQueue -> "AWS::Batch::JobQueue"
+      | AWS__Batch__ComputeEnvironment -> "AWS::Batch::ComputeEnvironment"
+      | AWS__AccessAnalyzer__Analyzer -> "AWS::AccessAnalyzer::Analyzer"
+      | AWS__Athena__WorkGroup -> "AWS::Athena::WorkGroup"
+      | AWS__Athena__DataCatalog -> "AWS::Athena::DataCatalog"
+      | AWS__Detective__Graph -> "AWS::Detective::Graph"
+      | AWS__GlobalAccelerator__Accelerator ->
+          "AWS::GlobalAccelerator::Accelerator"
+      | AWS__GlobalAccelerator__EndpointGroup ->
+          "AWS::GlobalAccelerator::EndpointGroup"
+      | AWS__GlobalAccelerator__Listener ->
+          "AWS::GlobalAccelerator::Listener"
+      | AWS__EC2__TransitGatewayAttachment ->
+          "AWS::EC2::TransitGatewayAttachment"
+      | AWS__EC2__TransitGatewayRouteTable ->
+          "AWS::EC2::TransitGatewayRouteTable"
+      | AWS__DMS__Certificate -> "AWS::DMS::Certificate"
+      | AWS__AppConfig__Application -> "AWS::AppConfig::Application"
+      | AWS__AppSync__GraphQLApi -> "AWS::AppSync::GraphQLApi"
+      | AWS__DataSync__LocationSMB -> "AWS::DataSync::LocationSMB"
+      | AWS__DataSync__LocationFSxLustre ->
+          "AWS::DataSync::LocationFSxLustre"
+      | AWS__DataSync__LocationS3 -> "AWS::DataSync::LocationS3"
+      | AWS__DataSync__LocationEFS -> "AWS::DataSync::LocationEFS"
+      | AWS__DataSync__Task -> "AWS::DataSync::Task"
+      | AWS__DataSync__LocationNFS -> "AWS::DataSync::LocationNFS"
+      | AWS__EC2__NetworkInsightsAccessScopeAnalysis ->
+          "AWS::EC2::NetworkInsightsAccessScopeAnalysis"
+      | AWS__EKS__FargateProfile -> "AWS::EKS::FargateProfile"
+      | AWS__Glue__Job -> "AWS::Glue::Job"
+      | AWS__GuardDuty__ThreatIntelSet -> "AWS::GuardDuty::ThreatIntelSet"
+      | AWS__GuardDuty__IPSet -> "AWS::GuardDuty::IPSet"
+      | AWS__SageMaker__Workteam -> "AWS::SageMaker::Workteam"
+      | AWS__SageMaker__NotebookInstanceLifecycleConfig ->
+          "AWS::SageMaker::NotebookInstanceLifecycleConfig"
+      | AWS__ServiceDiscovery__Service -> "AWS::ServiceDiscovery::Service"
+      | AWS__ServiceDiscovery__PublicDnsNamespace ->
+          "AWS::ServiceDiscovery::PublicDnsNamespace"
+      | AWS__SES__ContactList -> "AWS::SES::ContactList"
+      | AWS__SES__ConfigurationSet -> "AWS::SES::ConfigurationSet"
+      | AWS__Route53__HostedZone -> "AWS::Route53::HostedZone"
+      | AWS__IoTEvents__Input -> "AWS::IoTEvents::Input"
+      | AWS__IoTEvents__DetectorModel -> "AWS::IoTEvents::DetectorModel"
+      | AWS__IoTEvents__AlarmModel -> "AWS::IoTEvents::AlarmModel"
+      | AWS__ServiceDiscovery__HttpNamespace ->
+          "AWS::ServiceDiscovery::HttpNamespace"
+      | AWS__Events__EventBus -> "AWS::Events::EventBus"
+      | AWS__ImageBuilder__ContainerRecipe ->
+          "AWS::ImageBuilder::ContainerRecipe"
+      | AWS__ImageBuilder__DistributionConfiguration ->
+          "AWS::ImageBuilder::DistributionConfiguration"
+      | AWS__ImageBuilder__InfrastructureConfiguration ->
+          "AWS::ImageBuilder::InfrastructureConfiguration"
+      | AWS__DataSync__LocationObjectStorage ->
+          "AWS::DataSync::LocationObjectStorage"
+      | AWS__DataSync__LocationHDFS -> "AWS::DataSync::LocationHDFS"
+      | AWS__Glue__Classifier -> "AWS::Glue::Classifier"
+      | AWS__Route53RecoveryReadiness__Cell ->
+          "AWS::Route53RecoveryReadiness::Cell"
+      | AWS__Route53RecoveryReadiness__ReadinessCheck ->
+          "AWS::Route53RecoveryReadiness::ReadinessCheck"
+      | AWS__ECR__RegistryPolicy -> "AWS::ECR::RegistryPolicy"
+      | AWS__Backup__ReportPlan -> "AWS::Backup::ReportPlan"
+      | AWS__Lightsail__Certificate -> "AWS::Lightsail::Certificate"
+      | AWS__RUM__AppMonitor -> "AWS::RUM::AppMonitor"
+      | AWS__Events__Endpoint -> "AWS::Events::Endpoint"
+      | AWS__SES__ReceiptRuleSet -> "AWS::SES::ReceiptRuleSet"
+      | AWS__Events__Archive -> "AWS::Events::Archive"
+      | AWS__Events__ApiDestination -> "AWS::Events::ApiDestination"
+      | AWS__Lightsail__Disk -> "AWS::Lightsail::Disk"
+      | AWS__FIS__ExperimentTemplate -> "AWS::FIS::ExperimentTemplate"
+      | AWS__DataSync__LocationFSxWindows ->
+          "AWS::DataSync::LocationFSxWindows"
+      | AWS__SES__ReceiptFilter -> "AWS::SES::ReceiptFilter"
+      | AWS__GuardDuty__Filter -> "AWS::GuardDuty::Filter"
+      | AWS__SES__Template -> "AWS::SES::Template"
+      | AWS__AmazonMQ__Broker -> "AWS::AmazonMQ::Broker"
+      | AWS__AppConfig__Environment -> "AWS::AppConfig::Environment"
+      | AWS__AppConfig__ConfigurationProfile ->
+          "AWS::AppConfig::ConfigurationProfile"
+      | AWS__Cloud9__EnvironmentEC2 -> "AWS::Cloud9::EnvironmentEC2"
+      | AWS__EventSchemas__Registry -> "AWS::EventSchemas::Registry"
+      | AWS__EventSchemas__RegistryPolicy ->
+          "AWS::EventSchemas::RegistryPolicy"
+      | AWS__EventSchemas__Discoverer -> "AWS::EventSchemas::Discoverer"
+      | AWS__FraudDetector__Label -> "AWS::FraudDetector::Label"
+      | AWS__FraudDetector__EntityType -> "AWS::FraudDetector::EntityType"
+      | AWS__FraudDetector__Variable -> "AWS::FraudDetector::Variable"
+      | AWS__FraudDetector__Outcome -> "AWS::FraudDetector::Outcome"
+      | AWS__IoT__Authorizer -> "AWS::IoT::Authorizer"
+      | AWS__IoT__SecurityProfile -> "AWS::IoT::SecurityProfile"
+      | AWS__IoT__RoleAlias -> "AWS::IoT::RoleAlias"
+      | AWS__IoT__Dimension -> "AWS::IoT::Dimension"
+      | AWS__IoTAnalytics__Datastore -> "AWS::IoTAnalytics::Datastore"
+      | AWS__Lightsail__Bucket -> "AWS::Lightsail::Bucket"
+      | AWS__Lightsail__StaticIp -> "AWS::Lightsail::StaticIp"
+      | AWS__MediaPackage__PackagingGroup ->
+          "AWS::MediaPackage::PackagingGroup"
+      | AWS__Route53RecoveryReadiness__RecoveryGroup ->
+          "AWS::Route53RecoveryReadiness::RecoveryGroup"
+      | AWS__ResilienceHub__ResiliencyPolicy ->
+          "AWS::ResilienceHub::ResiliencyPolicy"
+      | AWS__Transfer__Workflow -> "AWS::Transfer::Workflow"
+      | AWS__EKS__IdentityProviderConfig ->
+          "AWS::EKS::IdentityProviderConfig"
+      | AWS__EKS__Addon -> "AWS::EKS::Addon"
+      | AWS__Glue__MLTransform -> "AWS::Glue::MLTransform"
+      | AWS__IoT__Policy -> "AWS::IoT::Policy"
+      | AWS__IoT__MitigationAction -> "AWS::IoT::MitigationAction"
+      | AWS__IoTTwinMaker__Workspace -> "AWS::IoTTwinMaker::Workspace"
+      | AWS__IoTTwinMaker__Entity -> "AWS::IoTTwinMaker::Entity"
+      | AWS__IoTAnalytics__Dataset -> "AWS::IoTAnalytics::Dataset"
+      | AWS__IoTAnalytics__Pipeline -> "AWS::IoTAnalytics::Pipeline"
+      | AWS__IoTAnalytics__Channel -> "AWS::IoTAnalytics::Channel"
+      | AWS__IoTSiteWise__Dashboard -> "AWS::IoTSiteWise::Dashboard"
+      | AWS__IoTSiteWise__Project -> "AWS::IoTSiteWise::Project"
+      | AWS__IoTSiteWise__Portal -> "AWS::IoTSiteWise::Portal"
+      | AWS__IoTSiteWise__AssetModel -> "AWS::IoTSiteWise::AssetModel"
+      | AWS__IVS__Channel -> "AWS::IVS::Channel"
+      | AWS__IVS__RecordingConfiguration ->
+          "AWS::IVS::RecordingConfiguration"
+      | AWS__IVS__PlaybackKeyPair -> "AWS::IVS::PlaybackKeyPair"
+      | AWS__KinesisAnalyticsV2__Application ->
+          "AWS::KinesisAnalyticsV2::Application"
+      | AWS__RDS__GlobalCluster -> "AWS::RDS::GlobalCluster"
+      | AWS__S3__MultiRegionAccessPoint -> "AWS::S3::MultiRegionAccessPoint"
+      | AWS__DeviceFarm__TestGridProject ->
+          "AWS::DeviceFarm::TestGridProject"
+      | AWS__Budgets__BudgetsAction -> "AWS::Budgets::BudgetsAction"
+      | AWS__Lex__Bot -> "AWS::Lex::Bot"
+      | AWS__CodeGuruReviewer__RepositoryAssociation ->
+          "AWS::CodeGuruReviewer::RepositoryAssociation"
+      | AWS__IoT__CustomMetric -> "AWS::IoT::CustomMetric"
+      | AWS__Route53Resolver__FirewallDomainList ->
+          "AWS::Route53Resolver::FirewallDomainList"
+      | AWS__RoboMaker__RobotApplicationVersion ->
+          "AWS::RoboMaker::RobotApplicationVersion"
+      | AWS__EC2__TrafficMirrorSession -> "AWS::EC2::TrafficMirrorSession"
+      | AWS__IoTSiteWise__Gateway -> "AWS::IoTSiteWise::Gateway"
+      | AWS__Lex__BotAlias -> "AWS::Lex::BotAlias"
+      | AWS__LookoutMetrics__Alert -> "AWS::LookoutMetrics::Alert"
+      | AWS__IoT__AccountAuditConfiguration ->
+          "AWS::IoT::AccountAuditConfiguration"
+      | AWS__EC2__TrafficMirrorTarget -> "AWS::EC2::TrafficMirrorTarget"
+      | AWS__S3__StorageLens -> "AWS::S3::StorageLens"
+      | AWS__IoT__ScheduledAudit -> "AWS::IoT::ScheduledAudit"
+      | AWS__Events__Connection -> "AWS::Events::Connection"
+      | AWS__EventSchemas__Schema -> "AWS::EventSchemas::Schema"
+      | AWS__MediaPackage__PackagingConfiguration ->
+          "AWS::MediaPackage::PackagingConfiguration"
+      | AWS__KinesisVideo__SignalingChannel ->
+          "AWS::KinesisVideo::SignalingChannel"
+      | AWS__AppStream__DirectoryConfig -> "AWS::AppStream::DirectoryConfig"
+      | AWS__LookoutVision__Project -> "AWS::LookoutVision::Project"
+      | AWS__Route53RecoveryControl__Cluster ->
+          "AWS::Route53RecoveryControl::Cluster"
+      | AWS__Route53RecoveryControl__SafetyRule ->
+          "AWS::Route53RecoveryControl::SafetyRule"
+      | AWS__Route53RecoveryControl__ControlPanel ->
+          "AWS::Route53RecoveryControl::ControlPanel"
+      | AWS__Route53RecoveryControl__RoutingControl ->
+          "AWS::Route53RecoveryControl::RoutingControl"
+      | AWS__Route53RecoveryReadiness__ResourceSet ->
+          "AWS::Route53RecoveryReadiness::ResourceSet"
+      | AWS__RoboMaker__SimulationApplication ->
+          "AWS::RoboMaker::SimulationApplication"
+      | AWS__RoboMaker__RobotApplication ->
+          "AWS::RoboMaker::RobotApplication"
+      | AWS__HealthLake__FHIRDatastore -> "AWS::HealthLake::FHIRDatastore"
+      | AWS__Pinpoint__Segment -> "AWS::Pinpoint::Segment"
+      | AWS__Pinpoint__ApplicationSettings ->
+          "AWS::Pinpoint::ApplicationSettings"
+      | AWS__Events__Rule -> "AWS::Events::Rule"
+      | AWS__EC2__DHCPOptions -> "AWS::EC2::DHCPOptions"
+      | AWS__EC2__NetworkInsightsPath -> "AWS::EC2::NetworkInsightsPath"
+      | AWS__EC2__TrafficMirrorFilter -> "AWS::EC2::TrafficMirrorFilter"
+      | AWS__EC2__IPAM -> "AWS::EC2::IPAM"
+      | AWS__IoTTwinMaker__Scene -> "AWS::IoTTwinMaker::Scene"
+      | AWS__NetworkManager__TransitGatewayRegistration ->
+          "AWS::NetworkManager::TransitGatewayRegistration"
+      | AWS__CustomerProfiles__Domain -> "AWS::CustomerProfiles::Domain"
+      | AWS__AutoScaling__WarmPool -> "AWS::AutoScaling::WarmPool"
+      | AWS__Connect__PhoneNumber -> "AWS::Connect::PhoneNumber"
+      | AWS__AppConfig__DeploymentStrategy ->
+          "AWS::AppConfig::DeploymentStrategy"
+      | AWS__AppFlow__Flow -> "AWS::AppFlow::Flow"
+      | AWS__AuditManager__Assessment -> "AWS::AuditManager::Assessment"
+      | AWS__CloudWatch__MetricStream -> "AWS::CloudWatch::MetricStream"
+      | AWS__DeviceFarm__InstanceProfile ->
+          "AWS::DeviceFarm::InstanceProfile"
+      | AWS__DeviceFarm__Project -> "AWS::DeviceFarm::Project"
+      | AWS__EC2__EC2Fleet -> "AWS::EC2::EC2Fleet"
+      | AWS__EC2__SubnetRouteTableAssociation ->
+          "AWS::EC2::SubnetRouteTableAssociation"
+      | AWS__ECR__PullThroughCacheRule -> "AWS::ECR::PullThroughCacheRule"
+      | AWS__GroundStation__Config -> "AWS::GroundStation::Config"
+      | AWS__ImageBuilder__ImagePipeline ->
+          "AWS::ImageBuilder::ImagePipeline"
+      | AWS__IoT__FleetMetric -> "AWS::IoT::FleetMetric"
+      | AWS__IoTWireless__ServiceProfile ->
+          "AWS::IoTWireless::ServiceProfile"
+      | AWS__NetworkManager__Device -> "AWS::NetworkManager::Device"
+      | AWS__NetworkManager__GlobalNetwork ->
+          "AWS::NetworkManager::GlobalNetwork"
+      | AWS__NetworkManager__Link -> "AWS::NetworkManager::Link"
+      | AWS__NetworkManager__Site -> "AWS::NetworkManager::Site"
+      | AWS__Panorama__Package -> "AWS::Panorama::Package"
+      | AWS__Pinpoint__App -> "AWS::Pinpoint::App"
+      | AWS__Redshift__ScheduledAction -> "AWS::Redshift::ScheduledAction"
+      | AWS__Route53Resolver__FirewallRuleGroupAssociation ->
+          "AWS::Route53Resolver::FirewallRuleGroupAssociation"
+      | AWS__SageMaker__AppImageConfig -> "AWS::SageMaker::AppImageConfig"
+      | AWS__SageMaker__Image -> "AWS::SageMaker::Image"
+      | AWS__ECS__TaskSet -> "AWS::ECS::TaskSet"
+      | AWS__Cassandra__Keyspace -> "AWS::Cassandra::Keyspace"
+      | AWS__Signer__SigningProfile -> "AWS::Signer::SigningProfile"
+      | AWS__Amplify__App -> "AWS::Amplify::App"
+      | AWS__AppMesh__VirtualNode -> "AWS::AppMesh::VirtualNode"
+      | AWS__AppMesh__VirtualService -> "AWS::AppMesh::VirtualService"
+      | AWS__AppRunner__VpcConnector -> "AWS::AppRunner::VpcConnector"
+      | AWS__AppStream__Application -> "AWS::AppStream::Application"
+      | AWS__CodeArtifact__Repository -> "AWS::CodeArtifact::Repository"
+      | AWS__EC2__PrefixList -> "AWS::EC2::PrefixList"
+      | AWS__EC2__SpotFleet -> "AWS::EC2::SpotFleet"
+      | AWS__Evidently__Project -> "AWS::Evidently::Project"
+      | AWS__Forecast__Dataset -> "AWS::Forecast::Dataset"
+      | AWS__IAM__SAMLProvider -> "AWS::IAM::SAMLProvider"
+      | AWS__IAM__ServerCertificate -> "AWS::IAM::ServerCertificate"
+      | AWS__Pinpoint__Campaign -> "AWS::Pinpoint::Campaign"
+      | AWS__Pinpoint__InAppTemplate -> "AWS::Pinpoint::InAppTemplate"
+      | AWS__SageMaker__Domain -> "AWS::SageMaker::Domain"
+      | AWS__Transfer__Agreement -> "AWS::Transfer::Agreement"
+      | AWS__Transfer__Connector -> "AWS::Transfer::Connector"
+      | AWS__KinesisFirehose__DeliveryStream ->
+          "AWS::KinesisFirehose::DeliveryStream"
+      | AWS__Amplify__Branch -> "AWS::Amplify::Branch"
+      | AWS__AppIntegrations__EventIntegration ->
+          "AWS::AppIntegrations::EventIntegration"
+      | AWS__AppMesh__Route -> "AWS::AppMesh::Route"
+      | AWS__Athena__PreparedStatement -> "AWS::Athena::PreparedStatement"
+      | AWS__EC2__IPAMScope -> "AWS::EC2::IPAMScope"
+      | AWS__Evidently__Launch -> "AWS::Evidently::Launch"
+      | AWS__Forecast__DatasetGroup -> "AWS::Forecast::DatasetGroup"
+      | AWS__GreengrassV2__ComponentVersion ->
+          "AWS::GreengrassV2::ComponentVersion"
+      | AWS__GroundStation__MissionProfile ->
+          "AWS::GroundStation::MissionProfile"
+      | AWS__MediaConnect__FlowEntitlement ->
+          "AWS::MediaConnect::FlowEntitlement"
+      | AWS__MediaConnect__FlowVpcInterface ->
+          "AWS::MediaConnect::FlowVpcInterface"
+      | AWS__MediaTailor__PlaybackConfiguration ->
+          "AWS::MediaTailor::PlaybackConfiguration"
+      | AWS__MSK__Configuration -> "AWS::MSK::Configuration"
+      | AWS__Personalize__Dataset -> "AWS::Personalize::Dataset"
+      | AWS__Personalize__Schema -> "AWS::Personalize::Schema"
+      | AWS__Personalize__Solution -> "AWS::Personalize::Solution"
+      | AWS__Pinpoint__EmailTemplate -> "AWS::Pinpoint::EmailTemplate"
+      | AWS__Pinpoint__EventStream -> "AWS::Pinpoint::EventStream"
+      | AWS__ResilienceHub__App -> "AWS::ResilienceHub::App"
+      | AWS__ACMPCA__CertificateAuthority ->
+          "AWS::ACMPCA::CertificateAuthority"
+      | AWS__AppConfig__HostedConfigurationVersion ->
+          "AWS::AppConfig::HostedConfigurationVersion"
+      | AWS__AppMesh__VirtualGateway -> "AWS::AppMesh::VirtualGateway"
+      | AWS__AppMesh__VirtualRouter -> "AWS::AppMesh::VirtualRouter"
+      | AWS__AppRunner__Service -> "AWS::AppRunner::Service"
+      | AWS__CustomerProfiles__ObjectType ->
+          "AWS::CustomerProfiles::ObjectType"
+      | AWS__DMS__Endpoint -> "AWS::DMS::Endpoint"
+      | AWS__EC2__CapacityReservation -> "AWS::EC2::CapacityReservation"
+      | AWS__EC2__ClientVpnEndpoint -> "AWS::EC2::ClientVpnEndpoint"
+      | AWS__Kendra__Index -> "AWS::Kendra::Index"
+      | AWS__KinesisVideo__Stream -> "AWS::KinesisVideo::Stream"
+      | AWS__Logs__Destination -> "AWS::Logs::Destination"
+      | AWS__Pinpoint__EmailChannel -> "AWS::Pinpoint::EmailChannel"
+      | AWS__S3__AccessPoint -> "AWS::S3::AccessPoint"
+      | AWS__NetworkManager__CustomerGatewayAssociation ->
+          "AWS::NetworkManager::CustomerGatewayAssociation"
+      | AWS__NetworkManager__LinkAssociation ->
+          "AWS::NetworkManager::LinkAssociation"
+      | AWS__IoTWireless__MulticastGroup ->
+          "AWS::IoTWireless::MulticastGroup"
+      | AWS__Personalize__DatasetGroup -> "AWS::Personalize::DatasetGroup"
+      | AWS__IoTTwinMaker__ComponentType ->
+          "AWS::IoTTwinMaker::ComponentType"
+      | AWS__CodeBuild__ReportGroup -> "AWS::CodeBuild::ReportGroup"
+      | AWS__SageMaker__FeatureGroup -> "AWS::SageMaker::FeatureGroup"
+      | AWS__MSK__BatchScramSecret -> "AWS::MSK::BatchScramSecret"
+      | AWS__AppStream__Stack -> "AWS::AppStream::Stack"
+      | AWS__IoT__JobTemplate -> "AWS::IoT::JobTemplate"
+      | AWS__IoTWireless__FuotaTask -> "AWS::IoTWireless::FuotaTask"
+      | AWS__IoT__ProvisioningTemplate -> "AWS::IoT::ProvisioningTemplate"
+      | AWS__InspectorV2__Filter -> "AWS::InspectorV2::Filter"
+      | AWS__Route53Resolver__ResolverQueryLoggingConfigAssociation ->
+          "AWS::Route53Resolver::ResolverQueryLoggingConfigAssociation"
+      | AWS__ServiceDiscovery__Instance -> "AWS::ServiceDiscovery::Instance"
+      | AWS__Transfer__Certificate -> "AWS::Transfer::Certificate"
+      | AWS__MediaConnect__FlowSource -> "AWS::MediaConnect::FlowSource"
+      | AWS__APS__RuleGroupsNamespace -> "AWS::APS::RuleGroupsNamespace"
+      | AWS__CodeGuruProfiler__ProfilingGroup ->
+          "AWS::CodeGuruProfiler::ProfilingGroup"
+      | AWS__Route53Resolver__ResolverQueryLoggingConfig ->
+          "AWS::Route53Resolver::ResolverQueryLoggingConfig"
+      | AWS__Batch__SchedulingPolicy -> "AWS::Batch::SchedulingPolicy"
+      | AWS__ACMPCA__CertificateAuthorityActivation ->
+          "AWS::ACMPCA::CertificateAuthorityActivation"
+      | AWS__AppMesh__GatewayRoute -> "AWS::AppMesh::GatewayRoute"
+      | AWS__AppMesh__Mesh -> "AWS::AppMesh::Mesh"
+      | AWS__Connect__Instance -> "AWS::Connect::Instance"
+      | AWS__Connect__QuickConnect -> "AWS::Connect::QuickConnect"
+      | AWS__EC2__CarrierGateway -> "AWS::EC2::CarrierGateway"
+      | AWS__EC2__IPAMPool -> "AWS::EC2::IPAMPool"
+      | AWS__EC2__TransitGatewayConnect -> "AWS::EC2::TransitGatewayConnect"
+      | AWS__EC2__TransitGatewayMulticastDomain ->
+          "AWS::EC2::TransitGatewayMulticastDomain"
+      | AWS__ECS__CapacityProvider -> "AWS::ECS::CapacityProvider"
+      | AWS__IAM__InstanceProfile -> "AWS::IAM::InstanceProfile"
+      | AWS__IoT__CACertificate -> "AWS::IoT::CACertificate"
+      | AWS__IoTTwinMaker__SyncJob -> "AWS::IoTTwinMaker::SyncJob"
+      | AWS__KafkaConnect__Connector -> "AWS::KafkaConnect::Connector"
+      | AWS__Lambda__CodeSigningConfig -> "AWS::Lambda::CodeSigningConfig"
+      | AWS__NetworkManager__ConnectPeer ->
+          "AWS::NetworkManager::ConnectPeer"
+      | AWS__ResourceExplorer2__Index -> "AWS::ResourceExplorer2::Index"
+      | AWS__AppStream__Fleet -> "AWS::AppStream::Fleet"
+      | AWS__Cognito__UserPool -> "AWS::Cognito::UserPool"
+      | AWS__Cognito__UserPoolClient -> "AWS::Cognito::UserPoolClient"
+      | AWS__Cognito__UserPoolGroup -> "AWS::Cognito::UserPoolGroup"
+      | AWS__EC2__NetworkInsightsAccessScope ->
+          "AWS::EC2::NetworkInsightsAccessScope"
+      | AWS__EC2__NetworkInsightsAnalysis ->
+          "AWS::EC2::NetworkInsightsAnalysis"
+      | AWS__Grafana__Workspace -> "AWS::Grafana::Workspace"
+      | AWS__GroundStation__DataflowEndpointGroup ->
+          "AWS::GroundStation::DataflowEndpointGroup"
+      | AWS__ImageBuilder__ImageRecipe -> "AWS::ImageBuilder::ImageRecipe"
+      | AWS__KMS__Alias -> "AWS::KMS::Alias"
+      | AWS__M2__Environment -> "AWS::M2::Environment"
+      | AWS__QuickSight__DataSource -> "AWS::QuickSight::DataSource"
+      | AWS__QuickSight__Template -> "AWS::QuickSight::Template"
+      | AWS__QuickSight__Theme -> "AWS::QuickSight::Theme"
+      | AWS__RDS__OptionGroup -> "AWS::RDS::OptionGroup"
+      | AWS__Redshift__EndpointAccess -> "AWS::Redshift::EndpointAccess"
+      | AWS__Route53Resolver__FirewallRuleGroup ->
+          "AWS::Route53Resolver::FirewallRuleGroup"
+      | AWS__SSM__Document -> "AWS::SSM::Document"
+      | AWS__AppConfig__ExtensionAssociation ->
+          "AWS::AppConfig::ExtensionAssociation"
+      | AWS__AppIntegrations__Application ->
+          "AWS::AppIntegrations::Application"
+      | AWS__AppSync__ApiCache -> "AWS::AppSync::ApiCache"
+      | AWS__Bedrock__Guardrail -> "AWS::Bedrock::Guardrail"
+      | AWS__Bedrock__KnowledgeBase -> "AWS::Bedrock::KnowledgeBase"
+      | AWS__Cognito__IdentityPool -> "AWS::Cognito::IdentityPool"
+      | AWS__Connect__Rule -> "AWS::Connect::Rule"
+      | AWS__Connect__User -> "AWS::Connect::User"
+      | AWS__EC2__ClientVpnTargetNetworkAssociation ->
+          "AWS::EC2::ClientVpnTargetNetworkAssociation"
+      | AWS__EC2__EIPAssociation -> "AWS::EC2::EIPAssociation"
+      | AWS__EC2__IPAMResourceDiscovery -> "AWS::EC2::IPAMResourceDiscovery"
+      | AWS__EC2__IPAMResourceDiscoveryAssociation ->
+          "AWS::EC2::IPAMResourceDiscoveryAssociation"
+      | AWS__EC2__InstanceConnectEndpoint ->
+          "AWS::EC2::InstanceConnectEndpoint"
+      | AWS__EC2__SnapshotBlockPublicAccess ->
+          "AWS::EC2::SnapshotBlockPublicAccess"
+      | AWS__EC2__VPCBlockPublicAccessExclusion ->
+          "AWS::EC2::VPCBlockPublicAccessExclusion"
+      | AWS__EC2__VPCBlockPublicAccessOptions ->
+          "AWS::EC2::VPCBlockPublicAccessOptions"
+      | AWS__EC2__VPCEndpointConnectionNotification ->
+          "AWS::EC2::VPCEndpointConnectionNotification"
+      | AWS__EC2__VPNConnectionRoute -> "AWS::EC2::VPNConnectionRoute"
+      | AWS__Evidently__Segment -> "AWS::Evidently::Segment"
+      | AWS__IAM__OIDCProvider -> "AWS::IAM::OIDCProvider"
+      | AWS__InspectorV2__Activation -> "AWS::InspectorV2::Activation"
+      | AWS__MSK__ClusterPolicy -> "AWS::MSK::ClusterPolicy"
+      | AWS__MSK__VpcConnection -> "AWS::MSK::VpcConnection"
+      | AWS__MediaConnect__Gateway -> "AWS::MediaConnect::Gateway"
+      | AWS__MemoryDB__SubnetGroup -> "AWS::MemoryDB::SubnetGroup"
+      | AWS__OpenSearchServerless__Collection ->
+          "AWS::OpenSearchServerless::Collection"
+      | AWS__OpenSearchServerless__VpcEndpoint ->
+          "AWS::OpenSearchServerless::VpcEndpoint"
+      | AWS__Redshift__EndpointAuthorization ->
+          "AWS::Redshift::EndpointAuthorization"
+      | AWS__Route53Profiles__Profile -> "AWS::Route53Profiles::Profile"
+      | AWS__S3__StorageLensGroup -> "AWS::S3::StorageLensGroup"
+      | AWS__S3Express__BucketPolicy -> "AWS::S3Express::BucketPolicy"
+      | AWS__S3Express__DirectoryBucket -> "AWS::S3Express::DirectoryBucket"
+      | AWS__SageMaker__InferenceExperiment ->
+          "AWS::SageMaker::InferenceExperiment"
+      | AWS__SecurityHub__Standard -> "AWS::SecurityHub::Standard"
+      | AWS__Transfer__Profile -> "AWS::Transfer::Profile"
+      | AWS__CloudFormation__StackSet -> "AWS::CloudFormation::StackSet"
+      | AWS__MediaPackageV2__Channel -> "AWS::MediaPackageV2::Channel"
+      | AWS__S3__AccessGrantsLocation -> "AWS::S3::AccessGrantsLocation"
+      | AWS__S3__AccessGrant -> "AWS::S3::AccessGrant"
+      | AWS__S3__AccessGrantsInstance -> "AWS::S3::AccessGrantsInstance"
+      | AWS__EMRServerless__Application -> "AWS::EMRServerless::Application"
+      | AWS__Config__AggregationAuthorization ->
+          "AWS::Config::AggregationAuthorization"
+      | AWS__Bedrock__ApplicationInferenceProfile ->
+          "AWS::Bedrock::ApplicationInferenceProfile"
+      | AWS__ApiGatewayV2__Integration -> "AWS::ApiGatewayV2::Integration"
+      | AWS__SageMaker__MlflowTrackingServer ->
+          "AWS::SageMaker::MlflowTrackingServer"
+      | AWS__SageMaker__ModelBiasJobDefinition ->
+          "AWS::SageMaker::ModelBiasJobDefinition"
+      | AWS__SecretsManager__RotationSchedule ->
+          "AWS::SecretsManager::RotationSchedule"
+      | AWS__Deadline__QueueFleetAssociation ->
+          "AWS::Deadline::QueueFleetAssociation"
+      | AWS__ECR__RepositoryCreationTemplate ->
+          "AWS::ECR::RepositoryCreationTemplate"
+      | AWS__CloudFormation__LambdaHook -> "AWS::CloudFormation::LambdaHook"
+      | AWS__EC2__SubnetNetworkAclAssociation ->
+          "AWS::EC2::SubnetNetworkAclAssociation"
+      | AWS__ApiGateway__UsagePlan -> "AWS::ApiGateway::UsagePlan"
+      | AWS__AppConfig__Extension -> "AWS::AppConfig::Extension"
+      | AWS__Deadline__Fleet -> "AWS::Deadline::Fleet"
+      | AWS__EMR__Studio -> "AWS::EMR::Studio"
+      | AWS__S3Tables__TableBucket -> "AWS::S3Tables::TableBucket"
+      | AWS__CloudFront__RealtimeLogConfig ->
+          "AWS::CloudFront::RealtimeLogConfig"
+      | AWS__BackupGateway__Hypervisor -> "AWS::BackupGateway::Hypervisor"
+      | AWS__BCMDataExports__Export -> "AWS::BCMDataExports::Export"
+      | AWS__CloudFormation__GuardHook -> "AWS::CloudFormation::GuardHook"
+      | AWS__CloudFront__PublicKey -> "AWS::CloudFront::PublicKey"
+      | AWS__CloudTrail__EventDataStore -> "AWS::CloudTrail::EventDataStore"
+      | AWS__EntityResolution__IdMappingWorkflow ->
+          "AWS::EntityResolution::IdMappingWorkflow"
+      | AWS__EntityResolution__SchemaMapping ->
+          "AWS::EntityResolution::SchemaMapping"
+      | AWS__IoT__DomainConfiguration -> "AWS::IoT::DomainConfiguration"
+      | AWS__PCAConnectorAD__DirectoryRegistration ->
+          "AWS::PCAConnectorAD::DirectoryRegistration"
+      | AWS__RDS__Integration -> "AWS::RDS::Integration"
+      | AWS__Config__ConformancePack -> "AWS::Config::ConformancePack"
+      | AWS__RolesAnywhere__Profile -> "AWS::RolesAnywhere::Profile"
+      | AWS__CodeArtifact__Domain -> "AWS::CodeArtifact::Domain"
+      | AWS__Backup__RestoreTestingPlan -> "AWS::Backup::RestoreTestingPlan"
+      | AWS__Config__StoredQuery -> "AWS::Config::StoredQuery"
+      | AWS__SageMaker__DataQualityJobDefinition ->
+          "AWS::SageMaker::DataQualityJobDefinition"
+      | AWS__SageMaker__ModelExplainabilityJobDefinition ->
+          "AWS::SageMaker::ModelExplainabilityJobDefinition"
+      | AWS__SageMaker__ModelQualityJobDefinition ->
+          "AWS::SageMaker::ModelQualityJobDefinition"
+      | AWS__SageMaker__StudioLifecycleConfig ->
+          "AWS::SageMaker::StudioLifecycleConfig"
+      | AWS__SES__DedicatedIpPool -> "AWS::SES::DedicatedIpPool"
+      | AWS__SES__MailManagerTrafficPolicy ->
+          "AWS::SES::MailManagerTrafficPolicy"
+      | AWS__SSM__ResourceDataSync -> "AWS::SSM::ResourceDataSync"
+      | AWS__BedrockAgentCore__Runtime -> "AWS::BedrockAgentCore::Runtime"
+      | AWS__BedrockAgentCore__BrowserCustom ->
+          "AWS::BedrockAgentCore::BrowserCustom"
+      | AWS__ElasticLoadBalancingV2__TargetGroup ->
+          "AWS::ElasticLoadBalancingV2::TargetGroup"
+      | AWS__EMRContainers__VirtualCluster ->
+          "AWS::EMRContainers::VirtualCluster"
+      | AWS__EntityResolution__MatchingWorkflow ->
+          "AWS::EntityResolution::MatchingWorkflow"
+      | AWS__IoTCoreDeviceAdvisor__SuiteDefinition ->
+          "AWS::IoTCoreDeviceAdvisor::SuiteDefinition"
+      | AWS__EC2__SecurityGroupVpcAssociation ->
+          "AWS::EC2::SecurityGroupVpcAssociation"
+      | AWS__EC2__VerifiedAccessInstance ->
+          "AWS::EC2::VerifiedAccessInstance"
+      | AWS__KafkaConnect__CustomPlugin -> "AWS::KafkaConnect::CustomPlugin"
+      | AWS__NetworkManager__TransitGatewayPeering ->
+          "AWS::NetworkManager::TransitGatewayPeering"
+      | AWS__OpenSearchServerless__SecurityConfig ->
+          "AWS::OpenSearchServerless::SecurityConfig"
+      | AWS__Redshift__Integration -> "AWS::Redshift::Integration"
+      | AWS__RolesAnywhere__TrustAnchor -> "AWS::RolesAnywhere::TrustAnchor"
+      | AWS__Route53Profiles__ProfileAssociation ->
+          "AWS::Route53Profiles::ProfileAssociation"
+      | AWS__SSMIncidents__ResponsePlan -> "AWS::SSMIncidents::ResponsePlan"
+      | AWS__Transfer__Server -> "AWS::Transfer::Server"
+      | AWS__Glue__Database -> "AWS::Glue::Database"
+      | AWS__Organizations__OrganizationalUnit ->
+          "AWS::Organizations::OrganizationalUnit"
+      | AWS__EC2__IPAMPoolCidr -> "AWS::EC2::IPAMPoolCidr"
+      | AWS__EC2__VPCGatewayAttachment -> "AWS::EC2::VPCGatewayAttachment"
+      | AWS__Bedrock__Prompt -> "AWS::Bedrock::Prompt"
+      | AWS__Comprehend__Flywheel -> "AWS::Comprehend::Flywheel"
+      | AWS__DataSync__Agent -> "AWS::DataSync::Agent"
+      | AWS__MediaTailor__LiveSource -> "AWS::MediaTailor::LiveSource"
+      | AWS__MSK__ServerlessCluster -> "AWS::MSK::ServerlessCluster"
+      | AWS__IoTSiteWise__Asset -> "AWS::IoTSiteWise::Asset"
+      | AWS__B2BI__Capability -> "AWS::B2BI::Capability"
+      | AWS__CloudFront__KeyValueStore -> "AWS::CloudFront::KeyValueStore"
+      | AWS__Deadline__Monitor -> "AWS::Deadline::Monitor"
+      | AWS__GuardDuty__MalwareProtectionPlan ->
+          "AWS::GuardDuty::MalwareProtectionPlan"
+      | AWS__Location__APIKey -> "AWS::Location::APIKey"
+      | AWS__MediaPackageV2__OriginEndpoint ->
+          "AWS::MediaPackageV2::OriginEndpoint"
+      | AWS__PCAConnectorAD__Connector -> "AWS::PCAConnectorAD::Connector"
+      | AWS__S3Tables__TableBucketPolicy ->
+          "AWS::S3Tables::TableBucketPolicy"
+      | AWS__SecretsManager__ResourcePolicy ->
+          "AWS::SecretsManager::ResourcePolicy"
+      | AWS__SSMContacts__Contact -> "AWS::SSMContacts::Contact"
+      | AWS__IoT__ThingGroup -> "AWS::IoT::ThingGroup"
+      | AWS__ImageBuilder__LifecyclePolicy ->
+          "AWS::ImageBuilder::LifecyclePolicy"
+      | AWS__GameLift__Build -> "AWS::GameLift::Build"
+      | AWS__ECR__ReplicationConfiguration ->
+          "AWS::ECR::ReplicationConfiguration"
+      | AWS__EC2__SubnetCidrBlock -> "AWS::EC2::SubnetCidrBlock"
+      | AWS__Connect__SecurityProfile -> "AWS::Connect::SecurityProfile"
+      | AWS__CleanRoomsML__TrainingDataset ->
+          "AWS::CleanRoomsML::TrainingDataset"
+      | AWS__AppStream__AppBlockBuilder -> "AWS::AppStream::AppBlockBuilder"
+      | AWS__Route53__DNSSEC -> "AWS::Route53::DNSSEC"
+      | AWS__SageMaker__UserProfile -> "AWS::SageMaker::UserProfile"
+      | AWS__ApiGateway__Method -> "AWS::ApiGateway::Method"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AWS::EC2::CustomerGateway" -> AWS__EC2__CustomerGateway
+      | "AWS::EC2::EIP" -> AWS__EC2__EIP
+      | "AWS::EC2::Host" -> AWS__EC2__Host
+      | "AWS::EC2::Instance" -> AWS__EC2__Instance
+      | "AWS::EC2::InternetGateway" -> AWS__EC2__InternetGateway
+      | "AWS::EC2::NetworkAcl" -> AWS__EC2__NetworkAcl
+      | "AWS::EC2::NetworkInterface" -> AWS__EC2__NetworkInterface
+      | "AWS::EC2::RouteTable" -> AWS__EC2__RouteTable
+      | "AWS::EC2::SecurityGroup" -> AWS__EC2__SecurityGroup
+      | "AWS::EC2::Subnet" -> AWS__EC2__Subnet
+      | "AWS::CloudTrail::Trail" -> AWS__CloudTrail__Trail
+      | "AWS::EC2::Volume" -> AWS__EC2__Volume
+      | "AWS::EC2::VPC" -> AWS__EC2__VPC
+      | "AWS::EC2::VPNConnection" -> AWS__EC2__VPNConnection
+      | "AWS::EC2::VPNGateway" -> AWS__EC2__VPNGateway
+      | "AWS::EC2::RegisteredHAInstance" -> AWS__EC2__RegisteredHAInstance
+      | "AWS::EC2::NatGateway" -> AWS__EC2__NatGateway
+      | "AWS::EC2::EgressOnlyInternetGateway" ->
+          AWS__EC2__EgressOnlyInternetGateway
+      | "AWS::EC2::VPCEndpoint" -> AWS__EC2__VPCEndpoint
+      | "AWS::EC2::VPCEndpointService" -> AWS__EC2__VPCEndpointService
+      | "AWS::EC2::FlowLog" -> AWS__EC2__FlowLog
+      | "AWS::EC2::VPCPeeringConnection" -> AWS__EC2__VPCPeeringConnection
+      | "AWS::Elasticsearch::Domain" -> AWS__Elasticsearch__Domain
+      | "AWS::IAM::Group" -> AWS__IAM__Group
+      | "AWS::IAM::Policy" -> AWS__IAM__Policy
+      | "AWS::IAM::Role" -> AWS__IAM__Role
+      | "AWS::IAM::User" -> AWS__IAM__User
+      | "AWS::ElasticLoadBalancingV2::LoadBalancer" ->
+          AWS__ElasticLoadBalancingV2__LoadBalancer
+      | "AWS::ACM::Certificate" -> AWS__ACM__Certificate
+      | "AWS::RDS::DBInstance" -> AWS__RDS__DBInstance
+      | "AWS::RDS::DBSubnetGroup" -> AWS__RDS__DBSubnetGroup
+      | "AWS::RDS::DBSecurityGroup" -> AWS__RDS__DBSecurityGroup
+      | "AWS::RDS::DBSnapshot" -> AWS__RDS__DBSnapshot
+      | "AWS::RDS::DBCluster" -> AWS__RDS__DBCluster
+      | "AWS::RDS::DBClusterSnapshot" -> AWS__RDS__DBClusterSnapshot
+      | "AWS::RDS::EventSubscription" -> AWS__RDS__EventSubscription
+      | "AWS::S3::Bucket" -> AWS__S3__Bucket
+      | "AWS::S3::AccountPublicAccessBlock" ->
+          AWS__S3__AccountPublicAccessBlock
+      | "AWS::Redshift::Cluster" -> AWS__Redshift__Cluster
+      | "AWS::Redshift::ClusterSnapshot" -> AWS__Redshift__ClusterSnapshot
+      | "AWS::Redshift::ClusterParameterGroup" ->
+          AWS__Redshift__ClusterParameterGroup
+      | "AWS::Redshift::ClusterSecurityGroup" ->
+          AWS__Redshift__ClusterSecurityGroup
+      | "AWS::Redshift::ClusterSubnetGroup" ->
+          AWS__Redshift__ClusterSubnetGroup
+      | "AWS::Redshift::EventSubscription" ->
+          AWS__Redshift__EventSubscription
+      | "AWS::SSM::ManagedInstanceInventory" ->
+          AWS__SSM__ManagedInstanceInventory
+      | "AWS::CloudWatch::Alarm" -> AWS__CloudWatch__Alarm
+      | "AWS::CloudFormation::Stack" -> AWS__CloudFormation__Stack
+      | "AWS::ElasticLoadBalancing::LoadBalancer" ->
+          AWS__ElasticLoadBalancing__LoadBalancer
+      | "AWS::AutoScaling::AutoScalingGroup" ->
+          AWS__AutoScaling__AutoScalingGroup
+      | "AWS::AutoScaling::LaunchConfiguration" ->
+          AWS__AutoScaling__LaunchConfiguration
+      | "AWS::AutoScaling::ScalingPolicy" -> AWS__AutoScaling__ScalingPolicy
+      | "AWS::AutoScaling::ScheduledAction" ->
+          AWS__AutoScaling__ScheduledAction
+      | "AWS::DynamoDB::Table" -> AWS__DynamoDB__Table
+      | "AWS::CodeBuild::Project" -> AWS__CodeBuild__Project
+      | "AWS::WAF::RateBasedRule" -> AWS__WAF__RateBasedRule
+      | "AWS::WAF::Rule" -> AWS__WAF__Rule
+      | "AWS::WAF::RuleGroup" -> AWS__WAF__RuleGroup
+      | "AWS::WAF::WebACL" -> AWS__WAF__WebACL
+      | "AWS::WAFRegional::RateBasedRule" -> AWS__WAFRegional__RateBasedRule
+      | "AWS::WAFRegional::Rule" -> AWS__WAFRegional__Rule
+      | "AWS::WAFRegional::RuleGroup" -> AWS__WAFRegional__RuleGroup
+      | "AWS::WAFRegional::WebACL" -> AWS__WAFRegional__WebACL
+      | "AWS::CloudFront::Distribution" -> AWS__CloudFront__Distribution
+      | "AWS::CloudFront::StreamingDistribution" ->
+          AWS__CloudFront__StreamingDistribution
+      | "AWS::Lambda::Function" -> AWS__Lambda__Function
+      | "AWS::NetworkFirewall::Firewall" -> AWS__NetworkFirewall__Firewall
+      | "AWS::NetworkFirewall::FirewallPolicy" ->
+          AWS__NetworkFirewall__FirewallPolicy
+      | "AWS::NetworkFirewall::RuleGroup" -> AWS__NetworkFirewall__RuleGroup
+      | "AWS::ElasticBeanstalk::Application" ->
+          AWS__ElasticBeanstalk__Application
+      | "AWS::ElasticBeanstalk::ApplicationVersion" ->
+          AWS__ElasticBeanstalk__ApplicationVersion
+      | "AWS::ElasticBeanstalk::Environment" ->
+          AWS__ElasticBeanstalk__Environment
+      | "AWS::WAFv2::WebACL" -> AWS__WAFv2__WebACL
+      | "AWS::WAFv2::RuleGroup" -> AWS__WAFv2__RuleGroup
+      | "AWS::WAFv2::IPSet" -> AWS__WAFv2__IPSet
+      | "AWS::WAFv2::RegexPatternSet" -> AWS__WAFv2__RegexPatternSet
+      | "AWS::WAFv2::ManagedRuleSet" -> AWS__WAFv2__ManagedRuleSet
+      | "AWS::XRay::EncryptionConfig" -> AWS__XRay__EncryptionConfig
+      | "AWS::SSM::AssociationCompliance" -> AWS__SSM__AssociationCompliance
+      | "AWS::SSM::PatchCompliance" -> AWS__SSM__PatchCompliance
+      | "AWS::Shield::Protection" -> AWS__Shield__Protection
+      | "AWS::ShieldRegional::Protection" -> AWS__ShieldRegional__Protection
+      | "AWS::Config::ConformancePackCompliance" ->
+          AWS__Config__ConformancePackCompliance
+      | "AWS::Config::ResourceCompliance" -> AWS__Config__ResourceCompliance
+      | "AWS::ApiGateway::Stage" -> AWS__ApiGateway__Stage
+      | "AWS::ApiGateway::RestApi" -> AWS__ApiGateway__RestApi
+      | "AWS::ApiGatewayV2::Stage" -> AWS__ApiGatewayV2__Stage
+      | "AWS::ApiGatewayV2::Api" -> AWS__ApiGatewayV2__Api
+      | "AWS::CodePipeline::Pipeline" -> AWS__CodePipeline__Pipeline
+      | "AWS::ServiceCatalog::CloudFormationProvisionedProduct" ->
+          AWS__ServiceCatalog__CloudFormationProvisionedProduct
+      | "AWS::ServiceCatalog::CloudFormationProduct" ->
+          AWS__ServiceCatalog__CloudFormationProduct
+      | "AWS::ServiceCatalog::Portfolio" -> AWS__ServiceCatalog__Portfolio
+      | "AWS::SQS::Queue" -> AWS__SQS__Queue
+      | "AWS::KMS::Key" -> AWS__KMS__Key
+      | "AWS::QLDB::Ledger" -> AWS__QLDB__Ledger
+      | "AWS::SecretsManager::Secret" -> AWS__SecretsManager__Secret
+      | "AWS::SNS::Topic" -> AWS__SNS__Topic
+      | "AWS::SSM::FileData" -> AWS__SSM__FileData
+      | "AWS::Backup::BackupPlan" -> AWS__Backup__BackupPlan
+      | "AWS::Backup::BackupSelection" -> AWS__Backup__BackupSelection
+      | "AWS::Backup::BackupVault" -> AWS__Backup__BackupVault
+      | "AWS::Backup::RecoveryPoint" -> AWS__Backup__RecoveryPoint
+      | "AWS::ECR::Repository" -> AWS__ECR__Repository
+      | "AWS::ECS::Cluster" -> AWS__ECS__Cluster
+      | "AWS::ECS::Service" -> AWS__ECS__Service
+      | "AWS::ECS::TaskDefinition" -> AWS__ECS__TaskDefinition
+      | "AWS::EFS::AccessPoint" -> AWS__EFS__AccessPoint
+      | "AWS::EFS::FileSystem" -> AWS__EFS__FileSystem
+      | "AWS::EKS::Cluster" -> AWS__EKS__Cluster
+      | "AWS::OpenSearch::Domain" -> AWS__OpenSearch__Domain
+      | "AWS::EC2::TransitGateway" -> AWS__EC2__TransitGateway
+      | "AWS::Kinesis::Stream" -> AWS__Kinesis__Stream
+      | "AWS::Kinesis::StreamConsumer" -> AWS__Kinesis__StreamConsumer
+      | "AWS::CodeDeploy::Application" -> AWS__CodeDeploy__Application
+      | "AWS::CodeDeploy::DeploymentConfig" ->
+          AWS__CodeDeploy__DeploymentConfig
+      | "AWS::CodeDeploy::DeploymentGroup" ->
+          AWS__CodeDeploy__DeploymentGroup
+      | "AWS::EC2::LaunchTemplate" -> AWS__EC2__LaunchTemplate
+      | "AWS::ECR::PublicRepository" -> AWS__ECR__PublicRepository
+      | "AWS::GuardDuty::Detector" -> AWS__GuardDuty__Detector
+      | "AWS::EMR::SecurityConfiguration" -> AWS__EMR__SecurityConfiguration
+      | "AWS::SageMaker::CodeRepository" -> AWS__SageMaker__CodeRepository
+      | "AWS::Route53Resolver::ResolverEndpoint" ->
+          AWS__Route53Resolver__ResolverEndpoint
+      | "AWS::Route53Resolver::ResolverRule" ->
+          AWS__Route53Resolver__ResolverRule
+      | "AWS::Route53Resolver::ResolverRuleAssociation" ->
+          AWS__Route53Resolver__ResolverRuleAssociation
+      | "AWS::DMS::ReplicationSubnetGroup" ->
+          AWS__DMS__ReplicationSubnetGroup
+      | "AWS::DMS::EventSubscription" -> AWS__DMS__EventSubscription
+      | "AWS::MSK::Cluster" -> AWS__MSK__Cluster
+      | "AWS::StepFunctions::Activity" -> AWS__StepFunctions__Activity
+      | "AWS::WorkSpaces::Workspace" -> AWS__WorkSpaces__Workspace
+      | "AWS::WorkSpaces::ConnectionAlias" ->
+          AWS__WorkSpaces__ConnectionAlias
+      | "AWS::SageMaker::Model" -> AWS__SageMaker__Model
+      | "AWS::ElasticLoadBalancingV2::Listener" ->
+          AWS__ElasticLoadBalancingV2__Listener
+      | "AWS::StepFunctions::StateMachine" ->
+          AWS__StepFunctions__StateMachine
+      | "AWS::Batch::JobQueue" -> AWS__Batch__JobQueue
+      | "AWS::Batch::ComputeEnvironment" -> AWS__Batch__ComputeEnvironment
+      | "AWS::AccessAnalyzer::Analyzer" -> AWS__AccessAnalyzer__Analyzer
+      | "AWS::Athena::WorkGroup" -> AWS__Athena__WorkGroup
+      | "AWS::Athena::DataCatalog" -> AWS__Athena__DataCatalog
+      | "AWS::Detective::Graph" -> AWS__Detective__Graph
+      | "AWS::GlobalAccelerator::Accelerator" ->
+          AWS__GlobalAccelerator__Accelerator
+      | "AWS::GlobalAccelerator::EndpointGroup" ->
+          AWS__GlobalAccelerator__EndpointGroup
+      | "AWS::GlobalAccelerator::Listener" ->
+          AWS__GlobalAccelerator__Listener
+      | "AWS::EC2::TransitGatewayAttachment" ->
+          AWS__EC2__TransitGatewayAttachment
+      | "AWS::EC2::TransitGatewayRouteTable" ->
+          AWS__EC2__TransitGatewayRouteTable
+      | "AWS::DMS::Certificate" -> AWS__DMS__Certificate
+      | "AWS::AppConfig::Application" -> AWS__AppConfig__Application
+      | "AWS::AppSync::GraphQLApi" -> AWS__AppSync__GraphQLApi
+      | "AWS::DataSync::LocationSMB" -> AWS__DataSync__LocationSMB
+      | "AWS::DataSync::LocationFSxLustre" ->
+          AWS__DataSync__LocationFSxLustre
+      | "AWS::DataSync::LocationS3" -> AWS__DataSync__LocationS3
+      | "AWS::DataSync::LocationEFS" -> AWS__DataSync__LocationEFS
+      | "AWS::DataSync::Task" -> AWS__DataSync__Task
+      | "AWS::DataSync::LocationNFS" -> AWS__DataSync__LocationNFS
+      | "AWS::EC2::NetworkInsightsAccessScopeAnalysis" ->
+          AWS__EC2__NetworkInsightsAccessScopeAnalysis
+      | "AWS::EKS::FargateProfile" -> AWS__EKS__FargateProfile
+      | "AWS::Glue::Job" -> AWS__Glue__Job
+      | "AWS::GuardDuty::ThreatIntelSet" -> AWS__GuardDuty__ThreatIntelSet
+      | "AWS::GuardDuty::IPSet" -> AWS__GuardDuty__IPSet
+      | "AWS::SageMaker::Workteam" -> AWS__SageMaker__Workteam
+      | "AWS::SageMaker::NotebookInstanceLifecycleConfig" ->
+          AWS__SageMaker__NotebookInstanceLifecycleConfig
+      | "AWS::ServiceDiscovery::Service" -> AWS__ServiceDiscovery__Service
+      | "AWS::ServiceDiscovery::PublicDnsNamespace" ->
+          AWS__ServiceDiscovery__PublicDnsNamespace
+      | "AWS::SES::ContactList" -> AWS__SES__ContactList
+      | "AWS::SES::ConfigurationSet" -> AWS__SES__ConfigurationSet
+      | "AWS::Route53::HostedZone" -> AWS__Route53__HostedZone
+      | "AWS::IoTEvents::Input" -> AWS__IoTEvents__Input
+      | "AWS::IoTEvents::DetectorModel" -> AWS__IoTEvents__DetectorModel
+      | "AWS::IoTEvents::AlarmModel" -> AWS__IoTEvents__AlarmModel
+      | "AWS::ServiceDiscovery::HttpNamespace" ->
+          AWS__ServiceDiscovery__HttpNamespace
+      | "AWS::Events::EventBus" -> AWS__Events__EventBus
+      | "AWS::ImageBuilder::ContainerRecipe" ->
+          AWS__ImageBuilder__ContainerRecipe
+      | "AWS::ImageBuilder::DistributionConfiguration" ->
+          AWS__ImageBuilder__DistributionConfiguration
+      | "AWS::ImageBuilder::InfrastructureConfiguration" ->
+          AWS__ImageBuilder__InfrastructureConfiguration
+      | "AWS::DataSync::LocationObjectStorage" ->
+          AWS__DataSync__LocationObjectStorage
+      | "AWS::DataSync::LocationHDFS" -> AWS__DataSync__LocationHDFS
+      | "AWS::Glue::Classifier" -> AWS__Glue__Classifier
+      | "AWS::Route53RecoveryReadiness::Cell" ->
+          AWS__Route53RecoveryReadiness__Cell
+      | "AWS::Route53RecoveryReadiness::ReadinessCheck" ->
+          AWS__Route53RecoveryReadiness__ReadinessCheck
+      | "AWS::ECR::RegistryPolicy" -> AWS__ECR__RegistryPolicy
+      | "AWS::Backup::ReportPlan" -> AWS__Backup__ReportPlan
+      | "AWS::Lightsail::Certificate" -> AWS__Lightsail__Certificate
+      | "AWS::RUM::AppMonitor" -> AWS__RUM__AppMonitor
+      | "AWS::Events::Endpoint" -> AWS__Events__Endpoint
+      | "AWS::SES::ReceiptRuleSet" -> AWS__SES__ReceiptRuleSet
+      | "AWS::Events::Archive" -> AWS__Events__Archive
+      | "AWS::Events::ApiDestination" -> AWS__Events__ApiDestination
+      | "AWS::Lightsail::Disk" -> AWS__Lightsail__Disk
+      | "AWS::FIS::ExperimentTemplate" -> AWS__FIS__ExperimentTemplate
+      | "AWS::DataSync::LocationFSxWindows" ->
+          AWS__DataSync__LocationFSxWindows
+      | "AWS::SES::ReceiptFilter" -> AWS__SES__ReceiptFilter
+      | "AWS::GuardDuty::Filter" -> AWS__GuardDuty__Filter
+      | "AWS::SES::Template" -> AWS__SES__Template
+      | "AWS::AmazonMQ::Broker" -> AWS__AmazonMQ__Broker
+      | "AWS::AppConfig::Environment" -> AWS__AppConfig__Environment
+      | "AWS::AppConfig::ConfigurationProfile" ->
+          AWS__AppConfig__ConfigurationProfile
+      | "AWS::Cloud9::EnvironmentEC2" -> AWS__Cloud9__EnvironmentEC2
+      | "AWS::EventSchemas::Registry" -> AWS__EventSchemas__Registry
+      | "AWS::EventSchemas::RegistryPolicy" ->
+          AWS__EventSchemas__RegistryPolicy
+      | "AWS::EventSchemas::Discoverer" -> AWS__EventSchemas__Discoverer
+      | "AWS::FraudDetector::Label" -> AWS__FraudDetector__Label
+      | "AWS::FraudDetector::EntityType" -> AWS__FraudDetector__EntityType
+      | "AWS::FraudDetector::Variable" -> AWS__FraudDetector__Variable
+      | "AWS::FraudDetector::Outcome" -> AWS__FraudDetector__Outcome
+      | "AWS::IoT::Authorizer" -> AWS__IoT__Authorizer
+      | "AWS::IoT::SecurityProfile" -> AWS__IoT__SecurityProfile
+      | "AWS::IoT::RoleAlias" -> AWS__IoT__RoleAlias
+      | "AWS::IoT::Dimension" -> AWS__IoT__Dimension
+      | "AWS::IoTAnalytics::Datastore" -> AWS__IoTAnalytics__Datastore
+      | "AWS::Lightsail::Bucket" -> AWS__Lightsail__Bucket
+      | "AWS::Lightsail::StaticIp" -> AWS__Lightsail__StaticIp
+      | "AWS::MediaPackage::PackagingGroup" ->
+          AWS__MediaPackage__PackagingGroup
+      | "AWS::Route53RecoveryReadiness::RecoveryGroup" ->
+          AWS__Route53RecoveryReadiness__RecoveryGroup
+      | "AWS::ResilienceHub::ResiliencyPolicy" ->
+          AWS__ResilienceHub__ResiliencyPolicy
+      | "AWS::Transfer::Workflow" -> AWS__Transfer__Workflow
+      | "AWS::EKS::IdentityProviderConfig" ->
+          AWS__EKS__IdentityProviderConfig
+      | "AWS::EKS::Addon" -> AWS__EKS__Addon
+      | "AWS::Glue::MLTransform" -> AWS__Glue__MLTransform
+      | "AWS::IoT::Policy" -> AWS__IoT__Policy
+      | "AWS::IoT::MitigationAction" -> AWS__IoT__MitigationAction
+      | "AWS::IoTTwinMaker::Workspace" -> AWS__IoTTwinMaker__Workspace
+      | "AWS::IoTTwinMaker::Entity" -> AWS__IoTTwinMaker__Entity
+      | "AWS::IoTAnalytics::Dataset" -> AWS__IoTAnalytics__Dataset
+      | "AWS::IoTAnalytics::Pipeline" -> AWS__IoTAnalytics__Pipeline
+      | "AWS::IoTAnalytics::Channel" -> AWS__IoTAnalytics__Channel
+      | "AWS::IoTSiteWise::Dashboard" -> AWS__IoTSiteWise__Dashboard
+      | "AWS::IoTSiteWise::Project" -> AWS__IoTSiteWise__Project
+      | "AWS::IoTSiteWise::Portal" -> AWS__IoTSiteWise__Portal
+      | "AWS::IoTSiteWise::AssetModel" -> AWS__IoTSiteWise__AssetModel
+      | "AWS::IVS::Channel" -> AWS__IVS__Channel
+      | "AWS::IVS::RecordingConfiguration" ->
+          AWS__IVS__RecordingConfiguration
+      | "AWS::IVS::PlaybackKeyPair" -> AWS__IVS__PlaybackKeyPair
+      | "AWS::KinesisAnalyticsV2::Application" ->
+          AWS__KinesisAnalyticsV2__Application
+      | "AWS::RDS::GlobalCluster" -> AWS__RDS__GlobalCluster
+      | "AWS::S3::MultiRegionAccessPoint" -> AWS__S3__MultiRegionAccessPoint
+      | "AWS::DeviceFarm::TestGridProject" ->
+          AWS__DeviceFarm__TestGridProject
+      | "AWS::Budgets::BudgetsAction" -> AWS__Budgets__BudgetsAction
+      | "AWS::Lex::Bot" -> AWS__Lex__Bot
+      | "AWS::CodeGuruReviewer::RepositoryAssociation" ->
+          AWS__CodeGuruReviewer__RepositoryAssociation
+      | "AWS::IoT::CustomMetric" -> AWS__IoT__CustomMetric
+      | "AWS::Route53Resolver::FirewallDomainList" ->
+          AWS__Route53Resolver__FirewallDomainList
+      | "AWS::RoboMaker::RobotApplicationVersion" ->
+          AWS__RoboMaker__RobotApplicationVersion
+      | "AWS::EC2::TrafficMirrorSession" -> AWS__EC2__TrafficMirrorSession
+      | "AWS::IoTSiteWise::Gateway" -> AWS__IoTSiteWise__Gateway
+      | "AWS::Lex::BotAlias" -> AWS__Lex__BotAlias
+      | "AWS::LookoutMetrics::Alert" -> AWS__LookoutMetrics__Alert
+      | "AWS::IoT::AccountAuditConfiguration" ->
+          AWS__IoT__AccountAuditConfiguration
+      | "AWS::EC2::TrafficMirrorTarget" -> AWS__EC2__TrafficMirrorTarget
+      | "AWS::S3::StorageLens" -> AWS__S3__StorageLens
+      | "AWS::IoT::ScheduledAudit" -> AWS__IoT__ScheduledAudit
+      | "AWS::Events::Connection" -> AWS__Events__Connection
+      | "AWS::EventSchemas::Schema" -> AWS__EventSchemas__Schema
+      | "AWS::MediaPackage::PackagingConfiguration" ->
+          AWS__MediaPackage__PackagingConfiguration
+      | "AWS::KinesisVideo::SignalingChannel" ->
+          AWS__KinesisVideo__SignalingChannel
+      | "AWS::AppStream::DirectoryConfig" -> AWS__AppStream__DirectoryConfig
+      | "AWS::LookoutVision::Project" -> AWS__LookoutVision__Project
+      | "AWS::Route53RecoveryControl::Cluster" ->
+          AWS__Route53RecoveryControl__Cluster
+      | "AWS::Route53RecoveryControl::SafetyRule" ->
+          AWS__Route53RecoveryControl__SafetyRule
+      | "AWS::Route53RecoveryControl::ControlPanel" ->
+          AWS__Route53RecoveryControl__ControlPanel
+      | "AWS::Route53RecoveryControl::RoutingControl" ->
+          AWS__Route53RecoveryControl__RoutingControl
+      | "AWS::Route53RecoveryReadiness::ResourceSet" ->
+          AWS__Route53RecoveryReadiness__ResourceSet
+      | "AWS::RoboMaker::SimulationApplication" ->
+          AWS__RoboMaker__SimulationApplication
+      | "AWS::RoboMaker::RobotApplication" ->
+          AWS__RoboMaker__RobotApplication
+      | "AWS::HealthLake::FHIRDatastore" -> AWS__HealthLake__FHIRDatastore
+      | "AWS::Pinpoint::Segment" -> AWS__Pinpoint__Segment
+      | "AWS::Pinpoint::ApplicationSettings" ->
+          AWS__Pinpoint__ApplicationSettings
+      | "AWS::Events::Rule" -> AWS__Events__Rule
+      | "AWS::EC2::DHCPOptions" -> AWS__EC2__DHCPOptions
+      | "AWS::EC2::NetworkInsightsPath" -> AWS__EC2__NetworkInsightsPath
+      | "AWS::EC2::TrafficMirrorFilter" -> AWS__EC2__TrafficMirrorFilter
+      | "AWS::EC2::IPAM" -> AWS__EC2__IPAM
+      | "AWS::IoTTwinMaker::Scene" -> AWS__IoTTwinMaker__Scene
+      | "AWS::NetworkManager::TransitGatewayRegistration" ->
+          AWS__NetworkManager__TransitGatewayRegistration
+      | "AWS::CustomerProfiles::Domain" -> AWS__CustomerProfiles__Domain
+      | "AWS::AutoScaling::WarmPool" -> AWS__AutoScaling__WarmPool
+      | "AWS::Connect::PhoneNumber" -> AWS__Connect__PhoneNumber
+      | "AWS::AppConfig::DeploymentStrategy" ->
+          AWS__AppConfig__DeploymentStrategy
+      | "AWS::AppFlow::Flow" -> AWS__AppFlow__Flow
+      | "AWS::AuditManager::Assessment" -> AWS__AuditManager__Assessment
+      | "AWS::CloudWatch::MetricStream" -> AWS__CloudWatch__MetricStream
+      | "AWS::DeviceFarm::InstanceProfile" ->
+          AWS__DeviceFarm__InstanceProfile
+      | "AWS::DeviceFarm::Project" -> AWS__DeviceFarm__Project
+      | "AWS::EC2::EC2Fleet" -> AWS__EC2__EC2Fleet
+      | "AWS::EC2::SubnetRouteTableAssociation" ->
+          AWS__EC2__SubnetRouteTableAssociation
+      | "AWS::ECR::PullThroughCacheRule" -> AWS__ECR__PullThroughCacheRule
+      | "AWS::GroundStation::Config" -> AWS__GroundStation__Config
+      | "AWS::ImageBuilder::ImagePipeline" ->
+          AWS__ImageBuilder__ImagePipeline
+      | "AWS::IoT::FleetMetric" -> AWS__IoT__FleetMetric
+      | "AWS::IoTWireless::ServiceProfile" ->
+          AWS__IoTWireless__ServiceProfile
+      | "AWS::NetworkManager::Device" -> AWS__NetworkManager__Device
+      | "AWS::NetworkManager::GlobalNetwork" ->
+          AWS__NetworkManager__GlobalNetwork
+      | "AWS::NetworkManager::Link" -> AWS__NetworkManager__Link
+      | "AWS::NetworkManager::Site" -> AWS__NetworkManager__Site
+      | "AWS::Panorama::Package" -> AWS__Panorama__Package
+      | "AWS::Pinpoint::App" -> AWS__Pinpoint__App
+      | "AWS::Redshift::ScheduledAction" -> AWS__Redshift__ScheduledAction
+      | "AWS::Route53Resolver::FirewallRuleGroupAssociation" ->
+          AWS__Route53Resolver__FirewallRuleGroupAssociation
+      | "AWS::SageMaker::AppImageConfig" -> AWS__SageMaker__AppImageConfig
+      | "AWS::SageMaker::Image" -> AWS__SageMaker__Image
+      | "AWS::ECS::TaskSet" -> AWS__ECS__TaskSet
+      | "AWS::Cassandra::Keyspace" -> AWS__Cassandra__Keyspace
+      | "AWS::Signer::SigningProfile" -> AWS__Signer__SigningProfile
+      | "AWS::Amplify::App" -> AWS__Amplify__App
+      | "AWS::AppMesh::VirtualNode" -> AWS__AppMesh__VirtualNode
+      | "AWS::AppMesh::VirtualService" -> AWS__AppMesh__VirtualService
+      | "AWS::AppRunner::VpcConnector" -> AWS__AppRunner__VpcConnector
+      | "AWS::AppStream::Application" -> AWS__AppStream__Application
+      | "AWS::CodeArtifact::Repository" -> AWS__CodeArtifact__Repository
+      | "AWS::EC2::PrefixList" -> AWS__EC2__PrefixList
+      | "AWS::EC2::SpotFleet" -> AWS__EC2__SpotFleet
+      | "AWS::Evidently::Project" -> AWS__Evidently__Project
+      | "AWS::Forecast::Dataset" -> AWS__Forecast__Dataset
+      | "AWS::IAM::SAMLProvider" -> AWS__IAM__SAMLProvider
+      | "AWS::IAM::ServerCertificate" -> AWS__IAM__ServerCertificate
+      | "AWS::Pinpoint::Campaign" -> AWS__Pinpoint__Campaign
+      | "AWS::Pinpoint::InAppTemplate" -> AWS__Pinpoint__InAppTemplate
+      | "AWS::SageMaker::Domain" -> AWS__SageMaker__Domain
+      | "AWS::Transfer::Agreement" -> AWS__Transfer__Agreement
+      | "AWS::Transfer::Connector" -> AWS__Transfer__Connector
+      | "AWS::KinesisFirehose::DeliveryStream" ->
+          AWS__KinesisFirehose__DeliveryStream
+      | "AWS::Amplify::Branch" -> AWS__Amplify__Branch
+      | "AWS::AppIntegrations::EventIntegration" ->
+          AWS__AppIntegrations__EventIntegration
+      | "AWS::AppMesh::Route" -> AWS__AppMesh__Route
+      | "AWS::Athena::PreparedStatement" -> AWS__Athena__PreparedStatement
+      | "AWS::EC2::IPAMScope" -> AWS__EC2__IPAMScope
+      | "AWS::Evidently::Launch" -> AWS__Evidently__Launch
+      | "AWS::Forecast::DatasetGroup" -> AWS__Forecast__DatasetGroup
+      | "AWS::GreengrassV2::ComponentVersion" ->
+          AWS__GreengrassV2__ComponentVersion
+      | "AWS::GroundStation::MissionProfile" ->
+          AWS__GroundStation__MissionProfile
+      | "AWS::MediaConnect::FlowEntitlement" ->
+          AWS__MediaConnect__FlowEntitlement
+      | "AWS::MediaConnect::FlowVpcInterface" ->
+          AWS__MediaConnect__FlowVpcInterface
+      | "AWS::MediaTailor::PlaybackConfiguration" ->
+          AWS__MediaTailor__PlaybackConfiguration
+      | "AWS::MSK::Configuration" -> AWS__MSK__Configuration
+      | "AWS::Personalize::Dataset" -> AWS__Personalize__Dataset
+      | "AWS::Personalize::Schema" -> AWS__Personalize__Schema
+      | "AWS::Personalize::Solution" -> AWS__Personalize__Solution
+      | "AWS::Pinpoint::EmailTemplate" -> AWS__Pinpoint__EmailTemplate
+      | "AWS::Pinpoint::EventStream" -> AWS__Pinpoint__EventStream
+      | "AWS::ResilienceHub::App" -> AWS__ResilienceHub__App
+      | "AWS::ACMPCA::CertificateAuthority" ->
+          AWS__ACMPCA__CertificateAuthority
+      | "AWS::AppConfig::HostedConfigurationVersion" ->
+          AWS__AppConfig__HostedConfigurationVersion
+      | "AWS::AppMesh::VirtualGateway" -> AWS__AppMesh__VirtualGateway
+      | "AWS::AppMesh::VirtualRouter" -> AWS__AppMesh__VirtualRouter
+      | "AWS::AppRunner::Service" -> AWS__AppRunner__Service
+      | "AWS::CustomerProfiles::ObjectType" ->
+          AWS__CustomerProfiles__ObjectType
+      | "AWS::DMS::Endpoint" -> AWS__DMS__Endpoint
+      | "AWS::EC2::CapacityReservation" -> AWS__EC2__CapacityReservation
+      | "AWS::EC2::ClientVpnEndpoint" -> AWS__EC2__ClientVpnEndpoint
+      | "AWS::Kendra::Index" -> AWS__Kendra__Index
+      | "AWS::KinesisVideo::Stream" -> AWS__KinesisVideo__Stream
+      | "AWS::Logs::Destination" -> AWS__Logs__Destination
+      | "AWS::Pinpoint::EmailChannel" -> AWS__Pinpoint__EmailChannel
+      | "AWS::S3::AccessPoint" -> AWS__S3__AccessPoint
+      | "AWS::NetworkManager::CustomerGatewayAssociation" ->
+          AWS__NetworkManager__CustomerGatewayAssociation
+      | "AWS::NetworkManager::LinkAssociation" ->
+          AWS__NetworkManager__LinkAssociation
+      | "AWS::IoTWireless::MulticastGroup" ->
+          AWS__IoTWireless__MulticastGroup
+      | "AWS::Personalize::DatasetGroup" -> AWS__Personalize__DatasetGroup
+      | "AWS::IoTTwinMaker::ComponentType" ->
+          AWS__IoTTwinMaker__ComponentType
+      | "AWS::CodeBuild::ReportGroup" -> AWS__CodeBuild__ReportGroup
+      | "AWS::SageMaker::FeatureGroup" -> AWS__SageMaker__FeatureGroup
+      | "AWS::MSK::BatchScramSecret" -> AWS__MSK__BatchScramSecret
+      | "AWS::AppStream::Stack" -> AWS__AppStream__Stack
+      | "AWS::IoT::JobTemplate" -> AWS__IoT__JobTemplate
+      | "AWS::IoTWireless::FuotaTask" -> AWS__IoTWireless__FuotaTask
+      | "AWS::IoT::ProvisioningTemplate" -> AWS__IoT__ProvisioningTemplate
+      | "AWS::InspectorV2::Filter" -> AWS__InspectorV2__Filter
+      | "AWS::Route53Resolver::ResolverQueryLoggingConfigAssociation" ->
+          AWS__Route53Resolver__ResolverQueryLoggingConfigAssociation
+      | "AWS::ServiceDiscovery::Instance" -> AWS__ServiceDiscovery__Instance
+      | "AWS::Transfer::Certificate" -> AWS__Transfer__Certificate
+      | "AWS::MediaConnect::FlowSource" -> AWS__MediaConnect__FlowSource
+      | "AWS::APS::RuleGroupsNamespace" -> AWS__APS__RuleGroupsNamespace
+      | "AWS::CodeGuruProfiler::ProfilingGroup" ->
+          AWS__CodeGuruProfiler__ProfilingGroup
+      | "AWS::Route53Resolver::ResolverQueryLoggingConfig" ->
+          AWS__Route53Resolver__ResolverQueryLoggingConfig
+      | "AWS::Batch::SchedulingPolicy" -> AWS__Batch__SchedulingPolicy
+      | "AWS::ACMPCA::CertificateAuthorityActivation" ->
+          AWS__ACMPCA__CertificateAuthorityActivation
+      | "AWS::AppMesh::GatewayRoute" -> AWS__AppMesh__GatewayRoute
+      | "AWS::AppMesh::Mesh" -> AWS__AppMesh__Mesh
+      | "AWS::Connect::Instance" -> AWS__Connect__Instance
+      | "AWS::Connect::QuickConnect" -> AWS__Connect__QuickConnect
+      | "AWS::EC2::CarrierGateway" -> AWS__EC2__CarrierGateway
+      | "AWS::EC2::IPAMPool" -> AWS__EC2__IPAMPool
+      | "AWS::EC2::TransitGatewayConnect" -> AWS__EC2__TransitGatewayConnect
+      | "AWS::EC2::TransitGatewayMulticastDomain" ->
+          AWS__EC2__TransitGatewayMulticastDomain
+      | "AWS::ECS::CapacityProvider" -> AWS__ECS__CapacityProvider
+      | "AWS::IAM::InstanceProfile" -> AWS__IAM__InstanceProfile
+      | "AWS::IoT::CACertificate" -> AWS__IoT__CACertificate
+      | "AWS::IoTTwinMaker::SyncJob" -> AWS__IoTTwinMaker__SyncJob
+      | "AWS::KafkaConnect::Connector" -> AWS__KafkaConnect__Connector
+      | "AWS::Lambda::CodeSigningConfig" -> AWS__Lambda__CodeSigningConfig
+      | "AWS::NetworkManager::ConnectPeer" ->
+          AWS__NetworkManager__ConnectPeer
+      | "AWS::ResourceExplorer2::Index" -> AWS__ResourceExplorer2__Index
+      | "AWS::AppStream::Fleet" -> AWS__AppStream__Fleet
+      | "AWS::Cognito::UserPool" -> AWS__Cognito__UserPool
+      | "AWS::Cognito::UserPoolClient" -> AWS__Cognito__UserPoolClient
+      | "AWS::Cognito::UserPoolGroup" -> AWS__Cognito__UserPoolGroup
+      | "AWS::EC2::NetworkInsightsAccessScope" ->
+          AWS__EC2__NetworkInsightsAccessScope
+      | "AWS::EC2::NetworkInsightsAnalysis" ->
+          AWS__EC2__NetworkInsightsAnalysis
+      | "AWS::Grafana::Workspace" -> AWS__Grafana__Workspace
+      | "AWS::GroundStation::DataflowEndpointGroup" ->
+          AWS__GroundStation__DataflowEndpointGroup
+      | "AWS::ImageBuilder::ImageRecipe" -> AWS__ImageBuilder__ImageRecipe
+      | "AWS::KMS::Alias" -> AWS__KMS__Alias
+      | "AWS::M2::Environment" -> AWS__M2__Environment
+      | "AWS::QuickSight::DataSource" -> AWS__QuickSight__DataSource
+      | "AWS::QuickSight::Template" -> AWS__QuickSight__Template
+      | "AWS::QuickSight::Theme" -> AWS__QuickSight__Theme
+      | "AWS::RDS::OptionGroup" -> AWS__RDS__OptionGroup
+      | "AWS::Redshift::EndpointAccess" -> AWS__Redshift__EndpointAccess
+      | "AWS::Route53Resolver::FirewallRuleGroup" ->
+          AWS__Route53Resolver__FirewallRuleGroup
+      | "AWS::SSM::Document" -> AWS__SSM__Document
+      | "AWS::AppConfig::ExtensionAssociation" ->
+          AWS__AppConfig__ExtensionAssociation
+      | "AWS::AppIntegrations::Application" ->
+          AWS__AppIntegrations__Application
+      | "AWS::AppSync::ApiCache" -> AWS__AppSync__ApiCache
+      | "AWS::Bedrock::Guardrail" -> AWS__Bedrock__Guardrail
+      | "AWS::Bedrock::KnowledgeBase" -> AWS__Bedrock__KnowledgeBase
+      | "AWS::Cognito::IdentityPool" -> AWS__Cognito__IdentityPool
+      | "AWS::Connect::Rule" -> AWS__Connect__Rule
+      | "AWS::Connect::User" -> AWS__Connect__User
+      | "AWS::EC2::ClientVpnTargetNetworkAssociation" ->
+          AWS__EC2__ClientVpnTargetNetworkAssociation
+      | "AWS::EC2::EIPAssociation" -> AWS__EC2__EIPAssociation
+      | "AWS::EC2::IPAMResourceDiscovery" -> AWS__EC2__IPAMResourceDiscovery
+      | "AWS::EC2::IPAMResourceDiscoveryAssociation" ->
+          AWS__EC2__IPAMResourceDiscoveryAssociation
+      | "AWS::EC2::InstanceConnectEndpoint" ->
+          AWS__EC2__InstanceConnectEndpoint
+      | "AWS::EC2::SnapshotBlockPublicAccess" ->
+          AWS__EC2__SnapshotBlockPublicAccess
+      | "AWS::EC2::VPCBlockPublicAccessExclusion" ->
+          AWS__EC2__VPCBlockPublicAccessExclusion
+      | "AWS::EC2::VPCBlockPublicAccessOptions" ->
+          AWS__EC2__VPCBlockPublicAccessOptions
+      | "AWS::EC2::VPCEndpointConnectionNotification" ->
+          AWS__EC2__VPCEndpointConnectionNotification
+      | "AWS::EC2::VPNConnectionRoute" -> AWS__EC2__VPNConnectionRoute
+      | "AWS::Evidently::Segment" -> AWS__Evidently__Segment
+      | "AWS::IAM::OIDCProvider" -> AWS__IAM__OIDCProvider
+      | "AWS::InspectorV2::Activation" -> AWS__InspectorV2__Activation
+      | "AWS::MSK::ClusterPolicy" -> AWS__MSK__ClusterPolicy
+      | "AWS::MSK::VpcConnection" -> AWS__MSK__VpcConnection
+      | "AWS::MediaConnect::Gateway" -> AWS__MediaConnect__Gateway
+      | "AWS::MemoryDB::SubnetGroup" -> AWS__MemoryDB__SubnetGroup
+      | "AWS::OpenSearchServerless::Collection" ->
+          AWS__OpenSearchServerless__Collection
+      | "AWS::OpenSearchServerless::VpcEndpoint" ->
+          AWS__OpenSearchServerless__VpcEndpoint
+      | "AWS::Redshift::EndpointAuthorization" ->
+          AWS__Redshift__EndpointAuthorization
+      | "AWS::Route53Profiles::Profile" -> AWS__Route53Profiles__Profile
+      | "AWS::S3::StorageLensGroup" -> AWS__S3__StorageLensGroup
+      | "AWS::S3Express::BucketPolicy" -> AWS__S3Express__BucketPolicy
+      | "AWS::S3Express::DirectoryBucket" -> AWS__S3Express__DirectoryBucket
+      | "AWS::SageMaker::InferenceExperiment" ->
+          AWS__SageMaker__InferenceExperiment
+      | "AWS::SecurityHub::Standard" -> AWS__SecurityHub__Standard
+      | "AWS::Transfer::Profile" -> AWS__Transfer__Profile
+      | "AWS::CloudFormation::StackSet" -> AWS__CloudFormation__StackSet
+      | "AWS::MediaPackageV2::Channel" -> AWS__MediaPackageV2__Channel
+      | "AWS::S3::AccessGrantsLocation" -> AWS__S3__AccessGrantsLocation
+      | "AWS::S3::AccessGrant" -> AWS__S3__AccessGrant
+      | "AWS::S3::AccessGrantsInstance" -> AWS__S3__AccessGrantsInstance
+      | "AWS::EMRServerless::Application" -> AWS__EMRServerless__Application
+      | "AWS::Config::AggregationAuthorization" ->
+          AWS__Config__AggregationAuthorization
+      | "AWS::Bedrock::ApplicationInferenceProfile" ->
+          AWS__Bedrock__ApplicationInferenceProfile
+      | "AWS::ApiGatewayV2::Integration" -> AWS__ApiGatewayV2__Integration
+      | "AWS::SageMaker::MlflowTrackingServer" ->
+          AWS__SageMaker__MlflowTrackingServer
+      | "AWS::SageMaker::ModelBiasJobDefinition" ->
+          AWS__SageMaker__ModelBiasJobDefinition
+      | "AWS::SecretsManager::RotationSchedule" ->
+          AWS__SecretsManager__RotationSchedule
+      | "AWS::Deadline::QueueFleetAssociation" ->
+          AWS__Deadline__QueueFleetAssociation
+      | "AWS::ECR::RepositoryCreationTemplate" ->
+          AWS__ECR__RepositoryCreationTemplate
+      | "AWS::CloudFormation::LambdaHook" -> AWS__CloudFormation__LambdaHook
+      | "AWS::EC2::SubnetNetworkAclAssociation" ->
+          AWS__EC2__SubnetNetworkAclAssociation
+      | "AWS::ApiGateway::UsagePlan" -> AWS__ApiGateway__UsagePlan
+      | "AWS::AppConfig::Extension" -> AWS__AppConfig__Extension
+      | "AWS::Deadline::Fleet" -> AWS__Deadline__Fleet
+      | "AWS::EMR::Studio" -> AWS__EMR__Studio
+      | "AWS::S3Tables::TableBucket" -> AWS__S3Tables__TableBucket
+      | "AWS::CloudFront::RealtimeLogConfig" ->
+          AWS__CloudFront__RealtimeLogConfig
+      | "AWS::BackupGateway::Hypervisor" -> AWS__BackupGateway__Hypervisor
+      | "AWS::BCMDataExports::Export" -> AWS__BCMDataExports__Export
+      | "AWS::CloudFormation::GuardHook" -> AWS__CloudFormation__GuardHook
+      | "AWS::CloudFront::PublicKey" -> AWS__CloudFront__PublicKey
+      | "AWS::CloudTrail::EventDataStore" -> AWS__CloudTrail__EventDataStore
+      | "AWS::EntityResolution::IdMappingWorkflow" ->
+          AWS__EntityResolution__IdMappingWorkflow
+      | "AWS::EntityResolution::SchemaMapping" ->
+          AWS__EntityResolution__SchemaMapping
+      | "AWS::IoT::DomainConfiguration" -> AWS__IoT__DomainConfiguration
+      | "AWS::PCAConnectorAD::DirectoryRegistration" ->
+          AWS__PCAConnectorAD__DirectoryRegistration
+      | "AWS::RDS::Integration" -> AWS__RDS__Integration
+      | "AWS::Config::ConformancePack" -> AWS__Config__ConformancePack
+      | "AWS::RolesAnywhere::Profile" -> AWS__RolesAnywhere__Profile
+      | "AWS::CodeArtifact::Domain" -> AWS__CodeArtifact__Domain
+      | "AWS::Backup::RestoreTestingPlan" -> AWS__Backup__RestoreTestingPlan
+      | "AWS::Config::StoredQuery" -> AWS__Config__StoredQuery
+      | "AWS::SageMaker::DataQualityJobDefinition" ->
+          AWS__SageMaker__DataQualityJobDefinition
+      | "AWS::SageMaker::ModelExplainabilityJobDefinition" ->
+          AWS__SageMaker__ModelExplainabilityJobDefinition
+      | "AWS::SageMaker::ModelQualityJobDefinition" ->
+          AWS__SageMaker__ModelQualityJobDefinition
+      | "AWS::SageMaker::StudioLifecycleConfig" ->
+          AWS__SageMaker__StudioLifecycleConfig
+      | "AWS::SES::DedicatedIpPool" -> AWS__SES__DedicatedIpPool
+      | "AWS::SES::MailManagerTrafficPolicy" ->
+          AWS__SES__MailManagerTrafficPolicy
+      | "AWS::SSM::ResourceDataSync" -> AWS__SSM__ResourceDataSync
+      | "AWS::BedrockAgentCore::Runtime" -> AWS__BedrockAgentCore__Runtime
+      | "AWS::BedrockAgentCore::BrowserCustom" ->
+          AWS__BedrockAgentCore__BrowserCustom
+      | "AWS::ElasticLoadBalancingV2::TargetGroup" ->
+          AWS__ElasticLoadBalancingV2__TargetGroup
+      | "AWS::EMRContainers::VirtualCluster" ->
+          AWS__EMRContainers__VirtualCluster
+      | "AWS::EntityResolution::MatchingWorkflow" ->
+          AWS__EntityResolution__MatchingWorkflow
+      | "AWS::IoTCoreDeviceAdvisor::SuiteDefinition" ->
+          AWS__IoTCoreDeviceAdvisor__SuiteDefinition
+      | "AWS::EC2::SecurityGroupVpcAssociation" ->
+          AWS__EC2__SecurityGroupVpcAssociation
+      | "AWS::EC2::VerifiedAccessInstance" ->
+          AWS__EC2__VerifiedAccessInstance
+      | "AWS::KafkaConnect::CustomPlugin" -> AWS__KafkaConnect__CustomPlugin
+      | "AWS::NetworkManager::TransitGatewayPeering" ->
+          AWS__NetworkManager__TransitGatewayPeering
+      | "AWS::OpenSearchServerless::SecurityConfig" ->
+          AWS__OpenSearchServerless__SecurityConfig
+      | "AWS::Redshift::Integration" -> AWS__Redshift__Integration
+      | "AWS::RolesAnywhere::TrustAnchor" -> AWS__RolesAnywhere__TrustAnchor
+      | "AWS::Route53Profiles::ProfileAssociation" ->
+          AWS__Route53Profiles__ProfileAssociation
+      | "AWS::SSMIncidents::ResponsePlan" -> AWS__SSMIncidents__ResponsePlan
+      | "AWS::Transfer::Server" -> AWS__Transfer__Server
+      | "AWS::Glue::Database" -> AWS__Glue__Database
+      | "AWS::Organizations::OrganizationalUnit" ->
+          AWS__Organizations__OrganizationalUnit
+      | "AWS::EC2::IPAMPoolCidr" -> AWS__EC2__IPAMPoolCidr
+      | "AWS::EC2::VPCGatewayAttachment" -> AWS__EC2__VPCGatewayAttachment
+      | "AWS::Bedrock::Prompt" -> AWS__Bedrock__Prompt
+      | "AWS::Comprehend::Flywheel" -> AWS__Comprehend__Flywheel
+      | "AWS::DataSync::Agent" -> AWS__DataSync__Agent
+      | "AWS::MediaTailor::LiveSource" -> AWS__MediaTailor__LiveSource
+      | "AWS::MSK::ServerlessCluster" -> AWS__MSK__ServerlessCluster
+      | "AWS::IoTSiteWise::Asset" -> AWS__IoTSiteWise__Asset
+      | "AWS::B2BI::Capability" -> AWS__B2BI__Capability
+      | "AWS::CloudFront::KeyValueStore" -> AWS__CloudFront__KeyValueStore
+      | "AWS::Deadline::Monitor" -> AWS__Deadline__Monitor
+      | "AWS::GuardDuty::MalwareProtectionPlan" ->
+          AWS__GuardDuty__MalwareProtectionPlan
+      | "AWS::Location::APIKey" -> AWS__Location__APIKey
+      | "AWS::MediaPackageV2::OriginEndpoint" ->
+          AWS__MediaPackageV2__OriginEndpoint
+      | "AWS::PCAConnectorAD::Connector" -> AWS__PCAConnectorAD__Connector
+      | "AWS::S3Tables::TableBucketPolicy" ->
+          AWS__S3Tables__TableBucketPolicy
+      | "AWS::SecretsManager::ResourcePolicy" ->
+          AWS__SecretsManager__ResourcePolicy
+      | "AWS::SSMContacts::Contact" -> AWS__SSMContacts__Contact
+      | "AWS::IoT::ThingGroup" -> AWS__IoT__ThingGroup
+      | "AWS::ImageBuilder::LifecyclePolicy" ->
+          AWS__ImageBuilder__LifecyclePolicy
+      | "AWS::GameLift::Build" -> AWS__GameLift__Build
+      | "AWS::ECR::ReplicationConfiguration" ->
+          AWS__ECR__ReplicationConfiguration
+      | "AWS::EC2::SubnetCidrBlock" -> AWS__EC2__SubnetCidrBlock
+      | "AWS::Connect::SecurityProfile" -> AWS__Connect__SecurityProfile
+      | "AWS::CleanRoomsML::TrainingDataset" ->
+          AWS__CleanRoomsML__TrainingDataset
+      | "AWS::AppStream::AppBlockBuilder" -> AWS__AppStream__AppBlockBuilder
+      | "AWS::Route53::DNSSEC" -> AWS__Route53__DNSSEC
+      | "AWS::SageMaker::UserProfile" -> AWS__SageMaker__UserProfile
+      | "AWS::ApiGateway::Method" -> AWS__ApiGateway__Method
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ResourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResourceType" j)
+    let to_json = simple_to_json to_value
+  end
 module SsmControls =
   struct
     type nonrec t =
@@ -186,11 +2106,12 @@ module SsmControls =
           (Xml.child xml_arg0 "ConcurrentExecutionRatePercentage") in
       make ?errorPercentage ?concurrentExecutionRatePercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorPercentage =
-        field_map json "ErrorPercentage" Percentage.of_json in
+        field_map json__ "ErrorPercentage" Percentage.of_json in
       let concurrentExecutionRatePercentage =
-        field_map json "ConcurrentExecutionRatePercentage" Percentage.of_json in
+        field_map json__ "ConcurrentExecutionRatePercentage"
+          Percentage.of_json in
       make ?errorPercentage ?concurrentExecutionRatePercentage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -219,14 +2140,86 @@ module RemediationParameterValue =
           (Xml.child xml_arg0 "ResourceValue") in
       make ?staticValue ?resourceValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let staticValue = field_map json "StaticValue" StaticValue.of_json in
+    let of_json json__ =
+      let staticValue = field_map json__ "StaticValue" StaticValue.of_json in
       let resourceValue =
-        field_map json "ResourceValue" ResourceValue.of_json in
+        field_map json__ "ResourceValue" ResourceValue.of_json in
       make ?staticValue ?resourceValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The value is either a dynamic (resource) value or a static value. You must select either a dynamic value or a static value."]
+module Description =
+  struct
+    type nonrec t = string
+    let context_ = "Description"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Description" j
+    let to_json = simple_to_json to_value
+  end
+module RecordingFrequency =
+  struct
+    type nonrec t =
+      | CONTINUOUS 
+      | DAILY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CONTINUOUS -> "CONTINUOUS"
+      | DAILY -> "DAILY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CONTINUOUS" -> CONTINUOUS
+      | "DAILY" -> DAILY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RecordingFrequency" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RecordingFrequency" j)
+    let to_json = simple_to_json to_value
+  end
+module RecordingModeResourceTypesList =
+  struct
+    type nonrec t = ResourceType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RecordingModeResourceTypesList"
+        ~of_json:ResourceType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AccountId =
   struct
     type nonrec t = string
@@ -253,6 +2246,48 @@ module String_ =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceTypeValue =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceTypeValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-zA-Z0-9]{2,64}::[a-zA-Z0-9]{2,64}::[a-zA-Z0-9]{2,64}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceTypeValue" j
+    let to_json = simple_to_json to_value
+  end
+module ServicePrincipalValue =
+  struct
+    type nonrec t = string
+    let context_ = "ServicePrincipalValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\w+=,.@-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ServicePrincipalValue" j
     let to_json = simple_to_json to_value
   end
 module EventSource =
@@ -461,8 +2496,8 @@ module ExecutionControls =
         (Option.map ~f:SsmControls.of_xml) (Xml.child xml_arg0 "SsmControls") in
       make ?ssmControls ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ssmControls = field_map json "SsmControls" SsmControls.of_json in
+    let of_json json__ =
+      let ssmControls = field_map json__ "SsmControls" SsmControls.of_json in
       make ?ssmControls ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -497,6 +2532,8 @@ module RemediationParameters =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -568,429 +2605,6 @@ module ResourceName =
     let of_json j = string_of_json ~kind:"ResourceName" j
     let to_json = simple_to_json to_value
   end
-module ResourceType =
-  struct
-    type nonrec t =
-      | AWS__EC2__CustomerGateway 
-      | AWS__EC2__EIP 
-      | AWS__EC2__Host 
-      | AWS__EC2__Instance 
-      | AWS__EC2__InternetGateway 
-      | AWS__EC2__NetworkAcl 
-      | AWS__EC2__NetworkInterface 
-      | AWS__EC2__RouteTable 
-      | AWS__EC2__SecurityGroup 
-      | AWS__EC2__Subnet 
-      | AWS__CloudTrail__Trail 
-      | AWS__EC2__Volume 
-      | AWS__EC2__VPC 
-      | AWS__EC2__VPNConnection 
-      | AWS__EC2__VPNGateway 
-      | AWS__EC2__RegisteredHAInstance 
-      | AWS__EC2__NatGateway 
-      | AWS__EC2__EgressOnlyInternetGateway 
-      | AWS__EC2__VPCEndpoint 
-      | AWS__EC2__VPCEndpointService 
-      | AWS__EC2__FlowLog 
-      | AWS__EC2__VPCPeeringConnection 
-      | AWS__Elasticsearch__Domain 
-      | AWS__IAM__Group 
-      | AWS__IAM__Policy 
-      | AWS__IAM__Role 
-      | AWS__IAM__User 
-      | AWS__ElasticLoadBalancingV2__LoadBalancer 
-      | AWS__ACM__Certificate 
-      | AWS__RDS__DBInstance 
-      | AWS__RDS__DBSubnetGroup 
-      | AWS__RDS__DBSecurityGroup 
-      | AWS__RDS__DBSnapshot 
-      | AWS__RDS__DBCluster 
-      | AWS__RDS__DBClusterSnapshot 
-      | AWS__RDS__EventSubscription 
-      | AWS__S3__Bucket 
-      | AWS__S3__AccountPublicAccessBlock 
-      | AWS__Redshift__Cluster 
-      | AWS__Redshift__ClusterSnapshot 
-      | AWS__Redshift__ClusterParameterGroup 
-      | AWS__Redshift__ClusterSecurityGroup 
-      | AWS__Redshift__ClusterSubnetGroup 
-      | AWS__Redshift__EventSubscription 
-      | AWS__SSM__ManagedInstanceInventory 
-      | AWS__CloudWatch__Alarm 
-      | AWS__CloudFormation__Stack 
-      | AWS__ElasticLoadBalancing__LoadBalancer 
-      | AWS__AutoScaling__AutoScalingGroup 
-      | AWS__AutoScaling__LaunchConfiguration 
-      | AWS__AutoScaling__ScalingPolicy 
-      | AWS__AutoScaling__ScheduledAction 
-      | AWS__DynamoDB__Table 
-      | AWS__CodeBuild__Project 
-      | AWS__WAF__RateBasedRule 
-      | AWS__WAF__Rule 
-      | AWS__WAF__RuleGroup 
-      | AWS__WAF__WebACL 
-      | AWS__WAFRegional__RateBasedRule 
-      | AWS__WAFRegional__Rule 
-      | AWS__WAFRegional__RuleGroup 
-      | AWS__WAFRegional__WebACL 
-      | AWS__CloudFront__Distribution 
-      | AWS__CloudFront__StreamingDistribution 
-      | AWS__Lambda__Function 
-      | AWS__NetworkFirewall__Firewall 
-      | AWS__NetworkFirewall__FirewallPolicy 
-      | AWS__NetworkFirewall__RuleGroup 
-      | AWS__ElasticBeanstalk__Application 
-      | AWS__ElasticBeanstalk__ApplicationVersion 
-      | AWS__ElasticBeanstalk__Environment 
-      | AWS__WAFv2__WebACL 
-      | AWS__WAFv2__RuleGroup 
-      | AWS__WAFv2__IPSet 
-      | AWS__WAFv2__RegexPatternSet 
-      | AWS__WAFv2__ManagedRuleSet 
-      | AWS__XRay__EncryptionConfig 
-      | AWS__SSM__AssociationCompliance 
-      | AWS__SSM__PatchCompliance 
-      | AWS__Shield__Protection 
-      | AWS__ShieldRegional__Protection 
-      | AWS__Config__ConformancePackCompliance 
-      | AWS__Config__ResourceCompliance 
-      | AWS__ApiGateway__Stage 
-      | AWS__ApiGateway__RestApi 
-      | AWS__ApiGatewayV2__Stage 
-      | AWS__ApiGatewayV2__Api 
-      | AWS__CodePipeline__Pipeline 
-      | AWS__ServiceCatalog__CloudFormationProvisionedProduct 
-      | AWS__ServiceCatalog__CloudFormationProduct 
-      | AWS__ServiceCatalog__Portfolio 
-      | AWS__SQS__Queue 
-      | AWS__KMS__Key 
-      | AWS__QLDB__Ledger 
-      | AWS__SecretsManager__Secret 
-      | AWS__SNS__Topic 
-      | AWS__SSM__FileData 
-      | AWS__Backup__BackupPlan 
-      | AWS__Backup__BackupSelection 
-      | AWS__Backup__BackupVault 
-      | AWS__Backup__RecoveryPoint 
-      | AWS__ECR__Repository 
-      | AWS__ECS__Cluster 
-      | AWS__ECS__Service 
-      | AWS__ECS__TaskDefinition 
-      | AWS__EFS__AccessPoint 
-      | AWS__EFS__FileSystem 
-      | AWS__EKS__Cluster 
-      | AWS__OpenSearch__Domain 
-      | AWS__EC2__TransitGateway 
-      | AWS__Kinesis__Stream 
-      | AWS__Kinesis__StreamConsumer 
-      | AWS__CodeDeploy__Application 
-      | AWS__CodeDeploy__DeploymentConfig 
-      | AWS__CodeDeploy__DeploymentGroup 
-      | AWS__EC2__LaunchTemplate 
-      | AWS__ECR__PublicRepository 
-      | AWS__GuardDuty__Detector 
-      | AWS__EMR__SecurityConfiguration 
-      | AWS__SageMaker__CodeRepository 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | AWS__EC2__CustomerGateway -> "AWS::EC2::CustomerGateway"
-      | AWS__EC2__EIP -> "AWS::EC2::EIP"
-      | AWS__EC2__Host -> "AWS::EC2::Host"
-      | AWS__EC2__Instance -> "AWS::EC2::Instance"
-      | AWS__EC2__InternetGateway -> "AWS::EC2::InternetGateway"
-      | AWS__EC2__NetworkAcl -> "AWS::EC2::NetworkAcl"
-      | AWS__EC2__NetworkInterface -> "AWS::EC2::NetworkInterface"
-      | AWS__EC2__RouteTable -> "AWS::EC2::RouteTable"
-      | AWS__EC2__SecurityGroup -> "AWS::EC2::SecurityGroup"
-      | AWS__EC2__Subnet -> "AWS::EC2::Subnet"
-      | AWS__CloudTrail__Trail -> "AWS::CloudTrail::Trail"
-      | AWS__EC2__Volume -> "AWS::EC2::Volume"
-      | AWS__EC2__VPC -> "AWS::EC2::VPC"
-      | AWS__EC2__VPNConnection -> "AWS::EC2::VPNConnection"
-      | AWS__EC2__VPNGateway -> "AWS::EC2::VPNGateway"
-      | AWS__EC2__RegisteredHAInstance -> "AWS::EC2::RegisteredHAInstance"
-      | AWS__EC2__NatGateway -> "AWS::EC2::NatGateway"
-      | AWS__EC2__EgressOnlyInternetGateway ->
-          "AWS::EC2::EgressOnlyInternetGateway"
-      | AWS__EC2__VPCEndpoint -> "AWS::EC2::VPCEndpoint"
-      | AWS__EC2__VPCEndpointService -> "AWS::EC2::VPCEndpointService"
-      | AWS__EC2__FlowLog -> "AWS::EC2::FlowLog"
-      | AWS__EC2__VPCPeeringConnection -> "AWS::EC2::VPCPeeringConnection"
-      | AWS__Elasticsearch__Domain -> "AWS::Elasticsearch::Domain"
-      | AWS__IAM__Group -> "AWS::IAM::Group"
-      | AWS__IAM__Policy -> "AWS::IAM::Policy"
-      | AWS__IAM__Role -> "AWS::IAM::Role"
-      | AWS__IAM__User -> "AWS::IAM::User"
-      | AWS__ElasticLoadBalancingV2__LoadBalancer ->
-          "AWS::ElasticLoadBalancingV2::LoadBalancer"
-      | AWS__ACM__Certificate -> "AWS::ACM::Certificate"
-      | AWS__RDS__DBInstance -> "AWS::RDS::DBInstance"
-      | AWS__RDS__DBSubnetGroup -> "AWS::RDS::DBSubnetGroup"
-      | AWS__RDS__DBSecurityGroup -> "AWS::RDS::DBSecurityGroup"
-      | AWS__RDS__DBSnapshot -> "AWS::RDS::DBSnapshot"
-      | AWS__RDS__DBCluster -> "AWS::RDS::DBCluster"
-      | AWS__RDS__DBClusterSnapshot -> "AWS::RDS::DBClusterSnapshot"
-      | AWS__RDS__EventSubscription -> "AWS::RDS::EventSubscription"
-      | AWS__S3__Bucket -> "AWS::S3::Bucket"
-      | AWS__S3__AccountPublicAccessBlock ->
-          "AWS::S3::AccountPublicAccessBlock"
-      | AWS__Redshift__Cluster -> "AWS::Redshift::Cluster"
-      | AWS__Redshift__ClusterSnapshot -> "AWS::Redshift::ClusterSnapshot"
-      | AWS__Redshift__ClusterParameterGroup ->
-          "AWS::Redshift::ClusterParameterGroup"
-      | AWS__Redshift__ClusterSecurityGroup ->
-          "AWS::Redshift::ClusterSecurityGroup"
-      | AWS__Redshift__ClusterSubnetGroup ->
-          "AWS::Redshift::ClusterSubnetGroup"
-      | AWS__Redshift__EventSubscription ->
-          "AWS::Redshift::EventSubscription"
-      | AWS__SSM__ManagedInstanceInventory ->
-          "AWS::SSM::ManagedInstanceInventory"
-      | AWS__CloudWatch__Alarm -> "AWS::CloudWatch::Alarm"
-      | AWS__CloudFormation__Stack -> "AWS::CloudFormation::Stack"
-      | AWS__ElasticLoadBalancing__LoadBalancer ->
-          "AWS::ElasticLoadBalancing::LoadBalancer"
-      | AWS__AutoScaling__AutoScalingGroup ->
-          "AWS::AutoScaling::AutoScalingGroup"
-      | AWS__AutoScaling__LaunchConfiguration ->
-          "AWS::AutoScaling::LaunchConfiguration"
-      | AWS__AutoScaling__ScalingPolicy -> "AWS::AutoScaling::ScalingPolicy"
-      | AWS__AutoScaling__ScheduledAction ->
-          "AWS::AutoScaling::ScheduledAction"
-      | AWS__DynamoDB__Table -> "AWS::DynamoDB::Table"
-      | AWS__CodeBuild__Project -> "AWS::CodeBuild::Project"
-      | AWS__WAF__RateBasedRule -> "AWS::WAF::RateBasedRule"
-      | AWS__WAF__Rule -> "AWS::WAF::Rule"
-      | AWS__WAF__RuleGroup -> "AWS::WAF::RuleGroup"
-      | AWS__WAF__WebACL -> "AWS::WAF::WebACL"
-      | AWS__WAFRegional__RateBasedRule -> "AWS::WAFRegional::RateBasedRule"
-      | AWS__WAFRegional__Rule -> "AWS::WAFRegional::Rule"
-      | AWS__WAFRegional__RuleGroup -> "AWS::WAFRegional::RuleGroup"
-      | AWS__WAFRegional__WebACL -> "AWS::WAFRegional::WebACL"
-      | AWS__CloudFront__Distribution -> "AWS::CloudFront::Distribution"
-      | AWS__CloudFront__StreamingDistribution ->
-          "AWS::CloudFront::StreamingDistribution"
-      | AWS__Lambda__Function -> "AWS::Lambda::Function"
-      | AWS__NetworkFirewall__Firewall -> "AWS::NetworkFirewall::Firewall"
-      | AWS__NetworkFirewall__FirewallPolicy ->
-          "AWS::NetworkFirewall::FirewallPolicy"
-      | AWS__NetworkFirewall__RuleGroup -> "AWS::NetworkFirewall::RuleGroup"
-      | AWS__ElasticBeanstalk__Application ->
-          "AWS::ElasticBeanstalk::Application"
-      | AWS__ElasticBeanstalk__ApplicationVersion ->
-          "AWS::ElasticBeanstalk::ApplicationVersion"
-      | AWS__ElasticBeanstalk__Environment ->
-          "AWS::ElasticBeanstalk::Environment"
-      | AWS__WAFv2__WebACL -> "AWS::WAFv2::WebACL"
-      | AWS__WAFv2__RuleGroup -> "AWS::WAFv2::RuleGroup"
-      | AWS__WAFv2__IPSet -> "AWS::WAFv2::IPSet"
-      | AWS__WAFv2__RegexPatternSet -> "AWS::WAFv2::RegexPatternSet"
-      | AWS__WAFv2__ManagedRuleSet -> "AWS::WAFv2::ManagedRuleSet"
-      | AWS__XRay__EncryptionConfig -> "AWS::XRay::EncryptionConfig"
-      | AWS__SSM__AssociationCompliance -> "AWS::SSM::AssociationCompliance"
-      | AWS__SSM__PatchCompliance -> "AWS::SSM::PatchCompliance"
-      | AWS__Shield__Protection -> "AWS::Shield::Protection"
-      | AWS__ShieldRegional__Protection -> "AWS::ShieldRegional::Protection"
-      | AWS__Config__ConformancePackCompliance ->
-          "AWS::Config::ConformancePackCompliance"
-      | AWS__Config__ResourceCompliance -> "AWS::Config::ResourceCompliance"
-      | AWS__ApiGateway__Stage -> "AWS::ApiGateway::Stage"
-      | AWS__ApiGateway__RestApi -> "AWS::ApiGateway::RestApi"
-      | AWS__ApiGatewayV2__Stage -> "AWS::ApiGatewayV2::Stage"
-      | AWS__ApiGatewayV2__Api -> "AWS::ApiGatewayV2::Api"
-      | AWS__CodePipeline__Pipeline -> "AWS::CodePipeline::Pipeline"
-      | AWS__ServiceCatalog__CloudFormationProvisionedProduct ->
-          "AWS::ServiceCatalog::CloudFormationProvisionedProduct"
-      | AWS__ServiceCatalog__CloudFormationProduct ->
-          "AWS::ServiceCatalog::CloudFormationProduct"
-      | AWS__ServiceCatalog__Portfolio -> "AWS::ServiceCatalog::Portfolio"
-      | AWS__SQS__Queue -> "AWS::SQS::Queue"
-      | AWS__KMS__Key -> "AWS::KMS::Key"
-      | AWS__QLDB__Ledger -> "AWS::QLDB::Ledger"
-      | AWS__SecretsManager__Secret -> "AWS::SecretsManager::Secret"
-      | AWS__SNS__Topic -> "AWS::SNS::Topic"
-      | AWS__SSM__FileData -> "AWS::SSM::FileData"
-      | AWS__Backup__BackupPlan -> "AWS::Backup::BackupPlan"
-      | AWS__Backup__BackupSelection -> "AWS::Backup::BackupSelection"
-      | AWS__Backup__BackupVault -> "AWS::Backup::BackupVault"
-      | AWS__Backup__RecoveryPoint -> "AWS::Backup::RecoveryPoint"
-      | AWS__ECR__Repository -> "AWS::ECR::Repository"
-      | AWS__ECS__Cluster -> "AWS::ECS::Cluster"
-      | AWS__ECS__Service -> "AWS::ECS::Service"
-      | AWS__ECS__TaskDefinition -> "AWS::ECS::TaskDefinition"
-      | AWS__EFS__AccessPoint -> "AWS::EFS::AccessPoint"
-      | AWS__EFS__FileSystem -> "AWS::EFS::FileSystem"
-      | AWS__EKS__Cluster -> "AWS::EKS::Cluster"
-      | AWS__OpenSearch__Domain -> "AWS::OpenSearch::Domain"
-      | AWS__EC2__TransitGateway -> "AWS::EC2::TransitGateway"
-      | AWS__Kinesis__Stream -> "AWS::Kinesis::Stream"
-      | AWS__Kinesis__StreamConsumer -> "AWS::Kinesis::StreamConsumer"
-      | AWS__CodeDeploy__Application -> "AWS::CodeDeploy::Application"
-      | AWS__CodeDeploy__DeploymentConfig ->
-          "AWS::CodeDeploy::DeploymentConfig"
-      | AWS__CodeDeploy__DeploymentGroup ->
-          "AWS::CodeDeploy::DeploymentGroup"
-      | AWS__EC2__LaunchTemplate -> "AWS::EC2::LaunchTemplate"
-      | AWS__ECR__PublicRepository -> "AWS::ECR::PublicRepository"
-      | AWS__GuardDuty__Detector -> "AWS::GuardDuty::Detector"
-      | AWS__EMR__SecurityConfiguration -> "AWS::EMR::SecurityConfiguration"
-      | AWS__SageMaker__CodeRepository -> "AWS::SageMaker::CodeRepository"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "AWS::EC2::CustomerGateway" -> AWS__EC2__CustomerGateway
-      | "AWS::EC2::EIP" -> AWS__EC2__EIP
-      | "AWS::EC2::Host" -> AWS__EC2__Host
-      | "AWS::EC2::Instance" -> AWS__EC2__Instance
-      | "AWS::EC2::InternetGateway" -> AWS__EC2__InternetGateway
-      | "AWS::EC2::NetworkAcl" -> AWS__EC2__NetworkAcl
-      | "AWS::EC2::NetworkInterface" -> AWS__EC2__NetworkInterface
-      | "AWS::EC2::RouteTable" -> AWS__EC2__RouteTable
-      | "AWS::EC2::SecurityGroup" -> AWS__EC2__SecurityGroup
-      | "AWS::EC2::Subnet" -> AWS__EC2__Subnet
-      | "AWS::CloudTrail::Trail" -> AWS__CloudTrail__Trail
-      | "AWS::EC2::Volume" -> AWS__EC2__Volume
-      | "AWS::EC2::VPC" -> AWS__EC2__VPC
-      | "AWS::EC2::VPNConnection" -> AWS__EC2__VPNConnection
-      | "AWS::EC2::VPNGateway" -> AWS__EC2__VPNGateway
-      | "AWS::EC2::RegisteredHAInstance" -> AWS__EC2__RegisteredHAInstance
-      | "AWS::EC2::NatGateway" -> AWS__EC2__NatGateway
-      | "AWS::EC2::EgressOnlyInternetGateway" ->
-          AWS__EC2__EgressOnlyInternetGateway
-      | "AWS::EC2::VPCEndpoint" -> AWS__EC2__VPCEndpoint
-      | "AWS::EC2::VPCEndpointService" -> AWS__EC2__VPCEndpointService
-      | "AWS::EC2::FlowLog" -> AWS__EC2__FlowLog
-      | "AWS::EC2::VPCPeeringConnection" -> AWS__EC2__VPCPeeringConnection
-      | "AWS::Elasticsearch::Domain" -> AWS__Elasticsearch__Domain
-      | "AWS::IAM::Group" -> AWS__IAM__Group
-      | "AWS::IAM::Policy" -> AWS__IAM__Policy
-      | "AWS::IAM::Role" -> AWS__IAM__Role
-      | "AWS::IAM::User" -> AWS__IAM__User
-      | "AWS::ElasticLoadBalancingV2::LoadBalancer" ->
-          AWS__ElasticLoadBalancingV2__LoadBalancer
-      | "AWS::ACM::Certificate" -> AWS__ACM__Certificate
-      | "AWS::RDS::DBInstance" -> AWS__RDS__DBInstance
-      | "AWS::RDS::DBSubnetGroup" -> AWS__RDS__DBSubnetGroup
-      | "AWS::RDS::DBSecurityGroup" -> AWS__RDS__DBSecurityGroup
-      | "AWS::RDS::DBSnapshot" -> AWS__RDS__DBSnapshot
-      | "AWS::RDS::DBCluster" -> AWS__RDS__DBCluster
-      | "AWS::RDS::DBClusterSnapshot" -> AWS__RDS__DBClusterSnapshot
-      | "AWS::RDS::EventSubscription" -> AWS__RDS__EventSubscription
-      | "AWS::S3::Bucket" -> AWS__S3__Bucket
-      | "AWS::S3::AccountPublicAccessBlock" ->
-          AWS__S3__AccountPublicAccessBlock
-      | "AWS::Redshift::Cluster" -> AWS__Redshift__Cluster
-      | "AWS::Redshift::ClusterSnapshot" -> AWS__Redshift__ClusterSnapshot
-      | "AWS::Redshift::ClusterParameterGroup" ->
-          AWS__Redshift__ClusterParameterGroup
-      | "AWS::Redshift::ClusterSecurityGroup" ->
-          AWS__Redshift__ClusterSecurityGroup
-      | "AWS::Redshift::ClusterSubnetGroup" ->
-          AWS__Redshift__ClusterSubnetGroup
-      | "AWS::Redshift::EventSubscription" ->
-          AWS__Redshift__EventSubscription
-      | "AWS::SSM::ManagedInstanceInventory" ->
-          AWS__SSM__ManagedInstanceInventory
-      | "AWS::CloudWatch::Alarm" -> AWS__CloudWatch__Alarm
-      | "AWS::CloudFormation::Stack" -> AWS__CloudFormation__Stack
-      | "AWS::ElasticLoadBalancing::LoadBalancer" ->
-          AWS__ElasticLoadBalancing__LoadBalancer
-      | "AWS::AutoScaling::AutoScalingGroup" ->
-          AWS__AutoScaling__AutoScalingGroup
-      | "AWS::AutoScaling::LaunchConfiguration" ->
-          AWS__AutoScaling__LaunchConfiguration
-      | "AWS::AutoScaling::ScalingPolicy" -> AWS__AutoScaling__ScalingPolicy
-      | "AWS::AutoScaling::ScheduledAction" ->
-          AWS__AutoScaling__ScheduledAction
-      | "AWS::DynamoDB::Table" -> AWS__DynamoDB__Table
-      | "AWS::CodeBuild::Project" -> AWS__CodeBuild__Project
-      | "AWS::WAF::RateBasedRule" -> AWS__WAF__RateBasedRule
-      | "AWS::WAF::Rule" -> AWS__WAF__Rule
-      | "AWS::WAF::RuleGroup" -> AWS__WAF__RuleGroup
-      | "AWS::WAF::WebACL" -> AWS__WAF__WebACL
-      | "AWS::WAFRegional::RateBasedRule" -> AWS__WAFRegional__RateBasedRule
-      | "AWS::WAFRegional::Rule" -> AWS__WAFRegional__Rule
-      | "AWS::WAFRegional::RuleGroup" -> AWS__WAFRegional__RuleGroup
-      | "AWS::WAFRegional::WebACL" -> AWS__WAFRegional__WebACL
-      | "AWS::CloudFront::Distribution" -> AWS__CloudFront__Distribution
-      | "AWS::CloudFront::StreamingDistribution" ->
-          AWS__CloudFront__StreamingDistribution
-      | "AWS::Lambda::Function" -> AWS__Lambda__Function
-      | "AWS::NetworkFirewall::Firewall" -> AWS__NetworkFirewall__Firewall
-      | "AWS::NetworkFirewall::FirewallPolicy" ->
-          AWS__NetworkFirewall__FirewallPolicy
-      | "AWS::NetworkFirewall::RuleGroup" -> AWS__NetworkFirewall__RuleGroup
-      | "AWS::ElasticBeanstalk::Application" ->
-          AWS__ElasticBeanstalk__Application
-      | "AWS::ElasticBeanstalk::ApplicationVersion" ->
-          AWS__ElasticBeanstalk__ApplicationVersion
-      | "AWS::ElasticBeanstalk::Environment" ->
-          AWS__ElasticBeanstalk__Environment
-      | "AWS::WAFv2::WebACL" -> AWS__WAFv2__WebACL
-      | "AWS::WAFv2::RuleGroup" -> AWS__WAFv2__RuleGroup
-      | "AWS::WAFv2::IPSet" -> AWS__WAFv2__IPSet
-      | "AWS::WAFv2::RegexPatternSet" -> AWS__WAFv2__RegexPatternSet
-      | "AWS::WAFv2::ManagedRuleSet" -> AWS__WAFv2__ManagedRuleSet
-      | "AWS::XRay::EncryptionConfig" -> AWS__XRay__EncryptionConfig
-      | "AWS::SSM::AssociationCompliance" -> AWS__SSM__AssociationCompliance
-      | "AWS::SSM::PatchCompliance" -> AWS__SSM__PatchCompliance
-      | "AWS::Shield::Protection" -> AWS__Shield__Protection
-      | "AWS::ShieldRegional::Protection" -> AWS__ShieldRegional__Protection
-      | "AWS::Config::ConformancePackCompliance" ->
-          AWS__Config__ConformancePackCompliance
-      | "AWS::Config::ResourceCompliance" -> AWS__Config__ResourceCompliance
-      | "AWS::ApiGateway::Stage" -> AWS__ApiGateway__Stage
-      | "AWS::ApiGateway::RestApi" -> AWS__ApiGateway__RestApi
-      | "AWS::ApiGatewayV2::Stage" -> AWS__ApiGatewayV2__Stage
-      | "AWS::ApiGatewayV2::Api" -> AWS__ApiGatewayV2__Api
-      | "AWS::CodePipeline::Pipeline" -> AWS__CodePipeline__Pipeline
-      | "AWS::ServiceCatalog::CloudFormationProvisionedProduct" ->
-          AWS__ServiceCatalog__CloudFormationProvisionedProduct
-      | "AWS::ServiceCatalog::CloudFormationProduct" ->
-          AWS__ServiceCatalog__CloudFormationProduct
-      | "AWS::ServiceCatalog::Portfolio" -> AWS__ServiceCatalog__Portfolio
-      | "AWS::SQS::Queue" -> AWS__SQS__Queue
-      | "AWS::KMS::Key" -> AWS__KMS__Key
-      | "AWS::QLDB::Ledger" -> AWS__QLDB__Ledger
-      | "AWS::SecretsManager::Secret" -> AWS__SecretsManager__Secret
-      | "AWS::SNS::Topic" -> AWS__SNS__Topic
-      | "AWS::SSM::FileData" -> AWS__SSM__FileData
-      | "AWS::Backup::BackupPlan" -> AWS__Backup__BackupPlan
-      | "AWS::Backup::BackupSelection" -> AWS__Backup__BackupSelection
-      | "AWS::Backup::BackupVault" -> AWS__Backup__BackupVault
-      | "AWS::Backup::RecoveryPoint" -> AWS__Backup__RecoveryPoint
-      | "AWS::ECR::Repository" -> AWS__ECR__Repository
-      | "AWS::ECS::Cluster" -> AWS__ECS__Cluster
-      | "AWS::ECS::Service" -> AWS__ECS__Service
-      | "AWS::ECS::TaskDefinition" -> AWS__ECS__TaskDefinition
-      | "AWS::EFS::AccessPoint" -> AWS__EFS__AccessPoint
-      | "AWS::EFS::FileSystem" -> AWS__EFS__FileSystem
-      | "AWS::EKS::Cluster" -> AWS__EKS__Cluster
-      | "AWS::OpenSearch::Domain" -> AWS__OpenSearch__Domain
-      | "AWS::EC2::TransitGateway" -> AWS__EC2__TransitGateway
-      | "AWS::Kinesis::Stream" -> AWS__Kinesis__Stream
-      | "AWS::Kinesis::StreamConsumer" -> AWS__Kinesis__StreamConsumer
-      | "AWS::CodeDeploy::Application" -> AWS__CodeDeploy__Application
-      | "AWS::CodeDeploy::DeploymentConfig" ->
-          AWS__CodeDeploy__DeploymentConfig
-      | "AWS::CodeDeploy::DeploymentGroup" ->
-          AWS__CodeDeploy__DeploymentGroup
-      | "AWS::EC2::LaunchTemplate" -> AWS__EC2__LaunchTemplate
-      | "AWS::ECR::PublicRepository" -> AWS__ECR__PublicRepository
-      | "AWS::GuardDuty::Detector" -> AWS__GuardDuty__Detector
-      | "AWS::EMR::SecurityConfiguration" -> AWS__EMR__SecurityConfiguration
-      | "AWS::SageMaker::CodeRepository" -> AWS__SageMaker__CodeRepository
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration ResourceType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ResourceType" j)
-    let to_json = simple_to_json to_value
-  end
 module BaseResourceId =
   struct
     type nonrec t = string
@@ -1007,6 +2621,31 @@ module BaseResourceId =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"BaseResourceId" j
+    let to_json = simple_to_json to_value
+  end
+module EvaluationMode =
+  struct
+    type nonrec t =
+      | DETECTIVE 
+      | PROACTIVE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DETECTIVE -> "DETECTIVE"
+      | PROACTIVE -> "PROACTIVE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DETECTIVE" -> DETECTIVE
+      | "PROACTIVE" -> PROACTIVE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EvaluationMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EvaluationMode" j)
     let to_json = simple_to_json to_value
   end
 module Integer =
@@ -1028,6 +2667,9 @@ module RemediationExecutionStepState =
       | SUCCEEDED 
       | PENDING 
       | FAILED 
+      | IN_PROGRESS 
+      | EXITED 
+      | UNKNOWN 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1035,12 +2677,18 @@ module RemediationExecutionStepState =
       | SUCCEEDED -> "SUCCEEDED"
       | PENDING -> "PENDING"
       | FAILED -> "FAILED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | EXITED -> "EXITED"
+      | UNKNOWN -> "UNKNOWN"
       | Non_static_id s -> s
     let of_string =
       function
       | "SUCCEEDED" -> SUCCEEDED
       | "PENDING" -> PENDING
       | "FAILED" -> FAILED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "EXITED" -> EXITED
+      | "UNKNOWN" -> UNKNOWN
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1157,11 +2805,118 @@ module OrganizationConfigRuleTriggerType =
       of_string (string_of_json ~kind:"OrganizationConfigRuleTriggerType" j)
     let to_json = simple_to_json to_value
   end
+module ResourceTypeList =
+  struct
+    type nonrec t = ResourceType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceTypeList" ~of_json:ResourceType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RecordingStrategyType =
+  struct
+    type nonrec t =
+      | ALL_SUPPORTED_RESOURCE_TYPES 
+      | INCLUSION_BY_RESOURCE_TYPES 
+      | EXCLUSION_BY_RESOURCE_TYPES 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ALL_SUPPORTED_RESOURCE_TYPES -> "ALL_SUPPORTED_RESOURCE_TYPES"
+      | INCLUSION_BY_RESOURCE_TYPES -> "INCLUSION_BY_RESOURCE_TYPES"
+      | EXCLUSION_BY_RESOURCE_TYPES -> "EXCLUSION_BY_RESOURCE_TYPES"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ALL_SUPPORTED_RESOURCE_TYPES" -> ALL_SUPPORTED_RESOURCE_TYPES
+      | "INCLUSION_BY_RESOURCE_TYPES" -> INCLUSION_BY_RESOURCE_TYPES
+      | "EXCLUSION_BY_RESOURCE_TYPES" -> EXCLUSION_BY_RESOURCE_TYPES
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RecordingStrategyType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RecordingStrategyType" j)
+    let to_json = simple_to_json to_value
+  end
+module RecordingModeOverride =
+  struct
+    type nonrec t =
+      {
+      description: Description.t option
+        [@ocaml.doc "A description that you provide for the override."];
+      resourceTypes: RecordingModeResourceTypesList.t
+        [@ocaml.doc
+          "A comma-separated list that specifies which resource types Config includes in the override. Daily recording cannot be specified for the following resource types: AWS::Config::ResourceCompliance AWS::Config::ConformancePackCompliance AWS::Config::ConfigurationRecorder"];
+      recordingFrequency: RecordingFrequency.t
+        [@ocaml.doc
+          "The recording frequency that will be applied to all the resource types specified in the override. Continuous recording allows you to record configuration changes continuously whenever a change occurs. Daily recording allows you to receive a configuration item (CI) representing the most recent state of your resources over the last 24-hour period, only if it\226\128\153s different from the previous CI recorded. Firewall Manager depends on continuous recording to monitor your resources. If you are using Firewall Manager, it is recommended that you set the recording frequency to Continuous."]}
+    let context_ = "RecordingModeOverride"
+    let make ?description =
+      fun ~resourceTypes ->
+        fun ~recordingFrequency ->
+          fun () -> { description; resourceTypes; recordingFrequency }
+    let to_value x =
+      structure_to_value
+        [("description", (Option.map x.description ~f:Description.to_value));
+        ("resourceTypes",
+          (Some (RecordingModeResourceTypesList.to_value x.resourceTypes)));
+        ("recordingFrequency",
+          (Some (RecordingFrequency.to_value x.recordingFrequency)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recordingFrequency =
+        RecordingFrequency.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "recordingFrequency") in
+      let resourceTypes =
+        RecordingModeResourceTypesList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceTypes") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      make ~recordingFrequency ~resourceTypes ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recordingFrequency =
+        field_map_exn json__ "recordingFrequency" RecordingFrequency.of_json in
+      let resourceTypes =
+        field_map_exn json__ "resourceTypes"
+          RecordingModeResourceTypesList.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      make ~recordingFrequency ~resourceTypes ?description ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object for you to specify your overrides for the recording mode."]
 module AccountAggregationSourceAccountList =
   struct
     type nonrec t = AccountId.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1188,6 +2943,9 @@ module AggregatorRegionList =
     type nonrec t = String_.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1206,6 +2964,80 @@ module AggregatorRegionList =
                      | _ -> true))) ~f:String_.of_xml)
     let of_json j =
       list_of_json ~kind:"AggregatorRegionList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AggregatorFilterType =
+  struct
+    type nonrec t =
+      | INCLUDE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | INCLUDE -> "INCLUDE" | Non_static_id s -> s
+    let of_string = function | "INCLUDE" -> INCLUDE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AggregatorFilterType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AggregatorFilterType" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceTypeValueList =
+  struct
+    type nonrec t = ResourceTypeValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceTypeValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceTypeValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceTypeValueList"
+        ~of_json:ResourceTypeValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServicePrincipalValueList =
+  struct
+    type nonrec t = ServicePrincipalValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServicePrincipalValue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServicePrincipalValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServicePrincipalValueList"
+        ~of_json:ServicePrincipalValue.of_json j
     let to_json v = composed_to_json to_value v
   end
 module PolicyRuntime =
@@ -1281,12 +3113,12 @@ module SourceDetail =
         (Option.map ~f:EventSource.of_xml) (Xml.child xml_arg0 "EventSource") in
       make ?maximumExecutionFrequency ?messageType ?eventSource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maximumExecutionFrequency =
-        field_map json "MaximumExecutionFrequency"
+        field_map json__ "MaximumExecutionFrequency"
           MaximumExecutionFrequency.of_json in
-      let messageType = field_map json "MessageType" MessageType.of_json in
-      let eventSource = field_map json "EventSource" EventSource.of_json in
+      let messageType = field_map json__ "MessageType" MessageType.of_json in
+      let eventSource = field_map json__ "EventSource" EventSource.of_json in
       make ?maximumExecutionFrequency ?messageType ?eventSource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1308,39 +3140,38 @@ module RemediationException =
   struct
     type nonrec t =
       {
-      configRuleName: ConfigRuleName.t
+      configRuleName: ConfigRuleName.t option
         [@ocaml.doc "The name of the Config rule."];
-      resourceType: StringWithCharLimit256.t
+      resourceType: StringWithCharLimit256.t option
         [@ocaml.doc "The type of a resource."];
-      resourceId: StringWithCharLimit1024.t
+      resourceId: StringWithCharLimit1024.t option
         [@ocaml.doc "The ID of the resource (for example., sg-xxxxxx)."];
       message: StringWithCharLimit1024.t option
         [@ocaml.doc "An explanation of an remediation exception."];
       expirationTime: Date.t option
         [@ocaml.doc
           "The time when the remediation exception will be deleted."]}
-    let context_ = "RemediationException"
-    let make ?message =
-      fun ?expirationTime ->
-        fun ~configRuleName ->
-          fun ~resourceType ->
-            fun ~resourceId ->
+    let make ?configRuleName =
+      fun ?resourceType ->
+        fun ?resourceId ->
+          fun ?message ->
+            fun ?expirationTime ->
               fun () ->
                 {
-                  message;
-                  expirationTime;
                   configRuleName;
                   resourceType;
-                  resourceId
+                  resourceId;
+                  message;
+                  expirationTime
                 }
     let to_value x =
       structure_to_value
         [("ConfigRuleName",
-           (Some (ConfigRuleName.to_value x.configRuleName)));
+           (Option.map x.configRuleName ~f:ConfigRuleName.to_value));
         ("ResourceType",
-          (Some (StringWithCharLimit256.to_value x.resourceType)));
+          (Option.map x.resourceType ~f:StringWithCharLimit256.to_value));
         ("ResourceId",
-          (Some (StringWithCharLimit1024.to_value x.resourceId)));
+          (Option.map x.resourceId ~f:StringWithCharLimit1024.to_value));
         ("Message",
           (Option.map x.message ~f:StringWithCharLimit1024.to_value));
         ("ExpirationTime", (Option.map x.expirationTime ~f:Date.to_value))]
@@ -1352,27 +3183,28 @@ module RemediationException =
         (Option.map ~f:StringWithCharLimit1024.of_xml)
           (Xml.child xml_arg0 "Message") in
       let resourceId =
-        StringWithCharLimit1024.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:StringWithCharLimit1024.of_xml)
+          (Xml.child xml_arg0 "ResourceId") in
       let resourceType =
-        StringWithCharLimit256.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
+        (Option.map ~f:StringWithCharLimit256.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
       let configRuleName =
-        ConfigRuleName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConfigRuleName") in
-      make ?expirationTime ?message ~resourceId ~resourceType ~configRuleName
+        (Option.map ~f:ConfigRuleName.of_xml)
+          (Xml.child xml_arg0 "ConfigRuleName") in
+      make ?expirationTime ?message ?resourceId ?resourceType ?configRuleName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expirationTime = field_map json "ExpirationTime" Date.of_json in
-      let message = field_map json "Message" StringWithCharLimit1024.of_json in
+    let of_json json__ =
+      let expirationTime = field_map json__ "ExpirationTime" Date.of_json in
+      let message =
+        field_map json__ "Message" StringWithCharLimit1024.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" StringWithCharLimit1024.of_json in
+        field_map json__ "ResourceId" StringWithCharLimit1024.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" StringWithCharLimit256.of_json in
+        field_map json__ "ResourceType" StringWithCharLimit256.of_json in
       let configRuleName =
-        field_map_exn json "ConfigRuleName" ConfigRuleName.of_json in
-      make ?expirationTime ?message ~resourceId ~resourceType ~configRuleName
+        field_map json__ "ConfigRuleName" ConfigRuleName.of_json in
+      make ?expirationTime ?message ?resourceId ?resourceType ?configRuleName
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1387,7 +3219,7 @@ module RemediationConfiguration =
         [@ocaml.doc
           "The type of the target. Target executes remediation. For example, SSM document."];
       targetId: StringWithCharLimit256.t
-        [@ocaml.doc "Target ID is the name of the public document."];
+        [@ocaml.doc "Target ID is the name of the SSM document."];
       targetVersion: String_.t option
         [@ocaml.doc
           "Version of the target. For example, version of the SSM document. If you make backward incompatible changes to the SSM document, you must call PutRemediationConfiguration API again to ensure the remediations can run."];
@@ -1403,13 +3235,13 @@ module RemediationConfiguration =
           "The maximum number of failed attempts for auto-remediation. If you do not select a number, the default is 5. For example, if you specify MaximumAutomaticAttempts as 5 with RetryAttemptSeconds as 50 seconds, Config will put a RemediationException on your behalf for the failing resource after the 5th failed attempt within 50 seconds."];
       retryAttemptSeconds: AutoRemediationAttemptSeconds.t option
         [@ocaml.doc
-          "Maximum time in seconds that Config runs auto-remediation. If you do not select a number, the default is 60 seconds. For example, if you specify RetryAttemptSeconds as 50 seconds and MaximumAutomaticAttempts as 5, Config will run auto-remediations 5 times within 50 seconds before throwing an exception."];
+          "Time window to determine whether or not to add a remediation exception to prevent infinite remediation attempts. If MaximumAutomaticAttempts remediation attempts have been made under RetryAttemptSeconds, a remediation exception will be added to the resource. If you do not select a number, the default is 60 seconds. For example, if you specify RetryAttemptSeconds as 50 seconds and MaximumAutomaticAttempts as 5, Config will run auto-remediations 5 times within 50 seconds before adding a remediation exception to the resource."];
       arn: StringWithCharLimit1024.t option
         [@ocaml.doc
           "Amazon Resource Name (ARN) of remediation configuration."];
       createdByService: StringWithCharLimit1024.t option
         [@ocaml.doc
-          "Name of the service that owns the service linked rule, if applicable."]}
+          "Name of the service that owns the service-linked rule, if applicable."]}
     let context_ = "RemediationConfiguration"
     let make ?targetVersion =
       fun ?parameters ->
@@ -1499,35 +3331,52 @@ module RemediationConfiguration =
         ?maximumAutomaticAttempts ?executionControls ?automatic ?resourceType
         ?parameters ?targetVersion ~targetId ~targetType ~configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let createdByService =
-        field_map json "CreatedByService" StringWithCharLimit1024.of_json in
-      let arn = field_map json "Arn" StringWithCharLimit1024.of_json in
+        field_map json__ "CreatedByService" StringWithCharLimit1024.of_json in
+      let arn = field_map json__ "Arn" StringWithCharLimit1024.of_json in
       let retryAttemptSeconds =
-        field_map json "RetryAttemptSeconds"
+        field_map json__ "RetryAttemptSeconds"
           AutoRemediationAttemptSeconds.of_json in
       let maximumAutomaticAttempts =
-        field_map json "MaximumAutomaticAttempts"
+        field_map json__ "MaximumAutomaticAttempts"
           AutoRemediationAttempts.of_json in
       let executionControls =
-        field_map json "ExecutionControls" ExecutionControls.of_json in
-      let automatic = field_map json "Automatic" Boolean.of_json in
-      let resourceType = field_map json "ResourceType" String_.of_json in
+        field_map json__ "ExecutionControls" ExecutionControls.of_json in
+      let automatic = field_map json__ "Automatic" Boolean.of_json in
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
       let parameters =
-        field_map json "Parameters" RemediationParameters.of_json in
-      let targetVersion = field_map json "TargetVersion" String_.of_json in
+        field_map json__ "Parameters" RemediationParameters.of_json in
+      let targetVersion = field_map json__ "TargetVersion" String_.of_json in
       let targetId =
-        field_map_exn json "TargetId" StringWithCharLimit256.of_json in
+        field_map_exn json__ "TargetId" StringWithCharLimit256.of_json in
       let targetType =
-        field_map_exn json "TargetType" RemediationTargetType.of_json in
+        field_map_exn json__ "TargetType" RemediationTargetType.of_json in
       let configRuleName =
-        field_map_exn json "ConfigRuleName" ConfigRuleName.of_json in
+        field_map_exn json__ "ConfigRuleName" ConfigRuleName.of_json in
       make ?createdByService ?arn ?retryAttemptSeconds
         ?maximumAutomaticAttempts ?executionControls ?automatic ?resourceType
         ?parameters ?targetVersion ~targetId ~targetType ~configRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the details about the remediation configuration that includes the remediation action, parameters, and data to execute the action."]
+module ConfigurationRecorderFilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "ConfigurationRecorderFilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i ~pattern:"^[0-9a-zA-Z\\\\*\\\\.\\\\\\/\\\\?-]*$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ConfigurationRecorderFilterValue" j
+    let to_json = simple_to_json to_value
+  end
 module RelatedEvent =
   struct
     type nonrec t = string
@@ -1584,12 +3433,12 @@ module Relationship =
           (Xml.child xml_arg0 "resourceType") in
       make ?relationshipName ?resourceName ?resourceId ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let relationshipName =
-        field_map json "relationshipName" RelationshipName.of_json in
-      let resourceName = field_map json "resourceName" ResourceName.of_json in
-      let resourceId = field_map json "resourceId" ResourceId.of_json in
-      let resourceType = field_map json "resourceType" ResourceType.of_json in
+        field_map json__ "relationshipName" RelationshipName.of_json in
+      let resourceName = field_map json__ "resourceName" ResourceName.of_json in
+      let resourceId = field_map json__ "resourceId" ResourceId.of_json in
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
       make ?relationshipName ?resourceName ?resourceId ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1657,20 +3506,30 @@ module EvaluationResultQualifier =
         [@ocaml.doc
           "The type of Amazon Web Services resource that was evaluated."];
       resourceId: BaseResourceId.t option
-        [@ocaml.doc "The ID of the evaluated Amazon Web Services resource."]}
+        [@ocaml.doc "The ID of the evaluated Amazon Web Services resource."];
+      evaluationMode: EvaluationMode.t option
+        [@ocaml.doc
+          "The mode of an evaluation. The valid values are Detective or Proactive."]}
     let make ?configRuleName =
       fun ?resourceType ->
         fun ?resourceId ->
-          fun () -> { configRuleName; resourceType; resourceId }
+          fun ?evaluationMode ->
+            fun () ->
+              { configRuleName; resourceType; resourceId; evaluationMode }
     let to_value x =
       structure_to_value
         [("ConfigRuleName",
            (Option.map x.configRuleName ~f:ConfigRuleName.to_value));
         ("ResourceType",
           (Option.map x.resourceType ~f:StringWithCharLimit256.to_value));
-        ("ResourceId", (Option.map x.resourceId ~f:BaseResourceId.to_value))]
+        ("ResourceId", (Option.map x.resourceId ~f:BaseResourceId.to_value));
+        ("EvaluationMode",
+          (Option.map x.evaluationMode ~f:EvaluationMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let evaluationMode =
+        (Option.map ~f:EvaluationMode.of_xml)
+          (Xml.child xml_arg0 "EvaluationMode") in
       let resourceId =
         (Option.map ~f:BaseResourceId.of_xml)
           (Xml.child xml_arg0 "ResourceId") in
@@ -1680,18 +3539,38 @@ module EvaluationResultQualifier =
       let configRuleName =
         (Option.map ~f:ConfigRuleName.of_xml)
           (Xml.child xml_arg0 "ConfigRuleName") in
-      make ?resourceId ?resourceType ?configRuleName ()
+      make ?evaluationMode ?resourceId ?resourceType ?configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map json "ResourceId" BaseResourceId.of_json in
+    let of_json json__ =
+      let evaluationMode =
+        field_map json__ "EvaluationMode" EvaluationMode.of_json in
+      let resourceId = field_map json__ "ResourceId" BaseResourceId.of_json in
       let resourceType =
-        field_map json "ResourceType" StringWithCharLimit256.of_json in
+        field_map json__ "ResourceType" StringWithCharLimit256.of_json in
       let configRuleName =
-        field_map json "ConfigRuleName" ConfigRuleName.of_json in
-      make ?resourceId ?resourceType ?configRuleName ()
+        field_map json__ "ConfigRuleName" ConfigRuleName.of_json in
+      make ?evaluationMode ?resourceId ?resourceType ?configRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Identifies an Config rule that evaluated an Amazon Web Services resource, and provides the type and ID of the resource that the rule evaluated."]
+module ResourceEvaluationId =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceEvaluationId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceEvaluationId" j
+    let to_json = simple_to_json to_value
+  end
 module ComplianceContributorCount =
   struct
     type nonrec t =
@@ -1715,9 +3594,9 @@ module ComplianceContributorCount =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "CappedCount") in
       make ?capExceeded ?cappedCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let capExceeded = field_map json "CapExceeded" Boolean.of_json in
-      let cappedCount = field_map json "CappedCount" Integer.of_json in
+    let of_json json__ =
+      let capExceeded = field_map json__ "CapExceeded" Boolean.of_json in
+      let cappedCount = field_map json__ "CappedCount" Integer.of_json in
       make ?capExceeded ?cappedCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1762,13 +3641,13 @@ module RemediationExecutionStep =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?stopTime ?startTime ?errorMessage ?state ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stopTime = field_map json "StopTime" Date.of_json in
-      let startTime = field_map json "StartTime" Date.of_json in
-      let errorMessage = field_map json "ErrorMessage" String_.of_json in
+    let of_json json__ =
+      let stopTime = field_map json__ "StopTime" Date.of_json in
+      let startTime = field_map json__ "StartTime" Date.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
       let state =
-        field_map json "State" RemediationExecutionStepState.of_json in
-      let name = field_map json "Name" String_.of_json in
+        field_map json__ "State" RemediationExecutionStepState.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?stopTime ?startTime ?errorMessage ?state ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Name of the step from the SSM document."]
@@ -1797,11 +3676,11 @@ module ConformancePackInputParameter =
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterName") in
       make ~parameterValue ~parameterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterValue =
-        field_map_exn json "ParameterValue" ParameterValue.of_json in
+        field_map_exn json__ "ParameterValue" ParameterValue.of_json in
       let parameterName =
-        field_map_exn json "ParameterName" ParameterName.of_json in
+        field_map_exn json__ "ParameterName" ParameterName.of_json in
       make ~parameterValue ~parameterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1815,6 +3694,9 @@ module DebugLogDeliveryAccounts =
           ((check_list_max i ~max:1000) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1840,6 +3722,9 @@ module OrganizationConfigRuleTriggerTypeNoSNs =
   struct
     type nonrec t = OrganizationConfigRuleTriggerTypeNoSN.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrganizationConfigRuleTriggerTypeNoSN.to_value)) |>
         (fun x -> `List x)
@@ -1872,6 +3757,9 @@ module ResourceTypesScope =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StringWithCharLimit256.to_value)) |>
         (fun x -> `List x)
@@ -1910,24 +3798,6 @@ module StringWithCharLimit128 =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"StringWithCharLimit128" j
-    let to_json = simple_to_json to_value
-  end
-module StringWithCharLimit2048 =
-  struct
-    type nonrec t = string
-    let context_ = "StringWithCharLimit2048"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:2048) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"StringWithCharLimit2048" j
     let to_json = simple_to_json to_value
   end
 module StringWithCharLimit256Min0 =
@@ -1970,6 +3840,9 @@ module OrganizationConfigRuleTriggerTypes =
   struct
     type nonrec t = OrganizationConfigRuleTriggerType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrganizationConfigRuleTriggerType.to_value)) |>
         (fun x -> `List x)
@@ -2021,6 +3894,40 @@ module DeliveryStatus =
     let of_json j = of_string (string_of_json ~kind:"DeliveryStatus" j)
     let to_json = simple_to_json to_value
   end
+module SSMDocumentName =
+  struct
+    type nonrec t = string
+    let context_ = "SSMDocumentName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i ~pattern:"^[a-zA-Z0-9_\\-.:/]{3,200}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SSMDocumentName" j
+    let to_json = simple_to_json to_value
+  end
+module SSMDocumentVersion =
+  struct
+    type nonrec t = string
+    let context_ = "SSMDocumentVersion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i ~pattern:"([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SSMDocumentVersion" j
+    let to_json = simple_to_json to_value
+  end
 module AllSupported =
   struct
     type nonrec t = bool
@@ -2034,6 +3941,32 @@ module AllSupported =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module ExclusionByResourceTypes =
+  struct
+    type nonrec t =
+      {
+      resourceTypes: ResourceTypeList.t option
+        [@ocaml.doc
+          "A comma-separated list of resource types to exclude from recording by the configuration recorder."]}
+    let make ?resourceTypes = fun () -> { resourceTypes }
+    let to_value x =
+      structure_to_value
+        [("resourceTypes",
+           (Option.map x.resourceTypes ~f:ResourceTypeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceTypes =
+        (Option.map ~f:ResourceTypeList.of_xml)
+          (Xml.child xml_arg0 "resourceTypes") in
+      make ?resourceTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceTypes =
+        field_map json__ "resourceTypes" ResourceTypeList.of_json in
+      make ?resourceTypes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies whether the configuration recorder excludes certain resource types from being recorded. Use the resourceTypes field to enter a comma-separated list of resource types you want to exclude from recording. By default, when Config adds support for a new resource type in the Region where you set up the configuration recorder, including global resource types, Config starts recording resources of that type automatically. How to use the exclusion recording strategy To use this option, you must set the useOnly field of RecordingStrategy to EXCLUSION_BY_RESOURCE_TYPES. Config will then record configuration changes for all supported resource types, except the resource types that you specify to exclude from being recorded. Global resource types and the exclusion recording strategy Unless specifically listed as exclusions, AWS::RDS::GlobalCluster will be recorded automatically in all supported Config Regions were the configuration recorder is enabled. IAM users, groups, roles, and customer managed policies will be recorded in the Region where you set up the configuration recorder if that is a Region where Config was available before February 2022. You cannot be record the global IAM resouce types in Regions supported by Config after February 2022. For a list of those Regions, see Recording Amazon Web Services Resources | Global Resources."]
 module IncludeGlobalResourceTypes =
   struct
     type nonrec t = bool
@@ -2047,12 +3980,45 @@ module IncludeGlobalResourceTypes =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
-module ResourceTypeList =
+module RecordingStrategy =
   struct
-    type nonrec t = ResourceType.t list
-    let make i = i
+    type nonrec t =
+      {
+      useOnly: RecordingStrategyType.t option
+        [@ocaml.doc
+          "The recording strategy for the configuration recorder. If you set this option to ALL_SUPPORTED_RESOURCE_TYPES, Config records configuration changes for all supported resource types, excluding the global IAM resource types. You also must set the allSupported field of RecordingGroup to true. When Config adds support for a new resource type, Config automatically starts recording resources of that type. For a list of supported resource types, see Supported Resource Types in the Config developer guide. If you set this option to INCLUSION_BY_RESOURCE_TYPES, Config records configuration changes for only the resource types that you specify in the resourceTypes field of RecordingGroup. If you set this option to EXCLUSION_BY_RESOURCE_TYPES, Config records configuration changes for all supported resource types, except the resource types that you specify to exclude from being recorded in the resourceTypes field of ExclusionByResourceTypes. Required and optional fields The recordingStrategy field is optional when you set the allSupported field of RecordingGroup to true. The recordingStrategy field is optional when you list resource types in the resourceTypes field of RecordingGroup. The recordingStrategy field is required if you list resource types to exclude from recording in the resourceTypes field of ExclusionByResourceTypes. Overriding fields If you choose EXCLUSION_BY_RESOURCE_TYPES for the recording strategy, the exclusionByResourceTypes field will override other properties in the request. For example, even if you set includeGlobalResourceTypes to false, global IAM resource types will still be automatically recorded in this option unless those resource types are specifically listed as exclusions in the resourceTypes field of exclusionByResourceTypes. Global resource types and the exclusion recording strategy By default, if you choose the EXCLUSION_BY_RESOURCE_TYPES recording strategy, when Config adds support for a new resource type in the Region where you set up the configuration recorder, including global resource types, Config starts recording resources of that type automatically. Unless specifically listed as exclusions, AWS::RDS::GlobalCluster will be recorded automatically in all supported Config Regions were the configuration recorder is enabled. IAM users, groups, roles, and customer managed policies will be recorded in the Region where you set up the configuration recorder if that is a Region where Config was available before February 2022. You cannot be record the global IAM resouce types in Regions supported by Config after February 2022. This list where you cannot record the global IAM resource types includes the following Regions: Asia Pacific (Hyderabad) Asia Pacific (Melbourne) Canada West (Calgary) Europe (Spain) Europe (Zurich) Israel (Tel Aviv) Middle East (UAE)"]}
+    let make ?useOnly = fun () -> { useOnly }
+    let to_value x =
+      structure_to_value
+        [("useOnly",
+           (Option.map x.useOnly ~f:RecordingStrategyType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let useOnly =
+        (Option.map ~f:RecordingStrategyType.of_xml)
+          (Xml.child xml_arg0 "useOnly") in
+      make ?useOnly ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let useOnly = field_map json__ "useOnly" RecordingStrategyType.of_json in
+      make ?useOnly ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the recording strategy of the configuration recorder."]
+module RecordingModeOverrides =
+  struct
+    type nonrec t = RecordingModeOverride.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:ResourceType.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:RecordingModeOverride.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -2066,9 +4032,10 @@ module ResourceTypeList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:ResourceType.of_xml)
+                     | _ -> true))) ~f:RecordingModeOverride.of_xml)
     let of_json j =
-      list_of_json ~kind:"ResourceTypeList" ~of_json:ResourceType.of_json j
+      list_of_json ~kind:"RecordingModeOverrides"
+        ~of_json:RecordingModeOverride.of_json j
     let to_json v = composed_to_json to_value v
   end
 module AccountAggregationSource =
@@ -2107,16 +4074,103 @@ module AccountAggregationSource =
           (Xml.child_exn ~context:context_ xml_arg0 "AccountIds") in
       make ?awsRegions ?allAwsRegions ~accountIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let awsRegions =
-        field_map json "AwsRegions" AggregatorRegionList.of_json in
-      let allAwsRegions = field_map json "AllAwsRegions" Boolean.of_json in
+        field_map json__ "AwsRegions" AggregatorRegionList.of_json in
+      let allAwsRegions = field_map json__ "AllAwsRegions" Boolean.of_json in
       let accountIds =
-        field_map_exn json "AccountIds"
+        field_map_exn json__ "AccountIds"
           AccountAggregationSourceAccountList.of_json in
       make ?awsRegions ?allAwsRegions ~accountIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A collection of accounts and regions."]
+module AggregatorFilterResourceType =
+  struct
+    type nonrec t =
+      {
+      type_: AggregatorFilterType.t option
+        [@ocaml.doc
+          "The type of resource type filter to apply. INCLUDE specifies that the list of resource types in the Value field will be aggregated and no other resource types will be filtered."];
+      value: ResourceTypeValueList.t option
+        [@ocaml.doc
+          "Comma-separate list of resource types to filter your aggregated configuration recorders."]}
+    let make ?type_ = fun ?value -> fun () -> { type_; value }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:AggregatorFilterType.to_value));
+        ("Value", (Option.map x.value ~f:ResourceTypeValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:ResourceTypeValueList.of_xml)
+          (Xml.child xml_arg0 "Value") in
+      let type_ =
+        (Option.map ~f:AggregatorFilterType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      make ?value ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" ResourceTypeValueList.of_json in
+      let type_ = field_map json__ "Type" AggregatorFilterType.of_json in
+      make ?value ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object to filter the configuration recorders based on the resource types in scope for recording."]
+module AggregatorFilterServicePrincipal =
+  struct
+    type nonrec t =
+      {
+      type_: AggregatorFilterType.t option
+        [@ocaml.doc
+          "The type of service principal filter to apply. INCLUDE specifies that the list of service principals in the Value field will be aggregated and no other service principals will be filtered."];
+      value: ServicePrincipalValueList.t option
+        [@ocaml.doc
+          "Comma-separated list of service principals for the linked Amazon Web Services services to filter your aggregated service-linked configuration recorders."]}
+    let make ?type_ = fun ?value -> fun () -> { type_; value }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:AggregatorFilterType.to_value));
+        ("Value", (Option.map x.value ~f:ServicePrincipalValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:ServicePrincipalValueList.of_xml)
+          (Xml.child xml_arg0 "Value") in
+      let type_ =
+        (Option.map ~f:AggregatorFilterType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      make ?value ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" ServicePrincipalValueList.of_json in
+      let type_ = field_map json__ "Type" AggregatorFilterType.of_json in
+      make ?value ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object to filter service-linked configuration recorders in an aggregator based on the linked Amazon Web Services service."]
+module EvaluationModeConfiguration =
+  struct
+    type nonrec t =
+      {
+      mode: EvaluationMode.t option
+        [@ocaml.doc
+          "The mode of an evaluation. The valid values are Detective or Proactive."]}
+    let make ?mode = fun () -> { mode }
+    let to_value x =
+      structure_to_value
+        [("Mode", (Option.map x.mode ~f:EvaluationMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mode =
+        (Option.map ~f:EvaluationMode.of_xml) (Xml.child xml_arg0 "Mode") in
+      make ?mode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mode = field_map json__ "Mode" EvaluationMode.of_json in
+      make ?mode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration object for Config rule evaluation mode. The supported valid values are Detective or Proactive."]
 module ComplianceResourceTypes =
   struct
     type nonrec t = StringWithCharLimit256.t list
@@ -2126,6 +4180,9 @@ module ComplianceResourceTypes =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StringWithCharLimit256.to_value)) |>
         (fun x -> `List x)
@@ -2185,12 +4242,12 @@ module CustomPolicyDetails =
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyRuntime") in
       make ?enableDebugLogDelivery ~policyText ~policyRuntime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let enableDebugLogDelivery =
-        field_map json "EnableDebugLogDelivery" Boolean.of_json in
-      let policyText = field_map_exn json "PolicyText" PolicyText.of_json in
+        field_map json__ "EnableDebugLogDelivery" Boolean.of_json in
+      let policyText = field_map_exn json__ "PolicyText" PolicyText.of_json in
       let policyRuntime =
-        field_map_exn json "PolicyRuntime" PolicyRuntime.of_json in
+        field_map_exn json__ "PolicyRuntime" PolicyRuntime.of_json in
       make ?enableDebugLogDelivery ~policyText ~policyRuntime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2231,6 +4288,9 @@ module SourceDetails =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SourceDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2339,11 +4399,11 @@ module RemediationExceptionResourceKey =
           (Xml.child xml_arg0 "ResourceType") in
       make ?resourceId ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceId =
-        field_map json "ResourceId" StringWithCharLimit1024.of_json in
+        field_map json__ "ResourceId" StringWithCharLimit1024.of_json in
       let resourceType =
-        field_map json "ResourceType" StringWithCharLimit256.of_json in
+        field_map json__ "ResourceType" StringWithCharLimit256.of_json in
       make ?resourceId ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2398,8 +4458,8 @@ module FieldInfo =
       let name = (Option.map ~f:FieldName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" FieldName.of_json in make ?name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" FieldName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about the fields such as name of the field."]
 module RemediationExceptions =
@@ -2410,6 +4470,9 @@ module RemediationExceptions =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RemediationException.to_value)) |>
         (fun x -> `List x)
@@ -2440,6 +4503,9 @@ module RemediationConfigurations =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RemediationConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -2568,6 +4634,183 @@ module ResourceDeletionTime =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
+module ComplianceScore =
+  struct
+    type nonrec t = string
+    let context_ = "ComplianceScore"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ComplianceScore" j
+    let to_json = simple_to_json to_value
+  end
+module ConformancePackName =
+  struct
+    type nonrec t = string
+    let context_ = "ConformancePackName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z][-a-zA-Z0-9]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ConformancePackName" j
+    let to_json = simple_to_json to_value
+  end
+module LastUpdatedTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module AmazonResourceName =
+  struct
+    type nonrec t = string
+    let context_ = "AmazonResourceName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AmazonResourceName" j
+    let to_json = simple_to_json to_value
+  end
+module RecorderName =
+  struct
+    type nonrec t = string
+    let context_ = "RecorderName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RecorderName" j
+    let to_json = simple_to_json to_value
+  end
+module RecordingScope =
+  struct
+    type nonrec t =
+      | INTERNAL 
+      | PAID 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INTERNAL -> "INTERNAL"
+      | PAID -> "PAID"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INTERNAL" -> INTERNAL
+      | "PAID" -> PAID
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RecordingScope" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RecordingScope" j)
+    let to_json = simple_to_json to_value
+  end
+module ServicePrincipal =
+  struct
+    type nonrec t = string
+    let context_ = "ServicePrincipal"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\w+=,.@-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ServicePrincipal" j
+    let to_json = simple_to_json to_value
+  end
+module ConfigurationRecorderFilterName =
+  struct
+    type nonrec t =
+      | RecordingScope 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | RecordingScope -> "recordingScope" | Non_static_id s -> s
+    let of_string =
+      function | "recordingScope" -> RecordingScope | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConfigurationRecorderFilterName"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ConfigurationRecorderFilterName" j)
+    let to_json = simple_to_json to_value
+  end
+module ConfigurationRecorderFilterValues =
+  struct
+    type nonrec t = ConfigurationRecorderFilterValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConfigurationRecorderFilterValue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ConfigurationRecorderFilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConfigurationRecorderFilterValues"
+        ~of_json:ConfigurationRecorderFilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AwsRegion =
   struct
     type nonrec t = string
@@ -2626,6 +4869,18 @@ module Configuration =
     let to_json = simple_to_json to_value
   end
 module ConfigurationItemCaptureTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module ConfigurationItemDeliveryTime =
   struct
     type nonrec t = string
     let make i = i
@@ -2703,6 +4958,9 @@ module RelatedEventList =
   struct
     type nonrec t = RelatedEvent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RelatedEvent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2727,6 +4985,9 @@ module RelationshipList =
   struct
     type nonrec t = Relationship.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Relationship.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2785,6 +5046,8 @@ module SupplementaryConfiguration =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2812,6 +5075,8 @@ module Tags =
                     (fun x -> (Value.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2959,26 +5224,6 @@ module Long =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
-module ConformancePackName =
-  struct
-    type nonrec t = string
-    let context_ = "ConformancePackName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:"[a-zA-Z][-a-zA-Z0-9]*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ConformancePackName" j
-    let to_json = simple_to_json to_value
-  end
 module Annotation =
   struct
     type nonrec t = string
@@ -3006,32 +5251,50 @@ module EvaluationResultIdentifier =
           "Identifies an Config rule used to evaluate an Amazon Web Services resource, and provides the type and ID of the evaluated resource."];
       orderingTimestamp: Date.t option
         [@ocaml.doc
-          "The time of the event that triggered the evaluation of your Amazon Web Services resources. The time can indicate when Config delivered a configuration item change notification, or it can indicate when Config delivered the configuration snapshot, depending on which event triggered the evaluation."]}
+          "The time of the event that triggered the evaluation of your Amazon Web Services resources. The time can indicate when Config delivered a configuration item change notification, or it can indicate when Config delivered the configuration snapshot, depending on which event triggered the evaluation."];
+      resourceEvaluationId: ResourceEvaluationId.t option
+        [@ocaml.doc "A Unique ID for an evaluation result."]}
     let make ?evaluationResultQualifier =
       fun ?orderingTimestamp ->
-        fun () -> { evaluationResultQualifier; orderingTimestamp }
+        fun ?resourceEvaluationId ->
+          fun () ->
+            {
+              evaluationResultQualifier;
+              orderingTimestamp;
+              resourceEvaluationId
+            }
     let to_value x =
       structure_to_value
         [("EvaluationResultQualifier",
            (Option.map x.evaluationResultQualifier
               ~f:EvaluationResultQualifier.to_value));
         ("OrderingTimestamp",
-          (Option.map x.orderingTimestamp ~f:Date.to_value))]
+          (Option.map x.orderingTimestamp ~f:Date.to_value));
+        ("ResourceEvaluationId",
+          (Option.map x.resourceEvaluationId ~f:ResourceEvaluationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let resourceEvaluationId =
+        (Option.map ~f:ResourceEvaluationId.of_xml)
+          (Xml.child xml_arg0 "ResourceEvaluationId") in
       let orderingTimestamp =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "OrderingTimestamp") in
       let evaluationResultQualifier =
         (Option.map ~f:EvaluationResultQualifier.of_xml)
           (Xml.child xml_arg0 "EvaluationResultQualifier") in
-      make ?orderingTimestamp ?evaluationResultQualifier ()
+      make ?resourceEvaluationId ?orderingTimestamp
+        ?evaluationResultQualifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let orderingTimestamp = field_map json "OrderingTimestamp" Date.of_json in
+    let of_json json__ =
+      let resourceEvaluationId =
+        field_map json__ "ResourceEvaluationId" ResourceEvaluationId.of_json in
+      let orderingTimestamp =
+        field_map json__ "OrderingTimestamp" Date.of_json in
       let evaluationResultQualifier =
-        field_map json "EvaluationResultQualifier"
+        field_map json__ "EvaluationResultQualifier"
           EvaluationResultQualifier.of_json in
-      make ?orderingTimestamp ?evaluationResultQualifier ()
+      make ?resourceEvaluationId ?orderingTimestamp
+        ?evaluationResultQualifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Uniquely identifies an evaluation result."]
 module ComplianceSummary =
@@ -3079,14 +5342,14 @@ module ComplianceSummary =
       make ?complianceSummaryTimestamp ?nonCompliantResourceCount
         ?compliantResourceCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let complianceSummaryTimestamp =
-        field_map json "ComplianceSummaryTimestamp" Date.of_json in
+        field_map json__ "ComplianceSummaryTimestamp" Date.of_json in
       let nonCompliantResourceCount =
-        field_map json "NonCompliantResourceCount"
+        field_map json__ "NonCompliantResourceCount"
           ComplianceContributorCount.of_json in
       let compliantResourceCount =
-        field_map json "CompliantResourceCount"
+        field_map json__ "CompliantResourceCount"
           ComplianceContributorCount.of_json in
       make ?complianceSummaryTimestamp ?nonCompliantResourceCount
         ?compliantResourceCount ()
@@ -3122,11 +5385,11 @@ module AggregateConformancePackComplianceCount =
       make ?nonCompliantConformancePackCount ?compliantConformancePackCount
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nonCompliantConformancePackCount =
-        field_map json "NonCompliantConformancePackCount" Integer.of_json in
+        field_map json__ "NonCompliantConformancePackCount" Integer.of_json in
       let compliantConformancePackCount =
-        field_map json "CompliantConformancePackCount" Integer.of_json in
+        field_map json__ "CompliantConformancePackCount" Integer.of_json in
       make ?nonCompliantConformancePackCount ?compliantConformancePackCount
         ()
     let to_json v = composed_to_json to_value v
@@ -3178,6 +5441,7 @@ module RemediationExecutionState =
       | IN_PROGRESS 
       | SUCCEEDED 
       | FAILED 
+      | UNKNOWN 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -3186,6 +5450,7 @@ module RemediationExecutionState =
       | IN_PROGRESS -> "IN_PROGRESS"
       | SUCCEEDED -> "SUCCEEDED"
       | FAILED -> "FAILED"
+      | UNKNOWN -> "UNKNOWN"
       | Non_static_id s -> s
     let of_string =
       function
@@ -3193,6 +5458,7 @@ module RemediationExecutionState =
       | "IN_PROGRESS" -> IN_PROGRESS
       | "SUCCEEDED" -> SUCCEEDED
       | "FAILED" -> FAILED
+      | "UNKNOWN" -> UNKNOWN
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3208,6 +5474,9 @@ module RemediationExecutionSteps =
   struct
     type nonrec t = RemediationExecutionStep.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RemediationExecutionStep.to_value)) |>
         (fun x -> `List x)
@@ -3254,10 +5523,10 @@ module ResourceKey =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ~resourceId ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map_exn json "resourceId" ResourceId.of_json in
+    let of_json json__ =
+      let resourceId = field_map_exn json__ "resourceId" ResourceId.of_json in
       let resourceType =
-        field_map_exn json "resourceType" ResourceType.of_json in
+        field_map_exn json__ "resourceType" ResourceType.of_json in
       make ~resourceId ~resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3270,6 +5539,9 @@ module ConformancePackInputParameters =
         ok_or_failwith
           ((check_list_max i ~max:60) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConformancePackInputParameter.to_value)) |>
         (fun x -> `List x)
@@ -3337,6 +5609,9 @@ module ExcludedAccounts =
           ((check_list_max i ~max:1000) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3436,7 +5711,7 @@ module OrganizationConfigRuleName =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:64) >>=
-                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+                  (fun () -> check_pattern i ~pattern:"[A-Za-z0-9-_]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -3457,7 +5732,7 @@ module OrganizationCustomPolicyRuleMetadataNoPolicy =
         OrganizationConfigRuleTriggerTypeNoSNs.t option
         [@ocaml.doc
           "The type of notification that triggers Config to run an evaluation for a rule. For Config Custom Policy rules, Config supports change triggered notification types: ConfigurationItemChangeNotification - Triggers an evaluation when Config delivers a configuration item as a result of a resource change. OversizedConfigurationItemChangeNotification - Triggers an evaluation when Config delivers an oversized configuration item. Config may generate this notification type when a resource changes and the notification exceeds the maximum size allowed by Amazon SNS."];
-      inputParameters: StringWithCharLimit2048.t option
+      inputParameters: StringWithCharLimit1024.t option
         [@ocaml.doc
           "A string, in JSON format, that is passed to your organization Config Custom Policy rule."];
       maximumExecutionFrequency: MaximumExecutionFrequency.t option
@@ -3512,7 +5787,7 @@ module OrganizationCustomPolicyRuleMetadataNoPolicy =
           (Option.map x.organizationConfigRuleTriggerTypes
              ~f:OrganizationConfigRuleTriggerTypeNoSNs.to_value));
         ("InputParameters",
-          (Option.map x.inputParameters ~f:StringWithCharLimit2048.to_value));
+          (Option.map x.inputParameters ~f:StringWithCharLimit1024.to_value));
         ("MaximumExecutionFrequency",
           (Option.map x.maximumExecutionFrequency
              ~f:MaximumExecutionFrequency.to_value));
@@ -3553,7 +5828,7 @@ module OrganizationCustomPolicyRuleMetadataNoPolicy =
         (Option.map ~f:MaximumExecutionFrequency.of_xml)
           (Xml.child xml_arg0 "MaximumExecutionFrequency") in
       let inputParameters =
-        (Option.map ~f:StringWithCharLimit2048.of_xml)
+        (Option.map ~f:StringWithCharLimit1024.of_xml)
           (Xml.child xml_arg0 "InputParameters") in
       let organizationConfigRuleTriggerTypes =
         (Option.map ~f:OrganizationConfigRuleTriggerTypeNoSNs.of_xml)
@@ -3566,37 +5841,37 @@ module OrganizationCustomPolicyRuleMetadataNoPolicy =
         ?maximumExecutionFrequency ?inputParameters
         ?organizationConfigRuleTriggerTypes ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let debugLogDeliveryAccounts =
-        field_map json "DebugLogDeliveryAccounts"
+        field_map json__ "DebugLogDeliveryAccounts"
           DebugLogDeliveryAccounts.of_json in
       let policyRuntime =
-        field_map json "PolicyRuntime" PolicyRuntime.of_json in
+        field_map json__ "PolicyRuntime" PolicyRuntime.of_json in
       let tagValueScope =
-        field_map json "TagValueScope" StringWithCharLimit256.of_json in
+        field_map json__ "TagValueScope" StringWithCharLimit256.of_json in
       let tagKeyScope =
-        field_map json "TagKeyScope" StringWithCharLimit128.of_json in
+        field_map json__ "TagKeyScope" StringWithCharLimit128.of_json in
       let resourceIdScope =
-        field_map json "ResourceIdScope" StringWithCharLimit768.of_json in
+        field_map json__ "ResourceIdScope" StringWithCharLimit768.of_json in
       let resourceTypesScope =
-        field_map json "ResourceTypesScope" ResourceTypesScope.of_json in
+        field_map json__ "ResourceTypesScope" ResourceTypesScope.of_json in
       let maximumExecutionFrequency =
-        field_map json "MaximumExecutionFrequency"
+        field_map json__ "MaximumExecutionFrequency"
           MaximumExecutionFrequency.of_json in
       let inputParameters =
-        field_map json "InputParameters" StringWithCharLimit2048.of_json in
+        field_map json__ "InputParameters" StringWithCharLimit1024.of_json in
       let organizationConfigRuleTriggerTypes =
-        field_map json "OrganizationConfigRuleTriggerTypes"
+        field_map json__ "OrganizationConfigRuleTriggerTypes"
           OrganizationConfigRuleTriggerTypeNoSNs.of_json in
       let description =
-        field_map json "Description" StringWithCharLimit256Min0.of_json in
+        field_map json__ "Description" StringWithCharLimit256Min0.of_json in
       make ?debugLogDeliveryAccounts ?policyRuntime ?tagValueScope
         ?tagKeyScope ?resourceIdScope ?resourceTypesScope
         ?maximumExecutionFrequency ?inputParameters
         ?organizationConfigRuleTriggerTypes ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that specifies metadata for your organization Config Custom Policy rule including the runtime system in use, which accounts have debug logging enabled, and other custom rule metadata such as resource type, resource ID of Amazon Web Services resource, and organization trigger types that trigger Config to evaluate Amazon Web Services resources against a rule."]
+       "metadata for your organization Config Custom Policy rule including the runtime system in use, which accounts have debug logging enabled, and other custom rule metadata such as resource type, resource ID of Amazon Web Services resource, and organization trigger types that trigger Config to evaluate Amazon Web Services resources against a rule."]
 module OrganizationCustomRuleMetadata =
   struct
     type nonrec t =
@@ -3610,7 +5885,7 @@ module OrganizationCustomRuleMetadata =
         OrganizationConfigRuleTriggerTypes.t
         [@ocaml.doc
           "The type of notification that triggers Config to run an evaluation for a rule. You can specify the following notification types: ConfigurationItemChangeNotification - Triggers an evaluation when Config delivers a configuration item as a result of a resource change. OversizedConfigurationItemChangeNotification - Triggers an evaluation when Config delivers an oversized configuration item. Config may generate this notification type when a resource changes and the notification exceeds the maximum size allowed by Amazon SNS. ScheduledNotification - Triggers a periodic evaluation at the frequency specified for MaximumExecutionFrequency."];
-      inputParameters: StringWithCharLimit2048.t option
+      inputParameters: StringWithCharLimit1024.t option
         [@ocaml.doc
           "A string, in JSON format, that is passed to your organization Config rule Lambda function."];
       maximumExecutionFrequency: MaximumExecutionFrequency.t option
@@ -3661,7 +5936,7 @@ module OrganizationCustomRuleMetadata =
              (OrganizationConfigRuleTriggerTypes.to_value
                 x.organizationConfigRuleTriggerTypes)));
         ("InputParameters",
-          (Option.map x.inputParameters ~f:StringWithCharLimit2048.to_value));
+          (Option.map x.inputParameters ~f:StringWithCharLimit1024.to_value));
         ("MaximumExecutionFrequency",
           (Option.map x.maximumExecutionFrequency
              ~f:MaximumExecutionFrequency.to_value));
@@ -3691,7 +5966,7 @@ module OrganizationCustomRuleMetadata =
         (Option.map ~f:MaximumExecutionFrequency.of_xml)
           (Xml.child xml_arg0 "MaximumExecutionFrequency") in
       let inputParameters =
-        (Option.map ~f:StringWithCharLimit2048.of_xml)
+        (Option.map ~f:StringWithCharLimit1024.of_xml)
           (Xml.child xml_arg0 "InputParameters") in
       let organizationConfigRuleTriggerTypes =
         OrganizationConfigRuleTriggerTypes.of_xml
@@ -3708,27 +5983,28 @@ module OrganizationCustomRuleMetadata =
         ~organizationConfigRuleTriggerTypes ~lambdaFunctionArn ?description
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tagValueScope =
-        field_map json "TagValueScope" StringWithCharLimit256.of_json in
+        field_map json__ "TagValueScope" StringWithCharLimit256.of_json in
       let tagKeyScope =
-        field_map json "TagKeyScope" StringWithCharLimit128.of_json in
+        field_map json__ "TagKeyScope" StringWithCharLimit128.of_json in
       let resourceIdScope =
-        field_map json "ResourceIdScope" StringWithCharLimit768.of_json in
+        field_map json__ "ResourceIdScope" StringWithCharLimit768.of_json in
       let resourceTypesScope =
-        field_map json "ResourceTypesScope" ResourceTypesScope.of_json in
+        field_map json__ "ResourceTypesScope" ResourceTypesScope.of_json in
       let maximumExecutionFrequency =
-        field_map json "MaximumExecutionFrequency"
+        field_map json__ "MaximumExecutionFrequency"
           MaximumExecutionFrequency.of_json in
       let inputParameters =
-        field_map json "InputParameters" StringWithCharLimit2048.of_json in
+        field_map json__ "InputParameters" StringWithCharLimit1024.of_json in
       let organizationConfigRuleTriggerTypes =
-        field_map_exn json "OrganizationConfigRuleTriggerTypes"
+        field_map_exn json__ "OrganizationConfigRuleTriggerTypes"
           OrganizationConfigRuleTriggerTypes.of_json in
       let lambdaFunctionArn =
-        field_map_exn json "LambdaFunctionArn" StringWithCharLimit256.of_json in
+        field_map_exn json__ "LambdaFunctionArn"
+          StringWithCharLimit256.of_json in
       let description =
-        field_map json "Description" StringWithCharLimit256Min0.of_json in
+        field_map json__ "Description" StringWithCharLimit256Min0.of_json in
       make ?tagValueScope ?tagKeyScope ?resourceIdScope ?resourceTypesScope
         ?maximumExecutionFrequency ?inputParameters
         ~organizationConfigRuleTriggerTypes ~lambdaFunctionArn ?description
@@ -3746,12 +6022,12 @@ module OrganizationManagedRuleMetadata =
       ruleIdentifier: StringWithCharLimit256.t
         [@ocaml.doc
           "For organization config managed rules, a predefined identifier from a list. For example, IAM_PASSWORD_POLICY is a managed rule. To reference a managed rule, see Using Config managed rules."];
-      inputParameters: StringWithCharLimit2048.t option
+      inputParameters: StringWithCharLimit1024.t option
         [@ocaml.doc
           "A string, in JSON format, that is passed to your organization Config rule Lambda function."];
       maximumExecutionFrequency: MaximumExecutionFrequency.t option
         [@ocaml.doc
-          "The maximum frequency with which Config runs evaluations for a rule. You are using an Config managed rule that is triggered at a periodic frequency. By default, rules with a periodic trigger are evaluated every 24 hours. To change the frequency, specify a valid value for the MaximumExecutionFrequency parameter."];
+          "The maximum frequency with which Config runs evaluations for a rule. This is for an Config managed rule that is triggered at a periodic frequency. By default, rules with a periodic trigger are evaluated every 24 hours. To change the frequency, specify a valid value for the MaximumExecutionFrequency parameter."];
       resourceTypesScope: ResourceTypesScope.t option
         [@ocaml.doc
           "The type of the Amazon Web Services resource that was evaluated."];
@@ -3791,7 +6067,7 @@ module OrganizationManagedRuleMetadata =
         ("RuleIdentifier",
           (Some (StringWithCharLimit256.to_value x.ruleIdentifier)));
         ("InputParameters",
-          (Option.map x.inputParameters ~f:StringWithCharLimit2048.to_value));
+          (Option.map x.inputParameters ~f:StringWithCharLimit1024.to_value));
         ("MaximumExecutionFrequency",
           (Option.map x.maximumExecutionFrequency
              ~f:MaximumExecutionFrequency.to_value));
@@ -3821,7 +6097,7 @@ module OrganizationManagedRuleMetadata =
         (Option.map ~f:MaximumExecutionFrequency.of_xml)
           (Xml.child xml_arg0 "MaximumExecutionFrequency") in
       let inputParameters =
-        (Option.map ~f:StringWithCharLimit2048.of_xml)
+        (Option.map ~f:StringWithCharLimit1024.of_xml)
           (Xml.child xml_arg0 "InputParameters") in
       let ruleIdentifier =
         StringWithCharLimit256.of_xml
@@ -3833,24 +6109,24 @@ module OrganizationManagedRuleMetadata =
         ?maximumExecutionFrequency ?inputParameters ~ruleIdentifier
         ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tagValueScope =
-        field_map json "TagValueScope" StringWithCharLimit256.of_json in
+        field_map json__ "TagValueScope" StringWithCharLimit256.of_json in
       let tagKeyScope =
-        field_map json "TagKeyScope" StringWithCharLimit128.of_json in
+        field_map json__ "TagKeyScope" StringWithCharLimit128.of_json in
       let resourceIdScope =
-        field_map json "ResourceIdScope" StringWithCharLimit768.of_json in
+        field_map json__ "ResourceIdScope" StringWithCharLimit768.of_json in
       let resourceTypesScope =
-        field_map json "ResourceTypesScope" ResourceTypesScope.of_json in
+        field_map json__ "ResourceTypesScope" ResourceTypesScope.of_json in
       let maximumExecutionFrequency =
-        field_map json "MaximumExecutionFrequency"
+        field_map json__ "MaximumExecutionFrequency"
           MaximumExecutionFrequency.of_json in
       let inputParameters =
-        field_map json "InputParameters" StringWithCharLimit2048.of_json in
+        field_map json__ "InputParameters" StringWithCharLimit1024.of_json in
       let ruleIdentifier =
-        field_map_exn json "RuleIdentifier" StringWithCharLimit256.of_json in
+        field_map_exn json__ "RuleIdentifier" StringWithCharLimit256.of_json in
       let description =
-        field_map json "Description" StringWithCharLimit256Min0.of_json in
+        field_map json__ "Description" StringWithCharLimit256Min0.of_json in
       make ?tagValueScope ?tagKeyScope ?resourceIdScope ?resourceTypesScope
         ?maximumExecutionFrequency ?inputParameters ~ruleIdentifier
         ?description ()
@@ -3943,9 +6219,10 @@ module ConfigSnapshotDeliveryProperties =
           (Xml.child xml_arg0 "deliveryFrequency") in
       make ?deliveryFrequency ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliveryFrequency =
-        field_map json "deliveryFrequency" MaximumExecutionFrequency.of_json in
+        field_map json__ "deliveryFrequency"
+          MaximumExecutionFrequency.of_json in
       make ?deliveryFrequency ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4011,15 +6288,15 @@ module ConfigExportDeliveryInfo =
       make ?nextDeliveryTime ?lastSuccessfulTime ?lastAttemptTime
         ?lastErrorMessage ?lastErrorCode ?lastStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextDeliveryTime = field_map json "nextDeliveryTime" Date.of_json in
+    let of_json json__ =
+      let nextDeliveryTime = field_map json__ "nextDeliveryTime" Date.of_json in
       let lastSuccessfulTime =
-        field_map json "lastSuccessfulTime" Date.of_json in
-      let lastAttemptTime = field_map json "lastAttemptTime" Date.of_json in
+        field_map json__ "lastSuccessfulTime" Date.of_json in
+      let lastAttemptTime = field_map json__ "lastAttemptTime" Date.of_json in
       let lastErrorMessage =
-        field_map json "lastErrorMessage" String_.of_json in
-      let lastErrorCode = field_map json "lastErrorCode" String_.of_json in
-      let lastStatus = field_map json "lastStatus" DeliveryStatus.of_json in
+        field_map json__ "lastErrorMessage" String_.of_json in
+      let lastErrorCode = field_map json__ "lastErrorCode" String_.of_json in
+      let lastStatus = field_map json__ "lastStatus" DeliveryStatus.of_json in
       make ?nextDeliveryTime ?lastSuccessfulTime ?lastAttemptTime
         ?lastErrorMessage ?lastErrorCode ?lastStatus ()
     let to_json v = composed_to_json to_value v
@@ -4073,13 +6350,13 @@ module ConfigStreamDeliveryInfo =
       make ?lastStatusChangeTime ?lastErrorMessage ?lastErrorCode ?lastStatus
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastStatusChangeTime =
-        field_map json "lastStatusChangeTime" Date.of_json in
+        field_map json__ "lastStatusChangeTime" Date.of_json in
       let lastErrorMessage =
-        field_map json "lastErrorMessage" String_.of_json in
-      let lastErrorCode = field_map json "lastErrorCode" String_.of_json in
-      let lastStatus = field_map json "lastStatus" DeliveryStatus.of_json in
+        field_map json__ "lastErrorMessage" String_.of_json in
+      let lastErrorCode = field_map json__ "lastErrorCode" String_.of_json in
+      let lastStatus = field_map json__ "lastStatus" DeliveryStatus.of_json in
       make ?lastStatusChangeTime ?lastErrorMessage ?lastErrorCode ?lastStatus
         ()
     let to_json v = composed_to_json to_value v
@@ -4121,6 +6398,43 @@ module ConformancePackId =
     let of_json j = string_of_json ~kind:"ConformancePackId" j
     let to_json = simple_to_json to_value
   end
+module TemplateSSMDocumentDetails =
+  struct
+    type nonrec t =
+      {
+      documentName: SSMDocumentName.t
+        [@ocaml.doc
+          "The name or Amazon Resource Name (ARN) of the SSM document to use to create a conformance pack. If you use the document name, Config checks only your account and Amazon Web Services Region for the SSM document."];
+      documentVersion: SSMDocumentVersion.t option
+        [@ocaml.doc
+          "The version of the SSM document to use to create a conformance pack. By default, Config uses the latest version. This field is optional."]}
+    let context_ = "TemplateSSMDocumentDetails"
+    let make ?documentVersion =
+      fun ~documentName -> fun () -> { documentVersion; documentName }
+    let to_value x =
+      structure_to_value
+        [("DocumentName", (Some (SSMDocumentName.to_value x.documentName)));
+        ("DocumentVersion",
+          (Option.map x.documentVersion ~f:SSMDocumentVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let documentVersion =
+        (Option.map ~f:SSMDocumentVersion.of_xml)
+          (Xml.child xml_arg0 "DocumentVersion") in
+      let documentName =
+        SSMDocumentName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DocumentName") in
+      make ?documentVersion ~documentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let documentVersion =
+        field_map json__ "DocumentVersion" SSMDocumentVersion.of_json in
+      let documentName =
+        field_map_exn json__ "DocumentName" SSMDocumentName.of_json in
+      make ?documentVersion ~documentName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This API allows you to create a conformance pack template with an Amazon Web Services Systems Manager document (SSM document). To deploy a conformance pack using an SSM document, first create an SSM document with conformance pack content, and then provide the DocumentName in the PutConformancePack API. You can also provide the DocumentVersion. The TemplateSSMDocumentDetails object contains the name of the SSM document and the version of the SSM document."]
 module ConformancePackState =
   struct
     type nonrec t =
@@ -4200,6 +6514,9 @@ module ControlsList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StringWithCharLimit128.to_value)) |>
         (fun x -> `List x)
@@ -4222,42 +6539,38 @@ module ControlsList =
         ~of_json:StringWithCharLimit128.of_json j
     let to_json v = composed_to_json to_value v
   end
-module RecorderName =
-  struct
-    type nonrec t = string
-    let context_ = "RecorderName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"RecorderName" j
-    let to_json = simple_to_json to_value
-  end
 module RecordingGroup =
   struct
     type nonrec t =
       {
       allSupported: AllSupported.t option
         [@ocaml.doc
-          "Specifies whether Config records configuration changes for every supported type of regional resource. If you set this option to true, when Config adds support for a new type of regional resource, it starts recording resources of that type automatically. If you set this option to true, you cannot enumerate a list of resourceTypes."];
+          "Specifies whether Config records configuration changes for all supported resource types, excluding the global IAM resource types. If you set this field to true, when Config adds support for a new resource type, Config starts recording resources of that type automatically. If you set this field to true, you cannot enumerate specific resource types to record in the resourceTypes field of RecordingGroup, or to exclude in the resourceTypes field of ExclusionByResourceTypes. Region availability Check Resource Coverage by Region Availability to see if a resource type is supported in the Amazon Web Services Region where you set up Config."];
       includeGlobalResourceTypes: IncludeGlobalResourceTypes.t option
         [@ocaml.doc
-          "Specifies whether Config includes all supported types of global resources (for example, IAM resources) with the resources that it records. Before you can set this option to true, you must set the allSupported option to true. If you set this option to true, when Config adds support for a new type of global resource, it starts recording resources of that type automatically. The configuration details for any global resource are the same in all regions. To prevent duplicate configuration items, you should consider customizing Config in only one region to record global resources."];
+          "This option is a bundle which only applies to the global IAM resource types: IAM users, groups, roles, and customer managed policies. These global IAM resource types can only be recorded by Config in Regions where Config was available before February 2022. You cannot be record the global IAM resouce types in Regions supported by Config after February 2022. For a list of those Regions, see Recording Amazon Web Services Resources | Global Resources. Aurora global clusters are recorded in all enabled Regions The AWS::RDS::GlobalCluster resource type will be recorded in all supported Config Regions where the configuration recorder is enabled, even if includeGlobalResourceTypes is setfalse. The includeGlobalResourceTypes option is a bundle which only applies to IAM users, groups, roles, and customer managed policies. If you do not want to record AWS::RDS::GlobalCluster in all enabled Regions, use one of the following recording strategies: Record all current and future resource types with exclusions (EXCLUSION_BY_RESOURCE_TYPES), or Record specific resource types (INCLUSION_BY_RESOURCE_TYPES). For more information, see Selecting Which Resources are Recorded in the Config developer guide. includeGlobalResourceTypes and the exclusion recording strategy The includeGlobalResourceTypes field has no impact on the EXCLUSION_BY_RESOURCE_TYPES recording strategy. This means that the global IAM resource types (IAM users, groups, roles, and customer managed policies) will not be automatically added as exclusions for exclusionByResourceTypes when includeGlobalResourceTypes is set to false. The includeGlobalResourceTypes field should only be used to modify the AllSupported field, as the default for the AllSupported field is to record configuration changes for all supported resource types excluding the global IAM resource types. To include the global IAM resource types when AllSupported is set to true, make sure to set includeGlobalResourceTypes to true. To exclude the global IAM resource types for the EXCLUSION_BY_RESOURCE_TYPES recording strategy, you need to manually add them to the resourceTypes field of exclusionByResourceTypes. Required and optional fields Before you set this field to true, set the allSupported field of RecordingGroup to true. Optionally, you can set the useOnly field of RecordingStrategy to ALL_SUPPORTED_RESOURCE_TYPES. Overriding fields If you set this field to false but list global IAM resource types in the resourceTypes field of RecordingGroup, Config will still record configuration changes for those specified resource types regardless of if you set the includeGlobalResourceTypes field to false. If you do not want to record configuration changes to the global IAM resource types (IAM users, groups, roles, and customer managed policies), make sure to not list them in the resourceTypes field in addition to setting the includeGlobalResourceTypes field to false."];
       resourceTypes: ResourceTypeList.t option
         [@ocaml.doc
-          "A comma-separated list that specifies the types of Amazon Web Services resources for which Config records configuration changes (for example, AWS::EC2::Instance or AWS::CloudTrail::Trail). To record all configuration changes, you must set the allSupported option to true. If you set this option to false, when Config adds support for a new type of resource, it will not record resources of that type unless you manually add that type to your recording group. For a list of valid resourceTypes values, see the resourceType Value column in Supported Amazon Web Services resource Types."]}
+          "A comma-separated list that specifies which resource types Config records. For a list of valid resourceTypes values, see the Resource Type Value column in Supported Amazon Web Services resource Types in the Config developer guide. Required and optional fields Optionally, you can set the useOnly field of RecordingStrategy to INCLUSION_BY_RESOURCE_TYPES. To record all configuration changes, set the allSupported field of RecordingGroup to true, and either omit this field or don't specify any resource types in this field. If you set the allSupported field to false and specify values for resourceTypes, when Config adds support for a new type of resource, it will not record resources of that type unless you manually add that type to your recording group. Region availability Before specifying a resource type for Config to track, check Resource Coverage by Region Availability to see if the resource type is supported in the Amazon Web Services Region where you set up Config. If a resource type is supported by Config in at least one Region, you can enable the recording of that resource type in all Regions supported by Config, even if the specified resource type is not supported in the Amazon Web Services Region where you set up Config."];
+      exclusionByResourceTypes: ExclusionByResourceTypes.t option
+        [@ocaml.doc
+          "An object that specifies how Config excludes resource types from being recorded by the configuration recorder. Required fields To use this option, you must set the useOnly field of RecordingStrategy to EXCLUSION_BY_RESOURCE_TYPES."];
+      recordingStrategy: RecordingStrategy.t option
+        [@ocaml.doc
+          "An object that specifies the recording strategy for the configuration recorder. If you set the useOnly field of RecordingStrategy to ALL_SUPPORTED_RESOURCE_TYPES, Config records configuration changes for all supported resource types, excluding the global IAM resource types. You also must set the allSupported field of RecordingGroup to true. When Config adds support for a new resource type, Config automatically starts recording resources of that type. If you set the useOnly field of RecordingStrategy to INCLUSION_BY_RESOURCE_TYPES, Config records configuration changes for only the resource types you specify in the resourceTypes field of RecordingGroup. If you set the useOnly field of RecordingStrategy to EXCLUSION_BY_RESOURCE_TYPES, Config records configuration changes for all supported resource types except the resource types that you specify to exclude from being recorded in the resourceTypes field of ExclusionByResourceTypes. Required and optional fields The recordingStrategy field is optional when you set the allSupported field of RecordingGroup to true. The recordingStrategy field is optional when you list resource types in the resourceTypes field of RecordingGroup. The recordingStrategy field is required if you list resource types to exclude from recording in the resourceTypes field of ExclusionByResourceTypes. Overriding fields If you choose EXCLUSION_BY_RESOURCE_TYPES for the recording strategy, the exclusionByResourceTypes field will override other properties in the request. For example, even if you set includeGlobalResourceTypes to false, global IAM resource types will still be automatically recorded in this option unless those resource types are specifically listed as exclusions in the resourceTypes field of exclusionByResourceTypes. Global resources types and the resource exclusion recording strategy By default, if you choose the EXCLUSION_BY_RESOURCE_TYPES recording strategy, when Config adds support for a new resource type in the Region where you set up the configuration recorder, including global resource types, Config starts recording resources of that type automatically. Unless specifically listed as exclusions, AWS::RDS::GlobalCluster will be recorded automatically in all supported Config Regions were the configuration recorder is enabled. IAM users, groups, roles, and customer managed policies will be recorded in the Region where you set up the configuration recorder if that is a Region where Config was available before February 2022. You cannot be record the global IAM resouce types in Regions supported by Config after February 2022. For a list of those Regions, see Recording Amazon Web Services Resources | Global Resources."]}
     let make ?allSupported =
       fun ?includeGlobalResourceTypes ->
         fun ?resourceTypes ->
-          fun () ->
-            { allSupported; includeGlobalResourceTypes; resourceTypes }
+          fun ?exclusionByResourceTypes ->
+            fun ?recordingStrategy ->
+              fun () ->
+                {
+                  allSupported;
+                  includeGlobalResourceTypes;
+                  resourceTypes;
+                  exclusionByResourceTypes;
+                  recordingStrategy
+                }
     let to_value x =
       structure_to_value
         [("allSupported",
@@ -4266,9 +6579,20 @@ module RecordingGroup =
           (Option.map x.includeGlobalResourceTypes
              ~f:IncludeGlobalResourceTypes.to_value));
         ("resourceTypes",
-          (Option.map x.resourceTypes ~f:ResourceTypeList.to_value))]
+          (Option.map x.resourceTypes ~f:ResourceTypeList.to_value));
+        ("exclusionByResourceTypes",
+          (Option.map x.exclusionByResourceTypes
+             ~f:ExclusionByResourceTypes.to_value));
+        ("recordingStrategy",
+          (Option.map x.recordingStrategy ~f:RecordingStrategy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let recordingStrategy =
+        (Option.map ~f:RecordingStrategy.of_xml)
+          (Xml.child xml_arg0 "recordingStrategy") in
+      let exclusionByResourceTypes =
+        (Option.map ~f:ExclusionByResourceTypes.of_xml)
+          (Xml.child xml_arg0 "exclusionByResourceTypes") in
       let resourceTypes =
         (Option.map ~f:ResourceTypeList.of_xml)
           (Xml.child xml_arg0 "resourceTypes") in
@@ -4278,25 +6602,74 @@ module RecordingGroup =
       let allSupported =
         (Option.map ~f:AllSupported.of_xml)
           (Xml.child xml_arg0 "allSupported") in
-      make ?resourceTypes ?includeGlobalResourceTypes ?allSupported ()
+      make ?recordingStrategy ?exclusionByResourceTypes ?resourceTypes
+        ?includeGlobalResourceTypes ?allSupported ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let recordingStrategy =
+        field_map json__ "recordingStrategy" RecordingStrategy.of_json in
+      let exclusionByResourceTypes =
+        field_map json__ "exclusionByResourceTypes"
+          ExclusionByResourceTypes.of_json in
       let resourceTypes =
-        field_map json "resourceTypes" ResourceTypeList.of_json in
+        field_map json__ "resourceTypes" ResourceTypeList.of_json in
       let includeGlobalResourceTypes =
-        field_map json "includeGlobalResourceTypes"
+        field_map json__ "includeGlobalResourceTypes"
           IncludeGlobalResourceTypes.of_json in
-      let allSupported = field_map json "allSupported" AllSupported.of_json in
-      make ?resourceTypes ?includeGlobalResourceTypes ?allSupported ()
+      let allSupported = field_map json__ "allSupported" AllSupported.of_json in
+      make ?recordingStrategy ?exclusionByResourceTypes ?resourceTypes
+        ?includeGlobalResourceTypes ?allSupported ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the types of Amazon Web Services resource for which Config records configuration changes. In the recording group, you specify whether all supported types or specific types of resources are recorded. By default, Config records configuration changes for all supported types of regional resources that Config discovers in the region in which it is running. Regional resources are tied to a region and can be used only in that region. Examples of regional resources are EC2 instances and EBS volumes. You can also have Config record configuration changes for supported types of global resources (for example, IAM resources). Global resources are not tied to an individual region and can be used in all regions. The configuration details for any global resource are the same in all regions. If you customize Config in multiple regions to record global resources, it will create multiple configuration items each time a global resource changes: one configuration item for each region. These configuration items will contain identical data. To prevent duplicate configuration items, you should consider customizing Config in only one region to record global resources, unless you want the configuration items to be available in multiple regions. If you don't want Config to record all resources, you can specify which types of resources it will record with the resourceTypes parameter. For a list of supported resource types, see Supported Resource Types. For more information, see Selecting Which Resources Config Records."]
+       "Specifies which resource types Config records for configuration changes. By default, Config records configuration changes for all current and future supported resource types in the Amazon Web Services Region where you have enabled Config, excluding the global IAM resource types: IAM users, groups, roles, and customer managed policies. In the recording group, you specify whether you want to record all supported current and future supported resource types or to include or exclude specific resources types. For a list of supported resource types, see Supported Resource Types in the Config developer guide. If you don't want Config to record all current and future supported resource types (excluding the global IAM resource types), use one of the following recording strategies: Record all current and future resource types with exclusions (EXCLUSION_BY_RESOURCE_TYPES), or Record specific resource types (INCLUSION_BY_RESOURCE_TYPES). If you use the recording strategy to Record all current and future resource types (ALL_SUPPORTED_RESOURCE_TYPES), you can use the flag includeGlobalResourceTypes to include the global IAM resource types in your recording. Aurora global clusters are recorded in all enabled Regions The AWS::RDS::GlobalCluster resource type will be recorded in all supported Config Regions where the configuration recorder is enabled. If you do not want to record AWS::RDS::GlobalCluster in all enabled Regions, use the EXCLUSION_BY_RESOURCE_TYPES or INCLUSION_BY_RESOURCE_TYPES recording strategy."]
+module RecordingMode =
+  struct
+    type nonrec t =
+      {
+      recordingFrequency: RecordingFrequency.t
+        [@ocaml.doc
+          "The default recording frequency that Config uses to record configuration changes. Daily recording cannot be specified for the following resource types: AWS::Config::ResourceCompliance AWS::Config::ConformancePackCompliance AWS::Config::ConfigurationRecorder For the allSupported (ALL_SUPPORTED_RESOURCE_TYPES) recording strategy, these resource types will be set to Continuous recording."];
+      recordingModeOverrides: RecordingModeOverrides.t option
+        [@ocaml.doc
+          "An array of recordingModeOverride objects for you to specify your overrides for the recording mode. The recordingModeOverride object in the recordingModeOverrides array consists of three fields: a description, the new recordingFrequency, and an array of resourceTypes to override."]}
+    let context_ = "RecordingMode"
+    let make ?recordingModeOverrides =
+      fun ~recordingFrequency ->
+        fun () -> { recordingModeOverrides; recordingFrequency }
+    let to_value x =
+      structure_to_value
+        [("recordingFrequency",
+           (Some (RecordingFrequency.to_value x.recordingFrequency)));
+        ("recordingModeOverrides",
+          (Option.map x.recordingModeOverrides
+             ~f:RecordingModeOverrides.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recordingModeOverrides =
+        (Option.map ~f:RecordingModeOverrides.of_xml)
+          (Xml.child xml_arg0 "recordingModeOverrides") in
+      let recordingFrequency =
+        RecordingFrequency.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "recordingFrequency") in
+      make ?recordingModeOverrides ~recordingFrequency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recordingModeOverrides =
+        field_map json__ "recordingModeOverrides"
+          RecordingModeOverrides.of_json in
+      let recordingFrequency =
+        field_map_exn json__ "recordingFrequency" RecordingFrequency.of_json in
+      make ?recordingModeOverrides ~recordingFrequency ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the default recording frequency that Config uses to record configuration changes. Config supports Continuous recording and Daily recording. Continuous recording allows you to record configuration changes continuously whenever a change occurs. Daily recording allows you to receive a configuration item (CI) representing the most recent state of your resources over the last 24-hour period, only if it\226\128\153s different from the previous CI recorded. Firewall Manager depends on continuous recording to monitor your resources. If you are using Firewall Manager, it is recommended that you set the recording frequency to Continuous. You can also override the recording frequency for specific resource types."]
 module RecorderStatus =
   struct
     type nonrec t =
       | Pending 
       | Success 
       | Failure 
+      | NotApplicable 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -4304,12 +6677,14 @@ module RecorderStatus =
       | Pending -> "Pending"
       | Success -> "Success"
       | Failure -> "Failure"
+      | NotApplicable -> "NotApplicable"
       | Non_static_id s -> s
     let of_string =
       function
       | "Pending" -> Pending
       | "Success" -> Success
       | "Failure" -> Failure
+      | "NotApplicable" -> NotApplicable
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -4327,6 +6702,9 @@ module AccountAggregationSourceList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountAggregationSource.to_value)) |>
         (fun x -> `List x)
@@ -4349,6 +6727,46 @@ module AccountAggregationSourceList =
         ~of_json:AccountAggregationSource.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AggregatorFilters =
+  struct
+    type nonrec t =
+      {
+      resourceType: AggregatorFilterResourceType.t option
+        [@ocaml.doc
+          "An object to filter the configuration recorders based on the resource types in scope for recording."];
+      servicePrincipal: AggregatorFilterServicePrincipal.t option
+        [@ocaml.doc
+          "An object to filter service-linked configuration recorders in an aggregator based on the linked Amazon Web Services service."]}
+    let make ?resourceType =
+      fun ?servicePrincipal -> fun () -> { resourceType; servicePrincipal }
+    let to_value x =
+      structure_to_value
+        [("ResourceType",
+           (Option.map x.resourceType
+              ~f:AggregatorFilterResourceType.to_value));
+        ("ServicePrincipal",
+          (Option.map x.servicePrincipal
+             ~f:AggregatorFilterServicePrincipal.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let servicePrincipal =
+        (Option.map ~f:AggregatorFilterServicePrincipal.of_xml)
+          (Xml.child xml_arg0 "ServicePrincipal") in
+      let resourceType =
+        (Option.map ~f:AggregatorFilterResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      make ?servicePrincipal ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let servicePrincipal =
+        field_map json__ "ServicePrincipal"
+          AggregatorFilterServicePrincipal.of_json in
+      let resourceType =
+        field_map json__ "ResourceType" AggregatorFilterResourceType.of_json in
+      make ?servicePrincipal ?resourceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object to filter the data you specify for an aggregator."]
 module ConfigurationAggregatorArn =
   struct
     type nonrec t = string
@@ -4420,11 +6838,11 @@ module OrganizationAggregationSource =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
       make ?allAwsRegions ?awsRegions ~roleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let allAwsRegions = field_map json "AllAwsRegions" Boolean.of_json in
+    let of_json json__ =
+      let allAwsRegions = field_map json__ "AllAwsRegions" Boolean.of_json in
       let awsRegions =
-        field_map json "AwsRegions" AggregatorRegionList.of_json in
-      let roleArn = field_map_exn json "RoleArn" String_.of_json in
+        field_map json__ "AwsRegions" AggregatorRegionList.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" String_.of_json in
       make ?allAwsRegions ?awsRegions ~roleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4535,6 +6953,35 @@ module EmptiableStringWithCharLimit256 =
     let of_json j = string_of_json ~kind:"EmptiableStringWithCharLimit256" j
     let to_json = simple_to_json to_value
   end
+module EvaluationModes =
+  struct
+    type nonrec t = EvaluationModeConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EvaluationModeConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EvaluationModeConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EvaluationModes"
+        ~of_json:EvaluationModeConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Scope =
   struct
     type nonrec t =
@@ -4589,13 +7036,14 @@ module Scope =
       make ?complianceResourceId ?tagValue ?tagKey ?complianceResourceTypes
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let complianceResourceId =
-        field_map json "ComplianceResourceId" BaseResourceId.of_json in
-      let tagValue = field_map json "TagValue" StringWithCharLimit256.of_json in
-      let tagKey = field_map json "TagKey" StringWithCharLimit128.of_json in
+        field_map json__ "ComplianceResourceId" BaseResourceId.of_json in
+      let tagValue =
+        field_map json__ "TagValue" StringWithCharLimit256.of_json in
+      let tagKey = field_map json__ "TagKey" StringWithCharLimit128.of_json in
       let complianceResourceTypes =
-        field_map json "ComplianceResourceTypes"
+        field_map json__ "ComplianceResourceTypes"
           ComplianceResourceTypes.of_json in
       make ?complianceResourceId ?tagValue ?tagKey ?complianceResourceTypes
         ()
@@ -4649,18 +7097,18 @@ module Source =
         Owner.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Owner") in
       make ?customPolicyDetails ?sourceDetails ?sourceIdentifier ~owner ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customPolicyDetails =
-        field_map json "CustomPolicyDetails" CustomPolicyDetails.of_json in
+        field_map json__ "CustomPolicyDetails" CustomPolicyDetails.of_json in
       let sourceDetails =
-        field_map json "SourceDetails" SourceDetails.of_json in
+        field_map json__ "SourceDetails" SourceDetails.of_json in
       let sourceIdentifier =
-        field_map json "SourceIdentifier" StringWithCharLimit256.of_json in
-      let owner = field_map_exn json "Owner" Owner.of_json in
+        field_map json__ "SourceIdentifier" StringWithCharLimit256.of_json in
+      let owner = field_map_exn json__ "Owner" Owner.of_json in
       make ?customPolicyDetails ?sourceDetails ?sourceIdentifier ~owner ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides the CustomPolicyDetails, the rule owner (Amazon Web Services or customer), the rule identifier, and the events that cause the evaluation of your Amazon Web Services resources."]
+       "Provides the CustomPolicyDetails, the rule owner (Amazon Web Services for managed rules, CUSTOM_POLICY for Custom Policy rules, and CUSTOM_LAMBDA for Custom Lambda rules), the rule identifier, and the events that cause the evaluation of your Amazon Web Services resources."]
 module Compliance =
   struct
     type nonrec t =
@@ -4691,12 +7139,12 @@ module Compliance =
           (Xml.child xml_arg0 "ComplianceType") in
       make ?complianceContributorCount ?complianceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let complianceContributorCount =
-        field_map json "ComplianceContributorCount"
+        field_map json__ "ComplianceContributorCount"
           ComplianceContributorCount.of_json in
       let complianceType =
-        field_map json "ComplianceType" ComplianceType.of_json in
+        field_map json__ "ComplianceType" ComplianceType.of_json in
       make ?complianceContributorCount ?complianceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4751,14 +7199,15 @@ module AggregateConformancePackCompliance =
       make ?totalRuleCount ?nonCompliantRuleCount ?compliantRuleCount
         ?complianceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let totalRuleCount = field_map json "TotalRuleCount" Integer.of_json in
+    let of_json json__ =
+      let totalRuleCount = field_map json__ "TotalRuleCount" Integer.of_json in
       let nonCompliantRuleCount =
-        field_map json "NonCompliantRuleCount" Integer.of_json in
+        field_map json__ "NonCompliantRuleCount" Integer.of_json in
       let compliantRuleCount =
-        field_map json "CompliantRuleCount" Integer.of_json in
+        field_map json__ "CompliantRuleCount" Integer.of_json in
       let complianceType =
-        field_map json "ComplianceType" ConformancePackComplianceType.of_json in
+        field_map json__ "ComplianceType"
+          ConformancePackComplianceType.of_json in
       make ?totalRuleCount ?nonCompliantRuleCount ?compliantRuleCount
         ?complianceType ()
     let to_json v = composed_to_json to_value v
@@ -4773,6 +7222,9 @@ module RemediationExceptionResourceKeys =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RemediationExceptionResourceKey.to_value)) |>
         (fun x -> `List x)
@@ -4817,16 +7269,80 @@ module Tag =
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map json__ "Key" TagKey.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The tags for the resource. The metadata that you apply to a resource to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."]
+module EvaluationContextIdentifier =
+  struct
+    type nonrec t = string
+    let context_ = "EvaluationContextIdentifier"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EvaluationContextIdentifier" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceConfiguration =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceConfiguration"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:51200) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceConfiguration" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceConfigurationSchemaType =
+  struct
+    type nonrec t =
+      | CFN_RESOURCE_SCHEMA 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CFN_RESOURCE_SCHEMA -> "CFN_RESOURCE_SCHEMA"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CFN_RESOURCE_SCHEMA" -> CFN_RESOURCE_SCHEMA
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResourceConfigurationSchemaType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ResourceConfigurationSchemaType" j)
+    let to_json = simple_to_json to_value
+  end
 module FieldInfoList =
   struct
     type nonrec t = FieldInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FieldInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4907,10 +7423,10 @@ module FailedRemediationExceptionBatch =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "FailureMessage") in
       make ?failedItems ?failureMessage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedItems =
-        field_map json "FailedItems" RemediationExceptions.of_json in
-      let failureMessage = field_map json "FailureMessage" String_.of_json in
+        field_map json__ "FailedItems" RemediationExceptions.of_json in
+      let failureMessage = field_map json__ "FailureMessage" String_.of_json in
       make ?failedItems ?failureMessage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4942,10 +7458,10 @@ module FailedRemediationBatch =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "FailureMessage") in
       make ?failedItems ?failureMessage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedItems =
-        field_map json "FailedItems" RemediationConfigurations.of_json in
-      let failureMessage = field_map json "FailureMessage" String_.of_json in
+        field_map json__ "FailedItems" RemediationConfigurations.of_json in
+      let failureMessage = field_map json__ "FailureMessage" String_.of_json in
       make ?failedItems ?failureMessage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5014,17 +7530,17 @@ module Evaluation =
       make ~orderingTimestamp ?annotation ~complianceType
         ~complianceResourceId ~complianceResourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let orderingTimestamp =
-        field_map_exn json "OrderingTimestamp" OrderingTimestamp.of_json in
+        field_map_exn json__ "OrderingTimestamp" OrderingTimestamp.of_json in
       let annotation =
-        field_map json "Annotation" StringWithCharLimit256.of_json in
+        field_map json__ "Annotation" StringWithCharLimit256.of_json in
       let complianceType =
-        field_map_exn json "ComplianceType" ComplianceType.of_json in
+        field_map_exn json__ "ComplianceType" ComplianceType.of_json in
       let complianceResourceId =
-        field_map_exn json "ComplianceResourceId" BaseResourceId.of_json in
+        field_map_exn json__ "ComplianceResourceId" BaseResourceId.of_json in
       let complianceResourceType =
-        field_map_exn json "ComplianceResourceType"
+        field_map_exn json__ "ComplianceResourceType"
           StringWithCharLimit256.of_json in
       make ~orderingTimestamp ?annotation ~complianceType
         ~complianceResourceId ~complianceResourceType ()
@@ -5035,24 +7551,23 @@ module StoredQueryMetadata =
   struct
     type nonrec t =
       {
-      queryId: QueryId.t [@ocaml.doc "The ID of the query."];
-      queryArn: QueryArn.t
+      queryId: QueryId.t option [@ocaml.doc "The ID of the query."];
+      queryArn: QueryArn.t option
         [@ocaml.doc
           "Amazon Resource Name (ARN) of the query. For example, arn:partition:service:region:account-id:resource-type/resource-name/resource-id."];
-      queryName: QueryName.t [@ocaml.doc "The name of the query."];
+      queryName: QueryName.t option [@ocaml.doc "The name of the query."];
       description: QueryDescription.t option
         [@ocaml.doc "A unique description for the query."]}
-    let context_ = "StoredQueryMetadata"
-    let make ?description =
-      fun ~queryId ->
-        fun ~queryArn ->
-          fun ~queryName ->
-            fun () -> { description; queryId; queryArn; queryName }
+    let make ?queryId =
+      fun ?queryArn ->
+        fun ?queryName ->
+          fun ?description ->
+            fun () -> { queryId; queryArn; queryName; description }
     let to_value x =
       structure_to_value
-        [("QueryId", (Some (QueryId.to_value x.queryId)));
-        ("QueryArn", (Some (QueryArn.to_value x.queryArn)));
-        ("QueryName", (Some (QueryName.to_value x.queryName)));
+        [("QueryId", (Option.map x.queryId ~f:QueryId.to_value));
+        ("QueryArn", (Option.map x.queryArn ~f:QueryArn.to_value));
+        ("QueryName", (Option.map x.queryName ~f:QueryName.to_value));
         ("Description",
           (Option.map x.description ~f:QueryDescription.to_value))]
     let to_query v = to_query to_value v
@@ -5061,22 +7576,98 @@ module StoredQueryMetadata =
         (Option.map ~f:QueryDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       let queryName =
-        QueryName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryName") in
+        (Option.map ~f:QueryName.of_xml) (Xml.child xml_arg0 "QueryName") in
       let queryArn =
-        QueryArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueryArn") in
+        (Option.map ~f:QueryArn.of_xml) (Xml.child xml_arg0 "QueryArn") in
       let queryId =
-        QueryId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueryId") in
-      make ?description ~queryName ~queryArn ~queryId ()
+        (Option.map ~f:QueryId.of_xml) (Xml.child xml_arg0 "QueryId") in
+      make ?description ?queryName ?queryArn ?queryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" QueryDescription.of_json in
-      let queryName = field_map_exn json "QueryName" QueryName.of_json in
-      let queryArn = field_map_exn json "QueryArn" QueryArn.of_json in
-      let queryId = field_map_exn json "QueryId" QueryId.of_json in
-      make ?description ~queryName ~queryArn ~queryId ()
+    let of_json json__ =
+      let description =
+        field_map json__ "Description" QueryDescription.of_json in
+      let queryName = field_map json__ "QueryName" QueryName.of_json in
+      let queryArn = field_map json__ "QueryArn" QueryArn.of_json in
+      let queryId = field_map json__ "QueryId" QueryId.of_json in
+      make ?description ?queryName ?queryArn ?queryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns details of a specific query."]
+module ResourceEvaluation =
+  struct
+    type nonrec t =
+      {
+      resourceEvaluationId: ResourceEvaluationId.t option
+        [@ocaml.doc "The ResourceEvaluationId of a evaluation."];
+      evaluationMode: EvaluationMode.t option
+        [@ocaml.doc
+          "The mode of an evaluation. The valid values are Detective or Proactive."];
+      evaluationStartTimestamp: Date.t option
+        [@ocaml.doc "The starting time of an execution."]}
+    let make ?resourceEvaluationId =
+      fun ?evaluationMode ->
+        fun ?evaluationStartTimestamp ->
+          fun () ->
+            { resourceEvaluationId; evaluationMode; evaluationStartTimestamp
+            }
+    let to_value x =
+      structure_to_value
+        [("ResourceEvaluationId",
+           (Option.map x.resourceEvaluationId
+              ~f:ResourceEvaluationId.to_value));
+        ("EvaluationMode",
+          (Option.map x.evaluationMode ~f:EvaluationMode.to_value));
+        ("EvaluationStartTimestamp",
+          (Option.map x.evaluationStartTimestamp ~f:Date.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let evaluationStartTimestamp =
+        (Option.map ~f:Date.of_xml)
+          (Xml.child xml_arg0 "EvaluationStartTimestamp") in
+      let evaluationMode =
+        (Option.map ~f:EvaluationMode.of_xml)
+          (Xml.child xml_arg0 "EvaluationMode") in
+      let resourceEvaluationId =
+        (Option.map ~f:ResourceEvaluationId.of_xml)
+          (Xml.child xml_arg0 "ResourceEvaluationId") in
+      make ?evaluationStartTimestamp ?evaluationMode ?resourceEvaluationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let evaluationStartTimestamp =
+        field_map json__ "EvaluationStartTimestamp" Date.of_json in
+      let evaluationMode =
+        field_map json__ "EvaluationMode" EvaluationMode.of_json in
+      let resourceEvaluationId =
+        field_map json__ "ResourceEvaluationId" ResourceEvaluationId.of_json in
+      make ?evaluationStartTimestamp ?evaluationMode ?resourceEvaluationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns details of a resource evaluation."]
+module TimeWindow =
+  struct
+    type nonrec t =
+      {
+      startTime: Date.t option [@ocaml.doc "The start time of an execution."];
+      endTime: Date.t option
+        [@ocaml.doc
+          "The end time of an execution. The end time must be after the start date."]}
+    let make ?startTime = fun ?endTime -> fun () -> { startTime; endTime }
+    let to_value x =
+      structure_to_value
+        [("StartTime", (Option.map x.startTime ~f:Date.to_value));
+        ("EndTime", (Option.map x.endTime ~f:Date.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "StartTime") in
+      make ?endTime ?startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" Date.of_json in
+      let startTime = field_map json__ "StartTime" Date.of_json in
+      make ?endTime ?startTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Filters evaluation results based on start and end times."]
 module ResourceIdentifier =
   struct
     type nonrec t =
@@ -5120,16 +7711,186 @@ module ResourceIdentifier =
           (Xml.child xml_arg0 "resourceType") in
       make ?resourceDeletionTime ?resourceName ?resourceId ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceDeletionTime =
-        field_map json "resourceDeletionTime" ResourceDeletionTime.of_json in
-      let resourceName = field_map json "resourceName" ResourceName.of_json in
-      let resourceId = field_map json "resourceId" ResourceId.of_json in
-      let resourceType = field_map json "resourceType" ResourceType.of_json in
+        field_map json__ "resourceDeletionTime" ResourceDeletionTime.of_json in
+      let resourceName = field_map json__ "resourceName" ResourceName.of_json in
+      let resourceId = field_map json__ "resourceId" ResourceId.of_json in
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
       make ?resourceDeletionTime ?resourceName ?resourceId ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The details that identify a resource that is discovered by Config, including the resource type, ID, and (if available) the custom resource name."]
+module ConformancePackComplianceScore =
+  struct
+    type nonrec t =
+      {
+      score: ComplianceScore.t option
+        [@ocaml.doc
+          "Compliance score for the conformance pack. Conformance packs with no evaluation results will have a compliance score of INSUFFICIENT_DATA."];
+      conformancePackName: ConformancePackName.t option
+        [@ocaml.doc "The name of the conformance pack."];
+      lastUpdatedTime: LastUpdatedTime.t option
+        [@ocaml.doc
+          "The time that the conformance pack compliance score was last updated."]}
+    let make ?score =
+      fun ?conformancePackName ->
+        fun ?lastUpdatedTime ->
+          fun () -> { score; conformancePackName; lastUpdatedTime }
+    let to_value x =
+      structure_to_value
+        [("Score", (Option.map x.score ~f:ComplianceScore.to_value));
+        ("ConformancePackName",
+          (Option.map x.conformancePackName ~f:ConformancePackName.to_value));
+        ("LastUpdatedTime",
+          (Option.map x.lastUpdatedTime ~f:LastUpdatedTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdatedTime =
+        (Option.map ~f:LastUpdatedTime.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTime") in
+      let conformancePackName =
+        (Option.map ~f:ConformancePackName.of_xml)
+          (Xml.child xml_arg0 "ConformancePackName") in
+      let score =
+        (Option.map ~f:ComplianceScore.of_xml) (Xml.child xml_arg0 "Score") in
+      make ?lastUpdatedTime ?conformancePackName ?score ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdatedTime =
+        field_map json__ "LastUpdatedTime" LastUpdatedTime.of_json in
+      let conformancePackName =
+        field_map json__ "ConformancePackName" ConformancePackName.of_json in
+      let score = field_map json__ "Score" ComplianceScore.of_json in
+      make ?lastUpdatedTime ?conformancePackName ?score ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A compliance score is the percentage of the number of compliant rule-resource combinations in a conformance pack compared to the number of total possible rule-resource combinations in the conformance pack. This metric provides you with a high-level view of the compliance state of your conformance packs. You can use it to identify, investigate, and understand the level of compliance in your conformance packs."]
+module ConformancePackNameFilter =
+  struct
+    type nonrec t = ConformancePackName.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConformancePackName.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConformancePackName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConformancePackNameFilter"
+        ~of_json:ConformancePackName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ConfigurationRecorderSummary =
+  struct
+    type nonrec t =
+      {
+      arn: AmazonResourceName.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the configuration recorder."];
+      name: RecorderName.t option
+        [@ocaml.doc "The name of the configuration recorder."];
+      servicePrincipal: ServicePrincipal.t option
+        [@ocaml.doc
+          "For service-linked configuration recorders, indicates which Amazon Web Services service the configuration recorder is linked to."];
+      recordingScope: RecordingScope.t option
+        [@ocaml.doc
+          "Indicates whether the ConfigurationItems in scope for the configuration recorder are recorded for free (INTERNAL) or if you are charged a service fee for recording (PAID)."]}
+    let make ?arn =
+      fun ?name ->
+        fun ?servicePrincipal ->
+          fun ?recordingScope ->
+            fun () -> { arn; name; servicePrincipal; recordingScope }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:AmazonResourceName.to_value));
+        ("name", (Option.map x.name ~f:RecorderName.to_value));
+        ("servicePrincipal",
+          (Option.map x.servicePrincipal ~f:ServicePrincipal.to_value));
+        ("recordingScope",
+          (Option.map x.recordingScope ~f:RecordingScope.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recordingScope =
+        (Option.map ~f:RecordingScope.of_xml)
+          (Xml.child xml_arg0 "recordingScope") in
+      let servicePrincipal =
+        (Option.map ~f:ServicePrincipal.of_xml)
+          (Xml.child xml_arg0 "servicePrincipal") in
+      let name =
+        (Option.map ~f:RecorderName.of_xml) (Xml.child xml_arg0 "name") in
+      let arn =
+        (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?recordingScope ?servicePrincipal ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recordingScope =
+        field_map json__ "recordingScope" RecordingScope.of_json in
+      let servicePrincipal =
+        field_map json__ "servicePrincipal" ServicePrincipal.of_json in
+      let name = field_map json__ "name" RecorderName.of_json in
+      let arn = field_map json__ "arn" AmazonResourceName.of_json in
+      make ?recordingScope ?servicePrincipal ?name ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A summary of a configuration recorder, including the arn, name, servicePrincipal, and recordingScope."]
+module ConfigurationRecorderFilter =
+  struct
+    type nonrec t =
+      {
+      filterName: ConfigurationRecorderFilterName.t option
+        [@ocaml.doc
+          "The name of the type of filter. Currently, only recordingScope is supported."];
+      filterValue: ConfigurationRecorderFilterValues.t option
+        [@ocaml.doc
+          "The value of the filter. For recordingScope, valid values include: INTERNAL and PAID. INTERNAL indicates that the ConfigurationItems in scope for the configuration recorder are recorded for free. PAID indicates that the ConfigurationItems in scope for the configuration recorder impact the costs to your bill."]}
+    let make ?filterName =
+      fun ?filterValue -> fun () -> { filterName; filterValue }
+    let to_value x =
+      structure_to_value
+        [("filterName",
+           (Option.map x.filterName
+              ~f:ConfigurationRecorderFilterName.to_value));
+        ("filterValue",
+          (Option.map x.filterValue
+             ~f:ConfigurationRecorderFilterValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filterValue =
+        (Option.map ~f:ConfigurationRecorderFilterValues.of_xml)
+          (Xml.child xml_arg0 "filterValue") in
+      let filterName =
+        (Option.map ~f:ConfigurationRecorderFilterName.of_xml)
+          (Xml.child xml_arg0 "filterName") in
+      make ?filterValue ?filterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filterValue =
+        field_map json__ "filterValue"
+          ConfigurationRecorderFilterValues.of_json in
+      let filterName =
+        field_map json__ "filterName" ConfigurationRecorderFilterName.of_json in
+      make ?filterValue ?filterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Filters configuration recorders by recording scope."]
 module AggregateResourceIdentifier =
   struct
     type nonrec t =
@@ -5186,19 +7947,50 @@ module AggregateResourceIdentifier =
       make ?resourceName ~resourceType ~resourceId ~sourceRegion
         ~sourceAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "ResourceName" ResourceName.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "ResourceName" ResourceName.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" ResourceType.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
-      let sourceRegion = field_map_exn json "SourceRegion" AwsRegion.of_json in
+        field_map_exn json__ "ResourceType" ResourceType.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
+      let sourceRegion =
+        field_map_exn json__ "SourceRegion" AwsRegion.of_json in
       let sourceAccountId =
-        field_map_exn json "SourceAccountId" AccountId.of_json in
+        field_map_exn json__ "SourceAccountId" AccountId.of_json in
       make ?resourceName ~resourceType ~resourceId ~sourceRegion
         ~sourceAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The details that identify a resource that is collected by Config aggregator, including the resource type, ID, (if available) the custom resource name, the source account, and source region."]
+module ResourceEvaluationStatus =
+  struct
+    type nonrec t =
+      | IN_PROGRESS 
+      | FAILED 
+      | SUCCEEDED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | FAILED -> "FAILED"
+      | SUCCEEDED -> "SUCCEEDED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "FAILED" -> FAILED
+      | "SUCCEEDED" -> SUCCEEDED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResourceEvaluationStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ResourceEvaluationStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module ConfigurationItem =
   struct
     type nonrec t =
@@ -5210,10 +8002,10 @@ module ConfigurationItem =
           "The 12-digit Amazon Web Services account ID associated with the resource."];
       configurationItemCaptureTime: ConfigurationItemCaptureTime.t option
         [@ocaml.doc
-          "The time when the configuration recording was initiated."];
+          "The time when the recording of configuration changes was initiated for the resource."];
       configurationItemStatus: ConfigurationItemStatus.t option
         [@ocaml.doc
-          "The configuration item status. The valid values are: OK \226\128\147 The resource configuration has been updated ResourceDiscovered \226\128\147 The resource was newly discovered ResourceNotRecorded \226\128\147 The resource was discovered but its configuration was not recorded since the recorder excludes the recording of resources of this type ResourceDeleted \226\128\147 The resource was deleted ResourceDeletedNotRecorded \226\128\147 The resource was deleted but its configuration was not recorded since the recorder excludes the recording of resources of this type The CIs do not incur any cost."];
+          "The configuration item status. Valid values include: OK \226\128\147 The resource configuration has been updated ResourceDiscovered \226\128\147 The resource was newly discovered ResourceNotRecorded \226\128\147 The resource was discovered but its configuration was not recorded since the recorder doesn't record resources of this type ResourceDeleted \226\128\147 The resource was deleted ResourceDeletedNotRecorded \226\128\147 The resource was deleted but its configuration was not recorded since the recorder doesn't record resources of this type"];
       configurationStateId: ConfigurationStateId.t option
         [@ocaml.doc
           "An identifier that indicates the ordering of the configuration items of a resource."];
@@ -5244,10 +8036,17 @@ module ConfigurationItem =
       relationships: RelationshipList.t option
         [@ocaml.doc "A list of related Amazon Web Services resources."];
       configuration: Configuration.t option
-        [@ocaml.doc "The description of the resource configuration."];
+        [@ocaml.doc
+          "A JSON-encoded string that contains the contents for the resource configuration. This string needs to be deserialized using json.loads() before you can access the contents."];
       supplementaryConfiguration: SupplementaryConfiguration.t option
         [@ocaml.doc
-          "Configuration attributes that Config returns for certain resource types to supplement the information returned for the configuration parameter."]}
+          "A string to string map that contains additional contents for the resource configuration.Config returns this field for certain resource types to supplement the information returned for the configuration field. This string to string map needs to be deserialized using json.loads() before you can accessing the contents."];
+      recordingFrequency: RecordingFrequency.t option
+        [@ocaml.doc
+          "The recording frequency that Config uses to record configuration changes for the resource. This field only appears in the API response when DAILY recording is enabled for a resource type. If this field is not present, CONTINUOUS recording is enabled for that resource type. For more information on daily recording and continuous recording, see Recording Frequency in the Config Developer Guide."];
+      configurationItemDeliveryTime: ConfigurationItemDeliveryTime.t option
+        [@ocaml.doc
+          "The time when configuration changes for the resource were delivered. This field is optional and is not guaranteed to be present in a configuration item (CI). If you are using daily recording, this field will be populated. However, if you are using continuous recording, this field will be omitted since the delivery time is instantaneous as the CI is available right away. For more information on daily recording and continuous recording, see Recording Frequency in the Config Developer Guide."]}
     let make ?version =
       fun ?accountId ->
         fun ?configurationItemCaptureTime ->
@@ -5266,27 +8065,32 @@ module ConfigurationItem =
                                   fun ?relationships ->
                                     fun ?configuration ->
                                       fun ?supplementaryConfiguration ->
-                                        fun () ->
-                                          {
-                                            version;
-                                            accountId;
-                                            configurationItemCaptureTime;
-                                            configurationItemStatus;
-                                            configurationStateId;
-                                            configurationItemMD5Hash;
-                                            arn;
-                                            resourceType;
-                                            resourceId;
-                                            resourceName;
-                                            awsRegion;
-                                            availabilityZone;
-                                            resourceCreationTime;
-                                            tags;
-                                            relatedEvents;
-                                            relationships;
-                                            configuration;
-                                            supplementaryConfiguration
-                                          }
+                                        fun ?recordingFrequency ->
+                                          fun ?configurationItemDeliveryTime
+                                            ->
+                                            fun () ->
+                                              {
+                                                version;
+                                                accountId;
+                                                configurationItemCaptureTime;
+                                                configurationItemStatus;
+                                                configurationStateId;
+                                                configurationItemMD5Hash;
+                                                arn;
+                                                resourceType;
+                                                resourceId;
+                                                resourceName;
+                                                awsRegion;
+                                                availabilityZone;
+                                                resourceCreationTime;
+                                                tags;
+                                                relatedEvents;
+                                                relationships;
+                                                configuration;
+                                                supplementaryConfiguration;
+                                                recordingFrequency;
+                                                configurationItemDeliveryTime
+                                              }
     let to_value x =
       structure_to_value
         [("version", (Option.map x.version ~f:Version.to_value));
@@ -5322,9 +8126,20 @@ module ConfigurationItem =
           (Option.map x.configuration ~f:Configuration.to_value));
         ("supplementaryConfiguration",
           (Option.map x.supplementaryConfiguration
-             ~f:SupplementaryConfiguration.to_value))]
+             ~f:SupplementaryConfiguration.to_value));
+        ("recordingFrequency",
+          (Option.map x.recordingFrequency ~f:RecordingFrequency.to_value));
+        ("configurationItemDeliveryTime",
+          (Option.map x.configurationItemDeliveryTime
+             ~f:ConfigurationItemDeliveryTime.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let configurationItemDeliveryTime =
+        (Option.map ~f:ConfigurationItemDeliveryTime.of_xml)
+          (Xml.child xml_arg0 "configurationItemDeliveryTime") in
+      let recordingFrequency =
+        (Option.map ~f:RecordingFrequency.of_xml)
+          (Xml.child xml_arg0 "recordingFrequency") in
       let supplementaryConfiguration =
         (Option.map ~f:SupplementaryConfiguration.of_xml)
           (Xml.child xml_arg0 "supplementaryConfiguration") in
@@ -5371,47 +8186,54 @@ module ConfigurationItem =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "accountId") in
       let version =
         (Option.map ~f:Version.of_xml) (Xml.child xml_arg0 "version") in
-      make ?supplementaryConfiguration ?configuration ?relationships
+      make ?configurationItemDeliveryTime ?recordingFrequency
+        ?supplementaryConfiguration ?configuration ?relationships
         ?relatedEvents ?tags ?resourceCreationTime ?availabilityZone
         ?awsRegion ?resourceName ?resourceId ?resourceType ?arn
         ?configurationItemMD5Hash ?configurationStateId
         ?configurationItemStatus ?configurationItemCaptureTime ?accountId
         ?version ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let configurationItemDeliveryTime =
+        field_map json__ "configurationItemDeliveryTime"
+          ConfigurationItemDeliveryTime.of_json in
+      let recordingFrequency =
+        field_map json__ "recordingFrequency" RecordingFrequency.of_json in
       let supplementaryConfiguration =
-        field_map json "supplementaryConfiguration"
+        field_map json__ "supplementaryConfiguration"
           SupplementaryConfiguration.of_json in
       let configuration =
-        field_map json "configuration" Configuration.of_json in
+        field_map json__ "configuration" Configuration.of_json in
       let relationships =
-        field_map json "relationships" RelationshipList.of_json in
+        field_map json__ "relationships" RelationshipList.of_json in
       let relatedEvents =
-        field_map json "relatedEvents" RelatedEventList.of_json in
-      let tags = field_map json "tags" Tags.of_json in
+        field_map json__ "relatedEvents" RelatedEventList.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
       let resourceCreationTime =
-        field_map json "resourceCreationTime" ResourceCreationTime.of_json in
+        field_map json__ "resourceCreationTime" ResourceCreationTime.of_json in
       let availabilityZone =
-        field_map json "availabilityZone" AvailabilityZone.of_json in
-      let awsRegion = field_map json "awsRegion" AwsRegion.of_json in
-      let resourceName = field_map json "resourceName" ResourceName.of_json in
-      let resourceId = field_map json "resourceId" ResourceId.of_json in
-      let resourceType = field_map json "resourceType" ResourceType.of_json in
-      let arn = field_map json "arn" ARN.of_json in
+        field_map json__ "availabilityZone" AvailabilityZone.of_json in
+      let awsRegion = field_map json__ "awsRegion" AwsRegion.of_json in
+      let resourceName = field_map json__ "resourceName" ResourceName.of_json in
+      let resourceId = field_map json__ "resourceId" ResourceId.of_json in
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let arn = field_map json__ "arn" ARN.of_json in
       let configurationItemMD5Hash =
-        field_map json "configurationItemMD5Hash"
+        field_map json__ "configurationItemMD5Hash"
           ConfigurationItemMD5Hash.of_json in
       let configurationStateId =
-        field_map json "configurationStateId" ConfigurationStateId.of_json in
+        field_map json__ "configurationStateId" ConfigurationStateId.of_json in
       let configurationItemStatus =
-        field_map json "configurationItemStatus"
+        field_map json__ "configurationItemStatus"
           ConfigurationItemStatus.of_json in
       let configurationItemCaptureTime =
-        field_map json "configurationItemCaptureTime"
+        field_map json__ "configurationItemCaptureTime"
           ConfigurationItemCaptureTime.of_json in
-      let accountId = field_map json "accountId" AccountId.of_json in
-      let version = field_map json "version" Version.of_json in
-      make ?supplementaryConfiguration ?configuration ?relationships
+      let accountId = field_map json__ "accountId" AccountId.of_json in
+      let version = field_map json__ "version" Version.of_json in
+      make ?configurationItemDeliveryTime ?recordingFrequency
+        ?supplementaryConfiguration ?configuration ?relationships
         ?relatedEvents ?tags ?resourceCreationTime ?availabilityZone
         ?awsRegion ?resourceName ?resourceId ?resourceType ?arn
         ?configurationItemMD5Hash ?configurationStateId
@@ -5424,14 +8246,14 @@ module OrganizationConformancePackDetailedStatus =
   struct
     type nonrec t =
       {
-      accountId: AccountId.t
+      accountId: AccountId.t option
         [@ocaml.doc "The 12-digit account ID of a member account."];
-      conformancePackName: StringWithCharLimit256.t
+      conformancePackName: StringWithCharLimit256.t option
         [@ocaml.doc
           "The name of conformance pack deployed in the member account."];
-      status: OrganizationResourceDetailedStatus.t
+      status: OrganizationResourceDetailedStatus.t option
         [@ocaml.doc
-          "Indicates deployment status for conformance pack in a member account. When master account calls PutOrganizationConformancePack action for the first time, conformance pack status is created in the member account. When master account calls PutOrganizationConformancePack action for the second time, conformance pack status is updated in the member account. Conformance pack status is deleted when the master account deletes OrganizationConformancePack and disables service access for config-multiaccountsetup.amazonaws.com. Config sets the state of the conformance pack to: CREATE_SUCCESSFUL when conformance pack has been created in the member account. CREATE_IN_PROGRESS when conformance pack is being created in the member account. CREATE_FAILED when conformance pack creation has failed in the member account. DELETE_FAILED when conformance pack deletion has failed in the member account. DELETE_IN_PROGRESS when conformance pack is being deleted in the member account. DELETE_SUCCESSFUL when conformance pack has been deleted in the member account. UPDATE_SUCCESSFUL when conformance pack has been updated in the member account. UPDATE_IN_PROGRESS when conformance pack is being updated in the member account. UPDATE_FAILED when conformance pack deletion has failed in the member account."];
+          "Indicates deployment status for conformance pack in a member account. When management account calls PutOrganizationConformancePack action for the first time, conformance pack status is created in the member account. When management account calls PutOrganizationConformancePack action for the second time, conformance pack status is updated in the member account. Conformance pack status is deleted when the management account deletes OrganizationConformancePack and disables service access for config-multiaccountsetup.amazonaws.com. Config sets the state of the conformance pack to: CREATE_SUCCESSFUL when conformance pack has been created in the member account. CREATE_IN_PROGRESS when conformance pack is being created in the member account. CREATE_FAILED when conformance pack creation has failed in the member account. DELETE_FAILED when conformance pack deletion has failed in the member account. DELETE_IN_PROGRESS when conformance pack is being deleted in the member account. DELETE_SUCCESSFUL when conformance pack has been deleted in the member account. UPDATE_SUCCESSFUL when conformance pack has been updated in the member account. UPDATE_IN_PROGRESS when conformance pack is being updated in the member account. UPDATE_FAILED when conformance pack deletion has failed in the member account."];
       errorCode: String_.t option
         [@ocaml.doc
           "An error code that is returned when conformance pack creation or deletion failed in the member account."];
@@ -5440,29 +8262,29 @@ module OrganizationConformancePackDetailedStatus =
           "An error message indicating that conformance pack account creation or deletion has failed due to an error in the member account."];
       lastUpdateTime: Date.t option
         [@ocaml.doc "The timestamp of the last status update."]}
-    let context_ = "OrganizationConformancePackDetailedStatus"
-    let make ?errorCode =
-      fun ?errorMessage ->
-        fun ?lastUpdateTime ->
-          fun ~accountId ->
-            fun ~conformancePackName ->
-              fun ~status ->
+    let make ?accountId =
+      fun ?conformancePackName ->
+        fun ?status ->
+          fun ?errorCode ->
+            fun ?errorMessage ->
+              fun ?lastUpdateTime ->
                 fun () ->
                   {
-                    errorCode;
-                    errorMessage;
-                    lastUpdateTime;
                     accountId;
                     conformancePackName;
-                    status
+                    status;
+                    errorCode;
+                    errorMessage;
+                    lastUpdateTime
                   }
     let to_value x =
       structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
         ("ConformancePackName",
-          (Some (StringWithCharLimit256.to_value x.conformancePackName)));
+          (Option.map x.conformancePackName
+             ~f:StringWithCharLimit256.to_value));
         ("Status",
-          (Some (OrganizationResourceDetailedStatus.to_value x.status)));
+          (Option.map x.status ~f:OrganizationResourceDetailedStatus.to_value));
         ("ErrorCode", (Option.map x.errorCode ~f:String_.to_value));
         ("ErrorMessage", (Option.map x.errorMessage ~f:String_.to_value));
         ("LastUpdateTime", (Option.map x.lastUpdateTime ~f:Date.to_value))]
@@ -5475,30 +8297,27 @@ module OrganizationConformancePackDetailedStatus =
       let errorCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       let status =
-        OrganizationResourceDetailedStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:OrganizationResourceDetailedStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
       let conformancePackName =
-        StringWithCharLimit256.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConformancePackName") in
+        (Option.map ~f:StringWithCharLimit256.of_xml)
+          (Xml.child xml_arg0 "ConformancePackName") in
       let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ?lastUpdateTime ?errorMessage ?errorCode ~status
-        ~conformancePackName ~accountId ()
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ?lastUpdateTime ?errorMessage ?errorCode ?status
+        ?conformancePackName ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdateTime = field_map json "LastUpdateTime" Date.of_json in
-      let errorMessage = field_map json "ErrorMessage" String_.of_json in
-      let errorCode = field_map json "ErrorCode" String_.of_json in
+    let of_json json__ =
+      let lastUpdateTime = field_map json__ "LastUpdateTime" Date.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
       let status =
-        field_map_exn json "Status"
-          OrganizationResourceDetailedStatus.of_json in
+        field_map json__ "Status" OrganizationResourceDetailedStatus.of_json in
       let conformancePackName =
-        field_map_exn json "ConformancePackName"
-          StringWithCharLimit256.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ?lastUpdateTime ?errorMessage ?errorCode ~status
-        ~conformancePackName ~accountId ()
+        field_map json__ "ConformancePackName" StringWithCharLimit256.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?lastUpdateTime ?errorMessage ?errorCode ?status
+        ?conformancePackName ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Organization conformance pack creation or deletion status in each member account. This includes the name of the conformance pack, the status, error code and error message when the conformance pack creation or deletion failed."]
@@ -5506,14 +8325,14 @@ module MemberAccountStatus =
   struct
     type nonrec t =
       {
-      accountId: AccountId.t
+      accountId: AccountId.t option
         [@ocaml.doc "The 12-digit account ID of a member account."];
-      configRuleName: StringWithCharLimit64.t
+      configRuleName: StringWithCharLimit64.t option
         [@ocaml.doc
           "The name of Config rule deployed in the member account."];
-      memberAccountRuleStatus: MemberAccountRuleStatus.t
+      memberAccountRuleStatus: MemberAccountRuleStatus.t option
         [@ocaml.doc
-          "Indicates deployment status for Config rule in the member account. When master account calls PutOrganizationConfigRule action for the first time, Config rule status is created in the member account. When master account calls PutOrganizationConfigRule action for the second time, Config rule status is updated in the member account. Config rule status is deleted when the master account deletes OrganizationConfigRule and disables service access for config-multiaccountsetup.amazonaws.com. Config sets the state of the rule to: CREATE_SUCCESSFUL when Config rule has been created in the member account. CREATE_IN_PROGRESS when Config rule is being created in the member account. CREATE_FAILED when Config rule creation has failed in the member account. DELETE_FAILED when Config rule deletion has failed in the member account. DELETE_IN_PROGRESS when Config rule is being deleted in the member account. DELETE_SUCCESSFUL when Config rule has been deleted in the member account. UPDATE_SUCCESSFUL when Config rule has been updated in the member account. UPDATE_IN_PROGRESS when Config rule is being updated in the member account. UPDATE_FAILED when Config rule deletion has failed in the member account."];
+          "Indicates deployment status for Config rule in the member account. When management account calls PutOrganizationConfigRule action for the first time, Config rule status is created in the member account. When management account calls PutOrganizationConfigRule action for the second time, Config rule status is updated in the member account. Config rule status is deleted when the management account deletes OrganizationConfigRule and disables service access for config-multiaccountsetup.amazonaws.com. Config sets the state of the rule to: CREATE_SUCCESSFUL when Config rule has been created in the member account. CREATE_IN_PROGRESS when Config rule is being created in the member account. CREATE_FAILED when Config rule creation has failed in the member account. DELETE_FAILED when Config rule deletion has failed in the member account. DELETE_IN_PROGRESS when Config rule is being deleted in the member account. DELETE_SUCCESSFUL when Config rule has been deleted in the member account. UPDATE_SUCCESSFUL when Config rule has been updated in the member account. UPDATE_IN_PROGRESS when Config rule is being updated in the member account. UPDATE_FAILED when Config rule deletion has failed in the member account."];
       errorCode: String_.t option
         [@ocaml.doc
           "An error code that is returned when Config rule creation or deletion failed in the member account."];
@@ -5522,29 +8341,29 @@ module MemberAccountStatus =
           "An error message indicating that Config rule account creation or deletion has failed due to an error in the member account."];
       lastUpdateTime: Date.t option
         [@ocaml.doc "The timestamp of the last status update."]}
-    let context_ = "MemberAccountStatus"
-    let make ?errorCode =
-      fun ?errorMessage ->
-        fun ?lastUpdateTime ->
-          fun ~accountId ->
-            fun ~configRuleName ->
-              fun ~memberAccountRuleStatus ->
+    let make ?accountId =
+      fun ?configRuleName ->
+        fun ?memberAccountRuleStatus ->
+          fun ?errorCode ->
+            fun ?errorMessage ->
+              fun ?lastUpdateTime ->
                 fun () ->
                   {
-                    errorCode;
-                    errorMessage;
-                    lastUpdateTime;
                     accountId;
                     configRuleName;
-                    memberAccountRuleStatus
+                    memberAccountRuleStatus;
+                    errorCode;
+                    errorMessage;
+                    lastUpdateTime
                   }
     let to_value x =
       structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
         ("ConfigRuleName",
-          (Some (StringWithCharLimit64.to_value x.configRuleName)));
+          (Option.map x.configRuleName ~f:StringWithCharLimit64.to_value));
         ("MemberAccountRuleStatus",
-          (Some (MemberAccountRuleStatus.to_value x.memberAccountRuleStatus)));
+          (Option.map x.memberAccountRuleStatus
+             ~f:MemberAccountRuleStatus.to_value));
         ("ErrorCode", (Option.map x.errorCode ~f:String_.to_value));
         ("ErrorMessage", (Option.map x.errorMessage ~f:String_.to_value));
         ("LastUpdateTime", (Option.map x.lastUpdateTime ~f:Date.to_value))]
@@ -5557,29 +8376,28 @@ module MemberAccountStatus =
       let errorCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       let memberAccountRuleStatus =
-        MemberAccountRuleStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MemberAccountRuleStatus") in
+        (Option.map ~f:MemberAccountRuleStatus.of_xml)
+          (Xml.child xml_arg0 "MemberAccountRuleStatus") in
       let configRuleName =
-        StringWithCharLimit64.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConfigRuleName") in
+        (Option.map ~f:StringWithCharLimit64.of_xml)
+          (Xml.child xml_arg0 "ConfigRuleName") in
       let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ?lastUpdateTime ?errorMessage ?errorCode ~memberAccountRuleStatus
-        ~configRuleName ~accountId ()
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ?lastUpdateTime ?errorMessage ?errorCode ?memberAccountRuleStatus
+        ?configRuleName ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdateTime = field_map json "LastUpdateTime" Date.of_json in
-      let errorMessage = field_map json "ErrorMessage" String_.of_json in
-      let errorCode = field_map json "ErrorCode" String_.of_json in
+    let of_json json__ =
+      let lastUpdateTime = field_map json__ "LastUpdateTime" Date.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
       let memberAccountRuleStatus =
-        field_map_exn json "MemberAccountRuleStatus"
+        field_map json__ "MemberAccountRuleStatus"
           MemberAccountRuleStatus.of_json in
       let configRuleName =
-        field_map_exn json "ConfigRuleName" StringWithCharLimit64.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ?lastUpdateTime ?errorMessage ?errorCode ~memberAccountRuleStatus
-        ~configRuleName ~accountId ()
+        field_map json__ "ConfigRuleName" StringWithCharLimit64.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?lastUpdateTime ?errorMessage ?errorCode ?memberAccountRuleStatus
+        ?configRuleName ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Organization Config rule creation or deletion status in each member account. This includes the name of the rule, the status, error code and error message when the rule creation or deletion failed."]
@@ -5605,9 +8423,9 @@ module ResourceCount =
           (Xml.child xml_arg0 "resourceType") in
       make ?count ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let count = field_map json "count" Long.of_json in
-      let resourceType = field_map json "resourceType" ResourceType.of_json in
+    let of_json json__ =
+      let count = field_map json__ "count" Long.of_json in
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
       make ?count ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5616,41 +8434,37 @@ module ConformancePackComplianceSummary =
   struct
     type nonrec t =
       {
-      conformancePackName: ConformancePackName.t
+      conformancePackName: ConformancePackName.t option
         [@ocaml.doc "The name of the conformance pack name."];
-      conformancePackComplianceStatus: ConformancePackComplianceType.t
-        [@ocaml.doc
-          "The status of the conformance pack. The allowed values are COMPLIANT, NON_COMPLIANT and INSUFFICIENT_DATA."]}
-    let context_ = "ConformancePackComplianceSummary"
-    let make ~conformancePackName =
-      fun ~conformancePackComplianceStatus ->
+      conformancePackComplianceStatus: ConformancePackComplianceType.t option
+        [@ocaml.doc "The status of the conformance pack."]}
+    let make ?conformancePackName =
+      fun ?conformancePackComplianceStatus ->
         fun () -> { conformancePackName; conformancePackComplianceStatus }
     let to_value x =
       structure_to_value
         [("ConformancePackName",
-           (Some (ConformancePackName.to_value x.conformancePackName)));
+           (Option.map x.conformancePackName ~f:ConformancePackName.to_value));
         ("ConformancePackComplianceStatus",
-          (Some
-             (ConformancePackComplianceType.to_value
-                x.conformancePackComplianceStatus)))]
+          (Option.map x.conformancePackComplianceStatus
+             ~f:ConformancePackComplianceType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let conformancePackComplianceStatus =
-        ConformancePackComplianceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ConformancePackComplianceStatus") in
+        (Option.map ~f:ConformancePackComplianceType.of_xml)
+          (Xml.child xml_arg0 "ConformancePackComplianceStatus") in
       let conformancePackName =
-        ConformancePackName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConformancePackName") in
-      make ~conformancePackComplianceStatus ~conformancePackName ()
+        (Option.map ~f:ConformancePackName.of_xml)
+          (Xml.child xml_arg0 "ConformancePackName") in
+      make ?conformancePackComplianceStatus ?conformancePackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let conformancePackComplianceStatus =
-        field_map_exn json "ConformancePackComplianceStatus"
+        field_map json__ "ConformancePackComplianceStatus"
           ConformancePackComplianceType.of_json in
       let conformancePackName =
-        field_map_exn json "ConformancePackName" ConformancePackName.of_json in
-      make ~conformancePackComplianceStatus ~conformancePackName ()
+        field_map json__ "ConformancePackName" ConformancePackName.of_json in
+      make ?conformancePackComplianceStatus ?conformancePackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Summary includes the name and status of the conformance pack."]
@@ -5658,78 +8472,76 @@ module ConformancePackEvaluationResult =
   struct
     type nonrec t =
       {
-      complianceType: ConformancePackComplianceType.t
+      complianceType: ConformancePackComplianceType.t option
         [@ocaml.doc
           "The compliance type. The allowed values are COMPLIANT and NON_COMPLIANT. INSUFFICIENT_DATA is not supported."];
-      evaluationResultIdentifier: EvaluationResultIdentifier.t ;
-      configRuleInvokedTime: Date.t
+      evaluationResultIdentifier: EvaluationResultIdentifier.t option ;
+      configRuleInvokedTime: Date.t option
         [@ocaml.doc
           "The time when Config rule evaluated Amazon Web Services resource."];
-      resultRecordedTime: Date.t
+      resultRecordedTime: Date.t option
         [@ocaml.doc "The time when Config recorded the evaluation result."];
       annotation: Annotation.t option
         [@ocaml.doc
           "Supplementary information about how the evaluation determined the compliance."]}
-    let context_ = "ConformancePackEvaluationResult"
-    let make ?annotation =
-      fun ~complianceType ->
-        fun ~evaluationResultIdentifier ->
-          fun ~configRuleInvokedTime ->
-            fun ~resultRecordedTime ->
+    let make ?complianceType =
+      fun ?evaluationResultIdentifier ->
+        fun ?configRuleInvokedTime ->
+          fun ?resultRecordedTime ->
+            fun ?annotation ->
               fun () ->
                 {
-                  annotation;
                   complianceType;
                   evaluationResultIdentifier;
                   configRuleInvokedTime;
-                  resultRecordedTime
+                  resultRecordedTime;
+                  annotation
                 }
     let to_value x =
       structure_to_value
         [("ComplianceType",
-           (Some (ConformancePackComplianceType.to_value x.complianceType)));
+           (Option.map x.complianceType
+              ~f:ConformancePackComplianceType.to_value));
         ("EvaluationResultIdentifier",
-          (Some
-             (EvaluationResultIdentifier.to_value
-                x.evaluationResultIdentifier)));
+          (Option.map x.evaluationResultIdentifier
+             ~f:EvaluationResultIdentifier.to_value));
         ("ConfigRuleInvokedTime",
-          (Some (Date.to_value x.configRuleInvokedTime)));
-        ("ResultRecordedTime", (Some (Date.to_value x.resultRecordedTime)));
+          (Option.map x.configRuleInvokedTime ~f:Date.to_value));
+        ("ResultRecordedTime",
+          (Option.map x.resultRecordedTime ~f:Date.to_value));
         ("Annotation", (Option.map x.annotation ~f:Annotation.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let annotation =
         (Option.map ~f:Annotation.of_xml) (Xml.child xml_arg0 "Annotation") in
       let resultRecordedTime =
-        Date.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResultRecordedTime") in
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "ResultRecordedTime") in
       let configRuleInvokedTime =
-        Date.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConfigRuleInvokedTime") in
+        (Option.map ~f:Date.of_xml)
+          (Xml.child xml_arg0 "ConfigRuleInvokedTime") in
       let evaluationResultIdentifier =
-        EvaluationResultIdentifier.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "EvaluationResultIdentifier") in
+        (Option.map ~f:EvaluationResultIdentifier.of_xml)
+          (Xml.child xml_arg0 "EvaluationResultIdentifier") in
       let complianceType =
-        ConformancePackComplianceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ComplianceType") in
-      make ?annotation ~resultRecordedTime ~configRuleInvokedTime
-        ~evaluationResultIdentifier ~complianceType ()
+        (Option.map ~f:ConformancePackComplianceType.of_xml)
+          (Xml.child xml_arg0 "ComplianceType") in
+      make ?annotation ?resultRecordedTime ?configRuleInvokedTime
+        ?evaluationResultIdentifier ?complianceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let annotation = field_map json "Annotation" Annotation.of_json in
+    let of_json json__ =
+      let annotation = field_map json__ "Annotation" Annotation.of_json in
       let resultRecordedTime =
-        field_map_exn json "ResultRecordedTime" Date.of_json in
+        field_map json__ "ResultRecordedTime" Date.of_json in
       let configRuleInvokedTime =
-        field_map_exn json "ConfigRuleInvokedTime" Date.of_json in
+        field_map json__ "ConfigRuleInvokedTime" Date.of_json in
       let evaluationResultIdentifier =
-        field_map_exn json "EvaluationResultIdentifier"
+        field_map json__ "EvaluationResultIdentifier"
           EvaluationResultIdentifier.of_json in
       let complianceType =
-        field_map_exn json "ComplianceType"
+        field_map json__ "ComplianceType"
           ConformancePackComplianceType.of_json in
-      make ?annotation ~resultRecordedTime ~configRuleInvokedTime
-        ~evaluationResultIdentifier ~complianceType ()
+      make ?annotation ?resultRecordedTime ?configRuleInvokedTime
+        ?evaluationResultIdentifier ?complianceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The details of a conformance pack evaluation. Provides Config rule and Amazon Web Services resource type that was evaluated, the compliance of the conformance pack, related time stamps, and supplementary information."]
@@ -5741,6 +8553,9 @@ module ConformancePackComplianceResourceIds =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StringWithCharLimit256.to_value)) |>
         (fun x -> `List x)
@@ -5771,6 +8586,9 @@ module ConformancePackConfigRuleNames =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StringWithCharLimit64.to_value)) |>
         (fun x -> `List x)
@@ -5820,11 +8638,11 @@ module ComplianceSummaryByResourceType =
           (Xml.child xml_arg0 "ResourceType") in
       make ?complianceSummary ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let complianceSummary =
-        field_map json "ComplianceSummary" ComplianceSummary.of_json in
+        field_map json__ "ComplianceSummary" ComplianceSummary.of_json in
       let resourceType =
-        field_map json "ResourceType" StringWithCharLimit256.of_json in
+        field_map json__ "ResourceType" StringWithCharLimit256.of_json in
       make ?complianceSummary ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5899,18 +8717,18 @@ module EvaluationResult =
       make ?resultToken ?annotation ?configRuleInvokedTime
         ?resultRecordedTime ?complianceType ?evaluationResultIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resultToken = field_map json "ResultToken" String_.of_json in
+    let of_json json__ =
+      let resultToken = field_map json__ "ResultToken" String_.of_json in
       let annotation =
-        field_map json "Annotation" StringWithCharLimit256.of_json in
+        field_map json__ "Annotation" StringWithCharLimit256.of_json in
       let configRuleInvokedTime =
-        field_map json "ConfigRuleInvokedTime" Date.of_json in
+        field_map json__ "ConfigRuleInvokedTime" Date.of_json in
       let resultRecordedTime =
-        field_map json "ResultRecordedTime" Date.of_json in
+        field_map json__ "ResultRecordedTime" Date.of_json in
       let complianceType =
-        field_map json "ComplianceType" ComplianceType.of_json in
+        field_map json__ "ComplianceType" ComplianceType.of_json in
       let evaluationResultIdentifier =
-        field_map json "EvaluationResultIdentifier"
+        field_map json__ "EvaluationResultIdentifier"
           EvaluationResultIdentifier.of_json in
       make ?resultToken ?annotation ?configRuleInvokedTime
         ?resultRecordedTime ?complianceType ?evaluationResultIdentifier ()
@@ -5921,33 +8739,32 @@ module GroupedResourceCount =
   struct
     type nonrec t =
       {
-      groupName: StringWithCharLimit256.t
+      groupName: StringWithCharLimit256.t option
         [@ocaml.doc
           "The name of the group that can be region, account ID, or resource type. For example, region1, region2 if the region was chosen as GroupByKey."];
-      resourceCount: Long.t
+      resourceCount: Long.t option
         [@ocaml.doc "The number of resources in the group."]}
-    let context_ = "GroupedResourceCount"
-    let make ~groupName =
-      fun ~resourceCount -> fun () -> { groupName; resourceCount }
+    let make ?groupName =
+      fun ?resourceCount -> fun () -> { groupName; resourceCount }
     let to_value x =
       structure_to_value
-        [("GroupName", (Some (StringWithCharLimit256.to_value x.groupName)));
-        ("ResourceCount", (Some (Long.to_value x.resourceCount)))]
+        [("GroupName",
+           (Option.map x.groupName ~f:StringWithCharLimit256.to_value));
+        ("ResourceCount", (Option.map x.resourceCount ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceCount =
-        Long.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceCount") in
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "ResourceCount") in
       let groupName =
-        StringWithCharLimit256.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GroupName") in
-      make ~resourceCount ~groupName ()
+        (Option.map ~f:StringWithCharLimit256.of_xml)
+          (Xml.child xml_arg0 "GroupName") in
+      make ?resourceCount ?groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceCount = field_map_exn json "ResourceCount" Long.of_json in
+    let of_json json__ =
+      let resourceCount = field_map json__ "ResourceCount" Long.of_json in
       let groupName =
-        field_map_exn json "GroupName" StringWithCharLimit256.of_json in
-      make ~resourceCount ~groupName ()
+        field_map json__ "GroupName" StringWithCharLimit256.of_json in
+      make ?resourceCount ?groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The count of resources that are grouped by the group name."]
@@ -5980,11 +8797,11 @@ module AggregateConformancePackComplianceSummary =
           (Xml.child xml_arg0 "ComplianceSummary") in
       make ?groupName ?complianceSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let groupName =
-        field_map json "GroupName" StringWithCharLimit256.of_json in
+        field_map json__ "GroupName" StringWithCharLimit256.of_json in
       let complianceSummary =
-        field_map json "ComplianceSummary"
+        field_map json__ "ComplianceSummary"
           AggregateConformancePackComplianceCount.of_json in
       make ?groupName ?complianceSummary ()
     let to_json v = composed_to_json to_value v
@@ -6017,11 +8834,11 @@ module AggregateComplianceCount =
           (Xml.child xml_arg0 "GroupName") in
       make ?complianceSummary ?groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let complianceSummary =
-        field_map json "ComplianceSummary" ComplianceSummary.of_json in
+        field_map json__ "ComplianceSummary" ComplianceSummary.of_json in
       let groupName =
-        field_map json "GroupName" StringWithCharLimit256.of_json in
+        field_map json__ "GroupName" StringWithCharLimit256.of_json in
       make ?complianceSummary ?groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6103,19 +8920,19 @@ module AggregateEvaluationResult =
       make ?awsRegion ?accountId ?annotation ?configRuleInvokedTime
         ?resultRecordedTime ?complianceType ?evaluationResultIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let awsRegion = field_map json "AwsRegion" AwsRegion.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+    let of_json json__ =
+      let awsRegion = field_map json__ "AwsRegion" AwsRegion.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let annotation =
-        field_map json "Annotation" StringWithCharLimit256.of_json in
+        field_map json__ "Annotation" StringWithCharLimit256.of_json in
       let configRuleInvokedTime =
-        field_map json "ConfigRuleInvokedTime" Date.of_json in
+        field_map json__ "ConfigRuleInvokedTime" Date.of_json in
       let resultRecordedTime =
-        field_map json "ResultRecordedTime" Date.of_json in
+        field_map json__ "ResultRecordedTime" Date.of_json in
       let complianceType =
-        field_map json "ComplianceType" ComplianceType.of_json in
+        field_map json__ "ComplianceType" ComplianceType.of_json in
       let evaluationResultIdentifier =
-        field_map json "EvaluationResultIdentifier"
+        field_map json__ "EvaluationResultIdentifier"
           EvaluationResultIdentifier.of_json in
       make ?awsRegion ?accountId ?annotation ?configRuleInvokedTime
         ?resultRecordedTime ?complianceType ?evaluationResultIdentifier ()
@@ -6126,35 +8943,35 @@ module RetentionConfiguration =
   struct
     type nonrec t =
       {
-      name: RetentionConfigurationName.t
+      name: RetentionConfigurationName.t option
         [@ocaml.doc "The name of the retention configuration object."];
-      retentionPeriodInDays: RetentionPeriodInDays.t
+      retentionPeriodInDays: RetentionPeriodInDays.t option
         [@ocaml.doc
           "Number of days Config stores your historical information. Currently, only applicable to the configuration item history."]}
-    let context_ = "RetentionConfiguration"
-    let make ~name =
-      fun ~retentionPeriodInDays -> fun () -> { name; retentionPeriodInDays }
+    let make ?name =
+      fun ?retentionPeriodInDays -> fun () -> { name; retentionPeriodInDays }
     let to_value x =
       structure_to_value
-        [("Name", (Some (RetentionConfigurationName.to_value x.name)));
+        [("Name", (Option.map x.name ~f:RetentionConfigurationName.to_value));
         ("RetentionPeriodInDays",
-          (Some (RetentionPeriodInDays.to_value x.retentionPeriodInDays)))]
+          (Option.map x.retentionPeriodInDays
+             ~f:RetentionPeriodInDays.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let retentionPeriodInDays =
-        RetentionPeriodInDays.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RetentionPeriodInDays") in
+        (Option.map ~f:RetentionPeriodInDays.of_xml)
+          (Xml.child xml_arg0 "RetentionPeriodInDays") in
       let name =
-        RetentionConfigurationName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~retentionPeriodInDays ~name ()
+        (Option.map ~f:RetentionConfigurationName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      make ?retentionPeriodInDays ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retentionPeriodInDays =
-        field_map_exn json "RetentionPeriodInDays"
+        field_map json__ "RetentionPeriodInDays"
           RetentionPeriodInDays.of_json in
-      let name = field_map_exn json "Name" RetentionConfigurationName.of_json in
-      make ~retentionPeriodInDays ~name ()
+      let name = field_map json__ "Name" RetentionConfigurationName.of_json in
+      make ?retentionPeriodInDays ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object with the name of the retention configuration and the retention period in days. The object stores the configuration for data retention in Config."]
@@ -6210,13 +9027,13 @@ module RemediationExecutionStatus =
       make ?lastUpdatedTime ?invocationTime ?stepDetails ?state ?resourceKey
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdatedTime = field_map json "LastUpdatedTime" Date.of_json in
-      let invocationTime = field_map json "InvocationTime" Date.of_json in
+    let of_json json__ =
+      let lastUpdatedTime = field_map json__ "LastUpdatedTime" Date.of_json in
+      let invocationTime = field_map json__ "InvocationTime" Date.of_json in
       let stepDetails =
-        field_map json "StepDetails" RemediationExecutionSteps.of_json in
-      let state = field_map json "State" RemediationExecutionState.of_json in
-      let resourceKey = field_map json "ResourceKey" ResourceKey.of_json in
+        field_map json__ "StepDetails" RemediationExecutionSteps.of_json in
+      let state = field_map json__ "State" RemediationExecutionState.of_json in
+      let resourceKey = field_map json__ "ResourceKey" ResourceKey.of_json in
       make ?lastUpdatedTime ?invocationTime ?stepDetails ?state ?resourceKey
         ()
     let to_json v = composed_to_json to_value v
@@ -6250,11 +9067,11 @@ module PendingAggregationRequest =
           (Xml.child xml_arg0 "RequesterAccountId") in
       make ?requesterAwsRegion ?requesterAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requesterAwsRegion =
-        field_map json "RequesterAwsRegion" AwsRegion.of_json in
+        field_map json__ "RequesterAwsRegion" AwsRegion.of_json in
       let requesterAccountId =
-        field_map json "RequesterAccountId" AccountId.of_json in
+        field_map json__ "RequesterAccountId" AccountId.of_json in
       make ?requesterAwsRegion ?requesterAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6263,10 +9080,11 @@ module OrganizationConformancePack =
   struct
     type nonrec t =
       {
-      organizationConformancePackName: OrganizationConformancePackName.t
+      organizationConformancePackName:
+        OrganizationConformancePackName.t option
         [@ocaml.doc
           "The name you assign to an organization conformance pack."];
-      organizationConformancePackArn: StringWithCharLimit256.t
+      organizationConformancePackArn: StringWithCharLimit256.t option
         [@ocaml.doc
           "Amazon Resource Name (ARN) of organization conformance pack."];
       deliveryS3Bucket: DeliveryS3Bucket.t option
@@ -6280,37 +9098,34 @@ module OrganizationConformancePack =
       excludedAccounts: ExcludedAccounts.t option
         [@ocaml.doc
           "A comma-separated list of accounts excluded from organization conformance pack."];
-      lastUpdateTime: Date.t
+      lastUpdateTime: Date.t option
         [@ocaml.doc
           "Last time when organization conformation pack was updated."]}
-    let context_ = "OrganizationConformancePack"
-    let make ?deliveryS3Bucket =
-      fun ?deliveryS3KeyPrefix ->
-        fun ?conformancePackInputParameters ->
-          fun ?excludedAccounts ->
-            fun ~organizationConformancePackName ->
-              fun ~organizationConformancePackArn ->
-                fun ~lastUpdateTime ->
+    let make ?organizationConformancePackName =
+      fun ?organizationConformancePackArn ->
+        fun ?deliveryS3Bucket ->
+          fun ?deliveryS3KeyPrefix ->
+            fun ?conformancePackInputParameters ->
+              fun ?excludedAccounts ->
+                fun ?lastUpdateTime ->
                   fun () ->
                     {
+                      organizationConformancePackName;
+                      organizationConformancePackArn;
                       deliveryS3Bucket;
                       deliveryS3KeyPrefix;
                       conformancePackInputParameters;
                       excludedAccounts;
-                      organizationConformancePackName;
-                      organizationConformancePackArn;
                       lastUpdateTime
                     }
     let to_value x =
       structure_to_value
         [("OrganizationConformancePackName",
-           (Some
-              (OrganizationConformancePackName.to_value
-                 x.organizationConformancePackName)));
+           (Option.map x.organizationConformancePackName
+              ~f:OrganizationConformancePackName.to_value));
         ("OrganizationConformancePackArn",
-          (Some
-             (StringWithCharLimit256.to_value
-                x.organizationConformancePackArn)));
+          (Option.map x.organizationConformancePackArn
+             ~f:StringWithCharLimit256.to_value));
         ("DeliveryS3Bucket",
           (Option.map x.deliveryS3Bucket ~f:DeliveryS3Bucket.to_value));
         ("DeliveryS3KeyPrefix",
@@ -6320,12 +9135,11 @@ module OrganizationConformancePack =
              ~f:ConformancePackInputParameters.to_value));
         ("ExcludedAccounts",
           (Option.map x.excludedAccounts ~f:ExcludedAccounts.to_value));
-        ("LastUpdateTime", (Some (Date.to_value x.lastUpdateTime)))]
+        ("LastUpdateTime", (Option.map x.lastUpdateTime ~f:Date.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let lastUpdateTime =
-        Date.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LastUpdateTime") in
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "LastUpdateTime") in
       let excludedAccounts =
         (Option.map ~f:ExcludedAccounts.of_xml)
           (Xml.child xml_arg0 "ExcludedAccounts") in
@@ -6339,37 +9153,35 @@ module OrganizationConformancePack =
         (Option.map ~f:DeliveryS3Bucket.of_xml)
           (Xml.child xml_arg0 "DeliveryS3Bucket") in
       let organizationConformancePackArn =
-        StringWithCharLimit256.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "OrganizationConformancePackArn") in
+        (Option.map ~f:StringWithCharLimit256.of_xml)
+          (Xml.child xml_arg0 "OrganizationConformancePackArn") in
       let organizationConformancePackName =
-        OrganizationConformancePackName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "OrganizationConformancePackName") in
-      make ~lastUpdateTime ?excludedAccounts ?conformancePackInputParameters
+        (Option.map ~f:OrganizationConformancePackName.of_xml)
+          (Xml.child xml_arg0 "OrganizationConformancePackName") in
+      make ?lastUpdateTime ?excludedAccounts ?conformancePackInputParameters
         ?deliveryS3KeyPrefix ?deliveryS3Bucket
-        ~organizationConformancePackArn ~organizationConformancePackName ()
+        ?organizationConformancePackArn ?organizationConformancePackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdateTime = field_map_exn json "LastUpdateTime" Date.of_json in
+    let of_json json__ =
+      let lastUpdateTime = field_map json__ "LastUpdateTime" Date.of_json in
       let excludedAccounts =
-        field_map json "ExcludedAccounts" ExcludedAccounts.of_json in
+        field_map json__ "ExcludedAccounts" ExcludedAccounts.of_json in
       let conformancePackInputParameters =
-        field_map json "ConformancePackInputParameters"
+        field_map json__ "ConformancePackInputParameters"
           ConformancePackInputParameters.of_json in
       let deliveryS3KeyPrefix =
-        field_map json "DeliveryS3KeyPrefix" DeliveryS3KeyPrefix.of_json in
+        field_map json__ "DeliveryS3KeyPrefix" DeliveryS3KeyPrefix.of_json in
       let deliveryS3Bucket =
-        field_map json "DeliveryS3Bucket" DeliveryS3Bucket.of_json in
+        field_map json__ "DeliveryS3Bucket" DeliveryS3Bucket.of_json in
       let organizationConformancePackArn =
-        field_map_exn json "OrganizationConformancePackArn"
+        field_map json__ "OrganizationConformancePackArn"
           StringWithCharLimit256.of_json in
       let organizationConformancePackName =
-        field_map_exn json "OrganizationConformancePackName"
+        field_map json__ "OrganizationConformancePackName"
           OrganizationConformancePackName.of_json in
-      make ~lastUpdateTime ?excludedAccounts ?conformancePackInputParameters
+      make ?lastUpdateTime ?excludedAccounts ?conformancePackInputParameters
         ?deliveryS3KeyPrefix ?deliveryS3Bucket
-        ~organizationConformancePackArn ~organizationConformancePackName ()
+        ?organizationConformancePackArn ?organizationConformancePackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An organization conformance pack that has information about conformance packs that Config creates in member accounts."]
@@ -6377,12 +9189,13 @@ module OrganizationConformancePackStatus =
   struct
     type nonrec t =
       {
-      organizationConformancePackName: OrganizationConformancePackName.t
+      organizationConformancePackName:
+        OrganizationConformancePackName.t option
         [@ocaml.doc
           "The name that you assign to organization conformance pack."];
-      status: OrganizationResourceStatus.t
+      status: OrganizationResourceStatus.t option
         [@ocaml.doc
-          "Indicates deployment status of an organization conformance pack. When master account calls PutOrganizationConformancePack for the first time, conformance pack status is created in all the member accounts. When master account calls PutOrganizationConformancePack for the second time, conformance pack status is updated in all the member accounts. Additionally, conformance pack status is updated when one or more member accounts join or leave an organization. Conformance pack status is deleted when the master account deletes OrganizationConformancePack in all the member accounts and disables service access for config-multiaccountsetup.amazonaws.com. Config sets the state of the conformance pack to: CREATE_SUCCESSFUL when an organization conformance pack has been successfully created in all the member accounts. CREATE_IN_PROGRESS when an organization conformance pack creation is in progress. CREATE_FAILED when an organization conformance pack creation failed in one or more member accounts within that organization. DELETE_FAILED when an organization conformance pack deletion failed in one or more member accounts within that organization. DELETE_IN_PROGRESS when an organization conformance pack deletion is in progress. DELETE_SUCCESSFUL when an organization conformance pack has been successfully deleted from all the member accounts. UPDATE_SUCCESSFUL when an organization conformance pack has been successfully updated in all the member accounts. UPDATE_IN_PROGRESS when an organization conformance pack update is in progress. UPDATE_FAILED when an organization conformance pack update failed in one or more member accounts within that organization."];
+          "Indicates deployment status of an organization conformance pack. When management account calls PutOrganizationConformancePack for the first time, conformance pack status is created in all the member accounts. When management account calls PutOrganizationConformancePack for the second time, conformance pack status is updated in all the member accounts. Additionally, conformance pack status is updated when one or more member accounts join or leave an organization. Conformance pack status is deleted when the management account deletes OrganizationConformancePack in all the member accounts and disables service access for config-multiaccountsetup.amazonaws.com. Config sets the state of the conformance pack to: CREATE_SUCCESSFUL when an organization conformance pack has been successfully created in all the member accounts. CREATE_IN_PROGRESS when an organization conformance pack creation is in progress. CREATE_FAILED when an organization conformance pack creation failed in one or more member accounts within that organization. DELETE_FAILED when an organization conformance pack deletion failed in one or more member accounts within that organization. DELETE_IN_PROGRESS when an organization conformance pack deletion is in progress. DELETE_SUCCESSFUL when an organization conformance pack has been successfully deleted from all the member accounts. UPDATE_SUCCESSFUL when an organization conformance pack has been successfully updated in all the member accounts. UPDATE_IN_PROGRESS when an organization conformance pack update is in progress. UPDATE_FAILED when an organization conformance pack update failed in one or more member accounts within that organization."];
       errorCode: String_.t option
         [@ocaml.doc
           "An error code that is returned when organization conformance pack creation or deletion has failed in a member account."];
@@ -6391,27 +9204,26 @@ module OrganizationConformancePackStatus =
           "An error message indicating that organization conformance pack creation or deletion failed due to an error."];
       lastUpdateTime: Date.t option
         [@ocaml.doc "The timestamp of the last update."]}
-    let context_ = "OrganizationConformancePackStatus"
-    let make ?errorCode =
-      fun ?errorMessage ->
-        fun ?lastUpdateTime ->
-          fun ~organizationConformancePackName ->
-            fun ~status ->
+    let make ?organizationConformancePackName =
+      fun ?status ->
+        fun ?errorCode ->
+          fun ?errorMessage ->
+            fun ?lastUpdateTime ->
               fun () ->
                 {
+                  organizationConformancePackName;
+                  status;
                   errorCode;
                   errorMessage;
-                  lastUpdateTime;
-                  organizationConformancePackName;
-                  status
+                  lastUpdateTime
                 }
     let to_value x =
       structure_to_value
         [("OrganizationConformancePackName",
-           (Some
-              (OrganizationConformancePackName.to_value
-                 x.organizationConformancePackName)));
-        ("Status", (Some (OrganizationResourceStatus.to_value x.status)));
+           (Option.map x.organizationConformancePackName
+              ~f:OrganizationConformancePackName.to_value));
+        ("Status",
+          (Option.map x.status ~f:OrganizationResourceStatus.to_value));
         ("ErrorCode", (Option.map x.errorCode ~f:String_.to_value));
         ("ErrorMessage", (Option.map x.errorMessage ~f:String_.to_value));
         ("LastUpdateTime", (Option.map x.lastUpdateTime ~f:Date.to_value))]
@@ -6424,26 +9236,25 @@ module OrganizationConformancePackStatus =
       let errorCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       let status =
-        OrganizationResourceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:OrganizationResourceStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
       let organizationConformancePackName =
-        OrganizationConformancePackName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "OrganizationConformancePackName") in
-      make ?lastUpdateTime ?errorMessage ?errorCode ~status
-        ~organizationConformancePackName ()
+        (Option.map ~f:OrganizationConformancePackName.of_xml)
+          (Xml.child xml_arg0 "OrganizationConformancePackName") in
+      make ?lastUpdateTime ?errorMessage ?errorCode ?status
+        ?organizationConformancePackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdateTime = field_map json "LastUpdateTime" Date.of_json in
-      let errorMessage = field_map json "ErrorMessage" String_.of_json in
-      let errorCode = field_map json "ErrorCode" String_.of_json in
+    let of_json json__ =
+      let lastUpdateTime = field_map json__ "LastUpdateTime" Date.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
       let status =
-        field_map_exn json "Status" OrganizationResourceStatus.of_json in
+        field_map json__ "Status" OrganizationResourceStatus.of_json in
       let organizationConformancePackName =
-        field_map_exn json "OrganizationConformancePackName"
+        field_map json__ "OrganizationConformancePackName"
           OrganizationConformancePackName.of_json in
-      make ?lastUpdateTime ?errorMessage ?errorCode ~status
-        ~organizationConformancePackName ()
+      make ?lastUpdateTime ?errorMessage ?errorCode ?status
+        ?organizationConformancePackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the status for an organization conformance pack in an organization."]
@@ -6451,9 +9262,9 @@ module OrganizationConfigRule =
   struct
     type nonrec t =
       {
-      organizationConfigRuleName: OrganizationConfigRuleName.t
+      organizationConfigRuleName: OrganizationConfigRuleName.t option
         [@ocaml.doc "The name that you assign to organization Config rule."];
-      organizationConfigRuleArn: StringWithCharLimit256.t
+      organizationConfigRuleArn: StringWithCharLimit256.t option
         [@ocaml.doc
           "Amazon Resource Name (ARN) of organization Config rule."];
       organizationManagedRuleMetadata:
@@ -6470,32 +9281,31 @@ module OrganizationConfigRule =
         OrganizationCustomPolicyRuleMetadataNoPolicy.t option
         [@ocaml.doc
           "An object that specifies metadata for your organization's Config Custom Policy rule. The metadata includes the runtime system in use, which accounts have debug logging enabled, and other custom rule metadata, such as resource type, resource ID of Amazon Web Services resource, and organization trigger types that initiate Config to evaluate Amazon Web Services resources against a rule."]}
-    let context_ = "OrganizationConfigRule"
-    let make ?organizationManagedRuleMetadata =
-      fun ?organizationCustomRuleMetadata ->
-        fun ?excludedAccounts ->
-          fun ?lastUpdateTime ->
-            fun ?organizationCustomPolicyRuleMetadata ->
-              fun ~organizationConfigRuleName ->
-                fun ~organizationConfigRuleArn ->
+    let make ?organizationConfigRuleName =
+      fun ?organizationConfigRuleArn ->
+        fun ?organizationManagedRuleMetadata ->
+          fun ?organizationCustomRuleMetadata ->
+            fun ?excludedAccounts ->
+              fun ?lastUpdateTime ->
+                fun ?organizationCustomPolicyRuleMetadata ->
                   fun () ->
                     {
+                      organizationConfigRuleName;
+                      organizationConfigRuleArn;
                       organizationManagedRuleMetadata;
                       organizationCustomRuleMetadata;
                       excludedAccounts;
                       lastUpdateTime;
-                      organizationCustomPolicyRuleMetadata;
-                      organizationConfigRuleName;
-                      organizationConfigRuleArn
+                      organizationCustomPolicyRuleMetadata
                     }
     let to_value x =
       structure_to_value
         [("OrganizationConfigRuleName",
-           (Some
-              (OrganizationConfigRuleName.to_value
-                 x.organizationConfigRuleName)));
+           (Option.map x.organizationConfigRuleName
+              ~f:OrganizationConfigRuleName.to_value));
         ("OrganizationConfigRuleArn",
-          (Some (StringWithCharLimit256.to_value x.organizationConfigRuleArn)));
+          (Option.map x.organizationConfigRuleArn
+             ~f:StringWithCharLimit256.to_value));
         ("OrganizationManagedRuleMetadata",
           (Option.map x.organizationManagedRuleMetadata
              ~f:OrganizationManagedRuleMetadata.to_value));
@@ -6525,41 +9335,39 @@ module OrganizationConfigRule =
         (Option.map ~f:OrganizationManagedRuleMetadata.of_xml)
           (Xml.child xml_arg0 "OrganizationManagedRuleMetadata") in
       let organizationConfigRuleArn =
-        StringWithCharLimit256.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "OrganizationConfigRuleArn") in
+        (Option.map ~f:StringWithCharLimit256.of_xml)
+          (Xml.child xml_arg0 "OrganizationConfigRuleArn") in
       let organizationConfigRuleName =
-        OrganizationConfigRuleName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "OrganizationConfigRuleName") in
+        (Option.map ~f:OrganizationConfigRuleName.of_xml)
+          (Xml.child xml_arg0 "OrganizationConfigRuleName") in
       make ?organizationCustomPolicyRuleMetadata ?lastUpdateTime
         ?excludedAccounts ?organizationCustomRuleMetadata
-        ?organizationManagedRuleMetadata ~organizationConfigRuleArn
-        ~organizationConfigRuleName ()
+        ?organizationManagedRuleMetadata ?organizationConfigRuleArn
+        ?organizationConfigRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationCustomPolicyRuleMetadata =
-        field_map json "OrganizationCustomPolicyRuleMetadata"
+        field_map json__ "OrganizationCustomPolicyRuleMetadata"
           OrganizationCustomPolicyRuleMetadataNoPolicy.of_json in
-      let lastUpdateTime = field_map json "LastUpdateTime" Date.of_json in
+      let lastUpdateTime = field_map json__ "LastUpdateTime" Date.of_json in
       let excludedAccounts =
-        field_map json "ExcludedAccounts" ExcludedAccounts.of_json in
+        field_map json__ "ExcludedAccounts" ExcludedAccounts.of_json in
       let organizationCustomRuleMetadata =
-        field_map json "OrganizationCustomRuleMetadata"
+        field_map json__ "OrganizationCustomRuleMetadata"
           OrganizationCustomRuleMetadata.of_json in
       let organizationManagedRuleMetadata =
-        field_map json "OrganizationManagedRuleMetadata"
+        field_map json__ "OrganizationManagedRuleMetadata"
           OrganizationManagedRuleMetadata.of_json in
       let organizationConfigRuleArn =
-        field_map_exn json "OrganizationConfigRuleArn"
+        field_map json__ "OrganizationConfigRuleArn"
           StringWithCharLimit256.of_json in
       let organizationConfigRuleName =
-        field_map_exn json "OrganizationConfigRuleName"
+        field_map json__ "OrganizationConfigRuleName"
           OrganizationConfigRuleName.of_json in
       make ?organizationCustomPolicyRuleMetadata ?lastUpdateTime
         ?excludedAccounts ?organizationCustomRuleMetadata
-        ?organizationManagedRuleMetadata ~organizationConfigRuleArn
-        ~organizationConfigRuleName ()
+        ?organizationManagedRuleMetadata ?organizationConfigRuleArn
+        ?organizationConfigRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An organization Config rule that has information about Config rules that Config creates in member accounts."]
@@ -6567,11 +9375,11 @@ module OrganizationConfigRuleStatus =
   struct
     type nonrec t =
       {
-      organizationConfigRuleName: OrganizationConfigRuleName.t
+      organizationConfigRuleName: OrganizationConfigRuleName.t option
         [@ocaml.doc "The name that you assign to organization Config rule."];
-      organizationRuleStatus: OrganizationRuleStatus.t
+      organizationRuleStatus: OrganizationRuleStatus.t option
         [@ocaml.doc
-          "Indicates deployment status of an organization Config rule. When master account calls PutOrganizationConfigRule action for the first time, Config rule status is created in all the member accounts. When master account calls PutOrganizationConfigRule action for the second time, Config rule status is updated in all the member accounts. Additionally, Config rule status is updated when one or more member accounts join or leave an organization. Config rule status is deleted when the master account deletes OrganizationConfigRule in all the member accounts and disables service access for config-multiaccountsetup.amazonaws.com. Config sets the state of the rule to: CREATE_SUCCESSFUL when an organization Config rule has been successfully created in all the member accounts. CREATE_IN_PROGRESS when an organization Config rule creation is in progress. CREATE_FAILED when an organization Config rule creation failed in one or more member accounts within that organization. DELETE_FAILED when an organization Config rule deletion failed in one or more member accounts within that organization. DELETE_IN_PROGRESS when an organization Config rule deletion is in progress. DELETE_SUCCESSFUL when an organization Config rule has been successfully deleted from all the member accounts. UPDATE_SUCCESSFUL when an organization Config rule has been successfully updated in all the member accounts. UPDATE_IN_PROGRESS when an organization Config rule update is in progress. UPDATE_FAILED when an organization Config rule update failed in one or more member accounts within that organization."];
+          "Indicates deployment status of an organization Config rule. When management account calls PutOrganizationConfigRule action for the first time, Config rule status is created in all the member accounts. When management account calls PutOrganizationConfigRule action for the second time, Config rule status is updated in all the member accounts. Additionally, Config rule status is updated when one or more member accounts join or leave an organization. Config rule status is deleted when the management account deletes OrganizationConfigRule in all the member accounts and disables service access for config-multiaccountsetup.amazonaws.com. Config sets the state of the rule to: CREATE_SUCCESSFUL when an organization Config rule has been successfully created in all the member accounts. CREATE_IN_PROGRESS when an organization Config rule creation is in progress. CREATE_FAILED when an organization Config rule creation failed in one or more member accounts within that organization. DELETE_FAILED when an organization Config rule deletion failed in one or more member accounts within that organization. DELETE_IN_PROGRESS when an organization Config rule deletion is in progress. DELETE_SUCCESSFUL when an organization Config rule has been successfully deleted from all the member accounts. UPDATE_SUCCESSFUL when an organization Config rule has been successfully updated in all the member accounts. UPDATE_IN_PROGRESS when an organization Config rule update is in progress. UPDATE_FAILED when an organization Config rule update failed in one or more member accounts within that organization."];
       errorCode: String_.t option
         [@ocaml.doc
           "An error code that is returned when organization Config rule creation or deletion has failed."];
@@ -6580,28 +9388,27 @@ module OrganizationConfigRuleStatus =
           "An error message indicating that organization Config rule creation or deletion failed due to an error."];
       lastUpdateTime: Date.t option
         [@ocaml.doc "The timestamp of the last update."]}
-    let context_ = "OrganizationConfigRuleStatus"
-    let make ?errorCode =
-      fun ?errorMessage ->
-        fun ?lastUpdateTime ->
-          fun ~organizationConfigRuleName ->
-            fun ~organizationRuleStatus ->
+    let make ?organizationConfigRuleName =
+      fun ?organizationRuleStatus ->
+        fun ?errorCode ->
+          fun ?errorMessage ->
+            fun ?lastUpdateTime ->
               fun () ->
                 {
+                  organizationConfigRuleName;
+                  organizationRuleStatus;
                   errorCode;
                   errorMessage;
-                  lastUpdateTime;
-                  organizationConfigRuleName;
-                  organizationRuleStatus
+                  lastUpdateTime
                 }
     let to_value x =
       structure_to_value
         [("OrganizationConfigRuleName",
-           (Some
-              (OrganizationConfigRuleName.to_value
-                 x.organizationConfigRuleName)));
+           (Option.map x.organizationConfigRuleName
+              ~f:OrganizationConfigRuleName.to_value));
         ("OrganizationRuleStatus",
-          (Some (OrganizationRuleStatus.to_value x.organizationRuleStatus)));
+          (Option.map x.organizationRuleStatus
+             ~f:OrganizationRuleStatus.to_value));
         ("ErrorCode", (Option.map x.errorCode ~f:String_.to_value));
         ("ErrorMessage", (Option.map x.errorMessage ~f:String_.to_value));
         ("LastUpdateTime", (Option.map x.lastUpdateTime ~f:Date.to_value))]
@@ -6614,27 +9421,26 @@ module OrganizationConfigRuleStatus =
       let errorCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       let organizationRuleStatus =
-        OrganizationRuleStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationRuleStatus") in
+        (Option.map ~f:OrganizationRuleStatus.of_xml)
+          (Xml.child xml_arg0 "OrganizationRuleStatus") in
       let organizationConfigRuleName =
-        OrganizationConfigRuleName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "OrganizationConfigRuleName") in
-      make ?lastUpdateTime ?errorMessage ?errorCode ~organizationRuleStatus
-        ~organizationConfigRuleName ()
+        (Option.map ~f:OrganizationConfigRuleName.of_xml)
+          (Xml.child xml_arg0 "OrganizationConfigRuleName") in
+      make ?lastUpdateTime ?errorMessage ?errorCode ?organizationRuleStatus
+        ?organizationConfigRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdateTime = field_map json "LastUpdateTime" Date.of_json in
-      let errorMessage = field_map json "ErrorMessage" String_.of_json in
-      let errorCode = field_map json "ErrorCode" String_.of_json in
+    let of_json json__ =
+      let lastUpdateTime = field_map json__ "LastUpdateTime" Date.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
       let organizationRuleStatus =
-        field_map_exn json "OrganizationRuleStatus"
+        field_map json__ "OrganizationRuleStatus"
           OrganizationRuleStatus.of_json in
       let organizationConfigRuleName =
-        field_map_exn json "OrganizationConfigRuleName"
+        field_map json__ "OrganizationConfigRuleName"
           OrganizationConfigRuleName.of_json in
-      make ?lastUpdateTime ?errorMessage ?errorCode ~organizationRuleStatus
-        ~organizationConfigRuleName ()
+      make ?lastUpdateTime ?errorMessage ?errorCode ?organizationRuleStatus
+        ?organizationConfigRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the status for an organization Config rule in an organization."]
@@ -6703,15 +9509,15 @@ module DeliveryChannel =
       make ?configSnapshotDeliveryProperties ?snsTopicARN ?s3KmsKeyArn
         ?s3KeyPrefix ?s3BucketName ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configSnapshotDeliveryProperties =
-        field_map json "configSnapshotDeliveryProperties"
+        field_map json__ "configSnapshotDeliveryProperties"
           ConfigSnapshotDeliveryProperties.of_json in
-      let snsTopicARN = field_map json "snsTopicARN" String_.of_json in
-      let s3KmsKeyArn = field_map json "s3KmsKeyArn" String_.of_json in
-      let s3KeyPrefix = field_map json "s3KeyPrefix" String_.of_json in
-      let s3BucketName = field_map json "s3BucketName" String_.of_json in
-      let name = field_map json "name" ChannelName.of_json in
+      let snsTopicARN = field_map json__ "snsTopicARN" String_.of_json in
+      let s3KmsKeyArn = field_map json__ "s3KmsKeyArn" String_.of_json in
+      let s3KeyPrefix = field_map json__ "s3KeyPrefix" String_.of_json in
+      let s3BucketName = field_map json__ "s3BucketName" String_.of_json in
+      let name = field_map json__ "name" ChannelName.of_json in
       make ?configSnapshotDeliveryProperties ?snsTopicARN ?s3KmsKeyArn
         ?s3KeyPrefix ?s3BucketName ?name ()
     let to_json v = composed_to_json to_value v
@@ -6769,17 +9575,17 @@ module DeliveryChannelStatus =
       make ?configStreamDeliveryInfo ?configHistoryDeliveryInfo
         ?configSnapshotDeliveryInfo ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configStreamDeliveryInfo =
-        field_map json "configStreamDeliveryInfo"
+        field_map json__ "configStreamDeliveryInfo"
           ConfigStreamDeliveryInfo.of_json in
       let configHistoryDeliveryInfo =
-        field_map json "configHistoryDeliveryInfo"
+        field_map json__ "configHistoryDeliveryInfo"
           ConfigExportDeliveryInfo.of_json in
       let configSnapshotDeliveryInfo =
-        field_map json "configSnapshotDeliveryInfo"
+        field_map json__ "configSnapshotDeliveryInfo"
           ConfigExportDeliveryInfo.of_json in
-      let name = field_map json "name" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
       make ?configStreamDeliveryInfo ?configHistoryDeliveryInfo
         ?configSnapshotDeliveryInfo ?name ()
     let to_json v = composed_to_json to_value v
@@ -6789,11 +9595,11 @@ module ConformancePackDetail =
   struct
     type nonrec t =
       {
-      conformancePackName: ConformancePackName.t
+      conformancePackName: ConformancePackName.t option
         [@ocaml.doc "Name of the conformance pack."];
-      conformancePackArn: ConformancePackArn.t
+      conformancePackArn: ConformancePackArn.t option
         [@ocaml.doc "Amazon Resource Name (ARN) of the conformance pack."];
-      conformancePackId: ConformancePackId.t
+      conformancePackId: ConformancePackId.t option
         [@ocaml.doc "ID of the conformance pack."];
       deliveryS3Bucket: DeliveryS3Bucket.t option
         [@ocaml.doc
@@ -6804,38 +9610,43 @@ module ConformancePackDetail =
       conformancePackInputParameters: ConformancePackInputParameters.t option
         [@ocaml.doc "A list of ConformancePackInputParameter objects."];
       lastUpdateRequestedTime: Date.t option
-        [@ocaml.doc "Last time when conformation pack update was requested."];
+        [@ocaml.doc
+          "The last time a conformation pack update was requested."];
       createdBy: StringWithCharLimit256.t option
         [@ocaml.doc
-          "Amazon Web Services service that created the conformance pack."]}
-    let context_ = "ConformancePackDetail"
-    let make ?deliveryS3Bucket =
-      fun ?deliveryS3KeyPrefix ->
-        fun ?conformancePackInputParameters ->
-          fun ?lastUpdateRequestedTime ->
-            fun ?createdBy ->
-              fun ~conformancePackName ->
-                fun ~conformancePackArn ->
-                  fun ~conformancePackId ->
-                    fun () ->
-                      {
-                        deliveryS3Bucket;
-                        deliveryS3KeyPrefix;
-                        conformancePackInputParameters;
-                        lastUpdateRequestedTime;
-                        createdBy;
-                        conformancePackName;
-                        conformancePackArn;
-                        conformancePackId
-                      }
+          "The Amazon Web Services service that created the conformance pack."];
+      templateSSMDocumentDetails: TemplateSSMDocumentDetails.t option
+        [@ocaml.doc
+          "An object that contains the name or Amazon Resource Name (ARN) of the Amazon Web Services Systems Manager document (SSM document) and the version of the SSM document that is used to create a conformance pack."]}
+    let make ?conformancePackName =
+      fun ?conformancePackArn ->
+        fun ?conformancePackId ->
+          fun ?deliveryS3Bucket ->
+            fun ?deliveryS3KeyPrefix ->
+              fun ?conformancePackInputParameters ->
+                fun ?lastUpdateRequestedTime ->
+                  fun ?createdBy ->
+                    fun ?templateSSMDocumentDetails ->
+                      fun () ->
+                        {
+                          conformancePackName;
+                          conformancePackArn;
+                          conformancePackId;
+                          deliveryS3Bucket;
+                          deliveryS3KeyPrefix;
+                          conformancePackInputParameters;
+                          lastUpdateRequestedTime;
+                          createdBy;
+                          templateSSMDocumentDetails
+                        }
     let to_value x =
       structure_to_value
         [("ConformancePackName",
-           (Some (ConformancePackName.to_value x.conformancePackName)));
+           (Option.map x.conformancePackName ~f:ConformancePackName.to_value));
         ("ConformancePackArn",
-          (Some (ConformancePackArn.to_value x.conformancePackArn)));
+          (Option.map x.conformancePackArn ~f:ConformancePackArn.to_value));
         ("ConformancePackId",
-          (Some (ConformancePackId.to_value x.conformancePackId)));
+          (Option.map x.conformancePackId ~f:ConformancePackId.to_value));
         ("DeliveryS3Bucket",
           (Option.map x.deliveryS3Bucket ~f:DeliveryS3Bucket.to_value));
         ("DeliveryS3KeyPrefix",
@@ -6846,9 +9657,15 @@ module ConformancePackDetail =
         ("LastUpdateRequestedTime",
           (Option.map x.lastUpdateRequestedTime ~f:Date.to_value));
         ("CreatedBy",
-          (Option.map x.createdBy ~f:StringWithCharLimit256.to_value))]
+          (Option.map x.createdBy ~f:StringWithCharLimit256.to_value));
+        ("TemplateSSMDocumentDetails",
+          (Option.map x.templateSSMDocumentDetails
+             ~f:TemplateSSMDocumentDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let templateSSMDocumentDetails =
+        (Option.map ~f:TemplateSSMDocumentDetails.of_xml)
+          (Xml.child xml_arg0 "TemplateSSMDocumentDetails") in
       let createdBy =
         (Option.map ~f:StringWithCharLimit256.of_xml)
           (Xml.child xml_arg0 "CreatedBy") in
@@ -6865,41 +9682,44 @@ module ConformancePackDetail =
         (Option.map ~f:DeliveryS3Bucket.of_xml)
           (Xml.child xml_arg0 "DeliveryS3Bucket") in
       let conformancePackId =
-        ConformancePackId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConformancePackId") in
+        (Option.map ~f:ConformancePackId.of_xml)
+          (Xml.child xml_arg0 "ConformancePackId") in
       let conformancePackArn =
-        ConformancePackArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConformancePackArn") in
+        (Option.map ~f:ConformancePackArn.of_xml)
+          (Xml.child xml_arg0 "ConformancePackArn") in
       let conformancePackName =
-        ConformancePackName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConformancePackName") in
-      make ?createdBy ?lastUpdateRequestedTime
+        (Option.map ~f:ConformancePackName.of_xml)
+          (Xml.child xml_arg0 "ConformancePackName") in
+      make ?templateSSMDocumentDetails ?createdBy ?lastUpdateRequestedTime
         ?conformancePackInputParameters ?deliveryS3KeyPrefix
-        ?deliveryS3Bucket ~conformancePackId ~conformancePackArn
-        ~conformancePackName ()
+        ?deliveryS3Bucket ?conformancePackId ?conformancePackArn
+        ?conformancePackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let templateSSMDocumentDetails =
+        field_map json__ "TemplateSSMDocumentDetails"
+          TemplateSSMDocumentDetails.of_json in
       let createdBy =
-        field_map json "CreatedBy" StringWithCharLimit256.of_json in
+        field_map json__ "CreatedBy" StringWithCharLimit256.of_json in
       let lastUpdateRequestedTime =
-        field_map json "LastUpdateRequestedTime" Date.of_json in
+        field_map json__ "LastUpdateRequestedTime" Date.of_json in
       let conformancePackInputParameters =
-        field_map json "ConformancePackInputParameters"
+        field_map json__ "ConformancePackInputParameters"
           ConformancePackInputParameters.of_json in
       let deliveryS3KeyPrefix =
-        field_map json "DeliveryS3KeyPrefix" DeliveryS3KeyPrefix.of_json in
+        field_map json__ "DeliveryS3KeyPrefix" DeliveryS3KeyPrefix.of_json in
       let deliveryS3Bucket =
-        field_map json "DeliveryS3Bucket" DeliveryS3Bucket.of_json in
+        field_map json__ "DeliveryS3Bucket" DeliveryS3Bucket.of_json in
       let conformancePackId =
-        field_map_exn json "ConformancePackId" ConformancePackId.of_json in
+        field_map json__ "ConformancePackId" ConformancePackId.of_json in
       let conformancePackArn =
-        field_map_exn json "ConformancePackArn" ConformancePackArn.of_json in
+        field_map json__ "ConformancePackArn" ConformancePackArn.of_json in
       let conformancePackName =
-        field_map_exn json "ConformancePackName" ConformancePackName.of_json in
-      make ?createdBy ?lastUpdateRequestedTime
+        field_map json__ "ConformancePackName" ConformancePackName.of_json in
+      make ?templateSSMDocumentDetails ?createdBy ?lastUpdateRequestedTime
         ?conformancePackInputParameters ?deliveryS3KeyPrefix
-        ?deliveryS3Bucket ~conformancePackId ~conformancePackArn
-        ~conformancePackName ()
+        ?deliveryS3Bucket ?conformancePackId ?conformancePackArn
+        ?conformancePackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns details of a conformance pack. A conformance pack is a collection of Config rules and remediation actions that can be easily deployed in an account and a region."]
@@ -6907,61 +9727,60 @@ module ConformancePackStatusDetail =
   struct
     type nonrec t =
       {
-      conformancePackName: ConformancePackName.t
+      conformancePackName: ConformancePackName.t option
         [@ocaml.doc "Name of the conformance pack."];
-      conformancePackId: ConformancePackId.t
+      conformancePackId: ConformancePackId.t option
         [@ocaml.doc "ID of the conformance pack."];
-      conformancePackArn: ConformancePackArn.t
+      conformancePackArn: ConformancePackArn.t option
         [@ocaml.doc "Amazon Resource Name (ARN) of comformance pack."];
-      conformancePackState: ConformancePackState.t
+      conformancePackState: ConformancePackState.t option
         [@ocaml.doc
           "Indicates deployment status of conformance pack. Config sets the state of the conformance pack to: CREATE_IN_PROGRESS when a conformance pack creation is in progress for an account. CREATE_COMPLETE when a conformance pack has been successfully created in your account. CREATE_FAILED when a conformance pack creation failed in your account. DELETE_IN_PROGRESS when a conformance pack deletion is in progress. DELETE_FAILED when a conformance pack deletion failed in your account."];
-      stackArn: StackArn.t
+      stackArn: StackArn.t option
         [@ocaml.doc "Amazon Resource Name (ARN) of CloudFormation stack."];
       conformancePackStatusReason: ConformancePackStatusReason.t option
         [@ocaml.doc "The reason of conformance pack creation failure."];
-      lastUpdateRequestedTime: Date.t
+      lastUpdateRequestedTime: Date.t option
         [@ocaml.doc
           "Last time when conformation pack creation and update was requested."];
       lastUpdateCompletedTime: Date.t option
         [@ocaml.doc
           "Last time when conformation pack creation and update was successful."]}
-    let context_ = "ConformancePackStatusDetail"
-    let make ?conformancePackStatusReason =
-      fun ?lastUpdateCompletedTime ->
-        fun ~conformancePackName ->
-          fun ~conformancePackId ->
-            fun ~conformancePackArn ->
-              fun ~conformancePackState ->
-                fun ~stackArn ->
-                  fun ~lastUpdateRequestedTime ->
+    let make ?conformancePackName =
+      fun ?conformancePackId ->
+        fun ?conformancePackArn ->
+          fun ?conformancePackState ->
+            fun ?stackArn ->
+              fun ?conformancePackStatusReason ->
+                fun ?lastUpdateRequestedTime ->
+                  fun ?lastUpdateCompletedTime ->
                     fun () ->
                       {
-                        conformancePackStatusReason;
-                        lastUpdateCompletedTime;
                         conformancePackName;
                         conformancePackId;
                         conformancePackArn;
                         conformancePackState;
                         stackArn;
-                        lastUpdateRequestedTime
+                        conformancePackStatusReason;
+                        lastUpdateRequestedTime;
+                        lastUpdateCompletedTime
                       }
     let to_value x =
       structure_to_value
         [("ConformancePackName",
-           (Some (ConformancePackName.to_value x.conformancePackName)));
+           (Option.map x.conformancePackName ~f:ConformancePackName.to_value));
         ("ConformancePackId",
-          (Some (ConformancePackId.to_value x.conformancePackId)));
+          (Option.map x.conformancePackId ~f:ConformancePackId.to_value));
         ("ConformancePackArn",
-          (Some (ConformancePackArn.to_value x.conformancePackArn)));
+          (Option.map x.conformancePackArn ~f:ConformancePackArn.to_value));
         ("ConformancePackState",
-          (Some (ConformancePackState.to_value x.conformancePackState)));
-        ("StackArn", (Some (StackArn.to_value x.stackArn)));
+          (Option.map x.conformancePackState ~f:ConformancePackState.to_value));
+        ("StackArn", (Option.map x.stackArn ~f:StackArn.to_value));
         ("ConformancePackStatusReason",
           (Option.map x.conformancePackStatusReason
              ~f:ConformancePackStatusReason.to_value));
         ("LastUpdateRequestedTime",
-          (Some (Date.to_value x.lastUpdateRequestedTime)));
+          (Option.map x.lastUpdateRequestedTime ~f:Date.to_value));
         ("LastUpdateCompletedTime",
           (Option.map x.lastUpdateCompletedTime ~f:Date.to_value))]
     let to_query v = to_query to_value v
@@ -6970,50 +9789,49 @@ module ConformancePackStatusDetail =
         (Option.map ~f:Date.of_xml)
           (Xml.child xml_arg0 "LastUpdateCompletedTime") in
       let lastUpdateRequestedTime =
-        Date.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LastUpdateRequestedTime") in
+        (Option.map ~f:Date.of_xml)
+          (Xml.child xml_arg0 "LastUpdateRequestedTime") in
       let conformancePackStatusReason =
         (Option.map ~f:ConformancePackStatusReason.of_xml)
           (Xml.child xml_arg0 "ConformancePackStatusReason") in
       let stackArn =
-        StackArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "StackArn") in
+        (Option.map ~f:StackArn.of_xml) (Xml.child xml_arg0 "StackArn") in
       let conformancePackState =
-        ConformancePackState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConformancePackState") in
+        (Option.map ~f:ConformancePackState.of_xml)
+          (Xml.child xml_arg0 "ConformancePackState") in
       let conformancePackArn =
-        ConformancePackArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConformancePackArn") in
+        (Option.map ~f:ConformancePackArn.of_xml)
+          (Xml.child xml_arg0 "ConformancePackArn") in
       let conformancePackId =
-        ConformancePackId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConformancePackId") in
+        (Option.map ~f:ConformancePackId.of_xml)
+          (Xml.child xml_arg0 "ConformancePackId") in
       let conformancePackName =
-        ConformancePackName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConformancePackName") in
-      make ?lastUpdateCompletedTime ~lastUpdateRequestedTime
-        ?conformancePackStatusReason ~stackArn ~conformancePackState
-        ~conformancePackArn ~conformancePackId ~conformancePackName ()
+        (Option.map ~f:ConformancePackName.of_xml)
+          (Xml.child xml_arg0 "ConformancePackName") in
+      make ?lastUpdateCompletedTime ?lastUpdateRequestedTime
+        ?conformancePackStatusReason ?stackArn ?conformancePackState
+        ?conformancePackArn ?conformancePackId ?conformancePackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdateCompletedTime =
-        field_map json "LastUpdateCompletedTime" Date.of_json in
+        field_map json__ "LastUpdateCompletedTime" Date.of_json in
       let lastUpdateRequestedTime =
-        field_map_exn json "LastUpdateRequestedTime" Date.of_json in
+        field_map json__ "LastUpdateRequestedTime" Date.of_json in
       let conformancePackStatusReason =
-        field_map json "ConformancePackStatusReason"
+        field_map json__ "ConformancePackStatusReason"
           ConformancePackStatusReason.of_json in
-      let stackArn = field_map_exn json "StackArn" StackArn.of_json in
+      let stackArn = field_map json__ "StackArn" StackArn.of_json in
       let conformancePackState =
-        field_map_exn json "ConformancePackState"
-          ConformancePackState.of_json in
+        field_map json__ "ConformancePackState" ConformancePackState.of_json in
       let conformancePackArn =
-        field_map_exn json "ConformancePackArn" ConformancePackArn.of_json in
+        field_map json__ "ConformancePackArn" ConformancePackArn.of_json in
       let conformancePackId =
-        field_map_exn json "ConformancePackId" ConformancePackId.of_json in
+        field_map json__ "ConformancePackId" ConformancePackId.of_json in
       let conformancePackName =
-        field_map_exn json "ConformancePackName" ConformancePackName.of_json in
-      make ?lastUpdateCompletedTime ~lastUpdateRequestedTime
-        ?conformancePackStatusReason ~stackArn ~conformancePackState
-        ~conformancePackArn ~conformancePackId ~conformancePackName ()
+        field_map json__ "ConformancePackName" ConformancePackName.of_json in
+      make ?lastUpdateCompletedTime ?lastUpdateRequestedTime
+        ?conformancePackStatusReason ?stackArn ?conformancePackState
+        ?conformancePackArn ?conformancePackId ?conformancePackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Status details of a conformance pack."]
 module ConformancePackRuleCompliance =
@@ -7023,8 +9841,7 @@ module ConformancePackRuleCompliance =
       configRuleName: ConfigRuleName.t option
         [@ocaml.doc "Name of the Config rule."];
       complianceType: ConformancePackComplianceType.t option
-        [@ocaml.doc
-          "Compliance of the Config rule. The allowed values are COMPLIANT, NON_COMPLIANT, and INSUFFICIENT_DATA."];
+        [@ocaml.doc "Compliance of the Config rule."];
       controls: ControlsList.t option
         [@ocaml.doc
           "Controls for the conformance pack. A control is a process to prevent or detect problems while meeting objectives. A control can align with a specific compliance regime or map to internal controls defined by an organization."]}
@@ -7052,12 +9869,13 @@ module ConformancePackRuleCompliance =
           (Xml.child xml_arg0 "ConfigRuleName") in
       make ?controls ?complianceType ?configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let controls = field_map json "Controls" ControlsList.of_json in
+    let of_json json__ =
+      let controls = field_map json__ "Controls" ControlsList.of_json in
       let complianceType =
-        field_map json "ComplianceType" ConformancePackComplianceType.of_json in
+        field_map json__ "ComplianceType"
+          ConformancePackComplianceType.of_json in
       let configRuleName =
-        field_map json "ConfigRuleName" ConfigRuleName.of_json in
+        field_map json__ "ConfigRuleName" ConfigRuleName.of_json in
       make ?controls ?complianceType ?configRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7066,26 +9884,68 @@ module ConfigurationRecorder =
   struct
     type nonrec t =
       {
+      arn: AmazonResourceName.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the specified configuration recorder."];
       name: RecorderName.t option
         [@ocaml.doc
-          "The name of the recorder. By default, Config automatically assigns the name \"default\" when creating the configuration recorder. You cannot change the assigned name."];
+          "The name of the configuration recorder. For customer managed configuration recorders, Config automatically assigns the name of \"default\" when creating a configuration recorder if you do not specify a name at creation time. For service-linked configuration recorders, Config automatically assigns a name that has the prefix \"AWSConfigurationRecorderFor\" to a new service-linked configuration recorder. Changing the name of a configuration recorder To change the name of the customer managed configuration recorder, you must delete it and create a new customer managed configuration recorder with a new name. You cannot change the name of a service-linked configuration recorder."];
       roleARN: String_.t option
         [@ocaml.doc
-          "Amazon Resource Name (ARN) of the IAM role used to describe the Amazon Web Services resources associated with the account."];
+          "The Amazon Resource Name (ARN) of the IAM role assumed by Config and used by the specified configuration recorder. The server will reject a request without a defined roleARN for the configuration recorder While the API model does not require this field, the server will reject a request without a defined roleARN for the configuration recorder. Policies and compliance results IAM policies and other policies managed in Organizations can impact whether Config has permissions to record configuration changes for your resources. Additionally, rules directly evaluate the configuration of a resource and rules don't take into account these policies when running evaluations. Make sure that the policies in effect align with how you intend to use Config. Keep Minimum Permisions When Reusing an IAM role If you use an Amazon Web Services service that uses Config, such as Security Hub CSPM or Control Tower, and an IAM role has already been created, make sure that the IAM role that you use when setting up Config keeps the same minimum permissions as the pre-existing IAM role. You must do this to ensure that the other Amazon Web Services service continues to run as expected. For example, if Control Tower has an IAM role that allows Config to read S3 objects, make sure that the same permissions are granted to the IAM role you use when setting up Config. Otherwise, it may interfere with how Control Tower operates. The service-linked IAM role for Config must be used for service-linked configuration recorders For service-linked configuration recorders, you must use the service-linked IAM role for Config: AWSServiceRoleForConfig."];
       recordingGroup: RecordingGroup.t option
         [@ocaml.doc
-          "Specifies the types of Amazon Web Services resources for which Config records configuration changes."]}
-    let make ?name =
-      fun ?roleARN ->
-        fun ?recordingGroup -> fun () -> { name; roleARN; recordingGroup }
+          "Specifies which resource types are in scope for the configuration recorder to record. High Number of Config Evaluations You might notice increased activity in your account during your initial month recording with Config when compared to subsequent months. During the initial bootstrapping process, Config runs evaluations on all the resources in your account that you have selected for Config to record. If you are running ephemeral workloads, you may see increased activity from Config as it records configuration changes associated with creating and deleting these temporary resources. An ephemeral workload is a temporary use of computing resources that are loaded and run when needed. Examples include Amazon Elastic Compute Cloud (Amazon EC2) Spot Instances, Amazon EMR jobs, and Auto Scaling. If you want to avoid the increased activity from running ephemeral workloads, you can set up the configuration recorder to exclude these resource types from being recorded, or run these types of workloads in a separate account with Config turned off to avoid increased configuration recording and rule evaluations."];
+      recordingMode: RecordingMode.t option
+        [@ocaml.doc
+          "Specifies the default recording frequency for the configuration recorder. Config supports Continuous recording and Daily recording. Continuous recording allows you to record configuration changes continuously whenever a change occurs. Daily recording allows you to receive a configuration item (CI) representing the most recent state of your resources over the last 24-hour period, only if it\226\128\153s different from the previous CI recorded. Some resource types require continuous recording Firewall Manager depends on continuous recording to monitor your resources. If you are using Firewall Manager, it is recommended that you set the recording frequency to Continuous. You can also override the recording frequency for specific resource types."];
+      recordingScope: RecordingScope.t option
+        [@ocaml.doc
+          "Specifies whether the ConfigurationItems in scope for the specified configuration recorder are recorded for free (INTERNAL) or if it impacts the costs to your bill (PAID)."];
+      servicePrincipal: ServicePrincipal.t option
+        [@ocaml.doc
+          "For service-linked configuration recorders, specifies the linked Amazon Web Services service for the configuration recorder."]}
+    let make ?arn =
+      fun ?name ->
+        fun ?roleARN ->
+          fun ?recordingGroup ->
+            fun ?recordingMode ->
+              fun ?recordingScope ->
+                fun ?servicePrincipal ->
+                  fun () ->
+                    {
+                      arn;
+                      name;
+                      roleARN;
+                      recordingGroup;
+                      recordingMode;
+                      recordingScope;
+                      servicePrincipal
+                    }
     let to_value x =
       structure_to_value
-        [("name", (Option.map x.name ~f:RecorderName.to_value));
+        [("arn", (Option.map x.arn ~f:AmazonResourceName.to_value));
+        ("name", (Option.map x.name ~f:RecorderName.to_value));
         ("roleARN", (Option.map x.roleARN ~f:String_.to_value));
         ("recordingGroup",
-          (Option.map x.recordingGroup ~f:RecordingGroup.to_value))]
+          (Option.map x.recordingGroup ~f:RecordingGroup.to_value));
+        ("recordingMode",
+          (Option.map x.recordingMode ~f:RecordingMode.to_value));
+        ("recordingScope",
+          (Option.map x.recordingScope ~f:RecordingScope.to_value));
+        ("servicePrincipal",
+          (Option.map x.servicePrincipal ~f:ServicePrincipal.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let servicePrincipal =
+        (Option.map ~f:ServicePrincipal.of_xml)
+          (Xml.child xml_arg0 "servicePrincipal") in
+      let recordingScope =
+        (Option.map ~f:RecordingScope.of_xml)
+          (Xml.child xml_arg0 "recordingScope") in
+      let recordingMode =
+        (Option.map ~f:RecordingMode.of_xml)
+          (Xml.child xml_arg0 "recordingMode") in
       let recordingGroup =
         (Option.map ~f:RecordingGroup.of_xml)
           (Xml.child xml_arg0 "recordingGroup") in
@@ -7093,21 +9953,35 @@ module ConfigurationRecorder =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "roleARN") in
       let name =
         (Option.map ~f:RecorderName.of_xml) (Xml.child xml_arg0 "name") in
-      make ?recordingGroup ?roleARN ?name ()
+      let arn =
+        (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?servicePrincipal ?recordingScope ?recordingMode ?recordingGroup
+        ?roleARN ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let servicePrincipal =
+        field_map json__ "servicePrincipal" ServicePrincipal.of_json in
+      let recordingScope =
+        field_map json__ "recordingScope" RecordingScope.of_json in
+      let recordingMode =
+        field_map json__ "recordingMode" RecordingMode.of_json in
       let recordingGroup =
-        field_map json "recordingGroup" RecordingGroup.of_json in
-      let roleARN = field_map json "roleARN" String_.of_json in
-      let name = field_map json "name" RecorderName.of_json in
-      make ?recordingGroup ?roleARN ?name ()
+        field_map json__ "recordingGroup" RecordingGroup.of_json in
+      let roleARN = field_map json__ "roleARN" String_.of_json in
+      let name = field_map json__ "name" RecorderName.of_json in
+      let arn = field_map json__ "arn" AmazonResourceName.of_json in
+      make ?servicePrincipal ?recordingScope ?recordingMode ?recordingGroup
+        ?roleARN ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that represents the recording of configuration changes of an Amazon Web Services resource."]
+       "Records configuration changes to the resource types in scope. For more information about the configuration recorder, see Working with the Configuration Recorder in the Config Developer Guide."]
 module ConfigurationRecorderStatus =
   struct
     type nonrec t =
       {
+      arn: AmazonResourceName.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the configuration recorder."];
       name: String_.t option
         [@ocaml.doc "The name of the configuration recorder."];
       lastStartTime: Date.t option
@@ -7118,36 +9992,47 @@ module ConfigurationRecorderStatus =
         [@ocaml.doc
           "Specifies whether or not the recorder is currently recording."];
       lastStatus: RecorderStatus.t option
-        [@ocaml.doc "The last (previous) status of the recorder."];
+        [@ocaml.doc
+          "The status of the latest recording event processed by the recorder."];
       lastErrorCode: String_.t option
-        [@ocaml.doc "The error code indicating that the recording failed."];
+        [@ocaml.doc
+          "The latest error code from when the recorder last failed."];
       lastErrorMessage: String_.t option
         [@ocaml.doc
-          "The message indicating that the recording failed due to an error."];
+          "The latest error message from when the recorder last failed."];
       lastStatusChangeTime: Date.t option
-        [@ocaml.doc "The time when the status was last changed."]}
-    let make ?name =
-      fun ?lastStartTime ->
-        fun ?lastStopTime ->
-          fun ?recording ->
-            fun ?lastStatus ->
-              fun ?lastErrorCode ->
-                fun ?lastErrorMessage ->
-                  fun ?lastStatusChangeTime ->
-                    fun () ->
-                      {
-                        name;
-                        lastStartTime;
-                        lastStopTime;
-                        recording;
-                        lastStatus;
-                        lastErrorCode;
-                        lastErrorMessage;
-                        lastStatusChangeTime
-                      }
+        [@ocaml.doc
+          "The time of the latest change in status of an recording event processed by the recorder."];
+      servicePrincipal: ServicePrincipal.t option
+        [@ocaml.doc
+          "For service-linked configuration recorders, the service principal of the linked Amazon Web Services service."]}
+    let make ?arn =
+      fun ?name ->
+        fun ?lastStartTime ->
+          fun ?lastStopTime ->
+            fun ?recording ->
+              fun ?lastStatus ->
+                fun ?lastErrorCode ->
+                  fun ?lastErrorMessage ->
+                    fun ?lastStatusChangeTime ->
+                      fun ?servicePrincipal ->
+                        fun () ->
+                          {
+                            arn;
+                            name;
+                            lastStartTime;
+                            lastStopTime;
+                            recording;
+                            lastStatus;
+                            lastErrorCode;
+                            lastErrorMessage;
+                            lastStatusChangeTime;
+                            servicePrincipal
+                          }
     let to_value x =
       structure_to_value
-        [("name", (Option.map x.name ~f:String_.to_value));
+        [("arn", (Option.map x.arn ~f:AmazonResourceName.to_value));
+        ("name", (Option.map x.name ~f:String_.to_value));
         ("lastStartTime", (Option.map x.lastStartTime ~f:Date.to_value));
         ("lastStopTime", (Option.map x.lastStopTime ~f:Date.to_value));
         ("recording", (Option.map x.recording ~f:Boolean.to_value));
@@ -7156,9 +10041,14 @@ module ConfigurationRecorderStatus =
         ("lastErrorMessage",
           (Option.map x.lastErrorMessage ~f:String_.to_value));
         ("lastStatusChangeTime",
-          (Option.map x.lastStatusChangeTime ~f:Date.to_value))]
+          (Option.map x.lastStatusChangeTime ~f:Date.to_value));
+        ("servicePrincipal",
+          (Option.map x.servicePrincipal ~f:ServicePrincipal.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let servicePrincipal =
+        (Option.map ~f:ServicePrincipal.of_xml)
+          (Xml.child xml_arg0 "servicePrincipal") in
       let lastStatusChangeTime =
         (Option.map ~f:Date.of_xml)
           (Xml.child xml_arg0 "lastStatusChangeTime") in
@@ -7177,24 +10067,32 @@ module ConfigurationRecorderStatus =
       let lastStartTime =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "lastStartTime") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
-      make ?lastStatusChangeTime ?lastErrorMessage ?lastErrorCode ?lastStatus
-        ?recording ?lastStopTime ?lastStartTime ?name ()
+      let arn =
+        (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?servicePrincipal ?lastStatusChangeTime ?lastErrorMessage
+        ?lastErrorCode ?lastStatus ?recording ?lastStopTime ?lastStartTime
+        ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let servicePrincipal =
+        field_map json__ "servicePrincipal" ServicePrincipal.of_json in
       let lastStatusChangeTime =
-        field_map json "lastStatusChangeTime" Date.of_json in
+        field_map json__ "lastStatusChangeTime" Date.of_json in
       let lastErrorMessage =
-        field_map json "lastErrorMessage" String_.of_json in
-      let lastErrorCode = field_map json "lastErrorCode" String_.of_json in
-      let lastStatus = field_map json "lastStatus" RecorderStatus.of_json in
-      let recording = field_map json "recording" Boolean.of_json in
-      let lastStopTime = field_map json "lastStopTime" Date.of_json in
-      let lastStartTime = field_map json "lastStartTime" Date.of_json in
-      let name = field_map json "name" String_.of_json in
-      make ?lastStatusChangeTime ?lastErrorMessage ?lastErrorCode ?lastStatus
-        ?recording ?lastStopTime ?lastStartTime ?name ()
+        field_map json__ "lastErrorMessage" String_.of_json in
+      let lastErrorCode = field_map json__ "lastErrorCode" String_.of_json in
+      let lastStatus = field_map json__ "lastStatus" RecorderStatus.of_json in
+      let recording = field_map json__ "recording" Boolean.of_json in
+      let lastStopTime = field_map json__ "lastStopTime" Date.of_json in
+      let lastStartTime = field_map json__ "lastStartTime" Date.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let arn = field_map json__ "arn" AmazonResourceName.of_json in
+      make ?servicePrincipal ?lastStatusChangeTime ?lastErrorMessage
+        ?lastErrorCode ?lastStatus ?recording ?lastStopTime ?lastStartTime
+        ?name ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The current status of the configuration recorder."]
+  end[@@ocaml.doc
+       "The current status of the configuration recorder. For a detailed status of recording events over time, add your Config events to CloudWatch metrics and use CloudWatch metrics."]
 module ConfigurationAggregator =
   struct
     type nonrec t =
@@ -7216,7 +10114,10 @@ module ConfigurationAggregator =
         [@ocaml.doc "The time of the last update."];
       createdBy: StringWithCharLimit256.t option
         [@ocaml.doc
-          "Amazon Web Services service that created the configuration aggregator."]}
+          "Amazon Web Services service that created the configuration aggregator."];
+      aggregatorFilters: AggregatorFilters.t option
+        [@ocaml.doc
+          "An object to filter the data you specify for an aggregator."]}
     let make ?configurationAggregatorName =
       fun ?configurationAggregatorArn ->
         fun ?accountAggregationSources ->
@@ -7224,16 +10125,18 @@ module ConfigurationAggregator =
             fun ?creationTime ->
               fun ?lastUpdatedTime ->
                 fun ?createdBy ->
-                  fun () ->
-                    {
-                      configurationAggregatorName;
-                      configurationAggregatorArn;
-                      accountAggregationSources;
-                      organizationAggregationSource;
-                      creationTime;
-                      lastUpdatedTime;
-                      createdBy
-                    }
+                  fun ?aggregatorFilters ->
+                    fun () ->
+                      {
+                        configurationAggregatorName;
+                        configurationAggregatorArn;
+                        accountAggregationSources;
+                        organizationAggregationSource;
+                        creationTime;
+                        lastUpdatedTime;
+                        createdBy;
+                        aggregatorFilters
+                      }
     let to_value x =
       structure_to_value
         [("ConfigurationAggregatorName",
@@ -7251,9 +10154,14 @@ module ConfigurationAggregator =
         ("CreationTime", (Option.map x.creationTime ~f:Date.to_value));
         ("LastUpdatedTime", (Option.map x.lastUpdatedTime ~f:Date.to_value));
         ("CreatedBy",
-          (Option.map x.createdBy ~f:StringWithCharLimit256.to_value))]
+          (Option.map x.createdBy ~f:StringWithCharLimit256.to_value));
+        ("AggregatorFilters",
+          (Option.map x.aggregatorFilters ~f:AggregatorFilters.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let aggregatorFilters =
+        (Option.map ~f:AggregatorFilters.of_xml)
+          (Xml.child xml_arg0 "AggregatorFilters") in
       let createdBy =
         (Option.map ~f:StringWithCharLimit256.of_xml)
           (Xml.child xml_arg0 "CreatedBy") in
@@ -7273,28 +10181,30 @@ module ConfigurationAggregator =
       let configurationAggregatorName =
         (Option.map ~f:ConfigurationAggregatorName.of_xml)
           (Xml.child xml_arg0 "ConfigurationAggregatorName") in
-      make ?createdBy ?lastUpdatedTime ?creationTime
+      make ?aggregatorFilters ?createdBy ?lastUpdatedTime ?creationTime
         ?organizationAggregationSource ?accountAggregationSources
         ?configurationAggregatorArn ?configurationAggregatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let aggregatorFilters =
+        field_map json__ "AggregatorFilters" AggregatorFilters.of_json in
       let createdBy =
-        field_map json "CreatedBy" StringWithCharLimit256.of_json in
-      let lastUpdatedTime = field_map json "LastUpdatedTime" Date.of_json in
-      let creationTime = field_map json "CreationTime" Date.of_json in
+        field_map json__ "CreatedBy" StringWithCharLimit256.of_json in
+      let lastUpdatedTime = field_map json__ "LastUpdatedTime" Date.of_json in
+      let creationTime = field_map json__ "CreationTime" Date.of_json in
       let organizationAggregationSource =
-        field_map json "OrganizationAggregationSource"
+        field_map json__ "OrganizationAggregationSource"
           OrganizationAggregationSource.of_json in
       let accountAggregationSources =
-        field_map json "AccountAggregationSources"
+        field_map json__ "AccountAggregationSources"
           AccountAggregationSourceList.of_json in
       let configurationAggregatorArn =
-        field_map json "ConfigurationAggregatorArn"
+        field_map json__ "ConfigurationAggregatorArn"
           ConfigurationAggregatorArn.of_json in
       let configurationAggregatorName =
-        field_map json "ConfigurationAggregatorName"
+        field_map json__ "ConfigurationAggregatorName"
           ConfigurationAggregatorName.of_json in
-      make ?createdBy ?lastUpdatedTime ?creationTime
+      make ?aggregatorFilters ?createdBy ?lastUpdatedTime ?creationTime
         ?organizationAggregationSource ?accountAggregationSources
         ?configurationAggregatorArn ?configurationAggregatorName ()
     let to_json v = composed_to_json to_value v
@@ -7373,17 +10283,18 @@ module AggregatedSourceStatus =
       make ?lastErrorMessage ?lastErrorCode ?lastUpdateTime ?lastUpdateStatus
         ?awsRegion ?sourceType ?sourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastErrorMessage =
-        field_map json "LastErrorMessage" String_.of_json in
-      let lastErrorCode = field_map json "LastErrorCode" String_.of_json in
-      let lastUpdateTime = field_map json "LastUpdateTime" Date.of_json in
+        field_map json__ "LastErrorMessage" String_.of_json in
+      let lastErrorCode = field_map json__ "LastErrorCode" String_.of_json in
+      let lastUpdateTime = field_map json__ "LastUpdateTime" Date.of_json in
       let lastUpdateStatus =
-        field_map json "LastUpdateStatus" AggregatedSourceStatusType.of_json in
-      let awsRegion = field_map json "AwsRegion" AwsRegion.of_json in
+        field_map json__ "LastUpdateStatus"
+          AggregatedSourceStatusType.of_json in
+      let awsRegion = field_map json__ "AwsRegion" AwsRegion.of_json in
       let sourceType =
-        field_map json "SourceType" AggregatedSourceType.of_json in
-      let sourceId = field_map json "SourceId" String_.of_json in
+        field_map json__ "SourceType" AggregatedSourceType.of_json in
+      let sourceId = field_map json__ "SourceId" String_.of_json in
       make ?lastErrorMessage ?lastErrorCode ?lastUpdateTime ?lastUpdateStatus
         ?awsRegion ?sourceType ?sourceId ()
     let to_json v = composed_to_json to_value v
@@ -7404,22 +10315,25 @@ module ConfigRule =
         [@ocaml.doc "The description that you provide for the Config rule."];
       scope: Scope.t option
         [@ocaml.doc
-          "Defines which resources can trigger an evaluation for the rule. The scope can include one or more resource types, a combination of one resource type and one resource ID, or a combination of a tag key and value. Specify a scope to constrain the resources that can trigger an evaluation for the rule. If you do not specify a scope, evaluations are triggered when any resource in the recording group changes. The scope can be empty."];
+          "Defines which resources can trigger an evaluation for the rule. The scope can include one or more resource types, a combination of one resource type and one resource ID, or a combination of a tag key and value. Specify a scope to constrain the resources that can trigger an evaluation for the rule. If you do not specify a scope, evaluations are triggered when any resource in the recording group changes."];
       source: Source.t
         [@ocaml.doc
-          "Provides the rule owner (Amazon Web Services or customer), the rule identifier, and the notifications that cause the function to evaluate your Amazon Web Services resources."];
+          "Provides the rule owner (Amazon Web Services for managed rules, CUSTOM_POLICY for Custom Policy rules, and CUSTOM_LAMBDA for Custom Lambda rules), the rule identifier, and the notifications that cause the function to evaluate your Amazon Web Services resources."];
       inputParameters: StringWithCharLimit1024.t option
         [@ocaml.doc
           "A string, in JSON format, that is passed to the Config rule Lambda function."];
       maximumExecutionFrequency: MaximumExecutionFrequency.t option
         [@ocaml.doc
-          "The maximum frequency with which Config runs evaluations for a rule. You can specify a value for MaximumExecutionFrequency when: You are using an Config managed rule that is triggered at a periodic frequency. Your custom rule is triggered when Config delivers the configuration snapshot. For more information, see ConfigSnapshotDeliveryProperties. By default, rules with a periodic trigger are evaluated every 24 hours. To change the frequency, specify a valid value for the MaximumExecutionFrequency parameter."];
+          "The maximum frequency with which Config runs evaluations for a rule. You can specify a value for MaximumExecutionFrequency when: This is for an Config managed rule that is triggered at a periodic frequency. Your custom rule is triggered when Config delivers the configuration snapshot. For more information, see ConfigSnapshotDeliveryProperties. By default, rules with a periodic trigger are evaluated every 24 hours. To change the frequency, specify a valid value for the MaximumExecutionFrequency parameter."];
       configRuleState: ConfigRuleState.t option
         [@ocaml.doc
           "Indicates whether the Config rule is active or is currently being deleted by Config. It can also indicate the evaluation status for the Config rule. Config sets the state of the rule to EVALUATING temporarily after you use the StartConfigRulesEvaluation request to evaluate your resources against the Config rule. Config sets the state of the rule to DELETING_RESULTS temporarily after you use the DeleteEvaluationResults request to delete the current evaluation results for the Config rule. Config temporarily sets the state of a rule to DELETING after you use the DeleteConfigRule request to delete the rule. After Config deletes the rule, the rule and all of its evaluations are erased and are no longer available."];
       createdBy: StringWithCharLimit256.t option
         [@ocaml.doc
-          "Service principal name of the service that created the rule. The field is populated only if the service linked rule is created by a service. The field is empty if you create your own rule."]}
+          "Service principal name of the service that created the rule. The field is populated only if the service-linked rule is created by a service. The field is empty if you create your own rule."];
+      evaluationModes: EvaluationModes.t option
+        [@ocaml.doc
+          "The modes the Config rule can be evaluated in. The valid values are distinct objects. By default, the value is Detective evaluation mode only."]}
     let context_ = "ConfigRule"
     let make ?configRuleName =
       fun ?configRuleArn ->
@@ -7430,20 +10344,22 @@ module ConfigRule =
                 fun ?maximumExecutionFrequency ->
                   fun ?configRuleState ->
                     fun ?createdBy ->
-                      fun ~source ->
-                        fun () ->
-                          {
-                            configRuleName;
-                            configRuleArn;
-                            configRuleId;
-                            description;
-                            scope;
-                            inputParameters;
-                            maximumExecutionFrequency;
-                            configRuleState;
-                            createdBy;
-                            source
-                          }
+                      fun ?evaluationModes ->
+                        fun ~source ->
+                          fun () ->
+                            {
+                              configRuleName;
+                              configRuleArn;
+                              configRuleId;
+                              description;
+                              scope;
+                              inputParameters;
+                              maximumExecutionFrequency;
+                              configRuleState;
+                              createdBy;
+                              evaluationModes;
+                              source
+                            }
     let to_value x =
       structure_to_value
         [("ConfigRuleName",
@@ -7465,9 +10381,14 @@ module ConfigRule =
         ("ConfigRuleState",
           (Option.map x.configRuleState ~f:ConfigRuleState.to_value));
         ("CreatedBy",
-          (Option.map x.createdBy ~f:StringWithCharLimit256.to_value))]
+          (Option.map x.createdBy ~f:StringWithCharLimit256.to_value));
+        ("EvaluationModes",
+          (Option.map x.evaluationModes ~f:EvaluationModes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let evaluationModes =
+        (Option.map ~f:EvaluationModes.of_xml)
+          (Xml.child xml_arg0 "EvaluationModes") in
       let createdBy =
         (Option.map ~f:StringWithCharLimit256.of_xml)
           (Xml.child xml_arg0 "CreatedBy") in
@@ -7495,36 +10416,39 @@ module ConfigRule =
       let configRuleName =
         (Option.map ~f:ConfigRuleName.of_xml)
           (Xml.child xml_arg0 "ConfigRuleName") in
-      make ?createdBy ?configRuleState ?maximumExecutionFrequency
-        ?inputParameters ~source ?scope ?description ?configRuleId
-        ?configRuleArn ?configRuleName ()
+      make ?evaluationModes ?createdBy ?configRuleState
+        ?maximumExecutionFrequency ?inputParameters ~source ?scope
+        ?description ?configRuleId ?configRuleArn ?configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let evaluationModes =
+        field_map json__ "EvaluationModes" EvaluationModes.of_json in
       let createdBy =
-        field_map json "CreatedBy" StringWithCharLimit256.of_json in
+        field_map json__ "CreatedBy" StringWithCharLimit256.of_json in
       let configRuleState =
-        field_map json "ConfigRuleState" ConfigRuleState.of_json in
+        field_map json__ "ConfigRuleState" ConfigRuleState.of_json in
       let maximumExecutionFrequency =
-        field_map json "MaximumExecutionFrequency"
+        field_map json__ "MaximumExecutionFrequency"
           MaximumExecutionFrequency.of_json in
       let inputParameters =
-        field_map json "InputParameters" StringWithCharLimit1024.of_json in
-      let source = field_map_exn json "Source" Source.of_json in
-      let scope = field_map json "Scope" Scope.of_json in
+        field_map json__ "InputParameters" StringWithCharLimit1024.of_json in
+      let source = field_map_exn json__ "Source" Source.of_json in
+      let scope = field_map json__ "Scope" Scope.of_json in
       let description =
-        field_map json "Description" EmptiableStringWithCharLimit256.of_json in
+        field_map json__ "Description"
+          EmptiableStringWithCharLimit256.of_json in
       let configRuleId =
-        field_map json "ConfigRuleId" StringWithCharLimit64.of_json in
+        field_map json__ "ConfigRuleId" StringWithCharLimit64.of_json in
       let configRuleArn =
-        field_map json "ConfigRuleArn" StringWithCharLimit256.of_json in
+        field_map json__ "ConfigRuleArn" StringWithCharLimit256.of_json in
       let configRuleName =
-        field_map json "ConfigRuleName" ConfigRuleName.of_json in
-      make ?createdBy ?configRuleState ?maximumExecutionFrequency
-        ?inputParameters ~source ?scope ?description ?configRuleId
-        ?configRuleArn ?configRuleName ()
+        field_map json__ "ConfigRuleName" ConfigRuleName.of_json in
+      make ?evaluationModes ?createdBy ?configRuleState
+        ?maximumExecutionFrequency ?inputParameters ~source ?scope
+        ?description ?configRuleId ?configRuleArn ?configRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An Config rule represents an Lambda function that you create for a custom rule or a predefined function for an Config managed rule. The function evaluates configuration items to assess whether your Amazon Web Services resources comply with your desired configurations. This function can run when Config detects a configuration change to an Amazon Web Services resource and at a periodic frequency that you choose (for example, every 24 hours). You can use the Amazon Web Services CLI and Amazon Web Services SDKs if you want to create a rule that triggers evaluations for your resources when Config delivers the configuration snapshot. For more information, see ConfigSnapshotDeliveryProperties. For more information about developing and using Config rules, see Evaluating Amazon Web Services resource Configurations with Config in the Config Developer Guide."]
+       "Config rules evaluate the configuration settings of your Amazon Web Services resources. A rule can run when Config detects a configuration change to an Amazon Web Services resource or at a periodic frequency that you choose (for example, every 24 hours). There are two types of rules: Config Managed Rules and Config Custom Rules. Config Managed Rules are predefined, customizable rules created by Config. For a list of managed rules, see List of Config Managed Rules. Config Custom Rules are rules that you create from scratch. There are two ways to create Config custom rules: with Lambda functions ( Lambda Developer Guide) and with Guard (Guard GitHub Repository), a policy-as-code language. Config custom rules created with Lambda are called Config Custom Lambda Rules and Config custom rules created with Guard are called Config Custom Policy Rules. For more information about developing and using Config rules, see Evaluating Resource with Config Rules in the Config Developer Guide. You can use the Amazon Web Services CLI and Amazon Web Services SDKs if you want to create a rule that triggers evaluations for your resources when Config delivers the configuration snapshot. For more information, see ConfigSnapshotDeliveryProperties."]
 module ConfigRuleEvaluationStatus =
   struct
     type nonrec t =
@@ -7681,34 +10605,34 @@ module ConfigRuleEvaluationStatus =
         ?lastFailedInvocationTime ?lastSuccessfulInvocationTime ?configRuleId
         ?configRuleArn ?configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastDebugLogDeliveryTime =
-        field_map json "LastDebugLogDeliveryTime" Date.of_json in
+        field_map json__ "LastDebugLogDeliveryTime" Date.of_json in
       let lastDebugLogDeliveryStatusReason =
-        field_map json "LastDebugLogDeliveryStatusReason" String_.of_json in
+        field_map json__ "LastDebugLogDeliveryStatusReason" String_.of_json in
       let lastDebugLogDeliveryStatus =
-        field_map json "LastDebugLogDeliveryStatus" String_.of_json in
+        field_map json__ "LastDebugLogDeliveryStatus" String_.of_json in
       let firstEvaluationStarted =
-        field_map json "FirstEvaluationStarted" Boolean.of_json in
+        field_map json__ "FirstEvaluationStarted" Boolean.of_json in
       let lastErrorMessage =
-        field_map json "LastErrorMessage" String_.of_json in
-      let lastErrorCode = field_map json "LastErrorCode" String_.of_json in
+        field_map json__ "LastErrorMessage" String_.of_json in
+      let lastErrorCode = field_map json__ "LastErrorCode" String_.of_json in
       let lastDeactivatedTime =
-        field_map json "LastDeactivatedTime" Date.of_json in
+        field_map json__ "LastDeactivatedTime" Date.of_json in
       let firstActivatedTime =
-        field_map json "FirstActivatedTime" Date.of_json in
+        field_map json__ "FirstActivatedTime" Date.of_json in
       let lastFailedEvaluationTime =
-        field_map json "LastFailedEvaluationTime" Date.of_json in
+        field_map json__ "LastFailedEvaluationTime" Date.of_json in
       let lastSuccessfulEvaluationTime =
-        field_map json "LastSuccessfulEvaluationTime" Date.of_json in
+        field_map json__ "LastSuccessfulEvaluationTime" Date.of_json in
       let lastFailedInvocationTime =
-        field_map json "LastFailedInvocationTime" Date.of_json in
+        field_map json__ "LastFailedInvocationTime" Date.of_json in
       let lastSuccessfulInvocationTime =
-        field_map json "LastSuccessfulInvocationTime" Date.of_json in
-      let configRuleId = field_map json "ConfigRuleId" String_.of_json in
-      let configRuleArn = field_map json "ConfigRuleArn" String_.of_json in
+        field_map json__ "LastSuccessfulInvocationTime" Date.of_json in
+      let configRuleId = field_map json__ "ConfigRuleId" String_.of_json in
+      let configRuleArn = field_map json__ "ConfigRuleArn" String_.of_json in
       let configRuleName =
-        field_map json "ConfigRuleName" ConfigRuleName.of_json in
+        field_map json__ "ConfigRuleName" ConfigRuleName.of_json in
       make ?lastDebugLogDeliveryTime ?lastDebugLogDeliveryStatusReason
         ?lastDebugLogDeliveryStatus ?firstEvaluationStarted ?lastErrorMessage
         ?lastErrorCode ?lastDeactivatedTime ?firstActivatedTime
@@ -7717,7 +10641,7 @@ module ConfigRuleEvaluationStatus =
         ?configRuleArn ?configRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Status information for your Config Managed rules and Config Custom Policy rules. The status includes information such as the last time the rule ran, the last time it failed, and the related error for the last failure. This action does not return status information about Config Custom Lambda rules."]
+       "Status information for your Config Managed rules and Config Custom Policy rules. The status includes information such as the last time the rule ran, the last time it failed, and the related error for the last failure. This operation does not return status information about Config Custom Lambda rules."]
 module ComplianceByResource =
   struct
     type nonrec t =
@@ -7752,11 +10676,11 @@ module ComplianceByResource =
           (Xml.child xml_arg0 "ResourceType") in
       make ?compliance ?resourceId ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let compliance = field_map json "Compliance" Compliance.of_json in
-      let resourceId = field_map json "ResourceId" BaseResourceId.of_json in
+    let of_json json__ =
+      let compliance = field_map json__ "Compliance" Compliance.of_json in
+      let resourceId = field_map json__ "ResourceId" BaseResourceId.of_json in
       let resourceType =
-        field_map json "ResourceType" StringWithCharLimit256.of_json in
+        field_map json__ "ResourceType" StringWithCharLimit256.of_json in
       make ?compliance ?resourceId ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7785,10 +10709,10 @@ module ComplianceByConfigRule =
           (Xml.child xml_arg0 "ConfigRuleName") in
       make ?compliance ?configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let compliance = field_map json "Compliance" Compliance.of_json in
+    let of_json json__ =
+      let compliance = field_map json__ "Compliance" Compliance.of_json in
       let configRuleName =
-        field_map json "ConfigRuleName" StringWithCharLimit64.of_json in
+        field_map json__ "ConfigRuleName" StringWithCharLimit64.of_json in
       make ?compliance ?configRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7844,14 +10768,14 @@ module AggregationAuthorization =
       make ?creationTime ?authorizedAwsRegion ?authorizedAccountId
         ?aggregationAuthorizationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Date.of_json in
+    let of_json json__ =
+      let creationTime = field_map json__ "CreationTime" Date.of_json in
       let authorizedAwsRegion =
-        field_map json "AuthorizedAwsRegion" AwsRegion.of_json in
+        field_map json__ "AuthorizedAwsRegion" AwsRegion.of_json in
       let authorizedAccountId =
-        field_map json "AuthorizedAccountId" AccountId.of_json in
+        field_map json__ "AuthorizedAccountId" AccountId.of_json in
       let aggregationAuthorizationArn =
-        field_map json "AggregationAuthorizationArn" String_.of_json in
+        field_map json__ "AggregationAuthorizationArn" String_.of_json in
       make ?creationTime ?authorizedAwsRegion ?authorizedAccountId
         ?aggregationAuthorizationArn ()
     let to_json v = composed_to_json to_value v
@@ -7900,14 +10824,14 @@ module AggregateComplianceByConformancePack =
           (Xml.child xml_arg0 "ConformancePackName") in
       make ?awsRegion ?accountId ?compliance ?conformancePackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let awsRegion = field_map json "AwsRegion" AwsRegion.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+    let of_json json__ =
+      let awsRegion = field_map json__ "AwsRegion" AwsRegion.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let compliance =
-        field_map json "Compliance"
+        field_map json__ "Compliance"
           AggregateConformancePackCompliance.of_json in
       let conformancePackName =
-        field_map json "ConformancePackName" ConformancePackName.of_json in
+        field_map json__ "ConformancePackName" ConformancePackName.of_json in
       make ?awsRegion ?accountId ?compliance ?conformancePackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7950,12 +10874,12 @@ module AggregateComplianceByConfigRule =
           (Xml.child xml_arg0 "ConfigRuleName") in
       make ?awsRegion ?accountId ?compliance ?configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let awsRegion = field_map json "AwsRegion" AwsRegion.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
-      let compliance = field_map json "Compliance" Compliance.of_json in
+    let of_json json__ =
+      let awsRegion = field_map json__ "AwsRegion" AwsRegion.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let compliance = field_map json__ "Compliance" Compliance.of_json in
       let configRuleName =
-        field_map json "ConfigRuleName" ConfigRuleName.of_json in
+        field_map json__ "ConfigRuleName" ConfigRuleName.of_json in
       make ?awsRegion ?accountId ?compliance ?configRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7988,10 +10912,11 @@ module FailedDeleteRemediationExceptionsBatch =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "FailureMessage") in
       make ?failedItems ?failureMessage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedItems =
-        field_map json "FailedItems" RemediationExceptionResourceKeys.of_json in
-      let failureMessage = field_map json "FailureMessage" String_.of_json in
+        field_map json__ "FailedItems"
+          RemediationExceptionResourceKeys.of_json in
+      let failureMessage = field_map json__ "FailureMessage" String_.of_json in
       make ?failedItems ?failureMessage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8007,10 +10932,10 @@ module BaseConfigurationItem =
           "The 12-digit Amazon Web Services account ID associated with the resource."];
       configurationItemCaptureTime: ConfigurationItemCaptureTime.t option
         [@ocaml.doc
-          "The time when the configuration recording was initiated."];
+          "The time when the recording of configuration changes was initiated for the resource."];
       configurationItemStatus: ConfigurationItemStatus.t option
         [@ocaml.doc
-          "The configuration item status. The valid values are: OK \226\128\147 The resource configuration has been updated ResourceDiscovered \226\128\147 The resource was newly discovered ResourceNotRecorded \226\128\147 The resource was discovered but its configuration was not recorded since the recorder excludes the recording of resources of this type ResourceDeleted \226\128\147 The resource was deleted ResourceDeletedNotRecorded \226\128\147 The resource was deleted but its configuration was not recorded since the recorder excludes the recording of resources of this type The CIs do not incur any cost."];
+          "The configuration item status. Valid values include: OK \226\128\147 The resource configuration has been updated. ResourceDiscovered \226\128\147 The resource was newly discovered. ResourceNotRecorded \226\128\147 The resource was discovered, but its configuration was not recorded since the recorder doesn't record resources of this type. ResourceDeleted \226\128\147 The resource was deleted ResourceDeletedNotRecorded \226\128\147 The resource was deleted, but its configuration was not recorded since the recorder doesn't record resources of this type."];
       configurationStateId: ConfigurationStateId.t option
         [@ocaml.doc
           "An identifier that indicates the ordering of the configuration items of a resource."];
@@ -8029,10 +10954,17 @@ module BaseConfigurationItem =
       resourceCreationTime: ResourceCreationTime.t option
         [@ocaml.doc "The time stamp when the resource was created."];
       configuration: Configuration.t option
-        [@ocaml.doc "The description of the resource configuration."];
+        [@ocaml.doc
+          "A JSON-encoded string that contains the contents for the resource configuration. This string needs to be deserialized using json.loads() before you can access the contents."];
       supplementaryConfiguration: SupplementaryConfiguration.t option
         [@ocaml.doc
-          "Configuration attributes that Config returns for certain resource types to supplement the information returned for the configuration parameter."]}
+          "A string to string map that contains additional contents for the resource configuration.Config returns this field for certain resource types to supplement the information returned for the configuration field. This string needs to be deserialized using json.loads() before you can access the contents."];
+      recordingFrequency: RecordingFrequency.t option
+        [@ocaml.doc
+          "The recording frequency that Config uses to record configuration changes for the resource. This field only appears in the API response when DAILY recording is enabled for a resource type. If this field is not present, CONTINUOUS recording is enabled for that resource type. For more information on daily recording and continuous recording, see Recording Frequency in the Config Developer Guide."];
+      configurationItemDeliveryTime: ConfigurationItemDeliveryTime.t option
+        [@ocaml.doc
+          "The time when configuration changes for the resource were delivered. This field is optional and is not guaranteed to be present in a configuration item (CI). If you are using daily recording, this field will be populated. However, if you are using continuous recording, this field will be omitted since the delivery time is instantaneous as the CI is available right away. For more information on daily recording and continuous recording, see Recording Frequency in the Config Developer Guide."]}
     let make ?version =
       fun ?accountId ->
         fun ?configurationItemCaptureTime ->
@@ -8047,23 +10979,27 @@ module BaseConfigurationItem =
                           fun ?resourceCreationTime ->
                             fun ?configuration ->
                               fun ?supplementaryConfiguration ->
-                                fun () ->
-                                  {
-                                    version;
-                                    accountId;
-                                    configurationItemCaptureTime;
-                                    configurationItemStatus;
-                                    configurationStateId;
-                                    arn;
-                                    resourceType;
-                                    resourceId;
-                                    resourceName;
-                                    awsRegion;
-                                    availabilityZone;
-                                    resourceCreationTime;
-                                    configuration;
-                                    supplementaryConfiguration
-                                  }
+                                fun ?recordingFrequency ->
+                                  fun ?configurationItemDeliveryTime ->
+                                    fun () ->
+                                      {
+                                        version;
+                                        accountId;
+                                        configurationItemCaptureTime;
+                                        configurationItemStatus;
+                                        configurationStateId;
+                                        arn;
+                                        resourceType;
+                                        resourceId;
+                                        resourceName;
+                                        awsRegion;
+                                        availabilityZone;
+                                        resourceCreationTime;
+                                        configuration;
+                                        supplementaryConfiguration;
+                                        recordingFrequency;
+                                        configurationItemDeliveryTime
+                                      }
     let to_value x =
       structure_to_value
         [("version", (Option.map x.version ~f:Version.to_value));
@@ -8091,9 +11027,20 @@ module BaseConfigurationItem =
           (Option.map x.configuration ~f:Configuration.to_value));
         ("supplementaryConfiguration",
           (Option.map x.supplementaryConfiguration
-             ~f:SupplementaryConfiguration.to_value))]
+             ~f:SupplementaryConfiguration.to_value));
+        ("recordingFrequency",
+          (Option.map x.recordingFrequency ~f:RecordingFrequency.to_value));
+        ("configurationItemDeliveryTime",
+          (Option.map x.configurationItemDeliveryTime
+             ~f:ConfigurationItemDeliveryTime.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let configurationItemDeliveryTime =
+        (Option.map ~f:ConfigurationItemDeliveryTime.of_xml)
+          (Xml.child xml_arg0 "configurationItemDeliveryTime") in
+      let recordingFrequency =
+        (Option.map ~f:RecordingFrequency.of_xml)
+          (Xml.child xml_arg0 "recordingFrequency") in
       let supplementaryConfiguration =
         (Option.map ~f:SupplementaryConfiguration.of_xml)
           (Xml.child xml_arg0 "supplementaryConfiguration") in
@@ -8130,60 +11077,49 @@ module BaseConfigurationItem =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "accountId") in
       let version =
         (Option.map ~f:Version.of_xml) (Xml.child xml_arg0 "version") in
-      make ?supplementaryConfiguration ?configuration ?resourceCreationTime
+      make ?configurationItemDeliveryTime ?recordingFrequency
+        ?supplementaryConfiguration ?configuration ?resourceCreationTime
         ?availabilityZone ?awsRegion ?resourceName ?resourceId ?resourceType
         ?arn ?configurationStateId ?configurationItemStatus
         ?configurationItemCaptureTime ?accountId ?version ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let configurationItemDeliveryTime =
+        field_map json__ "configurationItemDeliveryTime"
+          ConfigurationItemDeliveryTime.of_json in
+      let recordingFrequency =
+        field_map json__ "recordingFrequency" RecordingFrequency.of_json in
       let supplementaryConfiguration =
-        field_map json "supplementaryConfiguration"
+        field_map json__ "supplementaryConfiguration"
           SupplementaryConfiguration.of_json in
       let configuration =
-        field_map json "configuration" Configuration.of_json in
+        field_map json__ "configuration" Configuration.of_json in
       let resourceCreationTime =
-        field_map json "resourceCreationTime" ResourceCreationTime.of_json in
+        field_map json__ "resourceCreationTime" ResourceCreationTime.of_json in
       let availabilityZone =
-        field_map json "availabilityZone" AvailabilityZone.of_json in
-      let awsRegion = field_map json "awsRegion" AwsRegion.of_json in
-      let resourceName = field_map json "resourceName" ResourceName.of_json in
-      let resourceId = field_map json "resourceId" ResourceId.of_json in
-      let resourceType = field_map json "resourceType" ResourceType.of_json in
-      let arn = field_map json "arn" ARN.of_json in
+        field_map json__ "availabilityZone" AvailabilityZone.of_json in
+      let awsRegion = field_map json__ "awsRegion" AwsRegion.of_json in
+      let resourceName = field_map json__ "resourceName" ResourceName.of_json in
+      let resourceId = field_map json__ "resourceId" ResourceId.of_json in
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let arn = field_map json__ "arn" ARN.of_json in
       let configurationStateId =
-        field_map json "configurationStateId" ConfigurationStateId.of_json in
+        field_map json__ "configurationStateId" ConfigurationStateId.of_json in
       let configurationItemStatus =
-        field_map json "configurationItemStatus"
+        field_map json__ "configurationItemStatus"
           ConfigurationItemStatus.of_json in
       let configurationItemCaptureTime =
-        field_map json "configurationItemCaptureTime"
+        field_map json__ "configurationItemCaptureTime"
           ConfigurationItemCaptureTime.of_json in
-      let accountId = field_map json "accountId" AccountId.of_json in
-      let version = field_map json "version" Version.of_json in
-      make ?supplementaryConfiguration ?configuration ?resourceCreationTime
+      let accountId = field_map json__ "accountId" AccountId.of_json in
+      let version = field_map json__ "version" Version.of_json in
+      make ?configurationItemDeliveryTime ?recordingFrequency
+        ?supplementaryConfiguration ?configuration ?resourceCreationTime
         ?availabilityZone ?awsRegion ?resourceName ?resourceId ?resourceType
         ?arn ?configurationStateId ?configurationItemStatus
         ?configurationItemCaptureTime ?accountId ?version ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The detailed configuration of a specified resource."]
-module AmazonResourceName =
-  struct
-    type nonrec t = string
-    let context_ = "AmazonResourceName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:1000) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AmazonResourceName" j
-    let to_json = simple_to_json to_value
-  end
+  end[@@ocaml.doc "The detailed configurations of a specified resource."]
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
@@ -8192,6 +11128,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8219,6 +11158,9 @@ module TagList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8238,19 +11180,26 @@ module TagList =
     let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
     let to_json v = composed_to_json to_value v
   end
-module InsufficientPermissionsException =
+module IdempotentParameterMismatch =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Indicates one of the following errors: For PutConfigRule, the rule cannot be created because the IAM role assigned to Config lacks permissions to perform the config:Put* action. For PutConfigRule, the Lambda function cannot be invoked. Check the function ARN, and check the function's permissions. For PutOrganizationConfigRule, organization Config rule cannot be created because you do not have permissions to call IAM GetRole action or create a service linked role. For PutConformancePack and PutOrganizationConformancePack, a conformance pack cannot be created because you do not have permissions: To call IAM GetRole action or create a service linked role. To read Amazon S3 bucket."]
+       "Using the same client token with one or more different parameters. Specify a new client token with the parameter changes and try again."]
 module InvalidParameterValueException =
   struct
     type nonrec t = unit
@@ -8263,7 +11212,154 @@ module InvalidParameterValueException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "One or more of the specified parameters are invalid. Verify that your parameters are valid and try again."]
+       "One or more of the specified parameters are not valid. Verify that your parameters are valid and try again."]
+module ClientToken =
+  struct
+    type nonrec t = string
+    let context_ = "ClientToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:64));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientToken" j
+    let to_json = simple_to_json to_value
+  end
+module EvaluationContext =
+  struct
+    type nonrec t =
+      {
+      evaluationContextIdentifier: EvaluationContextIdentifier.t option
+        [@ocaml.doc
+          "A unique EvaluationContextIdentifier ID for an EvaluationContext."]}
+    let make ?evaluationContextIdentifier =
+      fun () -> { evaluationContextIdentifier }
+    let to_value x =
+      structure_to_value
+        [("EvaluationContextIdentifier",
+           (Option.map x.evaluationContextIdentifier
+              ~f:EvaluationContextIdentifier.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let evaluationContextIdentifier =
+        (Option.map ~f:EvaluationContextIdentifier.of_xml)
+          (Xml.child xml_arg0 "EvaluationContextIdentifier") in
+      make ?evaluationContextIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let evaluationContextIdentifier =
+        field_map json__ "EvaluationContextIdentifier"
+          EvaluationContextIdentifier.of_json in
+      make ?evaluationContextIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Use EvaluationContext to group independently initiated proactive resource evaluations. For example, CFN Stack. If you want to check just a resource definition, you do not need to provide evaluation context."]
+module EvaluationTimeout =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:3600) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for EvaluationTimeout" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceDetails =
+  struct
+    type nonrec t =
+      {
+      resourceId: BaseResourceId.t
+        [@ocaml.doc "A unique resource ID for an evaluation."];
+      resourceType: StringWithCharLimit256.t
+        [@ocaml.doc "The type of resource being evaluated."];
+      resourceConfiguration: ResourceConfiguration.t
+        [@ocaml.doc
+          "The resource definition to be evaluated as per the resource configuration schema type."];
+      resourceConfigurationSchemaType:
+        ResourceConfigurationSchemaType.t option
+        [@ocaml.doc
+          "The schema type of the resource configuration. You can find the Resource type schema, or CFN_RESOURCE_SCHEMA, in \"Amazon Web Services public extensions\" within the CloudFormation registry or with the following CLI commmand: aws cloudformation describe-type --type-name \"AWS::S3::Bucket\" --type RESOURCE. For more information, see Managing extensions through the CloudFormation registry and Amazon Web Services resource and property types reference in the CloudFormation User Guide."]}
+    let context_ = "ResourceDetails"
+    let make ?resourceConfigurationSchemaType =
+      fun ~resourceId ->
+        fun ~resourceType ->
+          fun ~resourceConfiguration ->
+            fun () ->
+              {
+                resourceConfigurationSchemaType;
+                resourceId;
+                resourceType;
+                resourceConfiguration
+              }
+    let to_value x =
+      structure_to_value
+        [("ResourceId", (Some (BaseResourceId.to_value x.resourceId)));
+        ("ResourceType",
+          (Some (StringWithCharLimit256.to_value x.resourceType)));
+        ("ResourceConfiguration",
+          (Some (ResourceConfiguration.to_value x.resourceConfiguration)));
+        ("ResourceConfigurationSchemaType",
+          (Option.map x.resourceConfigurationSchemaType
+             ~f:ResourceConfigurationSchemaType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceConfigurationSchemaType =
+        (Option.map ~f:ResourceConfigurationSchemaType.of_xml)
+          (Xml.child xml_arg0 "ResourceConfigurationSchemaType") in
+      let resourceConfiguration =
+        ResourceConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceConfiguration") in
+      let resourceType =
+        StringWithCharLimit256.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
+      let resourceId =
+        BaseResourceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+      make ?resourceConfigurationSchemaType ~resourceConfiguration
+        ~resourceType ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceConfigurationSchemaType =
+        field_map json__ "ResourceConfigurationSchemaType"
+          ResourceConfigurationSchemaType.of_json in
+      let resourceConfiguration =
+        field_map_exn json__ "ResourceConfiguration"
+          ResourceConfiguration.of_json in
+      let resourceType =
+        field_map_exn json__ "ResourceType" StringWithCharLimit256.of_json in
+      let resourceId =
+        field_map_exn json__ "ResourceId" BaseResourceId.of_json in
+      make ?resourceConfigurationSchemaType ~resourceConfiguration
+        ~resourceType ~resourceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns information about the resource being evaluated."]
+module InsufficientPermissionsException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates one of the following errors: For PutConfigRule, the rule cannot be created because the IAM role assigned to Config lacks permissions to perform the config:Put* action. For PutConfigRule, the Lambda function cannot be invoked. Check the function ARN, and check the function's permissions. For PutOrganizationConfigRule, organization Config rule cannot be created because you do not have permissions to call IAM GetRole action or create a service-linked role. For PutConformancePack and PutOrganizationConformancePack, a conformance pack cannot be created because you do not have the following permissions: You do not have permission to call IAM GetRole action or create a service-linked role. You do not have permission to read Amazon S3 bucket or call SSM:GetDocument. For PutServiceLinkedConfigurationRecorder, a service-linked configuration recorder cannot be created because you do not have the following permissions: IAM CreateServiceLinkedRole."]
 module NoSuchRemediationConfigurationException =
   struct
     type nonrec t = unit
@@ -8286,6 +11382,9 @@ module ResourceKeys =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8318,7 +11417,7 @@ module LimitExceededException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "For StartConfigRulesEvaluation API, this exception is thrown if an evaluation is in progress or if you call the StartConfigRulesEvaluation API more than once per minute. For PutConfigurationAggregator API, this exception is thrown if the number of accounts and aggregators exceeds the limit."]
+       "For PutServiceLinkedConfigurationRecorder API, this exception is thrown if the number of service-linked roles in the account exceeds the limit. For StartConfigRulesEvaluation API, this exception is thrown if an evaluation is in progress or if you call the StartConfigRulesEvaluation API more than once per minute. For PutConfigurationAggregator API, this exception is thrown if the number of accounts and aggregators exceeds the limit."]
 module NoSuchConfigRuleException =
   struct
     type nonrec t = unit
@@ -8331,7 +11430,7 @@ module NoSuchConfigRuleException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The Config rule in the request is not valid. Verify that the rule is an Config Custom Policy rule, that the rule name is correct, and that valid Amazon Resouce Names (ARNs) are used before trying again."]
+       "The Config rule in the request is not valid. Verify that the rule is an Config Process Check rule, that the rule name is correct, and that valid Amazon Resouce Names (ARNs) are used before trying again."]
 module ResourceInUseException =
   struct
     type nonrec t = unit
@@ -8353,6 +11452,9 @@ module ReevaluateConfigRuleNames =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigRuleName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8410,7 +11512,7 @@ module InvalidNextTokenException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified next token is invalid. Specify the nextToken string that was returned in the previous response to get the next page of results."]
+       "The specified next token is not valid. Specify the nextToken string that was returned in the previous response to get the next page of results."]
 module NextToken =
   struct
     type nonrec t = string
@@ -8442,8 +11544,9 @@ module QueryInfo =
           (Xml.child xml_arg0 "SelectFields") in
       make ?selectFields ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let selectFields = field_map json "SelectFields" FieldInfoList.of_json in
+    let of_json json__ =
+      let selectFields =
+        field_map json__ "SelectFields" FieldInfoList.of_json in
       make ?selectFields ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about the query."]
@@ -8451,6 +11554,9 @@ module Results =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8532,8 +11638,8 @@ module ResourceConcurrentModificationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8550,7 +11656,7 @@ module TooManyTagsException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You have reached the limit of the number of tags you can use. You have more than 50 tags."]
+       "You have reached the limit of the number of tags you can use. For more information, see Service Limits in the Config Developer Guide."]
 module ValidationException =
   struct
     type nonrec t = unit
@@ -8563,7 +11669,7 @@ module ValidationException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The requested action is not valid. For PutStoredQuery, you will see this exception if there are missing required fields or if the input value fails the validation, or if you are trying to create more than 300 queries. For GetStoredQuery, ListStoredQuery, and DeleteStoredQuery you will see this exception if there are missing required fields or if the input value fails the validation."]
+       "The requested operation is not valid. You will see this exception if there are missing required fields or if the input value fails the validation. For PutStoredQuery, one of the following errors: There are missing required fields. The input value fails the validation. You are trying to create more than 300 queries. For DescribeConfigurationRecorders and DescribeConfigurationRecorderStatus, one of the following errors: You have specified more than one configuration recorder. You have provided a service principal for service-linked configuration recorder that is not valid. For AssociateResourceTypes and DisassociateResourceTypes, one of the following errors: Your configuraiton recorder has a recording strategy that does not allow the association or disassociation of resource types. One or more of the specified resource types are already associated or disassociated with the configuration recorder. For service-linked configuration recorders, the configuration recorder does not record one or more of the specified resource types."]
 module StoredQuery =
   struct
     type nonrec t =
@@ -8611,12 +11717,13 @@ module StoredQuery =
         (Option.map ~f:QueryId.of_xml) (Xml.child xml_arg0 "QueryId") in
       make ?expression ?description ~queryName ?queryArn ?queryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expression = field_map json "Expression" QueryExpression.of_json in
-      let description = field_map json "Description" QueryDescription.of_json in
-      let queryName = field_map_exn json "QueryName" QueryName.of_json in
-      let queryArn = field_map json "QueryArn" QueryArn.of_json in
-      let queryId = field_map json "QueryId" QueryId.of_json in
+    let of_json json__ =
+      let expression = field_map json__ "Expression" QueryExpression.of_json in
+      let description =
+        field_map json__ "Description" QueryDescription.of_json in
+      let queryName = field_map_exn json__ "QueryName" QueryName.of_json in
+      let queryArn = field_map json__ "QueryArn" QueryArn.of_json in
+      let queryId = field_map json__ "QueryId" QueryId.of_json in
       make ?expression ?description ~queryName ?queryArn ?queryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of a stored query."]
@@ -8628,6 +11735,9 @@ module TagsList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8647,6 +11757,19 @@ module TagsList =
     let of_json j = list_of_json ~kind:"TagsList" ~of_json:Tag.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ConflictException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "For PutServiceLinkedConfigurationRecorder, you cannot create a service-linked recorder because a service-linked recorder already exists for the specified service. For DeleteServiceLinkedConfigurationRecorder, you cannot delete the service-linked recorder because it is currently in use by the linked Amazon Web Services service. For DeleteDeliveryChannel, you cannot delete the specified delivery channel because the customer managed configuration recorder is running. Use the StopConfigurationRecorder operation to stop the customer managed configuration recorder. For AssociateResourceTypes and DisassociateResourceTypes, one of the following errors: For service-linked configuration recorders, the configuration recorder is not in use by the service. No association or dissociation of resource types is permitted. For service-linked configuration recorders, your requested change to the configuration recorder has been denied by its linked Amazon Web Services service."]
 module MaxNumberOfRetentionConfigurationsExceededException =
   struct
     type nonrec t = unit
@@ -8702,6 +11825,9 @@ module FailedRemediationExceptionBatches =
   struct
     type nonrec t = FailedRemediationExceptionBatch.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FailedRemediationExceptionBatch.to_value)) |>
         (fun x -> `List x)
@@ -8728,6 +11854,9 @@ module FailedRemediationBatches =
   struct
     type nonrec t = FailedRemediationBatch.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FailedRemediationBatch.to_value)) |>
         (fun x -> `List x)
@@ -8762,7 +11891,7 @@ module MaxNumberOfOrganizationConformancePacksExceededException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You have reached the limit (6) of the number of organization conformance packs in an account (6 conformance pack with 25 Config rules per pack per account)."]
+       "You have reached the limit of the number of organization conformance packs you can create in an account. For more information, see Service Limits in the Config Developer Guide."]
 module NoAvailableOrganizationException =
   struct
     type nonrec t = unit
@@ -8787,7 +11916,7 @@ module OrganizationAccessDeniedException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "For PutConfigurationAggregator API, you can see this exception for the following reasons: No permission to call EnableAWSServiceAccess API The configuration aggregator cannot be updated because your Amazon Web Services Organization management account or the delegated administrator role changed. Delete this aggregator and create a new one with the current Amazon Web Services Organization. The configuration aggregator is associated with a previous Amazon Web Services Organization and Config cannot aggregate data with current Amazon Web Services Organization. Delete this aggregator and create a new one with the current Amazon Web Services Organization. You are not a registered delegated administrator for Config with permissions to call ListDelegatedAdministrators API. Ensure that the management account registers delagated administrator for Config service principle name before the delegated administrator creates an aggregator. For all OrganizationConfigRule and OrganizationConformancePack APIs, Config throws an exception if APIs are called from member accounts. All APIs must be called from organization master account."]
+       "For PutConfigurationAggregator API, you can see this exception for the following reasons: No permission to call EnableAWSServiceAccess API The configuration aggregator cannot be updated because your Amazon Web Services Organization management account or the delegated administrator role changed. Delete this aggregator and create a new one with the current Amazon Web Services Organization. The configuration aggregator is associated with a previous Amazon Web Services Organization and Config cannot aggregate data with current Amazon Web Services Organization. Delete this aggregator and create a new one with the current Amazon Web Services Organization. You are not a registered delegated administrator for Config with permissions to call ListDelegatedAdministrators API. Ensure that the management account registers delagated administrator for Config service principal name before the delegated administrator creates an aggregator. For all OrganizationConfigRule and OrganizationConformancePack APIs, Config throws an exception if APIs are called from member accounts. All APIs must be called from organization management account."]
 module OrganizationAllFeaturesNotEnabledException =
   struct
     type nonrec t = unit
@@ -8864,7 +11993,7 @@ module MaxNumberOfOrganizationConfigRulesExceededException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You have reached the limit of the number of organization Config rules you can create."]
+       "You have reached the limit of the number of organization Config rules you can create. For more information, see see Service Limits in the Config Developer Guide."]
 module OrganizationCustomPolicyRuleMetadata =
   struct
     type nonrec t =
@@ -8876,7 +12005,7 @@ module OrganizationCustomPolicyRuleMetadata =
         OrganizationConfigRuleTriggerTypeNoSNs.t option
         [@ocaml.doc
           "The type of notification that initiates Config to run an evaluation for a rule. For Config Custom Policy rules, Config supports change-initiated notification types: ConfigurationItemChangeNotification - Initiates an evaluation when Config delivers a configuration item as a result of a resource change. OversizedConfigurationItemChangeNotification - Initiates an evaluation when Config delivers an oversized configuration item. Config may generate this notification type when a resource changes and the notification exceeds the maximum size allowed by Amazon SNS."];
-      inputParameters: StringWithCharLimit2048.t option
+      inputParameters: StringWithCharLimit1024.t option
         [@ocaml.doc
           "A string, in JSON format, that is passed to your organization Config Custom Policy rule."];
       maximumExecutionFrequency: MaximumExecutionFrequency.t option
@@ -8937,7 +12066,7 @@ module OrganizationCustomPolicyRuleMetadata =
           (Option.map x.organizationConfigRuleTriggerTypes
              ~f:OrganizationConfigRuleTriggerTypeNoSNs.to_value));
         ("InputParameters",
-          (Option.map x.inputParameters ~f:StringWithCharLimit2048.to_value));
+          (Option.map x.inputParameters ~f:StringWithCharLimit1024.to_value));
         ("MaximumExecutionFrequency",
           (Option.map x.maximumExecutionFrequency
              ~f:MaximumExecutionFrequency.to_value));
@@ -8981,7 +12110,7 @@ module OrganizationCustomPolicyRuleMetadata =
         (Option.map ~f:MaximumExecutionFrequency.of_xml)
           (Xml.child xml_arg0 "MaximumExecutionFrequency") in
       let inputParameters =
-        (Option.map ~f:StringWithCharLimit2048.of_xml)
+        (Option.map ~f:StringWithCharLimit1024.of_xml)
           (Xml.child xml_arg0 "InputParameters") in
       let organizationConfigRuleTriggerTypes =
         (Option.map ~f:OrganizationConfigRuleTriggerTypeNoSNs.of_xml)
@@ -8994,31 +12123,31 @@ module OrganizationCustomPolicyRuleMetadata =
         ?maximumExecutionFrequency ?inputParameters
         ?organizationConfigRuleTriggerTypes ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let debugLogDeliveryAccounts =
-        field_map json "DebugLogDeliveryAccounts"
+        field_map json__ "DebugLogDeliveryAccounts"
           DebugLogDeliveryAccounts.of_json in
-      let policyText = field_map_exn json "PolicyText" PolicyText.of_json in
+      let policyText = field_map_exn json__ "PolicyText" PolicyText.of_json in
       let policyRuntime =
-        field_map_exn json "PolicyRuntime" PolicyRuntime.of_json in
+        field_map_exn json__ "PolicyRuntime" PolicyRuntime.of_json in
       let tagValueScope =
-        field_map json "TagValueScope" StringWithCharLimit256.of_json in
+        field_map json__ "TagValueScope" StringWithCharLimit256.of_json in
       let tagKeyScope =
-        field_map json "TagKeyScope" StringWithCharLimit128.of_json in
+        field_map json__ "TagKeyScope" StringWithCharLimit128.of_json in
       let resourceIdScope =
-        field_map json "ResourceIdScope" StringWithCharLimit768.of_json in
+        field_map json__ "ResourceIdScope" StringWithCharLimit768.of_json in
       let resourceTypesScope =
-        field_map json "ResourceTypesScope" ResourceTypesScope.of_json in
+        field_map json__ "ResourceTypesScope" ResourceTypesScope.of_json in
       let maximumExecutionFrequency =
-        field_map json "MaximumExecutionFrequency"
+        field_map json__ "MaximumExecutionFrequency"
           MaximumExecutionFrequency.of_json in
       let inputParameters =
-        field_map json "InputParameters" StringWithCharLimit2048.of_json in
+        field_map json__ "InputParameters" StringWithCharLimit1024.of_json in
       let organizationConfigRuleTriggerTypes =
-        field_map json "OrganizationConfigRuleTriggerTypes"
+        field_map json__ "OrganizationConfigRuleTriggerTypes"
           OrganizationConfigRuleTriggerTypeNoSNs.of_json in
       let description =
-        field_map json "Description" StringWithCharLimit256Min0.of_json in
+        field_map json__ "Description" StringWithCharLimit256Min0.of_json in
       make ?debugLogDeliveryAccounts ~policyText ~policyRuntime
         ?tagValueScope ?tagKeyScope ?resourceIdScope ?resourceTypesScope
         ?maximumExecutionFrequency ?inputParameters
@@ -9089,17 +12218,17 @@ module ExternalEvaluation =
       make ~orderingTimestamp ?annotation ~complianceType
         ~complianceResourceId ~complianceResourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let orderingTimestamp =
-        field_map_exn json "OrderingTimestamp" OrderingTimestamp.of_json in
+        field_map_exn json__ "OrderingTimestamp" OrderingTimestamp.of_json in
       let annotation =
-        field_map json "Annotation" StringWithCharLimit256.of_json in
+        field_map json__ "Annotation" StringWithCharLimit256.of_json in
       let complianceType =
-        field_map_exn json "ComplianceType" ComplianceType.of_json in
+        field_map_exn json__ "ComplianceType" ComplianceType.of_json in
       let complianceResourceId =
-        field_map_exn json "ComplianceResourceId" BaseResourceId.of_json in
+        field_map_exn json__ "ComplianceResourceId" BaseResourceId.of_json in
       let complianceResourceType =
-        field_map_exn json "ComplianceResourceType"
+        field_map_exn json__ "ComplianceResourceType"
           StringWithCharLimit256.of_json in
       make ~orderingTimestamp ?annotation ~complianceType
         ~complianceResourceId ~complianceResourceType ()
@@ -9115,6 +12244,9 @@ module Evaluations =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Evaluation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9146,7 +12278,7 @@ module InvalidResultTokenException =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified ResultToken is invalid."]
+  end[@@ocaml.doc "The specified ResultToken is not valid."]
 module ConformancePackTemplateValidationException =
   struct
     type nonrec t = unit
@@ -9172,7 +12304,7 @@ module MaxNumberOfConformancePacksExceededException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You have reached the limit (6) of the number of conformance packs in an account (6 conformance pack with 25 Config rules per pack)."]
+       "You have reached the limit of the number of conformance packs you can create in an account. For more information, see Service Limits in the Config Developer Guide."]
 module InvalidRoleException =
   struct
     type nonrec t = unit
@@ -9184,7 +12316,8 @@ module InvalidRoleException =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "You have provided a null or empty role ARN."]
+  end[@@ocaml.doc
+       "You have provided a null or empty Amazon Resource Name (ARN) for the IAM role assumed by Config and used by the customer managed configuration recorder."]
 module ResourceNotFoundException =
   struct
     type nonrec t = unit
@@ -9201,6 +12334,9 @@ module StoredQueryMetadataList =
   struct
     type nonrec t = StoredQueryMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StoredQueryMetadata.to_value)) |>
         (fun x -> `List x)
@@ -9223,6 +12359,115 @@ module StoredQueryMetadataList =
         ~of_json:StoredQueryMetadata.of_json j
     let to_json v = composed_to_json to_value v
   end
+module InvalidTimeRangeException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The specified time range is not valid. The earlier time is not chronologically before the later time."]
+module ResourceEvaluations =
+  struct
+    type nonrec t = ResourceEvaluation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceEvaluation.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceEvaluation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceEvaluations"
+        ~of_json:ResourceEvaluation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListResourceEvaluationsPageItemLimit =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListResourceEvaluationsPageItemLimit"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceEvaluationFilters =
+  struct
+    type nonrec t =
+      {
+      evaluationMode: EvaluationMode.t option
+        [@ocaml.doc
+          "Filters all resource evaluations results based on an evaluation mode. Currently, DECTECTIVE is not supported as a valid value. Ignore other documentation stating otherwise."];
+      timeWindow: TimeWindow.t option
+        [@ocaml.doc "Returns a TimeWindow object."];
+      evaluationContextIdentifier: EvaluationContextIdentifier.t option
+        [@ocaml.doc
+          "Filters evaluations for a given infrastructure deployment. For example: CFN Stack."]}
+    let make ?evaluationMode =
+      fun ?timeWindow ->
+        fun ?evaluationContextIdentifier ->
+          fun () ->
+            { evaluationMode; timeWindow; evaluationContextIdentifier }
+    let to_value x =
+      structure_to_value
+        [("EvaluationMode",
+           (Option.map x.evaluationMode ~f:EvaluationMode.to_value));
+        ("TimeWindow", (Option.map x.timeWindow ~f:TimeWindow.to_value));
+        ("EvaluationContextIdentifier",
+          (Option.map x.evaluationContextIdentifier
+             ~f:EvaluationContextIdentifier.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let evaluationContextIdentifier =
+        (Option.map ~f:EvaluationContextIdentifier.of_xml)
+          (Xml.child xml_arg0 "EvaluationContextIdentifier") in
+      let timeWindow =
+        (Option.map ~f:TimeWindow.of_xml) (Xml.child xml_arg0 "TimeWindow") in
+      let evaluationMode =
+        (Option.map ~f:EvaluationMode.of_xml)
+          (Xml.child xml_arg0 "EvaluationMode") in
+      make ?evaluationContextIdentifier ?timeWindow ?evaluationMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let evaluationContextIdentifier =
+        field_map json__ "EvaluationContextIdentifier"
+          EvaluationContextIdentifier.of_json in
+      let timeWindow = field_map json__ "TimeWindow" TimeWindow.of_json in
+      let evaluationMode =
+        field_map json__ "EvaluationMode" EvaluationMode.of_json in
+      make ?evaluationContextIdentifier ?timeWindow ?evaluationMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns details of a resource evaluation based on the selected filter."]
 module NoAvailableConfigurationRecorderException =
   struct
     type nonrec t = unit
@@ -9235,11 +12480,14 @@ module NoAvailableConfigurationRecorderException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "There are no configuration recorders available to provide the role needed to describe your resources. Create a configuration recorder."]
+       "There are no customer managed configuration recorders available to record your resources. Use the PutConfigurationRecorder operation to create the customer managed configuration recorder."]
 module ResourceIdentifierList =
   struct
     type nonrec t = ResourceIdentifier.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceIdentifier.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9265,6 +12513,9 @@ module ResourceIdList =
   struct
     type nonrec t = ResourceId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9285,10 +12536,205 @@ module ResourceIdList =
       list_of_json ~kind:"ResourceIdList" ~of_json:ResourceId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ConformancePackComplianceScores =
+  struct
+    type nonrec t = ConformancePackComplianceScore.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConformancePackComplianceScore.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConformancePackComplianceScore.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConformancePackComplianceScores"
+        ~of_json:ConformancePackComplianceScore.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ConformancePackComplianceScoresFilters =
+  struct
+    type nonrec t =
+      {
+      conformancePackNames: ConformancePackNameFilter.t
+        [@ocaml.doc
+          "The names of the conformance packs whose compliance scores you want to include in the conformance pack compliance score result set. You can include up to 25 conformance packs in the ConformancePackNames array of strings, each with a character limit of 256 characters for the conformance pack name."]}
+    let context_ = "ConformancePackComplianceScoresFilters"
+    let make ~conformancePackNames = fun () -> { conformancePackNames }
+    let to_value x =
+      structure_to_value
+        [("ConformancePackNames",
+           (Some (ConformancePackNameFilter.to_value x.conformancePackNames)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let conformancePackNames =
+        ConformancePackNameFilter.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConformancePackNames") in
+      make ~conformancePackNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let conformancePackNames =
+        field_map_exn json__ "ConformancePackNames"
+          ConformancePackNameFilter.of_json in
+      make ~conformancePackNames ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A list of filters to apply to the conformance pack compliance score result set."]
+module PageSizeLimit =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:20) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PageSizeLimit" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SortBy =
+  struct
+    type nonrec t =
+      | SCORE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | SCORE -> "SCORE" | Non_static_id s -> s
+    let of_string = function | "SCORE" -> SCORE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SortBy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SortBy" j)
+    let to_json = simple_to_json to_value
+  end
+module SortOrder =
+  struct
+    type nonrec t =
+      | ASCENDING 
+      | DESCENDING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ASCENDING -> "ASCENDING"
+      | DESCENDING -> "DESCENDING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ASCENDING" -> ASCENDING
+      | "DESCENDING" -> DESCENDING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SortOrder" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SortOrder" j)
+    let to_json = simple_to_json to_value
+  end
+module ConfigurationRecorderSummaries =
+  struct
+    type nonrec t = ConfigurationRecorderSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConfigurationRecorderSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConfigurationRecorderSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConfigurationRecorderSummaries"
+        ~of_json:ConfigurationRecorderSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ConfigurationRecorderFilterList =
+  struct
+    type nonrec t = ConfigurationRecorderFilter.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConfigurationRecorderFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConfigurationRecorderFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConfigurationRecorderFilterList"
+        ~of_json:ConfigurationRecorderFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:20) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module DiscoveredResourceIdentifierList =
   struct
     type nonrec t = AggregateResourceIdentifier.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AggregateResourceIdentifier.to_value)) |>
         (fun x -> `List x)
@@ -9346,19 +12792,56 @@ module ResourceFilters =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?region ?resourceName ?resourceId ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let region = field_map json "Region" AwsRegion.of_json in
-      let resourceName = field_map json "ResourceName" ResourceName.of_json in
-      let resourceId = field_map json "ResourceId" ResourceId.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+    let of_json json__ =
+      let region = field_map json__ "Region" AwsRegion.of_json in
+      let resourceName = field_map json__ "ResourceName" ResourceName.of_json in
+      let resourceId = field_map json__ "ResourceId" ResourceId.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       make ?region ?resourceName ?resourceId ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Filters the results by resource account ID, region, resource ID, and resource name."]
+module EvaluationStatus =
+  struct
+    type nonrec t =
+      {
+      status: ResourceEvaluationStatus.t option
+        [@ocaml.doc
+          "The status of an execution. The valid values are In_Progress, Succeeded or Failed."];
+      failureReason: StringWithCharLimit1024.t option
+        [@ocaml.doc "An explanation for failed execution status."]}
+    let make ?status =
+      fun ?failureReason -> fun () -> { status; failureReason }
+    let to_value x =
+      structure_to_value
+        [("Status",
+           (Option.map x.status ~f:ResourceEvaluationStatus.to_value));
+        ("FailureReason",
+          (Option.map x.failureReason ~f:StringWithCharLimit1024.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureReason =
+        (Option.map ~f:StringWithCharLimit1024.of_xml)
+          (Xml.child xml_arg0 "FailureReason") in
+      let status =
+        (Option.map ~f:ResourceEvaluationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?failureReason ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureReason =
+        field_map json__ "FailureReason" StringWithCharLimit1024.of_json in
+      let status = field_map json__ "Status" ResourceEvaluationStatus.of_json in
+      make ?failureReason ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns status details of an evaluation."]
 module ConfigurationItemList =
   struct
     type nonrec t = ConfigurationItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigurationItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9380,19 +12863,6 @@ module ConfigurationItemList =
         ~of_json:ConfigurationItem.of_json j
     let to_json v = composed_to_json to_value v
   end
-module InvalidTimeRangeException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The specified time range is not valid. The earlier time is not chronologically before the later time."]
 module ResourceNotDiscoveredException =
   struct
     type nonrec t = unit
@@ -9468,7 +12938,7 @@ module NoSuchOrganizationConfigRuleException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The Config rule in the request is not valid. Verify that the rule is an organization Config Custom Policy rule, that the rule name is correct, and that valid Amazon Resouce Names (ARNs) are used before trying again."]
+       "The Config rule in the request is not valid. Verify that the rule is an organization Config Process Check rule, that the rule name is correct, and that valid Amazon Resouce Names (ARNs) are used before trying again."]
 module NoSuchOrganizationConformancePackException =
   struct
     type nonrec t = unit
@@ -9486,6 +12956,9 @@ module OrganizationConformancePackDetailedStatuses =
   struct
     type nonrec t = OrganizationConformancePackDetailedStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrganizationConformancePackDetailedStatus.to_value))
         |> (fun x -> `List x)
@@ -9536,7 +13009,7 @@ module OrganizationResourceDetailedStatusFilters =
           "The 12-digit account ID of the member account within an organization."];
       status: OrganizationResourceDetailedStatus.t option
         [@ocaml.doc
-          "Indicates deployment status for conformance pack in a member account. When master account calls PutOrganizationConformancePack action for the first time, conformance pack status is created in the member account. When master account calls PutOrganizationConformancePack action for the second time, conformance pack status is updated in the member account. Conformance pack status is deleted when the master account deletes OrganizationConformancePack and disables service access for config-multiaccountsetup.amazonaws.com. Config sets the state of the conformance pack to: CREATE_SUCCESSFUL when conformance pack has been created in the member account. CREATE_IN_PROGRESS when conformance pack is being created in the member account. CREATE_FAILED when conformance pack creation has failed in the member account. DELETE_FAILED when conformance pack deletion has failed in the member account. DELETE_IN_PROGRESS when conformance pack is being deleted in the member account. DELETE_SUCCESSFUL when conformance pack has been deleted in the member account. UPDATE_SUCCESSFUL when conformance pack has been updated in the member account. UPDATE_IN_PROGRESS when conformance pack is being updated in the member account. UPDATE_FAILED when conformance pack deletion has failed in the member account."]}
+          "Indicates deployment status for conformance pack in a member account. When management account calls PutOrganizationConformancePack action for the first time, conformance pack status is created in the member account. When management account calls PutOrganizationConformancePack action for the second time, conformance pack status is updated in the member account. Conformance pack status is deleted when the management account deletes OrganizationConformancePack and disables service access for config-multiaccountsetup.amazonaws.com. Config sets the state of the conformance pack to: CREATE_SUCCESSFUL when conformance pack has been created in the member account. CREATE_IN_PROGRESS when conformance pack is being created in the member account. CREATE_FAILED when conformance pack creation has failed in the member account. DELETE_FAILED when conformance pack deletion has failed in the member account. DELETE_IN_PROGRESS when conformance pack is being deleted in the member account. DELETE_SUCCESSFUL when conformance pack has been deleted in the member account. UPDATE_SUCCESSFUL when conformance pack has been updated in the member account. UPDATE_IN_PROGRESS when conformance pack is being updated in the member account. UPDATE_FAILED when conformance pack deletion has failed in the member account."]}
     let make ?accountId = fun ?status -> fun () -> { accountId; status }
     let to_value x =
       structure_to_value
@@ -9552,10 +13025,10 @@ module OrganizationResourceDetailedStatusFilters =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?status ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map json "Status" OrganizationResourceDetailedStatus.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+        field_map json__ "Status" OrganizationResourceDetailedStatus.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       make ?status ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9564,6 +13037,9 @@ module OrganizationConfigRuleDetailedStatus =
   struct
     type nonrec t = MemberAccountStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MemberAccountStatus.to_value)) |>
         (fun x -> `List x)
@@ -9595,7 +13071,7 @@ module StatusDetailFilters =
           "The 12-digit account ID of the member account within an organization."];
       memberAccountRuleStatus: MemberAccountRuleStatus.t option
         [@ocaml.doc
-          "Indicates deployment status for Config rule in the member account. When master account calls PutOrganizationConfigRule action for the first time, Config rule status is created in the member account. When master account calls PutOrganizationConfigRule action for the second time, Config rule status is updated in the member account. Config rule status is deleted when the master account deletes OrganizationConfigRule and disables service access for config-multiaccountsetup.amazonaws.com. Config sets the state of the rule to: CREATE_SUCCESSFUL when Config rule has been created in the member account. CREATE_IN_PROGRESS when Config rule is being created in the member account. CREATE_FAILED when Config rule creation has failed in the member account. DELETE_FAILED when Config rule deletion has failed in the member account. DELETE_IN_PROGRESS when Config rule is being deleted in the member account. DELETE_SUCCESSFUL when Config rule has been deleted in the member account. UPDATE_SUCCESSFUL when Config rule has been updated in the member account. UPDATE_IN_PROGRESS when Config rule is being updated in the member account. UPDATE_FAILED when Config rule deletion has failed in the member account."]}
+          "Indicates deployment status for Config rule in the member account. When management account calls PutOrganizationConfigRule action for the first time, Config rule status is created in the member account. When management account calls PutOrganizationConfigRule action for the second time, Config rule status is updated in the member account. Config rule status is deleted when the management account deletes OrganizationConfigRule and disables service access for config-multiaccountsetup.amazonaws.com. Config sets the state of the rule to: CREATE_SUCCESSFUL when Config rule has been created in the member account. CREATE_IN_PROGRESS when Config rule is being created in the member account. CREATE_FAILED when Config rule creation has failed in the member account. DELETE_FAILED when Config rule deletion has failed in the member account. DELETE_IN_PROGRESS when Config rule is being deleted in the member account. DELETE_SUCCESSFUL when Config rule has been deleted in the member account. UPDATE_SUCCESSFUL when Config rule has been updated in the member account. UPDATE_IN_PROGRESS when Config rule is being updated in the member account. UPDATE_FAILED when Config rule deletion has failed in the member account."]}
     let make ?accountId =
       fun ?memberAccountRuleStatus ->
         fun () -> { accountId; memberAccountRuleStatus }
@@ -9614,11 +13090,11 @@ module StatusDetailFilters =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?memberAccountRuleStatus ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let memberAccountRuleStatus =
-        field_map json "MemberAccountRuleStatus"
+        field_map json__ "MemberAccountRuleStatus"
           MemberAccountRuleStatus.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       make ?memberAccountRuleStatus ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9627,6 +13103,9 @@ module ResourceCounts =
   struct
     type nonrec t = ResourceCount.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceCount.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9655,6 +13134,9 @@ module ResourceTypes =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StringWithCharLimit256.to_value)) |>
         (fun x -> `List x)
@@ -9685,6 +13167,9 @@ module ConformancePackComplianceSummaryList =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConformancePackComplianceSummary.to_value)) |>
         (fun x -> `List x)
@@ -9729,6 +13214,9 @@ module ConformancePackNamesToSummarizeList =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConformancePackName.to_value)) |>
         (fun x -> `List x)
@@ -9751,24 +13239,6 @@ module ConformancePackNamesToSummarizeList =
         ~of_json:ConformancePackName.of_json j
     let to_json v = composed_to_json to_value v
   end
-module PageSizeLimit =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:20) >>= (fun () -> check_int_min i ~min:0));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for PageSizeLimit" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
 module ConformancePackRuleEvaluationResultsList =
   struct
     type nonrec t = ConformancePackEvaluationResult.t list
@@ -9778,6 +13248,9 @@ module ConformancePackRuleEvaluationResultsList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConformancePackEvaluationResult.to_value)) |>
         (fun x -> `List x)
@@ -9863,16 +13336,17 @@ module ConformancePackEvaluationFilters =
           (Xml.child xml_arg0 "ConfigRuleNames") in
       make ?resourceIds ?resourceType ?complianceType ?configRuleNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceIds =
-        field_map json "ResourceIds"
+        field_map json__ "ResourceIds"
           ConformancePackComplianceResourceIds.of_json in
       let resourceType =
-        field_map json "ResourceType" StringWithCharLimit256.of_json in
+        field_map json__ "ResourceType" StringWithCharLimit256.of_json in
       let complianceType =
-        field_map json "ComplianceType" ConformancePackComplianceType.of_json in
+        field_map json__ "ComplianceType"
+          ConformancePackComplianceType.of_json in
       let configRuleNames =
-        field_map json "ConfigRuleNames"
+        field_map json__ "ConfigRuleNames"
           ConformancePackConfigRuleNames.of_json in
       make ?resourceIds ?resourceType ?complianceType ?configRuleNames ()
     let to_json v = composed_to_json to_value v
@@ -9902,6 +13376,9 @@ module ComplianceSummariesByResourceType =
   struct
     type nonrec t = ComplianceSummaryByResourceType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComplianceSummaryByResourceType.to_value)) |>
         (fun x -> `List x)
@@ -9928,6 +13405,9 @@ module EvaluationResults =
   struct
     type nonrec t = EvaluationResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EvaluationResult.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9957,6 +13437,9 @@ module ComplianceTypes =
         ok_or_failwith
           ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComplianceType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9994,6 +13477,9 @@ module GroupedResourceCountList =
   struct
     type nonrec t = GroupedResourceCount.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroupedResourceCount.to_value)) |>
         (fun x -> `List x)
@@ -10064,10 +13550,10 @@ module ResourceCountFilters =
           (Xml.child xml_arg0 "ResourceType") in
       make ?region ?accountId ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let region = field_map json "Region" AwsRegion.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
+    let of_json json__ =
+      let region = field_map json__ "Region" AwsRegion.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
       make ?region ?accountId ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10106,6 +13592,9 @@ module AggregateConformancePackComplianceSummaryList =
   struct
     type nonrec t = AggregateConformancePackComplianceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AggregateConformancePackComplianceSummary.to_value))
         |> (fun x -> `List x)
@@ -10153,9 +13642,9 @@ module AggregateConformancePackComplianceSummaryFilters =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?awsRegion ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let awsRegion = field_map json "AwsRegion" AwsRegion.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+    let of_json json__ =
+      let awsRegion = field_map json__ "AwsRegion" AwsRegion.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       make ?awsRegion ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Filters the results based on account ID and region."]
@@ -10194,6 +13683,9 @@ module AggregateComplianceCountList =
   struct
     type nonrec t = AggregateComplianceCount.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AggregateComplianceCount.to_value)) |>
         (fun x -> `List x)
@@ -10238,9 +13730,9 @@ module ConfigRuleComplianceSummaryFilters =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?awsRegion ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let awsRegion = field_map json "AwsRegion" AwsRegion.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+    let of_json json__ =
+      let awsRegion = field_map json__ "AwsRegion" AwsRegion.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       make ?awsRegion ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10278,6 +13770,9 @@ module AggregateEvaluationResultList =
   struct
     type nonrec t = AggregateEvaluationResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AggregateEvaluationResult.to_value)) |>
         (fun x -> `List x)
@@ -10300,6 +13795,19 @@ module AggregateEvaluationResultList =
         ~of_json:AggregateEvaluationResult.of_json j
     let to_json v = composed_to_json to_value v
   end
+module NoSuchConfigurationRecorderException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You have specified a configuration recorder that does not exist."]
 module NoSuchRetentionConfigurationException =
   struct
     type nonrec t = unit
@@ -10317,6 +13825,9 @@ module RetentionConfigurationList =
   struct
     type nonrec t = RetentionConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RetentionConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -10347,6 +13858,9 @@ module RetentionConfigurationNameList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RetentionConfigurationName.to_value)) |>
         (fun x -> `List x)
@@ -10373,6 +13887,9 @@ module RemediationExecutionStatuses =
   struct
     type nonrec t = RemediationExecutionStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RemediationExecutionStatus.to_value)) |>
         (fun x -> `List x)
@@ -10403,6 +13920,9 @@ module ConfigRuleNames =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigRuleName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10427,6 +13947,9 @@ module PendingAggregationRequestList =
   struct
     type nonrec t = PendingAggregationRequest.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PendingAggregationRequest.to_value)) |>
         (fun x -> `List x)
@@ -10473,6 +13996,9 @@ module OrganizationConformancePacks =
   struct
     type nonrec t = OrganizationConformancePack.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrganizationConformancePack.to_value)) |>
         (fun x -> `List x)
@@ -10503,6 +14029,9 @@ module OrganizationConformancePackNames =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrganizationConformancePackName.to_value)) |>
         (fun x -> `List x)
@@ -10529,6 +14058,9 @@ module OrganizationConformancePackStatuses =
   struct
     type nonrec t = OrganizationConformancePackStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrganizationConformancePackStatus.to_value)) |>
         (fun x -> `List x)
@@ -10556,6 +14088,9 @@ module OrganizationConfigRules =
   struct
     type nonrec t = OrganizationConfigRule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrganizationConfigRule.to_value)) |>
         (fun x -> `List x)
@@ -10586,6 +14121,9 @@ module OrganizationConfigRuleNames =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StringWithCharLimit64.to_value)) |>
         (fun x -> `List x)
@@ -10612,6 +14150,9 @@ module OrganizationConfigRuleStatuses =
   struct
     type nonrec t = OrganizationConfigRuleStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrganizationConfigRuleStatus.to_value)) |>
         (fun x -> `List x)
@@ -10638,6 +14179,9 @@ module DeliveryChannelList =
   struct
     type nonrec t = DeliveryChannel.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeliveryChannel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10676,6 +14220,9 @@ module DeliveryChannelNameList =
   struct
     type nonrec t = ChannelName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChannelName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10701,6 +14248,9 @@ module DeliveryChannelStatusList =
   struct
     type nonrec t = DeliveryChannelStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeliveryChannelStatus.to_value)) |>
         (fun x -> `List x)
@@ -10731,6 +14281,9 @@ module ConformancePackDetailList =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConformancePackDetail.to_value)) |>
         (fun x -> `List x)
@@ -10761,6 +14314,9 @@ module ConformancePackNamesList =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConformancePackName.to_value)) |>
         (fun x -> `List x)
@@ -10791,6 +14347,9 @@ module ConformancePackStatusDetailsList =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConformancePackStatusDetail.to_value)) |>
         (fun x -> `List x)
@@ -10822,6 +14381,9 @@ module ConformancePackRuleComplianceList =
           ((check_list_max i ~max:1000) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConformancePackRuleCompliance.to_value)) |>
         (fun x -> `List x)
@@ -10873,11 +14435,12 @@ module ConformancePackComplianceFilters =
           (Xml.child xml_arg0 "ConfigRuleNames") in
       make ?complianceType ?configRuleNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let complianceType =
-        field_map json "ComplianceType" ConformancePackComplianceType.of_json in
+        field_map json__ "ComplianceType"
+          ConformancePackComplianceType.of_json in
       let configRuleNames =
-        field_map json "ConfigRuleNames"
+        field_map json__ "ConfigRuleNames"
           ConformancePackConfigRuleNames.of_json in
       make ?complianceType ?configRuleNames ()
     let to_json v = composed_to_json to_value v
@@ -10907,6 +14470,9 @@ module ConfigurationRecorderList =
   struct
     type nonrec t = ConfigurationRecorder.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigurationRecorder.to_value)) |>
         (fun x -> `List x)
@@ -10929,23 +14495,13 @@ module ConfigurationRecorderList =
         ~of_json:ConfigurationRecorder.of_json j
     let to_json v = composed_to_json to_value v
   end
-module NoSuchConfigurationRecorderException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "You have specified a configuration recorder that does not exist."]
 module ConfigurationRecorderNameList =
   struct
     type nonrec t = RecorderName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecorderName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10971,6 +14527,9 @@ module ConfigurationRecorderStatusList =
   struct
     type nonrec t = ConfigurationRecorderStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigurationRecorderStatus.to_value)) |>
         (fun x -> `List x)
@@ -10997,6 +14556,9 @@ module ConfigurationAggregatorList =
   struct
     type nonrec t = ConfigurationAggregator.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigurationAggregator.to_value)) |>
         (fun x -> `List x)
@@ -11027,6 +14589,9 @@ module ConfigurationAggregatorNameList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigurationAggregatorName.to_value)) |>
         (fun x -> `List x)
@@ -11053,6 +14618,9 @@ module AggregatedSourceStatusList =
   struct
     type nonrec t = AggregatedSourceStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AggregatedSourceStatus.to_value)) |>
         (fun x -> `List x)
@@ -11080,6 +14648,9 @@ module AggregatedSourceStatusTypeList =
     type nonrec t = AggregatedSourceStatusType.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AggregatedSourceStatusType.to_value)) |>
         (fun x -> `List x)
@@ -11106,6 +14677,9 @@ module ConfigRules =
   struct
     type nonrec t = ConfigRule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11126,10 +14700,39 @@ module ConfigRules =
       list_of_json ~kind:"ConfigRules" ~of_json:ConfigRule.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DescribeConfigRulesFilters =
+  struct
+    type nonrec t =
+      {
+      evaluationMode: EvaluationMode.t option
+        [@ocaml.doc
+          "The mode of an evaluation. The valid values are Detective or Proactive."]}
+    let make ?evaluationMode = fun () -> { evaluationMode }
+    let to_value x =
+      structure_to_value
+        [("EvaluationMode",
+           (Option.map x.evaluationMode ~f:EvaluationMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let evaluationMode =
+        (Option.map ~f:EvaluationMode.of_xml)
+          (Xml.child xml_arg0 "EvaluationMode") in
+      make ?evaluationMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let evaluationMode =
+        field_map json__ "EvaluationMode" EvaluationMode.of_json in
+      make ?evaluationMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a filtered list of Detective or Proactive Config rules. By default, if the filter is not defined, this API returns an unfiltered list. For more information on Detective or Proactive Config rules, see Evaluation Mode in the Config Developer Guide."]
 module ConfigRuleEvaluationStatusList =
   struct
     type nonrec t = ConfigRuleEvaluationStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigRuleEvaluationStatus.to_value)) |>
         (fun x -> `List x)
@@ -11173,6 +14776,9 @@ module ComplianceByResources =
   struct
     type nonrec t = ComplianceByResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComplianceByResource.to_value)) |>
         (fun x -> `List x)
@@ -11199,6 +14805,9 @@ module ComplianceByConfigRules =
   struct
     type nonrec t = ComplianceByConfigRule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComplianceByConfigRule.to_value)) |>
         (fun x -> `List x)
@@ -11225,6 +14834,9 @@ module AggregationAuthorizationList =
   struct
     type nonrec t = AggregationAuthorization.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AggregationAuthorization.to_value)) |>
         (fun x -> `List x)
@@ -11251,6 +14863,9 @@ module AggregateComplianceByConformancePackList =
   struct
     type nonrec t = AggregateComplianceByConformancePack.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AggregateComplianceByConformancePack.to_value)) |>
         (fun x -> `List x)
@@ -11317,13 +14932,14 @@ module AggregateConformancePackComplianceFilters =
           (Xml.child xml_arg0 "ConformancePackName") in
       make ?awsRegion ?accountId ?complianceType ?conformancePackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let awsRegion = field_map json "AwsRegion" AwsRegion.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+    let of_json json__ =
+      let awsRegion = field_map json__ "AwsRegion" AwsRegion.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let complianceType =
-        field_map json "ComplianceType" ConformancePackComplianceType.of_json in
+        field_map json__ "ComplianceType"
+          ConformancePackComplianceType.of_json in
       let conformancePackName =
-        field_map json "ConformancePackName" ConformancePackName.of_json in
+        field_map json__ "ConformancePackName" ConformancePackName.of_json in
       make ?awsRegion ?accountId ?complianceType ?conformancePackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11332,6 +14948,9 @@ module AggregateComplianceByConfigRuleList =
   struct
     type nonrec t = AggregateComplianceByConfigRule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AggregateComplianceByConfigRule.to_value)) |>
         (fun x -> `List x)
@@ -11395,13 +15014,13 @@ module ConfigRuleComplianceFilters =
           (Xml.child xml_arg0 "ConfigRuleName") in
       make ?awsRegion ?accountId ?complianceType ?configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let awsRegion = field_map json "AwsRegion" AwsRegion.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+    let of_json json__ =
+      let awsRegion = field_map json__ "AwsRegion" AwsRegion.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let complianceType =
-        field_map json "ComplianceType" ComplianceType.of_json in
+        field_map json__ "ComplianceType" ComplianceType.of_json in
       let configRuleName =
-        field_map json "ConfigRuleName" ConfigRuleName.of_json in
+        field_map json__ "ConfigRuleName" ConfigRuleName.of_json in
       make ?awsRegion ?accountId ?complianceType ?configRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11422,6 +15041,9 @@ module FailedDeleteRemediationExceptionsBatches =
   struct
     type nonrec t = FailedDeleteRemediationExceptionsBatch.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FailedDeleteRemediationExceptionsBatch.to_value))
         |> (fun x -> `List x)
@@ -11475,6 +15097,9 @@ module BaseConfigurationItems =
   struct
     type nonrec t = BaseConfigurationItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BaseConfigurationItem.to_value)) |>
         (fun x -> `List x)
@@ -11501,6 +15126,9 @@ module UnprocessedResourceIdentifierList =
   struct
     type nonrec t = AggregateResourceIdentifier.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AggregateResourceIdentifier.to_value)) |>
         (fun x -> `List x)
@@ -11532,6 +15160,9 @@ module ResourceIdentifiersList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AggregateResourceIdentifier.to_value)) |>
         (fun x -> `List x)
@@ -11560,7 +15191,7 @@ module UntagResourceRequest =
       {
       resourceArn: AmazonResourceName.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that identifies the resource for which to list the tags. Currently, the supported resources are ConfigRule, ConfigurationAggregator and AggregatorAuthorization."];
+          "The Amazon Resource Name (ARN) that identifies the resource for which to list the tags. The following resources are supported: ConfigurationRecorder ConfigRule OrganizationConfigRule ConformancePack OrganizationConformancePack ConfigurationAggregator AggregationAuthorization StoredQuery"];
       tagKeys: TagKeyList.t
         [@ocaml.doc "The keys of the tags to be removed."]}
     let context_ = "UntagResourceRequest"
@@ -11580,20 +15211,33 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes specified tags from a resource."]
+module UnmodifiableEntityException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The requested operation is not valid. For PutConfigurationRecorder, you will see this exception because you cannot use this operation to create a service-linked configuration recorder. Use the PutServiceLinkedConfigurationRecorder operation to create a service-linked configuration recorder. For DeleteConfigurationRecorder, you will see this exception because you cannot use this operation to delete a service-linked configuration recorder. Use the DeleteServiceLinkedConfigurationRecorder operation to delete a service-linked configuration recorder. For StartConfigurationRecorder and StopConfigurationRecorder, you will see this exception because these operations do not affect service-linked configuration recorders. Service-linked configuration recorders are always recording. To stop recording, you must delete the service-linked configuration recorder. Use the DeleteServiceLinkedConfigurationRecorder operation to delete a service-linked configuration recorder."]
 module TagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: AmazonResourceName.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that identifies the resource for which to list the tags. Currently, the supported resources are ConfigRule, ConfigurationAggregator and AggregatorAuthorization."];
+          "The Amazon Resource Name (ARN) that identifies the resource for which to list the tags. The following resources are supported: ConfigurationRecorder ConfigRule OrganizationConfigRule ConformancePack OrganizationConformancePack ConfigurationAggregator AggregationAuthorization StoredQuery"];
       tags: TagList.t [@ocaml.doc "An array of tag object."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
@@ -11610,21 +15254,21 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates the specified tags to a resource with the specified resourceArn. If existing tags on a resource are not specified in the request parameters, they are not changed. When a resource is deleted, the tags associated with that resource are deleted as well."]
+       "Associates the specified tags to a resource with the specified ResourceArn. If existing tags on a resource are not specified in the request parameters, they are not changed. If existing tags are specified, however, then their values will be updated. When a resource is deleted, the tags associated with that resource are deleted as well."]
 module StopConfigurationRecorderRequest =
   struct
     type nonrec t =
       {
       configurationRecorderName: RecorderName.t
         [@ocaml.doc
-          "The name of the recorder object that records each configuration change made to the resources."]}
+          "The name of the customer managed configuration recorder that you want to stop."]}
     let context_ = "StopConfigurationRecorderRequest"
     let make ~configurationRecorderName =
       fun () -> { configurationRecorderName }
@@ -11640,12 +15284,154 @@ module StopConfigurationRecorderRequest =
              "ConfigurationRecorderName") in
       make ~configurationRecorderName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationRecorderName =
-        field_map_exn json "ConfigurationRecorderName" RecorderName.of_json in
+        field_map_exn json__ "ConfigurationRecorderName" RecorderName.of_json in
       make ~configurationRecorderName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The input for the StopConfigurationRecorder action."]
+  end[@@ocaml.doc "The input for the StopConfigurationRecorder operation."]
+module StartResourceEvaluationResponse =
+  struct
+    type nonrec t =
+      {
+      resourceEvaluationId: ResourceEvaluationId.t option
+        [@ocaml.doc
+          "A unique ResourceEvaluationId that is associated with a single execution."]}
+    type nonrec error =
+      [ `IdempotentParameterMismatch of IdempotentParameterMismatch.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceEvaluationId = fun () -> { resourceEvaluationId }
+    let error_of_json name json =
+      match name with
+      | "IdempotentParameterMismatch" ->
+          `IdempotentParameterMismatch
+            (IdempotentParameterMismatch.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "IdempotentParameterMismatch" ->
+          `IdempotentParameterMismatch
+            (IdempotentParameterMismatch.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `IdempotentParameterMismatch e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatch"));
+            ("details", (IdempotentParameterMismatch.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceEvaluationId",
+           (Option.map x.resourceEvaluationId
+              ~f:ResourceEvaluationId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceEvaluationId =
+        (Option.map ~f:ResourceEvaluationId.of_xml)
+          (Xml.child xml_arg0 "ResourceEvaluationId") in
+      make ?resourceEvaluationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceEvaluationId =
+        field_map json__ "ResourceEvaluationId" ResourceEvaluationId.of_json in
+      make ?resourceEvaluationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Runs an on-demand evaluation for the specified resource to determine whether the resource details will comply with configured Config rules. You can also use it for evaluation purposes. Config recommends using an evaluation context. It runs an execution against the resource details with all of the Config rules in your account that match with the specified proactive mode and resource type. Ensure you have the cloudformation:DescribeType role setup to validate the resource type schema. You can find the Resource type schema in \"Amazon Web Services public extensions\" within the CloudFormation registry or with the following CLI commmand: aws cloudformation describe-type --type-name \"AWS::S3::Bucket\" --type RESOURCE. For more information, see Managing extensions through the CloudFormation registry and Amazon Web Services resource and property types reference in the CloudFormation User Guide."]
+module StartResourceEvaluationRequest =
+  struct
+    type nonrec t =
+      {
+      resourceDetails: ResourceDetails.t
+        [@ocaml.doc "Returns a ResourceDetails object."];
+      evaluationContext: EvaluationContext.t option
+        [@ocaml.doc "Returns an EvaluationContext object."];
+      evaluationMode: EvaluationMode.t
+        [@ocaml.doc
+          "The mode of an evaluation. The only valid value for this API is PROACTIVE."];
+      evaluationTimeout: EvaluationTimeout.t option
+        [@ocaml.doc
+          "The timeout for an evaluation. The default is 900 seconds. You cannot specify a number greater than 3600. If you specify 0, Config uses the default."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A client token is a unique, case-sensitive string of up to 64 ASCII characters. To make an idempotent API request using one of these actions, specify a client token in the request. Avoid reusing the same client token for other API requests. If you retry a request that completed successfully using the same client token and the same parameters, the retry succeeds without performing any further actions. If you retry a successful request using the same client token, but one or more of the parameters are different, other than the Region or Availability Zone, the retry fails with an IdempotentParameterMismatch error."]}
+    let context_ = "StartResourceEvaluationRequest"
+    let make ?evaluationContext =
+      fun ?evaluationTimeout ->
+        fun ?clientToken ->
+          fun ~resourceDetails ->
+            fun ~evaluationMode ->
+              fun () ->
+                {
+                  evaluationContext;
+                  evaluationTimeout;
+                  clientToken;
+                  resourceDetails;
+                  evaluationMode
+                }
+    let to_value x =
+      structure_to_value
+        [("ResourceDetails",
+           (Some (ResourceDetails.to_value x.resourceDetails)));
+        ("EvaluationContext",
+          (Option.map x.evaluationContext ~f:EvaluationContext.to_value));
+        ("EvaluationMode", (Some (EvaluationMode.to_value x.evaluationMode)));
+        ("EvaluationTimeout",
+          (Option.map x.evaluationTimeout ~f:EvaluationTimeout.to_value));
+        ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
+      let evaluationTimeout =
+        (Option.map ~f:EvaluationTimeout.of_xml)
+          (Xml.child xml_arg0 "EvaluationTimeout") in
+      let evaluationMode =
+        EvaluationMode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EvaluationMode") in
+      let evaluationContext =
+        (Option.map ~f:EvaluationContext.of_xml)
+          (Xml.child xml_arg0 "EvaluationContext") in
+      let resourceDetails =
+        ResourceDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceDetails") in
+      make ?clientToken ?evaluationTimeout ~evaluationMode ?evaluationContext
+        ~resourceDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let evaluationTimeout =
+        field_map json__ "EvaluationTimeout" EvaluationTimeout.of_json in
+      let evaluationMode =
+        field_map_exn json__ "EvaluationMode" EvaluationMode.of_json in
+      let evaluationContext =
+        field_map json__ "EvaluationContext" EvaluationContext.of_json in
+      let resourceDetails =
+        field_map_exn json__ "ResourceDetails" ResourceDetails.of_json in
+      make ?clientToken ?evaluationTimeout ~evaluationMode ?evaluationContext
+        ~resourceDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Runs an on-demand evaluation for the specified resource to determine whether the resource details will comply with configured Config rules. You can also use it for evaluation purposes. Config recommends using an evaluation context. It runs an execution against the resource details with all of the Config rules in your account that match with the specified proactive mode and resource type. Ensure you have the cloudformation:DescribeType role setup to validate the resource type schema. You can find the Resource type schema in \"Amazon Web Services public extensions\" within the CloudFormation registry or with the following CLI commmand: aws cloudformation describe-type --type-name \"AWS::S3::Bucket\" --type RESOURCE. For more information, see Managing extensions through the CloudFormation registry and Amazon Web Services resource and property types reference in the CloudFormation User Guide."]
 module StartRemediationExecutionResponse =
   struct
     type nonrec t =
@@ -11726,9 +15512,9 @@ module StartRemediationExecutionResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "FailureMessage") in
       make ?failedItems ?failureMessage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failedItems = field_map json "FailedItems" ResourceKeys.of_json in
-      let failureMessage = field_map json "FailureMessage" String_.of_json in
+    let of_json json__ =
+      let failedItems = field_map json__ "FailedItems" ResourceKeys.of_json in
+      let failureMessage = field_map json__ "FailureMessage" String_.of_json in
       make ?failedItems ?failureMessage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11761,11 +15547,11 @@ module StartRemediationExecutionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigRuleName") in
       make ~resourceKeys ~configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceKeys =
-        field_map_exn json "ResourceKeys" ResourceKeys.of_json in
+        field_map_exn json__ "ResourceKeys" ResourceKeys.of_json in
       let configRuleName =
-        field_map_exn json "ConfigRuleName" ConfigRuleName.of_json in
+        field_map_exn json__ "ConfigRuleName" ConfigRuleName.of_json in
       make ~resourceKeys ~configRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11776,7 +15562,7 @@ module StartConfigurationRecorderRequest =
       {
       configurationRecorderName: RecorderName.t
         [@ocaml.doc
-          "The name of the recorder object that records each configuration change made to the resources."]}
+          "The name of the customer managed configuration recorder that you want to start."]}
     let context_ = "StartConfigurationRecorderRequest"
     let make ~configurationRecorderName =
       fun () -> { configurationRecorderName }
@@ -11792,12 +15578,12 @@ module StartConfigurationRecorderRequest =
              "ConfigurationRecorderName") in
       make ~configurationRecorderName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationRecorderName =
-        field_map_exn json "ConfigurationRecorderName" RecorderName.of_json in
+        field_map_exn json__ "ConfigurationRecorderName" RecorderName.of_json in
       make ~configurationRecorderName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The input for the StartConfigurationRecorder action."]
+  end[@@ocaml.doc "The input for the StartConfigurationRecorder operation."]
 module StartConfigRulesEvaluationResponse =
   struct
     type nonrec t = unit
@@ -11887,9 +15673,9 @@ module StartConfigRulesEvaluationRequest =
           (Xml.child xml_arg0 "ConfigRuleNames") in
       make ?configRuleNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configRuleNames =
-        field_map json "ConfigRuleNames" ReevaluateConfigRuleNames.of_json in
+        field_map json__ "ConfigRuleNames" ReevaluateConfigRuleNames.of_json in
       make ?configRuleNames ()
     let to_json v = composed_to_json to_value v
   end
@@ -11968,10 +15754,10 @@ module SelectResourceConfigResponse =
         (Option.map ~f:Results.of_xml) (Xml.child xml_arg0 "Results") in
       make ?nextToken ?queryInfo ?results ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let queryInfo = field_map json "QueryInfo" QueryInfo.of_json in
-      let results = field_map json "Results" Results.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let queryInfo = field_map json__ "QueryInfo" QueryInfo.of_json in
+      let results = field_map json__ "Results" Results.of_json in
       make ?nextToken ?queryInfo ?results ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12006,10 +15792,10 @@ module SelectResourceConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Expression") in
       make ?nextToken ?limit ~expression ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let limit = field_map json "Limit" Limit.of_json in
-      let expression = field_map_exn json "Expression" Expression.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let limit = field_map json__ "Limit" Limit.of_json in
+      let expression = field_map_exn json__ "Expression" Expression.of_json in
       make ?nextToken ?limit ~expression ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12100,10 +15886,10 @@ module SelectAggregateResourceConfigResponse =
         (Option.map ~f:Results.of_xml) (Xml.child xml_arg0 "Results") in
       make ?nextToken ?queryInfo ?results ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let queryInfo = field_map json "QueryInfo" QueryInfo.of_json in
-      let results = field_map json "Results" Results.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let queryInfo = field_map json__ "QueryInfo" QueryInfo.of_json in
+      let results = field_map json__ "Results" Results.of_json in
       make ?nextToken ?queryInfo ?results ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12165,14 +15951,14 @@ module SelectAggregateResourceConfigRequest =
       make ?nextToken ?maxResults ?limit ~configurationAggregatorName
         ~expression ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" Limit.of_json in
-      let limit = field_map json "Limit" Limit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" Limit.of_json in
+      let limit = field_map json__ "Limit" Limit.of_json in
       let configurationAggregatorName =
-        field_map_exn json "ConfigurationAggregatorName"
+        field_map_exn json__ "ConfigurationAggregatorName"
           ConfigurationAggregatorName.of_json in
-      let expression = field_map_exn json "Expression" Expression.of_json in
+      let expression = field_map_exn json__ "Expression" Expression.of_json in
       make ?nextToken ?maxResults ?limit ~configurationAggregatorName
         ~expression ()
     let to_json v = composed_to_json to_value v
@@ -12244,12 +16030,12 @@ module PutStoredQueryResponse =
         (Option.map ~f:QueryArn.of_xml) (Xml.child xml_arg0 "QueryArn") in
       make ?queryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryArn = field_map json "QueryArn" QueryArn.of_json in
+    let of_json json__ =
+      let queryArn = field_map json__ "QueryArn" QueryArn.of_json in
       make ?queryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Saves a new query or updates an existing saved query. The QueryName must be unique for a single Amazon Web Services account and a single Amazon Web Services Region. You can create upto 300 queries in a single Amazon Web Services account and a single Amazon Web Services Region."]
+       "Saves a new query or updates an existing saved query. The QueryName must be unique for a single Amazon Web Services account and a single Amazon Web Services Region. You can create upto 300 queries in a single Amazon Web Services account and a single Amazon Web Services Region. Tags are added at creation and cannot be updated PutStoredQuery is an idempotent API. Subsequent requests won\226\128\153t create a duplicate resource if one was already created. If a following request has different tags values, Config will ignore these differences and treat it as an idempotent request of the previous. In this case, tags will not be updated, even if they are different."]
 module PutStoredQueryRequest =
   struct
     type nonrec t =
@@ -12272,13 +16058,135 @@ module PutStoredQueryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "StoredQuery") in
       make ?tags ~storedQuery ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagsList.of_json in
-      let storedQuery = field_map_exn json "StoredQuery" StoredQuery.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagsList.of_json in
+      let storedQuery =
+        field_map_exn json__ "StoredQuery" StoredQuery.of_json in
       make ?tags ~storedQuery ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Saves a new query or updates an existing saved query. The QueryName must be unique for a single Amazon Web Services account and a single Amazon Web Services Region. You can create upto 300 queries in a single Amazon Web Services account and a single Amazon Web Services Region."]
+       "Saves a new query or updates an existing saved query. The QueryName must be unique for a single Amazon Web Services account and a single Amazon Web Services Region. You can create upto 300 queries in a single Amazon Web Services account and a single Amazon Web Services Region. Tags are added at creation and cannot be updated PutStoredQuery is an idempotent API. Subsequent requests won\226\128\153t create a duplicate resource if one was already created. If a following request has different tags values, Config will ignore these differences and treat it as an idempotent request of the previous. In this case, tags will not be updated, even if they are different."]
+module PutServiceLinkedConfigurationRecorderResponse =
+  struct
+    type nonrec t =
+      {
+      arn: AmazonResourceName.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the specified configuration recorder."];
+      name: RecorderName.t option
+        [@ocaml.doc
+          "The name of the specified configuration recorder. For service-linked configuration recorders, Config automatically assigns a name that has the prefix \"AWSConfigurationRecorderFor\" to the new service-linked configuration recorder."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InsufficientPermissionsException of
+          InsufficientPermissionsException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?arn = fun ?name -> fun () -> { arn; name }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InsufficientPermissionsException" ->
+          `InsufficientPermissionsException
+            (InsufficientPermissionsException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InsufficientPermissionsException" ->
+          `InsufficientPermissionsException
+            (InsufficientPermissionsException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InsufficientPermissionsException e ->
+          `Assoc
+            [("error", (`String "InsufficientPermissionsException"));
+            ("details", (InsufficientPermissionsException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:AmazonResourceName.to_value));
+        ("Name", (Option.map x.name ~f:RecorderName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        (Option.map ~f:RecorderName.of_xml) (Xml.child xml_arg0 "Name") in
+      let arn =
+        (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "Name" RecorderName.of_json in
+      let arn = field_map json__ "Arn" AmazonResourceName.of_json in
+      make ?name ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a service-linked configuration recorder that is linked to a specific Amazon Web Services service based on the ServicePrincipal you specify. The configuration recorder's name, recordingGroup, recordingMode, and recordingScope is set by the service that is linked to the configuration recorder. For more information and a list of supported services/service principals, see Working with the Configuration Recorder in the Config Developer Guide. This API creates a service-linked role AWSServiceRoleForConfig in your account. The service-linked role is created only when the role does not exist in your account. The recording scope determines if you receive configuration items The recording scope is set by the service that is linked to the configuration recorder and determines whether you receive configuration items (CIs) in the delivery channel. If the recording scope is internal, you will not receive CIs in the delivery channel. Tags are added at creation and cannot be updated with this operation Use TagResource and UntagResource to update tags after creation."]
+module PutServiceLinkedConfigurationRecorderRequest =
+  struct
+    type nonrec t =
+      {
+      servicePrincipal: ServicePrincipal.t
+        [@ocaml.doc
+          "The service principal of the Amazon Web Services service for the service-linked configuration recorder that you want to create."];
+      tags: TagsList.t option
+        [@ocaml.doc
+          "The tags for a service-linked configuration recorder. Each tag consists of a key and an optional value, both of which you define."]}
+    let context_ = "PutServiceLinkedConfigurationRecorderRequest"
+    let make ?tags =
+      fun ~servicePrincipal -> fun () -> { tags; servicePrincipal }
+    let to_value x =
+      structure_to_value
+        [("ServicePrincipal",
+           (Some (ServicePrincipal.to_value x.servicePrincipal)));
+        ("Tags", (Option.map x.tags ~f:TagsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagsList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let servicePrincipal =
+        ServicePrincipal.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServicePrincipal") in
+      make ?tags ~servicePrincipal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagsList.of_json in
+      let servicePrincipal =
+        field_map_exn json__ "ServicePrincipal" ServicePrincipal.of_json in
+      make ?tags ~servicePrincipal ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a service-linked configuration recorder that is linked to a specific Amazon Web Services service based on the ServicePrincipal you specify. The configuration recorder's name, recordingGroup, recordingMode, and recordingScope is set by the service that is linked to the configuration recorder. For more information and a list of supported services/service principals, see Working with the Configuration Recorder in the Config Developer Guide. This API creates a service-linked role AWSServiceRoleForConfig in your account. The service-linked role is created only when the role does not exist in your account. The recording scope determines if you receive configuration items The recording scope is set by the service that is linked to the configuration recorder and determines whether you receive configuration items (CIs) in the delivery channel. If the recording scope is internal, you will not receive CIs in the delivery channel. Tags are added at creation and cannot be updated with this operation Use TagResource and UntagResource to update tags after creation."]
 module PutRetentionConfigurationResponse =
   struct
     type nonrec t =
@@ -12341,9 +16249,9 @@ module PutRetentionConfigurationResponse =
           (Xml.child xml_arg0 "RetentionConfiguration") in
       make ?retentionConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retentionConfiguration =
-        field_map json "RetentionConfiguration"
+        field_map json__ "RetentionConfiguration"
           RetentionConfiguration.of_json in
       make ?retentionConfiguration ()
     let to_json v = composed_to_json to_value v
@@ -12369,9 +16277,9 @@ module PutRetentionConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RetentionPeriodInDays") in
       make ~retentionPeriodInDays ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retentionPeriodInDays =
-        field_map_exn json "RetentionPeriodInDays"
+        field_map_exn json__ "RetentionPeriodInDays"
           RetentionPeriodInDays.of_json in
       make ~retentionPeriodInDays ()
     let to_json v = composed_to_json to_value v
@@ -12394,7 +16302,9 @@ module PutResourceConfigRequest =
       configuration: Configuration.t
         [@ocaml.doc
           "The configuration object of the resource in valid JSON format. It must match the schema registered with CloudFormation. The configuration JSON must not exceed 64 KB."];
-      tags: Tags.t option [@ocaml.doc "Tags associated with the resource."]}
+      tags: Tags.t option
+        [@ocaml.doc
+          "Tags associated with the resource. This field is not to be confused with the Amazon Web Services-wide tag feature for Amazon Web Services resources. Tags for PutResourceConfig are tags that you supply for the configuration items of your custom resources."]}
     let context_ = "PutResourceConfigRequest"
     let make ?resourceName =
       fun ?tags ->
@@ -12443,16 +16353,16 @@ module PutResourceConfigRequest =
       make ?tags ~configuration ?resourceName ~resourceId ~schemaVersionId
         ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let configuration =
-        field_map_exn json "Configuration" Configuration.of_json in
-      let resourceName = field_map json "ResourceName" ResourceName.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+        field_map_exn json__ "Configuration" Configuration.of_json in
+      let resourceName = field_map json__ "ResourceName" ResourceName.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       let schemaVersionId =
-        field_map_exn json "SchemaVersionId" SchemaVersionId.of_json in
+        field_map_exn json__ "SchemaVersionId" SchemaVersionId.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" ResourceTypeString.of_json in
+        field_map_exn json__ "ResourceType" ResourceTypeString.of_json in
       make ?tags ~configuration ?resourceName ~resourceId ~schemaVersionId
         ~resourceType ()
     let to_json v = composed_to_json to_value v
@@ -12520,14 +16430,14 @@ module PutRemediationExceptionsResponse =
           (Xml.child xml_arg0 "FailedBatches") in
       make ?failedBatches ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedBatches =
-        field_map json "FailedBatches"
+        field_map json__ "FailedBatches"
           FailedRemediationExceptionBatches.of_json in
       make ?failedBatches ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A remediation exception is when a specific resource is no longer considered for auto-remediation. This API adds a new exception or updates an existing exception for a specific resource with a specific Config rule. Config generates a remediation exception when a problem occurs executing a remediation action to a specific resource. Remediation exceptions blocks auto-remediation until the exception is cleared."]
+       "A remediation exception is when a specified resource is no longer considered for auto-remediation. This API adds a new exception or updates an existing exception for a specified resource with a specified Config rule. Exceptions block auto remediation Config generates a remediation exception when a problem occurs running a remediation action for a specified resource. Remediation exceptions blocks auto-remediation until the exception is cleared. Manual remediation is recommended when placing an exception When placing an exception on an Amazon Web Services resource, it is recommended that remediation is set as manual remediation until the given Config rule for the specified resource evaluates the resource as NON_COMPLIANT. Once the resource has been evaluated as NON_COMPLIANT, you can add remediation exceptions and change the remediation type back from Manual to Auto if you want to use auto-remediation. Otherwise, using auto-remediation before a NON_COMPLIANT evaluation result can delete resources before the exception is applied. Exceptions can only be performed on non-compliant resources Placing an exception can only be performed on resources that are NON_COMPLIANT. If you use this API for COMPLIANT resources or resources that are NOT_APPLICABLE, a remediation exception will not be generated. For more information on the conditions that initiate the possible Config evaluation results, see Concepts | Config Rules in the Config Developer Guide. Exceptions cannot be placed on service-linked remediation actions You cannot place an exception on service-linked remediation actions, such as remediation actions put by an organizational conformance pack. Auto remediation can be initiated even for compliant resources If you enable auto remediation for a specific Config rule using the PutRemediationConfigurations API or the Config console, it initiates the remediation process for all non-compliant resources for that specific rule. The auto remediation process relies on the compliance data snapshot which is captured on a periodic basis. Any non-compliant resource that is updated between the snapshot schedule will continue to be remediated based on the last known compliance data snapshot. This means that in some cases auto remediation can be initiated even for compliant resources, since the bootstrap processor uses a database that can have stale evaluation results based on the last known compliance data snapshot."]
 module PutRemediationExceptionsRequest =
   struct
     type nonrec t =
@@ -12574,18 +16484,19 @@ module PutRemediationExceptionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigRuleName") in
       make ?expirationTime ?message ~resourceKeys ~configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expirationTime = field_map json "ExpirationTime" Date.of_json in
-      let message = field_map json "Message" StringWithCharLimit1024.of_json in
+    let of_json json__ =
+      let expirationTime = field_map json__ "ExpirationTime" Date.of_json in
+      let message =
+        field_map json__ "Message" StringWithCharLimit1024.of_json in
       let resourceKeys =
-        field_map_exn json "ResourceKeys"
+        field_map_exn json__ "ResourceKeys"
           RemediationExceptionResourceKeys.of_json in
       let configRuleName =
-        field_map_exn json "ConfigRuleName" ConfigRuleName.of_json in
+        field_map_exn json__ "ConfigRuleName" ConfigRuleName.of_json in
       make ?expirationTime ?message ~resourceKeys ~configRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A remediation exception is when a specific resource is no longer considered for auto-remediation. This API adds a new exception or updates an existing exception for a specific resource with a specific Config rule. Config generates a remediation exception when a problem occurs executing a remediation action to a specific resource. Remediation exceptions blocks auto-remediation until the exception is cleared."]
+       "A remediation exception is when a specified resource is no longer considered for auto-remediation. This API adds a new exception or updates an existing exception for a specified resource with a specified Config rule. Exceptions block auto remediation Config generates a remediation exception when a problem occurs running a remediation action for a specified resource. Remediation exceptions blocks auto-remediation until the exception is cleared. Manual remediation is recommended when placing an exception When placing an exception on an Amazon Web Services resource, it is recommended that remediation is set as manual remediation until the given Config rule for the specified resource evaluates the resource as NON_COMPLIANT. Once the resource has been evaluated as NON_COMPLIANT, you can add remediation exceptions and change the remediation type back from Manual to Auto if you want to use auto-remediation. Otherwise, using auto-remediation before a NON_COMPLIANT evaluation result can delete resources before the exception is applied. Exceptions can only be performed on non-compliant resources Placing an exception can only be performed on resources that are NON_COMPLIANT. If you use this API for COMPLIANT resources or resources that are NOT_APPLICABLE, a remediation exception will not be generated. For more information on the conditions that initiate the possible Config evaluation results, see Concepts | Config Rules in the Config Developer Guide. Exceptions cannot be placed on service-linked remediation actions You cannot place an exception on service-linked remediation actions, such as remediation actions put by an organizational conformance pack. Auto remediation can be initiated even for compliant resources If you enable auto remediation for a specific Config rule using the PutRemediationConfigurations API or the Config console, it initiates the remediation process for all non-compliant resources for that specific rule. The auto remediation process relies on the compliance data snapshot which is captured on a periodic basis. Any non-compliant resource that is updated between the snapshot schedule will continue to be remediated based on the last known compliance data snapshot. This means that in some cases auto remediation can be initiated even for compliant resources, since the bootstrap processor uses a database that can have stale evaluation results based on the last known compliance data snapshot."]
 module PutRemediationConfigurationsResponse =
   struct
     type nonrec t =
@@ -12646,13 +16557,13 @@ module PutRemediationConfigurationsResponse =
           (Xml.child xml_arg0 "FailedBatches") in
       make ?failedBatches ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedBatches =
-        field_map json "FailedBatches" FailedRemediationBatches.of_json in
+        field_map json__ "FailedBatches" FailedRemediationBatches.of_json in
       make ?failedBatches ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates the remediation configuration with a specific Config rule with the selected target or action. The API creates the RemediationConfiguration object for the Config rule. The Config rule must already exist for you to add a remediation configuration. The target (SSM document) must exist and have permissions to use the target. If you make backward incompatible changes to the SSM document, you must call this again to ensure the remediations can run. This API does not support adding remediation configurations for service-linked Config Rules such as Organization Config rules, the rules deployed by conformance packs, and rules deployed by Amazon Web Services Security Hub."]
+       "Adds or updates the remediation configuration with a specific Config rule with the selected target or action. The API creates the RemediationConfiguration object for the Config rule. The Config rule must already exist for you to add a remediation configuration. The target (SSM document) must exist and have permissions to use the target. Be aware of backward incompatible changes If you make backward incompatible changes to the SSM document, you must call this again to ensure the remediations can run. This API does not support adding remediation configurations for service-linked Config Rules such as Organization Config rules, the rules deployed by conformance packs, and rules deployed by Amazon Web Services Security Hub. Required fields For manual remediation configuration, you need to provide a value for automationAssumeRole or use a value in the assumeRolefield to remediate your resources. The SSM automation document can use either as long as it maps to a valid parameter. However, for automatic remediation configuration, the only valid assumeRole field value is AutomationAssumeRole and you need to provide a value for AutomationAssumeRole to remediate your resources. Auto remediation can be initiated even for compliant resources If you enable auto remediation for a specific Config rule using the PutRemediationConfigurations API or the Config console, it initiates the remediation process for all non-compliant resources for that specific rule. The auto remediation process relies on the compliance data snapshot which is captured on a periodic basis. Any non-compliant resource that is updated between the snapshot schedule will continue to be remediated based on the last known compliance data snapshot. This means that in some cases auto remediation can be initiated even for compliant resources, since the bootstrap processor uses a database that can have stale evaluation results based on the last known compliance data snapshot."]
 module PutRemediationConfigurationsRequest =
   struct
     type nonrec t =
@@ -12675,14 +16586,14 @@ module PutRemediationConfigurationsRequest =
              "RemediationConfigurations") in
       make ~remediationConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let remediationConfigurations =
-        field_map_exn json "RemediationConfigurations"
+        field_map_exn json__ "RemediationConfigurations"
           RemediationConfigurations.of_json in
       make ~remediationConfigurations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates the remediation configuration with a specific Config rule with the selected target or action. The API creates the RemediationConfiguration object for the Config rule. The Config rule must already exist for you to add a remediation configuration. The target (SSM document) must exist and have permissions to use the target. If you make backward incompatible changes to the SSM document, you must call this again to ensure the remediations can run. This API does not support adding remediation configurations for service-linked Config Rules such as Organization Config rules, the rules deployed by conformance packs, and rules deployed by Amazon Web Services Security Hub."]
+       "Adds or updates the remediation configuration with a specific Config rule with the selected target or action. The API creates the RemediationConfiguration object for the Config rule. The Config rule must already exist for you to add a remediation configuration. The target (SSM document) must exist and have permissions to use the target. Be aware of backward incompatible changes If you make backward incompatible changes to the SSM document, you must call this again to ensure the remediations can run. This API does not support adding remediation configurations for service-linked Config Rules such as Organization Config rules, the rules deployed by conformance packs, and rules deployed by Amazon Web Services Security Hub. Required fields For manual remediation configuration, you need to provide a value for automationAssumeRole or use a value in the assumeRolefield to remediate your resources. The SSM automation document can use either as long as it maps to a valid parameter. However, for automatic remediation configuration, the only valid assumeRole field value is AutomationAssumeRole and you need to provide a value for AutomationAssumeRole to remediate your resources. Auto remediation can be initiated even for compliant resources If you enable auto remediation for a specific Config rule using the PutRemediationConfigurations API or the Config console, it initiates the remediation process for all non-compliant resources for that specific rule. The auto remediation process relies on the compliance data snapshot which is captured on a periodic basis. Any non-compliant resource that is updated between the snapshot schedule will continue to be remediated based on the last known compliance data snapshot. This means that in some cases auto remediation can be initiated even for compliant resources, since the bootstrap processor uses a database that can have stale evaluation results based on the last known compliance data snapshot."]
 module PutOrganizationConformancePackResponse =
   struct
     type nonrec t =
@@ -12826,14 +16737,14 @@ module PutOrganizationConformancePackResponse =
           (Xml.child xml_arg0 "OrganizationConformancePackArn") in
       make ?organizationConformancePackArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationConformancePackArn =
-        field_map json "OrganizationConformancePackArn"
+        field_map json__ "OrganizationConformancePackArn"
           StringWithCharLimit256.of_json in
       make ?organizationConformancePackArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deploys conformance packs across member accounts in an Amazon Web Services Organization. Only a master account and a delegated administrator can call this API. When calling this API with a delegated administrator, you must ensure Organizations ListDelegatedAdministrator permissions are added. This API enables organization service access for config-multiaccountsetup.amazonaws.com through the EnableAWSServiceAccess action and creates a service linked role AWSServiceRoleForConfigMultiAccountSetup in the master or delegated administrator account of your organization. The service linked role is created only when the role does not exist in the caller account. To use this API with delegated administrator, register a delegated administrator by calling Amazon Web Services Organization register-delegate-admin for config-multiaccountsetup.amazonaws.com. Prerequisite: Ensure you call EnableAllFeatures API to enable all features in an organization. You must specify either the TemplateS3Uri or the TemplateBody parameter, but not both. If you provide both Config uses the TemplateS3Uri parameter and ignores the TemplateBody parameter. Config sets the state of a conformance pack to CREATE_IN_PROGRESS and UPDATE_IN_PROGRESS until the conformance pack is created or updated. You cannot update a conformance pack while it is in this state. You can create 50 conformance packs with 25 Config rules in each pack and 3 delegated administrator per organization."]
+       "Deploys conformance packs across member accounts in an Amazon Web Services Organization. For information on how many organization conformance packs and how many Config rules you can have per account, see Service Limits in the Config Developer Guide. Only a management account and a delegated administrator can call this API. When calling this API with a delegated administrator, you must ensure Organizations ListDelegatedAdministrator permissions are added. An organization can have up to 3 delegated administrators. When you use PutOrganizationConformancePack to deploy conformance packs across member accounts, the operation can create Config rules and remediation actions without requiring config:PutConfigRule or config:PutRemediationConfigurations permissions in member account IAM policies. This API uses the AWSServiceRoleForConfigConforms service-linked role in each member account to create conformance pack resources. This service-linked role includes the permissions to create Config rules and remediation configurations, even if member account IAM policies explicitly deny these actions. This API enables organization service access for config-multiaccountsetup.amazonaws.com through the EnableAWSServiceAccess action and creates a service-linked role AWSServiceRoleForConfigMultiAccountSetup in the management or delegated administrator account of your organization. The service-linked role is created only when the role does not exist in the caller account. To use this API with delegated administrator, register a delegated administrator by calling Amazon Web Services Organization register-delegate-admin for config-multiaccountsetup.amazonaws.com. Prerequisite: Ensure you call EnableAllFeatures API to enable all features in an organization. You must specify either the TemplateS3Uri or the TemplateBody parameter, but not both. If you provide both Config uses the TemplateS3Uri parameter and ignores the TemplateBody parameter. Config sets the state of a conformance pack to CREATE_IN_PROGRESS and UPDATE_IN_PROGRESS until the conformance pack is created or updated. You cannot update a conformance pack while it is in this state."]
 module PutOrganizationConformancePackRequest =
   struct
     type nonrec t =
@@ -12843,10 +16754,10 @@ module PutOrganizationConformancePackRequest =
           "Name of the organization conformance pack you want to create."];
       templateS3Uri: TemplateS3Uri.t option
         [@ocaml.doc
-          "Location of file containing the template body. The uri must point to the conformance pack template (max size: 300 KB). You must have access to read Amazon S3 bucket."];
+          "Location of file containing the template body. The uri must point to the conformance pack template (max size: 300 KB). You must have access to read Amazon S3 bucket. In addition, in order to ensure a successful deployment, the template object must not be in an archived storage class if this parameter is passed."];
       templateBody: TemplateBody.t option
         [@ocaml.doc
-          "A string containing full conformance pack template body. Structure containing the template body with a minimum length of 1 byte and a maximum length of 51,200 bytes."];
+          "A string that contains the full conformance pack template body. Structure containing the template body with a minimum length of 1 byte and a maximum length of 51,200 bytes."];
       deliveryS3Bucket: DeliveryS3Bucket.t option
         [@ocaml.doc
           "The name of the Amazon S3 bucket where Config stores conformance pack templates. This field is optional. If used, it must be prefixed with awsconfigconforms."];
@@ -12923,28 +16834,28 @@ module PutOrganizationConformancePackRequest =
         ?deliveryS3KeyPrefix ?deliveryS3Bucket ?templateBody ?templateS3Uri
         ~organizationConformancePackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let excludedAccounts =
-        field_map json "ExcludedAccounts" ExcludedAccounts.of_json in
+        field_map json__ "ExcludedAccounts" ExcludedAccounts.of_json in
       let conformancePackInputParameters =
-        field_map json "ConformancePackInputParameters"
+        field_map json__ "ConformancePackInputParameters"
           ConformancePackInputParameters.of_json in
       let deliveryS3KeyPrefix =
-        field_map json "DeliveryS3KeyPrefix" DeliveryS3KeyPrefix.of_json in
+        field_map json__ "DeliveryS3KeyPrefix" DeliveryS3KeyPrefix.of_json in
       let deliveryS3Bucket =
-        field_map json "DeliveryS3Bucket" DeliveryS3Bucket.of_json in
-      let templateBody = field_map json "TemplateBody" TemplateBody.of_json in
+        field_map json__ "DeliveryS3Bucket" DeliveryS3Bucket.of_json in
+      let templateBody = field_map json__ "TemplateBody" TemplateBody.of_json in
       let templateS3Uri =
-        field_map json "TemplateS3Uri" TemplateS3Uri.of_json in
+        field_map json__ "TemplateS3Uri" TemplateS3Uri.of_json in
       let organizationConformancePackName =
-        field_map_exn json "OrganizationConformancePackName"
+        field_map_exn json__ "OrganizationConformancePackName"
           OrganizationConformancePackName.of_json in
       make ?excludedAccounts ?conformancePackInputParameters
         ?deliveryS3KeyPrefix ?deliveryS3Bucket ?templateBody ?templateS3Uri
         ~organizationConformancePackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deploys conformance packs across member accounts in an Amazon Web Services Organization. Only a master account and a delegated administrator can call this API. When calling this API with a delegated administrator, you must ensure Organizations ListDelegatedAdministrator permissions are added. This API enables organization service access for config-multiaccountsetup.amazonaws.com through the EnableAWSServiceAccess action and creates a service linked role AWSServiceRoleForConfigMultiAccountSetup in the master or delegated administrator account of your organization. The service linked role is created only when the role does not exist in the caller account. To use this API with delegated administrator, register a delegated administrator by calling Amazon Web Services Organization register-delegate-admin for config-multiaccountsetup.amazonaws.com. Prerequisite: Ensure you call EnableAllFeatures API to enable all features in an organization. You must specify either the TemplateS3Uri or the TemplateBody parameter, but not both. If you provide both Config uses the TemplateS3Uri parameter and ignores the TemplateBody parameter. Config sets the state of a conformance pack to CREATE_IN_PROGRESS and UPDATE_IN_PROGRESS until the conformance pack is created or updated. You cannot update a conformance pack while it is in this state. You can create 50 conformance packs with 25 Config rules in each pack and 3 delegated administrator per organization."]
+       "Deploys conformance packs across member accounts in an Amazon Web Services Organization. For information on how many organization conformance packs and how many Config rules you can have per account, see Service Limits in the Config Developer Guide. Only a management account and a delegated administrator can call this API. When calling this API with a delegated administrator, you must ensure Organizations ListDelegatedAdministrator permissions are added. An organization can have up to 3 delegated administrators. When you use PutOrganizationConformancePack to deploy conformance packs across member accounts, the operation can create Config rules and remediation actions without requiring config:PutConfigRule or config:PutRemediationConfigurations permissions in member account IAM policies. This API uses the AWSServiceRoleForConfigConforms service-linked role in each member account to create conformance pack resources. This service-linked role includes the permissions to create Config rules and remediation configurations, even if member account IAM policies explicitly deny these actions. This API enables organization service access for config-multiaccountsetup.amazonaws.com through the EnableAWSServiceAccess action and creates a service-linked role AWSServiceRoleForConfigMultiAccountSetup in the management or delegated administrator account of your organization. The service-linked role is created only when the role does not exist in the caller account. To use this API with delegated administrator, register a delegated administrator by calling Amazon Web Services Organization register-delegate-admin for config-multiaccountsetup.amazonaws.com. Prerequisite: Ensure you call EnableAllFeatures API to enable all features in an organization. You must specify either the TemplateS3Uri or the TemplateBody parameter, but not both. If you provide both Config uses the TemplateS3Uri parameter and ignores the TemplateBody parameter. Config sets the state of a conformance pack to CREATE_IN_PROGRESS and UPDATE_IN_PROGRESS until the conformance pack is created or updated. You cannot update a conformance pack while it is in this state."]
 module PutOrganizationConfigRuleResponse =
   struct
     type nonrec t =
@@ -13078,14 +16989,14 @@ module PutOrganizationConfigRuleResponse =
           (Xml.child xml_arg0 "OrganizationConfigRuleArn") in
       make ?organizationConfigRuleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationConfigRuleArn =
-        field_map json "OrganizationConfigRuleArn"
+        field_map json__ "OrganizationConfigRuleArn"
           StringWithCharLimit256.of_json in
       make ?organizationConfigRuleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates organization Config rule for your entire organization evaluating whether your Amazon Web Services resources comply with your desired configurations. Only a master account and a delegated administrator can create or update an organization Config rule. When calling this API with a delegated administrator, you must ensure Organizations ListDelegatedAdministrator permissions are added. This API enables organization service access through the EnableAWSServiceAccess action and creates a service linked role AWSServiceRoleForConfigMultiAccountSetup in the master or delegated administrator account of your organization. The service linked role is created only when the role does not exist in the caller account. Config verifies the existence of role with GetRole action. To use this API with delegated administrator, register a delegated administrator by calling Amazon Web Services Organization register-delegated-administrator for config-multiaccountsetup.amazonaws.com. You can use this action to create both Config custom rules and Config managed rules. If you are adding a new Config custom rule, you must first create Lambda function in the master account or a delegated administrator that the rule invokes to evaluate your resources. You also need to create an IAM role in the managed-account that can be assumed by the Lambda function. When you use the PutOrganizationConfigRule action to add the rule to Config, you must specify the Amazon Resource Name (ARN) that Lambda assigns to the function. If you are adding an Config managed rule, specify the rule's identifier for the RuleIdentifier key. The maximum number of organization Config rules that Config supports is 150 and 3 delegated administrator per organization. Prerequisite: Ensure you call EnableAllFeatures API to enable all features in an organization. Specify either OrganizationCustomRuleMetadata or OrganizationManagedRuleMetadata."]
+       "Adds or updates an Config rule for your entire organization to evaluate if your Amazon Web Services resources comply with your desired configurations. For information on how many organization Config rules you can have per account, see Service Limits in the Config Developer Guide. Only a management account and a delegated administrator can create or update an organization Config rule. When calling this API with a delegated administrator, you must ensure Organizations ListDelegatedAdministrator permissions are added. An organization can have up to 3 delegated administrators. This API enables organization service access through the EnableAWSServiceAccess action and creates a service-linked role AWSServiceRoleForConfigMultiAccountSetup in the management or delegated administrator account of your organization. The service-linked role is created only when the role does not exist in the caller account. Config verifies the existence of role with GetRole action. To use this API with delegated administrator, register a delegated administrator by calling Amazon Web Services Organization register-delegated-administrator for config-multiaccountsetup.amazonaws.com. There are two types of rules: Config Managed Rules and Config Custom Rules. You can use PutOrganizationConfigRule to create both Config Managed Rules and Config Custom Rules. Config Managed Rules are predefined, customizable rules created by Config. For a list of managed rules, see List of Config Managed Rules. If you are adding an Config managed rule, you must specify the rule's identifier for the RuleIdentifier key. Config Custom Rules are rules that you create from scratch. There are two ways to create Config custom rules: with Lambda functions ( Lambda Developer Guide) and with Guard (Guard GitHub Repository), a policy-as-code language. Config custom rules created with Lambda are called Config Custom Lambda Rules and Config custom rules created with Guard are called Config Custom Policy Rules. If you are adding a new Config Custom Lambda rule, you first need to create an Lambda function in the management account or a delegated administrator that the rule invokes to evaluate your resources. You also need to create an IAM role in the managed account that can be assumed by the Lambda function. When you use PutOrganizationConfigRule to add a Custom Lambda rule to Config, you must specify the Amazon Resource Name (ARN) that Lambda assigns to the function. Prerequisite: Ensure you call EnableAllFeatures API to enable all features in an organization. Make sure to specify one of either OrganizationCustomPolicyRuleMetadata for Custom Policy rules, OrganizationCustomRuleMetadata for Custom Lambda rules, or OrganizationManagedRuleMetadata for managed rules."]
 module PutOrganizationConfigRuleRequest =
   struct
     type nonrec t =
@@ -13095,16 +17006,18 @@ module PutOrganizationConfigRuleRequest =
           "The name that you assign to an organization Config rule."];
       organizationManagedRuleMetadata:
         OrganizationManagedRuleMetadata.t option
-        [@ocaml.doc "An OrganizationManagedRuleMetadata object."];
+        [@ocaml.doc
+          "An OrganizationManagedRuleMetadata object. This object specifies organization managed rule metadata such as resource type and ID of Amazon Web Services resource along with the rule identifier. It also provides the frequency with which you want Config to run evaluations for the rule if the trigger type is periodic."];
       organizationCustomRuleMetadata: OrganizationCustomRuleMetadata.t option
-        [@ocaml.doc "An OrganizationCustomRuleMetadata object."];
+        [@ocaml.doc
+          "An OrganizationCustomRuleMetadata object. This object specifies organization custom rule metadata such as resource type, resource ID of Amazon Web Services resource, Lambda function ARN, and organization trigger types that trigger Config to evaluate your Amazon Web Services resources against a rule. It also provides the frequency with which you want Config to run evaluations for the rule if the trigger type is periodic."];
       excludedAccounts: ExcludedAccounts.t option
         [@ocaml.doc
           "A comma-separated list of accounts that you want to exclude from an organization Config rule."];
       organizationCustomPolicyRuleMetadata:
         OrganizationCustomPolicyRuleMetadata.t option
         [@ocaml.doc
-          "An object that specifies metadata for your organization's Config Custom Policy rule. The metadata includes the runtime system in use, which accounts have debug logging enabled, and other custom rule metadata, such as resource type, resource ID of Amazon Web Services resource, and organization trigger types that initiate Config to evaluate Amazon Web Services resources against a rule."]}
+          "An OrganizationCustomPolicyRuleMetadata object. This object specifies metadata for your organization's Config Custom Policy rule. The metadata includes the runtime system in use, which accounts have debug logging enabled, and other custom rule metadata, such as resource type, resource ID of Amazon Web Services resource, and organization trigger types that initiate Config to evaluate Amazon Web Services resources against a rule."]}
     let context_ = "PutOrganizationConfigRuleRequest"
     let make ?organizationManagedRuleMetadata =
       fun ?organizationCustomRuleMetadata ->
@@ -13158,27 +17071,27 @@ module PutOrganizationConfigRuleRequest =
         ?organizationCustomRuleMetadata ?organizationManagedRuleMetadata
         ~organizationConfigRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationCustomPolicyRuleMetadata =
-        field_map json "OrganizationCustomPolicyRuleMetadata"
+        field_map json__ "OrganizationCustomPolicyRuleMetadata"
           OrganizationCustomPolicyRuleMetadata.of_json in
       let excludedAccounts =
-        field_map json "ExcludedAccounts" ExcludedAccounts.of_json in
+        field_map json__ "ExcludedAccounts" ExcludedAccounts.of_json in
       let organizationCustomRuleMetadata =
-        field_map json "OrganizationCustomRuleMetadata"
+        field_map json__ "OrganizationCustomRuleMetadata"
           OrganizationCustomRuleMetadata.of_json in
       let organizationManagedRuleMetadata =
-        field_map json "OrganizationManagedRuleMetadata"
+        field_map json__ "OrganizationManagedRuleMetadata"
           OrganizationManagedRuleMetadata.of_json in
       let organizationConfigRuleName =
-        field_map_exn json "OrganizationConfigRuleName"
+        field_map_exn json__ "OrganizationConfigRuleName"
           OrganizationConfigRuleName.of_json in
       make ?organizationCustomPolicyRuleMetadata ?excludedAccounts
         ?organizationCustomRuleMetadata ?organizationManagedRuleMetadata
         ~organizationConfigRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates organization Config rule for your entire organization evaluating whether your Amazon Web Services resources comply with your desired configurations. Only a master account and a delegated administrator can create or update an organization Config rule. When calling this API with a delegated administrator, you must ensure Organizations ListDelegatedAdministrator permissions are added. This API enables organization service access through the EnableAWSServiceAccess action and creates a service linked role AWSServiceRoleForConfigMultiAccountSetup in the master or delegated administrator account of your organization. The service linked role is created only when the role does not exist in the caller account. Config verifies the existence of role with GetRole action. To use this API with delegated administrator, register a delegated administrator by calling Amazon Web Services Organization register-delegated-administrator for config-multiaccountsetup.amazonaws.com. You can use this action to create both Config custom rules and Config managed rules. If you are adding a new Config custom rule, you must first create Lambda function in the master account or a delegated administrator that the rule invokes to evaluate your resources. You also need to create an IAM role in the managed-account that can be assumed by the Lambda function. When you use the PutOrganizationConfigRule action to add the rule to Config, you must specify the Amazon Resource Name (ARN) that Lambda assigns to the function. If you are adding an Config managed rule, specify the rule's identifier for the RuleIdentifier key. The maximum number of organization Config rules that Config supports is 150 and 3 delegated administrator per organization. Prerequisite: Ensure you call EnableAllFeatures API to enable all features in an organization. Specify either OrganizationCustomRuleMetadata or OrganizationManagedRuleMetadata."]
+       "Adds or updates an Config rule for your entire organization to evaluate if your Amazon Web Services resources comply with your desired configurations. For information on how many organization Config rules you can have per account, see Service Limits in the Config Developer Guide. Only a management account and a delegated administrator can create or update an organization Config rule. When calling this API with a delegated administrator, you must ensure Organizations ListDelegatedAdministrator permissions are added. An organization can have up to 3 delegated administrators. This API enables organization service access through the EnableAWSServiceAccess action and creates a service-linked role AWSServiceRoleForConfigMultiAccountSetup in the management or delegated administrator account of your organization. The service-linked role is created only when the role does not exist in the caller account. Config verifies the existence of role with GetRole action. To use this API with delegated administrator, register a delegated administrator by calling Amazon Web Services Organization register-delegated-administrator for config-multiaccountsetup.amazonaws.com. There are two types of rules: Config Managed Rules and Config Custom Rules. You can use PutOrganizationConfigRule to create both Config Managed Rules and Config Custom Rules. Config Managed Rules are predefined, customizable rules created by Config. For a list of managed rules, see List of Config Managed Rules. If you are adding an Config managed rule, you must specify the rule's identifier for the RuleIdentifier key. Config Custom Rules are rules that you create from scratch. There are two ways to create Config custom rules: with Lambda functions ( Lambda Developer Guide) and with Guard (Guard GitHub Repository), a policy-as-code language. Config custom rules created with Lambda are called Config Custom Lambda Rules and Config custom rules created with Guard are called Config Custom Policy Rules. If you are adding a new Config Custom Lambda rule, you first need to create an Lambda function in the management account or a delegated administrator that the rule invokes to evaluate your resources. You also need to create an IAM role in the managed account that can be assumed by the Lambda function. When you use PutOrganizationConfigRule to add a Custom Lambda rule to Config, you must specify the Amazon Resource Name (ARN) that Lambda assigns to the function. Prerequisite: Ensure you call EnableAllFeatures API to enable all features in an organization. Make sure to specify one of either OrganizationCustomPolicyRuleMetadata for Custom Policy rules, OrganizationCustomRuleMetadata for Custom Lambda rules, or OrganizationManagedRuleMetadata for managed rules."]
 module PutExternalEvaluationResponse =
   struct
     type nonrec t = unit
@@ -13259,11 +17172,11 @@ module PutExternalEvaluationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigRuleName") in
       make ~externalEvaluation ~configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let externalEvaluation =
-        field_map_exn json "ExternalEvaluation" ExternalEvaluation.of_json in
+        field_map_exn json__ "ExternalEvaluation" ExternalEvaluation.of_json in
       let configRuleName =
-        field_map_exn json "ConfigRuleName" ConfigRuleName.of_json in
+        field_map_exn json__ "ConfigRuleName" ConfigRuleName.of_json in
       make ~externalEvaluation ~configRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13336,9 +17249,9 @@ module PutEvaluationsResponse =
           (Xml.child xml_arg0 "FailedEvaluations") in
       make ?failedEvaluations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedEvaluations =
-        field_map json "FailedEvaluations" Evaluations.of_json in
+        field_map json__ "FailedEvaluations" Evaluations.of_json in
       make ?failedEvaluations ()
     let to_json v = composed_to_json to_value v
   end
@@ -13375,10 +17288,10 @@ module PutEvaluationsRequest =
         (Option.map ~f:Evaluations.of_xml) (Xml.child xml_arg0 "Evaluations") in
       make ?testMode ~resultToken ?evaluations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let testMode = field_map json "TestMode" Boolean.of_json in
-      let resultToken = field_map_exn json "ResultToken" String_.of_json in
-      let evaluations = field_map json "Evaluations" Evaluations.of_json in
+    let of_json json__ =
+      let testMode = field_map json__ "TestMode" Boolean.of_json in
+      let resultToken = field_map_exn json__ "ResultToken" String_.of_json in
+      let evaluations = field_map json__ "Evaluations" Evaluations.of_json in
       make ?testMode ~resultToken ?evaluations ()
     let to_json v = composed_to_json to_value v
   end
@@ -13388,7 +17301,7 @@ module PutDeliveryChannelRequest =
       {
       deliveryChannel: DeliveryChannel.t
         [@ocaml.doc
-          "The configuration delivery channel object that delivers the configuration information to an Amazon S3 bucket and to an Amazon SNS topic."]}
+          "An object for the delivery channel. A delivery channel sends notifications and updated configuration states."]}
     let context_ = "PutDeliveryChannelRequest"
     let make ~deliveryChannel = fun () -> { deliveryChannel }
     let to_value x =
@@ -13402,9 +17315,9 @@ module PutDeliveryChannelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryChannel") in
       make ~deliveryChannel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliveryChannel =
-        field_map_exn json "DeliveryChannel" DeliveryChannel.of_json in
+        field_map_exn json__ "DeliveryChannel" DeliveryChannel.of_json in
       make ~deliveryChannel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the PutDeliveryChannel action."]
@@ -13505,25 +17418,26 @@ module PutConformancePackResponse =
           (Xml.child xml_arg0 "ConformancePackArn") in
       make ?conformancePackArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let conformancePackArn =
-        field_map json "ConformancePackArn" ConformancePackArn.of_json in
+        field_map json__ "ConformancePackArn" ConformancePackArn.of_json in
       make ?conformancePackArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates a conformance pack. A conformance pack is a collection of Config rules that can be easily deployed in an account and a region and across Amazon Web Services Organization. This API creates a service linked role AWSServiceRoleForConfigConforms in your account. The service linked role is created only when the role does not exist in your account. You must specify either the TemplateS3Uri or the TemplateBody parameter, but not both. If you provide both Config uses the TemplateS3Uri parameter and ignores the TemplateBody parameter."]
+       "Creates or updates a conformance pack. A conformance pack is a collection of Config rules that can be easily deployed in an account and a region and across an organization. For information on how many conformance packs you can have per account, see Service Limits in the Config Developer Guide. When you use PutConformancePack to deploy conformance packs in your account, the operation can create Config rules and remediation actions without requiring config:PutConfigRule or config:PutRemediationConfigurations permissions in your account IAM policies. This API uses the AWSServiceRoleForConfigConforms service-linked role in your account to create conformance pack resources. This service-linked role includes the permissions to create Config rules and remediation configurations, even if your account IAM policies explicitly deny these actions. This API creates a service-linked role AWSServiceRoleForConfigConforms in your account. The service-linked role is created only when the role does not exist in your account. You must specify only one of the follow parameters: TemplateS3Uri, TemplateBody or TemplateSSMDocumentDetails. Tags are added at creation and cannot be updated with this operation PutConformancePack is an idempotent API. Subsequent requests won't create a duplicate resource if one was already created. If a following request has different tags values, Config will ignore these differences and treat it as an idempotent request of the previous. In this case, tags will not be updated, even if they are different. Use TagResource and UntagResource to update tags after creation."]
 module PutConformancePackRequest =
   struct
     type nonrec t =
       {
       conformancePackName: ConformancePackName.t
-        [@ocaml.doc "Name of the conformance pack you want to create."];
+        [@ocaml.doc
+          "The unique name of the conformance pack you want to deploy."];
       templateS3Uri: TemplateS3Uri.t option
         [@ocaml.doc
-          "Location of file containing the template body (s3://bucketname/prefix). The uri must point to the conformance pack template (max size: 300 KB) that is located in an Amazon S3 bucket in the same region as the conformance pack. You must have access to read Amazon S3 bucket."];
+          "The location of the file containing the template body (s3://bucketname/prefix). The uri must point to a conformance pack template (max size: 300 KB) that is located in an Amazon S3 bucket in the same Region as the conformance pack. You must have access to read Amazon S3 bucket. In addition, in order to ensure a successful deployment, the template object must not be in an archived storage class if this parameter is passed."];
       templateBody: TemplateBody.t option
         [@ocaml.doc
-          "A string containing full conformance pack template body. Structure containing the template body with a minimum length of 1 byte and a maximum length of 51,200 bytes. You can only use a YAML template with two resource types: Config rule (AWS::Config::ConfigRule) and a remediation action (AWS::Config::RemediationConfiguration)."];
+          "A string that contains the full conformance pack template body. The structure containing the template body has a minimum length of 1 byte and a maximum length of 51,200 bytes. You can use a YAML template with two resource types: Config rule (AWS::Config::ConfigRule) and remediation action (AWS::Config::RemediationConfiguration)."];
       deliveryS3Bucket: DeliveryS3Bucket.t option
         [@ocaml.doc
           "The name of the Amazon S3 bucket where Config stores conformance pack templates. This field is optional."];
@@ -13531,23 +17445,33 @@ module PutConformancePackRequest =
         [@ocaml.doc
           "The prefix for the Amazon S3 bucket. This field is optional."];
       conformancePackInputParameters: ConformancePackInputParameters.t option
-        [@ocaml.doc "A list of ConformancePackInputParameter objects."]}
+        [@ocaml.doc "A list of ConformancePackInputParameter objects."];
+      templateSSMDocumentDetails: TemplateSSMDocumentDetails.t option
+        [@ocaml.doc
+          "An object of type TemplateSSMDocumentDetails, which contains the name or the Amazon Resource Name (ARN) of the Amazon Web Services Systems Manager document (SSM document) and the version of the SSM document that is used to create a conformance pack."];
+      tags: TagsList.t option
+        [@ocaml.doc
+          "The tags for the conformance pack. Each tag consists of a key and an optional value, both of which you define."]}
     let context_ = "PutConformancePackRequest"
     let make ?templateS3Uri =
       fun ?templateBody ->
         fun ?deliveryS3Bucket ->
           fun ?deliveryS3KeyPrefix ->
             fun ?conformancePackInputParameters ->
-              fun ~conformancePackName ->
-                fun () ->
-                  {
-                    templateS3Uri;
-                    templateBody;
-                    deliveryS3Bucket;
-                    deliveryS3KeyPrefix;
-                    conformancePackInputParameters;
-                    conformancePackName
-                  }
+              fun ?templateSSMDocumentDetails ->
+                fun ?tags ->
+                  fun ~conformancePackName ->
+                    fun () ->
+                      {
+                        templateS3Uri;
+                        templateBody;
+                        deliveryS3Bucket;
+                        deliveryS3KeyPrefix;
+                        conformancePackInputParameters;
+                        templateSSMDocumentDetails;
+                        tags;
+                        conformancePackName
+                      }
     let to_value x =
       structure_to_value
         [("ConformancePackName",
@@ -13562,9 +17486,17 @@ module PutConformancePackRequest =
           (Option.map x.deliveryS3KeyPrefix ~f:DeliveryS3KeyPrefix.to_value));
         ("ConformancePackInputParameters",
           (Option.map x.conformancePackInputParameters
-             ~f:ConformancePackInputParameters.to_value))]
+             ~f:ConformancePackInputParameters.to_value));
+        ("TemplateSSMDocumentDetails",
+          (Option.map x.templateSSMDocumentDetails
+             ~f:TemplateSSMDocumentDetails.to_value));
+        ("Tags", (Option.map x.tags ~f:TagsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagsList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let templateSSMDocumentDetails =
+        (Option.map ~f:TemplateSSMDocumentDetails.of_xml)
+          (Xml.child xml_arg0 "TemplateSSMDocumentDetails") in
       let conformancePackInputParameters =
         (Option.map ~f:ConformancePackInputParameters.of_xml)
           (Xml.child xml_arg0 "ConformancePackInputParameters") in
@@ -13583,54 +17515,66 @@ module PutConformancePackRequest =
       let conformancePackName =
         ConformancePackName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConformancePackName") in
-      make ?conformancePackInputParameters ?deliveryS3KeyPrefix
-        ?deliveryS3Bucket ?templateBody ?templateS3Uri ~conformancePackName
-        ()
+      make ?tags ?templateSSMDocumentDetails ?conformancePackInputParameters
+        ?deliveryS3KeyPrefix ?deliveryS3Bucket ?templateBody ?templateS3Uri
+        ~conformancePackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagsList.of_json in
+      let templateSSMDocumentDetails =
+        field_map json__ "TemplateSSMDocumentDetails"
+          TemplateSSMDocumentDetails.of_json in
       let conformancePackInputParameters =
-        field_map json "ConformancePackInputParameters"
+        field_map json__ "ConformancePackInputParameters"
           ConformancePackInputParameters.of_json in
       let deliveryS3KeyPrefix =
-        field_map json "DeliveryS3KeyPrefix" DeliveryS3KeyPrefix.of_json in
+        field_map json__ "DeliveryS3KeyPrefix" DeliveryS3KeyPrefix.of_json in
       let deliveryS3Bucket =
-        field_map json "DeliveryS3Bucket" DeliveryS3Bucket.of_json in
-      let templateBody = field_map json "TemplateBody" TemplateBody.of_json in
+        field_map json__ "DeliveryS3Bucket" DeliveryS3Bucket.of_json in
+      let templateBody = field_map json__ "TemplateBody" TemplateBody.of_json in
       let templateS3Uri =
-        field_map json "TemplateS3Uri" TemplateS3Uri.of_json in
+        field_map json__ "TemplateS3Uri" TemplateS3Uri.of_json in
       let conformancePackName =
-        field_map_exn json "ConformancePackName" ConformancePackName.of_json in
-      make ?conformancePackInputParameters ?deliveryS3KeyPrefix
-        ?deliveryS3Bucket ?templateBody ?templateS3Uri ~conformancePackName
-        ()
+        field_map_exn json__ "ConformancePackName"
+          ConformancePackName.of_json in
+      make ?tags ?templateSSMDocumentDetails ?conformancePackInputParameters
+        ?deliveryS3KeyPrefix ?deliveryS3Bucket ?templateBody ?templateS3Uri
+        ~conformancePackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates a conformance pack. A conformance pack is a collection of Config rules that can be easily deployed in an account and a region and across Amazon Web Services Organization. This API creates a service linked role AWSServiceRoleForConfigConforms in your account. The service linked role is created only when the role does not exist in your account. You must specify either the TemplateS3Uri or the TemplateBody parameter, but not both. If you provide both Config uses the TemplateS3Uri parameter and ignores the TemplateBody parameter."]
+       "Creates or updates a conformance pack. A conformance pack is a collection of Config rules that can be easily deployed in an account and a region and across an organization. For information on how many conformance packs you can have per account, see Service Limits in the Config Developer Guide. When you use PutConformancePack to deploy conformance packs in your account, the operation can create Config rules and remediation actions without requiring config:PutConfigRule or config:PutRemediationConfigurations permissions in your account IAM policies. This API uses the AWSServiceRoleForConfigConforms service-linked role in your account to create conformance pack resources. This service-linked role includes the permissions to create Config rules and remediation configurations, even if your account IAM policies explicitly deny these actions. This API creates a service-linked role AWSServiceRoleForConfigConforms in your account. The service-linked role is created only when the role does not exist in your account. You must specify only one of the follow parameters: TemplateS3Uri, TemplateBody or TemplateSSMDocumentDetails. Tags are added at creation and cannot be updated with this operation PutConformancePack is an idempotent API. Subsequent requests won't create a duplicate resource if one was already created. If a following request has different tags values, Config will ignore these differences and treat it as an idempotent request of the previous. In this case, tags will not be updated, even if they are different. Use TagResource and UntagResource to update tags after creation."]
 module PutConfigurationRecorderRequest =
   struct
     type nonrec t =
       {
       configurationRecorder: ConfigurationRecorder.t
         [@ocaml.doc
-          "The configuration recorder object that records each configuration change made to the resources."]}
+          "An object for the configuration recorder. A configuration recorder records configuration changes for the resource types in scope."];
+      tags: TagsList.t option
+        [@ocaml.doc
+          "The tags for the customer managed configuration recorder. Each tag consists of a key and an optional value, both of which you define."]}
     let context_ = "PutConfigurationRecorderRequest"
-    let make ~configurationRecorder = fun () -> { configurationRecorder }
+    let make ?tags =
+      fun ~configurationRecorder -> fun () -> { tags; configurationRecorder }
     let to_value x =
       structure_to_value
         [("ConfigurationRecorder",
-           (Some (ConfigurationRecorder.to_value x.configurationRecorder)))]
+           (Some (ConfigurationRecorder.to_value x.configurationRecorder)));
+        ("Tags", (Option.map x.tags ~f:TagsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagsList.of_xml) (Xml.child xml_arg0 "Tags") in
       let configurationRecorder =
         ConfigurationRecorder.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationRecorder") in
-      make ~configurationRecorder ()
+      make ?tags ~configurationRecorder ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagsList.of_json in
       let configurationRecorder =
-        field_map_exn json "ConfigurationRecorder"
+        field_map_exn json__ "ConfigurationRecorder"
           ConfigurationRecorder.of_json in
-      make ~configurationRecorder ()
+      make ?tags ~configurationRecorder ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the PutConfigurationRecorder action."]
 module PutConfigurationAggregatorResponse =
@@ -13737,14 +17681,14 @@ module PutConfigurationAggregatorResponse =
           (Xml.child xml_arg0 "ConfigurationAggregator") in
       make ?configurationAggregator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationAggregator =
-        field_map json "ConfigurationAggregator"
+        field_map json__ "ConfigurationAggregator"
           ConfigurationAggregator.of_json in
       make ?configurationAggregator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates and updates the configuration aggregator with the selected source accounts and regions. The source account can be individual account(s) or an organization. accountIds that are passed will be replaced with existing accounts. If you want to add additional accounts into the aggregator, call DescribeConfigurationAggregators to get the previous accounts and then append new ones. Config should be enabled in source accounts and regions you want to aggregate. If your source type is an organization, you must be signed in to the management account or a registered delegated administrator and all the features must be enabled in your organization. If the caller is a management account, Config calls EnableAwsServiceAccess API to enable integration between Config and Organizations. If the caller is a registered delegated administrator, Config calls ListDelegatedAdministrators API to verify whether the caller is a valid delegated administrator. To register a delegated administrator, see Register a Delegated Administrator in the Config developer guide."]
+       "Creates and updates the configuration aggregator with the selected source accounts and regions. The source account can be individual account(s) or an organization. accountIds that are passed will be replaced with existing accounts. If you want to add additional accounts into the aggregator, call DescribeConfigurationAggregators to get the previous accounts and then append new ones. Config should be enabled in source accounts and regions you want to aggregate. If your source type is an organization, you must be signed in to the management account or a registered delegated administrator and all the features must be enabled in your organization. If the caller is a management account, Config calls EnableAwsServiceAccess API to enable integration between Config and Organizations. If the caller is a registered delegated administrator, Config calls ListDelegatedAdministrators API to verify whether the caller is a valid delegated administrator. To register a delegated administrator, see Register a Delegated Administrator in the Config developer guide. Tags are added at creation and cannot be updated with this operation PutConfigurationAggregator is an idempotent API. Subsequent requests won\226\128\153t create a duplicate resource if one was already created. If a following request has different tags values, Config will ignore these differences and treat it as an idempotent request of the previous. In this case, tags will not be updated, even if they are different. Use TagResource and UntagResource to update tags after creation."]
 module PutConfigurationAggregatorRequest =
   struct
     type nonrec t =
@@ -13755,19 +17699,24 @@ module PutConfigurationAggregatorRequest =
         [@ocaml.doc "A list of AccountAggregationSource object."];
       organizationAggregationSource: OrganizationAggregationSource.t option
         [@ocaml.doc "An OrganizationAggregationSource object."];
-      tags: TagsList.t option [@ocaml.doc "An array of tag object."]}
+      tags: TagsList.t option [@ocaml.doc "An array of tag object."];
+      aggregatorFilters: AggregatorFilters.t option
+        [@ocaml.doc
+          "An object to filter configuration recorders in an aggregator. Either ResourceType or ServicePrincipal is required."]}
     let context_ = "PutConfigurationAggregatorRequest"
     let make ?accountAggregationSources =
       fun ?organizationAggregationSource ->
         fun ?tags ->
-          fun ~configurationAggregatorName ->
-            fun () ->
-              {
-                accountAggregationSources;
-                organizationAggregationSource;
-                tags;
-                configurationAggregatorName
-              }
+          fun ?aggregatorFilters ->
+            fun ~configurationAggregatorName ->
+              fun () ->
+                {
+                  accountAggregationSources;
+                  organizationAggregationSource;
+                  tags;
+                  aggregatorFilters;
+                  configurationAggregatorName
+                }
     let to_value x =
       structure_to_value
         [("ConfigurationAggregatorName",
@@ -13780,9 +17729,14 @@ module PutConfigurationAggregatorRequest =
         ("OrganizationAggregationSource",
           (Option.map x.organizationAggregationSource
              ~f:OrganizationAggregationSource.to_value));
-        ("Tags", (Option.map x.tags ~f:TagsList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagsList.to_value));
+        ("AggregatorFilters",
+          (Option.map x.aggregatorFilters ~f:AggregatorFilters.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let aggregatorFilters =
+        (Option.map ~f:AggregatorFilters.of_xml)
+          (Xml.child xml_arg0 "AggregatorFilters") in
       let tags = (Option.map ~f:TagsList.of_xml) (Xml.child xml_arg0 "Tags") in
       let organizationAggregationSource =
         (Option.map ~f:OrganizationAggregationSource.of_xml)
@@ -13794,25 +17748,27 @@ module PutConfigurationAggregatorRequest =
         ConfigurationAggregatorName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
              "ConfigurationAggregatorName") in
-      make ?tags ?organizationAggregationSource ?accountAggregationSources
-        ~configurationAggregatorName ()
+      make ?aggregatorFilters ?tags ?organizationAggregationSource
+        ?accountAggregationSources ~configurationAggregatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagsList.of_json in
+    let of_json json__ =
+      let aggregatorFilters =
+        field_map json__ "AggregatorFilters" AggregatorFilters.of_json in
+      let tags = field_map json__ "Tags" TagsList.of_json in
       let organizationAggregationSource =
-        field_map json "OrganizationAggregationSource"
+        field_map json__ "OrganizationAggregationSource"
           OrganizationAggregationSource.of_json in
       let accountAggregationSources =
-        field_map json "AccountAggregationSources"
+        field_map json__ "AccountAggregationSources"
           AccountAggregationSourceList.of_json in
       let configurationAggregatorName =
-        field_map_exn json "ConfigurationAggregatorName"
+        field_map_exn json__ "ConfigurationAggregatorName"
           ConfigurationAggregatorName.of_json in
-      make ?tags ?organizationAggregationSource ?accountAggregationSources
-        ~configurationAggregatorName ()
+      make ?aggregatorFilters ?tags ?organizationAggregationSource
+        ?accountAggregationSources ~configurationAggregatorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates and updates the configuration aggregator with the selected source accounts and regions. The source account can be individual account(s) or an organization. accountIds that are passed will be replaced with existing accounts. If you want to add additional accounts into the aggregator, call DescribeConfigurationAggregators to get the previous accounts and then append new ones. Config should be enabled in source accounts and regions you want to aggregate. If your source type is an organization, you must be signed in to the management account or a registered delegated administrator and all the features must be enabled in your organization. If the caller is a management account, Config calls EnableAwsServiceAccess API to enable integration between Config and Organizations. If the caller is a registered delegated administrator, Config calls ListDelegatedAdministrators API to verify whether the caller is a valid delegated administrator. To register a delegated administrator, see Register a Delegated Administrator in the Config developer guide."]
+       "Creates and updates the configuration aggregator with the selected source accounts and regions. The source account can be individual account(s) or an organization. accountIds that are passed will be replaced with existing accounts. If you want to add additional accounts into the aggregator, call DescribeConfigurationAggregators to get the previous accounts and then append new ones. Config should be enabled in source accounts and regions you want to aggregate. If your source type is an organization, you must be signed in to the management account or a registered delegated administrator and all the features must be enabled in your organization. If the caller is a management account, Config calls EnableAwsServiceAccess API to enable integration between Config and Organizations. If the caller is a registered delegated administrator, Config calls ListDelegatedAdministrators API to verify whether the caller is a valid delegated administrator. To register a delegated administrator, see Register a Delegated Administrator in the Config developer guide. Tags are added at creation and cannot be updated with this operation PutConfigurationAggregator is an idempotent API. Subsequent requests won\226\128\153t create a duplicate resource if one was already created. If a following request has different tags values, Config will ignore these differences and treat it as an idempotent request of the previous. In this case, tags will not be updated, even if they are different. Use TagResource and UntagResource to update tags after creation."]
 module PutConfigRuleRequest =
   struct
     type nonrec t =
@@ -13834,13 +17790,13 @@ module PutConfigRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigRule") in
       make ?tags ~configRule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagsList.of_json in
-      let configRule = field_map_exn json "ConfigRule" ConfigRule.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagsList.of_json in
+      let configRule = field_map_exn json__ "ConfigRule" ConfigRule.of_json in
       make ?tags ~configRule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates an Config rule for evaluating whether your Amazon Web Services resources comply with your desired configurations. You can use this action for Config custom rules and Config managed rules. A Config custom rule is a rule that you develop and maintain. An Config managed rule is a customizable, predefined rule that Config provides. If you are adding a new Config custom rule, you must first create the Lambda function that the rule invokes to evaluate your resources. When you use the PutConfigRule action to add the rule to Config, you must specify the Amazon Resource Name (ARN) that Lambda assigns to the function. Specify the ARN for the SourceIdentifier key. This key is part of the Source object, which is part of the ConfigRule object. If you are adding an Config managed rule, specify the rule's identifier for the SourceIdentifier key. To reference Config managed rule identifiers, see About Config managed rules. For any new rule that you add, specify the ConfigRuleName in the ConfigRule object. Do not specify the ConfigRuleArn or the ConfigRuleId. These values are generated by Config for new rules. If you are updating a rule that you added previously, you can specify the rule by ConfigRuleName, ConfigRuleId, or ConfigRuleArn in the ConfigRule data type that you use in this request. The maximum number of rules that Config supports is 150. For information about requesting a rule limit increase, see Config Limits in the Amazon Web Services General Reference Guide. For more information about developing and using Config rules, see Evaluating Amazon Web Services resource Configurations with Config in the Config Developer Guide."]
+       "Adds or updates an Config rule to evaluate if your Amazon Web Services resources comply with your desired configurations. For information on how many Config rules you can have per account, see Service Limits in the Config Developer Guide. There are two types of rules: Config Managed Rules and Config Custom Rules. You can use PutConfigRule to create both Config Managed Rules and Config Custom Rules. Config Managed Rules are predefined, customizable rules created by Config. For a list of managed rules, see List of Config Managed Rules. If you are adding an Config managed rule, you must specify the rule's identifier for the SourceIdentifier key. Config Custom Rules are rules that you create from scratch. There are two ways to create Config custom rules: with Lambda functions ( Lambda Developer Guide) and with Guard (Guard GitHub Repository), a policy-as-code language. Config custom rules created with Lambda are called Config Custom Lambda Rules and Config custom rules created with Guard are called Config Custom Policy Rules. If you are adding a new Config Custom Lambda rule, you first need to create an Lambda function that the rule invokes to evaluate your resources. When you use PutConfigRule to add a Custom Lambda rule to Config, you must specify the Amazon Resource Name (ARN) that Lambda assigns to the function. You specify the ARN in the SourceIdentifier key. This key is part of the Source object, which is part of the ConfigRule object. For any new Config rule that you add, specify the ConfigRuleName in the ConfigRule object. Do not specify the ConfigRuleArn or the ConfigRuleId. These values are generated by Config for new rules. If you are updating a rule that you added previously, you can specify the rule by ConfigRuleName, ConfigRuleId, or ConfigRuleArn in the ConfigRule data type that you use in this request. For more information about developing and using Config rules, see Evaluating Resources with Config Rules in the Config Developer Guide. Tags are added at creation and cannot be updated with this operation PutConfigRule is an idempotent API. Subsequent requests won\226\128\153t create a duplicate resource if one was already created. If a following request has different tags values, Config will ignore these differences and treat it as an idempotent request of the previous. In this case, tags will not be updated, even if they are different. Use TagResource and UntagResource to update tags after creation."]
 module PutAggregationAuthorizationResponse =
   struct
     type nonrec t =
@@ -13890,14 +17846,14 @@ module PutAggregationAuthorizationResponse =
           (Xml.child xml_arg0 "AggregationAuthorization") in
       make ?aggregationAuthorization ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let aggregationAuthorization =
-        field_map json "AggregationAuthorization"
+        field_map json__ "AggregationAuthorization"
           AggregationAuthorization.of_json in
       make ?aggregationAuthorization ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Authorizes the aggregator account and region to collect data from the source account and region."]
+       "Authorizes the aggregator account and region to collect data from the source account and region. Tags are added at creation and cannot be updated with this operation PutAggregationAuthorization is an idempotent API. Subsequent requests won\226\128\153t create a duplicate resource if one was already created. If a following request has different tags values, Config will ignore these differences and treat it as an idempotent request of the previous. In this case, tags will not be updated, even if they are different. Use TagResource and UntagResource to update tags after creation."]
 module PutAggregationAuthorizationRequest =
   struct
     type nonrec t =
@@ -13931,16 +17887,16 @@ module PutAggregationAuthorizationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AuthorizedAccountId") in
       make ?tags ~authorizedAwsRegion ~authorizedAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagsList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagsList.of_json in
       let authorizedAwsRegion =
-        field_map_exn json "AuthorizedAwsRegion" AwsRegion.of_json in
+        field_map_exn json__ "AuthorizedAwsRegion" AwsRegion.of_json in
       let authorizedAccountId =
-        field_map_exn json "AuthorizedAccountId" AccountId.of_json in
+        field_map_exn json__ "AuthorizedAccountId" AccountId.of_json in
       make ?tags ~authorizedAwsRegion ~authorizedAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Authorizes the aggregator account and region to collect data from the source account and region."]
+       "Authorizes the aggregator account and region to collect data from the source account and region. Tags are added at creation and cannot be updated with this operation PutAggregationAuthorization is an idempotent API. Subsequent requests won\226\128\153t create a duplicate resource if one was already created. If a following request has different tags values, Config will ignore these differences and treat it as an idempotent request of the previous. In this case, tags will not be updated, even if they are different. Use TagResource and UntagResource to update tags after creation."]
 module NoSuchBucketException =
   struct
     type nonrec t = unit
@@ -13991,7 +17947,7 @@ module MaxNumberOfConfigurationRecordersExceededException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You have reached the limit of the number of recorders you can create."]
+       "You have reached the limit of the number of configuration recorders you can create."]
 module MaxNumberOfConfigRulesExceededException =
   struct
     type nonrec t = unit
@@ -14004,7 +17960,7 @@ module MaxNumberOfConfigRulesExceededException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Failed to add the Config rule because the account already contains the maximum number of 150 rules. Consider deleting any deactivated rules before you add new rules."]
+       "Failed to add the Config rule because the account already contains the maximum number of 1000 rules. Consider deleting any deactivated rules before you add new rules."]
 module MaxActiveResourcesExceededException =
   struct
     type nonrec t = unit
@@ -14017,7 +17973,7 @@ module MaxActiveResourcesExceededException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You have reached the limit (100,000) of active custom resource types in your account. Delete unused resources using DeleteResourceConfig."]
+       "You have reached the limit of active custom resource types in your account. There is a limit of 100,000. Delete unused resources using DeleteResourceConfig ."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -14092,9 +18048,9 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       make ?nextToken ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the tags for Config resource."]
@@ -14104,7 +18060,7 @@ module ListTagsForResourceRequest =
       {
       resourceArn: AmazonResourceName.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that identifies the resource for which to list the tags. Currently, the supported resources are ConfigRule, ConfigurationAggregator and AggregatorAuthorization."];
+          "The Amazon Resource Name (ARN) that identifies the resource for which to list the tags. The following resources are supported: ConfigurationRecorder ConfigRule OrganizationConfigRule ConformancePack OrganizationConformancePack ConfigurationAggregator AggregationAuthorization StoredQuery"];
       limit: Limit.t option
         [@ocaml.doc
           "The maximum number of tags returned on each page. The limit maximum is 50. You cannot specify a number greater than 50. If you specify 0, Config uses the default."];
@@ -14130,11 +18086,11 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?nextToken ?limit ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let limit = field_map json "Limit" Limit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let limit = field_map json__ "Limit" Limit.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ?nextToken ?limit ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the tags for Config resource."]
@@ -14146,7 +18102,7 @@ module ListStoredQueriesResponse =
         [@ocaml.doc "A list of StoredQueryMetadata objects."];
       nextToken: String_.t option
         [@ocaml.doc
-          "If the previous paginated request didn't return all of the remaining results, the response object's NextToken parameter value is set to a token. To retrieve the next set of results, call this action again and assign that token to the request object's NextToken parameter. If there are no remaining results, the previous response object's NextToken parameter is set to null."]}
+          "If the previous paginated request didn't return all of the remaining results, the response object's NextToken parameter value is set to a token. To retrieve the next set of results, call this operation again and assign that token to the request object's NextToken parameter. If there are no remaining results, the previous response object's NextToken parameter is set to null."]}
     type nonrec error =
       [ `InvalidNextTokenException of InvalidNextTokenException.t 
       | `ValidationException of ValidationException.t 
@@ -14200,10 +18156,11 @@ module ListStoredQueriesResponse =
           (Xml.child xml_arg0 "StoredQueryMetadata") in
       make ?nextToken ?storedQueryMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let storedQueryMetadata =
-        field_map json "StoredQueryMetadata" StoredQueryMetadataList.of_json in
+        field_map json__ "StoredQueryMetadata"
+          StoredQueryMetadataList.of_json in
       make ?nextToken ?storedQueryMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14232,13 +18189,135 @@ module ListStoredQueriesRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" Limit.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" Limit.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the stored queries for a single Amazon Web Services account and a single Amazon Web Services Region. The default is 100."]
+module ListResourceEvaluationsResponse =
+  struct
+    type nonrec t =
+      {
+      resourceEvaluations: ResourceEvaluations.t option
+        [@ocaml.doc "Returns a ResourceEvaluations object."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken string returned on a previous page that you use to get the next page of results in a paginated response."]}
+    type nonrec error =
+      [ `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `InvalidTimeRangeException of InvalidTimeRangeException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceEvaluations =
+      fun ?nextToken -> fun () -> { resourceEvaluations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "InvalidTimeRangeException" ->
+          `InvalidTimeRangeException (InvalidTimeRangeException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "InvalidTimeRangeException" ->
+          `InvalidTimeRangeException (InvalidTimeRangeException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `InvalidTimeRangeException e ->
+          `Assoc
+            [("error", (`String "InvalidTimeRangeException"));
+            ("details", (InvalidTimeRangeException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceEvaluations",
+           (Option.map x.resourceEvaluations ~f:ResourceEvaluations.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let resourceEvaluations =
+        (Option.map ~f:ResourceEvaluations.of_xml)
+          (Xml.child xml_arg0 "ResourceEvaluations") in
+      make ?nextToken ?resourceEvaluations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let resourceEvaluations =
+        field_map json__ "ResourceEvaluations" ResourceEvaluations.of_json in
+      make ?nextToken ?resourceEvaluations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of proactive resource evaluations."]
+module ListResourceEvaluationsRequest =
+  struct
+    type nonrec t =
+      {
+      filters: ResourceEvaluationFilters.t option
+        [@ocaml.doc "Returns a ResourceEvaluationFilters object."];
+      limit: ListResourceEvaluationsPageItemLimit.t option
+        [@ocaml.doc
+          "The maximum number of evaluations returned on each page. The default is 10. You cannot specify a number greater than 100. If you specify 0, Config uses the default."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken string returned on a previous page that you use to get the next page of results in a paginated response."]}
+    let make ?filters =
+      fun ?limit -> fun ?nextToken -> fun () -> { filters; limit; nextToken }
+    let to_value x =
+      structure_to_value
+        [("Filters",
+           (Option.map x.filters ~f:ResourceEvaluationFilters.to_value));
+        ("Limit",
+          (Option.map x.limit
+             ~f:ListResourceEvaluationsPageItemLimit.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let limit =
+        (Option.map ~f:ListResourceEvaluationsPageItemLimit.of_xml)
+          (Xml.child xml_arg0 "Limit") in
+      let filters =
+        (Option.map ~f:ResourceEvaluationFilters.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      make ?nextToken ?limit ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let limit =
+        field_map json__ "Limit" ListResourceEvaluationsPageItemLimit.of_json in
+      let filters =
+        field_map json__ "Filters" ResourceEvaluationFilters.of_json in
+      make ?nextToken ?limit ?filters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of proactive resource evaluations."]
 module ListDiscoveredResourcesResponse =
   struct
     type nonrec t =
@@ -14324,10 +18403,10 @@ module ListDiscoveredResourcesResponse =
           (Xml.child xml_arg0 "resourceIdentifiers") in
       make ?nextToken ?resourceIdentifiers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let resourceIdentifiers =
-        field_map json "resourceIdentifiers" ResourceIdentifierList.of_json in
+        field_map json__ "resourceIdentifiers" ResourceIdentifierList.of_json in
       make ?nextToken ?resourceIdentifiers ()
     let to_json v = composed_to_json to_value v
   end
@@ -14340,7 +18419,7 @@ module ListDiscoveredResourcesRequest =
           "The type of resources that you want Config to list in the response."];
       resourceIds: ResourceIdList.t option
         [@ocaml.doc
-          "The IDs of only those resources that you want Config to list in the response. If you do not specify this parameter, Config lists all resources of the specified type that it has discovered."];
+          "The IDs of only those resources that you want Config to list in the response. If you do not specify this parameter, Config lists all resources of the specified type that it has discovered. You can list a minimum of 1 resourceID and a maximum of 20 resourceIds."];
       resourceName: ResourceName.t option
         [@ocaml.doc
           "The custom name of only those resources that you want Config to list in the response. If you do not specify this parameter, Config lists all resources of the specified type that it has discovered."];
@@ -14400,19 +18479,270 @@ module ListDiscoveredResourcesRequest =
       make ?nextToken ?includeDeletedResources ?limit ?resourceName
         ?resourceIds ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let includeDeletedResources =
-        field_map json "includeDeletedResources" Boolean.of_json in
-      let limit = field_map json "limit" Limit.of_json in
-      let resourceName = field_map json "resourceName" ResourceName.of_json in
-      let resourceIds = field_map json "resourceIds" ResourceIdList.of_json in
+        field_map json__ "includeDeletedResources" Boolean.of_json in
+      let limit = field_map json__ "limit" Limit.of_json in
+      let resourceName = field_map json__ "resourceName" ResourceName.of_json in
+      let resourceIds = field_map json__ "resourceIds" ResourceIdList.of_json in
       let resourceType =
-        field_map_exn json "resourceType" ResourceType.of_json in
+        field_map_exn json__ "resourceType" ResourceType.of_json in
       make ?nextToken ?includeDeletedResources ?limit ?resourceName
         ?resourceIds ~resourceType ()
     let to_json v = composed_to_json to_value v
   end
+module ListConformancePackComplianceScoresResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The nextToken string that you can use to get the next page of results in a paginated response."];
+      conformancePackComplianceScores:
+        ConformancePackComplianceScores.t option
+        [@ocaml.doc "A list of ConformancePackComplianceScore objects."]}
+    type nonrec error =
+      [ `InvalidLimitException of InvalidLimitException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?conformancePackComplianceScores ->
+        fun () -> { nextToken; conformancePackComplianceScores }
+    let error_of_json name json =
+      match name with
+      | "InvalidLimitException" ->
+          `InvalidLimitException (InvalidLimitException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidLimitException" ->
+          `InvalidLimitException (InvalidLimitException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidLimitException e ->
+          `Assoc
+            [("error", (`String "InvalidLimitException"));
+            ("details", (InvalidLimitException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("ConformancePackComplianceScores",
+          (Option.map x.conformancePackComplianceScores
+             ~f:ConformancePackComplianceScores.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let conformancePackComplianceScores =
+        (Option.map ~f:ConformancePackComplianceScores.of_xml)
+          (Xml.child xml_arg0 "ConformancePackComplianceScores") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?conformancePackComplianceScores ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let conformancePackComplianceScores =
+        field_map json__ "ConformancePackComplianceScores"
+          ConformancePackComplianceScores.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?conformancePackComplianceScores ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of conformance pack compliance scores. A compliance score is the percentage of the number of compliant rule-resource combinations in a conformance pack compared to the number of total possible rule-resource combinations in the conformance pack. This metric provides you with a high-level view of the compliance state of your conformance packs. You can use it to identify, investigate, and understand the level of compliance in your conformance packs. Conformance packs with no evaluation results will have a compliance score of INSUFFICIENT_DATA."]
+module ListConformancePackComplianceScoresRequest =
+  struct
+    type nonrec t =
+      {
+      filters: ConformancePackComplianceScoresFilters.t option
+        [@ocaml.doc
+          "Filters the results based on the ConformancePackComplianceScoresFilters."];
+      sortOrder: SortOrder.t option
+        [@ocaml.doc
+          "Determines the order in which conformance pack compliance scores are sorted. Either in ascending or descending order. By default, conformance pack compliance scores are sorted in alphabetical order by name of the conformance pack. Conformance pack compliance scores are sorted in reverse alphabetical order if you enter DESCENDING. You can sort conformance pack compliance scores by the numerical value of the compliance score by entering SCORE in the SortBy action. When compliance scores are sorted by SCORE, conformance packs with a compliance score of INSUFFICIENT_DATA will be last when sorting by ascending order and first when sorting by descending order."];
+      sortBy: SortBy.t option
+        [@ocaml.doc
+          "Sorts your conformance pack compliance scores in either ascending or descending order, depending on SortOrder. By default, conformance pack compliance scores are sorted in alphabetical order by name of the conformance pack. Enter SCORE, to sort conformance pack compliance scores by the numerical value of the compliance score."];
+      limit: PageSizeLimit.t option
+        [@ocaml.doc
+          "The maximum number of conformance pack compliance scores returned on each page."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The nextToken string in a prior request that you can use to get the paginated response for the next set of conformance pack compliance scores."]}
+    let make ?filters =
+      fun ?sortOrder ->
+        fun ?sortBy ->
+          fun ?limit ->
+            fun ?nextToken ->
+              fun () -> { filters; sortOrder; sortBy; limit; nextToken }
+    let to_value x =
+      structure_to_value
+        [("Filters",
+           (Option.map x.filters
+              ~f:ConformancePackComplianceScoresFilters.to_value));
+        ("SortOrder", (Option.map x.sortOrder ~f:SortOrder.to_value));
+        ("SortBy", (Option.map x.sortBy ~f:SortBy.to_value));
+        ("Limit", (Option.map x.limit ~f:PageSizeLimit.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let limit =
+        (Option.map ~f:PageSizeLimit.of_xml) (Xml.child xml_arg0 "Limit") in
+      let sortBy =
+        (Option.map ~f:SortBy.of_xml) (Xml.child xml_arg0 "SortBy") in
+      let sortOrder =
+        (Option.map ~f:SortOrder.of_xml) (Xml.child xml_arg0 "SortOrder") in
+      let filters =
+        (Option.map ~f:ConformancePackComplianceScoresFilters.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      make ?nextToken ?limit ?sortBy ?sortOrder ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let limit = field_map json__ "Limit" PageSizeLimit.of_json in
+      let sortBy = field_map json__ "SortBy" SortBy.of_json in
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let filters =
+        field_map json__ "Filters"
+          ConformancePackComplianceScoresFilters.of_json in
+      make ?nextToken ?limit ?sortBy ?sortOrder ?filters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of conformance pack compliance scores. A compliance score is the percentage of the number of compliant rule-resource combinations in a conformance pack compared to the number of total possible rule-resource combinations in the conformance pack. This metric provides you with a high-level view of the compliance state of your conformance packs. You can use it to identify, investigate, and understand the level of compliance in your conformance packs. Conformance packs with no evaluation results will have a compliance score of INSUFFICIENT_DATA."]
+module ListConfigurationRecordersResponse =
+  struct
+    type nonrec t =
+      {
+      configurationRecorderSummaries: ConfigurationRecorderSummaries.t option
+        [@ocaml.doc
+          "A list of ConfigurationRecorderSummary objects that includes."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The NextToken string returned on a previous page that you use to get the next page of results in a paginated response."]}
+    type nonrec error =
+      [ `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?configurationRecorderSummaries =
+      fun ?nextToken ->
+        fun () -> { configurationRecorderSummaries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ConfigurationRecorderSummaries",
+           (Option.map x.configurationRecorderSummaries
+              ~f:ConfigurationRecorderSummaries.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let configurationRecorderSummaries =
+        (Option.map ~f:ConfigurationRecorderSummaries.of_xml)
+          (Xml.child xml_arg0 "ConfigurationRecorderSummaries") in
+      make ?nextToken ?configurationRecorderSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let configurationRecorderSummaries =
+        field_map json__ "ConfigurationRecorderSummaries"
+          ConfigurationRecorderSummaries.of_json in
+      make ?nextToken ?configurationRecorderSummaries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of configuration recorders depending on the filters you specify."]
+module ListConfigurationRecordersRequest =
+  struct
+    type nonrec t =
+      {
+      filters: ConfigurationRecorderFilterList.t option
+        [@ocaml.doc
+          "Filters the results based on a list of ConfigurationRecorderFilter objects that you specify."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to include in the response."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The NextToken string returned on a previous page that you use to get the next page of results in a paginated response."]}
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { filters; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("Filters",
+           (Option.map x.filters ~f:ConfigurationRecorderFilterList.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let filters =
+        (Option.map ~f:ConfigurationRecorderFilterList.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      make ?nextToken ?maxResults ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let filters =
+        field_map json__ "Filters" ConfigurationRecorderFilterList.of_json in
+      make ?nextToken ?maxResults ?filters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of configuration recorders depending on the filters you specify."]
 module ListAggregateDiscoveredResourcesResponse =
   struct
     type nonrec t =
@@ -14496,10 +18826,10 @@ module ListAggregateDiscoveredResourcesResponse =
           (Xml.child xml_arg0 "ResourceIdentifiers") in
       make ?nextToken ?resourceIdentifiers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let resourceIdentifiers =
-        field_map json "ResourceIdentifiers"
+        field_map json__ "ResourceIdentifiers"
           DiscoveredResourceIdentifierList.of_json in
       make ?nextToken ?resourceIdentifiers ()
     let to_json v = composed_to_json to_value v
@@ -14564,14 +18894,14 @@ module ListAggregateDiscoveredResourcesRequest =
       make ?nextToken ?limit ?filters ~resourceType
         ~configurationAggregatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let limit = field_map json "Limit" Limit.of_json in
-      let filters = field_map json "Filters" ResourceFilters.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let limit = field_map json__ "Limit" Limit.of_json in
+      let filters = field_map json__ "Filters" ResourceFilters.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" ResourceType.of_json in
+        field_map_exn json__ "ResourceType" ResourceType.of_json in
       let configurationAggregatorName =
-        field_map_exn json "ConfigurationAggregatorName"
+        field_map_exn json__ "ConfigurationAggregatorName"
           ConfigurationAggregatorName.of_json in
       make ?nextToken ?limit ?filters ~resourceType
         ~configurationAggregatorName ()
@@ -14590,7 +18920,7 @@ module LastDeliveryChannelDeleteFailedException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You cannot delete the delivery channel you specified because the configuration recorder is running."]
+       "You cannot delete the delivery channel you specified because the customer managed configuration recorder is running."]
 module InvalidSNSTopicARNException =
   struct
     type nonrec t = unit
@@ -14639,7 +18969,7 @@ module InvalidRecordingGroupException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Config throws an exception if the recording group does not contain a valid list of resource types. Invalid values might also be incorrectly formatted."]
+       "One of the following errors: You have provided a combination of parameter values that is not valid. For example: Setting the allSupported field of RecordingGroup to true, but providing a non-empty list for the resourceTypesfield of RecordingGroup. Setting the allSupported field of RecordingGroup to true, but also setting the useOnly field of RecordingStrategy to EXCLUSION_BY_RESOURCE_TYPES. Every parameter is either null, false, or empty. You have reached the limit of the number of resource types you can provide for the recording group. You have provided resource types or a recording strategy that are not valid."]
 module InvalidDeliveryChannelNameException =
   struct
     type nonrec t = unit
@@ -14664,7 +18994,7 @@ module InvalidConfigurationRecorderNameException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You have provided a configuration recorder name that is not valid."]
+       "The configuration recorder name is not valid. The prefix \"AWSConfigurationRecorderFor\" is reserved for service-linked configuration recorders."]
 module InsufficientDeliveryPolicyException =
   struct
     type nonrec t = unit
@@ -14677,7 +19007,7 @@ module InsufficientDeliveryPolicyException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Your Amazon S3 bucket policy does not permit Config to write to it."]
+       "Your Amazon S3 bucket policy does not allow Config to write to it."]
 module GetStoredQueryResponse =
   struct
     type nonrec t =
@@ -14730,8 +19060,8 @@ module GetStoredQueryResponse =
         (Option.map ~f:StoredQuery.of_xml) (Xml.child xml_arg0 "StoredQuery") in
       make ?storedQuery ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let storedQuery = field_map json "StoredQuery" StoredQuery.of_json in
+    let of_json json__ =
+      let storedQuery = field_map json__ "StoredQuery" StoredQuery.of_json in
       make ?storedQuery ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the details of a specific stored query."]
@@ -14752,18 +19082,175 @@ module GetStoredQueryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "QueryName") in
       make ~queryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryName = field_map_exn json "QueryName" QueryName.of_json in
+    let of_json json__ =
+      let queryName = field_map_exn json__ "QueryName" QueryName.of_json in
       make ~queryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the details of a specific stored query."]
+module GetResourceEvaluationSummaryResponse =
+  struct
+    type nonrec t =
+      {
+      resourceEvaluationId: ResourceEvaluationId.t option
+        [@ocaml.doc
+          "The unique ResourceEvaluationId of Amazon Web Services resource execution for which you want to retrieve the evaluation summary."];
+      evaluationMode: EvaluationMode.t option
+        [@ocaml.doc
+          "Lists results of the mode that you requested to retrieve the resource evaluation summary. The valid values are Detective or Proactive."];
+      evaluationStatus: EvaluationStatus.t option
+        [@ocaml.doc "Returns an EvaluationStatus object."];
+      evaluationStartTimestamp: Date.t option
+        [@ocaml.doc
+          "The start timestamp when Config rule starts evaluating compliance for the provided resource details."];
+      compliance: ComplianceType.t option
+        [@ocaml.doc
+          "The compliance status of the resource evaluation summary."];
+      evaluationContext: EvaluationContext.t option
+        [@ocaml.doc "Returns an EvaluationContext object."];
+      resourceDetails: ResourceDetails.t option
+        [@ocaml.doc "Returns a ResourceDetails object."]}
+    type nonrec error =
+      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceEvaluationId =
+      fun ?evaluationMode ->
+        fun ?evaluationStatus ->
+          fun ?evaluationStartTimestamp ->
+            fun ?compliance ->
+              fun ?evaluationContext ->
+                fun ?resourceDetails ->
+                  fun () ->
+                    {
+                      resourceEvaluationId;
+                      evaluationMode;
+                      evaluationStatus;
+                      evaluationStartTimestamp;
+                      compliance;
+                      evaluationContext;
+                      resourceDetails
+                    }
+    let error_of_json name json =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceEvaluationId",
+           (Option.map x.resourceEvaluationId
+              ~f:ResourceEvaluationId.to_value));
+        ("EvaluationMode",
+          (Option.map x.evaluationMode ~f:EvaluationMode.to_value));
+        ("EvaluationStatus",
+          (Option.map x.evaluationStatus ~f:EvaluationStatus.to_value));
+        ("EvaluationStartTimestamp",
+          (Option.map x.evaluationStartTimestamp ~f:Date.to_value));
+        ("Compliance", (Option.map x.compliance ~f:ComplianceType.to_value));
+        ("EvaluationContext",
+          (Option.map x.evaluationContext ~f:EvaluationContext.to_value));
+        ("ResourceDetails",
+          (Option.map x.resourceDetails ~f:ResourceDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceDetails =
+        (Option.map ~f:ResourceDetails.of_xml)
+          (Xml.child xml_arg0 "ResourceDetails") in
+      let evaluationContext =
+        (Option.map ~f:EvaluationContext.of_xml)
+          (Xml.child xml_arg0 "EvaluationContext") in
+      let compliance =
+        (Option.map ~f:ComplianceType.of_xml)
+          (Xml.child xml_arg0 "Compliance") in
+      let evaluationStartTimestamp =
+        (Option.map ~f:Date.of_xml)
+          (Xml.child xml_arg0 "EvaluationStartTimestamp") in
+      let evaluationStatus =
+        (Option.map ~f:EvaluationStatus.of_xml)
+          (Xml.child xml_arg0 "EvaluationStatus") in
+      let evaluationMode =
+        (Option.map ~f:EvaluationMode.of_xml)
+          (Xml.child xml_arg0 "EvaluationMode") in
+      let resourceEvaluationId =
+        (Option.map ~f:ResourceEvaluationId.of_xml)
+          (Xml.child xml_arg0 "ResourceEvaluationId") in
+      make ?resourceDetails ?evaluationContext ?compliance
+        ?evaluationStartTimestamp ?evaluationStatus ?evaluationMode
+        ?resourceEvaluationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceDetails =
+        field_map json__ "ResourceDetails" ResourceDetails.of_json in
+      let evaluationContext =
+        field_map json__ "EvaluationContext" EvaluationContext.of_json in
+      let compliance = field_map json__ "Compliance" ComplianceType.of_json in
+      let evaluationStartTimestamp =
+        field_map json__ "EvaluationStartTimestamp" Date.of_json in
+      let evaluationStatus =
+        field_map json__ "EvaluationStatus" EvaluationStatus.of_json in
+      let evaluationMode =
+        field_map json__ "EvaluationMode" EvaluationMode.of_json in
+      let resourceEvaluationId =
+        field_map json__ "ResourceEvaluationId" ResourceEvaluationId.of_json in
+      make ?resourceDetails ?evaluationContext ?compliance
+        ?evaluationStartTimestamp ?evaluationStatus ?evaluationMode
+        ?resourceEvaluationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a summary of resource evaluation for the specified resource evaluation ID from the proactive rules that were run. The results indicate which evaluation context was used to evaluate the rules, which resource details were evaluated, the evaluation mode that was run, and whether the resource details comply with the configuration of the proactive rules. To see additional information about the evaluation result, such as which rule flagged a resource as NON_COMPLIANT, use the GetComplianceDetailsByResource API. For more information, see the Examples section."]
+module GetResourceEvaluationSummaryRequest =
+  struct
+    type nonrec t =
+      {
+      resourceEvaluationId: ResourceEvaluationId.t
+        [@ocaml.doc
+          "The unique ResourceEvaluationId of Amazon Web Services resource execution for which you want to retrieve the evaluation summary."]}
+    let context_ = "GetResourceEvaluationSummaryRequest"
+    let make ~resourceEvaluationId = fun () -> { resourceEvaluationId }
+    let to_value x =
+      structure_to_value
+        [("ResourceEvaluationId",
+           (Some (ResourceEvaluationId.to_value x.resourceEvaluationId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceEvaluationId =
+        ResourceEvaluationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceEvaluationId") in
+      make ~resourceEvaluationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceEvaluationId =
+        field_map_exn json__ "ResourceEvaluationId"
+          ResourceEvaluationId.of_json in
+      make ~resourceEvaluationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a summary of resource evaluation for the specified resource evaluation ID from the proactive rules that were run. The results indicate which evaluation context was used to evaluate the rules, which resource details were evaluated, the evaluation mode that was run, and whether the resource details comply with the configuration of the proactive rules. To see additional information about the evaluation result, such as which rule flagged a resource as NON_COMPLIANT, use the GetComplianceDetailsByResource API. For more information, see the Examples section."]
 module GetResourceConfigHistoryResponse =
   struct
     type nonrec t =
       {
       configurationItems: ConfigurationItemList.t option
         [@ocaml.doc
-          "A list that contains the configuration history of one or more resources."];
+          "An array of ConfigurationItems Objects. Contatins the configuration history for one or more resources."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The string that you use in a subsequent request to get the next page of results in a paginated response."]}
@@ -14861,10 +19348,10 @@ module GetResourceConfigHistoryResponse =
           (Xml.child xml_arg0 "configurationItems") in
       make ?nextToken ?configurationItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let configurationItems =
-        field_map json "configurationItems" ConfigurationItemList.of_json in
+        field_map json__ "configurationItems" ConfigurationItemList.of_json in
       make ?nextToken ?configurationItems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The output for the GetResourceConfigHistory action."]
@@ -14877,10 +19364,10 @@ module GetResourceConfigHistoryRequest =
         [@ocaml.doc "The ID of the resource (for example., sg-xxxxxx)."];
       laterTime: LaterTime.t option
         [@ocaml.doc
-          "The time stamp that indicates a later time. If not specified, current time is taken."];
+          "The chronologically latest time in the time range for which the history requested. If not specified, current time is taken."];
       earlierTime: EarlierTime.t option
         [@ocaml.doc
-          "The time stamp that indicates an earlier time. If not specified, the action returns paginated results that contain configuration items that start when the first configuration item was recorded."];
+          "The chronologically earliest time in the time range for which the history requested. If not specified, the action returns paginated results that contain configuration items that start when the first configuration item was recorded."];
       chronologicalOrder: ChronologicalOrder.t option
         [@ocaml.doc
           "The chronological order for configuration items listed. By default, the results are listed in reverse chronological order."];
@@ -14939,16 +19426,16 @@ module GetResourceConfigHistoryRequest =
       make ?nextToken ?limit ?chronologicalOrder ?earlierTime ?laterTime
         ~resourceId ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let limit = field_map json "limit" Limit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let limit = field_map json__ "limit" Limit.of_json in
       let chronologicalOrder =
-        field_map json "chronologicalOrder" ChronologicalOrder.of_json in
-      let earlierTime = field_map json "earlierTime" EarlierTime.of_json in
-      let laterTime = field_map json "laterTime" LaterTime.of_json in
-      let resourceId = field_map_exn json "resourceId" ResourceId.of_json in
+        field_map json__ "chronologicalOrder" ChronologicalOrder.of_json in
+      let earlierTime = field_map json__ "earlierTime" EarlierTime.of_json in
+      let laterTime = field_map json__ "laterTime" LaterTime.of_json in
+      let resourceId = field_map_exn json__ "resourceId" ResourceId.of_json in
       let resourceType =
-        field_map_exn json "resourceType" ResourceType.of_json in
+        field_map_exn json__ "resourceType" ResourceType.of_json in
       make ?nextToken ?limit ?chronologicalOrder ?earlierTime ?laterTime
         ~resourceId ~resourceType ()
     let to_json v = composed_to_json to_value v
@@ -15013,8 +19500,8 @@ module GetOrganizationCustomRulePolicyResponse =
         (Option.map ~f:PolicyText.of_xml) (Xml.child xml_arg0 "PolicyText") in
       make ?policyText ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyText = field_map json "PolicyText" PolicyText.of_json in
+    let of_json json__ =
+      let policyText = field_map json__ "PolicyText" PolicyText.of_json in
       make ?policyText ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15043,9 +19530,9 @@ module GetOrganizationCustomRulePolicyRequest =
              "OrganizationConfigRuleName") in
       make ~organizationConfigRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationConfigRuleName =
-        field_map_exn json "OrganizationConfigRuleName"
+        field_map_exn json__ "OrganizationConfigRuleName"
           OrganizationConfigRuleName.of_json in
       make ~organizationConfigRuleName ()
     let to_json v = composed_to_json to_value v
@@ -15142,10 +19629,10 @@ module GetOrganizationConformancePackDetailedStatusResponse =
           (Xml.child xml_arg0 "OrganizationConformancePackDetailedStatuses") in
       make ?nextToken ?organizationConformancePackDetailedStatuses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let organizationConformancePackDetailedStatuses =
-        field_map json "OrganizationConformancePackDetailedStatuses"
+        field_map json__ "OrganizationConformancePackDetailedStatuses"
           OrganizationConformancePackDetailedStatuses.of_json in
       make ?nextToken ?organizationConformancePackDetailedStatuses ()
     let to_json v = composed_to_json to_value v
@@ -15199,14 +19686,14 @@ module GetOrganizationConformancePackDetailedStatusRequest =
              "OrganizationConformancePackName") in
       make ?nextToken ?limit ?filters ~organizationConformancePackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let limit = field_map json "Limit" CosmosPageLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let limit = field_map json__ "Limit" CosmosPageLimit.of_json in
       let filters =
-        field_map json "Filters"
+        field_map json__ "Filters"
           OrganizationResourceDetailedStatusFilters.of_json in
       let organizationConformancePackName =
-        field_map_exn json "OrganizationConformancePackName"
+        field_map_exn json__ "OrganizationConformancePackName"
           OrganizationConformancePackName.of_json in
       make ?nextToken ?limit ?filters ~organizationConformancePackName ()
     let to_json v = composed_to_json to_value v
@@ -15300,10 +19787,10 @@ module GetOrganizationConfigRuleDetailedStatusResponse =
           (Xml.child xml_arg0 "OrganizationConfigRuleDetailedStatus") in
       make ?nextToken ?organizationConfigRuleDetailedStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let organizationConfigRuleDetailedStatus =
-        field_map json "OrganizationConfigRuleDetailedStatus"
+        field_map json__ "OrganizationConfigRuleDetailedStatus"
           OrganizationConfigRuleDetailedStatus.of_json in
       make ?nextToken ?organizationConfigRuleDetailedStatus ()
     let to_json v = composed_to_json to_value v
@@ -15355,12 +19842,12 @@ module GetOrganizationConfigRuleDetailedStatusRequest =
              "OrganizationConfigRuleName") in
       make ?nextToken ?limit ?filters ~organizationConfigRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let limit = field_map json "Limit" CosmosPageLimit.of_json in
-      let filters = field_map json "Filters" StatusDetailFilters.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let limit = field_map json__ "Limit" CosmosPageLimit.of_json in
+      let filters = field_map json__ "Filters" StatusDetailFilters.of_json in
       let organizationConfigRuleName =
-        field_map_exn json "OrganizationConfigRuleName"
+        field_map_exn json__ "OrganizationConfigRuleName"
           OrganizationConfigRuleName.of_json in
       make ?nextToken ?limit ?filters ~organizationConfigRuleName ()
     let to_json v = composed_to_json to_value v
@@ -15447,12 +19934,12 @@ module GetDiscoveredResourceCountsResponse =
           (Xml.child xml_arg0 "totalDiscoveredResources") in
       make ?nextToken ?resourceCounts ?totalDiscoveredResources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let resourceCounts =
-        field_map json "resourceCounts" ResourceCounts.of_json in
+        field_map json__ "resourceCounts" ResourceCounts.of_json in
       let totalDiscoveredResources =
-        field_map json "totalDiscoveredResources" Long.of_json in
+        field_map json__ "totalDiscoveredResources" Long.of_json in
       make ?nextToken ?resourceCounts ?totalDiscoveredResources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15489,11 +19976,11 @@ module GetDiscoveredResourceCountsRequest =
           (Xml.child xml_arg0 "resourceTypes") in
       make ?nextToken ?limit ?resourceTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let limit = field_map json "limit" Limit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let limit = field_map json__ "limit" Limit.of_json in
       let resourceTypes =
-        field_map json "resourceTypes" ResourceTypes.of_json in
+        field_map json__ "resourceTypes" ResourceTypes.of_json in
       make ?nextToken ?limit ?resourceTypes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15542,8 +20029,8 @@ module GetCustomRulePolicyResponse =
         (Option.map ~f:PolicyText.of_xml) (Xml.child xml_arg0 "PolicyText") in
       make ?policyText ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyText = field_map json "PolicyText" PolicyText.of_json in
+    let of_json json__ =
+      let policyText = field_map json__ "PolicyText" PolicyText.of_json in
       make ?policyText ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15566,9 +20053,9 @@ module GetCustomRulePolicyRequest =
           (Xml.child xml_arg0 "ConfigRuleName") in
       make ?configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configRuleName =
-        field_map json "ConfigRuleName" ConfigRuleName.of_json in
+        field_map json__ "ConfigRuleName" ConfigRuleName.of_json in
       make ?configRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15648,10 +20135,10 @@ module GetConformancePackComplianceSummaryResponse =
           (Xml.child xml_arg0 "ConformancePackComplianceSummaryList") in
       make ?nextToken ?conformancePackComplianceSummaryList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let conformancePackComplianceSummaryList =
-        field_map json "ConformancePackComplianceSummaryList"
+        field_map json__ "ConformancePackComplianceSummaryList"
           ConformancePackComplianceSummaryList.of_json in
       make ?nextToken ?conformancePackComplianceSummaryList ()
     let to_json v = composed_to_json to_value v
@@ -15693,11 +20180,11 @@ module GetConformancePackComplianceSummaryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConformancePackNames") in
       make ?nextToken ?limit ~conformancePackNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let limit = field_map json "Limit" PageSizeLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let limit = field_map json__ "Limit" PageSizeLimit.of_json in
       let conformancePackNames =
-        field_map_exn json "ConformancePackNames"
+        field_map_exn json__ "ConformancePackNames"
           ConformancePackNamesToSummarizeList.of_json in
       make ?nextToken ?limit ~conformancePackNames ()
     let to_json v = composed_to_json to_value v
@@ -15707,7 +20194,7 @@ module GetConformancePackComplianceDetailsResponse =
   struct
     type nonrec t =
       {
-      conformancePackName: ConformancePackName.t
+      conformancePackName: ConformancePackName.t option
         [@ocaml.doc "Name of the conformance pack."];
       conformancePackRuleEvaluationResults:
         ConformancePackRuleEvaluationResultsList.t option
@@ -15724,15 +20211,14 @@ module GetConformancePackComplianceDetailsResponse =
           NoSuchConfigRuleInConformancePackException.t 
       | `NoSuchConformancePackException of NoSuchConformancePackException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetConformancePackComplianceDetailsResponse"
-    let make ?conformancePackRuleEvaluationResults =
-      fun ?nextToken ->
-        fun ~conformancePackName ->
+    let make ?conformancePackName =
+      fun ?conformancePackRuleEvaluationResults ->
+        fun ?nextToken ->
           fun () ->
             {
+              conformancePackName;
               conformancePackRuleEvaluationResults;
-              nextToken;
-              conformancePackName
+              nextToken
             }
     let error_of_json name json =
       match name with
@@ -15801,7 +20287,7 @@ module GetConformancePackComplianceDetailsResponse =
     let to_value x =
       structure_to_value
         [("ConformancePackName",
-           (Some (ConformancePackName.to_value x.conformancePackName)));
+           (Option.map x.conformancePackName ~f:ConformancePackName.to_value));
         ("ConformancePackRuleEvaluationResults",
           (Option.map x.conformancePackRuleEvaluationResults
              ~f:ConformancePackRuleEvaluationResultsList.to_value));
@@ -15814,20 +20300,20 @@ module GetConformancePackComplianceDetailsResponse =
         (Option.map ~f:ConformancePackRuleEvaluationResultsList.of_xml)
           (Xml.child xml_arg0 "ConformancePackRuleEvaluationResults") in
       let conformancePackName =
-        ConformancePackName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConformancePackName") in
+        (Option.map ~f:ConformancePackName.of_xml)
+          (Xml.child xml_arg0 "ConformancePackName") in
       make ?nextToken ?conformancePackRuleEvaluationResults
-        ~conformancePackName ()
+        ?conformancePackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let conformancePackRuleEvaluationResults =
-        field_map json "ConformancePackRuleEvaluationResults"
+        field_map json__ "ConformancePackRuleEvaluationResults"
           ConformancePackRuleEvaluationResultsList.of_json in
       let conformancePackName =
-        field_map_exn json "ConformancePackName" ConformancePackName.of_json in
+        field_map json__ "ConformancePackName" ConformancePackName.of_json in
       make ?nextToken ?conformancePackRuleEvaluationResults
-        ~conformancePackName ()
+        ?conformancePackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns compliance details of a conformance pack for all Amazon Web Services resources that are monitered by conformance pack."]
@@ -15876,15 +20362,16 @@ module GetConformancePackComplianceDetailsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConformancePackName") in
       make ?nextToken ?limit ?filters ~conformancePackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let limit =
-        field_map json "Limit"
+        field_map json__ "Limit"
           GetConformancePackComplianceDetailsLimit.of_json in
       let filters =
-        field_map json "Filters" ConformancePackEvaluationFilters.of_json in
+        field_map json__ "Filters" ConformancePackEvaluationFilters.of_json in
       let conformancePackName =
-        field_map_exn json "ConformancePackName" ConformancePackName.of_json in
+        field_map_exn json__ "ConformancePackName"
+          ConformancePackName.of_json in
       make ?nextToken ?limit ?filters ~conformancePackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15940,9 +20427,9 @@ module GetComplianceSummaryByResourceTypeResponse =
           (Xml.child xml_arg0 "ComplianceSummariesByResourceType") in
       make ?complianceSummariesByResourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let complianceSummariesByResourceType =
-        field_map json "ComplianceSummariesByResourceType"
+        field_map json__ "ComplianceSummariesByResourceType"
           ComplianceSummariesByResourceType.of_json in
       make ?complianceSummariesByResourceType ()
     let to_json v = composed_to_json to_value v
@@ -15966,9 +20453,9 @@ module GetComplianceSummaryByResourceTypeRequest =
           (Xml.child xml_arg0 "ResourceTypes") in
       make ?resourceTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceTypes =
-        field_map json "ResourceTypes" ResourceTypes.of_json in
+        field_map json__ "ResourceTypes" ResourceTypes.of_json in
       make ?resourceTypes ()
     let to_json v = composed_to_json to_value v
   end
@@ -16009,9 +20496,9 @@ module GetComplianceSummaryByConfigRuleResponse =
           (Xml.child xml_arg0 "ComplianceSummary") in
       make ?complianceSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let complianceSummary =
-        field_map json "ComplianceSummary" ComplianceSummary.of_json in
+        field_map json__ "ComplianceSummary" ComplianceSummary.of_json in
       make ?complianceSummary ()
     let to_json v = composed_to_json to_value v
   end
@@ -16070,10 +20557,10 @@ module GetComplianceDetailsByResourceResponse =
           (Xml.child xml_arg0 "EvaluationResults") in
       make ?nextToken ?evaluationResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let evaluationResults =
-        field_map json "EvaluationResults" EvaluationResults.of_json in
+        field_map json__ "EvaluationResults" EvaluationResults.of_json in
       make ?nextToken ?evaluationResults ()
     let to_json v = composed_to_json to_value v
   end
@@ -16081,56 +20568,74 @@ module GetComplianceDetailsByResourceRequest =
   struct
     type nonrec t =
       {
-      resourceType: StringWithCharLimit256.t
+      resourceType: StringWithCharLimit256.t option
         [@ocaml.doc
           "The type of the Amazon Web Services resource for which you want compliance information."];
-      resourceId: BaseResourceId.t
+      resourceId: BaseResourceId.t option
         [@ocaml.doc
           "The ID of the Amazon Web Services resource for which you want compliance information."];
       complianceTypes: ComplianceTypes.t option
         [@ocaml.doc
-          "Filters the results by compliance. The allowed values are COMPLIANT, NON_COMPLIANT, and NOT_APPLICABLE."];
+          "Filters the results by compliance. INSUFFICIENT_DATA is a valid ComplianceType that is returned when an Config rule cannot be evaluated. However, INSUFFICIENT_DATA cannot be used as a ComplianceType for filtering results."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken string returned on a previous page that you use to get the next page of results in a paginated response."]}
-    let context_ = "GetComplianceDetailsByResourceRequest"
-    let make ?complianceTypes =
-      fun ?nextToken ->
-        fun ~resourceType ->
-          fun ~resourceId ->
-            fun () ->
-              { complianceTypes; nextToken; resourceType; resourceId }
+          "The nextToken string returned on a previous page that you use to get the next page of results in a paginated response."];
+      resourceEvaluationId: ResourceEvaluationId.t option
+        [@ocaml.doc
+          "The unique ID of Amazon Web Services resource execution for which you want to retrieve evaluation results. You need to only provide either a ResourceEvaluationID or a ResourceID and ResourceType."]}
+    let make ?resourceType =
+      fun ?resourceId ->
+        fun ?complianceTypes ->
+          fun ?nextToken ->
+            fun ?resourceEvaluationId ->
+              fun () ->
+                {
+                  resourceType;
+                  resourceId;
+                  complianceTypes;
+                  nextToken;
+                  resourceEvaluationId
+                }
     let to_value x =
       structure_to_value
         [("ResourceType",
-           (Some (StringWithCharLimit256.to_value x.resourceType)));
-        ("ResourceId", (Some (BaseResourceId.to_value x.resourceId)));
+           (Option.map x.resourceType ~f:StringWithCharLimit256.to_value));
+        ("ResourceId", (Option.map x.resourceId ~f:BaseResourceId.to_value));
         ("ComplianceTypes",
           (Option.map x.complianceTypes ~f:ComplianceTypes.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("ResourceEvaluationId",
+          (Option.map x.resourceEvaluationId ~f:ResourceEvaluationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let resourceEvaluationId =
+        (Option.map ~f:ResourceEvaluationId.of_xml)
+          (Xml.child xml_arg0 "ResourceEvaluationId") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       let complianceTypes =
         (Option.map ~f:ComplianceTypes.of_xml)
           (Xml.child xml_arg0 "ComplianceTypes") in
       let resourceId =
-        BaseResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:BaseResourceId.of_xml)
+          (Xml.child xml_arg0 "ResourceId") in
       let resourceType =
-        StringWithCharLimit256.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
-      make ?nextToken ?complianceTypes ~resourceId ~resourceType ()
+        (Option.map ~f:StringWithCharLimit256.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      make ?resourceEvaluationId ?nextToken ?complianceTypes ?resourceId
+        ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let resourceEvaluationId =
+        field_map json__ "ResourceEvaluationId" ResourceEvaluationId.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let complianceTypes =
-        field_map json "ComplianceTypes" ComplianceTypes.of_json in
-      let resourceId = field_map_exn json "ResourceId" BaseResourceId.of_json in
+        field_map json__ "ComplianceTypes" ComplianceTypes.of_json in
+      let resourceId = field_map json__ "ResourceId" BaseResourceId.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" StringWithCharLimit256.of_json in
-      make ?nextToken ?complianceTypes ~resourceId ~resourceType ()
+        field_map json__ "ResourceType" StringWithCharLimit256.of_json in
+      make ?resourceEvaluationId ?nextToken ?complianceTypes ?resourceId
+        ?resourceType ()
     let to_json v = composed_to_json to_value v
   end
 module GetComplianceDetailsByConfigRuleResponse =
@@ -16206,10 +20711,10 @@ module GetComplianceDetailsByConfigRuleResponse =
           (Xml.child xml_arg0 "EvaluationResults") in
       make ?nextToken ?evaluationResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let evaluationResults =
-        field_map json "EvaluationResults" EvaluationResults.of_json in
+        field_map json__ "EvaluationResults" EvaluationResults.of_json in
       make ?nextToken ?evaluationResults ()
     let to_json v = composed_to_json to_value v
   end
@@ -16222,7 +20727,7 @@ module GetComplianceDetailsByConfigRuleRequest =
           "The name of the Config rule for which you want compliance information."];
       complianceTypes: ComplianceTypes.t option
         [@ocaml.doc
-          "Filters the results by compliance. The allowed values are COMPLIANT, NON_COMPLIANT, and NOT_APPLICABLE."];
+          "Filters the results by compliance. INSUFFICIENT_DATA is a valid ComplianceType that is returned when an Config rule cannot be evaluated. However, INSUFFICIENT_DATA cannot be used as a ComplianceType for filtering results."];
       limit: Limit.t option
         [@ocaml.doc
           "The maximum number of evaluation results returned on each page. The default is 10. You cannot specify a number greater than 100. If you specify 0, Config uses the default."];
@@ -16256,13 +20761,13 @@ module GetComplianceDetailsByConfigRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigRuleName") in
       make ?nextToken ?limit ?complianceTypes ~configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let limit = field_map json "Limit" Limit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let limit = field_map json__ "Limit" Limit.of_json in
       let complianceTypes =
-        field_map json "ComplianceTypes" ComplianceTypes.of_json in
+        field_map json__ "ComplianceTypes" ComplianceTypes.of_json in
       let configRuleName =
-        field_map_exn json "ConfigRuleName" StringWithCharLimit64.of_json in
+        field_map_exn json__ "ConfigRuleName" StringWithCharLimit64.of_json in
       make ?nextToken ?limit ?complianceTypes ~configRuleName ()
     let to_json v = composed_to_json to_value v
   end
@@ -16347,13 +20852,13 @@ module GetAggregateResourceConfigResponse =
           (Xml.child xml_arg0 "ConfigurationItem") in
       make ?configurationItem ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationItem =
-        field_map json "ConfigurationItem" ConfigurationItem.of_json in
+        field_map json__ "ConfigurationItem" ConfigurationItem.of_json in
       make ?configurationItem ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns configuration item that is aggregated for your specific resource in a specific source account and region."]
+       "Returns configuration item that is aggregated for your specific resource in a specific source account and region. The API does not return results for deleted resources."]
 module GetAggregateResourceConfigRequest =
   struct
     type nonrec t =
@@ -16385,22 +20890,22 @@ module GetAggregateResourceConfigRequest =
              "ConfigurationAggregatorName") in
       make ~resourceIdentifier ~configurationAggregatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceIdentifier =
-        field_map_exn json "ResourceIdentifier"
+        field_map_exn json__ "ResourceIdentifier"
           AggregateResourceIdentifier.of_json in
       let configurationAggregatorName =
-        field_map_exn json "ConfigurationAggregatorName"
+        field_map_exn json__ "ConfigurationAggregatorName"
           ConfigurationAggregatorName.of_json in
       make ~resourceIdentifier ~configurationAggregatorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns configuration item that is aggregated for your specific resource in a specific source account and region."]
+       "Returns configuration item that is aggregated for your specific resource in a specific source account and region. The API does not return results for deleted resources."]
 module GetAggregateDiscoveredResourceCountsResponse =
   struct
     type nonrec t =
       {
-      totalDiscoveredResources: Long.t
+      totalDiscoveredResources: Long.t option
         [@ocaml.doc
           "The total number of resources that are present in an aggregator with the filters that you provide."];
       groupByKey: StringWithCharLimit256.t option
@@ -16418,17 +20923,16 @@ module GetAggregateDiscoveredResourceCountsResponse =
           NoSuchConfigurationAggregatorException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetAggregateDiscoveredResourceCountsResponse"
-    let make ?groupByKey =
-      fun ?groupedResourceCounts ->
-        fun ?nextToken ->
-          fun ~totalDiscoveredResources ->
+    let make ?totalDiscoveredResources =
+      fun ?groupByKey ->
+        fun ?groupedResourceCounts ->
+          fun ?nextToken ->
             fun () ->
               {
+                totalDiscoveredResources;
                 groupByKey;
                 groupedResourceCounts;
-                nextToken;
-                totalDiscoveredResources
+                nextToken
               }
     let error_of_json name json =
       match name with
@@ -16483,7 +20987,7 @@ module GetAggregateDiscoveredResourceCountsResponse =
     let to_value x =
       structure_to_value
         [("TotalDiscoveredResources",
-           (Some (Long.to_value x.totalDiscoveredResources)));
+           (Option.map x.totalDiscoveredResources ~f:Long.to_value));
         ("GroupByKey",
           (Option.map x.groupByKey ~f:StringWithCharLimit256.to_value));
         ("GroupedResourceCounts",
@@ -16501,23 +21005,22 @@ module GetAggregateDiscoveredResourceCountsResponse =
         (Option.map ~f:StringWithCharLimit256.of_xml)
           (Xml.child xml_arg0 "GroupByKey") in
       let totalDiscoveredResources =
-        Long.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "TotalDiscoveredResources") in
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "TotalDiscoveredResources") in
       make ?nextToken ?groupedResourceCounts ?groupByKey
-        ~totalDiscoveredResources ()
+        ?totalDiscoveredResources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let groupedResourceCounts =
-        field_map json "GroupedResourceCounts"
+        field_map json__ "GroupedResourceCounts"
           GroupedResourceCountList.of_json in
       let groupByKey =
-        field_map json "GroupByKey" StringWithCharLimit256.of_json in
+        field_map json__ "GroupByKey" StringWithCharLimit256.of_json in
       let totalDiscoveredResources =
-        field_map_exn json "TotalDiscoveredResources" Long.of_json in
+        field_map json__ "TotalDiscoveredResources" Long.of_json in
       make ?nextToken ?groupedResourceCounts ?groupByKey
-        ~totalDiscoveredResources ()
+        ?totalDiscoveredResources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the resource counts across accounts and regions that are present in your Config aggregator. You can request the resource counts by providing filters and GroupByKey. For example, if the input contains accountID 12345678910 and region us-east-1 in filters, the API returns the count of resources in account ID 12345678910 and region us-east-1. If the input contains ACCOUNT_ID as a GroupByKey, the API returns resource counts for all source accounts that are present in your aggregator."]
@@ -16582,14 +21085,14 @@ module GetAggregateDiscoveredResourceCountsRequest =
       make ?nextToken ?limit ?groupByKey ?filters
         ~configurationAggregatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let limit = field_map json "Limit" GroupByAPILimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let limit = field_map json__ "Limit" GroupByAPILimit.of_json in
       let groupByKey =
-        field_map json "GroupByKey" ResourceCountGroupKey.of_json in
-      let filters = field_map json "Filters" ResourceCountFilters.of_json in
+        field_map json__ "GroupByKey" ResourceCountGroupKey.of_json in
+      let filters = field_map json__ "Filters" ResourceCountFilters.of_json in
       let configurationAggregatorName =
-        field_map_exn json "ConfigurationAggregatorName"
+        field_map_exn json__ "ConfigurationAggregatorName"
           ConfigurationAggregatorName.of_json in
       make ?nextToken ?limit ?groupByKey ?filters
         ~configurationAggregatorName ()
@@ -16697,12 +21200,12 @@ module GetAggregateConformancePackComplianceSummaryResponse =
       make ?nextToken ?groupByKey
         ?aggregateConformancePackComplianceSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let groupByKey =
-        field_map json "GroupByKey" StringWithCharLimit256.of_json in
+        field_map json__ "GroupByKey" StringWithCharLimit256.of_json in
       let aggregateConformancePackComplianceSummaries =
-        field_map json "AggregateConformancePackComplianceSummaries"
+        field_map json__ "AggregateConformancePackComplianceSummaries"
           AggregateConformancePackComplianceSummaryList.of_json in
       make ?nextToken ?groupByKey
         ?aggregateConformancePackComplianceSummaries ()
@@ -16775,17 +21278,17 @@ module GetAggregateConformancePackComplianceSummaryRequest =
       make ?nextToken ?limit ?groupByKey ?filters
         ~configurationAggregatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let limit = field_map json "Limit" Limit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let limit = field_map json__ "Limit" Limit.of_json in
       let groupByKey =
-        field_map json "GroupByKey"
+        field_map json__ "GroupByKey"
           AggregateConformancePackComplianceSummaryGroupKey.of_json in
       let filters =
-        field_map json "Filters"
+        field_map json__ "Filters"
           AggregateConformancePackComplianceSummaryFilters.of_json in
       let configurationAggregatorName =
-        field_map_exn json "ConfigurationAggregatorName"
+        field_map_exn json__ "ConfigurationAggregatorName"
           ConfigurationAggregatorName.of_json in
       make ?nextToken ?limit ?groupByKey ?filters
         ~configurationAggregatorName ()
@@ -16884,13 +21387,13 @@ module GetAggregateConfigRuleComplianceSummaryResponse =
           (Xml.child xml_arg0 "GroupByKey") in
       make ?nextToken ?aggregateComplianceCounts ?groupByKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let aggregateComplianceCounts =
-        field_map json "AggregateComplianceCounts"
+        field_map json__ "AggregateComplianceCounts"
           AggregateComplianceCountList.of_json in
       let groupByKey =
-        field_map json "GroupByKey" StringWithCharLimit256.of_json in
+        field_map json__ "GroupByKey" StringWithCharLimit256.of_json in
       make ?nextToken ?aggregateComplianceCounts ?groupByKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16959,16 +21462,16 @@ module GetAggregateConfigRuleComplianceSummaryRequest =
       make ?nextToken ?limit ?groupByKey ?filters
         ~configurationAggregatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let limit = field_map json "Limit" GroupByAPILimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let limit = field_map json__ "Limit" GroupByAPILimit.of_json in
       let groupByKey =
-        field_map json "GroupByKey"
+        field_map json__ "GroupByKey"
           ConfigRuleComplianceSummaryGroupKey.of_json in
       let filters =
-        field_map json "Filters" ConfigRuleComplianceSummaryFilters.of_json in
+        field_map json__ "Filters" ConfigRuleComplianceSummaryFilters.of_json in
       let configurationAggregatorName =
-        field_map_exn json "ConfigurationAggregatorName"
+        field_map_exn json__ "ConfigurationAggregatorName"
           ConfigurationAggregatorName.of_json in
       make ?nextToken ?limit ?groupByKey ?filters
         ~configurationAggregatorName ()
@@ -17058,10 +21561,10 @@ module GetAggregateComplianceDetailsByConfigRuleResponse =
           (Xml.child xml_arg0 "AggregateEvaluationResults") in
       make ?nextToken ?aggregateEvaluationResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let aggregateEvaluationResults =
-        field_map json "AggregateEvaluationResults"
+        field_map json__ "AggregateEvaluationResults"
           AggregateEvaluationResultList.of_json in
       make ?nextToken ?aggregateEvaluationResults ()
     let to_json v = composed_to_json to_value v
@@ -17144,23 +21647,136 @@ module GetAggregateComplianceDetailsByConfigRuleRequest =
       make ?nextToken ?limit ?complianceType ~awsRegion ~accountId
         ~configRuleName ~configurationAggregatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let limit = field_map json "Limit" Limit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let limit = field_map json__ "Limit" Limit.of_json in
       let complianceType =
-        field_map json "ComplianceType" ComplianceType.of_json in
-      let awsRegion = field_map_exn json "AwsRegion" AwsRegion.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
+        field_map json__ "ComplianceType" ComplianceType.of_json in
+      let awsRegion = field_map_exn json__ "AwsRegion" AwsRegion.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
       let configRuleName =
-        field_map_exn json "ConfigRuleName" ConfigRuleName.of_json in
+        field_map_exn json__ "ConfigRuleName" ConfigRuleName.of_json in
       let configurationAggregatorName =
-        field_map_exn json "ConfigurationAggregatorName"
+        field_map_exn json__ "ConfigurationAggregatorName"
           ConfigurationAggregatorName.of_json in
       make ?nextToken ?limit ?complianceType ~awsRegion ~accountId
         ~configRuleName ~configurationAggregatorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the evaluation results for the specified Config rule for a specific resource in a rule. The results indicate which Amazon Web Services resources were evaluated by the rule, when each resource was last evaluated, and whether each resource complies with the rule. The results can return an empty result page. But if you have a nextToken, the results are displayed on the next page."]
+module DisassociateResourceTypesResponse =
+  struct
+    type nonrec t = {
+      configurationRecorder: ConfigurationRecorder.t option }
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `NoSuchConfigurationRecorderException of
+          NoSuchConfigurationRecorderException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?configurationRecorder = fun () -> { configurationRecorder }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "NoSuchConfigurationRecorderException" ->
+          `NoSuchConfigurationRecorderException
+            (NoSuchConfigurationRecorderException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "NoSuchConfigurationRecorderException" ->
+          `NoSuchConfigurationRecorderException
+            (NoSuchConfigurationRecorderException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `NoSuchConfigurationRecorderException e ->
+          `Assoc
+            [("error", (`String "NoSuchConfigurationRecorderException"));
+            ("details", (NoSuchConfigurationRecorderException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ConfigurationRecorder",
+           (Option.map x.configurationRecorder
+              ~f:ConfigurationRecorder.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let configurationRecorder =
+        (Option.map ~f:ConfigurationRecorder.of_xml)
+          (Xml.child xml_arg0 "ConfigurationRecorder") in
+      make ?configurationRecorder ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let configurationRecorder =
+        field_map json__ "ConfigurationRecorder"
+          ConfigurationRecorder.of_json in
+      make ?configurationRecorder ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes all resource types specified in the ResourceTypes list from the RecordingGroup of configuration recorder and excludes these resource types when recording. For this operation, the configuration recorder must use a RecordingStrategy that is either INCLUSION_BY_RESOURCE_TYPES or EXCLUSION_BY_RESOURCE_TYPES."]
+module DisassociateResourceTypesRequest =
+  struct
+    type nonrec t =
+      {
+      configurationRecorderArn: AmazonResourceName.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the specified configuration recorder."];
+      resourceTypes: ResourceTypeList.t
+        [@ocaml.doc
+          "The list of resource types you want to remove from the recording group of the specified configuration recorder."]}
+    let context_ = "DisassociateResourceTypesRequest"
+    let make ~configurationRecorderArn =
+      fun ~resourceTypes ->
+        fun () -> { configurationRecorderArn; resourceTypes }
+    let to_value x =
+      structure_to_value
+        [("ConfigurationRecorderArn",
+           (Some (AmazonResourceName.to_value x.configurationRecorderArn)));
+        ("ResourceTypes", (Some (ResourceTypeList.to_value x.resourceTypes)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceTypes =
+        ResourceTypeList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceTypes") in
+      let configurationRecorderArn =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "ConfigurationRecorderArn") in
+      make ~resourceTypes ~configurationRecorderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceTypes =
+        field_map_exn json__ "ResourceTypes" ResourceTypeList.of_json in
+      let configurationRecorderArn =
+        field_map_exn json__ "ConfigurationRecorderArn"
+          AmazonResourceName.of_json in
+      make ~resourceTypes ~configurationRecorderArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes all resource types specified in the ResourceTypes list from the RecordingGroup of configuration recorder and excludes these resource types when recording. For this operation, the configuration recorder must use a RecordingStrategy that is either INCLUSION_BY_RESOURCE_TYPES or EXCLUSION_BY_RESOURCE_TYPES."]
 module DescribeRetentionConfigurationsResponse =
   struct
     type nonrec t =
@@ -17237,15 +21853,15 @@ module DescribeRetentionConfigurationsResponse =
           (Xml.child xml_arg0 "RetentionConfigurations") in
       make ?nextToken ?retentionConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let retentionConfigurations =
-        field_map json "RetentionConfigurations"
+        field_map json__ "RetentionConfigurations"
           RetentionConfigurationList.of_json in
       make ?nextToken ?retentionConfigurations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the details of one or more retention configurations. If the retention configuration name is not specified, this action returns the details for all the retention configurations for that account. Currently, Config supports only one retention configuration per region in your account."]
+       "Returns the details of one or more retention configurations. If the retention configuration name is not specified, this operation returns the details for all the retention configurations for that account. Currently, Config supports only one retention configuration per region in your account."]
 module DescribeRetentionConfigurationsRequest =
   struct
     type nonrec t =
@@ -17273,15 +21889,15 @@ module DescribeRetentionConfigurationsRequest =
           (Xml.child xml_arg0 "RetentionConfigurationNames") in
       make ?nextToken ?retentionConfigurationNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let retentionConfigurationNames =
-        field_map json "RetentionConfigurationNames"
+        field_map json__ "RetentionConfigurationNames"
           RetentionConfigurationNameList.of_json in
       make ?nextToken ?retentionConfigurationNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the details of one or more retention configurations. If the retention configuration name is not specified, this action returns the details for all the retention configurations for that account. Currently, Config supports only one retention configuration per region in your account."]
+       "Returns the details of one or more retention configurations. If the retention configuration name is not specified, this operation returns the details for all the retention configurations for that account. Currently, Config supports only one retention configuration per region in your account."]
 module DescribeRemediationExecutionStatusResponse =
   struct
     type nonrec t =
@@ -17359,10 +21975,10 @@ module DescribeRemediationExecutionStatusResponse =
           (Xml.child xml_arg0 "RemediationExecutionStatuses") in
       make ?nextToken ?remediationExecutionStatuses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let remediationExecutionStatuses =
-        field_map json "RemediationExecutionStatuses"
+        field_map json__ "RemediationExecutionStatuses"
           RemediationExecutionStatuses.of_json in
       make ?nextToken ?remediationExecutionStatuses ()
     let to_json v = composed_to_json to_value v
@@ -17373,7 +21989,7 @@ module DescribeRemediationExecutionStatusRequest =
     type nonrec t =
       {
       configRuleName: ConfigRuleName.t
-        [@ocaml.doc "A list of Config rule names."];
+        [@ocaml.doc "The name of the Config rule."];
       resourceKeys: ResourceKeys.t option
         [@ocaml.doc
           "A list of resource keys to be processed with the current request. Each element in the list consists of the resource type and resource ID."];
@@ -17410,12 +22026,12 @@ module DescribeRemediationExecutionStatusRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigRuleName") in
       make ?nextToken ?limit ?resourceKeys ~configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let limit = field_map json "Limit" Limit.of_json in
-      let resourceKeys = field_map json "ResourceKeys" ResourceKeys.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let limit = field_map json__ "Limit" Limit.of_json in
+      let resourceKeys = field_map json__ "ResourceKeys" ResourceKeys.of_json in
       let configRuleName =
-        field_map_exn json "ConfigRuleName" ConfigRuleName.of_json in
+        field_map_exn json__ "ConfigRuleName" ConfigRuleName.of_json in
       make ?nextToken ?limit ?resourceKeys ~configRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17484,10 +22100,11 @@ module DescribeRemediationExceptionsResponse =
           (Xml.child xml_arg0 "RemediationExceptions") in
       make ?nextToken ?remediationExceptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let remediationExceptions =
-        field_map json "RemediationExceptions" RemediationExceptions.of_json in
+        field_map json__ "RemediationExceptions"
+          RemediationExceptions.of_json in
       make ?nextToken ?remediationExceptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17535,14 +22152,14 @@ module DescribeRemediationExceptionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigRuleName") in
       make ?nextToken ?limit ?resourceKeys ~configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let limit = field_map json "Limit" Limit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let limit = field_map json__ "Limit" Limit.of_json in
       let resourceKeys =
-        field_map json "ResourceKeys"
+        field_map json__ "ResourceKeys"
           RemediationExceptionResourceKeys.of_json in
       let configRuleName =
-        field_map_exn json "ConfigRuleName" ConfigRuleName.of_json in
+        field_map_exn json__ "ConfigRuleName" ConfigRuleName.of_json in
       make ?nextToken ?limit ?resourceKeys ~configRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17585,9 +22202,9 @@ module DescribeRemediationConfigurationsResponse =
           (Xml.child xml_arg0 "RemediationConfigurations") in
       make ?remediationConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let remediationConfigurations =
-        field_map json "RemediationConfigurations"
+        field_map json__ "RemediationConfigurations"
           RemediationConfigurations.of_json in
       make ?remediationConfigurations ()
     let to_json v = composed_to_json to_value v
@@ -17613,9 +22230,9 @@ module DescribeRemediationConfigurationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigRuleNames") in
       make ~configRuleNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configRuleNames =
-        field_map_exn json "ConfigRuleNames" ConfigRuleNames.of_json in
+        field_map_exn json__ "ConfigRuleNames" ConfigRuleNames.of_json in
       make ~configRuleNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17693,10 +22310,10 @@ module DescribePendingAggregationRequestsResponse =
           (Xml.child xml_arg0 "PendingAggregationRequests") in
       make ?nextToken ?pendingAggregationRequests ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let pendingAggregationRequests =
-        field_map json "PendingAggregationRequests"
+        field_map json__ "PendingAggregationRequests"
           PendingAggregationRequestList.of_json in
       make ?nextToken ?pendingAggregationRequests ()
     let to_json v = composed_to_json to_value v
@@ -17727,10 +22344,10 @@ module DescribePendingAggregationRequestsRequest =
           (Xml.child xml_arg0 "Limit") in
       make ?nextToken ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let limit =
-        field_map json "Limit"
+        field_map json__ "Limit"
           DescribePendingAggregationRequestsLimit.of_json in
       make ?nextToken ?limit ()
     let to_json v = composed_to_json to_value v
@@ -17824,15 +22441,15 @@ module DescribeOrganizationConformancePacksResponse =
           (Xml.child xml_arg0 "OrganizationConformancePacks") in
       make ?nextToken ?organizationConformancePacks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let organizationConformancePacks =
-        field_map json "OrganizationConformancePacks"
+        field_map json__ "OrganizationConformancePacks"
           OrganizationConformancePacks.of_json in
       make ?nextToken ?organizationConformancePacks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of organization conformance packs. When you specify the limit and the next token, you receive a paginated response. Limit and next token are not applicable if you specify organization conformance packs names. They are only applicable, when you request all the organization conformance packs."]
+       "Returns a list of organization conformance packs. When you specify the limit and the next token, you receive a paginated response. Limit and next token are not applicable if you specify organization conformance packs names. They are only applicable, when you request all the organization conformance packs. For accounts within an organization If you deploy an organizational rule or conformance pack in an organization administrator account, and then establish a delegated administrator and deploy an organizational rule or conformance pack in the delegated administrator account, you won't be able to see the organizational rule or conformance pack in the organization administrator account from the delegated administrator account or see the organizational rule or conformance pack in the delegated administrator account from organization administrator account. The DescribeOrganizationConfigRules and DescribeOrganizationConformancePacks APIs can only see and interact with the organization-related resource that were deployed from within the account calling those APIs."]
 module DescribeOrganizationConformancePacksRequest =
   struct
     type nonrec t =
@@ -17869,16 +22486,16 @@ module DescribeOrganizationConformancePacksRequest =
           (Xml.child xml_arg0 "OrganizationConformancePackNames") in
       make ?nextToken ?limit ?organizationConformancePackNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let limit = field_map json "Limit" CosmosPageLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let limit = field_map json__ "Limit" CosmosPageLimit.of_json in
       let organizationConformancePackNames =
-        field_map json "OrganizationConformancePackNames"
+        field_map json__ "OrganizationConformancePackNames"
           OrganizationConformancePackNames.of_json in
       make ?nextToken ?limit ?organizationConformancePackNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of organization conformance packs. When you specify the limit and the next token, you receive a paginated response. Limit and next token are not applicable if you specify organization conformance packs names. They are only applicable, when you request all the organization conformance packs."]
+       "Returns a list of organization conformance packs. When you specify the limit and the next token, you receive a paginated response. Limit and next token are not applicable if you specify organization conformance packs names. They are only applicable, when you request all the organization conformance packs. For accounts within an organization If you deploy an organizational rule or conformance pack in an organization administrator account, and then establish a delegated administrator and deploy an organizational rule or conformance pack in the delegated administrator account, you won't be able to see the organizational rule or conformance pack in the organization administrator account from the delegated administrator account or see the organizational rule or conformance pack in the delegated administrator account from organization administrator account. The DescribeOrganizationConfigRules and DescribeOrganizationConformancePacks APIs can only see and interact with the organization-related resource that were deployed from within the account calling those APIs."]
 module DescribeOrganizationConformancePackStatusesResponse =
   struct
     type nonrec t =
@@ -17969,10 +22586,10 @@ module DescribeOrganizationConformancePackStatusesResponse =
           (Xml.child xml_arg0 "OrganizationConformancePackStatuses") in
       make ?nextToken ?organizationConformancePackStatuses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let organizationConformancePackStatuses =
-        field_map json "OrganizationConformancePackStatuses"
+        field_map json__ "OrganizationConformancePackStatuses"
           OrganizationConformancePackStatuses.of_json in
       make ?nextToken ?organizationConformancePackStatuses ()
     let to_json v = composed_to_json to_value v
@@ -18014,11 +22631,11 @@ module DescribeOrganizationConformancePackStatusesRequest =
           (Xml.child xml_arg0 "OrganizationConformancePackNames") in
       make ?nextToken ?limit ?organizationConformancePackNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let limit = field_map json "Limit" CosmosPageLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let limit = field_map json__ "Limit" CosmosPageLimit.of_json in
       let organizationConformancePackNames =
-        field_map json "OrganizationConformancePackNames"
+        field_map json__ "OrganizationConformancePackNames"
           OrganizationConformancePackNames.of_json in
       make ?nextToken ?limit ?organizationConformancePackNames ()
     let to_json v = composed_to_json to_value v
@@ -18110,15 +22727,15 @@ module DescribeOrganizationConfigRulesResponse =
           (Xml.child xml_arg0 "OrganizationConfigRules") in
       make ?nextToken ?organizationConfigRules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let organizationConfigRules =
-        field_map json "OrganizationConfigRules"
+        field_map json__ "OrganizationConfigRules"
           OrganizationConfigRules.of_json in
       make ?nextToken ?organizationConfigRules ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of organization Config rules. When you specify the limit and the next token, you receive a paginated response. Limit and next token are not applicable if you specify organization Config rule names. It is only applicable, when you request all the organization Config rules."]
+       "Returns a list of organization Config rules. When you specify the limit and the next token, you receive a paginated response. Limit and next token are not applicable if you specify organization Config rule names. It is only applicable, when you request all the organization Config rules. For accounts within an organization If you deploy an organizational rule or conformance pack in an organization administrator account, and then establish a delegated administrator and deploy an organizational rule or conformance pack in the delegated administrator account, you won't be able to see the organizational rule or conformance pack in the organization administrator account from the delegated administrator account or see the organizational rule or conformance pack in the delegated administrator account from organization administrator account. The DescribeOrganizationConfigRules and DescribeOrganizationConformancePacks APIs can only see and interact with the organization-related resource that were deployed from within the account calling those APIs."]
 module DescribeOrganizationConfigRulesRequest =
   struct
     type nonrec t =
@@ -18154,16 +22771,16 @@ module DescribeOrganizationConfigRulesRequest =
           (Xml.child xml_arg0 "OrganizationConfigRuleNames") in
       make ?nextToken ?limit ?organizationConfigRuleNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let limit = field_map json "Limit" CosmosPageLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let limit = field_map json__ "Limit" CosmosPageLimit.of_json in
       let organizationConfigRuleNames =
-        field_map json "OrganizationConfigRuleNames"
+        field_map json__ "OrganizationConfigRuleNames"
           OrganizationConfigRuleNames.of_json in
       make ?nextToken ?limit ?organizationConfigRuleNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of organization Config rules. When you specify the limit and the next token, you receive a paginated response. Limit and next token are not applicable if you specify organization Config rule names. It is only applicable, when you request all the organization Config rules."]
+       "Returns a list of organization Config rules. When you specify the limit and the next token, you receive a paginated response. Limit and next token are not applicable if you specify organization Config rule names. It is only applicable, when you request all the organization Config rules. For accounts within an organization If you deploy an organizational rule or conformance pack in an organization administrator account, and then establish a delegated administrator and deploy an organizational rule or conformance pack in the delegated administrator account, you won't be able to see the organizational rule or conformance pack in the organization administrator account from the delegated administrator account or see the organizational rule or conformance pack in the delegated administrator account from organization administrator account. The DescribeOrganizationConfigRules and DescribeOrganizationConformancePacks APIs can only see and interact with the organization-related resource that were deployed from within the account calling those APIs."]
 module DescribeOrganizationConfigRuleStatusesResponse =
   struct
     type nonrec t =
@@ -18251,10 +22868,10 @@ module DescribeOrganizationConfigRuleStatusesResponse =
           (Xml.child xml_arg0 "OrganizationConfigRuleStatuses") in
       make ?nextToken ?organizationConfigRuleStatuses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let organizationConfigRuleStatuses =
-        field_map json "OrganizationConfigRuleStatuses"
+        field_map json__ "OrganizationConfigRuleStatuses"
           OrganizationConfigRuleStatuses.of_json in
       make ?nextToken ?organizationConfigRuleStatuses ()
     let to_json v = composed_to_json to_value v
@@ -18295,11 +22912,11 @@ module DescribeOrganizationConfigRuleStatusesRequest =
           (Xml.child xml_arg0 "OrganizationConfigRuleNames") in
       make ?nextToken ?limit ?organizationConfigRuleNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let limit = field_map json "Limit" CosmosPageLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let limit = field_map json__ "Limit" CosmosPageLimit.of_json in
       let organizationConfigRuleNames =
-        field_map json "OrganizationConfigRuleNames"
+        field_map json__ "OrganizationConfigRuleNames"
           OrganizationConfigRuleNames.of_json in
       make ?nextToken ?limit ?organizationConfigRuleNames ()
     let to_json v = composed_to_json to_value v
@@ -18353,9 +22970,9 @@ module DescribeDeliveryChannelsResponse =
           (Xml.child xml_arg0 "DeliveryChannels") in
       make ?deliveryChannels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliveryChannels =
-        field_map json "DeliveryChannels" DeliveryChannelList.of_json in
+        field_map json__ "DeliveryChannels" DeliveryChannelList.of_json in
       make ?deliveryChannels ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The output for the DescribeDeliveryChannels action."]
@@ -18378,9 +22995,10 @@ module DescribeDeliveryChannelsRequest =
           (Xml.child xml_arg0 "DeliveryChannelNames") in
       make ?deliveryChannelNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliveryChannelNames =
-        field_map json "DeliveryChannelNames" DeliveryChannelNameList.of_json in
+        field_map json__ "DeliveryChannelNames"
+          DeliveryChannelNameList.of_json in
       make ?deliveryChannelNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the DescribeDeliveryChannels action."]
@@ -18433,9 +23051,9 @@ module DescribeDeliveryChannelStatusResponse =
           (Xml.child xml_arg0 "DeliveryChannelsStatus") in
       make ?deliveryChannelsStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliveryChannelsStatus =
-        field_map json "DeliveryChannelsStatus"
+        field_map json__ "DeliveryChannelsStatus"
           DeliveryChannelStatusList.of_json in
       make ?deliveryChannelsStatus ()
     let to_json v = composed_to_json to_value v
@@ -18459,9 +23077,10 @@ module DescribeDeliveryChannelStatusRequest =
           (Xml.child xml_arg0 "DeliveryChannelNames") in
       make ?deliveryChannelNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliveryChannelNames =
-        field_map json "DeliveryChannelNames" DeliveryChannelNameList.of_json in
+        field_map json__ "DeliveryChannelNames"
+          DeliveryChannelNameList.of_json in
       make ?deliveryChannelNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the DeliveryChannelStatus action."]
@@ -18549,10 +23168,10 @@ module DescribeConformancePacksResponse =
           (Xml.child xml_arg0 "ConformancePackDetails") in
       make ?nextToken ?conformancePackDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let conformancePackDetails =
-        field_map json "ConformancePackDetails"
+        field_map json__ "ConformancePackDetails"
           ConformancePackDetailList.of_json in
       make ?nextToken ?conformancePackDetails ()
     let to_json v = composed_to_json to_value v
@@ -18592,11 +23211,11 @@ module DescribeConformancePacksRequest =
           (Xml.child xml_arg0 "ConformancePackNames") in
       make ?nextToken ?limit ?conformancePackNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let limit = field_map json "Limit" PageSizeLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let limit = field_map json__ "Limit" PageSizeLimit.of_json in
       let conformancePackNames =
-        field_map json "ConformancePackNames"
+        field_map json__ "ConformancePackNames"
           ConformancePackNamesList.of_json in
       make ?nextToken ?limit ?conformancePackNames ()
     let to_json v = composed_to_json to_value v
@@ -18674,10 +23293,10 @@ module DescribeConformancePackStatusResponse =
           (Xml.child xml_arg0 "ConformancePackStatusDetails") in
       make ?nextToken ?conformancePackStatusDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let conformancePackStatusDetails =
-        field_map json "ConformancePackStatusDetails"
+        field_map json__ "ConformancePackStatusDetails"
           ConformancePackStatusDetailsList.of_json in
       make ?nextToken ?conformancePackStatusDetails ()
     let to_json v = composed_to_json to_value v
@@ -18717,11 +23336,11 @@ module DescribeConformancePackStatusRequest =
           (Xml.child xml_arg0 "ConformancePackNames") in
       make ?nextToken ?limit ?conformancePackNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let limit = field_map json "Limit" PageSizeLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let limit = field_map json__ "Limit" PageSizeLimit.of_json in
       let conformancePackNames =
-        field_map json "ConformancePackNames"
+        field_map json__ "ConformancePackNames"
           ConformancePackNamesList.of_json in
       make ?nextToken ?limit ?conformancePackNames ()
     let to_json v = composed_to_json to_value v
@@ -18731,9 +23350,10 @@ module DescribeConformancePackComplianceResponse =
   struct
     type nonrec t =
       {
-      conformancePackName: ConformancePackName.t
+      conformancePackName: ConformancePackName.t option
         [@ocaml.doc "Name of the conformance pack."];
-      conformancePackRuleComplianceList: ConformancePackRuleComplianceList.t
+      conformancePackRuleComplianceList:
+        ConformancePackRuleComplianceList.t option
         [@ocaml.doc
           "Returns a list of ConformancePackRuleCompliance objects."];
       nextToken: NextToken.t option
@@ -18747,15 +23367,14 @@ module DescribeConformancePackComplianceResponse =
           NoSuchConfigRuleInConformancePackException.t 
       | `NoSuchConformancePackException of NoSuchConformancePackException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeConformancePackComplianceResponse"
-    let make ?nextToken =
-      fun ~conformancePackName ->
-        fun ~conformancePackRuleComplianceList ->
+    let make ?conformancePackName =
+      fun ?conformancePackRuleComplianceList ->
+        fun ?nextToken ->
           fun () ->
             {
-              nextToken;
               conformancePackName;
-              conformancePackRuleComplianceList
+              conformancePackRuleComplianceList;
+              nextToken
             }
     let error_of_json name json =
       match name with
@@ -18824,34 +23443,32 @@ module DescribeConformancePackComplianceResponse =
     let to_value x =
       structure_to_value
         [("ConformancePackName",
-           (Some (ConformancePackName.to_value x.conformancePackName)));
+           (Option.map x.conformancePackName ~f:ConformancePackName.to_value));
         ("ConformancePackRuleComplianceList",
-          (Some
-             (ConformancePackRuleComplianceList.to_value
-                x.conformancePackRuleComplianceList)));
+          (Option.map x.conformancePackRuleComplianceList
+             ~f:ConformancePackRuleComplianceList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let conformancePackRuleComplianceList =
-        ConformancePackRuleComplianceList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ConformancePackRuleComplianceList") in
+        (Option.map ~f:ConformancePackRuleComplianceList.of_xml)
+          (Xml.child xml_arg0 "ConformancePackRuleComplianceList") in
       let conformancePackName =
-        ConformancePackName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConformancePackName") in
-      make ?nextToken ~conformancePackRuleComplianceList ~conformancePackName
+        (Option.map ~f:ConformancePackName.of_xml)
+          (Xml.child xml_arg0 "ConformancePackName") in
+      make ?nextToken ?conformancePackRuleComplianceList ?conformancePackName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let conformancePackRuleComplianceList =
-        field_map_exn json "ConformancePackRuleComplianceList"
+        field_map json__ "ConformancePackRuleComplianceList"
           ConformancePackRuleComplianceList.of_json in
       let conformancePackName =
-        field_map_exn json "ConformancePackName" ConformancePackName.of_json in
-      make ?nextToken ~conformancePackRuleComplianceList ~conformancePackName
+        field_map json__ "ConformancePackName" ConformancePackName.of_json in
+      make ?nextToken ?conformancePackRuleComplianceList ?conformancePackName
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18901,14 +23518,16 @@ module DescribeConformancePackComplianceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConformancePackName") in
       make ?nextToken ?limit ?filters ~conformancePackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let limit =
-        field_map json "Limit" DescribeConformancePackComplianceLimit.of_json in
+        field_map json__ "Limit"
+          DescribeConformancePackComplianceLimit.of_json in
       let filters =
-        field_map json "Filters" ConformancePackComplianceFilters.of_json in
+        field_map json__ "Filters" ConformancePackComplianceFilters.of_json in
       let conformancePackName =
-        field_map_exn json "ConformancePackName" ConformancePackName.of_json in
+        field_map_exn json__ "ConformancePackName"
+          ConformancePackName.of_json in
       make ?nextToken ?limit ?filters ~conformancePackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18924,6 +23543,7 @@ module DescribeConfigurationRecordersResponse =
       [
         `NoSuchConfigurationRecorderException of
           NoSuchConfigurationRecorderException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?configurationRecorders = fun () -> { configurationRecorders }
     let error_of_json name json =
@@ -18931,6 +23551,8 @@ module DescribeConfigurationRecordersResponse =
       | "NoSuchConfigurationRecorderException" ->
           `NoSuchConfigurationRecorderException
             (NoSuchConfigurationRecorderException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -18939,6 +23561,8 @@ module DescribeConfigurationRecordersResponse =
       | "NoSuchConfigurationRecorderException" ->
           `NoSuchConfigurationRecorderException
             (NoSuchConfigurationRecorderException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -18947,6 +23571,10 @@ module DescribeConfigurationRecordersResponse =
           `Assoc
             [("error", (`String "NoSuchConfigurationRecorderException"));
             ("details", (NoSuchConfigurationRecorderException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -18964,9 +23592,9 @@ module DescribeConfigurationRecordersResponse =
           (Xml.child xml_arg0 "ConfigurationRecorders") in
       make ?configurationRecorders ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationRecorders =
-        field_map json "ConfigurationRecorders"
+        field_map json__ "ConfigurationRecorders"
           ConfigurationRecorderList.of_json in
       make ?configurationRecorders ()
     let to_json v = composed_to_json to_value v
@@ -18977,26 +23605,46 @@ module DescribeConfigurationRecordersRequest =
     type nonrec t =
       {
       configurationRecorderNames: ConfigurationRecorderNameList.t option
-        [@ocaml.doc "A list of configuration recorder names."]}
+        [@ocaml.doc
+          "A list of names of the configuration recorders that you want to specify. When making a request to this operation, you can only specify one configuration recorder."];
+      servicePrincipal: ServicePrincipal.t option
+        [@ocaml.doc
+          "For service-linked configuration recorders, you can use the service principal of the linked Amazon Web Services service to specify the configuration recorder."];
+      arn: AmazonResourceName.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the configuration recorder that you want to specify."]}
     let make ?configurationRecorderNames =
-      fun () -> { configurationRecorderNames }
+      fun ?servicePrincipal ->
+        fun ?arn ->
+          fun () -> { configurationRecorderNames; servicePrincipal; arn }
     let to_value x =
       structure_to_value
         [("ConfigurationRecorderNames",
            (Option.map x.configurationRecorderNames
-              ~f:ConfigurationRecorderNameList.to_value))]
+              ~f:ConfigurationRecorderNameList.to_value));
+        ("ServicePrincipal",
+          (Option.map x.servicePrincipal ~f:ServicePrincipal.to_value));
+        ("Arn", (Option.map x.arn ~f:AmazonResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let arn =
+        (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "Arn") in
+      let servicePrincipal =
+        (Option.map ~f:ServicePrincipal.of_xml)
+          (Xml.child xml_arg0 "ServicePrincipal") in
       let configurationRecorderNames =
         (Option.map ~f:ConfigurationRecorderNameList.of_xml)
           (Xml.child xml_arg0 "ConfigurationRecorderNames") in
-      make ?configurationRecorderNames ()
+      make ?arn ?servicePrincipal ?configurationRecorderNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let arn = field_map json__ "Arn" AmazonResourceName.of_json in
+      let servicePrincipal =
+        field_map json__ "ServicePrincipal" ServicePrincipal.of_json in
       let configurationRecorderNames =
-        field_map json "ConfigurationRecorderNames"
+        field_map json__ "ConfigurationRecorderNames"
           ConfigurationRecorderNameList.of_json in
-      make ?configurationRecorderNames ()
+      make ?arn ?servicePrincipal ?configurationRecorderNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the DescribeConfigurationRecorders action."]
 module DescribeConfigurationRecorderStatusResponse =
@@ -19010,6 +23658,7 @@ module DescribeConfigurationRecorderStatusResponse =
       [
         `NoSuchConfigurationRecorderException of
           NoSuchConfigurationRecorderException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?configurationRecordersStatus =
       fun () -> { configurationRecordersStatus }
@@ -19018,6 +23667,8 @@ module DescribeConfigurationRecorderStatusResponse =
       | "NoSuchConfigurationRecorderException" ->
           `NoSuchConfigurationRecorderException
             (NoSuchConfigurationRecorderException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -19026,6 +23677,8 @@ module DescribeConfigurationRecorderStatusResponse =
       | "NoSuchConfigurationRecorderException" ->
           `NoSuchConfigurationRecorderException
             (NoSuchConfigurationRecorderException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -19034,6 +23687,10 @@ module DescribeConfigurationRecorderStatusResponse =
           `Assoc
             [("error", (`String "NoSuchConfigurationRecorderException"));
             ("details", (NoSuchConfigurationRecorderException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -19051,9 +23708,9 @@ module DescribeConfigurationRecorderStatusResponse =
           (Xml.child xml_arg0 "ConfigurationRecordersStatus") in
       make ?configurationRecordersStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationRecordersStatus =
-        field_map json "ConfigurationRecordersStatus"
+        field_map json__ "ConfigurationRecordersStatus"
           ConfigurationRecorderStatusList.of_json in
       make ?configurationRecordersStatus ()
     let to_json v = composed_to_json to_value v
@@ -19065,26 +23722,45 @@ module DescribeConfigurationRecorderStatusRequest =
       {
       configurationRecorderNames: ConfigurationRecorderNameList.t option
         [@ocaml.doc
-          "The name(s) of the configuration recorder. If the name is not specified, the action returns the current status of all the configuration recorders associated with the account."]}
+          "The name of the configuration recorder. If the name is not specified, the operation returns the status for the customer managed configuration recorder configured for the account, if applicable. When making a request to this operation, you can only specify one configuration recorder."];
+      servicePrincipal: ServicePrincipal.t option
+        [@ocaml.doc
+          "For service-linked configuration recorders, you can use the service principal of the linked Amazon Web Services service to specify the configuration recorder."];
+      arn: AmazonResourceName.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the configuration recorder that you want to specify."]}
     let make ?configurationRecorderNames =
-      fun () -> { configurationRecorderNames }
+      fun ?servicePrincipal ->
+        fun ?arn ->
+          fun () -> { configurationRecorderNames; servicePrincipal; arn }
     let to_value x =
       structure_to_value
         [("ConfigurationRecorderNames",
            (Option.map x.configurationRecorderNames
-              ~f:ConfigurationRecorderNameList.to_value))]
+              ~f:ConfigurationRecorderNameList.to_value));
+        ("ServicePrincipal",
+          (Option.map x.servicePrincipal ~f:ServicePrincipal.to_value));
+        ("Arn", (Option.map x.arn ~f:AmazonResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let arn =
+        (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "Arn") in
+      let servicePrincipal =
+        (Option.map ~f:ServicePrincipal.of_xml)
+          (Xml.child xml_arg0 "ServicePrincipal") in
       let configurationRecorderNames =
         (Option.map ~f:ConfigurationRecorderNameList.of_xml)
           (Xml.child xml_arg0 "ConfigurationRecorderNames") in
-      make ?configurationRecorderNames ()
+      make ?arn ?servicePrincipal ?configurationRecorderNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let arn = field_map json__ "Arn" AmazonResourceName.of_json in
+      let servicePrincipal =
+        field_map json__ "ServicePrincipal" ServicePrincipal.of_json in
       let configurationRecorderNames =
-        field_map json "ConfigurationRecorderNames"
+        field_map json__ "ConfigurationRecorderNames"
           ConfigurationRecorderNameList.of_json in
-      make ?configurationRecorderNames ()
+      make ?arn ?servicePrincipal ?configurationRecorderNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The input for the DescribeConfigurationRecorderStatus action."]
@@ -19173,15 +23849,15 @@ module DescribeConfigurationAggregatorsResponse =
           (Xml.child xml_arg0 "ConfigurationAggregators") in
       make ?nextToken ?configurationAggregators ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let configurationAggregators =
-        field_map json "ConfigurationAggregators"
+        field_map json__ "ConfigurationAggregators"
           ConfigurationAggregatorList.of_json in
       make ?nextToken ?configurationAggregators ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the details of one or more configuration aggregators. If the configuration aggregator is not specified, this action returns the details for all the configuration aggregators associated with the account."]
+       "Returns the details of one or more configuration aggregators. If the configuration aggregator is not specified, this operation returns the details for all the configuration aggregators associated with the account."]
 module DescribeConfigurationAggregatorsRequest =
   struct
     type nonrec t =
@@ -19215,16 +23891,16 @@ module DescribeConfigurationAggregatorsRequest =
           (Xml.child xml_arg0 "ConfigurationAggregatorNames") in
       make ?limit ?nextToken ?configurationAggregatorNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" Limit.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" Limit.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let configurationAggregatorNames =
-        field_map json "ConfigurationAggregatorNames"
+        field_map json__ "ConfigurationAggregatorNames"
           ConfigurationAggregatorNameList.of_json in
       make ?limit ?nextToken ?configurationAggregatorNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the details of one or more configuration aggregators. If the configuration aggregator is not specified, this action returns the details for all the configuration aggregators associated with the account."]
+       "Returns the details of one or more configuration aggregators. If the configuration aggregator is not specified, this operation returns the details for all the configuration aggregators associated with the account."]
 module DescribeConfigurationAggregatorSourcesStatusResponse =
   struct
     type nonrec t =
@@ -19310,10 +23986,10 @@ module DescribeConfigurationAggregatorSourcesStatusResponse =
           (Xml.child xml_arg0 "AggregatedSourceStatusList") in
       make ?nextToken ?aggregatedSourceStatusList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let aggregatedSourceStatusList =
-        field_map json "AggregatedSourceStatusList"
+        field_map json__ "AggregatedSourceStatusList"
           AggregatedSourceStatusList.of_json in
       make ?nextToken ?aggregatedSourceStatusList ()
     let to_json v = composed_to_json to_value v
@@ -19366,13 +24042,14 @@ module DescribeConfigurationAggregatorSourcesStatusRequest =
              "ConfigurationAggregatorName") in
       make ?limit ?nextToken ?updateStatus ~configurationAggregatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" Limit.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" Limit.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let updateStatus =
-        field_map json "UpdateStatus" AggregatedSourceStatusTypeList.of_json in
+        field_map json__ "UpdateStatus"
+          AggregatedSourceStatusTypeList.of_json in
       let configurationAggregatorName =
-        field_map_exn json "ConfigurationAggregatorName"
+        field_map_exn json__ "ConfigurationAggregatorName"
           ConfigurationAggregatorName.of_json in
       make ?limit ?nextToken ?updateStatus ~configurationAggregatorName ()
     let to_json v = composed_to_json to_value v
@@ -19389,6 +24066,7 @@ module DescribeConfigRulesResponse =
           "The string that you use in a subsequent request to get the next page of results in a paginated response."]}
     type nonrec error =
       [ `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
       | `NoSuchConfigRuleException of NoSuchConfigRuleException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?configRules =
@@ -19397,6 +24075,9 @@ module DescribeConfigRulesResponse =
       match name with
       | "InvalidNextTokenException" ->
           `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
       | "NoSuchConfigRuleException" ->
           `NoSuchConfigRuleException (NoSuchConfigRuleException.of_json json)
       | name ->
@@ -19406,6 +24087,9 @@ module DescribeConfigRulesResponse =
       match name with
       | "InvalidNextTokenException" ->
           `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
       | "NoSuchConfigRuleException" ->
           `NoSuchConfigRuleException (NoSuchConfigRuleException.of_xml xml)
       | name ->
@@ -19416,6 +24100,10 @@ module DescribeConfigRulesResponse =
           `Assoc
             [("error", (`String "InvalidNextTokenException"));
             ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
       | `NoSuchConfigRuleException e ->
           `Assoc
             [("error", (`String "NoSuchConfigRuleException"));
@@ -19437,9 +24125,9 @@ module DescribeConfigRulesResponse =
         (Option.map ~f:ConfigRules.of_xml) (Xml.child xml_arg0 "ConfigRules") in
       make ?nextToken ?configRules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let configRules = field_map json "ConfigRules" ConfigRules.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let configRules = field_map json__ "ConfigRules" ConfigRules.of_json in
       make ?nextToken ?configRules ()
     let to_json v = composed_to_json to_value v
   end
@@ -19452,28 +24140,39 @@ module DescribeConfigRulesRequest =
           "The names of the Config rules for which you want details. If you do not specify any names, Config returns details for all your rules."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken string returned on a previous page that you use to get the next page of results in a paginated response."]}
+          "The nextToken string returned on a previous page that you use to get the next page of results in a paginated response."];
+      filters: DescribeConfigRulesFilters.t option
+        [@ocaml.doc
+          "Returns a list of Detective or Proactive Config rules. By default, this API returns an unfiltered list. For more information on Detective or Proactive Config rules, see Evaluation Mode in the Config Developer Guide."]}
     let make ?configRuleNames =
-      fun ?nextToken -> fun () -> { configRuleNames; nextToken }
+      fun ?nextToken ->
+        fun ?filters -> fun () -> { configRuleNames; nextToken; filters }
     let to_value x =
       structure_to_value
         [("ConfigRuleNames",
            (Option.map x.configRuleNames ~f:ConfigRuleNames.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("Filters",
+          (Option.map x.filters ~f:DescribeConfigRulesFilters.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let filters =
+        (Option.map ~f:DescribeConfigRulesFilters.of_xml)
+          (Xml.child xml_arg0 "Filters") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       let configRuleNames =
         (Option.map ~f:ConfigRuleNames.of_xml)
           (Xml.child xml_arg0 "ConfigRuleNames") in
-      make ?nextToken ?configRuleNames ()
+      make ?filters ?nextToken ?configRuleNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let filters =
+        field_map json__ "Filters" DescribeConfigRulesFilters.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let configRuleNames =
-        field_map json "ConfigRuleNames" ConfigRuleNames.of_json in
-      make ?nextToken ?configRuleNames ()
+        field_map json__ "ConfigRuleNames" ConfigRuleNames.of_json in
+      make ?filters ?nextToken ?configRuleNames ()
     let to_json v = composed_to_json to_value v
   end
 module DescribeConfigRuleEvaluationStatusResponse =
@@ -19549,10 +24248,10 @@ module DescribeConfigRuleEvaluationStatusResponse =
           (Xml.child xml_arg0 "ConfigRulesEvaluationStatus") in
       make ?nextToken ?configRulesEvaluationStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let configRulesEvaluationStatus =
-        field_map json "ConfigRulesEvaluationStatus"
+        field_map json__ "ConfigRulesEvaluationStatus"
           ConfigRuleEvaluationStatusList.of_json in
       make ?nextToken ?configRulesEvaluationStatus ()
     let to_json v = composed_to_json to_value v
@@ -19569,7 +24268,7 @@ module DescribeConfigRuleEvaluationStatusRequest =
           "The nextToken string returned on a previous page that you use to get the next page of results in a paginated response."];
       limit: RuleLimit.t option
         [@ocaml.doc
-          "The number of rule evaluation results that you want returned. This parameter is required if the rule limit for your account is more than the default of 150 rules. For information about requesting a rule limit increase, see Config Limits in the Amazon Web Services General Reference Guide."]}
+          "The number of rule evaluation results that you want returned. This parameter is required if the rule limit for your account is more than the default of 1000 rules. For information about requesting a rule limit increase, see Config Limits in the Amazon Web Services General Reference Guide."]}
     let make ?configRuleNames =
       fun ?nextToken ->
         fun ?limit -> fun () -> { configRuleNames; nextToken; limit }
@@ -19590,11 +24289,11 @@ module DescribeConfigRuleEvaluationStatusRequest =
           (Xml.child xml_arg0 "ConfigRuleNames") in
       make ?limit ?nextToken ?configRuleNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" RuleLimit.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" RuleLimit.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let configRuleNames =
-        field_map json "ConfigRuleNames" ConfigRuleNames.of_json in
+        field_map json__ "ConfigRuleNames" ConfigRuleNames.of_json in
       make ?limit ?nextToken ?configRuleNames ()
     let to_json v = composed_to_json to_value v
   end
@@ -19663,10 +24362,11 @@ module DescribeComplianceByResourceResponse =
           (Xml.child xml_arg0 "ComplianceByResources") in
       make ?nextToken ?complianceByResources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let complianceByResources =
-        field_map json "ComplianceByResources" ComplianceByResources.of_json in
+        field_map json__ "ComplianceByResources"
+          ComplianceByResources.of_json in
       make ?nextToken ?complianceByResources ()
     let to_json v = composed_to_json to_value v
   end
@@ -19676,13 +24376,12 @@ module DescribeComplianceByResourceRequest =
       {
       resourceType: StringWithCharLimit256.t option
         [@ocaml.doc
-          "The types of Amazon Web Services resources for which you want compliance information (for example, AWS::EC2::Instance). For this action, you can specify that the resource type is an Amazon Web Services account by specifying AWS::::Account."];
+          "The types of Amazon Web Services resources for which you want compliance information (for example, AWS::EC2::Instance). For this operation, you can specify that the resource type is an Amazon Web Services account by specifying AWS::::Account."];
       resourceId: BaseResourceId.t option
         [@ocaml.doc
           "The ID of the Amazon Web Services resource for which you want compliance information. You can specify only one resource ID. If you specify a resource ID, you must also specify a type for ResourceType."];
       complianceTypes: ComplianceTypes.t option
-        [@ocaml.doc
-          "Filters the results by compliance. The allowed values are COMPLIANT, NON_COMPLIANT, and INSUFFICIENT_DATA."];
+        [@ocaml.doc "Filters the results by compliance."];
       limit: Limit.t option
         [@ocaml.doc
           "The maximum number of evaluation results returned on each page. The default is 10. You cannot specify a number greater than 100. If you specify 0, Config uses the default."];
@@ -19722,14 +24421,14 @@ module DescribeComplianceByResourceRequest =
           (Xml.child xml_arg0 "ResourceType") in
       make ?nextToken ?limit ?complianceTypes ?resourceId ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let limit = field_map json "Limit" Limit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let limit = field_map json__ "Limit" Limit.of_json in
       let complianceTypes =
-        field_map json "ComplianceTypes" ComplianceTypes.of_json in
-      let resourceId = field_map json "ResourceId" BaseResourceId.of_json in
+        field_map json__ "ComplianceTypes" ComplianceTypes.of_json in
+      let resourceId = field_map json__ "ResourceId" BaseResourceId.of_json in
       let resourceType =
-        field_map json "ResourceType" StringWithCharLimit256.of_json in
+        field_map json__ "ResourceType" StringWithCharLimit256.of_json in
       make ?nextToken ?limit ?complianceTypes ?resourceId ?resourceType ()
     let to_json v = composed_to_json to_value v
   end
@@ -19807,10 +24506,10 @@ module DescribeComplianceByConfigRuleResponse =
           (Xml.child xml_arg0 "ComplianceByConfigRules") in
       make ?nextToken ?complianceByConfigRules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let complianceByConfigRules =
-        field_map json "ComplianceByConfigRules"
+        field_map json__ "ComplianceByConfigRules"
           ComplianceByConfigRules.of_json in
       make ?nextToken ?complianceByConfigRules ()
     let to_json v = composed_to_json to_value v
@@ -19823,8 +24522,7 @@ module DescribeComplianceByConfigRuleRequest =
         [@ocaml.doc
           "Specify one or more Config rule names to filter the results by rule."];
       complianceTypes: ComplianceTypes.t option
-        [@ocaml.doc
-          "Filters the results by compliance. The allowed values are COMPLIANT and NON_COMPLIANT."];
+        [@ocaml.doc "Filters the results by compliance."];
       nextToken: String_.t option
         [@ocaml.doc
           "The nextToken string returned on a previous page that you use to get the next page of results in a paginated response."]}
@@ -19851,12 +24549,12 @@ module DescribeComplianceByConfigRuleRequest =
           (Xml.child xml_arg0 "ConfigRuleNames") in
       make ?nextToken ?complianceTypes ?configRuleNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let complianceTypes =
-        field_map json "ComplianceTypes" ComplianceTypes.of_json in
+        field_map json__ "ComplianceTypes" ComplianceTypes.of_json in
       let configRuleNames =
-        field_map json "ConfigRuleNames" ConfigRuleNames.of_json in
+        field_map json__ "ConfigRuleNames" ConfigRuleNames.of_json in
       make ?nextToken ?complianceTypes ?configRuleNames ()
     let to_json v = composed_to_json to_value v
   end
@@ -19934,10 +24632,10 @@ module DescribeAggregationAuthorizationsResponse =
           (Xml.child xml_arg0 "AggregationAuthorizations") in
       make ?nextToken ?aggregationAuthorizations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let aggregationAuthorizations =
-        field_map json "AggregationAuthorizations"
+        field_map json__ "AggregationAuthorizations"
           AggregationAuthorizationList.of_json in
       make ?nextToken ?aggregationAuthorizations ()
     let to_json v = composed_to_json to_value v
@@ -19965,9 +24663,9 @@ module DescribeAggregationAuthorizationsRequest =
       let limit = (Option.map ~f:Limit.of_xml) (Xml.child xml_arg0 "Limit") in
       make ?nextToken ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let limit = field_map json "Limit" Limit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let limit = field_map json__ "Limit" Limit.of_json in
       make ?nextToken ?limit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20058,15 +24756,15 @@ module DescribeAggregateComplianceByConformancePacksResponse =
           (Xml.child xml_arg0 "AggregateComplianceByConformancePacks") in
       make ?nextToken ?aggregateComplianceByConformancePacks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let aggregateComplianceByConformancePacks =
-        field_map json "AggregateComplianceByConformancePacks"
+        field_map json__ "AggregateComplianceByConformancePacks"
           AggregateComplianceByConformancePackList.of_json in
       make ?nextToken ?aggregateComplianceByConformancePacks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the conformance packs and their associated compliance status with the count of compliant and noncompliant Config rules within each conformance pack. Also returns the total rule count which includes compliant rules, noncompliant rules, and rules that cannot be evaluated due to insufficient data. The results can return an empty result page, but if you have a nextToken, the results are displayed on the next page."]
+       "Returns a list of the existing and deleted conformance packs and their associated compliance status with the count of compliant and noncompliant Config rules within each conformance pack. Also returns the total rule count which includes compliant rules, noncompliant rules, and rules that cannot be evaluated due to insufficient data. The results can return an empty result page, but if you have a nextToken, the results are displayed on the next page."]
 module DescribeAggregateComplianceByConformancePacksRequest =
   struct
     type nonrec t =
@@ -20114,19 +24812,19 @@ module DescribeAggregateComplianceByConformancePacksRequest =
              "ConfigurationAggregatorName") in
       make ?nextToken ?limit ?filters ~configurationAggregatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let limit = field_map json "Limit" Limit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let limit = field_map json__ "Limit" Limit.of_json in
       let filters =
-        field_map json "Filters"
+        field_map json__ "Filters"
           AggregateConformancePackComplianceFilters.of_json in
       let configurationAggregatorName =
-        field_map_exn json "ConfigurationAggregatorName"
+        field_map_exn json__ "ConfigurationAggregatorName"
           ConfigurationAggregatorName.of_json in
       make ?nextToken ?limit ?filters ~configurationAggregatorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the conformance packs and their associated compliance status with the count of compliant and noncompliant Config rules within each conformance pack. Also returns the total rule count which includes compliant rules, noncompliant rules, and rules that cannot be evaluated due to insufficient data. The results can return an empty result page, but if you have a nextToken, the results are displayed on the next page."]
+       "Returns a list of the existing and deleted conformance packs and their associated compliance status with the count of compliant and noncompliant Config rules within each conformance pack. Also returns the total rule count which includes compliant rules, noncompliant rules, and rules that cannot be evaluated due to insufficient data. The results can return an empty result page, but if you have a nextToken, the results are displayed on the next page."]
 module DescribeAggregateComplianceByConfigRulesResponse =
   struct
     type nonrec t =
@@ -20213,10 +24911,10 @@ module DescribeAggregateComplianceByConfigRulesResponse =
           (Xml.child xml_arg0 "AggregateComplianceByConfigRules") in
       make ?nextToken ?aggregateComplianceByConfigRules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let aggregateComplianceByConfigRules =
-        field_map json "AggregateComplianceByConfigRules"
+        field_map json__ "AggregateComplianceByConfigRules"
           AggregateComplianceByConfigRuleList.of_json in
       make ?nextToken ?aggregateComplianceByConfigRules ()
     let to_json v = composed_to_json to_value v
@@ -20269,13 +24967,13 @@ module DescribeAggregateComplianceByConfigRulesRequest =
              "ConfigurationAggregatorName") in
       make ?nextToken ?limit ?filters ~configurationAggregatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let limit = field_map json "Limit" GroupByAPILimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let limit = field_map json__ "Limit" GroupByAPILimit.of_json in
       let filters =
-        field_map json "Filters" ConfigRuleComplianceFilters.of_json in
+        field_map json__ "Filters" ConfigRuleComplianceFilters.of_json in
       let configurationAggregatorName =
-        field_map_exn json "ConfigurationAggregatorName"
+        field_map_exn json__ "ConfigurationAggregatorName"
           ConfigurationAggregatorName.of_json in
       make ?nextToken ?limit ?filters ~configurationAggregatorName ()
     let to_json v = composed_to_json to_value v
@@ -20354,9 +25052,9 @@ module DeliverConfigSnapshotResponse =
           (Xml.child xml_arg0 "configSnapshotId") in
       make ?configSnapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configSnapshotId =
-        field_map json "configSnapshotId" String_.of_json in
+        field_map json__ "configSnapshotId" String_.of_json in
       make ?configSnapshotId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20381,9 +25079,9 @@ module DeliverConfigSnapshotRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "deliveryChannelName") in
       make ~deliveryChannelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliveryChannelName =
-        field_map_exn json "deliveryChannelName" ChannelName.of_json in
+        field_map_exn json__ "deliveryChannelName" ChannelName.of_json in
       make ~deliveryChannelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the DeliverConfigSnapshot action."]
@@ -20454,12 +25152,116 @@ module DeleteStoredQueryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "QueryName") in
       make ~queryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryName = field_map_exn json "QueryName" QueryName.of_json in
+    let of_json json__ =
+      let queryName = field_map_exn json__ "QueryName" QueryName.of_json in
       make ~queryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the stored query for a single Amazon Web Services account and a single Amazon Web Services Region."]
+module DeleteServiceLinkedConfigurationRecorderResponse =
+  struct
+    type nonrec t =
+      {
+      arn: AmazonResourceName.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the specified configuration recorder."];
+      name: RecorderName.t option
+        [@ocaml.doc "The name of the specified configuration recorder."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `NoSuchConfigurationRecorderException of
+          NoSuchConfigurationRecorderException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?arn = fun ?name -> fun () -> { arn; name }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "NoSuchConfigurationRecorderException" ->
+          `NoSuchConfigurationRecorderException
+            (NoSuchConfigurationRecorderException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "NoSuchConfigurationRecorderException" ->
+          `NoSuchConfigurationRecorderException
+            (NoSuchConfigurationRecorderException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `NoSuchConfigurationRecorderException e ->
+          `Assoc
+            [("error", (`String "NoSuchConfigurationRecorderException"));
+            ("details", (NoSuchConfigurationRecorderException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:AmazonResourceName.to_value));
+        ("Name", (Option.map x.name ~f:RecorderName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        (Option.map ~f:RecorderName.of_xml) (Xml.child xml_arg0 "Name") in
+      let arn =
+        (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "Name" RecorderName.of_json in
+      let arn = field_map json__ "Arn" AmazonResourceName.of_json in
+      make ?name ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an existing service-linked configuration recorder. This operation does not delete the configuration information that was previously recorded. You will be able to access the previously recorded information by using the GetResourceConfigHistory operation, but you will not be able to access this information in the Config console until you have created a new service-linked configuration recorder for the same service. The recording scope determines if you receive configuration items The recording scope is set by the service that is linked to the configuration recorder and determines whether you receive configuration items (CIs) in the delivery channel. If the recording scope is internal, you will not receive CIs in the delivery channel."]
+module DeleteServiceLinkedConfigurationRecorderRequest =
+  struct
+    type nonrec t =
+      {
+      servicePrincipal: ServicePrincipal.t
+        [@ocaml.doc
+          "The service principal of the Amazon Web Services service for the service-linked configuration recorder that you want to delete."]}
+    let context_ = "DeleteServiceLinkedConfigurationRecorderRequest"
+    let make ~servicePrincipal = fun () -> { servicePrincipal }
+    let to_value x =
+      structure_to_value
+        [("ServicePrincipal",
+           (Some (ServicePrincipal.to_value x.servicePrincipal)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let servicePrincipal =
+        ServicePrincipal.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServicePrincipal") in
+      make ~servicePrincipal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let servicePrincipal =
+        field_map_exn json__ "ServicePrincipal" ServicePrincipal.of_json in
+      make ~servicePrincipal ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an existing service-linked configuration recorder. This operation does not delete the configuration information that was previously recorded. You will be able to access the previously recorded information by using the GetResourceConfigHistory operation, but you will not be able to access this information in the Config console until you have created a new service-linked configuration recorder for the same service. The recording scope determines if you receive configuration items The recording scope is set by the service that is linked to the configuration recorder and determines whether you receive configuration items (CIs) in the delivery channel. If the recording scope is internal, you will not receive CIs in the delivery channel."]
 module DeleteRetentionConfigurationRequest =
   struct
     type nonrec t =
@@ -20483,9 +25285,9 @@ module DeleteRetentionConfigurationRequest =
              "RetentionConfigurationName") in
       make ~retentionConfigurationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retentionConfigurationName =
-        field_map_exn json "RetentionConfigurationName"
+        field_map_exn json__ "RetentionConfigurationName"
           RetentionConfigurationName.of_json in
       make ~retentionConfigurationName ()
     let to_json v = composed_to_json to_value v
@@ -20516,10 +25318,10 @@ module DeleteResourceConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
       make ~resourceId ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" ResourceTypeString.of_json in
+        field_map_exn json__ "ResourceType" ResourceTypeString.of_json in
       make ~resourceId ~resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20575,9 +25377,9 @@ module DeleteRemediationExceptionsResponse =
           (Xml.child xml_arg0 "FailedBatches") in
       make ?failedBatches ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedBatches =
-        field_map json "FailedBatches"
+        field_map json__ "FailedBatches"
           FailedDeleteRemediationExceptionsBatches.of_json in
       make ?failedBatches ()
     let to_json v = composed_to_json to_value v
@@ -20612,12 +25414,12 @@ module DeleteRemediationExceptionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigRuleName") in
       make ~resourceKeys ~configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceKeys =
-        field_map_exn json "ResourceKeys"
+        field_map_exn json__ "ResourceKeys"
           RemediationExceptionResourceKeys.of_json in
       let configRuleName =
-        field_map_exn json "ConfigRuleName" ConfigRuleName.of_json in
+        field_map_exn json__ "ConfigRuleName" ConfigRuleName.of_json in
       make ~resourceKeys ~configRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20724,10 +25526,10 @@ module DeleteRemediationConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigRuleName") in
       make ?resourceType ~configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" String_.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
       let configRuleName =
-        field_map_exn json "ConfigRuleName" ConfigRuleName.of_json in
+        field_map_exn json__ "ConfigRuleName" ConfigRuleName.of_json in
       make ?resourceType ~configRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the remediation configuration."]
@@ -20760,11 +25562,11 @@ module DeletePendingAggregationRequestRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RequesterAccountId") in
       make ~requesterAwsRegion ~requesterAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requesterAwsRegion =
-        field_map_exn json "RequesterAwsRegion" AwsRegion.of_json in
+        field_map_exn json__ "RequesterAwsRegion" AwsRegion.of_json in
       let requesterAccountId =
-        field_map_exn json "RequesterAccountId" AccountId.of_json in
+        field_map_exn json__ "RequesterAccountId" AccountId.of_json in
       make ~requesterAwsRegion ~requesterAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20793,14 +25595,14 @@ module DeleteOrganizationConformancePackRequest =
              "OrganizationConformancePackName") in
       make ~organizationConformancePackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationConformancePackName =
-        field_map_exn json "OrganizationConformancePackName"
+        field_map_exn json__ "OrganizationConformancePackName"
           OrganizationConformancePackName.of_json in
       make ~organizationConformancePackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified organization conformance pack and all of the Config rules and remediation actions from all member accounts in that organization. Only a master account or a delegated administrator account can delete an organization conformance pack. When calling this API with a delegated administrator, you must ensure Organizations ListDelegatedAdministrator permissions are added. Config sets the state of a conformance pack to DELETE_IN_PROGRESS until the deletion is complete. You cannot update a conformance pack while it is in this state."]
+       "Deletes the specified organization conformance pack and all of the Config rules and remediation actions from all member accounts in that organization. Only a management account or a delegated administrator account can delete an organization conformance pack. When calling this API with a delegated administrator, you must ensure Organizations ListDelegatedAdministrator permissions are added. Config sets the state of a conformance pack to DELETE_IN_PROGRESS until the deletion is complete. You cannot update a conformance pack while it is in this state. Recommendation: Consider excluding the AWS::Config::ResourceCompliance resource type from recording before deleting rules Deleting rules creates configuration items (CIs) for AWS::Config::ResourceCompliance that can affect your costs for the configuration recorder. If you are deleting rules which evaluate a large number of resource types, this can lead to a spike in the number of CIs recorded. To avoid the associated costs, you can opt to disable recording for the AWS::Config::ResourceCompliance resource type before deleting rules, and re-enable recording after the rules have been deleted. However, since deleting rules is an asynchronous process, it might take an hour or more to complete. During the time when recording is disabled for AWS::Config::ResourceCompliance, rule evaluations will not be recorded in the associated resource\226\128\153s history."]
 module DeleteOrganizationConfigRuleRequest =
   struct
     type nonrec t =
@@ -20825,14 +25627,14 @@ module DeleteOrganizationConfigRuleRequest =
              "OrganizationConfigRuleName") in
       make ~organizationConfigRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationConfigRuleName =
-        field_map_exn json "OrganizationConfigRuleName"
+        field_map_exn json__ "OrganizationConfigRuleName"
           OrganizationConfigRuleName.of_json in
       make ~organizationConfigRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified organization Config rule and all of its evaluation results from all member accounts in that organization. Only a master account and a delegated administrator account can delete an organization Config rule. When calling this API with a delegated administrator, you must ensure Organizations ListDelegatedAdministrator permissions are added. Config sets the state of a rule to DELETE_IN_PROGRESS until the deletion is complete. You cannot update a rule while it is in this state."]
+       "Deletes the specified organization Config rule and all of its evaluation results from all member accounts in that organization. Only a management account and a delegated administrator account can delete an organization Config rule. When calling this API with a delegated administrator, you must ensure Organizations ListDelegatedAdministrator permissions are added. Config sets the state of a rule to DELETE_IN_PROGRESS until the deletion is complete. You cannot update a rule while it is in this state. Recommendation: Consider excluding the AWS::Config::ResourceCompliance resource type from recording before deleting rules Deleting rules creates configuration items (CIs) for AWS::Config::ResourceCompliance that can affect your costs for the configuration recorder. If you are deleting rules which evaluate a large number of resource types, this can lead to a spike in the number of CIs recorded. To avoid the associated costs, you can opt to disable recording for the AWS::Config::ResourceCompliance resource type before deleting rules, and re-enable recording after the rules have been deleted. However, since deleting rules is an asynchronous process, it might take an hour or more to complete. During the time when recording is disabled for AWS::Config::ResourceCompliance, rule evaluations will not be recorded in the associated resource\226\128\153s history."]
 module DeleteEvaluationResultsResponse =
   struct
     type nonrec t = unit
@@ -20902,9 +25704,9 @@ module DeleteEvaluationResultsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigRuleName") in
       make ~configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configRuleName =
-        field_map_exn json "ConfigRuleName" StringWithCharLimit64.of_json in
+        field_map_exn json__ "ConfigRuleName" StringWithCharLimit64.of_json in
       make ~configRuleName ()
     let to_json v = composed_to_json to_value v
   end
@@ -20913,7 +25715,8 @@ module DeleteDeliveryChannelRequest =
     type nonrec t =
       {
       deliveryChannelName: ChannelName.t
-        [@ocaml.doc "The name of the delivery channel to delete."]}
+        [@ocaml.doc
+          "The name of the delivery channel that you want to delete."]}
     let context_ = "DeleteDeliveryChannelRequest"
     let make ~deliveryChannelName = fun () -> { deliveryChannelName }
     let to_value x =
@@ -20927,9 +25730,9 @@ module DeleteDeliveryChannelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DeliveryChannelName") in
       make ~deliveryChannelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliveryChannelName =
-        field_map_exn json "DeliveryChannelName" ChannelName.of_json in
+        field_map_exn json__ "DeliveryChannelName" ChannelName.of_json in
       make ~deliveryChannelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20953,20 +25756,21 @@ module DeleteConformancePackRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConformancePackName") in
       make ~conformancePackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let conformancePackName =
-        field_map_exn json "ConformancePackName" ConformancePackName.of_json in
+        field_map_exn json__ "ConformancePackName"
+          ConformancePackName.of_json in
       make ~conformancePackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified conformance pack and all the Config rules, remediation actions, and all evaluation results within that conformance pack. Config sets the conformance pack to DELETE_IN_PROGRESS until the deletion is complete. You cannot update a conformance pack while it is in this state."]
+       "Deletes the specified conformance pack and all the Config rules, remediation actions, and all evaluation results within that conformance pack. Config sets the conformance pack to DELETE_IN_PROGRESS until the deletion is complete. You cannot update a conformance pack while it is in this state. Recommendation: Consider excluding the AWS::Config::ResourceCompliance resource type from recording before deleting rules Deleting rules creates configuration items (CIs) for AWS::Config::ResourceCompliance that can affect your costs for the configuration recorder. If you are deleting rules which evaluate a large number of resource types, this can lead to a spike in the number of CIs recorded. To avoid the associated costs, you can opt to disable recording for the AWS::Config::ResourceCompliance resource type before deleting rules, and re-enable recording after the rules have been deleted. However, since deleting rules is an asynchronous process, it might take an hour or more to complete. During the time when recording is disabled for AWS::Config::ResourceCompliance, rule evaluations will not be recorded in the associated resource\226\128\153s history."]
 module DeleteConfigurationRecorderRequest =
   struct
     type nonrec t =
       {
       configurationRecorderName: RecorderName.t
         [@ocaml.doc
-          "The name of the configuration recorder to be deleted. You can retrieve the name of your configuration recorder by using the DescribeConfigurationRecorders action."]}
+          "The name of the customer managed configuration recorder that you want to delete. You can retrieve the name of your configuration recorders by using the DescribeConfigurationRecorders operation."]}
     let context_ = "DeleteConfigurationRecorderRequest"
     let make ~configurationRecorderName =
       fun () -> { configurationRecorderName }
@@ -20982,13 +25786,13 @@ module DeleteConfigurationRecorderRequest =
              "ConfigurationRecorderName") in
       make ~configurationRecorderName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationRecorderName =
-        field_map_exn json "ConfigurationRecorderName" RecorderName.of_json in
+        field_map_exn json__ "ConfigurationRecorderName" RecorderName.of_json in
       make ~configurationRecorderName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The request object for the DeleteConfigurationRecorder action."]
+       "The request object for the DeleteConfigurationRecorder operation."]
 module DeleteConfigurationAggregatorRequest =
   struct
     type nonrec t =
@@ -21012,9 +25816,9 @@ module DeleteConfigurationAggregatorRequest =
              "ConfigurationAggregatorName") in
       make ~configurationAggregatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationAggregatorName =
-        field_map_exn json "ConfigurationAggregatorName"
+        field_map_exn json__ "ConfigurationAggregatorName"
           ConfigurationAggregatorName.of_json in
       make ~configurationAggregatorName ()
     let to_json v = composed_to_json to_value v
@@ -21039,9 +25843,9 @@ module DeleteConfigRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigRuleName") in
       make ~configRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configRuleName =
-        field_map_exn json "ConfigRuleName" ConfigRuleName.of_json in
+        field_map_exn json__ "ConfigRuleName" ConfigRuleName.of_json in
       make ~configRuleName ()
     let to_json v = composed_to_json to_value v
   end
@@ -21074,11 +25878,11 @@ module DeleteAggregationAuthorizationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AuthorizedAccountId") in
       make ~authorizedAwsRegion ~authorizedAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authorizedAwsRegion =
-        field_map_exn json "AuthorizedAwsRegion" AwsRegion.of_json in
+        field_map_exn json__ "AuthorizedAwsRegion" AwsRegion.of_json in
       let authorizedAccountId =
-        field_map_exn json "AuthorizedAccountId" AccountId.of_json in
+        field_map_exn json__ "AuthorizedAccountId" AccountId.of_json in
       make ~authorizedAwsRegion ~authorizedAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21154,11 +25958,11 @@ module BatchGetResourceConfigResponse =
           (Xml.child xml_arg0 "baseConfigurationItems") in
       make ?unprocessedResourceKeys ?baseConfigurationItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unprocessedResourceKeys =
-        field_map json "unprocessedResourceKeys" ResourceKeys.of_json in
+        field_map json__ "unprocessedResourceKeys" ResourceKeys.of_json in
       let baseConfigurationItems =
-        field_map json "baseConfigurationItems"
+        field_map json__ "baseConfigurationItems"
           BaseConfigurationItems.of_json in
       make ?unprocessedResourceKeys ?baseConfigurationItems ()
     let to_json v = composed_to_json to_value v
@@ -21183,9 +25987,9 @@ module BatchGetResourceConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceKeys") in
       make ~resourceKeys ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceKeys =
-        field_map_exn json "resourceKeys" ResourceKeys.of_json in
+        field_map_exn json__ "resourceKeys" ResourceKeys.of_json in
       make ~resourceKeys ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21262,12 +26066,12 @@ module BatchGetAggregateResourceConfigResponse =
           (Xml.child xml_arg0 "BaseConfigurationItems") in
       make ?unprocessedResourceIdentifiers ?baseConfigurationItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unprocessedResourceIdentifiers =
-        field_map json "UnprocessedResourceIdentifiers"
+        field_map json__ "UnprocessedResourceIdentifiers"
           UnprocessedResourceIdentifierList.of_json in
       let baseConfigurationItems =
-        field_map json "BaseConfigurationItems"
+        field_map json__ "BaseConfigurationItems"
           BaseConfigurationItems.of_json in
       make ?unprocessedResourceIdentifiers ?baseConfigurationItems ()
     let to_json v = composed_to_json to_value v
@@ -21304,14 +26108,127 @@ module BatchGetAggregateResourceConfigRequest =
              "ConfigurationAggregatorName") in
       make ~resourceIdentifiers ~configurationAggregatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceIdentifiers =
-        field_map_exn json "ResourceIdentifiers"
+        field_map_exn json__ "ResourceIdentifiers"
           ResourceIdentifiersList.of_json in
       let configurationAggregatorName =
-        field_map_exn json "ConfigurationAggregatorName"
+        field_map_exn json__ "ConfigurationAggregatorName"
           ConfigurationAggregatorName.of_json in
       make ~resourceIdentifiers ~configurationAggregatorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the current configuration items for resources that are present in your Config aggregator. The operation also returns a list of resources that are not processed in the current request. If there are no unprocessed resources, the operation returns an empty unprocessedResourceIdentifiers list. The API does not return results for deleted resources. The API does not return tags and relationships."]
+module AssociateResourceTypesResponse =
+  struct
+    type nonrec t = {
+      configurationRecorder: ConfigurationRecorder.t option }
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `NoSuchConfigurationRecorderException of
+          NoSuchConfigurationRecorderException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?configurationRecorder = fun () -> { configurationRecorder }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "NoSuchConfigurationRecorderException" ->
+          `NoSuchConfigurationRecorderException
+            (NoSuchConfigurationRecorderException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "NoSuchConfigurationRecorderException" ->
+          `NoSuchConfigurationRecorderException
+            (NoSuchConfigurationRecorderException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `NoSuchConfigurationRecorderException e ->
+          `Assoc
+            [("error", (`String "NoSuchConfigurationRecorderException"));
+            ("details", (NoSuchConfigurationRecorderException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ConfigurationRecorder",
+           (Option.map x.configurationRecorder
+              ~f:ConfigurationRecorder.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let configurationRecorder =
+        (Option.map ~f:ConfigurationRecorder.of_xml)
+          (Xml.child xml_arg0 "ConfigurationRecorder") in
+      make ?configurationRecorder ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let configurationRecorder =
+        field_map json__ "ConfigurationRecorder"
+          ConfigurationRecorder.of_json in
+      make ?configurationRecorder ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds all resource types specified in the ResourceTypes list to the RecordingGroup of specified configuration recorder and includes those resource types when recording. For this operation, the specified configuration recorder must use a RecordingStrategy that is either INCLUSION_BY_RESOURCE_TYPES or EXCLUSION_BY_RESOURCE_TYPES."]
+module AssociateResourceTypesRequest =
+  struct
+    type nonrec t =
+      {
+      configurationRecorderArn: AmazonResourceName.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the specified configuration recorder."];
+      resourceTypes: ResourceTypeList.t
+        [@ocaml.doc
+          "The list of resource types you want to add to the recording group of the specified configuration recorder."]}
+    let context_ = "AssociateResourceTypesRequest"
+    let make ~configurationRecorderArn =
+      fun ~resourceTypes ->
+        fun () -> { configurationRecorderArn; resourceTypes }
+    let to_value x =
+      structure_to_value
+        [("ConfigurationRecorderArn",
+           (Some (AmazonResourceName.to_value x.configurationRecorderArn)));
+        ("ResourceTypes", (Some (ResourceTypeList.to_value x.resourceTypes)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceTypes =
+        ResourceTypeList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceTypes") in
+      let configurationRecorderArn =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "ConfigurationRecorderArn") in
+      make ~resourceTypes ~configurationRecorderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceTypes =
+        field_map_exn json__ "ResourceTypes" ResourceTypeList.of_json in
+      let configurationRecorderArn =
+        field_map_exn json__ "ConfigurationRecorderArn"
+          AmazonResourceName.of_json in
+      make ~resourceTypes ~configurationRecorderArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds all resource types specified in the ResourceTypes list to the RecordingGroup of specified configuration recorder and includes those resource types when recording. For this operation, the specified configuration recorder must use a RecordingStrategy that is either INCLUSION_BY_RESOURCE_TYPES or EXCLUSION_BY_RESOURCE_TYPES."]

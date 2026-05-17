@@ -1,14 +1,7 @@
 (library
  (name awso)
  (public_name awso)
- (libraries
-  awso_common
-  cohttp
-  unix
-  cryptokit
-  xmlm
-  yojson
-  re.perl)
+ (libraries awso_common cohttp unix cryptokit xmlm yojson re.perl)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect ppx_yojson_conv))

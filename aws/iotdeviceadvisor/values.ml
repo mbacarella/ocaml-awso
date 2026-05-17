@@ -37,6 +37,177 @@ module Failure =
     let of_json j = string_of_json ~kind:"Failure" j
     let to_json = simple_to_json to_value
   end
+module SystemMessage =
+  struct
+    type nonrec t = string
+    let context_ = "SystemMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SystemMessage" j
+    let to_json = simple_to_json to_value
+  end
+module TestCaseScenarioId =
+  struct
+    type nonrec t = string
+    let context_ = "TestCaseScenarioId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TestCaseScenarioId" j
+    let to_json = simple_to_json to_value
+  end
+module TestCaseScenarioStatus =
+  struct
+    type nonrec t =
+      | PASS 
+      | FAIL 
+      | CANCELED 
+      | PENDING 
+      | RUNNING 
+      | STOPPING 
+      | STOPPED 
+      | PASS_WITH_WARNINGS 
+      | ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PASS -> "PASS"
+      | FAIL -> "FAIL"
+      | CANCELED -> "CANCELED"
+      | PENDING -> "PENDING"
+      | RUNNING -> "RUNNING"
+      | STOPPING -> "STOPPING"
+      | STOPPED -> "STOPPED"
+      | PASS_WITH_WARNINGS -> "PASS_WITH_WARNINGS"
+      | ERROR -> "ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PASS" -> PASS
+      | "FAIL" -> FAIL
+      | "CANCELED" -> CANCELED
+      | "PENDING" -> PENDING
+      | "RUNNING" -> RUNNING
+      | "STOPPING" -> STOPPING
+      | "STOPPED" -> STOPPED
+      | "PASS_WITH_WARNINGS" -> PASS_WITH_WARNINGS
+      | "ERROR" -> ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TestCaseScenarioStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"TestCaseScenarioStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module TestCaseScenarioType =
+  struct
+    type nonrec t =
+      | Advanced 
+      | Basic 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Advanced -> "Advanced"
+      | Basic -> "Basic"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Advanced" -> Advanced
+      | "Basic" -> Basic
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TestCaseScenarioType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TestCaseScenarioType" j)
+    let to_json = simple_to_json to_value
+  end
+module TestCaseScenario =
+  struct
+    type nonrec t =
+      {
+      testCaseScenarioId: TestCaseScenarioId.t option
+        [@ocaml.doc "Provides test case scenario ID."];
+      testCaseScenarioType: TestCaseScenarioType.t option
+        [@ocaml.doc
+          "Provides test case scenario type. Type is one of the following: Advanced Basic"];
+      status: TestCaseScenarioStatus.t option
+        [@ocaml.doc
+          "Provides the test case scenario status. Status is one of the following: PASS: Test passed. FAIL: Test failed. PENDING: Test has not started running but is scheduled. RUNNING: Test is running. STOPPING: Test is performing cleanup steps. You will see this status only if you stop a suite run. STOPPED Test is stopped. You will see this status only if you stop a suite run. PASS_WITH_WARNINGS: Test passed with warnings. ERORR: Test faced an error when running due to an internal issue."];
+      failure: Failure.t option
+        [@ocaml.doc "Provides test case scenario failure result."];
+      systemMessage: SystemMessage.t option
+        [@ocaml.doc "Provides test case scenario system messages if any."]}
+    let make ?testCaseScenarioId =
+      fun ?testCaseScenarioType ->
+        fun ?status ->
+          fun ?failure ->
+            fun ?systemMessage ->
+              fun () ->
+                {
+                  testCaseScenarioId;
+                  testCaseScenarioType;
+                  status;
+                  failure;
+                  systemMessage
+                }
+    let to_value x =
+      structure_to_value
+        [("testCaseScenarioId",
+           (Option.map x.testCaseScenarioId ~f:TestCaseScenarioId.to_value));
+        ("testCaseScenarioType",
+          (Option.map x.testCaseScenarioType ~f:TestCaseScenarioType.to_value));
+        ("status", (Option.map x.status ~f:TestCaseScenarioStatus.to_value));
+        ("failure", (Option.map x.failure ~f:Failure.to_value));
+        ("systemMessage",
+          (Option.map x.systemMessage ~f:SystemMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let systemMessage =
+        (Option.map ~f:SystemMessage.of_xml)
+          (Xml.child xml_arg0 "systemMessage") in
+      let failure =
+        (Option.map ~f:Failure.of_xml) (Xml.child xml_arg0 "failure") in
+      let status =
+        (Option.map ~f:TestCaseScenarioStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let testCaseScenarioType =
+        (Option.map ~f:TestCaseScenarioType.of_xml)
+          (Xml.child xml_arg0 "testCaseScenarioType") in
+      let testCaseScenarioId =
+        (Option.map ~f:TestCaseScenarioId.of_xml)
+          (Xml.child xml_arg0 "testCaseScenarioId") in
+      make ?systemMessage ?failure ?status ?testCaseScenarioType
+        ?testCaseScenarioId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let systemMessage =
+        field_map json__ "systemMessage" SystemMessage.of_json in
+      let failure = field_map json__ "failure" Failure.of_json in
+      let status = field_map json__ "status" TestCaseScenarioStatus.of_json in
+      let testCaseScenarioType =
+        field_map json__ "testCaseScenarioType" TestCaseScenarioType.of_json in
+      let testCaseScenarioId =
+        field_map json__ "testCaseScenarioId" TestCaseScenarioId.of_json in
+      make ?systemMessage ?failure ?status ?testCaseScenarioType
+        ?testCaseScenarioId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Provides test case scenario."]
 module LogUrl =
   struct
     type nonrec t = string
@@ -108,6 +279,34 @@ module TestCaseDefinitionName =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TestCaseDefinitionName" j
     let to_json = simple_to_json to_value
+  end
+module TestCaseScenariosList =
+  struct
+    type nonrec t = TestCaseScenario.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TestCaseScenario.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TestCaseScenario.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TestCaseScenariosList"
+        ~of_json:TestCaseScenario.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module Timestamp =
   struct
@@ -191,7 +390,9 @@ module TestCaseRun =
       warnings: Warnings.t option
         [@ocaml.doc "Provides test case run warnings."];
       failure: Failure.t option
-        [@ocaml.doc "Provides test case run failure result."]}
+        [@ocaml.doc "Provides test case run failure result."];
+      testScenarios: TestCaseScenariosList.t option
+        [@ocaml.doc "Provides the test scenarios for the test case run."]}
     let make ?testCaseRunId =
       fun ?testCaseDefinitionId ->
         fun ?testCaseDefinitionName ->
@@ -201,18 +402,20 @@ module TestCaseRun =
                 fun ?logUrl ->
                   fun ?warnings ->
                     fun ?failure ->
-                      fun () ->
-                        {
-                          testCaseRunId;
-                          testCaseDefinitionId;
-                          testCaseDefinitionName;
-                          status;
-                          startTime;
-                          endTime;
-                          logUrl;
-                          warnings;
-                          failure
-                        }
+                      fun ?testScenarios ->
+                        fun () ->
+                          {
+                            testCaseRunId;
+                            testCaseDefinitionId;
+                            testCaseDefinitionName;
+                            status;
+                            startTime;
+                            endTime;
+                            logUrl;
+                            warnings;
+                            failure;
+                            testScenarios
+                          }
     let to_value x =
       structure_to_value
         [("testCaseRunId", (Option.map x.testCaseRunId ~f:UUID.to_value));
@@ -226,9 +429,14 @@ module TestCaseRun =
         ("endTime", (Option.map x.endTime ~f:Timestamp.to_value));
         ("logUrl", (Option.map x.logUrl ~f:LogUrl.to_value));
         ("warnings", (Option.map x.warnings ~f:Warnings.to_value));
-        ("failure", (Option.map x.failure ~f:Failure.to_value))]
+        ("failure", (Option.map x.failure ~f:Failure.to_value));
+        ("testScenarios",
+          (Option.map x.testScenarios ~f:TestCaseScenariosList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let testScenarios =
+        (Option.map ~f:TestCaseScenariosList.of_xml)
+          (Xml.child xml_arg0 "testScenarios") in
       let failure =
         (Option.map ~f:Failure.of_xml) (Xml.child xml_arg0 "failure") in
       let warnings =
@@ -249,24 +457,28 @@ module TestCaseRun =
           (Xml.child xml_arg0 "testCaseDefinitionId") in
       let testCaseRunId =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "testCaseRunId") in
-      make ?failure ?warnings ?logUrl ?endTime ?startTime ?status
-        ?testCaseDefinitionName ?testCaseDefinitionId ?testCaseRunId ()
+      make ?testScenarios ?failure ?warnings ?logUrl ?endTime ?startTime
+        ?status ?testCaseDefinitionName ?testCaseDefinitionId ?testCaseRunId
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failure = field_map json "failure" Failure.of_json in
-      let warnings = field_map json "warnings" Warnings.of_json in
-      let logUrl = field_map json "logUrl" LogUrl.of_json in
-      let endTime = field_map json "endTime" Timestamp.of_json in
-      let startTime = field_map json "startTime" Timestamp.of_json in
-      let status = field_map json "status" Status.of_json in
+    let of_json json__ =
+      let testScenarios =
+        field_map json__ "testScenarios" TestCaseScenariosList.of_json in
+      let failure = field_map json__ "failure" Failure.of_json in
+      let warnings = field_map json__ "warnings" Warnings.of_json in
+      let logUrl = field_map json__ "logUrl" LogUrl.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let status = field_map json__ "status" Status.of_json in
       let testCaseDefinitionName =
-        field_map json "testCaseDefinitionName"
+        field_map json__ "testCaseDefinitionName"
           TestCaseDefinitionName.of_json in
       let testCaseDefinitionId =
-        field_map json "testCaseDefinitionId" UUID.of_json in
-      let testCaseRunId = field_map json "testCaseRunId" UUID.of_json in
-      make ?failure ?warnings ?logUrl ?endTime ?startTime ?status
-        ?testCaseDefinitionName ?testCaseDefinitionId ?testCaseRunId ()
+        field_map json__ "testCaseDefinitionId" UUID.of_json in
+      let testCaseRunId = field_map json__ "testCaseRunId" UUID.of_json in
+      make ?testScenarios ?failure ?warnings ?logUrl ?endTime ?startTime
+        ?status ?testCaseDefinitionName ?testCaseDefinitionId ?testCaseRunId
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the test case run."]
 module DeviceUnderTest =
@@ -274,34 +486,45 @@ module DeviceUnderTest =
     type nonrec t =
       {
       thingArn: AmazonResourceName.t option
-        [@ocaml.doc "Lists devices thing ARN."];
+        [@ocaml.doc "Lists device's thing ARN."];
       certificateArn: AmazonResourceName.t option
-        [@ocaml.doc "Lists devices certificate ARN."]}
+        [@ocaml.doc "Lists device's certificate ARN."];
+      deviceRoleArn: AmazonResourceName.t option
+        [@ocaml.doc "Lists device's role ARN."]}
     let make ?thingArn =
-      fun ?certificateArn -> fun () -> { thingArn; certificateArn }
+      fun ?certificateArn ->
+        fun ?deviceRoleArn ->
+          fun () -> { thingArn; certificateArn; deviceRoleArn }
     let to_value x =
       structure_to_value
         [("thingArn", (Option.map x.thingArn ~f:AmazonResourceName.to_value));
         ("certificateArn",
-          (Option.map x.certificateArn ~f:AmazonResourceName.to_value))]
+          (Option.map x.certificateArn ~f:AmazonResourceName.to_value));
+        ("deviceRoleArn",
+          (Option.map x.deviceRoleArn ~f:AmazonResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let deviceRoleArn =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "deviceRoleArn") in
       let certificateArn =
         (Option.map ~f:AmazonResourceName.of_xml)
           (Xml.child xml_arg0 "certificateArn") in
       let thingArn =
         (Option.map ~f:AmazonResourceName.of_xml)
           (Xml.child xml_arg0 "thingArn") in
-      make ?certificateArn ?thingArn ()
+      make ?deviceRoleArn ?certificateArn ?thingArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let deviceRoleArn =
+        field_map json__ "deviceRoleArn" AmazonResourceName.of_json in
       let certificateArn =
-        field_map json "certificateArn" AmazonResourceName.of_json in
-      let thingArn = field_map json "thingArn" AmazonResourceName.of_json in
-      make ?certificateArn ?thingArn ()
+        field_map json__ "certificateArn" AmazonResourceName.of_json in
+      let thingArn = field_map json__ "thingArn" AmazonResourceName.of_json in
+      make ?deviceRoleArn ?certificateArn ?thingArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information of a test device. A thing ARN or a certificate ARN is required."]
+       "Information of a test device. A thing ARN, certificate ARN or device role ARN is required."]
 module GroupName =
   struct
     type nonrec t = string
@@ -319,6 +542,9 @@ module TestCaseRuns =
   struct
     type nonrec t = TestCaseRun.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TestCaseRun.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -447,6 +673,9 @@ module DeviceUnderTestList =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeviceUnderTest.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -481,6 +710,50 @@ module IntendedForQualificationBoolean =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module IsLongDurationTestBoolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module Protocol =
+  struct
+    type nonrec t =
+      | MqttV3_1_1 
+      | MqttV5 
+      | MqttV3_1_1_OverWebSocket 
+      | MqttV5_OverWebSocket 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MqttV3_1_1 -> "MqttV3_1_1"
+      | MqttV5 -> "MqttV5"
+      | MqttV3_1_1_OverWebSocket -> "MqttV3_1_1_OverWebSocket"
+      | MqttV5_OverWebSocket -> "MqttV5_OverWebSocket"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MqttV3_1_1" -> MqttV3_1_1
+      | "MqttV5" -> MqttV5
+      | "MqttV3_1_1_OverWebSocket" -> MqttV3_1_1_OverWebSocket
+      | "MqttV5_OverWebSocket" -> MqttV5_OverWebSocket
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Protocol" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Protocol" j)
+    let to_json = simple_to_json to_value
+  end
 module GroupResult =
   struct
     type nonrec t =
@@ -505,10 +778,10 @@ module GroupResult =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "groupId") in
       make ?tests ?groupName ?groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tests = field_map json "tests" TestCaseRuns.of_json in
-      let groupName = field_map json "groupName" GroupName.of_json in
-      let groupId = field_map json "groupId" UUID.of_json in
+    let of_json json__ =
+      let tests = field_map json__ "tests" TestCaseRuns.of_json in
+      let groupName = field_map json__ "groupName" GroupName.of_json in
+      let groupId = field_map json__ "groupId" UUID.of_json in
       make ?tests ?groupName ?groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Show Group Result."]
@@ -538,7 +811,7 @@ module RootGroup =
       let open Result in
         ok_or_failwith
           ((check_string_max i ~max:2048) >>=
-             (fun () -> check_string_min i ~min:1));
+             (fun () -> check_string_min i ~min:0));
         i
     let of_string x = x
     let to_value x = `String x
@@ -606,6 +879,9 @@ module SelectedTestList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UUID.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -718,20 +994,21 @@ module SuiteRunInformation =
       make ?failed ?passed ?status ?endAt ?startedAt ?createdAt ?suiteRunId
         ?suiteDefinitionName ?suiteDefinitionVersion ?suiteDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failed = field_map json "failed" SuiteRunResultCount.of_json in
-      let passed = field_map json "passed" SuiteRunResultCount.of_json in
-      let status = field_map json "status" SuiteRunStatus.of_json in
-      let endAt = field_map json "endAt" Timestamp.of_json in
-      let startedAt = field_map json "startedAt" Timestamp.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
-      let suiteRunId = field_map json "suiteRunId" UUID.of_json in
+    let of_json json__ =
+      let failed = field_map json__ "failed" SuiteRunResultCount.of_json in
+      let passed = field_map json__ "passed" SuiteRunResultCount.of_json in
+      let status = field_map json__ "status" SuiteRunStatus.of_json in
+      let endAt = field_map json__ "endAt" Timestamp.of_json in
+      let startedAt = field_map json__ "startedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let suiteRunId = field_map json__ "suiteRunId" UUID.of_json in
       let suiteDefinitionName =
-        field_map json "suiteDefinitionName" SuiteDefinitionName.of_json in
+        field_map json__ "suiteDefinitionName" SuiteDefinitionName.of_json in
       let suiteDefinitionVersion =
-        field_map json "suiteDefinitionVersion"
+        field_map json__ "suiteDefinitionVersion"
           SuiteDefinitionVersion.of_json in
-      let suiteDefinitionId = field_map json "suiteDefinitionId" UUID.of_json in
+      let suiteDefinitionId =
+        field_map json__ "suiteDefinitionId" UUID.of_json in
       make ?failed ?passed ?status ?endAt ?startedAt ?createdAt ?suiteRunId
         ?suiteDefinitionName ?suiteDefinitionVersion ?suiteDefinitionId ()
     let to_json v = composed_to_json to_value v
@@ -751,6 +1028,11 @@ module SuiteDefinitionInformation =
       intendedForQualification: IntendedForQualificationBoolean.t option
         [@ocaml.doc
           "Specifies if the test suite is intended for qualification."];
+      isLongDurationTest: IsLongDurationTestBoolean.t option
+        [@ocaml.doc "Verifies if the test suite is a long duration test."];
+      protocol: Protocol.t option
+        [@ocaml.doc
+          "Gets the MQTT protocol that is configured in the suite definition."];
       createdAt: Timestamp.t option
         [@ocaml.doc
           "Date (in Unix epoch time) when the test suite was created."]}
@@ -758,15 +1040,19 @@ module SuiteDefinitionInformation =
       fun ?suiteDefinitionName ->
         fun ?defaultDevices ->
           fun ?intendedForQualification ->
-            fun ?createdAt ->
-              fun () ->
-                {
-                  suiteDefinitionId;
-                  suiteDefinitionName;
-                  defaultDevices;
-                  intendedForQualification;
-                  createdAt
-                }
+            fun ?isLongDurationTest ->
+              fun ?protocol ->
+                fun ?createdAt ->
+                  fun () ->
+                    {
+                      suiteDefinitionId;
+                      suiteDefinitionName;
+                      defaultDevices;
+                      intendedForQualification;
+                      isLongDurationTest;
+                      protocol;
+                      createdAt
+                    }
     let to_value x =
       structure_to_value
         [("suiteDefinitionId",
@@ -778,11 +1064,20 @@ module SuiteDefinitionInformation =
         ("intendedForQualification",
           (Option.map x.intendedForQualification
              ~f:IntendedForQualificationBoolean.to_value));
+        ("isLongDurationTest",
+          (Option.map x.isLongDurationTest
+             ~f:IsLongDurationTestBoolean.to_value));
+        ("protocol", (Option.map x.protocol ~f:Protocol.to_value));
         ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let createdAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let protocol =
+        (Option.map ~f:Protocol.of_xml) (Xml.child xml_arg0 "protocol") in
+      let isLongDurationTest =
+        (Option.map ~f:IsLongDurationTestBoolean.of_xml)
+          (Xml.child xml_arg0 "isLongDurationTest") in
       let intendedForQualification =
         (Option.map ~f:IntendedForQualificationBoolean.of_xml)
           (Xml.child xml_arg0 "intendedForQualification") in
@@ -794,27 +1089,35 @@ module SuiteDefinitionInformation =
           (Xml.child xml_arg0 "suiteDefinitionName") in
       let suiteDefinitionId =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "suiteDefinitionId") in
-      make ?createdAt ?intendedForQualification ?defaultDevices
-        ?suiteDefinitionName ?suiteDefinitionId ()
+      make ?createdAt ?protocol ?isLongDurationTest ?intendedForQualification
+        ?defaultDevices ?suiteDefinitionName ?suiteDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
+    let of_json json__ =
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let protocol = field_map json__ "protocol" Protocol.of_json in
+      let isLongDurationTest =
+        field_map json__ "isLongDurationTest"
+          IsLongDurationTestBoolean.of_json in
       let intendedForQualification =
-        field_map json "intendedForQualification"
+        field_map json__ "intendedForQualification"
           IntendedForQualificationBoolean.of_json in
       let defaultDevices =
-        field_map json "defaultDevices" DeviceUnderTestList.of_json in
+        field_map json__ "defaultDevices" DeviceUnderTestList.of_json in
       let suiteDefinitionName =
-        field_map json "suiteDefinitionName" SuiteDefinitionName.of_json in
-      let suiteDefinitionId = field_map json "suiteDefinitionId" UUID.of_json in
-      make ?createdAt ?intendedForQualification ?defaultDevices
-        ?suiteDefinitionName ?suiteDefinitionId ()
+        field_map json__ "suiteDefinitionName" SuiteDefinitionName.of_json in
+      let suiteDefinitionId =
+        field_map json__ "suiteDefinitionId" UUID.of_json in
+      make ?createdAt ?protocol ?isLongDurationTest ?intendedForQualification
+        ?defaultDevices ?suiteDefinitionName ?suiteDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the suite definition."]
 module GroupResultList =
   struct
     type nonrec t = GroupResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroupResult.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -851,8 +1154,8 @@ module InternalServerException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Sends an Internal Failure exception."]
@@ -872,8 +1175,8 @@ module ValidationException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Sends a validation exception."]
@@ -881,48 +1184,70 @@ module SuiteDefinitionConfiguration =
   struct
     type nonrec t =
       {
-      suiteDefinitionName: SuiteDefinitionName.t option
-        [@ocaml.doc "Gets Suite Definition Configuration name."];
+      suiteDefinitionName: SuiteDefinitionName.t
+        [@ocaml.doc
+          "Gets the suite definition name. This is a required parameter."];
       devices: DeviceUnderTestList.t option
         [@ocaml.doc "Gets the devices configured."];
       intendedForQualification: IntendedForQualificationBoolean.t option
         [@ocaml.doc "Gets the tests intended for qualification in a suite."];
-      rootGroup: RootGroup.t option
-        [@ocaml.doc "Gets test suite root group."];
-      devicePermissionRoleArn: AmazonResourceName.t option
-        [@ocaml.doc "Gets the device permission ARN."]}
-    let make ?suiteDefinitionName =
-      fun ?devices ->
-        fun ?intendedForQualification ->
-          fun ?rootGroup ->
-            fun ?devicePermissionRoleArn ->
-              fun () ->
-                {
-                  suiteDefinitionName;
-                  devices;
-                  intendedForQualification;
-                  rootGroup;
-                  devicePermissionRoleArn
-                }
+      isLongDurationTest: IsLongDurationTestBoolean.t option
+        [@ocaml.doc "Verifies if the test suite is a long duration test."];
+      rootGroup: RootGroup.t
+        [@ocaml.doc
+          "Gets the test suite root group. This is a required parameter. For updating or creating the latest qualification suite, if intendedForQualification is set to true, rootGroup can be an empty string. If intendedForQualification is false, rootGroup cannot be an empty string. If rootGroup is empty, and intendedForQualification is set to true, all the qualification tests are included, and the configuration is default. For a qualification suite, the minimum length is 0, and the maximum is 2048. For a non-qualification suite, the minimum length is 1, and the maximum is 2048."];
+      devicePermissionRoleArn: AmazonResourceName.t
+        [@ocaml.doc
+          "Gets the device permission ARN. This is a required parameter."];
+      protocol: Protocol.t option
+        [@ocaml.doc
+          "Sets the MQTT protocol that is configured in the suite definition."]}
+    let context_ = "SuiteDefinitionConfiguration"
+    let make ?devices =
+      fun ?intendedForQualification ->
+        fun ?isLongDurationTest ->
+          fun ?protocol ->
+            fun ~suiteDefinitionName ->
+              fun ~rootGroup ->
+                fun ~devicePermissionRoleArn ->
+                  fun () ->
+                    {
+                      devices;
+                      intendedForQualification;
+                      isLongDurationTest;
+                      protocol;
+                      suiteDefinitionName;
+                      rootGroup;
+                      devicePermissionRoleArn
+                    }
     let to_value x =
       structure_to_value
         [("suiteDefinitionName",
-           (Option.map x.suiteDefinitionName ~f:SuiteDefinitionName.to_value));
+           (Some (SuiteDefinitionName.to_value x.suiteDefinitionName)));
         ("devices", (Option.map x.devices ~f:DeviceUnderTestList.to_value));
         ("intendedForQualification",
           (Option.map x.intendedForQualification
              ~f:IntendedForQualificationBoolean.to_value));
-        ("rootGroup", (Option.map x.rootGroup ~f:RootGroup.to_value));
+        ("isLongDurationTest",
+          (Option.map x.isLongDurationTest
+             ~f:IsLongDurationTestBoolean.to_value));
+        ("rootGroup", (Some (RootGroup.to_value x.rootGroup)));
         ("devicePermissionRoleArn",
-          (Option.map x.devicePermissionRoleArn
-             ~f:AmazonResourceName.to_value))]
+          (Some (AmazonResourceName.to_value x.devicePermissionRoleArn)));
+        ("protocol", (Option.map x.protocol ~f:Protocol.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let protocol =
+        (Option.map ~f:Protocol.of_xml) (Xml.child xml_arg0 "protocol") in
       let devicePermissionRoleArn =
-        (Option.map ~f:AmazonResourceName.of_xml)
-          (Xml.child xml_arg0 "devicePermissionRoleArn") in
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "devicePermissionRoleArn") in
       let rootGroup =
-        (Option.map ~f:RootGroup.of_xml) (Xml.child xml_arg0 "rootGroup") in
+        RootGroup.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "rootGroup") in
+      let isLongDurationTest =
+        (Option.map ~f:IsLongDurationTestBoolean.of_xml)
+          (Xml.child xml_arg0 "isLongDurationTest") in
       let intendedForQualification =
         (Option.map ~f:IntendedForQualificationBoolean.of_xml)
           (Xml.child xml_arg0 "intendedForQualification") in
@@ -930,25 +1255,31 @@ module SuiteDefinitionConfiguration =
         (Option.map ~f:DeviceUnderTestList.of_xml)
           (Xml.child xml_arg0 "devices") in
       let suiteDefinitionName =
-        (Option.map ~f:SuiteDefinitionName.of_xml)
-          (Xml.child xml_arg0 "suiteDefinitionName") in
-      make ?devicePermissionRoleArn ?rootGroup ?intendedForQualification
-        ?devices ?suiteDefinitionName ()
+        SuiteDefinitionName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "suiteDefinitionName") in
+      make ?protocol ~devicePermissionRoleArn ~rootGroup ?isLongDurationTest
+        ?intendedForQualification ?devices ~suiteDefinitionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let protocol = field_map json__ "protocol" Protocol.of_json in
       let devicePermissionRoleArn =
-        field_map json "devicePermissionRoleArn" AmazonResourceName.of_json in
-      let rootGroup = field_map json "rootGroup" RootGroup.of_json in
+        field_map_exn json__ "devicePermissionRoleArn"
+          AmazonResourceName.of_json in
+      let rootGroup = field_map_exn json__ "rootGroup" RootGroup.of_json in
+      let isLongDurationTest =
+        field_map json__ "isLongDurationTest"
+          IsLongDurationTestBoolean.of_json in
       let intendedForQualification =
-        field_map json "intendedForQualification"
+        field_map json__ "intendedForQualification"
           IntendedForQualificationBoolean.of_json in
-      let devices = field_map json "devices" DeviceUnderTestList.of_json in
+      let devices = field_map json__ "devices" DeviceUnderTestList.of_json in
       let suiteDefinitionName =
-        field_map json "suiteDefinitionName" SuiteDefinitionName.of_json in
-      make ?devicePermissionRoleArn ?rootGroup ?intendedForQualification
-        ?devices ?suiteDefinitionName ()
+        field_map_exn json__ "suiteDefinitionName"
+          SuiteDefinitionName.of_json in
+      make ?protocol ~devicePermissionRoleArn ~rootGroup ?isLongDurationTest
+        ?intendedForQualification ?devices ~suiteDefinitionName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets Suite Definition Configuration."]
+  end[@@ocaml.doc "Gets the suite definition configuration."]
 module ResourceNotFoundException =
   struct
     type nonrec t =
@@ -965,8 +1296,8 @@ module ResourceNotFoundException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Sends a Resource Not Found exception."]
@@ -978,6 +1309,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String128.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1023,6 +1357,8 @@ module TagMap =
                     (fun x -> (String256.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1046,29 +1382,48 @@ module ConflictException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Sends a Conflict Exception."]
+module Endpoint =
+  struct
+    type nonrec t = string
+    let context_ = "Endpoint"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:75) >>=
+             (fun () -> check_string_min i ~min:45));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Endpoint" j
+    let to_json = simple_to_json to_value
+  end
 module SuiteRunConfiguration =
   struct
     type nonrec t =
       {
-      primaryDevice: DeviceUnderTest.t option
-        [@ocaml.doc "Gets the primary device for suite run."];
+      primaryDevice: DeviceUnderTest.t
+        [@ocaml.doc
+          "Sets the primary device for the test suite run. This requires a thing ARN or a certificate ARN."];
       selectedTestList: SelectedTestList.t option
-        [@ocaml.doc "Gets test case list."];
+        [@ocaml.doc "Sets test case list."];
       parallelRun: ParallelRun.t option
         [@ocaml.doc "TRUE if multiple test suites run in parallel."]}
-    let make ?primaryDevice =
-      fun ?selectedTestList ->
-        fun ?parallelRun ->
-          fun () -> { primaryDevice; selectedTestList; parallelRun }
+    let context_ = "SuiteRunConfiguration"
+    let make ?selectedTestList =
+      fun ?parallelRun ->
+        fun ~primaryDevice ->
+          fun () -> { selectedTestList; parallelRun; primaryDevice }
     let to_value x =
       structure_to_value
-        [("primaryDevice",
-           (Option.map x.primaryDevice ~f:DeviceUnderTest.to_value));
+        [("primaryDevice", (Some (DeviceUnderTest.to_value x.primaryDevice)));
         ("selectedTestList",
           (Option.map x.selectedTestList ~f:SelectedTestList.to_value));
         ("parallelRun", (Option.map x.parallelRun ~f:ParallelRun.to_value))]
@@ -1080,23 +1435,26 @@ module SuiteRunConfiguration =
         (Option.map ~f:SelectedTestList.of_xml)
           (Xml.child xml_arg0 "selectedTestList") in
       let primaryDevice =
-        (Option.map ~f:DeviceUnderTest.of_xml)
-          (Xml.child xml_arg0 "primaryDevice") in
-      make ?parallelRun ?selectedTestList ?primaryDevice ()
+        DeviceUnderTest.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "primaryDevice") in
+      make ?parallelRun ?selectedTestList ~primaryDevice ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parallelRun = field_map json "parallelRun" ParallelRun.of_json in
+    let of_json json__ =
+      let parallelRun = field_map json__ "parallelRun" ParallelRun.of_json in
       let selectedTestList =
-        field_map json "selectedTestList" SelectedTestList.of_json in
+        field_map json__ "selectedTestList" SelectedTestList.of_json in
       let primaryDevice =
-        field_map json "primaryDevice" DeviceUnderTest.of_json in
-      make ?parallelRun ?selectedTestList ?primaryDevice ()
+        field_map_exn json__ "primaryDevice" DeviceUnderTest.of_json in
+      make ?parallelRun ?selectedTestList ~primaryDevice ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets suite run configuration."]
 module SuiteRunsList =
   struct
     type nonrec t = SuiteRunInformation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SuiteRunInformation.to_value)) |>
         (fun x -> `List x)
@@ -1155,6 +1513,9 @@ module SuiteDefinitionInformationList =
   struct
     type nonrec t = SuiteDefinitionInformation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SuiteDefinitionInformation.to_value)) |>
         (fun x -> `List x)
@@ -1206,8 +1567,8 @@ module TestResult =
         (Option.map ~f:GroupResultList.of_xml) (Xml.child xml_arg0 "groups") in
       make ?groups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groups = field_map json "groups" GroupResultList.of_json in
+    let of_json json__ =
+      let groups = field_map json__ "groups" GroupResultList.of_json in
       make ?groups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Show each group result."]
@@ -1224,22 +1585,50 @@ module QualificationReportDownloadUrl =
     let of_json j = string_of_json ~kind:"QualificationReportDownloadUrl" j
     let to_json = simple_to_json to_value
   end
-module Endpoint =
+module AuthenticationMethod =
+  struct
+    type nonrec t =
+      | X509ClientCertificate 
+      | SignatureVersion4 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | X509ClientCertificate -> "X509ClientCertificate"
+      | SignatureVersion4 -> "SignatureVersion4"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "X509ClientCertificate" -> X509ClientCertificate
+      | "SignatureVersion4" -> SignatureVersion4
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AuthenticationMethod" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AuthenticationMethod" j)
+    let to_json = simple_to_json to_value
+  end
+module ClientToken =
   struct
     type nonrec t = string
-    let context_ = "Endpoint"
+    let context_ = "ClientToken"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:75) >>=
-             (fun () -> check_string_min i ~min:45));
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"^[\\u0021-\\u007E]+$")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Endpoint" j
+    let of_json j = string_of_json ~kind:"ClientToken" j
     let to_json = simple_to_json to_value
   end
 module UpdateSuiteDefinitionResponse =
@@ -1251,7 +1640,8 @@ module UpdateSuiteDefinitionResponse =
       suiteDefinitionArn: AmazonResourceName.t option
         [@ocaml.doc "Amazon Resource Name (ARN) of the updated test suite."];
       suiteDefinitionName: SuiteDefinitionName.t option
-        [@ocaml.doc "Suite definition name of the updated test suite."];
+        [@ocaml.doc
+          "Updates the suite definition name. This is a required parameter."];
       suiteDefinitionVersion: SuiteDefinitionVersion.t option
         [@ocaml.doc "Suite definition version of the updated test suite."];
       createdAt: Timestamp.t option
@@ -1342,17 +1732,18 @@ module UpdateSuiteDefinitionResponse =
       make ?lastUpdatedAt ?createdAt ?suiteDefinitionVersion
         ?suiteDefinitionName ?suiteDefinitionArn ?suiteDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
+    let of_json json__ =
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let suiteDefinitionVersion =
-        field_map json "suiteDefinitionVersion"
+        field_map json__ "suiteDefinitionVersion"
           SuiteDefinitionVersion.of_json in
       let suiteDefinitionName =
-        field_map json "suiteDefinitionName" SuiteDefinitionName.of_json in
+        field_map json__ "suiteDefinitionName" SuiteDefinitionName.of_json in
       let suiteDefinitionArn =
-        field_map json "suiteDefinitionArn" AmazonResourceName.of_json in
-      let suiteDefinitionId = field_map json "suiteDefinitionId" UUID.of_json in
+        field_map json__ "suiteDefinitionArn" AmazonResourceName.of_json in
+      let suiteDefinitionId =
+        field_map json__ "suiteDefinitionId" UUID.of_json in
       make ?lastUpdatedAt ?createdAt ?suiteDefinitionVersion
         ?suiteDefinitionName ?suiteDefinitionArn ?suiteDefinitionId ()
     let to_json v = composed_to_json to_value v
@@ -1364,36 +1755,38 @@ module UpdateSuiteDefinitionRequest =
       {
       suiteDefinitionId: UUID.t
         [@ocaml.doc "Suite definition ID of the test suite to be updated."];
-      suiteDefinitionConfiguration: SuiteDefinitionConfiguration.t option
+      suiteDefinitionConfiguration: SuiteDefinitionConfiguration.t
         [@ocaml.doc
           "Updates a Device Advisor test suite with suite definition configuration."]}
     let context_ = "UpdateSuiteDefinitionRequest"
-    let make ?suiteDefinitionConfiguration =
-      fun ~suiteDefinitionId ->
-        fun () -> { suiteDefinitionConfiguration; suiteDefinitionId }
+    let make ~suiteDefinitionId =
+      fun ~suiteDefinitionConfiguration ->
+        fun () -> { suiteDefinitionId; suiteDefinitionConfiguration }
     let to_value x =
       structure_to_value
         [("suiteDefinitionId", (Some (UUID.to_value x.suiteDefinitionId)));
         ("suiteDefinitionConfiguration",
-          (Option.map x.suiteDefinitionConfiguration
-             ~f:SuiteDefinitionConfiguration.to_value))]
+          (Some
+             (SuiteDefinitionConfiguration.to_value
+                x.suiteDefinitionConfiguration)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let suiteDefinitionConfiguration =
-        (Option.map ~f:SuiteDefinitionConfiguration.of_xml)
-          (Xml.child xml_arg0 "suiteDefinitionConfiguration") in
+        SuiteDefinitionConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "suiteDefinitionConfiguration") in
       let suiteDefinitionId =
         UUID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "suiteDefinitionId") in
-      make ?suiteDefinitionConfiguration ~suiteDefinitionId ()
+      make ~suiteDefinitionConfiguration ~suiteDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let suiteDefinitionConfiguration =
-        field_map json "suiteDefinitionConfiguration"
+        field_map_exn json__ "suiteDefinitionConfiguration"
           SuiteDefinitionConfiguration.of_json in
       let suiteDefinitionId =
-        field_map_exn json "suiteDefinitionId" UUID.of_json in
-      make ?suiteDefinitionConfiguration ~suiteDefinitionId ()
+        field_map_exn json__ "suiteDefinitionId" UUID.of_json in
+      make ~suiteDefinitionConfiguration ~suiteDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates a Device Advisor test suite. Requires permission to access the UpdateSuiteDefinition action."]
@@ -1460,7 +1853,8 @@ module UntagResourceRequest =
     type nonrec t =
       {
       resourceArn: AmazonResourceName.t
-        [@ocaml.doc "The resource ARN of an IoT Device Advisor resource."];
+        [@ocaml.doc
+          "The resource ARN of an IoT Device Advisor resource. This can be SuiteDefinition ARN or SuiteRun ARN."];
       tagKeys: TagKeyList.t
         [@ocaml.doc
           "List of tag keys to remove from the IoT Device Advisor resource."]}
@@ -1481,10 +1875,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "resourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "resourceArn" AmazonResourceName.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1552,7 +1946,8 @@ module TagResourceRequest =
     type nonrec t =
       {
       resourceArn: AmazonResourceName.t
-        [@ocaml.doc "The resource ARN of an IoT Device Advisor resource."];
+        [@ocaml.doc
+          "The resource ARN of an IoT Device Advisor resource. This can be SuiteDefinition ARN or SuiteRun ARN."];
       tags: TagMap.t
         [@ocaml.doc
           "The tags to be attached to the IoT Device Advisor resource."]}
@@ -1571,10 +1966,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
       let resourceArn =
-        field_map_exn json "resourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "resourceArn" AmazonResourceName.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1662,10 +2057,10 @@ module StopSuiteRunRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "suiteDefinitionId") in
       make ~suiteRunId ~suiteDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let suiteRunId = field_map_exn json "suiteRunId" UUID.of_json in
+    let of_json json__ =
+      let suiteRunId = field_map_exn json__ "suiteRunId" UUID.of_json in
       let suiteDefinitionId =
-        field_map_exn json "suiteDefinitionId" UUID.of_json in
+        field_map_exn json__ "suiteDefinitionId" UUID.of_json in
       make ~suiteRunId ~suiteDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1680,7 +2075,9 @@ module StartSuiteRunResponse =
         [@ocaml.doc "Amazon Resource Name (ARN) of the started suite run."];
       createdAt: Timestamp.t option
         [@ocaml.doc
-          "Starts a Device Advisor test suite run based on suite create time."]}
+          "Starts a Device Advisor test suite run based on suite create time."];
+      endpoint: Endpoint.t option
+        [@ocaml.doc "The response of an Device Advisor test endpoint."]}
     type nonrec error =
       [ `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
@@ -1688,7 +2085,9 @@ module StartSuiteRunResponse =
       | `Unknown_operation_error of (string * string option) ]
     let make ?suiteRunId =
       fun ?suiteRunArn ->
-        fun ?createdAt -> fun () -> { suiteRunId; suiteRunArn; createdAt }
+        fun ?createdAt ->
+          fun ?endpoint ->
+            fun () -> { suiteRunId; suiteRunArn; createdAt; endpoint }
     let error_of_json name json =
       match name with
       | "ConflictException" ->
@@ -1734,9 +2133,12 @@ module StartSuiteRunResponse =
         [("suiteRunId", (Option.map x.suiteRunId ~f:UUID.to_value));
         ("suiteRunArn",
           (Option.map x.suiteRunArn ~f:AmazonResourceName.to_value));
-        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value))]
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("endpoint", (Option.map x.endpoint ~f:Endpoint.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let endpoint =
+        (Option.map ~f:Endpoint.of_xml) (Xml.child xml_arg0 "endpoint") in
       let createdAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let suiteRunArn =
@@ -1744,14 +2146,15 @@ module StartSuiteRunResponse =
           (Xml.child xml_arg0 "suiteRunArn") in
       let suiteRunId =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "suiteRunId") in
-      make ?createdAt ?suiteRunArn ?suiteRunId ()
+      make ?endpoint ?createdAt ?suiteRunArn ?suiteRunId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
+    let of_json json__ =
+      let endpoint = field_map json__ "endpoint" Endpoint.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let suiteRunArn =
-        field_map json "suiteRunArn" AmazonResourceName.of_json in
-      let suiteRunId = field_map json "suiteRunId" UUID.of_json in
-      make ?createdAt ?suiteRunArn ?suiteRunId ()
+        field_map json__ "suiteRunArn" AmazonResourceName.of_json in
+      let suiteRunId = field_map json__ "suiteRunId" UUID.of_json in
+      make ?endpoint ?createdAt ?suiteRunArn ?suiteRunId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts a Device Advisor test suite run. Requires permission to access the StartSuiteRun action."]
@@ -1763,21 +2166,21 @@ module StartSuiteRunRequest =
         [@ocaml.doc "Suite definition ID of the test suite."];
       suiteDefinitionVersion: SuiteDefinitionVersion.t option
         [@ocaml.doc "Suite definition version of the test suite."];
-      suiteRunConfiguration: SuiteRunConfiguration.t option
+      suiteRunConfiguration: SuiteRunConfiguration.t
         [@ocaml.doc "Suite run configuration."];
       tags: TagMap.t option
         [@ocaml.doc "The tags to be attached to the suite run."]}
     let context_ = "StartSuiteRunRequest"
     let make ?suiteDefinitionVersion =
-      fun ?suiteRunConfiguration ->
-        fun ?tags ->
-          fun ~suiteDefinitionId ->
+      fun ?tags ->
+        fun ~suiteDefinitionId ->
+          fun ~suiteRunConfiguration ->
             fun () ->
               {
                 suiteDefinitionVersion;
-                suiteRunConfiguration;
                 tags;
-                suiteDefinitionId
+                suiteDefinitionId;
+                suiteRunConfiguration
               }
     let to_value x =
       structure_to_value
@@ -1786,34 +2189,34 @@ module StartSuiteRunRequest =
           (Option.map x.suiteDefinitionVersion
              ~f:SuiteDefinitionVersion.to_value));
         ("suiteRunConfiguration",
-          (Option.map x.suiteRunConfiguration
-             ~f:SuiteRunConfiguration.to_value));
+          (Some (SuiteRunConfiguration.to_value x.suiteRunConfiguration)));
         ("tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let suiteRunConfiguration =
-        (Option.map ~f:SuiteRunConfiguration.of_xml)
-          (Xml.child xml_arg0 "suiteRunConfiguration") in
+        SuiteRunConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "suiteRunConfiguration") in
       let suiteDefinitionVersion =
         (Option.map ~f:SuiteDefinitionVersion.of_xml)
           (Xml.child xml_arg0 "suiteDefinitionVersion") in
       let suiteDefinitionId =
         UUID.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "suiteDefinitionId") in
-      make ?tags ?suiteRunConfiguration ?suiteDefinitionVersion
+      make ?tags ~suiteRunConfiguration ?suiteDefinitionVersion
         ~suiteDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
       let suiteRunConfiguration =
-        field_map json "suiteRunConfiguration" SuiteRunConfiguration.of_json in
+        field_map_exn json__ "suiteRunConfiguration"
+          SuiteRunConfiguration.of_json in
       let suiteDefinitionVersion =
-        field_map json "suiteDefinitionVersion"
+        field_map json__ "suiteDefinitionVersion"
           SuiteDefinitionVersion.of_json in
       let suiteDefinitionId =
-        field_map_exn json "suiteDefinitionId" UUID.of_json in
-      make ?tags ?suiteRunConfiguration ?suiteDefinitionVersion
+        field_map_exn json__ "suiteDefinitionId" UUID.of_json in
+      make ?tags ~suiteRunConfiguration ?suiteDefinitionVersion
         ~suiteDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1877,8 +2280,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the tags attached to an IoT Device Advisor resource. Requires permission to access the ListTagsForResource action."]
@@ -1887,7 +2290,8 @@ module ListTagsForResourceRequest =
     type nonrec t =
       {
       resourceArn: AmazonResourceName.t
-        [@ocaml.doc "The ARN of the IoT Device Advisor resource."]}
+        [@ocaml.doc
+          "The resource ARN of the IoT Device Advisor resource. This can be SuiteDefinition ARN or SuiteRun ARN."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -1900,9 +2304,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "resourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "resourceArn" AmazonResourceName.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1968,10 +2372,10 @@ module ListSuiteRunsResponse =
           (Xml.child xml_arg0 "suiteRunsList") in
       make ?nextToken ?suiteRunsList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let suiteRunsList =
-        field_map json "suiteRunsList" SuiteRunsList.of_json in
+        field_map json__ "suiteRunsList" SuiteRunsList.of_json in
       make ?nextToken ?suiteRunsList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2024,13 +2428,14 @@ module ListSuiteRunsRequest =
       make ?nextToken ?maxResults ?suiteDefinitionVersion ?suiteDefinitionId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       let suiteDefinitionVersion =
-        field_map json "suiteDefinitionVersion"
+        field_map json__ "suiteDefinitionVersion"
           SuiteDefinitionVersion.of_json in
-      let suiteDefinitionId = field_map json "suiteDefinitionId" UUID.of_json in
+      let suiteDefinitionId =
+        field_map json__ "suiteDefinitionId" UUID.of_json in
       make ?nextToken ?maxResults ?suiteDefinitionVersion ?suiteDefinitionId
         ()
     let to_json v = composed_to_json to_value v
@@ -2099,10 +2504,10 @@ module ListSuiteDefinitionsResponse =
           (Xml.child xml_arg0 "suiteDefinitionInformationList") in
       make ?nextToken ?suiteDefinitionInformationList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let suiteDefinitionInformationList =
-        field_map json "suiteDefinitionInformationList"
+        field_map json__ "suiteDefinitionInformationList"
           SuiteDefinitionInformationList.of_json in
       make ?nextToken ?suiteDefinitionInformationList ()
     let to_json v = composed_to_json to_value v
@@ -2130,9 +2535,9 @@ module ListSuiteDefinitionsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2284,22 +2689,24 @@ module GetSuiteRunResponse =
         ?suiteRunConfiguration ?suiteRunArn ?suiteRunId
         ?suiteDefinitionVersion ?suiteDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let errorReason = field_map json "errorReason" ErrorReason.of_json in
-      let status = field_map json "status" SuiteRunStatus.of_json in
-      let endTime = field_map json "endTime" Timestamp.of_json in
-      let startTime = field_map json "startTime" Timestamp.of_json in
-      let testResult = field_map json "testResult" TestResult.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let errorReason = field_map json__ "errorReason" ErrorReason.of_json in
+      let status = field_map json__ "status" SuiteRunStatus.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let testResult = field_map json__ "testResult" TestResult.of_json in
       let suiteRunConfiguration =
-        field_map json "suiteRunConfiguration" SuiteRunConfiguration.of_json in
+        field_map json__ "suiteRunConfiguration"
+          SuiteRunConfiguration.of_json in
       let suiteRunArn =
-        field_map json "suiteRunArn" AmazonResourceName.of_json in
-      let suiteRunId = field_map json "suiteRunId" UUID.of_json in
+        field_map json__ "suiteRunArn" AmazonResourceName.of_json in
+      let suiteRunId = field_map json__ "suiteRunId" UUID.of_json in
       let suiteDefinitionVersion =
-        field_map json "suiteDefinitionVersion"
+        field_map json__ "suiteDefinitionVersion"
           SuiteDefinitionVersion.of_json in
-      let suiteDefinitionId = field_map json "suiteDefinitionId" UUID.of_json in
+      let suiteDefinitionId =
+        field_map json__ "suiteDefinitionId" UUID.of_json in
       make ?tags ?errorReason ?status ?endTime ?startTime ?testResult
         ?suiteRunConfiguration ?suiteRunArn ?suiteRunId
         ?suiteDefinitionVersion ?suiteDefinitionId ()
@@ -2329,10 +2736,10 @@ module GetSuiteRunRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "suiteDefinitionId") in
       make ~suiteRunId ~suiteDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let suiteRunId = field_map_exn json "suiteRunId" UUID.of_json in
+    let of_json json__ =
+      let suiteRunId = field_map_exn json__ "suiteRunId" UUID.of_json in
       let suiteDefinitionId =
-        field_map_exn json "suiteDefinitionId" UUID.of_json in
+        field_map_exn json__ "suiteDefinitionId" UUID.of_json in
       make ~suiteRunId ~suiteDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2402,9 +2809,9 @@ module GetSuiteRunReportResponse =
           (Xml.child xml_arg0 "qualificationReportDownloadUrl") in
       make ?qualificationReportDownloadUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let qualificationReportDownloadUrl =
-        field_map json "qualificationReportDownloadUrl"
+        field_map json__ "qualificationReportDownloadUrl"
           QualificationReportDownloadUrl.of_json in
       make ?qualificationReportDownloadUrl ()
     let to_json v = composed_to_json to_value v
@@ -2433,10 +2840,10 @@ module GetSuiteRunReportRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "suiteDefinitionId") in
       make ~suiteRunId ~suiteDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let suiteRunId = field_map_exn json "suiteRunId" UUID.of_json in
+    let of_json json__ =
+      let suiteRunId = field_map_exn json__ "suiteRunId" UUID.of_json in
       let suiteDefinitionId =
-        field_map_exn json "suiteDefinitionId" UUID.of_json in
+        field_map_exn json__ "suiteDefinitionId" UUID.of_json in
       make ~suiteRunId ~suiteDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2572,21 +2979,23 @@ module GetSuiteDefinitionResponse =
         ?latestVersion ?suiteDefinitionVersion ?suiteDefinitionArn
         ?suiteDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let lastModifiedAt = field_map json "lastModifiedAt" Timestamp.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let lastModifiedAt =
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let suiteDefinitionConfiguration =
-        field_map json "suiteDefinitionConfiguration"
+        field_map json__ "suiteDefinitionConfiguration"
           SuiteDefinitionConfiguration.of_json in
       let latestVersion =
-        field_map json "latestVersion" SuiteDefinitionVersion.of_json in
+        field_map json__ "latestVersion" SuiteDefinitionVersion.of_json in
       let suiteDefinitionVersion =
-        field_map json "suiteDefinitionVersion"
+        field_map json__ "suiteDefinitionVersion"
           SuiteDefinitionVersion.of_json in
       let suiteDefinitionArn =
-        field_map json "suiteDefinitionArn" AmazonResourceName.of_json in
-      let suiteDefinitionId = field_map json "suiteDefinitionId" UUID.of_json in
+        field_map json__ "suiteDefinitionArn" AmazonResourceName.of_json in
+      let suiteDefinitionId =
+        field_map json__ "suiteDefinitionId" UUID.of_json in
       make ?tags ?lastModifiedAt ?createdAt ?suiteDefinitionConfiguration
         ?latestVersion ?suiteDefinitionVersion ?suiteDefinitionArn
         ?suiteDefinitionId ()
@@ -2621,12 +3030,12 @@ module GetSuiteDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "suiteDefinitionId") in
       make ?suiteDefinitionVersion ~suiteDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let suiteDefinitionVersion =
-        field_map json "suiteDefinitionVersion"
+        field_map json__ "suiteDefinitionVersion"
           SuiteDefinitionVersion.of_json in
       let suiteDefinitionId =
-        field_map_exn json "suiteDefinitionId" UUID.of_json in
+        field_map_exn json__ "suiteDefinitionId" UUID.of_json in
       make ?suiteDefinitionVersion ~suiteDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2692,8 +3101,8 @@ module GetEndpointResponse =
         (Option.map ~f:Endpoint.of_xml) (Xml.child xml_arg0 "endpoint") in
       make ?endpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpoint = field_map json "endpoint" Endpoint.of_json in
+    let of_json json__ =
+      let endpoint = field_map json__ "endpoint" Endpoint.of_json in
       make ?endpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about an Device Advisor endpoint."]
@@ -2706,29 +3115,54 @@ module GetEndpointRequest =
           "The thing ARN of the device. This is an optional parameter."];
       certificateArn: AmazonResourceName.t option
         [@ocaml.doc
-          "The certificate ARN of the device. This is an optional parameter."]}
+          "The certificate ARN of the device. This is an optional parameter."];
+      deviceRoleArn: AmazonResourceName.t option
+        [@ocaml.doc
+          "The device role ARN of the device. This is an optional parameter."];
+      authenticationMethod: AuthenticationMethod.t option
+        [@ocaml.doc
+          "The authentication method used during the device connection."]}
     let make ?thingArn =
-      fun ?certificateArn -> fun () -> { thingArn; certificateArn }
+      fun ?certificateArn ->
+        fun ?deviceRoleArn ->
+          fun ?authenticationMethod ->
+            fun () ->
+              { thingArn; certificateArn; deviceRoleArn; authenticationMethod
+              }
     let to_value x =
       structure_to_value
         [("thingArn", (Option.map x.thingArn ~f:AmazonResourceName.to_value));
         ("certificateArn",
-          (Option.map x.certificateArn ~f:AmazonResourceName.to_value))]
+          (Option.map x.certificateArn ~f:AmazonResourceName.to_value));
+        ("deviceRoleArn",
+          (Option.map x.deviceRoleArn ~f:AmazonResourceName.to_value));
+        ("authenticationMethod",
+          (Option.map x.authenticationMethod ~f:AuthenticationMethod.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let authenticationMethod =
+        (Option.map ~f:AuthenticationMethod.of_xml)
+          (Xml.child xml_arg0 "authenticationMethod") in
+      let deviceRoleArn =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "deviceRoleArn") in
       let certificateArn =
         (Option.map ~f:AmazonResourceName.of_xml)
           (Xml.child xml_arg0 "certificateArn") in
       let thingArn =
         (Option.map ~f:AmazonResourceName.of_xml)
           (Xml.child xml_arg0 "thingArn") in
-      make ?certificateArn ?thingArn ()
+      make ?authenticationMethod ?deviceRoleArn ?certificateArn ?thingArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let authenticationMethod =
+        field_map json__ "authenticationMethod" AuthenticationMethod.of_json in
+      let deviceRoleArn =
+        field_map json__ "deviceRoleArn" AmazonResourceName.of_json in
       let certificateArn =
-        field_map json "certificateArn" AmazonResourceName.of_json in
-      let thingArn = field_map json "thingArn" AmazonResourceName.of_json in
-      make ?certificateArn ?thingArn ()
+        field_map json__ "certificateArn" AmazonResourceName.of_json in
+      let thingArn = field_map json__ "thingArn" AmazonResourceName.of_json in
+      make ?authenticationMethod ?deviceRoleArn ?certificateArn ?thingArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about an Device Advisor endpoint."]
 module DeleteSuiteDefinitionResponse =
@@ -2798,9 +3232,9 @@ module DeleteSuiteDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "suiteDefinitionId") in
       make ~suiteDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let suiteDefinitionId =
-        field_map_exn json "suiteDefinitionId" UUID.of_json in
+        field_map_exn json__ "suiteDefinitionId" UUID.of_json in
       make ~suiteDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2810,16 +3244,14 @@ module CreateSuiteDefinitionResponse =
     type nonrec t =
       {
       suiteDefinitionId: UUID.t option
-        [@ocaml.doc "Creates a Device Advisor test suite with suite UUID."];
+        [@ocaml.doc "The UUID of the test suite created."];
       suiteDefinitionArn: AmazonResourceName.t option
-        [@ocaml.doc
-          "Creates a Device Advisor test suite with Amazon Resource Name (ARN)."];
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the test suite."];
       suiteDefinitionName: SuiteDefinitionName.t option
         [@ocaml.doc
-          "Creates a Device Advisor test suite with suite definition name."];
+          "The suite definition name of the test suite. This is a required parameter."];
       createdAt: Timestamp.t option
-        [@ocaml.doc
-          "Creates a Device Advisor test suite with TimeStamp of when it was created."]}
+        [@ocaml.doc "The timestamp of when the test suite was created."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ValidationException of ValidationException.t 
@@ -2891,13 +3323,14 @@ module CreateSuiteDefinitionResponse =
       make ?createdAt ?suiteDefinitionName ?suiteDefinitionArn
         ?suiteDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
+    let of_json json__ =
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let suiteDefinitionName =
-        field_map json "suiteDefinitionName" SuiteDefinitionName.of_json in
+        field_map json__ "suiteDefinitionName" SuiteDefinitionName.of_json in
       let suiteDefinitionArn =
-        field_map json "suiteDefinitionArn" AmazonResourceName.of_json in
-      let suiteDefinitionId = field_map json "suiteDefinitionId" UUID.of_json in
+        field_map json__ "suiteDefinitionArn" AmazonResourceName.of_json in
+      let suiteDefinitionId =
+        field_map json__ "suiteDefinitionId" UUID.of_json in
       make ?createdAt ?suiteDefinitionName ?suiteDefinitionArn
         ?suiteDefinitionId ()
     let to_json v = composed_to_json to_value v
@@ -2907,33 +3340,45 @@ module CreateSuiteDefinitionRequest =
   struct
     type nonrec t =
       {
-      suiteDefinitionConfiguration: SuiteDefinitionConfiguration.t option
+      suiteDefinitionConfiguration: SuiteDefinitionConfiguration.t
         [@ocaml.doc
           "Creates a Device Advisor test suite with suite definition configuration."];
       tags: TagMap.t option
-        [@ocaml.doc "The tags to be attached to the suite definition."]}
-    let make ?suiteDefinitionConfiguration =
-      fun ?tags -> fun () -> { suiteDefinitionConfiguration; tags }
+        [@ocaml.doc "The tags to be attached to the suite definition."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "The client token for the test suite definition creation. This token is used for tracking test suite definition creation using retries and obtaining its status. This parameter is optional."]}
+    let context_ = "CreateSuiteDefinitionRequest"
+    let make ?tags =
+      fun ?clientToken ->
+        fun ~suiteDefinitionConfiguration ->
+          fun () -> { tags; clientToken; suiteDefinitionConfiguration }
     let to_value x =
       structure_to_value
         [("suiteDefinitionConfiguration",
-           (Option.map x.suiteDefinitionConfiguration
-              ~f:SuiteDefinitionConfiguration.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+           (Some
+              (SuiteDefinitionConfiguration.to_value
+                 x.suiteDefinitionConfiguration)));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let suiteDefinitionConfiguration =
-        (Option.map ~f:SuiteDefinitionConfiguration.of_xml)
-          (Xml.child xml_arg0 "suiteDefinitionConfiguration") in
-      make ?tags ?suiteDefinitionConfiguration ()
+        SuiteDefinitionConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "suiteDefinitionConfiguration") in
+      make ?clientToken ?tags ~suiteDefinitionConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let suiteDefinitionConfiguration =
-        field_map json "suiteDefinitionConfiguration"
+        field_map_exn json__ "suiteDefinitionConfiguration"
           SuiteDefinitionConfiguration.of_json in
-      make ?tags ?suiteDefinitionConfiguration ()
+      make ?clientToken ?tags ~suiteDefinitionConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a Device Advisor test suite. Requires permission to access the CreateSuiteDefinition action."]

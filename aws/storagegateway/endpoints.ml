@@ -19,6 +19,8 @@ type ('i, 'o, 'e) t =
   AttachVolumeOutput.error) t 
   | CancelArchival: (CancelArchivalInput.t, CancelArchivalOutput.t,
   CancelArchivalOutput.error) t 
+  | CancelCacheReport: (CancelCacheReportInput.t, CancelCacheReportOutput.t,
+  CancelCacheReportOutput.error) t 
   | CancelRetrieval: (CancelRetrievalInput.t, CancelRetrievalOutput.t,
   CancelRetrievalOutput.error) t 
   | CreateCachediSCSIVolume: (CreateCachediSCSIVolumeInput.t,
@@ -47,6 +49,8 @@ type ('i, 'o, 'e) t =
   DeleteAutomaticTapeCreationPolicyOutput.error) t 
   | DeleteBandwidthRateLimit: (DeleteBandwidthRateLimitInput.t,
   DeleteBandwidthRateLimitOutput.t, DeleteBandwidthRateLimitOutput.error) t 
+  | DeleteCacheReport: (DeleteCacheReportInput.t, DeleteCacheReportOutput.t,
+  DeleteCacheReportOutput.error) t 
   | DeleteChapCredentials: (DeleteChapCredentialsInput.t,
   DeleteChapCredentialsOutput.t, DeleteChapCredentialsOutput.error) t 
   | DeleteFileShare: (DeleteFileShareInput.t, DeleteFileShareOutput.t,
@@ -75,6 +79,8 @@ type ('i, 'o, 'e) t =
   DescribeBandwidthRateLimitScheduleOutput.error) t 
   | DescribeCache: (DescribeCacheInput.t, DescribeCacheOutput.t,
   DescribeCacheOutput.error) t 
+  | DescribeCacheReport: (DescribeCacheReportInput.t,
+  DescribeCacheReportOutput.t, DescribeCacheReportOutput.error) t 
   | DescribeCachediSCSIVolumes: (DescribeCachediSCSIVolumesInput.t,
   DescribeCachediSCSIVolumesOutput.t, DescribeCachediSCSIVolumesOutput.error)
   t 
@@ -119,12 +125,16 @@ type ('i, 'o, 'e) t =
   DisableGatewayOutput.error) t 
   | DisassociateFileSystem: (DisassociateFileSystemInput.t,
   DisassociateFileSystemOutput.t, DisassociateFileSystemOutput.error) t 
+  | EvictFilesFailingUpload: (EvictFilesFailingUploadInput.t,
+  EvictFilesFailingUploadOutput.t, EvictFilesFailingUploadOutput.error) t 
   | JoinDomain: (JoinDomainInput.t, JoinDomainOutput.t,
   JoinDomainOutput.error) t 
   | ListAutomaticTapeCreationPolicies:
   (ListAutomaticTapeCreationPoliciesInput.t,
   ListAutomaticTapeCreationPoliciesOutput.t,
   ListAutomaticTapeCreationPoliciesOutput.error) t 
+  | ListCacheReports: (ListCacheReportsInput.t, ListCacheReportsOutput.t,
+  ListCacheReportsOutput.error) t 
   | ListFileShares: (ListFileSharesInput.t, ListFileSharesOutput.t,
   ListFileSharesOutput.error) t 
   | ListFileSystemAssociations: (ListFileSystemAssociationsInput.t,
@@ -168,6 +178,8 @@ type ('i, 'o, 'e) t =
   | StartAvailabilityMonitorTest: (StartAvailabilityMonitorTestInput.t,
   StartAvailabilityMonitorTestOutput.t,
   StartAvailabilityMonitorTestOutput.error) t 
+  | StartCacheReport: (StartCacheReportInput.t, StartCacheReportOutput.t,
+  StartCacheReportOutput.error) t 
   | StartGateway: (StartGatewayInput.t, StartGatewayOutput.t,
   StartGatewayOutput.error) t 
   | UpdateAutomaticTapeCreationPolicy:
@@ -219,6 +231,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | AssociateFileSystem -> `POST
   | AttachVolume -> `POST
   | CancelArchival -> `POST
+  | CancelCacheReport -> `POST
   | CancelRetrieval -> `POST
   | CreateCachediSCSIVolume -> `POST
   | CreateNFSFileShare -> `POST
@@ -231,6 +244,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateTapes -> `POST
   | DeleteAutomaticTapeCreationPolicy -> `POST
   | DeleteBandwidthRateLimit -> `POST
+  | DeleteCacheReport -> `POST
   | DeleteChapCredentials -> `POST
   | DeleteFileShare -> `POST
   | DeleteGateway -> `POST
@@ -243,6 +257,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeBandwidthRateLimit -> `POST
   | DescribeBandwidthRateLimitSchedule -> `POST
   | DescribeCache -> `POST
+  | DescribeCacheReport -> `POST
   | DescribeCachediSCSIVolumes -> `POST
   | DescribeChapCredentials -> `POST
   | DescribeFileSystemAssociations -> `POST
@@ -262,8 +277,10 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DetachVolume -> `POST
   | DisableGateway -> `POST
   | DisassociateFileSystem -> `POST
+  | EvictFilesFailingUpload -> `POST
   | JoinDomain -> `POST
   | ListAutomaticTapeCreationPolicies -> `POST
+  | ListCacheReports -> `POST
   | ListFileShares -> `POST
   | ListFileSystemAssociations -> `POST
   | ListGateways -> `POST
@@ -284,6 +301,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | SetSMBGuestPassword -> `POST
   | ShutdownGateway -> `POST
   | StartAvailabilityMonitorTest -> `POST
+  | StartCacheReport -> `POST
   | StartGateway -> `POST
   | UpdateAutomaticTapeCreationPolicy -> `POST
   | UpdateBandwidthRateLimit -> `POST
@@ -312,6 +330,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | AssociateFileSystem -> (Format.kasprintf Uri.of_string) "/"
       | AttachVolume -> (Format.kasprintf Uri.of_string) "/"
       | CancelArchival -> (Format.kasprintf Uri.of_string) "/"
+      | CancelCacheReport -> (Format.kasprintf Uri.of_string) "/"
       | CancelRetrieval -> (Format.kasprintf Uri.of_string) "/"
       | CreateCachediSCSIVolume -> (Format.kasprintf Uri.of_string) "/"
       | CreateNFSFileShare -> (Format.kasprintf Uri.of_string) "/"
@@ -326,6 +345,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteAutomaticTapeCreationPolicy ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteBandwidthRateLimit -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteCacheReport -> (Format.kasprintf Uri.of_string) "/"
       | DeleteChapCredentials -> (Format.kasprintf Uri.of_string) "/"
       | DeleteFileShare -> (Format.kasprintf Uri.of_string) "/"
       | DeleteGateway -> (Format.kasprintf Uri.of_string) "/"
@@ -340,6 +360,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeBandwidthRateLimitSchedule ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeCache -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeCacheReport -> (Format.kasprintf Uri.of_string) "/"
       | DescribeCachediSCSIVolumes -> (Format.kasprintf Uri.of_string) "/"
       | DescribeChapCredentials -> (Format.kasprintf Uri.of_string) "/"
       | DescribeFileSystemAssociations ->
@@ -360,9 +381,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DetachVolume -> (Format.kasprintf Uri.of_string) "/"
       | DisableGateway -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateFileSystem -> (Format.kasprintf Uri.of_string) "/"
+      | EvictFilesFailingUpload -> (Format.kasprintf Uri.of_string) "/"
       | JoinDomain -> (Format.kasprintf Uri.of_string) "/"
       | ListAutomaticTapeCreationPolicies ->
           (Format.kasprintf Uri.of_string) "/"
+      | ListCacheReports -> (Format.kasprintf Uri.of_string) "/"
       | ListFileShares -> (Format.kasprintf Uri.of_string) "/"
       | ListFileSystemAssociations -> (Format.kasprintf Uri.of_string) "/"
       | ListGateways -> (Format.kasprintf Uri.of_string) "/"
@@ -383,6 +406,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | SetSMBGuestPassword -> (Format.kasprintf Uri.of_string) "/"
       | ShutdownGateway -> (Format.kasprintf Uri.of_string) "/"
       | StartAvailabilityMonitorTest -> (Format.kasprintf Uri.of_string) "/"
+      | StartCacheReport -> (Format.kasprintf Uri.of_string) "/"
       | StartGateway -> (Format.kasprintf Uri.of_string) "/"
       | UpdateAutomaticTapeCreationPolicy ->
           (Format.kasprintf Uri.of_string) "/"
@@ -475,6 +499,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "StorageGateway_20130630.CancelArchival")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CancelCacheReport ->
+      let json = CancelCacheReportInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "StorageGateway_20130630.CancelCacheReport")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CancelRetrieval ->
       let json = CancelRetrievalInput.to_json req in
@@ -575,6 +607,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "StorageGateway_20130630.DeleteBandwidthRateLimit")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteCacheReport ->
+      let json = DeleteCacheReportInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "StorageGateway_20130630.DeleteCacheReport")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteChapCredentials ->
       let json = DeleteChapCredentialsInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -673,6 +713,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "StorageGateway_20130630.DescribeCache")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeCacheReport ->
+      let json = DescribeCacheReportInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "StorageGateway_20130630.DescribeCacheReport")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeCachediSCSIVolumes ->
       let json = DescribeCachediSCSIVolumesInput.to_json req in
@@ -833,6 +881,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "StorageGateway_20130630.DisassociateFileSystem")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | EvictFilesFailingUpload ->
+      let json = EvictFilesFailingUploadInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "StorageGateway_20130630.EvictFilesFailingUpload")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | JoinDomain ->
       let json = JoinDomainInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -849,6 +905,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "StorageGateway_20130630.ListAutomaticTapeCreationPolicies")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListCacheReports ->
+      let json = ListCacheReportsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "StorageGateway_20130630.ListCacheReports")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListFileShares ->
       let json = ListFileSharesInput.to_json req in
@@ -1013,6 +1077,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "StorageGateway_20130630.StartAvailabilityMonitorTest")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartCacheReport ->
+      let json = StartCacheReportInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "StorageGateway_20130630.StartCacheReport")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartGateway ->
       let json = StartGatewayInput.to_json req in
@@ -1232,6 +1304,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CancelArchivalOutput.of_json json)
       else Error (parse_aws_error (Some CancelArchivalOutput.error_of_json))
+  | CancelCacheReport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CancelCacheReportOutput.of_json json)
+      else
+        Error (parse_aws_error (Some CancelCacheReportOutput.error_of_json))
   | CancelRetrieval ->
       if is_success
       then
@@ -1321,6 +1400,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteBandwidthRateLimitOutput.error_of_json))
+  | DeleteCacheReport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteCacheReportOutput.of_json json)
+      else
+        Error (parse_aws_error (Some DeleteCacheReportOutput.error_of_json))
   | DeleteChapCredentials ->
       if is_success
       then
@@ -1407,6 +1493,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeCacheOutput.of_json json)
       else Error (parse_aws_error (Some DescribeCacheOutput.error_of_json))
+  | DescribeCacheReport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeCacheReportOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeCacheReportOutput.error_of_json))
   | DescribeCachediSCSIVolumes ->
       if is_success
       then
@@ -1559,6 +1653,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DisassociateFileSystemOutput.error_of_json))
+  | EvictFilesFailingUpload ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (EvictFilesFailingUploadOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some EvictFilesFailingUploadOutput.error_of_json))
   | JoinDomain ->
       if is_success
       then
@@ -1574,6 +1676,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListAutomaticTapeCreationPoliciesOutput.error_of_json))
+  | ListCacheReports ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCacheReportsOutput.of_json json)
+      else
+        Error (parse_aws_error (Some ListCacheReportsOutput.error_of_json))
   | ListFileShares ->
       if is_success
       then
@@ -1719,6 +1828,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some StartAvailabilityMonitorTestOutput.error_of_json))
+  | StartCacheReport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartCacheReportOutput.of_json json)
+      else
+        Error (parse_aws_error (Some StartCacheReportOutput.error_of_json))
   | StartGateway ->
       if is_success
       then

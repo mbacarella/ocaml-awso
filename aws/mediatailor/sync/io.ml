@@ -11,11 +11,15 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let configure_logs_for_channel ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ConfigureLogsForChannel input
 let configure_logs_for_playback_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ConfigureLogsForPlaybackConfiguration
     input
 let create_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateChannel input
+let create_live_source ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLiveSource input
 let create_prefetch_schedule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreatePrefetchSchedule input
 let create_program ?endpoint_url ?cfg input =
@@ -28,6 +32,10 @@ let delete_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteChannel input
 let delete_channel_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteChannelPolicy input
+let delete_function ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteFunction input
+let delete_live_source ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteLiveSource input
 let delete_playback_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeletePlaybackConfiguration input
 let delete_prefetch_schedule ?endpoint_url ?cfg input =
@@ -40,6 +48,8 @@ let delete_vod_source ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteVodSource input
 let describe_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeChannel input
+let describe_live_source ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeLiveSource input
 let describe_program ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeProgram input
 let describe_source_location ?endpoint_url ?cfg input =
@@ -50,6 +60,8 @@ let get_channel_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetChannelPolicy input
 let get_channel_schedule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetChannelSchedule input
+let get_function ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetFunction input
 let get_playback_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPlaybackConfiguration input
 let get_prefetch_schedule ?endpoint_url ?cfg input =
@@ -58,6 +70,10 @@ let list_alerts ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAlerts input
 let list_channels ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListChannels input
+let list_functions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListFunctions input
+let list_live_sources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListLiveSources input
 let list_playback_configurations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPlaybackConfigurations input
 let list_prefetch_schedules ?endpoint_url ?cfg input =
@@ -70,6 +86,8 @@ let list_vod_sources ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListVodSources input
 let put_channel_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutChannelPolicy input
+let put_function ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutFunction input
 let put_playback_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutPlaybackConfiguration input
 let start_channel ?endpoint_url ?cfg input =
@@ -82,6 +100,10 @@ let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateChannel input
+let update_live_source ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateLiveSource input
+let update_program ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateProgram input
 let update_source_location ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateSourceLocation input
 let update_vod_source ?endpoint_url ?cfg input =

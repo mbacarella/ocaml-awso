@@ -32,6 +32,12 @@ val create_queue :
     ?cfg:Awso.Cfg.t ->
       CreateQueueRequest.t ->
         (CreateQueueResponse.t, CreateQueueResponse.error) Result.t
+val create_resource_share :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateResourceShareRequest.t ->
+        (CreateResourceShareResponse.t, CreateResourceShareResponse.error)
+          Result.t
 val delete_job_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -74,6 +80,12 @@ val get_job_template :
     ?cfg:Awso.Cfg.t ->
       GetJobTemplateRequest.t ->
         (GetJobTemplateResponse.t, GetJobTemplateResponse.error) Result.t
+val get_jobs_query_results :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetJobsQueryResultsRequest.t ->
+        (GetJobsQueryResultsResponse.t, GetJobsQueryResultsResponse.error)
+          Result.t
 val get_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -115,11 +127,30 @@ val list_tags_for_resource :
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t
+val list_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListVersionsRequest.t ->
+        (ListVersionsResponse.t, ListVersionsResponse.error) Result.t
+val probe :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ProbeRequest.t -> (ProbeResponse.t, ProbeResponse.error) Result.t
 val put_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutPolicyRequest.t ->
         (PutPolicyResponse.t, PutPolicyResponse.error) Result.t
+val search_jobs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SearchJobsRequest.t ->
+        (SearchJobsResponse.t, SearchJobsResponse.error) Result.t
+val start_jobs_query :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartJobsQueryRequest.t ->
+        (StartJobsQueryResponse.t, StartJobsQueryResponse.error) Result.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

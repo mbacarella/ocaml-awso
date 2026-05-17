@@ -2,67 +2,95 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | CancelTagSyncTask: (CancelTagSyncTaskInput.t, unit, unit) t 
   | CreateGroup: (CreateGroupInput.t, CreateGroupOutput.t,
   CreateGroupOutput.error) t 
   | DeleteGroup: (DeleteGroupInput.t, DeleteGroupOutput.t,
   DeleteGroupOutput.error) t 
+  | GetAccountSettings: (unit, GetAccountSettingsOutput.t,
+  GetAccountSettingsOutput.error) t 
   | GetGroup: (GetGroupInput.t, GetGroupOutput.t, GetGroupOutput.error) t 
   | GetGroupConfiguration: (GetGroupConfigurationInput.t,
   GetGroupConfigurationOutput.t, GetGroupConfigurationOutput.error) t 
   | GetGroupQuery: (GetGroupQueryInput.t, GetGroupQueryOutput.t,
   GetGroupQueryOutput.error) t 
+  | GetTagSyncTask: (GetTagSyncTaskInput.t, GetTagSyncTaskOutput.t,
+  GetTagSyncTaskOutput.error) t 
   | GetTags: (GetTagsInput.t, GetTagsOutput.t, GetTagsOutput.error) t 
   | GroupResources: (GroupResourcesInput.t, GroupResourcesOutput.t,
   GroupResourcesOutput.error) t 
   | ListGroupResources: (ListGroupResourcesInput.t,
   ListGroupResourcesOutput.t, ListGroupResourcesOutput.error) t 
+  | ListGroupingStatuses: (ListGroupingStatusesInput.t,
+  ListGroupingStatusesOutput.t, ListGroupingStatusesOutput.error) t 
   | ListGroups: (ListGroupsInput.t, ListGroupsOutput.t,
   ListGroupsOutput.error) t 
+  | ListTagSyncTasks: (ListTagSyncTasksInput.t, ListTagSyncTasksOutput.t,
+  ListTagSyncTasksOutput.error) t 
   | PutGroupConfiguration: (PutGroupConfigurationInput.t,
   PutGroupConfigurationOutput.t, PutGroupConfigurationOutput.error) t 
   | SearchResources: (SearchResourcesInput.t, SearchResourcesOutput.t,
   SearchResourcesOutput.error) t 
+  | StartTagSyncTask: (StartTagSyncTaskInput.t, StartTagSyncTaskOutput.t,
+  StartTagSyncTaskOutput.error) t 
   | Tag: (TagInput.t, TagOutput.t, TagOutput.error) t 
   | UngroupResources: (UngroupResourcesInput.t, UngroupResourcesOutput.t,
   UngroupResourcesOutput.error) t 
   | Untag: (UntagInput.t, UntagOutput.t, UntagOutput.error) t 
+  | UpdateAccountSettings: (UpdateAccountSettingsInput.t,
+  UpdateAccountSettingsOutput.t, UpdateAccountSettingsOutput.error) t 
   | UpdateGroup: (UpdateGroupInput.t, UpdateGroupOutput.t,
   UpdateGroupOutput.error) t 
   | UpdateGroupQuery: (UpdateGroupQueryInput.t, UpdateGroupQueryOutput.t,
   UpdateGroupQueryOutput.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | CancelTagSyncTask -> `POST
   | CreateGroup -> `POST
   | DeleteGroup -> `POST
+  | GetAccountSettings -> `POST
   | GetGroup -> `POST
   | GetGroupConfiguration -> `POST
   | GetGroupQuery -> `POST
+  | GetTagSyncTask -> `POST
   | GetTags -> `GET
   | GroupResources -> `POST
   | ListGroupResources -> `POST
+  | ListGroupingStatuses -> `POST
   | ListGroups -> `POST
+  | ListTagSyncTasks -> `POST
   | PutGroupConfiguration -> `POST
   | SearchResources -> `POST
+  | StartTagSyncTask -> `POST
   | Tag -> `PUT
   | UngroupResources -> `POST
   | Untag -> `PATCH
+  | UpdateAccountSettings -> `POST
   | UpdateGroup -> `POST
   | UpdateGroupQuery -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | CancelTagSyncTask ->
+          (Format.kasprintf Uri.of_string) "/cancel-tag-sync-task"
       | CreateGroup -> (Format.kasprintf Uri.of_string) "/groups"
       | DeleteGroup -> (Format.kasprintf Uri.of_string) "/delete-group"
+      | GetAccountSettings ->
+          (Format.kasprintf Uri.of_string) "/get-account-settings"
       | GetGroup -> (Format.kasprintf Uri.of_string) "/get-group"
       | GetGroupConfiguration ->
           (Format.kasprintf Uri.of_string) "/get-group-configuration"
       | GetGroupQuery -> (Format.kasprintf Uri.of_string) "/get-group-query"
+      | GetTagSyncTask ->
+          (Format.kasprintf Uri.of_string) "/get-tag-sync-task"
       | GetTags ->
           (Format.kasprintf Uri.of_string) "/resources/%s/tags"
-            (GroupArn.to_header x.GetTagsInput.arn)
+            (GroupArnV2.to_header x.GetTagsInput.arn)
       | GroupResources -> (Format.kasprintf Uri.of_string) "/group-resources"
       | ListGroupResources ->
           (Format.kasprintf Uri.of_string) "/list-group-resources"
+      | ListGroupingStatuses ->
+          (Format.kasprintf Uri.of_string) "/list-grouping-statuses"
       | ListGroups ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/groups-list")
@@ -73,18 +101,24 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken])
+      | ListTagSyncTasks ->
+          (Format.kasprintf Uri.of_string) "/list-tag-sync-tasks"
       | PutGroupConfiguration ->
           (Format.kasprintf Uri.of_string) "/put-group-configuration"
       | SearchResources ->
           (Format.kasprintf Uri.of_string) "/resources/search"
+      | StartTagSyncTask ->
+          (Format.kasprintf Uri.of_string) "/start-tag-sync-task"
       | Tag ->
           (Format.kasprintf Uri.of_string) "/resources/%s/tags"
-            (GroupArn.to_header x.TagInput.arn)
+            (GroupArnV2.to_header x.TagInput.arn)
       | UngroupResources ->
           (Format.kasprintf Uri.of_string) "/ungroup-resources"
       | Untag ->
           (Format.kasprintf Uri.of_string) "/resources/%s/tags"
-            (GroupArn.to_header x.UntagInput.arn)
+            (GroupArnV2.to_header x.UntagInput.arn)
+      | UpdateAccountSettings ->
+          (Format.kasprintf Uri.of_string) "/update-account-settings"
       | UpdateGroup -> (Format.kasprintf Uri.of_string) "/update-group"
       | UpdateGroupQuery ->
           (Format.kasprintf Uri.of_string) "/update-group-query")
@@ -92,6 +126,26 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | CancelTagSyncTask ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("TaskArn",
+                           (TagSyncTaskArn.to_value
+                              req.CancelTagSyncTaskInput.taskArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateGroup ->
       let (headers, body) =
         let headers =
@@ -103,7 +157,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                    (List.filter_opt
                       [Some
                          ("Name",
-                           (GroupName.to_value req.CreateGroupInput.name));
+                           (CreateGroupName.to_value
+                              req.CreateGroupInput.name));
                       Option.map req.CreateGroupInput.description
                         ~f:(fun x ->
                               ("Description", (Description.to_value x)));
@@ -115,7 +170,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.CreateGroupInput.configuration
                         ~f:(fun x ->
                               ("Configuration",
-                                (GroupConfigurationList.to_value x)))])
+                                (GroupConfigurationList.to_value x)));
+                      Option.map req.CreateGroupInput.criticality
+                        ~f:(fun x ->
+                              ("Criticality", (Criticality.to_value x)));
+                      Option.map req.CreateGroupInput.owner
+                        ~f:(fun x -> ("Owner", (Owner.to_value x)));
+                      Option.map req.CreateGroupInput.displayName
+                        ~f:(fun x ->
+                              ("DisplayName", (DisplayName.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -135,13 +198,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Option.map req.DeleteGroupInput.groupName
                          ~f:(fun x -> ("GroupName", (GroupName.to_value x)));
                       Option.map req.DeleteGroupInput.group
-                        ~f:(fun x -> ("Group", (GroupString.to_value x)))])
+                        ~f:(fun x -> ("Group", (GroupStringV2.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
                          (x, value))))
                |> Yojson.Safe.to_string) in
         (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetAccountSettings ->
+      let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetGroup ->
       let (headers, body) =
@@ -155,7 +221,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Option.map req.GetGroupInput.groupName
                          ~f:(fun x -> ("GroupName", (GroupName.to_value x)));
                       Option.map req.GetGroupInput.group
-                        ~f:(fun x -> ("Group", (GroupString.to_value x)))])
+                        ~f:(fun x -> ("Group", (GroupStringV2.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -201,6 +267,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetTagSyncTask ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("TaskArn",
+                           (TagSyncTaskArn.to_value
+                              req.GetTagSyncTaskInput.taskArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetTags ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -215,7 +301,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                    (List.filter_opt
                       [Some
                          ("Group",
-                           (GroupString.to_value
+                           (GroupStringV2.to_value
                               req.GroupResourcesInput.group));
                       Some
                         ("ResourceArns",
@@ -240,13 +326,41 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Option.map req.ListGroupResourcesInput.groupName
                          ~f:(fun x -> ("GroupName", (GroupName.to_value x)));
                       Option.map req.ListGroupResourcesInput.group
-                        ~f:(fun x -> ("Group", (GroupString.to_value x)));
+                        ~f:(fun x -> ("Group", (GroupStringV2.to_value x)));
                       Option.map req.ListGroupResourcesInput.filters
                         ~f:(fun x ->
                               ("Filters", (ResourceFilterList.to_value x)));
                       Option.map req.ListGroupResourcesInput.maxResults
                         ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)));
                       Option.map req.ListGroupResourcesInput.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListGroupingStatuses ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Group",
+                           (GroupStringV2.to_value
+                              req.ListGroupingStatusesInput.group));
+                      Option.map req.ListGroupingStatusesInput.maxResults
+                        ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)));
+                      Option.map req.ListGroupingStatusesInput.filters
+                        ~f:(fun x ->
+                              ("Filters",
+                                (ListGroupingStatusesFilterList.to_value x)));
+                      Option.map req.ListGroupingStatusesInput.nextToken
                         ~f:(fun x -> ("NextToken", (NextToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -267,6 +381,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Option.map req.ListGroupsInput.filters
                          ~f:(fun x ->
                                ("Filters", (GroupFilterList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTagSyncTasks ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListTagSyncTasksInput.filters
+                         ~f:(fun x ->
+                               ("Filters",
+                                 (ListTagSyncTasksFilterList.to_value x)));
+                      Option.map req.ListTagSyncTasksInput.maxResults
+                        ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)));
+                      Option.map req.ListTagSyncTasksInput.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -320,6 +458,36 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartTagSyncTask ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Group",
+                           (GroupStringV2.to_value
+                              req.StartTagSyncTaskInput.group));
+                      Option.map req.StartTagSyncTaskInput.tagKey
+                        ~f:(fun x -> ("TagKey", (TagKey.to_value x)));
+                      Option.map req.StartTagSyncTaskInput.tagValue
+                        ~f:(fun x -> ("TagValue", (TagValue.to_value x)));
+                      Option.map req.StartTagSyncTaskInput.resourceQuery
+                        ~f:(fun x ->
+                              ("ResourceQuery", (ResourceQuery.to_value x)));
+                      Some
+                        ("RoleArn",
+                          (RoleArn.to_value req.StartTagSyncTaskInput.roleArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | Tag -> Awso.Http.Request.make (method_of_endpoint endp)
   | UngroupResources ->
       let (headers, body) =
@@ -332,7 +500,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                    (List.filter_opt
                       [Some
                          ("Group",
-                           (GroupString.to_value
+                           (GroupStringV2.to_value
                               req.UngroupResourcesInput.group));
                       Some
                         ("ResourceArns",
@@ -346,6 +514,28 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | Untag -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateAccountSettings ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateAccountSettingsInput.groupLifecycleEventsDesiredStatus
+                         ~f:(fun x ->
+                               ("GroupLifecycleEventsDesiredStatus",
+                                 (GroupLifecycleEventsDesiredStatus.to_value
+                                    x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateGroup ->
       let (headers, body) =
         let headers =
@@ -358,10 +548,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Option.map req.UpdateGroupInput.groupName
                          ~f:(fun x -> ("GroupName", (GroupName.to_value x)));
                       Option.map req.UpdateGroupInput.group
-                        ~f:(fun x -> ("Group", (GroupString.to_value x)));
+                        ~f:(fun x -> ("Group", (GroupStringV2.to_value x)));
                       Option.map req.UpdateGroupInput.description
                         ~f:(fun x ->
-                              ("Description", (Description.to_value x)))])
+                              ("Description", (Description.to_value x)));
+                      Option.map req.UpdateGroupInput.criticality
+                        ~f:(fun x ->
+                              ("Criticality", (Criticality.to_value x)));
+                      Option.map req.UpdateGroupInput.owner
+                        ~f:(fun x -> ("Owner", (Owner.to_value x)));
+                      Option.map req.UpdateGroupInput.displayName
+                        ~f:(fun x ->
+                              ("DisplayName", (DisplayName.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -441,6 +639,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | CancelTagSyncTask ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | CreateGroup ->
       if is_success
       then Ok (CreateGroupOutput.of_json (response_to_json resp))
@@ -449,6 +649,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (DeleteGroupOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some DeleteGroupOutput.error_of_json))
+  | GetAccountSettings ->
+      if is_success
+      then Ok (GetAccountSettingsOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetAccountSettingsOutput.error_of_json))
   | GetGroup ->
       if is_success
       then Ok (GetGroupOutput.of_json (response_to_json resp))
@@ -463,6 +668,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetGroupQueryOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetGroupQueryOutput.error_of_json))
+  | GetTagSyncTask ->
+      if is_success
+      then Ok (GetTagSyncTaskOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetTagSyncTaskOutput.error_of_json))
   | GetTags ->
       if is_success
       then Ok (GetTagsOutput.of_json (response_to_json resp))
@@ -476,10 +685,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (ListGroupResourcesOutput.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListGroupResourcesOutput.error_of_json))
+  | ListGroupingStatuses ->
+      if is_success
+      then Ok (ListGroupingStatusesOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListGroupingStatusesOutput.error_of_json))
   | ListGroups ->
       if is_success
       then Ok (ListGroupsOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListGroupsOutput.error_of_json))
+  | ListTagSyncTasks ->
+      if is_success
+      then Ok (ListTagSyncTasksOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListTagSyncTasksOutput.error_of_json))
   | PutGroupConfiguration ->
       if is_success
       then
@@ -493,6 +713,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (SearchResourcesOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some SearchResourcesOutput.error_of_json))
+  | StartTagSyncTask ->
+      if is_success
+      then Ok (StartTagSyncTaskOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some StartTagSyncTaskOutput.error_of_json))
   | Tag ->
       if is_success
       then Ok (TagOutput.of_json (response_to_json resp))
@@ -506,6 +731,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (UntagOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UntagOutput.error_of_json))
+  | UpdateAccountSettings ->
+      if is_success
+      then Ok (UpdateAccountSettingsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateAccountSettingsOutput.error_of_json))
   | UpdateGroup ->
       if is_success
       then Ok (UpdateGroupOutput.of_json (response_to_json resp))

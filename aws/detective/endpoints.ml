@@ -3,6 +3,12 @@ open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
   | AcceptInvitation: (AcceptInvitationRequest.t, unit, unit) t 
+  | BatchGetGraphMemberDatasources: (BatchGetGraphMemberDatasourcesRequest.t,
+  BatchGetGraphMemberDatasourcesResponse.t,
+  BatchGetGraphMemberDatasourcesResponse.error) t 
+  | BatchGetMembershipDatasources: (BatchGetMembershipDatasourcesRequest.t,
+  BatchGetMembershipDatasourcesResponse.t,
+  BatchGetMembershipDatasourcesResponse.error) t 
   | CreateGraph: (CreateGraphRequest.t, CreateGraphResponse.t,
   CreateGraphResponse.error) t 
   | CreateMembers: (CreateMembersRequest.t, CreateMembersResponse.t,
@@ -18,10 +24,18 @@ type ('i, 'o, 'e) t =
   | DisassociateMembership: (DisassociateMembershipRequest.t, unit, unit) t 
   | EnableOrganizationAdminAccount: (EnableOrganizationAdminAccountRequest.t,
   unit, unit) t 
+  | GetInvestigation: (GetInvestigationRequest.t, GetInvestigationResponse.t,
+  GetInvestigationResponse.error) t 
   | GetMembers: (GetMembersRequest.t, GetMembersResponse.t,
   GetMembersResponse.error) t 
+  | ListDatasourcePackages: (ListDatasourcePackagesRequest.t,
+  ListDatasourcePackagesResponse.t, ListDatasourcePackagesResponse.error) t 
   | ListGraphs: (ListGraphsRequest.t, ListGraphsResponse.t,
   ListGraphsResponse.error) t 
+  | ListIndicators: (ListIndicatorsRequest.t, ListIndicatorsResponse.t,
+  ListIndicatorsResponse.error) t 
+  | ListInvestigations: (ListInvestigationsRequest.t,
+  ListInvestigationsResponse.t, ListInvestigationsResponse.error) t 
   | ListInvitations: (ListInvitationsRequest.t, ListInvitationsResponse.t,
   ListInvitationsResponse.error) t 
   | ListMembers: (ListMembersRequest.t, ListMembersResponse.t,
@@ -32,16 +46,24 @@ type ('i, 'o, 'e) t =
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | RejectInvitation: (RejectInvitationRequest.t, unit, unit) t 
+  | StartInvestigation: (StartInvestigationRequest.t,
+  StartInvestigationResponse.t, StartInvestigationResponse.error) t 
   | StartMonitoringMember: (StartMonitoringMemberRequest.t, unit, unit) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateDatasourcePackages: (UpdateDatasourcePackagesRequest.t, unit, 
+  unit) t 
+  | UpdateInvestigationState: (UpdateInvestigationStateRequest.t, unit, 
+  unit) t 
   | UpdateOrganizationConfiguration:
   (UpdateOrganizationConfigurationRequest.t, unit, unit) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AcceptInvitation -> `PUT
+  | BatchGetGraphMemberDatasources -> `POST
+  | BatchGetMembershipDatasources -> `POST
   | CreateGraph -> `POST
   | CreateMembers -> `POST
   | DeleteGraph -> `POST
@@ -50,21 +72,32 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DisableOrganizationAdminAccount -> `POST
   | DisassociateMembership -> `POST
   | EnableOrganizationAdminAccount -> `POST
+  | GetInvestigation -> `POST
   | GetMembers -> `POST
+  | ListDatasourcePackages -> `POST
   | ListGraphs -> `POST
+  | ListIndicators -> `POST
+  | ListInvestigations -> `POST
   | ListInvitations -> `POST
   | ListMembers -> `POST
   | ListOrganizationAdminAccounts -> `POST
   | ListTagsForResource -> `GET
   | RejectInvitation -> `POST
+  | StartInvestigation -> `POST
   | StartMonitoringMember -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
+  | UpdateDatasourcePackages -> `POST
+  | UpdateInvestigationState -> `POST
   | UpdateOrganizationConfiguration -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | AcceptInvitation -> (Format.kasprintf Uri.of_string) "/invitation"
+      | BatchGetGraphMemberDatasources ->
+          (Format.kasprintf Uri.of_string) "/graph/datasources/get"
+      | BatchGetMembershipDatasources ->
+          (Format.kasprintf Uri.of_string) "/membership/datasources/get"
       | CreateGraph -> (Format.kasprintf Uri.of_string) "/graph"
       | CreateMembers -> (Format.kasprintf Uri.of_string) "/graph/members"
       | DeleteGraph -> (Format.kasprintf Uri.of_string) "/graph/removal"
@@ -79,8 +112,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/membership/removal"
       | EnableOrganizationAdminAccount ->
           (Format.kasprintf Uri.of_string) "/orgs/enableAdminAccount"
+      | GetInvestigation ->
+          (Format.kasprintf Uri.of_string) "/investigations/getInvestigation"
       | GetMembers -> (Format.kasprintf Uri.of_string) "/graph/members/get"
+      | ListDatasourcePackages ->
+          (Format.kasprintf Uri.of_string) "/graph/datasources/list"
       | ListGraphs -> (Format.kasprintf Uri.of_string) "/graphs/list"
+      | ListIndicators ->
+          (Format.kasprintf Uri.of_string) "/investigations/listIndicators"
+      | ListInvestigations ->
+          (Format.kasprintf Uri.of_string)
+            "/investigations/listInvestigations"
       | ListInvitations ->
           (Format.kasprintf Uri.of_string) "/invitations/list"
       | ListMembers -> (Format.kasprintf Uri.of_string) "/graph/members/list"
@@ -91,6 +133,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (GraphArn.to_header x.ListTagsForResourceRequest.resourceArn)
       | RejectInvitation ->
           (Format.kasprintf Uri.of_string) "/invitation/removal"
+      | StartInvestigation ->
+          (Format.kasprintf Uri.of_string)
+            "/investigations/startInvestigation"
       | StartMonitoringMember ->
           (Format.kasprintf Uri.of_string) "/graph/member/monitoringstate"
       | TagResource ->
@@ -102,6 +147,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (GraphArn.to_header x.UntagResourceRequest.resourceArn))
             (List.filter_opt
                [Some ("tagKeys", (TagKeyList.to_header x.tagKeys))])
+      | UpdateDatasourcePackages ->
+          (Format.kasprintf Uri.of_string) "/graph/datasources/update"
+      | UpdateInvestigationState ->
+          (Format.kasprintf Uri.of_string)
+            "/investigations/updateInvestigationState"
       | UpdateOrganizationConfiguration ->
           (Format.kasprintf Uri.of_string)
             "/orgs/updateOrganizationConfiguration")
@@ -110,6 +160,50 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
   | AcceptInvitation -> Awso.Http.Request.make (method_of_endpoint endp)
+  | BatchGetGraphMemberDatasources ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("GraphArn",
+                           (GraphArn.to_value
+                              req.BatchGetGraphMemberDatasourcesRequest.graphArn));
+                      Some
+                        ("AccountIds",
+                          (AccountIdExtendedList.to_value
+                             req.BatchGetGraphMemberDatasourcesRequest.accountIds))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchGetMembershipDatasources ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("GraphArns",
+                           (GraphArnList.to_value
+                              req.BatchGetMembershipDatasourcesRequest.graphArns))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateGraph ->
       let (headers, body) =
         let headers =
@@ -265,6 +359,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetInvestigation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("GraphArn",
+                           (GraphArn.to_value
+                              req.GetInvestigationRequest.graphArn));
+                      Some
+                        ("InvestigationId",
+                          (InvestigationId.to_value
+                             req.GetInvestigationRequest.investigationId))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetMembers ->
       let (headers, body) =
         let headers =
@@ -288,6 +406,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListDatasourcePackages ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("GraphArn",
+                           (GraphArn.to_value
+                              req.ListDatasourcePackagesRequest.graphArn));
+                      Option.map req.ListDatasourcePackagesRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (PaginationToken.to_value x)));
+                      Option.map req.ListDatasourcePackagesRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MemberResultsLimit.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListGraphs ->
       let (headers, body) =
         let headers =
@@ -303,6 +447,69 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.ListGraphsRequest.maxResults
                         ~f:(fun x ->
                               ("MaxResults", (MemberResultsLimit.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListIndicators ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("GraphArn",
+                           (GraphArn.to_value
+                              req.ListIndicatorsRequest.graphArn));
+                      Some
+                        ("InvestigationId",
+                          (InvestigationId.to_value
+                             req.ListIndicatorsRequest.investigationId));
+                      Option.map req.ListIndicatorsRequest.indicatorType
+                        ~f:(fun x ->
+                              ("IndicatorType", (IndicatorType.to_value x)));
+                      Option.map req.ListIndicatorsRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (AiPaginationToken.to_value x)));
+                      Option.map req.ListIndicatorsRequest.maxResults
+                        ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListInvestigations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("GraphArn",
+                           (GraphArn.to_value
+                              req.ListInvestigationsRequest.graphArn));
+                      Option.map req.ListInvestigationsRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (AiPaginationToken.to_value x)));
+                      Option.map req.ListInvestigationsRequest.maxResults
+                        ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)));
+                      Option.map req.ListInvestigationsRequest.filterCriteria
+                        ~f:(fun x ->
+                              ("FilterCriteria", (FilterCriteria.to_value x)));
+                      Option.map req.ListInvestigationsRequest.sortCriteria
+                        ~f:(fun x ->
+                              ("SortCriteria", (SortCriteria.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -404,6 +611,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartInvestigation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("GraphArn",
+                           (GraphArn.to_value
+                              req.StartInvestigationRequest.graphArn));
+                      Some
+                        ("EntityArn",
+                          (EntityArn.to_value
+                             req.StartInvestigationRequest.entityArn));
+                      Some
+                        ("ScopeStartTime",
+                          (Timestamp.to_value
+                             req.StartInvestigationRequest.scopeStartTime));
+                      Some
+                        ("ScopeEndTime",
+                          (Timestamp.to_value
+                             req.StartInvestigationRequest.scopeEndTime))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | StartMonitoringMember ->
       let (headers, body) =
         let headers =
@@ -448,6 +687,58 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateDatasourcePackages ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("GraphArn",
+                           (GraphArn.to_value
+                              req.UpdateDatasourcePackagesRequest.graphArn));
+                      Some
+                        ("DatasourcePackages",
+                          (DatasourcePackageList.to_value
+                             req.UpdateDatasourcePackagesRequest.datasourcePackages))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateInvestigationState ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("GraphArn",
+                           (GraphArn.to_value
+                              req.UpdateInvestigationStateRequest.graphArn));
+                      Some
+                        ("InvestigationId",
+                          (InvestigationId.to_value
+                             req.UpdateInvestigationStateRequest.investigationId));
+                      Some
+                        ("State",
+                          (State.to_value
+                             req.UpdateInvestigationStateRequest.state))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateOrganizationConfiguration ->
       let (headers, body) =
         let headers =
@@ -521,6 +812,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   match endpoint with
   | AcceptInvitation ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | BatchGetGraphMemberDatasources ->
+      if is_success
+      then
+        Ok
+          (BatchGetGraphMemberDatasourcesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetGraphMemberDatasourcesResponse.error_of_json))
+  | BatchGetMembershipDatasources ->
+      if is_success
+      then
+        Ok
+          (BatchGetMembershipDatasourcesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetMembershipDatasourcesResponse.error_of_json))
   | CreateGraph ->
       if is_success
       then Ok (CreateGraphResponse.of_json (response_to_json resp))
@@ -550,14 +861,38 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | EnableOrganizationAdminAccount ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | GetInvestigation ->
+      if is_success
+      then Ok (GetInvestigationResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetInvestigationResponse.error_of_json))
   | GetMembers ->
       if is_success
       then Ok (GetMembersResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetMembersResponse.error_of_json))
+  | ListDatasourcePackages ->
+      if is_success
+      then
+        Ok (ListDatasourcePackagesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDatasourcePackagesResponse.error_of_json))
   | ListGraphs ->
       if is_success
       then Ok (ListGraphsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListGraphsResponse.error_of_json))
+  | ListIndicators ->
+      if is_success
+      then Ok (ListIndicatorsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListIndicatorsResponse.error_of_json))
+  | ListInvestigations ->
+      if is_success
+      then Ok (ListInvestigationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListInvestigationsResponse.error_of_json))
   | ListInvitations ->
       if is_success
       then Ok (ListInvitationsResponse.of_json (response_to_json resp))
@@ -585,6 +920,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | RejectInvitation ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | StartInvestigation ->
+      if is_success
+      then Ok (StartInvestigationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartInvestigationResponse.error_of_json))
   | StartMonitoringMember ->
       if is_success then Ok () else Error (parse_aws_error None)
   | TagResource ->
@@ -601,5 +942,9 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UntagResourceResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateDatasourcePackages ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateInvestigationState ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateOrganizationConfiguration ->
       if is_success then Ok () else Error (parse_aws_error None)

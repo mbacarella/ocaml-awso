@@ -14,10 +14,14 @@ type ('i, 'o, 'e) t =
   DeleteClusterResponse.error) t 
   | DeleteHsm: (DeleteHsmRequest.t, DeleteHsmResponse.t,
   DeleteHsmResponse.error) t 
+  | DeleteResourcePolicy: (DeleteResourcePolicyRequest.t,
+  DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error) t 
   | DescribeBackups: (DescribeBackupsRequest.t, DescribeBackupsResponse.t,
   DescribeBackupsResponse.error) t 
   | DescribeClusters: (DescribeClustersRequest.t, DescribeClustersResponse.t,
   DescribeClustersResponse.error) t 
+  | GetResourcePolicy: (GetResourcePolicyRequest.t,
+  GetResourcePolicyResponse.t, GetResourcePolicyResponse.error) t 
   | InitializeCluster: (InitializeClusterRequest.t,
   InitializeClusterResponse.t, InitializeClusterResponse.error) t 
   | ListTags: (ListTagsRequest.t, ListTagsResponse.t, ListTagsResponse.error)
@@ -26,6 +30,8 @@ type ('i, 'o, 'e) t =
   ModifyBackupAttributesResponse.t, ModifyBackupAttributesResponse.error) t 
   | ModifyCluster: (ModifyClusterRequest.t, ModifyClusterResponse.t,
   ModifyClusterResponse.error) t 
+  | PutResourcePolicy: (PutResourcePolicyRequest.t,
+  PutResourcePolicyResponse.t, PutResourcePolicyResponse.error) t 
   | RestoreBackup: (RestoreBackupRequest.t, RestoreBackupResponse.t,
   RestoreBackupResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
@@ -40,12 +46,15 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteBackup -> `POST
   | DeleteCluster -> `POST
   | DeleteHsm -> `POST
+  | DeleteResourcePolicy -> `POST
   | DescribeBackups -> `POST
   | DescribeClusters -> `POST
+  | GetResourcePolicy -> `POST
   | InitializeCluster -> `POST
   | ListTags -> `POST
   | ModifyBackupAttributes -> `POST
   | ModifyCluster -> `POST
+  | PutResourcePolicy -> `POST
   | RestoreBackup -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
@@ -58,12 +67,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteBackup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteCluster -> (Format.kasprintf Uri.of_string) "/"
       | DeleteHsm -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | DescribeBackups -> (Format.kasprintf Uri.of_string) "/"
       | DescribeClusters -> (Format.kasprintf Uri.of_string) "/"
+      | GetResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | InitializeCluster -> (Format.kasprintf Uri.of_string) "/"
       | ListTags -> (Format.kasprintf Uri.of_string) "/"
       | ModifyBackupAttributes -> (Format.kasprintf Uri.of_string) "/"
       | ModifyCluster -> (Format.kasprintf Uri.of_string) "/"
+      | PutResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | RestoreBackup -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/")
@@ -118,6 +130,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "BaldrApiService.DeleteHsm")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteResourcePolicy ->
+      let json = DeleteResourcePolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "BaldrApiService.DeleteResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeBackups ->
       let json = DescribeBackupsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -133,6 +153,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "BaldrApiService.DescribeClusters")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetResourcePolicy ->
+      let json = GetResourcePolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "BaldrApiService.GetResourcePolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | InitializeCluster ->
       let json = InitializeClusterRequest.to_json req in
@@ -165,6 +193,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "BaldrApiService.ModifyCluster")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutResourcePolicy ->
+      let json = PutResourcePolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "BaldrApiService.PutResourcePolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | RestoreBackup ->
       let json = RestoreBackupRequest.to_json req in
@@ -251,6 +287,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteHsmResponse.of_json json)
       else Error (parse_aws_error (Some DeleteHsmResponse.error_of_json))
+  | DeleteResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteResourcePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteResourcePolicyResponse.error_of_json))
   | DescribeBackups ->
       if is_success
       then
@@ -265,6 +309,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DescribeClustersResponse.of_json json)
       else
         Error (parse_aws_error (Some DescribeClustersResponse.error_of_json))
+  | GetResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetResourcePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetResourcePolicyResponse.error_of_json))
   | InitializeCluster ->
       if is_success
       then
@@ -294,6 +346,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ModifyClusterResponse.of_json json)
       else Error (parse_aws_error (Some ModifyClusterResponse.error_of_json))
+  | PutResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutResourcePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutResourcePolicyResponse.error_of_json))
   | RestoreBackup ->
       if is_success
       then

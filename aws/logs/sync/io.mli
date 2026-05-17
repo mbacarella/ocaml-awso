@@ -3,29 +3,108 @@ open Awso_logs.Values
 val associate_kms_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> AssociateKmsKeyRequest.t -> (unit, unit) Result.t
+val associate_source_to_s3_table_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AssociateSourceToS3TableIntegrationRequest.t ->
+        (AssociateSourceToS3TableIntegrationResponse.t,
+          AssociateSourceToS3TableIntegrationResponse.error) Result.t
 val cancel_export_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> CancelExportTaskRequest.t -> (unit, unit) Result.t
+val cancel_import_task :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CancelImportTaskRequest.t ->
+        (CancelImportTaskResponse.t, CancelImportTaskResponse.error) Result.t
+val create_delivery :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateDeliveryRequest.t ->
+        (CreateDeliveryResponse.t, CreateDeliveryResponse.error) Result.t
 val create_export_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateExportTaskRequest.t ->
         (CreateExportTaskResponse.t, CreateExportTaskResponse.error) Result.t
+val create_import_task :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateImportTaskRequest.t ->
+        (CreateImportTaskResponse.t, CreateImportTaskResponse.error) Result.t
+val create_log_anomaly_detector :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateLogAnomalyDetectorRequest.t ->
+        (CreateLogAnomalyDetectorResponse.t,
+          CreateLogAnomalyDetectorResponse.error) Result.t
 val create_log_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> CreateLogGroupRequest.t -> (unit, unit) Result.t
 val create_log_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> CreateLogStreamRequest.t -> (unit, unit) Result.t
+val create_lookup_table :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateLookupTableRequest.t ->
+        (CreateLookupTableResponse.t, CreateLookupTableResponse.error)
+          Result.t
+val create_scheduled_query :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateScheduledQueryRequest.t ->
+        (CreateScheduledQueryResponse.t, CreateScheduledQueryResponse.error)
+          Result.t
+val delete_account_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteAccountPolicyRequest.t -> (unit, unit) Result.t
+val delete_data_protection_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDataProtectionPolicyRequest.t -> (unit, unit) Result.t
+val delete_delivery :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteDeliveryRequest.t -> (unit, unit) Result.t
+val delete_delivery_destination :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDeliveryDestinationRequest.t -> (unit, unit) Result.t
+val delete_delivery_destination_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDeliveryDestinationPolicyRequest.t -> (unit, unit) Result.t
+val delete_delivery_source :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteDeliverySourceRequest.t -> (unit, unit) Result.t
 val delete_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteDestinationRequest.t -> (unit, unit) Result.t
+val delete_index_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteIndexPolicyRequest.t ->
+        (DeleteIndexPolicyResponse.t, DeleteIndexPolicyResponse.error)
+          Result.t
+val delete_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteIntegrationRequest.t ->
+        (DeleteIntegrationResponse.t, DeleteIntegrationResponse.error)
+          Result.t
+val delete_log_anomaly_detector :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteLogAnomalyDetectorRequest.t -> (unit, unit) Result.t
 val delete_log_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteLogGroupRequest.t -> (unit, unit) Result.t
 val delete_log_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteLogStreamRequest.t -> (unit, unit) Result.t
+val delete_lookup_table :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteLookupTableRequest.t -> (unit, unit) Result.t
 val delete_metric_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteMetricFilterRequest.t -> (unit, unit) Result.t
@@ -42,10 +121,49 @@ val delete_retention_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRetentionPolicyRequest.t -> (unit, unit) Result.t
+val delete_scheduled_query :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteScheduledQueryRequest.t ->
+        (DeleteScheduledQueryResponse.t, DeleteScheduledQueryResponse.error)
+          Result.t
 val delete_subscription_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSubscriptionFilterRequest.t -> (unit, unit) Result.t
+val delete_transformer :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteTransformerRequest.t -> (unit, unit) Result.t
+val describe_account_policies :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeAccountPoliciesRequest.t ->
+        (DescribeAccountPoliciesResponse.t,
+          DescribeAccountPoliciesResponse.error) Result.t
+val describe_configuration_templates :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeConfigurationTemplatesRequest.t ->
+        (DescribeConfigurationTemplatesResponse.t,
+          DescribeConfigurationTemplatesResponse.error) Result.t
+val describe_deliveries :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDeliveriesRequest.t ->
+        (DescribeDeliveriesResponse.t, DescribeDeliveriesResponse.error)
+          Result.t
+val describe_delivery_destinations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDeliveryDestinationsRequest.t ->
+        (DescribeDeliveryDestinationsResponse.t,
+          DescribeDeliveryDestinationsResponse.error) Result.t
+val describe_delivery_sources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDeliverySourcesRequest.t ->
+        (DescribeDeliverySourcesResponse.t,
+          DescribeDeliverySourcesResponse.error) Result.t
 val describe_destinations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -58,6 +176,30 @@ val describe_export_tasks :
       DescribeExportTasksRequest.t ->
         (DescribeExportTasksResponse.t, DescribeExportTasksResponse.error)
           Result.t
+val describe_field_indexes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeFieldIndexesRequest.t ->
+        (DescribeFieldIndexesResponse.t, DescribeFieldIndexesResponse.error)
+          Result.t
+val describe_import_task_batches :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeImportTaskBatchesRequest.t ->
+        (DescribeImportTaskBatchesResponse.t,
+          DescribeImportTaskBatchesResponse.error) Result.t
+val describe_import_tasks :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeImportTasksRequest.t ->
+        (DescribeImportTasksResponse.t, DescribeImportTasksResponse.error)
+          Result.t
+val describe_index_policies :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeIndexPoliciesRequest.t ->
+        (DescribeIndexPoliciesResponse.t,
+          DescribeIndexPoliciesResponse.error) Result.t
 val describe_log_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -69,6 +211,12 @@ val describe_log_streams :
     ?cfg:Awso.Cfg.t ->
       DescribeLogStreamsRequest.t ->
         (DescribeLogStreamsResponse.t, DescribeLogStreamsResponse.error)
+          Result.t
+val describe_lookup_tables :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeLookupTablesRequest.t ->
+        (DescribeLookupTablesResponse.t, DescribeLookupTablesResponse.error)
           Result.t
 val describe_metric_filters :
   ?endpoint_url:string ->
@@ -102,37 +250,199 @@ val describe_subscription_filters :
 val disassociate_kms_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DisassociateKmsKeyRequest.t -> (unit, unit) Result.t
+val disassociate_source_from_s3_table_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DisassociateSourceFromS3TableIntegrationRequest.t ->
+        (DisassociateSourceFromS3TableIntegrationResponse.t,
+          DisassociateSourceFromS3TableIntegrationResponse.error) Result.t
 val filter_log_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       FilterLogEventsRequest.t ->
         (FilterLogEventsResponse.t, FilterLogEventsResponse.error) Result.t
+val get_data_protection_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDataProtectionPolicyRequest.t ->
+        (GetDataProtectionPolicyResponse.t,
+          GetDataProtectionPolicyResponse.error) Result.t
+val get_delivery :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDeliveryRequest.t ->
+        (GetDeliveryResponse.t, GetDeliveryResponse.error) Result.t
+val get_delivery_destination :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDeliveryDestinationRequest.t ->
+        (GetDeliveryDestinationResponse.t,
+          GetDeliveryDestinationResponse.error) Result.t
+val get_delivery_destination_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDeliveryDestinationPolicyRequest.t ->
+        (GetDeliveryDestinationPolicyResponse.t,
+          GetDeliveryDestinationPolicyResponse.error) Result.t
+val get_delivery_source :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDeliverySourceRequest.t ->
+        (GetDeliverySourceResponse.t, GetDeliverySourceResponse.error)
+          Result.t
+val get_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetIntegrationRequest.t ->
+        (GetIntegrationResponse.t, GetIntegrationResponse.error) Result.t
+val get_log_anomaly_detector :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetLogAnomalyDetectorRequest.t ->
+        (GetLogAnomalyDetectorResponse.t,
+          GetLogAnomalyDetectorResponse.error) Result.t
 val get_log_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLogEventsRequest.t ->
         (GetLogEventsResponse.t, GetLogEventsResponse.error) Result.t
+val get_log_fields :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetLogFieldsRequest.t ->
+        (GetLogFieldsResponse.t, GetLogFieldsResponse.error) Result.t
 val get_log_group_fields :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLogGroupFieldsRequest.t ->
         (GetLogGroupFieldsResponse.t, GetLogGroupFieldsResponse.error)
           Result.t
+val get_log_object :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetLogObjectRequest.t ->
+        (GetLogObjectResponse.t, GetLogObjectResponse.error) Result.t
 val get_log_record :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLogRecordRequest.t ->
         (GetLogRecordResponse.t, GetLogRecordResponse.error) Result.t
+val get_lookup_table :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetLookupTableRequest.t ->
+        (GetLookupTableResponse.t, GetLookupTableResponse.error) Result.t
 val get_query_results :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetQueryResultsRequest.t ->
         (GetQueryResultsResponse.t, GetQueryResultsResponse.error) Result.t
+val get_scheduled_query :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetScheduledQueryRequest.t ->
+        (GetScheduledQueryResponse.t, GetScheduledQueryResponse.error)
+          Result.t
+val get_scheduled_query_history :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetScheduledQueryHistoryRequest.t ->
+        (GetScheduledQueryHistoryResponse.t,
+          GetScheduledQueryHistoryResponse.error) Result.t
+val get_transformer :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetTransformerRequest.t ->
+        (GetTransformerResponse.t, GetTransformerResponse.error) Result.t
+val list_aggregate_log_group_summaries :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAggregateLogGroupSummariesRequest.t ->
+        (ListAggregateLogGroupSummariesResponse.t,
+          ListAggregateLogGroupSummariesResponse.error) Result.t
+val list_anomalies :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAnomaliesRequest.t ->
+        (ListAnomaliesResponse.t, ListAnomaliesResponse.error) Result.t
+val list_integrations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListIntegrationsRequest.t ->
+        (ListIntegrationsResponse.t, ListIntegrationsResponse.error) Result.t
+val list_log_anomaly_detectors :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListLogAnomalyDetectorsRequest.t ->
+        (ListLogAnomalyDetectorsResponse.t,
+          ListLogAnomalyDetectorsResponse.error) Result.t
+val list_log_groups :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListLogGroupsRequest.t ->
+        (ListLogGroupsResponse.t, ListLogGroupsResponse.error) Result.t
+val list_log_groups_for_query :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListLogGroupsForQueryRequest.t ->
+        (ListLogGroupsForQueryResponse.t,
+          ListLogGroupsForQueryResponse.error) Result.t
+val list_scheduled_queries :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListScheduledQueriesRequest.t ->
+        (ListScheduledQueriesResponse.t, ListScheduledQueriesResponse.error)
+          Result.t
+val list_sources_for_s3_table_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSourcesForS3TableIntegrationRequest.t ->
+        (ListSourcesForS3TableIntegrationResponse.t,
+          ListSourcesForS3TableIntegrationResponse.error) Result.t
+val list_tags_for_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTagsForResourceRequest.t ->
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t
 val list_tags_log_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsLogGroupRequest.t ->
         (ListTagsLogGroupResponse.t, ListTagsLogGroupResponse.error) Result.t
+val put_account_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutAccountPolicyRequest.t ->
+        (PutAccountPolicyResponse.t, PutAccountPolicyResponse.error) Result.t
+val put_bearer_token_authentication :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutBearerTokenAuthenticationRequest.t -> (unit, unit) Result.t
+val put_data_protection_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutDataProtectionPolicyRequest.t ->
+        (PutDataProtectionPolicyResponse.t,
+          PutDataProtectionPolicyResponse.error) Result.t
+val put_delivery_destination :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutDeliveryDestinationRequest.t ->
+        (PutDeliveryDestinationResponse.t,
+          PutDeliveryDestinationResponse.error) Result.t
+val put_delivery_destination_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutDeliveryDestinationPolicyRequest.t ->
+        (PutDeliveryDestinationPolicyResponse.t,
+          PutDeliveryDestinationPolicyResponse.error) Result.t
+val put_delivery_source :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutDeliverySourceRequest.t ->
+        (PutDeliverySourceResponse.t, PutDeliverySourceResponse.error)
+          Result.t
 val put_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -141,11 +451,25 @@ val put_destination :
 val put_destination_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> PutDestinationPolicyRequest.t -> (unit, unit) Result.t
+val put_index_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutIndexPolicyRequest.t ->
+        (PutIndexPolicyResponse.t, PutIndexPolicyResponse.error) Result.t
+val put_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutIntegrationRequest.t ->
+        (PutIntegrationResponse.t, PutIntegrationResponse.error) Result.t
 val put_log_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutLogEventsRequest.t ->
         (PutLogEventsResponse.t, PutLogEventsResponse.error) Result.t
+val put_log_group_deletion_protection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutLogGroupDeletionProtectionRequest.t -> (unit, unit) Result.t
 val put_metric_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> PutMetricFilterRequest.t -> (unit, unit) Result.t
@@ -168,6 +492,14 @@ val put_subscription_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutSubscriptionFilterRequest.t -> (unit, unit) Result.t
+val put_transformer :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> PutTransformerRequest.t -> (unit, unit) Result.t
+val start_live_tail :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartLiveTailRequest.t ->
+        (StartLiveTailResponse.t, StartLiveTailResponse.error) Result.t
 val start_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -181,11 +513,47 @@ val stop_query :
 val tag_log_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> TagLogGroupRequest.t -> (unit, unit) Result.t
+val tag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> TagResourceRequest.t -> (unit, unit) Result.t
 val test_metric_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TestMetricFilterRequest.t ->
         (TestMetricFilterResponse.t, TestMetricFilterResponse.error) Result.t
+val test_transformer :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TestTransformerRequest.t ->
+        (TestTransformerResponse.t, TestTransformerResponse.error) Result.t
 val untag_log_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> UntagLogGroupRequest.t -> (unit, unit) Result.t
+val untag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> UntagResourceRequest.t -> (unit, unit) Result.t
+val update_anomaly :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> UpdateAnomalyRequest.t -> (unit, unit) Result.t
+val update_delivery_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDeliveryConfigurationRequest.t ->
+        (UpdateDeliveryConfigurationResponse.t,
+          UpdateDeliveryConfigurationResponse.error) Result.t
+val update_log_anomaly_detector :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateLogAnomalyDetectorRequest.t -> (unit, unit) Result.t
+val update_lookup_table :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateLookupTableRequest.t ->
+        (UpdateLookupTableResponse.t, UpdateLookupTableResponse.error)
+          Result.t
+val update_scheduled_query :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateScheduledQueryRequest.t ->
+        (UpdateScheduledQueryResponse.t, UpdateScheduledQueryResponse.error)
+          Result.t

@@ -28,6 +28,22 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let cancel_tag_sync_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and taskArn =
+         flag "task-arn" (required string) ~doc:"STRING TagSyncTaskArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_tag_sync_task
+           (Values.CancelTagSyncTaskInput.make ~taskArn ()) None None])
 let create_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -46,7 +62,12 @@ let create_group =
        and configuration =
          flag "configuration" (optional json_arg)
            ~doc:"JSON GroupConfigurationList"
-       and name = flag "name" (required string) ~doc:"STRING GroupName" in
+       and criticality =
+         flag "criticality" (optional int) ~doc:"INT Criticality"
+       and owner = flag "owner" (optional string) ~doc:"STRING Owner"
+       and displayName =
+         flag "display-name" (optional string) ~doc:"STRING DisplayName"
+       and name = flag "name" (required string) ~doc:"STRING CreateGroupName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_group
@@ -56,8 +77,8 @@ let create_group =
               ?tags:(Option.map ~f:Values.Tags.of_json tags)
               ?configuration:(Option.map
                                 ~f:Values.GroupConfigurationList.of_json
-                                configuration) ~name ())
-           (Some Values.CreateGroupOutput.to_json)
+                                configuration) ?criticality ?owner
+              ?displayName ~name ()) (Some Values.CreateGroupOutput.to_json)
            (Some Values.CreateGroupOutput.error_to_json)])
 let delete_group =
   Command.async ~summary:""
@@ -71,13 +92,29 @@ let delete_group =
            ~doc:"URL override endpoint url"
        and groupName =
          flag "group-name" (optional string) ~doc:"STRING GroupName"
-       and group = flag "group" (optional string) ~doc:"STRING GroupString" in
+       and group = flag "group" (optional string) ~doc:"STRING GroupStringV2" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_group
            (Values.DeleteGroupInput.make ?groupName ?group ())
            (Some Values.DeleteGroupOutput.to_json)
            (Some Values.DeleteGroupOutput.error_to_json)])
+let get_account_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_account_settings (Fn.id ())
+           (Some Values.GetAccountSettingsOutput.to_json)
+           (Some Values.GetAccountSettingsOutput.error_to_json)])
 let get_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -90,7 +127,7 @@ let get_group =
            ~doc:"URL override endpoint url"
        and groupName =
          flag "group-name" (optional string) ~doc:"STRING GroupName"
-       and group = flag "group" (optional string) ~doc:"STRING GroupString" in
+       and group = flag "group" (optional string) ~doc:"STRING GroupStringV2" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_group (Values.GetGroupInput.make ?groupName ?group ())
@@ -132,6 +169,23 @@ let get_group_query =
            (Values.GetGroupQueryInput.make ?groupName ?group ())
            (Some Values.GetGroupQueryOutput.to_json)
            (Some Values.GetGroupQueryOutput.error_to_json)])
+let get_tag_sync_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and taskArn =
+         flag "task-arn" (required string) ~doc:"STRING TagSyncTaskArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_tag_sync_task (Values.GetTagSyncTaskInput.make ~taskArn ())
+           (Some Values.GetTagSyncTaskOutput.to_json)
+           (Some Values.GetTagSyncTaskOutput.error_to_json)])
 let get_tags =
   Command.async ~summary:""
     ([%map_open.Command
@@ -142,7 +196,7 @@ let get_tags =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and arn = flag "arn" (required string) ~doc:"STRING GroupArn" in
+       and arn = flag "arn" (required string) ~doc:"STRING GroupArnV2" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_tags (Values.GetTagsInput.make ~arn ())
@@ -158,7 +212,7 @@ let group_resources =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and group = flag "group" (required string) ~doc:"STRING GroupString"
+       and group = flag "group" (required string) ~doc:"STRING GroupStringV2"
        and resourceArns =
          flag "resource-arns" (required json_arg) ~doc:"JSON ResourceArnList" in
        fun () ->
@@ -180,7 +234,7 @@ let list_group_resources =
            ~doc:"URL override endpoint url"
        and groupName =
          flag "group-name" (optional string) ~doc:"STRING GroupName"
-       and group = flag "group" (optional string) ~doc:"STRING GroupString"
+       and group = flag "group" (optional string) ~doc:"STRING GroupStringV2"
        and filters =
          flag "filters" (optional json_arg) ~doc:"JSON ResourceFilterList"
        and maxResults =
@@ -195,6 +249,33 @@ let list_group_resources =
                           filters) ?maxResults ?nextToken ())
            (Some Values.ListGroupResourcesOutput.to_json)
            (Some Values.ListGroupResourcesOutput.error_to_json)])
+let list_grouping_statuses =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListGroupingStatusesFilterList"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and group = flag "group" (required string) ~doc:"STRING GroupStringV2" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_grouping_statuses
+           (Values.ListGroupingStatusesInput.make ?maxResults
+              ?filters:(Option.map
+                          ~f:Values.ListGroupingStatusesFilterList.of_json
+                          filters) ?nextToken ~group ())
+           (Some Values.ListGroupingStatusesOutput.to_json)
+           (Some Values.ListGroupingStatusesOutput.error_to_json)])
 let list_groups =
   Command.async ~summary:""
     ([%map_open.Command
@@ -219,6 +300,32 @@ let list_groups =
               ?maxResults ?nextToken ())
            (Some Values.ListGroupsOutput.to_json)
            (Some Values.ListGroupsOutput.error_to_json)])
+let list_tag_sync_tasks =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListTagSyncTasksFilterList"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_tag_sync_tasks
+           (Values.ListTagSyncTasksInput.make
+              ?filters:(Option.map
+                          ~f:Values.ListTagSyncTasksFilterList.of_json
+                          filters) ?maxResults ?nextToken ())
+           (Some Values.ListTagSyncTasksOutput.to_json)
+           (Some Values.ListTagSyncTasksOutput.error_to_json)])
 let put_group_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -265,6 +372,31 @@ let search_resources =
               ~resourceQuery:(Values.ResourceQuery.of_json resourceQuery) ())
            (Some Values.SearchResourcesOutput.to_json)
            (Some Values.SearchResourcesOutput.error_to_json)])
+let start_tag_sync_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tagKey = flag "tag-key" (optional string) ~doc:"STRING TagKey"
+       and tagValue =
+         flag "tag-value" (optional string) ~doc:"STRING TagValue"
+       and resourceQuery =
+         flag "resource-query" (optional json_arg) ~doc:"JSON ResourceQuery"
+       and group = flag "group" (required string) ~doc:"STRING GroupStringV2"
+       and roleArn = flag "role-arn" (required string) ~doc:"STRING RoleArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_tag_sync_task
+           (Values.StartTagSyncTaskInput.make ?tagKey ?tagValue
+              ?resourceQuery:(Option.map ~f:Values.ResourceQuery.of_json
+                                resourceQuery) ~group ~roleArn ())
+           (Some Values.StartTagSyncTaskOutput.to_json)
+           (Some Values.StartTagSyncTaskOutput.error_to_json)])
 let tag =
   Command.async ~summary:""
     ([%map_open.Command
@@ -275,7 +407,7 @@ let tag =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and arn = flag "arn" (required string) ~doc:"STRING GroupArn"
+       and arn = flag "arn" (required string) ~doc:"STRING GroupArnV2"
        and tags = flag "tags" (required json_arg) ~doc:"JSON Tags" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region Io.tag
@@ -292,7 +424,7 @@ let ungroup_resources =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and group = flag "group" (required string) ~doc:"STRING GroupString"
+       and group = flag "group" (required string) ~doc:"STRING GroupStringV2"
        and resourceArns =
          flag "resource-arns" (required json_arg) ~doc:"JSON ResourceArnList" in
        fun () ->
@@ -312,7 +444,7 @@ let untag =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and arn = flag "arn" (required string) ~doc:"STRING GroupArn"
+       and arn = flag "arn" (required string) ~doc:"STRING GroupArnV2"
        and keys = flag "keys" (required json_arg) ~doc:"JSON TagKeyList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region Io.untag
@@ -320,6 +452,28 @@ let untag =
               ~keys:(Values.TagKeyList.of_json keys) ())
            (Some Values.UntagOutput.to_json)
            (Some Values.UntagOutput.error_to_json)])
+let update_account_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and groupLifecycleEventsDesiredStatus =
+         flag "group-lifecycle-events-desired-status" (optional json_arg)
+           ~doc:"JSON GroupLifecycleEventsDesiredStatus" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_account_settings
+           (Values.UpdateAccountSettingsInput.make
+              ?groupLifecycleEventsDesiredStatus:(Option.map
+                                                    ~f:Values.GroupLifecycleEventsDesiredStatus.of_json
+                                                    groupLifecycleEventsDesiredStatus)
+              ()) (Some Values.UpdateAccountSettingsOutput.to_json)
+           (Some Values.UpdateAccountSettingsOutput.error_to_json)])
 let update_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -332,13 +486,19 @@ let update_group =
            ~doc:"URL override endpoint url"
        and groupName =
          flag "group-name" (optional string) ~doc:"STRING GroupName"
-       and group = flag "group" (optional string) ~doc:"STRING GroupString"
+       and group = flag "group" (optional string) ~doc:"STRING GroupStringV2"
        and description =
-         flag "description" (optional string) ~doc:"STRING Description" in
+         flag "description" (optional string) ~doc:"STRING Description"
+       and criticality =
+         flag "criticality" (optional int) ~doc:"INT Criticality"
+       and owner = flag "owner" (optional string) ~doc:"STRING Owner"
+       and displayName =
+         flag "display-name" (optional string) ~doc:"STRING DisplayName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_group
-           (Values.UpdateGroupInput.make ?groupName ?group ?description ())
+           (Values.UpdateGroupInput.make ?groupName ?group ?description
+              ?criticality ?owner ?displayName ())
            (Some Values.UpdateGroupOutput.to_json)
            (Some Values.UpdateGroupOutput.error_to_json)])
 let update_group_query =
@@ -366,19 +526,26 @@ let update_group_query =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("create-group", create_group);
+    [("cancel-tag-sync-task", cancel_tag_sync_task);
+    ("create-group", create_group);
     ("delete-group", delete_group);
+    ("get-account-settings", get_account_settings);
     ("get-group", get_group);
     ("get-group-configuration", get_group_configuration);
     ("get-group-query", get_group_query);
+    ("get-tag-sync-task", get_tag_sync_task);
     ("get-tags", get_tags);
     ("group-resources", group_resources);
     ("list-group-resources", list_group_resources);
+    ("list-grouping-statuses", list_grouping_statuses);
     ("list-groups", list_groups);
+    ("list-tag-sync-tasks", list_tag_sync_tasks);
     ("put-group-configuration", put_group_configuration);
     ("search-resources", search_resources);
+    ("start-tag-sync-task", start_tag_sync_task);
     ("tag", tag);
     ("ungroup-resources", ungroup_resources);
     ("untag", untag);
+    ("update-account-settings", update_account_settings);
     ("update-group", update_group);
     ("update-group-query", update_group_query)]

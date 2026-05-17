@@ -374,6 +374,9 @@ let list_anomalies_for_insight =
          flag "next-token" (optional string) ~doc:"STRING UuidNextToken"
        and accountId =
          flag "account-id" (optional string) ~doc:"STRING AwsAccountId"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListAnomaliesForInsightFilters"
        and insightId =
          flag "insight-id" (required string) ~doc:"STRING InsightId" in
        fun () ->
@@ -382,9 +385,36 @@ let list_anomalies_for_insight =
            (Values.ListAnomaliesForInsightRequest.make
               ?startTimeRange:(Option.map ~f:Values.StartTimeRange.of_json
                                  startTimeRange) ?maxResults ?nextToken
-              ?accountId ~insightId ())
+              ?accountId
+              ?filters:(Option.map
+                          ~f:Values.ListAnomaliesForInsightFilters.of_json
+                          filters) ~insightId ())
            (Some Values.ListAnomaliesForInsightResponse.to_json)
            (Some Values.ListAnomaliesForInsightResponse.error_to_json)])
+let list_anomalous_log_groups =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListAnomalousLogGroupsMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING UuidNextToken"
+       and insightId =
+         flag "insight-id" (required string) ~doc:"STRING InsightId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_anomalous_log_groups
+           (Values.ListAnomalousLogGroupsRequest.make ?maxResults ?nextToken
+              ~insightId ())
+           (Some Values.ListAnomalousLogGroupsResponse.to_json)
+           (Some Values.ListAnomalousLogGroupsResponse.error_to_json)])
 let list_events =
   Command.async ~summary:""
     ([%map_open.Command
@@ -435,6 +465,33 @@ let list_insights =
                                statusFilter) ())
            (Some Values.ListInsightsResponse.to_json)
            (Some Values.ListInsightsResponse.error_to_json)])
+let list_monitored_resources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListMonitoredResourcesFilters"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListMonitoredResourcesMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING UuidNextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_monitored_resources
+           (Values.ListMonitoredResourcesRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListMonitoredResourcesFilters.of_json
+                          filters) ?maxResults ?nextToken ())
+           (Some Values.ListMonitoredResourcesResponse.to_json)
+           (Some Values.ListMonitoredResourcesResponse.error_to_json)])
 let list_notification_channels =
   Command.async ~summary:""
     ([%map_open.Command
@@ -734,8 +791,10 @@ let main =
     ("get-cost-estimation", get_cost_estimation);
     ("get-resource-collection", get_resource_collection);
     ("list-anomalies-for-insight", list_anomalies_for_insight);
+    ("list-anomalous-log-groups", list_anomalous_log_groups);
     ("list-events", list_events);
     ("list-insights", list_insights);
+    ("list-monitored-resources", list_monitored_resources);
     ("list-notification-channels", list_notification_channels);
     ("list-organization-insights", list_organization_insights);
     ("list-recommendations", list_recommendations);

@@ -71,3 +71,5 @@ let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_file_system ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateFileSystem input
+let update_file_system_protection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateFileSystemProtection input

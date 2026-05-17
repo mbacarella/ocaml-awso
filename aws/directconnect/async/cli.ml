@@ -451,6 +451,7 @@ let create_direct_connect_gateway =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and amazonSideAsn =
          flag "amazon-side-asn" (optional json_arg) ~doc:"JSON LongAsn"
        and directConnectGatewayName =
@@ -460,6 +461,7 @@ let create_direct_connect_gateway =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_direct_connect_gateway
            (Values.CreateDirectConnectGatewayRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ?amazonSideAsn:(Option.map ~f:Values.LongAsn.of_json
                                 amazonSideAsn) ~directConnectGatewayName ())
            (Some Values.CreateDirectConnectGatewayResult.to_json)
@@ -553,6 +555,8 @@ let create_interconnect =
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and providerName =
          flag "provider-name" (optional string) ~doc:"STRING ProviderName"
+       and requestMACSec =
+         flag "request-m-a-c-sec" (optional bool) ~doc:"BOOL RequestMACSec"
        and interconnectName =
          flag "interconnect-name" (required string)
            ~doc:"STRING InterconnectName"
@@ -565,7 +569,7 @@ let create_interconnect =
            Io.create_interconnect
            (Values.CreateInterconnectRequest.make ?lagId
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ?providerName
-              ~interconnectName ~bandwidth ~location ())
+              ?requestMACSec ~interconnectName ~bandwidth ~location ())
            (Some Values.Interconnect.to_json)
            (Some Values.Interconnect.error_to_json)])
 let create_lag =
@@ -688,6 +692,7 @@ let delete_b_g_p_peer =
          flag "virtual-interface-id" (optional string)
            ~doc:"STRING VirtualInterfaceId"
        and asn = flag "asn" (optional int) ~doc:"INT ASN"
+       and asnLong = flag "asn-long" (optional json_arg) ~doc:"JSON LongAsn"
        and customerAddress =
          flag "customer-address" (optional string)
            ~doc:"STRING CustomerAddress"
@@ -697,6 +702,7 @@ let delete_b_g_p_peer =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_b_g_p_peer
            (Values.DeleteBGPPeerRequest.make ?virtualInterfaceId ?asn
+              ?asnLong:(Option.map ~f:Values.LongAsn.of_json asnLong)
               ?customerAddress ?bgpPeerId ())
            (Some Values.DeleteBGPPeerResponse.to_json)
            (Some Values.DeleteBGPPeerResponse.error_to_json)])
@@ -876,12 +882,16 @@ let describe_connections =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and connectionId =
-         flag "connection-id" (optional string) ~doc:"STRING ConnectionId" in
+         flag "connection-id" (optional string) ~doc:"STRING ConnectionId"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultSetSize"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_connections
-           (Values.DescribeConnectionsRequest.make ?connectionId ())
-           (Some Values.Connections.to_json)
+           (Values.DescribeConnectionsRequest.make ?connectionId ?maxResults
+              ?nextToken ()) (Some Values.Connections.to_json)
            (Some Values.Connections.error_to_json)])
 let describe_connections_on_interconnect =
   Command.async ~summary:""
@@ -1050,13 +1060,17 @@ let describe_hosted_connections =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultSetSize"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
        and connectionId =
          flag "connection-id" (required string) ~doc:"STRING ConnectionId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_hosted_connections
-           (Values.DescribeHostedConnectionsRequest.make ~connectionId ())
-           (Some Values.Connections.to_json)
+           (Values.DescribeHostedConnectionsRequest.make ?maxResults
+              ?nextToken ~connectionId ()) (Some Values.Connections.to_json)
            (Some Values.Connections.error_to_json)])
 let describe_interconnect_loa =
   Command.async ~summary:""
@@ -1096,12 +1110,16 @@ let describe_interconnects =
            ~doc:"URL override endpoint url"
        and interconnectId =
          flag "interconnect-id" (optional string)
-           ~doc:"STRING InterconnectId" in
+           ~doc:"STRING InterconnectId"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultSetSize"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_interconnects
-           (Values.DescribeInterconnectsRequest.make ?interconnectId ())
-           (Some Values.Interconnects.to_json)
+           (Values.DescribeInterconnectsRequest.make ?interconnectId
+              ?maxResults ?nextToken ()) (Some Values.Interconnects.to_json)
            (Some Values.Interconnects.error_to_json)])
 let describe_lags =
   Command.async ~summary:""
@@ -1113,10 +1131,15 @@ let describe_lags =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and lagId = flag "lag-id" (optional string) ~doc:"STRING LagId" in
+       and lagId = flag "lag-id" (optional string) ~doc:"STRING LagId"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultSetSize"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_lags (Values.DescribeLagsRequest.make ?lagId ())
+           Io.describe_lags
+           (Values.DescribeLagsRequest.make ?lagId ?maxResults ?nextToken ())
            (Some Values.Lags.to_json) (Some Values.Lags.error_to_json)])
 let describe_loa =
   Command.async ~summary:""
@@ -1229,12 +1252,17 @@ let describe_virtual_interfaces =
          flag "connection-id" (optional string) ~doc:"STRING ConnectionId"
        and virtualInterfaceId =
          flag "virtual-interface-id" (optional string)
-           ~doc:"STRING VirtualInterfaceId" in
+           ~doc:"STRING VirtualInterfaceId"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultSetSize"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_virtual_interfaces
            (Values.DescribeVirtualInterfacesRequest.make ?connectionId
-              ?virtualInterfaceId ()) (Some Values.VirtualInterfaces.to_json)
+              ?virtualInterfaceId ?maxResults ?nextToken ())
+           (Some Values.VirtualInterfaces.to_json)
            (Some Values.VirtualInterfaces.error_to_json)])
 let disassociate_connection_from_lag =
   Command.async ~summary:""

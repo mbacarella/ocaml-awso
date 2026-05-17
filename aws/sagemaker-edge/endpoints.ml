@@ -2,14 +2,20 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | GetDeployments: (GetDeploymentsRequest.t, GetDeploymentsResult.t,
+  GetDeploymentsResult.error) t 
   | GetDeviceRegistration: (GetDeviceRegistrationRequest.t,
   GetDeviceRegistrationResult.t, GetDeviceRegistrationResult.error) t 
   | SendHeartbeat: (SendHeartbeatRequest.t, unit, unit) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
-  function | GetDeviceRegistration -> `POST | SendHeartbeat -> `POST
+  function
+  | GetDeployments -> `POST
+  | GetDeviceRegistration -> `POST
+  | SendHeartbeat -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | GetDeployments -> (Format.kasprintf Uri.of_string) "/GetDeployments"
       | GetDeviceRegistration ->
           (Format.kasprintf Uri.of_string) "/GetDeviceRegistration"
       | SendHeartbeat -> (Format.kasprintf Uri.of_string) "/SendHeartbeat")
@@ -17,6 +23,30 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | GetDeployments ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("DeviceName",
+                           (DeviceName.to_value
+                              req.GetDeploymentsRequest.deviceName));
+                      Some
+                        ("DeviceFleetName",
+                          (DeviceFleetName.to_value
+                             req.GetDeploymentsRequest.deviceFleetName))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetDeviceRegistration ->
       let (headers, body) =
         let headers =
@@ -66,7 +96,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("DeviceFleetName",
                           (DeviceFleetName.to_value
-                             req.SendHeartbeatRequest.deviceFleetName))])
+                             req.SendHeartbeatRequest.deviceFleetName));
+                      Option.map req.SendHeartbeatRequest.deploymentResult
+                        ~f:(fun x ->
+                              ("DeploymentResult",
+                                (DeploymentResult.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -122,6 +156,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | GetDeployments ->
+      if is_success
+      then Ok (GetDeploymentsResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetDeploymentsResult.error_of_json))
   | GetDeviceRegistration ->
       if is_success
       then Ok (GetDeviceRegistrationResult.of_json (response_to_json resp))

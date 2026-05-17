@@ -62,7 +62,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | Subscribe -> (Format.kasprintf Uri.of_string) "/subscribe"
       | TagResource -> (Format.kasprintf Uri.of_string) "/tagResource"
       | Unsubscribe -> (Format.kasprintf Uri.of_string) "/unsubscribe"
-      | UntagResource -> (Format.kasprintf Uri.of_string) "/untagResource"
+      | UntagResource ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/untagResource/%s"
+               (NotificationRuleArn.to_header x.UntagResourceRequest.arn))
+            (List.filter_opt
+               [Some ("tagKeys", (TagKeys.to_header x.tagKeys))])
       | UpdateNotificationRule ->
           (Format.kasprintf Uri.of_string) "/updateNotificationRule")
   [@ocaml.warning "-27"])
@@ -344,27 +349,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("Arn",
-                           (NotificationRuleArn.to_value
-                              req.UntagResourceRequest.arn));
-                      Some
-                        ("TagKeys",
-                          (TagKeys.to_value req.UntagResourceRequest.tagKeys))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
+      let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateNotificationRule ->
       let (headers, body) =

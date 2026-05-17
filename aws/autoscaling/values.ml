@@ -50,6 +50,19 @@ module MetricDimensionValue =
     let of_json j = string_of_json ~kind:"MetricDimensionValue" j
     let to_json = simple_to_json to_value
   end
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
 module MetricDimension =
   struct
     type nonrec t =
@@ -73,16 +86,43 @@ module MetricDimension =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" MetricDimensionValue.of_json in
-      let name = field_map_exn json "Name" MetricDimensionName.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" MetricDimensionValue.of_json in
+      let name = field_map_exn json__ "Name" MetricDimensionName.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the dimension of a metric."]
+module PerformanceFactorReferenceRequest =
+  struct
+    type nonrec t =
+      {
+      instanceFamily: String_.t option
+        [@ocaml.doc
+          "The instance family to use as a baseline reference. Make sure that you specify the correct value for the instance family. The instance family is everything before the period (.) in the instance type name. For example, in the instance c6i.large, the instance family is c6i, not c6. For more information, see Amazon EC2 instance type naming conventions in Amazon EC2 Instance Types. The following instance types are not supported for performance protection. c1 g3| g3s hpc7g m1| m2 mac1 | mac2 | mac2-m1ultra | mac2-m2 | mac2-m2pro p3dn | p4d | p5 t1 u-12tb1 | u-18tb1 | u-24tb1 | u-3tb1 | u-6tb1 | u-9tb1 | u7i-12tb | u7in-16tb | u7in-24tb | u7in-32tb If you performance protection by specifying a supported instance family, the returned instance types will exclude the preceding unsupported instance families. If you specify an unsupported instance family as a value for baseline performance, the API returns an empty response."]}
+    let make ?instanceFamily = fun () -> { instanceFamily }
+    let to_value x =
+      structure_to_value
+        [("InstanceFamily",
+           (Option.map x.instanceFamily ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let instanceFamily =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "InstanceFamily") in
+      make ?instanceFamily ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let instanceFamily = field_map json__ "InstanceFamily" String_.of_json in
+      make ?instanceFamily ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specify an instance family to use as the baseline reference for CPU performance. All instance types that All instance types that match your specified attributes will be compared against the CPU performance of the referenced instance family, regardless of CPU manufacturer or architecture differences. Currently only one instance family can be specified in the list."]
 module MetricDimensions =
   struct
     type nonrec t = MetricDimension.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricDimension.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -130,6 +170,36 @@ module MetricNamespace =
     let of_json j = string_of_json ~kind:"MetricNamespace" j
     let to_json = simple_to_json to_value
   end
+module PerformanceFactorReferenceSetRequest =
+  struct
+    type nonrec t = PerformanceFactorReferenceRequest.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PerformanceFactorReferenceRequest.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:PerformanceFactorReferenceRequest.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PerformanceFactorReferenceSetRequest"
+        ~of_json:PerformanceFactorReferenceRequest.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Metric =
   struct
     type nonrec t =
@@ -164,10 +234,11 @@ module Metric =
           (Xml.child_exn ~context:context_ xml_arg0 "Namespace") in
       make ?dimensions ~metricName ~namespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dimensions = field_map json "Dimensions" MetricDimensions.of_json in
-      let metricName = field_map_exn json "MetricName" MetricName.of_json in
-      let namespace = field_map_exn json "Namespace" MetricNamespace.of_json in
+    let of_json json__ =
+      let dimensions = field_map json__ "Dimensions" MetricDimensions.of_json in
+      let metricName = field_map_exn json__ "MetricName" MetricName.of_json in
+      let namespace =
+        field_map_exn json__ "Namespace" MetricNamespace.of_json in
       make ?dimensions ~metricName ~namespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a specific metric."]
@@ -323,12 +394,61 @@ module AcceleratorType =
     let of_json j = of_string (string_of_json ~kind:"AcceleratorType" j)
     let to_json = simple_to_json to_value
   end
+module AllowedInstanceType =
+  struct
+    type nonrec t = string
+    let context_ = "AllowedInstanceType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:30) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9\\.\\*\\-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AllowedInstanceType" j
+    let to_json = simple_to_json to_value
+  end
+module CpuPerformanceFactorRequest =
+  struct
+    type nonrec t =
+      {
+      references: PerformanceFactorReferenceSetRequest.t option
+        [@ocaml.doc
+          "Specify an instance family to use as the baseline reference for CPU performance. All instance types that match your specified attributes will be compared against the CPU performance of the referenced instance family, regardless of CPU manufacturer or architecture differences. Currently only one instance family can be specified in the list."]}
+    let make ?references = fun () -> { references }
+    let to_value x =
+      structure_to_value
+        [("Reference",
+           (Option.map x.references
+              ~f:PerformanceFactorReferenceSetRequest.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let references =
+        (Option.map ~f:PerformanceFactorReferenceSetRequest.of_xml)
+          (Xml.child xml_arg0 "Reference") in
+      make ?references ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let references =
+        field_map json__ "References"
+          PerformanceFactorReferenceSetRequest.of_json in
+      make ?references ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The CPU performance to consider, using an instance family as the baseline reference."]
 module CpuManufacturer =
   struct
     type nonrec t =
       | Intel 
       | Amd 
       | Amazon_web_services 
+      | Apple 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -336,12 +456,14 @@ module CpuManufacturer =
       | Intel -> "intel"
       | Amd -> "amd"
       | Amazon_web_services -> "amazon-web-services"
+      | Apple -> "apple"
       | Non_static_id s -> s
     let of_string =
       function
       | "intel" -> Intel
       | "amd" -> Amd
       | "amazon-web-services" -> Amazon_web_services
+      | "apple" -> Apple
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -361,7 +483,7 @@ module ExcludedInstance =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:30) >>=
-                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9\\.\\*]+")));
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9\\.\\*\\-]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -462,14 +584,14 @@ module MetricStat =
         Metric.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Metric") in
       make ?unit ~stat ~metric ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map json "Unit" MetricUnit.of_json in
-      let stat = field_map_exn json "Stat" XmlStringMetricStat.of_json in
-      let metric = field_map_exn json "Metric" Metric.of_json in
+    let of_json json__ =
+      let unit = field_map json__ "Unit" MetricUnit.of_json in
+      let stat = field_map_exn json__ "Stat" XmlStringMetricStat.of_json in
+      let metric = field_map_exn json__ "Metric" Metric.of_json in
       make ?unit ~stat ~metric ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This structure defines the CloudWatch metric to return, along with the statistic, period, and unit. For more information about the CloudWatch terminology below, see Amazon CloudWatch concepts in the Amazon CloudWatch User Guide."]
+       "This structure defines the CloudWatch metric to return, along with the statistic and unit. For more information about the CloudWatch terminology below, see Amazon CloudWatch concepts in the Amazon CloudWatch User Guide."]
 module ReturnData =
   struct
     type nonrec t = bool
@@ -568,9 +690,9 @@ module AcceleratorCountRequest =
           (Xml.child xml_arg0 "Min") in
       make ?max ?min ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let max = field_map json "Max" NullablePositiveInteger.of_json in
-      let min = field_map json "Min" NullablePositiveInteger.of_json in
+    let of_json json__ =
+      let max = field_map json__ "Max" NullablePositiveInteger.of_json in
+      let min = field_map json__ "Min" NullablePositiveInteger.of_json in
       make ?max ?min ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -579,6 +701,9 @@ module AcceleratorManufacturers =
   struct
     type nonrec t = AcceleratorManufacturer.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AcceleratorManufacturer.to_value)) |>
         (fun x -> `List x)
@@ -605,6 +730,9 @@ module AcceleratorNames =
   struct
     type nonrec t = AcceleratorName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AcceleratorName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -649,9 +777,9 @@ module AcceleratorTotalMemoryMiBRequest =
           (Xml.child xml_arg0 "Min") in
       make ?max ?min ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let max = field_map json "Max" NullablePositiveInteger.of_json in
-      let min = field_map json "Min" NullablePositiveInteger.of_json in
+    let of_json json__ =
+      let max = field_map json__ "Max" NullablePositiveInteger.of_json in
+      let min = field_map json__ "Min" NullablePositiveInteger.of_json in
       make ?max ?min ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -660,6 +788,9 @@ module AcceleratorTypes =
   struct
     type nonrec t = AcceleratorType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AcceleratorType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -679,6 +810,36 @@ module AcceleratorTypes =
     let of_json j =
       list_of_json ~kind:"AcceleratorTypes" ~of_json:AcceleratorType.of_json
         j
+    let to_json v = composed_to_json to_value v
+  end
+module AllowedInstanceTypes =
+  struct
+    type nonrec t = AllowedInstanceType.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:400); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AllowedInstanceType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AllowedInstanceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AllowedInstanceTypes"
+        ~of_json:AllowedInstanceType.of_json j
     let to_json v = composed_to_json to_value v
   end
 module BareMetal =
@@ -732,13 +893,37 @@ module BaselineEbsBandwidthMbpsRequest =
           (Xml.child xml_arg0 "Min") in
       make ?max ?min ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let max = field_map json "Max" NullablePositiveInteger.of_json in
-      let min = field_map json "Min" NullablePositiveInteger.of_json in
+    let of_json json__ =
+      let max = field_map json__ "Max" NullablePositiveInteger.of_json in
+      let min = field_map json__ "Min" NullablePositiveInteger.of_json in
       make ?max ?min ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the minimum and maximum for the BaselineEbsBandwidthMbps object when you specify InstanceRequirements for an Auto Scaling group."]
+module BaselinePerformanceFactorsRequest =
+  struct
+    type nonrec t =
+      {
+      cpu: CpuPerformanceFactorRequest.t option
+        [@ocaml.doc
+          "The CPU performance to consider, using an instance family as the baseline reference."]}
+    let make ?cpu = fun () -> { cpu }
+    let to_value x =
+      structure_to_value
+        [("Cpu", (Option.map x.cpu ~f:CpuPerformanceFactorRequest.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cpu =
+        (Option.map ~f:CpuPerformanceFactorRequest.of_xml)
+          (Xml.child xml_arg0 "Cpu") in
+      make ?cpu ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cpu = field_map json__ "Cpu" CpuPerformanceFactorRequest.of_json in
+      make ?cpu ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The baseline performance to consider, using an instance family as a baseline reference. The instance family establishes the lowest acceptable level of performance. Auto Scaling uses this baseline to guide instance type selection, but there is no guarantee that the selected instance types will always exceed the baseline for every application. Currently, this parameter only supports CPU performance as a baseline performance factor. For example, specifying c6i uses the CPU performance of the c6i family as the baseline reference."]
 module BurstablePerformance =
   struct
     type nonrec t =
@@ -772,6 +957,9 @@ module CpuManufacturers =
   struct
     type nonrec t = CpuManufacturer.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CpuManufacturer.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -798,6 +986,9 @@ module ExcludedInstanceTypes =
     type nonrec t = ExcludedInstance.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:400); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExcludedInstance.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -823,6 +1014,9 @@ module InstanceGenerations =
   struct
     type nonrec t = InstanceGeneration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceGeneration.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -876,6 +1070,9 @@ module LocalStorageTypes =
   struct
     type nonrec t = LocalStorageType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LocalStorageType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -920,9 +1117,9 @@ module MemoryGiBPerVCpuRequest =
           (Xml.child xml_arg0 "Min") in
       make ?max ?min ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let max = field_map json "Max" NullablePositiveDouble.of_json in
-      let min = field_map json "Min" NullablePositiveDouble.of_json in
+    let of_json json__ =
+      let max = field_map json__ "Max" NullablePositiveDouble.of_json in
+      let min = field_map json__ "Min" NullablePositiveDouble.of_json in
       make ?max ?min ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -951,13 +1148,45 @@ module MemoryMiBRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Min") in
       make ?max ~min ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let max = field_map json "Max" NullablePositiveInteger.of_json in
-      let min = field_map_exn json "Min" NullablePositiveInteger.of_json in
+    let of_json json__ =
+      let max = field_map json__ "Max" NullablePositiveInteger.of_json in
+      let min = field_map_exn json__ "Min" NullablePositiveInteger.of_json in
       make ?max ~min ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the minimum and maximum for the MemoryMiB object when you specify InstanceRequirements for an Auto Scaling group."]
+module NetworkBandwidthGbpsRequest =
+  struct
+    type nonrec t =
+      {
+      min: NullablePositiveDouble.t option
+        [@ocaml.doc
+          "The minimum amount of network bandwidth, in gigabits per second (Gbps)."];
+      max: NullablePositiveDouble.t option
+        [@ocaml.doc
+          "The maximum amount of network bandwidth, in gigabits per second (Gbps)."]}
+    let make ?min = fun ?max -> fun () -> { min; max }
+    let to_value x =
+      structure_to_value
+        [("Min", (Option.map x.min ~f:NullablePositiveDouble.to_value));
+        ("Max", (Option.map x.max ~f:NullablePositiveDouble.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let max =
+        (Option.map ~f:NullablePositiveDouble.of_xml)
+          (Xml.child xml_arg0 "Max") in
+      let min =
+        (Option.map ~f:NullablePositiveDouble.of_xml)
+          (Xml.child xml_arg0 "Min") in
+      make ?max ?min ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let max = field_map json__ "Max" NullablePositiveDouble.of_json in
+      let min = field_map json__ "Min" NullablePositiveDouble.of_json in
+      make ?max ?min ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the minimum and maximum for the NetworkBandwidthGbps object when you specify InstanceRequirements for an Auto Scaling group. Setting the minimum bandwidth does not guarantee that your instance will achieve the minimum bandwidth. Amazon EC2 will identify instance types that support the specified minimum bandwidth, but the actual bandwidth of your instance might go below the specified minimum at times. For more information, see Available instance bandwidth in the Amazon EC2 User Guide."]
 module NetworkInterfaceCountRequest =
   struct
     type nonrec t =
@@ -981,9 +1210,9 @@ module NetworkInterfaceCountRequest =
           (Xml.child xml_arg0 "Min") in
       make ?max ?min ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let max = field_map json "Max" NullablePositiveInteger.of_json in
-      let min = field_map json "Min" NullablePositiveInteger.of_json in
+    let of_json json__ =
+      let max = field_map json__ "Max" NullablePositiveInteger.of_json in
+      let min = field_map json__ "Min" NullablePositiveInteger.of_json in
       make ?max ?min ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1024,9 +1253,9 @@ module TotalLocalStorageGBRequest =
           (Xml.child xml_arg0 "Min") in
       make ?max ?min ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let max = field_map json "Max" NullablePositiveDouble.of_json in
-      let min = field_map json "Min" NullablePositiveDouble.of_json in
+    let of_json json__ =
+      let max = field_map json__ "Max" NullablePositiveDouble.of_json in
+      let min = field_map json__ "Min" NullablePositiveDouble.of_json in
       make ?max ?min ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1055,9 +1284,9 @@ module VCpuCountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Min") in
       make ?max ~min ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let max = field_map json "Max" NullablePositiveInteger.of_json in
-      let min = field_map_exn json "Min" NullablePositiveInteger.of_json in
+    let of_json json__ =
+      let max = field_map json__ "Max" NullablePositiveInteger.of_json in
+      let min = field_map_exn json__ "Min" NullablePositiveInteger.of_json in
       make ?max ~min ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1134,17 +1363,53 @@ module MetricDataQuery =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?returnData ?label ?metricStat ?expression ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let returnData = field_map json "ReturnData" ReturnData.of_json in
-      let label = field_map json "Label" XmlStringMetricLabel.of_json in
-      let metricStat = field_map json "MetricStat" MetricStat.of_json in
+    let of_json json__ =
+      let returnData = field_map json__ "ReturnData" ReturnData.of_json in
+      let label = field_map json__ "Label" XmlStringMetricLabel.of_json in
+      let metricStat = field_map json__ "MetricStat" MetricStat.of_json in
       let expression =
-        field_map json "Expression" XmlStringMaxLen1023.of_json in
-      let id = field_map_exn json "Id" XmlStringMaxLen255.of_json in
+        field_map json__ "Expression" XmlStringMaxLen1023.of_json in
+      let id = field_map_exn json__ "Id" XmlStringMaxLen255.of_json in
       make ?returnData ?label ?metricStat ?expression ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The metric data to return. Also defines whether this call is returning data for one metric only, or whether it is performing a math expression on the values of returned metric statistics to create a new time series. A time series is a series of data points, each of which is associated with a timestamp. For more information and examples, see Advanced predictive scaling policy configurations using custom metrics in the Amazon EC2 Auto Scaling User Guide."]
+module MetricGranularityInSeconds =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MetricGranularityInSeconds"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ImageId =
+  struct
+    type nonrec t = string
+    let context_ = "ImageId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:5) >>=
+             (fun () ->
+                (check_string_max i ~max:21) >>=
+                  (fun () -> check_pattern i ~pattern:"^ami-[a-z0-9]{1,17}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImageId" j
+    let to_json = simple_to_json to_value
+  end
 module InstanceRequirements =
   struct
     type nonrec t =
@@ -1157,53 +1422,57 @@ module InstanceRequirements =
           "The minimum and maximum instance memory size for an instance type, in MiB."];
       cpuManufacturers: CpuManufacturers.t option
         [@ocaml.doc
-          "Lists which specific CPU manufacturers to include. For instance types with Intel CPUs, specify intel. For instance types with AMD CPUs, specify amd. For instance types with Amazon Web Services CPUs, specify amazon-web-services. Don't confuse the CPU hardware manufacturer with the CPU hardware architecture. Instances will be launched with a compatible CPU architecture based on the Amazon Machine Image (AMI) that you specify in your launch template. Default: Any manufacturer"];
+          "Lists which specific CPU manufacturers to include. For instance types with Intel CPUs, specify intel. For instance types with AMD CPUs, specify amd. For instance types with Amazon Web Services CPUs, specify amazon-web-services. For instance types with Apple CPUs, specify apple. Don't confuse the CPU hardware manufacturer with the CPU hardware architecture. Instances will be launched with a compatible CPU architecture based on the Amazon Machine Image (AMI) that you specify in your launch template. Default: Any manufacturer"];
       memoryGiBPerVCpu: MemoryGiBPerVCpuRequest.t option
         [@ocaml.doc
-          "The minimum and maximum amount of memory per vCPU for an instance type, in GiB. Default: No minimum or maximum"];
+          "The minimum and maximum amount of memory per vCPU for an instance type, in GiB. Default: No minimum or maximum limits"];
       excludedInstanceTypes: ExcludedInstanceTypes.t option
         [@ocaml.doc
-          "Lists which instance types to exclude. You can use strings with one or more wild cards, represented by an asterisk (*). The following are examples: c5*, m5a.*, r*, *3*. For example, if you specify c5*, you are excluding the entire C5 instance family, which includes all C5a and C5n instance types. If you specify m5a.*, you are excluding all the M5a instance types, but not the M5n instance types. Default: No excluded instance types"];
+          "The instance types to exclude. You can use strings with one or more wild cards, represented by an asterisk (*), to exclude an instance family, type, size, or generation. The following are examples: m5.8xlarge, c5*.*, m5a.*, r*, *3*. For example, if you specify c5*, you are excluding the entire C5 instance family, which includes all C5a and C5n instance types. If you specify m5a.*, Amazon EC2 Auto Scaling will exclude all the M5a instance types, but not the M5n instance types. If you specify ExcludedInstanceTypes, you can't specify AllowedInstanceTypes. Default: No excluded instance types"];
       instanceGenerations: InstanceGenerations.t option
         [@ocaml.doc
-          "Indicates whether current or previous generation instance types are included. For current generation instance types, specify current. The current generation includes EC2 instance types currently recommended for use. This typically includes the latest two to three generations in each instance family. For more information, see Instance types in the Amazon EC2 User Guide for Linux Instances. For previous generation instance types, specify previous. Default: Any current or previous generation"];
+          "Indicates whether current or previous generation instance types are included. For current generation instance types, specify current. The current generation includes EC2 instance types currently recommended for use. This typically includes the latest two to three generations in each instance family. For more information, see Instance types in the Amazon EC2 User Guide. For previous generation instance types, specify previous. Default: Any current or previous generation"];
       spotMaxPricePercentageOverLowestPrice: NullablePositiveInteger.t option
         [@ocaml.doc
-          "The price protection threshold for Spot Instances. This is the maximum you\226\128\153ll pay for a Spot Instance, expressed as a percentage higher than the cheapest M, C, or R instance type with your specified attributes. When Amazon EC2 Auto Scaling selects instance types with your attributes, we will exclude instance types whose price is higher than your threshold. The parameter accepts an integer, which Amazon EC2 Auto Scaling interprets as a percentage. To turn off price protection, specify a high value, such as 999999. If you set DesiredCapacityType to vcpu or memory-mib, the price protection threshold is applied based on the per vCPU or per memory price instead of the per instance price. Default: 100"];
+          "\\[Price protection\\] The price protection threshold for Spot Instances, as a percentage higher than an identified Spot price. The identified Spot price is the price of the lowest priced current generation C, M, or R instance type with your specified attributes. If no current generation C, M, or R instance type matches your attributes, then the identified price is from either the lowest priced current generation instance types or, failing that, the lowest priced previous generation instance types that match your attributes. When Amazon EC2 Auto Scaling selects instance types with your attributes, we will exclude instance types whose price exceeds your specified threshold. The parameter accepts an integer, which Amazon EC2 Auto Scaling interprets as a percentage. If you set DesiredCapacityType to vcpu or memory-mib, the price protection threshold is based on the per-vCPU or per-memory price instead of the per instance price. Only one of SpotMaxPricePercentageOverLowestPrice or MaxSpotPriceAsPercentageOfOptimalOnDemandPrice can be specified. If you don't specify either, Amazon EC2 Auto Scaling will automatically apply optimal price protection to consistently select from a wide range of instance types. To indicate no price protection threshold for Spot Instances, meaning you want to consider all instance types that match your attributes, include one of these parameters and specify a high value, such as 999999."];
+      maxSpotPriceAsPercentageOfOptimalOnDemandPrice:
+        NullablePositiveInteger.t option
+        [@ocaml.doc
+          "\\[Price protection\\] The price protection threshold for Spot Instances, as a percentage of an identified On-Demand price. The identified On-Demand price is the price of the lowest priced current generation C, M, or R instance type with your specified attributes. If no current generation C, M, or R instance type matches your attributes, then the identified price is from either the lowest priced current generation instance types or, failing that, the lowest priced previous generation instance types that match your attributes. When Amazon EC2 Auto Scaling selects instance types with your attributes, we will exclude instance types whose price exceeds your specified threshold. The parameter accepts an integer, which Amazon EC2 Auto Scaling interprets as a percentage. If you set DesiredCapacityType to vcpu or memory-mib, the price protection threshold is based on the per-vCPU or per-memory price instead of the per instance price. Only one of SpotMaxPricePercentageOverLowestPrice or MaxSpotPriceAsPercentageOfOptimalOnDemandPrice can be specified. If you don't specify either, Amazon EC2 Auto Scaling will automatically apply optimal price protection to consistently select from a wide range of instance types. To indicate no price protection threshold for Spot Instances, meaning you want to consider all instance types that match your attributes, include one of these parameters and specify a high value, such as 999999."];
       onDemandMaxPricePercentageOverLowestPrice:
         NullablePositiveInteger.t option
         [@ocaml.doc
-          "The price protection threshold for On-Demand Instances. This is the maximum you\226\128\153ll pay for an On-Demand Instance, expressed as a percentage higher than the cheapest M, C, or R instance type with your specified attributes. When Amazon EC2 Auto Scaling selects instance types with your attributes, we will exclude instance types whose price is higher than your threshold. The parameter accepts an integer, which Amazon EC2 Auto Scaling interprets as a percentage. To turn off price protection, specify a high value, such as 999999. If you set DesiredCapacityType to vcpu or memory-mib, the price protection threshold is applied based on the per vCPU or per memory price instead of the per instance price. Default: 20"];
+          "\\[Price protection\\] The price protection threshold for On-Demand Instances, as a percentage higher than an identified On-Demand price. The identified On-Demand price is the price of the lowest priced current generation C, M, or R instance type with your specified attributes. If no current generation C, M, or R instance type matches your attributes, then the identified price is from either the lowest priced current generation instance types or, failing that, the lowest priced previous generation instance types that match your attributes. When Amazon EC2 Auto Scaling selects instance types with your attributes, we will exclude instance types whose price exceeds your specified threshold. The parameter accepts an integer, which Amazon EC2 Auto Scaling interprets as a percentage. To turn off price protection, specify a high value, such as 999999. If you set DesiredCapacityType to vcpu or memory-mib, the price protection threshold is applied based on the per-vCPU or per-memory price instead of the per instance price. Default: 20"];
       bareMetal: BareMetal.t option
         [@ocaml.doc
           "Indicates whether bare metal instance types are included, excluded, or required. Default: excluded"];
       burstablePerformance: BurstablePerformance.t option
         [@ocaml.doc
-          "Indicates whether burstable performance instance types are included, excluded, or required. For more information, see Burstable performance instances in the Amazon EC2 User Guide for Linux Instances. Default: excluded"];
+          "Indicates whether burstable performance instance types are included, excluded, or required. For more information, see Burstable performance instances in the Amazon EC2 User Guide. Default: excluded"];
       requireHibernateSupport: NullableBoolean.t option
         [@ocaml.doc
           "Indicates whether instance types must provide On-Demand Instance hibernation support. Default: false"];
       networkInterfaceCount: NetworkInterfaceCountRequest.t option
         [@ocaml.doc
-          "The minimum and maximum number of network interfaces for an instance type. Default: No minimum or maximum"];
+          "The minimum and maximum number of network interfaces for an instance type. Default: No minimum or maximum limits"];
       localStorage: LocalStorage.t option
         [@ocaml.doc
-          "Indicates whether instance types with instance store volumes are included, excluded, or required. For more information, see Amazon EC2 instance store in the Amazon EC2 User Guide for Linux Instances. Default: included"];
+          "Indicates whether instance types with instance store volumes are included, excluded, or required. For more information, see Amazon EC2 instance store in the Amazon EC2 User Guide. Default: included"];
       localStorageTypes: LocalStorageTypes.t option
         [@ocaml.doc
-          "Indicates the type of local storage that is required. For instance types with hard disk drive (HDD) storage, specify hdd. For instance types with solid state drive (SSD) storage, specify sdd. Default: Any local storage type"];
+          "Indicates the type of local storage that is required. For instance types with hard disk drive (HDD) storage, specify hdd. For instance types with solid state drive (SSD) storage, specify ssd. Default: Any local storage type"];
       totalLocalStorageGB: TotalLocalStorageGBRequest.t option
         [@ocaml.doc
-          "The minimum and maximum total local storage size for an instance type, in GB. Default: No minimum or maximum"];
+          "The minimum and maximum total local storage size for an instance type, in GB. Default: No minimum or maximum limits"];
       baselineEbsBandwidthMbps: BaselineEbsBandwidthMbpsRequest.t option
         [@ocaml.doc
-          "The minimum and maximum baseline bandwidth performance for an instance type, in Mbps. For more information, see Amazon EBS\226\128\147optimized instances in the Amazon EC2 User Guide for Linux Instances. Default: No minimum or maximum"];
+          "The minimum and maximum baseline bandwidth performance for an instance type, in Mbps. For more information, see Amazon EBS\226\128\147optimized instances in the Amazon EC2 User Guide. Default: No minimum or maximum limits"];
       acceleratorTypes: AcceleratorTypes.t option
         [@ocaml.doc
           "Lists the accelerator types that must be on an instance type. For instance types with GPU accelerators, specify gpu. For instance types with FPGA accelerators, specify fpga. For instance types with inference accelerators, specify inference. Default: Any accelerator type"];
       acceleratorCount: AcceleratorCountRequest.t option
         [@ocaml.doc
-          "The minimum and maximum number of accelerators (GPUs, FPGAs, or Amazon Web Services Inferentia chips) for an instance type. To exclude accelerator-enabled instance types, set Max to 0. Default: No minimum or maximum"];
+          "The minimum and maximum number of accelerators (GPUs, FPGAs, or Amazon Web Services Inferentia chips) for an instance type. To exclude accelerator-enabled instance types, set Max to 0. Default: No minimum or maximum limits"];
       acceleratorManufacturers: AcceleratorManufacturers.t option
         [@ocaml.doc
           "Indicates whether instance types must have accelerators by specific manufacturers. For instance types with NVIDIA devices, specify nvidia. For instance types with AMD devices, specify amd. For instance types with Amazon Web Services devices, specify amazon-web-services. For instance types with Xilinx devices, specify xilinx. Default: Any manufacturer"];
@@ -1212,53 +1481,72 @@ module InstanceRequirements =
           "Lists the accelerators that must be on an instance type. For instance types with NVIDIA A100 GPUs, specify a100. For instance types with NVIDIA V100 GPUs, specify v100. For instance types with NVIDIA K80 GPUs, specify k80. For instance types with NVIDIA T4 GPUs, specify t4. For instance types with NVIDIA M60 GPUs, specify m60. For instance types with AMD Radeon Pro V520 GPUs, specify radeon-pro-v520. For instance types with Xilinx VU9P FPGAs, specify vu9p. Default: Any accelerator"];
       acceleratorTotalMemoryMiB: AcceleratorTotalMemoryMiBRequest.t option
         [@ocaml.doc
-          "The minimum and maximum total memory size for the accelerators on an instance type, in MiB. Default: No minimum or maximum"]}
+          "The minimum and maximum total memory size for the accelerators on an instance type, in MiB. Default: No minimum or maximum limits"];
+      networkBandwidthGbps: NetworkBandwidthGbpsRequest.t option
+        [@ocaml.doc
+          "The minimum and maximum amount of network bandwidth, in gigabits per second (Gbps). Default: No minimum or maximum limits"];
+      allowedInstanceTypes: AllowedInstanceTypes.t option
+        [@ocaml.doc
+          "The instance types to apply your specified attributes against. All other instance types are ignored, even if they match your specified attributes. You can use strings with one or more wild cards, represented by an asterisk (*), to allow an instance type, size, or generation. The following are examples: m5.8xlarge, c5*.*, m5a.*, r*, *3*. For example, if you specify c5*, Amazon EC2 Auto Scaling will allow the entire C5 instance family, which includes all C5a and C5n instance types. If you specify m5a.*, Amazon EC2 Auto Scaling will allow all the M5a instance types, but not the M5n instance types. If you specify AllowedInstanceTypes, you can't specify ExcludedInstanceTypes. Default: All instance types"];
+      baselinePerformanceFactors: BaselinePerformanceFactorsRequest.t option
+        [@ocaml.doc
+          "The baseline performance factors for the instance requirements."]}
     let context_ = "InstanceRequirements"
     let make ?cpuManufacturers =
       fun ?memoryGiBPerVCpu ->
         fun ?excludedInstanceTypes ->
           fun ?instanceGenerations ->
             fun ?spotMaxPricePercentageOverLowestPrice ->
-              fun ?onDemandMaxPricePercentageOverLowestPrice ->
-                fun ?bareMetal ->
-                  fun ?burstablePerformance ->
-                    fun ?requireHibernateSupport ->
-                      fun ?networkInterfaceCount ->
-                        fun ?localStorage ->
-                          fun ?localStorageTypes ->
-                            fun ?totalLocalStorageGB ->
-                              fun ?baselineEbsBandwidthMbps ->
-                                fun ?acceleratorTypes ->
-                                  fun ?acceleratorCount ->
-                                    fun ?acceleratorManufacturers ->
-                                      fun ?acceleratorNames ->
-                                        fun ?acceleratorTotalMemoryMiB ->
-                                          fun ~vCpuCount ->
-                                            fun ~memoryMiB ->
-                                              fun () ->
-                                                {
-                                                  cpuManufacturers;
-                                                  memoryGiBPerVCpu;
-                                                  excludedInstanceTypes;
-                                                  instanceGenerations;
-                                                  spotMaxPricePercentageOverLowestPrice;
-                                                  onDemandMaxPricePercentageOverLowestPrice;
-                                                  bareMetal;
-                                                  burstablePerformance;
-                                                  requireHibernateSupport;
-                                                  networkInterfaceCount;
-                                                  localStorage;
-                                                  localStorageTypes;
-                                                  totalLocalStorageGB;
-                                                  baselineEbsBandwidthMbps;
-                                                  acceleratorTypes;
-                                                  acceleratorCount;
-                                                  acceleratorManufacturers;
-                                                  acceleratorNames;
-                                                  acceleratorTotalMemoryMiB;
-                                                  vCpuCount;
-                                                  memoryMiB
-                                                }
+              fun ?maxSpotPriceAsPercentageOfOptimalOnDemandPrice ->
+                fun ?onDemandMaxPricePercentageOverLowestPrice ->
+                  fun ?bareMetal ->
+                    fun ?burstablePerformance ->
+                      fun ?requireHibernateSupport ->
+                        fun ?networkInterfaceCount ->
+                          fun ?localStorage ->
+                            fun ?localStorageTypes ->
+                              fun ?totalLocalStorageGB ->
+                                fun ?baselineEbsBandwidthMbps ->
+                                  fun ?acceleratorTypes ->
+                                    fun ?acceleratorCount ->
+                                      fun ?acceleratorManufacturers ->
+                                        fun ?acceleratorNames ->
+                                          fun ?acceleratorTotalMemoryMiB ->
+                                            fun ?networkBandwidthGbps ->
+                                              fun ?allowedInstanceTypes ->
+                                                fun
+                                                  ?baselinePerformanceFactors
+                                                  ->
+                                                  fun ~vCpuCount ->
+                                                    fun ~memoryMiB ->
+                                                      fun () ->
+                                                        {
+                                                          cpuManufacturers;
+                                                          memoryGiBPerVCpu;
+                                                          excludedInstanceTypes;
+                                                          instanceGenerations;
+                                                          spotMaxPricePercentageOverLowestPrice;
+                                                          maxSpotPriceAsPercentageOfOptimalOnDemandPrice;
+                                                          onDemandMaxPricePercentageOverLowestPrice;
+                                                          bareMetal;
+                                                          burstablePerformance;
+                                                          requireHibernateSupport;
+                                                          networkInterfaceCount;
+                                                          localStorage;
+                                                          localStorageTypes;
+                                                          totalLocalStorageGB;
+                                                          baselineEbsBandwidthMbps;
+                                                          acceleratorTypes;
+                                                          acceleratorCount;
+                                                          acceleratorManufacturers;
+                                                          acceleratorNames;
+                                                          acceleratorTotalMemoryMiB;
+                                                          networkBandwidthGbps;
+                                                          allowedInstanceTypes;
+                                                          baselinePerformanceFactors;
+                                                          vCpuCount;
+                                                          memoryMiB
+                                                        }
     let to_value x =
       structure_to_value
         [("VCpuCount", (Some (VCpuCountRequest.to_value x.vCpuCount)));
@@ -1274,6 +1562,9 @@ module InstanceRequirements =
           (Option.map x.instanceGenerations ~f:InstanceGenerations.to_value));
         ("SpotMaxPricePercentageOverLowestPrice",
           (Option.map x.spotMaxPricePercentageOverLowestPrice
+             ~f:NullablePositiveInteger.to_value));
+        ("MaxSpotPriceAsPercentageOfOptimalOnDemandPrice",
+          (Option.map x.maxSpotPriceAsPercentageOfOptimalOnDemandPrice
              ~f:NullablePositiveInteger.to_value));
         ("OnDemandMaxPricePercentageOverLowestPrice",
           (Option.map x.onDemandMaxPricePercentageOverLowestPrice
@@ -1307,9 +1598,26 @@ module InstanceRequirements =
           (Option.map x.acceleratorNames ~f:AcceleratorNames.to_value));
         ("AcceleratorTotalMemoryMiB",
           (Option.map x.acceleratorTotalMemoryMiB
-             ~f:AcceleratorTotalMemoryMiBRequest.to_value))]
+             ~f:AcceleratorTotalMemoryMiBRequest.to_value));
+        ("NetworkBandwidthGbps",
+          (Option.map x.networkBandwidthGbps
+             ~f:NetworkBandwidthGbpsRequest.to_value));
+        ("AllowedInstanceTypes",
+          (Option.map x.allowedInstanceTypes ~f:AllowedInstanceTypes.to_value));
+        ("BaselinePerformanceFactors",
+          (Option.map x.baselinePerformanceFactors
+             ~f:BaselinePerformanceFactorsRequest.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let baselinePerformanceFactors =
+        (Option.map ~f:BaselinePerformanceFactorsRequest.of_xml)
+          (Xml.child xml_arg0 "BaselinePerformanceFactors") in
+      let allowedInstanceTypes =
+        (Option.map ~f:AllowedInstanceTypes.of_xml)
+          (Xml.child xml_arg0 "AllowedInstanceTypes") in
+      let networkBandwidthGbps =
+        (Option.map ~f:NetworkBandwidthGbpsRequest.of_xml)
+          (Xml.child xml_arg0 "NetworkBandwidthGbps") in
       let acceleratorTotalMemoryMiB =
         (Option.map ~f:AcceleratorTotalMemoryMiBRequest.of_xml)
           (Xml.child xml_arg0 "AcceleratorTotalMemoryMiB") in
@@ -1351,6 +1659,10 @@ module InstanceRequirements =
       let onDemandMaxPricePercentageOverLowestPrice =
         (Option.map ~f:NullablePositiveInteger.of_xml)
           (Xml.child xml_arg0 "OnDemandMaxPricePercentageOverLowestPrice") in
+      let maxSpotPriceAsPercentageOfOptimalOnDemandPrice =
+        (Option.map ~f:NullablePositiveInteger.of_xml)
+          (Xml.child xml_arg0
+             "MaxSpotPriceAsPercentageOfOptimalOnDemandPrice") in
       let spotMaxPricePercentageOverLowestPrice =
         (Option.map ~f:NullablePositiveInteger.of_xml)
           (Xml.child xml_arg0 "SpotMaxPricePercentageOverLowestPrice") in
@@ -1372,74 +1684,92 @@ module InstanceRequirements =
       let vCpuCount =
         VCpuCountRequest.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VCpuCount") in
-      make ?acceleratorTotalMemoryMiB ?acceleratorNames
+      make ?baselinePerformanceFactors ?allowedInstanceTypes
+        ?networkBandwidthGbps ?acceleratorTotalMemoryMiB ?acceleratorNames
         ?acceleratorManufacturers ?acceleratorCount ?acceleratorTypes
         ?baselineEbsBandwidthMbps ?totalLocalStorageGB ?localStorageTypes
         ?localStorage ?networkInterfaceCount ?requireHibernateSupport
         ?burstablePerformance ?bareMetal
         ?onDemandMaxPricePercentageOverLowestPrice
+        ?maxSpotPriceAsPercentageOfOptimalOnDemandPrice
         ?spotMaxPricePercentageOverLowestPrice ?instanceGenerations
         ?excludedInstanceTypes ?memoryGiBPerVCpu ?cpuManufacturers ~memoryMiB
         ~vCpuCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let baselinePerformanceFactors =
+        field_map json__ "BaselinePerformanceFactors"
+          BaselinePerformanceFactorsRequest.of_json in
+      let allowedInstanceTypes =
+        field_map json__ "AllowedInstanceTypes" AllowedInstanceTypes.of_json in
+      let networkBandwidthGbps =
+        field_map json__ "NetworkBandwidthGbps"
+          NetworkBandwidthGbpsRequest.of_json in
       let acceleratorTotalMemoryMiB =
-        field_map json "AcceleratorTotalMemoryMiB"
+        field_map json__ "AcceleratorTotalMemoryMiB"
           AcceleratorTotalMemoryMiBRequest.of_json in
       let acceleratorNames =
-        field_map json "AcceleratorNames" AcceleratorNames.of_json in
+        field_map json__ "AcceleratorNames" AcceleratorNames.of_json in
       let acceleratorManufacturers =
-        field_map json "AcceleratorManufacturers"
+        field_map json__ "AcceleratorManufacturers"
           AcceleratorManufacturers.of_json in
       let acceleratorCount =
-        field_map json "AcceleratorCount" AcceleratorCountRequest.of_json in
+        field_map json__ "AcceleratorCount" AcceleratorCountRequest.of_json in
       let acceleratorTypes =
-        field_map json "AcceleratorTypes" AcceleratorTypes.of_json in
+        field_map json__ "AcceleratorTypes" AcceleratorTypes.of_json in
       let baselineEbsBandwidthMbps =
-        field_map json "BaselineEbsBandwidthMbps"
+        field_map json__ "BaselineEbsBandwidthMbps"
           BaselineEbsBandwidthMbpsRequest.of_json in
       let totalLocalStorageGB =
-        field_map json "TotalLocalStorageGB"
+        field_map json__ "TotalLocalStorageGB"
           TotalLocalStorageGBRequest.of_json in
       let localStorageTypes =
-        field_map json "LocalStorageTypes" LocalStorageTypes.of_json in
-      let localStorage = field_map json "LocalStorage" LocalStorage.of_json in
+        field_map json__ "LocalStorageTypes" LocalStorageTypes.of_json in
+      let localStorage = field_map json__ "LocalStorage" LocalStorage.of_json in
       let networkInterfaceCount =
-        field_map json "NetworkInterfaceCount"
+        field_map json__ "NetworkInterfaceCount"
           NetworkInterfaceCountRequest.of_json in
       let requireHibernateSupport =
-        field_map json "RequireHibernateSupport" NullableBoolean.of_json in
+        field_map json__ "RequireHibernateSupport" NullableBoolean.of_json in
       let burstablePerformance =
-        field_map json "BurstablePerformance" BurstablePerformance.of_json in
-      let bareMetal = field_map json "BareMetal" BareMetal.of_json in
+        field_map json__ "BurstablePerformance" BurstablePerformance.of_json in
+      let bareMetal = field_map json__ "BareMetal" BareMetal.of_json in
       let onDemandMaxPricePercentageOverLowestPrice =
-        field_map json "OnDemandMaxPricePercentageOverLowestPrice"
+        field_map json__ "OnDemandMaxPricePercentageOverLowestPrice"
+          NullablePositiveInteger.of_json in
+      let maxSpotPriceAsPercentageOfOptimalOnDemandPrice =
+        field_map json__ "MaxSpotPriceAsPercentageOfOptimalOnDemandPrice"
           NullablePositiveInteger.of_json in
       let spotMaxPricePercentageOverLowestPrice =
-        field_map json "SpotMaxPricePercentageOverLowestPrice"
+        field_map json__ "SpotMaxPricePercentageOverLowestPrice"
           NullablePositiveInteger.of_json in
       let instanceGenerations =
-        field_map json "InstanceGenerations" InstanceGenerations.of_json in
+        field_map json__ "InstanceGenerations" InstanceGenerations.of_json in
       let excludedInstanceTypes =
-        field_map json "ExcludedInstanceTypes" ExcludedInstanceTypes.of_json in
+        field_map json__ "ExcludedInstanceTypes"
+          ExcludedInstanceTypes.of_json in
       let memoryGiBPerVCpu =
-        field_map json "MemoryGiBPerVCpu" MemoryGiBPerVCpuRequest.of_json in
+        field_map json__ "MemoryGiBPerVCpu" MemoryGiBPerVCpuRequest.of_json in
       let cpuManufacturers =
-        field_map json "CpuManufacturers" CpuManufacturers.of_json in
-      let memoryMiB = field_map_exn json "MemoryMiB" MemoryMiBRequest.of_json in
-      let vCpuCount = field_map_exn json "VCpuCount" VCpuCountRequest.of_json in
-      make ?acceleratorTotalMemoryMiB ?acceleratorNames
+        field_map json__ "CpuManufacturers" CpuManufacturers.of_json in
+      let memoryMiB =
+        field_map_exn json__ "MemoryMiB" MemoryMiBRequest.of_json in
+      let vCpuCount =
+        field_map_exn json__ "VCpuCount" VCpuCountRequest.of_json in
+      make ?baselinePerformanceFactors ?allowedInstanceTypes
+        ?networkBandwidthGbps ?acceleratorTotalMemoryMiB ?acceleratorNames
         ?acceleratorManufacturers ?acceleratorCount ?acceleratorTypes
         ?baselineEbsBandwidthMbps ?totalLocalStorageGB ?localStorageTypes
         ?localStorage ?networkInterfaceCount ?requireHibernateSupport
         ?burstablePerformance ?bareMetal
         ?onDemandMaxPricePercentageOverLowestPrice
+        ?maxSpotPriceAsPercentageOfOptimalOnDemandPrice
         ?spotMaxPricePercentageOverLowestPrice ?instanceGenerations
         ?excludedInstanceTypes ?memoryGiBPerVCpu ?cpuManufacturers ~memoryMiB
         ~vCpuCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "When you specify multiple parameters, you get instance types that satisfy all of the specified parameters. If you specify multiple values for a parameter, you get instance types that satisfy any of the specified values. Represents requirements for the types of instances that can be launched. You must specify VCpuCount and MemoryMiB, but all other parameters are optional. For more information, see Creating an Auto Scaling group using attribute-based instance type selection in the Amazon EC2 Auto Scaling User Guide."]
+       "The attributes for the instance types for a mixed instances policy. Amazon EC2 Auto Scaling uses your specified requirements to identify instance types. Then, it uses your On-Demand and Spot allocation strategies to launch instances from these instance types. When you specify multiple attributes, you get instance types that satisfy all of the specified attributes. If you specify multiple values for an attribute, you get instance types that satisfy any of the specified values. To limit the list of instance types from which Amazon EC2 Auto Scaling can identify matching instance types, you can use one of the following parameters, but not both in the same request: AllowedInstanceTypes - The instance types to include in the list. All other instance types are ignored, even if they match your specified attributes. ExcludedInstanceTypes - The instance types to exclude from the list, even if they match your specified attributes. You must specify VCpuCount and MemoryMiB. All other attributes are optional. Any unspecified optional attribute is set to its default. For more information, see Create a mixed instances group using attribute-based instance type selection in the Amazon EC2 Auto Scaling User Guide. For help determining which instance types match your attributes before you apply them to your Auto Scaling group, see Preview instance types with specified attributes in the Amazon EC2 User Guide."]
 module LaunchTemplateSpecification =
   struct
     type nonrec t =
@@ -1477,12 +1807,12 @@ module LaunchTemplateSpecification =
           (Xml.child xml_arg0 "LaunchTemplateId") in
       make ?version ?launchTemplateName ?launchTemplateId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" XmlStringMaxLen255.of_json in
       let launchTemplateName =
-        field_map json "LaunchTemplateName" LaunchTemplateName.of_json in
+        field_map json__ "LaunchTemplateName" LaunchTemplateName.of_json in
       let launchTemplateId =
-        field_map json "LaunchTemplateId" XmlStringMaxLen255.of_json in
+        field_map json__ "LaunchTemplateId" XmlStringMaxLen255.of_json in
       make ?version ?launchTemplateName ?launchTemplateId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1513,6 +1843,9 @@ module MetricDataQueries =
   struct
     type nonrec t = MetricDataQuery.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricDataQuery.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1634,33 +1967,131 @@ module PredefinedScalingMetricType =
       of_string (string_of_json ~kind:"PredefinedScalingMetricType" j)
     let to_json = simple_to_json to_value
   end
+module TargetTrackingMetricStat =
+  struct
+    type nonrec t =
+      {
+      metric: Metric.t [@ocaml.doc "The metric to use."];
+      stat: XmlStringMetricStat.t
+        [@ocaml.doc
+          "The statistic to return. It can include any CloudWatch statistic or extended statistic. For a list of valid values, see the table in Statistics in the Amazon CloudWatch User Guide. The most commonly used metric for scaling is Average."];
+      unit: MetricUnit.t option
+        [@ocaml.doc
+          "The unit to use for the returned data points. For a complete list of the units that CloudWatch supports, see the MetricDatum data type in the Amazon CloudWatch API Reference."];
+      period: MetricGranularityInSeconds.t option
+        [@ocaml.doc
+          "The period of the metric in seconds. The default value is 60. Accepted values are 10, 30, and 60. For high resolution metric, set the value to less than 60. For more information, see Create a target tracking policy using high-resolution metrics for faster response."]}
+    let context_ = "TargetTrackingMetricStat"
+    let make ?unit =
+      fun ?period ->
+        fun ~metric -> fun ~stat -> fun () -> { unit; period; metric; stat }
+    let to_value x =
+      structure_to_value
+        [("Metric", (Some (Metric.to_value x.metric)));
+        ("Stat", (Some (XmlStringMetricStat.to_value x.stat)));
+        ("Unit", (Option.map x.unit ~f:MetricUnit.to_value));
+        ("Period",
+          (Option.map x.period ~f:MetricGranularityInSeconds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let period =
+        (Option.map ~f:MetricGranularityInSeconds.of_xml)
+          (Xml.child xml_arg0 "Period") in
+      let unit =
+        (Option.map ~f:MetricUnit.of_xml) (Xml.child xml_arg0 "Unit") in
+      let stat =
+        XmlStringMetricStat.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Stat") in
+      let metric =
+        Metric.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Metric") in
+      make ?period ?unit ~stat ~metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let period =
+        field_map json__ "Period" MetricGranularityInSeconds.of_json in
+      let unit = field_map json__ "Unit" MetricUnit.of_json in
+      let stat = field_map_exn json__ "Stat" XmlStringMetricStat.of_json in
+      let metric = field_map_exn json__ "Metric" Metric.of_json in
+      make ?period ?unit ~stat ~metric ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This structure defines the CloudWatch metric to return, along with the statistic and unit. For more information about the CloudWatch terminology below, see Amazon CloudWatch concepts in the Amazon CloudWatch User Guide."]
+module XmlStringMaxLen2047 =
+  struct
+    type nonrec t = string
+    let context_ = "XmlStringMaxLen2047"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2047) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"XmlStringMaxLen2047" j
+    let to_json = simple_to_json to_value
+  end
+module XmlStringMaxLen64 =
+  struct
+    type nonrec t = string
+    let context_ = "XmlStringMaxLen64"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"XmlStringMaxLen64" j
+    let to_json = simple_to_json to_value
+  end
 module LaunchTemplateOverrides =
   struct
     type nonrec t =
       {
       instanceType: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "The instance type, such as m3.xlarge. You must use an instance type that is supported in your requested Region and Availability Zones. For more information, see Instance types in the Amazon Elastic Compute Cloud User Guide."];
+          "The instance type, such as m3.xlarge. You must specify an instance type that is supported in your requested Region and Availability Zones. For more information, see Instance types in the Amazon EC2 User Guide. You can specify up to 40 instance types per Auto Scaling group."];
       weightedCapacity: XmlStringMaxLen32.t option
         [@ocaml.doc
-          "The number of capacity units provided by the instance type specified in InstanceType in terms of virtual CPUs, memory, storage, throughput, or other relative performance characteristic. When a Spot or On-Demand Instance is launched, the capacity units count toward the desired capacity. Amazon EC2 Auto Scaling launches instances until the desired capacity is totally fulfilled, even if this results in an overage. For example, if there are two units remaining to fulfill capacity, and Amazon EC2 Auto Scaling can only launch an instance with a WeightedCapacity of five units, the instance is launched, and the desired capacity is exceeded by three units. For more information, see Configuring instance weighting for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide. Value must be in the range of 1\226\128\147999."];
+          "If you provide a list of instance types to use, you can specify the number of capacity units provided by each instance type in terms of virtual CPUs, memory, storage, throughput, or other relative performance characteristic. When a Spot or On-Demand Instance is launched, the capacity units count toward the desired capacity. Amazon EC2 Auto Scaling launches instances until the desired capacity is totally fulfilled, even if this results in an overage. For example, if there are two units remaining to fulfill capacity, and Amazon EC2 Auto Scaling can only launch an instance with a WeightedCapacity of five units, the instance is launched, and the desired capacity is exceeded by three units. For more information, see Configure an Auto Scaling group to use instance weights in the Amazon EC2 Auto Scaling User Guide. Value must be in the range of 1\226\128\147999. If you specify a value for WeightedCapacity for one instance type, you must specify a value for WeightedCapacity for all of them. Every Auto Scaling group has three size parameters (DesiredCapacity, MaxSize, and MinSize). Usually, you set these sizes based on a specific number of instances. However, if you configure a mixed instances policy that defines weights for the instance types, you must specify these sizes with the same units that you use for weighting instances."];
       launchTemplateSpecification: LaunchTemplateSpecification.t option
         [@ocaml.doc
-          "Provides a launch template for the specified instance type or instance requirements. For example, some instance types might require a launch template with a different AMI. If not provided, Amazon EC2 Auto Scaling uses the launch template that's defined for your mixed instances policy. For more information, see Specifying a different launch template for an instance type in the Amazon EC2 Auto Scaling User Guide."];
+          "Provides a launch template for the specified instance type or set of instance requirements. For example, some instance types might require a launch template with a different AMI. If not provided, Amazon EC2 Auto Scaling uses the launch template that's specified in the LaunchTemplate definition. For more information, see Specifying a different launch template for an instance type in the Amazon EC2 Auto Scaling User Guide. You can specify up to 20 launch templates per Auto Scaling group. The launch templates specified in the overrides and in the LaunchTemplate definition count towards this limit."];
       instanceRequirements: InstanceRequirements.t option
         [@ocaml.doc
-          "The instance requirements. When you specify instance requirements, Amazon EC2 Auto Scaling finds instance types that satisfy your requirements, and then uses your On-Demand and Spot allocation strategies to launch instances from these instance types, in the same way as when you specify a list of specific instance types."]}
+          "The instance requirements. Amazon EC2 Auto Scaling uses your specified requirements to identify instance types. Then, it uses your On-Demand and Spot allocation strategies to launch instances from these instance types. You can specify up to four separate sets of instance requirements per Auto Scaling group. This is useful for provisioning instances from different Amazon Machine Images (AMIs) in the same Auto Scaling group. To do this, create the AMIs and create a new launch template for each AMI. Then, create a compatible set of instance requirements for each launch template. If you specify InstanceRequirements, you can't specify InstanceType."];
+      imageId: ImageId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Machine Image (AMI) to use for instances launched with this override. When using Instance Refresh with ReplaceRootVolume strategy, this specifies the AMI for root volume replacement operations. For ReplaceRootVolume operations: All overrides in the MixedInstancesPolicy must specify an ImageId The AMI must contain only a single root volume Root volume replacement doesn't support multi-volume AMIs"]}
     let make ?instanceType =
       fun ?weightedCapacity ->
         fun ?launchTemplateSpecification ->
           fun ?instanceRequirements ->
-            fun () ->
-              {
-                instanceType;
-                weightedCapacity;
-                launchTemplateSpecification;
-                instanceRequirements
-              }
+            fun ?imageId ->
+              fun () ->
+                {
+                  instanceType;
+                  weightedCapacity;
+                  launchTemplateSpecification;
+                  instanceRequirements;
+                  imageId
+                }
     let to_value x =
       structure_to_value
         [("InstanceType",
@@ -1671,9 +2102,12 @@ module LaunchTemplateOverrides =
           (Option.map x.launchTemplateSpecification
              ~f:LaunchTemplateSpecification.to_value));
         ("InstanceRequirements",
-          (Option.map x.instanceRequirements ~f:InstanceRequirements.to_value))]
+          (Option.map x.instanceRequirements ~f:InstanceRequirements.to_value));
+        ("ImageId", (Option.map x.imageId ~f:ImageId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let imageId =
+        (Option.map ~f:ImageId.of_xml) (Xml.child xml_arg0 "ImageId") in
       let instanceRequirements =
         (Option.map ~f:InstanceRequirements.of_xml)
           (Xml.child xml_arg0 "InstanceRequirements") in
@@ -1686,24 +2120,25 @@ module LaunchTemplateOverrides =
       let instanceType =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "InstanceType") in
-      make ?instanceRequirements ?launchTemplateSpecification
+      make ?imageId ?instanceRequirements ?launchTemplateSpecification
         ?weightedCapacity ?instanceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let imageId = field_map json__ "ImageId" ImageId.of_json in
       let instanceRequirements =
-        field_map json "InstanceRequirements" InstanceRequirements.of_json in
+        field_map json__ "InstanceRequirements" InstanceRequirements.of_json in
       let launchTemplateSpecification =
-        field_map json "LaunchTemplateSpecification"
+        field_map json__ "LaunchTemplateSpecification"
           LaunchTemplateSpecification.of_json in
       let weightedCapacity =
-        field_map json "WeightedCapacity" XmlStringMaxLen32.of_json in
+        field_map json__ "WeightedCapacity" XmlStringMaxLen32.of_json in
       let instanceType =
-        field_map json "InstanceType" XmlStringMaxLen255.of_json in
-      make ?instanceRequirements ?launchTemplateSpecification
+        field_map json__ "InstanceType" XmlStringMaxLen255.of_json in
+      make ?imageId ?instanceRequirements ?launchTemplateSpecification
         ?weightedCapacity ?instanceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes an override for a launch template. For more information, see Configuring overrides in the Amazon EC2 Auto Scaling User Guide."]
+       "Use this structure to let Amazon EC2 Auto Scaling do the following when the Auto Scaling group has a mixed instances policy: Override the instance type that is specified in the launch template. Use multiple instance types. Specify the instance types that you want, or define your instance requirements instead and let Amazon EC2 Auto Scaling provision the available instance types that meet your requirements. This can provide Amazon EC2 Auto Scaling with a larger selection of instance types to choose from when fulfilling Spot and On-Demand capacities. You can view which instance types are matched before you apply the instance requirements to your Auto Scaling group. After you define your instance requirements, you don't have to keep updating these settings to get new EC2 instance types automatically. Amazon EC2 Auto Scaling uses the instance requirements of the Auto Scaling group to determine whether a new EC2 instance type can be used."]
 module MetricScale =
   struct
     type nonrec t = float
@@ -1737,9 +2172,9 @@ module PredictiveScalingCustomizedCapacityMetric =
           (Xml.child_exn ~context:context_ xml_arg0 "MetricDataQueries") in
       make ~metricDataQueries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metricDataQueries =
-        field_map_exn json "MetricDataQueries" MetricDataQueries.of_json in
+        field_map_exn json__ "MetricDataQueries" MetricDataQueries.of_json in
       make ~metricDataQueries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1764,9 +2199,9 @@ module PredictiveScalingCustomizedLoadMetric =
           (Xml.child_exn ~context:context_ xml_arg0 "MetricDataQueries") in
       make ~metricDataQueries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metricDataQueries =
-        field_map_exn json "MetricDataQueries" MetricDataQueries.of_json in
+        field_map_exn json__ "MetricDataQueries" MetricDataQueries.of_json in
       make ~metricDataQueries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1791,9 +2226,9 @@ module PredictiveScalingCustomizedScalingMetric =
           (Xml.child_exn ~context:context_ xml_arg0 "MetricDataQueries") in
       make ~metricDataQueries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metricDataQueries =
-        field_map_exn json "MetricDataQueries" MetricDataQueries.of_json in
+        field_map_exn json__ "MetricDataQueries" MetricDataQueries.of_json in
       make ~metricDataQueries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1827,11 +2262,11 @@ module PredictiveScalingPredefinedLoadMetric =
           (Xml.child_exn ~context:context_ xml_arg0 "PredefinedMetricType") in
       make ?resourceLabel ~predefinedMetricType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceLabel =
-        field_map json "ResourceLabel" XmlStringMaxLen1023.of_json in
+        field_map json__ "ResourceLabel" XmlStringMaxLen1023.of_json in
       let predefinedMetricType =
-        field_map_exn json "PredefinedMetricType"
+        field_map_exn json__ "PredefinedMetricType"
           PredefinedLoadMetricType.of_json in
       make ?resourceLabel ~predefinedMetricType ()
     let to_json v = composed_to_json to_value v
@@ -1867,11 +2302,11 @@ module PredictiveScalingPredefinedMetricPair =
           (Xml.child_exn ~context:context_ xml_arg0 "PredefinedMetricType") in
       make ?resourceLabel ~predefinedMetricType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceLabel =
-        field_map json "ResourceLabel" XmlStringMaxLen1023.of_json in
+        field_map json__ "ResourceLabel" XmlStringMaxLen1023.of_json in
       let predefinedMetricType =
-        field_map_exn json "PredefinedMetricType"
+        field_map_exn json__ "PredefinedMetricType"
           PredefinedMetricPairType.of_json in
       make ?resourceLabel ~predefinedMetricType ()
     let to_json v = composed_to_json to_value v
@@ -1907,16 +2342,93 @@ module PredictiveScalingPredefinedScalingMetric =
           (Xml.child_exn ~context:context_ xml_arg0 "PredefinedMetricType") in
       make ?resourceLabel ~predefinedMetricType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceLabel =
-        field_map json "ResourceLabel" XmlStringMaxLen1023.of_json in
+        field_map json__ "ResourceLabel" XmlStringMaxLen1023.of_json in
       let predefinedMetricType =
-        field_map_exn json "PredefinedMetricType"
+        field_map_exn json__ "PredefinedMetricType"
           PredefinedScalingMetricType.of_json in
       make ?resourceLabel ~predefinedMetricType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a scaling metric for a predictive scaling policy. When returned in the output of DescribePolicies, it indicates that a predictive scaling policy uses individually specified load and scaling metrics instead of a metric pair."]
+module TargetTrackingMetricDataQuery =
+  struct
+    type nonrec t =
+      {
+      id: XmlStringMaxLen64.t
+        [@ocaml.doc
+          "A short name that identifies the object's results in the response. This name must be unique among all TargetTrackingMetricDataQuery objects specified for a single scaling policy. If you are performing math expressions on this set of data, this name represents that data and can serve as a variable in the mathematical expression. The valid characters are letters, numbers, and underscores. The first character must be a lowercase letter."];
+      expression: XmlStringMaxLen2047.t option
+        [@ocaml.doc
+          "The math expression to perform on the returned data, if this object is performing a math expression. This expression can use the Id of the other metrics to refer to those metrics, and can also use the Id of other expressions to use the result of those expressions. Conditional: Within each TargetTrackingMetricDataQuery object, you must specify either Expression or MetricStat, but not both."];
+      metricStat: TargetTrackingMetricStat.t option
+        [@ocaml.doc
+          "Information about the metric data to return. Conditional: Within each TargetTrackingMetricDataQuery object, you must specify either Expression or MetricStat, but not both."];
+      label: XmlStringMetricLabel.t option
+        [@ocaml.doc
+          "A human-readable label for this metric or expression. This is especially useful if this is a math expression, so that you know what the value represents."];
+      period: MetricGranularityInSeconds.t option
+        [@ocaml.doc
+          "The period of the metric in seconds. The default value is 60. Accepted values are 10, 30, and 60. For high resolution metric, set the value to less than 60. For more information, see Create a target tracking policy using high-resolution metrics for faster response."];
+      returnData: ReturnData.t option
+        [@ocaml.doc
+          "Indicates whether to return the timestamps and raw data values of this metric. If you use any math expressions, specify true for this value for only the final math expression that the metric specification is based on. You must specify false for ReturnData for all the other metrics and expressions used in the metric specification. If you are only retrieving metrics and not performing any math expressions, do not specify anything for ReturnData. This sets it to its default (true)."]}
+    let context_ = "TargetTrackingMetricDataQuery"
+    let make ?expression =
+      fun ?metricStat ->
+        fun ?label ->
+          fun ?period ->
+            fun ?returnData ->
+              fun ~id ->
+                fun () ->
+                  { expression; metricStat; label; period; returnData; id }
+    let to_value x =
+      structure_to_value
+        [("Id", (Some (XmlStringMaxLen64.to_value x.id)));
+        ("Expression",
+          (Option.map x.expression ~f:XmlStringMaxLen2047.to_value));
+        ("MetricStat",
+          (Option.map x.metricStat ~f:TargetTrackingMetricStat.to_value));
+        ("Label", (Option.map x.label ~f:XmlStringMetricLabel.to_value));
+        ("Period",
+          (Option.map x.period ~f:MetricGranularityInSeconds.to_value));
+        ("ReturnData", (Option.map x.returnData ~f:ReturnData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let returnData =
+        (Option.map ~f:ReturnData.of_xml) (Xml.child xml_arg0 "ReturnData") in
+      let period =
+        (Option.map ~f:MetricGranularityInSeconds.of_xml)
+          (Xml.child xml_arg0 "Period") in
+      let label =
+        (Option.map ~f:XmlStringMetricLabel.of_xml)
+          (Xml.child xml_arg0 "Label") in
+      let metricStat =
+        (Option.map ~f:TargetTrackingMetricStat.of_xml)
+          (Xml.child xml_arg0 "MetricStat") in
+      let expression =
+        (Option.map ~f:XmlStringMaxLen2047.of_xml)
+          (Xml.child xml_arg0 "Expression") in
+      let id =
+        XmlStringMaxLen64.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ?returnData ?period ?label ?metricStat ?expression ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let returnData = field_map json__ "ReturnData" ReturnData.of_json in
+      let period =
+        field_map json__ "Period" MetricGranularityInSeconds.of_json in
+      let label = field_map json__ "Label" XmlStringMetricLabel.of_json in
+      let metricStat =
+        field_map json__ "MetricStat" TargetTrackingMetricStat.of_json in
+      let expression =
+        field_map json__ "Expression" XmlStringMaxLen2047.of_json in
+      let id = field_map_exn json__ "Id" XmlStringMaxLen64.of_json in
+      make ?returnData ?period ?label ?metricStat ?expression ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The metric data to return. Also defines whether this call is returning data for one metric only, or whether it is performing a math expression on the values of returned metric statistics to create a new time series. A time series is a series of data points, each of which is associated with a timestamp."]
 module BlockDeviceEbsDeleteOnTermination =
   struct
     type nonrec t = bool
@@ -2104,6 +2616,9 @@ module Overrides =
   struct
     type nonrec t = LaunchTemplateOverrides.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LaunchTemplateOverrides.to_value)) |>
         (fun x -> `List x)
@@ -2125,6 +2640,59 @@ module Overrides =
       list_of_json ~kind:"Overrides" ~of_json:LaunchTemplateOverrides.of_json
         j
     let to_json v = composed_to_json to_value v
+  end
+module InstancesToUpdate =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for InstancesToUpdate" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module IntPercent =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for IntPercent" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module AsciiStringMaxLen255 =
+  struct
+    type nonrec t = string
+    let context_ = "AsciiStringMaxLen255"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"[A-Za-z0-9\\-_\\/]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AsciiStringMaxLen255" j
+    let to_json = simple_to_json to_value
   end
 module ResourceName =
   struct
@@ -2243,26 +2811,27 @@ module PredictiveScalingMetricSpecification =
         ?predefinedScalingMetricSpecification
         ?predefinedMetricPairSpecification ~targetValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customizedCapacityMetricSpecification =
-        field_map json "CustomizedCapacityMetricSpecification"
+        field_map json__ "CustomizedCapacityMetricSpecification"
           PredictiveScalingCustomizedCapacityMetric.of_json in
       let customizedLoadMetricSpecification =
-        field_map json "CustomizedLoadMetricSpecification"
+        field_map json__ "CustomizedLoadMetricSpecification"
           PredictiveScalingCustomizedLoadMetric.of_json in
       let customizedScalingMetricSpecification =
-        field_map json "CustomizedScalingMetricSpecification"
+        field_map json__ "CustomizedScalingMetricSpecification"
           PredictiveScalingCustomizedScalingMetric.of_json in
       let predefinedLoadMetricSpecification =
-        field_map json "PredefinedLoadMetricSpecification"
+        field_map json__ "PredefinedLoadMetricSpecification"
           PredictiveScalingPredefinedLoadMetric.of_json in
       let predefinedScalingMetricSpecification =
-        field_map json "PredefinedScalingMetricSpecification"
+        field_map json__ "PredefinedScalingMetricSpecification"
           PredictiveScalingPredefinedScalingMetric.of_json in
       let predefinedMetricPairSpecification =
-        field_map json "PredefinedMetricPairSpecification"
+        field_map json__ "PredefinedMetricPairSpecification"
           PredictiveScalingPredefinedMetricPair.of_json in
-      let targetValue = field_map_exn json "TargetValue" MetricScale.of_json in
+      let targetValue =
+        field_map_exn json__ "TargetValue" MetricScale.of_json in
       make ?customizedCapacityMetricSpecification
         ?customizedLoadMetricSpecification
         ?customizedScalingMetricSpecification
@@ -2320,6 +2889,35 @@ module MetricStatistic =
     let of_json j = of_string (string_of_json ~kind:"MetricStatistic" j)
     let to_json = simple_to_json to_value
   end
+module TargetTrackingMetricDataQueries =
+  struct
+    type nonrec t = TargetTrackingMetricDataQuery.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TargetTrackingMetricDataQuery.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TargetTrackingMetricDataQuery.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TargetTrackingMetricDataQueries"
+        ~of_json:TargetTrackingMetricDataQuery.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module MetricType =
   struct
     type nonrec t =
@@ -2363,16 +2961,16 @@ module Ebs =
           "The volume size, in GiBs. The following are the supported volumes sizes for each volume type: gp2 and gp3: 1-16,384 io1: 4-16,384 st1 and sc1: 125-16,384 standard: 1-1,024 You must specify either a SnapshotId or a VolumeSize. If you specify both SnapshotId and VolumeSize, the volume size must be equal or greater than the size of the snapshot."];
       volumeType: BlockDeviceEbsVolumeType.t option
         [@ocaml.doc
-          "The volume type. For more information, see Amazon EBS volume types in the Amazon EC2 User Guide for Linux Instances. Valid Values: standard | io1 | gp2 | st1 | sc1 | gp3"];
+          "The volume type. For more information, see Amazon EBS volume types in the Amazon EBS User Guide. Valid values: standard | io1 | gp2 | st1 | sc1 | gp3"];
       deleteOnTermination: BlockDeviceEbsDeleteOnTermination.t option
         [@ocaml.doc
           "Indicates whether the volume is deleted on instance termination. For Amazon EC2 Auto Scaling, the default value is true."];
       iops: BlockDeviceEbsIops.t option
         [@ocaml.doc
-          "The number of input/output (I/O) operations per second (IOPS) to provision for the volume. For gp3 and io1 volumes, this represents the number of IOPS that are provisioned for the volume. For gp2 volumes, this represents the baseline performance of the volume and the rate at which the volume accumulates I/O credits for bursting. The following are the supported values for each volume type: gp3: 3,000-16,000 IOPS io1: 100-64,000 IOPS For io1 volumes, we guarantee 64,000 IOPS only for Instances built on the Nitro System. Other instance families guarantee performance up to 32,000 IOPS. Iops is supported when the volume type is gp3 or io1 and required only when the volume type is io1. (Not used with standard, gp2, st1, or sc1 volumes.)"];
+          "The number of input/output (I/O) operations per second (IOPS) to provision for the volume. For gp3 and io1 volumes, this represents the number of IOPS that are provisioned for the volume. For gp2 volumes, this represents the baseline performance of the volume and the rate at which the volume accumulates I/O credits for bursting. The following are the supported values for each volume type: gp3: 3,000-16,000 IOPS io1: 100-64,000 IOPS For io1 volumes, we guarantee 64,000 IOPS only for Instances built on the Amazon Web Services Nitro System. Other instance families guarantee performance up to 32,000 IOPS. Iops is supported when the volume type is gp3 or io1 and required only when the volume type is io1. (Not used with standard, gp2, st1, or sc1 volumes.)"];
       encrypted: BlockDeviceEbsEncrypted.t option
         [@ocaml.doc
-          "Specifies whether the volume should be encrypted. Encrypted EBS volumes can only be attached to instances that support Amazon EBS encryption. For more information, see Supported instance types. If your AMI uses encrypted volumes, you can also only launch it on supported instance types. If you are creating a volume from a snapshot, you cannot create an unencrypted volume from an encrypted snapshot. Also, you cannot specify a KMS key ID when using a launch configuration. If you enable encryption by default, the EBS volumes that you create are always encrypted, either using the Amazon Web Services managed KMS key or a customer-managed KMS key, regardless of whether the snapshot was encrypted. For more information, see Using Amazon Web Services KMS keys to encrypt Amazon EBS volumes in the Amazon EC2 Auto Scaling User Guide."];
+          "Specifies whether the volume should be encrypted. Encrypted EBS volumes can only be attached to instances that support Amazon EBS encryption. For more information, see Requirements for Amazon EBS encryption in the Amazon EBS User Guide. If your AMI uses encrypted volumes, you can also only launch it on supported instance types. If you are creating a volume from a snapshot, you cannot create an unencrypted volume from an encrypted snapshot. Also, you cannot specify a KMS key ID when using a launch configuration. If you enable encryption by default, the EBS volumes that you create are always encrypted, either using the Amazon Web Services managed KMS key or a customer-managed KMS key, regardless of whether the snapshot was encrypted. For more information, see Use Amazon Web Services KMS keys to encrypt Amazon EBS volumes in the Amazon EC2 Auto Scaling User Guide."];
       throughput: BlockDeviceEbsThroughput.t option
         [@ocaml.doc "The throughput (MiBps) to provision for a gp3 volume."]}
     let make ?snapshotId =
@@ -2433,20 +3031,21 @@ module Ebs =
       make ?throughput ?encrypted ?iops ?deleteOnTermination ?volumeType
         ?volumeSize ?snapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let throughput =
-        field_map json "Throughput" BlockDeviceEbsThroughput.of_json in
+        field_map json__ "Throughput" BlockDeviceEbsThroughput.of_json in
       let encrypted =
-        field_map json "Encrypted" BlockDeviceEbsEncrypted.of_json in
-      let iops = field_map json "Iops" BlockDeviceEbsIops.of_json in
+        field_map json__ "Encrypted" BlockDeviceEbsEncrypted.of_json in
+      let iops = field_map json__ "Iops" BlockDeviceEbsIops.of_json in
       let deleteOnTermination =
-        field_map json "DeleteOnTermination"
+        field_map json__ "DeleteOnTermination"
           BlockDeviceEbsDeleteOnTermination.of_json in
       let volumeType =
-        field_map json "VolumeType" BlockDeviceEbsVolumeType.of_json in
+        field_map json__ "VolumeType" BlockDeviceEbsVolumeType.of_json in
       let volumeSize =
-        field_map json "VolumeSize" BlockDeviceEbsVolumeSize.of_json in
-      let snapshotId = field_map json "SnapshotId" XmlStringMaxLen255.of_json in
+        field_map json__ "VolumeSize" BlockDeviceEbsVolumeSize.of_json in
+      let snapshotId =
+        field_map json__ "SnapshotId" XmlStringMaxLen255.of_json in
       make ?throughput ?encrypted ?iops ?deleteOnTermination ?volumeType
         ?volumeSize ?snapshotId ()
     let to_json v = composed_to_json to_value v
@@ -2471,23 +3070,23 @@ module InstancesDistribution =
       {
       onDemandAllocationStrategy: XmlString.t option
         [@ocaml.doc
-          "The order of the launch template overrides to use in fulfilling On-Demand capacity. If you specify lowest-price, Amazon EC2 Auto Scaling uses price to determine the order, launching the lowest price first. If you specify prioritized, Amazon EC2 Auto Scaling uses the priority that you assigned to each launch template override, launching the highest priority first. If all your On-Demand capacity cannot be fulfilled using your highest priority instance, then Amazon EC2 Auto Scaling launches the remaining capacity using the second priority instance type, and so on. Default: lowest-price for Auto Scaling groups that specify InstanceRequirements in the overrides and prioritized for Auto Scaling groups that don't."];
+          "The allocation strategy to apply to your On-Demand Instances when they are launched. Possible instance types are determined by the launch template overrides that you specify. The following lists the valid values: lowest-price Uses price to determine which instance types are the highest priority, launching the lowest priced instance types within an Availability Zone first. This is the default value for Auto Scaling groups that specify InstanceRequirements. prioritized You set the order of instance types for the launch template overrides from highest to lowest priority (from first to last in the list). Amazon EC2 Auto Scaling launches your highest priority instance types first. If all your On-Demand capacity cannot be fulfilled using your highest priority instance type, then Amazon EC2 Auto Scaling launches the remaining capacity using the second priority instance type, and so on. This is the default value for Auto Scaling groups that don't specify InstanceRequirements and cannot be used for groups that do."];
       onDemandBaseCapacity: OnDemandBaseCapacity.t option
         [@ocaml.doc
-          "The minimum amount of the Auto Scaling group's capacity that must be fulfilled by On-Demand Instances. This base portion is launched first as your group scales. If you specify weights for the instance types in the overrides, the base capacity is measured in the same unit of measurement as the instance types. If you specify InstanceRequirements in the overrides, the base capacity is measured in the same unit of measurement as your group's desired capacity. Default: 0"];
+          "The minimum amount of the Auto Scaling group's capacity that must be fulfilled by On-Demand Instances. This base portion is launched first as your group scales. This number has the same unit of measurement as the group's desired capacity. If you change the default unit of measurement (number of instances) by specifying weighted capacity values in your launch template overrides list, or by changing the default desired capacity type setting of the group, you must specify this number using the same unit of measurement. Default: 0"];
       onDemandPercentageAboveBaseCapacity:
         OnDemandPercentageAboveBaseCapacity.t option
         [@ocaml.doc
           "Controls the percentages of On-Demand Instances and Spot Instances for your additional capacity beyond OnDemandBaseCapacity. Expressed as a number (for example, 20 specifies 20% On-Demand Instances, 80% Spot Instances). If set to 100, only On-Demand Instances are used. Default: 100"];
       spotAllocationStrategy: XmlString.t option
         [@ocaml.doc
-          "Indicates how to allocate instances across Spot Instance pools. If the allocation strategy is lowest-price, the Auto Scaling group launches instances using the Spot pools with the lowest price, and evenly allocates your instances across the number of Spot pools that you specify. If the allocation strategy is capacity-optimized (recommended), the Auto Scaling group launches instances using Spot pools that are optimally chosen based on the available Spot capacity. Alternatively, you can use capacity-optimized-prioritized and set the order of instance types in the list of launch template overrides from highest to lowest priority (from first to last in the list). Amazon EC2 Auto Scaling honors the instance type priorities on a best-effort basis but optimizes for capacity first. Default: lowest-price"];
+          "The allocation strategy to apply to your Spot Instances when they are launched. Possible instance types are determined by the launch template overrides that you specify. The following lists the valid values: capacity-optimized Requests Spot Instances using pools that are optimally chosen based on the available Spot capacity. This strategy has the lowest risk of interruption. To give certain instance types a higher chance of launching first, use capacity-optimized-prioritized. capacity-optimized-prioritized You set the order of instance types for the launch template overrides from highest to lowest priority (from first to last in the list). Amazon EC2 Auto Scaling honors the instance type priorities on a best effort basis but optimizes for capacity first. Note that if the On-Demand allocation strategy is set to prioritized, the same priority is applied when fulfilling On-Demand capacity. This is not a valid value for Auto Scaling groups that specify InstanceRequirements. lowest-price Requests Spot Instances using the lowest priced pools within an Availability Zone, across the number of Spot pools that you specify for the SpotInstancePools property. To ensure that your desired capacity is met, you might receive Spot Instances from several pools. This is the default value, but it might lead to high interruption rates because this strategy only considers instance price and not available capacity. price-capacity-optimized (recommended) The price and capacity optimized allocation strategy looks at both price and capacity to select the Spot Instance pools that are the least likely to be interrupted and have the lowest possible price."];
       spotInstancePools: SpotInstancePools.t option
         [@ocaml.doc
-          "The number of Spot Instance pools across which to allocate your Spot Instances. The Spot pools are determined from the different instance types in the overrides. Valid only when the Spot allocation strategy is lowest-price. Value must be in the range of 1\226\128\14720. Default: 2"];
+          "The number of Spot Instance pools across which to allocate your Spot Instances. The Spot pools are determined from the different instance types in the overrides. Valid only when the SpotAllocationStrategy is lowest-price. Value must be in the range of 1\226\128\14720. Default: 2"];
       spotMaxPrice: MixedInstanceSpotPrice.t option
         [@ocaml.doc
-          "The maximum price per unit hour that you are willing to pay for a Spot Instance. If you keep the value at its default (unspecified), Amazon EC2 Auto Scaling uses the On-Demand price as the maximum Spot price. To remove a value that you previously set, include the property but specify an empty string (\"\") for the value."]}
+          "The maximum price per unit hour that you are willing to pay for a Spot Instance. If your maximum price is lower than the Spot price for the instance types that you selected, your Spot Instances are not launched. We do not recommend specifying a maximum price because it can lead to increased interruptions. When Spot Instances launch, you pay the current Spot price. To remove a maximum price that you previously set, include the property but specify an empty string (\"\") for the value. If you specify a maximum price, your instances will be interrupted more frequently than if you do not specify one. Valid Range: Minimum value of 0.001"]}
     let make ?onDemandAllocationStrategy =
       fun ?onDemandBaseCapacity ->
         fun ?onDemandPercentageAboveBaseCapacity ->
@@ -2542,35 +3141,35 @@ module InstancesDistribution =
         ?onDemandPercentageAboveBaseCapacity ?onDemandBaseCapacity
         ?onDemandAllocationStrategy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let spotMaxPrice =
-        field_map json "SpotMaxPrice" MixedInstanceSpotPrice.of_json in
+        field_map json__ "SpotMaxPrice" MixedInstanceSpotPrice.of_json in
       let spotInstancePools =
-        field_map json "SpotInstancePools" SpotInstancePools.of_json in
+        field_map json__ "SpotInstancePools" SpotInstancePools.of_json in
       let spotAllocationStrategy =
-        field_map json "SpotAllocationStrategy" XmlString.of_json in
+        field_map json__ "SpotAllocationStrategy" XmlString.of_json in
       let onDemandPercentageAboveBaseCapacity =
-        field_map json "OnDemandPercentageAboveBaseCapacity"
+        field_map json__ "OnDemandPercentageAboveBaseCapacity"
           OnDemandPercentageAboveBaseCapacity.of_json in
       let onDemandBaseCapacity =
-        field_map json "OnDemandBaseCapacity" OnDemandBaseCapacity.of_json in
+        field_map json__ "OnDemandBaseCapacity" OnDemandBaseCapacity.of_json in
       let onDemandAllocationStrategy =
-        field_map json "OnDemandAllocationStrategy" XmlString.of_json in
+        field_map json__ "OnDemandAllocationStrategy" XmlString.of_json in
       make ?spotMaxPrice ?spotInstancePools ?spotAllocationStrategy
         ?onDemandPercentageAboveBaseCapacity ?onDemandBaseCapacity
         ?onDemandAllocationStrategy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes an instances distribution for an Auto Scaling group."]
+       "Use this structure to specify the distribution of On-Demand Instances and Spot Instances and the allocation strategies used to fulfill On-Demand and Spot capacities for a mixed instances policy."]
 module LaunchTemplate =
   struct
     type nonrec t =
       {
       launchTemplateSpecification: LaunchTemplateSpecification.t option
-        [@ocaml.doc "The launch template to use."];
+        [@ocaml.doc "The launch template."];
       overrides: Overrides.t option
         [@ocaml.doc
-          "Any properties that you specify override the same properties in the launch template. If not provided, Amazon EC2 Auto Scaling uses the instance type or instance type requirements specified in the launch template when it launches an instance. The overrides can include either one or more instance types or a set of instance requirements, but not both."]}
+          "Any properties that you specify override the same properties in the launch template."]}
     let make ?launchTemplateSpecification =
       fun ?overrides -> fun () -> { launchTemplateSpecification; overrides }
     let to_value x =
@@ -2588,47 +3187,41 @@ module LaunchTemplate =
           (Xml.child xml_arg0 "LaunchTemplateSpecification") in
       make ?overrides ?launchTemplateSpecification ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let overrides = field_map json "Overrides" Overrides.of_json in
+    let of_json json__ =
+      let overrides = field_map json__ "Overrides" Overrides.of_json in
       let launchTemplateSpecification =
-        field_map json "LaunchTemplateSpecification"
+        field_map json__ "LaunchTemplateSpecification"
           LaunchTemplateSpecification.of_json in
       make ?overrides ?launchTemplateSpecification ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes a launch template and overrides. You specify these properties as part of a mixed instances policy."]
-module InstancesToUpdate =
+       "Use this structure to specify the launch templates and instance types (overrides) for a mixed instances policy."]
+module AlarmList =
   struct
-    type nonrec t = int
-    let make i =
-      let open Result in ok_or_failwith (check_int_min i ~min:0); i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    type nonrec t = XmlStringMaxLen255.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:XmlStringMaxLen255.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for InstancesToUpdate" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module IntPercent =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for IntPercent" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:XmlStringMaxLen255.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AlarmList" ~of_json:XmlStringMaxLen255.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module NonZeroIntPercent =
   struct
@@ -2646,6 +3239,162 @@ module NonZeroIntPercent =
       Int.of_string
         (string_of_xml ~kind:"an integer for NonZeroIntPercent" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module InstanceRefreshLivePoolProgress =
+  struct
+    type nonrec t =
+      {
+      percentageComplete: IntPercent.t option
+        [@ocaml.doc
+          "The percentage of instances in the Auto Scaling group that have been replaced. For each instance replacement, Amazon EC2 Auto Scaling tracks the instance's health status and warm-up time. When the instance's health status changes to healthy and the specified warm-up time passes, the instance is considered updated and is added to the percentage complete."];
+      instancesToUpdate: InstancesToUpdate.t option
+        [@ocaml.doc "The number of instances remaining to update."]}
+    let make ?percentageComplete =
+      fun ?instancesToUpdate ->
+        fun () -> { percentageComplete; instancesToUpdate }
+    let to_value x =
+      structure_to_value
+        [("PercentageComplete",
+           (Option.map x.percentageComplete ~f:IntPercent.to_value));
+        ("InstancesToUpdate",
+          (Option.map x.instancesToUpdate ~f:InstancesToUpdate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let instancesToUpdate =
+        (Option.map ~f:InstancesToUpdate.of_xml)
+          (Xml.child xml_arg0 "InstancesToUpdate") in
+      let percentageComplete =
+        (Option.map ~f:IntPercent.of_xml)
+          (Xml.child xml_arg0 "PercentageComplete") in
+      make ?instancesToUpdate ?percentageComplete ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let instancesToUpdate =
+        field_map json__ "InstancesToUpdate" InstancesToUpdate.of_json in
+      let percentageComplete =
+        field_map json__ "PercentageComplete" IntPercent.of_json in
+      make ?instancesToUpdate ?percentageComplete ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Reports progress on replacing instances that are in the Auto Scaling group."]
+module InstanceRefreshWarmPoolProgress =
+  struct
+    type nonrec t =
+      {
+      percentageComplete: IntPercent.t option
+        [@ocaml.doc
+          "The percentage of instances in the warm pool that have been replaced. For each instance replacement, Amazon EC2 Auto Scaling tracks the instance's health status and warm-up time. When the instance's health status changes to healthy and the specified warm-up time passes, the instance is considered updated and is added to the percentage complete."];
+      instancesToUpdate: InstancesToUpdate.t option
+        [@ocaml.doc "The number of instances remaining to update."]}
+    let make ?percentageComplete =
+      fun ?instancesToUpdate ->
+        fun () -> { percentageComplete; instancesToUpdate }
+    let to_value x =
+      structure_to_value
+        [("PercentageComplete",
+           (Option.map x.percentageComplete ~f:IntPercent.to_value));
+        ("InstancesToUpdate",
+          (Option.map x.instancesToUpdate ~f:InstancesToUpdate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let instancesToUpdate =
+        (Option.map ~f:InstancesToUpdate.of_xml)
+          (Xml.child xml_arg0 "InstancesToUpdate") in
+      let percentageComplete =
+        (Option.map ~f:IntPercent.of_xml)
+          (Xml.child xml_arg0 "PercentageComplete") in
+      make ?instancesToUpdate ?percentageComplete ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let instancesToUpdate =
+        field_map json__ "InstancesToUpdate" InstancesToUpdate.of_json in
+      let percentageComplete =
+        field_map json__ "PercentageComplete" IntPercent.of_json in
+      make ?instancesToUpdate ?percentageComplete ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Reports progress on replacing instances that are in the warm pool."]
+module CapacityReservationIds =
+  struct
+    type nonrec t = AsciiStringMaxLen255.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AsciiStringMaxLen255.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AsciiStringMaxLen255.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapacityReservationIds"
+        ~of_json:AsciiStringMaxLen255.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CapacityReservationResourceGroupArns =
+  struct
+    type nonrec t = ResourceName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapacityReservationResourceGroupArns"
+        ~of_json:ResourceName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RetentionAction =
+  struct
+    type nonrec t =
+      | Retain 
+      | Terminate 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Retain -> "retain"
+      | Terminate -> "terminate"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "retain" -> Retain
+      | "terminate" -> Terminate
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RetentionAction" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RetentionAction" j)
     let to_json = simple_to_json to_value
   end
 module InstanceProtected =
@@ -2672,17 +3421,24 @@ module LifecycleState =
       | Terminating 
       | Terminating_Wait 
       | Terminating_Proceed 
+      | Terminating_Retained 
       | Terminated 
       | Detaching 
       | Detached 
       | EnteringStandby 
       | Standby 
+      | ReplacingRootVolume 
+      | ReplacingRootVolume_Wait 
+      | ReplacingRootVolume_Proceed 
+      | RootVolumeReplaced 
       | Warmed_Pending 
       | Warmed_Pending_Wait 
       | Warmed_Pending_Proceed 
+      | Warmed_Pending_Retained 
       | Warmed_Terminating 
       | Warmed_Terminating_Wait 
       | Warmed_Terminating_Proceed 
+      | Warmed_Terminating_Retained 
       | Warmed_Terminated 
       | Warmed_Stopped 
       | Warmed_Running 
@@ -2699,17 +3455,24 @@ module LifecycleState =
       | Terminating -> "Terminating"
       | Terminating_Wait -> "Terminating:Wait"
       | Terminating_Proceed -> "Terminating:Proceed"
+      | Terminating_Retained -> "Terminating:Retained"
       | Terminated -> "Terminated"
       | Detaching -> "Detaching"
       | Detached -> "Detached"
       | EnteringStandby -> "EnteringStandby"
       | Standby -> "Standby"
+      | ReplacingRootVolume -> "ReplacingRootVolume"
+      | ReplacingRootVolume_Wait -> "ReplacingRootVolume:Wait"
+      | ReplacingRootVolume_Proceed -> "ReplacingRootVolume:Proceed"
+      | RootVolumeReplaced -> "RootVolumeReplaced"
       | Warmed_Pending -> "Warmed:Pending"
       | Warmed_Pending_Wait -> "Warmed:Pending:Wait"
       | Warmed_Pending_Proceed -> "Warmed:Pending:Proceed"
+      | Warmed_Pending_Retained -> "Warmed:Pending:Retained"
       | Warmed_Terminating -> "Warmed:Terminating"
       | Warmed_Terminating_Wait -> "Warmed:Terminating:Wait"
       | Warmed_Terminating_Proceed -> "Warmed:Terminating:Proceed"
+      | Warmed_Terminating_Retained -> "Warmed:Terminating:Retained"
       | Warmed_Terminated -> "Warmed:Terminated"
       | Warmed_Stopped -> "Warmed:Stopped"
       | Warmed_Running -> "Warmed:Running"
@@ -2725,17 +3488,24 @@ module LifecycleState =
       | "Terminating" -> Terminating
       | "Terminating:Wait" -> Terminating_Wait
       | "Terminating:Proceed" -> Terminating_Proceed
+      | "Terminating:Retained" -> Terminating_Retained
       | "Terminated" -> Terminated
       | "Detaching" -> Detaching
       | "Detached" -> Detached
       | "EnteringStandby" -> EnteringStandby
       | "Standby" -> Standby
+      | "ReplacingRootVolume" -> ReplacingRootVolume
+      | "ReplacingRootVolume:Wait" -> ReplacingRootVolume_Wait
+      | "ReplacingRootVolume:Proceed" -> ReplacingRootVolume_Proceed
+      | "RootVolumeReplaced" -> RootVolumeReplaced
       | "Warmed:Pending" -> Warmed_Pending
       | "Warmed:Pending:Wait" -> Warmed_Pending_Wait
       | "Warmed:Pending:Proceed" -> Warmed_Pending_Proceed
+      | "Warmed:Pending:Retained" -> Warmed_Pending_Retained
       | "Warmed:Terminating" -> Warmed_Terminating
       | "Warmed:Terminating:Wait" -> Warmed_Terminating_Wait
       | "Warmed:Terminating:Proceed" -> Warmed_Terminating_Proceed
+      | "Warmed:Terminating:Retained" -> Warmed_Terminating_Retained
       | "Warmed:Terminated" -> Warmed_Terminated
       | "Warmed:Stopped" -> Warmed_Stopped
       | "Warmed:Running" -> Warmed_Running
@@ -2828,6 +3598,28 @@ module TagValue =
     let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
+module XmlStringMaxLen511 =
+  struct
+    type nonrec t = string
+    let context_ = "XmlStringMaxLen511"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:511) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"XmlStringMaxLen511" j
+    let to_json = simple_to_json to_value
+  end
 module ReuseOnScaleIn =
   struct
     type nonrec t = bool
@@ -2864,9 +3656,9 @@ module Alarm =
           (Xml.child xml_arg0 "AlarmName") in
       make ?alarmARN ?alarmName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let alarmARN = field_map json "AlarmARN" ResourceName.of_json in
-      let alarmName = field_map json "AlarmName" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let alarmARN = field_map json__ "AlarmARN" ResourceName.of_json in
+      let alarmName = field_map json__ "AlarmName" XmlStringMaxLen255.of_json in
       make ?alarmARN ?alarmName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an alarm."]
@@ -2923,6 +3715,9 @@ module PredictiveScalingMetricSpecifications =
   struct
     type nonrec t = PredictiveScalingMetricSpecification.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PredictiveScalingMetricSpecification.to_value)) |>
         (fun x -> `List x)
@@ -3002,7 +3797,7 @@ module StepAdjustment =
           "The upper bound for the difference between the alarm threshold and the CloudWatch metric. If the metric value is above the breach threshold, the upper bound is exclusive (the metric must be less than the threshold plus the upper bound). Otherwise, it is inclusive (the metric must be less than or equal to the threshold plus the upper bound). A null value indicates positive infinity. The upper bound must be greater than the lower bound."];
       scalingAdjustment: PolicyIncrement.t
         [@ocaml.doc
-          "The amount by which to scale, based on the specified adjustment type. A positive value adds to the current capacity while a negative number removes from the current capacity."]}
+          "The amount by which to scale, based on the specified adjustment type. A positive value adds to the current capacity while a negative number removes from the current capacity. For exact capacity, you must specify a non-negative value."]}
     let context_ = "StepAdjustment"
     let make ?metricIntervalLowerBound =
       fun ?metricIntervalUpperBound ->
@@ -3035,13 +3830,13 @@ module StepAdjustment =
       make ~scalingAdjustment ?metricIntervalUpperBound
         ?metricIntervalLowerBound ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scalingAdjustment =
-        field_map_exn json "ScalingAdjustment" PolicyIncrement.of_json in
+        field_map_exn json__ "ScalingAdjustment" PolicyIncrement.of_json in
       let metricIntervalUpperBound =
-        field_map json "MetricIntervalUpperBound" MetricScale.of_json in
+        field_map json__ "MetricIntervalUpperBound" MetricScale.of_json in
       let metricIntervalLowerBound =
-        field_map json "MetricIntervalLowerBound" MetricScale.of_json in
+        field_map json__ "MetricIntervalLowerBound" MetricScale.of_json in
       make ~scalingAdjustment ?metricIntervalUpperBound
         ?metricIntervalLowerBound ()
     let to_json v = composed_to_json to_value v
@@ -3051,63 +3846,93 @@ module CustomizedMetricSpecification =
   struct
     type nonrec t =
       {
-      metricName: MetricName.t
+      metricName: MetricName.t option
         [@ocaml.doc
           "The name of the metric. To get the exact metric name, namespace, and dimensions, inspect the Metric object that is returned by a call to ListMetrics."];
-      namespace: MetricNamespace.t
+      namespace: MetricNamespace.t option
         [@ocaml.doc "The namespace of the metric."];
       dimensions: MetricDimensions.t option
         [@ocaml.doc
           "The dimensions of the metric. Conditional: If you published your metric with dimensions, you must specify the same dimensions in your scaling policy."];
-      statistic: MetricStatistic.t
+      statistic: MetricStatistic.t option
         [@ocaml.doc "The statistic of the metric."];
       unit: MetricUnit.t option
         [@ocaml.doc
-          "The unit of the metric. For a complete list of the units that CloudWatch supports, see the MetricDatum data type in the Amazon CloudWatch API Reference."]}
-    let context_ = "CustomizedMetricSpecification"
-    let make ?dimensions =
-      fun ?unit ->
-        fun ~metricName ->
-          fun ~namespace ->
-            fun ~statistic ->
-              fun () ->
-                { dimensions; unit; metricName; namespace; statistic }
+          "The unit of the metric. For a complete list of the units that CloudWatch supports, see the MetricDatum data type in the Amazon CloudWatch API Reference."];
+      period: MetricGranularityInSeconds.t option
+        [@ocaml.doc
+          "The period of the metric in seconds. The default value is 60. Accepted values are 10, 30, and 60. For high resolution metric, set the value to less than 60. For more information, see Create a target tracking policy using high-resolution metrics for faster response."];
+      metrics: TargetTrackingMetricDataQueries.t option
+        [@ocaml.doc
+          "The metrics to include in the target tracking scaling policy, as a metric data query. This can include both raw metric and metric math expressions."]}
+    let make ?metricName =
+      fun ?namespace ->
+        fun ?dimensions ->
+          fun ?statistic ->
+            fun ?unit ->
+              fun ?period ->
+                fun ?metrics ->
+                  fun () ->
+                    {
+                      metricName;
+                      namespace;
+                      dimensions;
+                      statistic;
+                      unit;
+                      period;
+                      metrics
+                    }
     let to_value x =
       structure_to_value
-        [("MetricName", (Some (MetricName.to_value x.metricName)));
-        ("Namespace", (Some (MetricNamespace.to_value x.namespace)));
+        [("MetricName", (Option.map x.metricName ~f:MetricName.to_value));
+        ("Namespace", (Option.map x.namespace ~f:MetricNamespace.to_value));
         ("Dimensions",
           (Option.map x.dimensions ~f:MetricDimensions.to_value));
-        ("Statistic", (Some (MetricStatistic.to_value x.statistic)));
-        ("Unit", (Option.map x.unit ~f:MetricUnit.to_value))]
+        ("Statistic", (Option.map x.statistic ~f:MetricStatistic.to_value));
+        ("Unit", (Option.map x.unit ~f:MetricUnit.to_value));
+        ("Period",
+          (Option.map x.period ~f:MetricGranularityInSeconds.to_value));
+        ("Metrics",
+          (Option.map x.metrics ~f:TargetTrackingMetricDataQueries.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let metrics =
+        (Option.map ~f:TargetTrackingMetricDataQueries.of_xml)
+          (Xml.child xml_arg0 "Metrics") in
+      let period =
+        (Option.map ~f:MetricGranularityInSeconds.of_xml)
+          (Xml.child xml_arg0 "Period") in
       let unit =
         (Option.map ~f:MetricUnit.of_xml) (Xml.child xml_arg0 "Unit") in
       let statistic =
-        MetricStatistic.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Statistic") in
+        (Option.map ~f:MetricStatistic.of_xml)
+          (Xml.child xml_arg0 "Statistic") in
       let dimensions =
         (Option.map ~f:MetricDimensions.of_xml)
           (Xml.child xml_arg0 "Dimensions") in
       let namespace =
-        MetricNamespace.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Namespace") in
+        (Option.map ~f:MetricNamespace.of_xml)
+          (Xml.child xml_arg0 "Namespace") in
       let metricName =
-        MetricName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MetricName") in
-      make ?unit ~statistic ?dimensions ~namespace ~metricName ()
+        (Option.map ~f:MetricName.of_xml) (Xml.child xml_arg0 "MetricName") in
+      make ?metrics ?period ?unit ?statistic ?dimensions ?namespace
+        ?metricName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map json "Unit" MetricUnit.of_json in
-      let statistic = field_map_exn json "Statistic" MetricStatistic.of_json in
-      let dimensions = field_map json "Dimensions" MetricDimensions.of_json in
-      let namespace = field_map_exn json "Namespace" MetricNamespace.of_json in
-      let metricName = field_map_exn json "MetricName" MetricName.of_json in
-      make ?unit ~statistic ?dimensions ~namespace ~metricName ()
+    let of_json json__ =
+      let metrics =
+        field_map json__ "Metrics" TargetTrackingMetricDataQueries.of_json in
+      let period =
+        field_map json__ "Period" MetricGranularityInSeconds.of_json in
+      let unit = field_map json__ "Unit" MetricUnit.of_json in
+      let statistic = field_map json__ "Statistic" MetricStatistic.of_json in
+      let dimensions = field_map json__ "Dimensions" MetricDimensions.of_json in
+      let namespace = field_map json__ "Namespace" MetricNamespace.of_json in
+      let metricName = field_map json__ "MetricName" MetricName.of_json in
+      make ?metrics ?period ?unit ?statistic ?dimensions ?namespace
+        ?metricName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a CloudWatch metric of your choosing for a target tracking scaling policy to use with Amazon EC2 Auto Scaling. To create your customized metric specification: Add values for each required parameter from CloudWatch. You can use an existing metric, or a new metric that you create. To use your own metric, you must first publish the metric to CloudWatch. For more information, see Publish custom metrics in the Amazon CloudWatch User Guide. Choose a metric that changes proportionally with capacity. The value of the metric should increase or decrease in inverse proportion to the number of capacity units. That is, the value of the metric should decrease when capacity increases. For more information about the CloudWatch terminology below, see Amazon CloudWatch concepts. Each individual service provides information about the metrics, namespace, and dimensions they use. For more information, see Amazon Web Services services that publish CloudWatch metrics in the Amazon CloudWatch User Guide."]
+       "Represents a CloudWatch metric of your choosing for a target tracking scaling policy to use with Amazon EC2 Auto Scaling. To create your customized metric specification: Add values for each required property from CloudWatch. You can use an existing metric, or a new metric that you create. To use your own metric, you must first publish the metric to CloudWatch. For more information, see Publish custom metrics in the Amazon CloudWatch User Guide. Choose a metric that changes proportionally with capacity. The value of the metric should increase or decrease in inverse proportion to the number of capacity units. That is, the value of the metric should decrease when capacity increases. For more information about the CloudWatch terminology below, see Amazon CloudWatch concepts. Each individual service provides information about the metrics, namespace, and dimensions they use. For more information, see Amazon Web Services services that publish CloudWatch metrics in the Amazon CloudWatch User Guide."]
 module DisableScaleIn =
   struct
     type nonrec t = bool
@@ -3127,7 +3952,7 @@ module PredefinedMetricSpecification =
       {
       predefinedMetricType: MetricType.t
         [@ocaml.doc
-          "The metric type. The following predefined metrics are available: ASGAverageCPUUtilization - Average CPU utilization of the Auto Scaling group. ASGAverageNetworkIn - Average number of bytes received (per instance per minute) for the Auto Scaling group. ASGAverageNetworkOut - Average number of bytes sent out (per instance per minute) for the Auto Scaling group. ALBRequestCountPerTarget - Average Application Load Balancer request count (per target per minute) for your Auto Scaling group."];
+          "The metric type. The following predefined metrics are available: ASGAverageCPUUtilization - Average CPU utilization of the Auto Scaling group. ASGAverageNetworkIn - Average number of bytes received on all network interfaces by the Auto Scaling group. ASGAverageNetworkOut - Average number of bytes sent out on all network interfaces by the Auto Scaling group. ALBRequestCountPerTarget - Average Application Load Balancer request count per target for your Auto Scaling group."];
       resourceLabel: XmlStringMaxLen1023.t option
         [@ocaml.doc
           "A label that uniquely identifies a specific Application Load Balancer target group from which to determine the average request count served by your Auto Scaling group. You can't specify a resource label unless the target group is attached to the Auto Scaling group. You create the resource label by appending the final portion of the load balancer ARN and the final portion of the target group ARN into a single value, separated by a forward slash (/). The format of the resource label is: app/my-alb/778d41231b141a0f/targetgroup/my-alb-target-group/943f017f100becff. Where: app/<load-balancer-name>/<load-balancer-id> is the final portion of the load balancer ARN targetgroup/<target-group-name>/<target-group-id> is the final portion of the target group ARN. To find the ARN for an Application Load Balancer, use the DescribeLoadBalancers API operation. To find the ARN for the target group, use the DescribeTargetGroups API operation."]}
@@ -3151,11 +3976,11 @@ module PredefinedMetricSpecification =
           (Xml.child_exn ~context:context_ xml_arg0 "PredefinedMetricType") in
       make ?resourceLabel ~predefinedMetricType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceLabel =
-        field_map json "ResourceLabel" XmlStringMaxLen1023.of_json in
+        field_map json__ "ResourceLabel" XmlStringMaxLen1023.of_json in
       let predefinedMetricType =
-        field_map_exn json "PredefinedMetricType" MetricType.of_json in
+        field_map_exn json__ "PredefinedMetricType" MetricType.of_json in
       make ?resourceLabel ~predefinedMetricType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3166,16 +3991,16 @@ module BlockDeviceMapping =
       {
       virtualName: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "The name of the virtual device (for example, ephemeral0). You can specify either VirtualName or Ebs, but not both."];
+          "The name of the instance store volume (virtual device) to attach to an instance at launch. The name must be in the form ephemeralX where X is a number starting from zero (0), for example, ephemeral0."];
       deviceName: XmlStringMaxLen255.t
         [@ocaml.doc
-          "The device name exposed to the EC2 instance (for example, /dev/sdh or xvdh). For more information, see Device Naming on Linux Instances in the Amazon EC2 User Guide for Linux Instances."];
+          "The device name assigned to the volume (for example, /dev/sdh or xvdh). For more information, see Device naming on Linux instances in the Amazon EC2 User Guide. To define a block device mapping, set the device name and exactly one of the following properties: Ebs, NoDevice, or VirtualName."];
       ebs: Ebs.t option
         [@ocaml.doc
-          "Parameters used to automatically set up EBS volumes when an instance is launched. You can specify either VirtualName or Ebs, but not both."];
+          "Information to attach an EBS volume to an instance at launch."];
       noDevice: NoDevice.t option
         [@ocaml.doc
-          "Setting this value to true suppresses the specified device included in the block device mapping of the AMI. If NoDevice is true for the root device, instances might fail the EC2 health check. In that case, Amazon EC2 Auto Scaling launches replacement instances. If you specify NoDevice, you cannot specify Ebs."]}
+          "Setting this value to true prevents a volume that is included in the block device mapping of the AMI from being mapped to the specified device name at launch. If NoDevice is true for the root device, instances might fail the EC2 health check. In that case, Amazon EC2 Auto Scaling launches replacement instances."]}
     let context_ = "BlockDeviceMapping"
     let make ?virtualName =
       fun ?ebs ->
@@ -3202,13 +4027,13 @@ module BlockDeviceMapping =
           (Xml.child xml_arg0 "VirtualName") in
       make ?noDevice ?ebs ~deviceName ?virtualName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let noDevice = field_map json "NoDevice" NoDevice.of_json in
-      let ebs = field_map json "Ebs" Ebs.of_json in
+    let of_json json__ =
+      let noDevice = field_map json__ "NoDevice" NoDevice.of_json in
+      let ebs = field_map json__ "Ebs" Ebs.of_json in
       let deviceName =
-        field_map_exn json "DeviceName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "DeviceName" XmlStringMaxLen255.of_json in
       let virtualName =
-        field_map json "VirtualName" XmlStringMaxLen255.of_json in
+        field_map json__ "VirtualName" XmlStringMaxLen255.of_json in
       make ?noDevice ?ebs ~deviceName ?virtualName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a block device mapping."]
@@ -3319,9 +4144,9 @@ module MixedInstancesPolicy =
       {
       launchTemplate: LaunchTemplate.t option
         [@ocaml.doc
-          "Specifies the launch template to use and the instance types (overrides) that are used to launch EC2 instances to fulfill On-Demand and Spot capacities. Required when creating a mixed instances policy."];
+          "One or more launch templates and the instance types (overrides) that are used to launch EC2 instances to fulfill On-Demand and Spot capacities."];
       instancesDistribution: InstancesDistribution.t option
-        [@ocaml.doc "Specifies the instances distribution."]}
+        [@ocaml.doc "The instances distribution."]}
     let make ?launchTemplate =
       fun ?instancesDistribution ->
         fun () -> { launchTemplate; instancesDistribution }
@@ -3342,89 +4167,70 @@ module MixedInstancesPolicy =
           (Xml.child xml_arg0 "LaunchTemplate") in
       make ?instancesDistribution ?launchTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instancesDistribution =
-        field_map json "InstancesDistribution" InstancesDistribution.of_json in
+        field_map json__ "InstancesDistribution"
+          InstancesDistribution.of_json in
       let launchTemplate =
-        field_map json "LaunchTemplate" LaunchTemplate.of_json in
+        field_map json__ "LaunchTemplate" LaunchTemplate.of_json in
       make ?instancesDistribution ?launchTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes a mixed instances policy. A mixed instances policy contains the instance types that Amazon EC2 Auto Scaling can launch and other information that Amazon EC2 Auto Scaling can use to launch instances and help optimize your costs. For more information, see Auto Scaling groups with multiple instance types and purchase options in the Amazon EC2 Auto Scaling User Guide."]
-module InstanceRefreshLivePoolProgress =
+       "Use this structure to launch multiple instance types and On-Demand Instances and Spot Instances within a single Auto Scaling group. A mixed instances policy contains information that Amazon EC2 Auto Scaling can use to launch instances and help optimize your costs. For more information, see Auto Scaling groups with multiple instance types and purchase options in the Amazon EC2 Auto Scaling User Guide."]
+module AlarmSpecification =
   struct
     type nonrec t =
       {
-      percentageComplete: IntPercent.t option
+      alarms: AlarmList.t option
         [@ocaml.doc
-          "The percentage of instances in the Auto Scaling group that have been replaced. For each instance replacement, Amazon EC2 Auto Scaling tracks the instance's health status and warm-up time. When the instance's health status changes to healthy and the specified warm-up time passes, the instance is considered updated and is added to the percentage complete."];
-      instancesToUpdate: InstancesToUpdate.t option
-        [@ocaml.doc "The number of instances remaining to update."]}
-    let make ?percentageComplete =
-      fun ?instancesToUpdate ->
-        fun () -> { percentageComplete; instancesToUpdate }
+          "The names of one or more CloudWatch alarms to monitor for the instance refresh. You can specify up to 10 alarms."]}
+    let make ?alarms = fun () -> { alarms }
     let to_value x =
       structure_to_value
-        [("PercentageComplete",
-           (Option.map x.percentageComplete ~f:IntPercent.to_value));
-        ("InstancesToUpdate",
-          (Option.map x.instancesToUpdate ~f:InstancesToUpdate.to_value))]
+        [("Alarms", (Option.map x.alarms ~f:AlarmList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let instancesToUpdate =
-        (Option.map ~f:InstancesToUpdate.of_xml)
-          (Xml.child xml_arg0 "InstancesToUpdate") in
-      let percentageComplete =
-        (Option.map ~f:IntPercent.of_xml)
-          (Xml.child xml_arg0 "PercentageComplete") in
-      make ?instancesToUpdate ?percentageComplete ()
+      let alarms =
+        (Option.map ~f:AlarmList.of_xml) (Xml.child xml_arg0 "Alarms") in
+      make ?alarms ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instancesToUpdate =
-        field_map json "InstancesToUpdate" InstancesToUpdate.of_json in
-      let percentageComplete =
-        field_map json "PercentageComplete" IntPercent.of_json in
-      make ?instancesToUpdate ?percentageComplete ()
+    let of_json json__ =
+      let alarms = field_map json__ "Alarms" AlarmList.of_json in
+      make ?alarms ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Reports the progress of an instance refresh on instances that are in the Auto Scaling group."]
-module InstanceRefreshWarmPoolProgress =
+       "Specifies the CloudWatch alarm specification to use in an instance refresh."]
+module AutoRollback =
   struct
-    type nonrec t =
-      {
-      percentageComplete: IntPercent.t option
-        [@ocaml.doc
-          "The percentage of instances in the warm pool that have been replaced. For each instance replacement, Amazon EC2 Auto Scaling tracks the instance's health status and warm-up time. When the instance's health status changes to healthy and the specified warm-up time passes, the instance is considered updated and is added to the percentage complete."];
-      instancesToUpdate: InstancesToUpdate.t option
-        [@ocaml.doc "The number of instances remaining to update."]}
-    let make ?percentageComplete =
-      fun ?instancesToUpdate ->
-        fun () -> { percentageComplete; instancesToUpdate }
-    let to_value x =
-      structure_to_value
-        [("PercentageComplete",
-           (Option.map x.percentageComplete ~f:IntPercent.to_value));
-        ("InstancesToUpdate",
-          (Option.map x.instancesToUpdate ~f:InstancesToUpdate.to_value))]
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
     let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
     let of_xml xml_arg0 =
-      let instancesToUpdate =
-        (Option.map ~f:InstancesToUpdate.of_xml)
-          (Xml.child xml_arg0 "InstancesToUpdate") in
-      let percentageComplete =
-        (Option.map ~f:IntPercent.of_xml)
-          (Xml.child xml_arg0 "PercentageComplete") in
-      make ?instancesToUpdate ?percentageComplete ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instancesToUpdate =
-        field_map json "InstancesToUpdate" InstancesToUpdate.of_json in
-      let percentageComplete =
-        field_map json "PercentageComplete" IntPercent.of_json in
-      make ?instancesToUpdate ?percentageComplete ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Reports the progress of an instance refresh on instances that are in the warm pool."]
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module BakeTime =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:172800) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for BakeTime" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module CheckpointDelay =
   struct
     type nonrec t = int
@@ -3448,6 +4254,9 @@ module CheckpointPercentages =
   struct
     type nonrec t = NonZeroIntPercent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonZeroIntPercent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3469,6 +4278,25 @@ module CheckpointPercentages =
         ~of_json:NonZeroIntPercent.of_json j
     let to_json v = composed_to_json to_value v
   end
+module IntPercent100To200 =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:200) >>=
+             (fun () -> check_int_min i ~min:100));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for IntPercent100To200" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module RefreshInstanceWarmup =
   struct
     type nonrec t = int
@@ -3484,6 +4312,36 @@ module RefreshInstanceWarmup =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ScaleInProtectedInstances =
+  struct
+    type nonrec t =
+      | Refresh 
+      | Ignore 
+      | Wait 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Refresh -> "Refresh"
+      | Ignore -> "Ignore"
+      | Wait -> "Wait"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Refresh" -> Refresh
+      | "Ignore" -> Ignore
+      | "Wait" -> Wait
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ScaleInProtectedInstances" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ScaleInProtectedInstances" j)
+    let to_json = simple_to_json to_value
+  end
 module SkipMatching =
   struct
     type nonrec t = bool
@@ -3497,13 +4355,229 @@ module SkipMatching =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module StandbyInstances =
+  struct
+    type nonrec t =
+      | Terminate 
+      | Ignore 
+      | Wait 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Terminate -> "Terminate"
+      | Ignore -> "Ignore"
+      | Wait -> "Wait"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Terminate" -> Terminate
+      | "Ignore" -> Ignore
+      | "Wait" -> Wait
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration StandbyInstances" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"StandbyInstances" j)
+    let to_json = simple_to_json to_value
+  end
+module InstanceRefreshProgressDetails =
+  struct
+    type nonrec t =
+      {
+      livePoolProgress: InstanceRefreshLivePoolProgress.t option
+        [@ocaml.doc
+          "Reports progress on replacing instances that are in the Auto Scaling group."];
+      warmPoolProgress: InstanceRefreshWarmPoolProgress.t option
+        [@ocaml.doc
+          "Reports progress on replacing instances that are in the warm pool."]}
+    let make ?livePoolProgress =
+      fun ?warmPoolProgress ->
+        fun () -> { livePoolProgress; warmPoolProgress }
+    let to_value x =
+      structure_to_value
+        [("LivePoolProgress",
+           (Option.map x.livePoolProgress
+              ~f:InstanceRefreshLivePoolProgress.to_value));
+        ("WarmPoolProgress",
+          (Option.map x.warmPoolProgress
+             ~f:InstanceRefreshWarmPoolProgress.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let warmPoolProgress =
+        (Option.map ~f:InstanceRefreshWarmPoolProgress.of_xml)
+          (Xml.child xml_arg0 "WarmPoolProgress") in
+      let livePoolProgress =
+        (Option.map ~f:InstanceRefreshLivePoolProgress.of_xml)
+          (Xml.child xml_arg0 "LivePoolProgress") in
+      make ?warmPoolProgress ?livePoolProgress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let warmPoolProgress =
+        field_map json__ "WarmPoolProgress"
+          InstanceRefreshWarmPoolProgress.of_json in
+      let livePoolProgress =
+        field_map json__ "LivePoolProgress"
+          InstanceRefreshLivePoolProgress.of_json in
+      make ?warmPoolProgress ?livePoolProgress ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Reports progress on replacing instances in an Auto Scaling group that has a warm pool. This includes separate details for instances in the warm pool and instances in the Auto Scaling group (the live pool)."]
+module CapacityDistributionStrategy =
+  struct
+    type nonrec t =
+      | Balanced_only 
+      | Balanced_best_effort 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Balanced_only -> "balanced-only"
+      | Balanced_best_effort -> "balanced-best-effort"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "balanced-only" -> Balanced_only
+      | "balanced-best-effort" -> Balanced_best_effort
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CapacityDistributionStrategy"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CapacityDistributionStrategy" j)
+    let to_json = simple_to_json to_value
+  end
+module ImpairedZoneHealthCheckBehavior =
+  struct
+    type nonrec t =
+      | ReplaceUnhealthy 
+      | IgnoreUnhealthy 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ReplaceUnhealthy -> "ReplaceUnhealthy"
+      | IgnoreUnhealthy -> "IgnoreUnhealthy"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ReplaceUnhealthy" -> ReplaceUnhealthy
+      | "IgnoreUnhealthy" -> IgnoreUnhealthy
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ImpairedZoneHealthCheckBehavior"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ImpairedZoneHealthCheckBehavior" j)
+    let to_json = simple_to_json to_value
+  end
+module ZonalShiftEnabled =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module CapacityReservationPreference =
+  struct
+    type nonrec t =
+      | Capacity_reservations_only 
+      | Capacity_reservations_first 
+      | None 
+      | Default 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Capacity_reservations_only -> "capacity-reservations-only"
+      | Capacity_reservations_first -> "capacity-reservations-first"
+      | None -> "none"
+      | Default -> "default"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "capacity-reservations-only" -> Capacity_reservations_only
+      | "capacity-reservations-first" -> Capacity_reservations_first
+      | "none" -> None
+      | "default" -> Default
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CapacityReservationPreference"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CapacityReservationPreference" j)
+    let to_json = simple_to_json to_value
+  end
+module CapacityReservationTarget =
+  struct
+    type nonrec t =
+      {
+      capacityReservationIds: CapacityReservationIds.t option
+        [@ocaml.doc "The Capacity Reservation IDs to launch instances into."];
+      capacityReservationResourceGroupArns:
+        CapacityReservationResourceGroupArns.t option
+        [@ocaml.doc
+          "The resource group ARNs of the Capacity Reservation to launch instances into."]}
+    let make ?capacityReservationIds =
+      fun ?capacityReservationResourceGroupArns ->
+        fun () ->
+          { capacityReservationIds; capacityReservationResourceGroupArns }
+    let to_value x =
+      structure_to_value
+        [("CapacityReservationIds",
+           (Option.map x.capacityReservationIds
+              ~f:CapacityReservationIds.to_value));
+        ("CapacityReservationResourceGroupArns",
+          (Option.map x.capacityReservationResourceGroupArns
+             ~f:CapacityReservationResourceGroupArns.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityReservationResourceGroupArns =
+        (Option.map ~f:CapacityReservationResourceGroupArns.of_xml)
+          (Xml.child xml_arg0 "CapacityReservationResourceGroupArns") in
+      let capacityReservationIds =
+        (Option.map ~f:CapacityReservationIds.of_xml)
+          (Xml.child xml_arg0 "CapacityReservationIds") in
+      make ?capacityReservationResourceGroupArns ?capacityReservationIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityReservationResourceGroupArns =
+        field_map json__ "CapacityReservationResourceGroupArns"
+          CapacityReservationResourceGroupArns.of_json in
+      let capacityReservationIds =
+        field_map json__ "CapacityReservationIds"
+          CapacityReservationIds.of_json in
+      make ?capacityReservationResourceGroupArns ?capacityReservationIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The target for the Capacity Reservation. Specify Capacity Reservations IDs or Capacity Reservation resource group ARNs."]
 module EnabledMetric =
   struct
     type nonrec t =
       {
       metric: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "One of the following metrics: GroupMinSize GroupMaxSize GroupDesiredCapacity GroupInServiceInstances GroupPendingInstances GroupStandbyInstances GroupTerminatingInstances GroupTotalInstances GroupInServiceCapacity GroupPendingCapacity GroupStandbyCapacity GroupTerminatingCapacity GroupTotalCapacity WarmPoolDesiredCapacity WarmPoolWarmedCapacity WarmPoolPendingCapacity WarmPoolTerminatingCapacity WarmPoolTotalCapacity GroupAndWarmPoolDesiredCapacity GroupAndWarmPoolTotalCapacity"];
+          "One of the following metrics: GroupMinSize GroupMaxSize GroupDesiredCapacity GroupInServiceInstances GroupPendingInstances GroupStandbyInstances GroupTerminatingInstances GroupTotalInstances GroupInServiceCapacity GroupPendingCapacity GroupStandbyCapacity GroupTerminatingCapacity GroupTotalCapacity WarmPoolDesiredCapacity WarmPoolWarmedCapacity WarmPoolPendingCapacity WarmPoolTerminatingCapacity WarmPoolTotalCapacity GroupAndWarmPoolDesiredCapacity GroupAndWarmPoolTotalCapacity For more information, see Amazon CloudWatch metrics for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."];
       granularity: XmlStringMaxLen255.t option
         [@ocaml.doc
           "The granularity of the metric. The only valid value is 1Minute."]}
@@ -3523,78 +4597,159 @@ module EnabledMetric =
           (Xml.child xml_arg0 "Metric") in
       make ?granularity ?metric ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let granularity =
-        field_map json "Granularity" XmlStringMaxLen255.of_json in
-      let metric = field_map json "Metric" XmlStringMaxLen255.of_json in
+        field_map json__ "Granularity" XmlStringMaxLen255.of_json in
+      let metric = field_map json__ "Metric" XmlStringMaxLen255.of_json in
       make ?granularity ?metric ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes an enabled metric."]
+  end[@@ocaml.doc "Describes an enabled Auto Scaling group metric."]
+module RetentionTriggers =
+  struct
+    type nonrec t =
+      {
+      terminateHookAbandon: RetentionAction.t option
+        [@ocaml.doc
+          "Specifies the action when a termination lifecycle hook is abandoned due to failure, timeout, or explicit abandonment (calling CompleteLifecycleAction). Set to retain to move instances to a retained state. Set to terminate for default termination behavior. Retained instances don't count toward desired capacity and remain until you call TerminateInstanceInAutoScalingGroup."]}
+    let make ?terminateHookAbandon = fun () -> { terminateHookAbandon }
+    let to_value x =
+      structure_to_value
+        [("TerminateHookAbandon",
+           (Option.map x.terminateHookAbandon ~f:RetentionAction.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let terminateHookAbandon =
+        (Option.map ~f:RetentionAction.of_xml)
+          (Xml.child xml_arg0 "TerminateHookAbandon") in
+      make ?terminateHookAbandon ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let terminateHookAbandon =
+        field_map json__ "TerminateHookAbandon" RetentionAction.of_json in
+      make ?terminateHookAbandon ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the specific triggers that cause instances to be retained in a Retained state rather than terminated. Each trigger corresponds to a different failure scenario during the instance lifecycle. This allows fine-grained control over when to preserve instances for manual intervention."]
+module IntPercent100To200Resettable =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:200) >>=
+             (fun () -> check_int_min i ~min:(-1)));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for IntPercent100To200Resettable"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module IntPercentResettable =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>=
+             (fun () -> check_int_min i ~min:(-1)));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for IntPercentResettable" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module Instance =
   struct
     type nonrec t =
       {
-      instanceId: XmlStringMaxLen19.t [@ocaml.doc "The ID of the instance."];
+      instanceId: XmlStringMaxLen19.t option
+        [@ocaml.doc "The ID of the instance."];
       instanceType: XmlStringMaxLen255.t option
         [@ocaml.doc "The instance type of the EC2 instance."];
-      availabilityZone: XmlStringMaxLen255.t
+      availabilityZone: XmlStringMaxLen255.t option
         [@ocaml.doc
           "The Availability Zone in which the instance is running."];
-      lifecycleState: LifecycleState.t
+      availabilityZoneId: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "A description of the current lifecycle state. The Quarantined state is not used. For information about lifecycle states, see Instance lifecycle in the Amazon EC2 Auto Scaling User Guide."];
-      healthStatus: XmlStringMaxLen32.t
+          "The Availability Zone ID where the instance was launched."];
+      lifecycleState: LifecycleState.t option
         [@ocaml.doc
-          "The last reported health status of the instance. \"Healthy\" means that the instance is healthy and should remain in service. \"Unhealthy\" means that the instance is unhealthy and that Amazon EC2 Auto Scaling should terminate and replace it."];
+          "A description of the current lifecycle state. The Quarantined state is not used. For more information, see Amazon EC2 Auto Scaling instance lifecycle in the Amazon EC2 Auto Scaling User Guide."];
+      healthStatus: XmlStringMaxLen32.t option
+        [@ocaml.doc
+          "The last reported health status of the instance. Healthy means that the instance is healthy and should remain in service. Unhealthy means that the instance is unhealthy and that Amazon EC2 Auto Scaling should terminate and replace it."];
       launchConfigurationName: XmlStringMaxLen255.t option
         [@ocaml.doc "The launch configuration associated with the instance."];
       launchTemplate: LaunchTemplateSpecification.t option
         [@ocaml.doc "The launch template for the instance."];
-      protectedFromScaleIn: InstanceProtected.t
+      imageId: XmlStringMaxLen255.t option
+        [@ocaml.doc
+          "The ID of the Amazon Machine Image (AMI) used for the instance's current root volume. This value reflects the most recent AMI applied to the instance, including updates made through root volume replacement operations. This field appears for: Instances with root volume replacements through Instance Refresh Instances launched with AMI overrides This field won't appear for: Existing instances launched from Launch Templates without overrides Existing instances that didn\226\128\153t have their root volume replaced through Instance Refresh"];
+      protectedFromScaleIn: InstanceProtected.t option
         [@ocaml.doc
           "Indicates whether the instance is protected from termination by Amazon EC2 Auto Scaling when scaling in."];
       weightedCapacity: XmlStringMaxLen32.t option
         [@ocaml.doc
           "The number of capacity units contributed by the instance based on its instance type. Valid Range: Minimum value of 1. Maximum value of 999."]}
-    let context_ = "Instance"
-    let make ?instanceType =
-      fun ?launchConfigurationName ->
-        fun ?launchTemplate ->
-          fun ?weightedCapacity ->
-            fun ~instanceId ->
-              fun ~availabilityZone ->
-                fun ~lifecycleState ->
-                  fun ~healthStatus ->
-                    fun ~protectedFromScaleIn ->
-                      fun () ->
-                        {
-                          instanceType;
-                          launchConfigurationName;
-                          launchTemplate;
-                          weightedCapacity;
-                          instanceId;
-                          availabilityZone;
-                          lifecycleState;
-                          healthStatus;
-                          protectedFromScaleIn
-                        }
+    let make ?instanceId =
+      fun ?instanceType ->
+        fun ?availabilityZone ->
+          fun ?availabilityZoneId ->
+            fun ?lifecycleState ->
+              fun ?healthStatus ->
+                fun ?launchConfigurationName ->
+                  fun ?launchTemplate ->
+                    fun ?imageId ->
+                      fun ?protectedFromScaleIn ->
+                        fun ?weightedCapacity ->
+                          fun () ->
+                            {
+                              instanceId;
+                              instanceType;
+                              availabilityZone;
+                              availabilityZoneId;
+                              lifecycleState;
+                              healthStatus;
+                              launchConfigurationName;
+                              launchTemplate;
+                              imageId;
+                              protectedFromScaleIn;
+                              weightedCapacity
+                            }
     let to_value x =
       structure_to_value
-        [("InstanceId", (Some (XmlStringMaxLen19.to_value x.instanceId)));
+        [("InstanceId",
+           (Option.map x.instanceId ~f:XmlStringMaxLen19.to_value));
         ("InstanceType",
           (Option.map x.instanceType ~f:XmlStringMaxLen255.to_value));
         ("AvailabilityZone",
-          (Some (XmlStringMaxLen255.to_value x.availabilityZone)));
-        ("LifecycleState", (Some (LifecycleState.to_value x.lifecycleState)));
-        ("HealthStatus", (Some (XmlStringMaxLen32.to_value x.healthStatus)));
+          (Option.map x.availabilityZone ~f:XmlStringMaxLen255.to_value));
+        ("AvailabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:XmlStringMaxLen255.to_value));
+        ("LifecycleState",
+          (Option.map x.lifecycleState ~f:LifecycleState.to_value));
+        ("HealthStatus",
+          (Option.map x.healthStatus ~f:XmlStringMaxLen32.to_value));
         ("LaunchConfigurationName",
           (Option.map x.launchConfigurationName
              ~f:XmlStringMaxLen255.to_value));
         ("LaunchTemplate",
           (Option.map x.launchTemplate
              ~f:LaunchTemplateSpecification.to_value));
+        ("ImageId", (Option.map x.imageId ~f:XmlStringMaxLen255.to_value));
         ("ProtectedFromScaleIn",
-          (Some (InstanceProtected.to_value x.protectedFromScaleIn)));
+          (Option.map x.protectedFromScaleIn ~f:InstanceProtected.to_value));
         ("WeightedCapacity",
           (Option.map x.weightedCapacity ~f:XmlStringMaxLen32.to_value))]
     let to_query v = to_query to_value v
@@ -3603,8 +4758,11 @@ module Instance =
         (Option.map ~f:XmlStringMaxLen32.of_xml)
           (Xml.child xml_arg0 "WeightedCapacity") in
       let protectedFromScaleIn =
-        InstanceProtected.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ProtectedFromScaleIn") in
+        (Option.map ~f:InstanceProtected.of_xml)
+          (Xml.child xml_arg0 "ProtectedFromScaleIn") in
+      let imageId =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "ImageId") in
       let launchTemplate =
         (Option.map ~f:LaunchTemplateSpecification.of_xml)
           (Xml.child xml_arg0 "LaunchTemplate") in
@@ -3612,46 +4770,52 @@ module Instance =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "LaunchConfigurationName") in
       let healthStatus =
-        XmlStringMaxLen32.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HealthStatus") in
+        (Option.map ~f:XmlStringMaxLen32.of_xml)
+          (Xml.child xml_arg0 "HealthStatus") in
       let lifecycleState =
-        LifecycleState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LifecycleState") in
+        (Option.map ~f:LifecycleState.of_xml)
+          (Xml.child xml_arg0 "LifecycleState") in
+      let availabilityZoneId =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZoneId") in
       let availabilityZone =
-        XmlStringMaxLen255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AvailabilityZone") in
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZone") in
       let instanceType =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "InstanceType") in
       let instanceId =
-        XmlStringMaxLen19.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
-      make ?weightedCapacity ~protectedFromScaleIn ?launchTemplate
-        ?launchConfigurationName ~healthStatus ~lifecycleState
-        ~availabilityZone ?instanceType ~instanceId ()
+        (Option.map ~f:XmlStringMaxLen19.of_xml)
+          (Xml.child xml_arg0 "InstanceId") in
+      make ?weightedCapacity ?protectedFromScaleIn ?imageId ?launchTemplate
+        ?launchConfigurationName ?healthStatus ?lifecycleState
+        ?availabilityZoneId ?availabilityZone ?instanceType ?instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let weightedCapacity =
-        field_map json "WeightedCapacity" XmlStringMaxLen32.of_json in
+        field_map json__ "WeightedCapacity" XmlStringMaxLen32.of_json in
       let protectedFromScaleIn =
-        field_map_exn json "ProtectedFromScaleIn" InstanceProtected.of_json in
+        field_map json__ "ProtectedFromScaleIn" InstanceProtected.of_json in
+      let imageId = field_map json__ "ImageId" XmlStringMaxLen255.of_json in
       let launchTemplate =
-        field_map json "LaunchTemplate" LaunchTemplateSpecification.of_json in
+        field_map json__ "LaunchTemplate" LaunchTemplateSpecification.of_json in
       let launchConfigurationName =
-        field_map json "LaunchConfigurationName" XmlStringMaxLen255.of_json in
+        field_map json__ "LaunchConfigurationName" XmlStringMaxLen255.of_json in
       let healthStatus =
-        field_map_exn json "HealthStatus" XmlStringMaxLen32.of_json in
+        field_map json__ "HealthStatus" XmlStringMaxLen32.of_json in
       let lifecycleState =
-        field_map_exn json "LifecycleState" LifecycleState.of_json in
+        field_map json__ "LifecycleState" LifecycleState.of_json in
+      let availabilityZoneId =
+        field_map json__ "AvailabilityZoneId" XmlStringMaxLen255.of_json in
       let availabilityZone =
-        field_map_exn json "AvailabilityZone" XmlStringMaxLen255.of_json in
+        field_map json__ "AvailabilityZone" XmlStringMaxLen255.of_json in
       let instanceType =
-        field_map json "InstanceType" XmlStringMaxLen255.of_json in
+        field_map json__ "InstanceType" XmlStringMaxLen255.of_json in
       let instanceId =
-        field_map_exn json "InstanceId" XmlStringMaxLen19.of_json in
-      make ?weightedCapacity ~protectedFromScaleIn ?launchTemplate
-        ?launchConfigurationName ~healthStatus ~lifecycleState
-        ~availabilityZone ?instanceType ~instanceId ()
+        field_map json__ "InstanceId" XmlStringMaxLen19.of_json in
+      make ?weightedCapacity ?protectedFromScaleIn ?imageId ?launchTemplate
+        ?launchConfigurationName ?healthStatus ?lifecycleState
+        ?availabilityZoneId ?availabilityZone ?instanceType ?instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an EC2 instance."]
 module SuspendedProcess =
@@ -3680,15 +4844,15 @@ module SuspendedProcess =
           (Xml.child xml_arg0 "ProcessName") in
       make ?suspensionReason ?processName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let suspensionReason =
-        field_map json "SuspensionReason" XmlStringMaxLen255.of_json in
+        field_map json__ "SuspensionReason" XmlStringMaxLen255.of_json in
       let processName =
-        field_map json "ProcessName" XmlStringMaxLen255.of_json in
+        field_map json__ "ProcessName" XmlStringMaxLen255.of_json in
       make ?suspensionReason ?processName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes an auto scaling process that has been suspended. For more information, see Scaling processes in the Amazon EC2 Auto Scaling User Guide."]
+       "Describes an auto scaling process that has been suspended. For more information, see Types of processes in the Amazon EC2 Auto Scaling User Guide."]
 module TagDescription =
   struct
     type nonrec t =
@@ -3731,38 +4895,16 @@ module TagDescription =
         (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "ResourceId") in
       make ?propagateAtLaunch ?value ?key ?resourceType ?resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let propagateAtLaunch =
-        field_map json "PropagateAtLaunch" PropagateAtLaunch.of_json in
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map json "Key" TagKey.of_json in
-      let resourceType = field_map json "ResourceType" XmlString.of_json in
-      let resourceId = field_map json "ResourceId" XmlString.of_json in
+        field_map json__ "PropagateAtLaunch" PropagateAtLaunch.of_json in
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map json__ "Key" TagKey.of_json in
+      let resourceType = field_map json__ "ResourceType" XmlString.of_json in
+      let resourceId = field_map json__ "ResourceId" XmlString.of_json in
       make ?propagateAtLaunch ?value ?key ?resourceType ?resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a tag for an Auto Scaling group."]
-module XmlStringMaxLen511 =
-  struct
-    type nonrec t = string
-    let context_ = "XmlStringMaxLen511"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:511) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"XmlStringMaxLen511" j
-    let to_json = simple_to_json to_value
-  end
 module XmlStringMaxLen1600 =
   struct
     type nonrec t = string
@@ -3785,6 +4927,38 @@ module XmlStringMaxLen1600 =
     let of_json j = string_of_json ~kind:"XmlStringMaxLen1600" j
     let to_json = simple_to_json to_value
   end
+module TrafficSourceIdentifier =
+  struct
+    type nonrec t =
+      {
+      identifier: XmlStringMaxLen511.t
+        [@ocaml.doc
+          "Identifies the traffic source. For Application Load Balancers, Gateway Load Balancers, Network Load Balancers, and VPC Lattice, this will be the Amazon Resource Name (ARN) for a target group in this account and Region. For Classic Load Balancers, this will be the name of the Classic Load Balancer in this account and Region. For example: Application Load Balancer ARN: arn:aws:elasticloadbalancing:us-west-2:123456789012:targetgroup/my-targets/1234567890123456 Classic Load Balancer name: my-classic-load-balancer VPC Lattice ARN: arn:aws:vpc-lattice:us-west-2:123456789012:targetgroup/tg-1234567890123456 To get the ARN of a target group for a Application Load Balancer, Gateway Load Balancer, or Network Load Balancer, or the name of a Classic Load Balancer, use the Elastic Load Balancing DescribeTargetGroups and DescribeLoadBalancers API operations. To get the ARN of a target group for VPC Lattice, use the VPC Lattice GetTargetGroup API operation."];
+      type_: XmlStringMaxLen511.t option
+        [@ocaml.doc
+          "Provides additional context for the value of Identifier. The following lists the valid values: elb if Identifier is the name of a Classic Load Balancer. elbv2 if Identifier is the ARN of an Application Load Balancer, Gateway Load Balancer, or Network Load Balancer target group. vpc-lattice if Identifier is the ARN of a VPC Lattice target group. Required if the identifier is the name of a Classic Load Balancer."]}
+    let context_ = "TrafficSourceIdentifier"
+    let make ?type_ = fun ~identifier -> fun () -> { type_; identifier }
+    let to_value x =
+      structure_to_value
+        [("Identifier", (Some (XmlStringMaxLen511.to_value x.identifier)));
+        ("Type", (Option.map x.type_ ~f:XmlStringMaxLen511.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:XmlStringMaxLen511.of_xml) (Xml.child xml_arg0 "Type") in
+      let identifier =
+        XmlStringMaxLen511.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      make ?type_ ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" XmlStringMaxLen511.of_json in
+      let identifier =
+        field_map_exn json__ "Identifier" XmlStringMaxLen511.of_json in
+      make ?type_ ~identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Identifying information for a traffic source."]
 module InstanceReusePolicy =
   struct
     type nonrec t =
@@ -3804,9 +4978,9 @@ module InstanceReusePolicy =
           (Xml.child xml_arg0 "ReuseOnScaleIn") in
       make ?reuseOnScaleIn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reuseOnScaleIn =
-        field_map json "ReuseOnScaleIn" ReuseOnScaleIn.of_json in
+        field_map json__ "ReuseOnScaleIn" ReuseOnScaleIn.of_json in
       make ?reuseOnScaleIn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3937,6 +5111,9 @@ module Alarms =
   struct
     type nonrec t = Alarm.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Alarm.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4028,7 +5205,7 @@ module PredictiveScalingConfiguration =
       maxCapacityBreachBehavior:
         PredictiveScalingMaxCapacityBreachBehavior.t option
         [@ocaml.doc
-          "Defines the behavior that should be applied if the forecast capacity approaches or exceeds the maximum capacity of the Auto Scaling group. Defaults to HonorMaxCapacity if not specified. The following are possible values: HonorMaxCapacity - Amazon EC2 Auto Scaling cannot scale out capacity higher than the maximum capacity. The maximum capacity is enforced as a hard limit. IncreaseMaxCapacity - Amazon EC2 Auto Scaling can scale out capacity higher than the maximum capacity when the forecast capacity is close to or exceeds the maximum capacity. The upper limit is determined by the forecasted capacity and the value for MaxCapacityBuffer."];
+          "Defines the behavior that should be applied if the forecast capacity approaches or exceeds the maximum capacity of the Auto Scaling group. Defaults to HonorMaxCapacity if not specified. The following are possible values: HonorMaxCapacity - Amazon EC2 Auto Scaling can't increase the maximum capacity of the group when the forecast capacity is close to or exceeds the maximum capacity. IncreaseMaxCapacity - Amazon EC2 Auto Scaling can increase the maximum capacity of the group when the forecast capacity is close to or exceeds the maximum capacity. The upper limit is determined by the forecasted capacity and the value for MaxCapacityBuffer. Use caution when allowing the maximum capacity to be automatically increased. This can lead to more instances being launched than intended if the increased maximum capacity is not monitored and managed. The increased maximum capacity then becomes the new normal maximum capacity for the Auto Scaling group until you manually update it. The maximum capacity does not automatically decrease back to the original maximum."];
       maxCapacityBuffer: PredictiveScalingMaxCapacityBuffer.t option
         [@ocaml.doc
           "The size of the capacity buffer to use when the forecast capacity is close to or exceeds the maximum capacity. The value is specified as a percentage relative to the forecast capacity. For example, if the buffer is 10, this means a 10 percent buffer, such that if the forecast capacity is 50, and the maximum capacity is 40, then the effective maximum capacity is 55. If set to 0, Amazon EC2 Auto Scaling may scale capacity higher than the maximum capacity to equal but not exceed forecast capacity. Required if the MaxCapacityBreachBehavior property is set to IncreaseMaxCapacity, and cannot be used otherwise."]}
@@ -4082,19 +5259,19 @@ module PredictiveScalingConfiguration =
       make ?maxCapacityBuffer ?maxCapacityBreachBehavior
         ?schedulingBufferTime ?mode ~metricSpecifications ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxCapacityBuffer =
-        field_map json "MaxCapacityBuffer"
+        field_map json__ "MaxCapacityBuffer"
           PredictiveScalingMaxCapacityBuffer.of_json in
       let maxCapacityBreachBehavior =
-        field_map json "MaxCapacityBreachBehavior"
+        field_map json__ "MaxCapacityBreachBehavior"
           PredictiveScalingMaxCapacityBreachBehavior.of_json in
       let schedulingBufferTime =
-        field_map json "SchedulingBufferTime"
+        field_map json__ "SchedulingBufferTime"
           PredictiveScalingSchedulingBufferTime.of_json in
-      let mode = field_map json "Mode" PredictiveScalingMode.of_json in
+      let mode = field_map json__ "Mode" PredictiveScalingMode.of_json in
       let metricSpecifications =
-        field_map_exn json "MetricSpecifications"
+        field_map_exn json__ "MetricSpecifications"
           PredictiveScalingMetricSpecifications.of_json in
       make ?maxCapacityBuffer ?maxCapacityBreachBehavior
         ?schedulingBufferTime ?mode ~metricSpecifications ()
@@ -4118,6 +5295,9 @@ module StepAdjustments =
   struct
     type nonrec t = StepAdjustment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StepAdjustment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4194,42 +5374,48 @@ module TargetTrackingConfiguration =
       make ?disableScaleIn ~targetValue ?customizedMetricSpecification
         ?predefinedMetricSpecification ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let disableScaleIn =
-        field_map json "DisableScaleIn" DisableScaleIn.of_json in
-      let targetValue = field_map_exn json "TargetValue" MetricScale.of_json in
+        field_map json__ "DisableScaleIn" DisableScaleIn.of_json in
+      let targetValue =
+        field_map_exn json__ "TargetValue" MetricScale.of_json in
       let customizedMetricSpecification =
-        field_map json "CustomizedMetricSpecification"
+        field_map json__ "CustomizedMetricSpecification"
           CustomizedMetricSpecification.of_json in
       let predefinedMetricSpecification =
-        field_map json "PredefinedMetricSpecification"
+        field_map json__ "PredefinedMetricSpecification"
           PredefinedMetricSpecification.of_json in
       make ?disableScaleIn ~targetValue ?customizedMetricSpecification
         ?predefinedMetricSpecification ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a target tracking scaling policy configuration to use with Amazon EC2 Auto Scaling."]
-module XmlStringMaxLen64 =
+module InstanceIds =
   struct
-    type nonrec t = string
-    let context_ = "XmlStringMaxLen64"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:64) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t = XmlStringMaxLen19.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:XmlStringMaxLen19.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"XmlStringMaxLen64" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:XmlStringMaxLen19.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstanceIds" ~of_json:XmlStringMaxLen19.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module AssociatePublicIpAddress =
   struct
@@ -4248,6 +5434,9 @@ module BlockDeviceMappings =
   struct
     type nonrec t = BlockDeviceMapping.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BlockDeviceMapping.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4273,6 +5462,9 @@ module ClassicLinkVPCSecurityGroups =
   struct
     type nonrec t = XmlStringMaxLen255.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen255.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4349,18 +5541,18 @@ module InstanceMetadataOptions =
           (Xml.child xml_arg0 "HttpTokens") in
       make ?httpEndpoint ?httpPutResponseHopLimit ?httpTokens ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let httpEndpoint =
-        field_map json "HttpEndpoint" InstanceMetadataEndpointState.of_json in
+        field_map json__ "HttpEndpoint" InstanceMetadataEndpointState.of_json in
       let httpPutResponseHopLimit =
-        field_map json "HttpPutResponseHopLimit"
+        field_map json__ "HttpPutResponseHopLimit"
           InstanceMetadataHttpPutResponseHopLimit.of_json in
       let httpTokens =
-        field_map json "HttpTokens" InstanceMetadataHttpTokensState.of_json in
+        field_map json__ "HttpTokens" InstanceMetadataHttpTokensState.of_json in
       make ?httpEndpoint ?httpPutResponseHopLimit ?httpTokens ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The metadata options for the instances. For more information, see Configuring the Instance Metadata Options in the Amazon EC2 Auto Scaling User Guide."]
+       "The metadata options for the instances. For more information, see Configure the instance metadata options in the Amazon EC2 Auto Scaling User Guide."]
 module InstanceMonitoring =
   struct
     type nonrec t =
@@ -4379,8 +5571,8 @@ module InstanceMonitoring =
           (Xml.child xml_arg0 "Enabled") in
       make ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "Enabled" MonitoringEnabled.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "Enabled" MonitoringEnabled.of_json in
       make ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4389,6 +5581,9 @@ module SecurityGroups =
   struct
     type nonrec t = XmlString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4451,6 +5646,9 @@ module PredictiveScalingForecastTimestamps =
   struct
     type nonrec t = TimestampType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TimestampType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4476,6 +5674,9 @@ module PredictiveScalingForecastValues =
   struct
     type nonrec t = MetricScale.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricScale.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4543,6 +5744,10 @@ module ScalingActivityStatusCode =
       | Successful 
       | Failed 
       | Cancelled 
+      | WaitingForConnectionDraining 
+      | WaitingForInPlaceUpdateToStart 
+      | WaitingForInPlaceUpdateToFinalize 
+      | InPlaceUpdateInProgress 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -4559,6 +5764,11 @@ module ScalingActivityStatusCode =
       | Successful -> "Successful"
       | Failed -> "Failed"
       | Cancelled -> "Cancelled"
+      | WaitingForConnectionDraining -> "WaitingForConnectionDraining"
+      | WaitingForInPlaceUpdateToStart -> "WaitingForInPlaceUpdateToStart"
+      | WaitingForInPlaceUpdateToFinalize ->
+          "WaitingForInPlaceUpdateToFinalize"
+      | InPlaceUpdateInProgress -> "InPlaceUpdateInProgress"
       | Non_static_id s -> s
     let of_string =
       function
@@ -4574,6 +5784,11 @@ module ScalingActivityStatusCode =
       | "Successful" -> Successful
       | "Failed" -> Failed
       | "Cancelled" -> Cancelled
+      | "WaitingForConnectionDraining" -> WaitingForConnectionDraining
+      | "WaitingForInPlaceUpdateToStart" -> WaitingForInPlaceUpdateToStart
+      | "WaitingForInPlaceUpdateToFinalize" ->
+          WaitingForInPlaceUpdateToFinalize
+      | "InPlaceUpdateInProgress" -> InPlaceUpdateInProgress
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -4589,6 +5804,9 @@ module Values =
   struct
     type nonrec t = XmlString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4608,24 +5826,27 @@ module Values =
     let of_json j = list_of_json ~kind:"Values" ~of_json:XmlString.of_json j
     let to_json v = composed_to_json to_value v
   end
-module AsciiStringMaxLen255 =
+module AnyPrintableAsciiStringMaxLen4000 =
   struct
     type nonrec t = string
-    let context_ = "AsciiStringMaxLen255"
+    let context_ = "AnyPrintableAsciiStringMaxLen4000"
     let make i =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:255) >>=
-                  (fun () -> check_pattern i ~pattern:"[A-Za-z0-9\\-_\\/]+")));
+                (check_string_max i ~max:4000) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0009\\u000A\\u000D\\u0020-\\u007e]+")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AsciiStringMaxLen255" j
+    let of_json j =
+      string_of_json ~kind:"AnyPrintableAsciiStringMaxLen4000" j
     let to_json = simple_to_json to_value
   end
 module GlobalTimeout =
@@ -4708,8 +5929,12 @@ module DesiredConfiguration =
   struct
     type nonrec t =
       {
-      launchTemplate: LaunchTemplateSpecification.t option ;
-      mixedInstancesPolicy: MixedInstancesPolicy.t option }
+      launchTemplate: LaunchTemplateSpecification.t option
+        [@ocaml.doc
+          "Describes the launch template and the version of the launch template that Amazon EC2 Auto Scaling uses to launch Amazon EC2 instances. For more information about launch templates, see Launch templates in the Amazon EC2 Auto Scaling User Guide."];
+      mixedInstancesPolicy: MixedInstancesPolicy.t option
+        [@ocaml.doc
+          "Use this structure to launch multiple instance types and On-Demand Instances and Spot Instances within a single Auto Scaling group. A mixed instances policy contains information that Amazon EC2 Auto Scaling can use to launch instances and help optimize your costs. For more information, see Auto Scaling groups with multiple instance types and purchase options in the Amazon EC2 Auto Scaling User Guide."]}
     let make ?launchTemplate =
       fun ?mixedInstancesPolicy ->
         fun () -> { launchTemplate; mixedInstancesPolicy }
@@ -4730,57 +5955,15 @@ module DesiredConfiguration =
           (Xml.child xml_arg0 "LaunchTemplate") in
       make ?mixedInstancesPolicy ?launchTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mixedInstancesPolicy =
-        field_map json "MixedInstancesPolicy" MixedInstancesPolicy.of_json in
+        field_map json__ "MixedInstancesPolicy" MixedInstancesPolicy.of_json in
       let launchTemplate =
-        field_map json "LaunchTemplate" LaunchTemplateSpecification.of_json in
+        field_map json__ "LaunchTemplate" LaunchTemplateSpecification.of_json in
       make ?mixedInstancesPolicy ?launchTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the desired configuration for an instance refresh. If you specify a desired configuration, you must specify either a LaunchTemplate or a MixedInstancesPolicy."]
-module InstanceRefreshProgressDetails =
-  struct
-    type nonrec t =
-      {
-      livePoolProgress: InstanceRefreshLivePoolProgress.t option
-        [@ocaml.doc
-          "Indicates the progress of an instance refresh on instances that are in the Auto Scaling group."];
-      warmPoolProgress: InstanceRefreshWarmPoolProgress.t option
-        [@ocaml.doc
-          "Indicates the progress of an instance refresh on instances that are in the warm pool."]}
-    let make ?livePoolProgress =
-      fun ?warmPoolProgress ->
-        fun () -> { livePoolProgress; warmPoolProgress }
-    let to_value x =
-      structure_to_value
-        [("LivePoolProgress",
-           (Option.map x.livePoolProgress
-              ~f:InstanceRefreshLivePoolProgress.to_value));
-        ("WarmPoolProgress",
-          (Option.map x.warmPoolProgress
-             ~f:InstanceRefreshWarmPoolProgress.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let warmPoolProgress =
-        (Option.map ~f:InstanceRefreshWarmPoolProgress.of_xml)
-          (Xml.child xml_arg0 "WarmPoolProgress") in
-      let livePoolProgress =
-        (Option.map ~f:InstanceRefreshLivePoolProgress.of_xml)
-          (Xml.child xml_arg0 "LivePoolProgress") in
-      make ?warmPoolProgress ?livePoolProgress ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let warmPoolProgress =
-        field_map json "WarmPoolProgress"
-          InstanceRefreshWarmPoolProgress.of_json in
-      let livePoolProgress =
-        field_map json "LivePoolProgress"
-          InstanceRefreshLivePoolProgress.of_json in
-      make ?warmPoolProgress ?livePoolProgress ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Reports the progress of an instance refresh on an Auto Scaling group that has a warm pool. This includes separate details for instances in the warm pool and instances in the Auto Scaling group (the live pool)."]
 module InstanceRefreshStatus =
   struct
     type nonrec t =
@@ -4790,6 +5973,10 @@ module InstanceRefreshStatus =
       | Failed 
       | Cancelling 
       | Cancelled 
+      | RollbackInProgress 
+      | RollbackFailed 
+      | RollbackSuccessful 
+      | Baking 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -4800,6 +5987,10 @@ module InstanceRefreshStatus =
       | Failed -> "Failed"
       | Cancelling -> "Cancelling"
       | Cancelled -> "Cancelled"
+      | RollbackInProgress -> "RollbackInProgress"
+      | RollbackFailed -> "RollbackFailed"
+      | RollbackSuccessful -> "RollbackSuccessful"
+      | Baking -> "Baking"
       | Non_static_id s -> s
     let of_string =
       function
@@ -4809,6 +6000,10 @@ module InstanceRefreshStatus =
       | "Failed" -> Failed
       | "Cancelling" -> Cancelling
       | "Cancelled" -> Cancelled
+      | "RollbackInProgress" -> RollbackInProgress
+      | "RollbackFailed" -> RollbackFailed
+      | "RollbackSuccessful" -> RollbackSuccessful
+      | "Baking" -> Baking
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -4826,32 +6021,62 @@ module RefreshPreferences =
       {
       minHealthyPercentage: IntPercent.t option
         [@ocaml.doc
-          "The amount of capacity in the Auto Scaling group that must remain healthy during an instance refresh to allow the operation to continue. The value is expressed as a percentage of the desired capacity of the Auto Scaling group (rounded up to the nearest integer). The default is 90. Setting the minimum healthy percentage to 100 percent limits the rate of replacement to one instance at a time. In contrast, setting it to 0 percent has the effect of replacing all instances at the same time."];
+          "Specifies the minimum percentage of the group to keep in service, healthy, and ready to use to support your workload to allow the operation to continue. The value is expressed as a percentage of the desired capacity of the Auto Scaling group. Value range is 0 to 100. If you do not specify this property, the default is 90 percent, or the percentage set in the instance maintenance policy for the Auto Scaling group, if defined."];
       instanceWarmup: RefreshInstanceWarmup.t option
         [@ocaml.doc
-          "The number of seconds until a newly launched instance is configured and ready to use. During this time, Amazon EC2 Auto Scaling does not immediately move on to the next replacement. The default is to use the value for the health check grace period defined for the group."];
+          "A time period, in seconds, during which an instance refresh waits before moving on to replacing the next instance after a new instance enters the InService state. This property is not required for normal usage. Instead, use the DefaultInstanceWarmup property of the Auto Scaling group. The InstanceWarmup and DefaultInstanceWarmup properties work the same way. Only specify this property if you must override the DefaultInstanceWarmup property. If you do not specify this property, the instance warmup by default is the value of the DefaultInstanceWarmup property, if defined (which is recommended in all cases), or the HealthCheckGracePeriod property otherwise."];
       checkpointPercentages: CheckpointPercentages.t option
         [@ocaml.doc
-          "Threshold values for each checkpoint in ascending order. Each number must be unique. To replace all instances in the Auto Scaling group, the last number in the array must be 100. For usage examples, see Adding checkpoints to an instance refresh in the Amazon EC2 Auto Scaling User Guide."];
+          "(Optional) Threshold values for each checkpoint in ascending order. Each number must be unique. To replace all instances in the Auto Scaling group, the last number in the array must be 100. For usage examples, see Add checkpoints to an instance refresh in the Amazon EC2 Auto Scaling User Guide."];
       checkpointDelay: CheckpointDelay.t option
         [@ocaml.doc
-          "The amount of time, in seconds, to wait after a checkpoint before continuing. This property is optional, but if you specify a value for it, you must also specify a value for CheckpointPercentages. If you specify a value for CheckpointPercentages and not for CheckpointDelay, the CheckpointDelay defaults to 3600 (1 hour)."];
+          "(Optional) The amount of time, in seconds, to wait after a checkpoint before continuing. This property is optional, but if you specify a value for it, you must also specify a value for CheckpointPercentages. If you specify a value for CheckpointPercentages and not for CheckpointDelay, the CheckpointDelay defaults to 3600 (1 hour)."];
       skipMatching: SkipMatching.t option
         [@ocaml.doc
-          "A boolean value that indicates whether skip matching is enabled. If true, then Amazon EC2 Auto Scaling skips replacing instances that match the desired configuration. If no desired configuration is specified, then it skips replacing instances that have the same configuration that is already set on the group. The default is false."]}
+          "(Optional) Indicates whether skip matching is enabled. If enabled (true), then Amazon EC2 Auto Scaling skips replacing instances that match the desired configuration. If no desired configuration is specified, then it skips replacing instances that have the same launch template and instance types that the Auto Scaling group was using before the start of the instance refresh. The default is false. For more information, see Use an instance refresh with skip matching in the Amazon EC2 Auto Scaling User Guide."];
+      autoRollback: AutoRollback.t option
+        [@ocaml.doc
+          "(Optional) Indicates whether to roll back the Auto Scaling group to its previous configuration if the instance refresh fails or a CloudWatch alarm threshold is met. The default is false. A rollback is not supported in the following situations: There is no desired configuration specified for the instance refresh. The Auto Scaling group has a launch template that uses an Amazon Web Services Systems Manager parameter instead of an AMI ID for the ImageId property. The Auto Scaling group uses the launch template's $Latest or $Default version. For more information, see Undo changes with a rollback in the Amazon EC2 Auto Scaling User Guide."];
+      scaleInProtectedInstances: ScaleInProtectedInstances.t option
+        [@ocaml.doc
+          "Choose the behavior that you want Amazon EC2 Auto Scaling to use if instances protected from scale in are found. The following lists the valid values: Refresh Amazon EC2 Auto Scaling replaces instances that are protected from scale in. Ignore Amazon EC2 Auto Scaling ignores instances that are protected from scale in and continues to replace instances that are not protected. Wait (default) Amazon EC2 Auto Scaling waits one hour for you to remove scale-in protection. Otherwise, the instance refresh will fail."];
+      standbyInstances: StandbyInstances.t option
+        [@ocaml.doc
+          "Choose the behavior that you want Amazon EC2 Auto Scaling to use if instances in Standby state are found. The following lists the valid values: Terminate Amazon EC2 Auto Scaling terminates instances that are in Standby. Ignore Amazon EC2 Auto Scaling ignores instances that are in Standby and continues to replace instances that are in the InService state. Wait (default) Amazon EC2 Auto Scaling waits one hour for you to return the instances to service. Otherwise, the instance refresh will fail."];
+      alarmSpecification: AlarmSpecification.t option
+        [@ocaml.doc
+          "(Optional) The CloudWatch alarm specification. CloudWatch alarms can be used to identify any issues and fail the operation if an alarm threshold is met."];
+      maxHealthyPercentage: IntPercent100To200.t option
+        [@ocaml.doc
+          "Specifies the maximum percentage of the group that can be in service and healthy, or pending, to support your workload when replacing instances. The value is expressed as a percentage of the desired capacity of the Auto Scaling group. Value range is 100 to 200. If you specify MaxHealthyPercentage, you must also specify MinHealthyPercentage, and the difference between them cannot be greater than 100. A larger range increases the number of instances that can be replaced at the same time. If you do not specify this property, the default is 100 percent, or the percentage set in the instance maintenance policy for the Auto Scaling group, if defined."];
+      bakeTime: BakeTime.t option
+        [@ocaml.doc
+          "The amount of time, in seconds, to wait at the end of an instance refresh before the instance refresh is considered complete."]}
     let make ?minHealthyPercentage =
       fun ?instanceWarmup ->
         fun ?checkpointPercentages ->
           fun ?checkpointDelay ->
             fun ?skipMatching ->
-              fun () ->
-                {
-                  minHealthyPercentage;
-                  instanceWarmup;
-                  checkpointPercentages;
-                  checkpointDelay;
-                  skipMatching
-                }
+              fun ?autoRollback ->
+                fun ?scaleInProtectedInstances ->
+                  fun ?standbyInstances ->
+                    fun ?alarmSpecification ->
+                      fun ?maxHealthyPercentage ->
+                        fun ?bakeTime ->
+                          fun () ->
+                            {
+                              minHealthyPercentage;
+                              instanceWarmup;
+                              checkpointPercentages;
+                              checkpointDelay;
+                              skipMatching;
+                              autoRollback;
+                              scaleInProtectedInstances;
+                              standbyInstances;
+                              alarmSpecification;
+                              maxHealthyPercentage;
+                              bakeTime
+                            }
     let to_value x =
       structure_to_value
         [("MinHealthyPercentage",
@@ -4864,9 +6089,38 @@ module RefreshPreferences =
         ("CheckpointDelay",
           (Option.map x.checkpointDelay ~f:CheckpointDelay.to_value));
         ("SkipMatching",
-          (Option.map x.skipMatching ~f:SkipMatching.to_value))]
+          (Option.map x.skipMatching ~f:SkipMatching.to_value));
+        ("AutoRollback",
+          (Option.map x.autoRollback ~f:AutoRollback.to_value));
+        ("ScaleInProtectedInstances",
+          (Option.map x.scaleInProtectedInstances
+             ~f:ScaleInProtectedInstances.to_value));
+        ("StandbyInstances",
+          (Option.map x.standbyInstances ~f:StandbyInstances.to_value));
+        ("AlarmSpecification",
+          (Option.map x.alarmSpecification ~f:AlarmSpecification.to_value));
+        ("MaxHealthyPercentage",
+          (Option.map x.maxHealthyPercentage ~f:IntPercent100To200.to_value));
+        ("BakeTime", (Option.map x.bakeTime ~f:BakeTime.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let bakeTime =
+        (Option.map ~f:BakeTime.of_xml) (Xml.child xml_arg0 "BakeTime") in
+      let maxHealthyPercentage =
+        (Option.map ~f:IntPercent100To200.of_xml)
+          (Xml.child xml_arg0 "MaxHealthyPercentage") in
+      let alarmSpecification =
+        (Option.map ~f:AlarmSpecification.of_xml)
+          (Xml.child xml_arg0 "AlarmSpecification") in
+      let standbyInstances =
+        (Option.map ~f:StandbyInstances.of_xml)
+          (Xml.child xml_arg0 "StandbyInstances") in
+      let scaleInProtectedInstances =
+        (Option.map ~f:ScaleInProtectedInstances.of_xml)
+          (Xml.child xml_arg0 "ScaleInProtectedInstances") in
+      let autoRollback =
+        (Option.map ~f:AutoRollback.of_xml)
+          (Xml.child xml_arg0 "AutoRollback") in
       let skipMatching =
         (Option.map ~f:SkipMatching.of_xml)
           (Xml.child xml_arg0 "SkipMatching") in
@@ -4882,23 +6136,146 @@ module RefreshPreferences =
       let minHealthyPercentage =
         (Option.map ~f:IntPercent.of_xml)
           (Xml.child xml_arg0 "MinHealthyPercentage") in
-      make ?skipMatching ?checkpointDelay ?checkpointPercentages
-        ?instanceWarmup ?minHealthyPercentage ()
+      make ?bakeTime ?maxHealthyPercentage ?alarmSpecification
+        ?standbyInstances ?scaleInProtectedInstances ?autoRollback
+        ?skipMatching ?checkpointDelay ?checkpointPercentages ?instanceWarmup
+        ?minHealthyPercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let skipMatching = field_map json "SkipMatching" SkipMatching.of_json in
+    let of_json json__ =
+      let bakeTime = field_map json__ "BakeTime" BakeTime.of_json in
+      let maxHealthyPercentage =
+        field_map json__ "MaxHealthyPercentage" IntPercent100To200.of_json in
+      let alarmSpecification =
+        field_map json__ "AlarmSpecification" AlarmSpecification.of_json in
+      let standbyInstances =
+        field_map json__ "StandbyInstances" StandbyInstances.of_json in
+      let scaleInProtectedInstances =
+        field_map json__ "ScaleInProtectedInstances"
+          ScaleInProtectedInstances.of_json in
+      let autoRollback = field_map json__ "AutoRollback" AutoRollback.of_json in
+      let skipMatching = field_map json__ "SkipMatching" SkipMatching.of_json in
       let checkpointDelay =
-        field_map json "CheckpointDelay" CheckpointDelay.of_json in
+        field_map json__ "CheckpointDelay" CheckpointDelay.of_json in
       let checkpointPercentages =
-        field_map json "CheckpointPercentages" CheckpointPercentages.of_json in
+        field_map json__ "CheckpointPercentages"
+          CheckpointPercentages.of_json in
       let instanceWarmup =
-        field_map json "InstanceWarmup" RefreshInstanceWarmup.of_json in
+        field_map json__ "InstanceWarmup" RefreshInstanceWarmup.of_json in
       let minHealthyPercentage =
-        field_map json "MinHealthyPercentage" IntPercent.of_json in
-      make ?skipMatching ?checkpointDelay ?checkpointPercentages
-        ?instanceWarmup ?minHealthyPercentage ()
+        field_map json__ "MinHealthyPercentage" IntPercent.of_json in
+      make ?bakeTime ?maxHealthyPercentage ?alarmSpecification
+        ?standbyInstances ?scaleInProtectedInstances ?autoRollback
+        ?skipMatching ?checkpointDelay ?checkpointPercentages ?instanceWarmup
+        ?minHealthyPercentage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the preferences for an instance refresh."]
+module RefreshStrategy =
+  struct
+    type nonrec t =
+      | Rolling 
+      | ReplaceRootVolume 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Rolling -> "Rolling"
+      | ReplaceRootVolume -> "ReplaceRootVolume"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Rolling" -> Rolling
+      | "ReplaceRootVolume" -> ReplaceRootVolume
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RefreshStrategy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RefreshStrategy" j)
+    let to_json = simple_to_json to_value
+  end
+module RollbackDetails =
+  struct
+    type nonrec t =
+      {
+      rollbackReason: XmlStringMaxLen1023.t option
+        [@ocaml.doc
+          "The reason for this instance refresh rollback (for example, whether a manual or automatic rollback was initiated)."];
+      rollbackStartTime: TimestampType.t option
+        [@ocaml.doc "The date and time at which the rollback began."];
+      percentageCompleteOnRollback: IntPercent.t option
+        [@ocaml.doc
+          "Indicates the value of PercentageComplete at the time the rollback started."];
+      instancesToUpdateOnRollback: InstancesToUpdate.t option
+        [@ocaml.doc
+          "Indicates the value of InstancesToUpdate at the time the rollback started."];
+      progressDetailsOnRollback: InstanceRefreshProgressDetails.t option
+        [@ocaml.doc
+          "Reports progress on replacing instances in an Auto Scaling group that has a warm pool. This includes separate details for instances in the warm pool and instances in the Auto Scaling group (the live pool)."]}
+    let make ?rollbackReason =
+      fun ?rollbackStartTime ->
+        fun ?percentageCompleteOnRollback ->
+          fun ?instancesToUpdateOnRollback ->
+            fun ?progressDetailsOnRollback ->
+              fun () ->
+                {
+                  rollbackReason;
+                  rollbackStartTime;
+                  percentageCompleteOnRollback;
+                  instancesToUpdateOnRollback;
+                  progressDetailsOnRollback
+                }
+    let to_value x =
+      structure_to_value
+        [("RollbackReason",
+           (Option.map x.rollbackReason ~f:XmlStringMaxLen1023.to_value));
+        ("RollbackStartTime",
+          (Option.map x.rollbackStartTime ~f:TimestampType.to_value));
+        ("PercentageCompleteOnRollback",
+          (Option.map x.percentageCompleteOnRollback ~f:IntPercent.to_value));
+        ("InstancesToUpdateOnRollback",
+          (Option.map x.instancesToUpdateOnRollback
+             ~f:InstancesToUpdate.to_value));
+        ("ProgressDetailsOnRollback",
+          (Option.map x.progressDetailsOnRollback
+             ~f:InstanceRefreshProgressDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let progressDetailsOnRollback =
+        (Option.map ~f:InstanceRefreshProgressDetails.of_xml)
+          (Xml.child xml_arg0 "ProgressDetailsOnRollback") in
+      let instancesToUpdateOnRollback =
+        (Option.map ~f:InstancesToUpdate.of_xml)
+          (Xml.child xml_arg0 "InstancesToUpdateOnRollback") in
+      let percentageCompleteOnRollback =
+        (Option.map ~f:IntPercent.of_xml)
+          (Xml.child xml_arg0 "PercentageCompleteOnRollback") in
+      let rollbackStartTime =
+        (Option.map ~f:TimestampType.of_xml)
+          (Xml.child xml_arg0 "RollbackStartTime") in
+      let rollbackReason =
+        (Option.map ~f:XmlStringMaxLen1023.of_xml)
+          (Xml.child xml_arg0 "RollbackReason") in
+      make ?progressDetailsOnRollback ?instancesToUpdateOnRollback
+        ?percentageCompleteOnRollback ?rollbackStartTime ?rollbackReason ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let progressDetailsOnRollback =
+        field_map json__ "ProgressDetailsOnRollback"
+          InstanceRefreshProgressDetails.of_json in
+      let instancesToUpdateOnRollback =
+        field_map json__ "InstancesToUpdateOnRollback"
+          InstancesToUpdate.of_json in
+      let percentageCompleteOnRollback =
+        field_map json__ "PercentageCompleteOnRollback" IntPercent.of_json in
+      let rollbackStartTime =
+        field_map json__ "RollbackStartTime" TimestampType.of_json in
+      let rollbackReason =
+        field_map json__ "RollbackReason" XmlStringMaxLen1023.of_json in
+      make ?progressDetailsOnRollback ?instancesToUpdateOnRollback
+        ?percentageCompleteOnRollback ?rollbackStartTime ?rollbackReason ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details about an instance refresh rollback."]
 module AutoScalingGroupPredictedCapacity =
   struct
     type nonrec t = int
@@ -4914,10 +6291,109 @@ module AutoScalingGroupPredictedCapacity =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module AvailabilityZoneDistribution =
+  struct
+    type nonrec t =
+      {
+      capacityDistributionStrategy: CapacityDistributionStrategy.t option
+        [@ocaml.doc
+          "If launches fail in an Availability Zone, the following strategies are available. The default is balanced-best-effort. balanced-only - If launches fail in an Availability Zone, Auto Scaling will continue to attempt to launch in the unhealthy zone to preserve a balanced distribution. balanced-best-effort - If launches fail in an Availability Zone, Auto Scaling will attempt to launch in another healthy Availability Zone instead."]}
+    let make ?capacityDistributionStrategy =
+      fun () -> { capacityDistributionStrategy }
+    let to_value x =
+      structure_to_value
+        [("CapacityDistributionStrategy",
+           (Option.map x.capacityDistributionStrategy
+              ~f:CapacityDistributionStrategy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityDistributionStrategy =
+        (Option.map ~f:CapacityDistributionStrategy.of_xml)
+          (Xml.child xml_arg0 "CapacityDistributionStrategy") in
+      make ?capacityDistributionStrategy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityDistributionStrategy =
+        field_map json__ "CapacityDistributionStrategy"
+          CapacityDistributionStrategy.of_json in
+      make ?capacityDistributionStrategy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes an Availability Zone distribution."]
+module AvailabilityZoneIds =
+  struct
+    type nonrec t = XmlStringMaxLen255.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:XmlStringMaxLen255.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:XmlStringMaxLen255.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AvailabilityZoneIds"
+        ~of_json:XmlStringMaxLen255.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AvailabilityZoneImpairmentPolicy =
+  struct
+    type nonrec t =
+      {
+      zonalShiftEnabled: ZonalShiftEnabled.t option
+        [@ocaml.doc
+          "If true, enable zonal shift for your Auto Scaling group."];
+      impairedZoneHealthCheckBehavior:
+        ImpairedZoneHealthCheckBehavior.t option
+        [@ocaml.doc
+          "Specifies the health check behavior for the impaired Availability Zone in an active zonal shift. If you select Replace unhealthy, instances that appear unhealthy will be replaced in all Availability Zones. If you select Ignore unhealthy, instances will not be replaced in the Availability Zone with the active zonal shift. For more information, see Auto Scaling group zonal shift in the Amazon EC2 Auto Scaling User Guide."]}
+    let make ?zonalShiftEnabled =
+      fun ?impairedZoneHealthCheckBehavior ->
+        fun () -> { zonalShiftEnabled; impairedZoneHealthCheckBehavior }
+    let to_value x =
+      structure_to_value
+        [("ZonalShiftEnabled",
+           (Option.map x.zonalShiftEnabled ~f:ZonalShiftEnabled.to_value));
+        ("ImpairedZoneHealthCheckBehavior",
+          (Option.map x.impairedZoneHealthCheckBehavior
+             ~f:ImpairedZoneHealthCheckBehavior.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let impairedZoneHealthCheckBehavior =
+        (Option.map ~f:ImpairedZoneHealthCheckBehavior.of_xml)
+          (Xml.child xml_arg0 "ImpairedZoneHealthCheckBehavior") in
+      let zonalShiftEnabled =
+        (Option.map ~f:ZonalShiftEnabled.of_xml)
+          (Xml.child xml_arg0 "ZonalShiftEnabled") in
+      make ?impairedZoneHealthCheckBehavior ?zonalShiftEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let impairedZoneHealthCheckBehavior =
+        field_map json__ "ImpairedZoneHealthCheckBehavior"
+          ImpairedZoneHealthCheckBehavior.of_json in
+      let zonalShiftEnabled =
+        field_map json__ "ZonalShiftEnabled" ZonalShiftEnabled.of_json in
+      make ?impairedZoneHealthCheckBehavior ?zonalShiftEnabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes an Availability Zone impairment policy."]
 module AvailabilityZones =
   struct
     type nonrec t = XmlStringMaxLen255.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen255.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4952,6 +6428,49 @@ module CapacityRebalanceEnabled =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module CapacityReservationSpecification =
+  struct
+    type nonrec t =
+      {
+      capacityReservationPreference: CapacityReservationPreference.t option
+        [@ocaml.doc
+          "The capacity reservation preference. The following options are available: capacity-reservations-only - Auto Scaling will only launch instances into a Capacity Reservation or Capacity Reservation resource group. If capacity isn't available, instances will fail to launch. capacity-reservations-first - Auto Scaling will try to launch instances into a Capacity Reservation or Capacity Reservation resource group first. If capacity isn't available, instances will run in On-Demand capacity. none - Auto Scaling will not launch instances into a Capacity Reservation. Instances will run in On-Demand capacity. default - Auto Scaling uses the Capacity Reservation preference from your launch template or an open Capacity Reservation."];
+      capacityReservationTarget: CapacityReservationTarget.t option
+        [@ocaml.doc
+          "Describes a target Capacity Reservation or Capacity Reservation resource group."]}
+    let make ?capacityReservationPreference =
+      fun ?capacityReservationTarget ->
+        fun () ->
+          { capacityReservationPreference; capacityReservationTarget }
+    let to_value x =
+      structure_to_value
+        [("CapacityReservationPreference",
+           (Option.map x.capacityReservationPreference
+              ~f:CapacityReservationPreference.to_value));
+        ("CapacityReservationTarget",
+          (Option.map x.capacityReservationTarget
+             ~f:CapacityReservationTarget.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityReservationTarget =
+        (Option.map ~f:CapacityReservationTarget.of_xml)
+          (Xml.child xml_arg0 "CapacityReservationTarget") in
+      let capacityReservationPreference =
+        (Option.map ~f:CapacityReservationPreference.of_xml)
+          (Xml.child xml_arg0 "CapacityReservationPreference") in
+      make ?capacityReservationTarget ?capacityReservationPreference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityReservationTarget =
+        field_map json__ "CapacityReservationTarget"
+          CapacityReservationTarget.of_json in
+      let capacityReservationPreference =
+        field_map json__ "CapacityReservationPreference"
+          CapacityReservationPreference.of_json in
+      make ?capacityReservationTarget ?capacityReservationPreference ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the Capacity Reservation preference and targeting options. If you specify open or none for CapacityReservationPreference, do not specify a CapacityReservationTarget."]
 module Context =
   struct
     type nonrec t = string
@@ -4965,10 +6484,56 @@ module Context =
     let of_json j = string_of_json ~kind:"Context" j
     let to_json = simple_to_json to_value
   end
+module DefaultInstanceWarmup =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for DefaultInstanceWarmup" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module DeletionProtection =
+  struct
+    type nonrec t =
+      | None 
+      | Prevent_force_deletion 
+      | Prevent_all_deletion 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | None -> "none"
+      | Prevent_force_deletion -> "prevent-force-deletion"
+      | Prevent_all_deletion -> "prevent-all-deletion"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "none" -> None
+      | "prevent-force-deletion" -> Prevent_force_deletion
+      | "prevent-all-deletion" -> Prevent_all_deletion
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DeletionProtection" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DeletionProtection" j)
+    let to_json = simple_to_json to_value
+  end
 module EnabledMetrics =
   struct
     type nonrec t = EnabledMetric.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnabledMetric.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5003,10 +6568,80 @@ module HealthCheckGracePeriod =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module InstanceLifecyclePolicy =
+  struct
+    type nonrec t =
+      {
+      retentionTriggers: RetentionTriggers.t option
+        [@ocaml.doc
+          "Specifies the conditions that trigger instance retention behavior. These triggers determine when instances should move to a Retained state instead of automatic termination. This allows you to maintain control over instance management when lifecycles transition and operations fail."]}
+    let make ?retentionTriggers = fun () -> { retentionTriggers }
+    let to_value x =
+      structure_to_value
+        [("RetentionTriggers",
+           (Option.map x.retentionTriggers ~f:RetentionTriggers.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retentionTriggers =
+        (Option.map ~f:RetentionTriggers.of_xml)
+          (Xml.child xml_arg0 "RetentionTriggers") in
+      make ?retentionTriggers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retentionTriggers =
+        field_map json__ "RetentionTriggers" RetentionTriggers.of_json in
+      make ?retentionTriggers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The instance lifecycle policy for the Auto Scaling group. This policy controls instance behavior when an instance transitions through its lifecycle states. Configure retention triggers to specify when instances should move to a Retained state instead of automatic termination. For more information, see Control instance retention with instance lifecycle policies in the Amazon EC2 Auto Scaling User Guide."]
+module InstanceMaintenancePolicy =
+  struct
+    type nonrec t =
+      {
+      minHealthyPercentage: IntPercentResettable.t option
+        [@ocaml.doc
+          "Specifies the lower threshold as a percentage of the desired capacity of the Auto Scaling group. It represents the minimum percentage of the group to keep in service, healthy, and ready to use to support your workload when replacing instances. Value range is 0 to 100. To clear a previously set value, specify a value of -1."];
+      maxHealthyPercentage: IntPercent100To200Resettable.t option
+        [@ocaml.doc
+          "Specifies the upper threshold as a percentage of the desired capacity of the Auto Scaling group. It represents the maximum percentage of the group that can be in service and healthy, or pending, to support your workload when replacing instances. Value range is 100 to 200. To clear a previously set value, specify a value of -1. Both MinHealthyPercentage and MaxHealthyPercentage must be specified, and the difference between them cannot be greater than 100. A large range increases the number of instances that can be replaced at the same time."]}
+    let make ?minHealthyPercentage =
+      fun ?maxHealthyPercentage ->
+        fun () -> { minHealthyPercentage; maxHealthyPercentage }
+    let to_value x =
+      structure_to_value
+        [("MinHealthyPercentage",
+           (Option.map x.minHealthyPercentage
+              ~f:IntPercentResettable.to_value));
+        ("MaxHealthyPercentage",
+          (Option.map x.maxHealthyPercentage
+             ~f:IntPercent100To200Resettable.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxHealthyPercentage =
+        (Option.map ~f:IntPercent100To200Resettable.of_xml)
+          (Xml.child xml_arg0 "MaxHealthyPercentage") in
+      let minHealthyPercentage =
+        (Option.map ~f:IntPercentResettable.of_xml)
+          (Xml.child xml_arg0 "MinHealthyPercentage") in
+      make ?maxHealthyPercentage ?minHealthyPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxHealthyPercentage =
+        field_map json__ "MaxHealthyPercentage"
+          IntPercent100To200Resettable.of_json in
+      let minHealthyPercentage =
+        field_map json__ "MinHealthyPercentage" IntPercentResettable.of_json in
+      make ?maxHealthyPercentage ?minHealthyPercentage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes an instance maintenance policy. For more information, see Set instance maintenance policy in the Amazon EC2 Auto Scaling User Guide."]
 module Instances =
   struct
     type nonrec t = Instance.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Instance.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5031,6 +6666,9 @@ module LoadBalancerNames =
   struct
     type nonrec t = XmlStringMaxLen255.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen255.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5070,6 +6708,9 @@ module SuspendedProcesses =
   struct
     type nonrec t = SuspendedProcess.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SuspendedProcess.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5095,6 +6736,9 @@ module TagDescriptionList =
   struct
     type nonrec t = TagDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagDescription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5120,6 +6764,9 @@ module TargetGroupARNs =
   struct
     type nonrec t = XmlStringMaxLen511.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen511.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5145,6 +6792,9 @@ module TerminationPolicies =
   struct
     type nonrec t = XmlStringMaxLen1600.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen1600.to_value)) |>
         (fun x -> `List x)
@@ -5165,6 +6815,35 @@ module TerminationPolicies =
     let of_json j =
       list_of_json ~kind:"TerminationPolicies"
         ~of_json:XmlStringMaxLen1600.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TrafficSources =
+  struct
+    type nonrec t = TrafficSourceIdentifier.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TrafficSourceIdentifier.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TrafficSourceIdentifier.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TrafficSources"
+        ~of_json:TrafficSourceIdentifier.of_json j
     let to_json v = composed_to_json to_value v
   end
 module WarmPoolConfiguration =
@@ -5224,14 +6903,14 @@ module WarmPoolConfiguration =
       make ?instanceReusePolicy ?status ?poolState ?minSize
         ?maxGroupPreparedCapacity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceReusePolicy =
-        field_map json "InstanceReusePolicy" InstanceReusePolicy.of_json in
-      let status = field_map json "Status" WarmPoolStatus.of_json in
-      let poolState = field_map json "PoolState" WarmPoolState.of_json in
-      let minSize = field_map json "MinSize" WarmPoolMinSize.of_json in
+        field_map json__ "InstanceReusePolicy" InstanceReusePolicy.of_json in
+      let status = field_map json__ "Status" WarmPoolStatus.of_json in
+      let poolState = field_map json__ "PoolState" WarmPoolState.of_json in
+      let minSize = field_map json__ "MinSize" WarmPoolMinSize.of_json in
       let maxGroupPreparedCapacity =
-        field_map json "MaxGroupPreparedCapacity"
+        field_map json__ "MaxGroupPreparedCapacity"
           MaxGroupPreparedCapacity.of_json in
       make ?instanceReusePolicy ?status ?poolState ?minSize
         ?maxGroupPreparedCapacity ()
@@ -5251,16 +6930,16 @@ module WarmPoolSize =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module XmlStringMaxLen2047 =
+module XmlStringMaxLen5000 =
   struct
     type nonrec t = string
-    let context_ = "XmlStringMaxLen2047"
+    let context_ = "XmlStringMaxLen5000"
     let make i =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:2047) >>=
+                (check_string_max i ~max:5000) >>=
                   (fun () ->
                      check_pattern i
                        ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
@@ -5270,7 +6949,7 @@ module XmlStringMaxLen2047 =
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"XmlStringMaxLen2047" j
+    let of_json j = string_of_json ~kind:"XmlStringMaxLen5000" j
     let to_json = simple_to_json to_value
   end
 module ScheduledUpdateGroupAction =
@@ -5285,7 +6964,7 @@ module ScheduledUpdateGroupAction =
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the scheduled action."];
       time: TimestampType.t option
-        [@ocaml.doc "This parameter is no longer used."];
+        [@ocaml.doc "This property is no longer used."];
       startTime: TimestampType.t option
         [@ocaml.doc
           "The date and time in UTC for this action to start. For example, \"2019-06-01T00:00:00Z\"."];
@@ -5386,23 +7065,26 @@ module ScheduledUpdateGroupAction =
         ?startTime ?time ?scheduledActionARN ?scheduledActionName
         ?autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeZone = field_map json "TimeZone" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let timeZone = field_map json__ "TimeZone" XmlStringMaxLen255.of_json in
       let desiredCapacity =
-        field_map json "DesiredCapacity"
+        field_map json__ "DesiredCapacity"
           AutoScalingGroupDesiredCapacity.of_json in
-      let maxSize = field_map json "MaxSize" AutoScalingGroupMaxSize.of_json in
-      let minSize = field_map json "MinSize" AutoScalingGroupMinSize.of_json in
-      let recurrence = field_map json "Recurrence" XmlStringMaxLen255.of_json in
-      let endTime = field_map json "EndTime" TimestampType.of_json in
-      let startTime = field_map json "StartTime" TimestampType.of_json in
-      let time = field_map json "Time" TimestampType.of_json in
+      let maxSize =
+        field_map json__ "MaxSize" AutoScalingGroupMaxSize.of_json in
+      let minSize =
+        field_map json__ "MinSize" AutoScalingGroupMinSize.of_json in
+      let recurrence =
+        field_map json__ "Recurrence" XmlStringMaxLen255.of_json in
+      let endTime = field_map json__ "EndTime" TimestampType.of_json in
+      let startTime = field_map json__ "StartTime" TimestampType.of_json in
+      let time = field_map json__ "Time" TimestampType.of_json in
       let scheduledActionARN =
-        field_map json "ScheduledActionARN" ResourceName.of_json in
+        field_map json__ "ScheduledActionARN" ResourceName.of_json in
       let scheduledActionName =
-        field_map json "ScheduledActionName" XmlStringMaxLen255.of_json in
+        field_map json__ "ScheduledActionName" XmlStringMaxLen255.of_json in
       let autoScalingGroupName =
-        field_map json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map json__ "AutoScalingGroupName" XmlStringMaxLen255.of_json in
       make ?timeZone ?desiredCapacity ?maxSize ?minSize ?recurrence ?endTime
         ?startTime ?time ?scheduledActionARN ?scheduledActionName
         ?autoScalingGroupName ()
@@ -5412,28 +7094,28 @@ module ProcessType =
   struct
     type nonrec t =
       {
-      processName: XmlStringMaxLen255.t
+      processName: XmlStringMaxLen255.t option
         [@ocaml.doc
           "One of the following processes: Launch Terminate AddToLoadBalancer AlarmNotification AZRebalance HealthCheck InstanceRefresh ReplaceUnhealthy ScheduledActions"]}
-    let context_ = "ProcessType"
-    let make ~processName = fun () -> { processName }
+    let make ?processName = fun () -> { processName }
     let to_value x =
       structure_to_value
-        [("ProcessName", (Some (XmlStringMaxLen255.to_value x.processName)))]
+        [("ProcessName",
+           (Option.map x.processName ~f:XmlStringMaxLen255.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let processName =
-        XmlStringMaxLen255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ProcessName") in
-      make ~processName ()
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "ProcessName") in
+      make ?processName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let processName =
-        field_map_exn json "ProcessName" XmlStringMaxLen255.of_json in
-      make ~processName ()
+        field_map json__ "ProcessName" XmlStringMaxLen255.of_json in
+      make ?processName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes a process type. For more information, see Scaling processes in the Amazon EC2 Auto Scaling User Guide."]
+       "Describes a process type. For more information, see Types of processes in the Amazon EC2 Auto Scaling User Guide."]
 module ScalingPolicy =
   struct
     type nonrec t =
@@ -5602,37 +7284,39 @@ module ScalingPolicy =
         ?minAdjustmentMagnitude ?minAdjustmentStep ?adjustmentType
         ?policyType ?policyARN ?policyName ?autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let predictiveScalingConfiguration =
-        field_map json "PredictiveScalingConfiguration"
+        field_map json__ "PredictiveScalingConfiguration"
           PredictiveScalingConfiguration.of_json in
-      let enabled = field_map json "Enabled" ScalingPolicyEnabled.of_json in
+      let enabled = field_map json__ "Enabled" ScalingPolicyEnabled.of_json in
       let targetTrackingConfiguration =
-        field_map json "TargetTrackingConfiguration"
+        field_map json__ "TargetTrackingConfiguration"
           TargetTrackingConfiguration.of_json in
-      let alarms = field_map json "Alarms" Alarms.of_json in
+      let alarms = field_map json__ "Alarms" Alarms.of_json in
       let estimatedInstanceWarmup =
-        field_map json "EstimatedInstanceWarmup"
+        field_map json__ "EstimatedInstanceWarmup"
           EstimatedInstanceWarmup.of_json in
       let metricAggregationType =
-        field_map json "MetricAggregationType" XmlStringMaxLen32.of_json in
+        field_map json__ "MetricAggregationType" XmlStringMaxLen32.of_json in
       let stepAdjustments =
-        field_map json "StepAdjustments" StepAdjustments.of_json in
-      let cooldown = field_map json "Cooldown" Cooldown.of_json in
+        field_map json__ "StepAdjustments" StepAdjustments.of_json in
+      let cooldown = field_map json__ "Cooldown" Cooldown.of_json in
       let scalingAdjustment =
-        field_map json "ScalingAdjustment" PolicyIncrement.of_json in
+        field_map json__ "ScalingAdjustment" PolicyIncrement.of_json in
       let minAdjustmentMagnitude =
-        field_map json "MinAdjustmentMagnitude"
+        field_map json__ "MinAdjustmentMagnitude"
           MinAdjustmentMagnitude.of_json in
       let minAdjustmentStep =
-        field_map json "MinAdjustmentStep" MinAdjustmentStep.of_json in
+        field_map json__ "MinAdjustmentStep" MinAdjustmentStep.of_json in
       let adjustmentType =
-        field_map json "AdjustmentType" XmlStringMaxLen255.of_json in
-      let policyType = field_map json "PolicyType" XmlStringMaxLen64.of_json in
-      let policyARN = field_map json "PolicyARN" ResourceName.of_json in
-      let policyName = field_map json "PolicyName" XmlStringMaxLen255.of_json in
+        field_map json__ "AdjustmentType" XmlStringMaxLen255.of_json in
+      let policyType =
+        field_map json__ "PolicyType" XmlStringMaxLen64.of_json in
+      let policyARN = field_map json__ "PolicyARN" ResourceName.of_json in
+      let policyName =
+        field_map json__ "PolicyName" XmlStringMaxLen255.of_json in
       let autoScalingGroupName =
-        field_map json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map json__ "AutoScalingGroupName" XmlStringMaxLen255.of_json in
       make ?predictiveScalingConfiguration ?enabled
         ?targetTrackingConfiguration ?alarms ?estimatedInstanceWarmup
         ?metricAggregationType ?stepAdjustments ?cooldown ?scalingAdjustment
@@ -5640,118 +7324,296 @@ module ScalingPolicy =
         ?policyType ?policyARN ?policyName ?autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a scaling policy."]
+module InstanceCollection =
+  struct
+    type nonrec t =
+      {
+      instanceType: XmlStringMaxLen255.t option
+        [@ocaml.doc "The instance type of the launched instances."];
+      marketType: XmlStringMaxLen64.t option
+        [@ocaml.doc "The market type for the instances (On-Demand or Spot)."];
+      subnetId: XmlStringMaxLen255.t option
+        [@ocaml.doc
+          "The ID of the subnet where the instances were launched."];
+      availabilityZone: XmlStringMaxLen255.t option
+        [@ocaml.doc
+          "The Availability Zone where the instances were launched."];
+      availabilityZoneId: XmlStringMaxLen255.t option
+        [@ocaml.doc
+          "The Availability Zone ID where the instances in this collection were launched."];
+      instanceIds: InstanceIds.t option
+        [@ocaml.doc
+          "A list of instance IDs for the successfully launched instances."]}
+    let make ?instanceType =
+      fun ?marketType ->
+        fun ?subnetId ->
+          fun ?availabilityZone ->
+            fun ?availabilityZoneId ->
+              fun ?instanceIds ->
+                fun () ->
+                  {
+                    instanceType;
+                    marketType;
+                    subnetId;
+                    availabilityZone;
+                    availabilityZoneId;
+                    instanceIds
+                  }
+    let to_value x =
+      structure_to_value
+        [("InstanceType",
+           (Option.map x.instanceType ~f:XmlStringMaxLen255.to_value));
+        ("MarketType",
+          (Option.map x.marketType ~f:XmlStringMaxLen64.to_value));
+        ("SubnetId", (Option.map x.subnetId ~f:XmlStringMaxLen255.to_value));
+        ("AvailabilityZone",
+          (Option.map x.availabilityZone ~f:XmlStringMaxLen255.to_value));
+        ("AvailabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:XmlStringMaxLen255.to_value));
+        ("InstanceIds", (Option.map x.instanceIds ~f:InstanceIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let instanceIds =
+        (Option.map ~f:InstanceIds.of_xml) (Xml.child xml_arg0 "InstanceIds") in
+      let availabilityZoneId =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZoneId") in
+      let availabilityZone =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZone") in
+      let subnetId =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "SubnetId") in
+      let marketType =
+        (Option.map ~f:XmlStringMaxLen64.of_xml)
+          (Xml.child xml_arg0 "MarketType") in
+      let instanceType =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "InstanceType") in
+      make ?instanceIds ?availabilityZoneId ?availabilityZone ?subnetId
+        ?marketType ?instanceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let instanceIds = field_map json__ "InstanceIds" InstanceIds.of_json in
+      let availabilityZoneId =
+        field_map json__ "AvailabilityZoneId" XmlStringMaxLen255.of_json in
+      let availabilityZone =
+        field_map json__ "AvailabilityZone" XmlStringMaxLen255.of_json in
+      let subnetId = field_map json__ "SubnetId" XmlStringMaxLen255.of_json in
+      let marketType =
+        field_map json__ "MarketType" XmlStringMaxLen64.of_json in
+      let instanceType =
+        field_map json__ "InstanceType" XmlStringMaxLen255.of_json in
+      make ?instanceIds ?availabilityZoneId ?availabilityZone ?subnetId
+        ?marketType ?instanceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains details about a collection of instances launched in the Auto Scaling group."]
+module LaunchInstancesError =
+  struct
+    type nonrec t =
+      {
+      instanceType: XmlStringMaxLen255.t option
+        [@ocaml.doc "The instance type that failed to launch."];
+      marketType: XmlStringMaxLen64.t option
+        [@ocaml.doc
+          "The market type (On-Demand or Spot) that encountered the launch error."];
+      subnetId: XmlStringMaxLen255.t option
+        [@ocaml.doc "The subnet ID where the instance launch was attempted."];
+      availabilityZone: XmlStringMaxLen255.t option
+        [@ocaml.doc
+          "The Availability Zone where the instance launch was attempted."];
+      availabilityZoneId: XmlStringMaxLen255.t option
+        [@ocaml.doc
+          "The Availability Zone ID where the launch error occurred."];
+      errorCode: XmlStringMaxLen64.t option
+        [@ocaml.doc
+          "The error code representing the type of error encountered (e.g., InsufficientInstanceCapacity)."];
+      errorMessage: XmlString.t option
+        [@ocaml.doc
+          "A descriptive message providing details about the error encountered during the launch attempt."]}
+    let make ?instanceType =
+      fun ?marketType ->
+        fun ?subnetId ->
+          fun ?availabilityZone ->
+            fun ?availabilityZoneId ->
+              fun ?errorCode ->
+                fun ?errorMessage ->
+                  fun () ->
+                    {
+                      instanceType;
+                      marketType;
+                      subnetId;
+                      availabilityZone;
+                      availabilityZoneId;
+                      errorCode;
+                      errorMessage
+                    }
+    let to_value x =
+      structure_to_value
+        [("InstanceType",
+           (Option.map x.instanceType ~f:XmlStringMaxLen255.to_value));
+        ("MarketType",
+          (Option.map x.marketType ~f:XmlStringMaxLen64.to_value));
+        ("SubnetId", (Option.map x.subnetId ~f:XmlStringMaxLen255.to_value));
+        ("AvailabilityZone",
+          (Option.map x.availabilityZone ~f:XmlStringMaxLen255.to_value));
+        ("AvailabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:XmlStringMaxLen255.to_value));
+        ("ErrorCode", (Option.map x.errorCode ~f:XmlStringMaxLen64.to_value));
+        ("ErrorMessage", (Option.map x.errorMessage ~f:XmlString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "ErrorMessage") in
+      let errorCode =
+        (Option.map ~f:XmlStringMaxLen64.of_xml)
+          (Xml.child xml_arg0 "ErrorCode") in
+      let availabilityZoneId =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZoneId") in
+      let availabilityZone =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZone") in
+      let subnetId =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "SubnetId") in
+      let marketType =
+        (Option.map ~f:XmlStringMaxLen64.of_xml)
+          (Xml.child xml_arg0 "MarketType") in
+      let instanceType =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "InstanceType") in
+      make ?errorMessage ?errorCode ?availabilityZoneId ?availabilityZone
+        ?subnetId ?marketType ?instanceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" XmlString.of_json in
+      let errorCode = field_map json__ "ErrorCode" XmlStringMaxLen64.of_json in
+      let availabilityZoneId =
+        field_map json__ "AvailabilityZoneId" XmlStringMaxLen255.of_json in
+      let availabilityZone =
+        field_map json__ "AvailabilityZone" XmlStringMaxLen255.of_json in
+      let subnetId = field_map json__ "SubnetId" XmlStringMaxLen255.of_json in
+      let marketType =
+        field_map json__ "MarketType" XmlStringMaxLen64.of_json in
+      let instanceType =
+        field_map json__ "InstanceType" XmlStringMaxLen255.of_json in
+      make ?errorMessage ?errorCode ?availabilityZoneId ?availabilityZone
+        ?subnetId ?marketType ?instanceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains details about errors encountered during instance launch attempts."]
 module LaunchConfiguration =
   struct
     type nonrec t =
       {
-      launchConfigurationName: XmlStringMaxLen255.t
+      launchConfigurationName: XmlStringMaxLen255.t option
         [@ocaml.doc "The name of the launch configuration."];
       launchConfigurationARN: ResourceName.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the launch configuration."];
-      imageId: XmlStringMaxLen255.t
+      imageId: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "The ID of the Amazon Machine Image (AMI) to use to launch your EC2 instances. For more information, see Finding an AMI in the Amazon EC2 User Guide for Linux Instances."];
+          "The ID of the Amazon Machine Image (AMI) to use to launch your EC2 instances. For more information, see Find a Linux AMI in the Amazon EC2 User Guide."];
       keyName: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "The name of the key pair. For more information, see Amazon EC2 Key Pairs in the Amazon EC2 User Guide for Linux Instances."];
+          "The name of the key pair. For more information, see Amazon EC2 key pairs and Amazon EC2 instances in the Amazon EC2 User Guide."];
       securityGroups: SecurityGroups.t option
         [@ocaml.doc
-          "A list that contains the security groups to assign to the instances in the Auto Scaling group. For more information, see Security Groups for Your VPC in the Amazon Virtual Private Cloud User Guide."];
+          "A list that contains the security groups to assign to the instances in the Auto Scaling group. For more information, see Control traffic to your Amazon Web Services resources using security groups in the Amazon Virtual Private Cloud User Guide."];
       classicLinkVPCId: XmlStringMaxLen255.t option
-        [@ocaml.doc
-          "The ID of a ClassicLink-enabled VPC to link your EC2-Classic instances to. For more information, see ClassicLink in the Amazon EC2 User Guide for Linux Instances and Linking EC2-Classic instances to a VPC in the Amazon EC2 Auto Scaling User Guide."];
+        [@ocaml.doc "Available for backward compatibility."];
       classicLinkVPCSecurityGroups: ClassicLinkVPCSecurityGroups.t option
-        [@ocaml.doc
-          "The IDs of one or more security groups for the VPC specified in ClassicLinkVPCId. For more information, see ClassicLink in the Amazon EC2 User Guide for Linux Instances and Linking EC2-Classic instances to a VPC in the Amazon EC2 Auto Scaling User Guide."];
+        [@ocaml.doc "Available for backward compatibility."];
       userData: XmlStringUserData.t option
         [@ocaml.doc
-          "The user data to make available to the launched EC2 instances. For more information, see Instance metadata and user data (Linux) and Instance metadata and user data (Windows). If you are using a command line tool, base64-encoding is performed for you, and you can load the text from a file. Otherwise, you must provide base64-encoded text. User data is limited to 16 KB."];
-      instanceType: XmlStringMaxLen255.t
+          "The user data to make available to the launched EC2 instances. For more information, see Instance metadata and user data in the Amazon EC2 User Guide. If you are using a command line tool, base64-encoding is performed for you, and you can load the text from a file. Otherwise, you must provide base64-encoded text. User data is limited to 16 KB."];
+      instanceType: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "The instance type for the instances. For information about available instance types, see Available Instance Types in the Amazon EC2 User Guide for Linux Instances."];
+          "The instance type for the instances. For information about available instance types, see Available instance types in the Amazon EC2 User Guide."];
       kernelId: XmlStringMaxLen255.t option
         [@ocaml.doc "The ID of the kernel associated with the AMI."];
       ramdiskId: XmlStringMaxLen255.t option
         [@ocaml.doc "The ID of the RAM disk associated with the AMI."];
       blockDeviceMappings: BlockDeviceMappings.t option
         [@ocaml.doc
-          "A block device mapping, which specifies the block devices for the instance. For more information, see Block Device Mapping in the Amazon EC2 User Guide for Linux Instances."];
+          "The block device mapping entries that define the block devices to attach to the instances at launch. By default, the block devices specified in the block device mapping for the AMI are used. For more information, see Block device mappings in the Amazon EC2 User Guide."];
       instanceMonitoring: InstanceMonitoring.t option
         [@ocaml.doc
-          "Controls whether instances in this group are launched with detailed (true) or basic (false) monitoring. For more information, see Configure Monitoring for Auto Scaling Instances in the Amazon EC2 Auto Scaling User Guide."];
+          "Controls whether instances in this group are launched with detailed (true) or basic (false) monitoring. For more information, see Configure monitoring for Auto Scaling instances in the Amazon EC2 Auto Scaling User Guide."];
       spotPrice: SpotPrice.t option
         [@ocaml.doc
-          "The maximum hourly price to be paid for any Spot Instance launched to fulfill the request. Spot Instances are launched when the price you specify exceeds the current Spot price. For more information, see Requesting Spot Instances in the Amazon EC2 Auto Scaling User Guide."];
+          "The maximum hourly price to be paid for any Spot Instance launched to fulfill the request. Spot Instances are launched when the price you specify exceeds the current Spot price. For more information, see Requesting Spot Instances for fault-tolerant and flexible applications in the Amazon EC2 Auto Scaling User Guide."];
       iamInstanceProfile: XmlStringMaxLen1600.t option
         [@ocaml.doc
           "The name or the Amazon Resource Name (ARN) of the instance profile associated with the IAM role for the instance. The instance profile contains the IAM role. For more information, see IAM role for applications that run on Amazon EC2 instances in the Amazon EC2 Auto Scaling User Guide."];
-      createdTime: TimestampType.t
+      createdTime: TimestampType.t option
         [@ocaml.doc
           "The creation date and time for the launch configuration."];
       ebsOptimized: EbsOptimized.t option
         [@ocaml.doc
-          "Specifies whether the launch configuration is optimized for EBS I/O (true) or not (false). For more information, see Amazon EBS-Optimized Instances in the Amazon EC2 User Guide for Linux Instances."];
+          "Specifies whether the launch configuration is optimized for EBS I/O (true) or not (false). For more information, see Amazon EBS-optimized instances in the Amazon EC2 User Guide."];
       associatePublicIpAddress: AssociatePublicIpAddress.t option
         [@ocaml.doc
-          "For Auto Scaling groups that are running in a VPC, specifies whether to assign a public IP address to the group's instances. For more information, see Launching Auto Scaling instances in a VPC in the Amazon EC2 Auto Scaling User Guide."];
+          "Specifies whether to assign a public IPv4 address to the group's instances. If the instance is launched into a default subnet, the default is to assign a public IPv4 address, unless you disabled the option to assign a public IPv4 address on the subnet. If the instance is launched into a nondefault subnet, the default is not to assign a public IPv4 address, unless you enabled the option to assign a public IPv4 address on the subnet. For more information, see Provide network connectivity for your Auto Scaling instances using Amazon VPC in the Amazon EC2 Auto Scaling User Guide."];
       placementTenancy: XmlStringMaxLen64.t option
         [@ocaml.doc
-          "The tenancy of the instance, either default or dedicated. An instance with dedicated tenancy runs on isolated, single-tenant hardware and can only be launched into a VPC. For more information, see Configuring instance tenancy with Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."];
+          "The tenancy of the instance, either default or dedicated. An instance with dedicated tenancy runs on isolated, single-tenant hardware and can only be launched into a VPC."];
       metadataOptions: InstanceMetadataOptions.t option
         [@ocaml.doc
-          "The metadata options for the instances. For more information, see Configuring the Instance Metadata Options in the Amazon EC2 Auto Scaling User Guide."]}
-    let context_ = "LaunchConfiguration"
-    let make ?launchConfigurationARN =
-      fun ?keyName ->
-        fun ?securityGroups ->
-          fun ?classicLinkVPCId ->
-            fun ?classicLinkVPCSecurityGroups ->
-              fun ?userData ->
-                fun ?kernelId ->
-                  fun ?ramdiskId ->
-                    fun ?blockDeviceMappings ->
-                      fun ?instanceMonitoring ->
-                        fun ?spotPrice ->
-                          fun ?iamInstanceProfile ->
-                            fun ?ebsOptimized ->
-                              fun ?associatePublicIpAddress ->
-                                fun ?placementTenancy ->
-                                  fun ?metadataOptions ->
-                                    fun ~launchConfigurationName ->
-                                      fun ~imageId ->
-                                        fun ~instanceType ->
-                                          fun ~createdTime ->
+          "The metadata options for the instances. For more information, see Configure the instance metadata options in the Amazon EC2 Auto Scaling User Guide."]}
+    let make ?launchConfigurationName =
+      fun ?launchConfigurationARN ->
+        fun ?imageId ->
+          fun ?keyName ->
+            fun ?securityGroups ->
+              fun ?classicLinkVPCId ->
+                fun ?classicLinkVPCSecurityGroups ->
+                  fun ?userData ->
+                    fun ?instanceType ->
+                      fun ?kernelId ->
+                        fun ?ramdiskId ->
+                          fun ?blockDeviceMappings ->
+                            fun ?instanceMonitoring ->
+                              fun ?spotPrice ->
+                                fun ?iamInstanceProfile ->
+                                  fun ?createdTime ->
+                                    fun ?ebsOptimized ->
+                                      fun ?associatePublicIpAddress ->
+                                        fun ?placementTenancy ->
+                                          fun ?metadataOptions ->
                                             fun () ->
                                               {
+                                                launchConfigurationName;
                                                 launchConfigurationARN;
+                                                imageId;
                                                 keyName;
                                                 securityGroups;
                                                 classicLinkVPCId;
                                                 classicLinkVPCSecurityGroups;
                                                 userData;
+                                                instanceType;
                                                 kernelId;
                                                 ramdiskId;
                                                 blockDeviceMappings;
                                                 instanceMonitoring;
                                                 spotPrice;
                                                 iamInstanceProfile;
+                                                createdTime;
                                                 ebsOptimized;
                                                 associatePublicIpAddress;
                                                 placementTenancy;
-                                                metadataOptions;
-                                                launchConfigurationName;
-                                                imageId;
-                                                instanceType;
-                                                createdTime
+                                                metadataOptions
                                               }
     let to_value x =
       structure_to_value
         [("LaunchConfigurationName",
-           (Some (XmlStringMaxLen255.to_value x.launchConfigurationName)));
+           (Option.map x.launchConfigurationName
+              ~f:XmlStringMaxLen255.to_value));
         ("LaunchConfigurationARN",
           (Option.map x.launchConfigurationARN ~f:ResourceName.to_value));
-        ("ImageId", (Some (XmlStringMaxLen255.to_value x.imageId)));
+        ("ImageId", (Option.map x.imageId ~f:XmlStringMaxLen255.to_value));
         ("KeyName", (Option.map x.keyName ~f:XmlStringMaxLen255.to_value));
         ("SecurityGroups",
           (Option.map x.securityGroups ~f:SecurityGroups.to_value));
@@ -5761,7 +7623,8 @@ module LaunchConfiguration =
           (Option.map x.classicLinkVPCSecurityGroups
              ~f:ClassicLinkVPCSecurityGroups.to_value));
         ("UserData", (Option.map x.userData ~f:XmlStringUserData.to_value));
-        ("InstanceType", (Some (XmlStringMaxLen255.to_value x.instanceType)));
+        ("InstanceType",
+          (Option.map x.instanceType ~f:XmlStringMaxLen255.to_value));
         ("KernelId", (Option.map x.kernelId ~f:XmlStringMaxLen255.to_value));
         ("RamdiskId",
           (Option.map x.ramdiskId ~f:XmlStringMaxLen255.to_value));
@@ -5772,7 +7635,7 @@ module LaunchConfiguration =
         ("SpotPrice", (Option.map x.spotPrice ~f:SpotPrice.to_value));
         ("IamInstanceProfile",
           (Option.map x.iamInstanceProfile ~f:XmlStringMaxLen1600.to_value));
-        ("CreatedTime", (Some (TimestampType.to_value x.createdTime)));
+        ("CreatedTime", (Option.map x.createdTime ~f:TimestampType.to_value));
         ("EbsOptimized",
           (Option.map x.ebsOptimized ~f:EbsOptimized.to_value));
         ("AssociatePublicIpAddress",
@@ -5797,8 +7660,8 @@ module LaunchConfiguration =
         (Option.map ~f:EbsOptimized.of_xml)
           (Xml.child xml_arg0 "EbsOptimized") in
       let createdTime =
-        TimestampType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreatedTime") in
+        (Option.map ~f:TimestampType.of_xml)
+          (Xml.child xml_arg0 "CreatedTime") in
       let iamInstanceProfile =
         (Option.map ~f:XmlStringMaxLen1600.of_xml)
           (Xml.child xml_arg0 "IamInstanceProfile") in
@@ -5817,8 +7680,8 @@ module LaunchConfiguration =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "KernelId") in
       let instanceType =
-        XmlStringMaxLen255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstanceType") in
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "InstanceType") in
       let userData =
         (Option.map ~f:XmlStringUserData.of_xml)
           (Xml.child xml_arg0 "UserData") in
@@ -5835,114 +7698,111 @@ module LaunchConfiguration =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "KeyName") in
       let imageId =
-        XmlStringMaxLen255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ImageId") in
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "ImageId") in
       let launchConfigurationARN =
         (Option.map ~f:ResourceName.of_xml)
           (Xml.child xml_arg0 "LaunchConfigurationARN") in
       let launchConfigurationName =
-        XmlStringMaxLen255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LaunchConfigurationName") in
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "LaunchConfigurationName") in
       make ?metadataOptions ?placementTenancy ?associatePublicIpAddress
-        ?ebsOptimized ~createdTime ?iamInstanceProfile ?spotPrice
+        ?ebsOptimized ?createdTime ?iamInstanceProfile ?spotPrice
         ?instanceMonitoring ?blockDeviceMappings ?ramdiskId ?kernelId
-        ~instanceType ?userData ?classicLinkVPCSecurityGroups
-        ?classicLinkVPCId ?securityGroups ?keyName ~imageId
-        ?launchConfigurationARN ~launchConfigurationName ()
+        ?instanceType ?userData ?classicLinkVPCSecurityGroups
+        ?classicLinkVPCId ?securityGroups ?keyName ?imageId
+        ?launchConfigurationARN ?launchConfigurationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metadataOptions =
-        field_map json "MetadataOptions" InstanceMetadataOptions.of_json in
+        field_map json__ "MetadataOptions" InstanceMetadataOptions.of_json in
       let placementTenancy =
-        field_map json "PlacementTenancy" XmlStringMaxLen64.of_json in
+        field_map json__ "PlacementTenancy" XmlStringMaxLen64.of_json in
       let associatePublicIpAddress =
-        field_map json "AssociatePublicIpAddress"
+        field_map json__ "AssociatePublicIpAddress"
           AssociatePublicIpAddress.of_json in
-      let ebsOptimized = field_map json "EbsOptimized" EbsOptimized.of_json in
-      let createdTime =
-        field_map_exn json "CreatedTime" TimestampType.of_json in
+      let ebsOptimized = field_map json__ "EbsOptimized" EbsOptimized.of_json in
+      let createdTime = field_map json__ "CreatedTime" TimestampType.of_json in
       let iamInstanceProfile =
-        field_map json "IamInstanceProfile" XmlStringMaxLen1600.of_json in
-      let spotPrice = field_map json "SpotPrice" SpotPrice.of_json in
+        field_map json__ "IamInstanceProfile" XmlStringMaxLen1600.of_json in
+      let spotPrice = field_map json__ "SpotPrice" SpotPrice.of_json in
       let instanceMonitoring =
-        field_map json "InstanceMonitoring" InstanceMonitoring.of_json in
+        field_map json__ "InstanceMonitoring" InstanceMonitoring.of_json in
       let blockDeviceMappings =
-        field_map json "BlockDeviceMappings" BlockDeviceMappings.of_json in
-      let ramdiskId = field_map json "RamdiskId" XmlStringMaxLen255.of_json in
-      let kernelId = field_map json "KernelId" XmlStringMaxLen255.of_json in
+        field_map json__ "BlockDeviceMappings" BlockDeviceMappings.of_json in
+      let ramdiskId = field_map json__ "RamdiskId" XmlStringMaxLen255.of_json in
+      let kernelId = field_map json__ "KernelId" XmlStringMaxLen255.of_json in
       let instanceType =
-        field_map_exn json "InstanceType" XmlStringMaxLen255.of_json in
-      let userData = field_map json "UserData" XmlStringUserData.of_json in
+        field_map json__ "InstanceType" XmlStringMaxLen255.of_json in
+      let userData = field_map json__ "UserData" XmlStringUserData.of_json in
       let classicLinkVPCSecurityGroups =
-        field_map json "ClassicLinkVPCSecurityGroups"
+        field_map json__ "ClassicLinkVPCSecurityGroups"
           ClassicLinkVPCSecurityGroups.of_json in
       let classicLinkVPCId =
-        field_map json "ClassicLinkVPCId" XmlStringMaxLen255.of_json in
+        field_map json__ "ClassicLinkVPCId" XmlStringMaxLen255.of_json in
       let securityGroups =
-        field_map json "SecurityGroups" SecurityGroups.of_json in
-      let keyName = field_map json "KeyName" XmlStringMaxLen255.of_json in
-      let imageId = field_map_exn json "ImageId" XmlStringMaxLen255.of_json in
+        field_map json__ "SecurityGroups" SecurityGroups.of_json in
+      let keyName = field_map json__ "KeyName" XmlStringMaxLen255.of_json in
+      let imageId = field_map json__ "ImageId" XmlStringMaxLen255.of_json in
       let launchConfigurationARN =
-        field_map json "LaunchConfigurationARN" ResourceName.of_json in
+        field_map json__ "LaunchConfigurationARN" ResourceName.of_json in
       let launchConfigurationName =
-        field_map_exn json "LaunchConfigurationName"
-          XmlStringMaxLen255.of_json in
+        field_map json__ "LaunchConfigurationName" XmlStringMaxLen255.of_json in
       make ?metadataOptions ?placementTenancy ?associatePublicIpAddress
-        ?ebsOptimized ~createdTime ?iamInstanceProfile ?spotPrice
+        ?ebsOptimized ?createdTime ?iamInstanceProfile ?spotPrice
         ?instanceMonitoring ?blockDeviceMappings ?ramdiskId ?kernelId
-        ~instanceType ?userData ?classicLinkVPCSecurityGroups
-        ?classicLinkVPCId ?securityGroups ?keyName ~imageId
-        ?launchConfigurationARN ~launchConfigurationName ()
+        ?instanceType ?userData ?classicLinkVPCSecurityGroups
+        ?classicLinkVPCId ?securityGroups ?keyName ?imageId
+        ?launchConfigurationARN ?launchConfigurationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a launch configuration."]
 module LoadForecast =
   struct
     type nonrec t =
       {
-      timestamps: PredictiveScalingForecastTimestamps.t
+      timestamps: PredictiveScalingForecastTimestamps.t option
         [@ocaml.doc "The timestamps for the data points, in UTC format."];
-      values: PredictiveScalingForecastValues.t
+      values: PredictiveScalingForecastValues.t option
         [@ocaml.doc "The values of the data points."];
-      metricSpecification: PredictiveScalingMetricSpecification.t
+      metricSpecification: PredictiveScalingMetricSpecification.t option
         [@ocaml.doc "The metric specification for the load forecast."]}
-    let context_ = "LoadForecast"
-    let make ~timestamps =
-      fun ~values ->
-        fun ~metricSpecification ->
+    let make ?timestamps =
+      fun ?values ->
+        fun ?metricSpecification ->
           fun () -> { timestamps; values; metricSpecification }
     let to_value x =
       structure_to_value
         [("Timestamps",
-           (Some (PredictiveScalingForecastTimestamps.to_value x.timestamps)));
+           (Option.map x.timestamps
+              ~f:PredictiveScalingForecastTimestamps.to_value));
         ("Values",
-          (Some (PredictiveScalingForecastValues.to_value x.values)));
+          (Option.map x.values ~f:PredictiveScalingForecastValues.to_value));
         ("MetricSpecification",
-          (Some
-             (PredictiveScalingMetricSpecification.to_value
-                x.metricSpecification)))]
+          (Option.map x.metricSpecification
+             ~f:PredictiveScalingMetricSpecification.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let metricSpecification =
-        PredictiveScalingMetricSpecification.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MetricSpecification") in
+        (Option.map ~f:PredictiveScalingMetricSpecification.of_xml)
+          (Xml.child xml_arg0 "MetricSpecification") in
       let values =
-        PredictiveScalingForecastValues.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Values") in
+        (Option.map ~f:PredictiveScalingForecastValues.of_xml)
+          (Xml.child xml_arg0 "Values") in
       let timestamps =
-        PredictiveScalingForecastTimestamps.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Timestamps") in
-      make ~metricSpecification ~values ~timestamps ()
+        (Option.map ~f:PredictiveScalingForecastTimestamps.of_xml)
+          (Xml.child xml_arg0 "Timestamps") in
+      make ?metricSpecification ?values ?timestamps ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metricSpecification =
-        field_map_exn json "MetricSpecification"
+        field_map json__ "MetricSpecification"
           PredictiveScalingMetricSpecification.of_json in
       let values =
-        field_map_exn json "Values" PredictiveScalingForecastValues.of_json in
+        field_map json__ "Values" PredictiveScalingForecastValues.of_json in
       let timestamps =
-        field_map_exn json "Timestamps"
+        field_map json__ "Timestamps"
           PredictiveScalingForecastTimestamps.of_json in
-      make ~metricSpecification ~values ~timestamps ()
+      make ?metricSpecification ?values ?timestamps ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A GetPredictiveScalingForecast call returns the load forecast for a predictive scaling policy. This structure includes the data points for that load forecast, along with the timestamps of those data points and the metric specification."]
@@ -5950,18 +7810,18 @@ module Activity =
   struct
     type nonrec t =
       {
-      activityId: XmlString.t [@ocaml.doc "The ID of the activity."];
-      autoScalingGroupName: XmlStringMaxLen255.t
+      activityId: XmlString.t option [@ocaml.doc "The ID of the activity."];
+      autoScalingGroupName: XmlStringMaxLen255.t option
         [@ocaml.doc "The name of the Auto Scaling group."];
       description: XmlString.t option
         [@ocaml.doc "A friendly, more verbose description of the activity."];
-      cause: XmlStringMaxLen1023.t
+      cause: XmlStringMaxLen1023.t option
         [@ocaml.doc "The reason the activity began."];
-      startTime: TimestampType.t
+      startTime: TimestampType.t option
         [@ocaml.doc "The start time of the activity."];
       endTime: TimestampType.t option
         [@ocaml.doc "The end time of the activity."];
-      statusCode: ScalingActivityStatusCode.t
+      statusCode: ScalingActivityStatusCode.t option
         [@ocaml.doc "The current status of the activity."];
       statusMessage: XmlStringMaxLen255.t option
         [@ocaml.doc
@@ -5977,45 +7837,44 @@ module Activity =
       autoScalingGroupARN: ResourceName.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the Auto Scaling group."]}
-    let context_ = "Activity"
-    let make ?description =
-      fun ?endTime ->
-        fun ?statusMessage ->
-          fun ?progress ->
-            fun ?details ->
-              fun ?autoScalingGroupState ->
-                fun ?autoScalingGroupARN ->
-                  fun ~activityId ->
-                    fun ~autoScalingGroupName ->
-                      fun ~cause ->
-                        fun ~startTime ->
-                          fun ~statusCode ->
+    let make ?activityId =
+      fun ?autoScalingGroupName ->
+        fun ?description ->
+          fun ?cause ->
+            fun ?startTime ->
+              fun ?endTime ->
+                fun ?statusCode ->
+                  fun ?statusMessage ->
+                    fun ?progress ->
+                      fun ?details ->
+                        fun ?autoScalingGroupState ->
+                          fun ?autoScalingGroupARN ->
                             fun () ->
                               {
+                                activityId;
+                                autoScalingGroupName;
                                 description;
+                                cause;
+                                startTime;
                                 endTime;
+                                statusCode;
                                 statusMessage;
                                 progress;
                                 details;
                                 autoScalingGroupState;
-                                autoScalingGroupARN;
-                                activityId;
-                                autoScalingGroupName;
-                                cause;
-                                startTime;
-                                statusCode
+                                autoScalingGroupARN
                               }
     let to_value x =
       structure_to_value
-        [("ActivityId", (Some (XmlString.to_value x.activityId)));
+        [("ActivityId", (Option.map x.activityId ~f:XmlString.to_value));
         ("AutoScalingGroupName",
-          (Some (XmlStringMaxLen255.to_value x.autoScalingGroupName)));
+          (Option.map x.autoScalingGroupName ~f:XmlStringMaxLen255.to_value));
         ("Description", (Option.map x.description ~f:XmlString.to_value));
-        ("Cause", (Some (XmlStringMaxLen1023.to_value x.cause)));
-        ("StartTime", (Some (TimestampType.to_value x.startTime)));
+        ("Cause", (Option.map x.cause ~f:XmlStringMaxLen1023.to_value));
+        ("StartTime", (Option.map x.startTime ~f:TimestampType.to_value));
         ("EndTime", (Option.map x.endTime ~f:TimestampType.to_value));
         ("StatusCode",
-          (Some (ScalingActivityStatusCode.to_value x.statusCode)));
+          (Option.map x.statusCode ~f:ScalingActivityStatusCode.to_value));
         ("StatusMessage",
           (Option.map x.statusMessage ~f:XmlStringMaxLen255.to_value));
         ("Progress", (Option.map x.progress ~f:Progress.to_value));
@@ -6041,62 +7900,112 @@ module Activity =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "StatusMessage") in
       let statusCode =
-        ScalingActivityStatusCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StatusCode") in
+        (Option.map ~f:ScalingActivityStatusCode.of_xml)
+          (Xml.child xml_arg0 "StatusCode") in
       let endTime =
         (Option.map ~f:TimestampType.of_xml) (Xml.child xml_arg0 "EndTime") in
       let startTime =
-        TimestampType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StartTime") in
+        (Option.map ~f:TimestampType.of_xml) (Xml.child xml_arg0 "StartTime") in
       let cause =
-        XmlStringMaxLen1023.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Cause") in
+        (Option.map ~f:XmlStringMaxLen1023.of_xml)
+          (Xml.child xml_arg0 "Cause") in
       let description =
         (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "Description") in
       let autoScalingGroupName =
-        XmlStringMaxLen255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "AutoScalingGroupName") in
       let activityId =
-        XmlString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ActivityId") in
+        (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "ActivityId") in
       make ?autoScalingGroupARN ?autoScalingGroupState ?details ?progress
-        ?statusMessage ~statusCode ?endTime ~startTime ~cause ?description
-        ~autoScalingGroupName ~activityId ()
+        ?statusMessage ?statusCode ?endTime ?startTime ?cause ?description
+        ?autoScalingGroupName ?activityId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoScalingGroupARN =
-        field_map json "AutoScalingGroupARN" ResourceName.of_json in
+        field_map json__ "AutoScalingGroupARN" ResourceName.of_json in
       let autoScalingGroupState =
-        field_map json "AutoScalingGroupState" AutoScalingGroupState.of_json in
-      let details = field_map json "Details" XmlString.of_json in
-      let progress = field_map json "Progress" Progress.of_json in
+        field_map json__ "AutoScalingGroupState"
+          AutoScalingGroupState.of_json in
+      let details = field_map json__ "Details" XmlString.of_json in
+      let progress = field_map json__ "Progress" Progress.of_json in
       let statusMessage =
-        field_map json "StatusMessage" XmlStringMaxLen255.of_json in
+        field_map json__ "StatusMessage" XmlStringMaxLen255.of_json in
       let statusCode =
-        field_map_exn json "StatusCode" ScalingActivityStatusCode.of_json in
-      let endTime = field_map json "EndTime" TimestampType.of_json in
-      let startTime = field_map_exn json "StartTime" TimestampType.of_json in
-      let cause = field_map_exn json "Cause" XmlStringMaxLen1023.of_json in
-      let description = field_map json "Description" XmlString.of_json in
+        field_map json__ "StatusCode" ScalingActivityStatusCode.of_json in
+      let endTime = field_map json__ "EndTime" TimestampType.of_json in
+      let startTime = field_map json__ "StartTime" TimestampType.of_json in
+      let cause = field_map json__ "Cause" XmlStringMaxLen1023.of_json in
+      let description = field_map json__ "Description" XmlString.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
-      let activityId = field_map_exn json "ActivityId" XmlString.of_json in
+        field_map json__ "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+      let activityId = field_map json__ "ActivityId" XmlString.of_json in
       make ?autoScalingGroupARN ?autoScalingGroupState ?details ?progress
-        ?statusMessage ~statusCode ?endTime ~startTime ~cause ?description
-        ~autoScalingGroupName ~activityId ()
+        ?statusMessage ?statusCode ?endTime ?startTime ?cause ?description
+        ?autoScalingGroupName ?activityId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes scaling activity, which is a long-running process that represents a change to your Auto Scaling group, such as changing its size or replacing an instance."]
+module TrafficSourceState =
+  struct
+    type nonrec t =
+      {
+      trafficSource: XmlStringMaxLen511.t option
+        [@ocaml.doc "This is replaced by Identifier."];
+      state: XmlStringMaxLen255.t option
+        [@ocaml.doc
+          "Describes the current state of a traffic source. The state values are as follows: Adding - The Auto Scaling instances are being registered with the load balancer or target group. Added - All Auto Scaling instances are registered with the load balancer or target group. InService - For an Elastic Load Balancing load balancer or target group, at least one Auto Scaling instance passed an ELB health check. For VPC Lattice, at least one Auto Scaling instance passed an VPC_LATTICE health check. Removing - The Auto Scaling instances are being deregistered from the load balancer or target group. If connection draining (deregistration delay) is enabled, Elastic Load Balancing or VPC Lattice waits for in-flight requests to complete before deregistering the instances. Removed - All Auto Scaling instances are deregistered from the load balancer or target group."];
+      identifier: XmlStringMaxLen511.t option
+        [@ocaml.doc "The unique identifier of the traffic source."];
+      type_: XmlStringMaxLen511.t option
+        [@ocaml.doc
+          "Provides additional context for the value of Identifier. The following lists the valid values: elb if Identifier is the name of a Classic Load Balancer. elbv2 if Identifier is the ARN of an Application Load Balancer, Gateway Load Balancer, or Network Load Balancer target group. vpc-lattice if Identifier is the ARN of a VPC Lattice target group. Required if the identifier is the name of a Classic Load Balancer."]}
+    let make ?trafficSource =
+      fun ?state ->
+        fun ?identifier ->
+          fun ?type_ -> fun () -> { trafficSource; state; identifier; type_ }
+    let to_value x =
+      structure_to_value
+        [("TrafficSource",
+           (Option.map x.trafficSource ~f:XmlStringMaxLen511.to_value));
+        ("State", (Option.map x.state ~f:XmlStringMaxLen255.to_value));
+        ("Identifier",
+          (Option.map x.identifier ~f:XmlStringMaxLen511.to_value));
+        ("Type", (Option.map x.type_ ~f:XmlStringMaxLen511.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:XmlStringMaxLen511.of_xml) (Xml.child xml_arg0 "Type") in
+      let identifier =
+        (Option.map ~f:XmlStringMaxLen511.of_xml)
+          (Xml.child xml_arg0 "Identifier") in
+      let state =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "State") in
+      let trafficSource =
+        (Option.map ~f:XmlStringMaxLen511.of_xml)
+          (Xml.child xml_arg0 "TrafficSource") in
+      make ?type_ ?identifier ?state ?trafficSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" XmlStringMaxLen511.of_json in
+      let identifier =
+        field_map json__ "Identifier" XmlStringMaxLen511.of_json in
+      let state = field_map json__ "State" XmlStringMaxLen255.of_json in
+      let trafficSource =
+        field_map json__ "TrafficSource" XmlStringMaxLen511.of_json in
+      make ?type_ ?identifier ?state ?trafficSource ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the state of a traffic source."]
 module Filter =
   struct
     type nonrec t =
       {
       name: XmlString.t option
         [@ocaml.doc
-          "The name of the filter. The valid values for Name depend on which API operation you're using with the filter (DescribeAutoScalingGroups or DescribeTags). DescribeAutoScalingGroups Valid values for Name include the following: tag-key - Accepts tag keys. The results only include information about the Auto Scaling groups associated with these tag keys. tag-value - Accepts tag values. The results only include information about the Auto Scaling groups associated with these tag values. tag:<key> - Accepts the key/value combination of the tag. Use the tag key in the filter name and the tag value as the filter value. The results only include information about the Auto Scaling groups associated with the specified key/value combination. DescribeTags Valid values for Name include the following: auto-scaling-group - Accepts the names of Auto Scaling groups. The results only include information about the tags associated with these Auto Scaling groups. key - Accepts tag keys. The results only include information about the tags associated with these tag keys. value - Accepts tag values. The results only include information about the tags associated with these tag values. propagate-at-launch - Accepts a Boolean value, which specifies whether tags propagate to instances at launch. The results only include information about the tags associated with the specified Boolean value."];
+          "The name of the filter. The valid values for Name depend on which API operation you're using with the filter. DescribeAutoScalingGroups Valid values for Name include the following: tag-key - Accepts tag keys. The results only include information about the Auto Scaling groups associated with these tag keys. tag-value - Accepts tag values. The results only include information about the Auto Scaling groups associated with these tag values. tag:<key> - Accepts the key/value combination of the tag. Use the tag key in the filter name and the tag value as the filter value. The results only include information about the Auto Scaling groups associated with the specified key/value combination. DescribeTags Valid values for Name include the following: auto-scaling-group - Accepts the names of Auto Scaling groups. The results only include information about the tags associated with these Auto Scaling groups. key - Accepts tag keys. The results only include information about the tags associated with these tag keys. value - Accepts tag values. The results only include information about the tags associated with these tag values. propagate-at-launch - Accepts a Boolean value, which specifies whether tags propagate to instances at launch. The results only include information about the tags associated with the specified Boolean value. DescribeScalingActivities Valid values for Name include the following: StartTimeLowerBound - The earliest scaling activities to return based on the activity start time. Scaling activities with a start time earlier than this value are not included in the results. Only activities started within the last six weeks can be returned regardless of the value specified. StartTimeUpperBound - The latest scaling activities to return based on the activity start time. Scaling activities with a start time later than this value are not included in the results. Only activities started within the last six weeks can be returned regardless of the value specified. Status - The StatusCode value of the scaling activity. This filter can only be used in combination with the AutoScalingGroupName parameter. For valid StatusCode values, see Activity in the Amazon EC2 Auto Scaling API Reference. StartTimeLowerBound and StartTimeUpperBound accept ISO 8601 formatted timestamps. Timestamps without a timezone offset are assumed to be UTC. 2000-01-18T08:15:00Z 2000-01-18T16:15:00+08:00"];
       values: Values.t option
         [@ocaml.doc
-          "One or more filter values. Filter values are case-sensitive. If you specify multiple values for a filter, the values are automatically logically joined with an OR, and the request returns all results that match any of the specified values. For example, specify \"tag:environment\" for the filter name and \"production,development\" for the filter values to find Auto Scaling groups with the tag \"environment=production\" or \"environment=development\"."]}
+          "One or more filter values. Filter values are case-sensitive. If you specify multiple values for a filter, the values are automatically logically joined with an OR, and the request returns all results that match any of the specified values. DescribeAutoScalingGroups example: Specify \"tag:environment\" for the filter name and \"production,development\" for the filter values to find Auto Scaling groups with the tag \"environment=production\" or \"environment=development\". DescribeScalingActivities example: Specify \"Status\" for the filter name and \"Successful,Failed\" for the filter values to find scaling activities with a status of either \"Successful\" or \"Failed\"."]}
     let make ?name = fun ?values -> fun () -> { name; values }
     let to_value x =
       structure_to_value
@@ -6109,13 +8018,13 @@ module Filter =
       let name = (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" Values.of_json in
-      let name = field_map json "Name" XmlString.of_json in
+    let of_json json__ =
+      let values = field_map json__ "Values" Values.of_json in
+      let name = field_map json__ "Name" XmlString.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes a filter that is used to return a more specific list of results from a describe operation. If you specify multiple filters, the filters are automatically logically joined with an AND, and the request returns only the results that match all of the specified filters. For more information, see Tagging Auto Scaling groups and instances in the Amazon EC2 Auto Scaling User Guide."]
+       "Describes a filter that is used to return a more specific list of results from a describe operation. If you specify multiple filters, the filters are automatically logically joined with an AND, and the request returns only the results that match all of the specified filters. For more information, see Tag Auto Scaling groups and instances in the Amazon EC2 Auto Scaling User Guide."]
 module NotificationConfiguration =
   struct
     type nonrec t =
@@ -6152,12 +8061,12 @@ module NotificationConfiguration =
           (Xml.child xml_arg0 "AutoScalingGroupName") in
       make ?notificationType ?topicARN ?autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let notificationType =
-        field_map json "NotificationType" XmlStringMaxLen255.of_json in
-      let topicARN = field_map json "TopicARN" XmlStringMaxLen255.of_json in
+        field_map json__ "NotificationType" XmlStringMaxLen255.of_json in
+      let topicARN = field_map json__ "TopicARN" XmlStringMaxLen255.of_json in
       let autoScalingGroupName =
-        field_map json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map json__ "AutoScalingGroupName" XmlStringMaxLen255.of_json in
       make ?notificationType ?topicARN ?autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a notification."]
@@ -6179,8 +8088,8 @@ module MetricCollectionType =
           (Xml.child xml_arg0 "Metric") in
       make ?metric ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metric = field_map json "Metric" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let metric = field_map json__ "Metric" XmlStringMaxLen255.of_json in
       make ?metric ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a metric."]
@@ -6202,9 +8111,9 @@ module MetricGranularityType =
           (Xml.child xml_arg0 "Granularity") in
       make ?granularity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let granularity =
-        field_map json "Granularity" XmlStringMaxLen255.of_json in
+        field_map json__ "Granularity" XmlStringMaxLen255.of_json in
       make ?granularity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a granularity of a metric."]
@@ -6234,10 +8143,10 @@ module LoadBalancerState =
           (Xml.child xml_arg0 "LoadBalancerName") in
       make ?state ?loadBalancerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" XmlStringMaxLen255.of_json in
       let loadBalancerName =
-        field_map json "LoadBalancerName" XmlStringMaxLen255.of_json in
+        field_map json__ "LoadBalancerName" XmlStringMaxLen255.of_json in
       make ?state ?loadBalancerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the state of a Classic Load Balancer."]
@@ -6268,10 +8177,10 @@ module LoadBalancerTargetGroupState =
           (Xml.child xml_arg0 "LoadBalancerTargetGroupARN") in
       make ?state ?loadBalancerTargetGroupARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" XmlStringMaxLen255.of_json in
       let loadBalancerTargetGroupARN =
-        field_map json "LoadBalancerTargetGroupARN"
+        field_map json__ "LoadBalancerTargetGroupARN"
           XmlStringMaxLen511.of_json in
       make ?state ?loadBalancerTargetGroupARN ()
     let to_json v = composed_to_json to_value v
@@ -6287,25 +8196,25 @@ module LifecycleHook =
           "The name of the Auto Scaling group for the lifecycle hook."];
       lifecycleTransition: LifecycleTransition.t option
         [@ocaml.doc
-          "The state of the EC2 instance to which to attach the lifecycle hook. The following are possible values: autoscaling:EC2_INSTANCE_LAUNCHING autoscaling:EC2_INSTANCE_TERMINATING"];
+          "The lifecycle transition. Valid values: autoscaling:EC2_INSTANCE_LAUNCHING | autoscaling:EC2_INSTANCE_TERMINATING"];
       notificationTargetARN: NotificationTargetResourceName.t option
         [@ocaml.doc
-          "The ARN of the target that Amazon EC2 Auto Scaling sends notifications to when an instance is in the transition state for the lifecycle hook. The notification target can be either an SQS queue or an SNS topic."];
+          "The ARN of the target that Amazon EC2 Auto Scaling sends notifications to when an instance is in a wait state for the lifecycle hook."];
       roleARN: XmlStringMaxLen255.t option
         [@ocaml.doc
           "The ARN of the IAM role that allows the Auto Scaling group to publish to the specified notification target (an Amazon SNS topic or an Amazon SQS queue)."];
-      notificationMetadata: XmlStringMaxLen1023.t option
+      notificationMetadata: AnyPrintableAsciiStringMaxLen4000.t option
         [@ocaml.doc
           "Additional information that is included any time Amazon EC2 Auto Scaling sends a message to the notification target."];
       heartbeatTimeout: HeartbeatTimeout.t option
         [@ocaml.doc
-          "The maximum time, in seconds, that can elapse before the lifecycle hook times out. If the lifecycle hook times out, Amazon EC2 Auto Scaling performs the action that you specified in the DefaultResult parameter."];
+          "The maximum time, in seconds, that can elapse before the lifecycle hook times out. If the lifecycle hook times out, Amazon EC2 Auto Scaling performs the action that you specified in the DefaultResult property."];
       globalTimeout: GlobalTimeout.t option
         [@ocaml.doc
-          "The maximum time, in seconds, that an instance can remain in a Pending:Wait or Terminating:Wait state. The maximum is 172800 seconds (48 hours) or 100 times HeartbeatTimeout, whichever is smaller."];
+          "The maximum time, in seconds, that an instance can remain in a wait state. The maximum is 172800 seconds (48 hours) or 100 times HeartbeatTimeout, whichever is smaller."];
       defaultResult: LifecycleActionResult.t option
         [@ocaml.doc
-          "Defines the action the Auto Scaling group should take when the lifecycle hook timeout elapses or if an unexpected failure occurs. The possible values are CONTINUE and ABANDON."]}
+          "The action the Auto Scaling group takes when the lifecycle hook timeout elapses or if an unexpected failure occurs. Valid values: CONTINUE | ABANDON"]}
     let make ?lifecycleHookName =
       fun ?autoScalingGroupName ->
         fun ?lifecycleTransition ->
@@ -6340,7 +8249,8 @@ module LifecycleHook =
              ~f:NotificationTargetResourceName.to_value));
         ("RoleARN", (Option.map x.roleARN ~f:XmlStringMaxLen255.to_value));
         ("NotificationMetadata",
-          (Option.map x.notificationMetadata ~f:XmlStringMaxLen1023.to_value));
+          (Option.map x.notificationMetadata
+             ~f:AnyPrintableAsciiStringMaxLen4000.to_value));
         ("HeartbeatTimeout",
           (Option.map x.heartbeatTimeout ~f:HeartbeatTimeout.to_value));
         ("GlobalTimeout",
@@ -6359,7 +8269,7 @@ module LifecycleHook =
         (Option.map ~f:HeartbeatTimeout.of_xml)
           (Xml.child xml_arg0 "HeartbeatTimeout") in
       let notificationMetadata =
-        (Option.map ~f:XmlStringMaxLen1023.of_xml)
+        (Option.map ~f:AnyPrintableAsciiStringMaxLen4000.of_xml)
           (Xml.child xml_arg0 "NotificationMetadata") in
       let roleARN =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
@@ -6380,25 +8290,26 @@ module LifecycleHook =
         ?notificationMetadata ?roleARN ?notificationTargetARN
         ?lifecycleTransition ?autoScalingGroupName ?lifecycleHookName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultResult =
-        field_map json "DefaultResult" LifecycleActionResult.of_json in
+        field_map json__ "DefaultResult" LifecycleActionResult.of_json in
       let globalTimeout =
-        field_map json "GlobalTimeout" GlobalTimeout.of_json in
+        field_map json__ "GlobalTimeout" GlobalTimeout.of_json in
       let heartbeatTimeout =
-        field_map json "HeartbeatTimeout" HeartbeatTimeout.of_json in
+        field_map json__ "HeartbeatTimeout" HeartbeatTimeout.of_json in
       let notificationMetadata =
-        field_map json "NotificationMetadata" XmlStringMaxLen1023.of_json in
-      let roleARN = field_map json "RoleARN" XmlStringMaxLen255.of_json in
+        field_map json__ "NotificationMetadata"
+          AnyPrintableAsciiStringMaxLen4000.of_json in
+      let roleARN = field_map json__ "RoleARN" XmlStringMaxLen255.of_json in
       let notificationTargetARN =
-        field_map json "NotificationTargetARN"
+        field_map json__ "NotificationTargetARN"
           NotificationTargetResourceName.of_json in
       let lifecycleTransition =
-        field_map json "LifecycleTransition" LifecycleTransition.of_json in
+        field_map json__ "LifecycleTransition" LifecycleTransition.of_json in
       let autoScalingGroupName =
-        field_map json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map json__ "AutoScalingGroupName" XmlStringMaxLen255.of_json in
       let lifecycleHookName =
-        field_map json "LifecycleHookName" AsciiStringMaxLen255.of_json in
+        field_map json__ "LifecycleHookName" AsciiStringMaxLen255.of_json in
       make ?defaultResult ?globalTimeout ?heartbeatTimeout
         ?notificationMetadata ?roleARN ?notificationTargetARN
         ?lifecycleTransition ?autoScalingGroupName ?lifecycleHookName ()
@@ -6415,26 +8326,33 @@ module InstanceRefresh =
         [@ocaml.doc "The name of the Auto Scaling group."];
       status: InstanceRefreshStatus.t option
         [@ocaml.doc
-          "The current status for the instance refresh operation: Pending - The request was created, but the operation has not started. InProgress - The operation is in progress. Successful - The operation completed successfully. Failed - The operation failed to complete. You can troubleshoot using the status reason and the scaling activities. Cancelling - An ongoing operation is being cancelled. Cancellation does not roll back any replacements that have already been completed, but it prevents new replacements from being started. Cancelled - The operation is cancelled."];
+          "The current status for the instance refresh operation: Pending - The request was created, but the instance refresh has not started. InProgress - An instance refresh is in progress. Successful - An instance refresh completed successfully. Failed - An instance refresh failed to complete. You can troubleshoot using the status reason and the scaling activities. Cancelling - An ongoing instance refresh is being cancelled. Cancelled - The instance refresh is cancelled. RollbackInProgress - An instance refresh is being rolled back. RollbackFailed - The rollback failed to complete. You can troubleshoot using the status reason and the scaling activities. RollbackSuccessful - The rollback completed successfully. Baking - Waiting the specified bake time after an instance refresh has finished updating instances."];
       statusReason: XmlStringMaxLen1023.t option
         [@ocaml.doc
-          "Provides more details about the current status of the instance refresh."];
+          "The explanation for the specific status assigned to this operation."];
       startTime: TimestampType.t option
         [@ocaml.doc "The date and time at which the instance refresh began."];
       endTime: TimestampType.t option
         [@ocaml.doc "The date and time at which the instance refresh ended."];
       percentageComplete: IntPercent.t option
         [@ocaml.doc
-          "The percentage of the instance refresh that is complete. For each instance replacement, Amazon EC2 Auto Scaling tracks the instance's health status and warm-up time. When the instance's health status changes to healthy and the specified warm-up time passes, the instance is considered updated and is added to the percentage complete."];
+          "The percentage of the instance refresh that is complete. For each instance replacement, Amazon EC2 Auto Scaling tracks the instance's health status and warm-up time. When the instance's health status changes to healthy and the specified warm-up time passes, the instance is considered updated and is added to the percentage complete. PercentageComplete does not include instances that are replaced during a rollback. This value gradually goes back down to zero during a rollback."];
       instancesToUpdate: InstancesToUpdate.t option
         [@ocaml.doc
-          "The number of instances remaining to update before the instance refresh is complete."];
+          "The number of instances remaining to update before the instance refresh is complete. If you roll back the instance refresh, InstancesToUpdate shows you the number of instances that were not yet updated by the instance refresh. Therefore, these instances don't need to be replaced as part of the rollback."];
       progressDetails: InstanceRefreshProgressDetails.t option
         [@ocaml.doc
           "Additional progress details for an Auto Scaling group that has a warm pool."];
-      preferences: RefreshPreferences.t option ;
+      preferences: RefreshPreferences.t option
+        [@ocaml.doc "The preferences for an instance refresh."];
       desiredConfiguration: DesiredConfiguration.t option
-        [@ocaml.doc "Describes the specific update you want to deploy."]}
+        [@ocaml.doc
+          "Describes the desired configuration for the instance refresh."];
+      rollbackDetails: RollbackDetails.t option
+        [@ocaml.doc "The rollback details."];
+      strategy: RefreshStrategy.t option
+        [@ocaml.doc
+          "The strategy to use for the instance refresh. This determines how instances in the Auto Scaling group are updated. Default is Rolling. Rolling \226\128\147 Terminates instances and launches replacements in batches ReplaceRootVolume \226\128\147 Updates instances by replacing only the root volume without terminating the instance"]}
     let make ?instanceRefreshId =
       fun ?autoScalingGroupName ->
         fun ?status ->
@@ -6446,20 +8364,24 @@ module InstanceRefresh =
                     fun ?progressDetails ->
                       fun ?preferences ->
                         fun ?desiredConfiguration ->
-                          fun () ->
-                            {
-                              instanceRefreshId;
-                              autoScalingGroupName;
-                              status;
-                              statusReason;
-                              startTime;
-                              endTime;
-                              percentageComplete;
-                              instancesToUpdate;
-                              progressDetails;
-                              preferences;
-                              desiredConfiguration
-                            }
+                          fun ?rollbackDetails ->
+                            fun ?strategy ->
+                              fun () ->
+                                {
+                                  instanceRefreshId;
+                                  autoScalingGroupName;
+                                  status;
+                                  statusReason;
+                                  startTime;
+                                  endTime;
+                                  percentageComplete;
+                                  instancesToUpdate;
+                                  progressDetails;
+                                  preferences;
+                                  desiredConfiguration;
+                                  rollbackDetails;
+                                  strategy
+                                }
     let to_value x =
       structure_to_value
         [("InstanceRefreshId",
@@ -6481,9 +8403,18 @@ module InstanceRefresh =
         ("Preferences",
           (Option.map x.preferences ~f:RefreshPreferences.to_value));
         ("DesiredConfiguration",
-          (Option.map x.desiredConfiguration ~f:DesiredConfiguration.to_value))]
+          (Option.map x.desiredConfiguration ~f:DesiredConfiguration.to_value));
+        ("RollbackDetails",
+          (Option.map x.rollbackDetails ~f:RollbackDetails.to_value));
+        ("Strategy", (Option.map x.strategy ~f:RefreshStrategy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let strategy =
+        (Option.map ~f:RefreshStrategy.of_xml)
+          (Xml.child xml_arg0 "Strategy") in
+      let rollbackDetails =
+        (Option.map ~f:RollbackDetails.of_xml)
+          (Xml.child xml_arg0 "RollbackDetails") in
       let desiredConfiguration =
         (Option.map ~f:DesiredConfiguration.of_xml)
           (Xml.child xml_arg0 "DesiredConfiguration") in
@@ -6515,34 +8446,39 @@ module InstanceRefresh =
       let instanceRefreshId =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "InstanceRefreshId") in
-      make ?desiredConfiguration ?preferences ?progressDetails
-        ?instancesToUpdate ?percentageComplete ?endTime ?startTime
-        ?statusReason ?status ?autoScalingGroupName ?instanceRefreshId ()
+      make ?strategy ?rollbackDetails ?desiredConfiguration ?preferences
+        ?progressDetails ?instancesToUpdate ?percentageComplete ?endTime
+        ?startTime ?statusReason ?status ?autoScalingGroupName
+        ?instanceRefreshId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let strategy = field_map json__ "Strategy" RefreshStrategy.of_json in
+      let rollbackDetails =
+        field_map json__ "RollbackDetails" RollbackDetails.of_json in
       let desiredConfiguration =
-        field_map json "DesiredConfiguration" DesiredConfiguration.of_json in
+        field_map json__ "DesiredConfiguration" DesiredConfiguration.of_json in
       let preferences =
-        field_map json "Preferences" RefreshPreferences.of_json in
+        field_map json__ "Preferences" RefreshPreferences.of_json in
       let progressDetails =
-        field_map json "ProgressDetails"
+        field_map json__ "ProgressDetails"
           InstanceRefreshProgressDetails.of_json in
       let instancesToUpdate =
-        field_map json "InstancesToUpdate" InstancesToUpdate.of_json in
+        field_map json__ "InstancesToUpdate" InstancesToUpdate.of_json in
       let percentageComplete =
-        field_map json "PercentageComplete" IntPercent.of_json in
-      let endTime = field_map json "EndTime" TimestampType.of_json in
-      let startTime = field_map json "StartTime" TimestampType.of_json in
+        field_map json__ "PercentageComplete" IntPercent.of_json in
+      let endTime = field_map json__ "EndTime" TimestampType.of_json in
+      let startTime = field_map json__ "StartTime" TimestampType.of_json in
       let statusReason =
-        field_map json "StatusReason" XmlStringMaxLen1023.of_json in
-      let status = field_map json "Status" InstanceRefreshStatus.of_json in
+        field_map json__ "StatusReason" XmlStringMaxLen1023.of_json in
+      let status = field_map json__ "Status" InstanceRefreshStatus.of_json in
       let autoScalingGroupName =
-        field_map json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map json__ "AutoScalingGroupName" XmlStringMaxLen255.of_json in
       let instanceRefreshId =
-        field_map json "InstanceRefreshId" XmlStringMaxLen255.of_json in
-      make ?desiredConfiguration ?preferences ?progressDetails
-        ?instancesToUpdate ?percentageComplete ?endTime ?startTime
-        ?statusReason ?status ?autoScalingGroupName ?instanceRefreshId ()
+        field_map json__ "InstanceRefreshId" XmlStringMaxLen255.of_json in
+      make ?strategy ?rollbackDetails ?desiredConfiguration ?preferences
+        ?progressDetails ?instancesToUpdate ?percentageComplete ?endTime
+        ?startTime ?statusReason ?status ?autoScalingGroupName
+        ?instanceRefreshId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an instance refresh for an Auto Scaling group."]
 module AdjustmentType =
@@ -6564,9 +8500,9 @@ module AdjustmentType =
           (Xml.child xml_arg0 "AdjustmentType") in
       make ?adjustmentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let adjustmentType =
-        field_map json "AdjustmentType" XmlStringMaxLen255.of_json in
+        field_map json__ "AdjustmentType" XmlStringMaxLen255.of_json in
       make ?adjustmentType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a policy adjustment type."]
@@ -6615,13 +8551,13 @@ module Tag =
         (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "ResourceId") in
       make ?propagateAtLaunch ?value ~key ?resourceType ?resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let propagateAtLaunch =
-        field_map json "PropagateAtLaunch" PropagateAtLaunch.of_json in
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
-      let resourceType = field_map json "ResourceType" XmlString.of_json in
-      let resourceId = field_map json "ResourceId" XmlString.of_json in
+        field_map json__ "PropagateAtLaunch" PropagateAtLaunch.of_json in
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
+      let resourceType = field_map json__ "ResourceType" XmlString.of_json in
+      let resourceId = field_map json__ "ResourceId" XmlString.of_json in
       make ?propagateAtLaunch ?value ~key ?resourceType ?resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a tag for an Auto Scaling group."]
@@ -6633,22 +8569,22 @@ module LifecycleHookSpecification =
         [@ocaml.doc "The name of the lifecycle hook."];
       lifecycleTransition: LifecycleTransition.t
         [@ocaml.doc
-          "The state of the EC2 instance to which you want to attach the lifecycle hook. The valid values are: autoscaling:EC2_INSTANCE_LAUNCHING autoscaling:EC2_INSTANCE_TERMINATING"];
-      notificationMetadata: XmlStringMaxLen1023.t option
+          "The lifecycle transition. For Auto Scaling groups, there are two major lifecycle transitions. To create a lifecycle hook for scale-out events, specify autoscaling:EC2_INSTANCE_LAUNCHING. To create a lifecycle hook for scale-in events, specify autoscaling:EC2_INSTANCE_TERMINATING."];
+      notificationMetadata: AnyPrintableAsciiStringMaxLen4000.t option
         [@ocaml.doc
           "Additional information that you want to include any time Amazon EC2 Auto Scaling sends a message to the notification target."];
       heartbeatTimeout: HeartbeatTimeout.t option
         [@ocaml.doc
-          "The maximum time, in seconds, that can elapse before the lifecycle hook times out. If the lifecycle hook times out, Amazon EC2 Auto Scaling performs the action that you specified in the DefaultResult parameter. You can prevent the lifecycle hook from timing out by calling RecordLifecycleActionHeartbeat."];
+          "The maximum time, in seconds, that can elapse before the lifecycle hook times out. The range is from 30 to 7200 seconds. The default value is 3600 seconds (1 hour)."];
       defaultResult: LifecycleActionResult.t option
         [@ocaml.doc
-          "Defines the action the Auto Scaling group should take when the lifecycle hook timeout elapses or if an unexpected failure occurs. The valid values are CONTINUE and ABANDON. The default value is ABANDON."];
+          "The action the Auto Scaling group takes when the lifecycle hook timeout elapses or if an unexpected failure occurs. The default value is ABANDON. Valid values: CONTINUE | ABANDON"];
       notificationTargetARN: NotificationTargetResourceName.t option
         [@ocaml.doc
-          "The ARN of the target that Amazon EC2 Auto Scaling sends notifications to when an instance is in the transition state for the lifecycle hook. The notification target can be either an SQS queue or an SNS topic."];
+          "The Amazon Resource Name (ARN) of the notification target that Amazon EC2 Auto Scaling sends notifications to when an instance is in a wait state for the lifecycle hook. You can specify an Amazon SNS topic or an Amazon SQS queue."];
       roleARN: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "The ARN of the IAM role that allows the Auto Scaling group to publish to the specified notification target. Valid only if the notification target is an Amazon SNS topic or an Amazon SQS queue. Required for new lifecycle hooks, but optional when updating existing hooks."]}
+          "The ARN of the IAM role that allows the Auto Scaling group to publish to the specified notification target. For information about creating this role, see Prepare to add a lifecycle hook to your Auto Scaling group in the Amazon EC2 Auto Scaling User Guide. Valid only if the notification target is an Amazon SNS topic or an Amazon SQS queue."]}
     let context_ = "LifecycleHookSpecification"
     let make ?notificationMetadata =
       fun ?heartbeatTimeout ->
@@ -6674,7 +8610,8 @@ module LifecycleHookSpecification =
         ("LifecycleTransition",
           (Some (LifecycleTransition.to_value x.lifecycleTransition)));
         ("NotificationMetadata",
-          (Option.map x.notificationMetadata ~f:XmlStringMaxLen1023.to_value));
+          (Option.map x.notificationMetadata
+             ~f:AnyPrintableAsciiStringMaxLen4000.to_value));
         ("HeartbeatTimeout",
           (Option.map x.heartbeatTimeout ~f:HeartbeatTimeout.to_value));
         ("DefaultResult",
@@ -6698,7 +8635,7 @@ module LifecycleHookSpecification =
         (Option.map ~f:HeartbeatTimeout.of_xml)
           (Xml.child xml_arg0 "HeartbeatTimeout") in
       let notificationMetadata =
-        (Option.map ~f:XmlStringMaxLen1023.of_xml)
+        (Option.map ~f:AnyPrintableAsciiStringMaxLen4000.of_xml)
           (Xml.child xml_arg0 "NotificationMetadata") in
       let lifecycleTransition =
         LifecycleTransition.of_xml
@@ -6709,21 +8646,23 @@ module LifecycleHookSpecification =
       make ?roleARN ?notificationTargetARN ?defaultResult ?heartbeatTimeout
         ?notificationMetadata ~lifecycleTransition ~lifecycleHookName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map json "RoleARN" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let roleARN = field_map json__ "RoleARN" XmlStringMaxLen255.of_json in
       let notificationTargetARN =
-        field_map json "NotificationTargetARN"
+        field_map json__ "NotificationTargetARN"
           NotificationTargetResourceName.of_json in
       let defaultResult =
-        field_map json "DefaultResult" LifecycleActionResult.of_json in
+        field_map json__ "DefaultResult" LifecycleActionResult.of_json in
       let heartbeatTimeout =
-        field_map json "HeartbeatTimeout" HeartbeatTimeout.of_json in
+        field_map json__ "HeartbeatTimeout" HeartbeatTimeout.of_json in
       let notificationMetadata =
-        field_map json "NotificationMetadata" XmlStringMaxLen1023.of_json in
+        field_map json__ "NotificationMetadata"
+          AnyPrintableAsciiStringMaxLen4000.of_json in
       let lifecycleTransition =
-        field_map_exn json "LifecycleTransition" LifecycleTransition.of_json in
+        field_map_exn json__ "LifecycleTransition"
+          LifecycleTransition.of_json in
       let lifecycleHookName =
-        field_map_exn json "LifecycleHookName" AsciiStringMaxLen255.of_json in
+        field_map_exn json__ "LifecycleHookName" AsciiStringMaxLen255.of_json in
       make ?roleARN ?notificationTargetARN ?defaultResult ?heartbeatTimeout
         ?notificationMetadata ~lifecycleTransition ~lifecycleHookName ()
     let to_json v = composed_to_json to_value v
@@ -6817,18 +8756,21 @@ module ScheduledUpdateGroupActionRequest =
       make ?timeZone ?desiredCapacity ?maxSize ?minSize ?recurrence ?endTime
         ?startTime ~scheduledActionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeZone = field_map json "TimeZone" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let timeZone = field_map json__ "TimeZone" XmlStringMaxLen255.of_json in
       let desiredCapacity =
-        field_map json "DesiredCapacity"
+        field_map json__ "DesiredCapacity"
           AutoScalingGroupDesiredCapacity.of_json in
-      let maxSize = field_map json "MaxSize" AutoScalingGroupMaxSize.of_json in
-      let minSize = field_map json "MinSize" AutoScalingGroupMinSize.of_json in
-      let recurrence = field_map json "Recurrence" XmlStringMaxLen255.of_json in
-      let endTime = field_map json "EndTime" TimestampType.of_json in
-      let startTime = field_map json "StartTime" TimestampType.of_json in
+      let maxSize =
+        field_map json__ "MaxSize" AutoScalingGroupMaxSize.of_json in
+      let minSize =
+        field_map json__ "MinSize" AutoScalingGroupMinSize.of_json in
+      let recurrence =
+        field_map json__ "Recurrence" XmlStringMaxLen255.of_json in
+      let endTime = field_map json__ "EndTime" TimestampType.of_json in
+      let startTime = field_map json__ "StartTime" TimestampType.of_json in
       let scheduledActionName =
-        field_map_exn json "ScheduledActionName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "ScheduledActionName" XmlStringMaxLen255.of_json in
       make ?timeZone ?desiredCapacity ?maxSize ?minSize ?recurrence ?endTime
         ?startTime ~scheduledActionName ()
     let to_json v = composed_to_json to_value v
@@ -6838,20 +8780,19 @@ module FailedScheduledUpdateGroupActionRequest =
   struct
     type nonrec t =
       {
-      scheduledActionName: XmlStringMaxLen255.t
+      scheduledActionName: XmlStringMaxLen255.t option
         [@ocaml.doc "The name of the scheduled action."];
       errorCode: XmlStringMaxLen64.t option [@ocaml.doc "The error code."];
       errorMessage: XmlString.t option
         [@ocaml.doc "The error message accompanying the error code."]}
-    let context_ = "FailedScheduledUpdateGroupActionRequest"
-    let make ?errorCode =
-      fun ?errorMessage ->
-        fun ~scheduledActionName ->
-          fun () -> { errorCode; errorMessage; scheduledActionName }
+    let make ?scheduledActionName =
+      fun ?errorCode ->
+        fun ?errorMessage ->
+          fun () -> { scheduledActionName; errorCode; errorMessage }
     let to_value x =
       structure_to_value
         [("ScheduledActionName",
-           (Some (XmlStringMaxLen255.to_value x.scheduledActionName)));
+           (Option.map x.scheduledActionName ~f:XmlStringMaxLen255.to_value));
         ("ErrorCode", (Option.map x.errorCode ~f:XmlStringMaxLen64.to_value));
         ("ErrorMessage", (Option.map x.errorMessage ~f:XmlString.to_value))]
     let to_query v = to_query to_value v
@@ -6862,16 +8803,16 @@ module FailedScheduledUpdateGroupActionRequest =
         (Option.map ~f:XmlStringMaxLen64.of_xml)
           (Xml.child xml_arg0 "ErrorCode") in
       let scheduledActionName =
-        XmlStringMaxLen255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScheduledActionName") in
-      make ?errorMessage ?errorCode ~scheduledActionName ()
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "ScheduledActionName") in
+      make ?errorMessage ?errorCode ?scheduledActionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" XmlString.of_json in
-      let errorCode = field_map json "ErrorCode" XmlStringMaxLen64.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" XmlString.of_json in
+      let errorCode = field_map json__ "ErrorCode" XmlStringMaxLen64.of_json in
       let scheduledActionName =
-        field_map_exn json "ScheduledActionName" XmlStringMaxLen255.of_json in
-      make ?errorMessage ?errorCode ~scheduledActionName ()
+        field_map json__ "ScheduledActionName" XmlStringMaxLen255.of_json in
+      make ?errorMessage ?errorCode ?scheduledActionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a scheduled action that could not be created, updated, or deleted."]
@@ -6879,74 +8820,89 @@ module AutoScalingInstanceDetails =
   struct
     type nonrec t =
       {
-      instanceId: XmlStringMaxLen19.t [@ocaml.doc "The ID of the instance."];
+      instanceId: XmlStringMaxLen19.t option
+        [@ocaml.doc "The ID of the instance."];
       instanceType: XmlStringMaxLen255.t option
         [@ocaml.doc "The instance type of the EC2 instance."];
-      autoScalingGroupName: XmlStringMaxLen255.t
+      autoScalingGroupName: XmlStringMaxLen255.t option
         [@ocaml.doc "The name of the Auto Scaling group for the instance."];
-      availabilityZone: XmlStringMaxLen255.t
+      availabilityZone: XmlStringMaxLen255.t option
         [@ocaml.doc "The Availability Zone for the instance."];
-      lifecycleState: XmlStringMaxLen32.t
+      availabilityZoneId: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "The lifecycle state for the instance. The Quarantined state is not used. For information about lifecycle states, see Instance lifecycle in the Amazon EC2 Auto Scaling User Guide. Valid Values: Pending | Pending:Wait | Pending:Proceed | Quarantined | InService | Terminating | Terminating:Wait | Terminating:Proceed | Terminated | Detaching | Detached | EnteringStandby | Standby | Warmed:Pending | Warmed:Pending:Wait | Warmed:Pending:Proceed | Warmed:Terminating | Warmed:Terminating:Wait | Warmed:Terminating:Proceed | Warmed:Terminated | Warmed:Stopped | Warmed:Running"];
-      healthStatus: XmlStringMaxLen32.t
+          "The Availability Zone ID where the instance is located."];
+      lifecycleState: XmlStringMaxLen32.t option
         [@ocaml.doc
-          "The last reported health status of this instance. \"Healthy\" means that the instance is healthy and should remain in service. \"Unhealthy\" means that the instance is unhealthy and Amazon EC2 Auto Scaling should terminate and replace it."];
+          "The lifecycle state for the instance. The Quarantined state is not used. For more information, see Amazon EC2 Auto Scaling instance lifecycle in the Amazon EC2 Auto Scaling User Guide. Valid values: Pending | Pending:Wait | Pending:Proceed | Quarantined | InService | Terminating | Terminating:Wait | Terminating:Proceed | Terminating:Retained | Terminated | Detaching | Detached | EnteringStandby | Standby | ReplacingRootVolume | ReplacingRootVolume:Wait | ReplacingRootVolume:Proceed | RootVolumeReplaced | Warmed:Pending | Warmed:Pending:Wait | Warmed:Pending:Proceed | Warmed:Pending:Retained | Warmed:Terminating | Warmed:Terminating:Wait | Warmed:Terminating:Proceed | Warmed:Terminating:Retained | Warmed:Terminated | Warmed:Stopped | Warmed:Running | Warmed:Hibernated"];
+      healthStatus: XmlStringMaxLen32.t option
+        [@ocaml.doc
+          "The last reported health status of this instance. Healthy means that the instance is healthy and should remain in service. Unhealthy means that the instance is unhealthy and Amazon EC2 Auto Scaling should terminate and replace it."];
       launchConfigurationName: XmlStringMaxLen255.t option
         [@ocaml.doc
           "The launch configuration used to launch the instance. This value is not available if you attached the instance to the Auto Scaling group."];
       launchTemplate: LaunchTemplateSpecification.t option
         [@ocaml.doc "The launch template for the instance."];
-      protectedFromScaleIn: InstanceProtected.t
+      imageId: XmlStringMaxLen255.t option
+        [@ocaml.doc
+          "The ID of the Amazon Machine Image (AMI) associated with the instance. This field shows the current AMI ID of the instance's root volume. It may differ from the original AMI used when the instance was first launched. This field appears for: Instances with root volume replacements through Instance Refresh Instances launched with AMI overrides This field won't appear for: Existing instances launched from Launch Templates without overrides Existing instances that didn\226\128\153t have their root volume replaced through Instance Refresh"];
+      protectedFromScaleIn: InstanceProtected.t option
         [@ocaml.doc
           "Indicates whether the instance is protected from termination by Amazon EC2 Auto Scaling when scaling in."];
       weightedCapacity: XmlStringMaxLen32.t option
         [@ocaml.doc
           "The number of capacity units contributed by the instance based on its instance type. Valid Range: Minimum value of 1. Maximum value of 999."]}
-    let context_ = "AutoScalingInstanceDetails"
-    let make ?instanceType =
-      fun ?launchConfigurationName ->
-        fun ?launchTemplate ->
-          fun ?weightedCapacity ->
-            fun ~instanceId ->
-              fun ~autoScalingGroupName ->
-                fun ~availabilityZone ->
-                  fun ~lifecycleState ->
-                    fun ~healthStatus ->
-                      fun ~protectedFromScaleIn ->
-                        fun () ->
-                          {
-                            instanceType;
-                            launchConfigurationName;
-                            launchTemplate;
-                            weightedCapacity;
-                            instanceId;
-                            autoScalingGroupName;
-                            availabilityZone;
-                            lifecycleState;
-                            healthStatus;
-                            protectedFromScaleIn
-                          }
+    let make ?instanceId =
+      fun ?instanceType ->
+        fun ?autoScalingGroupName ->
+          fun ?availabilityZone ->
+            fun ?availabilityZoneId ->
+              fun ?lifecycleState ->
+                fun ?healthStatus ->
+                  fun ?launchConfigurationName ->
+                    fun ?launchTemplate ->
+                      fun ?imageId ->
+                        fun ?protectedFromScaleIn ->
+                          fun ?weightedCapacity ->
+                            fun () ->
+                              {
+                                instanceId;
+                                instanceType;
+                                autoScalingGroupName;
+                                availabilityZone;
+                                availabilityZoneId;
+                                lifecycleState;
+                                healthStatus;
+                                launchConfigurationName;
+                                launchTemplate;
+                                imageId;
+                                protectedFromScaleIn;
+                                weightedCapacity
+                              }
     let to_value x =
       structure_to_value
-        [("InstanceId", (Some (XmlStringMaxLen19.to_value x.instanceId)));
+        [("InstanceId",
+           (Option.map x.instanceId ~f:XmlStringMaxLen19.to_value));
         ("InstanceType",
           (Option.map x.instanceType ~f:XmlStringMaxLen255.to_value));
         ("AutoScalingGroupName",
-          (Some (XmlStringMaxLen255.to_value x.autoScalingGroupName)));
+          (Option.map x.autoScalingGroupName ~f:XmlStringMaxLen255.to_value));
         ("AvailabilityZone",
-          (Some (XmlStringMaxLen255.to_value x.availabilityZone)));
+          (Option.map x.availabilityZone ~f:XmlStringMaxLen255.to_value));
+        ("AvailabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:XmlStringMaxLen255.to_value));
         ("LifecycleState",
-          (Some (XmlStringMaxLen32.to_value x.lifecycleState)));
-        ("HealthStatus", (Some (XmlStringMaxLen32.to_value x.healthStatus)));
+          (Option.map x.lifecycleState ~f:XmlStringMaxLen32.to_value));
+        ("HealthStatus",
+          (Option.map x.healthStatus ~f:XmlStringMaxLen32.to_value));
         ("LaunchConfigurationName",
           (Option.map x.launchConfigurationName
              ~f:XmlStringMaxLen255.to_value));
         ("LaunchTemplate",
           (Option.map x.launchTemplate
              ~f:LaunchTemplateSpecification.to_value));
+        ("ImageId", (Option.map x.imageId ~f:XmlStringMaxLen255.to_value));
         ("ProtectedFromScaleIn",
-          (Some (InstanceProtected.to_value x.protectedFromScaleIn)));
+          (Option.map x.protectedFromScaleIn ~f:InstanceProtected.to_value));
         ("WeightedCapacity",
           (Option.map x.weightedCapacity ~f:XmlStringMaxLen32.to_value))]
     let to_query v = to_query to_value v
@@ -6955,8 +8911,11 @@ module AutoScalingInstanceDetails =
         (Option.map ~f:XmlStringMaxLen32.of_xml)
           (Xml.child xml_arg0 "WeightedCapacity") in
       let protectedFromScaleIn =
-        InstanceProtected.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ProtectedFromScaleIn") in
+        (Option.map ~f:InstanceProtected.of_xml)
+          (Xml.child xml_arg0 "ProtectedFromScaleIn") in
+      let imageId =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "ImageId") in
       let launchTemplate =
         (Option.map ~f:LaunchTemplateSpecification.of_xml)
           (Xml.child xml_arg0 "LaunchTemplate") in
@@ -6964,51 +8923,59 @@ module AutoScalingInstanceDetails =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "LaunchConfigurationName") in
       let healthStatus =
-        XmlStringMaxLen32.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HealthStatus") in
+        (Option.map ~f:XmlStringMaxLen32.of_xml)
+          (Xml.child xml_arg0 "HealthStatus") in
       let lifecycleState =
-        XmlStringMaxLen32.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LifecycleState") in
+        (Option.map ~f:XmlStringMaxLen32.of_xml)
+          (Xml.child xml_arg0 "LifecycleState") in
+      let availabilityZoneId =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZoneId") in
       let availabilityZone =
-        XmlStringMaxLen255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AvailabilityZone") in
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZone") in
       let autoScalingGroupName =
-        XmlStringMaxLen255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "AutoScalingGroupName") in
       let instanceType =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "InstanceType") in
       let instanceId =
-        XmlStringMaxLen19.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
-      make ?weightedCapacity ~protectedFromScaleIn ?launchTemplate
-        ?launchConfigurationName ~healthStatus ~lifecycleState
-        ~availabilityZone ~autoScalingGroupName ?instanceType ~instanceId ()
+        (Option.map ~f:XmlStringMaxLen19.of_xml)
+          (Xml.child xml_arg0 "InstanceId") in
+      make ?weightedCapacity ?protectedFromScaleIn ?imageId ?launchTemplate
+        ?launchConfigurationName ?healthStatus ?lifecycleState
+        ?availabilityZoneId ?availabilityZone ?autoScalingGroupName
+        ?instanceType ?instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let weightedCapacity =
-        field_map json "WeightedCapacity" XmlStringMaxLen32.of_json in
+        field_map json__ "WeightedCapacity" XmlStringMaxLen32.of_json in
       let protectedFromScaleIn =
-        field_map_exn json "ProtectedFromScaleIn" InstanceProtected.of_json in
+        field_map json__ "ProtectedFromScaleIn" InstanceProtected.of_json in
+      let imageId = field_map json__ "ImageId" XmlStringMaxLen255.of_json in
       let launchTemplate =
-        field_map json "LaunchTemplate" LaunchTemplateSpecification.of_json in
+        field_map json__ "LaunchTemplate" LaunchTemplateSpecification.of_json in
       let launchConfigurationName =
-        field_map json "LaunchConfigurationName" XmlStringMaxLen255.of_json in
+        field_map json__ "LaunchConfigurationName" XmlStringMaxLen255.of_json in
       let healthStatus =
-        field_map_exn json "HealthStatus" XmlStringMaxLen32.of_json in
+        field_map json__ "HealthStatus" XmlStringMaxLen32.of_json in
       let lifecycleState =
-        field_map_exn json "LifecycleState" XmlStringMaxLen32.of_json in
+        field_map json__ "LifecycleState" XmlStringMaxLen32.of_json in
+      let availabilityZoneId =
+        field_map json__ "AvailabilityZoneId" XmlStringMaxLen255.of_json in
       let availabilityZone =
-        field_map_exn json "AvailabilityZone" XmlStringMaxLen255.of_json in
+        field_map json__ "AvailabilityZone" XmlStringMaxLen255.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map json__ "AutoScalingGroupName" XmlStringMaxLen255.of_json in
       let instanceType =
-        field_map json "InstanceType" XmlStringMaxLen255.of_json in
+        field_map json__ "InstanceType" XmlStringMaxLen255.of_json in
       let instanceId =
-        field_map_exn json "InstanceId" XmlStringMaxLen19.of_json in
-      make ?weightedCapacity ~protectedFromScaleIn ?launchTemplate
-        ?launchConfigurationName ~healthStatus ~lifecycleState
-        ~availabilityZone ~autoScalingGroupName ?instanceType ~instanceId ()
+        field_map json__ "InstanceId" XmlStringMaxLen19.of_json in
+      make ?weightedCapacity ?protectedFromScaleIn ?imageId ?launchTemplate
+        ?launchConfigurationName ?healthStatus ?lifecycleState
+        ?availabilityZoneId ?availabilityZone ?autoScalingGroupName
+        ?instanceType ?instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes an EC2 instance associated with an Auto Scaling group."]
@@ -7016,72 +8983,79 @@ module AutoScalingGroup =
   struct
     type nonrec t =
       {
-      autoScalingGroupName: XmlStringMaxLen255.t
+      autoScalingGroupName: XmlStringMaxLen255.t option
         [@ocaml.doc "The name of the Auto Scaling group."];
       autoScalingGroupARN: ResourceName.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the Auto Scaling group."];
       launchConfigurationName: XmlStringMaxLen255.t option
-        [@ocaml.doc "The name of the associated launch configuration."];
+        [@ocaml.doc
+          "The name of the associated launch configuration for the Auto Scaling group."];
       launchTemplate: LaunchTemplateSpecification.t option
-        [@ocaml.doc "The launch template for the group."];
+        [@ocaml.doc "The launch template for the Auto Scaling group."];
       mixedInstancesPolicy: MixedInstancesPolicy.t option
         [@ocaml.doc "The mixed instances policy for the group."];
-      minSize: AutoScalingGroupMinSize.t
-        [@ocaml.doc "The minimum size of the group."];
-      maxSize: AutoScalingGroupMaxSize.t
-        [@ocaml.doc "The maximum size of the group."];
-      desiredCapacity: AutoScalingGroupDesiredCapacity.t
-        [@ocaml.doc "The desired size of the group."];
+      minSize: AutoScalingGroupMinSize.t option
+        [@ocaml.doc "The minimum size of the Auto Scaling group."];
+      maxSize: AutoScalingGroupMaxSize.t option
+        [@ocaml.doc "The maximum size of the Auto Scaling group."];
+      desiredCapacity: AutoScalingGroupDesiredCapacity.t option
+        [@ocaml.doc "The desired size of the Auto Scaling group."];
       predictedCapacity: AutoScalingGroupPredictedCapacity.t option
         [@ocaml.doc
           "The predicted capacity of the group when it has a predictive scaling policy."];
-      defaultCooldown: Cooldown.t
+      defaultCooldown: Cooldown.t option
         [@ocaml.doc
-          "The duration of the default cooldown period, in seconds."];
-      availabilityZones: AvailabilityZones.t
-        [@ocaml.doc "One or more Availability Zones for the group."];
+          "The duration of the default cooldown period, in seconds, for the Auto Scaling group."];
+      availabilityZones: AvailabilityZones.t option
+        [@ocaml.doc
+          "One or more Availability Zones for the Auto Scaling group."];
+      availabilityZoneIds: AvailabilityZoneIds.t option
+        [@ocaml.doc
+          "The Availability Zone IDs where the Auto Scaling group can launch instances."];
       loadBalancerNames: LoadBalancerNames.t option
         [@ocaml.doc "One or more load balancers associated with the group."];
       targetGroupARNs: TargetGroupARNs.t option
         [@ocaml.doc
           "The Amazon Resource Names (ARN) of the target groups for your load balancer."];
-      healthCheckType: XmlStringMaxLen32.t
+      healthCheckType: XmlStringMaxLen32.t option
         [@ocaml.doc
-          "The service to use for the health checks. The valid values are EC2 and ELB. If you configure an Auto Scaling group to use ELB health checks, it considers the instance unhealthy if it fails either the EC2 status checks or the load balancer health checks."];
+          "One or more comma-separated health check types for the Auto Scaling group."];
       healthCheckGracePeriod: HealthCheckGracePeriod.t option
         [@ocaml.doc
-          "The amount of time, in seconds, that Amazon EC2 Auto Scaling waits before checking the health status of an EC2 instance that has come into service and marking it unhealthy due to a failed health check."];
+          "The duration of the health check grace period, in seconds, for the Auto Scaling group."];
       instances: Instances.t option
-        [@ocaml.doc "The EC2 instances associated with the group."];
-      createdTime: TimestampType.t
-        [@ocaml.doc "The date and time the group was created."];
+        [@ocaml.doc
+          "The EC2 instances associated with the Auto Scaling group."];
+      createdTime: TimestampType.t option
+        [@ocaml.doc "The date and time the Auto Scaling group was created."];
       suspendedProcesses: SuspendedProcesses.t option
-        [@ocaml.doc "The suspended processes associated with the group."];
+        [@ocaml.doc
+          "The suspended processes associated with the Auto Scaling group."];
       placementGroup: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "The name of the placement group into which to launch your instances, if any."];
-      vPCZoneIdentifier: XmlStringMaxLen2047.t option
+          "The name of the placement group into which to launch EC2 instances for the Auto Scaling group."];
+      vPCZoneIdentifier: XmlStringMaxLen5000.t option
         [@ocaml.doc
-          "One or more subnet IDs, if applicable, separated by commas."];
+          "One or more comma-separated subnet IDs for the Auto Scaling group."];
       enabledMetrics: EnabledMetrics.t option
-        [@ocaml.doc "The metrics enabled for the group."];
+        [@ocaml.doc "The metrics enabled for the Auto Scaling group."];
       status: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "The current state of the group when the DeleteAutoScalingGroup operation is in progress."];
+          "The current state of the Auto Scaling group when the DeleteAutoScalingGroup operation is in progress."];
       tags: TagDescriptionList.t option
-        [@ocaml.doc "The tags for the group."];
+        [@ocaml.doc "The tags for the Auto Scaling group."];
       terminationPolicies: TerminationPolicies.t option
-        [@ocaml.doc "The termination policies for the group."];
+        [@ocaml.doc "The termination policies for the Auto Scaling group."];
       newInstancesProtectedFromScaleIn: InstanceProtected.t option
         [@ocaml.doc
-          "Indicates whether newly launched instances are protected from termination by Amazon EC2 Auto Scaling when scaling in."];
+          "Indicates whether newly launched EC2 instances are protected from termination when scaling in for the Auto Scaling group. For more information about preventing instances from terminating on scale in, see Use instance scale-in protection in the Amazon EC2 Auto Scaling User Guide."];
       serviceLinkedRoleARN: ResourceName.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the service-linked role that the Auto Scaling group uses to call other Amazon Web Services on your behalf."];
       maxInstanceLifetime: MaxInstanceLifetime.t option
         [@ocaml.doc
-          "The maximum amount of time, in seconds, that an instance can be in service. Valid Range: Minimum value of 0."];
+          "The maximum amount of time, in seconds, that an EC2 instance can be in service for the Auto Scaling group."];
       capacityRebalance: CapacityRebalanceEnabled.t option
         [@ocaml.doc "Indicates whether Capacity Rebalancing is enabled."];
       warmPoolConfiguration: WarmPoolConfiguration.t option
@@ -7091,62 +9065,126 @@ module AutoScalingGroup =
       context: Context.t option [@ocaml.doc "Reserved."];
       desiredCapacityType: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "The unit of measurement for the value specified for desired capacity. Amazon EC2 Auto Scaling supports DesiredCapacityType for attribute-based instance type selection only. For more information, see Creating an Auto Scaling group using attribute-based instance type selection in the Amazon EC2 Auto Scaling User Guide. By default, Amazon EC2 Auto Scaling specifies units, which translates into number of instances. Valid values: units | vcpu | memory-mib"]}
-    let context_ = "AutoScalingGroup"
-    let make ?autoScalingGroupARN =
-      fun ?launchConfigurationName ->
-        fun ?launchTemplate ->
-          fun ?mixedInstancesPolicy ->
-            fun ?predictedCapacity ->
-              fun ?loadBalancerNames ->
-                fun ?targetGroupARNs ->
-                  fun ?healthCheckGracePeriod ->
-                    fun ?instances ->
-                      fun ?suspendedProcesses ->
-                        fun ?placementGroup ->
-                          fun ?vPCZoneIdentifier ->
-                            fun ?enabledMetrics ->
-                              fun ?status ->
-                                fun ?tags ->
-                                  fun ?terminationPolicies ->
-                                    fun ?newInstancesProtectedFromScaleIn ->
-                                      fun ?serviceLinkedRoleARN ->
-                                        fun ?maxInstanceLifetime ->
-                                          fun ?capacityRebalance ->
-                                            fun ?warmPoolConfiguration ->
-                                              fun ?warmPoolSize ->
-                                                fun ?context ->
-                                                  fun ?desiredCapacityType ->
-                                                    fun ~autoScalingGroupName
+          "The unit of measurement for the value specified for desired capacity. Amazon EC2 Auto Scaling supports DesiredCapacityType for attribute-based instance type selection only."];
+      defaultInstanceWarmup: DefaultInstanceWarmup.t option
+        [@ocaml.doc
+          "The duration of the default EC2 instance warmup time, in seconds, for the Auto Scaling group."];
+      trafficSources: TrafficSources.t option
+        [@ocaml.doc
+          "The traffic sources associated with this Auto Scaling group."];
+      instanceMaintenancePolicy: InstanceMaintenancePolicy.t option
+        [@ocaml.doc "An instance maintenance policy."];
+      deletionProtection: DeletionProtection.t option
+        [@ocaml.doc
+          "The deletion protection setting for the Auto Scaling group."];
+      availabilityZoneDistribution: AvailabilityZoneDistribution.t option
+        [@ocaml.doc
+          "The EC2 instance capacity distribution across Availability Zones for the Auto Scaling group."];
+      availabilityZoneImpairmentPolicy:
+        AvailabilityZoneImpairmentPolicy.t option
+        [@ocaml.doc
+          "The Availability Zone impairment policy for the Auto Scaling group."];
+      capacityReservationSpecification:
+        CapacityReservationSpecification.t option
+        [@ocaml.doc
+          "The capacity reservation specification for the Auto Scaling group."];
+      instanceLifecyclePolicy: InstanceLifecyclePolicy.t option
+        [@ocaml.doc
+          "The instance lifecycle policy for the Auto Scaling group."]}
+    let make ?autoScalingGroupName =
+      fun ?autoScalingGroupARN ->
+        fun ?launchConfigurationName ->
+          fun ?launchTemplate ->
+            fun ?mixedInstancesPolicy ->
+              fun ?minSize ->
+                fun ?maxSize ->
+                  fun ?desiredCapacity ->
+                    fun ?predictedCapacity ->
+                      fun ?defaultCooldown ->
+                        fun ?availabilityZones ->
+                          fun ?availabilityZoneIds ->
+                            fun ?loadBalancerNames ->
+                              fun ?targetGroupARNs ->
+                                fun ?healthCheckType ->
+                                  fun ?healthCheckGracePeriod ->
+                                    fun ?instances ->
+                                      fun ?createdTime ->
+                                        fun ?suspendedProcesses ->
+                                          fun ?placementGroup ->
+                                            fun ?vPCZoneIdentifier ->
+                                              fun ?enabledMetrics ->
+                                                fun ?status ->
+                                                  fun ?tags ->
+                                                    fun ?terminationPolicies
                                                       ->
-                                                      fun ~minSize ->
-                                                        fun ~maxSize ->
+                                                      fun
+                                                        ?newInstancesProtectedFromScaleIn
+                                                        ->
+                                                        fun
+                                                          ?serviceLinkedRoleARN
+                                                          ->
                                                           fun
-                                                            ~desiredCapacity
+                                                            ?maxInstanceLifetime
                                                             ->
                                                             fun
-                                                              ~defaultCooldown
+                                                              ?capacityRebalance
                                                               ->
                                                               fun
-                                                                ~availabilityZones
+                                                                ?warmPoolConfiguration
                                                                 ->
                                                                 fun
-                                                                  ~healthCheckType
+                                                                  ?warmPoolSize
                                                                   ->
                                                                   fun
-                                                                    ~createdTime
+                                                                    ?context
+                                                                    ->
+                                                                    fun
+                                                                    ?desiredCapacityType
+                                                                    ->
+                                                                    fun
+                                                                    ?defaultInstanceWarmup
+                                                                    ->
+                                                                    fun
+                                                                    ?trafficSources
+                                                                    ->
+                                                                    fun
+                                                                    ?instanceMaintenancePolicy
+                                                                    ->
+                                                                    fun
+                                                                    ?deletionProtection
+                                                                    ->
+                                                                    fun
+                                                                    ?availabilityZoneDistribution
+                                                                    ->
+                                                                    fun
+                                                                    ?availabilityZoneImpairmentPolicy
+                                                                    ->
+                                                                    fun
+                                                                    ?capacityReservationSpecification
+                                                                    ->
+                                                                    fun
+                                                                    ?instanceLifecyclePolicy
                                                                     ->
                                                                     fun () ->
                                                                     {
+                                                                    autoScalingGroupName;
                                                                     autoScalingGroupARN;
                                                                     launchConfigurationName;
                                                                     launchTemplate;
                                                                     mixedInstancesPolicy;
+                                                                    minSize;
+                                                                    maxSize;
+                                                                    desiredCapacity;
                                                                     predictedCapacity;
+                                                                    defaultCooldown;
+                                                                    availabilityZones;
+                                                                    availabilityZoneIds;
                                                                     loadBalancerNames;
                                                                     targetGroupARNs;
+                                                                    healthCheckType;
                                                                     healthCheckGracePeriod;
                                                                     instances;
+                                                                    createdTime;
                                                                     suspendedProcesses;
                                                                     placementGroup;
                                                                     vPCZoneIdentifier;
@@ -7162,19 +9200,19 @@ module AutoScalingGroup =
                                                                     warmPoolSize;
                                                                     context;
                                                                     desiredCapacityType;
-                                                                    autoScalingGroupName;
-                                                                    minSize;
-                                                                    maxSize;
-                                                                    desiredCapacity;
-                                                                    defaultCooldown;
-                                                                    availabilityZones;
-                                                                    healthCheckType;
-                                                                    createdTime
+                                                                    defaultInstanceWarmup;
+                                                                    trafficSources;
+                                                                    instanceMaintenancePolicy;
+                                                                    deletionProtection;
+                                                                    availabilityZoneDistribution;
+                                                                    availabilityZoneImpairmentPolicy;
+                                                                    capacityReservationSpecification;
+                                                                    instanceLifecyclePolicy
                                                                     }
     let to_value x =
       structure_to_value
         [("AutoScalingGroupName",
-           (Some (XmlStringMaxLen255.to_value x.autoScalingGroupName)));
+           (Option.map x.autoScalingGroupName ~f:XmlStringMaxLen255.to_value));
         ("AutoScalingGroupARN",
           (Option.map x.autoScalingGroupARN ~f:ResourceName.to_value));
         ("LaunchConfigurationName",
@@ -7185,33 +9223,39 @@ module AutoScalingGroup =
              ~f:LaunchTemplateSpecification.to_value));
         ("MixedInstancesPolicy",
           (Option.map x.mixedInstancesPolicy ~f:MixedInstancesPolicy.to_value));
-        ("MinSize", (Some (AutoScalingGroupMinSize.to_value x.minSize)));
-        ("MaxSize", (Some (AutoScalingGroupMaxSize.to_value x.maxSize)));
+        ("MinSize",
+          (Option.map x.minSize ~f:AutoScalingGroupMinSize.to_value));
+        ("MaxSize",
+          (Option.map x.maxSize ~f:AutoScalingGroupMaxSize.to_value));
         ("DesiredCapacity",
-          (Some (AutoScalingGroupDesiredCapacity.to_value x.desiredCapacity)));
+          (Option.map x.desiredCapacity
+             ~f:AutoScalingGroupDesiredCapacity.to_value));
         ("PredictedCapacity",
           (Option.map x.predictedCapacity
              ~f:AutoScalingGroupPredictedCapacity.to_value));
-        ("DefaultCooldown", (Some (Cooldown.to_value x.defaultCooldown)));
+        ("DefaultCooldown",
+          (Option.map x.defaultCooldown ~f:Cooldown.to_value));
         ("AvailabilityZones",
-          (Some (AvailabilityZones.to_value x.availabilityZones)));
+          (Option.map x.availabilityZones ~f:AvailabilityZones.to_value));
+        ("AvailabilityZoneIds",
+          (Option.map x.availabilityZoneIds ~f:AvailabilityZoneIds.to_value));
         ("LoadBalancerNames",
           (Option.map x.loadBalancerNames ~f:LoadBalancerNames.to_value));
         ("TargetGroupARNs",
           (Option.map x.targetGroupARNs ~f:TargetGroupARNs.to_value));
         ("HealthCheckType",
-          (Some (XmlStringMaxLen32.to_value x.healthCheckType)));
+          (Option.map x.healthCheckType ~f:XmlStringMaxLen32.to_value));
         ("HealthCheckGracePeriod",
           (Option.map x.healthCheckGracePeriod
              ~f:HealthCheckGracePeriod.to_value));
         ("Instances", (Option.map x.instances ~f:Instances.to_value));
-        ("CreatedTime", (Some (TimestampType.to_value x.createdTime)));
+        ("CreatedTime", (Option.map x.createdTime ~f:TimestampType.to_value));
         ("SuspendedProcesses",
           (Option.map x.suspendedProcesses ~f:SuspendedProcesses.to_value));
         ("PlacementGroup",
           (Option.map x.placementGroup ~f:XmlStringMaxLen255.to_value));
         ("VPCZoneIdentifier",
-          (Option.map x.vPCZoneIdentifier ~f:XmlStringMaxLen2047.to_value));
+          (Option.map x.vPCZoneIdentifier ~f:XmlStringMaxLen5000.to_value));
         ("EnabledMetrics",
           (Option.map x.enabledMetrics ~f:EnabledMetrics.to_value));
         ("Status", (Option.map x.status ~f:XmlStringMaxLen255.to_value));
@@ -7235,9 +9279,55 @@ module AutoScalingGroup =
           (Option.map x.warmPoolSize ~f:WarmPoolSize.to_value));
         ("Context", (Option.map x.context ~f:Context.to_value));
         ("DesiredCapacityType",
-          (Option.map x.desiredCapacityType ~f:XmlStringMaxLen255.to_value))]
+          (Option.map x.desiredCapacityType ~f:XmlStringMaxLen255.to_value));
+        ("DefaultInstanceWarmup",
+          (Option.map x.defaultInstanceWarmup
+             ~f:DefaultInstanceWarmup.to_value));
+        ("TrafficSources",
+          (Option.map x.trafficSources ~f:TrafficSources.to_value));
+        ("InstanceMaintenancePolicy",
+          (Option.map x.instanceMaintenancePolicy
+             ~f:InstanceMaintenancePolicy.to_value));
+        ("DeletionProtection",
+          (Option.map x.deletionProtection ~f:DeletionProtection.to_value));
+        ("AvailabilityZoneDistribution",
+          (Option.map x.availabilityZoneDistribution
+             ~f:AvailabilityZoneDistribution.to_value));
+        ("AvailabilityZoneImpairmentPolicy",
+          (Option.map x.availabilityZoneImpairmentPolicy
+             ~f:AvailabilityZoneImpairmentPolicy.to_value));
+        ("CapacityReservationSpecification",
+          (Option.map x.capacityReservationSpecification
+             ~f:CapacityReservationSpecification.to_value));
+        ("InstanceLifecyclePolicy",
+          (Option.map x.instanceLifecyclePolicy
+             ~f:InstanceLifecyclePolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let instanceLifecyclePolicy =
+        (Option.map ~f:InstanceLifecyclePolicy.of_xml)
+          (Xml.child xml_arg0 "InstanceLifecyclePolicy") in
+      let capacityReservationSpecification =
+        (Option.map ~f:CapacityReservationSpecification.of_xml)
+          (Xml.child xml_arg0 "CapacityReservationSpecification") in
+      let availabilityZoneImpairmentPolicy =
+        (Option.map ~f:AvailabilityZoneImpairmentPolicy.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZoneImpairmentPolicy") in
+      let availabilityZoneDistribution =
+        (Option.map ~f:AvailabilityZoneDistribution.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZoneDistribution") in
+      let deletionProtection =
+        (Option.map ~f:DeletionProtection.of_xml)
+          (Xml.child xml_arg0 "DeletionProtection") in
+      let instanceMaintenancePolicy =
+        (Option.map ~f:InstanceMaintenancePolicy.of_xml)
+          (Xml.child xml_arg0 "InstanceMaintenancePolicy") in
+      let trafficSources =
+        (Option.map ~f:TrafficSources.of_xml)
+          (Xml.child xml_arg0 "TrafficSources") in
+      let defaultInstanceWarmup =
+        (Option.map ~f:DefaultInstanceWarmup.of_xml)
+          (Xml.child xml_arg0 "DefaultInstanceWarmup") in
       let desiredCapacityType =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "DesiredCapacityType") in
@@ -7273,7 +9363,7 @@ module AutoScalingGroup =
         (Option.map ~f:EnabledMetrics.of_xml)
           (Xml.child xml_arg0 "EnabledMetrics") in
       let vPCZoneIdentifier =
-        (Option.map ~f:XmlStringMaxLen2047.of_xml)
+        (Option.map ~f:XmlStringMaxLen5000.of_xml)
           (Xml.child xml_arg0 "VPCZoneIdentifier") in
       let placementGroup =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
@@ -7282,40 +9372,43 @@ module AutoScalingGroup =
         (Option.map ~f:SuspendedProcesses.of_xml)
           (Xml.child xml_arg0 "SuspendedProcesses") in
       let createdTime =
-        TimestampType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreatedTime") in
+        (Option.map ~f:TimestampType.of_xml)
+          (Xml.child xml_arg0 "CreatedTime") in
       let instances =
         (Option.map ~f:Instances.of_xml) (Xml.child xml_arg0 "Instances") in
       let healthCheckGracePeriod =
         (Option.map ~f:HealthCheckGracePeriod.of_xml)
           (Xml.child xml_arg0 "HealthCheckGracePeriod") in
       let healthCheckType =
-        XmlStringMaxLen32.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HealthCheckType") in
+        (Option.map ~f:XmlStringMaxLen32.of_xml)
+          (Xml.child xml_arg0 "HealthCheckType") in
       let targetGroupARNs =
         (Option.map ~f:TargetGroupARNs.of_xml)
           (Xml.child xml_arg0 "TargetGroupARNs") in
       let loadBalancerNames =
         (Option.map ~f:LoadBalancerNames.of_xml)
           (Xml.child xml_arg0 "LoadBalancerNames") in
+      let availabilityZoneIds =
+        (Option.map ~f:AvailabilityZoneIds.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZoneIds") in
       let availabilityZones =
-        AvailabilityZones.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AvailabilityZones") in
+        (Option.map ~f:AvailabilityZones.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZones") in
       let defaultCooldown =
-        Cooldown.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DefaultCooldown") in
+        (Option.map ~f:Cooldown.of_xml)
+          (Xml.child xml_arg0 "DefaultCooldown") in
       let predictedCapacity =
         (Option.map ~f:AutoScalingGroupPredictedCapacity.of_xml)
           (Xml.child xml_arg0 "PredictedCapacity") in
       let desiredCapacity =
-        AutoScalingGroupDesiredCapacity.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DesiredCapacity") in
+        (Option.map ~f:AutoScalingGroupDesiredCapacity.of_xml)
+          (Xml.child xml_arg0 "DesiredCapacity") in
       let maxSize =
-        AutoScalingGroupMaxSize.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MaxSize") in
+        (Option.map ~f:AutoScalingGroupMaxSize.of_xml)
+          (Xml.child xml_arg0 "MaxSize") in
       let minSize =
-        AutoScalingGroupMinSize.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MinSize") in
+        (Option.map ~f:AutoScalingGroupMinSize.of_xml)
+          (Xml.child xml_arg0 "MinSize") in
       let mixedInstancesPolicy =
         (Option.map ~f:MixedInstancesPolicy.of_xml)
           (Xml.child xml_arg0 "MixedInstancesPolicy") in
@@ -7329,95 +9422,162 @@ module AutoScalingGroup =
         (Option.map ~f:ResourceName.of_xml)
           (Xml.child xml_arg0 "AutoScalingGroupARN") in
       let autoScalingGroupName =
-        XmlStringMaxLen255.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
-      make ?desiredCapacityType ?context ?warmPoolSize ?warmPoolConfiguration
-        ?capacityRebalance ?maxInstanceLifetime ?serviceLinkedRoleARN
-        ?newInstancesProtectedFromScaleIn ?terminationPolicies ?tags ?status
-        ?enabledMetrics ?vPCZoneIdentifier ?placementGroup
-        ?suspendedProcesses ~createdTime ?instances ?healthCheckGracePeriod
-        ~healthCheckType ?targetGroupARNs ?loadBalancerNames
-        ~availabilityZones ~defaultCooldown ?predictedCapacity
-        ~desiredCapacity ~maxSize ~minSize ?mixedInstancesPolicy
-        ?launchTemplate ?launchConfigurationName ?autoScalingGroupARN
-        ~autoScalingGroupName ()
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "AutoScalingGroupName") in
+      make ?instanceLifecyclePolicy ?capacityReservationSpecification
+        ?availabilityZoneImpairmentPolicy ?availabilityZoneDistribution
+        ?deletionProtection ?instanceMaintenancePolicy ?trafficSources
+        ?defaultInstanceWarmup ?desiredCapacityType ?context ?warmPoolSize
+        ?warmPoolConfiguration ?capacityRebalance ?maxInstanceLifetime
+        ?serviceLinkedRoleARN ?newInstancesProtectedFromScaleIn
+        ?terminationPolicies ?tags ?status ?enabledMetrics ?vPCZoneIdentifier
+        ?placementGroup ?suspendedProcesses ?createdTime ?instances
+        ?healthCheckGracePeriod ?healthCheckType ?targetGroupARNs
+        ?loadBalancerNames ?availabilityZoneIds ?availabilityZones
+        ?defaultCooldown ?predictedCapacity ?desiredCapacity ?maxSize
+        ?minSize ?mixedInstancesPolicy ?launchTemplate
+        ?launchConfigurationName ?autoScalingGroupARN ?autoScalingGroupName
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let instanceLifecyclePolicy =
+        field_map json__ "InstanceLifecyclePolicy"
+          InstanceLifecyclePolicy.of_json in
+      let capacityReservationSpecification =
+        field_map json__ "CapacityReservationSpecification"
+          CapacityReservationSpecification.of_json in
+      let availabilityZoneImpairmentPolicy =
+        field_map json__ "AvailabilityZoneImpairmentPolicy"
+          AvailabilityZoneImpairmentPolicy.of_json in
+      let availabilityZoneDistribution =
+        field_map json__ "AvailabilityZoneDistribution"
+          AvailabilityZoneDistribution.of_json in
+      let deletionProtection =
+        field_map json__ "DeletionProtection" DeletionProtection.of_json in
+      let instanceMaintenancePolicy =
+        field_map json__ "InstanceMaintenancePolicy"
+          InstanceMaintenancePolicy.of_json in
+      let trafficSources =
+        field_map json__ "TrafficSources" TrafficSources.of_json in
+      let defaultInstanceWarmup =
+        field_map json__ "DefaultInstanceWarmup"
+          DefaultInstanceWarmup.of_json in
       let desiredCapacityType =
-        field_map json "DesiredCapacityType" XmlStringMaxLen255.of_json in
-      let context = field_map json "Context" Context.of_json in
-      let warmPoolSize = field_map json "WarmPoolSize" WarmPoolSize.of_json in
+        field_map json__ "DesiredCapacityType" XmlStringMaxLen255.of_json in
+      let context = field_map json__ "Context" Context.of_json in
+      let warmPoolSize = field_map json__ "WarmPoolSize" WarmPoolSize.of_json in
       let warmPoolConfiguration =
-        field_map json "WarmPoolConfiguration" WarmPoolConfiguration.of_json in
+        field_map json__ "WarmPoolConfiguration"
+          WarmPoolConfiguration.of_json in
       let capacityRebalance =
-        field_map json "CapacityRebalance" CapacityRebalanceEnabled.of_json in
+        field_map json__ "CapacityRebalance" CapacityRebalanceEnabled.of_json in
       let maxInstanceLifetime =
-        field_map json "MaxInstanceLifetime" MaxInstanceLifetime.of_json in
+        field_map json__ "MaxInstanceLifetime" MaxInstanceLifetime.of_json in
       let serviceLinkedRoleARN =
-        field_map json "ServiceLinkedRoleARN" ResourceName.of_json in
+        field_map json__ "ServiceLinkedRoleARN" ResourceName.of_json in
       let newInstancesProtectedFromScaleIn =
-        field_map json "NewInstancesProtectedFromScaleIn"
+        field_map json__ "NewInstancesProtectedFromScaleIn"
           InstanceProtected.of_json in
       let terminationPolicies =
-        field_map json "TerminationPolicies" TerminationPolicies.of_json in
-      let tags = field_map json "Tags" TagDescriptionList.of_json in
-      let status = field_map json "Status" XmlStringMaxLen255.of_json in
+        field_map json__ "TerminationPolicies" TerminationPolicies.of_json in
+      let tags = field_map json__ "Tags" TagDescriptionList.of_json in
+      let status = field_map json__ "Status" XmlStringMaxLen255.of_json in
       let enabledMetrics =
-        field_map json "EnabledMetrics" EnabledMetrics.of_json in
+        field_map json__ "EnabledMetrics" EnabledMetrics.of_json in
       let vPCZoneIdentifier =
-        field_map json "VPCZoneIdentifier" XmlStringMaxLen2047.of_json in
+        field_map json__ "VPCZoneIdentifier" XmlStringMaxLen5000.of_json in
       let placementGroup =
-        field_map json "PlacementGroup" XmlStringMaxLen255.of_json in
+        field_map json__ "PlacementGroup" XmlStringMaxLen255.of_json in
       let suspendedProcesses =
-        field_map json "SuspendedProcesses" SuspendedProcesses.of_json in
-      let createdTime =
-        field_map_exn json "CreatedTime" TimestampType.of_json in
-      let instances = field_map json "Instances" Instances.of_json in
+        field_map json__ "SuspendedProcesses" SuspendedProcesses.of_json in
+      let createdTime = field_map json__ "CreatedTime" TimestampType.of_json in
+      let instances = field_map json__ "Instances" Instances.of_json in
       let healthCheckGracePeriod =
-        field_map json "HealthCheckGracePeriod"
+        field_map json__ "HealthCheckGracePeriod"
           HealthCheckGracePeriod.of_json in
       let healthCheckType =
-        field_map_exn json "HealthCheckType" XmlStringMaxLen32.of_json in
+        field_map json__ "HealthCheckType" XmlStringMaxLen32.of_json in
       let targetGroupARNs =
-        field_map json "TargetGroupARNs" TargetGroupARNs.of_json in
+        field_map json__ "TargetGroupARNs" TargetGroupARNs.of_json in
       let loadBalancerNames =
-        field_map json "LoadBalancerNames" LoadBalancerNames.of_json in
+        field_map json__ "LoadBalancerNames" LoadBalancerNames.of_json in
+      let availabilityZoneIds =
+        field_map json__ "AvailabilityZoneIds" AvailabilityZoneIds.of_json in
       let availabilityZones =
-        field_map_exn json "AvailabilityZones" AvailabilityZones.of_json in
+        field_map json__ "AvailabilityZones" AvailabilityZones.of_json in
       let defaultCooldown =
-        field_map_exn json "DefaultCooldown" Cooldown.of_json in
+        field_map json__ "DefaultCooldown" Cooldown.of_json in
       let predictedCapacity =
-        field_map json "PredictedCapacity"
+        field_map json__ "PredictedCapacity"
           AutoScalingGroupPredictedCapacity.of_json in
       let desiredCapacity =
-        field_map_exn json "DesiredCapacity"
+        field_map json__ "DesiredCapacity"
           AutoScalingGroupDesiredCapacity.of_json in
       let maxSize =
-        field_map_exn json "MaxSize" AutoScalingGroupMaxSize.of_json in
+        field_map json__ "MaxSize" AutoScalingGroupMaxSize.of_json in
       let minSize =
-        field_map_exn json "MinSize" AutoScalingGroupMinSize.of_json in
+        field_map json__ "MinSize" AutoScalingGroupMinSize.of_json in
       let mixedInstancesPolicy =
-        field_map json "MixedInstancesPolicy" MixedInstancesPolicy.of_json in
+        field_map json__ "MixedInstancesPolicy" MixedInstancesPolicy.of_json in
       let launchTemplate =
-        field_map json "LaunchTemplate" LaunchTemplateSpecification.of_json in
+        field_map json__ "LaunchTemplate" LaunchTemplateSpecification.of_json in
       let launchConfigurationName =
-        field_map json "LaunchConfigurationName" XmlStringMaxLen255.of_json in
+        field_map json__ "LaunchConfigurationName" XmlStringMaxLen255.of_json in
       let autoScalingGroupARN =
-        field_map json "AutoScalingGroupARN" ResourceName.of_json in
+        field_map json__ "AutoScalingGroupARN" ResourceName.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
-      make ?desiredCapacityType ?context ?warmPoolSize ?warmPoolConfiguration
-        ?capacityRebalance ?maxInstanceLifetime ?serviceLinkedRoleARN
-        ?newInstancesProtectedFromScaleIn ?terminationPolicies ?tags ?status
-        ?enabledMetrics ?vPCZoneIdentifier ?placementGroup
-        ?suspendedProcesses ~createdTime ?instances ?healthCheckGracePeriod
-        ~healthCheckType ?targetGroupARNs ?loadBalancerNames
-        ~availabilityZones ~defaultCooldown ?predictedCapacity
-        ~desiredCapacity ~maxSize ~minSize ?mixedInstancesPolicy
-        ?launchTemplate ?launchConfigurationName ?autoScalingGroupARN
-        ~autoScalingGroupName ()
+        field_map json__ "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+      make ?instanceLifecyclePolicy ?capacityReservationSpecification
+        ?availabilityZoneImpairmentPolicy ?availabilityZoneDistribution
+        ?deletionProtection ?instanceMaintenancePolicy ?trafficSources
+        ?defaultInstanceWarmup ?desiredCapacityType ?context ?warmPoolSize
+        ?warmPoolConfiguration ?capacityRebalance ?maxInstanceLifetime
+        ?serviceLinkedRoleARN ?newInstancesProtectedFromScaleIn
+        ?terminationPolicies ?tags ?status ?enabledMetrics ?vPCZoneIdentifier
+        ?placementGroup ?suspendedProcesses ?createdTime ?instances
+        ?healthCheckGracePeriod ?healthCheckType ?targetGroupARNs
+        ?loadBalancerNames ?availabilityZoneIds ?availabilityZones
+        ?defaultCooldown ?predictedCapacity ?desiredCapacity ?maxSize
+        ?minSize ?mixedInstancesPolicy ?launchTemplate
+        ?launchConfigurationName ?autoScalingGroupARN ?autoScalingGroupName
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an Auto Scaling group."]
+module SkipZonalShiftValidation =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module UpdatePlacementGroupParam =
+  struct
+    type nonrec t = string
+    let context_ = "UpdatePlacementGroupParam"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UpdatePlacementGroupParam" j
+    let to_json = simple_to_json to_value
+  end
 module ShouldDecrementDesiredCapacity =
   struct
     type nonrec t = bool
@@ -7446,8 +9606,8 @@ module InvalidNextToken =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" XmlStringMaxLen255.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The NextToken value is not valid."]
@@ -7466,28 +9626,12 @@ module ResourceContentionFault =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" XmlStringMaxLen255.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You already have a pending update to an Amazon EC2 Auto Scaling resource (for example, an Auto Scaling group, instance, or load balancer)."]
-module RefreshStrategy =
-  struct
-    type nonrec t =
-      | Rolling 
-      | Non_static_id of string 
-    let make i = i
-    let to_string = function | Rolling -> "Rolling" | Non_static_id s -> s
-    let of_string = function | "Rolling" -> Rolling | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration RefreshStrategy" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"RefreshStrategy" j)
-    let to_json = simple_to_json to_value
-  end
 module InstanceRefreshInProgressFault =
   struct
     type nonrec t = {
@@ -7503,12 +9647,12 @@ module InstanceRefreshInProgressFault =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" XmlStringMaxLen255.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The request failed because an active instance refresh operation already exists for the specified Auto Scaling group."]
+       "The request failed because an active instance refresh already exists for the specified Auto Scaling group."]
 module LimitExceededFault =
   struct
     type nonrec t = {
@@ -7524,36 +9668,12 @@ module LimitExceededFault =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" XmlStringMaxLen255.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You have already reached a limit for your Amazon EC2 Auto Scaling resources (for example, Auto Scaling groups, launch configurations, or lifecycle hooks). For more information, see DescribeAccountLimits in the Amazon EC2 Auto Scaling API Reference."]
-module InstanceIds =
-  struct
-    type nonrec t = XmlStringMaxLen19.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:XmlStringMaxLen19.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:XmlStringMaxLen19.of_xml)
-    let of_json j =
-      list_of_json ~kind:"InstanceIds" ~of_json:XmlStringMaxLen19.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module ProtectedFromScaleIn =
   struct
     type nonrec t = bool
@@ -7597,6 +9717,9 @@ module ScheduledUpdateGroupActions =
   struct
     type nonrec t = ScheduledUpdateGroupAction.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScheduledUpdateGroupAction.to_value)) |>
         (fun x -> `List x)
@@ -7623,6 +9746,9 @@ module ProcessNames =
   struct
     type nonrec t = XmlStringMaxLen255.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen255.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7643,6 +9769,48 @@ module ProcessNames =
       list_of_json ~kind:"ProcessNames" ~of_json:XmlStringMaxLen255.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ActiveInstanceRefreshNotFoundFault =
+  struct
+    type nonrec t = {
+      message: XmlStringMaxLen255.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:XmlStringMaxLen255.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" XmlStringMaxLen255.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request failed because an active instance refresh or rollback for the specified Auto Scaling group was not found."]
+module IrreversibleInstanceRefreshFault =
+  struct
+    type nonrec t = {
+      message: XmlStringMaxLen255.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:XmlStringMaxLen255.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" XmlStringMaxLen255.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request failed because a desired configuration was not found or an incompatible launch template (uses a Systems Manager parameter instead of an AMI ID) or launch template version ($Latest or $Default) is present on the Auto Scaling group."]
 module LifecycleActionToken =
   struct
     type nonrec t = string
@@ -7665,6 +9833,9 @@ module AutoScalingNotificationTypes =
   struct
     type nonrec t = XmlStringMaxLen255.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen255.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7690,6 +9861,9 @@ module Processes =
   struct
     type nonrec t = ProcessType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProcessType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7725,8 +9899,8 @@ module ServiceLinkedRoleFailure =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" XmlStringMaxLen255.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service-linked role is not yet ready for use."]
@@ -7734,6 +9908,9 @@ module ScalingPolicies =
   struct
     type nonrec t = ScalingPolicy.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScalingPolicy.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7754,10 +9931,238 @@ module ScalingPolicies =
       list_of_json ~kind:"ScalingPolicies" ~of_json:ScalingPolicy.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ClientToken =
+  struct
+    type nonrec t = string
+    let context_ = "ClientToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[A-Za-z0-9\\-_\\/]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientToken" j
+    let to_json = simple_to_json to_value
+  end
+module IdempotentParameterMismatchError =
+  struct
+    type nonrec t = {
+      message: XmlStringMaxLen255.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:XmlStringMaxLen255.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" XmlStringMaxLen255.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates that the parameters in the current request do not match the parameters from a previous request with the same client token within the idempotency window."]
+module InstanceCollections =
+  struct
+    type nonrec t = InstanceCollection.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstanceCollection.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstanceCollection.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstanceCollections"
+        ~of_json:InstanceCollection.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LaunchInstancesErrors =
+  struct
+    type nonrec t = LaunchInstancesError.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LaunchInstancesError.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LaunchInstancesError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LaunchInstancesErrors"
+        ~of_json:LaunchInstancesError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AvailabilityZoneIdsLimit1 =
+  struct
+    type nonrec t = XmlStringMaxLen255.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:XmlStringMaxLen255.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:XmlStringMaxLen255.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AvailabilityZoneIdsLimit1"
+        ~of_json:XmlStringMaxLen255.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AvailabilityZonesLimit1 =
+  struct
+    type nonrec t = XmlStringMaxLen255.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:XmlStringMaxLen255.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:XmlStringMaxLen255.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AvailabilityZonesLimit1"
+        ~of_json:XmlStringMaxLen255.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RequestedCapacity =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RequestedCapacity" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RetryStrategy =
+  struct
+    type nonrec t =
+      | Retry_with_group_configuration 
+      | None 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Retry_with_group_configuration -> "retry-with-group-configuration"
+      | None -> "none"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "retry-with-group-configuration" -> Retry_with_group_configuration
+      | "none" -> None
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RetryStrategy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RetryStrategy" j)
+    let to_json = simple_to_json to_value
+  end
+module SubnetIdsLimit1 =
+  struct
+    type nonrec t = XmlStringMaxLen255.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:XmlStringMaxLen255.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:XmlStringMaxLen255.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SubnetIdsLimit1"
+        ~of_json:XmlStringMaxLen255.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module LaunchConfigurations =
   struct
     type nonrec t = LaunchConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LaunchConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -7784,6 +10189,9 @@ module LaunchConfigurationNames =
   struct
     type nonrec t = XmlStringMaxLen255.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen255.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7823,35 +10231,35 @@ module CapacityForecast =
   struct
     type nonrec t =
       {
-      timestamps: PredictiveScalingForecastTimestamps.t
+      timestamps: PredictiveScalingForecastTimestamps.t option
         [@ocaml.doc "The timestamps for the data points, in UTC format."];
-      values: PredictiveScalingForecastValues.t
+      values: PredictiveScalingForecastValues.t option
         [@ocaml.doc "The values of the data points."]}
-    let context_ = "CapacityForecast"
-    let make ~timestamps = fun ~values -> fun () -> { timestamps; values }
+    let make ?timestamps = fun ?values -> fun () -> { timestamps; values }
     let to_value x =
       structure_to_value
         [("Timestamps",
-           (Some (PredictiveScalingForecastTimestamps.to_value x.timestamps)));
+           (Option.map x.timestamps
+              ~f:PredictiveScalingForecastTimestamps.to_value));
         ("Values",
-          (Some (PredictiveScalingForecastValues.to_value x.values)))]
+          (Option.map x.values ~f:PredictiveScalingForecastValues.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let values =
-        PredictiveScalingForecastValues.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Values") in
+        (Option.map ~f:PredictiveScalingForecastValues.of_xml)
+          (Xml.child xml_arg0 "Values") in
       let timestamps =
-        PredictiveScalingForecastTimestamps.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Timestamps") in
-      make ~values ~timestamps ()
+        (Option.map ~f:PredictiveScalingForecastTimestamps.of_xml)
+          (Xml.child xml_arg0 "Timestamps") in
+      make ?values ?timestamps ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let values =
-        field_map_exn json "Values" PredictiveScalingForecastValues.of_json in
+        field_map json__ "Values" PredictiveScalingForecastValues.of_json in
       let timestamps =
-        field_map_exn json "Timestamps"
+        field_map json__ "Timestamps"
           PredictiveScalingForecastTimestamps.of_json in
-      make ~values ~timestamps ()
+      make ?values ?timestamps ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A GetPredictiveScalingForecast call returns the capacity forecast for a predictive scaling policy. This structure includes the data points for that capacity forecast, along with the timestamps of those data points."]
@@ -7859,6 +10267,9 @@ module LoadForecasts =
   struct
     type nonrec t = LoadForecast.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LoadForecast.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7883,6 +10294,9 @@ module Activities =
   struct
     type nonrec t = Activity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Activity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7907,6 +10321,9 @@ module Metrics =
   struct
     type nonrec t = XmlStringMaxLen255.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen255.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7927,10 +10344,41 @@ module Metrics =
       list_of_json ~kind:"Metrics" ~of_json:XmlStringMaxLen255.of_json j
     let to_json v = composed_to_json to_value v
   end
+module TrafficSourceStates =
+  struct
+    type nonrec t = TrafficSourceState.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TrafficSourceState.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TrafficSourceState.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TrafficSourceStates"
+        ~of_json:TrafficSourceState.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Filters =
   struct
     type nonrec t = Filter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7954,6 +10402,9 @@ module ScheduledActionNames =
   struct
     type nonrec t = XmlStringMaxLen255.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen255.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7979,6 +10430,9 @@ module ActivityIds =
   struct
     type nonrec t = XmlString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8016,6 +10470,9 @@ module PolicyNames =
   struct
     type nonrec t = ResourceName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8040,6 +10497,9 @@ module PolicyTypes =
   struct
     type nonrec t = XmlStringMaxLen64.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen64.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8064,6 +10524,9 @@ module AutoScalingGroupNames =
   struct
     type nonrec t = XmlStringMaxLen255.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen255.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8089,6 +10552,9 @@ module NotificationConfigurations =
   struct
     type nonrec t = NotificationConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NotificationConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -8115,6 +10581,9 @@ module MetricCollectionTypes =
   struct
     type nonrec t = MetricCollectionType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricCollectionType.to_value)) |>
         (fun x -> `List x)
@@ -8141,6 +10610,9 @@ module MetricGranularityTypes =
   struct
     type nonrec t = MetricGranularityType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricGranularityType.to_value)) |>
         (fun x -> `List x)
@@ -8167,6 +10639,9 @@ module LoadBalancerStates =
   struct
     type nonrec t = LoadBalancerState.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LoadBalancerState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8192,6 +10667,9 @@ module LoadBalancerTargetGroupStates =
   struct
     type nonrec t = LoadBalancerTargetGroupState.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LoadBalancerTargetGroupState.to_value)) |>
         (fun x -> `List x)
@@ -8219,6 +10697,9 @@ module LifecycleHookNames =
     type nonrec t = AsciiStringMaxLen255.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AsciiStringMaxLen255.to_value)) |>
         (fun x -> `List x)
@@ -8245,6 +10726,9 @@ module LifecycleHooks =
   struct
     type nonrec t = LifecycleHook.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LifecycleHook.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8269,6 +10753,9 @@ module InstanceRefreshIds =
   struct
     type nonrec t = XmlStringMaxLen255.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen255.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8294,6 +10781,9 @@ module InstanceRefreshes =
   struct
     type nonrec t = InstanceRefresh.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceRefresh.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8319,6 +10809,9 @@ module AdjustmentTypes =
   struct
     type nonrec t = AdjustmentType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AdjustmentType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8427,8 +10920,8 @@ module ResourceInUseFault =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" XmlStringMaxLen255.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8448,8 +10941,8 @@ module ScalingActivityInProgressFault =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" XmlStringMaxLen255.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8458,6 +10951,9 @@ module Tags =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8481,6 +10977,9 @@ module LifecycleHookSpecifications =
   struct
     type nonrec t = LifecycleHookSpecification.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LifecycleHookSpecification.to_value)) |>
         (fun x -> `List x)
@@ -8503,31 +11002,26 @@ module LifecycleHookSpecifications =
         ~of_json:LifecycleHookSpecification.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ActiveInstanceRefreshNotFoundFault =
+module BooleanType =
   struct
-    type nonrec t = {
-      message: XmlStringMaxLen255.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:XmlStringMaxLen255.to_value))]
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
     let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
     let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:XmlStringMaxLen255.of_xml)
-          (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" XmlStringMaxLen255.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The request failed because an active instance refresh for the specified Auto Scaling group was not found."]
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module ScheduledUpdateGroupActionRequests =
   struct
     type nonrec t = ScheduledUpdateGroupActionRequest.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScheduledUpdateGroupActionRequest.to_value)) |>
         (fun x -> `List x)
@@ -8566,8 +11060,8 @@ module AlreadyExistsFault =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" XmlStringMaxLen255.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8576,6 +11070,9 @@ module FailedScheduledUpdateGroupActionRequests =
   struct
     type nonrec t = FailedScheduledUpdateGroupActionRequest.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FailedScheduledUpdateGroupActionRequest.to_value))
         |> (fun x -> `List x)
@@ -8603,6 +11100,9 @@ module AutoScalingInstances =
   struct
     type nonrec t = AutoScalingInstanceDetails.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutoScalingInstanceDetails.to_value)) |>
         (fun x -> `List x)
@@ -8629,6 +11129,9 @@ module AutoScalingGroups =
   struct
     type nonrec t = AutoScalingGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutoScalingGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8650,6 +11153,19 @@ module AutoScalingGroups =
         ~of_json:AutoScalingGroup.of_json j
     let to_json v = composed_to_json to_value v
   end
+module IncludeInstances =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module UpdateAutoScalingGroupType =
   struct
     type nonrec t =
@@ -8664,7 +11180,7 @@ module UpdateAutoScalingGroupType =
           "The launch template and version to use to specify the updates. If you specify LaunchTemplate in your update request, you can't specify LaunchConfigurationName or MixedInstancesPolicy."];
       mixedInstancesPolicy: MixedInstancesPolicy.t option
         [@ocaml.doc
-          "An embedded object that specifies a mixed instances policy. For more information, see Auto Scaling groups with multiple instance types and purchase options in the Amazon EC2 Auto Scaling User Guide."];
+          "The mixed instances policy. For more information, see Auto Scaling groups with multiple instance types and purchase options in the Amazon EC2 Auto Scaling User Guide."];
       minSize: AutoScalingGroupMinSize.t option
         [@ocaml.doc "The minimum size of the Auto Scaling group."];
       maxSize: AutoScalingGroupMaxSize.t option
@@ -8675,27 +11191,30 @@ module UpdateAutoScalingGroupType =
           "The desired capacity is the initial capacity of the Auto Scaling group after this operation completes and the capacity it attempts to maintain. This number must be greater than or equal to the minimum size of the group and less than or equal to the maximum size of the group."];
       defaultCooldown: Cooldown.t option
         [@ocaml.doc
-          "The amount of time, in seconds, after a scaling activity completes before another scaling activity can start. The default value is 300. This setting applies when using simple scaling policies, but not when using other scaling policies or scheduled scaling. For more information, see Scaling cooldowns for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."];
+          "Only needed if you use simple scaling policies. The amount of time, in seconds, between one scaling activity ending and another one starting due to simple scaling policies. For more information, see Scaling cooldowns for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."];
       availabilityZones: AvailabilityZones.t option
         [@ocaml.doc "One or more Availability Zones for the group."];
+      availabilityZoneIds: AvailabilityZoneIds.t option
+        [@ocaml.doc
+          "A list of Availability Zone IDs for the Auto Scaling group. You cannot specify both AvailabilityZones and AvailabilityZoneIds in the same request."];
       healthCheckType: XmlStringMaxLen32.t option
         [@ocaml.doc
-          "The service to use for the health checks. The valid values are EC2 and ELB. If you configure an Auto Scaling group to use ELB health checks, it considers the instance unhealthy if it fails either the EC2 status checks or the load balancer health checks."];
+          "A comma-separated value string of one or more health check types. The valid values are EC2, EBS, ELB, and VPC_LATTICE. EC2 is the default health check and cannot be disabled. For more information, see Health checks for instances in an Auto Scaling group in the Amazon EC2 Auto Scaling User Guide. Only specify EC2 if you must clear a value that was previously set."];
       healthCheckGracePeriod: HealthCheckGracePeriod.t option
         [@ocaml.doc
-          "The amount of time, in seconds, that Amazon EC2 Auto Scaling waits before checking the health status of an EC2 instance that has come into service and marking it unhealthy due to a failed health check. The default value is 0. For more information, see Health check grace period in the Amazon EC2 Auto Scaling User Guide. Required if you are adding an ELB health check."];
-      placementGroup: XmlStringMaxLen255.t option
+          "The amount of time, in seconds, that Amazon EC2 Auto Scaling waits before checking the health status of an EC2 instance that has come into service and marking it unhealthy due to a failed health check. This is useful if your instances do not immediately pass their health checks after they enter the InService state. For more information, see Set the health check grace period for an Auto Scaling group in the Amazon EC2 Auto Scaling User Guide."];
+      placementGroup: UpdatePlacementGroupParam.t option
         [@ocaml.doc
-          "The name of an existing placement group into which to launch your instances, if any. A placement group is a logical grouping of instances within a single Availability Zone. You cannot specify multiple Availability Zones and a placement group. For more information, see Placement Groups in the Amazon EC2 User Guide for Linux Instances."];
-      vPCZoneIdentifier: XmlStringMaxLen2047.t option
+          "The name of an existing placement group into which to launch your instances. To remove the placement group setting, pass an empty string for placement-group. For more information about placement groups, see Placement groups in the Amazon EC2 User Guide. A cluster placement group is a logical grouping of instances within a single Availability Zone. You cannot specify multiple Availability Zones and a cluster placement group."];
+      vPCZoneIdentifier: XmlStringMaxLen5000.t option
         [@ocaml.doc
-          "A comma-separated list of subnet IDs for a virtual private cloud (VPC). If you specify VPCZoneIdentifier with AvailabilityZones, the subnets that you specify for this parameter must reside in those Availability Zones."];
+          "A comma-separated list of subnet IDs for a virtual private cloud (VPC). If you specify VPCZoneIdentifier with AvailabilityZones, the subnets that you specify must reside in those Availability Zones."];
       terminationPolicies: TerminationPolicies.t option
         [@ocaml.doc
-          "A policy or a list of policies that are used to select the instances to terminate. The policies are executed in the order that you list them. For more information, see Controlling which Auto Scaling instances terminate during scale in in the Amazon EC2 Auto Scaling User Guide."];
+          "A policy or a list of policies that are used to select the instances to terminate. The policies are executed in the order that you list them. For more information, see Configure termination policies for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide. Valid values: Default | AllocationStrategy | ClosestToNextInstanceHour | NewestInstance | OldestInstance | OldestLaunchConfiguration | OldestLaunchTemplate | arn:aws:lambda:region:account-id:function:my-function:my-alias"];
       newInstancesProtectedFromScaleIn: InstanceProtected.t option
         [@ocaml.doc
-          "Indicates whether newly launched instances are protected from termination by Amazon EC2 Auto Scaling when scaling in. For more information about preventing instances from terminating on scale in, see Using instance scale-in protection in the Amazon EC2 Auto Scaling User Guide."];
+          "Indicates whether newly launched instances are protected from termination by Amazon EC2 Auto Scaling when scaling in. For more information about preventing instances from terminating on scale in, see Use instance scale-in protection in the Amazon EC2 Auto Scaling User Guide."];
       serviceLinkedRoleARN: ResourceName.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the service-linked role that the Auto Scaling group uses to call other Amazon Web Services on your behalf. For more information, see Service-linked roles in the Amazon EC2 Auto Scaling User Guide."];
@@ -8704,11 +11223,36 @@ module UpdateAutoScalingGroupType =
           "The maximum amount of time, in seconds, that an instance can be in service. The default is null. If specified, the value must be either 0 or a number equal to or greater than 86,400 seconds (1 day). To clear a previously set value, specify a new value of 0. For more information, see Replacing Auto Scaling instances based on maximum instance lifetime in the Amazon EC2 Auto Scaling User Guide."];
       capacityRebalance: CapacityRebalanceEnabled.t option
         [@ocaml.doc
-          "Enables or disables Capacity Rebalancing. For more information, see Amazon EC2 Auto Scaling Capacity Rebalancing in the Amazon EC2 Auto Scaling User Guide."];
+          "Enables or disables Capacity Rebalancing. If Capacity Rebalancing is disabled, proactive replacement of at-risk Spot Instances does not occur. For more information, see Capacity Rebalancing in Auto Scaling to replace at-risk Spot Instances in the Amazon EC2 Auto Scaling User Guide. To suspend rebalancing across Availability Zones, use the SuspendProcesses API."];
       context: Context.t option [@ocaml.doc "Reserved."];
       desiredCapacityType: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "The unit of measurement for the value specified for desired capacity. Amazon EC2 Auto Scaling supports DesiredCapacityType for attribute-based instance type selection only. For more information, see Creating an Auto Scaling group using attribute-based instance type selection in the Amazon EC2 Auto Scaling User Guide. By default, Amazon EC2 Auto Scaling specifies units, which translates into number of instances. Valid values: units | vcpu | memory-mib"]}
+          "The unit of measurement for the value specified for desired capacity. Amazon EC2 Auto Scaling supports DesiredCapacityType for attribute-based instance type selection only. For more information, see Create a mixed instances group using attribute-based instance type selection in the Amazon EC2 Auto Scaling User Guide. By default, Amazon EC2 Auto Scaling specifies units, which translates into number of instances. Valid values: units | vcpu | memory-mib"];
+      defaultInstanceWarmup: DefaultInstanceWarmup.t option
+        [@ocaml.doc
+          "The amount of time, in seconds, until a new instance is considered to have finished initializing and resource consumption to become stable after it enters the InService state. During an instance refresh, Amazon EC2 Auto Scaling waits for the warm-up period after it replaces an instance before it moves on to replacing the next instance. Amazon EC2 Auto Scaling also waits for the warm-up period before aggregating the metrics for new instances with existing instances in the Amazon CloudWatch metrics that are used for scaling, resulting in more reliable usage data. For more information, see Set the default instance warmup for an Auto Scaling group in the Amazon EC2 Auto Scaling User Guide. To manage various warm-up settings at the group level, we recommend that you set the default instance warmup, even if it is set to 0 seconds. To remove a value that you previously set, include the property but specify -1 for the value. However, we strongly recommend keeping the default instance warmup enabled by specifying a value of 0 or other nominal value."];
+      instanceMaintenancePolicy: InstanceMaintenancePolicy.t option
+        [@ocaml.doc
+          "An instance maintenance policy. For more information, see Set instance maintenance policy in the Amazon EC2 Auto Scaling User Guide."];
+      availabilityZoneDistribution: AvailabilityZoneDistribution.t option
+        [@ocaml.doc
+          "The instance capacity distribution across Availability Zones."];
+      availabilityZoneImpairmentPolicy:
+        AvailabilityZoneImpairmentPolicy.t option
+        [@ocaml.doc "The policy for Availability Zone impairment."];
+      skipZonalShiftValidation: SkipZonalShiftValidation.t option
+        [@ocaml.doc
+          "If you enable zonal shift with cross-zone disabled load balancers, capacity could become imbalanced across Availability Zones. To skip the validation, specify true. For more information, see Auto Scaling group zonal shift in the Amazon EC2 Auto Scaling User Guide."];
+      capacityReservationSpecification:
+        CapacityReservationSpecification.t option
+        [@ocaml.doc
+          "The capacity reservation specification for the Auto Scaling group."];
+      instanceLifecyclePolicy: InstanceLifecyclePolicy.t option
+        [@ocaml.doc
+          "The instance lifecycle policy for the Auto Scaling group. This policy controls instance behavior when an instance transitions through its lifecycle states. Configure retention triggers to specify when instances should move to a Retained state instead of automatic termination. For more information, see Control instance retention with instance lifecycle policies in the Amazon EC2 Auto Scaling User Guide."];
+      deletionProtection: DeletionProtection.t option
+        [@ocaml.doc
+          "The deletion protection setting for the Auto Scaling group. This setting helps safeguard your Auto Scaling group and its instances by controlling whether the DeleteAutoScalingGroup operation is allowed. When deletion protection is enabled, users cannot delete the Auto Scaling group according to the specified protection level until the setting is changed back to a less restrictive level. The valid values are none, prevent-force-deletion, and prevent-all-deletion. Default: none For more information, see Configure deletion protection for your Amazon EC2 Auto Scaling resources in the Amazon EC2 Auto Scaling User Guide."]}
     let context_ = "UpdateAutoScalingGroupType"
     let make ?launchConfigurationName =
       fun ?launchTemplate ->
@@ -8718,41 +11262,74 @@ module UpdateAutoScalingGroupType =
               fun ?desiredCapacity ->
                 fun ?defaultCooldown ->
                   fun ?availabilityZones ->
-                    fun ?healthCheckType ->
-                      fun ?healthCheckGracePeriod ->
-                        fun ?placementGroup ->
-                          fun ?vPCZoneIdentifier ->
-                            fun ?terminationPolicies ->
-                              fun ?newInstancesProtectedFromScaleIn ->
-                                fun ?serviceLinkedRoleARN ->
-                                  fun ?maxInstanceLifetime ->
-                                    fun ?capacityRebalance ->
-                                      fun ?context ->
-                                        fun ?desiredCapacityType ->
-                                          fun ~autoScalingGroupName ->
-                                            fun () ->
-                                              {
-                                                launchConfigurationName;
-                                                launchTemplate;
-                                                mixedInstancesPolicy;
-                                                minSize;
-                                                maxSize;
-                                                desiredCapacity;
-                                                defaultCooldown;
-                                                availabilityZones;
-                                                healthCheckType;
-                                                healthCheckGracePeriod;
-                                                placementGroup;
-                                                vPCZoneIdentifier;
-                                                terminationPolicies;
-                                                newInstancesProtectedFromScaleIn;
-                                                serviceLinkedRoleARN;
-                                                maxInstanceLifetime;
-                                                capacityRebalance;
-                                                context;
-                                                desiredCapacityType;
-                                                autoScalingGroupName
-                                              }
+                    fun ?availabilityZoneIds ->
+                      fun ?healthCheckType ->
+                        fun ?healthCheckGracePeriod ->
+                          fun ?placementGroup ->
+                            fun ?vPCZoneIdentifier ->
+                              fun ?terminationPolicies ->
+                                fun ?newInstancesProtectedFromScaleIn ->
+                                  fun ?serviceLinkedRoleARN ->
+                                    fun ?maxInstanceLifetime ->
+                                      fun ?capacityRebalance ->
+                                        fun ?context ->
+                                          fun ?desiredCapacityType ->
+                                            fun ?defaultInstanceWarmup ->
+                                              fun ?instanceMaintenancePolicy
+                                                ->
+                                                fun
+                                                  ?availabilityZoneDistribution
+                                                  ->
+                                                  fun
+                                                    ?availabilityZoneImpairmentPolicy
+                                                    ->
+                                                    fun
+                                                      ?skipZonalShiftValidation
+                                                      ->
+                                                      fun
+                                                        ?capacityReservationSpecification
+                                                        ->
+                                                        fun
+                                                          ?instanceLifecyclePolicy
+                                                          ->
+                                                          fun
+                                                            ?deletionProtection
+                                                            ->
+                                                            fun
+                                                              ~autoScalingGroupName
+                                                              ->
+                                                              fun () ->
+                                                                {
+                                                                  launchConfigurationName;
+                                                                  launchTemplate;
+                                                                  mixedInstancesPolicy;
+                                                                  minSize;
+                                                                  maxSize;
+                                                                  desiredCapacity;
+                                                                  defaultCooldown;
+                                                                  availabilityZones;
+                                                                  availabilityZoneIds;
+                                                                  healthCheckType;
+                                                                  healthCheckGracePeriod;
+                                                                  placementGroup;
+                                                                  vPCZoneIdentifier;
+                                                                  terminationPolicies;
+                                                                  newInstancesProtectedFromScaleIn;
+                                                                  serviceLinkedRoleARN;
+                                                                  maxInstanceLifetime;
+                                                                  capacityRebalance;
+                                                                  context;
+                                                                  desiredCapacityType;
+                                                                  defaultInstanceWarmup;
+                                                                  instanceMaintenancePolicy;
+                                                                  availabilityZoneDistribution;
+                                                                  availabilityZoneImpairmentPolicy;
+                                                                  skipZonalShiftValidation;
+                                                                  capacityReservationSpecification;
+                                                                  instanceLifecyclePolicy;
+                                                                  deletionProtection;
+                                                                  autoScalingGroupName
+                                                                }
     let to_value x =
       structure_to_value
         [("AutoScalingGroupName",
@@ -8776,15 +11353,17 @@ module UpdateAutoScalingGroupType =
           (Option.map x.defaultCooldown ~f:Cooldown.to_value));
         ("AvailabilityZones",
           (Option.map x.availabilityZones ~f:AvailabilityZones.to_value));
+        ("AvailabilityZoneIds",
+          (Option.map x.availabilityZoneIds ~f:AvailabilityZoneIds.to_value));
         ("HealthCheckType",
           (Option.map x.healthCheckType ~f:XmlStringMaxLen32.to_value));
         ("HealthCheckGracePeriod",
           (Option.map x.healthCheckGracePeriod
              ~f:HealthCheckGracePeriod.to_value));
         ("PlacementGroup",
-          (Option.map x.placementGroup ~f:XmlStringMaxLen255.to_value));
+          (Option.map x.placementGroup ~f:UpdatePlacementGroupParam.to_value));
         ("VPCZoneIdentifier",
-          (Option.map x.vPCZoneIdentifier ~f:XmlStringMaxLen2047.to_value));
+          (Option.map x.vPCZoneIdentifier ~f:XmlStringMaxLen5000.to_value));
         ("TerminationPolicies",
           (Option.map x.terminationPolicies ~f:TerminationPolicies.to_value));
         ("NewInstancesProtectedFromScaleIn",
@@ -8799,9 +11378,56 @@ module UpdateAutoScalingGroupType =
              ~f:CapacityRebalanceEnabled.to_value));
         ("Context", (Option.map x.context ~f:Context.to_value));
         ("DesiredCapacityType",
-          (Option.map x.desiredCapacityType ~f:XmlStringMaxLen255.to_value))]
+          (Option.map x.desiredCapacityType ~f:XmlStringMaxLen255.to_value));
+        ("DefaultInstanceWarmup",
+          (Option.map x.defaultInstanceWarmup
+             ~f:DefaultInstanceWarmup.to_value));
+        ("InstanceMaintenancePolicy",
+          (Option.map x.instanceMaintenancePolicy
+             ~f:InstanceMaintenancePolicy.to_value));
+        ("AvailabilityZoneDistribution",
+          (Option.map x.availabilityZoneDistribution
+             ~f:AvailabilityZoneDistribution.to_value));
+        ("AvailabilityZoneImpairmentPolicy",
+          (Option.map x.availabilityZoneImpairmentPolicy
+             ~f:AvailabilityZoneImpairmentPolicy.to_value));
+        ("SkipZonalShiftValidation",
+          (Option.map x.skipZonalShiftValidation
+             ~f:SkipZonalShiftValidation.to_value));
+        ("CapacityReservationSpecification",
+          (Option.map x.capacityReservationSpecification
+             ~f:CapacityReservationSpecification.to_value));
+        ("InstanceLifecyclePolicy",
+          (Option.map x.instanceLifecyclePolicy
+             ~f:InstanceLifecyclePolicy.to_value));
+        ("DeletionProtection",
+          (Option.map x.deletionProtection ~f:DeletionProtection.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let deletionProtection =
+        (Option.map ~f:DeletionProtection.of_xml)
+          (Xml.child xml_arg0 "DeletionProtection") in
+      let instanceLifecyclePolicy =
+        (Option.map ~f:InstanceLifecyclePolicy.of_xml)
+          (Xml.child xml_arg0 "InstanceLifecyclePolicy") in
+      let capacityReservationSpecification =
+        (Option.map ~f:CapacityReservationSpecification.of_xml)
+          (Xml.child xml_arg0 "CapacityReservationSpecification") in
+      let skipZonalShiftValidation =
+        (Option.map ~f:SkipZonalShiftValidation.of_xml)
+          (Xml.child xml_arg0 "SkipZonalShiftValidation") in
+      let availabilityZoneImpairmentPolicy =
+        (Option.map ~f:AvailabilityZoneImpairmentPolicy.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZoneImpairmentPolicy") in
+      let availabilityZoneDistribution =
+        (Option.map ~f:AvailabilityZoneDistribution.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZoneDistribution") in
+      let instanceMaintenancePolicy =
+        (Option.map ~f:InstanceMaintenancePolicy.of_xml)
+          (Xml.child xml_arg0 "InstanceMaintenancePolicy") in
+      let defaultInstanceWarmup =
+        (Option.map ~f:DefaultInstanceWarmup.of_xml)
+          (Xml.child xml_arg0 "DefaultInstanceWarmup") in
       let desiredCapacityType =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "DesiredCapacityType") in
@@ -8823,10 +11449,10 @@ module UpdateAutoScalingGroupType =
         (Option.map ~f:TerminationPolicies.of_xml)
           (Xml.child xml_arg0 "TerminationPolicies") in
       let vPCZoneIdentifier =
-        (Option.map ~f:XmlStringMaxLen2047.of_xml)
+        (Option.map ~f:XmlStringMaxLen5000.of_xml)
           (Xml.child xml_arg0 "VPCZoneIdentifier") in
       let placementGroup =
-        (Option.map ~f:XmlStringMaxLen255.of_xml)
+        (Option.map ~f:UpdatePlacementGroupParam.of_xml)
           (Xml.child xml_arg0 "PlacementGroup") in
       let healthCheckGracePeriod =
         (Option.map ~f:HealthCheckGracePeriod.of_xml)
@@ -8834,6 +11460,9 @@ module UpdateAutoScalingGroupType =
       let healthCheckType =
         (Option.map ~f:XmlStringMaxLen32.of_xml)
           (Xml.child xml_arg0 "HealthCheckType") in
+      let availabilityZoneIds =
+        (Option.map ~f:AvailabilityZoneIds.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZoneIds") in
       let availabilityZones =
         (Option.map ~f:AvailabilityZones.of_xml)
           (Xml.child xml_arg0 "AvailabilityZones") in
@@ -8861,64 +11490,101 @@ module UpdateAutoScalingGroupType =
       let autoScalingGroupName =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
-      make ?desiredCapacityType ?context ?capacityRebalance
-        ?maxInstanceLifetime ?serviceLinkedRoleARN
-        ?newInstancesProtectedFromScaleIn ?terminationPolicies
-        ?vPCZoneIdentifier ?placementGroup ?healthCheckGracePeriod
-        ?healthCheckType ?availabilityZones ?defaultCooldown ?desiredCapacity
-        ?maxSize ?minSize ?mixedInstancesPolicy ?launchTemplate
+      make ?deletionProtection ?instanceLifecyclePolicy
+        ?capacityReservationSpecification ?skipZonalShiftValidation
+        ?availabilityZoneImpairmentPolicy ?availabilityZoneDistribution
+        ?instanceMaintenancePolicy ?defaultInstanceWarmup
+        ?desiredCapacityType ?context ?capacityRebalance ?maxInstanceLifetime
+        ?serviceLinkedRoleARN ?newInstancesProtectedFromScaleIn
+        ?terminationPolicies ?vPCZoneIdentifier ?placementGroup
+        ?healthCheckGracePeriod ?healthCheckType ?availabilityZoneIds
+        ?availabilityZones ?defaultCooldown ?desiredCapacity ?maxSize
+        ?minSize ?mixedInstancesPolicy ?launchTemplate
         ?launchConfigurationName ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let deletionProtection =
+        field_map json__ "DeletionProtection" DeletionProtection.of_json in
+      let instanceLifecyclePolicy =
+        field_map json__ "InstanceLifecyclePolicy"
+          InstanceLifecyclePolicy.of_json in
+      let capacityReservationSpecification =
+        field_map json__ "CapacityReservationSpecification"
+          CapacityReservationSpecification.of_json in
+      let skipZonalShiftValidation =
+        field_map json__ "SkipZonalShiftValidation"
+          SkipZonalShiftValidation.of_json in
+      let availabilityZoneImpairmentPolicy =
+        field_map json__ "AvailabilityZoneImpairmentPolicy"
+          AvailabilityZoneImpairmentPolicy.of_json in
+      let availabilityZoneDistribution =
+        field_map json__ "AvailabilityZoneDistribution"
+          AvailabilityZoneDistribution.of_json in
+      let instanceMaintenancePolicy =
+        field_map json__ "InstanceMaintenancePolicy"
+          InstanceMaintenancePolicy.of_json in
+      let defaultInstanceWarmup =
+        field_map json__ "DefaultInstanceWarmup"
+          DefaultInstanceWarmup.of_json in
       let desiredCapacityType =
-        field_map json "DesiredCapacityType" XmlStringMaxLen255.of_json in
-      let context = field_map json "Context" Context.of_json in
+        field_map json__ "DesiredCapacityType" XmlStringMaxLen255.of_json in
+      let context = field_map json__ "Context" Context.of_json in
       let capacityRebalance =
-        field_map json "CapacityRebalance" CapacityRebalanceEnabled.of_json in
+        field_map json__ "CapacityRebalance" CapacityRebalanceEnabled.of_json in
       let maxInstanceLifetime =
-        field_map json "MaxInstanceLifetime" MaxInstanceLifetime.of_json in
+        field_map json__ "MaxInstanceLifetime" MaxInstanceLifetime.of_json in
       let serviceLinkedRoleARN =
-        field_map json "ServiceLinkedRoleARN" ResourceName.of_json in
+        field_map json__ "ServiceLinkedRoleARN" ResourceName.of_json in
       let newInstancesProtectedFromScaleIn =
-        field_map json "NewInstancesProtectedFromScaleIn"
+        field_map json__ "NewInstancesProtectedFromScaleIn"
           InstanceProtected.of_json in
       let terminationPolicies =
-        field_map json "TerminationPolicies" TerminationPolicies.of_json in
+        field_map json__ "TerminationPolicies" TerminationPolicies.of_json in
       let vPCZoneIdentifier =
-        field_map json "VPCZoneIdentifier" XmlStringMaxLen2047.of_json in
+        field_map json__ "VPCZoneIdentifier" XmlStringMaxLen5000.of_json in
       let placementGroup =
-        field_map json "PlacementGroup" XmlStringMaxLen255.of_json in
+        field_map json__ "PlacementGroup" UpdatePlacementGroupParam.of_json in
       let healthCheckGracePeriod =
-        field_map json "HealthCheckGracePeriod"
+        field_map json__ "HealthCheckGracePeriod"
           HealthCheckGracePeriod.of_json in
       let healthCheckType =
-        field_map json "HealthCheckType" XmlStringMaxLen32.of_json in
+        field_map json__ "HealthCheckType" XmlStringMaxLen32.of_json in
+      let availabilityZoneIds =
+        field_map json__ "AvailabilityZoneIds" AvailabilityZoneIds.of_json in
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZones.of_json in
-      let defaultCooldown = field_map json "DefaultCooldown" Cooldown.of_json in
+        field_map json__ "AvailabilityZones" AvailabilityZones.of_json in
+      let defaultCooldown =
+        field_map json__ "DefaultCooldown" Cooldown.of_json in
       let desiredCapacity =
-        field_map json "DesiredCapacity"
+        field_map json__ "DesiredCapacity"
           AutoScalingGroupDesiredCapacity.of_json in
-      let maxSize = field_map json "MaxSize" AutoScalingGroupMaxSize.of_json in
-      let minSize = field_map json "MinSize" AutoScalingGroupMinSize.of_json in
+      let maxSize =
+        field_map json__ "MaxSize" AutoScalingGroupMaxSize.of_json in
+      let minSize =
+        field_map json__ "MinSize" AutoScalingGroupMinSize.of_json in
       let mixedInstancesPolicy =
-        field_map json "MixedInstancesPolicy" MixedInstancesPolicy.of_json in
+        field_map json__ "MixedInstancesPolicy" MixedInstancesPolicy.of_json in
       let launchTemplate =
-        field_map json "LaunchTemplate" LaunchTemplateSpecification.of_json in
+        field_map json__ "LaunchTemplate" LaunchTemplateSpecification.of_json in
       let launchConfigurationName =
-        field_map json "LaunchConfigurationName" XmlStringMaxLen255.of_json in
+        field_map json__ "LaunchConfigurationName" XmlStringMaxLen255.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
-      make ?desiredCapacityType ?context ?capacityRebalance
-        ?maxInstanceLifetime ?serviceLinkedRoleARN
-        ?newInstancesProtectedFromScaleIn ?terminationPolicies
-        ?vPCZoneIdentifier ?placementGroup ?healthCheckGracePeriod
-        ?healthCheckType ?availabilityZones ?defaultCooldown ?desiredCapacity
-        ?maxSize ?minSize ?mixedInstancesPolicy ?launchTemplate
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
+      make ?deletionProtection ?instanceLifecyclePolicy
+        ?capacityReservationSpecification ?skipZonalShiftValidation
+        ?availabilityZoneImpairmentPolicy ?availabilityZoneDistribution
+        ?instanceMaintenancePolicy ?defaultInstanceWarmup
+        ?desiredCapacityType ?context ?capacityRebalance ?maxInstanceLifetime
+        ?serviceLinkedRoleARN ?newInstancesProtectedFromScaleIn
+        ?terminationPolicies ?vPCZoneIdentifier ?placementGroup
+        ?healthCheckGracePeriod ?healthCheckType ?availabilityZoneIds
+        ?availabilityZones ?defaultCooldown ?desiredCapacity ?maxSize
+        ?minSize ?mixedInstancesPolicy ?launchTemplate
         ?launchConfigurationName ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "We strongly recommend that all Auto Scaling groups use launch templates to ensure full functionality for Amazon EC2 Auto Scaling and Amazon EC2. Updates the configuration for the specified Auto Scaling group. To update an Auto Scaling group, specify the name of the group and the parameter that you want to change. Any parameters that you don't specify are not changed by this update request. The new settings take effect on any scaling activities after this call returns. If you associate a new launch configuration or template with an Auto Scaling group, all new instances will get the updated configuration. Existing instances continue to run with the configuration that they were originally launched with. When you update a group to specify a mixed instances policy instead of a launch configuration or template, existing instances may be replaced to match the new purchasing options that you specified in the policy. For example, if the group currently has 100% On-Demand capacity and the policy specifies 50% Spot capacity, this means that half of your instances will be gradually terminated and relaunched as Spot Instances. When replacing instances, Amazon EC2 Auto Scaling launches new instances before terminating the old ones, so that updating your group does not compromise the performance or availability of your application. Note the following about changing DesiredCapacity, MaxSize, or MinSize: If a scale-in activity occurs as a result of a new DesiredCapacity value that is lower than the current size of the group, the Auto Scaling group uses its termination policy to determine which instances to terminate. If you specify a new value for MinSize without specifying a value for DesiredCapacity, and the new MinSize is larger than the current size of the group, this sets the group's DesiredCapacity to the new MinSize value. If you specify a new value for MaxSize without specifying a value for DesiredCapacity, and the new MaxSize is smaller than the current size of the group, this sets the group's DesiredCapacity to the new MaxSize value. To see which parameters have been set, call the DescribeAutoScalingGroups API. To view the scaling policies for an Auto Scaling group, call the DescribePolicies API. If the group has scaling policies, you can update them by calling the PutScalingPolicy API."]
+       "We strongly recommend that all Auto Scaling groups use launch templates to ensure full functionality for Amazon EC2 Auto Scaling and Amazon EC2. Updates the configuration for the specified Auto Scaling group. To update an Auto Scaling group, specify the name of the group and the property that you want to change. Any properties that you don't specify are not changed by this update request. The new settings take effect on any scaling activities after this call returns. If you associate a new launch configuration or template with an Auto Scaling group, all new instances will get the updated configuration. Existing instances continue to run with the configuration that they were originally launched with. When you update a group to specify a mixed instances policy instead of a launch configuration or template, existing instances may be replaced to match the new purchasing options that you specified in the policy. For example, if the group currently has 100% On-Demand capacity and the policy specifies 50% Spot capacity, this means that half of your instances will be gradually terminated and relaunched as Spot Instances. When replacing instances, Amazon EC2 Auto Scaling launches new instances before terminating the old ones, so that updating your group does not compromise the performance or availability of your application. Note the following about changing DesiredCapacity, MaxSize, or MinSize: If a scale-in activity occurs as a result of a new DesiredCapacity value that is lower than the current size of the group, the Auto Scaling group uses its termination policy to determine which instances to terminate. If you specify a new value for MinSize without specifying a value for DesiredCapacity, and the new MinSize is larger than the current size of the group, this sets the group's DesiredCapacity to the new MinSize value. If you specify a new value for MaxSize without specifying a value for DesiredCapacity, and the new MaxSize is smaller than the current size of the group, this sets the group's DesiredCapacity to the new MaxSize value. To see which properties have been set, call the DescribeAutoScalingGroups API. To view the scaling policies for an Auto Scaling group, call the DescribePolicies API. If the group has scaling policies, you can update them by calling the PutScalingPolicy API."]
 module TerminateInstanceInAutoScalingGroupType =
   struct
     type nonrec t =
@@ -8949,16 +11615,16 @@ module TerminateInstanceInAutoScalingGroupType =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~shouldDecrementDesiredCapacity ~instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let shouldDecrementDesiredCapacity =
-        field_map_exn json "ShouldDecrementDesiredCapacity"
+        field_map_exn json__ "ShouldDecrementDesiredCapacity"
           ShouldDecrementDesiredCapacity.of_json in
       let instanceId =
-        field_map_exn json "InstanceId" XmlStringMaxLen19.of_json in
+        field_map_exn json__ "InstanceId" XmlStringMaxLen19.of_json in
       make ~shouldDecrementDesiredCapacity ~instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Terminates the specified instance and optionally adjusts the desired group size. This operation cannot be called on instances in a warm pool. This call simply makes a termination request. The instance is not terminated immediately. When an instance is terminated, the instance status changes to terminated. You can't connect to or start an instance after you've terminated it. If you do not specify the option to decrement the desired capacity, Amazon EC2 Auto Scaling launches instances to replace the ones that are terminated. By default, Amazon EC2 Auto Scaling balances instances across all Availability Zones. If you decrement the desired capacity, your Auto Scaling group can become unbalanced between Availability Zones. Amazon EC2 Auto Scaling tries to rebalance the group, and rebalancing might terminate instances in other zones. For more information, see Rebalancing activities in the Amazon EC2 Auto Scaling User Guide."]
+       "Terminates the specified instance and optionally adjusts the desired group size. This operation cannot be called on instances in a warm pool. This call simply makes a termination request. The instance is not terminated immediately. When an instance is terminated, the instance status changes to terminated. You can't connect to or start an instance after you've terminated it. If you do not specify the option to decrement the desired capacity, Amazon EC2 Auto Scaling launches instances to replace the ones that are terminated. By default, Amazon EC2 Auto Scaling balances instances across all Availability Zones. If you decrement the desired capacity, your Auto Scaling group can become unbalanced between Availability Zones. Amazon EC2 Auto Scaling tries to rebalance the group, and rebalancing might terminate instances in other zones. For more information, see Manual scaling in the Amazon EC2 Auto Scaling User Guide."]
 module TagsType =
   struct
     type describeTagsResult =
@@ -9027,13 +11693,13 @@ module TagsType =
         (Option.map ~f:TagDescriptionList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
-      let tags = field_map json "Tags" TagDescriptionList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
+      let tags = field_map json__ "Tags" TagDescriptionList.of_json in
       make ?nextToken ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the specified tags. You can use filters to limit the results. For example, you can query for the tags for a specific Auto Scaling group. You can specify multiple values for a filter. A tag must match at least one of the specified values for it to be included in the results. You can also specify multiple filters. The result includes information for a particular tag only if it matches all the filters. If there's no match, no special message is returned. For more information, see Tagging Auto Scaling groups and instances in the Amazon EC2 Auto Scaling User Guide."]
+       "Describes the specified tags. You can use filters to limit the results. For example, you can query for the tags for a specific Auto Scaling group. You can specify multiple values for a filter. A tag must match at least one of the specified values for it to be included in the results. You can also specify multiple filters. The result includes information for a particular tag only if it matches all the filters. If there's no match, no special message is returned. For more information, see Tag Auto Scaling groups and instances in the Amazon EC2 Auto Scaling User Guide."]
 module StartInstanceRefreshType =
   struct
     type nonrec t =
@@ -9042,13 +11708,13 @@ module StartInstanceRefreshType =
         [@ocaml.doc "The name of the Auto Scaling group."];
       strategy: RefreshStrategy.t option
         [@ocaml.doc
-          "The strategy to use for the instance refresh. The only valid value is Rolling. A rolling update helps you update your instances gradually. A rolling update can fail due to failed health checks or if instances are on standby or are protected from scale in. If the rolling update process fails, any instances that are replaced are not rolled back to their previous configuration."];
+          "The strategy to use for the instance refresh. The default value is Rolling."];
       desiredConfiguration: DesiredConfiguration.t option
         [@ocaml.doc
-          "The desired configuration. For example, the desired configuration can specify a new launch template or a new version of the current launch template. Once the instance refresh succeeds, Amazon EC2 Auto Scaling updates the settings of the Auto Scaling group to reflect the new desired configuration. When you specify a new launch template or a new version of the current launch template for your desired configuration, consider enabling the SkipMatching property in preferences. If it's enabled, Amazon EC2 Auto Scaling skips replacing instances that already use the specified launch template and version. This can help you reduce the number of replacements that are required to apply updates."];
+          "The desired configuration. For example, the desired configuration can specify a new launch template or a new version of the current launch template. Once the instance refresh succeeds, Amazon EC2 Auto Scaling updates the settings of the Auto Scaling group to reflect the new desired configuration. When you specify a new launch template or a new version of the current launch template for your desired configuration, consider enabling the SkipMatching property in preferences. If it's enabled, Amazon EC2 Auto Scaling skips replacing instances that already use the specified launch template and instance types. This can help you reduce the number of replacements that are required to apply updates."];
       preferences: RefreshPreferences.t option
         [@ocaml.doc
-          "Set of preferences associated with the instance refresh request. If not provided, the default values are used."]}
+          "Sets your preferences for the instance refresh so that it performs as expected when you start it. Includes the instance warmup time, the minimum and maximum healthy percentages, and the behaviors that you want Amazon EC2 Auto Scaling to use if instances that are in Standby state or protected from scale in are found. You can also choose to enable additional features, such as the following: Auto rollback Checkpoints CloudWatch alarms Skip matching Bake time"]}
     let context_ = "StartInstanceRefreshType"
     let make ?strategy =
       fun ?desiredConfiguration ->
@@ -9087,25 +11753,27 @@ module StartInstanceRefreshType =
       make ?preferences ?desiredConfiguration ?strategy ~autoScalingGroupName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let preferences =
-        field_map json "Preferences" RefreshPreferences.of_json in
+        field_map json__ "Preferences" RefreshPreferences.of_json in
       let desiredConfiguration =
-        field_map json "DesiredConfiguration" DesiredConfiguration.of_json in
-      let strategy = field_map json "Strategy" RefreshStrategy.of_json in
+        field_map json__ "DesiredConfiguration" DesiredConfiguration.of_json in
+      let strategy = field_map json__ "Strategy" RefreshStrategy.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ?preferences ?desiredConfiguration ?strategy ~autoScalingGroupName
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts a new instance refresh operation. An instance refresh performs a rolling replacement of all or some instances in an Auto Scaling group. Each instance is terminated first and then replaced, which temporarily reduces the capacity available within your Auto Scaling group. This operation is part of the instance refresh feature in Amazon EC2 Auto Scaling, which helps you update instances in your Auto Scaling group. This feature is helpful, for example, when you have a new AMI or a new user data script. You just need to create a new launch template that specifies the new AMI or user data script. Then start an instance refresh to immediately begin the process of updating instances in the group. If the call succeeds, it creates a new instance refresh request with a unique ID that you can use to track its progress. To query its status, call the DescribeInstanceRefreshes API. To describe the instance refreshes that have already run, call the DescribeInstanceRefreshes API. To cancel an instance refresh operation in progress, use the CancelInstanceRefresh API."]
+       "Starts an instance refresh. This operation is part of the instance refresh feature in Amazon EC2 Auto Scaling, which helps you update instances in your Auto Scaling group. This feature is helpful, for example, when you have a new AMI or a new user data script. You just need to create a new launch template that specifies the new AMI or user data script. Then start an instance refresh to immediately begin the process of updating instances in the group. If successful, the request's response contains a unique ID that you can use to track the progress of the instance refresh. To query its status, call the DescribeInstanceRefreshes API. To describe the instance refreshes that have already run, call the DescribeInstanceRefreshes API. To cancel an instance refresh that is in progress, use the CancelInstanceRefresh API. An instance refresh might fail for several reasons, such as EC2 launch failures, misconfigured health checks, or not ignoring or allowing the termination of instances that are in Standby state or protected from scale in. You can monitor for failed EC2 launches using the scaling activities. To find the scaling activities, call the DescribeScalingActivities API. If you enable auto rollback, your Auto Scaling group will be rolled back automatically when the instance refresh fails. You can enable this feature before starting an instance refresh by specifying the AutoRollback property in the instance refresh preferences. Otherwise, to roll back an instance refresh before it finishes, use the RollbackInstanceRefresh API."]
 module StartInstanceRefreshAnswer =
   struct
     type startInstanceRefreshResult =
       {
       instanceRefreshId: XmlStringMaxLen255.t option
-        [@ocaml.doc "A unique ID for tracking the progress of the request."]}
+        [@ocaml.doc
+          "A unique ID for tracking the progress of the instance refresh."]}
     and responseMetaData = unit
     and t =
       {
@@ -9180,13 +11848,13 @@ module StartInstanceRefreshAnswer =
           (Xml.child xml_arg0 "InstanceRefreshId") in
       make ?instanceRefreshId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceRefreshId =
-        field_map json "InstanceRefreshId" XmlStringMaxLen255.of_json in
+        field_map json__ "InstanceRefreshId" XmlStringMaxLen255.of_json in
       make ?instanceRefreshId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts a new instance refresh operation. An instance refresh performs a rolling replacement of all or some instances in an Auto Scaling group. Each instance is terminated first and then replaced, which temporarily reduces the capacity available within your Auto Scaling group. This operation is part of the instance refresh feature in Amazon EC2 Auto Scaling, which helps you update instances in your Auto Scaling group. This feature is helpful, for example, when you have a new AMI or a new user data script. You just need to create a new launch template that specifies the new AMI or user data script. Then start an instance refresh to immediately begin the process of updating instances in the group. If the call succeeds, it creates a new instance refresh request with a unique ID that you can use to track its progress. To query its status, call the DescribeInstanceRefreshes API. To describe the instance refreshes that have already run, call the DescribeInstanceRefreshes API. To cancel an instance refresh operation in progress, use the CancelInstanceRefresh API."]
+       "Starts an instance refresh. This operation is part of the instance refresh feature in Amazon EC2 Auto Scaling, which helps you update instances in your Auto Scaling group. This feature is helpful, for example, when you have a new AMI or a new user data script. You just need to create a new launch template that specifies the new AMI or user data script. Then start an instance refresh to immediately begin the process of updating instances in the group. If successful, the request's response contains a unique ID that you can use to track the progress of the instance refresh. To query its status, call the DescribeInstanceRefreshes API. To describe the instance refreshes that have already run, call the DescribeInstanceRefreshes API. To cancel an instance refresh that is in progress, use the CancelInstanceRefresh API. An instance refresh might fail for several reasons, such as EC2 launch failures, misconfigured health checks, or not ignoring or allowing the termination of instances that are in Standby state or protected from scale in. You can monitor for failed EC2 launches using the scaling activities. To find the scaling activities, call the DescribeScalingActivities API. If you enable auto rollback, your Auto Scaling group will be rolled back automatically when the instance refresh fails. You can enable this feature before starting an instance refresh by specifying the AutoRollback property in the instance refresh preferences. Otherwise, to roll back an instance refresh before it finishes, use the RollbackInstanceRefresh API."]
 module SetInstanceProtectionQuery =
   struct
     type nonrec t =
@@ -9225,17 +11893,19 @@ module SetInstanceProtectionQuery =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceIds") in
       make ~protectedFromScaleIn ~autoScalingGroupName ~instanceIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let protectedFromScaleIn =
-        field_map_exn json "ProtectedFromScaleIn"
+        field_map_exn json__ "ProtectedFromScaleIn"
           ProtectedFromScaleIn.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
-      let instanceIds = field_map_exn json "InstanceIds" InstanceIds.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
+      let instanceIds =
+        field_map_exn json__ "InstanceIds" InstanceIds.of_json in
       make ~protectedFromScaleIn ~autoScalingGroupName ~instanceIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the instance protection settings of the specified instances. This operation cannot be called on instances in a warm pool. For more information about preventing instances that are part of an Auto Scaling group from terminating on scale in, see Using instance scale-in protection in the Amazon EC2 Auto Scaling User Guide. If you exceed your maximum limit of instance IDs, which is 50 per Auto Scaling group, the call fails."]
+       "Updates the instance protection settings of the specified instances. This operation cannot be called on instances in a warm pool. For more information, see Use instance scale-in protection in the Amazon EC2 Auto Scaling User Guide. If you exceed your maximum limit of instance IDs, which is 50 per Auto Scaling group, the call fails."]
 module SetInstanceProtectionAnswer =
   struct
     type setInstanceProtectionResult = unit
@@ -9289,7 +11959,7 @@ module SetInstanceProtectionAnswer =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the instance protection settings of the specified instances. This operation cannot be called on instances in a warm pool. For more information about preventing instances that are part of an Auto Scaling group from terminating on scale in, see Using instance scale-in protection in the Amazon EC2 Auto Scaling User Guide. If you exceed your maximum limit of instance IDs, which is 50 per Auto Scaling group, the call fails."]
+       "Updates the instance protection settings of the specified instances. This operation cannot be called on instances in a warm pool. For more information, see Use instance scale-in protection in the Amazon EC2 Auto Scaling User Guide. If you exceed your maximum limit of instance IDs, which is 50 per Auto Scaling group, the call fails."]
 module SetInstanceHealthQuery =
   struct
     type nonrec t =
@@ -9300,7 +11970,7 @@ module SetInstanceHealthQuery =
           "The health status of the instance. Set to Healthy to have the instance remain in service. Set to Unhealthy to have the instance be out of service. Amazon EC2 Auto Scaling terminates and replaces the unhealthy instance."];
       shouldRespectGracePeriod: ShouldRespectGracePeriod.t option
         [@ocaml.doc
-          "If the Auto Scaling group of the specified instance has a HealthCheckGracePeriod specified for the group, by default, this call respects the grace period. Set this to False, to have the call not respect the grace period associated with the group. For more information about the health check grace period, see CreateAutoScalingGroup in the Amazon EC2 Auto Scaling API Reference."]}
+          "If the Auto Scaling group of the specified instance has a HealthCheckGracePeriod specified for the group, by default, this call respects the grace period. Set this to False, to have the call not respect the grace period associated with the group. For more information about the health check grace period, see Set the health check grace period for an Auto Scaling group in the Amazon EC2 Auto Scaling User Guide."]}
     let context_ = "SetInstanceHealthQuery"
     let make ?shouldRespectGracePeriod =
       fun ~instanceId ->
@@ -9326,18 +11996,18 @@ module SetInstanceHealthQuery =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?shouldRespectGracePeriod ~healthStatus ~instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let shouldRespectGracePeriod =
-        field_map json "ShouldRespectGracePeriod"
+        field_map json__ "ShouldRespectGracePeriod"
           ShouldRespectGracePeriod.of_json in
       let healthStatus =
-        field_map_exn json "HealthStatus" XmlStringMaxLen32.of_json in
+        field_map_exn json__ "HealthStatus" XmlStringMaxLen32.of_json in
       let instanceId =
-        field_map_exn json "InstanceId" XmlStringMaxLen19.of_json in
+        field_map_exn json__ "InstanceId" XmlStringMaxLen19.of_json in
       make ?shouldRespectGracePeriod ~healthStatus ~instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sets the health status of the specified instance. For more information, see Health checks for Auto Scaling instances in the Amazon EC2 Auto Scaling User Guide."]
+       "Sets the health status of the specified instance. For more information, see Set up a custom health check for your Auto Scaling group in the Amazon EC2 Auto Scaling User Guide."]
 module SetDesiredCapacityType =
   struct
     type nonrec t =
@@ -9376,14 +12046,15 @@ module SetDesiredCapacityType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?honorCooldown ~desiredCapacity ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let honorCooldown =
-        field_map json "HonorCooldown" HonorCooldown.of_json in
+        field_map json__ "HonorCooldown" HonorCooldown.of_json in
       let desiredCapacity =
-        field_map_exn json "DesiredCapacity"
+        field_map_exn json__ "DesiredCapacity"
           AutoScalingGroupDesiredCapacity.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ?honorCooldown ~desiredCapacity ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9466,10 +12137,10 @@ module ScheduledActionsType =
           (Xml.child xml_arg0 "ScheduledUpdateGroupActions") in
       make ?nextToken ?scheduledUpdateGroupActions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let scheduledUpdateGroupActions =
-        field_map json "ScheduledUpdateGroupActions"
+        field_map json__ "ScheduledUpdateGroupActions"
           ScheduledUpdateGroupActions.of_json in
       make ?nextToken ?scheduledUpdateGroupActions ()
     let to_json v = composed_to_json to_value v
@@ -9483,7 +12154,7 @@ module ScalingProcessQuery =
         [@ocaml.doc "The name of the Auto Scaling group."];
       scalingProcesses: ProcessNames.t option
         [@ocaml.doc
-          "One or more of the following processes: Launch Terminate AddToLoadBalancer AlarmNotification AZRebalance HealthCheck InstanceRefresh ReplaceUnhealthy ScheduledActions If you omit this parameter, all processes are specified."]}
+          "One or more of the following processes: Launch Terminate AddToLoadBalancer AlarmNotification AZRebalance HealthCheck InstanceRefresh ReplaceUnhealthy ScheduledActions If you omit this property, all processes are specified."]}
     let context_ = "ScalingProcessQuery"
     let make ?scalingProcesses =
       fun ~autoScalingGroupName ->
@@ -9504,15 +12175,145 @@ module ScalingProcessQuery =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?scalingProcesses ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scalingProcesses =
-        field_map json "ScalingProcesses" ProcessNames.of_json in
+        field_map json__ "ScalingProcesses" ProcessNames.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ?scalingProcesses ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Resumes the specified suspended auto scaling processes, or all suspended process, for the specified Auto Scaling group. For more information, see Suspending and resuming scaling processes in the Amazon EC2 Auto Scaling User Guide."]
+       "Resumes the specified suspended auto scaling processes, or all suspended process, for the specified Auto Scaling group. For more information, see Suspend and resume Amazon EC2 Auto Scaling processes in the Amazon EC2 Auto Scaling User Guide."]
+module RollbackInstanceRefreshType =
+  struct
+    type nonrec t =
+      {
+      autoScalingGroupName: XmlStringMaxLen255.t
+        [@ocaml.doc "The name of the Auto Scaling group."]}
+    let context_ = "RollbackInstanceRefreshType"
+    let make ~autoScalingGroupName = fun () -> { autoScalingGroupName }
+    let to_value x =
+      structure_to_value
+        [("AutoScalingGroupName",
+           (Some (XmlStringMaxLen255.to_value x.autoScalingGroupName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let autoScalingGroupName =
+        XmlStringMaxLen255.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
+      make ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let autoScalingGroupName =
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
+      make ~autoScalingGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Cancels an instance refresh that is in progress and rolls back any changes that it made. Amazon EC2 Auto Scaling replaces any instances that were replaced during the instance refresh. This restores your Auto Scaling group to the configuration that it was using before the start of the instance refresh. This operation is part of the instance refresh feature in Amazon EC2 Auto Scaling, which helps you update instances in your Auto Scaling group after you make configuration changes. A rollback is not supported in the following situations: There is no desired configuration specified for the instance refresh. The Auto Scaling group has a launch template that uses an Amazon Web Services Systems Manager parameter instead of an AMI ID for the ImageId property. The Auto Scaling group uses the launch template's $Latest or $Default version. When you receive a successful response from this operation, Amazon EC2 Auto Scaling immediately begins replacing instances. You can check the status of this operation through the DescribeInstanceRefreshes API operation."]
+module RollbackInstanceRefreshAnswer =
+  struct
+    type rollbackInstanceRefreshResult =
+      {
+      instanceRefreshId: XmlStringMaxLen255.t option
+        [@ocaml.doc
+          "The instance refresh ID associated with the request. This is the unique ID assigned to the instance refresh when it was started."]}
+    and responseMetaData = unit
+    and t =
+      {
+      rollbackInstanceRefreshResult: rollbackInstanceRefreshResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `ActiveInstanceRefreshNotFoundFault of
+          ActiveInstanceRefreshNotFoundFault.t 
+      | `IrreversibleInstanceRefreshFault of
+          IrreversibleInstanceRefreshFault.t 
+      | `LimitExceededFault of LimitExceededFault.t 
+      | `ResourceContentionFault of ResourceContentionFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "RollbackInstanceRefreshAnswer"
+    let make ?instanceRefreshId =
+      fun () ->
+        {
+          rollbackInstanceRefreshResult = { instanceRefreshId };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "ActiveInstanceRefreshNotFoundFault" ->
+          `ActiveInstanceRefreshNotFoundFault
+            (ActiveInstanceRefreshNotFoundFault.of_json json)
+      | "IrreversibleInstanceRefreshFault" ->
+          `IrreversibleInstanceRefreshFault
+            (IrreversibleInstanceRefreshFault.of_json json)
+      | "LimitExceededFault" ->
+          `LimitExceededFault (LimitExceededFault.of_json json)
+      | "ResourceContentionFault" ->
+          `ResourceContentionFault (ResourceContentionFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ActiveInstanceRefreshNotFoundFault" ->
+          `ActiveInstanceRefreshNotFoundFault
+            (ActiveInstanceRefreshNotFoundFault.of_xml xml)
+      | "IrreversibleInstanceRefreshFault" ->
+          `IrreversibleInstanceRefreshFault
+            (IrreversibleInstanceRefreshFault.of_xml xml)
+      | "LimitExceededFault" ->
+          `LimitExceededFault (LimitExceededFault.of_xml xml)
+      | "ResourceContentionFault" ->
+          `ResourceContentionFault (ResourceContentionFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ActiveInstanceRefreshNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ActiveInstanceRefreshNotFoundFault"));
+            ("details", (ActiveInstanceRefreshNotFoundFault.to_json e))]
+      | `IrreversibleInstanceRefreshFault e ->
+          `Assoc
+            [("error", (`String "IrreversibleInstanceRefreshFault"));
+            ("details", (IrreversibleInstanceRefreshFault.to_json e))]
+      | `LimitExceededFault e ->
+          `Assoc
+            [("error", (`String "LimitExceededFault"));
+            ("details", (LimitExceededFault.to_json e))]
+      | `ResourceContentionFault e ->
+          `Assoc
+            [("error", (`String "ResourceContentionFault"));
+            ("details", (ResourceContentionFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.rollbackInstanceRefreshResult in
+      structure_to_wrapped_value
+        [("InstanceRefreshId",
+           (Option.map x.instanceRefreshId ~f:XmlStringMaxLen255.to_value))]
+        ~wrapper:"RollbackInstanceRefreshResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "RollbackInstanceRefreshResult" in
+      let instanceRefreshId =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "InstanceRefreshId") in
+      make ?instanceRefreshId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let instanceRefreshId =
+        field_map json__ "InstanceRefreshId" XmlStringMaxLen255.of_json in
+      make ?instanceRefreshId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Cancels an instance refresh that is in progress and rolls back any changes that it made. Amazon EC2 Auto Scaling replaces any instances that were replaced during the instance refresh. This restores your Auto Scaling group to the configuration that it was using before the start of the instance refresh. This operation is part of the instance refresh feature in Amazon EC2 Auto Scaling, which helps you update instances in your Auto Scaling group after you make configuration changes. A rollback is not supported in the following situations: There is no desired configuration specified for the instance refresh. The Auto Scaling group has a launch template that uses an Amazon Web Services Systems Manager parameter instead of an AMI ID for the ImageId property. The Auto Scaling group uses the launch template's $Latest or $Default version. When you receive a successful response from this operation, Amazon EC2 Auto Scaling immediately begins replacing instances. You can check the status of this operation through the DescribeInstanceRefreshes API operation."]
 module RecordLifecycleActionHeartbeatType =
   struct
     type nonrec t =
@@ -9565,14 +12366,15 @@ module RecordLifecycleActionHeartbeatType =
       make ?instanceId ?lifecycleActionToken ~autoScalingGroupName
         ~lifecycleHookName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceId = field_map json "InstanceId" XmlStringMaxLen19.of_json in
+    let of_json json__ =
+      let instanceId =
+        field_map json__ "InstanceId" XmlStringMaxLen19.of_json in
       let lifecycleActionToken =
-        field_map json "LifecycleActionToken" LifecycleActionToken.of_json in
+        field_map json__ "LifecycleActionToken" LifecycleActionToken.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" ResourceName.of_json in
+        field_map_exn json__ "AutoScalingGroupName" ResourceName.of_json in
       let lifecycleHookName =
-        field_map_exn json "LifecycleHookName" AsciiStringMaxLen255.of_json in
+        field_map_exn json__ "LifecycleHookName" AsciiStringMaxLen255.of_json in
       make ?instanceId ?lifecycleActionToken ~autoScalingGroupName
         ~lifecycleHookName ()
     let to_json v = composed_to_json to_value v
@@ -9686,21 +12488,22 @@ module PutWarmPoolType =
       make ?instanceReusePolicy ?poolState ?minSize ?maxGroupPreparedCapacity
         ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceReusePolicy =
-        field_map json "InstanceReusePolicy" InstanceReusePolicy.of_json in
-      let poolState = field_map json "PoolState" WarmPoolState.of_json in
-      let minSize = field_map json "MinSize" WarmPoolMinSize.of_json in
+        field_map json__ "InstanceReusePolicy" InstanceReusePolicy.of_json in
+      let poolState = field_map json__ "PoolState" WarmPoolState.of_json in
+      let minSize = field_map json__ "MinSize" WarmPoolMinSize.of_json in
       let maxGroupPreparedCapacity =
-        field_map json "MaxGroupPreparedCapacity"
+        field_map json__ "MaxGroupPreparedCapacity"
           MaxGroupPreparedCapacity.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ?instanceReusePolicy ?poolState ?minSize ?maxGroupPreparedCapacity
         ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates a warm pool for the specified Auto Scaling group. A warm pool is a pool of pre-initialized EC2 instances that sits alongside the Auto Scaling group. Whenever your application needs to scale out, the Auto Scaling group can draw on the warm pool to meet its new desired capacity. For more information and example configurations, see Warm pools for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide. This operation must be called from the Region in which the Auto Scaling group was created. This operation cannot be called on an Auto Scaling group that has a mixed instances policy or a launch template or launch configuration that requests Spot Instances. You can view the instances in the warm pool using the DescribeWarmPool API call. If you are no longer using a warm pool, you can delete it by calling the DeleteWarmPool API."]
+       "Creates or updates a warm pool for the specified Auto Scaling group. A warm pool is a pool of pre-initialized EC2 instances that sits alongside the Auto Scaling group. Whenever your application needs to scale out, the Auto Scaling group can draw on the warm pool to meet its new desired capacity. This operation must be called from the Region in which the Auto Scaling group was created. You can view the instances in the warm pool using the DescribeWarmPool API call. If you are no longer using a warm pool, you can delete it by calling the DeleteWarmPool API. For more information, see Warm pools for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]
 module PutWarmPoolAnswer =
   struct
     type putWarmPoolResult = unit
@@ -9710,12 +12513,16 @@ module PutWarmPoolAnswer =
       putWarmPoolResult: putWarmPoolResult ;
       responseMetaData: responseMetaData }
     type error =
-      [ `LimitExceededFault of LimitExceededFault.t 
+      [ `InstanceRefreshInProgressFault of InstanceRefreshInProgressFault.t 
+      | `LimitExceededFault of LimitExceededFault.t 
       | `ResourceContentionFault of ResourceContentionFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = { putWarmPoolResult = (); responseMetaData = () }
     let error_of_json name json =
       match name with
+      | "InstanceRefreshInProgressFault" ->
+          `InstanceRefreshInProgressFault
+            (InstanceRefreshInProgressFault.of_json json)
       | "LimitExceededFault" ->
           `LimitExceededFault (LimitExceededFault.of_json json)
       | "ResourceContentionFault" ->
@@ -9725,6 +12532,9 @@ module PutWarmPoolAnswer =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "InstanceRefreshInProgressFault" ->
+          `InstanceRefreshInProgressFault
+            (InstanceRefreshInProgressFault.of_xml xml)
       | "LimitExceededFault" ->
           `LimitExceededFault (LimitExceededFault.of_xml xml)
       | "ResourceContentionFault" ->
@@ -9733,6 +12543,10 @@ module PutWarmPoolAnswer =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `InstanceRefreshInProgressFault e ->
+          `Assoc
+            [("error", (`String "InstanceRefreshInProgressFault"));
+            ("details", (InstanceRefreshInProgressFault.to_json e))]
       | `LimitExceededFault e ->
           `Assoc
             [("error", (`String "LimitExceededFault"));
@@ -9754,7 +12568,7 @@ module PutWarmPoolAnswer =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates a warm pool for the specified Auto Scaling group. A warm pool is a pool of pre-initialized EC2 instances that sits alongside the Auto Scaling group. Whenever your application needs to scale out, the Auto Scaling group can draw on the warm pool to meet its new desired capacity. For more information and example configurations, see Warm pools for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide. This operation must be called from the Region in which the Auto Scaling group was created. This operation cannot be called on an Auto Scaling group that has a mixed instances policy or a launch template or launch configuration that requests Spot Instances. You can view the instances in the warm pool using the DescribeWarmPool API call. If you are no longer using a warm pool, you can delete it by calling the DeleteWarmPool API."]
+       "Creates or updates a warm pool for the specified Auto Scaling group. A warm pool is a pool of pre-initialized EC2 instances that sits alongside the Auto Scaling group. Whenever your application needs to scale out, the Auto Scaling group can draw on the warm pool to meet its new desired capacity. This operation must be called from the Region in which the Auto Scaling group was created. You can view the instances in the warm pool using the DescribeWarmPool API call. If you are no longer using a warm pool, you can delete it by calling the DeleteWarmPool API. For more information, see Warm pools for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]
 module PutScheduledUpdateGroupActionType =
   struct
     type nonrec t =
@@ -9764,13 +12578,13 @@ module PutScheduledUpdateGroupActionType =
       scheduledActionName: XmlStringMaxLen255.t
         [@ocaml.doc "The name of this scaling action."];
       time: TimestampType.t option
-        [@ocaml.doc "This parameter is no longer used."];
+        [@ocaml.doc "This property is no longer used."];
       startTime: TimestampType.t option
         [@ocaml.doc
-          "The date and time for this action to start, in YYYY-MM-DDThh:mm:ssZ format in UTC/GMT only and in quotes (for example, \"2019-06-01T00:00:00Z\"). If you specify Recurrence and StartTime, Amazon EC2 Auto Scaling performs the action at this time, and then performs the action based on the specified recurrence. If you try to schedule your action in the past, Amazon EC2 Auto Scaling returns an error message."];
+          "The date and time for this action to start, in YYYY-MM-DDThh:mm:ssZ format in UTC/GMT only and in quotes (for example, \"2021-06-01T00:00:00Z\"). If you specify Recurrence and StartTime, Amazon EC2 Auto Scaling performs the action at this time, and then performs the action based on the specified recurrence."];
       endTime: TimestampType.t option
         [@ocaml.doc
-          "The date and time for the recurring schedule to end, in UTC."];
+          "The date and time for the recurring schedule to end, in UTC. For example, \"2021-06-01T00:00:00Z\"."];
       recurrence: XmlStringMaxLen255.t option
         [@ocaml.doc
           "The recurring schedule for this action. This format consists of five fields separated by white spaces: \\[Minute\\] \\[Hour\\] \\[Day_of_Month\\] \\[Month_of_Year\\] \\[Day_of_Week\\]. The value must be in quotes (for example, \"30 0 1 1,6,12 *\"). For more information about this format, see Crontab. When StartTime and EndTime are specified with Recurrence, they form the boundaries of when the recurring action starts and stops. Cron expressions use Universal Coordinated Time (UTC) by default."];
@@ -9780,7 +12594,7 @@ module PutScheduledUpdateGroupActionType =
         [@ocaml.doc "The maximum size of the Auto Scaling group."];
       desiredCapacity: AutoScalingGroupDesiredCapacity.t option
         [@ocaml.doc
-          "The desired capacity is the initial capacity of the Auto Scaling group after the scheduled action runs and the capacity it attempts to maintain. It can scale beyond this capacity if you add more scaling conditions."];
+          "The desired capacity is the initial capacity of the Auto Scaling group after the scheduled action runs and the capacity it attempts to maintain. It can scale beyond this capacity if you add more scaling conditions. You must specify at least one of the following properties: MaxSize, MinSize, or DesiredCapacity."];
       timeZone: XmlStringMaxLen255.t option
         [@ocaml.doc
           "Specifies the time zone for a cron expression. If a time zone is not provided, UTC is used by default. Valid values are the canonical names of the IANA time zones, derived from the IANA Time Zone Database (such as Etc/GMT+9 or Pacific/Tahiti). For more information, see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones."]}
@@ -9859,26 +12673,30 @@ module PutScheduledUpdateGroupActionType =
       make ?timeZone ?desiredCapacity ?maxSize ?minSize ?recurrence ?endTime
         ?startTime ?time ~scheduledActionName ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeZone = field_map json "TimeZone" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let timeZone = field_map json__ "TimeZone" XmlStringMaxLen255.of_json in
       let desiredCapacity =
-        field_map json "DesiredCapacity"
+        field_map json__ "DesiredCapacity"
           AutoScalingGroupDesiredCapacity.of_json in
-      let maxSize = field_map json "MaxSize" AutoScalingGroupMaxSize.of_json in
-      let minSize = field_map json "MinSize" AutoScalingGroupMinSize.of_json in
-      let recurrence = field_map json "Recurrence" XmlStringMaxLen255.of_json in
-      let endTime = field_map json "EndTime" TimestampType.of_json in
-      let startTime = field_map json "StartTime" TimestampType.of_json in
-      let time = field_map json "Time" TimestampType.of_json in
+      let maxSize =
+        field_map json__ "MaxSize" AutoScalingGroupMaxSize.of_json in
+      let minSize =
+        field_map json__ "MinSize" AutoScalingGroupMinSize.of_json in
+      let recurrence =
+        field_map json__ "Recurrence" XmlStringMaxLen255.of_json in
+      let endTime = field_map json__ "EndTime" TimestampType.of_json in
+      let startTime = field_map json__ "StartTime" TimestampType.of_json in
+      let time = field_map json__ "Time" TimestampType.of_json in
       let scheduledActionName =
-        field_map_exn json "ScheduledActionName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "ScheduledActionName" XmlStringMaxLen255.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ?timeZone ?desiredCapacity ?maxSize ?minSize ?recurrence ?endTime
         ?startTime ?time ~scheduledActionName ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates a scheduled scaling action for an Auto Scaling group. For more information, see Scheduled scaling in the Amazon EC2 Auto Scaling User Guide. You can view the scheduled actions for an Auto Scaling group using the DescribeScheduledActions API call. If you are no longer using a scheduled action, you can delete it by calling the DeleteScheduledAction API."]
+       "Creates or updates a scheduled scaling action for an Auto Scaling group. For more information, see Scheduled scaling in the Amazon EC2 Auto Scaling User Guide. You can view the scheduled actions for an Auto Scaling group using the DescribeScheduledActions API call. If you are no longer using a scheduled action, you can delete it by calling the DeleteScheduledAction API. If you try to schedule your action in the past, Amazon EC2 Auto Scaling returns an error message."]
 module PutScalingPolicyType =
   struct
     type nonrec t =
@@ -9900,10 +12718,10 @@ module PutScalingPolicyType =
           "The minimum value to scale by when the adjustment type is PercentChangeInCapacity. For example, suppose that you create a step scaling policy to scale out an Auto Scaling group by 25 percent and you specify a MinAdjustmentMagnitude of 2. If the group has 4 instances and the scaling policy is performed, 25 percent of 4 is 1. However, because you specified a MinAdjustmentMagnitude of 2, Amazon EC2 Auto Scaling scales out the group by 2 instances. Valid only if the policy type is StepScaling or SimpleScaling. For more information, see Scaling adjustment types in the Amazon EC2 Auto Scaling User Guide. Some Auto Scaling groups use instance weights. In this case, set the MinAdjustmentMagnitude to a value that is at least as large as your largest instance weight."];
       scalingAdjustment: PolicyIncrement.t option
         [@ocaml.doc
-          "The amount by which to scale, based on the specified adjustment type. A positive value adds to the current capacity while a negative number removes from the current capacity. For exact capacity, you must specify a positive value. Required if the policy type is SimpleScaling. (Not used with any other policy type.)"];
+          "The amount by which to scale, based on the specified adjustment type. A positive value adds to the current capacity while a negative number removes from the current capacity. For exact capacity, you must specify a non-negative value. Required if the policy type is SimpleScaling. (Not used with any other policy type.)"];
       cooldown: Cooldown.t option
         [@ocaml.doc
-          "The duration of the policy's cooldown period, in seconds. When a cooldown period is specified here, it overrides the default cooldown period defined for the Auto Scaling group. Valid only if the policy type is SimpleScaling. For more information, see Scaling cooldowns for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."];
+          "A cooldown period, in seconds, that applies to a specific simple scaling policy. When a cooldown period is specified here, it overrides the default cooldown. Valid only if the policy type is SimpleScaling. For more information, see Scaling cooldowns for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide. Default: None"];
       metricAggregationType: XmlStringMaxLen32.t option
         [@ocaml.doc
           "The aggregation type for the CloudWatch metrics. The valid values are Minimum, Maximum, and Average. If the aggregation type is null, the value is treated as Average. Valid only if the policy type is StepScaling."];
@@ -9912,13 +12730,13 @@ module PutScalingPolicyType =
           "A set of adjustments that enable you to scale based on the size of the alarm breach. Required if the policy type is StepScaling. (Not used with any other policy type.)"];
       estimatedInstanceWarmup: EstimatedInstanceWarmup.t option
         [@ocaml.doc
-          "The estimated time, in seconds, until a newly launched instance can contribute to the CloudWatch metrics. If not provided, the default is to use the value from the default cooldown period for the Auto Scaling group. Valid only if the policy type is TargetTrackingScaling or StepScaling."];
+          "Not needed if the default instance warmup is defined for the group. The estimated time, in seconds, until a newly launched instance can contribute to the CloudWatch metrics. This warm-up period applies to instances launched due to a specific target tracking or step scaling policy. When a warm-up period is specified here, it overrides the default instance warmup. Valid only if the policy type is TargetTrackingScaling or StepScaling. The default is to use the value for the default instance warmup defined for the group. If default instance warmup is null, then EstimatedInstanceWarmup falls back to the value of default cooldown."];
       targetTrackingConfiguration: TargetTrackingConfiguration.t option
         [@ocaml.doc
-          "A target tracking scaling policy. Provides support for predefined or custom metrics. The following predefined metrics are available: ASGAverageCPUUtilization ASGAverageNetworkIn ASGAverageNetworkOut ALBRequestCountPerTarget If you specify ALBRequestCountPerTarget for the metric, you must specify the ResourceLabel parameter with the PredefinedMetricSpecification. For more information, see TargetTrackingConfiguration in the Amazon EC2 Auto Scaling API Reference. Required if the policy type is TargetTrackingScaling."];
+          "A target tracking scaling policy. Provides support for predefined or custom metrics. The following predefined metrics are available: ASGAverageCPUUtilization ASGAverageNetworkIn ASGAverageNetworkOut ALBRequestCountPerTarget If you specify ALBRequestCountPerTarget for the metric, you must specify the ResourceLabel property with the PredefinedMetricSpecification. For more information, see TargetTrackingConfiguration in the Amazon EC2 Auto Scaling API Reference. Required if the policy type is TargetTrackingScaling."];
       enabled: ScalingPolicyEnabled.t option
         [@ocaml.doc
-          "Indicates whether the scaling policy is enabled or disabled. The default is enabled. For more information, see Disabling a scaling policy for an Auto Scaling group in the Amazon EC2 Auto Scaling User Guide."];
+          "Indicates whether the scaling policy is enabled or disabled. The default is enabled. For more information, see Disable a scaling policy for an Auto Scaling group in the Amazon EC2 Auto Scaling User Guide."];
       predictiveScalingConfiguration: PredictiveScalingConfiguration.t option
         [@ocaml.doc
           "A predictive scaling policy. Provides support for predefined and custom metrics. Predefined metrics include CPU utilization, network in/out, and the Application Load Balancer request count. For more information, see PredictiveScalingConfiguration in the Amazon EC2 Auto Scaling API Reference. Required if the policy type is PredictiveScaling."]}
@@ -10034,36 +12852,38 @@ module PutScalingPolicyType =
         ?minAdjustmentMagnitude ?minAdjustmentStep ?adjustmentType
         ?policyType ~policyName ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let predictiveScalingConfiguration =
-        field_map json "PredictiveScalingConfiguration"
+        field_map json__ "PredictiveScalingConfiguration"
           PredictiveScalingConfiguration.of_json in
-      let enabled = field_map json "Enabled" ScalingPolicyEnabled.of_json in
+      let enabled = field_map json__ "Enabled" ScalingPolicyEnabled.of_json in
       let targetTrackingConfiguration =
-        field_map json "TargetTrackingConfiguration"
+        field_map json__ "TargetTrackingConfiguration"
           TargetTrackingConfiguration.of_json in
       let estimatedInstanceWarmup =
-        field_map json "EstimatedInstanceWarmup"
+        field_map json__ "EstimatedInstanceWarmup"
           EstimatedInstanceWarmup.of_json in
       let stepAdjustments =
-        field_map json "StepAdjustments" StepAdjustments.of_json in
+        field_map json__ "StepAdjustments" StepAdjustments.of_json in
       let metricAggregationType =
-        field_map json "MetricAggregationType" XmlStringMaxLen32.of_json in
-      let cooldown = field_map json "Cooldown" Cooldown.of_json in
+        field_map json__ "MetricAggregationType" XmlStringMaxLen32.of_json in
+      let cooldown = field_map json__ "Cooldown" Cooldown.of_json in
       let scalingAdjustment =
-        field_map json "ScalingAdjustment" PolicyIncrement.of_json in
+        field_map json__ "ScalingAdjustment" PolicyIncrement.of_json in
       let minAdjustmentMagnitude =
-        field_map json "MinAdjustmentMagnitude"
+        field_map json__ "MinAdjustmentMagnitude"
           MinAdjustmentMagnitude.of_json in
       let minAdjustmentStep =
-        field_map json "MinAdjustmentStep" MinAdjustmentStep.of_json in
+        field_map json__ "MinAdjustmentStep" MinAdjustmentStep.of_json in
       let adjustmentType =
-        field_map json "AdjustmentType" XmlStringMaxLen255.of_json in
-      let policyType = field_map json "PolicyType" XmlStringMaxLen64.of_json in
+        field_map json__ "AdjustmentType" XmlStringMaxLen255.of_json in
+      let policyType =
+        field_map json__ "PolicyType" XmlStringMaxLen64.of_json in
       let policyName =
-        field_map_exn json "PolicyName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "PolicyName" XmlStringMaxLen255.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ?predictiveScalingConfiguration ?enabled
         ?targetTrackingConfiguration ?estimatedInstanceWarmup
         ?stepAdjustments ?metricAggregationType ?cooldown ?scalingAdjustment
@@ -10109,17 +12929,19 @@ module PutNotificationConfigurationType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~notificationTypes ~topicARN ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let notificationTypes =
-        field_map_exn json "NotificationTypes"
+        field_map_exn json__ "NotificationTypes"
           AutoScalingNotificationTypes.of_json in
-      let topicARN = field_map_exn json "TopicARN" XmlStringMaxLen255.of_json in
+      let topicARN =
+        field_map_exn json__ "TopicARN" XmlStringMaxLen255.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ~notificationTypes ~topicARN ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configures an Auto Scaling group to send notifications when specified events take place. Subscribers to the specified topic can have messages delivered to an endpoint such as a web server or an email address. This configuration overwrites any existing configuration. For more information, see Getting Amazon SNS notifications when your Auto Scaling group scales in the Amazon EC2 Auto Scaling User Guide. If you exceed your maximum limit of SNS topics, which is 10 per Auto Scaling group, the call fails."]
+       "Configures an Auto Scaling group to send notifications when specified events take place. Subscribers to the specified topic can have messages delivered to an endpoint such as a web server or an email address. This configuration overwrites any existing configuration. For more information, see Amazon SNS notification options for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide. If you exceed your maximum limit of SNS topics, which is 10 per Auto Scaling group, the call fails."]
 module PutLifecycleHookType =
   struct
     type nonrec t =
@@ -10130,22 +12952,22 @@ module PutLifecycleHookType =
         [@ocaml.doc "The name of the Auto Scaling group."];
       lifecycleTransition: LifecycleTransition.t option
         [@ocaml.doc
-          "The instance state to which you want to attach the lifecycle hook. The valid values are: autoscaling:EC2_INSTANCE_LAUNCHING autoscaling:EC2_INSTANCE_TERMINATING Required for new lifecycle hooks, but optional when updating existing hooks."];
+          "The lifecycle transition. For Auto Scaling groups, there are two major lifecycle transitions. To create a lifecycle hook for scale-out events, specify autoscaling:EC2_INSTANCE_LAUNCHING. To create a lifecycle hook for scale-in events, specify autoscaling:EC2_INSTANCE_TERMINATING. Required for new lifecycle hooks, but optional when updating existing hooks."];
       roleARN: XmlStringMaxLen255.t option
         [@ocaml.doc
           "The ARN of the IAM role that allows the Auto Scaling group to publish to the specified notification target. Valid only if the notification target is an Amazon SNS topic or an Amazon SQS queue. Required for new lifecycle hooks, but optional when updating existing hooks."];
       notificationTargetARN: NotificationTargetResourceName.t option
         [@ocaml.doc
-          "The ARN of the notification target that Amazon EC2 Auto Scaling uses to notify you when an instance is in the transition state for the lifecycle hook. This target can be either an SQS queue or an SNS topic. If you specify an empty string, this overrides the current ARN. This operation uses the JSON format when sending notifications to an Amazon SQS queue, and an email key-value pair format when sending notifications to an Amazon SNS topic. When you specify a notification target, Amazon EC2 Auto Scaling sends it a test message. Test messages contain the following additional key-value pair: \"Event\": \"autoscaling:TEST_NOTIFICATION\"."];
-      notificationMetadata: XmlStringMaxLen1023.t option
+          "The Amazon Resource Name (ARN) of the notification target that Amazon EC2 Auto Scaling uses to notify you when an instance is in a wait state for the lifecycle hook. You can specify either an Amazon SNS topic or an Amazon SQS queue. If you specify an empty string, this overrides the current ARN. This operation uses the JSON format when sending notifications to an Amazon SQS queue, and an email key-value pair format when sending notifications to an Amazon SNS topic. When you specify a notification target, Amazon EC2 Auto Scaling sends it a test message. Test messages contain the following additional key-value pair: \"Event\": \"autoscaling:TEST_NOTIFICATION\"."];
+      notificationMetadata: AnyPrintableAsciiStringMaxLen4000.t option
         [@ocaml.doc
           "Additional information that you want to include any time Amazon EC2 Auto Scaling sends a message to the notification target."];
       heartbeatTimeout: HeartbeatTimeout.t option
         [@ocaml.doc
-          "The maximum time, in seconds, that can elapse before the lifecycle hook times out. The range is from 30 to 7200 seconds. The default value is 3600 seconds (1 hour). If the lifecycle hook times out, Amazon EC2 Auto Scaling performs the action that you specified in the DefaultResult parameter. You can prevent the lifecycle hook from timing out by calling the RecordLifecycleActionHeartbeat API."];
+          "The maximum time, in seconds, that can elapse before the lifecycle hook times out. The range is from 30 to 7200 seconds. The default value is 3600 seconds (1 hour)."];
       defaultResult: LifecycleActionResult.t option
         [@ocaml.doc
-          "Defines the action the Auto Scaling group should take when the lifecycle hook timeout elapses or if an unexpected failure occurs. This parameter can be either CONTINUE or ABANDON. The default value is ABANDON."]}
+          "The action the Auto Scaling group takes when the lifecycle hook timeout elapses or if an unexpected failure occurs. The default value is ABANDON. Valid values: CONTINUE | ABANDON"]}
     let context_ = "PutLifecycleHookType"
     let make ?lifecycleTransition =
       fun ?roleARN ->
@@ -10179,7 +13001,8 @@ module PutLifecycleHookType =
           (Option.map x.notificationTargetARN
              ~f:NotificationTargetResourceName.to_value));
         ("NotificationMetadata",
-          (Option.map x.notificationMetadata ~f:XmlStringMaxLen1023.to_value));
+          (Option.map x.notificationMetadata
+             ~f:AnyPrintableAsciiStringMaxLen4000.to_value));
         ("HeartbeatTimeout",
           (Option.map x.heartbeatTimeout ~f:HeartbeatTimeout.to_value));
         ("DefaultResult",
@@ -10193,7 +13016,7 @@ module PutLifecycleHookType =
         (Option.map ~f:HeartbeatTimeout.of_xml)
           (Xml.child xml_arg0 "HeartbeatTimeout") in
       let notificationMetadata =
-        (Option.map ~f:XmlStringMaxLen1023.of_xml)
+        (Option.map ~f:AnyPrintableAsciiStringMaxLen4000.of_xml)
           (Xml.child xml_arg0 "NotificationMetadata") in
       let notificationTargetARN =
         (Option.map ~f:NotificationTargetResourceName.of_xml)
@@ -10214,23 +13037,25 @@ module PutLifecycleHookType =
         ?notificationTargetARN ?roleARN ?lifecycleTransition
         ~autoScalingGroupName ~lifecycleHookName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultResult =
-        field_map json "DefaultResult" LifecycleActionResult.of_json in
+        field_map json__ "DefaultResult" LifecycleActionResult.of_json in
       let heartbeatTimeout =
-        field_map json "HeartbeatTimeout" HeartbeatTimeout.of_json in
+        field_map json__ "HeartbeatTimeout" HeartbeatTimeout.of_json in
       let notificationMetadata =
-        field_map json "NotificationMetadata" XmlStringMaxLen1023.of_json in
+        field_map json__ "NotificationMetadata"
+          AnyPrintableAsciiStringMaxLen4000.of_json in
       let notificationTargetARN =
-        field_map json "NotificationTargetARN"
+        field_map json__ "NotificationTargetARN"
           NotificationTargetResourceName.of_json in
-      let roleARN = field_map json "RoleARN" XmlStringMaxLen255.of_json in
+      let roleARN = field_map json__ "RoleARN" XmlStringMaxLen255.of_json in
       let lifecycleTransition =
-        field_map json "LifecycleTransition" LifecycleTransition.of_json in
+        field_map json__ "LifecycleTransition" LifecycleTransition.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       let lifecycleHookName =
-        field_map_exn json "LifecycleHookName" AsciiStringMaxLen255.of_json in
+        field_map_exn json__ "LifecycleHookName" AsciiStringMaxLen255.of_json in
       make ?defaultResult ?heartbeatTimeout ?notificationMetadata
         ?notificationTargetARN ?roleARN ?lifecycleTransition
         ~autoScalingGroupName ~lifecycleHookName ()
@@ -10350,8 +13175,8 @@ module ProcessesType =
         (Option.map ~f:Processes.of_xml) (Xml.child xml_arg0 "Processes") in
       make ?processes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let processes = field_map json "Processes" Processes.of_json in
+    let of_json json__ =
+      let processes = field_map json__ "Processes" Processes.of_json in
       make ?processes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10439,9 +13264,9 @@ module PolicyARNType =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "PolicyARN") in
       make ?alarms ?policyARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let alarms = field_map json "Alarms" Alarms.of_json in
-      let policyARN = field_map json "PolicyARN" ResourceName.of_json in
+    let of_json json__ =
+      let alarms = field_map json__ "Alarms" Alarms.of_json in
+      let policyARN = field_map json__ "PolicyARN" ResourceName.of_json in
       make ?alarms ?policyARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of PutScalingPolicy."]
@@ -10529,19 +13354,234 @@ module PoliciesType =
           (Xml.child xml_arg0 "ScalingPolicies") in
       make ?nextToken ?scalingPolicies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let scalingPolicies =
-        field_map json "ScalingPolicies" ScalingPolicies.of_json in
+        field_map json__ "ScalingPolicies" ScalingPolicies.of_json in
       make ?nextToken ?scalingPolicies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about the scaling policies in the account and Region."]
+module LaunchInstancesResult =
+  struct
+    type launchInstancesResult =
+      {
+      autoScalingGroupName: XmlStringMaxLen255.t option
+        [@ocaml.doc
+          "The name of the Auto Scaling group where the instances were launched."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "The idempotency token used for the request, either customer-specified or auto-generated."];
+      instances: InstanceCollections.t option
+        [@ocaml.doc
+          "A list of successfully launched instances including details such as instance type, Availability Zone, subnet, lifecycle state, and instance IDs."];
+      errors: LaunchInstancesErrors.t option
+        [@ocaml.doc
+          "A list of errors encountered during the launch attempt including details about failed instance launches with their corresponding error codes and messages."]}
+    and responseMetaData = unit
+    and t =
+      {
+      launchInstancesResult: launchInstancesResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `IdempotentParameterMismatchError of
+          IdempotentParameterMismatchError.t 
+      | `ResourceContentionFault of ResourceContentionFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "LaunchInstancesResult"
+    let make ?autoScalingGroupName =
+      fun ?clientToken ->
+        fun ?instances ->
+          fun ?errors ->
+            fun () ->
+              {
+                launchInstancesResult =
+                  { autoScalingGroupName; clientToken; instances; errors };
+                responseMetaData = ()
+              }
+    let error_of_json name json =
+      match name with
+      | "IdempotentParameterMismatchError" ->
+          `IdempotentParameterMismatchError
+            (IdempotentParameterMismatchError.of_json json)
+      | "ResourceContentionFault" ->
+          `ResourceContentionFault (ResourceContentionFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "IdempotentParameterMismatchError" ->
+          `IdempotentParameterMismatchError
+            (IdempotentParameterMismatchError.of_xml xml)
+      | "ResourceContentionFault" ->
+          `ResourceContentionFault (ResourceContentionFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `IdempotentParameterMismatchError e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchError"));
+            ("details", (IdempotentParameterMismatchError.to_json e))]
+      | `ResourceContentionFault e ->
+          `Assoc
+            [("error", (`String "ResourceContentionFault"));
+            ("details", (ResourceContentionFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.launchInstancesResult in
+      structure_to_wrapped_value
+        [("AutoScalingGroupName",
+           (Option.map x.autoScalingGroupName ~f:XmlStringMaxLen255.to_value));
+        ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("Instances",
+          (Option.map x.instances ~f:InstanceCollections.to_value));
+        ("Errors", (Option.map x.errors ~f:LaunchInstancesErrors.to_value))]
+        ~wrapper:"LaunchInstancesResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "LaunchInstancesResult" in
+      let errors =
+        (Option.map ~f:LaunchInstancesErrors.of_xml)
+          (Xml.child xml_arg0 "Errors") in
+      let instances =
+        (Option.map ~f:InstanceCollections.of_xml)
+          (Xml.child xml_arg0 "Instances") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
+      let autoScalingGroupName =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "AutoScalingGroupName") in
+      make ?errors ?instances ?clientToken ?autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errors = field_map json__ "Errors" LaunchInstancesErrors.of_json in
+      let instances =
+        field_map json__ "Instances" InstanceCollections.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let autoScalingGroupName =
+        field_map json__ "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+      make ?errors ?instances ?clientToken ?autoScalingGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Launches a specified number of instances in an Auto Scaling group. Returns instance IDs and other details if launch is successful or error details if launch is unsuccessful."]
+module LaunchInstancesRequest =
+  struct
+    type nonrec t =
+      {
+      autoScalingGroupName: XmlStringMaxLen255.t
+        [@ocaml.doc
+          "The name of the Auto Scaling group to launch instances into."];
+      requestedCapacity: RequestedCapacity.t
+        [@ocaml.doc
+          "The number of instances to launch. Although this value can exceed 100 for instance weights, the actual instance count is limited to 100 instances per launch."];
+      clientToken: ClientToken.t
+        [@ocaml.doc
+          "A unique, case-sensitive identifier to ensure idempotency of the request."];
+      availabilityZones: AvailabilityZonesLimit1.t option
+        [@ocaml.doc
+          "The Availability Zones for the instance launch. Must match or be included in the Auto Scaling group's Availability Zone configuration. Either AvailabilityZones or SubnetIds must be specified for groups with multiple Availability Zone configurations."];
+      availabilityZoneIds: AvailabilityZoneIdsLimit1.t option
+        [@ocaml.doc
+          "A list of Availability Zone IDs where instances should be launched. Must match or be included in the group's AZ configuration. You cannot specify both AvailabilityZones and AvailabilityZoneIds. Required for multi-AZ groups, optional for single-AZ groups."];
+      subnetIds: SubnetIdsLimit1.t option
+        [@ocaml.doc
+          "The subnet IDs for the instance launch. Either AvailabilityZones or SubnetIds must be specified. If both are specified, the subnets must reside in the specified Availability Zones."];
+      retryStrategy: RetryStrategy.t option
+        [@ocaml.doc
+          "Specifies whether to retry asynchronously if the synchronous launch fails. Valid values are NONE (default, no async retry) and RETRY_WITH_GROUP_CONFIGURATION (increase desired capacity and retry with group configuration)."]}
+    let context_ = "LaunchInstancesRequest"
+    let make ?availabilityZones =
+      fun ?availabilityZoneIds ->
+        fun ?subnetIds ->
+          fun ?retryStrategy ->
+            fun ~autoScalingGroupName ->
+              fun ~requestedCapacity ->
+                fun ~clientToken ->
+                  fun () ->
+                    {
+                      availabilityZones;
+                      availabilityZoneIds;
+                      subnetIds;
+                      retryStrategy;
+                      autoScalingGroupName;
+                      requestedCapacity;
+                      clientToken
+                    }
+    let to_value x =
+      structure_to_value
+        [("AutoScalingGroupName",
+           (Some (XmlStringMaxLen255.to_value x.autoScalingGroupName)));
+        ("RequestedCapacity",
+          (Some (RequestedCapacity.to_value x.requestedCapacity)));
+        ("ClientToken", (Some (ClientToken.to_value x.clientToken)));
+        ("AvailabilityZones",
+          (Option.map x.availabilityZones ~f:AvailabilityZonesLimit1.to_value));
+        ("AvailabilityZoneIds",
+          (Option.map x.availabilityZoneIds
+             ~f:AvailabilityZoneIdsLimit1.to_value));
+        ("SubnetIds", (Option.map x.subnetIds ~f:SubnetIdsLimit1.to_value));
+        ("RetryStrategy",
+          (Option.map x.retryStrategy ~f:RetryStrategy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retryStrategy =
+        (Option.map ~f:RetryStrategy.of_xml)
+          (Xml.child xml_arg0 "RetryStrategy") in
+      let subnetIds =
+        (Option.map ~f:SubnetIdsLimit1.of_xml)
+          (Xml.child xml_arg0 "SubnetIds") in
+      let availabilityZoneIds =
+        (Option.map ~f:AvailabilityZoneIdsLimit1.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZoneIds") in
+      let availabilityZones =
+        (Option.map ~f:AvailabilityZonesLimit1.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZones") in
+      let clientToken =
+        ClientToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
+      let requestedCapacity =
+        RequestedCapacity.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RequestedCapacity") in
+      let autoScalingGroupName =
+        XmlStringMaxLen255.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
+      make ?retryStrategy ?subnetIds ?availabilityZoneIds ?availabilityZones
+        ~clientToken ~requestedCapacity ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retryStrategy =
+        field_map json__ "RetryStrategy" RetryStrategy.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIdsLimit1.of_json in
+      let availabilityZoneIds =
+        field_map json__ "AvailabilityZoneIds"
+          AvailabilityZoneIdsLimit1.of_json in
+      let availabilityZones =
+        field_map json__ "AvailabilityZones" AvailabilityZonesLimit1.of_json in
+      let clientToken =
+        field_map_exn json__ "ClientToken" ClientToken.of_json in
+      let requestedCapacity =
+        field_map_exn json__ "RequestedCapacity" RequestedCapacity.of_json in
+      let autoScalingGroupName =
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
+      make ?retryStrategy ?subnetIds ?availabilityZoneIds ?availabilityZones
+        ~clientToken ~requestedCapacity ~autoScalingGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Launches a specified number of instances in an Auto Scaling group. Returns instance IDs and other details if launch is successful or error details if launch is unsuccessful."]
 module LaunchConfigurationsType =
   struct
     type describeLaunchConfigurationsResult =
       {
-      launchConfigurations: LaunchConfigurations.t
+      launchConfigurations: LaunchConfigurations.t option
         [@ocaml.doc "The launch configurations."];
       nextToken: XmlString.t option
         [@ocaml.doc
@@ -10556,12 +13596,12 @@ module LaunchConfigurationsType =
       | `ResourceContentionFault of ResourceContentionFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "LaunchConfigurationsType"
-    let make ?nextToken =
-      fun ~launchConfigurations ->
+    let make ?launchConfigurations =
+      fun ?nextToken ->
         fun () ->
           {
             describeLaunchConfigurationsResult =
-              { nextToken; launchConfigurations };
+              { launchConfigurations; nextToken };
             responseMetaData = ()
           }
     let error_of_json name json =
@@ -10599,7 +13639,8 @@ module LaunchConfigurationsType =
       let x = t.describeLaunchConfigurationsResult in
       structure_to_wrapped_value
         [("LaunchConfigurations",
-           (Some (LaunchConfigurations.to_value x.launchConfigurations)));
+           (Option.map x.launchConfigurations
+              ~f:LaunchConfigurations.to_value));
         ("NextToken", (Option.map x.nextToken ~f:XmlString.to_value))]
         ~wrapper:"DescribeLaunchConfigurationsResult"
         ~response:"ResponseMetaData"
@@ -10611,16 +13652,15 @@ module LaunchConfigurationsType =
       let nextToken =
         (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "NextToken") in
       let launchConfigurations =
-        LaunchConfigurations.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LaunchConfigurations") in
-      make ?nextToken ~launchConfigurations ()
+        (Option.map ~f:LaunchConfigurations.of_xml)
+          (Xml.child xml_arg0 "LaunchConfigurations") in
+      make ?nextToken ?launchConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let launchConfigurations =
-        field_map_exn json "LaunchConfigurations"
-          LaunchConfigurations.of_json in
-      make ?nextToken ~launchConfigurations ()
+        field_map json__ "LaunchConfigurations" LaunchConfigurations.of_json in
+      make ?nextToken ?launchConfigurations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about the launch configurations in the account and Region."]
@@ -10630,7 +13670,7 @@ module LaunchConfigurationNamesType =
       {
       launchConfigurationNames: LaunchConfigurationNames.t option
         [@ocaml.doc
-          "The launch configuration names. If you omit this parameter, all launch configurations are described. Array Members: Maximum number of 50 items."];
+          "The launch configuration names. If you omit this property, all launch configurations are described. Array Members: Maximum number of 50 items."];
       nextToken: XmlString.t option
         [@ocaml.doc
           "The token for the next set of items to return. (You received this token from a previous call.)"];
@@ -10659,11 +13699,11 @@ module LaunchConfigurationNamesType =
           (Xml.child xml_arg0 "LaunchConfigurationNames") in
       make ?maxRecords ?nextToken ?launchConfigurationNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let maxRecords = field_map json__ "MaxRecords" MaxRecords.of_json in
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let launchConfigurationNames =
-        field_map json "LaunchConfigurationNames"
+        field_map json__ "LaunchConfigurationNames"
           LaunchConfigurationNames.of_json in
       make ?maxRecords ?nextToken ?launchConfigurationNames ()
     let to_json v = composed_to_json to_value v
@@ -10688,9 +13728,9 @@ module LaunchConfigurationNameType =
           (Xml.child_exn ~context:context_ xml_arg0 "LaunchConfigurationName") in
       make ~launchConfigurationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let launchConfigurationName =
-        field_map_exn json "LaunchConfigurationName"
+        field_map_exn json__ "LaunchConfigurationName"
           XmlStringMaxLen255.of_json in
       make ~launchConfigurationName ()
     let to_json v = composed_to_json to_value v
@@ -10739,13 +13779,14 @@ module GetPredictiveScalingForecastType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~endTime ~startTime ~policyName ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map_exn json "EndTime" TimestampType.of_json in
-      let startTime = field_map_exn json "StartTime" TimestampType.of_json in
+    let of_json json__ =
+      let endTime = field_map_exn json__ "EndTime" TimestampType.of_json in
+      let startTime = field_map_exn json__ "StartTime" TimestampType.of_json in
       let policyName =
-        field_map_exn json "PolicyName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "PolicyName" XmlStringMaxLen255.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ~endTime ~startTime ~policyName ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10754,10 +13795,10 @@ module GetPredictiveScalingForecastAnswer =
   struct
     type getPredictiveScalingForecastResult =
       {
-      loadForecast: LoadForecasts.t [@ocaml.doc "The load forecast."];
-      capacityForecast: CapacityForecast.t
+      loadForecast: LoadForecasts.t option [@ocaml.doc "The load forecast."];
+      capacityForecast: CapacityForecast.t option
         [@ocaml.doc "The capacity forecast."];
-      updateTime: TimestampType.t
+      updateTime: TimestampType.t option
         [@ocaml.doc "The time the forecast was made."]}
     and responseMetaData = unit
     and t =
@@ -10768,9 +13809,9 @@ module GetPredictiveScalingForecastAnswer =
       [ `ResourceContentionFault of ResourceContentionFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "GetPredictiveScalingForecastAnswer"
-    let make ~loadForecast =
-      fun ~capacityForecast ->
-        fun ~updateTime ->
+    let make ?loadForecast =
+      fun ?capacityForecast ->
+        fun ?updateTime ->
           fun () ->
             {
               getPredictiveScalingForecastResult =
@@ -10804,10 +13845,11 @@ module GetPredictiveScalingForecastAnswer =
     let to_value t =
       let x = t.getPredictiveScalingForecastResult in
       structure_to_wrapped_value
-        [("LoadForecast", (Some (LoadForecasts.to_value x.loadForecast)));
+        [("LoadForecast",
+           (Option.map x.loadForecast ~f:LoadForecasts.to_value));
         ("CapacityForecast",
-          (Some (CapacityForecast.to_value x.capacityForecast)));
-        ("UpdateTime", (Some (TimestampType.to_value x.updateTime)))]
+          (Option.map x.capacityForecast ~f:CapacityForecast.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:TimestampType.to_value))]
         ~wrapper:"GetPredictiveScalingForecastResult"
         ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
@@ -10816,23 +13858,23 @@ module GetPredictiveScalingForecastAnswer =
         Xml.child_exn ~context:context_ t
           "GetPredictiveScalingForecastResult" in
       let updateTime =
-        TimestampType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
+        (Option.map ~f:TimestampType.of_xml)
+          (Xml.child xml_arg0 "UpdateTime") in
       let capacityForecast =
-        CapacityForecast.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CapacityForecast") in
+        (Option.map ~f:CapacityForecast.of_xml)
+          (Xml.child xml_arg0 "CapacityForecast") in
       let loadForecast =
-        LoadForecasts.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LoadForecast") in
-      make ~updateTime ~capacityForecast ~loadForecast ()
+        (Option.map ~f:LoadForecasts.of_xml)
+          (Xml.child xml_arg0 "LoadForecast") in
+      make ?updateTime ?capacityForecast ?loadForecast ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" TimestampType.of_json in
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" TimestampType.of_json in
       let capacityForecast =
-        field_map_exn json "CapacityForecast" CapacityForecast.of_json in
+        field_map json__ "CapacityForecast" CapacityForecast.of_json in
       let loadForecast =
-        field_map_exn json "LoadForecast" LoadForecasts.of_json in
-      make ~updateTime ~capacityForecast ~loadForecast ()
+        field_map json__ "LoadForecast" LoadForecasts.of_json in
+      make ?updateTime ?capacityForecast ?loadForecast ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the forecast data for a predictive scaling policy. Load forecasts are predictions of the hourly load values using historical load data from CloudWatch and an analysis of historical trends. Capacity forecasts are represented as predicted values for the minimum capacity that is needed on an hourly basis, based on the hourly load forecast. A minimum of 24 hours of data is required to create the initial forecasts. However, having a full 14 days of historical data results in more accurate forecasts. For more information, see Predictive scaling for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]
@@ -10863,10 +13905,11 @@ module ExitStandbyQuery =
         (Option.map ~f:InstanceIds.of_xml) (Xml.child xml_arg0 "InstanceIds") in
       make ~autoScalingGroupName ?instanceIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
-      let instanceIds = field_map json "InstanceIds" InstanceIds.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
+      let instanceIds = field_map json__ "InstanceIds" InstanceIds.of_json in
       make ~autoScalingGroupName ?instanceIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10925,8 +13968,8 @@ module ExitStandbyAnswer =
         (Option.map ~f:Activities.of_xml) (Xml.child xml_arg0 "Activities") in
       make ?activities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let activities = field_map json "Activities" Activities.of_json in
+    let of_json json__ =
+      let activities = field_map json__ "Activities" Activities.of_json in
       make ?activities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10991,15 +14034,15 @@ module ExecutePolicyType =
       make ?breachThreshold ?metricValue ?honorCooldown ~policyName
         ?autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let breachThreshold =
-        field_map json "BreachThreshold" MetricScale.of_json in
-      let metricValue = field_map json "MetricValue" MetricScale.of_json in
+        field_map json__ "BreachThreshold" MetricScale.of_json in
+      let metricValue = field_map json__ "MetricValue" MetricScale.of_json in
       let honorCooldown =
-        field_map json "HonorCooldown" HonorCooldown.of_json in
-      let policyName = field_map_exn json "PolicyName" ResourceName.of_json in
+        field_map json__ "HonorCooldown" HonorCooldown.of_json in
+      let policyName = field_map_exn json__ "PolicyName" ResourceName.of_json in
       let autoScalingGroupName =
-        field_map json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map json__ "AutoScalingGroupName" XmlStringMaxLen255.of_json in
       make ?breachThreshold ?metricValue ?honorCooldown ~policyName
         ?autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
@@ -11050,13 +14093,14 @@ module EnterStandbyQuery =
       make ~shouldDecrementDesiredCapacity ~autoScalingGroupName ?instanceIds
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let shouldDecrementDesiredCapacity =
-        field_map_exn json "ShouldDecrementDesiredCapacity"
+        field_map_exn json__ "ShouldDecrementDesiredCapacity"
           ShouldDecrementDesiredCapacity.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
-      let instanceIds = field_map json "InstanceIds" InstanceIds.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
+      let instanceIds = field_map json__ "InstanceIds" InstanceIds.of_json in
       make ~shouldDecrementDesiredCapacity ~autoScalingGroupName ?instanceIds
         ()
     let to_json v = composed_to_json to_value v
@@ -11117,8 +14161,8 @@ module EnterStandbyAnswer =
         (Option.map ~f:Activities.of_xml) (Xml.child xml_arg0 "Activities") in
       make ?activities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let activities = field_map json "Activities" Activities.of_json in
+    let of_json json__ =
+      let activities = field_map json__ "Activities" Activities.of_json in
       make ?activities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11131,10 +14175,10 @@ module EnableMetricsCollectionQuery =
         [@ocaml.doc "The name of the Auto Scaling group."];
       metrics: Metrics.t option
         [@ocaml.doc
-          "Specifies which group-level metrics to start collecting. You can specify one or more of the following metrics: GroupMinSize GroupMaxSize GroupDesiredCapacity GroupInServiceInstances GroupPendingInstances GroupStandbyInstances GroupTerminatingInstances GroupTotalInstances The instance weighting feature supports the following additional metrics: GroupInServiceCapacity GroupPendingCapacity GroupStandbyCapacity GroupTerminatingCapacity GroupTotalCapacity The warm pools feature supports the following additional metrics: WarmPoolDesiredCapacity WarmPoolWarmedCapacity WarmPoolPendingCapacity WarmPoolTerminatingCapacity WarmPoolTotalCapacity GroupAndWarmPoolDesiredCapacity GroupAndWarmPoolTotalCapacity If you omit this parameter, all metrics are enabled."];
+          "Identifies the metrics to enable. You can specify one or more of the following metrics: GroupMinSize GroupMaxSize GroupDesiredCapacity GroupInServiceInstances GroupPendingInstances GroupStandbyInstances GroupTerminatingInstances GroupTotalInstances GroupInServiceCapacity GroupPendingCapacity GroupStandbyCapacity GroupTerminatingCapacity GroupTotalCapacity WarmPoolDesiredCapacity WarmPoolWarmedCapacity WarmPoolPendingCapacity WarmPoolTerminatingCapacity WarmPoolTotalCapacity GroupAndWarmPoolDesiredCapacity GroupAndWarmPoolTotalCapacity If you specify Granularity and don't specify any metrics, all metrics are enabled. For more information, see Amazon CloudWatch metrics for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."];
       granularity: XmlStringMaxLen255.t
         [@ocaml.doc
-          "The granularity to associate with the metrics to collect. The only valid value is 1Minute."]}
+          "The frequency at which Amazon EC2 Auto Scaling sends aggregated data to CloudWatch. The only valid value is 1Minute."]}
     let context_ = "EnableMetricsCollectionQuery"
     let make ?metrics =
       fun ~autoScalingGroupName ->
@@ -11158,16 +14202,17 @@ module EnableMetricsCollectionQuery =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~granularity ?metrics ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let granularity =
-        field_map_exn json "Granularity" XmlStringMaxLen255.of_json in
-      let metrics = field_map json "Metrics" Metrics.of_json in
+        field_map_exn json__ "Granularity" XmlStringMaxLen255.of_json in
+      let metrics = field_map json__ "Metrics" Metrics.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ~granularity ?metrics ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables group metrics for the specified Auto Scaling group. For more information, see Monitoring CloudWatch metrics for your Auto Scaling groups and instances in the Amazon EC2 Auto Scaling User Guide."]
+       "Enables group metrics collection for the specified Auto Scaling group. You can use these metrics to track changes in an Auto Scaling group and to set alarms on threshold values. You can view group metrics using the Amazon EC2 Auto Scaling console or the CloudWatch console. For more information, see Monitor CloudWatch metrics for your Auto Scaling groups and instances in the Amazon EC2 Auto Scaling User Guide."]
 module DisableMetricsCollectionQuery =
   struct
     type nonrec t =
@@ -11176,7 +14221,7 @@ module DisableMetricsCollectionQuery =
         [@ocaml.doc "The name of the Auto Scaling group."];
       metrics: Metrics.t option
         [@ocaml.doc
-          "Specifies one or more of the following metrics: GroupMinSize GroupMaxSize GroupDesiredCapacity GroupInServiceInstances GroupPendingInstances GroupStandbyInstances GroupTerminatingInstances GroupTotalInstances GroupInServiceCapacity GroupPendingCapacity GroupStandbyCapacity GroupTerminatingCapacity GroupTotalCapacity WarmPoolDesiredCapacity WarmPoolWarmedCapacity WarmPoolPendingCapacity WarmPoolTerminatingCapacity WarmPoolTotalCapacity GroupAndWarmPoolDesiredCapacity GroupAndWarmPoolTotalCapacity If you omit this parameter, all metrics are disabled."]}
+          "Identifies the metrics to disable. You can specify one or more of the following metrics: GroupMinSize GroupMaxSize GroupDesiredCapacity GroupInServiceInstances GroupPendingInstances GroupStandbyInstances GroupTerminatingInstances GroupTotalInstances GroupInServiceCapacity GroupPendingCapacity GroupStandbyCapacity GroupTerminatingCapacity GroupTotalCapacity WarmPoolDesiredCapacity WarmPoolWarmedCapacity WarmPoolPendingCapacity WarmPoolTerminatingCapacity WarmPoolTotalCapacity GroupAndWarmPoolDesiredCapacity GroupAndWarmPoolTotalCapacity If you omit this property, all metrics are disabled. For more information, see Amazon CloudWatch metrics for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]}
     let context_ = "DisableMetricsCollectionQuery"
     let make ?metrics =
       fun ~autoScalingGroupName ->
@@ -11195,14 +14240,98 @@ module DisableMetricsCollectionQuery =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?metrics ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metrics = field_map json "Metrics" Metrics.of_json in
+    let of_json json__ =
+      let metrics = field_map json__ "Metrics" Metrics.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ?metrics ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disables group metrics for the specified Auto Scaling group."]
+       "Disables group metrics collection for the specified Auto Scaling group."]
+module DetachTrafficSourcesType =
+  struct
+    type nonrec t =
+      {
+      autoScalingGroupName: XmlStringMaxLen255.t
+        [@ocaml.doc "The name of the Auto Scaling group."];
+      trafficSources: TrafficSources.t
+        [@ocaml.doc
+          "The unique identifiers of one or more traffic sources. You can specify up to 10 traffic sources."]}
+    let context_ = "DetachTrafficSourcesType"
+    let make ~autoScalingGroupName =
+      fun ~trafficSources ->
+        fun () -> { autoScalingGroupName; trafficSources }
+    let to_value x =
+      structure_to_value
+        [("AutoScalingGroupName",
+           (Some (XmlStringMaxLen255.to_value x.autoScalingGroupName)));
+        ("TrafficSources", (Some (TrafficSources.to_value x.trafficSources)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let trafficSources =
+        TrafficSources.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrafficSources") in
+      let autoScalingGroupName =
+        XmlStringMaxLen255.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
+      make ~trafficSources ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let trafficSources =
+        field_map_exn json__ "TrafficSources" TrafficSources.of_json in
+      let autoScalingGroupName =
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
+      make ~trafficSources ~autoScalingGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detaches one or more traffic sources from the specified Auto Scaling group. When you detach a traffic source, it enters the Removing state while deregistering the instances in the group. When all instances are deregistered, then you can no longer describe the traffic source using the DescribeTrafficSources API call. The instances continue to run."]
+module DetachTrafficSourcesResultType =
+  struct
+    type detachTrafficSourcesResult = unit
+    and responseMetaData = unit
+    and t =
+      {
+      detachTrafficSourcesResult: detachTrafficSourcesResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `ResourceContentionFault of ResourceContentionFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = { detachTrafficSourcesResult = (); responseMetaData = () }
+    let error_of_json name json =
+      match name with
+      | "ResourceContentionFault" ->
+          `ResourceContentionFault (ResourceContentionFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ResourceContentionFault" ->
+          `ResourceContentionFault (ResourceContentionFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ResourceContentionFault e ->
+          `Assoc
+            [("error", (`String "ResourceContentionFault"));
+            ("details", (ResourceContentionFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detaches one or more traffic sources from the specified Auto Scaling group. When you detach a traffic source, it enters the Removing state while deregistering the instances in the group. When all instances are deregistered, then you can no longer describe the traffic source using the DescribeTrafficSources API call. The instances continue to run."]
 module DetachLoadBalancersType =
   struct
     type nonrec t =
@@ -11232,15 +14361,16 @@ module DetachLoadBalancersType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~loadBalancerNames ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loadBalancerNames =
-        field_map_exn json "LoadBalancerNames" LoadBalancerNames.of_json in
+        field_map_exn json__ "LoadBalancerNames" LoadBalancerNames.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ~loadBalancerNames ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detaches one or more Classic Load Balancers from the specified Auto Scaling group. This operation detaches only Classic Load Balancers. If you have Application Load Balancers, Network Load Balancers, or Gateway Load Balancers, use the DetachLoadBalancerTargetGroups API instead. When you detach a load balancer, it enters the Removing state while deregistering the instances in the group. When all instances are deregistered, then you can no longer describe the load balancer using the DescribeLoadBalancers API call. The instances remain running."]
+       "This API operation is superseded by DetachTrafficSources, which can detach multiple traffic sources types. We recommend using DetachTrafficSources to simplify how you manage traffic sources. However, we continue to support DetachLoadBalancers. You can use both the original DetachLoadBalancers API operation and DetachTrafficSources on the same Auto Scaling group. Detaches one or more Classic Load Balancers from the specified Auto Scaling group. This operation detaches only Classic Load Balancers. If you have Application Load Balancers, Network Load Balancers, or Gateway Load Balancers, use the DetachLoadBalancerTargetGroups API instead. When you detach a load balancer, it enters the Removing state while deregistering the instances in the group. When all instances are deregistered, then you can no longer describe the load balancer using the DescribeLoadBalancers API call. The instances remain running."]
 module DetachLoadBalancersResultType =
   struct
     type detachLoadBalancersResult = unit
@@ -11285,7 +14415,7 @@ module DetachLoadBalancersResultType =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detaches one or more Classic Load Balancers from the specified Auto Scaling group. This operation detaches only Classic Load Balancers. If you have Application Load Balancers, Network Load Balancers, or Gateway Load Balancers, use the DetachLoadBalancerTargetGroups API instead. When you detach a load balancer, it enters the Removing state while deregistering the instances in the group. When all instances are deregistered, then you can no longer describe the load balancer using the DescribeLoadBalancers API call. The instances remain running."]
+       "This API operation is superseded by DetachTrafficSources, which can detach multiple traffic sources types. We recommend using DetachTrafficSources to simplify how you manage traffic sources. However, we continue to support DetachLoadBalancers. You can use both the original DetachLoadBalancers API operation and DetachTrafficSources on the same Auto Scaling group. Detaches one or more Classic Load Balancers from the specified Auto Scaling group. This operation detaches only Classic Load Balancers. If you have Application Load Balancers, Network Load Balancers, or Gateway Load Balancers, use the DetachLoadBalancerTargetGroups API instead. When you detach a load balancer, it enters the Removing state while deregistering the instances in the group. When all instances are deregistered, then you can no longer describe the load balancer using the DescribeLoadBalancers API call. The instances remain running."]
 module DetachLoadBalancerTargetGroupsType =
   struct
     type nonrec t =
@@ -11315,15 +14445,16 @@ module DetachLoadBalancerTargetGroupsType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~targetGroupARNs ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetGroupARNs =
-        field_map_exn json "TargetGroupARNs" TargetGroupARNs.of_json in
+        field_map_exn json__ "TargetGroupARNs" TargetGroupARNs.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ~targetGroupARNs ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detaches one or more target groups from the specified Auto Scaling group."]
+       "This API operation is superseded by DetachTrafficSources, which can detach multiple traffic sources types. We recommend using DetachTrafficSources to simplify how you manage traffic sources. However, we continue to support DetachLoadBalancerTargetGroups. You can use both the original DetachLoadBalancerTargetGroups API operation and DetachTrafficSources on the same Auto Scaling group. Detaches one or more target groups from the specified Auto Scaling group. When you detach a target group, it enters the Removing state while deregistering the instances in the group. When all instances are deregistered, then you can no longer describe the target group using the DescribeLoadBalancerTargetGroups API call. The instances remain running. You can use this operation to detach target groups that were attached by using AttachLoadBalancerTargetGroups, but not for target groups that were attached by using AttachTrafficSources."]
 module DetachLoadBalancerTargetGroupsResultType =
   struct
     type detachLoadBalancerTargetGroupsResult = unit
@@ -11370,7 +14501,7 @@ module DetachLoadBalancerTargetGroupsResultType =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detaches one or more target groups from the specified Auto Scaling group."]
+       "This API operation is superseded by DetachTrafficSources, which can detach multiple traffic sources types. We recommend using DetachTrafficSources to simplify how you manage traffic sources. However, we continue to support DetachLoadBalancerTargetGroups. You can use both the original DetachLoadBalancerTargetGroups API operation and DetachTrafficSources on the same Auto Scaling group. Detaches one or more target groups from the specified Auto Scaling group. When you detach a target group, it enters the Removing state while deregistering the instances in the group. When all instances are deregistered, then you can no longer describe the target group using the DescribeLoadBalancerTargetGroups API call. The instances remain running. You can use this operation to detach target groups that were attached by using AttachLoadBalancerTargetGroups, but not for target groups that were attached by using AttachTrafficSources."]
 module DetachInstancesQuery =
   struct
     type nonrec t =
@@ -11416,18 +14547,19 @@ module DetachInstancesQuery =
       make ~shouldDecrementDesiredCapacity ~autoScalingGroupName ?instanceIds
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let shouldDecrementDesiredCapacity =
-        field_map_exn json "ShouldDecrementDesiredCapacity"
+        field_map_exn json__ "ShouldDecrementDesiredCapacity"
           ShouldDecrementDesiredCapacity.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
-      let instanceIds = field_map json "InstanceIds" InstanceIds.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
+      let instanceIds = field_map json__ "InstanceIds" InstanceIds.of_json in
       make ~shouldDecrementDesiredCapacity ~autoScalingGroupName ?instanceIds
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes one or more instances from the specified Auto Scaling group. After the instances are detached, you can manage them independent of the Auto Scaling group. If you do not specify the option to decrement the desired capacity, Amazon EC2 Auto Scaling launches instances to replace the ones that are detached. If there is a Classic Load Balancer attached to the Auto Scaling group, the instances are deregistered from the load balancer. If there are target groups attached to the Auto Scaling group, the instances are deregistered from the target groups. For more information, see Detach EC2 instances from your Auto Scaling group in the Amazon EC2 Auto Scaling User Guide."]
+       "Removes one or more instances from the specified Auto Scaling group. After the instances are detached, you can manage them independent of the Auto Scaling group. If you do not specify the option to decrement the desired capacity, Amazon EC2 Auto Scaling launches instances to replace the ones that are detached. If there is a Classic Load Balancer attached to the Auto Scaling group, the instances are deregistered from the load balancer. If there are target groups attached to the Auto Scaling group, the instances are deregistered from the target groups. For more information, see Detach or attach instances in the Amazon EC2 Auto Scaling User Guide."]
 module DetachInstancesAnswer =
   struct
     type detachInstancesResult =
@@ -11484,12 +14616,12 @@ module DetachInstancesAnswer =
         (Option.map ~f:Activities.of_xml) (Xml.child xml_arg0 "Activities") in
       make ?activities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let activities = field_map json "Activities" Activities.of_json in
+    let of_json json__ =
+      let activities = field_map json__ "Activities" Activities.of_json in
       make ?activities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes one or more instances from the specified Auto Scaling group. After the instances are detached, you can manage them independent of the Auto Scaling group. If you do not specify the option to decrement the desired capacity, Amazon EC2 Auto Scaling launches instances to replace the ones that are detached. If there is a Classic Load Balancer attached to the Auto Scaling group, the instances are deregistered from the load balancer. If there are target groups attached to the Auto Scaling group, the instances are deregistered from the target groups. For more information, see Detach EC2 instances from your Auto Scaling group in the Amazon EC2 Auto Scaling User Guide."]
+       "Removes one or more instances from the specified Auto Scaling group. After the instances are detached, you can manage them independent of the Auto Scaling group. If you do not specify the option to decrement the desired capacity, Amazon EC2 Auto Scaling launches instances to replace the ones that are detached. If there is a Classic Load Balancer attached to the Auto Scaling group, the instances are deregistered from the load balancer. If there are target groups attached to the Auto Scaling group, the instances are deregistered from the target groups. For more information, see Detach or attach instances in the Amazon EC2 Auto Scaling User Guide."]
 module DescribeWarmPoolType =
   struct
     type nonrec t =
@@ -11524,11 +14656,12 @@ module DescribeWarmPoolType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?nextToken ?maxRecords ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
-      let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
+      let maxRecords = field_map json__ "MaxRecords" MaxRecords.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ?nextToken ?maxRecords ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11543,7 +14676,7 @@ module DescribeWarmPoolAnswer =
         [@ocaml.doc "The instances that are currently in the warm pool."];
       nextToken: XmlString.t option
         [@ocaml.doc
-          "The token for the next set of items to return. (You received this token from a previous call.)"]}
+          "This string indicates that the response contains more items than can be returned in a single response. To receive additional items, specify this string for the NextToken value when requesting the next set of items. This value is null when there are no more items to return."]}
     and responseMetaData = unit
     and t =
       {
@@ -11625,15 +14758,160 @@ module DescribeWarmPoolAnswer =
           (Xml.child xml_arg0 "WarmPoolConfiguration") in
       make ?nextToken ?instances ?warmPoolConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
-      let instances = field_map json "Instances" Instances.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
+      let instances = field_map json__ "Instances" Instances.of_json in
       let warmPoolConfiguration =
-        field_map json "WarmPoolConfiguration" WarmPoolConfiguration.of_json in
+        field_map json__ "WarmPoolConfiguration"
+          WarmPoolConfiguration.of_json in
       make ?nextToken ?instances ?warmPoolConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about a warm pool and its instances. For more information, see Warm pools for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]
+module DescribeTrafficSourcesResponse =
+  struct
+    type describeTrafficSourcesResult =
+      {
+      trafficSources: TrafficSourceStates.t option
+        [@ocaml.doc "Information about the traffic sources."];
+      nextToken: XmlString.t option
+        [@ocaml.doc
+          "This string indicates that the response contains more items than can be returned in a single response. To receive additional items, specify this string for the NextToken value when requesting the next set of items. This value is null when there are no more items to return."]}
+    and responseMetaData = unit
+    and t =
+      {
+      describeTrafficSourcesResult: describeTrafficSourcesResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `InvalidNextToken of InvalidNextToken.t 
+      | `ResourceContentionFault of ResourceContentionFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "DescribeTrafficSourcesResponse"
+    let make ?trafficSources =
+      fun ?nextToken ->
+        fun () ->
+          {
+            describeTrafficSourcesResult = { trafficSources; nextToken };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "InvalidNextToken" ->
+          `InvalidNextToken (InvalidNextToken.of_json json)
+      | "ResourceContentionFault" ->
+          `ResourceContentionFault (ResourceContentionFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidNextToken" -> `InvalidNextToken (InvalidNextToken.of_xml xml)
+      | "ResourceContentionFault" ->
+          `ResourceContentionFault (ResourceContentionFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidNextToken e ->
+          `Assoc
+            [("error", (`String "InvalidNextToken"));
+            ("details", (InvalidNextToken.to_json e))]
+      | `ResourceContentionFault e ->
+          `Assoc
+            [("error", (`String "ResourceContentionFault"));
+            ("details", (ResourceContentionFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.describeTrafficSourcesResult in
+      structure_to_wrapped_value
+        [("TrafficSources",
+           (Option.map x.trafficSources ~f:TrafficSourceStates.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:XmlString.to_value))]
+        ~wrapper:"DescribeTrafficSourcesResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "DescribeTrafficSourcesResult" in
+      let nextToken =
+        (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let trafficSources =
+        (Option.map ~f:TrafficSourceStates.of_xml)
+          (Xml.child xml_arg0 "TrafficSources") in
+      make ?nextToken ?trafficSources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
+      let trafficSources =
+        field_map json__ "TrafficSources" TrafficSourceStates.of_json in
+      make ?nextToken ?trafficSources ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets information about the traffic sources for the specified Auto Scaling group. You can optionally provide a traffic source type. If you provide a traffic source type, then the results only include that traffic source type. If you do not provide a traffic source type, then the results include all the traffic sources for the specified Auto Scaling group."]
+module DescribeTrafficSourcesRequest =
+  struct
+    type nonrec t =
+      {
+      autoScalingGroupName: XmlStringMaxLen255.t
+        [@ocaml.doc "The name of the Auto Scaling group."];
+      trafficSourceType: XmlStringMaxLen255.t option
+        [@ocaml.doc
+          "The traffic source type that you want to describe. The following lists the valid values: elb if the traffic source is a Classic Load Balancer. elbv2 if the traffic source is a Application Load Balancer, Gateway Load Balancer, or Network Load Balancer. vpc-lattice if the traffic source is VPC Lattice."];
+      nextToken: XmlString.t option
+        [@ocaml.doc
+          "The token for the next set of items to return. (You received this token from a previous call.)"];
+      maxRecords: MaxRecords.t option
+        [@ocaml.doc
+          "The maximum number of items to return with this call. The maximum value is 50."]}
+    let context_ = "DescribeTrafficSourcesRequest"
+    let make ?trafficSourceType =
+      fun ?nextToken ->
+        fun ?maxRecords ->
+          fun ~autoScalingGroupName ->
+            fun () ->
+              {
+                trafficSourceType;
+                nextToken;
+                maxRecords;
+                autoScalingGroupName
+              }
+    let to_value x =
+      structure_to_value
+        [("AutoScalingGroupName",
+           (Some (XmlStringMaxLen255.to_value x.autoScalingGroupName)));
+        ("TrafficSourceType",
+          (Option.map x.trafficSourceType ~f:XmlStringMaxLen255.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:XmlString.to_value));
+        ("MaxRecords", (Option.map x.maxRecords ~f:MaxRecords.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxRecords =
+        (Option.map ~f:MaxRecords.of_xml) (Xml.child xml_arg0 "MaxRecords") in
+      let nextToken =
+        (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let trafficSourceType =
+        (Option.map ~f:XmlStringMaxLen255.of_xml)
+          (Xml.child xml_arg0 "TrafficSourceType") in
+      let autoScalingGroupName =
+        XmlStringMaxLen255.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
+      make ?maxRecords ?nextToken ?trafficSourceType ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxRecords = field_map json__ "MaxRecords" MaxRecords.of_json in
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
+      let trafficSourceType =
+        field_map json__ "TrafficSourceType" XmlStringMaxLen255.of_json in
+      let autoScalingGroupName =
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
+      make ?maxRecords ?nextToken ?trafficSourceType ~autoScalingGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets information about the traffic sources for the specified Auto Scaling group. You can optionally provide a traffic source type. If you provide a traffic source type, then the results only include that traffic source type. If you do not provide a traffic source type, then the results include all the traffic sources for the specified Auto Scaling group."]
 module DescribeTerminationPolicyTypesAnswer =
   struct
     type describeTerminationPolicyTypesResult =
@@ -11699,13 +14977,13 @@ module DescribeTerminationPolicyTypesAnswer =
           (Xml.child xml_arg0 "TerminationPolicyTypes") in
       make ?terminationPolicyTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let terminationPolicyTypes =
-        field_map json "TerminationPolicyTypes" TerminationPolicies.of_json in
+        field_map json__ "TerminationPolicyTypes" TerminationPolicies.of_json in
       make ?terminationPolicyTypes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the termination policies supported by Amazon EC2 Auto Scaling. For more information, see Controlling which Auto Scaling instances terminate during scale in in the Amazon EC2 Auto Scaling User Guide."]
+       "Describes the termination policies supported by Amazon EC2 Auto Scaling. For more information, see Configure termination policies for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]
 module DescribeTagsType =
   struct
     type nonrec t =
@@ -11737,14 +15015,14 @@ module DescribeTagsType =
         (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?maxRecords ?nextToken ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
-      let nextToken = field_map json "NextToken" XmlString.of_json in
-      let filters = field_map json "Filters" Filters.of_json in
+    let of_json json__ =
+      let maxRecords = field_map json__ "MaxRecords" MaxRecords.of_json in
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
+      let filters = field_map json__ "Filters" Filters.of_json in
       make ?maxRecords ?nextToken ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the specified tags. You can use filters to limit the results. For example, you can query for the tags for a specific Auto Scaling group. You can specify multiple values for a filter. A tag must match at least one of the specified values for it to be included in the results. You can also specify multiple filters. The result includes information for a particular tag only if it matches all the filters. If there's no match, no special message is returned. For more information, see Tagging Auto Scaling groups and instances in the Amazon EC2 Auto Scaling User Guide."]
+       "Describes the specified tags. You can use filters to limit the results. For example, you can query for the tags for a specific Auto Scaling group. You can specify multiple values for a filter. A tag must match at least one of the specified values for it to be included in the results. You can also specify multiple filters. The result includes information for a particular tag only if it matches all the filters. If there's no match, no special message is returned. For more information, see Tag Auto Scaling groups and instances in the Amazon EC2 Auto Scaling User Guide."]
 module DescribeScheduledActionsType =
   struct
     type nonrec t =
@@ -11753,13 +15031,13 @@ module DescribeScheduledActionsType =
         [@ocaml.doc "The name of the Auto Scaling group."];
       scheduledActionNames: ScheduledActionNames.t option
         [@ocaml.doc
-          "The names of one or more scheduled actions. If you omit this parameter, all scheduled actions are described. If you specify an unknown scheduled action, it is ignored with no error. Array Members: Maximum number of 50 actions."];
+          "The names of one or more scheduled actions. If you omit this property, all scheduled actions are described. If you specify an unknown scheduled action, it is ignored with no error. Array Members: Maximum number of 50 actions."];
       startTime: TimestampType.t option
         [@ocaml.doc
-          "The earliest scheduled start time to return. If scheduled action names are provided, this parameter is ignored."];
+          "The earliest scheduled start time to return. If scheduled action names are provided, this property is ignored."];
       endTime: TimestampType.t option
         [@ocaml.doc
-          "The latest scheduled start time to return. If scheduled action names are provided, this parameter is ignored."];
+          "The latest scheduled start time to return. If scheduled action names are provided, this property is ignored."];
       nextToken: XmlString.t option
         [@ocaml.doc
           "The token for the next set of items to return. (You received this token from a previous call.)"];
@@ -11810,15 +15088,15 @@ module DescribeScheduledActionsType =
       make ?maxRecords ?nextToken ?endTime ?startTime ?scheduledActionNames
         ?autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
-      let nextToken = field_map json "NextToken" XmlString.of_json in
-      let endTime = field_map json "EndTime" TimestampType.of_json in
-      let startTime = field_map json "StartTime" TimestampType.of_json in
+    let of_json json__ =
+      let maxRecords = field_map json__ "MaxRecords" MaxRecords.of_json in
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
+      let endTime = field_map json__ "EndTime" TimestampType.of_json in
+      let startTime = field_map json__ "StartTime" TimestampType.of_json in
       let scheduledActionNames =
-        field_map json "ScheduledActionNames" ScheduledActionNames.of_json in
+        field_map json__ "ScheduledActionNames" ScheduledActionNames.of_json in
       let autoScalingGroupName =
-        field_map json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map json__ "AutoScalingGroupName" XmlStringMaxLen255.of_json in
       make ?maxRecords ?nextToken ?endTime ?startTime ?scheduledActionNames
         ?autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
@@ -11830,9 +15108,10 @@ module DescribeScalingActivitiesType =
       {
       activityIds: ActivityIds.t option
         [@ocaml.doc
-          "The activity IDs of the desired scaling activities. If you omit this parameter, all activities for the past six weeks are described. If unknown activities are requested, they are ignored with no error. If you specify an Auto Scaling group, the results are limited to that group. Array Members: Maximum number of 50 IDs."];
+          "The activity IDs of the desired scaling activities. If unknown activity IDs are requested, they are ignored with no error. Only activities started within the last six weeks can be returned regardless of the activity IDs specified. If other filters are specified with the request, only results matching all filter criteria can be returned. Array Members: Maximum number of 50 IDs."];
       autoScalingGroupName: XmlStringMaxLen255.t option
-        [@ocaml.doc "The name of the Auto Scaling group."];
+        [@ocaml.doc
+          "The name of the Auto Scaling group. Omitting this property performs an account-wide operation, which can result in slower or timed-out requests."];
       includeDeletedGroups: IncludeDeletedGroups.t option
         [@ocaml.doc
           "Indicates whether to include scaling activity from deleted Auto Scaling groups."];
@@ -11841,20 +15120,25 @@ module DescribeScalingActivitiesType =
           "The maximum number of items to return with this call. The default value is 100 and the maximum value is 100."];
       nextToken: XmlString.t option
         [@ocaml.doc
-          "The token for the next set of items to return. (You received this token from a previous call.)"]}
+          "The token for the next set of items to return. (You received this token from a previous call.)"];
+      filters: Filters.t option
+        [@ocaml.doc
+          "One or more filters to limit the results based on specific criteria. The following filters are supported: StartTimeLowerBound - The earliest scaling activities to return based on the activity start time. Scaling activities with a start time earlier than this value are not included in the results. Only activities started within the last six weeks can be returned regardless of the value specified. StartTimeUpperBound - The latest scaling activities to return based on the activity start time. Scaling activities with a start time later than this value are not included in the results. Only activities started within the last six weeks can be returned regardless of the value specified. Status - The StatusCode value of the scaling activity. This filter can only be used in combination with the AutoScalingGroupName parameter. For valid StatusCode values, see Activity in the Amazon EC2 Auto Scaling API Reference. StartTimeLowerBound and StartTimeUpperBound accept ISO 8601 formatted timestamps. Timestamps without a timezone offset are assumed to be UTC. 2000-01-18T08:15:00Z 2000-01-18T16:15:00+08:00"]}
     let make ?activityIds =
       fun ?autoScalingGroupName ->
         fun ?includeDeletedGroups ->
           fun ?maxRecords ->
             fun ?nextToken ->
-              fun () ->
-                {
-                  activityIds;
-                  autoScalingGroupName;
-                  includeDeletedGroups;
-                  maxRecords;
-                  nextToken
-                }
+              fun ?filters ->
+                fun () ->
+                  {
+                    activityIds;
+                    autoScalingGroupName;
+                    includeDeletedGroups;
+                    maxRecords;
+                    nextToken;
+                    filters
+                  }
     let to_value x =
       structure_to_value
         [("ActivityIds", (Option.map x.activityIds ~f:ActivityIds.to_value));
@@ -11863,9 +15147,12 @@ module DescribeScalingActivitiesType =
         ("IncludeDeletedGroups",
           (Option.map x.includeDeletedGroups ~f:IncludeDeletedGroups.to_value));
         ("MaxRecords", (Option.map x.maxRecords ~f:MaxRecords.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:XmlString.to_value))]
+        ("NextToken", (Option.map x.nextToken ~f:XmlString.to_value));
+        ("Filters", (Option.map x.filters ~f:Filters.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let filters =
+        (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Filters") in
       let nextToken =
         (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "NextToken") in
       let maxRecords =
@@ -11878,22 +15165,23 @@ module DescribeScalingActivitiesType =
           (Xml.child xml_arg0 "AutoScalingGroupName") in
       let activityIds =
         (Option.map ~f:ActivityIds.of_xml) (Xml.child xml_arg0 "ActivityIds") in
-      make ?nextToken ?maxRecords ?includeDeletedGroups ?autoScalingGroupName
-        ?activityIds ()
+      make ?filters ?nextToken ?maxRecords ?includeDeletedGroups
+        ?autoScalingGroupName ?activityIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
-      let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
+      let maxRecords = field_map json__ "MaxRecords" MaxRecords.of_json in
       let includeDeletedGroups =
-        field_map json "IncludeDeletedGroups" IncludeDeletedGroups.of_json in
+        field_map json__ "IncludeDeletedGroups" IncludeDeletedGroups.of_json in
       let autoScalingGroupName =
-        field_map json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
-      let activityIds = field_map json "ActivityIds" ActivityIds.of_json in
-      make ?nextToken ?maxRecords ?includeDeletedGroups ?autoScalingGroupName
-        ?activityIds ()
+        field_map json__ "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+      let activityIds = field_map json__ "ActivityIds" ActivityIds.of_json in
+      make ?filters ?nextToken ?maxRecords ?includeDeletedGroups
+        ?autoScalingGroupName ?activityIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about the scaling activities in the account and Region. When scaling events occur, you see a record of the scaling activity in the scaling activities. For more information, see Verifying a scaling activity for an Auto Scaling group in the Amazon EC2 Auto Scaling User Guide. If the scaling event succeeds, the value of the StatusCode element in the response is Successful. If an attempt to launch instances failed, the StatusCode value is Failed or Cancelled and the StatusMessage element in the response indicates the cause of the failure. For help interpreting the StatusMessage, see Troubleshooting Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]
+       "Gets information about the scaling activities in the account and Region. When scaling events occur, you see a record of the scaling activity in the scaling activities. For more information, see Verify a scaling activity for an Auto Scaling group in the Amazon EC2 Auto Scaling User Guide. If the scaling event succeeds, the value of the StatusCode element in the response is Successful. If an attempt to launch instances failed, the StatusCode value is Failed or Cancelled and the StatusMessage element in the response indicates the cause of the failure. For help interpreting the StatusMessage, see Troubleshooting Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]
 module DescribePoliciesType =
   struct
     type nonrec t =
@@ -11902,7 +15190,7 @@ module DescribePoliciesType =
         [@ocaml.doc "The name of the Auto Scaling group."];
       policyNames: PolicyNames.t option
         [@ocaml.doc
-          "The names of one or more policies. If you omit this parameter, all policies are described. If a group name is provided, the results are limited to that group. If you specify an unknown policy name, it is ignored with no error. Array Members: Maximum number of 50 items."];
+          "The names of one or more policies. If you omit this property, all policies are described. If a group name is provided, the results are limited to that group. If you specify an unknown policy name, it is ignored with no error. Array Members: Maximum number of 50 items."];
       policyTypes: PolicyTypes.t option
         [@ocaml.doc
           "One or more policy types. The valid values are SimpleScaling, StepScaling, TargetTrackingScaling, and PredictiveScaling."];
@@ -11949,13 +15237,13 @@ module DescribePoliciesType =
       make ?maxRecords ?nextToken ?policyTypes ?policyNames
         ?autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
-      let nextToken = field_map json "NextToken" XmlString.of_json in
-      let policyTypes = field_map json "PolicyTypes" PolicyTypes.of_json in
-      let policyNames = field_map json "PolicyNames" PolicyNames.of_json in
+    let of_json json__ =
+      let maxRecords = field_map json__ "MaxRecords" MaxRecords.of_json in
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
+      let policyTypes = field_map json__ "PolicyTypes" PolicyTypes.of_json in
+      let policyNames = field_map json__ "PolicyNames" PolicyNames.of_json in
       let autoScalingGroupName =
-        field_map json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map json__ "AutoScalingGroupName" XmlStringMaxLen255.of_json in
       make ?maxRecords ?nextToken ?policyTypes ?policyNames
         ?autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
@@ -11995,11 +15283,12 @@ module DescribeNotificationConfigurationsType =
           (Xml.child xml_arg0 "AutoScalingGroupNames") in
       make ?maxRecords ?nextToken ?autoScalingGroupNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let maxRecords = field_map json__ "MaxRecords" MaxRecords.of_json in
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let autoScalingGroupNames =
-        field_map json "AutoScalingGroupNames" AutoScalingGroupNames.of_json in
+        field_map json__ "AutoScalingGroupNames"
+          AutoScalingGroupNames.of_json in
       make ?maxRecords ?nextToken ?autoScalingGroupNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12008,7 +15297,7 @@ module DescribeNotificationConfigurationsAnswer =
   struct
     type describeNotificationConfigurationsResult =
       {
-      notificationConfigurations: NotificationConfigurations.t
+      notificationConfigurations: NotificationConfigurations.t option
         [@ocaml.doc "The notification configurations."];
       nextToken: XmlString.t option
         [@ocaml.doc
@@ -12024,12 +15313,12 @@ module DescribeNotificationConfigurationsAnswer =
       | `ResourceContentionFault of ResourceContentionFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "DescribeNotificationConfigurationsAnswer"
-    let make ?nextToken =
-      fun ~notificationConfigurations ->
+    let make ?notificationConfigurations =
+      fun ?nextToken ->
         fun () ->
           {
             describeNotificationConfigurationsResult =
-              { nextToken; notificationConfigurations };
+              { notificationConfigurations; nextToken };
             responseMetaData = ()
           }
     let error_of_json name json =
@@ -12067,9 +15356,8 @@ module DescribeNotificationConfigurationsAnswer =
       let x = t.describeNotificationConfigurationsResult in
       structure_to_wrapped_value
         [("NotificationConfigurations",
-           (Some
-              (NotificationConfigurations.to_value
-                 x.notificationConfigurations)));
+           (Option.map x.notificationConfigurations
+              ~f:NotificationConfigurations.to_value));
         ("NextToken", (Option.map x.nextToken ~f:XmlString.to_value))]
         ~wrapper:"DescribeNotificationConfigurationsResult"
         ~response:"ResponseMetaData"
@@ -12081,17 +15369,16 @@ module DescribeNotificationConfigurationsAnswer =
       let nextToken =
         (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "NextToken") in
       let notificationConfigurations =
-        NotificationConfigurations.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "NotificationConfigurations") in
-      make ?nextToken ~notificationConfigurations ()
+        (Option.map ~f:NotificationConfigurations.of_xml)
+          (Xml.child xml_arg0 "NotificationConfigurations") in
+      make ?nextToken ?notificationConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let notificationConfigurations =
-        field_map_exn json "NotificationConfigurations"
+        field_map json__ "NotificationConfigurations"
           NotificationConfigurations.of_json in
-      make ?nextToken ~notificationConfigurations ()
+      make ?nextToken ?notificationConfigurations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about the Amazon SNS notifications that are configured for one or more Auto Scaling groups."]
@@ -12099,8 +15386,7 @@ module DescribeMetricCollectionTypesAnswer =
   struct
     type describeMetricCollectionTypesResult =
       {
-      metrics: MetricCollectionTypes.t option
-        [@ocaml.doc "One or more metrics."];
+      metrics: MetricCollectionTypes.t option [@ocaml.doc "The metrics."];
       granularities: MetricGranularityTypes.t option
         [@ocaml.doc "The granularities for the metrics."]}
     and responseMetaData = unit
@@ -12166,14 +15452,14 @@ module DescribeMetricCollectionTypesAnswer =
           (Xml.child xml_arg0 "Metrics") in
       make ?granularities ?metrics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let granularities =
-        field_map json "Granularities" MetricGranularityTypes.of_json in
-      let metrics = field_map json "Metrics" MetricCollectionTypes.of_json in
+        field_map json__ "Granularities" MetricGranularityTypes.of_json in
+      let metrics = field_map json__ "Metrics" MetricCollectionTypes.of_json in
       make ?granularities ?metrics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the available CloudWatch metrics for Amazon EC2 Auto Scaling. The GroupStandbyInstances metric is not returned by default. You must explicitly request this metric when calling the EnableMetricsCollection API."]
+       "Describes the available CloudWatch metrics for Amazon EC2 Auto Scaling."]
 module DescribeLoadBalancersResponse =
   struct
     type describeLoadBalancersResult =
@@ -12249,14 +15535,14 @@ module DescribeLoadBalancersResponse =
           (Xml.child xml_arg0 "LoadBalancers") in
       make ?nextToken ?loadBalancers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let loadBalancers =
-        field_map json "LoadBalancers" LoadBalancerStates.of_json in
+        field_map json__ "LoadBalancers" LoadBalancerStates.of_json in
       make ?nextToken ?loadBalancers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about the load balancers for the specified Auto Scaling group. This operation describes only Classic Load Balancers. If you have Application Load Balancers, Network Load Balancers, or Gateway Load Balancers, use the DescribeLoadBalancerTargetGroups API instead. To determine the availability of registered instances, use the State element in the response. When you attach a load balancer to an Auto Scaling group, the initial State value is Adding. The state transitions to Added after all Auto Scaling instances are registered with the load balancer. If Elastic Load Balancing health checks are enabled for the Auto Scaling group, the state transitions to InService after at least one Auto Scaling instance passes the health check. When the load balancer is in the InService state, Amazon EC2 Auto Scaling can terminate and replace any instances that are reported as unhealthy. If no registered instances pass the health checks, the load balancer doesn't enter the InService state. Load balancers also have an InService state if you attach them in the CreateAutoScalingGroup API call. If your load balancer state is InService, but it is not working properly, check the scaling activities by calling DescribeScalingActivities and take any corrective actions necessary. For help with failed health checks, see Troubleshooting Amazon EC2 Auto Scaling: Health checks in the Amazon EC2 Auto Scaling User Guide. For more information, see Elastic Load Balancing and Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]
+       "This API operation is superseded by DescribeTrafficSources, which can describe multiple traffic sources types. We recommend using DescribeTrafficSources to simplify how you manage traffic sources. However, we continue to support DescribeLoadBalancers. You can use both the original DescribeLoadBalancers API operation and DescribeTrafficSources on the same Auto Scaling group. Gets information about the load balancers for the specified Auto Scaling group. This operation describes only Classic Load Balancers. If you have Application Load Balancers, Network Load Balancers, or Gateway Load Balancers, use the DescribeLoadBalancerTargetGroups API instead. To determine the attachment status of the load balancer, use the State element in the response. When you attach a load balancer to an Auto Scaling group, the initial State value is Adding. The state transitions to Added after all Auto Scaling instances are registered with the load balancer. If Elastic Load Balancing health checks are enabled for the Auto Scaling group, the state transitions to InService after at least one Auto Scaling instance passes the health check. When the load balancer is in the InService state, Amazon EC2 Auto Scaling can terminate and replace any instances that are reported as unhealthy. If no registered instances pass the health checks, the load balancer doesn't enter the InService state. Load balancers also have an InService state if you attach them in the CreateAutoScalingGroup API call. If your load balancer state is InService, but it is not working properly, check the scaling activities by calling DescribeScalingActivities and take any corrective actions necessary. For help with failed health checks, see Troubleshooting Amazon EC2 Auto Scaling: Health checks in the Amazon EC2 Auto Scaling User Guide. For more information, see Use Elastic Load Balancing to distribute traffic across the instances in your Auto Scaling group in the Amazon EC2 Auto Scaling User Guide."]
 module DescribeLoadBalancersRequest =
   struct
     type nonrec t =
@@ -12291,15 +15577,16 @@ module DescribeLoadBalancersRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?maxRecords ?nextToken ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let maxRecords = field_map json__ "MaxRecords" MaxRecords.of_json in
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ?maxRecords ?nextToken ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about the load balancers for the specified Auto Scaling group. This operation describes only Classic Load Balancers. If you have Application Load Balancers, Network Load Balancers, or Gateway Load Balancers, use the DescribeLoadBalancerTargetGroups API instead. To determine the availability of registered instances, use the State element in the response. When you attach a load balancer to an Auto Scaling group, the initial State value is Adding. The state transitions to Added after all Auto Scaling instances are registered with the load balancer. If Elastic Load Balancing health checks are enabled for the Auto Scaling group, the state transitions to InService after at least one Auto Scaling instance passes the health check. When the load balancer is in the InService state, Amazon EC2 Auto Scaling can terminate and replace any instances that are reported as unhealthy. If no registered instances pass the health checks, the load balancer doesn't enter the InService state. Load balancers also have an InService state if you attach them in the CreateAutoScalingGroup API call. If your load balancer state is InService, but it is not working properly, check the scaling activities by calling DescribeScalingActivities and take any corrective actions necessary. For help with failed health checks, see Troubleshooting Amazon EC2 Auto Scaling: Health checks in the Amazon EC2 Auto Scaling User Guide. For more information, see Elastic Load Balancing and Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]
+       "This API operation is superseded by DescribeTrafficSources, which can describe multiple traffic sources types. We recommend using DescribeTrafficSources to simplify how you manage traffic sources. However, we continue to support DescribeLoadBalancers. You can use both the original DescribeLoadBalancers API operation and DescribeTrafficSources on the same Auto Scaling group. Gets information about the load balancers for the specified Auto Scaling group. This operation describes only Classic Load Balancers. If you have Application Load Balancers, Network Load Balancers, or Gateway Load Balancers, use the DescribeLoadBalancerTargetGroups API instead. To determine the attachment status of the load balancer, use the State element in the response. When you attach a load balancer to an Auto Scaling group, the initial State value is Adding. The state transitions to Added after all Auto Scaling instances are registered with the load balancer. If Elastic Load Balancing health checks are enabled for the Auto Scaling group, the state transitions to InService after at least one Auto Scaling instance passes the health check. When the load balancer is in the InService state, Amazon EC2 Auto Scaling can terminate and replace any instances that are reported as unhealthy. If no registered instances pass the health checks, the load balancer doesn't enter the InService state. Load balancers also have an InService state if you attach them in the CreateAutoScalingGroup API call. If your load balancer state is InService, but it is not working properly, check the scaling activities by calling DescribeScalingActivities and take any corrective actions necessary. For help with failed health checks, see Troubleshooting Amazon EC2 Auto Scaling: Health checks in the Amazon EC2 Auto Scaling User Guide. For more information, see Use Elastic Load Balancing to distribute traffic across the instances in your Auto Scaling group in the Amazon EC2 Auto Scaling User Guide."]
 module DescribeLoadBalancerTargetGroupsResponse =
   struct
     type describeLoadBalancerTargetGroupsResult =
@@ -12380,15 +15667,15 @@ module DescribeLoadBalancerTargetGroupsResponse =
           (Xml.child xml_arg0 "LoadBalancerTargetGroups") in
       make ?nextToken ?loadBalancerTargetGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let loadBalancerTargetGroups =
-        field_map json "LoadBalancerTargetGroups"
+        field_map json__ "LoadBalancerTargetGroups"
           LoadBalancerTargetGroupStates.of_json in
       make ?nextToken ?loadBalancerTargetGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about the load balancer target groups for the specified Auto Scaling group. To determine the availability of registered instances, use the State element in the response. When you attach a target group to an Auto Scaling group, the initial State value is Adding. The state transitions to Added after all Auto Scaling instances are registered with the target group. If Elastic Load Balancing health checks are enabled for the Auto Scaling group, the state transitions to InService after at least one Auto Scaling instance passes the health check. When the target group is in the InService state, Amazon EC2 Auto Scaling can terminate and replace any instances that are reported as unhealthy. If no registered instances pass the health checks, the target group doesn't enter the InService state. Target groups also have an InService state if you attach them in the CreateAutoScalingGroup API call. If your target group state is InService, but it is not working properly, check the scaling activities by calling DescribeScalingActivities and take any corrective actions necessary. For help with failed health checks, see Troubleshooting Amazon EC2 Auto Scaling: Health checks in the Amazon EC2 Auto Scaling User Guide. For more information, see Elastic Load Balancing and Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]
+       "This API operation is superseded by DescribeTrafficSources, which can describe multiple traffic sources types. We recommend using DetachTrafficSources to simplify how you manage traffic sources. However, we continue to support DescribeLoadBalancerTargetGroups. You can use both the original DescribeLoadBalancerTargetGroups API operation and DescribeTrafficSources on the same Auto Scaling group. Gets information about the Elastic Load Balancing target groups for the specified Auto Scaling group. To determine the attachment status of the target group, use the State element in the response. When you attach a target group to an Auto Scaling group, the initial State value is Adding. The state transitions to Added after all Auto Scaling instances are registered with the target group. If Elastic Load Balancing health checks are enabled for the Auto Scaling group, the state transitions to InService after at least one Auto Scaling instance passes the health check. When the target group is in the InService state, Amazon EC2 Auto Scaling can terminate and replace any instances that are reported as unhealthy. If no registered instances pass the health checks, the target group doesn't enter the InService state. Target groups also have an InService state if you attach them in the CreateAutoScalingGroup API call. If your target group state is InService, but it is not working properly, check the scaling activities by calling DescribeScalingActivities and take any corrective actions necessary. For help with failed health checks, see Troubleshooting Amazon EC2 Auto Scaling: Health checks in the Amazon EC2 Auto Scaling User Guide. For more information, see Use Elastic Load Balancing to distribute traffic across the instances in your Auto Scaling group in the Amazon EC2 Auto Scaling User Guide. You can use this operation to describe target groups that were attached by using AttachLoadBalancerTargetGroups, but not for target groups that were attached by using AttachTrafficSources."]
 module DescribeLoadBalancerTargetGroupsRequest =
   struct
     type nonrec t =
@@ -12423,15 +15710,16 @@ module DescribeLoadBalancerTargetGroupsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?maxRecords ?nextToken ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let maxRecords = field_map json__ "MaxRecords" MaxRecords.of_json in
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ?maxRecords ?nextToken ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about the load balancer target groups for the specified Auto Scaling group. To determine the availability of registered instances, use the State element in the response. When you attach a target group to an Auto Scaling group, the initial State value is Adding. The state transitions to Added after all Auto Scaling instances are registered with the target group. If Elastic Load Balancing health checks are enabled for the Auto Scaling group, the state transitions to InService after at least one Auto Scaling instance passes the health check. When the target group is in the InService state, Amazon EC2 Auto Scaling can terminate and replace any instances that are reported as unhealthy. If no registered instances pass the health checks, the target group doesn't enter the InService state. Target groups also have an InService state if you attach them in the CreateAutoScalingGroup API call. If your target group state is InService, but it is not working properly, check the scaling activities by calling DescribeScalingActivities and take any corrective actions necessary. For help with failed health checks, see Troubleshooting Amazon EC2 Auto Scaling: Health checks in the Amazon EC2 Auto Scaling User Guide. For more information, see Elastic Load Balancing and Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]
+       "This API operation is superseded by DescribeTrafficSources, which can describe multiple traffic sources types. We recommend using DetachTrafficSources to simplify how you manage traffic sources. However, we continue to support DescribeLoadBalancerTargetGroups. You can use both the original DescribeLoadBalancerTargetGroups API operation and DescribeTrafficSources on the same Auto Scaling group. Gets information about the Elastic Load Balancing target groups for the specified Auto Scaling group. To determine the attachment status of the target group, use the State element in the response. When you attach a target group to an Auto Scaling group, the initial State value is Adding. The state transitions to Added after all Auto Scaling instances are registered with the target group. If Elastic Load Balancing health checks are enabled for the Auto Scaling group, the state transitions to InService after at least one Auto Scaling instance passes the health check. When the target group is in the InService state, Amazon EC2 Auto Scaling can terminate and replace any instances that are reported as unhealthy. If no registered instances pass the health checks, the target group doesn't enter the InService state. Target groups also have an InService state if you attach them in the CreateAutoScalingGroup API call. If your target group state is InService, but it is not working properly, check the scaling activities by calling DescribeScalingActivities and take any corrective actions necessary. For help with failed health checks, see Troubleshooting Amazon EC2 Auto Scaling: Health checks in the Amazon EC2 Auto Scaling User Guide. For more information, see Use Elastic Load Balancing to distribute traffic across the instances in your Auto Scaling group in the Amazon EC2 Auto Scaling User Guide. You can use this operation to describe target groups that were attached by using AttachLoadBalancerTargetGroups, but not for target groups that were attached by using AttachTrafficSources."]
 module DescribeLifecycleHooksType =
   struct
     type nonrec t =
@@ -12440,7 +15728,7 @@ module DescribeLifecycleHooksType =
         [@ocaml.doc "The name of the Auto Scaling group."];
       lifecycleHookNames: LifecycleHookNames.t option
         [@ocaml.doc
-          "The names of one or more lifecycle hooks. If you omit this parameter, all lifecycle hooks are described."]}
+          "The names of one or more lifecycle hooks. If you omit this property, all lifecycle hooks are described."]}
     let context_ = "DescribeLifecycleHooksType"
     let make ?lifecycleHookNames =
       fun ~autoScalingGroupName ->
@@ -12461,11 +15749,12 @@ module DescribeLifecycleHooksType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?lifecycleHookNames ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lifecycleHookNames =
-        field_map json "LifecycleHookNames" LifecycleHookNames.of_json in
+        field_map json__ "LifecycleHookNames" LifecycleHookNames.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ?lifecycleHookNames ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12530,9 +15819,9 @@ module DescribeLifecycleHooksAnswer =
           (Xml.child xml_arg0 "LifecycleHooks") in
       make ?lifecycleHooks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lifecycleHooks =
-        field_map json "LifecycleHooks" LifecycleHooks.of_json in
+        field_map json__ "LifecycleHooks" LifecycleHooks.of_json in
       make ?lifecycleHooks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12599,9 +15888,9 @@ module DescribeLifecycleHookTypesAnswer =
           (Xml.child xml_arg0 "LifecycleHookTypes") in
       make ?lifecycleHookTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lifecycleHookTypes =
-        field_map json "LifecycleHookTypes"
+        field_map json__ "LifecycleHookTypes"
           AutoScalingNotificationTypes.of_json in
       make ?lifecycleHookTypes ()
     let to_json v = composed_to_json to_value v
@@ -12656,24 +15945,26 @@ module DescribeInstanceRefreshesType =
       make ?maxRecords ?nextToken ?instanceRefreshIds ~autoScalingGroupName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let maxRecords = field_map json__ "MaxRecords" MaxRecords.of_json in
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let instanceRefreshIds =
-        field_map json "InstanceRefreshIds" InstanceRefreshIds.of_json in
+        field_map json__ "InstanceRefreshIds" InstanceRefreshIds.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ?maxRecords ?nextToken ?instanceRefreshIds ~autoScalingGroupName
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about the instance refreshes for the specified Auto Scaling group. This operation is part of the instance refresh feature in Amazon EC2 Auto Scaling, which helps you update instances in your Auto Scaling group after you make configuration changes. To help you determine the status of an instance refresh, this operation returns information about the instance refreshes you previously initiated, including their status, end time, the percentage of the instance refresh that is complete, and the number of instances remaining to update before the instance refresh is complete. The following are the possible statuses: Pending - The request was created, but the operation has not started. InProgress - The operation is in progress. Successful - The operation completed successfully. Failed - The operation failed to complete. You can troubleshoot using the status reason and the scaling activities. Cancelling - An ongoing operation is being cancelled. Cancellation does not roll back any replacements that have already been completed, but it prevents new replacements from being started. Cancelled - The operation is cancelled."]
+       "Gets information about the instance refreshes for the specified Auto Scaling group from the previous six weeks. This operation is part of the instance refresh feature in Amazon EC2 Auto Scaling, which helps you update instances in your Auto Scaling group after you make configuration changes. To help you determine the status of an instance refresh, Amazon EC2 Auto Scaling returns information about the instance refreshes you previously initiated, including their status, start time, end time, the percentage of the instance refresh that is complete, and the number of instances remaining to update before the instance refresh is complete. If a rollback is initiated while an instance refresh is in progress, Amazon EC2 Auto Scaling also returns information about the rollback of the instance refresh."]
 module DescribeInstanceRefreshesAnswer =
   struct
     type describeInstanceRefreshesResult =
       {
       instanceRefreshes: InstanceRefreshes.t option
-        [@ocaml.doc "The instance refreshes for the specified group."];
+        [@ocaml.doc
+          "The instance refreshes for the specified group, sorted by creation timestamp in descending order."];
       nextToken: XmlString.t option
         [@ocaml.doc
           "A string that indicates that the response contains more items than can be returned in a single response. To receive additional items, specify this string for the NextToken value when requesting the next set of items. This value is null when there are no more items to return."]}
@@ -12745,14 +16036,14 @@ module DescribeInstanceRefreshesAnswer =
           (Xml.child xml_arg0 "InstanceRefreshes") in
       make ?nextToken ?instanceRefreshes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let instanceRefreshes =
-        field_map json "InstanceRefreshes" InstanceRefreshes.of_json in
+        field_map json__ "InstanceRefreshes" InstanceRefreshes.of_json in
       make ?nextToken ?instanceRefreshes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about the instance refreshes for the specified Auto Scaling group. This operation is part of the instance refresh feature in Amazon EC2 Auto Scaling, which helps you update instances in your Auto Scaling group after you make configuration changes. To help you determine the status of an instance refresh, this operation returns information about the instance refreshes you previously initiated, including their status, end time, the percentage of the instance refresh that is complete, and the number of instances remaining to update before the instance refresh is complete. The following are the possible statuses: Pending - The request was created, but the operation has not started. InProgress - The operation is in progress. Successful - The operation completed successfully. Failed - The operation failed to complete. You can troubleshoot using the status reason and the scaling activities. Cancelling - An ongoing operation is being cancelled. Cancellation does not roll back any replacements that have already been completed, but it prevents new replacements from being started. Cancelled - The operation is cancelled."]
+       "Gets information about the instance refreshes for the specified Auto Scaling group from the previous six weeks. This operation is part of the instance refresh feature in Amazon EC2 Auto Scaling, which helps you update instances in your Auto Scaling group after you make configuration changes. To help you determine the status of an instance refresh, Amazon EC2 Auto Scaling returns information about the instance refreshes you previously initiated, including their status, start time, end time, the percentage of the instance refresh that is complete, and the number of instances remaining to update before the instance refresh is complete. If a rollback is initiated while an instance refresh is in progress, Amazon EC2 Auto Scaling also returns information about the rollback of the instance refresh."]
 module DescribeAutoScalingNotificationTypesAnswer =
   struct
     type describeAutoScalingNotificationTypesResult =
@@ -12818,9 +16109,9 @@ module DescribeAutoScalingNotificationTypesAnswer =
           (Xml.child xml_arg0 "AutoScalingNotificationTypes") in
       make ?autoScalingNotificationTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoScalingNotificationTypes =
-        field_map json "AutoScalingNotificationTypes"
+        field_map json__ "AutoScalingNotificationTypes"
           AutoScalingNotificationTypes.of_json in
       make ?autoScalingNotificationTypes ()
     let to_json v = composed_to_json to_value v
@@ -12832,7 +16123,7 @@ module DescribeAutoScalingInstancesType =
       {
       instanceIds: InstanceIds.t option
         [@ocaml.doc
-          "The IDs of the instances. If you omit this parameter, all Auto Scaling instances are described. If you specify an ID that does not exist, it is ignored with no error. Array Members: Maximum number of 50 items."];
+          "The IDs of the instances. If you omit this property, all Auto Scaling instances are described. If you specify an ID that does not exist, it is ignored with no error. Array Members: Maximum number of 50 items."];
       maxRecords: MaxRecords.t option
         [@ocaml.doc
           "The maximum number of items to return with this call. The default value is 50 and the maximum value is 50."];
@@ -12857,10 +16148,10 @@ module DescribeAutoScalingInstancesType =
         (Option.map ~f:InstanceIds.of_xml) (Xml.child xml_arg0 "InstanceIds") in
       make ?nextToken ?maxRecords ?instanceIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
-      let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
-      let instanceIds = field_map json "InstanceIds" InstanceIds.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
+      let maxRecords = field_map json__ "MaxRecords" MaxRecords.of_json in
+      let instanceIds = field_map json__ "InstanceIds" InstanceIds.of_json in
       make ?nextToken ?maxRecords ?instanceIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12925,9 +16216,9 @@ module DescribeAdjustmentTypesAnswer =
           (Xml.child xml_arg0 "AdjustmentTypes") in
       make ?adjustmentTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let adjustmentTypes =
-        field_map json "AdjustmentTypes" AdjustmentTypes.of_json in
+        field_map json__ "AdjustmentTypes" AdjustmentTypes.of_json in
       make ?adjustmentTypes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13031,24 +16322,24 @@ module DescribeAccountLimitsAnswer =
       make ?numberOfLaunchConfigurations ?numberOfAutoScalingGroups
         ?maxNumberOfLaunchConfigurations ?maxNumberOfAutoScalingGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let numberOfLaunchConfigurations =
-        field_map json "NumberOfLaunchConfigurations"
+        field_map json__ "NumberOfLaunchConfigurations"
           NumberOfLaunchConfigurations.of_json in
       let numberOfAutoScalingGroups =
-        field_map json "NumberOfAutoScalingGroups"
+        field_map json__ "NumberOfAutoScalingGroups"
           NumberOfAutoScalingGroups.of_json in
       let maxNumberOfLaunchConfigurations =
-        field_map json "MaxNumberOfLaunchConfigurations"
+        field_map json__ "MaxNumberOfLaunchConfigurations"
           MaxNumberOfLaunchConfigurations.of_json in
       let maxNumberOfAutoScalingGroups =
-        field_map json "MaxNumberOfAutoScalingGroups"
+        field_map json__ "MaxNumberOfAutoScalingGroups"
           MaxNumberOfAutoScalingGroups.of_json in
       make ?numberOfLaunchConfigurations ?numberOfAutoScalingGroups
         ?maxNumberOfLaunchConfigurations ?maxNumberOfAutoScalingGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the current Amazon EC2 Auto Scaling resource quotas for your account. When you establish an Amazon Web Services account, the account has initial quotas on the maximum number of Auto Scaling groups and launch configurations that you can create in a given Region. For more information, see Amazon EC2 Auto Scaling service quotas in the Amazon EC2 Auto Scaling User Guide."]
+       "Describes the current Amazon EC2 Auto Scaling resource quotas for your account. When you establish an Amazon Web Services account, the account has initial quotas on the maximum number of Auto Scaling groups and launch configurations that you can create in a given Region. For more information, see Quotas for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]
 module DeleteWarmPoolType =
   struct
     type nonrec t =
@@ -13076,10 +16367,11 @@ module DeleteWarmPoolType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?forceDelete ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let forceDelete = field_map json "ForceDelete" ForceDelete.of_json in
+    let of_json json__ =
+      let forceDelete = field_map json__ "ForceDelete" ForceDelete.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ?forceDelete ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13172,8 +16464,8 @@ module DeleteTagsType =
         Tags.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ~tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in make ~tags ()
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in make ~tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified tags."]
 module DeleteScheduledActionType =
@@ -13204,11 +16496,12 @@ module DeleteScheduledActionType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~scheduledActionName ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduledActionName =
-        field_map_exn json "ScheduledActionName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "ScheduledActionName" XmlStringMaxLen255.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ~scheduledActionName ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified scheduled action."]
@@ -13238,14 +16531,14 @@ module DeletePolicyType =
           (Xml.child xml_arg0 "AutoScalingGroupName") in
       make ~policyName ?autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyName = field_map_exn json "PolicyName" ResourceName.of_json in
+    let of_json json__ =
+      let policyName = field_map_exn json__ "PolicyName" ResourceName.of_json in
       let autoScalingGroupName =
-        field_map json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map json__ "AutoScalingGroupName" XmlStringMaxLen255.of_json in
       make ~policyName ?autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified scaling policy. Deleting either a step scaling policy or a simple scaling policy deletes the underlying alarm action, but does not delete the alarm, even if it no longer has an associated action. For more information, see Deleting a scaling policy in the Amazon EC2 Auto Scaling User Guide."]
+       "Deletes the specified scaling policy. Deleting either a step scaling policy or a simple scaling policy deletes the underlying alarm action, but does not delete the alarm, even if it no longer has an associated action. For more information, see Delete a scaling policy in the Amazon EC2 Auto Scaling User Guide."]
 module DeleteNotificationConfigurationType =
   struct
     type nonrec t =
@@ -13273,10 +16566,12 @@ module DeleteNotificationConfigurationType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~topicARN ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicARN = field_map_exn json "TopicARN" XmlStringMaxLen255.of_json in
+    let of_json json__ =
+      let topicARN =
+        field_map_exn json__ "TopicARN" XmlStringMaxLen255.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ~topicARN ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified notification."]
@@ -13308,11 +16603,12 @@ module DeleteLifecycleHookType =
           (Xml.child_exn ~context:context_ xml_arg0 "LifecycleHookName") in
       make ~autoScalingGroupName ~lifecycleHookName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       let lifecycleHookName =
-        field_map_exn json "LifecycleHookName" AsciiStringMaxLen255.of_json in
+        field_map_exn json__ "LifecycleHookName" AsciiStringMaxLen255.of_json in
       make ~autoScalingGroupName ~lifecycleHookName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13370,7 +16666,7 @@ module DeleteAutoScalingGroupType =
         [@ocaml.doc "The name of the Auto Scaling group."];
       forceDelete: ForceDelete.t option
         [@ocaml.doc
-          "Specifies that the group is to be deleted along with all instances associated with the group, without waiting for all instances to be terminated. This parameter also deletes any outstanding lifecycle actions associated with the group."]}
+          "Specifies that the group is to be deleted along with all instances associated with the group, without waiting for all instances to be terminated. This action also deletes any outstanding lifecycle actions associated with the group."]}
     let context_ = "DeleteAutoScalingGroupType"
     let make ?forceDelete =
       fun ~autoScalingGroupName ->
@@ -13389,14 +16685,15 @@ module DeleteAutoScalingGroupType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ?forceDelete ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let forceDelete = field_map json "ForceDelete" ForceDelete.of_json in
+    let of_json json__ =
+      let forceDelete = field_map json__ "ForceDelete" ForceDelete.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ?forceDelete ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified Auto Scaling group. If the group has instances or scaling activities in progress, you must specify the option to force the deletion in order for it to succeed. If the group has policies, deleting the group deletes the policies, the underlying alarm actions, and any alarm that no longer has an associated action. To remove instances from the Auto Scaling group before deleting it, call the DetachInstances API with the list of instances and the option to decrement the desired capacity. This ensures that Amazon EC2 Auto Scaling does not launch replacement instances. To terminate all instances before deleting the Auto Scaling group, call the UpdateAutoScalingGroup API and set the minimum size and desired capacity of the Auto Scaling group to zero."]
+       "Deletes the specified Auto Scaling group. If the group has instances or scaling activities in progress, you must specify the option to force the deletion in order for it to succeed. The force delete operation will also terminate the EC2 instances. If the group has a warm pool, the force delete option also deletes the warm pool. To remove instances from the Auto Scaling group before deleting it, call the DetachInstances API with the list of instances and the option to decrement the desired capacity. This ensures that Amazon EC2 Auto Scaling does not launch replacement instances. To terminate all instances before deleting the Auto Scaling group, call the UpdateAutoScalingGroup API and set the minimum size and desired capacity of the Auto Scaling group to zero. If the group has scaling policies, deleting the group deletes the policies, the underlying alarm actions, and any alarm that no longer has an associated action. For more information, see Delete your Auto Scaling infrastructure in the Amazon EC2 Auto Scaling User Guide."]
 module CreateOrUpdateTagsType =
   struct
     type nonrec t = {
@@ -13411,11 +16708,11 @@ module CreateOrUpdateTagsType =
         Tags.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       make ~tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in make ~tags ()
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in make ~tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates tags for the specified Auto Scaling group. When you specify a tag with a key that already exists, the operation overwrites the previous tag definition, and you do not get an error message. For more information, see Tagging Auto Scaling groups and instances in the Amazon EC2 Auto Scaling User Guide."]
+       "Creates or updates tags for the specified Auto Scaling group. When you specify a tag with a key that already exists, the operation overwrites the previous tag definition, and you do not get an error message. For more information, see Tag Auto Scaling groups and instances in the Amazon EC2 Auto Scaling User Guide."]
 module CreateLaunchConfigurationType =
   struct
     type nonrec t =
@@ -13425,56 +16722,56 @@ module CreateLaunchConfigurationType =
           "The name of the launch configuration. This name must be unique per Region per account."];
       imageId: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "The ID of the Amazon Machine Image (AMI) that was assigned during registration. For more information, see Finding an AMI in the Amazon EC2 User Guide for Linux Instances. If you do not specify InstanceId, you must specify ImageId."];
+          "The ID of the Amazon Machine Image (AMI) that was assigned during registration. For more information, see Find a Linux AMI in the Amazon EC2 User Guide. If you specify InstanceId, an ImageId is not required."];
       keyName: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "The name of the key pair. For more information, see Amazon EC2 Key Pairs in the Amazon EC2 User Guide for Linux Instances."];
+          "The name of the key pair. For more information, see Amazon EC2 key pairs and Amazon EC2 instances in the Amazon EC2 User Guide."];
       securityGroups: SecurityGroups.t option
         [@ocaml.doc
-          "A list that contains the security groups to assign to the instances in the Auto Scaling group. \\[EC2-VPC\\] Specify the security group IDs. For more information, see Security Groups for Your VPC in the Amazon Virtual Private Cloud User Guide. \\[EC2-Classic\\] Specify either the security group names or the security group IDs. For more information, see Amazon EC2 Security Groups in the Amazon EC2 User Guide for Linux Instances."];
+          "A list that contains the security group IDs to assign to the instances in the Auto Scaling group. For more information, see Control traffic to your Amazon Web Services resources using security groups in the Amazon Virtual Private Cloud User Guide."];
       classicLinkVPCId: XmlStringMaxLen255.t option
-        [@ocaml.doc
-          "The ID of a ClassicLink-enabled VPC to link your EC2-Classic instances to. For more information, see ClassicLink in the Amazon EC2 User Guide for Linux Instances and Linking EC2-Classic instances to a VPC in the Amazon EC2 Auto Scaling User Guide. This parameter can only be used if you are launching EC2-Classic instances."];
+        [@ocaml.doc "Available for backward compatibility."];
       classicLinkVPCSecurityGroups: ClassicLinkVPCSecurityGroups.t option
-        [@ocaml.doc
-          "The IDs of one or more security groups for the specified ClassicLink-enabled VPC. For more information, see ClassicLink in the Amazon EC2 User Guide for Linux Instances and Linking EC2-Classic instances to a VPC in the Amazon EC2 Auto Scaling User Guide. If you specify the ClassicLinkVPCId parameter, you must specify this parameter."];
+        [@ocaml.doc "Available for backward compatibility."];
       userData: XmlStringUserData.t option
         [@ocaml.doc
           "The user data to make available to the launched EC2 instances. For more information, see Instance metadata and user data (Linux) and Instance metadata and user data (Windows). If you are using a command line tool, base64-encoding is performed for you, and you can load the text from a file. Otherwise, you must provide base64-encoded text. User data is limited to 16 KB."];
       instanceId: XmlStringMaxLen19.t option
         [@ocaml.doc
-          "The ID of the instance to use to create the launch configuration. The new launch configuration derives attributes from the instance, except for the block device mapping. To create a launch configuration with a block device mapping or override any other instance attributes, specify them as part of the same request. For more information, see Creating a launch configuration using an EC2 instance in the Amazon EC2 Auto Scaling User Guide. If you do not specify InstanceId, you must specify both ImageId and InstanceType."];
+          "The ID of the instance to use to create the launch configuration. The new launch configuration derives attributes from the instance, except for the block device mapping. To create a launch configuration with a block device mapping or override any other instance attributes, specify them as part of the same request. For more information, see Create a launch configuration in the Amazon EC2 Auto Scaling User Guide."];
       instanceType: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "Specifies the instance type of the EC2 instance. For information about available instance types, see Available Instance Types in the Amazon EC2 User Guide for Linux Instances. If you do not specify InstanceId, you must specify InstanceType."];
+          "Specifies the instance type of the EC2 instance. For information about available instance types, see Available instance types in the Amazon EC2 User Guide. If you specify InstanceId, an InstanceType is not required."];
       kernelId: XmlStringMaxLen255.t option
-        [@ocaml.doc "The ID of the kernel associated with the AMI."];
+        [@ocaml.doc
+          "The ID of the kernel associated with the AMI. We recommend that you use PV-GRUB instead of kernels and RAM disks. For more information, see User provided kernels in the Amazon EC2 User Guide."];
       ramdiskId: XmlStringMaxLen255.t option
-        [@ocaml.doc "The ID of the RAM disk to select."];
+        [@ocaml.doc
+          "The ID of the RAM disk to select. We recommend that you use PV-GRUB instead of kernels and RAM disks. For more information, see User provided kernels in the Amazon EC2 User Guide."];
       blockDeviceMappings: BlockDeviceMappings.t option
         [@ocaml.doc
-          "A block device mapping, which specifies the block devices for the instance. You can specify virtual devices and EBS volumes. For more information, see Block Device Mapping in the Amazon EC2 User Guide for Linux Instances."];
+          "The block device mapping entries that define the block devices to attach to the instances at launch. By default, the block devices specified in the block device mapping for the AMI are used. For more information, see Block device mappings in the Amazon EC2 User Guide."];
       instanceMonitoring: InstanceMonitoring.t option
         [@ocaml.doc
-          "Controls whether instances in this group are launched with detailed (true) or basic (false) monitoring. The default value is true (enabled). When detailed monitoring is enabled, Amazon CloudWatch generates metrics every minute and your account is charged a fee. When you disable detailed monitoring, CloudWatch generates metrics every 5 minutes. For more information, see Configure Monitoring for Auto Scaling Instances in the Amazon EC2 Auto Scaling User Guide."];
+          "Controls whether instances in this group are launched with detailed (true) or basic (false) monitoring. The default value is true (enabled). When detailed monitoring is enabled, Amazon CloudWatch generates metrics every minute and your account is charged a fee. When you disable detailed monitoring, CloudWatch generates metrics every 5 minutes. For more information, see Configure monitoring for Auto Scaling instances in the Amazon EC2 Auto Scaling User Guide."];
       spotPrice: SpotPrice.t option
         [@ocaml.doc
-          "The maximum hourly price to be paid for any Spot Instance launched to fulfill the request. Spot Instances are launched when the price you specify exceeds the current Spot price. For more information, see Requesting Spot Instances in the Amazon EC2 Auto Scaling User Guide. When you change your maximum price by creating a new launch configuration, running instances will continue to run as long as the maximum price for those running instances is higher than the current Spot price."];
+          "The maximum hourly price to be paid for any Spot Instance launched to fulfill the request. Spot Instances are launched when the price you specify exceeds the current Spot price. For more information, see Request Spot Instances for fault-tolerant and flexible applications in the Amazon EC2 Auto Scaling User Guide. Valid Range: Minimum value of 0.001 When you change your maximum price by creating a new launch configuration, running instances will continue to run as long as the maximum price for those running instances is higher than the current Spot price."];
       iamInstanceProfile: XmlStringMaxLen1600.t option
         [@ocaml.doc
           "The name or the Amazon Resource Name (ARN) of the instance profile associated with the IAM role for the instance. The instance profile contains the IAM role. For more information, see IAM role for applications that run on Amazon EC2 instances in the Amazon EC2 Auto Scaling User Guide."];
       ebsOptimized: EbsOptimized.t option
         [@ocaml.doc
-          "Specifies whether the launch configuration is optimized for EBS I/O (true) or not (false). The optimization provides dedicated throughput to Amazon EBS and an optimized configuration stack to provide optimal I/O performance. This optimization is not available with all instance types. Additional fees are incurred when you enable EBS optimization for an instance type that is not EBS-optimized by default. For more information, see Amazon EBS-optimized instances in the Amazon EC2 User Guide for Linux Instances. The default value is false."];
+          "Specifies whether the launch configuration is optimized for EBS I/O (true) or not (false). The optimization provides dedicated throughput to Amazon EBS and an optimized configuration stack to provide optimal I/O performance. This optimization is not available with all instance types. Additional fees are incurred when you enable EBS optimization for an instance type that is not EBS-optimized by default. For more information, see Amazon EBS-optimized instances in the Amazon EC2 User Guide. The default value is false."];
       associatePublicIpAddress: AssociatePublicIpAddress.t option
         [@ocaml.doc
-          "For Auto Scaling groups that are running in a virtual private cloud (VPC), specifies whether to assign a public IP address to the group's instances. If you specify true, each instance in the Auto Scaling group receives a unique public IP address. For more information, see Launching Auto Scaling instances in a VPC in the Amazon EC2 Auto Scaling User Guide. If you specify this parameter, you must specify at least one subnet for VPCZoneIdentifier when you create your group. If the instance is launched into a default subnet, the default is to assign a public IP address, unless you disabled the option to assign a public IP address on the subnet. If the instance is launched into a nondefault subnet, the default is not to assign a public IP address, unless you enabled the option to assign a public IP address on the subnet."];
+          "Specifies whether to assign a public IPv4 address to the group's instances. If the instance is launched into a default subnet, the default is to assign a public IPv4 address, unless you disabled the option to assign a public IPv4 address on the subnet. If the instance is launched into a nondefault subnet, the default is not to assign a public IPv4 address, unless you enabled the option to assign a public IPv4 address on the subnet. If you specify true, each instance in the Auto Scaling group receives a unique public IPv4 address. For more information, see Provide network connectivity for your Auto Scaling instances using Amazon VPC in the Amazon EC2 Auto Scaling User Guide. If you specify this property, you must specify at least one subnet for VPCZoneIdentifier when you create your group."];
       placementTenancy: XmlStringMaxLen64.t option
         [@ocaml.doc
-          "The tenancy of the instance. An instance with dedicated tenancy runs on isolated, single-tenant hardware and can only be launched into a VPC. To launch dedicated instances into a shared tenancy VPC (a VPC with the instance placement tenancy attribute set to default), you must set the value of this parameter to dedicated. If you specify PlacementTenancy, you must specify at least one subnet for VPCZoneIdentifier when you create your group. For more information, see Configuring instance tenancy with Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide. Valid Values: default | dedicated"];
+          "The tenancy of the instance, either default or dedicated. An instance with dedicated tenancy runs on isolated, single-tenant hardware and can only be launched into a VPC. To launch dedicated instances into a shared tenancy VPC (a VPC with the instance placement tenancy attribute set to default), you must set the value of this property to dedicated. If you specify PlacementTenancy, you must specify at least one subnet for VPCZoneIdentifier when you create your group. Valid values: default | dedicated"];
       metadataOptions: InstanceMetadataOptions.t option
         [@ocaml.doc
-          "The metadata options for the instances. For more information, see Configuring the Instance Metadata Options in the Amazon EC2 Auto Scaling User Guide."]}
+          "The metadata options for the instances. For more information, see Configure the instance metadata options in the Amazon EC2 Auto Scaling User Guide."]}
     let context_ = "CreateLaunchConfigurationType"
     let make ?imageId =
       fun ?keyName ->
@@ -13618,39 +16915,40 @@ module CreateLaunchConfigurationType =
         ?userData ?classicLinkVPCSecurityGroups ?classicLinkVPCId
         ?securityGroups ?keyName ?imageId ~launchConfigurationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metadataOptions =
-        field_map json "MetadataOptions" InstanceMetadataOptions.of_json in
+        field_map json__ "MetadataOptions" InstanceMetadataOptions.of_json in
       let placementTenancy =
-        field_map json "PlacementTenancy" XmlStringMaxLen64.of_json in
+        field_map json__ "PlacementTenancy" XmlStringMaxLen64.of_json in
       let associatePublicIpAddress =
-        field_map json "AssociatePublicIpAddress"
+        field_map json__ "AssociatePublicIpAddress"
           AssociatePublicIpAddress.of_json in
-      let ebsOptimized = field_map json "EbsOptimized" EbsOptimized.of_json in
+      let ebsOptimized = field_map json__ "EbsOptimized" EbsOptimized.of_json in
       let iamInstanceProfile =
-        field_map json "IamInstanceProfile" XmlStringMaxLen1600.of_json in
-      let spotPrice = field_map json "SpotPrice" SpotPrice.of_json in
+        field_map json__ "IamInstanceProfile" XmlStringMaxLen1600.of_json in
+      let spotPrice = field_map json__ "SpotPrice" SpotPrice.of_json in
       let instanceMonitoring =
-        field_map json "InstanceMonitoring" InstanceMonitoring.of_json in
+        field_map json__ "InstanceMonitoring" InstanceMonitoring.of_json in
       let blockDeviceMappings =
-        field_map json "BlockDeviceMappings" BlockDeviceMappings.of_json in
-      let ramdiskId = field_map json "RamdiskId" XmlStringMaxLen255.of_json in
-      let kernelId = field_map json "KernelId" XmlStringMaxLen255.of_json in
+        field_map json__ "BlockDeviceMappings" BlockDeviceMappings.of_json in
+      let ramdiskId = field_map json__ "RamdiskId" XmlStringMaxLen255.of_json in
+      let kernelId = field_map json__ "KernelId" XmlStringMaxLen255.of_json in
       let instanceType =
-        field_map json "InstanceType" XmlStringMaxLen255.of_json in
-      let instanceId = field_map json "InstanceId" XmlStringMaxLen19.of_json in
-      let userData = field_map json "UserData" XmlStringUserData.of_json in
+        field_map json__ "InstanceType" XmlStringMaxLen255.of_json in
+      let instanceId =
+        field_map json__ "InstanceId" XmlStringMaxLen19.of_json in
+      let userData = field_map json__ "UserData" XmlStringUserData.of_json in
       let classicLinkVPCSecurityGroups =
-        field_map json "ClassicLinkVPCSecurityGroups"
+        field_map json__ "ClassicLinkVPCSecurityGroups"
           ClassicLinkVPCSecurityGroups.of_json in
       let classicLinkVPCId =
-        field_map json "ClassicLinkVPCId" XmlStringMaxLen255.of_json in
+        field_map json__ "ClassicLinkVPCId" XmlStringMaxLen255.of_json in
       let securityGroups =
-        field_map json "SecurityGroups" SecurityGroups.of_json in
-      let keyName = field_map json "KeyName" XmlStringMaxLen255.of_json in
-      let imageId = field_map json "ImageId" XmlStringMaxLen255.of_json in
+        field_map json__ "SecurityGroups" SecurityGroups.of_json in
+      let keyName = field_map json__ "KeyName" XmlStringMaxLen255.of_json in
+      let imageId = field_map json__ "ImageId" XmlStringMaxLen255.of_json in
       let launchConfigurationName =
-        field_map_exn json "LaunchConfigurationName"
+        field_map_exn json__ "LaunchConfigurationName"
           XmlStringMaxLen255.of_json in
       make ?metadataOptions ?placementTenancy ?associatePublicIpAddress
         ?ebsOptimized ?iamInstanceProfile ?spotPrice ?instanceMonitoring
@@ -13659,26 +16957,26 @@ module CreateLaunchConfigurationType =
         ?securityGroups ?keyName ?imageId ~launchConfigurationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a launch configuration. If you exceed your maximum limit of launch configurations, the call fails. To query this limit, call the DescribeAccountLimits API. For information about updating this limit, see Amazon EC2 Auto Scaling service quotas in the Amazon EC2 Auto Scaling User Guide. For more information, see Launch configurations in the Amazon EC2 Auto Scaling User Guide."]
+       "Creates a launch configuration. If you exceed your maximum limit of launch configurations, the call fails. To query this limit, call the DescribeAccountLimits API. For information about updating this limit, see Quotas for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide. For more information, see Launch configurations in the Amazon EC2 Auto Scaling User Guide. Amazon EC2 Auto Scaling configures instances launched as part of an Auto Scaling group using either a launch template or a launch configuration. We strongly recommend that you do not use launch configurations. They do not provide full functionality for Amazon EC2 Auto Scaling or Amazon EC2. For information about using launch templates, see Launch templates in the Amazon EC2 Auto Scaling User Guide."]
 module CreateAutoScalingGroupType =
   struct
     type nonrec t =
       {
       autoScalingGroupName: XmlStringMaxLen255.t
         [@ocaml.doc
-          "The name of the Auto Scaling group. This name must be unique per Region per account."];
+          "The name of the Auto Scaling group. This name must be unique per Region per account. The name can contain any ASCII character 33 to 126 including most punctuation characters, digits, and upper and lowercased letters. You cannot use a colon (:) in the name."];
       launchConfigurationName: XmlStringMaxLen255.t option
         [@ocaml.doc
           "The name of the launch configuration to use to launch instances. Conditional: You must specify either a launch template (LaunchTemplate or MixedInstancesPolicy) or a launch configuration (LaunchConfigurationName or InstanceId)."];
       launchTemplate: LaunchTemplateSpecification.t option
         [@ocaml.doc
-          "Parameters used to specify the launch template and version to use to launch instances. Conditional: You must specify either a launch template (LaunchTemplate or MixedInstancesPolicy) or a launch configuration (LaunchConfigurationName or InstanceId). The launch template that is specified must be configured for use with an Auto Scaling group. For more information, see Creating a launch template for an Auto Scaling group in the Amazon EC2 Auto Scaling User Guide."];
+          "Information used to specify the launch template and version to use to launch instances. Conditional: You must specify either a launch template (LaunchTemplate or MixedInstancesPolicy) or a launch configuration (LaunchConfigurationName or InstanceId). The launch template that is specified must be configured for use with an Auto Scaling group. For more information, see Create a launch template for an Auto Scaling group in the Amazon EC2 Auto Scaling User Guide."];
       mixedInstancesPolicy: MixedInstancesPolicy.t option
         [@ocaml.doc
-          "An embedded object that specifies a mixed instances policy. For more information, see Auto Scaling groups with multiple instance types and purchase options in the Amazon EC2 Auto Scaling User Guide."];
+          "The mixed instances policy. For more information, see Auto Scaling groups with multiple instance types and purchase options in the Amazon EC2 Auto Scaling User Guide."];
       instanceId: XmlStringMaxLen19.t option
         [@ocaml.doc
-          "The ID of the instance used to base the launch configuration on. If specified, Amazon EC2 Auto Scaling uses the configuration values from the specified instance to create a new launch configuration. To get the instance ID, use the Amazon EC2 DescribeInstances API operation. For more information, see Creating an Auto Scaling group using an EC2 instance in the Amazon EC2 Auto Scaling User Guide."];
+          "The ID of the instance used to base the launch configuration on. If specified, Amazon EC2 Auto Scaling uses the configuration values from the specified instance to create a new launch configuration. To get the instance ID, use the Amazon EC2 DescribeInstances API operation. For more information, see Create an Auto Scaling group using parameters from an existing instance in the Amazon EC2 Auto Scaling User Guide."];
       minSize: AutoScalingGroupMinSize.t
         [@ocaml.doc "The minimum size of the group."];
       maxSize: AutoScalingGroupMaxSize.t
@@ -13689,53 +16987,84 @@ module CreateAutoScalingGroupType =
           "The desired capacity is the initial capacity of the Auto Scaling group at the time of its creation and the capacity it attempts to maintain. It can scale beyond this capacity if you configure auto scaling. This number must be greater than or equal to the minimum size of the group and less than or equal to the maximum size of the group. If you do not specify a desired capacity, the default is the minimum size of the group."];
       defaultCooldown: Cooldown.t option
         [@ocaml.doc
-          "The amount of time, in seconds, after a scaling activity completes before another scaling activity can start. The default value is 300. This setting applies when using simple scaling policies, but not when using other scaling policies or scheduled scaling. For more information, see Scaling cooldowns for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."];
+          "Only needed if you use simple scaling policies. The amount of time, in seconds, between one scaling activity ending and another one starting due to simple scaling policies. For more information, see Scaling cooldowns for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide. Default: 300 seconds"];
       availabilityZones: AvailabilityZones.t option
         [@ocaml.doc
-          "A list of Availability Zones where instances in the Auto Scaling group can be created. This parameter is optional if you specify one or more subnets for VPCZoneIdentifier. Conditional: If your account supports EC2-Classic and VPC, this parameter is required to launch instances into EC2-Classic."];
+          "A list of Availability Zones where instances in the Auto Scaling group can be created. Used for launching into the default VPC subnet in each Availability Zone when not using the VPCZoneIdentifier property, or for attaching a network interface when an existing network interface ID is specified in a launch template."];
+      availabilityZoneIds: AvailabilityZoneIds.t option
+        [@ocaml.doc
+          "A list of Availability Zone IDs where the Auto Scaling group can launch instances. You cannot specify both AvailabilityZones and AvailabilityZoneIds in the same request."];
       loadBalancerNames: LoadBalancerNames.t option
         [@ocaml.doc
           "A list of Classic Load Balancers associated with this Auto Scaling group. For Application Load Balancers, Network Load Balancers, and Gateway Load Balancers, specify the TargetGroupARNs property instead."];
       targetGroupARNs: TargetGroupARNs.t option
         [@ocaml.doc
-          "The Amazon Resource Names (ARN) of the target groups to associate with the Auto Scaling group. Instances are registered as targets in a target group, and traffic is routed to the target group. For more information, see Elastic Load Balancing and Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."];
+          "The Amazon Resource Names (ARN) of the Elastic Load Balancing target groups to associate with the Auto Scaling group. Instances are registered as targets with the target groups. The target groups receive incoming traffic and route requests to one or more registered targets. For more information, see Use Elastic Load Balancing to distribute traffic across the instances in your Auto Scaling group in the Amazon EC2 Auto Scaling User Guide."];
       healthCheckType: XmlStringMaxLen32.t option
         [@ocaml.doc
-          "The service to use for the health checks. The valid values are EC2 (default) and ELB. If you configure an Auto Scaling group to use load balancer (ELB) health checks, it considers the instance unhealthy if it fails either the EC2 status checks or the load balancer health checks. For more information, see Health checks for Auto Scaling instances in the Amazon EC2 Auto Scaling User Guide."];
+          "A comma-separated value string of one or more health check types. The valid values are EC2, EBS, ELB, and VPC_LATTICE. EC2 is the default health check and cannot be disabled. For more information, see Health checks for instances in an Auto Scaling group in the Amazon EC2 Auto Scaling User Guide. Only specify EC2 if you must clear a value that was previously set."];
       healthCheckGracePeriod: HealthCheckGracePeriod.t option
         [@ocaml.doc
-          "The amount of time, in seconds, that Amazon EC2 Auto Scaling waits before checking the health status of an EC2 instance that has come into service and marking it unhealthy due to a failed health check. The default value is 0. For more information, see Health check grace period in the Amazon EC2 Auto Scaling User Guide. Required if you are adding an ELB health check."];
+          "The amount of time, in seconds, that Amazon EC2 Auto Scaling waits before checking the health status of an EC2 instance that has come into service and marking it unhealthy due to a failed health check. This is useful if your instances do not immediately pass their health checks after they enter the InService state. For more information, see Set the health check grace period for an Auto Scaling group in the Amazon EC2 Auto Scaling User Guide. Default: 0 seconds"];
       placementGroup: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "The name of an existing placement group into which to launch your instances, if any. A placement group is a logical grouping of instances within a single Availability Zone. You cannot specify multiple Availability Zones and a placement group. For more information, see Placement Groups in the Amazon EC2 User Guide for Linux Instances."];
-      vPCZoneIdentifier: XmlStringMaxLen2047.t option
+          "The name of the placement group into which to launch your instances. For more information, see Placement groups in the Amazon EC2 User Guide. A cluster placement group is a logical grouping of instances within a single Availability Zone. You cannot specify multiple Availability Zones and a cluster placement group."];
+      vPCZoneIdentifier: XmlStringMaxLen5000.t option
         [@ocaml.doc
-          "A comma-separated list of subnet IDs for a virtual private cloud (VPC) where instances in the Auto Scaling group can be created. If you specify VPCZoneIdentifier with AvailabilityZones, the subnets that you specify for this parameter must reside in those Availability Zones. Conditional: If your account supports EC2-Classic and VPC, this parameter is required to launch instances into a VPC."];
+          "A comma-separated list of subnet IDs for a virtual private cloud (VPC) where instances in the Auto Scaling group can be created. If you specify VPCZoneIdentifier with AvailabilityZones, the subnets that you specify must reside in those Availability Zones."];
       terminationPolicies: TerminationPolicies.t option
         [@ocaml.doc
-          "A policy or a list of policies that are used to select the instance to terminate. These policies are executed in the order that you list them. For more information, see Controlling which Auto Scaling instances terminate during scale in in the Amazon EC2 Auto Scaling User Guide."];
+          "A policy or a list of policies that are used to select the instance to terminate. These policies are executed in the order that you list them. For more information, see Configure termination policies for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide. Valid values: Default | AllocationStrategy | ClosestToNextInstanceHour | NewestInstance | OldestInstance | OldestLaunchConfiguration | OldestLaunchTemplate | arn:aws:lambda:region:account-id:function:my-function:my-alias"];
       newInstancesProtectedFromScaleIn: InstanceProtected.t option
         [@ocaml.doc
-          "Indicates whether newly launched instances are protected from termination by Amazon EC2 Auto Scaling when scaling in. For more information about preventing instances from terminating on scale in, see Using instance scale-in protection in the Amazon EC2 Auto Scaling User Guide."];
+          "Indicates whether newly launched instances are protected from termination by Amazon EC2 Auto Scaling when scaling in. For more information about preventing instances from terminating on scale in, see Use instance scale-in protection in the Amazon EC2 Auto Scaling User Guide."];
       capacityRebalance: CapacityRebalanceEnabled.t option
         [@ocaml.doc
-          "Indicates whether Capacity Rebalancing is enabled. Otherwise, Capacity Rebalancing is disabled. When you turn on Capacity Rebalancing, Amazon EC2 Auto Scaling attempts to launch a Spot Instance whenever Amazon EC2 notifies that a Spot Instance is at an elevated risk of interruption. After launching a new instance, it then terminates an old instance. For more information, see Amazon EC2 Auto Scaling Capacity Rebalancing in the Amazon EC2 Auto Scaling User Guide."];
+          "Indicates whether Capacity Rebalancing is enabled. Otherwise, Capacity Rebalancing is disabled. When you turn on Capacity Rebalancing, Amazon EC2 Auto Scaling attempts to launch a Spot Instance whenever Amazon EC2 notifies that a Spot Instance is at an elevated risk of interruption. After launching a new instance, it then terminates an old instance. For more information, see Use Capacity Rebalancing to handle Amazon EC2 Spot Interruptions in the in the Amazon EC2 Auto Scaling User Guide."];
       lifecycleHookSpecificationList: LifecycleHookSpecifications.t option
         [@ocaml.doc
-          "One or more lifecycle hooks for the group, which specify actions to perform when Amazon EC2 Auto Scaling launches or terminates instances."];
+          "One or more lifecycle hooks to add to the Auto Scaling group before instances are launched."];
+      deletionProtection: DeletionProtection.t option
+        [@ocaml.doc
+          "The deletion protection setting for the Auto Scaling group. This setting helps safeguard your Auto Scaling group and its instances by controlling whether the DeleteAutoScalingGroup operation is allowed. When deletion protection is enabled, users cannot delete the Auto Scaling group according to the specified protection level until the setting is changed back to a less restrictive level. The valid values are none, prevent-force-deletion, and prevent-all-deletion. Default: none For more information, see Configure deletion protection for your Amazon EC2 Auto Scaling resources in the Amazon EC2 Auto Scaling User Guide."];
       tags: Tags.t option
         [@ocaml.doc
-          "One or more tags. You can tag your Auto Scaling group and propagate the tags to the Amazon EC2 instances it launches. Tags are not propagated to Amazon EBS volumes. To add tags to Amazon EBS volumes, specify the tags in a launch template but use caution. If the launch template specifies an instance tag with a key that is also specified for the Auto Scaling group, Amazon EC2 Auto Scaling overrides the value of that instance tag with the value specified by the Auto Scaling group. For more information, see Tagging Auto Scaling groups and instances in the Amazon EC2 Auto Scaling User Guide."];
+          "One or more tags. You can tag your Auto Scaling group and propagate the tags to the Amazon EC2 instances it launches. Tags are not propagated to Amazon EBS volumes. To add tags to Amazon EBS volumes, specify the tags in a launch template but use caution. If the launch template specifies an instance tag with a key that is also specified for the Auto Scaling group, Amazon EC2 Auto Scaling overrides the value of that instance tag with the value specified by the Auto Scaling group. For more information, see Tag Auto Scaling groups and instances in the Amazon EC2 Auto Scaling User Guide."];
       serviceLinkedRoleARN: ResourceName.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the service-linked role that the Auto Scaling group uses to call other Amazon Web Services on your behalf. By default, Amazon EC2 Auto Scaling uses a service-linked role named AWSServiceRoleForAutoScaling, which it creates if it does not exist. For more information, see Service-linked roles in the Amazon EC2 Auto Scaling User Guide."];
+          "The Amazon Resource Name (ARN) of the service-linked role that the Auto Scaling group uses to call other Amazon Web Services service on your behalf. By default, Amazon EC2 Auto Scaling uses a service-linked role named AWSServiceRoleForAutoScaling, which it creates if it does not exist. For more information, see Service-linked roles in the Amazon EC2 Auto Scaling User Guide."];
       maxInstanceLifetime: MaxInstanceLifetime.t option
         [@ocaml.doc
-          "The maximum amount of time, in seconds, that an instance can be in service. The default is null. If specified, the value must be either 0 or a number equal to or greater than 86,400 seconds (1 day). For more information, see Replacing Auto Scaling instances based on maximum instance lifetime in the Amazon EC2 Auto Scaling User Guide."];
+          "The maximum amount of time, in seconds, that an instance can be in service. The default is null. If specified, the value must be either 0 or a number equal to or greater than 86,400 seconds (1 day). For more information, see Replace Auto Scaling instances based on maximum instance lifetime in the Amazon EC2 Auto Scaling User Guide."];
       context: Context.t option [@ocaml.doc "Reserved."];
       desiredCapacityType: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "The unit of measurement for the value specified for desired capacity. Amazon EC2 Auto Scaling supports DesiredCapacityType for attribute-based instance type selection only. For more information, see Creating an Auto Scaling group using attribute-based instance type selection in the Amazon EC2 Auto Scaling User Guide. By default, Amazon EC2 Auto Scaling specifies units, which translates into number of instances. Valid values: units | vcpu | memory-mib"]}
+          "The unit of measurement for the value specified for desired capacity. Amazon EC2 Auto Scaling supports DesiredCapacityType for attribute-based instance type selection only. For more information, see Create a mixed instances group using attribute-based instance type selection in the Amazon EC2 Auto Scaling User Guide. By default, Amazon EC2 Auto Scaling specifies units, which translates into number of instances. Valid values: units | vcpu | memory-mib"];
+      defaultInstanceWarmup: DefaultInstanceWarmup.t option
+        [@ocaml.doc
+          "The amount of time, in seconds, until a new instance is considered to have finished initializing and resource consumption to become stable after it enters the InService state. During an instance refresh, Amazon EC2 Auto Scaling waits for the warm-up period after it replaces an instance before it moves on to replacing the next instance. Amazon EC2 Auto Scaling also waits for the warm-up period before aggregating the metrics for new instances with existing instances in the Amazon CloudWatch metrics that are used for scaling, resulting in more reliable usage data. For more information, see Set the default instance warmup for an Auto Scaling group in the Amazon EC2 Auto Scaling User Guide. To manage various warm-up settings at the group level, we recommend that you set the default instance warmup, even if it is set to 0 seconds. To remove a value that you previously set, include the property but specify -1 for the value. However, we strongly recommend keeping the default instance warmup enabled by specifying a value of 0 or other nominal value. Default: None"];
+      trafficSources: TrafficSources.t option
+        [@ocaml.doc
+          "The list of traffic sources to attach to this Auto Scaling group. You can use any of the following as traffic sources for an Auto Scaling group: Classic Load Balancer, Application Load Balancer, Gateway Load Balancer, Network Load Balancer, and VPC Lattice."];
+      instanceMaintenancePolicy: InstanceMaintenancePolicy.t option
+        [@ocaml.doc
+          "An instance maintenance policy. For more information, see Set instance maintenance policy in the Amazon EC2 Auto Scaling User Guide."];
+      availabilityZoneDistribution: AvailabilityZoneDistribution.t option
+        [@ocaml.doc
+          "The instance capacity distribution across Availability Zones."];
+      availabilityZoneImpairmentPolicy:
+        AvailabilityZoneImpairmentPolicy.t option
+        [@ocaml.doc "The policy for Availability Zone impairment."];
+      skipZonalShiftValidation: SkipZonalShiftValidation.t option
+        [@ocaml.doc
+          "If you enable zonal shift with cross-zone disabled load balancers, capacity could become imbalanced across Availability Zones. To skip the validation, specify true. For more information, see Auto Scaling group zonal shift in the Amazon EC2 Auto Scaling User Guide."];
+      capacityReservationSpecification:
+        CapacityReservationSpecification.t option
+        [@ocaml.doc
+          "The capacity reservation specification for the Auto Scaling group."];
+      instanceLifecyclePolicy: InstanceLifecyclePolicy.t option
+        [@ocaml.doc
+          "The instance lifecycle policy for the Auto Scaling group. This policy controls instance behavior when an instance transitions through its lifecycle states. Configure retention triggers to specify when instances should move to a Retained state instead of automatic termination. For more information, see Control instance retention with instance lifecycle policies in the Amazon EC2 Auto Scaling User Guide. Instances in a Retained state will continue to incur standard EC2 charges until terminated."]}
     let context_ = "CreateAutoScalingGroupType"
     let make ?launchConfigurationName =
       fun ?launchTemplate ->
@@ -13744,52 +17073,92 @@ module CreateAutoScalingGroupType =
             fun ?desiredCapacity ->
               fun ?defaultCooldown ->
                 fun ?availabilityZones ->
-                  fun ?loadBalancerNames ->
-                    fun ?targetGroupARNs ->
-                      fun ?healthCheckType ->
-                        fun ?healthCheckGracePeriod ->
-                          fun ?placementGroup ->
-                            fun ?vPCZoneIdentifier ->
-                              fun ?terminationPolicies ->
-                                fun ?newInstancesProtectedFromScaleIn ->
-                                  fun ?capacityRebalance ->
-                                    fun ?lifecycleHookSpecificationList ->
-                                      fun ?tags ->
-                                        fun ?serviceLinkedRoleARN ->
-                                          fun ?maxInstanceLifetime ->
-                                            fun ?context ->
-                                              fun ?desiredCapacityType ->
-                                                fun ~autoScalingGroupName ->
-                                                  fun ~minSize ->
-                                                    fun ~maxSize ->
-                                                      fun () ->
-                                                        {
-                                                          launchConfigurationName;
-                                                          launchTemplate;
-                                                          mixedInstancesPolicy;
-                                                          instanceId;
-                                                          desiredCapacity;
-                                                          defaultCooldown;
-                                                          availabilityZones;
-                                                          loadBalancerNames;
-                                                          targetGroupARNs;
-                                                          healthCheckType;
-                                                          healthCheckGracePeriod;
-                                                          placementGroup;
-                                                          vPCZoneIdentifier;
-                                                          terminationPolicies;
-                                                          newInstancesProtectedFromScaleIn;
-                                                          capacityRebalance;
-                                                          lifecycleHookSpecificationList;
-                                                          tags;
-                                                          serviceLinkedRoleARN;
-                                                          maxInstanceLifetime;
-                                                          context;
-                                                          desiredCapacityType;
-                                                          autoScalingGroupName;
-                                                          minSize;
-                                                          maxSize
-                                                        }
+                  fun ?availabilityZoneIds ->
+                    fun ?loadBalancerNames ->
+                      fun ?targetGroupARNs ->
+                        fun ?healthCheckType ->
+                          fun ?healthCheckGracePeriod ->
+                            fun ?placementGroup ->
+                              fun ?vPCZoneIdentifier ->
+                                fun ?terminationPolicies ->
+                                  fun ?newInstancesProtectedFromScaleIn ->
+                                    fun ?capacityRebalance ->
+                                      fun ?lifecycleHookSpecificationList ->
+                                        fun ?deletionProtection ->
+                                          fun ?tags ->
+                                            fun ?serviceLinkedRoleARN ->
+                                              fun ?maxInstanceLifetime ->
+                                                fun ?context ->
+                                                  fun ?desiredCapacityType ->
+                                                    fun
+                                                      ?defaultInstanceWarmup
+                                                      ->
+                                                      fun ?trafficSources ->
+                                                        fun
+                                                          ?instanceMaintenancePolicy
+                                                          ->
+                                                          fun
+                                                            ?availabilityZoneDistribution
+                                                            ->
+                                                            fun
+                                                              ?availabilityZoneImpairmentPolicy
+                                                              ->
+                                                              fun
+                                                                ?skipZonalShiftValidation
+                                                                ->
+                                                                fun
+                                                                  ?capacityReservationSpecification
+                                                                  ->
+                                                                  fun
+                                                                    ?instanceLifecyclePolicy
+                                                                    ->
+                                                                    fun
+                                                                    ~autoScalingGroupName
+                                                                    ->
+                                                                    fun
+                                                                    ~minSize
+                                                                    ->
+                                                                    fun
+                                                                    ~maxSize
+                                                                    ->
+                                                                    fun () ->
+                                                                    {
+                                                                    launchConfigurationName;
+                                                                    launchTemplate;
+                                                                    mixedInstancesPolicy;
+                                                                    instanceId;
+                                                                    desiredCapacity;
+                                                                    defaultCooldown;
+                                                                    availabilityZones;
+                                                                    availabilityZoneIds;
+                                                                    loadBalancerNames;
+                                                                    targetGroupARNs;
+                                                                    healthCheckType;
+                                                                    healthCheckGracePeriod;
+                                                                    placementGroup;
+                                                                    vPCZoneIdentifier;
+                                                                    terminationPolicies;
+                                                                    newInstancesProtectedFromScaleIn;
+                                                                    capacityRebalance;
+                                                                    lifecycleHookSpecificationList;
+                                                                    deletionProtection;
+                                                                    tags;
+                                                                    serviceLinkedRoleARN;
+                                                                    maxInstanceLifetime;
+                                                                    context;
+                                                                    desiredCapacityType;
+                                                                    defaultInstanceWarmup;
+                                                                    trafficSources;
+                                                                    instanceMaintenancePolicy;
+                                                                    availabilityZoneDistribution;
+                                                                    availabilityZoneImpairmentPolicy;
+                                                                    skipZonalShiftValidation;
+                                                                    capacityReservationSpecification;
+                                                                    instanceLifecyclePolicy;
+                                                                    autoScalingGroupName;
+                                                                    minSize;
+                                                                    maxSize
+                                                                    }
     let to_value x =
       structure_to_value
         [("AutoScalingGroupName",
@@ -13813,6 +17182,8 @@ module CreateAutoScalingGroupType =
           (Option.map x.defaultCooldown ~f:Cooldown.to_value));
         ("AvailabilityZones",
           (Option.map x.availabilityZones ~f:AvailabilityZones.to_value));
+        ("AvailabilityZoneIds",
+          (Option.map x.availabilityZoneIds ~f:AvailabilityZoneIds.to_value));
         ("LoadBalancerNames",
           (Option.map x.loadBalancerNames ~f:LoadBalancerNames.to_value));
         ("TargetGroupARNs",
@@ -13825,7 +17196,7 @@ module CreateAutoScalingGroupType =
         ("PlacementGroup",
           (Option.map x.placementGroup ~f:XmlStringMaxLen255.to_value));
         ("VPCZoneIdentifier",
-          (Option.map x.vPCZoneIdentifier ~f:XmlStringMaxLen2047.to_value));
+          (Option.map x.vPCZoneIdentifier ~f:XmlStringMaxLen5000.to_value));
         ("TerminationPolicies",
           (Option.map x.terminationPolicies ~f:TerminationPolicies.to_value));
         ("NewInstancesProtectedFromScaleIn",
@@ -13837,6 +17208,8 @@ module CreateAutoScalingGroupType =
         ("LifecycleHookSpecificationList",
           (Option.map x.lifecycleHookSpecificationList
              ~f:LifecycleHookSpecifications.to_value));
+        ("DeletionProtection",
+          (Option.map x.deletionProtection ~f:DeletionProtection.to_value));
         ("Tags", (Option.map x.tags ~f:Tags.to_value));
         ("ServiceLinkedRoleARN",
           (Option.map x.serviceLinkedRoleARN ~f:ResourceName.to_value));
@@ -13844,9 +17217,56 @@ module CreateAutoScalingGroupType =
           (Option.map x.maxInstanceLifetime ~f:MaxInstanceLifetime.to_value));
         ("Context", (Option.map x.context ~f:Context.to_value));
         ("DesiredCapacityType",
-          (Option.map x.desiredCapacityType ~f:XmlStringMaxLen255.to_value))]
+          (Option.map x.desiredCapacityType ~f:XmlStringMaxLen255.to_value));
+        ("DefaultInstanceWarmup",
+          (Option.map x.defaultInstanceWarmup
+             ~f:DefaultInstanceWarmup.to_value));
+        ("TrafficSources",
+          (Option.map x.trafficSources ~f:TrafficSources.to_value));
+        ("InstanceMaintenancePolicy",
+          (Option.map x.instanceMaintenancePolicy
+             ~f:InstanceMaintenancePolicy.to_value));
+        ("AvailabilityZoneDistribution",
+          (Option.map x.availabilityZoneDistribution
+             ~f:AvailabilityZoneDistribution.to_value));
+        ("AvailabilityZoneImpairmentPolicy",
+          (Option.map x.availabilityZoneImpairmentPolicy
+             ~f:AvailabilityZoneImpairmentPolicy.to_value));
+        ("SkipZonalShiftValidation",
+          (Option.map x.skipZonalShiftValidation
+             ~f:SkipZonalShiftValidation.to_value));
+        ("CapacityReservationSpecification",
+          (Option.map x.capacityReservationSpecification
+             ~f:CapacityReservationSpecification.to_value));
+        ("InstanceLifecyclePolicy",
+          (Option.map x.instanceLifecyclePolicy
+             ~f:InstanceLifecyclePolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let instanceLifecyclePolicy =
+        (Option.map ~f:InstanceLifecyclePolicy.of_xml)
+          (Xml.child xml_arg0 "InstanceLifecyclePolicy") in
+      let capacityReservationSpecification =
+        (Option.map ~f:CapacityReservationSpecification.of_xml)
+          (Xml.child xml_arg0 "CapacityReservationSpecification") in
+      let skipZonalShiftValidation =
+        (Option.map ~f:SkipZonalShiftValidation.of_xml)
+          (Xml.child xml_arg0 "SkipZonalShiftValidation") in
+      let availabilityZoneImpairmentPolicy =
+        (Option.map ~f:AvailabilityZoneImpairmentPolicy.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZoneImpairmentPolicy") in
+      let availabilityZoneDistribution =
+        (Option.map ~f:AvailabilityZoneDistribution.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZoneDistribution") in
+      let instanceMaintenancePolicy =
+        (Option.map ~f:InstanceMaintenancePolicy.of_xml)
+          (Xml.child xml_arg0 "InstanceMaintenancePolicy") in
+      let trafficSources =
+        (Option.map ~f:TrafficSources.of_xml)
+          (Xml.child xml_arg0 "TrafficSources") in
+      let defaultInstanceWarmup =
+        (Option.map ~f:DefaultInstanceWarmup.of_xml)
+          (Xml.child xml_arg0 "DefaultInstanceWarmup") in
       let desiredCapacityType =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
           (Xml.child xml_arg0 "DesiredCapacityType") in
@@ -13859,6 +17279,9 @@ module CreateAutoScalingGroupType =
         (Option.map ~f:ResourceName.of_xml)
           (Xml.child xml_arg0 "ServiceLinkedRoleARN") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let deletionProtection =
+        (Option.map ~f:DeletionProtection.of_xml)
+          (Xml.child xml_arg0 "DeletionProtection") in
       let lifecycleHookSpecificationList =
         (Option.map ~f:LifecycleHookSpecifications.of_xml)
           (Xml.child xml_arg0 "LifecycleHookSpecificationList") in
@@ -13872,7 +17295,7 @@ module CreateAutoScalingGroupType =
         (Option.map ~f:TerminationPolicies.of_xml)
           (Xml.child xml_arg0 "TerminationPolicies") in
       let vPCZoneIdentifier =
-        (Option.map ~f:XmlStringMaxLen2047.of_xml)
+        (Option.map ~f:XmlStringMaxLen5000.of_xml)
           (Xml.child xml_arg0 "VPCZoneIdentifier") in
       let placementGroup =
         (Option.map ~f:XmlStringMaxLen255.of_xml)
@@ -13889,6 +17312,9 @@ module CreateAutoScalingGroupType =
       let loadBalancerNames =
         (Option.map ~f:LoadBalancerNames.of_xml)
           (Xml.child xml_arg0 "LoadBalancerNames") in
+      let availabilityZoneIds =
+        (Option.map ~f:AvailabilityZoneIds.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZoneIds") in
       let availabilityZones =
         (Option.map ~f:AvailabilityZones.of_xml)
           (Xml.child xml_arg0 "AvailabilityZones") in
@@ -13919,77 +17345,115 @@ module CreateAutoScalingGroupType =
       let autoScalingGroupName =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
-      make ?desiredCapacityType ?context ?maxInstanceLifetime
-        ?serviceLinkedRoleARN ?tags ?lifecycleHookSpecificationList
-        ?capacityRebalance ?newInstancesProtectedFromScaleIn
-        ?terminationPolicies ?vPCZoneIdentifier ?placementGroup
-        ?healthCheckGracePeriod ?healthCheckType ?targetGroupARNs
-        ?loadBalancerNames ?availabilityZones ?defaultCooldown
+      make ?instanceLifecyclePolicy ?capacityReservationSpecification
+        ?skipZonalShiftValidation ?availabilityZoneImpairmentPolicy
+        ?availabilityZoneDistribution ?instanceMaintenancePolicy
+        ?trafficSources ?defaultInstanceWarmup ?desiredCapacityType ?context
+        ?maxInstanceLifetime ?serviceLinkedRoleARN ?tags ?deletionProtection
+        ?lifecycleHookSpecificationList ?capacityRebalance
+        ?newInstancesProtectedFromScaleIn ?terminationPolicies
+        ?vPCZoneIdentifier ?placementGroup ?healthCheckGracePeriod
+        ?healthCheckType ?targetGroupARNs ?loadBalancerNames
+        ?availabilityZoneIds ?availabilityZones ?defaultCooldown
         ?desiredCapacity ~maxSize ~minSize ?instanceId ?mixedInstancesPolicy
         ?launchTemplate ?launchConfigurationName ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let instanceLifecyclePolicy =
+        field_map json__ "InstanceLifecyclePolicy"
+          InstanceLifecyclePolicy.of_json in
+      let capacityReservationSpecification =
+        field_map json__ "CapacityReservationSpecification"
+          CapacityReservationSpecification.of_json in
+      let skipZonalShiftValidation =
+        field_map json__ "SkipZonalShiftValidation"
+          SkipZonalShiftValidation.of_json in
+      let availabilityZoneImpairmentPolicy =
+        field_map json__ "AvailabilityZoneImpairmentPolicy"
+          AvailabilityZoneImpairmentPolicy.of_json in
+      let availabilityZoneDistribution =
+        field_map json__ "AvailabilityZoneDistribution"
+          AvailabilityZoneDistribution.of_json in
+      let instanceMaintenancePolicy =
+        field_map json__ "InstanceMaintenancePolicy"
+          InstanceMaintenancePolicy.of_json in
+      let trafficSources =
+        field_map json__ "TrafficSources" TrafficSources.of_json in
+      let defaultInstanceWarmup =
+        field_map json__ "DefaultInstanceWarmup"
+          DefaultInstanceWarmup.of_json in
       let desiredCapacityType =
-        field_map json "DesiredCapacityType" XmlStringMaxLen255.of_json in
-      let context = field_map json "Context" Context.of_json in
+        field_map json__ "DesiredCapacityType" XmlStringMaxLen255.of_json in
+      let context = field_map json__ "Context" Context.of_json in
       let maxInstanceLifetime =
-        field_map json "MaxInstanceLifetime" MaxInstanceLifetime.of_json in
+        field_map json__ "MaxInstanceLifetime" MaxInstanceLifetime.of_json in
       let serviceLinkedRoleARN =
-        field_map json "ServiceLinkedRoleARN" ResourceName.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "ServiceLinkedRoleARN" ResourceName.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let deletionProtection =
+        field_map json__ "DeletionProtection" DeletionProtection.of_json in
       let lifecycleHookSpecificationList =
-        field_map json "LifecycleHookSpecificationList"
+        field_map json__ "LifecycleHookSpecificationList"
           LifecycleHookSpecifications.of_json in
       let capacityRebalance =
-        field_map json "CapacityRebalance" CapacityRebalanceEnabled.of_json in
+        field_map json__ "CapacityRebalance" CapacityRebalanceEnabled.of_json in
       let newInstancesProtectedFromScaleIn =
-        field_map json "NewInstancesProtectedFromScaleIn"
+        field_map json__ "NewInstancesProtectedFromScaleIn"
           InstanceProtected.of_json in
       let terminationPolicies =
-        field_map json "TerminationPolicies" TerminationPolicies.of_json in
+        field_map json__ "TerminationPolicies" TerminationPolicies.of_json in
       let vPCZoneIdentifier =
-        field_map json "VPCZoneIdentifier" XmlStringMaxLen2047.of_json in
+        field_map json__ "VPCZoneIdentifier" XmlStringMaxLen5000.of_json in
       let placementGroup =
-        field_map json "PlacementGroup" XmlStringMaxLen255.of_json in
+        field_map json__ "PlacementGroup" XmlStringMaxLen255.of_json in
       let healthCheckGracePeriod =
-        field_map json "HealthCheckGracePeriod"
+        field_map json__ "HealthCheckGracePeriod"
           HealthCheckGracePeriod.of_json in
       let healthCheckType =
-        field_map json "HealthCheckType" XmlStringMaxLen32.of_json in
+        field_map json__ "HealthCheckType" XmlStringMaxLen32.of_json in
       let targetGroupARNs =
-        field_map json "TargetGroupARNs" TargetGroupARNs.of_json in
+        field_map json__ "TargetGroupARNs" TargetGroupARNs.of_json in
       let loadBalancerNames =
-        field_map json "LoadBalancerNames" LoadBalancerNames.of_json in
+        field_map json__ "LoadBalancerNames" LoadBalancerNames.of_json in
+      let availabilityZoneIds =
+        field_map json__ "AvailabilityZoneIds" AvailabilityZoneIds.of_json in
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZones.of_json in
-      let defaultCooldown = field_map json "DefaultCooldown" Cooldown.of_json in
+        field_map json__ "AvailabilityZones" AvailabilityZones.of_json in
+      let defaultCooldown =
+        field_map json__ "DefaultCooldown" Cooldown.of_json in
       let desiredCapacity =
-        field_map json "DesiredCapacity"
+        field_map json__ "DesiredCapacity"
           AutoScalingGroupDesiredCapacity.of_json in
       let maxSize =
-        field_map_exn json "MaxSize" AutoScalingGroupMaxSize.of_json in
+        field_map_exn json__ "MaxSize" AutoScalingGroupMaxSize.of_json in
       let minSize =
-        field_map_exn json "MinSize" AutoScalingGroupMinSize.of_json in
-      let instanceId = field_map json "InstanceId" XmlStringMaxLen19.of_json in
+        field_map_exn json__ "MinSize" AutoScalingGroupMinSize.of_json in
+      let instanceId =
+        field_map json__ "InstanceId" XmlStringMaxLen19.of_json in
       let mixedInstancesPolicy =
-        field_map json "MixedInstancesPolicy" MixedInstancesPolicy.of_json in
+        field_map json__ "MixedInstancesPolicy" MixedInstancesPolicy.of_json in
       let launchTemplate =
-        field_map json "LaunchTemplate" LaunchTemplateSpecification.of_json in
+        field_map json__ "LaunchTemplate" LaunchTemplateSpecification.of_json in
       let launchConfigurationName =
-        field_map json "LaunchConfigurationName" XmlStringMaxLen255.of_json in
+        field_map json__ "LaunchConfigurationName" XmlStringMaxLen255.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
-      make ?desiredCapacityType ?context ?maxInstanceLifetime
-        ?serviceLinkedRoleARN ?tags ?lifecycleHookSpecificationList
-        ?capacityRebalance ?newInstancesProtectedFromScaleIn
-        ?terminationPolicies ?vPCZoneIdentifier ?placementGroup
-        ?healthCheckGracePeriod ?healthCheckType ?targetGroupARNs
-        ?loadBalancerNames ?availabilityZones ?defaultCooldown
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
+      make ?instanceLifecyclePolicy ?capacityReservationSpecification
+        ?skipZonalShiftValidation ?availabilityZoneImpairmentPolicy
+        ?availabilityZoneDistribution ?instanceMaintenancePolicy
+        ?trafficSources ?defaultInstanceWarmup ?desiredCapacityType ?context
+        ?maxInstanceLifetime ?serviceLinkedRoleARN ?tags ?deletionProtection
+        ?lifecycleHookSpecificationList ?capacityRebalance
+        ?newInstancesProtectedFromScaleIn ?terminationPolicies
+        ?vPCZoneIdentifier ?placementGroup ?healthCheckGracePeriod
+        ?healthCheckType ?targetGroupARNs ?loadBalancerNames
+        ?availabilityZoneIds ?availabilityZones ?defaultCooldown
         ?desiredCapacity ~maxSize ~minSize ?instanceId ?mixedInstancesPolicy
         ?launchTemplate ?launchConfigurationName ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "We strongly recommend using a launch template when calling this operation to ensure full functionality for Amazon EC2 Auto Scaling and Amazon EC2. Creates an Auto Scaling group with the specified name and attributes. If you exceed your maximum limit of Auto Scaling groups, the call fails. To query this limit, call the DescribeAccountLimits API. For information about updating this limit, see Amazon EC2 Auto Scaling service quotas in the Amazon EC2 Auto Scaling User Guide. For introductory exercises for creating an Auto Scaling group, see Getting started with Amazon EC2 Auto Scaling and Tutorial: Set up a scaled and load-balanced application in the Amazon EC2 Auto Scaling User Guide. For more information, see Auto Scaling groups in the Amazon EC2 Auto Scaling User Guide. Every Auto Scaling group has three size parameters (DesiredCapacity, MaxSize, and MinSize). Usually, you set these sizes based on a specific number of instances. However, if you configure a mixed instances policy that defines weights for the instance types, you must specify these sizes with the same units that you use for weighting instances."]
+       "We strongly recommend using a launch template when calling this operation to ensure full functionality for Amazon EC2 Auto Scaling and Amazon EC2. Creates an Auto Scaling group with the specified name and attributes. If you exceed your maximum limit of Auto Scaling groups, the call fails. To query this limit, call the DescribeAccountLimits API. For information about updating this limit, see Quotas for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide. If you're new to Amazon EC2 Auto Scaling, see the introductory tutorials in Get started with Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide. Every Auto Scaling group has three size properties (DesiredCapacity, MaxSize, and MinSize). Usually, you set these sizes based on a specific number of instances. However, if you configure a mixed instances policy that defines weights for the instance types, you must specify these sizes with the same units that you use for weighting instances."]
 module CompleteLifecycleActionType =
   struct
     type nonrec t =
@@ -14003,7 +17467,7 @@ module CompleteLifecycleActionType =
           "A universally unique identifier (UUID) that identifies a specific lifecycle action associated with an instance. Amazon EC2 Auto Scaling sends this token to the notification target you specified when you created the lifecycle hook."];
       lifecycleActionResult: LifecycleActionResult.t
         [@ocaml.doc
-          "The action for the group to take. This parameter can be either CONTINUE or ABANDON."];
+          "The action for the group to take. You can specify either CONTINUE or ABANDON."];
       instanceId: XmlStringMaxLen19.t option
         [@ocaml.doc "The ID of the instance."]}
     let context_ = "CompleteLifecycleActionType"
@@ -14052,22 +17516,23 @@ module CompleteLifecycleActionType =
       make ?instanceId ~lifecycleActionResult ?lifecycleActionToken
         ~autoScalingGroupName ~lifecycleHookName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceId = field_map json "InstanceId" XmlStringMaxLen19.of_json in
+    let of_json json__ =
+      let instanceId =
+        field_map json__ "InstanceId" XmlStringMaxLen19.of_json in
       let lifecycleActionResult =
-        field_map_exn json "LifecycleActionResult"
+        field_map_exn json__ "LifecycleActionResult"
           LifecycleActionResult.of_json in
       let lifecycleActionToken =
-        field_map json "LifecycleActionToken" LifecycleActionToken.of_json in
+        field_map json__ "LifecycleActionToken" LifecycleActionToken.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" ResourceName.of_json in
+        field_map_exn json__ "AutoScalingGroupName" ResourceName.of_json in
       let lifecycleHookName =
-        field_map_exn json "LifecycleHookName" AsciiStringMaxLen255.of_json in
+        field_map_exn json__ "LifecycleHookName" AsciiStringMaxLen255.of_json in
       make ?instanceId ~lifecycleActionResult ?lifecycleActionToken
         ~autoScalingGroupName ~lifecycleHookName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Completes the lifecycle action for the specified token or instance with the specified result. This step is a part of the procedure for adding a lifecycle hook to an Auto Scaling group: (Optional) Create a launch template or launch configuration with a user data script that runs while an instance is in a wait state due to a lifecycle hook. (Optional) Create a Lambda function and a rule that allows Amazon EventBridge to invoke your Lambda function when an instance is put into a wait state due to a lifecycle hook. (Optional) Create a notification target and an IAM role. The target can be either an Amazon SQS queue or an Amazon SNS topic. The role allows Amazon EC2 Auto Scaling to publish lifecycle notifications to the target. Create the lifecycle hook. Specify whether the hook is used when the instances launch or terminate. If you need more time, record the lifecycle action heartbeat to keep the instance in a wait state. If you finish before the timeout period ends, send a callback by using the CompleteLifecycleAction API call. For more information, see Amazon EC2 Auto Scaling lifecycle hooks in the Amazon EC2 Auto Scaling User Guide."]
+       "Completes the lifecycle action for the specified token or instance with the specified result. This step is a part of the procedure for adding a lifecycle hook to an Auto Scaling group: (Optional) Create a launch template or launch configuration with a user data script that runs while an instance is in a wait state due to a lifecycle hook. (Optional) Create a Lambda function and a rule that allows Amazon EventBridge to invoke your Lambda function when an instance is put into a wait state due to a lifecycle hook. (Optional) Create a notification target and an IAM role. The target can be either an Amazon SQS queue or an Amazon SNS topic. The role allows Amazon EC2 Auto Scaling to publish lifecycle notifications to the target. Create the lifecycle hook. Specify whether the hook is used when the instances launch or terminate. If you need more time, record the lifecycle action heartbeat to keep the instance in a wait state. If you finish before the timeout period ends, send a callback by using the CompleteLifecycleAction API call. For more information, see Complete a lifecycle action in the Amazon EC2 Auto Scaling User Guide."]
 module CompleteLifecycleActionAnswer =
   struct
     type completeLifecycleActionResult = unit
@@ -14113,39 +17578,53 @@ module CompleteLifecycleActionAnswer =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Completes the lifecycle action for the specified token or instance with the specified result. This step is a part of the procedure for adding a lifecycle hook to an Auto Scaling group: (Optional) Create a launch template or launch configuration with a user data script that runs while an instance is in a wait state due to a lifecycle hook. (Optional) Create a Lambda function and a rule that allows Amazon EventBridge to invoke your Lambda function when an instance is put into a wait state due to a lifecycle hook. (Optional) Create a notification target and an IAM role. The target can be either an Amazon SQS queue or an Amazon SNS topic. The role allows Amazon EC2 Auto Scaling to publish lifecycle notifications to the target. Create the lifecycle hook. Specify whether the hook is used when the instances launch or terminate. If you need more time, record the lifecycle action heartbeat to keep the instance in a wait state. If you finish before the timeout period ends, send a callback by using the CompleteLifecycleAction API call. For more information, see Amazon EC2 Auto Scaling lifecycle hooks in the Amazon EC2 Auto Scaling User Guide."]
+       "Completes the lifecycle action for the specified token or instance with the specified result. This step is a part of the procedure for adding a lifecycle hook to an Auto Scaling group: (Optional) Create a launch template or launch configuration with a user data script that runs while an instance is in a wait state due to a lifecycle hook. (Optional) Create a Lambda function and a rule that allows Amazon EventBridge to invoke your Lambda function when an instance is put into a wait state due to a lifecycle hook. (Optional) Create a notification target and an IAM role. The target can be either an Amazon SQS queue or an Amazon SNS topic. The role allows Amazon EC2 Auto Scaling to publish lifecycle notifications to the target. Create the lifecycle hook. Specify whether the hook is used when the instances launch or terminate. If you need more time, record the lifecycle action heartbeat to keep the instance in a wait state. If you finish before the timeout period ends, send a callback by using the CompleteLifecycleAction API call. For more information, see Complete a lifecycle action in the Amazon EC2 Auto Scaling User Guide."]
 module CancelInstanceRefreshType =
   struct
     type nonrec t =
       {
       autoScalingGroupName: XmlStringMaxLen255.t
-        [@ocaml.doc "The name of the Auto Scaling group."]}
+        [@ocaml.doc "The name of the Auto Scaling group."];
+      waitForTransitioningInstances: BooleanType.t option
+        [@ocaml.doc
+          "When cancelling an instance refresh, this indicates whether to wait for in-flight launches and terminations to complete. The default is true. When set to false, Amazon EC2 Auto Scaling cancels the instance refresh without waiting for any pending launches or terminations to complete."]}
     let context_ = "CancelInstanceRefreshType"
-    let make ~autoScalingGroupName = fun () -> { autoScalingGroupName }
+    let make ?waitForTransitioningInstances =
+      fun ~autoScalingGroupName ->
+        fun () -> { waitForTransitioningInstances; autoScalingGroupName }
     let to_value x =
       structure_to_value
         [("AutoScalingGroupName",
-           (Some (XmlStringMaxLen255.to_value x.autoScalingGroupName)))]
+           (Some (XmlStringMaxLen255.to_value x.autoScalingGroupName)));
+        ("WaitForTransitioningInstances",
+          (Option.map x.waitForTransitioningInstances ~f:BooleanType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let waitForTransitioningInstances =
+        (Option.map ~f:BooleanType.of_xml)
+          (Xml.child xml_arg0 "WaitForTransitioningInstances") in
       let autoScalingGroupName =
         XmlStringMaxLen255.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
-      make ~autoScalingGroupName ()
+      make ?waitForTransitioningInstances ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let waitForTransitioningInstances =
+        field_map json__ "WaitForTransitioningInstances" BooleanType.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
-      make ~autoScalingGroupName ()
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
+      make ?waitForTransitioningInstances ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Cancels an instance refresh operation in progress. Cancellation does not roll back any replacements that have already been completed, but it prevents new replacements from being started. This operation is part of the instance refresh feature in Amazon EC2 Auto Scaling, which helps you update instances in your Auto Scaling group after you make configuration changes."]
+       "Cancels an instance refresh or rollback that is in progress. If an instance refresh or rollback is not in progress, an ActiveInstanceRefreshNotFound error occurs. This operation is part of the instance refresh feature in Amazon EC2 Auto Scaling, which helps you update instances in your Auto Scaling group after you make configuration changes. When you cancel an instance refresh, this does not roll back any changes that it made. Use the RollbackInstanceRefresh API to roll back instead."]
 module CancelInstanceRefreshAnswer =
   struct
     type cancelInstanceRefreshResult =
       {
       instanceRefreshId: XmlStringMaxLen255.t option
-        [@ocaml.doc "The instance refresh ID."]}
+        [@ocaml.doc
+          "The instance refresh ID associated with the request. This is the unique ID assigned to the instance refresh when it was started."]}
     and responseMetaData = unit
     and t =
       {
@@ -14222,13 +17701,13 @@ module CancelInstanceRefreshAnswer =
           (Xml.child xml_arg0 "InstanceRefreshId") in
       make ?instanceRefreshId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceRefreshId =
-        field_map json "InstanceRefreshId" XmlStringMaxLen255.of_json in
+        field_map json__ "InstanceRefreshId" XmlStringMaxLen255.of_json in
       make ?instanceRefreshId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Cancels an instance refresh operation in progress. Cancellation does not roll back any replacements that have already been completed, but it prevents new replacements from being started. This operation is part of the instance refresh feature in Amazon EC2 Auto Scaling, which helps you update instances in your Auto Scaling group after you make configuration changes."]
+       "Cancels an instance refresh or rollback that is in progress. If an instance refresh or rollback is not in progress, an ActiveInstanceRefreshNotFound error occurs. This operation is part of the instance refresh feature in Amazon EC2 Auto Scaling, which helps you update instances in your Auto Scaling group after you make configuration changes. When you cancel an instance refresh, this does not roll back any changes that it made. Use the RollbackInstanceRefresh API to roll back instead."]
 module BatchPutScheduledUpdateGroupActionType =
   struct
     type nonrec t =
@@ -14261,12 +17740,13 @@ module BatchPutScheduledUpdateGroupActionType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~scheduledUpdateGroupActions ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduledUpdateGroupActions =
-        field_map_exn json "ScheduledUpdateGroupActions"
+        field_map_exn json__ "ScheduledUpdateGroupActions"
           ScheduledUpdateGroupActionRequests.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ~scheduledUpdateGroupActions ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14356,9 +17836,9 @@ module BatchPutScheduledUpdateGroupActionAnswer =
           (Xml.child xml_arg0 "FailedScheduledUpdateGroupActions") in
       make ?failedScheduledUpdateGroupActions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedScheduledUpdateGroupActions =
-        field_map json "FailedScheduledUpdateGroupActions"
+        field_map json__ "FailedScheduledUpdateGroupActions"
           FailedScheduledUpdateGroupActionRequests.of_json in
       make ?failedScheduledUpdateGroupActions ()
     let to_json v = composed_to_json to_value v
@@ -14393,12 +17873,13 @@ module BatchDeleteScheduledActionType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~scheduledActionNames ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduledActionNames =
-        field_map_exn json "ScheduledActionNames"
+        field_map_exn json__ "ScheduledActionNames"
           ScheduledActionNames.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ~scheduledActionNames ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14467,9 +17948,9 @@ module BatchDeleteScheduledActionAnswer =
           (Xml.child xml_arg0 "FailedScheduledActions") in
       make ?failedScheduledActions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedScheduledActions =
-        field_map json "FailedScheduledActions"
+        field_map json__ "FailedScheduledActions"
           FailedScheduledUpdateGroupActionRequests.of_json in
       make ?failedScheduledActions ()
     let to_json v = composed_to_json to_value v
@@ -14554,10 +18035,10 @@ module AutoScalingInstancesType =
           (Xml.child xml_arg0 "AutoScalingInstances") in
       make ?nextToken ?autoScalingInstances ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let autoScalingInstances =
-        field_map json "AutoScalingInstances" AutoScalingInstances.of_json in
+        field_map json__ "AutoScalingInstances" AutoScalingInstances.of_json in
       make ?nextToken ?autoScalingInstances ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14566,7 +18047,8 @@ module AutoScalingGroupsType =
   struct
     type describeAutoScalingGroupsResult =
       {
-      autoScalingGroups: AutoScalingGroups.t [@ocaml.doc "The groups."];
+      autoScalingGroups: AutoScalingGroups.t option
+        [@ocaml.doc "The groups."];
       nextToken: XmlString.t option
         [@ocaml.doc
           "A string that indicates that the response contains more items than can be returned in a single response. To receive additional items, specify this string for the NextToken value when requesting the next set of items. This value is null when there are no more items to return."]}
@@ -14580,12 +18062,12 @@ module AutoScalingGroupsType =
       | `ResourceContentionFault of ResourceContentionFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "AutoScalingGroupsType"
-    let make ?nextToken =
-      fun ~autoScalingGroups ->
+    let make ?autoScalingGroups =
+      fun ?nextToken ->
         fun () ->
           {
             describeAutoScalingGroupsResult =
-              { nextToken; autoScalingGroups };
+              { autoScalingGroups; nextToken };
             responseMetaData = ()
           }
     let error_of_json name json =
@@ -14623,7 +18105,7 @@ module AutoScalingGroupsType =
       let x = t.describeAutoScalingGroupsResult in
       structure_to_wrapped_value
         [("AutoScalingGroups",
-           (Some (AutoScalingGroups.to_value x.autoScalingGroups)));
+           (Option.map x.autoScalingGroups ~f:AutoScalingGroups.to_value));
         ("NextToken", (Option.map x.nextToken ~f:XmlString.to_value))]
         ~wrapper:"DescribeAutoScalingGroupsResult"
         ~response:"ResponseMetaData"
@@ -14634,15 +18116,15 @@ module AutoScalingGroupsType =
       let nextToken =
         (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "NextToken") in
       let autoScalingGroups =
-        AutoScalingGroups.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroups") in
-      make ?nextToken ~autoScalingGroups ()
+        (Option.map ~f:AutoScalingGroups.of_xml)
+          (Xml.child xml_arg0 "AutoScalingGroups") in
+      make ?nextToken ?autoScalingGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let autoScalingGroups =
-        field_map_exn json "AutoScalingGroups" AutoScalingGroups.of_json in
-      make ?nextToken ~autoScalingGroups ()
+        field_map json__ "AutoScalingGroups" AutoScalingGroups.of_json in
+      make ?nextToken ?autoScalingGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about the Auto Scaling groups in the account and Region. If you specify Auto Scaling group names, the output includes information for only the specified Auto Scaling groups. If you specify filters, the output includes information for only those Auto Scaling groups that meet the filter criteria. If you do not specify group names or filters, the output includes information for all Auto Scaling groups. This operation also returns information about instances in Auto Scaling groups. To retrieve information about the instances in a warm pool, you must call the DescribeWarmPool API."]
@@ -14652,7 +18134,10 @@ module AutoScalingGroupNamesType =
       {
       autoScalingGroupNames: AutoScalingGroupNames.t option
         [@ocaml.doc
-          "The names of the Auto Scaling groups. By default, you can only specify up to 50 names. You can optionally increase this limit using the MaxRecords parameter. If you omit this parameter, all Auto Scaling groups are described."];
+          "The names of the Auto Scaling groups. By default, you can only specify up to 50 names. You can optionally increase this limit using the MaxRecords property. If you omit this property, all Auto Scaling groups are described."];
+      includeInstances: IncludeInstances.t option
+        [@ocaml.doc
+          "Specifies whether to include information about Amazon EC2 instances in the response. When set to true (default), the response includes instance details."];
       nextToken: XmlString.t option
         [@ocaml.doc
           "The token for the next set of items to return. (You received this token from a previous call.)"];
@@ -14663,16 +18148,25 @@ module AutoScalingGroupNamesType =
         [@ocaml.doc
           "One or more filters to limit the results based on specific tags."]}
     let make ?autoScalingGroupNames =
-      fun ?nextToken ->
-        fun ?maxRecords ->
-          fun ?filters ->
-            fun () ->
-              { autoScalingGroupNames; nextToken; maxRecords; filters }
+      fun ?includeInstances ->
+        fun ?nextToken ->
+          fun ?maxRecords ->
+            fun ?filters ->
+              fun () ->
+                {
+                  autoScalingGroupNames;
+                  includeInstances;
+                  nextToken;
+                  maxRecords;
+                  filters
+                }
     let to_value x =
       structure_to_value
         [("AutoScalingGroupNames",
            (Option.map x.autoScalingGroupNames
               ~f:AutoScalingGroupNames.to_value));
+        ("IncludeInstances",
+          (Option.map x.includeInstances ~f:IncludeInstances.to_value));
         ("NextToken", (Option.map x.nextToken ~f:XmlString.to_value));
         ("MaxRecords", (Option.map x.maxRecords ~f:MaxRecords.to_value));
         ("Filters", (Option.map x.filters ~f:Filters.to_value))]
@@ -14684,21 +18178,147 @@ module AutoScalingGroupNamesType =
         (Option.map ~f:MaxRecords.of_xml) (Xml.child xml_arg0 "MaxRecords") in
       let nextToken =
         (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let includeInstances =
+        (Option.map ~f:IncludeInstances.of_xml)
+          (Xml.child xml_arg0 "IncludeInstances") in
       let autoScalingGroupNames =
         (Option.map ~f:AutoScalingGroupNames.of_xml)
           (Xml.child xml_arg0 "AutoScalingGroupNames") in
-      make ?filters ?maxRecords ?nextToken ?autoScalingGroupNames ()
+      make ?filters ?maxRecords ?nextToken ?includeInstances
+        ?autoScalingGroupNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" Filters.of_json in
-      let maxRecords = field_map json "MaxRecords" MaxRecords.of_json in
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let maxRecords = field_map json__ "MaxRecords" MaxRecords.of_json in
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
+      let includeInstances =
+        field_map json__ "IncludeInstances" IncludeInstances.of_json in
       let autoScalingGroupNames =
-        field_map json "AutoScalingGroupNames" AutoScalingGroupNames.of_json in
-      make ?filters ?maxRecords ?nextToken ?autoScalingGroupNames ()
+        field_map json__ "AutoScalingGroupNames"
+          AutoScalingGroupNames.of_json in
+      make ?filters ?maxRecords ?nextToken ?includeInstances
+        ?autoScalingGroupNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about the Auto Scaling groups in the account and Region. If you specify Auto Scaling group names, the output includes information for only the specified Auto Scaling groups. If you specify filters, the output includes information for only those Auto Scaling groups that meet the filter criteria. If you do not specify group names or filters, the output includes information for all Auto Scaling groups. This operation also returns information about instances in Auto Scaling groups. To retrieve information about the instances in a warm pool, you must call the DescribeWarmPool API."]
+module AttachTrafficSourcesType =
+  struct
+    type nonrec t =
+      {
+      autoScalingGroupName: XmlStringMaxLen255.t
+        [@ocaml.doc "The name of the Auto Scaling group."];
+      trafficSources: TrafficSources.t
+        [@ocaml.doc
+          "The unique identifiers of one or more traffic sources. You can specify up to 10 traffic sources."];
+      skipZonalShiftValidation: SkipZonalShiftValidation.t option
+        [@ocaml.doc
+          "If you enable zonal shift with cross-zone disabled load balancers, capacity could become imbalanced across Availability Zones. To skip the validation, specify true. For more information, see Auto Scaling group zonal shift in the Amazon EC2 Auto Scaling User Guide."]}
+    let context_ = "AttachTrafficSourcesType"
+    let make ?skipZonalShiftValidation =
+      fun ~autoScalingGroupName ->
+        fun ~trafficSources ->
+          fun () ->
+            { skipZonalShiftValidation; autoScalingGroupName; trafficSources
+            }
+    let to_value x =
+      structure_to_value
+        [("AutoScalingGroupName",
+           (Some (XmlStringMaxLen255.to_value x.autoScalingGroupName)));
+        ("TrafficSources", (Some (TrafficSources.to_value x.trafficSources)));
+        ("SkipZonalShiftValidation",
+          (Option.map x.skipZonalShiftValidation
+             ~f:SkipZonalShiftValidation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let skipZonalShiftValidation =
+        (Option.map ~f:SkipZonalShiftValidation.of_xml)
+          (Xml.child xml_arg0 "SkipZonalShiftValidation") in
+      let trafficSources =
+        TrafficSources.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrafficSources") in
+      let autoScalingGroupName =
+        XmlStringMaxLen255.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
+      make ?skipZonalShiftValidation ~trafficSources ~autoScalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let skipZonalShiftValidation =
+        field_map json__ "SkipZonalShiftValidation"
+          SkipZonalShiftValidation.of_json in
+      let trafficSources =
+        field_map_exn json__ "TrafficSources" TrafficSources.of_json in
+      let autoScalingGroupName =
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
+      make ?skipZonalShiftValidation ~trafficSources ~autoScalingGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Attaches one or more traffic sources to the specified Auto Scaling group. You can use any of the following as traffic sources for an Auto Scaling group: Application Load Balancer Classic Load Balancer Gateway Load Balancer Network Load Balancer VPC Lattice This operation is additive and does not detach existing traffic sources from the Auto Scaling group. After the operation completes, use the DescribeTrafficSources API to return details about the state of the attachments between traffic sources and your Auto Scaling group. To detach a traffic source from the Auto Scaling group, call the DetachTrafficSources API."]
+module AttachTrafficSourcesResultType =
+  struct
+    type attachTrafficSourcesResult = unit
+    and responseMetaData = unit
+    and t =
+      {
+      attachTrafficSourcesResult: attachTrafficSourcesResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `InstanceRefreshInProgressFault of InstanceRefreshInProgressFault.t 
+      | `ResourceContentionFault of ResourceContentionFault.t 
+      | `ServiceLinkedRoleFailure of ServiceLinkedRoleFailure.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = { attachTrafficSourcesResult = (); responseMetaData = () }
+    let error_of_json name json =
+      match name with
+      | "InstanceRefreshInProgressFault" ->
+          `InstanceRefreshInProgressFault
+            (InstanceRefreshInProgressFault.of_json json)
+      | "ResourceContentionFault" ->
+          `ResourceContentionFault (ResourceContentionFault.of_json json)
+      | "ServiceLinkedRoleFailure" ->
+          `ServiceLinkedRoleFailure (ServiceLinkedRoleFailure.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InstanceRefreshInProgressFault" ->
+          `InstanceRefreshInProgressFault
+            (InstanceRefreshInProgressFault.of_xml xml)
+      | "ResourceContentionFault" ->
+          `ResourceContentionFault (ResourceContentionFault.of_xml xml)
+      | "ServiceLinkedRoleFailure" ->
+          `ServiceLinkedRoleFailure (ServiceLinkedRoleFailure.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InstanceRefreshInProgressFault e ->
+          `Assoc
+            [("error", (`String "InstanceRefreshInProgressFault"));
+            ("details", (InstanceRefreshInProgressFault.to_json e))]
+      | `ResourceContentionFault e ->
+          `Assoc
+            [("error", (`String "ResourceContentionFault"));
+            ("details", (ResourceContentionFault.to_json e))]
+      | `ServiceLinkedRoleFailure e ->
+          `Assoc
+            [("error", (`String "ServiceLinkedRoleFailure"));
+            ("details", (ServiceLinkedRoleFailure.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Attaches one or more traffic sources to the specified Auto Scaling group. You can use any of the following as traffic sources for an Auto Scaling group: Application Load Balancer Classic Load Balancer Gateway Load Balancer Network Load Balancer VPC Lattice This operation is additive and does not detach existing traffic sources from the Auto Scaling group. After the operation completes, use the DescribeTrafficSources API to return details about the state of the attachments between traffic sources and your Auto Scaling group. To detach a traffic source from the Auto Scaling group, call the DetachTrafficSources API."]
 module AttachLoadBalancersType =
   struct
     type nonrec t =
@@ -14728,15 +18348,16 @@ module AttachLoadBalancersType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~loadBalancerNames ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loadBalancerNames =
-        field_map_exn json "LoadBalancerNames" LoadBalancerNames.of_json in
+        field_map_exn json__ "LoadBalancerNames" LoadBalancerNames.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ~loadBalancerNames ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "To attach an Application Load Balancer, Network Load Balancer, or Gateway Load Balancer, use the AttachLoadBalancerTargetGroups API operation instead. Attaches one or more Classic Load Balancers to the specified Auto Scaling group. Amazon EC2 Auto Scaling registers the running instances with these Classic Load Balancers. To describe the load balancers for an Auto Scaling group, call the DescribeLoadBalancers API. To detach the load balancer from the Auto Scaling group, call the DetachLoadBalancers API. This operation is additive and does not detach existing Classic Load Balancers or target groups from the Auto Scaling group. For more information, see Elastic Load Balancing and Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]
+       "This API operation is superseded by AttachTrafficSources, which can attach multiple traffic sources types. We recommend using AttachTrafficSources to simplify how you manage traffic sources. However, we continue to support AttachLoadBalancers. You can use both the original AttachLoadBalancers API operation and AttachTrafficSources on the same Auto Scaling group. Attaches one or more Classic Load Balancers to the specified Auto Scaling group. Amazon EC2 Auto Scaling registers the running instances with these Classic Load Balancers. To describe the load balancers for an Auto Scaling group, call the DescribeLoadBalancers API. To detach a load balancer from the Auto Scaling group, call the DetachLoadBalancers API. This operation is additive and does not detach existing Classic Load Balancers or target groups from the Auto Scaling group. For more information, see Use Elastic Load Balancing to distribute traffic across the instances in your Auto Scaling group in the Amazon EC2 Auto Scaling User Guide."]
 module AttachLoadBalancersResultType =
   struct
     type attachLoadBalancersResult = unit
@@ -14746,12 +18367,16 @@ module AttachLoadBalancersResultType =
       attachLoadBalancersResult: attachLoadBalancersResult ;
       responseMetaData: responseMetaData }
     type error =
-      [ `ResourceContentionFault of ResourceContentionFault.t 
+      [ `InstanceRefreshInProgressFault of InstanceRefreshInProgressFault.t 
+      | `ResourceContentionFault of ResourceContentionFault.t 
       | `ServiceLinkedRoleFailure of ServiceLinkedRoleFailure.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = { attachLoadBalancersResult = (); responseMetaData = () }
     let error_of_json name json =
       match name with
+      | "InstanceRefreshInProgressFault" ->
+          `InstanceRefreshInProgressFault
+            (InstanceRefreshInProgressFault.of_json json)
       | "ResourceContentionFault" ->
           `ResourceContentionFault (ResourceContentionFault.of_json json)
       | "ServiceLinkedRoleFailure" ->
@@ -14761,6 +18386,9 @@ module AttachLoadBalancersResultType =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "InstanceRefreshInProgressFault" ->
+          `InstanceRefreshInProgressFault
+            (InstanceRefreshInProgressFault.of_xml xml)
       | "ResourceContentionFault" ->
           `ResourceContentionFault (ResourceContentionFault.of_xml xml)
       | "ServiceLinkedRoleFailure" ->
@@ -14769,6 +18397,10 @@ module AttachLoadBalancersResultType =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `InstanceRefreshInProgressFault e ->
+          `Assoc
+            [("error", (`String "InstanceRefreshInProgressFault"));
+            ("details", (InstanceRefreshInProgressFault.to_json e))]
       | `ResourceContentionFault e ->
           `Assoc
             [("error", (`String "ResourceContentionFault"));
@@ -14790,7 +18422,7 @@ module AttachLoadBalancersResultType =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "To attach an Application Load Balancer, Network Load Balancer, or Gateway Load Balancer, use the AttachLoadBalancerTargetGroups API operation instead. Attaches one or more Classic Load Balancers to the specified Auto Scaling group. Amazon EC2 Auto Scaling registers the running instances with these Classic Load Balancers. To describe the load balancers for an Auto Scaling group, call the DescribeLoadBalancers API. To detach the load balancer from the Auto Scaling group, call the DetachLoadBalancers API. This operation is additive and does not detach existing Classic Load Balancers or target groups from the Auto Scaling group. For more information, see Elastic Load Balancing and Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]
+       "This API operation is superseded by AttachTrafficSources, which can attach multiple traffic sources types. We recommend using AttachTrafficSources to simplify how you manage traffic sources. However, we continue to support AttachLoadBalancers. You can use both the original AttachLoadBalancers API operation and AttachTrafficSources on the same Auto Scaling group. Attaches one or more Classic Load Balancers to the specified Auto Scaling group. Amazon EC2 Auto Scaling registers the running instances with these Classic Load Balancers. To describe the load balancers for an Auto Scaling group, call the DescribeLoadBalancers API. To detach a load balancer from the Auto Scaling group, call the DetachLoadBalancers API. This operation is additive and does not detach existing Classic Load Balancers or target groups from the Auto Scaling group. For more information, see Use Elastic Load Balancing to distribute traffic across the instances in your Auto Scaling group in the Amazon EC2 Auto Scaling User Guide."]
 module AttachLoadBalancerTargetGroupsType =
   struct
     type nonrec t =
@@ -14799,7 +18431,7 @@ module AttachLoadBalancerTargetGroupsType =
         [@ocaml.doc "The name of the Auto Scaling group."];
       targetGroupARNs: TargetGroupARNs.t
         [@ocaml.doc
-          "The Amazon Resource Names (ARN) of the target groups. You can specify up to 10 target groups. To get the ARN of a target group, use the Elastic Load Balancing DescribeTargetGroups API operation."]}
+          "The Amazon Resource Names (ARNs) of the target groups. You can specify up to 10 target groups. To get the ARN of a target group, use the Elastic Load Balancing DescribeTargetGroups API operation."]}
     let context_ = "AttachLoadBalancerTargetGroupsType"
     let make ~autoScalingGroupName =
       fun ~targetGroupARNs ->
@@ -14820,15 +18452,16 @@ module AttachLoadBalancerTargetGroupsType =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoScalingGroupName") in
       make ~targetGroupARNs ~autoScalingGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetGroupARNs =
-        field_map_exn json "TargetGroupARNs" TargetGroupARNs.of_json in
+        field_map_exn json__ "TargetGroupARNs" TargetGroupARNs.of_json in
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
       make ~targetGroupARNs ~autoScalingGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attaches one or more target groups to the specified Auto Scaling group. This operation is used with the following load balancer types: Application Load Balancer - Operates at the application layer (layer 7) and supports HTTP and HTTPS. Network Load Balancer - Operates at the transport layer (layer 4) and supports TCP, TLS, and UDP. Gateway Load Balancer - Operates at the network layer (layer 3). To describe the target groups for an Auto Scaling group, call the DescribeLoadBalancerTargetGroups API. To detach the target group from the Auto Scaling group, call the DetachLoadBalancerTargetGroups API. This operation is additive and does not detach existing target groups or Classic Load Balancers from the Auto Scaling group. For more information, see Elastic Load Balancing and Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]
+       "This API operation is superseded by AttachTrafficSources, which can attach multiple traffic sources types. We recommend using AttachTrafficSources to simplify how you manage traffic sources. However, we continue to support AttachLoadBalancerTargetGroups. You can use both the original AttachLoadBalancerTargetGroups API operation and AttachTrafficSources on the same Auto Scaling group. Attaches one or more target groups to the specified Auto Scaling group. This operation is used with the following load balancer types: Application Load Balancer - Operates at the application layer (layer 7) and supports HTTP and HTTPS. Network Load Balancer - Operates at the transport layer (layer 4) and supports TCP, TLS, and UDP. Gateway Load Balancer - Operates at the network layer (layer 3). To describe the target groups for an Auto Scaling group, call the DescribeLoadBalancerTargetGroups API. To detach the target group from the Auto Scaling group, call the DetachLoadBalancerTargetGroups API. This operation is additive and does not detach existing target groups or Classic Load Balancers from the Auto Scaling group. For more information, see Use Elastic Load Balancing to distribute traffic across the instances in your Auto Scaling group in the Amazon EC2 Auto Scaling User Guide."]
 module AttachLoadBalancerTargetGroupsResultType =
   struct
     type attachLoadBalancerTargetGroupsResult = unit
@@ -14839,13 +18472,17 @@ module AttachLoadBalancerTargetGroupsResultType =
         attachLoadBalancerTargetGroupsResult ;
       responseMetaData: responseMetaData }
     type error =
-      [ `ResourceContentionFault of ResourceContentionFault.t 
+      [ `InstanceRefreshInProgressFault of InstanceRefreshInProgressFault.t 
+      | `ResourceContentionFault of ResourceContentionFault.t 
       | `ServiceLinkedRoleFailure of ServiceLinkedRoleFailure.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () =
       { attachLoadBalancerTargetGroupsResult = (); responseMetaData = () }
     let error_of_json name json =
       match name with
+      | "InstanceRefreshInProgressFault" ->
+          `InstanceRefreshInProgressFault
+            (InstanceRefreshInProgressFault.of_json json)
       | "ResourceContentionFault" ->
           `ResourceContentionFault (ResourceContentionFault.of_json json)
       | "ServiceLinkedRoleFailure" ->
@@ -14855,6 +18492,9 @@ module AttachLoadBalancerTargetGroupsResultType =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "InstanceRefreshInProgressFault" ->
+          `InstanceRefreshInProgressFault
+            (InstanceRefreshInProgressFault.of_xml xml)
       | "ResourceContentionFault" ->
           `ResourceContentionFault (ResourceContentionFault.of_xml xml)
       | "ServiceLinkedRoleFailure" ->
@@ -14863,6 +18503,10 @@ module AttachLoadBalancerTargetGroupsResultType =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `InstanceRefreshInProgressFault e ->
+          `Assoc
+            [("error", (`String "InstanceRefreshInProgressFault"));
+            ("details", (InstanceRefreshInProgressFault.to_json e))]
       | `ResourceContentionFault e ->
           `Assoc
             [("error", (`String "ResourceContentionFault"));
@@ -14884,7 +18528,7 @@ module AttachLoadBalancerTargetGroupsResultType =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attaches one or more target groups to the specified Auto Scaling group. This operation is used with the following load balancer types: Application Load Balancer - Operates at the application layer (layer 7) and supports HTTP and HTTPS. Network Load Balancer - Operates at the transport layer (layer 4) and supports TCP, TLS, and UDP. Gateway Load Balancer - Operates at the network layer (layer 3). To describe the target groups for an Auto Scaling group, call the DescribeLoadBalancerTargetGroups API. To detach the target group from the Auto Scaling group, call the DetachLoadBalancerTargetGroups API. This operation is additive and does not detach existing target groups or Classic Load Balancers from the Auto Scaling group. For more information, see Elastic Load Balancing and Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]
+       "This API operation is superseded by AttachTrafficSources, which can attach multiple traffic sources types. We recommend using AttachTrafficSources to simplify how you manage traffic sources. However, we continue to support AttachLoadBalancerTargetGroups. You can use both the original AttachLoadBalancerTargetGroups API operation and AttachTrafficSources on the same Auto Scaling group. Attaches one or more target groups to the specified Auto Scaling group. This operation is used with the following load balancer types: Application Load Balancer - Operates at the application layer (layer 7) and supports HTTP and HTTPS. Network Load Balancer - Operates at the transport layer (layer 4) and supports TCP, TLS, and UDP. Gateway Load Balancer - Operates at the network layer (layer 3). To describe the target groups for an Auto Scaling group, call the DescribeLoadBalancerTargetGroups API. To detach the target group from the Auto Scaling group, call the DetachLoadBalancerTargetGroups API. This operation is additive and does not detach existing target groups or Classic Load Balancers from the Auto Scaling group. For more information, see Use Elastic Load Balancing to distribute traffic across the instances in your Auto Scaling group in the Amazon EC2 Auto Scaling User Guide."]
 module AttachInstancesQuery =
   struct
     type nonrec t =
@@ -14912,14 +18556,15 @@ module AttachInstancesQuery =
         (Option.map ~f:InstanceIds.of_xml) (Xml.child xml_arg0 "InstanceIds") in
       make ~autoScalingGroupName ?instanceIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoScalingGroupName =
-        field_map_exn json "AutoScalingGroupName" XmlStringMaxLen255.of_json in
-      let instanceIds = field_map json "InstanceIds" InstanceIds.of_json in
+        field_map_exn json__ "AutoScalingGroupName"
+          XmlStringMaxLen255.of_json in
+      let instanceIds = field_map json__ "InstanceIds" InstanceIds.of_json in
       make ~autoScalingGroupName ?instanceIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attaches one or more EC2 instances to the specified Auto Scaling group. When you attach instances, Amazon EC2 Auto Scaling increases the desired capacity of the group by the number of instances being attached. If the number of instances being attached plus the desired capacity of the group exceeds the maximum size of the group, the operation fails. If there is a Classic Load Balancer attached to your Auto Scaling group, the instances are also registered with the load balancer. If there are target groups attached to your Auto Scaling group, the instances are also registered with the target groups. For more information, see Attach EC2 instances to your Auto Scaling group in the Amazon EC2 Auto Scaling User Guide."]
+       "Attaches one or more EC2 instances to the specified Auto Scaling group. When you attach instances, Amazon EC2 Auto Scaling increases the desired capacity of the group by the number of instances being attached. If the number of instances being attached plus the desired capacity of the group exceeds the maximum size of the group, the operation fails. If there is a Classic Load Balancer attached to your Auto Scaling group, the instances are also registered with the load balancer. If there are target groups attached to your Auto Scaling group, the instances are also registered with the target groups. For more information, see Detach or attach instances in the Amazon EC2 Auto Scaling User Guide."]
 module ActivityType =
   struct
     type terminateInstanceInAutoScalingGroupResult =
@@ -14991,17 +18636,17 @@ module ActivityType =
         (Option.map ~f:Activity.of_xml) (Xml.child xml_arg0 "Activity") in
       make ?activity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let activity = field_map json "Activity" Activity.of_json in
+    let of_json json__ =
+      let activity = field_map json__ "Activity" Activity.of_json in
       make ?activity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Terminates the specified instance and optionally adjusts the desired group size. This operation cannot be called on instances in a warm pool. This call simply makes a termination request. The instance is not terminated immediately. When an instance is terminated, the instance status changes to terminated. You can't connect to or start an instance after you've terminated it. If you do not specify the option to decrement the desired capacity, Amazon EC2 Auto Scaling launches instances to replace the ones that are terminated. By default, Amazon EC2 Auto Scaling balances instances across all Availability Zones. If you decrement the desired capacity, your Auto Scaling group can become unbalanced between Availability Zones. Amazon EC2 Auto Scaling tries to rebalance the group, and rebalancing might terminate instances in other zones. For more information, see Rebalancing activities in the Amazon EC2 Auto Scaling User Guide."]
+       "Terminates the specified instance and optionally adjusts the desired group size. This operation cannot be called on instances in a warm pool. This call simply makes a termination request. The instance is not terminated immediately. When an instance is terminated, the instance status changes to terminated. You can't connect to or start an instance after you've terminated it. If you do not specify the option to decrement the desired capacity, Amazon EC2 Auto Scaling launches instances to replace the ones that are terminated. By default, Amazon EC2 Auto Scaling balances instances across all Availability Zones. If you decrement the desired capacity, your Auto Scaling group can become unbalanced between Availability Zones. Amazon EC2 Auto Scaling tries to rebalance the group, and rebalancing might terminate instances in other zones. For more information, see Manual scaling in the Amazon EC2 Auto Scaling User Guide."]
 module ActivitiesType =
   struct
     type describeScalingActivitiesResult =
       {
-      activities: Activities.t
+      activities: Activities.t option
         [@ocaml.doc
           "The scaling activities. Activities are sorted by start time. Activities still in progress are described first."];
       nextToken: XmlString.t option
@@ -15017,11 +18662,11 @@ module ActivitiesType =
       | `ResourceContentionFault of ResourceContentionFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ActivitiesType"
-    let make ?nextToken =
-      fun ~activities ->
+    let make ?activities =
+      fun ?nextToken ->
         fun () ->
           {
-            describeScalingActivitiesResult = { nextToken; activities };
+            describeScalingActivitiesResult = { activities; nextToken };
             responseMetaData = ()
           }
     let error_of_json name json =
@@ -15058,7 +18703,7 @@ module ActivitiesType =
     let to_value t =
       let x = t.describeScalingActivitiesResult in
       structure_to_wrapped_value
-        [("Activities", (Some (Activities.to_value x.activities)));
+        [("Activities", (Option.map x.activities ~f:Activities.to_value));
         ("NextToken", (Option.map x.nextToken ~f:XmlString.to_value))]
         ~wrapper:"DescribeScalingActivitiesResult"
         ~response:"ResponseMetaData"
@@ -15069,14 +18714,13 @@ module ActivitiesType =
       let nextToken =
         (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "NextToken") in
       let activities =
-        Activities.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Activities") in
-      make ?nextToken ~activities ()
+        (Option.map ~f:Activities.of_xml) (Xml.child xml_arg0 "Activities") in
+      make ?nextToken ?activities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
-      let activities = field_map_exn json "Activities" Activities.of_json in
-      make ?nextToken ~activities ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
+      let activities = field_map json__ "Activities" Activities.of_json in
+      make ?nextToken ?activities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about the scaling activities in the account and Region. When scaling events occur, you see a record of the scaling activity in the scaling activities. For more information, see Verifying a scaling activity for an Auto Scaling group in the Amazon EC2 Auto Scaling User Guide. If the scaling event succeeds, the value of the StatusCode element in the response is Successful. If an attempt to launch instances failed, the StatusCode value is Failed or Cancelled and the StatusMessage element in the response indicates the cause of the failure. For help interpreting the StatusMessage, see Troubleshooting Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]
+       "Gets information about the scaling activities in the account and Region. When scaling events occur, you see a record of the scaling activity in the scaling activities. For more information, see Verify a scaling activity for an Auto Scaling group in the Amazon EC2 Auto Scaling User Guide. If the scaling event succeeds, the value of the StatusCode element in the response is Successful. If an attempt to launch instances failed, the StatusCode value is Failed or Cancelled and the StatusMessage element in the response indicates the cause of the failure. For help interpreting the StatusMessage, see Troubleshooting Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide."]

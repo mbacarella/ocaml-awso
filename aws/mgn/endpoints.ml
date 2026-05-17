@@ -2,14 +2,43 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | ArchiveApplication: (ArchiveApplicationRequest.t, Application.t,
+  Application.error) t 
+  | ArchiveWave: (ArchiveWaveRequest.t, Wave.t, Wave.error) t 
+  | AssociateApplications: (AssociateApplicationsRequest.t,
+  AssociateApplicationsResponse.t, AssociateApplicationsResponse.error) t 
+  | AssociateSourceServers: (AssociateSourceServersRequest.t,
+  AssociateSourceServersResponse.t, AssociateSourceServersResponse.error) t 
   | ChangeServerLifeCycleState: (ChangeServerLifeCycleStateRequest.t,
   SourceServer.t, SourceServer.error) t 
+  | CreateApplication: (CreateApplicationRequest.t, Application.t,
+  Application.error) t 
+  | CreateConnector: (CreateConnectorRequest.t, Connector.t, Connector.error)
+  t 
+  | CreateLaunchConfigurationTemplate:
+  (CreateLaunchConfigurationTemplateRequest.t, LaunchConfigurationTemplate.t,
+  LaunchConfigurationTemplate.error) t 
+  | CreateNetworkMigrationDefinition:
+  (CreateNetworkMigrationDefinitionRequest.t, NetworkMigrationDefinition.t,
+  NetworkMigrationDefinition.error) t 
   | CreateReplicationConfigurationTemplate:
   (CreateReplicationConfigurationTemplateRequest.t,
   ReplicationConfigurationTemplate.t, ReplicationConfigurationTemplate.error)
   t 
+  | CreateWave: (CreateWaveRequest.t, Wave.t, Wave.error) t 
+  | DeleteApplication: (DeleteApplicationRequest.t,
+  DeleteApplicationResponse.t, DeleteApplicationResponse.error) t 
+  | DeleteConnector: (DeleteConnectorRequest.t, unit, unit) t 
   | DeleteJob: (DeleteJobRequest.t, DeleteJobResponse.t,
   DeleteJobResponse.error) t 
+  | DeleteLaunchConfigurationTemplate:
+  (DeleteLaunchConfigurationTemplateRequest.t,
+  DeleteLaunchConfigurationTemplateResponse.t,
+  DeleteLaunchConfigurationTemplateResponse.error) t 
+  | DeleteNetworkMigrationDefinition:
+  (DeleteNetworkMigrationDefinitionRequest.t,
+  DeleteNetworkMigrationDefinitionResponse.t,
+  DeleteNetworkMigrationDefinitionResponse.error) t 
   | DeleteReplicationConfigurationTemplate:
   (DeleteReplicationConfigurationTemplateRequest.t,
   DeleteReplicationConfigurationTemplateResponse.t,
@@ -17,10 +46,16 @@ type ('i, 'o, 'e) t =
   | DeleteSourceServer: (DeleteSourceServerRequest.t,
   DeleteSourceServerResponse.t, DeleteSourceServerResponse.error) t 
   | DeleteVcenterClient: (DeleteVcenterClientRequest.t, unit, unit) t 
+  | DeleteWave: (DeleteWaveRequest.t, DeleteWaveResponse.t,
+  DeleteWaveResponse.error) t 
   | DescribeJobLogItems: (DescribeJobLogItemsRequest.t,
   DescribeJobLogItemsResponse.t, DescribeJobLogItemsResponse.error) t 
   | DescribeJobs: (DescribeJobsRequest.t, DescribeJobsResponse.t,
   DescribeJobsResponse.error) t 
+  | DescribeLaunchConfigurationTemplates:
+  (DescribeLaunchConfigurationTemplatesRequest.t,
+  DescribeLaunchConfigurationTemplatesResponse.t,
+  DescribeLaunchConfigurationTemplatesResponse.error) t 
   | DescribeReplicationConfigurationTemplates:
   (DescribeReplicationConfigurationTemplatesRequest.t,
   DescribeReplicationConfigurationTemplatesResponse.t,
@@ -29,84 +64,318 @@ type ('i, 'o, 'e) t =
   DescribeSourceServersResponse.t, DescribeSourceServersResponse.error) t 
   | DescribeVcenterClients: (DescribeVcenterClientsRequest.t,
   DescribeVcenterClientsResponse.t, DescribeVcenterClientsResponse.error) t 
+  | DisassociateApplications: (DisassociateApplicationsRequest.t,
+  DisassociateApplicationsResponse.t, DisassociateApplicationsResponse.error)
+  t 
+  | DisassociateSourceServers: (DisassociateSourceServersRequest.t,
+  DisassociateSourceServersResponse.t,
+  DisassociateSourceServersResponse.error) t 
   | DisconnectFromService: (DisconnectFromServiceRequest.t, SourceServer.t,
   SourceServer.error) t 
   | FinalizeCutover: (FinalizeCutoverRequest.t, SourceServer.t,
   SourceServer.error) t 
   | GetLaunchConfiguration: (GetLaunchConfigurationRequest.t,
   LaunchConfiguration.t, LaunchConfiguration.error) t 
+  | GetNetworkMigrationDefinition: (GetNetworkMigrationDefinitionRequest.t,
+  NetworkMigrationDefinition.t, NetworkMigrationDefinition.error) t 
+  | GetNetworkMigrationMapperSegmentConstruct:
+  (GetNetworkMigrationMapperSegmentConstructRequest.t,
+  GetNetworkMigrationMapperSegmentConstructResponse.t,
+  GetNetworkMigrationMapperSegmentConstructResponse.error) t 
   | GetReplicationConfiguration: (GetReplicationConfigurationRequest.t,
   ReplicationConfiguration.t, ReplicationConfiguration.error) t 
   | InitializeService: (InitializeServiceRequest.t,
   InitializeServiceResponse.t, InitializeServiceResponse.error) t 
+  | ListApplications: (ListApplicationsRequest.t, ListApplicationsResponse.t,
+  ListApplicationsResponse.error) t 
+  | ListConnectors: (ListConnectorsRequest.t, ListConnectorsResponse.t,
+  ListConnectorsResponse.error) t 
+  | ListExportErrors: (ListExportErrorsRequest.t, ListExportErrorsResponse.t,
+  ListExportErrorsResponse.error) t 
+  | ListExports: (ListExportsRequest.t, ListExportsResponse.t,
+  ListExportsResponse.error) t 
+  | ListImportErrors: (ListImportErrorsRequest.t, ListImportErrorsResponse.t,
+  ListImportErrorsResponse.error) t 
+  | ListImportFileEnrichments: (ListImportFileEnrichmentsRequest.t,
+  ListImportFileEnrichmentsResponse.t,
+  ListImportFileEnrichmentsResponse.error) t 
+  | ListImports: (ListImportsRequest.t, ListImportsResponse.t,
+  ListImportsResponse.error) t 
+  | ListManagedAccounts: (ListManagedAccountsRequest.t,
+  ListManagedAccountsResponse.t, ListManagedAccountsResponse.error) t 
+  | ListNetworkMigrationAnalyses: (ListNetworkMigrationAnalysesRequest.t,
+  ListNetworkMigrationAnalysesResponse.t,
+  ListNetworkMigrationAnalysesResponse.error) t 
+  | ListNetworkMigrationAnalysisResults:
+  (ListNetworkMigrationAnalysisResultsRequest.t,
+  ListNetworkMigrationAnalysisResultsResponse.t,
+  ListNetworkMigrationAnalysisResultsResponse.error) t 
+  | ListNetworkMigrationCodeGenerationSegments:
+  (ListNetworkMigrationCodeGenerationSegmentsRequest.t,
+  ListNetworkMigrationCodeGenerationSegmentsResponse.t,
+  ListNetworkMigrationCodeGenerationSegmentsResponse.error) t 
+  | ListNetworkMigrationCodeGenerations:
+  (ListNetworkMigrationCodeGenerationsRequest.t,
+  ListNetworkMigrationCodeGenerationsResponse.t,
+  ListNetworkMigrationCodeGenerationsResponse.error) t 
+  | ListNetworkMigrationDefinitions:
+  (ListNetworkMigrationDefinitionsRequest.t,
+  ListNetworkMigrationDefinitionsResponse.t,
+  ListNetworkMigrationDefinitionsResponse.error) t 
+  | ListNetworkMigrationDeployedStacks:
+  (ListNetworkMigrationDeployedStacksRequest.t,
+  ListNetworkMigrationDeployedStacksResponse.t,
+  ListNetworkMigrationDeployedStacksResponse.error) t 
+  | ListNetworkMigrationDeployments:
+  (ListNetworkMigrationDeploymentsRequest.t,
+  ListNetworkMigrationDeployerJobResponse.t,
+  ListNetworkMigrationDeployerJobResponse.error) t 
+  | ListNetworkMigrationExecutions: (ListNetworkMigrationExecutionsRequest.t,
+  ListNetworkMigrationExecutionsResponse.t,
+  ListNetworkMigrationExecutionsResponse.error) t 
+  | ListNetworkMigrationMapperSegmentConstructs:
+  (ListNetworkMigrationMapperSegmentConstructsRequest.t,
+  ListNetworkMigrationMapperSegmentConstructsResponse.t,
+  ListNetworkMigrationMapperSegmentConstructsResponse.error) t 
+  | ListNetworkMigrationMapperSegments:
+  (ListNetworkMigrationMapperSegmentsRequest.t,
+  ListNetworkMigrationMapperSegmentsResponse.t,
+  ListNetworkMigrationMapperSegmentsResponse.error) t 
+  | ListNetworkMigrationMappingUpdates:
+  (ListNetworkMigrationMappingUpdatesRequest.t,
+  ListNetworkMigrationMappingUpdatesResponse.t,
+  ListNetworkMigrationMappingUpdatesResponse.error) t 
+  | ListNetworkMigrationMappings: (ListNetworkMigrationMappingsRequest.t,
+  ListNetworkMigrationMappingsResponse.t,
+  ListNetworkMigrationMappingsResponse.error) t 
+  | ListSourceServerActions: (ListSourceServerActionsRequest.t,
+  ListSourceServerActionsResponse.t, ListSourceServerActionsResponse.error) t
+  
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListTemplateActions: (ListTemplateActionsRequest.t,
+  ListTemplateActionsResponse.t, ListTemplateActionsResponse.error) t 
+  | ListWaves: (ListWavesRequest.t, ListWavesResponse.t,
+  ListWavesResponse.error) t 
   | MarkAsArchived: (MarkAsArchivedRequest.t, SourceServer.t,
+  SourceServer.error) t 
+  | PauseReplication: (PauseReplicationRequest.t, SourceServer.t,
+  SourceServer.error) t 
+  | PutSourceServerAction: (PutSourceServerActionRequest.t,
+  SourceServerActionDocument.t, SourceServerActionDocument.error) t 
+  | PutTemplateAction: (PutTemplateActionRequest.t, TemplateActionDocument.t,
+  TemplateActionDocument.error) t 
+  | RemoveSourceServerAction: (RemoveSourceServerActionRequest.t,
+  RemoveSourceServerActionResponse.t, RemoveSourceServerActionResponse.error)
+  t 
+  | RemoveTemplateAction: (RemoveTemplateActionRequest.t,
+  RemoveTemplateActionResponse.t, RemoveTemplateActionResponse.error) t 
+  | ResumeReplication: (ResumeReplicationRequest.t, SourceServer.t,
   SourceServer.error) t 
   | RetryDataReplication: (RetryDataReplicationRequest.t, SourceServer.t,
   SourceServer.error) t 
   | StartCutover: (StartCutoverRequest.t, StartCutoverResponse.t,
   StartCutoverResponse.error) t 
+  | StartExport: (StartExportRequest.t, StartExportResponse.t,
+  StartExportResponse.error) t 
+  | StartImport: (StartImportRequest.t, StartImportResponse.t,
+  StartImportResponse.error) t 
+  | StartImportFileEnrichment: (StartImportFileEnrichmentRequest.t,
+  StartImportFileEnrichmentResponse.t,
+  StartImportFileEnrichmentResponse.error) t 
+  | StartNetworkMigrationAnalysis: (StartNetworkMigrationAnalysisRequest.t,
+  StartNetworkMigrationAnalysisResponse.t,
+  StartNetworkMigrationAnalysisResponse.error) t 
+  | StartNetworkMigrationCodeGeneration:
+  (StartNetworkMigrationCodeGenerationRequest.t,
+  StartNetworkMigrationCodeGenerationResponse.t,
+  StartNetworkMigrationCodeGenerationResponse.error) t 
+  | StartNetworkMigrationDeployment:
+  (StartNetworkMigrationDeploymentRequest.t,
+  StartNetworkMigrationDeployerJobResponse.t,
+  StartNetworkMigrationDeployerJobResponse.error) t 
+  | StartNetworkMigrationMapping: (StartNetworkMigrationMappingRequest.t,
+  StartNetworkMigrationMappingResponse.t,
+  StartNetworkMigrationMappingResponse.error) t 
+  | StartNetworkMigrationMappingUpdate:
+  (StartNetworkMigrationMappingUpdateRequest.t,
+  StartNetworkMigrationMappingUpdateResponse.t,
+  StartNetworkMigrationMappingUpdateResponse.error) t 
   | StartReplication: (StartReplicationRequest.t, SourceServer.t,
   SourceServer.error) t 
   | StartTest: (StartTestRequest.t, StartTestResponse.t,
   StartTestResponse.error) t 
+  | StopReplication: (StopReplicationRequest.t, SourceServer.t,
+  SourceServer.error) t 
   | TagResource: (TagResourceRequest.t, unit, unit) t 
   | TerminateTargetInstances: (TerminateTargetInstancesRequest.t,
   TerminateTargetInstancesResponse.t, TerminateTargetInstancesResponse.error)
   t 
+  | UnarchiveApplication: (UnarchiveApplicationRequest.t, Application.t,
+  Application.error) t 
+  | UnarchiveWave: (UnarchiveWaveRequest.t, Wave.t, Wave.error) t 
   | UntagResource: (UntagResourceRequest.t, unit, unit) t 
+  | UpdateApplication: (UpdateApplicationRequest.t, Application.t,
+  Application.error) t 
+  | UpdateConnector: (UpdateConnectorRequest.t, Connector.t, Connector.error)
+  t 
   | UpdateLaunchConfiguration: (UpdateLaunchConfigurationRequest.t,
   LaunchConfiguration.t, LaunchConfiguration.error) t 
+  | UpdateLaunchConfigurationTemplate:
+  (UpdateLaunchConfigurationTemplateRequest.t, LaunchConfigurationTemplate.t,
+  LaunchConfigurationTemplate.error) t 
+  | UpdateNetworkMigrationDefinition:
+  (UpdateNetworkMigrationDefinitionRequest.t, NetworkMigrationDefinition.t,
+  NetworkMigrationDefinition.error) t 
+  | UpdateNetworkMigrationMapperSegment:
+  (UpdateNetworkMigrationMapperSegmentRequest.t,
+  NetworkMigrationMapperSegment.t, NetworkMigrationMapperSegment.error) t 
   | UpdateReplicationConfiguration: (UpdateReplicationConfigurationRequest.t,
   ReplicationConfiguration.t, ReplicationConfiguration.error) t 
   | UpdateReplicationConfigurationTemplate:
   (UpdateReplicationConfigurationTemplateRequest.t,
   ReplicationConfigurationTemplate.t, ReplicationConfigurationTemplate.error)
   t 
+  | UpdateSourceServer: (UpdateSourceServerRequest.t, SourceServer.t,
+  SourceServer.error) t 
   | UpdateSourceServerReplicationType:
   (UpdateSourceServerReplicationTypeRequest.t, SourceServer.t,
   SourceServer.error) t 
+  | UpdateWave: (UpdateWaveRequest.t, Wave.t, Wave.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | ArchiveApplication -> `POST
+  | ArchiveWave -> `POST
+  | AssociateApplications -> `POST
+  | AssociateSourceServers -> `POST
   | ChangeServerLifeCycleState -> `POST
+  | CreateApplication -> `POST
+  | CreateConnector -> `POST
+  | CreateLaunchConfigurationTemplate -> `POST
+  | CreateNetworkMigrationDefinition -> `POST
   | CreateReplicationConfigurationTemplate -> `POST
+  | CreateWave -> `POST
+  | DeleteApplication -> `POST
+  | DeleteConnector -> `POST
   | DeleteJob -> `POST
+  | DeleteLaunchConfigurationTemplate -> `POST
+  | DeleteNetworkMigrationDefinition -> `POST
   | DeleteReplicationConfigurationTemplate -> `POST
   | DeleteSourceServer -> `POST
   | DeleteVcenterClient -> `POST
+  | DeleteWave -> `POST
   | DescribeJobLogItems -> `POST
   | DescribeJobs -> `POST
+  | DescribeLaunchConfigurationTemplates -> `POST
   | DescribeReplicationConfigurationTemplates -> `POST
   | DescribeSourceServers -> `POST
   | DescribeVcenterClients -> `GET
+  | DisassociateApplications -> `POST
+  | DisassociateSourceServers -> `POST
   | DisconnectFromService -> `POST
   | FinalizeCutover -> `POST
   | GetLaunchConfiguration -> `POST
+  | GetNetworkMigrationDefinition -> `POST
+  | GetNetworkMigrationMapperSegmentConstruct -> `POST
   | GetReplicationConfiguration -> `POST
   | InitializeService -> `POST
+  | ListApplications -> `POST
+  | ListConnectors -> `POST
+  | ListExportErrors -> `POST
+  | ListExports -> `POST
+  | ListImportErrors -> `POST
+  | ListImportFileEnrichments -> `POST
+  | ListImports -> `POST
+  | ListManagedAccounts -> `POST
+  | ListNetworkMigrationAnalyses -> `POST
+  | ListNetworkMigrationAnalysisResults -> `POST
+  | ListNetworkMigrationCodeGenerationSegments -> `POST
+  | ListNetworkMigrationCodeGenerations -> `POST
+  | ListNetworkMigrationDefinitions -> `POST
+  | ListNetworkMigrationDeployedStacks -> `POST
+  | ListNetworkMigrationDeployments -> `POST
+  | ListNetworkMigrationExecutions -> `POST
+  | ListNetworkMigrationMapperSegmentConstructs -> `POST
+  | ListNetworkMigrationMapperSegments -> `POST
+  | ListNetworkMigrationMappingUpdates -> `POST
+  | ListNetworkMigrationMappings -> `POST
+  | ListSourceServerActions -> `POST
   | ListTagsForResource -> `GET
+  | ListTemplateActions -> `POST
+  | ListWaves -> `POST
   | MarkAsArchived -> `POST
+  | PauseReplication -> `POST
+  | PutSourceServerAction -> `POST
+  | PutTemplateAction -> `POST
+  | RemoveSourceServerAction -> `POST
+  | RemoveTemplateAction -> `POST
+  | ResumeReplication -> `POST
   | RetryDataReplication -> `POST
   | StartCutover -> `POST
+  | StartExport -> `POST
+  | StartImport -> `POST
+  | StartImportFileEnrichment -> `POST
+  | StartNetworkMigrationAnalysis -> `POST
+  | StartNetworkMigrationCodeGeneration -> `POST
+  | StartNetworkMigrationDeployment -> `POST
+  | StartNetworkMigrationMapping -> `POST
+  | StartNetworkMigrationMappingUpdate -> `POST
   | StartReplication -> `POST
   | StartTest -> `POST
+  | StopReplication -> `POST
   | TagResource -> `POST
   | TerminateTargetInstances -> `POST
+  | UnarchiveApplication -> `POST
+  | UnarchiveWave -> `POST
   | UntagResource -> `DELETE
+  | UpdateApplication -> `POST
+  | UpdateConnector -> `POST
   | UpdateLaunchConfiguration -> `POST
+  | UpdateLaunchConfigurationTemplate -> `POST
+  | UpdateNetworkMigrationDefinition -> `POST
+  | UpdateNetworkMigrationMapperSegment -> `POST
   | UpdateReplicationConfiguration -> `POST
   | UpdateReplicationConfigurationTemplate -> `POST
+  | UpdateSourceServer -> `POST
   | UpdateSourceServerReplicationType -> `POST
+  | UpdateWave -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | ArchiveApplication ->
+          (Format.kasprintf Uri.of_string) "/ArchiveApplication"
+      | ArchiveWave -> (Format.kasprintf Uri.of_string) "/ArchiveWave"
+      | AssociateApplications ->
+          (Format.kasprintf Uri.of_string) "/AssociateApplications"
+      | AssociateSourceServers ->
+          (Format.kasprintf Uri.of_string) "/AssociateSourceServers"
       | ChangeServerLifeCycleState ->
           (Format.kasprintf Uri.of_string) "/ChangeServerLifeCycleState"
+      | CreateApplication ->
+          (Format.kasprintf Uri.of_string) "/CreateApplication"
+      | CreateConnector ->
+          (Format.kasprintf Uri.of_string) "/CreateConnector"
+      | CreateLaunchConfigurationTemplate ->
+          (Format.kasprintf Uri.of_string)
+            "/CreateLaunchConfigurationTemplate"
+      | CreateNetworkMigrationDefinition ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/CreateNetworkMigrationDefinition"
       | CreateReplicationConfigurationTemplate ->
           (Format.kasprintf Uri.of_string)
             "/CreateReplicationConfigurationTemplate"
+      | CreateWave -> (Format.kasprintf Uri.of_string) "/CreateWave"
+      | DeleteApplication ->
+          (Format.kasprintf Uri.of_string) "/DeleteApplication"
+      | DeleteConnector ->
+          (Format.kasprintf Uri.of_string) "/DeleteConnector"
       | DeleteJob -> (Format.kasprintf Uri.of_string) "/DeleteJob"
+      | DeleteLaunchConfigurationTemplate ->
+          (Format.kasprintf Uri.of_string)
+            "/DeleteLaunchConfigurationTemplate"
+      | DeleteNetworkMigrationDefinition ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/DeleteNetworkMigrationDefinition"
       | DeleteReplicationConfigurationTemplate ->
           (Format.kasprintf Uri.of_string)
             "/DeleteReplicationConfigurationTemplate"
@@ -114,9 +383,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/DeleteSourceServer"
       | DeleteVcenterClient ->
           (Format.kasprintf Uri.of_string) "/DeleteVcenterClient"
+      | DeleteWave -> (Format.kasprintf Uri.of_string) "/DeleteWave"
       | DescribeJobLogItems ->
           (Format.kasprintf Uri.of_string) "/DescribeJobLogItems"
       | DescribeJobs -> (Format.kasprintf Uri.of_string) "/DescribeJobs"
+      | DescribeLaunchConfigurationTemplates ->
+          (Format.kasprintf Uri.of_string)
+            "/DescribeLaunchConfigurationTemplates"
       | DescribeReplicationConfigurationTemplates ->
           (Format.kasprintf Uri.of_string)
             "/DescribeReplicationConfigurationTemplates"
@@ -127,57 +400,269 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             ((Format.kasprintf Uri.of_string) "/DescribeVcenterClients")
             (List.filter_opt
                [Option.map
-                  ~f:(fun v ->
-                        ("maxResults", (StrictlyPositiveInteger.to_header v)))
+                  ~f:(fun v -> ("maxResults", (MaxResultsType.to_header v)))
                   x.maxResults;
                Option.map
                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
                  x.nextToken])
+      | DisassociateApplications ->
+          (Format.kasprintf Uri.of_string) "/DisassociateApplications"
+      | DisassociateSourceServers ->
+          (Format.kasprintf Uri.of_string) "/DisassociateSourceServers"
       | DisconnectFromService ->
           (Format.kasprintf Uri.of_string) "/DisconnectFromService"
       | FinalizeCutover ->
           (Format.kasprintf Uri.of_string) "/FinalizeCutover"
       | GetLaunchConfiguration ->
           (Format.kasprintf Uri.of_string) "/GetLaunchConfiguration"
+      | GetNetworkMigrationDefinition ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/GetNetworkMigrationDefinition"
+      | GetNetworkMigrationMapperSegmentConstruct ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/GetNetworkMigrationMapperSegmentConstruct"
       | GetReplicationConfiguration ->
           (Format.kasprintf Uri.of_string) "/GetReplicationConfiguration"
       | InitializeService ->
           (Format.kasprintf Uri.of_string) "/InitializeService"
+      | ListApplications ->
+          (Format.kasprintf Uri.of_string) "/ListApplications"
+      | ListConnectors -> (Format.kasprintf Uri.of_string) "/ListConnectors"
+      | ListExportErrors ->
+          (Format.kasprintf Uri.of_string) "/ListExportErrors"
+      | ListExports -> (Format.kasprintf Uri.of_string) "/ListExports"
+      | ListImportErrors ->
+          (Format.kasprintf Uri.of_string) "/ListImportErrors"
+      | ListImportFileEnrichments ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/ListImportFileEnrichments"
+      | ListImports -> (Format.kasprintf Uri.of_string) "/ListImports"
+      | ListManagedAccounts ->
+          (Format.kasprintf Uri.of_string) "/ListManagedAccounts"
+      | ListNetworkMigrationAnalyses ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/ListNetworkMigrationAnalyses"
+      | ListNetworkMigrationAnalysisResults ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/ListNetworkMigrationAnalysisResults"
+      | ListNetworkMigrationCodeGenerationSegments ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/ListNetworkMigrationCodeGenerationSegments"
+      | ListNetworkMigrationCodeGenerations ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/ListNetworkMigrationCodeGenerations"
+      | ListNetworkMigrationDefinitions ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/ListNetworkMigrationDefinitions"
+      | ListNetworkMigrationDeployedStacks ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/ListNetworkMigrationDeployedStacks"
+      | ListNetworkMigrationDeployments ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/ListNetworkMigrationDeployments"
+      | ListNetworkMigrationExecutions ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/ListNetworkMigrationExecutions"
+      | ListNetworkMigrationMapperSegmentConstructs ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/ListNetworkMigrationMapperSegmentConstructs"
+      | ListNetworkMigrationMapperSegments ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/ListNetworkMigrationMapperSegments"
+      | ListNetworkMigrationMappingUpdates ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/ListNetworkMigrationMappingUpdates"
+      | ListNetworkMigrationMappings ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/ListNetworkMigrationMappings"
+      | ListSourceServerActions ->
+          (Format.kasprintf Uri.of_string) "/ListSourceServerActions"
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (ARN.to_header x.ListTagsForResourceRequest.resourceArn)
+      | ListTemplateActions ->
+          (Format.kasprintf Uri.of_string) "/ListTemplateActions"
+      | ListWaves -> (Format.kasprintf Uri.of_string) "/ListWaves"
       | MarkAsArchived -> (Format.kasprintf Uri.of_string) "/MarkAsArchived"
+      | PauseReplication ->
+          (Format.kasprintf Uri.of_string) "/PauseReplication"
+      | PutSourceServerAction ->
+          (Format.kasprintf Uri.of_string) "/PutSourceServerAction"
+      | PutTemplateAction ->
+          (Format.kasprintf Uri.of_string) "/PutTemplateAction"
+      | RemoveSourceServerAction ->
+          (Format.kasprintf Uri.of_string) "/RemoveSourceServerAction"
+      | RemoveTemplateAction ->
+          (Format.kasprintf Uri.of_string) "/RemoveTemplateAction"
+      | ResumeReplication ->
+          (Format.kasprintf Uri.of_string) "/ResumeReplication"
       | RetryDataReplication ->
           (Format.kasprintf Uri.of_string) "/RetryDataReplication"
       | StartCutover -> (Format.kasprintf Uri.of_string) "/StartCutover"
+      | StartExport -> (Format.kasprintf Uri.of_string) "/StartExport"
+      | StartImport -> (Format.kasprintf Uri.of_string) "/StartImport"
+      | StartImportFileEnrichment ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/StartImportFileEnrichment"
+      | StartNetworkMigrationAnalysis ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/StartNetworkMigrationAnalysis"
+      | StartNetworkMigrationCodeGeneration ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/StartNetworkMigrationCodeGeneration"
+      | StartNetworkMigrationDeployment ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/StartNetworkMigrationDeployment"
+      | StartNetworkMigrationMapping ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/StartNetworkMigrationMapping"
+      | StartNetworkMigrationMappingUpdate ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/StartNetworkMigrationMappingUpdate"
       | StartReplication ->
           (Format.kasprintf Uri.of_string) "/StartReplication"
       | StartTest -> (Format.kasprintf Uri.of_string) "/StartTest"
+      | StopReplication ->
+          (Format.kasprintf Uri.of_string) "/StopReplication"
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (ARN.to_header x.TagResourceRequest.resourceArn)
       | TerminateTargetInstances ->
           (Format.kasprintf Uri.of_string) "/TerminateTargetInstances"
+      | UnarchiveApplication ->
+          (Format.kasprintf Uri.of_string) "/UnarchiveApplication"
+      | UnarchiveWave -> (Format.kasprintf Uri.of_string) "/UnarchiveWave"
       | UntagResource ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/tags/%s"
                (ARN.to_header x.UntagResourceRequest.resourceArn))
             (List.filter_opt
                [Some ("tagKeys", (TagKeys.to_header x.tagKeys))])
+      | UpdateApplication ->
+          (Format.kasprintf Uri.of_string) "/UpdateApplication"
+      | UpdateConnector ->
+          (Format.kasprintf Uri.of_string) "/UpdateConnector"
       | UpdateLaunchConfiguration ->
           (Format.kasprintf Uri.of_string) "/UpdateLaunchConfiguration"
+      | UpdateLaunchConfigurationTemplate ->
+          (Format.kasprintf Uri.of_string)
+            "/UpdateLaunchConfigurationTemplate"
+      | UpdateNetworkMigrationDefinition ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/UpdateNetworkMigrationDefinition"
+      | UpdateNetworkMigrationMapperSegment ->
+          (Format.kasprintf Uri.of_string)
+            "/network-migration/UpdateNetworkMigrationMapperSegment"
       | UpdateReplicationConfiguration ->
           (Format.kasprintf Uri.of_string) "/UpdateReplicationConfiguration"
       | UpdateReplicationConfigurationTemplate ->
           (Format.kasprintf Uri.of_string)
             "/UpdateReplicationConfigurationTemplate"
+      | UpdateSourceServer ->
+          (Format.kasprintf Uri.of_string) "/UpdateSourceServer"
       | UpdateSourceServerReplicationType ->
           (Format.kasprintf Uri.of_string)
-            "/UpdateSourceServerReplicationType")
+            "/UpdateSourceServerReplicationType"
+      | UpdateWave -> (Format.kasprintf Uri.of_string) "/UpdateWave")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | ArchiveApplication ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("applicationID",
+                           (ApplicationID.to_value
+                              req.ArchiveApplicationRequest.applicationID));
+                      Option.map req.ArchiveApplicationRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ArchiveWave ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("waveID",
+                           (WaveID.to_value req.ArchiveWaveRequest.waveID));
+                      Option.map req.ArchiveWaveRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | AssociateApplications ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("waveID",
+                           (WaveID.to_value
+                              req.AssociateApplicationsRequest.waveID));
+                      Some
+                        ("applicationIDs",
+                          (ApplicationIDs.to_value
+                             req.AssociateApplicationsRequest.applicationIDs));
+                      Option.map req.AssociateApplicationsRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | AssociateSourceServers ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("applicationID",
+                           (ApplicationID.to_value
+                              req.AssociateSourceServersRequest.applicationID));
+                      Some
+                        ("sourceServerIDs",
+                          (AssociateSourceServersRequestSourceServerIDs.to_value
+                             req.AssociateSourceServersRequest.sourceServerIDs));
+                      Option.map req.AssociateSourceServersRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ChangeServerLifeCycleState ->
       let (headers, body) =
         let headers =
@@ -188,13 +673,209 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Some
-                         ("lifeCycle",
-                           (ChangeServerLifeCycleStateSourceServerLifecycle.to_value
-                              req.ChangeServerLifeCycleStateRequest.lifeCycle));
+                         ("sourceServerID",
+                           (SourceServerID.to_value
+                              req.ChangeServerLifeCycleStateRequest.sourceServerID));
                       Some
-                        ("sourceServerID",
-                          (SourceServerID.to_value
-                             req.ChangeServerLifeCycleStateRequest.sourceServerID))])
+                        ("lifeCycle",
+                          (ChangeServerLifeCycleStateSourceServerLifecycle.to_value
+                             req.ChangeServerLifeCycleStateRequest.lifeCycle));
+                      Option.map
+                        req.ChangeServerLifeCycleStateRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateApplication ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("name",
+                           (ApplicationName.to_value
+                              req.CreateApplicationRequest.name));
+                      Option.map req.CreateApplicationRequest.description
+                        ~f:(fun x ->
+                              ("description",
+                                (ApplicationDescription.to_value x)));
+                      Option.map req.CreateApplicationRequest.tags
+                        ~f:(fun x -> ("tags", (TagsMap.to_value x)));
+                      Option.map req.CreateApplicationRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateConnector ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("name",
+                           (ConnectorName.to_value
+                              req.CreateConnectorRequest.name));
+                      Some
+                        ("ssmInstanceID",
+                          (SsmInstanceID.to_value
+                             req.CreateConnectorRequest.ssmInstanceID));
+                      Option.map req.CreateConnectorRequest.tags
+                        ~f:(fun x -> ("tags", (TagsMap.to_value x)));
+                      Option.map req.CreateConnectorRequest.ssmCommandConfig
+                        ~f:(fun x ->
+                              ("ssmCommandConfig",
+                                (ConnectorSsmCommandConfig.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateLaunchConfigurationTemplate ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.CreateLaunchConfigurationTemplateRequest.postLaunchActions
+                         ~f:(fun x ->
+                               ("postLaunchActions",
+                                 (PostLaunchActions.to_value x)));
+                      Option.map
+                        req.CreateLaunchConfigurationTemplateRequest.enableMapAutoTagging
+                        ~f:(fun x ->
+                              ("enableMapAutoTagging", (Boolean.to_value x)));
+                      Option.map
+                        req.CreateLaunchConfigurationTemplateRequest.mapAutoTaggingMpeID
+                        ~f:(fun x ->
+                              ("mapAutoTaggingMpeID", (TagValue.to_value x)));
+                      Option.map
+                        req.CreateLaunchConfigurationTemplateRequest.tags
+                        ~f:(fun x -> ("tags", (TagsMap.to_value x)));
+                      Option.map
+                        req.CreateLaunchConfigurationTemplateRequest.launchDisposition
+                        ~f:(fun x ->
+                              ("launchDisposition",
+                                (LaunchDisposition.to_value x)));
+                      Option.map
+                        req.CreateLaunchConfigurationTemplateRequest.targetInstanceTypeRightSizingMethod
+                        ~f:(fun x ->
+                              ("targetInstanceTypeRightSizingMethod",
+                                (TargetInstanceTypeRightSizingMethod.to_value
+                                   x)));
+                      Option.map
+                        req.CreateLaunchConfigurationTemplateRequest.copyPrivateIp
+                        ~f:(fun x -> ("copyPrivateIp", (Boolean.to_value x)));
+                      Option.map
+                        req.CreateLaunchConfigurationTemplateRequest.associatePublicIpAddress
+                        ~f:(fun x ->
+                              ("associatePublicIpAddress",
+                                (Boolean.to_value x)));
+                      Option.map
+                        req.CreateLaunchConfigurationTemplateRequest.copyTags
+                        ~f:(fun x -> ("copyTags", (Boolean.to_value x)));
+                      Option.map
+                        req.CreateLaunchConfigurationTemplateRequest.licensing
+                        ~f:(fun x -> ("licensing", (Licensing.to_value x)));
+                      Option.map
+                        req.CreateLaunchConfigurationTemplateRequest.bootMode
+                        ~f:(fun x -> ("bootMode", (BootMode.to_value x)));
+                      Option.map
+                        req.CreateLaunchConfigurationTemplateRequest.smallVolumeMaxSize
+                        ~f:(fun x ->
+                              ("smallVolumeMaxSize",
+                                (PositiveInteger.to_value x)));
+                      Option.map
+                        req.CreateLaunchConfigurationTemplateRequest.smallVolumeConf
+                        ~f:(fun x ->
+                              ("smallVolumeConf",
+                                (LaunchTemplateDiskConf.to_value x)));
+                      Option.map
+                        req.CreateLaunchConfigurationTemplateRequest.largeVolumeConf
+                        ~f:(fun x ->
+                              ("largeVolumeConf",
+                                (LaunchTemplateDiskConf.to_value x)));
+                      Option.map
+                        req.CreateLaunchConfigurationTemplateRequest.enableParametersEncryption
+                        ~f:(fun x ->
+                              ("enableParametersEncryption",
+                                (Boolean.to_value x)));
+                      Option.map
+                        req.CreateLaunchConfigurationTemplateRequest.parametersEncryptionKey
+                        ~f:(fun x ->
+                              ("parametersEncryptionKey",
+                                (KmsKeyArn.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateNetworkMigrationDefinition ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("name",
+                           (NetworkMigrationDefinitionName.to_value
+                              req.CreateNetworkMigrationDefinitionRequest.name));
+                      Option.map
+                        req.CreateNetworkMigrationDefinitionRequest.description
+                        ~f:(fun x ->
+                              ("description",
+                                (NetworkMigrationDefinitionDescription.to_value
+                                   x)));
+                      Option.map
+                        req.CreateNetworkMigrationDefinitionRequest.sourceConfigurations
+                        ~f:(fun x ->
+                              ("sourceConfigurations",
+                                (SourceConfigurationList.to_value x)));
+                      Some
+                        ("targetS3Configuration",
+                          (TargetS3Configuration.to_value
+                             req.CreateNetworkMigrationDefinitionRequest.targetS3Configuration));
+                      Some
+                        ("targetNetwork",
+                          (TargetNetwork.to_value
+                             req.CreateNetworkMigrationDefinitionRequest.targetNetwork));
+                      Option.map
+                        req.CreateNetworkMigrationDefinitionRequest.targetDeployment
+                        ~f:(fun x ->
+                              ("targetDeployment",
+                                (TargetDeployment.to_value x)));
+                      Option.map
+                        req.CreateNetworkMigrationDefinitionRequest.tags
+                        ~f:(fun x -> ("tags", (TagsMap.to_value x)));
+                      Option.map
+                        req.CreateNetworkMigrationDefinitionRequest.scopeTags
+                        ~f:(fun x -> ("scopeTags", (ScopeTagsMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -212,21 +893,25 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Some
-                         ("associateDefaultSecurityGroup",
-                           (Boolean.to_value
-                              req.CreateReplicationConfigurationTemplateRequest.associateDefaultSecurityGroup));
+                         ("stagingAreaSubnetId",
+                           (SubnetID.to_value
+                              req.CreateReplicationConfigurationTemplateRequest.stagingAreaSubnetId));
                       Some
-                        ("bandwidthThrottling",
-                          (PositiveInteger.to_value
-                             req.CreateReplicationConfigurationTemplateRequest.bandwidthThrottling));
-                      Some
-                        ("createPublicIP",
+                        ("associateDefaultSecurityGroup",
                           (Boolean.to_value
-                             req.CreateReplicationConfigurationTemplateRequest.createPublicIP));
+                             req.CreateReplicationConfigurationTemplateRequest.associateDefaultSecurityGroup));
                       Some
-                        ("dataPlaneRouting",
-                          (ReplicationConfigurationDataPlaneRouting.to_value
-                             req.CreateReplicationConfigurationTemplateRequest.dataPlaneRouting));
+                        ("replicationServersSecurityGroupsIDs",
+                          (ReplicationServersSecurityGroupsIDs.to_value
+                             req.CreateReplicationConfigurationTemplateRequest.replicationServersSecurityGroupsIDs));
+                      Some
+                        ("replicationServerInstanceType",
+                          (EC2InstanceType.to_value
+                             req.CreateReplicationConfigurationTemplateRequest.replicationServerInstanceType));
+                      Some
+                        ("useDedicatedReplicationServer",
+                          (Boolean.to_value
+                             req.CreateReplicationConfigurationTemplateRequest.useDedicatedReplicationServer));
                       Some
                         ("defaultLargeStagingDiskType",
                           (ReplicationConfigurationDefaultLargeStagingDiskType.to_value
@@ -240,28 +925,106 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("ebsEncryptionKeyArn", (ARN.to_value x)));
                       Some
-                        ("replicationServerInstanceType",
-                          (EC2InstanceType.to_value
-                             req.CreateReplicationConfigurationTemplateRequest.replicationServerInstanceType));
+                        ("bandwidthThrottling",
+                          (BandwidthThrottling.to_value
+                             req.CreateReplicationConfigurationTemplateRequest.bandwidthThrottling));
                       Some
-                        ("replicationServersSecurityGroupsIDs",
-                          (ReplicationServersSecurityGroupsIDs.to_value
-                             req.CreateReplicationConfigurationTemplateRequest.replicationServersSecurityGroupsIDs));
+                        ("dataPlaneRouting",
+                          (ReplicationConfigurationDataPlaneRouting.to_value
+                             req.CreateReplicationConfigurationTemplateRequest.dataPlaneRouting));
                       Some
-                        ("stagingAreaSubnetId",
-                          (SubnetID.to_value
-                             req.CreateReplicationConfigurationTemplateRequest.stagingAreaSubnetId));
+                        ("createPublicIP",
+                          (Boolean.to_value
+                             req.CreateReplicationConfigurationTemplateRequest.createPublicIP));
                       Some
                         ("stagingAreaTags",
                           (TagsMap.to_value
                              req.CreateReplicationConfigurationTemplateRequest.stagingAreaTags));
                       Option.map
+                        req.CreateReplicationConfigurationTemplateRequest.useFipsEndpoint
+                        ~f:(fun x ->
+                              ("useFipsEndpoint", (Boolean.to_value x)));
+                      Option.map
                         req.CreateReplicationConfigurationTemplateRequest.tags
                         ~f:(fun x -> ("tags", (TagsMap.to_value x)));
-                      Some
-                        ("useDedicatedReplicationServer",
-                          (Boolean.to_value
-                             req.CreateReplicationConfigurationTemplateRequest.useDedicatedReplicationServer))])
+                      Option.map
+                        req.CreateReplicationConfigurationTemplateRequest.internetProtocol
+                        ~f:(fun x ->
+                              ("internetProtocol",
+                                (InternetProtocol.to_value x)));
+                      Option.map
+                        req.CreateReplicationConfigurationTemplateRequest.storeSnapshotOnLocalZone
+                        ~f:(fun x ->
+                              ("storeSnapshotOnLocalZone",
+                                (Boolean.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateWave ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("name",
+                           (WaveName.to_value req.CreateWaveRequest.name));
+                      Option.map req.CreateWaveRequest.description
+                        ~f:(fun x ->
+                              ("description", (WaveDescription.to_value x)));
+                      Option.map req.CreateWaveRequest.tags
+                        ~f:(fun x -> ("tags", (TagsMap.to_value x)));
+                      Option.map req.CreateWaveRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteApplication ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("applicationID",
+                           (ApplicationID.to_value
+                              req.DeleteApplicationRequest.applicationID));
+                      Option.map req.DeleteApplicationRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteConnector ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("connectorID",
+                           (ConnectorID.to_value
+                              req.DeleteConnectorRequest.connectorID))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -280,7 +1043,49 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                    (List.filter_opt
                       [Some
                          ("jobID",
-                           (JobID.to_value req.DeleteJobRequest.jobID))])
+                           (JobID.to_value req.DeleteJobRequest.jobID));
+                      Option.map req.DeleteJobRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteLaunchConfigurationTemplate ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("launchConfigurationTemplateID",
+                           (LaunchConfigurationTemplateID.to_value
+                              req.DeleteLaunchConfigurationTemplateRequest.launchConfigurationTemplateID))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteNetworkMigrationDefinition ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationDefinitionID",
+                           (NetworkMigrationDefinitionID.to_value
+                              req.DeleteNetworkMigrationDefinitionRequest.networkMigrationDefinitionID))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -320,7 +1125,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("sourceServerID",
                            (SourceServerID.to_value
-                              req.DeleteSourceServerRequest.sourceServerID))])
+                              req.DeleteSourceServerRequest.sourceServerID));
+                      Option.map req.DeleteSourceServerRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -348,6 +1155,27 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteWave ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("waveID",
+                           (WaveID.to_value req.DeleteWaveRequest.waveID));
+                      Option.map req.DeleteWaveRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeJobLogItems ->
       let (headers, body) =
         let headers =
@@ -363,11 +1191,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               req.DescribeJobLogItemsRequest.jobID));
                       Option.map req.DescribeJobLogItemsRequest.maxResults
                         ~f:(fun x ->
-                              ("maxResults",
-                                (StrictlyPositiveInteger.to_value x)));
+                              ("maxResults", (MaxResultsType.to_value x)));
                       Option.map req.DescribeJobLogItemsRequest.nextToken
                         ~f:(fun x ->
-                              ("nextToken", (PaginationToken.to_value x)))])
+                              ("nextToken", (PaginationToken.to_value x)));
+                      Option.map req.DescribeJobLogItemsRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -384,15 +1213,45 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("filters",
-                           (DescribeJobsRequestFilters.to_value
-                              req.DescribeJobsRequest.filters));
+                      [Option.map req.DescribeJobsRequest.filters
+                         ~f:(fun x ->
+                               ("filters",
+                                 (DescribeJobsRequestFilters.to_value x)));
                       Option.map req.DescribeJobsRequest.maxResults
                         ~f:(fun x ->
-                              ("maxResults",
-                                (StrictlyPositiveInteger.to_value x)));
+                              ("maxResults", (MaxResultsType.to_value x)));
                       Option.map req.DescribeJobsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)));
+                      Option.map req.DescribeJobsRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeLaunchConfigurationTemplates ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.DescribeLaunchConfigurationTemplatesRequest.launchConfigurationTemplateIDs
+                         ~f:(fun x ->
+                               ("launchConfigurationTemplateIDs",
+                                 (LaunchConfigurationTemplateIDs.to_value x)));
+                      Option.map
+                        req.DescribeLaunchConfigurationTemplatesRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map
+                        req.DescribeLaunchConfigurationTemplatesRequest.nextToken
                         ~f:(fun x ->
                               ("nextToken", (PaginationToken.to_value x)))])
                    ~f:(fun (x, y) ->
@@ -412,18 +1271,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Option.map
-                         req.DescribeReplicationConfigurationTemplatesRequest.maxResults
+                         req.DescribeReplicationConfigurationTemplatesRequest.replicationConfigurationTemplateIDs
                          ~f:(fun x ->
-                               ("maxResults",
-                                 (StrictlyPositiveInteger.to_value x)));
+                               ("replicationConfigurationTemplateIDs",
+                                 (ReplicationConfigurationTemplateIDs.to_value
+                                    x)));
+                      Option.map
+                        req.DescribeReplicationConfigurationTemplatesRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
                       Option.map
                         req.DescribeReplicationConfigurationTemplatesRequest.nextToken
                         ~f:(fun x ->
-                              ("nextToken", (PaginationToken.to_value x)));
-                      Some
-                        ("replicationConfigurationTemplateIDs",
-                          (ReplicationConfigurationTemplateIDs.to_value
-                             req.DescribeReplicationConfigurationTemplatesRequest.replicationConfigurationTemplateIDs))])
+                              ("nextToken", (PaginationToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -440,17 +1300,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("filters",
-                           (DescribeSourceServersRequestFilters.to_value
-                              req.DescribeSourceServersRequest.filters));
+                      [Option.map req.DescribeSourceServersRequest.filters
+                         ~f:(fun x ->
+                               ("filters",
+                                 (DescribeSourceServersRequestFilters.to_value
+                                    x)));
                       Option.map req.DescribeSourceServersRequest.maxResults
                         ~f:(fun x ->
-                              ("maxResults",
-                                (StrictlyPositiveInteger.to_value x)));
+                              ("maxResults", (MaxResultsType.to_value x)));
                       Option.map req.DescribeSourceServersRequest.nextToken
                         ~f:(fun x ->
-                              ("nextToken", (PaginationToken.to_value x)))])
+                              ("nextToken", (PaginationToken.to_value x)));
+                      Option.map req.DescribeSourceServersRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -460,6 +1322,60 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeVcenterClients ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DisassociateApplications ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("waveID",
+                           (WaveID.to_value
+                              req.DisassociateApplicationsRequest.waveID));
+                      Some
+                        ("applicationIDs",
+                          (ApplicationIDs.to_value
+                             req.DisassociateApplicationsRequest.applicationIDs));
+                      Option.map
+                        req.DisassociateApplicationsRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DisassociateSourceServers ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("applicationID",
+                           (ApplicationID.to_value
+                              req.DisassociateSourceServersRequest.applicationID));
+                      Some
+                        ("sourceServerIDs",
+                          (DisassociateSourceServersRequestSourceServerIDs.to_value
+                             req.DisassociateSourceServersRequest.sourceServerIDs));
+                      Option.map
+                        req.DisassociateSourceServersRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DisconnectFromService ->
       let (headers, body) =
@@ -473,7 +1389,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("sourceServerID",
                            (SourceServerID.to_value
-                              req.DisconnectFromServiceRequest.sourceServerID))])
+                              req.DisconnectFromServiceRequest.sourceServerID));
+                      Option.map req.DisconnectFromServiceRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -493,7 +1411,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("sourceServerID",
                            (SourceServerID.to_value
-                              req.FinalizeCutoverRequest.sourceServerID))])
+                              req.FinalizeCutoverRequest.sourceServerID));
+                      Option.map req.FinalizeCutoverRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -513,7 +1433,61 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("sourceServerID",
                            (SourceServerID.to_value
-                              req.GetLaunchConfigurationRequest.sourceServerID))])
+                              req.GetLaunchConfigurationRequest.sourceServerID));
+                      Option.map req.GetLaunchConfigurationRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetNetworkMigrationDefinition ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationDefinitionID",
+                           (NetworkMigrationDefinitionID.to_value
+                              req.GetNetworkMigrationDefinitionRequest.networkMigrationDefinitionID))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetNetworkMigrationMapperSegmentConstruct ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationDefinitionID",
+                           (NetworkMigrationDefinitionID.to_value
+                              req.GetNetworkMigrationMapperSegmentConstructRequest.networkMigrationDefinitionID));
+                      Some
+                        ("networkMigrationExecutionID",
+                          (NetworkMigrationExecutionID.to_value
+                             req.GetNetworkMigrationMapperSegmentConstructRequest.networkMigrationExecutionID));
+                      Some
+                        ("segmentID",
+                          (SegmentID.to_value
+                             req.GetNetworkMigrationMapperSegmentConstructRequest.segmentID));
+                      Some
+                        ("constructID",
+                          (ConstructID.to_value
+                             req.GetNetworkMigrationMapperSegmentConstructRequest.constructID))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -533,7 +1507,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("sourceServerID",
                            (SourceServerID.to_value
-                              req.GetReplicationConfigurationRequest.sourceServerID))])
+                              req.GetReplicationConfigurationRequest.sourceServerID));
+                      Option.map
+                        req.GetReplicationConfigurationRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -544,8 +1521,750 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | InitializeService ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListApplications ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListApplicationsRequest.filters
+                         ~f:(fun x ->
+                               ("filters",
+                                 (ListApplicationsRequestFilters.to_value x)));
+                      Option.map req.ListApplicationsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map req.ListApplicationsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)));
+                      Option.map req.ListApplicationsRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListConnectors ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListConnectorsRequest.filters
+                         ~f:(fun x ->
+                               ("filters",
+                                 (ListConnectorsRequestFilters.to_value x)));
+                      Option.map req.ListConnectorsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map req.ListConnectorsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListExportErrors ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("exportID",
+                           (ExportID.to_value
+                              req.ListExportErrorsRequest.exportID));
+                      Option.map req.ListExportErrorsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map req.ListExportErrorsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListExports ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListExportsRequest.filters
+                         ~f:(fun x ->
+                               ("filters",
+                                 (ListExportsRequestFilters.to_value x)));
+                      Option.map req.ListExportsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map req.ListExportsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListImportErrors ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("importID",
+                           (ImportID.to_value
+                              req.ListImportErrorsRequest.importID));
+                      Option.map req.ListImportErrorsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map req.ListImportErrorsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListImportFileEnrichments ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListImportFileEnrichmentsRequest.filters
+                         ~f:(fun x ->
+                               ("filters",
+                                 (ListImportFileEnrichmentsFilters.to_value x)));
+                      Option.map
+                        req.ListImportFileEnrichmentsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map
+                        req.ListImportFileEnrichmentsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListImports ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListImportsRequest.filters
+                         ~f:(fun x ->
+                               ("filters",
+                                 (ListImportsRequestFilters.to_value x)));
+                      Option.map req.ListImportsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map req.ListImportsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListManagedAccounts ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListManagedAccountsRequest.maxResults
+                         ~f:(fun x ->
+                               ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map req.ListManagedAccountsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListNetworkMigrationAnalyses ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationExecutionID",
+                           (NetworkMigrationExecutionID.to_value
+                              req.ListNetworkMigrationAnalysesRequest.networkMigrationExecutionID));
+                      Some
+                        ("networkMigrationDefinitionID",
+                          (NetworkMigrationDefinitionID.to_value
+                             req.ListNetworkMigrationAnalysesRequest.networkMigrationDefinitionID));
+                      Option.map
+                        req.ListNetworkMigrationAnalysesRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (ListNetworkMigrationAnalysesFilters.to_value
+                                   x)));
+                      Option.map
+                        req.ListNetworkMigrationAnalysesRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map
+                        req.ListNetworkMigrationAnalysesRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListNetworkMigrationAnalysisResults ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationExecutionID",
+                           (NetworkMigrationExecutionID.to_value
+                              req.ListNetworkMigrationAnalysisResultsRequest.networkMigrationExecutionID));
+                      Some
+                        ("networkMigrationDefinitionID",
+                          (NetworkMigrationDefinitionID.to_value
+                             req.ListNetworkMigrationAnalysisResultsRequest.networkMigrationDefinitionID));
+                      Option.map
+                        req.ListNetworkMigrationAnalysisResultsRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (ListNetworkMigrationAnalysisResultsFilters.to_value
+                                   x)));
+                      Option.map
+                        req.ListNetworkMigrationAnalysisResultsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map
+                        req.ListNetworkMigrationAnalysisResultsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListNetworkMigrationCodeGenerationSegments ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationExecutionID",
+                           (NetworkMigrationExecutionID.to_value
+                              req.ListNetworkMigrationCodeGenerationSegmentsRequest.networkMigrationExecutionID));
+                      Some
+                        ("networkMigrationDefinitionID",
+                          (NetworkMigrationDefinitionID.to_value
+                             req.ListNetworkMigrationCodeGenerationSegmentsRequest.networkMigrationDefinitionID));
+                      Option.map
+                        req.ListNetworkMigrationCodeGenerationSegmentsRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (ListNetworkMigrationCodeGenerationSegmentsFilters.to_value
+                                   x)));
+                      Option.map
+                        req.ListNetworkMigrationCodeGenerationSegmentsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map
+                        req.ListNetworkMigrationCodeGenerationSegmentsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListNetworkMigrationCodeGenerations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationExecutionID",
+                           (NetworkMigrationExecutionID.to_value
+                              req.ListNetworkMigrationCodeGenerationsRequest.networkMigrationExecutionID));
+                      Some
+                        ("networkMigrationDefinitionID",
+                          (NetworkMigrationDefinitionID.to_value
+                             req.ListNetworkMigrationCodeGenerationsRequest.networkMigrationDefinitionID));
+                      Option.map
+                        req.ListNetworkMigrationCodeGenerationsRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (ListNetworkMigrationCodeGenerationsFilters.to_value
+                                   x)));
+                      Option.map
+                        req.ListNetworkMigrationCodeGenerationsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map
+                        req.ListNetworkMigrationCodeGenerationsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListNetworkMigrationDefinitions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListNetworkMigrationDefinitionsRequest.filters
+                         ~f:(fun x ->
+                               ("filters",
+                                 (ListNetworkMigrationDefinitionsRequestFilters.to_value
+                                    x)));
+                      Option.map
+                        req.ListNetworkMigrationDefinitionsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)));
+                      Option.map
+                        req.ListNetworkMigrationDefinitionsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListNetworkMigrationDeployedStacks ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationExecutionID",
+                           (NetworkMigrationExecutionID.to_value
+                              req.ListNetworkMigrationDeployedStacksRequest.networkMigrationExecutionID));
+                      Some
+                        ("networkMigrationDefinitionID",
+                          (NetworkMigrationDefinitionID.to_value
+                             req.ListNetworkMigrationDeployedStacksRequest.networkMigrationDefinitionID));
+                      Option.map
+                        req.ListNetworkMigrationDeployedStacksRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map
+                        req.ListNetworkMigrationDeployedStacksRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListNetworkMigrationDeployments ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationExecutionID",
+                           (NetworkMigrationExecutionID.to_value
+                              req.ListNetworkMigrationDeploymentsRequest.networkMigrationExecutionID));
+                      Some
+                        ("networkMigrationDefinitionID",
+                          (NetworkMigrationDefinitionID.to_value
+                             req.ListNetworkMigrationDeploymentsRequest.networkMigrationDefinitionID));
+                      Option.map
+                        req.ListNetworkMigrationDeploymentsRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (ListNetworkMigrationDeployerJobFilters.to_value
+                                   x)));
+                      Option.map
+                        req.ListNetworkMigrationDeploymentsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map
+                        req.ListNetworkMigrationDeploymentsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListNetworkMigrationExecutions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationDefinitionID",
+                           (NetworkMigrationDefinitionID.to_value
+                              req.ListNetworkMigrationExecutionsRequest.networkMigrationDefinitionID));
+                      Option.map
+                        req.ListNetworkMigrationExecutionsRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (ListNetworkMigrationExecutionRequestFilters.to_value
+                                   x)));
+                      Option.map
+                        req.ListNetworkMigrationExecutionsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)));
+                      Option.map
+                        req.ListNetworkMigrationExecutionsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListNetworkMigrationMapperSegmentConstructs ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationExecutionID",
+                           (NetworkMigrationExecutionID.to_value
+                              req.ListNetworkMigrationMapperSegmentConstructsRequest.networkMigrationExecutionID));
+                      Some
+                        ("networkMigrationDefinitionID",
+                          (NetworkMigrationDefinitionID.to_value
+                             req.ListNetworkMigrationMapperSegmentConstructsRequest.networkMigrationDefinitionID));
+                      Some
+                        ("segmentID",
+                          (SegmentID.to_value
+                             req.ListNetworkMigrationMapperSegmentConstructsRequest.segmentID));
+                      Option.map
+                        req.ListNetworkMigrationMapperSegmentConstructsRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (ListNetworkMigrationMapperSegmentConstructsFilters.to_value
+                                   x)));
+                      Option.map
+                        req.ListNetworkMigrationMapperSegmentConstructsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map
+                        req.ListNetworkMigrationMapperSegmentConstructsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListNetworkMigrationMapperSegments ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationExecutionID",
+                           (NetworkMigrationExecutionID.to_value
+                              req.ListNetworkMigrationMapperSegmentsRequest.networkMigrationExecutionID));
+                      Some
+                        ("networkMigrationDefinitionID",
+                          (NetworkMigrationDefinitionID.to_value
+                             req.ListNetworkMigrationMapperSegmentsRequest.networkMigrationDefinitionID));
+                      Option.map
+                        req.ListNetworkMigrationMapperSegmentsRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (ListNetworkMigrationMapperSegmentsFilters.to_value
+                                   x)));
+                      Option.map
+                        req.ListNetworkMigrationMapperSegmentsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map
+                        req.ListNetworkMigrationMapperSegmentsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListNetworkMigrationMappingUpdates ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationExecutionID",
+                           (NetworkMigrationExecutionID.to_value
+                              req.ListNetworkMigrationMappingUpdatesRequest.networkMigrationExecutionID));
+                      Some
+                        ("networkMigrationDefinitionID",
+                          (NetworkMigrationDefinitionID.to_value
+                             req.ListNetworkMigrationMappingUpdatesRequest.networkMigrationDefinitionID));
+                      Option.map
+                        req.ListNetworkMigrationMappingUpdatesRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (ListNetworkMigrationMappingUpdatesFilters.to_value
+                                   x)));
+                      Option.map
+                        req.ListNetworkMigrationMappingUpdatesRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map
+                        req.ListNetworkMigrationMappingUpdatesRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListNetworkMigrationMappings ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationExecutionID",
+                           (NetworkMigrationExecutionID.to_value
+                              req.ListNetworkMigrationMappingsRequest.networkMigrationExecutionID));
+                      Some
+                        ("networkMigrationDefinitionID",
+                          (NetworkMigrationDefinitionID.to_value
+                             req.ListNetworkMigrationMappingsRequest.networkMigrationDefinitionID));
+                      Option.map
+                        req.ListNetworkMigrationMappingsRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (ListNetworkMigrationMappingsFilters.to_value
+                                   x)));
+                      Option.map
+                        req.ListNetworkMigrationMappingsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map
+                        req.ListNetworkMigrationMappingsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListSourceServerActions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("sourceServerID",
+                           (SourceServerID.to_value
+                              req.ListSourceServerActionsRequest.sourceServerID));
+                      Option.map req.ListSourceServerActionsRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (SourceServerActionsRequestFilters.to_value x)));
+                      Option.map
+                        req.ListSourceServerActionsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map req.ListSourceServerActionsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)));
+                      Option.map req.ListSourceServerActionsRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTemplateActions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("launchConfigurationTemplateID",
+                           (LaunchConfigurationTemplateID.to_value
+                              req.ListTemplateActionsRequest.launchConfigurationTemplateID));
+                      Option.map req.ListTemplateActionsRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (TemplateActionsRequestFilters.to_value x)));
+                      Option.map req.ListTemplateActionsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map req.ListTemplateActionsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListWaves ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListWavesRequest.filters
+                         ~f:(fun x ->
+                               ("filters",
+                                 (ListWavesRequestFilters.to_value x)));
+                      Option.map req.ListWavesRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResultsType.to_value x)));
+                      Option.map req.ListWavesRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)));
+                      Option.map req.ListWavesRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | MarkAsArchived ->
       let (headers, body) =
@@ -559,7 +2278,242 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("sourceServerID",
                            (SourceServerID.to_value
-                              req.MarkAsArchivedRequest.sourceServerID))])
+                              req.MarkAsArchivedRequest.sourceServerID));
+                      Option.map req.MarkAsArchivedRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PauseReplication ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("sourceServerID",
+                           (SourceServerID.to_value
+                              req.PauseReplicationRequest.sourceServerID));
+                      Option.map req.PauseReplicationRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutSourceServerAction ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("sourceServerID",
+                           (SourceServerID.to_value
+                              req.PutSourceServerActionRequest.sourceServerID));
+                      Some
+                        ("actionName",
+                          (ActionName.to_value
+                             req.PutSourceServerActionRequest.actionName));
+                      Some
+                        ("documentIdentifier",
+                          (BoundedString.to_value
+                             req.PutSourceServerActionRequest.documentIdentifier));
+                      Some
+                        ("order",
+                          (OrderType.to_value
+                             req.PutSourceServerActionRequest.order));
+                      Some
+                        ("actionID",
+                          (ActionID.to_value
+                             req.PutSourceServerActionRequest.actionID));
+                      Option.map
+                        req.PutSourceServerActionRequest.documentVersion
+                        ~f:(fun x ->
+                              ("documentVersion",
+                                (DocumentVersion.to_value x)));
+                      Option.map req.PutSourceServerActionRequest.active
+                        ~f:(fun x -> ("active", (Boolean.to_value x)));
+                      Option.map
+                        req.PutSourceServerActionRequest.timeoutSeconds
+                        ~f:(fun x ->
+                              ("timeoutSeconds",
+                                (StrictlyPositiveInteger.to_value x)));
+                      Option.map
+                        req.PutSourceServerActionRequest.mustSucceedForCutover
+                        ~f:(fun x ->
+                              ("mustSucceedForCutover", (Boolean.to_value x)));
+                      Option.map req.PutSourceServerActionRequest.parameters
+                        ~f:(fun x ->
+                              ("parameters",
+                                (SsmDocumentParameters.to_value x)));
+                      Option.map
+                        req.PutSourceServerActionRequest.externalParameters
+                        ~f:(fun x ->
+                              ("externalParameters",
+                                (SsmDocumentExternalParameters.to_value x)));
+                      Option.map req.PutSourceServerActionRequest.description
+                        ~f:(fun x ->
+                              ("description", (ActionDescription.to_value x)));
+                      Option.map req.PutSourceServerActionRequest.category
+                        ~f:(fun x ->
+                              ("category", (ActionCategory.to_value x)));
+                      Option.map req.PutSourceServerActionRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutTemplateAction ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("launchConfigurationTemplateID",
+                           (LaunchConfigurationTemplateID.to_value
+                              req.PutTemplateActionRequest.launchConfigurationTemplateID));
+                      Some
+                        ("actionName",
+                          (BoundedString.to_value
+                             req.PutTemplateActionRequest.actionName));
+                      Some
+                        ("documentIdentifier",
+                          (BoundedString.to_value
+                             req.PutTemplateActionRequest.documentIdentifier));
+                      Some
+                        ("order",
+                          (OrderType.to_value
+                             req.PutTemplateActionRequest.order));
+                      Some
+                        ("actionID",
+                          (ActionID.to_value
+                             req.PutTemplateActionRequest.actionID));
+                      Option.map req.PutTemplateActionRequest.documentVersion
+                        ~f:(fun x ->
+                              ("documentVersion",
+                                (DocumentVersion.to_value x)));
+                      Option.map req.PutTemplateActionRequest.active
+                        ~f:(fun x -> ("active", (Boolean.to_value x)));
+                      Option.map req.PutTemplateActionRequest.timeoutSeconds
+                        ~f:(fun x ->
+                              ("timeoutSeconds",
+                                (StrictlyPositiveInteger.to_value x)));
+                      Option.map
+                        req.PutTemplateActionRequest.mustSucceedForCutover
+                        ~f:(fun x ->
+                              ("mustSucceedForCutover", (Boolean.to_value x)));
+                      Option.map req.PutTemplateActionRequest.parameters
+                        ~f:(fun x ->
+                              ("parameters",
+                                (SsmDocumentParameters.to_value x)));
+                      Option.map req.PutTemplateActionRequest.operatingSystem
+                        ~f:(fun x ->
+                              ("operatingSystem",
+                                (OperatingSystemString.to_value x)));
+                      Option.map
+                        req.PutTemplateActionRequest.externalParameters
+                        ~f:(fun x ->
+                              ("externalParameters",
+                                (SsmDocumentExternalParameters.to_value x)));
+                      Option.map req.PutTemplateActionRequest.description
+                        ~f:(fun x ->
+                              ("description", (ActionDescription.to_value x)));
+                      Option.map req.PutTemplateActionRequest.category
+                        ~f:(fun x ->
+                              ("category", (ActionCategory.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | RemoveSourceServerAction ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("sourceServerID",
+                           (SourceServerID.to_value
+                              req.RemoveSourceServerActionRequest.sourceServerID));
+                      Some
+                        ("actionID",
+                          (ActionID.to_value
+                             req.RemoveSourceServerActionRequest.actionID));
+                      Option.map
+                        req.RemoveSourceServerActionRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | RemoveTemplateAction ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("launchConfigurationTemplateID",
+                           (LaunchConfigurationTemplateID.to_value
+                              req.RemoveTemplateActionRequest.launchConfigurationTemplateID));
+                      Some
+                        ("actionID",
+                          (ActionID.to_value
+                             req.RemoveTemplateActionRequest.actionID))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ResumeReplication ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("sourceServerID",
+                           (SourceServerID.to_value
+                              req.ResumeReplicationRequest.sourceServerID));
+                      Option.map req.ResumeReplicationRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -579,7 +2533,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("sourceServerID",
                            (SourceServerID.to_value
-                              req.RetryDataReplicationRequest.sourceServerID))])
+                              req.RetryDataReplicationRequest.sourceServerID));
+                      Option.map req.RetryDataReplicationRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -601,7 +2557,239 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                            (StartCutoverRequestSourceServerIDs.to_value
                               req.StartCutoverRequest.sourceServerIDs));
                       Option.map req.StartCutoverRequest.tags
+                        ~f:(fun x -> ("tags", (TagsMap.to_value x)));
+                      Option.map req.StartCutoverRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartExport ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("s3Bucket",
+                           (S3BucketName.to_value
+                              req.StartExportRequest.s3Bucket));
+                      Some
+                        ("s3Key",
+                          (S3Key.to_value req.StartExportRequest.s3Key));
+                      Option.map req.StartExportRequest.s3BucketOwner
+                        ~f:(fun x ->
+                              ("s3BucketOwner", (AccountID.to_value x)));
+                      Option.map req.StartExportRequest.tags
                         ~f:(fun x -> ("tags", (TagsMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartImport ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.StartImportRequest.clientToken
+                         ~f:(fun x ->
+                               ("clientToken",
+                                 (ClientIdempotencyToken.to_value x)));
+                      Some
+                        ("s3BucketSource",
+                          (S3BucketSource.to_value
+                             req.StartImportRequest.s3BucketSource));
+                      Option.map req.StartImportRequest.tags
+                        ~f:(fun x -> ("tags", (TagsMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartImportFileEnrichment ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.StartImportFileEnrichmentRequest.clientToken
+                         ~f:(fun x ->
+                               ("clientToken",
+                                 (ClientIdempotencyToken.to_value x)));
+                      Some
+                        ("s3BucketSource",
+                          (EnrichmentSourceS3Configuration.to_value
+                             req.StartImportFileEnrichmentRequest.s3BucketSource));
+                      Some
+                        ("s3BucketTarget",
+                          (EnrichmentTargetS3Configuration.to_value
+                             req.StartImportFileEnrichmentRequest.s3BucketTarget));
+                      Option.map
+                        req.StartImportFileEnrichmentRequest.ipAssignmentStrategy
+                        ~f:(fun x ->
+                              ("ipAssignmentStrategy",
+                                (IpAssignmentStrategy.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartNetworkMigrationAnalysis ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationExecutionID",
+                           (NetworkMigrationExecutionID.to_value
+                              req.StartNetworkMigrationAnalysisRequest.networkMigrationExecutionID));
+                      Some
+                        ("networkMigrationDefinitionID",
+                          (NetworkMigrationDefinitionID.to_value
+                             req.StartNetworkMigrationAnalysisRequest.networkMigrationDefinitionID))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartNetworkMigrationCodeGeneration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationExecutionID",
+                           (NetworkMigrationExecutionID.to_value
+                              req.StartNetworkMigrationCodeGenerationRequest.networkMigrationExecutionID));
+                      Some
+                        ("networkMigrationDefinitionID",
+                          (NetworkMigrationDefinitionID.to_value
+                             req.StartNetworkMigrationCodeGenerationRequest.networkMigrationDefinitionID));
+                      Option.map
+                        req.StartNetworkMigrationCodeGenerationRequest.codeGenerationOutputFormatTypes
+                        ~f:(fun x ->
+                              ("codeGenerationOutputFormatTypes",
+                                (CodeGenerationOutputFormatTypes.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartNetworkMigrationDeployment ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationExecutionID",
+                           (NetworkMigrationExecutionID.to_value
+                              req.StartNetworkMigrationDeploymentRequest.networkMigrationExecutionID));
+                      Some
+                        ("networkMigrationDefinitionID",
+                          (NetworkMigrationDefinitionID.to_value
+                             req.StartNetworkMigrationDeploymentRequest.networkMigrationDefinitionID))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartNetworkMigrationMapping ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationExecutionID",
+                           (NetworkMigrationExecutionID.to_value
+                              req.StartNetworkMigrationMappingRequest.networkMigrationExecutionID));
+                      Some
+                        ("networkMigrationDefinitionID",
+                          (NetworkMigrationDefinitionID.to_value
+                             req.StartNetworkMigrationMappingRequest.networkMigrationDefinitionID));
+                      Option.map
+                        req.StartNetworkMigrationMappingRequest.securityGroupMappingStrategy
+                        ~f:(fun x ->
+                              ("securityGroupMappingStrategy",
+                                (SecurityGroupMappingStrategy.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartNetworkMigrationMappingUpdate ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationExecutionID",
+                           (NetworkMigrationExecutionID.to_value
+                              req.StartNetworkMigrationMappingUpdateRequest.networkMigrationExecutionID));
+                      Some
+                        ("networkMigrationDefinitionID",
+                          (NetworkMigrationDefinitionID.to_value
+                             req.StartNetworkMigrationMappingUpdateRequest.networkMigrationDefinitionID));
+                      Option.map
+                        req.StartNetworkMigrationMappingUpdateRequest.constructs
+                        ~f:(fun x ->
+                              ("constructs",
+                                (StartNetworkMigrationMappingUpdateConstructs.to_value
+                                   x)));
+                      Option.map
+                        req.StartNetworkMigrationMappingUpdateRequest.segments
+                        ~f:(fun x ->
+                              ("segments",
+                                (StartNetworkMigrationMappingUpdateSegments.to_value
+                                   x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -621,7 +2809,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("sourceServerID",
                            (SourceServerID.to_value
-                              req.StartReplicationRequest.sourceServerID))])
+                              req.StartReplicationRequest.sourceServerID));
+                      Option.map req.StartReplicationRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -643,7 +2833,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                            (StartTestRequestSourceServerIDs.to_value
                               req.StartTestRequest.sourceServerIDs));
                       Option.map req.StartTestRequest.tags
-                        ~f:(fun x -> ("tags", (TagsMap.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagsMap.to_value x)));
+                      Option.map req.StartTestRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StopReplication ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("sourceServerID",
+                           (SourceServerID.to_value
+                              req.StopReplicationRequest.sourceServerID));
+                      Option.map req.StopReplicationRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -684,7 +2898,53 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                            (TerminateTargetInstancesRequestSourceServerIDs.to_value
                               req.TerminateTargetInstancesRequest.sourceServerIDs));
                       Option.map req.TerminateTargetInstancesRequest.tags
-                        ~f:(fun x -> ("tags", (TagsMap.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagsMap.to_value x)));
+                      Option.map
+                        req.TerminateTargetInstancesRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UnarchiveApplication ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("applicationID",
+                           (ApplicationID.to_value
+                              req.UnarchiveApplicationRequest.applicationID));
+                      Option.map req.UnarchiveApplicationRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UnarchiveWave ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("waveID",
+                           (WaveID.to_value req.UnarchiveWaveRequest.waveID));
+                      Option.map req.UnarchiveWaveRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -693,6 +2953,60 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateApplication ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("applicationID",
+                           (ApplicationID.to_value
+                              req.UpdateApplicationRequest.applicationID));
+                      Option.map req.UpdateApplicationRequest.name
+                        ~f:(fun x -> ("name", (ApplicationName.to_value x)));
+                      Option.map req.UpdateApplicationRequest.description
+                        ~f:(fun x ->
+                              ("description",
+                                (ApplicationDescription.to_value x)));
+                      Option.map req.UpdateApplicationRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateConnector ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("connectorID",
+                           (ConnectorID.to_value
+                              req.UpdateConnectorRequest.connectorID));
+                      Option.map req.UpdateConnectorRequest.name
+                        ~f:(fun x -> ("name", (ConnectorName.to_value x)));
+                      Option.map req.UpdateConnectorRequest.ssmCommandConfig
+                        ~f:(fun x ->
+                              ("ssmCommandConfig",
+                                (ConnectorSsmCommandConfig.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateLaunchConfiguration ->
       let (headers, body) =
         let headers =
@@ -702,9 +3016,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.UpdateLaunchConfigurationRequest.bootMode
-                         ~f:(fun x -> ("bootMode", (BootMode.to_value x)));
+                      [Some
+                         ("sourceServerID",
+                           (SourceServerID.to_value
+                              req.UpdateLaunchConfigurationRequest.sourceServerID));
+                      Option.map req.UpdateLaunchConfigurationRequest.name
+                        ~f:(fun x ->
+                              ("name", (SmallBoundedString.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationRequest.launchDisposition
+                        ~f:(fun x ->
+                              ("launchDisposition",
+                                (LaunchDisposition.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationRequest.targetInstanceTypeRightSizingMethod
+                        ~f:(fun x ->
+                              ("targetInstanceTypeRightSizingMethod",
+                                (TargetInstanceTypeRightSizingMethod.to_value
+                                   x)));
                       Option.map
                         req.UpdateLaunchConfigurationRequest.copyPrivateIp
                         ~f:(fun x -> ("copyPrivateIp", (Boolean.to_value x)));
@@ -712,26 +3041,197 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.UpdateLaunchConfigurationRequest.copyTags
                         ~f:(fun x -> ("copyTags", (Boolean.to_value x)));
                       Option.map
-                        req.UpdateLaunchConfigurationRequest.launchDisposition
+                        req.UpdateLaunchConfigurationRequest.licensing
+                        ~f:(fun x -> ("licensing", (Licensing.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationRequest.bootMode
+                        ~f:(fun x -> ("bootMode", (BootMode.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationRequest.postLaunchActions
+                        ~f:(fun x ->
+                              ("postLaunchActions",
+                                (PostLaunchActions.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationRequest.enableMapAutoTagging
+                        ~f:(fun x ->
+                              ("enableMapAutoTagging", (Boolean.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationRequest.mapAutoTaggingMpeID
+                        ~f:(fun x ->
+                              ("mapAutoTaggingMpeID", (TagValue.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateLaunchConfigurationTemplate ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("launchConfigurationTemplateID",
+                           (LaunchConfigurationTemplateID.to_value
+                              req.UpdateLaunchConfigurationTemplateRequest.launchConfigurationTemplateID));
+                      Option.map
+                        req.UpdateLaunchConfigurationTemplateRequest.postLaunchActions
+                        ~f:(fun x ->
+                              ("postLaunchActions",
+                                (PostLaunchActions.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationTemplateRequest.enableMapAutoTagging
+                        ~f:(fun x ->
+                              ("enableMapAutoTagging", (Boolean.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationTemplateRequest.mapAutoTaggingMpeID
+                        ~f:(fun x ->
+                              ("mapAutoTaggingMpeID", (TagValue.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationTemplateRequest.launchDisposition
                         ~f:(fun x ->
                               ("launchDisposition",
                                 (LaunchDisposition.to_value x)));
                       Option.map
-                        req.UpdateLaunchConfigurationRequest.licensing
-                        ~f:(fun x -> ("licensing", (Licensing.to_value x)));
-                      Option.map req.UpdateLaunchConfigurationRequest.name
-                        ~f:(fun x ->
-                              ("name", (SmallBoundedString.to_value x)));
-                      Some
-                        ("sourceServerID",
-                          (SourceServerID.to_value
-                             req.UpdateLaunchConfigurationRequest.sourceServerID));
-                      Option.map
-                        req.UpdateLaunchConfigurationRequest.targetInstanceTypeRightSizingMethod
+                        req.UpdateLaunchConfigurationTemplateRequest.targetInstanceTypeRightSizingMethod
                         ~f:(fun x ->
                               ("targetInstanceTypeRightSizingMethod",
                                 (TargetInstanceTypeRightSizingMethod.to_value
-                                   x)))])
+                                   x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationTemplateRequest.copyPrivateIp
+                        ~f:(fun x -> ("copyPrivateIp", (Boolean.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationTemplateRequest.associatePublicIpAddress
+                        ~f:(fun x ->
+                              ("associatePublicIpAddress",
+                                (Boolean.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationTemplateRequest.copyTags
+                        ~f:(fun x -> ("copyTags", (Boolean.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationTemplateRequest.licensing
+                        ~f:(fun x -> ("licensing", (Licensing.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationTemplateRequest.bootMode
+                        ~f:(fun x -> ("bootMode", (BootMode.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationTemplateRequest.smallVolumeMaxSize
+                        ~f:(fun x ->
+                              ("smallVolumeMaxSize",
+                                (PositiveInteger.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationTemplateRequest.smallVolumeConf
+                        ~f:(fun x ->
+                              ("smallVolumeConf",
+                                (LaunchTemplateDiskConf.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationTemplateRequest.largeVolumeConf
+                        ~f:(fun x ->
+                              ("largeVolumeConf",
+                                (LaunchTemplateDiskConf.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationTemplateRequest.enableParametersEncryption
+                        ~f:(fun x ->
+                              ("enableParametersEncryption",
+                                (Boolean.to_value x)));
+                      Option.map
+                        req.UpdateLaunchConfigurationTemplateRequest.parametersEncryptionKey
+                        ~f:(fun x ->
+                              ("parametersEncryptionKey", (ARN.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateNetworkMigrationDefinition ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationDefinitionID",
+                           (NetworkMigrationDefinitionID.to_value
+                              req.UpdateNetworkMigrationDefinitionRequest.networkMigrationDefinitionID));
+                      Option.map
+                        req.UpdateNetworkMigrationDefinitionRequest.name
+                        ~f:(fun x ->
+                              ("name",
+                                (NetworkMigrationDefinitionName.to_value x)));
+                      Option.map
+                        req.UpdateNetworkMigrationDefinitionRequest.description
+                        ~f:(fun x ->
+                              ("description",
+                                (NetworkMigrationDefinitionDescription.to_value
+                                   x)));
+                      Option.map
+                        req.UpdateNetworkMigrationDefinitionRequest.sourceConfigurations
+                        ~f:(fun x ->
+                              ("sourceConfigurations",
+                                (SourceConfigurationList.to_value x)));
+                      Option.map
+                        req.UpdateNetworkMigrationDefinitionRequest.targetS3Configuration
+                        ~f:(fun x ->
+                              ("targetS3Configuration",
+                                (TargetS3ConfigurationUpdate.to_value x)));
+                      Option.map
+                        req.UpdateNetworkMigrationDefinitionRequest.targetNetwork
+                        ~f:(fun x ->
+                              ("targetNetwork",
+                                (TargetNetworkUpdate.to_value x)));
+                      Option.map
+                        req.UpdateNetworkMigrationDefinitionRequest.targetDeployment
+                        ~f:(fun x ->
+                              ("targetDeployment",
+                                (TargetDeployment.to_value x)));
+                      Option.map
+                        req.UpdateNetworkMigrationDefinitionRequest.scopeTags
+                        ~f:(fun x -> ("scopeTags", (ScopeTagsMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateNetworkMigrationMapperSegment ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("networkMigrationDefinitionID",
+                           (NetworkMigrationDefinitionID.to_value
+                              req.UpdateNetworkMigrationMapperSegmentRequest.networkMigrationDefinitionID));
+                      Some
+                        ("networkMigrationExecutionID",
+                          (NetworkMigrationExecutionID.to_value
+                             req.UpdateNetworkMigrationMapperSegmentRequest.networkMigrationExecutionID));
+                      Some
+                        ("segmentID",
+                          (SegmentID.to_value
+                             req.UpdateNetworkMigrationMapperSegmentRequest.segmentID));
+                      Option.map
+                        req.UpdateNetworkMigrationMapperSegmentRequest.scopeTags
+                        ~f:(fun x -> ("scopeTags", (ScopeTagsMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -748,30 +3248,50 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.UpdateReplicationConfigurationRequest.associateDefaultSecurityGroup
-                         ~f:(fun x ->
-                               ("associateDefaultSecurityGroup",
-                                 (Boolean.to_value x)));
+                      [Some
+                         ("sourceServerID",
+                           (SourceServerID.to_value
+                              req.UpdateReplicationConfigurationRequest.sourceServerID));
                       Option.map
-                        req.UpdateReplicationConfigurationRequest.bandwidthThrottling
+                        req.UpdateReplicationConfigurationRequest.name
                         ~f:(fun x ->
-                              ("bandwidthThrottling",
-                                (PositiveInteger.to_value x)));
+                              ("name", (SmallBoundedString.to_value x)));
                       Option.map
-                        req.UpdateReplicationConfigurationRequest.createPublicIP
-                        ~f:(fun x -> ("createPublicIP", (Boolean.to_value x)));
-                      Option.map
-                        req.UpdateReplicationConfigurationRequest.dataPlaneRouting
+                        req.UpdateReplicationConfigurationRequest.stagingAreaSubnetId
                         ~f:(fun x ->
-                              ("dataPlaneRouting",
-                                (ReplicationConfigurationDataPlaneRouting.to_value
+                              ("stagingAreaSubnetId", (SubnetID.to_value x)));
+                      Option.map
+                        req.UpdateReplicationConfigurationRequest.associateDefaultSecurityGroup
+                        ~f:(fun x ->
+                              ("associateDefaultSecurityGroup",
+                                (Boolean.to_value x)));
+                      Option.map
+                        req.UpdateReplicationConfigurationRequest.replicationServersSecurityGroupsIDs
+                        ~f:(fun x ->
+                              ("replicationServersSecurityGroupsIDs",
+                                (ReplicationServersSecurityGroupsIDs.to_value
                                    x)));
+                      Option.map
+                        req.UpdateReplicationConfigurationRequest.replicationServerInstanceType
+                        ~f:(fun x ->
+                              ("replicationServerInstanceType",
+                                (EC2InstanceType.to_value x)));
+                      Option.map
+                        req.UpdateReplicationConfigurationRequest.useDedicatedReplicationServer
+                        ~f:(fun x ->
+                              ("useDedicatedReplicationServer",
+                                (Boolean.to_value x)));
                       Option.map
                         req.UpdateReplicationConfigurationRequest.defaultLargeStagingDiskType
                         ~f:(fun x ->
                               ("defaultLargeStagingDiskType",
                                 (ReplicationConfigurationDefaultLargeStagingDiskType.to_value
+                                   x)));
+                      Option.map
+                        req.UpdateReplicationConfigurationRequest.replicatedDisks
+                        ~f:(fun x ->
+                              ("replicatedDisks",
+                                (ReplicationConfigurationReplicatedDisks.to_value
                                    x)));
                       Option.map
                         req.UpdateReplicationConfigurationRequest.ebsEncryption
@@ -784,42 +3304,39 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("ebsEncryptionKeyArn", (ARN.to_value x)));
                       Option.map
-                        req.UpdateReplicationConfigurationRequest.name
+                        req.UpdateReplicationConfigurationRequest.bandwidthThrottling
                         ~f:(fun x ->
-                              ("name", (SmallBoundedString.to_value x)));
+                              ("bandwidthThrottling",
+                                (BandwidthThrottling.to_value x)));
                       Option.map
-                        req.UpdateReplicationConfigurationRequest.replicatedDisks
+                        req.UpdateReplicationConfigurationRequest.dataPlaneRouting
                         ~f:(fun x ->
-                              ("replicatedDisks",
-                                (ReplicationConfigurationReplicatedDisks.to_value
+                              ("dataPlaneRouting",
+                                (ReplicationConfigurationDataPlaneRouting.to_value
                                    x)));
                       Option.map
-                        req.UpdateReplicationConfigurationRequest.replicationServerInstanceType
-                        ~f:(fun x ->
-                              ("replicationServerInstanceType",
-                                (EC2InstanceType.to_value x)));
-                      Option.map
-                        req.UpdateReplicationConfigurationRequest.replicationServersSecurityGroupsIDs
-                        ~f:(fun x ->
-                              ("replicationServersSecurityGroupsIDs",
-                                (ReplicationServersSecurityGroupsIDs.to_value
-                                   x)));
-                      Some
-                        ("sourceServerID",
-                          (SourceServerID.to_value
-                             req.UpdateReplicationConfigurationRequest.sourceServerID));
-                      Option.map
-                        req.UpdateReplicationConfigurationRequest.stagingAreaSubnetId
-                        ~f:(fun x ->
-                              ("stagingAreaSubnetId", (SubnetID.to_value x)));
+                        req.UpdateReplicationConfigurationRequest.createPublicIP
+                        ~f:(fun x -> ("createPublicIP", (Boolean.to_value x)));
                       Option.map
                         req.UpdateReplicationConfigurationRequest.stagingAreaTags
                         ~f:(fun x ->
                               ("stagingAreaTags", (TagsMap.to_value x)));
                       Option.map
-                        req.UpdateReplicationConfigurationRequest.useDedicatedReplicationServer
+                        req.UpdateReplicationConfigurationRequest.useFipsEndpoint
                         ~f:(fun x ->
-                              ("useDedicatedReplicationServer",
+                              ("useFipsEndpoint", (Boolean.to_value x)));
+                      Option.map
+                        req.UpdateReplicationConfigurationRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)));
+                      Option.map
+                        req.UpdateReplicationConfigurationRequest.internetProtocol
+                        ~f:(fun x ->
+                              ("internetProtocol",
+                                (InternetProtocol.to_value x)));
+                      Option.map
+                        req.UpdateReplicationConfigurationRequest.storeSnapshotOnLocalZone
+                        ~f:(fun x ->
+                              ("storeSnapshotOnLocalZone",
                                 (Boolean.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -837,28 +3354,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.UpdateReplicationConfigurationTemplateRequest.arn
-                         ~f:(fun x -> ("arn", (ARN.to_value x)));
+                      [Some
+                         ("replicationConfigurationTemplateID",
+                           (ReplicationConfigurationTemplateID.to_value
+                              req.UpdateReplicationConfigurationTemplateRequest.replicationConfigurationTemplateID));
+                      Option.map
+                        req.UpdateReplicationConfigurationTemplateRequest.arn
+                        ~f:(fun x -> ("arn", (ARN.to_value x)));
+                      Option.map
+                        req.UpdateReplicationConfigurationTemplateRequest.stagingAreaSubnetId
+                        ~f:(fun x ->
+                              ("stagingAreaSubnetId", (SubnetID.to_value x)));
                       Option.map
                         req.UpdateReplicationConfigurationTemplateRequest.associateDefaultSecurityGroup
                         ~f:(fun x ->
                               ("associateDefaultSecurityGroup",
                                 (Boolean.to_value x)));
                       Option.map
-                        req.UpdateReplicationConfigurationTemplateRequest.bandwidthThrottling
+                        req.UpdateReplicationConfigurationTemplateRequest.replicationServersSecurityGroupsIDs
                         ~f:(fun x ->
-                              ("bandwidthThrottling",
-                                (PositiveInteger.to_value x)));
-                      Option.map
-                        req.UpdateReplicationConfigurationTemplateRequest.createPublicIP
-                        ~f:(fun x -> ("createPublicIP", (Boolean.to_value x)));
-                      Option.map
-                        req.UpdateReplicationConfigurationTemplateRequest.dataPlaneRouting
-                        ~f:(fun x ->
-                              ("dataPlaneRouting",
-                                (ReplicationConfigurationDataPlaneRouting.to_value
+                              ("replicationServersSecurityGroupsIDs",
+                                (ReplicationServersSecurityGroupsIDs.to_value
                                    x)));
+                      Option.map
+                        req.UpdateReplicationConfigurationTemplateRequest.replicationServerInstanceType
+                        ~f:(fun x ->
+                              ("replicationServerInstanceType",
+                                (EC2InstanceType.to_value x)));
+                      Option.map
+                        req.UpdateReplicationConfigurationTemplateRequest.useDedicatedReplicationServer
+                        ~f:(fun x ->
+                              ("useDedicatedReplicationServer",
+                                (Boolean.to_value x)));
                       Option.map
                         req.UpdateReplicationConfigurationTemplateRequest.defaultLargeStagingDiskType
                         ~f:(fun x ->
@@ -875,34 +3402,65 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.UpdateReplicationConfigurationTemplateRequest.ebsEncryptionKeyArn
                         ~f:(fun x ->
                               ("ebsEncryptionKeyArn", (ARN.to_value x)));
-                      Some
-                        ("replicationConfigurationTemplateID",
-                          (ReplicationConfigurationTemplateID.to_value
-                             req.UpdateReplicationConfigurationTemplateRequest.replicationConfigurationTemplateID));
                       Option.map
-                        req.UpdateReplicationConfigurationTemplateRequest.replicationServerInstanceType
+                        req.UpdateReplicationConfigurationTemplateRequest.bandwidthThrottling
                         ~f:(fun x ->
-                              ("replicationServerInstanceType",
-                                (EC2InstanceType.to_value x)));
+                              ("bandwidthThrottling",
+                                (BandwidthThrottling.to_value x)));
                       Option.map
-                        req.UpdateReplicationConfigurationTemplateRequest.replicationServersSecurityGroupsIDs
+                        req.UpdateReplicationConfigurationTemplateRequest.dataPlaneRouting
                         ~f:(fun x ->
-                              ("replicationServersSecurityGroupsIDs",
-                                (ReplicationServersSecurityGroupsIDs.to_value
+                              ("dataPlaneRouting",
+                                (ReplicationConfigurationDataPlaneRouting.to_value
                                    x)));
                       Option.map
-                        req.UpdateReplicationConfigurationTemplateRequest.stagingAreaSubnetId
-                        ~f:(fun x ->
-                              ("stagingAreaSubnetId", (SubnetID.to_value x)));
+                        req.UpdateReplicationConfigurationTemplateRequest.createPublicIP
+                        ~f:(fun x -> ("createPublicIP", (Boolean.to_value x)));
                       Option.map
                         req.UpdateReplicationConfigurationTemplateRequest.stagingAreaTags
                         ~f:(fun x ->
                               ("stagingAreaTags", (TagsMap.to_value x)));
                       Option.map
-                        req.UpdateReplicationConfigurationTemplateRequest.useDedicatedReplicationServer
+                        req.UpdateReplicationConfigurationTemplateRequest.useFipsEndpoint
                         ~f:(fun x ->
-                              ("useDedicatedReplicationServer",
+                              ("useFipsEndpoint", (Boolean.to_value x)));
+                      Option.map
+                        req.UpdateReplicationConfigurationTemplateRequest.internetProtocol
+                        ~f:(fun x ->
+                              ("internetProtocol",
+                                (InternetProtocol.to_value x)));
+                      Option.map
+                        req.UpdateReplicationConfigurationTemplateRequest.storeSnapshotOnLocalZone
+                        ~f:(fun x ->
+                              ("storeSnapshotOnLocalZone",
                                 (Boolean.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateSourceServer ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdateSourceServerRequest.accountID
+                         ~f:(fun x -> ("accountID", (AccountID.to_value x)));
+                      Some
+                        ("sourceServerID",
+                          (SourceServerID.to_value
+                             req.UpdateSourceServerRequest.sourceServerID));
+                      Option.map
+                        req.UpdateSourceServerRequest.connectorAction
+                        ~f:(fun x ->
+                              ("connectorAction",
+                                (SourceServerConnectorAction.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -920,13 +3478,42 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Some
-                         ("replicationType",
-                           (ReplicationType.to_value
-                              req.UpdateSourceServerReplicationTypeRequest.replicationType));
+                         ("sourceServerID",
+                           (SourceServerID.to_value
+                              req.UpdateSourceServerReplicationTypeRequest.sourceServerID));
                       Some
-                        ("sourceServerID",
-                          (SourceServerID.to_value
-                             req.UpdateSourceServerReplicationTypeRequest.sourceServerID))])
+                        ("replicationType",
+                          (ReplicationType.to_value
+                             req.UpdateSourceServerReplicationTypeRequest.replicationType));
+                      Option.map
+                        req.UpdateSourceServerReplicationTypeRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateWave ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("waveID",
+                           (WaveID.to_value req.UpdateWaveRequest.waveID));
+                      Option.map req.UpdateWaveRequest.name
+                        ~f:(fun x -> ("name", (WaveName.to_value x)));
+                      Option.map req.UpdateWaveRequest.description
+                        ~f:(fun x ->
+                              ("description", (WaveDescription.to_value x)));
+                      Option.map req.UpdateWaveRequest.accountID
+                        ~f:(fun x -> ("accountID", (AccountID.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -982,10 +3569,57 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | ArchiveApplication ->
+      if is_success
+      then Ok (Application.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some Application.error_of_json))
+  | ArchiveWave ->
+      if is_success
+      then Ok (Wave.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some Wave.error_of_json))
+  | AssociateApplications ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (AssociateApplicationsResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some AssociateApplicationsResponse.error_of_json))
+  | AssociateSourceServers ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (AssociateSourceServersResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateSourceServersResponse.error_of_json))
   | ChangeServerLifeCycleState ->
       if is_success
       then Ok (SourceServer.of_json (response_to_json resp))
       else Error (parse_aws_error (Some SourceServer.error_of_json))
+  | CreateApplication ->
+      if is_success
+      then Ok (Application.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some Application.error_of_json))
+  | CreateConnector ->
+      if is_success
+      then Ok (Connector.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some Connector.error_of_json))
+  | CreateLaunchConfigurationTemplate ->
+      if is_success
+      then Ok (LaunchConfigurationTemplate.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some LaunchConfigurationTemplate.error_of_json))
+  | CreateNetworkMigrationDefinition ->
+      if is_success
+      then Ok (NetworkMigrationDefinition.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some NetworkMigrationDefinition.error_of_json))
   | CreateReplicationConfigurationTemplate ->
       if is_success
       then
@@ -994,6 +3628,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ReplicationConfigurationTemplate.error_of_json))
+  | CreateWave ->
+      if is_success
+      then Ok (Wave.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some Wave.error_of_json))
+  | DeleteApplication ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteApplicationResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteApplicationResponse.error_of_json))
+  | DeleteConnector ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteJob ->
       if is_success
       then
@@ -1001,6 +3650,30 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DeleteJobResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some DeleteJobResponse.error_of_json))
+  | DeleteLaunchConfigurationTemplate ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteLaunchConfigurationTemplateResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteLaunchConfigurationTemplateResponse.error_of_json))
+  | DeleteNetworkMigrationDefinition ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteNetworkMigrationDefinitionResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteNetworkMigrationDefinitionResponse.error_of_json))
   | DeleteReplicationConfigurationTemplate ->
       if is_success
       then
@@ -1025,6 +3698,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error (Some DeleteSourceServerResponse.error_of_json))
   | DeleteVcenterClient ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteWave ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteWaveResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteWaveResponse.error_of_json))
   | DescribeJobLogItems ->
       if is_success
       then Ok (DescribeJobLogItemsResponse.of_json (response_to_json resp))
@@ -1035,6 +3715,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (DescribeJobsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some DescribeJobsResponse.error_of_json))
+  | DescribeLaunchConfigurationTemplates ->
+      if is_success
+      then
+        Ok
+          (DescribeLaunchConfigurationTemplatesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeLaunchConfigurationTemplatesResponse.error_of_json))
   | DescribeReplicationConfigurationTemplates ->
       if is_success
       then
@@ -1060,6 +3750,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeVcenterClientsResponse.error_of_json))
+  | DisassociateApplications ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateApplicationsResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateApplicationsResponse.error_of_json))
+  | DisassociateSourceServers ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateSourceServersResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateSourceServersResponse.error_of_json))
   | DisconnectFromService ->
       if is_success
       then Ok (SourceServer.of_json (response_to_json resp))
@@ -1072,6 +3784,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (LaunchConfiguration.of_json (response_to_json resp))
       else Error (parse_aws_error (Some LaunchConfiguration.error_of_json))
+  | GetNetworkMigrationDefinition ->
+      if is_success
+      then Ok (NetworkMigrationDefinition.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some NetworkMigrationDefinition.error_of_json))
+  | GetNetworkMigrationMapperSegmentConstruct ->
+      if is_success
+      then
+        Ok
+          (GetNetworkMigrationMapperSegmentConstructResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                GetNetworkMigrationMapperSegmentConstructResponse.error_of_json))
   | GetReplicationConfiguration ->
       if is_success
       then Ok (ReplicationConfiguration.of_json (response_to_json resp))
@@ -1086,13 +3815,235 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some InitializeServiceResponse.error_of_json))
+  | ListApplications ->
+      if is_success
+      then Ok (ListApplicationsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListApplicationsResponse.error_of_json))
+  | ListConnectors ->
+      if is_success
+      then Ok (ListConnectorsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListConnectorsResponse.error_of_json))
+  | ListExportErrors ->
+      if is_success
+      then Ok (ListExportErrorsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListExportErrorsResponse.error_of_json))
+  | ListExports ->
+      if is_success
+      then Ok (ListExportsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListExportsResponse.error_of_json))
+  | ListImportErrors ->
+      if is_success
+      then Ok (ListImportErrorsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListImportErrorsResponse.error_of_json))
+  | ListImportFileEnrichments ->
+      if is_success
+      then
+        Ok
+          (ListImportFileEnrichmentsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListImportFileEnrichmentsResponse.error_of_json))
+  | ListImports ->
+      if is_success
+      then Ok (ListImportsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListImportsResponse.error_of_json))
+  | ListManagedAccounts ->
+      if is_success
+      then Ok (ListManagedAccountsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListManagedAccountsResponse.error_of_json))
+  | ListNetworkMigrationAnalyses ->
+      if is_success
+      then
+        Ok
+          (ListNetworkMigrationAnalysesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListNetworkMigrationAnalysesResponse.error_of_json))
+  | ListNetworkMigrationAnalysisResults ->
+      if is_success
+      then
+        Ok
+          (ListNetworkMigrationAnalysisResultsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListNetworkMigrationAnalysisResultsResponse.error_of_json))
+  | ListNetworkMigrationCodeGenerationSegments ->
+      if is_success
+      then
+        Ok
+          (ListNetworkMigrationCodeGenerationSegmentsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListNetworkMigrationCodeGenerationSegmentsResponse.error_of_json))
+  | ListNetworkMigrationCodeGenerations ->
+      if is_success
+      then
+        Ok
+          (ListNetworkMigrationCodeGenerationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListNetworkMigrationCodeGenerationsResponse.error_of_json))
+  | ListNetworkMigrationDefinitions ->
+      if is_success
+      then
+        Ok
+          (ListNetworkMigrationDefinitionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListNetworkMigrationDefinitionsResponse.error_of_json))
+  | ListNetworkMigrationDeployedStacks ->
+      if is_success
+      then
+        Ok
+          (ListNetworkMigrationDeployedStacksResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListNetworkMigrationDeployedStacksResponse.error_of_json))
+  | ListNetworkMigrationDeployments ->
+      if is_success
+      then
+        Ok
+          (ListNetworkMigrationDeployerJobResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListNetworkMigrationDeployerJobResponse.error_of_json))
+  | ListNetworkMigrationExecutions ->
+      if is_success
+      then
+        Ok
+          (ListNetworkMigrationExecutionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListNetworkMigrationExecutionsResponse.error_of_json))
+  | ListNetworkMigrationMapperSegmentConstructs ->
+      if is_success
+      then
+        Ok
+          (ListNetworkMigrationMapperSegmentConstructsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListNetworkMigrationMapperSegmentConstructsResponse.error_of_json))
+  | ListNetworkMigrationMapperSegments ->
+      if is_success
+      then
+        Ok
+          (ListNetworkMigrationMapperSegmentsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListNetworkMigrationMapperSegmentsResponse.error_of_json))
+  | ListNetworkMigrationMappingUpdates ->
+      if is_success
+      then
+        Ok
+          (ListNetworkMigrationMappingUpdatesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListNetworkMigrationMappingUpdatesResponse.error_of_json))
+  | ListNetworkMigrationMappings ->
+      if is_success
+      then
+        Ok
+          (ListNetworkMigrationMappingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListNetworkMigrationMappingsResponse.error_of_json))
+  | ListSourceServerActions ->
+      if is_success
+      then
+        Ok (ListSourceServerActionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListSourceServerActionsResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListTemplateActions ->
+      if is_success
+      then Ok (ListTemplateActionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTemplateActionsResponse.error_of_json))
+  | ListWaves ->
+      if is_success
+      then Ok (ListWavesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListWavesResponse.error_of_json))
   | MarkAsArchived ->
+      if is_success
+      then Ok (SourceServer.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SourceServer.error_of_json))
+  | PauseReplication ->
+      if is_success
+      then Ok (SourceServer.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SourceServer.error_of_json))
+  | PutSourceServerAction ->
+      if is_success
+      then Ok (SourceServerActionDocument.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SourceServerActionDocument.error_of_json))
+  | PutTemplateAction ->
+      if is_success
+      then Ok (TemplateActionDocument.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some TemplateActionDocument.error_of_json))
+  | RemoveSourceServerAction ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (RemoveSourceServerActionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some RemoveSourceServerActionResponse.error_of_json))
+  | RemoveTemplateAction ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (RemoveTemplateActionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some RemoveTemplateActionResponse.error_of_json))
+  | ResumeReplication ->
       if is_success
       then Ok (SourceServer.of_json (response_to_json resp))
       else Error (parse_aws_error (Some SourceServer.error_of_json))
@@ -1104,6 +4055,73 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (StartCutoverResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some StartCutoverResponse.error_of_json))
+  | StartExport ->
+      if is_success
+      then Ok (StartExportResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StartExportResponse.error_of_json))
+  | StartImport ->
+      if is_success
+      then Ok (StartImportResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StartImportResponse.error_of_json))
+  | StartImportFileEnrichment ->
+      if is_success
+      then
+        Ok
+          (StartImportFileEnrichmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartImportFileEnrichmentResponse.error_of_json))
+  | StartNetworkMigrationAnalysis ->
+      if is_success
+      then
+        Ok
+          (StartNetworkMigrationAnalysisResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartNetworkMigrationAnalysisResponse.error_of_json))
+  | StartNetworkMigrationCodeGeneration ->
+      if is_success
+      then
+        Ok
+          (StartNetworkMigrationCodeGenerationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartNetworkMigrationCodeGenerationResponse.error_of_json))
+  | StartNetworkMigrationDeployment ->
+      if is_success
+      then
+        Ok
+          (StartNetworkMigrationDeployerJobResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartNetworkMigrationDeployerJobResponse.error_of_json))
+  | StartNetworkMigrationMapping ->
+      if is_success
+      then
+        Ok
+          (StartNetworkMigrationMappingResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartNetworkMigrationMappingResponse.error_of_json))
+  | StartNetworkMigrationMappingUpdate ->
+      if is_success
+      then
+        Ok
+          (StartNetworkMigrationMappingUpdateResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartNetworkMigrationMappingUpdateResponse.error_of_json))
   | StartReplication ->
       if is_success
       then Ok (SourceServer.of_json (response_to_json resp))
@@ -1112,6 +4130,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (StartTestResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some StartTestResponse.error_of_json))
+  | StopReplication ->
+      if is_success
+      then Ok (SourceServer.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SourceServer.error_of_json))
   | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
   | TerminateTargetInstances ->
       if is_success
@@ -1121,12 +4143,46 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some TerminateTargetInstancesResponse.error_of_json))
+  | UnarchiveApplication ->
+      if is_success
+      then Ok (Application.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some Application.error_of_json))
+  | UnarchiveWave ->
+      if is_success
+      then Ok (Wave.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some Wave.error_of_json))
   | UntagResource ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateApplication ->
+      if is_success
+      then Ok (Application.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some Application.error_of_json))
+  | UpdateConnector ->
+      if is_success
+      then Ok (Connector.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some Connector.error_of_json))
   | UpdateLaunchConfiguration ->
       if is_success
       then Ok (LaunchConfiguration.of_json (response_to_json resp))
       else Error (parse_aws_error (Some LaunchConfiguration.error_of_json))
+  | UpdateLaunchConfigurationTemplate ->
+      if is_success
+      then Ok (LaunchConfigurationTemplate.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some LaunchConfigurationTemplate.error_of_json))
+  | UpdateNetworkMigrationDefinition ->
+      if is_success
+      then Ok (NetworkMigrationDefinition.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some NetworkMigrationDefinition.error_of_json))
+  | UpdateNetworkMigrationMapperSegment ->
+      if is_success
+      then Ok (NetworkMigrationMapperSegment.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some NetworkMigrationMapperSegment.error_of_json))
   | UpdateReplicationConfiguration ->
       if is_success
       then Ok (ReplicationConfiguration.of_json (response_to_json resp))
@@ -1140,7 +4196,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ReplicationConfigurationTemplate.error_of_json))
+  | UpdateSourceServer ->
+      if is_success
+      then Ok (SourceServer.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SourceServer.error_of_json))
   | UpdateSourceServerReplicationType ->
       if is_success
       then Ok (SourceServer.of_json (response_to_json resp))
       else Error (parse_aws_error (Some SourceServer.error_of_json))
+  | UpdateWave ->
+      if is_success
+      then Ok (Wave.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some Wave.error_of_json))

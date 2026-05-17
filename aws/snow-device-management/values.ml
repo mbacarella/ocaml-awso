@@ -129,12 +129,12 @@ module EbsInstanceBlockDevice =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "attachTime") in
       make ?volumeId ?status ?deleteOnTermination ?attachTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volumeId = field_map json "volumeId" String_.of_json in
-      let status = field_map json "status" AttachmentStatus.of_json in
+    let of_json json__ =
+      let volumeId = field_map json__ "volumeId" String_.of_json in
+      let status = field_map json__ "status" AttachmentStatus.of_json in
       let deleteOnTermination =
-        field_map json "deleteOnTermination" Boolean.of_json in
-      let attachTime = field_map json "attachTime" Timestamp.of_json in
+        field_map json__ "deleteOnTermination" Boolean.of_json in
+      let attachTime = field_map json__ "attachTime" Timestamp.of_json in
       make ?volumeId ?status ?deleteOnTermination ?attachTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -174,9 +174,9 @@ module InstanceBlockDeviceMapping =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "deviceName") in
       make ?ebs ?deviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ebs = field_map json "ebs" EbsInstanceBlockDevice.of_json in
-      let deviceName = field_map json "deviceName" String_.of_json in
+    let of_json json__ =
+      let ebs = field_map json__ "ebs" EbsInstanceBlockDevice.of_json in
+      let deviceName = field_map json__ "deviceName" String_.of_json in
       make ?ebs ?deviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The description of a block device mapping."]
@@ -237,9 +237,9 @@ module SecurityGroupIdentifier =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groupId") in
       make ?groupName ?groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupName = field_map json "groupName" String_.of_json in
-      let groupId = field_map json "groupId" String_.of_json in
+    let of_json json__ =
+      let groupName = field_map json__ "groupName" String_.of_json in
+      let groupId = field_map json__ "groupId" String_.of_json in
       make ?groupName ?groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the device's security group."]
@@ -265,9 +265,9 @@ module CpuOptions =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "coreCount") in
       make ?threadsPerCore ?coreCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let threadsPerCore = field_map json "threadsPerCore" Integer.of_json in
-      let coreCount = field_map json "coreCount" Integer.of_json in
+    let of_json json__ =
+      let threadsPerCore = field_map json__ "threadsPerCore" Integer.of_json in
+      let coreCount = field_map json__ "coreCount" Integer.of_json in
       make ?threadsPerCore ?coreCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The options for how a device's CPU is configured."]
@@ -275,6 +275,9 @@ module InstanceBlockDeviceMappingList =
   struct
     type nonrec t = InstanceBlockDeviceMapping.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceBlockDeviceMapping.to_value)) |>
         (fun x -> `List x)
@@ -318,15 +321,19 @@ module InstanceState =
       let code = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "code") in
       make ?name ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" InstanceStateName.of_json in
-      let code = field_map json "code" Integer.of_json in make ?name ?code ()
+    let of_json json__ =
+      let name = field_map json__ "name" InstanceStateName.of_json in
+      let code = field_map json__ "code" Integer.of_json in
+      make ?name ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The description of the current state of an instance."]
 module SecurityGroupIdentifierList =
   struct
     type nonrec t = SecurityGroupIdentifier.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupIdentifier.to_value)) |>
         (fun x -> `List x)
@@ -370,6 +377,8 @@ module TagMap =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -719,24 +728,25 @@ module Instance =
         ?privateIpAddress ?instanceType ?instanceId ?imageId ?createdAt
         ?cpuOptions ?blockDeviceMappings ?amiLaunchIndex ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "updatedAt" Timestamp.of_json in
-      let state = field_map json "state" InstanceState.of_json in
+    let of_json json__ =
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
+      let state = field_map json__ "state" InstanceState.of_json in
       let securityGroups =
-        field_map json "securityGroups" SecurityGroupIdentifierList.of_json in
-      let rootDeviceName = field_map json "rootDeviceName" String_.of_json in
-      let publicIpAddress = field_map json "publicIpAddress" String_.of_json in
+        field_map json__ "securityGroups" SecurityGroupIdentifierList.of_json in
+      let rootDeviceName = field_map json__ "rootDeviceName" String_.of_json in
+      let publicIpAddress =
+        field_map json__ "publicIpAddress" String_.of_json in
       let privateIpAddress =
-        field_map json "privateIpAddress" String_.of_json in
-      let instanceType = field_map json "instanceType" String_.of_json in
-      let instanceId = field_map json "instanceId" String_.of_json in
-      let imageId = field_map json "imageId" String_.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
-      let cpuOptions = field_map json "cpuOptions" CpuOptions.of_json in
+        field_map json__ "privateIpAddress" String_.of_json in
+      let instanceType = field_map json__ "instanceType" String_.of_json in
+      let instanceId = field_map json__ "instanceId" String_.of_json in
+      let imageId = field_map json__ "imageId" String_.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let cpuOptions = field_map json__ "cpuOptions" CpuOptions.of_json in
       let blockDeviceMappings =
-        field_map json "blockDeviceMappings"
+        field_map json__ "blockDeviceMappings"
           InstanceBlockDeviceMappingList.of_json in
-      let amiLaunchIndex = field_map json "amiLaunchIndex" Integer.of_json in
+      let amiLaunchIndex = field_map json__ "amiLaunchIndex" Integer.of_json in
       make ?updatedAt ?state ?securityGroups ?rootDeviceName ?publicIpAddress
         ?privateIpAddress ?instanceType ?instanceId ?imageId ?createdAt
         ?cpuOptions ?blockDeviceMappings ?amiLaunchIndex ()
@@ -754,35 +764,34 @@ module TaskSummary =
           "Optional metadata that you assign to a resource. You can use tags to categorize a resource in different ways, such as by purpose, owner, or environment."];
       taskArn: String_.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the task."];
-      taskId: TaskId.t [@ocaml.doc "The task ID."]}
-    let context_ = "TaskSummary"
+      taskId: TaskId.t option [@ocaml.doc "The task ID."]}
     let make ?state =
       fun ?tags ->
         fun ?taskArn ->
-          fun ~taskId -> fun () -> { state; tags; taskArn; taskId }
+          fun ?taskId -> fun () -> { state; tags; taskArn; taskId }
     let to_value x =
       structure_to_value
         [("state", (Option.map x.state ~f:TaskState.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
         ("taskArn", (Option.map x.taskArn ~f:String_.to_value));
-        ("taskId", (Some (TaskId.to_value x.taskId)))]
+        ("taskId", (Option.map x.taskId ~f:TaskId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let taskId =
-        TaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "taskId") in
+        (Option.map ~f:TaskId.of_xml) (Xml.child xml_arg0 "taskId") in
       let taskArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "taskArn") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let state =
         (Option.map ~f:TaskState.of_xml) (Xml.child xml_arg0 "state") in
-      make ~taskId ?taskArn ?tags ?state ()
+      make ?taskId ?taskArn ?tags ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskId = field_map_exn json "taskId" TaskId.of_json in
-      let taskArn = field_map json "taskArn" String_.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let state = field_map json "state" TaskState.of_json in
-      make ~taskId ?taskArn ?tags ?state ()
+    let of_json json__ =
+      let taskId = field_map json__ "taskId" TaskId.of_json in
+      let taskArn = field_map json__ "taskArn" String_.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let state = field_map json__ "state" TaskState.of_json in
+      make ?taskId ?taskArn ?tags ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the task assigned to one or many devices."]
@@ -823,12 +832,12 @@ module ExecutionSummary =
         (Option.map ~f:ExecutionId.of_xml) (Xml.child xml_arg0 "executionId") in
       make ?taskId ?state ?managedDeviceId ?executionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskId = field_map json "taskId" TaskId.of_json in
-      let state = field_map json "state" ExecutionState.of_json in
+    let of_json json__ =
+      let taskId = field_map json__ "taskId" TaskId.of_json in
+      let state = field_map json__ "state" ExecutionState.of_json in
       let managedDeviceId =
-        field_map json "managedDeviceId" ManagedDeviceId.of_json in
-      let executionId = field_map json "executionId" ExecutionId.of_json in
+        field_map json__ "managedDeviceId" ManagedDeviceId.of_json in
+      let executionId = field_map json__ "executionId" ExecutionId.of_json in
       make ?taskId ?state ?managedDeviceId ?executionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The summary of a task execution on a specified device."]
@@ -874,14 +883,14 @@ module DeviceSummary =
           (Xml.child xml_arg0 "associatedWithJob") in
       make ?tags ?managedDeviceId ?managedDeviceArn ?associatedWithJob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
       let managedDeviceId =
-        field_map json "managedDeviceId" ManagedDeviceId.of_json in
+        field_map json__ "managedDeviceId" ManagedDeviceId.of_json in
       let managedDeviceArn =
-        field_map json "managedDeviceArn" String_.of_json in
+        field_map json__ "managedDeviceArn" String_.of_json in
       let associatedWithJob =
-        field_map json "associatedWithJob" String_.of_json in
+        field_map json__ "associatedWithJob" String_.of_json in
       make ?tags ?managedDeviceId ?managedDeviceArn ?associatedWithJob ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Identifying information about the device."]
@@ -892,29 +901,27 @@ module ResourceSummary =
       arn: String_.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."];
       id: String_.t option [@ocaml.doc "The ID of the resource."];
-      resourceType: String_.t [@ocaml.doc "The resource type."]}
-    let context_ = "ResourceSummary"
+      resourceType: String_.t option [@ocaml.doc "The resource type."]}
     let make ?arn =
-      fun ?id -> fun ~resourceType -> fun () -> { arn; id; resourceType }
+      fun ?id -> fun ?resourceType -> fun () -> { arn; id; resourceType }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:String_.to_value));
         ("id", (Option.map x.id ~f:String_.to_value));
-        ("resourceType", (Some (String_.to_value x.resourceType)))]
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
       let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
-      make ~resourceType ?id ?arn ()
+      make ?resourceType ?id ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "resourceType" String_.of_json in
-      let id = field_map json "id" String_.of_json in
-      let arn = field_map json "arn" String_.of_json in
-      make ~resourceType ?id ?arn ()
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
+      make ?resourceType ?id ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A summary of a resource available on the device."]
 module Capacity =
@@ -955,12 +962,12 @@ module Capacity =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "available") in
       make ?used ?unit ?total ?name ?available ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let used = field_map json "used" Long.of_json in
-      let unit = field_map json "unit" CapacityUnitString.of_json in
-      let total = field_map json "total" Long.of_json in
-      let name = field_map json "name" CapacityNameString.of_json in
-      let available = field_map json "available" Long.of_json in
+    let of_json json__ =
+      let used = field_map json__ "used" Long.of_json in
+      let unit = field_map json__ "unit" CapacityUnitString.of_json in
+      let total = field_map json__ "total" Long.of_json in
+      let name = field_map json__ "name" CapacityNameString.of_json in
+      let available = field_map json__ "available" Long.of_json in
       make ?used ?unit ?total ?name ?available ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1038,17 +1045,18 @@ module PhysicalNetworkInterface =
       make ?physicalNetworkInterfaceId ?physicalConnectorType ?netmask
         ?macAddress ?ipAddressAssignment ?ipAddress ?defaultGateway ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let physicalNetworkInterfaceId =
-        field_map json "physicalNetworkInterfaceId" String_.of_json in
+        field_map json__ "physicalNetworkInterfaceId" String_.of_json in
       let physicalConnectorType =
-        field_map json "physicalConnectorType" PhysicalConnectorType.of_json in
-      let netmask = field_map json "netmask" String_.of_json in
-      let macAddress = field_map json "macAddress" String_.of_json in
+        field_map json__ "physicalConnectorType"
+          PhysicalConnectorType.of_json in
+      let netmask = field_map json__ "netmask" String_.of_json in
+      let macAddress = field_map json__ "macAddress" String_.of_json in
       let ipAddressAssignment =
-        field_map json "ipAddressAssignment" IpAddressAssignment.of_json in
-      let ipAddress = field_map json "ipAddress" String_.of_json in
-      let defaultGateway = field_map json "defaultGateway" String_.of_json in
+        field_map json__ "ipAddressAssignment" IpAddressAssignment.of_json in
+      let ipAddress = field_map json__ "ipAddress" String_.of_json in
+      let defaultGateway = field_map json__ "defaultGateway" String_.of_json in
       make ?physicalNetworkInterfaceId ?physicalConnectorType ?netmask
         ?macAddress ?ipAddressAssignment ?ipAddress ?defaultGateway ()
     let to_json v = composed_to_json to_value v
@@ -1076,9 +1084,9 @@ module InstanceSummary =
         (Option.map ~f:Instance.of_xml) (Xml.child xml_arg0 "instance") in
       make ?lastUpdatedAt ?instance ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Timestamp.of_json in
-      let instance = field_map json "instance" Instance.of_json in
+    let of_json json__ =
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let instance = field_map json__ "instance" Instance.of_json in
       make ?lastUpdatedAt ?instance ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details about the instance."]
@@ -1110,6 +1118,9 @@ module TagKeys =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1132,39 +1143,39 @@ module TagKeys =
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You don't have sufficient access to perform this action."]
 module InternalServerException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "InternalServerException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An unexpected error occurred while processing the request."]
@@ -1192,6 +1203,9 @@ module TaskSummaryList =
   struct
     type nonrec t = TaskSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TaskSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1215,39 +1229,39 @@ module TaskSummaryList =
 module ThrottlingException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ThrottlingException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied due to request throttling."]
 module ValidationException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ValidationException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The input fails to satisfy the constraints specified by an Amazon Web Services service."]
@@ -1272,26 +1286,29 @@ module MaxResults =
 module ResourceNotFoundException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ResourceNotFoundException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request references a resource that doesn't exist."]
 module ExecutionSummaryList =
   struct
     type nonrec t = ExecutionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExecutionSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1317,6 +1334,9 @@ module DeviceSummaryList =
   struct
     type nonrec t = DeviceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeviceSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1359,6 +1379,9 @@ module ResourceSummaryList =
   struct
     type nonrec t = ResourceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1407,6 +1430,9 @@ module TargetList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1456,6 +1482,9 @@ module CapacityList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Capacity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1480,6 +1509,9 @@ module PhysicalNetworkInterfaceList =
   struct
     type nonrec t = PhysicalNetworkInterface.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PhysicalNetworkInterface.to_value)) |>
         (fun x -> `List x)
@@ -1538,12 +1570,12 @@ module SoftwareInformation =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "installState") in
       make ?installingVersion ?installedVersion ?installState ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let installingVersion =
-        field_map json "installingVersion" String_.of_json in
+        field_map json__ "installingVersion" String_.of_json in
       let installedVersion =
-        field_map json "installedVersion" String_.of_json in
-      let installState = field_map json "installState" String_.of_json in
+        field_map json__ "installedVersion" String_.of_json in
+      let installState = field_map json__ "installState" String_.of_json in
       make ?installingVersion ?installedVersion ?installState ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the software on the device."]
@@ -1579,6 +1611,9 @@ module InstanceSummaryList =
   struct
     type nonrec t = InstanceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1604,6 +1639,9 @@ module InstanceIdsList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1627,20 +1665,20 @@ module InstanceIdsList =
 module ServiceQuotaExceededException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ServiceQuotaExceededException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request would cause a service quota to be exceeded."]
 module Command =
@@ -1662,9 +1700,9 @@ module Command =
         (Option.map ~f:Reboot.of_xml) (Xml.child xml_arg0 "reboot") in
       make ?unlock ?reboot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unlock = field_map json "unlock" Unlock.of_json in
-      let reboot = field_map json "reboot" Reboot.of_json in
+    let of_json json__ =
+      let unlock = field_map json__ "unlock" Unlock.of_json in
+      let reboot = field_map json__ "reboot" Reboot.of_json in
       make ?unlock ?reboot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The command given to the device to execute."]
@@ -1713,9 +1751,9 @@ module UntagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeys.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeys.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from a device or task."]
@@ -1743,9 +1781,9 @@ module TagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds or replaces tags on a device or task."]
@@ -1826,9 +1864,9 @@ module ListTasksOutput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?tasks ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tasks = field_map json "tasks" TaskSummaryList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let tasks = field_map json__ "tasks" TaskSummaryList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?tasks ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of tasks that can be filtered by state."]
@@ -1861,10 +1899,10 @@ module ListTasksInput =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?state ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "state" TaskState.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let state = field_map json__ "state" TaskState.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       make ?state ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of tasks that can be filtered by state."]
@@ -1927,8 +1965,8 @@ module ListTagsForResourceOutput =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of tags for a managed device or task."]
 module ListTagsForResourceInput =
@@ -1949,8 +1987,8 @@ module ListTagsForResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of tags for a managed device or task."]
@@ -2043,10 +2081,10 @@ module ListExecutionsOutput =
           (Xml.child xml_arg0 "executions") in
       make ?nextToken ?executions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let executions =
-        field_map json "executions" ExecutionSummaryList.of_json in
+        field_map json__ "executions" ExecutionSummaryList.of_json in
       make ?nextToken ?executions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2087,11 +2125,11 @@ module ListExecutionsInput =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ~taskId ?state ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskId = field_map_exn json "taskId" TaskId.of_json in
-      let state = field_map json "state" ExecutionState.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let taskId = field_map_exn json__ "taskId" TaskId.of_json in
+      let state = field_map json__ "state" ExecutionState.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       make ~taskId ?state ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2174,9 +2212,9 @@ module ListDevicesOutput =
           (Xml.child xml_arg0 "devices") in
       make ?nextToken ?devices ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let devices = field_map json "devices" DeviceSummaryList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let devices = field_map json__ "devices" DeviceSummaryList.of_json in
       make ?nextToken ?devices ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2209,10 +2247,10 @@ module ListDevicesInput =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
       make ?nextToken ?maxResults ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let jobId = field_map json "jobId" JobId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
       make ?nextToken ?maxResults ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2306,9 +2344,10 @@ module ListDeviceResourcesOutput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?resources ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resources = field_map json "resources" ResourceSummaryList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let resources =
+        field_map json__ "resources" ResourceSummaryList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?resources ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2356,13 +2395,13 @@ module ListDeviceResourcesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "managedDeviceId") in
       make ?type_ ?nextToken ?maxResults ~managedDeviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let type_ =
-        field_map json "type" ListDeviceResourcesInputTypeString.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+        field_map json__ "type" ListDeviceResourcesInputTypeString.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       let managedDeviceId =
-        field_map_exn json "managedDeviceId" ManagedDeviceId.of_json in
+        field_map_exn json__ "managedDeviceId" ManagedDeviceId.of_json in
       make ?type_ ?nextToken ?maxResults ~managedDeviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2508,17 +2547,17 @@ module DescribeTaskOutput =
       make ?taskId ?taskArn ?targets ?tags ?state ?lastUpdatedAt ?description
         ?createdAt ?completedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskId = field_map json "taskId" String_.of_json in
-      let taskArn = field_map json "taskArn" String_.of_json in
-      let targets = field_map json "targets" TargetList.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let state = field_map json "state" TaskState.of_json in
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Timestamp.of_json in
+    let of_json json__ =
+      let taskId = field_map json__ "taskId" String_.of_json in
+      let taskArn = field_map json__ "taskArn" String_.of_json in
+      let targets = field_map json__ "targets" TargetList.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let state = field_map json__ "state" TaskState.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
       let description =
-        field_map json "description" TaskDescriptionString.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
-      let completedAt = field_map json "completedAt" Timestamp.of_json in
+        field_map json__ "description" TaskDescriptionString.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let completedAt = field_map json__ "completedAt" Timestamp.of_json in
       make ?taskId ?taskArn ?targets ?tags ?state ?lastUpdatedAt ?description
         ?createdAt ?completedAt ()
     let to_json v = composed_to_json to_value v
@@ -2538,8 +2577,8 @@ module DescribeTaskInput =
         TaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "taskId") in
       make ~taskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskId = field_map_exn json "taskId" TaskId.of_json in
+    let of_json json__ =
+      let taskId = field_map_exn json__ "taskId" TaskId.of_json in
       make ~taskId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Checks the metadata for a given task on a device."]
@@ -2664,14 +2703,14 @@ module DescribeExecutionOutput =
       make ?taskId ?state ?startedAt ?managedDeviceId ?lastUpdatedAt
         ?executionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskId = field_map json "taskId" TaskId.of_json in
-      let state = field_map json "state" ExecutionState.of_json in
-      let startedAt = field_map json "startedAt" Timestamp.of_json in
+    let of_json json__ =
+      let taskId = field_map json__ "taskId" TaskId.of_json in
+      let state = field_map json__ "state" ExecutionState.of_json in
+      let startedAt = field_map json__ "startedAt" Timestamp.of_json in
       let managedDeviceId =
-        field_map json "managedDeviceId" ManagedDeviceId.of_json in
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Timestamp.of_json in
-      let executionId = field_map json "executionId" ExecutionId.of_json in
+        field_map json__ "managedDeviceId" ManagedDeviceId.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let executionId = field_map json__ "executionId" ExecutionId.of_json in
       make ?taskId ?state ?startedAt ?managedDeviceId ?lastUpdatedAt
         ?executionId ()
     let to_json v = composed_to_json to_value v
@@ -2702,10 +2741,10 @@ module DescribeExecutionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "managedDeviceId") in
       make ~taskId ~managedDeviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskId = field_map_exn json "taskId" TaskId.of_json in
+    let of_json json__ =
+      let taskId = field_map_exn json__ "taskId" TaskId.of_json in
       let managedDeviceId =
-        field_map_exn json "managedDeviceId" ManagedDeviceId.of_json in
+        field_map_exn json__ "managedDeviceId" ManagedDeviceId.of_json in
       make ~taskId ~managedDeviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2882,25 +2921,25 @@ module DescribeDeviceOutput =
         ?managedDeviceArn ?lastUpdatedAt ?lastReachedOutAt ?deviceType
         ?deviceState ?deviceCapacities ?associatedWithJob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let software = field_map json "software" SoftwareInformation.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let software = field_map json__ "software" SoftwareInformation.of_json in
       let physicalNetworkInterfaces =
-        field_map json "physicalNetworkInterfaces"
+        field_map json__ "physicalNetworkInterfaces"
           PhysicalNetworkInterfaceList.of_json in
       let managedDeviceId =
-        field_map json "managedDeviceId" ManagedDeviceId.of_json in
+        field_map json__ "managedDeviceId" ManagedDeviceId.of_json in
       let managedDeviceArn =
-        field_map json "managedDeviceArn" String_.of_json in
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Timestamp.of_json in
+        field_map json__ "managedDeviceArn" String_.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
       let lastReachedOutAt =
-        field_map json "lastReachedOutAt" Timestamp.of_json in
-      let deviceType = field_map json "deviceType" String_.of_json in
-      let deviceState = field_map json "deviceState" UnlockState.of_json in
+        field_map json__ "lastReachedOutAt" Timestamp.of_json in
+      let deviceType = field_map json__ "deviceType" String_.of_json in
+      let deviceState = field_map json__ "deviceState" UnlockState.of_json in
       let deviceCapacities =
-        field_map json "deviceCapacities" CapacityList.of_json in
+        field_map json__ "deviceCapacities" CapacityList.of_json in
       let associatedWithJob =
-        field_map json "associatedWithJob" String_.of_json in
+        field_map json__ "associatedWithJob" String_.of_json in
       make ?tags ?software ?physicalNetworkInterfaces ?managedDeviceId
         ?managedDeviceArn ?lastUpdatedAt ?lastReachedOutAt ?deviceType
         ?deviceState ?deviceCapacities ?associatedWithJob ()
@@ -2927,9 +2966,9 @@ module DescribeDeviceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "managedDeviceId") in
       make ~managedDeviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let managedDeviceId =
-        field_map_exn json "managedDeviceId" ManagedDeviceId.of_json in
+        field_map_exn json__ "managedDeviceId" ManagedDeviceId.of_json in
       make ~managedDeviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3016,8 +3055,9 @@ module DescribeDeviceEc2Output =
           (Xml.child xml_arg0 "instances") in
       make ?instances ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instances = field_map json "instances" InstanceSummaryList.of_json in
+    let of_json json__ =
+      let instances =
+        field_map json__ "instances" InstanceSummaryList.of_json in
       make ?instances ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3049,11 +3089,11 @@ module DescribeDeviceEc2Input =
           (Xml.child_exn ~context:context_ xml_arg0 "instanceIds") in
       make ~managedDeviceId ~instanceIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let managedDeviceId =
-        field_map_exn json "managedDeviceId" ManagedDeviceId.of_json in
+        field_map_exn json__ "managedDeviceId" ManagedDeviceId.of_json in
       let instanceIds =
-        field_map_exn json "instanceIds" InstanceIdsList.of_json in
+        field_map_exn json__ "instanceIds" InstanceIdsList.of_json in
       make ~managedDeviceId ~instanceIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3154,9 +3194,9 @@ module CreateTaskOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "taskArn") in
       make ?taskId ?taskArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskId = field_map json "taskId" String_.of_json in
-      let taskArn = field_map json "taskArn" String_.of_json in
+    let of_json json__ =
+      let taskId = field_map json__ "taskId" String_.of_json in
+      let taskArn = field_map json__ "taskArn" String_.of_json in
       make ?taskId ?taskArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3209,13 +3249,14 @@ module CreateTaskInput =
           (Xml.child xml_arg0 "clientToken") in
       make ~targets ?tags ?description ~command ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targets = field_map_exn json "targets" TargetList.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let targets = field_map_exn json__ "targets" TargetList.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let description =
-        field_map json "description" TaskDescriptionString.of_json in
-      let command = field_map_exn json "command" Command.of_json in
-      let clientToken = field_map json "clientToken" IdempotencyToken.of_json in
+        field_map json__ "description" TaskDescriptionString.of_json in
+      let command = field_map_exn json__ "command" Command.of_json in
+      let clientToken =
+        field_map json__ "clientToken" IdempotencyToken.of_json in
       make ~targets ?tags ?description ~command ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3299,8 +3340,9 @@ module CancelTaskOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "taskId") in
       make ?taskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskId = field_map json "taskId" String_.of_json in make ?taskId ()
+    let of_json json__ =
+      let taskId = field_map json__ "taskId" String_.of_json in
+      make ?taskId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Sends a cancel request for a specified task. You can cancel a task only if it's still in a QUEUED state. Tasks that are already running can't be cancelled. A task might still run if it's processed from the queue before the CancelTask operation changes the task's state."]
@@ -3321,8 +3363,8 @@ module CancelTaskInput =
         TaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "taskId") in
       make ~taskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskId = field_map_exn json "taskId" TaskId.of_json in
+    let of_json json__ =
+      let taskId = field_map_exn json__ "taskId" TaskId.of_json in
       make ~taskId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

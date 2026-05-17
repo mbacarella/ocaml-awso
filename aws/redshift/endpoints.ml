@@ -45,6 +45,9 @@ type ('i, 'o, 'e) t =
   CreateClusterSnapshotResult.t, CreateClusterSnapshotResult.error) t 
   | CreateClusterSubnetGroup: (CreateClusterSubnetGroupMessage.t,
   CreateClusterSubnetGroupResult.t, CreateClusterSubnetGroupResult.error) t 
+  | CreateCustomDomainAssociation: (CreateCustomDomainAssociationMessage.t,
+  CreateCustomDomainAssociationResult.t,
+  CreateCustomDomainAssociationResult.error) t 
   | CreateEndpointAccess: (CreateEndpointAccessMessage.t, EndpointAccess.t,
   EndpointAccess.error) t 
   | CreateEventSubscription: (CreateEventSubscriptionMessage.t,
@@ -54,6 +57,11 @@ type ('i, 'o, 'e) t =
   t 
   | CreateHsmConfiguration: (CreateHsmConfigurationMessage.t,
   CreateHsmConfigurationResult.t, CreateHsmConfigurationResult.error) t 
+  | CreateIntegration: (CreateIntegrationMessage.t, Integration.t,
+  Integration.error) t 
+  | CreateRedshiftIdcApplication: (CreateRedshiftIdcApplicationMessage.t,
+  CreateRedshiftIdcApplicationResult.t,
+  CreateRedshiftIdcApplicationResult.error) t 
   | CreateScheduledAction: (CreateScheduledActionMessage.t,
   ScheduledAction.t, ScheduledAction.error) t 
   | CreateSnapshotCopyGrant: (CreateSnapshotCopyGrantMessage.t,
@@ -78,6 +86,8 @@ type ('i, 'o, 'e) t =
   DeleteClusterSnapshotResult.t, DeleteClusterSnapshotResult.error) t 
   | DeleteClusterSubnetGroup: (DeleteClusterSubnetGroupMessage.t, unit, 
   unit) t 
+  | DeleteCustomDomainAssociation: (DeleteCustomDomainAssociationMessage.t,
+  unit, unit) t 
   | DeleteEndpointAccess: (DeleteEndpointAccessMessage.t, EndpointAccess.t,
   EndpointAccess.error) t 
   | DeleteEventSubscription: (DeleteEventSubscriptionMessage.t, unit, 
@@ -85,15 +95,23 @@ type ('i, 'o, 'e) t =
   | DeleteHsmClientCertificate: (DeleteHsmClientCertificateMessage.t, 
   unit, unit) t 
   | DeleteHsmConfiguration: (DeleteHsmConfigurationMessage.t, unit, unit) t 
+  | DeleteIntegration: (DeleteIntegrationMessage.t, Integration.t,
+  Integration.error) t 
   | DeletePartner: (PartnerIntegrationInputMessage.t,
   PartnerIntegrationOutputMessage.t, PartnerIntegrationOutputMessage.error) t
   
+  | DeleteRedshiftIdcApplication: (DeleteRedshiftIdcApplicationMessage.t,
+  unit, unit) t 
+  | DeleteResourcePolicy: (DeleteResourcePolicyMessage.t, unit, unit) t 
   | DeleteScheduledAction: (DeleteScheduledActionMessage.t, unit, unit) t 
   | DeleteSnapshotCopyGrant: (DeleteSnapshotCopyGrantMessage.t, unit, 
   unit) t 
   | DeleteSnapshotSchedule: (DeleteSnapshotScheduleMessage.t, unit, unit) t 
   | DeleteTags: (DeleteTagsMessage.t, unit, unit) t 
   | DeleteUsageLimit: (DeleteUsageLimitMessage.t, unit, unit) t 
+  | DeregisterNamespace: (DeregisterNamespaceInputMessage.t,
+  DeregisterNamespaceOutputMessage.t, DeregisterNamespaceOutputMessage.error)
+  t 
   | DescribeAccountAttributes: (DescribeAccountAttributesMessage.t,
   AccountAttributeList.t, AccountAttributeList.error) t 
   | DescribeAuthenticationProfiles: (DescribeAuthenticationProfilesMessage.t,
@@ -117,6 +135,10 @@ type ('i, 'o, 'e) t =
   ClusterVersionsMessage.t, ClusterVersionsMessage.error) t 
   | DescribeClusters: (DescribeClustersMessage.t, ClustersMessage.t,
   ClustersMessage.error) t 
+  | DescribeCustomDomainAssociations:
+  (DescribeCustomDomainAssociationsMessage.t,
+  CustomDomainAssociationsMessage.t, CustomDomainAssociationsMessage.error) t
+  
   | DescribeDataShares: (DescribeDataSharesMessage.t,
   DescribeDataSharesResult.t, DescribeDataSharesResult.error) t 
   | DescribeDataSharesForConsumer: (DescribeDataSharesForConsumerMessage.t,
@@ -143,6 +165,10 @@ type ('i, 'o, 'e) t =
   HsmClientCertificateMessage.t, HsmClientCertificateMessage.error) t 
   | DescribeHsmConfigurations: (DescribeHsmConfigurationsMessage.t,
   HsmConfigurationMessage.t, HsmConfigurationMessage.error) t 
+  | DescribeInboundIntegrations: (DescribeInboundIntegrationsMessage.t,
+  InboundIntegrationsMessage.t, InboundIntegrationsMessage.error) t 
+  | DescribeIntegrations: (DescribeIntegrationsMessage.t,
+  IntegrationsMessage.t, IntegrationsMessage.error) t 
   | DescribeLoggingStatus: (DescribeLoggingStatusMessage.t, LoggingStatus.t,
   LoggingStatus.error) t 
   | DescribeNodeConfigurationOptions:
@@ -154,6 +180,10 @@ type ('i, 'o, 'e) t =
   OrderableClusterOptionsMessage.t, OrderableClusterOptionsMessage.error) t 
   | DescribePartners: (DescribePartnersInputMessage.t,
   DescribePartnersOutputMessage.t, DescribePartnersOutputMessage.error) t 
+  | DescribeRedshiftIdcApplications:
+  (DescribeRedshiftIdcApplicationsMessage.t,
+  DescribeRedshiftIdcApplicationsResult.t,
+  DescribeRedshiftIdcApplicationsResult.error) t 
   | DescribeReservedNodeExchangeStatus:
   (DescribeReservedNodeExchangeStatusInputMessage.t,
   DescribeReservedNodeExchangeStatusOutputMessage.t,
@@ -189,8 +219,15 @@ type ('i, 'o, 'e) t =
   LoggingStatus.error) t 
   | EnableSnapshotCopy: (EnableSnapshotCopyMessage.t,
   EnableSnapshotCopyResult.t, EnableSnapshotCopyResult.error) t 
+  | FailoverPrimaryCompute: (FailoverPrimaryComputeInputMessage.t,
+  FailoverPrimaryComputeResult.t, FailoverPrimaryComputeResult.error) t 
   | GetClusterCredentials: (GetClusterCredentialsMessage.t,
   ClusterCredentials.t, ClusterCredentials.error) t 
+  | GetClusterCredentialsWithIAM: (GetClusterCredentialsWithIAMMessage.t,
+  ClusterExtendedCredentials.t, ClusterExtendedCredentials.error) t 
+  | GetIdentityCenterAuthToken: (GetIdentityCenterAuthTokenRequest.t,
+  GetIdentityCenterAuthTokenResponse.t,
+  GetIdentityCenterAuthTokenResponse.error) t 
   | GetReservedNodeExchangeConfigurationOptions:
   (GetReservedNodeExchangeConfigurationOptionsInputMessage.t,
   GetReservedNodeExchangeConfigurationOptionsOutputMessage.t,
@@ -199,6 +236,10 @@ type ('i, 'o, 'e) t =
   (GetReservedNodeExchangeOfferingsInputMessage.t,
   GetReservedNodeExchangeOfferingsOutputMessage.t,
   GetReservedNodeExchangeOfferingsOutputMessage.error) t 
+  | GetResourcePolicy: (GetResourcePolicyMessage.t,
+  GetResourcePolicyResult.t, GetResourcePolicyResult.error) t 
+  | ListRecommendations: (ListRecommendationsMessage.t,
+  ListRecommendationsResult.t, ListRecommendationsResult.error) t 
   | ModifyAquaConfiguration: (ModifyAquaInputMessage.t,
   ModifyAquaOutputMessage.t, ModifyAquaOutputMessage.error) t 
   | ModifyAuthenticationProfile: (ModifyAuthenticationProfileMessage.t,
@@ -221,10 +262,20 @@ type ('i, 'o, 'e) t =
   unit, unit) t 
   | ModifyClusterSubnetGroup: (ModifyClusterSubnetGroupMessage.t,
   ModifyClusterSubnetGroupResult.t, ModifyClusterSubnetGroupResult.error) t 
+  | ModifyCustomDomainAssociation: (ModifyCustomDomainAssociationMessage.t,
+  ModifyCustomDomainAssociationResult.t,
+  ModifyCustomDomainAssociationResult.error) t 
   | ModifyEndpointAccess: (ModifyEndpointAccessMessage.t, EndpointAccess.t,
   EndpointAccess.error) t 
   | ModifyEventSubscription: (ModifyEventSubscriptionMessage.t,
   ModifyEventSubscriptionResult.t, ModifyEventSubscriptionResult.error) t 
+  | ModifyIntegration: (ModifyIntegrationMessage.t, Integration.t,
+  Integration.error) t 
+  | ModifyLakehouseConfiguration: (ModifyLakehouseConfigurationMessage.t,
+  LakehouseConfiguration.t, LakehouseConfiguration.error) t 
+  | ModifyRedshiftIdcApplication: (ModifyRedshiftIdcApplicationMessage.t,
+  ModifyRedshiftIdcApplicationResult.t,
+  ModifyRedshiftIdcApplicationResult.error) t 
   | ModifyScheduledAction: (ModifyScheduledActionMessage.t,
   ScheduledAction.t, ScheduledAction.error) t 
   | ModifySnapshotCopyRetentionPeriod:
@@ -240,8 +291,12 @@ type ('i, 'o, 'e) t =
   | PurchaseReservedNodeOffering: (PurchaseReservedNodeOfferingMessage.t,
   PurchaseReservedNodeOfferingResult.t,
   PurchaseReservedNodeOfferingResult.error) t 
+  | PutResourcePolicy: (PutResourcePolicyMessage.t,
+  PutResourcePolicyResult.t, PutResourcePolicyResult.error) t 
   | RebootCluster: (RebootClusterMessage.t, RebootClusterResult.t,
   RebootClusterResult.error) t 
+  | RegisterNamespace: (RegisterNamespaceInputMessage.t,
+  RegisterNamespaceOutputMessage.t, RegisterNamespaceOutputMessage.error) t 
   | RejectDataShare: (RejectDataShareMessage.t, DataShare.t, DataShare.error)
   t 
   | ResetClusterParameterGroup: (ResetClusterParameterGroupMessage.t,
@@ -289,10 +344,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateClusterSecurityGroup -> `POST
   | CreateClusterSnapshot -> `POST
   | CreateClusterSubnetGroup -> `POST
+  | CreateCustomDomainAssociation -> `POST
   | CreateEndpointAccess -> `POST
   | CreateEventSubscription -> `POST
   | CreateHsmClientCertificate -> `POST
   | CreateHsmConfiguration -> `POST
+  | CreateIntegration -> `POST
+  | CreateRedshiftIdcApplication -> `POST
   | CreateScheduledAction -> `POST
   | CreateSnapshotCopyGrant -> `POST
   | CreateSnapshotSchedule -> `POST
@@ -305,16 +363,21 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteClusterSecurityGroup -> `POST
   | DeleteClusterSnapshot -> `POST
   | DeleteClusterSubnetGroup -> `POST
+  | DeleteCustomDomainAssociation -> `POST
   | DeleteEndpointAccess -> `POST
   | DeleteEventSubscription -> `POST
   | DeleteHsmClientCertificate -> `POST
   | DeleteHsmConfiguration -> `POST
+  | DeleteIntegration -> `POST
   | DeletePartner -> `POST
+  | DeleteRedshiftIdcApplication -> `POST
+  | DeleteResourcePolicy -> `POST
   | DeleteScheduledAction -> `POST
   | DeleteSnapshotCopyGrant -> `POST
   | DeleteSnapshotSchedule -> `POST
   | DeleteTags -> `POST
   | DeleteUsageLimit -> `POST
+  | DeregisterNamespace -> `POST
   | DescribeAccountAttributes -> `POST
   | DescribeAuthenticationProfiles -> `POST
   | DescribeClusterDbRevisions -> `POST
@@ -326,6 +389,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeClusterTracks -> `POST
   | DescribeClusterVersions -> `POST
   | DescribeClusters -> `POST
+  | DescribeCustomDomainAssociations -> `POST
   | DescribeDataShares -> `POST
   | DescribeDataSharesForConsumer -> `POST
   | DescribeDataSharesForProducer -> `POST
@@ -337,10 +401,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeEvents -> `POST
   | DescribeHsmClientCertificates -> `POST
   | DescribeHsmConfigurations -> `POST
+  | DescribeInboundIntegrations -> `POST
+  | DescribeIntegrations -> `POST
   | DescribeLoggingStatus -> `POST
   | DescribeNodeConfigurationOptions -> `POST
   | DescribeOrderableClusterOptions -> `POST
   | DescribePartners -> `POST
+  | DescribeRedshiftIdcApplications -> `POST
   | DescribeReservedNodeExchangeStatus -> `POST
   | DescribeReservedNodeOfferings -> `POST
   | DescribeReservedNodes -> `POST
@@ -357,9 +424,14 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DisassociateDataShareConsumer -> `POST
   | EnableLogging -> `POST
   | EnableSnapshotCopy -> `POST
+  | FailoverPrimaryCompute -> `POST
   | GetClusterCredentials -> `POST
+  | GetClusterCredentialsWithIAM -> `POST
+  | GetIdentityCenterAuthToken -> `POST
   | GetReservedNodeExchangeConfigurationOptions -> `POST
   | GetReservedNodeExchangeOfferings -> `POST
+  | GetResourcePolicy -> `POST
+  | ListRecommendations -> `POST
   | ModifyAquaConfiguration -> `POST
   | ModifyAuthenticationProfile -> `POST
   | ModifyCluster -> `POST
@@ -370,15 +442,21 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ModifyClusterSnapshot -> `POST
   | ModifyClusterSnapshotSchedule -> `POST
   | ModifyClusterSubnetGroup -> `POST
+  | ModifyCustomDomainAssociation -> `POST
   | ModifyEndpointAccess -> `POST
   | ModifyEventSubscription -> `POST
+  | ModifyIntegration -> `POST
+  | ModifyLakehouseConfiguration -> `POST
+  | ModifyRedshiftIdcApplication -> `POST
   | ModifyScheduledAction -> `POST
   | ModifySnapshotCopyRetentionPeriod -> `POST
   | ModifySnapshotSchedule -> `POST
   | ModifyUsageLimit -> `POST
   | PauseCluster -> `POST
   | PurchaseReservedNodeOffering -> `POST
+  | PutResourcePolicy -> `POST
   | RebootCluster -> `POST
+  | RegisterNamespace -> `POST
   | RejectDataShare -> `POST
   | ResetClusterParameterGroup -> `POST
   | ResizeCluster -> `POST
@@ -411,10 +489,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateClusterSecurityGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateClusterSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | CreateClusterSubnetGroup -> (Format.kasprintf Uri.of_string) "/"
+      | CreateCustomDomainAssociation -> (Format.kasprintf Uri.of_string) "/"
       | CreateEndpointAccess -> (Format.kasprintf Uri.of_string) "/"
       | CreateEventSubscription -> (Format.kasprintf Uri.of_string) "/"
       | CreateHsmClientCertificate -> (Format.kasprintf Uri.of_string) "/"
       | CreateHsmConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | CreateIntegration -> (Format.kasprintf Uri.of_string) "/"
+      | CreateRedshiftIdcApplication -> (Format.kasprintf Uri.of_string) "/"
       | CreateScheduledAction -> (Format.kasprintf Uri.of_string) "/"
       | CreateSnapshotCopyGrant -> (Format.kasprintf Uri.of_string) "/"
       | CreateSnapshotSchedule -> (Format.kasprintf Uri.of_string) "/"
@@ -427,16 +508,21 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteClusterSecurityGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteClusterSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | DeleteClusterSubnetGroup -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteCustomDomainAssociation -> (Format.kasprintf Uri.of_string) "/"
       | DeleteEndpointAccess -> (Format.kasprintf Uri.of_string) "/"
       | DeleteEventSubscription -> (Format.kasprintf Uri.of_string) "/"
       | DeleteHsmClientCertificate -> (Format.kasprintf Uri.of_string) "/"
       | DeleteHsmConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteIntegration -> (Format.kasprintf Uri.of_string) "/"
       | DeletePartner -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteRedshiftIdcApplication -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | DeleteScheduledAction -> (Format.kasprintf Uri.of_string) "/"
       | DeleteSnapshotCopyGrant -> (Format.kasprintf Uri.of_string) "/"
       | DeleteSnapshotSchedule -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTags -> (Format.kasprintf Uri.of_string) "/"
       | DeleteUsageLimit -> (Format.kasprintf Uri.of_string) "/"
+      | DeregisterNamespace -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAccountAttributes -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAuthenticationProfiles ->
           (Format.kasprintf Uri.of_string) "/"
@@ -450,6 +536,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeClusterTracks -> (Format.kasprintf Uri.of_string) "/"
       | DescribeClusterVersions -> (Format.kasprintf Uri.of_string) "/"
       | DescribeClusters -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeCustomDomainAssociations ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeDataShares -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDataSharesForConsumer -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDataSharesForProducer -> (Format.kasprintf Uri.of_string) "/"
@@ -462,12 +550,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeEvents -> (Format.kasprintf Uri.of_string) "/"
       | DescribeHsmClientCertificates -> (Format.kasprintf Uri.of_string) "/"
       | DescribeHsmConfigurations -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeInboundIntegrations -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeIntegrations -> (Format.kasprintf Uri.of_string) "/"
       | DescribeLoggingStatus -> (Format.kasprintf Uri.of_string) "/"
       | DescribeNodeConfigurationOptions ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeOrderableClusterOptions ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribePartners -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeRedshiftIdcApplications ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeReservedNodeExchangeStatus ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeReservedNodeOfferings -> (Format.kasprintf Uri.of_string) "/"
@@ -485,11 +577,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DisassociateDataShareConsumer -> (Format.kasprintf Uri.of_string) "/"
       | EnableLogging -> (Format.kasprintf Uri.of_string) "/"
       | EnableSnapshotCopy -> (Format.kasprintf Uri.of_string) "/"
+      | FailoverPrimaryCompute -> (Format.kasprintf Uri.of_string) "/"
       | GetClusterCredentials -> (Format.kasprintf Uri.of_string) "/"
+      | GetClusterCredentialsWithIAM -> (Format.kasprintf Uri.of_string) "/"
+      | GetIdentityCenterAuthToken -> (Format.kasprintf Uri.of_string) "/"
       | GetReservedNodeExchangeConfigurationOptions ->
           (Format.kasprintf Uri.of_string) "/"
       | GetReservedNodeExchangeOfferings ->
           (Format.kasprintf Uri.of_string) "/"
+      | GetResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
+      | ListRecommendations -> (Format.kasprintf Uri.of_string) "/"
       | ModifyAquaConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | ModifyAuthenticationProfile -> (Format.kasprintf Uri.of_string) "/"
       | ModifyCluster -> (Format.kasprintf Uri.of_string) "/"
@@ -500,8 +597,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ModifyClusterSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | ModifyClusterSnapshotSchedule -> (Format.kasprintf Uri.of_string) "/"
       | ModifyClusterSubnetGroup -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyCustomDomainAssociation -> (Format.kasprintf Uri.of_string) "/"
       | ModifyEndpointAccess -> (Format.kasprintf Uri.of_string) "/"
       | ModifyEventSubscription -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyIntegration -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyLakehouseConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyRedshiftIdcApplication -> (Format.kasprintf Uri.of_string) "/"
       | ModifyScheduledAction -> (Format.kasprintf Uri.of_string) "/"
       | ModifySnapshotCopyRetentionPeriod ->
           (Format.kasprintf Uri.of_string) "/"
@@ -509,7 +610,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ModifyUsageLimit -> (Format.kasprintf Uri.of_string) "/"
       | PauseCluster -> (Format.kasprintf Uri.of_string) "/"
       | PurchaseReservedNodeOffering -> (Format.kasprintf Uri.of_string) "/"
+      | PutResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | RebootCluster -> (Format.kasprintf Uri.of_string) "/"
+      | RegisterNamespace -> (Format.kasprintf Uri.of_string) "/"
       | RejectDataShare -> (Format.kasprintf Uri.of_string) "/"
       | ResetClusterParameterGroup -> (Format.kasprintf Uri.of_string) "/"
       | ResizeCluster -> (Format.kasprintf Uri.of_string) "/"
@@ -754,6 +857,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateCustomDomainAssociation ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateCustomDomainAssociation"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateCustomDomainAssociationMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateEndpointAccess ->
       let headers =
         Awso.Http.Headers.of_list
@@ -805,6 +922,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["CreateHsmConfiguration"]); ("Version", [apiVersion])] in
         let query =
           (CreateHsmConfigurationMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateIntegration ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateIntegration"]); ("Version", [apiVersion])] in
+        let query =
+          (CreateIntegrationMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateRedshiftIdcApplication ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateRedshiftIdcApplication"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateRedshiftIdcApplicationMessage.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -964,6 +1107,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteCustomDomainAssociation ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteCustomDomainAssociation"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteCustomDomainAssociationMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteEndpointAccess ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1018,6 +1175,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteIntegration ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteIntegration"]); ("Version", [apiVersion])] in
+        let query =
+          (DeleteIntegrationMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeletePartner ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1027,6 +1196,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let meta = [("Action", ["DeletePartner"]); ("Version", [apiVersion])] in
         let query =
           (PartnerIntegrationInputMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteRedshiftIdcApplication ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteRedshiftIdcApplication"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteRedshiftIdcApplicationMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteResourcePolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteResourcePolicy"]); ("Version", [apiVersion])] in
+        let query =
+          (DeleteResourcePolicyMessage.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -1091,6 +1287,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DeleteUsageLimit"]); ("Version", [apiVersion])] in
         let query =
           (DeleteUsageLimitMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeregisterNamespace ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeregisterNamespace"]); ("Version", [apiVersion])] in
+        let query =
+          (DeregisterNamespaceInputMessage.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeAccountAttributes ->
@@ -1244,6 +1453,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (DescribeClustersMessage.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeCustomDomainAssociations ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeCustomDomainAssociations"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeCustomDomainAssociationsMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeDataShares ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1394,6 +1617,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeInboundIntegrations ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeInboundIntegrations"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeInboundIntegrationsMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeIntegrations ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeIntegrations"]); ("Version", [apiVersion])] in
+        let query =
+          (DescribeIntegrationsMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeLoggingStatus ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1445,6 +1695,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DescribePartners"]); ("Version", [apiVersion])] in
         let query =
           (DescribePartnersInputMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeRedshiftIdcApplications ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeRedshiftIdcApplications"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeRedshiftIdcApplicationsMessage.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -1651,6 +1915,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | FailoverPrimaryCompute ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["FailoverPrimaryCompute"]); ("Version", [apiVersion])] in
+        let query =
+          (FailoverPrimaryComputeInputMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetClusterCredentials ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1661,6 +1938,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["GetClusterCredentials"]); ("Version", [apiVersion])] in
         let query =
           (GetClusterCredentialsMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetClusterCredentialsWithIAM ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetClusterCredentialsWithIAM"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetClusterCredentialsWithIAMMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetIdentityCenterAuthToken ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetIdentityCenterAuthToken"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetIdentityCenterAuthTokenRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -1690,6 +1995,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (GetReservedNodeExchangeOfferingsInputMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetResourcePolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetResourcePolicy"]); ("Version", [apiVersion])] in
+        let query =
+          (GetResourcePolicyMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ListRecommendations ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ListRecommendations"]); ("Version", [apiVersion])] in
+        let query =
+          (ListRecommendationsMessage.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -1827,6 +2157,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyCustomDomainAssociation ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyCustomDomainAssociation"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyCustomDomainAssociationMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ModifyEndpointAccess ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1851,6 +2195,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (ModifyEventSubscriptionMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyIntegration ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyIntegration"]); ("Version", [apiVersion])] in
+        let query =
+          (ModifyIntegrationMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyLakehouseConfiguration ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyLakehouseConfiguration"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyLakehouseConfigurationMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyRedshiftIdcApplication ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyRedshiftIdcApplication"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyRedshiftIdcApplicationMessage.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -1931,6 +2315,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | PutResourcePolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["PutResourcePolicy"]); ("Version", [apiVersion])] in
+        let query =
+          (PutResourcePolicyMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | RebootCluster ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1940,6 +2336,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let meta = [("Action", ["RebootCluster"]); ("Version", [apiVersion])] in
         let query =
           (RebootClusterMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | RegisterNamespace ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["RegisterNamespace"]); ("Version", [apiVersion])] in
+        let query =
+          (RegisterNamespaceInputMessage.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | RejectDataShare ->
@@ -2248,6 +2657,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateClusterSubnetGroupResult.error_of_xml))
+  | CreateCustomDomainAssociation ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateCustomDomainAssociationResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCustomDomainAssociationResult.error_of_xml))
   | CreateEndpointAccess ->
       if is_success
       then
@@ -2279,6 +2697,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateHsmConfigurationResult.error_of_xml))
+  | CreateIntegration ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (Integration.of_xml xml)
+      else Error (parse_aws_error (Some Integration.error_of_xml))
+  | CreateRedshiftIdcApplication ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateRedshiftIdcApplicationResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateRedshiftIdcApplicationResult.error_of_xml))
   | CreateScheduledAction ->
       if is_success
       then
@@ -2341,6 +2774,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error (Some DeleteClusterSnapshotResult.error_of_xml))
   | DeleteClusterSubnetGroup ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteCustomDomainAssociation ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteEndpointAccess ->
       if is_success
       then
@@ -2353,6 +2788,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteHsmConfiguration ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteIntegration ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (Integration.of_xml xml)
+      else Error (parse_aws_error (Some Integration.error_of_xml))
   | DeletePartner ->
       if is_success
       then
@@ -2362,6 +2803,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some PartnerIntegrationOutputMessage.error_of_xml))
+  | DeleteRedshiftIdcApplication ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteResourcePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteScheduledAction ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteSnapshotCopyGrant ->
@@ -2371,6 +2816,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DeleteTags -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteUsageLimit ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeregisterNamespace ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeregisterNamespaceOutputMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DeregisterNamespaceOutputMessage.error_of_xml))
   | DescribeAccountAttributes ->
       if is_success
       then
@@ -2448,6 +2902,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (ClustersMessage.of_xml xml)
       else Error (parse_aws_error (Some ClustersMessage.error_of_xml))
+  | DescribeCustomDomainAssociations ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CustomDomainAssociationsMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CustomDomainAssociationsMessage.error_of_xml))
   | DescribeDataShares ->
       if is_success
       then
@@ -2526,6 +2989,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (HsmConfigurationMessage.of_xml xml)
       else
         Error (parse_aws_error (Some HsmConfigurationMessage.error_of_xml))
+  | DescribeInboundIntegrations ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (InboundIntegrationsMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some InboundIntegrationsMessage.error_of_xml))
+  | DescribeIntegrations ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (IntegrationsMessage.of_xml xml)
+      else Error (parse_aws_error (Some IntegrationsMessage.error_of_xml))
   | DescribeLoggingStatus ->
       if is_success
       then
@@ -2555,6 +3032,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribePartnersOutputMessage.error_of_xml))
+  | DescribeRedshiftIdcApplications ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeRedshiftIdcApplicationsResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRedshiftIdcApplicationsResult.error_of_xml))
   | DescribeReservedNodeExchangeStatus ->
       if is_success
       then
@@ -2663,12 +3149,37 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (EnableSnapshotCopyResult.of_xml xml)
       else
         Error (parse_aws_error (Some EnableSnapshotCopyResult.error_of_xml))
+  | FailoverPrimaryCompute ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (FailoverPrimaryComputeResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some FailoverPrimaryComputeResult.error_of_xml))
   | GetClusterCredentials ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (ClusterCredentials.of_xml xml)
       else Error (parse_aws_error (Some ClusterCredentials.error_of_xml))
+  | GetClusterCredentialsWithIAM ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ClusterExtendedCredentials.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ClusterExtendedCredentials.error_of_xml))
+  | GetIdentityCenterAuthToken ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetIdentityCenterAuthTokenResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetIdentityCenterAuthTokenResponse.error_of_xml))
   | GetReservedNodeExchangeConfigurationOptions ->
       if is_success
       then
@@ -2690,6 +3201,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetReservedNodeExchangeOfferingsOutputMessage.error_of_xml))
+  | GetResourcePolicy ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetResourcePolicyResult.of_xml xml)
+      else
+        Error (parse_aws_error (Some GetResourcePolicyResult.error_of_xml))
+  | ListRecommendations ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListRecommendationsResult.of_xml xml)
+      else
+        Error (parse_aws_error (Some ListRecommendationsResult.error_of_xml))
   | ModifyAquaConfiguration ->
       if is_success
       then
@@ -2763,6 +3288,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ModifyClusterSubnetGroupResult.error_of_xml))
+  | ModifyCustomDomainAssociation ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyCustomDomainAssociationResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ModifyCustomDomainAssociationResult.error_of_xml))
   | ModifyEndpointAccess ->
       if is_success
       then
@@ -2777,6 +3311,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ModifyEventSubscriptionResult.error_of_xml))
+  | ModifyIntegration ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (Integration.of_xml xml)
+      else Error (parse_aws_error (Some Integration.error_of_xml))
+  | ModifyLakehouseConfiguration ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (LakehouseConfiguration.of_xml xml)
+      else Error (parse_aws_error (Some LakehouseConfiguration.error_of_xml))
+  | ModifyRedshiftIdcApplication ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyRedshiftIdcApplicationResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ModifyRedshiftIdcApplicationResult.error_of_xml))
   | ModifyScheduledAction ->
       if is_success
       then
@@ -2819,12 +3374,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some PurchaseReservedNodeOfferingResult.error_of_xml))
+  | PutResourcePolicy ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PutResourcePolicyResult.of_xml xml)
+      else
+        Error (parse_aws_error (Some PutResourcePolicyResult.error_of_xml))
   | RebootCluster ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (RebootClusterResult.of_xml xml)
       else Error (parse_aws_error (Some RebootClusterResult.error_of_xml))
+  | RegisterNamespace ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RegisterNamespaceOutputMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some RegisterNamespaceOutputMessage.error_of_xml))
   | RejectDataShare ->
       if is_success
       then

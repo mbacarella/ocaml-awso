@@ -44,6 +44,9 @@ let create_app =
          flag "repository" (optional string) ~doc:"STRING Repository"
        and platform =
          flag "platform" (optional json_arg) ~doc:"JSON Platform"
+       and computeRoleArn =
+         flag "compute-role-arn" (optional string)
+           ~doc:"STRING ComputeRoleArn"
        and iamServiceRoleArn =
          flag "iam-service-role-arn" (optional string)
            ~doc:"STRING ServiceRoleArn"
@@ -81,13 +84,17 @@ let create_app =
        and autoBranchCreationConfig =
          flag "auto-branch-creation-config" (optional json_arg)
            ~doc:"JSON AutoBranchCreationConfig"
+       and jobConfig =
+         flag "job-config" (optional json_arg) ~doc:"JSON JobConfig"
+       and cacheConfig =
+         flag "cache-config" (optional json_arg) ~doc:"JSON CacheConfig"
        and name = flag "name" (required string) ~doc:"STRING Name" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_app
            (Values.CreateAppRequest.make ?description ?repository
               ?platform:(Option.map ~f:Values.Platform.of_json platform)
-              ?iamServiceRoleArn ?oauthToken ?accessToken
+              ?computeRoleArn ?iamServiceRoleArn ?oauthToken ?accessToken
               ?environmentVariables:(Option.map
                                        ~f:Values.EnvironmentVariables.of_json
                                        environmentVariables)
@@ -102,7 +109,10 @@ let create_app =
                                              autoBranchCreationPatterns)
               ?autoBranchCreationConfig:(Option.map
                                            ~f:Values.AutoBranchCreationConfig.of_json
-                                           autoBranchCreationConfig) ~name ())
+                                           autoBranchCreationConfig)
+              ?jobConfig:(Option.map ~f:Values.JobConfig.of_json jobConfig)
+              ?cacheConfig:(Option.map ~f:Values.CacheConfig.of_json
+                              cacheConfig) ~name ())
            (Some Values.CreateAppResult.to_json)
            (Some Values.CreateAppResult.error_to_json)])
 let create_backend_environment =
@@ -151,6 +161,9 @@ let create_branch =
            ~doc:"BOOL EnableNotification"
        and enableAutoBuild =
          flag "enable-auto-build" (optional bool) ~doc:"BOOL EnableAutoBuild"
+       and enableSkewProtection =
+         flag "enable-skew-protection" (optional bool)
+           ~doc:"BOOL EnableSkewProtection"
        and environmentVariables =
          flag "environment-variables" (optional json_arg)
            ~doc:"JSON EnvironmentVariables"
@@ -177,6 +190,10 @@ let create_branch =
        and backendEnvironmentArn =
          flag "backend-environment-arn" (optional string)
            ~doc:"STRING BackendEnvironmentArn"
+       and backend = flag "backend" (optional json_arg) ~doc:"JSON Backend"
+       and computeRoleArn =
+         flag "compute-role-arn" (optional string)
+           ~doc:"STRING ComputeRoleArn"
        and appId = flag "app-id" (required string) ~doc:"STRING AppId"
        and branchName =
          flag "branch-name" (required string) ~doc:"STRING BranchName" in
@@ -185,15 +202,17 @@ let create_branch =
            Io.create_branch
            (Values.CreateBranchRequest.make ?description
               ?stage:(Option.map ~f:Values.Stage.of_json stage) ?framework
-              ?enableNotification ?enableAutoBuild
+              ?enableNotification ?enableAutoBuild ?enableSkewProtection
               ?environmentVariables:(Option.map
                                        ~f:Values.EnvironmentVariables.of_json
                                        environmentVariables)
               ?basicAuthCredentials ?enableBasicAuth ?enablePerformanceMode
               ?tags:(Option.map ~f:Values.TagMap.of_json tags) ?buildSpec
               ?ttl ?displayName ?enablePullRequestPreview
-              ?pullRequestEnvironmentName ?backendEnvironmentArn ~appId
-              ~branchName ()) (Some Values.CreateBranchResult.to_json)
+              ?pullRequestEnvironmentName ?backendEnvironmentArn
+              ?backend:(Option.map ~f:Values.Backend.of_json backend)
+              ?computeRoleArn ~appId ~branchName ())
+           (Some Values.CreateBranchResult.to_json)
            (Some Values.CreateBranchResult.error_to_json)])
 let create_deployment =
   Command.async ~summary:""
@@ -235,6 +254,9 @@ let create_domain_association =
        and autoSubDomainIAMRole =
          flag "auto-sub-domain-i-a-m-role" (optional string)
            ~doc:"STRING AutoSubDomainIAMRole"
+       and certificateSettings =
+         flag "certificate-settings" (optional json_arg)
+           ~doc:"JSON CertificateSettings"
        and appId = flag "app-id" (required string) ~doc:"STRING AppId"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING DomainName"
@@ -248,7 +270,10 @@ let create_domain_association =
               ?autoSubDomainCreationPatterns:(Option.map
                                                 ~f:Values.AutoSubDomainCreationPatterns.of_json
                                                 autoSubDomainCreationPatterns)
-              ?autoSubDomainIAMRole ~appId ~domainName
+              ?autoSubDomainIAMRole
+              ?certificateSettings:(Option.map
+                                      ~f:Values.CertificateSettings.of_json
+                                      certificateSettings) ~appId ~domainName
               ~subDomainSettings:(Values.SubDomainSettings.of_json
                                     subDomainSettings) ())
            (Some Values.CreateDomainAssociationResult.to_json)
@@ -552,7 +577,7 @@ let list_apps =
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+         flag "max-results" (optional int) ~doc:"INT MaxResultsForListApps" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_apps
@@ -726,14 +751,18 @@ let start_deployment =
        and jobId = flag "job-id" (optional string) ~doc:"STRING JobId"
        and sourceUrl =
          flag "source-url" (optional string) ~doc:"STRING SourceUrl"
+       and sourceUrlType =
+         flag "source-url-type" (optional json_arg) ~doc:"JSON SourceUrlType"
        and appId = flag "app-id" (required string) ~doc:"STRING AppId"
        and branchName =
          flag "branch-name" (required string) ~doc:"STRING BranchName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_deployment
-           (Values.StartDeploymentRequest.make ?jobId ?sourceUrl ~appId
-              ~branchName ()) (Some Values.StartDeploymentResult.to_json)
+           (Values.StartDeploymentRequest.make ?jobId ?sourceUrl
+              ?sourceUrlType:(Option.map ~f:Values.SourceUrlType.of_json
+                                sourceUrlType) ~appId ~branchName ())
+           (Some Values.StartDeploymentResult.to_json)
            (Some Values.StartDeploymentResult.error_to_json)])
 let start_job =
   Command.async ~summary:""
@@ -843,6 +872,9 @@ let update_app =
          flag "description" (optional string) ~doc:"STRING Description"
        and platform =
          flag "platform" (optional json_arg) ~doc:"JSON Platform"
+       and computeRoleArn =
+         flag "compute-role-arn" (optional string)
+           ~doc:"STRING ComputeRoleArn"
        and iamServiceRoleArn =
          flag "iam-service-role-arn" (optional string)
            ~doc:"STRING ServiceRoleArn"
@@ -881,13 +913,17 @@ let update_app =
          flag "oauth-token" (optional string) ~doc:"STRING OauthToken"
        and accessToken =
          flag "access-token" (optional string) ~doc:"STRING AccessToken"
+       and jobConfig =
+         flag "job-config" (optional json_arg) ~doc:"JSON JobConfig"
+       and cacheConfig =
+         flag "cache-config" (optional json_arg) ~doc:"JSON CacheConfig"
        and appId = flag "app-id" (required string) ~doc:"STRING AppId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_app
            (Values.UpdateAppRequest.make ?name ?description
               ?platform:(Option.map ~f:Values.Platform.of_json platform)
-              ?iamServiceRoleArn
+              ?computeRoleArn ?iamServiceRoleArn
               ?environmentVariables:(Option.map
                                        ~f:Values.EnvironmentVariables.of_json
                                        environmentVariables)
@@ -902,7 +938,10 @@ let update_app =
               ?autoBranchCreationConfig:(Option.map
                                            ~f:Values.AutoBranchCreationConfig.of_json
                                            autoBranchCreationConfig)
-              ?repository ?oauthToken ?accessToken ~appId ())
+              ?repository ?oauthToken ?accessToken
+              ?jobConfig:(Option.map ~f:Values.JobConfig.of_json jobConfig)
+              ?cacheConfig:(Option.map ~f:Values.CacheConfig.of_json
+                              cacheConfig) ~appId ())
            (Some Values.UpdateAppResult.to_json)
            (Some Values.UpdateAppResult.error_to_json)])
 let update_branch =
@@ -925,6 +964,9 @@ let update_branch =
            ~doc:"BOOL EnableNotification"
        and enableAutoBuild =
          flag "enable-auto-build" (optional bool) ~doc:"BOOL EnableAutoBuild"
+       and enableSkewProtection =
+         flag "enable-skew-protection" (optional bool)
+           ~doc:"BOOL EnableSkewProtection"
        and environmentVariables =
          flag "environment-variables" (optional json_arg)
            ~doc:"JSON EnvironmentVariables"
@@ -950,6 +992,10 @@ let update_branch =
        and backendEnvironmentArn =
          flag "backend-environment-arn" (optional string)
            ~doc:"STRING BackendEnvironmentArn"
+       and backend = flag "backend" (optional json_arg) ~doc:"JSON Backend"
+       and computeRoleArn =
+         flag "compute-role-arn" (optional string)
+           ~doc:"STRING ComputeRoleArn"
        and appId = flag "app-id" (required string) ~doc:"STRING AppId"
        and branchName =
          flag "branch-name" (required string) ~doc:"STRING BranchName" in
@@ -958,14 +1004,16 @@ let update_branch =
            Io.update_branch
            (Values.UpdateBranchRequest.make ?description ?framework
               ?stage:(Option.map ~f:Values.Stage.of_json stage)
-              ?enableNotification ?enableAutoBuild
+              ?enableNotification ?enableAutoBuild ?enableSkewProtection
               ?environmentVariables:(Option.map
                                        ~f:Values.EnvironmentVariables.of_json
                                        environmentVariables)
               ?basicAuthCredentials ?enableBasicAuth ?enablePerformanceMode
               ?buildSpec ?ttl ?displayName ?enablePullRequestPreview
-              ?pullRequestEnvironmentName ?backendEnvironmentArn ~appId
-              ~branchName ()) (Some Values.UpdateBranchResult.to_json)
+              ?pullRequestEnvironmentName ?backendEnvironmentArn
+              ?backend:(Option.map ~f:Values.Backend.of_json backend)
+              ?computeRoleArn ~appId ~branchName ())
+           (Some Values.UpdateBranchResult.to_json)
            (Some Values.UpdateBranchResult.error_to_json)])
 let update_domain_association =
   Command.async ~summary:""
@@ -989,6 +1037,9 @@ let update_domain_association =
        and autoSubDomainIAMRole =
          flag "auto-sub-domain-i-a-m-role" (optional string)
            ~doc:"STRING AutoSubDomainIAMRole"
+       and certificateSettings =
+         flag "certificate-settings" (optional json_arg)
+           ~doc:"JSON CertificateSettings"
        and appId = flag "app-id" (required string) ~doc:"STRING AppId"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING DomainName" in
@@ -1002,8 +1053,11 @@ let update_domain_association =
               ?autoSubDomainCreationPatterns:(Option.map
                                                 ~f:Values.AutoSubDomainCreationPatterns.of_json
                                                 autoSubDomainCreationPatterns)
-              ?autoSubDomainIAMRole ~appId ~domainName ())
-           (Some Values.UpdateDomainAssociationResult.to_json)
+              ?autoSubDomainIAMRole
+              ?certificateSettings:(Option.map
+                                      ~f:Values.CertificateSettings.of_json
+                                      certificateSettings) ~appId ~domainName
+              ()) (Some Values.UpdateDomainAssociationResult.to_json)
            (Some Values.UpdateDomainAssociationResult.error_to_json)])
 let update_webhook =
   Command.async ~summary:""

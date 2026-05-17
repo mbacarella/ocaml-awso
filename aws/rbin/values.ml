@@ -88,6 +88,40 @@ module ResourceTagValue =
     let of_json j = string_of_json ~kind:"ResourceTagValue" j
     let to_json = simple_to_json to_value
   end
+module UnlockDelayUnit =
+  struct
+    type nonrec t =
+      | DAYS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | DAYS -> "DAYS" | Non_static_id s -> s
+    let of_string = function | "DAYS" -> DAYS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration UnlockDelayUnit" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"UnlockDelayUnit" j)
+    let to_json = simple_to_json to_value
+  end
+module UnlockDelayValue =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:30) >>= (fun () -> check_int_min i ~min:7));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for UnlockDelayValue" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module TagKey =
   struct
     type nonrec t = string
@@ -147,13 +181,41 @@ module Description =
     let of_json j = string_of_json ~kind:"Description" j
     let to_json = simple_to_json to_value
   end
+module LockState =
+  struct
+    type nonrec t =
+      | Locked 
+      | Pending_unlock 
+      | Unlocked 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Locked -> "locked"
+      | Pending_unlock -> "pending_unlock"
+      | Unlocked -> "unlocked"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "locked" -> Locked
+      | "pending_unlock" -> Pending_unlock
+      | "unlocked" -> Unlocked
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LockState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LockState" j)
+    let to_json = simple_to_json to_value
+  end
 module RetentionPeriod =
   struct
     type nonrec t =
       {
       retentionPeriodValue: RetentionPeriodValue.t
         [@ocaml.doc
-          "The period value for which the retention rule is to retain resources. The period is measured using the unit specified for RetentionPeriodUnit."];
+          "The period value for which the retention rule is to retain resources, measured in days. The supported retention periods are: EBS volumes: 1 - 7 days EBS snapshots and EBS-backed AMIs: 1 - 365 days"];
       retentionPeriodUnit: RetentionPeriodUnit.t
         [@ocaml.doc
           "The unit of time in which the retention period is measured. Currently, only DAYS is supported."]}
@@ -177,16 +239,39 @@ module RetentionPeriod =
           (Xml.child_exn ~context:context_ xml_arg0 "RetentionPeriodValue") in
       make ~retentionPeriodUnit ~retentionPeriodValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retentionPeriodUnit =
-        field_map_exn json "RetentionPeriodUnit" RetentionPeriodUnit.of_json in
+        field_map_exn json__ "RetentionPeriodUnit"
+          RetentionPeriodUnit.of_json in
       let retentionPeriodValue =
-        field_map_exn json "RetentionPeriodValue"
+        field_map_exn json__ "RetentionPeriodValue"
           RetentionPeriodValue.of_json in
       make ~retentionPeriodUnit ~retentionPeriodValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the retention period for which the retention rule is to retain resources."]
+module RuleArn =
+  struct
+    type nonrec t = string
+    let context_ = "RuleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1011) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:\\S+:rbin:[a-z\\-0-9]{0,63}:[0-9]{12}:rule/[0-9a-zA-Z]{11}{0,1011}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RuleArn" j
+    let to_json = simple_to_json to_value
+  end
 module RuleIdentifier =
   struct
     type nonrec t = string
@@ -202,6 +287,30 @@ module RuleIdentifier =
     let of_json j = string_of_json ~kind:"RuleIdentifier" j
     let to_json = simple_to_json to_value
   end
+module ConflictExceptionReason =
+  struct
+    type nonrec t =
+      | INVALID_RULE_STATE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INVALID_RULE_STATE -> "INVALID_RULE_STATE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INVALID_RULE_STATE" -> INVALID_RULE_STATE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConflictExceptionReason" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ConflictExceptionReason" j)
+    let to_json = simple_to_json to_value
+  end
 module ErrorMessage =
   struct
     type nonrec t = string
@@ -213,27 +322,6 @@ module ErrorMessage =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ErrorMessage" j
-    let to_json = simple_to_json to_value
-  end
-module ResourceNotFoundExceptionReason =
-  struct
-    type nonrec t =
-      | RULE_NOT_FOUND 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | RULE_NOT_FOUND -> "RULE_NOT_FOUND" | Non_static_id s -> s
-    let of_string =
-      function | "RULE_NOT_FOUND" -> RULE_NOT_FOUND | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration ResourceNotFoundExceptionReason"
-           xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"ResourceNotFoundExceptionReason" j)
     let to_json = simple_to_json to_value
   end
 module ResourceTag =
@@ -262,40 +350,34 @@ module ResourceTag =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceTagKey") in
       make ?resourceTagValue ~resourceTagKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceTagValue =
-        field_map json "ResourceTagValue" ResourceTagValue.of_json in
+        field_map json__ "ResourceTagValue" ResourceTagValue.of_json in
       let resourceTagKey =
-        field_map_exn json "ResourceTagKey" ResourceTagKey.of_json in
+        field_map_exn json__ "ResourceTagKey" ResourceTagKey.of_json in
       make ?resourceTagValue ~resourceTagKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about the resource tags used to identify resources that are retained by the retention rule."]
-module ValidationExceptionReason =
+       "\\[Tag-level retention rules only\\] Information about the resource tags used to identify resources that are retained by the retention rule."]
+module ResourceNotFoundExceptionReason =
   struct
     type nonrec t =
-      | INVALID_PAGE_TOKEN 
-      | INVALID_PARAMETER_VALUE 
+      | RULE_NOT_FOUND 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function
-      | INVALID_PAGE_TOKEN -> "INVALID_PAGE_TOKEN"
-      | INVALID_PARAMETER_VALUE -> "INVALID_PARAMETER_VALUE"
-      | Non_static_id s -> s
+      function | RULE_NOT_FOUND -> "RULE_NOT_FOUND" | Non_static_id s -> s
     let of_string =
-      function
-      | "INVALID_PAGE_TOKEN" -> INVALID_PAGE_TOKEN
-      | "INVALID_PARAMETER_VALUE" -> INVALID_PARAMETER_VALUE
-      | x -> Non_static_id x
+      function | "RULE_NOT_FOUND" -> RULE_NOT_FOUND | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
       of_string
-        (string_of_xml ~kind:"enumeration ValidationExceptionReason" xml_arg0)
+        (string_of_xml ~kind:"enumeration ResourceNotFoundExceptionReason"
+           xml_arg0)
     let of_json j =
-      of_string (string_of_json ~kind:"ValidationExceptionReason" j)
+      of_string (string_of_json ~kind:"ResourceNotFoundExceptionReason" j)
     let to_json = simple_to_json to_value
   end
 module ServiceQuotaExceededExceptionReason =
@@ -324,6 +406,71 @@ module ServiceQuotaExceededExceptionReason =
         (string_of_json ~kind:"ServiceQuotaExceededExceptionReason" j)
     let to_json = simple_to_json to_value
   end
+module ValidationExceptionReason =
+  struct
+    type nonrec t =
+      | INVALID_PAGE_TOKEN 
+      | INVALID_PARAMETER_VALUE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INVALID_PAGE_TOKEN -> "INVALID_PAGE_TOKEN"
+      | INVALID_PARAMETER_VALUE -> "INVALID_PARAMETER_VALUE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INVALID_PAGE_TOKEN" -> INVALID_PAGE_TOKEN
+      | "INVALID_PARAMETER_VALUE" -> INVALID_PARAMETER_VALUE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ValidationExceptionReason" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ValidationExceptionReason" j)
+    let to_json = simple_to_json to_value
+  end
+module UnlockDelay =
+  struct
+    type nonrec t =
+      {
+      unlockDelayValue: UnlockDelayValue.t
+        [@ocaml.doc
+          "The unlock delay period, measured in the unit specified for UnlockDelayUnit."];
+      unlockDelayUnit: UnlockDelayUnit.t
+        [@ocaml.doc
+          "The unit of time in which to measure the unlock delay. Currently, the unlock delay can be measured only in days."]}
+    let context_ = "UnlockDelay"
+    let make ~unlockDelayValue =
+      fun ~unlockDelayUnit -> fun () -> { unlockDelayValue; unlockDelayUnit }
+    let to_value x =
+      structure_to_value
+        [("UnlockDelayValue",
+           (Some (UnlockDelayValue.to_value x.unlockDelayValue)));
+        ("UnlockDelayUnit",
+          (Some (UnlockDelayUnit.to_value x.unlockDelayUnit)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unlockDelayUnit =
+        UnlockDelayUnit.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "UnlockDelayUnit") in
+      let unlockDelayValue =
+        UnlockDelayValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "UnlockDelayValue") in
+      make ~unlockDelayUnit ~unlockDelayValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unlockDelayUnit =
+        field_map_exn json__ "UnlockDelayUnit" UnlockDelayUnit.of_json in
+      let unlockDelayValue =
+        field_map_exn json__ "UnlockDelayValue" UnlockDelayValue.of_json in
+      make ~unlockDelayUnit ~unlockDelayValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the retention rule unlock delay. The unlock delay is the period after which a retention rule can be modified or edited after it has been unlocked by a user with the required permissions. The retention rule can't be modified or deleted during the unlock delay."]
 module Tag =
   struct
     type nonrec t =
@@ -344,9 +491,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -361,19 +508,39 @@ module RuleSummary =
         [@ocaml.doc "The retention rule description."];
       retentionPeriod: RetentionPeriod.t option
         [@ocaml.doc
-          "Information about the retention period for which the retention rule is to retain resources."]}
+          "Information about the retention period for which the retention rule is to retain resources."];
+      lockState: LockState.t option
+        [@ocaml.doc
+          "\\[Region-level retention rules only\\] The lock state for the retention rule. locked - The retention rule is locked and can't be modified or deleted. pending_unlock - The retention rule has been unlocked but it is still within the unlock delay period. The retention rule can be modified or deleted only after the unlock delay period has expired. unlocked - The retention rule is unlocked and it can be modified or deleted by any user with the required permissions. null - The retention rule has never been locked. Once a retention rule has been locked, it can transition between the locked and unlocked states only; it can never transition back to null."];
+      ruleArn: RuleArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the retention rule."]}
     let make ?identifier =
       fun ?description ->
         fun ?retentionPeriod ->
-          fun () -> { identifier; description; retentionPeriod }
+          fun ?lockState ->
+            fun ?ruleArn ->
+              fun () ->
+                {
+                  identifier;
+                  description;
+                  retentionPeriod;
+                  lockState;
+                  ruleArn
+                }
     let to_value x =
       structure_to_value
         [("Identifier", (Option.map x.identifier ~f:RuleIdentifier.to_value));
         ("Description", (Option.map x.description ~f:Description.to_value));
         ("RetentionPeriod",
-          (Option.map x.retentionPeriod ~f:RetentionPeriod.to_value))]
+          (Option.map x.retentionPeriod ~f:RetentionPeriod.to_value));
+        ("LockState", (Option.map x.lockState ~f:LockState.to_value));
+        ("RuleArn", (Option.map x.ruleArn ~f:RuleArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ruleArn =
+        (Option.map ~f:RuleArn.of_xml) (Xml.child xml_arg0 "RuleArn") in
+      let lockState =
+        (Option.map ~f:LockState.of_xml) (Xml.child xml_arg0 "LockState") in
       let retentionPeriod =
         (Option.map ~f:RetentionPeriod.of_xml)
           (Xml.child xml_arg0 "RetentionPeriod") in
@@ -382,16 +549,77 @@ module RuleSummary =
       let identifier =
         (Option.map ~f:RuleIdentifier.of_xml)
           (Xml.child xml_arg0 "Identifier") in
-      make ?retentionPeriod ?description ?identifier ()
+      make ?ruleArn ?lockState ?retentionPeriod ?description ?identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ruleArn = field_map json__ "RuleArn" RuleArn.of_json in
+      let lockState = field_map json__ "LockState" LockState.of_json in
       let retentionPeriod =
-        field_map json "RetentionPeriod" RetentionPeriod.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let identifier = field_map json "Identifier" RuleIdentifier.of_json in
-      make ?retentionPeriod ?description ?identifier ()
+        field_map json__ "RetentionPeriod" RetentionPeriod.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let identifier = field_map json__ "Identifier" RuleIdentifier.of_json in
+      make ?ruleArn ?lockState ?retentionPeriod ?description ?identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a Recycle Bin retention rule."]
+module ConflictException =
+  struct
+    type nonrec t =
+      {
+      message: ErrorMessage.t option ;
+      reason: ConflictExceptionReason.t option
+        [@ocaml.doc "The reason for the exception."]}
+    let make ?message = fun ?reason -> fun () -> { message; reason }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("Reason", (Option.map x.reason ~f:ConflictExceptionReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:ConflictExceptionReason.of_xml)
+          (Xml.child xml_arg0 "Reason") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "Reason" ConflictExceptionReason.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?reason ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The specified retention rule lock request can't be completed."]
+module ExcludeResourceTags =
+  struct
+    type nonrec t = ResourceTag.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceTag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceTag.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExcludeResourceTags" ~of_json:ResourceTag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module InternalServerException =
   struct
     type nonrec t = {
@@ -406,8 +634,8 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -434,10 +662,10 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reason =
-        field_map json "Reason" ResourceNotFoundExceptionReason.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+        field_map json__ "Reason" ResourceNotFoundExceptionReason.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource was not found."]
@@ -449,6 +677,9 @@ module ResourceTags =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -474,17 +705,20 @@ module ResourceType =
     type nonrec t =
       | EBS_SNAPSHOT 
       | EC2_IMAGE 
+      | EBS_VOLUME 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | EBS_SNAPSHOT -> "EBS_SNAPSHOT"
       | EC2_IMAGE -> "EC2_IMAGE"
+      | EBS_VOLUME -> "EBS_VOLUME"
       | Non_static_id s -> s
     let of_string =
       function
       | "EBS_SNAPSHOT" -> EBS_SNAPSHOT
       | "EC2_IMAGE" -> EC2_IMAGE
+      | "EBS_VOLUME" -> EBS_VOLUME
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -519,85 +753,6 @@ module RuleStatus =
     let of_json j = of_string (string_of_json ~kind:"RuleStatus" j)
     let to_json = simple_to_json to_value
   end
-module ValidationException =
-  struct
-    type nonrec t =
-      {
-      message: ErrorMessage.t option ;
-      reason: ValidationExceptionReason.t option
-        [@ocaml.doc "The reason for the exception."]}
-    let make ?message = fun ?reason -> fun () -> { message; reason }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
-        ("Reason",
-          (Option.map x.reason ~f:ValidationExceptionReason.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let reason =
-        (Option.map ~f:ValidationExceptionReason.of_xml)
-          (Xml.child xml_arg0 "Reason") in
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?reason ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "Reason" ValidationExceptionReason.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?reason ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "One or more of the parameters in the request is not valid."]
-module RuleArn =
-  struct
-    type nonrec t = string
-    let context_ = "RuleArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:1011) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^arn:aws(-[a-z]{1,3}){0,2}:rbin:[a-z\\-0-9]{0,63}:[0-9]{12}:rule/[0-9a-zA-Z]{11}{0,1011}$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"RuleArn" j
-    let to_json = simple_to_json to_value
-  end
-module TagKeyList =
-  struct
-    type nonrec t = TagKey.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:200) >>=
-             (fun () -> check_list_min i ~min:0));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:TagKey.of_xml)
-    let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module ServiceQuotaExceededException =
   struct
     type nonrec t =
@@ -621,14 +776,111 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reason =
-        field_map json "Reason" ServiceQuotaExceededExceptionReason.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+        field_map json__ "Reason" ServiceQuotaExceededExceptionReason.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request would cause a service quota for the number of tags per resource to be exceeded."]
+module TimeStamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module ValidationException =
+  struct
+    type nonrec t =
+      {
+      message: ErrorMessage.t option ;
+      reason: ValidationExceptionReason.t option
+        [@ocaml.doc "The reason for the exception."]}
+    let make ?message = fun ?reason -> fun () -> { message; reason }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("Reason",
+          (Option.map x.reason ~f:ValidationExceptionReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:ValidationExceptionReason.of_xml)
+          (Xml.child xml_arg0 "Reason") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason =
+        field_map json__ "Reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?reason ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "One or more of the parameters in the request is not valid."]
+module TagKeyList =
+  struct
+    type nonrec t = TagKey.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TagKey.of_xml)
+    let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LockConfiguration =
+  struct
+    type nonrec t =
+      {
+      unlockDelay: UnlockDelay.t
+        [@ocaml.doc "Information about the retention rule unlock delay."]}
+    let context_ = "LockConfiguration"
+    let make ~unlockDelay = fun () -> { unlockDelay }
+    let to_value x =
+      structure_to_value
+        [("UnlockDelay", (Some (UnlockDelay.to_value x.unlockDelay)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unlockDelay =
+        UnlockDelay.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "UnlockDelay") in
+      make ~unlockDelay ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unlockDelay =
+        field_map_exn json__ "UnlockDelay" UnlockDelay.of_json in
+      make ~unlockDelay ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a retention rule lock configuration."]
 module TagList =
   struct
     type nonrec t = Tag.t list
@@ -638,6 +890,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -677,6 +932,9 @@ module RuleSummaryList =
   struct
     type nonrec t = RuleSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RuleSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -728,13 +986,26 @@ module UpdateRuleResponse =
         [@ocaml.doc "The resource type retained by the retention rule."];
       resourceTags: ResourceTags.t option
         [@ocaml.doc
-          "Information about the resource tags used to identify resources that are retained by the retention rule."];
+          "\\[Tag-level retention rules only\\] Information about the resource tags used to identify resources that are retained by the retention rule."];
       status: RuleStatus.t option
         [@ocaml.doc
-          "The state of the retention rule. Only retention rules that are in the available state retain resources."]}
+          "The state of the retention rule. Only retention rules that are in the available state retain resources."];
+      lockState: LockState.t option
+        [@ocaml.doc
+          "\\[Region-level retention rules only\\] The lock state for the retention rule. locked - The retention rule is locked and can't be modified or deleted. pending_unlock - The retention rule has been unlocked but it is still within the unlock delay period. The retention rule can be modified or deleted only after the unlock delay period has expired. unlocked - The retention rule is unlocked and it can be modified or deleted by any user with the required permissions. null - The retention rule has never been locked. Once a retention rule has been locked, it can transition between the locked and unlocked states only; it can never transition back to null."];
+      lockEndTime: TimeStamp.t option
+        [@ocaml.doc
+          "The date and time at which the unlock delay is set to expire. Only returned for retention rules that have been unlocked and that are still within the unlock delay period."];
+      ruleArn: RuleArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the retention rule."];
+      excludeResourceTags: ExcludeResourceTags.t option
+        [@ocaml.doc
+          "\\[Region-level retention rules only\\] Information about the exclusion tags used to identify resources that are to be excluded, or ignored, by the retention rule."]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?identifier =
@@ -743,21 +1014,34 @@ module UpdateRuleResponse =
           fun ?resourceType ->
             fun ?resourceTags ->
               fun ?status ->
-                fun () ->
-                  {
-                    identifier;
-                    retentionPeriod;
-                    description;
-                    resourceType;
-                    resourceTags;
-                    status
-                  }
+                fun ?lockState ->
+                  fun ?lockEndTime ->
+                    fun ?ruleArn ->
+                      fun ?excludeResourceTags ->
+                        fun () ->
+                          {
+                            identifier;
+                            retentionPeriod;
+                            description;
+                            resourceType;
+                            resourceTags;
+                            status;
+                            lockState;
+                            lockEndTime;
+                            ruleArn;
+                            excludeResourceTags
+                          }
     let error_of_json name json =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -765,16 +1049,25 @@ module UpdateRuleResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -783,6 +1076,10 @@ module UpdateRuleResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -802,9 +1099,23 @@ module UpdateRuleResponse =
           (Option.map x.resourceType ~f:ResourceType.to_value));
         ("ResourceTags",
           (Option.map x.resourceTags ~f:ResourceTags.to_value));
-        ("Status", (Option.map x.status ~f:RuleStatus.to_value))]
+        ("Status", (Option.map x.status ~f:RuleStatus.to_value));
+        ("LockState", (Option.map x.lockState ~f:LockState.to_value));
+        ("LockEndTime", (Option.map x.lockEndTime ~f:TimeStamp.to_value));
+        ("RuleArn", (Option.map x.ruleArn ~f:RuleArn.to_value));
+        ("ExcludeResourceTags",
+          (Option.map x.excludeResourceTags ~f:ExcludeResourceTags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let excludeResourceTags =
+        (Option.map ~f:ExcludeResourceTags.of_xml)
+          (Xml.child xml_arg0 "ExcludeResourceTags") in
+      let ruleArn =
+        (Option.map ~f:RuleArn.of_xml) (Xml.child xml_arg0 "RuleArn") in
+      let lockEndTime =
+        (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "LockEndTime") in
+      let lockState =
+        (Option.map ~f:LockState.of_xml) (Xml.child xml_arg0 "LockState") in
       let status =
         (Option.map ~f:RuleStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let resourceTags =
@@ -821,22 +1132,29 @@ module UpdateRuleResponse =
       let identifier =
         (Option.map ~f:RuleIdentifier.of_xml)
           (Xml.child xml_arg0 "Identifier") in
-      make ?status ?resourceTags ?resourceType ?description ?retentionPeriod
-        ?identifier ()
+      make ?excludeResourceTags ?ruleArn ?lockEndTime ?lockState ?status
+        ?resourceTags ?resourceType ?description ?retentionPeriod ?identifier
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" RuleStatus.of_json in
-      let resourceTags = field_map json "ResourceTags" ResourceTags.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
-      let description = field_map json "Description" Description.of_json in
+    let of_json json__ =
+      let excludeResourceTags =
+        field_map json__ "ExcludeResourceTags" ExcludeResourceTags.of_json in
+      let ruleArn = field_map json__ "RuleArn" RuleArn.of_json in
+      let lockEndTime = field_map json__ "LockEndTime" TimeStamp.of_json in
+      let lockState = field_map json__ "LockState" LockState.of_json in
+      let status = field_map json__ "Status" RuleStatus.of_json in
+      let resourceTags = field_map json__ "ResourceTags" ResourceTags.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       let retentionPeriod =
-        field_map json "RetentionPeriod" RetentionPeriod.of_json in
-      let identifier = field_map json "Identifier" RuleIdentifier.of_json in
-      make ?status ?resourceTags ?resourceType ?description ?retentionPeriod
-        ?identifier ()
+        field_map json__ "RetentionPeriod" RetentionPeriod.of_json in
+      let identifier = field_map json__ "Identifier" RuleIdentifier.of_json in
+      make ?excludeResourceTags ?ruleArn ?lockEndTime ?lockState ?status
+        ?resourceTags ?resourceType ?description ?retentionPeriod ?identifier
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an existing Recycle Bin retention rule. For more information, see Update Recycle Bin retention rules in the Amazon Elastic Compute Cloud User Guide."]
+       "Updates an existing Recycle Bin retention rule. You can update a retention rule's description, resource tags, and retention period at any time after creation. You can't update a retention rule's resource type after creation. For more information, see Update Recycle Bin retention rules in the Amazon Elastic Compute Cloud User Guide."]
 module UpdateRuleRequest =
   struct
     type nonrec t =
@@ -850,24 +1168,29 @@ module UpdateRuleRequest =
         [@ocaml.doc "The retention rule description."];
       resourceType: ResourceType.t option
         [@ocaml.doc
-          "The resource type to be retained by the retention rule. Currently, only Amazon EBS snapshots and EBS-backed AMIs are supported. To retain snapshots, specify EBS_SNAPSHOT. To retain EBS-backed AMIs, specify EC2_IMAGE."];
+          "This parameter is currently not supported. You can't update a retention rule's resource type after creation."];
       resourceTags: ResourceTags.t option
         [@ocaml.doc
-          "Specifies the resource tags to use to identify resources that are to be retained by a tag-level retention rule. For tag-level retention rules, only deleted resources, of the specified resource type, that have one or more of the specified tag key and value pairs are retained. If a resource is deleted, but it does not have any of the specified tag key and value pairs, it is immediately deleted without being retained by the retention rule. You can add the same tag key and value pair to a maximum or five retention rules. To create a Region-level retention rule, omit this parameter. A Region-level retention rule does not have any resource tags specified. It retains all deleted resources of the specified resource type in the Region in which the rule is created, even if the resources are not tagged."]}
+          "\\[Tag-level retention rules only\\] Specifies the resource tags to use to identify resources that are to be retained by a tag-level retention rule. For tag-level retention rules, only deleted resources, of the specified resource type, that have one or more of the specified tag key and value pairs are retained. If a resource is deleted, but it does not have any of the specified tag key and value pairs, it is immediately deleted without being retained by the retention rule. You can add the same tag key and value pair to a maximum or five retention rules. To create a Region-level retention rule, omit this parameter. A Region-level retention rule does not have any resource tags specified. It retains all deleted resources of the specified resource type in the Region in which the rule is created, even if the resources are not tagged."];
+      excludeResourceTags: ExcludeResourceTags.t option
+        [@ocaml.doc
+          "\\[Region-level retention rules only\\] Specifies the exclusion tags to use to identify resources that are to be excluded, or ignored, by a Region-level retention rule. Resources that have any of these tags are not retained by the retention rule upon deletion. You can't specify exclusion tags for tag-level retention rules."]}
     let context_ = "UpdateRuleRequest"
     let make ?retentionPeriod =
       fun ?description ->
         fun ?resourceType ->
           fun ?resourceTags ->
-            fun ~identifier ->
-              fun () ->
-                {
-                  retentionPeriod;
-                  description;
-                  resourceType;
-                  resourceTags;
-                  identifier
-                }
+            fun ?excludeResourceTags ->
+              fun ~identifier ->
+                fun () ->
+                  {
+                    retentionPeriod;
+                    description;
+                    resourceType;
+                    resourceTags;
+                    excludeResourceTags;
+                    identifier
+                  }
     let to_value x =
       structure_to_value
         [("identifier", (Some (RuleIdentifier.to_value x.identifier)));
@@ -877,9 +1200,14 @@ module UpdateRuleRequest =
         ("ResourceType",
           (Option.map x.resourceType ~f:ResourceType.to_value));
         ("ResourceTags",
-          (Option.map x.resourceTags ~f:ResourceTags.to_value))]
+          (Option.map x.resourceTags ~f:ResourceTags.to_value));
+        ("ExcludeResourceTags",
+          (Option.map x.excludeResourceTags ~f:ExcludeResourceTags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let excludeResourceTags =
+        (Option.map ~f:ExcludeResourceTags.of_xml)
+          (Xml.child xml_arg0 "ExcludeResourceTags") in
       let resourceTags =
         (Option.map ~f:ResourceTags.of_xml)
           (Xml.child xml_arg0 "ResourceTags") in
@@ -894,21 +1222,24 @@ module UpdateRuleRequest =
       let identifier =
         RuleIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "identifier") in
-      make ?resourceTags ?resourceType ?description ?retentionPeriod
-        ~identifier ()
+      make ?excludeResourceTags ?resourceTags ?resourceType ?description
+        ?retentionPeriod ~identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceTags = field_map json "ResourceTags" ResourceTags.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
-      let description = field_map json "Description" Description.of_json in
+    let of_json json__ =
+      let excludeResourceTags =
+        field_map json__ "ExcludeResourceTags" ExcludeResourceTags.of_json in
+      let resourceTags = field_map json__ "ResourceTags" ResourceTags.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       let retentionPeriod =
-        field_map json "RetentionPeriod" RetentionPeriod.of_json in
-      let identifier = field_map_exn json "Identifier" RuleIdentifier.of_json in
-      make ?resourceTags ?resourceType ?description ?retentionPeriod
-        ~identifier ()
+        field_map json__ "RetentionPeriod" RetentionPeriod.of_json in
+      let identifier =
+        field_map_exn json__ "Identifier" RuleIdentifier.of_json in
+      make ?excludeResourceTags ?resourceTags ?resourceType ?description
+        ?retentionPeriod ~identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an existing Recycle Bin retention rule. For more information, see Update Recycle Bin retention rules in the Amazon Elastic Compute Cloud User Guide."]
+       "Updates an existing Recycle Bin retention rule. You can update a retention rule's description, resource tags, and retention period at any time after creation. You can't update a retention rule's resource type after creation. For more information, see Update Recycle Bin retention rules in the Amazon Elastic Compute Cloud User Guide."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -992,12 +1323,220 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" RuleArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" RuleArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Unassigns a tag from a retention rule."]
+module UnlockRuleResponse =
+  struct
+    type nonrec t =
+      {
+      identifier: RuleIdentifier.t option
+        [@ocaml.doc "The unique ID of the retention rule."];
+      description: Description.t option
+        [@ocaml.doc "The retention rule description."];
+      resourceType: ResourceType.t option
+        [@ocaml.doc "The resource type retained by the retention rule."];
+      retentionPeriod: RetentionPeriod.t option ;
+      resourceTags: ResourceTags.t option
+        [@ocaml.doc
+          "\\[Tag-level retention rules only\\] Information about the resource tags used to identify resources that are retained by the retention rule."];
+      status: RuleStatus.t option
+        [@ocaml.doc
+          "The state of the retention rule. Only retention rules that are in the available state retain resources."];
+      lockConfiguration: LockConfiguration.t option
+        [@ocaml.doc
+          "Information about the retention rule lock configuration."];
+      lockState: LockState.t option
+        [@ocaml.doc
+          "\\[Region-level retention rules only\\] The lock state for the retention rule. locked - The retention rule is locked and can't be modified or deleted. pending_unlock - The retention rule has been unlocked but it is still within the unlock delay period. The retention rule can be modified or deleted only after the unlock delay period has expired. unlocked - The retention rule is unlocked and it can be modified or deleted by any user with the required permissions. null - The retention rule has never been locked. Once a retention rule has been locked, it can transition between the locked and unlocked states only; it can never transition back to null."];
+      lockEndTime: TimeStamp.t option
+        [@ocaml.doc
+          "The date and time at which the unlock delay is set to expire. Only returned for retention rules that have been unlocked and that are still within the unlock delay period."];
+      ruleArn: RuleArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the retention rule."];
+      excludeResourceTags: ExcludeResourceTags.t option
+        [@ocaml.doc
+          "\\[Region-level retention rules only\\] Information about the exclusion tags used to identify resources that are to be excluded, or ignored, by the retention rule."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?identifier =
+      fun ?description ->
+        fun ?resourceType ->
+          fun ?retentionPeriod ->
+            fun ?resourceTags ->
+              fun ?status ->
+                fun ?lockConfiguration ->
+                  fun ?lockState ->
+                    fun ?lockEndTime ->
+                      fun ?ruleArn ->
+                        fun ?excludeResourceTags ->
+                          fun () ->
+                            {
+                              identifier;
+                              description;
+                              resourceType;
+                              retentionPeriod;
+                              resourceTags;
+                              status;
+                              lockConfiguration;
+                              lockState;
+                              lockEndTime;
+                              ruleArn;
+                              excludeResourceTags
+                            }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Identifier", (Option.map x.identifier ~f:RuleIdentifier.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType ~f:ResourceType.to_value));
+        ("RetentionPeriod",
+          (Option.map x.retentionPeriod ~f:RetentionPeriod.to_value));
+        ("ResourceTags",
+          (Option.map x.resourceTags ~f:ResourceTags.to_value));
+        ("Status", (Option.map x.status ~f:RuleStatus.to_value));
+        ("LockConfiguration",
+          (Option.map x.lockConfiguration ~f:LockConfiguration.to_value));
+        ("LockState", (Option.map x.lockState ~f:LockState.to_value));
+        ("LockEndTime", (Option.map x.lockEndTime ~f:TimeStamp.to_value));
+        ("RuleArn", (Option.map x.ruleArn ~f:RuleArn.to_value));
+        ("ExcludeResourceTags",
+          (Option.map x.excludeResourceTags ~f:ExcludeResourceTags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excludeResourceTags =
+        (Option.map ~f:ExcludeResourceTags.of_xml)
+          (Xml.child xml_arg0 "ExcludeResourceTags") in
+      let ruleArn =
+        (Option.map ~f:RuleArn.of_xml) (Xml.child xml_arg0 "RuleArn") in
+      let lockEndTime =
+        (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "LockEndTime") in
+      let lockState =
+        (Option.map ~f:LockState.of_xml) (Xml.child xml_arg0 "LockState") in
+      let lockConfiguration =
+        (Option.map ~f:LockConfiguration.of_xml)
+          (Xml.child xml_arg0 "LockConfiguration") in
+      let status =
+        (Option.map ~f:RuleStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let resourceTags =
+        (Option.map ~f:ResourceTags.of_xml)
+          (Xml.child xml_arg0 "ResourceTags") in
+      let retentionPeriod =
+        (Option.map ~f:RetentionPeriod.of_xml)
+          (Xml.child xml_arg0 "RetentionPeriod") in
+      let resourceType =
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let identifier =
+        (Option.map ~f:RuleIdentifier.of_xml)
+          (Xml.child xml_arg0 "Identifier") in
+      make ?excludeResourceTags ?ruleArn ?lockEndTime ?lockState
+        ?lockConfiguration ?status ?resourceTags ?retentionPeriod
+        ?resourceType ?description ?identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excludeResourceTags =
+        field_map json__ "ExcludeResourceTags" ExcludeResourceTags.of_json in
+      let ruleArn = field_map json__ "RuleArn" RuleArn.of_json in
+      let lockEndTime = field_map json__ "LockEndTime" TimeStamp.of_json in
+      let lockState = field_map json__ "LockState" LockState.of_json in
+      let lockConfiguration =
+        field_map json__ "LockConfiguration" LockConfiguration.of_json in
+      let status = field_map json__ "Status" RuleStatus.of_json in
+      let resourceTags = field_map json__ "ResourceTags" ResourceTags.of_json in
+      let retentionPeriod =
+        field_map json__ "RetentionPeriod" RetentionPeriod.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let identifier = field_map json__ "Identifier" RuleIdentifier.of_json in
+      make ?excludeResourceTags ?ruleArn ?lockEndTime ?lockState
+        ?lockConfiguration ?status ?resourceTags ?retentionPeriod
+        ?resourceType ?description ?identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Unlocks a retention rule. After a retention rule is unlocked, it can be modified or deleted only after the unlock delay period expires."]
+module UnlockRuleRequest =
+  struct
+    type nonrec t =
+      {
+      identifier: RuleIdentifier.t
+        [@ocaml.doc "The unique ID of the retention rule."]}
+    let context_ = "UnlockRuleRequest"
+    let make ~identifier = fun () -> { identifier }
+    let to_value x =
+      structure_to_value
+        [("identifier", (Some (RuleIdentifier.to_value x.identifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identifier =
+        RuleIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "identifier") in
+      make ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identifier =
+        field_map_exn json__ "Identifier" RuleIdentifier.of_json in
+      make ~identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Unlocks a retention rule. After a retention rule is unlocked, it can be modified or deleted only after the unlock delay period expires."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -1090,12 +1629,222 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" RuleArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" RuleArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Assigns tags to the specified retention rule."]
+module LockRuleResponse =
+  struct
+    type nonrec t =
+      {
+      identifier: RuleIdentifier.t option
+        [@ocaml.doc "The unique ID of the retention rule."];
+      description: Description.t option
+        [@ocaml.doc "The retention rule description."];
+      resourceType: ResourceType.t option
+        [@ocaml.doc "The resource type retained by the retention rule."];
+      retentionPeriod: RetentionPeriod.t option ;
+      resourceTags: ResourceTags.t option
+        [@ocaml.doc
+          "\\[Tag-level retention rules only\\] Information about the resource tags used to identify resources that are retained by the retention rule."];
+      status: RuleStatus.t option
+        [@ocaml.doc
+          "The state of the retention rule. Only retention rules that are in the available state retain resources."];
+      lockConfiguration: LockConfiguration.t option
+        [@ocaml.doc
+          "Information about the retention rule lock configuration."];
+      lockState: LockState.t option
+        [@ocaml.doc
+          "\\[Region-level retention rules only\\] The lock state for the retention rule. locked - The retention rule is locked and can't be modified or deleted. pending_unlock - The retention rule has been unlocked but it is still within the unlock delay period. The retention rule can be modified or deleted only after the unlock delay period has expired. unlocked - The retention rule is unlocked and it can be modified or deleted by any user with the required permissions. null - The retention rule has never been locked. Once a retention rule has been locked, it can transition between the locked and unlocked states only; it can never transition back to null."];
+      ruleArn: RuleArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the retention rule."];
+      excludeResourceTags: ExcludeResourceTags.t option
+        [@ocaml.doc
+          "\\[Region-level retention rules only\\] Information about the exclusion tags used to identify resources that are to be excluded, or ignored, by the retention rule."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?identifier =
+      fun ?description ->
+        fun ?resourceType ->
+          fun ?retentionPeriod ->
+            fun ?resourceTags ->
+              fun ?status ->
+                fun ?lockConfiguration ->
+                  fun ?lockState ->
+                    fun ?ruleArn ->
+                      fun ?excludeResourceTags ->
+                        fun () ->
+                          {
+                            identifier;
+                            description;
+                            resourceType;
+                            retentionPeriod;
+                            resourceTags;
+                            status;
+                            lockConfiguration;
+                            lockState;
+                            ruleArn;
+                            excludeResourceTags
+                          }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Identifier", (Option.map x.identifier ~f:RuleIdentifier.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType ~f:ResourceType.to_value));
+        ("RetentionPeriod",
+          (Option.map x.retentionPeriod ~f:RetentionPeriod.to_value));
+        ("ResourceTags",
+          (Option.map x.resourceTags ~f:ResourceTags.to_value));
+        ("Status", (Option.map x.status ~f:RuleStatus.to_value));
+        ("LockConfiguration",
+          (Option.map x.lockConfiguration ~f:LockConfiguration.to_value));
+        ("LockState", (Option.map x.lockState ~f:LockState.to_value));
+        ("RuleArn", (Option.map x.ruleArn ~f:RuleArn.to_value));
+        ("ExcludeResourceTags",
+          (Option.map x.excludeResourceTags ~f:ExcludeResourceTags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excludeResourceTags =
+        (Option.map ~f:ExcludeResourceTags.of_xml)
+          (Xml.child xml_arg0 "ExcludeResourceTags") in
+      let ruleArn =
+        (Option.map ~f:RuleArn.of_xml) (Xml.child xml_arg0 "RuleArn") in
+      let lockState =
+        (Option.map ~f:LockState.of_xml) (Xml.child xml_arg0 "LockState") in
+      let lockConfiguration =
+        (Option.map ~f:LockConfiguration.of_xml)
+          (Xml.child xml_arg0 "LockConfiguration") in
+      let status =
+        (Option.map ~f:RuleStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let resourceTags =
+        (Option.map ~f:ResourceTags.of_xml)
+          (Xml.child xml_arg0 "ResourceTags") in
+      let retentionPeriod =
+        (Option.map ~f:RetentionPeriod.of_xml)
+          (Xml.child xml_arg0 "RetentionPeriod") in
+      let resourceType =
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let identifier =
+        (Option.map ~f:RuleIdentifier.of_xml)
+          (Xml.child xml_arg0 "Identifier") in
+      make ?excludeResourceTags ?ruleArn ?lockState ?lockConfiguration
+        ?status ?resourceTags ?retentionPeriod ?resourceType ?description
+        ?identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excludeResourceTags =
+        field_map json__ "ExcludeResourceTags" ExcludeResourceTags.of_json in
+      let ruleArn = field_map json__ "RuleArn" RuleArn.of_json in
+      let lockState = field_map json__ "LockState" LockState.of_json in
+      let lockConfiguration =
+        field_map json__ "LockConfiguration" LockConfiguration.of_json in
+      let status = field_map json__ "Status" RuleStatus.of_json in
+      let resourceTags = field_map json__ "ResourceTags" ResourceTags.of_json in
+      let retentionPeriod =
+        field_map json__ "RetentionPeriod" RetentionPeriod.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let identifier = field_map json__ "Identifier" RuleIdentifier.of_json in
+      make ?excludeResourceTags ?ruleArn ?lockState ?lockConfiguration
+        ?status ?resourceTags ?retentionPeriod ?resourceType ?description
+        ?identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Locks a Region-level retention rule. A locked retention rule can't be modified or deleted. You can't lock tag-level retention rules, or Region-level retention rules that have exclusion tags."]
+module LockRuleRequest =
+  struct
+    type nonrec t =
+      {
+      identifier: RuleIdentifier.t
+        [@ocaml.doc "The unique ID of the retention rule."];
+      lockConfiguration: LockConfiguration.t
+        [@ocaml.doc
+          "Information about the retention rule lock configuration."]}
+    let context_ = "LockRuleRequest"
+    let make ~identifier =
+      fun ~lockConfiguration -> fun () -> { identifier; lockConfiguration }
+    let to_value x =
+      structure_to_value
+        [("identifier", (Some (RuleIdentifier.to_value x.identifier)));
+        ("LockConfiguration",
+          (Some (LockConfiguration.to_value x.lockConfiguration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lockConfiguration =
+        LockConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LockConfiguration") in
+      let identifier =
+        RuleIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "identifier") in
+      make ~lockConfiguration ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lockConfiguration =
+        field_map_exn json__ "LockConfiguration" LockConfiguration.of_json in
+      let identifier =
+        field_map_exn json__ "Identifier" RuleIdentifier.of_json in
+      make ~lockConfiguration ~identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Locks a Region-level retention rule. A locked retention rule can't be modified or deleted. You can't lock tag-level retention rules, or Region-level retention rules that have exclusion tags."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -1156,8 +1905,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags assigned to a retention rule."]
 module ListTagsForResourceRequest =
@@ -1178,8 +1927,8 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" RuleArn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" RuleArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags assigned to a retention rule."]
@@ -1241,9 +1990,9 @@ module ListRulesResponse =
         (Option.map ~f:RuleSummaryList.of_xml) (Xml.child xml_arg0 "Rules") in
       make ?nextToken ?rules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let rules = field_map json "Rules" RuleSummaryList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let rules = field_map json__ "Rules" RuleSummaryList.of_json in
       make ?nextToken ?rules ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the Recycle Bin retention rules in the Region."]
@@ -1258,25 +2007,49 @@ module ListRulesRequest =
         [@ocaml.doc "The token for the next page of results."];
       resourceType: ResourceType.t
         [@ocaml.doc
-          "The resource type retained by the retention rule. Only retention rules that retain the specified resource type are listed. Currently, only Amazon EBS snapshots and EBS-backed AMIs are supported. To list retention rules that retain snapshots, specify EBS_SNAPSHOT. To list retention rules that retain EBS-backed AMIs, specify EC2_IMAGE."];
+          "The resource type retained by the retention rule. Only retention rules that retain the specified resource type are listed. Currently, only EBS volumes, EBS snapshots, and EBS-backed AMIs are supported. To list retention rules that retain EBS volumes, specify EBS_VOLUME. To list retention rules that retain EBS snapshots, specify EBS_SNAPSHOT. To list retention rules that retain EBS-backed AMIs, specify EC2_IMAGE."];
       resourceTags: ResourceTags.t option
         [@ocaml.doc
-          "Information about the resource tags used to identify resources that are retained by the retention rule."]}
+          "\\[Tag-level retention rules only\\] Information about the resource tags used to identify resources that are retained by the retention rule."];
+      lockState: LockState.t option
+        [@ocaml.doc
+          "The lock state of the retention rules to list. Only retention rules with the specified lock state are returned."];
+      excludeResourceTags: ExcludeResourceTags.t option
+        [@ocaml.doc
+          "\\[Region-level retention rules only\\] Information about the exclusion tags used to identify resources that are to be excluded, or ignored, by the retention rule."]}
     let context_ = "ListRulesRequest"
     let make ?maxResults =
       fun ?nextToken ->
         fun ?resourceTags ->
-          fun ~resourceType ->
-            fun () -> { maxResults; nextToken; resourceTags; resourceType }
+          fun ?lockState ->
+            fun ?excludeResourceTags ->
+              fun ~resourceType ->
+                fun () ->
+                  {
+                    maxResults;
+                    nextToken;
+                    resourceTags;
+                    lockState;
+                    excludeResourceTags;
+                    resourceType
+                  }
     let to_value x =
       structure_to_value
         [("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("ResourceType", (Some (ResourceType.to_value x.resourceType)));
         ("ResourceTags",
-          (Option.map x.resourceTags ~f:ResourceTags.to_value))]
+          (Option.map x.resourceTags ~f:ResourceTags.to_value));
+        ("LockState", (Option.map x.lockState ~f:LockState.to_value));
+        ("ExcludeResourceTags",
+          (Option.map x.excludeResourceTags ~f:ExcludeResourceTags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let excludeResourceTags =
+        (Option.map ~f:ExcludeResourceTags.of_xml)
+          (Xml.child xml_arg0 "ExcludeResourceTags") in
+      let lockState =
+        (Option.map ~f:LockState.of_xml) (Xml.child xml_arg0 "LockState") in
       let resourceTags =
         (Option.map ~f:ResourceTags.of_xml)
           (Xml.child xml_arg0 "ResourceTags") in
@@ -1287,15 +2060,20 @@ module ListRulesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      make ?resourceTags ~resourceType ?nextToken ?maxResults ()
+      make ?excludeResourceTags ?lockState ?resourceTags ~resourceType
+        ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceTags = field_map json "ResourceTags" ResourceTags.of_json in
+    let of_json json__ =
+      let excludeResourceTags =
+        field_map json__ "ExcludeResourceTags" ExcludeResourceTags.of_json in
+      let lockState = field_map json__ "LockState" LockState.of_json in
+      let resourceTags = field_map json__ "ResourceTags" ResourceTags.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" ResourceType.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      make ?resourceTags ~resourceType ?nextToken ?maxResults ()
+        field_map_exn json__ "ResourceType" ResourceType.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ?excludeResourceTags ?lockState ?resourceTags ~resourceType
+        ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the Recycle Bin retention rules in the Region."]
 module GetRuleResponse =
@@ -1313,10 +2091,24 @@ module GetRuleResponse =
           "Information about the retention period for which the retention rule is to retain resources."];
       resourceTags: ResourceTags.t option
         [@ocaml.doc
-          "Information about the resource tags used to identify resources that are retained by the retention rule."];
+          "\\[Tag-level retention rules only\\] Information about the resource tags used to identify resources that are retained by the retention rule."];
       status: RuleStatus.t option
         [@ocaml.doc
-          "The state of the retention rule. Only retention rules that are in the available state retain resources."]}
+          "The state of the retention rule. Only retention rules that are in the available state retain resources."];
+      lockConfiguration: LockConfiguration.t option
+        [@ocaml.doc
+          "Information about the retention rule lock configuration."];
+      lockState: LockState.t option
+        [@ocaml.doc
+          "\\[Region-level retention rules only\\] The lock state for the retention rule. locked - The retention rule is locked and can't be modified or deleted. pending_unlock - The retention rule has been unlocked but it is still within the unlock delay period. The retention rule can be modified or deleted only after the unlock delay period has expired. unlocked - The retention rule is unlocked and it can be modified or deleted by any user with the required permissions. null - The retention rule has never been locked. Once a retention rule has been locked, it can transition between the locked and unlocked states only; it can never transition back to null."];
+      lockEndTime: TimeStamp.t option
+        [@ocaml.doc
+          "The date and time at which the unlock delay is set to expire. Only returned for retention rules that have been unlocked and that are still within the unlock delay period."];
+      ruleArn: RuleArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the retention rule."];
+      excludeResourceTags: ExcludeResourceTags.t option
+        [@ocaml.doc
+          "\\[Region-level retention rules only\\] Information about the exclusion tags used to identify resources that are to be excluded, or ignored, by the retention rule."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -1328,15 +2120,25 @@ module GetRuleResponse =
           fun ?retentionPeriod ->
             fun ?resourceTags ->
               fun ?status ->
-                fun () ->
-                  {
-                    identifier;
-                    description;
-                    resourceType;
-                    retentionPeriod;
-                    resourceTags;
-                    status
-                  }
+                fun ?lockConfiguration ->
+                  fun ?lockState ->
+                    fun ?lockEndTime ->
+                      fun ?ruleArn ->
+                        fun ?excludeResourceTags ->
+                          fun () ->
+                            {
+                              identifier;
+                              description;
+                              resourceType;
+                              retentionPeriod;
+                              resourceTags;
+                              status;
+                              lockConfiguration;
+                              lockState;
+                              lockEndTime;
+                              ruleArn;
+                              excludeResourceTags
+                            }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -1387,9 +2189,28 @@ module GetRuleResponse =
           (Option.map x.retentionPeriod ~f:RetentionPeriod.to_value));
         ("ResourceTags",
           (Option.map x.resourceTags ~f:ResourceTags.to_value));
-        ("Status", (Option.map x.status ~f:RuleStatus.to_value))]
+        ("Status", (Option.map x.status ~f:RuleStatus.to_value));
+        ("LockConfiguration",
+          (Option.map x.lockConfiguration ~f:LockConfiguration.to_value));
+        ("LockState", (Option.map x.lockState ~f:LockState.to_value));
+        ("LockEndTime", (Option.map x.lockEndTime ~f:TimeStamp.to_value));
+        ("RuleArn", (Option.map x.ruleArn ~f:RuleArn.to_value));
+        ("ExcludeResourceTags",
+          (Option.map x.excludeResourceTags ~f:ExcludeResourceTags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let excludeResourceTags =
+        (Option.map ~f:ExcludeResourceTags.of_xml)
+          (Xml.child xml_arg0 "ExcludeResourceTags") in
+      let ruleArn =
+        (Option.map ~f:RuleArn.of_xml) (Xml.child xml_arg0 "RuleArn") in
+      let lockEndTime =
+        (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "LockEndTime") in
+      let lockState =
+        (Option.map ~f:LockState.of_xml) (Xml.child xml_arg0 "LockState") in
+      let lockConfiguration =
+        (Option.map ~f:LockConfiguration.of_xml)
+          (Xml.child xml_arg0 "LockConfiguration") in
       let status =
         (Option.map ~f:RuleStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let resourceTags =
@@ -1406,19 +2227,28 @@ module GetRuleResponse =
       let identifier =
         (Option.map ~f:RuleIdentifier.of_xml)
           (Xml.child xml_arg0 "Identifier") in
-      make ?status ?resourceTags ?retentionPeriod ?resourceType ?description
-        ?identifier ()
+      make ?excludeResourceTags ?ruleArn ?lockEndTime ?lockState
+        ?lockConfiguration ?status ?resourceTags ?retentionPeriod
+        ?resourceType ?description ?identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" RuleStatus.of_json in
-      let resourceTags = field_map json "ResourceTags" ResourceTags.of_json in
+    let of_json json__ =
+      let excludeResourceTags =
+        field_map json__ "ExcludeResourceTags" ExcludeResourceTags.of_json in
+      let ruleArn = field_map json__ "RuleArn" RuleArn.of_json in
+      let lockEndTime = field_map json__ "LockEndTime" TimeStamp.of_json in
+      let lockState = field_map json__ "LockState" LockState.of_json in
+      let lockConfiguration =
+        field_map json__ "LockConfiguration" LockConfiguration.of_json in
+      let status = field_map json__ "Status" RuleStatus.of_json in
+      let resourceTags = field_map json__ "ResourceTags" ResourceTags.of_json in
       let retentionPeriod =
-        field_map json "RetentionPeriod" RetentionPeriod.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let identifier = field_map json "Identifier" RuleIdentifier.of_json in
-      make ?status ?resourceTags ?retentionPeriod ?resourceType ?description
-        ?identifier ()
+        field_map json__ "RetentionPeriod" RetentionPeriod.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let identifier = field_map json__ "Identifier" RuleIdentifier.of_json in
+      make ?excludeResourceTags ?ruleArn ?lockEndTime ?lockState
+        ?lockConfiguration ?status ?resourceTags ?retentionPeriod
+        ?resourceType ?description ?identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a Recycle Bin retention rule."]
 module GetRuleRequest =
@@ -1439,8 +2269,9 @@ module GetRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "identifier") in
       make ~identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identifier = field_map_exn json "Identifier" RuleIdentifier.of_json in
+    let of_json json__ =
+      let identifier =
+        field_map_exn json__ "Identifier" RuleIdentifier.of_json in
       make ~identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a Recycle Bin retention rule."]
@@ -1448,13 +2279,16 @@ module DeleteRuleResponse =
   struct
     type nonrec t = unit
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
@@ -1466,6 +2300,8 @@ module DeleteRuleResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -1476,6 +2312,10 @@ module DeleteRuleResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -1520,8 +2360,9 @@ module DeleteRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "identifier") in
       make ~identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identifier = field_map_exn json "Identifier" RuleIdentifier.of_json in
+    let of_json json__ =
+      let identifier =
+        field_map_exn json__ "Identifier" RuleIdentifier.of_json in
       make ~identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1542,10 +2383,21 @@ module CreateRuleResponse =
         [@ocaml.doc "The resource type retained by the retention rule."];
       resourceTags: ResourceTags.t option
         [@ocaml.doc
-          "Information about the resource tags used to identify resources that are retained by the retention rule."];
+          "\\[Tag-level retention rules only\\] Information about the resource tags used to identify resources that are retained by the retention rule."];
       status: RuleStatus.t option
         [@ocaml.doc
-          "The state of the retention rule. Only retention rules that are in the available state retain resources."]}
+          "The state of the retention rule. Only retention rules that are in the available state retain resources."];
+      lockConfiguration: LockConfiguration.t option
+        [@ocaml.doc
+          "Information about the retention rule lock configuration."];
+      lockState: LockState.t option
+        [@ocaml.doc
+          "\\[Region-level retention rules only\\] The lock state for the retention rule. locked - The retention rule is locked and can't be modified or deleted. pending_unlock - The retention rule has been unlocked but it is still within the unlock delay period. The retention rule can be modified or deleted only after the unlock delay period has expired. unlocked - The retention rule is unlocked and it can be modified or deleted by any user with the required permissions. null - The retention rule has never been locked. Once a retention rule has been locked, it can transition between the locked and unlocked states only; it can never transition back to null."];
+      ruleArn: RuleArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the retention rule."];
+      excludeResourceTags: ExcludeResourceTags.t option
+        [@ocaml.doc
+          "\\[Region-level retention rules only\\] Information about the exclusion tags used to identify resources that are to be excluded, or ignored, by the retention rule."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
@@ -1558,16 +2410,24 @@ module CreateRuleResponse =
             fun ?resourceType ->
               fun ?resourceTags ->
                 fun ?status ->
-                  fun () ->
-                    {
-                      identifier;
-                      retentionPeriod;
-                      description;
-                      tags;
-                      resourceType;
-                      resourceTags;
-                      status
-                    }
+                  fun ?lockConfiguration ->
+                    fun ?lockState ->
+                      fun ?ruleArn ->
+                        fun ?excludeResourceTags ->
+                          fun () ->
+                            {
+                              identifier;
+                              retentionPeriod;
+                              description;
+                              tags;
+                              resourceType;
+                              resourceTags;
+                              status;
+                              lockConfiguration;
+                              lockState;
+                              ruleArn;
+                              excludeResourceTags
+                            }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -1621,9 +2481,25 @@ module CreateRuleResponse =
           (Option.map x.resourceType ~f:ResourceType.to_value));
         ("ResourceTags",
           (Option.map x.resourceTags ~f:ResourceTags.to_value));
-        ("Status", (Option.map x.status ~f:RuleStatus.to_value))]
+        ("Status", (Option.map x.status ~f:RuleStatus.to_value));
+        ("LockConfiguration",
+          (Option.map x.lockConfiguration ~f:LockConfiguration.to_value));
+        ("LockState", (Option.map x.lockState ~f:LockState.to_value));
+        ("RuleArn", (Option.map x.ruleArn ~f:RuleArn.to_value));
+        ("ExcludeResourceTags",
+          (Option.map x.excludeResourceTags ~f:ExcludeResourceTags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let excludeResourceTags =
+        (Option.map ~f:ExcludeResourceTags.of_xml)
+          (Xml.child xml_arg0 "ExcludeResourceTags") in
+      let ruleArn =
+        (Option.map ~f:RuleArn.of_xml) (Xml.child xml_arg0 "RuleArn") in
+      let lockState =
+        (Option.map ~f:LockState.of_xml) (Xml.child xml_arg0 "LockState") in
+      let lockConfiguration =
+        (Option.map ~f:LockConfiguration.of_xml)
+          (Xml.child xml_arg0 "LockConfiguration") in
       let status =
         (Option.map ~f:RuleStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let resourceTags =
@@ -1641,23 +2517,31 @@ module CreateRuleResponse =
       let identifier =
         (Option.map ~f:RuleIdentifier.of_xml)
           (Xml.child xml_arg0 "Identifier") in
-      make ?status ?resourceTags ?resourceType ?tags ?description
+      make ?excludeResourceTags ?ruleArn ?lockState ?lockConfiguration
+        ?status ?resourceTags ?resourceType ?tags ?description
         ?retentionPeriod ?identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" RuleStatus.of_json in
-      let resourceTags = field_map json "ResourceTags" ResourceTags.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let description = field_map json "Description" Description.of_json in
+    let of_json json__ =
+      let excludeResourceTags =
+        field_map json__ "ExcludeResourceTags" ExcludeResourceTags.of_json in
+      let ruleArn = field_map json__ "RuleArn" RuleArn.of_json in
+      let lockState = field_map json__ "LockState" LockState.of_json in
+      let lockConfiguration =
+        field_map json__ "LockConfiguration" LockConfiguration.of_json in
+      let status = field_map json__ "Status" RuleStatus.of_json in
+      let resourceTags = field_map json__ "ResourceTags" ResourceTags.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       let retentionPeriod =
-        field_map json "RetentionPeriod" RetentionPeriod.of_json in
-      let identifier = field_map json "Identifier" RuleIdentifier.of_json in
-      make ?status ?resourceTags ?resourceType ?tags ?description
+        field_map json__ "RetentionPeriod" RetentionPeriod.of_json in
+      let identifier = field_map json__ "Identifier" RuleIdentifier.of_json in
+      make ?excludeResourceTags ?ruleArn ?lockState ?lockConfiguration
+        ?status ?resourceTags ?resourceType ?tags ?description
         ?retentionPeriod ?identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a Recycle Bin retention rule. For more information, see Create Recycle Bin retention rules in the Amazon Elastic Compute Cloud User Guide."]
+       "Creates a Recycle Bin retention rule. You can create two types of retention rules: Tag-level retention rules - These retention rules use resource tags to identify the resources to protect. For each retention rule, you specify one or more tag key and value pairs. Resources (of the specified type) that have at least one of these tag key and value pairs are automatically retained in the Recycle Bin upon deletion. Use this type of retention rule to protect specific resources in your account based on their tags. Region-level retention rules - These retention rules, by default, apply to all of the resources (of the specified type) in the Region, even if the resources are not tagged. However, you can specify exclusion tags to exclude resources that have specific tags. Use this type of retention rule to protect all resources of a specific type in a Region. For more information, see Create Recycle Bin retention rules in the Amazon EBS User Guide."]
 module CreateRuleRequest =
   struct
     type nonrec t =
@@ -1672,24 +2556,34 @@ module CreateRuleRequest =
           "Information about the tags to assign to the retention rule."];
       resourceType: ResourceType.t
         [@ocaml.doc
-          "The resource type to be retained by the retention rule. Currently, only Amazon EBS snapshots and EBS-backed AMIs are supported. To retain snapshots, specify EBS_SNAPSHOT. To retain EBS-backed AMIs, specify EC2_IMAGE."];
+          "The resource type to be retained by the retention rule. Currently, only EBS volumes, EBS snapshots, and EBS-backed AMIs are supported. To retain EBS volumes, specify EBS_VOLUME. To retain EBS snapshots, specify EBS_SNAPSHOT To retain EBS-backed AMIs, specify EC2_IMAGE."];
       resourceTags: ResourceTags.t option
         [@ocaml.doc
-          "Specifies the resource tags to use to identify resources that are to be retained by a tag-level retention rule. For tag-level retention rules, only deleted resources, of the specified resource type, that have one or more of the specified tag key and value pairs are retained. If a resource is deleted, but it does not have any of the specified tag key and value pairs, it is immediately deleted without being retained by the retention rule. You can add the same tag key and value pair to a maximum or five retention rules. To create a Region-level retention rule, omit this parameter. A Region-level retention rule does not have any resource tags specified. It retains all deleted resources of the specified resource type in the Region in which the rule is created, even if the resources are not tagged."]}
+          "\\[Tag-level retention rules only\\] Specifies the resource tags to use to identify resources that are to be retained by a tag-level retention rule. For tag-level retention rules, only deleted resources, of the specified resource type, that have one or more of the specified tag key and value pairs are retained. If a resource is deleted, but it does not have any of the specified tag key and value pairs, it is immediately deleted without being retained by the retention rule. You can add the same tag key and value pair to a maximum or five retention rules. To create a Region-level retention rule, omit this parameter. A Region-level retention rule does not have any resource tags specified. It retains all deleted resources of the specified resource type in the Region in which the rule is created, even if the resources are not tagged."];
+      lockConfiguration: LockConfiguration.t option
+        [@ocaml.doc
+          "Information about the retention rule lock configuration."];
+      excludeResourceTags: ExcludeResourceTags.t option
+        [@ocaml.doc
+          "\\[Region-level retention rules only\\] Specifies the exclusion tags to use to identify resources that are to be excluded, or ignored, by a Region-level retention rule. Resources that have any of these tags are not retained by the retention rule upon deletion. You can't specify exclusion tags for tag-level retention rules."]}
     let context_ = "CreateRuleRequest"
     let make ?description =
       fun ?tags ->
         fun ?resourceTags ->
-          fun ~retentionPeriod ->
-            fun ~resourceType ->
-              fun () ->
-                {
-                  description;
-                  tags;
-                  resourceTags;
-                  retentionPeriod;
-                  resourceType
-                }
+          fun ?lockConfiguration ->
+            fun ?excludeResourceTags ->
+              fun ~retentionPeriod ->
+                fun ~resourceType ->
+                  fun () ->
+                    {
+                      description;
+                      tags;
+                      resourceTags;
+                      lockConfiguration;
+                      excludeResourceTags;
+                      retentionPeriod;
+                      resourceType
+                    }
     let to_value x =
       structure_to_value
         [("RetentionPeriod",
@@ -1698,9 +2592,19 @@ module CreateRuleRequest =
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("ResourceType", (Some (ResourceType.to_value x.resourceType)));
         ("ResourceTags",
-          (Option.map x.resourceTags ~f:ResourceTags.to_value))]
+          (Option.map x.resourceTags ~f:ResourceTags.to_value));
+        ("LockConfiguration",
+          (Option.map x.lockConfiguration ~f:LockConfiguration.to_value));
+        ("ExcludeResourceTags",
+          (Option.map x.excludeResourceTags ~f:ExcludeResourceTags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let excludeResourceTags =
+        (Option.map ~f:ExcludeResourceTags.of_xml)
+          (Xml.child xml_arg0 "ExcludeResourceTags") in
+      let lockConfiguration =
+        (Option.map ~f:LockConfiguration.of_xml)
+          (Xml.child xml_arg0 "LockConfiguration") in
       let resourceTags =
         (Option.map ~f:ResourceTags.of_xml)
           (Xml.child xml_arg0 "ResourceTags") in
@@ -1713,17 +2617,23 @@ module CreateRuleRequest =
       let retentionPeriod =
         RetentionPeriod.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RetentionPeriod") in
-      make ?resourceTags ~resourceType ?tags ?description ~retentionPeriod ()
+      make ?excludeResourceTags ?lockConfiguration ?resourceTags
+        ~resourceType ?tags ?description ~retentionPeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceTags = field_map json "ResourceTags" ResourceTags.of_json in
+    let of_json json__ =
+      let excludeResourceTags =
+        field_map json__ "ExcludeResourceTags" ExcludeResourceTags.of_json in
+      let lockConfiguration =
+        field_map json__ "LockConfiguration" LockConfiguration.of_json in
+      let resourceTags = field_map json__ "ResourceTags" ResourceTags.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" ResourceType.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let description = field_map json "Description" Description.of_json in
+        field_map_exn json__ "ResourceType" ResourceType.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       let retentionPeriod =
-        field_map_exn json "RetentionPeriod" RetentionPeriod.of_json in
-      make ?resourceTags ~resourceType ?tags ?description ~retentionPeriod ()
+        field_map_exn json__ "RetentionPeriod" RetentionPeriod.of_json in
+      make ?excludeResourceTags ?lockConfiguration ?resourceTags
+        ~resourceType ?tags ?description ~retentionPeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a Recycle Bin retention rule. For more information, see Create Recycle Bin retention rules in the Amazon Elastic Compute Cloud User Guide."]
+       "Creates a Recycle Bin retention rule. You can create two types of retention rules: Tag-level retention rules - These retention rules use resource tags to identify the resources to protect. For each retention rule, you specify one or more tag key and value pairs. Resources (of the specified type) that have at least one of these tag key and value pairs are automatically retained in the Recycle Bin upon deletion. Use this type of retention rule to protect specific resources in your account based on their tags. Region-level retention rules - These retention rules, by default, apply to all of the resources (of the specified type) in the Region, even if the resources are not tagged. However, you can specify exclusion tags to exclude resources that have specific tags. Use this type of retention rule to protect all resources of a specific type in a Region. For more information, see Create Recycle Bin retention rules in the Amazon EBS User Guide."]

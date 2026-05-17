@@ -7,121 +7,228 @@ type ('i, 'o, 'e) t =
   | CreateComputeEnvironment: (CreateComputeEnvironmentRequest.t,
   CreateComputeEnvironmentResponse.t, CreateComputeEnvironmentResponse.error)
   t 
+  | CreateConsumableResource: (CreateConsumableResourceRequest.t,
+  CreateConsumableResourceResponse.t, CreateConsumableResourceResponse.error)
+  t 
   | CreateJobQueue: (CreateJobQueueRequest.t, CreateJobQueueResponse.t,
   CreateJobQueueResponse.error) t 
+  | CreateQuotaShare: (CreateQuotaShareRequest.t, CreateQuotaShareResponse.t,
+  CreateQuotaShareResponse.error) t 
   | CreateSchedulingPolicy: (CreateSchedulingPolicyRequest.t,
   CreateSchedulingPolicyResponse.t, CreateSchedulingPolicyResponse.error) t 
+  | CreateServiceEnvironment: (CreateServiceEnvironmentRequest.t,
+  CreateServiceEnvironmentResponse.t, CreateServiceEnvironmentResponse.error)
+  t 
   | DeleteComputeEnvironment: (DeleteComputeEnvironmentRequest.t,
   DeleteComputeEnvironmentResponse.t, DeleteComputeEnvironmentResponse.error)
   t 
+  | DeleteConsumableResource: (DeleteConsumableResourceRequest.t,
+  DeleteConsumableResourceResponse.t, DeleteConsumableResourceResponse.error)
+  t 
   | DeleteJobQueue: (DeleteJobQueueRequest.t, DeleteJobQueueResponse.t,
   DeleteJobQueueResponse.error) t 
+  | DeleteQuotaShare: (DeleteQuotaShareRequest.t, DeleteQuotaShareResponse.t,
+  DeleteQuotaShareResponse.error) t 
   | DeleteSchedulingPolicy: (DeleteSchedulingPolicyRequest.t,
   DeleteSchedulingPolicyResponse.t, DeleteSchedulingPolicyResponse.error) t 
+  | DeleteServiceEnvironment: (DeleteServiceEnvironmentRequest.t,
+  DeleteServiceEnvironmentResponse.t, DeleteServiceEnvironmentResponse.error)
+  t 
   | DeregisterJobDefinition: (DeregisterJobDefinitionRequest.t,
   DeregisterJobDefinitionResponse.t, DeregisterJobDefinitionResponse.error) t
   
   | DescribeComputeEnvironments: (DescribeComputeEnvironmentsRequest.t,
   DescribeComputeEnvironmentsResponse.t,
   DescribeComputeEnvironmentsResponse.error) t 
+  | DescribeConsumableResource: (DescribeConsumableResourceRequest.t,
+  DescribeConsumableResourceResponse.t,
+  DescribeConsumableResourceResponse.error) t 
   | DescribeJobDefinitions: (DescribeJobDefinitionsRequest.t,
   DescribeJobDefinitionsResponse.t, DescribeJobDefinitionsResponse.error) t 
   | DescribeJobQueues: (DescribeJobQueuesRequest.t,
   DescribeJobQueuesResponse.t, DescribeJobQueuesResponse.error) t 
   | DescribeJobs: (DescribeJobsRequest.t, DescribeJobsResponse.t,
   DescribeJobsResponse.error) t 
+  | DescribeQuotaShare: (DescribeQuotaShareRequest.t,
+  DescribeQuotaShareResponse.t, DescribeQuotaShareResponse.error) t 
   | DescribeSchedulingPolicies: (DescribeSchedulingPoliciesRequest.t,
   DescribeSchedulingPoliciesResponse.t,
   DescribeSchedulingPoliciesResponse.error) t 
+  | DescribeServiceEnvironments: (DescribeServiceEnvironmentsRequest.t,
+  DescribeServiceEnvironmentsResponse.t,
+  DescribeServiceEnvironmentsResponse.error) t 
+  | DescribeServiceJob: (DescribeServiceJobRequest.t,
+  DescribeServiceJobResponse.t, DescribeServiceJobResponse.error) t 
+  | GetJobQueueSnapshot: (GetJobQueueSnapshotRequest.t,
+  GetJobQueueSnapshotResponse.t, GetJobQueueSnapshotResponse.error) t 
+  | ListConsumableResources: (ListConsumableResourcesRequest.t,
+  ListConsumableResourcesResponse.t, ListConsumableResourcesResponse.error) t
+  
   | ListJobs: (ListJobsRequest.t, ListJobsResponse.t, ListJobsResponse.error)
   t 
+  | ListJobsByConsumableResource: (ListJobsByConsumableResourceRequest.t,
+  ListJobsByConsumableResourceResponse.t,
+  ListJobsByConsumableResourceResponse.error) t 
+  | ListQuotaShares: (ListQuotaSharesRequest.t, ListQuotaSharesResponse.t,
+  ListQuotaSharesResponse.error) t 
   | ListSchedulingPolicies: (ListSchedulingPoliciesRequest.t,
   ListSchedulingPoliciesResponse.t, ListSchedulingPoliciesResponse.error) t 
+  | ListServiceJobs: (ListServiceJobsRequest.t, ListServiceJobsResponse.t,
+  ListServiceJobsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | RegisterJobDefinition: (RegisterJobDefinitionRequest.t,
   RegisterJobDefinitionResponse.t, RegisterJobDefinitionResponse.error) t 
   | SubmitJob: (SubmitJobRequest.t, SubmitJobResponse.t,
   SubmitJobResponse.error) t 
+  | SubmitServiceJob: (SubmitServiceJobRequest.t, SubmitServiceJobResponse.t,
+  SubmitServiceJobResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | TerminateJob: (TerminateJobRequest.t, TerminateJobResponse.t,
   TerminateJobResponse.error) t 
+  | TerminateServiceJob: (TerminateServiceJobRequest.t,
+  TerminateServiceJobResponse.t, TerminateServiceJobResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
   | UpdateComputeEnvironment: (UpdateComputeEnvironmentRequest.t,
   UpdateComputeEnvironmentResponse.t, UpdateComputeEnvironmentResponse.error)
   t 
+  | UpdateConsumableResource: (UpdateConsumableResourceRequest.t,
+  UpdateConsumableResourceResponse.t, UpdateConsumableResourceResponse.error)
+  t 
   | UpdateJobQueue: (UpdateJobQueueRequest.t, UpdateJobQueueResponse.t,
   UpdateJobQueueResponse.error) t 
+  | UpdateQuotaShare: (UpdateQuotaShareRequest.t, UpdateQuotaShareResponse.t,
+  UpdateQuotaShareResponse.error) t 
   | UpdateSchedulingPolicy: (UpdateSchedulingPolicyRequest.t,
   UpdateSchedulingPolicyResponse.t, UpdateSchedulingPolicyResponse.error) t 
+  | UpdateServiceEnvironment: (UpdateServiceEnvironmentRequest.t,
+  UpdateServiceEnvironmentResponse.t, UpdateServiceEnvironmentResponse.error)
+  t 
+  | UpdateServiceJob: (UpdateServiceJobRequest.t, UpdateServiceJobResponse.t,
+  UpdateServiceJobResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CancelJob -> `POST
   | CreateComputeEnvironment -> `POST
+  | CreateConsumableResource -> `POST
   | CreateJobQueue -> `POST
+  | CreateQuotaShare -> `POST
   | CreateSchedulingPolicy -> `POST
+  | CreateServiceEnvironment -> `POST
   | DeleteComputeEnvironment -> `POST
+  | DeleteConsumableResource -> `POST
   | DeleteJobQueue -> `POST
+  | DeleteQuotaShare -> `POST
   | DeleteSchedulingPolicy -> `POST
+  | DeleteServiceEnvironment -> `POST
   | DeregisterJobDefinition -> `POST
   | DescribeComputeEnvironments -> `POST
+  | DescribeConsumableResource -> `POST
   | DescribeJobDefinitions -> `POST
   | DescribeJobQueues -> `POST
   | DescribeJobs -> `POST
+  | DescribeQuotaShare -> `POST
   | DescribeSchedulingPolicies -> `POST
+  | DescribeServiceEnvironments -> `POST
+  | DescribeServiceJob -> `POST
+  | GetJobQueueSnapshot -> `POST
+  | ListConsumableResources -> `POST
   | ListJobs -> `POST
+  | ListJobsByConsumableResource -> `POST
+  | ListQuotaShares -> `POST
   | ListSchedulingPolicies -> `POST
+  | ListServiceJobs -> `POST
   | ListTagsForResource -> `GET
   | RegisterJobDefinition -> `POST
   | SubmitJob -> `POST
+  | SubmitServiceJob -> `POST
   | TagResource -> `POST
   | TerminateJob -> `POST
+  | TerminateServiceJob -> `POST
   | UntagResource -> `DELETE
   | UpdateComputeEnvironment -> `POST
+  | UpdateConsumableResource -> `POST
   | UpdateJobQueue -> `POST
+  | UpdateQuotaShare -> `POST
   | UpdateSchedulingPolicy -> `POST
+  | UpdateServiceEnvironment -> `POST
+  | UpdateServiceJob -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | CancelJob -> (Format.kasprintf Uri.of_string) "/v1/canceljob"
       | CreateComputeEnvironment ->
           (Format.kasprintf Uri.of_string) "/v1/createcomputeenvironment"
+      | CreateConsumableResource ->
+          (Format.kasprintf Uri.of_string) "/v1/createconsumableresource"
       | CreateJobQueue ->
           (Format.kasprintf Uri.of_string) "/v1/createjobqueue"
+      | CreateQuotaShare ->
+          (Format.kasprintf Uri.of_string) "/v1/createquotashare"
       | CreateSchedulingPolicy ->
           (Format.kasprintf Uri.of_string) "/v1/createschedulingpolicy"
+      | CreateServiceEnvironment ->
+          (Format.kasprintf Uri.of_string) "/v1/createserviceenvironment"
       | DeleteComputeEnvironment ->
           (Format.kasprintf Uri.of_string) "/v1/deletecomputeenvironment"
+      | DeleteConsumableResource ->
+          (Format.kasprintf Uri.of_string) "/v1/deleteconsumableresource"
       | DeleteJobQueue ->
           (Format.kasprintf Uri.of_string) "/v1/deletejobqueue"
+      | DeleteQuotaShare ->
+          (Format.kasprintf Uri.of_string) "/v1/deletequotashare"
       | DeleteSchedulingPolicy ->
           (Format.kasprintf Uri.of_string) "/v1/deleteschedulingpolicy"
+      | DeleteServiceEnvironment ->
+          (Format.kasprintf Uri.of_string) "/v1/deleteserviceenvironment"
       | DeregisterJobDefinition ->
           (Format.kasprintf Uri.of_string) "/v1/deregisterjobdefinition"
       | DescribeComputeEnvironments ->
           (Format.kasprintf Uri.of_string) "/v1/describecomputeenvironments"
+      | DescribeConsumableResource ->
+          (Format.kasprintf Uri.of_string) "/v1/describeconsumableresource"
       | DescribeJobDefinitions ->
           (Format.kasprintf Uri.of_string) "/v1/describejobdefinitions"
       | DescribeJobQueues ->
           (Format.kasprintf Uri.of_string) "/v1/describejobqueues"
       | DescribeJobs -> (Format.kasprintf Uri.of_string) "/v1/describejobs"
+      | DescribeQuotaShare ->
+          (Format.kasprintf Uri.of_string) "/v1/describequotashare"
       | DescribeSchedulingPolicies ->
           (Format.kasprintf Uri.of_string) "/v1/describeschedulingpolicies"
+      | DescribeServiceEnvironments ->
+          (Format.kasprintf Uri.of_string) "/v1/describeserviceenvironments"
+      | DescribeServiceJob ->
+          (Format.kasprintf Uri.of_string) "/v1/describeservicejob"
+      | GetJobQueueSnapshot ->
+          (Format.kasprintf Uri.of_string) "/v1/getjobqueuesnapshot"
+      | ListConsumableResources ->
+          (Format.kasprintf Uri.of_string) "/v1/listconsumableresources"
       | ListJobs -> (Format.kasprintf Uri.of_string) "/v1/listjobs"
+      | ListJobsByConsumableResource ->
+          (Format.kasprintf Uri.of_string) "/v1/listjobsbyconsumableresource"
+      | ListQuotaShares ->
+          (Format.kasprintf Uri.of_string) "/v1/listquotashares"
       | ListSchedulingPolicies ->
           (Format.kasprintf Uri.of_string) "/v1/listschedulingpolicies"
+      | ListServiceJobs ->
+          (Format.kasprintf Uri.of_string) "/v1/listservicejobs"
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/v1/tags/%s"
             (String_.to_header x.ListTagsForResourceRequest.resourceArn)
       | RegisterJobDefinition ->
           (Format.kasprintf Uri.of_string) "/v1/registerjobdefinition"
       | SubmitJob -> (Format.kasprintf Uri.of_string) "/v1/submitjob"
+      | SubmitServiceJob ->
+          (Format.kasprintf Uri.of_string) "/v1/submitservicejob"
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/v1/tags/%s"
             (String_.to_header x.TagResourceRequest.resourceArn)
       | TerminateJob -> (Format.kasprintf Uri.of_string) "/v1/terminatejob"
+      | TerminateServiceJob ->
+          (Format.kasprintf Uri.of_string) "/v1/terminateservicejob"
       | UntagResource ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/v1/tags/%s"
@@ -130,10 +237,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Some ("tagKeys", (TagKeysList.to_header x.tagKeys))])
       | UpdateComputeEnvironment ->
           (Format.kasprintf Uri.of_string) "/v1/updatecomputeenvironment"
+      | UpdateConsumableResource ->
+          (Format.kasprintf Uri.of_string) "/v1/updateconsumableresource"
       | UpdateJobQueue ->
           (Format.kasprintf Uri.of_string) "/v1/updatejobqueue"
+      | UpdateQuotaShare ->
+          (Format.kasprintf Uri.of_string) "/v1/updatequotashare"
       | UpdateSchedulingPolicy ->
-          (Format.kasprintf Uri.of_string) "/v1/updateschedulingpolicy")
+          (Format.kasprintf Uri.of_string) "/v1/updateschedulingpolicy"
+      | UpdateServiceEnvironment ->
+          (Format.kasprintf Uri.of_string) "/v1/updateserviceenvironment"
+      | UpdateServiceJob ->
+          (Format.kasprintf Uri.of_string) "/v1/updateservicejob")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -191,6 +306,41 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.CreateComputeEnvironmentRequest.serviceRole
                         ~f:(fun x -> ("serviceRole", (String_.to_value x)));
                       Option.map req.CreateComputeEnvironmentRequest.tags
+                        ~f:(fun x -> ("tags", (TagrisTagsMap.to_value x)));
+                      Option.map
+                        req.CreateComputeEnvironmentRequest.eksConfiguration
+                        ~f:(fun x ->
+                              ("eksConfiguration",
+                                (EksConfiguration.to_value x)));
+                      Option.map req.CreateComputeEnvironmentRequest.context
+                        ~f:(fun x -> ("context", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateConsumableResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("consumableResourceName",
+                           (String_.to_value
+                              req.CreateConsumableResourceRequest.consumableResourceName));
+                      Option.map
+                        req.CreateConsumableResourceRequest.totalQuantity
+                        ~f:(fun x -> ("totalQuantity", (Long.to_value x)));
+                      Option.map
+                        req.CreateConsumableResourceRequest.resourceType
+                        ~f:(fun x -> ("resourceType", (String_.to_value x)));
+                      Option.map req.CreateConsumableResourceRequest.tags
                         ~f:(fun x -> ("tags", (TagrisTagsMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -222,11 +372,65 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("priority",
                           (Integer.to_value
                              req.CreateJobQueueRequest.priority));
-                      Some
-                        ("computeEnvironmentOrder",
-                          (ComputeEnvironmentOrders.to_value
-                             req.CreateJobQueueRequest.computeEnvironmentOrder));
+                      Option.map
+                        req.CreateJobQueueRequest.computeEnvironmentOrder
+                        ~f:(fun x ->
+                              ("computeEnvironmentOrder",
+                                (ComputeEnvironmentOrders.to_value x)));
+                      Option.map
+                        req.CreateJobQueueRequest.serviceEnvironmentOrder
+                        ~f:(fun x ->
+                              ("serviceEnvironmentOrder",
+                                (ServiceEnvironmentOrders.to_value x)));
+                      Option.map req.CreateJobQueueRequest.jobQueueType
+                        ~f:(fun x ->
+                              ("jobQueueType", (JobQueueType.to_value x)));
                       Option.map req.CreateJobQueueRequest.tags
+                        ~f:(fun x -> ("tags", (TagrisTagsMap.to_value x)));
+                      Option.map
+                        req.CreateJobQueueRequest.jobStateTimeLimitActions
+                        ~f:(fun x ->
+                              ("jobStateTimeLimitActions",
+                                (JobStateTimeLimitActions.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateQuotaShare ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("quotaShareName",
+                           (String_.to_value
+                              req.CreateQuotaShareRequest.quotaShareName));
+                      Some
+                        ("jobQueue",
+                          (String_.to_value
+                             req.CreateQuotaShareRequest.jobQueue));
+                      Some
+                        ("capacityLimits",
+                          (QuotaShareCapacityLimits.to_value
+                             req.CreateQuotaShareRequest.capacityLimits));
+                      Some
+                        ("resourceSharingConfiguration",
+                          (QuotaShareResourceSharingConfiguration.to_value
+                             req.CreateQuotaShareRequest.resourceSharingConfiguration));
+                      Some
+                        ("preemptionConfiguration",
+                          (QuotaSharePreemptionConfiguration.to_value
+                             req.CreateQuotaShareRequest.preemptionConfiguration));
+                      Option.map req.CreateQuotaShareRequest.state
+                        ~f:(fun x -> ("state", (QuotaShareState.to_value x)));
+                      Option.map req.CreateQuotaShareRequest.tags
                         ~f:(fun x -> ("tags", (TagrisTagsMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -249,11 +453,49 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                            (String_.to_value
                               req.CreateSchedulingPolicyRequest.name));
                       Option.map
+                        req.CreateSchedulingPolicyRequest.quotaSharePolicy
+                        ~f:(fun x ->
+                              ("quotaSharePolicy",
+                                (QuotaSharePolicy.to_value x)));
+                      Option.map
                         req.CreateSchedulingPolicyRequest.fairsharePolicy
                         ~f:(fun x ->
                               ("fairsharePolicy",
                                 (FairsharePolicy.to_value x)));
                       Option.map req.CreateSchedulingPolicyRequest.tags
+                        ~f:(fun x -> ("tags", (TagrisTagsMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateServiceEnvironment ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("serviceEnvironmentName",
+                           (String_.to_value
+                              req.CreateServiceEnvironmentRequest.serviceEnvironmentName));
+                      Some
+                        ("serviceEnvironmentType",
+                          (ServiceEnvironmentType.to_value
+                             req.CreateServiceEnvironmentRequest.serviceEnvironmentType));
+                      Option.map req.CreateServiceEnvironmentRequest.state
+                        ~f:(fun x ->
+                              ("state", (ServiceEnvironmentState.to_value x)));
+                      Some
+                        ("capacityLimits",
+                          (CapacityLimits.to_value
+                             req.CreateServiceEnvironmentRequest.capacityLimits));
+                      Option.map req.CreateServiceEnvironmentRequest.tags
                         ~f:(fun x -> ("tags", (TagrisTagsMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -282,6 +524,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteConsumableResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("consumableResource",
+                           (String_.to_value
+                              req.DeleteConsumableResourceRequest.consumableResource))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteJobQueue ->
       let (headers, body) =
         let headers =
@@ -302,6 +564,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteQuotaShare ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("quotaShareArn",
+                           (String_.to_value
+                              req.DeleteQuotaShareRequest.quotaShareArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteSchedulingPolicy ->
       let (headers, body) =
         let headers =
@@ -315,6 +597,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("arn",
                            (String_.to_value
                               req.DeleteSchedulingPolicyRequest.arn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteServiceEnvironment ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("serviceEnvironment",
+                           (String_.to_value
+                              req.DeleteServiceEnvironmentRequest.serviceEnvironment))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -362,6 +664,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map
                         req.DescribeComputeEnvironmentsRequest.nextToken
                         ~f:(fun x -> ("nextToken", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeConsumableResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("consumableResource",
+                           (String_.to_value
+                              req.DescribeConsumableResourceRequest.consumableResource))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -440,6 +762,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeQuotaShare ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("quotaShareArn",
+                           (String_.to_value
+                              req.DescribeQuotaShareRequest.quotaShareArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeSchedulingPolicies ->
       let (headers, body) =
         let headers =
@@ -453,6 +795,99 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("arns",
                            (StringList.to_value
                               req.DescribeSchedulingPoliciesRequest.arns))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeServiceEnvironments ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.DescribeServiceEnvironmentsRequest.serviceEnvironments
+                         ~f:(fun x ->
+                               ("serviceEnvironments",
+                                 (StringList.to_value x)));
+                      Option.map
+                        req.DescribeServiceEnvironmentsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (Integer.to_value x)));
+                      Option.map
+                        req.DescribeServiceEnvironmentsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeServiceJob ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("jobId",
+                           (String_.to_value
+                              req.DescribeServiceJobRequest.jobId))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetJobQueueSnapshot ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("jobQueue",
+                           (String_.to_value
+                              req.GetJobQueueSnapshotRequest.jobQueue))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListConsumableResources ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListConsumableResourcesRequest.filters
+                         ~f:(fun x ->
+                               ("filters",
+                                 (ListConsumableResourcesFilterList.to_value
+                                    x)));
+                      Option.map
+                        req.ListConsumableResourcesRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (Integer.to_value x)));
+                      Option.map req.ListConsumableResourcesRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (String_.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -491,6 +926,62 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListJobsByConsumableResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("consumableResource",
+                           (String_.to_value
+                              req.ListJobsByConsumableResourceRequest.consumableResource));
+                      Option.map
+                        req.ListJobsByConsumableResourceRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (ListJobsByConsumableResourceFilterList.to_value
+                                   x)));
+                      Option.map
+                        req.ListJobsByConsumableResourceRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (Integer.to_value x)));
+                      Option.map
+                        req.ListJobsByConsumableResourceRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListQuotaShares ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("jobQueue",
+                           (String_.to_value
+                              req.ListQuotaSharesRequest.jobQueue));
+                      Option.map req.ListQuotaSharesRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (Integer.to_value x)));
+                      Option.map req.ListQuotaSharesRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListSchedulingPolicies ->
       let (headers, body) =
         let headers =
@@ -505,6 +996,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ~f:(fun x -> ("maxResults", (Integer.to_value x)));
                       Option.map req.ListSchedulingPoliciesRequest.nextToken
                         ~f:(fun x -> ("nextToken", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListServiceJobs ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListServiceJobsRequest.jobQueue
+                         ~f:(fun x -> ("jobQueue", (String_.to_value x)));
+                      Option.map req.ListServiceJobsRequest.jobStatus
+                        ~f:(fun x ->
+                              ("jobStatus", (ServiceJobStatus.to_value x)));
+                      Option.map req.ListServiceJobsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (Integer.to_value x)));
+                      Option.map req.ListServiceJobsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (String_.to_value x)));
+                      Option.map req.ListServiceJobsRequest.filters
+                        ~f:(fun x ->
+                              ("filters", (ListJobsFilterList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -563,7 +1082,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.RegisterJobDefinitionRequest.platformCapabilities
                         ~f:(fun x ->
                               ("platformCapabilities",
-                                (PlatformCapabilityList.to_value x)))])
+                                (PlatformCapabilityList.to_value x)));
+                      Option.map
+                        req.RegisterJobDefinitionRequest.eksProperties
+                        ~f:(fun x ->
+                              ("eksProperties", (EksProperties.to_value x)));
+                      Option.map
+                        req.RegisterJobDefinitionRequest.ecsProperties
+                        ~f:(fun x ->
+                              ("ecsProperties", (EcsProperties.to_value x)));
+                      Option.map
+                        req.RegisterJobDefinitionRequest.consumableResourceProperties
+                        ~f:(fun x ->
+                              ("consumableResourceProperties",
+                                (ConsumableResourceProperties.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -623,7 +1155,80 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.SubmitJobRequest.timeout
                         ~f:(fun x -> ("timeout", (JobTimeout.to_value x)));
                       Option.map req.SubmitJobRequest.tags
-                        ~f:(fun x -> ("tags", (TagrisTagsMap.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagrisTagsMap.to_value x)));
+                      Option.map req.SubmitJobRequest.eksPropertiesOverride
+                        ~f:(fun x ->
+                              ("eksPropertiesOverride",
+                                (EksPropertiesOverride.to_value x)));
+                      Option.map req.SubmitJobRequest.ecsPropertiesOverride
+                        ~f:(fun x ->
+                              ("ecsPropertiesOverride",
+                                (EcsPropertiesOverride.to_value x)));
+                      Option.map
+                        req.SubmitJobRequest.consumableResourcePropertiesOverride
+                        ~f:(fun x ->
+                              ("consumableResourcePropertiesOverride",
+                                (ConsumableResourceProperties.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SubmitServiceJob ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("jobName",
+                           (String_.to_value
+                              req.SubmitServiceJobRequest.jobName));
+                      Some
+                        ("jobQueue",
+                          (String_.to_value
+                             req.SubmitServiceJobRequest.jobQueue));
+                      Option.map req.SubmitServiceJobRequest.retryStrategy
+                        ~f:(fun x ->
+                              ("retryStrategy",
+                                (ServiceJobRetryStrategy.to_value x)));
+                      Option.map
+                        req.SubmitServiceJobRequest.schedulingPriority
+                        ~f:(fun x ->
+                              ("schedulingPriority", (Integer.to_value x)));
+                      Some
+                        ("serviceRequestPayload",
+                          (String_.to_value
+                             req.SubmitServiceJobRequest.serviceRequestPayload));
+                      Some
+                        ("serviceJobType",
+                          (ServiceJobType.to_value
+                             req.SubmitServiceJobRequest.serviceJobType));
+                      Option.map req.SubmitServiceJobRequest.shareIdentifier
+                        ~f:(fun x ->
+                              ("shareIdentifier", (String_.to_value x)));
+                      Option.map req.SubmitServiceJobRequest.quotaShareName
+                        ~f:(fun x -> ("quotaShareName", (String_.to_value x)));
+                      Option.map
+                        req.SubmitServiceJobRequest.preemptionConfiguration
+                        ~f:(fun x ->
+                              ("preemptionConfiguration",
+                                (ServiceJobPreemptionConfiguration.to_value x)));
+                      Option.map req.SubmitServiceJobRequest.timeoutConfig
+                        ~f:(fun x ->
+                              ("timeoutConfig",
+                                (ServiceJobTimeout.to_value x)));
+                      Option.map req.SubmitServiceJobRequest.tags
+                        ~f:(fun x -> ("tags", (TagrisTagsMap.to_value x)));
+                      Option.map req.SubmitServiceJobRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken",
+                                (ClientRequestToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -673,6 +1278,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | TerminateServiceJob ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("jobId",
+                           (String_.to_value
+                              req.TerminateServiceJobRequest.jobId));
+                      Some
+                        ("reason",
+                          (String_.to_value
+                             req.TerminateServiceJobRequest.reason))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateComputeEnvironment ->
       let (headers, body) =
@@ -699,7 +1328,43 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                                 (ComputeResourceUpdate.to_value x)));
                       Option.map
                         req.UpdateComputeEnvironmentRequest.serviceRole
-                        ~f:(fun x -> ("serviceRole", (String_.to_value x)))])
+                        ~f:(fun x -> ("serviceRole", (String_.to_value x)));
+                      Option.map
+                        req.UpdateComputeEnvironmentRequest.updatePolicy
+                        ~f:(fun x ->
+                              ("updatePolicy", (UpdatePolicy.to_value x)));
+                      Option.map req.UpdateComputeEnvironmentRequest.context
+                        ~f:(fun x -> ("context", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateConsumableResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("consumableResource",
+                           (String_.to_value
+                              req.UpdateConsumableResourceRequest.consumableResource));
+                      Option.map
+                        req.UpdateConsumableResourceRequest.operation
+                        ~f:(fun x -> ("operation", (String_.to_value x)));
+                      Option.map req.UpdateConsumableResourceRequest.quantity
+                        ~f:(fun x -> ("quantity", (Long.to_value x)));
+                      Option.map
+                        req.UpdateConsumableResourceRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken",
+                                (ClientRequestToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -732,7 +1397,54 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.UpdateJobQueueRequest.computeEnvironmentOrder
                         ~f:(fun x ->
                               ("computeEnvironmentOrder",
-                                (ComputeEnvironmentOrders.to_value x)))])
+                                (ComputeEnvironmentOrders.to_value x)));
+                      Option.map
+                        req.UpdateJobQueueRequest.serviceEnvironmentOrder
+                        ~f:(fun x ->
+                              ("serviceEnvironmentOrder",
+                                (ServiceEnvironmentOrders.to_value x)));
+                      Option.map
+                        req.UpdateJobQueueRequest.jobStateTimeLimitActions
+                        ~f:(fun x ->
+                              ("jobStateTimeLimitActions",
+                                (JobStateTimeLimitActions.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateQuotaShare ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("quotaShareArn",
+                           (String_.to_value
+                              req.UpdateQuotaShareRequest.quotaShareArn));
+                      Option.map req.UpdateQuotaShareRequest.capacityLimits
+                        ~f:(fun x ->
+                              ("capacityLimits",
+                                (QuotaShareCapacityLimits.to_value x)));
+                      Option.map
+                        req.UpdateQuotaShareRequest.resourceSharingConfiguration
+                        ~f:(fun x ->
+                              ("resourceSharingConfiguration",
+                                (QuotaShareResourceSharingConfiguration.to_value
+                                   x)));
+                      Option.map
+                        req.UpdateQuotaShareRequest.preemptionConfiguration
+                        ~f:(fun x ->
+                              ("preemptionConfiguration",
+                                (QuotaSharePreemptionConfiguration.to_value x)));
+                      Option.map req.UpdateQuotaShareRequest.state
+                        ~f:(fun x -> ("state", (QuotaShareState.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -754,10 +1466,66 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                            (String_.to_value
                               req.UpdateSchedulingPolicyRequest.arn));
                       Option.map
+                        req.UpdateSchedulingPolicyRequest.quotaSharePolicy
+                        ~f:(fun x ->
+                              ("quotaSharePolicy",
+                                (QuotaSharePolicy.to_value x)));
+                      Option.map
                         req.UpdateSchedulingPolicyRequest.fairsharePolicy
                         ~f:(fun x ->
                               ("fairsharePolicy",
                                 (FairsharePolicy.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateServiceEnvironment ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("serviceEnvironment",
+                           (String_.to_value
+                              req.UpdateServiceEnvironmentRequest.serviceEnvironment));
+                      Option.map req.UpdateServiceEnvironmentRequest.state
+                        ~f:(fun x ->
+                              ("state", (ServiceEnvironmentState.to_value x)));
+                      Option.map
+                        req.UpdateServiceEnvironmentRequest.capacityLimits
+                        ~f:(fun x ->
+                              ("capacityLimits", (CapacityLimits.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateServiceJob ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("jobId",
+                           (String_.to_value
+                              req.UpdateServiceJobRequest.jobId));
+                      Some
+                        ("schedulingPriority",
+                          (Integer.to_value
+                             req.UpdateServiceJobRequest.schedulingPriority))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -828,11 +1596,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateComputeEnvironmentResponse.error_of_json))
+  | CreateConsumableResource ->
+      if is_success
+      then
+        Ok (CreateConsumableResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateConsumableResourceResponse.error_of_json))
   | CreateJobQueue ->
       if is_success
       then Ok (CreateJobQueueResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some CreateJobQueueResponse.error_of_json))
+  | CreateQuotaShare ->
+      if is_success
+      then Ok (CreateQuotaShareResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateQuotaShareResponse.error_of_json))
   | CreateSchedulingPolicy ->
       if is_success
       then
@@ -841,6 +1622,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateSchedulingPolicyResponse.error_of_json))
+  | CreateServiceEnvironment ->
+      if is_success
+      then
+        Ok (CreateServiceEnvironmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateServiceEnvironmentResponse.error_of_json))
   | DeleteComputeEnvironment ->
       if is_success
       then
@@ -852,6 +1641,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteComputeEnvironmentResponse.error_of_json))
+  | DeleteConsumableResource ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteConsumableResourceResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteConsumableResourceResponse.error_of_json))
   | DeleteJobQueue ->
       if is_success
       then
@@ -860,6 +1660,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteJobQueueResponse.of_header_and_body (headers, ()))
       else
         Error (parse_aws_error (Some DeleteJobQueueResponse.error_of_json))
+  | DeleteQuotaShare ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteQuotaShareResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteQuotaShareResponse.error_of_json))
   | DeleteSchedulingPolicy ->
       if is_success
       then
@@ -870,6 +1678,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteSchedulingPolicyResponse.error_of_json))
+  | DeleteServiceEnvironment ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteServiceEnvironmentResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteServiceEnvironmentResponse.error_of_json))
   | DeregisterJobDefinition ->
       if is_success
       then
@@ -890,6 +1709,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeComputeEnvironmentsResponse.error_of_json))
+  | DescribeConsumableResource ->
+      if is_success
+      then
+        Ok
+          (DescribeConsumableResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeConsumableResourceResponse.error_of_json))
   | DescribeJobDefinitions ->
       if is_success
       then
@@ -908,6 +1736,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (DescribeJobsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some DescribeJobsResponse.error_of_json))
+  | DescribeQuotaShare ->
+      if is_success
+      then Ok (DescribeQuotaShareResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeQuotaShareResponse.error_of_json))
   | DescribeSchedulingPolicies ->
       if is_success
       then
@@ -917,10 +1751,55 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeSchedulingPoliciesResponse.error_of_json))
+  | DescribeServiceEnvironments ->
+      if is_success
+      then
+        Ok
+          (DescribeServiceEnvironmentsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeServiceEnvironmentsResponse.error_of_json))
+  | DescribeServiceJob ->
+      if is_success
+      then Ok (DescribeServiceJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeServiceJobResponse.error_of_json))
+  | GetJobQueueSnapshot ->
+      if is_success
+      then Ok (GetJobQueueSnapshotResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetJobQueueSnapshotResponse.error_of_json))
+  | ListConsumableResources ->
+      if is_success
+      then
+        Ok (ListConsumableResourcesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListConsumableResourcesResponse.error_of_json))
   | ListJobs ->
       if is_success
       then Ok (ListJobsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListJobsResponse.error_of_json))
+  | ListJobsByConsumableResource ->
+      if is_success
+      then
+        Ok
+          (ListJobsByConsumableResourceResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListJobsByConsumableResourceResponse.error_of_json))
+  | ListQuotaShares ->
+      if is_success
+      then Ok (ListQuotaSharesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListQuotaSharesResponse.error_of_json))
   | ListSchedulingPolicies ->
       if is_success
       then
@@ -929,6 +1808,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListSchedulingPoliciesResponse.error_of_json))
+  | ListServiceJobs ->
+      if is_success
+      then Ok (ListServiceJobsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListServiceJobsResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
@@ -945,6 +1829,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (SubmitJobResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some SubmitJobResponse.error_of_json))
+  | SubmitServiceJob ->
+      if is_success
+      then Ok (SubmitServiceJobResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some SubmitServiceJobResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -959,6 +1848,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (TerminateJobResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some TerminateJobResponse.error_of_json))
+  | TerminateServiceJob ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TerminateServiceJobResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some TerminateServiceJobResponse.error_of_json))
   | UntagResource ->
       if is_success
       then
@@ -974,11 +1872,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateComputeEnvironmentResponse.error_of_json))
+  | UpdateConsumableResource ->
+      if is_success
+      then
+        Ok (UpdateConsumableResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateConsumableResourceResponse.error_of_json))
   | UpdateJobQueue ->
       if is_success
       then Ok (UpdateJobQueueResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some UpdateJobQueueResponse.error_of_json))
+  | UpdateQuotaShare ->
+      if is_success
+      then Ok (UpdateQuotaShareResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateQuotaShareResponse.error_of_json))
   | UpdateSchedulingPolicy ->
       if is_success
       then
@@ -989,3 +1900,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateSchedulingPolicyResponse.error_of_json))
+  | UpdateServiceEnvironment ->
+      if is_success
+      then
+        Ok (UpdateServiceEnvironmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateServiceEnvironmentResponse.error_of_json))
+  | UpdateServiceJob ->
+      if is_success
+      then Ok (UpdateServiceJobResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateServiceJobResponse.error_of_json))

@@ -15,24 +15,38 @@ let batch_get_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetChannel input
 let batch_get_stream_key ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetStreamKey input
+let batch_start_viewer_session_revocation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchStartViewerSessionRevocation input
+let create_ad_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAdConfiguration input
 let create_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateChannel input
+let create_playback_restriction_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreatePlaybackRestrictionPolicy input
 let create_recording_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateRecordingConfiguration input
 let create_stream_key ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateStreamKey input
+let delete_ad_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAdConfiguration input
 let delete_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteChannel input
 let delete_playback_key_pair ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeletePlaybackKeyPair input
+let delete_playback_restriction_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeletePlaybackRestrictionPolicy input
 let delete_recording_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteRecordingConfiguration input
 let delete_stream_key ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteStreamKey input
+let get_ad_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAdConfiguration input
 let get_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetChannel input
 let get_playback_key_pair ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPlaybackKeyPair input
+let get_playback_restriction_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetPlaybackRestrictionPolicy input
 let get_recording_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRecordingConfiguration input
 let get_stream ?endpoint_url ?cfg input =
@@ -43,10 +57,16 @@ let get_stream_session ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetStreamSession input
 let import_playback_key_pair ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ImportPlaybackKeyPair input
+let insert_ad_break ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.InsertAdBreak input
+let list_ad_configurations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAdConfigurations input
 let list_channels ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListChannels input
 let list_playback_key_pairs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPlaybackKeyPairs input
+let list_playback_restriction_policies ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPlaybackRestrictionPolicies input
 let list_recording_configurations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListRecordingConfigurations input
 let list_stream_keys ?endpoint_url ?cfg input =
@@ -59,6 +79,8 @@ let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let put_metadata ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutMetadata input
+let start_viewer_session_revocation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartViewerSessionRevocation input
 let stop_stream ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopStream input
 let tag_resource ?endpoint_url ?cfg input =
@@ -67,3 +89,5 @@ let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateChannel input
+let update_playback_restriction_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdatePlaybackRestrictionPolicy input

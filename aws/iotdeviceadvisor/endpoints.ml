@@ -64,7 +64,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v ->
                        ("certificateArn", (AmazonResourceName.to_header v)))
-                 x.certificateArn])
+                 x.certificateArn;
+               Option.map
+                 ~f:(fun v ->
+                       ("deviceRoleArn", (AmazonResourceName.to_header v)))
+                 x.deviceRoleArn;
+               Option.map
+                 ~f:(fun v ->
+                       ("authenticationMethod",
+                         (AuthenticationMethod.to_header v)))
+                 x.authenticationMethod])
       | GetSuiteDefinition ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/suiteDefinitions/%s"
@@ -149,13 +158,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.CreateSuiteDefinitionRequest.suiteDefinitionConfiguration
-                         ~f:(fun x ->
-                               ("suiteDefinitionConfiguration",
-                                 (SuiteDefinitionConfiguration.to_value x)));
+                      [Some
+                         ("suiteDefinitionConfiguration",
+                           (SuiteDefinitionConfiguration.to_value
+                              req.CreateSuiteDefinitionRequest.suiteDefinitionConfiguration));
                       Option.map req.CreateSuiteDefinitionRequest.tags
-                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map req.CreateSuiteDefinitionRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -199,11 +210,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ~f:(fun x ->
                                ("suiteDefinitionVersion",
                                  (SuiteDefinitionVersion.to_value x)));
-                      Option.map
-                        req.StartSuiteRunRequest.suiteRunConfiguration
-                        ~f:(fun x ->
-                              ("suiteRunConfiguration",
-                                (SuiteRunConfiguration.to_value x)));
+                      Some
+                        ("suiteRunConfiguration",
+                          (SuiteRunConfiguration.to_value
+                             req.StartSuiteRunRequest.suiteRunConfiguration));
                       Option.map req.StartSuiteRunRequest.tags
                         ~f:(fun x -> ("tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->

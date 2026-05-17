@@ -9,6 +9,8 @@ type ('i, 'o, 'e) t =
   | AssumeRoleWithWebIdentity: (AssumeRoleWithWebIdentityRequest.t,
   AssumeRoleWithWebIdentityResponse.t,
   AssumeRoleWithWebIdentityResponse.error) t 
+  | AssumeRoot: (AssumeRootRequest.t, AssumeRootResponse.t,
+  AssumeRootResponse.error) t 
   | DecodeAuthorizationMessage: (DecodeAuthorizationMessageRequest.t,
   DecodeAuthorizationMessageResponse.t,
   DecodeAuthorizationMessageResponse.error) t 
@@ -16,31 +18,42 @@ type ('i, 'o, 'e) t =
   GetAccessKeyInfoResponse.error) t 
   | GetCallerIdentity: (GetCallerIdentityRequest.t,
   GetCallerIdentityResponse.t, GetCallerIdentityResponse.error) t 
+  | GetDelegatedAccessToken: (GetDelegatedAccessTokenRequest.t,
+  GetDelegatedAccessTokenResponse.t, GetDelegatedAccessTokenResponse.error) t
+  
   | GetFederationToken: (GetFederationTokenRequest.t,
   GetFederationTokenResponse.t, GetFederationTokenResponse.error) t 
   | GetSessionToken: (GetSessionTokenRequest.t, GetSessionTokenResponse.t,
   GetSessionTokenResponse.error) t 
+  | GetWebIdentityToken: (GetWebIdentityTokenRequest.t,
+  GetWebIdentityTokenResponse.t, GetWebIdentityTokenResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AssumeRole -> `POST
   | AssumeRoleWithSAML -> `POST
   | AssumeRoleWithWebIdentity -> `POST
+  | AssumeRoot -> `POST
   | DecodeAuthorizationMessage -> `POST
   | GetAccessKeyInfo -> `POST
   | GetCallerIdentity -> `POST
+  | GetDelegatedAccessToken -> `POST
   | GetFederationToken -> `POST
   | GetSessionToken -> `POST
+  | GetWebIdentityToken -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | AssumeRole -> (Format.kasprintf Uri.of_string) "/"
       | AssumeRoleWithSAML -> (Format.kasprintf Uri.of_string) "/"
       | AssumeRoleWithWebIdentity -> (Format.kasprintf Uri.of_string) "/"
+      | AssumeRoot -> (Format.kasprintf Uri.of_string) "/"
       | DecodeAuthorizationMessage -> (Format.kasprintf Uri.of_string) "/"
       | GetAccessKeyInfo -> (Format.kasprintf Uri.of_string) "/"
       | GetCallerIdentity -> (Format.kasprintf Uri.of_string) "/"
+      | GetDelegatedAccessToken -> (Format.kasprintf Uri.of_string) "/"
       | GetFederationToken -> (Format.kasprintf Uri.of_string) "/"
-      | GetSessionToken -> (Format.kasprintf Uri.of_string) "/")
+      | GetSessionToken -> (Format.kasprintf Uri.of_string) "/"
+      | GetWebIdentityToken -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -83,6 +96,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | AssumeRoot ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta = [("Action", ["AssumeRoot"]); ("Version", [apiVersion])] in
+        let query =
+          (AssumeRootRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DecodeAuthorizationMessage ->
       let headers =
         Awso.Http.Headers.of_list
@@ -121,6 +145,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (GetCallerIdentityRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetDelegatedAccessToken ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetDelegatedAccessToken"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetDelegatedAccessTokenRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetFederationToken ->
       let headers =
         Awso.Http.Headers.of_list
@@ -144,6 +182,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["GetSessionToken"]); ("Version", [apiVersion])] in
         let query =
           (GetSessionTokenRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetWebIdentityToken ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetWebIdentityToken"]); ("Version", [apiVersion])] in
+        let query =
+          (GetWebIdentityTokenRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
@@ -200,6 +251,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AssumeRoleWithWebIdentityResponse.error_of_xml))
+  | AssumeRoot ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (AssumeRootResponse.of_xml xml)
+      else Error (parse_aws_error (Some AssumeRootResponse.error_of_xml))
   | DecodeAuthorizationMessage ->
       if is_success
       then
@@ -221,6 +278,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (GetCallerIdentityResponse.of_xml xml)
       else Error (parse_aws_error None)
+  | GetDelegatedAccessToken ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetDelegatedAccessTokenResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetDelegatedAccessTokenResponse.error_of_xml))
   | GetFederationToken ->
       if is_success
       then
@@ -236,3 +302,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetSessionTokenResponse.of_xml xml)
       else
         Error (parse_aws_error (Some GetSessionTokenResponse.error_of_xml))
+  | GetWebIdentityToken ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetWebIdentityTokenResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some GetWebIdentityTokenResponse.error_of_xml))

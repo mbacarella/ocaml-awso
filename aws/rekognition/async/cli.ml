@@ -28,6 +28,34 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let associate_faces =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and userMatchThreshold =
+         flag "user-match-threshold" (optional float) ~doc:"FLOAT Percent"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and collectionId =
+         flag "collection-id" (required string) ~doc:"STRING CollectionId"
+       and userId = flag "user-id" (required string) ~doc:"STRING UserId"
+       and faceIds =
+         flag "face-ids" (required json_arg) ~doc:"JSON UserFaceIdList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_faces
+           (Values.AssociateFacesRequest.make ?userMatchThreshold
+              ?clientRequestToken ~collectionId ~userId
+              ~faceIds:(Values.UserFaceIdList.of_json faceIds) ())
+           (Some Values.AssociateFacesResponse.to_json)
+           (Some Values.AssociateFacesResponse.error_to_json)])
 let compare_faces =
   Command.async ~summary:""
     ([%map_open.Command
@@ -56,6 +84,41 @@ let compare_faces =
               ~targetImage:(Values.Image.of_json targetImage) ())
            (Some Values.CompareFacesResponse.to_json)
            (Some Values.CompareFacesResponse.error_to_json)])
+let copy_project_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING KmsKeyId"
+       and sourceProjectArn =
+         flag "source-project-arn" (required string) ~doc:"STRING ProjectArn"
+       and sourceProjectVersionArn =
+         flag "source-project-version-arn" (required string)
+           ~doc:"STRING ProjectVersionArn"
+       and destinationProjectArn =
+         flag "destination-project-arn" (required string)
+           ~doc:"STRING ProjectArn"
+       and versionName =
+         flag "version-name" (required string) ~doc:"STRING VersionName"
+       and outputConfig =
+         flag "output-config" (required json_arg) ~doc:"JSON OutputConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.copy_project_version
+           (Values.CopyProjectVersionRequest.make
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ?kmsKeyId
+              ~sourceProjectArn ~sourceProjectVersionArn
+              ~destinationProjectArn ~versionName
+              ~outputConfig:(Values.OutputConfig.of_json outputConfig) ())
+           (Some Values.CopyProjectVersionResponse.to_json)
+           (Some Values.CopyProjectVersionResponse.error_to_json)])
 let create_collection =
   Command.async ~summary:""
     ([%map_open.Command
@@ -88,6 +151,7 @@ let create_dataset =
            ~doc:"URL override endpoint url"
        and datasetSource =
          flag "dataset-source" (optional json_arg) ~doc:"JSON DatasetSource"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and datasetType =
          flag "dataset-type" (required json_arg) ~doc:"JSON DatasetType"
        and projectArn =
@@ -98,9 +162,37 @@ let create_dataset =
            (Values.CreateDatasetRequest.make
               ?datasetSource:(Option.map ~f:Values.DatasetSource.of_json
                                 datasetSource)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
               ~datasetType:(Values.DatasetType.of_json datasetType)
               ~projectArn ()) (Some Values.CreateDatasetResponse.to_json)
            (Some Values.CreateDatasetResponse.error_to_json)])
+let create_face_liveness_session =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING KmsKeyId"
+       and settings =
+         flag "settings" (optional json_arg)
+           ~doc:"JSON CreateFaceLivenessSessionRequestSettings"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_face_liveness_session
+           (Values.CreateFaceLivenessSessionRequest.make ?kmsKeyId
+              ?settings:(Option.map
+                           ~f:Values.CreateFaceLivenessSessionRequestSettings.of_json
+                           settings) ?clientRequestToken ())
+           (Some Values.CreateFaceLivenessSessionResponse.to_json)
+           (Some Values.CreateFaceLivenessSessionResponse.error_to_json)])
 let create_project =
   Command.async ~summary:""
     ([%map_open.Command
@@ -111,13 +203,23 @@ let create_project =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and feature =
+         flag "feature" (optional json_arg) ~doc:"JSON CustomizationFeature"
+       and autoUpdate =
+         flag "auto-update" (optional json_arg) ~doc:"JSON ProjectAutoUpdate"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and projectName =
          flag "project-name" (required string) ~doc:"STRING ProjectName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_project
-           (Values.CreateProjectRequest.make ~projectName ())
-           (Some Values.CreateProjectResponse.to_json)
+           (Values.CreateProjectRequest.make
+              ?feature:(Option.map ~f:Values.CustomizationFeature.of_json
+                          feature)
+              ?autoUpdate:(Option.map ~f:Values.ProjectAutoUpdate.of_json
+                             autoUpdate)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~projectName
+              ()) (Some Values.CreateProjectResponse.to_json)
            (Some Values.CreateProjectResponse.error_to_json)])
 let create_project_version =
   Command.async ~summary:""
@@ -136,6 +238,12 @@ let create_project_version =
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and kmsKeyId =
          flag "kms-key-id" (optional string) ~doc:"STRING KmsKeyId"
+       and versionDescription =
+         flag "version-description" (optional string)
+           ~doc:"STRING VersionDescription"
+       and featureConfig =
+         flag "feature-config" (optional json_arg)
+           ~doc:"JSON CustomizationFeatureConfig"
        and projectArn =
          flag "project-arn" (required string) ~doc:"STRING ProjectArn"
        and versionName =
@@ -151,7 +259,10 @@ let create_project_version =
               ?testingData:(Option.map ~f:Values.TestingData.of_json
                               testingData)
               ?tags:(Option.map ~f:Values.TagMap.of_json tags) ?kmsKeyId
-              ~projectArn ~versionName
+              ?versionDescription
+              ?featureConfig:(Option.map
+                                ~f:Values.CustomizationFeatureConfig.of_json
+                                featureConfig) ~projectArn ~versionName
               ~outputConfig:(Values.OutputConfig.of_json outputConfig) ())
            (Some Values.CreateProjectVersionResponse.to_json)
            (Some Values.CreateProjectVersionResponse.error_to_json)])
@@ -166,6 +277,17 @@ let create_stream_processor =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and notificationChannel =
+         flag "notification-channel" (optional json_arg)
+           ~doc:"JSON StreamProcessorNotificationChannel"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING KmsKeyId"
+       and regionsOfInterest =
+         flag "regions-of-interest" (optional json_arg)
+           ~doc:"JSON RegionsOfInterest"
+       and dataSharingPreference =
+         flag "data-sharing-preference" (optional json_arg)
+           ~doc:"JSON StreamProcessorDataSharingPreference"
        and input =
          flag "input" (required json_arg) ~doc:"JSON StreamProcessorInput"
        and output =
@@ -181,12 +303,43 @@ let create_stream_processor =
            Io.create_stream_processor
            (Values.CreateStreamProcessorRequest.make
               ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?notificationChannel:(Option.map
+                                      ~f:Values.StreamProcessorNotificationChannel.of_json
+                                      notificationChannel) ?kmsKeyId
+              ?regionsOfInterest:(Option.map
+                                    ~f:Values.RegionsOfInterest.of_json
+                                    regionsOfInterest)
+              ?dataSharingPreference:(Option.map
+                                        ~f:Values.StreamProcessorDataSharingPreference.of_json
+                                        dataSharingPreference)
               ~input:(Values.StreamProcessorInput.of_json input)
               ~output:(Values.StreamProcessorOutput.of_json output) ~name
               ~settings:(Values.StreamProcessorSettings.of_json settings)
               ~roleArn ())
            (Some Values.CreateStreamProcessorResponse.to_json)
            (Some Values.CreateStreamProcessorResponse.error_to_json)])
+let create_user =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and collectionId =
+         flag "collection-id" (required string) ~doc:"STRING CollectionId"
+       and userId = flag "user-id" (required string) ~doc:"STRING UserId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_user
+           (Values.CreateUserRequest.make ?clientRequestToken ~collectionId
+              ~userId ()) (Some Values.CreateUserResponse.to_json)
+           (Some Values.CreateUserResponse.error_to_json)])
 let delete_collection =
   Command.async ~summary:""
     ([%map_open.Command
@@ -262,6 +415,30 @@ let delete_project =
            (Values.DeleteProjectRequest.make ~projectArn ())
            (Some Values.DeleteProjectResponse.to_json)
            (Some Values.DeleteProjectResponse.error_to_json)])
+let delete_project_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and policyRevisionId =
+         flag "policy-revision-id" (optional string)
+           ~doc:"STRING ProjectPolicyRevisionId"
+       and projectArn =
+         flag "project-arn" (required string) ~doc:"STRING ProjectArn"
+       and policyName =
+         flag "policy-name" (required string) ~doc:"STRING ProjectPolicyName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_project_policy
+           (Values.DeleteProjectPolicyRequest.make ?policyRevisionId
+              ~projectArn ~policyName ())
+           (Some Values.DeleteProjectPolicyResponse.to_json)
+           (Some Values.DeleteProjectPolicyResponse.error_to_json)])
 let delete_project_version =
   Command.async ~summary:""
     ([%map_open.Command
@@ -299,6 +476,28 @@ let delete_stream_processor =
            (Values.DeleteStreamProcessorRequest.make ~name ())
            (Some Values.DeleteStreamProcessorResponse.to_json)
            (Some Values.DeleteStreamProcessorResponse.error_to_json)])
+let delete_user =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and collectionId =
+         flag "collection-id" (required string) ~doc:"STRING CollectionId"
+       and userId = flag "user-id" (required string) ~doc:"STRING UserId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_user
+           (Values.DeleteUserRequest.make ?clientRequestToken ~collectionId
+              ~userId ()) (Some Values.DeleteUserResponse.to_json)
+           (Some Values.DeleteUserResponse.error_to_json)])
 let describe_collection =
   Command.async ~summary:""
     ([%map_open.Command
@@ -379,13 +578,18 @@ let describe_projects =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT ProjectsPageSize"
        and projectNames =
-         flag "project-names" (optional json_arg) ~doc:"JSON ProjectNames" in
+         flag "project-names" (optional json_arg) ~doc:"JSON ProjectNames"
+       and features =
+         flag "features" (optional json_arg)
+           ~doc:"JSON CustomizationFeatures" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_projects
            (Values.DescribeProjectsRequest.make ?nextToken ?maxResults
               ?projectNames:(Option.map ~f:Values.ProjectNames.of_json
-                               projectNames) ())
+                               projectNames)
+              ?features:(Option.map ~f:Values.CustomizationFeatures.of_json
+                           features) ())
            (Some Values.DescribeProjectsResponse.to_json)
            (Some Values.DescribeProjectsResponse.error_to_json)])
 let describe_stream_processor =
@@ -464,12 +668,20 @@ let detect_labels =
        and maxLabels = flag "max-labels" (optional int) ~doc:"INT UInteger"
        and minConfidence =
          flag "min-confidence" (optional float) ~doc:"FLOAT Percent"
+       and features =
+         flag "features" (optional json_arg)
+           ~doc:"JSON DetectLabelsFeatureList"
+       and settings =
+         flag "settings" (optional json_arg) ~doc:"JSON DetectLabelsSettings"
        and image = flag "image" (required json_arg) ~doc:"JSON Image" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.detect_labels
            (Values.DetectLabelsRequest.make ?maxLabels ?minConfidence
-              ~image:(Values.Image.of_json image) ())
+              ?features:(Option.map ~f:Values.DetectLabelsFeatureList.of_json
+                           features)
+              ?settings:(Option.map ~f:Values.DetectLabelsSettings.of_json
+                           settings) ~image:(Values.Image.of_json image) ())
            (Some Values.DetectLabelsResponse.to_json)
            (Some Values.DetectLabelsResponse.error_to_json)])
 let detect_moderation_labels =
@@ -487,13 +699,16 @@ let detect_moderation_labels =
        and humanLoopConfig =
          flag "human-loop-config" (optional json_arg)
            ~doc:"JSON HumanLoopConfig"
+       and projectVersion =
+         flag "project-version" (optional string)
+           ~doc:"STRING ProjectVersionId"
        and image = flag "image" (required json_arg) ~doc:"JSON Image" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.detect_moderation_labels
            (Values.DetectModerationLabelsRequest.make ?minConfidence
               ?humanLoopConfig:(Option.map ~f:Values.HumanLoopConfig.of_json
-                                  humanLoopConfig)
+                                  humanLoopConfig) ?projectVersion
               ~image:(Values.Image.of_json image) ())
            (Some Values.DetectModerationLabelsResponse.to_json)
            (Some Values.DetectModerationLabelsResponse.error_to_json)])
@@ -542,6 +757,32 @@ let detect_text =
                           filters) ~image:(Values.Image.of_json image) ())
            (Some Values.DetectTextResponse.to_json)
            (Some Values.DetectTextResponse.error_to_json)])
+let disassociate_faces =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and collectionId =
+         flag "collection-id" (required string) ~doc:"STRING CollectionId"
+       and userId = flag "user-id" (required string) ~doc:"STRING UserId"
+       and faceIds =
+         flag "face-ids" (required json_arg) ~doc:"JSON UserFaceIdList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_faces
+           (Values.DisassociateFacesRequest.make ?clientRequestToken
+              ~collectionId ~userId
+              ~faceIds:(Values.UserFaceIdList.of_json faceIds) ())
+           (Some Values.DisassociateFacesResponse.to_json)
+           (Some Values.DisassociateFacesResponse.error_to_json)])
 let distribute_dataset_entries =
   Command.async ~summary:""
     ([%map_open.Command
@@ -623,13 +864,19 @@ let get_content_moderation =
        and sortBy =
          flag "sort-by" (optional json_arg)
            ~doc:"JSON ContentModerationSortBy"
+       and aggregateBy =
+         flag "aggregate-by" (optional json_arg)
+           ~doc:"JSON ContentModerationAggregateBy"
        and jobId = flag "job-id" (required string) ~doc:"STRING JobId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_content_moderation
            (Values.GetContentModerationRequest.make ?maxResults ?nextToken
               ?sortBy:(Option.map ~f:Values.ContentModerationSortBy.of_json
-                         sortBy) ~jobId ())
+                         sortBy)
+              ?aggregateBy:(Option.map
+                              ~f:Values.ContentModerationAggregateBy.of_json
+                              aggregateBy) ~jobId ())
            (Some Values.GetContentModerationResponse.to_json)
            (Some Values.GetContentModerationResponse.error_to_json)])
 let get_face_detection =
@@ -653,6 +900,24 @@ let get_face_detection =
            (Values.GetFaceDetectionRequest.make ?maxResults ?nextToken ~jobId
               ()) (Some Values.GetFaceDetectionResponse.to_json)
            (Some Values.GetFaceDetectionResponse.error_to_json)])
+let get_face_liveness_session_results =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sessionId =
+         flag "session-id" (required string) ~doc:"STRING LivenessSessionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_face_liveness_session_results
+           (Values.GetFaceLivenessSessionResultsRequest.make ~sessionId ())
+           (Some Values.GetFaceLivenessSessionResultsResponse.to_json)
+           (Some Values.GetFaceLivenessSessionResultsResponse.error_to_json)])
 let get_face_search =
   Command.async ~summary:""
     ([%map_open.Command
@@ -693,15 +958,39 @@ let get_label_detection =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
        and sortBy =
          flag "sort-by" (optional json_arg) ~doc:"JSON LabelDetectionSortBy"
+       and aggregateBy =
+         flag "aggregate-by" (optional json_arg)
+           ~doc:"JSON LabelDetectionAggregateBy"
        and jobId = flag "job-id" (required string) ~doc:"STRING JobId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_label_detection
            (Values.GetLabelDetectionRequest.make ?maxResults ?nextToken
               ?sortBy:(Option.map ~f:Values.LabelDetectionSortBy.of_json
-                         sortBy) ~jobId ())
+                         sortBy)
+              ?aggregateBy:(Option.map
+                              ~f:Values.LabelDetectionAggregateBy.of_json
+                              aggregateBy) ~jobId ())
            (Some Values.GetLabelDetectionResponse.to_json)
            (Some Values.GetLabelDetectionResponse.error_to_json)])
+let get_media_analysis_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and jobId =
+         flag "job-id" (required string) ~doc:"STRING MediaAnalysisJobId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_media_analysis_job
+           (Values.GetMediaAnalysisJobRequest.make ~jobId ())
+           (Some Values.GetMediaAnalysisJobResponse.to_json)
+           (Some Values.GetMediaAnalysisJobResponse.error_to_json)])
 let get_person_tracking =
   Command.async ~summary:""
     ([%map_open.Command
@@ -894,14 +1183,65 @@ let list_faces =
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
        and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and userId = flag "user-id" (optional string) ~doc:"STRING UserId"
+       and faceIds =
+         flag "face-ids" (optional json_arg) ~doc:"JSON FaceIdList"
        and collectionId =
          flag "collection-id" (required string) ~doc:"STRING CollectionId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_faces
-           (Values.ListFacesRequest.make ?nextToken ?maxResults ~collectionId
-              ()) (Some Values.ListFacesResponse.to_json)
+           (Values.ListFacesRequest.make ?nextToken ?maxResults ?userId
+              ?faceIds:(Option.map ~f:Values.FaceIdList.of_json faceIds)
+              ~collectionId ()) (Some Values.ListFacesResponse.to_json)
            (Some Values.ListFacesResponse.error_to_json)])
+let list_media_analysis_jobs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING ExtendedPaginationToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListMediaAnalysisJobsPageSize" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_media_analysis_jobs
+           (Values.ListMediaAnalysisJobsRequest.make ?nextToken ?maxResults
+              ()) (Some Values.ListMediaAnalysisJobsResponse.to_json)
+           (Some Values.ListMediaAnalysisJobsResponse.error_to_json)])
+let list_project_policies =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING ExtendedPaginationToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListProjectPoliciesPageSize"
+       and projectArn =
+         flag "project-arn" (required string) ~doc:"STRING ProjectArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_project_policies
+           (Values.ListProjectPoliciesRequest.make ?nextToken ?maxResults
+              ~projectArn ())
+           (Some Values.ListProjectPoliciesResponse.to_json)
+           (Some Values.ListProjectPoliciesResponse.error_to_json)])
 let list_stream_processors =
   Command.async ~summary:""
     ([%map_open.Command
@@ -940,6 +1280,55 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_users =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxUserResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and collectionId =
+         flag "collection-id" (required string) ~doc:"STRING CollectionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_users
+           (Values.ListUsersRequest.make ?maxResults ?nextToken ~collectionId
+              ()) (Some Values.ListUsersResponse.to_json)
+           (Some Values.ListUsersResponse.error_to_json)])
+let put_project_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and policyRevisionId =
+         flag "policy-revision-id" (optional string)
+           ~doc:"STRING ProjectPolicyRevisionId"
+       and projectArn =
+         flag "project-arn" (required string) ~doc:"STRING ProjectArn"
+       and policyName =
+         flag "policy-name" (required string) ~doc:"STRING ProjectPolicyName"
+       and policyDocument =
+         flag "policy-document" (required string)
+           ~doc:"STRING ProjectPolicyDocument" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_project_policy
+           (Values.PutProjectPolicyRequest.make ?policyRevisionId ~projectArn
+              ~policyName ~policyDocument ())
+           (Some Values.PutProjectPolicyResponse.to_json)
+           (Some Values.PutProjectPolicyResponse.error_to_json)])
 let recognize_celebrities =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1009,6 +1398,60 @@ let search_faces_by_image =
               ~image:(Values.Image.of_json image) ())
            (Some Values.SearchFacesByImageResponse.to_json)
            (Some Values.SearchFacesByImageResponse.error_to_json)])
+let search_users =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and userId = flag "user-id" (optional string) ~doc:"STRING UserId"
+       and faceId = flag "face-id" (optional string) ~doc:"STRING FaceId"
+       and userMatchThreshold =
+         flag "user-match-threshold" (optional float) ~doc:"FLOAT Percent"
+       and maxUsers =
+         flag "max-users" (optional int) ~doc:"INT MaxUserResults"
+       and collectionId =
+         flag "collection-id" (required string) ~doc:"STRING CollectionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.search_users
+           (Values.SearchUsersRequest.make ?userId ?faceId
+              ?userMatchThreshold ?maxUsers ~collectionId ())
+           (Some Values.SearchUsersResponse.to_json)
+           (Some Values.SearchUsersResponse.error_to_json)])
+let search_users_by_image =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and userMatchThreshold =
+         flag "user-match-threshold" (optional float) ~doc:"FLOAT Percent"
+       and maxUsers =
+         flag "max-users" (optional int) ~doc:"INT MaxUserResults"
+       and qualityFilter =
+         flag "quality-filter" (optional json_arg) ~doc:"JSON QualityFilter"
+       and collectionId =
+         flag "collection-id" (required string) ~doc:"STRING CollectionId"
+       and image = flag "image" (required json_arg) ~doc:"JSON Image" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.search_users_by_image
+           (Values.SearchUsersByImageRequest.make ?userMatchThreshold
+              ?maxUsers
+              ?qualityFilter:(Option.map ~f:Values.QualityFilter.of_json
+                                qualityFilter) ~collectionId
+              ~image:(Values.Image.of_json image) ())
+           (Some Values.SearchUsersByImageResponse.to_json)
+           (Some Values.SearchUsersByImageResponse.error_to_json)])
 let start_celebrity_recognition =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1153,6 +1596,12 @@ let start_label_detection =
          flag "notification-channel" (optional json_arg)
            ~doc:"JSON NotificationChannel"
        and jobTag = flag "job-tag" (optional string) ~doc:"STRING JobTag"
+       and features =
+         flag "features" (optional json_arg)
+           ~doc:"JSON LabelDetectionFeatureList"
+       and settings =
+         flag "settings" (optional json_arg)
+           ~doc:"JSON LabelDetectionSettings"
        and video = flag "video" (required json_arg) ~doc:"JSON Video" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1162,9 +1611,50 @@ let start_label_detection =
               ?notificationChannel:(Option.map
                                       ~f:Values.NotificationChannel.of_json
                                       notificationChannel) ?jobTag
-              ~video:(Values.Video.of_json video) ())
+              ?features:(Option.map
+                           ~f:Values.LabelDetectionFeatureList.of_json
+                           features)
+              ?settings:(Option.map ~f:Values.LabelDetectionSettings.of_json
+                           settings) ~video:(Values.Video.of_json video) ())
            (Some Values.StartLabelDetectionResponse.to_json)
            (Some Values.StartLabelDetectionResponse.error_to_json)])
+let start_media_analysis_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and jobName =
+         flag "job-name" (optional string) ~doc:"STRING MediaAnalysisJobName"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING KmsKeyId"
+       and operationsConfig =
+         flag "operations-config" (required json_arg)
+           ~doc:"JSON MediaAnalysisOperationsConfig"
+       and input =
+         flag "input" (required json_arg) ~doc:"JSON MediaAnalysisInput"
+       and outputConfig =
+         flag "output-config" (required json_arg)
+           ~doc:"JSON MediaAnalysisOutputConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_media_analysis_job
+           (Values.StartMediaAnalysisJobRequest.make ?clientRequestToken
+              ?jobName ?kmsKeyId
+              ~operationsConfig:(Values.MediaAnalysisOperationsConfig.of_json
+                                   operationsConfig)
+              ~input:(Values.MediaAnalysisInput.of_json input)
+              ~outputConfig:(Values.MediaAnalysisOutputConfig.of_json
+                               outputConfig) ())
+           (Some Values.StartMediaAnalysisJobResponse.to_json)
+           (Some Values.StartMediaAnalysisJobResponse.error_to_json)])
 let start_person_tracking =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1203,6 +1693,8 @@ let start_project_version =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and maxInferenceUnits =
+         flag "max-inference-units" (optional int) ~doc:"INT InferenceUnits"
        and projectVersionArn =
          flag "project-version-arn" (required string)
            ~doc:"STRING ProjectVersionArn"
@@ -1211,8 +1703,8 @@ let start_project_version =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_project_version
-           (Values.StartProjectVersionRequest.make ~projectVersionArn
-              ~minInferenceUnits ())
+           (Values.StartProjectVersionRequest.make ?maxInferenceUnits
+              ~projectVersionArn ~minInferenceUnits ())
            (Some Values.StartProjectVersionResponse.to_json)
            (Some Values.StartProjectVersionResponse.error_to_json)])
 let start_segment_detection =
@@ -1261,12 +1753,24 @@ let start_stream_processor =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and startSelector =
+         flag "start-selector" (optional json_arg)
+           ~doc:"JSON StreamProcessingStartSelector"
+       and stopSelector =
+         flag "stop-selector" (optional json_arg)
+           ~doc:"JSON StreamProcessingStopSelector"
        and name =
          flag "name" (required string) ~doc:"STRING StreamProcessorName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_stream_processor
-           (Values.StartStreamProcessorRequest.make ~name ())
+           (Values.StartStreamProcessorRequest.make
+              ?startSelector:(Option.map
+                                ~f:Values.StreamProcessingStartSelector.of_json
+                                startSelector)
+              ?stopSelector:(Option.map
+                               ~f:Values.StreamProcessingStopSelector.of_json
+                               stopSelector) ~name ())
            (Some Values.StartStreamProcessorResponse.to_json)
            (Some Values.StartStreamProcessorResponse.error_to_json)])
 let start_text_detection =
@@ -1401,21 +1905,69 @@ let update_dataset_entries =
               ~changes:(Values.DatasetChanges.of_json changes) ())
            (Some Values.UpdateDatasetEntriesResponse.to_json)
            (Some Values.UpdateDatasetEntriesResponse.error_to_json)])
+let update_stream_processor =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and settingsForUpdate =
+         flag "settings-for-update" (optional json_arg)
+           ~doc:"JSON StreamProcessorSettingsForUpdate"
+       and regionsOfInterestForUpdate =
+         flag "regions-of-interest-for-update" (optional json_arg)
+           ~doc:"JSON RegionsOfInterest"
+       and dataSharingPreferenceForUpdate =
+         flag "data-sharing-preference-for-update" (optional json_arg)
+           ~doc:"JSON StreamProcessorDataSharingPreference"
+       and parametersToDelete =
+         flag "parameters-to-delete" (optional json_arg)
+           ~doc:"JSON StreamProcessorParametersToDelete"
+       and name =
+         flag "name" (required string) ~doc:"STRING StreamProcessorName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_stream_processor
+           (Values.UpdateStreamProcessorRequest.make
+              ?settingsForUpdate:(Option.map
+                                    ~f:Values.StreamProcessorSettingsForUpdate.of_json
+                                    settingsForUpdate)
+              ?regionsOfInterestForUpdate:(Option.map
+                                             ~f:Values.RegionsOfInterest.of_json
+                                             regionsOfInterestForUpdate)
+              ?dataSharingPreferenceForUpdate:(Option.map
+                                                 ~f:Values.StreamProcessorDataSharingPreference.of_json
+                                                 dataSharingPreferenceForUpdate)
+              ?parametersToDelete:(Option.map
+                                     ~f:Values.StreamProcessorParametersToDelete.of_json
+                                     parametersToDelete) ~name ())
+           (Some Values.UpdateStreamProcessorResponse.to_json)
+           (Some Values.UpdateStreamProcessorResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("compare-faces", compare_faces);
+    [("associate-faces", associate_faces);
+    ("compare-faces", compare_faces);
+    ("copy-project-version", copy_project_version);
     ("create-collection", create_collection);
     ("create-dataset", create_dataset);
+    ("create-face-liveness-session", create_face_liveness_session);
     ("create-project", create_project);
     ("create-project-version", create_project_version);
     ("create-stream-processor", create_stream_processor);
+    ("create-user", create_user);
     ("delete-collection", delete_collection);
     ("delete-dataset", delete_dataset);
     ("delete-faces", delete_faces);
     ("delete-project", delete_project);
+    ("delete-project-policy", delete_project_policy);
     ("delete-project-version", delete_project_version);
     ("delete-stream-processor", delete_stream_processor);
+    ("delete-user", delete_user);
     ("describe-collection", describe_collection);
     ("describe-dataset", describe_dataset);
     ("describe-project-versions", describe_project_versions);
@@ -1427,13 +1979,16 @@ let main =
     ("detect-moderation-labels", detect_moderation_labels);
     ("detect-protective-equipment", detect_protective_equipment);
     ("detect-text", detect_text);
+    ("disassociate-faces", disassociate_faces);
     ("distribute-dataset-entries", distribute_dataset_entries);
     ("get-celebrity-info", get_celebrity_info);
     ("get-celebrity-recognition", get_celebrity_recognition);
     ("get-content-moderation", get_content_moderation);
     ("get-face-detection", get_face_detection);
+    ("get-face-liveness-session-results", get_face_liveness_session_results);
     ("get-face-search", get_face_search);
     ("get-label-detection", get_label_detection);
+    ("get-media-analysis-job", get_media_analysis_job);
     ("get-person-tracking", get_person_tracking);
     ("get-segment-detection", get_segment_detection);
     ("get-text-detection", get_text_detection);
@@ -1442,16 +1997,23 @@ let main =
     ("list-dataset-entries", list_dataset_entries);
     ("list-dataset-labels", list_dataset_labels);
     ("list-faces", list_faces);
+    ("list-media-analysis-jobs", list_media_analysis_jobs);
+    ("list-project-policies", list_project_policies);
     ("list-stream-processors", list_stream_processors);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-users", list_users);
+    ("put-project-policy", put_project_policy);
     ("recognize-celebrities", recognize_celebrities);
     ("search-faces", search_faces);
     ("search-faces-by-image", search_faces_by_image);
+    ("search-users", search_users);
+    ("search-users-by-image", search_users_by_image);
     ("start-celebrity-recognition", start_celebrity_recognition);
     ("start-content-moderation", start_content_moderation);
     ("start-face-detection", start_face_detection);
     ("start-face-search", start_face_search);
     ("start-label-detection", start_label_detection);
+    ("start-media-analysis-job", start_media_analysis_job);
     ("start-person-tracking", start_person_tracking);
     ("start-project-version", start_project_version);
     ("start-segment-detection", start_segment_detection);
@@ -1461,4 +2023,5 @@ let main =
     ("stop-stream-processor", stop_stream_processor);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
-    ("update-dataset-entries", update_dataset_entries)]
+    ("update-dataset-entries", update_dataset_entries);
+    ("update-stream-processor", update_stream_processor)]

@@ -10,6 +10,10 @@ val decrease_stream_retention_period :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DecreaseStreamRetentionPeriodInput.t -> (unit, unit) Result.t Lwt.t
+val delete_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteResourcePolicyInput.t -> (unit, unit) Result.t Lwt.t
 val delete_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteStreamInput.t -> (unit, unit) Result.t Lwt.t
@@ -17,6 +21,12 @@ val deregister_stream_consumer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterStreamConsumerInput.t -> (unit, unit) Result.t Lwt.t
+val describe_account_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeAccountSettingsInput.t ->
+        (DescribeAccountSettingsOutput.t,
+          DescribeAccountSettingsOutput.error) Result.t Lwt.t
 val describe_limits :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -56,6 +66,12 @@ val get_records :
     ?cfg:Awso.Cfg.t ->
       GetRecordsInput.t ->
         (GetRecordsOutput.t, GetRecordsOutput.error) Result.t Lwt.t
+val get_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourcePolicyInput.t ->
+        (GetResourcePolicyOutput.t, GetResourcePolicyOutput.error) Result.t
+          Lwt.t
 val get_shard_iterator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -82,6 +98,12 @@ val list_streams :
     ?cfg:Awso.Cfg.t ->
       ListStreamsInput.t ->
         (ListStreamsOutput.t, ListStreamsOutput.error) Result.t Lwt.t
+val list_tags_for_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTagsForResourceInput.t ->
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Lwt.t
 val list_tags_for_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -101,6 +123,10 @@ val put_records :
     ?cfg:Awso.Cfg.t ->
       PutRecordsInput.t ->
         (PutRecordsOutput.t, PutRecordsOutput.error) Result.t Lwt.t
+val put_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutResourcePolicyInput.t -> (unit, unit) Result.t Lwt.t
 val register_stream_consumer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -128,6 +154,22 @@ val subscribe_to_shard :
       SubscribeToShardInput.t ->
         (SubscribeToShardOutput.t, SubscribeToShardOutput.error) Result.t
           Lwt.t
+val tag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> TagResourceInput.t -> (unit, unit) Result.t Lwt.t
+val untag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> UntagResourceInput.t -> (unit, unit) Result.t Lwt.t
+val update_account_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAccountSettingsInput.t ->
+        (UpdateAccountSettingsOutput.t, UpdateAccountSettingsOutput.error)
+          Result.t Lwt.t
+val update_max_record_size :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateMaxRecordSizeInput.t -> (unit, unit) Result.t Lwt.t
 val update_shard_count :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -137,3 +179,9 @@ val update_shard_count :
 val update_stream_mode :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> UpdateStreamModeInput.t -> (unit, unit) Result.t Lwt.t
+val update_stream_warm_throughput :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateStreamWarmThroughputInput.t ->
+        (UpdateStreamWarmThroughputOutput.t,
+          UpdateStreamWarmThroughputOutput.error) Result.t Lwt.t

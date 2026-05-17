@@ -15,25 +15,37 @@ let create_keyspace ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateKeyspace input
 let create_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTable input
+let create_type ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateType input
 let delete_keyspace ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteKeyspace input
 let delete_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTable input
+let delete_type ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteType input
 let get_keyspace ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetKeyspace input
 let get_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTable input
+let get_table_auto_scaling_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTableAutoScalingSettings input
+let get_type ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetType input
 let list_keyspaces ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListKeyspaces input
 let list_tables ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTables input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let list_types ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTypes input
 let restore_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RestoreTable input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_keyspace ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateKeyspace input
 let update_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateTable input

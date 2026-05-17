@@ -39,10 +39,10 @@ let batch_execute_statement =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and database = flag "database" (optional string) ~doc:"STRING DbName"
+       and schema = flag "schema" (optional string) ~doc:"STRING DbName"
        and parameterSets =
          flag "parameter-sets" (optional json_arg)
            ~doc:"JSON SqlParameterSets"
-       and schema = flag "schema" (optional string) ~doc:"STRING DbName"
        and transactionId =
          flag "transaction-id" (optional string) ~doc:"STRING Id"
        and resourceArn =
@@ -52,10 +52,10 @@ let batch_execute_statement =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.batch_execute_statement
-           (Values.BatchExecuteStatementRequest.make ?database
+           (Values.BatchExecuteStatementRequest.make ?database ?schema
               ?parameterSets:(Option.map ~f:Values.SqlParameterSets.of_json
-                                parameterSets) ?schema ?transactionId
-              ~resourceArn ~secretArn ~sql ())
+                                parameterSets) ?transactionId ~resourceArn
+              ~secretArn ~sql ())
            (Some Values.BatchExecuteStatementResponse.to_json)
            (Some Values.BatchExecuteStatementResponse.error_to_json)])
 let begin_transaction =
@@ -114,18 +114,18 @@ let execute_sql =
            ~doc:"URL override endpoint url"
        and database = flag "database" (optional string) ~doc:"STRING DbName"
        and schema = flag "schema" (optional string) ~doc:"STRING DbName"
-       and awsSecretStoreArn =
-         flag "aws-secret-store-arn" (required string) ~doc:"STRING Arn"
        and dbClusterOrInstanceArn =
          flag "db-cluster-or-instance-arn" (required string)
            ~doc:"STRING Arn"
+       and awsSecretStoreArn =
+         flag "aws-secret-store-arn" (required string) ~doc:"STRING Arn"
        and sqlStatements =
          flag "sql-statements" (required string) ~doc:"STRING SqlStatement" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.execute_sql
            (Values.ExecuteSqlRequest.make ?database ?schema
-              ~awsSecretStoreArn ~dbClusterOrInstanceArn ~sqlStatements ())
+              ~dbClusterOrInstanceArn ~awsSecretStoreArn ~sqlStatements ())
            (Some Values.ExecuteSqlResponse.to_json)
            (Some Values.ExecuteSqlResponse.error_to_json)])
 let execute_statement =
@@ -138,19 +138,22 @@ let execute_statement =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and continueAfterTimeout =
-         flag "continue-after-timeout" (optional bool) ~doc:"BOOL Boolean"
        and database = flag "database" (optional string) ~doc:"STRING DbName"
-       and includeResultMetadata =
-         flag "include-result-metadata" (optional bool) ~doc:"BOOL Boolean"
+       and schema = flag "schema" (optional string) ~doc:"STRING DbName"
        and parameters =
          flag "parameters" (optional json_arg) ~doc:"JSON SqlParametersList"
+       and transactionId =
+         flag "transaction-id" (optional string) ~doc:"STRING Id"
+       and includeResultMetadata =
+         flag "include-result-metadata" (optional bool) ~doc:"BOOL Boolean"
+       and continueAfterTimeout =
+         flag "continue-after-timeout" (optional bool) ~doc:"BOOL Boolean"
        and resultSetOptions =
          flag "result-set-options" (optional json_arg)
            ~doc:"JSON ResultSetOptions"
-       and schema = flag "schema" (optional string) ~doc:"STRING DbName"
-       and transactionId =
-         flag "transaction-id" (optional string) ~doc:"STRING Id"
+       and formatRecordsAs =
+         flag "format-records-as" (optional json_arg)
+           ~doc:"JSON RecordsFormatType"
        and resourceArn =
          flag "resource-arn" (required string) ~doc:"STRING Arn"
        and secretArn = flag "secret-arn" (required string) ~doc:"STRING Arn"
@@ -158,15 +161,17 @@ let execute_statement =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.execute_statement
-           (Values.ExecuteStatementRequest.make ?continueAfterTimeout
-              ?database ?includeResultMetadata
+           (Values.ExecuteStatementRequest.make ?database ?schema
               ?parameters:(Option.map ~f:Values.SqlParametersList.of_json
-                             parameters)
+                             parameters) ?transactionId
+              ?includeResultMetadata ?continueAfterTimeout
               ?resultSetOptions:(Option.map
                                    ~f:Values.ResultSetOptions.of_json
-                                   resultSetOptions) ?schema ?transactionId
-              ~resourceArn ~secretArn ~sql ())
-           (Some Values.ExecuteStatementResponse.to_json)
+                                   resultSetOptions)
+              ?formatRecordsAs:(Option.map
+                                  ~f:Values.RecordsFormatType.of_json
+                                  formatRecordsAs) ~resourceArn ~secretArn
+              ~sql ()) (Some Values.ExecuteStatementResponse.to_json)
            (Some Values.ExecuteStatementResponse.error_to_json)])
 let rollback_transaction =
   Command.async ~summary:""

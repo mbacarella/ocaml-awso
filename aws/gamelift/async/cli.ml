@@ -42,7 +42,8 @@ let accept_match =
          flag "ticket-id" (required string)
            ~doc:"STRING MatchmakingIdStringModel"
        and playerIds =
-         flag "player-ids" (required json_arg) ~doc:"JSON StringList"
+         flag "player-ids" (required json_arg)
+           ~doc:"JSON PlayerIdsForAcceptMatch"
        and acceptanceType =
          flag "acceptance-type" (required json_arg)
            ~doc:"JSON AcceptanceType" in
@@ -50,7 +51,7 @@ let accept_match =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.accept_match
            (Values.AcceptMatchInput.make ~ticketId
-              ~playerIds:(Values.StringList.of_json playerIds)
+              ~playerIds:(Values.PlayerIdsForAcceptMatch.of_json playerIds)
               ~acceptanceType:(Values.AcceptanceType.of_json acceptanceType)
               ()) (Some Values.AcceptMatchOutput.to_json)
            (Some Values.AcceptMatchOutput.error_to_json)])
@@ -69,6 +70,9 @@ let claim_game_server =
        and gameServerData =
          flag "game-server-data" (optional string)
            ~doc:"STRING GameServerData"
+       and filterOption =
+         flag "filter-option" (optional json_arg)
+           ~doc:"JSON ClaimFilterOption"
        and gameServerGroupName =
          flag "game-server-group-name" (required string)
            ~doc:"STRING GameServerGroupNameOrArn" in
@@ -76,7 +80,8 @@ let claim_game_server =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.claim_game_server
            (Values.ClaimGameServerInput.make ?gameServerId ?gameServerData
-              ~gameServerGroupName ())
+              ?filterOption:(Option.map ~f:Values.ClaimFilterOption.of_json
+                               filterOption) ~gameServerGroupName ())
            (Some Values.ClaimGameServerOutput.to_json)
            (Some Values.ClaimGameServerOutput.error_to_json)])
 let create_alias =
@@ -127,7 +132,10 @@ let create_build =
        and operatingSystem =
          flag "operating-system" (optional json_arg)
            ~doc:"JSON OperatingSystem"
-       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList" in
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and serverSdkVersion =
+         flag "server-sdk-version" (optional string)
+           ~doc:"STRING ServerSdkVersion" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_build
@@ -136,9 +144,154 @@ let create_build =
                                   storageLocation)
               ?operatingSystem:(Option.map ~f:Values.OperatingSystem.of_json
                                   operatingSystem)
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ())
-           (Some Values.CreateBuildOutput.to_json)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?serverSdkVersion ()) (Some Values.CreateBuildOutput.to_json)
            (Some Values.CreateBuildOutput.error_to_json)])
+let create_container_fleet =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING NonZeroAndMaxString"
+       and gameServerContainerGroupDefinitionName =
+         flag "game-server-container-group-definition-name" (optional string)
+           ~doc:"STRING ContainerGroupDefinitionNameOrArn"
+       and perInstanceContainerGroupDefinitionName =
+         flag "per-instance-container-group-definition-name"
+           (optional string) ~doc:"STRING ContainerGroupDefinitionNameOrArn"
+       and instanceConnectionPortRange =
+         flag "instance-connection-port-range" (optional json_arg)
+           ~doc:"JSON ConnectionPortRange"
+       and instanceInboundPermissions =
+         flag "instance-inbound-permissions" (optional json_arg)
+           ~doc:"JSON IpPermissionsList"
+       and gameServerContainerGroupsPerInstance =
+         flag "game-server-container-groups-per-instance" (optional int)
+           ~doc:"INT GameServerContainerGroupsPerInstance"
+       and instanceType =
+         flag "instance-type" (optional string)
+           ~doc:"STRING NonZeroAndMaxString"
+       and billingType =
+         flag "billing-type" (optional json_arg)
+           ~doc:"JSON ContainerFleetBillingType"
+       and locations =
+         flag "locations" (optional json_arg)
+           ~doc:"JSON LocationConfigurationList"
+       and metricGroups =
+         flag "metric-groups" (optional json_arg) ~doc:"JSON MetricGroupList"
+       and newGameSessionProtectionPolicy =
+         flag "new-game-session-protection-policy" (optional json_arg)
+           ~doc:"JSON ProtectionPolicy"
+       and gameSessionCreationLimitPolicy =
+         flag "game-session-creation-limit-policy" (optional json_arg)
+           ~doc:"JSON GameSessionCreationLimitPolicy"
+       and logConfiguration =
+         flag "log-configuration" (optional json_arg)
+           ~doc:"JSON LogConfiguration"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and playerGatewayMode =
+         flag "player-gateway-mode" (optional json_arg)
+           ~doc:"JSON PlayerGatewayMode"
+       and fleetRoleArn =
+         flag "fleet-role-arn" (required string) ~doc:"STRING IamRoleArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_container_fleet
+           (Values.CreateContainerFleetInput.make ?description
+              ?gameServerContainerGroupDefinitionName
+              ?perInstanceContainerGroupDefinitionName
+              ?instanceConnectionPortRange:(Option.map
+                                              ~f:Values.ConnectionPortRange.of_json
+                                              instanceConnectionPortRange)
+              ?instanceInboundPermissions:(Option.map
+                                             ~f:Values.IpPermissionsList.of_json
+                                             instanceInboundPermissions)
+              ?gameServerContainerGroupsPerInstance ?instanceType
+              ?billingType:(Option.map
+                              ~f:Values.ContainerFleetBillingType.of_json
+                              billingType)
+              ?locations:(Option.map
+                            ~f:Values.LocationConfigurationList.of_json
+                            locations)
+              ?metricGroups:(Option.map ~f:Values.MetricGroupList.of_json
+                               metricGroups)
+              ?newGameSessionProtectionPolicy:(Option.map
+                                                 ~f:Values.ProtectionPolicy.of_json
+                                                 newGameSessionProtectionPolicy)
+              ?gameSessionCreationLimitPolicy:(Option.map
+                                                 ~f:Values.GameSessionCreationLimitPolicy.of_json
+                                                 gameSessionCreationLimitPolicy)
+              ?logConfiguration:(Option.map
+                                   ~f:Values.LogConfiguration.of_json
+                                   logConfiguration)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?playerGatewayMode:(Option.map
+                                    ~f:Values.PlayerGatewayMode.of_json
+                                    playerGatewayMode) ~fleetRoleArn ())
+           (Some Values.CreateContainerFleetOutput.to_json)
+           (Some Values.CreateContainerFleetOutput.error_to_json)])
+let create_container_group_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and containerGroupType =
+         flag "container-group-type" (optional json_arg)
+           ~doc:"JSON ContainerGroupType"
+       and gameServerContainerDefinition =
+         flag "game-server-container-definition" (optional json_arg)
+           ~doc:"JSON GameServerContainerDefinitionInput"
+       and supportContainerDefinitions =
+         flag "support-container-definitions" (optional json_arg)
+           ~doc:"JSON SupportContainerDefinitionInputList"
+       and versionDescription =
+         flag "version-description" (optional string)
+           ~doc:"STRING NonZeroAndMaxString"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and name =
+         flag "name" (required string)
+           ~doc:"STRING ContainerGroupDefinitionName"
+       and totalMemoryLimitMebibytes =
+         flag "total-memory-limit-mebibytes" (required int)
+           ~doc:"INT ContainerTotalMemoryLimit"
+       and totalVcpuLimit =
+         flag "total-vcpu-limit" (required float)
+           ~doc:"FLOAT ContainerTotalVcpuLimit"
+       and operatingSystem =
+         flag "operating-system" (required json_arg)
+           ~doc:"JSON ContainerOperatingSystem" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_container_group_definition
+           (Values.CreateContainerGroupDefinitionInput.make
+              ?containerGroupType:(Option.map
+                                     ~f:Values.ContainerGroupType.of_json
+                                     containerGroupType)
+              ?gameServerContainerDefinition:(Option.map
+                                                ~f:Values.GameServerContainerDefinitionInput.of_json
+                                                gameServerContainerDefinition)
+              ?supportContainerDefinitions:(Option.map
+                                              ~f:Values.SupportContainerDefinitionInputList.of_json
+                                              supportContainerDefinitions)
+              ?versionDescription
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name
+              ~totalMemoryLimitMebibytes ~totalVcpuLimit
+              ~operatingSystem:(Values.ContainerOperatingSystem.of_json
+                                  operatingSystem) ())
+           (Some Values.CreateContainerGroupDefinitionOutput.to_json)
+           (Some Values.CreateContainerGroupDefinitionOutput.error_to_json)])
 let create_fleet =
   Command.async ~summary:""
     ([%map_open.Command
@@ -164,6 +317,9 @@ let create_fleet =
            ~doc:"STRING LaunchParametersStringModel"
        and logPaths =
          flag "log-paths" (optional json_arg) ~doc:"JSON StringList"
+       and eC2InstanceType =
+         flag "e-c2-instance-type" (optional json_arg)
+           ~doc:"JSON EC2InstanceType"
        and eC2InboundPermissions =
          flag "e-c2-inbound-permissions" (optional json_arg)
            ~doc:"JSON IpPermissionsList"
@@ -196,17 +352,30 @@ let create_fleet =
          flag "locations" (optional json_arg)
            ~doc:"JSON LocationConfigurationList"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and computeType =
+         flag "compute-type" (optional json_arg) ~doc:"JSON ComputeType"
+       and anywhereConfiguration =
+         flag "anywhere-configuration" (optional json_arg)
+           ~doc:"JSON AnywhereConfiguration"
+       and instanceRoleCredentialsProvider =
+         flag "instance-role-credentials-provider" (optional json_arg)
+           ~doc:"JSON InstanceRoleCredentialsProvider"
+       and playerGatewayMode =
+         flag "player-gateway-mode" (optional json_arg)
+           ~doc:"JSON PlayerGatewayMode"
+       and playerGatewayConfiguration =
+         flag "player-gateway-configuration" (optional json_arg)
+           ~doc:"JSON PlayerGatewayConfiguration"
        and name =
-         flag "name" (required string) ~doc:"STRING NonZeroAndMaxString"
-       and eC2InstanceType =
-         flag "e-c2-instance-type" (required json_arg)
-           ~doc:"JSON EC2InstanceType" in
+         flag "name" (required string) ~doc:"STRING NonZeroAndMaxString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_fleet
            (Values.CreateFleetInput.make ?description ?buildId ?scriptId
               ?serverLaunchPath ?serverLaunchParameters
               ?logPaths:(Option.map ~f:Values.StringList.of_json logPaths)
+              ?eC2InstanceType:(Option.map ~f:Values.EC2InstanceType.of_json
+                                  eC2InstanceType)
               ?eC2InboundPermissions:(Option.map
                                         ~f:Values.IpPermissionsList.of_json
                                         eC2InboundPermissions)
@@ -229,10 +398,22 @@ let create_fleet =
               ?locations:(Option.map
                             ~f:Values.LocationConfigurationList.of_json
                             locations)
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name
-              ~eC2InstanceType:(Values.EC2InstanceType.of_json
-                                  eC2InstanceType) ())
-           (Some Values.CreateFleetOutput.to_json)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?computeType:(Option.map ~f:Values.ComputeType.of_json
+                              computeType)
+              ?anywhereConfiguration:(Option.map
+                                        ~f:Values.AnywhereConfiguration.of_json
+                                        anywhereConfiguration)
+              ?instanceRoleCredentialsProvider:(Option.map
+                                                  ~f:Values.InstanceRoleCredentialsProvider.of_json
+                                                  instanceRoleCredentialsProvider)
+              ?playerGatewayMode:(Option.map
+                                    ~f:Values.PlayerGatewayMode.of_json
+                                    playerGatewayMode)
+              ?playerGatewayConfiguration:(Option.map
+                                             ~f:Values.PlayerGatewayConfiguration.of_json
+                                             playerGatewayConfiguration)
+              ~name ()) (Some Values.CreateFleetOutput.to_json)
            (Some Values.CreateFleetOutput.error_to_json)])
 let create_fleet_locations =
   Command.async ~summary:""
@@ -412,6 +593,27 @@ let create_game_session_queue =
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name ())
            (Some Values.CreateGameSessionQueueOutput.to_json)
            (Some Values.CreateGameSessionQueueOutput.error_to_json)])
+let create_location =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and locationName =
+         flag "location-name" (required string)
+           ~doc:"STRING CustomInputLocationStringModel" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_location
+           (Values.CreateLocationInput.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~locationName
+              ()) (Some Values.CreateLocationOutput.to_json)
+           (Some Values.CreateLocationOutput.error_to_json)])
 let create_matchmaking_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -518,7 +720,7 @@ let create_player_session =
          flag "game-session-id" (required string)
            ~doc:"STRING ArnStringModel"
        and playerId =
-         flag "player-id" (required string) ~doc:"STRING NonZeroAndMaxString" in
+         flag "player-id" (required string) ~doc:"STRING PlayerId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_player_session
@@ -568,7 +770,9 @@ let create_script =
        and storageLocation =
          flag "storage-location" (optional json_arg) ~doc:"JSON S3Location"
        and zipFile = flag "zip-file" (optional json_arg) ~doc:"JSON ZipBlob"
-       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList" in
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and nodeJsVersion =
+         flag "node-js-version" (optional string) ~doc:"STRING NodeJsVersion" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_script
@@ -576,8 +780,8 @@ let create_script =
               ?storageLocation:(Option.map ~f:Values.S3Location.of_json
                                   storageLocation)
               ?zipFile:(Option.map ~f:Values.ZipBlob.of_json zipFile)
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ())
-           (Some Values.CreateScriptOutput.to_json)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?nodeJsVersion ()) (Some Values.CreateScriptOutput.to_json)
            (Some Values.CreateScriptOutput.error_to_json)])
 let create_vpc_peering_authorization =
   Command.async ~summary:""
@@ -658,6 +862,48 @@ let delete_build =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_build (Values.DeleteBuildInput.make ~buildId ()) None
            None])
+let delete_container_fleet =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and fleetId =
+         flag "fleet-id" (required string) ~doc:"STRING FleetIdOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_container_fleet
+           (Values.DeleteContainerFleetInput.make ~fleetId ())
+           (Some Values.DeleteContainerFleetOutput.to_json)
+           (Some Values.DeleteContainerFleetOutput.error_to_json)])
+let delete_container_group_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and versionNumber =
+         flag "version-number" (optional int) ~doc:"INT PositiveInteger"
+       and versionCountToRetain =
+         flag "version-count-to-retain" (optional int) ~doc:"INT WholeNumber"
+       and name =
+         flag "name" (required string)
+           ~doc:"STRING ContainerGroupDefinitionNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_container_group_definition
+           (Values.DeleteContainerGroupDefinitionInput.make ?versionNumber
+              ?versionCountToRetain ~name ())
+           (Some Values.DeleteContainerGroupDefinitionOutput.to_json)
+           (Some Values.DeleteContainerGroupDefinitionOutput.error_to_json)])
 let delete_fleet =
   Command.async ~summary:""
     ([%map_open.Command
@@ -739,6 +985,25 @@ let delete_game_session_queue =
            (Values.DeleteGameSessionQueueInput.make ~name ())
            (Some Values.DeleteGameSessionQueueOutput.to_json)
            (Some Values.DeleteGameSessionQueueOutput.error_to_json)])
+let delete_location =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and locationName =
+         flag "location-name" (required string)
+           ~doc:"STRING CustomLocationNameOrArnModel" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_location
+           (Values.DeleteLocationInput.make ~locationName ())
+           (Some Values.DeleteLocationOutput.to_json)
+           (Some Values.DeleteLocationOutput.error_to_json)])
 let delete_matchmaking_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -854,6 +1119,26 @@ let delete_vpc_peering_connection =
               ~vpcPeeringConnectionId ())
            (Some Values.DeleteVpcPeeringConnectionOutput.to_json)
            (Some Values.DeleteVpcPeeringConnectionOutput.error_to_json)])
+let deregister_compute =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and fleetId =
+         flag "fleet-id" (required string) ~doc:"STRING FleetIdOrArn"
+       and computeName =
+         flag "compute-name" (required string) ~doc:"STRING ComputeNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.deregister_compute
+           (Values.DeregisterComputeInput.make ~fleetId ~computeName ())
+           (Some Values.DeregisterComputeOutput.to_json)
+           (Some Values.DeregisterComputeOutput.error_to_json)])
 let deregister_game_server =
   Command.async ~summary:""
     ([%map_open.Command
@@ -908,6 +1193,98 @@ let describe_build =
            Io.describe_build (Values.DescribeBuildInput.make ~buildId ())
            (Some Values.DescribeBuildOutput.to_json)
            (Some Values.DescribeBuildOutput.error_to_json)])
+let describe_compute =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and fleetId =
+         flag "fleet-id" (required string) ~doc:"STRING FleetIdOrArn"
+       and computeName =
+         flag "compute-name" (required string) ~doc:"STRING ComputeNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_compute
+           (Values.DescribeComputeInput.make ~fleetId ~computeName ())
+           (Some Values.DescribeComputeOutput.to_json)
+           (Some Values.DescribeComputeOutput.error_to_json)])
+let describe_container_fleet =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and fleetId =
+         flag "fleet-id" (required string) ~doc:"STRING FleetIdOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_container_fleet
+           (Values.DescribeContainerFleetInput.make ~fleetId ())
+           (Some Values.DescribeContainerFleetOutput.to_json)
+           (Some Values.DescribeContainerFleetOutput.error_to_json)])
+let describe_container_group_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and versionNumber =
+         flag "version-number" (optional int) ~doc:"INT PositiveInteger"
+       and name =
+         flag "name" (required string)
+           ~doc:"STRING ContainerGroupDefinitionNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_container_group_definition
+           (Values.DescribeContainerGroupDefinitionInput.make ?versionNumber
+              ~name ())
+           (Some Values.DescribeContainerGroupDefinitionOutput.to_json)
+           (Some Values.DescribeContainerGroupDefinitionOutput.error_to_json)])
+let describe_container_group_port_mappings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and computeName =
+         flag "compute-name" (optional string) ~doc:"STRING ComputeNameOrArn"
+       and instanceId =
+         flag "instance-id" (optional string) ~doc:"STRING InstanceId"
+       and containerName =
+         flag "container-name" (optional string)
+           ~doc:"STRING NonZeroAnd128MaxAsciiString"
+       and fleetId =
+         flag "fleet-id" (required string) ~doc:"STRING FleetIdOrArn"
+       and containerGroupType =
+         flag "container-group-type" (required json_arg)
+           ~doc:"JSON ContainerGroupType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_container_group_port_mappings
+           (Values.DescribeContainerGroupPortMappingsInput.make ?computeName
+              ?instanceId ?containerName ~fleetId
+              ~containerGroupType:(Values.ContainerGroupType.of_json
+                                     containerGroupType) ())
+           (Some Values.DescribeContainerGroupPortMappingsOutput.to_json)
+           (Some
+              Values.DescribeContainerGroupPortMappingsOutput.error_to_json)])
 let describe_e_c2_instance_limits =
   Command.async ~summary:""
     ([%map_open.Command
@@ -979,6 +1356,26 @@ let describe_fleet_capacity =
                            fleetIds) ?limit ?nextToken ())
            (Some Values.DescribeFleetCapacityOutput.to_json)
            (Some Values.DescribeFleetCapacityOutput.error_to_json)])
+let describe_fleet_deployment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and deploymentId =
+         flag "deployment-id" (optional string) ~doc:"STRING DeploymentId"
+       and fleetId =
+         flag "fleet-id" (required string) ~doc:"STRING FleetIdOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_fleet_deployment
+           (Values.DescribeFleetDeploymentInput.make ?deploymentId ~fleetId
+              ()) (Some Values.DescribeFleetDeploymentOutput.to_json)
+           (Some Values.DescribeFleetDeploymentOutput.error_to_json)])
 let describe_fleet_events =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1415,7 +1812,7 @@ let describe_player_sessions =
          flag "game-session-id" (optional string)
            ~doc:"STRING ArnStringModel"
        and playerId =
-         flag "player-id" (optional string) ~doc:"STRING NonZeroAndMaxString"
+         flag "player-id" (optional string) ~doc:"STRING PlayerId"
        and playerSessionId =
          flag "player-session-id" (optional string)
            ~doc:"STRING PlayerSessionId"
@@ -1532,6 +1929,46 @@ let describe_vpc_peering_connections =
            (Values.DescribeVpcPeeringConnectionsInput.make ?fleetId ())
            (Some Values.DescribeVpcPeeringConnectionsOutput.to_json)
            (Some Values.DescribeVpcPeeringConnectionsOutput.error_to_json)])
+let get_compute_access =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and fleetId =
+         flag "fleet-id" (required string) ~doc:"STRING FleetIdOrArn"
+       and computeName =
+         flag "compute-name" (required string) ~doc:"STRING ComputeNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_compute_access
+           (Values.GetComputeAccessInput.make ~fleetId ~computeName ())
+           (Some Values.GetComputeAccessOutput.to_json)
+           (Some Values.GetComputeAccessOutput.error_to_json)])
+let get_compute_auth_token =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and fleetId =
+         flag "fleet-id" (required string) ~doc:"STRING FleetIdOrArn"
+       and computeName =
+         flag "compute-name" (required string) ~doc:"STRING ComputeNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_compute_auth_token
+           (Values.GetComputeAuthTokenInput.make ~fleetId ~computeName ())
+           (Some Values.GetComputeAuthTokenOutput.to_json)
+           (Some Values.GetComputeAuthTokenOutput.error_to_json)])
 let get_game_session_log_url =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1571,6 +2008,28 @@ let get_instance_access =
            (Values.GetInstanceAccessInput.make ~fleetId ~instanceId ())
            (Some Values.GetInstanceAccessOutput.to_json)
            (Some Values.GetInstanceAccessOutput.error_to_json)])
+let get_player_connection_details =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and gameSessionId =
+         flag "game-session-id" (required string)
+           ~doc:"STRING ArnStringModel"
+       and playerIds =
+         flag "player-ids" (required json_arg) ~doc:"JSON PlayerIdList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_player_connection_details
+           (Values.GetPlayerConnectionDetailsInput.make ~gameSessionId
+              ~playerIds:(Values.PlayerIdList.of_json playerIds) ())
+           (Some Values.GetPlayerConnectionDetailsOutput.to_json)
+           (Some Values.GetPlayerConnectionDetailsOutput.error_to_json)])
 let list_aliases =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1618,6 +2077,141 @@ let list_builds =
               ?status:(Option.map ~f:Values.BuildStatus.of_json status)
               ?limit ?nextToken ()) (Some Values.ListBuildsOutput.to_json)
            (Some Values.ListBuildsOutput.error_to_json)])
+let list_compute =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and location =
+         flag "location" (optional string) ~doc:"STRING LocationStringModel"
+       and containerGroupDefinitionName =
+         flag "container-group-definition-name" (optional string)
+           ~doc:"STRING ContainerGroupDefinitionNameOrArn"
+       and computeStatus =
+         flag "compute-status" (optional json_arg)
+           ~doc:"JSON ListComputeInputStatus"
+       and limit = flag "limit" (optional int) ~doc:"INT PositiveInteger"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING NonZeroAndMaxString"
+       and fleetId =
+         flag "fleet-id" (required string) ~doc:"STRING FleetIdOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_compute
+           (Values.ListComputeInput.make ?location
+              ?containerGroupDefinitionName
+              ?computeStatus:(Option.map
+                                ~f:Values.ListComputeInputStatus.of_json
+                                computeStatus) ?limit ?nextToken ~fleetId ())
+           (Some Values.ListComputeOutput.to_json)
+           (Some Values.ListComputeOutput.error_to_json)])
+let list_container_fleets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and containerGroupDefinitionName =
+         flag "container-group-definition-name" (optional string)
+           ~doc:"STRING ContainerGroupDefinitionNameOrArn"
+       and limit = flag "limit" (optional int) ~doc:"INT PositiveInteger"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING NonZeroAndMaxString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_container_fleets
+           (Values.ListContainerFleetsInput.make
+              ?containerGroupDefinitionName ?limit ?nextToken ())
+           (Some Values.ListContainerFleetsOutput.to_json)
+           (Some Values.ListContainerFleetsOutput.error_to_json)])
+let list_container_group_definition_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and limit =
+         flag "limit" (optional int)
+           ~doc:"INT ListContainerGroupDefinitionVersionsLimit"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING NonZeroAndMaxString"
+       and name =
+         flag "name" (required string)
+           ~doc:"STRING ContainerGroupDefinitionNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_container_group_definition_versions
+           (Values.ListContainerGroupDefinitionVersionsInput.make ?limit
+              ?nextToken ~name ())
+           (Some Values.ListContainerGroupDefinitionVersionsOutput.to_json)
+           (Some
+              Values.ListContainerGroupDefinitionVersionsOutput.error_to_json)])
+let list_container_group_definitions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and containerGroupType =
+         flag "container-group-type" (optional json_arg)
+           ~doc:"JSON ContainerGroupType"
+       and limit =
+         flag "limit" (optional int)
+           ~doc:"INT ListContainerGroupDefinitionsLimit"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING NonZeroAndMaxString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_container_group_definitions
+           (Values.ListContainerGroupDefinitionsInput.make
+              ?containerGroupType:(Option.map
+                                     ~f:Values.ContainerGroupType.of_json
+                                     containerGroupType) ?limit ?nextToken ())
+           (Some Values.ListContainerGroupDefinitionsOutput.to_json)
+           (Some Values.ListContainerGroupDefinitionsOutput.error_to_json)])
+let list_fleet_deployments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and fleetId =
+         flag "fleet-id" (optional string) ~doc:"STRING FleetIdOrArn"
+       and limit = flag "limit" (optional int) ~doc:"INT PositiveInteger"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING NonZeroAndMaxString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_fleet_deployments
+           (Values.ListFleetDeploymentsInput.make ?fleetId ?limit ?nextToken
+              ()) (Some Values.ListFleetDeploymentsOutput.to_json)
+           (Some Values.ListFleetDeploymentsOutput.error_to_json)])
 let list_fleets =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1689,6 +2283,30 @@ let list_game_servers =
               ?limit ?nextToken ~gameServerGroupName ())
            (Some Values.ListGameServersOutput.to_json)
            (Some Values.ListGameServersOutput.error_to_json)])
+let list_locations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON LocationFilterList"
+       and limit = flag "limit" (optional int) ~doc:"INT ListLocationsLimit"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING NonZeroAndMaxString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_locations
+           (Values.ListLocationsInput.make
+              ?filters:(Option.map ~f:Values.LocationFilterList.of_json
+                          filters) ?limit ?nextToken ())
+           (Some Values.ListLocationsOutput.to_json)
+           (Some Values.ListLocationsOutput.error_to_json)])
 let list_scripts =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1776,6 +2394,36 @@ let put_scaling_policy =
               ~metricName:(Values.MetricName.of_json metricName) ())
            (Some Values.PutScalingPolicyOutput.to_json)
            (Some Values.PutScalingPolicyOutput.error_to_json)])
+let register_compute =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and certificatePath =
+         flag "certificate-path" (optional string)
+           ~doc:"STRING NonZeroAndMaxString"
+       and dnsName =
+         flag "dns-name" (optional string) ~doc:"STRING DnsNameInput"
+       and ipAddress =
+         flag "ip-address" (optional string) ~doc:"STRING IpAddress"
+       and location =
+         flag "location" (optional string) ~doc:"STRING LocationStringModel"
+       and fleetId =
+         flag "fleet-id" (required string) ~doc:"STRING FleetIdOrArn"
+       and computeName =
+         flag "compute-name" (required string) ~doc:"STRING ComputeName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.register_compute
+           (Values.RegisterComputeInput.make ?certificatePath ?dnsName
+              ?ipAddress ?location ~fleetId ~computeName ())
+           (Some Values.RegisterComputeOutput.to_json)
+           (Some Values.RegisterComputeOutput.error_to_json)])
 let register_game_server =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1947,6 +2595,9 @@ let start_game_session_placement =
        and gameSessionData =
          flag "game-session-data" (optional string)
            ~doc:"STRING LargeGameSessionData"
+       and priorityConfigurationOverride =
+         flag "priority-configuration-override" (optional json_arg)
+           ~doc:"JSON PriorityConfigurationOverride"
        and placementId =
          flag "placement-id" (required string) ~doc:"STRING IdStringModel"
        and gameSessionQueueName =
@@ -1967,9 +2618,12 @@ let start_game_session_placement =
               ?desiredPlayerSessions:(Option.map
                                         ~f:Values.DesiredPlayerSessionList.of_json
                                         desiredPlayerSessions)
-              ?gameSessionData ~placementId ~gameSessionQueueName
-              ~maximumPlayerSessionCount ())
-           (Some Values.StartGameSessionPlacementOutput.to_json)
+              ?gameSessionData
+              ?priorityConfigurationOverride:(Option.map
+                                                ~f:Values.PriorityConfigurationOverride.of_json
+                                                priorityConfigurationOverride)
+              ~placementId ~gameSessionQueueName ~maximumPlayerSessionCount
+              ()) (Some Values.StartGameSessionPlacementOutput.to_json)
            (Some Values.StartGameSessionPlacementOutput.error_to_json)])
 let start_match_backfill =
   Command.async ~summary:""
@@ -2129,6 +2783,30 @@ let tag_resource =
               ~tags:(Values.TagList.of_json tags) ())
            (Some Values.TagResourceResponse.to_json)
            (Some Values.TagResourceResponse.error_to_json)])
+let terminate_game_session =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and gameSessionId =
+         flag "game-session-id" (required string)
+           ~doc:"STRING ArnStringModel"
+       and terminationMode =
+         flag "termination-mode" (required json_arg)
+           ~doc:"JSON TerminationMode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.terminate_game_session
+           (Values.TerminateGameSessionInput.make ~gameSessionId
+              ~terminationMode:(Values.TerminationMode.of_json
+                                  terminationMode) ())
+           (Some Values.TerminateGameSessionOutput.to_json)
+           (Some Values.TerminateGameSessionOutput.error_to_json)])
 let untag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2202,6 +2880,143 @@ let update_build =
            (Values.UpdateBuildInput.make ?name ?version ~buildId ())
            (Some Values.UpdateBuildOutput.to_json)
            (Some Values.UpdateBuildOutput.error_to_json)])
+let update_container_fleet =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and gameServerContainerGroupDefinitionName =
+         flag "game-server-container-group-definition-name" (optional string)
+           ~doc:"STRING ContainerGroupDefinitionNameOrArn"
+       and perInstanceContainerGroupDefinitionName =
+         flag "per-instance-container-group-definition-name"
+           (optional string) ~doc:"STRING ContainerGroupDefinitionNameOrArn"
+       and gameServerContainerGroupsPerInstance =
+         flag "game-server-container-groups-per-instance" (optional int)
+           ~doc:"INT GameServerContainerGroupsPerInstance"
+       and instanceConnectionPortRange =
+         flag "instance-connection-port-range" (optional json_arg)
+           ~doc:"JSON ConnectionPortRange"
+       and instanceInboundPermissionAuthorizations =
+         flag "instance-inbound-permission-authorizations"
+           (optional json_arg) ~doc:"JSON IpPermissionsList"
+       and instanceInboundPermissionRevocations =
+         flag "instance-inbound-permission-revocations" (optional json_arg)
+           ~doc:"JSON IpPermissionsList"
+       and deploymentConfiguration =
+         flag "deployment-configuration" (optional json_arg)
+           ~doc:"JSON DeploymentConfiguration"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING NonZeroAndMaxString"
+       and metricGroups =
+         flag "metric-groups" (optional json_arg) ~doc:"JSON MetricGroupList"
+       and newGameSessionProtectionPolicy =
+         flag "new-game-session-protection-policy" (optional json_arg)
+           ~doc:"JSON ProtectionPolicy"
+       and gameSessionCreationLimitPolicy =
+         flag "game-session-creation-limit-policy" (optional json_arg)
+           ~doc:"JSON GameSessionCreationLimitPolicy"
+       and logConfiguration =
+         flag "log-configuration" (optional json_arg)
+           ~doc:"JSON LogConfiguration"
+       and removeAttributes =
+         flag "remove-attributes" (optional json_arg)
+           ~doc:"JSON ContainerFleetRemoveAttributeList"
+       and fleetId =
+         flag "fleet-id" (required string) ~doc:"STRING FleetIdOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_container_fleet
+           (Values.UpdateContainerFleetInput.make
+              ?gameServerContainerGroupDefinitionName
+              ?perInstanceContainerGroupDefinitionName
+              ?gameServerContainerGroupsPerInstance
+              ?instanceConnectionPortRange:(Option.map
+                                              ~f:Values.ConnectionPortRange.of_json
+                                              instanceConnectionPortRange)
+              ?instanceInboundPermissionAuthorizations:(Option.map
+                                                          ~f:Values.IpPermissionsList.of_json
+                                                          instanceInboundPermissionAuthorizations)
+              ?instanceInboundPermissionRevocations:(Option.map
+                                                       ~f:Values.IpPermissionsList.of_json
+                                                       instanceInboundPermissionRevocations)
+              ?deploymentConfiguration:(Option.map
+                                          ~f:Values.DeploymentConfiguration.of_json
+                                          deploymentConfiguration)
+              ?description
+              ?metricGroups:(Option.map ~f:Values.MetricGroupList.of_json
+                               metricGroups)
+              ?newGameSessionProtectionPolicy:(Option.map
+                                                 ~f:Values.ProtectionPolicy.of_json
+                                                 newGameSessionProtectionPolicy)
+              ?gameSessionCreationLimitPolicy:(Option.map
+                                                 ~f:Values.GameSessionCreationLimitPolicy.of_json
+                                                 gameSessionCreationLimitPolicy)
+              ?logConfiguration:(Option.map
+                                   ~f:Values.LogConfiguration.of_json
+                                   logConfiguration)
+              ?removeAttributes:(Option.map
+                                   ~f:Values.ContainerFleetRemoveAttributeList.of_json
+                                   removeAttributes) ~fleetId ())
+           (Some Values.UpdateContainerFleetOutput.to_json)
+           (Some Values.UpdateContainerFleetOutput.error_to_json)])
+let update_container_group_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and gameServerContainerDefinition =
+         flag "game-server-container-definition" (optional json_arg)
+           ~doc:"JSON GameServerContainerDefinitionInput"
+       and supportContainerDefinitions =
+         flag "support-container-definitions" (optional json_arg)
+           ~doc:"JSON SupportContainerDefinitionInputList"
+       and totalMemoryLimitMebibytes =
+         flag "total-memory-limit-mebibytes" (optional int)
+           ~doc:"INT ContainerTotalMemoryLimit"
+       and totalVcpuLimit =
+         flag "total-vcpu-limit" (optional float)
+           ~doc:"FLOAT ContainerTotalVcpuLimit"
+       and versionDescription =
+         flag "version-description" (optional string)
+           ~doc:"STRING NonZeroAndMaxString"
+       and sourceVersionNumber =
+         flag "source-version-number" (optional int)
+           ~doc:"INT PositiveInteger"
+       and operatingSystem =
+         flag "operating-system" (optional json_arg)
+           ~doc:"JSON ContainerOperatingSystem"
+       and name =
+         flag "name" (required string)
+           ~doc:"STRING ContainerGroupDefinitionNameOrArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_container_group_definition
+           (Values.UpdateContainerGroupDefinitionInput.make
+              ?gameServerContainerDefinition:(Option.map
+                                                ~f:Values.GameServerContainerDefinitionInput.of_json
+                                                gameServerContainerDefinition)
+              ?supportContainerDefinitions:(Option.map
+                                              ~f:Values.SupportContainerDefinitionInputList.of_json
+                                              supportContainerDefinitions)
+              ?totalMemoryLimitMebibytes ?totalVcpuLimit ?versionDescription
+              ?sourceVersionNumber
+              ?operatingSystem:(Option.map
+                                  ~f:Values.ContainerOperatingSystem.of_json
+                                  operatingSystem) ~name ())
+           (Some Values.UpdateContainerGroupDefinitionOutput.to_json)
+           (Some Values.UpdateContainerGroupDefinitionOutput.error_to_json)])
 let update_fleet_attributes =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2225,6 +3040,9 @@ let update_fleet_attributes =
            ~doc:"JSON ResourceCreationLimitPolicy"
        and metricGroups =
          flag "metric-groups" (optional json_arg) ~doc:"JSON MetricGroupList"
+       and anywhereConfiguration =
+         flag "anywhere-configuration" (optional json_arg)
+           ~doc:"JSON AnywhereConfiguration"
        and fleetId =
          flag "fleet-id" (required string) ~doc:"STRING FleetIdOrArn" in
        fun () ->
@@ -2238,7 +3056,10 @@ let update_fleet_attributes =
                                               ~f:Values.ResourceCreationLimitPolicy.of_json
                                               resourceCreationLimitPolicy)
               ?metricGroups:(Option.map ~f:Values.MetricGroupList.of_json
-                               metricGroups) ~fleetId ())
+                               metricGroups)
+              ?anywhereConfiguration:(Option.map
+                                        ~f:Values.AnywhereConfiguration.of_json
+                                        anywhereConfiguration) ~fleetId ())
            (Some Values.UpdateFleetAttributesOutput.to_json)
            (Some Values.UpdateFleetAttributesOutput.error_to_json)])
 let update_fleet_capacity =
@@ -2257,14 +3078,20 @@ let update_fleet_capacity =
        and maxSize = flag "max-size" (optional int) ~doc:"INT WholeNumber"
        and location =
          flag "location" (optional string) ~doc:"STRING LocationStringModel"
+       and managedCapacityConfiguration =
+         flag "managed-capacity-configuration" (optional json_arg)
+           ~doc:"JSON ManagedCapacityConfiguration"
        and fleetId =
          flag "fleet-id" (required string) ~doc:"STRING FleetIdOrArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_fleet_capacity
            (Values.UpdateFleetCapacityInput.make ?desiredInstances ?minSize
-              ?maxSize ?location ~fleetId ())
-           (Some Values.UpdateFleetCapacityOutput.to_json)
+              ?maxSize ?location
+              ?managedCapacityConfiguration:(Option.map
+                                               ~f:Values.ManagedCapacityConfiguration.of_json
+                                               managedCapacityConfiguration)
+              ~fleetId ()) (Some Values.UpdateFleetCapacityOutput.to_json)
            (Some Values.UpdateFleetCapacityOutput.error_to_json)])
 let update_fleet_port_settings =
   Command.async ~summary:""
@@ -2393,6 +3220,9 @@ let update_game_session =
        and protectionPolicy =
          flag "protection-policy" (optional json_arg)
            ~doc:"JSON ProtectionPolicy"
+       and gameProperties =
+         flag "game-properties" (optional json_arg)
+           ~doc:"JSON GamePropertyList"
        and gameSessionId =
          flag "game-session-id" (required string)
            ~doc:"STRING ArnStringModel" in
@@ -2406,7 +3236,9 @@ let update_game_session =
                                               playerSessionCreationPolicy)
               ?protectionPolicy:(Option.map
                                    ~f:Values.ProtectionPolicy.of_json
-                                   protectionPolicy) ~gameSessionId ())
+                                   protectionPolicy)
+              ?gameProperties:(Option.map ~f:Values.GamePropertyList.of_json
+                                 gameProperties) ~gameSessionId ())
            (Some Values.UpdateGameSessionOutput.to_json)
            (Some Values.UpdateGameSessionOutput.error_to_json)])
 let update_game_session_queue =
@@ -2603,11 +3435,14 @@ let main =
     ("claim-game-server", claim_game_server);
     ("create-alias", create_alias);
     ("create-build", create_build);
+    ("create-container-fleet", create_container_fleet);
+    ("create-container-group-definition", create_container_group_definition);
     ("create-fleet", create_fleet);
     ("create-fleet-locations", create_fleet_locations);
     ("create-game-server-group", create_game_server_group);
     ("create-game-session", create_game_session);
     ("create-game-session-queue", create_game_session_queue);
+    ("create-location", create_location);
     ("create-matchmaking-configuration", create_matchmaking_configuration);
     ("create-matchmaking-rule-set", create_matchmaking_rule_set);
     ("create-player-session", create_player_session);
@@ -2617,22 +3452,33 @@ let main =
     ("create-vpc-peering-connection", create_vpc_peering_connection);
     ("delete-alias", delete_alias);
     ("delete-build", delete_build);
+    ("delete-container-fleet", delete_container_fleet);
+    ("delete-container-group-definition", delete_container_group_definition);
     ("delete-fleet", delete_fleet);
     ("delete-fleet-locations", delete_fleet_locations);
     ("delete-game-server-group", delete_game_server_group);
     ("delete-game-session-queue", delete_game_session_queue);
+    ("delete-location", delete_location);
     ("delete-matchmaking-configuration", delete_matchmaking_configuration);
     ("delete-matchmaking-rule-set", delete_matchmaking_rule_set);
     ("delete-scaling-policy", delete_scaling_policy);
     ("delete-script", delete_script);
     ("delete-vpc-peering-authorization", delete_vpc_peering_authorization);
     ("delete-vpc-peering-connection", delete_vpc_peering_connection);
+    ("deregister-compute", deregister_compute);
     ("deregister-game-server", deregister_game_server);
     ("describe-alias", describe_alias);
     ("describe-build", describe_build);
+    ("describe-compute", describe_compute);
+    ("describe-container-fleet", describe_container_fleet);
+    ("describe-container-group-definition",
+      describe_container_group_definition);
+    ("describe-container-group-port-mappings",
+      describe_container_group_port_mappings);
     ("describe-e-c2-instance-limits", describe_e_c2_instance_limits);
     ("describe-fleet-attributes", describe_fleet_attributes);
     ("describe-fleet-capacity", describe_fleet_capacity);
+    ("describe-fleet-deployment", describe_fleet_deployment);
     ("describe-fleet-events", describe_fleet_events);
     ("describe-fleet-location-attributes",
       describe_fleet_location_attributes);
@@ -2660,16 +3506,27 @@ let main =
     ("describe-vpc-peering-authorizations",
       describe_vpc_peering_authorizations);
     ("describe-vpc-peering-connections", describe_vpc_peering_connections);
+    ("get-compute-access", get_compute_access);
+    ("get-compute-auth-token", get_compute_auth_token);
     ("get-game-session-log-url", get_game_session_log_url);
     ("get-instance-access", get_instance_access);
+    ("get-player-connection-details", get_player_connection_details);
     ("list-aliases", list_aliases);
     ("list-builds", list_builds);
+    ("list-compute", list_compute);
+    ("list-container-fleets", list_container_fleets);
+    ("list-container-group-definition-versions",
+      list_container_group_definition_versions);
+    ("list-container-group-definitions", list_container_group_definitions);
+    ("list-fleet-deployments", list_fleet_deployments);
     ("list-fleets", list_fleets);
     ("list-game-server-groups", list_game_server_groups);
     ("list-game-servers", list_game_servers);
+    ("list-locations", list_locations);
     ("list-scripts", list_scripts);
     ("list-tags-for-resource", list_tags_for_resource);
     ("put-scaling-policy", put_scaling_policy);
+    ("register-compute", register_compute);
     ("register-game-server", register_game_server);
     ("request-upload-credentials", request_upload_credentials);
     ("resolve-alias", resolve_alias);
@@ -2684,9 +3541,12 @@ let main =
     ("stop-matchmaking", stop_matchmaking);
     ("suspend-game-server-group", suspend_game_server_group);
     ("tag-resource", tag_resource);
+    ("terminate-game-session", terminate_game_session);
     ("untag-resource", untag_resource);
     ("update-alias", update_alias);
     ("update-build", update_build);
+    ("update-container-fleet", update_container_fleet);
+    ("update-container-group-definition", update_container_group_definition);
     ("update-fleet-attributes", update_fleet_attributes);
     ("update-fleet-capacity", update_fleet_capacity);
     ("update-fleet-port-settings", update_fleet_port_settings);

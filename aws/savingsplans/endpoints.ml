@@ -21,6 +21,8 @@ type ('i, 'o, 'e) t =
   DescribeSavingsPlansOfferingsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ReturnSavingsPlan: (ReturnSavingsPlanRequest.t,
+  ReturnSavingsPlanResponse.t, ReturnSavingsPlanResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
@@ -34,6 +36,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeSavingsPlansOfferingRates -> `POST
   | DescribeSavingsPlansOfferings -> `POST
   | ListTagsForResource -> `POST
+  | ReturnSavingsPlan -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
@@ -54,6 +57,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/DescribeSavingsPlansOfferings"
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/ListTagsForResource"
+      | ReturnSavingsPlan ->
+          (Format.kasprintf Uri.of_string) "/ReturnSavingsPlan"
       | TagResource -> (Format.kasprintf Uri.of_string) "/TagResource"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/UntagResource")
   [@ocaml.warning "-27"])
@@ -339,6 +344,29 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ReturnSavingsPlan ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("savingsPlanId",
+                           (SavingsPlanId.to_value
+                              req.ReturnSavingsPlanRequest.savingsPlanId));
+                      Option.map req.ReturnSavingsPlanRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | TagResource ->
       let (headers, body) =
         let headers =
@@ -490,6 +518,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ReturnSavingsPlan ->
+      if is_success
+      then Ok (ReturnSavingsPlanResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ReturnSavingsPlanResponse.error_of_json))
   | TagResource ->
       if is_success
       then

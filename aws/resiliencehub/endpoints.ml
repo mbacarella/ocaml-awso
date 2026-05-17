@@ -2,12 +2,26 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | AcceptResourceGroupingRecommendations:
+  (AcceptResourceGroupingRecommendationsRequest.t,
+  AcceptResourceGroupingRecommendationsResponse.t,
+  AcceptResourceGroupingRecommendationsResponse.error) t 
   | AddDraftAppVersionResourceMappings:
   (AddDraftAppVersionResourceMappingsRequest.t,
   AddDraftAppVersionResourceMappingsResponse.t,
   AddDraftAppVersionResourceMappingsResponse.error) t 
+  | BatchUpdateRecommendationStatus:
+  (BatchUpdateRecommendationStatusRequest.t,
+  BatchUpdateRecommendationStatusResponse.t,
+  BatchUpdateRecommendationStatusResponse.error) t 
   | CreateApp: (CreateAppRequest.t, CreateAppResponse.t,
   CreateAppResponse.error) t 
+  | CreateAppVersionAppComponent: (CreateAppVersionAppComponentRequest.t,
+  CreateAppVersionAppComponentResponse.t,
+  CreateAppVersionAppComponentResponse.error) t 
+  | CreateAppVersionResource: (CreateAppVersionResourceRequest.t,
+  CreateAppVersionResourceResponse.t, CreateAppVersionResourceResponse.error)
+  t 
   | CreateRecommendationTemplate: (CreateRecommendationTemplateRequest.t,
   CreateRecommendationTemplateResponse.t,
   CreateRecommendationTemplateResponse.error) t 
@@ -17,6 +31,14 @@ type ('i, 'o, 'e) t =
   DeleteAppResponse.error) t 
   | DeleteAppAssessment: (DeleteAppAssessmentRequest.t,
   DeleteAppAssessmentResponse.t, DeleteAppAssessmentResponse.error) t 
+  | DeleteAppInputSource: (DeleteAppInputSourceRequest.t,
+  DeleteAppInputSourceResponse.t, DeleteAppInputSourceResponse.error) t 
+  | DeleteAppVersionAppComponent: (DeleteAppVersionAppComponentRequest.t,
+  DeleteAppVersionAppComponentResponse.t,
+  DeleteAppVersionAppComponentResponse.error) t 
+  | DeleteAppVersionResource: (DeleteAppVersionResourceRequest.t,
+  DeleteAppVersionResourceResponse.t, DeleteAppVersionResourceResponse.error)
+  t 
   | DeleteRecommendationTemplate: (DeleteRecommendationTemplateRequest.t,
   DeleteRecommendationTemplateResponse.t,
   DeleteRecommendationTemplateResponse.error) t 
@@ -26,6 +48,14 @@ type ('i, 'o, 'e) t =
   DescribeAppResponse.error) t 
   | DescribeAppAssessment: (DescribeAppAssessmentRequest.t,
   DescribeAppAssessmentResponse.t, DescribeAppAssessmentResponse.error) t 
+  | DescribeAppVersion: (DescribeAppVersionRequest.t,
+  DescribeAppVersionResponse.t, DescribeAppVersionResponse.error) t 
+  | DescribeAppVersionAppComponent: (DescribeAppVersionAppComponentRequest.t,
+  DescribeAppVersionAppComponentResponse.t,
+  DescribeAppVersionAppComponentResponse.error) t 
+  | DescribeAppVersionResource: (DescribeAppVersionResourceRequest.t,
+  DescribeAppVersionResourceResponse.t,
+  DescribeAppVersionResourceResponse.error) t 
   | DescribeAppVersionResourcesResolutionStatus:
   (DescribeAppVersionResourcesResolutionStatusRequest.t,
   DescribeAppVersionResourcesResolutionStatusResponse.t,
@@ -37,9 +67,15 @@ type ('i, 'o, 'e) t =
   (DescribeDraftAppVersionResourcesImportStatusRequest.t,
   DescribeDraftAppVersionResourcesImportStatusResponse.t,
   DescribeDraftAppVersionResourcesImportStatusResponse.error) t 
+  | DescribeMetricsExport: (DescribeMetricsExportRequest.t,
+  DescribeMetricsExportResponse.t, DescribeMetricsExportResponse.error) t 
   | DescribeResiliencyPolicy: (DescribeResiliencyPolicyRequest.t,
   DescribeResiliencyPolicyResponse.t, DescribeResiliencyPolicyResponse.error)
   t 
+  | DescribeResourceGroupingRecommendationTask:
+  (DescribeResourceGroupingRecommendationTaskRequest.t,
+  DescribeResourceGroupingRecommendationTaskResponse.t,
+  DescribeResourceGroupingRecommendationTaskResponse.error) t 
   | ImportResourcesToDraftAppVersion:
   (ImportResourcesToDraftAppVersionRequest.t,
   ImportResourcesToDraftAppVersionResponse.t,
@@ -47,6 +83,14 @@ type ('i, 'o, 'e) t =
   | ListAlarmRecommendations: (ListAlarmRecommendationsRequest.t,
   ListAlarmRecommendationsResponse.t, ListAlarmRecommendationsResponse.error)
   t 
+  | ListAppAssessmentComplianceDrifts:
+  (ListAppAssessmentComplianceDriftsRequest.t,
+  ListAppAssessmentComplianceDriftsResponse.t,
+  ListAppAssessmentComplianceDriftsResponse.error) t 
+  | ListAppAssessmentResourceDrifts:
+  (ListAppAssessmentResourceDriftsRequest.t,
+  ListAppAssessmentResourceDriftsResponse.t,
+  ListAppAssessmentResourceDriftsResponse.error) t 
   | ListAppAssessments: (ListAppAssessmentsRequest.t,
   ListAppAssessmentsResponse.t, ListAppAssessmentsResponse.error) t 
   | ListAppComponentCompliances: (ListAppComponentCompliancesRequest.t,
@@ -56,6 +100,11 @@ type ('i, 'o, 'e) t =
   (ListAppComponentRecommendationsRequest.t,
   ListAppComponentRecommendationsResponse.t,
   ListAppComponentRecommendationsResponse.error) t 
+  | ListAppInputSources: (ListAppInputSourcesRequest.t,
+  ListAppInputSourcesResponse.t, ListAppInputSourcesResponse.error) t 
+  | ListAppVersionAppComponents: (ListAppVersionAppComponentsRequest.t,
+  ListAppVersionAppComponentsResponse.t,
+  ListAppVersionAppComponentsResponse.error) t 
   | ListAppVersionResourceMappings: (ListAppVersionResourceMappingsRequest.t,
   ListAppVersionResourceMappingsResponse.t,
   ListAppVersionResourceMappingsResponse.error) t 
@@ -66,11 +115,17 @@ type ('i, 'o, 'e) t =
   ListAppVersionsResponse.error) t 
   | ListApps: (ListAppsRequest.t, ListAppsResponse.t, ListAppsResponse.error)
   t 
+  | ListMetrics: (ListMetricsRequest.t, ListMetricsResponse.t,
+  ListMetricsResponse.error) t 
   | ListRecommendationTemplates: (ListRecommendationTemplatesRequest.t,
   ListRecommendationTemplatesResponse.t,
   ListRecommendationTemplatesResponse.error) t 
   | ListResiliencyPolicies: (ListResiliencyPoliciesRequest.t,
   ListResiliencyPoliciesResponse.t, ListResiliencyPoliciesResponse.error) t 
+  | ListResourceGroupingRecommendations:
+  (ListResourceGroupingRecommendationsRequest.t,
+  ListResourceGroupingRecommendationsResponse.t,
+  ListResourceGroupingRecommendationsResponse.error) t 
   | ListSopRecommendations: (ListSopRecommendationsRequest.t,
   ListSopRecommendationsResponse.t, ListSopRecommendationsResponse.error) t 
   | ListSuggestedResiliencyPolicies:
@@ -91,6 +146,10 @@ type ('i, 'o, 'e) t =
   | PutDraftAppVersionTemplate: (PutDraftAppVersionTemplateRequest.t,
   PutDraftAppVersionTemplateResponse.t,
   PutDraftAppVersionTemplateResponse.error) t 
+  | RejectResourceGroupingRecommendations:
+  (RejectResourceGroupingRecommendationsRequest.t,
+  RejectResourceGroupingRecommendationsResponse.t,
+  RejectResourceGroupingRecommendationsResponse.error) t 
   | RemoveDraftAppVersionResourceMappings:
   (RemoveDraftAppVersionResourceMappingsRequest.t,
   RemoveDraftAppVersionResourceMappingsResponse.t,
@@ -100,41 +159,73 @@ type ('i, 'o, 'e) t =
   ResolveAppVersionResourcesResponse.error) t 
   | StartAppAssessment: (StartAppAssessmentRequest.t,
   StartAppAssessmentResponse.t, StartAppAssessmentResponse.error) t 
+  | StartMetricsExport: (StartMetricsExportRequest.t,
+  StartMetricsExportResponse.t, StartMetricsExportResponse.error) t 
+  | StartResourceGroupingRecommendationTask:
+  (StartResourceGroupingRecommendationTaskRequest.t,
+  StartResourceGroupingRecommendationTaskResponse.t,
+  StartResourceGroupingRecommendationTaskResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
   | UpdateApp: (UpdateAppRequest.t, UpdateAppResponse.t,
   UpdateAppResponse.error) t 
+  | UpdateAppVersion: (UpdateAppVersionRequest.t, UpdateAppVersionResponse.t,
+  UpdateAppVersionResponse.error) t 
+  | UpdateAppVersionAppComponent: (UpdateAppVersionAppComponentRequest.t,
+  UpdateAppVersionAppComponentResponse.t,
+  UpdateAppVersionAppComponentResponse.error) t 
+  | UpdateAppVersionResource: (UpdateAppVersionResourceRequest.t,
+  UpdateAppVersionResourceResponse.t, UpdateAppVersionResourceResponse.error)
+  t 
   | UpdateResiliencyPolicy: (UpdateResiliencyPolicyRequest.t,
   UpdateResiliencyPolicyResponse.t, UpdateResiliencyPolicyResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | AcceptResourceGroupingRecommendations -> `POST
   | AddDraftAppVersionResourceMappings -> `POST
+  | BatchUpdateRecommendationStatus -> `POST
   | CreateApp -> `POST
+  | CreateAppVersionAppComponent -> `POST
+  | CreateAppVersionResource -> `POST
   | CreateRecommendationTemplate -> `POST
   | CreateResiliencyPolicy -> `POST
   | DeleteApp -> `POST
   | DeleteAppAssessment -> `POST
+  | DeleteAppInputSource -> `POST
+  | DeleteAppVersionAppComponent -> `POST
+  | DeleteAppVersionResource -> `POST
   | DeleteRecommendationTemplate -> `POST
   | DeleteResiliencyPolicy -> `POST
   | DescribeApp -> `POST
   | DescribeAppAssessment -> `POST
+  | DescribeAppVersion -> `POST
+  | DescribeAppVersionAppComponent -> `POST
+  | DescribeAppVersionResource -> `POST
   | DescribeAppVersionResourcesResolutionStatus -> `POST
   | DescribeAppVersionTemplate -> `POST
   | DescribeDraftAppVersionResourcesImportStatus -> `POST
+  | DescribeMetricsExport -> `POST
   | DescribeResiliencyPolicy -> `POST
+  | DescribeResourceGroupingRecommendationTask -> `POST
   | ImportResourcesToDraftAppVersion -> `POST
   | ListAlarmRecommendations -> `POST
+  | ListAppAssessmentComplianceDrifts -> `POST
+  | ListAppAssessmentResourceDrifts -> `POST
   | ListAppAssessments -> `GET
   | ListAppComponentCompliances -> `POST
   | ListAppComponentRecommendations -> `POST
+  | ListAppInputSources -> `POST
+  | ListAppVersionAppComponents -> `POST
   | ListAppVersionResourceMappings -> `POST
   | ListAppVersionResources -> `POST
   | ListAppVersions -> `POST
   | ListApps -> `GET
+  | ListMetrics -> `POST
   | ListRecommendationTemplates -> `GET
   | ListResiliencyPolicies -> `GET
+  | ListResourceGroupingRecommendations -> `GET
   | ListSopRecommendations -> `POST
   | ListSuggestedResiliencyPolicies -> `GET
   | ListTagsForResource -> `GET
@@ -142,20 +233,37 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListUnsupportedAppVersionResources -> `POST
   | PublishAppVersion -> `POST
   | PutDraftAppVersionTemplate -> `POST
+  | RejectResourceGroupingRecommendations -> `POST
   | RemoveDraftAppVersionResourceMappings -> `POST
   | ResolveAppVersionResources -> `POST
   | StartAppAssessment -> `POST
+  | StartMetricsExport -> `POST
+  | StartResourceGroupingRecommendationTask -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateApp -> `POST
+  | UpdateAppVersion -> `POST
+  | UpdateAppVersionAppComponent -> `POST
+  | UpdateAppVersionResource -> `POST
   | UpdateResiliencyPolicy -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | AcceptResourceGroupingRecommendations ->
+          (Format.kasprintf Uri.of_string)
+            "/accept-resource-grouping-recommendations"
       | AddDraftAppVersionResourceMappings ->
           (Format.kasprintf Uri.of_string)
             "/add-draft-app-version-resource-mappings"
+      | BatchUpdateRecommendationStatus ->
+          (Format.kasprintf Uri.of_string)
+            "/batch-update-recommendation-status"
       | CreateApp -> (Format.kasprintf Uri.of_string) "/create-app"
+      | CreateAppVersionAppComponent ->
+          (Format.kasprintf Uri.of_string)
+            "/create-app-version-app-component"
+      | CreateAppVersionResource ->
+          (Format.kasprintf Uri.of_string) "/create-app-version-resource"
       | CreateRecommendationTemplate ->
           (Format.kasprintf Uri.of_string) "/create-recommendation-template"
       | CreateResiliencyPolicy ->
@@ -163,6 +271,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteApp -> (Format.kasprintf Uri.of_string) "/delete-app"
       | DeleteAppAssessment ->
           (Format.kasprintf Uri.of_string) "/delete-app-assessment"
+      | DeleteAppInputSource ->
+          (Format.kasprintf Uri.of_string) "/delete-app-input-source"
+      | DeleteAppVersionAppComponent ->
+          (Format.kasprintf Uri.of_string)
+            "/delete-app-version-app-component"
+      | DeleteAppVersionResource ->
+          (Format.kasprintf Uri.of_string) "/delete-app-version-resource"
       | DeleteRecommendationTemplate ->
           (Format.kasprintf Uri.of_string) "/delete-recommendation-template"
       | DeleteResiliencyPolicy ->
@@ -170,6 +285,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeApp -> (Format.kasprintf Uri.of_string) "/describe-app"
       | DescribeAppAssessment ->
           (Format.kasprintf Uri.of_string) "/describe-app-assessment"
+      | DescribeAppVersion ->
+          (Format.kasprintf Uri.of_string) "/describe-app-version"
+      | DescribeAppVersionAppComponent ->
+          (Format.kasprintf Uri.of_string)
+            "/describe-app-version-app-component"
+      | DescribeAppVersionResource ->
+          (Format.kasprintf Uri.of_string) "/describe-app-version-resource"
       | DescribeAppVersionResourcesResolutionStatus ->
           (Format.kasprintf Uri.of_string)
             "/describe-app-version-resources-resolution-status"
@@ -178,13 +300,24 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeDraftAppVersionResourcesImportStatus ->
           (Format.kasprintf Uri.of_string)
             "/describe-draft-app-version-resources-import-status"
+      | DescribeMetricsExport ->
+          (Format.kasprintf Uri.of_string) "/describe-metrics-export"
       | DescribeResiliencyPolicy ->
           (Format.kasprintf Uri.of_string) "/describe-resiliency-policy"
+      | DescribeResourceGroupingRecommendationTask ->
+          (Format.kasprintf Uri.of_string)
+            "/describe-resource-grouping-recommendation-task"
       | ImportResourcesToDraftAppVersion ->
           (Format.kasprintf Uri.of_string)
             "/import-resources-to-draft-app-version"
       | ListAlarmRecommendations ->
           (Format.kasprintf Uri.of_string) "/list-alarm-recommendations"
+      | ListAppAssessmentComplianceDrifts ->
+          (Format.kasprintf Uri.of_string)
+            "/list-app-assessment-compliance-drifts"
+      | ListAppAssessmentResourceDrifts ->
+          (Format.kasprintf Uri.of_string)
+            "/list-app-assessment-resource-drifts"
       | ListAppAssessments ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/list-app-assessments")
@@ -220,6 +353,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListAppComponentRecommendations ->
           (Format.kasprintf Uri.of_string)
             "/list-app-component-recommendations"
+      | ListAppInputSources ->
+          (Format.kasprintf Uri.of_string) "/list-app-input-sources"
+      | ListAppVersionAppComponents ->
+          (Format.kasprintf Uri.of_string) "/list-app-version-app-components"
       | ListAppVersionResourceMappings ->
           (Format.kasprintf Uri.of_string)
             "/list-app-version-resource-mappings"
@@ -234,19 +371,35 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map ~f:(fun v -> ("appArn", (Arn.to_header v)))
                   x.appArn;
                Option.map
+                 ~f:(fun v -> ("awsApplicationArn", (Arn.to_header v)))
+                 x.awsApplicationArn;
+               Option.map
+                 ~f:(fun v ->
+                       ("fromLastAssessmentTime", (TimeStamp.to_header v)))
+                 x.fromLastAssessmentTime;
+               Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
                  x.maxResults;
                Option.map ~f:(fun v -> ("name", (EntityName.to_header v)))
                  x.name;
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
-                 x.nextToken])
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("reverseOrder", (BooleanOptional.to_header v)))
+                 x.reverseOrder;
+               Option.map
+                 ~f:(fun v ->
+                       ("toLastAssessmentTime", (TimeStamp.to_header v)))
+                 x.toLastAssessmentTime])
+      | ListMetrics -> (Format.kasprintf Uri.of_string) "/list-metrics"
       | ListRecommendationTemplates ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/list-recommendation-templates")
             (List.filter_opt
-               [Some ("assessmentArn", (Arn.to_header x.assessmentArn));
+               [Option.map ~f:(fun v -> ("assessmentArn", (Arn.to_header v)))
+                  x.assessmentArn;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
                  x.maxResults;
@@ -280,6 +433,19 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("policyName", (EntityName.to_header v)))
                  x.policyName])
+      | ListResourceGroupingRecommendations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/list-resource-grouping-recommendations")
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("appArn", (Arn.to_header v)))
+                  x.appArn;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | ListSopRecommendations ->
           (Format.kasprintf Uri.of_string) "/list-sop-recommendations"
       | ListSuggestedResiliencyPolicies ->
@@ -305,6 +471,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/publish-app-version"
       | PutDraftAppVersionTemplate ->
           (Format.kasprintf Uri.of_string) "/put-draft-app-version-template"
+      | RejectResourceGroupingRecommendations ->
+          (Format.kasprintf Uri.of_string)
+            "/reject-resource-grouping-recommendations"
       | RemoveDraftAppVersionResourceMappings ->
           (Format.kasprintf Uri.of_string)
             "/remove-draft-app-version-resource-mappings"
@@ -312,6 +481,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/resolve-app-version-resources"
       | StartAppAssessment ->
           (Format.kasprintf Uri.of_string) "/start-app-assessment"
+      | StartMetricsExport ->
+          (Format.kasprintf Uri.of_string) "/start-metrics-export"
+      | StartResourceGroupingRecommendationTask ->
+          (Format.kasprintf Uri.of_string)
+            "/start-resource-grouping-recommendation-task"
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (Arn.to_header x.TagResourceRequest.resourceArn)
@@ -322,12 +496,43 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (List.filter_opt
                [Some ("tagKeys", (TagKeyList.to_header x.tagKeys))])
       | UpdateApp -> (Format.kasprintf Uri.of_string) "/update-app"
+      | UpdateAppVersion ->
+          (Format.kasprintf Uri.of_string) "/update-app-version"
+      | UpdateAppVersionAppComponent ->
+          (Format.kasprintf Uri.of_string)
+            "/update-app-version-app-component"
+      | UpdateAppVersionResource ->
+          (Format.kasprintf Uri.of_string) "/update-app-version-resource"
       | UpdateResiliencyPolicy ->
           (Format.kasprintf Uri.of_string) "/update-resiliency-policy")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | AcceptResourceGroupingRecommendations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("appArn",
+                           (Arn.to_value
+                              req.AcceptResourceGroupingRecommendationsRequest.appArn));
+                      Some
+                        ("entries",
+                          (AcceptGroupingRecommendationEntries.to_value
+                             req.AcceptResourceGroupingRecommendationsRequest.entries))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | AddDraftAppVersionResourceMappings ->
       let (headers, body) =
         let headers =
@@ -352,6 +557,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchUpdateRecommendationStatus ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("appArn",
+                           (Arn.to_value
+                              req.BatchUpdateRecommendationStatusRequest.appArn));
+                      Some
+                        ("requestEntries",
+                          (UpdateRecommendationStatusRequestEntries.to_value
+                             req.BatchUpdateRecommendationStatusRequest.requestEntries))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateApp ->
       let (headers, body) =
         let headers =
@@ -361,19 +590,128 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.CreateAppRequest.clientToken
+                      [Option.map req.CreateAppRequest.assessmentSchedule
                          ~f:(fun x ->
-                               ("clientToken", (ClientToken.to_value x)));
+                               ("assessmentSchedule",
+                                 (AppAssessmentScheduleType.to_value x)));
+                      Option.map req.CreateAppRequest.awsApplicationArn
+                        ~f:(fun x -> ("awsApplicationArn", (Arn.to_value x)));
+                      Option.map req.CreateAppRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
                       Option.map req.CreateAppRequest.description
                         ~f:(fun x ->
                               ("description", (EntityDescription.to_value x)));
+                      Option.map req.CreateAppRequest.eventSubscriptions
+                        ~f:(fun x ->
+                              ("eventSubscriptions",
+                                (EventSubscriptionList.to_value x)));
                       Some
                         ("name",
                           (EntityName.to_value req.CreateAppRequest.name));
+                      Option.map req.CreateAppRequest.permissionModel
+                        ~f:(fun x ->
+                              ("permissionModel",
+                                (PermissionModel.to_value x)));
                       Option.map req.CreateAppRequest.policyArn
                         ~f:(fun x -> ("policyArn", (Arn.to_value x)));
                       Option.map req.CreateAppRequest.tags
                         ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateAppVersionAppComponent ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.CreateAppVersionAppComponentRequest.additionalInfo
+                         ~f:(fun x ->
+                               ("additionalInfo",
+                                 (AdditionalInfoMap.to_value x)));
+                      Some
+                        ("appArn",
+                          (Arn.to_value
+                             req.CreateAppVersionAppComponentRequest.appArn));
+                      Option.map
+                        req.CreateAppVersionAppComponentRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
+                      Option.map req.CreateAppVersionAppComponentRequest.id
+                        ~f:(fun x -> ("id", (String255.to_value x)));
+                      Some
+                        ("name",
+                          (String255.to_value
+                             req.CreateAppVersionAppComponentRequest.name));
+                      Some
+                        ("type",
+                          (String255.to_value
+                             req.CreateAppVersionAppComponentRequest.type_))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateAppVersionResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.CreateAppVersionResourceRequest.additionalInfo
+                         ~f:(fun x ->
+                               ("additionalInfo",
+                                 (AdditionalInfoMap.to_value x)));
+                      Some
+                        ("appArn",
+                          (Arn.to_value
+                             req.CreateAppVersionResourceRequest.appArn));
+                      Some
+                        ("appComponents",
+                          (AppComponentNameList.to_value
+                             req.CreateAppVersionResourceRequest.appComponents));
+                      Option.map
+                        req.CreateAppVersionResourceRequest.awsAccountId
+                        ~f:(fun x ->
+                              ("awsAccountId", (CustomerId.to_value x)));
+                      Option.map
+                        req.CreateAppVersionResourceRequest.awsRegion
+                        ~f:(fun x -> ("awsRegion", (AwsRegion.to_value x)));
+                      Option.map
+                        req.CreateAppVersionResourceRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
+                      Some
+                        ("logicalResourceId",
+                          (LogicalResourceId.to_value
+                             req.CreateAppVersionResourceRequest.logicalResourceId));
+                      Some
+                        ("physicalResourceId",
+                          (String2048.to_value
+                             req.CreateAppVersionResourceRequest.physicalResourceId));
+                      Option.map
+                        req.CreateAppVersionResourceRequest.resourceName
+                        ~f:(fun x ->
+                              ("resourceName", (EntityName.to_value x)));
+                      Some
+                        ("resourceType",
+                          (String255.to_value
+                             req.CreateAppVersionResourceRequest.resourceType))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -519,6 +857,113 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteAppInputSource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("appArn",
+                           (Arn.to_value
+                              req.DeleteAppInputSourceRequest.appArn));
+                      Option.map req.DeleteAppInputSourceRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
+                      Option.map
+                        req.DeleteAppInputSourceRequest.eksSourceClusterNamespace
+                        ~f:(fun x ->
+                              ("eksSourceClusterNamespace",
+                                (EksSourceClusterNamespace.to_value x)));
+                      Option.map req.DeleteAppInputSourceRequest.sourceArn
+                        ~f:(fun x -> ("sourceArn", (Arn.to_value x)));
+                      Option.map
+                        req.DeleteAppInputSourceRequest.terraformSource
+                        ~f:(fun x ->
+                              ("terraformSource",
+                                (TerraformSource.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteAppVersionAppComponent ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("appArn",
+                           (Arn.to_value
+                              req.DeleteAppVersionAppComponentRequest.appArn));
+                      Option.map
+                        req.DeleteAppVersionAppComponentRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
+                      Some
+                        ("id",
+                          (String255.to_value
+                             req.DeleteAppVersionAppComponentRequest.id))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteAppVersionResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("appArn",
+                           (Arn.to_value
+                              req.DeleteAppVersionResourceRequest.appArn));
+                      Option.map
+                        req.DeleteAppVersionResourceRequest.awsAccountId
+                        ~f:(fun x ->
+                              ("awsAccountId", (CustomerId.to_value x)));
+                      Option.map
+                        req.DeleteAppVersionResourceRequest.awsRegion
+                        ~f:(fun x -> ("awsRegion", (AwsRegion.to_value x)));
+                      Option.map
+                        req.DeleteAppVersionResourceRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
+                      Option.map
+                        req.DeleteAppVersionResourceRequest.logicalResourceId
+                        ~f:(fun x ->
+                              ("logicalResourceId",
+                                (LogicalResourceId.to_value x)));
+                      Option.map
+                        req.DeleteAppVersionResourceRequest.physicalResourceId
+                        ~f:(fun x ->
+                              ("physicalResourceId", (String2048.to_value x)));
+                      Option.map
+                        req.DeleteAppVersionResourceRequest.resourceName
+                        ~f:(fun x ->
+                              ("resourceName", (EntityName.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteRecommendationTemplate ->
       let (headers, body) =
         let headers =
@@ -606,6 +1051,101 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeAppVersion ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("appArn",
+                           (Arn.to_value req.DescribeAppVersionRequest.appArn));
+                      Some
+                        ("appVersion",
+                          (EntityVersion.to_value
+                             req.DescribeAppVersionRequest.appVersion))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeAppVersionAppComponent ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("appArn",
+                           (Arn.to_value
+                              req.DescribeAppVersionAppComponentRequest.appArn));
+                      Some
+                        ("appVersion",
+                          (EntityVersion.to_value
+                             req.DescribeAppVersionAppComponentRequest.appVersion));
+                      Some
+                        ("id",
+                          (String255.to_value
+                             req.DescribeAppVersionAppComponentRequest.id))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeAppVersionResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("appArn",
+                           (Arn.to_value
+                              req.DescribeAppVersionResourceRequest.appArn));
+                      Some
+                        ("appVersion",
+                          (EntityVersion.to_value
+                             req.DescribeAppVersionResourceRequest.appVersion));
+                      Option.map
+                        req.DescribeAppVersionResourceRequest.awsAccountId
+                        ~f:(fun x ->
+                              ("awsAccountId", (CustomerId.to_value x)));
+                      Option.map
+                        req.DescribeAppVersionResourceRequest.awsRegion
+                        ~f:(fun x -> ("awsRegion", (AwsRegion.to_value x)));
+                      Option.map
+                        req.DescribeAppVersionResourceRequest.logicalResourceId
+                        ~f:(fun x ->
+                              ("logicalResourceId",
+                                (LogicalResourceId.to_value x)));
+                      Option.map
+                        req.DescribeAppVersionResourceRequest.physicalResourceId
+                        ~f:(fun x ->
+                              ("physicalResourceId", (String2048.to_value x)));
+                      Option.map
+                        req.DescribeAppVersionResourceRequest.resourceName
+                        ~f:(fun x ->
+                              ("resourceName", (EntityName.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeAppVersionResourcesResolutionStatus ->
       let (headers, body) =
         let headers =
@@ -677,6 +1217,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeMetricsExport ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("metricsExportId",
+                           (String255.to_value
+                              req.DescribeMetricsExportRequest.metricsExportId))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeResiliencyPolicy ->
       let (headers, body) =
         let headers =
@@ -697,6 +1257,29 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeResourceGroupingRecommendationTask ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("appArn",
+                           (Arn.to_value
+                              req.DescribeResourceGroupingRecommendationTaskRequest.appArn));
+                      Option.map
+                        req.DescribeResourceGroupingRecommendationTaskRequest.groupingId
+                        ~f:(fun x -> ("groupingId", (String255.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ImportResourcesToDraftAppVersion ->
       let (headers, body) =
         let headers =
@@ -710,10 +1293,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("appArn",
                            (Arn.to_value
                               req.ImportResourcesToDraftAppVersionRequest.appArn));
-                      Some
-                        ("sourceArns",
-                          (ArnList.to_value
-                             req.ImportResourcesToDraftAppVersionRequest.sourceArns))])
+                      Option.map
+                        req.ImportResourcesToDraftAppVersionRequest.eksSources
+                        ~f:(fun x ->
+                              ("eksSources", (EksSourceList.to_value x)));
+                      Option.map
+                        req.ImportResourcesToDraftAppVersionRequest.importStrategy
+                        ~f:(fun x ->
+                              ("importStrategy",
+                                (ResourceImportStrategyType.to_value x)));
+                      Option.map
+                        req.ImportResourcesToDraftAppVersionRequest.sourceArns
+                        ~f:(fun x -> ("sourceArns", (ArnList.to_value x)));
+                      Option.map
+                        req.ImportResourcesToDraftAppVersionRequest.terraformSources
+                        ~f:(fun x ->
+                              ("terraformSources",
+                                (TerraformSourceList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -739,6 +1335,58 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
                       Option.map
                         req.ListAlarmRecommendationsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAppAssessmentComplianceDrifts ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("assessmentArn",
+                           (Arn.to_value
+                              req.ListAppAssessmentComplianceDriftsRequest.assessmentArn));
+                      Option.map
+                        req.ListAppAssessmentComplianceDriftsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map
+                        req.ListAppAssessmentComplianceDriftsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAppAssessmentResourceDrifts ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("assessmentArn",
+                           (Arn.to_value
+                              req.ListAppAssessmentResourceDriftsRequest.assessmentArn));
+                      Option.map
+                        req.ListAppAssessmentResourceDriftsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map
+                        req.ListAppAssessmentResourceDriftsRequest.nextToken
                         ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -794,6 +1442,64 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
                       Option.map
                         req.ListAppComponentRecommendationsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAppInputSources ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("appArn",
+                           (Arn.to_value
+                              req.ListAppInputSourcesRequest.appArn));
+                      Some
+                        ("appVersion",
+                          (EntityVersion.to_value
+                             req.ListAppInputSourcesRequest.appVersion));
+                      Option.map req.ListAppInputSourcesRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map req.ListAppInputSourcesRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAppVersionAppComponents ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("appArn",
+                           (Arn.to_value
+                              req.ListAppVersionAppComponentsRequest.appArn));
+                      Some
+                        ("appVersion",
+                          (EntityVersion.to_value
+                             req.ListAppVersionAppComponentsRequest.appVersion));
+                      Option.map
+                        req.ListAppVersionAppComponentsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map
+                        req.ListAppVersionAppComponentsRequest.nextToken
                         ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -876,10 +1582,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("appArn",
                            (Arn.to_value req.ListAppVersionsRequest.appArn));
+                      Option.map req.ListAppVersionsRequest.endTime
+                        ~f:(fun x -> ("endTime", (TimeStamp.to_value x)));
                       Option.map req.ListAppVersionsRequest.maxResults
                         ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
                       Option.map req.ListAppVersionsRequest.nextToken
-                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
+                      Option.map req.ListAppVersionsRequest.startTime
+                        ~f:(fun x -> ("startTime", (TimeStamp.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -890,10 +1600,42 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListApps ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListMetrics ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListMetricsRequest.conditions
+                         ~f:(fun x ->
+                               ("conditions", (ConditionList.to_value x)));
+                      Option.map req.ListMetricsRequest.dataSource
+                        ~f:(fun x -> ("dataSource", (String255.to_value x)));
+                      Option.map req.ListMetricsRequest.fields
+                        ~f:(fun x -> ("fields", (FieldList.to_value x)));
+                      Option.map req.ListMetricsRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map req.ListMetricsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
+                      Option.map req.ListMetricsRequest.sorts
+                        ~f:(fun x -> ("sorts", (SortList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListRecommendationTemplates ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListResiliencyPolicies ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListResourceGroupingRecommendations ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListSopRecommendations ->
@@ -995,7 +1737,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                    (List.filter_opt
                       [Some
                          ("appArn",
-                           (Arn.to_value req.PublishAppVersionRequest.appArn))])
+                           (Arn.to_value req.PublishAppVersionRequest.appArn));
+                      Option.map req.PublishAppVersionRequest.versionName
+                        ~f:(fun x ->
+                              ("versionName", (EntityVersion.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1027,6 +1772,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | RejectResourceGroupingRecommendations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("appArn",
+                           (Arn.to_value
+                              req.RejectResourceGroupingRecommendationsRequest.appArn));
+                      Some
+                        ("entries",
+                          (RejectGroupingRecommendationEntries.to_value
+                             req.RejectResourceGroupingRecommendationsRequest.entries))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | RemoveDraftAppVersionResourceMappings ->
       let (headers, body) =
         let headers =
@@ -1046,6 +1815,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("appRegistryAppNames",
                                 (EntityNameList.to_value x)));
                       Option.map
+                        req.RemoveDraftAppVersionResourceMappingsRequest.eksSourceNames
+                        ~f:(fun x ->
+                              ("eksSourceNames", (String255List.to_value x)));
+                      Option.map
                         req.RemoveDraftAppVersionResourceMappingsRequest.logicalStackNames
                         ~f:(fun x ->
                               ("logicalStackNames",
@@ -1058,7 +1831,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map
                         req.RemoveDraftAppVersionResourceMappingsRequest.resourceNames
                         ~f:(fun x ->
-                              ("resourceNames", (EntityNameList.to_value x)))])
+                              ("resourceNames", (EntityNameList.to_value x)));
+                      Option.map
+                        req.RemoveDraftAppVersionResourceMappingsRequest.terraformSourceNames
+                        ~f:(fun x ->
+                              ("terraformSourceNames",
+                                (String255List.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1122,6 +1900,47 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartMetricsExport ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.StartMetricsExportRequest.bucketName
+                         ~f:(fun x -> ("bucketName", (EntityName.to_value x)));
+                      Option.map req.StartMetricsExportRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartResourceGroupingRecommendationTask ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("appArn",
+                           (Arn.to_value
+                              req.StartResourceGroupingRecommendationTaskRequest.appArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | TagResource ->
       let (headers, body) =
         let headers =
@@ -1154,6 +1973,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("appArn",
                            (Arn.to_value req.UpdateAppRequest.appArn));
+                      Option.map req.UpdateAppRequest.assessmentSchedule
+                        ~f:(fun x ->
+                              ("assessmentSchedule",
+                                (AppAssessmentScheduleType.to_value x)));
                       Option.map
                         req.UpdateAppRequest.clearResiliencyPolicyArn
                         ~f:(fun x ->
@@ -1162,8 +1985,129 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.UpdateAppRequest.description
                         ~f:(fun x ->
                               ("description", (EntityDescription.to_value x)));
+                      Option.map req.UpdateAppRequest.eventSubscriptions
+                        ~f:(fun x ->
+                              ("eventSubscriptions",
+                                (EventSubscriptionList.to_value x)));
+                      Option.map req.UpdateAppRequest.permissionModel
+                        ~f:(fun x ->
+                              ("permissionModel",
+                                (PermissionModel.to_value x)));
                       Option.map req.UpdateAppRequest.policyArn
                         ~f:(fun x -> ("policyArn", (Arn.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateAppVersion ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdateAppVersionRequest.additionalInfo
+                         ~f:(fun x ->
+                               ("additionalInfo",
+                                 (AdditionalInfoMap.to_value x)));
+                      Some
+                        ("appArn",
+                          (Arn.to_value req.UpdateAppVersionRequest.appArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateAppVersionAppComponent ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateAppVersionAppComponentRequest.additionalInfo
+                         ~f:(fun x ->
+                               ("additionalInfo",
+                                 (AdditionalInfoMap.to_value x)));
+                      Some
+                        ("appArn",
+                          (Arn.to_value
+                             req.UpdateAppVersionAppComponentRequest.appArn));
+                      Some
+                        ("id",
+                          (String255.to_value
+                             req.UpdateAppVersionAppComponentRequest.id));
+                      Option.map req.UpdateAppVersionAppComponentRequest.name
+                        ~f:(fun x -> ("name", (String255.to_value x)));
+                      Option.map
+                        req.UpdateAppVersionAppComponentRequest.type_
+                        ~f:(fun x -> ("type", (String255.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateAppVersionResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateAppVersionResourceRequest.additionalInfo
+                         ~f:(fun x ->
+                               ("additionalInfo",
+                                 (AdditionalInfoMap.to_value x)));
+                      Some
+                        ("appArn",
+                          (Arn.to_value
+                             req.UpdateAppVersionResourceRequest.appArn));
+                      Option.map
+                        req.UpdateAppVersionResourceRequest.appComponents
+                        ~f:(fun x ->
+                              ("appComponents",
+                                (AppComponentNameList.to_value x)));
+                      Option.map
+                        req.UpdateAppVersionResourceRequest.awsAccountId
+                        ~f:(fun x ->
+                              ("awsAccountId", (CustomerId.to_value x)));
+                      Option.map
+                        req.UpdateAppVersionResourceRequest.awsRegion
+                        ~f:(fun x -> ("awsRegion", (AwsRegion.to_value x)));
+                      Option.map req.UpdateAppVersionResourceRequest.excluded
+                        ~f:(fun x ->
+                              ("excluded", (BooleanOptional.to_value x)));
+                      Option.map
+                        req.UpdateAppVersionResourceRequest.logicalResourceId
+                        ~f:(fun x ->
+                              ("logicalResourceId",
+                                (LogicalResourceId.to_value x)));
+                      Option.map
+                        req.UpdateAppVersionResourceRequest.physicalResourceId
+                        ~f:(fun x ->
+                              ("physicalResourceId", (String2048.to_value x)));
+                      Option.map
+                        req.UpdateAppVersionResourceRequest.resourceName
+                        ~f:(fun x ->
+                              ("resourceName", (EntityName.to_value x)));
+                      Option.map
+                        req.UpdateAppVersionResourceRequest.resourceType
+                        ~f:(fun x -> ("resourceType", (String255.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1257,6 +2201,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | AcceptResourceGroupingRecommendations ->
+      if is_success
+      then
+        Ok
+          (AcceptResourceGroupingRecommendationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                AcceptResourceGroupingRecommendationsResponse.error_of_json))
   | AddDraftAppVersionResourceMappings ->
       if is_success
       then
@@ -1267,10 +2222,38 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AddDraftAppVersionResourceMappingsResponse.error_of_json))
+  | BatchUpdateRecommendationStatus ->
+      if is_success
+      then
+        Ok
+          (BatchUpdateRecommendationStatusResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchUpdateRecommendationStatusResponse.error_of_json))
   | CreateApp ->
       if is_success
       then Ok (CreateAppResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateAppResponse.error_of_json))
+  | CreateAppVersionAppComponent ->
+      if is_success
+      then
+        Ok
+          (CreateAppVersionAppComponentResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAppVersionAppComponentResponse.error_of_json))
+  | CreateAppVersionResource ->
+      if is_success
+      then
+        Ok (CreateAppVersionResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAppVersionResourceResponse.error_of_json))
   | CreateRecommendationTemplate ->
       if is_success
       then
@@ -1299,6 +2282,30 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteAppAssessmentResponse.error_of_json))
+  | DeleteAppInputSource ->
+      if is_success
+      then Ok (DeleteAppInputSourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteAppInputSourceResponse.error_of_json))
+  | DeleteAppVersionAppComponent ->
+      if is_success
+      then
+        Ok
+          (DeleteAppVersionAppComponentResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAppVersionAppComponentResponse.error_of_json))
+  | DeleteAppVersionResource ->
+      if is_success
+      then
+        Ok (DeleteAppVersionResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAppVersionResourceResponse.error_of_json))
   | DeleteRecommendationTemplate ->
       if is_success
       then
@@ -1327,6 +2334,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeAppAssessmentResponse.error_of_json))
+  | DescribeAppVersion ->
+      if is_success
+      then Ok (DescribeAppVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeAppVersionResponse.error_of_json))
+  | DescribeAppVersionAppComponent ->
+      if is_success
+      then
+        Ok
+          (DescribeAppVersionAppComponentResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAppVersionAppComponentResponse.error_of_json))
+  | DescribeAppVersionResource ->
+      if is_success
+      then
+        Ok
+          (DescribeAppVersionResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAppVersionResourceResponse.error_of_json))
   | DescribeAppVersionResourcesResolutionStatus ->
       if is_success
       then
@@ -1358,6 +2390,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 DescribeDraftAppVersionResourcesImportStatusResponse.error_of_json))
+  | DescribeMetricsExport ->
+      if is_success
+      then Ok (DescribeMetricsExportResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeMetricsExportResponse.error_of_json))
   | DescribeResiliencyPolicy ->
       if is_success
       then
@@ -1366,6 +2404,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeResiliencyPolicyResponse.error_of_json))
+  | DescribeResourceGroupingRecommendationTask ->
+      if is_success
+      then
+        Ok
+          (DescribeResourceGroupingRecommendationTaskResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DescribeResourceGroupingRecommendationTaskResponse.error_of_json))
   | ImportResourcesToDraftAppVersion ->
       if is_success
       then
@@ -1384,6 +2433,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListAlarmRecommendationsResponse.error_of_json))
+  | ListAppAssessmentComplianceDrifts ->
+      if is_success
+      then
+        Ok
+          (ListAppAssessmentComplianceDriftsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAppAssessmentComplianceDriftsResponse.error_of_json))
+  | ListAppAssessmentResourceDrifts ->
+      if is_success
+      then
+        Ok
+          (ListAppAssessmentResourceDriftsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAppAssessmentResourceDriftsResponse.error_of_json))
   | ListAppAssessments ->
       if is_success
       then Ok (ListAppAssessmentsResponse.of_json (response_to_json resp))
@@ -1410,6 +2479,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListAppComponentRecommendationsResponse.error_of_json))
+  | ListAppInputSources ->
+      if is_success
+      then Ok (ListAppInputSourcesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAppInputSourcesResponse.error_of_json))
+  | ListAppVersionAppComponents ->
+      if is_success
+      then
+        Ok
+          (ListAppVersionAppComponentsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAppVersionAppComponentsResponse.error_of_json))
   | ListAppVersionResourceMappings ->
       if is_success
       then
@@ -1437,6 +2522,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListAppsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListAppsResponse.error_of_json))
+  | ListMetrics ->
+      if is_success
+      then Ok (ListMetricsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListMetricsResponse.error_of_json))
   | ListRecommendationTemplates ->
       if is_success
       then
@@ -1455,6 +2544,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListResiliencyPoliciesResponse.error_of_json))
+  | ListResourceGroupingRecommendations ->
+      if is_success
+      then
+        Ok
+          (ListResourceGroupingRecommendationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListResourceGroupingRecommendationsResponse.error_of_json))
   | ListSopRecommendations ->
       if is_success
       then
@@ -1512,6 +2611,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some PutDraftAppVersionTemplateResponse.error_of_json))
+  | RejectResourceGroupingRecommendations ->
+      if is_success
+      then
+        Ok
+          (RejectResourceGroupingRecommendationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                RejectResourceGroupingRecommendationsResponse.error_of_json))
   | RemoveDraftAppVersionResourceMappings ->
       if is_success
       then
@@ -1538,6 +2648,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some StartAppAssessmentResponse.error_of_json))
+  | StartMetricsExport ->
+      if is_success
+      then Ok (StartMetricsExportResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartMetricsExportResponse.error_of_json))
+  | StartResourceGroupingRecommendationTask ->
+      if is_success
+      then
+        Ok
+          (StartResourceGroupingRecommendationTaskResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                StartResourceGroupingRecommendationTaskResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -1556,6 +2683,29 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (UpdateAppResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UpdateAppResponse.error_of_json))
+  | UpdateAppVersion ->
+      if is_success
+      then Ok (UpdateAppVersionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateAppVersionResponse.error_of_json))
+  | UpdateAppVersionAppComponent ->
+      if is_success
+      then
+        Ok
+          (UpdateAppVersionAppComponentResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAppVersionAppComponentResponse.error_of_json))
+  | UpdateAppVersionResource ->
+      if is_success
+      then
+        Ok (UpdateAppVersionResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAppVersionResourceResponse.error_of_json))
   | UpdateResiliencyPolicy ->
       if is_success
       then

@@ -41,6 +41,11 @@ let analyze_document =
        and humanLoopConfig =
          flag "human-loop-config" (optional json_arg)
            ~doc:"JSON HumanLoopConfig"
+       and queriesConfig =
+         flag "queries-config" (optional json_arg) ~doc:"JSON QueriesConfig"
+       and adaptersConfig =
+         flag "adapters-config" (optional json_arg)
+           ~doc:"JSON AdaptersConfig"
        and document =
          flag "document" (required json_arg) ~doc:"JSON Document"
        and featureTypes =
@@ -51,6 +56,10 @@ let analyze_document =
            (Values.AnalyzeDocumentRequest.make
               ?humanLoopConfig:(Option.map ~f:Values.HumanLoopConfig.of_json
                                   humanLoopConfig)
+              ?queriesConfig:(Option.map ~f:Values.QueriesConfig.of_json
+                                queriesConfig)
+              ?adaptersConfig:(Option.map ~f:Values.AdaptersConfig.of_json
+                                 adaptersConfig)
               ~document:(Values.Document.of_json document)
               ~featureTypes:(Values.FeatureTypes.of_json featureTypes) ())
            (Some Values.AnalyzeDocumentResponse.to_json)
@@ -93,6 +102,111 @@ let analyze_i_d =
               ~documentPages:(Values.DocumentPages.of_json documentPages) ())
            (Some Values.AnalyzeIDResponse.to_json)
            (Some Values.AnalyzeIDResponse.error_to_json)])
+let create_adapter =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING AdapterDescription"
+       and autoUpdate =
+         flag "auto-update" (optional json_arg) ~doc:"JSON AutoUpdate"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and adapterName =
+         flag "adapter-name" (required string) ~doc:"STRING AdapterName"
+       and featureTypes =
+         flag "feature-types" (required json_arg) ~doc:"JSON FeatureTypes" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_adapter
+           (Values.CreateAdapterRequest.make ?clientRequestToken ?description
+              ?autoUpdate:(Option.map ~f:Values.AutoUpdate.of_json autoUpdate)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~adapterName
+              ~featureTypes:(Values.FeatureTypes.of_json featureTypes) ())
+           (Some Values.CreateAdapterResponse.to_json)
+           (Some Values.CreateAdapterResponse.error_to_json)])
+let create_adapter_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and kMSKeyId =
+         flag "k-m-s-key-id" (optional string) ~doc:"STRING KMSKeyId"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and adapterId =
+         flag "adapter-id" (required string) ~doc:"STRING AdapterId"
+       and datasetConfig =
+         flag "dataset-config" (required json_arg)
+           ~doc:"JSON AdapterVersionDatasetConfig"
+       and outputConfig =
+         flag "output-config" (required json_arg) ~doc:"JSON OutputConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_adapter_version
+           (Values.CreateAdapterVersionRequest.make ?clientRequestToken
+              ?kMSKeyId ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ~adapterId
+              ~datasetConfig:(Values.AdapterVersionDatasetConfig.of_json
+                                datasetConfig)
+              ~outputConfig:(Values.OutputConfig.of_json outputConfig) ())
+           (Some Values.CreateAdapterVersionResponse.to_json)
+           (Some Values.CreateAdapterVersionResponse.error_to_json)])
+let delete_adapter =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and adapterId =
+         flag "adapter-id" (required string) ~doc:"STRING AdapterId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_adapter (Values.DeleteAdapterRequest.make ~adapterId ())
+           (Some Values.DeleteAdapterResponse.to_json)
+           (Some Values.DeleteAdapterResponse.error_to_json)])
+let delete_adapter_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and adapterId =
+         flag "adapter-id" (required string) ~doc:"STRING AdapterId"
+       and adapterVersion =
+         flag "adapter-version" (required string)
+           ~doc:"STRING AdapterVersion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_adapter_version
+           (Values.DeleteAdapterVersionRequest.make ~adapterId
+              ~adapterVersion ())
+           (Some Values.DeleteAdapterVersionResponse.to_json)
+           (Some Values.DeleteAdapterVersionResponse.error_to_json)])
 let detect_document_text =
   Command.async ~summary:""
     ([%map_open.Command
@@ -112,6 +226,44 @@ let detect_document_text =
               ~document:(Values.Document.of_json document) ())
            (Some Values.DetectDocumentTextResponse.to_json)
            (Some Values.DetectDocumentTextResponse.error_to_json)])
+let get_adapter =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and adapterId =
+         flag "adapter-id" (required string) ~doc:"STRING AdapterId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_adapter (Values.GetAdapterRequest.make ~adapterId ())
+           (Some Values.GetAdapterResponse.to_json)
+           (Some Values.GetAdapterResponse.error_to_json)])
+let get_adapter_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and adapterId =
+         flag "adapter-id" (required string) ~doc:"STRING AdapterId"
+       and adapterVersion =
+         flag "adapter-version" (required string)
+           ~doc:"STRING AdapterVersion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_adapter_version
+           (Values.GetAdapterVersionRequest.make ~adapterId ~adapterVersion
+              ()) (Some Values.GetAdapterVersionResponse.to_json)
+           (Some Values.GetAdapterVersionResponse.error_to_json)])
 let get_document_analysis =
   Command.async ~summary:""
     ([%map_open.Command
@@ -176,6 +328,122 @@ let get_expense_analysis =
            (Values.GetExpenseAnalysisRequest.make ?maxResults ?nextToken
               ~jobId ()) (Some Values.GetExpenseAnalysisResponse.to_json)
            (Some Values.GetExpenseAnalysisResponse.error_to_json)])
+let get_lending_analysis =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and jobId = flag "job-id" (required string) ~doc:"STRING JobId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_lending_analysis
+           (Values.GetLendingAnalysisRequest.make ?maxResults ?nextToken
+              ~jobId ()) (Some Values.GetLendingAnalysisResponse.to_json)
+           (Some Values.GetLendingAnalysisResponse.error_to_json)])
+let get_lending_analysis_summary =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and jobId = flag "job-id" (required string) ~doc:"STRING JobId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_lending_analysis_summary
+           (Values.GetLendingAnalysisSummaryRequest.make ~jobId ())
+           (Some Values.GetLendingAnalysisSummaryResponse.to_json)
+           (Some Values.GetLendingAnalysisSummaryResponse.error_to_json)])
+let list_adapter_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and adapterId =
+         flag "adapter-id" (optional string) ~doc:"STRING AdapterId"
+       and afterCreationTime =
+         flag "after-creation-time" (optional json_arg) ~doc:"JSON DateTime"
+       and beforeCreationTime =
+         flag "before-creation-time" (optional json_arg) ~doc:"JSON DateTime"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_adapter_versions
+           (Values.ListAdapterVersionsRequest.make ?adapterId
+              ?afterCreationTime:(Option.map ~f:Values.DateTime.of_json
+                                    afterCreationTime)
+              ?beforeCreationTime:(Option.map ~f:Values.DateTime.of_json
+                                     beforeCreationTime) ?maxResults
+              ?nextToken ())
+           (Some Values.ListAdapterVersionsResponse.to_json)
+           (Some Values.ListAdapterVersionsResponse.error_to_json)])
+let list_adapters =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and afterCreationTime =
+         flag "after-creation-time" (optional json_arg) ~doc:"JSON DateTime"
+       and beforeCreationTime =
+         flag "before-creation-time" (optional json_arg) ~doc:"JSON DateTime"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_adapters
+           (Values.ListAdaptersRequest.make
+              ?afterCreationTime:(Option.map ~f:Values.DateTime.of_json
+                                    afterCreationTime)
+              ?beforeCreationTime:(Option.map ~f:Values.DateTime.of_json
+                                     beforeCreationTime) ?maxResults
+              ?nextToken ()) (Some Values.ListAdaptersResponse.to_json)
+           (Some Values.ListAdaptersResponse.error_to_json)])
+let list_tags_for_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceARN =
+         flag "resource-a-r-n" (required string)
+           ~doc:"STRING AmazonResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_tags_for_resource
+           (Values.ListTagsForResourceRequest.make ~resourceARN ())
+           (Some Values.ListTagsForResourceResponse.to_json)
+           (Some Values.ListTagsForResourceResponse.error_to_json)])
 let start_document_analysis =
   Command.async ~summary:""
     ([%map_open.Command
@@ -197,6 +465,11 @@ let start_document_analysis =
          flag "output-config" (optional json_arg) ~doc:"JSON OutputConfig"
        and kMSKeyId =
          flag "k-m-s-key-id" (optional string) ~doc:"STRING KMSKeyId"
+       and queriesConfig =
+         flag "queries-config" (optional json_arg) ~doc:"JSON QueriesConfig"
+       and adaptersConfig =
+         flag "adapters-config" (optional json_arg)
+           ~doc:"JSON AdaptersConfig"
        and documentLocation =
          flag "document-location" (required json_arg)
            ~doc:"JSON DocumentLocation"
@@ -212,6 +485,10 @@ let start_document_analysis =
                                       notificationChannel)
               ?outputConfig:(Option.map ~f:Values.OutputConfig.of_json
                                outputConfig) ?kMSKeyId
+              ?queriesConfig:(Option.map ~f:Values.QueriesConfig.of_json
+                                queriesConfig)
+              ?adaptersConfig:(Option.map ~f:Values.AdaptersConfig.of_json
+                                 adaptersConfig)
               ~documentLocation:(Values.DocumentLocation.of_json
                                    documentLocation)
               ~featureTypes:(Values.FeatureTypes.of_json featureTypes) ())
@@ -293,16 +570,138 @@ let start_expense_analysis =
                                    documentLocation) ())
            (Some Values.StartExpenseAnalysisResponse.to_json)
            (Some Values.StartExpenseAnalysisResponse.error_to_json)])
+let start_lending_analysis =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and jobTag = flag "job-tag" (optional string) ~doc:"STRING JobTag"
+       and notificationChannel =
+         flag "notification-channel" (optional json_arg)
+           ~doc:"JSON NotificationChannel"
+       and outputConfig =
+         flag "output-config" (optional json_arg) ~doc:"JSON OutputConfig"
+       and kMSKeyId =
+         flag "k-m-s-key-id" (optional string) ~doc:"STRING KMSKeyId"
+       and documentLocation =
+         flag "document-location" (required json_arg)
+           ~doc:"JSON DocumentLocation" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_lending_analysis
+           (Values.StartLendingAnalysisRequest.make ?clientRequestToken
+              ?jobTag
+              ?notificationChannel:(Option.map
+                                      ~f:Values.NotificationChannel.of_json
+                                      notificationChannel)
+              ?outputConfig:(Option.map ~f:Values.OutputConfig.of_json
+                               outputConfig) ?kMSKeyId
+              ~documentLocation:(Values.DocumentLocation.of_json
+                                   documentLocation) ())
+           (Some Values.StartLendingAnalysisResponse.to_json)
+           (Some Values.StartLendingAnalysisResponse.error_to_json)])
+let tag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceARN =
+         flag "resource-a-r-n" (required string)
+           ~doc:"STRING AmazonResourceName"
+       and tags = flag "tags" (required json_arg) ~doc:"JSON TagMap" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.tag_resource
+           (Values.TagResourceRequest.make ~resourceARN
+              ~tags:(Values.TagMap.of_json tags) ())
+           (Some Values.TagResourceResponse.to_json)
+           (Some Values.TagResourceResponse.error_to_json)])
+let untag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceARN =
+         flag "resource-a-r-n" (required string)
+           ~doc:"STRING AmazonResourceName"
+       and tagKeys =
+         flag "tag-keys" (required json_arg) ~doc:"JSON TagKeyList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.untag_resource
+           (Values.UntagResourceRequest.make ~resourceARN
+              ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
+           (Some Values.UntagResourceResponse.to_json)
+           (Some Values.UntagResourceResponse.error_to_json)])
+let update_adapter =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING AdapterDescription"
+       and adapterName =
+         flag "adapter-name" (optional string) ~doc:"STRING AdapterName"
+       and autoUpdate =
+         flag "auto-update" (optional json_arg) ~doc:"JSON AutoUpdate"
+       and adapterId =
+         flag "adapter-id" (required string) ~doc:"STRING AdapterId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_adapter
+           (Values.UpdateAdapterRequest.make ?description ?adapterName
+              ?autoUpdate:(Option.map ~f:Values.AutoUpdate.of_json autoUpdate)
+              ~adapterId ()) (Some Values.UpdateAdapterResponse.to_json)
+           (Some Values.UpdateAdapterResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("analyze-document", analyze_document);
     ("analyze-expense", analyze_expense);
     ("analyze-i-d", analyze_i_d);
+    ("create-adapter", create_adapter);
+    ("create-adapter-version", create_adapter_version);
+    ("delete-adapter", delete_adapter);
+    ("delete-adapter-version", delete_adapter_version);
     ("detect-document-text", detect_document_text);
+    ("get-adapter", get_adapter);
+    ("get-adapter-version", get_adapter_version);
     ("get-document-analysis", get_document_analysis);
     ("get-document-text-detection", get_document_text_detection);
     ("get-expense-analysis", get_expense_analysis);
+    ("get-lending-analysis", get_lending_analysis);
+    ("get-lending-analysis-summary", get_lending_analysis_summary);
+    ("list-adapter-versions", list_adapter_versions);
+    ("list-adapters", list_adapters);
+    ("list-tags-for-resource", list_tags_for_resource);
     ("start-document-analysis", start_document_analysis);
     ("start-document-text-detection", start_document_text_detection);
-    ("start-expense-analysis", start_expense_analysis)]
+    ("start-expense-analysis", start_expense_analysis);
+    ("start-lending-analysis", start_lending_analysis);
+    ("tag-resource", tag_resource);
+    ("untag-resource", untag_resource);
+    ("update-adapter", update_adapter)]

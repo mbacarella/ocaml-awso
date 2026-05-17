@@ -28,6 +28,26 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let accept_account_link_invitation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and linkId = flag "link-id" (required string) ~doc:"STRING LinkId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.accept_account_link_invitation
+           (Values.AcceptAccountLinkInvitationRequest.make ?clientToken
+              ~linkId ())
+           (Some Values.AcceptAccountLinkInvitationResult.to_json)
+           (Some Values.AcceptAccountLinkInvitationResult.error_to_json)])
 let associate_connection_alias =
   Command.async ~summary:""
     ([%map_open.Command
@@ -69,6 +89,28 @@ let associate_ip_groups =
               ~groupIds:(Values.IpGroupIdList.of_json groupIds) ())
            (Some Values.AssociateIpGroupsResult.to_json)
            (Some Values.AssociateIpGroupsResult.error_to_json)])
+let associate_workspace_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
+       and applicationId =
+         flag "application-id" (required string)
+           ~doc:"STRING WorkSpaceApplicationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_workspace_application
+           (Values.AssociateWorkspaceApplicationRequest.make ~workspaceId
+              ~applicationId ())
+           (Some Values.AssociateWorkspaceApplicationResult.to_json)
+           (Some Values.AssociateWorkspaceApplicationResult.error_to_json)])
 let authorize_ip_rules =
   Command.async ~summary:""
     ([%map_open.Command
@@ -119,6 +161,27 @@ let copy_workspace_image =
               ~sourceImageId ~sourceRegion ())
            (Some Values.CopyWorkspaceImageResult.to_json)
            (Some Values.CopyWorkspaceImageResult.error_to_json)])
+let create_account_link_invitation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and targetAccountId =
+         flag "target-account-id" (required string) ~doc:"STRING AwsAccount" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_account_link_invitation
+           (Values.CreateAccountLinkInvitationRequest.make ?clientToken
+              ~targetAccountId ())
+           (Some Values.CreateAccountLinkInvitationResult.to_json)
+           (Some Values.CreateAccountLinkInvitationResult.error_to_json)])
 let create_connect_client_add_in =
   Command.async ~summary:""
     ([%map_open.Command
@@ -186,6 +249,29 @@ let create_ip_group =
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ~groupName ())
            (Some Values.CreateIpGroupResult.to_json)
            (Some Values.CreateIpGroupResult.error_to_json)])
+let create_standby_workspaces =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and primaryRegion =
+         flag "primary-region" (required string) ~doc:"STRING Region"
+       and standbyWorkspaces =
+         flag "standby-workspaces" (required json_arg)
+           ~doc:"JSON StandbyWorkspacesList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_standby_workspaces
+           (Values.CreateStandbyWorkspacesRequest.make ~primaryRegion
+              ~standbyWorkspaces:(Values.StandbyWorkspacesList.of_json
+                                    standbyWorkspaces) ())
+           (Some Values.CreateStandbyWorkspacesResult.to_json)
+           (Some Values.CreateStandbyWorkspacesResult.error_to_json)])
 let create_tags =
   Command.async ~summary:""
     ([%map_open.Command
@@ -270,6 +356,32 @@ let create_workspace_bundle =
               ~userStorage:(Values.UserStorage.of_json userStorage) ())
            (Some Values.CreateWorkspaceBundleResult.to_json)
            (Some Values.CreateWorkspaceBundleResult.error_to_json)])
+let create_workspace_image =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and name =
+         flag "name" (required string) ~doc:"STRING WorkspaceImageName"
+       and description =
+         flag "description" (required string)
+           ~doc:"STRING WorkspaceImageDescription"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_workspace_image
+           (Values.CreateWorkspaceImageRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name
+              ~description ~workspaceId ())
+           (Some Values.CreateWorkspaceImageResult.to_json)
+           (Some Values.CreateWorkspaceImageResult.error_to_json)])
 let create_workspaces =
   Command.async ~summary:""
     ([%map_open.Command
@@ -290,6 +402,70 @@ let create_workspaces =
               ~workspaces:(Values.WorkspaceRequestList.of_json workspaces) ())
            (Some Values.CreateWorkspacesResult.to_json)
            (Some Values.CreateWorkspacesResult.error_to_json)])
+let create_workspaces_pool =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and applicationSettings =
+         flag "application-settings" (optional json_arg)
+           ~doc:"JSON ApplicationSettingsRequest"
+       and timeoutSettings =
+         flag "timeout-settings" (optional json_arg)
+           ~doc:"JSON TimeoutSettings"
+       and runningMode =
+         flag "running-mode" (optional json_arg) ~doc:"JSON PoolsRunningMode"
+       and poolName =
+         flag "pool-name" (required string) ~doc:"STRING WorkspacesPoolName"
+       and description =
+         flag "description" (required string) ~doc:"STRING UpdateDescription"
+       and bundleId =
+         flag "bundle-id" (required string) ~doc:"STRING BundleId"
+       and directoryId =
+         flag "directory-id" (required string) ~doc:"STRING DirectoryId"
+       and capacity =
+         flag "capacity" (required json_arg) ~doc:"JSON Capacity" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_workspaces_pool
+           (Values.CreateWorkspacesPoolRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?applicationSettings:(Option.map
+                                      ~f:Values.ApplicationSettingsRequest.of_json
+                                      applicationSettings)
+              ?timeoutSettings:(Option.map ~f:Values.TimeoutSettings.of_json
+                                  timeoutSettings)
+              ?runningMode:(Option.map ~f:Values.PoolsRunningMode.of_json
+                              runningMode) ~poolName ~description ~bundleId
+              ~directoryId ~capacity:(Values.Capacity.of_json capacity) ())
+           (Some Values.CreateWorkspacesPoolResult.to_json)
+           (Some Values.CreateWorkspacesPoolResult.error_to_json)])
+let delete_account_link_invitation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and linkId = flag "link-id" (required string) ~doc:"STRING LinkId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_account_link_invitation
+           (Values.DeleteAccountLinkInvitationRequest.make ?clientToken
+              ~linkId ())
+           (Some Values.DeleteAccountLinkInvitationResult.to_json)
+           (Some Values.DeleteAccountLinkInvitationResult.error_to_json)])
 let delete_client_branding =
   Command.async ~summary:""
     ([%map_open.Command
@@ -424,6 +600,26 @@ let delete_workspace_image =
            (Values.DeleteWorkspaceImageRequest.make ~imageId ())
            (Some Values.DeleteWorkspaceImageResult.to_json)
            (Some Values.DeleteWorkspaceImageResult.error_to_json)])
+let deploy_workspace_applications =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and force = flag "force" (optional bool) ~doc:"BOOL BooleanObject"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.deploy_workspace_applications
+           (Values.DeployWorkspaceApplicationsRequest.make ?force
+              ~workspaceId ())
+           (Some Values.DeployWorkspaceApplicationsResult.to_json)
+           (Some Values.DeployWorkspaceApplicationsResult.error_to_json)])
 let deregister_workspace_directory =
   Command.async ~summary:""
     ([%map_open.Command
@@ -476,6 +672,103 @@ let describe_account_modifications =
            (Values.DescribeAccountModificationsRequest.make ?nextToken ())
            (Some Values.DescribeAccountModificationsResult.to_json)
            (Some Values.DescribeAccountModificationsResult.error_to_json)])
+let describe_application_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Limit"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and applicationId =
+         flag "application-id" (required string)
+           ~doc:"STRING WorkSpaceApplicationId"
+       and associatedResourceTypes =
+         flag "associated-resource-types" (required json_arg)
+           ~doc:"JSON ApplicationAssociatedResourceTypeList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_application_associations
+           (Values.DescribeApplicationAssociationsRequest.make ?maxResults
+              ?nextToken ~applicationId
+              ~associatedResourceTypes:(Values.ApplicationAssociatedResourceTypeList.of_json
+                                          associatedResourceTypes) ())
+           (Some Values.DescribeApplicationAssociationsResult.to_json)
+           (Some Values.DescribeApplicationAssociationsResult.error_to_json)])
+let describe_applications =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationIds =
+         flag "application-ids" (optional json_arg)
+           ~doc:"JSON WorkSpaceApplicationIdList"
+       and computeTypeNames =
+         flag "compute-type-names" (optional json_arg)
+           ~doc:"JSON ComputeList"
+       and licenseType =
+         flag "license-type" (optional json_arg)
+           ~doc:"JSON WorkSpaceApplicationLicenseType"
+       and operatingSystemNames =
+         flag "operating-system-names" (optional json_arg)
+           ~doc:"JSON OperatingSystemNameList"
+       and owner =
+         flag "owner" (optional string)
+           ~doc:"STRING WorkSpaceApplicationOwner"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Limit"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_applications
+           (Values.DescribeApplicationsRequest.make
+              ?applicationIds:(Option.map
+                                 ~f:Values.WorkSpaceApplicationIdList.of_json
+                                 applicationIds)
+              ?computeTypeNames:(Option.map ~f:Values.ComputeList.of_json
+                                   computeTypeNames)
+              ?licenseType:(Option.map
+                              ~f:Values.WorkSpaceApplicationLicenseType.of_json
+                              licenseType)
+              ?operatingSystemNames:(Option.map
+                                       ~f:Values.OperatingSystemNameList.of_json
+                                       operatingSystemNames) ?owner
+              ?maxResults ?nextToken ())
+           (Some Values.DescribeApplicationsResult.to_json)
+           (Some Values.DescribeApplicationsResult.error_to_json)])
+let describe_bundle_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and bundleId =
+         flag "bundle-id" (required string) ~doc:"STRING BundleId"
+       and associatedResourceTypes =
+         flag "associated-resource-types" (required json_arg)
+           ~doc:"JSON BundleAssociatedResourceTypeList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_bundle_associations
+           (Values.DescribeBundleAssociationsRequest.make ~bundleId
+              ~associatedResourceTypes:(Values.BundleAssociatedResourceTypeList.of_json
+                                          associatedResourceTypes) ())
+           (Some Values.DescribeBundleAssociationsResult.to_json)
+           (Some Values.DescribeBundleAssociationsResult.error_to_json)])
 let describe_client_branding =
   Command.async ~summary:""
     ([%map_open.Command
@@ -584,6 +877,48 @@ let describe_connection_aliases =
                            aliasIds) ?resourceId ?limit ?nextToken ())
            (Some Values.DescribeConnectionAliasesResult.to_json)
            (Some Values.DescribeConnectionAliasesResult.error_to_json)])
+let describe_custom_workspace_image_import =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and imageId =
+         flag "image-id" (required string) ~doc:"STRING WorkspaceImageId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_custom_workspace_image_import
+           (Values.DescribeCustomWorkspaceImageImportRequest.make ~imageId ())
+           (Some Values.DescribeCustomWorkspaceImageImportResult.to_json)
+           (Some
+              Values.DescribeCustomWorkspaceImageImportResult.error_to_json)])
+let describe_image_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and imageId =
+         flag "image-id" (required string) ~doc:"STRING WorkspaceImageId"
+       and associatedResourceTypes =
+         flag "associated-resource-types" (required json_arg)
+           ~doc:"JSON ImageAssociatedResourceTypeList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_image_associations
+           (Values.DescribeImageAssociationsRequest.make ~imageId
+              ~associatedResourceTypes:(Values.ImageAssociatedResourceTypeList.of_json
+                                          associatedResourceTypes) ())
+           (Some Values.DescribeImageAssociationsResult.to_json)
+           (Some Values.DescribeImageAssociationsResult.error_to_json)])
 let describe_ip_groups =
   Command.async ~summary:""
     ([%map_open.Command
@@ -624,6 +959,29 @@ let describe_tags =
            Io.describe_tags (Values.DescribeTagsRequest.make ~resourceId ())
            (Some Values.DescribeTagsResult.to_json)
            (Some Values.DescribeTagsResult.error_to_json)])
+let describe_workspace_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
+       and associatedResourceTypes =
+         flag "associated-resource-types" (required json_arg)
+           ~doc:"JSON WorkSpaceAssociatedResourceTypeList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_workspace_associations
+           (Values.DescribeWorkspaceAssociationsRequest.make ~workspaceId
+              ~associatedResourceTypes:(Values.WorkSpaceAssociatedResourceTypeList.of_json
+                                          associatedResourceTypes) ())
+           (Some Values.DescribeWorkspaceAssociationsResult.to_json)
+           (Some Values.DescribeWorkspaceAssociationsResult.error_to_json)])
 let describe_workspace_bundles =
   Command.async ~summary:""
     ([%map_open.Command
@@ -659,15 +1017,28 @@ let describe_workspace_directories =
            ~doc:"URL override endpoint url"
        and directoryIds =
          flag "directory-ids" (optional json_arg) ~doc:"JSON DirectoryIdList"
+       and workspaceDirectoryNames =
+         flag "workspace-directory-names" (optional json_arg)
+           ~doc:"JSON WorkspaceDirectoryNameList"
        and limit = flag "limit" (optional int) ~doc:"INT Limit"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON DescribeWorkspaceDirectoriesFilterList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_workspace_directories
            (Values.DescribeWorkspaceDirectoriesRequest.make
               ?directoryIds:(Option.map ~f:Values.DirectoryIdList.of_json
-                               directoryIds) ?limit ?nextToken ())
+                               directoryIds)
+              ?workspaceDirectoryNames:(Option.map
+                                          ~f:Values.WorkspaceDirectoryNameList.of_json
+                                          workspaceDirectoryNames) ?limit
+              ?nextToken
+              ?filters:(Option.map
+                          ~f:Values.DescribeWorkspaceDirectoriesFilterList.of_json
+                          filters) ())
            (Some Values.DescribeWorkspaceDirectoriesResult.to_json)
            (Some Values.DescribeWorkspaceDirectoriesResult.error_to_json)])
 let describe_workspace_image_permissions =
@@ -758,14 +1129,16 @@ let describe_workspaces =
          flag "bundle-id" (optional string) ~doc:"STRING BundleId"
        and limit = flag "limit" (optional int) ~doc:"INT Limit"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and workspaceName =
+         flag "workspace-name" (optional string) ~doc:"STRING WorkspaceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_workspaces
            (Values.DescribeWorkspacesRequest.make
               ?workspaceIds:(Option.map ~f:Values.WorkspaceIdList.of_json
                                workspaceIds) ?directoryId ?userName ?bundleId
-              ?limit ?nextToken ())
+              ?limit ?nextToken ?workspaceName ())
            (Some Values.DescribeWorkspacesResult.to_json)
            (Some Values.DescribeWorkspacesResult.error_to_json)])
 let describe_workspaces_connection_status =
@@ -791,6 +1164,59 @@ let describe_workspaces_connection_status =
            (Some Values.DescribeWorkspacesConnectionStatusResult.to_json)
            (Some
               Values.DescribeWorkspacesConnectionStatusResult.error_to_json)])
+let describe_workspaces_pool_sessions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and userId =
+         flag "user-id" (optional string) ~doc:"STRING WorkspacesPoolUserId"
+       and limit = flag "limit" (optional int) ~doc:"INT Limit50"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and poolId =
+         flag "pool-id" (required string) ~doc:"STRING WorkspacesPoolId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_workspaces_pool_sessions
+           (Values.DescribeWorkspacesPoolSessionsRequest.make ?userId ?limit
+              ?nextToken ~poolId ())
+           (Some Values.DescribeWorkspacesPoolSessionsResult.to_json)
+           (Some Values.DescribeWorkspacesPoolSessionsResult.error_to_json)])
+let describe_workspaces_pools =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and poolIds =
+         flag "pool-ids" (optional json_arg) ~doc:"JSON WorkspacesPoolIds"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON DescribeWorkspacesPoolsFilters"
+       and limit = flag "limit" (optional int) ~doc:"INT Limit"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_workspaces_pools
+           (Values.DescribeWorkspacesPoolsRequest.make
+              ?poolIds:(Option.map ~f:Values.WorkspacesPoolIds.of_json
+                          poolIds)
+              ?filters:(Option.map
+                          ~f:Values.DescribeWorkspacesPoolsFilters.of_json
+                          filters) ?limit ?nextToken ())
+           (Some Values.DescribeWorkspacesPoolsResult.to_json)
+           (Some Values.DescribeWorkspacesPoolsResult.error_to_json)])
 let disassociate_connection_alias =
   Command.async ~summary:""
     ([%map_open.Command
@@ -830,6 +1256,47 @@ let disassociate_ip_groups =
               ~groupIds:(Values.IpGroupIdList.of_json groupIds) ())
            (Some Values.DisassociateIpGroupsResult.to_json)
            (Some Values.DisassociateIpGroupsResult.error_to_json)])
+let disassociate_workspace_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
+       and applicationId =
+         flag "application-id" (required string)
+           ~doc:"STRING WorkSpaceApplicationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_workspace_application
+           (Values.DisassociateWorkspaceApplicationRequest.make ~workspaceId
+              ~applicationId ())
+           (Some Values.DisassociateWorkspaceApplicationResult.to_json)
+           (Some Values.DisassociateWorkspaceApplicationResult.error_to_json)])
+let get_account_link =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and linkId = flag "link-id" (optional string) ~doc:"STRING LinkId"
+       and linkedAccountId =
+         flag "linked-account-id" (optional string) ~doc:"STRING AwsAccount" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_account_link
+           (Values.GetAccountLinkRequest.make ?linkId ?linkedAccountId ())
+           (Some Values.GetAccountLinkResult.to_json)
+           (Some Values.GetAccountLinkResult.error_to_json)])
 let import_client_branding =
   Command.async ~summary:""
     ([%map_open.Command
@@ -884,6 +1351,50 @@ let import_client_branding =
                                 deviceTypeWeb) ~resourceId ())
            (Some Values.ImportClientBrandingResult.to_json)
            (Some Values.ImportClientBrandingResult.error_to_json)])
+let import_custom_workspace_image =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and imageName =
+         flag "image-name" (required string) ~doc:"STRING WorkspaceImageName"
+       and imageDescription =
+         flag "image-description" (required string)
+           ~doc:"STRING WorkspaceImageDescription"
+       and computeType =
+         flag "compute-type" (required json_arg) ~doc:"JSON ImageComputeType"
+       and protocol =
+         flag "protocol" (required json_arg) ~doc:"JSON CustomImageProtocol"
+       and imageSource =
+         flag "image-source" (required json_arg)
+           ~doc:"JSON ImageSourceIdentifier"
+       and infrastructureConfigurationArn =
+         flag "infrastructure-configuration-arn" (required string)
+           ~doc:"STRING InfrastructureConfigurationArn"
+       and platform =
+         flag "platform" (required json_arg) ~doc:"JSON Platform"
+       and osVersion =
+         flag "os-version" (required json_arg) ~doc:"JSON OSVersion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.import_custom_workspace_image
+           (Values.ImportCustomWorkspaceImageRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~imageName
+              ~imageDescription
+              ~computeType:(Values.ImageComputeType.of_json computeType)
+              ~protocol:(Values.CustomImageProtocol.of_json protocol)
+              ~imageSource:(Values.ImageSourceIdentifier.of_json imageSource)
+              ~infrastructureConfigurationArn
+              ~platform:(Values.Platform.of_json platform)
+              ~osVersion:(Values.OSVersion.of_json osVersion) ())
+           (Some Values.ImportCustomWorkspaceImageResult.to_json)
+           (Some Values.ImportCustomWorkspaceImageResult.error_to_json)])
 let import_workspace_image =
   Command.async ~summary:""
     ([%map_open.Command
@@ -919,6 +1430,31 @@ let import_workspace_image =
               ~imageDescription ())
            (Some Values.ImportWorkspaceImageResult.to_json)
            (Some Values.ImportWorkspaceImageResult.error_to_json)])
+let list_account_links =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and linkStatusFilter =
+         flag "link-status-filter" (optional json_arg)
+           ~doc:"JSON LinkStatusFilterList"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Limit" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_account_links
+           (Values.ListAccountLinksRequest.make
+              ?linkStatusFilter:(Option.map
+                                   ~f:Values.LinkStatusFilterList.of_json
+                                   linkStatusFilter) ?nextToken ?maxResults
+              ()) (Some Values.ListAccountLinksResult.to_json)
+           (Some Values.ListAccountLinksResult.error_to_json)])
 let list_available_management_cidr_ranges =
   Command.async ~summary:""
     ([%map_open.Command
@@ -991,6 +1527,37 @@ let modify_account =
               ?dedicatedTenancyManagementCidrRange ())
            (Some Values.ModifyAccountResult.to_json)
            (Some Values.ModifyAccountResult.error_to_json)])
+let modify_certificate_based_auth_properties =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and certificateBasedAuthProperties =
+         flag "certificate-based-auth-properties" (optional json_arg)
+           ~doc:"JSON CertificateBasedAuthProperties"
+       and propertiesToDelete =
+         flag "properties-to-delete" (optional json_arg)
+           ~doc:"JSON DeletableCertificateBasedAuthPropertiesList"
+       and resourceId =
+         flag "resource-id" (required string) ~doc:"STRING DirectoryId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_certificate_based_auth_properties
+           (Values.ModifyCertificateBasedAuthPropertiesRequest.make
+              ?certificateBasedAuthProperties:(Option.map
+                                                 ~f:Values.CertificateBasedAuthProperties.of_json
+                                                 certificateBasedAuthProperties)
+              ?propertiesToDelete:(Option.map
+                                     ~f:Values.DeletableCertificateBasedAuthPropertiesList.of_json
+                                     propertiesToDelete) ~resourceId ())
+           (Some Values.ModifyCertificateBasedAuthPropertiesResult.to_json)
+           (Some
+              Values.ModifyCertificateBasedAuthPropertiesResult.error_to_json)])
 let modify_client_properties =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1014,6 +1581,58 @@ let modify_client_properties =
                                    clientProperties) ())
            (Some Values.ModifyClientPropertiesResult.to_json)
            (Some Values.ModifyClientPropertiesResult.error_to_json)])
+let modify_endpoint_encryption_mode =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and directoryId =
+         flag "directory-id" (required string) ~doc:"STRING DirectoryId"
+       and endpointEncryptionMode =
+         flag "endpoint-encryption-mode" (required json_arg)
+           ~doc:"JSON EndpointEncryptionMode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_endpoint_encryption_mode
+           (Values.ModifyEndpointEncryptionModeRequest.make ~directoryId
+              ~endpointEncryptionMode:(Values.EndpointEncryptionMode.of_json
+                                         endpointEncryptionMode) ())
+           (Some Values.ModifyEndpointEncryptionModeResponse.to_json)
+           (Some Values.ModifyEndpointEncryptionModeResponse.error_to_json)])
+let modify_saml_properties =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and samlProperties =
+         flag "saml-properties" (optional json_arg)
+           ~doc:"JSON SamlProperties"
+       and propertiesToDelete =
+         flag "properties-to-delete" (optional json_arg)
+           ~doc:"JSON DeletableSamlPropertiesList"
+       and resourceId =
+         flag "resource-id" (required string) ~doc:"STRING DirectoryId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_saml_properties
+           (Values.ModifySamlPropertiesRequest.make
+              ?samlProperties:(Option.map ~f:Values.SamlProperties.of_json
+                                 samlProperties)
+              ?propertiesToDelete:(Option.map
+                                     ~f:Values.DeletableSamlPropertiesList.of_json
+                                     propertiesToDelete) ~resourceId ())
+           (Some Values.ModifySamlPropertiesResult.to_json)
+           (Some Values.ModifySamlPropertiesResult.error_to_json)])
 let modify_selfservice_permissions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1037,6 +1656,30 @@ let modify_selfservice_permissions =
                                          selfservicePermissions) ())
            (Some Values.ModifySelfservicePermissionsResult.to_json)
            (Some Values.ModifySelfservicePermissionsResult.error_to_json)])
+let modify_streaming_properties =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamingProperties =
+         flag "streaming-properties" (optional json_arg)
+           ~doc:"JSON StreamingProperties"
+       and resourceId =
+         flag "resource-id" (required string) ~doc:"STRING DirectoryId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_streaming_properties
+           (Values.ModifyStreamingPropertiesRequest.make
+              ?streamingProperties:(Option.map
+                                      ~f:Values.StreamingProperties.of_json
+                                      streamingProperties) ~resourceId ())
+           (Some Values.ModifyStreamingPropertiesResult.to_json)
+           (Some Values.ModifyStreamingPropertiesResult.error_to_json)])
 let modify_workspace_access_properties =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1093,17 +1736,23 @@ let modify_workspace_properties =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and workspaceId =
-         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
        and workspaceProperties =
-         flag "workspace-properties" (required json_arg)
-           ~doc:"JSON WorkspaceProperties" in
+         flag "workspace-properties" (optional json_arg)
+           ~doc:"JSON WorkspaceProperties"
+       and dataReplication =
+         flag "data-replication" (optional json_arg)
+           ~doc:"JSON DataReplication"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.modify_workspace_properties
-           (Values.ModifyWorkspacePropertiesRequest.make ~workspaceId
-              ~workspaceProperties:(Values.WorkspaceProperties.of_json
-                                      workspaceProperties) ())
+           (Values.ModifyWorkspacePropertiesRequest.make
+              ?workspaceProperties:(Option.map
+                                      ~f:Values.WorkspaceProperties.of_json
+                                      workspaceProperties)
+              ?dataReplication:(Option.map ~f:Values.DataReplication.of_json
+                                  dataReplication) ~workspaceId ())
            (Some Values.ModifyWorkspacePropertiesResult.to_json)
            (Some Values.ModifyWorkspacePropertiesResult.error_to_json)])
 let modify_workspace_state =
@@ -1181,27 +1830,75 @@ let register_workspace_directory =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and directoryId =
+         flag "directory-id" (optional string) ~doc:"STRING DirectoryId"
        and subnetIds =
          flag "subnet-ids" (optional json_arg) ~doc:"JSON SubnetIds"
        and enableSelfService =
          flag "enable-self-service" (optional bool) ~doc:"BOOL BooleanObject"
        and tenancy = flag "tenancy" (optional json_arg) ~doc:"JSON Tenancy"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
-       and directoryId =
-         flag "directory-id" (required string) ~doc:"STRING DirectoryId"
-       and enableWorkDocs =
-         flag "enable-work-docs" (required bool) ~doc:"BOOL BooleanObject" in
+       and workspaceDirectoryName =
+         flag "workspace-directory-name" (optional string)
+           ~doc:"STRING WorkspaceDirectoryName"
+       and workspaceDirectoryDescription =
+         flag "workspace-directory-description" (optional string)
+           ~doc:"STRING WorkspaceDirectoryDescription"
+       and userIdentityType =
+         flag "user-identity-type" (optional json_arg)
+           ~doc:"JSON UserIdentityType"
+       and idcInstanceArn =
+         flag "idc-instance-arn" (optional string) ~doc:"STRING ARN"
+       and microsoftEntraConfig =
+         flag "microsoft-entra-config" (optional json_arg)
+           ~doc:"JSON MicrosoftEntraConfig"
+       and workspaceType =
+         flag "workspace-type" (optional json_arg) ~doc:"JSON WorkspaceType"
+       and activeDirectoryConfig =
+         flag "active-directory-config" (optional json_arg)
+           ~doc:"JSON ActiveDirectoryConfig" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.register_workspace_directory
-           (Values.RegisterWorkspaceDirectoryRequest.make
+           (Values.RegisterWorkspaceDirectoryRequest.make ?directoryId
               ?subnetIds:(Option.map ~f:Values.SubnetIds.of_json subnetIds)
               ?enableSelfService
               ?tenancy:(Option.map ~f:Values.Tenancy.of_json tenancy)
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~directoryId
-              ~enableWorkDocs ())
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?workspaceDirectoryName ?workspaceDirectoryDescription
+              ?userIdentityType:(Option.map
+                                   ~f:Values.UserIdentityType.of_json
+                                   userIdentityType) ?idcInstanceArn
+              ?microsoftEntraConfig:(Option.map
+                                       ~f:Values.MicrosoftEntraConfig.of_json
+                                       microsoftEntraConfig)
+              ?workspaceType:(Option.map ~f:Values.WorkspaceType.of_json
+                                workspaceType)
+              ?activeDirectoryConfig:(Option.map
+                                        ~f:Values.ActiveDirectoryConfig.of_json
+                                        activeDirectoryConfig) ())
            (Some Values.RegisterWorkspaceDirectoryResult.to_json)
            (Some Values.RegisterWorkspaceDirectoryResult.error_to_json)])
+let reject_account_link_invitation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and linkId = flag "link-id" (required string) ~doc:"STRING LinkId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.reject_account_link_invitation
+           (Values.RejectAccountLinkInvitationRequest.make ?clientToken
+              ~linkId ())
+           (Some Values.RejectAccountLinkInvitationResult.to_json)
+           (Some Values.RejectAccountLinkInvitationResult.error_to_json)])
 let restore_workspace =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1262,6 +1959,24 @@ let start_workspaces =
                                          startWorkspaceRequests) ())
            (Some Values.StartWorkspacesResult.to_json)
            (Some Values.StartWorkspacesResult.error_to_json)])
+let start_workspaces_pool =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and poolId =
+         flag "pool-id" (required string) ~doc:"STRING WorkspacesPoolId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_workspaces_pool
+           (Values.StartWorkspacesPoolRequest.make ~poolId ())
+           (Some Values.StartWorkspacesPoolResult.to_json)
+           (Some Values.StartWorkspacesPoolResult.error_to_json)])
 let stop_workspaces =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1283,6 +1998,24 @@ let stop_workspaces =
                                         stopWorkspaceRequests) ())
            (Some Values.StopWorkspacesResult.to_json)
            (Some Values.StopWorkspacesResult.error_to_json)])
+let stop_workspaces_pool =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and poolId =
+         flag "pool-id" (required string) ~doc:"STRING WorkspacesPoolId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_workspaces_pool
+           (Values.StopWorkspacesPoolRequest.make ~poolId ())
+           (Some Values.StopWorkspacesPoolResult.to_json)
+           (Some Values.StopWorkspacesPoolResult.error_to_json)])
 let terminate_workspaces =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1304,6 +2037,42 @@ let terminate_workspaces =
                                              terminateWorkspaceRequests) ())
            (Some Values.TerminateWorkspacesResult.to_json)
            (Some Values.TerminateWorkspacesResult.error_to_json)])
+let terminate_workspaces_pool =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and poolId =
+         flag "pool-id" (required string) ~doc:"STRING WorkspacesPoolId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.terminate_workspaces_pool
+           (Values.TerminateWorkspacesPoolRequest.make ~poolId ())
+           (Some Values.TerminateWorkspacesPoolResult.to_json)
+           (Some Values.TerminateWorkspacesPoolResult.error_to_json)])
+let terminate_workspaces_pool_session =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sessionId =
+         flag "session-id" (required string) ~doc:"STRING AmazonUuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.terminate_workspaces_pool_session
+           (Values.TerminateWorkspacesPoolSessionRequest.make ~sessionId ())
+           (Some Values.TerminateWorkspacesPoolSessionResult.to_json)
+           (Some Values.TerminateWorkspacesPoolSessionResult.error_to_json)])
 let update_connect_client_add_in =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1414,20 +2183,70 @@ let update_workspace_image_permission =
               ~allowCopyImage ~sharedAccountId ())
            (Some Values.UpdateWorkspaceImagePermissionResult.to_json)
            (Some Values.UpdateWorkspaceImagePermissionResult.error_to_json)])
+let update_workspaces_pool =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING UpdateDescription"
+       and bundleId =
+         flag "bundle-id" (optional string) ~doc:"STRING BundleId"
+       and directoryId =
+         flag "directory-id" (optional string) ~doc:"STRING DirectoryId"
+       and capacity =
+         flag "capacity" (optional json_arg) ~doc:"JSON Capacity"
+       and applicationSettings =
+         flag "application-settings" (optional json_arg)
+           ~doc:"JSON ApplicationSettingsRequest"
+       and timeoutSettings =
+         flag "timeout-settings" (optional json_arg)
+           ~doc:"JSON TimeoutSettings"
+       and runningMode =
+         flag "running-mode" (optional json_arg) ~doc:"JSON PoolsRunningMode"
+       and poolId =
+         flag "pool-id" (required string) ~doc:"STRING WorkspacesPoolId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_workspaces_pool
+           (Values.UpdateWorkspacesPoolRequest.make ?description ?bundleId
+              ?directoryId
+              ?capacity:(Option.map ~f:Values.Capacity.of_json capacity)
+              ?applicationSettings:(Option.map
+                                      ~f:Values.ApplicationSettingsRequest.of_json
+                                      applicationSettings)
+              ?timeoutSettings:(Option.map ~f:Values.TimeoutSettings.of_json
+                                  timeoutSettings)
+              ?runningMode:(Option.map ~f:Values.PoolsRunningMode.of_json
+                              runningMode) ~poolId ())
+           (Some Values.UpdateWorkspacesPoolResult.to_json)
+           (Some Values.UpdateWorkspacesPoolResult.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("associate-connection-alias", associate_connection_alias);
+    [("accept-account-link-invitation", accept_account_link_invitation);
+    ("associate-connection-alias", associate_connection_alias);
     ("associate-ip-groups", associate_ip_groups);
+    ("associate-workspace-application", associate_workspace_application);
     ("authorize-ip-rules", authorize_ip_rules);
     ("copy-workspace-image", copy_workspace_image);
+    ("create-account-link-invitation", create_account_link_invitation);
     ("create-connect-client-add-in", create_connect_client_add_in);
     ("create-connection-alias", create_connection_alias);
     ("create-ip-group", create_ip_group);
+    ("create-standby-workspaces", create_standby_workspaces);
     ("create-tags", create_tags);
     ("create-updated-workspace-image", create_updated_workspace_image);
     ("create-workspace-bundle", create_workspace_bundle);
+    ("create-workspace-image", create_workspace_image);
     ("create-workspaces", create_workspaces);
+    ("create-workspaces-pool", create_workspaces_pool);
+    ("delete-account-link-invitation", delete_account_link_invitation);
     ("delete-client-branding", delete_client_branding);
     ("delete-connect-client-add-in", delete_connect_client_add_in);
     ("delete-connection-alias", delete_connection_alias);
@@ -1435,17 +2254,25 @@ let main =
     ("delete-tags", delete_tags);
     ("delete-workspace-bundle", delete_workspace_bundle);
     ("delete-workspace-image", delete_workspace_image);
+    ("deploy-workspace-applications", deploy_workspace_applications);
     ("deregister-workspace-directory", deregister_workspace_directory);
     ("describe-account", describe_account);
     ("describe-account-modifications", describe_account_modifications);
+    ("describe-application-associations", describe_application_associations);
+    ("describe-applications", describe_applications);
+    ("describe-bundle-associations", describe_bundle_associations);
     ("describe-client-branding", describe_client_branding);
     ("describe-client-properties", describe_client_properties);
     ("describe-connect-client-add-ins", describe_connect_client_add_ins);
     ("describe-connection-alias-permissions",
       describe_connection_alias_permissions);
     ("describe-connection-aliases", describe_connection_aliases);
+    ("describe-custom-workspace-image-import",
+      describe_custom_workspace_image_import);
+    ("describe-image-associations", describe_image_associations);
     ("describe-ip-groups", describe_ip_groups);
     ("describe-tags", describe_tags);
+    ("describe-workspace-associations", describe_workspace_associations);
     ("describe-workspace-bundles", describe_workspace_bundles);
     ("describe-workspace-directories", describe_workspace_directories);
     ("describe-workspace-image-permissions",
@@ -1455,16 +2282,28 @@ let main =
     ("describe-workspaces", describe_workspaces);
     ("describe-workspaces-connection-status",
       describe_workspaces_connection_status);
+    ("describe-workspaces-pool-sessions", describe_workspaces_pool_sessions);
+    ("describe-workspaces-pools", describe_workspaces_pools);
     ("disassociate-connection-alias", disassociate_connection_alias);
     ("disassociate-ip-groups", disassociate_ip_groups);
+    ("disassociate-workspace-application",
+      disassociate_workspace_application);
+    ("get-account-link", get_account_link);
     ("import-client-branding", import_client_branding);
+    ("import-custom-workspace-image", import_custom_workspace_image);
     ("import-workspace-image", import_workspace_image);
+    ("list-account-links", list_account_links);
     ("list-available-management-cidr-ranges",
       list_available_management_cidr_ranges);
     ("migrate-workspace", migrate_workspace);
     ("modify-account", modify_account);
+    ("modify-certificate-based-auth-properties",
+      modify_certificate_based_auth_properties);
     ("modify-client-properties", modify_client_properties);
+    ("modify-endpoint-encryption-mode", modify_endpoint_encryption_mode);
+    ("modify-saml-properties", modify_saml_properties);
     ("modify-selfservice-permissions", modify_selfservice_permissions);
+    ("modify-streaming-properties", modify_streaming_properties);
     ("modify-workspace-access-properties",
       modify_workspace_access_properties);
     ("modify-workspace-creation-properties",
@@ -1474,14 +2313,20 @@ let main =
     ("reboot-workspaces", reboot_workspaces);
     ("rebuild-workspaces", rebuild_workspaces);
     ("register-workspace-directory", register_workspace_directory);
+    ("reject-account-link-invitation", reject_account_link_invitation);
     ("restore-workspace", restore_workspace);
     ("revoke-ip-rules", revoke_ip_rules);
     ("start-workspaces", start_workspaces);
+    ("start-workspaces-pool", start_workspaces_pool);
     ("stop-workspaces", stop_workspaces);
+    ("stop-workspaces-pool", stop_workspaces_pool);
     ("terminate-workspaces", terminate_workspaces);
+    ("terminate-workspaces-pool", terminate_workspaces_pool);
+    ("terminate-workspaces-pool-session", terminate_workspaces_pool_session);
     ("update-connect-client-add-in", update_connect_client_add_in);
     ("update-connection-alias-permission",
       update_connection_alias_permission);
     ("update-rules-of-ip-group", update_rules_of_ip_group);
     ("update-workspace-bundle", update_workspace_bundle);
-    ("update-workspace-image-permission", update_workspace_image_permission)]
+    ("update-workspace-image-permission", update_workspace_image_permission);
+    ("update-workspaces-pool", update_workspaces_pool)]

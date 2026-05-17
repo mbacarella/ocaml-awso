@@ -87,13 +87,13 @@ module Attribute =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?alternateValueEncoding ~value ?alternateNameEncoding ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let alternateValueEncoding =
-        field_map json "AlternateValueEncoding" String_.of_json in
-      let value = field_map_exn json "Value" String_.of_json in
+        field_map json__ "AlternateValueEncoding" String_.of_json in
+      let value = field_map_exn json__ "Value" String_.of_json in
       let alternateNameEncoding =
-        field_map json "AlternateNameEncoding" String_.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
+        field_map json__ "AlternateNameEncoding" String_.of_json in
+      let name = field_map_exn json__ "Name" String_.of_json in
       make ?alternateValueEncoding ~value ?alternateNameEncoding ~name ()
     let to_json v = composed_to_json to_value v
   end
@@ -124,10 +124,10 @@ module ReplaceableAttribute =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?replace ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let replace = field_map json "Replace" Boolean.of_json in
-      let value = field_map_exn json "Value" String_.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
+    let of_json json__ =
+      let replace = field_map json__ "Replace" Boolean.of_json in
+      let value = field_map_exn json__ "Value" String_.of_json in
+      let name = field_map_exn json__ "Name" String_.of_json in
       make ?replace ~value ~name ()
     let to_json v = composed_to_json to_value v
   end
@@ -135,6 +135,9 @@ module AttributeList =
   struct
     type nonrec t = Attribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Attribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -149,6 +152,9 @@ module ReplaceableAttributeList =
   struct
     type nonrec t = ReplaceableAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplaceableAttribute.to_value)) |>
         (fun x -> `List x)
@@ -161,7 +167,7 @@ module ReplaceableAttributeList =
         ~of_json:ReplaceableAttribute.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Float =
+module Float_ =
   struct
     type nonrec t = float
     let make i = i
@@ -178,37 +184,36 @@ module Item =
   struct
     type nonrec t =
       {
-      name: String_.t [@ocaml.doc "The name of the item."];
+      name: String_.t option [@ocaml.doc "The name of the item."];
       alternateNameEncoding: String_.t option ;
-      attributes: AttributeList.t [@ocaml.doc "A list of attributes."]}
-    let context_ = "Item"
-    let make ?alternateNameEncoding =
-      fun ~name ->
-        fun ~attributes ->
-          fun () -> { alternateNameEncoding; name; attributes }
+      attributes: AttributeList.t option [@ocaml.doc "A list of attributes."]}
+    let make ?name =
+      fun ?alternateNameEncoding ->
+        fun ?attributes ->
+          fun () -> { name; alternateNameEncoding; attributes }
     let to_value x =
       structure_to_value
-        [("Name", (Some (String_.to_value x.name)));
+        [("Name", (Option.map x.name ~f:String_.to_value));
         ("AlternateNameEncoding",
           (Option.map x.alternateNameEncoding ~f:String_.to_value));
-        ("Attributes", (Some (AttributeList.to_value x.attributes)))]
+        ("Attributes", (Option.map x.attributes ~f:AttributeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let attributes =
-        AttributeList.of_xml (Xml.children xml_arg0 "Attribute") in
+        (Option.map ~f:AttributeList.of_xml)
+          (Some (Xml.children xml_arg0 "Attribute")) in
       let alternateNameEncoding =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "AlternateNameEncoding") in
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~attributes ?alternateNameEncoding ~name ()
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?attributes ?alternateNameEncoding ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map_exn json "Attributes" AttributeList.of_json in
+    let of_json json__ =
+      let attributes = field_map json__ "Attributes" AttributeList.of_json in
       let alternateNameEncoding =
-        field_map json "AlternateNameEncoding" String_.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
-      make ~attributes ?alternateNameEncoding ~name ()
+        field_map json__ "AlternateNameEncoding" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?attributes ?alternateNameEncoding ?name ()
     let to_json v = composed_to_json to_value v
   end
 module ReplaceableItem =
@@ -233,10 +238,10 @@ module ReplaceableItem =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ItemName") in
       make ~attributes ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map_exn json "Attributes" ReplaceableAttributeList.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
+        field_map_exn json__ "Attributes" ReplaceableAttributeList.of_json in
+      let name = field_map_exn json__ "Name" String_.of_json in
       make ~attributes ~name ()
     let to_json v = composed_to_json to_value v
   end
@@ -260,104 +265,104 @@ module DeletableItem =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ItemName") in
       make ?attributes ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "Attributes" AttributeList.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
+    let of_json json__ =
+      let attributes = field_map json__ "Attributes" AttributeList.of_json in
+      let name = field_map_exn json__ "Name" String_.of_json in
       make ?attributes ~name ()
     let to_json v = composed_to_json to_value v
   end
 module InvalidNextToken =
   struct
     type nonrec t = {
-      boxUsage: Float.t option }
+      boxUsage: Float_.t option }
     let make ?boxUsage = fun () -> { boxUsage }
     let to_value x =
       structure_to_value
-        [("BoxUsage", (Option.map x.boxUsage ~f:Float.to_value))]
+        [("BoxUsage", (Option.map x.boxUsage ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let boxUsage =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boxUsage = field_map json "BoxUsage" Float.of_json in
+    let of_json json__ =
+      let boxUsage = field_map json__ "BoxUsage" Float_.of_json in
       make ?boxUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified NextToken is not valid."]
 module InvalidNumberPredicates =
   struct
     type nonrec t = {
-      boxUsage: Float.t option }
+      boxUsage: Float_.t option }
     let make ?boxUsage = fun () -> { boxUsage }
     let to_value x =
       structure_to_value
-        [("BoxUsage", (Option.map x.boxUsage ~f:Float.to_value))]
+        [("BoxUsage", (Option.map x.boxUsage ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let boxUsage =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boxUsage = field_map json "BoxUsage" Float.of_json in
+    let of_json json__ =
+      let boxUsage = field_map json__ "BoxUsage" Float_.of_json in
       make ?boxUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Too many predicates exist in the query expression."]
 module InvalidNumberValueTests =
   struct
     type nonrec t = {
-      boxUsage: Float.t option }
+      boxUsage: Float_.t option }
     let make ?boxUsage = fun () -> { boxUsage }
     let to_value x =
       structure_to_value
-        [("BoxUsage", (Option.map x.boxUsage ~f:Float.to_value))]
+        [("BoxUsage", (Option.map x.boxUsage ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let boxUsage =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boxUsage = field_map json "BoxUsage" Float.of_json in
+    let of_json json__ =
+      let boxUsage = field_map json__ "BoxUsage" Float_.of_json in
       make ?boxUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Too many predicates exist in the query expression."]
 module InvalidParameterValue =
   struct
     type nonrec t = {
-      boxUsage: Float.t option }
+      boxUsage: Float_.t option }
     let make ?boxUsage = fun () -> { boxUsage }
     let to_value x =
       structure_to_value
-        [("BoxUsage", (Option.map x.boxUsage ~f:Float.to_value))]
+        [("BoxUsage", (Option.map x.boxUsage ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let boxUsage =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boxUsage = field_map json "BoxUsage" Float.of_json in
+    let of_json json__ =
+      let boxUsage = field_map json__ "BoxUsage" Float_.of_json in
       make ?boxUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The value for a parameter is invalid."]
 module InvalidQueryExpression =
   struct
     type nonrec t = {
-      boxUsage: Float.t option }
+      boxUsage: Float_.t option }
     let make ?boxUsage = fun () -> { boxUsage }
     let to_value x =
       structure_to_value
-        [("BoxUsage", (Option.map x.boxUsage ~f:Float.to_value))]
+        [("BoxUsage", (Option.map x.boxUsage ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let boxUsage =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boxUsage = field_map json "BoxUsage" Float.of_json in
+    let of_json json__ =
+      let boxUsage = field_map json__ "BoxUsage" Float_.of_json in
       make ?boxUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified query expression syntax is not valid."]
@@ -365,6 +370,9 @@ module ItemList =
   struct
     type nonrec t = Item.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Item.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -377,19 +385,19 @@ module ItemList =
 module MissingParameter =
   struct
     type nonrec t = {
-      boxUsage: Float.t option }
+      boxUsage: Float_.t option }
     let make ?boxUsage = fun () -> { boxUsage }
     let to_value x =
       structure_to_value
-        [("BoxUsage", (Option.map x.boxUsage ~f:Float.to_value))]
+        [("BoxUsage", (Option.map x.boxUsage ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let boxUsage =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boxUsage = field_map json "BoxUsage" Float.of_json in
+    let of_json json__ =
+      let boxUsage = field_map json__ "BoxUsage" Float_.of_json in
       make ?boxUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -397,38 +405,38 @@ module MissingParameter =
 module NoSuchDomain =
   struct
     type nonrec t = {
-      boxUsage: Float.t option }
+      boxUsage: Float_.t option }
     let make ?boxUsage = fun () -> { boxUsage }
     let to_value x =
       structure_to_value
-        [("BoxUsage", (Option.map x.boxUsage ~f:Float.to_value))]
+        [("BoxUsage", (Option.map x.boxUsage ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let boxUsage =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boxUsage = field_map json "BoxUsage" Float.of_json in
+    let of_json json__ =
+      let boxUsage = field_map json__ "BoxUsage" Float_.of_json in
       make ?boxUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified domain does not exist."]
 module RequestTimeout =
   struct
     type nonrec t = {
-      boxUsage: Float.t option }
+      boxUsage: Float_.t option }
     let make ?boxUsage = fun () -> { boxUsage }
     let to_value x =
       structure_to_value
-        [("BoxUsage", (Option.map x.boxUsage ~f:Float.to_value))]
+        [("BoxUsage", (Option.map x.boxUsage ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let boxUsage =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boxUsage = field_map json "BoxUsage" Float.of_json in
+    let of_json json__ =
+      let boxUsage = field_map json__ "BoxUsage" Float_.of_json in
       make ?boxUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -436,19 +444,19 @@ module RequestTimeout =
 module TooManyRequestedAttributes =
   struct
     type nonrec t = {
-      boxUsage: Float.t option }
+      boxUsage: Float_.t option }
     let make ?boxUsage = fun () -> { boxUsage }
     let to_value x =
       structure_to_value
-        [("BoxUsage", (Option.map x.boxUsage ~f:Float.to_value))]
+        [("BoxUsage", (Option.map x.boxUsage ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let boxUsage =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boxUsage = field_map json "BoxUsage" Float.of_json in
+    let of_json json__ =
+      let boxUsage = field_map json__ "BoxUsage" Float_.of_json in
       make ?boxUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Too many attributes requested."]
@@ -479,10 +487,10 @@ module UpdateCondition =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?exists ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let exists = field_map json "Exists" Boolean.of_json in
-      let value = field_map json "Value" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+    let of_json json__ =
+      let exists = field_map json__ "Exists" Boolean.of_json in
+      let value = field_map json__ "Value" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?exists ?value ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -491,6 +499,9 @@ module DomainNameList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -518,6 +529,9 @@ module AttributeNameList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -545,6 +559,9 @@ module ReplaceableItemList =
   struct
     type nonrec t = ReplaceableItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplaceableItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -560,6 +577,9 @@ module DeletableItemList =
   struct
     type nonrec t = DeletableItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeletableItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -697,9 +717,9 @@ module SelectResult =
         (Option.map ~f:ItemList.of_xml) (Some (Xml.children xml_arg0 "Item")) in
       make ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let items = field_map json "Items" ItemList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let items = field_map json__ "Items" ItemList.of_json in
       make ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -737,11 +757,11 @@ module SelectRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SelectExpression") in
       make ?consistentRead ?nextToken ~selectExpression ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let consistentRead = field_map json "ConsistentRead" Boolean.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let consistentRead = field_map json__ "ConsistentRead" Boolean.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let selectExpression =
-        field_map_exn json "SelectExpression" String_.of_json in
+        field_map_exn json__ "SelectExpression" String_.of_json in
       make ?consistentRead ?nextToken ~selectExpression ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -786,12 +806,12 @@ module PutAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?expected ~attributes ~itemName ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expected = field_map json "Expected" UpdateCondition.of_json in
+    let of_json json__ =
+      let expected = field_map json__ "Expected" UpdateCondition.of_json in
       let attributes =
-        field_map_exn json "Attributes" ReplaceableAttributeList.of_json in
-      let itemName = field_map_exn json "ItemName" String_.of_json in
-      let domainName = field_map_exn json "DomainName" String_.of_json in
+        field_map_exn json__ "Attributes" ReplaceableAttributeList.of_json in
+      let itemName = field_map_exn json__ "ItemName" String_.of_json in
+      let domainName = field_map_exn json__ "DomainName" String_.of_json in
       make ?expected ~attributes ~itemName ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -799,114 +819,114 @@ module PutAttributesRequest =
 module NumberSubmittedItemsExceeded =
   struct
     type nonrec t = {
-      boxUsage: Float.t option }
+      boxUsage: Float_.t option }
     let make ?boxUsage = fun () -> { boxUsage }
     let to_value x =
       structure_to_value
-        [("BoxUsage", (Option.map x.boxUsage ~f:Float.to_value))]
+        [("BoxUsage", (Option.map x.boxUsage ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let boxUsage =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boxUsage = field_map json "BoxUsage" Float.of_json in
+    let of_json json__ =
+      let boxUsage = field_map json__ "BoxUsage" Float_.of_json in
       make ?boxUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Too many items exist in a single call."]
 module NumberSubmittedAttributesExceeded =
   struct
     type nonrec t = {
-      boxUsage: Float.t option }
+      boxUsage: Float_.t option }
     let make ?boxUsage = fun () -> { boxUsage }
     let to_value x =
       structure_to_value
-        [("BoxUsage", (Option.map x.boxUsage ~f:Float.to_value))]
+        [("BoxUsage", (Option.map x.boxUsage ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let boxUsage =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boxUsage = field_map json "BoxUsage" Float.of_json in
+    let of_json json__ =
+      let boxUsage = field_map json__ "BoxUsage" Float_.of_json in
       make ?boxUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Too many attributes exist in a single call."]
 module NumberItemAttributesExceeded =
   struct
     type nonrec t = {
-      boxUsage: Float.t option }
+      boxUsage: Float_.t option }
     let make ?boxUsage = fun () -> { boxUsage }
     let to_value x =
       structure_to_value
-        [("BoxUsage", (Option.map x.boxUsage ~f:Float.to_value))]
+        [("BoxUsage", (Option.map x.boxUsage ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let boxUsage =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boxUsage = field_map json "BoxUsage" Float.of_json in
+    let of_json json__ =
+      let boxUsage = field_map json__ "BoxUsage" Float_.of_json in
       make ?boxUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Too many attributes in this item."]
 module NumberDomainsExceeded =
   struct
     type nonrec t = {
-      boxUsage: Float.t option }
+      boxUsage: Float_.t option }
     let make ?boxUsage = fun () -> { boxUsage }
     let to_value x =
       structure_to_value
-        [("BoxUsage", (Option.map x.boxUsage ~f:Float.to_value))]
+        [("BoxUsage", (Option.map x.boxUsage ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let boxUsage =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boxUsage = field_map json "BoxUsage" Float.of_json in
+    let of_json json__ =
+      let boxUsage = field_map json__ "BoxUsage" Float_.of_json in
       make ?boxUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Too many domains exist per this account."]
 module NumberDomainBytesExceeded =
   struct
     type nonrec t = {
-      boxUsage: Float.t option }
+      boxUsage: Float_.t option }
     let make ?boxUsage = fun () -> { boxUsage }
     let to_value x =
       structure_to_value
-        [("BoxUsage", (Option.map x.boxUsage ~f:Float.to_value))]
+        [("BoxUsage", (Option.map x.boxUsage ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let boxUsage =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boxUsage = field_map json "BoxUsage" Float.of_json in
+    let of_json json__ =
+      let boxUsage = field_map json__ "BoxUsage" Float_.of_json in
       make ?boxUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Too many bytes in this domain."]
 module NumberDomainAttributesExceeded =
   struct
     type nonrec t = {
-      boxUsage: Float.t option }
+      boxUsage: Float_.t option }
     let make ?boxUsage = fun () -> { boxUsage }
     let to_value x =
       structure_to_value
-        [("BoxUsage", (Option.map x.boxUsage ~f:Float.to_value))]
+        [("BoxUsage", (Option.map x.boxUsage ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let boxUsage =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boxUsage = field_map json "BoxUsage" Float.of_json in
+    let of_json json__ =
+      let boxUsage = field_map json__ "BoxUsage" Float_.of_json in
       make ?boxUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Too many attributes in this domain."]
@@ -984,9 +1004,9 @@ module ListDomainsResult =
           (Some (Xml.children xml_arg0 "DomainName")) in
       make ?nextToken ?domainNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let domainNames = field_map json "DomainNames" DomainNameList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let domainNames = field_map json__ "DomainNames" DomainNameList.of_json in
       make ?nextToken ?domainNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1017,10 +1037,10 @@ module ListDomainsRequest =
           (Xml.child xml_arg0 "MaxNumberOfDomains") in
       make ?nextToken ?maxNumberOfDomains ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let maxNumberOfDomains =
-        field_map json "MaxNumberOfDomains" Integer.of_json in
+        field_map json__ "MaxNumberOfDomains" Integer.of_json in
       make ?nextToken ?maxNumberOfDomains ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1095,8 +1115,8 @@ module GetAttributesResult =
           (Some (Xml.children xml_arg0 "Attribute")) in
       make ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "Attributes" AttributeList.of_json in
+    let of_json json__ =
+      let attributes = field_map json__ "Attributes" AttributeList.of_json in
       make ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1142,12 +1162,12 @@ module GetAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?consistentRead ?attributeNames ~itemName ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let consistentRead = field_map json "ConsistentRead" Boolean.of_json in
+    let of_json json__ =
+      let consistentRead = field_map json__ "ConsistentRead" Boolean.of_json in
       let attributeNames =
-        field_map json "AttributeNames" AttributeNameList.of_json in
-      let itemName = field_map_exn json "ItemName" String_.of_json in
-      let domainName = field_map_exn json "DomainName" String_.of_json in
+        field_map json__ "AttributeNames" AttributeNameList.of_json in
+      let itemName = field_map_exn json__ "ItemName" String_.of_json in
+      let domainName = field_map_exn json__ "DomainName" String_.of_json in
       make ?consistentRead ?attributeNames ~itemName ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1155,19 +1175,19 @@ module GetAttributesRequest =
 module DuplicateItemName =
   struct
     type nonrec t = {
-      boxUsage: Float.t option }
+      boxUsage: Float_.t option }
     let make ?boxUsage = fun () -> { boxUsage }
     let to_value x =
       structure_to_value
-        [("BoxUsage", (Option.map x.boxUsage ~f:Float.to_value))]
+        [("BoxUsage", (Option.map x.boxUsage ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let boxUsage =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boxUsage = field_map json "BoxUsage" Float.of_json in
+    let of_json json__ =
+      let boxUsage = field_map json__ "BoxUsage" Float_.of_json in
       make ?boxUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The item name was specified more than once."]
@@ -1295,19 +1315,19 @@ module DomainMetadataResult =
         ?attributeNamesSizeBytes ?attributeNameCount ?itemNamesSizeBytes
         ?itemCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timestamp = field_map json "Timestamp" Integer.of_json in
+    let of_json json__ =
+      let timestamp = field_map json__ "Timestamp" Integer.of_json in
       let attributeValuesSizeBytes =
-        field_map json "AttributeValuesSizeBytes" Long.of_json in
+        field_map json__ "AttributeValuesSizeBytes" Long.of_json in
       let attributeValueCount =
-        field_map json "AttributeValueCount" Integer.of_json in
+        field_map json__ "AttributeValueCount" Integer.of_json in
       let attributeNamesSizeBytes =
-        field_map json "AttributeNamesSizeBytes" Long.of_json in
+        field_map json__ "AttributeNamesSizeBytes" Long.of_json in
       let attributeNameCount =
-        field_map json "AttributeNameCount" Integer.of_json in
+        field_map json__ "AttributeNameCount" Integer.of_json in
       let itemNamesSizeBytes =
-        field_map json "ItemNamesSizeBytes" Long.of_json in
-      let itemCount = field_map json "ItemCount" Integer.of_json in
+        field_map json__ "ItemNamesSizeBytes" Long.of_json in
+      let itemCount = field_map json__ "ItemCount" Integer.of_json in
       make ?timestamp ?attributeValuesSizeBytes ?attributeValueCount
         ?attributeNamesSizeBytes ?attributeNameCount ?itemNamesSizeBytes
         ?itemCount ()
@@ -1333,8 +1353,8 @@ module DomainMetadataRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" String_.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" String_.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1356,8 +1376,8 @@ module DeleteDomainRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" String_.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" String_.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1405,11 +1425,11 @@ module DeleteAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?expected ?attributes ~itemName ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expected = field_map json "Expected" UpdateCondition.of_json in
-      let attributes = field_map json "Attributes" AttributeList.of_json in
-      let itemName = field_map_exn json "ItemName" String_.of_json in
-      let domainName = field_map_exn json "DomainName" String_.of_json in
+    let of_json json__ =
+      let expected = field_map json__ "Expected" UpdateCondition.of_json in
+      let attributes = field_map json__ "Attributes" AttributeList.of_json in
+      let itemName = field_map_exn json__ "ItemName" String_.of_json in
+      let domainName = field_map_exn json__ "DomainName" String_.of_json in
       make ?expected ?attributes ~itemName ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1433,8 +1453,8 @@ module CreateDomainRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" String_.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" String_.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1462,9 +1482,9 @@ module BatchPutAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~items ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let items = field_map_exn json "Items" ReplaceableItemList.of_json in
-      let domainName = field_map_exn json "DomainName" String_.of_json in
+    let of_json json__ =
+      let items = field_map_exn json__ "Items" ReplaceableItemList.of_json in
+      let domainName = field_map_exn json__ "DomainName" String_.of_json in
       make ~items ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1492,9 +1512,9 @@ module BatchDeleteAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~items ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let items = field_map_exn json "Items" DeletableItemList.of_json in
-      let domainName = field_map_exn json "DomainName" String_.of_json in
+    let of_json json__ =
+      let items = field_map_exn json__ "Items" DeletableItemList.of_json in
+      let domainName = field_map_exn json__ "DomainName" String_.of_json in
       make ~items ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1502,19 +1522,19 @@ module BatchDeleteAttributesRequest =
 module AttributeDoesNotExist =
   struct
     type nonrec t = {
-      boxUsage: Float.t option }
+      boxUsage: Float_.t option }
     let make ?boxUsage = fun () -> { boxUsage }
     let to_value x =
       structure_to_value
-        [("BoxUsage", (Option.map x.boxUsage ~f:Float.to_value))]
+        [("BoxUsage", (Option.map x.boxUsage ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let boxUsage =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "BoxUsage") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "BoxUsage") in
       make ?boxUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let boxUsage = field_map json "BoxUsage" Float.of_json in
+    let of_json json__ =
+      let boxUsage = field_map json__ "BoxUsage" Float_.of_json in
       make ?boxUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified attribute does not exist."]

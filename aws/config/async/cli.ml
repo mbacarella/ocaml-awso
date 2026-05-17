@@ -28,6 +28,30 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let associate_resource_types =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and configurationRecorderArn =
+         flag "configuration-recorder-arn" (required string)
+           ~doc:"STRING AmazonResourceName"
+       and resourceTypes =
+         flag "resource-types" (required json_arg)
+           ~doc:"JSON ResourceTypeList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_resource_types
+           (Values.AssociateResourceTypesRequest.make
+              ~configurationRecorderArn
+              ~resourceTypes:(Values.ResourceTypeList.of_json resourceTypes)
+              ()) (Some Values.AssociateResourceTypesResponse.to_json)
+           (Some Values.AssociateResourceTypesResponse.error_to_json)])
 let batch_get_aggregate_resource_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -342,6 +366,28 @@ let delete_retention_configuration =
            Io.delete_retention_configuration
            (Values.DeleteRetentionConfigurationRequest.make
               ~retentionConfigurationName ()) None None])
+let delete_service_linked_configuration_recorder =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and servicePrincipal =
+         flag "service-principal" (required string)
+           ~doc:"STRING ServicePrincipal" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_service_linked_configuration_recorder
+           (Values.DeleteServiceLinkedConfigurationRecorderRequest.make
+              ~servicePrincipal ())
+           (Some
+              Values.DeleteServiceLinkedConfigurationRecorderResponse.to_json)
+           (Some
+              Values.DeleteServiceLinkedConfigurationRecorderResponse.error_to_json)])
 let delete_stored_query =
   Command.async ~summary:""
     ([%map_open.Command
@@ -559,13 +605,19 @@ let describe_config_rules =
          flag "config-rule-names" (optional json_arg)
            ~doc:"JSON ConfigRuleNames"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String" in
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON DescribeConfigRulesFilters" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_config_rules
            (Values.DescribeConfigRulesRequest.make
               ?configRuleNames:(Option.map ~f:Values.ConfigRuleNames.of_json
-                                  configRuleNames) ?nextToken ())
+                                  configRuleNames) ?nextToken
+              ?filters:(Option.map
+                          ~f:Values.DescribeConfigRulesFilters.of_json
+                          filters) ())
            (Some Values.DescribeConfigRulesResponse.to_json)
            (Some Values.DescribeConfigRulesResponse.error_to_json)])
 let describe_configuration_aggregator_sources_status =
@@ -638,14 +690,20 @@ let describe_configuration_recorder_status =
            ~doc:"URL override endpoint url"
        and configurationRecorderNames =
          flag "configuration-recorder-names" (optional json_arg)
-           ~doc:"JSON ConfigurationRecorderNameList" in
+           ~doc:"JSON ConfigurationRecorderNameList"
+       and servicePrincipal =
+         flag "service-principal" (optional string)
+           ~doc:"STRING ServicePrincipal"
+       and arn =
+         flag "arn" (optional string) ~doc:"STRING AmazonResourceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_configuration_recorder_status
            (Values.DescribeConfigurationRecorderStatusRequest.make
               ?configurationRecorderNames:(Option.map
                                              ~f:Values.ConfigurationRecorderNameList.of_json
-                                             configurationRecorderNames) ())
+                                             configurationRecorderNames)
+              ?servicePrincipal ?arn ())
            (Some Values.DescribeConfigurationRecorderStatusResponse.to_json)
            (Some
               Values.DescribeConfigurationRecorderStatusResponse.error_to_json)])
@@ -661,14 +719,20 @@ let describe_configuration_recorders =
            ~doc:"URL override endpoint url"
        and configurationRecorderNames =
          flag "configuration-recorder-names" (optional json_arg)
-           ~doc:"JSON ConfigurationRecorderNameList" in
+           ~doc:"JSON ConfigurationRecorderNameList"
+       and servicePrincipal =
+         flag "service-principal" (optional string)
+           ~doc:"STRING ServicePrincipal"
+       and arn =
+         flag "arn" (optional string) ~doc:"STRING AmazonResourceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_configuration_recorders
            (Values.DescribeConfigurationRecordersRequest.make
               ?configurationRecorderNames:(Option.map
                                              ~f:Values.ConfigurationRecorderNameList.of_json
-                                             configurationRecorderNames) ())
+                                             configurationRecorderNames)
+              ?servicePrincipal ?arn ())
            (Some Values.DescribeConfigurationRecordersResponse.to_json)
            (Some Values.DescribeConfigurationRecordersResponse.error_to_json)])
 let describe_conformance_pack_compliance =
@@ -1034,6 +1098,30 @@ let describe_retention_configurations =
               ?nextToken ())
            (Some Values.DescribeRetentionConfigurationsResponse.to_json)
            (Some Values.DescribeRetentionConfigurationsResponse.error_to_json)])
+let disassociate_resource_types =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and configurationRecorderArn =
+         flag "configuration-recorder-arn" (required string)
+           ~doc:"STRING AmazonResourceName"
+       and resourceTypes =
+         flag "resource-types" (required json_arg)
+           ~doc:"JSON ResourceTypeList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_resource_types
+           (Values.DisassociateResourceTypesRequest.make
+              ~configurationRecorderArn
+              ~resourceTypes:(Values.ResourceTypeList.of_json resourceTypes)
+              ()) (Some Values.DisassociateResourceTypesResponse.to_json)
+           (Some Values.DisassociateResourceTypesResponse.error_to_json)])
 let get_aggregate_compliance_details_by_config_rule =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1243,23 +1331,27 @@ let get_compliance_details_by_resource =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and resourceType =
+         flag "resource-type" (optional string)
+           ~doc:"STRING StringWithCharLimit256"
+       and resourceId =
+         flag "resource-id" (optional string) ~doc:"STRING BaseResourceId"
        and complianceTypes =
          flag "compliance-types" (optional json_arg)
            ~doc:"JSON ComplianceTypes"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING String"
-       and resourceType =
-         flag "resource-type" (required string)
-           ~doc:"STRING StringWithCharLimit256"
-       and resourceId =
-         flag "resource-id" (required string) ~doc:"STRING BaseResourceId" in
+       and resourceEvaluationId =
+         flag "resource-evaluation-id" (optional string)
+           ~doc:"STRING ResourceEvaluationId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_compliance_details_by_resource
-           (Values.GetComplianceDetailsByResourceRequest.make
+           (Values.GetComplianceDetailsByResourceRequest.make ?resourceType
+              ?resourceId
               ?complianceTypes:(Option.map ~f:Values.ComplianceTypes.of_json
-                                  complianceTypes) ?nextToken ~resourceType
-              ~resourceId ())
+                                  complianceTypes) ?nextToken
+              ?resourceEvaluationId ())
            (Some Values.GetComplianceDetailsByResourceResponse.to_json)
            (Some Values.GetComplianceDetailsByResourceResponse.error_to_json)])
 let get_compliance_summary_by_config_rule =
@@ -1517,6 +1609,26 @@ let get_resource_config_history =
               ~resourceId ())
            (Some Values.GetResourceConfigHistoryResponse.to_json)
            (Some Values.GetResourceConfigHistoryResponse.error_to_json)])
+let get_resource_evaluation_summary =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceEvaluationId =
+         flag "resource-evaluation-id" (required string)
+           ~doc:"STRING ResourceEvaluationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resource_evaluation_summary
+           (Values.GetResourceEvaluationSummaryRequest.make
+              ~resourceEvaluationId ())
+           (Some Values.GetResourceEvaluationSummaryResponse.to_json)
+           (Some Values.GetResourceEvaluationSummaryResponse.error_to_json)])
 let get_stored_query =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1565,6 +1677,64 @@ let list_aggregate_discovered_resources =
            (Some Values.ListAggregateDiscoveredResourcesResponse.to_json)
            (Some
               Values.ListAggregateDiscoveredResourcesResponse.error_to_json)])
+let list_configuration_recorders =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ConfigurationRecorderFilterList"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_configuration_recorders
+           (Values.ListConfigurationRecordersRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ConfigurationRecorderFilterList.of_json
+                          filters) ?maxResults ?nextToken ())
+           (Some Values.ListConfigurationRecordersResponse.to_json)
+           (Some Values.ListConfigurationRecordersResponse.error_to_json)])
+let list_conformance_pack_compliance_scores =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ConformancePackComplianceScoresFilters"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder"
+       and sortBy = flag "sort-by" (optional json_arg) ~doc:"JSON SortBy"
+       and limit = flag "limit" (optional int) ~doc:"INT PageSizeLimit"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_conformance_pack_compliance_scores
+           (Values.ListConformancePackComplianceScoresRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ConformancePackComplianceScoresFilters.of_json
+                          filters)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ?sortBy:(Option.map ~f:Values.SortBy.of_json sortBy) ?limit
+              ?nextToken ())
+           (Some Values.ListConformancePackComplianceScoresResponse.to_json)
+           (Some
+              Values.ListConformancePackComplianceScoresResponse.error_to_json)])
 let list_discovered_resources =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1596,6 +1766,33 @@ let list_discovered_resources =
               ~resourceType:(Values.ResourceType.of_json resourceType) ())
            (Some Values.ListDiscoveredResourcesResponse.to_json)
            (Some Values.ListDiscoveredResourcesResponse.error_to_json)])
+let list_resource_evaluations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ResourceEvaluationFilters"
+       and limit =
+         flag "limit" (optional int)
+           ~doc:"INT ListResourceEvaluationsPageItemLimit"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_resource_evaluations
+           (Values.ListResourceEvaluationsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ResourceEvaluationFilters.of_json filters)
+              ?limit ?nextToken ())
+           (Some Values.ListResourceEvaluationsResponse.to_json)
+           (Some Values.ListResourceEvaluationsResponse.error_to_json)])
 let list_stored_queries =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1700,6 +1897,9 @@ let put_configuration_aggregator =
          flag "organization-aggregation-source" (optional json_arg)
            ~doc:"JSON OrganizationAggregationSource"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsList"
+       and aggregatorFilters =
+         flag "aggregator-filters" (optional json_arg)
+           ~doc:"JSON AggregatorFilters"
        and configurationAggregatorName =
          flag "configuration-aggregator-name" (required string)
            ~doc:"STRING ConfigurationAggregatorName" in
@@ -1714,6 +1914,9 @@ let put_configuration_aggregator =
                                                 ~f:Values.OrganizationAggregationSource.of_json
                                                 organizationAggregationSource)
               ?tags:(Option.map ~f:Values.TagsList.of_json tags)
+              ?aggregatorFilters:(Option.map
+                                    ~f:Values.AggregatorFilters.of_json
+                                    aggregatorFilters)
               ~configurationAggregatorName ())
            (Some Values.PutConfigurationAggregatorResponse.to_json)
            (Some Values.PutConfigurationAggregatorResponse.error_to_json)])
@@ -1727,6 +1930,7 @@ let put_configuration_recorder =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsList"
        and configurationRecorder =
          flag "configuration-recorder" (required json_arg)
            ~doc:"JSON ConfigurationRecorder" in
@@ -1734,6 +1938,7 @@ let put_configuration_recorder =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_configuration_recorder
            (Values.PutConfigurationRecorderRequest.make
+              ?tags:(Option.map ~f:Values.TagsList.of_json tags)
               ~configurationRecorder:(Values.ConfigurationRecorder.of_json
                                         configurationRecorder) ()) None None])
 let put_conformance_pack =
@@ -1759,6 +1964,10 @@ let put_conformance_pack =
        and conformancePackInputParameters =
          flag "conformance-pack-input-parameters" (optional json_arg)
            ~doc:"JSON ConformancePackInputParameters"
+       and templateSSMDocumentDetails =
+         flag "template-s-s-m-document-details" (optional json_arg)
+           ~doc:"JSON TemplateSSMDocumentDetails"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsList"
        and conformancePackName =
          flag "conformance-pack-name" (required string)
            ~doc:"STRING ConformancePackName" in
@@ -1770,6 +1979,10 @@ let put_conformance_pack =
               ?conformancePackInputParameters:(Option.map
                                                  ~f:Values.ConformancePackInputParameters.of_json
                                                  conformancePackInputParameters)
+              ?templateSSMDocumentDetails:(Option.map
+                                             ~f:Values.TemplateSSMDocumentDetails.of_json
+                                             templateSSMDocumentDetails)
+              ?tags:(Option.map ~f:Values.TagsList.of_json tags)
               ~conformancePackName ())
            (Some Values.PutConformancePackResponse.to_json)
            (Some Values.PutConformancePackResponse.error_to_json)])
@@ -2027,6 +2240,29 @@ let put_retention_configuration =
               ~retentionPeriodInDays ())
            (Some Values.PutRetentionConfigurationResponse.to_json)
            (Some Values.PutRetentionConfigurationResponse.error_to_json)])
+let put_service_linked_configuration_recorder =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsList"
+       and servicePrincipal =
+         flag "service-principal" (required string)
+           ~doc:"STRING ServicePrincipal" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_service_linked_configuration_recorder
+           (Values.PutServiceLinkedConfigurationRecorderRequest.make
+              ?tags:(Option.map ~f:Values.TagsList.of_json tags)
+              ~servicePrincipal ())
+           (Some Values.PutServiceLinkedConfigurationRecorderResponse.to_json)
+           (Some
+              Values.PutServiceLinkedConfigurationRecorderResponse.error_to_json)])
 let put_stored_query =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2158,6 +2394,43 @@ let start_remediation_execution =
               ~resourceKeys:(Values.ResourceKeys.of_json resourceKeys) ())
            (Some Values.StartRemediationExecutionResponse.to_json)
            (Some Values.StartRemediationExecutionResponse.error_to_json)])
+let start_resource_evaluation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and evaluationContext =
+         flag "evaluation-context" (optional json_arg)
+           ~doc:"JSON EvaluationContext"
+       and evaluationTimeout =
+         flag "evaluation-timeout" (optional int)
+           ~doc:"INT EvaluationTimeout"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and resourceDetails =
+         flag "resource-details" (required json_arg)
+           ~doc:"JSON ResourceDetails"
+       and evaluationMode =
+         flag "evaluation-mode" (required json_arg)
+           ~doc:"JSON EvaluationMode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_resource_evaluation
+           (Values.StartResourceEvaluationRequest.make
+              ?evaluationContext:(Option.map
+                                    ~f:Values.EvaluationContext.of_json
+                                    evaluationContext) ?evaluationTimeout
+              ?clientToken
+              ~resourceDetails:(Values.ResourceDetails.of_json
+                                  resourceDetails)
+              ~evaluationMode:(Values.EvaluationMode.of_json evaluationMode)
+              ()) (Some Values.StartResourceEvaluationResponse.to_json)
+           (Some Values.StartResourceEvaluationResponse.error_to_json)])
 let stop_configuration_recorder =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2218,8 +2491,9 @@ let untag_resource =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("batch-get-aggregate-resource-config",
-       batch_get_aggregate_resource_config);
+    [("associate-resource-types", associate_resource_types);
+    ("batch-get-aggregate-resource-config",
+      batch_get_aggregate_resource_config);
     ("batch-get-resource-config", batch_get_resource_config);
     ("delete-aggregation-authorization", delete_aggregation_authorization);
     ("delete-config-rule", delete_config_rule);
@@ -2237,6 +2511,8 @@ let main =
     ("delete-remediation-exceptions", delete_remediation_exceptions);
     ("delete-resource-config", delete_resource_config);
     ("delete-retention-configuration", delete_retention_configuration);
+    ("delete-service-linked-configuration-recorder",
+      delete_service_linked_configuration_recorder);
     ("delete-stored-query", delete_stored_query);
     ("deliver-config-snapshot", deliver_config_snapshot);
     ("describe-aggregate-compliance-by-config-rules",
@@ -2280,6 +2556,7 @@ let main =
     ("describe-remediation-execution-status",
       describe_remediation_execution_status);
     ("describe-retention-configurations", describe_retention_configurations);
+    ("disassociate-resource-types", disassociate_resource_types);
     ("get-aggregate-compliance-details-by-config-rule",
       get_aggregate_compliance_details_by_config_rule);
     ("get-aggregate-config-rule-compliance-summary",
@@ -2310,10 +2587,15 @@ let main =
     ("get-organization-custom-rule-policy",
       get_organization_custom_rule_policy);
     ("get-resource-config-history", get_resource_config_history);
+    ("get-resource-evaluation-summary", get_resource_evaluation_summary);
     ("get-stored-query", get_stored_query);
     ("list-aggregate-discovered-resources",
       list_aggregate_discovered_resources);
+    ("list-configuration-recorders", list_configuration_recorders);
+    ("list-conformance-pack-compliance-scores",
+      list_conformance_pack_compliance_scores);
     ("list-discovered-resources", list_discovered_resources);
+    ("list-resource-evaluations", list_resource_evaluations);
     ("list-stored-queries", list_stored_queries);
     ("list-tags-for-resource", list_tags_for_resource);
     ("put-aggregation-authorization", put_aggregation_authorization);
@@ -2330,12 +2612,15 @@ let main =
     ("put-remediation-exceptions", put_remediation_exceptions);
     ("put-resource-config", put_resource_config);
     ("put-retention-configuration", put_retention_configuration);
+    ("put-service-linked-configuration-recorder",
+      put_service_linked_configuration_recorder);
     ("put-stored-query", put_stored_query);
     ("select-aggregate-resource-config", select_aggregate_resource_config);
     ("select-resource-config", select_resource_config);
     ("start-config-rules-evaluation", start_config_rules_evaluation);
     ("start-configuration-recorder", start_configuration_recorder);
     ("start-remediation-execution", start_remediation_execution);
+    ("start-resource-evaluation", start_resource_evaluation);
     ("stop-configuration-recorder", stop_configuration_recorder);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource)]

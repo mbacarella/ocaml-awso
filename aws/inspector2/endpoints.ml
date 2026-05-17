@@ -4,16 +4,60 @@ open Values
 type ('i, 'o, 'e) t =
   | AssociateMember: (AssociateMemberRequest.t, AssociateMemberResponse.t,
   AssociateMemberResponse.error) t 
+  | BatchAssociateCodeSecurityScanConfiguration:
+  (BatchAssociateCodeSecurityScanConfigurationRequest.t,
+  BatchAssociateCodeSecurityScanConfigurationResponse.t,
+  BatchAssociateCodeSecurityScanConfigurationResponse.error) t 
+  | BatchDisassociateCodeSecurityScanConfiguration:
+  (BatchDisassociateCodeSecurityScanConfigurationRequest.t,
+  BatchDisassociateCodeSecurityScanConfigurationResponse.t,
+  BatchDisassociateCodeSecurityScanConfigurationResponse.error) t 
   | BatchGetAccountStatus: (BatchGetAccountStatusRequest.t,
   BatchGetAccountStatusResponse.t, BatchGetAccountStatusResponse.error) t 
+  | BatchGetCodeSnippet: (BatchGetCodeSnippetRequest.t,
+  BatchGetCodeSnippetResponse.t, BatchGetCodeSnippetResponse.error) t 
+  | BatchGetFindingDetails: (BatchGetFindingDetailsRequest.t,
+  BatchGetFindingDetailsResponse.t, BatchGetFindingDetailsResponse.error) t 
   | BatchGetFreeTrialInfo: (BatchGetFreeTrialInfoRequest.t,
   BatchGetFreeTrialInfoResponse.t, BatchGetFreeTrialInfoResponse.error) t 
+  | BatchGetMemberEc2DeepInspectionStatus:
+  (BatchGetMemberEc2DeepInspectionStatusRequest.t,
+  BatchGetMemberEc2DeepInspectionStatusResponse.t,
+  BatchGetMemberEc2DeepInspectionStatusResponse.error) t 
+  | BatchUpdateMemberEc2DeepInspectionStatus:
+  (BatchUpdateMemberEc2DeepInspectionStatusRequest.t,
+  BatchUpdateMemberEc2DeepInspectionStatusResponse.t,
+  BatchUpdateMemberEc2DeepInspectionStatusResponse.error) t 
   | CancelFindingsReport: (CancelFindingsReportRequest.t,
   CancelFindingsReportResponse.t, CancelFindingsReportResponse.error) t 
+  | CancelSbomExport: (CancelSbomExportRequest.t, CancelSbomExportResponse.t,
+  CancelSbomExportResponse.error) t 
+  | CreateCisScanConfiguration: (CreateCisScanConfigurationRequest.t,
+  CreateCisScanConfigurationResponse.t,
+  CreateCisScanConfigurationResponse.error) t 
+  | CreateCodeSecurityIntegration: (CreateCodeSecurityIntegrationRequest.t,
+  CreateCodeSecurityIntegrationResponse.t,
+  CreateCodeSecurityIntegrationResponse.error) t 
+  | CreateCodeSecurityScanConfiguration:
+  (CreateCodeSecurityScanConfigurationRequest.t,
+  CreateCodeSecurityScanConfigurationResponse.t,
+  CreateCodeSecurityScanConfigurationResponse.error) t 
   | CreateFilter: (CreateFilterRequest.t, CreateFilterResponse.t,
   CreateFilterResponse.error) t 
   | CreateFindingsReport: (CreateFindingsReportRequest.t,
   CreateFindingsReportResponse.t, CreateFindingsReportResponse.error) t 
+  | CreateSbomExport: (CreateSbomExportRequest.t, CreateSbomExportResponse.t,
+  CreateSbomExportResponse.error) t 
+  | DeleteCisScanConfiguration: (DeleteCisScanConfigurationRequest.t,
+  DeleteCisScanConfigurationResponse.t,
+  DeleteCisScanConfigurationResponse.error) t 
+  | DeleteCodeSecurityIntegration: (DeleteCodeSecurityIntegrationRequest.t,
+  DeleteCodeSecurityIntegrationResponse.t,
+  DeleteCodeSecurityIntegrationResponse.error) t 
+  | DeleteCodeSecurityScanConfiguration:
+  (DeleteCodeSecurityScanConfigurationRequest.t,
+  DeleteCodeSecurityScanConfigurationResponse.t,
+  DeleteCodeSecurityScanConfigurationResponse.error) t 
   | DeleteFilter: (DeleteFilterRequest.t, DeleteFilterResponse.t,
   DeleteFilterResponse.error) t 
   | DescribeOrganizationConfiguration:
@@ -30,16 +74,66 @@ type ('i, 'o, 'e) t =
   | EnableDelegatedAdminAccount: (EnableDelegatedAdminAccountRequest.t,
   EnableDelegatedAdminAccountResponse.t,
   EnableDelegatedAdminAccountResponse.error) t 
+  | GetCisScanReport: (GetCisScanReportRequest.t, GetCisScanReportResponse.t,
+  GetCisScanReportResponse.error) t 
+  | GetCisScanResultDetails: (GetCisScanResultDetailsRequest.t,
+  GetCisScanResultDetailsResponse.t, GetCisScanResultDetailsResponse.error) t
+  
+  | GetClustersForImage: (GetClustersForImageRequest.t,
+  GetClustersForImageResponse.t, GetClustersForImageResponse.error) t 
+  | GetCodeSecurityIntegration: (GetCodeSecurityIntegrationRequest.t,
+  GetCodeSecurityIntegrationResponse.t,
+  GetCodeSecurityIntegrationResponse.error) t 
+  | GetCodeSecurityScan: (GetCodeSecurityScanRequest.t,
+  GetCodeSecurityScanResponse.t, GetCodeSecurityScanResponse.error) t 
+  | GetCodeSecurityScanConfiguration:
+  (GetCodeSecurityScanConfigurationRequest.t,
+  GetCodeSecurityScanConfigurationResponse.t,
+  GetCodeSecurityScanConfigurationResponse.error) t 
+  | GetConfiguration: (GetConfigurationRequest.t, GetConfigurationResponse.t,
+  GetConfigurationResponse.error) t 
   | GetDelegatedAdminAccount: (GetDelegatedAdminAccountRequest.t,
   GetDelegatedAdminAccountResponse.t, GetDelegatedAdminAccountResponse.error)
   t 
+  | GetEc2DeepInspectionConfiguration:
+  (GetEc2DeepInspectionConfigurationRequest.t,
+  GetEc2DeepInspectionConfigurationResponse.t,
+  GetEc2DeepInspectionConfigurationResponse.error) t 
+  | GetEncryptionKey: (GetEncryptionKeyRequest.t, GetEncryptionKeyResponse.t,
+  GetEncryptionKeyResponse.error) t 
   | GetFindingsReportStatus: (GetFindingsReportStatusRequest.t,
   GetFindingsReportStatusResponse.t, GetFindingsReportStatusResponse.error) t
   
   | GetMember: (GetMemberRequest.t, GetMemberResponse.t,
   GetMemberResponse.error) t 
+  | GetSbomExport: (GetSbomExportRequest.t, GetSbomExportResponse.t,
+  GetSbomExportResponse.error) t 
   | ListAccountPermissions: (ListAccountPermissionsRequest.t,
   ListAccountPermissionsResponse.t, ListAccountPermissionsResponse.error) t 
+  | ListCisScanConfigurations: (ListCisScanConfigurationsRequest.t,
+  ListCisScanConfigurationsResponse.t,
+  ListCisScanConfigurationsResponse.error) t 
+  | ListCisScanResultsAggregatedByChecks:
+  (ListCisScanResultsAggregatedByChecksRequest.t,
+  ListCisScanResultsAggregatedByChecksResponse.t,
+  ListCisScanResultsAggregatedByChecksResponse.error) t 
+  | ListCisScanResultsAggregatedByTargetResource:
+  (ListCisScanResultsAggregatedByTargetResourceRequest.t,
+  ListCisScanResultsAggregatedByTargetResourceResponse.t,
+  ListCisScanResultsAggregatedByTargetResourceResponse.error) t 
+  | ListCisScans: (ListCisScansRequest.t, ListCisScansResponse.t,
+  ListCisScansResponse.error) t 
+  | ListCodeSecurityIntegrations: (ListCodeSecurityIntegrationsRequest.t,
+  ListCodeSecurityIntegrationsResponse.t,
+  ListCodeSecurityIntegrationsResponse.error) t 
+  | ListCodeSecurityScanConfigurationAssociations:
+  (ListCodeSecurityScanConfigurationAssociationsRequest.t,
+  ListCodeSecurityScanConfigurationAssociationsResponse.t,
+  ListCodeSecurityScanConfigurationAssociationsResponse.error) t 
+  | ListCodeSecurityScanConfigurations:
+  (ListCodeSecurityScanConfigurationsRequest.t,
+  ListCodeSecurityScanConfigurationsResponse.t,
+  ListCodeSecurityScanConfigurationsResponse.error) t 
   | ListCoverage: (ListCoverageRequest.t, ListCoverageResponse.t,
   ListCoverageResponse.error) t 
   | ListCoverageStatistics: (ListCoverageStatisticsRequest.t,
@@ -60,12 +154,49 @@ type ('i, 'o, 'e) t =
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ListUsageTotals: (ListUsageTotalsRequest.t, ListUsageTotalsResponse.t,
   ListUsageTotalsResponse.error) t 
+  | ResetEncryptionKey: (ResetEncryptionKeyRequest.t,
+  ResetEncryptionKeyResponse.t, ResetEncryptionKeyResponse.error) t 
+  | SearchVulnerabilities: (SearchVulnerabilitiesRequest.t,
+  SearchVulnerabilitiesResponse.t, SearchVulnerabilitiesResponse.error) t 
+  | SendCisSessionHealth: (SendCisSessionHealthRequest.t,
+  SendCisSessionHealthResponse.t, SendCisSessionHealthResponse.error) t 
+  | SendCisSessionTelemetry: (SendCisSessionTelemetryRequest.t,
+  SendCisSessionTelemetryResponse.t, SendCisSessionTelemetryResponse.error) t
+  
+  | StartCisSession: (StartCisSessionRequest.t, StartCisSessionResponse.t,
+  StartCisSessionResponse.error) t 
+  | StartCodeSecurityScan: (StartCodeSecurityScanRequest.t,
+  StartCodeSecurityScanResponse.t, StartCodeSecurityScanResponse.error) t 
+  | StopCisSession: (StopCisSessionRequest.t, StopCisSessionResponse.t,
+  StopCisSessionResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateCisScanConfiguration: (UpdateCisScanConfigurationRequest.t,
+  UpdateCisScanConfigurationResponse.t,
+  UpdateCisScanConfigurationResponse.error) t 
+  | UpdateCodeSecurityIntegration: (UpdateCodeSecurityIntegrationRequest.t,
+  UpdateCodeSecurityIntegrationResponse.t,
+  UpdateCodeSecurityIntegrationResponse.error) t 
+  | UpdateCodeSecurityScanConfiguration:
+  (UpdateCodeSecurityScanConfigurationRequest.t,
+  UpdateCodeSecurityScanConfigurationResponse.t,
+  UpdateCodeSecurityScanConfigurationResponse.error) t 
+  | UpdateConfiguration: (UpdateConfigurationRequest.t,
+  UpdateConfigurationResponse.t, UpdateConfigurationResponse.error) t 
+  | UpdateEc2DeepInspectionConfiguration:
+  (UpdateEc2DeepInspectionConfigurationRequest.t,
+  UpdateEc2DeepInspectionConfigurationResponse.t,
+  UpdateEc2DeepInspectionConfigurationResponse.error) t 
+  | UpdateEncryptionKey: (UpdateEncryptionKeyRequest.t,
+  UpdateEncryptionKeyResponse.t, UpdateEncryptionKeyResponse.error) t 
   | UpdateFilter: (UpdateFilterRequest.t, UpdateFilterResponse.t,
   UpdateFilterResponse.error) t 
+  | UpdateOrgEc2DeepInspectionConfiguration:
+  (UpdateOrgEc2DeepInspectionConfigurationRequest.t,
+  UpdateOrgEc2DeepInspectionConfigurationResponse.t,
+  UpdateOrgEc2DeepInspectionConfigurationResponse.error) t 
   | UpdateOrganizationConfiguration:
   (UpdateOrganizationConfigurationRequest.t,
   UpdateOrganizationConfigurationResponse.t,
@@ -73,11 +204,25 @@ type ('i, 'o, 'e) t =
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AssociateMember -> `POST
+  | BatchAssociateCodeSecurityScanConfiguration -> `POST
+  | BatchDisassociateCodeSecurityScanConfiguration -> `POST
   | BatchGetAccountStatus -> `POST
+  | BatchGetCodeSnippet -> `POST
+  | BatchGetFindingDetails -> `POST
   | BatchGetFreeTrialInfo -> `POST
+  | BatchGetMemberEc2DeepInspectionStatus -> `POST
+  | BatchUpdateMemberEc2DeepInspectionStatus -> `POST
   | CancelFindingsReport -> `POST
+  | CancelSbomExport -> `POST
+  | CreateCisScanConfiguration -> `POST
+  | CreateCodeSecurityIntegration -> `POST
+  | CreateCodeSecurityScanConfiguration -> `POST
   | CreateFilter -> `POST
   | CreateFindingsReport -> `POST
+  | CreateSbomExport -> `POST
+  | DeleteCisScanConfiguration -> `POST
+  | DeleteCodeSecurityIntegration -> `POST
+  | DeleteCodeSecurityScanConfiguration -> `POST
   | DeleteFilter -> `POST
   | DescribeOrganizationConfiguration -> `POST
   | Disable -> `POST
@@ -85,10 +230,27 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DisassociateMember -> `POST
   | Enable -> `POST
   | EnableDelegatedAdminAccount -> `POST
+  | GetCisScanReport -> `POST
+  | GetCisScanResultDetails -> `POST
+  | GetClustersForImage -> `POST
+  | GetCodeSecurityIntegration -> `POST
+  | GetCodeSecurityScan -> `POST
+  | GetCodeSecurityScanConfiguration -> `POST
+  | GetConfiguration -> `POST
   | GetDelegatedAdminAccount -> `POST
+  | GetEc2DeepInspectionConfiguration -> `POST
+  | GetEncryptionKey -> `GET
   | GetFindingsReportStatus -> `POST
   | GetMember -> `POST
+  | GetSbomExport -> `POST
   | ListAccountPermissions -> `POST
+  | ListCisScanConfigurations -> `POST
+  | ListCisScanResultsAggregatedByChecks -> `POST
+  | ListCisScanResultsAggregatedByTargetResource -> `POST
+  | ListCisScans -> `POST
+  | ListCodeSecurityIntegrations -> `POST
+  | ListCodeSecurityScanConfigurationAssociations -> `POST
+  | ListCodeSecurityScanConfigurations -> `POST
   | ListCoverage -> `POST
   | ListCoverageStatistics -> `POST
   | ListDelegatedAdminAccounts -> `POST
@@ -98,24 +260,72 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListMembers -> `POST
   | ListTagsForResource -> `GET
   | ListUsageTotals -> `POST
+  | ResetEncryptionKey -> `PUT
+  | SearchVulnerabilities -> `POST
+  | SendCisSessionHealth -> `PUT
+  | SendCisSessionTelemetry -> `PUT
+  | StartCisSession -> `PUT
+  | StartCodeSecurityScan -> `POST
+  | StopCisSession -> `PUT
   | TagResource -> `POST
   | UntagResource -> `DELETE
+  | UpdateCisScanConfiguration -> `POST
+  | UpdateCodeSecurityIntegration -> `POST
+  | UpdateCodeSecurityScanConfiguration -> `POST
+  | UpdateConfiguration -> `POST
+  | UpdateEc2DeepInspectionConfiguration -> `POST
+  | UpdateEncryptionKey -> `PUT
   | UpdateFilter -> `POST
+  | UpdateOrgEc2DeepInspectionConfiguration -> `POST
   | UpdateOrganizationConfiguration -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | AssociateMember ->
           (Format.kasprintf Uri.of_string) "/members/associate"
+      | BatchAssociateCodeSecurityScanConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/codesecurity/scan-configuration/batch/associate"
+      | BatchDisassociateCodeSecurityScanConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/codesecurity/scan-configuration/batch/disassociate"
       | BatchGetAccountStatus ->
           (Format.kasprintf Uri.of_string) "/status/batch/get"
+      | BatchGetCodeSnippet ->
+          (Format.kasprintf Uri.of_string) "/codesnippet/batchget"
+      | BatchGetFindingDetails ->
+          (Format.kasprintf Uri.of_string) "/findings/details/batch/get"
       | BatchGetFreeTrialInfo ->
           (Format.kasprintf Uri.of_string) "/freetrialinfo/batchget"
+      | BatchGetMemberEc2DeepInspectionStatus ->
+          (Format.kasprintf Uri.of_string)
+            "/ec2deepinspectionstatus/member/batch/get"
+      | BatchUpdateMemberEc2DeepInspectionStatus ->
+          (Format.kasprintf Uri.of_string)
+            "/ec2deepinspectionstatus/member/batch/update"
       | CancelFindingsReport ->
           (Format.kasprintf Uri.of_string) "/reporting/cancel"
+      | CancelSbomExport ->
+          (Format.kasprintf Uri.of_string) "/sbomexport/cancel"
+      | CreateCisScanConfiguration ->
+          (Format.kasprintf Uri.of_string) "/cis/scan-configuration/create"
+      | CreateCodeSecurityIntegration ->
+          (Format.kasprintf Uri.of_string) "/codesecurity/integration/create"
+      | CreateCodeSecurityScanConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/codesecurity/scan-configuration/create"
       | CreateFilter -> (Format.kasprintf Uri.of_string) "/filters/create"
       | CreateFindingsReport ->
           (Format.kasprintf Uri.of_string) "/reporting/create"
+      | CreateSbomExport ->
+          (Format.kasprintf Uri.of_string) "/sbomexport/create"
+      | DeleteCisScanConfiguration ->
+          (Format.kasprintf Uri.of_string) "/cis/scan-configuration/delete"
+      | DeleteCodeSecurityIntegration ->
+          (Format.kasprintf Uri.of_string) "/codesecurity/integration/delete"
+      | DeleteCodeSecurityScanConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/codesecurity/scan-configuration/delete"
       | DeleteFilter -> (Format.kasprintf Uri.of_string) "/filters/delete"
       | DescribeOrganizationConfiguration ->
           (Format.kasprintf Uri.of_string)
@@ -128,13 +338,83 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | Enable -> (Format.kasprintf Uri.of_string) "/enable"
       | EnableDelegatedAdminAccount ->
           (Format.kasprintf Uri.of_string) "/delegatedadminaccounts/enable"
+      | GetCisScanReport ->
+          (Format.kasprintf Uri.of_string) "/cis/scan/report/get"
+      | GetCisScanResultDetails ->
+          (Format.kasprintf Uri.of_string) "/cis/scan-result/details/get"
+      | GetClustersForImage ->
+          (Format.kasprintf Uri.of_string) "/cluster/get"
+      | GetCodeSecurityIntegration ->
+          (Format.kasprintf Uri.of_string) "/codesecurity/integration/get"
+      | GetCodeSecurityScan ->
+          (Format.kasprintf Uri.of_string) "/codesecurity/scan/get"
+      | GetCodeSecurityScanConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/codesecurity/scan-configuration/get"
+      | GetConfiguration ->
+          (Format.kasprintf Uri.of_string) "/configuration/get"
       | GetDelegatedAdminAccount ->
           (Format.kasprintf Uri.of_string) "/delegatedadminaccounts/get"
+      | GetEc2DeepInspectionConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/ec2deepinspectionconfiguration/get"
+      | GetEncryptionKey ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/encryptionkey/get")
+            (List.filter_opt
+               [Some ("scanType", (ScanType.to_header x.scanType));
+               Some ("resourceType", (ResourceType.to_header x.resourceType))])
       | GetFindingsReportStatus ->
           (Format.kasprintf Uri.of_string) "/reporting/status/get"
       | GetMember -> (Format.kasprintf Uri.of_string) "/members/get"
+      | GetSbomExport -> (Format.kasprintf Uri.of_string) "/sbomexport/get"
       | ListAccountPermissions ->
           (Format.kasprintf Uri.of_string) "/accountpermissions/list"
+      | ListCisScanConfigurations ->
+          (Format.kasprintf Uri.of_string) "/cis/scan-configuration/list"
+      | ListCisScanResultsAggregatedByChecks ->
+          (Format.kasprintf Uri.of_string) "/cis/scan-result/check/list"
+      | ListCisScanResultsAggregatedByTargetResource ->
+          (Format.kasprintf Uri.of_string) "/cis/scan-result/resource/list"
+      | ListCisScans -> (Format.kasprintf Uri.of_string) "/cis/scan/list"
+      | ListCodeSecurityIntegrations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/codesecurity/integration/list")
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults",
+                         (ListCodeSecurityIntegrationsRequestMaxResultsInteger.to_header
+                            v))) x.maxResults])
+      | ListCodeSecurityScanConfigurationAssociations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/codesecurity/scan-configuration/associations/list")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults",
+                         (ListCodeSecurityScanConfigurationAssociationsRequestMaxResultsInteger.to_header
+                            v))) x.maxResults])
+      | ListCodeSecurityScanConfigurations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/codesecurity/scan-configuration/list")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults",
+                         (ListCodeSecurityScanConfigurationsRequestMaxResultsInteger.to_header
+                            v))) x.maxResults])
       | ListCoverage -> (Format.kasprintf Uri.of_string) "/coverage/list"
       | ListCoverageStatistics ->
           (Format.kasprintf Uri.of_string) "/coverage/statistics/list"
@@ -149,6 +429,19 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (Arn.to_header x.ListTagsForResourceRequest.resourceArn)
       | ListUsageTotals -> (Format.kasprintf Uri.of_string) "/usage/list"
+      | ResetEncryptionKey ->
+          (Format.kasprintf Uri.of_string) "/encryptionkey/reset"
+      | SearchVulnerabilities ->
+          (Format.kasprintf Uri.of_string) "/vulnerabilities/search"
+      | SendCisSessionHealth ->
+          (Format.kasprintf Uri.of_string) "/cissession/health/send"
+      | SendCisSessionTelemetry ->
+          (Format.kasprintf Uri.of_string) "/cissession/telemetry/send"
+      | StartCisSession ->
+          (Format.kasprintf Uri.of_string) "/cissession/start"
+      | StartCodeSecurityScan ->
+          (Format.kasprintf Uri.of_string) "/codesecurity/scan/start"
+      | StopCisSession -> (Format.kasprintf Uri.of_string) "/cissession/stop"
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (Arn.to_header x.TagResourceRequest.resourceArn)
@@ -158,7 +451,24 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (Arn.to_header x.UntagResourceRequest.resourceArn))
             (List.filter_opt
                [Some ("tagKeys", (TagKeyList.to_header x.tagKeys))])
+      | UpdateCisScanConfiguration ->
+          (Format.kasprintf Uri.of_string) "/cis/scan-configuration/update"
+      | UpdateCodeSecurityIntegration ->
+          (Format.kasprintf Uri.of_string) "/codesecurity/integration/update"
+      | UpdateCodeSecurityScanConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/codesecurity/scan-configuration/update"
+      | UpdateConfiguration ->
+          (Format.kasprintf Uri.of_string) "/configuration/update"
+      | UpdateEc2DeepInspectionConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/ec2deepinspectionconfiguration/update"
+      | UpdateEncryptionKey ->
+          (Format.kasprintf Uri.of_string) "/encryptionkey/update"
       | UpdateFilter -> (Format.kasprintf Uri.of_string) "/filters/update"
+      | UpdateOrgEc2DeepInspectionConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/ec2deepinspectionconfiguration/org/update"
       | UpdateOrganizationConfiguration ->
           (Format.kasprintf Uri.of_string)
             "/organizationconfiguration/update")
@@ -186,6 +496,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchAssociateCodeSecurityScanConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("associateConfigurationRequests",
+                           (AssociateConfigurationRequestList.to_value
+                              req.BatchAssociateCodeSecurityScanConfigurationRequest.associateConfigurationRequests))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchDisassociateCodeSecurityScanConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("disassociateConfigurationRequests",
+                           (DisassociateConfigurationRequestList.to_value
+                              req.BatchDisassociateCodeSecurityScanConfigurationRequest.disassociateConfigurationRequests))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | BatchGetAccountStatus ->
       let (headers, body) =
         let headers =
@@ -198,6 +548,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Option.map req.BatchGetAccountStatusRequest.accountIds
                          ~f:(fun x ->
                                ("accountIds", (AccountIdSet.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchGetCodeSnippet ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("findingArns",
+                           (BatchGetCodeSnippetRequestFindingArnsList.to_value
+                              req.BatchGetCodeSnippetRequest.findingArns))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchGetFindingDetails ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("findingArns",
+                           (FindingArnList.to_value
+                              req.BatchGetFindingDetailsRequest.findingArns))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -225,6 +615,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchGetMemberEc2DeepInspectionStatus ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.BatchGetMemberEc2DeepInspectionStatusRequest.accountIds
+                         ~f:(fun x ->
+                               ("accountIds", (AccountIdSet.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchUpdateMemberEc2DeepInspectionStatus ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("accountIds",
+                           (MemberAccountEc2DeepInspectionStatusList.to_value
+                              req.BatchUpdateMemberEc2DeepInspectionStatusRequest.accountIds))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CancelFindingsReport ->
       let (headers, body) =
         let headers =
@@ -238,6 +668,127 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("reportId",
                            (ReportId.to_value
                               req.CancelFindingsReportRequest.reportId))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CancelSbomExport ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("reportId",
+                           (ReportId.to_value
+                              req.CancelSbomExportRequest.reportId))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateCisScanConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("scanName",
+                           (CisScanName.to_value
+                              req.CreateCisScanConfigurationRequest.scanName));
+                      Some
+                        ("securityLevel",
+                          (CisSecurityLevel.to_value
+                             req.CreateCisScanConfigurationRequest.securityLevel));
+                      Some
+                        ("schedule",
+                          (Schedule.to_value
+                             req.CreateCisScanConfigurationRequest.schedule));
+                      Some
+                        ("targets",
+                          (CreateCisTargets.to_value
+                             req.CreateCisScanConfigurationRequest.targets));
+                      Option.map req.CreateCisScanConfigurationRequest.tags
+                        ~f:(fun x -> ("tags", (CisTagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateCodeSecurityIntegration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("name",
+                           (IntegrationName.to_value
+                              req.CreateCodeSecurityIntegrationRequest.name));
+                      Some
+                        ("type",
+                          (IntegrationType.to_value
+                             req.CreateCodeSecurityIntegrationRequest.type_));
+                      Option.map
+                        req.CreateCodeSecurityIntegrationRequest.details
+                        ~f:(fun x ->
+                              ("details",
+                                (CreateIntegrationDetail.to_value x)));
+                      Option.map
+                        req.CreateCodeSecurityIntegrationRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateCodeSecurityScanConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("name",
+                           (ScanConfigurationName.to_value
+                              req.CreateCodeSecurityScanConfigurationRequest.name));
+                      Some
+                        ("level",
+                          (ConfigurationLevel.to_value
+                             req.CreateCodeSecurityScanConfigurationRequest.level));
+                      Some
+                        ("configuration",
+                          (CodeSecurityScanConfiguration.to_value
+                             req.CreateCodeSecurityScanConfigurationRequest.configuration));
+                      Option.map
+                        req.CreateCodeSecurityScanConfigurationRequest.scopeSettings
+                        ~f:(fun x ->
+                              ("scopeSettings", (ScopeSettings.to_value x)));
+                      Option.map
+                        req.CreateCodeSecurityScanConfigurationRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -269,7 +820,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("name",
                           (FilterName.to_value req.CreateFilterRequest.name));
                       Option.map req.CreateFilterRequest.tags
-                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map req.CreateFilterRequest.reason
+                        ~f:(fun x -> ("reason", (FilterReason.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -299,6 +852,95 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("s3Destination",
                           (Destination.to_value
                              req.CreateFindingsReportRequest.s3Destination))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateSbomExport ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.CreateSbomExportRequest.resourceFilterCriteria
+                         ~f:(fun x ->
+                               ("resourceFilterCriteria",
+                                 (ResourceFilterCriteria.to_value x)));
+                      Some
+                        ("reportFormat",
+                          (SbomReportFormat.to_value
+                             req.CreateSbomExportRequest.reportFormat));
+                      Some
+                        ("s3Destination",
+                          (Destination.to_value
+                             req.CreateSbomExportRequest.s3Destination))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteCisScanConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("scanConfigurationArn",
+                           (CisScanConfigurationArn.to_value
+                              req.DeleteCisScanConfigurationRequest.scanConfigurationArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteCodeSecurityIntegration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("integrationArn",
+                           (CodeSecurityIntegrationArn.to_value
+                              req.DeleteCodeSecurityIntegrationRequest.integrationArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteCodeSecurityScanConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("scanConfigurationArn",
+                           (ScanConfigurationArn.to_value
+                              req.DeleteCodeSecurityScanConfigurationRequest.scanConfigurationArn))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -403,13 +1045,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Option.map req.EnableRequest.accountIds
                          ~f:(fun x ->
                                ("accountIds", (AccountIdSet.to_value x)));
-                      Option.map req.EnableRequest.clientToken
-                        ~f:(fun x ->
-                              ("clientToken", (ClientToken.to_value x)));
                       Some
                         ("resourceTypes",
                           (EnableResourceTypeList.to_value
-                             req.EnableRequest.resourceTypes))])
+                             req.EnableRequest.resourceTypes));
+                      Option.map req.EnableRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -426,14 +1068,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.EnableDelegatedAdminAccountRequest.clientToken
-                         ~f:(fun x ->
-                               ("clientToken", (ClientToken.to_value x)));
-                      Some
-                        ("delegatedAdminAccountId",
-                          (AccountId.to_value
-                             req.EnableDelegatedAdminAccountRequest.delegatedAdminAccountId))])
+                      [Some
+                         ("delegatedAdminAccountId",
+                           (AccountId.to_value
+                              req.EnableDelegatedAdminAccountRequest.delegatedAdminAccountId));
+                      Option.map
+                        req.EnableDelegatedAdminAccountRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -441,7 +1083,185 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetCisScanReport ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("scanArn",
+                           (CisScanArn.to_value
+                              req.GetCisScanReportRequest.scanArn));
+                      Option.map req.GetCisScanReportRequest.targetAccounts
+                        ~f:(fun x ->
+                              ("targetAccounts",
+                                (ReportTargetAccounts.to_value x)));
+                      Option.map req.GetCisScanReportRequest.reportFormat
+                        ~f:(fun x ->
+                              ("reportFormat", (CisReportFormat.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetCisScanResultDetails ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("scanArn",
+                           (CisScanArn.to_value
+                              req.GetCisScanResultDetailsRequest.scanArn));
+                      Some
+                        ("targetResourceId",
+                          (ResourceId.to_value
+                             req.GetCisScanResultDetailsRequest.targetResourceId));
+                      Some
+                        ("accountId",
+                          (AccountId.to_value
+                             req.GetCisScanResultDetailsRequest.accountId));
+                      Option.map
+                        req.GetCisScanResultDetailsRequest.filterCriteria
+                        ~f:(fun x ->
+                              ("filterCriteria",
+                                (CisScanResultDetailsFilterCriteria.to_value
+                                   x)));
+                      Option.map req.GetCisScanResultDetailsRequest.sortBy
+                        ~f:(fun x ->
+                              ("sortBy",
+                                (CisScanResultDetailsSortBy.to_value x)));
+                      Option.map req.GetCisScanResultDetailsRequest.sortOrder
+                        ~f:(fun x -> ("sortOrder", (CisSortOrder.to_value x)));
+                      Option.map req.GetCisScanResultDetailsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
+                      Option.map
+                        req.GetCisScanResultDetailsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (GetCisScanResultDetailsMaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetClustersForImage ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("filter",
+                           (ClusterForImageFilterCriteria.to_value
+                              req.GetClustersForImageRequest.filter));
+                      Option.map req.GetClustersForImageRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (GetClustersForImageRequestMaxResultsInteger.to_value
+                                   x)));
+                      Option.map req.GetClustersForImageRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken",
+                                (GetClustersForImageNextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetCodeSecurityIntegration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("integrationArn",
+                           (CodeSecurityIntegrationArn.to_value
+                              req.GetCodeSecurityIntegrationRequest.integrationArn));
+                      Option.map req.GetCodeSecurityIntegrationRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetCodeSecurityScan ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("resource",
+                           (CodeSecurityResource.to_value
+                              req.GetCodeSecurityScanRequest.resource));
+                      Some
+                        ("scanId",
+                          (CodeSecurityUuid.to_value
+                             req.GetCodeSecurityScanRequest.scanId))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetCodeSecurityScanConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("scanConfigurationArn",
+                           (ScanConfigurationArn.to_value
+                              req.GetCodeSecurityScanConfigurationRequest.scanConfigurationArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetDelegatedAdminAccount ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetEc2DeepInspectionConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetEncryptionKey ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetFindingsReportStatus ->
@@ -481,6 +1301,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetSbomExport ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("reportId",
+                           (ReportId.to_value
+                              req.GetSbomExportRequest.reportId))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListAccountPermissions ->
       let (headers, body) =
         let headers =
@@ -490,21 +1330,205 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.ListAccountPermissionsRequest.maxResults
-                         ~f:(fun x ->
-                               ("maxResults",
-                                 (ListAccountPermissionsMaxResults.to_value x)));
+                      [Option.map req.ListAccountPermissionsRequest.service
+                         ~f:(fun x -> ("service", (Service.to_value x)));
+                      Option.map req.ListAccountPermissionsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (ListAccountPermissionsMaxResults.to_value x)));
                       Option.map req.ListAccountPermissionsRequest.nextToken
-                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
-                      Option.map req.ListAccountPermissionsRequest.service
-                        ~f:(fun x -> ("service", (Service.to_value x)))])
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
                          (x, value))))
                |> Yojson.Safe.to_string) in
         (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCisScanConfigurations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListCisScanConfigurationsRequest.filterCriteria
+                         ~f:(fun x ->
+                               ("filterCriteria",
+                                 (ListCisScanConfigurationsFilterCriteria.to_value
+                                    x)));
+                      Option.map req.ListCisScanConfigurationsRequest.sortBy
+                        ~f:(fun x ->
+                              ("sortBy",
+                                (CisScanConfigurationsSortBy.to_value x)));
+                      Option.map
+                        req.ListCisScanConfigurationsRequest.sortOrder
+                        ~f:(fun x -> ("sortOrder", (CisSortOrder.to_value x)));
+                      Option.map
+                        req.ListCisScanConfigurationsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
+                      Option.map
+                        req.ListCisScanConfigurationsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (ListCisScanConfigurationsMaxResults.to_value
+                                   x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCisScanResultsAggregatedByChecks ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("scanArn",
+                           (CisScanArn.to_value
+                              req.ListCisScanResultsAggregatedByChecksRequest.scanArn));
+                      Option.map
+                        req.ListCisScanResultsAggregatedByChecksRequest.filterCriteria
+                        ~f:(fun x ->
+                              ("filterCriteria",
+                                (CisScanResultsAggregatedByChecksFilterCriteria.to_value
+                                   x)));
+                      Option.map
+                        req.ListCisScanResultsAggregatedByChecksRequest.sortBy
+                        ~f:(fun x ->
+                              ("sortBy",
+                                (CisScanResultsAggregatedByChecksSortBy.to_value
+                                   x)));
+                      Option.map
+                        req.ListCisScanResultsAggregatedByChecksRequest.sortOrder
+                        ~f:(fun x -> ("sortOrder", (CisSortOrder.to_value x)));
+                      Option.map
+                        req.ListCisScanResultsAggregatedByChecksRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
+                      Option.map
+                        req.ListCisScanResultsAggregatedByChecksRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (CisScanResultsMaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCisScanResultsAggregatedByTargetResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("scanArn",
+                           (CisScanArn.to_value
+                              req.ListCisScanResultsAggregatedByTargetResourceRequest.scanArn));
+                      Option.map
+                        req.ListCisScanResultsAggregatedByTargetResourceRequest.filterCriteria
+                        ~f:(fun x ->
+                              ("filterCriteria",
+                                (CisScanResultsAggregatedByTargetResourceFilterCriteria.to_value
+                                   x)));
+                      Option.map
+                        req.ListCisScanResultsAggregatedByTargetResourceRequest.sortBy
+                        ~f:(fun x ->
+                              ("sortBy",
+                                (CisScanResultsAggregatedByTargetResourceSortBy.to_value
+                                   x)));
+                      Option.map
+                        req.ListCisScanResultsAggregatedByTargetResourceRequest.sortOrder
+                        ~f:(fun x -> ("sortOrder", (CisSortOrder.to_value x)));
+                      Option.map
+                        req.ListCisScanResultsAggregatedByTargetResourceRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
+                      Option.map
+                        req.ListCisScanResultsAggregatedByTargetResourceRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (CisScanResultsMaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCisScans ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListCisScansRequest.filterCriteria
+                         ~f:(fun x ->
+                               ("filterCriteria",
+                                 (ListCisScansFilterCriteria.to_value x)));
+                      Option.map req.ListCisScansRequest.detailLevel
+                        ~f:(fun x ->
+                              ("detailLevel",
+                                (ListCisScansDetailLevel.to_value x)));
+                      Option.map req.ListCisScansRequest.sortBy
+                        ~f:(fun x ->
+                              ("sortBy", (ListCisScansSortBy.to_value x)));
+                      Option.map req.ListCisScansRequest.sortOrder
+                        ~f:(fun x -> ("sortOrder", (CisSortOrder.to_value x)));
+                      Option.map req.ListCisScansRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
+                      Option.map req.ListCisScansRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (ListCisScansMaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCodeSecurityIntegrations ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCodeSecurityScanConfigurationAssociations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("scanConfigurationArn",
+                           (ScanConfigurationArn.to_value
+                              req.ListCodeSecurityScanConfigurationAssociationsRequest.scanConfigurationArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCodeSecurityScanConfigurations ->
+      let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListCoverage ->
       let (headers, body) =
@@ -515,16 +1539,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.ListCoverageRequest.filterCriteria
+                      [Option.map req.ListCoverageRequest.maxResults
                          ~f:(fun x ->
-                               ("filterCriteria",
-                                 (CoverageFilterCriteria.to_value x)));
-                      Option.map req.ListCoverageRequest.maxResults
-                        ~f:(fun x ->
-                              ("maxResults",
-                                (ListCoverageMaxResults.to_value x)));
+                               ("maxResults",
+                                 (ListCoverageMaxResults.to_value x)));
                       Option.map req.ListCoverageRequest.nextToken
-                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
+                      Option.map req.ListCoverageRequest.filterCriteria
+                        ~f:(fun x ->
+                              ("filterCriteria",
+                                (CoverageFilterCriteria.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -590,16 +1614,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.ListFiltersRequest.action
-                         ~f:(fun x -> ("action", (FilterAction.to_value x)));
-                      Option.map req.ListFiltersRequest.arns
-                        ~f:(fun x -> ("arns", (FilterArnList.to_value x)));
+                      [Option.map req.ListFiltersRequest.arns
+                         ~f:(fun x -> ("arns", (FilterArnList.to_value x)));
+                      Option.map req.ListFiltersRequest.action
+                        ~f:(fun x -> ("action", (FilterAction.to_value x)));
+                      Option.map req.ListFiltersRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
                       Option.map req.ListFiltersRequest.maxResults
                         ~f:(fun x ->
                               ("maxResults",
-                                (ListFilterMaxResults.to_value x)));
-                      Option.map req.ListFiltersRequest.nextToken
-                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                                (ListFilterMaxResults.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -616,26 +1640,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.ListFindingAggregationsRequest.accountIds
-                         ~f:(fun x ->
-                               ("accountIds", (StringFilterList.to_value x)));
-                      Option.map
-                        req.ListFindingAggregationsRequest.aggregationRequest
-                        ~f:(fun x ->
-                              ("aggregationRequest",
-                                (AggregationRequest.to_value x)));
-                      Some
-                        ("aggregationType",
-                          (AggregationType.to_value
-                             req.ListFindingAggregationsRequest.aggregationType));
+                      [Some
+                         ("aggregationType",
+                           (AggregationType.to_value
+                              req.ListFindingAggregationsRequest.aggregationType));
+                      Option.map req.ListFindingAggregationsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
                       Option.map
                         req.ListFindingAggregationsRequest.maxResults
                         ~f:(fun x ->
                               ("maxResults",
                                 (ListFindingAggregationsMaxResults.to_value x)));
-                      Option.map req.ListFindingAggregationsRequest.nextToken
-                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                      Option.map
+                        req.ListFindingAggregationsRequest.accountIds
+                        ~f:(fun x ->
+                              ("accountIds", (StringFilterList.to_value x)));
+                      Option.map
+                        req.ListFindingAggregationsRequest.aggregationRequest
+                        ~f:(fun x ->
+                              ("aggregationRequest",
+                                (AggregationRequest.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -652,16 +1676,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.ListFindingsRequest.filterCriteria
+                      [Option.map req.ListFindingsRequest.maxResults
                          ~f:(fun x ->
-                               ("filterCriteria",
-                                 (FilterCriteria.to_value x)));
-                      Option.map req.ListFindingsRequest.maxResults
-                        ~f:(fun x ->
-                              ("maxResults",
-                                (ListFindingsMaxResults.to_value x)));
+                               ("maxResults",
+                                 (ListFindingsMaxResults.to_value x)));
                       Option.map req.ListFindingsRequest.nextToken
                         ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
+                      Option.map req.ListFindingsRequest.filterCriteria
+                        ~f:(fun x ->
+                              ("filterCriteria", (FilterCriteria.to_value x)));
                       Option.map req.ListFindingsRequest.sortCriteria
                         ~f:(fun x ->
                               ("sortCriteria", (SortCriteria.to_value x)))])
@@ -681,14 +1704,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.ListMembersRequest.maxResults
+                      [Option.map req.ListMembersRequest.onlyAssociated
                          ~f:(fun x ->
-                               ("maxResults",
-                                 (ListMembersMaxResults.to_value x)));
+                               ("onlyAssociated", (Boolean.to_value x)));
+                      Option.map req.ListMembersRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (ListMembersMaxResults.to_value x)));
                       Option.map req.ListMembersRequest.nextToken
-                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
-                      Option.map req.ListMembersRequest.onlyAssociated
-                        ~f:(fun x -> ("onlyAssociated", (Boolean.to_value x)))])
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -708,18 +1732,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.ListUsageTotalsRequest.accountIds
+                      [Option.map req.ListUsageTotalsRequest.maxResults
                          ~f:(fun x ->
-                               ("accountIds",
-                                 (UsageAccountIdList.to_value x)));
-                      Option.map req.ListUsageTotalsRequest.maxResults
-                        ~f:(fun x ->
-                              ("maxResults",
-                                (ListUsageTotalsMaxResults.to_value x)));
+                               ("maxResults",
+                                 (ListUsageTotalsMaxResults.to_value x)));
                       Option.map req.ListUsageTotalsRequest.nextToken
                         ~f:(fun x ->
                               ("nextToken",
-                                (ListUsageTotalsNextToken.to_value x)))])
+                                (ListUsageTotalsNextToken.to_value x)));
+                      Option.map req.ListUsageTotalsRequest.accountIds
+                        ~f:(fun x ->
+                              ("accountIds", (UsageAccountIdList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -727,6 +1750,59 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ResetEncryptionKey -> Awso.Http.Request.make (method_of_endpoint endp)
+  | SearchVulnerabilities ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("filterCriteria",
+                           (SearchVulnerabilitiesFilterCriteria.to_value
+                              req.SearchVulnerabilitiesRequest.filterCriteria));
+                      Option.map req.SearchVulnerabilitiesRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SendCisSessionHealth -> Awso.Http.Request.make (method_of_endpoint endp)
+  | SendCisSessionTelemetry ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | StartCisSession -> Awso.Http.Request.make (method_of_endpoint endp)
+  | StartCodeSecurityScan ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.StartCodeSecurityScanRequest.clientToken
+                         ~f:(fun x ->
+                               ("clientToken",
+                                 (CodeSecurityClientToken.to_value x)));
+                      Some
+                        ("resource",
+                          (CodeSecurityResource.to_value
+                             req.StartCodeSecurityScanRequest.resource))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StopCisSession -> Awso.Http.Request.make (method_of_endpoint endp)
   | TagResource ->
       let (headers, body) =
         let headers =
@@ -747,6 +1823,140 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateCisScanConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("scanConfigurationArn",
+                           (CisScanConfigurationArn.to_value
+                              req.UpdateCisScanConfigurationRequest.scanConfigurationArn));
+                      Option.map
+                        req.UpdateCisScanConfigurationRequest.scanName
+                        ~f:(fun x -> ("scanName", (CisScanName.to_value x)));
+                      Option.map
+                        req.UpdateCisScanConfigurationRequest.securityLevel
+                        ~f:(fun x ->
+                              ("securityLevel",
+                                (CisSecurityLevel.to_value x)));
+                      Option.map
+                        req.UpdateCisScanConfigurationRequest.schedule
+                        ~f:(fun x -> ("schedule", (Schedule.to_value x)));
+                      Option.map
+                        req.UpdateCisScanConfigurationRequest.targets
+                        ~f:(fun x ->
+                              ("targets", (UpdateCisTargets.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateCodeSecurityIntegration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("integrationArn",
+                           (CodeSecurityIntegrationArn.to_value
+                              req.UpdateCodeSecurityIntegrationRequest.integrationArn));
+                      Some
+                        ("details",
+                          (UpdateIntegrationDetails.to_value
+                             req.UpdateCodeSecurityIntegrationRequest.details))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateCodeSecurityScanConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("scanConfigurationArn",
+                           (ScanConfigurationArn.to_value
+                              req.UpdateCodeSecurityScanConfigurationRequest.scanConfigurationArn));
+                      Some
+                        ("configuration",
+                          (CodeSecurityScanConfiguration.to_value
+                             req.UpdateCodeSecurityScanConfigurationRequest.configuration))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateConfigurationRequest.ecrConfiguration
+                         ~f:(fun x ->
+                               ("ecrConfiguration",
+                                 (EcrConfiguration.to_value x)));
+                      Option.map
+                        req.UpdateConfigurationRequest.ec2Configuration
+                        ~f:(fun x ->
+                              ("ec2Configuration",
+                                (Ec2Configuration.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateEc2DeepInspectionConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateEc2DeepInspectionConfigurationRequest.activateDeepInspection
+                         ~f:(fun x ->
+                               ("activateDeepInspection",
+                                 (Boolean.to_value x)));
+                      Option.map
+                        req.UpdateEc2DeepInspectionConfigurationRequest.packagePaths
+                        ~f:(fun x -> ("packagePaths", (PathList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateEncryptionKey -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateFilter ->
       let (headers, body) =
         let headers =
@@ -761,15 +1971,37 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.UpdateFilterRequest.description
                         ~f:(fun x ->
                               ("description", (FilterDescription.to_value x)));
-                      Some
-                        ("filterArn",
-                          (FilterArn.to_value
-                             req.UpdateFilterRequest.filterArn));
                       Option.map req.UpdateFilterRequest.filterCriteria
                         ~f:(fun x ->
                               ("filterCriteria", (FilterCriteria.to_value x)));
                       Option.map req.UpdateFilterRequest.name
-                        ~f:(fun x -> ("name", (FilterName.to_value x)))])
+                        ~f:(fun x -> ("name", (FilterName.to_value x)));
+                      Some
+                        ("filterArn",
+                          (FilterArn.to_value
+                             req.UpdateFilterRequest.filterArn));
+                      Option.map req.UpdateFilterRequest.reason
+                        ~f:(fun x -> ("reason", (FilterReason.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateOrgEc2DeepInspectionConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("orgPackagePaths",
+                           (PathList.to_value
+                              req.UpdateOrgEc2DeepInspectionConfigurationRequest.orgPackagePaths))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -850,24 +2082,116 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (AssociateMemberResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some AssociateMemberResponse.error_of_json))
+  | BatchAssociateCodeSecurityScanConfiguration ->
+      if is_success
+      then
+        Ok
+          (BatchAssociateCodeSecurityScanConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                BatchAssociateCodeSecurityScanConfigurationResponse.error_of_json))
+  | BatchDisassociateCodeSecurityScanConfiguration ->
+      if is_success
+      then
+        Ok
+          (BatchDisassociateCodeSecurityScanConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                BatchDisassociateCodeSecurityScanConfigurationResponse.error_of_json))
   | BatchGetAccountStatus ->
       if is_success
       then Ok (BatchGetAccountStatusResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some BatchGetAccountStatusResponse.error_of_json))
+  | BatchGetCodeSnippet ->
+      if is_success
+      then Ok (BatchGetCodeSnippetResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some BatchGetCodeSnippetResponse.error_of_json))
+  | BatchGetFindingDetails ->
+      if is_success
+      then
+        Ok (BatchGetFindingDetailsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetFindingDetailsResponse.error_of_json))
   | BatchGetFreeTrialInfo ->
       if is_success
       then Ok (BatchGetFreeTrialInfoResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some BatchGetFreeTrialInfoResponse.error_of_json))
+  | BatchGetMemberEc2DeepInspectionStatus ->
+      if is_success
+      then
+        Ok
+          (BatchGetMemberEc2DeepInspectionStatusResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                BatchGetMemberEc2DeepInspectionStatusResponse.error_of_json))
+  | BatchUpdateMemberEc2DeepInspectionStatus ->
+      if is_success
+      then
+        Ok
+          (BatchUpdateMemberEc2DeepInspectionStatusResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                BatchUpdateMemberEc2DeepInspectionStatusResponse.error_of_json))
   | CancelFindingsReport ->
       if is_success
       then Ok (CancelFindingsReportResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some CancelFindingsReportResponse.error_of_json))
+  | CancelSbomExport ->
+      if is_success
+      then Ok (CancelSbomExportResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CancelSbomExportResponse.error_of_json))
+  | CreateCisScanConfiguration ->
+      if is_success
+      then
+        Ok
+          (CreateCisScanConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCisScanConfigurationResponse.error_of_json))
+  | CreateCodeSecurityIntegration ->
+      if is_success
+      then
+        Ok
+          (CreateCodeSecurityIntegrationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCodeSecurityIntegrationResponse.error_of_json))
+  | CreateCodeSecurityScanConfiguration ->
+      if is_success
+      then
+        Ok
+          (CreateCodeSecurityScanConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCodeSecurityScanConfigurationResponse.error_of_json))
   | CreateFilter ->
       if is_success
       then Ok (CreateFilterResponse.of_json (response_to_json resp))
@@ -878,6 +2202,40 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateFindingsReportResponse.error_of_json))
+  | CreateSbomExport ->
+      if is_success
+      then Ok (CreateSbomExportResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateSbomExportResponse.error_of_json))
+  | DeleteCisScanConfiguration ->
+      if is_success
+      then
+        Ok
+          (DeleteCisScanConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteCisScanConfigurationResponse.error_of_json))
+  | DeleteCodeSecurityIntegration ->
+      if is_success
+      then
+        Ok
+          (DeleteCodeSecurityIntegrationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteCodeSecurityIntegrationResponse.error_of_json))
+  | DeleteCodeSecurityScanConfiguration ->
+      if is_success
+      then
+        Ok
+          (DeleteCodeSecurityScanConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteCodeSecurityScanConfigurationResponse.error_of_json))
   | DeleteFilter ->
       if is_success
       then Ok (DeleteFilterResponse.of_json (response_to_json resp))
@@ -926,6 +2284,55 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some EnableDelegatedAdminAccountResponse.error_of_json))
+  | GetCisScanReport ->
+      if is_success
+      then Ok (GetCisScanReportResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetCisScanReportResponse.error_of_json))
+  | GetCisScanResultDetails ->
+      if is_success
+      then
+        Ok (GetCisScanResultDetailsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetCisScanResultDetailsResponse.error_of_json))
+  | GetClustersForImage ->
+      if is_success
+      then Ok (GetClustersForImageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetClustersForImageResponse.error_of_json))
+  | GetCodeSecurityIntegration ->
+      if is_success
+      then
+        Ok
+          (GetCodeSecurityIntegrationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetCodeSecurityIntegrationResponse.error_of_json))
+  | GetCodeSecurityScan ->
+      if is_success
+      then Ok (GetCodeSecurityScanResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetCodeSecurityScanResponse.error_of_json))
+  | GetCodeSecurityScanConfiguration ->
+      if is_success
+      then
+        Ok
+          (GetCodeSecurityScanConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetCodeSecurityScanConfigurationResponse.error_of_json))
+  | GetConfiguration ->
+      if is_success
+      then Ok (GetConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetConfigurationResponse.error_of_json))
   | GetDelegatedAdminAccount ->
       if is_success
       then
@@ -934,6 +2341,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetDelegatedAdminAccountResponse.error_of_json))
+  | GetEc2DeepInspectionConfiguration ->
+      if is_success
+      then
+        Ok
+          (GetEc2DeepInspectionConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetEc2DeepInspectionConfigurationResponse.error_of_json))
+  | GetEncryptionKey ->
+      if is_success
+      then Ok (GetEncryptionKeyResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetEncryptionKeyResponse.error_of_json))
   | GetFindingsReportStatus ->
       if is_success
       then
@@ -946,6 +2368,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetMemberResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetMemberResponse.error_of_json))
+  | GetSbomExport ->
+      if is_success
+      then Ok (GetSbomExportResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetSbomExportResponse.error_of_json))
   | ListAccountPermissions ->
       if is_success
       then
@@ -954,6 +2380,71 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListAccountPermissionsResponse.error_of_json))
+  | ListCisScanConfigurations ->
+      if is_success
+      then
+        Ok
+          (ListCisScanConfigurationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListCisScanConfigurationsResponse.error_of_json))
+  | ListCisScanResultsAggregatedByChecks ->
+      if is_success
+      then
+        Ok
+          (ListCisScanResultsAggregatedByChecksResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListCisScanResultsAggregatedByChecksResponse.error_of_json))
+  | ListCisScanResultsAggregatedByTargetResource ->
+      if is_success
+      then
+        Ok
+          (ListCisScanResultsAggregatedByTargetResourceResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListCisScanResultsAggregatedByTargetResourceResponse.error_of_json))
+  | ListCisScans ->
+      if is_success
+      then Ok (ListCisScansResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListCisScansResponse.error_of_json))
+  | ListCodeSecurityIntegrations ->
+      if is_success
+      then
+        Ok
+          (ListCodeSecurityIntegrationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListCodeSecurityIntegrationsResponse.error_of_json))
+  | ListCodeSecurityScanConfigurationAssociations ->
+      if is_success
+      then
+        Ok
+          (ListCodeSecurityScanConfigurationAssociationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListCodeSecurityScanConfigurationAssociationsResponse.error_of_json))
+  | ListCodeSecurityScanConfigurations ->
+      if is_success
+      then
+        Ok
+          (ListCodeSecurityScanConfigurationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListCodeSecurityScanConfigurationsResponse.error_of_json))
   | ListCoverage ->
       if is_success
       then Ok (ListCoverageResponse.of_json (response_to_json resp))
@@ -1006,6 +2497,62 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (ListUsageTotalsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListUsageTotalsResponse.error_of_json))
+  | ResetEncryptionKey ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ResetEncryptionKeyResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some ResetEncryptionKeyResponse.error_of_json))
+  | SearchVulnerabilities ->
+      if is_success
+      then Ok (SearchVulnerabilitiesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SearchVulnerabilitiesResponse.error_of_json))
+  | SendCisSessionHealth ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (SendCisSessionHealthResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some SendCisSessionHealthResponse.error_of_json))
+  | SendCisSessionTelemetry ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (SendCisSessionTelemetryResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some SendCisSessionTelemetryResponse.error_of_json))
+  | StartCisSession ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (StartCisSessionResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some StartCisSessionResponse.error_of_json))
+  | StartCodeSecurityScan ->
+      if is_success
+      then Ok (StartCodeSecurityScanResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartCodeSecurityScanResponse.error_of_json))
+  | StopCisSession ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (StopCisSessionResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some StopCisSessionResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -1020,10 +2567,80 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UntagResourceResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateCisScanConfiguration ->
+      if is_success
+      then
+        Ok
+          (UpdateCisScanConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateCisScanConfigurationResponse.error_of_json))
+  | UpdateCodeSecurityIntegration ->
+      if is_success
+      then
+        Ok
+          (UpdateCodeSecurityIntegrationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateCodeSecurityIntegrationResponse.error_of_json))
+  | UpdateCodeSecurityScanConfiguration ->
+      if is_success
+      then
+        Ok
+          (UpdateCodeSecurityScanConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateCodeSecurityScanConfigurationResponse.error_of_json))
+  | UpdateConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateConfigurationResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateConfigurationResponse.error_of_json))
+  | UpdateEc2DeepInspectionConfiguration ->
+      if is_success
+      then
+        Ok
+          (UpdateEc2DeepInspectionConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateEc2DeepInspectionConfigurationResponse.error_of_json))
+  | UpdateEncryptionKey ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateEncryptionKeyResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateEncryptionKeyResponse.error_of_json))
   | UpdateFilter ->
       if is_success
       then Ok (UpdateFilterResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UpdateFilterResponse.error_of_json))
+  | UpdateOrgEc2DeepInspectionConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateOrgEc2DeepInspectionConfigurationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                UpdateOrgEc2DeepInspectionConfigurationResponse.error_of_json))
   | UpdateOrganizationConfiguration ->
       if is_success
       then

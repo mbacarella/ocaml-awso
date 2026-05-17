@@ -19,6 +19,10 @@ let create_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAlias input
 let create_build ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateBuild input
+let create_container_fleet ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateContainerFleet input
+let create_container_group_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateContainerGroupDefinition input
 let create_fleet ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFleet input
 let create_fleet_locations ?endpoint_url ?cfg input =
@@ -29,6 +33,8 @@ let create_game_session ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateGameSession input
 let create_game_session_queue ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateGameSessionQueue input
+let create_location ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLocation input
 let create_matchmaking_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateMatchmakingConfiguration input
 let create_matchmaking_rule_set ?endpoint_url ?cfg input =
@@ -47,6 +53,10 @@ let delete_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAlias input
 let delete_build ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteBuild input
+let delete_container_fleet ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteContainerFleet input
+let delete_container_group_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteContainerGroupDefinition input
 let delete_fleet ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFleet input
 let delete_fleet_locations ?endpoint_url ?cfg input =
@@ -55,6 +65,8 @@ let delete_game_server_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteGameServerGroup input
 let delete_game_session_queue ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteGameSessionQueue input
+let delete_location ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteLocation input
 let delete_matchmaking_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteMatchmakingConfiguration input
 let delete_matchmaking_rule_set ?endpoint_url ?cfg input =
@@ -67,18 +79,30 @@ let delete_vpc_peering_authorization ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteVpcPeeringAuthorization input
 let delete_vpc_peering_connection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteVpcPeeringConnection input
+let deregister_compute ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeregisterCompute input
 let deregister_game_server ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeregisterGameServer input
 let describe_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAlias input
 let describe_build ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeBuild input
+let describe_compute ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCompute input
+let describe_container_fleet ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeContainerFleet input
+let describe_container_group_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeContainerGroupDefinition input
+let describe_container_group_port_mappings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeContainerGroupPortMappings input
 let describe_e_c2_instance_limits ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeEC2InstanceLimits input
 let describe_fleet_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeFleetAttributes input
 let describe_fleet_capacity ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeFleetCapacity input
+let describe_fleet_deployment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeFleetDeployment input
 let describe_fleet_events ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeFleetEvents input
 let describe_fleet_location_attributes ?endpoint_url ?cfg input =
@@ -125,26 +149,47 @@ let describe_vpc_peering_authorizations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeVpcPeeringAuthorizations input
 let describe_vpc_peering_connections ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeVpcPeeringConnections input
+let get_compute_access ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetComputeAccess input
+let get_compute_auth_token ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetComputeAuthToken input
 let get_game_session_log_url ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetGameSessionLogUrl input
 let get_instance_access ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetInstanceAccess input
+let get_player_connection_details ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetPlayerConnectionDetails input
 let list_aliases ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAliases input
 let list_builds ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBuilds input
+let list_compute ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCompute input
+let list_container_fleets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListContainerFleets input
+let list_container_group_definition_versions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListContainerGroupDefinitionVersions
+    input
+let list_container_group_definitions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListContainerGroupDefinitions input
+let list_fleet_deployments ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListFleetDeployments input
 let list_fleets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFleets input
 let list_game_server_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListGameServerGroups input
 let list_game_servers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListGameServers input
+let list_locations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListLocations input
 let list_scripts ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListScripts input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let put_scaling_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutScalingPolicy input
+let register_compute ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RegisterCompute input
 let register_game_server ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterGameServer input
 let request_upload_credentials ?endpoint_url ?cfg input =
@@ -173,12 +218,18 @@ let suspend_game_server_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SuspendGameServerGroup input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
+let terminate_game_session ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TerminateGameSession input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAlias input
 let update_build ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateBuild input
+let update_container_fleet ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateContainerFleet input
+let update_container_group_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateContainerGroupDefinition input
 let update_fleet_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateFleetAttributes input
 let update_fleet_capacity ?endpoint_url ?cfg input =

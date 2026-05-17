@@ -2,16 +2,24 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | CancelParticipantAuthentication:
+  (CancelParticipantAuthenticationRequest.t,
+  CancelParticipantAuthenticationResponse.t,
+  CancelParticipantAuthenticationResponse.error) t 
   | CompleteAttachmentUpload: (CompleteAttachmentUploadRequest.t,
   CompleteAttachmentUploadResponse.t, CompleteAttachmentUploadResponse.error)
   t 
   | CreateParticipantConnection: (CreateParticipantConnectionRequest.t,
   CreateParticipantConnectionResponse.t,
   CreateParticipantConnectionResponse.error) t 
+  | DescribeView: (DescribeViewRequest.t, DescribeViewResponse.t,
+  DescribeViewResponse.error) t 
   | DisconnectParticipant: (DisconnectParticipantRequest.t,
   DisconnectParticipantResponse.t, DisconnectParticipantResponse.error) t 
   | GetAttachment: (GetAttachmentRequest.t, GetAttachmentResponse.t,
   GetAttachmentResponse.error) t 
+  | GetAuthenticationUrl: (GetAuthenticationUrlRequest.t,
+  GetAuthenticationUrlResponse.t, GetAuthenticationUrlResponse.error) t 
   | GetTranscript: (GetTranscriptRequest.t, GetTranscriptResponse.t,
   GetTranscriptResponse.error) t 
   | SendEvent: (SendEventRequest.t, SendEventResponse.t,
@@ -22,10 +30,13 @@ type ('i, 'o, 'e) t =
   StartAttachmentUploadResponse.t, StartAttachmentUploadResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | CancelParticipantAuthentication -> `POST
   | CompleteAttachmentUpload -> `POST
   | CreateParticipantConnection -> `POST
+  | DescribeView -> `GET
   | DisconnectParticipant -> `POST
   | GetAttachment -> `POST
+  | GetAuthenticationUrl -> `POST
   | GetTranscript -> `POST
   | SendEvent -> `POST
   | SendMessage -> `POST
@@ -33,15 +44,23 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | CancelParticipantAuthentication ->
+          (Format.kasprintf Uri.of_string)
+            "/participant/cancel-authentication"
       | CompleteAttachmentUpload ->
           (Format.kasprintf Uri.of_string)
             "/participant/complete-attachment-upload"
       | CreateParticipantConnection ->
           (Format.kasprintf Uri.of_string) "/participant/connection"
+      | DescribeView ->
+          (Format.kasprintf Uri.of_string) "/participant/views/%s"
+            (ViewToken.to_header x.DescribeViewRequest.viewToken)
       | DisconnectParticipant ->
           (Format.kasprintf Uri.of_string) "/participant/disconnect"
       | GetAttachment ->
           (Format.kasprintf Uri.of_string) "/participant/attachment"
+      | GetAuthenticationUrl ->
+          (Format.kasprintf Uri.of_string) "/participant/authentication-url"
       | GetTranscript ->
           (Format.kasprintf Uri.of_string) "/participant/transcript"
       | SendEvent -> (Format.kasprintf Uri.of_string) "/participant/event"
@@ -54,6 +73,32 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | CancelParticipantAuthentication ->
+      let (headers, body) =
+        let headers =
+          Some
+            ((List.filter_opt
+                [Some
+                   ("X-Amz-Bearer",
+                     (ParticipantToken.to_header
+                        req.CancelParticipantAuthenticationRequest.connectionToken))])
+               |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("SessionId",
+                           (SessionId.to_value
+                              req.CancelParticipantAuthenticationRequest.sessionId))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CompleteAttachmentUpload ->
       let (headers, body) =
         let headers =
@@ -99,14 +144,35 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("Type",
-                           (ConnectionTypeList.to_value
-                              req.CreateParticipantConnectionRequest.type_));
+                      [Option.map
+                         req.CreateParticipantConnectionRequest.type_
+                         ~f:(fun x ->
+                               ("Type", (ConnectionTypeList.to_value x)));
                       Option.map
                         req.CreateParticipantConnectionRequest.connectParticipant
                         ~f:(fun x ->
-                              ("ConnectParticipant", (Bool.to_value x)))])
+                              ("ConnectParticipant", (Bool_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeView ->
+      let (headers, body) =
+        let headers =
+          Some
+            ((List.filter_opt
+                [Some
+                   ("X-Amz-Bearer",
+                     (ParticipantToken.to_header
+                        req.DescribeViewRequest.connectionToken))])
+               |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map (List.filter_opt [])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -158,7 +224,41 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("AttachmentId",
                            (ArtifactId.to_value
-                              req.GetAttachmentRequest.attachmentId))])
+                              req.GetAttachmentRequest.attachmentId));
+                      Option.map req.GetAttachmentRequest.urlExpiryInSeconds
+                        ~f:(fun x ->
+                              ("UrlExpiryInSeconds",
+                                (URLExpiryInSeconds.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetAuthenticationUrl ->
+      let (headers, body) =
+        let headers =
+          Some
+            ((List.filter_opt
+                [Some
+                   ("X-Amz-Bearer",
+                     (ParticipantToken.to_header
+                        req.GetAuthenticationUrlRequest.connectionToken))])
+               |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("SessionId",
+                           (SessionId.to_value
+                              req.GetAuthenticationUrlRequest.sessionId));
+                      Some
+                        ("RedirectUri",
+                          (RedirectURI.to_value
+                             req.GetAuthenticationUrlRequest.redirectUri))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -352,6 +452,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | CancelParticipantAuthentication ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CancelParticipantAuthenticationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some CancelParticipantAuthenticationResponse.error_of_json))
   | CompleteAttachmentUpload ->
       if is_success
       then
@@ -373,6 +485,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateParticipantConnectionResponse.error_of_json))
+  | DescribeView ->
+      if is_success
+      then Ok (DescribeViewResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeViewResponse.error_of_json))
   | DisconnectParticipant ->
       if is_success
       then
@@ -386,6 +502,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetAttachmentResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetAttachmentResponse.error_of_json))
+  | GetAuthenticationUrl ->
+      if is_success
+      then Ok (GetAuthenticationUrlResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetAuthenticationUrlResponse.error_of_json))
   | GetTranscript ->
       if is_success
       then Ok (GetTranscriptResponse.of_json (response_to_json resp))

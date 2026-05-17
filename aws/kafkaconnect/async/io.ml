@@ -21,17 +21,29 @@ let delete_connector ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteConnector input
 let delete_custom_plugin ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCustomPlugin input
+let delete_worker_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteWorkerConfiguration input
 let describe_connector ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeConnector input
+let describe_connector_operation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeConnectorOperation input
 let describe_custom_plugin ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCustomPlugin input
 let describe_worker_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeWorkerConfiguration input
+let list_connector_operations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListConnectorOperations input
 let list_connectors ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListConnectors input
 let list_custom_plugins ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCustomPlugins input
+let list_tags_for_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let list_worker_configurations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListWorkerConfigurations input
+let tag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TagResource input
+let untag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_connector ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateConnector input

@@ -36,6 +36,96 @@ module Double =
     let of_json j = float_of_json ~kind:"a double" j
     let to_json = simple_to_json to_value
   end
+module Earfcn =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:262143) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Earfcn" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module EutranCellId =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:268435455) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for EutranCellId" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Pci =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:503) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Pci" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Rsrp =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:(-44)) >>=
+             (fun () -> check_int_min i ~min:(-140)));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Rsrp" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Rsrq =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:(-3.)) >>=
+             (fun () -> check_float_min i ~min:(-19.5)));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
 module Position =
   struct
     type nonrec t = Double.t list
@@ -44,6 +134,9 @@ module Position =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:2));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Double.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -63,30 +156,147 @@ module Position =
     let of_json j = list_of_json ~kind:"Position" ~of_json:Double.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Integer =
+module LteNetworkMeasurements =
   struct
-    type nonrec t = int
-    let make i = i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    type nonrec t =
+      {
+      earfcn: Earfcn.t
+        [@ocaml.doc
+          "E-UTRA (Evolved Universal Terrestrial Radio Access) absolute radio frequency channel number (EARFCN)."];
+      cellId: EutranCellId.t [@ocaml.doc "E-UTRAN Cell Identifier (ECI)."];
+      pci: Pci.t [@ocaml.doc "Physical Cell ID (PCI)."];
+      rsrp: Rsrp.t option
+        [@ocaml.doc
+          "Signal power of the reference signal received, measured in dBm (decibel-milliwatts)."];
+      rsrq: Rsrq.t option
+        [@ocaml.doc
+          "Signal quality of the reference Signal received, measured in decibels (dB)."]}
+    let context_ = "LteNetworkMeasurements"
+    let make ?rsrp =
+      fun ?rsrq ->
+        fun ~earfcn ->
+          fun ~cellId ->
+            fun ~pci -> fun () -> { rsrp; rsrq; earfcn; cellId; pci }
+    let to_value x =
+      structure_to_value
+        [("Earfcn", (Some (Earfcn.to_value x.earfcn)));
+        ("CellId", (Some (EutranCellId.to_value x.cellId)));
+        ("Pci", (Some (Pci.to_value x.pci)));
+        ("Rsrp", (Option.map x.rsrp ~f:Rsrp.to_value));
+        ("Rsrq", (Option.map x.rsrq ~f:Rsrq.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module String_ =
+      let rsrq = (Option.map ~f:Rsrq.of_xml) (Xml.child xml_arg0 "Rsrq") in
+      let rsrp = (Option.map ~f:Rsrp.of_xml) (Xml.child xml_arg0 "Rsrp") in
+      let pci = Pci.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Pci") in
+      let cellId =
+        EutranCellId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CellId") in
+      let earfcn =
+        Earfcn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Earfcn") in
+      make ?rsrq ?rsrp ~pci ~cellId ~earfcn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rsrq = field_map json__ "Rsrq" Rsrq.of_json in
+      let rsrp = field_map json__ "Rsrp" Rsrp.of_json in
+      let pci = field_map_exn json__ "Pci" Pci.of_json in
+      let cellId = field_map_exn json__ "CellId" EutranCellId.of_json in
+      let earfcn = field_map_exn json__ "Earfcn" Earfcn.of_json in
+      make ?rsrq ?rsrp ~pci ~cellId ~earfcn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "LTE network measurements."]
+module AndroidPackageName =
   struct
     type nonrec t = string
-    let context_ = "String"
-    let make i = i
+    let context_ = "AndroidPackageName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"([A-Za-z][A-Za-z\\d_]*\\.)+[A-Za-z][A-Za-z\\d_]*")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
+    let of_json j = string_of_json ~kind:"AndroidPackageName" j
+    let to_json = simple_to_json to_value
+  end
+module Sha1CertificateFingerprint =
+  struct
+    type nonrec t = string
+    let context_ = "Sha1CertificateFingerprint"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:59) >>=
+             (fun () ->
+                (check_string_max i ~max:59) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"([A-Fa-f0-9]{2}:){19}[A-Fa-f0-9]{2}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Sha1CertificateFingerprint" j
+    let to_json = simple_to_json to_value
+  end
+module AppleBundleId =
+  struct
+    type nonrec t = string
+    let context_ = "AppleBundleId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:155) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[A-Za-z0-9\\-]+(\\.[A-Za-z0-9\\-]+)+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AppleBundleId" j
+    let to_json = simple_to_json to_value
+  end
+module ValidateAddressAdditionalFeature =
+  struct
+    type nonrec t =
+      | Position 
+      | CountrySpecificAttributes 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Position -> "Position"
+      | CountrySpecificAttributes -> "CountrySpecificAttributes"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Position" -> Position
+      | "CountrySpecificAttributes" -> CountrySpecificAttributes
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ValidateAddressAdditionalFeature"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ValidateAddressAdditionalFeature" j)
     let to_json = simple_to_json to_value
   end
 module LinearRing =
@@ -94,6 +304,9 @@ module LinearRing =
     type nonrec t = Position.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:4); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Position.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -112,6 +325,443 @@ module LinearRing =
                      | _ -> true))) ~f:Position.of_xml)
     let of_json j =
       list_of_json ~kind:"LinearRing" ~of_json:Position.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Boolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module LteCellDetailsMccInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:999) >>=
+             (fun () -> check_int_min i ~min:200));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for LteCellDetailsMccInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LteCellDetailsMncInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:999) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for LteCellDetailsMncInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LteCellDetailsNetworkMeasurementsList =
+  struct
+    type nonrec t = LteNetworkMeasurements.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:32) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LteNetworkMeasurements.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LteNetworkMeasurements.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LteCellDetailsNetworkMeasurementsList"
+        ~of_json:LteNetworkMeasurements.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LteCellDetailsTacInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:65535) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for LteCellDetailsTacInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LteCellDetailsTimingAdvanceInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1282) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for LteCellDetailsTimingAdvanceInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LteLocalId =
+  struct
+    type nonrec t =
+      {
+      earfcn: Earfcn.t
+        [@ocaml.doc
+          "E-UTRA (Evolved Universal Terrestrial Radio Access) absolute radio frequency channel number (EARFCN)."];
+      pci: Pci.t [@ocaml.doc "Physical Cell ID (PCI)."]}
+    let context_ = "LteLocalId"
+    let make ~earfcn = fun ~pci -> fun () -> { earfcn; pci }
+    let to_value x =
+      structure_to_value
+        [("Earfcn", (Some (Earfcn.to_value x.earfcn)));
+        ("Pci", (Some (Pci.to_value x.pci)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pci = Pci.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Pci") in
+      let earfcn =
+        Earfcn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Earfcn") in
+      make ~pci ~earfcn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pci = field_map_exn json__ "Pci" Pci.of_json in
+      let earfcn = field_map_exn json__ "Earfcn" Earfcn.of_json in
+      make ~pci ~earfcn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "LTE local identification information (local ID)."]
+module PlaceCategory =
+  struct
+    type nonrec t = string
+    let context_ = "PlaceCategory"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:35) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PlaceCategory" j
+    let to_json = simple_to_json to_value
+  end
+module PlaceSupplementalCategory =
+  struct
+    type nonrec t = string
+    let context_ = "PlaceSupplementalCategory"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:35) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PlaceSupplementalCategory" j
+    let to_json = simple_to_json to_value
+  end
+module SensitiveInteger =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for SensitiveInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SensitiveString =
+  struct
+    type nonrec t = string
+    let context_ = "SensitiveString"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SensitiveString" j
+    let to_json = simple_to_json to_value
+  end
+module ApiKeyAction =
+  struct
+    type nonrec t = string
+    let context_ = "ApiKeyAction"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:5) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(geo|geo-routes|geo-places|geo-maps):\\w*\\*?")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ApiKeyAction" j
+    let to_json = simple_to_json to_value
+  end
+module AndroidApp =
+  struct
+    type nonrec t =
+      {
+      package: AndroidPackageName.t
+        [@ocaml.doc
+          "Unique package name identifier for an Android app. Example: com.mydomain.appname"];
+      certificateFingerprint: Sha1CertificateFingerprint.t
+        [@ocaml.doc
+          "20 byte SHA-1 certificate fingerprint associated with the Android app signing certificate. Example: BB:0D:AC:74:D3:21:E1:43:67:71:9B:62:91:AF:A1:66:6E:44:5D:75"]}
+    let context_ = "AndroidApp"
+    let make ~package =
+      fun ~certificateFingerprint ->
+        fun () -> { package; certificateFingerprint }
+    let to_value x =
+      structure_to_value
+        [("Package", (Some (AndroidPackageName.to_value x.package)));
+        ("CertificateFingerprint",
+          (Some
+             (Sha1CertificateFingerprint.to_value x.certificateFingerprint)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateFingerprint =
+        Sha1CertificateFingerprint.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CertificateFingerprint") in
+      let package =
+        AndroidPackageName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Package") in
+      make ~certificateFingerprint ~package ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateFingerprint =
+        field_map_exn json__ "CertificateFingerprint"
+          Sha1CertificateFingerprint.of_json in
+      let package = field_map_exn json__ "Package" AndroidPackageName.of_json in
+      make ~certificateFingerprint ~package ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Unique identifying information for an Android app. Consists of a package name and a 20 byte SHA-1 certificate fingerprint."]
+module AppleApp =
+  struct
+    type nonrec t =
+      {
+      bundleId: AppleBundleId.t
+        [@ocaml.doc
+          "The unique identifier of the app across all Apple platforms (iOS, macOS, tvOS and watchOS). Example: com.mydomain.appname"]}
+    let context_ = "AppleApp"
+    let make ~bundleId = fun () -> { bundleId }
+    let to_value x =
+      structure_to_value
+        [("BundleId", (Some (AppleBundleId.to_value x.bundleId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let bundleId =
+        AppleBundleId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BundleId") in
+      make ~bundleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bundleId = field_map_exn json__ "BundleId" AppleBundleId.of_json in
+      make ~bundleId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Unique identifying information for an Apple app (iOS, macOS, tvOS and watchOS). Consists of an Apple Bundle ID."]
+module RefererPattern =
+  struct
+    type nonrec t = string
+    let context_ = "RefererPattern"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:253) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"([\\w!$&()*+,./:;=?@\\x{60}-]|%([\\dA-Fa-f]{2}|[\\dA-Fa-f]?\\*))+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RefererPattern" j
+    let to_json = simple_to_json to_value
+  end
+module GeoArnV2 =
+  struct
+    type nonrec t = string
+    let context_ = "GeoArnV2"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1600) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:".*(^arn(:[a-z0-9]+([.-][a-z0-9]+)*):geo(:([a-z0-9]+([.-][a-z0-9]+)*))(:[0-9]+):((\\*)|([-a-z]+[/][*-._\\w]+))$)|(^arn(:[a-z0-9]+([.-][a-z0-9]+)*):(geo-routes|geo-places|geo-maps)(:((\\*)|([a-z0-9]+([.-][a-z0-9]+)*)))::((provider[\\/][*-._\\w]+))$).*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GeoArnV2" j
+    let to_json = simple_to_json to_value
+  end
+module ValidateAddressAdditionalFeatureList =
+  struct
+    type nonrec t = ValidateAddressAdditionalFeature.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ValidateAddressAdditionalFeature.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ValidateAddressAdditionalFeature.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ValidateAddressAdditionalFeatureList"
+        ~of_json:ValidateAddressAdditionalFeature.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module JobErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "JobErrorMessage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:200) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"JobErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module SensitiveDouble =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module LinearRings =
+  struct
+    type nonrec t = LinearRing.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LinearRing.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LinearRing.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LinearRings" ~of_json:LinearRing.of_json j
     let to_json v = composed_to_json to_value v
   end
 module StepDistanceDouble =
@@ -196,18 +846,206 @@ module RouteMatrixErrorCode =
     let of_json j = of_string (string_of_json ~kind:"RouteMatrixErrorCode" j)
     let to_json = simple_to_json to_value
   end
-module Boolean =
+module String_ =
   struct
-    type nonrec t = bool
+    type nonrec t = string
+    let context_ = "String"
     let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
-    let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
+  end
+module LteCellDetails =
+  struct
+    type nonrec t =
+      {
+      cellId: EutranCellId.t
+        [@ocaml.doc "The E-UTRAN Cell Identifier (ECI)."];
+      mcc: LteCellDetailsMccInteger.t
+        [@ocaml.doc "The Mobile Country Code (MCC)."];
+      mnc: LteCellDetailsMncInteger.t
+        [@ocaml.doc "The Mobile Network Code (MNC)"];
+      localId: LteLocalId.t option
+        [@ocaml.doc "The LTE local identification information (local ID)."];
+      networkMeasurements: LteCellDetailsNetworkMeasurementsList.t option
+        [@ocaml.doc "The network measurements."];
+      timingAdvance: LteCellDetailsTimingAdvanceInteger.t option
+        [@ocaml.doc "Timing Advance (TA)."];
+      nrCapable: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the LTE object is capable of supporting NR (new radio)."];
+      rsrp: Rsrp.t option
+        [@ocaml.doc
+          "Signal power of the reference signal received, measured in decibel-milliwatts (dBm)."];
+      rsrq: Rsrq.t option
+        [@ocaml.doc
+          "Signal quality of the reference Signal received, measured in decibels (dB)."];
+      tac: LteCellDetailsTacInteger.t option
+        [@ocaml.doc "LTE Tracking Area Code (TAC)."]}
+    let context_ = "LteCellDetails"
+    let make ?localId =
+      fun ?networkMeasurements ->
+        fun ?timingAdvance ->
+          fun ?nrCapable ->
+            fun ?rsrp ->
+              fun ?rsrq ->
+                fun ?tac ->
+                  fun ~cellId ->
+                    fun ~mcc ->
+                      fun ~mnc ->
+                        fun () ->
+                          {
+                            localId;
+                            networkMeasurements;
+                            timingAdvance;
+                            nrCapable;
+                            rsrp;
+                            rsrq;
+                            tac;
+                            cellId;
+                            mcc;
+                            mnc
+                          }
+    let to_value x =
+      structure_to_value
+        [("CellId", (Some (EutranCellId.to_value x.cellId)));
+        ("Mcc", (Some (LteCellDetailsMccInteger.to_value x.mcc)));
+        ("Mnc", (Some (LteCellDetailsMncInteger.to_value x.mnc)));
+        ("LocalId", (Option.map x.localId ~f:LteLocalId.to_value));
+        ("NetworkMeasurements",
+          (Option.map x.networkMeasurements
+             ~f:LteCellDetailsNetworkMeasurementsList.to_value));
+        ("TimingAdvance",
+          (Option.map x.timingAdvance
+             ~f:LteCellDetailsTimingAdvanceInteger.to_value));
+        ("NrCapable", (Option.map x.nrCapable ~f:Boolean.to_value));
+        ("Rsrp", (Option.map x.rsrp ~f:Rsrp.to_value));
+        ("Rsrq", (Option.map x.rsrq ~f:Rsrq.to_value));
+        ("Tac", (Option.map x.tac ~f:LteCellDetailsTacInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tac =
+        (Option.map ~f:LteCellDetailsTacInteger.of_xml)
+          (Xml.child xml_arg0 "Tac") in
+      let rsrq = (Option.map ~f:Rsrq.of_xml) (Xml.child xml_arg0 "Rsrq") in
+      let rsrp = (Option.map ~f:Rsrp.of_xml) (Xml.child xml_arg0 "Rsrp") in
+      let nrCapable =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "NrCapable") in
+      let timingAdvance =
+        (Option.map ~f:LteCellDetailsTimingAdvanceInteger.of_xml)
+          (Xml.child xml_arg0 "TimingAdvance") in
+      let networkMeasurements =
+        (Option.map ~f:LteCellDetailsNetworkMeasurementsList.of_xml)
+          (Xml.child xml_arg0 "NetworkMeasurements") in
+      let localId =
+        (Option.map ~f:LteLocalId.of_xml) (Xml.child xml_arg0 "LocalId") in
+      let mnc =
+        LteCellDetailsMncInteger.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Mnc") in
+      let mcc =
+        LteCellDetailsMccInteger.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Mcc") in
+      let cellId =
+        EutranCellId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CellId") in
+      make ?tac ?rsrq ?rsrp ?nrCapable ?timingAdvance ?networkMeasurements
+        ?localId ~mnc ~mcc ~cellId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tac = field_map json__ "Tac" LteCellDetailsTacInteger.of_json in
+      let rsrq = field_map json__ "Rsrq" Rsrq.of_json in
+      let rsrp = field_map json__ "Rsrp" Rsrp.of_json in
+      let nrCapable = field_map json__ "NrCapable" Boolean.of_json in
+      let timingAdvance =
+        field_map json__ "TimingAdvance"
+          LteCellDetailsTimingAdvanceInteger.of_json in
+      let networkMeasurements =
+        field_map json__ "NetworkMeasurements"
+          LteCellDetailsNetworkMeasurementsList.of_json in
+      let localId = field_map json__ "LocalId" LteLocalId.of_json in
+      let mnc = field_map_exn json__ "Mnc" LteCellDetailsMncInteger.of_json in
+      let mcc = field_map_exn json__ "Mcc" LteCellDetailsMccInteger.of_json in
+      let cellId = field_map_exn json__ "CellId" EutranCellId.of_json in
+      make ?tac ?rsrq ?rsrp ?nrCapable ?timingAdvance ?networkMeasurements
+        ?localId ~mnc ~mcc ~cellId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details about the Long-Term Evolution (LTE) network."]
+module WiFiAccessPointMacAddressString =
+  struct
+    type nonrec t = string
+    let context_ = "WiFiAccessPointMacAddressString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:17) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WiFiAccessPointMacAddressString" j
+    let to_json = simple_to_json to_value
+  end
+module WiFiAccessPointRssInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:0) >>=
+             (fun () -> check_int_min i ~min:(-128)));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for WiFiAccessPointRssInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PlaceCategoryList =
+  struct
+    type nonrec t = PlaceCategory.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PlaceCategory.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PlaceCategory.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PlaceCategoryList" ~of_json:PlaceCategory.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module PlaceGeometry =
   struct
@@ -226,46 +1064,495 @@ module PlaceGeometry =
         (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "Point") in
       make ?point ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let point = field_map json "Point" Position.of_json in make ?point ()
+    let of_json json__ =
+      let point = field_map json__ "Point" Position.of_json in make ?point ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Places uses a point geometry to specify a location or a Place."]
+module PlaceSupplementalCategoryList =
+  struct
+    type nonrec t = PlaceSupplementalCategory.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PlaceSupplementalCategory.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PlaceSupplementalCategory.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PlaceSupplementalCategoryList"
+        ~of_json:PlaceSupplementalCategory.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SensitiveBoolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module TimeZone =
   struct
     type nonrec t =
       {
-      name: String_.t
+      name: SensitiveString.t option
         [@ocaml.doc
           "The name of the time zone, following the IANA time zone standard. For example, America/Los_Angeles."];
-      offset: Integer.t option
+      offset: SensitiveInteger.t option
         [@ocaml.doc "The time zone's offset, in seconds, from UTC."]}
-    let context_ = "TimeZone"
-    let make ?offset = fun ~name -> fun () -> { offset; name }
+    let make ?name = fun ?offset -> fun () -> { name; offset }
     let to_value x =
       structure_to_value
-        [("Name", (Some (String_.to_value x.name)));
-        ("Offset", (Option.map x.offset ~f:Integer.to_value))]
+        [("Name", (Option.map x.name ~f:SensitiveString.to_value));
+        ("Offset", (Option.map x.offset ~f:SensitiveInteger.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let offset =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Offset") in
+        (Option.map ~f:SensitiveInteger.of_xml) (Xml.child xml_arg0 "Offset") in
       let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?offset ~name ()
+        (Option.map ~f:SensitiveString.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?offset ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let offset = field_map json "Offset" Integer.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
-      make ?offset ~name ()
+    let of_json json__ =
+      let offset = field_map json__ "Offset" SensitiveInteger.of_json in
+      let name = field_map json__ "Name" SensitiveString.of_json in
+      make ?offset ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a time zone. Includes the name of the time zone and the offset from UTC in seconds."]
-module LinearRings =
+module ApiKeyRestrictionsAllowActionsList =
+  struct
+    type nonrec t = ApiKeyAction.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:24) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ApiKeyAction.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ApiKeyAction.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ApiKeyRestrictionsAllowActionsList"
+        ~of_json:ApiKeyAction.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ApiKeyRestrictionsAllowAndroidAppsList =
+  struct
+    type nonrec t = AndroidApp.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AndroidApp.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AndroidApp.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ApiKeyRestrictionsAllowAndroidAppsList"
+        ~of_json:AndroidApp.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ApiKeyRestrictionsAllowAppleAppsList =
+  struct
+    type nonrec t = AppleApp.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AppleApp.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AppleApp.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ApiKeyRestrictionsAllowAppleAppsList"
+        ~of_json:AppleApp.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ApiKeyRestrictionsAllowReferersList =
+  struct
+    type nonrec t = RefererPattern.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RefererPattern.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RefererPattern.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ApiKeyRestrictionsAllowReferersList"
+        ~of_json:RefererPattern.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ApiKeyRestrictionsAllowResourcesList =
+  struct
+    type nonrec t = GeoArnV2.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:8) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GeoArnV2.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GeoArnV2.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ApiKeyRestrictionsAllowResourcesList"
+        ~of_json:GeoArnV2.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ValidateAddressActionOptions =
+  struct
+    type nonrec t =
+      {
+      additionalFeatures: ValidateAddressAdditionalFeatureList.t option
+        [@ocaml.doc
+          "A list of optional additional parameters that can be requested for each result. Values: Position - Return the position coordinates of the address if available. CountrySpecificAttributes - Return additional information about the address specific to the country of origin."]}
+    let make ?additionalFeatures = fun () -> { additionalFeatures }
+    let to_value x =
+      structure_to_value
+        [("AdditionalFeatures",
+           (Option.map x.additionalFeatures
+              ~f:ValidateAddressAdditionalFeatureList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let additionalFeatures =
+        (Option.map ~f:ValidateAddressAdditionalFeatureList.of_xml)
+          (Xml.child xml_arg0 "AdditionalFeatures") in
+      make ?additionalFeatures ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let additionalFeatures =
+        field_map json__ "AdditionalFeatures"
+          ValidateAddressAdditionalFeatureList.of_json in
+      make ?additionalFeatures ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Options specific to address validation jobs."]
+module JobErrorCode =
+  struct
+    type nonrec t =
+      | ValidationError 
+      | InternalServerError 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ValidationError -> "ValidationError"
+      | InternalServerError -> "InternalServerError"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ValidationError" -> ValidationError
+      | "InternalServerError" -> InternalServerError
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration JobErrorCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"JobErrorCode" j)
+    let to_json = simple_to_json to_value
+  end
+module JobErrorMessagesList =
+  struct
+    type nonrec t = JobErrorMessage.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:JobErrorMessage.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:JobErrorMessage.of_xml)
+    let of_json j =
+      list_of_json ~kind:"JobErrorMessagesList"
+        ~of_json:JobErrorMessage.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module JobInputFormat =
+  struct
+    type nonrec t =
+      | Parquet 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | Parquet -> "Parquet" | Non_static_id s -> s
+    let of_string = function | "Parquet" -> Parquet | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration JobInputFormat" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"JobInputFormat" j)
+    let to_json = simple_to_json to_value
+  end
+module JobInputLocation =
+  struct
+    type nonrec t = string
+    let context_ = "JobInputLocation"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:300) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(arn:aws(-[a-z]+)*:[a-z0-9-]+:[a-z0-9-]*:(\\d{12})?:[\\w/+=,.-]+|s3://[a-z0-9][a-z0-9._-]{2,254}(/[^/]+)*/?)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"JobInputLocation" j
+    let to_json = simple_to_json to_value
+  end
+module JobOutputFormat =
+  struct
+    type nonrec t =
+      | Parquet 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | Parquet -> "Parquet" | Non_static_id s -> s
+    let of_string = function | "Parquet" -> Parquet | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration JobOutputFormat" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"JobOutputFormat" j)
+    let to_json = simple_to_json to_value
+  end
+module JobOutputLocation =
+  struct
+    type nonrec t = string
+    let context_ = "JobOutputLocation"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:300) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(arn:aws(-[a-z]+)*:[a-z0-9-]+:[a-z0-9-]*:(\\d{12})?:[\\w/+=,.-]+|s3://[a-z0-9][a-z0-9._-]{2,254}(/[^/]+)*/)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"JobOutputLocation" j
+    let to_json = simple_to_json to_value
+  end
+module Base64EncodedGeobuf =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module Circle =
+  struct
+    type nonrec t =
+      {
+      center: Position.t
+        [@ocaml.doc
+          "A single point geometry, specifying the center of the circle, using WGS 84 coordinates, in the form \\[longitude, latitude\\]."];
+      radius: SensitiveDouble.t
+        [@ocaml.doc
+          "The radius of the circle in meters. Must be greater than zero and no larger than 100,000 (100 kilometers)."]}
+    let context_ = "Circle"
+    let make ~center = fun ~radius -> fun () -> { center; radius }
+    let to_value x =
+      structure_to_value
+        [("Center", (Some (Position.to_value x.center)));
+        ("Radius", (Some (SensitiveDouble.to_value x.radius)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let radius =
+        SensitiveDouble.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Radius") in
+      let center =
+        Position.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Center") in
+      make ~radius ~center ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let radius = field_map_exn json__ "Radius" SensitiveDouble.of_json in
+      let center = field_map_exn json__ "Center" Position.of_json in
+      make ~radius ~center ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A circle on the earth, as defined by a center point and a radius."]
+module GeofenceGeometryMultiPolygonList =
+  struct
+    type nonrec t = LinearRings.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:250) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LinearRings.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LinearRings.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GeofenceGeometryMultiPolygonList"
+        ~of_json:LinearRings.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GeofenceGeometryPolygonList =
   struct
     type nonrec t = LinearRing.t list
     let make i =
-      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:250) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LinearRing.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -283,26 +1570,9 @@ module LinearRings =
                           | _ -> true)
                      | _ -> true))) ~f:LinearRing.of_xml)
     let of_json j =
-      list_of_json ~kind:"LinearRings" ~of_json:LinearRing.of_json j
+      list_of_json ~kind:"GeofenceGeometryPolygonList"
+        ~of_json:LinearRing.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module PositionalAccuracyHorizontalDouble =
-  struct
-    type nonrec t = float
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_float_min i ~min:10000.) >>=
-             (fun () -> check_float_min i ~min:0.));
-        i
-    let of_string = Float.of_string
-    let to_value x = `Double x
-    let to_query v = to_query to_value v
-    let to_header x = Stdlib.Float.to_string x
-    let of_xml xml_arg0 =
-      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
-    let of_json j = float_of_json ~kind:"a double" j
-    let to_json = simple_to_json to_value
   end
 module PropertyMapKeyString =
   struct
@@ -340,11 +1610,68 @@ module PropertyMapValueString =
     let of_json j = string_of_json ~kind:"PropertyMapValueString" j
     let to_json = simple_to_json to_value
   end
+module PositionPropertyMapKeyString =
+  struct
+    type nonrec t = string
+    let context_ = "PositionPropertyMapKeyString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:20) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PositionPropertyMapKeyString" j
+    let to_json = simple_to_json to_value
+  end
+module PositionPropertyMapValueString =
+  struct
+    type nonrec t = string
+    let context_ = "PositionPropertyMapValueString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:150) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PositionPropertyMapValueString" j
+    let to_json = simple_to_json to_value
+  end
+module PositionalAccuracyHorizontalDouble =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:10000000.) >>=
+             (fun () -> check_float_min i ~min:0.));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
 module LineString =
   struct
     type nonrec t = Position.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:2); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Position.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -369,75 +1696,71 @@ module Step =
   struct
     type nonrec t =
       {
-      distance: StepDistanceDouble.t
+      startPosition: Position.t option
         [@ocaml.doc
-          "The travel distance between the step's StartPosition and EndPosition."];
-      durationSeconds: StepDurationSecondsDouble.t
-        [@ocaml.doc
-          "The estimated travel time, in seconds, from the step's StartPosition to the EndPosition. . The travel mode and departure time that you specify in the request determines the calculated time."];
-      endPosition: Position.t
+          "The starting position of a step. If the position is the first step in the leg, this position is the same as the start position of the leg."];
+      endPosition: Position.t option
         [@ocaml.doc
           "The end position of a step. If the position the last step in the leg, this position is the same as the end position of the leg."];
+      distance: StepDistanceDouble.t option
+        [@ocaml.doc
+          "The travel distance between the step's StartPosition and EndPosition."];
+      durationSeconds: StepDurationSecondsDouble.t option
+        [@ocaml.doc
+          "The estimated travel time, in seconds, from the step's StartPosition to the EndPosition. . The travel mode and departure time that you specify in the request determines the calculated time."];
       geometryOffset: StepGeometryOffsetInteger.t option
         [@ocaml.doc
-          "Represents the start position, or index, in a sequence of steps within the leg's line string geometry. For example, the index of the first step in a leg geometry is 0. Included in the response for queries that set IncludeLegGeometry to True."];
-      startPosition: Position.t
-        [@ocaml.doc
-          "The starting position of a step. If the position is the first step in the leg, this position is the same as the start position of the leg."]}
-    let context_ = "Step"
-    let make ?geometryOffset =
-      fun ~distance ->
-        fun ~durationSeconds ->
-          fun ~endPosition ->
-            fun ~startPosition ->
+          "Represents the start position, or index, in a sequence of steps within the leg's line string geometry. For example, the index of the first step in a leg geometry is 0. Included in the response for queries that set IncludeLegGeometry to True."]}
+    let make ?startPosition =
+      fun ?endPosition ->
+        fun ?distance ->
+          fun ?durationSeconds ->
+            fun ?geometryOffset ->
               fun () ->
                 {
-                  geometryOffset;
+                  startPosition;
+                  endPosition;
                   distance;
                   durationSeconds;
-                  endPosition;
-                  startPosition
+                  geometryOffset
                 }
     let to_value x =
       structure_to_value
-        [("Distance", (Some (StepDistanceDouble.to_value x.distance)));
+        [("StartPosition", (Option.map x.startPosition ~f:Position.to_value));
+        ("EndPosition", (Option.map x.endPosition ~f:Position.to_value));
+        ("Distance", (Option.map x.distance ~f:StepDistanceDouble.to_value));
         ("DurationSeconds",
-          (Some (StepDurationSecondsDouble.to_value x.durationSeconds)));
-        ("EndPosition", (Some (Position.to_value x.endPosition)));
+          (Option.map x.durationSeconds ~f:StepDurationSecondsDouble.to_value));
         ("GeometryOffset",
-          (Option.map x.geometryOffset ~f:StepGeometryOffsetInteger.to_value));
-        ("StartPosition", (Some (Position.to_value x.startPosition)))]
+          (Option.map x.geometryOffset ~f:StepGeometryOffsetInteger.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let startPosition =
-        Position.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StartPosition") in
       let geometryOffset =
         (Option.map ~f:StepGeometryOffsetInteger.of_xml)
           (Xml.child xml_arg0 "GeometryOffset") in
-      let endPosition =
-        Position.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EndPosition") in
       let durationSeconds =
-        StepDurationSecondsDouble.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DurationSeconds") in
+        (Option.map ~f:StepDurationSecondsDouble.of_xml)
+          (Xml.child xml_arg0 "DurationSeconds") in
       let distance =
-        StepDistanceDouble.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Distance") in
-      make ~startPosition ?geometryOffset ~endPosition ~durationSeconds
-        ~distance ()
+        (Option.map ~f:StepDistanceDouble.of_xml)
+          (Xml.child xml_arg0 "Distance") in
+      let endPosition =
+        (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "EndPosition") in
+      let startPosition =
+        (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "StartPosition") in
+      make ?geometryOffset ?durationSeconds ?distance ?endPosition
+        ?startPosition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startPosition = field_map_exn json "StartPosition" Position.of_json in
+    let of_json json__ =
       let geometryOffset =
-        field_map json "GeometryOffset" StepGeometryOffsetInteger.of_json in
-      let endPosition = field_map_exn json "EndPosition" Position.of_json in
+        field_map json__ "GeometryOffset" StepGeometryOffsetInteger.of_json in
       let durationSeconds =
-        field_map_exn json "DurationSeconds"
-          StepDurationSecondsDouble.of_json in
-      let distance = field_map_exn json "Distance" StepDistanceDouble.of_json in
-      make ~startPosition ?geometryOffset ~endPosition ~durationSeconds
-        ~distance ()
+        field_map json__ "DurationSeconds" StepDurationSecondsDouble.of_json in
+      let distance = field_map json__ "Distance" StepDistanceDouble.of_json in
+      let endPosition = field_map json__ "EndPosition" Position.of_json in
+      let startPosition = field_map json__ "StartPosition" Position.of_json in
+      make ?geometryOffset ?durationSeconds ?distance ?endPosition
+        ?startPosition ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents an element of a leg within a route. A step contains instructions for how to move to the next step in the leg."]
@@ -473,31 +1796,30 @@ module RouteMatrixEntryError =
   struct
     type nonrec t =
       {
-      code: RouteMatrixErrorCode.t
+      code: RouteMatrixErrorCode.t option
         [@ocaml.doc
           "The type of error which occurred for the route calculation."];
       message: String_.t option
         [@ocaml.doc
           "A message about the error that occurred for the route calculation."]}
-    let context_ = "RouteMatrixEntryError"
-    let make ?message = fun ~code -> fun () -> { message; code }
+    let make ?code = fun ?message -> fun () -> { code; message }
     let to_value x =
       structure_to_value
-        [("Code", (Some (RouteMatrixErrorCode.to_value x.code)));
+        [("Code", (Option.map x.code ~f:RouteMatrixErrorCode.to_value));
         ("Message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code =
-        RouteMatrixErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Code") in
-      make ?message ~code ()
+        (Option.map ~f:RouteMatrixErrorCode.of_xml)
+          (Xml.child xml_arg0 "Code") in
+      make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map_exn json "Code" RouteMatrixErrorCode.of_json in
-      make ?message ~code ()
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" RouteMatrixErrorCode.of_json in
+      make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An error corresponding to the calculation of a route between the DeparturePosition and DestinationPosition. The error code can be one of the following: RouteNotFound - Unable to find a valid route with the given parameters. RouteTooLong - Route calculation went beyond the maximum size of a route and was terminated before completion. PositionsNotFound - One or more of the input positions were not found on the route network. DestinationPositionNotFound - The destination position was not found on the route network. DeparturePositionNotFound - The departure position was not found on the route network. OtherValidationError - The given inputs were not valid or a route was not found. More information is given in the error Message"]
@@ -543,161 +1865,331 @@ module ValidationExceptionField =
   struct
     type nonrec t =
       {
-      message: String_.t
+      name: String_.t option
+        [@ocaml.doc "The field name where the invalid entry was detected."];
+      message: String_.t option
         [@ocaml.doc
-          "A message with the reason for the validation exception error."];
-      name: String_.t
-        [@ocaml.doc "The field name where the invalid entry was detected."]}
-    let context_ = "ValidationExceptionField"
-    let make ~message = fun ~name -> fun () -> { message; name }
+          "A message with the reason for the validation exception error."]}
+    let make ?name = fun ?message -> fun () -> { name; message }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("name", (Some (String_.to_value x.name)))]
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~name ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?message ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" String_.of_json in
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~name ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?message ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The input failed to meet the constraints specified by the AWS service in a specified field."]
+module CellSignalsLteCellDetailsList =
+  struct
+    type nonrec t = LteCellDetails.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:16) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LteCellDetails.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LteCellDetails.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CellSignalsLteCellDetailsList"
+        ~of_json:LteCellDetails.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WiFiAccessPoint =
+  struct
+    type nonrec t =
+      {
+      macAddress: WiFiAccessPointMacAddressString.t
+        [@ocaml.doc "Medium access control address (Mac)."];
+      rss: WiFiAccessPointRssInteger.t
+        [@ocaml.doc
+          "Received signal strength (dBm) of the WLAN measurement data."]}
+    let context_ = "WiFiAccessPoint"
+    let make ~macAddress = fun ~rss -> fun () -> { macAddress; rss }
+    let to_value x =
+      structure_to_value
+        [("MacAddress",
+           (Some (WiFiAccessPointMacAddressString.to_value x.macAddress)));
+        ("Rss", (Some (WiFiAccessPointRssInteger.to_value x.rss)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let rss =
+        WiFiAccessPointRssInteger.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Rss") in
+      let macAddress =
+        WiFiAccessPointMacAddressString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MacAddress") in
+      make ~rss ~macAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rss = field_map_exn json__ "Rss" WiFiAccessPointRssInteger.of_json in
+      let macAddress =
+        field_map_exn json__ "MacAddress"
+          WiFiAccessPointMacAddressString.of_json in
+      make ~rss ~macAddress ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Wi-Fi access point."]
+module CustomLayer =
+  struct
+    type nonrec t = string
+    let context_ = "CustomLayer"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () -> check_pattern i ~pattern:"[-._\\w]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CustomLayer" j
+    let to_json = simple_to_json to_value
+  end
 module Place =
   struct
     type nonrec t =
       {
-      addressNumber: String_.t option
-        [@ocaml.doc
-          "The numerical portion of an address, such as a building number."];
-      country: String_.t option
-        [@ocaml.doc
-          "A country/region specified using ISO 3166 3-digit country/region code. For example, CAN."];
-      geometry: PlaceGeometry.t ;
-      interpolated: Boolean.t option
-        [@ocaml.doc
-          "True if the result is interpolated from other known places. False if the Place is a known place. Not returned when the partner does not provide the information. For example, returns False for an address location that is found in the partner data, but returns True if an address does not exist in the partner data and its location is calculated by interpolating between other known addresses."];
-      label: String_.t option
+      label: SensitiveString.t option
         [@ocaml.doc
           "The full name and address of the point of interest such as a city, region, or country. For example, 123 Any Street, Any Town, USA."];
-      municipality: String_.t option
+      geometry: PlaceGeometry.t option ;
+      addressNumber: SensitiveString.t option
         [@ocaml.doc
-          "A name for a local area, such as a city or town name. For example, Toronto."];
-      neighborhood: String_.t option
-        [@ocaml.doc
-          "The name of a community district. For example, Downtown."];
-      postalCode: String_.t option
-        [@ocaml.doc
-          "A group of numbers and letters in a country-specific format, which accompanies the address for the purpose of identifying a location."];
-      region: String_.t option
-        [@ocaml.doc
-          "A name for an area or geographical division, such as a province or state name. For example, British Columbia."];
-      street: String_.t option
+          "The numerical portion of an address, such as a building number."];
+      street: SensitiveString.t option
         [@ocaml.doc
           "The name for a street or a road to identify a location. For example, Main Street."];
-      subRegion: String_.t option
+      neighborhood: SensitiveString.t option
         [@ocaml.doc
-          "A country, or an area that's part of a larger region. For example, Metro Vancouver."];
+          "The name of a community district. For example, Downtown."];
+      municipality: SensitiveString.t option
+        [@ocaml.doc
+          "A name for a local area, such as a city or town name. For example, Toronto."];
+      subRegion: SensitiveString.t option
+        [@ocaml.doc
+          "A county, or an area that's part of a larger region. For example, Metro Vancouver."];
+      region: SensitiveString.t option
+        [@ocaml.doc
+          "A name for an area or geographical division, such as a province or state name. For example, British Columbia."];
+      country: SensitiveString.t option
+        [@ocaml.doc
+          "A country/region specified using ISO 3166 3-digit country/region code. For example, CAN."];
+      postalCode: SensitiveString.t option
+        [@ocaml.doc
+          "A group of numbers and letters in a country-specific format, which accompanies the address for the purpose of identifying a location."];
+      interpolated: SensitiveBoolean.t option
+        [@ocaml.doc
+          "True if the result is interpolated from other known places. False if the Place is a known place. Not returned when the partner does not provide the information. For example, returns False for an address location that is found in the partner data, but returns True if an address does not exist in the partner data and its location is calculated by interpolating between other known addresses."];
       timeZone: TimeZone.t option
         [@ocaml.doc
-          "The time zone in which the Place is located. Returned only when using Here as the selected partner."]}
-    let context_ = "Place"
-    let make ?addressNumber =
-      fun ?country ->
-        fun ?interpolated ->
-          fun ?label ->
-            fun ?municipality ->
-              fun ?neighborhood ->
-                fun ?postalCode ->
+          "The time zone in which the Place is located. Returned only when using HERE or Grab as the selected partner."];
+      unitType: SensitiveString.t option
+        [@ocaml.doc
+          "For addresses with a UnitNumber, the type of unit. For example, Apartment. Returned only for a place index that uses Esri as a data provider."];
+      unitNumber: SensitiveString.t option
+        [@ocaml.doc
+          "For addresses with multiple units, the unit identifier. Can include numbers and letters, for example 3B or Unit 123. Returned only for a place index that uses Esri or Grab as a data provider. Is not returned for SearchPlaceIndexForPosition."];
+      categories: PlaceCategoryList.t option
+        [@ocaml.doc
+          "The Amazon Location categories that describe this Place. For more information about using categories, including a list of Amazon Location categories, see Categories and filtering, in the Amazon Location Service developer guide."];
+      supplementalCategories: PlaceSupplementalCategoryList.t option
+        [@ocaml.doc
+          "Categories from the data provider that describe the Place that are not mapped to any Amazon Location categories."];
+      subMunicipality: SensitiveString.t option
+        [@ocaml.doc
+          "An area that's part of a larger municipality. For example, Blissville is a submunicipality in the Queen County in New York. This property supported by Esri and OpenData. The Esri property is district, and the OpenData property is borough."]}
+    let make ?label =
+      fun ?geometry ->
+        fun ?addressNumber ->
+          fun ?street ->
+            fun ?neighborhood ->
+              fun ?municipality ->
+                fun ?subRegion ->
                   fun ?region ->
-                    fun ?street ->
-                      fun ?subRegion ->
-                        fun ?timeZone ->
-                          fun ~geometry ->
-                            fun () ->
-                              {
-                                addressNumber;
-                                country;
-                                interpolated;
-                                label;
-                                municipality;
-                                neighborhood;
-                                postalCode;
-                                region;
-                                street;
-                                subRegion;
-                                timeZone;
-                                geometry
-                              }
+                    fun ?country ->
+                      fun ?postalCode ->
+                        fun ?interpolated ->
+                          fun ?timeZone ->
+                            fun ?unitType ->
+                              fun ?unitNumber ->
+                                fun ?categories ->
+                                  fun ?supplementalCategories ->
+                                    fun ?subMunicipality ->
+                                      fun () ->
+                                        {
+                                          label;
+                                          geometry;
+                                          addressNumber;
+                                          street;
+                                          neighborhood;
+                                          municipality;
+                                          subRegion;
+                                          region;
+                                          country;
+                                          postalCode;
+                                          interpolated;
+                                          timeZone;
+                                          unitType;
+                                          unitNumber;
+                                          categories;
+                                          supplementalCategories;
+                                          subMunicipality
+                                        }
     let to_value x =
       structure_to_value
-        [("AddressNumber", (Option.map x.addressNumber ~f:String_.to_value));
-        ("Country", (Option.map x.country ~f:String_.to_value));
-        ("Geometry", (Some (PlaceGeometry.to_value x.geometry)));
-        ("Interpolated", (Option.map x.interpolated ~f:Boolean.to_value));
-        ("Label", (Option.map x.label ~f:String_.to_value));
-        ("Municipality", (Option.map x.municipality ~f:String_.to_value));
-        ("Neighborhood", (Option.map x.neighborhood ~f:String_.to_value));
-        ("PostalCode", (Option.map x.postalCode ~f:String_.to_value));
-        ("Region", (Option.map x.region ~f:String_.to_value));
-        ("Street", (Option.map x.street ~f:String_.to_value));
-        ("SubRegion", (Option.map x.subRegion ~f:String_.to_value));
-        ("TimeZone", (Option.map x.timeZone ~f:TimeZone.to_value))]
+        [("Label", (Option.map x.label ~f:SensitiveString.to_value));
+        ("Geometry", (Option.map x.geometry ~f:PlaceGeometry.to_value));
+        ("AddressNumber",
+          (Option.map x.addressNumber ~f:SensitiveString.to_value));
+        ("Street", (Option.map x.street ~f:SensitiveString.to_value));
+        ("Neighborhood",
+          (Option.map x.neighborhood ~f:SensitiveString.to_value));
+        ("Municipality",
+          (Option.map x.municipality ~f:SensitiveString.to_value));
+        ("SubRegion", (Option.map x.subRegion ~f:SensitiveString.to_value));
+        ("Region", (Option.map x.region ~f:SensitiveString.to_value));
+        ("Country", (Option.map x.country ~f:SensitiveString.to_value));
+        ("PostalCode", (Option.map x.postalCode ~f:SensitiveString.to_value));
+        ("Interpolated",
+          (Option.map x.interpolated ~f:SensitiveBoolean.to_value));
+        ("TimeZone", (Option.map x.timeZone ~f:TimeZone.to_value));
+        ("UnitType", (Option.map x.unitType ~f:SensitiveString.to_value));
+        ("UnitNumber", (Option.map x.unitNumber ~f:SensitiveString.to_value));
+        ("Categories",
+          (Option.map x.categories ~f:PlaceCategoryList.to_value));
+        ("SupplementalCategories",
+          (Option.map x.supplementalCategories
+             ~f:PlaceSupplementalCategoryList.to_value));
+        ("SubMunicipality",
+          (Option.map x.subMunicipality ~f:SensitiveString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subMunicipality =
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "SubMunicipality") in
+      let supplementalCategories =
+        (Option.map ~f:PlaceSupplementalCategoryList.of_xml)
+          (Xml.child xml_arg0 "SupplementalCategories") in
+      let categories =
+        (Option.map ~f:PlaceCategoryList.of_xml)
+          (Xml.child xml_arg0 "Categories") in
+      let unitNumber =
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "UnitNumber") in
+      let unitType =
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "UnitType") in
       let timeZone =
         (Option.map ~f:TimeZone.of_xml) (Xml.child xml_arg0 "TimeZone") in
-      let subRegion =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SubRegion") in
-      let street =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Street") in
-      let region =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Region") in
-      let postalCode =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PostalCode") in
-      let neighborhood =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Neighborhood") in
-      let municipality =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Municipality") in
-      let label = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Label") in
       let interpolated =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Interpolated") in
-      let geometry =
-        PlaceGeometry.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Geometry") in
+        (Option.map ~f:SensitiveBoolean.of_xml)
+          (Xml.child xml_arg0 "Interpolated") in
+      let postalCode =
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "PostalCode") in
       let country =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Country") in
+        (Option.map ~f:SensitiveString.of_xml) (Xml.child xml_arg0 "Country") in
+      let region =
+        (Option.map ~f:SensitiveString.of_xml) (Xml.child xml_arg0 "Region") in
+      let subRegion =
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "SubRegion") in
+      let municipality =
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "Municipality") in
+      let neighborhood =
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "Neighborhood") in
+      let street =
+        (Option.map ~f:SensitiveString.of_xml) (Xml.child xml_arg0 "Street") in
       let addressNumber =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AddressNumber") in
-      make ?timeZone ?subRegion ?street ?region ?postalCode ?neighborhood
-        ?municipality ?label ?interpolated ~geometry ?country ?addressNumber
-        ()
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "AddressNumber") in
+      let geometry =
+        (Option.map ~f:PlaceGeometry.of_xml) (Xml.child xml_arg0 "Geometry") in
+      let label =
+        (Option.map ~f:SensitiveString.of_xml) (Xml.child xml_arg0 "Label") in
+      make ?subMunicipality ?supplementalCategories ?categories ?unitNumber
+        ?unitType ?timeZone ?interpolated ?postalCode ?country ?region
+        ?subRegion ?municipality ?neighborhood ?street ?addressNumber
+        ?geometry ?label ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeZone = field_map json "TimeZone" TimeZone.of_json in
-      let subRegion = field_map json "SubRegion" String_.of_json in
-      let street = field_map json "Street" String_.of_json in
-      let region = field_map json "Region" String_.of_json in
-      let postalCode = field_map json "PostalCode" String_.of_json in
-      let neighborhood = field_map json "Neighborhood" String_.of_json in
-      let municipality = field_map json "Municipality" String_.of_json in
-      let label = field_map json "Label" String_.of_json in
-      let interpolated = field_map json "Interpolated" Boolean.of_json in
-      let geometry = field_map_exn json "Geometry" PlaceGeometry.of_json in
-      let country = field_map json "Country" String_.of_json in
-      let addressNumber = field_map json "AddressNumber" String_.of_json in
-      make ?timeZone ?subRegion ?street ?region ?postalCode ?neighborhood
-        ?municipality ?label ?interpolated ~geometry ?country ?addressNumber
-        ()
+    let of_json json__ =
+      let subMunicipality =
+        field_map json__ "SubMunicipality" SensitiveString.of_json in
+      let supplementalCategories =
+        field_map json__ "SupplementalCategories"
+          PlaceSupplementalCategoryList.of_json in
+      let categories =
+        field_map json__ "Categories" PlaceCategoryList.of_json in
+      let unitNumber = field_map json__ "UnitNumber" SensitiveString.of_json in
+      let unitType = field_map json__ "UnitType" SensitiveString.of_json in
+      let timeZone = field_map json__ "TimeZone" TimeZone.of_json in
+      let interpolated =
+        field_map json__ "Interpolated" SensitiveBoolean.of_json in
+      let postalCode = field_map json__ "PostalCode" SensitiveString.of_json in
+      let country = field_map json__ "Country" SensitiveString.of_json in
+      let region = field_map json__ "Region" SensitiveString.of_json in
+      let subRegion = field_map json__ "SubRegion" SensitiveString.of_json in
+      let municipality =
+        field_map json__ "Municipality" SensitiveString.of_json in
+      let neighborhood =
+        field_map json__ "Neighborhood" SensitiveString.of_json in
+      let street = field_map json__ "Street" SensitiveString.of_json in
+      let addressNumber =
+        field_map json__ "AddressNumber" SensitiveString.of_json in
+      let geometry = field_map json__ "Geometry" PlaceGeometry.of_json in
+      let label = field_map json__ "Label" SensitiveString.of_json in
+      make ?subMunicipality ?supplementalCategories ?categories ?unitNumber
+        ?unitType ?timeZone ?interpolated ?postalCode ?country ?region
+        ?subRegion ?municipality ?neighborhood ?street ?addressNumber
+        ?geometry ?label ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains details about addresses or points of interest that match the search criteria."]
+       "Contains details about addresses or points of interest that match the search criteria. Not all details are included with all responses. Some details may only be returned by specific data partners."]
+module PlaceId =
+  struct
+    type nonrec t = string
+    let context_ = "PlaceId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PlaceId" j
+    let to_json = simple_to_json to_value
+  end
 module SearchForTextResultDistanceDouble =
   struct
     type nonrec t = float
@@ -730,19 +2222,24 @@ module SearchForTextResultRelevanceDouble =
     let of_json j = float_of_json ~kind:"a double" j
     let to_json = simple_to_json to_value
   end
-module CountryCode =
+module CountryCode3 =
   struct
     type nonrec t = string
-    let context_ = "CountryCode"
+    let context_ = "CountryCode3"
     let make i =
       let open Result in
-        ok_or_failwith (check_pattern i ~pattern:"^[A-Z]{3}$"); i
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:3) >>=
+                  (fun () -> check_pattern i ~pattern:"[A-Z]{3}")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"CountryCode" j
+    let of_json j = string_of_json ~kind:"CountryCode3" j
     let to_json = simple_to_json to_value
   end
 module SearchForPositionResultDistanceDouble =
@@ -815,7 +2312,7 @@ module ResourceName =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:100) >>=
-                  (fun () -> check_pattern i ~pattern:"^[-._\\w]+$")));
+                  (fun () -> check_pattern i ~pattern:"[-._\\w]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -837,29 +2334,385 @@ module Timestamp =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
+module ApiKeyRestrictions =
+  struct
+    type nonrec t =
+      {
+      allowActions: ApiKeyRestrictionsAllowActionsList.t
+        [@ocaml.doc
+          "A list of allowed actions that an API key resource grants permissions to perform. You must have at least one action for each type of resource. For example, if you have a place resource, you must include at least one place action. The following are valid values for the actions. Map actions geo:GetMap* - Allows all actions needed for map rendering. geo-maps:GetTile - Allows retrieving map tiles. geo-maps:GetStaticMap - Allows retrieving static map images. geo-maps:* - Allows all actions related to map functionalities. Place actions geo:SearchPlaceIndexForText - Allows geocoding. geo:SearchPlaceIndexForPosition - Allows reverse geocoding. geo:SearchPlaceIndexForSuggestions - Allows generating suggestions from text. GetPlace - Allows finding a place by place ID. geo-places:Geocode - Allows geocoding using place information. geo-places:ReverseGeocode - Allows reverse geocoding from location coordinates. geo-places:SearchNearby - Allows searching for places near a location. geo-places:SearchText - Allows searching for places based on text input. geo-places:Autocomplete - Allows auto-completion of place names based on text input. geo-places:Suggest - Allows generating suggestions for places based on partial input. geo-places:GetPlace - Allows finding a place by its ID. geo-places:* - Allows all actions related to place services. Route actions geo:CalculateRoute - Allows point to point routing. geo:CalculateRouteMatrix - Allows calculating a matrix of routes. geo-routes:CalculateRoutes - Allows calculating multiple routes between points. geo-routes:CalculateRouteMatrix - Allows calculating a matrix of routes between points. geo-routes:CalculateIsolines - Allows calculating isolines for a given area. geo-routes:OptimizeWaypoints - Allows optimizing the order of waypoints in a route. geo-routes:SnapToRoads - Allows snapping a route to the nearest roads. geo-routes:* - Allows all actions related to routing functionalities. You must use these strings exactly. For example, to provide access to map rendering, the only valid action is geo:GetMap* as an input to the list. \\[\"geo:GetMap*\"\\] is valid but \\[\"geo:GetMapTile\"\\] is not. Similarly, you cannot use \\[\"geo:SearchPlaceIndexFor*\"\\] - you must list each of the Place actions separately."];
+      allowResources: ApiKeyRestrictionsAllowResourcesList.t
+        [@ocaml.doc
+          "A list of allowed resource ARNs that a API key bearer can perform actions on. The ARN must be the correct ARN for a map, place, or route ARN. You may include wildcards in the resource-id to match multiple resources of the same type. The resources must be in the same partition, region, and account-id as the key that is being created. Other than wildcards, you must include the full ARN, including the arn, partition, service, region, account-id and resource-id delimited by colons (:). No spaces allowed, even with wildcards. For example, arn:aws:geo:region:account-id:map/ExampleMap*. For more information about ARN format, see Amazon Resource Names (ARNs)."];
+      allowReferers: ApiKeyRestrictionsAllowReferersList.t option
+        [@ocaml.doc
+          "An optional list of allowed HTTP referers for which requests must originate from. Requests using this API key from other domains will not be allowed. Requirements: Contain only alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479) or any symbols in this list $\\-._+!*`(),;/?:\\@=& May contain a percent (%) if followed by 2 hexadecimal digits (A-F, a-f, 0-9); this is used for URL encoding purposes. May contain wildcard characters question mark (?) and asterisk (*). Question mark (?) will replace any single character (including hexadecimal digits). Asterisk (*) will replace any multiple characters (including multiple hexadecimal digits). No spaces allowed. For example, https://example.com."];
+      allowAndroidApps: ApiKeyRestrictionsAllowAndroidAppsList.t option
+        [@ocaml.doc
+          "An optional list of allowed Android applications for which requests must originate from. Requests using this API key from other sources will not be allowed."];
+      allowAppleApps: ApiKeyRestrictionsAllowAppleAppsList.t option
+        [@ocaml.doc
+          "An optional list of allowed Apple applications for which requests must originate from. Requests using this API key from other sources will not be allowed."]}
+    let context_ = "ApiKeyRestrictions"
+    let make ?allowReferers =
+      fun ?allowAndroidApps ->
+        fun ?allowAppleApps ->
+          fun ~allowActions ->
+            fun ~allowResources ->
+              fun () ->
+                {
+                  allowReferers;
+                  allowAndroidApps;
+                  allowAppleApps;
+                  allowActions;
+                  allowResources
+                }
+    let to_value x =
+      structure_to_value
+        [("AllowActions",
+           (Some (ApiKeyRestrictionsAllowActionsList.to_value x.allowActions)));
+        ("AllowResources",
+          (Some
+             (ApiKeyRestrictionsAllowResourcesList.to_value x.allowResources)));
+        ("AllowReferers",
+          (Option.map x.allowReferers
+             ~f:ApiKeyRestrictionsAllowReferersList.to_value));
+        ("AllowAndroidApps",
+          (Option.map x.allowAndroidApps
+             ~f:ApiKeyRestrictionsAllowAndroidAppsList.to_value));
+        ("AllowAppleApps",
+          (Option.map x.allowAppleApps
+             ~f:ApiKeyRestrictionsAllowAppleAppsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let allowAppleApps =
+        (Option.map ~f:ApiKeyRestrictionsAllowAppleAppsList.of_xml)
+          (Xml.child xml_arg0 "AllowAppleApps") in
+      let allowAndroidApps =
+        (Option.map ~f:ApiKeyRestrictionsAllowAndroidAppsList.of_xml)
+          (Xml.child xml_arg0 "AllowAndroidApps") in
+      let allowReferers =
+        (Option.map ~f:ApiKeyRestrictionsAllowReferersList.of_xml)
+          (Xml.child xml_arg0 "AllowReferers") in
+      let allowResources =
+        ApiKeyRestrictionsAllowResourcesList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AllowResources") in
+      let allowActions =
+        ApiKeyRestrictionsAllowActionsList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AllowActions") in
+      make ?allowAppleApps ?allowAndroidApps ?allowReferers ~allowResources
+        ~allowActions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let allowAppleApps =
+        field_map json__ "AllowAppleApps"
+          ApiKeyRestrictionsAllowAppleAppsList.of_json in
+      let allowAndroidApps =
+        field_map json__ "AllowAndroidApps"
+          ApiKeyRestrictionsAllowAndroidAppsList.of_json in
+      let allowReferers =
+        field_map json__ "AllowReferers"
+          ApiKeyRestrictionsAllowReferersList.of_json in
+      let allowResources =
+        field_map_exn json__ "AllowResources"
+          ApiKeyRestrictionsAllowResourcesList.of_json in
+      let allowActions =
+        field_map_exn json__ "AllowActions"
+          ApiKeyRestrictionsAllowActionsList.of_json in
+      make ?allowAppleApps ?allowAndroidApps ?allowReferers ~allowResources
+        ~allowActions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "API Restrictions on the allowed actions, resources, and referers for an API key resource."]
+module GeoArn =
+  struct
+    type nonrec t = string
+    let context_ = "GeoArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1600) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn(:[a-z0-9]+([.-][a-z0-9]+)*):geo(:([a-z0-9]+([.-][a-z0-9]+)*))(:[0-9]+):((\\*)|([-a-z]+[/][*-._\\w]+))")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GeoArn" j
+    let to_json = simple_to_json to_value
+  end
+module IamRoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "IamRoleArn"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IamRoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module JobAction =
+  struct
+    type nonrec t =
+      | ValidateAddress 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ValidateAddress -> "ValidateAddress" | Non_static_id s -> s
+    let of_string =
+      function | "ValidateAddress" -> ValidateAddress | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration JobAction" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"JobAction" j)
+    let to_json = simple_to_json to_value
+  end
+module JobActionOptions =
+  struct
+    type nonrec t =
+      {
+      validateAddress: ValidateAddressActionOptions.t option
+        [@ocaml.doc "Options specific to address validation jobs."]}
+    let make ?validateAddress = fun () -> { validateAddress }
+    let to_value x =
+      structure_to_value
+        [("ValidateAddress",
+           (Option.map x.validateAddress
+              ~f:ValidateAddressActionOptions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let validateAddress =
+        (Option.map ~f:ValidateAddressActionOptions.of_xml)
+          (Xml.child xml_arg0 "ValidateAddress") in
+      make ?validateAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let validateAddress =
+        field_map json__ "ValidateAddress"
+          ValidateAddressActionOptions.of_json in
+      make ?validateAddress ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Additional options for configuring job action parameters."]
+module JobError =
+  struct
+    type nonrec t =
+      {
+      code: JobErrorCode.t option
+        [@ocaml.doc "Error code indicating the type of error that occurred."];
+      messages: JobErrorMessagesList.t option
+        [@ocaml.doc "Error messages providing details about the failure."]}
+    let make ?code = fun ?messages -> fun () -> { code; messages }
+    let to_value x =
+      structure_to_value
+        [("Code", (Option.map x.code ~f:JobErrorCode.to_value));
+        ("Messages",
+          (Option.map x.messages ~f:JobErrorMessagesList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let messages =
+        (Option.map ~f:JobErrorMessagesList.of_xml)
+          (Xml.child xml_arg0 "Messages") in
+      let code =
+        (Option.map ~f:JobErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?messages ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let messages = field_map json__ "Messages" JobErrorMessagesList.of_json in
+      let code = field_map json__ "Code" JobErrorCode.of_json in
+      make ?messages ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Error information for failed jobs."]
+module JobId =
+  struct
+    type nonrec t = string
+    let context_ = "JobId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () -> check_pattern i ~pattern:"[-._\\w]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"JobId" j
+    let to_json = simple_to_json to_value
+  end
+module JobInputOptions =
+  struct
+    type nonrec t =
+      {
+      location: JobInputLocation.t
+        [@ocaml.doc
+          "S3 ARN or URI where input files are stored. The Amazon S3 bucket must be created in the same Amazon Web Services region where you plan to run your job."];
+      format: JobInputFormat.t
+        [@ocaml.doc
+          "Input data format. Currently only Parquet is supported. Input files have a limitation of 10gb per file, and 1gb per Parquet row-group within the file."]}
+    let context_ = "JobInputOptions"
+    let make ~location = fun ~format -> fun () -> { location; format }
+    let to_value x =
+      structure_to_value
+        [("Location", (Some (JobInputLocation.to_value x.location)));
+        ("Format", (Some (JobInputFormat.to_value x.format)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let format =
+        JobInputFormat.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Format") in
+      let location =
+        JobInputLocation.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Location") in
+      make ~format ~location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let format = field_map_exn json__ "Format" JobInputFormat.of_json in
+      let location = field_map_exn json__ "Location" JobInputLocation.of_json in
+      make ~format ~location ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration for input data location and format. Input files have a limitation of 10gb per file, and 1gb per Parquet row-group within the file."]
+module JobOutputOptions =
+  struct
+    type nonrec t =
+      {
+      format: JobOutputFormat.t
+        [@ocaml.doc
+          "Output data format. Currently only \"Parquet\" is supported."];
+      location: JobOutputLocation.t
+        [@ocaml.doc
+          "S3 ARN or URI where output files will be written. The Amazon S3 bucket must exist in the same Amazon Web Services region where you plan to run your job."]}
+    let context_ = "JobOutputOptions"
+    let make ~format = fun ~location -> fun () -> { format; location }
+    let to_value x =
+      structure_to_value
+        [("Format", (Some (JobOutputFormat.to_value x.format)));
+        ("Location", (Some (JobOutputLocation.to_value x.location)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let location =
+        JobOutputLocation.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Location") in
+      let format =
+        JobOutputFormat.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Format") in
+      make ~location ~format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let location =
+        field_map_exn json__ "Location" JobOutputLocation.of_json in
+      let format = field_map_exn json__ "Format" JobOutputFormat.of_json in
+      make ~location ~format ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Configuration for output data location and format."]
+module JobStatus =
+  struct
+    type nonrec t =
+      | Pending 
+      | Running 
+      | Completed 
+      | Failed 
+      | Cancelling 
+      | Cancelled 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "Pending"
+      | Running -> "Running"
+      | Completed -> "Completed"
+      | Failed -> "Failed"
+      | Cancelling -> "Cancelling"
+      | Cancelled -> "Cancelled"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Pending" -> Pending
+      | "Running" -> Running
+      | "Completed" -> Completed
+      | "Failed" -> Failed
+      | "Cancelling" -> Cancelling
+      | "Cancelled" -> Cancelled
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration JobStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"JobStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module GeofenceGeometry =
   struct
     type nonrec t =
       {
-      polygon: LinearRings.t option
+      polygon: GeofenceGeometryPolygonList.t option
         [@ocaml.doc
-          "An array of 1 or more linear rings. A linear ring is an array of 4 or more vertices, where the first and last vertex are the same to form a closed boundary. Each vertex is a 2-dimensional point of the form: \\[longitude, latitude\\]. The first linear ring is an outer ring, describing the polygon's boundary. Subsequent linear rings may be inner or outer rings to describe holes and islands. Outer rings must list their vertices in counter-clockwise order around the ring's center, where the left side is the polygon's exterior. Inner rings must list their vertices in clockwise order, where the left side is the polygon's interior."]}
-    let make ?polygon = fun () -> { polygon }
+          "A Polygon is a list of up to 250 linear rings which represent the shape of a geofence. This list must include 1 exterior ring (representing the outer perimeter of the geofence), and can optionally include up to 249 interior rings (representing polygonal spaces within the perimeter, which are excluded from the geofence area). A linear ring is an array of 4 or more vertices, where the first and last vertex are the same (to form a closed boundary). Each vertex is a 2-dimensional point represented as an array of doubles of length 2: \\[longitude, latitude\\]. Each linear ring is represented as an array of arrays of doubles (\\[\\[longitude, latitude\\], \\[longitude, latitude\\], ...\\]). The vertices for the exterior ring must be listed in counter-clockwise sequence. Vertices for all interior rings must be listed in clockwise sequence. The list of linear rings that describe the entire Polygon is represented as an array of arrays of arrays of doubles (\\[\\[\\[longitude, latitude\\], \\[longitude, latitude\\], ...\\], \\[\\[longitude, latitude\\], \\[longitude, latitude\\], ...\\], ...\\]). The exterior ring must be listed first, before any interior rings. The following additional requirements and limitations apply to geometries defined using the Polygon parameter: The entire Polygon must consist of no more than 1,000 vertices, including all vertices from the exterior ring and all interior rings. Rings must not touch or cross each other. All interior rings must be fully contained within the exterior ring. Interior rings must not contain other interior rings. No ring is permitted to intersect itself."];
+      circle: Circle.t option
+        [@ocaml.doc
+          "A circle on the earth, as defined by a center point and a radius."];
+      geobuf: Base64EncodedGeobuf.t option
+        [@ocaml.doc
+          "Geobuf is a compact binary encoding for geographic data that provides lossless compression of GeoJSON polygons. The Geobuf must be Base64-encoded. This parameter can contain a Geobuf-encoded GeoJSON geometry object of type Polygon OR MultiPolygon. For more information and specific configuration requirements for these object types, see Polygon and MultiPolygon. The following limitations apply specifically to geometries defined using the Geobuf parameter, and supercede the corresponding limitations of the Polygon and MultiPolygon parameters: A Polygon in Geobuf format can have up to 25,000 rings and up to 100,000 total vertices, including all vertices from all component rings. A MultiPolygon in Geobuf format can contain up to 10,000 Polygons and up to 100,000 total vertices, including all vertices from all component Polygons."];
+      multiPolygon: GeofenceGeometryMultiPolygonList.t option
+        [@ocaml.doc
+          "A MultiPolygon is a list of up to 250 Polygon elements which represent the shape of a geofence. The Polygon components of a MultiPolygon geometry can define separate geographical areas that are considered part of the same geofence, perimeters of larger exterior areas with smaller interior spaces that are excluded from the geofence, or some combination of these use cases to form complex geofence boundaries. For more information and specific configuration requirements for the Polygon components that form a MultiPolygon, see Polygon. The following additional requirements and limitations apply to geometries defined using the MultiPolygon parameter: The entire MultiPolygon must consist of no more than 1,000 vertices, including all vertices from all component Polygons. Each edge of a component Polygon must intersect no more than 5 edges from other Polygons. Parallel edges that are shared but do not cross are not counted toward this limit. The total number of intersecting edges of component Polygons must be no more than 100,000. Parallel edges that are shared but do not cross are not counted toward this limit."]}
+    let make ?polygon =
+      fun ?circle ->
+        fun ?geobuf ->
+          fun ?multiPolygon ->
+            fun () -> { polygon; circle; geobuf; multiPolygon }
     let to_value x =
       structure_to_value
-        [("Polygon", (Option.map x.polygon ~f:LinearRings.to_value))]
+        [("Polygon",
+           (Option.map x.polygon ~f:GeofenceGeometryPolygonList.to_value));
+        ("Circle", (Option.map x.circle ~f:Circle.to_value));
+        ("Geobuf", (Option.map x.geobuf ~f:Base64EncodedGeobuf.to_value));
+        ("MultiPolygon",
+          (Option.map x.multiPolygon
+             ~f:GeofenceGeometryMultiPolygonList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let multiPolygon =
+        (Option.map ~f:GeofenceGeometryMultiPolygonList.of_xml)
+          (Xml.child xml_arg0 "MultiPolygon") in
+      let geobuf =
+        (Option.map ~f:Base64EncodedGeobuf.of_xml)
+          (Xml.child xml_arg0 "Geobuf") in
+      let circle =
+        (Option.map ~f:Circle.of_xml) (Xml.child xml_arg0 "Circle") in
       let polygon =
-        (Option.map ~f:LinearRings.of_xml) (Xml.child xml_arg0 "Polygon") in
-      make ?polygon ()
+        (Option.map ~f:GeofenceGeometryPolygonList.of_xml)
+          (Xml.child xml_arg0 "Polygon") in
+      make ?multiPolygon ?geobuf ?circle ?polygon ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let polygon = field_map json "Polygon" LinearRings.of_json in
-      make ?polygon ()
+    let of_json json__ =
+      let multiPolygon =
+        field_map json__ "MultiPolygon"
+          GeofenceGeometryMultiPolygonList.of_json in
+      let geobuf = field_map json__ "Geobuf" Base64EncodedGeobuf.of_json in
+      let circle = field_map json__ "Circle" Circle.of_json in
+      let polygon =
+        field_map json__ "Polygon" GeofenceGeometryPolygonList.of_json in
+      make ?multiPolygon ?geobuf ?circle ?polygon ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains the geofence geometry details. Amazon Location doesn't currently support polygons with holes, multipolygons, polygons that are wound clockwise, or that cross the antimeridian."]
+       "Contains the geofence geometry details. A geofence geometry can be a circle, a polygon, or a multipolygon. Polygon and MultiPolygon geometries can be defined using their respective parameters, or encoded in Geobuf format using the Geobuf parameter. Including multiple geometry types in the same request will return a validation error. Amazon Location doesn't currently support polygons that cross the antimeridian."]
 module Id =
   struct
     type nonrec t = string
@@ -870,7 +2723,7 @@ module Id =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:100) >>=
-                  (fun () -> check_pattern i ~pattern:"^[-._\\p{L}\\p{N}]+$")));
+                  (fun () -> check_pattern i ~pattern:"[-._\\p{L}\\p{N}]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -880,33 +2733,6 @@ module Id =
     let of_json j = string_of_json ~kind:"Id" j
     let to_json = simple_to_json to_value
   end
-module PositionalAccuracy =
-  struct
-    type nonrec t =
-      {
-      horizontal: PositionalAccuracyHorizontalDouble.t
-        [@ocaml.doc
-          "Estimated maximum distance, in meters, between the measured position and the true position of a device, along the Earth's surface."]}
-    let context_ = "PositionalAccuracy"
-    let make ~horizontal = fun () -> { horizontal }
-    let to_value x =
-      structure_to_value
-        [("Horizontal",
-           (Some (PositionalAccuracyHorizontalDouble.to_value x.horizontal)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let horizontal =
-        PositionalAccuracyHorizontalDouble.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Horizontal") in
-      make ~horizontal ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let horizontal =
-        field_map_exn json "Horizontal"
-          PositionalAccuracyHorizontalDouble.of_json in
-      make ~horizontal ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Defines the level of certainty of the position."]
 module PropertyMap =
   struct
     type nonrec t = (PropertyMapKeyString.t * PropertyMapValueString.t) list
@@ -934,12 +2760,142 @@ module PropertyMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:PropertyMapKeyString.of_string
         ~of_json:PropertyMapValueString.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module PositionPropertyMap =
+  struct
+    type nonrec t =
+      (PositionPropertyMapKeyString.t * PositionPropertyMapValueString.t)
+        list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((PositionPropertyMapKeyString.of_string chopped),
+                              (PositionPropertyMapValueString.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (PositionPropertyMapKeyString.to_value x) |>
+                    (fun x ->
+                       (PositionPropertyMapValueString.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:PositionPropertyMapKeyString.of_string
+        ~of_json:PositionPropertyMapValueString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PositionalAccuracy =
+  struct
+    type nonrec t =
+      {
+      horizontal: PositionalAccuracyHorizontalDouble.t
+        [@ocaml.doc
+          "Estimated maximum distance, in meters, between the measured position and the true position of a device, along the Earth's surface."]}
+    let context_ = "PositionalAccuracy"
+    let make ~horizontal = fun () -> { horizontal }
+    let to_value x =
+      structure_to_value
+        [("Horizontal",
+           (Some (PositionalAccuracyHorizontalDouble.to_value x.horizontal)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let horizontal =
+        PositionalAccuracyHorizontalDouble.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Horizontal") in
+      make ~horizontal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let horizontal =
+        field_map_exn json__ "Horizontal"
+          PositionalAccuracyHorizontalDouble.of_json in
+      make ~horizontal ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Defines the level of certainty of the position."]
+module ForecastedGeofenceEventType =
+  struct
+    type nonrec t =
+      | ENTER 
+      | EXIT 
+      | IDLE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENTER -> "ENTER"
+      | EXIT -> "EXIT"
+      | IDLE -> "IDLE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENTER" -> ENTER
+      | "EXIT" -> EXIT
+      | "IDLE" -> IDLE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ForecastedGeofenceEventType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ForecastedGeofenceEventType" j)
+    let to_json = simple_to_json to_value
+  end
+module NearestDistance =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in ok_or_failwith (check_float_min i ~min:0.); i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module Uuid =
+  struct
+    type nonrec t = string
+    let context_ = "Uuid"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Uuid" j
+    let to_json = simple_to_json to_value
   end
 module LegDistanceDouble =
   struct
@@ -986,8 +2942,8 @@ module LegGeometry =
         (Option.map ~f:LineString.of_xml) (Xml.child xml_arg0 "LineString") in
       make ?lineString ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lineString = field_map json "LineString" LineString.of_json in
+    let of_json json__ =
+      let lineString = field_map json__ "LineString" LineString.of_json in
       make ?lineString ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -996,6 +2952,9 @@ module StepList =
   struct
     type nonrec t = Step.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Step.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1151,13 +3110,13 @@ module RouteMatrixEntry =
           (Xml.child xml_arg0 "Distance") in
       make ?error ?durationSeconds ?distance ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map json "Error" RouteMatrixEntryError.of_json in
+    let of_json json__ =
+      let error = field_map json__ "Error" RouteMatrixEntryError.of_json in
       let durationSeconds =
-        field_map json "DurationSeconds"
+        field_map json__ "DurationSeconds"
           RouteMatrixEntryDurationSecondsDouble.of_json in
       let distance =
-        field_map json "Distance" RouteMatrixEntryDistanceDouble.of_json in
+        field_map json__ "Distance" RouteMatrixEntryDistanceDouble.of_json in
       make ?error ?durationSeconds ?distance ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1184,9 +3143,9 @@ module BatchItemError =
         (Option.map ~f:BatchItemErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" BatchItemErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" BatchItemErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1195,6 +3154,9 @@ module ValidationExceptionFieldList =
   struct
     type nonrec t = ValidationExceptionField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationExceptionField.to_value)) |>
         (fun x -> `List x)
@@ -1225,6 +3187,7 @@ module ValidationExceptionReason =
       | CannotParse 
       | FieldValidationFailed 
       | Other 
+      | UnknownField 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1234,6 +3197,7 @@ module ValidationExceptionReason =
       | CannotParse -> "CannotParse"
       | FieldValidationFailed -> "FieldValidationFailed"
       | Other -> "Other"
+      | UnknownField -> "UnknownField"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1242,6 +3206,7 @@ module ValidationExceptionReason =
       | "CannotParse" -> CannotParse
       | "FieldValidationFailed" -> FieldValidationFailed
       | "Other" -> Other
+      | "UnknownField" -> UnknownField
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1252,6 +3217,80 @@ module ValidationExceptionReason =
     let of_json j =
       of_string (string_of_json ~kind:"ValidationExceptionReason" j)
     let to_json = simple_to_json to_value
+  end
+module CellSignals =
+  struct
+    type nonrec t =
+      {
+      lteCellDetails: CellSignalsLteCellDetailsList.t
+        [@ocaml.doc
+          "Information about the Long-Term Evolution (LTE) network the device is connected to."]}
+    let context_ = "CellSignals"
+    let make ~lteCellDetails = fun () -> { lteCellDetails }
+    let to_value x =
+      structure_to_value
+        [("LteCellDetails",
+           (Some (CellSignalsLteCellDetailsList.to_value x.lteCellDetails)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lteCellDetails =
+        CellSignalsLteCellDetailsList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LteCellDetails") in
+      make ~lteCellDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lteCellDetails =
+        field_map_exn json__ "LteCellDetails"
+          CellSignalsLteCellDetailsList.of_json in
+      make ~lteCellDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The cellular network communication infrastructure that the device uses."]
+module DeviceStateIpv4AddressString =
+  struct
+    type nonrec t = string
+    let context_ = "DeviceStateIpv4AddressString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"(?:(?:25[0-5]|(?:2[0-4]|1\\d|[0-9]|)\\d)\\.?\\b){4}");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DeviceStateIpv4AddressString" j
+    let to_json = simple_to_json to_value
+  end
+module WiFiAccessPointList =
+  struct
+    type nonrec t = WiFiAccessPoint.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WiFiAccessPoint.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WiFiAccessPoint.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WiFiAccessPointList"
+        ~of_json:WiFiAccessPoint.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module IntendedUse =
   struct
@@ -1278,6 +3317,57 @@ module IntendedUse =
     let of_json j = of_string (string_of_json ~kind:"IntendedUse" j)
     let to_json = simple_to_json to_value
   end
+module CountryCode3OrEmpty =
+  struct
+    type nonrec t = string
+    let context_ = "CountryCode3OrEmpty"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:3) >>=
+                  (fun () -> check_pattern i ~pattern:"[A-Z]{3}$|^")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CountryCode3OrEmpty" j
+    let to_json = simple_to_json to_value
+  end
+module CustomLayerList =
+  struct
+    type nonrec t = CustomLayer.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CustomLayer.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CustomLayer.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CustomLayerList" ~of_json:CustomLayer.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TagKey =
   struct
     type nonrec t = string
@@ -1288,7 +3378,9 @@ module TagKey =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:128) >>=
-                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z+-=._:/]+$")));
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"([\\p{L}\\p{Z}\\p{N}_.,:/=+\\-@]*)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1309,7 +3401,8 @@ module TagValue =
              (fun () ->
                 (check_string_max i ~max:256) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"^[A-Za-z0-9 _=@:.+-/]*$")));
+                     check_pattern i
+                       ~pattern:"([\\p{L}\\p{Z}\\p{N}_.,:/=+\\-@]*)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1323,47 +3416,54 @@ module SearchForTextResult =
   struct
     type nonrec t =
       {
+      place: Place.t option
+        [@ocaml.doc
+          "Details about the search result, such as its address and position."];
       distance: SearchForTextResultDistanceDouble.t option
         [@ocaml.doc
           "The distance in meters of a great-circle arc between the bias position specified and the result. Distance will be returned only if a bias position was specified in the query. A great-circle arc is the shortest path on a sphere, in this case the Earth. This returns the shortest distance between two locations."];
-      place: Place.t
-        [@ocaml.doc
-          "Details about the search result, such as its address and position."];
       relevance: SearchForTextResultRelevanceDouble.t option
         [@ocaml.doc
-          "The relative confidence in the match for a result among the results returned. For example, if more fields for an address match (including house number, street, city, country/region, and postal code), the relevance score is closer to 1. Returned only when the partner selected is Esri."]}
-    let context_ = "SearchForTextResult"
-    let make ?distance =
-      fun ?relevance ->
-        fun ~place -> fun () -> { distance; relevance; place }
+          "The relative confidence in the match for a result among the results returned. For example, if more fields for an address match (including house number, street, city, country/region, and postal code), the relevance score is closer to 1. Returned only when the partner selected is Esri or Grab."];
+      placeId: PlaceId.t option
+        [@ocaml.doc
+          "The unique identifier of the place. You can use this with the GetPlace operation to find the place again later. For SearchPlaceIndexForText operations, the PlaceId is returned only by place indexes that use HERE or Grab as a data provider."]}
+    let make ?place =
+      fun ?distance ->
+        fun ?relevance ->
+          fun ?placeId -> fun () -> { place; distance; relevance; placeId }
     let to_value x =
       structure_to_value
-        [("Distance",
-           (Option.map x.distance
-              ~f:SearchForTextResultDistanceDouble.to_value));
-        ("Place", (Some (Place.to_value x.place)));
+        [("Place", (Option.map x.place ~f:Place.to_value));
+        ("Distance",
+          (Option.map x.distance
+             ~f:SearchForTextResultDistanceDouble.to_value));
         ("Relevance",
           (Option.map x.relevance
-             ~f:SearchForTextResultRelevanceDouble.to_value))]
+             ~f:SearchForTextResultRelevanceDouble.to_value));
+        ("PlaceId", (Option.map x.placeId ~f:PlaceId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let placeId =
+        (Option.map ~f:PlaceId.of_xml) (Xml.child xml_arg0 "PlaceId") in
       let relevance =
         (Option.map ~f:SearchForTextResultRelevanceDouble.of_xml)
           (Xml.child xml_arg0 "Relevance") in
-      let place =
-        Place.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Place") in
       let distance =
         (Option.map ~f:SearchForTextResultDistanceDouble.of_xml)
           (Xml.child xml_arg0 "Distance") in
-      make ?relevance ~place ?distance ()
+      let place = (Option.map ~f:Place.of_xml) (Xml.child xml_arg0 "Place") in
+      make ?placeId ?relevance ?distance ?place ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let placeId = field_map json__ "PlaceId" PlaceId.of_json in
       let relevance =
-        field_map json "Relevance" SearchForTextResultRelevanceDouble.of_json in
-      let place = field_map_exn json "Place" Place.of_json in
+        field_map json__ "Relevance"
+          SearchForTextResultRelevanceDouble.of_json in
       let distance =
-        field_map json "Distance" SearchForTextResultDistanceDouble.of_json in
-      make ?relevance ~place ?distance ()
+        field_map json__ "Distance" SearchForTextResultDistanceDouble.of_json in
+      let place = field_map json__ "Place" Place.of_json in
+      make ?placeId ?relevance ?distance ?place ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains a search result from a text search query that is run on a place index resource."]
@@ -1375,6 +3475,9 @@ module BoundingBox =
         ok_or_failwith
           ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:4));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Double.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1397,15 +3500,18 @@ module BoundingBox =
   end
 module CountryCodeList =
   struct
-    type nonrec t = CountryCode.t list
+    type nonrec t = CountryCode3.t list
     let make i =
       let open Result in
         ok_or_failwith
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:CountryCode.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:CountryCode3.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -1419,9 +3525,41 @@ module CountryCodeList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:CountryCode.of_xml)
+                     | _ -> true))) ~f:CountryCode3.of_xml)
     let of_json j =
-      list_of_json ~kind:"CountryCodeList" ~of_json:CountryCode.of_json j
+      list_of_json ~kind:"CountryCodeList" ~of_json:CountryCode3.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FilterPlaceCategoryList =
+  struct
+    type nonrec t = PlaceCategory.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PlaceCategory.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PlaceCategory.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FilterPlaceCategoryList"
+        ~of_json:PlaceCategory.of_json j
     let to_json v = composed_to_json to_value v
   end
 module LanguageTag =
@@ -1461,89 +3599,114 @@ module PlaceIndexSearchResultLimit =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module SyntheticSearchPlaceIndexForTextSummaryString =
-  struct
-    type nonrec t = string
-    let context_ = "SyntheticSearchPlaceIndexForTextSummaryString"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j =
-      string_of_json ~kind:"SyntheticSearchPlaceIndexForTextSummaryString" j
-    let to_json = simple_to_json to_value
-  end
 module SearchForSuggestionsResult =
   struct
     type nonrec t =
       {
-      text: String_.t
+      text: SensitiveString.t option
         [@ocaml.doc
-          "The text of the place suggestion, typically formatted as an address string."]}
-    let context_ = "SearchForSuggestionsResult"
-    let make ~text = fun () -> { text }
+          "The text of the place suggestion, typically formatted as an address string."];
+      placeId: PlaceId.t option
+        [@ocaml.doc
+          "The unique identifier of the Place. You can use this with the GetPlace operation to find the place again later, or to get full information for the Place. The GetPlace request must use the same PlaceIndex resource as the SearchPlaceIndexForSuggestions that generated the Place ID. For SearchPlaceIndexForSuggestions operations, the PlaceId is returned by place indexes that use Esri, Grab, or HERE as data providers."];
+      categories: PlaceCategoryList.t option
+        [@ocaml.doc
+          "The Amazon Location categories that describe the Place. For more information about using categories, including a list of Amazon Location categories, see Categories and filtering, in the Amazon Location Service developer guide."];
+      supplementalCategories: PlaceSupplementalCategoryList.t option
+        [@ocaml.doc
+          "Categories from the data provider that describe the Place that are not mapped to any Amazon Location categories."]}
+    let make ?text =
+      fun ?placeId ->
+        fun ?categories ->
+          fun ?supplementalCategories ->
+            fun () -> { text; placeId; categories; supplementalCategories }
     let to_value x =
-      structure_to_value [("Text", (Some (String_.to_value x.text)))]
+      structure_to_value
+        [("Text", (Option.map x.text ~f:SensitiveString.to_value));
+        ("PlaceId", (Option.map x.placeId ~f:PlaceId.to_value));
+        ("Categories",
+          (Option.map x.categories ~f:PlaceCategoryList.to_value));
+        ("SupplementalCategories",
+          (Option.map x.supplementalCategories
+             ~f:PlaceSupplementalCategoryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let supplementalCategories =
+        (Option.map ~f:PlaceSupplementalCategoryList.of_xml)
+          (Xml.child xml_arg0 "SupplementalCategories") in
+      let categories =
+        (Option.map ~f:PlaceCategoryList.of_xml)
+          (Xml.child xml_arg0 "Categories") in
+      let placeId =
+        (Option.map ~f:PlaceId.of_xml) (Xml.child xml_arg0 "PlaceId") in
       let text =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Text") in
-      make ~text ()
+        (Option.map ~f:SensitiveString.of_xml) (Xml.child xml_arg0 "Text") in
+      make ?supplementalCategories ?categories ?placeId ?text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let text = field_map_exn json "Text" String_.of_json in make ~text ()
+    let of_json json__ =
+      let supplementalCategories =
+        field_map json__ "SupplementalCategories"
+          PlaceSupplementalCategoryList.of_json in
+      let categories =
+        field_map json__ "Categories" PlaceCategoryList.of_json in
+      let placeId = field_map json__ "PlaceId" PlaceId.of_json in
+      let text = field_map json__ "Text" SensitiveString.of_json in
+      make ?supplementalCategories ?categories ?placeId ?text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains a place suggestion resulting from a place suggestion query that is run on a place index resource."]
-module SyntheticSearchPlaceIndexForSuggestionsSummaryString =
+module Integer =
   struct
-    type nonrec t = string
-    let context_ = "SyntheticSearchPlaceIndexForSuggestionsSummaryString"
+    type nonrec t = int
     let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string = Int.of_string
+    let to_value x = `Integer x
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j =
-      string_of_json
-        ~kind:"SyntheticSearchPlaceIndexForSuggestionsSummaryString" j
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module SearchForPositionResult =
   struct
     type nonrec t =
       {
-      distance: SearchForPositionResultDistanceDouble.t
+      place: Place.t option
+        [@ocaml.doc
+          "Details about the search result, such as its address and position."];
+      distance: SearchForPositionResultDistanceDouble.t option
         [@ocaml.doc
           "The distance in meters of a great-circle arc between the query position and the result. A great-circle arc is the shortest path on a sphere, in this case the Earth. This returns the shortest distance between two locations."];
-      place: Place.t
+      placeId: PlaceId.t option
         [@ocaml.doc
-          "Details about the search result, such as its address and position."]}
-    let context_ = "SearchForPositionResult"
-    let make ~distance = fun ~place -> fun () -> { distance; place }
+          "The unique identifier of the place. You can use this with the GetPlace operation to find the place again later. For SearchPlaceIndexForPosition operations, the PlaceId is returned only by place indexes that use HERE or Grab as a data provider."]}
+    let make ?place =
+      fun ?distance -> fun ?placeId -> fun () -> { place; distance; placeId }
     let to_value x =
       structure_to_value
-        [("Distance",
-           (Some (SearchForPositionResultDistanceDouble.to_value x.distance)));
-        ("Place", (Some (Place.to_value x.place)))]
+        [("Place", (Option.map x.place ~f:Place.to_value));
+        ("Distance",
+          (Option.map x.distance
+             ~f:SearchForPositionResultDistanceDouble.to_value));
+        ("PlaceId", (Option.map x.placeId ~f:PlaceId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let place =
-        Place.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Place") in
+      let placeId =
+        (Option.map ~f:PlaceId.of_xml) (Xml.child xml_arg0 "PlaceId") in
       let distance =
-        SearchForPositionResultDistanceDouble.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Distance") in
-      make ~place ~distance ()
+        (Option.map ~f:SearchForPositionResultDistanceDouble.of_xml)
+          (Xml.child xml_arg0 "Distance") in
+      let place = (Option.map ~f:Place.of_xml) (Xml.child xml_arg0 "Place") in
+      make ?placeId ?distance ?place ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let place = field_map_exn json "Place" Place.of_json in
+    let of_json json__ =
+      let placeId = field_map json__ "PlaceId" PlaceId.of_json in
       let distance =
-        field_map_exn json "Distance"
+        field_map json__ "Distance"
           SearchForPositionResultDistanceDouble.of_json in
-      make ~place ~distance ()
+      let place = field_map json__ "Place" Place.of_json in
+      make ?placeId ?distance ?place ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains a search result from a position search query that is run on a place index resource."]
@@ -1551,78 +3714,76 @@ module ListTrackersResponseEntry =
   struct
     type nonrec t =
       {
-      createTime: Timestamp.t
-        [@ocaml.doc
-          "The timestamp for when the tracker resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
-      description: ResourceDescription.t
+      trackerName: ResourceName.t option
+        [@ocaml.doc "The name of the tracker resource."];
+      description: ResourceDescription.t option
         [@ocaml.doc "The description for the tracker resource."];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc "Always returns RequestBasedUsage."];
       pricingPlanDataSource: String_.t option
         [@ocaml.doc "No longer used. Always returns an empty string."];
-      trackerName: ResourceName.t
-        [@ocaml.doc "The name of the tracker resource."];
-      updateTime: Timestamp.t
+      createTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the tracker resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      updateTime: Timestamp.t option
         [@ocaml.doc
           "The timestamp at which the device's position was determined. Uses ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
-    let context_ = "ListTrackersResponseEntry"
-    let make ?pricingPlan =
-      fun ?pricingPlanDataSource ->
-        fun ~createTime ->
-          fun ~description ->
-            fun ~trackerName ->
-              fun ~updateTime ->
+    let make ?trackerName =
+      fun ?description ->
+        fun ?pricingPlan ->
+          fun ?pricingPlanDataSource ->
+            fun ?createTime ->
+              fun ?updateTime ->
                 fun () ->
                   {
+                    trackerName;
+                    description;
                     pricingPlan;
                     pricingPlanDataSource;
                     createTime;
-                    description;
-                    trackerName;
                     updateTime
                   }
     let to_value x =
       structure_to_value
-        [("CreateTime", (Some (Timestamp.to_value x.createTime)));
-        ("Description", (Some (ResourceDescription.to_value x.description)));
+        [("TrackerName", (Option.map x.trackerName ~f:ResourceName.to_value));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
         ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
         ("PricingPlanDataSource",
           (Option.map x.pricingPlanDataSource ~f:String_.to_value));
-        ("TrackerName", (Some (ResourceName.to_value x.trackerName)));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
-      let trackerName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
+      let createTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
       let pricingPlanDataSource =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "PricingPlanDataSource") in
       let pricingPlan =
         (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
       let description =
-        ResourceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Description") in
-      let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      make ~updateTime ~trackerName ?pricingPlanDataSource ?pricingPlan
-        ~description ~createTime ()
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let trackerName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "TrackerName") in
+      make ?updateTime ?createTime ?pricingPlanDataSource ?pricingPlan
+        ?description ?trackerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
-      let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
       let pricingPlanDataSource =
-        field_map json "PricingPlanDataSource" String_.of_json in
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
+        field_map json__ "PricingPlanDataSource" String_.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
       let description =
-        field_map_exn json "Description" ResourceDescription.of_json in
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
-      make ~updateTime ~trackerName ?pricingPlanDataSource ?pricingPlan
-        ~description ~createTime ()
+        field_map json__ "Description" ResourceDescription.of_json in
+      let trackerName = field_map json__ "TrackerName" ResourceName.of_json in
+      make ?updateTime ?createTime ?pricingPlanDataSource ?pricingPlan
+        ?description ?trackerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the tracker resource details."]
 module Arn =
@@ -1637,7 +3798,7 @@ module Arn =
                 (check_string_max i ~max:1600) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn(:[a-z0-9]+([.-][a-z0-9]+)*){2}(:([a-z0-9]+([.-][a-z0-9]+)*)?){2}:([^/].*)?$")));
+                       ~pattern:"arn(:[a-z0-9]+([.-][a-z0-9]+)*){2}(:([a-z0-9]+([.-][a-z0-9]+)*)?){2}:([^/].*)?")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1651,513 +3812,866 @@ module ListRouteCalculatorsResponseEntry =
   struct
     type nonrec t =
       {
-      calculatorName: ResourceName.t
+      calculatorName: ResourceName.t option
         [@ocaml.doc "The name of the route calculator resource."];
-      createTime: Timestamp.t
-        [@ocaml.doc
-          "The timestamp when the route calculator resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. For example, 2020\226\128\14707-2T12:15:20.000Z+01:00"];
-      dataSource: String_.t
-        [@ocaml.doc
-          "The data provider of traffic and road network data. Indicates one of the available providers: Esri Here For more information about data providers, see Amazon Location Service data providers."];
-      description: ResourceDescription.t
+      description: ResourceDescription.t option
         [@ocaml.doc
           "The optional description of the route calculator resource."];
+      dataSource: String_.t option
+        [@ocaml.doc
+          "The data provider of traffic and road network data. Indicates one of the available providers: Esri Grab Here For more information about data providers, see Amazon Location Service data providers."];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc "Always returns RequestBasedUsage."];
-      updateTime: Timestamp.t
+      createTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp when the route calculator resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. For example, 2020\226\128\14707-2T12:15:20.000Z+01:00"];
+      updateTime: Timestamp.t option
         [@ocaml.doc
           "The timestamp when the route calculator resource was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. For example, 2020\226\128\14707-2T12:15:20.000Z+01:00"]}
-    let context_ = "ListRouteCalculatorsResponseEntry"
-    let make ?pricingPlan =
-      fun ~calculatorName ->
-        fun ~createTime ->
-          fun ~dataSource ->
-            fun ~description ->
-              fun ~updateTime ->
+    let make ?calculatorName =
+      fun ?description ->
+        fun ?dataSource ->
+          fun ?pricingPlan ->
+            fun ?createTime ->
+              fun ?updateTime ->
                 fun () ->
                   {
-                    pricingPlan;
                     calculatorName;
-                    createTime;
-                    dataSource;
                     description;
+                    dataSource;
+                    pricingPlan;
+                    createTime;
                     updateTime
                   }
     let to_value x =
       structure_to_value
-        [("CalculatorName", (Some (ResourceName.to_value x.calculatorName)));
-        ("CreateTime", (Some (Timestamp.to_value x.createTime)));
-        ("DataSource", (Some (String_.to_value x.dataSource)));
-        ("Description", (Some (ResourceDescription.to_value x.description)));
+        [("CalculatorName",
+           (Option.map x.calculatorName ~f:ResourceName.to_value));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
+        ("DataSource", (Option.map x.dataSource ~f:String_.to_value));
         ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
+      let createTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
       let pricingPlan =
         (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
-      let description =
-        ResourceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Description") in
       let dataSource =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DataSource") in
-      let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      let calculatorName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CalculatorName") in
-      make ~updateTime ?pricingPlan ~description ~dataSource ~createTime
-        ~calculatorName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DataSource") in
       let description =
-        field_map_exn json "Description" ResourceDescription.of_json in
-      let dataSource = field_map_exn json "DataSource" String_.of_json in
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let calculatorName =
-        field_map_exn json "CalculatorName" ResourceName.of_json in
-      make ~updateTime ?pricingPlan ~description ~dataSource ~createTime
-        ~calculatorName ()
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "CalculatorName") in
+      make ?updateTime ?createTime ?pricingPlan ?dataSource ?description
+        ?calculatorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
+      let dataSource = field_map json__ "DataSource" String_.of_json in
+      let description =
+        field_map json__ "Description" ResourceDescription.of_json in
+      let calculatorName =
+        field_map json__ "CalculatorName" ResourceName.of_json in
+      make ?updateTime ?createTime ?pricingPlan ?dataSource ?description
+        ?calculatorName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A route calculator resource listed in your AWS account."]
+  end[@@ocaml.doc
+       "A route calculator resource listed in your Amazon Web Services account."]
 module ListPlaceIndexesResponseEntry =
   struct
     type nonrec t =
       {
-      createTime: Timestamp.t
-        [@ocaml.doc
-          "The timestamp for when the place index resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
-      dataSource: String_.t
-        [@ocaml.doc
-          "The data provider of geospatial data. Values can be one of the following: Esri Here For more information about data providers, see Amazon Location Service data providers."];
-      description: ResourceDescription.t
-        [@ocaml.doc "The optional description for the place index resource."];
-      indexName: ResourceName.t
+      indexName: ResourceName.t option
         [@ocaml.doc "The name of the place index resource."];
+      description: ResourceDescription.t option
+        [@ocaml.doc "The optional description for the place index resource."];
+      dataSource: String_.t option
+        [@ocaml.doc
+          "The data provider of geospatial data. Values can be one of the following: Esri Grab Here For more information about data providers, see Amazon Location Service data providers."];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc "No longer used. Always returns RequestBasedUsage."];
-      updateTime: Timestamp.t
+      createTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the place index resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      updateTime: Timestamp.t option
         [@ocaml.doc
           "The timestamp for when the place index resource was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
-    let context_ = "ListPlaceIndexesResponseEntry"
-    let make ?pricingPlan =
-      fun ~createTime ->
-        fun ~dataSource ->
-          fun ~description ->
-            fun ~indexName ->
-              fun ~updateTime ->
+    let make ?indexName =
+      fun ?description ->
+        fun ?dataSource ->
+          fun ?pricingPlan ->
+            fun ?createTime ->
+              fun ?updateTime ->
                 fun () ->
                   {
+                    indexName;
+                    description;
+                    dataSource;
                     pricingPlan;
                     createTime;
-                    dataSource;
-                    description;
-                    indexName;
                     updateTime
                   }
     let to_value x =
       structure_to_value
-        [("CreateTime", (Some (Timestamp.to_value x.createTime)));
-        ("DataSource", (Some (String_.to_value x.dataSource)));
-        ("Description", (Some (ResourceDescription.to_value x.description)));
-        ("IndexName", (Some (ResourceName.to_value x.indexName)));
+        [("IndexName", (Option.map x.indexName ~f:ResourceName.to_value));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
+        ("DataSource", (Option.map x.dataSource ~f:String_.to_value));
         ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
+      let createTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
       let pricingPlan =
         (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
-      let indexName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
-      let description =
-        ResourceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Description") in
       let dataSource =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DataSource") in
-      let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      make ~updateTime ?pricingPlan ~indexName ~description ~dataSource
-        ~createTime ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
-      let indexName = field_map_exn json "IndexName" ResourceName.of_json in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DataSource") in
       let description =
-        field_map_exn json "Description" ResourceDescription.of_json in
-      let dataSource = field_map_exn json "DataSource" String_.of_json in
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
-      make ~updateTime ?pricingPlan ~indexName ~description ~dataSource
-        ~createTime ()
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let indexName =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "IndexName") in
+      make ?updateTime ?createTime ?pricingPlan ?dataSource ?description
+        ?indexName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
+      let dataSource = field_map json__ "DataSource" String_.of_json in
+      let description =
+        field_map json__ "Description" ResourceDescription.of_json in
+      let indexName = field_map json__ "IndexName" ResourceName.of_json in
+      make ?updateTime ?createTime ?pricingPlan ?dataSource ?description
+        ?indexName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A place index resource listed in your AWS account."]
+  end[@@ocaml.doc
+       "A place index resource listed in your Amazon Web Services account."]
 module ListMapsResponseEntry =
   struct
     type nonrec t =
       {
-      createTime: Timestamp.t
-        [@ocaml.doc
-          "The timestamp for when the map resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
-      dataSource: String_.t
+      mapName: ResourceName.t option
+        [@ocaml.doc "The name of the associated map resource."];
+      description: ResourceDescription.t option
+        [@ocaml.doc "The description for the map resource."];
+      dataSource: String_.t option
         [@ocaml.doc
           "Specifies the data provider for the associated map tiles."];
-      description: ResourceDescription.t
-        [@ocaml.doc "The description for the map resource."];
-      mapName: ResourceName.t
-        [@ocaml.doc "The name of the associated map resource."];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc "No longer used. Always returns RequestBasedUsage."];
-      updateTime: Timestamp.t
+      createTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the map resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      updateTime: Timestamp.t option
         [@ocaml.doc
           "The timestamp for when the map resource was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
-    let context_ = "ListMapsResponseEntry"
-    let make ?pricingPlan =
-      fun ~createTime ->
-        fun ~dataSource ->
-          fun ~description ->
-            fun ~mapName ->
-              fun ~updateTime ->
+    let make ?mapName =
+      fun ?description ->
+        fun ?dataSource ->
+          fun ?pricingPlan ->
+            fun ?createTime ->
+              fun ?updateTime ->
                 fun () ->
                   {
+                    mapName;
+                    description;
+                    dataSource;
                     pricingPlan;
                     createTime;
-                    dataSource;
-                    description;
-                    mapName;
                     updateTime
                   }
     let to_value x =
       structure_to_value
-        [("CreateTime", (Some (Timestamp.to_value x.createTime)));
-        ("DataSource", (Some (String_.to_value x.dataSource)));
-        ("Description", (Some (ResourceDescription.to_value x.description)));
-        ("MapName", (Some (ResourceName.to_value x.mapName)));
+        [("MapName", (Option.map x.mapName ~f:ResourceName.to_value));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
+        ("DataSource", (Option.map x.dataSource ~f:String_.to_value));
         ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
+      let createTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
       let pricingPlan =
         (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
-      let mapName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
-      let description =
-        ResourceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Description") in
       let dataSource =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DataSource") in
-      let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      make ~updateTime ?pricingPlan ~mapName ~description ~dataSource
-        ~createTime ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
-      let mapName = field_map_exn json "MapName" ResourceName.of_json in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DataSource") in
       let description =
-        field_map_exn json "Description" ResourceDescription.of_json in
-      let dataSource = field_map_exn json "DataSource" String_.of_json in
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
-      make ~updateTime ?pricingPlan ~mapName ~description ~dataSource
-        ~createTime ()
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let mapName =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "MapName") in
+      make ?updateTime ?createTime ?pricingPlan ?dataSource ?description
+        ?mapName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
+      let dataSource = field_map json__ "DataSource" String_.of_json in
+      let description =
+        field_map json__ "Description" ResourceDescription.of_json in
+      let mapName = field_map json__ "MapName" ResourceName.of_json in
+      make ?updateTime ?createTime ?pricingPlan ?dataSource ?description
+        ?mapName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains details of an existing map resource in your AWS account."]
+       "Contains details of an existing map resource in your Amazon Web Services account."]
+module ListKeysResponseEntry =
+  struct
+    type nonrec t =
+      {
+      keyName: ResourceName.t option
+        [@ocaml.doc "The name of the API key resource."];
+      expireTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the API key resource will expire, in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      description: ResourceDescription.t option
+        [@ocaml.doc "The optional description for the API key resource."];
+      restrictions: ApiKeyRestrictions.t option ;
+      createTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp of when the API key was created, in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      updateTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp of when the API key was last updated, in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
+    let make ?keyName =
+      fun ?expireTime ->
+        fun ?description ->
+          fun ?restrictions ->
+            fun ?createTime ->
+              fun ?updateTime ->
+                fun () ->
+                  {
+                    keyName;
+                    expireTime;
+                    description;
+                    restrictions;
+                    createTime;
+                    updateTime
+                  }
+    let to_value x =
+      structure_to_value
+        [("KeyName", (Option.map x.keyName ~f:ResourceName.to_value));
+        ("ExpireTime", (Option.map x.expireTime ~f:Timestamp.to_value));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
+        ("Restrictions",
+          (Option.map x.restrictions ~f:ApiKeyRestrictions.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updateTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
+      let createTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let restrictions =
+        (Option.map ~f:ApiKeyRestrictions.of_xml)
+          (Xml.child xml_arg0 "Restrictions") in
+      let description =
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let expireTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "ExpireTime") in
+      let keyName =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "KeyName") in
+      make ?updateTime ?createTime ?restrictions ?description ?expireTime
+        ?keyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let restrictions =
+        field_map json__ "Restrictions" ApiKeyRestrictions.of_json in
+      let description =
+        field_map json__ "Description" ResourceDescription.of_json in
+      let expireTime = field_map json__ "ExpireTime" Timestamp.of_json in
+      let keyName = field_map json__ "KeyName" ResourceName.of_json in
+      make ?updateTime ?createTime ?restrictions ?description ?expireTime
+        ?keyName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An API key resource listed in your Amazon Web Services account."]
+module Status =
+  struct
+    type nonrec t =
+      | Active 
+      | Expired 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Active -> "Active"
+      | Expired -> "Expired"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Active" -> Active
+      | "Expired" -> Expired
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Status" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Status" j)
+    let to_json = simple_to_json to_value
+  end
+module ListJobsResponseEntry =
+  struct
+    type nonrec t =
+      {
+      action: JobAction.t option [@ocaml.doc "Action performed by the job."];
+      actionOptions: JobActionOptions.t option
+        [@ocaml.doc
+          "Additional options for configuring job action parameters."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "Job creation time in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sss."];
+      executionRoleArn: IamRoleArn.t option
+        [@ocaml.doc "IAM role used for job execution."];
+      endedAt: Timestamp.t option
+        [@ocaml.doc
+          "Job completion time in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sss. Only returned for jobs in a terminal status: Completed | Failed | Cancelled."];
+      error: JobError.t option
+        [@ocaml.doc "Error information if the job failed."];
+      inputOptions: JobInputOptions.t option
+        [@ocaml.doc "Input configuration."];
+      jobId: JobId.t option [@ocaml.doc "Unique job identifier."];
+      jobArn: GeoArn.t option
+        [@ocaml.doc "Amazon Resource Name (ARN) of the job."];
+      name: ResourceName.t option
+        [@ocaml.doc "Job name (if provided during creation)."];
+      outputOptions: JobOutputOptions.t option
+        [@ocaml.doc "Output configuration."];
+      status: JobStatus.t option [@ocaml.doc "Current job status."];
+      updatedAt: Timestamp.t option
+        [@ocaml.doc
+          "Last update time in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sss."]}
+    let make ?action =
+      fun ?actionOptions ->
+        fun ?createdAt ->
+          fun ?executionRoleArn ->
+            fun ?endedAt ->
+              fun ?error ->
+                fun ?inputOptions ->
+                  fun ?jobId ->
+                    fun ?jobArn ->
+                      fun ?name ->
+                        fun ?outputOptions ->
+                          fun ?status ->
+                            fun ?updatedAt ->
+                              fun () ->
+                                {
+                                  action;
+                                  actionOptions;
+                                  createdAt;
+                                  executionRoleArn;
+                                  endedAt;
+                                  error;
+                                  inputOptions;
+                                  jobId;
+                                  jobArn;
+                                  name;
+                                  outputOptions;
+                                  status;
+                                  updatedAt
+                                }
+    let to_value x =
+      structure_to_value
+        [("Action", (Option.map x.action ~f:JobAction.to_value));
+        ("ActionOptions",
+          (Option.map x.actionOptions ~f:JobActionOptions.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("ExecutionRoleArn",
+          (Option.map x.executionRoleArn ~f:IamRoleArn.to_value));
+        ("EndedAt", (Option.map x.endedAt ~f:Timestamp.to_value));
+        ("Error", (Option.map x.error ~f:JobError.to_value));
+        ("InputOptions",
+          (Option.map x.inputOptions ~f:JobInputOptions.to_value));
+        ("JobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("JobArn", (Option.map x.jobArn ~f:GeoArn.to_value));
+        ("Name", (Option.map x.name ~f:ResourceName.to_value));
+        ("OutputOptions",
+          (Option.map x.outputOptions ~f:JobOutputOptions.to_value));
+        ("Status", (Option.map x.status ~f:JobStatus.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let status =
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let outputOptions =
+        (Option.map ~f:JobOutputOptions.of_xml)
+          (Xml.child xml_arg0 "OutputOptions") in
+      let name =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
+      let jobArn =
+        (Option.map ~f:GeoArn.of_xml) (Xml.child xml_arg0 "JobArn") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
+      let inputOptions =
+        (Option.map ~f:JobInputOptions.of_xml)
+          (Xml.child xml_arg0 "InputOptions") in
+      let error =
+        (Option.map ~f:JobError.of_xml) (Xml.child xml_arg0 "Error") in
+      let endedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EndedAt") in
+      let executionRoleArn =
+        (Option.map ~f:IamRoleArn.of_xml)
+          (Xml.child xml_arg0 "ExecutionRoleArn") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let actionOptions =
+        (Option.map ~f:JobActionOptions.of_xml)
+          (Xml.child xml_arg0 "ActionOptions") in
+      let action =
+        (Option.map ~f:JobAction.of_xml) (Xml.child xml_arg0 "Action") in
+      make ?updatedAt ?status ?outputOptions ?name ?jobArn ?jobId
+        ?inputOptions ?error ?endedAt ?executionRoleArn ?createdAt
+        ?actionOptions ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let status = field_map json__ "Status" JobStatus.of_json in
+      let outputOptions =
+        field_map json__ "OutputOptions" JobOutputOptions.of_json in
+      let name = field_map json__ "Name" ResourceName.of_json in
+      let jobArn = field_map json__ "JobArn" GeoArn.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      let inputOptions =
+        field_map json__ "InputOptions" JobInputOptions.of_json in
+      let error = field_map json__ "Error" JobError.of_json in
+      let endedAt = field_map json__ "EndedAt" Timestamp.of_json in
+      let executionRoleArn =
+        field_map json__ "ExecutionRoleArn" IamRoleArn.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let actionOptions =
+        field_map json__ "ActionOptions" JobActionOptions.of_json in
+      let action = field_map json__ "Action" JobAction.of_json in
+      make ?updatedAt ?status ?outputOptions ?name ?jobArn ?jobId
+        ?inputOptions ?error ?endedAt ?executionRoleArn ?createdAt
+        ?actionOptions ?action ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Job summary information returned in list operations."]
 module ListGeofenceResponseEntry =
   struct
     type nonrec t =
       {
-      createTime: Timestamp.t
+      geofenceId: Id.t option [@ocaml.doc "The geofence identifier."];
+      geometry: GeofenceGeometry.t option
         [@ocaml.doc
-          "The timestamp for when the geofence was stored in a geofence collection in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"];
-      geofenceId: Id.t [@ocaml.doc "The geofence identifier."];
-      geometry: GeofenceGeometry.t
-        [@ocaml.doc
-          "Contains the geofence geometry details describing a polygon."];
-      status: String_.t
+          "Contains the geofence geometry details describing the position of the geofence. Can be a circle, a polygon, or a multipolygon."];
+      status: String_.t option
         [@ocaml.doc
           "Identifies the state of the geofence. A geofence will hold one of the following states: ACTIVE \226\128\148 The geofence has been indexed by the system. PENDING \226\128\148 The geofence is being processed by the system. FAILED \226\128\148 The geofence failed to be indexed by the system. DELETED \226\128\148 The geofence has been deleted from the system index. DELETING \226\128\148 The geofence is being deleted from the system index."];
-      updateTime: Timestamp.t
+      createTime: Timestamp.t option
         [@ocaml.doc
-          "The timestamp for when the geofence was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"]}
-    let context_ = "ListGeofenceResponseEntry"
-    let make ~createTime =
-      fun ~geofenceId ->
-        fun ~geometry ->
-          fun ~status ->
-            fun ~updateTime ->
-              fun () ->
-                { createTime; geofenceId; geometry; status; updateTime }
+          "The timestamp for when the geofence was stored in a geofence collection in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"];
+      updateTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the geofence was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"];
+      geofenceProperties: PropertyMap.t option
+        [@ocaml.doc
+          "User defined properties of the geofence. A property is a key-value pair stored with the geofence and added to any geofence event triggered with that geofence. Format: \"key\" : \"value\""]}
+    let make ?geofenceId =
+      fun ?geometry ->
+        fun ?status ->
+          fun ?createTime ->
+            fun ?updateTime ->
+              fun ?geofenceProperties ->
+                fun () ->
+                  {
+                    geofenceId;
+                    geometry;
+                    status;
+                    createTime;
+                    updateTime;
+                    geofenceProperties
+                  }
     let to_value x =
       structure_to_value
-        [("CreateTime", (Some (Timestamp.to_value x.createTime)));
-        ("GeofenceId", (Some (Id.to_value x.geofenceId)));
-        ("Geometry", (Some (GeofenceGeometry.to_value x.geometry)));
-        ("Status", (Some (String_.to_value x.status)));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        [("GeofenceId", (Option.map x.geofenceId ~f:Id.to_value));
+        ("Geometry", (Option.map x.geometry ~f:GeofenceGeometry.to_value));
+        ("Status", (Option.map x.status ~f:String_.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value));
+        ("GeofenceProperties",
+          (Option.map x.geofenceProperties ~f:PropertyMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let geofenceProperties =
+        (Option.map ~f:PropertyMap.of_xml)
+          (Xml.child xml_arg0 "GeofenceProperties") in
       let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
-      let status =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Status") in
-      let geometry =
-        GeofenceGeometry.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Geometry") in
-      let geofenceId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GeofenceId") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
       let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      make ~updateTime ~status ~geometry ~geofenceId ~createTime ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
+      let geometry =
+        (Option.map ~f:GeofenceGeometry.of_xml)
+          (Xml.child xml_arg0 "Geometry") in
+      let geofenceId =
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "GeofenceId") in
+      make ?geofenceProperties ?updateTime ?createTime ?status ?geometry
+        ?geofenceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
-      let status = field_map_exn json "Status" String_.of_json in
-      let geometry = field_map_exn json "Geometry" GeofenceGeometry.of_json in
-      let geofenceId = field_map_exn json "GeofenceId" Id.of_json in
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
-      make ~updateTime ~status ~geometry ~geofenceId ~createTime ()
+    let of_json json__ =
+      let geofenceProperties =
+        field_map json__ "GeofenceProperties" PropertyMap.of_json in
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let geometry = field_map json__ "Geometry" GeofenceGeometry.of_json in
+      let geofenceId = field_map json__ "GeofenceId" Id.of_json in
+      make ?geofenceProperties ?updateTime ?createTime ?status ?geometry
+        ?geofenceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains a list of geofences stored in a given geofence collection."]
+       "Contains a list of geofences stored in a given geofence collection. The returned geometry will always match the geometry format used when the geofence was created."]
 module ListGeofenceCollectionsResponseEntry =
   struct
     type nonrec t =
       {
-      collectionName: ResourceName.t
+      collectionName: ResourceName.t option
         [@ocaml.doc "The name of the geofence collection."];
-      createTime: Timestamp.t
-        [@ocaml.doc
-          "The timestamp for when the geofence collection was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"];
-      description: ResourceDescription.t
+      description: ResourceDescription.t option
         [@ocaml.doc "The description for the geofence collection"];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc "No longer used. Always returns RequestBasedUsage."];
       pricingPlanDataSource: String_.t option
         [@ocaml.doc "No longer used. Always returns an empty string."];
-      updateTime: Timestamp.t
+      createTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the geofence collection was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"];
+      updateTime: Timestamp.t option
         [@ocaml.doc
           "Specifies a timestamp for when the resource was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"]}
-    let context_ = "ListGeofenceCollectionsResponseEntry"
-    let make ?pricingPlan =
-      fun ?pricingPlanDataSource ->
-        fun ~collectionName ->
-          fun ~createTime ->
-            fun ~description ->
-              fun ~updateTime ->
+    let make ?collectionName =
+      fun ?description ->
+        fun ?pricingPlan ->
+          fun ?pricingPlanDataSource ->
+            fun ?createTime ->
+              fun ?updateTime ->
                 fun () ->
                   {
+                    collectionName;
+                    description;
                     pricingPlan;
                     pricingPlanDataSource;
-                    collectionName;
                     createTime;
-                    description;
                     updateTime
                   }
     let to_value x =
       structure_to_value
-        [("CollectionName", (Some (ResourceName.to_value x.collectionName)));
-        ("CreateTime", (Some (Timestamp.to_value x.createTime)));
-        ("Description", (Some (ResourceDescription.to_value x.description)));
+        [("CollectionName",
+           (Option.map x.collectionName ~f:ResourceName.to_value));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
         ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
         ("PricingPlanDataSource",
           (Option.map x.pricingPlanDataSource ~f:String_.to_value));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
+      let createTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
       let pricingPlanDataSource =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "PricingPlanDataSource") in
       let pricingPlan =
         (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
       let description =
-        ResourceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Description") in
-      let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let collectionName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
-      make ~updateTime ?pricingPlanDataSource ?pricingPlan ~description
-        ~createTime ~collectionName ()
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "CollectionName") in
+      make ?updateTime ?createTime ?pricingPlanDataSource ?pricingPlan
+        ?description ?collectionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
       let pricingPlanDataSource =
-        field_map json "PricingPlanDataSource" String_.of_json in
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
+        field_map json__ "PricingPlanDataSource" String_.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
       let description =
-        field_map_exn json "Description" ResourceDescription.of_json in
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
+        field_map json__ "Description" ResourceDescription.of_json in
       let collectionName =
-        field_map_exn json "CollectionName" ResourceName.of_json in
-      make ~updateTime ?pricingPlanDataSource ?pricingPlan ~description
-        ~createTime ~collectionName ()
+        field_map json__ "CollectionName" ResourceName.of_json in
+      make ?updateTime ?createTime ?pricingPlanDataSource ?pricingPlan
+        ?description ?collectionName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains the geofence collection details."]
+  end[@@ocaml.doc
+       "Contains the geofence collection details. The returned geometry will always match the geometry format used when the geofence was created."]
 module ListDevicePositionsResponseEntry =
   struct
     type nonrec t =
       {
-      accuracy: PositionalAccuracy.t option
-        [@ocaml.doc "The accuracy of the device position."];
-      deviceId: Id.t [@ocaml.doc "The ID of the device for this position."];
-      position: Position.t
+      deviceId: Id.t option
+        [@ocaml.doc "The ID of the device for this position."];
+      sampleTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the device position was determined. Uses ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      position: Position.t option
         [@ocaml.doc
           "The last known device position. Empty if no positions currently stored."];
-      positionProperties: PropertyMap.t option
-        [@ocaml.doc "The properties associated with the position."];
-      sampleTime: Timestamp.t
-        [@ocaml.doc
-          "The timestamp at which the device position was determined. Uses ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
-    let context_ = "ListDevicePositionsResponseEntry"
-    let make ?accuracy =
-      fun ?positionProperties ->
-        fun ~deviceId ->
-          fun ~position ->
-            fun ~sampleTime ->
+      accuracy: PositionalAccuracy.t option
+        [@ocaml.doc "The accuracy of the device position."];
+      positionProperties: PositionPropertyMap.t option
+        [@ocaml.doc "The properties associated with the position."]}
+    let make ?deviceId =
+      fun ?sampleTime ->
+        fun ?position ->
+          fun ?accuracy ->
+            fun ?positionProperties ->
               fun () ->
                 {
-                  accuracy;
-                  positionProperties;
                   deviceId;
+                  sampleTime;
                   position;
-                  sampleTime
+                  accuracy;
+                  positionProperties
                 }
     let to_value x =
       structure_to_value
-        [("Accuracy", (Option.map x.accuracy ~f:PositionalAccuracy.to_value));
-        ("DeviceId", (Some (Id.to_value x.deviceId)));
-        ("Position", (Some (Position.to_value x.position)));
+        [("DeviceId", (Option.map x.deviceId ~f:Id.to_value));
+        ("SampleTime", (Option.map x.sampleTime ~f:Timestamp.to_value));
+        ("Position", (Option.map x.position ~f:Position.to_value));
+        ("Accuracy", (Option.map x.accuracy ~f:PositionalAccuracy.to_value));
         ("PositionProperties",
-          (Option.map x.positionProperties ~f:PropertyMap.to_value));
-        ("SampleTime", (Some (Timestamp.to_value x.sampleTime)))]
+          (Option.map x.positionProperties ~f:PositionPropertyMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let sampleTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SampleTime") in
       let positionProperties =
-        (Option.map ~f:PropertyMap.of_xml)
+        (Option.map ~f:PositionPropertyMap.of_xml)
           (Xml.child xml_arg0 "PositionProperties") in
-      let position =
-        Position.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Position") in
-      let deviceId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceId") in
       let accuracy =
         (Option.map ~f:PositionalAccuracy.of_xml)
           (Xml.child xml_arg0 "Accuracy") in
-      make ~sampleTime ?positionProperties ~position ~deviceId ?accuracy ()
+      let position =
+        (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "Position") in
+      let sampleTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "SampleTime") in
+      let deviceId =
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "DeviceId") in
+      make ?positionProperties ?accuracy ?position ?sampleTime ?deviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sampleTime = field_map_exn json "SampleTime" Timestamp.of_json in
+    let of_json json__ =
       let positionProperties =
-        field_map json "PositionProperties" PropertyMap.of_json in
-      let position = field_map_exn json "Position" Position.of_json in
-      let deviceId = field_map_exn json "DeviceId" Id.of_json in
-      let accuracy = field_map json "Accuracy" PositionalAccuracy.of_json in
-      make ~sampleTime ?positionProperties ~position ~deviceId ?accuracy ()
+        field_map json__ "PositionProperties" PositionPropertyMap.of_json in
+      let accuracy = field_map json__ "Accuracy" PositionalAccuracy.of_json in
+      let position = field_map json__ "Position" Position.of_json in
+      let sampleTime = field_map json__ "SampleTime" Timestamp.of_json in
+      let deviceId = field_map json__ "DeviceId" Id.of_json in
+      make ?positionProperties ?accuracy ?position ?sampleTime ?deviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the tracker resource details."]
 module DevicePosition =
   struct
     type nonrec t =
       {
-      accuracy: PositionalAccuracy.t option
-        [@ocaml.doc "The accuracy of the device position."];
       deviceId: Id.t option
         [@ocaml.doc "The device whose position you retrieved."];
-      position: Position.t [@ocaml.doc "The last known device position."];
-      positionProperties: PropertyMap.t option
-        [@ocaml.doc "The properties associated with the position."];
-      receivedTime: Timestamp.t
+      sampleTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the device's position was determined. Uses ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      receivedTime: Timestamp.t option
         [@ocaml.doc
           "The timestamp for when the tracker resource received the device position in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
-      sampleTime: Timestamp.t
-        [@ocaml.doc
-          "The timestamp at which the device's position was determined. Uses ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
-    let context_ = "DevicePosition"
-    let make ?accuracy =
-      fun ?deviceId ->
-        fun ?positionProperties ->
-          fun ~position ->
-            fun ~receivedTime ->
-              fun ~sampleTime ->
+      position: Position.t option
+        [@ocaml.doc "The last known device position."];
+      accuracy: PositionalAccuracy.t option
+        [@ocaml.doc "The accuracy of the device position."];
+      positionProperties: PositionPropertyMap.t option
+        [@ocaml.doc "The properties associated with the position."]}
+    let make ?deviceId =
+      fun ?sampleTime ->
+        fun ?receivedTime ->
+          fun ?position ->
+            fun ?accuracy ->
+              fun ?positionProperties ->
                 fun () ->
                   {
-                    accuracy;
                     deviceId;
-                    positionProperties;
-                    position;
+                    sampleTime;
                     receivedTime;
-                    sampleTime
+                    position;
+                    accuracy;
+                    positionProperties
                   }
     let to_value x =
       structure_to_value
-        [("Accuracy", (Option.map x.accuracy ~f:PositionalAccuracy.to_value));
-        ("DeviceId", (Option.map x.deviceId ~f:Id.to_value));
-        ("Position", (Some (Position.to_value x.position)));
+        [("DeviceId", (Option.map x.deviceId ~f:Id.to_value));
+        ("SampleTime", (Option.map x.sampleTime ~f:Timestamp.to_value));
+        ("ReceivedTime", (Option.map x.receivedTime ~f:Timestamp.to_value));
+        ("Position", (Option.map x.position ~f:Position.to_value));
+        ("Accuracy", (Option.map x.accuracy ~f:PositionalAccuracy.to_value));
         ("PositionProperties",
-          (Option.map x.positionProperties ~f:PropertyMap.to_value));
-        ("ReceivedTime", (Some (Timestamp.to_value x.receivedTime)));
-        ("SampleTime", (Some (Timestamp.to_value x.sampleTime)))]
+          (Option.map x.positionProperties ~f:PositionPropertyMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let sampleTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SampleTime") in
-      let receivedTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ReceivedTime") in
       let positionProperties =
-        (Option.map ~f:PropertyMap.of_xml)
+        (Option.map ~f:PositionPropertyMap.of_xml)
           (Xml.child xml_arg0 "PositionProperties") in
-      let position =
-        Position.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Position") in
-      let deviceId =
-        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "DeviceId") in
       let accuracy =
         (Option.map ~f:PositionalAccuracy.of_xml)
           (Xml.child xml_arg0 "Accuracy") in
-      make ~sampleTime ~receivedTime ?positionProperties ~position ?deviceId
-        ?accuracy ()
+      let position =
+        (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "Position") in
+      let receivedTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "ReceivedTime") in
+      let sampleTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "SampleTime") in
+      let deviceId =
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "DeviceId") in
+      make ?positionProperties ?accuracy ?position ?receivedTime ?sampleTime
+        ?deviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sampleTime = field_map_exn json "SampleTime" Timestamp.of_json in
-      let receivedTime = field_map_exn json "ReceivedTime" Timestamp.of_json in
+    let of_json json__ =
       let positionProperties =
-        field_map json "PositionProperties" PropertyMap.of_json in
-      let position = field_map_exn json "Position" Position.of_json in
-      let deviceId = field_map json "DeviceId" Id.of_json in
-      let accuracy = field_map json "Accuracy" PositionalAccuracy.of_json in
-      make ~sampleTime ~receivedTime ?positionProperties ~position ?deviceId
-        ?accuracy ()
+        field_map json__ "PositionProperties" PositionPropertyMap.of_json in
+      let accuracy = field_map json__ "Accuracy" PositionalAccuracy.of_json in
+      let position = field_map json__ "Position" Position.of_json in
+      let receivedTime = field_map json__ "ReceivedTime" Timestamp.of_json in
+      let sampleTime = field_map json__ "SampleTime" Timestamp.of_json in
+      let deviceId = field_map json__ "DeviceId" Id.of_json in
+      make ?positionProperties ?accuracy ?position ?receivedTime ?sampleTime
+        ?deviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the device position details."]
+module ForecastedEvent =
+  struct
+    type nonrec t =
+      {
+      eventId: Uuid.t option [@ocaml.doc "The forecasted event identifier."];
+      geofenceId: Id.t option
+        [@ocaml.doc
+          "The geofence identifier pertaining to the forecasted event."];
+      isDeviceInGeofence: Boolean.t option
+        [@ocaml.doc
+          "Indicates if the device is located within the geofence."];
+      nearestDistance: NearestDistance.t option
+        [@ocaml.doc
+          "The closest distance from the device's position to the geofence."];
+      eventType: ForecastedGeofenceEventType.t option
+        [@ocaml.doc
+          "The event type, forecasting three states for which a device can be in relative to a geofence: ENTER: If a device is outside of a geofence, but would breach the fence if the device is moving at its current speed within time horizon window. EXIT: If a device is inside of a geofence, but would breach the fence if the device is moving at its current speed within time horizon window. IDLE: If a device is inside of a geofence, and the device is not moving."];
+      forecastedBreachTime: Timestamp.t option
+        [@ocaml.doc
+          "The forecasted time the device will breach the geofence in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"];
+      geofenceProperties: PropertyMap.t option
+        [@ocaml.doc "The geofence properties."]}
+    let make ?eventId =
+      fun ?geofenceId ->
+        fun ?isDeviceInGeofence ->
+          fun ?nearestDistance ->
+            fun ?eventType ->
+              fun ?forecastedBreachTime ->
+                fun ?geofenceProperties ->
+                  fun () ->
+                    {
+                      eventId;
+                      geofenceId;
+                      isDeviceInGeofence;
+                      nearestDistance;
+                      eventType;
+                      forecastedBreachTime;
+                      geofenceProperties
+                    }
+    let to_value x =
+      structure_to_value
+        [("EventId", (Option.map x.eventId ~f:Uuid.to_value));
+        ("GeofenceId", (Option.map x.geofenceId ~f:Id.to_value));
+        ("IsDeviceInGeofence",
+          (Option.map x.isDeviceInGeofence ~f:Boolean.to_value));
+        ("NearestDistance",
+          (Option.map x.nearestDistance ~f:NearestDistance.to_value));
+        ("EventType",
+          (Option.map x.eventType ~f:ForecastedGeofenceEventType.to_value));
+        ("ForecastedBreachTime",
+          (Option.map x.forecastedBreachTime ~f:Timestamp.to_value));
+        ("GeofenceProperties",
+          (Option.map x.geofenceProperties ~f:PropertyMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let geofenceProperties =
+        (Option.map ~f:PropertyMap.of_xml)
+          (Xml.child xml_arg0 "GeofenceProperties") in
+      let forecastedBreachTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "ForecastedBreachTime") in
+      let eventType =
+        (Option.map ~f:ForecastedGeofenceEventType.of_xml)
+          (Xml.child xml_arg0 "EventType") in
+      let nearestDistance =
+        (Option.map ~f:NearestDistance.of_xml)
+          (Xml.child xml_arg0 "NearestDistance") in
+      let isDeviceInGeofence =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "IsDeviceInGeofence") in
+      let geofenceId =
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "GeofenceId") in
+      let eventId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "EventId") in
+      make ?geofenceProperties ?forecastedBreachTime ?eventType
+        ?nearestDistance ?isDeviceInGeofence ?geofenceId ?eventId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let geofenceProperties =
+        field_map json__ "GeofenceProperties" PropertyMap.of_json in
+      let forecastedBreachTime =
+        field_map json__ "ForecastedBreachTime" Timestamp.of_json in
+      let eventType =
+        field_map json__ "EventType" ForecastedGeofenceEventType.of_json in
+      let nearestDistance =
+        field_map json__ "NearestDistance" NearestDistance.of_json in
+      let isDeviceInGeofence =
+        field_map json__ "IsDeviceInGeofence" Boolean.of_json in
+      let geofenceId = field_map json__ "GeofenceId" Id.of_json in
+      let eventId = field_map json__ "EventId" Uuid.of_json in
+      make ?geofenceProperties ?forecastedBreachTime ?eventType
+        ?nearestDistance ?isDeviceInGeofence ?geofenceId ?eventId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A forecasted event represents a geofence event in relation to the requested device state, that may occur given the provided device state and time horizon."]
+module ForecastGeofenceEventsDeviceStateSpeedDouble =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in ok_or_failwith (check_float_min i ~min:0.); i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
 module MapStyle =
   struct
     type nonrec t = string
@@ -2168,7 +4682,7 @@ module MapStyle =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:100) >>=
-                  (fun () -> check_pattern i ~pattern:"^[-._\\w]+$")));
+                  (fun () -> check_pattern i ~pattern:"[-._\\w]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2235,80 +4749,77 @@ module Leg =
   struct
     type nonrec t =
       {
-      distance: LegDistanceDouble.t
+      startPosition: Position.t option
         [@ocaml.doc
-          "The distance between the leg's StartPosition and EndPosition along a calculated route. The default measurement is Kilometers unless the request specifies a DistanceUnit of Miles."];
-      durationSeconds: LegDurationSecondsDouble.t
-        [@ocaml.doc
-          "The estimated travel time between the leg's StartPosition and EndPosition. The travel mode and departure time that you specify in the request determines the calculated time."];
-      endPosition: Position.t
+          "The starting position of the leg. Follows the format \\[longitude,latitude\\]. If the StartPosition isn't located on a road, it's snapped to a nearby road."];
+      endPosition: Position.t option
         [@ocaml.doc
           "The terminating position of the leg. Follows the format \\[longitude,latitude\\]. If the EndPosition isn't located on a road, it's snapped to a nearby road."];
+      distance: LegDistanceDouble.t option
+        [@ocaml.doc
+          "The distance between the leg's StartPosition and EndPosition along a calculated route. The default measurement is Kilometers unless the request specifies a DistanceUnit of Miles."];
+      durationSeconds: LegDurationSecondsDouble.t option
+        [@ocaml.doc
+          "The estimated travel time between the leg's StartPosition and EndPosition. The travel mode and departure time that you specify in the request determines the calculated time."];
       geometry: LegGeometry.t option
         [@ocaml.doc
           "Contains the calculated route's path as a linestring geometry."];
-      startPosition: Position.t
-        [@ocaml.doc
-          "The starting position of the leg. Follows the format \\[longitude,latitude\\]. If the StartPosition isn't located on a road, it's snapped to a nearby road."];
-      steps: StepList.t
+      steps: StepList.t option
         [@ocaml.doc
           "Contains a list of steps, which represent subsections of a leg. Each step provides instructions for how to move to the next step in the leg such as the step's start position, end position, travel distance, travel duration, and geometry offset."]}
-    let context_ = "Leg"
-    let make ?geometry =
-      fun ~distance ->
-        fun ~durationSeconds ->
-          fun ~endPosition ->
-            fun ~startPosition ->
-              fun ~steps ->
+    let make ?startPosition =
+      fun ?endPosition ->
+        fun ?distance ->
+          fun ?durationSeconds ->
+            fun ?geometry ->
+              fun ?steps ->
                 fun () ->
                   {
-                    geometry;
+                    startPosition;
+                    endPosition;
                     distance;
                     durationSeconds;
-                    endPosition;
-                    startPosition;
+                    geometry;
                     steps
                   }
     let to_value x =
       structure_to_value
-        [("Distance", (Some (LegDistanceDouble.to_value x.distance)));
+        [("StartPosition", (Option.map x.startPosition ~f:Position.to_value));
+        ("EndPosition", (Option.map x.endPosition ~f:Position.to_value));
+        ("Distance", (Option.map x.distance ~f:LegDistanceDouble.to_value));
         ("DurationSeconds",
-          (Some (LegDurationSecondsDouble.to_value x.durationSeconds)));
-        ("EndPosition", (Some (Position.to_value x.endPosition)));
+          (Option.map x.durationSeconds ~f:LegDurationSecondsDouble.to_value));
         ("Geometry", (Option.map x.geometry ~f:LegGeometry.to_value));
-        ("StartPosition", (Some (Position.to_value x.startPosition)));
-        ("Steps", (Some (StepList.to_value x.steps)))]
+        ("Steps", (Option.map x.steps ~f:StepList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let steps =
-        StepList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Steps") in
-      let startPosition =
-        Position.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StartPosition") in
+        (Option.map ~f:StepList.of_xml) (Xml.child xml_arg0 "Steps") in
       let geometry =
         (Option.map ~f:LegGeometry.of_xml) (Xml.child xml_arg0 "Geometry") in
-      let endPosition =
-        Position.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EndPosition") in
       let durationSeconds =
-        LegDurationSecondsDouble.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DurationSeconds") in
+        (Option.map ~f:LegDurationSecondsDouble.of_xml)
+          (Xml.child xml_arg0 "DurationSeconds") in
       let distance =
-        LegDistanceDouble.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Distance") in
-      make ~steps ~startPosition ?geometry ~endPosition ~durationSeconds
-        ~distance ()
+        (Option.map ~f:LegDistanceDouble.of_xml)
+          (Xml.child xml_arg0 "Distance") in
+      let endPosition =
+        (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "EndPosition") in
+      let startPosition =
+        (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "StartPosition") in
+      make ?steps ?geometry ?durationSeconds ?distance ?endPosition
+        ?startPosition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let steps = field_map_exn json "Steps" StepList.of_json in
-      let startPosition = field_map_exn json "StartPosition" Position.of_json in
-      let geometry = field_map json "Geometry" LegGeometry.of_json in
-      let endPosition = field_map_exn json "EndPosition" Position.of_json in
+    let of_json json__ =
+      let steps = field_map json__ "Steps" StepList.of_json in
+      let geometry = field_map json__ "Geometry" LegGeometry.of_json in
       let durationSeconds =
-        field_map_exn json "DurationSeconds" LegDurationSecondsDouble.of_json in
-      let distance = field_map_exn json "Distance" LegDistanceDouble.of_json in
-      make ~steps ~startPosition ?geometry ~endPosition ~durationSeconds
-        ~distance ()
+        field_map json__ "DurationSeconds" LegDurationSecondsDouble.of_json in
+      let distance = field_map json__ "Distance" LegDistanceDouble.of_json in
+      let endPosition = field_map json__ "EndPosition" Position.of_json in
+      let startPosition = field_map json__ "StartPosition" Position.of_json in
+      make ?steps ?geometry ?durationSeconds ?distance ?endPosition
+        ?startPosition ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the calculated route's details for each path between a pair of positions. The number of legs returned corresponds to one fewer than the total number of positions in the request. For example, a route with a departure position and destination position returns one leg with the positions snapped to a nearby road: The StartPosition is the departure position. The EndPosition is the destination position. A route with a waypoint between the departure and destination position returns two legs with the positions snapped to a nearby road: Leg 1: The StartPosition is the departure position . The EndPosition is the waypoint positon. Leg 2: The StartPosition is the waypoint position. The EndPosition is the destination position."]
@@ -2316,50 +4827,53 @@ module TruckDimensions =
   struct
     type nonrec t =
       {
-      height: TruckDimensionsHeightDouble.t option
-        [@ocaml.doc "The height of the truck. For example, 4.5."];
       length: TruckDimensionsLengthDouble.t option
-        [@ocaml.doc "The length of the truck. For example, 15.5."];
+        [@ocaml.doc
+          "The length of the truck. For example, 15.5. For routes calculated with a HERE resource, this value must be between 0 and 300 meters."];
+      height: TruckDimensionsHeightDouble.t option
+        [@ocaml.doc
+          "The height of the truck. For example, 4.5. For routes calculated with a HERE resource, this value must be between 0 and 50 meters."];
+      width: TruckDimensionsWidthDouble.t option
+        [@ocaml.doc
+          "The width of the truck. For example, 4.5. For routes calculated with a HERE resource, this value must be between 0 and 50 meters."];
       unit: DimensionUnit.t option
         [@ocaml.doc
-          "Specifies the unit of measurement for the truck dimensions. Default Value: Meters"];
-      width: TruckDimensionsWidthDouble.t option
-        [@ocaml.doc "The width of the truck. For example, 4.5."]}
-    let make ?height =
-      fun ?length ->
-        fun ?unit -> fun ?width -> fun () -> { height; length; unit; width }
+          "Specifies the unit of measurement for the truck dimensions. Default Value: Meters"]}
+    let make ?length =
+      fun ?height ->
+        fun ?width -> fun ?unit -> fun () -> { length; height; width; unit }
     let to_value x =
       structure_to_value
-        [("Height",
-           (Option.map x.height ~f:TruckDimensionsHeightDouble.to_value));
-        ("Length",
-          (Option.map x.length ~f:TruckDimensionsLengthDouble.to_value));
-        ("Unit", (Option.map x.unit ~f:DimensionUnit.to_value));
+        [("Length",
+           (Option.map x.length ~f:TruckDimensionsLengthDouble.to_value));
+        ("Height",
+          (Option.map x.height ~f:TruckDimensionsHeightDouble.to_value));
         ("Width",
-          (Option.map x.width ~f:TruckDimensionsWidthDouble.to_value))]
+          (Option.map x.width ~f:TruckDimensionsWidthDouble.to_value));
+        ("Unit", (Option.map x.unit ~f:DimensionUnit.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let unit =
+        (Option.map ~f:DimensionUnit.of_xml) (Xml.child xml_arg0 "Unit") in
       let width =
         (Option.map ~f:TruckDimensionsWidthDouble.of_xml)
           (Xml.child xml_arg0 "Width") in
-      let unit =
-        (Option.map ~f:DimensionUnit.of_xml) (Xml.child xml_arg0 "Unit") in
-      let length =
-        (Option.map ~f:TruckDimensionsLengthDouble.of_xml)
-          (Xml.child xml_arg0 "Length") in
       let height =
         (Option.map ~f:TruckDimensionsHeightDouble.of_xml)
           (Xml.child xml_arg0 "Height") in
-      make ?width ?unit ?length ?height ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let width = field_map json "Width" TruckDimensionsWidthDouble.of_json in
-      let unit = field_map json "Unit" DimensionUnit.of_json in
       let length =
-        field_map json "Length" TruckDimensionsLengthDouble.of_json in
+        (Option.map ~f:TruckDimensionsLengthDouble.of_xml)
+          (Xml.child xml_arg0 "Length") in
+      make ?unit ?width ?height ?length ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unit = field_map json__ "Unit" DimensionUnit.of_json in
+      let width = field_map json__ "Width" TruckDimensionsWidthDouble.of_json in
       let height =
-        field_map json "Height" TruckDimensionsHeightDouble.of_json in
-      make ?width ?unit ?length ?height ()
+        field_map json__ "Height" TruckDimensionsHeightDouble.of_json in
+      let length =
+        field_map json__ "Length" TruckDimensionsLengthDouble.of_json in
+      make ?unit ?width ?height ?length ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about the truck dimensions in the unit of measurement that you specify. Used to filter out roads that can't support or allow the specified dimensions for requests that specify TravelMode as Truck."]
@@ -2386,9 +4900,9 @@ module TruckWeight =
           (Xml.child xml_arg0 "Total") in
       make ?unit ?total ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map json "Unit" VehicleWeightUnit.of_json in
-      let total = field_map json "Total" TruckWeightTotalDouble.of_json in
+    let of_json json__ =
+      let unit = field_map json__ "Unit" VehicleWeightUnit.of_json in
+      let total = field_map json__ "Total" TruckWeightTotalDouble.of_json in
       make ?unit ?total ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2439,6 +4953,9 @@ module RouteMatrixRow =
   struct
     type nonrec t = RouteMatrixEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RouteMatrixEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2463,40 +4980,37 @@ module BatchUpdateDevicePositionError =
   struct
     type nonrec t =
       {
-      deviceId: Id.t
+      deviceId: Id.t option
         [@ocaml.doc "The device associated with the failed location update."];
-      error: BatchItemError.t
+      sampleTime: Timestamp.t option
         [@ocaml.doc
-          "Contains details related to the error code such as the error code and error message."];
-      sampleTime: Timestamp.t
+          "The timestamp at which the device position was determined. Uses ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      error: BatchItemError.t option
         [@ocaml.doc
-          "The timestamp at which the device position was determined. Uses ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
-    let context_ = "BatchUpdateDevicePositionError"
-    let make ~deviceId =
-      fun ~error ->
-        fun ~sampleTime -> fun () -> { deviceId; error; sampleTime }
+          "Contains details related to the error code such as the error code and error message."]}
+    let make ?deviceId =
+      fun ?sampleTime ->
+        fun ?error -> fun () -> { deviceId; sampleTime; error }
     let to_value x =
       structure_to_value
-        [("DeviceId", (Some (Id.to_value x.deviceId)));
-        ("Error", (Some (BatchItemError.to_value x.error)));
-        ("SampleTime", (Some (Timestamp.to_value x.sampleTime)))]
+        [("DeviceId", (Option.map x.deviceId ~f:Id.to_value));
+        ("SampleTime", (Option.map x.sampleTime ~f:Timestamp.to_value));
+        ("Error", (Option.map x.error ~f:BatchItemError.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let sampleTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SampleTime") in
       let error =
-        BatchItemError.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Error") in
+        (Option.map ~f:BatchItemError.of_xml) (Xml.child xml_arg0 "Error") in
+      let sampleTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "SampleTime") in
       let deviceId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceId") in
-      make ~sampleTime ~error ~deviceId ()
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "DeviceId") in
+      make ?error ?sampleTime ?deviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sampleTime = field_map_exn json "SampleTime" Timestamp.of_json in
-      let error = field_map_exn json "Error" BatchItemError.of_json in
-      let deviceId = field_map_exn json "DeviceId" Id.of_json in
-      make ~sampleTime ~error ~deviceId ()
+    let of_json json__ =
+      let error = field_map json__ "Error" BatchItemError.of_json in
+      let sampleTime = field_map json__ "SampleTime" Timestamp.of_json in
+      let deviceId = field_map json__ "DeviceId" Id.of_json in
+      make ?error ?sampleTime ?deviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains error details for each device that failed to update its position."]
@@ -2504,95 +5018,93 @@ module DevicePositionUpdate =
   struct
     type nonrec t =
       {
-      accuracy: PositionalAccuracy.t option
-        [@ocaml.doc "The accuracy of the device position."];
       deviceId: Id.t
         [@ocaml.doc "The device associated to the position update."];
+      sampleTime: Timestamp.t
+        [@ocaml.doc
+          "The timestamp at which the device's position was determined. Uses ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"];
       position: Position.t
         [@ocaml.doc
           "The latest device position defined in WGS 84 format: \\[X or longitude, Y or latitude\\]."];
-      positionProperties: PropertyMap.t option
+      accuracy: PositionalAccuracy.t option
+        [@ocaml.doc "The accuracy of the device position."];
+      positionProperties: PositionPropertyMap.t option
         [@ocaml.doc
-          "Associates one of more properties with the position update. A property is a key-value pair stored with the position update and added to any geofence event the update may trigger. Format: \"key\" : \"value\""];
-      sampleTime: Timestamp.t
-        [@ocaml.doc
-          "The timestamp at which the device's position was determined. Uses ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"]}
+          "Associates one of more properties with the position update. A property is a key-value pair stored with the position update and added to any geofence event the update may trigger. Format: \"key\" : \"value\""]}
     let context_ = "DevicePositionUpdate"
     let make ?accuracy =
       fun ?positionProperties ->
         fun ~deviceId ->
-          fun ~position ->
-            fun ~sampleTime ->
+          fun ~sampleTime ->
+            fun ~position ->
               fun () ->
                 {
                   accuracy;
                   positionProperties;
                   deviceId;
-                  position;
-                  sampleTime
+                  sampleTime;
+                  position
                 }
     let to_value x =
       structure_to_value
-        [("Accuracy", (Option.map x.accuracy ~f:PositionalAccuracy.to_value));
-        ("DeviceId", (Some (Id.to_value x.deviceId)));
+        [("DeviceId", (Some (Id.to_value x.deviceId)));
+        ("SampleTime", (Some (Timestamp.to_value x.sampleTime)));
         ("Position", (Some (Position.to_value x.position)));
+        ("Accuracy", (Option.map x.accuracy ~f:PositionalAccuracy.to_value));
         ("PositionProperties",
-          (Option.map x.positionProperties ~f:PropertyMap.to_value));
-        ("SampleTime", (Some (Timestamp.to_value x.sampleTime)))]
+          (Option.map x.positionProperties ~f:PositionPropertyMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let sampleTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SampleTime") in
       let positionProperties =
-        (Option.map ~f:PropertyMap.of_xml)
+        (Option.map ~f:PositionPropertyMap.of_xml)
           (Xml.child xml_arg0 "PositionProperties") in
-      let position =
-        Position.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Position") in
-      let deviceId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceId") in
       let accuracy =
         (Option.map ~f:PositionalAccuracy.of_xml)
           (Xml.child xml_arg0 "Accuracy") in
-      make ~sampleTime ?positionProperties ~position ~deviceId ?accuracy ()
+      let position =
+        Position.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Position") in
+      let sampleTime =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SampleTime") in
+      let deviceId =
+        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceId") in
+      make ?positionProperties ?accuracy ~position ~sampleTime ~deviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sampleTime = field_map_exn json "SampleTime" Timestamp.of_json in
+    let of_json json__ =
       let positionProperties =
-        field_map json "PositionProperties" PropertyMap.of_json in
-      let position = field_map_exn json "Position" Position.of_json in
-      let deviceId = field_map_exn json "DeviceId" Id.of_json in
-      let accuracy = field_map json "Accuracy" PositionalAccuracy.of_json in
-      make ~sampleTime ?positionProperties ~position ~deviceId ?accuracy ()
+        field_map json__ "PositionProperties" PositionPropertyMap.of_json in
+      let accuracy = field_map json__ "Accuracy" PositionalAccuracy.of_json in
+      let position = field_map_exn json__ "Position" Position.of_json in
+      let sampleTime = field_map_exn json__ "SampleTime" Timestamp.of_json in
+      let deviceId = field_map_exn json__ "DeviceId" Id.of_json in
+      make ?positionProperties ?accuracy ~position ~sampleTime ~deviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the position update details for a device."]
 module BatchPutGeofenceError =
   struct
     type nonrec t =
       {
-      error: BatchItemError.t
-        [@ocaml.doc "Contains details associated to the batch error."];
-      geofenceId: Id.t
-        [@ocaml.doc "The geofence associated with the error message."]}
-    let context_ = "BatchPutGeofenceError"
-    let make ~error = fun ~geofenceId -> fun () -> { error; geofenceId }
+      geofenceId: Id.t option
+        [@ocaml.doc "The geofence associated with the error message."];
+      error: BatchItemError.t option
+        [@ocaml.doc "Contains details associated to the batch error."]}
+    let make ?geofenceId = fun ?error -> fun () -> { geofenceId; error }
     let to_value x =
       structure_to_value
-        [("Error", (Some (BatchItemError.to_value x.error)));
-        ("GeofenceId", (Some (Id.to_value x.geofenceId)))]
+        [("GeofenceId", (Option.map x.geofenceId ~f:Id.to_value));
+        ("Error", (Option.map x.error ~f:BatchItemError.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let geofenceId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GeofenceId") in
       let error =
-        BatchItemError.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Error") in
-      make ~geofenceId ~error ()
+        (Option.map ~f:BatchItemError.of_xml) (Xml.child xml_arg0 "Error") in
+      let geofenceId =
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "GeofenceId") in
+      make ?error ?geofenceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let geofenceId = field_map_exn json "GeofenceId" Id.of_json in
-      let error = field_map_exn json "Error" BatchItemError.of_json in
-      make ~geofenceId ~error ()
+    let of_json json__ =
+      let error = field_map json__ "Error" BatchItemError.of_json in
+      let geofenceId = field_map json__ "GeofenceId" Id.of_json in
+      make ?error ?geofenceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains error details for each geofence that failed to be stored in a given geofence collection."]
@@ -2600,41 +5112,38 @@ module BatchPutGeofenceSuccess =
   struct
     type nonrec t =
       {
-      createTime: Timestamp.t
-        [@ocaml.doc
-          "The timestamp for when the geofence was stored in a geofence collection in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"];
-      geofenceId: Id.t
+      geofenceId: Id.t option
         [@ocaml.doc
           "The geofence successfully stored in a geofence collection."];
-      updateTime: Timestamp.t
+      createTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the geofence was stored in a geofence collection in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"];
+      updateTime: Timestamp.t option
         [@ocaml.doc
           "The timestamp for when the geofence was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"]}
-    let context_ = "BatchPutGeofenceSuccess"
-    let make ~createTime =
-      fun ~geofenceId ->
-        fun ~updateTime -> fun () -> { createTime; geofenceId; updateTime }
+    let make ?geofenceId =
+      fun ?createTime ->
+        fun ?updateTime -> fun () -> { geofenceId; createTime; updateTime }
     let to_value x =
       structure_to_value
-        [("CreateTime", (Some (Timestamp.to_value x.createTime)));
-        ("GeofenceId", (Some (Id.to_value x.geofenceId)));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        [("GeofenceId", (Option.map x.geofenceId ~f:Id.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
-      let geofenceId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GeofenceId") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
       let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      make ~updateTime ~geofenceId ~createTime ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let geofenceId =
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "GeofenceId") in
+      make ?updateTime ?createTime ?geofenceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
-      let geofenceId = field_map_exn json "GeofenceId" Id.of_json in
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
-      make ~updateTime ~geofenceId ~createTime ()
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let geofenceId = field_map json__ "GeofenceId" Id.of_json in
+      make ?updateTime ?createTime ?geofenceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains a summary of each geofence that was successfully stored in a given geofence collection."]
@@ -2647,56 +5156,66 @@ module BatchPutGeofenceRequestEntry =
           "The identifier for the geofence to be stored in a given geofence collection."];
       geometry: GeofenceGeometry.t
         [@ocaml.doc
-          "Contains the polygon details to specify the position of the geofence. Each geofence polygon can have a maximum of 1,000 vertices."]}
+          "Contains the details to specify the position of the geofence. Can be a circle, a polygon, or a multipolygon. Polygon and MultiPolygon geometries can be defined using their respective parameters, or encoded in Geobuf format using the Geobuf parameter. Including multiple geometry types in the same request will return a validation error. The geofence Polygon and MultiPolygon formats support a maximum of 1,000 total vertices. The Geobuf format supports a maximum of 100,000 vertices."];
+      geofenceProperties: PropertyMap.t option
+        [@ocaml.doc
+          "Associates one of more properties with the geofence. A property is a key-value pair stored with the geofence and added to any geofence event triggered with that geofence. Format: \"key\" : \"value\""]}
     let context_ = "BatchPutGeofenceRequestEntry"
-    let make ~geofenceId =
-      fun ~geometry -> fun () -> { geofenceId; geometry }
+    let make ?geofenceProperties =
+      fun ~geofenceId ->
+        fun ~geometry ->
+          fun () -> { geofenceProperties; geofenceId; geometry }
     let to_value x =
       structure_to_value
         [("GeofenceId", (Some (Id.to_value x.geofenceId)));
-        ("Geometry", (Some (GeofenceGeometry.to_value x.geometry)))]
+        ("Geometry", (Some (GeofenceGeometry.to_value x.geometry)));
+        ("GeofenceProperties",
+          (Option.map x.geofenceProperties ~f:PropertyMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let geofenceProperties =
+        (Option.map ~f:PropertyMap.of_xml)
+          (Xml.child xml_arg0 "GeofenceProperties") in
       let geometry =
         GeofenceGeometry.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Geometry") in
       let geofenceId =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GeofenceId") in
-      make ~geometry ~geofenceId ()
+      make ?geofenceProperties ~geometry ~geofenceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let geometry = field_map_exn json "Geometry" GeofenceGeometry.of_json in
-      let geofenceId = field_map_exn json "GeofenceId" Id.of_json in
-      make ~geometry ~geofenceId ()
+    let of_json json__ =
+      let geofenceProperties =
+        field_map json__ "GeofenceProperties" PropertyMap.of_json in
+      let geometry = field_map_exn json__ "Geometry" GeofenceGeometry.of_json in
+      let geofenceId = field_map_exn json__ "GeofenceId" Id.of_json in
+      make ?geofenceProperties ~geometry ~geofenceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains geofence geometry details."]
 module BatchGetDevicePositionError =
   struct
     type nonrec t =
       {
-      deviceId: Id.t
+      deviceId: Id.t option
         [@ocaml.doc "The ID of the device that didn't return a position."];
-      error: BatchItemError.t
+      error: BatchItemError.t option
         [@ocaml.doc "Contains details related to the error code."]}
-    let context_ = "BatchGetDevicePositionError"
-    let make ~deviceId = fun ~error -> fun () -> { deviceId; error }
+    let make ?deviceId = fun ?error -> fun () -> { deviceId; error }
     let to_value x =
       structure_to_value
-        [("DeviceId", (Some (Id.to_value x.deviceId)));
-        ("Error", (Some (BatchItemError.to_value x.error)))]
+        [("DeviceId", (Option.map x.deviceId ~f:Id.to_value));
+        ("Error", (Option.map x.error ~f:BatchItemError.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let error =
-        BatchItemError.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Error") in
+        (Option.map ~f:BatchItemError.of_xml) (Xml.child xml_arg0 "Error") in
       let deviceId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceId") in
-      make ~error ~deviceId ()
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "DeviceId") in
+      make ?error ?deviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map_exn json "Error" BatchItemError.of_json in
-      let deviceId = field_map_exn json "DeviceId" Id.of_json in
-      make ~error ~deviceId ()
+    let of_json json__ =
+      let error = field_map json__ "Error" BatchItemError.of_json in
+      let deviceId = field_map json__ "DeviceId" Id.of_json in
+      make ?error ?deviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains error details for each device that didn't return a position."]
@@ -2704,40 +5223,37 @@ module BatchEvaluateGeofencesError =
   struct
     type nonrec t =
       {
-      deviceId: Id.t
+      deviceId: Id.t option
         [@ocaml.doc
           "The device associated with the position evaluation error."];
-      error: BatchItemError.t
-        [@ocaml.doc "Contains details associated to the batch error."];
-      sampleTime: Timestamp.t
+      sampleTime: Timestamp.t option
         [@ocaml.doc
-          "Specifies a timestamp for when the error occurred in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"]}
-    let context_ = "BatchEvaluateGeofencesError"
-    let make ~deviceId =
-      fun ~error ->
-        fun ~sampleTime -> fun () -> { deviceId; error; sampleTime }
+          "Specifies a timestamp for when the error occurred in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"];
+      error: BatchItemError.t option
+        [@ocaml.doc "Contains details associated to the batch error."]}
+    let make ?deviceId =
+      fun ?sampleTime ->
+        fun ?error -> fun () -> { deviceId; sampleTime; error }
     let to_value x =
       structure_to_value
-        [("DeviceId", (Some (Id.to_value x.deviceId)));
-        ("Error", (Some (BatchItemError.to_value x.error)));
-        ("SampleTime", (Some (Timestamp.to_value x.sampleTime)))]
+        [("DeviceId", (Option.map x.deviceId ~f:Id.to_value));
+        ("SampleTime", (Option.map x.sampleTime ~f:Timestamp.to_value));
+        ("Error", (Option.map x.error ~f:BatchItemError.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let sampleTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SampleTime") in
       let error =
-        BatchItemError.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Error") in
+        (Option.map ~f:BatchItemError.of_xml) (Xml.child xml_arg0 "Error") in
+      let sampleTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "SampleTime") in
       let deviceId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceId") in
-      make ~sampleTime ~error ~deviceId ()
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "DeviceId") in
+      make ?error ?sampleTime ?deviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sampleTime = field_map_exn json "SampleTime" Timestamp.of_json in
-      let error = field_map_exn json "Error" BatchItemError.of_json in
-      let deviceId = field_map_exn json "DeviceId" Id.of_json in
-      make ~sampleTime ~error ~deviceId ()
+    let of_json json__ =
+      let error = field_map json__ "Error" BatchItemError.of_json in
+      let sampleTime = field_map json__ "SampleTime" Timestamp.of_json in
+      let deviceId = field_map json__ "DeviceId" Id.of_json in
+      make ?error ?sampleTime ?deviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains error details for each device that failed to evaluate its position against the geofences in a given geofence collection."]
@@ -2745,29 +5261,27 @@ module BatchDeleteGeofenceError =
   struct
     type nonrec t =
       {
-      error: BatchItemError.t
-        [@ocaml.doc "Contains details associated to the batch error."];
-      geofenceId: Id.t
-        [@ocaml.doc "The geofence associated with the error message."]}
-    let context_ = "BatchDeleteGeofenceError"
-    let make ~error = fun ~geofenceId -> fun () -> { error; geofenceId }
+      geofenceId: Id.t option
+        [@ocaml.doc "The geofence associated with the error message."];
+      error: BatchItemError.t option
+        [@ocaml.doc "Contains details associated to the batch error."]}
+    let make ?geofenceId = fun ?error -> fun () -> { geofenceId; error }
     let to_value x =
       structure_to_value
-        [("Error", (Some (BatchItemError.to_value x.error)));
-        ("GeofenceId", (Some (Id.to_value x.geofenceId)))]
+        [("GeofenceId", (Option.map x.geofenceId ~f:Id.to_value));
+        ("Error", (Option.map x.error ~f:BatchItemError.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let geofenceId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GeofenceId") in
       let error =
-        BatchItemError.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Error") in
-      make ~geofenceId ~error ()
+        (Option.map ~f:BatchItemError.of_xml) (Xml.child xml_arg0 "Error") in
+      let geofenceId =
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "GeofenceId") in
+      make ?error ?geofenceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let geofenceId = field_map_exn json "GeofenceId" Id.of_json in
-      let error = field_map_exn json "Error" BatchItemError.of_json in
-      make ~geofenceId ~error ()
+    let of_json json__ =
+      let error = field_map json__ "Error" BatchItemError.of_json in
+      let geofenceId = field_map json__ "GeofenceId" Id.of_json in
+      make ?error ?geofenceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains error details for each geofence that failed to delete from the geofence collection."]
@@ -2775,149 +5289,284 @@ module BatchDeleteDevicePositionHistoryError =
   struct
     type nonrec t =
       {
-      deviceId: Id.t [@ocaml.doc "The ID of the device for this position."];
-      error: BatchItemError.t }
-    let context_ = "BatchDeleteDevicePositionHistoryError"
-    let make ~deviceId = fun ~error -> fun () -> { deviceId; error }
+      deviceId: Id.t option
+        [@ocaml.doc "The ID of the device for this position."];
+      error: BatchItemError.t option }
+    let make ?deviceId = fun ?error -> fun () -> { deviceId; error }
     let to_value x =
       structure_to_value
-        [("DeviceId", (Some (Id.to_value x.deviceId)));
-        ("Error", (Some (BatchItemError.to_value x.error)))]
+        [("DeviceId", (Option.map x.deviceId ~f:Id.to_value));
+        ("Error", (Option.map x.error ~f:BatchItemError.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let error =
-        BatchItemError.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Error") in
+        (Option.map ~f:BatchItemError.of_xml) (Xml.child xml_arg0 "Error") in
       let deviceId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceId") in
-      make ~error ~deviceId ()
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "DeviceId") in
+      make ?error ?deviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map_exn json "Error" BatchItemError.of_json in
-      let deviceId = field_map_exn json "DeviceId" Id.of_json in
-      make ~error ~deviceId ()
+    let of_json json__ =
+      let error = field_map json__ "Error" BatchItemError.of_json in
+      let deviceId = field_map json__ "DeviceId" Id.of_json in
+      make ?error ?deviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the tracker resource details."]
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request was denied because of insufficient access or permissions. Check with an administrator to verify your permissions."]
+module InferredState =
+  struct
+    type nonrec t =
+      {
+      position: Position.t option
+        [@ocaml.doc
+          "The device position inferred by the provided position, IP address, cellular signals, and Wi-Fi- access points."];
+      accuracy: PositionalAccuracy.t option
+        [@ocaml.doc "The level of certainty of the inferred position."];
+      deviationDistance: Double.t option
+        [@ocaml.doc
+          "The distance between the inferred position and the device's self-reported position."];
+      proxyDetected: Boolean.t option
+        [@ocaml.doc "Indicates if a proxy was used."]}
+    let make ?position =
+      fun ?accuracy ->
+        fun ?deviationDistance ->
+          fun ?proxyDetected ->
+            fun () ->
+              { position; accuracy; deviationDistance; proxyDetected }
+    let to_value x =
+      structure_to_value
+        [("Position", (Option.map x.position ~f:Position.to_value));
+        ("Accuracy", (Option.map x.accuracy ~f:PositionalAccuracy.to_value));
+        ("DeviationDistance",
+          (Option.map x.deviationDistance ~f:Double.to_value));
+        ("ProxyDetected", (Option.map x.proxyDetected ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let proxyDetected =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "ProxyDetected") in
+      let deviationDistance =
+        (Option.map ~f:Double.of_xml)
+          (Xml.child xml_arg0 "DeviationDistance") in
+      let accuracy =
+        (Option.map ~f:PositionalAccuracy.of_xml)
+          (Xml.child xml_arg0 "Accuracy") in
+      let position =
+        (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "Position") in
+      make ?proxyDetected ?deviationDistance ?accuracy ?position ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let proxyDetected = field_map json__ "ProxyDetected" Boolean.of_json in
+      let deviationDistance =
+        field_map json__ "DeviationDistance" Double.of_json in
+      let accuracy = field_map json__ "Accuracy" PositionalAccuracy.of_json in
+      let position = field_map json__ "Position" Position.of_json in
+      make ?proxyDetected ?deviationDistance ?accuracy ?position ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The inferred state of the device, given the provided position, IP address, cellular signals, and Wi-Fi- access points."]
 module InternalServerException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "InternalServerException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request has failed to process because of an unknown server error, exception, or failure."]
 module ResourceNotFoundException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ResourceNotFoundException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The resource that you've entered was not found in your AWS account."]
 module ThrottlingException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ThrottlingException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied because of request throttling."]
 module ValidationException =
   struct
     type nonrec t =
       {
-      fieldList: ValidationExceptionFieldList.t
-        [@ocaml.doc "The field where the invalid entry was detected."];
-      message: String_.t ;
-      reason: ValidationExceptionReason.t
+      message: String_.t option ;
+      reason: ValidationExceptionReason.t option
         [@ocaml.doc
-          "A message with the reason for the validation exception error."]}
-    let context_ = "ValidationException"
-    let make ~fieldList =
-      fun ~message -> fun ~reason -> fun () -> { fieldList; message; reason }
+          "A message with the reason for the validation exception error."];
+      fieldList: ValidationExceptionFieldList.t option
+        [@ocaml.doc "The field where the invalid entry was detected."]}
+    let make ?message =
+      fun ?reason ->
+        fun ?fieldList -> fun () -> { message; reason; fieldList }
     let to_value x =
       structure_to_value
-        [("fieldList",
-           (Some (ValidationExceptionFieldList.to_value x.fieldList)));
-        ("message", (Some (String_.to_value x.message)));
-        ("reason", (Some (ValidationExceptionReason.to_value x.reason)))]
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("reason",
+          (Option.map x.reason ~f:ValidationExceptionReason.to_value));
+        ("fieldList",
+          (Option.map x.fieldList ~f:ValidationExceptionFieldList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let fieldList =
+        (Option.map ~f:ValidationExceptionFieldList.of_xml)
+          (Xml.child xml_arg0 "fieldList") in
       let reason =
-        ValidationExceptionReason.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "reason") in
+        (Option.map ~f:ValidationExceptionReason.of_xml)
+          (Xml.child xml_arg0 "reason") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      let fieldList =
-        ValidationExceptionFieldList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "fieldList") in
-      make ~reason ~message ~fieldList ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?fieldList ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason =
-        field_map_exn json "Reason" ValidationExceptionReason.of_json in
-      let message = field_map_exn json "Message" String_.of_json in
+    let of_json json__ =
       let fieldList =
-        field_map_exn json "FieldList" ValidationExceptionFieldList.of_json in
-      make ~reason ~message ~fieldList ()
+        field_map json__ "FieldList" ValidationExceptionFieldList.of_json in
+      let reason =
+        field_map json__ "Reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?fieldList ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The input failed to meet the constraints specified by the AWS service."]
+module DeviceState =
+  struct
+    type nonrec t =
+      {
+      deviceId: Id.t [@ocaml.doc "The device identifier."];
+      sampleTime: Timestamp.t
+        [@ocaml.doc
+          "The timestamp at which the device's position was determined. Uses ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      position: Position.t [@ocaml.doc "The last known device position."];
+      accuracy: PositionalAccuracy.t option ;
+      ipv4Address: DeviceStateIpv4AddressString.t option
+        [@ocaml.doc "The device's Ipv4 address."];
+      wiFiAccessPoints: WiFiAccessPointList.t option
+        [@ocaml.doc "The Wi-Fi access points the device is using."];
+      cellSignals: CellSignals.t option
+        [@ocaml.doc
+          "The cellular network infrastructure that the device is connected to."]}
+    let context_ = "DeviceState"
+    let make ?accuracy =
+      fun ?ipv4Address ->
+        fun ?wiFiAccessPoints ->
+          fun ?cellSignals ->
+            fun ~deviceId ->
+              fun ~sampleTime ->
+                fun ~position ->
+                  fun () ->
+                    {
+                      accuracy;
+                      ipv4Address;
+                      wiFiAccessPoints;
+                      cellSignals;
+                      deviceId;
+                      sampleTime;
+                      position
+                    }
+    let to_value x =
+      structure_to_value
+        [("DeviceId", (Some (Id.to_value x.deviceId)));
+        ("SampleTime", (Some (Timestamp.to_value x.sampleTime)));
+        ("Position", (Some (Position.to_value x.position)));
+        ("Accuracy", (Option.map x.accuracy ~f:PositionalAccuracy.to_value));
+        ("Ipv4Address",
+          (Option.map x.ipv4Address ~f:DeviceStateIpv4AddressString.to_value));
+        ("WiFiAccessPoints",
+          (Option.map x.wiFiAccessPoints ~f:WiFiAccessPointList.to_value));
+        ("CellSignals", (Option.map x.cellSignals ~f:CellSignals.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cellSignals =
+        (Option.map ~f:CellSignals.of_xml) (Xml.child xml_arg0 "CellSignals") in
+      let wiFiAccessPoints =
+        (Option.map ~f:WiFiAccessPointList.of_xml)
+          (Xml.child xml_arg0 "WiFiAccessPoints") in
+      let ipv4Address =
+        (Option.map ~f:DeviceStateIpv4AddressString.of_xml)
+          (Xml.child xml_arg0 "Ipv4Address") in
+      let accuracy =
+        (Option.map ~f:PositionalAccuracy.of_xml)
+          (Xml.child xml_arg0 "Accuracy") in
+      let position =
+        Position.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Position") in
+      let sampleTime =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SampleTime") in
+      let deviceId =
+        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceId") in
+      make ?cellSignals ?wiFiAccessPoints ?ipv4Address ?accuracy ~position
+        ~sampleTime ~deviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cellSignals = field_map json__ "CellSignals" CellSignals.of_json in
+      let wiFiAccessPoints =
+        field_map json__ "WiFiAccessPoints" WiFiAccessPointList.of_json in
+      let ipv4Address =
+        field_map json__ "Ipv4Address" DeviceStateIpv4AddressString.of_json in
+      let accuracy = field_map json__ "Accuracy" PositionalAccuracy.of_json in
+      let position = field_map_exn json__ "Position" Position.of_json in
+      let sampleTime = field_map_exn json__ "SampleTime" Timestamp.of_json in
+      let deviceId = field_map_exn json__ "DeviceId" Id.of_json in
+      make ?cellSignals ?wiFiAccessPoints ?ipv4Address ?accuracy ~position
+        ~sampleTime ~deviceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The device's position, IP address, and Wi-Fi access points."]
 module PositionFiltering =
   struct
     type nonrec t =
@@ -2964,12 +5613,48 @@ module DataSourceConfiguration =
         (Option.map ~f:IntendedUse.of_xml) (Xml.child xml_arg0 "IntendedUse") in
       make ?intendedUse ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let intendedUse = field_map json "IntendedUse" IntendedUse.of_json in
+    let of_json json__ =
+      let intendedUse = field_map json__ "IntendedUse" IntendedUse.of_json in
       make ?intendedUse ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the data storage option chosen for requesting Places. When using Amazon Location Places: If using HERE Technologies as a data provider, you can't store results for locations in Japan by setting IntendedUse to Storage. parameter. Under the MobileAssetTracking or MobilAssetManagement pricing plan, you can't store results from your place index resources by setting IntendedUse to Storage. This returns a validation exception error. For more information, see the AWS Service Terms for Amazon Location Service."]
+module MapConfigurationUpdate =
+  struct
+    type nonrec t =
+      {
+      politicalView: CountryCode3OrEmpty.t option
+        [@ocaml.doc
+          "Specifies the political view for the style. Set to an empty string to not use a political view, or, for styles that support specific political views, you can choose a view, such as IND for the Indian view. Not all map resources or styles support political view styles. See Political views for more information."];
+      customLayers: CustomLayerList.t option
+        [@ocaml.doc
+          "Specifies the custom layers for the style. Leave unset to not enable any custom layer, or, for styles that support custom layers, you can enable layer(s), such as POI layer for the VectorEsriNavigation style. Default is unset. Not all map resources or styles support custom layers. See Custom Layers for more information."]}
+    let make ?politicalView =
+      fun ?customLayers -> fun () -> { politicalView; customLayers }
+    let to_value x =
+      structure_to_value
+        [("PoliticalView",
+           (Option.map x.politicalView ~f:CountryCode3OrEmpty.to_value));
+        ("CustomLayers",
+          (Option.map x.customLayers ~f:CustomLayerList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customLayers =
+        (Option.map ~f:CustomLayerList.of_xml)
+          (Xml.child xml_arg0 "CustomLayers") in
+      let politicalView =
+        (Option.map ~f:CountryCode3OrEmpty.of_xml)
+          (Xml.child xml_arg0 "PoliticalView") in
+      make ?customLayers ?politicalView ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customLayers =
+        field_map json__ "CustomLayers" CustomLayerList.of_json in
+      let politicalView =
+        field_map json__ "PoliticalView" CountryCode3OrEmpty.of_json in
+      make ?customLayers ?politicalView ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Specifies the political view for the style."]
 module TagKeys =
   struct
     type nonrec t = String_.t list
@@ -2978,6 +5663,9 @@ module TagKeys =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3022,6 +5710,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3029,10 +5719,33 @@ module TagMap =
         ~of_json:TagValue.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ClientToken =
+  struct
+    type nonrec t = string
+    let context_ = "ClientToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[!-~]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientToken" j
+    let to_json = simple_to_json to_value
+  end
 module SearchForTextResultList =
   struct
     type nonrec t = SearchForTextResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SearchForTextResult.to_value)) |>
         (fun x -> `List x)
@@ -3059,110 +5772,132 @@ module SearchPlaceIndexForTextSummary =
   struct
     type nonrec t =
       {
+      text: SensitiveString.t option
+        [@ocaml.doc "The search text specified in the request."];
       biasPosition: Position.t option
         [@ocaml.doc
           "Contains the coordinates for the optional bias position specified in the request. This parameter contains a pair of numbers. The first number represents the X coordinate, or longitude; the second number represents the Y coordinate, or latitude. For example, \\[-123.1174, 49.2847\\] represents the position with longitude -123.1174 and latitude 49.2847."];
-      dataSource: String_.t
-        [@ocaml.doc
-          "The geospatial data provider attached to the place index resource specified in the request. Values can be one of the following: Esri Here For more information about data providers, see Amazon Location Service data providers."];
       filterBBox: BoundingBox.t option
         [@ocaml.doc
           "Contains the coordinates for the optional bounding box specified in the request."];
       filterCountries: CountryCodeList.t option
         [@ocaml.doc
           "Contains the optional country filter specified in the request."];
-      language: LanguageTag.t option
-        [@ocaml.doc
-          "The preferred language used to return results. Matches the language in the request. The value is a valid BCP 47 language tag, for example, en for English."];
       maxResults: PlaceIndexSearchResultLimit.t option
         [@ocaml.doc
           "Contains the optional result count limit specified in the request."];
       resultBBox: BoundingBox.t option
         [@ocaml.doc
           "The bounding box that fully contains all search results. If you specified the optional FilterBBox parameter in the request, ResultBBox is contained within FilterBBox."];
-      text: SyntheticSearchPlaceIndexForTextSummaryString.t
-        [@ocaml.doc "The search text specified in the request."]}
-    let context_ = "SearchPlaceIndexForTextSummary"
-    let make ?biasPosition =
-      fun ?filterBBox ->
-        fun ?filterCountries ->
-          fun ?language ->
+      dataSource: String_.t option
+        [@ocaml.doc
+          "The geospatial data provider attached to the place index resource specified in the request. Values can be one of the following: Esri Grab Here For more information about data providers, see Amazon Location Service data providers."];
+      language: LanguageTag.t option
+        [@ocaml.doc
+          "The preferred language used to return results. Matches the language in the request. The value is a valid BCP 47 language tag, for example, en for English."];
+      filterCategories: FilterPlaceCategoryList.t option
+        [@ocaml.doc "The optional category filter specified in the request."]}
+    let make ?text =
+      fun ?biasPosition ->
+        fun ?filterBBox ->
+          fun ?filterCountries ->
             fun ?maxResults ->
               fun ?resultBBox ->
-                fun ~dataSource ->
-                  fun ~text ->
-                    fun () ->
-                      {
-                        biasPosition;
-                        filterBBox;
-                        filterCountries;
-                        language;
-                        maxResults;
-                        resultBBox;
-                        dataSource;
-                        text
-                      }
+                fun ?dataSource ->
+                  fun ?language ->
+                    fun ?filterCategories ->
+                      fun () ->
+                        {
+                          text;
+                          biasPosition;
+                          filterBBox;
+                          filterCountries;
+                          maxResults;
+                          resultBBox;
+                          dataSource;
+                          language;
+                          filterCategories
+                        }
     let to_value x =
       structure_to_value
-        [("BiasPosition", (Option.map x.biasPosition ~f:Position.to_value));
-        ("DataSource", (Some (String_.to_value x.dataSource)));
+        [("Text", (Option.map x.text ~f:SensitiveString.to_value));
+        ("BiasPosition", (Option.map x.biasPosition ~f:Position.to_value));
         ("FilterBBox", (Option.map x.filterBBox ~f:BoundingBox.to_value));
         ("FilterCountries",
           (Option.map x.filterCountries ~f:CountryCodeList.to_value));
-        ("Language", (Option.map x.language ~f:LanguageTag.to_value));
         ("MaxResults",
           (Option.map x.maxResults ~f:PlaceIndexSearchResultLimit.to_value));
         ("ResultBBox", (Option.map x.resultBBox ~f:BoundingBox.to_value));
-        ("Text",
-          (Some
-             (SyntheticSearchPlaceIndexForTextSummaryString.to_value x.text)))]
+        ("DataSource", (Option.map x.dataSource ~f:String_.to_value));
+        ("Language", (Option.map x.language ~f:LanguageTag.to_value));
+        ("FilterCategories",
+          (Option.map x.filterCategories ~f:FilterPlaceCategoryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let text =
-        SyntheticSearchPlaceIndexForTextSummaryString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Text") in
+      let filterCategories =
+        (Option.map ~f:FilterPlaceCategoryList.of_xml)
+          (Xml.child xml_arg0 "FilterCategories") in
+      let language =
+        (Option.map ~f:LanguageTag.of_xml) (Xml.child xml_arg0 "Language") in
+      let dataSource =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DataSource") in
       let resultBBox =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "ResultBBox") in
       let maxResults =
         (Option.map ~f:PlaceIndexSearchResultLimit.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
-      let language =
-        (Option.map ~f:LanguageTag.of_xml) (Xml.child xml_arg0 "Language") in
       let filterCountries =
         (Option.map ~f:CountryCodeList.of_xml)
           (Xml.child xml_arg0 "FilterCountries") in
       let filterBBox =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "FilterBBox") in
-      let dataSource =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DataSource") in
       let biasPosition =
         (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "BiasPosition") in
-      make ~text ?resultBBox ?maxResults ?language ?filterCountries
-        ?filterBBox ~dataSource ?biasPosition ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let text =
-        field_map_exn json "Text"
-          SyntheticSearchPlaceIndexForTextSummaryString.of_json in
-      let resultBBox = field_map json "ResultBBox" BoundingBox.of_json in
+        (Option.map ~f:SensitiveString.of_xml) (Xml.child xml_arg0 "Text") in
+      make ?filterCategories ?language ?dataSource ?resultBBox ?maxResults
+        ?filterCountries ?filterBBox ?biasPosition ?text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filterCategories =
+        field_map json__ "FilterCategories" FilterPlaceCategoryList.of_json in
+      let language = field_map json__ "Language" LanguageTag.of_json in
+      let dataSource = field_map json__ "DataSource" String_.of_json in
+      let resultBBox = field_map json__ "ResultBBox" BoundingBox.of_json in
       let maxResults =
-        field_map json "MaxResults" PlaceIndexSearchResultLimit.of_json in
-      let language = field_map json "Language" LanguageTag.of_json in
+        field_map json__ "MaxResults" PlaceIndexSearchResultLimit.of_json in
       let filterCountries =
-        field_map json "FilterCountries" CountryCodeList.of_json in
-      let filterBBox = field_map json "FilterBBox" BoundingBox.of_json in
-      let dataSource = field_map_exn json "DataSource" String_.of_json in
-      let biasPosition = field_map json "BiasPosition" Position.of_json in
-      make ~text ?resultBBox ?maxResults ?language ?filterCountries
-        ?filterBBox ~dataSource ?biasPosition ()
+        field_map json__ "FilterCountries" CountryCodeList.of_json in
+      let filterBBox = field_map json__ "FilterBBox" BoundingBox.of_json in
+      let biasPosition = field_map json__ "BiasPosition" Position.of_json in
+      let text = field_map json__ "Text" SensitiveString.of_json in
+      make ?filterCategories ?language ?dataSource ?resultBBox ?maxResults
+        ?filterCountries ?filterBBox ?biasPosition ?text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A summary of the request sent by using SearchPlaceIndexForText."]
-module SyntheticSearchPlaceIndexForTextRequestString =
+module ApiKey =
   struct
     type nonrec t = string
-    let context_ = "SyntheticSearchPlaceIndexForTextRequestString"
+    let context_ = "ApiKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1000) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ApiKey" j
+    let to_json = simple_to_json to_value
+  end
+module SearchPlaceIndexForTextRequestTextString =
+  struct
+    type nonrec t = string
+    let context_ = "SearchPlaceIndexForTextRequestTextString"
     let make i =
       let open Result in
         ok_or_failwith
@@ -3175,13 +5910,16 @@ module SyntheticSearchPlaceIndexForTextRequestString =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j =
-      string_of_json ~kind:"SyntheticSearchPlaceIndexForTextRequestString" j
+      string_of_json ~kind:"SearchPlaceIndexForTextRequestTextString" j
     let to_json = simple_to_json to_value
   end
 module SearchForSuggestionsResultList =
   struct
     type nonrec t = SearchForSuggestionsResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SearchForSuggestionsResult.to_value)) |>
         (fun x -> `List x)
@@ -3208,93 +5946,96 @@ module SearchPlaceIndexForSuggestionsSummary =
   struct
     type nonrec t =
       {
+      text: SensitiveString.t option
+        [@ocaml.doc
+          "The free-form partial text input specified in the request."];
       biasPosition: Position.t option
         [@ocaml.doc
           "Contains the coordinates for the optional bias position specified in the request. This parameter contains a pair of numbers. The first number represents the X coordinate, or longitude; the second number represents the Y coordinate, or latitude. For example, \\[-123.1174, 49.2847\\] represents the position with longitude -123.1174 and latitude 49.2847."];
-      dataSource: String_.t
-        [@ocaml.doc
-          "The geospatial data provider attached to the place index resource specified in the request. Values can be one of the following: Esri Here For more information about data providers, see Amazon Location Service data providers."];
       filterBBox: BoundingBox.t option
         [@ocaml.doc
           "Contains the coordinates for the optional bounding box specified in the request."];
       filterCountries: CountryCodeList.t option
         [@ocaml.doc
           "Contains the optional country filter specified in the request."];
-      language: LanguageTag.t option
-        [@ocaml.doc
-          "The preferred language used to return results. Matches the language in the request. The value is a valid BCP 47 language tag, for example, en for English."];
       maxResults: Integer.t option
         [@ocaml.doc
           "Contains the optional result count limit specified in the request."];
-      text: SyntheticSearchPlaceIndexForSuggestionsSummaryString.t
+      dataSource: String_.t option
         [@ocaml.doc
-          "The free-form partial text input specified in the request."]}
-    let context_ = "SearchPlaceIndexForSuggestionsSummary"
-    let make ?biasPosition =
-      fun ?filterBBox ->
-        fun ?filterCountries ->
-          fun ?language ->
+          "The geospatial data provider attached to the place index resource specified in the request. Values can be one of the following: Esri Grab Here For more information about data providers, see Amazon Location Service data providers."];
+      language: LanguageTag.t option
+        [@ocaml.doc
+          "The preferred language used to return results. Matches the language in the request. The value is a valid BCP 47 language tag, for example, en for English."];
+      filterCategories: FilterPlaceCategoryList.t option
+        [@ocaml.doc "The optional category filter specified in the request."]}
+    let make ?text =
+      fun ?biasPosition ->
+        fun ?filterBBox ->
+          fun ?filterCountries ->
             fun ?maxResults ->
-              fun ~dataSource ->
-                fun ~text ->
-                  fun () ->
-                    {
-                      biasPosition;
-                      filterBBox;
-                      filterCountries;
-                      language;
-                      maxResults;
-                      dataSource;
-                      text
-                    }
+              fun ?dataSource ->
+                fun ?language ->
+                  fun ?filterCategories ->
+                    fun () ->
+                      {
+                        text;
+                        biasPosition;
+                        filterBBox;
+                        filterCountries;
+                        maxResults;
+                        dataSource;
+                        language;
+                        filterCategories
+                      }
     let to_value x =
       structure_to_value
-        [("BiasPosition", (Option.map x.biasPosition ~f:Position.to_value));
-        ("DataSource", (Some (String_.to_value x.dataSource)));
+        [("Text", (Option.map x.text ~f:SensitiveString.to_value));
+        ("BiasPosition", (Option.map x.biasPosition ~f:Position.to_value));
         ("FilterBBox", (Option.map x.filterBBox ~f:BoundingBox.to_value));
         ("FilterCountries",
           (Option.map x.filterCountries ~f:CountryCodeList.to_value));
-        ("Language", (Option.map x.language ~f:LanguageTag.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:Integer.to_value));
-        ("Text",
-          (Some
-             (SyntheticSearchPlaceIndexForSuggestionsSummaryString.to_value
-                x.text)))]
+        ("DataSource", (Option.map x.dataSource ~f:String_.to_value));
+        ("Language", (Option.map x.language ~f:LanguageTag.to_value));
+        ("FilterCategories",
+          (Option.map x.filterCategories ~f:FilterPlaceCategoryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let text =
-        SyntheticSearchPlaceIndexForSuggestionsSummaryString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Text") in
-      let maxResults =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let filterCategories =
+        (Option.map ~f:FilterPlaceCategoryList.of_xml)
+          (Xml.child xml_arg0 "FilterCategories") in
       let language =
         (Option.map ~f:LanguageTag.of_xml) (Xml.child xml_arg0 "Language") in
+      let dataSource =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DataSource") in
+      let maxResults =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let filterCountries =
         (Option.map ~f:CountryCodeList.of_xml)
           (Xml.child xml_arg0 "FilterCountries") in
       let filterBBox =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "FilterBBox") in
-      let dataSource =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DataSource") in
       let biasPosition =
         (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "BiasPosition") in
-      make ~text ?maxResults ?language ?filterCountries ?filterBBox
-        ~dataSource ?biasPosition ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let text =
-        field_map_exn json "Text"
-          SyntheticSearchPlaceIndexForSuggestionsSummaryString.of_json in
-      let maxResults = field_map json "MaxResults" Integer.of_json in
-      let language = field_map json "Language" LanguageTag.of_json in
+        (Option.map ~f:SensitiveString.of_xml) (Xml.child xml_arg0 "Text") in
+      make ?filterCategories ?language ?dataSource ?maxResults
+        ?filterCountries ?filterBBox ?biasPosition ?text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filterCategories =
+        field_map json__ "FilterCategories" FilterPlaceCategoryList.of_json in
+      let language = field_map json__ "Language" LanguageTag.of_json in
+      let dataSource = field_map json__ "DataSource" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" Integer.of_json in
       let filterCountries =
-        field_map json "FilterCountries" CountryCodeList.of_json in
-      let filterBBox = field_map json "FilterBBox" BoundingBox.of_json in
-      let dataSource = field_map_exn json "DataSource" String_.of_json in
-      let biasPosition = field_map json "BiasPosition" Position.of_json in
-      make ~text ?maxResults ?language ?filterCountries ?filterBBox
-        ~dataSource ?biasPosition ()
+        field_map json__ "FilterCountries" CountryCodeList.of_json in
+      let filterBBox = field_map json__ "FilterBBox" BoundingBox.of_json in
+      let biasPosition = field_map json__ "BiasPosition" Position.of_json in
+      let text = field_map json__ "Text" SensitiveString.of_json in
+      make ?filterCategories ?language ?dataSource ?maxResults
+        ?filterCountries ?filterBBox ?biasPosition ?text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A summary of the request sent by using SearchPlaceIndexForSuggestions."]
@@ -3318,10 +6059,10 @@ module SearchPlaceIndexForSuggestionsRequestMaxResultsInteger =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module SyntheticSearchPlaceIndexForSuggestionsRequestString =
+module SearchPlaceIndexForSuggestionsRequestTextString =
   struct
     type nonrec t = string
-    let context_ = "SyntheticSearchPlaceIndexForSuggestionsRequestString"
+    let context_ = "SearchPlaceIndexForSuggestionsRequestTextString"
     let make i =
       let open Result in
         ok_or_failwith
@@ -3334,14 +6075,17 @@ module SyntheticSearchPlaceIndexForSuggestionsRequestString =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j =
-      string_of_json
-        ~kind:"SyntheticSearchPlaceIndexForSuggestionsRequestString" j
+      string_of_json ~kind:"SearchPlaceIndexForSuggestionsRequestTextString"
+        j
     let to_json = simple_to_json to_value
   end
 module SearchForPositionResultList =
   struct
     type nonrec t = SearchForPositionResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SearchForPositionResult.to_value)) |>
         (fun x -> `List x)
@@ -3368,77 +6112,78 @@ module SearchPlaceIndexForPositionSummary =
   struct
     type nonrec t =
       {
-      dataSource: String_.t
-        [@ocaml.doc
-          "The geospatial data provider attached to the place index resource specified in the request. Values can be one of the following: Esri Here For more information about data providers, see Amazon Location Service data providers."];
-      language: LanguageTag.t option
-        [@ocaml.doc
-          "The preferred language used to return results. Matches the language in the request. The value is a valid BCP 47 language tag, for example, en for English."];
+      position: Position.t option
+        [@ocaml.doc "The position specified in the request."];
       maxResults: PlaceIndexSearchResultLimit.t option
         [@ocaml.doc
           "Contains the optional result count limit that is specified in the request. Default value: 50"];
-      position: Position.t
-        [@ocaml.doc "The position specified in the request."]}
-    let context_ = "SearchPlaceIndexForPositionSummary"
-    let make ?language =
+      dataSource: String_.t option
+        [@ocaml.doc
+          "The geospatial data provider attached to the place index resource specified in the request. Values can be one of the following: Esri Grab Here For more information about data providers, see Amazon Location Service data providers."];
+      language: LanguageTag.t option
+        [@ocaml.doc
+          "The preferred language used to return results. Matches the language in the request. The value is a valid BCP 47 language tag, for example, en for English."]}
+    let make ?position =
       fun ?maxResults ->
-        fun ~dataSource ->
-          fun ~position ->
-            fun () -> { language; maxResults; dataSource; position }
+        fun ?dataSource ->
+          fun ?language ->
+            fun () -> { position; maxResults; dataSource; language }
     let to_value x =
       structure_to_value
-        [("DataSource", (Some (String_.to_value x.dataSource)));
-        ("Language", (Option.map x.language ~f:LanguageTag.to_value));
+        [("Position", (Option.map x.position ~f:Position.to_value));
         ("MaxResults",
           (Option.map x.maxResults ~f:PlaceIndexSearchResultLimit.to_value));
-        ("Position", (Some (Position.to_value x.position)))]
+        ("DataSource", (Option.map x.dataSource ~f:String_.to_value));
+        ("Language", (Option.map x.language ~f:LanguageTag.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let position =
-        Position.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Position") in
-      let maxResults =
-        (Option.map ~f:PlaceIndexSearchResultLimit.of_xml)
-          (Xml.child xml_arg0 "MaxResults") in
       let language =
         (Option.map ~f:LanguageTag.of_xml) (Xml.child xml_arg0 "Language") in
       let dataSource =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DataSource") in
-      make ~position ?maxResults ?language ~dataSource ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let position = field_map_exn json "Position" Position.of_json in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DataSource") in
       let maxResults =
-        field_map json "MaxResults" PlaceIndexSearchResultLimit.of_json in
-      let language = field_map json "Language" LanguageTag.of_json in
-      let dataSource = field_map_exn json "DataSource" String_.of_json in
-      make ~position ?maxResults ?language ~dataSource ()
+        (Option.map ~f:PlaceIndexSearchResultLimit.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let position =
+        (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "Position") in
+      make ?language ?dataSource ?maxResults ?position ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let language = field_map json__ "Language" LanguageTag.of_json in
+      let dataSource = field_map json__ "DataSource" String_.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" PlaceIndexSearchResultLimit.of_json in
+      let position = field_map json__ "Position" Position.of_json in
+      make ?language ?dataSource ?maxResults ?position ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A summary of the request sent by using SearchPlaceIndexForPosition."]
 module ConflictException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ConflictException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was unsuccessful because of a conflict."]
 module ListTrackersResponseEntryList =
   struct
     type nonrec t = ListTrackersResponseEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListTrackersResponseEntry.to_value)) |>
         (fun x -> `List x)
@@ -3503,6 +6248,9 @@ module ArnList =
   struct
     type nonrec t = Arn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3546,6 +6294,9 @@ module ListRouteCalculatorsResponseEntryList =
   struct
     type nonrec t = ListRouteCalculatorsResponseEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListRouteCalculatorsResponseEntry.to_value)) |>
         (fun x -> `List x)
@@ -3593,6 +6344,9 @@ module ListPlaceIndexesResponseEntryList =
   struct
     type nonrec t = ListPlaceIndexesResponseEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListPlaceIndexesResponseEntry.to_value)) |>
         (fun x -> `List x)
@@ -3639,6 +6393,9 @@ module ListMapsResponseEntryList =
   struct
     type nonrec t = ListMapsResponseEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListMapsResponseEntry.to_value)) |>
         (fun x -> `List x)
@@ -3680,10 +6437,168 @@ module ListMapsRequestMaxResultsInteger =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ListKeysResponseEntryList =
+  struct
+    type nonrec t = ListKeysResponseEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ListKeysResponseEntry.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ListKeysResponseEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListKeysResponseEntryList"
+        ~of_json:ListKeysResponseEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ApiKeyFilter =
+  struct
+    type nonrec t =
+      {
+      keyStatus: Status.t option
+        [@ocaml.doc "Filter on Active or Expired API keys."]}
+    let make ?keyStatus = fun () -> { keyStatus }
+    let to_value x =
+      structure_to_value
+        [("KeyStatus", (Option.map x.keyStatus ~f:Status.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let keyStatus =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "KeyStatus") in
+      make ?keyStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let keyStatus = field_map json__ "KeyStatus" Status.of_json in
+      make ?keyStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Options for filtering API keys."]
+module ListKeysRequestMaxResultsInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListKeysRequestMaxResultsInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LargeToken =
+  struct
+    type nonrec t = string
+    let context_ = "LargeToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:60000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LargeToken" j
+    let to_json = simple_to_json to_value
+  end
+module ListJobsResponseEntryList =
+  struct
+    type nonrec t = ListJobsResponseEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ListJobsResponseEntry.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ListJobsResponseEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListJobsResponseEntryList"
+        ~of_json:ListJobsResponseEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module JobsFilter =
+  struct
+    type nonrec t =
+      {
+      jobStatus: JobStatus.t option [@ocaml.doc "Filter by job status."]}
+    let make ?jobStatus = fun () -> { jobStatus }
+    let to_value x =
+      structure_to_value
+        [("JobStatus", (Option.map x.jobStatus ~f:JobStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobStatus =
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "JobStatus") in
+      make ?jobStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      make ?jobStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Criteria for filtering jobs."]
+module ListJobsRequestMaxResultsInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListJobsRequestMaxResultsInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ListGeofenceResponseEntryList =
   struct
     type nonrec t = ListGeofenceResponseEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListGeofenceResponseEntry.to_value)) |>
         (fun x -> `List x)
@@ -3706,10 +6621,33 @@ module ListGeofenceResponseEntryList =
         ~of_json:ListGeofenceResponseEntry.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ListGeofencesRequestMaxResultsInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListGeofencesRequestMaxResultsInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ListGeofenceCollectionsResponseEntryList =
   struct
     type nonrec t = ListGeofenceCollectionsResponseEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListGeofenceCollectionsResponseEntry.to_value)) |>
         (fun x -> `List x)
@@ -3757,6 +6695,9 @@ module ListDevicePositionsResponseEntryList =
   struct
     type nonrec t = ListDevicePositionsResponseEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListDevicePositionsResponseEntry.to_value)) |>
         (fun x -> `List x)
@@ -3800,6 +6741,28 @@ module ListDevicePositionsRequestMaxResultsInteger =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module TrackingFilterGeometry =
+  struct
+    type nonrec t =
+      {
+      polygon: LinearRings.t option
+        [@ocaml.doc
+          "The set of arrays which define the polygon. A polygon can have between 4 and 1000 vertices."]}
+    let make ?polygon = fun () -> { polygon }
+    let to_value x =
+      structure_to_value
+        [("Polygon", (Option.map x.polygon ~f:LinearRings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let polygon =
+        (Option.map ~f:LinearRings.of_xml) (Xml.child xml_arg0 "Polygon") in
+      make ?polygon ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let polygon = field_map json__ "Polygon" LinearRings.of_json in
+      make ?polygon ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The geomerty used to filter device positions."]
 module Blob =
   struct
     type nonrec t = string
@@ -3817,7 +6780,8 @@ module GetMapTileRequestXString =
     type nonrec t = string
     let context_ = "GetMapTileRequestXString"
     let make i =
-      let open Result in ok_or_failwith (check_pattern i ~pattern:"\\d+"); i
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:".*\\d+.*"); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -3831,7 +6795,8 @@ module GetMapTileRequestYString =
     type nonrec t = string
     let context_ = "GetMapTileRequestYString"
     let make i =
-      let open Result in ok_or_failwith (check_pattern i ~pattern:"\\d+"); i
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:".*\\d+.*"); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -3845,7 +6810,8 @@ module GetMapTileRequestZString =
     type nonrec t = string
     let context_ = "GetMapTileRequestZString"
     let make i =
-      let open Result in ok_or_failwith (check_pattern i ~pattern:"\\d+"); i
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:".*\\d+.*"); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -3861,7 +6827,7 @@ module GetMapSpritesRequestFileNameString =
     let make i =
       let open Result in
         ok_or_failwith
-          (check_pattern i ~pattern:"^sprites(@2x)?\\.(png|json)$");
+          (check_pattern i ~pattern:"sprites(@2x)?\\.(png|json)");
         i
     let of_string x = x
     let to_value x = `String x
@@ -3878,7 +6844,7 @@ module GetMapGlyphsRequestFontUnicodeRangeString =
     let context_ = "GetMapGlyphsRequestFontUnicodeRangeString"
     let make i =
       let open Result in
-        ok_or_failwith (check_pattern i ~pattern:"^[0-9]+-[0-9]+\\.pbf$"); i
+        ok_or_failwith (check_pattern i ~pattern:"[0-9]+-[0-9]+\\.pbf"); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -3892,6 +6858,9 @@ module DevicePositionList =
   struct
     type nonrec t = DevicePosition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DevicePosition.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3933,6 +6902,125 @@ module GetDevicePositionHistoryRequestMaxResultsInteger =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ForecastedEventsList =
+  struct
+    type nonrec t = ForecastedEvent.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ForecastedEvent.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ForecastedEvent.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ForecastedEventsList"
+        ~of_json:ForecastedEvent.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SpeedUnit =
+  struct
+    type nonrec t =
+      | KilometersPerHour 
+      | MilesPerHour 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | KilometersPerHour -> "KilometersPerHour"
+      | MilesPerHour -> "MilesPerHour"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "KilometersPerHour" -> KilometersPerHour
+      | "MilesPerHour" -> MilesPerHour
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SpeedUnit" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SpeedUnit" j)
+    let to_json = simple_to_json to_value
+  end
+module ForecastGeofenceEventsDeviceState =
+  struct
+    type nonrec t =
+      {
+      position: Position.t [@ocaml.doc "The device's position."];
+      speed: ForecastGeofenceEventsDeviceStateSpeedDouble.t option
+        [@ocaml.doc "The device's speed."]}
+    let context_ = "ForecastGeofenceEventsDeviceState"
+    let make ?speed = fun ~position -> fun () -> { speed; position }
+    let to_value x =
+      structure_to_value
+        [("Position", (Some (Position.to_value x.position)));
+        ("Speed",
+          (Option.map x.speed
+             ~f:ForecastGeofenceEventsDeviceStateSpeedDouble.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let speed =
+        (Option.map ~f:ForecastGeofenceEventsDeviceStateSpeedDouble.of_xml)
+          (Xml.child xml_arg0 "Speed") in
+      let position =
+        Position.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Position") in
+      make ?speed ~position ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let speed =
+        field_map json__ "Speed"
+          ForecastGeofenceEventsDeviceStateSpeedDouble.of_json in
+      let position = field_map_exn json__ "Position" Position.of_json in
+      make ?speed ~position ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The device's position and speed."]
+module ForecastGeofenceEventsRequestMaxResultsInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:20) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ForecastGeofenceEventsRequestMaxResultsInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ForecastGeofenceEventsRequestTimeHorizonMinutesDouble =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in ok_or_failwith (check_float_min i ~min:0.); i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
 module KmsKeyId =
   struct
     type nonrec t = string
@@ -3957,103 +7045,166 @@ module MapConfiguration =
       {
       style: MapStyle.t
         [@ocaml.doc
-          "Specifies the map style selected from an available data provider. Valid Esri map styles: VectorEsriDarkGrayCanvas \226\128\147 The Esri Dark Gray Canvas map style. A vector basemap with a dark gray, neutral background with minimal colors, labels, and features that's designed to draw attention to your thematic content. RasterEsriImagery \226\128\147 The Esri Imagery map style. A raster basemap that provides one meter or better satellite and aerial imagery in many parts of the world and lower resolution satellite imagery worldwide. VectorEsriLightGrayCanvas \226\128\147 The Esri Light Gray Canvas map style, which provides a detailed vector basemap with a light gray, neutral background style with minimal colors, labels, and features that's designed to draw attention to your thematic content. VectorEsriTopographic \226\128\147 The Esri Light map style, which provides a detailed vector basemap with a classic Esri map style. VectorEsriStreets \226\128\147 The Esri World Streets map style, which provides a detailed vector basemap for the world symbolized with a classic Esri street map style. The vector tile layer is similar in content and style to the World Street Map raster map. VectorEsriNavigation \226\128\147 The Esri World Navigation map style, which provides a detailed basemap for the world symbolized with a custom navigation map style that's designed for use during the day in mobile devices. Valid HERE Technologies map styles: VectorHereBerlin \226\128\147 The HERE Berlin map style is a high contrast detailed base map of the world that blends 3D and 2D rendering. VectorHereExplore \226\128\147 A default HERE map style containing a neutral, global map and its features including roads, buildings, landmarks, and water features. It also now includes a fully designed map of Japan. VectorHereExploreTruck \226\128\147 A global map containing truck restrictions and attributes (e.g. width / height / HAZMAT) symbolized with highlighted segments and icons on top of HERE Explore to support use cases within transport and logistics."]}
+          "Specifies the map style selected from an available data provider. Valid Esri map styles: VectorEsriDarkGrayCanvas \226\128\147 The Esri Dark Gray Canvas map style. A vector basemap with a dark gray, neutral background with minimal colors, labels, and features that's designed to draw attention to your thematic content. RasterEsriImagery \226\128\147 The Esri Imagery map style. A raster basemap that provides one meter or better satellite and aerial imagery in many parts of the world and lower resolution satellite imagery worldwide. VectorEsriLightGrayCanvas \226\128\147 The Esri Light Gray Canvas map style, which provides a detailed vector basemap with a light gray, neutral background style with minimal colors, labels, and features that's designed to draw attention to your thematic content. VectorEsriTopographic \226\128\147 The Esri Light map style, which provides a detailed vector basemap with a classic Esri map style. VectorEsriStreets \226\128\147 The Esri Street Map style, which provides a detailed vector basemap for the world symbolized with a classic Esri street map style. The vector tile layer is similar in content and style to the World Street Map raster map. VectorEsriNavigation \226\128\147 The Esri Navigation map style, which provides a detailed basemap for the world symbolized with a custom navigation map style that's designed for use during the day in mobile devices. Valid HERE Technologies map styles: VectorHereContrast \226\128\147 The HERE Contrast (Berlin) map style is a high contrast detailed base map of the world that blends 3D and 2D rendering. The VectorHereContrast style has been renamed from VectorHereBerlin. VectorHereBerlin has been deprecated, but will continue to work in applications that use it. VectorHereExplore \226\128\147 A default HERE map style containing a neutral, global map and its features including roads, buildings, landmarks, and water features. It also now includes a fully designed map of Japan. VectorHereExploreTruck \226\128\147 A global map containing truck restrictions and attributes (e.g. width / height / HAZMAT) symbolized with highlighted segments and icons on top of HERE Explore to support use cases within transport and logistics. RasterHereExploreSatellite \226\128\147 A global map containing high resolution satellite imagery. HybridHereExploreSatellite \226\128\147 A global map displaying the road network, street names, and city labels over satellite imagery. This style will automatically retrieve both raster and vector tiles, and your charges will be based on total tiles retrieved. Hybrid styles use both vector and raster tiles when rendering the map that you see. This means that more tiles are retrieved than when using either vector or raster tiles alone. Your charges will include all tiles retrieved. Valid GrabMaps map styles: VectorGrabStandardLight \226\128\147 The Grab Standard Light map style provides a basemap with detailed land use coloring, area names, roads, landmarks, and points of interest covering Southeast Asia. VectorGrabStandardDark \226\128\147 The Grab Standard Dark map style provides a dark variation of the standard basemap covering Southeast Asia. Grab provides maps only for countries in Southeast Asia, and is only available in the Asia Pacific (Singapore) Region (ap-southeast-1). For more information, see GrabMaps countries and area covered. Valid Open Data map styles: VectorOpenDataStandardLight \226\128\147 The Open Data Standard Light map style provides a detailed basemap for the world suitable for website and mobile application use. The map includes highways major roads, minor roads, railways, water features, cities, parks, landmarks, building footprints, and administrative boundaries. VectorOpenDataStandardDark \226\128\147 Open Data Standard Dark is a dark-themed map style that provides a detailed basemap for the world suitable for website and mobile application use. The map includes highways major roads, minor roads, railways, water features, cities, parks, landmarks, building footprints, and administrative boundaries. VectorOpenDataVisualizationLight \226\128\147 The Open Data Visualization Light map style is a light-themed style with muted colors and fewer features that aids in understanding overlaid data. VectorOpenDataVisualizationDark \226\128\147 The Open Data Visualization Dark map style is a dark-themed style with muted colors and fewer features that aids in understanding overlaid data."];
+      politicalView: CountryCode3.t option
+        [@ocaml.doc
+          "Specifies the political view for the style. Leave unset to not use a political view, or, for styles that support specific political views, you can choose a view, such as IND for the Indian view. Default is unset. Not all map resources or styles support political view styles. See Political views for more information."];
+      customLayers: CustomLayerList.t option
+        [@ocaml.doc
+          "Specifies the custom layers for the style. Leave unset to not enable any custom layer, or, for styles that support custom layers, you can enable layer(s), such as POI layer for the VectorEsriNavigation style. Default is unset. Not all map resources or styles support custom layers. See Custom Layers for more information."]}
     let context_ = "MapConfiguration"
-    let make ~style = fun () -> { style }
+    let make ?politicalView =
+      fun ?customLayers ->
+        fun ~style -> fun () -> { politicalView; customLayers; style }
     let to_value x =
-      structure_to_value [("Style", (Some (MapStyle.to_value x.style)))]
+      structure_to_value
+        [("Style", (Some (MapStyle.to_value x.style)));
+        ("PoliticalView",
+          (Option.map x.politicalView ~f:CountryCode3.to_value));
+        ("CustomLayers",
+          (Option.map x.customLayers ~f:CustomLayerList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let customLayers =
+        (Option.map ~f:CustomLayerList.of_xml)
+          (Xml.child xml_arg0 "CustomLayers") in
+      let politicalView =
+        (Option.map ~f:CountryCode3.of_xml)
+          (Xml.child xml_arg0 "PoliticalView") in
       let style =
         MapStyle.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Style") in
-      make ~style ()
+      make ?customLayers ?politicalView ~style ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let style = field_map_exn json "Style" MapStyle.of_json in
-      make ~style ()
+    let of_json json__ =
+      let customLayers =
+        field_map json__ "CustomLayers" CustomLayerList.of_json in
+      let politicalView =
+        field_map json__ "PoliticalView" CountryCode3.of_json in
+      let style = field_map_exn json__ "Style" MapStyle.of_json in
+      make ?customLayers ?politicalView ~style ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the map tile style selected from an available provider."]
+module DescribeGeofenceCollectionResponseGeofenceCountInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeGeofenceCollectionResponseGeofenceCountInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ServiceQuotaExceededException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc
+          "A message with the reason for the service quota exceeded exception error."]}
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation was denied because the request would exceed the maximum quota set for Amazon Location Service."]
 module CalculateRouteSummary =
   struct
     type nonrec t =
       {
-      dataSource: String_.t
+      routeBBox: BoundingBox.t option
         [@ocaml.doc
-          "The data provider of traffic and road network data used to calculate the route. Indicates one of the available providers: Esri Here For more information about data providers, see Amazon Location Service data providers."];
-      distance: CalculateRouteSummaryDistanceDouble.t
+          "Specifies a geographical box surrounding a route. Used to zoom into a route when displaying it in a map. For example, \\[min x, min y, max x, max y\\]. The first 2 bbox parameters describe the lower southwest corner: The first bbox position is the X coordinate or longitude of the lower southwest corner. The second bbox position is the Y coordinate or latitude of the lower southwest corner. The next 2 bbox parameters describe the upper northeast corner: The third bbox position is the X coordinate, or longitude of the upper northeast corner. The fourth bbox position is the Y coordinate, or latitude of the upper northeast corner."];
+      dataSource: String_.t option
+        [@ocaml.doc
+          "The data provider of traffic and road network data used to calculate the route. Indicates one of the available providers: Esri Grab Here For more information about data providers, see Amazon Location Service data providers."];
+      distance: CalculateRouteSummaryDistanceDouble.t option
         [@ocaml.doc
           "The total distance covered by the route. The sum of the distance travelled between every stop on the route. If Esri is the data source for the route calculator, the route distance can\226\128\153t be greater than 400 km. If the route exceeds 400 km, the response is a 400 RoutesValidationException error."];
-      distanceUnit: DistanceUnit.t
-        [@ocaml.doc "The unit of measurement for route distances."];
-      durationSeconds: CalculateRouteSummaryDurationSecondsDouble.t
+      durationSeconds: CalculateRouteSummaryDurationSecondsDouble.t option
         [@ocaml.doc
           "The total travel time for the route measured in seconds. The sum of the travel time between every stop on the route."];
-      routeBBox: BoundingBox.t
-        [@ocaml.doc
-          "Specifies a geographical box surrounding a route. Used to zoom into a route when displaying it in a map. For example, \\[min x, min y, max x, max y\\]. The first 2 bbox parameters describe the lower southwest corner: The first bbox position is the X coordinate or longitude of the lower southwest corner. The second bbox position is the Y coordinate or latitude of the lower southwest corner. The next 2 bbox parameters describe the upper northeast corner: The third bbox position is the X coordinate, or longitude of the upper northeast corner. The fourth bbox position is the Y coordinate, or latitude of the upper northeast corner."]}
-    let context_ = "CalculateRouteSummary"
-    let make ~dataSource =
-      fun ~distance ->
-        fun ~distanceUnit ->
-          fun ~durationSeconds ->
-            fun ~routeBBox ->
+      distanceUnit: DistanceUnit.t option
+        [@ocaml.doc "The unit of measurement for route distances."]}
+    let make ?routeBBox =
+      fun ?dataSource ->
+        fun ?distance ->
+          fun ?durationSeconds ->
+            fun ?distanceUnit ->
               fun () ->
                 {
+                  routeBBox;
                   dataSource;
                   distance;
-                  distanceUnit;
                   durationSeconds;
-                  routeBBox
+                  distanceUnit
                 }
     let to_value x =
       structure_to_value
-        [("DataSource", (Some (String_.to_value x.dataSource)));
+        [("RouteBBox", (Option.map x.routeBBox ~f:BoundingBox.to_value));
+        ("DataSource", (Option.map x.dataSource ~f:String_.to_value));
         ("Distance",
-          (Some (CalculateRouteSummaryDistanceDouble.to_value x.distance)));
-        ("DistanceUnit", (Some (DistanceUnit.to_value x.distanceUnit)));
+          (Option.map x.distance
+             ~f:CalculateRouteSummaryDistanceDouble.to_value));
         ("DurationSeconds",
-          (Some
-             (CalculateRouteSummaryDurationSecondsDouble.to_value
-                x.durationSeconds)));
-        ("RouteBBox", (Some (BoundingBox.to_value x.routeBBox)))]
+          (Option.map x.durationSeconds
+             ~f:CalculateRouteSummaryDurationSecondsDouble.to_value));
+        ("DistanceUnit",
+          (Option.map x.distanceUnit ~f:DistanceUnit.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let routeBBox =
-        BoundingBox.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RouteBBox") in
-      let durationSeconds =
-        CalculateRouteSummaryDurationSecondsDouble.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DurationSeconds") in
       let distanceUnit =
-        DistanceUnit.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DistanceUnit") in
+        (Option.map ~f:DistanceUnit.of_xml)
+          (Xml.child xml_arg0 "DistanceUnit") in
+      let durationSeconds =
+        (Option.map ~f:CalculateRouteSummaryDurationSecondsDouble.of_xml)
+          (Xml.child xml_arg0 "DurationSeconds") in
       let distance =
-        CalculateRouteSummaryDistanceDouble.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Distance") in
+        (Option.map ~f:CalculateRouteSummaryDistanceDouble.of_xml)
+          (Xml.child xml_arg0 "Distance") in
       let dataSource =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DataSource") in
-      make ~routeBBox ~durationSeconds ~distanceUnit ~distance ~dataSource ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DataSource") in
+      let routeBBox =
+        (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "RouteBBox") in
+      make ?distanceUnit ?durationSeconds ?distance ?dataSource ?routeBBox ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let routeBBox = field_map_exn json "RouteBBox" BoundingBox.of_json in
+    let of_json json__ =
+      let distanceUnit = field_map json__ "DistanceUnit" DistanceUnit.of_json in
       let durationSeconds =
-        field_map_exn json "DurationSeconds"
+        field_map json__ "DurationSeconds"
           CalculateRouteSummaryDurationSecondsDouble.of_json in
-      let distanceUnit =
-        field_map_exn json "DistanceUnit" DistanceUnit.of_json in
       let distance =
-        field_map_exn json "Distance"
+        field_map json__ "Distance"
           CalculateRouteSummaryDistanceDouble.of_json in
-      let dataSource = field_map_exn json "DataSource" String_.of_json in
-      make ~routeBBox ~durationSeconds ~distanceUnit ~distance ~dataSource ()
+      let dataSource = field_map json__ "DataSource" String_.of_json in
+      let routeBBox = field_map json__ "RouteBBox" BoundingBox.of_json in
+      make ?distanceUnit ?durationSeconds ?distance ?dataSource ?routeBBox ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A summary of the calculated route."]
 module LegList =
   struct
     type nonrec t = Leg.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Leg.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4077,29 +7228,34 @@ module CalculateRouteCarModeOptions =
   struct
     type nonrec t =
       {
-      avoidFerries: Boolean.t option
+      avoidFerries: SensitiveBoolean.t option
         [@ocaml.doc
           "Avoids ferries when calculating routes. Default Value: false Valid Values: false | true"];
-      avoidTolls: Boolean.t option
+      avoidTolls: SensitiveBoolean.t option
         [@ocaml.doc
           "Avoids tolls when calculating routes. Default Value: false Valid Values: false | true"]}
     let make ?avoidFerries =
       fun ?avoidTolls -> fun () -> { avoidFerries; avoidTolls }
     let to_value x =
       structure_to_value
-        [("AvoidFerries", (Option.map x.avoidFerries ~f:Boolean.to_value));
-        ("AvoidTolls", (Option.map x.avoidTolls ~f:Boolean.to_value))]
+        [("AvoidFerries",
+           (Option.map x.avoidFerries ~f:SensitiveBoolean.to_value));
+        ("AvoidTolls",
+          (Option.map x.avoidTolls ~f:SensitiveBoolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let avoidTolls =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "AvoidTolls") in
+        (Option.map ~f:SensitiveBoolean.of_xml)
+          (Xml.child xml_arg0 "AvoidTolls") in
       let avoidFerries =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "AvoidFerries") in
+        (Option.map ~f:SensitiveBoolean.of_xml)
+          (Xml.child xml_arg0 "AvoidFerries") in
       make ?avoidTolls ?avoidFerries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let avoidTolls = field_map json "AvoidTolls" Boolean.of_json in
-      let avoidFerries = field_map json "AvoidFerries" Boolean.of_json in
+    let of_json json__ =
+      let avoidTolls = field_map json__ "AvoidTolls" SensitiveBoolean.of_json in
+      let avoidFerries =
+        field_map json__ "AvoidFerries" SensitiveBoolean.of_json in
       make ?avoidTolls ?avoidFerries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4112,6 +7268,9 @@ module CalculateRouteRequestWaypointPositionsList =
         ok_or_failwith
           ((check_list_max i ~max:23) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Position.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4137,10 +7296,10 @@ module CalculateRouteTruckModeOptions =
   struct
     type nonrec t =
       {
-      avoidFerries: Boolean.t option
+      avoidFerries: SensitiveBoolean.t option
         [@ocaml.doc
           "Avoids ferries when calculating routes. Default Value: false Valid Values: false | true"];
-      avoidTolls: Boolean.t option
+      avoidTolls: SensitiveBoolean.t option
         [@ocaml.doc
           "Avoids tolls when calculating routes. Default Value: false Valid Values: false | true"];
       dimensions: TruckDimensions.t option
@@ -4156,8 +7315,10 @@ module CalculateRouteTruckModeOptions =
             fun () -> { avoidFerries; avoidTolls; dimensions; weight }
     let to_value x =
       structure_to_value
-        [("AvoidFerries", (Option.map x.avoidFerries ~f:Boolean.to_value));
-        ("AvoidTolls", (Option.map x.avoidTolls ~f:Boolean.to_value));
+        [("AvoidFerries",
+           (Option.map x.avoidFerries ~f:SensitiveBoolean.to_value));
+        ("AvoidTolls",
+          (Option.map x.avoidTolls ~f:SensitiveBoolean.to_value));
         ("Dimensions", (Option.map x.dimensions ~f:TruckDimensions.to_value));
         ("Weight", (Option.map x.weight ~f:TruckWeight.to_value))]
     let to_query v = to_query to_value v
@@ -4168,26 +7329,56 @@ module CalculateRouteTruckModeOptions =
         (Option.map ~f:TruckDimensions.of_xml)
           (Xml.child xml_arg0 "Dimensions") in
       let avoidTolls =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "AvoidTolls") in
+        (Option.map ~f:SensitiveBoolean.of_xml)
+          (Xml.child xml_arg0 "AvoidTolls") in
       let avoidFerries =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "AvoidFerries") in
+        (Option.map ~f:SensitiveBoolean.of_xml)
+          (Xml.child xml_arg0 "AvoidFerries") in
       make ?weight ?dimensions ?avoidTolls ?avoidFerries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let weight = field_map json "Weight" TruckWeight.of_json in
-      let dimensions = field_map json "Dimensions" TruckDimensions.of_json in
-      let avoidTolls = field_map json "AvoidTolls" Boolean.of_json in
-      let avoidFerries = field_map json "AvoidFerries" Boolean.of_json in
+    let of_json json__ =
+      let weight = field_map json__ "Weight" TruckWeight.of_json in
+      let dimensions = field_map json__ "Dimensions" TruckDimensions.of_json in
+      let avoidTolls = field_map json__ "AvoidTolls" SensitiveBoolean.of_json in
+      let avoidFerries =
+        field_map json__ "AvoidFerries" SensitiveBoolean.of_json in
       make ?weight ?dimensions ?avoidTolls ?avoidFerries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about additional route preferences for requests that specify TravelMode as Truck."]
+module OptimizationMode =
+  struct
+    type nonrec t =
+      | FastestRoute 
+      | ShortestRoute 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FastestRoute -> "FastestRoute"
+      | ShortestRoute -> "ShortestRoute"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FastestRoute" -> FastestRoute
+      | "ShortestRoute" -> ShortestRoute
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration OptimizationMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OptimizationMode" j)
+    let to_json = simple_to_json to_value
+  end
 module TravelMode =
   struct
     type nonrec t =
       | Car 
       | Truck 
       | Walking 
+      | Bicycle 
+      | Motorcycle 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -4195,12 +7386,16 @@ module TravelMode =
       | Car -> "Car"
       | Truck -> "Truck"
       | Walking -> "Walking"
+      | Bicycle -> "Bicycle"
+      | Motorcycle -> "Motorcycle"
       | Non_static_id s -> s
     let of_string =
       function
       | "Car" -> Car
       | "Truck" -> Truck
       | "Walking" -> Walking
+      | "Bicycle" -> Bicycle
+      | "Motorcycle" -> Motorcycle
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -4219,6 +7414,9 @@ module CalculateRouteMatrixResponseSnappedDeparturePositionsList =
           ((check_list_max i ~max:350) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Position.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4250,6 +7448,9 @@ module CalculateRouteMatrixResponseSnappedDestinationPositionsList =
           ((check_list_max i ~max:350) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Position.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4276,68 +7477,67 @@ module CalculateRouteMatrixSummary =
   struct
     type nonrec t =
       {
-      dataSource: String_.t
+      dataSource: String_.t option
         [@ocaml.doc
-          "The data provider of traffic and road network data used to calculate the routes. Indicates one of the available providers: Esri Here For more information about data providers, see Amazon Location Service data providers."];
-      distanceUnit: DistanceUnit.t
-        [@ocaml.doc "The unit of measurement for route distances."];
-      errorCount: CalculateRouteMatrixSummaryErrorCountInteger.t
+          "The data provider of traffic and road network data used to calculate the routes. Indicates one of the available providers: Esri Grab Here For more information about data providers, see Amazon Location Service data providers."];
+      routeCount: CalculateRouteMatrixSummaryRouteCountInteger.t option
+        [@ocaml.doc
+          "The count of cells in the route matrix. Equal to the number of DeparturePositions multiplied by the number of DestinationPositions."];
+      errorCount: CalculateRouteMatrixSummaryErrorCountInteger.t option
         [@ocaml.doc
           "The count of error results in the route matrix. If this number is 0, all routes were calculated successfully."];
-      routeCount: CalculateRouteMatrixSummaryRouteCountInteger.t
-        [@ocaml.doc
-          "The count of cells in the route matrix. Equal to the number of DeparturePositions multiplied by the number of DestinationPositions."]}
-    let context_ = "CalculateRouteMatrixSummary"
-    let make ~dataSource =
-      fun ~distanceUnit ->
-        fun ~errorCount ->
-          fun ~routeCount ->
-            fun () -> { dataSource; distanceUnit; errorCount; routeCount }
+      distanceUnit: DistanceUnit.t option
+        [@ocaml.doc "The unit of measurement for route distances."]}
+    let make ?dataSource =
+      fun ?routeCount ->
+        fun ?errorCount ->
+          fun ?distanceUnit ->
+            fun () -> { dataSource; routeCount; errorCount; distanceUnit }
     let to_value x =
       structure_to_value
-        [("DataSource", (Some (String_.to_value x.dataSource)));
-        ("DistanceUnit", (Some (DistanceUnit.to_value x.distanceUnit)));
-        ("ErrorCount",
-          (Some
-             (CalculateRouteMatrixSummaryErrorCountInteger.to_value
-                x.errorCount)));
+        [("DataSource", (Option.map x.dataSource ~f:String_.to_value));
         ("RouteCount",
-          (Some
-             (CalculateRouteMatrixSummaryRouteCountInteger.to_value
-                x.routeCount)))]
+          (Option.map x.routeCount
+             ~f:CalculateRouteMatrixSummaryRouteCountInteger.to_value));
+        ("ErrorCount",
+          (Option.map x.errorCount
+             ~f:CalculateRouteMatrixSummaryErrorCountInteger.to_value));
+        ("DistanceUnit",
+          (Option.map x.distanceUnit ~f:DistanceUnit.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let routeCount =
-        CalculateRouteMatrixSummaryRouteCountInteger.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RouteCount") in
-      let errorCount =
-        CalculateRouteMatrixSummaryErrorCountInteger.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCount") in
       let distanceUnit =
-        DistanceUnit.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DistanceUnit") in
+        (Option.map ~f:DistanceUnit.of_xml)
+          (Xml.child xml_arg0 "DistanceUnit") in
+      let errorCount =
+        (Option.map ~f:CalculateRouteMatrixSummaryErrorCountInteger.of_xml)
+          (Xml.child xml_arg0 "ErrorCount") in
+      let routeCount =
+        (Option.map ~f:CalculateRouteMatrixSummaryRouteCountInteger.of_xml)
+          (Xml.child xml_arg0 "RouteCount") in
       let dataSource =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DataSource") in
-      make ~routeCount ~errorCount ~distanceUnit ~dataSource ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DataSource") in
+      make ?distanceUnit ?errorCount ?routeCount ?dataSource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let routeCount =
-        field_map_exn json "RouteCount"
-          CalculateRouteMatrixSummaryRouteCountInteger.of_json in
+    let of_json json__ =
+      let distanceUnit = field_map json__ "DistanceUnit" DistanceUnit.of_json in
       let errorCount =
-        field_map_exn json "ErrorCount"
+        field_map json__ "ErrorCount"
           CalculateRouteMatrixSummaryErrorCountInteger.of_json in
-      let distanceUnit =
-        field_map_exn json "DistanceUnit" DistanceUnit.of_json in
-      let dataSource = field_map_exn json "DataSource" String_.of_json in
-      make ~routeCount ~errorCount ~distanceUnit ~dataSource ()
+      let routeCount =
+        field_map json__ "RouteCount"
+          CalculateRouteMatrixSummaryRouteCountInteger.of_json in
+      let dataSource = field_map json__ "DataSource" String_.of_json in
+      make ?distanceUnit ?errorCount ?routeCount ?dataSource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A summary of the calculated route matrix."]
 module RouteMatrix =
   struct
     type nonrec t = RouteMatrixRow.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RouteMatrixRow.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4367,6 +7567,9 @@ module CalculateRouteMatrixRequestDeparturePositionsList =
           ((check_list_max i ~max:350) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Position.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4397,6 +7600,9 @@ module CalculateRouteMatrixRequestDestinationPositionsList =
           ((check_list_max i ~max:350) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Position.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4423,6 +7629,9 @@ module BatchUpdateDevicePositionErrorList =
   struct
     type nonrec t = BatchUpdateDevicePositionError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchUpdateDevicePositionError.to_value)) |>
         (fun x -> `List x)
@@ -4453,6 +7662,9 @@ module BatchUpdateDevicePositionRequestUpdatesList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DevicePositionUpdate.to_value)) |>
         (fun x -> `List x)
@@ -4479,6 +7691,9 @@ module BatchPutGeofenceErrorList =
   struct
     type nonrec t = BatchPutGeofenceError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchPutGeofenceError.to_value)) |>
         (fun x -> `List x)
@@ -4505,6 +7720,9 @@ module BatchPutGeofenceSuccessList =
   struct
     type nonrec t = BatchPutGeofenceSuccess.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchPutGeofenceSuccess.to_value)) |>
         (fun x -> `List x)
@@ -4535,6 +7753,9 @@ module BatchPutGeofenceRequestEntriesList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchPutGeofenceRequestEntry.to_value)) |>
         (fun x -> `List x)
@@ -4561,6 +7782,9 @@ module BatchGetDevicePositionErrorList =
   struct
     type nonrec t = BatchGetDevicePositionError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchGetDevicePositionError.to_value)) |>
         (fun x -> `List x)
@@ -4591,6 +7815,9 @@ module BatchGetDevicePositionRequestDeviceIdsList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs = (xs |> (List.map ~f:Id.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
@@ -4619,7 +7846,7 @@ module BatchGetDevicePositionRequestTrackerNameString =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
-             (fun () -> check_pattern i ~pattern:"^[-._\\w]+$"));
+             (fun () -> check_pattern i ~pattern:"[-._\\w]+"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -4634,6 +7861,9 @@ module BatchEvaluateGeofencesErrorList =
   struct
     type nonrec t = BatchEvaluateGeofencesError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchEvaluateGeofencesError.to_value)) |>
         (fun x -> `List x)
@@ -4664,6 +7894,9 @@ module BatchEvaluateGeofencesRequestDevicePositionUpdatesList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DevicePositionUpdate.to_value)) |>
         (fun x -> `List x)
@@ -4691,6 +7924,9 @@ module BatchDeleteGeofenceErrorList =
   struct
     type nonrec t = BatchDeleteGeofenceError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchDeleteGeofenceError.to_value)) |>
         (fun x -> `List x)
@@ -4721,6 +7957,9 @@ module BatchDeleteGeofenceRequestGeofenceIdsList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs = (xs |> (List.map ~f:Id.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
@@ -4745,6 +7984,9 @@ module BatchDeleteDevicePositionHistoryErrorList =
   struct
     type nonrec t = BatchDeleteDevicePositionHistoryError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchDeleteDevicePositionHistoryError.to_value)) |>
         (fun x -> `List x)
@@ -4777,6 +8019,9 @@ module BatchDeleteDevicePositionHistoryRequestDeviceIdsList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs = (xs |> (List.map ~f:Id.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
@@ -4798,39 +8043,193 @@ module BatchDeleteDevicePositionHistoryRequestDeviceIdsList =
         ~of_json:Id.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ServiceQuotaExceededException =
+module VerifyDevicePositionResponse =
   struct
     type nonrec t =
       {
-      message: String_.t
+      inferredState: InferredState.t option
         [@ocaml.doc
-          "A message with the reason for the service quota exceeded exception error."]}
-    let context_ = "ServiceQuotaExceededException"
-    let make ~message = fun () -> { message }
+          "The inferred state of the device, given the provided position, IP address, cellular signals, and Wi-Fi- access points."];
+      deviceId: Id.t option [@ocaml.doc "The device identifier."];
+      sampleTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the device's position was determined. Uses ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      receivedTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the tracker resource received the device position in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      distanceUnit: DistanceUnit.t option
+        [@ocaml.doc "The distance unit for the verification response."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?inferredState =
+      fun ?deviceId ->
+        fun ?sampleTime ->
+          fun ?receivedTime ->
+            fun ?distanceUnit ->
+              fun () ->
+                {
+                  inferredState;
+                  deviceId;
+                  sampleTime;
+                  receivedTime;
+                  distanceUnit
+                }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("InferredState",
+           (Option.map x.inferredState ~f:InferredState.to_value));
+        ("DeviceId", (Option.map x.deviceId ~f:Id.to_value));
+        ("SampleTime", (Option.map x.sampleTime ~f:Timestamp.to_value));
+        ("ReceivedTime", (Option.map x.receivedTime ~f:Timestamp.to_value));
+        ("DistanceUnit",
+          (Option.map x.distanceUnit ~f:DistanceUnit.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+      let distanceUnit =
+        (Option.map ~f:DistanceUnit.of_xml)
+          (Xml.child xml_arg0 "DistanceUnit") in
+      let receivedTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "ReceivedTime") in
+      let sampleTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "SampleTime") in
+      let deviceId =
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "DeviceId") in
+      let inferredState =
+        (Option.map ~f:InferredState.of_xml)
+          (Xml.child xml_arg0 "InferredState") in
+      make ?distanceUnit ?receivedTime ?sampleTime ?deviceId ?inferredState
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let distanceUnit = field_map json__ "DistanceUnit" DistanceUnit.of_json in
+      let receivedTime = field_map json__ "ReceivedTime" Timestamp.of_json in
+      let sampleTime = field_map json__ "SampleTime" Timestamp.of_json in
+      let deviceId = field_map json__ "DeviceId" Id.of_json in
+      let inferredState =
+        field_map json__ "InferredState" InferredState.of_json in
+      make ?distanceUnit ?receivedTime ?sampleTime ?deviceId ?inferredState
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The operation was denied because the request would exceed the maximum quota set for Amazon Location Service."]
+       "Verifies the integrity of the device's position by determining if it was reported behind a proxy, and by comparing it to an inferred position estimated based on the device's state. The Location Integrity SDK provides enhanced features related to device verification, and it is available for use by request. To get access to the SDK, contact Sales Support."]
+module VerifyDevicePositionRequest =
+  struct
+    type nonrec t =
+      {
+      trackerName: ResourceName.t
+        [@ocaml.doc
+          "The name of the tracker resource to be associated with verification request."];
+      deviceState: DeviceState.t
+        [@ocaml.doc
+          "The device's state, including position, IP address, cell signals and Wi-Fi access points."];
+      distanceUnit: DistanceUnit.t option
+        [@ocaml.doc
+          "The distance unit for the verification request. Default Value: Kilometers"]}
+    let context_ = "VerifyDevicePositionRequest"
+    let make ?distanceUnit =
+      fun ~trackerName ->
+        fun ~deviceState ->
+          fun () -> { distanceUnit; trackerName; deviceState }
+    let to_value x =
+      structure_to_value
+        [("TrackerName", (Some (ResourceName.to_value x.trackerName)));
+        ("DeviceState", (Some (DeviceState.to_value x.deviceState)));
+        ("DistanceUnit",
+          (Option.map x.distanceUnit ~f:DistanceUnit.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let distanceUnit =
+        (Option.map ~f:DistanceUnit.of_xml)
+          (Xml.child xml_arg0 "DistanceUnit") in
+      let deviceState =
+        DeviceState.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DeviceState") in
+      let trackerName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
+      make ?distanceUnit ~deviceState ~trackerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let distanceUnit = field_map json__ "DistanceUnit" DistanceUnit.of_json in
+      let deviceState =
+        field_map_exn json__ "DeviceState" DeviceState.of_json in
+      let trackerName =
+        field_map_exn json__ "TrackerName" ResourceName.of_json in
+      make ?distanceUnit ~deviceState ~trackerName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Verifies the integrity of the device's position by determining if it was reported behind a proxy, and by comparing it to an inferred position estimated based on the device's state. The Location Integrity SDK provides enhanced features related to device verification, and it is available for use by request. To get access to the SDK, contact Sales Support."]
 module UpdateTrackerResponse =
   struct
     type nonrec t =
       {
-      trackerArn: Arn.t
+      trackerName: ResourceName.t option
+        [@ocaml.doc "The name of the updated tracker resource."];
+      trackerArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the updated tracker resource. Used to specify a resource across AWS. Format example: arn:aws:geo:region:account-id:tracker/ExampleTracker"];
-      trackerName: ResourceName.t
-        [@ocaml.doc "The name of the updated tracker resource."];
-      updateTime: Timestamp.t
+      updateTime: Timestamp.t option
         [@ocaml.doc
           "The timestamp for when the tracker resource was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
     type nonrec error =
@@ -4840,10 +8239,9 @@ module UpdateTrackerResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateTrackerResponse"
-    let make ~trackerArn =
-      fun ~trackerName ->
-        fun ~updateTime -> fun () -> { trackerArn; trackerName; updateTime }
+    let make ?trackerName =
+      fun ?trackerArn ->
+        fun ?updateTime -> fun () -> { trackerName; trackerArn; updateTime }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4902,26 +8300,25 @@ module UpdateTrackerResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("TrackerArn", (Some (Arn.to_value x.trackerArn)));
-        ("TrackerName", (Some (ResourceName.to_value x.trackerName)));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        [("TrackerName", (Option.map x.trackerName ~f:ResourceName.to_value));
+        ("TrackerArn", (Option.map x.trackerArn ~f:Arn.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
-      let trackerName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
       let trackerArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrackerArn") in
-      make ~updateTime ~trackerName ~trackerArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "TrackerArn") in
+      let trackerName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "TrackerName") in
+      make ?updateTime ?trackerArn ?trackerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
-      let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
-      let trackerArn = field_map_exn json "TrackerArn" Arn.of_json in
-      make ~updateTime ~trackerName ~trackerArn ()
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let trackerArn = field_map json__ "TrackerArn" Arn.of_json in
+      let trackerName = field_map json__ "TrackerName" ResourceName.of_json in
+      make ?updateTime ?trackerArn ?trackerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the specified properties of a given tracker resource."]
@@ -4929,72 +8326,99 @@ module UpdateTrackerRequest =
   struct
     type nonrec t =
       {
-      description: ResourceDescription.t option
-        [@ocaml.doc "Updates the description for the tracker resource."];
-      positionFiltering: PositionFiltering.t option
-        [@ocaml.doc
-          "Updates the position filtering for the tracker resource. Valid values: TimeBased - Location updates are evaluated against linked geofence collections, but not every location update is stored. If your update frequency is more often than 30 seconds, only one update per 30 seconds is stored for each unique device ID. DistanceBased - If the device has moved less than 30 m (98.4 ft), location updates are ignored. Location updates within this distance are neither evaluated against linked geofence collections, nor stored. This helps control costs by reducing the number of geofence evaluations and historical device positions to paginate through. Distance-based filtering can also reduce the effects of GPS noise when displaying device trajectories on a map. AccuracyBased - If the device has moved less than the measured accuracy, location updates are ignored. For example, if two consecutive updates from a device have a horizontal accuracy of 5 m and 10 m, the second update is ignored if the device has moved less than 15 m. Ignored location updates are neither evaluated against linked geofence collections, nor stored. This helps educe the effects of GPS noise when displaying device trajectories on a map, and can help control costs by reducing the number of geofence evaluations."];
+      trackerName: ResourceName.t
+        [@ocaml.doc "The name of the tracker resource to update."];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc
           "No longer used. If included, the only allowed value is RequestBasedUsage."];
       pricingPlanDataSource: String_.t option
         [@ocaml.doc "This parameter is no longer used."];
-      trackerName: ResourceName.t
-        [@ocaml.doc "The name of the tracker resource to update."]}
+      description: ResourceDescription.t option
+        [@ocaml.doc "Updates the description for the tracker resource."];
+      positionFiltering: PositionFiltering.t option
+        [@ocaml.doc
+          "Updates the position filtering for the tracker resource. Valid values: TimeBased - Location updates are evaluated against linked geofence collections, but not every location update is stored. If your update frequency is more often than 30 seconds, only one update per 30 seconds is stored for each unique device ID. DistanceBased - If the device has moved less than 30 m (98.4 ft), location updates are ignored. Location updates within this distance are neither evaluated against linked geofence collections, nor stored. This helps control costs by reducing the number of geofence evaluations and historical device positions to paginate through. Distance-based filtering can also reduce the effects of GPS noise when displaying device trajectories on a map. AccuracyBased - If the device has moved less than the measured accuracy, location updates are ignored. For example, if two consecutive updates from a device have a horizontal accuracy of 5 m and 10 m, the second update is ignored if the device has moved less than 15 m. Ignored location updates are neither evaluated against linked geofence collections, nor stored. This helps educe the effects of GPS noise when displaying device trajectories on a map, and can help control costs by reducing the number of geofence evaluations."];
+      eventBridgeEnabled: Boolean.t option
+        [@ocaml.doc
+          "Whether to enable position UPDATE events from this tracker to be sent to EventBridge. You do not need enable this feature to get ENTER and EXIT events for geofences with this tracker. Those events are always sent to EventBridge."];
+      kmsKeyEnableGeospatialQueries: Boolean.t option
+        [@ocaml.doc
+          "Enables GeospatialQueries for a tracker that uses a Amazon Web Services KMS customer managed key. This parameter is only used if you are using a KMS customer managed key."]}
     let context_ = "UpdateTrackerRequest"
-    let make ?description =
-      fun ?positionFiltering ->
-        fun ?pricingPlan ->
-          fun ?pricingPlanDataSource ->
-            fun ~trackerName ->
-              fun () ->
-                {
-                  description;
-                  positionFiltering;
-                  pricingPlan;
-                  pricingPlanDataSource;
-                  trackerName
-                }
+    let make ?pricingPlan =
+      fun ?pricingPlanDataSource ->
+        fun ?description ->
+          fun ?positionFiltering ->
+            fun ?eventBridgeEnabled ->
+              fun ?kmsKeyEnableGeospatialQueries ->
+                fun ~trackerName ->
+                  fun () ->
+                    {
+                      pricingPlan;
+                      pricingPlanDataSource;
+                      description;
+                      positionFiltering;
+                      eventBridgeEnabled;
+                      kmsKeyEnableGeospatialQueries;
+                      trackerName
+                    }
     let to_value x =
       structure_to_value
-        [("Description",
-           (Option.map x.description ~f:ResourceDescription.to_value));
-        ("PositionFiltering",
-          (Option.map x.positionFiltering ~f:PositionFiltering.to_value));
+        [("TrackerName", (Some (ResourceName.to_value x.trackerName)));
         ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
         ("PricingPlanDataSource",
           (Option.map x.pricingPlanDataSource ~f:String_.to_value));
-        ("TrackerName", (Some (ResourceName.to_value x.trackerName)))]
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
+        ("PositionFiltering",
+          (Option.map x.positionFiltering ~f:PositionFiltering.to_value));
+        ("EventBridgeEnabled",
+          (Option.map x.eventBridgeEnabled ~f:Boolean.to_value));
+        ("KmsKeyEnableGeospatialQueries",
+          (Option.map x.kmsKeyEnableGeospatialQueries ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let trackerName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
-      let pricingPlanDataSource =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "PricingPlanDataSource") in
-      let pricingPlan =
-        (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
+      let kmsKeyEnableGeospatialQueries =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "KmsKeyEnableGeospatialQueries") in
+      let eventBridgeEnabled =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "EventBridgeEnabled") in
       let positionFiltering =
         (Option.map ~f:PositionFiltering.of_xml)
           (Xml.child xml_arg0 "PositionFiltering") in
       let description =
         (Option.map ~f:ResourceDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
-      make ~trackerName ?pricingPlanDataSource ?pricingPlan
-        ?positionFiltering ?description ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
       let pricingPlanDataSource =
-        field_map json "PricingPlanDataSource" String_.of_json in
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "PricingPlanDataSource") in
+      let pricingPlan =
+        (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
+      let trackerName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
+      make ?kmsKeyEnableGeospatialQueries ?eventBridgeEnabled
+        ?positionFiltering ?description ?pricingPlanDataSource ?pricingPlan
+        ~trackerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKeyEnableGeospatialQueries =
+        field_map json__ "KmsKeyEnableGeospatialQueries" Boolean.of_json in
+      let eventBridgeEnabled =
+        field_map json__ "EventBridgeEnabled" Boolean.of_json in
       let positionFiltering =
-        field_map json "PositionFiltering" PositionFiltering.of_json in
+        field_map json__ "PositionFiltering" PositionFiltering.of_json in
       let description =
-        field_map json "Description" ResourceDescription.of_json in
-      make ~trackerName ?pricingPlanDataSource ?pricingPlan
-        ?positionFiltering ?description ()
+        field_map json__ "Description" ResourceDescription.of_json in
+      let pricingPlanDataSource =
+        field_map json__ "PricingPlanDataSource" String_.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
+      let trackerName =
+        field_map_exn json__ "TrackerName" ResourceName.of_json in
+      make ?kmsKeyEnableGeospatialQueries ?eventBridgeEnabled
+        ?positionFiltering ?description ?pricingPlanDataSource ?pricingPlan
+        ~trackerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the specified properties of a given tracker resource."]
@@ -5002,12 +8426,12 @@ module UpdateRouteCalculatorResponse =
   struct
     type nonrec t =
       {
-      calculatorArn: Arn.t
+      calculatorName: ResourceName.t option
+        [@ocaml.doc "The name of the updated route calculator resource."];
+      calculatorArn: GeoArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the updated route calculator resource. Used to specify a resource across AWS. Format example: arn:aws:geo:region:account-id:route- calculator/ExampleCalculator"];
-      calculatorName: ResourceName.t
-        [@ocaml.doc "The name of the updated route calculator resource."];
-      updateTime: Timestamp.t
+      updateTime: Timestamp.t option
         [@ocaml.doc
           "The timestamp for when the route calculator was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
     type nonrec error =
@@ -5017,11 +8441,10 @@ module UpdateRouteCalculatorResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateRouteCalculatorResponse"
-    let make ~calculatorArn =
-      fun ~calculatorName ->
-        fun ~updateTime ->
-          fun () -> { calculatorArn; calculatorName; updateTime }
+    let make ?calculatorName =
+      fun ?calculatorArn ->
+        fun ?updateTime ->
+          fun () -> { calculatorName; calculatorArn; updateTime }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5080,85 +8503,85 @@ module UpdateRouteCalculatorResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("CalculatorArn", (Some (Arn.to_value x.calculatorArn)));
-        ("CalculatorName", (Some (ResourceName.to_value x.calculatorName)));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        [("CalculatorName",
+           (Option.map x.calculatorName ~f:ResourceName.to_value));
+        ("CalculatorArn", (Option.map x.calculatorArn ~f:GeoArn.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
-      let calculatorName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CalculatorName") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
       let calculatorArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CalculatorArn") in
-      make ~updateTime ~calculatorName ~calculatorArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
+        (Option.map ~f:GeoArn.of_xml) (Xml.child xml_arg0 "CalculatorArn") in
       let calculatorName =
-        field_map_exn json "CalculatorName" ResourceName.of_json in
-      let calculatorArn = field_map_exn json "CalculatorArn" Arn.of_json in
-      make ~updateTime ~calculatorName ~calculatorArn ()
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "CalculatorName") in
+      make ?updateTime ?calculatorArn ?calculatorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let calculatorArn = field_map json__ "CalculatorArn" GeoArn.of_json in
+      let calculatorName =
+        field_map json__ "CalculatorName" ResourceName.of_json in
+      make ?updateTime ?calculatorArn ?calculatorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified properties for a given route calculator resource."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Routes API V2 unless you require Grab data. UpdateRouteCalculator is part of a previous Amazon Location Service Routes API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Routes API version 2 has a simplified interface that can be used without creating or managing route calculator resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Routes API version 2 is found under geo-routes or geo_routes, not under location. Since Grab is not yet fully supported in Routes API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Routes V2 API Reference or the Developer Guide. Updates the specified properties for a given route calculator resource."]
 module UpdateRouteCalculatorRequest =
   struct
     type nonrec t =
       {
       calculatorName: ResourceName.t
         [@ocaml.doc "The name of the route calculator resource to update."];
-      description: ResourceDescription.t option
-        [@ocaml.doc
-          "Updates the description for the route calculator resource."];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc
-          "No longer used. If included, the only allowed value is RequestBasedUsage."]}
+          "No longer used. If included, the only allowed value is RequestBasedUsage."];
+      description: ResourceDescription.t option
+        [@ocaml.doc
+          "Updates the description for the route calculator resource."]}
     let context_ = "UpdateRouteCalculatorRequest"
-    let make ?description =
-      fun ?pricingPlan ->
+    let make ?pricingPlan =
+      fun ?description ->
         fun ~calculatorName ->
-          fun () -> { description; pricingPlan; calculatorName }
+          fun () -> { pricingPlan; description; calculatorName }
     let to_value x =
       structure_to_value
         [("CalculatorName", (Some (ResourceName.to_value x.calculatorName)));
+        ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
         ("Description",
-          (Option.map x.description ~f:ResourceDescription.to_value));
-        ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value))]
+          (Option.map x.description ~f:ResourceDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let pricingPlan =
-        (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
       let description =
         (Option.map ~f:ResourceDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
+      let pricingPlan =
+        (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
       let calculatorName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CalculatorName") in
-      make ?pricingPlan ?description ~calculatorName ()
+      make ?description ?pricingPlan ~calculatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
+    let of_json json__ =
       let description =
-        field_map json "Description" ResourceDescription.of_json in
+        field_map json__ "Description" ResourceDescription.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
       let calculatorName =
-        field_map_exn json "CalculatorName" ResourceName.of_json in
-      make ?pricingPlan ?description ~calculatorName ()
+        field_map_exn json__ "CalculatorName" ResourceName.of_json in
+      make ?description ?pricingPlan ~calculatorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified properties for a given route calculator resource."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Routes API V2 unless you require Grab data. UpdateRouteCalculator is part of a previous Amazon Location Service Routes API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Routes API version 2 has a simplified interface that can be used without creating or managing route calculator resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Routes API version 2 is found under geo-routes or geo_routes, not under location. Since Grab is not yet fully supported in Routes API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Routes V2 API Reference or the Developer Guide. Updates the specified properties for a given route calculator resource."]
 module UpdatePlaceIndexResponse =
   struct
     type nonrec t =
       {
-      indexArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the upated place index resource. Used to specify a resource across AWS. Format example: arn:aws:geo:region:account-id:place- index/ExamplePlaceIndex"];
-      indexName: ResourceName.t
+      indexName: ResourceName.t option
         [@ocaml.doc "The name of the updated place index resource."];
-      updateTime: Timestamp.t
+      indexArn: GeoArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the upated place index resource. Used to specify a resource across Amazon Web Services. Format example: arn:aws:geo:region:account-id:place- index/ExamplePlaceIndex"];
+      updateTime: Timestamp.t option
         [@ocaml.doc
           "The timestamp for when the place index resource was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
     type nonrec error =
@@ -5168,10 +8591,9 @@ module UpdatePlaceIndexResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdatePlaceIndexResponse"
-    let make ~indexArn =
-      fun ~indexName ->
-        fun ~updateTime -> fun () -> { indexArn; indexName; updateTime }
+    let make ?indexName =
+      fun ?indexArn ->
+        fun ?updateTime -> fun () -> { indexName; indexArn; updateTime }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5230,97 +8652,95 @@ module UpdatePlaceIndexResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("IndexArn", (Some (Arn.to_value x.indexArn)));
-        ("IndexName", (Some (ResourceName.to_value x.indexName)));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        [("IndexName", (Option.map x.indexName ~f:ResourceName.to_value));
+        ("IndexArn", (Option.map x.indexArn ~f:GeoArn.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
-      let indexName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
       let indexArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexArn") in
-      make ~updateTime ~indexName ~indexArn ()
+        (Option.map ~f:GeoArn.of_xml) (Xml.child xml_arg0 "IndexArn") in
+      let indexName =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "IndexName") in
+      make ?updateTime ?indexArn ?indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
-      let indexName = field_map_exn json "IndexName" ResourceName.of_json in
-      let indexArn = field_map_exn json "IndexArn" Arn.of_json in
-      make ~updateTime ~indexName ~indexArn ()
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let indexArn = field_map json__ "IndexArn" GeoArn.of_json in
+      let indexName = field_map json__ "IndexName" ResourceName.of_json in
+      make ?updateTime ?indexArn ?indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified properties of a given place index resource."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Places API V2 unless you require Grab data. UpdatePlaceIndex is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Places API version 2 has a simplified interface that can be used without creating or managing place index resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Places V2 API Reference or the Developer Guide. Updates the specified properties of a given place index resource."]
 module UpdatePlaceIndexRequest =
   struct
     type nonrec t =
       {
-      dataSourceConfiguration: DataSourceConfiguration.t option
-        [@ocaml.doc
-          "Updates the data storage option for the place index resource."];
-      description: ResourceDescription.t option
-        [@ocaml.doc "Updates the description for the place index resource."];
       indexName: ResourceName.t
         [@ocaml.doc "The name of the place index resource to update."];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc
-          "No longer used. If included, the only allowed value is RequestBasedUsage."]}
+          "No longer used. If included, the only allowed value is RequestBasedUsage."];
+      description: ResourceDescription.t option
+        [@ocaml.doc "Updates the description for the place index resource."];
+      dataSourceConfiguration: DataSourceConfiguration.t option
+        [@ocaml.doc
+          "Updates the data storage option for the place index resource."]}
     let context_ = "UpdatePlaceIndexRequest"
-    let make ?dataSourceConfiguration =
+    let make ?pricingPlan =
       fun ?description ->
-        fun ?pricingPlan ->
+        fun ?dataSourceConfiguration ->
           fun ~indexName ->
             fun () ->
-              { dataSourceConfiguration; description; pricingPlan; indexName
+              { pricingPlan; description; dataSourceConfiguration; indexName
               }
     let to_value x =
       structure_to_value
-        [("DataSourceConfiguration",
-           (Option.map x.dataSourceConfiguration
-              ~f:DataSourceConfiguration.to_value));
+        [("IndexName", (Some (ResourceName.to_value x.indexName)));
+        ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
         ("Description",
           (Option.map x.description ~f:ResourceDescription.to_value));
-        ("IndexName", (Some (ResourceName.to_value x.indexName)));
-        ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value))]
+        ("DataSourceConfiguration",
+          (Option.map x.dataSourceConfiguration
+             ~f:DataSourceConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dataSourceConfiguration =
+        (Option.map ~f:DataSourceConfiguration.of_xml)
+          (Xml.child xml_arg0 "DataSourceConfiguration") in
+      let description =
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let pricingPlan =
         (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
       let indexName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
-      let description =
-        (Option.map ~f:ResourceDescription.of_xml)
-          (Xml.child xml_arg0 "Description") in
-      let dataSourceConfiguration =
-        (Option.map ~f:DataSourceConfiguration.of_xml)
-          (Xml.child xml_arg0 "DataSourceConfiguration") in
-      make ?pricingPlan ~indexName ?description ?dataSourceConfiguration ()
+      make ?dataSourceConfiguration ?description ?pricingPlan ~indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
-      let indexName = field_map_exn json "IndexName" ResourceName.of_json in
-      let description =
-        field_map json "Description" ResourceDescription.of_json in
+    let of_json json__ =
       let dataSourceConfiguration =
-        field_map json "DataSourceConfiguration"
+        field_map json__ "DataSourceConfiguration"
           DataSourceConfiguration.of_json in
-      make ?pricingPlan ~indexName ?description ?dataSourceConfiguration ()
+      let description =
+        field_map json__ "Description" ResourceDescription.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
+      let indexName = field_map_exn json__ "IndexName" ResourceName.of_json in
+      make ?dataSourceConfiguration ?description ?pricingPlan ~indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified properties of a given place index resource."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Places API V2 unless you require Grab data. UpdatePlaceIndex is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Places API version 2 has a simplified interface that can be used without creating or managing place index resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Places V2 API Reference or the Developer Guide. Updates the specified properties of a given place index resource."]
 module UpdateMapResponse =
   struct
     type nonrec t =
       {
-      mapArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the updated map resource. Used to specify a resource across AWS. Format example: arn:aws:geo:region:account-id:maps/ExampleMap"];
-      mapName: ResourceName.t
+      mapName: ResourceName.t option
         [@ocaml.doc "The name of the updated map resource."];
-      updateTime: Timestamp.t
+      mapArn: GeoArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the updated map resource. Used to specify a resource across AWS. Format example: arn:aws:geo:region:account-id:map/ExampleMap"];
+      updateTime: Timestamp.t option
         [@ocaml.doc
           "The timestamp for when the map resource was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
     type nonrec error =
@@ -5330,10 +8750,9 @@ module UpdateMapResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateMapResponse"
-    let make ~mapArn =
-      fun ~mapName ->
-        fun ~updateTime -> fun () -> { mapArn; mapName; updateTime }
+    let make ?mapName =
+      fun ?mapArn ->
+        fun ?updateTime -> fun () -> { mapName; mapArn; updateTime }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5392,81 +8811,273 @@ module UpdateMapResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("MapArn", (Some (Arn.to_value x.mapArn)));
-        ("MapName", (Some (ResourceName.to_value x.mapName)));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        [("MapName", (Option.map x.mapName ~f:ResourceName.to_value));
+        ("MapArn", (Option.map x.mapArn ~f:GeoArn.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
-      let mapName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
       let mapArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MapArn") in
-      make ~updateTime ~mapName ~mapArn ()
+        (Option.map ~f:GeoArn.of_xml) (Xml.child xml_arg0 "MapArn") in
+      let mapName =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "MapName") in
+      make ?updateTime ?mapArn ?mapName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
-      let mapName = field_map_exn json "MapName" ResourceName.of_json in
-      let mapArn = field_map_exn json "MapArn" Arn.of_json in
-      make ~updateTime ~mapName ~mapArn ()
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let mapArn = field_map json__ "MapArn" GeoArn.of_json in
+      let mapName = field_map json__ "MapName" ResourceName.of_json in
+      make ?updateTime ?mapArn ?mapName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified properties of a given map resource."]
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to the Maps API V2 unless you require Grab data. UpdateMap is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Maps API version 2 has a simplified interface that can be used without creating or managing map resources. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Updates the specified properties of a given map resource."]
 module UpdateMapRequest =
   struct
     type nonrec t =
       {
-      description: ResourceDescription.t option
-        [@ocaml.doc "Updates the description for the map resource."];
       mapName: ResourceName.t
         [@ocaml.doc "The name of the map resource to update."];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc
-          "No longer used. If included, the only allowed value is RequestBasedUsage."]}
+          "No longer used. If included, the only allowed value is RequestBasedUsage."];
+      description: ResourceDescription.t option
+        [@ocaml.doc "Updates the description for the map resource."];
+      configurationUpdate: MapConfigurationUpdate.t option
+        [@ocaml.doc
+          "Updates the parts of the map configuration that can be updated, including the political view."]}
     let context_ = "UpdateMapRequest"
-    let make ?description =
-      fun ?pricingPlan ->
-        fun ~mapName -> fun () -> { description; pricingPlan; mapName }
+    let make ?pricingPlan =
+      fun ?description ->
+        fun ?configurationUpdate ->
+          fun ~mapName ->
+            fun () ->
+              { pricingPlan; description; configurationUpdate; mapName }
     let to_value x =
       structure_to_value
-        [("Description",
-           (Option.map x.description ~f:ResourceDescription.to_value));
-        ("MapName", (Some (ResourceName.to_value x.mapName)));
-        ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value))]
+        [("MapName", (Some (ResourceName.to_value x.mapName)));
+        ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
+        ("ConfigurationUpdate",
+          (Option.map x.configurationUpdate
+             ~f:MapConfigurationUpdate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let configurationUpdate =
+        (Option.map ~f:MapConfigurationUpdate.of_xml)
+          (Xml.child xml_arg0 "ConfigurationUpdate") in
+      let description =
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let pricingPlan =
         (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
       let mapName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
+      make ?configurationUpdate ?description ?pricingPlan ~mapName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let configurationUpdate =
+        field_map json__ "ConfigurationUpdate" MapConfigurationUpdate.of_json in
+      let description =
+        field_map json__ "Description" ResourceDescription.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
+      let mapName = field_map_exn json__ "MapName" ResourceName.of_json in
+      make ?configurationUpdate ?description ?pricingPlan ~mapName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to the Maps API V2 unless you require Grab data. UpdateMap is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Maps API version 2 has a simplified interface that can be used without creating or managing map resources. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Updates the specified properties of a given map resource."]
+module UpdateKeyResponse =
+  struct
+    type nonrec t =
+      {
+      keyArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the API key resource. Used when you need to specify a resource across all Amazon Web Services. Format example: arn:aws:geo:region:account-id:key/ExampleKey"];
+      keyName: ResourceName.t option
+        [@ocaml.doc "The name of the API key resource."];
+      updateTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the API key resource was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?keyArn =
+      fun ?keyName ->
+        fun ?updateTime -> fun () -> { keyArn; keyName; updateTime }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("KeyArn", (Option.map x.keyArn ~f:Arn.to_value));
+        ("KeyName", (Option.map x.keyName ~f:ResourceName.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updateTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
+      let keyName =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "KeyName") in
+      let keyArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "KeyArn") in
+      make ?updateTime ?keyName ?keyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let keyName = field_map json__ "KeyName" ResourceName.of_json in
+      let keyArn = field_map json__ "KeyArn" Arn.of_json in
+      make ?updateTime ?keyName ?keyArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the specified properties of a given API key resource."]
+module UpdateKeyRequest =
+  struct
+    type nonrec t =
+      {
+      keyName: ResourceName.t
+        [@ocaml.doc "The name of the API key resource to update."];
+      description: ResourceDescription.t option
+        [@ocaml.doc "Updates the description for the API key resource."];
+      expireTime: Timestamp.t option
+        [@ocaml.doc
+          "Updates the timestamp for when the API key resource will expire in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      noExpiry: Boolean.t option
+        [@ocaml.doc
+          "Whether the API key should expire. Set to true to set the API key to have no expiration time."];
+      forceUpdate: Boolean.t option
+        [@ocaml.doc
+          "The boolean flag to be included for updating ExpireTime or Restrictions details. Must be set to true to update an API key resource that has been used in the past 7 days. False if force update is not preferred Default value: False"];
+      restrictions: ApiKeyRestrictions.t option
+        [@ocaml.doc
+          "Updates the API key restrictions for the API key resource."]}
+    let context_ = "UpdateKeyRequest"
+    let make ?description =
+      fun ?expireTime ->
+        fun ?noExpiry ->
+          fun ?forceUpdate ->
+            fun ?restrictions ->
+              fun ~keyName ->
+                fun () ->
+                  {
+                    description;
+                    expireTime;
+                    noExpiry;
+                    forceUpdate;
+                    restrictions;
+                    keyName
+                  }
+    let to_value x =
+      structure_to_value
+        [("KeyName", (Some (ResourceName.to_value x.keyName)));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
+        ("ExpireTime", (Option.map x.expireTime ~f:Timestamp.to_value));
+        ("NoExpiry", (Option.map x.noExpiry ~f:Boolean.to_value));
+        ("ForceUpdate", (Option.map x.forceUpdate ~f:Boolean.to_value));
+        ("Restrictions",
+          (Option.map x.restrictions ~f:ApiKeyRestrictions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let restrictions =
+        (Option.map ~f:ApiKeyRestrictions.of_xml)
+          (Xml.child xml_arg0 "Restrictions") in
+      let forceUpdate =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "ForceUpdate") in
+      let noExpiry =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "NoExpiry") in
+      let expireTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "ExpireTime") in
       let description =
         (Option.map ~f:ResourceDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
-      make ?pricingPlan ~mapName ?description ()
+      let keyName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "KeyName") in
+      make ?restrictions ?forceUpdate ?noExpiry ?expireTime ?description
+        ~keyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
-      let mapName = field_map_exn json "MapName" ResourceName.of_json in
+    let of_json json__ =
+      let restrictions =
+        field_map json__ "Restrictions" ApiKeyRestrictions.of_json in
+      let forceUpdate = field_map json__ "ForceUpdate" Boolean.of_json in
+      let noExpiry = field_map json__ "NoExpiry" Boolean.of_json in
+      let expireTime = field_map json__ "ExpireTime" Timestamp.of_json in
       let description =
-        field_map json "Description" ResourceDescription.of_json in
-      make ?pricingPlan ~mapName ?description ()
+        field_map json__ "Description" ResourceDescription.of_json in
+      let keyName = field_map_exn json__ "KeyName" ResourceName.of_json in
+      make ?restrictions ?forceUpdate ?noExpiry ?expireTime ?description
+        ~keyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified properties of a given map resource."]
+       "Updates the specified properties of a given API key resource."]
 module UpdateGeofenceCollectionResponse =
   struct
     type nonrec t =
       {
-      collectionArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the updated geofence collection. Used to specify a resource across AWS. Format example: arn:aws:geo:region:account-id:geofence-collection/ExampleGeofenceCollection"];
-      collectionName: ResourceName.t
+      collectionName: ResourceName.t option
         [@ocaml.doc "The name of the updated geofence collection."];
-      updateTime: Timestamp.t
+      collectionArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the updated geofence collection. Used to specify a resource across Amazon Web Services. Format example: arn:aws:geo:region:account-id:geofence-collection/ExampleGeofenceCollection"];
+      updateTime: Timestamp.t option
         [@ocaml.doc
           "The time when the geofence collection was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"]}
     type nonrec error =
@@ -5476,11 +9087,10 @@ module UpdateGeofenceCollectionResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateGeofenceCollectionResponse"
-    let make ~collectionArn =
-      fun ~collectionName ->
-        fun ~updateTime ->
-          fun () -> { collectionArn; collectionName; updateTime }
+    let make ?collectionName =
+      fun ?collectionArn ->
+        fun ?updateTime ->
+          fun () -> { collectionName; collectionArn; updateTime }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5539,27 +9149,27 @@ module UpdateGeofenceCollectionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("CollectionArn", (Some (Arn.to_value x.collectionArn)));
-        ("CollectionName", (Some (ResourceName.to_value x.collectionName)));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        [("CollectionName",
+           (Option.map x.collectionName ~f:ResourceName.to_value));
+        ("CollectionArn", (Option.map x.collectionArn ~f:Arn.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
-      let collectionName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
       let collectionArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CollectionArn") in
-      make ~updateTime ~collectionName ~collectionArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CollectionArn") in
       let collectionName =
-        field_map_exn json "CollectionName" ResourceName.of_json in
-      let collectionArn = field_map_exn json "CollectionArn" Arn.of_json in
-      make ~updateTime ~collectionName ~collectionArn ()
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "CollectionName") in
+      make ?updateTime ?collectionArn ?collectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let collectionArn = field_map json__ "CollectionArn" Arn.of_json in
+      let collectionName =
+        field_map json__ "CollectionName" ResourceName.of_json in
+      make ?updateTime ?collectionArn ?collectionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the specified properties of a given geofence collection."]
@@ -5569,58 +9179,58 @@ module UpdateGeofenceCollectionRequest =
       {
       collectionName: ResourceName.t
         [@ocaml.doc "The name of the geofence collection to update."];
-      description: ResourceDescription.t option
-        [@ocaml.doc "Updates the description for the geofence collection."];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc
           "No longer used. If included, the only allowed value is RequestBasedUsage."];
       pricingPlanDataSource: String_.t option
-        [@ocaml.doc "This parameter is no longer used."]}
+        [@ocaml.doc "This parameter is no longer used."];
+      description: ResourceDescription.t option
+        [@ocaml.doc "Updates the description for the geofence collection."]}
     let context_ = "UpdateGeofenceCollectionRequest"
-    let make ?description =
-      fun ?pricingPlan ->
-        fun ?pricingPlanDataSource ->
+    let make ?pricingPlan =
+      fun ?pricingPlanDataSource ->
+        fun ?description ->
           fun ~collectionName ->
             fun () ->
               {
-                description;
                 pricingPlan;
                 pricingPlanDataSource;
+                description;
                 collectionName
               }
     let to_value x =
       structure_to_value
         [("CollectionName", (Some (ResourceName.to_value x.collectionName)));
-        ("Description",
-          (Option.map x.description ~f:ResourceDescription.to_value));
         ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
         ("PricingPlanDataSource",
-          (Option.map x.pricingPlanDataSource ~f:String_.to_value))]
+          (Option.map x.pricingPlanDataSource ~f:String_.to_value));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let pricingPlanDataSource =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "PricingPlanDataSource") in
       let pricingPlan =
         (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
-      let description =
-        (Option.map ~f:ResourceDescription.of_xml)
-          (Xml.child xml_arg0 "Description") in
       let collectionName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
-      make ?pricingPlanDataSource ?pricingPlan ?description ~collectionName
+      make ?description ?pricingPlanDataSource ?pricingPlan ~collectionName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pricingPlanDataSource =
-        field_map json "PricingPlanDataSource" String_.of_json in
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
+    let of_json json__ =
       let description =
-        field_map json "Description" ResourceDescription.of_json in
+        field_map json__ "Description" ResourceDescription.of_json in
+      let pricingPlanDataSource =
+        field_map json__ "PricingPlanDataSource" String_.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
       let collectionName =
-        field_map_exn json "CollectionName" ResourceName.of_json in
-      make ?pricingPlanDataSource ?pricingPlan ?description ~collectionName
+        field_map_exn json__ "CollectionName" ResourceName.of_json in
+      make ?description ?pricingPlanDataSource ?pricingPlan ~collectionName
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5726,9 +9336,9 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeys.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5808,7 +9418,7 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Assigns one or more tags (key-value pairs) to the specified Amazon Location Service resource. <p>Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only resources with certain tag values.</p> <p>You can use the <code>TagResource</code> operation with an Amazon Location Service resource that already has tags. If you specify a new tag key for the resource, this tag is appended to the tags already associated with the resource. If you specify a tag key that's already associated with the resource, the new tag value that you specify replaces the previous value for that tag. </p> <p>You can associate up to 50 tags with a resource.</p>"]
+       "Assigns one or more tags (key-value pairs) to the specified Amazon Location Service resource. Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only resources with certain tag values. You can use the TagResource operation with an Amazon Location Service resource that already has tags. If you specify a new tag key for the resource, this tag is appended to the tags already associated with the resource. If you specify a tag key that's already associated with the resource, the new tag value that you specify replaces the previous value for that tag. You can associate up to 50 tags with a resource."]
 module TagResourceRequest =
   struct
     type nonrec t =
@@ -5833,23 +9443,218 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Assigns one or more tags (key-value pairs) to the specified Amazon Location Service resource. <p>Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only resources with certain tag values.</p> <p>You can use the <code>TagResource</code> operation with an Amazon Location Service resource that already has tags. If you specify a new tag key for the resource, this tag is appended to the tags already associated with the resource. If you specify a tag key that's already associated with the resource, the new tag value that you specify replaces the previous value for that tag. </p> <p>You can associate up to 50 tags with a resource.</p>"]
+       "Assigns one or more tags (key-value pairs) to the specified Amazon Location Service resource. Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only resources with certain tag values. You can use the TagResource operation with an Amazon Location Service resource that already has tags. If you specify a new tag key for the resource, this tag is appended to the tags already associated with the resource. If you specify a tag key that's already associated with the resource, the new tag value that you specify replaces the previous value for that tag. You can associate up to 50 tags with a resource."]
+module StartJobResponse =
+  struct
+    type nonrec t =
+      {
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "Job creation time in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sss."];
+      jobArn: GeoArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the job resource. Used when you need to specify a resource across all Amazon Web Services. Format example: arn:aws:geo:region:account-id:job/ExampleJob"];
+      jobId: JobId.t option [@ocaml.doc "Unique job identifier."];
+      status: JobStatus.t option
+        [@ocaml.doc "Initial job status (always \"Pending\" for new jobs)."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?createdAt =
+      fun ?jobArn ->
+        fun ?jobId ->
+          fun ?status -> fun () -> { createdAt; jobArn; jobId; status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("JobArn", (Option.map x.jobArn ~f:GeoArn.to_value));
+        ("JobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("Status", (Option.map x.status ~f:JobStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
+      let jobArn =
+        (Option.map ~f:GeoArn.of_xml) (Xml.child xml_arg0 "JobArn") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      make ?status ?jobId ?jobArn ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" JobStatus.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      let jobArn = field_map json__ "JobArn" GeoArn.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      make ?status ?jobId ?jobArn ?createdAt ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "StartJob starts a new asynchronous bulk processing job. You specify the input data location in Amazon S3, the action to perform, and the output location where results are written. For more information, see Job concepts in the Amazon Location Service Developer Guide."]
+module StartJobRequest =
+  struct
+    type nonrec t =
+      {
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique identifier for this request to ensure idempotency."];
+      action: JobAction.t
+        [@ocaml.doc "The action to perform on the input data."];
+      actionOptions: JobActionOptions.t option
+        [@ocaml.doc
+          "Additional parameters that can be requested for each result."];
+      executionRoleArn: IamRoleArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role that Amazon Location Service assumes during job processing. Amazon Location Service uses this role to access the input and output locations specified for the job. The IAM role must be created in the same Amazon Web Services account where you plan to run your job. For more information about configuring IAM roles for Amazon Location jobs, see Configure IAM permissions in the Amazon Location Service Developer Guide."];
+      inputOptions: JobInputOptions.t
+        [@ocaml.doc
+          "Configuration for input data location and format. Input files have a limitation of 10gb per file, and 1gb per Parquet row-group within the file."];
+      name: ResourceName.t option
+        [@ocaml.doc "An optional name for the job resource."];
+      outputOptions: JobOutputOptions.t
+        [@ocaml.doc "Configuration for output data location and format."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "Tags and corresponding values to be associated with the job."]}
+    let context_ = "StartJobRequest"
+    let make ?clientToken =
+      fun ?actionOptions ->
+        fun ?name ->
+          fun ?tags ->
+            fun ~action ->
+              fun ~executionRoleArn ->
+                fun ~inputOptions ->
+                  fun ~outputOptions ->
+                    fun () ->
+                      {
+                        clientToken;
+                        actionOptions;
+                        name;
+                        tags;
+                        action;
+                        executionRoleArn;
+                        inputOptions;
+                        outputOptions
+                      }
+    let to_value x =
+      structure_to_value
+        [("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("Action", (Some (JobAction.to_value x.action)));
+        ("ActionOptions",
+          (Option.map x.actionOptions ~f:JobActionOptions.to_value));
+        ("ExecutionRoleArn", (Some (IamRoleArn.to_value x.executionRoleArn)));
+        ("InputOptions", (Some (JobInputOptions.to_value x.inputOptions)));
+        ("Name", (Option.map x.name ~f:ResourceName.to_value));
+        ("OutputOptions", (Some (JobOutputOptions.to_value x.outputOptions)));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let outputOptions =
+        JobOutputOptions.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutputOptions") in
+      let name =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
+      let inputOptions =
+        JobInputOptions.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InputOptions") in
+      let executionRoleArn =
+        IamRoleArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ExecutionRoleArn") in
+      let actionOptions =
+        (Option.map ~f:JobActionOptions.of_xml)
+          (Xml.child xml_arg0 "ActionOptions") in
+      let action =
+        JobAction.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Action") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
+      make ?tags ~outputOptions ?name ~inputOptions ~executionRoleArn
+        ?actionOptions ~action ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let outputOptions =
+        field_map_exn json__ "OutputOptions" JobOutputOptions.of_json in
+      let name = field_map json__ "Name" ResourceName.of_json in
+      let inputOptions =
+        field_map_exn json__ "InputOptions" JobInputOptions.of_json in
+      let executionRoleArn =
+        field_map_exn json__ "ExecutionRoleArn" IamRoleArn.of_json in
+      let actionOptions =
+        field_map json__ "ActionOptions" JobActionOptions.of_json in
+      let action = field_map_exn json__ "Action" JobAction.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      make ?tags ~outputOptions ?name ~inputOptions ~executionRoleArn
+        ?actionOptions ~action ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "StartJob starts a new asynchronous bulk processing job. You specify the input data location in Amazon S3, the action to perform, and the output location where results are written. For more information, see Job concepts in the Amazon Location Service Developer Guide."]
 module SearchPlaceIndexForTextResponse =
   struct
     type nonrec t =
       {
-      results: SearchForTextResultList.t
+      summary: SearchPlaceIndexForTextSummary.t option
         [@ocaml.doc
-          "A list of Places matching the input text. Each result contains additional information about the specific point of interest."];
-      summary: SearchPlaceIndexForTextSummary.t
+          "Contains a summary of the request. Echoes the input values for BiasPosition, FilterBBox, FilterCountries, Language, MaxResults, and Text. Also includes the DataSource of the place index and the bounding box, ResultBBox, which surrounds the search results."];
+      results: SearchForTextResultList.t option
         [@ocaml.doc
-          "Contains a summary of the request. Echoes the input values for BiasPosition, FilterBBox, FilterCountries, Language, MaxResults, and Text. Also includes the DataSource of the place index and the bounding box, ResultBBox, which surrounds the search results."]}
+          "A list of Places matching the input text. Each result contains additional information about the specific point of interest. Not all response properties are included with all responses. Some properties may only be returned by specific data partners."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -5857,8 +9662,7 @@ module SearchPlaceIndexForTextResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "SearchPlaceIndexForTextResponse"
-    let make ~results = fun ~summary -> fun () -> { results; summary }
+    let make ?summary = fun ?results -> fun () -> { summary; results }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5917,32 +9721,39 @@ module SearchPlaceIndexForTextResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Results", (Some (SearchForTextResultList.to_value x.results)));
-        ("Summary",
-          (Some (SearchPlaceIndexForTextSummary.to_value x.summary)))]
+        [("Summary",
+           (Option.map x.summary ~f:SearchPlaceIndexForTextSummary.to_value));
+        ("Results",
+          (Option.map x.results ~f:SearchForTextResultList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let summary =
-        SearchPlaceIndexForTextSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Summary") in
       let results =
-        SearchForTextResultList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Results") in
-      make ~summary ~results ()
+        (Option.map ~f:SearchForTextResultList.of_xml)
+          (Xml.child xml_arg0 "Results") in
+      let summary =
+        (Option.map ~f:SearchPlaceIndexForTextSummary.of_xml)
+          (Xml.child xml_arg0 "Summary") in
+      make ?results ?summary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let summary =
-        field_map_exn json "Summary" SearchPlaceIndexForTextSummary.of_json in
+    let of_json json__ =
       let results =
-        field_map_exn json "Results" SearchForTextResultList.of_json in
-      make ~summary ~results ()
+        field_map json__ "Results" SearchForTextResultList.of_json in
+      let summary =
+        field_map json__ "Summary" SearchPlaceIndexForTextSummary.of_json in
+      make ?results ?summary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Geocodes free-form text, such as an address, name, city, or region to allow you to search for Places or points of interest. Optional parameters let you narrow your search results by bounding box or country, or bias your search toward a specific position on the globe. You can search for places near a given position using BiasPosition, or filter results within a bounding box using FilterBBox. Providing both parameters simultaneously returns an error. Search results are returned in order of highest to lowest relevance."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to Geocode or SearchText unless you require Grab data. SearchPlaceIndexForText is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The version 2 Geocode operation gives better results in the address geocoding use case, while the version 2 SearchText operation gives better results when searching for businesses and points of interest. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Geocodes free-form text, such as an address, name, city, or region to allow you to search for Places or points of interest. Optional parameters let you narrow your search results by bounding box or country, or bias your search toward a specific position on the globe. You can search for places near a given position using BiasPosition, or filter results within a bounding box using FilterBBox. Providing both parameters simultaneously returns an error. Search results are returned in order of highest to lowest relevance."]
 module SearchPlaceIndexForTextRequest =
   struct
     type nonrec t =
       {
+      indexName: ResourceName.t
+        [@ocaml.doc
+          "The name of the place index resource you want to use for the search."];
+      text: SearchPlaceIndexForTextRequestTextString.t
+        [@ocaml.doc
+          "The address, name, city, or region to be used in the search in free-form text format. For example, 123 Any Street."];
       biasPosition: Position.t option
         [@ocaml.doc
           "An optional parameter that indicates a preference for places that are closer to a specified position. If provided, this parameter must contain a pair of numbers. The first number represents the X coordinate, or longitude; the second number represents the Y coordinate, or latitude. For example, \\[-123.1174, 49.2847\\] represents the position with longitude -123.1174 and latitude 49.2847. BiasPosition and FilterBBox are mutually exclusive. Specifying both options results in an error."];
@@ -5952,62 +9763,65 @@ module SearchPlaceIndexForTextRequest =
       filterCountries: CountryCodeList.t option
         [@ocaml.doc
           "An optional parameter that limits the search results by returning only places that are in a specified list of countries. Valid values include ISO 3166 3-digit country codes. For example, Australia uses three upper-case characters: AUS."];
-      indexName: ResourceName.t
-        [@ocaml.doc
-          "The name of the place index resource you want to use for the search."];
-      language: LanguageTag.t option
-        [@ocaml.doc
-          "The preferred language used to return results. The value must be a valid BCP 47 language tag, for example, en for English. This setting affects the languages used in the results. It does not change which results are returned. If the language is not specified, or not supported for a particular result, the partner automatically chooses a language for the result."];
       maxResults: PlaceIndexSearchResultLimit.t option
         [@ocaml.doc
           "An optional parameter. The maximum number of results returned per request. The default: 50"];
-      text: SyntheticSearchPlaceIndexForTextRequestString.t
+      language: LanguageTag.t option
         [@ocaml.doc
-          "The address, name, city, or region to be used in the search in free-form text format. For example, 123 Any Street."]}
+          "The preferred language used to return results. The value must be a valid BCP 47 language tag, for example, en for English. This setting affects the languages used in the results, but not the results themselves. If no language is specified, or not supported for a particular result, the partner automatically chooses a language for the result. For an example, we'll use the Greek language. You search for Athens, Greece, with the language parameter set to en. The result found will most likely be returned as Athens. If you set the language parameter to el, for Greek, then the result found will more likely be returned as \206\145\206\184\206\174\206\189\206\177. If the data provider does not have a value for Greek, the result will be in a language that the provider does support."];
+      filterCategories: FilterPlaceCategoryList.t option
+        [@ocaml.doc
+          "A list of one or more Amazon Location categories to filter the returned places. If you include more than one category, the results will include results that match any of the categories listed. For more information about using categories, including a list of Amazon Location categories, see Categories and filtering, in the Amazon Location Service developer guide."];
+      key: ApiKey.t option
+        [@ocaml.doc "The optional API key to authorize the request."]}
     let context_ = "SearchPlaceIndexForTextRequest"
     let make ?biasPosition =
       fun ?filterBBox ->
         fun ?filterCountries ->
-          fun ?language ->
-            fun ?maxResults ->
-              fun ~indexName ->
-                fun ~text ->
-                  fun () ->
-                    {
-                      biasPosition;
-                      filterBBox;
-                      filterCountries;
-                      language;
-                      maxResults;
-                      indexName;
-                      text
-                    }
+          fun ?maxResults ->
+            fun ?language ->
+              fun ?filterCategories ->
+                fun ?key ->
+                  fun ~indexName ->
+                    fun ~text ->
+                      fun () ->
+                        {
+                          biasPosition;
+                          filterBBox;
+                          filterCountries;
+                          maxResults;
+                          language;
+                          filterCategories;
+                          key;
+                          indexName;
+                          text
+                        }
     let to_value x =
       structure_to_value
-        [("BiasPosition", (Option.map x.biasPosition ~f:Position.to_value));
+        [("IndexName", (Some (ResourceName.to_value x.indexName)));
+        ("Text",
+          (Some (SearchPlaceIndexForTextRequestTextString.to_value x.text)));
+        ("BiasPosition", (Option.map x.biasPosition ~f:Position.to_value));
         ("FilterBBox", (Option.map x.filterBBox ~f:BoundingBox.to_value));
         ("FilterCountries",
           (Option.map x.filterCountries ~f:CountryCodeList.to_value));
-        ("IndexName", (Some (ResourceName.to_value x.indexName)));
-        ("Language", (Option.map x.language ~f:LanguageTag.to_value));
         ("MaxResults",
           (Option.map x.maxResults ~f:PlaceIndexSearchResultLimit.to_value));
-        ("Text",
-          (Some
-             (SyntheticSearchPlaceIndexForTextRequestString.to_value x.text)))]
+        ("Language", (Option.map x.language ~f:LanguageTag.to_value));
+        ("FilterCategories",
+          (Option.map x.filterCategories ~f:FilterPlaceCategoryList.to_value));
+        ("key", (Option.map x.key ~f:ApiKey.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let text =
-        SyntheticSearchPlaceIndexForTextRequestString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Text") in
+      let key = (Option.map ~f:ApiKey.of_xml) (Xml.child xml_arg0 "key") in
+      let filterCategories =
+        (Option.map ~f:FilterPlaceCategoryList.of_xml)
+          (Xml.child xml_arg0 "FilterCategories") in
+      let language =
+        (Option.map ~f:LanguageTag.of_xml) (Xml.child xml_arg0 "Language") in
       let maxResults =
         (Option.map ~f:PlaceIndexSearchResultLimit.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
-      let language =
-        (Option.map ~f:LanguageTag.of_xml) (Xml.child xml_arg0 "Language") in
-      let indexName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
       let filterCountries =
         (Option.map ~f:CountryCodeList.of_xml)
           (Xml.child xml_arg0 "FilterCountries") in
@@ -6015,36 +9829,45 @@ module SearchPlaceIndexForTextRequest =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "FilterBBox") in
       let biasPosition =
         (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "BiasPosition") in
-      make ~text ?maxResults ?language ~indexName ?filterCountries
-        ?filterBBox ?biasPosition ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let text =
-        field_map_exn json "Text"
-          SyntheticSearchPlaceIndexForTextRequestString.of_json in
+        SearchPlaceIndexForTextRequestTextString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Text") in
+      let indexName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
+      make ?key ?filterCategories ?language ?maxResults ?filterCountries
+        ?filterBBox ?biasPosition ~text ~indexName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let key = field_map json__ "Key" ApiKey.of_json in
+      let filterCategories =
+        field_map json__ "FilterCategories" FilterPlaceCategoryList.of_json in
+      let language = field_map json__ "Language" LanguageTag.of_json in
       let maxResults =
-        field_map json "MaxResults" PlaceIndexSearchResultLimit.of_json in
-      let language = field_map json "Language" LanguageTag.of_json in
-      let indexName = field_map_exn json "IndexName" ResourceName.of_json in
+        field_map json__ "MaxResults" PlaceIndexSearchResultLimit.of_json in
       let filterCountries =
-        field_map json "FilterCountries" CountryCodeList.of_json in
-      let filterBBox = field_map json "FilterBBox" BoundingBox.of_json in
-      let biasPosition = field_map json "BiasPosition" Position.of_json in
-      make ~text ?maxResults ?language ~indexName ?filterCountries
-        ?filterBBox ?biasPosition ()
+        field_map json__ "FilterCountries" CountryCodeList.of_json in
+      let filterBBox = field_map json__ "FilterBBox" BoundingBox.of_json in
+      let biasPosition = field_map json__ "BiasPosition" Position.of_json in
+      let text =
+        field_map_exn json__ "Text"
+          SearchPlaceIndexForTextRequestTextString.of_json in
+      let indexName = field_map_exn json__ "IndexName" ResourceName.of_json in
+      make ?key ?filterCategories ?language ?maxResults ?filterCountries
+        ?filterBBox ?biasPosition ~text ~indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Geocodes free-form text, such as an address, name, city, or region to allow you to search for Places or points of interest. Optional parameters let you narrow your search results by bounding box or country, or bias your search toward a specific position on the globe. You can search for places near a given position using BiasPosition, or filter results within a bounding box using FilterBBox. Providing both parameters simultaneously returns an error. Search results are returned in order of highest to lowest relevance."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to Geocode or SearchText unless you require Grab data. SearchPlaceIndexForText is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The version 2 Geocode operation gives better results in the address geocoding use case, while the version 2 SearchText operation gives better results when searching for businesses and points of interest. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Geocodes free-form text, such as an address, name, city, or region to allow you to search for Places or points of interest. Optional parameters let you narrow your search results by bounding box or country, or bias your search toward a specific position on the globe. You can search for places near a given position using BiasPosition, or filter results within a bounding box using FilterBBox. Providing both parameters simultaneously returns an error. Search results are returned in order of highest to lowest relevance."]
 module SearchPlaceIndexForSuggestionsResponse =
   struct
     type nonrec t =
       {
-      results: SearchForSuggestionsResultList.t
+      summary: SearchPlaceIndexForSuggestionsSummary.t option
         [@ocaml.doc
-          "A list of place suggestions that best match the search text."];
-      summary: SearchPlaceIndexForSuggestionsSummary.t
+          "Contains a summary of the request. Echoes the input values for BiasPosition, FilterBBox, FilterCountries, Language, MaxResults, and Text. Also includes the DataSource of the place index."];
+      results: SearchForSuggestionsResultList.t option
         [@ocaml.doc
-          "Contains a summary of the request. Echoes the input values for BiasPosition, FilterBBox, FilterCountries, Language, MaxResults, and Text. Also includes the DataSource of the place index."]}
+          "A list of place suggestions that best match the search text."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -6052,8 +9875,7 @@ module SearchPlaceIndexForSuggestionsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "SearchPlaceIndexForSuggestionsResponse"
-    let make ~results = fun ~summary -> fun () -> { results; summary }
+    let make ?summary = fun ?results -> fun () -> { summary; results }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6112,34 +9934,41 @@ module SearchPlaceIndexForSuggestionsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Results",
-           (Some (SearchForSuggestionsResultList.to_value x.results)));
-        ("Summary",
-          (Some (SearchPlaceIndexForSuggestionsSummary.to_value x.summary)))]
+        [("Summary",
+           (Option.map x.summary
+              ~f:SearchPlaceIndexForSuggestionsSummary.to_value));
+        ("Results",
+          (Option.map x.results ~f:SearchForSuggestionsResultList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let summary =
-        SearchPlaceIndexForSuggestionsSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Summary") in
       let results =
-        SearchForSuggestionsResultList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Results") in
-      make ~summary ~results ()
+        (Option.map ~f:SearchForSuggestionsResultList.of_xml)
+          (Xml.child xml_arg0 "Results") in
+      let summary =
+        (Option.map ~f:SearchPlaceIndexForSuggestionsSummary.of_xml)
+          (Xml.child xml_arg0 "Summary") in
+      make ?results ?summary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let summary =
-        field_map_exn json "Summary"
-          SearchPlaceIndexForSuggestionsSummary.of_json in
+    let of_json json__ =
       let results =
-        field_map_exn json "Results" SearchForSuggestionsResultList.of_json in
-      make ~summary ~results ()
+        field_map json__ "Results" SearchForSuggestionsResultList.of_json in
+      let summary =
+        field_map json__ "Summary"
+          SearchPlaceIndexForSuggestionsSummary.of_json in
+      make ?results ?summary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generates suggestions for addresses and points of interest based on partial or misspelled free-form text. This operation is also known as autocomplete, autosuggest, or fuzzy matching. Optional parameters let you narrow your search results by bounding box or country, or bias your search toward a specific position on the globe. You can search for suggested place names near a specified position by using BiasPosition, or filter results within a bounding box by using FilterBBox. These parameters are mutually exclusive; using both BiasPosition and FilterBBox in the same command returns an error."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to Suggest or Autocomplete unless you require Grab data. SearchPlaceIndexForSuggestions is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The version 2 Suggest operation gives better results for typeahead place search suggestions with fuzzy matching, while the version 2 Autocomplete operation gives better results for address completion based on partial input. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Generates suggestions for addresses and points of interest based on partial or misspelled free-form text. This operation is also known as autocomplete, autosuggest, or fuzzy matching. Optional parameters let you narrow your search results by bounding box or country, or bias your search toward a specific position on the globe. You can search for suggested place names near a specified position by using BiasPosition, or filter results within a bounding box by using FilterBBox. These parameters are mutually exclusive; using both BiasPosition and FilterBBox in the same command returns an error."]
 module SearchPlaceIndexForSuggestionsRequest =
   struct
     type nonrec t =
       {
+      indexName: ResourceName.t
+        [@ocaml.doc
+          "The name of the place index resource you want to use for the search."];
+      text: SearchPlaceIndexForSuggestionsRequestTextString.t
+        [@ocaml.doc
+          "The free-form partial text to use to generate place suggestions. For example, eiffel tow."];
       biasPosition: Position.t option
         [@ocaml.doc
           "An optional parameter that indicates a preference for place suggestions that are closer to a specified position. If provided, this parameter must contain a pair of numbers. The first number represents the X coordinate, or longitude; the second number represents the Y coordinate, or latitude. For example, \\[-123.1174, 49.2847\\] represents the position with longitude -123.1174 and latitude 49.2847. BiasPosition and FilterBBox are mutually exclusive. Specifying both options results in an error."];
@@ -6149,66 +9978,69 @@ module SearchPlaceIndexForSuggestionsRequest =
       filterCountries: CountryCodeList.t option
         [@ocaml.doc
           "An optional parameter that limits the search results by returning only suggestions within the provided list of countries. Use the ISO 3166 3-digit country code. For example, Australia uses three upper-case characters: AUS."];
-      indexName: ResourceName.t
-        [@ocaml.doc
-          "The name of the place index resource you want to use for the search."];
-      language: LanguageTag.t option
-        [@ocaml.doc
-          "The preferred language used to return results. The value must be a valid BCP 47 language tag, for example, en for English. This setting affects the languages used in the results. It does not change which results are returned. If the language is not specified, or not supported for a particular result, the partner automatically chooses a language for the result. Used only when the partner selected is Here."];
       maxResults:
         SearchPlaceIndexForSuggestionsRequestMaxResultsInteger.t option
         [@ocaml.doc
           "An optional parameter. The maximum number of results returned per request. The default: 5"];
-      text: SyntheticSearchPlaceIndexForSuggestionsRequestString.t
+      language: LanguageTag.t option
         [@ocaml.doc
-          "The free-form partial text to use to generate place suggestions. For example, eiffel tow."]}
+          "The preferred language used to return results. The value must be a valid BCP 47 language tag, for example, en for English. This setting affects the languages used in the results. If no language is specified, or not supported for a particular result, the partner automatically chooses a language for the result. For an example, we'll use the Greek language. You search for Athens, Gr to get suggestions with the language parameter set to en. The results found will most likely be returned as Athens, Greece. If you set the language parameter to el, for Greek, then the result found will more likely be returned as \206\145\206\184\206\174\206\189\206\177, \206\149\206\187\206\187\206\172\206\180\206\177. If the data provider does not have a value for Greek, the result will be in a language that the provider does support."];
+      filterCategories: FilterPlaceCategoryList.t option
+        [@ocaml.doc
+          "A list of one or more Amazon Location categories to filter the returned places. If you include more than one category, the results will include results that match any of the categories listed. For more information about using categories, including a list of Amazon Location categories, see Categories and filtering, in the Amazon Location Service developer guide."];
+      key: ApiKey.t option
+        [@ocaml.doc "The optional API key to authorize the request."]}
     let context_ = "SearchPlaceIndexForSuggestionsRequest"
     let make ?biasPosition =
       fun ?filterBBox ->
         fun ?filterCountries ->
-          fun ?language ->
-            fun ?maxResults ->
-              fun ~indexName ->
-                fun ~text ->
-                  fun () ->
-                    {
-                      biasPosition;
-                      filterBBox;
-                      filterCountries;
-                      language;
-                      maxResults;
-                      indexName;
-                      text
-                    }
+          fun ?maxResults ->
+            fun ?language ->
+              fun ?filterCategories ->
+                fun ?key ->
+                  fun ~indexName ->
+                    fun ~text ->
+                      fun () ->
+                        {
+                          biasPosition;
+                          filterBBox;
+                          filterCountries;
+                          maxResults;
+                          language;
+                          filterCategories;
+                          key;
+                          indexName;
+                          text
+                        }
     let to_value x =
       structure_to_value
-        [("BiasPosition", (Option.map x.biasPosition ~f:Position.to_value));
+        [("IndexName", (Some (ResourceName.to_value x.indexName)));
+        ("Text",
+          (Some
+             (SearchPlaceIndexForSuggestionsRequestTextString.to_value x.text)));
+        ("BiasPosition", (Option.map x.biasPosition ~f:Position.to_value));
         ("FilterBBox", (Option.map x.filterBBox ~f:BoundingBox.to_value));
         ("FilterCountries",
           (Option.map x.filterCountries ~f:CountryCodeList.to_value));
-        ("IndexName", (Some (ResourceName.to_value x.indexName)));
-        ("Language", (Option.map x.language ~f:LanguageTag.to_value));
         ("MaxResults",
           (Option.map x.maxResults
              ~f:SearchPlaceIndexForSuggestionsRequestMaxResultsInteger.to_value));
-        ("Text",
-          (Some
-             (SyntheticSearchPlaceIndexForSuggestionsRequestString.to_value
-                x.text)))]
+        ("Language", (Option.map x.language ~f:LanguageTag.to_value));
+        ("FilterCategories",
+          (Option.map x.filterCategories ~f:FilterPlaceCategoryList.to_value));
+        ("key", (Option.map x.key ~f:ApiKey.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let text =
-        SyntheticSearchPlaceIndexForSuggestionsRequestString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Text") in
+      let key = (Option.map ~f:ApiKey.of_xml) (Xml.child xml_arg0 "key") in
+      let filterCategories =
+        (Option.map ~f:FilterPlaceCategoryList.of_xml)
+          (Xml.child xml_arg0 "FilterCategories") in
+      let language =
+        (Option.map ~f:LanguageTag.of_xml) (Xml.child xml_arg0 "Language") in
       let maxResults =
         (Option.map
            ~f:SearchPlaceIndexForSuggestionsRequestMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
-      let language =
-        (Option.map ~f:LanguageTag.of_xml) (Xml.child xml_arg0 "Language") in
-      let indexName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
       let filterCountries =
         (Option.map ~f:CountryCodeList.of_xml)
           (Xml.child xml_arg0 "FilterCountries") in
@@ -6216,37 +10048,46 @@ module SearchPlaceIndexForSuggestionsRequest =
         (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "FilterBBox") in
       let biasPosition =
         (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "BiasPosition") in
-      make ~text ?maxResults ?language ~indexName ?filterCountries
-        ?filterBBox ?biasPosition ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let text =
-        field_map_exn json "Text"
-          SyntheticSearchPlaceIndexForSuggestionsRequestString.of_json in
+        SearchPlaceIndexForSuggestionsRequestTextString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Text") in
+      let indexName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
+      make ?key ?filterCategories ?language ?maxResults ?filterCountries
+        ?filterBBox ?biasPosition ~text ~indexName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let key = field_map json__ "Key" ApiKey.of_json in
+      let filterCategories =
+        field_map json__ "FilterCategories" FilterPlaceCategoryList.of_json in
+      let language = field_map json__ "Language" LanguageTag.of_json in
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           SearchPlaceIndexForSuggestionsRequestMaxResultsInteger.of_json in
-      let language = field_map json "Language" LanguageTag.of_json in
-      let indexName = field_map_exn json "IndexName" ResourceName.of_json in
       let filterCountries =
-        field_map json "FilterCountries" CountryCodeList.of_json in
-      let filterBBox = field_map json "FilterBBox" BoundingBox.of_json in
-      let biasPosition = field_map json "BiasPosition" Position.of_json in
-      make ~text ?maxResults ?language ~indexName ?filterCountries
-        ?filterBBox ?biasPosition ()
+        field_map json__ "FilterCountries" CountryCodeList.of_json in
+      let filterBBox = field_map json__ "FilterBBox" BoundingBox.of_json in
+      let biasPosition = field_map json__ "BiasPosition" Position.of_json in
+      let text =
+        field_map_exn json__ "Text"
+          SearchPlaceIndexForSuggestionsRequestTextString.of_json in
+      let indexName = field_map_exn json__ "IndexName" ResourceName.of_json in
+      make ?key ?filterCategories ?language ?maxResults ?filterCountries
+        ?filterBBox ?biasPosition ~text ~indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generates suggestions for addresses and points of interest based on partial or misspelled free-form text. This operation is also known as autocomplete, autosuggest, or fuzzy matching. Optional parameters let you narrow your search results by bounding box or country, or bias your search toward a specific position on the globe. You can search for suggested place names near a specified position by using BiasPosition, or filter results within a bounding box by using FilterBBox. These parameters are mutually exclusive; using both BiasPosition and FilterBBox in the same command returns an error."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to Suggest or Autocomplete unless you require Grab data. SearchPlaceIndexForSuggestions is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The version 2 Suggest operation gives better results for typeahead place search suggestions with fuzzy matching, while the version 2 Autocomplete operation gives better results for address completion based on partial input. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Generates suggestions for addresses and points of interest based on partial or misspelled free-form text. This operation is also known as autocomplete, autosuggest, or fuzzy matching. Optional parameters let you narrow your search results by bounding box or country, or bias your search toward a specific position on the globe. You can search for suggested place names near a specified position by using BiasPosition, or filter results within a bounding box by using FilterBBox. These parameters are mutually exclusive; using both BiasPosition and FilterBBox in the same command returns an error."]
 module SearchPlaceIndexForPositionResponse =
   struct
     type nonrec t =
       {
-      results: SearchForPositionResultList.t
+      summary: SearchPlaceIndexForPositionSummary.t option
         [@ocaml.doc
-          "Returns a list of Places closest to the specified position. Each result contains additional information about the Places returned."];
-      summary: SearchPlaceIndexForPositionSummary.t
+          "Contains a summary of the request. Echoes the input values for Position, Language, MaxResults, and the DataSource of the place index."];
+      results: SearchForPositionResultList.t option
         [@ocaml.doc
-          "Contains a summary of the request. Echoes the input values for Position, Language, MaxResults, and the DataSource of the place index."]}
+          "Returns a list of Places closest to the specified position. Each result contains additional information about the Places returned."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -6254,8 +10095,7 @@ module SearchPlaceIndexForPositionResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "SearchPlaceIndexForPositionResponse"
-    let make ~results = fun ~summary -> fun () -> { results; summary }
+    let make ?summary = fun ?results -> fun () -> { summary; results }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6314,29 +10154,30 @@ module SearchPlaceIndexForPositionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Results", (Some (SearchForPositionResultList.to_value x.results)));
-        ("Summary",
-          (Some (SearchPlaceIndexForPositionSummary.to_value x.summary)))]
+        [("Summary",
+           (Option.map x.summary
+              ~f:SearchPlaceIndexForPositionSummary.to_value));
+        ("Results",
+          (Option.map x.results ~f:SearchForPositionResultList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let summary =
-        SearchPlaceIndexForPositionSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Summary") in
       let results =
-        SearchForPositionResultList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Results") in
-      make ~summary ~results ()
+        (Option.map ~f:SearchForPositionResultList.of_xml)
+          (Xml.child xml_arg0 "Results") in
+      let summary =
+        (Option.map ~f:SearchPlaceIndexForPositionSummary.of_xml)
+          (Xml.child xml_arg0 "Summary") in
+      make ?results ?summary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let summary =
-        field_map_exn json "Summary"
-          SearchPlaceIndexForPositionSummary.of_json in
+    let of_json json__ =
       let results =
-        field_map_exn json "Results" SearchForPositionResultList.of_json in
-      make ~summary ~results ()
+        field_map json__ "Results" SearchForPositionResultList.of_json in
+      let summary =
+        field_map json__ "Summary" SearchPlaceIndexForPositionSummary.of_json in
+      make ?results ?summary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Reverse geocodes a given coordinate and returns a legible address. Allows you to search for Places or points of interest near a given position."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to ReverseGeocode or SearchNearby unless you require Grab data. SearchPlaceIndexForPosition is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The version 2 ReverseGeocode operation gives better results in the address reverse-geocoding use case, while the version 2 SearchNearby operation gives better results when searching for businesses and points of interest near a specific location. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Reverse geocodes a given coordinate and returns a legible address. Allows you to search for Places or points of interest near a given position."]
 module SearchPlaceIndexForPositionRequest =
   struct
     type nonrec t =
@@ -6344,62 +10185,68 @@ module SearchPlaceIndexForPositionRequest =
       indexName: ResourceName.t
         [@ocaml.doc
           "The name of the place index resource you want to use for the search."];
-      language: LanguageTag.t option
+      position: Position.t
         [@ocaml.doc
-          "The preferred language used to return results. The value must be a valid BCP 47 language tag, for example, en for English. This setting affects the languages used in the results. It does not change which results are returned. If the language is not specified, or not supported for a particular result, the partner automatically chooses a language for the result."];
+          "Specifies the longitude and latitude of the position to query. This parameter must contain a pair of numbers. The first number represents the X coordinate, or longitude; the second number represents the Y coordinate, or latitude. For example, \\[-123.1174, 49.2847\\] represents a position with longitude -123.1174 and latitude 49.2847."];
       maxResults: PlaceIndexSearchResultLimit.t option
         [@ocaml.doc
           "An optional parameter. The maximum number of results returned per request. Default value: 50"];
-      position: Position.t
+      language: LanguageTag.t option
         [@ocaml.doc
-          "Specifies the longitude and latitude of the position to query. This parameter must contain a pair of numbers. The first number represents the X coordinate, or longitude; the second number represents the Y coordinate, or latitude. For example, \\[-123.1174, 49.2847\\] represents a position with longitude -123.1174 and latitude 49.2847."]}
+          "The preferred language used to return results. The value must be a valid BCP 47 language tag, for example, en for English. This setting affects the languages used in the results, but not the results themselves. If no language is specified, or not supported for a particular result, the partner automatically chooses a language for the result. For an example, we'll use the Greek language. You search for a location around Athens, Greece, with the language parameter set to en. The city in the results will most likely be returned as Athens. If you set the language parameter to el, for Greek, then the city in the results will more likely be returned as \206\145\206\184\206\174\206\189\206\177. If the data provider does not have a value for Greek, the result will be in a language that the provider does support."];
+      key: ApiKey.t option
+        [@ocaml.doc "The optional API key to authorize the request."]}
     let context_ = "SearchPlaceIndexForPositionRequest"
-    let make ?language =
-      fun ?maxResults ->
-        fun ~indexName ->
-          fun ~position ->
-            fun () -> { language; maxResults; indexName; position }
+    let make ?maxResults =
+      fun ?language ->
+        fun ?key ->
+          fun ~indexName ->
+            fun ~position ->
+              fun () -> { maxResults; language; key; indexName; position }
     let to_value x =
       structure_to_value
         [("IndexName", (Some (ResourceName.to_value x.indexName)));
-        ("Language", (Option.map x.language ~f:LanguageTag.to_value));
+        ("Position", (Some (Position.to_value x.position)));
         ("MaxResults",
           (Option.map x.maxResults ~f:PlaceIndexSearchResultLimit.to_value));
-        ("Position", (Some (Position.to_value x.position)))]
+        ("Language", (Option.map x.language ~f:LanguageTag.to_value));
+        ("key", (Option.map x.key ~f:ApiKey.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let position =
-        Position.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Position") in
+      let key = (Option.map ~f:ApiKey.of_xml) (Xml.child xml_arg0 "key") in
+      let language =
+        (Option.map ~f:LanguageTag.of_xml) (Xml.child xml_arg0 "Language") in
       let maxResults =
         (Option.map ~f:PlaceIndexSearchResultLimit.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
-      let language =
-        (Option.map ~f:LanguageTag.of_xml) (Xml.child xml_arg0 "Language") in
+      let position =
+        Position.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Position") in
       let indexName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
-      make ~position ?maxResults ?language ~indexName ()
+      make ?key ?language ?maxResults ~position ~indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let position = field_map_exn json "Position" Position.of_json in
+    let of_json json__ =
+      let key = field_map json__ "Key" ApiKey.of_json in
+      let language = field_map json__ "Language" LanguageTag.of_json in
       let maxResults =
-        field_map json "MaxResults" PlaceIndexSearchResultLimit.of_json in
-      let language = field_map json "Language" LanguageTag.of_json in
-      let indexName = field_map_exn json "IndexName" ResourceName.of_json in
-      make ~position ?maxResults ?language ~indexName ()
+        field_map json__ "MaxResults" PlaceIndexSearchResultLimit.of_json in
+      let position = field_map_exn json__ "Position" Position.of_json in
+      let indexName = field_map_exn json__ "IndexName" ResourceName.of_json in
+      make ?key ?language ?maxResults ~position ~indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Reverse geocodes a given coordinate and returns a legible address. Allows you to search for Places or points of interest near a given position."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to ReverseGeocode or SearchNearby unless you require Grab data. SearchPlaceIndexForPosition is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The version 2 ReverseGeocode operation gives better results in the address reverse-geocoding use case, while the version 2 SearchNearby operation gives better results when searching for businesses and points of interest near a specific location. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Reverse geocodes a given coordinate and returns a legible address. Allows you to search for Places or points of interest near a given position."]
 module PutGeofenceResponse =
   struct
     type nonrec t =
       {
-      createTime: Timestamp.t
+      geofenceId: Id.t option
+        [@ocaml.doc "The geofence identifier entered in the request."];
+      createTime: Timestamp.t option
         [@ocaml.doc
           "The timestamp for when the geofence was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"];
-      geofenceId: Id.t
-        [@ocaml.doc "The geofence identifier entered in the request."];
-      updateTime: Timestamp.t
+      updateTime: Timestamp.t option
         [@ocaml.doc
           "The timestamp for when the geofence was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"]}
     type nonrec error =
@@ -6410,10 +10257,9 @@ module PutGeofenceResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "PutGeofenceResponse"
-    let make ~createTime =
-      fun ~geofenceId ->
-        fun ~updateTime -> fun () -> { createTime; geofenceId; updateTime }
+    let make ?geofenceId =
+      fun ?createTime ->
+        fun ?updateTime -> fun () -> { geofenceId; createTime; updateTime }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6480,26 +10326,24 @@ module PutGeofenceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("CreateTime", (Some (Timestamp.to_value x.createTime)));
-        ("GeofenceId", (Some (Id.to_value x.geofenceId)));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        [("GeofenceId", (Option.map x.geofenceId ~f:Id.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
-      let geofenceId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GeofenceId") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
       let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      make ~updateTime ~geofenceId ~createTime ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let geofenceId =
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "GeofenceId") in
+      make ?updateTime ?createTime ?geofenceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
-      let geofenceId = field_map_exn json "GeofenceId" Id.of_json in
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
-      make ~updateTime ~geofenceId ~createTime ()
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let geofenceId = field_map json__ "GeofenceId" Id.of_json in
+      make ?updateTime ?createTime ?geofenceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Stores a geofence geometry in a given geofence collection, or updates the geometry of an existing geofence if a geofence ID is included in the request."]
@@ -6514,18 +10358,29 @@ module PutGeofenceRequest =
           "An identifier for the geofence. For example, ExampleGeofence-1."];
       geometry: GeofenceGeometry.t
         [@ocaml.doc
-          "Contains the polygon details to specify the position of the geofence. Each geofence polygon can have a maximum of 1,000 vertices."]}
+          "Contains the details to specify the position of the geofence. Can be a circle, a polygon, or a multipolygon. Polygon and MultiPolygon geometries can be defined using their respective parameters, or encoded in Geobuf format using the Geobuf parameter. Including multiple geometry types in the same request will return a validation error. The geofence Polygon and MultiPolygon formats support a maximum of 1,000 total vertices. The Geobuf format supports a maximum of 100,000 vertices."];
+      geofenceProperties: PropertyMap.t option
+        [@ocaml.doc
+          "Associates one of more properties with the geofence. A property is a key-value pair stored with the geofence and added to any geofence event triggered with that geofence. Format: \"key\" : \"value\""]}
     let context_ = "PutGeofenceRequest"
-    let make ~collectionName =
-      fun ~geofenceId ->
-        fun ~geometry -> fun () -> { collectionName; geofenceId; geometry }
+    let make ?geofenceProperties =
+      fun ~collectionName ->
+        fun ~geofenceId ->
+          fun ~geometry ->
+            fun () ->
+              { geofenceProperties; collectionName; geofenceId; geometry }
     let to_value x =
       structure_to_value
         [("CollectionName", (Some (ResourceName.to_value x.collectionName)));
         ("GeofenceId", (Some (Id.to_value x.geofenceId)));
-        ("Geometry", (Some (GeofenceGeometry.to_value x.geometry)))]
+        ("Geometry", (Some (GeofenceGeometry.to_value x.geometry)));
+        ("GeofenceProperties",
+          (Option.map x.geofenceProperties ~f:PropertyMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let geofenceProperties =
+        (Option.map ~f:PropertyMap.of_xml)
+          (Xml.child xml_arg0 "GeofenceProperties") in
       let geometry =
         GeofenceGeometry.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Geometry") in
@@ -6534,14 +10389,16 @@ module PutGeofenceRequest =
       let collectionName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
-      make ~geometry ~geofenceId ~collectionName ()
+      make ?geofenceProperties ~geometry ~geofenceId ~collectionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let geometry = field_map_exn json "Geometry" GeofenceGeometry.of_json in
-      let geofenceId = field_map_exn json "GeofenceId" Id.of_json in
+    let of_json json__ =
+      let geofenceProperties =
+        field_map json__ "GeofenceProperties" PropertyMap.of_json in
+      let geometry = field_map_exn json__ "Geometry" GeofenceGeometry.of_json in
+      let geofenceId = field_map_exn json__ "GeofenceId" Id.of_json in
       let collectionName =
-        field_map_exn json "CollectionName" ResourceName.of_json in
-      make ~geometry ~geofenceId ~collectionName ()
+        field_map_exn json__ "CollectionName" ResourceName.of_json in
+      make ?geofenceProperties ~geometry ~geofenceId ~collectionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Stores a geofence geometry in a given geofence collection, or updates the geometry of an existing geofence if a geofence ID is included in the request."]
@@ -6549,9 +10406,9 @@ module ListTrackersResponse =
   struct
     type nonrec t =
       {
-      entries: ListTrackersResponseEntryList.t
+      entries: ListTrackersResponseEntryList.t option
         [@ocaml.doc
-          "Contains tracker resources in your AWS account. Details include tracker name, description and timestamps for when the tracker was created and last updated."];
+          "Contains tracker resources in your Amazon Web Services account. Details include tracker name, description and timestamps for when the tracker was created and last updated."];
       nextToken: Token.t option
         [@ocaml.doc
           "A pagination token indicating there are additional pages available. You can use the token in a following request to fetch the next set of results."]}
@@ -6561,8 +10418,7 @@ module ListTrackersResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTrackersResponse"
-    let make ?nextToken = fun ~entries -> fun () -> { nextToken; entries }
+    let make ?entries = fun ?nextToken -> fun () -> { entries; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6614,24 +10470,25 @@ module ListTrackersResponse =
     let to_value x =
       structure_to_value
         [("Entries",
-           (Some (ListTrackersResponseEntryList.to_value x.entries)));
+           (Option.map x.entries ~f:ListTrackersResponseEntryList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let entries =
-        ListTrackersResponseEntryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Entries") in
-      make ?nextToken ~entries ()
+        (Option.map ~f:ListTrackersResponseEntryList.of_xml)
+          (Xml.child xml_arg0 "Entries") in
+      make ?nextToken ?entries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let entries =
-        field_map_exn json "Entries" ListTrackersResponseEntryList.of_json in
-      make ?nextToken ~entries ()
+        field_map json__ "Entries" ListTrackersResponseEntryList.of_json in
+      make ?nextToken ?entries ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists tracker resources in your AWS account."]
+  end[@@ocaml.doc
+       "Lists tracker resources in your Amazon Web Services account."]
 module ListTrackersRequest =
   struct
     type nonrec t =
@@ -6659,19 +10516,20 @@ module ListTrackersRequest =
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           ListTrackersRequestMaxResultsInteger.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists tracker resources in your AWS account."]
+  end[@@ocaml.doc
+       "Lists tracker resources in your Amazon Web Services account."]
 module ListTrackerConsumersResponse =
   struct
     type nonrec t =
       {
-      consumerArns: ArnList.t
+      consumerArns: ArnList.t option
         [@ocaml.doc
           "Contains the list of geofence collection ARNs associated to the tracker resource."];
       nextToken: Token.t option
@@ -6684,9 +10542,8 @@ module ListTrackerConsumersResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTrackerConsumersResponse"
-    let make ?nextToken =
-      fun ~consumerArns -> fun () -> { nextToken; consumerArns }
+    let make ?consumerArns =
+      fun ?nextToken -> fun () -> { consumerArns; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6745,21 +10602,20 @@ module ListTrackerConsumersResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ConsumerArns", (Some (ArnList.to_value x.consumerArns)));
+        [("ConsumerArns", (Option.map x.consumerArns ~f:ArnList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let consumerArns =
-        ArnList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConsumerArns") in
-      make ?nextToken ~consumerArns ()
+        (Option.map ~f:ArnList.of_xml) (Xml.child xml_arg0 "ConsumerArns") in
+      make ?nextToken ?consumerArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let consumerArns = field_map_exn json "ConsumerArns" ArnList.of_json in
-      make ?nextToken ~consumerArns ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let consumerArns = field_map json__ "ConsumerArns" ArnList.of_json in
+      make ?nextToken ?consumerArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists geofence collections currently associated to the given tracker resource."]
@@ -6767,45 +10623,46 @@ module ListTrackerConsumersRequest =
   struct
     type nonrec t =
       {
+      trackerName: ResourceName.t
+        [@ocaml.doc
+          "The tracker resource whose associated geofence collections you want to list."];
       maxResults: ListTrackerConsumersRequestMaxResultsInteger.t option
         [@ocaml.doc
           "An optional limit for the number of resources returned in a single call. Default value: 100"];
       nextToken: Token.t option
         [@ocaml.doc
-          "The pagination token specifying which page of results to return in the response. If no token is provided, the default page is the first page. Default value: null"];
-      trackerName: ResourceName.t
-        [@ocaml.doc
-          "The tracker resource whose associated geofence collections you want to list."]}
+          "The pagination token specifying which page of results to return in the response. If no token is provided, the default page is the first page. Default value: null"]}
     let context_ = "ListTrackerConsumersRequest"
     let make ?maxResults =
       fun ?nextToken ->
         fun ~trackerName -> fun () -> { maxResults; nextToken; trackerName }
     let to_value x =
       structure_to_value
-        [("MaxResults",
-           (Option.map x.maxResults
-              ~f:ListTrackerConsumersRequestMaxResultsInteger.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("TrackerName", (Some (ResourceName.to_value x.trackerName)))]
+        [("TrackerName", (Some (ResourceName.to_value x.trackerName)));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:ListTrackerConsumersRequestMaxResultsInteger.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let trackerName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let maxResults =
         (Option.map ~f:ListTrackerConsumersRequestMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
-      make ~trackerName ?nextToken ?maxResults ()
+      let trackerName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
+      make ?nextToken ?maxResults ~trackerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           ListTrackerConsumersRequestMaxResultsInteger.of_json in
-      make ~trackerName ?nextToken ?maxResults ()
+      let trackerName =
+        field_map_exn json__ "TrackerName" ResourceName.of_json in
+      make ?nextToken ?maxResults ~trackerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists geofence collections currently associated to the given tracker resource."]
@@ -6887,8 +10744,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of tags that are applied to the specified Amazon Location resource."]
@@ -6910,8 +10767,8 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6920,9 +10777,9 @@ module ListRouteCalculatorsResponse =
   struct
     type nonrec t =
       {
-      entries: ListRouteCalculatorsResponseEntryList.t
+      entries: ListRouteCalculatorsResponseEntryList.t option
         [@ocaml.doc
-          "Lists the route calculator resources that exist in your AWS account"];
+          "Lists the route calculator resources that exist in your Amazon Web Services account"];
       nextToken: Token.t option
         [@ocaml.doc
           "A pagination token indicating there are additional pages available. You can use the token in a subsequent request to fetch the next set of results."]}
@@ -6932,8 +10789,7 @@ module ListRouteCalculatorsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListRouteCalculatorsResponse"
-    let make ?nextToken = fun ~entries -> fun () -> { nextToken; entries }
+    let make ?entries = fun ?nextToken -> fun () -> { entries; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6985,25 +10841,27 @@ module ListRouteCalculatorsResponse =
     let to_value x =
       structure_to_value
         [("Entries",
-           (Some (ListRouteCalculatorsResponseEntryList.to_value x.entries)));
+           (Option.map x.entries
+              ~f:ListRouteCalculatorsResponseEntryList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let entries =
-        ListRouteCalculatorsResponseEntryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Entries") in
-      make ?nextToken ~entries ()
+        (Option.map ~f:ListRouteCalculatorsResponseEntryList.of_xml)
+          (Xml.child xml_arg0 "Entries") in
+      make ?nextToken ?entries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let entries =
-        field_map_exn json "Entries"
+        field_map json__ "Entries"
           ListRouteCalculatorsResponseEntryList.of_json in
-      make ?nextToken ~entries ()
+      make ?nextToken ?entries ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists route calculator resources in your AWS account."]
+  end[@@ocaml.doc
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Routes API V2 unless you require Grab data. ListRouteCalculators is part of a previous Amazon Location Service Routes API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Routes API version 2 has a simplified interface that can be used without creating or managing route calculator resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Routes API version 2 is found under geo-routes or geo_routes, not under location. Since Grab is not yet fully supported in Routes API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Routes V2 API Reference or the Developer Guide. Lists route calculator resources in your Amazon Web Services account."]
 module ListRouteCalculatorsRequest =
   struct
     type nonrec t =
@@ -7031,21 +10889,22 @@ module ListRouteCalculatorsRequest =
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           ListRouteCalculatorsRequestMaxResultsInteger.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists route calculator resources in your AWS account."]
+  end[@@ocaml.doc
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Routes API V2 unless you require Grab data. ListRouteCalculators is part of a previous Amazon Location Service Routes API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Routes API version 2 has a simplified interface that can be used without creating or managing route calculator resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Routes API version 2 is found under geo-routes or geo_routes, not under location. Since Grab is not yet fully supported in Routes API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Routes V2 API Reference or the Developer Guide. Lists route calculator resources in your Amazon Web Services account."]
 module ListPlaceIndexesResponse =
   struct
     type nonrec t =
       {
-      entries: ListPlaceIndexesResponseEntryList.t
+      entries: ListPlaceIndexesResponseEntryList.t option
         [@ocaml.doc
-          "Lists the place index resources that exist in your AWS account"];
+          "Lists the place index resources that exist in your Amazon Web Services account"];
       nextToken: Token.t option
         [@ocaml.doc
           "A pagination token indicating that there are additional pages available. You can use the token in a new request to fetch the next page of results."]}
@@ -7055,8 +10914,7 @@ module ListPlaceIndexesResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListPlaceIndexesResponse"
-    let make ?nextToken = fun ~entries -> fun () -> { nextToken; entries }
+    let make ?entries = fun ?nextToken -> fun () -> { entries; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7108,25 +10966,26 @@ module ListPlaceIndexesResponse =
     let to_value x =
       structure_to_value
         [("Entries",
-           (Some (ListPlaceIndexesResponseEntryList.to_value x.entries)));
+           (Option.map x.entries
+              ~f:ListPlaceIndexesResponseEntryList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let entries =
-        ListPlaceIndexesResponseEntryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Entries") in
-      make ?nextToken ~entries ()
+        (Option.map ~f:ListPlaceIndexesResponseEntryList.of_xml)
+          (Xml.child xml_arg0 "Entries") in
+      make ?nextToken ?entries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let entries =
-        field_map_exn json "Entries"
-          ListPlaceIndexesResponseEntryList.of_json in
-      make ?nextToken ~entries ()
+        field_map json__ "Entries" ListPlaceIndexesResponseEntryList.of_json in
+      make ?nextToken ?entries ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists place index resources in your AWS account."]
+  end[@@ocaml.doc
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Places API V2 unless you require Grab data. ListPlaceIndexes is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Places API version 2 has a simplified interface that can be used without creating or managing place index resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Places V2 API Reference or the Developer Guide. Lists place index resources in your Amazon Web Services account."]
 module ListPlaceIndexesRequest =
   struct
     type nonrec t =
@@ -7154,20 +11013,22 @@ module ListPlaceIndexesRequest =
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           ListPlaceIndexesRequestMaxResultsInteger.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists place index resources in your AWS account."]
+  end[@@ocaml.doc
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Places API V2 unless you require Grab data. ListPlaceIndexes is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Places API version 2 has a simplified interface that can be used without creating or managing place index resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Places V2 API Reference or the Developer Guide. Lists place index resources in your Amazon Web Services account."]
 module ListMapsResponse =
   struct
     type nonrec t =
       {
-      entries: ListMapsResponseEntryList.t
-        [@ocaml.doc "Contains a list of maps in your AWS account"];
+      entries: ListMapsResponseEntryList.t option
+        [@ocaml.doc
+          "Contains a list of maps in your Amazon Web Services account"];
       nextToken: Token.t option
         [@ocaml.doc
           "A pagination token indicating there are additional pages available. You can use the token in a following request to fetch the next set of results."]}
@@ -7177,8 +11038,7 @@ module ListMapsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListMapsResponse"
-    let make ?nextToken = fun ~entries -> fun () -> { nextToken; entries }
+    let make ?entries = fun ?nextToken -> fun () -> { entries; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7229,24 +11089,26 @@ module ListMapsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Entries", (Some (ListMapsResponseEntryList.to_value x.entries)));
+        [("Entries",
+           (Option.map x.entries ~f:ListMapsResponseEntryList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let entries =
-        ListMapsResponseEntryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Entries") in
-      make ?nextToken ~entries ()
+        (Option.map ~f:ListMapsResponseEntryList.of_xml)
+          (Xml.child xml_arg0 "Entries") in
+      make ?nextToken ?entries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let entries =
-        field_map_exn json "Entries" ListMapsResponseEntryList.of_json in
-      make ?nextToken ~entries ()
+        field_map json__ "Entries" ListMapsResponseEntryList.of_json in
+      make ?nextToken ?entries ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists map resources in your AWS account."]
+  end[@@ocaml.doc
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to the Maps API V2 unless you require Grab data. ListMaps is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Maps API version 2 has a simplified interface that can be used without creating or managing map resources. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Lists map resources in your Amazon Web Services account."]
 module ListMapsRequest =
   struct
     type nonrec t =
@@ -7274,21 +11136,283 @@ module ListMapsRequest =
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let maxResults =
-        field_map json "MaxResults" ListMapsRequestMaxResultsInteger.of_json in
+        field_map json__ "MaxResults"
+          ListMapsRequestMaxResultsInteger.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists map resources in your AWS account."]
+  end[@@ocaml.doc
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to the Maps API V2 unless you require Grab data. ListMaps is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Maps API version 2 has a simplified interface that can be used without creating or managing map resources. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Lists map resources in your Amazon Web Services account."]
+module ListKeysResponse =
+  struct
+    type nonrec t =
+      {
+      entries: ListKeysResponseEntryList.t option
+        [@ocaml.doc
+          "Contains API key resources in your Amazon Web Services account. Details include API key name, allowed referers and timestamp for when the API key will expire."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A pagination token indicating there are additional pages available. You can use the token in a following request to fetch the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?entries = fun ?nextToken -> fun () -> { entries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Entries",
+           (Option.map x.entries ~f:ListKeysResponseEntryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let entries =
+        (Option.map ~f:ListKeysResponseEntryList.of_xml)
+          (Xml.child xml_arg0 "Entries") in
+      make ?nextToken ?entries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let entries =
+        field_map json__ "Entries" ListKeysResponseEntryList.of_json in
+      make ?nextToken ?entries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists API key resources in your Amazon Web Services account. For more information, see Use API keys to authenticate in the Amazon Location Service Developer Guide."]
+module ListKeysRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: ListKeysRequestMaxResultsInteger.t option
+        [@ocaml.doc
+          "An optional limit for the number of resources returned in a single call. Default value: 100"];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "The pagination token specifying which page of results to return in the response. If no token is provided, the default page is the first page. Default value: null"];
+      filter: ApiKeyFilter.t option
+        [@ocaml.doc
+          "Optionally filter the list to only Active or Expired API keys."]}
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ?filter -> fun () -> { maxResults; nextToken; filter }
+    let to_value x =
+      structure_to_value
+        [("MaxResults",
+           (Option.map x.maxResults
+              ~f:ListKeysRequestMaxResultsInteger.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("Filter", (Option.map x.filter ~f:ApiKeyFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filter =
+        (Option.map ~f:ApiKeyFilter.of_xml) (Xml.child xml_arg0 "Filter") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:ListKeysRequestMaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      make ?filter ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filter = field_map json__ "Filter" ApiKeyFilter.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let maxResults =
+        field_map json__ "MaxResults"
+          ListKeysRequestMaxResultsInteger.of_json in
+      make ?filter ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists API key resources in your Amazon Web Services account. For more information, see Use API keys to authenticate in the Amazon Location Service Developer Guide."]
+module ListJobsResponse =
+  struct
+    type nonrec t =
+      {
+      entries: ListJobsResponseEntryList.t option
+        [@ocaml.doc "List of jobs in your Amazon Web Services account."];
+      nextToken: LargeToken.t option
+        [@ocaml.doc
+          "Token for retrieving the next page (present if more results available)."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?entries = fun ?nextToken -> fun () -> { entries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Entries",
+           (Option.map x.entries ~f:ListJobsResponseEntryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:LargeToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:LargeToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let entries =
+        (Option.map ~f:ListJobsResponseEntryList.of_xml)
+          (Xml.child xml_arg0 "Entries") in
+      make ?nextToken ?entries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" LargeToken.of_json in
+      let entries =
+        field_map json__ "Entries" ListJobsResponseEntryList.of_json in
+      make ?nextToken ?entries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "ListJobs retrieves a list of jobs with optional filtering and pagination support. For more information, see Job concepts in the Amazon Location Service Developer Guide."]
+module ListJobsRequest =
+  struct
+    type nonrec t =
+      {
+      filter: JobsFilter.t option
+        [@ocaml.doc
+          "An optional structure containing criteria by which to filter job results."];
+      maxResults: ListJobsRequestMaxResultsInteger.t option
+        [@ocaml.doc "Maximum number of jobs to return."];
+      nextToken: LargeToken.t option
+        [@ocaml.doc
+          "The pagination token specifying which page of results to return in the response. If no token is provided, the default page is the first page."]}
+    let make ?filter =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { filter; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("Filter", (Option.map x.filter ~f:JobsFilter.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:ListJobsRequestMaxResultsInteger.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:LargeToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:LargeToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:ListJobsRequestMaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let filter =
+        (Option.map ~f:JobsFilter.of_xml) (Xml.child xml_arg0 "Filter") in
+      make ?nextToken ?maxResults ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" LargeToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults"
+          ListJobsRequestMaxResultsInteger.of_json in
+      let filter = field_map json__ "Filter" JobsFilter.of_json in
+      make ?nextToken ?maxResults ?filter ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "ListJobs retrieves a list of jobs with optional filtering and pagination support. For more information, see Job concepts in the Amazon Location Service Developer Guide."]
 module ListGeofencesResponse =
   struct
     type nonrec t =
       {
-      entries: ListGeofenceResponseEntryList.t
+      entries: ListGeofenceResponseEntryList.t option
         [@ocaml.doc
           "Contains a list of geofences stored in the geofence collection."];
-      nextToken: Token.t option
+      nextToken: LargeToken.t option
         [@ocaml.doc
           "A pagination token indicating there are additional pages available. You can use the token in a following request to fetch the next set of results."]}
     type nonrec error =
@@ -7298,8 +11422,7 @@ module ListGeofencesResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListGeofencesResponse"
-    let make ?nextToken = fun ~entries -> fun () -> { nextToken; entries }
+    let make ?entries = fun ?nextToken -> fun () -> { entries; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7359,22 +11482,22 @@ module ListGeofencesResponse =
     let to_value x =
       structure_to_value
         [("Entries",
-           (Some (ListGeofenceResponseEntryList.to_value x.entries)));
-        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+           (Option.map x.entries ~f:ListGeofenceResponseEntryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:LargeToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+        (Option.map ~f:LargeToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let entries =
-        ListGeofenceResponseEntryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Entries") in
-      make ?nextToken ~entries ()
+        (Option.map ~f:ListGeofenceResponseEntryList.of_xml)
+          (Xml.child xml_arg0 "Entries") in
+      make ?nextToken ?entries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" LargeToken.of_json in
       let entries =
-        field_map_exn json "Entries" ListGeofenceResponseEntryList.of_json in
-      make ?nextToken ~entries ()
+        field_map json__ "Entries" ListGeofenceResponseEntryList.of_json in
+      make ?nextToken ?entries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists geofences stored in a given geofence collection."]
 module ListGeofencesRequest =
@@ -7384,39 +11507,53 @@ module ListGeofencesRequest =
       collectionName: ResourceName.t
         [@ocaml.doc
           "The name of the geofence collection storing the list of geofences."];
-      nextToken: Token.t option
+      nextToken: LargeToken.t option
         [@ocaml.doc
-          "The pagination token specifying which page of results to return in the response. If no token is provided, the default page is the first page. Default value: null"]}
+          "The pagination token specifying which page of results to return in the response. If no token is provided, the default page is the first page. Default value: null"];
+      maxResults: ListGeofencesRequestMaxResultsInteger.t option
+        [@ocaml.doc
+          "An optional limit for the number of geofences returned in a single call. Default value: 100"]}
     let context_ = "ListGeofencesRequest"
     let make ?nextToken =
-      fun ~collectionName -> fun () -> { nextToken; collectionName }
+      fun ?maxResults ->
+        fun ~collectionName ->
+          fun () -> { nextToken; maxResults; collectionName }
     let to_value x =
       structure_to_value
         [("CollectionName", (Some (ResourceName.to_value x.collectionName)));
-        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+        ("NextToken", (Option.map x.nextToken ~f:LargeToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:ListGeofencesRequestMaxResultsInteger.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:ListGeofencesRequestMaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+        (Option.map ~f:LargeToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let collectionName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
-      make ?nextToken ~collectionName ()
+      make ?maxResults ?nextToken ~collectionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults"
+          ListGeofencesRequestMaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" LargeToken.of_json in
       let collectionName =
-        field_map_exn json "CollectionName" ResourceName.of_json in
-      make ?nextToken ~collectionName ()
+        field_map_exn json__ "CollectionName" ResourceName.of_json in
+      make ?maxResults ?nextToken ~collectionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists geofences stored in a given geofence collection."]
 module ListGeofenceCollectionsResponse =
   struct
     type nonrec t =
       {
-      entries: ListGeofenceCollectionsResponseEntryList.t
+      entries: ListGeofenceCollectionsResponseEntryList.t option
         [@ocaml.doc
-          "Lists the geofence collections that exist in your AWS account."];
+          "Lists the geofence collections that exist in your Amazon Web Services account."];
       nextToken: Token.t option
         [@ocaml.doc
           "A pagination token indicating there are additional pages available. You can use the token in a following request to fetch the next set of results."]}
@@ -7426,8 +11563,7 @@ module ListGeofenceCollectionsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListGeofenceCollectionsResponse"
-    let make ?nextToken = fun ~entries -> fun () -> { nextToken; entries }
+    let make ?entries = fun ?nextToken -> fun () -> { entries; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7479,26 +11615,27 @@ module ListGeofenceCollectionsResponse =
     let to_value x =
       structure_to_value
         [("Entries",
-           (Some
-              (ListGeofenceCollectionsResponseEntryList.to_value x.entries)));
+           (Option.map x.entries
+              ~f:ListGeofenceCollectionsResponseEntryList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let entries =
-        ListGeofenceCollectionsResponseEntryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Entries") in
-      make ?nextToken ~entries ()
+        (Option.map ~f:ListGeofenceCollectionsResponseEntryList.of_xml)
+          (Xml.child xml_arg0 "Entries") in
+      make ?nextToken ?entries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let entries =
-        field_map_exn json "Entries"
+        field_map json__ "Entries"
           ListGeofenceCollectionsResponseEntryList.of_json in
-      make ?nextToken ~entries ()
+      make ?nextToken ?entries ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists geofence collections in your AWS account."]
+  end[@@ocaml.doc
+       "Lists geofence collections in your Amazon Web Services account."]
 module ListGeofenceCollectionsRequest =
   struct
     type nonrec t =
@@ -7526,21 +11663,22 @@ module ListGeofenceCollectionsRequest =
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           ListGeofenceCollectionsRequestMaxResultsInteger.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists geofence collections in your AWS account."]
+  end[@@ocaml.doc
+       "Lists geofence collections in your Amazon Web Services account."]
 module ListDevicePositionsResponse =
   struct
     type nonrec t =
       {
-      entries: ListDevicePositionsResponseEntryList.t
+      entries: ListDevicePositionsResponseEntryList.t option
         [@ocaml.doc
-          "Contains details about each device's last known position. These details includes the device ID, the time when the position was sampled on the device, the time that the service received the update, and the most recent coordinates."];
+          "Contains details about each device's last known position."];
       nextToken: Token.t option
         [@ocaml.doc
           "A pagination token indicating there are additional pages available. You can use the token in a following request to fetch the next set of results."]}
@@ -7550,8 +11688,7 @@ module ListDevicePositionsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListDevicePositionsResponse"
-    let make ?nextToken = fun ~entries -> fun () -> { nextToken; entries }
+    let make ?entries = fun ?nextToken -> fun () -> { entries; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7603,69 +11740,210 @@ module ListDevicePositionsResponse =
     let to_value x =
       structure_to_value
         [("Entries",
-           (Some (ListDevicePositionsResponseEntryList.to_value x.entries)));
+           (Option.map x.entries
+              ~f:ListDevicePositionsResponseEntryList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let entries =
-        ListDevicePositionsResponseEntryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Entries") in
-      make ?nextToken ~entries ()
+        (Option.map ~f:ListDevicePositionsResponseEntryList.of_xml)
+          (Xml.child xml_arg0 "Entries") in
+      make ?nextToken ?entries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let entries =
-        field_map_exn json "Entries"
+        field_map json__ "Entries"
           ListDevicePositionsResponseEntryList.of_json in
-      make ?nextToken ~entries ()
+      make ?nextToken ?entries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A batch request to retrieve all device positions."]
 module ListDevicePositionsRequest =
   struct
     type nonrec t =
       {
+      trackerName: ResourceName.t
+        [@ocaml.doc "The tracker resource containing the requested devices."];
       maxResults: ListDevicePositionsRequestMaxResultsInteger.t option
         [@ocaml.doc
           "An optional limit for the number of entries returned in a single call. Default value: 100"];
       nextToken: Token.t option
         [@ocaml.doc
           "The pagination token specifying which page of results to return in the response. If no token is provided, the default page is the first page. Default value: null"];
-      trackerName: ResourceName.t
-        [@ocaml.doc "The tracker resource containing the requested devices."]}
+      filterGeometry: TrackingFilterGeometry.t option
+        [@ocaml.doc "The geometry used to filter device positions."]}
     let context_ = "ListDevicePositionsRequest"
     let make ?maxResults =
       fun ?nextToken ->
-        fun ~trackerName -> fun () -> { maxResults; nextToken; trackerName }
+        fun ?filterGeometry ->
+          fun ~trackerName ->
+            fun () -> { maxResults; nextToken; filterGeometry; trackerName }
     let to_value x =
       structure_to_value
-        [("MaxResults",
-           (Option.map x.maxResults
-              ~f:ListDevicePositionsRequestMaxResultsInteger.to_value));
+        [("TrackerName", (Some (ResourceName.to_value x.trackerName)));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:ListDevicePositionsRequestMaxResultsInteger.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("TrackerName", (Some (ResourceName.to_value x.trackerName)))]
+        ("FilterGeometry",
+          (Option.map x.filterGeometry ~f:TrackingFilterGeometry.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let trackerName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
+      let filterGeometry =
+        (Option.map ~f:TrackingFilterGeometry.of_xml)
+          (Xml.child xml_arg0 "FilterGeometry") in
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let maxResults =
         (Option.map ~f:ListDevicePositionsRequestMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
-      make ~trackerName ?nextToken ?maxResults ()
+      let trackerName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
+      make ?filterGeometry ?nextToken ?maxResults ~trackerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let filterGeometry =
+        field_map json__ "FilterGeometry" TrackingFilterGeometry.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           ListDevicePositionsRequestMaxResultsInteger.of_json in
-      make ~trackerName ?nextToken ?maxResults ()
+      let trackerName =
+        field_map_exn json__ "TrackerName" ResourceName.of_json in
+      make ?filterGeometry ?nextToken ?maxResults ~trackerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A batch request to retrieve all device positions."]
+module GetPlaceResponse =
+  struct
+    type nonrec t =
+      {
+      place: Place.t option
+        [@ocaml.doc
+          "Details about the result, such as its address and position."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?place = fun () -> { place }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("Place", (Option.map x.place ~f:Place.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let place = (Option.map ~f:Place.of_xml) (Xml.child xml_arg0 "Place") in
+      make ?place ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let place = field_map json__ "Place" Place.of_json in make ?place ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the V2 GetPlace operation unless you require Grab data. This version of GetPlace is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). Version 2 of the GetPlace operation interoperates with the rest of the Places V2 API, while this version does not. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Places V2 API Reference or the Developer Guide. Finds a place by its unique ID. A PlaceId is returned by other search operations. A PlaceId is valid only if all of the following are the same in the original search request and the call to GetPlace. Customer Amazon Web Services account Amazon Web Services Region Data provider specified in the place index resource If your Place index resource is configured with Grab as your geolocation provider and Storage as Intended use, the GetPlace operation is unavailable. For more information, see AWS service terms."]
+module GetPlaceRequest =
+  struct
+    type nonrec t =
+      {
+      indexName: ResourceName.t
+        [@ocaml.doc
+          "The name of the place index resource that you want to use for the search."];
+      placeId: PlaceId.t [@ocaml.doc "The identifier of the place to find."];
+      language: LanguageTag.t option
+        [@ocaml.doc
+          "The preferred language used to return results. The value must be a valid BCP 47 language tag, for example, en for English. This setting affects the languages used in the results, but not the results themselves. If no language is specified, or not supported for a particular result, the partner automatically chooses a language for the result. For an example, we'll use the Greek language. You search for a location around Athens, Greece, with the language parameter set to en. The city in the results will most likely be returned as Athens. If you set the language parameter to el, for Greek, then the city in the results will more likely be returned as \206\145\206\184\206\174\206\189\206\177. If the data provider does not have a value for Greek, the result will be in a language that the provider does support."];
+      key: ApiKey.t option
+        [@ocaml.doc "The optional API key to authorize the request."]}
+    let context_ = "GetPlaceRequest"
+    let make ?language =
+      fun ?key ->
+        fun ~indexName ->
+          fun ~placeId -> fun () -> { language; key; indexName; placeId }
+    let to_value x =
+      structure_to_value
+        [("IndexName", (Some (ResourceName.to_value x.indexName)));
+        ("PlaceId", (Some (PlaceId.to_value x.placeId)));
+        ("language", (Option.map x.language ~f:LanguageTag.to_value));
+        ("key", (Option.map x.key ~f:ApiKey.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let key = (Option.map ~f:ApiKey.of_xml) (Xml.child xml_arg0 "key") in
+      let language =
+        (Option.map ~f:LanguageTag.of_xml) (Xml.child xml_arg0 "language") in
+      let placeId =
+        PlaceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PlaceId") in
+      let indexName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
+      make ?key ?language ~placeId ~indexName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let key = field_map json__ "Key" ApiKey.of_json in
+      let language = field_map json__ "Language" LanguageTag.of_json in
+      let placeId = field_map_exn json__ "PlaceId" PlaceId.of_json in
+      let indexName = field_map_exn json__ "IndexName" ResourceName.of_json in
+      make ?key ?language ~placeId ~indexName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the V2 GetPlace operation unless you require Grab data. This version of GetPlace is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). Version 2 of the GetPlace operation interoperates with the rest of the Places V2 API, while this version does not. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Places V2 API Reference or the Developer Guide. Finds a place by its unique ID. A PlaceId is returned by other search operations. A PlaceId is valid only if all of the following are the same in the original search request and the call to GetPlace. Customer Amazon Web Services account Amazon Web Services Region Data provider specified in the place index resource If your Place index resource is configured with Grab as your geolocation provider and Storage as Intended use, the GetPlace operation is unavailable. For more information, see AWS service terms."]
 module GetMapTileResponse =
   struct
     type nonrec t =
@@ -7674,7 +11952,9 @@ module GetMapTileResponse =
         [@ocaml.doc "Contains Mapbox Vector Tile (MVT) data."];
       contentType: String_.t option
         [@ocaml.doc
-          "The map tile's content type. For example, application/vnd.mapbox-vector-tile."]}
+          "The map tile's content type. For example, application/vnd.mapbox-vector-tile."];
+      cacheControl: String_.t option
+        [@ocaml.doc "The HTTP Cache-Control directive for the value."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -7682,7 +11962,9 @@ module GetMapTileResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?blob = fun ?contentType -> fun () -> { blob; contentType }
+    let make ?blob =
+      fun ?contentType ->
+        fun ?cacheControl -> fun () -> { blob; contentType; cacheControl }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7744,72 +12026,85 @@ module GetMapTileResponse =
           make ?blob:(Some pipe)
             ?contentType:(Option.map
                             ((List.Assoc.find ~equal:String.Caseless.equal)
-                               xs "Content-Type") ~f:String_.of_string) ())
+                               xs "Content-Type") ~f:String_.of_string)
+            ?cacheControl:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "Cache-Control") ~f:String_.of_string) ())
       [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Blob", (Option.map x.blob ~f:Blob.to_value));
-        ("Content-Type", (Option.map x.contentType ~f:String_.to_value))]
+        ("Content-Type", (Option.map x.contentType ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
       let contentType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Content-Type") in
       let blob = (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "Blob") in
-      make ?contentType ?blob ()
+      make ?cacheControl ?contentType ?blob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let contentType = field_map json "ContentType" String_.of_json in
-      let blob = field_map json "Blob" Blob.of_json in
-      make ?contentType ?blob ()
+    let of_json json__ =
+      let cacheControl = field_map json__ "CacheControl" String_.of_json in
+      let contentType = field_map json__ "ContentType" String_.of_json in
+      let blob = field_map json__ "Blob" Blob.of_json in
+      make ?cacheControl ?contentType ?blob ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a vector data tile from the map resource. Map tiles are used by clients to render a map. they're addressed using a grid arrangement with an X coordinate, Y coordinate, and Z (zoom) level. The origin (0, 0) is the top left of the map. Increasing the zoom level by 1 doubles both the X and Y dimensions, so a tile containing data for the entire world at (0/0/0) will be split into 4 tiles at zoom 1 (1/0/0, 1/0/1, 1/1/0, 1/1/1)."]
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to GetTile unless you require Grab data. GetMapTile is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The version 2 GetTile operation gives a better user experience and is compatible with the remainder of the V2 Maps API. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Retrieves a vector data tile from the map resource. Map tiles are used by clients to render a map. they're addressed using a grid arrangement with an X coordinate, Y coordinate, and Z (zoom) level. The origin (0, 0) is the top left of the map. Increasing the zoom level by 1 doubles both the X and Y dimensions, so a tile containing data for the entire world at (0/0/0) will be split into 4 tiles at zoom 1 (1/0/0, 1/0/1, 1/1/0, 1/1/1)."]
 module GetMapTileRequest =
   struct
     type nonrec t =
       {
       mapName: ResourceName.t
         [@ocaml.doc "The map resource to retrieve the map tiles from."];
+      z: GetMapTileRequestZString.t
+        [@ocaml.doc "The zoom value for the map tile."];
       x: GetMapTileRequestXString.t
         [@ocaml.doc "The X axis value for the map tile."];
       y: GetMapTileRequestYString.t
         [@ocaml.doc "The Y axis value for the map tile."];
-      z: GetMapTileRequestZString.t
-        [@ocaml.doc "The zoom value for the map tile."]}
+      key: ApiKey.t option
+        [@ocaml.doc "The optional API key to authorize the request."]}
     let context_ = "GetMapTileRequest"
-    let make ~mapName =
-      fun ~x -> fun ~y -> fun ~z -> fun () -> { mapName; x; y; z }
+    let make ?key =
+      fun ~mapName ->
+        fun ~z -> fun ~x -> fun ~y -> fun () -> { key; mapName; z; x; y }
     let to_value x =
       structure_to_value
         [("MapName", (Some (ResourceName.to_value x.mapName)));
+        ("Z", (Some (GetMapTileRequestZString.to_value x.z)));
         ("X", (Some (GetMapTileRequestXString.to_value x.x)));
         ("Y", (Some (GetMapTileRequestYString.to_value x.y)));
-        ("Z", (Some (GetMapTileRequestZString.to_value x.z)))]
+        ("key", (Option.map x.key ~f:ApiKey.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let z =
-        GetMapTileRequestZString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Z") in
+      let key = (Option.map ~f:ApiKey.of_xml) (Xml.child xml_arg0 "key") in
       let y =
         GetMapTileRequestYString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Y") in
       let x =
         GetMapTileRequestXString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "X") in
+      let z =
+        GetMapTileRequestZString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Z") in
       let mapName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
-      make ~z ~y ~x ~mapName ()
+      make ?key ~y ~x ~z ~mapName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let z = field_map_exn json "Z" GetMapTileRequestZString.of_json in
-      let y = field_map_exn json "Y" GetMapTileRequestYString.of_json in
-      let x = field_map_exn json "X" GetMapTileRequestXString.of_json in
-      let mapName = field_map_exn json "MapName" ResourceName.of_json in
-      make ~z ~y ~x ~mapName ()
+    let of_json json__ =
+      let key = field_map json__ "Key" ApiKey.of_json in
+      let y = field_map_exn json__ "Y" GetMapTileRequestYString.of_json in
+      let x = field_map_exn json__ "X" GetMapTileRequestXString.of_json in
+      let z = field_map_exn json__ "Z" GetMapTileRequestZString.of_json in
+      let mapName = field_map_exn json__ "MapName" ResourceName.of_json in
+      make ?key ~y ~x ~z ~mapName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a vector data tile from the map resource. Map tiles are used by clients to render a map. they're addressed using a grid arrangement with an X coordinate, Y coordinate, and Z (zoom) level. The origin (0, 0) is the top left of the map. Increasing the zoom level by 1 doubles both the X and Y dimensions, so a tile containing data for the entire world at (0/0/0) will be split into 4 tiles at zoom 1 (1/0/0, 1/0/1, 1/1/0, 1/1/1)."]
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to GetTile unless you require Grab data. GetMapTile is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The version 2 GetTile operation gives a better user experience and is compatible with the remainder of the V2 Maps API. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Retrieves a vector data tile from the map resource. Map tiles are used by clients to render a map. they're addressed using a grid arrangement with an X coordinate, Y coordinate, and Z (zoom) level. The origin (0, 0) is the top left of the map. Increasing the zoom level by 1 doubles both the X and Y dimensions, so a tile containing data for the entire world at (0/0/0) will be split into 4 tiles at zoom 1 (1/0/0, 1/0/1, 1/1/0, 1/1/1)."]
 module GetMapStyleDescriptorResponse =
   struct
     type nonrec t =
@@ -7818,7 +12113,9 @@ module GetMapStyleDescriptorResponse =
         [@ocaml.doc "Contains the body of the style descriptor."];
       contentType: String_.t option
         [@ocaml.doc
-          "The style descriptor's content type. For example, application/json."]}
+          "The style descriptor's content type. For example, application/json."];
+      cacheControl: String_.t option
+        [@ocaml.doc "The HTTP Cache-Control directive for the value."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -7826,7 +12123,9 @@ module GetMapStyleDescriptorResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?blob = fun ?contentType -> fun () -> { blob; contentType }
+    let make ?blob =
+      fun ?contentType ->
+        fun ?cacheControl -> fun () -> { blob; contentType; cacheControl }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7888,51 +12187,63 @@ module GetMapStyleDescriptorResponse =
           make ?blob:(Some pipe)
             ?contentType:(Option.map
                             ((List.Assoc.find ~equal:String.Caseless.equal)
-                               xs "Content-Type") ~f:String_.of_string) ())
+                               xs "Content-Type") ~f:String_.of_string)
+            ?cacheControl:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "Cache-Control") ~f:String_.of_string) ())
       [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Blob", (Option.map x.blob ~f:Blob.to_value));
-        ("Content-Type", (Option.map x.contentType ~f:String_.to_value))]
+        ("Content-Type", (Option.map x.contentType ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
       let contentType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Content-Type") in
       let blob = (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "Blob") in
-      make ?contentType ?blob ()
+      make ?cacheControl ?contentType ?blob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let contentType = field_map json "ContentType" String_.of_json in
-      let blob = field_map json "Blob" Blob.of_json in
-      make ?contentType ?blob ()
+    let of_json json__ =
+      let cacheControl = field_map json__ "CacheControl" String_.of_json in
+      let contentType = field_map json__ "ContentType" String_.of_json in
+      let blob = field_map json__ "Blob" Blob.of_json in
+      make ?cacheControl ?contentType ?blob ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the map style descriptor from a map resource. The style descriptor contains speci\239\172\129cations on how features render on a map. For example, what data to display, what order to display the data in, and the style for the data. Style descriptors follow the Mapbox Style Specification."]
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to GetStyleDescriptor unless you require Grab data. GetMapStyleDescriptor is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The version 2 GetStyleDescriptor operation gives a better user experience and is compatible with the remainder of the V2 Maps API. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Retrieves the map style descriptor from a map resource. The style descriptor contains speci\239\172\129cations on how features render on a map. For example, what data to display, what order to display the data in, and the style for the data. Style descriptors follow the Mapbox Style Specification."]
 module GetMapStyleDescriptorRequest =
   struct
     type nonrec t =
       {
       mapName: ResourceName.t
         [@ocaml.doc
-          "The map resource to retrieve the style descriptor from."]}
+          "The map resource to retrieve the style descriptor from."];
+      key: ApiKey.t option
+        [@ocaml.doc "The optional API key to authorize the request."]}
     let context_ = "GetMapStyleDescriptorRequest"
-    let make ~mapName = fun () -> { mapName }
+    let make ?key = fun ~mapName -> fun () -> { key; mapName }
     let to_value x =
       structure_to_value
-        [("MapName", (Some (ResourceName.to_value x.mapName)))]
+        [("MapName", (Some (ResourceName.to_value x.mapName)));
+        ("key", (Option.map x.key ~f:ApiKey.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let key = (Option.map ~f:ApiKey.of_xml) (Xml.child xml_arg0 "key") in
       let mapName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
-      make ~mapName ()
+      make ?key ~mapName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mapName = field_map_exn json "MapName" ResourceName.of_json in
-      make ~mapName ()
+    let of_json json__ =
+      let key = field_map json__ "Key" ApiKey.of_json in
+      let mapName = field_map_exn json__ "MapName" ResourceName.of_json in
+      make ?key ~mapName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the map style descriptor from a map resource. The style descriptor contains speci\239\172\129cations on how features render on a map. For example, what data to display, what order to display the data in, and the style for the data. Style descriptors follow the Mapbox Style Specification."]
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to GetStyleDescriptor unless you require Grab data. GetMapStyleDescriptor is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The version 2 GetStyleDescriptor operation gives a better user experience and is compatible with the remainder of the V2 Maps API. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Retrieves the map style descriptor from a map resource. The style descriptor contains speci\239\172\129cations on how features render on a map. For example, what data to display, what order to display the data in, and the style for the data. Style descriptors follow the Mapbox Style Specification."]
 module GetMapSpritesResponse =
   struct
     type nonrec t =
@@ -7942,7 +12253,9 @@ module GetMapSpritesResponse =
           "Contains the body of the sprite sheet or JSON offset \239\172\129le."];
       contentType: String_.t option
         [@ocaml.doc
-          "The content type of the sprite sheet and offsets. For example, the sprite sheet content type is image/png, and the sprite offset JSON document is application/json."]}
+          "The content type of the sprite sheet and offsets. For example, the sprite sheet content type is image/png, and the sprite offset JSON document is application/json."];
+      cacheControl: String_.t option
+        [@ocaml.doc "The HTTP Cache-Control directive for the value."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -7950,7 +12263,9 @@ module GetMapSpritesResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?blob = fun ?contentType -> fun () -> { blob; contentType }
+    let make ?blob =
+      fun ?contentType ->
+        fun ?cacheControl -> fun () -> { blob; contentType; cacheControl }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8012,70 +12327,85 @@ module GetMapSpritesResponse =
           make ?blob:(Some pipe)
             ?contentType:(Option.map
                             ((List.Assoc.find ~equal:String.Caseless.equal)
-                               xs "Content-Type") ~f:String_.of_string) ())
+                               xs "Content-Type") ~f:String_.of_string)
+            ?cacheControl:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "Cache-Control") ~f:String_.of_string) ())
       [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Blob", (Option.map x.blob ~f:Blob.to_value));
-        ("Content-Type", (Option.map x.contentType ~f:String_.to_value))]
+        ("Content-Type", (Option.map x.contentType ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
       let contentType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Content-Type") in
       let blob = (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "Blob") in
-      make ?contentType ?blob ()
+      make ?cacheControl ?contentType ?blob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let contentType = field_map json "ContentType" String_.of_json in
-      let blob = field_map json "Blob" Blob.of_json in
-      make ?contentType ?blob ()
+    let of_json json__ =
+      let cacheControl = field_map json__ "CacheControl" String_.of_json in
+      let contentType = field_map json__ "ContentType" String_.of_json in
+      let blob = field_map json__ "Blob" Blob.of_json in
+      make ?cacheControl ?contentType ?blob ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the sprite sheet corresponding to a map resource. The sprite sheet is a PNG image paired with a JSON document describing the offsets of individual icons that will be displayed on a rendered map."]
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to GetSprites unless you require Grab data. GetMapSprites is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The version 2 GetSprites operation gives a better user experience and is compatible with the remainder of the V2 Maps API. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Retrieves the sprite sheet corresponding to a map resource. The sprite sheet is a PNG image paired with a JSON document describing the offsets of individual icons that will be displayed on a rendered map."]
 module GetMapSpritesRequest =
   struct
     type nonrec t =
       {
-      fileName: GetMapSpritesRequestFileNameString.t
-        [@ocaml.doc
-          "The name of the sprite \239\172\129le. Use the following \239\172\129le names for the sprite sheet: sprites.png sprites\\@2x.png for high pixel density displays For the JSON document contain image offsets. Use the following \239\172\129le names: sprites.json sprites\\@2x.json for high pixel density displays"];
       mapName: ResourceName.t
         [@ocaml.doc
-          "The map resource associated with the sprite \239\172\129le."]}
+          "The map resource associated with the sprite \239\172\129le."];
+      fileName: GetMapSpritesRequestFileNameString.t
+        [@ocaml.doc
+          "The name of the sprite \239\172\129le. Use the following \239\172\129le names for the sprite sheet: sprites.png sprites\\@2x.png for high pixel density displays For the JSON document containing image offsets. Use the following \239\172\129le names: sprites.json sprites\\@2x.json for high pixel density displays"];
+      key: ApiKey.t option
+        [@ocaml.doc "The optional API key to authorize the request."]}
     let context_ = "GetMapSpritesRequest"
-    let make ~fileName = fun ~mapName -> fun () -> { fileName; mapName }
+    let make ?key =
+      fun ~mapName -> fun ~fileName -> fun () -> { key; mapName; fileName }
     let to_value x =
       structure_to_value
-        [("FileName",
-           (Some (GetMapSpritesRequestFileNameString.to_value x.fileName)));
-        ("MapName", (Some (ResourceName.to_value x.mapName)))]
+        [("MapName", (Some (ResourceName.to_value x.mapName)));
+        ("FileName",
+          (Some (GetMapSpritesRequestFileNameString.to_value x.fileName)));
+        ("key", (Option.map x.key ~f:ApiKey.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let mapName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
+      let key = (Option.map ~f:ApiKey.of_xml) (Xml.child xml_arg0 "key") in
       let fileName =
         GetMapSpritesRequestFileNameString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileName") in
-      make ~mapName ~fileName ()
+      let mapName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
+      make ?key ~fileName ~mapName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mapName = field_map_exn json "MapName" ResourceName.of_json in
+    let of_json json__ =
+      let key = field_map json__ "Key" ApiKey.of_json in
       let fileName =
-        field_map_exn json "FileName"
+        field_map_exn json__ "FileName"
           GetMapSpritesRequestFileNameString.of_json in
-      make ~mapName ~fileName ()
+      let mapName = field_map_exn json__ "MapName" ResourceName.of_json in
+      make ?key ~fileName ~mapName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the sprite sheet corresponding to a map resource. The sprite sheet is a PNG image paired with a JSON document describing the offsets of individual icons that will be displayed on a rendered map."]
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to GetSprites unless you require Grab data. GetMapSprites is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The version 2 GetSprites operation gives a better user experience and is compatible with the remainder of the V2 Maps API. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Retrieves the sprite sheet corresponding to a map resource. The sprite sheet is a PNG image paired with a JSON document describing the offsets of individual icons that will be displayed on a rendered map."]
 module GetMapGlyphsResponse =
   struct
     type nonrec t =
       {
-      blob: Blob.t option [@ocaml.doc "The blob's content type."];
+      blob: Blob.t option [@ocaml.doc "The glyph, as binary blob."];
       contentType: String_.t option
         [@ocaml.doc
-          "The map glyph content type. For example, application/octet-stream."]}
+          "The map glyph content type. For example, application/octet-stream."];
+      cacheControl: String_.t option
+        [@ocaml.doc "The HTTP Cache-Control directive for the value."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -8083,7 +12413,9 @@ module GetMapGlyphsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?blob = fun ?contentType -> fun () -> { blob; contentType }
+    let make ?blob =
+      fun ?contentType ->
+        fun ?cacheControl -> fun () -> { blob; contentType; cacheControl }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8145,88 +12477,121 @@ module GetMapGlyphsResponse =
           make ?blob:(Some pipe)
             ?contentType:(Option.map
                             ((List.Assoc.find ~equal:String.Caseless.equal)
-                               xs "Content-Type") ~f:String_.of_string) ())
+                               xs "Content-Type") ~f:String_.of_string)
+            ?cacheControl:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "Cache-Control") ~f:String_.of_string) ())
       [@warning "-27"])
     let to_value x =
       structure_to_value
         [("Blob", (Option.map x.blob ~f:Blob.to_value));
-        ("Content-Type", (Option.map x.contentType ~f:String_.to_value))]
+        ("Content-Type", (Option.map x.contentType ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
       let contentType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Content-Type") in
       let blob = (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "Blob") in
-      make ?contentType ?blob ()
+      make ?cacheControl ?contentType ?blob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let contentType = field_map json "ContentType" String_.of_json in
-      let blob = field_map json "Blob" Blob.of_json in
-      make ?contentType ?blob ()
+    let of_json json__ =
+      let cacheControl = field_map json__ "CacheControl" String_.of_json in
+      let contentType = field_map json__ "ContentType" String_.of_json in
+      let blob = field_map json__ "Blob" Blob.of_json in
+      make ?cacheControl ?contentType ?blob ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves glyphs used to display labels on a map."]
+  end[@@ocaml.doc
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to GetGlyphs unless you require Grab data. GetMapGlyphs is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The version 2 GetGlyphs operation gives a better user experience and is compatible with the remainder of the V2 Maps API. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Retrieves glyphs used to display labels on a map."]
 module GetMapGlyphsRequest =
   struct
     type nonrec t =
       {
+      mapName: ResourceName.t
+        [@ocaml.doc
+          "The map resource associated with the glyph \239\172\129le."];
       fontStack: String_.t
         [@ocaml.doc
-          "A comma-separated list of fonts to load glyphs from in order of preference. For example, Noto Sans Regular, Arial Unicode. Valid fonts stacks for Esri styles: VectorEsriDarkGrayCanvas \226\128\147 Ubuntu Medium Italic | Ubuntu Medium | Ubuntu Italic | Ubuntu Regular | Ubuntu Bold VectorEsriLightGrayCanvas \226\128\147 Ubuntu Italic | Ubuntu Regular | Ubuntu Light | Ubuntu Bold VectorEsriTopographic \226\128\147 Noto Sans Italic | Noto Sans Regular | Noto Sans Bold | Noto Serif Regular | Roboto Condensed Light Italic VectorEsriStreets \226\128\147 Arial Regular | Arial Italic | Arial Bold VectorEsriNavigation \226\128\147 Arial Regular | Arial Italic | Arial Bold Valid font stacks for HERE Technologies styles: VectorHereBerlin \226\128\147 Fira GO Regular | Fira GO Bold VectorHereExplore, VectorHereExploreTruck \226\128\147 Firo GO Italic | Fira GO Map | Fira GO Map Bold | Noto Sans CJK JP Bold | Noto Sans CJK JP Light | Noto Sans CJK JP Regular"];
+          "A comma-separated list of fonts to load glyphs from in order of preference. For example, Noto Sans Regular, Arial Unicode. Valid font stacks for Esri styles: VectorEsriDarkGrayCanvas \226\128\147 Ubuntu Medium Italic | Ubuntu Medium | Ubuntu Italic | Ubuntu Regular | Ubuntu Bold VectorEsriLightGrayCanvas \226\128\147 Ubuntu Italic | Ubuntu Regular | Ubuntu Light | Ubuntu Bold VectorEsriTopographic \226\128\147 Noto Sans Italic | Noto Sans Regular | Noto Sans Bold | Noto Serif Regular | Roboto Condensed Light Italic VectorEsriStreets \226\128\147 Arial Regular | Arial Italic | Arial Bold VectorEsriNavigation \226\128\147 Arial Regular | Arial Italic | Arial Bold Valid font stacks for HERE Technologies styles: VectorHereContrast \226\128\147 Fira GO Regular | Fira GO Bold VectorHereExplore, VectorHereExploreTruck, HybridHereExploreSatellite \226\128\147 Fira GO Italic | Fira GO Map | Fira GO Map Bold | Noto Sans CJK JP Bold | Noto Sans CJK JP Light | Noto Sans CJK JP Regular Valid font stacks for GrabMaps styles: VectorGrabStandardLight, VectorGrabStandardDark \226\128\147 Noto Sans Regular | Noto Sans Medium | Noto Sans Bold Valid font stacks for Open Data styles: VectorOpenDataStandardLight, VectorOpenDataStandardDark, VectorOpenDataVisualizationLight, VectorOpenDataVisualizationDark \226\128\147 Amazon Ember Regular,Noto Sans Regular | Amazon Ember Bold,Noto Sans Bold | Amazon Ember Medium,Noto Sans Medium | Amazon Ember Regular Italic,Noto Sans Italic | Amazon Ember Condensed RC Regular,Noto Sans Regular | Amazon Ember Condensed RC Bold,Noto Sans Bold | Amazon Ember Regular,Noto Sans Regular,Noto Sans Arabic Regular | Amazon Ember Condensed RC Bold,Noto Sans Bold,Noto Sans Arabic Condensed Bold | Amazon Ember Bold,Noto Sans Bold,Noto Sans Arabic Bold | Amazon Ember Regular Italic,Noto Sans Italic,Noto Sans Arabic Regular | Amazon Ember Condensed RC Regular,Noto Sans Regular,Noto Sans Arabic Condensed Regular | Amazon Ember Medium,Noto Sans Medium,Noto Sans Arabic Medium The fonts used by the Open Data map styles are combined fonts that use Amazon Ember for most glyphs but Noto Sans for glyphs unsupported by Amazon Ember."];
       fontUnicodeRange: GetMapGlyphsRequestFontUnicodeRangeString.t
         [@ocaml.doc
           "A Unicode range of characters to download glyphs for. Each response will contain 256 characters. For example, 0\226\128\147255 includes all characters from range U+0000 to 00FF. Must be aligned to multiples of 256."];
-      mapName: ResourceName.t
-        [@ocaml.doc
-          "The map resource associated with the glyph \239\172\129le."]}
+      key: ApiKey.t option
+        [@ocaml.doc "The optional API key to authorize the request."]}
     let context_ = "GetMapGlyphsRequest"
-    let make ~fontStack =
-      fun ~fontUnicodeRange ->
-        fun ~mapName -> fun () -> { fontStack; fontUnicodeRange; mapName }
+    let make ?key =
+      fun ~mapName ->
+        fun ~fontStack ->
+          fun ~fontUnicodeRange ->
+            fun () -> { key; mapName; fontStack; fontUnicodeRange }
     let to_value x =
       structure_to_value
-        [("FontStack", (Some (String_.to_value x.fontStack)));
+        [("MapName", (Some (ResourceName.to_value x.mapName)));
+        ("FontStack", (Some (String_.to_value x.fontStack)));
         ("FontUnicodeRange",
           (Some
              (GetMapGlyphsRequestFontUnicodeRangeString.to_value
                 x.fontUnicodeRange)));
-        ("MapName", (Some (ResourceName.to_value x.mapName)))]
+        ("key", (Option.map x.key ~f:ApiKey.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let mapName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
+      let key = (Option.map ~f:ApiKey.of_xml) (Xml.child xml_arg0 "key") in
       let fontUnicodeRange =
         GetMapGlyphsRequestFontUnicodeRangeString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FontUnicodeRange") in
       let fontStack =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FontStack") in
-      make ~mapName ~fontUnicodeRange ~fontStack ()
+      let mapName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
+      make ?key ~fontUnicodeRange ~fontStack ~mapName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mapName = field_map_exn json "MapName" ResourceName.of_json in
+    let of_json json__ =
+      let key = field_map json__ "Key" ApiKey.of_json in
       let fontUnicodeRange =
-        field_map_exn json "FontUnicodeRange"
+        field_map_exn json__ "FontUnicodeRange"
           GetMapGlyphsRequestFontUnicodeRangeString.of_json in
-      let fontStack = field_map_exn json "FontStack" String_.of_json in
-      make ~mapName ~fontUnicodeRange ~fontStack ()
+      let fontStack = field_map_exn json__ "FontStack" String_.of_json in
+      let mapName = field_map_exn json__ "MapName" ResourceName.of_json in
+      make ?key ~fontUnicodeRange ~fontStack ~mapName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves glyphs used to display labels on a map."]
-module GetGeofenceResponse =
+  end[@@ocaml.doc
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to GetGlyphs unless you require Grab data. GetMapGlyphs is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The version 2 GetGlyphs operation gives a better user experience and is compatible with the remainder of the V2 Maps API. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Retrieves glyphs used to display labels on a map."]
+module GetJobResponse =
   struct
     type nonrec t =
       {
-      createTime: Timestamp.t
+      action: JobAction.t option [@ocaml.doc "Action performed by the job."];
+      actionOptions: JobActionOptions.t option
         [@ocaml.doc
-          "The timestamp for when the geofence collection was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"];
-      geofenceId: Id.t [@ocaml.doc "The geofence identifier."];
-      geometry: GeofenceGeometry.t
+          "Additional options for configuring job action parameters."];
+      createdAt: Timestamp.t option
         [@ocaml.doc
-          "Contains the geofence geometry details describing a polygon."];
-      status: String_.t
+          "Job creation time in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sss."];
+      endedAt: Timestamp.t option
         [@ocaml.doc
-          "Identifies the state of the geofence. A geofence will hold one of the following states: ACTIVE \226\128\148 The geofence has been indexed by the system. PENDING \226\128\148 The geofence is being processed by the system. FAILED \226\128\148 The geofence failed to be indexed by the system. DELETED \226\128\148 The geofence has been deleted from the system index. DELETING \226\128\148 The geofence is being deleted from the system index."];
-      updateTime: Timestamp.t
+          "Job completion time in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sss. Only returned for jobs in a terminal status: Completed | Failed | Cancelled."];
+      error: JobError.t option
+        [@ocaml.doc "Error information if the job failed."];
+      executionRoleArn: IamRoleArn.t option
+        [@ocaml.doc "IAM role used for permissions when running the job."];
+      inputOptions: JobInputOptions.t option
+        [@ocaml.doc "Input configuration."];
+      jobArn: GeoArn.t option
+        [@ocaml.doc "Amazon Resource Name (ARN) of the specified job."];
+      jobId: JobId.t option [@ocaml.doc "Unique job identifier."];
+      name: ResourceName.t option
+        [@ocaml.doc "Job name (if provided during creation)."];
+      outputOptions: JobOutputOptions.t option
+        [@ocaml.doc "Output configuration."];
+      status: JobStatus.t option [@ocaml.doc "Current job status."];
+      updatedAt: Timestamp.t option
         [@ocaml.doc
-          "The timestamp for when the geofence collection was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"]}
+          "Last update time in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sss."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "Tags and corresponding values associated with the specified job."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -8234,14 +12599,37 @@ module GetGeofenceResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetGeofenceResponse"
-    let make ~createTime =
-      fun ~geofenceId ->
-        fun ~geometry ->
-          fun ~status ->
-            fun ~updateTime ->
-              fun () ->
-                { createTime; geofenceId; geometry; status; updateTime }
+    let make ?action =
+      fun ?actionOptions ->
+        fun ?createdAt ->
+          fun ?endedAt ->
+            fun ?error ->
+              fun ?executionRoleArn ->
+                fun ?inputOptions ->
+                  fun ?jobArn ->
+                    fun ?jobId ->
+                      fun ?name ->
+                        fun ?outputOptions ->
+                          fun ?status ->
+                            fun ?updatedAt ->
+                              fun ?tags ->
+                                fun () ->
+                                  {
+                                    action;
+                                    actionOptions;
+                                    createdAt;
+                                    endedAt;
+                                    error;
+                                    executionRoleArn;
+                                    inputOptions;
+                                    jobArn;
+                                    jobId;
+                                    name;
+                                    outputOptions;
+                                    status;
+                                    updatedAt;
+                                    tags
+                                  }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8300,87 +12688,127 @@ module GetGeofenceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("CreateTime", (Some (Timestamp.to_value x.createTime)));
-        ("GeofenceId", (Some (Id.to_value x.geofenceId)));
-        ("Geometry", (Some (GeofenceGeometry.to_value x.geometry)));
-        ("Status", (Some (String_.to_value x.status)));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        [("Action", (Option.map x.action ~f:JobAction.to_value));
+        ("ActionOptions",
+          (Option.map x.actionOptions ~f:JobActionOptions.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("EndedAt", (Option.map x.endedAt ~f:Timestamp.to_value));
+        ("Error", (Option.map x.error ~f:JobError.to_value));
+        ("ExecutionRoleArn",
+          (Option.map x.executionRoleArn ~f:IamRoleArn.to_value));
+        ("InputOptions",
+          (Option.map x.inputOptions ~f:JobInputOptions.to_value));
+        ("JobArn", (Option.map x.jobArn ~f:GeoArn.to_value));
+        ("JobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("Name", (Option.map x.name ~f:ResourceName.to_value));
+        ("OutputOptions",
+          (Option.map x.outputOptions ~f:JobOutputOptions.to_value));
+        ("Status", (Option.map x.status ~f:JobStatus.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
       let status =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Status") in
-      let geometry =
-        GeofenceGeometry.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Geometry") in
-      let geofenceId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GeofenceId") in
-      let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      make ~updateTime ~status ~geometry ~geofenceId ~createTime ()
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let outputOptions =
+        (Option.map ~f:JobOutputOptions.of_xml)
+          (Xml.child xml_arg0 "OutputOptions") in
+      let name =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
+      let jobArn =
+        (Option.map ~f:GeoArn.of_xml) (Xml.child xml_arg0 "JobArn") in
+      let inputOptions =
+        (Option.map ~f:JobInputOptions.of_xml)
+          (Xml.child xml_arg0 "InputOptions") in
+      let executionRoleArn =
+        (Option.map ~f:IamRoleArn.of_xml)
+          (Xml.child xml_arg0 "ExecutionRoleArn") in
+      let error =
+        (Option.map ~f:JobError.of_xml) (Xml.child xml_arg0 "Error") in
+      let endedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EndedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let actionOptions =
+        (Option.map ~f:JobActionOptions.of_xml)
+          (Xml.child xml_arg0 "ActionOptions") in
+      let action =
+        (Option.map ~f:JobAction.of_xml) (Xml.child xml_arg0 "Action") in
+      make ?tags ?updatedAt ?status ?outputOptions ?name ?jobId ?jobArn
+        ?inputOptions ?executionRoleArn ?error ?endedAt ?createdAt
+        ?actionOptions ?action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
-      let status = field_map_exn json "Status" String_.of_json in
-      let geometry = field_map_exn json "Geometry" GeofenceGeometry.of_json in
-      let geofenceId = field_map_exn json "GeofenceId" Id.of_json in
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
-      make ~updateTime ~status ~geometry ~geofenceId ~createTime ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let status = field_map json__ "Status" JobStatus.of_json in
+      let outputOptions =
+        field_map json__ "OutputOptions" JobOutputOptions.of_json in
+      let name = field_map json__ "Name" ResourceName.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      let jobArn = field_map json__ "JobArn" GeoArn.of_json in
+      let inputOptions =
+        field_map json__ "InputOptions" JobInputOptions.of_json in
+      let executionRoleArn =
+        field_map json__ "ExecutionRoleArn" IamRoleArn.of_json in
+      let error = field_map json__ "Error" JobError.of_json in
+      let endedAt = field_map json__ "EndedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let actionOptions =
+        field_map json__ "ActionOptions" JobActionOptions.of_json in
+      let action = field_map json__ "Action" JobAction.of_json in
+      make ?tags ?updatedAt ?status ?outputOptions ?name ?jobId ?jobArn
+        ?inputOptions ?executionRoleArn ?error ?endedAt ?createdAt
+        ?actionOptions ?action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the geofence details from a geofence collection."]
-module GetGeofenceRequest =
+       "GetJob retrieves detailed information about a specific job, including its current status, configuration, and error information if the job failed. For more information, see Job concepts in the Amazon Location Service Developer Guide."]
+module GetJobRequest =
   struct
     type nonrec t =
       {
-      collectionName: ResourceName.t
-        [@ocaml.doc "The geofence collection storing the target geofence."];
-      geofenceId: Id.t
-        [@ocaml.doc "The geofence you're retrieving details for."]}
-    let context_ = "GetGeofenceRequest"
-    let make ~collectionName =
-      fun ~geofenceId -> fun () -> { collectionName; geofenceId }
+      jobId: JobId.t
+        [@ocaml.doc "The unique identifier of the job to retrieve."]}
+    let context_ = "GetJobRequest"
+    let make ~jobId = fun () -> { jobId }
     let to_value x =
-      structure_to_value
-        [("CollectionName", (Some (ResourceName.to_value x.collectionName)));
-        ("GeofenceId", (Some (Id.to_value x.geofenceId)))]
+      structure_to_value [("JobId", (Some (JobId.to_value x.jobId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let geofenceId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GeofenceId") in
-      let collectionName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
-      make ~geofenceId ~collectionName ()
+      let jobId =
+        JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
+      make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let geofenceId = field_map_exn json "GeofenceId" Id.of_json in
-      let collectionName =
-        field_map_exn json "CollectionName" ResourceName.of_json in
-      make ~geofenceId ~collectionName ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the geofence details from a geofence collection."]
-module GetDevicePositionResponse =
+       "GetJob retrieves detailed information about a specific job, including its current status, configuration, and error information if the job failed. For more information, see Job concepts in the Amazon Location Service Developer Guide."]
+module GetGeofenceResponse =
   struct
     type nonrec t =
       {
-      accuracy: PositionalAccuracy.t option
-        [@ocaml.doc "The accuracy of the device position."];
-      deviceId: Id.t option
-        [@ocaml.doc "The device whose position you retrieved."];
-      position: Position.t [@ocaml.doc "The last known device position."];
-      positionProperties: PropertyMap.t option
-        [@ocaml.doc "The properties associated with the position."];
-      receivedTime: Timestamp.t
+      geofenceId: Id.t option [@ocaml.doc "The geofence identifier."];
+      geometry: GeofenceGeometry.t option
         [@ocaml.doc
-          "The timestamp for when the tracker resource received the device position in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
-      sampleTime: Timestamp.t
+          "Contains the geofence geometry details describing the position of the geofence. Can be a circle, a polygon, or a multipolygon."];
+      status: String_.t option
         [@ocaml.doc
-          "The timestamp at which the device's position was determined. Uses ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
+          "Identifies the state of the geofence. A geofence will hold one of the following states: ACTIVE \226\128\148 The geofence has been indexed by the system. PENDING \226\128\148 The geofence is being processed by the system. FAILED \226\128\148 The geofence failed to be indexed by the system. DELETED \226\128\148 The geofence has been deleted from the system index. DELETING \226\128\148 The geofence is being deleted from the system index."];
+      createTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the geofence collection was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"];
+      updateTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the geofence collection was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"];
+      geofenceProperties: PropertyMap.t option
+        [@ocaml.doc
+          "User defined properties of the geofence. A property is a key-value pair stored with the geofence and added to any geofence event triggered with that geofence. Format: \"key\" : \"value\""]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -8388,21 +12816,20 @@ module GetDevicePositionResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetDevicePositionResponse"
-    let make ?accuracy =
-      fun ?deviceId ->
-        fun ?positionProperties ->
-          fun ~position ->
-            fun ~receivedTime ->
-              fun ~sampleTime ->
+    let make ?geofenceId =
+      fun ?geometry ->
+        fun ?status ->
+          fun ?createTime ->
+            fun ?updateTime ->
+              fun ?geofenceProperties ->
                 fun () ->
                   {
-                    accuracy;
-                    deviceId;
-                    positionProperties;
-                    position;
-                    receivedTime;
-                    sampleTime
+                    geofenceId;
+                    geometry;
+                    status;
+                    createTime;
+                    updateTime;
+                    geofenceProperties
                   }
     let error_of_json name json =
       match name with
@@ -8462,44 +12889,211 @@ module GetDevicePositionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Accuracy", (Option.map x.accuracy ~f:PositionalAccuracy.to_value));
-        ("DeviceId", (Option.map x.deviceId ~f:Id.to_value));
-        ("Position", (Some (Position.to_value x.position)));
-        ("PositionProperties",
-          (Option.map x.positionProperties ~f:PropertyMap.to_value));
-        ("ReceivedTime", (Some (Timestamp.to_value x.receivedTime)));
-        ("SampleTime", (Some (Timestamp.to_value x.sampleTime)))]
+        [("GeofenceId", (Option.map x.geofenceId ~f:Id.to_value));
+        ("Geometry", (Option.map x.geometry ~f:GeofenceGeometry.to_value));
+        ("Status", (Option.map x.status ~f:String_.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value));
+        ("GeofenceProperties",
+          (Option.map x.geofenceProperties ~f:PropertyMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let sampleTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SampleTime") in
-      let receivedTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ReceivedTime") in
-      let positionProperties =
+      let geofenceProperties =
         (Option.map ~f:PropertyMap.of_xml)
+          (Xml.child xml_arg0 "GeofenceProperties") in
+      let updateTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
+      let createTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
+      let geometry =
+        (Option.map ~f:GeofenceGeometry.of_xml)
+          (Xml.child xml_arg0 "Geometry") in
+      let geofenceId =
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "GeofenceId") in
+      make ?geofenceProperties ?updateTime ?createTime ?status ?geometry
+        ?geofenceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let geofenceProperties =
+        field_map json__ "GeofenceProperties" PropertyMap.of_json in
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let geometry = field_map json__ "Geometry" GeofenceGeometry.of_json in
+      let geofenceId = field_map json__ "GeofenceId" Id.of_json in
+      make ?geofenceProperties ?updateTime ?createTime ?status ?geometry
+        ?geofenceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the geofence details from a geofence collection. The returned geometry will always match the geometry format used when the geofence was created."]
+module GetGeofenceRequest =
+  struct
+    type nonrec t =
+      {
+      collectionName: ResourceName.t
+        [@ocaml.doc "The geofence collection storing the target geofence."];
+      geofenceId: Id.t
+        [@ocaml.doc "The geofence you're retrieving details for."]}
+    let context_ = "GetGeofenceRequest"
+    let make ~collectionName =
+      fun ~geofenceId -> fun () -> { collectionName; geofenceId }
+    let to_value x =
+      structure_to_value
+        [("CollectionName", (Some (ResourceName.to_value x.collectionName)));
+        ("GeofenceId", (Some (Id.to_value x.geofenceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let geofenceId =
+        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GeofenceId") in
+      let collectionName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
+      make ~geofenceId ~collectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let geofenceId = field_map_exn json__ "GeofenceId" Id.of_json in
+      let collectionName =
+        field_map_exn json__ "CollectionName" ResourceName.of_json in
+      make ~geofenceId ~collectionName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the geofence details from a geofence collection. The returned geometry will always match the geometry format used when the geofence was created."]
+module GetDevicePositionResponse =
+  struct
+    type nonrec t =
+      {
+      deviceId: Id.t option
+        [@ocaml.doc "The device whose position you retrieved."];
+      sampleTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the device's position was determined. Uses ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      receivedTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the tracker resource received the device position. Uses ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      position: Position.t option
+        [@ocaml.doc "The last known device position."];
+      accuracy: PositionalAccuracy.t option
+        [@ocaml.doc "The accuracy of the device position."];
+      positionProperties: PositionPropertyMap.t option
+        [@ocaml.doc "The properties associated with the position."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?deviceId =
+      fun ?sampleTime ->
+        fun ?receivedTime ->
+          fun ?position ->
+            fun ?accuracy ->
+              fun ?positionProperties ->
+                fun () ->
+                  {
+                    deviceId;
+                    sampleTime;
+                    receivedTime;
+                    position;
+                    accuracy;
+                    positionProperties
+                  }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DeviceId", (Option.map x.deviceId ~f:Id.to_value));
+        ("SampleTime", (Option.map x.sampleTime ~f:Timestamp.to_value));
+        ("ReceivedTime", (Option.map x.receivedTime ~f:Timestamp.to_value));
+        ("Position", (Option.map x.position ~f:Position.to_value));
+        ("Accuracy", (Option.map x.accuracy ~f:PositionalAccuracy.to_value));
+        ("PositionProperties",
+          (Option.map x.positionProperties ~f:PositionPropertyMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let positionProperties =
+        (Option.map ~f:PositionPropertyMap.of_xml)
           (Xml.child xml_arg0 "PositionProperties") in
-      let position =
-        Position.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Position") in
-      let deviceId =
-        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "DeviceId") in
       let accuracy =
         (Option.map ~f:PositionalAccuracy.of_xml)
           (Xml.child xml_arg0 "Accuracy") in
-      make ~sampleTime ~receivedTime ?positionProperties ~position ?deviceId
-        ?accuracy ()
+      let position =
+        (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "Position") in
+      let receivedTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "ReceivedTime") in
+      let sampleTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "SampleTime") in
+      let deviceId =
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "DeviceId") in
+      make ?positionProperties ?accuracy ?position ?receivedTime ?sampleTime
+        ?deviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sampleTime = field_map_exn json "SampleTime" Timestamp.of_json in
-      let receivedTime = field_map_exn json "ReceivedTime" Timestamp.of_json in
+    let of_json json__ =
       let positionProperties =
-        field_map json "PositionProperties" PropertyMap.of_json in
-      let position = field_map_exn json "Position" Position.of_json in
-      let deviceId = field_map json "DeviceId" Id.of_json in
-      let accuracy = field_map json "Accuracy" PositionalAccuracy.of_json in
-      make ~sampleTime ~receivedTime ?positionProperties ~position ?deviceId
-        ?accuracy ()
+        field_map json__ "PositionProperties" PositionPropertyMap.of_json in
+      let accuracy = field_map json__ "Accuracy" PositionalAccuracy.of_json in
+      let position = field_map json__ "Position" Position.of_json in
+      let receivedTime = field_map json__ "ReceivedTime" Timestamp.of_json in
+      let sampleTime = field_map json__ "SampleTime" Timestamp.of_json in
+      let deviceId = field_map json__ "DeviceId" Id.of_json in
+      make ?positionProperties ?accuracy ?position ?receivedTime ?sampleTime
+        ?deviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a device's most recent position according to its sample time. Device positions are deleted after 30 days."]
@@ -8507,30 +13101,31 @@ module GetDevicePositionRequest =
   struct
     type nonrec t =
       {
-      deviceId: Id.t
-        [@ocaml.doc "The device whose position you want to retrieve."];
       trackerName: ResourceName.t
-        [@ocaml.doc "The tracker resource receiving the position update."]}
+        [@ocaml.doc "The tracker resource receiving the position update."];
+      deviceId: Id.t
+        [@ocaml.doc "The device whose position you want to retrieve."]}
     let context_ = "GetDevicePositionRequest"
-    let make ~deviceId =
-      fun ~trackerName -> fun () -> { deviceId; trackerName }
+    let make ~trackerName =
+      fun ~deviceId -> fun () -> { trackerName; deviceId }
     let to_value x =
       structure_to_value
-        [("DeviceId", (Some (Id.to_value x.deviceId)));
-        ("TrackerName", (Some (ResourceName.to_value x.trackerName)))]
+        [("TrackerName", (Some (ResourceName.to_value x.trackerName)));
+        ("DeviceId", (Some (Id.to_value x.deviceId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let deviceId =
+        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceId") in
       let trackerName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
-      let deviceId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceId") in
-      make ~trackerName ~deviceId ()
+      make ~deviceId ~trackerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
-      let deviceId = field_map_exn json "DeviceId" Id.of_json in
-      make ~trackerName ~deviceId ()
+    let of_json json__ =
+      let deviceId = field_map_exn json__ "DeviceId" Id.of_json in
+      let trackerName =
+        field_map_exn json__ "TrackerName" ResourceName.of_json in
+      make ~deviceId ~trackerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a device's most recent position according to its sample time. Device positions are deleted after 30 days."]
@@ -8538,7 +13133,7 @@ module GetDevicePositionHistoryResponse =
   struct
     type nonrec t =
       {
-      devicePositions: DevicePositionList.t
+      devicePositions: DevicePositionList.t option
         [@ocaml.doc
           "Contains the position history details for the requested device."];
       nextToken: Token.t option
@@ -8551,9 +13146,8 @@ module GetDevicePositionHistoryResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetDevicePositionHistoryResponse"
-    let make ?nextToken =
-      fun ~devicePositions -> fun () -> { nextToken; devicePositions }
+    let make ?devicePositions =
+      fun ?nextToken -> fun () -> { devicePositions; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8613,22 +13207,22 @@ module GetDevicePositionHistoryResponse =
     let to_value x =
       structure_to_value
         [("DevicePositions",
-           (Some (DevicePositionList.to_value x.devicePositions)));
+           (Option.map x.devicePositions ~f:DevicePositionList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let devicePositions =
-        DevicePositionList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DevicePositions") in
-      make ?nextToken ~devicePositions ()
+        (Option.map ~f:DevicePositionList.of_xml)
+          (Xml.child xml_arg0 "DevicePositions") in
+      make ?nextToken ?devicePositions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let devicePositions =
-        field_map_exn json "DevicePositions" DevicePositionList.of_json in
-      make ?nextToken ~devicePositions ()
+        field_map json__ "DevicePositions" DevicePositionList.of_json in
+      make ?nextToken ?devicePositions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the device position history from a tracker resource within a specified range of time. Device positions are deleted after 30 days."]
@@ -8636,62 +13230,54 @@ module GetDevicePositionHistoryRequest =
   struct
     type nonrec t =
       {
+      trackerName: ResourceName.t
+        [@ocaml.doc
+          "The tracker resource receiving the request for the device position history."];
       deviceId: Id.t
         [@ocaml.doc
           "The device whose position history you want to retrieve."];
-      endTimeExclusive: Timestamp.t option
-        [@ocaml.doc
-          "Specify the end time for the position history in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. By default, the value will be the time that the request is made. Requirement: The time specified for EndTimeExclusive must be after the time for StartTimeInclusive."];
-      maxResults: GetDevicePositionHistoryRequestMaxResultsInteger.t option
-        [@ocaml.doc
-          "An optional limit for the number of device positions returned in a single call. Default value: 100"];
       nextToken: Token.t option
         [@ocaml.doc
           "The pagination token specifying which page of results to return in the response. If no token is provided, the default page is the first page. Default value: null"];
       startTimeInclusive: Timestamp.t option
         [@ocaml.doc
           "Specify the start time for the position history in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. By default, the value will be 24 hours prior to the time that the request is made. Requirement: The time specified for StartTimeInclusive must be before EndTimeExclusive."];
-      trackerName: ResourceName.t
+      endTimeExclusive: Timestamp.t option
         [@ocaml.doc
-          "The tracker resource receiving the request for the device position history."]}
+          "Specify the end time for the position history in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. By default, the value will be the time that the request is made. Requirement: The time specified for EndTimeExclusive must be after the time for StartTimeInclusive."];
+      maxResults: GetDevicePositionHistoryRequestMaxResultsInteger.t option
+        [@ocaml.doc
+          "An optional limit for the number of device positions returned in a single call. Default value: 100"]}
     let context_ = "GetDevicePositionHistoryRequest"
-    let make ?endTimeExclusive =
-      fun ?maxResults ->
-        fun ?nextToken ->
-          fun ?startTimeInclusive ->
-            fun ~deviceId ->
-              fun ~trackerName ->
+    let make ?nextToken =
+      fun ?startTimeInclusive ->
+        fun ?endTimeExclusive ->
+          fun ?maxResults ->
+            fun ~trackerName ->
+              fun ~deviceId ->
                 fun () ->
                   {
-                    endTimeExclusive;
-                    maxResults;
                     nextToken;
                     startTimeInclusive;
-                    deviceId;
-                    trackerName
+                    endTimeExclusive;
+                    maxResults;
+                    trackerName;
+                    deviceId
                   }
     let to_value x =
       structure_to_value
-        [("DeviceId", (Some (Id.to_value x.deviceId)));
+        [("TrackerName", (Some (ResourceName.to_value x.trackerName)));
+        ("DeviceId", (Some (Id.to_value x.deviceId)));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("StartTimeInclusive",
+          (Option.map x.startTimeInclusive ~f:Timestamp.to_value));
         ("EndTimeExclusive",
           (Option.map x.endTimeExclusive ~f:Timestamp.to_value));
         ("MaxResults",
           (Option.map x.maxResults
-             ~f:GetDevicePositionHistoryRequestMaxResultsInteger.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("StartTimeInclusive",
-          (Option.map x.startTimeInclusive ~f:Timestamp.to_value));
-        ("TrackerName", (Some (ResourceName.to_value x.trackerName)))]
+             ~f:GetDevicePositionHistoryRequestMaxResultsInteger.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let trackerName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
-      let startTimeInclusive =
-        (Option.map ~f:Timestamp.of_xml)
-          (Xml.child xml_arg0 "StartTimeInclusive") in
-      let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let maxResults =
         (Option.map
            ~f:GetDevicePositionHistoryRequestMaxResultsInteger.of_xml)
@@ -8699,27 +13285,253 @@ module GetDevicePositionHistoryRequest =
       let endTimeExclusive =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "EndTimeExclusive") in
+      let startTimeInclusive =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "StartTimeInclusive") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let deviceId =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DeviceId") in
-      make ~trackerName ?startTimeInclusive ?nextToken ?maxResults
-        ?endTimeExclusive ~deviceId ()
+      let trackerName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
+      make ?maxResults ?endTimeExclusive ?startTimeInclusive ?nextToken
+        ~deviceId ~trackerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
-      let startTimeInclusive =
-        field_map json "StartTimeInclusive" Timestamp.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           GetDevicePositionHistoryRequestMaxResultsInteger.of_json in
       let endTimeExclusive =
-        field_map json "EndTimeExclusive" Timestamp.of_json in
-      let deviceId = field_map_exn json "DeviceId" Id.of_json in
-      make ~trackerName ?startTimeInclusive ?nextToken ?maxResults
-        ?endTimeExclusive ~deviceId ()
+        field_map json__ "EndTimeExclusive" Timestamp.of_json in
+      let startTimeInclusive =
+        field_map json__ "StartTimeInclusive" Timestamp.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let deviceId = field_map_exn json__ "DeviceId" Id.of_json in
+      let trackerName =
+        field_map_exn json__ "TrackerName" ResourceName.of_json in
+      make ?maxResults ?endTimeExclusive ?startTimeInclusive ?nextToken
+        ~deviceId ~trackerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the device position history from a tracker resource within a specified range of time. Device positions are deleted after 30 days."]
+module ForecastGeofenceEventsResponse =
+  struct
+    type nonrec t =
+      {
+      forecastedEvents: ForecastedEventsList.t option
+        [@ocaml.doc "The list of forecasted events."];
+      nextToken: LargeToken.t option
+        [@ocaml.doc
+          "The pagination token specifying which page of results to return in the response. If no token is provided, the default page is the first page."];
+      distanceUnit: DistanceUnit.t option
+        [@ocaml.doc "The distance unit for the forecasted events."];
+      speedUnit: SpeedUnit.t option
+        [@ocaml.doc "The speed unit for the forecasted events."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?forecastedEvents =
+      fun ?nextToken ->
+        fun ?distanceUnit ->
+          fun ?speedUnit ->
+            fun () ->
+              { forecastedEvents; nextToken; distanceUnit; speedUnit }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ForecastedEvents",
+           (Option.map x.forecastedEvents ~f:ForecastedEventsList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:LargeToken.to_value));
+        ("DistanceUnit",
+          (Option.map x.distanceUnit ~f:DistanceUnit.to_value));
+        ("SpeedUnit", (Option.map x.speedUnit ~f:SpeedUnit.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let speedUnit =
+        (Option.map ~f:SpeedUnit.of_xml) (Xml.child xml_arg0 "SpeedUnit") in
+      let distanceUnit =
+        (Option.map ~f:DistanceUnit.of_xml)
+          (Xml.child xml_arg0 "DistanceUnit") in
+      let nextToken =
+        (Option.map ~f:LargeToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let forecastedEvents =
+        (Option.map ~f:ForecastedEventsList.of_xml)
+          (Xml.child xml_arg0 "ForecastedEvents") in
+      make ?speedUnit ?distanceUnit ?nextToken ?forecastedEvents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let speedUnit = field_map json__ "SpeedUnit" SpeedUnit.of_json in
+      let distanceUnit = field_map json__ "DistanceUnit" DistanceUnit.of_json in
+      let nextToken = field_map json__ "NextToken" LargeToken.of_json in
+      let forecastedEvents =
+        field_map json__ "ForecastedEvents" ForecastedEventsList.of_json in
+      make ?speedUnit ?distanceUnit ?nextToken ?forecastedEvents ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This action forecasts future geofence events that are likely to occur within a specified time horizon if a device continues moving at its current speed. Each forecasted event is associated with a geofence from a provided geofence collection. A forecast event can have one of the following states: ENTER: The device position is outside the referenced geofence, but the device may cross into the geofence during the forecasting time horizon if it maintains its current speed. EXIT: The device position is inside the referenced geofence, but the device may leave the geofence during the forecasted time horizon if the device maintains it's current speed. IDLE:The device is inside the geofence, and it will remain inside the geofence through the end of the time horizon if the device maintains it's current speed. Heading direction is not considered in the current version. The API takes a conservative approach and includes events that can occur for any heading."]
+module ForecastGeofenceEventsRequest =
+  struct
+    type nonrec t =
+      {
+      collectionName: ResourceName.t
+        [@ocaml.doc "The name of the geofence collection."];
+      deviceState: ForecastGeofenceEventsDeviceState.t
+        [@ocaml.doc
+          "Represents the device's state, including its current position and speed. When speed is omitted, this API performs a containment check. The containment check operation returns IDLE events for geofences where the device is currently inside of, but no other events."];
+      timeHorizonMinutes:
+        ForecastGeofenceEventsRequestTimeHorizonMinutesDouble.t option
+        [@ocaml.doc
+          "The forward-looking time window for forecasting, specified in minutes. The API only returns events that are predicted to occur within this time horizon. When no value is specified, this API performs a containment check. The containment check operation returns IDLE events for geofences where the device is currently inside of, but no other events."];
+      distanceUnit: DistanceUnit.t option
+        [@ocaml.doc
+          "The distance unit used for the NearestDistance property returned in a forecasted event. The measurement system must match for DistanceUnit and SpeedUnit; if Kilometers is specified for DistanceUnit, then SpeedUnit must be KilometersPerHour. Default Value: Kilometers"];
+      speedUnit: SpeedUnit.t option
+        [@ocaml.doc
+          "The speed unit for the device captured by the device state. The measurement system must match for DistanceUnit and SpeedUnit; if Kilometers is specified for DistanceUnit, then SpeedUnit must be KilometersPerHour. Default Value: KilometersPerHour."];
+      nextToken: LargeToken.t option
+        [@ocaml.doc
+          "The pagination token specifying which page of results to return in the response. If no token is provided, the default page is the first page. Default value: null"];
+      maxResults: ForecastGeofenceEventsRequestMaxResultsInteger.t option
+        [@ocaml.doc
+          "An optional limit for the number of resources returned in a single call. Default value: 20"]}
+    let context_ = "ForecastGeofenceEventsRequest"
+    let make ?timeHorizonMinutes =
+      fun ?distanceUnit ->
+        fun ?speedUnit ->
+          fun ?nextToken ->
+            fun ?maxResults ->
+              fun ~collectionName ->
+                fun ~deviceState ->
+                  fun () ->
+                    {
+                      timeHorizonMinutes;
+                      distanceUnit;
+                      speedUnit;
+                      nextToken;
+                      maxResults;
+                      collectionName;
+                      deviceState
+                    }
+    let to_value x =
+      structure_to_value
+        [("CollectionName", (Some (ResourceName.to_value x.collectionName)));
+        ("DeviceState",
+          (Some (ForecastGeofenceEventsDeviceState.to_value x.deviceState)));
+        ("TimeHorizonMinutes",
+          (Option.map x.timeHorizonMinutes
+             ~f:ForecastGeofenceEventsRequestTimeHorizonMinutesDouble.to_value));
+        ("DistanceUnit",
+          (Option.map x.distanceUnit ~f:DistanceUnit.to_value));
+        ("SpeedUnit", (Option.map x.speedUnit ~f:SpeedUnit.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:LargeToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:ForecastGeofenceEventsRequestMaxResultsInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:ForecastGeofenceEventsRequestMaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:LargeToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let speedUnit =
+        (Option.map ~f:SpeedUnit.of_xml) (Xml.child xml_arg0 "SpeedUnit") in
+      let distanceUnit =
+        (Option.map ~f:DistanceUnit.of_xml)
+          (Xml.child xml_arg0 "DistanceUnit") in
+      let timeHorizonMinutes =
+        (Option.map
+           ~f:ForecastGeofenceEventsRequestTimeHorizonMinutesDouble.of_xml)
+          (Xml.child xml_arg0 "TimeHorizonMinutes") in
+      let deviceState =
+        ForecastGeofenceEventsDeviceState.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DeviceState") in
+      let collectionName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
+      make ?maxResults ?nextToken ?speedUnit ?distanceUnit
+        ?timeHorizonMinutes ~deviceState ~collectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults"
+          ForecastGeofenceEventsRequestMaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" LargeToken.of_json in
+      let speedUnit = field_map json__ "SpeedUnit" SpeedUnit.of_json in
+      let distanceUnit = field_map json__ "DistanceUnit" DistanceUnit.of_json in
+      let timeHorizonMinutes =
+        field_map json__ "TimeHorizonMinutes"
+          ForecastGeofenceEventsRequestTimeHorizonMinutesDouble.of_json in
+      let deviceState =
+        field_map_exn json__ "DeviceState"
+          ForecastGeofenceEventsDeviceState.of_json in
+      let collectionName =
+        field_map_exn json__ "CollectionName" ResourceName.of_json in
+      make ?maxResults ?nextToken ?speedUnit ?distanceUnit
+        ?timeHorizonMinutes ~deviceState ~collectionName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This action forecasts future geofence events that are likely to occur within a specified time horizon if a device continues moving at its current speed. Each forecasted event is associated with a geofence from a provided geofence collection. A forecast event can have one of the following states: ENTER: The device position is outside the referenced geofence, but the device may cross into the geofence during the forecasting time horizon if it maintains its current speed. EXIT: The device position is inside the referenced geofence, but the device may leave the geofence during the forecasted time horizon if the device maintains it's current speed. IDLE:The device is inside the geofence, and it will remain inside the geofence through the end of the time horizon if the device maintains it's current speed. Heading direction is not considered in the current version. The API takes a conservative approach and includes events that can occur for any heading."]
 module DisassociateTrackerConsumerResponse =
   struct
     type nonrec t = unit
@@ -8800,32 +13612,33 @@ module DisassociateTrackerConsumerRequest =
   struct
     type nonrec t =
       {
-      consumerArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the geofence collection to be disassociated from the tracker resource. Used when you need to specify a resource across all AWS. Format example: arn:aws:geo:region:account-id:geofence-collection/ExampleGeofenceCollectionConsumer"];
       trackerName: ResourceName.t
         [@ocaml.doc
-          "The name of the tracker resource to be dissociated from the consumer."]}
+          "The name of the tracker resource to be dissociated from the consumer."];
+      consumerArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the geofence collection to be disassociated from the tracker resource. Used when you need to specify a resource across all Amazon Web Services. Format example: arn:aws:geo:region:account-id:geofence-collection/ExampleGeofenceCollectionConsumer"]}
     let context_ = "DisassociateTrackerConsumerRequest"
-    let make ~consumerArn =
-      fun ~trackerName -> fun () -> { consumerArn; trackerName }
+    let make ~trackerName =
+      fun ~consumerArn -> fun () -> { trackerName; consumerArn }
     let to_value x =
       structure_to_value
-        [("ConsumerArn", (Some (Arn.to_value x.consumerArn)));
-        ("TrackerName", (Some (ResourceName.to_value x.trackerName)))]
+        [("TrackerName", (Some (ResourceName.to_value x.trackerName)));
+        ("ConsumerArn", (Some (Arn.to_value x.consumerArn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let consumerArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ConsumerArn") in
       let trackerName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
-      let consumerArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ConsumerArn") in
-      make ~trackerName ~consumerArn ()
+      make ~consumerArn ~trackerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
-      let consumerArn = field_map_exn json "ConsumerArn" Arn.of_json in
-      make ~trackerName ~consumerArn ()
+    let of_json json__ =
+      let consumerArn = field_map_exn json__ "ConsumerArn" Arn.of_json in
+      let trackerName =
+        field_map_exn json__ "TrackerName" ResourceName.of_json in
+      make ~consumerArn ~trackerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Removes the association between a tracker resource and a geofence collection. Once you unlink a tracker resource from a geofence collection, the tracker positions will no longer be automatically evaluated against geofences."]
@@ -8833,30 +13646,36 @@ module DescribeTrackerResponse =
   struct
     type nonrec t =
       {
-      createTime: Timestamp.t
+      trackerName: ResourceName.t option
+        [@ocaml.doc "The name of the tracker resource."];
+      trackerArn: Arn.t option
         [@ocaml.doc
-          "The timestamp for when the tracker resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
-      description: ResourceDescription.t
+          "The Amazon Resource Name (ARN) for the tracker resource. Used when you need to specify a resource across all Amazon Web Services. Format example: arn:aws:geo:region:account-id:tracker/ExampleTracker"];
+      description: ResourceDescription.t option
         [@ocaml.doc "The optional description for the tracker resource."];
-      kmsKeyId: KmsKeyId.t option
-        [@ocaml.doc
-          "A key identifier for an AWS KMS customer managed key assigned to the Amazon Location resource."];
-      positionFiltering: PositionFiltering.t option
-        [@ocaml.doc "The position filtering method of the tracker resource."];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc "Always returns RequestBasedUsage."];
       pricingPlanDataSource: String_.t option
         [@ocaml.doc "No longer used. Always returns an empty string."];
       tags: TagMap.t option
         [@ocaml.doc "The tags associated with the tracker resource."];
-      trackerArn: Arn.t
+      createTime: Timestamp.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the tracker resource. Used when you need to specify a resource across all AWS. Format example: arn:aws:geo:region:account-id:tracker/ExampleTracker"];
-      trackerName: ResourceName.t
-        [@ocaml.doc "The name of the tracker resource."];
-      updateTime: Timestamp.t
+          "The timestamp for when the tracker resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      updateTime: Timestamp.t option
         [@ocaml.doc
-          "The timestamp for when the tracker resource was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
+          "The timestamp for when the tracker resource was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "A key identifier for an Amazon Web Services KMS customer managed key assigned to the Amazon Location resource."];
+      positionFiltering: PositionFiltering.t option
+        [@ocaml.doc "The position filtering method of the tracker resource."];
+      eventBridgeEnabled: Boolean.t option
+        [@ocaml.doc
+          "Whether UPDATE events from this tracker in EventBridge are enabled. If set to true these events will be sent to EventBridge."];
+      kmsKeyEnableGeospatialQueries: Boolean.t option
+        [@ocaml.doc
+          "Enables GeospatialQueries for a tracker that uses a Amazon Web Services KMS customer managed key. This parameter is only used if you are using a KMS customer managed key. If you wish to encrypt your data using your own KMS customer managed key, then the Bounding Polygon Queries feature will be disabled by default. This is because by using this feature, a representation of your device positions will not be encrypted using the your KMS managed key. The exact device position, however; is still encrypted using your managed key. You can choose to opt-in to the Bounding Polygon Quseries feature. This is done by setting the KmsKeyEnableGeospatialQueries parameter to true when creating or updating a Tracker."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -8864,30 +13683,33 @@ module DescribeTrackerResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeTrackerResponse"
-    let make ?kmsKeyId =
-      fun ?positionFiltering ->
-        fun ?pricingPlan ->
-          fun ?pricingPlanDataSource ->
-            fun ?tags ->
-              fun ~createTime ->
-                fun ~description ->
-                  fun ~trackerArn ->
-                    fun ~trackerName ->
-                      fun ~updateTime ->
-                        fun () ->
-                          {
-                            kmsKeyId;
-                            positionFiltering;
-                            pricingPlan;
-                            pricingPlanDataSource;
-                            tags;
-                            createTime;
-                            description;
-                            trackerArn;
-                            trackerName;
-                            updateTime
-                          }
+    let make ?trackerName =
+      fun ?trackerArn ->
+        fun ?description ->
+          fun ?pricingPlan ->
+            fun ?pricingPlanDataSource ->
+              fun ?tags ->
+                fun ?createTime ->
+                  fun ?updateTime ->
+                    fun ?kmsKeyId ->
+                      fun ?positionFiltering ->
+                        fun ?eventBridgeEnabled ->
+                          fun ?kmsKeyEnableGeospatialQueries ->
+                            fun () ->
+                              {
+                                trackerName;
+                                trackerArn;
+                                description;
+                                pricingPlan;
+                                pricingPlanDataSource;
+                                tags;
+                                createTime;
+                                updateTime;
+                                kmsKeyId;
+                                positionFiltering;
+                                eventBridgeEnabled;
+                                kmsKeyEnableGeospatialQueries
+                              }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8946,64 +13768,81 @@ module DescribeTrackerResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("CreateTime", (Some (Timestamp.to_value x.createTime)));
-        ("Description", (Some (ResourceDescription.to_value x.description)));
-        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
-        ("PositionFiltering",
-          (Option.map x.positionFiltering ~f:PositionFiltering.to_value));
+        [("TrackerName", (Option.map x.trackerName ~f:ResourceName.to_value));
+        ("TrackerArn", (Option.map x.trackerArn ~f:Arn.to_value));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
         ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
         ("PricingPlanDataSource",
           (Option.map x.pricingPlanDataSource ~f:String_.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("TrackerArn", (Some (Arn.to_value x.trackerArn)));
-        ("TrackerName", (Some (ResourceName.to_value x.trackerName)));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("PositionFiltering",
+          (Option.map x.positionFiltering ~f:PositionFiltering.to_value));
+        ("EventBridgeEnabled",
+          (Option.map x.eventBridgeEnabled ~f:Boolean.to_value));
+        ("KmsKeyEnableGeospatialQueries",
+          (Option.map x.kmsKeyEnableGeospatialQueries ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let kmsKeyEnableGeospatialQueries =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "KmsKeyEnableGeospatialQueries") in
+      let eventBridgeEnabled =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "EventBridgeEnabled") in
+      let positionFiltering =
+        (Option.map ~f:PositionFiltering.of_xml)
+          (Xml.child xml_arg0 "PositionFiltering") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
       let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
-      let trackerName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
-      let trackerArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrackerArn") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
+      let createTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       let pricingPlanDataSource =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "PricingPlanDataSource") in
       let pricingPlan =
         (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
-      let positionFiltering =
-        (Option.map ~f:PositionFiltering.of_xml)
-          (Xml.child xml_arg0 "PositionFiltering") in
-      let kmsKeyId =
-        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
       let description =
-        ResourceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Description") in
-      let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      make ~updateTime ~trackerName ~trackerArn ?tags ?pricingPlanDataSource
-        ?pricingPlan ?positionFiltering ?kmsKeyId ~description ~createTime ()
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let trackerArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "TrackerArn") in
+      let trackerName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "TrackerName") in
+      make ?kmsKeyEnableGeospatialQueries ?eventBridgeEnabled
+        ?positionFiltering ?kmsKeyId ?updateTime ?createTime ?tags
+        ?pricingPlanDataSource ?pricingPlan ?description ?trackerArn
+        ?trackerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
-      let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
-      let trackerArn = field_map_exn json "TrackerArn" Arn.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let pricingPlanDataSource =
-        field_map json "PricingPlanDataSource" String_.of_json in
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
+    let of_json json__ =
+      let kmsKeyEnableGeospatialQueries =
+        field_map json__ "KmsKeyEnableGeospatialQueries" Boolean.of_json in
+      let eventBridgeEnabled =
+        field_map json__ "EventBridgeEnabled" Boolean.of_json in
       let positionFiltering =
-        field_map json "PositionFiltering" PositionFiltering.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
+        field_map json__ "PositionFiltering" PositionFiltering.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let pricingPlanDataSource =
+        field_map json__ "PricingPlanDataSource" String_.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
       let description =
-        field_map_exn json "Description" ResourceDescription.of_json in
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
-      make ~updateTime ~trackerName ~trackerArn ?tags ?pricingPlanDataSource
-        ?pricingPlan ?positionFiltering ?kmsKeyId ~description ~createTime ()
+        field_map json__ "Description" ResourceDescription.of_json in
+      let trackerArn = field_map json__ "TrackerArn" Arn.of_json in
+      let trackerName = field_map json__ "TrackerName" ResourceName.of_json in
+      make ?kmsKeyEnableGeospatialQueries ?eventBridgeEnabled
+        ?positionFiltering ?kmsKeyId ?updateTime ?createTime ?tags
+        ?pricingPlanDataSource ?pricingPlan ?description ?trackerArn
+        ?trackerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the tracker resource details."]
 module DescribeTrackerRequest =
@@ -9024,8 +13863,9 @@ module DescribeTrackerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
       make ~trackerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
+    let of_json json__ =
+      let trackerName =
+        field_map_exn json__ "TrackerName" ResourceName.of_json in
       make ~trackerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the tracker resource details."]
@@ -9033,28 +13873,28 @@ module DescribeRouteCalculatorResponse =
   struct
     type nonrec t =
       {
-      calculatorArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the Route calculator resource. Use the ARN when you specify a resource across AWS. Format example: arn:aws:geo:region:account-id:route-calculator/ExampleCalculator"];
-      calculatorName: ResourceName.t
+      calculatorName: ResourceName.t option
         [@ocaml.doc
           "The name of the route calculator resource being described."];
-      createTime: Timestamp.t
+      calculatorArn: GeoArn.t option
         [@ocaml.doc
-          "The timestamp when the route calculator resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. For example, 2020\226\128\14707-2T12:15:20.000Z+01:00"];
-      dataSource: String_.t
-        [@ocaml.doc
-          "The data provider of traffic and road network data. Indicates one of the available providers: Esri Here For more information about data providers, see Amazon Location Service data providers."];
-      description: ResourceDescription.t
-        [@ocaml.doc
-          "The optional description of the route calculator resource."];
+          "The Amazon Resource Name (ARN) for the Route calculator resource. Use the ARN when you specify a resource across Amazon Web Services. Format example: arn:aws:geo:region:account-id:route-calculator/ExampleCalculator"];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc "Always returns RequestBasedUsage."];
-      tags: TagMap.t option
-        [@ocaml.doc "Tags associated with route calculator resource."];
-      updateTime: Timestamp.t
+      description: ResourceDescription.t option
         [@ocaml.doc
-          "The timestamp when the route calculator resource was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. For example, 2020\226\128\14707-2T12:15:20.000Z+01:00"]}
+          "The optional description of the route calculator resource."];
+      createTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp when the route calculator resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. For example, 2020\226\128\14707-2T12:15:20.000Z+01:00"];
+      updateTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp when the route calculator resource was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. For example, 2020\226\128\14707-2T12:15:20.000Z+01:00"];
+      dataSource: String_.t option
+        [@ocaml.doc
+          "The data provider of traffic and road network data. Indicates one of the available providers: Esri Grab Here For more information about data providers, see Amazon Location Service data providers."];
+      tags: TagMap.t option
+        [@ocaml.doc "Tags associated with route calculator resource."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -9062,25 +13902,24 @@ module DescribeRouteCalculatorResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeRouteCalculatorResponse"
-    let make ?pricingPlan =
-      fun ?tags ->
-        fun ~calculatorArn ->
-          fun ~calculatorName ->
-            fun ~createTime ->
-              fun ~dataSource ->
-                fun ~description ->
-                  fun ~updateTime ->
+    let make ?calculatorName =
+      fun ?calculatorArn ->
+        fun ?pricingPlan ->
+          fun ?description ->
+            fun ?createTime ->
+              fun ?updateTime ->
+                fun ?dataSource ->
+                  fun ?tags ->
                     fun () ->
                       {
-                        pricingPlan;
-                        tags;
-                        calculatorArn;
                         calculatorName;
-                        createTime;
-                        dataSource;
+                        calculatorArn;
+                        pricingPlan;
                         description;
-                        updateTime
+                        createTime;
+                        updateTime;
+                        dataSource;
+                        tags
                       }
     let error_of_json name json =
       match name with
@@ -9140,54 +13979,54 @@ module DescribeRouteCalculatorResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("CalculatorArn", (Some (Arn.to_value x.calculatorArn)));
-        ("CalculatorName", (Some (ResourceName.to_value x.calculatorName)));
-        ("CreateTime", (Some (Timestamp.to_value x.createTime)));
-        ("DataSource", (Some (String_.to_value x.dataSource)));
-        ("Description", (Some (ResourceDescription.to_value x.description)));
+        [("CalculatorName",
+           (Option.map x.calculatorName ~f:ResourceName.to_value));
+        ("CalculatorArn", (Option.map x.calculatorArn ~f:GeoArn.to_value));
         ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
-        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value));
+        ("DataSource", (Option.map x.dataSource ~f:String_.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let dataSource =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DataSource") in
+      let updateTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
+      let createTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let description =
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let pricingPlan =
         (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
-      let description =
-        ResourceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Description") in
-      let dataSource =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DataSource") in
-      let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      let calculatorName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CalculatorName") in
       let calculatorArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CalculatorArn") in
-      make ~updateTime ?tags ?pricingPlan ~description ~dataSource
-        ~createTime ~calculatorName ~calculatorArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
-      let description =
-        field_map_exn json "Description" ResourceDescription.of_json in
-      let dataSource = field_map_exn json "DataSource" String_.of_json in
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
+        (Option.map ~f:GeoArn.of_xml) (Xml.child xml_arg0 "CalculatorArn") in
       let calculatorName =
-        field_map_exn json "CalculatorName" ResourceName.of_json in
-      let calculatorArn = field_map_exn json "CalculatorArn" Arn.of_json in
-      make ~updateTime ?tags ?pricingPlan ~description ~dataSource
-        ~createTime ~calculatorName ~calculatorArn ()
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "CalculatorName") in
+      make ?tags ?dataSource ?updateTime ?createTime ?description
+        ?pricingPlan ?calculatorArn ?calculatorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let dataSource = field_map json__ "DataSource" String_.of_json in
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let description =
+        field_map json__ "Description" ResourceDescription.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
+      let calculatorArn = field_map json__ "CalculatorArn" GeoArn.of_json in
+      let calculatorName =
+        field_map json__ "CalculatorName" ResourceName.of_json in
+      make ?tags ?dataSource ?updateTime ?createTime ?description
+        ?pricingPlan ?calculatorArn ?calculatorName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves the route calculator resource details."]
+  end[@@ocaml.doc
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Routes API V2 unless you require Grab data. DescribeRouteCalculator is part of a previous Amazon Location Service Routes API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Routes API version 2 has a simplified interface that can be used without creating or managing route calculator resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Routes API version 2 is found under geo-routes or geo_routes, not under location. Since Grab is not yet fully supported in Routes API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Routes V2 API Reference or the Developer Guide. Retrieves the route calculator resource details."]
 module DescribeRouteCalculatorRequest =
   struct
     type nonrec t =
@@ -9206,39 +14045,40 @@ module DescribeRouteCalculatorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CalculatorName") in
       make ~calculatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let calculatorName =
-        field_map_exn json "CalculatorName" ResourceName.of_json in
+        field_map_exn json__ "CalculatorName" ResourceName.of_json in
       make ~calculatorName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves the route calculator resource details."]
+  end[@@ocaml.doc
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Routes API V2 unless you require Grab data. DescribeRouteCalculator is part of a previous Amazon Location Service Routes API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Routes API version 2 has a simplified interface that can be used without creating or managing route calculator resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Routes API version 2 is found under geo-routes or geo_routes, not under location. Since Grab is not yet fully supported in Routes API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Routes V2 API Reference or the Developer Guide. Retrieves the route calculator resource details."]
 module DescribePlaceIndexResponse =
   struct
     type nonrec t =
       {
-      createTime: Timestamp.t
-        [@ocaml.doc
-          "The timestamp for when the place index resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
-      dataSource: String_.t
-        [@ocaml.doc
-          "The data provider of geospatial data. Values can be one of the following: Esri Here For more information about data providers, see Amazon Location Service data providers."];
-      dataSourceConfiguration: DataSourceConfiguration.t
-        [@ocaml.doc
-          "The specified data storage option for requesting Places."];
-      description: ResourceDescription.t
-        [@ocaml.doc "The optional description for the place index resource."];
-      indexArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the place index resource. Used to specify a resource across AWS. Format example: arn:aws:geo:region:account-id:place-index/ExamplePlaceIndex"];
-      indexName: ResourceName.t
+      indexName: ResourceName.t option
         [@ocaml.doc "The name of the place index resource being described."];
+      indexArn: GeoArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the place index resource. Used to specify a resource across Amazon Web Services. Format example: arn:aws:geo:region:account-id:place-index/ExamplePlaceIndex"];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc "No longer used. Always returns RequestBasedUsage."];
-      tags: TagMap.t option
-        [@ocaml.doc "Tags associated with place index resource."];
-      updateTime: Timestamp.t
+      description: ResourceDescription.t option
+        [@ocaml.doc "The optional description for the place index resource."];
+      createTime: Timestamp.t option
         [@ocaml.doc
-          "The timestamp for when the place index resource was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
+          "The timestamp for when the place index resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      updateTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the place index resource was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      dataSource: String_.t option
+        [@ocaml.doc
+          "The data provider of geospatial data. Values can be one of the following: Esri Grab Here For more information about data providers, see Amazon Location Service data providers."];
+      dataSourceConfiguration: DataSourceConfiguration.t option
+        [@ocaml.doc
+          "The specified data storage option for requesting Places."];
+      tags: TagMap.t option
+        [@ocaml.doc "Tags associated with place index resource."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -9246,27 +14086,26 @@ module DescribePlaceIndexResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribePlaceIndexResponse"
-    let make ?pricingPlan =
-      fun ?tags ->
-        fun ~createTime ->
-          fun ~dataSource ->
-            fun ~dataSourceConfiguration ->
-              fun ~description ->
-                fun ~indexArn ->
-                  fun ~indexName ->
-                    fun ~updateTime ->
+    let make ?indexName =
+      fun ?indexArn ->
+        fun ?pricingPlan ->
+          fun ?description ->
+            fun ?createTime ->
+              fun ?updateTime ->
+                fun ?dataSource ->
+                  fun ?dataSourceConfiguration ->
+                    fun ?tags ->
                       fun () ->
                         {
+                          indexName;
+                          indexArn;
                           pricingPlan;
-                          tags;
+                          description;
                           createTime;
+                          updateTime;
                           dataSource;
                           dataSourceConfiguration;
-                          description;
-                          indexArn;
-                          indexName;
-                          updateTime
+                          tags
                         }
     let error_of_json name json =
       match name with
@@ -9326,61 +14165,60 @@ module DescribePlaceIndexResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("CreateTime", (Some (Timestamp.to_value x.createTime)));
-        ("DataSource", (Some (String_.to_value x.dataSource)));
-        ("DataSourceConfiguration",
-          (Some (DataSourceConfiguration.to_value x.dataSourceConfiguration)));
-        ("Description", (Some (ResourceDescription.to_value x.description)));
-        ("IndexArn", (Some (Arn.to_value x.indexArn)));
-        ("IndexName", (Some (ResourceName.to_value x.indexName)));
+        [("IndexName", (Option.map x.indexName ~f:ResourceName.to_value));
+        ("IndexArn", (Option.map x.indexArn ~f:GeoArn.to_value));
         ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
-        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value));
+        ("DataSource", (Option.map x.dataSource ~f:String_.to_value));
+        ("DataSourceConfiguration",
+          (Option.map x.dataSourceConfiguration
+             ~f:DataSourceConfiguration.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let dataSourceConfiguration =
+        (Option.map ~f:DataSourceConfiguration.of_xml)
+          (Xml.child xml_arg0 "DataSourceConfiguration") in
+      let dataSource =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DataSource") in
+      let updateTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
+      let createTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let description =
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let pricingPlan =
         (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
-      let indexName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
       let indexArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexArn") in
-      let description =
-        ResourceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Description") in
-      let dataSourceConfiguration =
-        DataSourceConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DataSourceConfiguration") in
-      let dataSource =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DataSource") in
-      let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      make ~updateTime ?tags ?pricingPlan ~indexName ~indexArn ~description
-        ~dataSourceConfiguration ~dataSource ~createTime ()
+        (Option.map ~f:GeoArn.of_xml) (Xml.child xml_arg0 "IndexArn") in
+      let indexName =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "IndexName") in
+      make ?tags ?dataSourceConfiguration ?dataSource ?updateTime ?createTime
+        ?description ?pricingPlan ?indexArn ?indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
-      let indexName = field_map_exn json "IndexName" ResourceName.of_json in
-      let indexArn = field_map_exn json "IndexArn" Arn.of_json in
-      let description =
-        field_map_exn json "Description" ResourceDescription.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let dataSourceConfiguration =
-        field_map_exn json "DataSourceConfiguration"
+        field_map json__ "DataSourceConfiguration"
           DataSourceConfiguration.of_json in
-      let dataSource = field_map_exn json "DataSource" String_.of_json in
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
-      make ~updateTime ?tags ?pricingPlan ~indexName ~indexArn ~description
-        ~dataSourceConfiguration ~dataSource ~createTime ()
+      let dataSource = field_map json__ "DataSource" String_.of_json in
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let description =
+        field_map json__ "Description" ResourceDescription.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
+      let indexArn = field_map json__ "IndexArn" GeoArn.of_json in
+      let indexName = field_map json__ "IndexName" ResourceName.of_json in
+      make ?tags ?dataSourceConfiguration ?dataSource ?updateTime ?createTime
+        ?description ?pricingPlan ?indexArn ?indexName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves the place index resource details."]
+  end[@@ocaml.doc
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Places API V2 unless you require Grab data. DescribePlaceIndex is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Places API version 2 has a simplified interface that can be used without creating or managing place index resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Places V2 API Reference or the Developer Guide. Retrieves the place index resource details."]
 module DescribePlaceIndexRequest =
   struct
     type nonrec t =
@@ -9399,36 +14237,37 @@ module DescribePlaceIndexRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
       make ~indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexName = field_map_exn json "IndexName" ResourceName.of_json in
+    let of_json json__ =
+      let indexName = field_map_exn json__ "IndexName" ResourceName.of_json in
       make ~indexName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves the place index resource details."]
+  end[@@ocaml.doc
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Places API V2 unless you require Grab data. DescribePlaceIndex is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Places API version 2 has a simplified interface that can be used without creating or managing place index resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Places V2 API Reference or the Developer Guide. Retrieves the place index resource details."]
 module DescribeMapResponse =
   struct
     type nonrec t =
       {
-      configuration: MapConfiguration.t
-        [@ocaml.doc
-          "Specifies the map tile style selected from a partner data provider."];
-      createTime: Timestamp.t
-        [@ocaml.doc
-          "The timestamp for when the map resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
-      dataSource: String_.t
-        [@ocaml.doc
-          "Specifies the data provider for the associated map tiles."];
-      description: ResourceDescription.t
-        [@ocaml.doc "The optional description for the map resource."];
-      mapArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the map resource. Used to specify a resource across all AWS. Format example: arn:aws:geo:region:account-id:maps/ExampleMap"];
-      mapName: ResourceName.t
+      mapName: ResourceName.t option
         [@ocaml.doc "The map style selected from an available provider."];
+      mapArn: GeoArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the map resource. Used to specify a resource across all Amazon Web Services. Format example: arn:aws:geo:region:account-id:map/ExampleMap"];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc "No longer used. Always returns RequestBasedUsage."];
+      dataSource: String_.t option
+        [@ocaml.doc
+          "Specifies the data provider for the associated map tiles."];
+      configuration: MapConfiguration.t option
+        [@ocaml.doc
+          "Specifies the map tile style selected from a partner data provider."];
+      description: ResourceDescription.t option
+        [@ocaml.doc "The optional description for the map resource."];
       tags: TagMap.t option
         [@ocaml.doc "Tags associated with the map resource."];
-      updateTime: Timestamp.t
+      createTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the map resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      updateTime: Timestamp.t option
         [@ocaml.doc
           "The timestamp for when the map resource was last update in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
     type nonrec error =
@@ -9438,26 +14277,25 @@ module DescribeMapResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeMapResponse"
-    let make ?pricingPlan =
-      fun ?tags ->
-        fun ~configuration ->
-          fun ~createTime ->
-            fun ~dataSource ->
-              fun ~description ->
-                fun ~mapArn ->
-                  fun ~mapName ->
-                    fun ~updateTime ->
+    let make ?mapName =
+      fun ?mapArn ->
+        fun ?pricingPlan ->
+          fun ?dataSource ->
+            fun ?configuration ->
+              fun ?description ->
+                fun ?tags ->
+                  fun ?createTime ->
+                    fun ?updateTime ->
                       fun () ->
                         {
-                          pricingPlan;
-                          tags;
-                          configuration;
-                          createTime;
-                          dataSource;
-                          description;
-                          mapArn;
                           mapName;
+                          mapArn;
+                          pricingPlan;
+                          dataSource;
+                          configuration;
+                          description;
+                          tags;
+                          createTime;
                           updateTime
                         }
     let error_of_json name json =
@@ -9518,60 +14356,58 @@ module DescribeMapResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Configuration",
-           (Some (MapConfiguration.to_value x.configuration)));
-        ("CreateTime", (Some (Timestamp.to_value x.createTime)));
-        ("DataSource", (Some (String_.to_value x.dataSource)));
-        ("Description", (Some (ResourceDescription.to_value x.description)));
-        ("MapArn", (Some (Arn.to_value x.mapArn)));
-        ("MapName", (Some (ResourceName.to_value x.mapName)));
+        [("MapName", (Option.map x.mapName ~f:ResourceName.to_value));
+        ("MapArn", (Option.map x.mapArn ~f:GeoArn.to_value));
         ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
+        ("DataSource", (Option.map x.dataSource ~f:String_.to_value));
+        ("Configuration",
+          (Option.map x.configuration ~f:MapConfiguration.to_value));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
+      let createTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let description =
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let configuration =
+        (Option.map ~f:MapConfiguration.of_xml)
+          (Xml.child xml_arg0 "Configuration") in
+      let dataSource =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DataSource") in
       let pricingPlan =
         (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
-      let mapName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
       let mapArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MapArn") in
-      let description =
-        ResourceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Description") in
-      let dataSource =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DataSource") in
-      let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      let configuration =
-        MapConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Configuration") in
-      make ~updateTime ?tags ?pricingPlan ~mapName ~mapArn ~description
-        ~dataSource ~createTime ~configuration ()
+        (Option.map ~f:GeoArn.of_xml) (Xml.child xml_arg0 "MapArn") in
+      let mapName =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "MapName") in
+      make ?updateTime ?createTime ?tags ?description ?configuration
+        ?dataSource ?pricingPlan ?mapArn ?mapName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
-      let mapName = field_map_exn json "MapName" ResourceName.of_json in
-      let mapArn = field_map_exn json "MapArn" Arn.of_json in
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let description =
-        field_map_exn json "Description" ResourceDescription.of_json in
-      let dataSource = field_map_exn json "DataSource" String_.of_json in
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
+        field_map json__ "Description" ResourceDescription.of_json in
       let configuration =
-        field_map_exn json "Configuration" MapConfiguration.of_json in
-      make ~updateTime ?tags ?pricingPlan ~mapName ~mapArn ~description
-        ~dataSource ~createTime ~configuration ()
+        field_map json__ "Configuration" MapConfiguration.of_json in
+      let dataSource = field_map json__ "DataSource" String_.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
+      let mapArn = field_map json__ "MapArn" GeoArn.of_json in
+      let mapName = field_map json__ "MapName" ResourceName.of_json in
+      make ?updateTime ?createTime ?tags ?description ?configuration
+        ?dataSource ?pricingPlan ?mapArn ?mapName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves the map resource details."]
+  end[@@ocaml.doc
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to the Maps API V2 unless you require Grab data. DescribeMap is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Maps API version 2 has a simplified interface that can be used without creating or managing map resources. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Retrieves the map resource details."]
 module DescribeMapRequest =
   struct
     type nonrec t =
@@ -9589,38 +14425,36 @@ module DescribeMapRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
       make ~mapName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mapName = field_map_exn json "MapName" ResourceName.of_json in
+    let of_json json__ =
+      let mapName = field_map_exn json__ "MapName" ResourceName.of_json in
       make ~mapName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves the map resource details."]
-module DescribeGeofenceCollectionResponse =
+  end[@@ocaml.doc
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to the Maps API V2 unless you require Grab data. DescribeMap is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Maps API version 2 has a simplified interface that can be used without creating or managing map resources. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Retrieves the map resource details."]
+module DescribeKeyResponse =
   struct
     type nonrec t =
       {
-      collectionArn: Arn.t
+      key: ApiKey.t option [@ocaml.doc "The key value/string of an API key."];
+      keyArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the geofence collection resource. Used when you need to specify a resource across all AWS. Format example: arn:aws:geo:region:account-id:geofence-collection/ExampleGeofenceCollection"];
-      collectionName: ResourceName.t
-        [@ocaml.doc "The name of the geofence collection."];
-      createTime: Timestamp.t
+          "The Amazon Resource Name (ARN) for the API key resource. Used when you need to specify a resource across all Amazon Web Services. Format example: arn:aws:geo:region:account-id:key/ExampleKey"];
+      keyName: ResourceName.t option
+        [@ocaml.doc "The name of the API key resource."];
+      restrictions: ApiKeyRestrictions.t option ;
+      createTime: Timestamp.t option
         [@ocaml.doc
-          "The timestamp for when the geofence resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"];
-      description: ResourceDescription.t
-        [@ocaml.doc "The optional description for the geofence collection."];
-      kmsKeyId: KmsKeyId.t option
+          "The timestamp for when the API key resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      expireTime: Timestamp.t option
         [@ocaml.doc
-          "A key identifier for an AWS KMS customer managed key assigned to the Amazon Location resource"];
-      pricingPlan: PricingPlan.t option
-        [@ocaml.doc "No longer used. Always returns RequestBasedUsage."];
-      pricingPlanDataSource: String_.t option
-        [@ocaml.doc "No longer used. Always returns an empty string."];
+          "The timestamp for when the API key resource will expire in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      updateTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the API key resource was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
+      description: ResourceDescription.t option
+        [@ocaml.doc "The optional description for the API key resource."];
       tags: TagMap.t option
-        [@ocaml.doc
-          "Displays the key, value pairs of tags associated with this resource."];
-      updateTime: Timestamp.t
-        [@ocaml.doc
-          "The timestamp for when the geofence collection was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"]}
+        [@ocaml.doc "Tags associated with the API key resource."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -9628,27 +14462,26 @@ module DescribeGeofenceCollectionResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeGeofenceCollectionResponse"
-    let make ?kmsKeyId =
-      fun ?pricingPlan ->
-        fun ?pricingPlanDataSource ->
-          fun ?tags ->
-            fun ~collectionArn ->
-              fun ~collectionName ->
-                fun ~createTime ->
-                  fun ~description ->
-                    fun ~updateTime ->
+    let make ?key =
+      fun ?keyArn ->
+        fun ?keyName ->
+          fun ?restrictions ->
+            fun ?createTime ->
+              fun ?expireTime ->
+                fun ?updateTime ->
+                  fun ?description ->
+                    fun ?tags ->
                       fun () ->
                         {
-                          kmsKeyId;
-                          pricingPlan;
-                          pricingPlanDataSource;
-                          tags;
-                          collectionArn;
-                          collectionName;
+                          key;
+                          keyArn;
+                          keyName;
+                          restrictions;
                           createTime;
+                          expireTime;
+                          updateTime;
                           description;
-                          updateTime
+                          tags
                         }
     let error_of_json name json =
       match name with
@@ -9708,58 +14541,262 @@ module DescribeGeofenceCollectionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("CollectionArn", (Some (Arn.to_value x.collectionArn)));
-        ("CollectionName", (Some (ResourceName.to_value x.collectionName)));
-        ("CreateTime", (Some (Timestamp.to_value x.createTime)));
-        ("Description", (Some (ResourceDescription.to_value x.description)));
-        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        [("Key", (Option.map x.key ~f:ApiKey.to_value));
+        ("KeyArn", (Option.map x.keyArn ~f:Arn.to_value));
+        ("KeyName", (Option.map x.keyName ~f:ResourceName.to_value));
+        ("Restrictions",
+          (Option.map x.restrictions ~f:ApiKeyRestrictions.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
+        ("ExpireTime", (Option.map x.expireTime ~f:Timestamp.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let description =
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let updateTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
+      let expireTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "ExpireTime") in
+      let createTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let restrictions =
+        (Option.map ~f:ApiKeyRestrictions.of_xml)
+          (Xml.child xml_arg0 "Restrictions") in
+      let keyName =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "KeyName") in
+      let keyArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "KeyArn") in
+      let key = (Option.map ~f:ApiKey.of_xml) (Xml.child xml_arg0 "Key") in
+      make ?tags ?description ?updateTime ?expireTime ?createTime
+        ?restrictions ?keyName ?keyArn ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let description =
+        field_map json__ "Description" ResourceDescription.of_json in
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let expireTime = field_map json__ "ExpireTime" Timestamp.of_json in
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let restrictions =
+        field_map json__ "Restrictions" ApiKeyRestrictions.of_json in
+      let keyName = field_map json__ "KeyName" ResourceName.of_json in
+      let keyArn = field_map json__ "KeyArn" Arn.of_json in
+      let key = field_map json__ "Key" ApiKey.of_json in
+      make ?tags ?description ?updateTime ?expireTime ?createTime
+        ?restrictions ?keyName ?keyArn ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the API key resource details. For more information, see Use API keys to authenticate in the Amazon Location Service Developer Guide."]
+module DescribeKeyRequest =
+  struct
+    type nonrec t =
+      {
+      keyName: ResourceName.t
+        [@ocaml.doc "The name of the API key resource."]}
+    let context_ = "DescribeKeyRequest"
+    let make ~keyName = fun () -> { keyName }
+    let to_value x =
+      structure_to_value
+        [("KeyName", (Some (ResourceName.to_value x.keyName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let keyName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "KeyName") in
+      make ~keyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let keyName = field_map_exn json__ "KeyName" ResourceName.of_json in
+      make ~keyName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the API key resource details. For more information, see Use API keys to authenticate in the Amazon Location Service Developer Guide."]
+module DescribeGeofenceCollectionResponse =
+  struct
+    type nonrec t =
+      {
+      collectionName: ResourceName.t option
+        [@ocaml.doc "The name of the geofence collection."];
+      collectionArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the geofence collection resource. Used when you need to specify a resource across all Amazon Web Services. Format example: arn:aws:geo:region:account-id:geofence-collection/ExampleGeofenceCollection"];
+      description: ResourceDescription.t option
+        [@ocaml.doc "The optional description for the geofence collection."];
+      pricingPlan: PricingPlan.t option
+        [@ocaml.doc "No longer used. Always returns RequestBasedUsage."];
+      pricingPlanDataSource: String_.t option
+        [@ocaml.doc "No longer used. Always returns an empty string."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "A key identifier for an Amazon Web Services KMS customer managed key assigned to the Amazon Location resource"];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "Displays the key, value pairs of tags associated with this resource."];
+      createTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the geofence resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"];
+      updateTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the geofence collection was last updated in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"];
+      geofenceCount:
+        DescribeGeofenceCollectionResponseGeofenceCountInteger.t option
+        [@ocaml.doc "The number of geofences in the geofence collection."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?collectionName =
+      fun ?collectionArn ->
+        fun ?description ->
+          fun ?pricingPlan ->
+            fun ?pricingPlanDataSource ->
+              fun ?kmsKeyId ->
+                fun ?tags ->
+                  fun ?createTime ->
+                    fun ?updateTime ->
+                      fun ?geofenceCount ->
+                        fun () ->
+                          {
+                            collectionName;
+                            collectionArn;
+                            description;
+                            pricingPlan;
+                            pricingPlanDataSource;
+                            kmsKeyId;
+                            tags;
+                            createTime;
+                            updateTime;
+                            geofenceCount
+                          }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CollectionName",
+           (Option.map x.collectionName ~f:ResourceName.to_value));
+        ("CollectionArn", (Option.map x.collectionArn ~f:Arn.to_value));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
         ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
         ("PricingPlanDataSource",
           (Option.map x.pricingPlanDataSource ~f:String_.to_value));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("UpdateTime", (Some (Timestamp.to_value x.updateTime)))]
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:Timestamp.to_value));
+        ("GeofenceCount",
+          (Option.map x.geofenceCount
+             ~f:DescribeGeofenceCollectionResponseGeofenceCountInteger.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let geofenceCount =
+        (Option.map
+           ~f:DescribeGeofenceCollectionResponseGeofenceCountInteger.of_xml)
+          (Xml.child xml_arg0 "GeofenceCount") in
       let updateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateTime") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdateTime") in
+      let createTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
       let pricingPlanDataSource =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "PricingPlanDataSource") in
       let pricingPlan =
         (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
-      let kmsKeyId =
-        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
       let description =
-        ResourceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Description") in
-      let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      let collectionName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let collectionArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CollectionArn") in
-      make ~updateTime ?tags ?pricingPlanDataSource ?pricingPlan ?kmsKeyId
-        ~description ~createTime ~collectionName ~collectionArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updateTime = field_map_exn json "UpdateTime" Timestamp.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let pricingPlanDataSource =
-        field_map json "PricingPlanDataSource" String_.of_json in
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
-      let description =
-        field_map_exn json "Description" ResourceDescription.of_json in
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CollectionArn") in
       let collectionName =
-        field_map_exn json "CollectionName" ResourceName.of_json in
-      let collectionArn = field_map_exn json "CollectionArn" Arn.of_json in
-      make ~updateTime ?tags ?pricingPlanDataSource ?pricingPlan ?kmsKeyId
-        ~description ~createTime ~collectionName ~collectionArn ()
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "CollectionName") in
+      make ?geofenceCount ?updateTime ?createTime ?tags ?kmsKeyId
+        ?pricingPlanDataSource ?pricingPlan ?description ?collectionArn
+        ?collectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let geofenceCount =
+        field_map json__ "GeofenceCount"
+          DescribeGeofenceCollectionResponseGeofenceCountInteger.of_json in
+      let updateTime = field_map json__ "UpdateTime" Timestamp.of_json in
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let pricingPlanDataSource =
+        field_map json__ "PricingPlanDataSource" String_.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
+      let description =
+        field_map json__ "Description" ResourceDescription.of_json in
+      let collectionArn = field_map json__ "CollectionArn" Arn.of_json in
+      let collectionName =
+        field_map json__ "CollectionName" ResourceName.of_json in
+      make ?geofenceCount ?updateTime ?createTime ?tags ?kmsKeyId
+        ?pricingPlanDataSource ?pricingPlan ?description ?collectionArn
+        ?collectionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the geofence collection details."]
 module DescribeGeofenceCollectionRequest =
@@ -9780,9 +14817,9 @@ module DescribeGeofenceCollectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
       make ~collectionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let collectionName =
-        field_map_exn json "CollectionName" ResourceName.of_json in
+        field_map_exn json__ "CollectionName" ResourceName.of_json in
       make ~collectionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the geofence collection details."]
@@ -9861,7 +14898,7 @@ module DeleteTrackerResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a tracker resource from your AWS account. This operation deletes the resource permanently. If the tracker resource is in use, you may encounter an error. Make sure that the target resource isn't a dependency for your applications."]
+       "Deletes a tracker resource from your Amazon Web Services account. This operation deletes the resource permanently. If the tracker resource is in use, you may encounter an error. Make sure that the target resource isn't a dependency for your applications."]
 module DeleteTrackerRequest =
   struct
     type nonrec t =
@@ -9880,12 +14917,13 @@ module DeleteTrackerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
       make ~trackerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
+    let of_json json__ =
+      let trackerName =
+        field_map_exn json__ "TrackerName" ResourceName.of_json in
       make ~trackerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a tracker resource from your AWS account. This operation deletes the resource permanently. If the tracker resource is in use, you may encounter an error. Make sure that the target resource isn't a dependency for your applications."]
+       "Deletes a tracker resource from your Amazon Web Services account. This operation deletes the resource permanently. If the tracker resource is in use, you may encounter an error. Make sure that the target resource isn't a dependency for your applications."]
 module DeleteRouteCalculatorResponse =
   struct
     type nonrec t = unit
@@ -9961,7 +14999,7 @@ module DeleteRouteCalculatorResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a route calculator resource from your AWS account. This operation deletes the resource permanently."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Routes API V2 unless you require Grab data. DeleteRouteCalculator is part of a previous Amazon Location Service Routes API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Routes API version 2 has a simplified interface that can be used without creating or managing route calculator resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Routes API version 2 is found under geo-routes or geo_routes, not under location. Since Grab is not yet fully supported in Routes API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Routes V2 API Reference or the Developer Guide. Deletes a route calculator resource from your Amazon Web Services account. This operation deletes the resource permanently."]
 module DeleteRouteCalculatorRequest =
   struct
     type nonrec t =
@@ -9981,13 +15019,13 @@ module DeleteRouteCalculatorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CalculatorName") in
       make ~calculatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let calculatorName =
-        field_map_exn json "CalculatorName" ResourceName.of_json in
+        field_map_exn json__ "CalculatorName" ResourceName.of_json in
       make ~calculatorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a route calculator resource from your AWS account. This operation deletes the resource permanently."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Routes API V2 unless you require Grab data. DeleteRouteCalculator is part of a previous Amazon Location Service Routes API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Routes API version 2 has a simplified interface that can be used without creating or managing route calculator resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Routes API version 2 is found under geo-routes or geo_routes, not under location. Since Grab is not yet fully supported in Routes API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Routes V2 API Reference or the Developer Guide. Deletes a route calculator resource from your Amazon Web Services account. This operation deletes the resource permanently."]
 module DeletePlaceIndexResponse =
   struct
     type nonrec t = unit
@@ -10063,7 +15101,7 @@ module DeletePlaceIndexResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a place index resource from your AWS account. This operation deletes the resource permanently."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Places API V2 unless you require Grab data. DeletePlaceIndex is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Places API version 2 has a simplified interface that can be used without creating or managing place index resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Places V2 API Reference or the Developer Guide. Deletes a place index resource from your Amazon Web Services account. This operation deletes the resource permanently."]
 module DeletePlaceIndexRequest =
   struct
     type nonrec t =
@@ -10082,12 +15120,12 @@ module DeletePlaceIndexRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
       make ~indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexName = field_map_exn json "IndexName" ResourceName.of_json in
+    let of_json json__ =
+      let indexName = field_map_exn json__ "IndexName" ResourceName.of_json in
       make ~indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a place index resource from your AWS account. This operation deletes the resource permanently."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Places API V2 unless you require Grab data. DeletePlaceIndex is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Places API version 2 has a simplified interface that can be used without creating or managing place index resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Places V2 API Reference or the Developer Guide. Deletes a place index resource from your Amazon Web Services account. This operation deletes the resource permanently."]
 module DeleteMapResponse =
   struct
     type nonrec t = unit
@@ -10163,7 +15201,7 @@ module DeleteMapResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a map resource from your AWS account. This operation deletes the resource permanently. If the map is being used in an application, the map may not render."]
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to the Maps API V2 unless you require Grab data. DeleteMap is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Maps API version 2 has a simplified interface that can be used without creating or managing map resources. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Deletes a map resource from your Amazon Web Services account. This operation deletes the resource permanently. If the map is being used in an application, the map may not render."]
 module DeleteMapRequest =
   struct
     type nonrec t =
@@ -10182,12 +15220,120 @@ module DeleteMapRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
       make ~mapName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mapName = field_map_exn json "MapName" ResourceName.of_json in
+    let of_json json__ =
+      let mapName = field_map_exn json__ "MapName" ResourceName.of_json in
       make ~mapName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a map resource from your AWS account. This operation deletes the resource permanently. If the map is being used in an application, the map may not render."]
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to the Maps API V2 unless you require Grab data. DeleteMap is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Maps API version 2 has a simplified interface that can be used without creating or managing map resources. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Deletes a map resource from your Amazon Web Services account. This operation deletes the resource permanently. If the map is being used in an application, the map may not render."]
+module DeleteKeyResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified API key. The API key must have been deactivated more than 90 days previously. For more information, see Use API keys to authenticate in the Amazon Location Service Developer Guide."]
+module DeleteKeyRequest =
+  struct
+    type nonrec t =
+      {
+      keyName: ResourceName.t
+        [@ocaml.doc "The name of the API key to delete."];
+      forceDelete: Boolean.t option
+        [@ocaml.doc
+          "ForceDelete bypasses an API key's expiry conditions and deletes the key. Set the parameter true to delete the key or to false to not preemptively delete the API key. Valid values: true, or false. Required: No This action is irreversible. Only use ForceDelete if you are certain the key is no longer in use."]}
+    let context_ = "DeleteKeyRequest"
+    let make ?forceDelete =
+      fun ~keyName -> fun () -> { forceDelete; keyName }
+    let to_value x =
+      structure_to_value
+        [("KeyName", (Some (ResourceName.to_value x.keyName)));
+        ("forceDelete", (Option.map x.forceDelete ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let forceDelete =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "forceDelete") in
+      let keyName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "KeyName") in
+      make ?forceDelete ~keyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let forceDelete = field_map json__ "ForceDelete" Boolean.of_json in
+      let keyName = field_map_exn json__ "KeyName" ResourceName.of_json in
+      make ?forceDelete ~keyName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified API key. The API key must have been deactivated more than 90 days previously. For more information, see Use API keys to authenticate in the Amazon Location Service Developer Guide."]
 module DeleteGeofenceCollectionResponse =
   struct
     type nonrec t = unit
@@ -10263,7 +15409,7 @@ module DeleteGeofenceCollectionResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a geofence collection from your AWS account. This operation deletes the resource permanently. If the geofence collection is the target of a tracker resource, the devices will no longer be monitored."]
+       "Deletes a geofence collection from your Amazon Web Services account. This operation deletes the resource permanently. If the geofence collection is the target of a tracker resource, the devices will no longer be monitored."]
 module DeleteGeofenceCollectionRequest =
   struct
     type nonrec t =
@@ -10282,36 +15428,36 @@ module DeleteGeofenceCollectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
       make ~collectionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let collectionName =
-        field_map_exn json "CollectionName" ResourceName.of_json in
+        field_map_exn json__ "CollectionName" ResourceName.of_json in
       make ~collectionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a geofence collection from your AWS account. This operation deletes the resource permanently. If the geofence collection is the target of a tracker resource, the devices will no longer be monitored."]
+       "Deletes a geofence collection from your Amazon Web Services account. This operation deletes the resource permanently. If the geofence collection is the target of a tracker resource, the devices will no longer be monitored."]
 module CreateTrackerResponse =
   struct
     type nonrec t =
       {
-      createTime: Timestamp.t
+      trackerName: ResourceName.t option
+        [@ocaml.doc "The name of the tracker resource."];
+      trackerArn: Arn.t option
         [@ocaml.doc
-          "The timestamp for when the tracker resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
-      trackerArn: Arn.t
+          "The Amazon Resource Name (ARN) for the tracker resource. Used when you need to specify a resource across all Amazon Web Services. Format example: arn:aws:geo:region:account-id:tracker/ExampleTracker"];
+      createTime: Timestamp.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the tracker resource. Used when you need to specify a resource across all AWS. Format example: arn:aws:geo:region:account-id:tracker/ExampleTracker"];
-      trackerName: ResourceName.t
-        [@ocaml.doc "The name of the tracker resource."]}
+          "The timestamp for when the tracker resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateTrackerResponse"
-    let make ~createTime =
-      fun ~trackerArn ->
-        fun ~trackerName -> fun () -> { createTime; trackerArn; trackerName }
+    let make ?trackerName =
+      fun ?trackerArn ->
+        fun ?createTime -> fun () -> { trackerName; trackerArn; createTime }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -10320,6 +15466,9 @@ module CreateTrackerResponse =
           `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
@@ -10335,6 +15484,9 @@ module CreateTrackerResponse =
           `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
@@ -10355,6 +15507,10 @@ module CreateTrackerResponse =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
       | `ThrottlingException e ->
           `Assoc
             [("error", (`String "ThrottlingException"));
@@ -10370,145 +15526,171 @@ module CreateTrackerResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("CreateTime", (Some (Timestamp.to_value x.createTime)));
-        ("TrackerArn", (Some (Arn.to_value x.trackerArn)));
-        ("TrackerName", (Some (ResourceName.to_value x.trackerName)))]
+        [("TrackerName", (Option.map x.trackerName ~f:ResourceName.to_value));
+        ("TrackerArn", (Option.map x.trackerArn ~f:Arn.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let trackerName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
-      let trackerArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrackerArn") in
       let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      make ~trackerName ~trackerArn ~createTime ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let trackerArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "TrackerArn") in
+      let trackerName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "TrackerName") in
+      make ?createTime ?trackerArn ?trackerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
-      let trackerArn = field_map_exn json "TrackerArn" Arn.of_json in
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
-      make ~trackerName ~trackerArn ~createTime ()
+    let of_json json__ =
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let trackerArn = field_map json__ "TrackerArn" Arn.of_json in
+      let trackerName = field_map json__ "TrackerName" ResourceName.of_json in
+      make ?createTime ?trackerArn ?trackerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a tracker resource in your AWS account, which lets you retrieve current and historical location of devices."]
+       "Creates a tracker resource in your Amazon Web Services account, which lets you retrieve current and historical location of devices."]
 module CreateTrackerRequest =
   struct
     type nonrec t =
       {
-      description: ResourceDescription.t option
-        [@ocaml.doc "An optional description for the tracker resource."];
-      kmsKeyId: KmsKeyId.t option
+      trackerName: ResourceName.t
         [@ocaml.doc
-          "A key identifier for an AWS KMS customer managed key. Enter a key ID, key ARN, alias name, or alias ARN."];
-      positionFiltering: PositionFiltering.t option
-        [@ocaml.doc
-          "Specifies the position filtering for the tracker resource. Valid values: TimeBased - Location updates are evaluated against linked geofence collections, but not every location update is stored. If your update frequency is more often than 30 seconds, only one update per 30 seconds is stored for each unique device ID. DistanceBased - If the device has moved less than 30 m (98.4 ft), location updates are ignored. Location updates within this area are neither evaluated against linked geofence collections, nor stored. This helps control costs by reducing the number of geofence evaluations and historical device positions to paginate through. Distance-based filtering can also reduce the effects of GPS noise when displaying device trajectories on a map. AccuracyBased - If the device has moved less than the measured accuracy, location updates are ignored. For example, if two consecutive updates from a device have a horizontal accuracy of 5 m and 10 m, the second update is ignored if the device has moved less than 15 m. Ignored location updates are neither evaluated against linked geofence collections, nor stored. This can reduce the effects of GPS noise when displaying device trajectories on a map, and can help control your costs by reducing the number of geofence evaluations. This field is optional. If not specified, the default value is TimeBased."];
+          "The name for the tracker resource. Requirements: Contain only alphanumeric characters (A-Z, a-z, 0-9) , hyphens (-), periods (.), and underscores (_). Must be a unique tracker resource name. No spaces allowed. For example, ExampleTracker."];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc
           "No longer used. If included, the only allowed value is RequestBasedUsage."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "A key identifier for an Amazon Web Services KMS customer managed key. Enter a key ID, key ARN, alias name, or alias ARN."];
       pricingPlanDataSource: String_.t option
         [@ocaml.doc "This parameter is no longer used."];
+      description: ResourceDescription.t option
+        [@ocaml.doc "An optional description for the tracker resource."];
       tags: TagMap.t option
         [@ocaml.doc
           "Applies one or more tags to the tracker resource. A tag is a key-value pair helps manage, identify, search, and filter your resources by labelling them. Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource Each resource tag must be unique with a maximum of one value. Maximum key length: 128 Unicode characters in UTF-8 Maximum value length: 256 Unicode characters in UTF-8 Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / \\@. Cannot use \"aws:\" as a prefix for a key."];
-      trackerName: ResourceName.t
+      positionFiltering: PositionFiltering.t option
         [@ocaml.doc
-          "The name for the tracker resource. Requirements: Contain only alphanumeric characters (A-Z, a-z, 0-9) , hyphens (-), periods (.), and underscores (_). Must be a unique tracker resource name. No spaces allowed. For example, ExampleTracker."]}
+          "Specifies the position filtering for the tracker resource. Valid values: TimeBased - Location updates are evaluated against linked geofence collections, but not every location update is stored. If your update frequency is more often than 30 seconds, only one update per 30 seconds is stored for each unique device ID. DistanceBased - If the device has moved less than 30 m (98.4 ft), location updates are ignored. Location updates within this area are neither evaluated against linked geofence collections, nor stored. This helps control costs by reducing the number of geofence evaluations and historical device positions to paginate through. Distance-based filtering can also reduce the effects of GPS noise when displaying device trajectories on a map. AccuracyBased - If the device has moved less than the measured accuracy, location updates are ignored. For example, if two consecutive updates from a device have a horizontal accuracy of 5 m and 10 m, the second update is ignored if the device has moved less than 15 m. Ignored location updates are neither evaluated against linked geofence collections, nor stored. This can reduce the effects of GPS noise when displaying device trajectories on a map, and can help control your costs by reducing the number of geofence evaluations. This field is optional. If not specified, the default value is TimeBased."];
+      eventBridgeEnabled: Boolean.t option
+        [@ocaml.doc
+          "Whether to enable position UPDATE events from this tracker to be sent to EventBridge. You do not need enable this feature to get ENTER and EXIT events for geofences with this tracker. Those events are always sent to EventBridge."];
+      kmsKeyEnableGeospatialQueries: Boolean.t option
+        [@ocaml.doc
+          "Enables GeospatialQueries for a tracker that uses a Amazon Web Services KMS customer managed key. This parameter is only used if you are using a KMS customer managed key. If you wish to encrypt your data using your own KMS customer managed key, then the Bounding Polygon Queries feature will be disabled by default. This is because by using this feature, a representation of your device positions will not be encrypted using the your KMS managed key. The exact device position, however; is still encrypted using your managed key. You can choose to opt-in to the Bounding Polygon Quseries feature. This is done by setting the KmsKeyEnableGeospatialQueries parameter to true when creating or updating a Tracker."]}
     let context_ = "CreateTrackerRequest"
-    let make ?description =
+    let make ?pricingPlan =
       fun ?kmsKeyId ->
-        fun ?positionFiltering ->
-          fun ?pricingPlan ->
-            fun ?pricingPlanDataSource ->
-              fun ?tags ->
-                fun ~trackerName ->
-                  fun () ->
-                    {
-                      description;
-                      kmsKeyId;
-                      positionFiltering;
-                      pricingPlan;
-                      pricingPlanDataSource;
-                      tags;
-                      trackerName
-                    }
+        fun ?pricingPlanDataSource ->
+          fun ?description ->
+            fun ?tags ->
+              fun ?positionFiltering ->
+                fun ?eventBridgeEnabled ->
+                  fun ?kmsKeyEnableGeospatialQueries ->
+                    fun ~trackerName ->
+                      fun () ->
+                        {
+                          pricingPlan;
+                          kmsKeyId;
+                          pricingPlanDataSource;
+                          description;
+                          tags;
+                          positionFiltering;
+                          eventBridgeEnabled;
+                          kmsKeyEnableGeospatialQueries;
+                          trackerName
+                        }
     let to_value x =
       structure_to_value
-        [("Description",
-           (Option.map x.description ~f:ResourceDescription.to_value));
-        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
-        ("PositionFiltering",
-          (Option.map x.positionFiltering ~f:PositionFiltering.to_value));
+        [("TrackerName", (Some (ResourceName.to_value x.trackerName)));
         ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
         ("PricingPlanDataSource",
           (Option.map x.pricingPlanDataSource ~f:String_.to_value));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("TrackerName", (Some (ResourceName.to_value x.trackerName)))]
+        ("PositionFiltering",
+          (Option.map x.positionFiltering ~f:PositionFiltering.to_value));
+        ("EventBridgeEnabled",
+          (Option.map x.eventBridgeEnabled ~f:Boolean.to_value));
+        ("KmsKeyEnableGeospatialQueries",
+          (Option.map x.kmsKeyEnableGeospatialQueries ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let trackerName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
-      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
-      let pricingPlanDataSource =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "PricingPlanDataSource") in
-      let pricingPlan =
-        (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
+      let kmsKeyEnableGeospatialQueries =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "KmsKeyEnableGeospatialQueries") in
+      let eventBridgeEnabled =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "EventBridgeEnabled") in
       let positionFiltering =
         (Option.map ~f:PositionFiltering.of_xml)
           (Xml.child xml_arg0 "PositionFiltering") in
-      let kmsKeyId =
-        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       let description =
         (Option.map ~f:ResourceDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
-      make ~trackerName ?tags ?pricingPlanDataSource ?pricingPlan
-        ?positionFiltering ?kmsKeyId ?description ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
       let pricingPlanDataSource =
-        field_map json "PricingPlanDataSource" String_.of_json in
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "PricingPlanDataSource") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let pricingPlan =
+        (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
+      let trackerName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
+      make ?kmsKeyEnableGeospatialQueries ?eventBridgeEnabled
+        ?positionFiltering ?tags ?description ?pricingPlanDataSource
+        ?kmsKeyId ?pricingPlan ~trackerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKeyEnableGeospatialQueries =
+        field_map json__ "KmsKeyEnableGeospatialQueries" Boolean.of_json in
+      let eventBridgeEnabled =
+        field_map json__ "EventBridgeEnabled" Boolean.of_json in
       let positionFiltering =
-        field_map json "PositionFiltering" PositionFiltering.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
+        field_map json__ "PositionFiltering" PositionFiltering.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let description =
-        field_map json "Description" ResourceDescription.of_json in
-      make ~trackerName ?tags ?pricingPlanDataSource ?pricingPlan
-        ?positionFiltering ?kmsKeyId ?description ()
+        field_map json__ "Description" ResourceDescription.of_json in
+      let pricingPlanDataSource =
+        field_map json__ "PricingPlanDataSource" String_.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
+      let trackerName =
+        field_map_exn json__ "TrackerName" ResourceName.of_json in
+      make ?kmsKeyEnableGeospatialQueries ?eventBridgeEnabled
+        ?positionFiltering ?tags ?description ?pricingPlanDataSource
+        ?kmsKeyId ?pricingPlan ~trackerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a tracker resource in your AWS account, which lets you retrieve current and historical location of devices."]
+       "Creates a tracker resource in your Amazon Web Services account, which lets you retrieve current and historical location of devices."]
 module CreateRouteCalculatorResponse =
   struct
     type nonrec t =
       {
-      calculatorArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the route calculator resource. Use the ARN when you specify a resource across all AWS. Format example: arn:aws:geo:region:account-id:route-calculator/ExampleCalculator"];
-      calculatorName: ResourceName.t
+      calculatorName: ResourceName.t option
         [@ocaml.doc
           "The name of the route calculator resource. For example, ExampleRouteCalculator."];
-      createTime: Timestamp.t
+      calculatorArn: GeoArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the route calculator resource. Use the ARN when you specify a resource across all Amazon Web Services. Format example: arn:aws:geo:region:account-id:route-calculator/ExampleCalculator"];
+      createTime: Timestamp.t option
         [@ocaml.doc
           "The timestamp when the route calculator resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. For example, 2020\226\128\14707-2T12:15:20.000Z+01:00"]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateRouteCalculatorResponse"
-    let make ~calculatorArn =
-      fun ~calculatorName ->
-        fun ~createTime ->
-          fun () -> { calculatorArn; calculatorName; createTime }
+    let make ?calculatorName =
+      fun ?calculatorArn ->
+        fun ?createTime ->
+          fun () -> { calculatorName; calculatorArn; createTime }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -10517,6 +15699,9 @@ module CreateRouteCalculatorResponse =
           `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
@@ -10532,6 +15717,9 @@ module CreateRouteCalculatorResponse =
           `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
@@ -10552,6 +15740,10 @@ module CreateRouteCalculatorResponse =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
       | `ThrottlingException e ->
           `Assoc
             [("error", (`String "ThrottlingException"));
@@ -10567,30 +15759,30 @@ module CreateRouteCalculatorResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("CalculatorArn", (Some (Arn.to_value x.calculatorArn)));
-        ("CalculatorName", (Some (ResourceName.to_value x.calculatorName)));
-        ("CreateTime", (Some (Timestamp.to_value x.createTime)))]
+        [("CalculatorName",
+           (Option.map x.calculatorName ~f:ResourceName.to_value));
+        ("CalculatorArn", (Option.map x.calculatorArn ~f:GeoArn.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      let calculatorName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CalculatorName") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
       let calculatorArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CalculatorArn") in
-      make ~createTime ~calculatorName ~calculatorArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
+        (Option.map ~f:GeoArn.of_xml) (Xml.child xml_arg0 "CalculatorArn") in
       let calculatorName =
-        field_map_exn json "CalculatorName" ResourceName.of_json in
-      let calculatorArn = field_map_exn json "CalculatorArn" Arn.of_json in
-      make ~createTime ~calculatorName ~calculatorArn ()
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "CalculatorName") in
+      make ?createTime ?calculatorArn ?calculatorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let calculatorArn = field_map json__ "CalculatorArn" GeoArn.of_json in
+      let calculatorName =
+        field_map json__ "CalculatorName" ResourceName.of_json in
+      make ?createTime ?calculatorArn ?calculatorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a route calculator resource in your AWS account. You can send requests to a route calculator resource to estimate travel time, distance, and get directions. A route calculator sources traffic and road network data from your chosen data provider. If your application is tracking or routing assets you use in your business, such as delivery vehicles or employees, you may only use HERE as your geolocation provider. See section 82 of the AWS service terms for more details."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Routes API V2 unless you require Grab data. CreateRouteCalculator is part of a previous Amazon Location Service Routes API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Routes API version 2 has a simplified interface that can be used without creating or managing route calculator resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Routes API version 2 is found under geo-routes or geo_routes, not under location. Since Grab is not yet fully supported in Routes API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Routes V2 API Reference or the Developer Guide. Creates a route calculator resource in your Amazon Web Services account. You can send requests to a route calculator resource to estimate travel time, distance, and get directions. A route calculator sources traffic and road network data from your chosen data provider. If your application is tracking or routing assets you use in your business, such as delivery vehicles or employees, you must not use Esri as your geolocation provider. See section 82 of the Amazon Web Services service terms for more details."]
 module CreateRouteCalculatorRequest =
   struct
     type nonrec t =
@@ -10600,84 +15792,84 @@ module CreateRouteCalculatorRequest =
           "The name of the route calculator resource. Requirements: Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479) , hyphens (-), periods (.), and underscores (_). Must be a unique Route calculator resource name. No spaces allowed. For example, ExampleRouteCalculator."];
       dataSource: String_.t
         [@ocaml.doc
-          "Specifies the data provider of traffic and road network data. This field is case-sensitive. Enter the valid values as shown. For example, entering HERE returns an error. Route calculators that use Esri as a data source only calculate routes that are shorter than 400 km. Valid values include: Esri \226\128\147 For additional information about Esri's coverage in your region of interest, see Esri details on street networks and traffic coverage. Here \226\128\147 For additional information about HERE Technologies' coverage in your region of interest, see HERE car routing coverage and HERE truck routing coverage. For additional information , see Data providers on the Amazon Location Service Developer Guide."];
-      description: ResourceDescription.t option
-        [@ocaml.doc
-          "The optional description for the route calculator resource."];
+          "Specifies the data provider of traffic and road network data. This field is case-sensitive. Enter the valid values as shown. For example, entering HERE returns an error. Valid values include: Esri \226\128\147 For additional information about Esri's coverage in your region of interest, see Esri details on street networks and traffic coverage. Route calculators that use Esri as a data source only calculate routes that are shorter than 400 km. Grab \226\128\147 Grab provides routing functionality for Southeast Asia. For additional information about GrabMaps' coverage, see GrabMaps countries and areas covered. Here \226\128\147 For additional information about HERE Technologies' coverage in your region of interest, see HERE car routing coverage and HERE truck routing coverage. For additional information , see Data providers on the Amazon Location Service Developer Guide."];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc
           "No longer used. If included, the only allowed value is RequestBasedUsage."];
+      description: ResourceDescription.t option
+        [@ocaml.doc
+          "The optional description for the route calculator resource."];
       tags: TagMap.t option
         [@ocaml.doc
           "Applies one or more tags to the route calculator resource. A tag is a key-value pair helps manage, identify, search, and filter your resources by labelling them. For example: \\{ \"tag1\" : \"value1\", \"tag2\" : \"value2\"\\} Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource Each resource tag must be unique with a maximum of one value. Maximum key length: 128 Unicode characters in UTF-8 Maximum value length: 256 Unicode characters in UTF-8 Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / \\@. Cannot use \"aws:\" as a prefix for a key."]}
     let context_ = "CreateRouteCalculatorRequest"
-    let make ?description =
-      fun ?pricingPlan ->
+    let make ?pricingPlan =
+      fun ?description ->
         fun ?tags ->
           fun ~calculatorName ->
             fun ~dataSource ->
               fun () ->
-                { description; pricingPlan; tags; calculatorName; dataSource
+                { pricingPlan; description; tags; calculatorName; dataSource
                 }
     let to_value x =
       structure_to_value
         [("CalculatorName", (Some (ResourceName.to_value x.calculatorName)));
         ("DataSource", (Some (String_.to_value x.dataSource)));
+        ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
         ("Description",
           (Option.map x.description ~f:ResourceDescription.to_value));
-        ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
-      let pricingPlan =
-        (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
       let description =
         (Option.map ~f:ResourceDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
+      let pricingPlan =
+        (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
       let dataSource =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DataSource") in
       let calculatorName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CalculatorName") in
-      make ?tags ?pricingPlan ?description ~dataSource ~calculatorName ()
+      make ?tags ?description ?pricingPlan ~dataSource ~calculatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let description =
-        field_map json "Description" ResourceDescription.of_json in
-      let dataSource = field_map_exn json "DataSource" String_.of_json in
+        field_map json__ "Description" ResourceDescription.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
+      let dataSource = field_map_exn json__ "DataSource" String_.of_json in
       let calculatorName =
-        field_map_exn json "CalculatorName" ResourceName.of_json in
-      make ?tags ?pricingPlan ?description ~dataSource ~calculatorName ()
+        field_map_exn json__ "CalculatorName" ResourceName.of_json in
+      make ?tags ?description ?pricingPlan ~dataSource ~calculatorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a route calculator resource in your AWS account. You can send requests to a route calculator resource to estimate travel time, distance, and get directions. A route calculator sources traffic and road network data from your chosen data provider. If your application is tracking or routing assets you use in your business, such as delivery vehicles or employees, you may only use HERE as your geolocation provider. See section 82 of the AWS service terms for more details."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Routes API V2 unless you require Grab data. CreateRouteCalculator is part of a previous Amazon Location Service Routes API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Routes API version 2 has a simplified interface that can be used without creating or managing route calculator resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Routes API version 2 is found under geo-routes or geo_routes, not under location. Since Grab is not yet fully supported in Routes API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Routes V2 API Reference or the Developer Guide. Creates a route calculator resource in your Amazon Web Services account. You can send requests to a route calculator resource to estimate travel time, distance, and get directions. A route calculator sources traffic and road network data from your chosen data provider. If your application is tracking or routing assets you use in your business, such as delivery vehicles or employees, you must not use Esri as your geolocation provider. See section 82 of the Amazon Web Services service terms for more details."]
 module CreatePlaceIndexResponse =
   struct
     type nonrec t =
       {
-      createTime: Timestamp.t
+      indexName: ResourceName.t option
+        [@ocaml.doc "The name for the place index resource."];
+      indexArn: GeoArn.t option
         [@ocaml.doc
-          "The timestamp for when the place index resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
-      indexArn: Arn.t
+          "The Amazon Resource Name (ARN) for the place index resource. Used to specify a resource across Amazon Web Services. Format example: arn:aws:geo:region:account-id:place-index/ExamplePlaceIndex"];
+      createTime: Timestamp.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the place index resource. Used to specify a resource across AWS. Format example: arn:aws:geo:region:account-id:place-index/ExamplePlaceIndex"];
-      indexName: ResourceName.t
-        [@ocaml.doc "The name for the place index resource."]}
+          "The timestamp for when the place index resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreatePlaceIndexResponse"
-    let make ~createTime =
-      fun ~indexArn ->
-        fun ~indexName -> fun () -> { createTime; indexArn; indexName }
+    let make ?indexName =
+      fun ?indexArn ->
+        fun ?createTime -> fun () -> { indexName; indexArn; createTime }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -10686,6 +15878,9 @@ module CreatePlaceIndexResponse =
           `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
@@ -10701,6 +15896,9 @@ module CreatePlaceIndexResponse =
           `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
@@ -10721,6 +15919,10 @@ module CreatePlaceIndexResponse =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
       | `ThrottlingException e ->
           `Assoc
             [("error", (`String "ThrottlingException"));
@@ -10736,133 +15938,132 @@ module CreatePlaceIndexResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("CreateTime", (Some (Timestamp.to_value x.createTime)));
-        ("IndexArn", (Some (Arn.to_value x.indexArn)));
-        ("IndexName", (Some (ResourceName.to_value x.indexName)))]
+        [("IndexName", (Option.map x.indexName ~f:ResourceName.to_value));
+        ("IndexArn", (Option.map x.indexArn ~f:GeoArn.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let indexName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
-      let indexArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IndexArn") in
       let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      make ~indexName ~indexArn ~createTime ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let indexArn =
+        (Option.map ~f:GeoArn.of_xml) (Xml.child xml_arg0 "IndexArn") in
+      let indexName =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "IndexName") in
+      make ?createTime ?indexArn ?indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexName = field_map_exn json "IndexName" ResourceName.of_json in
-      let indexArn = field_map_exn json "IndexArn" Arn.of_json in
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
-      make ~indexName ~indexArn ~createTime ()
+    let of_json json__ =
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let indexArn = field_map json__ "IndexArn" GeoArn.of_json in
+      let indexName = field_map json__ "IndexName" ResourceName.of_json in
+      make ?createTime ?indexArn ?indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a place index resource in your AWS account. Use a place index resource to geocode addresses and other text queries by using the SearchPlaceIndexForText operation, and reverse geocode coordinates by using the SearchPlaceIndexForPosition operation, and enable autosuggestions by using the SearchPlaceIndexForSuggestions operation. If your application is tracking or routing assets you use in your business, such as delivery vehicles or employees, you may only use HERE as your geolocation provider. See section 82 of the AWS service terms for more details."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Places API V2 unless you require Grab data. CreatePlaceIndex is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Places API version 2 has a simplified interface that can be used without creating or managing place index resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Places V2 API Reference or the Developer Guide. Creates a place index resource in your Amazon Web Services account. Use a place index resource to geocode addresses and other text queries by using the SearchPlaceIndexForText operation, and reverse geocode coordinates by using the SearchPlaceIndexForPosition operation, and enable autosuggestions by using the SearchPlaceIndexForSuggestions operation. If your application is tracking or routing assets you use in your business, such as delivery vehicles or employees, you must not use Esri as your geolocation provider. See section 82 of the Amazon Web Services service terms for more details."]
 module CreatePlaceIndexRequest =
   struct
     type nonrec t =
       {
-      dataSource: String_.t
-        [@ocaml.doc
-          "Specifies the geospatial data provider for the new place index. This field is case-sensitive. Enter the valid values as shown. For example, entering HERE returns an error. Valid values include: Esri \226\128\147 For additional information about Esri's coverage in your region of interest, see Esri details on geocoding coverage. Here \226\128\147 For additional information about HERE Technologies' coverage in your region of interest, see HERE details on goecoding coverage. If you specify HERE Technologies (Here) as the data provider, you may not store results for locations in Japan. For more information, see the AWS Service Terms for Amazon Location Service. For additional information , see Data providers on the Amazon Location Service Developer Guide."];
-      dataSourceConfiguration: DataSourceConfiguration.t option
-        [@ocaml.doc "Specifies the data storage option requesting Places."];
-      description: ResourceDescription.t option
-        [@ocaml.doc "The optional description for the place index resource."];
       indexName: ResourceName.t
         [@ocaml.doc
           "The name of the place index resource. Requirements: Contain only alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), hyphens (-), periods (.), and underscores (_). Must be a unique place index resource name. No spaces allowed. For example, ExamplePlaceIndex."];
+      dataSource: String_.t
+        [@ocaml.doc
+          "Specifies the geospatial data provider for the new place index. This field is case-sensitive. Enter the valid values as shown. For example, entering HERE returns an error. Valid values include: Esri \226\128\147 For additional information about Esri's coverage in your region of interest, see Esri details on geocoding coverage. Grab \226\128\147 Grab provides place index functionality for Southeast Asia. For additional information about GrabMaps' coverage, see GrabMaps countries and areas covered. Here \226\128\147 For additional information about HERE Technologies' coverage in your region of interest, see HERE details on goecoding coverage. If you specify HERE Technologies (Here) as the data provider, you may not store results for locations in Japan. For more information, see the Amazon Web Services service terms for Amazon Location Service. For additional information , see Data providers on the Amazon Location Service developer guide."];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc
           "No longer used. If included, the only allowed value is RequestBasedUsage."];
+      description: ResourceDescription.t option
+        [@ocaml.doc "The optional description for the place index resource."];
+      dataSourceConfiguration: DataSourceConfiguration.t option
+        [@ocaml.doc "Specifies the data storage option requesting Places."];
       tags: TagMap.t option
         [@ocaml.doc
           "Applies one or more tags to the place index resource. A tag is a key-value pair that helps you manage, identify, search, and filter your resources. Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource. Each tag key must be unique and must have exactly one associated value. Maximum key length: 128 Unicode characters in UTF-8. Maximum value length: 256 Unicode characters in UTF-8. Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / \\@ Cannot use \"aws:\" as a prefix for a key."]}
     let context_ = "CreatePlaceIndexRequest"
-    let make ?dataSourceConfiguration =
+    let make ?pricingPlan =
       fun ?description ->
-        fun ?pricingPlan ->
+        fun ?dataSourceConfiguration ->
           fun ?tags ->
-            fun ~dataSource ->
-              fun ~indexName ->
+            fun ~indexName ->
+              fun ~dataSource ->
                 fun () ->
                   {
-                    dataSourceConfiguration;
-                    description;
                     pricingPlan;
+                    description;
+                    dataSourceConfiguration;
                     tags;
-                    dataSource;
-                    indexName
+                    indexName;
+                    dataSource
                   }
     let to_value x =
       structure_to_value
-        [("DataSource", (Some (String_.to_value x.dataSource)));
+        [("IndexName", (Some (ResourceName.to_value x.indexName)));
+        ("DataSource", (Some (String_.to_value x.dataSource)));
+        ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
         ("DataSourceConfiguration",
           (Option.map x.dataSourceConfiguration
              ~f:DataSourceConfiguration.to_value));
-        ("Description",
-          (Option.map x.description ~f:ResourceDescription.to_value));
-        ("IndexName", (Some (ResourceName.to_value x.indexName)));
-        ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
-      let pricingPlan =
-        (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
-      let indexName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
-      let description =
-        (Option.map ~f:ResourceDescription.of_xml)
-          (Xml.child xml_arg0 "Description") in
       let dataSourceConfiguration =
         (Option.map ~f:DataSourceConfiguration.of_xml)
           (Xml.child xml_arg0 "DataSourceConfiguration") in
+      let description =
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let pricingPlan =
+        (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
       let dataSource =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DataSource") in
-      make ?tags ?pricingPlan ~indexName ?description
-        ?dataSourceConfiguration ~dataSource ()
+      let indexName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
+      make ?tags ?dataSourceConfiguration ?description ?pricingPlan
+        ~dataSource ~indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
-      let indexName = field_map_exn json "IndexName" ResourceName.of_json in
-      let description =
-        field_map json "Description" ResourceDescription.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let dataSourceConfiguration =
-        field_map json "DataSourceConfiguration"
+        field_map json__ "DataSourceConfiguration"
           DataSourceConfiguration.of_json in
-      let dataSource = field_map_exn json "DataSource" String_.of_json in
-      make ?tags ?pricingPlan ~indexName ?description
-        ?dataSourceConfiguration ~dataSource ()
+      let description =
+        field_map json__ "Description" ResourceDescription.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
+      let dataSource = field_map_exn json__ "DataSource" String_.of_json in
+      let indexName = field_map_exn json__ "IndexName" ResourceName.of_json in
+      make ?tags ?dataSourceConfiguration ?description ?pricingPlan
+        ~dataSource ~indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a place index resource in your AWS account. Use a place index resource to geocode addresses and other text queries by using the SearchPlaceIndexForText operation, and reverse geocode coordinates by using the SearchPlaceIndexForPosition operation, and enable autosuggestions by using the SearchPlaceIndexForSuggestions operation. If your application is tracking or routing assets you use in your business, such as delivery vehicles or employees, you may only use HERE as your geolocation provider. See section 82 of the AWS service terms for more details."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the Places API V2 unless you require Grab data. CreatePlaceIndex is part of a previous Amazon Location Service Places API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Places API version 2 has a simplified interface that can be used without creating or managing place index resources. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Places API version 2 is found under geo-places or geo_places, not under location. Since Grab is not yet fully supported in Places API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Places V2 API Reference or the Developer Guide. Creates a place index resource in your Amazon Web Services account. Use a place index resource to geocode addresses and other text queries by using the SearchPlaceIndexForText operation, and reverse geocode coordinates by using the SearchPlaceIndexForPosition operation, and enable autosuggestions by using the SearchPlaceIndexForSuggestions operation. If your application is tracking or routing assets you use in your business, such as delivery vehicles or employees, you must not use Esri as your geolocation provider. See section 82 of the Amazon Web Services service terms for more details."]
 module CreateMapResponse =
   struct
     type nonrec t =
       {
-      createTime: Timestamp.t
+      mapName: ResourceName.t option
+        [@ocaml.doc "The name of the map resource."];
+      mapArn: GeoArn.t option
         [@ocaml.doc
-          "The timestamp for when the map resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."];
-      mapArn: Arn.t
+          "The Amazon Resource Name (ARN) for the map resource. Used to specify a resource across all Amazon Web Services. Format example: arn:aws:geo:region:account-id:map/ExampleMap"];
+      createTime: Timestamp.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the map resource. Used to specify a resource across all AWS. Format example: arn:aws:geo:region:account-id:maps/ExampleMap"];
-      mapName: ResourceName.t [@ocaml.doc "The name of the map resource."]}
+          "The timestamp for when the map resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateMapResponse"
-    let make ~createTime =
-      fun ~mapArn ->
-        fun ~mapName -> fun () -> { createTime; mapArn; mapName }
+    let make ?mapName =
+      fun ?mapArn ->
+        fun ?createTime -> fun () -> { mapName; mapArn; createTime }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -10871,6 +16072,9 @@ module CreateMapResponse =
           `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
@@ -10886,6 +16090,9 @@ module CreateMapResponse =
           `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
@@ -10906,6 +16113,10 @@ module CreateMapResponse =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
       | `ThrottlingException e ->
           `Assoc
             [("error", (`String "ThrottlingException"));
@@ -10921,116 +16132,307 @@ module CreateMapResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("CreateTime", (Some (Timestamp.to_value x.createTime)));
-        ("MapArn", (Some (Arn.to_value x.mapArn)));
-        ("MapName", (Some (ResourceName.to_value x.mapName)))]
+        [("MapName", (Option.map x.mapName ~f:ResourceName.to_value));
+        ("MapArn", (Option.map x.mapArn ~f:GeoArn.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let mapName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
-      let mapArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MapArn") in
       let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      make ~mapName ~mapArn ~createTime ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let mapArn =
+        (Option.map ~f:GeoArn.of_xml) (Xml.child xml_arg0 "MapArn") in
+      let mapName =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "MapName") in
+      make ?createTime ?mapArn ?mapName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mapName = field_map_exn json "MapName" ResourceName.of_json in
-      let mapArn = field_map_exn json "MapArn" Arn.of_json in
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
-      make ~mapName ~mapArn ~createTime ()
+    let of_json json__ =
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let mapArn = field_map json__ "MapArn" GeoArn.of_json in
+      let mapName = field_map json__ "MapName" ResourceName.of_json in
+      make ?createTime ?mapArn ?mapName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a map resource in your AWS account, which provides map tiles of different styles sourced from global location data providers. If your application is tracking or routing assets you use in your business, such as delivery vehicles or employees, you may only use HERE as your geolocation provider. See section 82 of the AWS service terms for more details."]
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to the Maps API V2 unless you require Grab data. CreateMap is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Maps API version 2 has a simplified interface that can be used without creating or managing map resources. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Creates a map resource in your Amazon Web Services account, which provides map tiles of different styles sourced from global location data providers. If your application is tracking or routing assets you use in your business, such as delivery vehicles or employees, you must not use Esri as your geolocation provider. See section 82 of the Amazon Web Services service terms for more details."]
 module CreateMapRequest =
   struct
     type nonrec t =
       {
-      configuration: MapConfiguration.t
-        [@ocaml.doc
-          "Specifies the map style selected from an available data provider."];
-      description: ResourceDescription.t option
-        [@ocaml.doc "An optional description for the map resource."];
       mapName: ResourceName.t
         [@ocaml.doc
           "The name for the map resource. Requirements: Must contain only alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), hyphens (-), periods (.), and underscores (_). Must be a unique map resource name. No spaces allowed. For example, ExampleMap."];
+      configuration: MapConfiguration.t
+        [@ocaml.doc
+          "Specifies the MapConfiguration, including the map style, for the map resource that you create. The map style defines the look of maps and the data provider for your map resource."];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc
           "No longer used. If included, the only allowed value is RequestBasedUsage."];
+      description: ResourceDescription.t option
+        [@ocaml.doc "An optional description for the map resource."];
       tags: TagMap.t option
         [@ocaml.doc
           "Applies one or more tags to the map resource. A tag is a key-value pair helps manage, identify, search, and filter your resources by labelling them. Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource Each resource tag must be unique with a maximum of one value. Maximum key length: 128 Unicode characters in UTF-8 Maximum value length: 256 Unicode characters in UTF-8 Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / \\@. Cannot use \"aws:\" as a prefix for a key."]}
     let context_ = "CreateMapRequest"
-    let make ?description =
-      fun ?pricingPlan ->
+    let make ?pricingPlan =
+      fun ?description ->
         fun ?tags ->
-          fun ~configuration ->
-            fun ~mapName ->
+          fun ~mapName ->
+            fun ~configuration ->
               fun () ->
-                { description; pricingPlan; tags; configuration; mapName }
+                { pricingPlan; description; tags; mapName; configuration }
     let to_value x =
       structure_to_value
-        [("Configuration",
-           (Some (MapConfiguration.to_value x.configuration)));
+        [("MapName", (Some (ResourceName.to_value x.mapName)));
+        ("Configuration", (Some (MapConfiguration.to_value x.configuration)));
+        ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
         ("Description",
           (Option.map x.description ~f:ResourceDescription.to_value));
-        ("MapName", (Some (ResourceName.to_value x.mapName)));
-        ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
-      let pricingPlan =
-        (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
-      let mapName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
       let description =
         (Option.map ~f:ResourceDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
+      let pricingPlan =
+        (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
       let configuration =
         MapConfiguration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Configuration") in
-      make ?tags ?pricingPlan ~mapName ?description ~configuration ()
+      let mapName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MapName") in
+      make ?tags ?description ?pricingPlan ~configuration ~mapName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
-      let mapName = field_map_exn json "MapName" ResourceName.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let description =
-        field_map json "Description" ResourceDescription.of_json in
+        field_map json__ "Description" ResourceDescription.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
       let configuration =
-        field_map_exn json "Configuration" MapConfiguration.of_json in
-      make ?tags ?pricingPlan ~mapName ?description ~configuration ()
+        field_map_exn json__ "Configuration" MapConfiguration.of_json in
+      let mapName = field_map_exn json__ "MapName" ResourceName.of_json in
+      make ?tags ?description ?pricingPlan ~configuration ~mapName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a map resource in your AWS account, which provides map tiles of different styles sourced from global location data providers. If your application is tracking or routing assets you use in your business, such as delivery vehicles or employees, you may only use HERE as your geolocation provider. See section 82 of the AWS service terms for more details."]
+       "This operation is no longer current and may be deprecated in the future. We recommend upgrading to the Maps API V2 unless you require Grab data. CreateMap is part of a previous Amazon Location Service Maps API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The Maps API version 2 has a simplified interface that can be used without creating or managing map resources. If you are using an AWS SDK or the AWS CLI, note that the Maps API version 2 is found under geo-maps or geo_maps, not under location. Since Grab is not yet fully supported in Maps API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Maps V2 API Reference or the Developer Guide. Creates a map resource in your Amazon Web Services account, which provides map tiles of different styles sourced from global location data providers. If your application is tracking or routing assets you use in your business, such as delivery vehicles or employees, you must not use Esri as your geolocation provider. See section 82 of the Amazon Web Services service terms for more details."]
+module CreateKeyResponse =
+  struct
+    type nonrec t =
+      {
+      key: ApiKey.t option
+        [@ocaml.doc
+          "The key value/string of an API key. This value is used when making API calls to authorize the call. For example, see GetMapGlyphs."];
+      keyArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the API key resource. Used when you need to specify a resource across all Amazon Web Services. Format example: arn:aws:geo:region:account-id:key/ExampleKey"];
+      keyName: ResourceName.t option
+        [@ocaml.doc "The name of the API key resource."];
+      createTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the API key resource was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?key =
+      fun ?keyArn ->
+        fun ?keyName ->
+          fun ?createTime -> fun () -> { key; keyArn; keyName; createTime }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Key", (Option.map x.key ~f:ApiKey.to_value));
+        ("KeyArn", (Option.map x.keyArn ~f:Arn.to_value));
+        ("KeyName", (Option.map x.keyName ~f:ResourceName.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let keyName =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "KeyName") in
+      let keyArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "KeyArn") in
+      let key = (Option.map ~f:ApiKey.of_xml) (Xml.child xml_arg0 "Key") in
+      make ?createTime ?keyName ?keyArn ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let keyName = field_map json__ "KeyName" ResourceName.of_json in
+      let keyArn = field_map json__ "KeyArn" Arn.of_json in
+      let key = field_map json__ "Key" ApiKey.of_json in
+      make ?createTime ?keyName ?keyArn ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an API key resource in your Amazon Web Services account, which lets you grant actions for Amazon Location resources to the API key bearer. For more information, see Use API keys to authenticate in the Amazon Location Service Developer Guide."]
+module CreateKeyRequest =
+  struct
+    type nonrec t =
+      {
+      keyName: ResourceName.t
+        [@ocaml.doc
+          "A custom name for the API key resource. Requirements: Contain only alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), hyphens (-), periods (.), and underscores (_). Must be a unique API key name. No spaces allowed. For example, ExampleAPIKey."];
+      restrictions: ApiKeyRestrictions.t
+        [@ocaml.doc "The API key restrictions for the API key resource."];
+      description: ResourceDescription.t option
+        [@ocaml.doc "An optional description for the API key resource."];
+      expireTime: Timestamp.t option
+        [@ocaml.doc
+          "The optional timestamp for when the API key resource will expire in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. One of NoExpiry or ExpireTime must be set."];
+      noExpiry: Boolean.t option
+        [@ocaml.doc
+          "Optionally set to true to set no expiration time for the API key. One of NoExpiry or ExpireTime must be set."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "Applies one or more tags to the map resource. A tag is a key-value pair that helps manage, identify, search, and filter your resources by labelling them. Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource Each resource tag must be unique with a maximum of one value. Maximum key length: 128 Unicode characters in UTF-8 Maximum value length: 256 Unicode characters in UTF-8 Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / \\@. Cannot use \"aws:\" as a prefix for a key."]}
+    let context_ = "CreateKeyRequest"
+    let make ?description =
+      fun ?expireTime ->
+        fun ?noExpiry ->
+          fun ?tags ->
+            fun ~keyName ->
+              fun ~restrictions ->
+                fun () ->
+                  {
+                    description;
+                    expireTime;
+                    noExpiry;
+                    tags;
+                    keyName;
+                    restrictions
+                  }
+    let to_value x =
+      structure_to_value
+        [("KeyName", (Some (ResourceName.to_value x.keyName)));
+        ("Restrictions", (Some (ApiKeyRestrictions.to_value x.restrictions)));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
+        ("ExpireTime", (Option.map x.expireTime ~f:Timestamp.to_value));
+        ("NoExpiry", (Option.map x.noExpiry ~f:Boolean.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let noExpiry =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "NoExpiry") in
+      let expireTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "ExpireTime") in
+      let description =
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let restrictions =
+        ApiKeyRestrictions.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Restrictions") in
+      let keyName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "KeyName") in
+      make ?tags ?noExpiry ?expireTime ?description ~restrictions ~keyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let noExpiry = field_map json__ "NoExpiry" Boolean.of_json in
+      let expireTime = field_map json__ "ExpireTime" Timestamp.of_json in
+      let description =
+        field_map json__ "Description" ResourceDescription.of_json in
+      let restrictions =
+        field_map_exn json__ "Restrictions" ApiKeyRestrictions.of_json in
+      let keyName = field_map_exn json__ "KeyName" ResourceName.of_json in
+      make ?tags ?noExpiry ?expireTime ?description ~restrictions ~keyName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an API key resource in your Amazon Web Services account, which lets you grant actions for Amazon Location resources to the API key bearer. For more information, see Use API keys to authenticate in the Amazon Location Service Developer Guide."]
 module CreateGeofenceCollectionResponse =
   struct
     type nonrec t =
       {
-      collectionArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the geofence collection resource. Used when you need to specify a resource across all AWS. Format example: arn:aws:geo:region:account-id:geofence-collection/ExampleGeofenceCollection"];
-      collectionName: ResourceName.t
+      collectionName: ResourceName.t option
         [@ocaml.doc "The name for the geofence collection."];
-      createTime: Timestamp.t
+      collectionArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the geofence collection resource. Used when you need to specify a resource across all Amazon Web Services. Format example: arn:aws:geo:region:account-id:geofence-collection/ExampleGeofenceCollection"];
+      createTime: Timestamp.t option
         [@ocaml.doc
           "The timestamp for when the geofence collection was created in ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ"]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateGeofenceCollectionResponse"
-    let make ~collectionArn =
-      fun ~collectionName ->
-        fun ~createTime ->
-          fun () -> { collectionArn; collectionName; createTime }
+    let make ?collectionName =
+      fun ?collectionArn ->
+        fun ?createTime ->
+          fun () -> { collectionName; collectionArn; createTime }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -11039,6 +16441,9 @@ module CreateGeofenceCollectionResponse =
           `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
@@ -11054,6 +16459,9 @@ module CreateGeofenceCollectionResponse =
           `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
@@ -11074,6 +16482,10 @@ module CreateGeofenceCollectionResponse =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
       | `ThrottlingException e ->
           `Assoc
             [("error", (`String "ThrottlingException"));
@@ -11089,27 +16501,27 @@ module CreateGeofenceCollectionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("CollectionArn", (Some (Arn.to_value x.collectionArn)));
-        ("CollectionName", (Some (ResourceName.to_value x.collectionName)));
-        ("CreateTime", (Some (Timestamp.to_value x.createTime)))]
+        [("CollectionName",
+           (Option.map x.collectionName ~f:ResourceName.to_value));
+        ("CollectionArn", (Option.map x.collectionArn ~f:Arn.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let createTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreateTime") in
-      let collectionName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
       let collectionArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CollectionArn") in
-      make ~createTime ~collectionName ~collectionArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createTime = field_map_exn json "CreateTime" Timestamp.of_json in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CollectionArn") in
       let collectionName =
-        field_map_exn json "CollectionName" ResourceName.of_json in
-      let collectionArn = field_map_exn json "CollectionArn" Arn.of_json in
-      make ~createTime ~collectionName ~collectionArn ()
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "CollectionName") in
+      make ?createTime ?collectionArn ?collectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createTime = field_map json__ "CreateTime" Timestamp.of_json in
+      let collectionArn = field_map json__ "CollectionArn" Arn.of_json in
+      let collectionName =
+        field_map json__ "CollectionName" ResourceName.of_json in
+      make ?createTime ?collectionArn ?collectionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a geofence collection, which manages and stores geofences."]
@@ -11120,87 +16532,196 @@ module CreateGeofenceCollectionRequest =
       collectionName: ResourceName.t
         [@ocaml.doc
           "A custom name for the geofence collection. Requirements: Contain only alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), hyphens (-), periods (.), and underscores (_). Must be a unique geofence collection name. No spaces allowed. For example, ExampleGeofenceCollection."];
-      description: ResourceDescription.t option
-        [@ocaml.doc "An optional description for the geofence collection."];
-      kmsKeyId: KmsKeyId.t option
-        [@ocaml.doc
-          "A key identifier for an AWS KMS customer managed key. Enter a key ID, key ARN, alias name, or alias ARN."];
       pricingPlan: PricingPlan.t option
         [@ocaml.doc
           "No longer used. If included, the only allowed value is RequestBasedUsage."];
       pricingPlanDataSource: String_.t option
         [@ocaml.doc "This parameter is no longer used."];
+      description: ResourceDescription.t option
+        [@ocaml.doc "An optional description for the geofence collection."];
       tags: TagMap.t option
         [@ocaml.doc
-          "Applies one or more tags to the geofence collection. A tag is a key-value pair helps manage, identify, search, and filter your resources by labelling them. Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource Each resource tag must be unique with a maximum of one value. Maximum key length: 128 Unicode characters in UTF-8 Maximum value length: 256 Unicode characters in UTF-8 Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / \\@. Cannot use \"aws:\" as a prefix for a key."]}
+          "Applies one or more tags to the geofence collection. A tag is a key-value pair helps manage, identify, search, and filter your resources by labelling them. Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource Each resource tag must be unique with a maximum of one value. Maximum key length: 128 Unicode characters in UTF-8 Maximum value length: 256 Unicode characters in UTF-8 Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / \\@. Cannot use \"aws:\" as a prefix for a key."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "A key identifier for an Amazon Web Services KMS customer managed key. Enter a key ID, key ARN, alias name, or alias ARN."]}
     let context_ = "CreateGeofenceCollectionRequest"
-    let make ?description =
-      fun ?kmsKeyId ->
-        fun ?pricingPlan ->
-          fun ?pricingPlanDataSource ->
-            fun ?tags ->
+    let make ?pricingPlan =
+      fun ?pricingPlanDataSource ->
+        fun ?description ->
+          fun ?tags ->
+            fun ?kmsKeyId ->
               fun ~collectionName ->
                 fun () ->
                   {
-                    description;
-                    kmsKeyId;
                     pricingPlan;
                     pricingPlanDataSource;
+                    description;
                     tags;
+                    kmsKeyId;
                     collectionName
                   }
     let to_value x =
       structure_to_value
         [("CollectionName", (Some (ResourceName.to_value x.collectionName)));
-        ("Description",
-          (Option.map x.description ~f:ResourceDescription.to_value));
-        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
         ("PricingPlan", (Option.map x.pricingPlan ~f:PricingPlan.to_value));
         ("PricingPlanDataSource",
           (Option.map x.pricingPlanDataSource ~f:String_.to_value));
-        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let description =
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let pricingPlanDataSource =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "PricingPlanDataSource") in
       let pricingPlan =
         (Option.map ~f:PricingPlan.of_xml) (Xml.child xml_arg0 "PricingPlan") in
-      let kmsKeyId =
-        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
-      let description =
-        (Option.map ~f:ResourceDescription.of_xml)
-          (Xml.child xml_arg0 "Description") in
       let collectionName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
-      make ?tags ?pricingPlanDataSource ?pricingPlan ?kmsKeyId ?description
+      make ?kmsKeyId ?tags ?description ?pricingPlanDataSource ?pricingPlan
         ~collectionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let pricingPlanDataSource =
-        field_map json "PricingPlanDataSource" String_.of_json in
-      let pricingPlan = field_map json "PricingPlan" PricingPlan.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let description =
-        field_map json "Description" ResourceDescription.of_json in
+        field_map json__ "Description" ResourceDescription.of_json in
+      let pricingPlanDataSource =
+        field_map json__ "PricingPlanDataSource" String_.of_json in
+      let pricingPlan = field_map json__ "PricingPlan" PricingPlan.of_json in
       let collectionName =
-        field_map_exn json "CollectionName" ResourceName.of_json in
-      make ?tags ?pricingPlanDataSource ?pricingPlan ?kmsKeyId ?description
+        field_map_exn json__ "CollectionName" ResourceName.of_json in
+      make ?kmsKeyId ?tags ?description ?pricingPlanDataSource ?pricingPlan
         ~collectionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a geofence collection, which manages and stores geofences."]
+module CancelJobResponse =
+  struct
+    type nonrec t =
+      {
+      jobArn: GeoArn.t option
+        [@ocaml.doc "Amazon Resource Name (ARN) of the cancelled job."];
+      jobId: JobId.t option [@ocaml.doc "Unique job identifier."];
+      status: JobStatus.t option
+        [@ocaml.doc "Job status after cancellation request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?jobArn =
+      fun ?jobId -> fun ?status -> fun () -> { jobArn; jobId; status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("JobArn", (Option.map x.jobArn ~f:GeoArn.to_value));
+        ("JobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("Status", (Option.map x.status ~f:JobStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
+      let jobArn =
+        (Option.map ~f:GeoArn.of_xml) (Xml.child xml_arg0 "JobArn") in
+      make ?status ?jobId ?jobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" JobStatus.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      let jobArn = field_map json__ "JobArn" GeoArn.of_json in
+      make ?status ?jobId ?jobArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "CancelJob cancels a job that is currently running or pending. If the job is already in a terminal state (Completed, Failed, or Cancelled), the operation returns successfully with the current status. For more information, see Job concepts in the Amazon Location Service Developer Guide."]
+module CancelJobRequest =
+  struct
+    type nonrec t =
+      {
+      jobId: JobId.t
+        [@ocaml.doc "The unique identifier of the job to cancel."]}
+    let context_ = "CancelJobRequest"
+    let make ~jobId = fun () -> { jobId }
+    let to_value x =
+      structure_to_value [("JobId", (Some (JobId.to_value x.jobId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobId =
+        JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
+      make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "CancelJob cancels a job that is currently running or pending. If the job is already in a terminal state (Completed, Failed, or Cancelled), the operation returns successfully with the current status. For more information, see Job concepts in the Amazon Location Service Developer Guide."]
 module CalculateRouteResponse =
   struct
     type nonrec t =
       {
-      legs: LegList.t
+      legs: LegList.t option
         [@ocaml.doc
           "Contains details about each path between a pair of positions included along a route such as: StartPosition, EndPosition, Distance, DurationSeconds, Geometry, and Steps. The number of legs returned corresponds to one fewer than the total number of positions in the request. For example, a route with a departure position and destination position returns one leg with the positions snapped to a nearby road: The StartPosition is the departure position. The EndPosition is the destination position. A route with a waypoint between the departure and destination position returns two legs with the positions snapped to a nearby road: Leg 1: The StartPosition is the departure position . The EndPosition is the waypoint positon. Leg 2: The StartPosition is the waypoint position. The EndPosition is the destination position."];
-      summary: CalculateRouteSummary.t
+      summary: CalculateRouteSummary.t option
         [@ocaml.doc
           "Contains information about the whole route, such as: RouteBBox, DataSource, Distance, DistanceUnit, and DurationSeconds."]}
     type nonrec error =
@@ -11210,8 +16731,7 @@ module CalculateRouteResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CalculateRouteResponse"
-    let make ~legs = fun ~summary -> fun () -> { legs; summary }
+    let make ?legs = fun ?summary -> fun () -> { legs; summary }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -11270,22 +16790,20 @@ module CalculateRouteResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Legs", (Some (LegList.to_value x.legs)));
-        ("Summary", (Some (CalculateRouteSummary.to_value x.summary)))]
+        [("Legs", (Option.map x.legs ~f:LegList.to_value));
+        ("Summary", (Option.map x.summary ~f:CalculateRouteSummary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let summary =
-        CalculateRouteSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Summary") in
-      let legs =
-        LegList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Legs") in
-      make ~summary ~legs ()
+        (Option.map ~f:CalculateRouteSummary.of_xml)
+          (Xml.child xml_arg0 "Summary") in
+      let legs = (Option.map ~f:LegList.of_xml) (Xml.child xml_arg0 "Legs") in
+      make ?summary ?legs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let summary =
-        field_map_exn json "Summary" CalculateRouteSummary.of_json in
-      let legs = field_map_exn json "Legs" LegList.of_json in
-      make ~summary ~legs ()
+    let of_json json__ =
+      let summary = field_map json__ "Summary" CalculateRouteSummary.of_json in
+      let legs = field_map json__ "Legs" LegList.of_json in
+      make ?summary ?legs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the result of the route calculation. Metadata includes legs and route summary."]
@@ -11296,152 +16814,184 @@ module CalculateRouteRequest =
       calculatorName: ResourceName.t
         [@ocaml.doc
           "The name of the route calculator resource that you want to use to calculate the route."];
-      carModeOptions: CalculateRouteCarModeOptions.t option
-        [@ocaml.doc
-          "Specifies route preferences when traveling by Car, such as avoiding routes that use ferries or tolls. Requirements: TravelMode must be specified as Car."];
-      departNow: Boolean.t option
-        [@ocaml.doc
-          "Sets the time of departure as the current time. Uses the current time to calculate a route. Otherwise, the best time of day to travel with the best traffic conditions is used to calculate the route. Default Value: false Valid Values: false | true"];
       departurePosition: Position.t
         [@ocaml.doc
-          "The start position for the route. Defined in WGS 84 format: \\[longitude, latitude\\]. For example, \\[-123.115, 49.285\\] If you specify a departure that's not located on a road, Amazon Location moves the position to the nearest road. If Esri is the provider for your route calculator, specifying a route that is longer than 400 km returns a 400 RoutesValidationException error. Valid Values: \\[-180 to 180,-90 to 90\\]"];
-      departureTime: Timestamp.t option
-        [@ocaml.doc
-          "Specifies the desired time of departure. Uses the given time to calculate the route. Otherwise, the best time of day to travel with the best traffic conditions is used to calculate the route. Setting a departure time in the past returns a 400 ValidationException error. In ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. For example, 2020\226\128\14707-2T12:15:20.000Z+01:00"];
+          "The start position for the route. Defined in World Geodetic System (WGS 84) format: \\[longitude, latitude\\]. For example, \\[-123.115, 49.285\\] If you specify a departure that's not located on a road, Amazon Location moves the position to the nearest road. If Esri is the provider for your route calculator, specifying a route that is longer than 400 km returns a 400 RoutesValidationException error. Valid Values: \\[-180 to 180,-90 to 90\\]"];
       destinationPosition: Position.t
         [@ocaml.doc
-          "The finish position for the route. Defined in WGS 84 format: \\[longitude, latitude\\]. For example, \\[-122.339, 47.615\\] If you specify a destination that's not located on a road, Amazon Location moves the position to the nearest road. Valid Values: \\[-180 to 180,-90 to 90\\]"];
+          "The finish position for the route. Defined in World Geodetic System (WGS 84) format: \\[longitude, latitude\\]. For example, \\[-122.339, 47.615\\] If you specify a destination that's not located on a road, Amazon Location moves the position to the nearest road. Valid Values: \\[-180 to 180,-90 to 90\\]"];
+      waypointPositions: CalculateRouteRequestWaypointPositionsList.t option
+        [@ocaml.doc
+          "Specifies an ordered list of up to 23 intermediate positions to include along a route between the departure position and destination position. For example, from the DeparturePosition \\[-123.115, 49.285\\], the route follows the order that the waypoint positions are given \\[\\[-122.757, 49.0021\\],\\[-122.349, 47.620\\]\\] If you specify a waypoint position that's not located on a road, Amazon Location moves the position to the nearest road. Specifying more than 23 waypoints returns a 400 ValidationException error. If Esri is the provider for your route calculator, specifying a route that is longer than 400 km returns a 400 RoutesValidationException error. Valid Values: \\[-180 to 180,-90 to 90\\]"];
+      travelMode: TravelMode.t option
+        [@ocaml.doc
+          "Specifies the mode of transport when calculating a route. Used in estimating the speed of travel and road compatibility. You can choose Car, Truck, Walking, Bicycle or Motorcycle as options for the TravelMode. Bicycle and Motorcycle are only valid when using Grab as a data provider, and only within Southeast Asia. Truck is not available for Grab. For more details on the using Grab for routing, including areas of coverage, see GrabMaps in the Amazon Location Service Developer Guide. The TravelMode you specify also determines how you specify route preferences: If traveling by Car use the CarModeOptions parameter. If traveling by Truck use the TruckModeOptions parameter. Default Value: Car"];
+      departureTime: Timestamp.t option
+        [@ocaml.doc
+          "Specifies the desired time of departure. Uses the given time to calculate the route. Otherwise, the best time of day to travel with the best traffic conditions is used to calculate the route. In ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. For example, 2020\226\128\14707-2T12:15:20.000Z+01:00"];
+      departNow: SensitiveBoolean.t option
+        [@ocaml.doc
+          "Sets the time of departure as the current time. Uses the current time to calculate a route. Otherwise, the best time of day to travel with the best traffic conditions is used to calculate the route. Default Value: false Valid Values: false | true"];
       distanceUnit: DistanceUnit.t option
         [@ocaml.doc
           "Set the unit system to specify the distance. Default Value: Kilometers"];
-      includeLegGeometry: Boolean.t option
+      includeLegGeometry: SensitiveBoolean.t option
         [@ocaml.doc
           "Set to include the geometry details in the result for each path between a pair of positions. Default Value: false Valid Values: false | true"];
-      travelMode: TravelMode.t option
+      carModeOptions: CalculateRouteCarModeOptions.t option
         [@ocaml.doc
-          "Specifies the mode of transport when calculating a route. Used in estimating the speed of travel and road compatibility. The TravelMode you specify also determines how you specify route preferences: If traveling by Car use the CarModeOptions parameter. If traveling by Truck use the TruckModeOptions parameter. Default Value: Car"];
+          "Specifies route preferences when traveling by Car, such as avoiding routes that use ferries or tolls. Requirements: TravelMode must be specified as Car."];
       truckModeOptions: CalculateRouteTruckModeOptions.t option
         [@ocaml.doc
           "Specifies route preferences when traveling by Truck, such as avoiding routes that use ferries or tolls, and truck specifications to consider when choosing an optimal road. Requirements: TravelMode must be specified as Truck."];
-      waypointPositions: CalculateRouteRequestWaypointPositionsList.t option
+      arrivalTime: Timestamp.t option
         [@ocaml.doc
-          "Specifies an ordered list of up to 23 intermediate positions to include along a route between the departure position and destination position. For example, from the DeparturePosition \\[-123.115, 49.285\\], the route follows the order that the waypoint positions are given \\[\\[-122.757, 49.0021\\],\\[-122.349, 47.620\\]\\] If you specify a waypoint position that's not located on a road, Amazon Location moves the position to the nearest road. Specifying more than 23 waypoints returns a 400 ValidationException error. If Esri is the provider for your route calculator, specifying a route that is longer than 400 km returns a 400 RoutesValidationException error. Valid Values: \\[-180 to 180,-90 to 90\\]"]}
+          "Specifies the desired time of arrival. Uses the given time to calculate the route. Otherwise, the best time of day to travel with the best traffic conditions is used to calculate the route. ArrivalTime is not supported Esri."];
+      optimizeFor: OptimizationMode.t option
+        [@ocaml.doc
+          "Specifies the distance to optimize for when calculating a route."];
+      key: ApiKey.t option
+        [@ocaml.doc "The optional API key to authorize the request."]}
     let context_ = "CalculateRouteRequest"
-    let make ?carModeOptions =
-      fun ?departNow ->
+    let make ?waypointPositions =
+      fun ?travelMode ->
         fun ?departureTime ->
-          fun ?distanceUnit ->
-            fun ?includeLegGeometry ->
-              fun ?travelMode ->
-                fun ?truckModeOptions ->
-                  fun ?waypointPositions ->
-                    fun ~calculatorName ->
-                      fun ~departurePosition ->
-                        fun ~destinationPosition ->
-                          fun () ->
-                            {
-                              carModeOptions;
-                              departNow;
-                              departureTime;
-                              distanceUnit;
-                              includeLegGeometry;
-                              travelMode;
-                              truckModeOptions;
-                              waypointPositions;
-                              calculatorName;
-                              departurePosition;
-                              destinationPosition
-                            }
+          fun ?departNow ->
+            fun ?distanceUnit ->
+              fun ?includeLegGeometry ->
+                fun ?carModeOptions ->
+                  fun ?truckModeOptions ->
+                    fun ?arrivalTime ->
+                      fun ?optimizeFor ->
+                        fun ?key ->
+                          fun ~calculatorName ->
+                            fun ~departurePosition ->
+                              fun ~destinationPosition ->
+                                fun () ->
+                                  {
+                                    waypointPositions;
+                                    travelMode;
+                                    departureTime;
+                                    departNow;
+                                    distanceUnit;
+                                    includeLegGeometry;
+                                    carModeOptions;
+                                    truckModeOptions;
+                                    arrivalTime;
+                                    optimizeFor;
+                                    key;
+                                    calculatorName;
+                                    departurePosition;
+                                    destinationPosition
+                                  }
     let to_value x =
       structure_to_value
         [("CalculatorName", (Some (ResourceName.to_value x.calculatorName)));
-        ("CarModeOptions",
-          (Option.map x.carModeOptions
-             ~f:CalculateRouteCarModeOptions.to_value));
-        ("DepartNow", (Option.map x.departNow ~f:Boolean.to_value));
         ("DeparturePosition", (Some (Position.to_value x.departurePosition)));
-        ("DepartureTime", (Option.map x.departureTime ~f:Timestamp.to_value));
         ("DestinationPosition",
           (Some (Position.to_value x.destinationPosition)));
+        ("WaypointPositions",
+          (Option.map x.waypointPositions
+             ~f:CalculateRouteRequestWaypointPositionsList.to_value));
+        ("TravelMode", (Option.map x.travelMode ~f:TravelMode.to_value));
+        ("DepartureTime", (Option.map x.departureTime ~f:Timestamp.to_value));
+        ("DepartNow", (Option.map x.departNow ~f:SensitiveBoolean.to_value));
         ("DistanceUnit",
           (Option.map x.distanceUnit ~f:DistanceUnit.to_value));
         ("IncludeLegGeometry",
-          (Option.map x.includeLegGeometry ~f:Boolean.to_value));
-        ("TravelMode", (Option.map x.travelMode ~f:TravelMode.to_value));
+          (Option.map x.includeLegGeometry ~f:SensitiveBoolean.to_value));
+        ("CarModeOptions",
+          (Option.map x.carModeOptions
+             ~f:CalculateRouteCarModeOptions.to_value));
         ("TruckModeOptions",
           (Option.map x.truckModeOptions
              ~f:CalculateRouteTruckModeOptions.to_value));
-        ("WaypointPositions",
-          (Option.map x.waypointPositions
-             ~f:CalculateRouteRequestWaypointPositionsList.to_value))]
+        ("ArrivalTime", (Option.map x.arrivalTime ~f:Timestamp.to_value));
+        ("OptimizeFor",
+          (Option.map x.optimizeFor ~f:OptimizationMode.to_value));
+        ("key", (Option.map x.key ~f:ApiKey.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let waypointPositions =
-        (Option.map ~f:CalculateRouteRequestWaypointPositionsList.of_xml)
-          (Xml.child xml_arg0 "WaypointPositions") in
+      let key = (Option.map ~f:ApiKey.of_xml) (Xml.child xml_arg0 "key") in
+      let optimizeFor =
+        (Option.map ~f:OptimizationMode.of_xml)
+          (Xml.child xml_arg0 "OptimizeFor") in
+      let arrivalTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "ArrivalTime") in
       let truckModeOptions =
         (Option.map ~f:CalculateRouteTruckModeOptions.of_xml)
           (Xml.child xml_arg0 "TruckModeOptions") in
-      let travelMode =
-        (Option.map ~f:TravelMode.of_xml) (Xml.child xml_arg0 "TravelMode") in
+      let carModeOptions =
+        (Option.map ~f:CalculateRouteCarModeOptions.of_xml)
+          (Xml.child xml_arg0 "CarModeOptions") in
       let includeLegGeometry =
-        (Option.map ~f:Boolean.of_xml)
+        (Option.map ~f:SensitiveBoolean.of_xml)
           (Xml.child xml_arg0 "IncludeLegGeometry") in
       let distanceUnit =
         (Option.map ~f:DistanceUnit.of_xml)
           (Xml.child xml_arg0 "DistanceUnit") in
+      let departNow =
+        (Option.map ~f:SensitiveBoolean.of_xml)
+          (Xml.child xml_arg0 "DepartNow") in
+      let departureTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DepartureTime") in
+      let travelMode =
+        (Option.map ~f:TravelMode.of_xml) (Xml.child xml_arg0 "TravelMode") in
+      let waypointPositions =
+        (Option.map ~f:CalculateRouteRequestWaypointPositionsList.of_xml)
+          (Xml.child xml_arg0 "WaypointPositions") in
       let destinationPosition =
         Position.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DestinationPosition") in
-      let departureTime =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DepartureTime") in
       let departurePosition =
         Position.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeparturePosition") in
-      let departNow =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DepartNow") in
-      let carModeOptions =
-        (Option.map ~f:CalculateRouteCarModeOptions.of_xml)
-          (Xml.child xml_arg0 "CarModeOptions") in
       let calculatorName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CalculatorName") in
-      make ?waypointPositions ?truckModeOptions ?travelMode
-        ?includeLegGeometry ?distanceUnit ~destinationPosition ?departureTime
-        ~departurePosition ?departNow ?carModeOptions ~calculatorName ()
+      make ?key ?optimizeFor ?arrivalTime ?truckModeOptions ?carModeOptions
+        ?includeLegGeometry ?distanceUnit ?departNow ?departureTime
+        ?travelMode ?waypointPositions ~destinationPosition
+        ~departurePosition ~calculatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let waypointPositions =
-        field_map json "WaypointPositions"
-          CalculateRouteRequestWaypointPositionsList.of_json in
+    let of_json json__ =
+      let key = field_map json__ "Key" ApiKey.of_json in
+      let optimizeFor =
+        field_map json__ "OptimizeFor" OptimizationMode.of_json in
+      let arrivalTime = field_map json__ "ArrivalTime" Timestamp.of_json in
       let truckModeOptions =
-        field_map json "TruckModeOptions"
+        field_map json__ "TruckModeOptions"
           CalculateRouteTruckModeOptions.of_json in
-      let travelMode = field_map json "TravelMode" TravelMode.of_json in
-      let includeLegGeometry =
-        field_map json "IncludeLegGeometry" Boolean.of_json in
-      let distanceUnit = field_map json "DistanceUnit" DistanceUnit.of_json in
-      let destinationPosition =
-        field_map_exn json "DestinationPosition" Position.of_json in
-      let departureTime = field_map json "DepartureTime" Timestamp.of_json in
-      let departurePosition =
-        field_map_exn json "DeparturePosition" Position.of_json in
-      let departNow = field_map json "DepartNow" Boolean.of_json in
       let carModeOptions =
-        field_map json "CarModeOptions" CalculateRouteCarModeOptions.of_json in
+        field_map json__ "CarModeOptions"
+          CalculateRouteCarModeOptions.of_json in
+      let includeLegGeometry =
+        field_map json__ "IncludeLegGeometry" SensitiveBoolean.of_json in
+      let distanceUnit = field_map json__ "DistanceUnit" DistanceUnit.of_json in
+      let departNow = field_map json__ "DepartNow" SensitiveBoolean.of_json in
+      let departureTime = field_map json__ "DepartureTime" Timestamp.of_json in
+      let travelMode = field_map json__ "TravelMode" TravelMode.of_json in
+      let waypointPositions =
+        field_map json__ "WaypointPositions"
+          CalculateRouteRequestWaypointPositionsList.of_json in
+      let destinationPosition =
+        field_map_exn json__ "DestinationPosition" Position.of_json in
+      let departurePosition =
+        field_map_exn json__ "DeparturePosition" Position.of_json in
       let calculatorName =
-        field_map_exn json "CalculatorName" ResourceName.of_json in
-      make ?waypointPositions ?truckModeOptions ?travelMode
-        ?includeLegGeometry ?distanceUnit ~destinationPosition ?departureTime
-        ~departurePosition ?departNow ?carModeOptions ~calculatorName ()
+        field_map_exn json__ "CalculatorName" ResourceName.of_json in
+      make ?key ?optimizeFor ?arrivalTime ?truckModeOptions ?carModeOptions
+        ?includeLegGeometry ?distanceUnit ?departNow ?departureTime
+        ?travelMode ?waypointPositions ~destinationPosition
+        ~departurePosition ~calculatorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Calculates a route given the following required parameters: DeparturePosition and DestinationPosition. Requires that you first create a route calculator resource. By default, a request that doesn't specify a departure time uses the best time of day to travel with the best traffic conditions when calculating the route. Additional options include: Specifying a departure time using either DepartureTime or DepartNow. This calculates a route based on predictive traffic data at the given time. You can't specify both DepartureTime and DepartNow in a single request. Specifying both parameters returns a validation error. Specifying a travel mode using TravelMode sets the transportation mode used to calculate the routes. This also lets you specify additional route preferences in CarModeOptions if traveling by Car, or TruckModeOptions if traveling by Truck."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to CalculateRoutes or CalculateIsolines unless you require Grab data. CalculateRoute is part of a previous Amazon Location Service Routes API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The version 2 CalculateRoutes operation gives better results for point-to-point routing, while the version 2 CalculateIsolines operation adds support for calculating service areas and travel time envelopes. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Routes API version 2 is found under geo-routes or geo_routes, not under location. Since Grab is not yet fully supported in Routes API version 2, we recommend you continue using API version 1 when using Grab. Calculates a route given the following required parameters: DeparturePosition and DestinationPosition. Requires that you first create a route calculator resource. By default, a request that doesn't specify a departure time uses the best time of day to travel with the best traffic conditions when calculating the route. Additional options include: Specifying a departure time using either DepartureTime or DepartNow. This calculates a route based on predictive traffic data at the given time. You can't specify both DepartureTime and DepartNow in a single request. Specifying both parameters returns a validation error. Specifying a travel mode using TravelMode sets the transportation mode used to calculate the routes. This also lets you specify additional route preferences in CarModeOptions if traveling by Car, or TruckModeOptions if traveling by Truck. If you specify walking for the travel mode and your data provider is Esri, the start and destination must be within 40km."]
 module CalculateRouteMatrixResponse =
   struct
     type nonrec t =
       {
-      routeMatrix: RouteMatrix.t
+      routeMatrix: RouteMatrix.t option
         [@ocaml.doc
           "The calculated route matrix containing the results for all pairs of DeparturePositions to DestinationPositions. Each row corresponds to one entry in DeparturePositions. Each entry in the row corresponds to the route from that entry in DeparturePositions to an entry in DestinationPositions."];
       snappedDeparturePositions:
@@ -11452,7 +17002,7 @@ module CalculateRouteMatrixResponse =
         CalculateRouteMatrixResponseSnappedDestinationPositionsList.t option
         [@ocaml.doc
           "The list of destination positions for the route matrix used for calculation of the RouteMatrix."];
-      summary: CalculateRouteMatrixSummary.t
+      summary: CalculateRouteMatrixSummary.t option
         [@ocaml.doc
           "Contains information about the route matrix, DataSource, DistanceUnit, RouteCount and ErrorCount."]}
     type nonrec error =
@@ -11462,16 +17012,15 @@ module CalculateRouteMatrixResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CalculateRouteMatrixResponse"
-    let make ?snappedDeparturePositions =
-      fun ?snappedDestinationPositions ->
-        fun ~routeMatrix ->
-          fun ~summary ->
+    let make ?routeMatrix =
+      fun ?snappedDeparturePositions ->
+        fun ?snappedDestinationPositions ->
+          fun ?summary ->
             fun () ->
               {
+                routeMatrix;
                 snappedDeparturePositions;
                 snappedDestinationPositions;
-                routeMatrix;
                 summary
               }
     let error_of_json name json =
@@ -11532,19 +17081,20 @@ module CalculateRouteMatrixResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("RouteMatrix", (Some (RouteMatrix.to_value x.routeMatrix)));
+        [("RouteMatrix", (Option.map x.routeMatrix ~f:RouteMatrix.to_value));
         ("SnappedDeparturePositions",
           (Option.map x.snappedDeparturePositions
              ~f:CalculateRouteMatrixResponseSnappedDeparturePositionsList.to_value));
         ("SnappedDestinationPositions",
           (Option.map x.snappedDestinationPositions
              ~f:CalculateRouteMatrixResponseSnappedDestinationPositionsList.to_value));
-        ("Summary", (Some (CalculateRouteMatrixSummary.to_value x.summary)))]
+        ("Summary",
+          (Option.map x.summary ~f:CalculateRouteMatrixSummary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let summary =
-        CalculateRouteMatrixSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Summary") in
+        (Option.map ~f:CalculateRouteMatrixSummary.of_xml)
+          (Xml.child xml_arg0 "Summary") in
       let snappedDestinationPositions =
         (Option.map
            ~f:CalculateRouteMatrixResponseSnappedDestinationPositionsList.of_xml)
@@ -11554,23 +17104,22 @@ module CalculateRouteMatrixResponse =
            ~f:CalculateRouteMatrixResponseSnappedDeparturePositionsList.of_xml)
           (Xml.child xml_arg0 "SnappedDeparturePositions") in
       let routeMatrix =
-        RouteMatrix.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RouteMatrix") in
-      make ~summary ?snappedDestinationPositions ?snappedDeparturePositions
-        ~routeMatrix ()
+        (Option.map ~f:RouteMatrix.of_xml) (Xml.child xml_arg0 "RouteMatrix") in
+      make ?summary ?snappedDestinationPositions ?snappedDeparturePositions
+        ?routeMatrix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let summary =
-        field_map_exn json "Summary" CalculateRouteMatrixSummary.of_json in
+        field_map json__ "Summary" CalculateRouteMatrixSummary.of_json in
       let snappedDestinationPositions =
-        field_map json "SnappedDestinationPositions"
+        field_map json__ "SnappedDestinationPositions"
           CalculateRouteMatrixResponseSnappedDestinationPositionsList.of_json in
       let snappedDeparturePositions =
-        field_map json "SnappedDeparturePositions"
+        field_map json__ "SnappedDeparturePositions"
           CalculateRouteMatrixResponseSnappedDeparturePositionsList.of_json in
-      let routeMatrix = field_map_exn json "RouteMatrix" RouteMatrix.of_json in
-      make ~summary ?snappedDestinationPositions ?snappedDeparturePositions
-        ~routeMatrix ()
+      let routeMatrix = field_map json__ "RouteMatrix" RouteMatrix.of_json in
+      make ?summary ?snappedDestinationPositions ?snappedDeparturePositions
+        ?routeMatrix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the result of the route matrix calculation."]
 module CalculateRouteMatrixRequest =
@@ -11580,134 +17129,143 @@ module CalculateRouteMatrixRequest =
       calculatorName: ResourceName.t
         [@ocaml.doc
           "The name of the route calculator resource that you want to use to calculate the route matrix."];
-      carModeOptions: CalculateRouteCarModeOptions.t option
-        [@ocaml.doc
-          "Specifies route preferences when traveling by Car, such as avoiding routes that use ferries or tolls. Requirements: TravelMode must be specified as Car."];
-      departNow: Boolean.t option
-        [@ocaml.doc
-          "Sets the time of departure as the current time. Uses the current time to calculate the route matrix. You can't set both DepartureTime and DepartNow. If neither is set, the best time of day to travel with the best traffic conditions is used to calculate the route matrix. Default Value: false Valid Values: false | true"];
       departurePositions: CalculateRouteMatrixRequestDeparturePositionsList.t
         [@ocaml.doc
           "The list of departure (origin) positions for the route matrix. An array of points, each of which is itself a 2-value array defined in WGS 84 format: \\[longitude, latitude\\]. For example, \\[-123.115, 49.285\\]. Depending on the data provider selected in the route calculator resource there may be additional restrictions on the inputs you can choose. See Position restrictions in the Amazon Location Service Developer Guide. For route calculators that use Esri as the data provider, if you specify a departure that's not located on a road, Amazon Location moves the position to the nearest road. The snapped value is available in the result in SnappedDeparturePositions. Valid Values: \\[-180 to 180,-90 to 90\\]"];
-      departureTime: Timestamp.t option
-        [@ocaml.doc
-          "Specifies the desired time of departure. Uses the given time to calculate the route matrix. You can't set both DepartureTime and DepartNow. If neither is set, the best time of day to travel with the best traffic conditions is used to calculate the route matrix. Setting a departure time in the past returns a 400 ValidationException error. In ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. For example, 2020\226\128\14707-2T12:15:20.000Z+01:00"];
       destinationPositions:
         CalculateRouteMatrixRequestDestinationPositionsList.t
         [@ocaml.doc
           "The list of destination positions for the route matrix. An array of points, each of which is itself a 2-value array defined in WGS 84 format: \\[longitude, latitude\\]. For example, \\[-122.339, 47.615\\] Depending on the data provider selected in the route calculator resource there may be additional restrictions on the inputs you can choose. See Position restrictions in the Amazon Location Service Developer Guide. For route calculators that use Esri as the data provider, if you specify a destination that's not located on a road, Amazon Location moves the position to the nearest road. The snapped value is available in the result in SnappedDestinationPositions. Valid Values: \\[-180 to 180,-90 to 90\\]"];
+      travelMode: TravelMode.t option
+        [@ocaml.doc
+          "Specifies the mode of transport when calculating a route. Used in estimating the speed of travel and road compatibility. The TravelMode you specify also determines how you specify route preferences: If traveling by Car use the CarModeOptions parameter. If traveling by Truck use the TruckModeOptions parameter. Bicycle or Motorcycle are only valid when using Grab as a data provider, and only within Southeast Asia. Truck is not available for Grab. For more information about using Grab as a data provider, see GrabMaps in the Amazon Location Service Developer Guide. Default Value: Car"];
+      departureTime: Timestamp.t option
+        [@ocaml.doc
+          "Specifies the desired time of departure. Uses the given time to calculate the route matrix. You can't set both DepartureTime and DepartNow. If neither is set, the best time of day to travel with the best traffic conditions is used to calculate the route matrix. Setting a departure time in the past returns a 400 ValidationException error. In ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. For example, 2020\226\128\14707-2T12:15:20.000Z+01:00"];
+      departNow: SensitiveBoolean.t option
+        [@ocaml.doc
+          "Sets the time of departure as the current time. Uses the current time to calculate the route matrix. You can't set both DepartureTime and DepartNow. If neither is set, the best time of day to travel with the best traffic conditions is used to calculate the route matrix. Default Value: false Valid Values: false | true"];
       distanceUnit: DistanceUnit.t option
         [@ocaml.doc
           "Set the unit system to specify the distance. Default Value: Kilometers"];
-      travelMode: TravelMode.t option
+      carModeOptions: CalculateRouteCarModeOptions.t option
         [@ocaml.doc
-          "Specifies the mode of transport when calculating a route. Used in estimating the speed of travel and road compatibility. The TravelMode you specify also determines how you specify route preferences: If traveling by Car use the CarModeOptions parameter. If traveling by Truck use the TruckModeOptions parameter. Default Value: Car"];
+          "Specifies route preferences when traveling by Car, such as avoiding routes that use ferries or tolls. Requirements: TravelMode must be specified as Car."];
       truckModeOptions: CalculateRouteTruckModeOptions.t option
         [@ocaml.doc
-          "Specifies route preferences when traveling by Truck, such as avoiding routes that use ferries or tolls, and truck specifications to consider when choosing an optimal road. Requirements: TravelMode must be specified as Truck."]}
+          "Specifies route preferences when traveling by Truck, such as avoiding routes that use ferries or tolls, and truck specifications to consider when choosing an optimal road. Requirements: TravelMode must be specified as Truck."];
+      key: ApiKey.t option
+        [@ocaml.doc "The optional API key to authorize the request."]}
     let context_ = "CalculateRouteMatrixRequest"
-    let make ?carModeOptions =
-      fun ?departNow ->
-        fun ?departureTime ->
+    let make ?travelMode =
+      fun ?departureTime ->
+        fun ?departNow ->
           fun ?distanceUnit ->
-            fun ?travelMode ->
+            fun ?carModeOptions ->
               fun ?truckModeOptions ->
-                fun ~calculatorName ->
-                  fun ~departurePositions ->
-                    fun ~destinationPositions ->
-                      fun () ->
-                        {
-                          carModeOptions;
-                          departNow;
-                          departureTime;
-                          distanceUnit;
-                          travelMode;
-                          truckModeOptions;
-                          calculatorName;
-                          departurePositions;
-                          destinationPositions
-                        }
+                fun ?key ->
+                  fun ~calculatorName ->
+                    fun ~departurePositions ->
+                      fun ~destinationPositions ->
+                        fun () ->
+                          {
+                            travelMode;
+                            departureTime;
+                            departNow;
+                            distanceUnit;
+                            carModeOptions;
+                            truckModeOptions;
+                            key;
+                            calculatorName;
+                            departurePositions;
+                            destinationPositions
+                          }
     let to_value x =
       structure_to_value
         [("CalculatorName", (Some (ResourceName.to_value x.calculatorName)));
-        ("CarModeOptions",
-          (Option.map x.carModeOptions
-             ~f:CalculateRouteCarModeOptions.to_value));
-        ("DepartNow", (Option.map x.departNow ~f:Boolean.to_value));
         ("DeparturePositions",
           (Some
              (CalculateRouteMatrixRequestDeparturePositionsList.to_value
                 x.departurePositions)));
-        ("DepartureTime", (Option.map x.departureTime ~f:Timestamp.to_value));
         ("DestinationPositions",
           (Some
              (CalculateRouteMatrixRequestDestinationPositionsList.to_value
                 x.destinationPositions)));
+        ("TravelMode", (Option.map x.travelMode ~f:TravelMode.to_value));
+        ("DepartureTime", (Option.map x.departureTime ~f:Timestamp.to_value));
+        ("DepartNow", (Option.map x.departNow ~f:SensitiveBoolean.to_value));
         ("DistanceUnit",
           (Option.map x.distanceUnit ~f:DistanceUnit.to_value));
-        ("TravelMode", (Option.map x.travelMode ~f:TravelMode.to_value));
+        ("CarModeOptions",
+          (Option.map x.carModeOptions
+             ~f:CalculateRouteCarModeOptions.to_value));
         ("TruckModeOptions",
           (Option.map x.truckModeOptions
-             ~f:CalculateRouteTruckModeOptions.to_value))]
+             ~f:CalculateRouteTruckModeOptions.to_value));
+        ("key", (Option.map x.key ~f:ApiKey.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let key = (Option.map ~f:ApiKey.of_xml) (Xml.child xml_arg0 "key") in
       let truckModeOptions =
         (Option.map ~f:CalculateRouteTruckModeOptions.of_xml)
           (Xml.child xml_arg0 "TruckModeOptions") in
-      let travelMode =
-        (Option.map ~f:TravelMode.of_xml) (Xml.child xml_arg0 "TravelMode") in
-      let distanceUnit =
-        (Option.map ~f:DistanceUnit.of_xml)
-          (Xml.child xml_arg0 "DistanceUnit") in
-      let destinationPositions =
-        CalculateRouteMatrixRequestDestinationPositionsList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DestinationPositions") in
-      let departureTime =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DepartureTime") in
-      let departurePositions =
-        CalculateRouteMatrixRequestDeparturePositionsList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DeparturePositions") in
-      let departNow =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DepartNow") in
       let carModeOptions =
         (Option.map ~f:CalculateRouteCarModeOptions.of_xml)
           (Xml.child xml_arg0 "CarModeOptions") in
+      let distanceUnit =
+        (Option.map ~f:DistanceUnit.of_xml)
+          (Xml.child xml_arg0 "DistanceUnit") in
+      let departNow =
+        (Option.map ~f:SensitiveBoolean.of_xml)
+          (Xml.child xml_arg0 "DepartNow") in
+      let departureTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DepartureTime") in
+      let travelMode =
+        (Option.map ~f:TravelMode.of_xml) (Xml.child xml_arg0 "TravelMode") in
+      let destinationPositions =
+        CalculateRouteMatrixRequestDestinationPositionsList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DestinationPositions") in
+      let departurePositions =
+        CalculateRouteMatrixRequestDeparturePositionsList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DeparturePositions") in
       let calculatorName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CalculatorName") in
-      make ?truckModeOptions ?travelMode ?distanceUnit ~destinationPositions
-        ?departureTime ~departurePositions ?departNow ?carModeOptions
+      make ?key ?truckModeOptions ?carModeOptions ?distanceUnit ?departNow
+        ?departureTime ?travelMode ~destinationPositions ~departurePositions
         ~calculatorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let key = field_map json__ "Key" ApiKey.of_json in
       let truckModeOptions =
-        field_map json "TruckModeOptions"
+        field_map json__ "TruckModeOptions"
           CalculateRouteTruckModeOptions.of_json in
-      let travelMode = field_map json "TravelMode" TravelMode.of_json in
-      let distanceUnit = field_map json "DistanceUnit" DistanceUnit.of_json in
-      let destinationPositions =
-        field_map_exn json "DestinationPositions"
-          CalculateRouteMatrixRequestDestinationPositionsList.of_json in
-      let departureTime = field_map json "DepartureTime" Timestamp.of_json in
-      let departurePositions =
-        field_map_exn json "DeparturePositions"
-          CalculateRouteMatrixRequestDeparturePositionsList.of_json in
-      let departNow = field_map json "DepartNow" Boolean.of_json in
       let carModeOptions =
-        field_map json "CarModeOptions" CalculateRouteCarModeOptions.of_json in
+        field_map json__ "CarModeOptions"
+          CalculateRouteCarModeOptions.of_json in
+      let distanceUnit = field_map json__ "DistanceUnit" DistanceUnit.of_json in
+      let departNow = field_map json__ "DepartNow" SensitiveBoolean.of_json in
+      let departureTime = field_map json__ "DepartureTime" Timestamp.of_json in
+      let travelMode = field_map json__ "TravelMode" TravelMode.of_json in
+      let destinationPositions =
+        field_map_exn json__ "DestinationPositions"
+          CalculateRouteMatrixRequestDestinationPositionsList.of_json in
+      let departurePositions =
+        field_map_exn json__ "DeparturePositions"
+          CalculateRouteMatrixRequestDeparturePositionsList.of_json in
       let calculatorName =
-        field_map_exn json "CalculatorName" ResourceName.of_json in
-      make ?truckModeOptions ?travelMode ?distanceUnit ~destinationPositions
-        ?departureTime ~departurePositions ?departNow ?carModeOptions
+        field_map_exn json__ "CalculatorName" ResourceName.of_json in
+      make ?key ?truckModeOptions ?carModeOptions ?distanceUnit ?departNow
+        ?departureTime ?travelMode ~destinationPositions ~departurePositions
         ~calculatorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Calculates a route matrix given the following required parameters: DeparturePositions and DestinationPositions. CalculateRouteMatrix calculates routes and returns the travel time and travel distance from each departure position to each destination position in the request. For example, given departure positions A and B, and destination positions X and Y, CalculateRouteMatrix will return time and distance for routes from A to X, A to Y, B to X, and B to Y (in that order). The number of results returned (and routes calculated) will be the number of DeparturePositions times the number of DestinationPositions. Your account is charged for each route calculated, not the number of requests. Requires that you first create a route calculator resource. By default, a request that doesn't specify a departure time uses the best time of day to travel with the best traffic conditions when calculating routes. Additional options include: Specifying a departure time using either DepartureTime or DepartNow. This calculates routes based on predictive traffic data at the given time. You can't specify both DepartureTime and DepartNow in a single request. Specifying both parameters returns a validation error. Specifying a travel mode using TravelMode sets the transportation mode used to calculate the routes. This also lets you specify additional route preferences in CarModeOptions if traveling by Car, or TruckModeOptions if traveling by Truck."]
+       "This operation is no longer current and may be deprecated in the future. We recommend you upgrade to the V2 CalculateRouteMatrix unless you require Grab data. This version of CalculateRouteMatrix is part of a previous Amazon Location Service Routes API (version 1) which has been superseded by a more intuitive, powerful, and complete API (version 2). The version 2 CalculateRouteMatrix operation gives better results for matrix routing calculations. If you are using an Amazon Web Services SDK or the Amazon Web Services CLI, note that the Routes API version 2 is found under geo-routes or geo_routes, not under location. Since Grab is not yet fully supported in Routes API version 2, we recommend you continue using API version 1 when using Grab. Start your version 2 API journey with the Routes V2 API Reference or the Developer Guide. Calculates a route matrix given the following required parameters: DeparturePositions and DestinationPositions. CalculateRouteMatrix calculates routes and returns the travel time and travel distance from each departure position to each destination position in the request. For example, given departure positions A and B, and destination positions X and Y, CalculateRouteMatrix will return time and distance for routes from A to X, A to Y, B to X, and B to Y (in that order). The number of results returned (and routes calculated) will be the number of DeparturePositions times the number of DestinationPositions. Your account is charged for each route calculated, not the number of requests. Requires that you first create a route calculator resource. By default, a request that doesn't specify a departure time uses the best time of day to travel with the best traffic conditions when calculating routes. Additional options include: Specifying a departure time using either DepartureTime or DepartNow. This calculates routes based on predictive traffic data at the given time. You can't specify both DepartureTime and DepartNow in a single request. Specifying both parameters returns a validation error. Specifying a travel mode using TravelMode sets the transportation mode used to calculate the routes. This also lets you specify additional route preferences in CarModeOptions if traveling by Car, or TruckModeOptions if traveling by Truck."]
 module BatchUpdateDevicePositionResponse =
   struct
     type nonrec t =
       {
-      errors: BatchUpdateDevicePositionErrorList.t
+      errors: BatchUpdateDevicePositionErrorList.t option
         [@ocaml.doc
           "Contains error details for each device that failed to update its position."]}
     type nonrec error =
@@ -11717,8 +17275,7 @@ module BatchUpdateDevicePositionResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "BatchUpdateDevicePositionResponse"
-    let make ~errors = fun () -> { errors }
+    let make ?errors = fun () -> { errors }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -11778,22 +17335,22 @@ module BatchUpdateDevicePositionResponse =
     let to_value x =
       structure_to_value
         [("Errors",
-           (Some (BatchUpdateDevicePositionErrorList.to_value x.errors)))]
+           (Option.map x.errors
+              ~f:BatchUpdateDevicePositionErrorList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let errors =
-        BatchUpdateDevicePositionErrorList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Errors") in
-      make ~errors ()
+        (Option.map ~f:BatchUpdateDevicePositionErrorList.of_xml)
+          (Xml.child xml_arg0 "Errors") in
+      make ?errors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errors =
-        field_map_exn json "Errors"
-          BatchUpdateDevicePositionErrorList.of_json in
-      make ~errors ()
+        field_map json__ "Errors" BatchUpdateDevicePositionErrorList.of_json in
+      make ?errors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Uploads position update data for one or more devices to a tracker resource. Amazon Location uses the data when it reports the last known device position and position history. Amazon Location retains location data for 30 days. Position updates are handled based on the PositionFiltering property of the tracker. When PositionFiltering is set to TimeBased, updates are evaluated against linked geofence collections, and location data is stored at a maximum of one position per 30 second interval. If your update frequency is more often than every 30 seconds, only one update per 30 seconds is stored for each unique device ID. When PositionFiltering is set to DistanceBased filtering, location data is stored and evaluated against linked geofence collections only if the device has moved more than 30 m (98.4 ft). When PositionFiltering is set to AccuracyBased filtering, location data is stored and evaluated against linked geofence collections only if the device has moved more than the measured accuracy. For example, if two consecutive updates from a device have a horizontal accuracy of 5 m and 10 m, the second update is neither stored or evaluated if the device has moved less than 15 m. If PositionFiltering is set to AccuracyBased filtering, Amazon Location uses the default value \\{ \"Horizontal\": 0\\} when accuracy is not provided on a DevicePositionUpdate."]
+       "Uploads position update data for one or more devices to a tracker resource (up to 10 devices per batch). Amazon Location uses the data when it reports the last known device position and position history. Amazon Location retains location data for 30 days. Position updates are handled based on the PositionFiltering property of the tracker. When PositionFiltering is set to TimeBased, updates are evaluated against linked geofence collections, and location data is stored at a maximum of one position per 30 second interval. If your update frequency is more often than every 30 seconds, only one update per 30 seconds is stored for each unique device ID. When PositionFiltering is set to DistanceBased filtering, location data is stored and evaluated against linked geofence collections only if the device has moved more than 30 m (98.4 ft). When PositionFiltering is set to AccuracyBased filtering, location data is stored and evaluated against linked geofence collections only if the device has moved more than the measured accuracy. For example, if two consecutive updates from a device have a horizontal accuracy of 5 m and 10 m, the second update is neither stored or evaluated if the device has moved less than 15 m. If PositionFiltering is set to AccuracyBased filtering, Amazon Location uses the default value \\{ \"Horizontal\": 0\\} when accuracy is not provided on a DevicePositionUpdate."]
 module BatchUpdateDevicePositionRequest =
   struct
     type nonrec t =
@@ -11801,7 +17358,8 @@ module BatchUpdateDevicePositionRequest =
       trackerName: ResourceName.t
         [@ocaml.doc "The name of the tracker resource to update."];
       updates: BatchUpdateDevicePositionRequestUpdatesList.t
-        [@ocaml.doc "Contains the position update details for each device."]}
+        [@ocaml.doc
+          "Contains the position update details for each device, up to 10 devices."]}
     let context_ = "BatchUpdateDevicePositionRequest"
     let make ~trackerName =
       fun ~updates -> fun () -> { trackerName; updates }
@@ -11821,25 +17379,26 @@ module BatchUpdateDevicePositionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
       make ~updates ~trackerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let updates =
-        field_map_exn json "Updates"
+        field_map_exn json__ "Updates"
           BatchUpdateDevicePositionRequestUpdatesList.of_json in
-      let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
+      let trackerName =
+        field_map_exn json__ "TrackerName" ResourceName.of_json in
       make ~updates ~trackerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Uploads position update data for one or more devices to a tracker resource. Amazon Location uses the data when it reports the last known device position and position history. Amazon Location retains location data for 30 days. Position updates are handled based on the PositionFiltering property of the tracker. When PositionFiltering is set to TimeBased, updates are evaluated against linked geofence collections, and location data is stored at a maximum of one position per 30 second interval. If your update frequency is more often than every 30 seconds, only one update per 30 seconds is stored for each unique device ID. When PositionFiltering is set to DistanceBased filtering, location data is stored and evaluated against linked geofence collections only if the device has moved more than 30 m (98.4 ft). When PositionFiltering is set to AccuracyBased filtering, location data is stored and evaluated against linked geofence collections only if the device has moved more than the measured accuracy. For example, if two consecutive updates from a device have a horizontal accuracy of 5 m and 10 m, the second update is neither stored or evaluated if the device has moved less than 15 m. If PositionFiltering is set to AccuracyBased filtering, Amazon Location uses the default value \\{ \"Horizontal\": 0\\} when accuracy is not provided on a DevicePositionUpdate."]
+       "Uploads position update data for one or more devices to a tracker resource (up to 10 devices per batch). Amazon Location uses the data when it reports the last known device position and position history. Amazon Location retains location data for 30 days. Position updates are handled based on the PositionFiltering property of the tracker. When PositionFiltering is set to TimeBased, updates are evaluated against linked geofence collections, and location data is stored at a maximum of one position per 30 second interval. If your update frequency is more often than every 30 seconds, only one update per 30 seconds is stored for each unique device ID. When PositionFiltering is set to DistanceBased filtering, location data is stored and evaluated against linked geofence collections only if the device has moved more than 30 m (98.4 ft). When PositionFiltering is set to AccuracyBased filtering, location data is stored and evaluated against linked geofence collections only if the device has moved more than the measured accuracy. For example, if two consecutive updates from a device have a horizontal accuracy of 5 m and 10 m, the second update is neither stored or evaluated if the device has moved less than 15 m. If PositionFiltering is set to AccuracyBased filtering, Amazon Location uses the default value \\{ \"Horizontal\": 0\\} when accuracy is not provided on a DevicePositionUpdate."]
 module BatchPutGeofenceResponse =
   struct
     type nonrec t =
       {
-      errors: BatchPutGeofenceErrorList.t
+      successes: BatchPutGeofenceSuccessList.t option
         [@ocaml.doc
-          "Contains additional error details for each geofence that failed to be stored in a geofence collection."];
-      successes: BatchPutGeofenceSuccessList.t
+          "Contains each geofence that was successfully stored in a geofence collection."];
+      errors: BatchPutGeofenceErrorList.t option
         [@ocaml.doc
-          "Contains each geofence that was successfully stored in a geofence collection."]}
+          "Contains additional error details for each geofence that failed to be stored in a geofence collection."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -11847,8 +17406,7 @@ module BatchPutGeofenceResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "BatchPutGeofenceResponse"
-    let make ~errors = fun ~successes -> fun () -> { errors; successes }
+    let make ?successes = fun ?errors -> fun () -> { successes; errors }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -11907,25 +17465,26 @@ module BatchPutGeofenceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Errors", (Some (BatchPutGeofenceErrorList.to_value x.errors)));
-        ("Successes",
-          (Some (BatchPutGeofenceSuccessList.to_value x.successes)))]
+        [("Successes",
+           (Option.map x.successes ~f:BatchPutGeofenceSuccessList.to_value));
+        ("Errors",
+          (Option.map x.errors ~f:BatchPutGeofenceErrorList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let successes =
-        BatchPutGeofenceSuccessList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Successes") in
       let errors =
-        BatchPutGeofenceErrorList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Errors") in
-      make ~successes ~errors ()
+        (Option.map ~f:BatchPutGeofenceErrorList.of_xml)
+          (Xml.child xml_arg0 "Errors") in
+      let successes =
+        (Option.map ~f:BatchPutGeofenceSuccessList.of_xml)
+          (Xml.child xml_arg0 "Successes") in
+      make ?errors ?successes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let successes =
-        field_map_exn json "Successes" BatchPutGeofenceSuccessList.of_json in
+    let of_json json__ =
       let errors =
-        field_map_exn json "Errors" BatchPutGeofenceErrorList.of_json in
-      make ~successes ~errors ()
+        field_map json__ "Errors" BatchPutGeofenceErrorList.of_json in
+      let successes =
+        field_map json__ "Successes" BatchPutGeofenceSuccessList.of_json in
+      make ?errors ?successes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A batch request for storing geofence geometries into a given geofence collection, or updates the geometry of an existing geofence if a geofence ID is included in the request."]
@@ -11956,12 +17515,12 @@ module BatchPutGeofenceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
       make ~entries ~collectionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entries =
-        field_map_exn json "Entries"
+        field_map_exn json__ "Entries"
           BatchPutGeofenceRequestEntriesList.of_json in
       let collectionName =
-        field_map_exn json "CollectionName" ResourceName.of_json in
+        field_map_exn json__ "CollectionName" ResourceName.of_json in
       make ~entries ~collectionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11970,12 +17529,12 @@ module BatchGetDevicePositionResponse =
   struct
     type nonrec t =
       {
-      devicePositions: DevicePositionList.t
+      errors: BatchGetDevicePositionErrorList.t option
         [@ocaml.doc
-          "Contains device position details such as the device ID, position, and timestamps for when the position was received and sampled."];
-      errors: BatchGetDevicePositionErrorList.t
+          "Contains error details for each device that failed to send its position to the tracker resource."];
+      devicePositions: DevicePositionList.t option
         [@ocaml.doc
-          "Contains error details for each device that failed to send its position to the tracker resource."]}
+          "Contains device position details such as the device ID, position, and timestamps for when the position was received and sampled."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -11983,147 +17542,8 @@ module BatchGetDevicePositionResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "BatchGetDevicePositionResponse"
-    let make ~devicePositions =
-      fun ~errors -> fun () -> { devicePositions; errors }
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | "ThrottlingException" ->
-          `ThrottlingException (ThrottlingException.of_json json)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | "ThrottlingException" ->
-          `ThrottlingException (ThrottlingException.of_xml xml)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `ThrottlingException e ->
-          `Assoc
-            [("error", (`String "ThrottlingException"));
-            ("details", (ThrottlingException.to_json e))]
-      | `ValidationException e ->
-          `Assoc
-            [("error", (`String "ValidationException"));
-            ("details", (ValidationException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("DevicePositions",
-           (Some (DevicePositionList.to_value x.devicePositions)));
-        ("Errors",
-          (Some (BatchGetDevicePositionErrorList.to_value x.errors)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let errors =
-        BatchGetDevicePositionErrorList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Errors") in
-      let devicePositions =
-        DevicePositionList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DevicePositions") in
-      make ~errors ~devicePositions ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errors =
-        field_map_exn json "Errors" BatchGetDevicePositionErrorList.of_json in
-      let devicePositions =
-        field_map_exn json "DevicePositions" DevicePositionList.of_json in
-      make ~errors ~devicePositions ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the latest device positions for requested devices."]
-module BatchGetDevicePositionRequest =
-  struct
-    type nonrec t =
-      {
-      deviceIds: BatchGetDevicePositionRequestDeviceIdsList.t
-        [@ocaml.doc
-          "Devices whose position you want to retrieve. For example, for two devices: device-ids=DeviceId1&device-ids=DeviceId2"];
-      trackerName: BatchGetDevicePositionRequestTrackerNameString.t
-        [@ocaml.doc "The tracker resource retrieving the device position."]}
-    let context_ = "BatchGetDevicePositionRequest"
-    let make ~deviceIds =
-      fun ~trackerName -> fun () -> { deviceIds; trackerName }
-    let to_value x =
-      structure_to_value
-        [("DeviceIds",
-           (Some
-              (BatchGetDevicePositionRequestDeviceIdsList.to_value
-                 x.deviceIds)));
-        ("TrackerName",
-          (Some
-             (BatchGetDevicePositionRequestTrackerNameString.to_value
-                x.trackerName)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let trackerName =
-        BatchGetDevicePositionRequestTrackerNameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
-      let deviceIds =
-        BatchGetDevicePositionRequestDeviceIdsList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DeviceIds") in
-      make ~trackerName ~deviceIds ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackerName =
-        field_map_exn json "TrackerName"
-          BatchGetDevicePositionRequestTrackerNameString.of_json in
-      let deviceIds =
-        field_map_exn json "DeviceIds"
-          BatchGetDevicePositionRequestDeviceIdsList.of_json in
-      make ~trackerName ~deviceIds ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the latest device positions for requested devices."]
-module BatchEvaluateGeofencesResponse =
-  struct
-    type nonrec t =
-      {
-      errors: BatchEvaluateGeofencesErrorList.t
-        [@ocaml.doc
-          "Contains error details for each device that failed to evaluate its position against the given geofence collection."]}
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `InternalServerException of InternalServerException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `ThrottlingException of ThrottlingException.t 
-      | `ValidationException of ValidationException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "BatchEvaluateGeofencesResponse"
-    let make ~errors = fun () -> { errors }
+    let make ?errors =
+      fun ?devicePositions -> fun () -> { errors; devicePositions }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -12183,21 +17603,157 @@ module BatchEvaluateGeofencesResponse =
     let to_value x =
       structure_to_value
         [("Errors",
-           (Some (BatchEvaluateGeofencesErrorList.to_value x.errors)))]
+           (Option.map x.errors ~f:BatchGetDevicePositionErrorList.to_value));
+        ("DevicePositions",
+          (Option.map x.devicePositions ~f:DevicePositionList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let devicePositions =
+        (Option.map ~f:DevicePositionList.of_xml)
+          (Xml.child xml_arg0 "DevicePositions") in
+      let errors =
+        (Option.map ~f:BatchGetDevicePositionErrorList.of_xml)
+          (Xml.child xml_arg0 "Errors") in
+      make ?devicePositions ?errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let devicePositions =
+        field_map json__ "DevicePositions" DevicePositionList.of_json in
+      let errors =
+        field_map json__ "Errors" BatchGetDevicePositionErrorList.of_json in
+      make ?devicePositions ?errors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the latest device positions for requested devices."]
+module BatchGetDevicePositionRequest =
+  struct
+    type nonrec t =
+      {
+      trackerName: BatchGetDevicePositionRequestTrackerNameString.t
+        [@ocaml.doc "The tracker resource retrieving the device position."];
+      deviceIds: BatchGetDevicePositionRequestDeviceIdsList.t
+        [@ocaml.doc
+          "Devices whose position you want to retrieve. For example, for two devices: device-ids=DeviceId1&device-ids=DeviceId2"]}
+    let context_ = "BatchGetDevicePositionRequest"
+    let make ~trackerName =
+      fun ~deviceIds -> fun () -> { trackerName; deviceIds }
+    let to_value x =
+      structure_to_value
+        [("TrackerName",
+           (Some
+              (BatchGetDevicePositionRequestTrackerNameString.to_value
+                 x.trackerName)));
+        ("DeviceIds",
+          (Some
+             (BatchGetDevicePositionRequestDeviceIdsList.to_value x.deviceIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deviceIds =
+        BatchGetDevicePositionRequestDeviceIdsList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DeviceIds") in
+      let trackerName =
+        BatchGetDevicePositionRequestTrackerNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
+      make ~deviceIds ~trackerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deviceIds =
+        field_map_exn json__ "DeviceIds"
+          BatchGetDevicePositionRequestDeviceIdsList.of_json in
+      let trackerName =
+        field_map_exn json__ "TrackerName"
+          BatchGetDevicePositionRequestTrackerNameString.of_json in
+      make ~deviceIds ~trackerName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the latest device positions for requested devices."]
+module BatchEvaluateGeofencesResponse =
+  struct
+    type nonrec t =
+      {
+      errors: BatchEvaluateGeofencesErrorList.t option
+        [@ocaml.doc
+          "Contains error details for each device that failed to evaluate its position against the given geofence collection."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?errors = fun () -> { errors }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Errors",
+           (Option.map x.errors ~f:BatchEvaluateGeofencesErrorList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let errors =
-        BatchEvaluateGeofencesErrorList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Errors") in
-      make ~errors ()
+        (Option.map ~f:BatchEvaluateGeofencesErrorList.of_xml)
+          (Xml.child xml_arg0 "Errors") in
+      make ?errors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errors =
-        field_map_exn json "Errors" BatchEvaluateGeofencesErrorList.of_json in
-      make ~errors ()
+        field_map json__ "Errors" BatchEvaluateGeofencesErrorList.of_json in
+      make ?errors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Evaluates device positions against the geofence geometries from a given geofence collection. This operation always returns an empty response because geofences are asynchronously evaluated. The evaluation determines if the device has entered or exited a geofenced area, and then publishes one of the following events to Amazon EventBridge: ENTER if Amazon Location determines that the tracked device has entered a geofenced area. EXIT if Amazon Location determines that the tracked device has exited a geofenced area. The last geofence that a device was observed within is tracked for 30 days after the most recent device position update. Geofence evaluation uses the given device position. It does not account for the optional Accuracy of a DevicePositionUpdate."]
+       "Evaluates device positions against the geofence geometries from a given geofence collection. This operation always returns an empty response because geofences are asynchronously evaluated. The evaluation determines if the device has entered or exited a geofenced area, and then publishes one of the following events to Amazon EventBridge: ENTER if Amazon Location determines that the tracked device has entered a geofenced area. EXIT if Amazon Location determines that the tracked device has exited a geofenced area. The last geofence that a device was observed within is tracked for 30 days after the most recent device position update. Geofence evaluation uses the given device position. It does not account for the optional Accuracy of a DevicePositionUpdate. The DeviceID is used as a string to represent the device. You do not need to have a Tracker associated with the DeviceID."]
 module BatchEvaluateGeofencesRequest =
   struct
     type nonrec t =
@@ -12230,21 +17786,21 @@ module BatchEvaluateGeofencesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
       make ~devicePositionUpdates ~collectionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let devicePositionUpdates =
-        field_map_exn json "DevicePositionUpdates"
+        field_map_exn json__ "DevicePositionUpdates"
           BatchEvaluateGeofencesRequestDevicePositionUpdatesList.of_json in
       let collectionName =
-        field_map_exn json "CollectionName" ResourceName.of_json in
+        field_map_exn json__ "CollectionName" ResourceName.of_json in
       make ~devicePositionUpdates ~collectionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Evaluates device positions against the geofence geometries from a given geofence collection. This operation always returns an empty response because geofences are asynchronously evaluated. The evaluation determines if the device has entered or exited a geofenced area, and then publishes one of the following events to Amazon EventBridge: ENTER if Amazon Location determines that the tracked device has entered a geofenced area. EXIT if Amazon Location determines that the tracked device has exited a geofenced area. The last geofence that a device was observed within is tracked for 30 days after the most recent device position update. Geofence evaluation uses the given device position. It does not account for the optional Accuracy of a DevicePositionUpdate."]
+       "Evaluates device positions against the geofence geometries from a given geofence collection. This operation always returns an empty response because geofences are asynchronously evaluated. The evaluation determines if the device has entered or exited a geofenced area, and then publishes one of the following events to Amazon EventBridge: ENTER if Amazon Location determines that the tracked device has entered a geofenced area. EXIT if Amazon Location determines that the tracked device has exited a geofenced area. The last geofence that a device was observed within is tracked for 30 days after the most recent device position update. Geofence evaluation uses the given device position. It does not account for the optional Accuracy of a DevicePositionUpdate. The DeviceID is used as a string to represent the device. You do not need to have a Tracker associated with the DeviceID."]
 module BatchDeleteGeofenceResponse =
   struct
     type nonrec t =
       {
-      errors: BatchDeleteGeofenceErrorList.t
+      errors: BatchDeleteGeofenceErrorList.t option
         [@ocaml.doc
           "Contains error details for each geofence that failed to delete."]}
     type nonrec error =
@@ -12254,136 +17810,7 @@ module BatchDeleteGeofenceResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "BatchDeleteGeofenceResponse"
-    let make ~errors = fun () -> { errors }
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | "ThrottlingException" ->
-          `ThrottlingException (ThrottlingException.of_json json)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | "ThrottlingException" ->
-          `ThrottlingException (ThrottlingException.of_xml xml)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `InternalServerException e ->
-          `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `ThrottlingException e ->
-          `Assoc
-            [("error", (`String "ThrottlingException"));
-            ("details", (ThrottlingException.to_json e))]
-      | `ValidationException e ->
-          `Assoc
-            [("error", (`String "ValidationException"));
-            ("details", (ValidationException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("Errors", (Some (BatchDeleteGeofenceErrorList.to_value x.errors)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let errors =
-        BatchDeleteGeofenceErrorList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Errors") in
-      make ~errors ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errors =
-        field_map_exn json "Errors" BatchDeleteGeofenceErrorList.of_json in
-      make ~errors ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Deletes a batch of geofences from a geofence collection. This operation deletes the resource permanently."]
-module BatchDeleteGeofenceRequest =
-  struct
-    type nonrec t =
-      {
-      collectionName: ResourceName.t
-        [@ocaml.doc
-          "The geofence collection storing the geofences to be deleted."];
-      geofenceIds: BatchDeleteGeofenceRequestGeofenceIdsList.t
-        [@ocaml.doc "The batch of geofences to be deleted."]}
-    let context_ = "BatchDeleteGeofenceRequest"
-    let make ~collectionName =
-      fun ~geofenceIds -> fun () -> { collectionName; geofenceIds }
-    let to_value x =
-      structure_to_value
-        [("CollectionName", (Some (ResourceName.to_value x.collectionName)));
-        ("GeofenceIds",
-          (Some
-             (BatchDeleteGeofenceRequestGeofenceIdsList.to_value
-                x.geofenceIds)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let geofenceIds =
-        BatchDeleteGeofenceRequestGeofenceIdsList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GeofenceIds") in
-      let collectionName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
-      make ~geofenceIds ~collectionName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let geofenceIds =
-        field_map_exn json "GeofenceIds"
-          BatchDeleteGeofenceRequestGeofenceIdsList.of_json in
-      let collectionName =
-        field_map_exn json "CollectionName" ResourceName.of_json in
-      make ~geofenceIds ~collectionName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Deletes a batch of geofences from a geofence collection. This operation deletes the resource permanently."]
-module BatchDeleteDevicePositionHistoryResponse =
-  struct
-    type nonrec t =
-      {
-      errors: BatchDeleteDevicePositionHistoryErrorList.t
-        [@ocaml.doc
-          "Contains error details for each device history that failed to delete."]}
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `InternalServerException of InternalServerException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `ThrottlingException of ThrottlingException.t 
-      | `ValidationException of ValidationException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "BatchDeleteDevicePositionHistoryResponse"
-    let make ~errors = fun () -> { errors }
+    let make ?errors = fun () -> { errors }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -12443,20 +17870,148 @@ module BatchDeleteDevicePositionHistoryResponse =
     let to_value x =
       structure_to_value
         [("Errors",
-           (Some
-              (BatchDeleteDevicePositionHistoryErrorList.to_value x.errors)))]
+           (Option.map x.errors ~f:BatchDeleteGeofenceErrorList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let errors =
-        BatchDeleteDevicePositionHistoryErrorList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Errors") in
-      make ~errors ()
+        (Option.map ~f:BatchDeleteGeofenceErrorList.of_xml)
+          (Xml.child xml_arg0 "Errors") in
+      make ?errors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errors =
-        field_map_exn json "Errors"
+        field_map json__ "Errors" BatchDeleteGeofenceErrorList.of_json in
+      make ?errors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a batch of geofences from a geofence collection. This operation deletes the resource permanently."]
+module BatchDeleteGeofenceRequest =
+  struct
+    type nonrec t =
+      {
+      collectionName: ResourceName.t
+        [@ocaml.doc
+          "The geofence collection storing the geofences to be deleted."];
+      geofenceIds: BatchDeleteGeofenceRequestGeofenceIdsList.t
+        [@ocaml.doc "The batch of geofences to be deleted."]}
+    let context_ = "BatchDeleteGeofenceRequest"
+    let make ~collectionName =
+      fun ~geofenceIds -> fun () -> { collectionName; geofenceIds }
+    let to_value x =
+      structure_to_value
+        [("CollectionName", (Some (ResourceName.to_value x.collectionName)));
+        ("GeofenceIds",
+          (Some
+             (BatchDeleteGeofenceRequestGeofenceIdsList.to_value
+                x.geofenceIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let geofenceIds =
+        BatchDeleteGeofenceRequestGeofenceIdsList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GeofenceIds") in
+      let collectionName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CollectionName") in
+      make ~geofenceIds ~collectionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let geofenceIds =
+        field_map_exn json__ "GeofenceIds"
+          BatchDeleteGeofenceRequestGeofenceIdsList.of_json in
+      let collectionName =
+        field_map_exn json__ "CollectionName" ResourceName.of_json in
+      make ~geofenceIds ~collectionName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a batch of geofences from a geofence collection. This operation deletes the resource permanently."]
+module BatchDeleteDevicePositionHistoryResponse =
+  struct
+    type nonrec t =
+      {
+      errors: BatchDeleteDevicePositionHistoryErrorList.t option
+        [@ocaml.doc
+          "Contains error details for each device history that failed to delete."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?errors = fun () -> { errors }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Errors",
+           (Option.map x.errors
+              ~f:BatchDeleteDevicePositionHistoryErrorList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errors =
+        (Option.map ~f:BatchDeleteDevicePositionHistoryErrorList.of_xml)
+          (Xml.child xml_arg0 "Errors") in
+      make ?errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errors =
+        field_map json__ "Errors"
           BatchDeleteDevicePositionHistoryErrorList.of_json in
-      make ~errors ()
+      make ?errors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the position history of one or more devices from a tracker resource."]
@@ -12464,38 +18019,39 @@ module BatchDeleteDevicePositionHistoryRequest =
   struct
     type nonrec t =
       {
-      deviceIds: BatchDeleteDevicePositionHistoryRequestDeviceIdsList.t
-        [@ocaml.doc
-          "Devices whose position history you want to delete. For example, for two devices: \226\128\156DeviceIds\226\128\157 : \\[DeviceId1,DeviceId2\\]"];
       trackerName: ResourceName.t
         [@ocaml.doc
-          "The name of the tracker resource to delete the device position history from."]}
+          "The name of the tracker resource to delete the device position history from."];
+      deviceIds: BatchDeleteDevicePositionHistoryRequestDeviceIdsList.t
+        [@ocaml.doc
+          "Devices whose position history you want to delete. For example, for two devices: \226\128\156DeviceIds\226\128\157 : \\[DeviceId1,DeviceId2\\]"]}
     let context_ = "BatchDeleteDevicePositionHistoryRequest"
-    let make ~deviceIds =
-      fun ~trackerName -> fun () -> { deviceIds; trackerName }
+    let make ~trackerName =
+      fun ~deviceIds -> fun () -> { trackerName; deviceIds }
     let to_value x =
       structure_to_value
-        [("DeviceIds",
-           (Some
-              (BatchDeleteDevicePositionHistoryRequestDeviceIdsList.to_value
-                 x.deviceIds)));
-        ("TrackerName", (Some (ResourceName.to_value x.trackerName)))]
+        [("TrackerName", (Some (ResourceName.to_value x.trackerName)));
+        ("DeviceIds",
+          (Some
+             (BatchDeleteDevicePositionHistoryRequestDeviceIdsList.to_value
+                x.deviceIds)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let trackerName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
       let deviceIds =
         BatchDeleteDevicePositionHistoryRequestDeviceIdsList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeviceIds") in
-      make ~trackerName ~deviceIds ()
+      let trackerName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
+      make ~deviceIds ~trackerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
+    let of_json json__ =
       let deviceIds =
-        field_map_exn json "DeviceIds"
+        field_map_exn json__ "DeviceIds"
           BatchDeleteDevicePositionHistoryRequestDeviceIdsList.of_json in
-      make ~trackerName ~deviceIds ()
+      let trackerName =
+        field_map_exn json__ "TrackerName" ResourceName.of_json in
+      make ~deviceIds ~trackerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the position history of one or more devices from a tracker resource."]
@@ -12599,32 +18155,33 @@ module AssociateTrackerConsumerRequest =
   struct
     type nonrec t =
       {
-      consumerArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the geofence collection to be associated to tracker resource. Used when you need to specify a resource across all AWS. Format example: arn:aws:geo:region:account-id:geofence-collection/ExampleGeofenceCollectionConsumer"];
       trackerName: ResourceName.t
         [@ocaml.doc
-          "The name of the tracker resource to be associated with a geofence collection."]}
+          "The name of the tracker resource to be associated with a geofence collection."];
+      consumerArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the geofence collection to be associated to tracker resource. Used when you need to specify a resource across all Amazon Web Services. Format example: arn:aws:geo:region:account-id:geofence-collection/ExampleGeofenceCollectionConsumer"]}
     let context_ = "AssociateTrackerConsumerRequest"
-    let make ~consumerArn =
-      fun ~trackerName -> fun () -> { consumerArn; trackerName }
+    let make ~trackerName =
+      fun ~consumerArn -> fun () -> { trackerName; consumerArn }
     let to_value x =
       structure_to_value
-        [("ConsumerArn", (Some (Arn.to_value x.consumerArn)));
-        ("TrackerName", (Some (ResourceName.to_value x.trackerName)))]
+        [("TrackerName", (Some (ResourceName.to_value x.trackerName)));
+        ("ConsumerArn", (Some (Arn.to_value x.consumerArn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let consumerArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ConsumerArn") in
       let trackerName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TrackerName") in
-      let consumerArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ConsumerArn") in
-      make ~trackerName ~consumerArn ()
+      make ~consumerArn ~trackerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackerName = field_map_exn json "TrackerName" ResourceName.of_json in
-      let consumerArn = field_map_exn json "ConsumerArn" Arn.of_json in
-      make ~trackerName ~consumerArn ()
+    let of_json json__ =
+      let consumerArn = field_map_exn json__ "ConsumerArn" Arn.of_json in
+      let trackerName =
+        field_map_exn json__ "TrackerName" ResourceName.of_json in
+      make ~consumerArn ~trackerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an association between a geofence collection and a tracker resource. This allows the tracker resource to communicate location data to the linked geofence collection. You can associate up to five geofence collections to each tracker resource. Currently not supported \226\128\148 Cross-account configurations, such as creating associations between a tracker resource in one account and a geofence collection in another account."]

@@ -35,6 +35,8 @@ let describe_routing_control ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeRoutingControl input
 let describe_safety_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSafetyRule input
+let get_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetResourcePolicy input
 let list_associated_route53_health_checks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAssociatedRoute53HealthChecks input
 let list_clusters ?endpoint_url ?cfg input =
@@ -51,6 +53,8 @@ let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_cluster ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateCluster input
 let update_control_panel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateControlPanel input
 let update_routing_control ?endpoint_url ?cfg input =

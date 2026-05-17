@@ -65,9 +65,9 @@ module PrivateIp =
         (Option.map ~f:Text.of_xml) (Xml.child xml_arg0 "privateDnsName") in
       make ?privateIpAddress ?privateDnsName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let privateIpAddress = field_map json "privateIpAddress" Text.of_json in
-      let privateDnsName = field_map json "privateDnsName" Text.of_json in
+    let of_json json__ =
+      let privateIpAddress = field_map json__ "privateIpAddress" Text.of_json in
+      let privateDnsName = field_map json__ "privateDnsName" Text.of_json in
       make ?privateIpAddress ?privateDnsName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -91,9 +91,9 @@ module SecurityGroup =
         (Option.map ~f:Text.of_xml) (Xml.child xml_arg0 "groupName") in
       make ?groupId ?groupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map json "groupId" Text.of_json in
-      let groupName = field_map json "groupName" Text.of_json in
+    let of_json json__ =
+      let groupId = field_map json__ "groupId" Text.of_json in
+      let groupName = field_map json__ "groupName" Text.of_json in
       make ?groupId ?groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -102,6 +102,9 @@ module Ipv6Addresses =
   struct
     type nonrec t = Text.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Text.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -126,6 +129,9 @@ module PrivateIpAddresses =
   struct
     type nonrec t = PrivateIp.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PrivateIp.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -150,6 +156,9 @@ module SecurityGroups =
   struct
     type nonrec t = SecurityGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -475,21 +484,21 @@ module NetworkInterface =
         ?privateIpAddresses ?privateIpAddress ?privateDnsName ?vpcId
         ?subnetId ?networkInterfaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroups =
-        field_map json "securityGroups" SecurityGroups.of_json in
+        field_map json__ "securityGroups" SecurityGroups.of_json in
       let ipv6Addresses =
-        field_map json "ipv6Addresses" Ipv6Addresses.of_json in
-      let publicIp = field_map json "publicIp" Text.of_json in
-      let publicDnsName = field_map json "publicDnsName" Text.of_json in
+        field_map json__ "ipv6Addresses" Ipv6Addresses.of_json in
+      let publicIp = field_map json__ "publicIp" Text.of_json in
+      let publicDnsName = field_map json__ "publicDnsName" Text.of_json in
       let privateIpAddresses =
-        field_map json "privateIpAddresses" PrivateIpAddresses.of_json in
-      let privateIpAddress = field_map json "privateIpAddress" Text.of_json in
-      let privateDnsName = field_map json "privateDnsName" Text.of_json in
-      let vpcId = field_map json "vpcId" Text.of_json in
-      let subnetId = field_map json "subnetId" Text.of_json in
+        field_map json__ "privateIpAddresses" PrivateIpAddresses.of_json in
+      let privateIpAddress = field_map json__ "privateIpAddress" Text.of_json in
+      let privateDnsName = field_map json__ "privateDnsName" Text.of_json in
+      let vpcId = field_map json__ "vpcId" Text.of_json in
+      let subnetId = field_map json__ "subnetId" Text.of_json in
       let networkInterfaceId =
-        field_map json "networkInterfaceId" Text.of_json in
+        field_map json__ "networkInterfaceId" Text.of_json in
       make ?securityGroups ?ipv6Addresses ?publicIp ?publicDnsName
         ?privateIpAddresses ?privateIpAddress ?privateDnsName ?vpcId
         ?subnetId ?networkInterfaceId ()
@@ -516,9 +525,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ?value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" TagValue.of_json in
-      let key = field_map_exn json "key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" TagValue.of_json in
+      let key = field_map_exn json__ "key" TagKey.of_json in
       make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -577,7 +586,7 @@ module AssessmentRunNotificationSnsStatusCode =
         (string_of_json ~kind:"AssessmentRunNotificationSnsStatusCode" j)
     let to_json = simple_to_json to_value
   end
-module Bool =
+module Bool_ =
   struct
     type nonrec t = bool
     let make i = i
@@ -691,71 +700,65 @@ module EventSubscription =
   struct
     type nonrec t =
       {
-      event: InspectorEvent.t
+      event: InspectorEvent.t option
         [@ocaml.doc
           "The event for which Amazon Simple Notification Service (SNS) notifications are sent."];
-      subscribedAt: Timestamp.t
+      subscribedAt: Timestamp.t option
         [@ocaml.doc "The time at which SubscribeToEvent is called."]}
-    let context_ = "EventSubscription"
-    let make ~event = fun ~subscribedAt -> fun () -> { event; subscribedAt }
+    let make ?event = fun ?subscribedAt -> fun () -> { event; subscribedAt }
     let to_value x =
       structure_to_value
-        [("event", (Some (InspectorEvent.to_value x.event)));
-        ("subscribedAt", (Some (Timestamp.to_value x.subscribedAt)))]
+        [("event", (Option.map x.event ~f:InspectorEvent.to_value));
+        ("subscribedAt", (Option.map x.subscribedAt ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let subscribedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "subscribedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "subscribedAt") in
       let event =
-        InspectorEvent.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "event") in
-      make ~subscribedAt ~event ()
+        (Option.map ~f:InspectorEvent.of_xml) (Xml.child xml_arg0 "event") in
+      make ?subscribedAt ?event ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subscribedAt = field_map_exn json "subscribedAt" Timestamp.of_json in
-      let event = field_map_exn json "event" InspectorEvent.of_json in
-      make ~subscribedAt ~event ()
+    let of_json json__ =
+      let subscribedAt = field_map json__ "subscribedAt" Timestamp.of_json in
+      let event = field_map json__ "event" InspectorEvent.of_json in
+      make ?subscribedAt ?event ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This data type is used in the Subscription data type."]
 module TelemetryMetadata =
   struct
     type nonrec t =
       {
-      messageType: MessageType.t
+      messageType: MessageType.t option
         [@ocaml.doc
           "A specific type of behavioral data that is collected by the agent."];
-      count: Long.t
+      count: Long.t option
         [@ocaml.doc
           "The count of messages that the agent sends to the Amazon Inspector service."];
       dataSize: Long.t option
         [@ocaml.doc
           "The data size of messages that the agent sends to the Amazon Inspector service."]}
-    let context_ = "TelemetryMetadata"
-    let make ?dataSize =
-      fun ~messageType ->
-        fun ~count -> fun () -> { dataSize; messageType; count }
+    let make ?messageType =
+      fun ?count ->
+        fun ?dataSize -> fun () -> { messageType; count; dataSize }
     let to_value x =
       structure_to_value
-        [("messageType", (Some (MessageType.to_value x.messageType)));
-        ("count", (Some (Long.to_value x.count)));
+        [("messageType", (Option.map x.messageType ~f:MessageType.to_value));
+        ("count", (Option.map x.count ~f:Long.to_value));
         ("dataSize", (Option.map x.dataSize ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let dataSize =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "dataSize") in
-      let count =
-        Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "count") in
+      let count = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "count") in
       let messageType =
-        MessageType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "messageType") in
-      make ?dataSize ~count ~messageType ()
+        (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "messageType") in
+      make ?dataSize ?count ?messageType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataSize = field_map json "dataSize" Long.of_json in
-      let count = field_map_exn json "count" Long.of_json in
-      let messageType = field_map_exn json "messageType" MessageType.of_json in
-      make ?dataSize ~count ~messageType ()
+    let of_json json__ =
+      let dataSize = field_map json__ "dataSize" Long.of_json in
+      let count = field_map json__ "count" Long.of_json in
+      let messageType = field_map json__ "messageType" MessageType.of_json in
+      make ?dataSize ?count ?messageType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The metadata about the Amazon Inspector application data metrics collected by the agent. This data type is used as the response element in the GetTelemetryMetadata action."]
@@ -780,9 +783,9 @@ module Attribute =
         AttributeKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ?value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" AttributeValue.of_json in
-      let key = field_map_exn json "key" AttributeKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" AttributeValue.of_json in
+      let key = field_map_exn json__ "key" AttributeKey.of_json in
       make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -806,9 +809,10 @@ module Scope =
       let key = (Option.map ~f:ScopeType.of_xml) (Xml.child xml_arg0 "key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" ScopeValue.of_json in
-      let key = field_map json "key" ScopeType.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "value" ScopeValue.of_json in
+      let key = field_map json__ "key" ScopeType.of_json in
+      make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This data type contains key-value pairs that identify various Amazon resources."]
@@ -833,9 +837,9 @@ module ResourceGroupTag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ?value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" TagValue.of_json in
-      let key = field_map_exn json "key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" TagValue.of_json in
+      let key = field_map_exn json__ "key" TagKey.of_json in
       make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -902,6 +906,9 @@ module Ipv4AddressList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Ipv4Address.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -926,6 +933,9 @@ module NetworkInterfaces =
   struct
     type nonrec t = NetworkInterface.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInterface.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -966,6 +976,9 @@ module Tags =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1037,40 +1050,39 @@ module AssessmentRunNotification =
   struct
     type nonrec t =
       {
-      date: Timestamp.t [@ocaml.doc "The date of the notification."];
-      event: InspectorEvent.t
+      date: Timestamp.t option [@ocaml.doc "The date of the notification."];
+      event: InspectorEvent.t option
         [@ocaml.doc "The event for which a notification is sent."];
       message: Message.t option
         [@ocaml.doc "The message included in the notification."];
-      error: Bool.t
+      error: Bool_.t option
         [@ocaml.doc
           "The Boolean value that specifies whether the notification represents an error."];
       snsTopicArn: Arn.t option
         [@ocaml.doc "The SNS topic to which the SNS notification is sent."];
       snsPublishStatusCode: AssessmentRunNotificationSnsStatusCode.t option
         [@ocaml.doc "The status code of the SNS notification."]}
-    let context_ = "AssessmentRunNotification"
-    let make ?message =
-      fun ?snsTopicArn ->
-        fun ?snsPublishStatusCode ->
-          fun ~date ->
-            fun ~event ->
-              fun ~error ->
+    let make ?date =
+      fun ?event ->
+        fun ?message ->
+          fun ?error ->
+            fun ?snsTopicArn ->
+              fun ?snsPublishStatusCode ->
                 fun () ->
                   {
-                    message;
-                    snsTopicArn;
-                    snsPublishStatusCode;
                     date;
                     event;
-                    error
+                    message;
+                    error;
+                    snsTopicArn;
+                    snsPublishStatusCode
                   }
     let to_value x =
       structure_to_value
-        [("date", (Some (Timestamp.to_value x.date)));
-        ("event", (Some (InspectorEvent.to_value x.event)));
+        [("date", (Option.map x.date ~f:Timestamp.to_value));
+        ("event", (Option.map x.event ~f:InspectorEvent.to_value));
         ("message", (Option.map x.message ~f:Message.to_value));
-        ("error", (Some (Bool.to_value x.error)));
+        ("error", (Option.map x.error ~f:Bool_.to_value));
         ("snsTopicArn", (Option.map x.snsTopicArn ~f:Arn.to_value));
         ("snsPublishStatusCode",
           (Option.map x.snsPublishStatusCode
@@ -1082,27 +1094,24 @@ module AssessmentRunNotification =
           (Xml.child xml_arg0 "snsPublishStatusCode") in
       let snsTopicArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "snsTopicArn") in
-      let error =
-        Bool.of_xml (Xml.child_exn ~context:context_ xml_arg0 "error") in
+      let error = (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "error") in
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       let event =
-        InspectorEvent.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "event") in
-      let date =
-        Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "date") in
-      make ?snsPublishStatusCode ?snsTopicArn ~error ?message ~event ~date ()
+        (Option.map ~f:InspectorEvent.of_xml) (Xml.child xml_arg0 "event") in
+      let date = (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "date") in
+      make ?snsPublishStatusCode ?snsTopicArn ?error ?message ?event ?date ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snsPublishStatusCode =
-        field_map json "snsPublishStatusCode"
+        field_map json__ "snsPublishStatusCode"
           AssessmentRunNotificationSnsStatusCode.of_json in
-      let snsTopicArn = field_map json "snsTopicArn" Arn.of_json in
-      let error = field_map_exn json "error" Bool.of_json in
-      let message = field_map json "message" Message.of_json in
-      let event = field_map_exn json "event" InspectorEvent.of_json in
-      let date = field_map_exn json "date" Timestamp.of_json in
-      make ?snsPublishStatusCode ?snsTopicArn ~error ?message ~event ~date ()
+      let snsTopicArn = field_map json__ "snsTopicArn" Arn.of_json in
+      let error = field_map json__ "error" Bool_.of_json in
+      let message = field_map json__ "message" Message.of_json in
+      let event = field_map json__ "event" InspectorEvent.of_json in
+      let date = field_map json__ "date" Timestamp.of_json in
+      make ?snsPublishStatusCode ?snsTopicArn ?error ?message ?event ?date ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Used as one of the elements of the AssessmentRun data type."]
@@ -1110,31 +1119,32 @@ module AssessmentRunStateChange =
   struct
     type nonrec t =
       {
-      stateChangedAt: Timestamp.t
+      stateChangedAt: Timestamp.t option
         [@ocaml.doc "The last time the assessment run state changed."];
-      state: AssessmentRunState.t [@ocaml.doc "The assessment run state."]}
-    let context_ = "AssessmentRunStateChange"
-    let make ~stateChangedAt =
-      fun ~state -> fun () -> { stateChangedAt; state }
+      state: AssessmentRunState.t option
+        [@ocaml.doc "The assessment run state."]}
+    let make ?stateChangedAt =
+      fun ?state -> fun () -> { stateChangedAt; state }
     let to_value x =
       structure_to_value
-        [("stateChangedAt", (Some (Timestamp.to_value x.stateChangedAt)));
-        ("state", (Some (AssessmentRunState.to_value x.state)))]
+        [("stateChangedAt",
+           (Option.map x.stateChangedAt ~f:Timestamp.to_value));
+        ("state", (Option.map x.state ~f:AssessmentRunState.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let state =
-        AssessmentRunState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "state") in
+        (Option.map ~f:AssessmentRunState.of_xml)
+          (Xml.child xml_arg0 "state") in
       let stateChangedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "stateChangedAt") in
-      make ~state ~stateChangedAt ()
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "stateChangedAt") in
+      make ?state ?stateChangedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map_exn json "state" AssessmentRunState.of_json in
+    let of_json json__ =
+      let state = field_map json__ "state" AssessmentRunState.of_json in
       let stateChangedAt =
-        field_map_exn json "stateChangedAt" Timestamp.of_json in
-      make ~state ~stateChangedAt ()
+        field_map json__ "stateChangedAt" Timestamp.of_json in
+      make ?state ?stateChangedAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Used as one of the elements of the AssessmentRun data type."]
@@ -1142,33 +1152,30 @@ module AgentAlreadyRunningAssessment =
   struct
     type nonrec t =
       {
-      agentId: AgentId.t
+      agentId: AgentId.t option
         [@ocaml.doc
           "ID of the agent that is running on an EC2 instance that is already participating in another started assessment run."];
-      assessmentRunArn: Arn.t
+      assessmentRunArn: Arn.t option
         [@ocaml.doc
           "The ARN of the assessment run that has already been started."]}
-    let context_ = "AgentAlreadyRunningAssessment"
-    let make ~agentId =
-      fun ~assessmentRunArn -> fun () -> { agentId; assessmentRunArn }
+    let make ?agentId =
+      fun ?assessmentRunArn -> fun () -> { agentId; assessmentRunArn }
     let to_value x =
       structure_to_value
-        [("agentId", (Some (AgentId.to_value x.agentId)));
-        ("assessmentRunArn", (Some (Arn.to_value x.assessmentRunArn)))]
+        [("agentId", (Option.map x.agentId ~f:AgentId.to_value));
+        ("assessmentRunArn", (Option.map x.assessmentRunArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let assessmentRunArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "assessmentRunArn") in
       let agentId =
-        AgentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "agentId") in
-      make ~assessmentRunArn ~agentId ()
+        (Option.map ~f:AgentId.of_xml) (Xml.child xml_arg0 "agentId") in
+      make ?assessmentRunArn ?agentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assessmentRunArn =
-        field_map_exn json "assessmentRunArn" Arn.of_json in
-      let agentId = field_map_exn json "agentId" AgentId.of_json in
-      make ~assessmentRunArn ~agentId ()
+    let of_json json__ =
+      let assessmentRunArn = field_map json__ "assessmentRunArn" Arn.of_json in
+      let agentId = field_map json__ "agentId" AgentId.of_json in
+      make ?assessmentRunArn ?agentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Used in the exception error that is thrown if you start an assessment run for an assessment target that includes an EC2 instance that is already participating in another started assessment run."]
@@ -1314,6 +1321,9 @@ module EventSubscriptionList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventSubscription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1400,6 +1410,9 @@ module TelemetryMetadataList =
           ((check_list_max i ~max:5000) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TelemetryMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1429,6 +1442,9 @@ module AttributeList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Attribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1454,6 +1470,9 @@ module ScopeList =
     type nonrec t = Scope.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Scope.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1535,6 +1554,9 @@ module ResourceGroupTags =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceGroupTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1560,7 +1582,7 @@ module AssetAttributes =
   struct
     type nonrec t =
       {
-      schemaVersion: NumericVersion.t
+      schemaVersion: NumericVersion.t option
         [@ocaml.doc "The schema version of this data type."];
       agentId: AgentId.t option
         [@ocaml.doc
@@ -1583,29 +1605,29 @@ module AssetAttributes =
       networkInterfaces: NetworkInterfaces.t option
         [@ocaml.doc
           "An array of the network interfaces interacting with the EC2 instance where the finding is generated."]}
-    let context_ = "AssetAttributes"
-    let make ?agentId =
-      fun ?autoScalingGroup ->
-        fun ?amiId ->
-          fun ?hostname ->
-            fun ?ipv4Addresses ->
-              fun ?tags ->
-                fun ?networkInterfaces ->
-                  fun ~schemaVersion ->
+    let make ?schemaVersion =
+      fun ?agentId ->
+        fun ?autoScalingGroup ->
+          fun ?amiId ->
+            fun ?hostname ->
+              fun ?ipv4Addresses ->
+                fun ?tags ->
+                  fun ?networkInterfaces ->
                     fun () ->
                       {
+                        schemaVersion;
                         agentId;
                         autoScalingGroup;
                         amiId;
                         hostname;
                         ipv4Addresses;
                         tags;
-                        networkInterfaces;
-                        schemaVersion
+                        networkInterfaces
                       }
     let to_value x =
       structure_to_value
-        [("schemaVersion", (Some (NumericVersion.to_value x.schemaVersion)));
+        [("schemaVersion",
+           (Option.map x.schemaVersion ~f:NumericVersion.to_value));
         ("agentId", (Option.map x.agentId ~f:AgentId.to_value));
         ("autoScalingGroup",
           (Option.map x.autoScalingGroup ~f:AutoScalingGroup.to_value));
@@ -1634,26 +1656,26 @@ module AssetAttributes =
       let agentId =
         (Option.map ~f:AgentId.of_xml) (Xml.child xml_arg0 "agentId") in
       let schemaVersion =
-        NumericVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "schemaVersion") in
+        (Option.map ~f:NumericVersion.of_xml)
+          (Xml.child xml_arg0 "schemaVersion") in
       make ?networkInterfaces ?tags ?ipv4Addresses ?hostname ?amiId
-        ?autoScalingGroup ?agentId ~schemaVersion ()
+        ?autoScalingGroup ?agentId ?schemaVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let networkInterfaces =
-        field_map json "networkInterfaces" NetworkInterfaces.of_json in
-      let tags = field_map json "tags" Tags.of_json in
+        field_map json__ "networkInterfaces" NetworkInterfaces.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
       let ipv4Addresses =
-        field_map json "ipv4Addresses" Ipv4AddressList.of_json in
-      let hostname = field_map json "hostname" Hostname.of_json in
-      let amiId = field_map json "amiId" AmiId.of_json in
+        field_map json__ "ipv4Addresses" Ipv4AddressList.of_json in
+      let hostname = field_map json__ "hostname" Hostname.of_json in
+      let amiId = field_map json__ "amiId" AmiId.of_json in
       let autoScalingGroup =
-        field_map json "autoScalingGroup" AutoScalingGroup.of_json in
-      let agentId = field_map json "agentId" AgentId.of_json in
+        field_map json__ "autoScalingGroup" AutoScalingGroup.of_json in
+      let agentId = field_map json__ "agentId" AgentId.of_json in
       let schemaVersion =
-        field_map_exn json "schemaVersion" NumericVersion.of_json in
+        field_map json__ "schemaVersion" NumericVersion.of_json in
       make ?networkInterfaces ?tags ?ipv4Addresses ?hostname ?amiId
-        ?autoScalingGroup ?agentId ~schemaVersion ()
+        ?autoScalingGroup ?agentId ?schemaVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A collection of attributes of the host from which the finding is generated."]
@@ -1697,7 +1719,7 @@ module InspectorServiceAttributes =
   struct
     type nonrec t =
       {
-      schemaVersion: NumericVersion.t
+      schemaVersion: NumericVersion.t option
         [@ocaml.doc "The schema version of this data type."];
       assessmentRunArn: Arn.t option
         [@ocaml.doc
@@ -1705,14 +1727,14 @@ module InspectorServiceAttributes =
       rulesPackageArn: Arn.t option
         [@ocaml.doc
           "The ARN of the rules package that is used to generate the finding."]}
-    let context_ = "InspectorServiceAttributes"
-    let make ?assessmentRunArn =
-      fun ?rulesPackageArn ->
-        fun ~schemaVersion ->
-          fun () -> { assessmentRunArn; rulesPackageArn; schemaVersion }
+    let make ?schemaVersion =
+      fun ?assessmentRunArn ->
+        fun ?rulesPackageArn ->
+          fun () -> { schemaVersion; assessmentRunArn; rulesPackageArn }
     let to_value x =
       structure_to_value
-        [("schemaVersion", (Some (NumericVersion.to_value x.schemaVersion)));
+        [("schemaVersion",
+           (Option.map x.schemaVersion ~f:NumericVersion.to_value));
         ("assessmentRunArn", (Option.map x.assessmentRunArn ~f:Arn.to_value));
         ("rulesPackageArn", (Option.map x.rulesPackageArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
@@ -1722,16 +1744,16 @@ module InspectorServiceAttributes =
       let assessmentRunArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "assessmentRunArn") in
       let schemaVersion =
-        NumericVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "schemaVersion") in
-      make ?rulesPackageArn ?assessmentRunArn ~schemaVersion ()
+        (Option.map ~f:NumericVersion.of_xml)
+          (Xml.child xml_arg0 "schemaVersion") in
+      make ?rulesPackageArn ?assessmentRunArn ?schemaVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rulesPackageArn = field_map json "rulesPackageArn" Arn.of_json in
-      let assessmentRunArn = field_map json "assessmentRunArn" Arn.of_json in
+    let of_json json__ =
+      let rulesPackageArn = field_map json__ "rulesPackageArn" Arn.of_json in
+      let assessmentRunArn = field_map json__ "assessmentRunArn" Arn.of_json in
       let schemaVersion =
-        field_map_exn json "schemaVersion" NumericVersion.of_json in
-      make ?rulesPackageArn ?assessmentRunArn ~schemaVersion ()
+        field_map json__ "schemaVersion" NumericVersion.of_json in
+      make ?rulesPackageArn ?assessmentRunArn ?schemaVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This data type is used in the Finding data type."]
 module IocConfidence =
@@ -1796,6 +1818,9 @@ module UserAttributeList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Attribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1855,6 +1880,9 @@ module AssessmentTemplateRulesPackageArnList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1902,6 +1930,9 @@ module AssessmentRulesPackageArnList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1944,6 +1975,8 @@ module AssessmentRunFindingCounts =
                     (fun x -> (FindingCount.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1977,6 +2010,9 @@ module AssessmentRunNotificationList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssessmentRunNotification.to_value)) |>
         (fun x -> `List x)
@@ -2007,6 +2043,9 @@ module AssessmentRunStateChangeList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssessmentRunStateChange.to_value)) |>
         (fun x -> `List x)
@@ -2104,6 +2143,9 @@ module AgentAlreadyRunningAssessmentList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AgentAlreadyRunningAssessment.to_value)) |>
         (fun x -> `List x)
@@ -2478,32 +2520,32 @@ module FailedItemDetails =
   struct
     type nonrec t =
       {
-      failureCode: FailedItemErrorCode.t
+      failureCode: FailedItemErrorCode.t option
         [@ocaml.doc "The status code of a failed item."];
-      retryable: Bool.t
+      retryable: Bool_.t option
         [@ocaml.doc
           "Indicates whether you can immediately retry a request for this item for a specified resource."]}
-    let context_ = "FailedItemDetails"
-    let make ~failureCode =
-      fun ~retryable -> fun () -> { failureCode; retryable }
+    let make ?failureCode =
+      fun ?retryable -> fun () -> { failureCode; retryable }
     let to_value x =
       structure_to_value
-        [("failureCode", (Some (FailedItemErrorCode.to_value x.failureCode)));
-        ("retryable", (Some (Bool.to_value x.retryable)))]
+        [("failureCode",
+           (Option.map x.failureCode ~f:FailedItemErrorCode.to_value));
+        ("retryable", (Option.map x.retryable ~f:Bool_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let retryable =
-        Bool.of_xml (Xml.child_exn ~context:context_ xml_arg0 "retryable") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "retryable") in
       let failureCode =
-        FailedItemErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "failureCode") in
-      make ~retryable ~failureCode ()
+        (Option.map ~f:FailedItemErrorCode.of_xml)
+          (Xml.child xml_arg0 "failureCode") in
+      make ?retryable ?failureCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let retryable = field_map_exn json "retryable" Bool.of_json in
+    let of_json json__ =
+      let retryable = field_map json__ "retryable" Bool_.of_json in
       let failureCode =
-        field_map_exn json "failureCode" FailedItemErrorCode.of_json in
-      make ~retryable ~failureCode ()
+        field_map json__ "failureCode" FailedItemErrorCode.of_json in
+      make ?retryable ?failureCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Includes details about the failed items."]
 module AgentPreview =
@@ -2513,7 +2555,7 @@ module AgentPreview =
       hostname: Hostname.t option
         [@ocaml.doc
           "The hostname of the EC2 instance on which the Amazon Inspector Agent is installed."];
-      agentId: AgentId.t
+      agentId: AgentId.t option
         [@ocaml.doc
           "The ID of the EC2 instance where the agent is installed."];
       autoScalingGroup: AutoScalingGroup.t option
@@ -2532,30 +2574,29 @@ module AgentPreview =
       ipv4Address: Ipv4Address.t option
         [@ocaml.doc
           "The IP address of the EC2 instance on which the Amazon Inspector Agent is installed."]}
-    let context_ = "AgentPreview"
     let make ?hostname =
-      fun ?autoScalingGroup ->
-        fun ?agentHealth ->
-          fun ?agentVersion ->
-            fun ?operatingSystem ->
-              fun ?kernelVersion ->
-                fun ?ipv4Address ->
-                  fun ~agentId ->
+      fun ?agentId ->
+        fun ?autoScalingGroup ->
+          fun ?agentHealth ->
+            fun ?agentVersion ->
+              fun ?operatingSystem ->
+                fun ?kernelVersion ->
+                  fun ?ipv4Address ->
                     fun () ->
                       {
                         hostname;
+                        agentId;
                         autoScalingGroup;
                         agentHealth;
                         agentVersion;
                         operatingSystem;
                         kernelVersion;
-                        ipv4Address;
-                        agentId
+                        ipv4Address
                       }
     let to_value x =
       structure_to_value
         [("hostname", (Option.map x.hostname ~f:Hostname.to_value));
-        ("agentId", (Some (AgentId.to_value x.agentId)));
+        ("agentId", (Option.map x.agentId ~f:AgentId.to_value));
         ("autoScalingGroup",
           (Option.map x.autoScalingGroup ~f:AutoScalingGroup.to_value));
         ("agentHealth", (Option.map x.agentHealth ~f:AgentHealth.to_value));
@@ -2585,26 +2626,26 @@ module AgentPreview =
         (Option.map ~f:AutoScalingGroup.of_xml)
           (Xml.child xml_arg0 "autoScalingGroup") in
       let agentId =
-        AgentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "agentId") in
+        (Option.map ~f:AgentId.of_xml) (Xml.child xml_arg0 "agentId") in
       let hostname =
         (Option.map ~f:Hostname.of_xml) (Xml.child xml_arg0 "hostname") in
       make ?ipv4Address ?kernelVersion ?operatingSystem ?agentVersion
-        ?agentHealth ?autoScalingGroup ~agentId ?hostname ()
+        ?agentHealth ?autoScalingGroup ?agentId ?hostname ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ipv4Address = field_map json "ipv4Address" Ipv4Address.of_json in
+    let of_json json__ =
+      let ipv4Address = field_map json__ "ipv4Address" Ipv4Address.of_json in
       let kernelVersion =
-        field_map json "kernelVersion" KernelVersion.of_json in
+        field_map json__ "kernelVersion" KernelVersion.of_json in
       let operatingSystem =
-        field_map json "operatingSystem" OperatingSystem.of_json in
-      let agentVersion = field_map json "agentVersion" AgentVersion.of_json in
-      let agentHealth = field_map json "agentHealth" AgentHealth.of_json in
+        field_map json__ "operatingSystem" OperatingSystem.of_json in
+      let agentVersion = field_map json__ "agentVersion" AgentVersion.of_json in
+      let agentHealth = field_map json__ "agentHealth" AgentHealth.of_json in
       let autoScalingGroup =
-        field_map json "autoScalingGroup" AutoScalingGroup.of_json in
-      let agentId = field_map_exn json "agentId" AgentId.of_json in
-      let hostname = field_map json "hostname" Hostname.of_json in
+        field_map json__ "autoScalingGroup" AutoScalingGroup.of_json in
+      let agentId = field_map json__ "agentId" AgentId.of_json in
+      let hostname = field_map json__ "hostname" Hostname.of_json in
       make ?ipv4Address ?kernelVersion ?operatingSystem ?agentVersion
-        ?agentHealth ?autoScalingGroup ~agentId ?hostname ()
+        ?agentHealth ?autoScalingGroup ?agentId ?hostname ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Used as a response element in the PreviewAgents action."]
 module AgentIdList =
@@ -2615,6 +2656,9 @@ module AgentIdList =
         ok_or_failwith
           ((check_list_max i ~max:99) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AgentId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2643,6 +2687,9 @@ module AutoScalingGroupList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutoScalingGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2672,6 +2719,9 @@ module FilterRulesPackageArnList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2700,6 +2750,9 @@ module RuleNameList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RuleName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2728,6 +2781,9 @@ module SeverityList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Severity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2769,9 +2825,9 @@ module TimestampRange =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "beginDate") in
       make ?endDate ?beginDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endDate = field_map json "endDate" Timestamp.of_json in
-      let beginDate = field_map json "beginDate" Timestamp.of_json in
+    let of_json json__ =
+      let endDate = field_map json__ "endDate" Timestamp.of_json in
+      let beginDate = field_map json__ "beginDate" Timestamp.of_json in
       make ?endDate ?beginDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2780,42 +2836,41 @@ module Subscription =
   struct
     type nonrec t =
       {
-      resourceArn: Arn.t
+      resourceArn: Arn.t option
         [@ocaml.doc
           "The ARN of the assessment template that is used during the event for which the SNS notification is sent."];
-      topicArn: Arn.t
+      topicArn: Arn.t option
         [@ocaml.doc
           "The ARN of the Amazon Simple Notification Service (SNS) topic to which the SNS notifications are sent."];
-      eventSubscriptions: EventSubscriptionList.t
+      eventSubscriptions: EventSubscriptionList.t option
         [@ocaml.doc "The list of existing event subscriptions."]}
-    let context_ = "Subscription"
-    let make ~resourceArn =
-      fun ~topicArn ->
-        fun ~eventSubscriptions ->
+    let make ?resourceArn =
+      fun ?topicArn ->
+        fun ?eventSubscriptions ->
           fun () -> { resourceArn; topicArn; eventSubscriptions }
     let to_value x =
       structure_to_value
-        [("resourceArn", (Some (Arn.to_value x.resourceArn)));
-        ("topicArn", (Some (Arn.to_value x.topicArn)));
+        [("resourceArn", (Option.map x.resourceArn ~f:Arn.to_value));
+        ("topicArn", (Option.map x.topicArn ~f:Arn.to_value));
         ("eventSubscriptions",
-          (Some (EventSubscriptionList.to_value x.eventSubscriptions)))]
+          (Option.map x.eventSubscriptions ~f:EventSubscriptionList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let eventSubscriptions =
-        EventSubscriptionList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "eventSubscriptions") in
+        (Option.map ~f:EventSubscriptionList.of_xml)
+          (Xml.child xml_arg0 "eventSubscriptions") in
       let topicArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "topicArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "topicArn") in
       let resourceArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
-      make ~eventSubscriptions ~topicArn ~resourceArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "resourceArn") in
+      make ?eventSubscriptions ?topicArn ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventSubscriptions =
-        field_map_exn json "eventSubscriptions" EventSubscriptionList.of_json in
-      let topicArn = field_map_exn json "topicArn" Arn.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
-      make ~eventSubscriptions ~topicArn ~resourceArn ()
+        field_map json__ "eventSubscriptions" EventSubscriptionList.of_json in
+      let topicArn = field_map json__ "topicArn" Arn.of_json in
+      let resourceArn = field_map json__ "resourceArn" Arn.of_json in
+      make ?eventSubscriptions ?topicArn ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This data type is used as a response element in the ListEventSubscriptions action."]
@@ -2847,11 +2902,11 @@ module DurationRange =
           (Xml.child xml_arg0 "minSeconds") in
       make ?maxSeconds ?minSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxSeconds =
-        field_map json "maxSeconds" AssessmentRunDuration.of_json in
+        field_map json__ "maxSeconds" AssessmentRunDuration.of_json in
       let minSeconds =
-        field_map json "minSeconds" AssessmentRunDuration.of_json in
+        field_map json__ "minSeconds" AssessmentRunDuration.of_json in
       make ?maxSeconds ?minSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2882,6 +2937,9 @@ module AssessmentRunStateList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssessmentRunState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2907,60 +2965,59 @@ module AssessmentRunAgent =
   struct
     type nonrec t =
       {
-      agentId: AgentId.t
+      agentId: AgentId.t option
         [@ocaml.doc
           "The AWS account of the EC2 instance where the agent is installed."];
-      assessmentRunArn: Arn.t
+      assessmentRunArn: Arn.t option
         [@ocaml.doc
           "The ARN of the assessment run that is associated with the agent."];
-      agentHealth: AgentHealth.t
+      agentHealth: AgentHealth.t option
         [@ocaml.doc "The current health state of the agent."];
-      agentHealthCode: AgentHealthCode.t
+      agentHealthCode: AgentHealthCode.t option
         [@ocaml.doc "The detailed health state of the agent."];
       agentHealthDetails: Message.t option
         [@ocaml.doc "The description for the agent health code."];
       autoScalingGroup: AutoScalingGroup.t option
         [@ocaml.doc
           "The Auto Scaling group of the EC2 instance that is specified by the agent ID."];
-      telemetryMetadata: TelemetryMetadataList.t
+      telemetryMetadata: TelemetryMetadataList.t option
         [@ocaml.doc
           "The Amazon Inspector application data metrics that are collected by the agent."]}
-    let context_ = "AssessmentRunAgent"
-    let make ?agentHealthDetails =
-      fun ?autoScalingGroup ->
-        fun ~agentId ->
-          fun ~assessmentRunArn ->
-            fun ~agentHealth ->
-              fun ~agentHealthCode ->
-                fun ~telemetryMetadata ->
+    let make ?agentId =
+      fun ?assessmentRunArn ->
+        fun ?agentHealth ->
+          fun ?agentHealthCode ->
+            fun ?agentHealthDetails ->
+              fun ?autoScalingGroup ->
+                fun ?telemetryMetadata ->
                   fun () ->
                     {
-                      agentHealthDetails;
-                      autoScalingGroup;
                       agentId;
                       assessmentRunArn;
                       agentHealth;
                       agentHealthCode;
+                      agentHealthDetails;
+                      autoScalingGroup;
                       telemetryMetadata
                     }
     let to_value x =
       structure_to_value
-        [("agentId", (Some (AgentId.to_value x.agentId)));
-        ("assessmentRunArn", (Some (Arn.to_value x.assessmentRunArn)));
-        ("agentHealth", (Some (AgentHealth.to_value x.agentHealth)));
+        [("agentId", (Option.map x.agentId ~f:AgentId.to_value));
+        ("assessmentRunArn", (Option.map x.assessmentRunArn ~f:Arn.to_value));
+        ("agentHealth", (Option.map x.agentHealth ~f:AgentHealth.to_value));
         ("agentHealthCode",
-          (Some (AgentHealthCode.to_value x.agentHealthCode)));
+          (Option.map x.agentHealthCode ~f:AgentHealthCode.to_value));
         ("agentHealthDetails",
           (Option.map x.agentHealthDetails ~f:Message.to_value));
         ("autoScalingGroup",
           (Option.map x.autoScalingGroup ~f:AutoScalingGroup.to_value));
         ("telemetryMetadata",
-          (Some (TelemetryMetadataList.to_value x.telemetryMetadata)))]
+          (Option.map x.telemetryMetadata ~f:TelemetryMetadataList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let telemetryMetadata =
-        TelemetryMetadataList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "telemetryMetadata") in
+        (Option.map ~f:TelemetryMetadataList.of_xml)
+          (Xml.child xml_arg0 "telemetryMetadata") in
       let autoScalingGroup =
         (Option.map ~f:AutoScalingGroup.of_xml)
           (Xml.child xml_arg0 "autoScalingGroup") in
@@ -2968,34 +3025,31 @@ module AssessmentRunAgent =
         (Option.map ~f:Message.of_xml)
           (Xml.child xml_arg0 "agentHealthDetails") in
       let agentHealthCode =
-        AgentHealthCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "agentHealthCode") in
+        (Option.map ~f:AgentHealthCode.of_xml)
+          (Xml.child xml_arg0 "agentHealthCode") in
       let agentHealth =
-        AgentHealth.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "agentHealth") in
+        (Option.map ~f:AgentHealth.of_xml) (Xml.child xml_arg0 "agentHealth") in
       let assessmentRunArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "assessmentRunArn") in
       let agentId =
-        AgentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "agentId") in
-      make ~telemetryMetadata ?autoScalingGroup ?agentHealthDetails
-        ~agentHealthCode ~agentHealth ~assessmentRunArn ~agentId ()
+        (Option.map ~f:AgentId.of_xml) (Xml.child xml_arg0 "agentId") in
+      make ?telemetryMetadata ?autoScalingGroup ?agentHealthDetails
+        ?agentHealthCode ?agentHealth ?assessmentRunArn ?agentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let telemetryMetadata =
-        field_map_exn json "telemetryMetadata" TelemetryMetadataList.of_json in
+        field_map json__ "telemetryMetadata" TelemetryMetadataList.of_json in
       let autoScalingGroup =
-        field_map json "autoScalingGroup" AutoScalingGroup.of_json in
+        field_map json__ "autoScalingGroup" AutoScalingGroup.of_json in
       let agentHealthDetails =
-        field_map json "agentHealthDetails" Message.of_json in
+        field_map json__ "agentHealthDetails" Message.of_json in
       let agentHealthCode =
-        field_map_exn json "agentHealthCode" AgentHealthCode.of_json in
-      let agentHealth = field_map_exn json "agentHealth" AgentHealth.of_json in
-      let assessmentRunArn =
-        field_map_exn json "assessmentRunArn" Arn.of_json in
-      let agentId = field_map_exn json "agentId" AgentId.of_json in
-      make ~telemetryMetadata ?autoScalingGroup ?agentHealthDetails
-        ~agentHealthCode ~agentHealth ~assessmentRunArn ~agentId ()
+        field_map json__ "agentHealthCode" AgentHealthCode.of_json in
+      let agentHealth = field_map json__ "agentHealth" AgentHealth.of_json in
+      let assessmentRunArn = field_map json__ "assessmentRunArn" Arn.of_json in
+      let agentId = field_map json__ "agentId" AgentId.of_json in
+      make ?telemetryMetadata ?autoScalingGroup ?agentHealthDetails
+        ?agentHealthCode ?agentHealth ?assessmentRunArn ?agentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about an Amazon Inspector agent. This data type is used as a response element in the ListAssessmentRunAgents action."]
@@ -3007,6 +3061,9 @@ module AgentHealthCodeList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AgentHealthCode.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3036,6 +3093,9 @@ module AgentHealthList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AgentHealth.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3060,31 +3120,30 @@ module ExclusionPreview =
   struct
     type nonrec t =
       {
-      title: Text.t [@ocaml.doc "The name of the exclusion preview."];
-      description: Text.t
+      title: Text.t option [@ocaml.doc "The name of the exclusion preview."];
+      description: Text.t option
         [@ocaml.doc "The description of the exclusion preview."];
-      recommendation: Text.t
+      recommendation: Text.t option
         [@ocaml.doc "The recommendation for the exclusion preview."];
-      scopes: ScopeList.t
+      scopes: ScopeList.t option
         [@ocaml.doc
           "The AWS resources for which the exclusion preview pertains."];
       attributes: AttributeList.t option
         [@ocaml.doc
           "The system-defined attributes for the exclusion preview."]}
-    let context_ = "ExclusionPreview"
-    let make ?attributes =
-      fun ~title ->
-        fun ~description ->
-          fun ~recommendation ->
-            fun ~scopes ->
+    let make ?title =
+      fun ?description ->
+        fun ?recommendation ->
+          fun ?scopes ->
+            fun ?attributes ->
               fun () ->
-                { attributes; title; description; recommendation; scopes }
+                { title; description; recommendation; scopes; attributes }
     let to_value x =
       structure_to_value
-        [("title", (Some (Text.to_value x.title)));
-        ("description", (Some (Text.to_value x.description)));
-        ("recommendation", (Some (Text.to_value x.recommendation)));
-        ("scopes", (Some (ScopeList.to_value x.scopes)));
+        [("title", (Option.map x.title ~f:Text.to_value));
+        ("description", (Option.map x.description ~f:Text.to_value));
+        ("recommendation", (Option.map x.recommendation ~f:Text.to_value));
+        ("scopes", (Option.map x.scopes ~f:ScopeList.to_value));
         ("attributes", (Option.map x.attributes ~f:AttributeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -3092,23 +3151,21 @@ module ExclusionPreview =
         (Option.map ~f:AttributeList.of_xml)
           (Xml.child xml_arg0 "attributes") in
       let scopes =
-        ScopeList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "scopes") in
+        (Option.map ~f:ScopeList.of_xml) (Xml.child xml_arg0 "scopes") in
       let recommendation =
-        Text.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "recommendation") in
+        (Option.map ~f:Text.of_xml) (Xml.child xml_arg0 "recommendation") in
       let description =
-        Text.of_xml (Xml.child_exn ~context:context_ xml_arg0 "description") in
-      let title =
-        Text.of_xml (Xml.child_exn ~context:context_ xml_arg0 "title") in
-      make ?attributes ~scopes ~recommendation ~description ~title ()
+        (Option.map ~f:Text.of_xml) (Xml.child xml_arg0 "description") in
+      let title = (Option.map ~f:Text.of_xml) (Xml.child xml_arg0 "title") in
+      make ?attributes ?scopes ?recommendation ?description ?title ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "attributes" AttributeList.of_json in
-      let scopes = field_map_exn json "scopes" ScopeList.of_json in
-      let recommendation = field_map_exn json "recommendation" Text.of_json in
-      let description = field_map_exn json "description" Text.of_json in
-      let title = field_map_exn json "title" Text.of_json in
-      make ?attributes ~scopes ~recommendation ~description ~title ()
+    let of_json json__ =
+      let attributes = field_map json__ "attributes" AttributeList.of_json in
+      let scopes = field_map json__ "scopes" ScopeList.of_json in
+      let recommendation = field_map json__ "recommendation" Text.of_json in
+      let description = field_map json__ "description" Text.of_json in
+      let title = field_map json__ "title" Text.of_json in
+      make ?attributes ?scopes ?recommendation ?description ?title ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about what is excluded from an assessment run given the current state of the assessment template."]
@@ -3120,6 +3177,9 @@ module AssessmentRunInProgressArnList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3145,49 +3205,48 @@ module RulesPackage =
   struct
     type nonrec t =
       {
-      arn: Arn.t [@ocaml.doc "The ARN of the rules package."];
-      name: RulesPackageName.t [@ocaml.doc "The name of the rules package."];
-      version: Version.t [@ocaml.doc "The version ID of the rules package."];
-      provider: ProviderName.t
+      arn: Arn.t option [@ocaml.doc "The ARN of the rules package."];
+      name: RulesPackageName.t option
+        [@ocaml.doc "The name of the rules package."];
+      version: Version.t option
+        [@ocaml.doc "The version ID of the rules package."];
+      provider: ProviderName.t option
         [@ocaml.doc "The provider of the rules package."];
       description: Text.t option
         [@ocaml.doc "The description of the rules package."]}
-    let context_ = "RulesPackage"
-    let make ?description =
-      fun ~arn ->
-        fun ~name ->
-          fun ~version ->
-            fun ~provider ->
-              fun () -> { description; arn; name; version; provider }
+    let make ?arn =
+      fun ?name ->
+        fun ?version ->
+          fun ?provider ->
+            fun ?description ->
+              fun () -> { arn; name; version; provider; description }
     let to_value x =
       structure_to_value
-        [("arn", (Some (Arn.to_value x.arn)));
-        ("name", (Some (RulesPackageName.to_value x.name)));
-        ("version", (Some (Version.to_value x.version)));
-        ("provider", (Some (ProviderName.to_value x.provider)));
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("name", (Option.map x.name ~f:RulesPackageName.to_value));
+        ("version", (Option.map x.version ~f:Version.to_value));
+        ("provider", (Option.map x.provider ~f:ProviderName.to_value));
         ("description", (Option.map x.description ~f:Text.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let description =
         (Option.map ~f:Text.of_xml) (Xml.child xml_arg0 "description") in
       let provider =
-        ProviderName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "provider") in
+        (Option.map ~f:ProviderName.of_xml) (Xml.child xml_arg0 "provider") in
       let version =
-        Version.of_xml (Xml.child_exn ~context:context_ xml_arg0 "version") in
+        (Option.map ~f:Version.of_xml) (Xml.child xml_arg0 "version") in
       let name =
-        RulesPackageName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ?description ~provider ~version ~name ~arn ()
+        (Option.map ~f:RulesPackageName.of_xml) (Xml.child xml_arg0 "name") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?description ?provider ?version ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "description" Text.of_json in
-      let provider = field_map_exn json "provider" ProviderName.of_json in
-      let version = field_map_exn json "version" Version.of_json in
-      let name = field_map_exn json "name" RulesPackageName.of_json in
-      let arn = field_map_exn json "arn" Arn.of_json in
-      make ?description ~provider ~version ~name ~arn ()
+    let of_json json__ =
+      let description = field_map json__ "description" Text.of_json in
+      let provider = field_map json__ "provider" ProviderName.of_json in
+      let version = field_map json__ "version" Version.of_json in
+      let name = field_map json__ "name" RulesPackageName.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?description ?provider ?version ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about an Amazon Inspector rules package. This data type is used as the response element in the DescribeRulesPackages action."]
@@ -3195,36 +3254,33 @@ module ResourceGroup =
   struct
     type nonrec t =
       {
-      arn: Arn.t [@ocaml.doc "The ARN of the resource group."];
-      tags: ResourceGroupTags.t
+      arn: Arn.t option [@ocaml.doc "The ARN of the resource group."];
+      tags: ResourceGroupTags.t option
         [@ocaml.doc
           "The tags (key and value pairs) of the resource group. This data type property is used in the CreateResourceGroup action."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time at which resource group is created."]}
-    let context_ = "ResourceGroup"
-    let make ~arn =
-      fun ~tags -> fun ~createdAt -> fun () -> { arn; tags; createdAt }
+    let make ?arn =
+      fun ?tags -> fun ?createdAt -> fun () -> { arn; tags; createdAt }
     let to_value x =
       structure_to_value
-        [("arn", (Some (Arn.to_value x.arn)));
-        ("tags", (Some (ResourceGroupTags.to_value x.tags)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)))]
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("tags", (Option.map x.tags ~f:ResourceGroupTags.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let tags =
-        ResourceGroupTags.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "tags") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~createdAt ~tags ~arn ()
+        (Option.map ~f:ResourceGroupTags.of_xml) (Xml.child xml_arg0 "tags") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?createdAt ?tags ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let tags = field_map_exn json "tags" ResourceGroupTags.of_json in
-      let arn = field_map_exn json "arn" Arn.of_json in
-      make ~createdAt ~tags ~arn ()
+    let of_json json__ =
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let tags = field_map json__ "tags" ResourceGroupTags.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?createdAt ?tags ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about a resource group. The resource group defines a set of tags that, when queried, identify the AWS resources that make up the assessment target. This data type is used as the response element in the DescribeResourceGroups action."]
@@ -3232,7 +3288,7 @@ module Finding =
   struct
     type nonrec t =
       {
-      arn: Arn.t [@ocaml.doc "The ARN that specifies the finding."];
+      arn: Arn.t option [@ocaml.doc "The ARN that specifies the finding."];
       schemaVersion: NumericVersion.t option
         [@ocaml.doc "The schema version of this data type."];
       service: ServiceName.t option
@@ -3258,38 +3314,38 @@ module Finding =
         [@ocaml.doc "The numeric value of the finding severity."];
       confidence: IocConfidence.t option
         [@ocaml.doc "This data element is currently not used."];
-      indicatorOfCompromise: Bool.t option
+      indicatorOfCompromise: Bool_.t option
         [@ocaml.doc "This data element is currently not used."];
-      attributes: AttributeList.t
+      attributes: AttributeList.t option
         [@ocaml.doc "The system-defined attributes for the finding."];
-      userAttributes: UserAttributeList.t
+      userAttributes: UserAttributeList.t option
         [@ocaml.doc
           "The user-defined attributes that are assigned to the finding."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time when the finding was generated."];
-      updatedAt: Timestamp.t
+      updatedAt: Timestamp.t option
         [@ocaml.doc "The time when AddAttributesToFindings is called."]}
-    let context_ = "Finding"
-    let make ?schemaVersion =
-      fun ?service ->
-        fun ?serviceAttributes ->
-          fun ?assetType ->
-            fun ?assetAttributes ->
-              fun ?id ->
-                fun ?title ->
-                  fun ?description ->
-                    fun ?recommendation ->
-                      fun ?severity ->
-                        fun ?numericSeverity ->
-                          fun ?confidence ->
-                            fun ?indicatorOfCompromise ->
-                              fun ~arn ->
-                                fun ~attributes ->
-                                  fun ~userAttributes ->
-                                    fun ~createdAt ->
-                                      fun ~updatedAt ->
+    let make ?arn =
+      fun ?schemaVersion ->
+        fun ?service ->
+          fun ?serviceAttributes ->
+            fun ?assetType ->
+              fun ?assetAttributes ->
+                fun ?id ->
+                  fun ?title ->
+                    fun ?description ->
+                      fun ?recommendation ->
+                        fun ?severity ->
+                          fun ?numericSeverity ->
+                            fun ?confidence ->
+                              fun ?indicatorOfCompromise ->
+                                fun ?attributes ->
+                                  fun ?userAttributes ->
+                                    fun ?createdAt ->
+                                      fun ?updatedAt ->
                                         fun () ->
                                           {
+                                            arn;
                                             schemaVersion;
                                             service;
                                             serviceAttributes;
@@ -3303,7 +3359,6 @@ module Finding =
                                             numericSeverity;
                                             confidence;
                                             indicatorOfCompromise;
-                                            arn;
                                             attributes;
                                             userAttributes;
                                             createdAt;
@@ -3311,7 +3366,7 @@ module Finding =
                                           }
     let to_value x =
       structure_to_value
-        [("arn", (Some (Arn.to_value x.arn)));
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
         ("schemaVersion",
           (Option.map x.schemaVersion ~f:NumericVersion.to_value));
         ("service", (Option.map x.service ~f:ServiceName.to_value));
@@ -3330,28 +3385,26 @@ module Finding =
           (Option.map x.numericSeverity ~f:NumericSeverity.to_value));
         ("confidence", (Option.map x.confidence ~f:IocConfidence.to_value));
         ("indicatorOfCompromise",
-          (Option.map x.indicatorOfCompromise ~f:Bool.to_value));
-        ("attributes", (Some (AttributeList.to_value x.attributes)));
+          (Option.map x.indicatorOfCompromise ~f:Bool_.to_value));
+        ("attributes", (Option.map x.attributes ~f:AttributeList.to_value));
         ("userAttributes",
-          (Some (UserAttributeList.to_value x.userAttributes)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("updatedAt", (Some (Timestamp.to_value x.updatedAt)))]
+          (Option.map x.userAttributes ~f:UserAttributeList.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("updatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updatedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "updatedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "updatedAt") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let userAttributes =
-        UserAttributeList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "userAttributes") in
+        (Option.map ~f:UserAttributeList.of_xml)
+          (Xml.child xml_arg0 "userAttributes") in
       let attributes =
-        AttributeList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "attributes") in
+        (Option.map ~f:AttributeList.of_xml)
+          (Xml.child xml_arg0 "attributes") in
       let indicatorOfCompromise =
-        (Option.map ~f:Bool.of_xml)
+        (Option.map ~f:Bool_.of_xml)
           (Xml.child xml_arg0 "indicatorOfCompromise") in
       let confidence =
         (Option.map ~f:IocConfidence.of_xml)
@@ -3380,41 +3433,42 @@ module Finding =
       let schemaVersion =
         (Option.map ~f:NumericVersion.of_xml)
           (Xml.child xml_arg0 "schemaVersion") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~updatedAt ~createdAt ~userAttributes ~attributes
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?updatedAt ?createdAt ?userAttributes ?attributes
         ?indicatorOfCompromise ?confidence ?numericSeverity ?severity
         ?recommendation ?description ?title ?id ?assetAttributes ?assetType
-        ?serviceAttributes ?service ?schemaVersion ~arn ()
+        ?serviceAttributes ?service ?schemaVersion ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map_exn json "updatedAt" Timestamp.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
+    let of_json json__ =
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let userAttributes =
-        field_map_exn json "userAttributes" UserAttributeList.of_json in
-      let attributes = field_map_exn json "attributes" AttributeList.of_json in
+        field_map json__ "userAttributes" UserAttributeList.of_json in
+      let attributes = field_map json__ "attributes" AttributeList.of_json in
       let indicatorOfCompromise =
-        field_map json "indicatorOfCompromise" Bool.of_json in
-      let confidence = field_map json "confidence" IocConfidence.of_json in
+        field_map json__ "indicatorOfCompromise" Bool_.of_json in
+      let confidence = field_map json__ "confidence" IocConfidence.of_json in
       let numericSeverity =
-        field_map json "numericSeverity" NumericSeverity.of_json in
-      let severity = field_map json "severity" Severity.of_json in
-      let recommendation = field_map json "recommendation" Text.of_json in
-      let description = field_map json "description" Text.of_json in
-      let title = field_map json "title" Text.of_json in
-      let id = field_map json "id" FindingId.of_json in
+        field_map json__ "numericSeverity" NumericSeverity.of_json in
+      let severity = field_map json__ "severity" Severity.of_json in
+      let recommendation = field_map json__ "recommendation" Text.of_json in
+      let description = field_map json__ "description" Text.of_json in
+      let title = field_map json__ "title" Text.of_json in
+      let id = field_map json__ "id" FindingId.of_json in
       let assetAttributes =
-        field_map json "assetAttributes" AssetAttributes.of_json in
-      let assetType = field_map json "assetType" AssetType.of_json in
+        field_map json__ "assetAttributes" AssetAttributes.of_json in
+      let assetType = field_map json__ "assetType" AssetType.of_json in
       let serviceAttributes =
-        field_map json "serviceAttributes" InspectorServiceAttributes.of_json in
-      let service = field_map json "service" ServiceName.of_json in
+        field_map json__ "serviceAttributes"
+          InspectorServiceAttributes.of_json in
+      let service = field_map json__ "service" ServiceName.of_json in
       let schemaVersion =
-        field_map json "schemaVersion" NumericVersion.of_json in
-      let arn = field_map_exn json "arn" Arn.of_json in
-      make ~updatedAt ~createdAt ~userAttributes ~attributes
+        field_map json__ "schemaVersion" NumericVersion.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?updatedAt ?createdAt ?userAttributes ?attributes
         ?indicatorOfCompromise ?confidence ?numericSeverity ?severity
         ?recommendation ?description ?title ?id ?assetAttributes ?assetType
-        ?serviceAttributes ?service ?schemaVersion ~arn ()
+        ?serviceAttributes ?service ?schemaVersion ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about an Amazon Inspector finding. This data type is used as the response element in the DescribeFindings action."]
@@ -3422,38 +3476,38 @@ module Exclusion =
   struct
     type nonrec t =
       {
-      arn: Arn.t [@ocaml.doc "The ARN that specifies the exclusion."];
-      title: Text.t [@ocaml.doc "The name of the exclusion."];
-      description: Text.t [@ocaml.doc "The description of the exclusion."];
-      recommendation: Text.t
+      arn: Arn.t option [@ocaml.doc "The ARN that specifies the exclusion."];
+      title: Text.t option [@ocaml.doc "The name of the exclusion."];
+      description: Text.t option
+        [@ocaml.doc "The description of the exclusion."];
+      recommendation: Text.t option
         [@ocaml.doc "The recommendation for the exclusion."];
-      scopes: ScopeList.t
+      scopes: ScopeList.t option
         [@ocaml.doc "The AWS resources for which the exclusion pertains."];
       attributes: AttributeList.t option
         [@ocaml.doc "The system-defined attributes for the exclusion."]}
-    let context_ = "Exclusion"
-    let make ?attributes =
-      fun ~arn ->
-        fun ~title ->
-          fun ~description ->
-            fun ~recommendation ->
-              fun ~scopes ->
+    let make ?arn =
+      fun ?title ->
+        fun ?description ->
+          fun ?recommendation ->
+            fun ?scopes ->
+              fun ?attributes ->
                 fun () ->
                   {
-                    attributes;
                     arn;
                     title;
                     description;
                     recommendation;
-                    scopes
+                    scopes;
+                    attributes
                   }
     let to_value x =
       structure_to_value
-        [("arn", (Some (Arn.to_value x.arn)));
-        ("title", (Some (Text.to_value x.title)));
-        ("description", (Some (Text.to_value x.description)));
-        ("recommendation", (Some (Text.to_value x.recommendation)));
-        ("scopes", (Some (ScopeList.to_value x.scopes)));
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("title", (Option.map x.title ~f:Text.to_value));
+        ("description", (Option.map x.description ~f:Text.to_value));
+        ("recommendation", (Option.map x.recommendation ~f:Text.to_value));
+        ("scopes", (Option.map x.scopes ~f:ScopeList.to_value));
         ("attributes", (Option.map x.attributes ~f:AttributeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -3461,25 +3515,23 @@ module Exclusion =
         (Option.map ~f:AttributeList.of_xml)
           (Xml.child xml_arg0 "attributes") in
       let scopes =
-        ScopeList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "scopes") in
+        (Option.map ~f:ScopeList.of_xml) (Xml.child xml_arg0 "scopes") in
       let recommendation =
-        Text.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "recommendation") in
+        (Option.map ~f:Text.of_xml) (Xml.child xml_arg0 "recommendation") in
       let description =
-        Text.of_xml (Xml.child_exn ~context:context_ xml_arg0 "description") in
-      let title =
-        Text.of_xml (Xml.child_exn ~context:context_ xml_arg0 "title") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ?attributes ~scopes ~recommendation ~description ~title ~arn ()
+        (Option.map ~f:Text.of_xml) (Xml.child xml_arg0 "description") in
+      let title = (Option.map ~f:Text.of_xml) (Xml.child xml_arg0 "title") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?attributes ?scopes ?recommendation ?description ?title ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "attributes" AttributeList.of_json in
-      let scopes = field_map_exn json "scopes" ScopeList.of_json in
-      let recommendation = field_map_exn json "recommendation" Text.of_json in
-      let description = field_map_exn json "description" Text.of_json in
-      let title = field_map_exn json "title" Text.of_json in
-      let arn = field_map_exn json "arn" Arn.of_json in
-      make ?attributes ~scopes ~recommendation ~description ~title ~arn ()
+    let of_json json__ =
+      let attributes = field_map json__ "attributes" AttributeList.of_json in
+      let scopes = field_map json__ "scopes" ScopeList.of_json in
+      let recommendation = field_map json__ "recommendation" Text.of_json in
+      let description = field_map json__ "description" Text.of_json in
+      let title = field_map json__ "title" Text.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?attributes ?scopes ?recommendation ?description ?title ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about what was excluded from an assessment run."]
@@ -3487,122 +3539,119 @@ module AssessmentTemplate =
   struct
     type nonrec t =
       {
-      arn: Arn.t [@ocaml.doc "The ARN of the assessment template."];
-      name: AssessmentTemplateName.t
+      arn: Arn.t option [@ocaml.doc "The ARN of the assessment template."];
+      name: AssessmentTemplateName.t option
         [@ocaml.doc "The name of the assessment template."];
-      assessmentTargetArn: Arn.t
+      assessmentTargetArn: Arn.t option
         [@ocaml.doc
           "The ARN of the assessment target that corresponds to this assessment template."];
-      durationInSeconds: AssessmentRunDuration.t
+      durationInSeconds: AssessmentRunDuration.t option
         [@ocaml.doc
           "The duration in seconds specified for this assessment template. The default value is 3600 seconds (one hour). The maximum value is 86400 seconds (one day)."];
-      rulesPackageArns: AssessmentTemplateRulesPackageArnList.t
+      rulesPackageArns: AssessmentTemplateRulesPackageArnList.t option
         [@ocaml.doc
           "The rules packages that are specified for this assessment template."];
-      userAttributesForFindings: UserAttributeList.t
+      userAttributesForFindings: UserAttributeList.t option
         [@ocaml.doc
           "The user-defined attributes that are assigned to every generated finding from the assessment run that uses this assessment template."];
       lastAssessmentRunArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the most recent assessment run associated with this assessment template. This value exists only when the value of assessmentRunCount is greaterpa than zero."];
-      assessmentRunCount: ArnCount.t
+      assessmentRunCount: ArnCount.t option
         [@ocaml.doc
           "The number of existing assessment runs associated with this assessment template. This value can be zero or a positive integer."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time at which the assessment template is created."]}
-    let context_ = "AssessmentTemplate"
-    let make ?lastAssessmentRunArn =
-      fun ~arn ->
-        fun ~name ->
-          fun ~assessmentTargetArn ->
-            fun ~durationInSeconds ->
-              fun ~rulesPackageArns ->
-                fun ~userAttributesForFindings ->
-                  fun ~assessmentRunCount ->
-                    fun ~createdAt ->
+    let make ?arn =
+      fun ?name ->
+        fun ?assessmentTargetArn ->
+          fun ?durationInSeconds ->
+            fun ?rulesPackageArns ->
+              fun ?userAttributesForFindings ->
+                fun ?lastAssessmentRunArn ->
+                  fun ?assessmentRunCount ->
+                    fun ?createdAt ->
                       fun () ->
                         {
-                          lastAssessmentRunArn;
                           arn;
                           name;
                           assessmentTargetArn;
                           durationInSeconds;
                           rulesPackageArns;
                           userAttributesForFindings;
+                          lastAssessmentRunArn;
                           assessmentRunCount;
                           createdAt
                         }
     let to_value x =
       structure_to_value
-        [("arn", (Some (Arn.to_value x.arn)));
-        ("name", (Some (AssessmentTemplateName.to_value x.name)));
-        ("assessmentTargetArn", (Some (Arn.to_value x.assessmentTargetArn)));
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("name", (Option.map x.name ~f:AssessmentTemplateName.to_value));
+        ("assessmentTargetArn",
+          (Option.map x.assessmentTargetArn ~f:Arn.to_value));
         ("durationInSeconds",
-          (Some (AssessmentRunDuration.to_value x.durationInSeconds)));
+          (Option.map x.durationInSeconds ~f:AssessmentRunDuration.to_value));
         ("rulesPackageArns",
-          (Some
-             (AssessmentTemplateRulesPackageArnList.to_value
-                x.rulesPackageArns)));
+          (Option.map x.rulesPackageArns
+             ~f:AssessmentTemplateRulesPackageArnList.to_value));
         ("userAttributesForFindings",
-          (Some (UserAttributeList.to_value x.userAttributesForFindings)));
+          (Option.map x.userAttributesForFindings
+             ~f:UserAttributeList.to_value));
         ("lastAssessmentRunArn",
           (Option.map x.lastAssessmentRunArn ~f:Arn.to_value));
         ("assessmentRunCount",
-          (Some (ArnCount.to_value x.assessmentRunCount)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)))]
+          (Option.map x.assessmentRunCount ~f:ArnCount.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let assessmentRunCount =
-        ArnCount.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunCount") in
+        (Option.map ~f:ArnCount.of_xml)
+          (Xml.child xml_arg0 "assessmentRunCount") in
       let lastAssessmentRunArn =
         (Option.map ~f:Arn.of_xml)
           (Xml.child xml_arg0 "lastAssessmentRunArn") in
       let userAttributesForFindings =
-        UserAttributeList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "userAttributesForFindings") in
+        (Option.map ~f:UserAttributeList.of_xml)
+          (Xml.child xml_arg0 "userAttributesForFindings") in
       let rulesPackageArns =
-        AssessmentTemplateRulesPackageArnList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "rulesPackageArns") in
+        (Option.map ~f:AssessmentTemplateRulesPackageArnList.of_xml)
+          (Xml.child xml_arg0 "rulesPackageArns") in
       let durationInSeconds =
-        AssessmentRunDuration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "durationInSeconds") in
+        (Option.map ~f:AssessmentRunDuration.of_xml)
+          (Xml.child xml_arg0 "durationInSeconds") in
       let assessmentTargetArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentTargetArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "assessmentTargetArn") in
       let name =
-        AssessmentTemplateName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~createdAt ~assessmentRunCount ?lastAssessmentRunArn
-        ~userAttributesForFindings ~rulesPackageArns ~durationInSeconds
-        ~assessmentTargetArn ~name ~arn ()
+        (Option.map ~f:AssessmentTemplateName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?createdAt ?assessmentRunCount ?lastAssessmentRunArn
+        ?userAttributesForFindings ?rulesPackageArns ?durationInSeconds
+        ?assessmentTargetArn ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
+    let of_json json__ =
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let assessmentRunCount =
-        field_map_exn json "assessmentRunCount" ArnCount.of_json in
+        field_map json__ "assessmentRunCount" ArnCount.of_json in
       let lastAssessmentRunArn =
-        field_map json "lastAssessmentRunArn" Arn.of_json in
+        field_map json__ "lastAssessmentRunArn" Arn.of_json in
       let userAttributesForFindings =
-        field_map_exn json "userAttributesForFindings"
+        field_map json__ "userAttributesForFindings"
           UserAttributeList.of_json in
       let rulesPackageArns =
-        field_map_exn json "rulesPackageArns"
+        field_map json__ "rulesPackageArns"
           AssessmentTemplateRulesPackageArnList.of_json in
       let durationInSeconds =
-        field_map_exn json "durationInSeconds" AssessmentRunDuration.of_json in
+        field_map json__ "durationInSeconds" AssessmentRunDuration.of_json in
       let assessmentTargetArn =
-        field_map_exn json "assessmentTargetArn" Arn.of_json in
-      let name = field_map_exn json "name" AssessmentTemplateName.of_json in
-      let arn = field_map_exn json "arn" Arn.of_json in
-      make ~createdAt ~assessmentRunCount ?lastAssessmentRunArn
-        ~userAttributesForFindings ~rulesPackageArns ~durationInSeconds
-        ~assessmentTargetArn ~name ~arn ()
+        field_map json__ "assessmentTargetArn" Arn.of_json in
+      let name = field_map json__ "name" AssessmentTemplateName.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?createdAt ?assessmentRunCount ?lastAssessmentRunArn
+        ?userAttributesForFindings ?rulesPackageArns ?durationInSeconds
+        ?assessmentTargetArn ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about an Amazon Inspector assessment template. This data type is used as the response element in the DescribeAssessmentTemplates action."]
@@ -3610,55 +3659,52 @@ module AssessmentTarget =
   struct
     type nonrec t =
       {
-      arn: Arn.t
+      arn: Arn.t option
         [@ocaml.doc
           "The ARN that specifies the Amazon Inspector assessment target."];
-      name: AssessmentTargetName.t
+      name: AssessmentTargetName.t option
         [@ocaml.doc "The name of the Amazon Inspector assessment target."];
       resourceGroupArn: Arn.t option
         [@ocaml.doc
           "The ARN that specifies the resource group that is associated with the assessment target."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time at which the assessment target is created."];
-      updatedAt: Timestamp.t
+      updatedAt: Timestamp.t option
         [@ocaml.doc "The time at which UpdateAssessmentTarget is called."]}
-    let context_ = "AssessmentTarget"
-    let make ?resourceGroupArn =
-      fun ~arn ->
-        fun ~name ->
-          fun ~createdAt ->
-            fun ~updatedAt ->
-              fun () -> { resourceGroupArn; arn; name; createdAt; updatedAt }
+    let make ?arn =
+      fun ?name ->
+        fun ?resourceGroupArn ->
+          fun ?createdAt ->
+            fun ?updatedAt ->
+              fun () -> { arn; name; resourceGroupArn; createdAt; updatedAt }
     let to_value x =
       structure_to_value
-        [("arn", (Some (Arn.to_value x.arn)));
-        ("name", (Some (AssessmentTargetName.to_value x.name)));
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("name", (Option.map x.name ~f:AssessmentTargetName.to_value));
         ("resourceGroupArn", (Option.map x.resourceGroupArn ~f:Arn.to_value));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("updatedAt", (Some (Timestamp.to_value x.updatedAt)))]
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("updatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updatedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "updatedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "updatedAt") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let resourceGroupArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "resourceGroupArn") in
       let name =
-        AssessmentTargetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~updatedAt ~createdAt ?resourceGroupArn ~name ~arn ()
+        (Option.map ~f:AssessmentTargetName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?updatedAt ?createdAt ?resourceGroupArn ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map_exn json "updatedAt" Timestamp.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let resourceGroupArn = field_map json "resourceGroupArn" Arn.of_json in
-      let name = field_map_exn json "name" AssessmentTargetName.of_json in
-      let arn = field_map_exn json "arn" Arn.of_json in
-      make ~updatedAt ~createdAt ?resourceGroupArn ~name ~arn ()
+    let of_json json__ =
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let resourceGroupArn = field_map json__ "resourceGroupArn" Arn.of_json in
+      let name = field_map json__ "name" AssessmentTargetName.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?updatedAt ?createdAt ?resourceGroupArn ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about an Amazon Inspector application. This data type is used as the response element in the DescribeAssessmentTargets action."]
@@ -3666,61 +3712,58 @@ module AssessmentRun =
   struct
     type nonrec t =
       {
-      arn: Arn.t [@ocaml.doc "The ARN of the assessment run."];
-      name: AssessmentRunName.t
+      arn: Arn.t option [@ocaml.doc "The ARN of the assessment run."];
+      name: AssessmentRunName.t option
         [@ocaml.doc "The auto-generated name for the assessment run."];
-      assessmentTemplateArn: Arn.t
+      assessmentTemplateArn: Arn.t option
         [@ocaml.doc
           "The ARN of the assessment template that is associated with the assessment run."];
-      state: AssessmentRunState.t
+      state: AssessmentRunState.t option
         [@ocaml.doc "The state of the assessment run."];
-      durationInSeconds: AssessmentRunDuration.t
+      durationInSeconds: AssessmentRunDuration.t option
         [@ocaml.doc "The duration of the assessment run."];
-      rulesPackageArns: AssessmentRulesPackageArnList.t
+      rulesPackageArns: AssessmentRulesPackageArnList.t option
         [@ocaml.doc "The rules packages selected for the assessment run."];
-      userAttributesForFindings: UserAttributeList.t
+      userAttributesForFindings: UserAttributeList.t option
         [@ocaml.doc
           "The user-defined attributes that are assigned to every generated finding."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time when StartAssessmentRun was called."];
       startedAt: Timestamp.t option
         [@ocaml.doc "The time when StartAssessmentRun was called."];
       completedAt: Timestamp.t option
         [@ocaml.doc
           "The assessment run completion time that corresponds to the rules packages evaluation completion time or failure."];
-      stateChangedAt: Timestamp.t
+      stateChangedAt: Timestamp.t option
         [@ocaml.doc "The last time when the assessment run's state changed."];
-      dataCollected: Bool.t
+      dataCollected: Bool_.t option
         [@ocaml.doc
           "A Boolean value (true or false) that specifies whether the process of collecting data from the agents is completed."];
-      stateChanges: AssessmentRunStateChangeList.t
+      stateChanges: AssessmentRunStateChangeList.t option
         [@ocaml.doc "A list of the assessment run state changes."];
-      notifications: AssessmentRunNotificationList.t
+      notifications: AssessmentRunNotificationList.t option
         [@ocaml.doc
           "A list of notifications for the event subscriptions. A notification about a particular generated finding is added to this list only once."];
-      findingCounts: AssessmentRunFindingCounts.t
+      findingCounts: AssessmentRunFindingCounts.t option
         [@ocaml.doc
           "Provides a total count of generated findings per severity."]}
-    let context_ = "AssessmentRun"
-    let make ?startedAt =
-      fun ?completedAt ->
-        fun ~arn ->
-          fun ~name ->
-            fun ~assessmentTemplateArn ->
-              fun ~state ->
-                fun ~durationInSeconds ->
-                  fun ~rulesPackageArns ->
-                    fun ~userAttributesForFindings ->
-                      fun ~createdAt ->
-                        fun ~stateChangedAt ->
-                          fun ~dataCollected ->
-                            fun ~stateChanges ->
-                              fun ~notifications ->
-                                fun ~findingCounts ->
+    let make ?arn =
+      fun ?name ->
+        fun ?assessmentTemplateArn ->
+          fun ?state ->
+            fun ?durationInSeconds ->
+              fun ?rulesPackageArns ->
+                fun ?userAttributesForFindings ->
+                  fun ?createdAt ->
+                    fun ?startedAt ->
+                      fun ?completedAt ->
+                        fun ?stateChangedAt ->
+                          fun ?dataCollected ->
+                            fun ?stateChanges ->
+                              fun ?notifications ->
+                                fun ?findingCounts ->
                                   fun () ->
                                     {
-                                      startedAt;
-                                      completedAt;
                                       arn;
                                       name;
                                       assessmentTemplateArn;
@@ -3729,6 +3772,8 @@ module AssessmentRun =
                                       rulesPackageArns;
                                       userAttributesForFindings;
                                       createdAt;
+                                      startedAt;
+                                      completedAt;
                                       stateChangedAt;
                                       dataCollected;
                                       stateChanges;
@@ -3737,109 +3782,108 @@ module AssessmentRun =
                                     }
     let to_value x =
       structure_to_value
-        [("arn", (Some (Arn.to_value x.arn)));
-        ("name", (Some (AssessmentRunName.to_value x.name)));
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("name", (Option.map x.name ~f:AssessmentRunName.to_value));
         ("assessmentTemplateArn",
-          (Some (Arn.to_value x.assessmentTemplateArn)));
-        ("state", (Some (AssessmentRunState.to_value x.state)));
+          (Option.map x.assessmentTemplateArn ~f:Arn.to_value));
+        ("state", (Option.map x.state ~f:AssessmentRunState.to_value));
         ("durationInSeconds",
-          (Some (AssessmentRunDuration.to_value x.durationInSeconds)));
+          (Option.map x.durationInSeconds ~f:AssessmentRunDuration.to_value));
         ("rulesPackageArns",
-          (Some (AssessmentRulesPackageArnList.to_value x.rulesPackageArns)));
+          (Option.map x.rulesPackageArns
+             ~f:AssessmentRulesPackageArnList.to_value));
         ("userAttributesForFindings",
-          (Some (UserAttributeList.to_value x.userAttributesForFindings)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+          (Option.map x.userAttributesForFindings
+             ~f:UserAttributeList.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("startedAt", (Option.map x.startedAt ~f:Timestamp.to_value));
         ("completedAt", (Option.map x.completedAt ~f:Timestamp.to_value));
-        ("stateChangedAt", (Some (Timestamp.to_value x.stateChangedAt)));
-        ("dataCollected", (Some (Bool.to_value x.dataCollected)));
+        ("stateChangedAt",
+          (Option.map x.stateChangedAt ~f:Timestamp.to_value));
+        ("dataCollected", (Option.map x.dataCollected ~f:Bool_.to_value));
         ("stateChanges",
-          (Some (AssessmentRunStateChangeList.to_value x.stateChanges)));
+          (Option.map x.stateChanges ~f:AssessmentRunStateChangeList.to_value));
         ("notifications",
-          (Some (AssessmentRunNotificationList.to_value x.notifications)));
+          (Option.map x.notifications
+             ~f:AssessmentRunNotificationList.to_value));
         ("findingCounts",
-          (Some (AssessmentRunFindingCounts.to_value x.findingCounts)))]
+          (Option.map x.findingCounts ~f:AssessmentRunFindingCounts.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let findingCounts =
-        AssessmentRunFindingCounts.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "findingCounts") in
+        (Option.map ~f:AssessmentRunFindingCounts.of_xml)
+          (Xml.child xml_arg0 "findingCounts") in
       let notifications =
-        AssessmentRunNotificationList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "notifications") in
+        (Option.map ~f:AssessmentRunNotificationList.of_xml)
+          (Xml.child xml_arg0 "notifications") in
       let stateChanges =
-        AssessmentRunStateChangeList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "stateChanges") in
+        (Option.map ~f:AssessmentRunStateChangeList.of_xml)
+          (Xml.child xml_arg0 "stateChanges") in
       let dataCollected =
-        Bool.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "dataCollected") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "dataCollected") in
       let stateChangedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "stateChangedAt") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "stateChangedAt") in
       let completedAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "completedAt") in
       let startedAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startedAt") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let userAttributesForFindings =
-        UserAttributeList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "userAttributesForFindings") in
+        (Option.map ~f:UserAttributeList.of_xml)
+          (Xml.child xml_arg0 "userAttributesForFindings") in
       let rulesPackageArns =
-        AssessmentRulesPackageArnList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "rulesPackageArns") in
+        (Option.map ~f:AssessmentRulesPackageArnList.of_xml)
+          (Xml.child xml_arg0 "rulesPackageArns") in
       let durationInSeconds =
-        AssessmentRunDuration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "durationInSeconds") in
+        (Option.map ~f:AssessmentRunDuration.of_xml)
+          (Xml.child xml_arg0 "durationInSeconds") in
       let state =
-        AssessmentRunState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "state") in
+        (Option.map ~f:AssessmentRunState.of_xml)
+          (Xml.child xml_arg0 "state") in
       let assessmentTemplateArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentTemplateArn") in
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "assessmentTemplateArn") in
       let name =
-        AssessmentRunName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~findingCounts ~notifications ~stateChanges ~dataCollected
-        ~stateChangedAt ?completedAt ?startedAt ~createdAt
-        ~userAttributesForFindings ~rulesPackageArns ~durationInSeconds
-        ~state ~assessmentTemplateArn ~name ~arn ()
+        (Option.map ~f:AssessmentRunName.of_xml) (Xml.child xml_arg0 "name") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?findingCounts ?notifications ?stateChanges ?dataCollected
+        ?stateChangedAt ?completedAt ?startedAt ?createdAt
+        ?userAttributesForFindings ?rulesPackageArns ?durationInSeconds
+        ?state ?assessmentTemplateArn ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let findingCounts =
-        field_map_exn json "findingCounts" AssessmentRunFindingCounts.of_json in
+        field_map json__ "findingCounts" AssessmentRunFindingCounts.of_json in
       let notifications =
-        field_map_exn json "notifications"
+        field_map json__ "notifications"
           AssessmentRunNotificationList.of_json in
       let stateChanges =
-        field_map_exn json "stateChanges"
-          AssessmentRunStateChangeList.of_json in
-      let dataCollected = field_map_exn json "dataCollected" Bool.of_json in
+        field_map json__ "stateChanges" AssessmentRunStateChangeList.of_json in
+      let dataCollected = field_map json__ "dataCollected" Bool_.of_json in
       let stateChangedAt =
-        field_map_exn json "stateChangedAt" Timestamp.of_json in
-      let completedAt = field_map json "completedAt" Timestamp.of_json in
-      let startedAt = field_map json "startedAt" Timestamp.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
+        field_map json__ "stateChangedAt" Timestamp.of_json in
+      let completedAt = field_map json__ "completedAt" Timestamp.of_json in
+      let startedAt = field_map json__ "startedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let userAttributesForFindings =
-        field_map_exn json "userAttributesForFindings"
+        field_map json__ "userAttributesForFindings"
           UserAttributeList.of_json in
       let rulesPackageArns =
-        field_map_exn json "rulesPackageArns"
+        field_map json__ "rulesPackageArns"
           AssessmentRulesPackageArnList.of_json in
       let durationInSeconds =
-        field_map_exn json "durationInSeconds" AssessmentRunDuration.of_json in
-      let state = field_map_exn json "state" AssessmentRunState.of_json in
+        field_map json__ "durationInSeconds" AssessmentRunDuration.of_json in
+      let state = field_map json__ "state" AssessmentRunState.of_json in
       let assessmentTemplateArn =
-        field_map_exn json "assessmentTemplateArn" Arn.of_json in
-      let name = field_map_exn json "name" AssessmentRunName.of_json in
-      let arn = field_map_exn json "arn" Arn.of_json in
-      make ~findingCounts ~notifications ~stateChanges ~dataCollected
-        ~stateChangedAt ?completedAt ?startedAt ~createdAt
-        ~userAttributesForFindings ~rulesPackageArns ~durationInSeconds
-        ~state ~assessmentTemplateArn ~name ~arn ()
+        field_map json__ "assessmentTemplateArn" Arn.of_json in
+      let name = field_map json__ "name" AssessmentRunName.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?findingCounts ?notifications ?stateChanges ?dataCollected
+        ?stateChangedAt ?completedAt ?startedAt ?createdAt
+        ?userAttributesForFindings ?rulesPackageArns ?durationInSeconds
+        ?state ?assessmentTemplateArn ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A snapshot of an Amazon Inspector assessment run that contains the findings of the assessment run . Used as the response element in the DescribeAssessmentRuns action."]
@@ -3872,38 +3916,39 @@ module AccessDeniedException =
   struct
     type nonrec t =
       {
-      message: ErrorMessage.t [@ocaml.doc "Details of the exception error."];
-      errorCode: AccessDeniedErrorCode.t
+      message: ErrorMessage.t option
+        [@ocaml.doc "Details of the exception error."];
+      errorCode: AccessDeniedErrorCode.t option
         [@ocaml.doc
           "Code that indicates the type of error that is generated."];
-      canRetry: Bool.t [@ocaml.doc "You can immediately retry your request."]}
-    let context_ = "AccessDeniedException"
-    let make ~message =
-      fun ~errorCode ->
-        fun ~canRetry -> fun () -> { message; errorCode; canRetry }
+      canRetry: Bool_.t option
+        [@ocaml.doc "You can immediately retry your request."]}
+    let make ?message =
+      fun ?errorCode ->
+        fun ?canRetry -> fun () -> { message; errorCode; canRetry }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)));
-        ("errorCode", (Some (AccessDeniedErrorCode.to_value x.errorCode)));
-        ("canRetry", (Some (Bool.to_value x.canRetry)))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("errorCode",
+          (Option.map x.errorCode ~f:AccessDeniedErrorCode.to_value));
+        ("canRetry", (Option.map x.canRetry ~f:Bool_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let canRetry =
-        Bool.of_xml (Xml.child_exn ~context:context_ xml_arg0 "canRetry") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "canRetry") in
       let errorCode =
-        AccessDeniedErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "errorCode") in
+        (Option.map ~f:AccessDeniedErrorCode.of_xml)
+          (Xml.child xml_arg0 "errorCode") in
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~canRetry ~errorCode ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?canRetry ?errorCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let canRetry = field_map_exn json "canRetry" Bool.of_json in
+    let of_json json__ =
+      let canRetry = field_map json__ "canRetry" Bool_.of_json in
       let errorCode =
-        field_map_exn json "errorCode" AccessDeniedErrorCode.of_json in
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~canRetry ~errorCode ~message ()
+        field_map json__ "errorCode" AccessDeniedErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?canRetry ?errorCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You do not have required permissions to access the requested resource."]
@@ -3911,45 +3956,44 @@ module AgentsAlreadyRunningAssessmentException =
   struct
     type nonrec t =
       {
-      message: ErrorMessage.t [@ocaml.doc "Details of the exception error."];
-      agents: AgentAlreadyRunningAssessmentList.t ;
-      agentsTruncated: Bool.t ;
-      canRetry: Bool.t [@ocaml.doc "You can immediately retry your request."]}
-    let context_ = "AgentsAlreadyRunningAssessmentException"
-    let make ~message =
-      fun ~agents ->
-        fun ~agentsTruncated ->
-          fun ~canRetry ->
+      message: ErrorMessage.t option
+        [@ocaml.doc "Details of the exception error."];
+      agents: AgentAlreadyRunningAssessmentList.t option ;
+      agentsTruncated: Bool_.t option ;
+      canRetry: Bool_.t option
+        [@ocaml.doc "You can immediately retry your request."]}
+    let make ?message =
+      fun ?agents ->
+        fun ?agentsTruncated ->
+          fun ?canRetry ->
             fun () -> { message; agents; agentsTruncated; canRetry }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)));
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
         ("agents",
-          (Some (AgentAlreadyRunningAssessmentList.to_value x.agents)));
-        ("agentsTruncated", (Some (Bool.to_value x.agentsTruncated)));
-        ("canRetry", (Some (Bool.to_value x.canRetry)))]
+          (Option.map x.agents ~f:AgentAlreadyRunningAssessmentList.to_value));
+        ("agentsTruncated", (Option.map x.agentsTruncated ~f:Bool_.to_value));
+        ("canRetry", (Option.map x.canRetry ~f:Bool_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let canRetry =
-        Bool.of_xml (Xml.child_exn ~context:context_ xml_arg0 "canRetry") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "canRetry") in
       let agentsTruncated =
-        Bool.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "agentsTruncated") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "agentsTruncated") in
       let agents =
-        AgentAlreadyRunningAssessmentList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "agents") in
+        (Option.map ~f:AgentAlreadyRunningAssessmentList.of_xml)
+          (Xml.child xml_arg0 "agents") in
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~canRetry ~agentsTruncated ~agents ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?canRetry ?agentsTruncated ?agents ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let canRetry = field_map_exn json "canRetry" Bool.of_json in
-      let agentsTruncated = field_map_exn json "agentsTruncated" Bool.of_json in
+    let of_json json__ =
+      let canRetry = field_map json__ "canRetry" Bool_.of_json in
+      let agentsTruncated = field_map json__ "agentsTruncated" Bool_.of_json in
       let agents =
-        field_map_exn json "agents" AgentAlreadyRunningAssessmentList.of_json in
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~canRetry ~agentsTruncated ~agents ~message ()
+        field_map json__ "agents" AgentAlreadyRunningAssessmentList.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?canRetry ?agentsTruncated ?agents ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You started an assessment run, but one of the instances is already participating in another assessment run."]
@@ -3957,67 +4001,67 @@ module InternalException =
   struct
     type nonrec t =
       {
-      message: ErrorMessage.t [@ocaml.doc "Details of the exception error."];
-      canRetry: Bool.t [@ocaml.doc "You can immediately retry your request."]}
-    let context_ = "InternalException"
-    let make ~message = fun ~canRetry -> fun () -> { message; canRetry }
+      message: ErrorMessage.t option
+        [@ocaml.doc "Details of the exception error."];
+      canRetry: Bool_.t option
+        [@ocaml.doc "You can immediately retry your request."]}
+    let make ?message = fun ?canRetry -> fun () -> { message; canRetry }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)));
-        ("canRetry", (Some (Bool.to_value x.canRetry)))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("canRetry", (Option.map x.canRetry ~f:Bool_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let canRetry =
-        Bool.of_xml (Xml.child_exn ~context:context_ xml_arg0 "canRetry") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "canRetry") in
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~canRetry ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?canRetry ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let canRetry = field_map_exn json "canRetry" Bool.of_json in
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~canRetry ~message ()
+    let of_json json__ =
+      let canRetry = field_map json__ "canRetry" Bool_.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?canRetry ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Internal server error."]
 module InvalidCrossAccountRoleException =
   struct
     type nonrec t =
       {
-      message: ErrorMessage.t [@ocaml.doc "Details of the exception error."];
-      errorCode: InvalidCrossAccountRoleErrorCode.t
+      message: ErrorMessage.t option
+        [@ocaml.doc "Details of the exception error."];
+      errorCode: InvalidCrossAccountRoleErrorCode.t option
         [@ocaml.doc
           "Code that indicates the type of error that is generated."];
-      canRetry: Bool.t [@ocaml.doc "You can immediately retry your request."]}
-    let context_ = "InvalidCrossAccountRoleException"
-    let make ~message =
-      fun ~errorCode ->
-        fun ~canRetry -> fun () -> { message; errorCode; canRetry }
+      canRetry: Bool_.t option
+        [@ocaml.doc "You can immediately retry your request."]}
+    let make ?message =
+      fun ?errorCode ->
+        fun ?canRetry -> fun () -> { message; errorCode; canRetry }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)));
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
         ("errorCode",
-          (Some (InvalidCrossAccountRoleErrorCode.to_value x.errorCode)));
-        ("canRetry", (Some (Bool.to_value x.canRetry)))]
+          (Option.map x.errorCode
+             ~f:InvalidCrossAccountRoleErrorCode.to_value));
+        ("canRetry", (Option.map x.canRetry ~f:Bool_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let canRetry =
-        Bool.of_xml (Xml.child_exn ~context:context_ xml_arg0 "canRetry") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "canRetry") in
       let errorCode =
-        InvalidCrossAccountRoleErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "errorCode") in
+        (Option.map ~f:InvalidCrossAccountRoleErrorCode.of_xml)
+          (Xml.child xml_arg0 "errorCode") in
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~canRetry ~errorCode ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?canRetry ?errorCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let canRetry = field_map_exn json "canRetry" Bool.of_json in
+    let of_json json__ =
+      let canRetry = field_map json__ "canRetry" Bool_.of_json in
       let errorCode =
-        field_map_exn json "errorCode"
-          InvalidCrossAccountRoleErrorCode.of_json in
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~canRetry ~errorCode ~message ()
+        field_map json__ "errorCode" InvalidCrossAccountRoleErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?canRetry ?errorCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Amazon Inspector cannot assume the cross-account role that it needs to list your EC2 instances during the assessment run."]
@@ -4025,38 +4069,39 @@ module InvalidInputException =
   struct
     type nonrec t =
       {
-      message: ErrorMessage.t [@ocaml.doc "Details of the exception error."];
-      errorCode: InvalidInputErrorCode.t
+      message: ErrorMessage.t option
+        [@ocaml.doc "Details of the exception error."];
+      errorCode: InvalidInputErrorCode.t option
         [@ocaml.doc
           "Code that indicates the type of error that is generated."];
-      canRetry: Bool.t [@ocaml.doc "You can immediately retry your request."]}
-    let context_ = "InvalidInputException"
-    let make ~message =
-      fun ~errorCode ->
-        fun ~canRetry -> fun () -> { message; errorCode; canRetry }
+      canRetry: Bool_.t option
+        [@ocaml.doc "You can immediately retry your request."]}
+    let make ?message =
+      fun ?errorCode ->
+        fun ?canRetry -> fun () -> { message; errorCode; canRetry }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)));
-        ("errorCode", (Some (InvalidInputErrorCode.to_value x.errorCode)));
-        ("canRetry", (Some (Bool.to_value x.canRetry)))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("errorCode",
+          (Option.map x.errorCode ~f:InvalidInputErrorCode.to_value));
+        ("canRetry", (Option.map x.canRetry ~f:Bool_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let canRetry =
-        Bool.of_xml (Xml.child_exn ~context:context_ xml_arg0 "canRetry") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "canRetry") in
       let errorCode =
-        InvalidInputErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "errorCode") in
+        (Option.map ~f:InvalidInputErrorCode.of_xml)
+          (Xml.child xml_arg0 "errorCode") in
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~canRetry ~errorCode ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?canRetry ?errorCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let canRetry = field_map_exn json "canRetry" Bool.of_json in
+    let of_json json__ =
+      let canRetry = field_map json__ "canRetry" Bool_.of_json in
       let errorCode =
-        field_map_exn json "errorCode" InvalidInputErrorCode.of_json in
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~canRetry ~errorCode ~message ()
+        field_map json__ "errorCode" InvalidInputErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?canRetry ?errorCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request was rejected because an invalid or out-of-range value was supplied for an input parameter."]
@@ -4064,38 +4109,39 @@ module LimitExceededException =
   struct
     type nonrec t =
       {
-      message: ErrorMessage.t [@ocaml.doc "Details of the exception error."];
-      errorCode: LimitExceededErrorCode.t
+      message: ErrorMessage.t option
+        [@ocaml.doc "Details of the exception error."];
+      errorCode: LimitExceededErrorCode.t option
         [@ocaml.doc
           "Code that indicates the type of error that is generated."];
-      canRetry: Bool.t [@ocaml.doc "You can immediately retry your request."]}
-    let context_ = "LimitExceededException"
-    let make ~message =
-      fun ~errorCode ->
-        fun ~canRetry -> fun () -> { message; errorCode; canRetry }
+      canRetry: Bool_.t option
+        [@ocaml.doc "You can immediately retry your request."]}
+    let make ?message =
+      fun ?errorCode ->
+        fun ?canRetry -> fun () -> { message; errorCode; canRetry }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)));
-        ("errorCode", (Some (LimitExceededErrorCode.to_value x.errorCode)));
-        ("canRetry", (Some (Bool.to_value x.canRetry)))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("errorCode",
+          (Option.map x.errorCode ~f:LimitExceededErrorCode.to_value));
+        ("canRetry", (Option.map x.canRetry ~f:Bool_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let canRetry =
-        Bool.of_xml (Xml.child_exn ~context:context_ xml_arg0 "canRetry") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "canRetry") in
       let errorCode =
-        LimitExceededErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "errorCode") in
+        (Option.map ~f:LimitExceededErrorCode.of_xml)
+          (Xml.child xml_arg0 "errorCode") in
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~canRetry ~errorCode ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?canRetry ?errorCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let canRetry = field_map_exn json "canRetry" Bool.of_json in
+    let of_json json__ =
+      let canRetry = field_map json__ "canRetry" Bool_.of_json in
       let errorCode =
-        field_map_exn json "errorCode" LimitExceededErrorCode.of_json in
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~canRetry ~errorCode ~message ()
+        field_map json__ "errorCode" LimitExceededErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?canRetry ?errorCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request was rejected because it attempted to create resources beyond the current AWS account limits. The error code describes the limit exceeded."]
@@ -4103,38 +4149,39 @@ module NoSuchEntityException =
   struct
     type nonrec t =
       {
-      message: ErrorMessage.t [@ocaml.doc "Details of the exception error."];
-      errorCode: NoSuchEntityErrorCode.t
+      message: ErrorMessage.t option
+        [@ocaml.doc "Details of the exception error."];
+      errorCode: NoSuchEntityErrorCode.t option
         [@ocaml.doc
           "Code that indicates the type of error that is generated."];
-      canRetry: Bool.t [@ocaml.doc "You can immediately retry your request."]}
-    let context_ = "NoSuchEntityException"
-    let make ~message =
-      fun ~errorCode ->
-        fun ~canRetry -> fun () -> { message; errorCode; canRetry }
+      canRetry: Bool_.t option
+        [@ocaml.doc "You can immediately retry your request."]}
+    let make ?message =
+      fun ?errorCode ->
+        fun ?canRetry -> fun () -> { message; errorCode; canRetry }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)));
-        ("errorCode", (Some (NoSuchEntityErrorCode.to_value x.errorCode)));
-        ("canRetry", (Some (Bool.to_value x.canRetry)))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("errorCode",
+          (Option.map x.errorCode ~f:NoSuchEntityErrorCode.to_value));
+        ("canRetry", (Option.map x.canRetry ~f:Bool_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let canRetry =
-        Bool.of_xml (Xml.child_exn ~context:context_ xml_arg0 "canRetry") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "canRetry") in
       let errorCode =
-        NoSuchEntityErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "errorCode") in
+        (Option.map ~f:NoSuchEntityErrorCode.of_xml)
+          (Xml.child xml_arg0 "errorCode") in
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~canRetry ~errorCode ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?canRetry ?errorCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let canRetry = field_map_exn json "canRetry" Bool.of_json in
+    let of_json json__ =
+      let canRetry = field_map json__ "canRetry" Bool_.of_json in
       let errorCode =
-        field_map_exn json "errorCode" NoSuchEntityErrorCode.of_json in
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~canRetry ~errorCode ~message ()
+        field_map json__ "errorCode" NoSuchEntityErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?canRetry ?errorCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request was rejected because it referenced an entity that does not exist. The error code describes the entity."]
@@ -4142,28 +4189,27 @@ module ServiceTemporarilyUnavailableException =
   struct
     type nonrec t =
       {
-      message: ErrorMessage.t [@ocaml.doc "Details of the exception error."];
-      canRetry: Bool.t
+      message: ErrorMessage.t option
+        [@ocaml.doc "Details of the exception error."];
+      canRetry: Bool_.t option
         [@ocaml.doc "You can wait and then retry your request."]}
-    let context_ = "ServiceTemporarilyUnavailableException"
-    let make ~message = fun ~canRetry -> fun () -> { message; canRetry }
+    let make ?message = fun ?canRetry -> fun () -> { message; canRetry }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)));
-        ("canRetry", (Some (Bool.to_value x.canRetry)))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("canRetry", (Option.map x.canRetry ~f:Bool_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let canRetry =
-        Bool.of_xml (Xml.child_exn ~context:context_ xml_arg0 "canRetry") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "canRetry") in
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~canRetry ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?canRetry ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let canRetry = field_map_exn json "canRetry" Bool.of_json in
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~canRetry ~message ()
+    let of_json json__ =
+      let canRetry = field_map json__ "canRetry" Bool_.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?canRetry ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The serice is temporary unavailable."]
 module TagList =
@@ -4174,6 +4220,9 @@ module TagList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4217,6 +4266,8 @@ module FailedItems =
                        (FailedItemDetails.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -4232,6 +4283,9 @@ module AddRemoveAttributesFindingArnList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4261,6 +4315,9 @@ module UserAttributeKeyList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4291,6 +4348,9 @@ module AgentPreviewList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AgentPreview.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4353,6 +4413,9 @@ module ListReturnedArnList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4474,19 +4537,19 @@ module FindingFilter =
       make ?creationTimeRange ?userAttributes ?attributes ?rulesPackageArns
         ?severities ?ruleNames ?autoScalingGroups ?agentIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let creationTimeRange =
-        field_map json "creationTimeRange" TimestampRange.of_json in
+        field_map json__ "creationTimeRange" TimestampRange.of_json in
       let userAttributes =
-        field_map json "userAttributes" AttributeList.of_json in
-      let attributes = field_map json "attributes" AttributeList.of_json in
+        field_map json__ "userAttributes" AttributeList.of_json in
+      let attributes = field_map json__ "attributes" AttributeList.of_json in
       let rulesPackageArns =
-        field_map json "rulesPackageArns" FilterRulesPackageArnList.of_json in
-      let severities = field_map json "severities" SeverityList.of_json in
-      let ruleNames = field_map json "ruleNames" RuleNameList.of_json in
+        field_map json__ "rulesPackageArns" FilterRulesPackageArnList.of_json in
+      let severities = field_map json__ "severities" SeverityList.of_json in
+      let ruleNames = field_map json__ "ruleNames" RuleNameList.of_json in
       let autoScalingGroups =
-        field_map json "autoScalingGroups" AutoScalingGroupList.of_json in
-      let agentIds = field_map json "agentIds" AgentIdList.of_json in
+        field_map json__ "autoScalingGroups" AutoScalingGroupList.of_json in
+      let agentIds = field_map json__ "agentIds" AgentIdList.of_json in
       make ?creationTimeRange ?userAttributes ?attributes ?rulesPackageArns
         ?severities ?ruleNames ?autoScalingGroups ?agentIds ()
     let to_json v = composed_to_json to_value v
@@ -4500,6 +4563,9 @@ module ListParentArnList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4528,6 +4594,9 @@ module SubscriptionList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Subscription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4600,12 +4669,12 @@ module AssessmentTemplateFilter =
         (Option.map ~f:NamePattern.of_xml) (Xml.child xml_arg0 "namePattern") in
       make ?rulesPackageArns ?durationRange ?namePattern ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let rulesPackageArns =
-        field_map json "rulesPackageArns" FilterRulesPackageArnList.of_json in
+        field_map json__ "rulesPackageArns" FilterRulesPackageArnList.of_json in
       let durationRange =
-        field_map json "durationRange" DurationRange.of_json in
-      let namePattern = field_map json "namePattern" NamePattern.of_json in
+        field_map json__ "durationRange" DurationRange.of_json in
+      let namePattern = field_map json__ "namePattern" NamePattern.of_json in
       make ?rulesPackageArns ?durationRange ?namePattern ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4630,9 +4699,9 @@ module AssessmentTargetFilter =
           (Xml.child xml_arg0 "assessmentTargetNamePattern") in
       make ?assessmentTargetNamePattern ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentTargetNamePattern =
-        field_map json "assessmentTargetNamePattern" NamePattern.of_json in
+        field_map json__ "assessmentTargetNamePattern" NamePattern.of_json in
       make ?assessmentTargetNamePattern ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4719,19 +4788,19 @@ module AssessmentRunFilter =
       make ?stateChangeTimeRange ?completionTimeRange ?startTimeRange
         ?rulesPackageArns ?durationRange ?states ?namePattern ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stateChangeTimeRange =
-        field_map json "stateChangeTimeRange" TimestampRange.of_json in
+        field_map json__ "stateChangeTimeRange" TimestampRange.of_json in
       let completionTimeRange =
-        field_map json "completionTimeRange" TimestampRange.of_json in
+        field_map json__ "completionTimeRange" TimestampRange.of_json in
       let startTimeRange =
-        field_map json "startTimeRange" TimestampRange.of_json in
+        field_map json__ "startTimeRange" TimestampRange.of_json in
       let rulesPackageArns =
-        field_map json "rulesPackageArns" FilterRulesPackageArnList.of_json in
+        field_map json__ "rulesPackageArns" FilterRulesPackageArnList.of_json in
       let durationRange =
-        field_map json "durationRange" DurationRange.of_json in
-      let states = field_map json "states" AssessmentRunStateList.of_json in
-      let namePattern = field_map json "namePattern" NamePattern.of_json in
+        field_map json__ "durationRange" DurationRange.of_json in
+      let states = field_map json__ "states" AssessmentRunStateList.of_json in
+      let namePattern = field_map json__ "namePattern" NamePattern.of_json in
       make ?stateChangeTimeRange ?completionTimeRange ?startTimeRange
         ?rulesPackageArns ?durationRange ?states ?namePattern ()
     let to_json v = composed_to_json to_value v
@@ -4746,6 +4815,9 @@ module AssessmentRunAgentList =
           ((check_list_max i ~max:500) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssessmentRunAgent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4795,11 +4867,11 @@ module AgentFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "agentHealths") in
       make ~agentHealthCodes ~agentHealths ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let agentHealthCodes =
-        field_map_exn json "agentHealthCodes" AgentHealthCodeList.of_json in
+        field_map_exn json__ "agentHealthCodes" AgentHealthCodeList.of_json in
       let agentHealths =
-        field_map_exn json "agentHealths" AgentHealthList.of_json in
+        field_map_exn json__ "agentHealths" AgentHealthList.of_json in
       make ~agentHealthCodes ~agentHealths ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4813,6 +4885,9 @@ module ExclusionPreviewList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExclusionPreview.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4897,19 +4972,20 @@ module AssessmentRunInProgressException =
   struct
     type nonrec t =
       {
-      message: ErrorMessage.t [@ocaml.doc "Details of the exception error."];
-      assessmentRunArns: AssessmentRunInProgressArnList.t
+      message: ErrorMessage.t option
+        [@ocaml.doc "Details of the exception error."];
+      assessmentRunArns: AssessmentRunInProgressArnList.t option
         [@ocaml.doc
           "The ARNs of the assessment runs that are currently in progress."];
-      assessmentRunArnsTruncated: Bool.t
+      assessmentRunArnsTruncated: Bool_.t option
         [@ocaml.doc
           "Boolean value that indicates whether the ARN list of the assessment runs is truncated."];
-      canRetry: Bool.t [@ocaml.doc "You can immediately retry your request."]}
-    let context_ = "AssessmentRunInProgressException"
-    let make ~message =
-      fun ~assessmentRunArns ->
-        fun ~assessmentRunArnsTruncated ->
-          fun ~canRetry ->
+      canRetry: Bool_.t option
+        [@ocaml.doc "You can immediately retry your request."]}
+    let make ?message =
+      fun ?assessmentRunArns ->
+        fun ?assessmentRunArnsTruncated ->
+          fun ?canRetry ->
             fun () ->
               {
                 message;
@@ -4919,38 +4995,37 @@ module AssessmentRunInProgressException =
               }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)));
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
         ("assessmentRunArns",
-          (Some (AssessmentRunInProgressArnList.to_value x.assessmentRunArns)));
+          (Option.map x.assessmentRunArns
+             ~f:AssessmentRunInProgressArnList.to_value));
         ("assessmentRunArnsTruncated",
-          (Some (Bool.to_value x.assessmentRunArnsTruncated)));
-        ("canRetry", (Some (Bool.to_value x.canRetry)))]
+          (Option.map x.assessmentRunArnsTruncated ~f:Bool_.to_value));
+        ("canRetry", (Option.map x.canRetry ~f:Bool_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let canRetry =
-        Bool.of_xml (Xml.child_exn ~context:context_ xml_arg0 "canRetry") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "canRetry") in
       let assessmentRunArnsTruncated =
-        Bool.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "assessmentRunArnsTruncated") in
+        (Option.map ~f:Bool_.of_xml)
+          (Xml.child xml_arg0 "assessmentRunArnsTruncated") in
       let assessmentRunArns =
-        AssessmentRunInProgressArnList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArns") in
+        (Option.map ~f:AssessmentRunInProgressArnList.of_xml)
+          (Xml.child xml_arg0 "assessmentRunArns") in
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~canRetry ~assessmentRunArnsTruncated ~assessmentRunArns ~message
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?canRetry ?assessmentRunArnsTruncated ?assessmentRunArns ?message
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let canRetry = field_map_exn json "canRetry" Bool.of_json in
+    let of_json json__ =
+      let canRetry = field_map json__ "canRetry" Bool_.of_json in
       let assessmentRunArnsTruncated =
-        field_map_exn json "assessmentRunArnsTruncated" Bool.of_json in
+        field_map json__ "assessmentRunArnsTruncated" Bool_.of_json in
       let assessmentRunArns =
-        field_map_exn json "assessmentRunArns"
+        field_map json__ "assessmentRunArns"
           AssessmentRunInProgressArnList.of_json in
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~canRetry ~assessmentRunArnsTruncated ~assessmentRunArns ~message
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?canRetry ?assessmentRunArnsTruncated ?assessmentRunArns ?message
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4985,28 +5060,27 @@ module ReportStatus =
   end
 module UnsupportedFeatureException =
   struct
-    type nonrec t = {
-      message: ErrorMessage.t ;
-      canRetry: Bool.t }
-    let context_ = "UnsupportedFeatureException"
-    let make ~message = fun ~canRetry -> fun () -> { message; canRetry }
+    type nonrec t =
+      {
+      message: ErrorMessage.t option ;
+      canRetry: Bool_.t option }
+    let make ?message = fun ?canRetry -> fun () -> { message; canRetry }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)));
-        ("canRetry", (Some (Bool.to_value x.canRetry)))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("canRetry", (Option.map x.canRetry ~f:Bool_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let canRetry =
-        Bool.of_xml (Xml.child_exn ~context:context_ xml_arg0 "canRetry") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "canRetry") in
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~canRetry ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?canRetry ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let canRetry = field_map_exn json "canRetry" Bool.of_json in
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~canRetry ~message ()
+    let of_json json__ =
+      let canRetry = field_map json__ "canRetry" Bool_.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?canRetry ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Used by the GetAssessmentReport API. The request was rejected because you tried to generate a report for an assessment run that existed before reporting was supported in Amazon Inspector. You can only generate reports for assessment runs that took place or will take place after generating reports in Amazon Inspector became available."]
@@ -5070,6 +5144,9 @@ module RulesPackageList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RulesPackage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5098,6 +5175,9 @@ module BatchDescribeArnList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5126,6 +5206,9 @@ module ResourceGroupList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5155,6 +5238,9 @@ module FindingList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Finding.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5203,6 +5289,8 @@ module ExclusionMap =
                     (fun x -> (Exclusion.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -5219,6 +5307,9 @@ module BatchDescribeExclusionsArnList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5248,6 +5339,9 @@ module AssessmentTemplateList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssessmentTemplate.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5277,6 +5371,9 @@ module AssessmentTargetList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssessmentTarget.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5306,6 +5403,9 @@ module AssessmentRunList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssessmentRun.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5329,22 +5429,20 @@ module AssessmentRunList =
 module PreviewGenerationInProgressException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t }
-    let context_ = "PreviewGenerationInProgressException"
-    let make ~message = fun () -> { message }
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request is rejected. The specified assessment template is currently generating an exclusions preview."]
@@ -5385,13 +5483,13 @@ module UpdateAssessmentTargetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTargetArn") in
       make ?resourceGroupArn ~assessmentTargetName ~assessmentTargetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceGroupArn = field_map json "resourceGroupArn" Arn.of_json in
+    let of_json json__ =
+      let resourceGroupArn = field_map json__ "resourceGroupArn" Arn.of_json in
       let assessmentTargetName =
-        field_map_exn json "assessmentTargetName"
+        field_map_exn json__ "assessmentTargetName"
           AssessmentTargetName.of_json in
       let assessmentTargetArn =
-        field_map_exn json "assessmentTargetArn" Arn.of_json in
+        field_map_exn json__ "assessmentTargetArn" Arn.of_json in
       make ?resourceGroupArn ~assessmentTargetName ~assessmentTargetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5429,10 +5527,10 @@ module UnsubscribeFromEventRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~topicArn ~event ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicArn = field_map_exn json "topicArn" Arn.of_json in
-      let event = field_map_exn json "event" InspectorEvent.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let topicArn = field_map_exn json__ "topicArn" Arn.of_json in
+      let event = field_map_exn json__ "event" InspectorEvent.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~topicArn ~event ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5470,10 +5568,10 @@ module SubscribeToEventRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~topicArn ~event ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicArn = field_map_exn json "topicArn" Arn.of_json in
-      let event = field_map_exn json "event" InspectorEvent.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let topicArn = field_map_exn json__ "topicArn" Arn.of_json in
+      let event = field_map_exn json__ "event" InspectorEvent.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~topicArn ~event ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5503,10 +5601,10 @@ module StopAssessmentRunRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArn") in
       make ?stopAction ~assessmentRunArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stopAction = field_map json "stopAction" StopAction.of_json in
+    let of_json json__ =
+      let stopAction = field_map json__ "stopAction" StopAction.of_json in
       let assessmentRunArn =
-        field_map_exn json "assessmentRunArn" Arn.of_json in
+        field_map_exn json__ "assessmentRunArn" Arn.of_json in
       make ?stopAction ~assessmentRunArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5515,7 +5613,7 @@ module StartAssessmentRunResponse =
   struct
     type nonrec t =
       {
-      assessmentRunArn: Arn.t
+      assessmentRunArn: Arn.t option
         [@ocaml.doc "The ARN of the assessment run that has been started."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -5530,8 +5628,7 @@ module StartAssessmentRunResponse =
       | `ServiceTemporarilyUnavailableException of
           ServiceTemporarilyUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "StartAssessmentRunResponse"
-    let make ~assessmentRunArn = fun () -> { assessmentRunArn }
+    let make ?assessmentRunArn = fun () -> { assessmentRunArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5620,18 +5717,17 @@ module StartAssessmentRunResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("assessmentRunArn", (Some (Arn.to_value x.assessmentRunArn)))]
+        [("assessmentRunArn",
+           (Option.map x.assessmentRunArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let assessmentRunArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArn") in
-      make ~assessmentRunArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "assessmentRunArn") in
+      make ?assessmentRunArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assessmentRunArn =
-        field_map_exn json "assessmentRunArn" Arn.of_json in
-      make ~assessmentRunArn ()
+    let of_json json__ =
+      let assessmentRunArn = field_map json__ "assessmentRunArn" Arn.of_json in
+      make ?assessmentRunArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts the assessment run specified by the ARN of the assessment template. For this API to function properly, you must not exceed the limit of running up to 500 concurrent agents per AWS account."]
@@ -5665,11 +5761,11 @@ module StartAssessmentRunRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTemplateArn") in
       make ?assessmentRunName ~assessmentTemplateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentRunName =
-        field_map json "assessmentRunName" AssessmentRunName.of_json in
+        field_map json__ "assessmentRunName" AssessmentRunName.of_json in
       let assessmentTemplateArn =
-        field_map_exn json "assessmentTemplateArn" Arn.of_json in
+        field_map_exn json__ "assessmentTemplateArn" Arn.of_json in
       make ?assessmentRunName ~assessmentTemplateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5697,9 +5793,9 @@ module SetTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ?tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ?tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5708,7 +5804,7 @@ module RemoveAttributesFromFindingsResponse =
   struct
     type nonrec t =
       {
-      failedItems: FailedItems.t
+      failedItems: FailedItems.t option
         [@ocaml.doc
           "Attributes details that cannot be described. An error code is provided for each failed item."]}
     type nonrec error =
@@ -5719,8 +5815,7 @@ module RemoveAttributesFromFindingsResponse =
       | `ServiceTemporarilyUnavailableException of
           ServiceTemporarilyUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "RemoveAttributesFromFindingsResponse"
-    let make ~failedItems = fun () -> { failedItems }
+    let make ?failedItems = fun () -> { failedItems }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5781,17 +5876,16 @@ module RemoveAttributesFromFindingsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("failedItems", (Some (FailedItems.to_value x.failedItems)))]
+        [("failedItems", (Option.map x.failedItems ~f:FailedItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let failedItems =
-        FailedItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "failedItems") in
-      make ~failedItems ()
+        (Option.map ~f:FailedItems.of_xml) (Xml.child xml_arg0 "failedItems") in
+      make ?failedItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
-      make ~failedItems ()
+    let of_json json__ =
+      let failedItems = field_map json__ "failedItems" FailedItems.of_json in
+      make ?failedItems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Removes entire attributes (key and value pairs) from the findings that are specified by the ARNs of the findings where an attribute with the specified key exists."]
@@ -5824,11 +5918,11 @@ module RemoveAttributesFromFindingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "findingArns") in
       make ~attributeKeys ~findingArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeKeys =
-        field_map_exn json "attributeKeys" UserAttributeKeyList.of_json in
+        field_map_exn json__ "attributeKeys" UserAttributeKeyList.of_json in
       let findingArns =
-        field_map_exn json "findingArns"
+        field_map_exn json__ "findingArns"
           AddRemoveAttributesFindingArnList.of_json in
       make ~attributeKeys ~findingArns ()
     let to_json v = composed_to_json to_value v
@@ -5851,8 +5945,8 @@ module RegisterCrossAccountAccessRoleRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ~roleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map_exn json "roleArn" Arn.of_json in
+    let of_json json__ =
+      let roleArn = field_map_exn json__ "roleArn" Arn.of_json in
       make ~roleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5861,7 +5955,7 @@ module PreviewAgentsResponse =
   struct
     type nonrec t =
       {
-      agentPreviews: AgentPreviewList.t
+      agentPreviews: AgentPreviewList.t option
         [@ocaml.doc "The resulting list of agents."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
@@ -5874,9 +5968,8 @@ module PreviewAgentsResponse =
       | `InvalidInputException of InvalidInputException.t 
       | `NoSuchEntityException of NoSuchEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "PreviewAgentsResponse"
-    let make ?nextToken =
-      fun ~agentPreviews -> fun () -> { nextToken; agentPreviews }
+    let make ?agentPreviews =
+      fun ?nextToken -> fun () -> { agentPreviews; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5938,7 +6031,7 @@ module PreviewAgentsResponse =
     let to_value x =
       structure_to_value
         [("agentPreviews",
-           (Some (AgentPreviewList.to_value x.agentPreviews)));
+           (Option.map x.agentPreviews ~f:AgentPreviewList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -5946,15 +6039,15 @@ module PreviewAgentsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       let agentPreviews =
-        AgentPreviewList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "agentPreviews") in
-      make ?nextToken ~agentPreviews ()
+        (Option.map ~f:AgentPreviewList.of_xml)
+          (Xml.child xml_arg0 "agentPreviews") in
+      make ?nextToken ?agentPreviews ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let agentPreviews =
-        field_map_exn json "agentPreviews" AgentPreviewList.of_json in
-      make ?nextToken ~agentPreviews ()
+        field_map json__ "agentPreviews" AgentPreviewList.of_json in
+      make ?nextToken ?agentPreviews ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Previews the agents installed on the EC2 instances that are part of the specified assessment target."]
@@ -5995,12 +6088,12 @@ module PreviewAgentsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "previewAgentsArn") in
       make ?maxResults ?nextToken ~previewAgentsArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "maxResults" PreviewAgentsMaxResults.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+        field_map json__ "maxResults" PreviewAgentsMaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let previewAgentsArn =
-        field_map_exn json "previewAgentsArn" Arn.of_json in
+        field_map_exn json__ "previewAgentsArn" Arn.of_json in
       make ?maxResults ?nextToken ~previewAgentsArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6009,15 +6102,15 @@ module ListTagsForResourceResponse =
   struct
     type nonrec t =
       {
-      tags: TagList.t [@ocaml.doc "A collection of key and value pairs."]}
+      tags: TagList.t option
+        [@ocaml.doc "A collection of key and value pairs."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalException of InternalException.t 
       | `InvalidInputException of InvalidInputException.t 
       | `NoSuchEntityException of NoSuchEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTagsForResourceResponse"
-    let make ~tags = fun () -> { tags }
+    let make ?tags = fun () -> { tags }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6067,15 +6160,14 @@ module ListTagsForResourceResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("tags", (Some (TagList.to_value x.tags)))]
+      structure_to_value [("tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags =
-        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
-      make ~tags ()
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagList.of_json in make ~tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all tags associated with an assessment template."]
 module ListTagsForResourceRequest =
@@ -6096,8 +6188,8 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all tags associated with an assessment template."]
@@ -6105,7 +6197,7 @@ module ListRulesPackagesResponse =
   struct
     type nonrec t =
       {
-      rulesPackageArns: ListReturnedArnList.t
+      rulesPackageArns: ListReturnedArnList.t option
         [@ocaml.doc
           "The list of ARNs that specifies the rules packages returned by the action."];
       nextToken: PaginationToken.t option
@@ -6116,9 +6208,8 @@ module ListRulesPackagesResponse =
       | `InternalException of InternalException.t 
       | `InvalidInputException of InvalidInputException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListRulesPackagesResponse"
-    let make ?nextToken =
-      fun ~rulesPackageArns -> fun () -> { nextToken; rulesPackageArns }
+    let make ?rulesPackageArns =
+      fun ?nextToken -> fun () -> { rulesPackageArns; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6162,7 +6253,7 @@ module ListRulesPackagesResponse =
     let to_value x =
       structure_to_value
         [("rulesPackageArns",
-           (Some (ListReturnedArnList.to_value x.rulesPackageArns)));
+           (Option.map x.rulesPackageArns ~f:ListReturnedArnList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -6170,15 +6261,15 @@ module ListRulesPackagesResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       let rulesPackageArns =
-        ListReturnedArnList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "rulesPackageArns") in
-      make ?nextToken ~rulesPackageArns ()
+        (Option.map ~f:ListReturnedArnList.of_xml)
+          (Xml.child xml_arg0 "rulesPackageArns") in
+      make ?nextToken ?rulesPackageArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let rulesPackageArns =
-        field_map_exn json "rulesPackageArns" ListReturnedArnList.of_json in
-      make ?nextToken ~rulesPackageArns ()
+        field_map json__ "rulesPackageArns" ListReturnedArnList.of_json in
+      make ?nextToken ?rulesPackageArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all available Amazon Inspector rules packages."]
 module ListRulesPackagesRequest =
@@ -6207,9 +6298,9 @@ module ListRulesPackagesRequest =
           (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" ListMaxResults.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" ListMaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all available Amazon Inspector rules packages."]
@@ -6217,7 +6308,7 @@ module ListFindingsResponse =
   struct
     type nonrec t =
       {
-      findingArns: ListReturnedArnList.t
+      findingArns: ListReturnedArnList.t option
         [@ocaml.doc
           "A list of ARNs that specifies the findings returned by the action."];
       nextToken: PaginationToken.t option
@@ -6229,9 +6320,8 @@ module ListFindingsResponse =
       | `InvalidInputException of InvalidInputException.t 
       | `NoSuchEntityException of NoSuchEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListFindingsResponse"
-    let make ?nextToken =
-      fun ~findingArns -> fun () -> { nextToken; findingArns }
+    let make ?findingArns =
+      fun ?nextToken -> fun () -> { findingArns; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6282,7 +6372,8 @@ module ListFindingsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("findingArns", (Some (ListReturnedArnList.to_value x.findingArns)));
+        [("findingArns",
+           (Option.map x.findingArns ~f:ListReturnedArnList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -6290,15 +6381,15 @@ module ListFindingsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       let findingArns =
-        ListReturnedArnList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "findingArns") in
-      make ?nextToken ~findingArns ()
+        (Option.map ~f:ListReturnedArnList.of_xml)
+          (Xml.child xml_arg0 "findingArns") in
+      make ?nextToken ?findingArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let findingArns =
-        field_map_exn json "findingArns" ListReturnedArnList.of_json in
-      make ?nextToken ~findingArns ()
+        field_map json__ "findingArns" ListReturnedArnList.of_json in
+      make ?nextToken ?findingArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists findings that are generated by the assessment runs that are specified by the ARNs of the assessment runs."]
@@ -6345,12 +6436,12 @@ module ListFindingsRequest =
           (Xml.child xml_arg0 "assessmentRunArns") in
       make ?maxResults ?nextToken ?filter ?assessmentRunArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" ListMaxResults.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let filter = field_map json "filter" FindingFilter.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" ListMaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let filter = field_map json__ "filter" FindingFilter.of_json in
       let assessmentRunArns =
-        field_map json "assessmentRunArns" ListParentArnList.of_json in
+        field_map json__ "assessmentRunArns" ListParentArnList.of_json in
       make ?maxResults ?nextToken ?filter ?assessmentRunArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6359,7 +6450,7 @@ module ListExclusionsResponse =
   struct
     type nonrec t =
       {
-      exclusionArns: ListReturnedArnList.t
+      exclusionArns: ListReturnedArnList.t option
         [@ocaml.doc "A list of exclusions' ARNs returned by the action."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
@@ -6370,9 +6461,8 @@ module ListExclusionsResponse =
       | `InvalidInputException of InvalidInputException.t 
       | `NoSuchEntityException of NoSuchEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListExclusionsResponse"
-    let make ?nextToken =
-      fun ~exclusionArns -> fun () -> { nextToken; exclusionArns }
+    let make ?exclusionArns =
+      fun ?nextToken -> fun () -> { exclusionArns; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6424,7 +6514,7 @@ module ListExclusionsResponse =
     let to_value x =
       structure_to_value
         [("exclusionArns",
-           (Some (ListReturnedArnList.to_value x.exclusionArns)));
+           (Option.map x.exclusionArns ~f:ListReturnedArnList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -6432,15 +6522,15 @@ module ListExclusionsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       let exclusionArns =
-        ListReturnedArnList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "exclusionArns") in
-      make ?nextToken ~exclusionArns ()
+        (Option.map ~f:ListReturnedArnList.of_xml)
+          (Xml.child xml_arg0 "exclusionArns") in
+      make ?nextToken ?exclusionArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let exclusionArns =
-        field_map_exn json "exclusionArns" ListReturnedArnList.of_json in
-      make ?nextToken ~exclusionArns ()
+        field_map json__ "exclusionArns" ListReturnedArnList.of_json in
+      make ?nextToken ?exclusionArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "List exclusions that are generated by the assessment run."]
@@ -6480,11 +6570,11 @@ module ListExclusionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArn") in
       make ?maxResults ?nextToken ~assessmentRunArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" ListMaxResults.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" ListMaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let assessmentRunArn =
-        field_map_exn json "assessmentRunArn" Arn.of_json in
+        field_map_exn json__ "assessmentRunArn" Arn.of_json in
       make ?maxResults ?nextToken ~assessmentRunArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6493,7 +6583,7 @@ module ListEventSubscriptionsResponse =
   struct
     type nonrec t =
       {
-      subscriptions: SubscriptionList.t
+      subscriptions: SubscriptionList.t option
         [@ocaml.doc "Details of the returned event subscriptions."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
@@ -6504,9 +6594,8 @@ module ListEventSubscriptionsResponse =
       | `InvalidInputException of InvalidInputException.t 
       | `NoSuchEntityException of NoSuchEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListEventSubscriptionsResponse"
-    let make ?nextToken =
-      fun ~subscriptions -> fun () -> { nextToken; subscriptions }
+    let make ?subscriptions =
+      fun ?nextToken -> fun () -> { subscriptions; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6558,7 +6647,7 @@ module ListEventSubscriptionsResponse =
     let to_value x =
       structure_to_value
         [("subscriptions",
-           (Some (SubscriptionList.to_value x.subscriptions)));
+           (Option.map x.subscriptions ~f:SubscriptionList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -6566,15 +6655,15 @@ module ListEventSubscriptionsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       let subscriptions =
-        SubscriptionList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "subscriptions") in
-      make ?nextToken ~subscriptions ()
+        (Option.map ~f:SubscriptionList.of_xml)
+          (Xml.child xml_arg0 "subscriptions") in
+      make ?nextToken ?subscriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let subscriptions =
-        field_map_exn json "subscriptions" SubscriptionList.of_json in
-      make ?nextToken ~subscriptions ()
+        field_map json__ "subscriptions" SubscriptionList.of_json in
+      make ?nextToken ?subscriptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all the event subscriptions for the assessment template that is specified by the ARN of the assessment template. For more information, see SubscribeToEvent and UnsubscribeFromEvent."]
@@ -6613,11 +6702,12 @@ module ListEventSubscriptionsRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "resourceArn") in
       make ?maxResults ?nextToken ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "maxResults" ListEventSubscriptionsMaxResults.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let resourceArn = field_map json "resourceArn" Arn.of_json in
+        field_map json__ "maxResults"
+          ListEventSubscriptionsMaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let resourceArn = field_map json__ "resourceArn" Arn.of_json in
       make ?maxResults ?nextToken ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6626,7 +6716,7 @@ module ListAssessmentTemplatesResponse =
   struct
     type nonrec t =
       {
-      assessmentTemplateArns: ListReturnedArnList.t
+      assessmentTemplateArns: ListReturnedArnList.t option
         [@ocaml.doc
           "A list of ARNs that specifies the assessment templates returned by the action."];
       nextToken: PaginationToken.t option
@@ -6638,10 +6728,8 @@ module ListAssessmentTemplatesResponse =
       | `InvalidInputException of InvalidInputException.t 
       | `NoSuchEntityException of NoSuchEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAssessmentTemplatesResponse"
-    let make ?nextToken =
-      fun ~assessmentTemplateArns ->
-        fun () -> { nextToken; assessmentTemplateArns }
+    let make ?assessmentTemplateArns =
+      fun ?nextToken -> fun () -> { assessmentTemplateArns; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6693,7 +6781,8 @@ module ListAssessmentTemplatesResponse =
     let to_value x =
       structure_to_value
         [("assessmentTemplateArns",
-           (Some (ListReturnedArnList.to_value x.assessmentTemplateArns)));
+           (Option.map x.assessmentTemplateArns
+              ~f:ListReturnedArnList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -6701,16 +6790,15 @@ module ListAssessmentTemplatesResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       let assessmentTemplateArns =
-        ListReturnedArnList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentTemplateArns") in
-      make ?nextToken ~assessmentTemplateArns ()
+        (Option.map ~f:ListReturnedArnList.of_xml)
+          (Xml.child xml_arg0 "assessmentTemplateArns") in
+      make ?nextToken ?assessmentTemplateArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let assessmentTemplateArns =
-        field_map_exn json "assessmentTemplateArns"
-          ListReturnedArnList.of_json in
-      make ?nextToken ~assessmentTemplateArns ()
+        field_map json__ "assessmentTemplateArns" ListReturnedArnList.of_json in
+      make ?nextToken ?assessmentTemplateArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the assessment templates that correspond to the assessment targets that are specified by the ARNs of the assessment targets."]
@@ -6759,12 +6847,12 @@ module ListAssessmentTemplatesRequest =
           (Xml.child xml_arg0 "assessmentTargetArns") in
       make ?maxResults ?nextToken ?filter ?assessmentTargetArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" ListMaxResults.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let filter = field_map json "filter" AssessmentTemplateFilter.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" ListMaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let filter = field_map json__ "filter" AssessmentTemplateFilter.of_json in
       let assessmentTargetArns =
-        field_map json "assessmentTargetArns" ListParentArnList.of_json in
+        field_map json__ "assessmentTargetArns" ListParentArnList.of_json in
       make ?maxResults ?nextToken ?filter ?assessmentTargetArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6773,7 +6861,7 @@ module ListAssessmentTargetsResponse =
   struct
     type nonrec t =
       {
-      assessmentTargetArns: ListReturnedArnList.t
+      assessmentTargetArns: ListReturnedArnList.t option
         [@ocaml.doc
           "A list of ARNs that specifies the assessment targets that are returned by the action."];
       nextToken: PaginationToken.t option
@@ -6784,10 +6872,8 @@ module ListAssessmentTargetsResponse =
       | `InternalException of InternalException.t 
       | `InvalidInputException of InvalidInputException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAssessmentTargetsResponse"
-    let make ?nextToken =
-      fun ~assessmentTargetArns ->
-        fun () -> { nextToken; assessmentTargetArns }
+    let make ?assessmentTargetArns =
+      fun ?nextToken -> fun () -> { assessmentTargetArns; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6831,7 +6917,7 @@ module ListAssessmentTargetsResponse =
     let to_value x =
       structure_to_value
         [("assessmentTargetArns",
-           (Some (ListReturnedArnList.to_value x.assessmentTargetArns)));
+           (Option.map x.assessmentTargetArns ~f:ListReturnedArnList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -6839,15 +6925,15 @@ module ListAssessmentTargetsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       let assessmentTargetArns =
-        ListReturnedArnList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentTargetArns") in
-      make ?nextToken ~assessmentTargetArns ()
+        (Option.map ~f:ListReturnedArnList.of_xml)
+          (Xml.child xml_arg0 "assessmentTargetArns") in
+      make ?nextToken ?assessmentTargetArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let assessmentTargetArns =
-        field_map_exn json "assessmentTargetArns" ListReturnedArnList.of_json in
-      make ?nextToken ~assessmentTargetArns ()
+        field_map json__ "assessmentTargetArns" ListReturnedArnList.of_json in
+      make ?nextToken ?assessmentTargetArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the ARNs of the assessment targets within this AWS account. For more information about assessment targets, see Amazon Inspector Assessment Targets."]
@@ -6885,10 +6971,10 @@ module ListAssessmentTargetsRequest =
           (Xml.child xml_arg0 "filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" ListMaxResults.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let filter = field_map json "filter" AssessmentTargetFilter.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" ListMaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let filter = field_map json__ "filter" AssessmentTargetFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6897,7 +6983,7 @@ module ListAssessmentRunsResponse =
   struct
     type nonrec t =
       {
-      assessmentRunArns: ListReturnedArnList.t
+      assessmentRunArns: ListReturnedArnList.t option
         [@ocaml.doc
           "A list of ARNs that specifies the assessment runs that are returned by the action."];
       nextToken: PaginationToken.t option
@@ -6909,9 +6995,8 @@ module ListAssessmentRunsResponse =
       | `InvalidInputException of InvalidInputException.t 
       | `NoSuchEntityException of NoSuchEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAssessmentRunsResponse"
-    let make ?nextToken =
-      fun ~assessmentRunArns -> fun () -> { nextToken; assessmentRunArns }
+    let make ?assessmentRunArns =
+      fun ?nextToken -> fun () -> { assessmentRunArns; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6963,7 +7048,7 @@ module ListAssessmentRunsResponse =
     let to_value x =
       structure_to_value
         [("assessmentRunArns",
-           (Some (ListReturnedArnList.to_value x.assessmentRunArns)));
+           (Option.map x.assessmentRunArns ~f:ListReturnedArnList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -6971,15 +7056,15 @@ module ListAssessmentRunsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       let assessmentRunArns =
-        ListReturnedArnList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArns") in
-      make ?nextToken ~assessmentRunArns ()
+        (Option.map ~f:ListReturnedArnList.of_xml)
+          (Xml.child xml_arg0 "assessmentRunArns") in
+      make ?nextToken ?assessmentRunArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let assessmentRunArns =
-        field_map_exn json "assessmentRunArns" ListReturnedArnList.of_json in
-      make ?nextToken ~assessmentRunArns ()
+        field_map json__ "assessmentRunArns" ListReturnedArnList.of_json in
+      make ?nextToken ?assessmentRunArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the assessment runs that correspond to the assessment templates that are specified by the ARNs of the assessment templates."]
@@ -7028,12 +7113,12 @@ module ListAssessmentRunsRequest =
           (Xml.child xml_arg0 "assessmentTemplateArns") in
       make ?maxResults ?nextToken ?filter ?assessmentTemplateArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" ListMaxResults.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let filter = field_map json "filter" AssessmentRunFilter.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" ListMaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let filter = field_map json__ "filter" AssessmentRunFilter.of_json in
       let assessmentTemplateArns =
-        field_map json "assessmentTemplateArns" ListParentArnList.of_json in
+        field_map json__ "assessmentTemplateArns" ListParentArnList.of_json in
       make ?maxResults ?nextToken ?filter ?assessmentTemplateArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7042,7 +7127,7 @@ module ListAssessmentRunAgentsResponse =
   struct
     type nonrec t =
       {
-      assessmentRunAgents: AssessmentRunAgentList.t
+      assessmentRunAgents: AssessmentRunAgentList.t option
         [@ocaml.doc
           "A list of ARNs that specifies the agents returned by the action."];
       nextToken: PaginationToken.t option
@@ -7054,10 +7139,8 @@ module ListAssessmentRunAgentsResponse =
       | `InvalidInputException of InvalidInputException.t 
       | `NoSuchEntityException of NoSuchEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAssessmentRunAgentsResponse"
-    let make ?nextToken =
-      fun ~assessmentRunAgents ->
-        fun () -> { nextToken; assessmentRunAgents }
+    let make ?assessmentRunAgents =
+      fun ?nextToken -> fun () -> { assessmentRunAgents; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7109,7 +7192,8 @@ module ListAssessmentRunAgentsResponse =
     let to_value x =
       structure_to_value
         [("assessmentRunAgents",
-           (Some (AssessmentRunAgentList.to_value x.assessmentRunAgents)));
+           (Option.map x.assessmentRunAgents
+              ~f:AssessmentRunAgentList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -7117,16 +7201,15 @@ module ListAssessmentRunAgentsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       let assessmentRunAgents =
-        AssessmentRunAgentList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunAgents") in
-      make ?nextToken ~assessmentRunAgents ()
+        (Option.map ~f:AssessmentRunAgentList.of_xml)
+          (Xml.child xml_arg0 "assessmentRunAgents") in
+      make ?nextToken ?assessmentRunAgents ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let assessmentRunAgents =
-        field_map_exn json "assessmentRunAgents"
-          AssessmentRunAgentList.of_json in
-      make ?nextToken ~assessmentRunAgents ()
+        field_map json__ "assessmentRunAgents" AssessmentRunAgentList.of_json in
+      make ?nextToken ?assessmentRunAgents ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the agents of the assessment runs that are specified by the ARNs of the assessment runs."]
@@ -7173,12 +7256,12 @@ module ListAssessmentRunAgentsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArn") in
       make ?maxResults ?nextToken ?filter ~assessmentRunArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" ListMaxResults.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let filter = field_map json "filter" AgentFilter.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" ListMaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let filter = field_map json__ "filter" AgentFilter.of_json in
       let assessmentRunArn =
-        field_map_exn json "assessmentRunArn" Arn.of_json in
+        field_map_exn json__ "assessmentRunArn" Arn.of_json in
       make ?maxResults ?nextToken ?filter ~assessmentRunArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7187,7 +7270,7 @@ module GetTelemetryMetadataResponse =
   struct
     type nonrec t =
       {
-      telemetryMetadata: TelemetryMetadataList.t
+      telemetryMetadata: TelemetryMetadataList.t option
         [@ocaml.doc "Telemetry details."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -7195,8 +7278,7 @@ module GetTelemetryMetadataResponse =
       | `InvalidInputException of InvalidInputException.t 
       | `NoSuchEntityException of NoSuchEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetTelemetryMetadataResponse"
-    let make ~telemetryMetadata = fun () -> { telemetryMetadata }
+    let make ?telemetryMetadata = fun () -> { telemetryMetadata }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7248,18 +7330,18 @@ module GetTelemetryMetadataResponse =
     let to_value x =
       structure_to_value
         [("telemetryMetadata",
-           (Some (TelemetryMetadataList.to_value x.telemetryMetadata)))]
+           (Option.map x.telemetryMetadata ~f:TelemetryMetadataList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let telemetryMetadata =
-        TelemetryMetadataList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "telemetryMetadata") in
-      make ~telemetryMetadata ()
+        (Option.map ~f:TelemetryMetadataList.of_xml)
+          (Xml.child xml_arg0 "telemetryMetadata") in
+      make ?telemetryMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let telemetryMetadata =
-        field_map_exn json "telemetryMetadata" TelemetryMetadataList.of_json in
-      make ~telemetryMetadata ()
+        field_map json__ "telemetryMetadata" TelemetryMetadataList.of_json in
+      make ?telemetryMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the data that is collected for the specified assessment run."]
@@ -7282,9 +7364,9 @@ module GetTelemetryMetadataRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArn") in
       make ~assessmentRunArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentRunArn =
-        field_map_exn json "assessmentRunArn" Arn.of_json in
+        field_map_exn json__ "assessmentRunArn" Arn.of_json in
       make ~assessmentRunArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7293,7 +7375,7 @@ module GetExclusionsPreviewResponse =
   struct
     type nonrec t =
       {
-      previewStatus: PreviewStatus.t
+      previewStatus: PreviewStatus.t option
         [@ocaml.doc
           "Specifies the status of the request to generate an exclusions preview."];
       exclusionPreviews: ExclusionPreviewList.t option
@@ -7308,11 +7390,10 @@ module GetExclusionsPreviewResponse =
       | `InvalidInputException of InvalidInputException.t 
       | `NoSuchEntityException of NoSuchEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetExclusionsPreviewResponse"
-    let make ?exclusionPreviews =
-      fun ?nextToken ->
-        fun ~previewStatus ->
-          fun () -> { exclusionPreviews; nextToken; previewStatus }
+    let make ?previewStatus =
+      fun ?exclusionPreviews ->
+        fun ?nextToken ->
+          fun () -> { previewStatus; exclusionPreviews; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7363,7 +7444,8 @@ module GetExclusionsPreviewResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("previewStatus", (Some (PreviewStatus.to_value x.previewStatus)));
+        [("previewStatus",
+           (Option.map x.previewStatus ~f:PreviewStatus.to_value));
         ("exclusionPreviews",
           (Option.map x.exclusionPreviews ~f:ExclusionPreviewList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
@@ -7376,17 +7458,17 @@ module GetExclusionsPreviewResponse =
         (Option.map ~f:ExclusionPreviewList.of_xml)
           (Xml.child xml_arg0 "exclusionPreviews") in
       let previewStatus =
-        PreviewStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "previewStatus") in
-      make ?nextToken ?exclusionPreviews ~previewStatus ()
+        (Option.map ~f:PreviewStatus.of_xml)
+          (Xml.child xml_arg0 "previewStatus") in
+      make ?nextToken ?exclusionPreviews ?previewStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let exclusionPreviews =
-        field_map json "exclusionPreviews" ExclusionPreviewList.of_json in
+        field_map json__ "exclusionPreviews" ExclusionPreviewList.of_json in
       let previewStatus =
-        field_map_exn json "previewStatus" PreviewStatus.of_json in
-      make ?nextToken ?exclusionPreviews ~previewStatus ()
+        field_map json__ "previewStatus" PreviewStatus.of_json in
+      make ?nextToken ?exclusionPreviews ?previewStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the exclusions preview (a list of ExclusionPreview objects) specified by the preview token. You can obtain the preview token by running the CreateExclusionsPreview API."]
@@ -7449,13 +7531,13 @@ module GetExclusionsPreviewRequest =
       make ?locale ?maxResults ?nextToken ~previewToken
         ~assessmentTemplateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locale = field_map json "locale" Locale.of_json in
-      let maxResults = field_map json "maxResults" ListMaxResults.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let previewToken = field_map_exn json "previewToken" UUID.of_json in
+    let of_json json__ =
+      let locale = field_map json__ "locale" Locale.of_json in
+      let maxResults = field_map json__ "maxResults" ListMaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let previewToken = field_map_exn json__ "previewToken" UUID.of_json in
       let assessmentTemplateArn =
-        field_map_exn json "assessmentTemplateArn" Arn.of_json in
+        field_map_exn json__ "assessmentTemplateArn" Arn.of_json in
       make ?locale ?maxResults ?nextToken ~previewToken
         ~assessmentTemplateArn ()
     let to_json v = composed_to_json to_value v
@@ -7465,7 +7547,7 @@ module GetAssessmentReportResponse =
   struct
     type nonrec t =
       {
-      status: ReportStatus.t
+      status: ReportStatus.t option
         [@ocaml.doc
           "Specifies the status of the request to generate an assessment report."];
       url: Url.t option
@@ -7482,8 +7564,7 @@ module GetAssessmentReportResponse =
           ServiceTemporarilyUnavailableException.t 
       | `UnsupportedFeatureException of UnsupportedFeatureException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetAssessmentReportResponse"
-    let make ?url = fun ~status -> fun () -> { url; status }
+    let make ?status = fun ?url -> fun () -> { status; url }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7564,20 +7645,19 @@ module GetAssessmentReportResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("status", (Some (ReportStatus.to_value x.status)));
+        [("status", (Option.map x.status ~f:ReportStatus.to_value));
         ("url", (Option.map x.url ~f:Url.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let url = (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "url") in
       let status =
-        ReportStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      make ?url ~status ()
+        (Option.map ~f:ReportStatus.of_xml) (Xml.child xml_arg0 "status") in
+      make ?url ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let url = field_map json "url" Url.of_json in
-      let status = field_map_exn json "status" ReportStatus.of_json in
-      make ?url ~status ()
+    let of_json json__ =
+      let url = field_map json__ "url" Url.of_json in
+      let status = field_map json__ "status" ReportStatus.of_json in
+      make ?url ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Produces an assessment report that includes detailed and comprehensive results of a specified assessment run."]
@@ -7618,12 +7698,12 @@ module GetAssessmentReportRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArn") in
       make ~reportType ~reportFileFormat ~assessmentRunArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reportType = field_map_exn json "reportType" ReportType.of_json in
+    let of_json json__ =
+      let reportType = field_map_exn json__ "reportType" ReportType.of_json in
       let reportFileFormat =
-        field_map_exn json "reportFileFormat" ReportFileFormat.of_json in
+        field_map_exn json__ "reportFileFormat" ReportFileFormat.of_json in
       let assessmentRunArn =
-        field_map_exn json "assessmentRunArn" Arn.of_json in
+        field_map_exn json__ "assessmentRunArn" Arn.of_json in
       make ~reportType ~reportFileFormat ~assessmentRunArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7632,18 +7712,17 @@ module DescribeRulesPackagesResponse =
   struct
     type nonrec t =
       {
-      rulesPackages: RulesPackageList.t
+      rulesPackages: RulesPackageList.t option
         [@ocaml.doc "Information about the rules package."];
-      failedItems: FailedItems.t
+      failedItems: FailedItems.t option
         [@ocaml.doc
           "Rules package details that cannot be described. An error code is provided for each failed item."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidInputException of InvalidInputException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeRulesPackagesResponse"
-    let make ~rulesPackages =
-      fun ~failedItems -> fun () -> { rulesPackages; failedItems }
+    let make ?rulesPackages =
+      fun ?failedItems -> fun () -> { rulesPackages; failedItems }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -7679,23 +7758,22 @@ module DescribeRulesPackagesResponse =
     let to_value x =
       structure_to_value
         [("rulesPackages",
-           (Some (RulesPackageList.to_value x.rulesPackages)));
-        ("failedItems", (Some (FailedItems.to_value x.failedItems)))]
+           (Option.map x.rulesPackages ~f:RulesPackageList.to_value));
+        ("failedItems", (Option.map x.failedItems ~f:FailedItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let failedItems =
-        FailedItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "failedItems") in
+        (Option.map ~f:FailedItems.of_xml) (Xml.child xml_arg0 "failedItems") in
       let rulesPackages =
-        RulesPackageList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "rulesPackages") in
-      make ~failedItems ~rulesPackages ()
+        (Option.map ~f:RulesPackageList.of_xml)
+          (Xml.child xml_arg0 "rulesPackages") in
+      make ?failedItems ?rulesPackages ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
+    let of_json json__ =
+      let failedItems = field_map json__ "failedItems" FailedItems.of_json in
       let rulesPackages =
-        field_map_exn json "rulesPackages" RulesPackageList.of_json in
-      make ~failedItems ~rulesPackages ()
+        field_map json__ "rulesPackages" RulesPackageList.of_json in
+      make ?failedItems ?rulesPackages ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the rules packages that are specified by the ARNs of the rules packages."]
@@ -7726,10 +7804,10 @@ module DescribeRulesPackagesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "rulesPackageArns") in
       make ?locale ~rulesPackageArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locale = field_map json "locale" Locale.of_json in
+    let of_json json__ =
+      let locale = field_map json__ "locale" Locale.of_json in
       let rulesPackageArns =
-        field_map_exn json "rulesPackageArns" BatchDescribeArnList.of_json in
+        field_map_exn json__ "rulesPackageArns" BatchDescribeArnList.of_json in
       make ?locale ~rulesPackageArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7738,18 +7816,17 @@ module DescribeResourceGroupsResponse =
   struct
     type nonrec t =
       {
-      resourceGroups: ResourceGroupList.t
+      resourceGroups: ResourceGroupList.t option
         [@ocaml.doc "Information about a resource group."];
-      failedItems: FailedItems.t
+      failedItems: FailedItems.t option
         [@ocaml.doc
           "Resource group details that cannot be described. An error code is provided for each failed item."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidInputException of InvalidInputException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeResourceGroupsResponse"
-    let make ~resourceGroups =
-      fun ~failedItems -> fun () -> { resourceGroups; failedItems }
+    let make ?resourceGroups =
+      fun ?failedItems -> fun () -> { resourceGroups; failedItems }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -7785,23 +7862,22 @@ module DescribeResourceGroupsResponse =
     let to_value x =
       structure_to_value
         [("resourceGroups",
-           (Some (ResourceGroupList.to_value x.resourceGroups)));
-        ("failedItems", (Some (FailedItems.to_value x.failedItems)))]
+           (Option.map x.resourceGroups ~f:ResourceGroupList.to_value));
+        ("failedItems", (Option.map x.failedItems ~f:FailedItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let failedItems =
-        FailedItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "failedItems") in
+        (Option.map ~f:FailedItems.of_xml) (Xml.child xml_arg0 "failedItems") in
       let resourceGroups =
-        ResourceGroupList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceGroups") in
-      make ~failedItems ~resourceGroups ()
+        (Option.map ~f:ResourceGroupList.of_xml)
+          (Xml.child xml_arg0 "resourceGroups") in
+      make ?failedItems ?resourceGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
+    let of_json json__ =
+      let failedItems = field_map json__ "failedItems" FailedItems.of_json in
       let resourceGroups =
-        field_map_exn json "resourceGroups" ResourceGroupList.of_json in
-      make ~failedItems ~resourceGroups ()
+        field_map json__ "resourceGroups" ResourceGroupList.of_json in
+      make ?failedItems ?resourceGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the resource groups that are specified by the ARNs of the resource groups."]
@@ -7825,9 +7901,9 @@ module DescribeResourceGroupsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceGroupArns") in
       make ~resourceGroupArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceGroupArns =
-        field_map_exn json "resourceGroupArns" BatchDescribeArnList.of_json in
+        field_map_exn json__ "resourceGroupArns" BatchDescribeArnList.of_json in
       make ~resourceGroupArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7836,17 +7912,17 @@ module DescribeFindingsResponse =
   struct
     type nonrec t =
       {
-      findings: FindingList.t [@ocaml.doc "Information about the finding."];
-      failedItems: FailedItems.t
+      findings: FindingList.t option
+        [@ocaml.doc "Information about the finding."];
+      failedItems: FailedItems.t option
         [@ocaml.doc
           "Finding details that cannot be described. An error code is provided for each failed item."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidInputException of InvalidInputException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeFindingsResponse"
-    let make ~findings =
-      fun ~failedItems -> fun () -> { findings; failedItems }
+    let make ?findings =
+      fun ?failedItems -> fun () -> { findings; failedItems }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -7881,22 +7957,20 @@ module DescribeFindingsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("findings", (Some (FindingList.to_value x.findings)));
-        ("failedItems", (Some (FailedItems.to_value x.failedItems)))]
+        [("findings", (Option.map x.findings ~f:FindingList.to_value));
+        ("failedItems", (Option.map x.failedItems ~f:FailedItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let failedItems =
-        FailedItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "failedItems") in
+        (Option.map ~f:FailedItems.of_xml) (Xml.child xml_arg0 "failedItems") in
       let findings =
-        FindingList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "findings") in
-      make ~failedItems ~findings ()
+        (Option.map ~f:FindingList.of_xml) (Xml.child xml_arg0 "findings") in
+      make ?failedItems ?findings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
-      let findings = field_map_exn json "findings" FindingList.of_json in
-      make ~failedItems ~findings ()
+    let of_json json__ =
+      let failedItems = field_map json__ "failedItems" FailedItems.of_json in
+      let findings = field_map json__ "findings" FindingList.of_json in
+      make ?failedItems ?findings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the findings that are specified by the ARNs of the findings."]
@@ -7926,10 +8000,10 @@ module DescribeFindingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "findingArns") in
       make ?locale ~findingArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locale = field_map json "locale" Locale.of_json in
+    let of_json json__ =
+      let locale = field_map json__ "locale" Locale.of_json in
       let findingArns =
-        field_map_exn json "findingArns" BatchDescribeArnList.of_json in
+        field_map_exn json__ "findingArns" BatchDescribeArnList.of_json in
       make ?locale ~findingArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7938,18 +8012,17 @@ module DescribeExclusionsResponse =
   struct
     type nonrec t =
       {
-      exclusions: ExclusionMap.t
+      exclusions: ExclusionMap.t option
         [@ocaml.doc "Information about the exclusions."];
-      failedItems: FailedItems.t
+      failedItems: FailedItems.t option
         [@ocaml.doc
           "Exclusion details that cannot be described. An error code is provided for each failed item."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidInputException of InvalidInputException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeExclusionsResponse"
-    let make ~exclusions =
-      fun ~failedItems -> fun () -> { exclusions; failedItems }
+    let make ?exclusions =
+      fun ?failedItems -> fun () -> { exclusions; failedItems }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -7984,22 +8057,20 @@ module DescribeExclusionsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("exclusions", (Some (ExclusionMap.to_value x.exclusions)));
-        ("failedItems", (Some (FailedItems.to_value x.failedItems)))]
+        [("exclusions", (Option.map x.exclusions ~f:ExclusionMap.to_value));
+        ("failedItems", (Option.map x.failedItems ~f:FailedItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let failedItems =
-        FailedItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "failedItems") in
+        (Option.map ~f:FailedItems.of_xml) (Xml.child xml_arg0 "failedItems") in
       let exclusions =
-        ExclusionMap.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "exclusions") in
-      make ~failedItems ~exclusions ()
+        (Option.map ~f:ExclusionMap.of_xml) (Xml.child xml_arg0 "exclusions") in
+      make ?failedItems ?exclusions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
-      let exclusions = field_map_exn json "exclusions" ExclusionMap.of_json in
-      make ~failedItems ~exclusions ()
+    let of_json json__ =
+      let failedItems = field_map json__ "failedItems" FailedItems.of_json in
+      let exclusions = field_map json__ "exclusions" ExclusionMap.of_json in
+      make ?failedItems ?exclusions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the exclusions that are specified by the exclusions' ARNs."]
@@ -8030,10 +8101,10 @@ module DescribeExclusionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "exclusionArns") in
       make ?locale ~exclusionArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locale = field_map json "locale" Locale.of_json in
+    let of_json json__ =
+      let locale = field_map json__ "locale" Locale.of_json in
       let exclusionArns =
-        field_map_exn json "exclusionArns"
+        field_map_exn json__ "exclusionArns"
           BatchDescribeExclusionsArnList.of_json in
       make ?locale ~exclusionArns ()
     let to_json v = composed_to_json to_value v
@@ -8043,22 +8114,21 @@ module DescribeCrossAccountAccessRoleResponse =
   struct
     type nonrec t =
       {
-      roleArn: Arn.t
+      roleArn: Arn.t option
         [@ocaml.doc
           "The ARN that specifies the IAM role that Amazon Inspector uses to access your AWS account."];
-      valid: Bool.t
+      valid: Bool_.t option
         [@ocaml.doc
           "A Boolean value that specifies whether the IAM role has the necessary policies attached to enable Amazon Inspector to access your AWS account."];
-      registeredAt: Timestamp.t
+      registeredAt: Timestamp.t option
         [@ocaml.doc
           "The date when the cross-account access role was registered."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeCrossAccountAccessRoleResponse"
-    let make ~roleArn =
-      fun ~valid ->
-        fun ~registeredAt -> fun () -> { roleArn; valid; registeredAt }
+    let make ?roleArn =
+      fun ?valid ->
+        fun ?registeredAt -> fun () -> { roleArn; valid; registeredAt }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -8085,25 +8155,22 @@ module DescribeCrossAccountAccessRoleResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("roleArn", (Some (Arn.to_value x.roleArn)));
-        ("valid", (Some (Bool.to_value x.valid)));
-        ("registeredAt", (Some (Timestamp.to_value x.registeredAt)))]
+        [("roleArn", (Option.map x.roleArn ~f:Arn.to_value));
+        ("valid", (Option.map x.valid ~f:Bool_.to_value));
+        ("registeredAt", (Option.map x.registeredAt ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let registeredAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "registeredAt") in
-      let valid =
-        Bool.of_xml (Xml.child_exn ~context:context_ xml_arg0 "valid") in
-      let roleArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
-      make ~registeredAt ~valid ~roleArn ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "registeredAt") in
+      let valid = (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "valid") in
+      let roleArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "roleArn") in
+      make ?registeredAt ?valid ?roleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let registeredAt = field_map_exn json "registeredAt" Timestamp.of_json in
-      let valid = field_map_exn json "valid" Bool.of_json in
-      let roleArn = field_map_exn json "roleArn" Arn.of_json in
-      make ~registeredAt ~valid ~roleArn ()
+    let of_json json__ =
+      let registeredAt = field_map json__ "registeredAt" Timestamp.of_json in
+      let valid = field_map json__ "valid" Bool_.of_json in
+      let roleArn = field_map json__ "roleArn" Arn.of_json in
+      make ?registeredAt ?valid ?roleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the IAM role that enables Amazon Inspector to access your AWS account."]
@@ -8111,18 +8178,17 @@ module DescribeAssessmentTemplatesResponse =
   struct
     type nonrec t =
       {
-      assessmentTemplates: AssessmentTemplateList.t
+      assessmentTemplates: AssessmentTemplateList.t option
         [@ocaml.doc "Information about the assessment templates."];
-      failedItems: FailedItems.t
+      failedItems: FailedItems.t option
         [@ocaml.doc
           "Assessment template details that cannot be described. An error code is provided for each failed item."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidInputException of InvalidInputException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeAssessmentTemplatesResponse"
-    let make ~assessmentTemplates =
-      fun ~failedItems -> fun () -> { assessmentTemplates; failedItems }
+    let make ?assessmentTemplates =
+      fun ?failedItems -> fun () -> { assessmentTemplates; failedItems }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -8158,24 +8224,23 @@ module DescribeAssessmentTemplatesResponse =
     let to_value x =
       structure_to_value
         [("assessmentTemplates",
-           (Some (AssessmentTemplateList.to_value x.assessmentTemplates)));
-        ("failedItems", (Some (FailedItems.to_value x.failedItems)))]
+           (Option.map x.assessmentTemplates
+              ~f:AssessmentTemplateList.to_value));
+        ("failedItems", (Option.map x.failedItems ~f:FailedItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let failedItems =
-        FailedItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "failedItems") in
+        (Option.map ~f:FailedItems.of_xml) (Xml.child xml_arg0 "failedItems") in
       let assessmentTemplates =
-        AssessmentTemplateList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentTemplates") in
-      make ~failedItems ~assessmentTemplates ()
+        (Option.map ~f:AssessmentTemplateList.of_xml)
+          (Xml.child xml_arg0 "assessmentTemplates") in
+      make ?failedItems ?assessmentTemplates ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
+    let of_json json__ =
+      let failedItems = field_map json__ "failedItems" FailedItems.of_json in
       let assessmentTemplates =
-        field_map_exn json "assessmentTemplates"
-          AssessmentTemplateList.of_json in
-      make ~failedItems ~assessmentTemplates ()
+        field_map json__ "assessmentTemplates" AssessmentTemplateList.of_json in
+      make ?failedItems ?assessmentTemplates ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the assessment templates that are specified by the ARNs of the assessment templates."]
@@ -8196,9 +8261,9 @@ module DescribeAssessmentTemplatesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTemplateArns") in
       make ~assessmentTemplateArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentTemplateArns =
-        field_map_exn json "assessmentTemplateArns"
+        field_map_exn json__ "assessmentTemplateArns"
           BatchDescribeArnList.of_json in
       make ~assessmentTemplateArns ()
     let to_json v = composed_to_json to_value v
@@ -8208,18 +8273,17 @@ module DescribeAssessmentTargetsResponse =
   struct
     type nonrec t =
       {
-      assessmentTargets: AssessmentTargetList.t
+      assessmentTargets: AssessmentTargetList.t option
         [@ocaml.doc "Information about the assessment targets."];
-      failedItems: FailedItems.t
+      failedItems: FailedItems.t option
         [@ocaml.doc
           "Assessment target details that cannot be described. An error code is provided for each failed item."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidInputException of InvalidInputException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeAssessmentTargetsResponse"
-    let make ~assessmentTargets =
-      fun ~failedItems -> fun () -> { assessmentTargets; failedItems }
+    let make ?assessmentTargets =
+      fun ?failedItems -> fun () -> { assessmentTargets; failedItems }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -8255,23 +8319,22 @@ module DescribeAssessmentTargetsResponse =
     let to_value x =
       structure_to_value
         [("assessmentTargets",
-           (Some (AssessmentTargetList.to_value x.assessmentTargets)));
-        ("failedItems", (Some (FailedItems.to_value x.failedItems)))]
+           (Option.map x.assessmentTargets ~f:AssessmentTargetList.to_value));
+        ("failedItems", (Option.map x.failedItems ~f:FailedItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let failedItems =
-        FailedItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "failedItems") in
+        (Option.map ~f:FailedItems.of_xml) (Xml.child xml_arg0 "failedItems") in
       let assessmentTargets =
-        AssessmentTargetList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentTargets") in
-      make ~failedItems ~assessmentTargets ()
+        (Option.map ~f:AssessmentTargetList.of_xml)
+          (Xml.child xml_arg0 "assessmentTargets") in
+      make ?failedItems ?assessmentTargets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
+    let of_json json__ =
+      let failedItems = field_map json__ "failedItems" FailedItems.of_json in
       let assessmentTargets =
-        field_map_exn json "assessmentTargets" AssessmentTargetList.of_json in
-      make ~failedItems ~assessmentTargets ()
+        field_map json__ "assessmentTargets" AssessmentTargetList.of_json in
+      make ?failedItems ?assessmentTargets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the assessment targets that are specified by the ARNs of the assessment targets."]
@@ -8295,9 +8358,9 @@ module DescribeAssessmentTargetsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTargetArns") in
       make ~assessmentTargetArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentTargetArns =
-        field_map_exn json "assessmentTargetArns"
+        field_map_exn json__ "assessmentTargetArns"
           BatchDescribeArnList.of_json in
       make ~assessmentTargetArns ()
     let to_json v = composed_to_json to_value v
@@ -8307,18 +8370,17 @@ module DescribeAssessmentRunsResponse =
   struct
     type nonrec t =
       {
-      assessmentRuns: AssessmentRunList.t
+      assessmentRuns: AssessmentRunList.t option
         [@ocaml.doc "Information about the assessment run."];
-      failedItems: FailedItems.t
+      failedItems: FailedItems.t option
         [@ocaml.doc
           "Assessment run details that cannot be described. An error code is provided for each failed item."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `InvalidInputException of InvalidInputException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeAssessmentRunsResponse"
-    let make ~assessmentRuns =
-      fun ~failedItems -> fun () -> { assessmentRuns; failedItems }
+    let make ?assessmentRuns =
+      fun ?failedItems -> fun () -> { assessmentRuns; failedItems }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -8354,23 +8416,22 @@ module DescribeAssessmentRunsResponse =
     let to_value x =
       structure_to_value
         [("assessmentRuns",
-           (Some (AssessmentRunList.to_value x.assessmentRuns)));
-        ("failedItems", (Some (FailedItems.to_value x.failedItems)))]
+           (Option.map x.assessmentRuns ~f:AssessmentRunList.to_value));
+        ("failedItems", (Option.map x.failedItems ~f:FailedItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let failedItems =
-        FailedItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "failedItems") in
+        (Option.map ~f:FailedItems.of_xml) (Xml.child xml_arg0 "failedItems") in
       let assessmentRuns =
-        AssessmentRunList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentRuns") in
-      make ~failedItems ~assessmentRuns ()
+        (Option.map ~f:AssessmentRunList.of_xml)
+          (Xml.child xml_arg0 "assessmentRuns") in
+      make ?failedItems ?assessmentRuns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
+    let of_json json__ =
+      let failedItems = field_map json__ "failedItems" FailedItems.of_json in
       let assessmentRuns =
-        field_map_exn json "assessmentRuns" AssessmentRunList.of_json in
-      make ~failedItems ~assessmentRuns ()
+        field_map json__ "assessmentRuns" AssessmentRunList.of_json in
+      make ?failedItems ?assessmentRuns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the assessment runs that are specified by the ARNs of the assessment runs."]
@@ -8394,9 +8455,9 @@ module DescribeAssessmentRunsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArns") in
       make ~assessmentRunArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentRunArns =
-        field_map_exn json "assessmentRunArns" BatchDescribeArnList.of_json in
+        field_map_exn json__ "assessmentRunArns" BatchDescribeArnList.of_json in
       make ~assessmentRunArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8421,9 +8482,9 @@ module DeleteAssessmentTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTemplateArn") in
       make ~assessmentTemplateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentTemplateArn =
-        field_map_exn json "assessmentTemplateArn" Arn.of_json in
+        field_map_exn json__ "assessmentTemplateArn" Arn.of_json in
       make ~assessmentTemplateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8447,9 +8508,9 @@ module DeleteAssessmentTargetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTargetArn") in
       make ~assessmentTargetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentTargetArn =
-        field_map_exn json "assessmentTargetArn" Arn.of_json in
+        field_map_exn json__ "assessmentTargetArn" Arn.of_json in
       make ~assessmentTargetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8473,9 +8534,9 @@ module DeleteAssessmentRunRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentRunArn") in
       make ~assessmentRunArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentRunArn =
-        field_map_exn json "assessmentRunArn" Arn.of_json in
+        field_map_exn json__ "assessmentRunArn" Arn.of_json in
       make ~assessmentRunArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8484,7 +8545,7 @@ module CreateResourceGroupResponse =
   struct
     type nonrec t =
       {
-      resourceGroupArn: Arn.t
+      resourceGroupArn: Arn.t option
         [@ocaml.doc
           "The ARN that specifies the resource group that is created."]}
     type nonrec error =
@@ -8495,8 +8556,7 @@ module CreateResourceGroupResponse =
       | `ServiceTemporarilyUnavailableException of
           ServiceTemporarilyUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateResourceGroupResponse"
-    let make ~resourceGroupArn = fun () -> { resourceGroupArn }
+    let make ?resourceGroupArn = fun () -> { resourceGroupArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8557,18 +8617,17 @@ module CreateResourceGroupResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("resourceGroupArn", (Some (Arn.to_value x.resourceGroupArn)))]
+        [("resourceGroupArn",
+           (Option.map x.resourceGroupArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceGroupArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceGroupArn") in
-      make ~resourceGroupArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "resourceGroupArn") in
+      make ?resourceGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceGroupArn =
-        field_map_exn json "resourceGroupArn" Arn.of_json in
-      make ~resourceGroupArn ()
+    let of_json json__ =
+      let resourceGroupArn = field_map json__ "resourceGroupArn" Arn.of_json in
+      make ?resourceGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a resource group using the specified set of tags (key and value pairs) that are used to select the EC2 instances to be included in an Amazon Inspector assessment target. The created resource group is then used to create an Amazon Inspector assessment target. For more information, see CreateAssessmentTarget."]
@@ -8592,9 +8651,9 @@ module CreateResourceGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceGroupTags") in
       make ~resourceGroupTags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceGroupTags =
-        field_map_exn json "resourceGroupTags" ResourceGroupTags.of_json in
+        field_map_exn json__ "resourceGroupTags" ResourceGroupTags.of_json in
       make ~resourceGroupTags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8603,7 +8662,7 @@ module CreateExclusionsPreviewResponse =
   struct
     type nonrec t =
       {
-      previewToken: UUID.t
+      previewToken: UUID.t option
         [@ocaml.doc
           "Specifies the unique identifier of the requested exclusions preview. You can use the unique identifier to retrieve the exclusions preview when running the GetExclusionsPreview API."]}
     type nonrec error =
@@ -8616,8 +8675,7 @@ module CreateExclusionsPreviewResponse =
       | `ServiceTemporarilyUnavailableException of
           ServiceTemporarilyUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateExclusionsPreviewResponse"
-    let make ~previewToken = fun () -> { previewToken }
+    let make ?previewToken = fun () -> { previewToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8688,16 +8746,16 @@ module CreateExclusionsPreviewResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("previewToken", (Some (UUID.to_value x.previewToken)))]
+        [("previewToken", (Option.map x.previewToken ~f:UUID.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let previewToken =
-        UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "previewToken") in
-      make ~previewToken ()
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "previewToken") in
+      make ?previewToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let previewToken = field_map_exn json "previewToken" UUID.of_json in
-      make ~previewToken ()
+    let of_json json__ =
+      let previewToken = field_map json__ "previewToken" UUID.of_json in
+      make ?previewToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts the generation of an exclusions preview for the specified assessment template. The exclusions preview lists the potential exclusions (ExclusionPreview) that Inspector can detect before it runs the assessment."]
@@ -8721,9 +8779,9 @@ module CreateExclusionsPreviewRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTemplateArn") in
       make ~assessmentTemplateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentTemplateArn =
-        field_map_exn json "assessmentTemplateArn" Arn.of_json in
+        field_map_exn json__ "assessmentTemplateArn" Arn.of_json in
       make ~assessmentTemplateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8732,7 +8790,7 @@ module CreateAssessmentTemplateResponse =
   struct
     type nonrec t =
       {
-      assessmentTemplateArn: Arn.t
+      assessmentTemplateArn: Arn.t option
         [@ocaml.doc
           "The ARN that specifies the assessment template that is created."]}
     type nonrec error =
@@ -8744,8 +8802,7 @@ module CreateAssessmentTemplateResponse =
       | `ServiceTemporarilyUnavailableException of
           ServiceTemporarilyUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateAssessmentTemplateResponse"
-    let make ~assessmentTemplateArn = fun () -> { assessmentTemplateArn }
+    let make ?assessmentTemplateArn = fun () -> { assessmentTemplateArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8815,18 +8872,18 @@ module CreateAssessmentTemplateResponse =
     let to_value x =
       structure_to_value
         [("assessmentTemplateArn",
-           (Some (Arn.to_value x.assessmentTemplateArn)))]
+           (Option.map x.assessmentTemplateArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let assessmentTemplateArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentTemplateArn") in
-      make ~assessmentTemplateArn ()
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "assessmentTemplateArn") in
+      make ?assessmentTemplateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentTemplateArn =
-        field_map_exn json "assessmentTemplateArn" Arn.of_json in
-      make ~assessmentTemplateArn ()
+        field_map json__ "assessmentTemplateArn" Arn.of_json in
+      make ?assessmentTemplateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an assessment template for the assessment target that is specified by the ARN of the assessment target. If the service-linked role isn\226\128\153t already registered, this action also creates and registers a service-linked role to grant Amazon Inspector access to AWS Services needed to perform security assessments."]
@@ -8896,19 +8953,21 @@ module CreateAssessmentTemplateRequest =
       make ?userAttributesForFindings ~rulesPackageArns ~durationInSeconds
         ~assessmentTemplateName ~assessmentTargetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userAttributesForFindings =
-        field_map json "userAttributesForFindings" UserAttributeList.of_json in
+        field_map json__ "userAttributesForFindings"
+          UserAttributeList.of_json in
       let rulesPackageArns =
-        field_map_exn json "rulesPackageArns"
+        field_map_exn json__ "rulesPackageArns"
           AssessmentTemplateRulesPackageArnList.of_json in
       let durationInSeconds =
-        field_map_exn json "durationInSeconds" AssessmentRunDuration.of_json in
+        field_map_exn json__ "durationInSeconds"
+          AssessmentRunDuration.of_json in
       let assessmentTemplateName =
-        field_map_exn json "assessmentTemplateName"
+        field_map_exn json__ "assessmentTemplateName"
           AssessmentTemplateName.of_json in
       let assessmentTargetArn =
-        field_map_exn json "assessmentTargetArn" Arn.of_json in
+        field_map_exn json__ "assessmentTargetArn" Arn.of_json in
       make ?userAttributesForFindings ~rulesPackageArns ~durationInSeconds
         ~assessmentTemplateName ~assessmentTargetArn ()
     let to_json v = composed_to_json to_value v
@@ -8918,7 +8977,7 @@ module CreateAssessmentTargetResponse =
   struct
     type nonrec t =
       {
-      assessmentTargetArn: Arn.t
+      assessmentTargetArn: Arn.t option
         [@ocaml.doc
           "The ARN that specifies the assessment target that is created."]}
     type nonrec error =
@@ -8932,8 +8991,7 @@ module CreateAssessmentTargetResponse =
       | `ServiceTemporarilyUnavailableException of
           ServiceTemporarilyUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateAssessmentTargetResponse"
-    let make ~assessmentTargetArn = fun () -> { assessmentTargetArn }
+    let make ?assessmentTargetArn = fun () -> { assessmentTargetArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -9012,18 +9070,18 @@ module CreateAssessmentTargetResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("assessmentTargetArn", (Some (Arn.to_value x.assessmentTargetArn)))]
+        [("assessmentTargetArn",
+           (Option.map x.assessmentTargetArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let assessmentTargetArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assessmentTargetArn") in
-      make ~assessmentTargetArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "assessmentTargetArn") in
+      make ?assessmentTargetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assessmentTargetArn =
-        field_map_exn json "assessmentTargetArn" Arn.of_json in
-      make ~assessmentTargetArn ()
+        field_map json__ "assessmentTargetArn" Arn.of_json in
+      make ?assessmentTargetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new assessment target using the ARN of the resource group that is generated by CreateResourceGroup. If resourceGroupArn is not specified, all EC2 instances in the current AWS account and region are included in the assessment target. If the service-linked role isn\226\128\153t already registered, this action also creates and registers a service-linked role to grant Amazon Inspector access to AWS Services needed to perform security assessments. You can create up to 50 assessment targets per AWS account. You can run up to 500 concurrent agents per AWS account. For more information, see Amazon Inspector Assessment Targets."]
@@ -9055,10 +9113,10 @@ module CreateAssessmentTargetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assessmentTargetName") in
       make ?resourceGroupArn ~assessmentTargetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceGroupArn = field_map json "resourceGroupArn" Arn.of_json in
+    let of_json json__ =
+      let resourceGroupArn = field_map json__ "resourceGroupArn" Arn.of_json in
       let assessmentTargetName =
-        field_map_exn json "assessmentTargetName"
+        field_map_exn json__ "assessmentTargetName"
           AssessmentTargetName.of_json in
       make ?resourceGroupArn ~assessmentTargetName ()
     let to_json v = composed_to_json to_value v
@@ -9068,7 +9126,7 @@ module AddAttributesToFindingsResponse =
   struct
     type nonrec t =
       {
-      failedItems: FailedItems.t
+      failedItems: FailedItems.t option
         [@ocaml.doc
           "Attribute details that cannot be described. An error code is provided for each failed item."]}
     type nonrec error =
@@ -9079,8 +9137,7 @@ module AddAttributesToFindingsResponse =
       | `ServiceTemporarilyUnavailableException of
           ServiceTemporarilyUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "AddAttributesToFindingsResponse"
-    let make ~failedItems = fun () -> { failedItems }
+    let make ?failedItems = fun () -> { failedItems }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -9141,17 +9198,16 @@ module AddAttributesToFindingsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("failedItems", (Some (FailedItems.to_value x.failedItems)))]
+        [("failedItems", (Option.map x.failedItems ~f:FailedItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let failedItems =
-        FailedItems.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "failedItems") in
-      make ~failedItems ()
+        (Option.map ~f:FailedItems.of_xml) (Xml.child xml_arg0 "failedItems") in
+      make ?failedItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failedItems = field_map_exn json "failedItems" FailedItems.of_json in
-      make ~failedItems ()
+    let of_json json__ =
+      let failedItems = field_map json__ "failedItems" FailedItems.of_json in
+      make ?failedItems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Assigns attributes (key and value pairs) to the findings that are specified by the ARNs of the findings."]
@@ -9183,11 +9239,11 @@ module AddAttributesToFindingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "findingArns") in
       make ~attributes ~findingArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map_exn json "attributes" UserAttributeList.of_json in
+        field_map_exn json__ "attributes" UserAttributeList.of_json in
       let findingArns =
-        field_map_exn json "findingArns"
+        field_map_exn json__ "findingArns"
           AddRemoveAttributesFindingArnList.of_json in
       make ~attributes ~findingArns ()
     let to_json v = composed_to_json to_value v

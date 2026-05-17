@@ -60,15 +60,76 @@ let cancel_query =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and eventDataStore =
-         flag "event-data-store" (required string)
+         flag "event-data-store" (optional string)
            ~doc:"STRING EventDataStoreArn"
+       and eventDataStoreOwnerAccountId =
+         flag "event-data-store-owner-account-id" (optional string)
+           ~doc:"STRING AccountId"
        and queryId = flag "query-id" (required string) ~doc:"STRING UUID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.cancel_query
-           (Values.CancelQueryRequest.make ~eventDataStore ~queryId ())
+           (Values.CancelQueryRequest.make ?eventDataStore
+              ?eventDataStoreOwnerAccountId ~queryId ())
            (Some Values.CancelQueryResponse.to_json)
            (Some Values.CancelQueryResponse.error_to_json)])
+let create_channel =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsList"
+       and name = flag "name" (required string) ~doc:"STRING ChannelName"
+       and source = flag "source" (required string) ~doc:"STRING Source"
+       and destinations =
+         flag "destinations" (required json_arg) ~doc:"JSON Destinations" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_channel
+           (Values.CreateChannelRequest.make
+              ?tags:(Option.map ~f:Values.TagsList.of_json tags) ~name
+              ~source
+              ~destinations:(Values.Destinations.of_json destinations) ())
+           (Some Values.CreateChannelResponse.to_json)
+           (Some Values.CreateChannelResponse.error_to_json)])
+let create_dashboard =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and refreshSchedule =
+         flag "refresh-schedule" (optional json_arg)
+           ~doc:"JSON RefreshSchedule"
+       and tagsList =
+         flag "tags-list" (optional json_arg) ~doc:"JSON TagsList"
+       and terminationProtectionEnabled =
+         flag "termination-protection-enabled" (optional bool)
+           ~doc:"BOOL TerminationProtectionEnabled"
+       and widgets =
+         flag "widgets" (optional json_arg) ~doc:"JSON RequestWidgetList"
+       and name = flag "name" (required string) ~doc:"STRING DashboardName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_dashboard
+           (Values.CreateDashboardRequest.make
+              ?refreshSchedule:(Option.map ~f:Values.RefreshSchedule.of_json
+                                  refreshSchedule)
+              ?tagsList:(Option.map ~f:Values.TagsList.of_json tagsList)
+              ?terminationProtectionEnabled
+              ?widgets:(Option.map ~f:Values.RequestWidgetList.of_json
+                          widgets) ~name ())
+           (Some Values.CreateDashboardResponse.to_json)
+           (Some Values.CreateDashboardResponse.error_to_json)])
 let create_event_data_store =
   Command.async ~summary:""
     ([%map_open.Command
@@ -93,6 +154,13 @@ let create_event_data_store =
            ~doc:"BOOL TerminationProtectionEnabled"
        and tagsList =
          flag "tags-list" (optional json_arg) ~doc:"JSON TagsList"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string)
+           ~doc:"STRING EventDataStoreKmsKeyId"
+       and startIngestion =
+         flag "start-ingestion" (optional bool) ~doc:"BOOL Boolean"
+       and billingMode =
+         flag "billing-mode" (optional json_arg) ~doc:"JSON BillingMode"
        and name =
          flag "name" (required string) ~doc:"STRING EventDataStoreName" in
        fun () ->
@@ -105,7 +173,10 @@ let create_event_data_store =
               ?multiRegionEnabled ?organizationEnabled ?retentionPeriod
               ?terminationProtectionEnabled
               ?tagsList:(Option.map ~f:Values.TagsList.of_json tagsList)
-              ~name ()) (Some Values.CreateEventDataStoreResponse.to_json)
+              ?kmsKeyId ?startIngestion
+              ?billingMode:(Option.map ~f:Values.BillingMode.of_json
+                              billingMode) ~name ())
+           (Some Values.CreateEventDataStoreResponse.to_json)
            (Some Values.CreateEventDataStoreResponse.error_to_json)])
 let create_trail =
   Command.async ~summary:""
@@ -155,6 +226,41 @@ let create_trail =
               ~name ~s3BucketName ())
            (Some Values.CreateTrailResponse.to_json)
            (Some Values.CreateTrailResponse.error_to_json)])
+let delete_channel =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and channel =
+         flag "channel" (required string) ~doc:"STRING ChannelArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_channel (Values.DeleteChannelRequest.make ~channel ())
+           (Some Values.DeleteChannelResponse.to_json)
+           (Some Values.DeleteChannelResponse.error_to_json)])
+let delete_dashboard =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dashboardId =
+         flag "dashboard-id" (required string) ~doc:"STRING DashboardArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_dashboard
+           (Values.DeleteDashboardRequest.make ~dashboardId ())
+           (Some Values.DeleteDashboardResponse.to_json)
+           (Some Values.DeleteDashboardResponse.error_to_json)])
 let delete_event_data_store =
   Command.async ~summary:""
     ([%map_open.Command
@@ -174,6 +280,24 @@ let delete_event_data_store =
            (Values.DeleteEventDataStoreRequest.make ~eventDataStore ())
            (Some Values.DeleteEventDataStoreResponse.to_json)
            (Some Values.DeleteEventDataStoreResponse.error_to_json)])
+let delete_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_resource_policy
+           (Values.DeleteResourcePolicyRequest.make ~resourceArn ())
+           (Some Values.DeleteResourcePolicyResponse.to_json)
+           (Some Values.DeleteResourcePolicyResponse.error_to_json)])
 let delete_trail =
   Command.async ~summary:""
     ([%map_open.Command
@@ -190,6 +314,27 @@ let delete_trail =
            Io.delete_trail (Values.DeleteTrailRequest.make ~name ())
            (Some Values.DeleteTrailResponse.to_json)
            (Some Values.DeleteTrailResponse.error_to_json)])
+let deregister_organization_delegated_admin =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and delegatedAdminAccountId =
+         flag "delegated-admin-account-id" (required string)
+           ~doc:"STRING AccountId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.deregister_organization_delegated_admin
+           (Values.DeregisterOrganizationDelegatedAdminRequest.make
+              ~delegatedAdminAccountId ())
+           (Some Values.DeregisterOrganizationDelegatedAdminResponse.to_json)
+           (Some
+              Values.DeregisterOrganizationDelegatedAdminResponse.error_to_json)])
 let describe_query =
   Command.async ~summary:""
     ([%map_open.Command
@@ -201,13 +346,21 @@ let describe_query =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and eventDataStore =
-         flag "event-data-store" (required string)
+         flag "event-data-store" (optional string)
            ~doc:"STRING EventDataStoreArn"
-       and queryId = flag "query-id" (required string) ~doc:"STRING UUID" in
+       and queryId = flag "query-id" (optional string) ~doc:"STRING UUID"
+       and queryAlias =
+         flag "query-alias" (optional string) ~doc:"STRING QueryAlias"
+       and refreshId =
+         flag "refresh-id" (optional string) ~doc:"STRING RefreshId"
+       and eventDataStoreOwnerAccountId =
+         flag "event-data-store-owner-account-id" (optional string)
+           ~doc:"STRING AccountId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_query
-           (Values.DescribeQueryRequest.make ~eventDataStore ~queryId ())
+           (Values.DescribeQueryRequest.make ?eventDataStore ?queryId
+              ?queryAlias ?refreshId ?eventDataStoreOwnerAccountId ())
            (Some Values.DescribeQueryResponse.to_json)
            (Some Values.DescribeQueryResponse.error_to_json)])
 let describe_trails =
@@ -232,6 +385,125 @@ let describe_trails =
                                 trailNameList) ?includeShadowTrails ())
            (Some Values.DescribeTrailsResponse.to_json)
            (Some Values.DescribeTrailsResponse.error_to_json)])
+let disable_federation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and eventDataStore =
+         flag "event-data-store" (required string)
+           ~doc:"STRING EventDataStoreArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disable_federation
+           (Values.DisableFederationRequest.make ~eventDataStore ())
+           (Some Values.DisableFederationResponse.to_json)
+           (Some Values.DisableFederationResponse.error_to_json)])
+let enable_federation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and eventDataStore =
+         flag "event-data-store" (required string)
+           ~doc:"STRING EventDataStoreArn"
+       and federationRoleArn =
+         flag "federation-role-arn" (required string)
+           ~doc:"STRING FederationRoleArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.enable_federation
+           (Values.EnableFederationRequest.make ~eventDataStore
+              ~federationRoleArn ())
+           (Some Values.EnableFederationResponse.to_json)
+           (Some Values.EnableFederationResponse.error_to_json)])
+let generate_query =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and eventDataStores =
+         flag "event-data-stores" (required json_arg)
+           ~doc:"JSON EventDataStoreList"
+       and prompt = flag "prompt" (required string) ~doc:"STRING Prompt" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.generate_query
+           (Values.GenerateQueryRequest.make
+              ~eventDataStores:(Values.EventDataStoreList.of_json
+                                  eventDataStores) ~prompt ())
+           (Some Values.GenerateQueryResponse.to_json)
+           (Some Values.GenerateQueryResponse.error_to_json)])
+let get_channel =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and channel =
+         flag "channel" (required string) ~doc:"STRING ChannelArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_channel (Values.GetChannelRequest.make ~channel ())
+           (Some Values.GetChannelResponse.to_json)
+           (Some Values.GetChannelResponse.error_to_json)])
+let get_dashboard =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dashboardId =
+         flag "dashboard-id" (required string) ~doc:"STRING DashboardArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_dashboard (Values.GetDashboardRequest.make ~dashboardId ())
+           (Some Values.GetDashboardResponse.to_json)
+           (Some Values.GetDashboardResponse.error_to_json)])
+let get_event_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trailName =
+         flag "trail-name" (optional string) ~doc:"STRING String"
+       and eventDataStore =
+         flag "event-data-store" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_event_configuration
+           (Values.GetEventConfigurationRequest.make ?trailName
+              ?eventDataStore ())
+           (Some Values.GetEventConfigurationResponse.to_json)
+           (Some Values.GetEventConfigurationResponse.error_to_json)])
 let get_event_data_store =
   Command.async ~summary:""
     ([%map_open.Command
@@ -269,6 +541,22 @@ let get_event_selectors =
            (Values.GetEventSelectorsRequest.make ~trailName ())
            (Some Values.GetEventSelectorsResponse.to_json)
            (Some Values.GetEventSelectorsResponse.error_to_json)])
+let get_import =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and importId = flag "import-id" (required string) ~doc:"STRING UUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_import (Values.GetImportRequest.make ~importId ())
+           (Some Values.GetImportResponse.to_json)
+           (Some Values.GetImportResponse.error_to_json)])
 let get_insight_selectors =
   Command.async ~summary:""
     ([%map_open.Command
@@ -280,12 +568,15 @@ let get_insight_selectors =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and trailName =
-         flag "trail-name" (required string) ~doc:"STRING String" in
+         flag "trail-name" (optional string) ~doc:"STRING String"
+       and eventDataStore =
+         flag "event-data-store" (optional string)
+           ~doc:"STRING EventDataStoreArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_insight_selectors
-           (Values.GetInsightSelectorsRequest.make ~trailName ())
-           (Some Values.GetInsightSelectorsResponse.to_json)
+           (Values.GetInsightSelectorsRequest.make ?trailName ?eventDataStore
+              ()) (Some Values.GetInsightSelectorsResponse.to_json)
            (Some Values.GetInsightSelectorsResponse.error_to_json)])
 let get_query_results =
   Command.async ~summary:""
@@ -297,21 +588,42 @@ let get_query_results =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and eventDataStore =
+         flag "event-data-store" (optional string)
+           ~doc:"STRING EventDataStoreArn"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
        and maxQueryResults =
          flag "max-query-results" (optional int) ~doc:"INT MaxQueryResults"
-       and eventDataStore =
-         flag "event-data-store" (required string)
-           ~doc:"STRING EventDataStoreArn"
+       and eventDataStoreOwnerAccountId =
+         flag "event-data-store-owner-account-id" (optional string)
+           ~doc:"STRING AccountId"
        and queryId = flag "query-id" (required string) ~doc:"STRING UUID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_query_results
-           (Values.GetQueryResultsRequest.make ?nextToken ?maxQueryResults
-              ~eventDataStore ~queryId ())
+           (Values.GetQueryResultsRequest.make ?eventDataStore ?nextToken
+              ?maxQueryResults ?eventDataStoreOwnerAccountId ~queryId ())
            (Some Values.GetQueryResultsResponse.to_json)
            (Some Values.GetQueryResultsResponse.error_to_json)])
+let get_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resource_policy
+           (Values.GetResourcePolicyRequest.make ~resourceArn ())
+           (Some Values.GetResourcePolicyResponse.to_json)
+           (Some Values.GetResourcePolicyResponse.error_to_json)])
 let get_trail =
   Command.async ~summary:""
     ([%map_open.Command
@@ -344,6 +656,53 @@ let get_trail_status =
            Io.get_trail_status (Values.GetTrailStatusRequest.make ~name ())
            (Some Values.GetTrailStatusResponse.to_json)
            (Some Values.GetTrailStatusResponse.error_to_json)])
+let list_channels =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListChannelsMaxResultsCount"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_channels
+           (Values.ListChannelsRequest.make ?maxResults ?nextToken ())
+           (Some Values.ListChannelsResponse.to_json)
+           (Some Values.ListChannelsResponse.error_to_json)])
+let list_dashboards =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and namePrefix =
+         flag "name-prefix" (optional string) ~doc:"STRING DashboardName"
+       and type_ = flag "type-" (optional json_arg) ~doc:"JSON DashboardType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListDashboardsMaxResultsCount" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_dashboards
+           (Values.ListDashboardsRequest.make ?namePrefix
+              ?type_:(Option.map ~f:Values.DashboardType.of_json type_)
+              ?nextToken ?maxResults ())
+           (Some Values.ListDashboardsResponse.to_json)
+           (Some Values.ListDashboardsResponse.error_to_json)])
 let list_event_data_stores =
   Command.async ~summary:""
     ([%map_open.Command
@@ -365,6 +724,138 @@ let list_event_data_stores =
            (Values.ListEventDataStoresRequest.make ?nextToken ?maxResults ())
            (Some Values.ListEventDataStoresResponse.to_json)
            (Some Values.ListEventDataStoresResponse.error_to_json)])
+let list_import_failures =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListImportFailuresMaxResultsCount"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and importId = flag "import-id" (required string) ~doc:"STRING UUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_import_failures
+           (Values.ListImportFailuresRequest.make ?maxResults ?nextToken
+              ~importId ()) (Some Values.ListImportFailuresResponse.to_json)
+           (Some Values.ListImportFailuresResponse.error_to_json)])
+let list_imports =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListImportsMaxResultsCount"
+       and destination =
+         flag "destination" (optional string) ~doc:"STRING EventDataStoreArn"
+       and importStatus =
+         flag "import-status" (optional json_arg) ~doc:"JSON ImportStatus"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_imports
+           (Values.ListImportsRequest.make ?maxResults ?destination
+              ?importStatus:(Option.map ~f:Values.ImportStatus.of_json
+                               importStatus) ?nextToken ())
+           (Some Values.ListImportsResponse.to_json)
+           (Some Values.ListImportsResponse.error_to_json)])
+let list_insights_data =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dimensions =
+         flag "dimensions" (optional json_arg)
+           ~doc:"JSON ListInsightsDataDimensions"
+       and startTime = flag "start-time" (optional json_arg) ~doc:"JSON Date"
+       and endTime = flag "end-time" (optional json_arg) ~doc:"JSON Date"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListInsightsDataMaxResultsCount"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and insightSource =
+         flag "insight-source" (required string) ~doc:"STRING ResourceArn"
+       and dataType =
+         flag "data-type" (required json_arg)
+           ~doc:"JSON ListInsightsDataType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_insights_data
+           (Values.ListInsightsDataRequest.make
+              ?dimensions:(Option.map
+                             ~f:Values.ListInsightsDataDimensions.of_json
+                             dimensions)
+              ?startTime:(Option.map ~f:Values.Date.of_json startTime)
+              ?endTime:(Option.map ~f:Values.Date.of_json endTime)
+              ?maxResults ?nextToken ~insightSource
+              ~dataType:(Values.ListInsightsDataType.of_json dataType) ())
+           (Some Values.ListInsightsDataResponse.to_json)
+           (Some Values.ListInsightsDataResponse.error_to_json)])
+let list_insights_metric_data =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trailName =
+         flag "trail-name" (optional string) ~doc:"STRING String"
+       and errorCode =
+         flag "error-code" (optional string) ~doc:"STRING ErrorCode"
+       and startTime = flag "start-time" (optional json_arg) ~doc:"JSON Date"
+       and endTime = flag "end-time" (optional json_arg) ~doc:"JSON Date"
+       and period =
+         flag "period" (optional int) ~doc:"INT InsightsMetricPeriod"
+       and dataType =
+         flag "data-type" (optional json_arg)
+           ~doc:"JSON InsightsMetricDataType"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT InsightsMetricMaxResults"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING InsightsMetricNextToken"
+       and eventSource =
+         flag "event-source" (required string) ~doc:"STRING EventSource"
+       and eventName =
+         flag "event-name" (required string) ~doc:"STRING EventName"
+       and insightType =
+         flag "insight-type" (required json_arg) ~doc:"JSON InsightType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_insights_metric_data
+           (Values.ListInsightsMetricDataRequest.make ?trailName ?errorCode
+              ?startTime:(Option.map ~f:Values.Date.of_json startTime)
+              ?endTime:(Option.map ~f:Values.Date.of_json endTime) ?period
+              ?dataType:(Option.map ~f:Values.InsightsMetricDataType.of_json
+                           dataType) ?maxResults ?nextToken ~eventSource
+              ~eventName
+              ~insightType:(Values.InsightType.of_json insightType) ())
+           (Some Values.ListInsightsMetricDataResponse.to_json)
+           (Some Values.ListInsightsMetricDataResponse.error_to_json)])
 let list_public_keys =
   Command.async ~summary:""
     ([%map_open.Command
@@ -492,6 +983,43 @@ let lookup_events =
                                 eventCategory) ?maxResults ?nextToken ())
            (Some Values.LookupEventsResponse.to_json)
            (Some Values.LookupEventsResponse.error_to_json)])
+let put_event_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trailName =
+         flag "trail-name" (optional string) ~doc:"STRING String"
+       and eventDataStore =
+         flag "event-data-store" (optional string) ~doc:"STRING String"
+       and maxEventSize =
+         flag "max-event-size" (optional json_arg) ~doc:"JSON MaxEventSize"
+       and contextKeySelectors =
+         flag "context-key-selectors" (optional json_arg)
+           ~doc:"JSON ContextKeySelectors"
+       and aggregationConfigurations =
+         flag "aggregation-configurations" (optional json_arg)
+           ~doc:"JSON AggregationConfigurations" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_event_configuration
+           (Values.PutEventConfigurationRequest.make ?trailName
+              ?eventDataStore
+              ?maxEventSize:(Option.map ~f:Values.MaxEventSize.of_json
+                               maxEventSize)
+              ?contextKeySelectors:(Option.map
+                                      ~f:Values.ContextKeySelectors.of_json
+                                      contextKeySelectors)
+              ?aggregationConfigurations:(Option.map
+                                            ~f:Values.AggregationConfigurations.of_json
+                                            aggregationConfigurations) ())
+           (Some Values.PutEventConfigurationResponse.to_json)
+           (Some Values.PutEventConfigurationResponse.error_to_json)])
 let put_event_selectors =
   Command.async ~summary:""
     ([%map_open.Command
@@ -532,18 +1060,66 @@ let put_insight_selectors =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and trailName =
-         flag "trail-name" (required string) ~doc:"STRING String"
+         flag "trail-name" (optional string) ~doc:"STRING String"
+       and eventDataStore =
+         flag "event-data-store" (optional string)
+           ~doc:"STRING EventDataStoreArn"
+       and insightsDestination =
+         flag "insights-destination" (optional string)
+           ~doc:"STRING EventDataStoreArn"
        and insightSelectors =
          flag "insight-selectors" (required json_arg)
            ~doc:"JSON InsightSelectors" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_insight_selectors
-           (Values.PutInsightSelectorsRequest.make ~trailName
+           (Values.PutInsightSelectorsRequest.make ?trailName ?eventDataStore
+              ?insightsDestination
               ~insightSelectors:(Values.InsightSelectors.of_json
                                    insightSelectors) ())
            (Some Values.PutInsightSelectorsResponse.to_json)
            (Some Values.PutInsightSelectorsResponse.error_to_json)])
+let put_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceArn"
+       and resourcePolicy =
+         flag "resource-policy" (required string)
+           ~doc:"STRING ResourcePolicy" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_resource_policy
+           (Values.PutResourcePolicyRequest.make ~resourceArn ~resourcePolicy
+              ()) (Some Values.PutResourcePolicyResponse.to_json)
+           (Some Values.PutResourcePolicyResponse.error_to_json)])
+let register_organization_delegated_admin =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and memberAccountId =
+         flag "member-account-id" (required string) ~doc:"STRING AccountId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.register_organization_delegated_admin
+           (Values.RegisterOrganizationDelegatedAdminRequest.make
+              ~memberAccountId ())
+           (Some Values.RegisterOrganizationDelegatedAdminResponse.to_json)
+           (Some
+              Values.RegisterOrganizationDelegatedAdminResponse.error_to_json)])
 let remove_tags =
   Command.async ~summary:""
     ([%map_open.Command
@@ -584,6 +1160,107 @@ let restore_event_data_store =
            (Values.RestoreEventDataStoreRequest.make ~eventDataStore ())
            (Some Values.RestoreEventDataStoreResponse.to_json)
            (Some Values.RestoreEventDataStoreResponse.error_to_json)])
+let search_sample_queries =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT SearchSampleQueriesMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and searchPhrase =
+         flag "search-phrase" (required string)
+           ~doc:"STRING SearchSampleQueriesSearchPhrase" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.search_sample_queries
+           (Values.SearchSampleQueriesRequest.make ?maxResults ?nextToken
+              ~searchPhrase ())
+           (Some Values.SearchSampleQueriesResponse.to_json)
+           (Some Values.SearchSampleQueriesResponse.error_to_json)])
+let start_dashboard_refresh =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and queryParameterValues =
+         flag "query-parameter-values" (optional json_arg)
+           ~doc:"JSON QueryParameterValues"
+       and dashboardId =
+         flag "dashboard-id" (required string) ~doc:"STRING DashboardArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_dashboard_refresh
+           (Values.StartDashboardRefreshRequest.make
+              ?queryParameterValues:(Option.map
+                                       ~f:Values.QueryParameterValues.of_json
+                                       queryParameterValues) ~dashboardId ())
+           (Some Values.StartDashboardRefreshResponse.to_json)
+           (Some Values.StartDashboardRefreshResponse.error_to_json)])
+let start_event_data_store_ingestion =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and eventDataStore =
+         flag "event-data-store" (required string)
+           ~doc:"STRING EventDataStoreArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_event_data_store_ingestion
+           (Values.StartEventDataStoreIngestionRequest.make ~eventDataStore
+              ()) (Some Values.StartEventDataStoreIngestionResponse.to_json)
+           (Some Values.StartEventDataStoreIngestionResponse.error_to_json)])
+let start_import =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and destinations =
+         flag "destinations" (optional json_arg)
+           ~doc:"JSON ImportDestinations"
+       and importSource =
+         flag "import-source" (optional json_arg) ~doc:"JSON ImportSource"
+       and startEventTime =
+         flag "start-event-time" (optional json_arg) ~doc:"JSON Date"
+       and endEventTime =
+         flag "end-event-time" (optional json_arg) ~doc:"JSON Date"
+       and importId = flag "import-id" (optional string) ~doc:"STRING UUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_import
+           (Values.StartImportRequest.make
+              ?destinations:(Option.map ~f:Values.ImportDestinations.of_json
+                               destinations)
+              ?importSource:(Option.map ~f:Values.ImportSource.of_json
+                               importSource)
+              ?startEventTime:(Option.map ~f:Values.Date.of_json
+                                 startEventTime)
+              ?endEventTime:(Option.map ~f:Values.Date.of_json endEventTime)
+              ?importId ()) (Some Values.StartImportResponse.to_json)
+           (Some Values.StartImportResponse.error_to_json)])
 let start_logging =
   Command.async ~summary:""
     ([%map_open.Command
@@ -611,13 +1288,63 @@ let start_query =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and queryStatement =
-         flag "query-statement" (required string)
-           ~doc:"STRING QueryStatement" in
+         flag "query-statement" (optional string)
+           ~doc:"STRING QueryStatement"
+       and deliveryS3Uri =
+         flag "delivery-s3-uri" (optional string) ~doc:"STRING DeliveryS3Uri"
+       and queryAlias =
+         flag "query-alias" (optional string) ~doc:"STRING QueryAlias"
+       and queryParameters =
+         flag "query-parameters" (optional json_arg)
+           ~doc:"JSON QueryParameters"
+       and eventDataStoreOwnerAccountId =
+         flag "event-data-store-owner-account-id" (optional string)
+           ~doc:"STRING AccountId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.start_query (Values.StartQueryRequest.make ~queryStatement ())
+           Io.start_query
+           (Values.StartQueryRequest.make ?queryStatement ?deliveryS3Uri
+              ?queryAlias
+              ?queryParameters:(Option.map ~f:Values.QueryParameters.of_json
+                                  queryParameters)
+              ?eventDataStoreOwnerAccountId ())
            (Some Values.StartQueryResponse.to_json)
            (Some Values.StartQueryResponse.error_to_json)])
+let stop_event_data_store_ingestion =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and eventDataStore =
+         flag "event-data-store" (required string)
+           ~doc:"STRING EventDataStoreArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_event_data_store_ingestion
+           (Values.StopEventDataStoreIngestionRequest.make ~eventDataStore ())
+           (Some Values.StopEventDataStoreIngestionResponse.to_json)
+           (Some Values.StopEventDataStoreIngestionResponse.error_to_json)])
+let stop_import =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and importId = flag "import-id" (required string) ~doc:"STRING UUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_import (Values.StopImportRequest.make ~importId ())
+           (Some Values.StopImportResponse.to_json)
+           (Some Values.StopImportResponse.error_to_json)])
 let stop_logging =
   Command.async ~summary:""
     ([%map_open.Command
@@ -634,6 +1361,60 @@ let stop_logging =
            Io.stop_logging (Values.StopLoggingRequest.make ~name ())
            (Some Values.StopLoggingResponse.to_json)
            (Some Values.StopLoggingResponse.error_to_json)])
+let update_channel =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and destinations =
+         flag "destinations" (optional json_arg) ~doc:"JSON Destinations"
+       and name = flag "name" (optional string) ~doc:"STRING ChannelName"
+       and channel =
+         flag "channel" (required string) ~doc:"STRING ChannelArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_channel
+           (Values.UpdateChannelRequest.make
+              ?destinations:(Option.map ~f:Values.Destinations.of_json
+                               destinations) ?name ~channel ())
+           (Some Values.UpdateChannelResponse.to_json)
+           (Some Values.UpdateChannelResponse.error_to_json)])
+let update_dashboard =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and widgets =
+         flag "widgets" (optional json_arg) ~doc:"JSON RequestWidgetList"
+       and refreshSchedule =
+         flag "refresh-schedule" (optional json_arg)
+           ~doc:"JSON RefreshSchedule"
+       and terminationProtectionEnabled =
+         flag "termination-protection-enabled" (optional bool)
+           ~doc:"BOOL TerminationProtectionEnabled"
+       and dashboardId =
+         flag "dashboard-id" (required string) ~doc:"STRING DashboardArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_dashboard
+           (Values.UpdateDashboardRequest.make
+              ?widgets:(Option.map ~f:Values.RequestWidgetList.of_json
+                          widgets)
+              ?refreshSchedule:(Option.map ~f:Values.RefreshSchedule.of_json
+                                  refreshSchedule)
+              ?terminationProtectionEnabled ~dashboardId ())
+           (Some Values.UpdateDashboardResponse.to_json)
+           (Some Values.UpdateDashboardResponse.error_to_json)])
 let update_event_data_store =
   Command.async ~summary:""
     ([%map_open.Command
@@ -658,6 +1439,11 @@ let update_event_data_store =
        and terminationProtectionEnabled =
          flag "termination-protection-enabled" (optional bool)
            ~doc:"BOOL TerminationProtectionEnabled"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string)
+           ~doc:"STRING EventDataStoreKmsKeyId"
+       and billingMode =
+         flag "billing-mode" (optional json_arg) ~doc:"JSON BillingMode"
        and eventDataStore =
          flag "event-data-store" (required string)
            ~doc:"STRING EventDataStoreArn" in
@@ -669,7 +1455,9 @@ let update_event_data_store =
                                          ~f:Values.AdvancedEventSelectors.of_json
                                          advancedEventSelectors)
               ?multiRegionEnabled ?organizationEnabled ?retentionPeriod
-              ?terminationProtectionEnabled ~eventDataStore ())
+              ?terminationProtectionEnabled ?kmsKeyId
+              ?billingMode:(Option.map ~f:Values.BillingMode.of_json
+                              billingMode) ~eventDataStore ())
            (Some Values.UpdateEventDataStoreResponse.to_json)
            (Some Values.UpdateEventDataStoreResponse.error_to_json)])
 let update_trail =
@@ -721,30 +1509,63 @@ let main =
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-tags", add_tags);
     ("cancel-query", cancel_query);
+    ("create-channel", create_channel);
+    ("create-dashboard", create_dashboard);
     ("create-event-data-store", create_event_data_store);
     ("create-trail", create_trail);
+    ("delete-channel", delete_channel);
+    ("delete-dashboard", delete_dashboard);
     ("delete-event-data-store", delete_event_data_store);
+    ("delete-resource-policy", delete_resource_policy);
     ("delete-trail", delete_trail);
+    ("deregister-organization-delegated-admin",
+      deregister_organization_delegated_admin);
     ("describe-query", describe_query);
     ("describe-trails", describe_trails);
+    ("disable-federation", disable_federation);
+    ("enable-federation", enable_federation);
+    ("generate-query", generate_query);
+    ("get-channel", get_channel);
+    ("get-dashboard", get_dashboard);
+    ("get-event-configuration", get_event_configuration);
     ("get-event-data-store", get_event_data_store);
     ("get-event-selectors", get_event_selectors);
+    ("get-import", get_import);
     ("get-insight-selectors", get_insight_selectors);
     ("get-query-results", get_query_results);
+    ("get-resource-policy", get_resource_policy);
     ("get-trail", get_trail);
     ("get-trail-status", get_trail_status);
+    ("list-channels", list_channels);
+    ("list-dashboards", list_dashboards);
     ("list-event-data-stores", list_event_data_stores);
+    ("list-import-failures", list_import_failures);
+    ("list-imports", list_imports);
+    ("list-insights-data", list_insights_data);
+    ("list-insights-metric-data", list_insights_metric_data);
     ("list-public-keys", list_public_keys);
     ("list-queries", list_queries);
     ("list-tags", list_tags);
     ("list-trails", list_trails);
     ("lookup-events", lookup_events);
+    ("put-event-configuration", put_event_configuration);
     ("put-event-selectors", put_event_selectors);
     ("put-insight-selectors", put_insight_selectors);
+    ("put-resource-policy", put_resource_policy);
+    ("register-organization-delegated-admin",
+      register_organization_delegated_admin);
     ("remove-tags", remove_tags);
     ("restore-event-data-store", restore_event_data_store);
+    ("search-sample-queries", search_sample_queries);
+    ("start-dashboard-refresh", start_dashboard_refresh);
+    ("start-event-data-store-ingestion", start_event_data_store_ingestion);
+    ("start-import", start_import);
     ("start-logging", start_logging);
     ("start-query", start_query);
+    ("stop-event-data-store-ingestion", stop_event_data_store_ingestion);
+    ("stop-import", stop_import);
     ("stop-logging", stop_logging);
+    ("update-channel", update_channel);
+    ("update-dashboard", update_dashboard);
     ("update-event-data-store", update_event_data_store);
     ("update-trail", update_trail)]

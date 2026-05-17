@@ -24,6 +24,31 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module SsoIdentityType =
+  struct
+    type nonrec t =
+      | SSO_USER 
+      | SSO_GROUP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SSO_USER -> "SSO_USER"
+      | SSO_GROUP -> "SSO_GROUP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SSO_USER" -> SSO_USER
+      | "SSO_GROUP" -> SSO_GROUP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SsoIdentityType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SsoIdentityType" j)
+    let to_json = simple_to_json to_value
+  end
 module String_ =
   struct
     type nonrec t = string
@@ -35,6 +60,62 @@ module String_ =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
+module SsoIdentity =
+  struct
+    type nonrec t =
+      {
+      id: String_.t
+        [@ocaml.doc
+          "The unique identifier of the IAM Identity CenterIAM; Identity Center user or group."];
+      type_: SsoIdentityType.t
+        [@ocaml.doc
+          "The type of identity. Valid values are SSO_USER or SSO_GROUP."]}
+    let context_ = "SsoIdentity"
+    let make ~id = fun ~type_ -> fun () -> { id; type_ }
+    let to_value x =
+      structure_to_value
+        [("id", (Some (String_.to_value x.id)));
+        ("type", (Some (SsoIdentityType.to_value x.type_)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        SsoIdentityType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ~type_ ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map_exn json__ "type" SsoIdentityType.of_json in
+      let id = field_map_exn json__ "id" String_.of_json in
+      make ~type_ ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An IAM Identity CenterIAM; Identity Center identity (user or group) that can be assigned permissions in a capability."]
+module Integer =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
 module Boolean =
@@ -54,6 +135,9 @@ module StringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -72,6 +156,61 @@ module StringList =
                      | _ -> true))) ~f:String_.of_xml)
     let of_json j =
       list_of_json ~kind:"StringList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ArgoCdRole =
+  struct
+    type nonrec t =
+      | ADMIN 
+      | EDITOR 
+      | VIEWER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ADMIN -> "ADMIN"
+      | EDITOR -> "EDITOR"
+      | VIEWER -> "VIEWER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ADMIN" -> ADMIN
+      | "EDITOR" -> EDITOR
+      | "VIEWER" -> VIEWER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ArgoCdRole" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ArgoCdRole" j)
+    let to_json = simple_to_json to_value
+  end
+module SsoIdentityList =
+  struct
+    type nonrec t = SsoIdentity.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SsoIdentity.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SsoIdentity.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SsoIdentityList" ~of_json:SsoIdentity.of_json j
     let to_json v = composed_to_json to_value v
   end
 module LogType =
@@ -108,6 +247,52 @@ module LogType =
     let of_json j = of_string (string_of_json ~kind:"LogType" j)
     let to_json = simple_to_json to_value
   end
+module ClientStat =
+  struct
+    type nonrec t =
+      {
+      userAgent: String_.t option
+        [@ocaml.doc
+          "The user agent of the Kubernetes client using the deprecated resource."];
+      numberOfRequestsLast30Days: Integer.t option
+        [@ocaml.doc
+          "The number of requests from the Kubernetes client seen over the last 30 days."];
+      lastRequestTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp of the last request seen from the Kubernetes client."]}
+    let make ?userAgent =
+      fun ?numberOfRequestsLast30Days ->
+        fun ?lastRequestTime ->
+          fun () ->
+            { userAgent; numberOfRequestsLast30Days; lastRequestTime }
+    let to_value x =
+      structure_to_value
+        [("userAgent", (Option.map x.userAgent ~f:String_.to_value));
+        ("numberOfRequestsLast30Days",
+          (Option.map x.numberOfRequestsLast30Days ~f:Integer.to_value));
+        ("lastRequestTime",
+          (Option.map x.lastRequestTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastRequestTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastRequestTime") in
+      let numberOfRequestsLast30Days =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "numberOfRequestsLast30Days") in
+      let userAgent =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "userAgent") in
+      make ?lastRequestTime ?numberOfRequestsLast30Days ?userAgent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastRequestTime =
+        field_map json__ "lastRequestTime" Timestamp.of_json in
+      let numberOfRequestsLast30Days =
+        field_map json__ "numberOfRequestsLast30Days" Integer.of_json in
+      let userAgent = field_map json__ "userAgent" String_.of_json in
+      make ?lastRequestTime ?numberOfRequestsLast30Days ?userAgent ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details about clients using the deprecated resources."]
 module Compatibility =
   struct
     type nonrec t =
@@ -140,14 +325,123 @@ module Compatibility =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterVersion") in
       make ?defaultVersion ?platformVersions ?clusterVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let defaultVersion = field_map json "defaultVersion" Boolean.of_json in
+    let of_json json__ =
+      let defaultVersion = field_map json__ "defaultVersion" Boolean.of_json in
       let platformVersions =
-        field_map json "platformVersions" StringList.of_json in
-      let clusterVersion = field_map json "clusterVersion" String_.of_json in
+        field_map json__ "platformVersions" StringList.of_json in
+      let clusterVersion = field_map json__ "clusterVersion" String_.of_json in
       make ?defaultVersion ?platformVersions ?clusterVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Compatibility information."]
+module ArgoCdRoleMapping =
+  struct
+    type nonrec t =
+      {
+      role: ArgoCdRole.t
+        [@ocaml.doc
+          "The Argo CD role to assign. Valid values are: ADMIN \226\128\147 Full administrative access to Argo CD. EDITOR \226\128\147 Edit access to Argo CD resources. VIEWER \226\128\147 Read-only access to Argo CD resources."];
+      identities: SsoIdentityList.t
+        [@ocaml.doc
+          "A list of IAM Identity CenterIAM; Identity Center identities (users or groups) that should be assigned this Argo CD role."]}
+    let context_ = "ArgoCdRoleMapping"
+    let make ~role = fun ~identities -> fun () -> { role; identities }
+    let to_value x =
+      structure_to_value
+        [("role", (Some (ArgoCdRole.to_value x.role)));
+        ("identities", (Some (SsoIdentityList.to_value x.identities)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identities =
+        SsoIdentityList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "identities") in
+      let role =
+        ArgoCdRole.of_xml (Xml.child_exn ~context:context_ xml_arg0 "role") in
+      make ~identities ~role ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identities =
+        field_map_exn json__ "identities" SsoIdentityList.of_json in
+      let role = field_map_exn json__ "role" ArgoCdRole.of_json in
+      make ~identities ~role ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A mapping between an Argo CD role and IAM Identity CenterIAM; Identity Center identities. This defines which users or groups have specific permissions in Argo CD."]
+module ClusterIssueCode =
+  struct
+    type nonrec t =
+      | AccessDenied 
+      | ClusterUnreachable 
+      | ConfigurationConflict 
+      | InternalFailure 
+      | ResourceLimitExceeded 
+      | ResourceNotFound 
+      | IamRoleNotFound 
+      | VpcNotFound 
+      | InsufficientFreeAddresses 
+      | Ec2ServiceNotSubscribed 
+      | Ec2SubnetNotFound 
+      | Ec2SecurityGroupNotFound 
+      | KmsGrantRevoked 
+      | KmsKeyNotFound 
+      | KmsKeyMarkedForDeletion 
+      | KmsKeyDisabled 
+      | StsRegionalEndpointDisabled 
+      | UnsupportedVersion 
+      | Other 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AccessDenied -> "AccessDenied"
+      | ClusterUnreachable -> "ClusterUnreachable"
+      | ConfigurationConflict -> "ConfigurationConflict"
+      | InternalFailure -> "InternalFailure"
+      | ResourceLimitExceeded -> "ResourceLimitExceeded"
+      | ResourceNotFound -> "ResourceNotFound"
+      | IamRoleNotFound -> "IamRoleNotFound"
+      | VpcNotFound -> "VpcNotFound"
+      | InsufficientFreeAddresses -> "InsufficientFreeAddresses"
+      | Ec2ServiceNotSubscribed -> "Ec2ServiceNotSubscribed"
+      | Ec2SubnetNotFound -> "Ec2SubnetNotFound"
+      | Ec2SecurityGroupNotFound -> "Ec2SecurityGroupNotFound"
+      | KmsGrantRevoked -> "KmsGrantRevoked"
+      | KmsKeyNotFound -> "KmsKeyNotFound"
+      | KmsKeyMarkedForDeletion -> "KmsKeyMarkedForDeletion"
+      | KmsKeyDisabled -> "KmsKeyDisabled"
+      | StsRegionalEndpointDisabled -> "StsRegionalEndpointDisabled"
+      | UnsupportedVersion -> "UnsupportedVersion"
+      | Other -> "Other"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AccessDenied" -> AccessDenied
+      | "ClusterUnreachable" -> ClusterUnreachable
+      | "ConfigurationConflict" -> ConfigurationConflict
+      | "InternalFailure" -> InternalFailure
+      | "ResourceLimitExceeded" -> ResourceLimitExceeded
+      | "ResourceNotFound" -> ResourceNotFound
+      | "IamRoleNotFound" -> IamRoleNotFound
+      | "VpcNotFound" -> VpcNotFound
+      | "InsufficientFreeAddresses" -> InsufficientFreeAddresses
+      | "Ec2ServiceNotSubscribed" -> Ec2ServiceNotSubscribed
+      | "Ec2SubnetNotFound" -> Ec2SubnetNotFound
+      | "Ec2SecurityGroupNotFound" -> Ec2SecurityGroupNotFound
+      | "KmsGrantRevoked" -> KmsGrantRevoked
+      | "KmsKeyNotFound" -> KmsKeyNotFound
+      | "KmsKeyMarkedForDeletion" -> KmsKeyMarkedForDeletion
+      | "KmsKeyDisabled" -> KmsKeyDisabled
+      | "StsRegionalEndpointDisabled" -> StsRegionalEndpointDisabled
+      | "UnsupportedVersion" -> UnsupportedVersion
+      | "Other" -> Other
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ClusterIssueCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ClusterIssueCode" j)
+    let to_json = simple_to_json to_value
+  end
 module BoxedBoolean =
   struct
     type nonrec t = bool
@@ -165,6 +459,9 @@ module LogTypes =
   struct
     type nonrec t = LogType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LogType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -184,6 +481,49 @@ module LogTypes =
     let of_json j = list_of_json ~kind:"LogTypes" ~of_json:LogType.of_json j
     let to_json v = composed_to_json to_value v
   end
+module NonZeroInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NonZeroInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RepairAction =
+  struct
+    type nonrec t =
+      | Replace 
+      | Reboot 
+      | NoAction 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Replace -> "Replace"
+      | Reboot -> "Reboot"
+      | NoAction -> "NoAction"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Replace" -> Replace
+      | "Reboot" -> Reboot
+      | "NoAction" -> NoAction
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RepairAction" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RepairAction" j)
+    let to_json = simple_to_json to_value
+  end
 module NodegroupIssueCode =
   struct
     type nonrec t =
@@ -196,6 +536,7 @@ module NodegroupIssueCode =
       | Ec2SubnetNotFound 
       | Ec2SubnetInvalidConfiguration 
       | IamInstanceProfileNotFound 
+      | Ec2SubnetMissingIpv6Assignment 
       | IamLimitExceeded 
       | IamNodeRoleNotFound 
       | NodeCreationFailure 
@@ -205,7 +546,23 @@ module NodegroupIssueCode =
       | AccessDenied 
       | InternalFailure 
       | ClusterUnreachable 
-      | Ec2SubnetMissingIpv6Assignment 
+      | AmiIdNotFound 
+      | AutoScalingGroupOptInRequired 
+      | AutoScalingGroupRateLimitExceeded 
+      | Ec2LaunchTemplateDeletionFailure 
+      | Ec2LaunchTemplateInvalidConfiguration 
+      | Ec2LaunchTemplateMaxLimitExceeded 
+      | Ec2SubnetListTooLong 
+      | IamThrottling 
+      | NodeTerminationFailure 
+      | PodEvictionFailure 
+      | SourceEc2LaunchTemplateNotFound 
+      | LimitExceeded 
+      | Unknown 
+      | AutoScalingGroupInstanceRefreshActive 
+      | KubernetesLabelInvalid 
+      | Ec2LaunchTemplateVersionMaxLimitExceeded 
+      | Ec2InstanceTypeDoesNotExist 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -221,6 +578,7 @@ module NodegroupIssueCode =
       | Ec2SubnetNotFound -> "Ec2SubnetNotFound"
       | Ec2SubnetInvalidConfiguration -> "Ec2SubnetInvalidConfiguration"
       | IamInstanceProfileNotFound -> "IamInstanceProfileNotFound"
+      | Ec2SubnetMissingIpv6Assignment -> "Ec2SubnetMissingIpv6Assignment"
       | IamLimitExceeded -> "IamLimitExceeded"
       | IamNodeRoleNotFound -> "IamNodeRoleNotFound"
       | NodeCreationFailure -> "NodeCreationFailure"
@@ -230,7 +588,29 @@ module NodegroupIssueCode =
       | AccessDenied -> "AccessDenied"
       | InternalFailure -> "InternalFailure"
       | ClusterUnreachable -> "ClusterUnreachable"
-      | Ec2SubnetMissingIpv6Assignment -> "Ec2SubnetMissingIpv6Assignment"
+      | AmiIdNotFound -> "AmiIdNotFound"
+      | AutoScalingGroupOptInRequired -> "AutoScalingGroupOptInRequired"
+      | AutoScalingGroupRateLimitExceeded ->
+          "AutoScalingGroupRateLimitExceeded"
+      | Ec2LaunchTemplateDeletionFailure ->
+          "Ec2LaunchTemplateDeletionFailure"
+      | Ec2LaunchTemplateInvalidConfiguration ->
+          "Ec2LaunchTemplateInvalidConfiguration"
+      | Ec2LaunchTemplateMaxLimitExceeded ->
+          "Ec2LaunchTemplateMaxLimitExceeded"
+      | Ec2SubnetListTooLong -> "Ec2SubnetListTooLong"
+      | IamThrottling -> "IamThrottling"
+      | NodeTerminationFailure -> "NodeTerminationFailure"
+      | PodEvictionFailure -> "PodEvictionFailure"
+      | SourceEc2LaunchTemplateNotFound -> "SourceEc2LaunchTemplateNotFound"
+      | LimitExceeded -> "LimitExceeded"
+      | Unknown -> "Unknown"
+      | AutoScalingGroupInstanceRefreshActive ->
+          "AutoScalingGroupInstanceRefreshActive"
+      | KubernetesLabelInvalid -> "KubernetesLabelInvalid"
+      | Ec2LaunchTemplateVersionMaxLimitExceeded ->
+          "Ec2LaunchTemplateVersionMaxLimitExceeded"
+      | Ec2InstanceTypeDoesNotExist -> "Ec2InstanceTypeDoesNotExist"
       | Non_static_id s -> s
     let of_string =
       function
@@ -245,6 +625,7 @@ module NodegroupIssueCode =
       | "Ec2SubnetNotFound" -> Ec2SubnetNotFound
       | "Ec2SubnetInvalidConfiguration" -> Ec2SubnetInvalidConfiguration
       | "IamInstanceProfileNotFound" -> IamInstanceProfileNotFound
+      | "Ec2SubnetMissingIpv6Assignment" -> Ec2SubnetMissingIpv6Assignment
       | "IamLimitExceeded" -> IamLimitExceeded
       | "IamNodeRoleNotFound" -> IamNodeRoleNotFound
       | "NodeCreationFailure" -> NodeCreationFailure
@@ -254,7 +635,29 @@ module NodegroupIssueCode =
       | "AccessDenied" -> AccessDenied
       | "InternalFailure" -> InternalFailure
       | "ClusterUnreachable" -> ClusterUnreachable
-      | "Ec2SubnetMissingIpv6Assignment" -> Ec2SubnetMissingIpv6Assignment
+      | "AmiIdNotFound" -> AmiIdNotFound
+      | "AutoScalingGroupOptInRequired" -> AutoScalingGroupOptInRequired
+      | "AutoScalingGroupRateLimitExceeded" ->
+          AutoScalingGroupRateLimitExceeded
+      | "Ec2LaunchTemplateDeletionFailure" ->
+          Ec2LaunchTemplateDeletionFailure
+      | "Ec2LaunchTemplateInvalidConfiguration" ->
+          Ec2LaunchTemplateInvalidConfiguration
+      | "Ec2LaunchTemplateMaxLimitExceeded" ->
+          Ec2LaunchTemplateMaxLimitExceeded
+      | "Ec2SubnetListTooLong" -> Ec2SubnetListTooLong
+      | "IamThrottling" -> IamThrottling
+      | "NodeTerminationFailure" -> NodeTerminationFailure
+      | "PodEvictionFailure" -> PodEvictionFailure
+      | "SourceEc2LaunchTemplateNotFound" -> SourceEc2LaunchTemplateNotFound
+      | "LimitExceeded" -> LimitExceeded
+      | "Unknown" -> Unknown
+      | "AutoScalingGroupInstanceRefreshActive" ->
+          AutoScalingGroupInstanceRefreshActive
+      | "KubernetesLabelInvalid" -> KubernetesLabelInvalid
+      | "Ec2LaunchTemplateVersionMaxLimitExceeded" ->
+          Ec2LaunchTemplateVersionMaxLimitExceeded
+      | "Ec2InstanceTypeDoesNotExist" -> Ec2InstanceTypeDoesNotExist
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -265,10 +668,131 @@ module NodegroupIssueCode =
     let of_json j = of_string (string_of_json ~kind:"NodegroupIssueCode" j)
     let to_json = simple_to_json to_value
   end
+module ClientStats =
+  struct
+    type nonrec t = ClientStat.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ClientStat.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ClientStat.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ClientStats" ~of_json:ClientStat.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InsightStatusValue =
+  struct
+    type nonrec t =
+      | PASSING 
+      | WARNING 
+      | ERROR 
+      | UNKNOWN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PASSING -> "PASSING"
+      | WARNING -> "WARNING"
+      | ERROR -> "ERROR"
+      | UNKNOWN -> "UNKNOWN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PASSING" -> PASSING
+      | "WARNING" -> WARNING
+      | "ERROR" -> ERROR
+      | "UNKNOWN" -> UNKNOWN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InsightStatusValue" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"InsightStatusValue" j)
+    let to_json = simple_to_json to_value
+  end
+module FargateProfileIssueCode =
+  struct
+    type nonrec t =
+      | PodExecutionRoleAlreadyInUse 
+      | AccessDenied 
+      | ClusterUnreachable 
+      | InternalFailure 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PodExecutionRoleAlreadyInUse -> "PodExecutionRoleAlreadyInUse"
+      | AccessDenied -> "AccessDenied"
+      | ClusterUnreachable -> "ClusterUnreachable"
+      | InternalFailure -> "InternalFailure"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PodExecutionRoleAlreadyInUse" -> PodExecutionRoleAlreadyInUse
+      | "AccessDenied" -> AccessDenied
+      | "ClusterUnreachable" -> ClusterUnreachable
+      | "InternalFailure" -> InternalFailure
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FargateProfileIssueCode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"FargateProfileIssueCode" j)
+    let to_json = simple_to_json to_value
+  end
+module CapabilityIssueCode =
+  struct
+    type nonrec t =
+      | AccessDenied 
+      | ClusterUnreachable 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AccessDenied -> "AccessDenied"
+      | ClusterUnreachable -> "ClusterUnreachable"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AccessDenied" -> AccessDenied
+      | "ClusterUnreachable" -> ClusterUnreachable
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CapabilityIssueCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CapabilityIssueCode" j)
+    let to_json = simple_to_json to_value
+  end
 module Compatibilities =
   struct
     type nonrec t = Compatibility.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Compatibility.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -300,6 +824,8 @@ module AddonIssueCode =
       | AdmissionRequestDenied 
       | UnsupportedAddonModification 
       | K8sResourceNotFound 
+      | AddonSubscriptionNeeded 
+      | AddonPermissionFailure 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -312,6 +838,8 @@ module AddonIssueCode =
       | AdmissionRequestDenied -> "AdmissionRequestDenied"
       | UnsupportedAddonModification -> "UnsupportedAddonModification"
       | K8sResourceNotFound -> "K8sResourceNotFound"
+      | AddonSubscriptionNeeded -> "AddonSubscriptionNeeded"
+      | AddonPermissionFailure -> "AddonPermissionFailure"
       | Non_static_id s -> s
     let of_string =
       function
@@ -323,6 +851,8 @@ module AddonIssueCode =
       | "AdmissionRequestDenied" -> AdmissionRequestDenied
       | "UnsupportedAddonModification" -> UnsupportedAddonModification
       | "K8sResourceNotFound" -> K8sResourceNotFound
+      | "AddonSubscriptionNeeded" -> AddonSubscriptionNeeded
+      | "AddonPermissionFailure" -> AddonPermissionFailure
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -428,6 +958,29 @@ module UpdateParamType =
       | ResolveConflicts 
       | MaxUnavailable 
       | MaxUnavailablePercentage 
+      | NodeRepairEnabled 
+      | UpdateStrategy 
+      | ConfigurationValues 
+      | SecurityGroups 
+      | Subnets 
+      | AuthenticationMode 
+      | PodIdentityAssociations 
+      | UpgradePolicy 
+      | ZonalShiftConfig 
+      | ComputeConfig 
+      | StorageConfig 
+      | KubernetesNetworkConfig 
+      | RemoteNetworkConfig 
+      | DeletionProtection 
+      | NodeRepairConfig 
+      | VendedLogs 
+      | UpdatedTier 
+      | PreviousTier 
+      | WarmPoolEnabled 
+      | WarmPoolMaxGroupPreparedCapacity 
+      | WarmPoolMinSize 
+      | WarmPoolState 
+      | WarmPoolReuseOnScaleIn 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -455,6 +1008,30 @@ module UpdateParamType =
       | ResolveConflicts -> "ResolveConflicts"
       | MaxUnavailable -> "MaxUnavailable"
       | MaxUnavailablePercentage -> "MaxUnavailablePercentage"
+      | NodeRepairEnabled -> "NodeRepairEnabled"
+      | UpdateStrategy -> "UpdateStrategy"
+      | ConfigurationValues -> "ConfigurationValues"
+      | SecurityGroups -> "SecurityGroups"
+      | Subnets -> "Subnets"
+      | AuthenticationMode -> "AuthenticationMode"
+      | PodIdentityAssociations -> "PodIdentityAssociations"
+      | UpgradePolicy -> "UpgradePolicy"
+      | ZonalShiftConfig -> "ZonalShiftConfig"
+      | ComputeConfig -> "ComputeConfig"
+      | StorageConfig -> "StorageConfig"
+      | KubernetesNetworkConfig -> "KubernetesNetworkConfig"
+      | RemoteNetworkConfig -> "RemoteNetworkConfig"
+      | DeletionProtection -> "DeletionProtection"
+      | NodeRepairConfig -> "NodeRepairConfig"
+      | VendedLogs -> "VendedLogs"
+      | UpdatedTier -> "UpdatedTier"
+      | PreviousTier -> "PreviousTier"
+      | WarmPoolEnabled -> "WarmPoolEnabled"
+      | WarmPoolMaxGroupPreparedCapacity ->
+          "WarmPoolMaxGroupPreparedCapacity"
+      | WarmPoolMinSize -> "WarmPoolMinSize"
+      | WarmPoolState -> "WarmPoolState"
+      | WarmPoolReuseOnScaleIn -> "WarmPoolReuseOnScaleIn"
       | Non_static_id s -> s
     let of_string =
       function
@@ -481,6 +1058,30 @@ module UpdateParamType =
       | "ResolveConflicts" -> ResolveConflicts
       | "MaxUnavailable" -> MaxUnavailable
       | "MaxUnavailablePercentage" -> MaxUnavailablePercentage
+      | "NodeRepairEnabled" -> NodeRepairEnabled
+      | "UpdateStrategy" -> UpdateStrategy
+      | "ConfigurationValues" -> ConfigurationValues
+      | "SecurityGroups" -> SecurityGroups
+      | "Subnets" -> Subnets
+      | "AuthenticationMode" -> AuthenticationMode
+      | "PodIdentityAssociations" -> PodIdentityAssociations
+      | "UpgradePolicy" -> UpgradePolicy
+      | "ZonalShiftConfig" -> ZonalShiftConfig
+      | "ComputeConfig" -> ComputeConfig
+      | "StorageConfig" -> StorageConfig
+      | "KubernetesNetworkConfig" -> KubernetesNetworkConfig
+      | "RemoteNetworkConfig" -> RemoteNetworkConfig
+      | "DeletionProtection" -> DeletionProtection
+      | "NodeRepairConfig" -> NodeRepairConfig
+      | "VendedLogs" -> VendedLogs
+      | "UpdatedTier" -> UpdatedTier
+      | "PreviousTier" -> PreviousTier
+      | "WarmPoolEnabled" -> WarmPoolEnabled
+      | "WarmPoolMaxGroupPreparedCapacity" ->
+          WarmPoolMaxGroupPreparedCapacity
+      | "WarmPoolMinSize" -> WarmPoolMinSize
+      | "WarmPoolState" -> WarmPoolState
+      | "WarmPoolReuseOnScaleIn" -> WarmPoolReuseOnScaleIn
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -554,13 +1155,75 @@ module TaintValue =
     let of_json j = string_of_json ~kind:"taintValue" j
     let to_json = simple_to_json to_value
   end
+module ArgoCdRoleMappingList =
+  struct
+    type nonrec t = ArgoCdRoleMapping.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ArgoCdRoleMapping.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ArgoCdRoleMapping.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ArgoCdRoleMappingList"
+        ~of_json:ArgoCdRoleMapping.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ClusterIssue =
+  struct
+    type nonrec t =
+      {
+      code: ClusterIssueCode.t option
+        [@ocaml.doc "The error code of the issue."];
+      message: String_.t option [@ocaml.doc "A description of the issue."];
+      resourceIds: StringList.t option
+        [@ocaml.doc "The resource IDs that the issue relates to."]}
+    let make ?code =
+      fun ?message ->
+        fun ?resourceIds -> fun () -> { code; message; resourceIds }
+    let to_value x =
+      structure_to_value
+        [("code", (Option.map x.code ~f:ClusterIssueCode.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceIds", (Option.map x.resourceIds ~f:StringList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceIds =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "resourceIds") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let code =
+        (Option.map ~f:ClusterIssueCode.of_xml) (Xml.child xml_arg0 "code") in
+      make ?resourceIds ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceIds = field_map json__ "resourceIds" StringList.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" ClusterIssueCode.of_json in
+      make ?resourceIds ?message ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An issue with your Amazon EKS cluster."]
 module Provider =
   struct
     type nonrec t =
       {
       keyArn: String_.t option
         [@ocaml.doc
-          "Amazon Resource Name (ARN) or alias of the KMS key. The KMS key must be symmetric, created in the same region as the cluster, and if the KMS key was created in a different account, the user must have access to the KMS key. For more information, see Allowing Users in Other Accounts to Use a KMS key in the Key Management Service Developer Guide."]}
+          "Amazon Resource Name (ARN) or alias of the KMS key. The KMS key must be symmetric and created in the same Amazon Web Services Region as the cluster. If the KMS key was created in a different account, the IAM principal must have access to the KMS key. For more information, see Allowing users in other accounts to use a KMS key in the Key Management Service Developer Guide."]}
     let make ?keyArn = fun () -> { keyArn }
     let to_value x =
       structure_to_value
@@ -571,8 +1234,9 @@ module Provider =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "keyArn") in
       make ?keyArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyArn = field_map json "keyArn" String_.of_json in make ?keyArn ()
+    let of_json json__ =
+      let keyArn = field_map json__ "keyArn" String_.of_json in
+      make ?keyArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Identifies the Key Management Service (KMS) key used to encrypt the secrets."]
@@ -584,7 +1248,7 @@ module LogSetup =
         [@ocaml.doc "The available cluster control plane log types."];
       enabled: BoxedBoolean.t option
         [@ocaml.doc
-          "If a log type is enabled, that log type exports its control plane logs to CloudWatch Logs. If a log type isn't enabled, that log type doesn't export its control plane logs. Each individual log type can be enabled or disabled independently."]}
+          "If a log type is enabled, that log type exports its control plane logs to CloudWatch Logs . If a log type isn't enabled, that log type doesn't export its control plane logs. Each individual log type can be enabled or disabled independently."]}
     let make ?types = fun ?enabled -> fun () -> { types; enabled }
     let to_value x =
       structure_to_value
@@ -598,20 +1262,239 @@ module LogSetup =
         (Option.map ~f:LogTypes.of_xml) (Xml.child xml_arg0 "types") in
       make ?enabled ?types ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "enabled" BoxedBoolean.of_json in
-      let types = field_map json "types" LogTypes.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "enabled" BoxedBoolean.of_json in
+      let types = field_map json__ "types" LogTypes.of_json in
       make ?enabled ?types ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object representing the enabled or disabled Kubernetes control plane logs for your cluster."]
+module RemoteNodeNetwork =
+  struct
+    type nonrec t =
+      {
+      cidrs: StringList.t option
+        [@ocaml.doc
+          "A network CIDR that can contain hybrid nodes. These CIDR blocks define the expected IP address range of the hybrid nodes that join the cluster. These blocks are typically determined by your network administrator. Enter one or more IPv4 CIDR blocks in decimal dotted-quad notation (for example, 10.2.0.0/16). It must satisfy the following requirements: Each block must be within an IPv4 RFC-1918 network range. Minimum allowed size is /32, maximum allowed size is /8. Publicly-routable addresses aren't supported. Each block cannot overlap with the range of the VPC CIDR blocks for your EKS resources, or the block of the Kubernetes service IP range. Each block must have a route to the VPC that uses the VPC CIDR blocks, not public IPs or Elastic IPs. There are many options including Transit Gateway, Site-to-Site VPN, or Direct Connect. Each host must allow outbound connection to the EKS cluster control plane on TCP ports 443 and 10250. Each host must allow inbound connection from the EKS cluster control plane on TCP port 10250 for logs, exec and port-forward operations. Each host must allow TCP and UDP network connectivity to and from other hosts that are running CoreDNS on UDP port 53 for service and pod DNS names."]}
+    let make ?cidrs = fun () -> { cidrs }
+    let to_value x =
+      structure_to_value
+        [("cidrs", (Option.map x.cidrs ~f:StringList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cidrs =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "cidrs") in
+      make ?cidrs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cidrs = field_map json__ "cidrs" StringList.of_json in
+      make ?cidrs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A network CIDR that can contain hybrid nodes. These CIDR blocks define the expected IP address range of the hybrid nodes that join the cluster. These blocks are typically determined by your network administrator. Enter one or more IPv4 CIDR blocks in decimal dotted-quad notation (for example, 10.2.0.0/16). It must satisfy the following requirements: Each block must be within an IPv4 RFC-1918 network range. Minimum allowed size is /32, maximum allowed size is /8. Publicly-routable addresses aren't supported. Each block cannot overlap with the range of the VPC CIDR blocks for your EKS resources, or the block of the Kubernetes service IP range. Each block must have a route to the VPC that uses the VPC CIDR blocks, not public IPs or Elastic IPs. There are many options including Transit Gateway, Site-to-Site VPN, or Direct Connect. Each host must allow outbound connection to the EKS cluster control plane on TCP ports 443 and 10250. Each host must allow inbound connection from the EKS cluster control plane on TCP port 10250 for logs, exec and port-forward operations. Each host must allow TCP and UDP network connectivity to and from other hosts that are running CoreDNS on UDP port 53 for service and pod DNS names."]
+module RemotePodNetwork =
+  struct
+    type nonrec t =
+      {
+      cidrs: StringList.t option
+        [@ocaml.doc
+          "A network CIDR that can contain pods that run Kubernetes webhooks on hybrid nodes. These CIDR blocks are determined by configuring your Container Network Interface (CNI) plugin. We recommend the Calico CNI or Cilium CNI. Note that the Amazon VPC CNI plugin for Kubernetes isn't available for on-premises and edge locations. Enter one or more IPv4 CIDR blocks in decimal dotted-quad notation (for example, 10.2.0.0/16). It must satisfy the following requirements: Each block must be within an IPv4 RFC-1918 network range. Minimum allowed size is /32, maximum allowed size is /8. Publicly-routable addresses aren't supported. Each block cannot overlap with the range of the VPC CIDR blocks for your EKS resources, or the block of the Kubernetes service IP range."]}
+    let make ?cidrs = fun () -> { cidrs }
+    let to_value x =
+      structure_to_value
+        [("cidrs", (Option.map x.cidrs ~f:StringList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cidrs =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "cidrs") in
+      make ?cidrs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cidrs = field_map json__ "cidrs" StringList.of_json in
+      make ?cidrs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A network CIDR that can contain pods that run Kubernetes webhooks on hybrid nodes. These CIDR blocks are determined by configuring your Container Network Interface (CNI) plugin. We recommend the Calico CNI or Cilium CNI. Note that the Amazon VPC CNI plugin for Kubernetes isn't available for on-premises and edge locations. Enter one or more IPv4 CIDR blocks in decimal dotted-quad notation (for example, 10.2.0.0/16). It must satisfy the following requirements: Each block must be within an IPv4 RFC-1918 network range. Minimum allowed size is /32, maximum allowed size is /8. Publicly-routable addresses aren't supported. Each block cannot overlap with the range of the VPC CIDR blocks for your EKS resources, or the block of the Kubernetes service IP range."]
+module EksAnywhereSubscriptionTermUnit =
+  struct
+    type nonrec t =
+      | MONTHS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | MONTHS -> "MONTHS" | Non_static_id s -> s
+    let of_string = function | "MONTHS" -> MONTHS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EksAnywhereSubscriptionTermUnit"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EksAnywhereSubscriptionTermUnit" j)
+    let to_json = simple_to_json to_value
+  end
+module License =
+  struct
+    type nonrec t =
+      {
+      id: String_.t option
+        [@ocaml.doc
+          "An id associated with an EKS Anywhere subscription license."];
+      token: String_.t option
+        [@ocaml.doc
+          "An optional license token that can be used for extended support verification."]}
+    let make ?id = fun ?token -> fun () -> { id; token }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:String_.to_value));
+        ("token", (Option.map x.token ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let token = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "token") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
+      make ?token ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let token = field_map json__ "token" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in make ?token ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An EKS Anywhere license associated with a subscription."]
+module TagKey =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "One part of a key-value pair that make up a tag. A key is a general label that acts like a category for more specific tag values."]
+    let context_ = "TagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "One part of a key-value pair that make up a tag. A key is a general label that acts like a category for more specific tag values."]
+module TagValue =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The optional part of a key-value pair that make up a tag. A value acts as a descriptor within a tag category (key)."]
+    let context_ = "TagValue"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The optional part of a key-value pair that make up a tag. A value acts as a descriptor within a tag category (key)."]
+module AccessScopeType =
+  struct
+    type nonrec t =
+      | Cluster 
+      | Namespace 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Cluster -> "cluster"
+      | Namespace -> "namespace"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "cluster" -> Cluster
+      | "namespace" -> Namespace
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AccessScopeType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AccessScopeType" j)
+    let to_json = simple_to_json to_value
+  end
+module NodeRepairConfigOverrides =
+  struct
+    type nonrec t =
+      {
+      nodeMonitoringCondition: String_.t option
+        [@ocaml.doc
+          "Specify an unhealthy condition reported by the node monitoring agent that this override would apply to."];
+      nodeUnhealthyReason: String_.t option
+        [@ocaml.doc
+          "Specify a reason reported by the node monitoring agent that this override would apply to."];
+      minRepairWaitTimeMins: NonZeroInteger.t option
+        [@ocaml.doc
+          "Specify the minimum time in minutes to wait before attempting to repair a node with this specific nodeMonitoringCondition and nodeUnhealthyReason."];
+      repairAction: RepairAction.t option
+        [@ocaml.doc
+          "Specify the repair action to take for nodes when all of the specified conditions are met."]}
+    let make ?nodeMonitoringCondition =
+      fun ?nodeUnhealthyReason ->
+        fun ?minRepairWaitTimeMins ->
+          fun ?repairAction ->
+            fun () ->
+              {
+                nodeMonitoringCondition;
+                nodeUnhealthyReason;
+                minRepairWaitTimeMins;
+                repairAction
+              }
+    let to_value x =
+      structure_to_value
+        [("nodeMonitoringCondition",
+           (Option.map x.nodeMonitoringCondition ~f:String_.to_value));
+        ("nodeUnhealthyReason",
+          (Option.map x.nodeUnhealthyReason ~f:String_.to_value));
+        ("minRepairWaitTimeMins",
+          (Option.map x.minRepairWaitTimeMins ~f:NonZeroInteger.to_value));
+        ("repairAction",
+          (Option.map x.repairAction ~f:RepairAction.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let repairAction =
+        (Option.map ~f:RepairAction.of_xml)
+          (Xml.child xml_arg0 "repairAction") in
+      let minRepairWaitTimeMins =
+        (Option.map ~f:NonZeroInteger.of_xml)
+          (Xml.child xml_arg0 "minRepairWaitTimeMins") in
+      let nodeUnhealthyReason =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "nodeUnhealthyReason") in
+      let nodeMonitoringCondition =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "nodeMonitoringCondition") in
+      make ?repairAction ?minRepairWaitTimeMins ?nodeUnhealthyReason
+        ?nodeMonitoringCondition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let repairAction = field_map json__ "repairAction" RepairAction.of_json in
+      let minRepairWaitTimeMins =
+        field_map json__ "minRepairWaitTimeMins" NonZeroInteger.of_json in
+      let nodeUnhealthyReason =
+        field_map json__ "nodeUnhealthyReason" String_.of_json in
+      let nodeMonitoringCondition =
+        field_map json__ "nodeMonitoringCondition" String_.of_json in
+      make ?repairAction ?minRepairWaitTimeMins ?nodeUnhealthyReason
+        ?nodeMonitoringCondition ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specify granular overrides for specific repair actions. These overrides control the repair action and the repair delay time before a node is considered eligible for repair. If you use this, you must specify all the values."]
 module Issue =
   struct
     type nonrec t =
       {
       code: NodegroupIssueCode.t option
         [@ocaml.doc
-          "A brief description of the error. AccessDenied: Amazon EKS or one or more of your managed nodes is failing to authenticate or authorize with your Kubernetes cluster API server. AsgInstanceLaunchFailures: Your Auto Scaling group is experiencing failures while attempting to launch instances. AutoScalingGroupNotFound: We couldn't find the Auto Scaling group associated with the managed node group. You may be able to recreate an Auto Scaling group with the same settings to recover. ClusterUnreachable: Amazon EKS or one or more of your managed nodes is unable to to communicate with your Kubernetes cluster API server. This can happen if there are network disruptions or if API servers are timing out processing requests. Ec2LaunchTemplateNotFound: We couldn't find the Amazon EC2 launch template for your managed node group. You may be able to recreate a launch template with the same settings to recover. Ec2LaunchTemplateVersionMismatch: The Amazon EC2 launch template version for your managed node group does not match the version that Amazon EKS created. You may be able to revert to the version that Amazon EKS created to recover. Ec2SecurityGroupDeletionFailure: We could not delete the remote access security group for your managed node group. Remove any dependencies from the security group. Ec2SecurityGroupNotFound: We couldn't find the cluster security group for the cluster. You must recreate your cluster. Ec2SubnetInvalidConfiguration: One or more Amazon EC2 subnets specified for a node group do not automatically assign public IP addresses to instances launched into it. If you want your instances to be assigned a public IP address, then you need to enable the auto-assign public IP address setting for the subnet. See Modifying the public IPv4 addressing attribute for your subnet in the Amazon VPC User Guide. IamInstanceProfileNotFound: We couldn't find the IAM instance profile for your managed node group. You may be able to recreate an instance profile with the same settings to recover. IamNodeRoleNotFound: We couldn't find the IAM role for your managed node group. You may be able to recreate an IAM role with the same settings to recover. InstanceLimitExceeded: Your Amazon Web Services account is unable to launch any more instances of the specified instance type. You may be able to request an Amazon EC2 instance limit increase to recover. InsufficientFreeAddresses: One or more of the subnets associated with your managed node group does not have enough available IP addresses for new nodes. InternalFailure: These errors are usually caused by an Amazon EKS server-side issue. NodeCreationFailure: Your launched instances are unable to register with your Amazon EKS cluster. Common causes of this failure are insufficient node IAM role permissions or lack of outbound internet access for the nodes."];
+          "A brief description of the error. AccessDenied: Amazon EKS or one or more of your managed nodes is failing to authenticate or authorize with your Kubernetes cluster API server. AsgInstanceLaunchFailures: Your Auto Scaling group is experiencing failures while attempting to launch instances. AutoScalingGroupNotFound: We couldn't find the Auto Scaling group associated with the managed node group. You may be able to recreate an Auto Scaling group with the same settings to recover. ClusterUnreachable: Amazon EKS or one or more of your managed nodes is unable to to communicate with your Kubernetes cluster API server. This can happen if there are network disruptions or if API servers are timing out processing requests. Ec2InstanceTypeDoesNotExist: One or more of the supplied Amazon EC2 instance types do not exist. Amazon EKS checked for the instance types that you provided in this Amazon Web Services Region, and one or more aren't available. Ec2LaunchTemplateNotFound: We couldn't find the Amazon EC2 launch template for your managed node group. You may be able to recreate a launch template with the same settings to recover. Ec2LaunchTemplateVersionMismatch: The Amazon EC2 launch template version for your managed node group does not match the version that Amazon EKS created. You may be able to revert to the version that Amazon EKS created to recover. Ec2SecurityGroupDeletionFailure: We could not delete the remote access security group for your managed node group. Remove any dependencies from the security group. Ec2SecurityGroupNotFound: We couldn't find the cluster security group for the cluster. You must recreate your cluster. Ec2SubnetInvalidConfiguration: One or more Amazon EC2 subnets specified for a node group do not automatically assign public IP addresses to instances launched into it. If you want your instances to be assigned a public IP address, then you need to enable the auto-assign public IP address setting for the subnet. See Modifying the public IPv4 addressing attribute for your subnet in the Amazon VPC User Guide. IamInstanceProfileNotFound: We couldn't find the IAM instance profile for your managed node group. You may be able to recreate an instance profile with the same settings to recover. IamNodeRoleNotFound: We couldn't find the IAM role for your managed node group. You may be able to recreate an IAM role with the same settings to recover. InstanceLimitExceeded: Your Amazon Web Services account is unable to launch any more instances of the specified instance type. You may be able to request an Amazon EC2 instance limit increase to recover. InsufficientFreeAddresses: One or more of the subnets associated with your managed node group does not have enough available IP addresses for new nodes. InternalFailure: These errors are usually caused by an Amazon EKS server-side issue. NodeCreationFailure: Your launched instances are unable to register with your Amazon EKS cluster. Common causes of this failure are insufficient node IAM role permissions or lack of outbound internet access for the nodes."];
       message: String_.t option
         [@ocaml.doc "The error message associated with the issue."];
       resourceIds: StringList.t option
@@ -635,10 +1518,10 @@ module Issue =
         (Option.map ~f:NodegroupIssueCode.of_xml) (Xml.child xml_arg0 "code") in
       make ?resourceIds ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceIds = field_map json "resourceIds" StringList.of_json in
-      let message = field_map json "message" String_.of_json in
-      let code = field_map json "code" NodegroupIssueCode.of_json in
+    let of_json json__ =
+      let resourceIds = field_map json__ "resourceIds" StringList.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" NodegroupIssueCode.of_json in
       make ?resourceIds ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -658,43 +1541,141 @@ module AutoScalingGroup =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" String_.of_json in make ?name ()
+    let of_json json__ =
+      let name = field_map json__ "name" String_.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An Auto Scaling group that is associated with an Amazon EKS managed node group."]
-module TagKey =
+module AddonCompatibilityDetail =
   struct
-    type nonrec t = string
-    let context_ = "TagKey"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:128) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      name: String_.t option
+        [@ocaml.doc "The name of the Amazon EKS add-on."];
+      compatibleVersions: StringList.t option
+        [@ocaml.doc
+          "The list of compatible Amazon EKS add-on versions for the next Kubernetes version."]}
+    let make ?name =
+      fun ?compatibleVersions -> fun () -> { name; compatibleVersions }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("compatibleVersions",
+          (Option.map x.compatibleVersions ~f:StringList.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagKey" j
-    let to_json = simple_to_json to_value
-  end
-module TagValue =
+    let of_xml xml_arg0 =
+      let compatibleVersions =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "compatibleVersions") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?compatibleVersions ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let compatibleVersions =
+        field_map json__ "compatibleVersions" StringList.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?compatibleVersions ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The summary information about the Amazon EKS add-on compatibility for the next Kubernetes version for an insight check in the UPGRADE_READINESS category."]
+module DeprecationDetail =
   struct
-    type nonrec t = string
-    let context_ = "TagValue"
-    let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:256); i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      usage: String_.t option
+        [@ocaml.doc "The deprecated version of the resource."];
+      replacedWith: String_.t option
+        [@ocaml.doc
+          "The newer version of the resource to migrate to if applicable."];
+      stopServingVersion: String_.t option
+        [@ocaml.doc
+          "The version of the software where the deprecated resource version will stop being served."];
+      startServingReplacementVersion: String_.t option
+        [@ocaml.doc
+          "The version of the software where the newer resource version became available to migrate to if applicable."];
+      clientStats: ClientStats.t option
+        [@ocaml.doc
+          "Details about Kubernetes clients using the deprecated resources."]}
+    let make ?usage =
+      fun ?replacedWith ->
+        fun ?stopServingVersion ->
+          fun ?startServingReplacementVersion ->
+            fun ?clientStats ->
+              fun () ->
+                {
+                  usage;
+                  replacedWith;
+                  stopServingVersion;
+                  startServingReplacementVersion;
+                  clientStats
+                }
+    let to_value x =
+      structure_to_value
+        [("usage", (Option.map x.usage ~f:String_.to_value));
+        ("replacedWith", (Option.map x.replacedWith ~f:String_.to_value));
+        ("stopServingVersion",
+          (Option.map x.stopServingVersion ~f:String_.to_value));
+        ("startServingReplacementVersion",
+          (Option.map x.startServingReplacementVersion ~f:String_.to_value));
+        ("clientStats", (Option.map x.clientStats ~f:ClientStats.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagValue" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let clientStats =
+        (Option.map ~f:ClientStats.of_xml) (Xml.child xml_arg0 "clientStats") in
+      let startServingReplacementVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "startServingReplacementVersion") in
+      let stopServingVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "stopServingVersion") in
+      let replacedWith =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "replacedWith") in
+      let usage = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "usage") in
+      make ?clientStats ?startServingReplacementVersion ?stopServingVersion
+        ?replacedWith ?usage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientStats = field_map json__ "clientStats" ClientStats.of_json in
+      let startServingReplacementVersion =
+        field_map json__ "startServingReplacementVersion" String_.of_json in
+      let stopServingVersion =
+        field_map json__ "stopServingVersion" String_.of_json in
+      let replacedWith = field_map json__ "replacedWith" String_.of_json in
+      let usage = field_map json__ "usage" String_.of_json in
+      make ?clientStats ?startServingReplacementVersion ?stopServingVersion
+        ?replacedWith ?usage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The summary information about deprecated resource usage for an insight check in the UPGRADE_READINESS category."]
+module InsightStatus =
+  struct
+    type nonrec t =
+      {
+      status: InsightStatusValue.t option
+        [@ocaml.doc "The status of the resource."];
+      reason: String_.t option
+        [@ocaml.doc
+          "Explanation on the reasoning for the status of the resource."]}
+    let make ?status = fun ?reason -> fun () -> { status; reason }
+    let to_value x =
+      structure_to_value
+        [("status", (Option.map x.status ~f:InsightStatusValue.to_value));
+        ("reason", (Option.map x.reason ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "reason") in
+      let status =
+        (Option.map ~f:InsightStatusValue.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?reason ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "reason" String_.of_json in
+      let status = field_map json__ "status" InsightStatusValue.of_json in
+      make ?reason ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The status of the insight."]
 module RequiredClaimsKey =
   struct
     type nonrec t = string
@@ -731,6 +1712,43 @@ module RequiredClaimsValue =
     let of_json j = string_of_json ~kind:"requiredClaimsValue" j
     let to_json = simple_to_json to_value
   end
+module FargateProfileIssue =
+  struct
+    type nonrec t =
+      {
+      code: FargateProfileIssueCode.t option
+        [@ocaml.doc "A brief description of the error."];
+      message: String_.t option
+        [@ocaml.doc "The error message associated with the issue."];
+      resourceIds: StringList.t option
+        [@ocaml.doc
+          "The Amazon Web Services resources that are affected by this issue."]}
+    let make ?code =
+      fun ?message ->
+        fun ?resourceIds -> fun () -> { code; message; resourceIds }
+    let to_value x =
+      structure_to_value
+        [("code", (Option.map x.code ~f:FargateProfileIssueCode.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceIds", (Option.map x.resourceIds ~f:StringList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceIds =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "resourceIds") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let code =
+        (Option.map ~f:FargateProfileIssueCode.of_xml)
+          (Xml.child xml_arg0 "code") in
+      make ?resourceIds ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceIds = field_map json__ "resourceIds" StringList.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" FargateProfileIssueCode.of_json in
+      make ?resourceIds ?message ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An issue that is associated with the Fargate profile."]
 module FargateProfileLabel =
   struct
     type nonrec t = (String_.t * String_.t) list
@@ -752,6 +1770,8 @@ module FargateProfileLabel =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -759,6 +1779,103 @@ module FargateProfileLabel =
         ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ArgoCdAwsIdcConfigResponse =
+  struct
+    type nonrec t =
+      {
+      idcInstanceArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM Identity CenterIAM; Identity Center instance used for authentication."];
+      idcRegion: String_.t option
+        [@ocaml.doc
+          "The Region where the IAM Identity CenterIAM; Identity Center instance is located."];
+      idcManagedApplicationArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the managed application created in IAM Identity CenterIAM; Identity Center for this Argo CD capability. This application is automatically created and managed by Amazon EKS."]}
+    let make ?idcInstanceArn =
+      fun ?idcRegion ->
+        fun ?idcManagedApplicationArn ->
+          fun () -> { idcInstanceArn; idcRegion; idcManagedApplicationArn }
+    let to_value x =
+      structure_to_value
+        [("idcInstanceArn",
+           (Option.map x.idcInstanceArn ~f:String_.to_value));
+        ("idcRegion", (Option.map x.idcRegion ~f:String_.to_value));
+        ("idcManagedApplicationArn",
+          (Option.map x.idcManagedApplicationArn ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let idcManagedApplicationArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "idcManagedApplicationArn") in
+      let idcRegion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "idcRegion") in
+      let idcInstanceArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "idcInstanceArn") in
+      make ?idcManagedApplicationArn ?idcRegion ?idcInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let idcManagedApplicationArn =
+        field_map json__ "idcManagedApplicationArn" String_.of_json in
+      let idcRegion = field_map json__ "idcRegion" String_.of_json in
+      let idcInstanceArn = field_map json__ "idcInstanceArn" String_.of_json in
+      make ?idcManagedApplicationArn ?idcRegion ?idcInstanceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The response object containing IAM Identity CenterIAM; Identity Center configuration details for an Argo CD capability."]
+module ArgoCdNetworkAccessConfigResponse =
+  struct
+    type nonrec t =
+      {
+      vpceIds: StringList.t option
+        [@ocaml.doc
+          "The list of VPC endpoint IDs associated with the managed Argo CD API server endpoint. Each VPC endpoint provides private connectivity from a specific VPC to the Argo CD server."]}
+    let make ?vpceIds = fun () -> { vpceIds }
+    let to_value x =
+      structure_to_value
+        [("vpceIds", (Option.map x.vpceIds ~f:StringList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpceIds =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "vpceIds") in
+      make ?vpceIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpceIds = field_map json__ "vpceIds" StringList.of_json in
+      make ?vpceIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The response object containing network access configuration for the Argo CD capability's managed API server endpoint. If VPC endpoint IDs are present, public access is blocked and the Argo CD server is only accessible through the specified VPC endpoints."]
+module CapabilityIssue =
+  struct
+    type nonrec t =
+      {
+      code: CapabilityIssueCode.t option
+        [@ocaml.doc
+          "A code identifying the type of issue. This can be used to programmatically handle specific issue types."];
+      message: String_.t option
+        [@ocaml.doc
+          "A human-readable message describing the issue and potential remediation steps."]}
+    let make ?code = fun ?message -> fun () -> { code; message }
+    let to_value x =
+      structure_to_value
+        [("code", (Option.map x.code ~f:CapabilityIssueCode.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let code =
+        (Option.map ~f:CapabilityIssueCode.of_xml)
+          (Xml.child xml_arg0 "code") in
+      make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" CapabilityIssueCode.of_json in
+      make ?message ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An issue affecting a capability's health or operation."]
 module AddonVersionInfo =
   struct
     type nonrec t =
@@ -767,36 +1884,74 @@ module AddonVersionInfo =
         [@ocaml.doc "The version of the add-on."];
       architecture: StringList.t option
         [@ocaml.doc "The architectures that the version supports."];
+      computeTypes: StringList.t option
+        [@ocaml.doc "Indicates the compute type of the add-on version."];
       compatibilities: Compatibilities.t option
         [@ocaml.doc
-          "An object that represents the compatibilities of a version."]}
+          "An object representing the compatibilities of a version."];
+      requiresConfiguration: Boolean.t option
+        [@ocaml.doc "Whether the add-on requires configuration."];
+      requiresIamPermissions: Boolean.t option
+        [@ocaml.doc
+          "Indicates if the add-on requires IAM Permissions to operate, such as networking permissions."]}
     let make ?addonVersion =
       fun ?architecture ->
-        fun ?compatibilities ->
-          fun () -> { addonVersion; architecture; compatibilities }
+        fun ?computeTypes ->
+          fun ?compatibilities ->
+            fun ?requiresConfiguration ->
+              fun ?requiresIamPermissions ->
+                fun () ->
+                  {
+                    addonVersion;
+                    architecture;
+                    computeTypes;
+                    compatibilities;
+                    requiresConfiguration;
+                    requiresIamPermissions
+                  }
     let to_value x =
       structure_to_value
         [("addonVersion", (Option.map x.addonVersion ~f:String_.to_value));
         ("architecture", (Option.map x.architecture ~f:StringList.to_value));
+        ("computeTypes", (Option.map x.computeTypes ~f:StringList.to_value));
         ("compatibilities",
-          (Option.map x.compatibilities ~f:Compatibilities.to_value))]
+          (Option.map x.compatibilities ~f:Compatibilities.to_value));
+        ("requiresConfiguration",
+          (Option.map x.requiresConfiguration ~f:Boolean.to_value));
+        ("requiresIamPermissions",
+          (Option.map x.requiresIamPermissions ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let requiresIamPermissions =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "requiresIamPermissions") in
+      let requiresConfiguration =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "requiresConfiguration") in
       let compatibilities =
         (Option.map ~f:Compatibilities.of_xml)
           (Xml.child xml_arg0 "compatibilities") in
+      let computeTypes =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "computeTypes") in
       let architecture =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "architecture") in
       let addonVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "addonVersion") in
-      make ?compatibilities ?architecture ?addonVersion ()
+      make ?requiresIamPermissions ?requiresConfiguration ?compatibilities
+        ?computeTypes ?architecture ?addonVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let requiresIamPermissions =
+        field_map json__ "requiresIamPermissions" Boolean.of_json in
+      let requiresConfiguration =
+        field_map json__ "requiresConfiguration" Boolean.of_json in
       let compatibilities =
-        field_map json "compatibilities" Compatibilities.of_json in
-      let architecture = field_map json "architecture" StringList.of_json in
-      let addonVersion = field_map json "addonVersion" String_.of_json in
-      make ?compatibilities ?architecture ?addonVersion ()
+        field_map json__ "compatibilities" Compatibilities.of_json in
+      let computeTypes = field_map json__ "computeTypes" StringList.of_json in
+      let architecture = field_map json__ "architecture" StringList.of_json in
+      let addonVersion = field_map json__ "addonVersion" String_.of_json in
+      make ?requiresIamPermissions ?requiresConfiguration ?compatibilities
+        ?computeTypes ?architecture ?addonVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an add-on version."]
 module AddonIssue =
@@ -828,10 +1983,10 @@ module AddonIssue =
         (Option.map ~f:AddonIssueCode.of_xml) (Xml.child xml_arg0 "code") in
       make ?resourceIds ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceIds = field_map json "resourceIds" StringList.of_json in
-      let message = field_map json "message" String_.of_json in
-      let code = field_map json "code" AddonIssueCode.of_json in
+    let of_json json__ =
+      let resourceIds = field_map json__ "resourceIds" StringList.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" AddonIssueCode.of_json in
       make ?resourceIds ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An issue related to an add-on."]
@@ -841,7 +1996,7 @@ module ErrorDetail =
       {
       errorCode: ErrorCode.t option
         [@ocaml.doc
-          "A brief description of the error. SubnetNotFound: We couldn't find one of the subnets associated with the cluster. SecurityGroupNotFound: We couldn't find one of the security groups associated with the cluster. EniLimitReached: You have reached the elastic network interface limit for your account. IpNotAvailable: A subnet associated with the cluster doesn't have any free IP addresses. AccessDenied: You don't have permissions to perform the specified operation. OperationNotPermitted: The service role associated with the cluster doesn't have the required access permissions for Amazon EKS. VpcIdNotFound: We couldn't find the VPC associated with the cluster."];
+          "A brief description of the error. SubnetNotFound: We couldn't find one of the subnets associated with the cluster. SecurityGroupNotFound: We couldn't find one of the security groups associated with the cluster. EniLimitReached: You have reached the elastic network interface limit for your account. IpNotAvailable: A subnet associated with the cluster doesn't have any available IP addresses. AccessDenied: You don't have permissions to perform the specified operation. OperationNotPermitted: The service role associated with the cluster doesn't have the required access permissions for Amazon EKS. VpcIdNotFound: We couldn't find the VPC associated with the cluster."];
       errorMessage: String_.t option
         [@ocaml.doc "A more complete description of the error."];
       resourceIds: StringList.t option
@@ -866,10 +2021,10 @@ module ErrorDetail =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?resourceIds ?errorMessage ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceIds = field_map json "resourceIds" StringList.of_json in
-      let errorMessage = field_map json "errorMessage" String_.of_json in
-      let errorCode = field_map json "errorCode" ErrorCode.of_json in
+    let of_json json__ =
+      let resourceIds = field_map json__ "resourceIds" StringList.of_json in
+      let errorMessage = field_map json__ "errorMessage" String_.of_json in
+      let errorCode = field_map json__ "errorCode" ErrorCode.of_json in
       make ?resourceIds ?errorMessage ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -895,9 +2050,9 @@ module UpdateParam =
         (Option.map ~f:UpdateParamType.of_xml) (Xml.child xml_arg0 "type") in
       make ?value ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" String_.of_json in
-      let type_ = field_map json "type" UpdateParamType.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" String_.of_json in
+      let type_ = field_map json__ "type" UpdateParamType.of_json in
       make ?value ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object representing the details of an update request."]
@@ -960,23 +2115,168 @@ module Taint =
       let key = (Option.map ~f:TaintKey.of_xml) (Xml.child xml_arg0 "key") in
       make ?effect_ ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let effect_ = field_map json "effect" TaintEffect.of_json in
-      let value = field_map json "value" TaintValue.of_json in
-      let key = field_map json "key" TaintKey.of_json in
+    let of_json json__ =
+      let effect_ = field_map json__ "effect" TaintEffect.of_json in
+      let value = field_map json__ "value" TaintValue.of_json in
+      let key = field_map json__ "key" TaintKey.of_json in
       make ?effect_ ?value ?key ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A property that allows a node to repel a set of pods."]
-module Timestamp =
+  end[@@ocaml.doc
+       "A property that allows a node to repel a Pod. For more information, see Node taints on managed node groups in the Amazon EKS User Guide."]
+module ArgoCdNetworkAccessConfigRequest =
   struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
+    type nonrec t =
+      {
+      vpceIds: StringList.t option
+        [@ocaml.doc
+          "A list of VPC endpoint IDs to associate with the managed Argo CD API server endpoint. Each VPC endpoint provides private connectivity from a specific VPC to the Argo CD server. You can specify multiple VPC endpoint IDs to enable access from multiple VPCs."]}
+    let make ?vpceIds = fun () -> { vpceIds }
+    let to_value x =
+      structure_to_value
+        [("vpceIds", (Option.map x.vpceIds ~f:StringList.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
+    let of_xml xml_arg0 =
+      let vpceIds =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "vpceIds") in
+      make ?vpceIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpceIds = field_map json__ "vpceIds" StringList.of_json in
+      make ?vpceIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration for network access to the Argo CD capability's managed API server endpoint. When VPC endpoint IDs are specified, public access is blocked and the Argo CD server is only accessible through the specified VPC endpoints."]
+module UpdateRoleMappings =
+  struct
+    type nonrec t =
+      {
+      addOrUpdateRoleMappings: ArgoCdRoleMappingList.t option
+        [@ocaml.doc
+          "A list of role mappings to add or update. If a mapping for the specified role already exists, it will be updated with the new identities. If it doesn't exist, a new mapping will be created."];
+      removeRoleMappings: ArgoCdRoleMappingList.t option
+        [@ocaml.doc
+          "A list of role mappings to remove from the RBAC configuration. Each mapping specifies an Argo CD role (ADMIN, EDITOR, or VIEWER) and the identities to remove from that role."]}
+    let make ?addOrUpdateRoleMappings =
+      fun ?removeRoleMappings ->
+        fun () -> { addOrUpdateRoleMappings; removeRoleMappings }
+    let to_value x =
+      structure_to_value
+        [("addOrUpdateRoleMappings",
+           (Option.map x.addOrUpdateRoleMappings
+              ~f:ArgoCdRoleMappingList.to_value));
+        ("removeRoleMappings",
+          (Option.map x.removeRoleMappings ~f:ArgoCdRoleMappingList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let removeRoleMappings =
+        (Option.map ~f:ArgoCdRoleMappingList.of_xml)
+          (Xml.child xml_arg0 "removeRoleMappings") in
+      let addOrUpdateRoleMappings =
+        (Option.map ~f:ArgoCdRoleMappingList.of_xml)
+          (Xml.child xml_arg0 "addOrUpdateRoleMappings") in
+      make ?removeRoleMappings ?addOrUpdateRoleMappings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let removeRoleMappings =
+        field_map json__ "removeRoleMappings" ArgoCdRoleMappingList.of_json in
+      let addOrUpdateRoleMappings =
+        field_map json__ "addOrUpdateRoleMappings"
+          ArgoCdRoleMappingList.of_json in
+      make ?removeRoleMappings ?addOrUpdateRoleMappings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates to RBAC role mappings for an Argo CD capability. You can add, update, or remove role mappings in a single operation."]
+module AuthenticationMode =
+  struct
+    type nonrec t =
+      | API 
+      | API_AND_CONFIG_MAP 
+      | CONFIG_MAP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | API -> "API"
+      | API_AND_CONFIG_MAP -> "API_AND_CONFIG_MAP"
+      | CONFIG_MAP -> "CONFIG_MAP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "API" -> API
+      | "API_AND_CONFIG_MAP" -> API_AND_CONFIG_MAP
+      | "CONFIG_MAP" -> CONFIG_MAP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AuthenticationMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AuthenticationMode" j)
+    let to_json = simple_to_json to_value
+  end
+module ClusterIssueList =
+  struct
+    type nonrec t = ClusterIssue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ClusterIssue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ClusterIssue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ClusterIssueList" ~of_json:ClusterIssue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ProvisionedControlPlaneTier =
+  struct
+    type nonrec t =
+      | Standard 
+      | Tier_xl 
+      | Tier_2xl 
+      | Tier_4xl 
+      | Tier_8xl 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Standard -> "standard"
+      | Tier_xl -> "tier-xl"
+      | Tier_2xl -> "tier-2xl"
+      | Tier_4xl -> "tier-4xl"
+      | Tier_8xl -> "tier-8xl"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "standard" -> Standard
+      | "tier-xl" -> Tier_xl
+      | "tier-2xl" -> Tier_2xl
+      | "tier-4xl" -> Tier_4xl
+      | "tier-8xl" -> Tier_8xl
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ProvisionedControlPlaneTier"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ProvisionedControlPlaneTier" j)
     let to_json = simple_to_json to_value
   end
 module EncryptionConfig =
@@ -985,7 +2285,7 @@ module EncryptionConfig =
       {
       resources: StringList.t option
         [@ocaml.doc
-          "Specifies the resources to be encrypted. The only supported value is \"secrets\"."];
+          "Specifies the resources to be encrypted. The only supported value is secrets."];
       provider: Provider.t option
         [@ocaml.doc
           "Key Management Service (KMS) key. Either the ARN or the alias can be used."]}
@@ -1002,9 +2302,9 @@ module EncryptionConfig =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "resources") in
       make ?provider ?resources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let provider = field_map json "provider" Provider.of_json in
-      let resources = field_map json "resources" StringList.of_json in
+    let of_json json__ =
+      let provider = field_map json__ "provider" Provider.of_json in
+      let resources = field_map json__ "resources" StringList.of_json in
       make ?provider ?resources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The encryption configuration for the cluster."]
@@ -1024,11 +2324,35 @@ module OIDC =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "issuer") in
       make ?issuer ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let issuer = field_map json "issuer" String_.of_json in make ?issuer ()
+    let of_json json__ =
+      let issuer = field_map json__ "issuer" String_.of_json in
+      make ?issuer ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object representing the OpenID Connect (OIDC) identity provider information for the cluster."]
+module ElasticLoadBalancing =
+  struct
+    type nonrec t =
+      {
+      enabled: BoxedBoolean.t option
+        [@ocaml.doc
+          "Indicates if the load balancing capability is enabled on your EKS Auto Mode cluster. If the load balancing capability is enabled, EKS Auto Mode will create and delete load balancers in your Amazon Web Services account."]}
+    let make ?enabled = fun () -> { enabled }
+    let to_value x =
+      structure_to_value
+        [("enabled", (Option.map x.enabled ~f:BoxedBoolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enabled =
+        (Option.map ~f:BoxedBoolean.of_xml) (Xml.child xml_arg0 "enabled") in
+      make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enabled = field_map json__ "enabled" BoxedBoolean.of_json in
+      make ?enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the current configuration of the load balancing capability on your EKS Auto Mode cluster. For example, if the capability is enabled or disabled. For more information, see EKS Auto Mode load balancing capability in the Amazon EKS User Guide."]
 module IpFamily =
   struct
     type nonrec t =
@@ -1052,6 +2376,9 @@ module LogSetups =
   struct
     type nonrec t = LogSetup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LogSetup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1072,10 +2399,424 @@ module LogSetups =
       list_of_json ~kind:"LogSetups" ~of_json:LogSetup.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ControlPlanePlacementResponse =
+  struct
+    type nonrec t =
+      {
+      groupName: String_.t option
+        [@ocaml.doc
+          "The name of the placement group for the Kubernetes control plane instances."]}
+    let make ?groupName = fun () -> { groupName }
+    let to_value x =
+      structure_to_value
+        [("groupName", (Option.map x.groupName ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let groupName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groupName") in
+      make ?groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let groupName = field_map json__ "groupName" String_.of_json in
+      make ?groupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The placement configuration for all the control plane instances of your local Amazon EKS cluster on an Amazon Web Services Outpost. For more information, see Capacity considerations in the Amazon EKS User Guide."]
+module RemoteNodeNetworkList =
+  struct
+    type nonrec t = RemoteNodeNetwork.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RemoteNodeNetwork.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RemoteNodeNetwork.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RemoteNodeNetworkList"
+        ~of_json:RemoteNodeNetwork.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RemotePodNetworkList =
+  struct
+    type nonrec t = RemotePodNetwork.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RemotePodNetwork.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RemotePodNetwork.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RemotePodNetworkList"
+        ~of_json:RemotePodNetwork.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BlockStorage =
+  struct
+    type nonrec t =
+      {
+      enabled: BoxedBoolean.t option
+        [@ocaml.doc
+          "Indicates if the block storage capability is enabled on your EKS Auto Mode cluster. If the block storage capability is enabled, EKS Auto Mode will create and delete EBS volumes in your Amazon Web Services account."]}
+    let make ?enabled = fun () -> { enabled }
+    let to_value x =
+      structure_to_value
+        [("enabled", (Option.map x.enabled ~f:BoxedBoolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enabled =
+        (Option.map ~f:BoxedBoolean.of_xml) (Xml.child xml_arg0 "enabled") in
+      make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enabled = field_map json__ "enabled" BoxedBoolean.of_json in
+      make ?enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the current configuration of the block storage capability on your EKS Auto Mode cluster. For example, if the capability is enabled or disabled. If the block storage capability is enabled, EKS Auto Mode will create and delete EBS volumes in your Amazon Web Services account. For more information, see EKS Auto Mode block storage capability in the Amazon EKS User Guide."]
+module SupportType =
+  struct
+    type nonrec t =
+      | STANDARD 
+      | EXTENDED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | STANDARD -> "STANDARD"
+      | EXTENDED -> "EXTENDED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "STANDARD" -> STANDARD
+      | "EXTENDED" -> EXTENDED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SupportType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SupportType" j)
+    let to_json = simple_to_json to_value
+  end
+module Category =
+  struct
+    type nonrec t =
+      | UPGRADE_READINESS 
+      | MISCONFIGURATION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | UPGRADE_READINESS -> "UPGRADE_READINESS"
+      | MISCONFIGURATION -> "MISCONFIGURATION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "UPGRADE_READINESS" -> UPGRADE_READINESS
+      | "MISCONFIGURATION" -> MISCONFIGURATION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Category" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Category" j)
+    let to_json = simple_to_json to_value
+  end
+module EksAnywhereSubscriptionLicenseType =
+  struct
+    type nonrec t =
+      | Cluster 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | Cluster -> "Cluster" | Non_static_id s -> s
+    let of_string = function | "Cluster" -> Cluster | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EksAnywhereSubscriptionLicenseType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EksAnywhereSubscriptionLicenseType" j)
+    let to_json = simple_to_json to_value
+  end
+module EksAnywhereSubscriptionTerm =
+  struct
+    type nonrec t =
+      {
+      duration: Integer.t option
+        [@ocaml.doc
+          "The duration of the subscription term. Valid values are 12 and 36, indicating a 12 month or 36 month subscription."];
+      unit: EksAnywhereSubscriptionTermUnit.t option
+        [@ocaml.doc
+          "The term unit of the subscription. Valid value is MONTHS."]}
+    let make ?duration = fun ?unit -> fun () -> { duration; unit }
+    let to_value x =
+      structure_to_value
+        [("duration", (Option.map x.duration ~f:Integer.to_value));
+        ("unit",
+          (Option.map x.unit ~f:EksAnywhereSubscriptionTermUnit.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unit =
+        (Option.map ~f:EksAnywhereSubscriptionTermUnit.of_xml)
+          (Xml.child xml_arg0 "unit") in
+      let duration =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "duration") in
+      make ?unit ?duration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unit =
+        field_map json__ "unit" EksAnywhereSubscriptionTermUnit.of_json in
+      let duration = field_map json__ "duration" Integer.of_json in
+      make ?unit ?duration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object representing the term duration and term unit type of your subscription. This determines the term length of your subscription. Valid values are MONTHS for term unit and 12 or 36 for term duration, indicating a 12 month or 36 month subscription."]
+module LicenseList =
+  struct
+    type nonrec t = License.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:License.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:License.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LicenseList" ~of_json:License.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TagMap =
+  struct
+    type nonrec t = (TagKey.t * TagValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((TagKey.of_string chopped),
+                              (TagValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (TagKey.to_value x) |>
+                    (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:TagKey.of_string
+        ~of_json:TagValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CapabilityStatus =
+  struct
+    type nonrec t =
+      | CREATING 
+      | CREATE_FAILED 
+      | UPDATING 
+      | DELETING 
+      | DELETE_FAILED 
+      | ACTIVE 
+      | DEGRADED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | CREATE_FAILED -> "CREATE_FAILED"
+      | UPDATING -> "UPDATING"
+      | DELETING -> "DELETING"
+      | DELETE_FAILED -> "DELETE_FAILED"
+      | ACTIVE -> "ACTIVE"
+      | DEGRADED -> "DEGRADED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "CREATE_FAILED" -> CREATE_FAILED
+      | "UPDATING" -> UPDATING
+      | "DELETING" -> DELETING
+      | "DELETE_FAILED" -> DELETE_FAILED
+      | "ACTIVE" -> ACTIVE
+      | "DEGRADED" -> DEGRADED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration CapabilityStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CapabilityStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module CapabilityType =
+  struct
+    type nonrec t =
+      | ACK 
+      | KRO 
+      | ARGOCD 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACK -> "ACK"
+      | KRO -> "KRO"
+      | ARGOCD -> "ARGOCD"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACK" -> ACK
+      | "KRO" -> KRO
+      | "ARGOCD" -> ARGOCD
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration CapabilityType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CapabilityType" j)
+    let to_json = simple_to_json to_value
+  end
+module AccessScope =
+  struct
+    type nonrec t =
+      {
+      type_: AccessScopeType.t option
+        [@ocaml.doc "The scope type of an access policy."];
+      namespaces: StringList.t option
+        [@ocaml.doc
+          "A Kubernetes namespace that an access policy is scoped to. A value is required if you specified namespace for Type."]}
+    let make ?type_ = fun ?namespaces -> fun () -> { type_; namespaces }
+    let to_value x =
+      structure_to_value
+        [("type", (Option.map x.type_ ~f:AccessScopeType.to_value));
+        ("namespaces", (Option.map x.namespaces ~f:StringList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let namespaces =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "namespaces") in
+      let type_ =
+        (Option.map ~f:AccessScopeType.of_xml) (Xml.child xml_arg0 "type") in
+      make ?namespaces ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let namespaces = field_map json__ "namespaces" StringList.of_json in
+      let type_ = field_map json__ "type" AccessScopeType.of_json in
+      make ?namespaces ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The scope of an AccessPolicy that's associated to an AccessEntry."]
+module NodeRepairConfigOverridesList =
+  struct
+    type nonrec t = NodeRepairConfigOverrides.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NodeRepairConfigOverrides.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NodeRepairConfigOverrides.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NodeRepairConfigOverridesList"
+        ~of_json:NodeRepairConfigOverrides.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PercentCapacity =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PercentCapacity" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module IssueList =
   struct
     type nonrec t = Issue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Issue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1099,6 +2840,9 @@ module AutoScalingGroupList =
   struct
     type nonrec t = AutoScalingGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutoScalingGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1149,71 +2893,173 @@ module ZeroCapacity =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module NonZeroInteger =
+module NodegroupUpdateStrategies =
   struct
-    type nonrec t = int
-    let make i =
-      let open Result in ok_or_failwith (check_int_min i ~min:1); i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    type nonrec t =
+      | DEFAULT 
+      | MINIMAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DEFAULT -> "DEFAULT"
+      | MINIMAL -> "MINIMAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DEFAULT" -> DEFAULT
+      | "MINIMAL" -> MINIMAL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
+    let to_header x = to_string x
     let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for NonZeroInteger" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module PercentCapacity =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for PercentCapacity" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module TagMap =
-  struct
-    type nonrec t = (TagKey.t * TagValue.t) list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((TagKey.of_string chopped),
-                              (TagValue.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (TagKey.to_value x) |>
-                    (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+      of_string
+        (string_of_xml ~kind:"enumeration NodegroupUpdateStrategies" xml_arg0)
     let of_json j =
-      object_of_json ~key_of_string:TagKey.of_string
-        ~of_json:TagValue.of_json j
+      of_string (string_of_json ~kind:"NodegroupUpdateStrategies" j)
+    let to_json = simple_to_json to_value
+  end
+module BoxedInteger =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for BoxedInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module WarmPoolState =
+  struct
+    type nonrec t =
+      | STOPPED 
+      | RUNNING 
+      | HIBERNATED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | STOPPED -> "STOPPED"
+      | RUNNING -> "RUNNING"
+      | HIBERNATED -> "HIBERNATED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "STOPPED" -> STOPPED
+      | "RUNNING" -> RUNNING
+      | "HIBERNATED" -> HIBERNATED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration WarmPoolState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"WarmPoolState" j)
+    let to_json = simple_to_json to_value
+  end
+module AddonCompatibilityDetails =
+  struct
+    type nonrec t = AddonCompatibilityDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AddonCompatibilityDetail.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AddonCompatibilityDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AddonCompatibilityDetails"
+        ~of_json:AddonCompatibilityDetail.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DeprecationDetails =
+  struct
+    type nonrec t = DeprecationDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DeprecationDetail.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DeprecationDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DeprecationDetails"
+        ~of_json:DeprecationDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InsightResourceDetail =
+  struct
+    type nonrec t =
+      {
+      insightStatus: InsightStatus.t option
+        [@ocaml.doc
+          "An object containing more detail on the status of the insight resource."];
+      kubernetesResourceUri: String_.t option
+        [@ocaml.doc "The Kubernetes resource URI if applicable."];
+      arn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) if applicable."]}
+    let make ?insightStatus =
+      fun ?kubernetesResourceUri ->
+        fun ?arn -> fun () -> { insightStatus; kubernetesResourceUri; arn }
+    let to_value x =
+      structure_to_value
+        [("insightStatus",
+           (Option.map x.insightStatus ~f:InsightStatus.to_value));
+        ("kubernetesResourceUri",
+          (Option.map x.kubernetesResourceUri ~f:String_.to_value));
+        ("arn", (Option.map x.arn ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
+      let kubernetesResourceUri =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "kubernetesResourceUri") in
+      let insightStatus =
+        (Option.map ~f:InsightStatus.of_xml)
+          (Xml.child xml_arg0 "insightStatus") in
+      make ?arn ?kubernetesResourceUri ?insightStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn = field_map json__ "arn" String_.of_json in
+      let kubernetesResourceUri =
+        field_map json__ "kubernetesResourceUri" String_.of_json in
+      let insightStatus =
+        field_map json__ "insightStatus" InsightStatus.of_json in
+      make ?arn ?kubernetesResourceUri ?insightStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns information about the resource being evaluated."]
 module ConfigStatus =
   struct
     type nonrec t =
@@ -1264,11 +3110,42 @@ module RequiredClaimsMap =
                        (RequiredClaimsValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:RequiredClaimsKey.of_string
         ~of_json:RequiredClaimsValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FargateProfileIssueList =
+  struct
+    type nonrec t = FargateProfileIssue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FargateProfileIssue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FargateProfileIssue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FargateProfileIssueList"
+        ~of_json:FargateProfileIssue.of_json j
     let to_json v = composed_to_json to_value v
   end
 module FargateProfileSelector =
@@ -1295,16 +3172,178 @@ module FargateProfileSelector =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "namespace") in
       make ?labels ?namespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let labels = field_map json "labels" FargateProfileLabel.of_json in
-      let namespace = field_map json "namespace" String_.of_json in
+    let of_json json__ =
+      let labels = field_map json__ "labels" FargateProfileLabel.of_json in
+      let namespace = field_map json__ "namespace" String_.of_json in
       make ?labels ?namespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object representing an Fargate profile selector."]
+module ClusterVersionStatus =
+  struct
+    type nonrec t =
+      | Unsupported 
+      | Standard_support 
+      | Extended_support 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Unsupported -> "unsupported"
+      | Standard_support -> "standard-support"
+      | Extended_support -> "extended-support"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "unsupported" -> Unsupported
+      | "standard-support" -> Standard_support
+      | "extended-support" -> Extended_support
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ClusterVersionStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ClusterVersionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module VersionStatus =
+  struct
+    type nonrec t =
+      | UNSUPPORTED 
+      | STANDARD_SUPPORT 
+      | EXTENDED_SUPPORT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | UNSUPPORTED -> "UNSUPPORTED"
+      | STANDARD_SUPPORT -> "STANDARD_SUPPORT"
+      | EXTENDED_SUPPORT -> "EXTENDED_SUPPORT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "UNSUPPORTED" -> UNSUPPORTED
+      | "STANDARD_SUPPORT" -> STANDARD_SUPPORT
+      | "EXTENDED_SUPPORT" -> EXTENDED_SUPPORT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration VersionStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"VersionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ArgoCdConfigResponse =
+  struct
+    type nonrec t =
+      {
+      namespace: String_.t option
+        [@ocaml.doc
+          "The Kubernetes namespace where Argo CD resources are monitored by your Argo CD Capability."];
+      awsIdc: ArgoCdAwsIdcConfigResponse.t option
+        [@ocaml.doc
+          "The IAM Identity CenterIAM; Identity Center integration configuration."];
+      rbacRoleMappings: ArgoCdRoleMappingList.t option
+        [@ocaml.doc
+          "The list of role mappings that define which IAM Identity CenterIAM; Identity Center users or groups have which Argo CD roles."];
+      networkAccess: ArgoCdNetworkAccessConfigResponse.t option
+        [@ocaml.doc
+          "The network access configuration for the Argo CD capability's managed API server endpoint. If VPC endpoint IDs are specified, public access is blocked and the Argo CD server is only accessible through the specified VPC endpoints."];
+      serverUrl: String_.t option
+        [@ocaml.doc
+          "The URL of the Argo CD server. Use this URL to access the Argo CD web interface and API."]}
+    let make ?namespace =
+      fun ?awsIdc ->
+        fun ?rbacRoleMappings ->
+          fun ?networkAccess ->
+            fun ?serverUrl ->
+              fun () ->
+                {
+                  namespace;
+                  awsIdc;
+                  rbacRoleMappings;
+                  networkAccess;
+                  serverUrl
+                }
+    let to_value x =
+      structure_to_value
+        [("namespace", (Option.map x.namespace ~f:String_.to_value));
+        ("awsIdc",
+          (Option.map x.awsIdc ~f:ArgoCdAwsIdcConfigResponse.to_value));
+        ("rbacRoleMappings",
+          (Option.map x.rbacRoleMappings ~f:ArgoCdRoleMappingList.to_value));
+        ("networkAccess",
+          (Option.map x.networkAccess
+             ~f:ArgoCdNetworkAccessConfigResponse.to_value));
+        ("serverUrl", (Option.map x.serverUrl ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serverUrl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serverUrl") in
+      let networkAccess =
+        (Option.map ~f:ArgoCdNetworkAccessConfigResponse.of_xml)
+          (Xml.child xml_arg0 "networkAccess") in
+      let rbacRoleMappings =
+        (Option.map ~f:ArgoCdRoleMappingList.of_xml)
+          (Xml.child xml_arg0 "rbacRoleMappings") in
+      let awsIdc =
+        (Option.map ~f:ArgoCdAwsIdcConfigResponse.of_xml)
+          (Xml.child xml_arg0 "awsIdc") in
+      let namespace =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "namespace") in
+      make ?serverUrl ?networkAccess ?rbacRoleMappings ?awsIdc ?namespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serverUrl = field_map json__ "serverUrl" String_.of_json in
+      let networkAccess =
+        field_map json__ "networkAccess"
+          ArgoCdNetworkAccessConfigResponse.of_json in
+      let rbacRoleMappings =
+        field_map json__ "rbacRoleMappings" ArgoCdRoleMappingList.of_json in
+      let awsIdc =
+        field_map json__ "awsIdc" ArgoCdAwsIdcConfigResponse.of_json in
+      let namespace = field_map json__ "namespace" String_.of_json in
+      make ?serverUrl ?networkAccess ?rbacRoleMappings ?awsIdc ?namespace ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The response object containing Argo CD configuration details, including the server URL that you use to access the Argo CD web interface and API."]
+module CapabilityIssueList =
+  struct
+    type nonrec t = CapabilityIssue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapabilityIssue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapabilityIssue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapabilityIssueList"
+        ~of_json:CapabilityIssue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AddonVersionInfoList =
   struct
     type nonrec t = AddonVersionInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AddonVersionInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1326,10 +3365,44 @@ module AddonVersionInfoList =
         ~of_json:AddonVersionInfo.of_json j
     let to_json v = composed_to_json to_value v
   end
+module MarketplaceInformation =
+  struct
+    type nonrec t =
+      {
+      productId: String_.t option
+        [@ocaml.doc
+          "The product ID from the Amazon Web Services Marketplace."];
+      productUrl: String_.t option
+        [@ocaml.doc
+          "The product URL from the Amazon Web Services Marketplace."]}
+    let make ?productId =
+      fun ?productUrl -> fun () -> { productId; productUrl }
+    let to_value x =
+      structure_to_value
+        [("productId", (Option.map x.productId ~f:String_.to_value));
+        ("productUrl", (Option.map x.productUrl ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let productUrl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "productUrl") in
+      let productId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "productId") in
+      make ?productUrl ?productId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let productUrl = field_map json__ "productUrl" String_.of_json in
+      let productId = field_map json__ "productId" String_.of_json in
+      make ?productUrl ?productId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about an Amazon EKS add-on from the Amazon Web Services Marketplace."]
 module AddonIssueList =
   struct
     type nonrec t = AddonIssue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AddonIssue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1350,10 +3423,65 @@ module AddonIssueList =
       list_of_json ~kind:"AddonIssueList" ~of_json:AddonIssue.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Namespace =
+  struct
+    type nonrec t = string
+    let context_ = "namespace"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:63) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"namespace" j
+    let to_json = simple_to_json to_value
+  end
+module ArgoCdAwsIdcConfigRequest =
+  struct
+    type nonrec t =
+      {
+      idcInstanceArn: String_.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM Identity CenterIAM; Identity Center instance to use for authentication."];
+      idcRegion: String_.t option
+        [@ocaml.doc
+          "The Region where your IAM Identity CenterIAM; Identity Center instance is located."]}
+    let context_ = "ArgoCdAwsIdcConfigRequest"
+    let make ?idcRegion =
+      fun ~idcInstanceArn -> fun () -> { idcRegion; idcInstanceArn }
+    let to_value x =
+      structure_to_value
+        [("idcInstanceArn", (Some (String_.to_value x.idcInstanceArn)));
+        ("idcRegion", (Option.map x.idcRegion ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let idcRegion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "idcRegion") in
+      let idcInstanceArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "idcInstanceArn") in
+      make ?idcRegion ~idcInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let idcRegion = field_map json__ "idcRegion" String_.of_json in
+      let idcInstanceArn =
+        field_map_exn json__ "idcInstanceArn" String_.of_json in
+      make ?idcRegion ~idcInstanceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration for integrating Argo CD with IAM Identity CenterIAM; Identity Center. This allows you to use your organization's identity provider for authentication to Argo CD."]
 module ErrorDetails =
   struct
     type nonrec t = ErrorDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ErrorDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1378,6 +3506,9 @@ module UpdateParams =
   struct
     type nonrec t = UpdateParam.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpdateParam.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1440,6 +3571,15 @@ module UpdateType =
       | DisassociateIdentityProviderConfig 
       | AssociateEncryptionConfig 
       | AddonUpdate 
+      | VpcConfigUpdate 
+      | AccessConfigUpdate 
+      | UpgradePolicyUpdate 
+      | ZonalShiftConfigUpdate 
+      | AutoModeUpdate 
+      | RemoteNetworkConfigUpdate 
+      | DeletionProtectionUpdate 
+      | ControlPlaneScalingConfigUpdate 
+      | VendedLogsUpdate 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1453,6 +3593,15 @@ module UpdateType =
           "DisassociateIdentityProviderConfig"
       | AssociateEncryptionConfig -> "AssociateEncryptionConfig"
       | AddonUpdate -> "AddonUpdate"
+      | VpcConfigUpdate -> "VpcConfigUpdate"
+      | AccessConfigUpdate -> "AccessConfigUpdate"
+      | UpgradePolicyUpdate -> "UpgradePolicyUpdate"
+      | ZonalShiftConfigUpdate -> "ZonalShiftConfigUpdate"
+      | AutoModeUpdate -> "AutoModeUpdate"
+      | RemoteNetworkConfigUpdate -> "RemoteNetworkConfigUpdate"
+      | DeletionProtectionUpdate -> "DeletionProtectionUpdate"
+      | ControlPlaneScalingConfigUpdate -> "ControlPlaneScalingConfigUpdate"
+      | VendedLogsUpdate -> "VendedLogsUpdate"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1465,6 +3614,15 @@ module UpdateType =
           DisassociateIdentityProviderConfig
       | "AssociateEncryptionConfig" -> AssociateEncryptionConfig
       | "AddonUpdate" -> AddonUpdate
+      | "VpcConfigUpdate" -> VpcConfigUpdate
+      | "AccessConfigUpdate" -> AccessConfigUpdate
+      | "UpgradePolicyUpdate" -> UpgradePolicyUpdate
+      | "ZonalShiftConfigUpdate" -> ZonalShiftConfigUpdate
+      | "AutoModeUpdate" -> AutoModeUpdate
+      | "RemoteNetworkConfigUpdate" -> RemoteNetworkConfigUpdate
+      | "DeletionProtectionUpdate" -> DeletionProtectionUpdate
+      | "ControlPlaneScalingConfigUpdate" -> ControlPlaneScalingConfigUpdate
+      | "VendedLogsUpdate" -> VendedLogsUpdate
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1478,6 +3636,9 @@ module LabelsKeyList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1519,6 +3680,8 @@ module LabelsMap =
                     (fun x -> (LabelValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1530,6 +3693,9 @@ module TaintsList =
   struct
     type nonrec t = Taint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Taint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1549,6 +3715,115 @@ module TaintsList =
     let of_json j = list_of_json ~kind:"taintsList" ~of_json:Taint.of_json j
     let to_json v = composed_to_json to_value v
   end
+module UpdateArgoCdConfig =
+  struct
+    type nonrec t =
+      {
+      rbacRoleMappings: UpdateRoleMappings.t option
+        [@ocaml.doc
+          "Updated RBAC role mappings for the Argo CD capability. You can add, update, or remove role mappings."];
+      networkAccess: ArgoCdNetworkAccessConfigRequest.t option
+        [@ocaml.doc
+          "Updated network access configuration for the Argo CD capability's managed API server endpoint. You can add or remove VPC endpoint associations to control which VPCs have private access to the Argo CD server."]}
+    let make ?rbacRoleMappings =
+      fun ?networkAccess -> fun () -> { rbacRoleMappings; networkAccess }
+    let to_value x =
+      structure_to_value
+        [("rbacRoleMappings",
+           (Option.map x.rbacRoleMappings ~f:UpdateRoleMappings.to_value));
+        ("networkAccess",
+          (Option.map x.networkAccess
+             ~f:ArgoCdNetworkAccessConfigRequest.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkAccess =
+        (Option.map ~f:ArgoCdNetworkAccessConfigRequest.of_xml)
+          (Xml.child xml_arg0 "networkAccess") in
+      let rbacRoleMappings =
+        (Option.map ~f:UpdateRoleMappings.of_xml)
+          (Xml.child xml_arg0 "rbacRoleMappings") in
+      make ?networkAccess ?rbacRoleMappings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkAccess =
+        field_map json__ "networkAccess"
+          ArgoCdNetworkAccessConfigRequest.of_json in
+      let rbacRoleMappings =
+        field_map json__ "rbacRoleMappings" UpdateRoleMappings.of_json in
+      make ?networkAccess ?rbacRoleMappings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration updates for an Argo CD capability. You only need to specify the fields you want to update."]
+module AddonPodIdentityAssociations =
+  struct
+    type nonrec t =
+      {
+      serviceAccount: String_.t
+        [@ocaml.doc "The name of a Kubernetes Service Account."];
+      roleArn: String_.t [@ocaml.doc "The ARN of an IAM Role."]}
+    let context_ = "AddonPodIdentityAssociations"
+    let make ~serviceAccount =
+      fun ~roleArn -> fun () -> { serviceAccount; roleArn }
+    let to_value x =
+      structure_to_value
+        [("serviceAccount", (Some (String_.to_value x.serviceAccount)));
+        ("roleArn", (Some (String_.to_value x.roleArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let roleArn =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
+      let serviceAccount =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceAccount") in
+      make ~roleArn ~serviceAccount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let roleArn = field_map_exn json__ "roleArn" String_.of_json in
+      let serviceAccount =
+        field_map_exn json__ "serviceAccount" String_.of_json in
+      make ~roleArn ~serviceAccount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A type of EKS Pod Identity association owned by an Amazon EKS add-on. Each association maps a role to a service account in a namespace in the cluster. For more information, see Attach an IAM Role to an Amazon EKS add-on using EKS Pod Identity in the Amazon EKS User Guide."]
+module AccessConfigResponse =
+  struct
+    type nonrec t =
+      {
+      bootstrapClusterCreatorAdminPermissions: BoxedBoolean.t option
+        [@ocaml.doc
+          "Specifies whether or not the cluster creator IAM principal was set as a cluster admin access entry during cluster creation time."];
+      authenticationMode: AuthenticationMode.t option
+        [@ocaml.doc "The current authentication mode of the cluster."]}
+    let make ?bootstrapClusterCreatorAdminPermissions =
+      fun ?authenticationMode ->
+        fun () ->
+          { bootstrapClusterCreatorAdminPermissions; authenticationMode }
+    let to_value x =
+      structure_to_value
+        [("bootstrapClusterCreatorAdminPermissions",
+           (Option.map x.bootstrapClusterCreatorAdminPermissions
+              ~f:BoxedBoolean.to_value));
+        ("authenticationMode",
+          (Option.map x.authenticationMode ~f:AuthenticationMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let authenticationMode =
+        (Option.map ~f:AuthenticationMode.of_xml)
+          (Xml.child xml_arg0 "authenticationMode") in
+      let bootstrapClusterCreatorAdminPermissions =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "bootstrapClusterCreatorAdminPermissions") in
+      make ?authenticationMode ?bootstrapClusterCreatorAdminPermissions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let authenticationMode =
+        field_map json__ "authenticationMode" AuthenticationMode.of_json in
+      let bootstrapClusterCreatorAdminPermissions =
+        field_map json__ "bootstrapClusterCreatorAdminPermissions"
+          BoxedBoolean.of_json in
+      make ?authenticationMode ?bootstrapClusterCreatorAdminPermissions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The access configuration for the cluster."]
 module Certificate =
   struct
     type nonrec t =
@@ -1564,11 +3839,34 @@ module Certificate =
       let data = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "data") in
       make ?data ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let data = field_map json "data" String_.of_json in make ?data ()
+    let of_json json__ =
+      let data = field_map json__ "data" String_.of_json in make ?data ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object representing the certificate-authority-data for your cluster."]
+module ClusterHealth =
+  struct
+    type nonrec t =
+      {
+      issues: ClusterIssueList.t option
+        [@ocaml.doc
+          "An object representing the health issues of your Amazon EKS cluster."]}
+    let make ?issues = fun () -> { issues }
+    let to_value x =
+      structure_to_value
+        [("issues", (Option.map x.issues ~f:ClusterIssueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let issues =
+        (Option.map ~f:ClusterIssueList.of_xml) (Xml.child xml_arg0 "issues") in
+      make ?issues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let issues = field_map json__ "issues" ClusterIssueList.of_json in
+      make ?issues ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object representing the health of your Amazon EKS cluster."]
 module ClusterStatus =
   struct
     type nonrec t =
@@ -1606,6 +3904,45 @@ module ClusterStatus =
     let of_json j = of_string (string_of_json ~kind:"ClusterStatus" j)
     let to_json = simple_to_json to_value
   end
+module ComputeConfigResponse =
+  struct
+    type nonrec t =
+      {
+      enabled: BoxedBoolean.t option
+        [@ocaml.doc
+          "Indicates if the compute capability is enabled on your EKS Auto Mode cluster. If the compute capability is enabled, EKS Auto Mode will create and delete EC2 Managed Instances in your Amazon Web Services account."];
+      nodePools: StringList.t option
+        [@ocaml.doc
+          "Indicates the current configuration of node pools in your EKS Auto Mode cluster. For more information, see EKS Auto Mode Node Pools in the Amazon EKS User Guide."];
+      nodeRoleArn: String_.t option
+        [@ocaml.doc
+          "The ARN of the IAM Role EKS will assign to EC2 Managed Instances in your EKS Auto Mode cluster."]}
+    let make ?enabled =
+      fun ?nodePools ->
+        fun ?nodeRoleArn -> fun () -> { enabled; nodePools; nodeRoleArn }
+    let to_value x =
+      structure_to_value
+        [("enabled", (Option.map x.enabled ~f:BoxedBoolean.to_value));
+        ("nodePools", (Option.map x.nodePools ~f:StringList.to_value));
+        ("nodeRoleArn", (Option.map x.nodeRoleArn ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nodeRoleArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nodeRoleArn") in
+      let nodePools =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "nodePools") in
+      let enabled =
+        (Option.map ~f:BoxedBoolean.of_xml) (Xml.child xml_arg0 "enabled") in
+      make ?nodeRoleArn ?nodePools ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nodeRoleArn = field_map json__ "nodeRoleArn" String_.of_json in
+      let nodePools = field_map json__ "nodePools" StringList.of_json in
+      let enabled = field_map json__ "enabled" BoxedBoolean.of_json in
+      make ?nodeRoleArn ?nodePools ?enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the status of the request to update the compute capability of your EKS Auto Mode cluster."]
 module ConnectorConfigResponse =
   struct
     type nonrec t =
@@ -1661,22 +3998,50 @@ module ConnectorConfigResponse =
       make ?roleArn ?provider ?activationExpiry ?activationCode ?activationId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "roleArn" String_.of_json in
-      let provider = field_map json "provider" String_.of_json in
+    let of_json json__ =
+      let roleArn = field_map json__ "roleArn" String_.of_json in
+      let provider = field_map json__ "provider" String_.of_json in
       let activationExpiry =
-        field_map json "activationExpiry" Timestamp.of_json in
-      let activationCode = field_map json "activationCode" String_.of_json in
-      let activationId = field_map json "activationId" String_.of_json in
+        field_map json__ "activationExpiry" Timestamp.of_json in
+      let activationCode = field_map json__ "activationCode" String_.of_json in
+      let activationId = field_map json__ "activationId" String_.of_json in
       make ?roleArn ?provider ?activationExpiry ?activationCode ?activationId
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The full description of your connected cluster."]
+module ControlPlaneScalingConfig =
+  struct
+    type nonrec t =
+      {
+      tier: ProvisionedControlPlaneTier.t option
+        [@ocaml.doc
+          "The control plane scaling tier configuration. Available options are standard, tier-xl, tier-2xl, tier-4xl, or tier-8xl. For more information, see EKS Provisioned Control Plane in the Amazon EKS User Guide."]}
+    let make ?tier = fun () -> { tier }
+    let to_value x =
+      structure_to_value
+        [("tier",
+           (Option.map x.tier ~f:ProvisionedControlPlaneTier.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tier =
+        (Option.map ~f:ProvisionedControlPlaneTier.of_xml)
+          (Xml.child xml_arg0 "tier") in
+      make ?tier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tier = field_map json__ "tier" ProvisionedControlPlaneTier.of_json in
+      make ?tier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The control plane scaling tier configuration. For more information, see EKS Provisioned Control Plane in the Amazon EKS User Guide."]
 module EncryptionConfigList =
   struct
     type nonrec t = EncryptionConfig.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EncryptionConfig.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1713,8 +4078,8 @@ module Identity =
       let oidc = (Option.map ~f:OIDC.of_xml) (Xml.child xml_arg0 "oidc") in
       make ?oidc ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let oidc = field_map json "oidc" OIDC.of_json in make ?oidc ()
+    let of_json json__ =
+      let oidc = field_map json__ "oidc" OIDC.of_json in make ?oidc ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object representing an identity provider."]
 module KubernetesNetworkConfigResponse =
@@ -1723,39 +4088,60 @@ module KubernetesNetworkConfigResponse =
       {
       serviceIpv4Cidr: String_.t option
         [@ocaml.doc
-          "The CIDR block that Kubernetes Pod and Service IP addresses are assigned from. Kubernetes assigns addresses from an IPv4 CIDR block assigned to a subnet that the node is in. If you didn't specify a CIDR block when you created the cluster, then Kubernetes assigns addresses from either the 10.100.0.0/16 or 172.20.0.0/16 CIDR blocks. If this was specified, then it was specified when the cluster was created and it can't be changed."];
+          "The CIDR block that Kubernetes Pod and Service object IP addresses are assigned from. Kubernetes assigns addresses from an IPv4 CIDR block assigned to a subnet that the node is in. If you didn't specify a CIDR block when you created the cluster, then Kubernetes assigns addresses from either the 10.100.0.0/16 or 172.20.0.0/16 CIDR blocks. If this was specified, then it was specified when the cluster was created and it can't be changed."];
       serviceIpv6Cidr: String_.t option
         [@ocaml.doc
-          "The CIDR block that Kubernetes Pod and Service IP addresses are assigned from if you created a 1.21 or later cluster with version 1.10.0 or later of the Amazon VPC CNI add-on and specified ipv6 for ipFamily when you created the cluster. Kubernetes assigns addresses from the unique local address range (fc00::/7)."];
+          "The CIDR block that Kubernetes pod and service IP addresses are assigned from if you created a 1.21 or later cluster with version 1.10.1 or later of the Amazon VPC CNI add-on and specified ipv6 for ipFamily when you created the cluster. Kubernetes assigns service addresses from the unique local address range (fc00::/7) because you can't specify a custom IPv6 CIDR block when you create the cluster."];
       ipFamily: IpFamily.t option
         [@ocaml.doc
-          "The IP family used to assign Kubernetes Pod and Service IP addresses. The IP family is always ipv4, unless you have a 1.21 or later cluster running version 1.10.0 or later of the Amazon VPC CNI add-on and specified ipv6 when you created the cluster."]}
+          "The IP family used to assign Kubernetes Pod and Service objects IP addresses. The IP family is always ipv4, unless you have a 1.21 or later cluster running version 1.10.1 or later of the Amazon VPC CNI plugin for Kubernetes and specified ipv6 when you created the cluster."];
+      elasticLoadBalancing: ElasticLoadBalancing.t option
+        [@ocaml.doc
+          "Indicates the current configuration of the load balancing capability on your EKS Auto Mode cluster. For example, if the capability is enabled or disabled."]}
     let make ?serviceIpv4Cidr =
       fun ?serviceIpv6Cidr ->
         fun ?ipFamily ->
-          fun () -> { serviceIpv4Cidr; serviceIpv6Cidr; ipFamily }
+          fun ?elasticLoadBalancing ->
+            fun () ->
+              {
+                serviceIpv4Cidr;
+                serviceIpv6Cidr;
+                ipFamily;
+                elasticLoadBalancing
+              }
     let to_value x =
       structure_to_value
         [("serviceIpv4Cidr",
            (Option.map x.serviceIpv4Cidr ~f:String_.to_value));
         ("serviceIpv6Cidr",
           (Option.map x.serviceIpv6Cidr ~f:String_.to_value));
-        ("ipFamily", (Option.map x.ipFamily ~f:IpFamily.to_value))]
+        ("ipFamily", (Option.map x.ipFamily ~f:IpFamily.to_value));
+        ("elasticLoadBalancing",
+          (Option.map x.elasticLoadBalancing ~f:ElasticLoadBalancing.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let elasticLoadBalancing =
+        (Option.map ~f:ElasticLoadBalancing.of_xml)
+          (Xml.child xml_arg0 "elasticLoadBalancing") in
       let ipFamily =
         (Option.map ~f:IpFamily.of_xml) (Xml.child xml_arg0 "ipFamily") in
       let serviceIpv6Cidr =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceIpv6Cidr") in
       let serviceIpv4Cidr =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceIpv4Cidr") in
-      make ?ipFamily ?serviceIpv6Cidr ?serviceIpv4Cidr ()
+      make ?elasticLoadBalancing ?ipFamily ?serviceIpv6Cidr ?serviceIpv4Cidr
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ipFamily = field_map json "ipFamily" IpFamily.of_json in
-      let serviceIpv6Cidr = field_map json "serviceIpv6Cidr" String_.of_json in
-      let serviceIpv4Cidr = field_map json "serviceIpv4Cidr" String_.of_json in
-      make ?ipFamily ?serviceIpv6Cidr ?serviceIpv4Cidr ()
+    let of_json json__ =
+      let elasticLoadBalancing =
+        field_map json__ "elasticLoadBalancing" ElasticLoadBalancing.of_json in
+      let ipFamily = field_map json__ "ipFamily" IpFamily.of_json in
+      let serviceIpv6Cidr =
+        field_map json__ "serviceIpv6Cidr" String_.of_json in
+      let serviceIpv4Cidr =
+        field_map json__ "serviceIpv4Cidr" String_.of_json in
+      make ?elasticLoadBalancing ?ipFamily ?serviceIpv6Cidr ?serviceIpv4Cidr
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Kubernetes network configuration for the cluster. The response contains a value for serviceIpv6Cidr or serviceIpv4Cidr, but not both."]
@@ -1778,12 +4164,148 @@ module Logging =
           (Xml.child xml_arg0 "clusterLogging") in
       make ?clusterLogging ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterLogging = field_map json "clusterLogging" LogSetups.of_json in
+    let of_json json__ =
+      let clusterLogging =
+        field_map json__ "clusterLogging" LogSetups.of_json in
       make ?clusterLogging ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object representing the logging configuration for resources in your cluster."]
+module OutpostConfigResponse =
+  struct
+    type nonrec t =
+      {
+      outpostArns: StringList.t option
+        [@ocaml.doc
+          "The ARN of the Outpost that you specified for use with your local Amazon EKS cluster on Outposts."];
+      controlPlaneInstanceType: String_.t option
+        [@ocaml.doc
+          "The Amazon EC2 instance type used for the control plane. The instance type is the same for all control plane instances."];
+      controlPlanePlacement: ControlPlanePlacementResponse.t option
+        [@ocaml.doc
+          "An object representing the placement configuration for all the control plane instances of your local Amazon EKS cluster on an Amazon Web Services Outpost. For more information, see Capacity considerations in the Amazon EKS User Guide."]}
+    let make ?outpostArns =
+      fun ?controlPlaneInstanceType ->
+        fun ?controlPlanePlacement ->
+          fun () ->
+            { outpostArns; controlPlaneInstanceType; controlPlanePlacement }
+    let to_value x =
+      structure_to_value
+        [("outpostArns", (Option.map x.outpostArns ~f:StringList.to_value));
+        ("controlPlaneInstanceType",
+          (Option.map x.controlPlaneInstanceType ~f:String_.to_value));
+        ("controlPlanePlacement",
+          (Option.map x.controlPlanePlacement
+             ~f:ControlPlanePlacementResponse.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let controlPlanePlacement =
+        (Option.map ~f:ControlPlanePlacementResponse.of_xml)
+          (Xml.child xml_arg0 "controlPlanePlacement") in
+      let controlPlaneInstanceType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "controlPlaneInstanceType") in
+      let outpostArns =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "outpostArns") in
+      make ?controlPlanePlacement ?controlPlaneInstanceType ?outpostArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let controlPlanePlacement =
+        field_map json__ "controlPlanePlacement"
+          ControlPlanePlacementResponse.of_json in
+      let controlPlaneInstanceType =
+        field_map json__ "controlPlaneInstanceType" String_.of_json in
+      let outpostArns = field_map json__ "outpostArns" StringList.of_json in
+      make ?controlPlanePlacement ?controlPlaneInstanceType ?outpostArns ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object representing the configuration of your local Amazon EKS cluster on an Amazon Web Services Outpost. This API isn't available for Amazon EKS clusters on the Amazon Web Services cloud."]
+module RemoteNetworkConfigResponse =
+  struct
+    type nonrec t =
+      {
+      remoteNodeNetworks: RemoteNodeNetworkList.t option
+        [@ocaml.doc
+          "The list of network CIDRs that can contain hybrid nodes."];
+      remotePodNetworks: RemotePodNetworkList.t option
+        [@ocaml.doc
+          "The list of network CIDRs that can contain pods that run Kubernetes webhooks on hybrid nodes."]}
+    let make ?remoteNodeNetworks =
+      fun ?remotePodNetworks ->
+        fun () -> { remoteNodeNetworks; remotePodNetworks }
+    let to_value x =
+      structure_to_value
+        [("remoteNodeNetworks",
+           (Option.map x.remoteNodeNetworks ~f:RemoteNodeNetworkList.to_value));
+        ("remotePodNetworks",
+          (Option.map x.remotePodNetworks ~f:RemotePodNetworkList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let remotePodNetworks =
+        (Option.map ~f:RemotePodNetworkList.of_xml)
+          (Xml.child xml_arg0 "remotePodNetworks") in
+      let remoteNodeNetworks =
+        (Option.map ~f:RemoteNodeNetworkList.of_xml)
+          (Xml.child xml_arg0 "remoteNodeNetworks") in
+      make ?remotePodNetworks ?remoteNodeNetworks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let remotePodNetworks =
+        field_map json__ "remotePodNetworks" RemotePodNetworkList.of_json in
+      let remoteNodeNetworks =
+        field_map json__ "remoteNodeNetworks" RemoteNodeNetworkList.of_json in
+      make ?remotePodNetworks ?remoteNodeNetworks ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration in the cluster for EKS Hybrid Nodes. You can add, change, or remove this configuration after the cluster is created."]
+module StorageConfigResponse =
+  struct
+    type nonrec t =
+      {
+      blockStorage: BlockStorage.t option
+        [@ocaml.doc
+          "Indicates the current configuration of the block storage capability on your EKS Auto Mode cluster. For example, if the capability is enabled or disabled."]}
+    let make ?blockStorage = fun () -> { blockStorage }
+    let to_value x =
+      structure_to_value
+        [("blockStorage",
+           (Option.map x.blockStorage ~f:BlockStorage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let blockStorage =
+        (Option.map ~f:BlockStorage.of_xml)
+          (Xml.child xml_arg0 "blockStorage") in
+      make ?blockStorage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let blockStorage = field_map json__ "blockStorage" BlockStorage.of_json in
+      make ?blockStorage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the status of the request to update the block storage capability of your EKS Auto Mode cluster."]
+module UpgradePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      supportType: SupportType.t option
+        [@ocaml.doc
+          "If the cluster is set to EXTENDED, it will enter extended support at the end of standard support. If the cluster is set to STANDARD, it will be automatically upgraded at the end of standard support. Learn more about EKS Extended Support in the Amazon EKS User Guide."]}
+    let make ?supportType = fun () -> { supportType }
+    let to_value x =
+      structure_to_value
+        [("supportType", (Option.map x.supportType ~f:SupportType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let supportType =
+        (Option.map ~f:SupportType.of_xml) (Xml.child xml_arg0 "supportType") in
+      make ?supportType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let supportType = field_map json__ "supportType" SupportType.of_json in
+      make ?supportType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This value indicates if extended support is enabled or disabled for the cluster. Learn more about EKS Extended Support in the Amazon EKS User Guide."]
 module VpcConfigResponse =
   struct
     type nonrec t =
@@ -1799,14 +4321,13 @@ module VpcConfigResponse =
       vpcId: String_.t option
         [@ocaml.doc "The VPC associated with your cluster."];
       endpointPublicAccess: Boolean.t option
-        [@ocaml.doc
-          "This parameter indicates whether the Amazon EKS public API server endpoint is enabled. If the Amazon EKS public API server endpoint is disabled, your cluster's Kubernetes API server can only receive requests that originate from within the cluster VPC."];
+        [@ocaml.doc "Whether the public API server endpoint is enabled."];
       endpointPrivateAccess: Boolean.t option
         [@ocaml.doc
-          "This parameter indicates whether the Amazon EKS private API server endpoint is enabled. If the Amazon EKS private API server endpoint is enabled, Kubernetes API requests that originate from within your cluster's VPC use the private VPC endpoint instead of traversing the internet. If this value is disabled and you have nodes or Fargate pods in the cluster, then ensure that publicAccessCidrs includes the necessary CIDR blocks for communication with the nodes or Fargate pods. For more information, see Amazon EKS cluster endpoint access control in the Amazon EKS User Guide ."];
+          "This parameter indicates whether the Amazon EKS private API server endpoint is enabled. If the Amazon EKS private API server endpoint is enabled, Kubernetes API requests that originate from within your cluster's VPC use the private VPC endpoint instead of traversing the internet. If this value is disabled and you have nodes or Fargate pods in the cluster, then ensure that publicAccessCidrs includes the necessary CIDR blocks for communication with the nodes or Fargate pods. For more information, see Cluster API server endpoint in the Amazon EKS User Guide ."];
       publicAccessCidrs: StringList.t option
         [@ocaml.doc
-          "The CIDR blocks that are allowed access to your cluster's public Kubernetes API server endpoint. Communication to the endpoint from addresses outside of the listed CIDR blocks is denied. The default value is 0.0.0.0/0. If you've disabled private endpoint access and you have nodes or Fargate pods in the cluster, then ensure that the necessary CIDR blocks are listed. For more information, see Amazon EKS cluster endpoint access control in the Amazon EKS User Guide ."]}
+          "The CIDR blocks that are allowed access to your cluster's public Kubernetes API server endpoint. Communication to the endpoint from addresses outside of the CIDR blocks that you specify is denied. The default value is 0.0.0.0/0 and additionally ::/0 for dual-stack `IPv6` clusters. If you've disabled private endpoint access, make sure that you specify the necessary CIDR blocks for every node and Fargate Pod in the cluster. For more information, see Cluster API server endpoint in the Amazon EKS User Guide . Note that the public endpoints are dual-stack for only IPv6 clusters that are made after October 2024. You can't add IPv6 CIDR blocks to IPv4 clusters or IPv6 clusters that were made before October 2024."]}
     let make ?subnetIds =
       fun ?securityGroupIds ->
         fun ?clusterSecurityGroupId ->
@@ -1861,24 +4382,45 @@ module VpcConfigResponse =
       make ?publicAccessCidrs ?endpointPrivateAccess ?endpointPublicAccess
         ?vpcId ?clusterSecurityGroupId ?securityGroupIds ?subnetIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let publicAccessCidrs =
-        field_map json "publicAccessCidrs" StringList.of_json in
+        field_map json__ "publicAccessCidrs" StringList.of_json in
       let endpointPrivateAccess =
-        field_map json "endpointPrivateAccess" Boolean.of_json in
+        field_map json__ "endpointPrivateAccess" Boolean.of_json in
       let endpointPublicAccess =
-        field_map json "endpointPublicAccess" Boolean.of_json in
-      let vpcId = field_map json "vpcId" String_.of_json in
+        field_map json__ "endpointPublicAccess" Boolean.of_json in
+      let vpcId = field_map json__ "vpcId" String_.of_json in
       let clusterSecurityGroupId =
-        field_map json "clusterSecurityGroupId" String_.of_json in
+        field_map json__ "clusterSecurityGroupId" String_.of_json in
       let securityGroupIds =
-        field_map json "securityGroupIds" StringList.of_json in
-      let subnetIds = field_map json "subnetIds" StringList.of_json in
+        field_map json__ "securityGroupIds" StringList.of_json in
+      let subnetIds = field_map json__ "subnetIds" StringList.of_json in
       make ?publicAccessCidrs ?endpointPrivateAccess ?endpointPublicAccess
         ?vpcId ?clusterSecurityGroupId ?securityGroupIds ?subnetIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object representing an Amazon EKS cluster VPC configuration response."]
+module ZonalShiftConfigResponse =
+  struct
+    type nonrec t =
+      {
+      enabled: BoxedBoolean.t option
+        [@ocaml.doc "Whether the zonal shift is enabled."]}
+    let make ?enabled = fun () -> { enabled }
+    let to_value x =
+      structure_to_value
+        [("enabled", (Option.map x.enabled ~f:BoxedBoolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enabled =
+        (Option.map ~f:BoxedBoolean.of_xml) (Xml.child xml_arg0 "enabled") in
+      make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enabled = field_map json__ "enabled" BoxedBoolean.of_json in
+      make ?enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The status of zonal shift configuration for the cluster"]
 module ConnectorConfigProvider =
   struct
     type nonrec t =
@@ -1927,12 +4469,233 @@ module ConnectorConfigProvider =
       of_string (string_of_json ~kind:"ConnectorConfigProvider" j)
     let to_json = simple_to_json to_value
   end
+module PodIdentityAssociationSummary =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t option
+        [@ocaml.doc "The name of the cluster that the association is in."];
+      namespace: String_.t option
+        [@ocaml.doc
+          "The name of the Kubernetes namespace inside the cluster to create the association in. The service account and the Pods that use the service account must be in this namespace."];
+      serviceAccount: String_.t option
+        [@ocaml.doc
+          "The name of the Kubernetes service account inside the cluster to associate the IAM credentials with."];
+      associationArn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the association."];
+      associationId: String_.t option
+        [@ocaml.doc "The ID of the association."];
+      ownerArn: String_.t option
+        [@ocaml.doc
+          "If defined, the association is owned by an Amazon EKS add-on."]}
+    let make ?clusterName =
+      fun ?namespace ->
+        fun ?serviceAccount ->
+          fun ?associationArn ->
+            fun ?associationId ->
+              fun ?ownerArn ->
+                fun () ->
+                  {
+                    clusterName;
+                    namespace;
+                    serviceAccount;
+                    associationArn;
+                    associationId;
+                    ownerArn
+                  }
+    let to_value x =
+      structure_to_value
+        [("clusterName", (Option.map x.clusterName ~f:String_.to_value));
+        ("namespace", (Option.map x.namespace ~f:String_.to_value));
+        ("serviceAccount", (Option.map x.serviceAccount ~f:String_.to_value));
+        ("associationArn", (Option.map x.associationArn ~f:String_.to_value));
+        ("associationId", (Option.map x.associationId ~f:String_.to_value));
+        ("ownerArn", (Option.map x.ownerArn ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ownerArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ownerArn") in
+      let associationId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "associationId") in
+      let associationArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "associationArn") in
+      let serviceAccount =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceAccount") in
+      let namespace =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "namespace") in
+      let clusterName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterName") in
+      make ?ownerArn ?associationId ?associationArn ?serviceAccount
+        ?namespace ?clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ownerArn = field_map json__ "ownerArn" String_.of_json in
+      let associationId = field_map json__ "associationId" String_.of_json in
+      let associationArn = field_map json__ "associationArn" String_.of_json in
+      let serviceAccount = field_map json__ "serviceAccount" String_.of_json in
+      let namespace = field_map json__ "namespace" String_.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
+      make ?ownerArn ?associationId ?associationArn ?serviceAccount
+        ?namespace ?clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The summarized description of the association. Each summary is simplified by removing these fields compared to the full PodIdentityAssociation : The IAM role: roleArn The timestamp that the association was created at: createdAt The most recent timestamp that the association was modified at:. modifiedAt The tags on the association: tags"]
+module InsightSummary =
+  struct
+    type nonrec t =
+      {
+      id: String_.t option [@ocaml.doc "The ID of the insight."];
+      name: String_.t option [@ocaml.doc "The name of the insight."];
+      category: Category.t option [@ocaml.doc "The category of the insight."];
+      kubernetesVersion: String_.t option
+        [@ocaml.doc
+          "The Kubernetes minor version associated with an insight if applicable."];
+      lastRefreshTime: Timestamp.t option
+        [@ocaml.doc
+          "The time Amazon EKS last successfully completed a refresh of this insight check on the cluster."];
+      lastTransitionTime: Timestamp.t option
+        [@ocaml.doc "The time the status of the insight last changed."];
+      description: String_.t option
+        [@ocaml.doc
+          "The description of the insight which includes alert criteria, remediation recommendation, and additional resources (contains Markdown)."];
+      insightStatus: InsightStatus.t option
+        [@ocaml.doc
+          "An object containing more detail on the status of the insight."]}
+    let make ?id =
+      fun ?name ->
+        fun ?category ->
+          fun ?kubernetesVersion ->
+            fun ?lastRefreshTime ->
+              fun ?lastTransitionTime ->
+                fun ?description ->
+                  fun ?insightStatus ->
+                    fun () ->
+                      {
+                        id;
+                        name;
+                        category;
+                        kubernetesVersion;
+                        lastRefreshTime;
+                        lastTransitionTime;
+                        description;
+                        insightStatus
+                      }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:String_.to_value));
+        ("name", (Option.map x.name ~f:String_.to_value));
+        ("category", (Option.map x.category ~f:Category.to_value));
+        ("kubernetesVersion",
+          (Option.map x.kubernetesVersion ~f:String_.to_value));
+        ("lastRefreshTime",
+          (Option.map x.lastRefreshTime ~f:Timestamp.to_value));
+        ("lastTransitionTime",
+          (Option.map x.lastTransitionTime ~f:Timestamp.to_value));
+        ("description", (Option.map x.description ~f:String_.to_value));
+        ("insightStatus",
+          (Option.map x.insightStatus ~f:InsightStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let insightStatus =
+        (Option.map ~f:InsightStatus.of_xml)
+          (Xml.child xml_arg0 "insightStatus") in
+      let description =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
+      let lastTransitionTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastTransitionTime") in
+      let lastRefreshTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastRefreshTime") in
+      let kubernetesVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "kubernetesVersion") in
+      let category =
+        (Option.map ~f:Category.of_xml) (Xml.child xml_arg0 "category") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
+      make ?insightStatus ?description ?lastTransitionTime ?lastRefreshTime
+        ?kubernetesVersion ?category ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let insightStatus =
+        field_map json__ "insightStatus" InsightStatus.of_json in
+      let description = field_map json__ "description" String_.of_json in
+      let lastTransitionTime =
+        field_map json__ "lastTransitionTime" Timestamp.of_json in
+      let lastRefreshTime =
+        field_map json__ "lastRefreshTime" Timestamp.of_json in
+      let kubernetesVersion =
+        field_map json__ "kubernetesVersion" String_.of_json in
+      let category = field_map json__ "category" Category.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
+      make ?insightStatus ?description ?lastTransitionTime ?lastRefreshTime
+        ?kubernetesVersion ?category ?name ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The summarized description of the insight."]
+module CategoryList =
+  struct
+    type nonrec t = Category.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Category.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Category.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CategoryList" ~of_json:Category.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InsightStatusValueList =
+  struct
+    type nonrec t = InsightStatusValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InsightStatusValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InsightStatusValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InsightStatusValueList"
+        ~of_json:InsightStatusValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module IdentityProviderConfig =
   struct
     type nonrec t =
       {
       type_: String_.t
-        [@ocaml.doc "The type of the identity provider configuration."];
+        [@ocaml.doc
+          "The type of the identity provider configuration. The only type available is oidc."];
       name: String_.t
         [@ocaml.doc "The name of the identity provider configuration."]}
     let context_ = "IdentityProviderConfig"
@@ -1949,13 +4712,342 @@ module IdentityProviderConfig =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ~name ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" String_.of_json in
-      let type_ = field_map_exn json "type" String_.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" String_.of_json in
+      let type_ = field_map_exn json__ "type" String_.of_json in
       make ~name ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object representing an identity provider configuration."]
+module EksAnywhereSubscription =
+  struct
+    type nonrec t =
+      {
+      id: String_.t option [@ocaml.doc "UUID identifying a subscription."];
+      arn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) for the subscription."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "The Unix timestamp in seconds for when the subscription was created."];
+      effectiveDate: Timestamp.t option
+        [@ocaml.doc
+          "The Unix timestamp in seconds for when the subscription is effective."];
+      expirationDate: Timestamp.t option
+        [@ocaml.doc
+          "The Unix timestamp in seconds for when the subscription will expire or auto renew, depending on the auto renew configuration of the subscription object."];
+      licenseQuantity: Integer.t option
+        [@ocaml.doc
+          "The number of licenses included in a subscription. Valid values are between 1 and 100."];
+      licenseType: EksAnywhereSubscriptionLicenseType.t option
+        [@ocaml.doc
+          "The type of licenses included in the subscription. Valid value is CLUSTER. With the CLUSTER license type, each license covers support for a single EKS Anywhere cluster."];
+      term: EksAnywhereSubscriptionTerm.t option
+        [@ocaml.doc "An EksAnywhereSubscriptionTerm object."];
+      status: String_.t option [@ocaml.doc "The status of a subscription."];
+      autoRenew: Boolean.t option
+        [@ocaml.doc
+          "A boolean indicating whether or not a subscription will auto renew when it expires."];
+      licenseArns: StringList.t option
+        [@ocaml.doc
+          "Amazon Web Services License Manager ARN associated with the subscription."];
+      licenses: LicenseList.t option
+        [@ocaml.doc
+          "Includes all of the claims in the license token necessary to validate the license for extended support."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The metadata for a subscription to assist with categorization and organization. Each tag consists of a key and an optional value. Subscription tags do not propagate to any other resources associated with the subscription."]}
+    let make ?id =
+      fun ?arn ->
+        fun ?createdAt ->
+          fun ?effectiveDate ->
+            fun ?expirationDate ->
+              fun ?licenseQuantity ->
+                fun ?licenseType ->
+                  fun ?term ->
+                    fun ?status ->
+                      fun ?autoRenew ->
+                        fun ?licenseArns ->
+                          fun ?licenses ->
+                            fun ?tags ->
+                              fun () ->
+                                {
+                                  id;
+                                  arn;
+                                  createdAt;
+                                  effectiveDate;
+                                  expirationDate;
+                                  licenseQuantity;
+                                  licenseType;
+                                  term;
+                                  status;
+                                  autoRenew;
+                                  licenseArns;
+                                  licenses;
+                                  tags
+                                }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:String_.to_value));
+        ("arn", (Option.map x.arn ~f:String_.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("effectiveDate", (Option.map x.effectiveDate ~f:Timestamp.to_value));
+        ("expirationDate",
+          (Option.map x.expirationDate ~f:Timestamp.to_value));
+        ("licenseQuantity",
+          (Option.map x.licenseQuantity ~f:Integer.to_value));
+        ("licenseType",
+          (Option.map x.licenseType
+             ~f:EksAnywhereSubscriptionLicenseType.to_value));
+        ("term", (Option.map x.term ~f:EksAnywhereSubscriptionTerm.to_value));
+        ("status", (Option.map x.status ~f:String_.to_value));
+        ("autoRenew", (Option.map x.autoRenew ~f:Boolean.to_value));
+        ("licenseArns", (Option.map x.licenseArns ~f:StringList.to_value));
+        ("licenses", (Option.map x.licenses ~f:LicenseList.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let licenses =
+        (Option.map ~f:LicenseList.of_xml) (Xml.child xml_arg0 "licenses") in
+      let licenseArns =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "licenseArns") in
+      let autoRenew =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "autoRenew") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
+      let term =
+        (Option.map ~f:EksAnywhereSubscriptionTerm.of_xml)
+          (Xml.child xml_arg0 "term") in
+      let licenseType =
+        (Option.map ~f:EksAnywhereSubscriptionLicenseType.of_xml)
+          (Xml.child xml_arg0 "licenseType") in
+      let licenseQuantity =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "licenseQuantity") in
+      let expirationDate =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "expirationDate") in
+      let effectiveDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "effectiveDate") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
+      make ?tags ?licenses ?licenseArns ?autoRenew ?status ?term ?licenseType
+        ?licenseQuantity ?expirationDate ?effectiveDate ?createdAt ?arn ?id
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let licenses = field_map json__ "licenses" LicenseList.of_json in
+      let licenseArns = field_map json__ "licenseArns" StringList.of_json in
+      let autoRenew = field_map json__ "autoRenew" Boolean.of_json in
+      let status = field_map json__ "status" String_.of_json in
+      let term = field_map json__ "term" EksAnywhereSubscriptionTerm.of_json in
+      let licenseType =
+        field_map json__ "licenseType"
+          EksAnywhereSubscriptionLicenseType.of_json in
+      let licenseQuantity =
+        field_map json__ "licenseQuantity" Integer.of_json in
+      let expirationDate =
+        field_map json__ "expirationDate" Timestamp.of_json in
+      let effectiveDate = field_map json__ "effectiveDate" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
+      make ?tags ?licenses ?licenseArns ?autoRenew ?status ?term ?licenseType
+        ?licenseQuantity ?expirationDate ?effectiveDate ?createdAt ?arn ?id
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An EKS Anywhere subscription authorizing the customer to support for licensed clusters and access to EKS Anywhere Curated Packages."]
+module EksAnywhereSubscriptionStatus =
+  struct
+    type nonrec t =
+      | CREATING 
+      | ACTIVE 
+      | UPDATING 
+      | EXPIRING 
+      | EXPIRED 
+      | DELETING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | ACTIVE -> "ACTIVE"
+      | UPDATING -> "UPDATING"
+      | EXPIRING -> "EXPIRING"
+      | EXPIRED -> "EXPIRED"
+      | DELETING -> "DELETING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "ACTIVE" -> ACTIVE
+      | "UPDATING" -> UPDATING
+      | "EXPIRING" -> EXPIRING
+      | "EXPIRED" -> EXPIRED
+      | "DELETING" -> DELETING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EksAnywhereSubscriptionStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EksAnywhereSubscriptionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module CapabilitySummary =
+  struct
+    type nonrec t =
+      {
+      capabilityName: String_.t option
+        [@ocaml.doc "The unique name of the capability within the cluster."];
+      arn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the capability."];
+      type_: CapabilityType.t option
+        [@ocaml.doc
+          "The type of capability. Valid values are ACK, ARGOCD, or KRO."];
+      status: CapabilityStatus.t option
+        [@ocaml.doc "The current status of the capability."];
+      version: String_.t option
+        [@ocaml.doc
+          "The version of the capability software that is currently running."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "The Unix epoch timestamp in seconds for when the capability was created."];
+      modifiedAt: Timestamp.t option
+        [@ocaml.doc
+          "The Unix epoch timestamp in seconds for when the capability was last modified."]}
+    let make ?capabilityName =
+      fun ?arn ->
+        fun ?type_ ->
+          fun ?status ->
+            fun ?version ->
+              fun ?createdAt ->
+                fun ?modifiedAt ->
+                  fun () ->
+                    {
+                      capabilityName;
+                      arn;
+                      type_;
+                      status;
+                      version;
+                      createdAt;
+                      modifiedAt
+                    }
+    let to_value x =
+      structure_to_value
+        [("capabilityName",
+           (Option.map x.capabilityName ~f:String_.to_value));
+        ("arn", (Option.map x.arn ~f:String_.to_value));
+        ("type", (Option.map x.type_ ~f:CapabilityType.to_value));
+        ("status", (Option.map x.status ~f:CapabilityStatus.to_value));
+        ("version", (Option.map x.version ~f:String_.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("modifiedAt", (Option.map x.modifiedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modifiedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "modifiedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let version =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "version") in
+      let status =
+        (Option.map ~f:CapabilityStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let type_ =
+        (Option.map ~f:CapabilityType.of_xml) (Xml.child xml_arg0 "type") in
+      let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
+      let capabilityName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "capabilityName") in
+      make ?modifiedAt ?createdAt ?version ?status ?type_ ?arn
+        ?capabilityName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modifiedAt = field_map json__ "modifiedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let version = field_map json__ "version" String_.of_json in
+      let status = field_map json__ "status" CapabilityStatus.of_json in
+      let type_ = field_map json__ "type" CapabilityType.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
+      let capabilityName = field_map json__ "capabilityName" String_.of_json in
+      make ?modifiedAt ?createdAt ?version ?status ?type_ ?arn
+        ?capabilityName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A summary of a capability, containing basic information without the full configuration details. This is returned by the ListCapabilities operation."]
+module AssociatedAccessPolicy =
+  struct
+    type nonrec t =
+      {
+      policyArn: String_.t option [@ocaml.doc "The ARN of the AccessPolicy."];
+      accessScope: AccessScope.t option
+        [@ocaml.doc "The scope of the access policy."];
+      associatedAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time the AccessPolicy was associated with an AccessEntry."];
+      modifiedAt: Timestamp.t option
+        [@ocaml.doc
+          "The Unix epoch timestamp for the last modification to the object."]}
+    let make ?policyArn =
+      fun ?accessScope ->
+        fun ?associatedAt ->
+          fun ?modifiedAt ->
+            fun () -> { policyArn; accessScope; associatedAt; modifiedAt }
+    let to_value x =
+      structure_to_value
+        [("policyArn", (Option.map x.policyArn ~f:String_.to_value));
+        ("accessScope", (Option.map x.accessScope ~f:AccessScope.to_value));
+        ("associatedAt", (Option.map x.associatedAt ~f:Timestamp.to_value));
+        ("modifiedAt", (Option.map x.modifiedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modifiedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "modifiedAt") in
+      let associatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "associatedAt") in
+      let accessScope =
+        (Option.map ~f:AccessScope.of_xml) (Xml.child xml_arg0 "accessScope") in
+      let policyArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "policyArn") in
+      make ?modifiedAt ?associatedAt ?accessScope ?policyArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modifiedAt = field_map json__ "modifiedAt" Timestamp.of_json in
+      let associatedAt = field_map json__ "associatedAt" Timestamp.of_json in
+      let accessScope = field_map json__ "accessScope" AccessScope.of_json in
+      let policyArn = field_map json__ "policyArn" String_.of_json in
+      make ?modifiedAt ?associatedAt ?accessScope ?policyArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An access policy association."]
+module AccessPolicy =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option [@ocaml.doc "The name of the access policy."];
+      arn: String_.t option [@ocaml.doc "The ARN of the access policy."]}
+    let make ?name = fun ?arn -> fun () -> { name; arn }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("arn", (Option.map x.arn ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn = field_map json__ "arn" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?arn ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An access policy includes permissions that allow Amazon EKS to authorize an IAM principal to work with Kubernetes objects on your cluster. The policies are managed by Amazon EKS, but they're not IAM policies. You can't view the permissions in the policies using the API. The permissions for many of the policies are similar to the Kubernetes cluster-admin, admin, edit, and view cluster roles. For more information about these cluster roles, see User-facing roles in the Kubernetes documentation. To view the contents of the policies, see Access policy permissions in the Amazon EKS User Guide."]
 module AMITypes =
   struct
     type nonrec t =
@@ -1965,6 +5057,23 @@ module AMITypes =
       | CUSTOM 
       | BOTTLEROCKET_ARM_64 
       | BOTTLEROCKET_x86_64 
+      | BOTTLEROCKET_ARM_64_FIPS 
+      | BOTTLEROCKET_x86_64_FIPS 
+      | BOTTLEROCKET_ARM_64_NVIDIA 
+      | BOTTLEROCKET_x86_64_NVIDIA 
+      | BOTTLEROCKET_ARM_64_NVIDIA_FIPS 
+      | BOTTLEROCKET_x86_64_NVIDIA_FIPS 
+      | WINDOWS_CORE_2019_x86_64 
+      | WINDOWS_FULL_2019_x86_64 
+      | WINDOWS_CORE_2022_x86_64 
+      | WINDOWS_FULL_2022_x86_64 
+      | WINDOWS_CORE_2025_x86_64 
+      | WINDOWS_FULL_2025_x86_64 
+      | AL2023_x86_64_STANDARD 
+      | AL2023_ARM_64_STANDARD 
+      | AL2023_x86_64_NEURON 
+      | AL2023_x86_64_NVIDIA 
+      | AL2023_ARM_64_NVIDIA 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1975,6 +5084,23 @@ module AMITypes =
       | CUSTOM -> "CUSTOM"
       | BOTTLEROCKET_ARM_64 -> "BOTTLEROCKET_ARM_64"
       | BOTTLEROCKET_x86_64 -> "BOTTLEROCKET_x86_64"
+      | BOTTLEROCKET_ARM_64_FIPS -> "BOTTLEROCKET_ARM_64_FIPS"
+      | BOTTLEROCKET_x86_64_FIPS -> "BOTTLEROCKET_x86_64_FIPS"
+      | BOTTLEROCKET_ARM_64_NVIDIA -> "BOTTLEROCKET_ARM_64_NVIDIA"
+      | BOTTLEROCKET_x86_64_NVIDIA -> "BOTTLEROCKET_x86_64_NVIDIA"
+      | BOTTLEROCKET_ARM_64_NVIDIA_FIPS -> "BOTTLEROCKET_ARM_64_NVIDIA_FIPS"
+      | BOTTLEROCKET_x86_64_NVIDIA_FIPS -> "BOTTLEROCKET_x86_64_NVIDIA_FIPS"
+      | WINDOWS_CORE_2019_x86_64 -> "WINDOWS_CORE_2019_x86_64"
+      | WINDOWS_FULL_2019_x86_64 -> "WINDOWS_FULL_2019_x86_64"
+      | WINDOWS_CORE_2022_x86_64 -> "WINDOWS_CORE_2022_x86_64"
+      | WINDOWS_FULL_2022_x86_64 -> "WINDOWS_FULL_2022_x86_64"
+      | WINDOWS_CORE_2025_x86_64 -> "WINDOWS_CORE_2025_x86_64"
+      | WINDOWS_FULL_2025_x86_64 -> "WINDOWS_FULL_2025_x86_64"
+      | AL2023_x86_64_STANDARD -> "AL2023_x86_64_STANDARD"
+      | AL2023_ARM_64_STANDARD -> "AL2023_ARM_64_STANDARD"
+      | AL2023_x86_64_NEURON -> "AL2023_x86_64_NEURON"
+      | AL2023_x86_64_NVIDIA -> "AL2023_x86_64_NVIDIA"
+      | AL2023_ARM_64_NVIDIA -> "AL2023_ARM_64_NVIDIA"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1984,6 +5110,23 @@ module AMITypes =
       | "CUSTOM" -> CUSTOM
       | "BOTTLEROCKET_ARM_64" -> BOTTLEROCKET_ARM_64
       | "BOTTLEROCKET_x86_64" -> BOTTLEROCKET_x86_64
+      | "BOTTLEROCKET_ARM_64_FIPS" -> BOTTLEROCKET_ARM_64_FIPS
+      | "BOTTLEROCKET_x86_64_FIPS" -> BOTTLEROCKET_x86_64_FIPS
+      | "BOTTLEROCKET_ARM_64_NVIDIA" -> BOTTLEROCKET_ARM_64_NVIDIA
+      | "BOTTLEROCKET_x86_64_NVIDIA" -> BOTTLEROCKET_x86_64_NVIDIA
+      | "BOTTLEROCKET_ARM_64_NVIDIA_FIPS" -> BOTTLEROCKET_ARM_64_NVIDIA_FIPS
+      | "BOTTLEROCKET_x86_64_NVIDIA_FIPS" -> BOTTLEROCKET_x86_64_NVIDIA_FIPS
+      | "WINDOWS_CORE_2019_x86_64" -> WINDOWS_CORE_2019_x86_64
+      | "WINDOWS_FULL_2019_x86_64" -> WINDOWS_FULL_2019_x86_64
+      | "WINDOWS_CORE_2022_x86_64" -> WINDOWS_CORE_2022_x86_64
+      | "WINDOWS_FULL_2022_x86_64" -> WINDOWS_FULL_2022_x86_64
+      | "WINDOWS_CORE_2025_x86_64" -> WINDOWS_CORE_2025_x86_64
+      | "WINDOWS_FULL_2025_x86_64" -> WINDOWS_FULL_2025_x86_64
+      | "AL2023_x86_64_STANDARD" -> AL2023_x86_64_STANDARD
+      | "AL2023_ARM_64_STANDARD" -> AL2023_ARM_64_STANDARD
+      | "AL2023_x86_64_NEURON" -> AL2023_x86_64_NEURON
+      | "AL2023_x86_64_NVIDIA" -> AL2023_x86_64_NVIDIA
+      | "AL2023_ARM_64_NVIDIA" -> AL2023_ARM_64_NVIDIA
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1993,36 +5136,25 @@ module AMITypes =
     let of_json j = of_string (string_of_json ~kind:"AMITypes" j)
     let to_json = simple_to_json to_value
   end
-module BoxedInteger =
-  struct
-    type nonrec t = int
-    let make i = i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for BoxedInteger" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
 module CapacityTypes =
   struct
     type nonrec t =
       | ON_DEMAND 
       | SPOT 
+      | CAPACITY_BLOCK 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | ON_DEMAND -> "ON_DEMAND"
       | SPOT -> "SPOT"
+      | CAPACITY_BLOCK -> "CAPACITY_BLOCK"
       | Non_static_id s -> s
     let of_string =
       function
       | "ON_DEMAND" -> ON_DEMAND
       | "SPOT" -> SPOT
+      | "CAPACITY_BLOCK" -> CAPACITY_BLOCK
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2036,11 +5168,15 @@ module LaunchTemplateSpecification =
   struct
     type nonrec t =
       {
-      name: String_.t option [@ocaml.doc "The name of the launch template."];
+      name: String_.t option
+        [@ocaml.doc
+          "The name of the launch template. You must specify either the launch template name or the launch template ID in the request, but not both. After node group creation, you cannot use a different name."];
       version: String_.t option
         [@ocaml.doc
-          "The version of the launch template to use. If no version is specified, then the template's default version is used."];
-      id: String_.t option [@ocaml.doc "The ID of the launch template."]}
+          "The version number of the launch template to use. If no version is specified, then the template's default version is used. You can use a different version for node group updates."];
+      id: String_.t option
+        [@ocaml.doc
+          "The ID of the launch template. You must specify either the launch template ID or the launch template name in the request, but not both. After node group creation, you cannot use a different ID."]}
     let make ?name =
       fun ?version -> fun ?id -> fun () -> { name; version; id }
     let to_value x =
@@ -2056,14 +5192,114 @@ module LaunchTemplateSpecification =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?id ?version ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "id" String_.of_json in
-      let version = field_map json "version" String_.of_json in
-      let name = field_map json "name" String_.of_json in
+    let of_json json__ =
+      let id = field_map json__ "id" String_.of_json in
+      let version = field_map json__ "version" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
       make ?id ?version ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing a node group launch template specification. The launch template cannot include SubnetId , IamInstanceProfile , RequestSpotInstances , HibernationOptions , or TerminateInstances , or the node group deployment or update will fail. For more information about launch templates, see CreateLaunchTemplate in the Amazon EC2 API Reference. For more information about using launch templates with Amazon EKS, see Launch template support in the Amazon EKS User Guide. Specify either name or id, but not both."]
+       "An object representing a node group launch template specification. The launch template can't include SubnetId , IamInstanceProfile , RequestSpotInstances , HibernationOptions , or TerminateInstances , or the node group deployment or update will fail. For more information about launch templates, see CreateLaunchTemplate in the Amazon EC2 API Reference. For more information about using launch templates with Amazon EKS, see Customizing managed nodes with launch templates in the Amazon EKS User Guide. You must specify either the launch template ID or the launch template name in the request, but not both."]
+module NodeRepairConfig =
+  struct
+    type nonrec t =
+      {
+      enabled: BoxedBoolean.t option
+        [@ocaml.doc
+          "Specifies whether to enable node auto repair for the node group. Node auto repair is disabled by default."];
+      maxUnhealthyNodeThresholdCount: NonZeroInteger.t option
+        [@ocaml.doc
+          "Specify a count threshold of unhealthy nodes, above which node auto repair actions will stop. When using this, you cannot also set maxUnhealthyNodeThresholdPercentage at the same time."];
+      maxUnhealthyNodeThresholdPercentage: PercentCapacity.t option
+        [@ocaml.doc
+          "Specify a percentage threshold of unhealthy nodes, above which node auto repair actions will stop. When using this, you cannot also set maxUnhealthyNodeThresholdCount at the same time."];
+      maxParallelNodesRepairedCount: NonZeroInteger.t option
+        [@ocaml.doc
+          "Specify the maximum number of nodes that can be repaired concurrently or in parallel, expressed as a count of unhealthy nodes. This gives you finer-grained control over the pace of node replacements. When using this, you cannot also set maxParallelNodesRepairedPercentage at the same time."];
+      maxParallelNodesRepairedPercentage: PercentCapacity.t option
+        [@ocaml.doc
+          "Specify the maximum number of nodes that can be repaired concurrently or in parallel, expressed as a percentage of unhealthy nodes. This gives you finer-grained control over the pace of node replacements. When using this, you cannot also set maxParallelNodesRepairedCount at the same time."];
+      nodeRepairConfigOverrides: NodeRepairConfigOverridesList.t option
+        [@ocaml.doc
+          "Specify granular overrides for specific repair actions. These overrides control the repair action and the repair delay time before a node is considered eligible for repair. If you use this, you must specify all the values."]}
+    let make ?enabled =
+      fun ?maxUnhealthyNodeThresholdCount ->
+        fun ?maxUnhealthyNodeThresholdPercentage ->
+          fun ?maxParallelNodesRepairedCount ->
+            fun ?maxParallelNodesRepairedPercentage ->
+              fun ?nodeRepairConfigOverrides ->
+                fun () ->
+                  {
+                    enabled;
+                    maxUnhealthyNodeThresholdCount;
+                    maxUnhealthyNodeThresholdPercentage;
+                    maxParallelNodesRepairedCount;
+                    maxParallelNodesRepairedPercentage;
+                    nodeRepairConfigOverrides
+                  }
+    let to_value x =
+      structure_to_value
+        [("enabled", (Option.map x.enabled ~f:BoxedBoolean.to_value));
+        ("maxUnhealthyNodeThresholdCount",
+          (Option.map x.maxUnhealthyNodeThresholdCount
+             ~f:NonZeroInteger.to_value));
+        ("maxUnhealthyNodeThresholdPercentage",
+          (Option.map x.maxUnhealthyNodeThresholdPercentage
+             ~f:PercentCapacity.to_value));
+        ("maxParallelNodesRepairedCount",
+          (Option.map x.maxParallelNodesRepairedCount
+             ~f:NonZeroInteger.to_value));
+        ("maxParallelNodesRepairedPercentage",
+          (Option.map x.maxParallelNodesRepairedPercentage
+             ~f:PercentCapacity.to_value));
+        ("nodeRepairConfigOverrides",
+          (Option.map x.nodeRepairConfigOverrides
+             ~f:NodeRepairConfigOverridesList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nodeRepairConfigOverrides =
+        (Option.map ~f:NodeRepairConfigOverridesList.of_xml)
+          (Xml.child xml_arg0 "nodeRepairConfigOverrides") in
+      let maxParallelNodesRepairedPercentage =
+        (Option.map ~f:PercentCapacity.of_xml)
+          (Xml.child xml_arg0 "maxParallelNodesRepairedPercentage") in
+      let maxParallelNodesRepairedCount =
+        (Option.map ~f:NonZeroInteger.of_xml)
+          (Xml.child xml_arg0 "maxParallelNodesRepairedCount") in
+      let maxUnhealthyNodeThresholdPercentage =
+        (Option.map ~f:PercentCapacity.of_xml)
+          (Xml.child xml_arg0 "maxUnhealthyNodeThresholdPercentage") in
+      let maxUnhealthyNodeThresholdCount =
+        (Option.map ~f:NonZeroInteger.of_xml)
+          (Xml.child xml_arg0 "maxUnhealthyNodeThresholdCount") in
+      let enabled =
+        (Option.map ~f:BoxedBoolean.of_xml) (Xml.child xml_arg0 "enabled") in
+      make ?nodeRepairConfigOverrides ?maxParallelNodesRepairedPercentage
+        ?maxParallelNodesRepairedCount ?maxUnhealthyNodeThresholdPercentage
+        ?maxUnhealthyNodeThresholdCount ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nodeRepairConfigOverrides =
+        field_map json__ "nodeRepairConfigOverrides"
+          NodeRepairConfigOverridesList.of_json in
+      let maxParallelNodesRepairedPercentage =
+        field_map json__ "maxParallelNodesRepairedPercentage"
+          PercentCapacity.of_json in
+      let maxParallelNodesRepairedCount =
+        field_map json__ "maxParallelNodesRepairedCount"
+          NonZeroInteger.of_json in
+      let maxUnhealthyNodeThresholdPercentage =
+        field_map json__ "maxUnhealthyNodeThresholdPercentage"
+          PercentCapacity.of_json in
+      let maxUnhealthyNodeThresholdCount =
+        field_map json__ "maxUnhealthyNodeThresholdCount"
+          NonZeroInteger.of_json in
+      let enabled = field_map json__ "enabled" BoxedBoolean.of_json in
+      make ?nodeRepairConfigOverrides ?maxParallelNodesRepairedPercentage
+        ?maxParallelNodesRepairedCount ?maxUnhealthyNodeThresholdPercentage
+        ?maxUnhealthyNodeThresholdCount ?enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The node auto repair configuration for the node group."]
 module NodegroupHealth =
   struct
     type nonrec t =
@@ -2080,8 +5316,8 @@ module NodegroupHealth =
         (Option.map ~f:IssueList.of_xml) (Xml.child xml_arg0 "issues") in
       make ?issues ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let issues = field_map json "issues" IssueList.of_json in
+    let of_json json__ =
+      let issues = field_map json__ "issues" IssueList.of_json in
       make ?issues ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2115,11 +5351,11 @@ module NodegroupResources =
           (Xml.child xml_arg0 "autoScalingGroups") in
       make ?remoteAccessSecurityGroup ?autoScalingGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let remoteAccessSecurityGroup =
-        field_map json "remoteAccessSecurityGroup" String_.of_json in
+        field_map json__ "remoteAccessSecurityGroup" String_.of_json in
       let autoScalingGroups =
-        field_map json "autoScalingGroups" AutoScalingGroupList.of_json in
+        field_map json__ "autoScalingGroups" AutoScalingGroupList.of_json in
       make ?remoteAccessSecurityGroup ?autoScalingGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2136,7 +5372,7 @@ module NodegroupScalingConfig =
           "The maximum number of nodes that the managed node group can scale out to. For information about the maximum number that you can specify, see Amazon EKS service quotas in the Amazon EKS User Guide."];
       desiredSize: ZeroCapacity.t option
         [@ocaml.doc
-          "The current number of nodes that the managed node group should maintain. If you use Cluster Autoscaler, you shouldn't change the desiredSize value directly, as this can cause the Cluster Autoscaler to suddenly scale up or scale down. Whenever this parameter changes, the number of worker nodes in the node group is updated to the specified size. If this parameter is given a value that is smaller than the current number of running worker nodes, the necessary number of worker nodes are terminated to match the given value. When using CloudFormation, no action occurs if you remove this parameter from your CFN template. This parameter can be different from minSize in some cases, such as when starting with extra hosts for testing. This parameter can also be different when you want to start with an estimated number of needed hosts, but let Cluster Autoscaler reduce the number if there are too many. When Cluster Autoscaler is used, the desiredSize parameter is altered by Cluster Autoscaler (but can be out-of-date for short periods of time). Cluster Autoscaler doesn't scale a managed node group lower than minSize or higher than maxSize."]}
+          "The current number of nodes that the managed node group should maintain. If you use the Kubernetes Cluster Autoscaler, you shouldn't change the desiredSize value directly, as this can cause the Cluster Autoscaler to suddenly scale up or scale down. Whenever this parameter changes, the number of worker nodes in the node group is updated to the specified size. If this parameter is given a value that is smaller than the current number of running worker nodes, the necessary number of worker nodes are terminated to match the given value. When using CloudFormation, no action occurs if you remove this parameter from your CFN template. This parameter can be different from minSize in some cases, such as when starting with extra hosts for testing. This parameter can also be different when you want to start with an estimated number of needed hosts, but let the Cluster Autoscaler reduce the number if there are too many. When the Cluster Autoscaler is used, the desiredSize parameter is altered by the Cluster Autoscaler (but can be out-of-date for short periods of time). the Cluster Autoscaler doesn't scale a managed node group lower than minSize or higher than maxSize."]}
     let make ?minSize =
       fun ?maxSize ->
         fun ?desiredSize -> fun () -> { minSize; maxSize; desiredSize }
@@ -2156,10 +5392,10 @@ module NodegroupScalingConfig =
         (Option.map ~f:ZeroCapacity.of_xml) (Xml.child xml_arg0 "minSize") in
       make ?desiredSize ?maxSize ?minSize ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let desiredSize = field_map json "desiredSize" ZeroCapacity.of_json in
-      let maxSize = field_map json "maxSize" Capacity.of_json in
-      let minSize = field_map json "minSize" ZeroCapacity.of_json in
+    let of_json json__ =
+      let desiredSize = field_map json__ "desiredSize" ZeroCapacity.of_json in
+      let maxSize = field_map json__ "maxSize" Capacity.of_json in
+      let minSize = field_map json__ "minSize" ZeroCapacity.of_json in
       make ?desiredSize ?maxSize ?minSize ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2210,47 +5446,60 @@ module NodegroupUpdateConfig =
       {
       maxUnavailable: NonZeroInteger.t option
         [@ocaml.doc
-          "The maximum number of nodes unavailable at once during a version update. Nodes will be updated in parallel. This value or maxUnavailablePercentage is required to have a value.The maximum number is 100."];
+          "The maximum number of nodes unavailable at once during a version update. Nodes are updated in parallel. This value or maxUnavailablePercentage is required to have a value.The maximum number is 100."];
       maxUnavailablePercentage: PercentCapacity.t option
         [@ocaml.doc
-          "The maximum percentage of nodes unavailable during a version update. This percentage of nodes will be updated in parallel, up to 100 nodes at once. This value or maxUnavailable is required to have a value."]}
+          "The maximum percentage of nodes unavailable during a version update. This percentage of nodes are updated in parallel, up to 100 nodes at once. This value or maxUnavailable is required to have a value."];
+      updateStrategy: NodegroupUpdateStrategies.t option
+        [@ocaml.doc
+          "The configuration for the behavior to follow during a node group version update of this managed node group. You choose between two possible strategies for replacing nodes during an UpdateNodegroupVersion action. An Amazon EKS managed node group updates by replacing nodes with new nodes of newer AMI versions in parallel. The update strategy changes the managed node update behavior of the managed node group for each quantity. The default strategy has guardrails to protect you from misconfiguration and launches the new instances first, before terminating the old instances. The minimal strategy removes the guardrails and terminates the old instances before launching the new instances. This minimal strategy is useful in scenarios where you are constrained to resources or costs (for example, with hardware accelerators such as GPUs)."]}
     let make ?maxUnavailable =
       fun ?maxUnavailablePercentage ->
-        fun () -> { maxUnavailable; maxUnavailablePercentage }
+        fun ?updateStrategy ->
+          fun () ->
+            { maxUnavailable; maxUnavailablePercentage; updateStrategy }
     let to_value x =
       structure_to_value
         [("maxUnavailable",
            (Option.map x.maxUnavailable ~f:NonZeroInteger.to_value));
         ("maxUnavailablePercentage",
-          (Option.map x.maxUnavailablePercentage ~f:PercentCapacity.to_value))]
+          (Option.map x.maxUnavailablePercentage ~f:PercentCapacity.to_value));
+        ("updateStrategy",
+          (Option.map x.updateStrategy ~f:NodegroupUpdateStrategies.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let updateStrategy =
+        (Option.map ~f:NodegroupUpdateStrategies.of_xml)
+          (Xml.child xml_arg0 "updateStrategy") in
       let maxUnavailablePercentage =
         (Option.map ~f:PercentCapacity.of_xml)
           (Xml.child xml_arg0 "maxUnavailablePercentage") in
       let maxUnavailable =
         (Option.map ~f:NonZeroInteger.of_xml)
           (Xml.child xml_arg0 "maxUnavailable") in
-      make ?maxUnavailablePercentage ?maxUnavailable ()
+      make ?updateStrategy ?maxUnavailablePercentage ?maxUnavailable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let updateStrategy =
+        field_map json__ "updateStrategy" NodegroupUpdateStrategies.of_json in
       let maxUnavailablePercentage =
-        field_map json "maxUnavailablePercentage" PercentCapacity.of_json in
+        field_map json__ "maxUnavailablePercentage" PercentCapacity.of_json in
       let maxUnavailable =
-        field_map json "maxUnavailable" NonZeroInteger.of_json in
-      make ?maxUnavailablePercentage ?maxUnavailable ()
+        field_map json__ "maxUnavailable" NonZeroInteger.of_json in
+      make ?updateStrategy ?maxUnavailablePercentage ?maxUnavailable ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The node group update configuration."]
+  end[@@ocaml.doc
+       "The node group update configuration. An Amazon EKS managed node group updates by replacing nodes with new nodes of newer AMI versions in parallel. You choose the maximum unavailable and the update strategy."]
 module RemoteAccessConfig =
   struct
     type nonrec t =
       {
       ec2SshKey: String_.t option
         [@ocaml.doc
-          "The Amazon EC2 SSH key that provides access for SSH communication with the nodes in the managed node group. For more information, see Amazon EC2 key pairs and Linux instances in the Amazon Elastic Compute Cloud User Guide for Linux Instances."];
+          "The Amazon EC2 SSH key name that provides access for SSH communication with the nodes in the managed node group. For more information, see Amazon EC2 key pairs and Linux instances in the Amazon Elastic Compute Cloud User Guide for Linux Instances. For Windows, an Amazon EC2 SSH key is used to obtain the RDP password. For more information, see Amazon EC2 key pairs and Windows instances in the Amazon Elastic Compute Cloud User Guide for Windows Instances."];
       sourceSecurityGroups: StringList.t option
         [@ocaml.doc
-          "The security groups that are allowed SSH access (port 22) to the nodes. If you specify an Amazon EC2 SSH key but do not specify a source security group when you create a managed node group, then port 22 on the nodes is opened to the internet (0.0.0.0/0). For more information, see Security Groups for Your VPC in the Amazon Virtual Private Cloud User Guide."]}
+          "The security group IDs that are allowed SSH access (port 22) to the nodes. For Windows, the port is 3389. If you specify an Amazon EC2 SSH key but don't specify a source security group when you create a managed node group, then the port on the nodes is opened to the internet (0.0.0.0/0). For more information, see Security Groups for Your VPC in the Amazon Virtual Private Cloud User Guide."]}
     let make ?ec2SshKey =
       fun ?sourceSecurityGroups ->
         fun () -> { ec2SshKey; sourceSecurityGroups }
@@ -2268,14 +5517,184 @@ module RemoteAccessConfig =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ec2SshKey") in
       make ?sourceSecurityGroups ?ec2SshKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceSecurityGroups =
-        field_map json "sourceSecurityGroups" StringList.of_json in
-      let ec2SshKey = field_map json "ec2SshKey" String_.of_json in
+        field_map json__ "sourceSecurityGroups" StringList.of_json in
+      let ec2SshKey = field_map json__ "ec2SshKey" String_.of_json in
       make ?sourceSecurityGroups ?ec2SshKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object representing the remote access configuration for the managed node group."]
+module WarmPoolConfig =
+  struct
+    type nonrec t =
+      {
+      enabled: BoxedBoolean.t option
+        [@ocaml.doc
+          "Specifies whether to attach warm pools on the managed node group. Set to true to enable the warm pool, or false to disable and remove it. If not specified during an update, the current value is preserved."];
+      minSize: ZeroCapacity.t option
+        [@ocaml.doc
+          "The minimum number of instances to maintain in the warm pool. Default: 0. Size your warm pool based on scaling patterns to balance cost and availability. Start with 10-20% of expected peak capacity."];
+      maxGroupPreparedCapacity: BoxedInteger.t option
+        [@ocaml.doc
+          "The maximum total number of instances across the warm pool and Auto Scaling group combined. This value controls the total prepared capacity available for your node group."];
+      poolState: WarmPoolState.t option
+        [@ocaml.doc
+          "The desired state for warm pool instances. Default: Stopped. Valid values are Stopped (most cost-effective with EBS storage costs only), Running (fastest transition time with full EC2 costs), and Hibernated (balance between cost and speed, only supported on specific instance types). Warm pool instances in the Hibernated state are not supported with Bottlerocket AMIs."];
+      reuseOnScaleIn: BoxedBoolean.t option
+        [@ocaml.doc
+          "Indicates whether instances should return to the warm pool during scale-in events instead of being terminated. Default: false. Enable this to reduce costs by reusing instances. This feature is not supported for Bottlerocket AMIs."]}
+    let make ?enabled =
+      fun ?minSize ->
+        fun ?maxGroupPreparedCapacity ->
+          fun ?poolState ->
+            fun ?reuseOnScaleIn ->
+              fun () ->
+                {
+                  enabled;
+                  minSize;
+                  maxGroupPreparedCapacity;
+                  poolState;
+                  reuseOnScaleIn
+                }
+    let to_value x =
+      structure_to_value
+        [("enabled", (Option.map x.enabled ~f:BoxedBoolean.to_value));
+        ("minSize", (Option.map x.minSize ~f:ZeroCapacity.to_value));
+        ("maxGroupPreparedCapacity",
+          (Option.map x.maxGroupPreparedCapacity ~f:BoxedInteger.to_value));
+        ("poolState", (Option.map x.poolState ~f:WarmPoolState.to_value));
+        ("reuseOnScaleIn",
+          (Option.map x.reuseOnScaleIn ~f:BoxedBoolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reuseOnScaleIn =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "reuseOnScaleIn") in
+      let poolState =
+        (Option.map ~f:WarmPoolState.of_xml) (Xml.child xml_arg0 "poolState") in
+      let maxGroupPreparedCapacity =
+        (Option.map ~f:BoxedInteger.of_xml)
+          (Xml.child xml_arg0 "maxGroupPreparedCapacity") in
+      let minSize =
+        (Option.map ~f:ZeroCapacity.of_xml) (Xml.child xml_arg0 "minSize") in
+      let enabled =
+        (Option.map ~f:BoxedBoolean.of_xml) (Xml.child xml_arg0 "enabled") in
+      make ?reuseOnScaleIn ?poolState ?maxGroupPreparedCapacity ?minSize
+        ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reuseOnScaleIn =
+        field_map json__ "reuseOnScaleIn" BoxedBoolean.of_json in
+      let poolState = field_map json__ "poolState" WarmPoolState.of_json in
+      let maxGroupPreparedCapacity =
+        field_map json__ "maxGroupPreparedCapacity" BoxedInteger.of_json in
+      let minSize = field_map json__ "minSize" ZeroCapacity.of_json in
+      let enabled = field_map json__ "enabled" BoxedBoolean.of_json in
+      make ?reuseOnScaleIn ?poolState ?maxGroupPreparedCapacity ?minSize
+        ?enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for an Amazon EC2 Auto Scaling warm pool attached to an Amazon EKS managed node group. Warm pools maintain pre-initialized EC2 instances alongside your Auto Scaling group that have already completed the bootup initialization process and can be kept in a Stopped, Running, or Hibernated state."]
+module AdditionalInfoMap =
+  struct
+    type nonrec t = (String_.t * String_.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (String_.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InsightCategorySpecificSummary =
+  struct
+    type nonrec t =
+      {
+      deprecationDetails: DeprecationDetails.t option
+        [@ocaml.doc
+          "The summary information about deprecated resource usage for an insight check in the UPGRADE_READINESS category."];
+      addonCompatibilityDetails: AddonCompatibilityDetails.t option
+        [@ocaml.doc
+          "A list of AddonCompatibilityDetail objects for Amazon EKS add-ons."]}
+    let make ?deprecationDetails =
+      fun ?addonCompatibilityDetails ->
+        fun () -> { deprecationDetails; addonCompatibilityDetails }
+    let to_value x =
+      structure_to_value
+        [("deprecationDetails",
+           (Option.map x.deprecationDetails ~f:DeprecationDetails.to_value));
+        ("addonCompatibilityDetails",
+          (Option.map x.addonCompatibilityDetails
+             ~f:AddonCompatibilityDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let addonCompatibilityDetails =
+        (Option.map ~f:AddonCompatibilityDetails.of_xml)
+          (Xml.child xml_arg0 "addonCompatibilityDetails") in
+      let deprecationDetails =
+        (Option.map ~f:DeprecationDetails.of_xml)
+          (Xml.child xml_arg0 "deprecationDetails") in
+      make ?addonCompatibilityDetails ?deprecationDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let addonCompatibilityDetails =
+        field_map json__ "addonCompatibilityDetails"
+          AddonCompatibilityDetails.of_json in
+      let deprecationDetails =
+        field_map json__ "deprecationDetails" DeprecationDetails.of_json in
+      make ?addonCompatibilityDetails ?deprecationDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Summary information that relates to the category of the insight. Currently only returned with certain insights having category UPGRADE_READINESS."]
+module InsightResourceDetails =
+  struct
+    type nonrec t = InsightResourceDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InsightResourceDetail.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InsightResourceDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InsightResourceDetails"
+        ~of_json:InsightResourceDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module OidcIdentityProviderConfig =
   struct
     type nonrec t =
@@ -2284,8 +5703,7 @@ module OidcIdentityProviderConfig =
         [@ocaml.doc "The name of the configuration."];
       identityProviderConfigArn: String_.t option
         [@ocaml.doc "The ARN of the configuration."];
-      clusterName: String_.t option
-        [@ocaml.doc "The cluster that the configuration is associated to."];
+      clusterName: String_.t option [@ocaml.doc "The name of your cluster."];
       issuerUrl: String_.t option
         [@ocaml.doc
           "The URL of the OIDC identity provider that allows the API server to discover public signing keys for verifying tokens."];
@@ -2309,7 +5727,7 @@ module OidcIdentityProviderConfig =
           "The key-value pairs that describe required claims in the identity token. If set, each claim is verified to be present in the token with a matching value."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The metadata to apply to the provider configuration to assist with categorization and organization. Each tag consists of a key and an optional value. You define both."];
+          "Metadata that assists with categorization and organization. Each tag consists of a key and an optional value. You define both. Tags don't propagate to any other cluster or Amazon Web Services resources."];
       status: ConfigStatus.t option
         [@ocaml.doc "The status of the OIDC identity provider."]}
     let make ?identityProviderConfigName =
@@ -2388,32 +5806,60 @@ module OidcIdentityProviderConfig =
         ?usernamePrefix ?usernameClaim ?clientId ?issuerUrl ?clusterName
         ?identityProviderConfigArn ?identityProviderConfigName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" ConfigStatus.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" ConfigStatus.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let requiredClaims =
-        field_map json "requiredClaims" RequiredClaimsMap.of_json in
-      let groupsPrefix = field_map json "groupsPrefix" String_.of_json in
-      let groupsClaim = field_map json "groupsClaim" String_.of_json in
-      let usernamePrefix = field_map json "usernamePrefix" String_.of_json in
-      let usernameClaim = field_map json "usernameClaim" String_.of_json in
-      let clientId = field_map json "clientId" String_.of_json in
-      let issuerUrl = field_map json "issuerUrl" String_.of_json in
-      let clusterName = field_map json "clusterName" String_.of_json in
+        field_map json__ "requiredClaims" RequiredClaimsMap.of_json in
+      let groupsPrefix = field_map json__ "groupsPrefix" String_.of_json in
+      let groupsClaim = field_map json__ "groupsClaim" String_.of_json in
+      let usernamePrefix = field_map json__ "usernamePrefix" String_.of_json in
+      let usernameClaim = field_map json__ "usernameClaim" String_.of_json in
+      let clientId = field_map json__ "clientId" String_.of_json in
+      let issuerUrl = field_map json__ "issuerUrl" String_.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
       let identityProviderConfigArn =
-        field_map json "identityProviderConfigArn" String_.of_json in
+        field_map json__ "identityProviderConfigArn" String_.of_json in
       let identityProviderConfigName =
-        field_map json "identityProviderConfigName" String_.of_json in
+        field_map json__ "identityProviderConfigName" String_.of_json in
       make ?status ?tags ?requiredClaims ?groupsPrefix ?groupsClaim
         ?usernamePrefix ?usernameClaim ?clientId ?issuerUrl ?clusterName
         ?identityProviderConfigArn ?identityProviderConfigName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that represents the configuration for an OpenID Connect (OIDC) identity provider."]
+       "An object representing the configuration for an OpenID Connect (OIDC) identity provider."]
+module FargateProfileHealth =
+  struct
+    type nonrec t =
+      {
+      issues: FargateProfileIssueList.t option
+        [@ocaml.doc
+          "Any issues that are associated with the Fargate profile."]}
+    let make ?issues = fun () -> { issues }
+    let to_value x =
+      structure_to_value
+        [("issues",
+           (Option.map x.issues ~f:FargateProfileIssueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let issues =
+        (Option.map ~f:FargateProfileIssueList.of_xml)
+          (Xml.child xml_arg0 "issues") in
+      make ?issues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let issues = field_map json__ "issues" FargateProfileIssueList.of_json in
+      make ?issues ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The health status of the Fargate profile. If there are issues with your Fargate profile's health, they are listed here."]
 module FargateProfileSelectors =
   struct
     type nonrec t = FargateProfileSelector.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FargateProfileSelector.to_value)) |>
         (fun x -> `List x)
@@ -2471,6 +5917,195 @@ module FargateProfileStatus =
     let of_json j = of_string (string_of_json ~kind:"FargateProfileStatus" j)
     let to_json = simple_to_json to_value
   end
+module ClusterVersionInformation =
+  struct
+    type nonrec t =
+      {
+      clusterVersion: String_.t option
+        [@ocaml.doc "The Kubernetes version for the cluster."];
+      clusterType: String_.t option
+        [@ocaml.doc "The type of cluster this version is for."];
+      defaultPlatformVersion: String_.t option
+        [@ocaml.doc "Default platform version for this Kubernetes version."];
+      defaultVersion: Boolean.t option
+        [@ocaml.doc "Indicates if this is a default version."];
+      releaseDate: Timestamp.t option
+        [@ocaml.doc "The release date of this cluster version."];
+      endOfStandardSupportDate: Timestamp.t option
+        [@ocaml.doc "Date when standard support ends for this version."];
+      endOfExtendedSupportDate: Timestamp.t option
+        [@ocaml.doc "Date when extended support ends for this version."];
+      status: ClusterVersionStatus.t option
+        [@ocaml.doc
+          "This field is deprecated. Use versionStatus instead, as that field matches for input and output of this action. Current status of this cluster version."];
+      versionStatus: VersionStatus.t option
+        [@ocaml.doc "Current status of this cluster version."];
+      kubernetesPatchVersion: String_.t option
+        [@ocaml.doc
+          "The patch version of Kubernetes for this cluster version."]}
+    let make ?clusterVersion =
+      fun ?clusterType ->
+        fun ?defaultPlatformVersion ->
+          fun ?defaultVersion ->
+            fun ?releaseDate ->
+              fun ?endOfStandardSupportDate ->
+                fun ?endOfExtendedSupportDate ->
+                  fun ?status ->
+                    fun ?versionStatus ->
+                      fun ?kubernetesPatchVersion ->
+                        fun () ->
+                          {
+                            clusterVersion;
+                            clusterType;
+                            defaultPlatformVersion;
+                            defaultVersion;
+                            releaseDate;
+                            endOfStandardSupportDate;
+                            endOfExtendedSupportDate;
+                            status;
+                            versionStatus;
+                            kubernetesPatchVersion
+                          }
+    let to_value x =
+      structure_to_value
+        [("clusterVersion",
+           (Option.map x.clusterVersion ~f:String_.to_value));
+        ("clusterType", (Option.map x.clusterType ~f:String_.to_value));
+        ("defaultPlatformVersion",
+          (Option.map x.defaultPlatformVersion ~f:String_.to_value));
+        ("defaultVersion", (Option.map x.defaultVersion ~f:Boolean.to_value));
+        ("releaseDate", (Option.map x.releaseDate ~f:Timestamp.to_value));
+        ("endOfStandardSupportDate",
+          (Option.map x.endOfStandardSupportDate ~f:Timestamp.to_value));
+        ("endOfExtendedSupportDate",
+          (Option.map x.endOfExtendedSupportDate ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:ClusterVersionStatus.to_value));
+        ("versionStatus",
+          (Option.map x.versionStatus ~f:VersionStatus.to_value));
+        ("kubernetesPatchVersion",
+          (Option.map x.kubernetesPatchVersion ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kubernetesPatchVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "kubernetesPatchVersion") in
+      let versionStatus =
+        (Option.map ~f:VersionStatus.of_xml)
+          (Xml.child xml_arg0 "versionStatus") in
+      let status =
+        (Option.map ~f:ClusterVersionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let endOfExtendedSupportDate =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "endOfExtendedSupportDate") in
+      let endOfStandardSupportDate =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "endOfStandardSupportDate") in
+      let releaseDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "releaseDate") in
+      let defaultVersion =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "defaultVersion") in
+      let defaultPlatformVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "defaultPlatformVersion") in
+      let clusterType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterType") in
+      let clusterVersion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterVersion") in
+      make ?kubernetesPatchVersion ?versionStatus ?status
+        ?endOfExtendedSupportDate ?endOfStandardSupportDate ?releaseDate
+        ?defaultVersion ?defaultPlatformVersion ?clusterType ?clusterVersion
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kubernetesPatchVersion =
+        field_map json__ "kubernetesPatchVersion" String_.of_json in
+      let versionStatus =
+        field_map json__ "versionStatus" VersionStatus.of_json in
+      let status = field_map json__ "status" ClusterVersionStatus.of_json in
+      let endOfExtendedSupportDate =
+        field_map json__ "endOfExtendedSupportDate" Timestamp.of_json in
+      let endOfStandardSupportDate =
+        field_map json__ "endOfStandardSupportDate" Timestamp.of_json in
+      let releaseDate = field_map json__ "releaseDate" Timestamp.of_json in
+      let defaultVersion = field_map json__ "defaultVersion" Boolean.of_json in
+      let defaultPlatformVersion =
+        field_map json__ "defaultPlatformVersion" String_.of_json in
+      let clusterType = field_map json__ "clusterType" String_.of_json in
+      let clusterVersion = field_map json__ "clusterVersion" String_.of_json in
+      make ?kubernetesPatchVersion ?versionStatus ?status
+        ?endOfExtendedSupportDate ?endOfStandardSupportDate ?releaseDate
+        ?defaultVersion ?defaultPlatformVersion ?clusterType ?clusterVersion
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains details about a specific EKS cluster version."]
+module CapabilityConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      argoCd: ArgoCdConfigResponse.t option
+        [@ocaml.doc
+          "Configuration settings for an Argo CD capability, including the server URL and other Argo CD-specific settings."]}
+    let make ?argoCd = fun () -> { argoCd }
+    let to_value x =
+      structure_to_value
+        [("argoCd", (Option.map x.argoCd ~f:ArgoCdConfigResponse.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let argoCd =
+        (Option.map ~f:ArgoCdConfigResponse.of_xml)
+          (Xml.child xml_arg0 "argoCd") in
+      make ?argoCd ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let argoCd = field_map json__ "argoCd" ArgoCdConfigResponse.of_json in
+      make ?argoCd ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The response object containing capability configuration details."]
+module CapabilityDeletePropagationPolicy =
+  struct
+    type nonrec t =
+      | RETAIN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | RETAIN -> "RETAIN" | Non_static_id s -> s
+    let of_string = function | "RETAIN" -> RETAIN | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CapabilityDeletePropagationPolicy"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CapabilityDeletePropagationPolicy" j)
+    let to_json = simple_to_json to_value
+  end
+module CapabilityHealth =
+  struct
+    type nonrec t =
+      {
+      issues: CapabilityIssueList.t option
+        [@ocaml.doc
+          "A list of issues affecting the capability. If this list is empty, the capability is healthy."]}
+    let make ?issues = fun () -> { issues }
+    let to_value x =
+      structure_to_value
+        [("issues", (Option.map x.issues ~f:CapabilityIssueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let issues =
+        (Option.map ~f:CapabilityIssueList.of_xml)
+          (Xml.child xml_arg0 "issues") in
+      make ?issues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let issues = field_map json__ "issues" CapabilityIssueList.of_json in
+      make ?issues ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Health information for a capability, including any issues that may be affecting its operation."]
 module AddonInfo =
   struct
     type nonrec t =
@@ -2479,32 +6114,79 @@ module AddonInfo =
       type_: String_.t option [@ocaml.doc "The type of the add-on."];
       addonVersions: AddonVersionInfoList.t option
         [@ocaml.doc
-          "An object that represents information about available add-on versions and compatible Kubernetes versions."]}
+          "An object representing information about available add-on versions and compatible Kubernetes versions."];
+      publisher: String_.t option [@ocaml.doc "The publisher of the add-on."];
+      owner: String_.t option [@ocaml.doc "The owner of the add-on."];
+      marketplaceInformation: MarketplaceInformation.t option
+        [@ocaml.doc
+          "Information about the add-on from the Amazon Web Services Marketplace."];
+      defaultNamespace: String_.t option
+        [@ocaml.doc
+          "The default Kubernetes namespace where this addon is typically installed if no custom namespace is specified."]}
     let make ?addonName =
       fun ?type_ ->
-        fun ?addonVersions -> fun () -> { addonName; type_; addonVersions }
+        fun ?addonVersions ->
+          fun ?publisher ->
+            fun ?owner ->
+              fun ?marketplaceInformation ->
+                fun ?defaultNamespace ->
+                  fun () ->
+                    {
+                      addonName;
+                      type_;
+                      addonVersions;
+                      publisher;
+                      owner;
+                      marketplaceInformation;
+                      defaultNamespace
+                    }
     let to_value x =
       structure_to_value
         [("addonName", (Option.map x.addonName ~f:String_.to_value));
         ("type", (Option.map x.type_ ~f:String_.to_value));
         ("addonVersions",
-          (Option.map x.addonVersions ~f:AddonVersionInfoList.to_value))]
+          (Option.map x.addonVersions ~f:AddonVersionInfoList.to_value));
+        ("publisher", (Option.map x.publisher ~f:String_.to_value));
+        ("owner", (Option.map x.owner ~f:String_.to_value));
+        ("marketplaceInformation",
+          (Option.map x.marketplaceInformation
+             ~f:MarketplaceInformation.to_value));
+        ("defaultNamespace",
+          (Option.map x.defaultNamespace ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let defaultNamespace =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "defaultNamespace") in
+      let marketplaceInformation =
+        (Option.map ~f:MarketplaceInformation.of_xml)
+          (Xml.child xml_arg0 "marketplaceInformation") in
+      let owner = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "owner") in
+      let publisher =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "publisher") in
       let addonVersions =
         (Option.map ~f:AddonVersionInfoList.of_xml)
           (Xml.child xml_arg0 "addonVersions") in
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       let addonName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "addonName") in
-      make ?addonVersions ?type_ ?addonName ()
+      make ?defaultNamespace ?marketplaceInformation ?owner ?publisher
+        ?addonVersions ?type_ ?addonName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let defaultNamespace =
+        field_map json__ "defaultNamespace" String_.of_json in
+      let marketplaceInformation =
+        field_map json__ "marketplaceInformation"
+          MarketplaceInformation.of_json in
+      let owner = field_map json__ "owner" String_.of_json in
+      let publisher = field_map json__ "publisher" String_.of_json in
       let addonVersions =
-        field_map json "addonVersions" AddonVersionInfoList.of_json in
-      let type_ = field_map json "type" String_.of_json in
-      let addonName = field_map json "addonName" String_.of_json in
-      make ?addonVersions ?type_ ?addonName ()
+        field_map json__ "addonVersions" AddonVersionInfoList.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
+      let addonName = field_map json__ "addonName" String_.of_json in
+      make ?defaultNamespace ?marketplaceInformation ?owner ?publisher
+        ?addonVersions ?type_ ?addonName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an add-on."]
 module AddonHealth =
@@ -2512,7 +6194,8 @@ module AddonHealth =
     type nonrec t =
       {
       issues: AddonIssueList.t option
-        [@ocaml.doc "An object that represents the add-on's health issues."]}
+        [@ocaml.doc
+          "An object representing the health issues for an add-on."]}
     let make ?issues = fun () -> { issues }
     let to_value x =
       structure_to_value
@@ -2523,11 +6206,34 @@ module AddonHealth =
         (Option.map ~f:AddonIssueList.of_xml) (Xml.child xml_arg0 "issues") in
       make ?issues ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let issues = field_map json "issues" AddonIssueList.of_json in
+    let of_json json__ =
+      let issues = field_map json__ "issues" AddonIssueList.of_json in
       make ?issues ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The health of the add-on."]
+module AddonNamespaceConfigResponse =
+  struct
+    type nonrec t =
+      {
+      namespace: Namespace.t option
+        [@ocaml.doc
+          "The name of the Kubernetes namespace where the addon is installed."]}
+    let make ?namespace = fun () -> { namespace }
+    let to_value x =
+      structure_to_value
+        [("namespace", (Option.map x.namespace ~f:Namespace.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let namespace =
+        (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "namespace") in
+      make ?namespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let namespace = field_map json__ "namespace" Namespace.of_json in
+      make ?namespace ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The namespace configuration response object containing information about the namespace where an addon is installed."]
 module AddonStatus =
   struct
     type nonrec t =
@@ -2538,6 +6244,7 @@ module AddonStatus =
       | DELETING 
       | DELETE_FAILED 
       | DEGRADED 
+      | UPDATE_FAILED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2549,6 +6256,7 @@ module AddonStatus =
       | DELETING -> "DELETING"
       | DELETE_FAILED -> "DELETE_FAILED"
       | DEGRADED -> "DEGRADED"
+      | UPDATE_FAILED -> "UPDATE_FAILED"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2559,6 +6267,7 @@ module AddonStatus =
       | "DELETING" -> DELETING
       | "DELETE_FAILED" -> DELETE_FAILED
       | "DEGRADED" -> DEGRADED
+      | "UPDATE_FAILED" -> UPDATE_FAILED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2589,49 +6298,122 @@ module ClusterName =
     let of_json j = string_of_json ~kind:"ClusterName" j
     let to_json = simple_to_json to_value
   end
-module ClientException =
+module AddonPodIdentityConfiguration =
   struct
     type nonrec t =
       {
-      clusterName: String_.t option
-        [@ocaml.doc "The Amazon EKS cluster associated with the exception."];
-      nodegroupName: String_.t option
+      serviceAccount: String_.t option
         [@ocaml.doc
-          "The Amazon EKS managed node group associated with the exception."];
-      addonName: String_.t option ;
-      message: String_.t option }
-    let make ?clusterName =
-      fun ?nodegroupName ->
-        fun ?addonName ->
-          fun ?message ->
-            fun () -> { clusterName; nodegroupName; addonName; message }
+          "The Kubernetes Service Account name used by the add-on."];
+      recommendedManagedPolicies: StringList.t option
+        [@ocaml.doc "A suggested IAM Policy for the add-on."]}
+    let make ?serviceAccount =
+      fun ?recommendedManagedPolicies ->
+        fun () -> { serviceAccount; recommendedManagedPolicies }
     let to_value x =
       structure_to_value
-        [("clusterName", (Option.map x.clusterName ~f:String_.to_value));
-        ("nodegroupName", (Option.map x.nodegroupName ~f:String_.to_value));
-        ("addonName", (Option.map x.addonName ~f:String_.to_value));
-        ("message", (Option.map x.message ~f:String_.to_value))]
+        [("serviceAccount",
+           (Option.map x.serviceAccount ~f:String_.to_value));
+        ("recommendedManagedPolicies",
+          (Option.map x.recommendedManagedPolicies ~f:StringList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      let addonName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "addonName") in
-      let nodegroupName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nodegroupName") in
-      let clusterName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterName") in
-      make ?message ?addonName ?nodegroupName ?clusterName ()
+      let recommendedManagedPolicies =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "recommendedManagedPolicies") in
+      let serviceAccount =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceAccount") in
+      make ?recommendedManagedPolicies ?serviceAccount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let addonName = field_map json "addonName" String_.of_json in
-      let nodegroupName = field_map json "nodegroupName" String_.of_json in
-      let clusterName = field_map json "clusterName" String_.of_json in
-      make ?message ?addonName ?nodegroupName ?clusterName ()
+    let of_json json__ =
+      let recommendedManagedPolicies =
+        field_map json__ "recommendedManagedPolicies" StringList.of_json in
+      let serviceAccount = field_map json__ "serviceAccount" String_.of_json in
+      make ?recommendedManagedPolicies ?serviceAccount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about how to configure IAM for an add-on."]
+module ControlPlanePlacementRequest =
+  struct
+    type nonrec t =
+      {
+      groupName: String_.t option
+        [@ocaml.doc
+          "The name of the placement group for the Kubernetes control plane instances. This setting can't be changed after cluster creation."]}
+    let make ?groupName = fun () -> { groupName }
+    let to_value x =
+      structure_to_value
+        [("groupName", (Option.map x.groupName ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let groupName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groupName") in
+      make ?groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let groupName = field_map json__ "groupName" String_.of_json in
+      make ?groupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "These errors are usually caused by a client action. Actions can include using an action or resource on behalf of a user that doesn't have permissions to use the action or resource or specifying an identifier that is not valid."]
+       "The placement configuration for all the control plane instances of your local Amazon EKS cluster on an Amazon Web Services Outpost. For more information, see Capacity considerations in the Amazon EKS User Guide."]
+module ArgoCdConfigRequest =
+  struct
+    type nonrec t =
+      {
+      namespace: String_.t option
+        [@ocaml.doc
+          "The Kubernetes namespace where Argo CD resources will be created. If not specified, the default namespace is used."];
+      awsIdc: ArgoCdAwsIdcConfigRequest.t
+        [@ocaml.doc
+          "Configuration for IAM Identity CenterIAM; Identity Center integration. When configured, users can authenticate to Argo CD using their IAM Identity CenterIAM; Identity Center credentials."];
+      rbacRoleMappings: ArgoCdRoleMappingList.t option
+        [@ocaml.doc
+          "A list of role mappings that define which IAM Identity CenterIAM; Identity Center users or groups have which Argo CD roles. Each mapping associates an Argo CD role (ADMIN, EDITOR, or VIEWER) with one or more IAM Identity CenterIAM; Identity Center identities."];
+      networkAccess: ArgoCdNetworkAccessConfigRequest.t option
+        [@ocaml.doc
+          "Configuration for network access to the Argo CD capability's managed API server endpoint. By default, the Argo CD server is accessible via a public endpoint. You can optionally specify one or more VPC endpoint IDs to enable private connectivity from your VPCs. When VPC endpoints are configured, public access is blocked and the Argo CD server is only accessible through the specified VPC endpoints."]}
+    let context_ = "ArgoCdConfigRequest"
+    let make ?namespace =
+      fun ?rbacRoleMappings ->
+        fun ?networkAccess ->
+          fun ~awsIdc ->
+            fun () -> { namespace; rbacRoleMappings; networkAccess; awsIdc }
+    let to_value x =
+      structure_to_value
+        [("namespace", (Option.map x.namespace ~f:String_.to_value));
+        ("awsIdc", (Some (ArgoCdAwsIdcConfigRequest.to_value x.awsIdc)));
+        ("rbacRoleMappings",
+          (Option.map x.rbacRoleMappings ~f:ArgoCdRoleMappingList.to_value));
+        ("networkAccess",
+          (Option.map x.networkAccess
+             ~f:ArgoCdNetworkAccessConfigRequest.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkAccess =
+        (Option.map ~f:ArgoCdNetworkAccessConfigRequest.of_xml)
+          (Xml.child xml_arg0 "networkAccess") in
+      let rbacRoleMappings =
+        (Option.map ~f:ArgoCdRoleMappingList.of_xml)
+          (Xml.child xml_arg0 "rbacRoleMappings") in
+      let awsIdc =
+        ArgoCdAwsIdcConfigRequest.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "awsIdc") in
+      let namespace =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "namespace") in
+      make ?networkAccess ?rbacRoleMappings ~awsIdc ?namespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkAccess =
+        field_map json__ "networkAccess"
+          ArgoCdNetworkAccessConfigRequest.of_json in
+      let rbacRoleMappings =
+        field_map json__ "rbacRoleMappings" ArgoCdRoleMappingList.of_json in
+      let awsIdc =
+        field_map_exn json__ "awsIdc" ArgoCdAwsIdcConfigRequest.of_json in
+      let namespace = field_map json__ "namespace" String_.of_json in
+      make ?networkAccess ?rbacRoleMappings ~awsIdc ?namespace ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration settings for an Argo CD capability. This includes the Kubernetes namespace, IAM Identity CenterIAM; Identity Center integration, RBAC role mappings, and network access configuration."]
 module InvalidParameterException =
   struct
     type nonrec t =
@@ -2643,21 +6425,29 @@ module InvalidParameterException =
           "The Amazon EKS managed node group associated with the exception."];
       fargateProfileName: String_.t option
         [@ocaml.doc "The Fargate profile associated with the exception."];
-      addonName: String_.t option ;
-      message: String_.t option }
+      addonName: String_.t option
+        [@ocaml.doc
+          "The specified parameter for the add-on name is invalid. Review the available parameters for the API request"];
+      subscriptionId: String_.t option
+        [@ocaml.doc "The Amazon EKS subscription ID with the exception."];
+      message: String_.t option
+        [@ocaml.doc
+          "The specified parameter is invalid. Review the available parameters for the API request."]}
     let make ?clusterName =
       fun ?nodegroupName ->
         fun ?fargateProfileName ->
           fun ?addonName ->
-            fun ?message ->
-              fun () ->
-                {
-                  clusterName;
-                  nodegroupName;
-                  fargateProfileName;
-                  addonName;
-                  message
-                }
+            fun ?subscriptionId ->
+              fun ?message ->
+                fun () ->
+                  {
+                    clusterName;
+                    nodegroupName;
+                    fargateProfileName;
+                    addonName;
+                    subscriptionId;
+                    message
+                  }
     let to_value x =
       structure_to_value
         [("clusterName", (Option.map x.clusterName ~f:String_.to_value));
@@ -2665,11 +6455,14 @@ module InvalidParameterException =
         ("fargateProfileName",
           (Option.map x.fargateProfileName ~f:String_.to_value));
         ("addonName", (Option.map x.addonName ~f:String_.to_value));
+        ("subscriptionId", (Option.map x.subscriptionId ~f:String_.to_value));
         ("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let subscriptionId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "subscriptionId") in
       let addonName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "addonName") in
       let fargateProfileName =
@@ -2679,18 +6472,19 @@ module InvalidParameterException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nodegroupName") in
       let clusterName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterName") in
-      make ?message ?addonName ?fargateProfileName ?nodegroupName
-        ?clusterName ()
+      make ?message ?subscriptionId ?addonName ?fargateProfileName
+        ?nodegroupName ?clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let addonName = field_map json "addonName" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let subscriptionId = field_map json__ "subscriptionId" String_.of_json in
+      let addonName = field_map json__ "addonName" String_.of_json in
       let fargateProfileName =
-        field_map json "fargateProfileName" String_.of_json in
-      let nodegroupName = field_map json "nodegroupName" String_.of_json in
-      let clusterName = field_map json "clusterName" String_.of_json in
-      make ?message ?addonName ?fargateProfileName ?nodegroupName
-        ?clusterName ()
+        field_map json__ "fargateProfileName" String_.of_json in
+      let nodegroupName = field_map json__ "nodegroupName" String_.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
+      make ?message ?subscriptionId ?addonName ?fargateProfileName
+        ?nodegroupName ?clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The specified parameter is invalid. Review the available parameters for the API request."]
@@ -2703,82 +6497,204 @@ module InvalidRequestException =
       nodegroupName: String_.t option
         [@ocaml.doc
           "The Amazon EKS managed node group associated with the exception."];
-      addonName: String_.t option ;
-      message: String_.t option }
+      addonName: String_.t option
+        [@ocaml.doc
+          "The request is invalid given the state of the add-on name. Check the state of the cluster and the associated operations."];
+      subscriptionId: String_.t option
+        [@ocaml.doc "The Amazon EKS subscription ID with the exception."];
+      message: String_.t option
+        [@ocaml.doc
+          "The Amazon EKS add-on name associated with the exception."]}
     let make ?clusterName =
       fun ?nodegroupName ->
         fun ?addonName ->
-          fun ?message ->
-            fun () -> { clusterName; nodegroupName; addonName; message }
+          fun ?subscriptionId ->
+            fun ?message ->
+              fun () ->
+                {
+                  clusterName;
+                  nodegroupName;
+                  addonName;
+                  subscriptionId;
+                  message
+                }
     let to_value x =
       structure_to_value
         [("clusterName", (Option.map x.clusterName ~f:String_.to_value));
         ("nodegroupName", (Option.map x.nodegroupName ~f:String_.to_value));
         ("addonName", (Option.map x.addonName ~f:String_.to_value));
+        ("subscriptionId", (Option.map x.subscriptionId ~f:String_.to_value));
         ("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let subscriptionId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "subscriptionId") in
       let addonName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "addonName") in
       let nodegroupName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nodegroupName") in
       let clusterName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterName") in
-      make ?message ?addonName ?nodegroupName ?clusterName ()
+      make ?message ?subscriptionId ?addonName ?nodegroupName ?clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let addonName = field_map json "addonName" String_.of_json in
-      let nodegroupName = field_map json "nodegroupName" String_.of_json in
-      let clusterName = field_map json "clusterName" String_.of_json in
-      make ?message ?addonName ?nodegroupName ?clusterName ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let subscriptionId = field_map json__ "subscriptionId" String_.of_json in
+      let addonName = field_map json__ "addonName" String_.of_json in
+      let nodegroupName = field_map json__ "nodegroupName" String_.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
+      make ?message ?subscriptionId ?addonName ?nodegroupName ?clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request is invalid given the state of the cluster. Check the state of the cluster and the associated operations."]
-module ResourceInUseException =
+module PodIdentityAssociation =
   struct
     type nonrec t =
       {
       clusterName: String_.t option
-        [@ocaml.doc "The Amazon EKS cluster associated with the exception."];
-      nodegroupName: String_.t option
+        [@ocaml.doc "The name of the cluster that the association is in."];
+      namespace: String_.t option
         [@ocaml.doc
-          "The Amazon EKS managed node group associated with the exception."];
-      addonName: String_.t option ;
-      message: String_.t option }
+          "The name of the Kubernetes namespace inside the cluster to create the association in. The service account and the Pods that use the service account must be in this namespace."];
+      serviceAccount: String_.t option
+        [@ocaml.doc
+          "The name of the Kubernetes service account inside the cluster to associate the IAM credentials with."];
+      roleArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role to associate with the service account. The EKS Pod Identity agent manages credentials to assume this role for applications in the containers in the Pods that use this service account."];
+      associationArn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the association."];
+      associationId: String_.t option
+        [@ocaml.doc "The ID of the association."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "Metadata that assists with categorization and organization. Each tag consists of a key and an optional value. You define both. Tags don't propagate to any other cluster or Amazon Web Services resources. The following basic restrictions apply to tags: Maximum number of tags per resource \226\128\147 50 For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length \226\128\147 128 Unicode characters in UTF-8 Maximum value length \226\128\147 256 Unicode characters in UTF-8 If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case-sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for either keys or values as it is reserved for Amazon Web Services use. You cannot edit or delete tag keys or values with this prefix. Tags with this prefix do not count against your tags per resource limit."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The timestamp that the association was created at."];
+      modifiedAt: Timestamp.t option
+        [@ocaml.doc
+          "The most recent timestamp that the association was modified at."];
+      ownerArn: String_.t option
+        [@ocaml.doc
+          "If defined, the EKS Pod Identity association is owned by an Amazon EKS add-on."];
+      disableSessionTags: BoxedBoolean.t option
+        [@ocaml.doc
+          "The state of the automatic sessions tags. The value of true disables these tags. EKS Pod Identity adds a pre-defined set of session tags when it assumes the role. You can use these tags to author a single role that can work across resources by allowing access to Amazon Web Services resources based on matching tags. By default, EKS Pod Identity attaches six tags, including tags for cluster name, namespace, and service account name. For the list of tags added by EKS Pod Identity, see List of session tags added by EKS Pod Identity in the Amazon EKS User Guide."];
+      targetRoleArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the target IAM role to associate with the service account. This role is assumed by using the EKS Pod Identity association role, then the credentials for this role are injected into the Pod."];
+      externalId: String_.t option
+        [@ocaml.doc
+          "The unique identifier for this EKS Pod Identity association for a target IAM role. You put this value in the trust policy of the target role, in a Condition to match the sts.ExternalId. This ensures that the target role can only be assumed by this association. This prevents the confused deputy problem. For more information about the confused deputy problem, see The confused deputy problem in the IAM User Guide. If you want to use the same target role with multiple associations or other roles, use independent statements in the trust policy to allow sts:AssumeRole access from each role."];
+      policy: String_.t option
+        [@ocaml.doc
+          "An optional IAM policy in JSON format (as an escaped string) that applies additional restrictions to this pod identity association beyond the IAM policies attached to the IAM role. This policy is applied as the intersection of the role's policies and this policy, allowing you to reduce the permissions that applications in the pods can use. Use this policy to enforce least privilege access while still leveraging a shared IAM role across multiple applications."]}
     let make ?clusterName =
-      fun ?nodegroupName ->
-        fun ?addonName ->
-          fun ?message ->
-            fun () -> { clusterName; nodegroupName; addonName; message }
+      fun ?namespace ->
+        fun ?serviceAccount ->
+          fun ?roleArn ->
+            fun ?associationArn ->
+              fun ?associationId ->
+                fun ?tags ->
+                  fun ?createdAt ->
+                    fun ?modifiedAt ->
+                      fun ?ownerArn ->
+                        fun ?disableSessionTags ->
+                          fun ?targetRoleArn ->
+                            fun ?externalId ->
+                              fun ?policy ->
+                                fun () ->
+                                  {
+                                    clusterName;
+                                    namespace;
+                                    serviceAccount;
+                                    roleArn;
+                                    associationArn;
+                                    associationId;
+                                    tags;
+                                    createdAt;
+                                    modifiedAt;
+                                    ownerArn;
+                                    disableSessionTags;
+                                    targetRoleArn;
+                                    externalId;
+                                    policy
+                                  }
     let to_value x =
       structure_to_value
         [("clusterName", (Option.map x.clusterName ~f:String_.to_value));
-        ("nodegroupName", (Option.map x.nodegroupName ~f:String_.to_value));
-        ("addonName", (Option.map x.addonName ~f:String_.to_value));
-        ("message", (Option.map x.message ~f:String_.to_value))]
+        ("namespace", (Option.map x.namespace ~f:String_.to_value));
+        ("serviceAccount", (Option.map x.serviceAccount ~f:String_.to_value));
+        ("roleArn", (Option.map x.roleArn ~f:String_.to_value));
+        ("associationArn", (Option.map x.associationArn ~f:String_.to_value));
+        ("associationId", (Option.map x.associationId ~f:String_.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("modifiedAt", (Option.map x.modifiedAt ~f:Timestamp.to_value));
+        ("ownerArn", (Option.map x.ownerArn ~f:String_.to_value));
+        ("disableSessionTags",
+          (Option.map x.disableSessionTags ~f:BoxedBoolean.to_value));
+        ("targetRoleArn", (Option.map x.targetRoleArn ~f:String_.to_value));
+        ("externalId", (Option.map x.externalId ~f:String_.to_value));
+        ("policy", (Option.map x.policy ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      let addonName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "addonName") in
-      let nodegroupName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nodegroupName") in
+      let policy =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "policy") in
+      let externalId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "externalId") in
+      let targetRoleArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "targetRoleArn") in
+      let disableSessionTags =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "disableSessionTags") in
+      let ownerArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ownerArn") in
+      let modifiedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "modifiedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let associationId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "associationId") in
+      let associationArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "associationArn") in
+      let roleArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "roleArn") in
+      let serviceAccount =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceAccount") in
+      let namespace =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "namespace") in
       let clusterName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterName") in
-      make ?message ?addonName ?nodegroupName ?clusterName ()
+      make ?policy ?externalId ?targetRoleArn ?disableSessionTags ?ownerArn
+        ?modifiedAt ?createdAt ?tags ?associationId ?associationArn ?roleArn
+        ?serviceAccount ?namespace ?clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let addonName = field_map json "addonName" String_.of_json in
-      let nodegroupName = field_map json "nodegroupName" String_.of_json in
-      let clusterName = field_map json "clusterName" String_.of_json in
-      make ?message ?addonName ?nodegroupName ?clusterName ()
+    let of_json json__ =
+      let policy = field_map json__ "policy" String_.of_json in
+      let externalId = field_map json__ "externalId" String_.of_json in
+      let targetRoleArn = field_map json__ "targetRoleArn" String_.of_json in
+      let disableSessionTags =
+        field_map json__ "disableSessionTags" BoxedBoolean.of_json in
+      let ownerArn = field_map json__ "ownerArn" String_.of_json in
+      let modifiedAt = field_map json__ "modifiedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let associationId = field_map json__ "associationId" String_.of_json in
+      let associationArn = field_map json__ "associationArn" String_.of_json in
+      let roleArn = field_map json__ "roleArn" String_.of_json in
+      let serviceAccount = field_map json__ "serviceAccount" String_.of_json in
+      let namespace = field_map json__ "namespace" String_.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
+      make ?policy ?externalId ?targetRoleArn ?disableSessionTags ?ownerArn
+        ?modifiedAt ?createdAt ?tags ?associationId ?associationArn ?roleArn
+        ?serviceAccount ?namespace ?clusterName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified resource is in use."]
+  end[@@ocaml.doc
+       "Amazon EKS Pod Identity associations provide the ability to manage credentials for your applications, similar to the way that Amazon EC2 instance profiles provide credentials to Amazon EC2 instances."]
 module ResourceNotFoundException =
   struct
     type nonrec t =
@@ -2790,21 +6706,28 @@ module ResourceNotFoundException =
           "The Amazon EKS managed node group associated with the exception."];
       fargateProfileName: String_.t option
         [@ocaml.doc "The Fargate profile associated with the exception."];
-      addonName: String_.t option ;
-      message: String_.t option }
+      addonName: String_.t option
+        [@ocaml.doc
+          "The Amazon EKS add-on name associated with the exception."];
+      subscriptionId: String_.t option
+        [@ocaml.doc "The Amazon EKS subscription ID with the exception."];
+      message: String_.t option
+        [@ocaml.doc "The Amazon EKS message associated with the exception."]}
     let make ?clusterName =
       fun ?nodegroupName ->
         fun ?fargateProfileName ->
           fun ?addonName ->
-            fun ?message ->
-              fun () ->
-                {
-                  clusterName;
-                  nodegroupName;
-                  fargateProfileName;
-                  addonName;
-                  message
-                }
+            fun ?subscriptionId ->
+              fun ?message ->
+                fun () ->
+                  {
+                    clusterName;
+                    nodegroupName;
+                    fargateProfileName;
+                    addonName;
+                    subscriptionId;
+                    message
+                  }
     let to_value x =
       structure_to_value
         [("clusterName", (Option.map x.clusterName ~f:String_.to_value));
@@ -2812,11 +6735,14 @@ module ResourceNotFoundException =
         ("fargateProfileName",
           (Option.map x.fargateProfileName ~f:String_.to_value));
         ("addonName", (Option.map x.addonName ~f:String_.to_value));
+        ("subscriptionId", (Option.map x.subscriptionId ~f:String_.to_value));
         ("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let subscriptionId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "subscriptionId") in
       let addonName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "addonName") in
       let fargateProfileName =
@@ -2826,21 +6752,22 @@ module ResourceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nodegroupName") in
       let clusterName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterName") in
-      make ?message ?addonName ?fargateProfileName ?nodegroupName
-        ?clusterName ()
+      make ?message ?subscriptionId ?addonName ?fargateProfileName
+        ?nodegroupName ?clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let addonName = field_map json "addonName" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let subscriptionId = field_map json__ "subscriptionId" String_.of_json in
+      let addonName = field_map json__ "addonName" String_.of_json in
       let fargateProfileName =
-        field_map json "fargateProfileName" String_.of_json in
-      let nodegroupName = field_map json "nodegroupName" String_.of_json in
-      let clusterName = field_map json "clusterName" String_.of_json in
-      make ?message ?addonName ?fargateProfileName ?nodegroupName
-        ?clusterName ()
+        field_map json__ "fargateProfileName" String_.of_json in
+      let nodegroupName = field_map json__ "nodegroupName" String_.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
+      make ?message ?subscriptionId ?addonName ?fargateProfileName
+        ?nodegroupName ?clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified resource could not be found. You can view your available clusters with ListClusters. You can view your available managed node groups with ListNodegroups. Amazon EKS clusters and node groups are Region-specific."]
+       "The specified resource could not be found. You can view your available clusters with ListClusters. You can view your available managed node groups with ListNodegroups. Amazon EKS clusters and node groups are Amazon Web Services Region specific."]
 module ServerException =
   struct
     type nonrec t =
@@ -2850,8 +6777,131 @@ module ServerException =
       nodegroupName: String_.t option
         [@ocaml.doc
           "The Amazon EKS managed node group associated with the exception."];
-      addonName: String_.t option ;
-      message: String_.t option }
+      addonName: String_.t option
+        [@ocaml.doc
+          "The Amazon EKS add-on name associated with the exception."];
+      subscriptionId: String_.t option
+        [@ocaml.doc "The Amazon EKS subscription ID with the exception."];
+      message: String_.t option
+        [@ocaml.doc
+          "These errors are usually caused by a server-side issue."]}
+    let make ?clusterName =
+      fun ?nodegroupName ->
+        fun ?addonName ->
+          fun ?subscriptionId ->
+            fun ?message ->
+              fun () ->
+                {
+                  clusterName;
+                  nodegroupName;
+                  addonName;
+                  subscriptionId;
+                  message
+                }
+    let to_value x =
+      structure_to_value
+        [("clusterName", (Option.map x.clusterName ~f:String_.to_value));
+        ("nodegroupName", (Option.map x.nodegroupName ~f:String_.to_value));
+        ("addonName", (Option.map x.addonName ~f:String_.to_value));
+        ("subscriptionId", (Option.map x.subscriptionId ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let subscriptionId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "subscriptionId") in
+      let addonName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "addonName") in
+      let nodegroupName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nodegroupName") in
+      let clusterName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterName") in
+      make ?message ?subscriptionId ?addonName ?nodegroupName ?clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let subscriptionId = field_map json__ "subscriptionId" String_.of_json in
+      let addonName = field_map json__ "addonName" String_.of_json in
+      let nodegroupName = field_map json__ "nodegroupName" String_.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
+      make ?message ?subscriptionId ?addonName ?nodegroupName ?clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "These errors are usually caused by a server-side issue."]
+module ClientException =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t option
+        [@ocaml.doc "The Amazon EKS cluster associated with the exception."];
+      nodegroupName: String_.t option
+        [@ocaml.doc
+          "The Amazon EKS managed node group associated with the exception."];
+      addonName: String_.t option
+        [@ocaml.doc
+          "The Amazon EKS add-on name associated with the exception."];
+      subscriptionId: String_.t option
+        [@ocaml.doc "The Amazon EKS subscription ID with the exception."];
+      message: String_.t option
+        [@ocaml.doc
+          "These errors are usually caused by a client action. Actions can include using an action or resource on behalf of an IAM principal that doesn't have permissions to use the action or resource or specifying an identifier that is not valid."]}
+    let make ?clusterName =
+      fun ?nodegroupName ->
+        fun ?addonName ->
+          fun ?subscriptionId ->
+            fun ?message ->
+              fun () ->
+                {
+                  clusterName;
+                  nodegroupName;
+                  addonName;
+                  subscriptionId;
+                  message
+                }
+    let to_value x =
+      structure_to_value
+        [("clusterName", (Option.map x.clusterName ~f:String_.to_value));
+        ("nodegroupName", (Option.map x.nodegroupName ~f:String_.to_value));
+        ("addonName", (Option.map x.addonName ~f:String_.to_value));
+        ("subscriptionId", (Option.map x.subscriptionId ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let subscriptionId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "subscriptionId") in
+      let addonName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "addonName") in
+      let nodegroupName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nodegroupName") in
+      let clusterName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterName") in
+      make ?message ?subscriptionId ?addonName ?nodegroupName ?clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let subscriptionId = field_map json__ "subscriptionId" String_.of_json in
+      let addonName = field_map json__ "addonName" String_.of_json in
+      let nodegroupName = field_map json__ "nodegroupName" String_.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
+      make ?message ?subscriptionId ?addonName ?nodegroupName ?clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "These errors are usually caused by a client action. Actions can include using an action or resource on behalf of an IAM principal that doesn't have permissions to use the action or resource or specifying an identifier that is not valid."]
+module ResourceInUseException =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t option
+        [@ocaml.doc "The Amazon EKS cluster associated with the exception."];
+      nodegroupName: String_.t option
+        [@ocaml.doc
+          "The Amazon EKS managed node group associated with the exception."];
+      addonName: String_.t option
+        [@ocaml.doc "The specified add-on name is in use."];
+      message: String_.t option
+        [@ocaml.doc "The Amazon EKS message associated with the exception."]}
     let make ?clusterName =
       fun ?nodegroupName ->
         fun ?addonName ->
@@ -2875,14 +6925,14 @@ module ServerException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterName") in
       make ?message ?addonName ?nodegroupName ?clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let addonName = field_map json "addonName" String_.of_json in
-      let nodegroupName = field_map json "nodegroupName" String_.of_json in
-      let clusterName = field_map json "clusterName" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let addonName = field_map json__ "addonName" String_.of_json in
+      let nodegroupName = field_map json__ "nodegroupName" String_.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
       make ?message ?addonName ?nodegroupName ?clusterName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "These errors are usually caused by a server-side issue."]
+  end[@@ocaml.doc "The specified resource is in use."]
 module Update =
   struct
     type nonrec t =
@@ -2896,8 +6946,7 @@ module Update =
         [@ocaml.doc
           "A key-value map that contains the parameters associated with the update."];
       createdAt: Timestamp.t option
-        [@ocaml.doc
-          "The Unix epoch timestamp in seconds for when the update was created."];
+        [@ocaml.doc "The Unix epoch timestamp at object creation."];
       errors: ErrorDetails.t option
         [@ocaml.doc "Any errors associated with a Failed update."]}
     let make ?id =
@@ -2930,13 +6979,13 @@ module Update =
       let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
       make ?errors ?createdAt ?params ?type_ ?status ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errors = field_map json "errors" ErrorDetails.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
-      let params = field_map json "params" UpdateParams.of_json in
-      let type_ = field_map json "type" UpdateType.of_json in
-      let status = field_map json "status" UpdateStatus.of_json in
-      let id = field_map json "id" String_.of_json in
+    let of_json json__ =
+      let errors = field_map json__ "errors" ErrorDetails.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let params = field_map json__ "params" UpdateParams.of_json in
+      let type_ = field_map json__ "type" UpdateType.of_json in
+      let status = field_map json__ "status" UpdateStatus.of_json in
+      let id = field_map json__ "id" String_.of_json in
       make ?errors ?createdAt ?params ?type_ ?status ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object representing an asynchronous update."]
@@ -2945,9 +6994,9 @@ module UpdateLabelsPayload =
     type nonrec t =
       {
       addOrUpdateLabels: LabelsMap.t option
-        [@ocaml.doc "Kubernetes labels to be added or updated."];
+        [@ocaml.doc "The Kubernetes labels to add or update."];
       removeLabels: LabelsKeyList.t option
-        [@ocaml.doc "Kubernetes labels to be removed."]}
+        [@ocaml.doc "The Kubernetes labels to remove."]}
     let make ?addOrUpdateLabels =
       fun ?removeLabels -> fun () -> { addOrUpdateLabels; removeLabels }
     let to_value x =
@@ -2966,10 +7015,11 @@ module UpdateLabelsPayload =
           (Xml.child xml_arg0 "addOrUpdateLabels") in
       make ?removeLabels ?addOrUpdateLabels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let removeLabels = field_map json "removeLabels" LabelsKeyList.of_json in
+    let of_json json__ =
+      let removeLabels =
+        field_map json__ "removeLabels" LabelsKeyList.of_json in
       let addOrUpdateLabels =
-        field_map json "addOrUpdateLabels" LabelsMap.of_json in
+        field_map json__ "addOrUpdateLabels" LabelsMap.of_json in
       make ?removeLabels ?addOrUpdateLabels ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2981,7 +7031,7 @@ module UpdateTaintsPayload =
       addOrUpdateTaints: TaintsList.t option
         [@ocaml.doc "Kubernetes taints to be added or updated."];
       removeTaints: TaintsList.t option
-        [@ocaml.doc "Kubernetes taints to be removed."]}
+        [@ocaml.doc "Kubernetes taints to remove."]}
     let make ?addOrUpdateTaints =
       fun ?removeTaints -> fun () -> { addOrUpdateTaints; removeTaints }
     let to_value x =
@@ -2998,14 +7048,263 @@ module UpdateTaintsPayload =
           (Xml.child xml_arg0 "addOrUpdateTaints") in
       make ?removeTaints ?addOrUpdateTaints ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let removeTaints = field_map json "removeTaints" TaintsList.of_json in
+    let of_json json__ =
+      let removeTaints = field_map json__ "removeTaints" TaintsList.of_json in
       let addOrUpdateTaints =
-        field_map json "addOrUpdateTaints" TaintsList.of_json in
+        field_map json__ "addOrUpdateTaints" TaintsList.of_json in
       make ?removeTaints ?addOrUpdateTaints ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing the details of an update to a taints payload."]
+       "An object representing the details of an update to a taints payload. For more information, see Node taints on managed node groups in the Amazon EKS User Guide."]
+module InvalidStateException =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t option
+        [@ocaml.doc "The Amazon EKS cluster associated with the exception."];
+      message: String_.t option }
+    let make ?clusterName =
+      fun ?message -> fun () -> { clusterName; message }
+    let to_value x =
+      structure_to_value
+        [("clusterName", (Option.map x.clusterName ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let clusterName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterName") in
+      make ?message ?clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
+      make ?message ?clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Amazon EKS detected upgrade readiness issues. Call the ListInsights API to view detected upgrade blocking issues. Pass the force flag when updating to override upgrade readiness errors."]
+module ThrottlingException =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t option
+        [@ocaml.doc "The Amazon EKS cluster associated with the exception."];
+      message: String_.t option }
+    let make ?clusterName =
+      fun ?message -> fun () -> { clusterName; message }
+    let to_value x =
+      structure_to_value
+        [("clusterName", (Option.map x.clusterName ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let clusterName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterName") in
+      make ?message ?clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
+      make ?message ?clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request or operation couldn't be performed because a service is throttling requests."]
+module ComputeConfigRequest =
+  struct
+    type nonrec t =
+      {
+      enabled: BoxedBoolean.t option
+        [@ocaml.doc
+          "Request to enable or disable the compute capability on your EKS Auto Mode cluster. If the compute capability is enabled, EKS Auto Mode will create and delete EC2 Managed Instances in your Amazon Web Services account."];
+      nodePools: StringList.t option
+        [@ocaml.doc
+          "Configuration for node pools that defines the compute resources for your EKS Auto Mode cluster. For more information, see EKS Auto Mode Node Pools in the Amazon EKS User Guide."];
+      nodeRoleArn: String_.t option
+        [@ocaml.doc
+          "The ARN of the IAM Role EKS will assign to EC2 Managed Instances in your EKS Auto Mode cluster. This value cannot be changed after the compute capability of EKS Auto Mode is enabled. For more information, see the IAM Reference in the Amazon EKS User Guide."]}
+    let make ?enabled =
+      fun ?nodePools ->
+        fun ?nodeRoleArn -> fun () -> { enabled; nodePools; nodeRoleArn }
+    let to_value x =
+      structure_to_value
+        [("enabled", (Option.map x.enabled ~f:BoxedBoolean.to_value));
+        ("nodePools", (Option.map x.nodePools ~f:StringList.to_value));
+        ("nodeRoleArn", (Option.map x.nodeRoleArn ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nodeRoleArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nodeRoleArn") in
+      let nodePools =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "nodePools") in
+      let enabled =
+        (Option.map ~f:BoxedBoolean.of_xml) (Xml.child xml_arg0 "enabled") in
+      make ?nodeRoleArn ?nodePools ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nodeRoleArn = field_map json__ "nodeRoleArn" String_.of_json in
+      let nodePools = field_map json__ "nodePools" StringList.of_json in
+      let enabled = field_map json__ "enabled" BoxedBoolean.of_json in
+      make ?nodeRoleArn ?nodePools ?enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Request to update the configuration of the compute capability of your EKS Auto Mode cluster. For example, enable the capability. For more information, see EKS Auto Mode compute capability in the Amazon EKS User Guide."]
+module KubernetesNetworkConfigRequest =
+  struct
+    type nonrec t =
+      {
+      serviceIpv4Cidr: String_.t option
+        [@ocaml.doc
+          "Don't specify a value if you select ipv6 for ipFamily. The CIDR block to assign Kubernetes service IP addresses from. If you don't specify a block, Kubernetes assigns addresses from either the 10.100.0.0/16 or 172.20.0.0/16 CIDR blocks. We recommend that you specify a block that does not overlap with resources in other networks that are peered or connected to your VPC. The block must meet the following requirements: Within one of the following private IP address blocks: 10.0.0.0/8, 172.16.0.0/12, or 192.168.0.0/16. Doesn't overlap with any CIDR block assigned to the VPC that you selected for VPC. Between /24 and /12. You can only specify a custom CIDR block when you create a cluster. You can't change this value after the cluster is created."];
+      ipFamily: IpFamily.t option
+        [@ocaml.doc
+          "Specify which IP family is used to assign Kubernetes pod and service IP addresses. If you don't specify a value, ipv4 is used by default. You can only specify an IP family when you create a cluster and can't change this value once the cluster is created. If you specify ipv6, the VPC and subnets that you specify for cluster creation must have both IPv4 and IPv6 CIDR blocks assigned to them. You can't specify ipv6 for clusters in China Regions. You can only specify ipv6 for 1.21 and later clusters that use version 1.10.1 or later of the Amazon VPC CNI add-on. If you specify ipv6, then ensure that your VPC meets the requirements listed in the considerations listed in Assigning IPv6 addresses to pods and services in the Amazon EKS User Guide. Kubernetes assigns services IPv6 addresses from the unique local address range (fc00::/7). You can't specify a custom IPv6 CIDR block. Pod addresses are assigned from the subnet's IPv6 CIDR."];
+      elasticLoadBalancing: ElasticLoadBalancing.t option
+        [@ocaml.doc
+          "Request to enable or disable the load balancing capability on your EKS Auto Mode cluster. For more information, see EKS Auto Mode load balancing capability in the Amazon EKS User Guide."]}
+    let make ?serviceIpv4Cidr =
+      fun ?ipFamily ->
+        fun ?elasticLoadBalancing ->
+          fun () -> { serviceIpv4Cidr; ipFamily; elasticLoadBalancing }
+    let to_value x =
+      structure_to_value
+        [("serviceIpv4Cidr",
+           (Option.map x.serviceIpv4Cidr ~f:String_.to_value));
+        ("ipFamily", (Option.map x.ipFamily ~f:IpFamily.to_value));
+        ("elasticLoadBalancing",
+          (Option.map x.elasticLoadBalancing ~f:ElasticLoadBalancing.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let elasticLoadBalancing =
+        (Option.map ~f:ElasticLoadBalancing.of_xml)
+          (Xml.child xml_arg0 "elasticLoadBalancing") in
+      let ipFamily =
+        (Option.map ~f:IpFamily.of_xml) (Xml.child xml_arg0 "ipFamily") in
+      let serviceIpv4Cidr =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceIpv4Cidr") in
+      make ?elasticLoadBalancing ?ipFamily ?serviceIpv4Cidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let elasticLoadBalancing =
+        field_map json__ "elasticLoadBalancing" ElasticLoadBalancing.of_json in
+      let ipFamily = field_map json__ "ipFamily" IpFamily.of_json in
+      let serviceIpv4Cidr =
+        field_map json__ "serviceIpv4Cidr" String_.of_json in
+      make ?elasticLoadBalancing ?ipFamily ?serviceIpv4Cidr ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The Kubernetes network configuration for the cluster."]
+module RemoteNetworkConfigRequest =
+  struct
+    type nonrec t =
+      {
+      remoteNodeNetworks: RemoteNodeNetworkList.t option
+        [@ocaml.doc
+          "The list of network CIDRs that can contain hybrid nodes. These CIDR blocks define the expected IP address range of the hybrid nodes that join the cluster. These blocks are typically determined by your network administrator. Enter one or more IPv4 CIDR blocks in decimal dotted-quad notation (for example, 10.2.0.0/16). It must satisfy the following requirements: Each block must be within an IPv4 RFC-1918 network range. Minimum allowed size is /32, maximum allowed size is /8. Publicly-routable addresses aren't supported. Each block cannot overlap with the range of the VPC CIDR blocks for your EKS resources, or the block of the Kubernetes service IP range. Each block must have a route to the VPC that uses the VPC CIDR blocks, not public IPs or Elastic IPs. There are many options including Transit Gateway, Site-to-Site VPN, or Direct Connect. Each host must allow outbound connection to the EKS cluster control plane on TCP ports 443 and 10250. Each host must allow inbound connection from the EKS cluster control plane on TCP port 10250 for logs, exec and port-forward operations. Each host must allow TCP and UDP network connectivity to and from other hosts that are running CoreDNS on UDP port 53 for service and pod DNS names."];
+      remotePodNetworks: RemotePodNetworkList.t option
+        [@ocaml.doc
+          "The list of network CIDRs that can contain pods that run Kubernetes webhooks on hybrid nodes. These CIDR blocks are determined by configuring your Container Network Interface (CNI) plugin. We recommend the Calico CNI or Cilium CNI. Note that the Amazon VPC CNI plugin for Kubernetes isn't available for on-premises and edge locations. Enter one or more IPv4 CIDR blocks in decimal dotted-quad notation (for example, 10.2.0.0/16). It must satisfy the following requirements: Each block must be within an IPv4 RFC-1918 network range. Minimum allowed size is /32, maximum allowed size is /8. Publicly-routable addresses aren't supported. Each block cannot overlap with the range of the VPC CIDR blocks for your EKS resources, or the block of the Kubernetes service IP range."]}
+    let make ?remoteNodeNetworks =
+      fun ?remotePodNetworks ->
+        fun () -> { remoteNodeNetworks; remotePodNetworks }
+    let to_value x =
+      structure_to_value
+        [("remoteNodeNetworks",
+           (Option.map x.remoteNodeNetworks ~f:RemoteNodeNetworkList.to_value));
+        ("remotePodNetworks",
+          (Option.map x.remotePodNetworks ~f:RemotePodNetworkList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let remotePodNetworks =
+        (Option.map ~f:RemotePodNetworkList.of_xml)
+          (Xml.child xml_arg0 "remotePodNetworks") in
+      let remoteNodeNetworks =
+        (Option.map ~f:RemoteNodeNetworkList.of_xml)
+          (Xml.child xml_arg0 "remoteNodeNetworks") in
+      make ?remotePodNetworks ?remoteNodeNetworks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let remotePodNetworks =
+        field_map json__ "remotePodNetworks" RemotePodNetworkList.of_json in
+      let remoteNodeNetworks =
+        field_map json__ "remoteNodeNetworks" RemoteNodeNetworkList.of_json in
+      make ?remotePodNetworks ?remoteNodeNetworks ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration in the cluster for EKS Hybrid Nodes. You can add, change, or remove this configuration after the cluster is created."]
+module StorageConfigRequest =
+  struct
+    type nonrec t =
+      {
+      blockStorage: BlockStorage.t option
+        [@ocaml.doc
+          "Request to configure EBS Block Storage settings for your EKS Auto Mode cluster."]}
+    let make ?blockStorage = fun () -> { blockStorage }
+    let to_value x =
+      structure_to_value
+        [("blockStorage",
+           (Option.map x.blockStorage ~f:BlockStorage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let blockStorage =
+        (Option.map ~f:BlockStorage.of_xml)
+          (Xml.child xml_arg0 "blockStorage") in
+      make ?blockStorage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let blockStorage = field_map json__ "blockStorage" BlockStorage.of_json in
+      make ?blockStorage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Request to update the configuration of the storage capability of your EKS Auto Mode cluster. For example, enable the capability. For more information, see EKS Auto Mode block storage capability in the Amazon EKS User Guide."]
+module UpdateAccessConfigRequest =
+  struct
+    type nonrec t =
+      {
+      authenticationMode: AuthenticationMode.t option
+        [@ocaml.doc "The desired authentication mode for the cluster."]}
+    let make ?authenticationMode = fun () -> { authenticationMode }
+    let to_value x =
+      structure_to_value
+        [("authenticationMode",
+           (Option.map x.authenticationMode ~f:AuthenticationMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let authenticationMode =
+        (Option.map ~f:AuthenticationMode.of_xml)
+          (Xml.child xml_arg0 "authenticationMode") in
+      make ?authenticationMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let authenticationMode =
+        field_map json__ "authenticationMode" AuthenticationMode.of_json in
+      make ?authenticationMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The access configuration information for the cluster."]
+module UpgradePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      supportType: SupportType.t option
+        [@ocaml.doc
+          "If the cluster is set to EXTENDED, it will enter extended support at the end of standard support. If the cluster is set to STANDARD, it will be automatically upgraded at the end of standard support. Learn more about EKS Extended Support in the Amazon EKS User Guide."]}
+    let make ?supportType = fun () -> { supportType }
+    let to_value x =
+      structure_to_value
+        [("supportType", (Option.map x.supportType ~f:SupportType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let supportType =
+        (Option.map ~f:SupportType.of_xml) (Xml.child xml_arg0 "supportType") in
+      make ?supportType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let supportType = field_map json__ "supportType" SupportType.of_json in
+      make ?supportType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The support policy to use for the cluster. Extended support allows you to remain on specific Kubernetes versions for longer. Clusters in extended support have higher costs. The default value is EXTENDED. Use STANDARD to disable extended support. Learn more about EKS Extended Support in the Amazon EKS User Guide."]
 module VpcConfigRequest =
   struct
     type nonrec t =
@@ -3015,16 +7314,16 @@ module VpcConfigRequest =
           "Specify subnets for your Amazon EKS nodes. Amazon EKS creates cross-account elastic network interfaces in these subnets to allow communication between your nodes and the Kubernetes control plane."];
       securityGroupIds: StringList.t option
         [@ocaml.doc
-          "Specify one or more security groups for the cross-account elastic network interfaces that Amazon EKS creates to use that allow communication between your nodes and the Kubernetes control plane. If you don't specify any security groups, then familiarize yourself with the difference between Amazon EKS defaults for clusters deployed with Kubernetes: 1.14 Amazon EKS platform version eks.2 and earlier 1.14 Amazon EKS platform version eks.3 and later For more information, see Amazon EKS security group considerations in the Amazon EKS User Guide ."];
+          "Specify one or more security groups for the cross-account elastic network interfaces that Amazon EKS creates to use that allow communication between your nodes and the Kubernetes control plane. If you don't specify any security groups, then familiarize yourself with the difference between Amazon EKS defaults for clusters deployed with Kubernetes. For more information, see Amazon EKS security group considerations in the Amazon EKS User Guide ."];
       endpointPublicAccess: BoxedBoolean.t option
         [@ocaml.doc
-          "Set this value to false to disable public access to your cluster's Kubernetes API server endpoint. If you disable public access, your cluster's Kubernetes API server can only receive requests from within the cluster VPC. The default value for this parameter is true, which enables public access for your Kubernetes API server. For more information, see Amazon EKS cluster endpoint access control in the Amazon EKS User Guide ."];
+          "Set this value to false to disable public access to your cluster's Kubernetes API server endpoint. If you disable public access, your cluster's Kubernetes API server can only receive requests from within the cluster VPC. The default value for this parameter is true, which enables public access for your Kubernetes API server. The endpoint domain name and IP address family depends on the value of the ipFamily for the cluster. For more information, see Cluster API server endpoint in the Amazon EKS User Guide ."];
       endpointPrivateAccess: BoxedBoolean.t option
         [@ocaml.doc
-          "Set this value to true to enable private access for your cluster's Kubernetes API server endpoint. If you enable private access, Kubernetes API requests from within your cluster's VPC use the private VPC endpoint. The default value for this parameter is false, which disables private access for your Kubernetes API server. If you disable private access and you have nodes or Fargate pods in the cluster, then ensure that publicAccessCidrs includes the necessary CIDR blocks for communication with the nodes or Fargate pods. For more information, see Amazon EKS cluster endpoint access control in the Amazon EKS User Guide ."];
+          "Set this value to true to enable private access for your cluster's Kubernetes API server endpoint. If you enable private access, Kubernetes API requests from within your cluster's VPC use the private VPC endpoint. The default value for this parameter is false, which disables private access for your Kubernetes API server. If you disable private access and you have nodes or Fargate pods in the cluster, then ensure that publicAccessCidrs includes the necessary CIDR blocks for communication with the nodes or Fargate pods. For more information, see Cluster API server endpoint in the Amazon EKS User Guide ."];
       publicAccessCidrs: StringList.t option
         [@ocaml.doc
-          "The CIDR blocks that are allowed access to your cluster's public Kubernetes API server endpoint. Communication to the endpoint from addresses outside of the CIDR blocks that you specify is denied. The default value is 0.0.0.0/0. If you've disabled private endpoint access and you have nodes or Fargate pods in the cluster, then ensure that you specify the necessary CIDR blocks. For more information, see Amazon EKS cluster endpoint access control in the Amazon EKS User Guide ."]}
+          "The CIDR blocks that are allowed access to your cluster's public Kubernetes API server endpoint. Communication to the endpoint from addresses outside of the CIDR blocks that you specify is denied. The default value is 0.0.0.0/0 and additionally ::/0 for dual-stack `IPv6` clusters. If you've disabled private endpoint access, make sure that you specify the necessary CIDR blocks for every node and Fargate Pod in the cluster. For more information, see Cluster API server endpoint in the Amazon EKS User Guide . Note that the public endpoints are dual-stack for only IPv6 clusters that are made after October 2024. You can't add IPv6 CIDR blocks to IPv4 clusters or IPv6 clusters that were made before October 2024."]}
     let make ?subnetIds =
       fun ?securityGroupIds ->
         fun ?endpointPublicAccess ->
@@ -3068,37 +7367,138 @@ module VpcConfigRequest =
       make ?publicAccessCidrs ?endpointPrivateAccess ?endpointPublicAccess
         ?securityGroupIds ?subnetIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let publicAccessCidrs =
-        field_map json "publicAccessCidrs" StringList.of_json in
+        field_map json__ "publicAccessCidrs" StringList.of_json in
       let endpointPrivateAccess =
-        field_map json "endpointPrivateAccess" BoxedBoolean.of_json in
+        field_map json__ "endpointPrivateAccess" BoxedBoolean.of_json in
       let endpointPublicAccess =
-        field_map json "endpointPublicAccess" BoxedBoolean.of_json in
+        field_map json__ "endpointPublicAccess" BoxedBoolean.of_json in
       let securityGroupIds =
-        field_map json "securityGroupIds" StringList.of_json in
-      let subnetIds = field_map json "subnetIds" StringList.of_json in
+        field_map json__ "securityGroupIds" StringList.of_json in
+      let subnetIds = field_map json__ "subnetIds" StringList.of_json in
       make ?publicAccessCidrs ?endpointPrivateAccess ?endpointPublicAccess
         ?securityGroupIds ?subnetIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object representing the VPC configuration to use for an Amazon EKS cluster."]
+module ZonalShiftConfigRequest =
+  struct
+    type nonrec t =
+      {
+      enabled: BoxedBoolean.t option
+        [@ocaml.doc
+          "If zonal shift is enabled, Amazon Web Services configures zonal autoshift for the cluster."]}
+    let make ?enabled = fun () -> { enabled }
+    let to_value x =
+      structure_to_value
+        [("enabled", (Option.map x.enabled ~f:BoxedBoolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enabled =
+        (Option.map ~f:BoxedBoolean.of_xml) (Xml.child xml_arg0 "enabled") in
+      make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enabled = field_map json__ "enabled" BoxedBoolean.of_json in
+      make ?enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration for zonal shift for the cluster."]
+module AccessDeniedException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc
+          "You do not have sufficient access to perform this action."]}
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You don't have permissions to perform the requested operation. The IAM principal making the request must have at least one IAM permissions policy attached that grants the required permissions. For more information, see Access management in the IAM User Guide."]
+module UpdateCapabilityConfiguration =
+  struct
+    type nonrec t =
+      {
+      argoCd: UpdateArgoCdConfig.t option
+        [@ocaml.doc
+          "Configuration updates specific to Argo CD capabilities."]}
+    let make ?argoCd = fun () -> { argoCd }
+    let to_value x =
+      structure_to_value
+        [("argoCd", (Option.map x.argoCd ~f:UpdateArgoCdConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let argoCd =
+        (Option.map ~f:UpdateArgoCdConfig.of_xml)
+          (Xml.child xml_arg0 "argoCd") in
+      make ?argoCd ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let argoCd = field_map json__ "argoCd" UpdateArgoCdConfig.of_json in
+      make ?argoCd ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration updates for a capability. The structure varies depending on the capability type."]
+module AddonPodIdentityAssociationsList =
+  struct
+    type nonrec t = AddonPodIdentityAssociations.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AddonPodIdentityAssociations.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AddonPodIdentityAssociations.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AddonPodIdentityAssociationsList"
+        ~of_json:AddonPodIdentityAssociations.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ResolveConflicts =
   struct
     type nonrec t =
       | OVERWRITE 
       | NONE 
+      | PRESERVE 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | OVERWRITE -> "OVERWRITE"
       | NONE -> "NONE"
+      | PRESERVE -> "PRESERVE"
       | Non_static_id s -> s
     let of_string =
       function
       | "OVERWRITE" -> OVERWRITE
       | "NONE" -> NONE
+      | "PRESERVE" -> PRESERVE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3126,10 +7526,109 @@ module RoleArn =
     let of_json j = string_of_json ~kind:"RoleArn" j
     let to_json = simple_to_json to_value
   end
+module AccessEntry =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t option [@ocaml.doc "The name of your cluster."];
+      principalArn: String_.t option
+        [@ocaml.doc
+          "The ARN of the IAM principal for the access entry. If you ever delete the IAM principal with this ARN, the access entry isn't automatically deleted. We recommend that you delete the access entry with an ARN for an IAM principal that you delete. If you don't delete the access entry and ever recreate the IAM principal, even if it has the same ARN, the access entry won't work. This is because even though the ARN is the same for the recreated IAM principal, the roleID or userID (you can see this with the Security Token Service GetCallerIdentity API) is different for the recreated IAM principal than it was for the original IAM principal. Even though you don't see the IAM principal's roleID or userID for an access entry, Amazon EKS stores it with the access entry."];
+      kubernetesGroups: StringList.t option
+        [@ocaml.doc
+          "A name that you've specified in a Kubernetes RoleBinding or ClusterRoleBinding object so that Kubernetes authorizes the principalARN access to cluster objects."];
+      accessEntryArn: String_.t option
+        [@ocaml.doc "The ARN of the access entry."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The Unix epoch timestamp at object creation."];
+      modifiedAt: Timestamp.t option
+        [@ocaml.doc
+          "The Unix epoch timestamp for the last modification to the object."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "Metadata that assists with categorization and organization. Each tag consists of a key and an optional value. You define both. Tags don't propagate to any other cluster or Amazon Web Services resources."];
+      username: String_.t option
+        [@ocaml.doc
+          "The name of a user that can authenticate to your cluster."];
+      type_: String_.t option [@ocaml.doc "The type of the access entry."]}
+    let make ?clusterName =
+      fun ?principalArn ->
+        fun ?kubernetesGroups ->
+          fun ?accessEntryArn ->
+            fun ?createdAt ->
+              fun ?modifiedAt ->
+                fun ?tags ->
+                  fun ?username ->
+                    fun ?type_ ->
+                      fun () ->
+                        {
+                          clusterName;
+                          principalArn;
+                          kubernetesGroups;
+                          accessEntryArn;
+                          createdAt;
+                          modifiedAt;
+                          tags;
+                          username;
+                          type_
+                        }
+    let to_value x =
+      structure_to_value
+        [("clusterName", (Option.map x.clusterName ~f:String_.to_value));
+        ("principalArn", (Option.map x.principalArn ~f:String_.to_value));
+        ("kubernetesGroups",
+          (Option.map x.kubernetesGroups ~f:StringList.to_value));
+        ("accessEntryArn", (Option.map x.accessEntryArn ~f:String_.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("modifiedAt", (Option.map x.modifiedAt ~f:Timestamp.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("username", (Option.map x.username ~f:String_.to_value));
+        ("type", (Option.map x.type_ ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
+      let username =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "username") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let modifiedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "modifiedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let accessEntryArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "accessEntryArn") in
+      let kubernetesGroups =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "kubernetesGroups") in
+      let principalArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "principalArn") in
+      let clusterName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterName") in
+      make ?type_ ?username ?tags ?modifiedAt ?createdAt ?accessEntryArn
+        ?kubernetesGroups ?principalArn ?clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "type" String_.of_json in
+      let username = field_map json__ "username" String_.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let modifiedAt = field_map json__ "modifiedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let accessEntryArn = field_map json__ "accessEntryArn" String_.of_json in
+      let kubernetesGroups =
+        field_map json__ "kubernetesGroups" StringList.of_json in
+      let principalArn = field_map json__ "principalArn" String_.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
+      make ?type_ ?username ?tags ?modifiedAt ?createdAt ?accessEntryArn
+        ?kubernetesGroups ?principalArn ?clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An access entry allows an IAM principal (user or role) to access your cluster. Access entries can replace the need to maintain the aws-auth ConfigMap for authentication. For more information about access entries, see Access entries in the Amazon EKS User Guide."]
 module BadRequestException =
   struct
-    type nonrec t = {
-      message: String_.t option }
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc
+          "This exception is thrown if the request contains a semantic error. The precise meaning will depend on the API, and will be documented in the error message."]}
     let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
@@ -3140,16 +7639,19 @@ module BadRequestException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This exception is thrown if the request contains a semantic error. The precise meaning will depend on the API, and will be documented in the error message."]
 module NotFoundException =
   struct
-    type nonrec t = {
-      message: String_.t option }
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc
+          "A service resource associated with the request could not be found. Clients should not retry such requests."]}
     let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
@@ -3160,8 +7662,8 @@ module NotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3174,6 +7676,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3193,36 +7698,45 @@ module TagKeyList =
     let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
     let to_json v = composed_to_json to_value v
   end
-module AccessDeniedException =
+module InsightsRefreshStatus =
   struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
+    type nonrec t =
+      | IN_PROGRESS 
+      | FAILED 
+      | COMPLETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | FAILED -> "FAILED"
+      | COMPLETED -> "COMPLETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "FAILED" -> FAILED
+      | "COMPLETED" -> COMPLETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
+    let to_header x = to_string x
     let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "You don't have permissions to perform the requested operation. The user or role that is making the request must have at least one IAM permissions policy attached that grants the required permissions. For more information, see Access Management in the IAM User Guide."]
+      of_string
+        (string_of_xml ~kind:"enumeration InsightsRefreshStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"InsightsRefreshStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module Cluster =
   struct
     type nonrec t =
       {
-      name: String_.t option [@ocaml.doc "The name of the cluster."];
+      name: String_.t option [@ocaml.doc "The name of your cluster."];
       arn: String_.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the cluster."];
       createdAt: Timestamp.t option
-        [@ocaml.doc
-          "The Unix epoch timestamp in seconds for when the cluster was created."];
+        [@ocaml.doc "The Unix epoch timestamp at object creation."];
       version: String_.t option
         [@ocaml.doc "The Kubernetes server version for the cluster."];
       endpoint: String_.t option
@@ -3232,7 +7746,7 @@ module Cluster =
           "The Amazon Resource Name (ARN) of the IAM role that provides permissions for the Kubernetes control plane to make calls to Amazon Web Services API operations on your behalf."];
       resourcesVpcConfig: VpcConfigResponse.t option
         [@ocaml.doc
-          "The VPC configuration used by the cluster control plane. Amazon EKS VPC resources have specific requirements to work properly with Kubernetes. For more information, see Cluster VPC Considerations and Cluster Security Group Considerations in the Amazon EKS User Guide."];
+          "The VPC configuration used by the cluster control plane. Amazon EKS VPC resources have specific requirements to work properly with Kubernetes. For more information, see Cluster VPC considerations and Cluster security group considerations in the Amazon EKS User Guide."];
       kubernetesNetworkConfig: KubernetesNetworkConfigResponse.t option
         [@ocaml.doc "The Kubernetes network configuration for the cluster."];
       logging: Logging.t option
@@ -3245,18 +7759,49 @@ module Cluster =
         [@ocaml.doc "The certificate-authority-data for your cluster."];
       clientRequestToken: String_.t option
         [@ocaml.doc
-          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
       platformVersion: String_.t option
         [@ocaml.doc
-          "The platform version of your Amazon EKS cluster. For more information, see Platform Versions in the Amazon EKS User Guide ."];
+          "The platform version of your Amazon EKS cluster. For more information about clusters deployed on the Amazon Web Services Cloud, see Platform versions in the Amazon EKS User Guide . For more information about local clusters deployed on an Outpost, see Amazon EKS local cluster platform versions in the Amazon EKS User Guide ."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The metadata that you apply to the cluster to assist with categorization and organization. Each tag consists of a key and an optional value. You define both. Cluster tags do not propagate to any other resources associated with the cluster."];
+          "Metadata that assists with categorization and organization. Each tag consists of a key and an optional value. You define both. Tags don't propagate to any other cluster or Amazon Web Services resources."];
       encryptionConfig: EncryptionConfigList.t option
         [@ocaml.doc "The encryption configuration for the cluster."];
       connectorConfig: ConnectorConfigResponse.t option
         [@ocaml.doc
-          "The configuration used to connect to a cluster for registration."]}
+          "The configuration used to connect to a cluster for registration."];
+      id: String_.t option
+        [@ocaml.doc
+          "The ID of your local Amazon EKS cluster on an Amazon Web Services Outpost. This property isn't available for an Amazon EKS cluster on the Amazon Web Services cloud."];
+      health: ClusterHealth.t option
+        [@ocaml.doc
+          "An object representing the health of your Amazon EKS cluster."];
+      outpostConfig: OutpostConfigResponse.t option
+        [@ocaml.doc
+          "An object representing the configuration of your local Amazon EKS cluster on an Amazon Web Services Outpost. This object isn't available for clusters on the Amazon Web Services cloud."];
+      accessConfig: AccessConfigResponse.t option
+        [@ocaml.doc "The access configuration for the cluster."];
+      upgradePolicy: UpgradePolicyResponse.t option
+        [@ocaml.doc
+          "This value indicates if extended support is enabled or disabled for the cluster. Learn more about EKS Extended Support in the Amazon EKS User Guide."];
+      zonalShiftConfig: ZonalShiftConfigResponse.t option
+        [@ocaml.doc "The configuration for zonal shift for the cluster."];
+      remoteNetworkConfig: RemoteNetworkConfigResponse.t option
+        [@ocaml.doc
+          "The configuration in the cluster for EKS Hybrid Nodes. You can add, change, or remove this configuration after the cluster is created."];
+      computeConfig: ComputeConfigResponse.t option
+        [@ocaml.doc
+          "Indicates the current configuration of the compute capability on your EKS Auto Mode cluster. For example, if the capability is enabled or disabled. If the compute capability is enabled, EKS Auto Mode will create and delete EC2 Managed Instances in your Amazon Web Services account. For more information, see EKS Auto Mode compute capability in the Amazon EKS User Guide."];
+      storageConfig: StorageConfigResponse.t option
+        [@ocaml.doc
+          "Indicates the current configuration of the block storage capability on your EKS Auto Mode cluster. For example, if the capability is enabled or disabled. If the block storage capability is enabled, EKS Auto Mode will create and delete EBS volumes in your Amazon Web Services account. For more information, see EKS Auto Mode block storage capability in the Amazon EKS User Guide."];
+      deletionProtection: BoxedBoolean.t option
+        [@ocaml.doc
+          "The current deletion protection setting for the cluster. When true, deletion protection is enabled and the cluster cannot be deleted until protection is disabled. When false, the cluster can be deleted normally. This setting only applies to clusters in an active state."];
+      controlPlaneScalingConfig: ControlPlaneScalingConfig.t option
+        [@ocaml.doc
+          "The control plane scaling tier configuration. For more information, see EKS Provisioned Control Plane in the Amazon EKS User Guide."]}
     let make ?name =
       fun ?arn ->
         fun ?createdAt ->
@@ -3274,26 +7819,52 @@ module Cluster =
                                 fun ?tags ->
                                   fun ?encryptionConfig ->
                                     fun ?connectorConfig ->
-                                      fun () ->
-                                        {
-                                          name;
-                                          arn;
-                                          createdAt;
-                                          version;
-                                          endpoint;
-                                          roleArn;
-                                          resourcesVpcConfig;
-                                          kubernetesNetworkConfig;
-                                          logging;
-                                          identity;
-                                          status;
-                                          certificateAuthority;
-                                          clientRequestToken;
-                                          platformVersion;
-                                          tags;
-                                          encryptionConfig;
-                                          connectorConfig
-                                        }
+                                      fun ?id ->
+                                        fun ?health ->
+                                          fun ?outpostConfig ->
+                                            fun ?accessConfig ->
+                                              fun ?upgradePolicy ->
+                                                fun ?zonalShiftConfig ->
+                                                  fun ?remoteNetworkConfig ->
+                                                    fun ?computeConfig ->
+                                                      fun ?storageConfig ->
+                                                        fun
+                                                          ?deletionProtection
+                                                          ->
+                                                          fun
+                                                            ?controlPlaneScalingConfig
+                                                            ->
+                                                            fun () ->
+                                                              {
+                                                                name;
+                                                                arn;
+                                                                createdAt;
+                                                                version;
+                                                                endpoint;
+                                                                roleArn;
+                                                                resourcesVpcConfig;
+                                                                kubernetesNetworkConfig;
+                                                                logging;
+                                                                identity;
+                                                                status;
+                                                                certificateAuthority;
+                                                                clientRequestToken;
+                                                                platformVersion;
+                                                                tags;
+                                                                encryptionConfig;
+                                                                connectorConfig;
+                                                                id;
+                                                                health;
+                                                                outpostConfig;
+                                                                accessConfig;
+                                                                upgradePolicy;
+                                                                zonalShiftConfig;
+                                                                remoteNetworkConfig;
+                                                                computeConfig;
+                                                                storageConfig;
+                                                                deletionProtection;
+                                                                controlPlaneScalingConfig
+                                                              }
     let to_value x =
       structure_to_value
         [("name", (Option.map x.name ~f:String_.to_value));
@@ -3320,9 +7891,61 @@ module Cluster =
         ("encryptionConfig",
           (Option.map x.encryptionConfig ~f:EncryptionConfigList.to_value));
         ("connectorConfig",
-          (Option.map x.connectorConfig ~f:ConnectorConfigResponse.to_value))]
+          (Option.map x.connectorConfig ~f:ConnectorConfigResponse.to_value));
+        ("id", (Option.map x.id ~f:String_.to_value));
+        ("health", (Option.map x.health ~f:ClusterHealth.to_value));
+        ("outpostConfig",
+          (Option.map x.outpostConfig ~f:OutpostConfigResponse.to_value));
+        ("accessConfig",
+          (Option.map x.accessConfig ~f:AccessConfigResponse.to_value));
+        ("upgradePolicy",
+          (Option.map x.upgradePolicy ~f:UpgradePolicyResponse.to_value));
+        ("zonalShiftConfig",
+          (Option.map x.zonalShiftConfig ~f:ZonalShiftConfigResponse.to_value));
+        ("remoteNetworkConfig",
+          (Option.map x.remoteNetworkConfig
+             ~f:RemoteNetworkConfigResponse.to_value));
+        ("computeConfig",
+          (Option.map x.computeConfig ~f:ComputeConfigResponse.to_value));
+        ("storageConfig",
+          (Option.map x.storageConfig ~f:StorageConfigResponse.to_value));
+        ("deletionProtection",
+          (Option.map x.deletionProtection ~f:BoxedBoolean.to_value));
+        ("controlPlaneScalingConfig",
+          (Option.map x.controlPlaneScalingConfig
+             ~f:ControlPlaneScalingConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let controlPlaneScalingConfig =
+        (Option.map ~f:ControlPlaneScalingConfig.of_xml)
+          (Xml.child xml_arg0 "controlPlaneScalingConfig") in
+      let deletionProtection =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "deletionProtection") in
+      let storageConfig =
+        (Option.map ~f:StorageConfigResponse.of_xml)
+          (Xml.child xml_arg0 "storageConfig") in
+      let computeConfig =
+        (Option.map ~f:ComputeConfigResponse.of_xml)
+          (Xml.child xml_arg0 "computeConfig") in
+      let remoteNetworkConfig =
+        (Option.map ~f:RemoteNetworkConfigResponse.of_xml)
+          (Xml.child xml_arg0 "remoteNetworkConfig") in
+      let zonalShiftConfig =
+        (Option.map ~f:ZonalShiftConfigResponse.of_xml)
+          (Xml.child xml_arg0 "zonalShiftConfig") in
+      let upgradePolicy =
+        (Option.map ~f:UpgradePolicyResponse.of_xml)
+          (Xml.child xml_arg0 "upgradePolicy") in
+      let accessConfig =
+        (Option.map ~f:AccessConfigResponse.of_xml)
+          (Xml.child xml_arg0 "accessConfig") in
+      let outpostConfig =
+        (Option.map ~f:OutpostConfigResponse.of_xml)
+          (Xml.child xml_arg0 "outpostConfig") in
+      let health =
+        (Option.map ~f:ClusterHealth.of_xml) (Xml.child xml_arg0 "health") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
       let connectorConfig =
         (Option.map ~f:ConnectorConfigResponse.of_xml)
           (Xml.child xml_arg0 "connectorConfig") in
@@ -3360,38 +7983,67 @@ module Cluster =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
-      make ?connectorConfig ?encryptionConfig ?tags ?platformVersion
-        ?clientRequestToken ?certificateAuthority ?status ?identity ?logging
+      make ?controlPlaneScalingConfig ?deletionProtection ?storageConfig
+        ?computeConfig ?remoteNetworkConfig ?zonalShiftConfig ?upgradePolicy
+        ?accessConfig ?outpostConfig ?health ?id ?connectorConfig
+        ?encryptionConfig ?tags ?platformVersion ?clientRequestToken
+        ?certificateAuthority ?status ?identity ?logging
         ?kubernetesNetworkConfig ?resourcesVpcConfig ?roleArn ?endpoint
         ?version ?createdAt ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let controlPlaneScalingConfig =
+        field_map json__ "controlPlaneScalingConfig"
+          ControlPlaneScalingConfig.of_json in
+      let deletionProtection =
+        field_map json__ "deletionProtection" BoxedBoolean.of_json in
+      let storageConfig =
+        field_map json__ "storageConfig" StorageConfigResponse.of_json in
+      let computeConfig =
+        field_map json__ "computeConfig" ComputeConfigResponse.of_json in
+      let remoteNetworkConfig =
+        field_map json__ "remoteNetworkConfig"
+          RemoteNetworkConfigResponse.of_json in
+      let zonalShiftConfig =
+        field_map json__ "zonalShiftConfig" ZonalShiftConfigResponse.of_json in
+      let upgradePolicy =
+        field_map json__ "upgradePolicy" UpgradePolicyResponse.of_json in
+      let accessConfig =
+        field_map json__ "accessConfig" AccessConfigResponse.of_json in
+      let outpostConfig =
+        field_map json__ "outpostConfig" OutpostConfigResponse.of_json in
+      let health = field_map json__ "health" ClusterHealth.of_json in
+      let id = field_map json__ "id" String_.of_json in
       let connectorConfig =
-        field_map json "connectorConfig" ConnectorConfigResponse.of_json in
+        field_map json__ "connectorConfig" ConnectorConfigResponse.of_json in
       let encryptionConfig =
-        field_map json "encryptionConfig" EncryptionConfigList.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let platformVersion = field_map json "platformVersion" String_.of_json in
+        field_map json__ "encryptionConfig" EncryptionConfigList.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let platformVersion =
+        field_map json__ "platformVersion" String_.of_json in
       let clientRequestToken =
-        field_map json "clientRequestToken" String_.of_json in
+        field_map json__ "clientRequestToken" String_.of_json in
       let certificateAuthority =
-        field_map json "certificateAuthority" Certificate.of_json in
-      let status = field_map json "status" ClusterStatus.of_json in
-      let identity = field_map json "identity" Identity.of_json in
-      let logging = field_map json "logging" Logging.of_json in
+        field_map json__ "certificateAuthority" Certificate.of_json in
+      let status = field_map json__ "status" ClusterStatus.of_json in
+      let identity = field_map json__ "identity" Identity.of_json in
+      let logging = field_map json__ "logging" Logging.of_json in
       let kubernetesNetworkConfig =
-        field_map json "kubernetesNetworkConfig"
+        field_map json__ "kubernetesNetworkConfig"
           KubernetesNetworkConfigResponse.of_json in
       let resourcesVpcConfig =
-        field_map json "resourcesVpcConfig" VpcConfigResponse.of_json in
-      let roleArn = field_map json "roleArn" String_.of_json in
-      let endpoint = field_map json "endpoint" String_.of_json in
-      let version = field_map json "version" String_.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
-      let arn = field_map json "arn" String_.of_json in
-      let name = field_map json "name" String_.of_json in
-      make ?connectorConfig ?encryptionConfig ?tags ?platformVersion
-        ?clientRequestToken ?certificateAuthority ?status ?identity ?logging
+        field_map json__ "resourcesVpcConfig" VpcConfigResponse.of_json in
+      let roleArn = field_map json__ "roleArn" String_.of_json in
+      let endpoint = field_map json__ "endpoint" String_.of_json in
+      let version = field_map json__ "version" String_.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?controlPlaneScalingConfig ?deletionProtection ?storageConfig
+        ?computeConfig ?remoteNetworkConfig ?zonalShiftConfig ?upgradePolicy
+        ?accessConfig ?outpostConfig ?health ?id ?connectorConfig
+        ?encryptionConfig ?tags ?platformVersion ?clientRequestToken
+        ?certificateAuthority ?status ?identity ?logging
         ?kubernetesNetworkConfig ?resourcesVpcConfig ?roleArn ?endpoint
         ?version ?createdAt ?arn ?name ()
     let to_json v = composed_to_json to_value v
@@ -3405,37 +8057,49 @@ module ResourceLimitExceededException =
       nodegroupName: String_.t option
         [@ocaml.doc
           "The Amazon EKS managed node group associated with the exception."];
-      message: String_.t option }
+      subscriptionId: String_.t option
+        [@ocaml.doc "The Amazon EKS subscription ID with the exception."];
+      message: String_.t option
+        [@ocaml.doc "The Amazon EKS message associated with the exception."]}
     let make ?clusterName =
       fun ?nodegroupName ->
-        fun ?message -> fun () -> { clusterName; nodegroupName; message }
+        fun ?subscriptionId ->
+          fun ?message ->
+            fun () -> { clusterName; nodegroupName; subscriptionId; message }
     let to_value x =
       structure_to_value
         [("clusterName", (Option.map x.clusterName ~f:String_.to_value));
         ("nodegroupName", (Option.map x.nodegroupName ~f:String_.to_value));
+        ("subscriptionId", (Option.map x.subscriptionId ~f:String_.to_value));
         ("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let subscriptionId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "subscriptionId") in
       let nodegroupName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nodegroupName") in
       let clusterName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterName") in
-      make ?message ?nodegroupName ?clusterName ()
+      make ?message ?subscriptionId ?nodegroupName ?clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let nodegroupName = field_map json "nodegroupName" String_.of_json in
-      let clusterName = field_map json "clusterName" String_.of_json in
-      make ?message ?nodegroupName ?clusterName ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let subscriptionId = field_map json__ "subscriptionId" String_.of_json in
+      let nodegroupName = field_map json__ "nodegroupName" String_.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
+      make ?message ?subscriptionId ?nodegroupName ?clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You have encountered a service limit on the specified resource."]
 module ResourcePropagationDelayException =
   struct
-    type nonrec t = {
-      message: String_.t option }
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc
+          "Required resources (such as service-linked roles) were created and are still propagating. Retry later."]}
     let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
@@ -3446,16 +8110,19 @@ module ResourcePropagationDelayException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Required resources (such as Service Linked Roles) were created and are still propagating. Retry later."]
+       "Required resources (such as service-linked roles) were created and are still propagating. Retry later."]
 module ServiceUnavailableException =
   struct
-    type nonrec t = {
-      message: String_.t option }
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc
+          "The request has failed due to a temporary failure of the server."]}
     let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
@@ -3466,8 +8133,8 @@ module ServiceUnavailableException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3496,10 +8163,10 @@ module ConnectorConfigRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       make ~provider ~roleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provider =
-        field_map_exn json "provider" ConnectorConfigProvider.of_json in
-      let roleArn = field_map_exn json "roleArn" String_.of_json in
+        field_map_exn json__ "provider" ConnectorConfigProvider.of_json in
+      let roleArn = field_map_exn json__ "roleArn" String_.of_json in
       make ~provider ~roleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The configuration sent to a cluster for configuration."]
@@ -3518,6 +8185,55 @@ module ListUpdatesRequestMaxResults =
     let of_xml xml_arg0 =
       Int.of_string
         (string_of_xml ~kind:"an integer for ListUpdatesRequestMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PodIdentityAssociationSummaries =
+  struct
+    type nonrec t = PodIdentityAssociationSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PodIdentityAssociationSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PodIdentityAssociationSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PodIdentityAssociationSummaries"
+        ~of_json:PodIdentityAssociationSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListPodIdentityAssociationsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListPodIdentityAssociationsMaxResults"
            xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
@@ -3541,10 +8257,101 @@ module ListNodegroupsRequestMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module InsightSummaries =
+  struct
+    type nonrec t = InsightSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InsightSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InsightSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InsightSummaries" ~of_json:InsightSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InsightsFilter =
+  struct
+    type nonrec t =
+      {
+      categories: CategoryList.t option
+        [@ocaml.doc
+          "The categories to use to filter insights. The following lists the available categories: UPGRADE_READINESS: Amazon EKS identifies issues that could impact your ability to upgrade to new versions of Kubernetes. These are called upgrade insights. MISCONFIGURATION: Amazon EKS identifies misconfiguration in your EKS Hybrid Nodes setup that could impair functionality of your cluster or workloads. These are called configuration insights."];
+      kubernetesVersions: StringList.t option
+        [@ocaml.doc "The Kubernetes versions to use to filter the insights."];
+      statuses: InsightStatusValueList.t option
+        [@ocaml.doc "The statuses to use to filter the insights."]}
+    let make ?categories =
+      fun ?kubernetesVersions ->
+        fun ?statuses ->
+          fun () -> { categories; kubernetesVersions; statuses }
+    let to_value x =
+      structure_to_value
+        [("categories", (Option.map x.categories ~f:CategoryList.to_value));
+        ("kubernetesVersions",
+          (Option.map x.kubernetesVersions ~f:StringList.to_value));
+        ("statuses",
+          (Option.map x.statuses ~f:InsightStatusValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statuses =
+        (Option.map ~f:InsightStatusValueList.of_xml)
+          (Xml.child xml_arg0 "statuses") in
+      let kubernetesVersions =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "kubernetesVersions") in
+      let categories =
+        (Option.map ~f:CategoryList.of_xml) (Xml.child xml_arg0 "categories") in
+      make ?statuses ?kubernetesVersions ?categories ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statuses =
+        field_map json__ "statuses" InsightStatusValueList.of_json in
+      let kubernetesVersions =
+        field_map json__ "kubernetesVersions" StringList.of_json in
+      let categories = field_map json__ "categories" CategoryList.of_json in
+      make ?statuses ?kubernetesVersions ?categories ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The criteria to use for the insights."]
+module ListInsightsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ListInsightsMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module IdentityProviderConfigs =
   struct
     type nonrec t = IdentityProviderConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IdentityProviderConfig.to_value)) |>
         (fun x -> `List x)
@@ -3606,10 +8413,91 @@ module FargateProfilesRequestMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module EksAnywhereSubscriptionList =
+  struct
+    type nonrec t = EksAnywhereSubscription.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EksAnywhereSubscription.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EksAnywhereSubscription.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EksAnywhereSubscriptionList"
+        ~of_json:EksAnywhereSubscription.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EksAnywhereSubscriptionStatusValues =
+  struct
+    type nonrec t = EksAnywhereSubscriptionStatus.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EksAnywhereSubscriptionStatus.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EksAnywhereSubscriptionStatus.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EksAnywhereSubscriptionStatusValues"
+        ~of_json:EksAnywhereSubscriptionStatus.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListEksAnywhereSubscriptionsRequestMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListEksAnywhereSubscriptionsRequestMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module IncludeClustersList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3649,6 +8537,102 @@ module ListClustersRequestMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module CapabilitySummaryList =
+  struct
+    type nonrec t = CapabilitySummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapabilitySummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapabilitySummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapabilitySummaryList"
+        ~of_json:CapabilitySummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListCapabilitiesRequestMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListCapabilitiesRequestMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module AssociatedAccessPoliciesList =
+  struct
+    type nonrec t = AssociatedAccessPolicy.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssociatedAccessPolicy.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssociatedAccessPolicy.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssociatedAccessPoliciesList"
+        ~of_json:AssociatedAccessPolicy.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListAssociatedAccessPoliciesRequestMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListAssociatedAccessPoliciesRequestMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ListAddonsRequestMaxResults =
   struct
     type nonrec t = int
@@ -3668,6 +8652,72 @@ module ListAddonsRequestMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module AccessPoliciesList =
+  struct
+    type nonrec t = AccessPolicy.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AccessPolicy.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AccessPolicy.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AccessPoliciesList" ~of_json:AccessPolicy.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListAccessPoliciesRequestMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListAccessPoliciesRequestMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListAccessEntriesRequestMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListAccessEntriesRequestMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module Nodegroup =
   struct
     type nonrec t =
@@ -3678,20 +8728,17 @@ module Nodegroup =
       nodegroupArn: String_.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) associated with the managed node group."];
-      clusterName: String_.t option
-        [@ocaml.doc
-          "The name of the cluster that the managed node group resides in."];
+      clusterName: String_.t option [@ocaml.doc "The name of your cluster."];
       version: String_.t option
         [@ocaml.doc "The Kubernetes version of the managed node group."];
       releaseVersion: String_.t option
         [@ocaml.doc
           "If the node group was deployed using a launch template with a custom AMI, then this is the AMI ID that was specified in the launch template. For node groups that weren't deployed using a launch template, this is the version of the Amazon EKS optimized AMI that the node group was deployed with."];
       createdAt: Timestamp.t option
-        [@ocaml.doc
-          "The Unix epoch timestamp in seconds for when the managed node group was created."];
+        [@ocaml.doc "The Unix epoch timestamp at object creation."];
       modifiedAt: Timestamp.t option
         [@ocaml.doc
-          "The Unix epoch timestamp in seconds for when the managed node group was last modified."];
+          "The Unix epoch timestamp for the last modification to the object."];
       status: NodegroupStatus.t option
         [@ocaml.doc "The current status of the managed node group."];
       capacityType: CapacityTypes.t option
@@ -3719,7 +8766,7 @@ module Nodegroup =
           "The Kubernetes labels applied to the nodes in the node group. Only labels that are applied with the Amazon EKS API are shown here. There may be other Kubernetes labels applied to the nodes in this group."];
       taints: TaintsList.t option
         [@ocaml.doc
-          "The Kubernetes taints to be applied to the nodes in the node group when they are created. Effect is one of No_Schedule, Prefer_No_Schedule, or No_Execute. Kubernetes taints can be used together with tolerations to control how workloads are scheduled to your nodes."];
+          "The Kubernetes taints to be applied to the nodes in the node group when they are created. Effect is one of No_Schedule, Prefer_No_Schedule, or No_Execute. Kubernetes taints can be used together with tolerations to control how workloads are scheduled to your nodes. For more information, see Node taints on managed node groups."];
       resources: NodegroupResources.t option
         [@ocaml.doc
           "The resources associated with the node group, such as Auto Scaling groups and security groups for remote access."];
@@ -3731,12 +8778,17 @@ module Nodegroup =
           "The health status of the node group. If there are issues with your node group's health, they are listed here."];
       updateConfig: NodegroupUpdateConfig.t option
         [@ocaml.doc "The node group update configuration."];
+      nodeRepairConfig: NodeRepairConfig.t option
+        [@ocaml.doc "The node auto repair configuration for the node group."];
       launchTemplate: LaunchTemplateSpecification.t option
         [@ocaml.doc
           "If a launch template was used to create the node group, then this is the launch template that was used."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The metadata applied to the node group to assist with categorization and organization. Each tag consists of a key and an optional value. You define both. Node group tags do not propagate to any other resources associated with the node group, such as the Amazon EC2 instances or subnets."]}
+          "Metadata that assists with categorization and organization. Each tag consists of a key and an optional value. You define both. Tags don't propagate to any other cluster or Amazon Web Services resources."];
+      warmPoolConfig: WarmPoolConfig.t option
+        [@ocaml.doc
+          "The warm pool configuration attached to the node group. Amazon EKS manages warm pools throughout the node group lifecycle using the AWSServiceRoleForAmazonEKSNodegroup service-linked role to create, update, and delete warm pool resources."]}
     let make ?nodegroupName =
       fun ?nodegroupArn ->
         fun ?clusterName ->
@@ -3758,34 +8810,38 @@ module Nodegroup =
                                         fun ?diskSize ->
                                           fun ?health ->
                                             fun ?updateConfig ->
-                                              fun ?launchTemplate ->
-                                                fun ?tags ->
-                                                  fun () ->
-                                                    {
-                                                      nodegroupName;
-                                                      nodegroupArn;
-                                                      clusterName;
-                                                      version;
-                                                      releaseVersion;
-                                                      createdAt;
-                                                      modifiedAt;
-                                                      status;
-                                                      capacityType;
-                                                      scalingConfig;
-                                                      instanceTypes;
-                                                      subnets;
-                                                      remoteAccess;
-                                                      amiType;
-                                                      nodeRole;
-                                                      labels;
-                                                      taints;
-                                                      resources;
-                                                      diskSize;
-                                                      health;
-                                                      updateConfig;
-                                                      launchTemplate;
-                                                      tags
-                                                    }
+                                              fun ?nodeRepairConfig ->
+                                                fun ?launchTemplate ->
+                                                  fun ?tags ->
+                                                    fun ?warmPoolConfig ->
+                                                      fun () ->
+                                                        {
+                                                          nodegroupName;
+                                                          nodegroupArn;
+                                                          clusterName;
+                                                          version;
+                                                          releaseVersion;
+                                                          createdAt;
+                                                          modifiedAt;
+                                                          status;
+                                                          capacityType;
+                                                          scalingConfig;
+                                                          instanceTypes;
+                                                          subnets;
+                                                          remoteAccess;
+                                                          amiType;
+                                                          nodeRole;
+                                                          labels;
+                                                          taints;
+                                                          resources;
+                                                          diskSize;
+                                                          health;
+                                                          updateConfig;
+                                                          nodeRepairConfig;
+                                                          launchTemplate;
+                                                          tags;
+                                                          warmPoolConfig
+                                                        }
     let to_value x =
       structure_to_value
         [("nodegroupName", (Option.map x.nodegroupName ~f:String_.to_value));
@@ -3815,16 +8871,26 @@ module Nodegroup =
         ("health", (Option.map x.health ~f:NodegroupHealth.to_value));
         ("updateConfig",
           (Option.map x.updateConfig ~f:NodegroupUpdateConfig.to_value));
+        ("nodeRepairConfig",
+          (Option.map x.nodeRepairConfig ~f:NodeRepairConfig.to_value));
         ("launchTemplate",
           (Option.map x.launchTemplate
              ~f:LaunchTemplateSpecification.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("warmPoolConfig",
+          (Option.map x.warmPoolConfig ~f:WarmPoolConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let warmPoolConfig =
+        (Option.map ~f:WarmPoolConfig.of_xml)
+          (Xml.child xml_arg0 "warmPoolConfig") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let launchTemplate =
         (Option.map ~f:LaunchTemplateSpecification.of_xml)
           (Xml.child xml_arg0 "launchTemplate") in
+      let nodeRepairConfig =
+        (Option.map ~f:NodeRepairConfig.of_xml)
+          (Xml.child xml_arg0 "nodeRepairConfig") in
       let updateConfig =
         (Option.map ~f:NodegroupUpdateConfig.of_xml)
           (Xml.child xml_arg0 "updateConfig") in
@@ -3873,54 +8939,203 @@ module Nodegroup =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nodegroupArn") in
       let nodegroupName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nodegroupName") in
-      make ?tags ?launchTemplate ?updateConfig ?health ?diskSize ?resources
-        ?taints ?labels ?nodeRole ?amiType ?remoteAccess ?subnets
-        ?instanceTypes ?scalingConfig ?capacityType ?status ?modifiedAt
-        ?createdAt ?releaseVersion ?version ?clusterName ?nodegroupArn
-        ?nodegroupName ()
+      make ?warmPoolConfig ?tags ?launchTemplate ?nodeRepairConfig
+        ?updateConfig ?health ?diskSize ?resources ?taints ?labels ?nodeRole
+        ?amiType ?remoteAccess ?subnets ?instanceTypes ?scalingConfig
+        ?capacityType ?status ?modifiedAt ?createdAt ?releaseVersion ?version
+        ?clusterName ?nodegroupArn ?nodegroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let warmPoolConfig =
+        field_map json__ "warmPoolConfig" WarmPoolConfig.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let launchTemplate =
-        field_map json "launchTemplate" LaunchTemplateSpecification.of_json in
+        field_map json__ "launchTemplate" LaunchTemplateSpecification.of_json in
+      let nodeRepairConfig =
+        field_map json__ "nodeRepairConfig" NodeRepairConfig.of_json in
       let updateConfig =
-        field_map json "updateConfig" NodegroupUpdateConfig.of_json in
-      let health = field_map json "health" NodegroupHealth.of_json in
-      let diskSize = field_map json "diskSize" BoxedInteger.of_json in
-      let resources = field_map json "resources" NodegroupResources.of_json in
-      let taints = field_map json "taints" TaintsList.of_json in
-      let labels = field_map json "labels" LabelsMap.of_json in
-      let nodeRole = field_map json "nodeRole" String_.of_json in
-      let amiType = field_map json "amiType" AMITypes.of_json in
+        field_map json__ "updateConfig" NodegroupUpdateConfig.of_json in
+      let health = field_map json__ "health" NodegroupHealth.of_json in
+      let diskSize = field_map json__ "diskSize" BoxedInteger.of_json in
+      let resources = field_map json__ "resources" NodegroupResources.of_json in
+      let taints = field_map json__ "taints" TaintsList.of_json in
+      let labels = field_map json__ "labels" LabelsMap.of_json in
+      let nodeRole = field_map json__ "nodeRole" String_.of_json in
+      let amiType = field_map json__ "amiType" AMITypes.of_json in
       let remoteAccess =
-        field_map json "remoteAccess" RemoteAccessConfig.of_json in
-      let subnets = field_map json "subnets" StringList.of_json in
-      let instanceTypes = field_map json "instanceTypes" StringList.of_json in
+        field_map json__ "remoteAccess" RemoteAccessConfig.of_json in
+      let subnets = field_map json__ "subnets" StringList.of_json in
+      let instanceTypes = field_map json__ "instanceTypes" StringList.of_json in
       let scalingConfig =
-        field_map json "scalingConfig" NodegroupScalingConfig.of_json in
-      let capacityType = field_map json "capacityType" CapacityTypes.of_json in
-      let status = field_map json "status" NodegroupStatus.of_json in
-      let modifiedAt = field_map json "modifiedAt" Timestamp.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
-      let releaseVersion = field_map json "releaseVersion" String_.of_json in
-      let version = field_map json "version" String_.of_json in
-      let clusterName = field_map json "clusterName" String_.of_json in
-      let nodegroupArn = field_map json "nodegroupArn" String_.of_json in
-      let nodegroupName = field_map json "nodegroupName" String_.of_json in
-      make ?tags ?launchTemplate ?updateConfig ?health ?diskSize ?resources
-        ?taints ?labels ?nodeRole ?amiType ?remoteAccess ?subnets
-        ?instanceTypes ?scalingConfig ?capacityType ?status ?modifiedAt
-        ?createdAt ?releaseVersion ?version ?clusterName ?nodegroupArn
-        ?nodegroupName ()
+        field_map json__ "scalingConfig" NodegroupScalingConfig.of_json in
+      let capacityType =
+        field_map json__ "capacityType" CapacityTypes.of_json in
+      let status = field_map json__ "status" NodegroupStatus.of_json in
+      let modifiedAt = field_map json__ "modifiedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let releaseVersion = field_map json__ "releaseVersion" String_.of_json in
+      let version = field_map json__ "version" String_.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
+      let nodegroupArn = field_map json__ "nodegroupArn" String_.of_json in
+      let nodegroupName = field_map json__ "nodegroupName" String_.of_json in
+      make ?warmPoolConfig ?tags ?launchTemplate ?nodeRepairConfig
+        ?updateConfig ?health ?diskSize ?resources ?taints ?labels ?nodeRole
+        ?amiType ?remoteAccess ?subnets ?instanceTypes ?scalingConfig
+        ?capacityType ?status ?modifiedAt ?createdAt ?releaseVersion ?version
+        ?clusterName ?nodegroupArn ?nodegroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object representing an Amazon EKS managed node group."]
+module Insight =
+  struct
+    type nonrec t =
+      {
+      id: String_.t option [@ocaml.doc "The ID of the insight."];
+      name: String_.t option [@ocaml.doc "The name of the insight."];
+      category: Category.t option [@ocaml.doc "The category of the insight."];
+      kubernetesVersion: String_.t option
+        [@ocaml.doc
+          "The Kubernetes minor version associated with an insight if applicable."];
+      lastRefreshTime: Timestamp.t option
+        [@ocaml.doc
+          "The time Amazon EKS last successfully completed a refresh of this insight check on the cluster."];
+      lastTransitionTime: Timestamp.t option
+        [@ocaml.doc "The time the status of the insight last changed."];
+      description: String_.t option
+        [@ocaml.doc
+          "The description of the insight which includes alert criteria, remediation recommendation, and additional resources (contains Markdown)."];
+      insightStatus: InsightStatus.t option
+        [@ocaml.doc
+          "An object containing more detail on the status of the insight resource."];
+      recommendation: String_.t option
+        [@ocaml.doc
+          "A summary of how to remediate the finding of this insight if applicable."];
+      additionalInfo: AdditionalInfoMap.t option
+        [@ocaml.doc
+          "Links to sources that provide additional context on the insight."];
+      resources: InsightResourceDetails.t option
+        [@ocaml.doc
+          "The details about each resource listed in the insight check result."];
+      categorySpecificSummary: InsightCategorySpecificSummary.t option
+        [@ocaml.doc
+          "Summary information that relates to the category of the insight. Currently only returned with certain insights having category UPGRADE_READINESS."]}
+    let make ?id =
+      fun ?name ->
+        fun ?category ->
+          fun ?kubernetesVersion ->
+            fun ?lastRefreshTime ->
+              fun ?lastTransitionTime ->
+                fun ?description ->
+                  fun ?insightStatus ->
+                    fun ?recommendation ->
+                      fun ?additionalInfo ->
+                        fun ?resources ->
+                          fun ?categorySpecificSummary ->
+                            fun () ->
+                              {
+                                id;
+                                name;
+                                category;
+                                kubernetesVersion;
+                                lastRefreshTime;
+                                lastTransitionTime;
+                                description;
+                                insightStatus;
+                                recommendation;
+                                additionalInfo;
+                                resources;
+                                categorySpecificSummary
+                              }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:String_.to_value));
+        ("name", (Option.map x.name ~f:String_.to_value));
+        ("category", (Option.map x.category ~f:Category.to_value));
+        ("kubernetesVersion",
+          (Option.map x.kubernetesVersion ~f:String_.to_value));
+        ("lastRefreshTime",
+          (Option.map x.lastRefreshTime ~f:Timestamp.to_value));
+        ("lastTransitionTime",
+          (Option.map x.lastTransitionTime ~f:Timestamp.to_value));
+        ("description", (Option.map x.description ~f:String_.to_value));
+        ("insightStatus",
+          (Option.map x.insightStatus ~f:InsightStatus.to_value));
+        ("recommendation", (Option.map x.recommendation ~f:String_.to_value));
+        ("additionalInfo",
+          (Option.map x.additionalInfo ~f:AdditionalInfoMap.to_value));
+        ("resources",
+          (Option.map x.resources ~f:InsightResourceDetails.to_value));
+        ("categorySpecificSummary",
+          (Option.map x.categorySpecificSummary
+             ~f:InsightCategorySpecificSummary.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let categorySpecificSummary =
+        (Option.map ~f:InsightCategorySpecificSummary.of_xml)
+          (Xml.child xml_arg0 "categorySpecificSummary") in
+      let resources =
+        (Option.map ~f:InsightResourceDetails.of_xml)
+          (Xml.child xml_arg0 "resources") in
+      let additionalInfo =
+        (Option.map ~f:AdditionalInfoMap.of_xml)
+          (Xml.child xml_arg0 "additionalInfo") in
+      let recommendation =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "recommendation") in
+      let insightStatus =
+        (Option.map ~f:InsightStatus.of_xml)
+          (Xml.child xml_arg0 "insightStatus") in
+      let description =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
+      let lastTransitionTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastTransitionTime") in
+      let lastRefreshTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastRefreshTime") in
+      let kubernetesVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "kubernetesVersion") in
+      let category =
+        (Option.map ~f:Category.of_xml) (Xml.child xml_arg0 "category") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
+      make ?categorySpecificSummary ?resources ?additionalInfo
+        ?recommendation ?insightStatus ?description ?lastTransitionTime
+        ?lastRefreshTime ?kubernetesVersion ?category ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let categorySpecificSummary =
+        field_map json__ "categorySpecificSummary"
+          InsightCategorySpecificSummary.of_json in
+      let resources =
+        field_map json__ "resources" InsightResourceDetails.of_json in
+      let additionalInfo =
+        field_map json__ "additionalInfo" AdditionalInfoMap.of_json in
+      let recommendation = field_map json__ "recommendation" String_.of_json in
+      let insightStatus =
+        field_map json__ "insightStatus" InsightStatus.of_json in
+      let description = field_map json__ "description" String_.of_json in
+      let lastTransitionTime =
+        field_map json__ "lastTransitionTime" Timestamp.of_json in
+      let lastRefreshTime =
+        field_map json__ "lastRefreshTime" Timestamp.of_json in
+      let kubernetesVersion =
+        field_map json__ "kubernetesVersion" String_.of_json in
+      let category = field_map json__ "category" Category.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
+      make ?categorySpecificSummary ?resources ?additionalInfo
+        ?recommendation ?insightStatus ?description ?lastTransitionTime
+        ?lastRefreshTime ?kubernetesVersion ?category ?name ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A check that provides recommendations to remedy potential upgrade-impacting issues."]
 module IdentityProviderConfigResponse =
   struct
     type nonrec t =
       {
       oidc: OidcIdentityProviderConfig.t option
         [@ocaml.doc
-          "An object that represents an OpenID Connect (OIDC) identity provider configuration."]}
+          "An object representing an OpenID Connect (OIDC) identity provider configuration."]}
     let make ?oidc = fun () -> { oidc }
     let to_value x =
       structure_to_value
@@ -3932,8 +9147,8 @@ module IdentityProviderConfigResponse =
           (Xml.child xml_arg0 "oidc") in
       make ?oidc ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let oidc = field_map json "oidc" OidcIdentityProviderConfig.of_json in
+    let of_json json__ =
+      let oidc = field_map json__ "oidc" OidcIdentityProviderConfig.of_json in
       make ?oidc ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The full description of your identity configuration."]
@@ -3946,25 +9161,25 @@ module FargateProfile =
       fargateProfileArn: String_.t option
         [@ocaml.doc
           "The full Amazon Resource Name (ARN) of the Fargate profile."];
-      clusterName: String_.t option
-        [@ocaml.doc
-          "The name of the Amazon EKS cluster that the Fargate profile belongs to."];
+      clusterName: String_.t option [@ocaml.doc "The name of your cluster."];
       createdAt: Timestamp.t option
-        [@ocaml.doc
-          "The Unix epoch timestamp in seconds for when the Fargate profile was created."];
+        [@ocaml.doc "The Unix epoch timestamp at object creation."];
       podExecutionRoleArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the pod execution role to use for pods that match the selectors in the Fargate profile. For more information, see Pod Execution Role in the Amazon EKS User Guide."];
+          "The Amazon Resource Name (ARN) of the Pod execution role to use for any Pod that matches the selectors in the Fargate profile. For more information, see Pod execution role in the Amazon EKS User Guide."];
       subnets: StringList.t option
-        [@ocaml.doc "The IDs of subnets to launch pods into."];
+        [@ocaml.doc "The IDs of subnets to launch a Pod into."];
       selectors: FargateProfileSelectors.t option
         [@ocaml.doc
-          "The selectors to match for pods to use this Fargate profile."];
+          "The selectors to match for a Pod to use this Fargate profile."];
       status: FargateProfileStatus.t option
         [@ocaml.doc "The current status of the Fargate profile."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The metadata applied to the Fargate profile to assist with categorization and organization. Each tag consists of a key and an optional value. You define both. Fargate profile tags do not propagate to any other resources associated with the Fargate profile, such as the pods that are scheduled with it."]}
+          "Metadata that assists with categorization and organization. Each tag consists of a key and an optional value. You define both. Tags don't propagate to any other cluster or Amazon Web Services resources."];
+      health: FargateProfileHealth.t option
+        [@ocaml.doc
+          "The health status of the Fargate profile. If there are issues with your Fargate profile's health, they are listed here."]}
     let make ?fargateProfileName =
       fun ?fargateProfileArn ->
         fun ?clusterName ->
@@ -3974,18 +9189,20 @@ module FargateProfile =
                 fun ?selectors ->
                   fun ?status ->
                     fun ?tags ->
-                      fun () ->
-                        {
-                          fargateProfileName;
-                          fargateProfileArn;
-                          clusterName;
-                          createdAt;
-                          podExecutionRoleArn;
-                          subnets;
-                          selectors;
-                          status;
-                          tags
-                        }
+                      fun ?health ->
+                        fun () ->
+                          {
+                            fargateProfileName;
+                            fargateProfileArn;
+                            clusterName;
+                            createdAt;
+                            podExecutionRoleArn;
+                            subnets;
+                            selectors;
+                            status;
+                            tags;
+                            health
+                          }
     let to_value x =
       structure_to_value
         [("fargateProfileName",
@@ -4000,9 +9217,13 @@ module FargateProfile =
         ("selectors",
           (Option.map x.selectors ~f:FargateProfileSelectors.to_value));
         ("status", (Option.map x.status ~f:FargateProfileStatus.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("health", (Option.map x.health ~f:FargateProfileHealth.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let health =
+        (Option.map ~f:FargateProfileHealth.of_xml)
+          (Xml.child xml_arg0 "health") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let status =
         (Option.map ~f:FargateProfileStatus.of_xml)
@@ -4025,31 +9246,227 @@ module FargateProfile =
       let fargateProfileName =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "fargateProfileName") in
-      make ?tags ?status ?selectors ?subnets ?podExecutionRoleArn ?createdAt
-        ?clusterName ?fargateProfileArn ?fargateProfileName ()
+      make ?health ?tags ?status ?selectors ?subnets ?podExecutionRoleArn
+        ?createdAt ?clusterName ?fargateProfileArn ?fargateProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let status = field_map json "status" FargateProfileStatus.of_json in
+    let of_json json__ =
+      let health = field_map json__ "health" FargateProfileHealth.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let status = field_map json__ "status" FargateProfileStatus.of_json in
       let selectors =
-        field_map json "selectors" FargateProfileSelectors.of_json in
-      let subnets = field_map json "subnets" StringList.of_json in
+        field_map json__ "selectors" FargateProfileSelectors.of_json in
+      let subnets = field_map json__ "subnets" StringList.of_json in
       let podExecutionRoleArn =
-        field_map json "podExecutionRoleArn" String_.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
-      let clusterName = field_map json "clusterName" String_.of_json in
+        field_map json__ "podExecutionRoleArn" String_.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
       let fargateProfileArn =
-        field_map json "fargateProfileArn" String_.of_json in
+        field_map json__ "fargateProfileArn" String_.of_json in
       let fargateProfileName =
-        field_map json "fargateProfileName" String_.of_json in
-      make ?tags ?status ?selectors ?subnets ?podExecutionRoleArn ?createdAt
-        ?clusterName ?fargateProfileArn ?fargateProfileName ()
+        field_map json__ "fargateProfileName" String_.of_json in
+      make ?health ?tags ?status ?selectors ?subnets ?podExecutionRoleArn
+        ?createdAt ?clusterName ?fargateProfileArn ?fargateProfileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object representing an Fargate profile."]
+module ClusterVersionList =
+  struct
+    type nonrec t = ClusterVersionInformation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ClusterVersionInformation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ClusterVersionInformation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ClusterVersionList"
+        ~of_json:ClusterVersionInformation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeClusterVersionMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeClusterVersionMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Capability =
+  struct
+    type nonrec t =
+      {
+      capabilityName: String_.t option
+        [@ocaml.doc "The unique name of the capability within the cluster."];
+      arn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the capability."];
+      clusterName: String_.t option
+        [@ocaml.doc
+          "The name of the Amazon EKS cluster that contains this capability."];
+      type_: CapabilityType.t option
+        [@ocaml.doc
+          "The type of capability. Valid values are ACK, ARGOCD, or KRO."];
+      roleArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role that the capability uses to interact with Amazon Web Services services."];
+      status: CapabilityStatus.t option
+        [@ocaml.doc
+          "The current status of the capability. Valid values include: CREATING \226\128\147 The capability is being created. ACTIVE \226\128\147 The capability is running and available. UPDATING \226\128\147 The capability is being updated. DELETING \226\128\147 The capability is being deleted. CREATE_FAILED \226\128\147 The capability creation failed. UPDATE_FAILED \226\128\147 The capability update failed. DELETE_FAILED \226\128\147 The capability deletion failed."];
+      version: String_.t option
+        [@ocaml.doc
+          "The version of the capability software that is currently running."];
+      configuration: CapabilityConfigurationResponse.t option
+        [@ocaml.doc
+          "The configuration settings for the capability. The structure varies depending on the capability type."];
+      tags: TagMap.t option ;
+      health: CapabilityHealth.t option
+        [@ocaml.doc
+          "Health information for the capability, including any issues that may be affecting its operation."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "The Unix epoch timestamp in seconds for when the capability was created."];
+      modifiedAt: Timestamp.t option
+        [@ocaml.doc
+          "The Unix epoch timestamp in seconds for when the capability was last modified."];
+      deletePropagationPolicy: CapabilityDeletePropagationPolicy.t option
+        [@ocaml.doc
+          "The delete propagation policy for the capability. Currently, the only supported value is RETAIN, which keeps all resources managed by the capability when the capability is deleted."]}
+    let make ?capabilityName =
+      fun ?arn ->
+        fun ?clusterName ->
+          fun ?type_ ->
+            fun ?roleArn ->
+              fun ?status ->
+                fun ?version ->
+                  fun ?configuration ->
+                    fun ?tags ->
+                      fun ?health ->
+                        fun ?createdAt ->
+                          fun ?modifiedAt ->
+                            fun ?deletePropagationPolicy ->
+                              fun () ->
+                                {
+                                  capabilityName;
+                                  arn;
+                                  clusterName;
+                                  type_;
+                                  roleArn;
+                                  status;
+                                  version;
+                                  configuration;
+                                  tags;
+                                  health;
+                                  createdAt;
+                                  modifiedAt;
+                                  deletePropagationPolicy
+                                }
+    let to_value x =
+      structure_to_value
+        [("capabilityName",
+           (Option.map x.capabilityName ~f:String_.to_value));
+        ("arn", (Option.map x.arn ~f:String_.to_value));
+        ("clusterName", (Option.map x.clusterName ~f:String_.to_value));
+        ("type", (Option.map x.type_ ~f:CapabilityType.to_value));
+        ("roleArn", (Option.map x.roleArn ~f:String_.to_value));
+        ("status", (Option.map x.status ~f:CapabilityStatus.to_value));
+        ("version", (Option.map x.version ~f:String_.to_value));
+        ("configuration",
+          (Option.map x.configuration
+             ~f:CapabilityConfigurationResponse.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("health", (Option.map x.health ~f:CapabilityHealth.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("modifiedAt", (Option.map x.modifiedAt ~f:Timestamp.to_value));
+        ("deletePropagationPolicy",
+          (Option.map x.deletePropagationPolicy
+             ~f:CapabilityDeletePropagationPolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deletePropagationPolicy =
+        (Option.map ~f:CapabilityDeletePropagationPolicy.of_xml)
+          (Xml.child xml_arg0 "deletePropagationPolicy") in
+      let modifiedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "modifiedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let health =
+        (Option.map ~f:CapabilityHealth.of_xml) (Xml.child xml_arg0 "health") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let configuration =
+        (Option.map ~f:CapabilityConfigurationResponse.of_xml)
+          (Xml.child xml_arg0 "configuration") in
+      let version =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "version") in
+      let status =
+        (Option.map ~f:CapabilityStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let roleArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "roleArn") in
+      let type_ =
+        (Option.map ~f:CapabilityType.of_xml) (Xml.child xml_arg0 "type") in
+      let clusterName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterName") in
+      let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
+      let capabilityName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "capabilityName") in
+      make ?deletePropagationPolicy ?modifiedAt ?createdAt ?health ?tags
+        ?configuration ?version ?status ?roleArn ?type_ ?clusterName ?arn
+        ?capabilityName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deletePropagationPolicy =
+        field_map json__ "deletePropagationPolicy"
+          CapabilityDeletePropagationPolicy.of_json in
+      let modifiedAt = field_map json__ "modifiedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let health = field_map json__ "health" CapabilityHealth.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let configuration =
+        field_map json__ "configuration"
+          CapabilityConfigurationResponse.of_json in
+      let version = field_map json__ "version" String_.of_json in
+      let status = field_map json__ "status" CapabilityStatus.of_json in
+      let roleArn = field_map json__ "roleArn" String_.of_json in
+      let type_ = field_map json__ "type" CapabilityType.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
+      let capabilityName = field_map json__ "capabilityName" String_.of_json in
+      make ?deletePropagationPolicy ?modifiedAt ?createdAt ?health ?tags
+        ?configuration ?version ?status ?roleArn ?type_ ?clusterName ?arn
+        ?capabilityName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object representing a managed capability in an Amazon EKS cluster. This includes all configuration, status, and health information for the capability."]
 module Addons =
   struct
     type nonrec t = AddonInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AddonInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4095,7 +9512,7 @@ module Addon =
       {
       addonName: String_.t option [@ocaml.doc "The name of the add-on."];
       clusterName: ClusterName.t option
-        [@ocaml.doc "The name of the cluster."];
+        [@ocaml.doc "The name of your cluster."];
       status: AddonStatus.t option [@ocaml.doc "The status of the add-on."];
       addonVersion: String_.t option
         [@ocaml.doc "The version of the add-on."];
@@ -4104,15 +9521,29 @@ module Addon =
       addonArn: String_.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the add-on."];
       createdAt: Timestamp.t option
-        [@ocaml.doc "The date and time that the add-on was created."];
+        [@ocaml.doc "The Unix epoch timestamp at object creation."];
       modifiedAt: Timestamp.t option
-        [@ocaml.doc "The date and time that the add-on was last modified."];
+        [@ocaml.doc
+          "The Unix epoch timestamp for the last modification to the object."];
       serviceAccountRoleArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the IAM role that is bound to the Kubernetes service account used by the add-on."];
+          "The Amazon Resource Name (ARN) of the IAM role that's bound to the Kubernetes ServiceAccount object that the add-on uses."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The metadata that you apply to the add-on to assist with categorization and organization. Each tag consists of a key and an optional value. You define both. Add-on tags do not propagate to any other resources associated with the cluster."]}
+          "Metadata that assists with categorization and organization. Each tag consists of a key and an optional value. You define both. Tags don't propagate to any other cluster or Amazon Web Services resources."];
+      publisher: String_.t option [@ocaml.doc "The publisher of the add-on."];
+      owner: String_.t option [@ocaml.doc "The owner of the add-on."];
+      marketplaceInformation: MarketplaceInformation.t option
+        [@ocaml.doc
+          "Information about an Amazon EKS add-on from the Amazon Web Services Marketplace."];
+      configurationValues: String_.t option
+        [@ocaml.doc "The configuration values that you provided."];
+      podIdentityAssociations: StringList.t option
+        [@ocaml.doc
+          "An array of EKS Pod Identity associations owned by the add-on. Each association maps a role to a service account in a namespace in the cluster. For more information, see Attach an IAM Role to an Amazon EKS add-on using EKS Pod Identity in the Amazon EKS User Guide."];
+      namespaceConfig: AddonNamespaceConfigResponse.t option
+        [@ocaml.doc
+          "The namespace configuration for the addon. This specifies the Kubernetes namespace where the addon is installed."]}
     let make ?addonName =
       fun ?clusterName ->
         fun ?status ->
@@ -4123,19 +9554,31 @@ module Addon =
                   fun ?modifiedAt ->
                     fun ?serviceAccountRoleArn ->
                       fun ?tags ->
-                        fun () ->
-                          {
-                            addonName;
-                            clusterName;
-                            status;
-                            addonVersion;
-                            health;
-                            addonArn;
-                            createdAt;
-                            modifiedAt;
-                            serviceAccountRoleArn;
-                            tags
-                          }
+                        fun ?publisher ->
+                          fun ?owner ->
+                            fun ?marketplaceInformation ->
+                              fun ?configurationValues ->
+                                fun ?podIdentityAssociations ->
+                                  fun ?namespaceConfig ->
+                                    fun () ->
+                                      {
+                                        addonName;
+                                        clusterName;
+                                        status;
+                                        addonVersion;
+                                        health;
+                                        addonArn;
+                                        createdAt;
+                                        modifiedAt;
+                                        serviceAccountRoleArn;
+                                        tags;
+                                        publisher;
+                                        owner;
+                                        marketplaceInformation;
+                                        configurationValues;
+                                        podIdentityAssociations;
+                                        namespaceConfig
+                                      }
     let to_value x =
       structure_to_value
         [("addonName", (Option.map x.addonName ~f:String_.to_value));
@@ -4148,9 +9591,36 @@ module Addon =
         ("modifiedAt", (Option.map x.modifiedAt ~f:Timestamp.to_value));
         ("serviceAccountRoleArn",
           (Option.map x.serviceAccountRoleArn ~f:String_.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("publisher", (Option.map x.publisher ~f:String_.to_value));
+        ("owner", (Option.map x.owner ~f:String_.to_value));
+        ("marketplaceInformation",
+          (Option.map x.marketplaceInformation
+             ~f:MarketplaceInformation.to_value));
+        ("configurationValues",
+          (Option.map x.configurationValues ~f:String_.to_value));
+        ("podIdentityAssociations",
+          (Option.map x.podIdentityAssociations ~f:StringList.to_value));
+        ("namespaceConfig",
+          (Option.map x.namespaceConfig
+             ~f:AddonNamespaceConfigResponse.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let namespaceConfig =
+        (Option.map ~f:AddonNamespaceConfigResponse.of_xml)
+          (Xml.child xml_arg0 "namespaceConfig") in
+      let podIdentityAssociations =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "podIdentityAssociations") in
+      let configurationValues =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "configurationValues") in
+      let marketplaceInformation =
+        (Option.map ~f:MarketplaceInformation.of_xml)
+          (Xml.child xml_arg0 "marketplaceInformation") in
+      let owner = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "owner") in
+      let publisher =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "publisher") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let serviceAccountRoleArn =
         (Option.map ~f:String_.of_xml)
@@ -4171,31 +9641,78 @@ module Addon =
         (Option.map ~f:ClusterName.of_xml) (Xml.child xml_arg0 "clusterName") in
       let addonName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "addonName") in
-      make ?tags ?serviceAccountRoleArn ?modifiedAt ?createdAt ?addonArn
-        ?health ?addonVersion ?status ?clusterName ?addonName ()
+      make ?namespaceConfig ?podIdentityAssociations ?configurationValues
+        ?marketplaceInformation ?owner ?publisher ?tags
+        ?serviceAccountRoleArn ?modifiedAt ?createdAt ?addonArn ?health
+        ?addonVersion ?status ?clusterName ?addonName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let namespaceConfig =
+        field_map json__ "namespaceConfig"
+          AddonNamespaceConfigResponse.of_json in
+      let podIdentityAssociations =
+        field_map json__ "podIdentityAssociations" StringList.of_json in
+      let configurationValues =
+        field_map json__ "configurationValues" String_.of_json in
+      let marketplaceInformation =
+        field_map json__ "marketplaceInformation"
+          MarketplaceInformation.of_json in
+      let owner = field_map json__ "owner" String_.of_json in
+      let publisher = field_map json__ "publisher" String_.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let serviceAccountRoleArn =
-        field_map json "serviceAccountRoleArn" String_.of_json in
-      let modifiedAt = field_map json "modifiedAt" Timestamp.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
-      let addonArn = field_map json "addonArn" String_.of_json in
-      let health = field_map json "health" AddonHealth.of_json in
-      let addonVersion = field_map json "addonVersion" String_.of_json in
-      let status = field_map json "status" AddonStatus.of_json in
-      let clusterName = field_map json "clusterName" ClusterName.of_json in
-      let addonName = field_map json "addonName" String_.of_json in
-      make ?tags ?serviceAccountRoleArn ?modifiedAt ?createdAt ?addonArn
-        ?health ?addonVersion ?status ?clusterName ?addonName ()
+        field_map json__ "serviceAccountRoleArn" String_.of_json in
+      let modifiedAt = field_map json__ "modifiedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let addonArn = field_map json__ "addonArn" String_.of_json in
+      let health = field_map json__ "health" AddonHealth.of_json in
+      let addonVersion = field_map json__ "addonVersion" String_.of_json in
+      let status = field_map json__ "status" AddonStatus.of_json in
+      let clusterName = field_map json__ "clusterName" ClusterName.of_json in
+      let addonName = field_map json__ "addonName" String_.of_json in
+      make ?namespaceConfig ?podIdentityAssociations ?configurationValues
+        ?marketplaceInformation ?owner ?publisher ?tags
+        ?serviceAccountRoleArn ?modifiedAt ?createdAt ?addonArn ?health
+        ?addonVersion ?status ?clusterName ?addonName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An Amazon EKS add-on. For more information, see Amazon EKS add-ons in the Amazon EKS User Guide."]
+module AddonPodIdentityConfigurationList =
+  struct
+    type nonrec t = AddonPodIdentityConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AddonPodIdentityConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AddonPodIdentityConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AddonPodIdentityConfigurationList"
+        ~of_json:AddonPodIdentityConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module UnsupportedAvailabilityZoneException =
   struct
     type nonrec t =
       {
-      message: String_.t option ;
+      message: String_.t option
+        [@ocaml.doc
+          "At least one of your specified cluster subnets is in an Availability Zone that does not support Amazon EKS. The exception output specifies the supported Availability Zones for your account, from which you can choose subnets for your cluster."];
       clusterName: String_.t option
         [@ocaml.doc "The Amazon EKS cluster associated with the exception."];
       nodegroupName: String_.t option
@@ -4227,46 +9744,175 @@ module UnsupportedAvailabilityZoneException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?validZones ?nodegroupName ?clusterName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let validZones = field_map json "validZones" StringList.of_json in
-      let nodegroupName = field_map json "nodegroupName" String_.of_json in
-      let clusterName = field_map json "clusterName" String_.of_json in
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let validZones = field_map json__ "validZones" StringList.of_json in
+      let nodegroupName = field_map json__ "nodegroupName" String_.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
       make ?validZones ?nodegroupName ?clusterName ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "At least one of your specified cluster subnets is in an Availability Zone that does not support Amazon EKS. The exception output specifies the supported Availability Zones for your account, from which you can choose subnets for your cluster."]
-module KubernetesNetworkConfigRequest =
+module EksAnywhereSubscriptionName =
+  struct
+    type nonrec t = string
+    let context_ = "EksAnywhereSubscriptionName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[0-9A-Za-z][A-Za-z0-9\\-_]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EksAnywhereSubscriptionName" j
+    let to_json = simple_to_json to_value
+  end
+module CreateAccessConfigRequest =
   struct
     type nonrec t =
       {
-      serviceIpv4Cidr: String_.t option
+      bootstrapClusterCreatorAdminPermissions: BoxedBoolean.t option
         [@ocaml.doc
-          "Don't specify a value if you select ipv6 for ipFamily. The CIDR block to assign Kubernetes service IP addresses from. If you don't specify a block, Kubernetes assigns addresses from either the 10.100.0.0/16 or 172.20.0.0/16 CIDR blocks. We recommend that you specify a block that does not overlap with resources in other networks that are peered or connected to your VPC. The block must meet the following requirements: Within one of the following private IP address blocks: 10.0.0.0/8, 172.16.0.0/12, or 192.168.0.0/16. Doesn't overlap with any CIDR block assigned to the VPC that you selected for VPC. Between /24 and /12. You can only specify a custom CIDR block when you create a cluster and can't change this value once the cluster is created."];
-      ipFamily: IpFamily.t option
+          "Specifies whether or not the cluster creator IAM principal was set as a cluster admin access entry during cluster creation time. The default value is true."];
+      authenticationMode: AuthenticationMode.t option
         [@ocaml.doc
-          "Specify which IP version is used to assign Kubernetes Pod and Service IP addresses. If you don't specify a value, ipv4 is used by default. You can only specify an IP family when you create a cluster and can't change this value once the cluster is created. If you specify ipv6, the VPC and subnets that you specify for cluster creation must have both IPv4 and IPv6 CIDR blocks assigned to them. You can only specify ipv6 for 1.21 and later clusters that use version 1.10.0 or later of the Amazon VPC CNI add-on. If you specify ipv6, then ensure that your VPC meets the requirements and that you're familiar with the considerations listed in Assigning IPv6 addresses to Pods and Services in the Amazon EKS User Guide. If you specify ipv6, Kubernetes assigns Service and Pod addresses from the unique local address range (fc00::/7). You can't specify a custom IPv6 CIDR block."]}
-    let make ?serviceIpv4Cidr =
-      fun ?ipFamily -> fun () -> { serviceIpv4Cidr; ipFamily }
+          "The desired authentication mode for the cluster. If you create a cluster by using the EKS API, Amazon Web Services SDKs, or CloudFormation, the default is CONFIG_MAP. If you create the cluster by using the Amazon Web Services Management Console, the default value is API_AND_CONFIG_MAP."]}
+    let make ?bootstrapClusterCreatorAdminPermissions =
+      fun ?authenticationMode ->
+        fun () ->
+          { bootstrapClusterCreatorAdminPermissions; authenticationMode }
     let to_value x =
       structure_to_value
-        [("serviceIpv4Cidr",
-           (Option.map x.serviceIpv4Cidr ~f:String_.to_value));
-        ("ipFamily", (Option.map x.ipFamily ~f:IpFamily.to_value))]
+        [("bootstrapClusterCreatorAdminPermissions",
+           (Option.map x.bootstrapClusterCreatorAdminPermissions
+              ~f:BoxedBoolean.to_value));
+        ("authenticationMode",
+          (Option.map x.authenticationMode ~f:AuthenticationMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let ipFamily =
-        (Option.map ~f:IpFamily.of_xml) (Xml.child xml_arg0 "ipFamily") in
-      let serviceIpv4Cidr =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceIpv4Cidr") in
-      make ?ipFamily ?serviceIpv4Cidr ()
+      let authenticationMode =
+        (Option.map ~f:AuthenticationMode.of_xml)
+          (Xml.child xml_arg0 "authenticationMode") in
+      let bootstrapClusterCreatorAdminPermissions =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "bootstrapClusterCreatorAdminPermissions") in
+      make ?authenticationMode ?bootstrapClusterCreatorAdminPermissions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ipFamily = field_map json "ipFamily" IpFamily.of_json in
-      let serviceIpv4Cidr = field_map json "serviceIpv4Cidr" String_.of_json in
-      make ?ipFamily ?serviceIpv4Cidr ()
+    let of_json json__ =
+      let authenticationMode =
+        field_map json__ "authenticationMode" AuthenticationMode.of_json in
+      let bootstrapClusterCreatorAdminPermissions =
+        field_map json__ "bootstrapClusterCreatorAdminPermissions"
+          BoxedBoolean.of_json in
+      make ?authenticationMode ?bootstrapClusterCreatorAdminPermissions ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The Kubernetes network configuration for the cluster."]
+  end[@@ocaml.doc "The access configuration information for the cluster."]
+module OutpostConfigRequest =
+  struct
+    type nonrec t =
+      {
+      outpostArns: StringList.t
+        [@ocaml.doc
+          "The ARN of the Outpost that you want to use for your local Amazon EKS cluster on Outposts. Only a single Outpost ARN is supported."];
+      controlPlaneInstanceType: String_.t
+        [@ocaml.doc
+          "The Amazon EC2 instance type that you want to use for your local Amazon EKS cluster on Outposts. Choose an instance type based on the number of nodes that your cluster will have. For more information, see Capacity considerations in the Amazon EKS User Guide. The instance type that you specify is used for all Kubernetes control plane instances. The instance type can't be changed after cluster creation. The control plane is not automatically scaled by Amazon EKS."];
+      controlPlanePlacement: ControlPlanePlacementRequest.t option
+        [@ocaml.doc
+          "An object representing the placement configuration for all the control plane instances of your local Amazon EKS cluster on an Amazon Web Services Outpost. For more information, see Capacity considerations in the Amazon EKS User Guide."]}
+    let context_ = "OutpostConfigRequest"
+    let make ?controlPlanePlacement =
+      fun ~outpostArns ->
+        fun ~controlPlaneInstanceType ->
+          fun () ->
+            { controlPlanePlacement; outpostArns; controlPlaneInstanceType }
+    let to_value x =
+      structure_to_value
+        [("outpostArns", (Some (StringList.to_value x.outpostArns)));
+        ("controlPlaneInstanceType",
+          (Some (String_.to_value x.controlPlaneInstanceType)));
+        ("controlPlanePlacement",
+          (Option.map x.controlPlanePlacement
+             ~f:ControlPlanePlacementRequest.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let controlPlanePlacement =
+        (Option.map ~f:ControlPlanePlacementRequest.of_xml)
+          (Xml.child xml_arg0 "controlPlanePlacement") in
+      let controlPlaneInstanceType =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "controlPlaneInstanceType") in
+      let outpostArns =
+        StringList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "outpostArns") in
+      make ?controlPlanePlacement ~controlPlaneInstanceType ~outpostArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let controlPlanePlacement =
+        field_map json__ "controlPlanePlacement"
+          ControlPlanePlacementRequest.of_json in
+      let controlPlaneInstanceType =
+        field_map_exn json__ "controlPlaneInstanceType" String_.of_json in
+      let outpostArns = field_map_exn json__ "outpostArns" StringList.of_json in
+      make ?controlPlanePlacement ~controlPlaneInstanceType ~outpostArns ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration of your local Amazon EKS cluster on an Amazon Web Services Outpost. Before creating a cluster on an Outpost, review Creating a local cluster on an Outpost in the Amazon EKS User Guide. This API isn't available for Amazon EKS clusters on the Amazon Web Services cloud."]
+module CapabilityConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      argoCd: ArgoCdConfigRequest.t option
+        [@ocaml.doc
+          "Configuration settings specific to Argo CD capabilities. This field is only used when creating or updating an Argo CD capability."]}
+    let make ?argoCd = fun () -> { argoCd }
+    let to_value x =
+      structure_to_value
+        [("argoCd", (Option.map x.argoCd ~f:ArgoCdConfigRequest.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let argoCd =
+        (Option.map ~f:ArgoCdConfigRequest.of_xml)
+          (Xml.child xml_arg0 "argoCd") in
+      make ?argoCd ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let argoCd = field_map json__ "argoCd" ArgoCdConfigRequest.of_json in
+      make ?argoCd ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration settings for a capability. The structure of this object varies depending on the capability type."]
+module AddonNamespaceConfigRequest =
+  struct
+    type nonrec t =
+      {
+      namespace: Namespace.t option
+        [@ocaml.doc
+          "The name of the Kubernetes namespace to install the addon in. Must be a valid RFC 1123 DNS label."]}
+    let make ?namespace = fun () -> { namespace }
+    let to_value x =
+      structure_to_value
+        [("namespace", (Option.map x.namespace ~f:Namespace.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let namespace =
+        (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "namespace") in
+      make ?namespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let namespace = field_map json__ "namespace" Namespace.of_json in
+      make ?namespace ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The namespace configuration request object for specifying a custom namespace when creating an addon."]
 module OidcIdentityProviderConfigRequest =
   struct
     type nonrec t =
@@ -4275,13 +9921,13 @@ module OidcIdentityProviderConfigRequest =
         [@ocaml.doc "The name of the OIDC provider configuration."];
       issuerUrl: String_.t
         [@ocaml.doc
-          "The URL of the OpenID identity provider that allows the API server to discover public signing keys for verifying tokens. The URL must begin with https:// and should correspond to the iss claim in the provider's OIDC ID tokens. Per the OIDC standard, path components are allowed but query parameters are not. Typically the URL consists of only a hostname, like https://server.example.org or https://example.com. This URL should point to the level below .well-known/openid-configuration and must be publicly accessible over the internet."];
+          "The URL of the OIDC identity provider that allows the API server to discover public signing keys for verifying tokens. The URL must begin with https:// and should correspond to the iss claim in the provider's OIDC ID tokens. Based on the OIDC standard, path components are allowed but query parameters are not. Typically the URL consists of only a hostname, like https://server.example.org or https://example.com. This URL should point to the level below .well-known/openid-configuration and must be publicly accessible over the internet."];
       clientId: String_.t
         [@ocaml.doc
-          "This is also known as audience. The ID for the client application that makes authentication requests to the OpenID identity provider."];
+          "This is also known as audience. The ID for the client application that makes authentication requests to the OIDC identity provider."];
       usernameClaim: String_.t option
         [@ocaml.doc
-          "The JSON Web Token (JWT) claim to use as the username. The default is sub, which is expected to be a unique identifier of the end user. You can choose other claims, such as email or name, depending on the OpenID identity provider. Claims other than email are prefixed with the issuer URL to prevent naming clashes with other plug-ins."];
+          "The JSON Web Token (JWT) claim to use as the username. The default is sub, which is expected to be a unique identifier of the end user. You can choose other claims, such as email or name, depending on the OIDC identity provider. Claims other than email are prefixed with the issuer URL to prevent naming clashes with other plug-ins."];
       usernamePrefix: String_.t option
         [@ocaml.doc
           "The prefix that is prepended to username claims to prevent clashes with existing names. If you do not provide this field, and username is a value other than email, the prefix defaults to issuerurl#. You can use the value - to disable all prefixing."];
@@ -4350,22 +9996,190 @@ module OidcIdentityProviderConfigRequest =
       make ?requiredClaims ?groupsPrefix ?groupsClaim ?usernamePrefix
         ?usernameClaim ~clientId ~issuerUrl ~identityProviderConfigName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requiredClaims =
-        field_map json "requiredClaims" RequiredClaimsMap.of_json in
-      let groupsPrefix = field_map json "groupsPrefix" String_.of_json in
-      let groupsClaim = field_map json "groupsClaim" String_.of_json in
-      let usernamePrefix = field_map json "usernamePrefix" String_.of_json in
-      let usernameClaim = field_map json "usernameClaim" String_.of_json in
-      let clientId = field_map_exn json "clientId" String_.of_json in
-      let issuerUrl = field_map_exn json "issuerUrl" String_.of_json in
+        field_map json__ "requiredClaims" RequiredClaimsMap.of_json in
+      let groupsPrefix = field_map json__ "groupsPrefix" String_.of_json in
+      let groupsClaim = field_map json__ "groupsClaim" String_.of_json in
+      let usernamePrefix = field_map json__ "usernamePrefix" String_.of_json in
+      let usernameClaim = field_map json__ "usernameClaim" String_.of_json in
+      let clientId = field_map_exn json__ "clientId" String_.of_json in
+      let issuerUrl = field_map_exn json__ "issuerUrl" String_.of_json in
       let identityProviderConfigName =
-        field_map_exn json "identityProviderConfigName" String_.of_json in
+        field_map_exn json__ "identityProviderConfigName" String_.of_json in
       make ?requiredClaims ?groupsPrefix ?groupsClaim ?usernamePrefix
         ?usernameClaim ~clientId ~issuerUrl ~identityProviderConfigName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing an OpenID Connect (OIDC) configuration. Before associating an OIDC identity provider to your cluster, review the considerations in Authenticating users for your cluster from an OpenID Connect identity provider in the Amazon EKS User Guide."]
+       "An object representing an OpenID Connect (OIDC) configuration. Before associating an OIDC identity provider to your cluster, review the considerations in Authenticating users for your cluster from an OIDC identity provider in the Amazon EKS User Guide."]
+module UpdatePodIdentityAssociationResponse =
+  struct
+    type nonrec t =
+      {
+      association: PodIdentityAssociation.t option
+        [@ocaml.doc
+          "The full description of the association that was updated."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?association = fun () -> { association }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("association",
+           (Option.map x.association ~f:PodIdentityAssociation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let association =
+        (Option.map ~f:PodIdentityAssociation.of_xml)
+          (Xml.child xml_arg0 "association") in
+      make ?association ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let association =
+        field_map json__ "association" PodIdentityAssociation.of_json in
+      make ?association ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates a EKS Pod Identity association. In an update, you can change the IAM role, the target IAM role, or disableSessionTags. You must change at least one of these in an update. An association can't be moved between clusters, namespaces, or service accounts. If you need to edit the namespace or service account, you need to delete the association and then create a new association with your desired settings. Similar to Amazon Web Services IAM behavior, EKS Pod Identity associations are eventually consistent, and may take several seconds to be effective after the initial API call returns successfully. You must design your applications to account for these potential delays. We recommend that you don\226\128\153t include association create/updates in the critical, high-availability code paths of your application. Instead, make changes in a separate initialization or setup routine that you run less frequently. You can set a target IAM role in the same or a different account for advanced scenarios. With a target role, EKS Pod Identity automatically performs two role assumptions in sequence: first assuming the role in the association that is in this account, then using those credentials to assume the target IAM role. This process provides your Pod with temporary credentials that have the permissions defined in the target role, allowing secure access to resources in another Amazon Web Services account."]
+module UpdatePodIdentityAssociationRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t
+        [@ocaml.doc
+          "The name of the cluster that you want to update the association in."];
+      associationId: String_.t
+        [@ocaml.doc "The ID of the association to be updated."];
+      roleArn: String_.t option
+        [@ocaml.doc "The new IAM role to change in the association."];
+      clientRequestToken: String_.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+      disableSessionTags: BoxedBoolean.t option
+        [@ocaml.doc
+          "Disable the automatic sessions tags that are appended by EKS Pod Identity. EKS Pod Identity adds a pre-defined set of session tags when it assumes the role. You can use these tags to author a single role that can work across resources by allowing access to Amazon Web Services resources based on matching tags. By default, EKS Pod Identity attaches six tags, including tags for cluster name, namespace, and service account name. For the list of tags added by EKS Pod Identity, see List of session tags added by EKS Pod Identity in the Amazon EKS User Guide. Amazon Web Services compresses inline session policies, managed policy ARNs, and session tags into a packed binary format that has a separate limit. If you receive a PackedPolicyTooLarge error indicating the packed binary format has exceeded the size limit, you can attempt to reduce the size by disabling the session tags added by EKS Pod Identity."];
+      targetRoleArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the target IAM role to associate with the service account. This role is assumed by using the EKS Pod Identity association role, then the credentials for this role are injected into the Pod. When you run applications on Amazon EKS, your application might need to access Amazon Web Services resources from a different role that exists in the same or different Amazon Web Services account. For example, your application running in \226\128\156Account A\226\128\157 might need to access resources, such as buckets in \226\128\156Account B\226\128\157 or within \226\128\156Account A\226\128\157 itself. You can create a association to access Amazon Web Services resources in \226\128\156Account B\226\128\157 by creating two IAM roles: a role in \226\128\156Account A\226\128\157 and a role in \226\128\156Account B\226\128\157 (which can be the same or different account), each with the necessary trust and permission policies. After you provide these roles in the IAM role and Target IAM role fields, EKS will perform role chaining to ensure your application gets the required permissions. This means Role A will assume Role B, allowing your Pods to securely access resources like S3 buckets in the target account."];
+      policy: String_.t option
+        [@ocaml.doc
+          "An optional IAM policy in JSON format (as an escaped string) that applies additional restrictions to this pod identity association beyond the IAM policies attached to the IAM role. This policy is applied as the intersection of the role's policies and this policy, allowing you to reduce the permissions that applications in the pods can use. Use this policy to enforce least privilege access while still leveraging a shared IAM role across multiple applications. Important considerations Session tags: When using this policy, disableSessionTags must be set to true. Target role permissions: If you specify both a TargetRoleArn and a policy, the policy restrictions apply only to the target role's permissions, not to the initial role used for assuming the target role."]}
+    let context_ = "UpdatePodIdentityAssociationRequest"
+    let make ?roleArn =
+      fun ?clientRequestToken ->
+        fun ?disableSessionTags ->
+          fun ?targetRoleArn ->
+            fun ?policy ->
+              fun ~clusterName ->
+                fun ~associationId ->
+                  fun () ->
+                    {
+                      roleArn;
+                      clientRequestToken;
+                      disableSessionTags;
+                      targetRoleArn;
+                      policy;
+                      clusterName;
+                      associationId
+                    }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("associationId", (Some (String_.to_value x.associationId)));
+        ("roleArn", (Option.map x.roleArn ~f:String_.to_value));
+        ("clientRequestToken",
+          (Option.map x.clientRequestToken ~f:String_.to_value));
+        ("disableSessionTags",
+          (Option.map x.disableSessionTags ~f:BoxedBoolean.to_value));
+        ("targetRoleArn", (Option.map x.targetRoleArn ~f:String_.to_value));
+        ("policy", (Option.map x.policy ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policy =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "policy") in
+      let targetRoleArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "targetRoleArn") in
+      let disableSessionTags =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "disableSessionTags") in
+      let clientRequestToken =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "clientRequestToken") in
+      let roleArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "roleArn") in
+      let associationId =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "associationId") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?policy ?targetRoleArn ?disableSessionTags ?clientRequestToken
+        ?roleArn ~associationId ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policy = field_map json__ "policy" String_.of_json in
+      let targetRoleArn = field_map json__ "targetRoleArn" String_.of_json in
+      let disableSessionTags =
+        field_map json__ "disableSessionTags" BoxedBoolean.of_json in
+      let clientRequestToken =
+        field_map json__ "clientRequestToken" String_.of_json in
+      let roleArn = field_map json__ "roleArn" String_.of_json in
+      let associationId =
+        field_map_exn json__ "associationId" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ?policy ?targetRoleArn ?disableSessionTags ?clientRequestToken
+        ?roleArn ~associationId ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates a EKS Pod Identity association. In an update, you can change the IAM role, the target IAM role, or disableSessionTags. You must change at least one of these in an update. An association can't be moved between clusters, namespaces, or service accounts. If you need to edit the namespace or service account, you need to delete the association and then create a new association with your desired settings. Similar to Amazon Web Services IAM behavior, EKS Pod Identity associations are eventually consistent, and may take several seconds to be effective after the initial API call returns successfully. You must design your applications to account for these potential delays. We recommend that you don\226\128\153t include association create/updates in the critical, high-availability code paths of your application. Instead, make changes in a separate initialization or setup routine that you run less frequently. You can set a target IAM role in the same or a different account for advanced scenarios. With a target role, EKS Pod Identity automatically performs two role assumptions in sequence: first assuming the role in the association that is in this account, then using those credentials to assume the target IAM role. This process provides your Pod with temporary credentials that have the permissions defined in the target role, allowing secure access to resources in another Amazon Web Services account."]
 module UpdateNodegroupVersionResponse =
   struct
     type nonrec t = {
@@ -4448,35 +10262,34 @@ module UpdateNodegroupVersionResponse =
         (Option.map ~f:Update.of_xml) (Xml.child xml_arg0 "update") in
       make ?update ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let update = field_map json "update" Update.of_json in make ?update ()
+    let of_json json__ =
+      let update = field_map json__ "update" Update.of_json in
+      make ?update ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the Kubernetes version or AMI version of an Amazon EKS managed node group. You can update a node group using a launch template only if the node group was originally deployed with a launch template. If you need to update a custom AMI in a node group that was deployed with a launch template, then update your custom AMI, specify the new ID in a new version of the launch template, and then update the node group to the new version of the launch template. If you update without a launch template, then you can update to the latest available AMI version of a node group's current Kubernetes version by not specifying a Kubernetes version in the request. You can update to the latest AMI version of your cluster's current Kubernetes version by specifying your cluster's Kubernetes version in the request. For more information, see Amazon EKS optimized Amazon Linux 2 AMI versions in the Amazon EKS User Guide. You cannot roll back a node group to an earlier Kubernetes version or AMI version. When a node in a managed node group is terminated due to a scaling action or update, the pods in that node are drained first. Amazon EKS attempts to drain the nodes gracefully and will fail if it is unable to do so. You can force the update if Amazon EKS is unable to drain the nodes as a result of a pod disruption budget issue."]
+       "Updates the Kubernetes version or AMI version of an Amazon EKS managed node group. You can update a node group using a launch template only if the node group was originally deployed with a launch template. Additionally, the launch template ID or name must match what was used when the node group was created. You can update the launch template version with necessary changes. If you need to update a custom AMI in a node group that was deployed with a launch template, then update your custom AMI, specify the new ID in a new version of the launch template, and then update the node group to the new version of the launch template. If you update without a launch template, then you can update to the latest available AMI version of a node group's current Kubernetes version by not specifying a Kubernetes version in the request. You can update to the latest AMI version of your cluster's current Kubernetes version by specifying your cluster's Kubernetes version in the request. For information about Linux versions, see Amazon EKS optimized Amazon Linux AMI versions in the Amazon EKS User Guide. For information about Windows versions, see Amazon EKS optimized Windows AMI versions in the Amazon EKS User Guide. You cannot roll back a node group to an earlier Kubernetes version or AMI version. When a node in a managed node group is terminated due to a scaling action or update, every Pod on that node is drained first. Amazon EKS attempts to drain the nodes gracefully and will fail if it is unable to do so. You can force the update if Amazon EKS is unable to drain the nodes as a result of a Pod disruption budget issue."]
 module UpdateNodegroupVersionRequest =
   struct
     type nonrec t =
       {
-      clusterName: String_.t
-        [@ocaml.doc
-          "The name of the Amazon EKS cluster that is associated with the managed node group to update."];
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
       nodegroupName: String_.t
         [@ocaml.doc "The name of the managed node group to update."];
       version: String_.t option
         [@ocaml.doc
-          "The Kubernetes version to update to. If no version is specified, then the Kubernetes version of the node group does not change. You can specify the Kubernetes version of the cluster to update the node group to the latest AMI version of the cluster's Kubernetes version. If you specify launchTemplate, and your launch template uses a custom AMI, then don't specify version, or the node group update will fail. For more information about using launch templates with Amazon EKS, see Launch template support in the Amazon EKS User Guide."];
+          "The Kubernetes version to update to. If no version is specified, then the node group will be updated to match the cluster's current Kubernetes version, and the latest available AMI for that version will be used. You can also specify the Kubernetes version of the cluster to update the node group to the latest AMI version of the cluster's Kubernetes version. If you specify launchTemplate, and your launch template uses a custom AMI, then don't specify version, or the node group update will fail. For more information about using launch templates with Amazon EKS, see Customizing managed nodes with launch templates in the Amazon EKS User Guide."];
       releaseVersion: String_.t option
         [@ocaml.doc
-          "The AMI version of the Amazon EKS optimized AMI to use for the update. By default, the latest available AMI version for the node group's Kubernetes version is used. For more information, see Amazon EKS optimized Amazon Linux 2 AMI versions in the Amazon EKS User Guide. If you specify launchTemplate, and your launch template uses a custom AMI, then don't specify releaseVersion, or the node group update will fail. For more information about using launch templates with Amazon EKS, see Launch template support in the Amazon EKS User Guide."];
+          "The AMI version of the Amazon EKS optimized AMI to use for the update. By default, the latest available AMI version for the node group's Kubernetes version is used. For information about Linux versions, see Amazon EKS optimized Amazon Linux AMI versions in the Amazon EKS User Guide. Amazon EKS managed node groups support the November 2022 and later releases of the Windows AMIs. For information about Windows versions, see Amazon EKS optimized Windows AMI versions in the Amazon EKS User Guide. If you specify launchTemplate, and your launch template uses a custom AMI, then don't specify releaseVersion, or the node group update will fail. For more information about using launch templates with Amazon EKS, see Customizing managed nodes with launch templates in the Amazon EKS User Guide."];
       launchTemplate: LaunchTemplateSpecification.t option
         [@ocaml.doc
-          "An object representing a node group's launch template specification. You can only update a node group using a launch template if the node group was originally deployed with a launch template."];
+          "An object representing a node group's launch template specification. You can only update a node group using a launch template if the node group was originally deployed with a launch template. When updating, you must specify the same launch template ID or name that was used to create the node group."];
       force: Boolean.t option
         [@ocaml.doc
-          "Force the update if the existing node group's pods are unable to be drained due to a pod disruption budget issue. If an update fails because pods could not be drained, you can force the update after it fails to terminate the old node whether or not any pods are running on the node."];
+          "Force the update if any Pod on the existing node group can't be drained due to a Pod disruption budget issue. If an update fails because all Pods can't be drained, you can force the update after it fails to terminate the old node whether or not any Pod is running on the node."];
       clientRequestToken: String_.t option
         [@ocaml.doc
-          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
     let context_ = "UpdateNodegroupVersionRequest"
     let make ?version =
       fun ?releaseVersion ->
@@ -4528,21 +10341,22 @@ module UpdateNodegroupVersionRequest =
       make ?clientRequestToken ?force ?launchTemplate ?releaseVersion
         ?version ~nodegroupName ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map json "clientRequestToken" String_.of_json in
-      let force = field_map json "force" Boolean.of_json in
+        field_map json__ "clientRequestToken" String_.of_json in
+      let force = field_map json__ "force" Boolean.of_json in
       let launchTemplate =
-        field_map json "launchTemplate" LaunchTemplateSpecification.of_json in
-      let releaseVersion = field_map json "releaseVersion" String_.of_json in
-      let version = field_map json "version" String_.of_json in
-      let nodegroupName = field_map_exn json "nodegroupName" String_.of_json in
-      let clusterName = field_map_exn json "clusterName" String_.of_json in
+        field_map json__ "launchTemplate" LaunchTemplateSpecification.of_json in
+      let releaseVersion = field_map json__ "releaseVersion" String_.of_json in
+      let version = field_map json__ "version" String_.of_json in
+      let nodegroupName =
+        field_map_exn json__ "nodegroupName" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
       make ?clientRequestToken ?force ?launchTemplate ?releaseVersion
         ?version ~nodegroupName ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the Kubernetes version or AMI version of an Amazon EKS managed node group. You can update a node group using a launch template only if the node group was originally deployed with a launch template. If you need to update a custom AMI in a node group that was deployed with a launch template, then update your custom AMI, specify the new ID in a new version of the launch template, and then update the node group to the new version of the launch template. If you update without a launch template, then you can update to the latest available AMI version of a node group's current Kubernetes version by not specifying a Kubernetes version in the request. You can update to the latest AMI version of your cluster's current Kubernetes version by specifying your cluster's Kubernetes version in the request. For more information, see Amazon EKS optimized Amazon Linux 2 AMI versions in the Amazon EKS User Guide. You cannot roll back a node group to an earlier Kubernetes version or AMI version. When a node in a managed node group is terminated due to a scaling action or update, the pods in that node are drained first. Amazon EKS attempts to drain the nodes gracefully and will fail if it is unable to do so. You can force the update if Amazon EKS is unable to drain the nodes as a result of a pod disruption budget issue."]
+       "Updates the Kubernetes version or AMI version of an Amazon EKS managed node group. You can update a node group using a launch template only if the node group was originally deployed with a launch template. Additionally, the launch template ID or name must match what was used when the node group was created. You can update the launch template version with necessary changes. If you need to update a custom AMI in a node group that was deployed with a launch template, then update your custom AMI, specify the new ID in a new version of the launch template, and then update the node group to the new version of the launch template. If you update without a launch template, then you can update to the latest available AMI version of a node group's current Kubernetes version by not specifying a Kubernetes version in the request. You can update to the latest AMI version of your cluster's current Kubernetes version by specifying your cluster's Kubernetes version in the request. For information about Linux versions, see Amazon EKS optimized Amazon Linux AMI versions in the Amazon EKS User Guide. For information about Windows versions, see Amazon EKS optimized Windows AMI versions in the Amazon EKS User Guide. You cannot roll back a node group to an earlier Kubernetes version or AMI version. When a node in a managed node group is terminated due to a scaling action or update, every Pod on that node is drained first. Amazon EKS attempts to drain the nodes gracefully and will fail if it is unable to do so. You can force the update if Amazon EKS is unable to drain the nodes as a result of a Pod disruption budget issue."]
 module UpdateNodegroupConfigResponse =
   struct
     type nonrec t = {
@@ -4625,52 +10439,60 @@ module UpdateNodegroupConfigResponse =
         (Option.map ~f:Update.of_xml) (Xml.child xml_arg0 "update") in
       make ?update ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let update = field_map json "update" Update.of_json in make ?update ()
+    let of_json json__ =
+      let update = field_map json__ "update" Update.of_json in
+      make ?update ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an Amazon EKS managed node group configuration. Your node group continues to function during the update. The response output includes an update ID that you can use to track the status of your node group update with the DescribeUpdate API operation. Currently you can update the Kubernetes labels for a node group or the scaling configuration."]
+       "Updates an Amazon EKS managed node group configuration. Your node group continues to function during the update. The response output includes an update ID that you can use to track the status of your node group update with the DescribeUpdate API operation. You can update the Kubernetes labels and taints for a node group and the scaling and version update configuration."]
 module UpdateNodegroupConfigRequest =
   struct
     type nonrec t =
       {
-      clusterName: String_.t
-        [@ocaml.doc
-          "The name of the Amazon EKS cluster that the managed node group resides in."];
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
       nodegroupName: String_.t
         [@ocaml.doc "The name of the managed node group to update."];
       labels: UpdateLabelsPayload.t option
         [@ocaml.doc
-          "The Kubernetes labels to be applied to the nodes in the node group after the update."];
+          "The Kubernetes labels to apply to the nodes in the node group after the update."];
       taints: UpdateTaintsPayload.t option
         [@ocaml.doc
-          "The Kubernetes taints to be applied to the nodes in the node group after the update."];
+          "The Kubernetes taints to be applied to the nodes in the node group after the update. For more information, see Node taints on managed node groups."];
       scalingConfig: NodegroupScalingConfig.t option
         [@ocaml.doc
           "The scaling configuration details for the Auto Scaling group after the update."];
       updateConfig: NodegroupUpdateConfig.t option
         [@ocaml.doc "The node group update configuration."];
+      nodeRepairConfig: NodeRepairConfig.t option
+        [@ocaml.doc "The node auto repair configuration for the node group."];
+      warmPoolConfig: WarmPoolConfig.t option
+        [@ocaml.doc
+          "The warm pool configuration to apply to the node group. You can use this to add a warm pool to an existing node group or modify the settings of an existing warm pool."];
       clientRequestToken: String_.t option
         [@ocaml.doc
-          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
     let context_ = "UpdateNodegroupConfigRequest"
     let make ?labels =
       fun ?taints ->
         fun ?scalingConfig ->
           fun ?updateConfig ->
-            fun ?clientRequestToken ->
-              fun ~clusterName ->
-                fun ~nodegroupName ->
-                  fun () ->
-                    {
-                      labels;
-                      taints;
-                      scalingConfig;
-                      updateConfig;
-                      clientRequestToken;
-                      clusterName;
-                      nodegroupName
-                    }
+            fun ?nodeRepairConfig ->
+              fun ?warmPoolConfig ->
+                fun ?clientRequestToken ->
+                  fun ~clusterName ->
+                    fun ~nodegroupName ->
+                      fun () ->
+                        {
+                          labels;
+                          taints;
+                          scalingConfig;
+                          updateConfig;
+                          nodeRepairConfig;
+                          warmPoolConfig;
+                          clientRequestToken;
+                          clusterName;
+                          nodegroupName
+                        }
     let to_value x =
       structure_to_value
         [("name", (Some (String_.to_value x.clusterName)));
@@ -4681,6 +10503,10 @@ module UpdateNodegroupConfigRequest =
           (Option.map x.scalingConfig ~f:NodegroupScalingConfig.to_value));
         ("updateConfig",
           (Option.map x.updateConfig ~f:NodegroupUpdateConfig.to_value));
+        ("nodeRepairConfig",
+          (Option.map x.nodeRepairConfig ~f:NodeRepairConfig.to_value));
+        ("warmPoolConfig",
+          (Option.map x.warmPoolConfig ~f:WarmPoolConfig.to_value));
         ("clientRequestToken",
           (Option.map x.clientRequestToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
@@ -4688,6 +10514,12 @@ module UpdateNodegroupConfigRequest =
       let clientRequestToken =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "clientRequestToken") in
+      let warmPoolConfig =
+        (Option.map ~f:WarmPoolConfig.of_xml)
+          (Xml.child xml_arg0 "warmPoolConfig") in
+      let nodeRepairConfig =
+        (Option.map ~f:NodeRepairConfig.of_xml)
+          (Xml.child xml_arg0 "nodeRepairConfig") in
       let updateConfig =
         (Option.map ~f:NodegroupUpdateConfig.of_xml)
           (Xml.child xml_arg0 "updateConfig") in
@@ -4705,40 +10537,46 @@ module UpdateNodegroupConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "nodegroupName") in
       let clusterName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?clientRequestToken ?updateConfig ?scalingConfig ?taints ?labels
-        ~nodegroupName ~clusterName ()
+      make ?clientRequestToken ?warmPoolConfig ?nodeRepairConfig
+        ?updateConfig ?scalingConfig ?taints ?labels ~nodegroupName
+        ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map json "clientRequestToken" String_.of_json in
+        field_map json__ "clientRequestToken" String_.of_json in
+      let warmPoolConfig =
+        field_map json__ "warmPoolConfig" WarmPoolConfig.of_json in
+      let nodeRepairConfig =
+        field_map json__ "nodeRepairConfig" NodeRepairConfig.of_json in
       let updateConfig =
-        field_map json "updateConfig" NodegroupUpdateConfig.of_json in
+        field_map json__ "updateConfig" NodegroupUpdateConfig.of_json in
       let scalingConfig =
-        field_map json "scalingConfig" NodegroupScalingConfig.of_json in
-      let taints = field_map json "taints" UpdateTaintsPayload.of_json in
-      let labels = field_map json "labels" UpdateLabelsPayload.of_json in
-      let nodegroupName = field_map_exn json "nodegroupName" String_.of_json in
-      let clusterName = field_map_exn json "clusterName" String_.of_json in
-      make ?clientRequestToken ?updateConfig ?scalingConfig ?taints ?labels
-        ~nodegroupName ~clusterName ()
+        field_map json__ "scalingConfig" NodegroupScalingConfig.of_json in
+      let taints = field_map json__ "taints" UpdateTaintsPayload.of_json in
+      let labels = field_map json__ "labels" UpdateLabelsPayload.of_json in
+      let nodegroupName =
+        field_map_exn json__ "nodegroupName" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ?clientRequestToken ?warmPoolConfig ?nodeRepairConfig
+        ?updateConfig ?scalingConfig ?taints ?labels ~nodegroupName
+        ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an Amazon EKS managed node group configuration. Your node group continues to function during the update. The response output includes an update ID that you can use to track the status of your node group update with the DescribeUpdate API operation. Currently you can update the Kubernetes labels for a node group or the scaling configuration."]
-module UpdateClusterVersionResponse =
+       "Updates an Amazon EKS managed node group configuration. Your node group continues to function during the update. The response output includes an update ID that you can use to track the status of your node group update with the DescribeUpdate API operation. You can update the Kubernetes labels and taints for a node group and the scaling and version update configuration."]
+module UpdateEksAnywhereSubscriptionResponse =
   struct
     type nonrec t =
       {
-      update: Update.t option
-        [@ocaml.doc "The full description of the specified update"]}
+      subscription: EksAnywhereSubscription.t option
+        [@ocaml.doc "The full description of the updated subscription."]}
     type nonrec error =
       [ `ClientException of ClientException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `InvalidRequestException of InvalidRequestException.t 
-      | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServerException of ServerException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?update = fun () -> { update }
+    let make ?subscription = fun () -> { subscription }
     let error_of_json name json =
       match name with
       | "ClientException" -> `ClientException (ClientException.of_json json)
@@ -4746,8 +10584,6 @@ module UpdateClusterVersionResponse =
           `InvalidParameterException (InvalidParameterException.of_json json)
       | "InvalidRequestException" ->
           `InvalidRequestException (InvalidRequestException.of_json json)
-      | "ResourceInUseException" ->
-          `ResourceInUseException (ResourceInUseException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
@@ -4761,8 +10597,6 @@ module UpdateClusterVersionResponse =
           `InvalidParameterException (InvalidParameterException.of_xml xml)
       | "InvalidRequestException" ->
           `InvalidRequestException (InvalidRequestException.of_xml xml)
-      | "ResourceInUseException" ->
-          `ResourceInUseException (ResourceInUseException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
@@ -4782,10 +10616,6 @@ module UpdateClusterVersionResponse =
           `Assoc
             [("error", (`String "InvalidRequestException"));
             ("details", (InvalidRequestException.to_json e))]
-      | `ResourceInUseException e ->
-          `Assoc
-            [("error", (`String "ResourceInUseException"));
-            ("details", (ResourceInUseException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -4801,6 +10631,157 @@ module UpdateClusterVersionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
+        [("subscription",
+           (Option.map x.subscription ~f:EksAnywhereSubscription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subscription =
+        (Option.map ~f:EksAnywhereSubscription.of_xml)
+          (Xml.child xml_arg0 "subscription") in
+      make ?subscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subscription =
+        field_map json__ "subscription" EksAnywhereSubscription.of_json in
+      make ?subscription ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update an EKS Anywhere Subscription. Only auto renewal and tags can be updated after subscription creation."]
+module UpdateEksAnywhereSubscriptionRequest =
+  struct
+    type nonrec t =
+      {
+      id: String_.t [@ocaml.doc "The ID of the subscription."];
+      autoRenew: Boolean.t
+        [@ocaml.doc
+          "A boolean indicating whether or not to automatically renew the subscription."];
+      clientRequestToken: String_.t option
+        [@ocaml.doc
+          "Unique, case-sensitive identifier to ensure the idempotency of the request."]}
+    let context_ = "UpdateEksAnywhereSubscriptionRequest"
+    let make ?clientRequestToken =
+      fun ~id ->
+        fun ~autoRenew -> fun () -> { clientRequestToken; id; autoRenew }
+    let to_value x =
+      structure_to_value
+        [("id", (Some (String_.to_value x.id)));
+        ("autoRenew", (Some (Boolean.to_value x.autoRenew)));
+        ("clientRequestToken",
+          (Option.map x.clientRequestToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "clientRequestToken") in
+      let autoRenew =
+        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "autoRenew") in
+      let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ?clientRequestToken ~autoRenew ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map json__ "clientRequestToken" String_.of_json in
+      let autoRenew = field_map_exn json__ "autoRenew" Boolean.of_json in
+      let id = field_map_exn json__ "id" String_.of_json in
+      make ?clientRequestToken ~autoRenew ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update an EKS Anywhere Subscription. Only auto renewal and tags can be updated after subscription creation."]
+module UpdateClusterVersionResponse =
+  struct
+    type nonrec t =
+      {
+      update: Update.t option
+        [@ocaml.doc "The full description of the specified update"]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `InvalidStateException of InvalidStateException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?update = fun () -> { update }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "InvalidStateException" ->
+          `InvalidStateException (InvalidStateException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "InvalidStateException" ->
+          `InvalidStateException (InvalidStateException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `InvalidStateException e ->
+          `Assoc
+            [("error", (`String "InvalidStateException"));
+            ("details", (InvalidStateException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
         [("update", (Option.map x.update ~f:Update.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -4808,11 +10789,12 @@ module UpdateClusterVersionResponse =
         (Option.map ~f:Update.of_xml) (Xml.child xml_arg0 "update") in
       make ?update ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let update = field_map json "update" Update.of_json in make ?update ()
+    let of_json json__ =
+      let update = field_map json__ "update" Update.of_json in
+      make ?update ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an Amazon EKS cluster to the specified Kubernetes version. Your cluster continues to function during the update. The response output includes an update ID that you can use to track the status of your cluster update with the DescribeUpdate API operation. Cluster updates are asynchronous, and they should finish within a few minutes. During an update, the cluster status moves to UPDATING (this status transition is eventually consistent). When the update is complete (either Failed or Successful), the cluster status moves to Active. If your cluster has managed node groups attached to it, all of your node groups\226\128\153 Kubernetes versions must match the cluster\226\128\153s Kubernetes version in order to update the cluster to a new Kubernetes version."]
+       "Updates an Amazon EKS cluster to the specified Kubernetes version. Your cluster continues to function during the update. The response output includes an update ID that you can use to track the status of your cluster update with the DescribeUpdate API operation. Cluster updates are asynchronous, and they should finish within a few minutes. During an update, the cluster status moves to UPDATING (this status transition is eventually consistent). When the update is complete (either Failed or Successful), the cluster status moves to Active. If your cluster has managed node groups attached to it, all of your node groups' Kubernetes versions must match the cluster's Kubernetes version in order to update the cluster to a new Kubernetes version."]
 module UpdateClusterVersionRequest =
   struct
     type nonrec t =
@@ -4824,19 +10806,26 @@ module UpdateClusterVersionRequest =
           "The desired Kubernetes version following a successful update."];
       clientRequestToken: String_.t option
         [@ocaml.doc
-          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+      force: Boolean.t option
+        [@ocaml.doc
+          "Set this value to true to override upgrade-blocking readiness checks when updating a cluster."]}
     let context_ = "UpdateClusterVersionRequest"
     let make ?clientRequestToken =
-      fun ~name ->
-        fun ~version -> fun () -> { clientRequestToken; name; version }
+      fun ?force ->
+        fun ~name ->
+          fun ~version ->
+            fun () -> { clientRequestToken; force; name; version }
     let to_value x =
       structure_to_value
         [("name", (Some (String_.to_value x.name)));
         ("version", (Some (String_.to_value x.version)));
         ("clientRequestToken",
-          (Option.map x.clientRequestToken ~f:String_.to_value))]
+          (Option.map x.clientRequestToken ~f:String_.to_value));
+        ("force", (Option.map x.force ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let force = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "force") in
       let clientRequestToken =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "clientRequestToken") in
@@ -4844,17 +10833,18 @@ module UpdateClusterVersionRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "version") in
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?clientRequestToken ~version ~name ()
+      make ?force ?clientRequestToken ~version ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let force = field_map json__ "force" Boolean.of_json in
       let clientRequestToken =
-        field_map json "clientRequestToken" String_.of_json in
-      let version = field_map_exn json "version" String_.of_json in
-      let name = field_map_exn json "name" String_.of_json in
-      make ?clientRequestToken ~version ~name ()
+        field_map json__ "clientRequestToken" String_.of_json in
+      let version = field_map_exn json__ "version" String_.of_json in
+      let name = field_map_exn json__ "name" String_.of_json in
+      make ?force ?clientRequestToken ~version ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an Amazon EKS cluster to the specified Kubernetes version. Your cluster continues to function during the update. The response output includes an update ID that you can use to track the status of your cluster update with the DescribeUpdate API operation. Cluster updates are asynchronous, and they should finish within a few minutes. During an update, the cluster status moves to UPDATING (this status transition is eventually consistent). When the update is complete (either Failed or Successful), the cluster status moves to Active. If your cluster has managed node groups attached to it, all of your node groups\226\128\153 Kubernetes versions must match the cluster\226\128\153s Kubernetes version in order to update the cluster to a new Kubernetes version."]
+       "Updates an Amazon EKS cluster to the specified Kubernetes version. Your cluster continues to function during the update. The response output includes an update ID that you can use to track the status of your cluster update with the DescribeUpdate API operation. Cluster updates are asynchronous, and they should finish within a few minutes. During an update, the cluster status moves to UPDATING (this status transition is eventually consistent). When the update is complete (either Failed or Successful), the cluster status moves to Active. If your cluster has managed node groups attached to it, all of your node groups' Kubernetes versions must match the cluster's Kubernetes version in order to update the cluster to a new Kubernetes version."]
 module UpdateClusterConfigResponse =
   struct
     type nonrec t = {
@@ -4866,6 +10856,7 @@ module UpdateClusterConfigResponse =
       | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?update = fun () -> { update }
     let error_of_json name json =
@@ -4880,6 +10871,8 @@ module UpdateClusterConfigResponse =
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -4895,6 +10888,8 @@ module UpdateClusterConfigResponse =
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -4923,6 +10918,10 @@ module UpdateClusterConfigResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -4937,11 +10936,12 @@ module UpdateClusterConfigResponse =
         (Option.map ~f:Update.of_xml) (Xml.child xml_arg0 "update") in
       make ?update ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let update = field_map json "update" Update.of_json in make ?update ()
+    let of_json json__ =
+      let update = field_map json__ "update" Update.of_json in
+      make ?update ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an Amazon EKS cluster configuration. Your cluster continues to function during the update. The response output includes an update ID that you can use to track the status of your cluster update with the DescribeUpdate API operation. You can use this API operation to enable or disable exporting the Kubernetes control plane logs for your cluster to CloudWatch Logs. By default, cluster control plane logs aren't exported to CloudWatch Logs. For more information, see Amazon EKS Cluster Control Plane Logs in the Amazon EKS User Guide . CloudWatch Logs ingestion, archive storage, and data scanning rates apply to exported control plane logs. For more information, see CloudWatch Pricing. You can also use this API operation to enable or disable public and private access to your cluster's Kubernetes API server endpoint. By default, public access is enabled, and private access is disabled. For more information, see Amazon EKS cluster endpoint access control in the Amazon EKS User Guide . You can't update the subnets or security group IDs for an existing cluster. Cluster updates are asynchronous, and they should finish within a few minutes. During an update, the cluster status moves to UPDATING (this status transition is eventually consistent). When the update is complete (either Failed or Successful), the cluster status moves to Active."]
+       "Updates an Amazon EKS cluster configuration. Your cluster continues to function during the update. The response output includes an update ID that you can use to track the status of your cluster update with DescribeUpdate. You can use this operation to do the following actions: You can use this API operation to enable or disable exporting the Kubernetes control plane logs for your cluster to CloudWatch Logs. By default, cluster control plane logs aren't exported to CloudWatch Logs. For more information, see Amazon EKS Cluster control plane logs in the Amazon EKS User Guide . CloudWatch Logs ingestion, archive storage, and data scanning rates apply to exported control plane logs. For more information, see CloudWatch Pricing. You can also use this API operation to enable or disable public and private access to your cluster's Kubernetes API server endpoint. By default, public access is enabled, and private access is disabled. For more information, see Cluster API server endpoint in the Amazon EKS User Guide . You can also use this API operation to choose different subnets and security groups for the cluster. You must specify at least two subnets that are in different Availability Zones. You can't change which VPC the subnets are from, the subnets must be in the same VPC as the subnets that the cluster was created with. For more information about the VPC requirements, see https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html in the Amazon EKS User Guide . You can also use this API operation to enable or disable ARC zonal shift. If zonal shift is enabled, Amazon Web Services configures zonal autoshift for the cluster. You can also use this API operation to add, change, or remove the configuration in the cluster for EKS Hybrid Nodes. To remove the configuration, use the remoteNetworkConfig key with an object containing both subkeys with empty arrays for each. Here is an inline example: \"remoteNetworkConfig\": \\{ \"remoteNodeNetworks\": \\[\\], \"remotePodNetworks\": \\[\\] \\}. Cluster updates are asynchronous, and they should finish within a few minutes. During an update, the cluster status moves to UPDATING (this status transition is eventually consistent). When the update is complete (either Failed or Successful), the cluster status moves to Active."]
 module UpdateClusterConfigRequest =
   struct
     type nonrec t =
@@ -4951,17 +10951,62 @@ module UpdateClusterConfigRequest =
       resourcesVpcConfig: VpcConfigRequest.t option ;
       logging: Logging.t option
         [@ocaml.doc
-          "Enable or disable exporting the Kubernetes control plane logs for your cluster to CloudWatch Logs. By default, cluster control plane logs aren't exported to CloudWatch Logs. For more information, see Amazon EKS cluster control plane logs in the Amazon EKS User Guide . CloudWatch Logs ingestion, archive storage, and data scanning rates apply to exported control plane logs. For more information, see CloudWatch Pricing."];
+          "Enable or disable exporting the Kubernetes control plane logs for your cluster to CloudWatch Logs . By default, cluster control plane logs aren't exported to CloudWatch Logs . For more information, see Amazon EKS cluster control plane logs in the Amazon EKS User Guide . CloudWatch Logs ingestion, archive storage, and data scanning rates apply to exported control plane logs. For more information, see CloudWatch Pricing."];
       clientRequestToken: String_.t option
         [@ocaml.doc
-          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+      accessConfig: UpdateAccessConfigRequest.t option
+        [@ocaml.doc "The access configuration for the cluster."];
+      upgradePolicy: UpgradePolicyRequest.t option
+        [@ocaml.doc
+          "You can enable or disable extended support for clusters currently on standard support. You cannot disable extended support once it starts. You must enable extended support before your cluster exits standard support."];
+      zonalShiftConfig: ZonalShiftConfigRequest.t option
+        [@ocaml.doc
+          "Enable or disable ARC zonal shift for the cluster. If zonal shift is enabled, Amazon Web Services configures zonal autoshift for the cluster. Zonal shift is a feature of Amazon Application Recovery Controller (ARC). ARC zonal shift is designed to be a temporary measure that allows you to move traffic for a resource away from an impaired AZ until the zonal shift expires or you cancel it. You can extend the zonal shift if necessary. You can start a zonal shift for an EKS cluster, or you can allow Amazon Web Services to do it for you by enabling zonal autoshift. This shift updates the flow of east-to-west network traffic in your cluster to only consider network endpoints for Pods running on worker nodes in healthy AZs. Additionally, any ALB or NLB handling ingress traffic for applications in your EKS cluster will automatically route traffic to targets in the healthy AZs. For more information about zonal shift in EKS, see Learn about Amazon Application Recovery Controller (ARC) Zonal Shift in Amazon EKS in the Amazon EKS User Guide ."];
+      computeConfig: ComputeConfigRequest.t option
+        [@ocaml.doc
+          "Update the configuration of the compute capability of your EKS Auto Mode cluster. For example, enable the capability."];
+      kubernetesNetworkConfig: KubernetesNetworkConfigRequest.t option ;
+      storageConfig: StorageConfigRequest.t option
+        [@ocaml.doc
+          "Update the configuration of the block storage capability of your EKS Auto Mode cluster. For example, enable the capability."];
+      remoteNetworkConfig: RemoteNetworkConfigRequest.t option ;
+      deletionProtection: BoxedBoolean.t option
+        [@ocaml.doc
+          "Specifies whether to enable or disable deletion protection for the cluster. When enabled (true), the cluster cannot be deleted until deletion protection is explicitly disabled. When disabled (false), the cluster can be deleted normally."];
+      controlPlaneScalingConfig: ControlPlaneScalingConfig.t option
+        [@ocaml.doc
+          "The control plane scaling tier configuration. For more information, see EKS Provisioned Control Plane in the Amazon EKS User Guide."]}
     let context_ = "UpdateClusterConfigRequest"
     let make ?resourcesVpcConfig =
       fun ?logging ->
         fun ?clientRequestToken ->
-          fun ~name ->
-            fun () ->
-              { resourcesVpcConfig; logging; clientRequestToken; name }
+          fun ?accessConfig ->
+            fun ?upgradePolicy ->
+              fun ?zonalShiftConfig ->
+                fun ?computeConfig ->
+                  fun ?kubernetesNetworkConfig ->
+                    fun ?storageConfig ->
+                      fun ?remoteNetworkConfig ->
+                        fun ?deletionProtection ->
+                          fun ?controlPlaneScalingConfig ->
+                            fun ~name ->
+                              fun () ->
+                                {
+                                  resourcesVpcConfig;
+                                  logging;
+                                  clientRequestToken;
+                                  accessConfig;
+                                  upgradePolicy;
+                                  zonalShiftConfig;
+                                  computeConfig;
+                                  kubernetesNetworkConfig;
+                                  storageConfig;
+                                  remoteNetworkConfig;
+                                  deletionProtection;
+                                  controlPlaneScalingConfig;
+                                  name
+                                }
     let to_value x =
       structure_to_value
         [("name", (Some (String_.to_value x.name)));
@@ -4969,9 +11014,57 @@ module UpdateClusterConfigRequest =
           (Option.map x.resourcesVpcConfig ~f:VpcConfigRequest.to_value));
         ("logging", (Option.map x.logging ~f:Logging.to_value));
         ("clientRequestToken",
-          (Option.map x.clientRequestToken ~f:String_.to_value))]
+          (Option.map x.clientRequestToken ~f:String_.to_value));
+        ("accessConfig",
+          (Option.map x.accessConfig ~f:UpdateAccessConfigRequest.to_value));
+        ("upgradePolicy",
+          (Option.map x.upgradePolicy ~f:UpgradePolicyRequest.to_value));
+        ("zonalShiftConfig",
+          (Option.map x.zonalShiftConfig ~f:ZonalShiftConfigRequest.to_value));
+        ("computeConfig",
+          (Option.map x.computeConfig ~f:ComputeConfigRequest.to_value));
+        ("kubernetesNetworkConfig",
+          (Option.map x.kubernetesNetworkConfig
+             ~f:KubernetesNetworkConfigRequest.to_value));
+        ("storageConfig",
+          (Option.map x.storageConfig ~f:StorageConfigRequest.to_value));
+        ("remoteNetworkConfig",
+          (Option.map x.remoteNetworkConfig
+             ~f:RemoteNetworkConfigRequest.to_value));
+        ("deletionProtection",
+          (Option.map x.deletionProtection ~f:BoxedBoolean.to_value));
+        ("controlPlaneScalingConfig",
+          (Option.map x.controlPlaneScalingConfig
+             ~f:ControlPlaneScalingConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let controlPlaneScalingConfig =
+        (Option.map ~f:ControlPlaneScalingConfig.of_xml)
+          (Xml.child xml_arg0 "controlPlaneScalingConfig") in
+      let deletionProtection =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "deletionProtection") in
+      let remoteNetworkConfig =
+        (Option.map ~f:RemoteNetworkConfigRequest.of_xml)
+          (Xml.child xml_arg0 "remoteNetworkConfig") in
+      let storageConfig =
+        (Option.map ~f:StorageConfigRequest.of_xml)
+          (Xml.child xml_arg0 "storageConfig") in
+      let kubernetesNetworkConfig =
+        (Option.map ~f:KubernetesNetworkConfigRequest.of_xml)
+          (Xml.child xml_arg0 "kubernetesNetworkConfig") in
+      let computeConfig =
+        (Option.map ~f:ComputeConfigRequest.of_xml)
+          (Xml.child xml_arg0 "computeConfig") in
+      let zonalShiftConfig =
+        (Option.map ~f:ZonalShiftConfigRequest.of_xml)
+          (Xml.child xml_arg0 "zonalShiftConfig") in
+      let upgradePolicy =
+        (Option.map ~f:UpgradePolicyRequest.of_xml)
+          (Xml.child xml_arg0 "upgradePolicy") in
+      let accessConfig =
+        (Option.map ~f:UpdateAccessConfigRequest.of_xml)
+          (Xml.child xml_arg0 "accessConfig") in
       let clientRequestToken =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "clientRequestToken") in
@@ -4982,19 +11075,217 @@ module UpdateClusterConfigRequest =
           (Xml.child xml_arg0 "resourcesVpcConfig") in
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?clientRequestToken ?logging ?resourcesVpcConfig ~name ()
+      make ?controlPlaneScalingConfig ?deletionProtection
+        ?remoteNetworkConfig ?storageConfig ?kubernetesNetworkConfig
+        ?computeConfig ?zonalShiftConfig ?upgradePolicy ?accessConfig
+        ?clientRequestToken ?logging ?resourcesVpcConfig ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let controlPlaneScalingConfig =
+        field_map json__ "controlPlaneScalingConfig"
+          ControlPlaneScalingConfig.of_json in
+      let deletionProtection =
+        field_map json__ "deletionProtection" BoxedBoolean.of_json in
+      let remoteNetworkConfig =
+        field_map json__ "remoteNetworkConfig"
+          RemoteNetworkConfigRequest.of_json in
+      let storageConfig =
+        field_map json__ "storageConfig" StorageConfigRequest.of_json in
+      let kubernetesNetworkConfig =
+        field_map json__ "kubernetesNetworkConfig"
+          KubernetesNetworkConfigRequest.of_json in
+      let computeConfig =
+        field_map json__ "computeConfig" ComputeConfigRequest.of_json in
+      let zonalShiftConfig =
+        field_map json__ "zonalShiftConfig" ZonalShiftConfigRequest.of_json in
+      let upgradePolicy =
+        field_map json__ "upgradePolicy" UpgradePolicyRequest.of_json in
+      let accessConfig =
+        field_map json__ "accessConfig" UpdateAccessConfigRequest.of_json in
       let clientRequestToken =
-        field_map json "clientRequestToken" String_.of_json in
-      let logging = field_map json "logging" Logging.of_json in
+        field_map json__ "clientRequestToken" String_.of_json in
+      let logging = field_map json__ "logging" Logging.of_json in
       let resourcesVpcConfig =
-        field_map json "resourcesVpcConfig" VpcConfigRequest.of_json in
-      let name = field_map_exn json "name" String_.of_json in
-      make ?clientRequestToken ?logging ?resourcesVpcConfig ~name ()
+        field_map json__ "resourcesVpcConfig" VpcConfigRequest.of_json in
+      let name = field_map_exn json__ "name" String_.of_json in
+      make ?controlPlaneScalingConfig ?deletionProtection
+        ?remoteNetworkConfig ?storageConfig ?kubernetesNetworkConfig
+        ?computeConfig ?zonalShiftConfig ?upgradePolicy ?accessConfig
+        ?clientRequestToken ?logging ?resourcesVpcConfig ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an Amazon EKS cluster configuration. Your cluster continues to function during the update. The response output includes an update ID that you can use to track the status of your cluster update with the DescribeUpdate API operation. You can use this API operation to enable or disable exporting the Kubernetes control plane logs for your cluster to CloudWatch Logs. By default, cluster control plane logs aren't exported to CloudWatch Logs. For more information, see Amazon EKS Cluster Control Plane Logs in the Amazon EKS User Guide . CloudWatch Logs ingestion, archive storage, and data scanning rates apply to exported control plane logs. For more information, see CloudWatch Pricing. You can also use this API operation to enable or disable public and private access to your cluster's Kubernetes API server endpoint. By default, public access is enabled, and private access is disabled. For more information, see Amazon EKS cluster endpoint access control in the Amazon EKS User Guide . You can't update the subnets or security group IDs for an existing cluster. Cluster updates are asynchronous, and they should finish within a few minutes. During an update, the cluster status moves to UPDATING (this status transition is eventually consistent). When the update is complete (either Failed or Successful), the cluster status moves to Active."]
+       "Updates an Amazon EKS cluster configuration. Your cluster continues to function during the update. The response output includes an update ID that you can use to track the status of your cluster update with DescribeUpdate. You can use this operation to do the following actions: You can use this API operation to enable or disable exporting the Kubernetes control plane logs for your cluster to CloudWatch Logs. By default, cluster control plane logs aren't exported to CloudWatch Logs. For more information, see Amazon EKS Cluster control plane logs in the Amazon EKS User Guide . CloudWatch Logs ingestion, archive storage, and data scanning rates apply to exported control plane logs. For more information, see CloudWatch Pricing. You can also use this API operation to enable or disable public and private access to your cluster's Kubernetes API server endpoint. By default, public access is enabled, and private access is disabled. For more information, see Cluster API server endpoint in the Amazon EKS User Guide . You can also use this API operation to choose different subnets and security groups for the cluster. You must specify at least two subnets that are in different Availability Zones. You can't change which VPC the subnets are from, the subnets must be in the same VPC as the subnets that the cluster was created with. For more information about the VPC requirements, see https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html in the Amazon EKS User Guide . You can also use this API operation to enable or disable ARC zonal shift. If zonal shift is enabled, Amazon Web Services configures zonal autoshift for the cluster. You can also use this API operation to add, change, or remove the configuration in the cluster for EKS Hybrid Nodes. To remove the configuration, use the remoteNetworkConfig key with an object containing both subkeys with empty arrays for each. Here is an inline example: \"remoteNetworkConfig\": \\{ \"remoteNodeNetworks\": \\[\\], \"remotePodNetworks\": \\[\\] \\}. Cluster updates are asynchronous, and they should finish within a few minutes. During an update, the cluster status moves to UPDATING (this status transition is eventually consistent). When the update is complete (either Failed or Successful), the cluster status moves to Active."]
+module UpdateCapabilityResponse =
+  struct
+    type nonrec t = {
+      update: Update.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?update = fun () -> { update }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("update", (Option.map x.update ~f:Update.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let update =
+        (Option.map ~f:Update.of_xml) (Xml.child xml_arg0 "update") in
+      make ?update ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let update = field_map json__ "update" Update.of_json in
+      make ?update ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the configuration of a managed capability in your Amazon EKS cluster. You can update the IAM role, configuration settings, and delete propagation policy for a capability. When you update a capability, Amazon EKS applies the changes and may restart capability components as needed. The capability remains available during the update process, but some operations may be temporarily unavailable."]
+module UpdateCapabilityRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t
+        [@ocaml.doc
+          "The name of the Amazon EKS cluster that contains the capability you want to update configuration for."];
+      capabilityName: String_.t
+        [@ocaml.doc
+          "The name of the capability to update configuration for."];
+      roleArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role that the capability uses to interact with Amazon Web Services services. If you specify a new role ARN, the capability will start using the new role for all subsequent operations."];
+      configuration: UpdateCapabilityConfiguration.t option
+        [@ocaml.doc
+          "The updated configuration settings for the capability. You only need to specify the configuration parameters you want to change. For Argo CD capabilities, you can update RBAC role mappings and network access settings."];
+      clientRequestToken: String_.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This token is valid for 24 hours after creation."];
+      deletePropagationPolicy: CapabilityDeletePropagationPolicy.t option
+        [@ocaml.doc
+          "The updated delete propagation policy for the capability. Currently, the only supported value is RETAIN."]}
+    let context_ = "UpdateCapabilityRequest"
+    let make ?roleArn =
+      fun ?configuration ->
+        fun ?clientRequestToken ->
+          fun ?deletePropagationPolicy ->
+            fun ~clusterName ->
+              fun ~capabilityName ->
+                fun () ->
+                  {
+                    roleArn;
+                    configuration;
+                    clientRequestToken;
+                    deletePropagationPolicy;
+                    clusterName;
+                    capabilityName
+                  }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("capabilityName", (Some (String_.to_value x.capabilityName)));
+        ("roleArn", (Option.map x.roleArn ~f:String_.to_value));
+        ("configuration",
+          (Option.map x.configuration
+             ~f:UpdateCapabilityConfiguration.to_value));
+        ("clientRequestToken",
+          (Option.map x.clientRequestToken ~f:String_.to_value));
+        ("deletePropagationPolicy",
+          (Option.map x.deletePropagationPolicy
+             ~f:CapabilityDeletePropagationPolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deletePropagationPolicy =
+        (Option.map ~f:CapabilityDeletePropagationPolicy.of_xml)
+          (Xml.child xml_arg0 "deletePropagationPolicy") in
+      let clientRequestToken =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "clientRequestToken") in
+      let configuration =
+        (Option.map ~f:UpdateCapabilityConfiguration.of_xml)
+          (Xml.child xml_arg0 "configuration") in
+      let roleArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "roleArn") in
+      let capabilityName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "capabilityName") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?deletePropagationPolicy ?clientRequestToken ?configuration
+        ?roleArn ~capabilityName ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deletePropagationPolicy =
+        field_map json__ "deletePropagationPolicy"
+          CapabilityDeletePropagationPolicy.of_json in
+      let clientRequestToken =
+        field_map json__ "clientRequestToken" String_.of_json in
+      let configuration =
+        field_map json__ "configuration"
+          UpdateCapabilityConfiguration.of_json in
+      let roleArn = field_map json__ "roleArn" String_.of_json in
+      let capabilityName =
+        field_map_exn json__ "capabilityName" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ?deletePropagationPolicy ?clientRequestToken ?configuration
+        ?roleArn ~capabilityName ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the configuration of a managed capability in your Amazon EKS cluster. You can update the IAM role, configuration settings, and delete propagation policy for a capability. When you update a capability, Amazon EKS applies the changes and may restart capability components as needed. The capability remains available during the update process, but some operations may be temporarily unavailable."]
 module UpdateAddonResponse =
   struct
     type nonrec t = {
@@ -5077,15 +11368,16 @@ module UpdateAddonResponse =
         (Option.map ~f:Update.of_xml) (Xml.child xml_arg0 "update") in
       make ?update ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let update = field_map json "update" Update.of_json in make ?update ()
+    let of_json json__ =
+      let update = field_map json__ "update" Update.of_json in
+      make ?update ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an Amazon EKS add-on."]
 module UpdateAddonRequest =
   struct
     type nonrec t =
       {
-      clusterName: ClusterName.t [@ocaml.doc "The name of the cluster."];
+      clusterName: ClusterName.t [@ocaml.doc "The name of your cluster."];
       addonName: String_.t
         [@ocaml.doc
           "The name of the add-on. The name must match one of the names returned by ListAddons ."];
@@ -5097,26 +11389,36 @@ module UpdateAddonRequest =
           "The Amazon Resource Name (ARN) of an existing IAM role to bind to the add-on's service account. The role must be assigned the IAM permissions required by the add-on. If you don't specify an existing IAM role, then the add-on uses the permissions assigned to the node IAM role. For more information, see Amazon EKS node IAM role in the Amazon EKS User Guide. To specify an existing IAM role, you must have an IAM OpenID Connect (OIDC) provider created for your cluster. For more information, see Enabling IAM roles for service accounts on your cluster in the Amazon EKS User Guide."];
       resolveConflicts: ResolveConflicts.t option
         [@ocaml.doc
-          "How to resolve parameter value conflicts when applying the new version of the add-on to the cluster."];
+          "How to resolve field value conflicts for an Amazon EKS add-on if you've changed a value from the Amazon EKS default value. Conflicts are handled based on the option you choose: None \226\128\147 Amazon EKS doesn't change the value. The update might fail. Overwrite \226\128\147 Amazon EKS overwrites the changed value back to the Amazon EKS default value. Preserve \226\128\147 Amazon EKS preserves the value. If you choose this option, we recommend that you test any field and value changes on a non-production cluster before updating the add-on on your production cluster."];
       clientRequestToken: String_.t option
         [@ocaml.doc
-          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+      configurationValues: String_.t option
+        [@ocaml.doc
+          "The set of configuration values for the add-on that's created. The values that you provide are validated against the schema returned by DescribeAddonConfiguration."];
+      podIdentityAssociations: AddonPodIdentityAssociationsList.t option
+        [@ocaml.doc
+          "An array of EKS Pod Identity associations to be updated. Each association maps a Kubernetes service account to an IAM role. If this value is left blank, no change. If an empty array is provided, existing associations owned by the add-on are deleted. For more information, see Attach an IAM Role to an Amazon EKS add-on using EKS Pod Identity in the Amazon EKS User Guide."]}
     let context_ = "UpdateAddonRequest"
     let make ?addonVersion =
       fun ?serviceAccountRoleArn ->
         fun ?resolveConflicts ->
           fun ?clientRequestToken ->
-            fun ~clusterName ->
-              fun ~addonName ->
-                fun () ->
-                  {
-                    addonVersion;
-                    serviceAccountRoleArn;
-                    resolveConflicts;
-                    clientRequestToken;
-                    clusterName;
-                    addonName
-                  }
+            fun ?configurationValues ->
+              fun ?podIdentityAssociations ->
+                fun ~clusterName ->
+                  fun ~addonName ->
+                    fun () ->
+                      {
+                        addonVersion;
+                        serviceAccountRoleArn;
+                        resolveConflicts;
+                        clientRequestToken;
+                        configurationValues;
+                        podIdentityAssociations;
+                        clusterName;
+                        addonName
+                      }
     let to_value x =
       structure_to_value
         [("name", (Some (ClusterName.to_value x.clusterName)));
@@ -5127,9 +11429,20 @@ module UpdateAddonRequest =
         ("resolveConflicts",
           (Option.map x.resolveConflicts ~f:ResolveConflicts.to_value));
         ("clientRequestToken",
-          (Option.map x.clientRequestToken ~f:String_.to_value))]
+          (Option.map x.clientRequestToken ~f:String_.to_value));
+        ("configurationValues",
+          (Option.map x.configurationValues ~f:String_.to_value));
+        ("podIdentityAssociations",
+          (Option.map x.podIdentityAssociations
+             ~f:AddonPodIdentityAssociationsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let podIdentityAssociations =
+        (Option.map ~f:AddonPodIdentityAssociationsList.of_xml)
+          (Xml.child xml_arg0 "podIdentityAssociations") in
+      let configurationValues =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "configurationValues") in
       let clientRequestToken =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "clientRequestToken") in
@@ -5145,23 +11458,173 @@ module UpdateAddonRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "addonName") in
       let clusterName =
         ClusterName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?clientRequestToken ?resolveConflicts ?serviceAccountRoleArn
-        ?addonVersion ~addonName ~clusterName ()
+      make ?podIdentityAssociations ?configurationValues ?clientRequestToken
+        ?resolveConflicts ?serviceAccountRoleArn ?addonVersion ~addonName
+        ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let podIdentityAssociations =
+        field_map json__ "podIdentityAssociations"
+          AddonPodIdentityAssociationsList.of_json in
+      let configurationValues =
+        field_map json__ "configurationValues" String_.of_json in
       let clientRequestToken =
-        field_map json "clientRequestToken" String_.of_json in
+        field_map json__ "clientRequestToken" String_.of_json in
       let resolveConflicts =
-        field_map json "resolveConflicts" ResolveConflicts.of_json in
+        field_map json__ "resolveConflicts" ResolveConflicts.of_json in
       let serviceAccountRoleArn =
-        field_map json "serviceAccountRoleArn" RoleArn.of_json in
-      let addonVersion = field_map json "addonVersion" String_.of_json in
-      let addonName = field_map_exn json "addonName" String_.of_json in
-      let clusterName = field_map_exn json "clusterName" ClusterName.of_json in
-      make ?clientRequestToken ?resolveConflicts ?serviceAccountRoleArn
-        ?addonVersion ~addonName ~clusterName ()
+        field_map json__ "serviceAccountRoleArn" RoleArn.of_json in
+      let addonVersion = field_map json__ "addonVersion" String_.of_json in
+      let addonName = field_map_exn json__ "addonName" String_.of_json in
+      let clusterName =
+        field_map_exn json__ "clusterName" ClusterName.of_json in
+      make ?podIdentityAssociations ?configurationValues ?clientRequestToken
+        ?resolveConflicts ?serviceAccountRoleArn ?addonVersion ~addonName
+        ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an Amazon EKS add-on."]
+module UpdateAccessEntryResponse =
+  struct
+    type nonrec t =
+      {
+      accessEntry: AccessEntry.t option
+        [@ocaml.doc "The ARN of the IAM principal for the AccessEntry."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accessEntry = fun () -> { accessEntry }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("accessEntry", (Option.map x.accessEntry ~f:AccessEntry.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accessEntry =
+        (Option.map ~f:AccessEntry.of_xml) (Xml.child xml_arg0 "accessEntry") in
+      make ?accessEntry ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accessEntry = field_map json__ "accessEntry" AccessEntry.of_json in
+      make ?accessEntry ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates an access entry."]
+module UpdateAccessEntryRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
+      principalArn: String_.t
+        [@ocaml.doc "The ARN of the IAM principal for the AccessEntry."];
+      kubernetesGroups: StringList.t option
+        [@ocaml.doc
+          "The value for name that you've specified for kind: Group as a subject in a Kubernetes RoleBinding or ClusterRoleBinding object. Amazon EKS doesn't confirm that the value for name exists in any bindings on your cluster. You can specify one or more names. Kubernetes authorizes the principalArn of the access entry to access any cluster objects that you've specified in a Kubernetes Role or ClusterRole object that is also specified in a binding's roleRef. For more information about creating Kubernetes RoleBinding, ClusterRoleBinding, Role, or ClusterRole objects, see Using RBAC Authorization in the Kubernetes documentation. If you want Amazon EKS to authorize the principalArn (instead of, or in addition to Kubernetes authorizing the principalArn), you can associate one or more access policies to the access entry using AssociateAccessPolicy. If you associate any access policies, the principalARN has all permissions assigned in the associated access policies and all permissions in any Kubernetes Role or ClusterRole objects that the group names are bound to."];
+      clientRequestToken: String_.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+      username: String_.t option
+        [@ocaml.doc
+          "The username to authenticate to Kubernetes with. We recommend not specifying a username and letting Amazon EKS specify it for you. For more information about the value Amazon EKS specifies for you, or constraints before specifying your own username, see Creating access entries in the Amazon EKS User Guide."]}
+    let context_ = "UpdateAccessEntryRequest"
+    let make ?kubernetesGroups =
+      fun ?clientRequestToken ->
+        fun ?username ->
+          fun ~clusterName ->
+            fun ~principalArn ->
+              fun () ->
+                {
+                  kubernetesGroups;
+                  clientRequestToken;
+                  username;
+                  clusterName;
+                  principalArn
+                }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("principalArn", (Some (String_.to_value x.principalArn)));
+        ("kubernetesGroups",
+          (Option.map x.kubernetesGroups ~f:StringList.to_value));
+        ("clientRequestToken",
+          (Option.map x.clientRequestToken ~f:String_.to_value));
+        ("username", (Option.map x.username ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let username =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "username") in
+      let clientRequestToken =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "clientRequestToken") in
+      let kubernetesGroups =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "kubernetesGroups") in
+      let principalArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "principalArn") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?username ?clientRequestToken ?kubernetesGroups ~principalArn
+        ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let username = field_map json__ "username" String_.of_json in
+      let clientRequestToken =
+        field_map json__ "clientRequestToken" String_.of_json in
+      let kubernetesGroups =
+        field_map json__ "kubernetesGroups" StringList.of_json in
+      let principalArn = field_map_exn json__ "principalArn" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ?username ?clientRequestToken ?kubernetesGroups ~principalArn
+        ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates an access entry."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -5209,16 +11672,15 @@ module UntagResourceResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes specified tags from a resource."]
+  end[@@ocaml.doc "Deletes specified tags from an Amazon EKS resource."]
 module UntagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: String_.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource from which to delete tags. Currently, the supported resources are Amazon EKS clusters and managed node groups."];
-      tagKeys: TagKeyList.t
-        [@ocaml.doc "The keys of the tags to be removed."]}
+          "The Amazon Resource Name (ARN) of the resource to delete tags from."];
+      tagKeys: TagKeyList.t [@ocaml.doc "The keys of the tags to remove."]}
     let context_ = "UntagResourceRequest"
     let make ~resourceArn =
       fun ~tagKeys -> fun () -> { resourceArn; tagKeys }
@@ -5236,12 +11698,12 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes specified tags from a resource."]
+  end[@@ocaml.doc "Deletes specified tags from an Amazon EKS resource."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -5290,17 +11752,17 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates the specified tags to a resource with the specified resourceArn. If existing tags on a resource are not specified in the request parameters, they are not changed. When a resource is deleted, the tags associated with that resource are deleted as well. Tags that you create for Amazon EKS resources do not propagate to any other resources associated with the cluster. For example, if you tag a cluster with this operation, that tag does not automatically propagate to the subnets and nodes associated with the cluster."]
+       "Associates the specified tags to an Amazon EKS resource with the specified resourceArn. If existing tags on a resource are not specified in the request parameters, they aren't changed. When a resource is deleted, the tags associated with that resource are also deleted. Tags that you create for Amazon EKS resources don't propagate to any other resources associated with the cluster. For example, if you tag a cluster with this operation, that tag doesn't automatically propagate to the subnets and nodes associated with the cluster."]
 module TagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: String_.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource to which to add tags. Currently, the supported resources are Amazon EKS clusters and managed node groups."];
+          "The Amazon Resource Name (ARN) of the resource to add tags to."];
       tags: TagMap.t
         [@ocaml.doc
-          "The tags to add to the resource. A tag is an array of key-value pairs."]}
+          "Metadata that assists with categorization and organization. Each tag consists of a key and an optional value. You define both. Tags don't propagate to any other cluster or Amazon Web Services resources."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
@@ -5316,13 +11778,118 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates the specified tags to a resource with the specified resourceArn. If existing tags on a resource are not specified in the request parameters, they are not changed. When a resource is deleted, the tags associated with that resource are deleted as well. Tags that you create for Amazon EKS resources do not propagate to any other resources associated with the cluster. For example, if you tag a cluster with this operation, that tag does not automatically propagate to the subnets and nodes associated with the cluster."]
+       "Associates the specified tags to an Amazon EKS resource with the specified resourceArn. If existing tags on a resource are not specified in the request parameters, they aren't changed. When a resource is deleted, the tags associated with that resource are also deleted. Tags that you create for Amazon EKS resources don't propagate to any other resources associated with the cluster. For example, if you tag a cluster with this operation, that tag doesn't automatically propagate to the subnets and nodes associated with the cluster."]
+module StartInsightsRefreshResponse =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc
+          "The message associated with the insights refresh operation."];
+      status: InsightsRefreshStatus.t option
+        [@ocaml.doc "The current status of the insights refresh operation."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?message = fun ?status -> fun () -> { message; status }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("status", (Option.map x.status ~f:InsightsRefreshStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:InsightsRefreshStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?status ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "status" InsightsRefreshStatus.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?status ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Initiates an on-demand refresh operation for cluster insights, getting the latest analysis outside of the standard refresh schedule."]
+module StartInsightsRefreshRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t
+        [@ocaml.doc
+          "The name of the cluster for the refresh insights operation."]}
+    let context_ = "StartInsightsRefreshRequest"
+    let make ~clusterName = fun () -> { clusterName }
+    let to_value x =
+      structure_to_value [("name", (Some (String_.to_value x.clusterName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Initiates an on-demand refresh operation for cluster insights, getting the latest analysis outside of the standard refresh schedule."]
 module RegisterClusterResponse =
   struct
     type nonrec t = {
@@ -5430,27 +11997,28 @@ module RegisterClusterResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Connects a Kubernetes cluster to the Amazon EKS control plane. Any Kubernetes cluster can be connected to the Amazon EKS control plane to view current information about the cluster and its nodes. Cluster connection requires two steps. First, send a RegisterClusterRequest to add it to the Amazon EKS control plane. Second, a Manifest containing the activationID and activationCode must be applied to the Kubernetes cluster through it's native provider to provide visibility. After the Manifest is updated and applied, then the connected cluster is visible to the Amazon EKS control plane. If the Manifest is not applied within three days, then the connected cluster will no longer be visible and must be deregistered. See DeregisterCluster."]
+       "Connects a Kubernetes cluster to the Amazon EKS control plane. Any Kubernetes cluster can be connected to the Amazon EKS control plane to view current information about the cluster and its nodes. Cluster connection requires two steps. First, send a RegisterClusterRequest to add it to the Amazon EKS control plane. Second, a Manifest containing the activationID and activationCode must be applied to the Kubernetes cluster through it's native provider to provide visibility. After the manifest is updated and applied, the connected cluster is visible to the Amazon EKS control plane. If the manifest isn't applied within three days, the connected cluster will no longer be visible and must be deregistered using DeregisterCluster."]
 module RegisterClusterRequest =
   struct
     type nonrec t =
       {
       name: ClusterName.t
-        [@ocaml.doc "Define a unique name for this cluster for your Region."];
+        [@ocaml.doc
+          "A unique name for this cluster in your Amazon Web Services Region."];
       connectorConfig: ConnectorConfigRequest.t
         [@ocaml.doc
           "The configuration settings required to connect the Kubernetes cluster to the Amazon EKS control plane."];
       clientRequestToken: String_.t option
         [@ocaml.doc
-          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The metadata that you apply to the cluster to assist with categorization and organization. Each tag consists of a key and an optional value, both of which you define. Cluster tags do not propagate to any other resources associated with the cluster."]}
+          "Metadata that assists with categorization and organization. Each tag consists of a key and an optional value. You define both. Tags don't propagate to any other cluster or Amazon Web Services resources."]}
     let context_ = "RegisterClusterRequest"
     let make ?clientRequestToken =
       fun ?tags ->
@@ -5478,17 +12046,17 @@ module RegisterClusterRequest =
         ClusterName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ?clientRequestToken ~connectorConfig ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
       let clientRequestToken =
-        field_map json "clientRequestToken" String_.of_json in
+        field_map json__ "clientRequestToken" String_.of_json in
       let connectorConfig =
-        field_map_exn json "connectorConfig" ConnectorConfigRequest.of_json in
-      let name = field_map_exn json "name" ClusterName.of_json in
+        field_map_exn json__ "connectorConfig" ConnectorConfigRequest.of_json in
+      let name = field_map_exn json__ "name" ClusterName.of_json in
       make ?tags ?clientRequestToken ~connectorConfig ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Connects a Kubernetes cluster to the Amazon EKS control plane. Any Kubernetes cluster can be connected to the Amazon EKS control plane to view current information about the cluster and its nodes. Cluster connection requires two steps. First, send a RegisterClusterRequest to add it to the Amazon EKS control plane. Second, a Manifest containing the activationID and activationCode must be applied to the Kubernetes cluster through it's native provider to provide visibility. After the Manifest is updated and applied, then the connected cluster is visible to the Amazon EKS control plane. If the Manifest is not applied within three days, then the connected cluster will no longer be visible and must be deregistered. See DeregisterCluster."]
+       "Connects a Kubernetes cluster to the Amazon EKS control plane. Any Kubernetes cluster can be connected to the Amazon EKS control plane to view current information about the cluster and its nodes. Cluster connection requires two steps. First, send a RegisterClusterRequest to add it to the Amazon EKS control plane. Second, a Manifest containing the activationID and activationCode must be applied to the Kubernetes cluster through it's native provider to provide visibility. After the manifest is updated and applied, the connected cluster is visible to the Amazon EKS control plane. If the manifest isn't applied within three days, the connected cluster will no longer be visible and must be deregistered using DeregisterCluster."]
 module ListUpdatesResponse =
   struct
     type nonrec t =
@@ -5498,7 +12066,7 @@ module ListUpdatesResponse =
           "A list of all the updates for the specified cluster and Region."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value to include in a future ListUpdates request. When the results of a ListUpdates request exceed maxResults, you can use this value to retrieve the next page of results. This value is null when there are no more results to return."]}
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
     type nonrec error =
       [ `ClientException of ClientException.t 
       | `InvalidParameterException of InvalidParameterException.t 
@@ -5563,13 +12131,13 @@ module ListUpdatesResponse =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "updateIds") in
       make ?nextToken ?updateIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let updateIds = field_map json "updateIds" StringList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let updateIds = field_map json__ "updateIds" StringList.of_json in
       make ?nextToken ?updateIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the updates associated with an Amazon EKS cluster or managed node group in your Amazon Web Services account, in the specified Region."]
+       "Lists the updates associated with an Amazon EKS resource in your Amazon Web Services account, in the specified Amazon Web Services Region."]
 module ListUpdatesRequest =
   struct
     type nonrec t =
@@ -5583,25 +12151,37 @@ module ListUpdatesRequest =
       addonName: String_.t option
         [@ocaml.doc
           "The names of the installed add-ons that have available updates."];
+      capabilityName: String_.t option
+        [@ocaml.doc
+          "The name of the capability for which you want to list updates."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value returned from a previous paginated ListUpdates request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value."];
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."];
       maxResults: ListUpdatesRequestMaxResults.t option
         [@ocaml.doc
-          "The maximum number of update results returned by ListUpdates in paginated output. When you use this parameter, ListUpdates returns only maxResults results in a single page along with a nextToken response element. You can see the remaining results of the initial request by sending another ListUpdates request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, ListUpdates returns up to 100 results and a nextToken value if applicable."]}
+          "The maximum number of results, returned in paginated output. You receive maxResults in a single page, along with a nextToken response element. You can see the remaining results of the initial request by sending another request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, 100 results and a nextToken value, if applicable, are returned."]}
     let context_ = "ListUpdatesRequest"
     let make ?nodegroupName =
       fun ?addonName ->
-        fun ?nextToken ->
-          fun ?maxResults ->
-            fun ~name ->
-              fun () ->
-                { nodegroupName; addonName; nextToken; maxResults; name }
+        fun ?capabilityName ->
+          fun ?nextToken ->
+            fun ?maxResults ->
+              fun ~name ->
+                fun () ->
+                  {
+                    nodegroupName;
+                    addonName;
+                    capabilityName;
+                    nextToken;
+                    maxResults;
+                    name
+                  }
     let to_value x =
       structure_to_value
         [("name", (Some (String_.to_value x.name)));
         ("nodegroupName", (Option.map x.nodegroupName ~f:String_.to_value));
         ("addonName", (Option.map x.addonName ~f:String_.to_value));
+        ("capabilityName", (Option.map x.capabilityName ~f:String_.to_value));
         ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
         ("maxResults",
           (Option.map x.maxResults ~f:ListUpdatesRequestMaxResults.to_value))]
@@ -5612,25 +12192,30 @@ module ListUpdatesRequest =
           (Xml.child xml_arg0 "maxResults") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let capabilityName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "capabilityName") in
       let addonName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "addonName") in
       let nodegroupName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nodegroupName") in
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?maxResults ?nextToken ?addonName ?nodegroupName ~name ()
+      make ?maxResults ?nextToken ?capabilityName ?addonName ?nodegroupName
+        ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "maxResults" ListUpdatesRequestMaxResults.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let addonName = field_map json "addonName" String_.of_json in
-      let nodegroupName = field_map json "nodegroupName" String_.of_json in
-      let name = field_map_exn json "name" String_.of_json in
-      make ?maxResults ?nextToken ?addonName ?nodegroupName ~name ()
+        field_map json__ "maxResults" ListUpdatesRequestMaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let capabilityName = field_map json__ "capabilityName" String_.of_json in
+      let addonName = field_map json__ "addonName" String_.of_json in
+      let nodegroupName = field_map json__ "nodegroupName" String_.of_json in
+      let name = field_map_exn json__ "name" String_.of_json in
+      make ?maxResults ?nextToken ?capabilityName ?addonName ?nodegroupName
+        ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the updates associated with an Amazon EKS cluster or managed node group in your Amazon Web Services account, in the specified Region."]
+       "Lists the updates associated with an Amazon EKS resource in your Amazon Web Services account, in the specified Amazon Web Services Region."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -5680,8 +12265,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the tags for an Amazon EKS resource."]
 module ListTagsForResourceRequest =
@@ -5690,7 +12275,7 @@ module ListTagsForResourceRequest =
       {
       resourceArn: String_.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that identifies the resource for which to list the tags. Currently, the supported resources are Amazon EKS clusters and managed node groups."]}
+          "The Amazon Resource Name (ARN) that identifies the resource to list tags for."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -5703,11 +12288,167 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the tags for an Amazon EKS resource."]
+module ListPodIdentityAssociationsResponse =
+  struct
+    type nonrec t =
+      {
+      associations: PodIdentityAssociationSummaries.t option
+        [@ocaml.doc
+          "The list of summarized descriptions of the associations that are in the cluster and match any filters that you provided. Each summary is simplified by removing these fields compared to the full PodIdentityAssociation : The IAM role: roleArn The timestamp that the association was created at: createdAt The most recent timestamp that the association was modified at:. modifiedAt The tags on the association: tags"];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value to include in a future ListPodIdentityAssociations request. When the results of a ListPodIdentityAssociations request exceed maxResults, you can use this value to retrieve the next page of results. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?associations =
+      fun ?nextToken -> fun () -> { associations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("associations",
+           (Option.map x.associations
+              ~f:PodIdentityAssociationSummaries.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let associations =
+        (Option.map ~f:PodIdentityAssociationSummaries.of_xml)
+          (Xml.child xml_arg0 "associations") in
+      make ?nextToken ?associations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let associations =
+        field_map json__ "associations"
+          PodIdentityAssociationSummaries.of_json in
+      make ?nextToken ?associations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List the EKS Pod Identity associations in a cluster. You can filter the list by the namespace that the association is in or the service account that the association uses."]
+module ListPodIdentityAssociationsRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t
+        [@ocaml.doc "The name of the cluster that the associations are in."];
+      namespace: String_.t option
+        [@ocaml.doc
+          "The name of the Kubernetes namespace inside the cluster that the associations are in."];
+      serviceAccount: String_.t option
+        [@ocaml.doc
+          "The name of the Kubernetes service account that the associations use."];
+      maxResults: ListPodIdentityAssociationsMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of EKS Pod Identity association results returned by ListPodIdentityAssociations in paginated output. When you use this parameter, ListPodIdentityAssociations returns only maxResults results in a single page along with a nextToken response element. You can see the remaining results of the initial request by sending another ListPodIdentityAssociations request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, ListPodIdentityAssociations returns up to 100 results and a nextToken value if applicable."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value returned from a previous paginated ListUpdates request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
+    let context_ = "ListPodIdentityAssociationsRequest"
+    let make ?namespace =
+      fun ?serviceAccount ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun ~clusterName ->
+              fun () ->
+                {
+                  namespace;
+                  serviceAccount;
+                  maxResults;
+                  nextToken;
+                  clusterName
+                }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("namespace", (Option.map x.namespace ~f:String_.to_value));
+        ("serviceAccount", (Option.map x.serviceAccount ~f:String_.to_value));
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:ListPodIdentityAssociationsMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:ListPodIdentityAssociationsMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let serviceAccount =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceAccount") in
+      let namespace =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "namespace") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?nextToken ?maxResults ?serviceAccount ?namespace ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          ListPodIdentityAssociationsMaxResults.of_json in
+      let serviceAccount = field_map json__ "serviceAccount" String_.of_json in
+      let namespace = field_map json__ "namespace" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ?nextToken ?maxResults ?serviceAccount ?namespace ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List the EKS Pod Identity associations in a cluster. You can filter the list by the namespace that the association is in or the service account that the association uses."]
 module ListNodegroupsResponse =
   struct
     type nonrec t =
@@ -5717,7 +12458,7 @@ module ListNodegroupsResponse =
           "A list of all of the node groups associated with the specified cluster."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value to include in a future ListNodegroups request. When the results of a ListNodegroups request exceed maxResults, you can use this value to retrieve the next page of results. This value is null when there are no more results to return."]}
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
     type nonrec error =
       [ `ClientException of ClientException.t 
       | `InvalidParameterException of InvalidParameterException.t 
@@ -5793,26 +12534,24 @@ module ListNodegroupsResponse =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "nodegroups") in
       make ?nextToken ?nodegroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let nodegroups = field_map json "nodegroups" StringList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let nodegroups = field_map json__ "nodegroups" StringList.of_json in
       make ?nextToken ?nodegroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the Amazon EKS managed node groups associated with the specified cluster in your Amazon Web Services account in the specified Region. Self-managed node groups are not listed."]
+       "Lists the managed node groups associated with the specified cluster in your Amazon Web Services account in the specified Amazon Web Services Region. Self-managed node groups aren't listed."]
 module ListNodegroupsRequest =
   struct
     type nonrec t =
       {
-      clusterName: String_.t
-        [@ocaml.doc
-          "The name of the Amazon EKS cluster that you would like to list node groups in."];
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
       maxResults: ListNodegroupsRequestMaxResults.t option
         [@ocaml.doc
-          "The maximum number of node group results returned by ListNodegroups in paginated output. When you use this parameter, ListNodegroups returns only maxResults results in a single page along with a nextToken response element. You can see the remaining results of the initial request by sending another ListNodegroups request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, ListNodegroups returns up to 100 results and a nextToken value if applicable."];
+          "The maximum number of results, returned in paginated output. You receive maxResults in a single page, along with a nextToken response element. You can see the remaining results of the initial request by sending another request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, 100 results and a nextToken value, if applicable, are returned."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value returned from a previous paginated ListNodegroups request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value."]}
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
     let context_ = "ListNodegroupsRequest"
     let make ?maxResults =
       fun ?nextToken ->
@@ -5835,15 +12574,149 @@ module ListNodegroupsRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?nextToken ?maxResults ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let maxResults =
-        field_map json "maxResults" ListNodegroupsRequestMaxResults.of_json in
-      let clusterName = field_map_exn json "clusterName" String_.of_json in
+        field_map json__ "maxResults" ListNodegroupsRequestMaxResults.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
       make ?nextToken ?maxResults ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the Amazon EKS managed node groups associated with the specified cluster in your Amazon Web Services account in the specified Region. Self-managed node groups are not listed."]
+       "Lists the managed node groups associated with the specified cluster in your Amazon Web Services account in the specified Amazon Web Services Region. Self-managed node groups aren't listed."]
+module ListInsightsResponse =
+  struct
+    type nonrec t =
+      {
+      insights: InsightSummaries.t option
+        [@ocaml.doc "The returned list of insights."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value to include in a future ListInsights request. When the results of a ListInsights request exceed maxResults, you can use this value to retrieve the next page of results. This value is null when there are no more results to return."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?insights = fun ?nextToken -> fun () -> { insights; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("insights", (Option.map x.insights ~f:InsightSummaries.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let insights =
+        (Option.map ~f:InsightSummaries.of_xml)
+          (Xml.child xml_arg0 "insights") in
+      make ?nextToken ?insights ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let insights = field_map json__ "insights" InsightSummaries.of_json in
+      make ?nextToken ?insights ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of all insights checked for against the specified cluster. You can filter which insights are returned by category, associated Kubernetes version, and status. The default filter lists all categories and every status. The following lists the available categories: UPGRADE_READINESS: Amazon EKS identifies issues that could impact your ability to upgrade to new versions of Kubernetes. These are called upgrade insights. MISCONFIGURATION: Amazon EKS identifies misconfiguration in your EKS Hybrid Nodes setup that could impair functionality of your cluster or workloads. These are called configuration insights."]
+module ListInsightsRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t
+        [@ocaml.doc
+          "The name of the Amazon EKS cluster associated with the insights."];
+      filter: InsightsFilter.t option
+        [@ocaml.doc
+          "The criteria to filter your list of insights for your cluster. You can filter which insights are returned by category, associated Kubernetes version, and status."];
+      maxResults: ListInsightsMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of identity provider configurations returned by ListInsights in paginated output. When you use this parameter, ListInsights returns only maxResults results in a single page along with a nextToken response element. You can see the remaining results of the initial request by sending another ListInsights request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, ListInsights returns up to 100 results and a nextToken value, if applicable."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value returned from a previous paginated ListInsights request. When the results of a ListInsights request exceed maxResults, you can use this value to retrieve the next page of results. This value is null when there are no more results to return."]}
+    let context_ = "ListInsightsRequest"
+    let make ?filter =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~clusterName ->
+            fun () -> { filter; maxResults; nextToken; clusterName }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("filter", (Option.map x.filter ~f:InsightsFilter.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:ListInsightsMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:ListInsightsMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let filter =
+        (Option.map ~f:InsightsFilter.of_xml) (Xml.child xml_arg0 "filter") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?nextToken ?maxResults ?filter ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults =
+        field_map json__ "maxResults" ListInsightsMaxResults.of_json in
+      let filter = field_map json__ "filter" InsightsFilter.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ?nextToken ?maxResults ?filter ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of all insights checked for against the specified cluster. You can filter which insights are returned by category, associated Kubernetes version, and status. The default filter lists all categories and every status. The following lists the available categories: UPGRADE_READINESS: Amazon EKS identifies issues that could impact your ability to upgrade to new versions of Kubernetes. These are called upgrade insights. MISCONFIGURATION: Amazon EKS identifies misconfiguration in your EKS Hybrid Nodes setup that could impair functionality of your cluster or workloads. These are called configuration insights."]
 module ListIdentityProviderConfigsResponse =
   struct
     type nonrec t =
@@ -5852,7 +12725,7 @@ module ListIdentityProviderConfigsResponse =
         [@ocaml.doc "The identity provider configurations for the cluster."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value returned from a previous paginated ListIdentityProviderConfigsResponse where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value."]}
+          "The nextToken value to include in a future ListIdentityProviderConfigsResponse request. When the results of a ListIdentityProviderConfigsResponse request exceed maxResults, you can use this value to retrieve the next page of results. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
     type nonrec error =
       [ `ClientException of ClientException.t 
       | `InvalidParameterException of InvalidParameterException.t 
@@ -5931,27 +12804,26 @@ module ListIdentityProviderConfigsResponse =
           (Xml.child xml_arg0 "identityProviderConfigs") in
       make ?nextToken ?identityProviderConfigs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let identityProviderConfigs =
-        field_map json "identityProviderConfigs"
+        field_map json__ "identityProviderConfigs"
           IdentityProviderConfigs.of_json in
       make ?nextToken ?identityProviderConfigs ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A list of identity provider configurations."]
+  end[@@ocaml.doc
+       "Lists the identity provider configurations for your cluster."]
 module ListIdentityProviderConfigsRequest =
   struct
     type nonrec t =
       {
-      clusterName: String_.t
-        [@ocaml.doc
-          "The cluster name that you want to list identity provider configurations for."];
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
       maxResults: ListIdentityProviderConfigsRequestMaxResults.t option
         [@ocaml.doc
-          "The maximum number of identity provider configurations returned by ListIdentityProviderConfigs in paginated output. When you use this parameter, ListIdentityProviderConfigs returns only maxResults results in a single page along with a nextToken response element. You can see the remaining results of the initial request by sending another ListIdentityProviderConfigs request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, ListIdentityProviderConfigs returns up to 100 results and a nextToken value, if applicable."];
+          "The maximum number of results, returned in paginated output. You receive maxResults in a single page, along with a nextToken response element. You can see the remaining results of the initial request by sending another request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, 100 results and a nextToken value, if applicable, are returned."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value returned from a previous paginated IdentityProviderConfigsRequest where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value."]}
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
     let context_ = "ListIdentityProviderConfigsRequest"
     let make ?maxResults =
       fun ?nextToken ->
@@ -5974,15 +12846,16 @@ module ListIdentityProviderConfigsRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?nextToken ?maxResults ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let maxResults =
-        field_map json "maxResults"
+        field_map json__ "maxResults"
           ListIdentityProviderConfigsRequestMaxResults.of_json in
-      let clusterName = field_map_exn json "clusterName" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
       make ?nextToken ?maxResults ~clusterName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A list of identity provider configurations."]
+  end[@@ocaml.doc
+       "Lists the identity provider configurations for your cluster."]
 module ListFargateProfilesResponse =
   struct
     type nonrec t =
@@ -5992,7 +12865,7 @@ module ListFargateProfilesResponse =
           "A list of all of the Fargate profiles associated with the specified cluster."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value to include in a future ListFargateProfiles request. When the results of a ListFargateProfiles request exceed maxResults, you can use this value to retrieve the next page of results. This value is null when there are no more results to return."]}
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
     type nonrec error =
       [ `ClientException of ClientException.t 
       | `InvalidParameterException of InvalidParameterException.t 
@@ -6059,27 +12932,25 @@ module ListFargateProfilesResponse =
           (Xml.child xml_arg0 "fargateProfileNames") in
       make ?nextToken ?fargateProfileNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let fargateProfileNames =
-        field_map json "fargateProfileNames" StringList.of_json in
+        field_map json__ "fargateProfileNames" StringList.of_json in
       make ?nextToken ?fargateProfileNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the Fargate profiles associated with the specified cluster in your Amazon Web Services account in the specified Region."]
+       "Lists the Fargate profiles associated with the specified cluster in your Amazon Web Services account in the specified Amazon Web Services Region."]
 module ListFargateProfilesRequest =
   struct
     type nonrec t =
       {
-      clusterName: String_.t
-        [@ocaml.doc
-          "The name of the Amazon EKS cluster that you would like to list Fargate profiles in."];
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
       maxResults: FargateProfilesRequestMaxResults.t option
         [@ocaml.doc
-          "The maximum number of Fargate profile results returned by ListFargateProfiles in paginated output. When you use this parameter, ListFargateProfiles returns only maxResults results in a single page along with a nextToken response element. You can see the remaining results of the initial request by sending another ListFargateProfiles request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, ListFargateProfiles returns up to 100 results and a nextToken value if applicable."];
+          "The maximum number of results, returned in paginated output. You receive maxResults in a single page, along with a nextToken response element. You can see the remaining results of the initial request by sending another request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, 100 results and a nextToken value, if applicable, are returned."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value returned from a previous paginated ListFargateProfiles request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value."]}
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
     let context_ = "ListFargateProfilesRequest"
     let make ?maxResults =
       fun ?nextToken ->
@@ -6102,25 +12973,160 @@ module ListFargateProfilesRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?nextToken ?maxResults ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let maxResults =
-        field_map json "maxResults" FargateProfilesRequestMaxResults.of_json in
-      let clusterName = field_map_exn json "clusterName" String_.of_json in
+        field_map json__ "maxResults"
+          FargateProfilesRequestMaxResults.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
       make ?nextToken ?maxResults ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the Fargate profiles associated with the specified cluster in your Amazon Web Services account in the specified Region."]
+       "Lists the Fargate profiles associated with the specified cluster in your Amazon Web Services account in the specified Amazon Web Services Region."]
+module ListEksAnywhereSubscriptionsResponse =
+  struct
+    type nonrec t =
+      {
+      subscriptions: EksAnywhereSubscriptionList.t option
+        [@ocaml.doc
+          "A list of all subscription objects in the region, filtered by includeStatus and paginated by nextToken and maxResults."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value to include in a future ListEksAnywhereSubscriptions request. When the results of a ListEksAnywhereSubscriptions request exceed maxResults, you can use this value to retrieve the next page of results. This value is null when there are no more results to return."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ServerException of ServerException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?subscriptions =
+      fun ?nextToken -> fun () -> { subscriptions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("subscriptions",
+           (Option.map x.subscriptions
+              ~f:EksAnywhereSubscriptionList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let subscriptions =
+        (Option.map ~f:EksAnywhereSubscriptionList.of_xml)
+          (Xml.child xml_arg0 "subscriptions") in
+      make ?nextToken ?subscriptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let subscriptions =
+        field_map json__ "subscriptions" EksAnywhereSubscriptionList.of_json in
+      make ?nextToken ?subscriptions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Displays the full description of the subscription."]
+module ListEksAnywhereSubscriptionsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: ListEksAnywhereSubscriptionsRequestMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of cluster results returned by ListEksAnywhereSubscriptions in paginated output. When you use this parameter, ListEksAnywhereSubscriptions returns only maxResults results in a single page along with a nextToken response element. You can see the remaining results of the initial request by sending another ListEksAnywhereSubscriptions request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, ListEksAnywhereSubscriptions returns up to 10 results and a nextToken value if applicable."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value returned from a previous paginated ListEksAnywhereSubscriptions request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value."];
+      includeStatus: EksAnywhereSubscriptionStatusValues.t option
+        [@ocaml.doc "An array of subscription statuses to filter on."]}
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ?includeStatus ->
+          fun () -> { maxResults; nextToken; includeStatus }
+    let to_value x =
+      structure_to_value
+        [("maxResults",
+           (Option.map x.maxResults
+              ~f:ListEksAnywhereSubscriptionsRequestMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("includeStatus",
+          (Option.map x.includeStatus
+             ~f:EksAnywhereSubscriptionStatusValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let includeStatus =
+        (Option.map ~f:EksAnywhereSubscriptionStatusValues.of_xml)
+          (Xml.child xml_arg0 "includeStatus") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:ListEksAnywhereSubscriptionsRequestMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      make ?includeStatus ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let includeStatus =
+        field_map json__ "includeStatus"
+          EksAnywhereSubscriptionStatusValues.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          ListEksAnywhereSubscriptionsRequestMaxResults.of_json in
+      make ?includeStatus ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Displays the full description of the subscription."]
 module ListClustersResponse =
   struct
     type nonrec t =
       {
       clusters: StringList.t option
         [@ocaml.doc
-          "A list of all of the clusters for your account in the specified Region."];
+          "A list of all of the clusters for your account in the specified Amazon Web Services Region ."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value to include in a future ListClusters request. When the results of a ListClusters request exceed maxResults, you can use this value to retrieve the next page of results. This value is null when there are no more results to return."]}
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
     type nonrec error =
       [ `ClientException of ClientException.t 
       | `InvalidParameterException of InvalidParameterException.t 
@@ -6186,26 +13192,26 @@ module ListClustersResponse =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "clusters") in
       make ?nextToken ?clusters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let clusters = field_map json "clusters" StringList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let clusters = field_map json__ "clusters" StringList.of_json in
       make ?nextToken ?clusters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the Amazon EKS clusters in your Amazon Web Services account in the specified Region."]
+       "Lists the Amazon EKS clusters in your Amazon Web Services account in the specified Amazon Web Services Region."]
 module ListClustersRequest =
   struct
     type nonrec t =
       {
       maxResults: ListClustersRequestMaxResults.t option
         [@ocaml.doc
-          "The maximum number of cluster results returned by ListClusters in paginated output. When you use this parameter, ListClusters returns only maxResults results in a single page along with a nextToken response element. You can see the remaining results of the initial request by sending another ListClusters request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, ListClusters returns up to 100 results and a nextToken value if applicable."];
+          "The maximum number of results, returned in paginated output. You receive maxResults in a single page, along with a nextToken response element. You can see the remaining results of the initial request by sending another request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, 100 results and a nextToken value, if applicable, are returned."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value returned from a previous paginated ListClusters request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."];
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."];
       include_: IncludeClustersList.t option
         [@ocaml.doc
-          "Indicates whether external clusters are included in the returned list. Use 'all' to return connected clusters, or blank to return only Amazon EKS clusters. 'all' must be in lowercase otherwise an error occurs."]}
+          "Indicates whether external clusters are included in the returned list. Use 'all' to return https://docs.aws.amazon.com/eks/latest/userguide/eks-connector.htmlconnected clusters, or blank to return only Amazon EKS clusters. 'all' must be in lowercase otherwise an error occurs."]}
     let make ?maxResults =
       fun ?nextToken ->
         fun ?include_ -> fun () -> { maxResults; nextToken; include_ }
@@ -6227,23 +13233,287 @@ module ListClustersRequest =
           (Xml.child xml_arg0 "maxResults") in
       make ?include_ ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let include_ = field_map json "include" IncludeClustersList.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let include_ = field_map json__ "include" IncludeClustersList.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let maxResults =
-        field_map json "maxResults" ListClustersRequestMaxResults.of_json in
+        field_map json__ "maxResults" ListClustersRequestMaxResults.of_json in
       make ?include_ ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the Amazon EKS clusters in your Amazon Web Services account in the specified Region."]
+       "Lists the Amazon EKS clusters in your Amazon Web Services account in the specified Amazon Web Services Region."]
+module ListCapabilitiesResponse =
+  struct
+    type nonrec t =
+      {
+      capabilities: CapabilitySummaryList.t option
+        [@ocaml.doc
+          "A list of capability summary objects, each containing basic information about a capability including its name, ARN, type, status, version, and timestamps."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value to include in a future ListCapabilities request. When the results of a ListCapabilities request exceed maxResults, you can use this value to retrieve the next page of results. This value is null when there are no more results to return."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?capabilities =
+      fun ?nextToken -> fun () -> { capabilities; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("capabilities",
+           (Option.map x.capabilities ~f:CapabilitySummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let capabilities =
+        (Option.map ~f:CapabilitySummaryList.of_xml)
+          (Xml.child xml_arg0 "capabilities") in
+      make ?nextToken ?capabilities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let capabilities =
+        field_map json__ "capabilities" CapabilitySummaryList.of_json in
+      make ?nextToken ?capabilities ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all managed capabilities in your Amazon EKS cluster. You can use this operation to get an overview of all capabilities and their current status."]
+module ListCapabilitiesRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t
+        [@ocaml.doc
+          "The name of the Amazon EKS cluster for which you want to list capabilities."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return."];
+      maxResults: ListCapabilitiesRequestMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return in a single call. To retrieve the remaining results, make another call with the returned nextToken value. If you don't specify a value, the default is 100 results."]}
+    let context_ = "ListCapabilitiesRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~clusterName -> fun () -> { nextToken; maxResults; clusterName }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:ListCapabilitiesRequestMaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:ListCapabilitiesRequestMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?maxResults ?nextToken ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "maxResults"
+          ListCapabilitiesRequestMaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ?maxResults ?nextToken ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all managed capabilities in your Amazon EKS cluster. You can use this operation to get an overview of all capabilities and their current status."]
+module ListAssociatedAccessPoliciesResponse =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t option [@ocaml.doc "The name of your cluster."];
+      principalArn: String_.t option
+        [@ocaml.doc "The ARN of the IAM principal for the AccessEntry."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."];
+      associatedAccessPolicies: AssociatedAccessPoliciesList.t option
+        [@ocaml.doc
+          "The list of access policies associated with the access entry."]}
+    type nonrec error =
+      [ `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?clusterName =
+      fun ?principalArn ->
+        fun ?nextToken ->
+          fun ?associatedAccessPolicies ->
+            fun () ->
+              {
+                clusterName;
+                principalArn;
+                nextToken;
+                associatedAccessPolicies
+              }
+    let error_of_json name json =
+      match name with
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("clusterName", (Option.map x.clusterName ~f:String_.to_value));
+        ("principalArn", (Option.map x.principalArn ~f:String_.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("associatedAccessPolicies",
+          (Option.map x.associatedAccessPolicies
+             ~f:AssociatedAccessPoliciesList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let associatedAccessPolicies =
+        (Option.map ~f:AssociatedAccessPoliciesList.of_xml)
+          (Xml.child xml_arg0 "associatedAccessPolicies") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let principalArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "principalArn") in
+      let clusterName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterName") in
+      make ?associatedAccessPolicies ?nextToken ?principalArn ?clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let associatedAccessPolicies =
+        field_map json__ "associatedAccessPolicies"
+          AssociatedAccessPoliciesList.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let principalArn = field_map json__ "principalArn" String_.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
+      make ?associatedAccessPolicies ?nextToken ?principalArn ?clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the access policies associated with an access entry."]
+module ListAssociatedAccessPoliciesRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
+      principalArn: String_.t
+        [@ocaml.doc "The ARN of the IAM principal for the AccessEntry."];
+      maxResults: ListAssociatedAccessPoliciesRequestMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results, returned in paginated output. You receive maxResults in a single page, along with a nextToken response element. You can see the remaining results of the initial request by sending another request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, 100 results and a nextToken value, if applicable, are returned."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
+    let context_ = "ListAssociatedAccessPoliciesRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~clusterName ->
+          fun ~principalArn ->
+            fun () -> { maxResults; nextToken; clusterName; principalArn }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("principalArn", (Some (String_.to_value x.principalArn)));
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:ListAssociatedAccessPoliciesRequestMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:ListAssociatedAccessPoliciesRequestMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let principalArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "principalArn") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?nextToken ?maxResults ~principalArn ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          ListAssociatedAccessPoliciesRequestMaxResults.of_json in
+      let principalArn = field_map_exn json__ "principalArn" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ?nextToken ?maxResults ~principalArn ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the access policies associated with an access entry."]
 module ListAddonsResponse =
   struct
     type nonrec t =
       {
-      addons: StringList.t option [@ocaml.doc "A list of available add-ons."];
+      addons: StringList.t option [@ocaml.doc "A list of installed add-ons."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value returned from a previous paginated ListAddonsResponse where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
+          "The nextToken value to include in a future ListAddons request. When the results of a ListAddons request exceed maxResults, you can use this value to retrieve the next page of results. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
     type nonrec error =
       [ `ClientException of ClientException.t 
       | `InvalidParameterException of InvalidParameterException.t 
@@ -6316,23 +13586,23 @@ module ListAddonsResponse =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "addons") in
       make ?nextToken ?addons ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let addons = field_map json "addons" StringList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let addons = field_map json__ "addons" StringList.of_json in
       make ?nextToken ?addons ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the available add-ons."]
+  end[@@ocaml.doc "Lists the installed add-ons."]
 module ListAddonsRequest =
   struct
     type nonrec t =
       {
-      clusterName: ClusterName.t [@ocaml.doc "The name of the cluster."];
+      clusterName: ClusterName.t [@ocaml.doc "The name of your cluster."];
       maxResults: ListAddonsRequestMaxResults.t option
         [@ocaml.doc
-          "The maximum number of add-on results returned by ListAddonsRequest in paginated output. When you use this parameter, ListAddonsRequest returns only maxResults results in a single page along with a nextToken response element. You can see the remaining results of the initial request by sending another ListAddonsRequest request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, ListAddonsRequest returns up to 100 results and a nextToken value, if applicable."];
+          "The maximum number of results, returned in paginated output. You receive maxResults in a single page, along with a nextToken response element. You can see the remaining results of the initial request by sending another request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, 100 results and a nextToken value, if applicable, are returned."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value returned from a previous paginated ListAddonsRequest where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
     let context_ = "ListAddonsRequest"
     let make ?maxResults =
       fun ?nextToken ->
@@ -6354,14 +13624,246 @@ module ListAddonsRequest =
         ClusterName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?nextToken ?maxResults ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let maxResults =
-        field_map json "maxResults" ListAddonsRequestMaxResults.of_json in
-      let clusterName = field_map_exn json "clusterName" ClusterName.of_json in
+        field_map json__ "maxResults" ListAddonsRequestMaxResults.of_json in
+      let clusterName =
+        field_map_exn json__ "clusterName" ClusterName.of_json in
       make ?nextToken ?maxResults ~clusterName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the available add-ons."]
+  end[@@ocaml.doc "Lists the installed add-ons."]
+module ListAccessPoliciesResponse =
+  struct
+    type nonrec t =
+      {
+      accessPolicies: AccessPoliciesList.t option
+        [@ocaml.doc
+          "The list of available access policies. You can't view the contents of an access policy using the API. To view the contents, see Access policy permissions in the Amazon EKS User Guide."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
+    type nonrec error =
+      [ `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accessPolicies =
+      fun ?nextToken -> fun () -> { accessPolicies; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("accessPolicies",
+           (Option.map x.accessPolicies ~f:AccessPoliciesList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let accessPolicies =
+        (Option.map ~f:AccessPoliciesList.of_xml)
+          (Xml.child xml_arg0 "accessPolicies") in
+      make ?nextToken ?accessPolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let accessPolicies =
+        field_map json__ "accessPolicies" AccessPoliciesList.of_json in
+      make ?nextToken ?accessPolicies ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the available access policies."]
+module ListAccessPoliciesRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: ListAccessPoliciesRequestMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results, returned in paginated output. You receive maxResults in a single page, along with a nextToken response element. You can see the remaining results of the initial request by sending another request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, 100 results and a nextToken value, if applicable, are returned."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("maxResults",
+           (Option.map x.maxResults
+              ~f:ListAccessPoliciesRequestMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:ListAccessPoliciesRequestMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          ListAccessPoliciesRequestMaxResults.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the available access policies."]
+module ListAccessEntriesResponse =
+  struct
+    type nonrec t =
+      {
+      accessEntries: StringList.t option
+        [@ocaml.doc "The list of access entries that exist for the cluster."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accessEntries =
+      fun ?nextToken -> fun () -> { accessEntries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("accessEntries",
+           (Option.map x.accessEntries ~f:StringList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let accessEntries =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "accessEntries") in
+      make ?nextToken ?accessEntries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let accessEntries = field_map json__ "accessEntries" StringList.of_json in
+      make ?nextToken ?accessEntries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the access entries for your cluster."]
+module ListAccessEntriesRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
+      associatedPolicyArn: String_.t option
+        [@ocaml.doc
+          "The ARN of an AccessPolicy. When you specify an access policy ARN, only the access entries associated to that access policy are returned. For a list of available policy ARNs, use ListAccessPolicies."];
+      maxResults: ListAccessEntriesRequestMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results, returned in paginated output. You receive maxResults in a single page, along with a nextToken response element. You can see the remaining results of the initial request by sending another request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, 100 results and a nextToken value, if applicable, are returned."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
+    let context_ = "ListAccessEntriesRequest"
+    let make ?associatedPolicyArn =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~clusterName ->
+            fun () ->
+              { associatedPolicyArn; maxResults; nextToken; clusterName }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("associatedPolicyArn",
+          (Option.map x.associatedPolicyArn ~f:String_.to_value));
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:ListAccessEntriesRequestMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:ListAccessEntriesRequestMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let associatedPolicyArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "associatedPolicyArn") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?nextToken ?maxResults ?associatedPolicyArn ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          ListAccessEntriesRequestMaxResults.of_json in
+      let associatedPolicyArn =
+        field_map json__ "associatedPolicyArn" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ?nextToken ?maxResults ?associatedPolicyArn ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the access entries for your cluster."]
 module DisassociateIdentityProviderConfigResponse =
   struct
     type nonrec t = {
@@ -6373,6 +13875,7 @@ module DisassociateIdentityProviderConfigResponse =
       | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?update = fun () -> { update }
     let error_of_json name json =
@@ -6387,6 +13890,8 @@ module DisassociateIdentityProviderConfigResponse =
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -6402,6 +13907,8 @@ module DisassociateIdentityProviderConfigResponse =
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -6430,6 +13937,10 @@ module DisassociateIdentityProviderConfigResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -6444,21 +13955,20 @@ module DisassociateIdentityProviderConfigResponse =
         (Option.map ~f:Update.of_xml) (Xml.child xml_arg0 "update") in
       make ?update ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let update = field_map json "update" Update.of_json in make ?update ()
+    let of_json json__ =
+      let update = field_map json__ "update" Update.of_json in
+      make ?update ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disassociates an identity provider configuration from a cluster. If you disassociate an identity provider from your cluster, users included in the provider can no longer access the cluster. However, you can still access the cluster with Amazon Web Services IAM users."]
+       "Disassociates an identity provider configuration from a cluster. If you disassociate an identity provider from your cluster, users included in the provider can no longer access the cluster. However, you can still access the cluster with IAM principals."]
 module DisassociateIdentityProviderConfigRequest =
   struct
     type nonrec t =
       {
-      clusterName: String_.t
-        [@ocaml.doc
-          "The name of the cluster to disassociate an identity provider from."];
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
       identityProviderConfig: IdentityProviderConfig.t
         [@ocaml.doc
-          "An object that represents an identity provider configuration."];
+          "An object representing an identity provider configuration."];
       clientRequestToken: String_.t option
         [@ocaml.doc
           "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
@@ -6487,17 +13997,109 @@ module DisassociateIdentityProviderConfigRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?clientRequestToken ~identityProviderConfig ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map json "clientRequestToken" String_.of_json in
+        field_map json__ "clientRequestToken" String_.of_json in
       let identityProviderConfig =
-        field_map_exn json "identityProviderConfig"
+        field_map_exn json__ "identityProviderConfig"
           IdentityProviderConfig.of_json in
-      let clusterName = field_map_exn json "clusterName" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
       make ?clientRequestToken ~identityProviderConfig ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disassociates an identity provider configuration from a cluster. If you disassociate an identity provider from your cluster, users included in the provider can no longer access the cluster. However, you can still access the cluster with Amazon Web Services IAM users."]
+       "Disassociates an identity provider configuration from a cluster. If you disassociate an identity provider from your cluster, users included in the provider can no longer access the cluster. However, you can still access the cluster with IAM principals."]
+module DisassociateAccessPolicyResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Disassociates an access policy from an access entry."]
+module DisassociateAccessPolicyRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
+      principalArn: String_.t
+        [@ocaml.doc "The ARN of the IAM principal for the AccessEntry."];
+      policyArn: String_.t
+        [@ocaml.doc
+          "The ARN of the policy to disassociate from the access entry. For a list of associated policies ARNs, use ListAssociatedAccessPolicies."]}
+    let context_ = "DisassociateAccessPolicyRequest"
+    let make ~clusterName =
+      fun ~principalArn ->
+        fun ~policyArn -> fun () -> { clusterName; principalArn; policyArn }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("principalArn", (Some (String_.to_value x.principalArn)));
+        ("policyArn", (Some (String_.to_value x.policyArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policyArn =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policyArn") in
+      let principalArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "principalArn") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~policyArn ~principalArn ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policyArn = field_map_exn json__ "policyArn" String_.of_json in
+      let principalArn = field_map_exn json__ "principalArn" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ~policyArn ~principalArn ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Disassociates an access policy from an access entry."]
 module DescribeUpdateResponse =
   struct
     type nonrec t =
@@ -6564,11 +14166,12 @@ module DescribeUpdateResponse =
         (Option.map ~f:Update.of_xml) (Xml.child xml_arg0 "update") in
       make ?update ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let update = field_map json "update" Update.of_json in make ?update ()
+    let of_json json__ =
+      let update = field_map json__ "update" Update.of_json in
+      make ?update ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns descriptive information about an update against your Amazon EKS cluster or associated managed node group. When the status of the update is Succeeded, the update is complete. If an update fails, the status is Failed, and an error detail explains the reason for the failure."]
+       "Describes an update to an Amazon EKS resource. When the status of the update is Successful, the update is complete. If an update fails, the status is Failed, and an error detail explains the reason for the failure."]
 module DescribeUpdateRequest =
   struct
     type nonrec t =
@@ -6579,24 +14182,32 @@ module DescribeUpdateRequest =
       updateId: String_.t [@ocaml.doc "The ID of the update to describe."];
       nodegroupName: String_.t option
         [@ocaml.doc
-          "The name of the Amazon EKS node group associated with the update."];
+          "The name of the Amazon EKS node group associated with the update. This parameter is required if the update is a node group update."];
       addonName: String_.t option
         [@ocaml.doc
-          "The name of the add-on. The name must match one of the names returned by ListAddons ."]}
+          "The name of the add-on. The name must match one of the names returned by ListAddons . This parameter is required if the update is an add-on update."];
+      capabilityName: String_.t option
+        [@ocaml.doc
+          "The name of the capability for which you want to describe updates."]}
     let context_ = "DescribeUpdateRequest"
     let make ?nodegroupName =
       fun ?addonName ->
-        fun ~name ->
-          fun ~updateId ->
-            fun () -> { nodegroupName; addonName; name; updateId }
+        fun ?capabilityName ->
+          fun ~name ->
+            fun ~updateId ->
+              fun () ->
+                { nodegroupName; addonName; capabilityName; name; updateId }
     let to_value x =
       structure_to_value
         [("name", (Some (String_.to_value x.name)));
         ("updateId", (Some (String_.to_value x.updateId)));
         ("nodegroupName", (Option.map x.nodegroupName ~f:String_.to_value));
-        ("addonName", (Option.map x.addonName ~f:String_.to_value))]
+        ("addonName", (Option.map x.addonName ~f:String_.to_value));
+        ("capabilityName", (Option.map x.capabilityName ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let capabilityName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "capabilityName") in
       let addonName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "addonName") in
       let nodegroupName =
@@ -6605,17 +14216,128 @@ module DescribeUpdateRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "updateId") in
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?addonName ?nodegroupName ~updateId ~name ()
+      make ?capabilityName ?addonName ?nodegroupName ~updateId ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let addonName = field_map json "addonName" String_.of_json in
-      let nodegroupName = field_map json "nodegroupName" String_.of_json in
-      let updateId = field_map_exn json "updateId" String_.of_json in
-      let name = field_map_exn json "name" String_.of_json in
-      make ?addonName ?nodegroupName ~updateId ~name ()
+    let of_json json__ =
+      let capabilityName = field_map json__ "capabilityName" String_.of_json in
+      let addonName = field_map json__ "addonName" String_.of_json in
+      let nodegroupName = field_map json__ "nodegroupName" String_.of_json in
+      let updateId = field_map_exn json__ "updateId" String_.of_json in
+      let name = field_map_exn json__ "name" String_.of_json in
+      make ?capabilityName ?addonName ?nodegroupName ~updateId ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes an update request."]
+module DescribePodIdentityAssociationResponse =
+  struct
+    type nonrec t =
+      {
+      association: PodIdentityAssociation.t option
+        [@ocaml.doc
+          "The full description of the EKS Pod Identity association."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?association = fun () -> { association }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("association",
+           (Option.map x.association ~f:PodIdentityAssociation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let association =
+        (Option.map ~f:PodIdentityAssociation.of_xml)
+          (Xml.child xml_arg0 "association") in
+      make ?association ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let association =
+        field_map json__ "association" PodIdentityAssociation.of_json in
+      make ?association ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns descriptive information about an update against your Amazon EKS cluster or associated managed node group. When the status of the update is Succeeded, the update is complete. If an update fails, the status is Failed, and an error detail explains the reason for the failure."]
+       "Returns descriptive information about an EKS Pod Identity association. This action requires the ID of the association. You can get the ID from the response to the CreatePodIdentityAssocation for newly created associations. Or, you can list the IDs for associations with ListPodIdentityAssociations and filter the list by namespace or service account."]
+module DescribePodIdentityAssociationRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t
+        [@ocaml.doc "The name of the cluster that the association is in."];
+      associationId: String_.t
+        [@ocaml.doc
+          "The ID of the association that you want the description of."]}
+    let context_ = "DescribePodIdentityAssociationRequest"
+    let make ~clusterName =
+      fun ~associationId -> fun () -> { clusterName; associationId }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("associationId", (Some (String_.to_value x.associationId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let associationId =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "associationId") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~associationId ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let associationId =
+        field_map_exn json__ "associationId" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ~associationId ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns descriptive information about an EKS Pod Identity association. This action requires the ID of the association. You can get the ID from the response to the CreatePodIdentityAssocation for newly created associations. Or, you can list the IDs for associations with ListPodIdentityAssociations and filter the list by namespace or service account."]
 module DescribeNodegroupResponse =
   struct
     type nonrec t =
@@ -6693,19 +14415,16 @@ module DescribeNodegroupResponse =
         (Option.map ~f:Nodegroup.of_xml) (Xml.child xml_arg0 "nodegroup") in
       make ?nodegroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nodegroup = field_map json "nodegroup" Nodegroup.of_json in
+    let of_json json__ =
+      let nodegroup = field_map json__ "nodegroup" Nodegroup.of_json in
       make ?nodegroup ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns descriptive information about an Amazon EKS node group."]
+  end[@@ocaml.doc "Describes a managed node group."]
 module DescribeNodegroupRequest =
   struct
     type nonrec t =
       {
-      clusterName: String_.t
-        [@ocaml.doc
-          "The name of the Amazon EKS cluster associated with the node group."];
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
       nodegroupName: String_.t
         [@ocaml.doc "The name of the node group to describe."]}
     let context_ = "DescribeNodegroupRequest"
@@ -6724,13 +14443,236 @@ module DescribeNodegroupRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~nodegroupName ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nodegroupName = field_map_exn json "nodegroupName" String_.of_json in
-      let clusterName = field_map_exn json "clusterName" String_.of_json in
+    let of_json json__ =
+      let nodegroupName =
+        field_map_exn json__ "nodegroupName" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
       make ~nodegroupName ~clusterName ()
     let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a managed node group."]
+module DescribeInsightsRefreshResponse =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc
+          "The message associated with the insights refresh operation."];
+      status: InsightsRefreshStatus.t option
+        [@ocaml.doc "The current status of the insights refresh operation."];
+      startedAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time when the insights refresh operation started."];
+      endedAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time when the insights refresh operation ended."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?message =
+      fun ?status ->
+        fun ?startedAt ->
+          fun ?endedAt -> fun () -> { message; status; startedAt; endedAt }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("status", (Option.map x.status ~f:InsightsRefreshStatus.to_value));
+        ("startedAt", (Option.map x.startedAt ~f:Timestamp.to_value));
+        ("endedAt", (Option.map x.endedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endedAt") in
+      let startedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startedAt") in
+      let status =
+        (Option.map ~f:InsightsRefreshStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?endedAt ?startedAt ?status ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endedAt = field_map json__ "endedAt" Timestamp.of_json in
+      let startedAt = field_map json__ "startedAt" Timestamp.of_json in
+      let status = field_map json__ "status" InsightsRefreshStatus.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?endedAt ?startedAt ?status ?message ()
+    let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns descriptive information about an Amazon EKS node group."]
+       "Returns the status of the latest on-demand cluster insights refresh operation."]
+module DescribeInsightsRefreshRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t
+        [@ocaml.doc
+          "The name of the cluster associated with the insights refresh operation."]}
+    let context_ = "DescribeInsightsRefreshRequest"
+    let make ~clusterName = fun () -> { clusterName }
+    let to_value x =
+      structure_to_value [("name", (Some (String_.to_value x.clusterName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the status of the latest on-demand cluster insights refresh operation."]
+module DescribeInsightResponse =
+  struct
+    type nonrec t =
+      {
+      insight: Insight.t option
+        [@ocaml.doc "The full description of the insight."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?insight = fun () -> { insight }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("insight", (Option.map x.insight ~f:Insight.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let insight =
+        (Option.map ~f:Insight.of_xml) (Xml.child xml_arg0 "insight") in
+      make ?insight ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let insight = field_map json__ "insight" Insight.of_json in
+      make ?insight ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns details about an insight that you specify using its ID."]
+module DescribeInsightRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t
+        [@ocaml.doc "The name of the cluster to describe the insight for."];
+      id: String_.t [@ocaml.doc "The identity of the insight to describe."]}
+    let context_ = "DescribeInsightRequest"
+    let make ~clusterName = fun ~id -> fun () -> { clusterName; id }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("id", (Some (String_.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~id ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ~id ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns details about an insight that you specify using its ID."]
 module DescribeIdentityProviderConfigResponse =
   struct
     type nonrec t =
@@ -6812,24 +14754,21 @@ module DescribeIdentityProviderConfigResponse =
           (Xml.child xml_arg0 "identityProviderConfig") in
       make ?identityProviderConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityProviderConfig =
-        field_map json "identityProviderConfig"
+        field_map json__ "identityProviderConfig"
           IdentityProviderConfigResponse.of_json in
       make ?identityProviderConfig ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns descriptive information about an identity provider configuration."]
+  end[@@ocaml.doc "Describes an identity provider configuration."]
 module DescribeIdentityProviderConfigRequest =
   struct
     type nonrec t =
       {
-      clusterName: String_.t
-        [@ocaml.doc
-          "The cluster name that the identity provider configuration is associated to."];
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
       identityProviderConfig: IdentityProviderConfig.t
         [@ocaml.doc
-          "An object that represents an identity provider configuration."]}
+          "An object representing an identity provider configuration."]}
     let context_ = "DescribeIdentityProviderConfigRequest"
     let make ~clusterName =
       fun ~identityProviderConfig ->
@@ -6848,15 +14787,14 @@ module DescribeIdentityProviderConfigRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~identityProviderConfig ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityProviderConfig =
-        field_map_exn json "identityProviderConfig"
+        field_map_exn json__ "identityProviderConfig"
           IdentityProviderConfig.of_json in
-      let clusterName = field_map_exn json "clusterName" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
       make ~identityProviderConfig ~clusterName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns descriptive information about an identity provider configuration."]
+  end[@@ocaml.doc "Describes an identity provider configuration."]
 module DescribeFargateProfileResponse =
   struct
     type nonrec t =
@@ -6925,20 +14863,17 @@ module DescribeFargateProfileResponse =
           (Xml.child xml_arg0 "fargateProfile") in
       make ?fargateProfile ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fargateProfile =
-        field_map json "fargateProfile" FargateProfile.of_json in
+        field_map json__ "fargateProfile" FargateProfile.of_json in
       make ?fargateProfile ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns descriptive information about an Fargate profile."]
+  end[@@ocaml.doc "Describes an Fargate profile."]
 module DescribeFargateProfileRequest =
   struct
     type nonrec t =
       {
-      clusterName: String_.t
-        [@ocaml.doc
-          "The name of the Amazon EKS cluster associated with the Fargate profile."];
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
       fargateProfileName: String_.t
         [@ocaml.doc "The name of the Fargate profile to describe."]}
     let context_ = "DescribeFargateProfileRequest"
@@ -6959,14 +14894,280 @@ module DescribeFargateProfileRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~fargateProfileName ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fargateProfileName =
-        field_map_exn json "fargateProfileName" String_.of_json in
-      let clusterName = field_map_exn json "clusterName" String_.of_json in
+        field_map_exn json__ "fargateProfileName" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
       make ~fargateProfileName ~clusterName ()
     let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes an Fargate profile."]
+module DescribeEksAnywhereSubscriptionResponse =
+  struct
+    type nonrec t =
+      {
+      subscription: EksAnywhereSubscription.t option
+        [@ocaml.doc "The full description of the subscription."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?subscription = fun () -> { subscription }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("subscription",
+           (Option.map x.subscription ~f:EksAnywhereSubscription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subscription =
+        (Option.map ~f:EksAnywhereSubscription.of_xml)
+          (Xml.child xml_arg0 "subscription") in
+      make ?subscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subscription =
+        field_map json__ "subscription" EksAnywhereSubscription.of_json in
+      make ?subscription ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns descriptive information about a subscription."]
+module DescribeEksAnywhereSubscriptionRequest =
+  struct
+    type nonrec t =
+      {
+      id: String_.t [@ocaml.doc "The ID of the subscription."]}
+    let context_ = "DescribeEksAnywhereSubscriptionRequest"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value [("id", (Some (String_.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" String_.of_json in make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns descriptive information about a subscription."]
+module DescribeClusterVersionsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: String_.t option
+        [@ocaml.doc "Pagination token for the next set of results."];
+      clusterVersions: ClusterVersionList.t option
+        [@ocaml.doc "List of cluster version information objects."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?clusterVersions -> fun () -> { nextToken; clusterVersions }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("clusterVersions",
+          (Option.map x.clusterVersions ~f:ClusterVersionList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clusterVersions =
+        (Option.map ~f:ClusterVersionList.of_xml)
+          (Xml.child xml_arg0 "clusterVersions") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ?clusterVersions ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clusterVersions =
+        field_map json__ "clusterVersions" ClusterVersionList.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      make ?clusterVersions ?nextToken ()
+    let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns descriptive information about an Fargate profile."]
+       "Lists available Kubernetes versions for Amazon EKS clusters."]
+module DescribeClusterVersionsRequest =
+  struct
+    type nonrec t =
+      {
+      clusterType: String_.t option
+        [@ocaml.doc "The type of cluster to filter versions by."];
+      maxResults: DescribeClusterVersionMaxResults.t option
+        [@ocaml.doc "Maximum number of results to return."];
+      nextToken: String_.t option
+        [@ocaml.doc "Pagination token for the next set of results."];
+      defaultOnly: BoxedBoolean.t option
+        [@ocaml.doc "Filter to show only default versions."];
+      includeAll: BoxedBoolean.t option
+        [@ocaml.doc "Include all available versions in the response."];
+      clusterVersions: StringList.t option
+        [@ocaml.doc "List of specific cluster versions to describe."];
+      status: ClusterVersionStatus.t option
+        [@ocaml.doc
+          "This field is deprecated. Use versionStatus instead, as that field matches for input and output of this action. Filter versions by their current status."];
+      versionStatus: VersionStatus.t option
+        [@ocaml.doc "Filter versions by their current status."]}
+    let make ?clusterType =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ?defaultOnly ->
+            fun ?includeAll ->
+              fun ?clusterVersions ->
+                fun ?status ->
+                  fun ?versionStatus ->
+                    fun () ->
+                      {
+                        clusterType;
+                        maxResults;
+                        nextToken;
+                        defaultOnly;
+                        includeAll;
+                        clusterVersions;
+                        status;
+                        versionStatus
+                      }
+    let to_value x =
+      structure_to_value
+        [("clusterType", (Option.map x.clusterType ~f:String_.to_value));
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:DescribeClusterVersionMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("defaultOnly", (Option.map x.defaultOnly ~f:BoxedBoolean.to_value));
+        ("includeAll", (Option.map x.includeAll ~f:BoxedBoolean.to_value));
+        ("clusterVersions",
+          (Option.map x.clusterVersions ~f:StringList.to_value));
+        ("status", (Option.map x.status ~f:ClusterVersionStatus.to_value));
+        ("versionStatus",
+          (Option.map x.versionStatus ~f:VersionStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let versionStatus =
+        (Option.map ~f:VersionStatus.of_xml)
+          (Xml.child xml_arg0 "versionStatus") in
+      let status =
+        (Option.map ~f:ClusterVersionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let clusterVersions =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "clusterVersions") in
+      let includeAll =
+        (Option.map ~f:BoxedBoolean.of_xml) (Xml.child xml_arg0 "includeAll") in
+      let defaultOnly =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "defaultOnly") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:DescribeClusterVersionMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let clusterType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterType") in
+      make ?versionStatus ?status ?clusterVersions ?includeAll ?defaultOnly
+        ?nextToken ?maxResults ?clusterType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let versionStatus =
+        field_map json__ "versionStatus" VersionStatus.of_json in
+      let status = field_map json__ "status" ClusterVersionStatus.of_json in
+      let clusterVersions =
+        field_map json__ "clusterVersions" StringList.of_json in
+      let includeAll = field_map json__ "includeAll" BoxedBoolean.of_json in
+      let defaultOnly = field_map json__ "defaultOnly" BoxedBoolean.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          DescribeClusterVersionMaxResults.of_json in
+      let clusterType = field_map json__ "clusterType" String_.of_json in
+      make ?versionStatus ?status ?clusterVersions ?includeAll ?defaultOnly
+        ?nextToken ?maxResults ?clusterType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists available Kubernetes versions for Amazon EKS clusters."]
 module DescribeClusterResponse =
   struct
     type nonrec t =
@@ -7035,17 +15236,17 @@ module DescribeClusterResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns descriptive information about an Amazon EKS cluster. The API server endpoint and certificate authority data returned by this operation are required for kubelet and kubectl to communicate with your Kubernetes API server. For more information, see Create a kubeconfig for Amazon EKS. The API server endpoint and certificate authority data aren't available until the cluster reaches the ACTIVE state."]
+       "Describes an Amazon EKS cluster. The API server endpoint and certificate authority data returned by this operation are required for kubelet and kubectl to communicate with your Kubernetes API server. For more information, see Creating or updating a kubeconfig file for an Amazon EKS cluster. The API server endpoint and certificate authority data aren't available until the cluster reaches the ACTIVE state."]
 module DescribeClusterRequest =
   struct
     type nonrec t =
       {
-      name: String_.t [@ocaml.doc "The name of the cluster to describe."]}
+      name: String_.t [@ocaml.doc "The name of your cluster."]}
     let context_ = "DescribeClusterRequest"
     let make ~name = fun () -> { name }
     let to_value x =
@@ -7056,21 +15257,129 @@ module DescribeClusterRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" String_.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns descriptive information about an Amazon EKS cluster. The API server endpoint and certificate authority data returned by this operation are required for kubelet and kubectl to communicate with your Kubernetes API server. For more information, see Create a kubeconfig for Amazon EKS. The API server endpoint and certificate authority data aren't available until the cluster reaches the ACTIVE state."]
+       "Describes an Amazon EKS cluster. The API server endpoint and certificate authority data returned by this operation are required for kubelet and kubectl to communicate with your Kubernetes API server. For more information, see Creating or updating a kubeconfig file for an Amazon EKS cluster. The API server endpoint and certificate authority data aren't available until the cluster reaches the ACTIVE state."]
+module DescribeCapabilityResponse =
+  struct
+    type nonrec t =
+      {
+      capability: Capability.t option
+        [@ocaml.doc
+          "An object containing detailed information about the capability, including its name, ARN, type, status, version, configuration, health status, and timestamps for when it was created and last modified."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?capability = fun () -> { capability }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("capability", (Option.map x.capability ~f:Capability.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capability =
+        (Option.map ~f:Capability.of_xml) (Xml.child xml_arg0 "capability") in
+      make ?capability ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capability = field_map json__ "capability" Capability.of_json in
+      make ?capability ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns detailed information about a specific managed capability in your Amazon EKS cluster, including its current status, configuration, health information, and any issues that may be affecting its operation."]
+module DescribeCapabilityRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t
+        [@ocaml.doc
+          "The name of the Amazon EKS cluster that contains the capability you want to describe."];
+      capabilityName: String_.t
+        [@ocaml.doc "The name of the capability to describe."]}
+    let context_ = "DescribeCapabilityRequest"
+    let make ~clusterName =
+      fun ~capabilityName -> fun () -> { clusterName; capabilityName }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("capabilityName", (Some (String_.to_value x.capabilityName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capabilityName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "capabilityName") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~capabilityName ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capabilityName =
+        field_map_exn json__ "capabilityName" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ~capabilityName ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns detailed information about a specific managed capability in your Amazon EKS cluster, including its current status, configuration, health information, and any issues that may be affecting its operation."]
 module DescribeAddonVersionsResponse =
   struct
     type nonrec t =
       {
       addons: Addons.t option
         [@ocaml.doc
-          "The list of available versions with Kubernetes version compatibility."];
+          "The list of available versions with Kubernetes version compatibility and other properties."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value returned from a previous paginated DescribeAddonVersionsResponse where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
+          "The nextToken value to include in a future DescribeAddonVersions request. When the results of a DescribeAddonVersions request exceed maxResults, you can use this value to retrieve the next page of results. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."]}
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -7127,33 +15436,55 @@ module DescribeAddonVersionsResponse =
         (Option.map ~f:Addons.of_xml) (Xml.child xml_arg0 "addons") in
       make ?nextToken ?addons ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let addons = field_map json "addons" Addons.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let addons = field_map json__ "addons" Addons.of_json in
       make ?nextToken ?addons ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the Kubernetes versions that the add-on can be used with."]
+       "Describes the versions for an add-on. Information such as the Kubernetes versions that you can use the add-on with, the owner, publisher, and the type of the add-on are returned."]
 module DescribeAddonVersionsRequest =
   struct
     type nonrec t =
       {
       kubernetesVersion: String_.t option
         [@ocaml.doc
-          "The Kubernetes versions that the add-on can be used with."];
+          "The Kubernetes versions that you can use the add-on with."];
       maxResults: DescribeAddonVersionsRequestMaxResults.t option
-        [@ocaml.doc "The maximum number of results to return."];
+        [@ocaml.doc
+          "The maximum number of results, returned in paginated output. You receive maxResults in a single page, along with a nextToken response element. You can see the remaining results of the initial request by sending another request with the returned nextToken value. This value can be between 1 and 100. If you don't use this parameter, 100 results and a nextToken value, if applicable, are returned."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value returned from a previous paginated DescribeAddonVersionsRequest where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."];
+          "The nextToken value returned from a previous paginated request, where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is used only to retrieve the next items in a list and not for other programmatic purposes."];
       addonName: String_.t option
         [@ocaml.doc
-          "The name of the add-on. The name must match one of the names returned by ListAddons ."]}
+          "The name of the add-on. The name must match one of the names returned by ListAddons ."];
+      types: StringList.t option
+        [@ocaml.doc
+          "The type of the add-on. For valid types, don't specify a value for this property."];
+      publishers: StringList.t option
+        [@ocaml.doc
+          "The publisher of the add-on. For valid publishers, don't specify a value for this property."];
+      owners: StringList.t option
+        [@ocaml.doc
+          "The owner of the add-on. For valid owners, don't specify a value for this property."]}
     let make ?kubernetesVersion =
       fun ?maxResults ->
         fun ?nextToken ->
           fun ?addonName ->
-            fun () -> { kubernetesVersion; maxResults; nextToken; addonName }
+            fun ?types ->
+              fun ?publishers ->
+                fun ?owners ->
+                  fun () ->
+                    {
+                      kubernetesVersion;
+                      maxResults;
+                      nextToken;
+                      addonName;
+                      types;
+                      publishers;
+                      owners
+                    }
     let to_value x =
       structure_to_value
         [("kubernetesVersion",
@@ -7162,9 +15493,18 @@ module DescribeAddonVersionsRequest =
           (Option.map x.maxResults
              ~f:DescribeAddonVersionsRequestMaxResults.to_value));
         ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("addonName", (Option.map x.addonName ~f:String_.to_value))]
+        ("addonName", (Option.map x.addonName ~f:String_.to_value));
+        ("types", (Option.map x.types ~f:StringList.to_value));
+        ("publishers", (Option.map x.publishers ~f:StringList.to_value));
+        ("owners", (Option.map x.owners ~f:StringList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let owners =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "owners") in
+      let publishers =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "publishers") in
+      let types =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "types") in
       let addonName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "addonName") in
       let nextToken =
@@ -7175,20 +15515,25 @@ module DescribeAddonVersionsRequest =
       let kubernetesVersion =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "kubernetesVersion") in
-      make ?addonName ?nextToken ?maxResults ?kubernetesVersion ()
+      make ?owners ?publishers ?types ?addonName ?nextToken ?maxResults
+        ?kubernetesVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let addonName = field_map json "addonName" String_.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let owners = field_map json__ "owners" StringList.of_json in
+      let publishers = field_map json__ "publishers" StringList.of_json in
+      let types = field_map json__ "types" StringList.of_json in
+      let addonName = field_map json__ "addonName" String_.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let maxResults =
-        field_map json "maxResults"
+        field_map json__ "maxResults"
           DescribeAddonVersionsRequestMaxResults.of_json in
       let kubernetesVersion =
-        field_map json "kubernetesVersion" String_.of_json in
-      make ?addonName ?nextToken ?maxResults ?kubernetesVersion ()
+        field_map json__ "kubernetesVersion" String_.of_json in
+      make ?owners ?publishers ?types ?addonName ?nextToken ?maxResults
+        ?kubernetesVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the Kubernetes versions that the add-on can be used with."]
+       "Describes the versions for an add-on. Information such as the Kubernetes versions that you can use the add-on with, the owner, publisher, and the type of the add-on are returned."]
 module DescribeAddonResponse =
   struct
     type nonrec t = {
@@ -7260,15 +15605,15 @@ module DescribeAddonResponse =
       let addon = (Option.map ~f:Addon.of_xml) (Xml.child xml_arg0 "addon") in
       make ?addon ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let addon = field_map json "addon" Addon.of_json in make ?addon ()
+    let of_json json__ =
+      let addon = field_map json__ "addon" Addon.of_json in make ?addon ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an Amazon EKS add-on."]
 module DescribeAddonRequest =
   struct
     type nonrec t =
       {
-      clusterName: ClusterName.t [@ocaml.doc "The name of the cluster."];
+      clusterName: ClusterName.t [@ocaml.doc "The name of your cluster."];
       addonName: String_.t
         [@ocaml.doc
           "The name of the add-on. The name must match one of the names returned by ListAddons ."]}
@@ -7287,12 +15632,242 @@ module DescribeAddonRequest =
         ClusterName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~addonName ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let addonName = field_map_exn json "addonName" String_.of_json in
-      let clusterName = field_map_exn json "clusterName" ClusterName.of_json in
+    let of_json json__ =
+      let addonName = field_map_exn json__ "addonName" String_.of_json in
+      let clusterName =
+        field_map_exn json__ "clusterName" ClusterName.of_json in
       make ~addonName ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an Amazon EKS add-on."]
+module DescribeAddonConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      addonName: String_.t option [@ocaml.doc "The name of the add-on."];
+      addonVersion: String_.t option
+        [@ocaml.doc
+          "The version of the add-on. The version must match one of the versions returned by DescribeAddonVersions ."];
+      configurationSchema: String_.t option
+        [@ocaml.doc
+          "A JSON schema that's used to validate the configuration values you provide when an add-on is created or updated."];
+      podIdentityConfiguration: AddonPodIdentityConfigurationList.t option
+        [@ocaml.doc
+          "The Kubernetes service account name used by the add-on, and any suggested IAM policies. Use this information to create an IAM Role for the add-on."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?addonName =
+      fun ?addonVersion ->
+        fun ?configurationSchema ->
+          fun ?podIdentityConfiguration ->
+            fun () ->
+              {
+                addonName;
+                addonVersion;
+                configurationSchema;
+                podIdentityConfiguration
+              }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("addonName", (Option.map x.addonName ~f:String_.to_value));
+        ("addonVersion", (Option.map x.addonVersion ~f:String_.to_value));
+        ("configurationSchema",
+          (Option.map x.configurationSchema ~f:String_.to_value));
+        ("podIdentityConfiguration",
+          (Option.map x.podIdentityConfiguration
+             ~f:AddonPodIdentityConfigurationList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let podIdentityConfiguration =
+        (Option.map ~f:AddonPodIdentityConfigurationList.of_xml)
+          (Xml.child xml_arg0 "podIdentityConfiguration") in
+      let configurationSchema =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "configurationSchema") in
+      let addonVersion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "addonVersion") in
+      let addonName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "addonName") in
+      make ?podIdentityConfiguration ?configurationSchema ?addonVersion
+        ?addonName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let podIdentityConfiguration =
+        field_map json__ "podIdentityConfiguration"
+          AddonPodIdentityConfigurationList.of_json in
+      let configurationSchema =
+        field_map json__ "configurationSchema" String_.of_json in
+      let addonVersion = field_map json__ "addonVersion" String_.of_json in
+      let addonName = field_map json__ "addonName" String_.of_json in
+      make ?podIdentityConfiguration ?configurationSchema ?addonVersion
+        ?addonName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns configuration options."]
+module DescribeAddonConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      addonName: String_.t
+        [@ocaml.doc
+          "The name of the add-on. The name must match one of the names returned by DescribeAddonVersions."];
+      addonVersion: String_.t
+        [@ocaml.doc
+          "The version of the add-on. The version must match one of the versions returned by DescribeAddonVersions ."]}
+    let context_ = "DescribeAddonConfigurationRequest"
+    let make ~addonName =
+      fun ~addonVersion -> fun () -> { addonName; addonVersion }
+    let to_value x =
+      structure_to_value
+        [("addonName", (Some (String_.to_value x.addonName)));
+        ("addonVersion", (Some (String_.to_value x.addonVersion)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let addonVersion =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "addonVersion") in
+      let addonName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "addonName") in
+      make ~addonVersion ~addonName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let addonVersion = field_map_exn json__ "addonVersion" String_.of_json in
+      let addonName = field_map_exn json__ "addonName" String_.of_json in
+      make ~addonVersion ~addonName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns configuration options."]
+module DescribeAccessEntryResponse =
+  struct
+    type nonrec t =
+      {
+      accessEntry: AccessEntry.t option
+        [@ocaml.doc "Information about the access entry."]}
+    type nonrec error =
+      [ `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accessEntry = fun () -> { accessEntry }
+    let error_of_json name json =
+      match name with
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("accessEntry", (Option.map x.accessEntry ~f:AccessEntry.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accessEntry =
+        (Option.map ~f:AccessEntry.of_xml) (Xml.child xml_arg0 "accessEntry") in
+      make ?accessEntry ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accessEntry = field_map json__ "accessEntry" AccessEntry.of_json in
+      make ?accessEntry ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes an access entry."]
+module DescribeAccessEntryRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
+      principalArn: String_.t
+        [@ocaml.doc "The ARN of the IAM principal for the AccessEntry."]}
+    let context_ = "DescribeAccessEntryRequest"
+    let make ~clusterName =
+      fun ~principalArn -> fun () -> { clusterName; principalArn }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("principalArn", (Some (String_.to_value x.principalArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let principalArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "principalArn") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~principalArn ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let principalArn = field_map_exn json__ "principalArn" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ~principalArn ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes an access entry."]
 module DeregisterClusterResponse =
   struct
     type nonrec t = {
@@ -7377,12 +15952,12 @@ module DeregisterClusterResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deregisters a connected cluster to remove it from the Amazon EKS control plane."]
+       "Deregisters a connected cluster to remove it from the Amazon EKS control plane. A connected cluster is a Kubernetes cluster that you've connected to your control plane using the Amazon EKS Connector."]
 module DeregisterClusterRequest =
   struct
     type nonrec t =
@@ -7399,11 +15974,120 @@ module DeregisterClusterRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" String_.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deregisters a connected cluster to remove it from the Amazon EKS control plane."]
+       "Deregisters a connected cluster to remove it from the Amazon EKS control plane. A connected cluster is a Kubernetes cluster that you've connected to your control plane using the Amazon EKS Connector."]
+module DeletePodIdentityAssociationResponse =
+  struct
+    type nonrec t =
+      {
+      association: PodIdentityAssociation.t option
+        [@ocaml.doc
+          "The full description of the EKS Pod Identity association that was deleted."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?association = fun () -> { association }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("association",
+           (Option.map x.association ~f:PodIdentityAssociation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let association =
+        (Option.map ~f:PodIdentityAssociation.of_xml)
+          (Xml.child xml_arg0 "association") in
+      make ?association ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let association =
+        field_map json__ "association" PodIdentityAssociation.of_json in
+      make ?association ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a EKS Pod Identity association. The temporary Amazon Web Services credentials from the previous IAM role session might still be valid until the session expiry. If you need to immediately revoke the temporary session credentials, then go to the role in the IAM console."]
+module DeletePodIdentityAssociationRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t [@ocaml.doc "The cluster name that"];
+      associationId: String_.t
+        [@ocaml.doc "The ID of the association to be deleted."]}
+    let context_ = "DeletePodIdentityAssociationRequest"
+    let make ~clusterName =
+      fun ~associationId -> fun () -> { clusterName; associationId }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("associationId", (Some (String_.to_value x.associationId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let associationId =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "associationId") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~associationId ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let associationId =
+        field_map_exn json__ "associationId" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ~associationId ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a EKS Pod Identity association. The temporary Amazon Web Services credentials from the previous IAM role session might still be valid until the session expiry. If you need to immediately revoke the temporary session credentials, then go to the role in the IAM console."]
 module DeleteNodegroupResponse =
   struct
     type nonrec t =
@@ -7490,18 +16174,16 @@ module DeleteNodegroupResponse =
         (Option.map ~f:Nodegroup.of_xml) (Xml.child xml_arg0 "nodegroup") in
       make ?nodegroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nodegroup = field_map json "nodegroup" Nodegroup.of_json in
+    let of_json json__ =
+      let nodegroup = field_map json__ "nodegroup" Nodegroup.of_json in
       make ?nodegroup ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes an Amazon EKS node group for a cluster."]
+  end[@@ocaml.doc "Deletes a managed node group."]
 module DeleteNodegroupRequest =
   struct
     type nonrec t =
       {
-      clusterName: String_.t
-        [@ocaml.doc
-          "The name of the Amazon EKS cluster that is associated with your node group."];
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
       nodegroupName: String_.t
         [@ocaml.doc "The name of the node group to delete."]}
     let context_ = "DeleteNodegroupRequest"
@@ -7520,12 +16202,13 @@ module DeleteNodegroupRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~nodegroupName ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nodegroupName = field_map_exn json "nodegroupName" String_.of_json in
-      let clusterName = field_map_exn json "clusterName" String_.of_json in
+    let of_json json__ =
+      let nodegroupName =
+        field_map_exn json__ "nodegroupName" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
       make ~nodegroupName ~clusterName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes an Amazon EKS node group for a cluster."]
+  end[@@ocaml.doc "Deletes a managed node group."]
 module DeleteFargateProfileResponse =
   struct
     type nonrec t =
@@ -7594,20 +16277,18 @@ module DeleteFargateProfileResponse =
           (Xml.child xml_arg0 "fargateProfile") in
       make ?fargateProfile ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fargateProfile =
-        field_map json "fargateProfile" FargateProfile.of_json in
+        field_map json__ "fargateProfile" FargateProfile.of_json in
       make ?fargateProfile ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an Fargate profile. When you delete a Fargate profile, any pods running on Fargate that were created with the profile are deleted. If those pods match another Fargate profile, then they are scheduled on Fargate with that profile. If they no longer match any Fargate profiles, then they are not scheduled on Fargate and they may remain in a pending state. Only one Fargate profile in a cluster can be in the DELETING status at a time. You must wait for a Fargate profile to finish deleting before you can delete any other profiles in that cluster."]
+       "Deletes an Fargate profile. When you delete a Fargate profile, any Pod running on Fargate that was created with the profile is deleted. If the Pod matches another Fargate profile, then it is scheduled on Fargate with that profile. If it no longer matches any Fargate profiles, then it's not scheduled on Fargate and may remain in a pending state. Only one Fargate profile in a cluster can be in the DELETING status at a time. You must wait for a Fargate profile to finish deleting before you can delete any other profiles in that cluster."]
 module DeleteFargateProfileRequest =
   struct
     type nonrec t =
       {
-      clusterName: String_.t
-        [@ocaml.doc
-          "The name of the Amazon EKS cluster associated with the Fargate profile to delete."];
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
       fargateProfileName: String_.t
         [@ocaml.doc "The name of the Fargate profile to delete."]}
     let context_ = "DeleteFargateProfileRequest"
@@ -7628,14 +16309,109 @@ module DeleteFargateProfileRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~fargateProfileName ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fargateProfileName =
-        field_map_exn json "fargateProfileName" String_.of_json in
-      let clusterName = field_map_exn json "clusterName" String_.of_json in
+        field_map_exn json__ "fargateProfileName" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
       make ~fargateProfileName ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an Fargate profile. When you delete a Fargate profile, any pods running on Fargate that were created with the profile are deleted. If those pods match another Fargate profile, then they are scheduled on Fargate with that profile. If they no longer match any Fargate profiles, then they are not scheduled on Fargate and they may remain in a pending state. Only one Fargate profile in a cluster can be in the DELETING status at a time. You must wait for a Fargate profile to finish deleting before you can delete any other profiles in that cluster."]
+       "Deletes an Fargate profile. When you delete a Fargate profile, any Pod running on Fargate that was created with the profile is deleted. If the Pod matches another Fargate profile, then it is scheduled on Fargate with that profile. If it no longer matches any Fargate profiles, then it's not scheduled on Fargate and may remain in a pending state. Only one Fargate profile in a cluster can be in the DELETING status at a time. You must wait for a Fargate profile to finish deleting before you can delete any other profiles in that cluster."]
+module DeleteEksAnywhereSubscriptionResponse =
+  struct
+    type nonrec t =
+      {
+      subscription: EksAnywhereSubscription.t option
+        [@ocaml.doc
+          "The full description of the subscription to be deleted."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?subscription = fun () -> { subscription }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("subscription",
+           (Option.map x.subscription ~f:EksAnywhereSubscription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subscription =
+        (Option.map ~f:EksAnywhereSubscription.of_xml)
+          (Xml.child xml_arg0 "subscription") in
+      make ?subscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subscription =
+        field_map json__ "subscription" EksAnywhereSubscription.of_json in
+      make ?subscription ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an expired or inactive subscription. Deleting inactive subscriptions removes them from the Amazon Web Services Management Console view and from list/describe API responses. Subscriptions can only be cancelled within 7 days of creation and are cancelled by creating a ticket in the Amazon Web Services Support Center."]
+module DeleteEksAnywhereSubscriptionRequest =
+  struct
+    type nonrec t =
+      {
+      id: String_.t [@ocaml.doc "The ID of the subscription."]}
+    let context_ = "DeleteEksAnywhereSubscriptionRequest"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value [("id", (Some (String_.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" String_.of_json in make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an expired or inactive subscription. Deleting inactive subscriptions removes them from the Amazon Web Services Management Console view and from list/describe API responses. Subscriptions can only be cancelled within 7 days of creation and are cancelled by creating a ticket in the Amazon Web Services Support Center."]
 module DeleteClusterResponse =
   struct
     type nonrec t =
@@ -7644,6 +16420,7 @@ module DeleteClusterResponse =
         [@ocaml.doc "The full description of the cluster to delete."]}
     type nonrec error =
       [ `ClientException of ClientException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServerException of ServerException.t 
@@ -7653,6 +16430,8 @@ module DeleteClusterResponse =
     let error_of_json name json =
       match name with
       | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
       | "ResourceInUseException" ->
           `ResourceInUseException (ResourceInUseException.of_json json)
       | "ResourceNotFoundException" ->
@@ -7667,6 +16446,8 @@ module DeleteClusterResponse =
     let error_of_xml name xml =
       match name with
       | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
       | "ResourceInUseException" ->
           `ResourceInUseException (ResourceInUseException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -7683,6 +16464,10 @@ module DeleteClusterResponse =
           `Assoc
             [("error", (`String "ClientException"));
             ("details", (ClientException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
       | `ResourceInUseException e ->
           `Assoc
             [("error", (`String "ResourceInUseException"));
@@ -7713,12 +16498,12 @@ module DeleteClusterResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the Amazon EKS cluster control plane. If you have active services in your cluster that are associated with a load balancer, you must delete those services before deleting the cluster so that the load balancers are deleted properly. Otherwise, you can have orphaned resources in your VPC that prevent you from being able to delete the VPC. For more information, see Deleting a Cluster in the Amazon EKS User Guide. If you have managed node groups or Fargate profiles attached to the cluster, you must delete them first. For more information, see DeleteNodegroup and DeleteFargateProfile."]
+       "Deletes an Amazon EKS cluster control plane. If you have active services and ingress resources in your cluster that are associated with a load balancer, you must delete those services before deleting the cluster so that the load balancers are deleted properly. Otherwise, you can have orphaned resources in your VPC that prevent you from being able to delete the VPC. For more information, see Deleting a cluster in the Amazon EKS User Guide. If you have managed node groups or Fargate profiles attached to the cluster, you must delete them first. For more information, see DeleteNodgroup and DeleteFargateProfile."]
 module DeleteClusterRequest =
   struct
     type nonrec t =
@@ -7734,11 +16519,128 @@ module DeleteClusterRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" String_.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "name" String_.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the Amazon EKS cluster control plane. If you have active services in your cluster that are associated with a load balancer, you must delete those services before deleting the cluster so that the load balancers are deleted properly. Otherwise, you can have orphaned resources in your VPC that prevent you from being able to delete the VPC. For more information, see Deleting a Cluster in the Amazon EKS User Guide. If you have managed node groups or Fargate profiles attached to the cluster, you must delete them first. For more information, see DeleteNodegroup and DeleteFargateProfile."]
+       "Deletes an Amazon EKS cluster control plane. If you have active services and ingress resources in your cluster that are associated with a load balancer, you must delete those services before deleting the cluster so that the load balancers are deleted properly. Otherwise, you can have orphaned resources in your VPC that prevent you from being able to delete the VPC. For more information, see Deleting a cluster in the Amazon EKS User Guide. If you have managed node groups or Fargate profiles attached to the cluster, you must delete them first. For more information, see DeleteNodgroup and DeleteFargateProfile."]
+module DeleteCapabilityResponse =
+  struct
+    type nonrec t =
+      {
+      capability: Capability.t option
+        [@ocaml.doc
+          "An object containing information about the deleted capability, including its final status and configuration."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?capability = fun () -> { capability }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("capability", (Option.map x.capability ~f:Capability.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capability =
+        (Option.map ~f:Capability.of_xml) (Xml.child xml_arg0 "capability") in
+      make ?capability ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capability = field_map json__ "capability" Capability.of_json in
+      make ?capability ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a managed capability from your Amazon EKS cluster. When you delete a capability, Amazon EKS removes the capability infrastructure but retains all resources that were managed by the capability. Before deleting a capability, you should delete all Kubernetes resources that were created by the capability. After the capability is deleted, these resources become difficult to manage because the controller that managed them is no longer available. To delete resources before removing the capability, use kubectl delete or remove them through your GitOps workflow."]
+module DeleteCapabilityRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t
+        [@ocaml.doc
+          "The name of the Amazon EKS cluster that contains the capability you want to delete."];
+      capabilityName: String_.t
+        [@ocaml.doc "The name of the capability to delete."]}
+    let context_ = "DeleteCapabilityRequest"
+    let make ~clusterName =
+      fun ~capabilityName -> fun () -> { clusterName; capabilityName }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("capabilityName", (Some (String_.to_value x.capabilityName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capabilityName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "capabilityName") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~capabilityName ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capabilityName =
+        field_map_exn json__ "capabilityName" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ~capabilityName ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a managed capability from your Amazon EKS cluster. When you delete a capability, Amazon EKS removes the capability infrastructure but retains all resources that were managed by the capability. Before deleting a capability, you should delete all Kubernetes resources that were created by the capability. After the capability is deleted, these resources become difficult to manage because the controller that managed them is no longer available. To delete resources before removing the capability, use kubectl delete or remove them through your GitOps workflow."]
 module DeleteAddonResponse =
   struct
     type nonrec t = {
@@ -7810,23 +16712,22 @@ module DeleteAddonResponse =
       let addon = (Option.map ~f:Addon.of_xml) (Xml.child xml_arg0 "addon") in
       make ?addon ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let addon = field_map json "addon" Addon.of_json in make ?addon ()
+    let of_json json__ =
+      let addon = field_map json__ "addon" Addon.of_json in make ?addon ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Delete an Amazon EKS add-on. When you remove the add-on, it will also be deleted from the cluster. You can always manually start an add-on on the cluster using the Kubernetes API."]
+       "Deletes an Amazon EKS add-on. When you remove an add-on, it's deleted from the cluster. You can always manually start an add-on on the cluster using the Kubernetes API."]
 module DeleteAddonRequest =
   struct
     type nonrec t =
       {
-      clusterName: ClusterName.t
-        [@ocaml.doc "The name of the cluster to delete the add-on from."];
+      clusterName: ClusterName.t [@ocaml.doc "The name of your cluster."];
       addonName: String_.t
         [@ocaml.doc
           "The name of the add-on. The name must match one of the names returned by ListAddons ."];
       preserve: Boolean.t option
         [@ocaml.doc
-          "Specifying this option preserves the add-on software on your cluster but Amazon EKS stops managing any settings for the add-on. If an IAM account is associated with the add-on, it is not removed."]}
+          "Specifying this option preserves the add-on software on your cluster but Amazon EKS stops managing any settings for the add-on. If an IAM account is associated with the add-on, it isn't removed."]}
     let context_ = "DeleteAddonRequest"
     let make ?preserve =
       fun ~clusterName ->
@@ -7846,14 +16747,310 @@ module DeleteAddonRequest =
         ClusterName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?preserve ~addonName ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let preserve = field_map json "preserve" Boolean.of_json in
-      let addonName = field_map_exn json "addonName" String_.of_json in
-      let clusterName = field_map_exn json "clusterName" ClusterName.of_json in
+    let of_json json__ =
+      let preserve = field_map json__ "preserve" Boolean.of_json in
+      let addonName = field_map_exn json__ "addonName" String_.of_json in
+      let clusterName =
+        field_map_exn json__ "clusterName" ClusterName.of_json in
       make ?preserve ~addonName ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Delete an Amazon EKS add-on. When you remove the add-on, it will also be deleted from the cluster. You can always manually start an add-on on the cluster using the Kubernetes API."]
+       "Deletes an Amazon EKS add-on. When you remove an add-on, it's deleted from the cluster. You can always manually start an add-on on the cluster using the Kubernetes API."]
+module DeleteAccessEntryResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an access entry. Deleting an access entry of a type other than Standard can cause your cluster to function improperly. If you delete an access entry in error, you can recreate it."]
+module DeleteAccessEntryRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
+      principalArn: String_.t
+        [@ocaml.doc "The ARN of the IAM principal for the AccessEntry."]}
+    let context_ = "DeleteAccessEntryRequest"
+    let make ~clusterName =
+      fun ~principalArn -> fun () -> { clusterName; principalArn }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("principalArn", (Some (String_.to_value x.principalArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let principalArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "principalArn") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~principalArn ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let principalArn = field_map_exn json__ "principalArn" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ~principalArn ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an access entry. Deleting an access entry of a type other than Standard can cause your cluster to function improperly. If you delete an access entry in error, you can recreate it."]
+module CreatePodIdentityAssociationResponse =
+  struct
+    type nonrec t =
+      {
+      association: PodIdentityAssociation.t option
+        [@ocaml.doc
+          "The full description of your new association. The description includes an ID for the association. Use the ID of the association in further actions to manage the association."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceLimitExceededException of ResourceLimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?association = fun () -> { association }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceLimitExceededException"));
+            ("details", (ResourceLimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("association",
+           (Option.map x.association ~f:PodIdentityAssociation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let association =
+        (Option.map ~f:PodIdentityAssociation.of_xml)
+          (Xml.child xml_arg0 "association") in
+      make ?association ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let association =
+        field_map json__ "association" PodIdentityAssociation.of_json in
+      make ?association ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an EKS Pod Identity association between a service account in an Amazon EKS cluster and an IAM role with EKS Pod Identity. Use EKS Pod Identity to give temporary IAM credentials to Pods and the credentials are rotated automatically. Amazon EKS Pod Identity associations provide the ability to manage credentials for your applications, similar to the way that Amazon EC2 instance profiles provide credentials to Amazon EC2 instances. If a Pod uses a service account that has an association, Amazon EKS sets environment variables in the containers of the Pod. The environment variables configure the Amazon Web Services SDKs, including the Command Line Interface, to use the EKS Pod Identity credentials. EKS Pod Identity is a simpler method than IAM roles for service accounts, as this method doesn't use OIDC identity providers. Additionally, you can configure a role for EKS Pod Identity once, and reuse it across clusters. Similar to Amazon Web Services IAM behavior, EKS Pod Identity associations are eventually consistent, and may take several seconds to be effective after the initial API call returns successfully. You must design your applications to account for these potential delays. We recommend that you don\226\128\153t include association create/updates in the critical, high-availability code paths of your application. Instead, make changes in a separate initialization or setup routine that you run less frequently. You can set a target IAM role in the same or a different account for advanced scenarios. With a target role, EKS Pod Identity automatically performs two role assumptions in sequence: first assuming the role in the association that is in this account, then using those credentials to assume the target IAM role. This process provides your Pod with temporary credentials that have the permissions defined in the target role, allowing secure access to resources in another Amazon Web Services account."]
+module CreatePodIdentityAssociationRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t
+        [@ocaml.doc
+          "The name of the cluster to create the EKS Pod Identity association in."];
+      namespace: String_.t
+        [@ocaml.doc
+          "The name of the Kubernetes namespace inside the cluster to create the EKS Pod Identity association in. The service account and the Pods that use the service account must be in this namespace."];
+      serviceAccount: String_.t
+        [@ocaml.doc
+          "The name of the Kubernetes service account inside the cluster to associate the IAM credentials with."];
+      roleArn: String_.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role to associate with the service account. The EKS Pod Identity agent manages credentials to assume this role for applications in the containers in the Pods that use this service account."];
+      clientRequestToken: String_.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "Metadata that assists with categorization and organization. Each tag consists of a key and an optional value. You define both. Tags don't propagate to any other cluster or Amazon Web Services resources. The following basic restrictions apply to tags: Maximum number of tags per resource \226\128\147 50 For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length \226\128\147 128 Unicode characters in UTF-8 Maximum value length \226\128\147 256 Unicode characters in UTF-8 If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case-sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for either keys or values as it is reserved for Amazon Web Services use. You cannot edit or delete tag keys or values with this prefix. Tags with this prefix do not count against your tags per resource limit."];
+      disableSessionTags: BoxedBoolean.t option
+        [@ocaml.doc
+          "Disable the automatic sessions tags that are appended by EKS Pod Identity. EKS Pod Identity adds a pre-defined set of session tags when it assumes the role. You can use these tags to author a single role that can work across resources by allowing access to Amazon Web Services resources based on matching tags. By default, EKS Pod Identity attaches six tags, including tags for cluster name, namespace, and service account name. For the list of tags added by EKS Pod Identity, see List of session tags added by EKS Pod Identity in the Amazon EKS User Guide. Amazon Web Services compresses inline session policies, managed policy ARNs, and session tags into a packed binary format that has a separate limit. If you receive a PackedPolicyTooLarge error indicating the packed binary format has exceeded the size limit, you can attempt to reduce the size by disabling the session tags added by EKS Pod Identity."];
+      targetRoleArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the target IAM role to associate with the service account. This role is assumed by using the EKS Pod Identity association role, then the credentials for this role are injected into the Pod. When you run applications on Amazon EKS, your application might need to access Amazon Web Services resources from a different role that exists in the same or different Amazon Web Services account. For example, your application running in \226\128\156Account A\226\128\157 might need to access resources, such as Amazon S3 buckets in \226\128\156Account B\226\128\157 or within \226\128\156Account A\226\128\157 itself. You can create a association to access Amazon Web Services resources in \226\128\156Account B\226\128\157 by creating two IAM roles: a role in \226\128\156Account A\226\128\157 and a role in \226\128\156Account B\226\128\157 (which can be the same or different account), each with the necessary trust and permission policies. After you provide these roles in the IAM role and Target IAM role fields, EKS will perform role chaining to ensure your application gets the required permissions. This means Role A will assume Role B, allowing your Pods to securely access resources like S3 buckets in the target account."];
+      policy: String_.t option
+        [@ocaml.doc
+          "An optional IAM policy in JSON format (as an escaped string) that applies additional restrictions to this pod identity association beyond the IAM policies attached to the IAM role. This policy is applied as the intersection of the role's policies and this policy, allowing you to reduce the permissions that applications in the pods can use. Use this policy to enforce least privilege access while still leveraging a shared IAM role across multiple applications. Important considerations Session tags: When using this policy, disableSessionTags must be set to true. Target role permissions: If you specify both a TargetRoleArn and a policy, the policy restrictions apply only to the target role's permissions, not to the initial role used for assuming the target role."]}
+    let context_ = "CreatePodIdentityAssociationRequest"
+    let make ?clientRequestToken =
+      fun ?tags ->
+        fun ?disableSessionTags ->
+          fun ?targetRoleArn ->
+            fun ?policy ->
+              fun ~clusterName ->
+                fun ~namespace ->
+                  fun ~serviceAccount ->
+                    fun ~roleArn ->
+                      fun () ->
+                        {
+                          clientRequestToken;
+                          tags;
+                          disableSessionTags;
+                          targetRoleArn;
+                          policy;
+                          clusterName;
+                          namespace;
+                          serviceAccount;
+                          roleArn
+                        }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("namespace", (Some (String_.to_value x.namespace)));
+        ("serviceAccount", (Some (String_.to_value x.serviceAccount)));
+        ("roleArn", (Some (String_.to_value x.roleArn)));
+        ("clientRequestToken",
+          (Option.map x.clientRequestToken ~f:String_.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("disableSessionTags",
+          (Option.map x.disableSessionTags ~f:BoxedBoolean.to_value));
+        ("targetRoleArn", (Option.map x.targetRoleArn ~f:String_.to_value));
+        ("policy", (Option.map x.policy ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policy =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "policy") in
+      let targetRoleArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "targetRoleArn") in
+      let disableSessionTags =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "disableSessionTags") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let clientRequestToken =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "clientRequestToken") in
+      let roleArn =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
+      let serviceAccount =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceAccount") in
+      let namespace =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "namespace") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?policy ?targetRoleArn ?disableSessionTags ?tags
+        ?clientRequestToken ~roleArn ~serviceAccount ~namespace ~clusterName
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policy = field_map json__ "policy" String_.of_json in
+      let targetRoleArn = field_map json__ "targetRoleArn" String_.of_json in
+      let disableSessionTags =
+        field_map json__ "disableSessionTags" BoxedBoolean.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let clientRequestToken =
+        field_map json__ "clientRequestToken" String_.of_json in
+      let roleArn = field_map_exn json__ "roleArn" String_.of_json in
+      let serviceAccount =
+        field_map_exn json__ "serviceAccount" String_.of_json in
+      let namespace = field_map_exn json__ "namespace" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ?policy ?targetRoleArn ?disableSessionTags ?tags
+        ?clientRequestToken ~roleArn ~serviceAccount ~namespace ~clusterName
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an EKS Pod Identity association between a service account in an Amazon EKS cluster and an IAM role with EKS Pod Identity. Use EKS Pod Identity to give temporary IAM credentials to Pods and the credentials are rotated automatically. Amazon EKS Pod Identity associations provide the ability to manage credentials for your applications, similar to the way that Amazon EC2 instance profiles provide credentials to Amazon EC2 instances. If a Pod uses a service account that has an association, Amazon EKS sets environment variables in the containers of the Pod. The environment variables configure the Amazon Web Services SDKs, including the Command Line Interface, to use the EKS Pod Identity credentials. EKS Pod Identity is a simpler method than IAM roles for service accounts, as this method doesn't use OIDC identity providers. Additionally, you can configure a role for EKS Pod Identity once, and reuse it across clusters. Similar to Amazon Web Services IAM behavior, EKS Pod Identity associations are eventually consistent, and may take several seconds to be effective after the initial API call returns successfully. You must design your applications to account for these potential delays. We recommend that you don\226\128\153t include association create/updates in the critical, high-availability code paths of your application. Instead, make changes in a separate initialization or setup routine that you run less frequently. You can set a target IAM role in the same or a different account for advanced scenarios. With a target role, EKS Pod Identity automatically performs two role assumptions in sequence: first assuming the role in the association that is in this account, then using those credentials to assume the target IAM role. This process provides your Pod with temporary credentials that have the permissions defined in the target role, allowing secure access to resources in another Amazon Web Services account."]
 module CreateNodegroupResponse =
   struct
     type nonrec t =
@@ -7951,18 +17148,17 @@ module CreateNodegroupResponse =
         (Option.map ~f:Nodegroup.of_xml) (Xml.child xml_arg0 "nodegroup") in
       make ?nodegroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nodegroup = field_map json "nodegroup" Nodegroup.of_json in
+    let of_json json__ =
+      let nodegroup = field_map json__ "nodegroup" Nodegroup.of_json in
       make ?nodegroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a managed node group for an Amazon EKS cluster. You can only create a node group for your cluster that is equal to the current Kubernetes version for the cluster. All node groups are created with the latest AMI release version for the respective minor Kubernetes version of the cluster, unless you deploy a custom AMI using a launch template. For more information about using launch templates, see Launch template support. An Amazon EKS managed node group is an Amazon EC2 Auto Scaling group and associated Amazon EC2 instances that are managed by Amazon Web Services for an Amazon EKS cluster. Each node group uses a version of the Amazon EKS optimized Amazon Linux 2 AMI. For more information, see Managed Node Groups in the Amazon EKS User Guide."]
+       "Creates a managed node group for an Amazon EKS cluster. You can only create a node group for your cluster that is equal to the current Kubernetes version for the cluster. All node groups are created with the latest AMI release version for the respective minor Kubernetes version of the cluster, unless you deploy a custom AMI using a launch template. For later updates, you will only be able to update a node group using a launch template only if it was originally deployed with a launch template. Additionally, the launch template ID or name must match what was used when the node group was created. You can update the launch template version with necessary changes. For more information about using launch templates, see Customizing managed nodes with launch templates. An Amazon EKS managed node group is an Amazon EC2 Auto Scaling group and associated Amazon EC2 instances that are managed by Amazon Web Services for an Amazon EKS cluster. For more information, see Managed node groups in the Amazon EKS User Guide. Windows AMI types are only supported for commercial Amazon Web Services Regions that support Windows on Amazon EKS."]
 module CreateNodegroupRequest =
   struct
     type nonrec t =
       {
-      clusterName: String_.t
-        [@ocaml.doc "The name of the cluster to create the node group in."];
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
       nodegroupName: String_.t
         [@ocaml.doc "The unique name to give your node group."];
       scalingConfig: NodegroupScalingConfig.t option
@@ -7970,47 +17166,52 @@ module CreateNodegroupRequest =
           "The scaling configuration details for the Auto Scaling group that is created for your node group."];
       diskSize: BoxedInteger.t option
         [@ocaml.doc
-          "The root device disk size (in GiB) for your node group instances. The default disk size is 20 GiB. If you specify launchTemplate, then don't specify diskSize, or the node group deployment will fail. For more information about using launch templates with Amazon EKS, see Launch template support in the Amazon EKS User Guide."];
+          "The root device disk size (in GiB) for your node group instances. The default disk size is 20 GiB for Linux and Bottlerocket. The default disk size is 50 GiB for Windows. If you specify launchTemplate, then don't specify diskSize, or the node group deployment will fail. For more information about using launch templates with Amazon EKS, see Customizing managed nodes with launch templates in the Amazon EKS User Guide."];
       subnets: StringList.t
         [@ocaml.doc
-          "The subnets to use for the Auto Scaling group that is created for your node group. If you specify launchTemplate, then don't specify SubnetId in your launch template, or the node group deployment will fail. For more information about using launch templates with Amazon EKS, see Launch template support in the Amazon EKS User Guide."];
+          "The subnets to use for the Auto Scaling group that is created for your node group. If you specify launchTemplate, then don't specify SubnetId in your launch template, or the node group deployment will fail. For more information about using launch templates with Amazon EKS, see Customizing managed nodes with launch templates in the Amazon EKS User Guide."];
       instanceTypes: StringList.t option
         [@ocaml.doc
-          "Specify the instance types for a node group. If you specify a GPU instance type, be sure to specify AL2_x86_64_GPU with the amiType parameter. If you specify launchTemplate, then you can specify zero or one instance type in your launch template or you can specify 0-20 instance types for instanceTypes. If however, you specify an instance type in your launch template and specify any instanceTypes, the node group deployment will fail. If you don't specify an instance type in a launch template or for instanceTypes, then t3.medium is used, by default. If you specify Spot for capacityType, then we recommend specifying multiple values for instanceTypes. For more information, see Managed node group capacity types and Launch template support in the Amazon EKS User Guide."];
+          "Specify the instance types for a node group. If you specify a GPU instance type, make sure to also specify an applicable GPU AMI type with the amiType parameter. If you specify launchTemplate, then you can specify zero or one instance type in your launch template or you can specify 0-20 instance types for instanceTypes. If however, you specify an instance type in your launch template and specify any instanceTypes, the node group deployment will fail. If you don't specify an instance type in a launch template or for instanceTypes, then t3.medium is used, by default. If you specify Spot for capacityType, then we recommend specifying multiple values for instanceTypes. For more information, see Managed node group capacity types and Customizing managed nodes with launch templates in the Amazon EKS User Guide."];
       amiType: AMITypes.t option
         [@ocaml.doc
-          "The AMI type for your node group. GPU instance types should use the AL2_x86_64_GPU AMI type. Non-GPU instances should use the AL2_x86_64 AMI type. Arm instances should use the AL2_ARM_64 AMI type. All types use the Amazon EKS optimized Amazon Linux 2 AMI. If you specify launchTemplate, and your launch template uses a custom AMI, then don't specify amiType, or the node group deployment will fail. For more information about using launch templates with Amazon EKS, see Launch template support in the Amazon EKS User Guide."];
+          "The AMI type for your node group. If you specify launchTemplate, and your launch template uses a custom AMI, then don't specify amiType, or the node group deployment will fail. If your launch template uses a Windows custom AMI, then add eks:kube-proxy-windows to your Windows nodes rolearn in the aws-auth ConfigMap. For more information about using launch templates with Amazon EKS, see Customizing managed nodes with launch templates in the Amazon EKS User Guide."];
       remoteAccess: RemoteAccessConfig.t option
         [@ocaml.doc
-          "The remote access (SSH) configuration to use with your node group. If you specify launchTemplate, then don't specify remoteAccess, or the node group deployment will fail. For more information about using launch templates with Amazon EKS, see Launch template support in the Amazon EKS User Guide."];
+          "The remote access configuration to use with your node group. For Linux, the protocol is SSH. For Windows, the protocol is RDP. If you specify launchTemplate, then don't specify remoteAccess, or the node group deployment will fail. For more information about using launch templates with Amazon EKS, see Customizing managed nodes with launch templates in the Amazon EKS User Guide."];
       nodeRole: String_.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the IAM role to associate with your node group. The Amazon EKS worker node kubelet daemon makes calls to Amazon Web Services APIs on your behalf. Nodes receive permissions for these API calls through an IAM instance profile and associated policies. Before you can launch nodes and register them into a cluster, you must create an IAM role for those nodes to use when they are launched. For more information, see Amazon EKS node IAM role in the Amazon EKS User Guide . If you specify launchTemplate, then don't specify IamInstanceProfile in your launch template, or the node group deployment will fail. For more information about using launch templates with Amazon EKS, see Launch template support in the Amazon EKS User Guide."];
+          "The Amazon Resource Name (ARN) of the IAM role to associate with your node group. The Amazon EKS worker node kubelet daemon makes calls to Amazon Web Services APIs on your behalf. Nodes receive permissions for these API calls through an IAM instance profile and associated policies. Before you can launch nodes and register them into a cluster, you must create an IAM role for those nodes to use when they are launched. For more information, see Amazon EKS node IAM role in the Amazon EKS User Guide . If you specify launchTemplate, then don't specify IamInstanceProfile in your launch template, or the node group deployment will fail. For more information about using launch templates with Amazon EKS, see Customizing managed nodes with launch templates in the Amazon EKS User Guide."];
       labels: LabelsMap.t option
         [@ocaml.doc
-          "The Kubernetes labels to be applied to the nodes in the node group when they are created."];
+          "The Kubernetes labels to apply to the nodes in the node group when they are created."];
       taints: TaintsList.t option
         [@ocaml.doc
-          "The Kubernetes taints to be applied to the nodes in the node group."];
+          "The Kubernetes taints to be applied to the nodes in the node group. For more information, see Node taints on managed node groups."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The metadata to apply to the node group to assist with categorization and organization. Each tag consists of a key and an optional value. You define both. Node group tags do not propagate to any other resources associated with the node group, such as the Amazon EC2 instances or subnets."];
+          "Metadata that assists with categorization and organization. Each tag consists of a key and an optional value. You define both. Tags don't propagate to any other cluster or Amazon Web Services resources."];
       clientRequestToken: String_.t option
         [@ocaml.doc
-          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
       launchTemplate: LaunchTemplateSpecification.t option
         [@ocaml.doc
-          "An object representing a node group's launch template specification. If specified, then do not specify instanceTypes, diskSize, or remoteAccess and make sure that the launch template meets the requirements in launchTemplateSpecification."];
+          "An object representing a node group's launch template specification. When using this object, don't directly specify instanceTypes, diskSize, or remoteAccess. You cannot later specify a different launch template ID or name than what was used to create the node group. Make sure that the launch template meets the requirements in launchTemplateSpecification. Also refer to Customizing managed nodes with launch templates in the Amazon EKS User Guide."];
       updateConfig: NodegroupUpdateConfig.t option
         [@ocaml.doc "The node group update configuration."];
+      nodeRepairConfig: NodeRepairConfig.t option
+        [@ocaml.doc "The node auto repair configuration for the node group."];
       capacityType: CapacityTypes.t option
         [@ocaml.doc "The capacity type for your node group."];
       version: String_.t option
         [@ocaml.doc
-          "The Kubernetes version to use for your managed nodes. By default, the Kubernetes version of the cluster is used, and this is the only accepted specified value. If you specify launchTemplate, and your launch template uses a custom AMI, then don't specify version, or the node group deployment will fail. For more information about using launch templates with Amazon EKS, see Launch template support in the Amazon EKS User Guide."];
+          "The Kubernetes version to use for your managed nodes. By default, the Kubernetes version of the cluster is used, and this is the only accepted specified value. If you specify launchTemplate, and your launch template uses a custom AMI, then don't specify version, or the node group deployment will fail. For more information about using launch templates with Amazon EKS, see Customizing managed nodes with launch templates in the Amazon EKS User Guide."];
       releaseVersion: String_.t option
         [@ocaml.doc
-          "The AMI version of the Amazon EKS optimized AMI to use with your node group. By default, the latest available AMI version for the node group's current Kubernetes version is used. For more information, see Amazon EKS optimized Amazon Linux 2 AMI versions in the Amazon EKS User Guide. If you specify launchTemplate, and your launch template uses a custom AMI, then don't specify releaseVersion, or the node group deployment will fail. For more information about using launch templates with Amazon EKS, see Launch template support in the Amazon EKS User Guide."]}
+          "The AMI version of the Amazon EKS optimized AMI to use with your node group. By default, the latest available AMI version for the node group's current Kubernetes version is used. For information about Linux versions, see Amazon EKS optimized Amazon Linux AMI versions in the Amazon EKS User Guide. Amazon EKS managed node groups support the November 2022 and later releases of the Windows AMIs. For information about Windows versions, see Amazon EKS optimized Windows AMI versions in the Amazon EKS User Guide. If you specify launchTemplate, and your launch template uses a custom AMI, then don't specify releaseVersion, or the node group deployment will fail. For more information about using launch templates with Amazon EKS, see Customizing managed nodes with launch templates in the Amazon EKS User Guide."];
+      warmPoolConfig: WarmPoolConfig.t option
+        [@ocaml.doc
+          "The warm pool configuration for the node group. Warm pools maintain pre-initialized EC2 instances that can quickly join your cluster during scale-out events, improving application scaling performance and reducing costs."]}
     let context_ = "CreateNodegroupRequest"
     let make ?scalingConfig =
       fun ?diskSize ->
@@ -8023,34 +17224,38 @@ module CreateNodegroupRequest =
                     fun ?clientRequestToken ->
                       fun ?launchTemplate ->
                         fun ?updateConfig ->
-                          fun ?capacityType ->
-                            fun ?version ->
-                              fun ?releaseVersion ->
-                                fun ~clusterName ->
-                                  fun ~nodegroupName ->
-                                    fun ~subnets ->
-                                      fun ~nodeRole ->
-                                        fun () ->
-                                          {
-                                            scalingConfig;
-                                            diskSize;
-                                            instanceTypes;
-                                            amiType;
-                                            remoteAccess;
-                                            labels;
-                                            taints;
-                                            tags;
-                                            clientRequestToken;
-                                            launchTemplate;
-                                            updateConfig;
-                                            capacityType;
-                                            version;
-                                            releaseVersion;
-                                            clusterName;
-                                            nodegroupName;
-                                            subnets;
-                                            nodeRole
-                                          }
+                          fun ?nodeRepairConfig ->
+                            fun ?capacityType ->
+                              fun ?version ->
+                                fun ?releaseVersion ->
+                                  fun ?warmPoolConfig ->
+                                    fun ~clusterName ->
+                                      fun ~nodegroupName ->
+                                        fun ~subnets ->
+                                          fun ~nodeRole ->
+                                            fun () ->
+                                              {
+                                                scalingConfig;
+                                                diskSize;
+                                                instanceTypes;
+                                                amiType;
+                                                remoteAccess;
+                                                labels;
+                                                taints;
+                                                tags;
+                                                clientRequestToken;
+                                                launchTemplate;
+                                                updateConfig;
+                                                nodeRepairConfig;
+                                                capacityType;
+                                                version;
+                                                releaseVersion;
+                                                warmPoolConfig;
+                                                clusterName;
+                                                nodegroupName;
+                                                subnets;
+                                                nodeRole
+                                              }
     let to_value x =
       structure_to_value
         [("name", (Some (String_.to_value x.clusterName)));
@@ -8075,12 +17280,19 @@ module CreateNodegroupRequest =
              ~f:LaunchTemplateSpecification.to_value));
         ("updateConfig",
           (Option.map x.updateConfig ~f:NodegroupUpdateConfig.to_value));
+        ("nodeRepairConfig",
+          (Option.map x.nodeRepairConfig ~f:NodeRepairConfig.to_value));
         ("capacityType",
           (Option.map x.capacityType ~f:CapacityTypes.to_value));
         ("version", (Option.map x.version ~f:String_.to_value));
-        ("releaseVersion", (Option.map x.releaseVersion ~f:String_.to_value))]
+        ("releaseVersion", (Option.map x.releaseVersion ~f:String_.to_value));
+        ("warmPoolConfig",
+          (Option.map x.warmPoolConfig ~f:WarmPoolConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let warmPoolConfig =
+        (Option.map ~f:WarmPoolConfig.of_xml)
+          (Xml.child xml_arg0 "warmPoolConfig") in
       let releaseVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "releaseVersion") in
       let version =
@@ -8088,6 +17300,9 @@ module CreateNodegroupRequest =
       let capacityType =
         (Option.map ~f:CapacityTypes.of_xml)
           (Xml.child xml_arg0 "capacityType") in
+      let nodeRepairConfig =
+        (Option.map ~f:NodeRepairConfig.of_xml)
+          (Xml.child xml_arg0 "nodeRepairConfig") in
       let updateConfig =
         (Option.map ~f:NodegroupUpdateConfig.of_xml)
           (Xml.child xml_arg0 "updateConfig") in
@@ -8125,42 +17340,48 @@ module CreateNodegroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "nodegroupName") in
       let clusterName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?releaseVersion ?version ?capacityType ?updateConfig
-        ?launchTemplate ?clientRequestToken ?tags ?taints ?labels ~nodeRole
-        ?remoteAccess ?amiType ?instanceTypes ~subnets ?diskSize
-        ?scalingConfig ~nodegroupName ~clusterName ()
+      make ?warmPoolConfig ?releaseVersion ?version ?capacityType
+        ?nodeRepairConfig ?updateConfig ?launchTemplate ?clientRequestToken
+        ?tags ?taints ?labels ~nodeRole ?remoteAccess ?amiType ?instanceTypes
+        ~subnets ?diskSize ?scalingConfig ~nodegroupName ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let releaseVersion = field_map json "releaseVersion" String_.of_json in
-      let version = field_map json "version" String_.of_json in
-      let capacityType = field_map json "capacityType" CapacityTypes.of_json in
+    let of_json json__ =
+      let warmPoolConfig =
+        field_map json__ "warmPoolConfig" WarmPoolConfig.of_json in
+      let releaseVersion = field_map json__ "releaseVersion" String_.of_json in
+      let version = field_map json__ "version" String_.of_json in
+      let capacityType =
+        field_map json__ "capacityType" CapacityTypes.of_json in
+      let nodeRepairConfig =
+        field_map json__ "nodeRepairConfig" NodeRepairConfig.of_json in
       let updateConfig =
-        field_map json "updateConfig" NodegroupUpdateConfig.of_json in
+        field_map json__ "updateConfig" NodegroupUpdateConfig.of_json in
       let launchTemplate =
-        field_map json "launchTemplate" LaunchTemplateSpecification.of_json in
+        field_map json__ "launchTemplate" LaunchTemplateSpecification.of_json in
       let clientRequestToken =
-        field_map json "clientRequestToken" String_.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let taints = field_map json "taints" TaintsList.of_json in
-      let labels = field_map json "labels" LabelsMap.of_json in
-      let nodeRole = field_map_exn json "nodeRole" String_.of_json in
+        field_map json__ "clientRequestToken" String_.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let taints = field_map json__ "taints" TaintsList.of_json in
+      let labels = field_map json__ "labels" LabelsMap.of_json in
+      let nodeRole = field_map_exn json__ "nodeRole" String_.of_json in
       let remoteAccess =
-        field_map json "remoteAccess" RemoteAccessConfig.of_json in
-      let amiType = field_map json "amiType" AMITypes.of_json in
-      let instanceTypes = field_map json "instanceTypes" StringList.of_json in
-      let subnets = field_map_exn json "subnets" StringList.of_json in
-      let diskSize = field_map json "diskSize" BoxedInteger.of_json in
+        field_map json__ "remoteAccess" RemoteAccessConfig.of_json in
+      let amiType = field_map json__ "amiType" AMITypes.of_json in
+      let instanceTypes = field_map json__ "instanceTypes" StringList.of_json in
+      let subnets = field_map_exn json__ "subnets" StringList.of_json in
+      let diskSize = field_map json__ "diskSize" BoxedInteger.of_json in
       let scalingConfig =
-        field_map json "scalingConfig" NodegroupScalingConfig.of_json in
-      let nodegroupName = field_map_exn json "nodegroupName" String_.of_json in
-      let clusterName = field_map_exn json "clusterName" String_.of_json in
-      make ?releaseVersion ?version ?capacityType ?updateConfig
-        ?launchTemplate ?clientRequestToken ?tags ?taints ?labels ~nodeRole
-        ?remoteAccess ?amiType ?instanceTypes ~subnets ?diskSize
-        ?scalingConfig ~nodegroupName ~clusterName ()
+        field_map json__ "scalingConfig" NodegroupScalingConfig.of_json in
+      let nodegroupName =
+        field_map_exn json__ "nodegroupName" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ?warmPoolConfig ?releaseVersion ?version ?capacityType
+        ?nodeRepairConfig ?updateConfig ?launchTemplate ?clientRequestToken
+        ?tags ?taints ?labels ~nodeRole ?remoteAccess ?amiType ?instanceTypes
+        ~subnets ?diskSize ?scalingConfig ~nodegroupName ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a managed node group for an Amazon EKS cluster. You can only create a node group for your cluster that is equal to the current Kubernetes version for the cluster. All node groups are created with the latest AMI release version for the respective minor Kubernetes version of the cluster, unless you deploy a custom AMI using a launch template. For more information about using launch templates, see Launch template support. An Amazon EKS managed node group is an Amazon EC2 Auto Scaling group and associated Amazon EC2 instances that are managed by Amazon Web Services for an Amazon EKS cluster. Each node group uses a version of the Amazon EKS optimized Amazon Linux 2 AMI. For more information, see Managed Node Groups in the Amazon EKS User Guide."]
+       "Creates a managed node group for an Amazon EKS cluster. You can only create a node group for your cluster that is equal to the current Kubernetes version for the cluster. All node groups are created with the latest AMI release version for the respective minor Kubernetes version of the cluster, unless you deploy a custom AMI using a launch template. For later updates, you will only be able to update a node group using a launch template only if it was originally deployed with a launch template. Additionally, the launch template ID or name must match what was used when the node group was created. You can update the launch template version with necessary changes. For more information about using launch templates, see Customizing managed nodes with launch templates. An Amazon EKS managed node group is an Amazon EC2 Auto Scaling group and associated Amazon EC2 instances that are managed by Amazon Web Services for an Amazon EKS cluster. For more information, see Managed node groups in the Amazon EKS User Guide. Windows AMI types are only supported for commercial Amazon Web Services Regions that support Windows on Amazon EKS."]
 module CreateFargateProfileResponse =
   struct
     type nonrec t =
@@ -8252,37 +17473,35 @@ module CreateFargateProfileResponse =
           (Xml.child xml_arg0 "fargateProfile") in
       make ?fargateProfile ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fargateProfile =
-        field_map json "fargateProfile" FargateProfile.of_json in
+        field_map json__ "fargateProfile" FargateProfile.of_json in
       make ?fargateProfile ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Fargate profile for your Amazon EKS cluster. You must have at least one Fargate profile in a cluster to be able to run pods on Fargate. The Fargate profile allows an administrator to declare which pods run on Fargate and specify which pods run on which Fargate profile. This declaration is done through the profile\226\128\153s selectors. Each profile can have up to five selectors that contain a namespace and labels. A namespace is required for every selector. The label field consists of multiple optional key-value pairs. Pods that match the selectors are scheduled on Fargate. If a to-be-scheduled pod matches any of the selectors in the Fargate profile, then that pod is run on Fargate. When you create a Fargate profile, you must specify a pod execution role to use with the pods that are scheduled with the profile. This role is added to the cluster's Kubernetes Role Based Access Control (RBAC) for authorization so that the kubelet that is running on the Fargate infrastructure can register with your Amazon EKS cluster so that it can appear in your cluster as a node. The pod execution role also provides IAM permissions to the Fargate infrastructure to allow read access to Amazon ECR image repositories. For more information, see Pod Execution Role in the Amazon EKS User Guide. Fargate profiles are immutable. However, you can create a new updated profile to replace an existing profile and then delete the original after the updated profile has finished creating. If any Fargate profiles in a cluster are in the DELETING status, you must wait for that Fargate profile to finish deleting before you can create any other profiles in that cluster. For more information, see Fargate Profile in the Amazon EKS User Guide."]
+       "Creates an Fargate profile for your Amazon EKS cluster. You must have at least one Fargate profile in a cluster to be able to run pods on Fargate. The Fargate profile allows an administrator to declare which pods run on Fargate and specify which pods run on which Fargate profile. This declaration is done through the profile's selectors. Each profile can have up to five selectors that contain a namespace and labels. A namespace is required for every selector. The label field consists of multiple optional key-value pairs. Pods that match the selectors are scheduled on Fargate. If a to-be-scheduled pod matches any of the selectors in the Fargate profile, then that pod is run on Fargate. When you create a Fargate profile, you must specify a pod execution role to use with the pods that are scheduled with the profile. This role is added to the cluster's Kubernetes Role Based Access Control (RBAC) for authorization so that the kubelet that is running on the Fargate infrastructure can register with your Amazon EKS cluster so that it can appear in your cluster as a node. The pod execution role also provides IAM permissions to the Fargate infrastructure to allow read access to Amazon ECR image repositories. For more information, see Pod Execution Role in the Amazon EKS User Guide. Fargate profiles are immutable. However, you can create a new updated profile to replace an existing profile and then delete the original after the updated profile has finished creating. If any Fargate profiles in a cluster are in the DELETING status, you must wait for that Fargate profile to finish deleting before you can create any other profiles in that cluster. For more information, see Fargate profile in the Amazon EKS User Guide."]
 module CreateFargateProfileRequest =
   struct
     type nonrec t =
       {
       fargateProfileName: String_.t
         [@ocaml.doc "The name of the Fargate profile."];
-      clusterName: String_.t
-        [@ocaml.doc
-          "The name of the Amazon EKS cluster to apply the Fargate profile to."];
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
       podExecutionRoleArn: String_.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the pod execution role to use for pods that match the selectors in the Fargate profile. The pod execution role allows Fargate infrastructure to register with your cluster as a node, and it provides read access to Amazon ECR image repositories. For more information, see Pod Execution Role in the Amazon EKS User Guide."];
+          "The Amazon Resource Name (ARN) of the Pod execution role to use for a Pod that matches the selectors in the Fargate profile. The Pod execution role allows Fargate infrastructure to register with your cluster as a node, and it provides read access to Amazon ECR image repositories. For more information, see Pod execution role in the Amazon EKS User Guide."];
       subnets: StringList.t option
         [@ocaml.doc
-          "The IDs of subnets to launch your pods into. At this time, pods running on Fargate are not assigned public IP addresses, so only private subnets (with no direct route to an Internet Gateway) are accepted for this parameter."];
+          "The IDs of subnets to launch a Pod into. A Pod running on Fargate isn't assigned a public IP address, so only private subnets (with no direct route to an Internet Gateway) are accepted for this parameter."];
       selectors: FargateProfileSelectors.t option
         [@ocaml.doc
-          "The selectors to match for pods to use this Fargate profile. Each selector must have an associated namespace. Optionally, you can also specify labels for a namespace. You may specify up to five selectors in a Fargate profile."];
+          "The selectors to match for a Pod to use this Fargate profile. Each selector must have an associated Kubernetes namespace. Optionally, you can also specify labels for a namespace. You may specify up to five selectors in a Fargate profile."];
       clientRequestToken: String_.t option
         [@ocaml.doc
-          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The metadata to apply to the Fargate profile to assist with categorization and organization. Each tag consists of a key and an optional value. You define both. Fargate profile tags do not propagate to any other resources associated with the Fargate profile, such as the pods that are scheduled with it."]}
+          "Metadata that assists with categorization and organization. Each tag consists of a key and an optional value. You define both. Tags don't propagate to any other cluster or Amazon Web Services resources."]}
     let context_ = "CreateFargateProfileRequest"
     let make ?subnets =
       fun ?selectors ->
@@ -8336,23 +17555,208 @@ module CreateFargateProfileRequest =
       make ?tags ?clientRequestToken ?selectors ?subnets ~podExecutionRoleArn
         ~clusterName ~fargateProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
       let clientRequestToken =
-        field_map json "clientRequestToken" String_.of_json in
+        field_map json__ "clientRequestToken" String_.of_json in
       let selectors =
-        field_map json "selectors" FargateProfileSelectors.of_json in
-      let subnets = field_map json "subnets" StringList.of_json in
+        field_map json__ "selectors" FargateProfileSelectors.of_json in
+      let subnets = field_map json__ "subnets" StringList.of_json in
       let podExecutionRoleArn =
-        field_map_exn json "podExecutionRoleArn" String_.of_json in
-      let clusterName = field_map_exn json "clusterName" String_.of_json in
+        field_map_exn json__ "podExecutionRoleArn" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
       let fargateProfileName =
-        field_map_exn json "fargateProfileName" String_.of_json in
+        field_map_exn json__ "fargateProfileName" String_.of_json in
       make ?tags ?clientRequestToken ?selectors ?subnets ~podExecutionRoleArn
         ~clusterName ~fargateProfileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Fargate profile for your Amazon EKS cluster. You must have at least one Fargate profile in a cluster to be able to run pods on Fargate. The Fargate profile allows an administrator to declare which pods run on Fargate and specify which pods run on which Fargate profile. This declaration is done through the profile\226\128\153s selectors. Each profile can have up to five selectors that contain a namespace and labels. A namespace is required for every selector. The label field consists of multiple optional key-value pairs. Pods that match the selectors are scheduled on Fargate. If a to-be-scheduled pod matches any of the selectors in the Fargate profile, then that pod is run on Fargate. When you create a Fargate profile, you must specify a pod execution role to use with the pods that are scheduled with the profile. This role is added to the cluster's Kubernetes Role Based Access Control (RBAC) for authorization so that the kubelet that is running on the Fargate infrastructure can register with your Amazon EKS cluster so that it can appear in your cluster as a node. The pod execution role also provides IAM permissions to the Fargate infrastructure to allow read access to Amazon ECR image repositories. For more information, see Pod Execution Role in the Amazon EKS User Guide. Fargate profiles are immutable. However, you can create a new updated profile to replace an existing profile and then delete the original after the updated profile has finished creating. If any Fargate profiles in a cluster are in the DELETING status, you must wait for that Fargate profile to finish deleting before you can create any other profiles in that cluster. For more information, see Fargate Profile in the Amazon EKS User Guide."]
+       "Creates an Fargate profile for your Amazon EKS cluster. You must have at least one Fargate profile in a cluster to be able to run pods on Fargate. The Fargate profile allows an administrator to declare which pods run on Fargate and specify which pods run on which Fargate profile. This declaration is done through the profile's selectors. Each profile can have up to five selectors that contain a namespace and labels. A namespace is required for every selector. The label field consists of multiple optional key-value pairs. Pods that match the selectors are scheduled on Fargate. If a to-be-scheduled pod matches any of the selectors in the Fargate profile, then that pod is run on Fargate. When you create a Fargate profile, you must specify a pod execution role to use with the pods that are scheduled with the profile. This role is added to the cluster's Kubernetes Role Based Access Control (RBAC) for authorization so that the kubelet that is running on the Fargate infrastructure can register with your Amazon EKS cluster so that it can appear in your cluster as a node. The pod execution role also provides IAM permissions to the Fargate infrastructure to allow read access to Amazon ECR image repositories. For more information, see Pod Execution Role in the Amazon EKS User Guide. Fargate profiles are immutable. However, you can create a new updated profile to replace an existing profile and then delete the original after the updated profile has finished creating. If any Fargate profiles in a cluster are in the DELETING status, you must wait for that Fargate profile to finish deleting before you can create any other profiles in that cluster. For more information, see Fargate profile in the Amazon EKS User Guide."]
+module CreateEksAnywhereSubscriptionResponse =
+  struct
+    type nonrec t =
+      {
+      subscription: EksAnywhereSubscription.t option
+        [@ocaml.doc "The full description of the subscription."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceLimitExceededException of ResourceLimitExceededException.t 
+      | `ServerException of ServerException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?subscription = fun () -> { subscription }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceLimitExceededException"));
+            ("details", (ResourceLimitExceededException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("subscription",
+           (Option.map x.subscription ~f:EksAnywhereSubscription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subscription =
+        (Option.map ~f:EksAnywhereSubscription.of_xml)
+          (Xml.child xml_arg0 "subscription") in
+      make ?subscription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subscription =
+        field_map json__ "subscription" EksAnywhereSubscription.of_json in
+      make ?subscription ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an EKS Anywhere subscription. When a subscription is created, it is a contract agreement for the length of the term specified in the request. Licenses that are used to validate support are provisioned in Amazon Web Services License Manager and the caller account is granted access to EKS Anywhere Curated Packages."]
+module CreateEksAnywhereSubscriptionRequest =
+  struct
+    type nonrec t =
+      {
+      name: EksAnywhereSubscriptionName.t
+        [@ocaml.doc
+          "The unique name for your subscription. It must be unique in your Amazon Web Services account in the Amazon Web Services Region you're creating the subscription in. The name can contain only alphanumeric characters (case-sensitive), hyphens, and underscores. It must start with an alphabetic character and can't be longer than 100 characters."];
+      term: EksAnywhereSubscriptionTerm.t
+        [@ocaml.doc
+          "An object representing the term duration and term unit type of your subscription. This determines the term length of your subscription. Valid values are MONTHS for term unit and 12 or 36 for term duration, indicating a 12 month or 36 month subscription. This value cannot be changed after creating the subscription."];
+      licenseQuantity: Integer.t option
+        [@ocaml.doc
+          "The number of licenses to purchase with the subscription. Valid values are between 1 and 100. This value can't be changed after creating the subscription."];
+      licenseType: EksAnywhereSubscriptionLicenseType.t option
+        [@ocaml.doc
+          "The license type for all licenses in the subscription. Valid value is CLUSTER. With the CLUSTER license type, each license covers support for a single EKS Anywhere cluster."];
+      autoRenew: Boolean.t option
+        [@ocaml.doc
+          "A boolean indicating whether the subscription auto renews at the end of the term."];
+      clientRequestToken: String_.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The metadata for a subscription to assist with categorization and organization. Each tag consists of a key and an optional value. Subscription tags don't propagate to any other resources associated with the subscription."]}
+    let context_ = "CreateEksAnywhereSubscriptionRequest"
+    let make ?licenseQuantity =
+      fun ?licenseType ->
+        fun ?autoRenew ->
+          fun ?clientRequestToken ->
+            fun ?tags ->
+              fun ~name ->
+                fun ~term ->
+                  fun () ->
+                    {
+                      licenseQuantity;
+                      licenseType;
+                      autoRenew;
+                      clientRequestToken;
+                      tags;
+                      name;
+                      term
+                    }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (EksAnywhereSubscriptionName.to_value x.name)));
+        ("term", (Some (EksAnywhereSubscriptionTerm.to_value x.term)));
+        ("licenseQuantity",
+          (Option.map x.licenseQuantity ~f:Integer.to_value));
+        ("licenseType",
+          (Option.map x.licenseType
+             ~f:EksAnywhereSubscriptionLicenseType.to_value));
+        ("autoRenew", (Option.map x.autoRenew ~f:Boolean.to_value));
+        ("clientRequestToken",
+          (Option.map x.clientRequestToken ~f:String_.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let clientRequestToken =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "clientRequestToken") in
+      let autoRenew =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "autoRenew") in
+      let licenseType =
+        (Option.map ~f:EksAnywhereSubscriptionLicenseType.of_xml)
+          (Xml.child xml_arg0 "licenseType") in
+      let licenseQuantity =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "licenseQuantity") in
+      let term =
+        EksAnywhereSubscriptionTerm.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "term") in
+      let name =
+        EksAnywhereSubscriptionName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?tags ?clientRequestToken ?autoRenew ?licenseType ?licenseQuantity
+        ~term ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let clientRequestToken =
+        field_map json__ "clientRequestToken" String_.of_json in
+      let autoRenew = field_map json__ "autoRenew" Boolean.of_json in
+      let licenseType =
+        field_map json__ "licenseType"
+          EksAnywhereSubscriptionLicenseType.of_json in
+      let licenseQuantity =
+        field_map json__ "licenseQuantity" Integer.of_json in
+      let term =
+        field_map_exn json__ "term" EksAnywhereSubscriptionTerm.of_json in
+      let name =
+        field_map_exn json__ "name" EksAnywhereSubscriptionName.of_json in
+      make ?tags ?clientRequestToken ?autoRenew ?licenseType ?licenseQuantity
+        ~term ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an EKS Anywhere subscription. When a subscription is created, it is a contract agreement for the length of the term specified in the request. Licenses that are used to validate support are provisioned in Amazon Web Services License Manager and the caller account is granted access to EKS Anywhere Curated Packages."]
 module CreateClusterResponse =
   struct
     type nonrec t =
@@ -8453,21 +17857,22 @@ module CreateClusterResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon EKS control plane. The Amazon EKS control plane consists of control plane instances that run the Kubernetes software, such as etcd and the API server. The control plane runs in an account managed by Amazon Web Services, and the Kubernetes API is exposed by the Amazon EKS API server endpoint. Each Amazon EKS cluster control plane is single tenant and unique. It runs on its own set of Amazon EC2 instances. The cluster control plane is provisioned across multiple Availability Zones and fronted by an Elastic Load Balancing Network Load Balancer. Amazon EKS also provisions elastic network interfaces in your VPC subnets to provide connectivity from the control plane instances to the nodes (for example, to support kubectl exec, logs, and proxy data flows). Amazon EKS nodes run in your Amazon Web Services account and connect to your cluster's control plane over the Kubernetes API server endpoint and a certificate file that is created for your cluster. In most cases, it takes several minutes to create a cluster. After you create an Amazon EKS cluster, you must configure your Kubernetes tooling to communicate with the API server and launch nodes into your cluster. For more information, see Managing Cluster Authentication and Launching Amazon EKS nodes in the Amazon EKS User Guide."]
+       "Creates an Amazon EKS control plane. The Amazon EKS control plane consists of control plane instances that run the Kubernetes software, such as etcd and the API server. The control plane runs in an account managed by Amazon Web Services, and the Kubernetes API is exposed by the Amazon EKS API server endpoint. Each Amazon EKS cluster control plane is single tenant and unique. It runs on its own set of Amazon EC2 instances. The cluster control plane is provisioned across multiple Availability Zones and fronted by an Elastic Load Balancing Network Load Balancer. Amazon EKS also provisions elastic network interfaces in your VPC subnets to provide connectivity from the control plane instances to the nodes (for example, to support kubectl exec, logs, and proxy data flows). Amazon EKS nodes run in your Amazon Web Services account and connect to your cluster's control plane over the Kubernetes API server endpoint and a certificate file that is created for your cluster. You can use the endpointPublicAccess and endpointPrivateAccess parameters to enable or disable public and private access to your cluster's Kubernetes API server endpoint. By default, public access is enabled, and private access is disabled. The endpoint domain name and IP address family depends on the value of the ipFamily for the cluster. For more information, see Amazon EKS Cluster Endpoint Access Control in the Amazon EKS User Guide . You can use the logging parameter to enable or disable exporting the Kubernetes control plane logs for your cluster to CloudWatch Logs. By default, cluster control plane logs aren't exported to CloudWatch Logs. For more information, see Amazon EKS Cluster Control Plane Logs in the Amazon EKS User Guide . CloudWatch Logs ingestion, archive storage, and data scanning rates apply to exported control plane logs. For more information, see CloudWatch Pricing. In most cases, it takes several minutes to create a cluster. After you create an Amazon EKS cluster, you must configure your Kubernetes tooling to communicate with the API server and launch nodes into your cluster. For more information, see Allowing users to access your cluster and Launching Amazon EKS nodes in the Amazon EKS User Guide."]
 module CreateClusterRequest =
   struct
     type nonrec t =
       {
       name: ClusterName.t
-        [@ocaml.doc "The unique name to give to your cluster."];
+        [@ocaml.doc
+          "The unique name to give to your cluster. The name can contain only alphanumeric characters (case-sensitive), hyphens, and underscores. It must start with an alphanumeric character and can't be longer than 100 characters. The name must be unique within the Amazon Web Services Region and Amazon Web Services account that you're creating the cluster in."];
       version: String_.t option
         [@ocaml.doc
-          "The desired Kubernetes version for your cluster. If you don't specify a value here, the latest version available in Amazon EKS is used."];
+          "The desired Kubernetes version for your cluster. If you don't specify a value here, the default version available in Amazon EKS is used. The default version might not be the latest version available."];
       roleArn: String_.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the IAM role that provides permissions for the Kubernetes control plane to make calls to Amazon Web Services API operations on your behalf. For more information, see Amazon EKS Service IAM Role in the Amazon EKS User Guide ."];
@@ -8478,15 +17883,44 @@ module CreateClusterRequest =
         [@ocaml.doc "The Kubernetes network configuration for the cluster."];
       logging: Logging.t option
         [@ocaml.doc
-          "Enable or disable exporting the Kubernetes control plane logs for your cluster to CloudWatch Logs. By default, cluster control plane logs aren't exported to CloudWatch Logs. For more information, see Amazon EKS Cluster control plane logs in the Amazon EKS User Guide . CloudWatch Logs ingestion, archive storage, and data scanning rates apply to exported control plane logs. For more information, see CloudWatch Pricing."];
+          "Enable or disable exporting the Kubernetes control plane logs for your cluster to CloudWatch Logs . By default, cluster control plane logs aren't exported to CloudWatch Logs . For more information, see Amazon EKS Cluster control plane logs in the Amazon EKS User Guide . CloudWatch Logs ingestion, archive storage, and data scanning rates apply to exported control plane logs. For more information, see CloudWatch Pricing."];
       clientRequestToken: String_.t option
         [@ocaml.doc
-          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The metadata to apply to the cluster to assist with categorization and organization. Each tag consists of a key and an optional value. You define both."];
+          "Metadata that assists with categorization and organization. Each tag consists of a key and an optional value. You define both. Tags don't propagate to any other cluster or Amazon Web Services resources."];
       encryptionConfig: EncryptionConfigList.t option
-        [@ocaml.doc "The encryption configuration for the cluster."]}
+        [@ocaml.doc "The encryption configuration for the cluster."];
+      outpostConfig: OutpostConfigRequest.t option
+        [@ocaml.doc
+          "An object representing the configuration of your local Amazon EKS cluster on an Amazon Web Services Outpost. Before creating a local cluster on an Outpost, review Local clusters for Amazon EKS on Amazon Web Services Outposts in the Amazon EKS User Guide. This object isn't available for creating Amazon EKS clusters on the Amazon Web Services cloud."];
+      accessConfig: CreateAccessConfigRequest.t option
+        [@ocaml.doc "The access configuration for the cluster."];
+      bootstrapSelfManagedAddons: BoxedBoolean.t option
+        [@ocaml.doc
+          "If you set this value to False when creating a cluster, the default networking add-ons will not be installed. The default networking add-ons include vpc-cni, coredns, and kube-proxy. Use this option when you plan to install third-party alternative add-ons or self-manage the default networking add-ons."];
+      upgradePolicy: UpgradePolicyRequest.t option
+        [@ocaml.doc
+          "New clusters, by default, have extended support enabled. You can disable extended support when creating a cluster by setting this value to STANDARD."];
+      zonalShiftConfig: ZonalShiftConfigRequest.t option
+        [@ocaml.doc
+          "Enable or disable ARC zonal shift for the cluster. If zonal shift is enabled, Amazon Web Services configures zonal autoshift for the cluster. Zonal shift is a feature of Amazon Application Recovery Controller (ARC). ARC zonal shift is designed to be a temporary measure that allows you to move traffic for a resource away from an impaired AZ until the zonal shift expires or you cancel it. You can extend the zonal shift if necessary. You can start a zonal shift for an Amazon EKS cluster, or you can allow Amazon Web Services to do it for you by enabling zonal autoshift. This shift updates the flow of east-to-west network traffic in your cluster to only consider network endpoints for Pods running on worker nodes in healthy AZs. Additionally, any ALB or NLB handling ingress traffic for applications in your Amazon EKS cluster will automatically route traffic to targets in the healthy AZs. For more information about zonal shift in EKS, see Learn about Amazon Application Recovery Controller (ARC) Zonal Shift in Amazon EKS in the Amazon EKS User Guide ."];
+      remoteNetworkConfig: RemoteNetworkConfigRequest.t option
+        [@ocaml.doc
+          "The configuration in the cluster for EKS Hybrid Nodes. You can add, change, or remove this configuration after the cluster is created."];
+      computeConfig: ComputeConfigRequest.t option
+        [@ocaml.doc
+          "Enable or disable the compute capability of EKS Auto Mode when creating your EKS Auto Mode cluster. If the compute capability is enabled, EKS Auto Mode will create and delete EC2 Managed Instances in your Amazon Web Services account"];
+      storageConfig: StorageConfigRequest.t option
+        [@ocaml.doc
+          "Enable or disable the block storage capability of EKS Auto Mode when creating your EKS Auto Mode cluster. If the block storage capability is enabled, EKS Auto Mode will create and delete EBS volumes in your Amazon Web Services account."];
+      deletionProtection: BoxedBoolean.t option
+        [@ocaml.doc
+          "Indicates whether to enable deletion protection for the cluster. When enabled, the cluster cannot be deleted unless deletion protection is first disabled. This helps prevent accidental cluster deletion. Default value is false."];
+      controlPlaneScalingConfig: ControlPlaneScalingConfig.t option
+        [@ocaml.doc
+          "The control plane scaling tier configuration. For more information, see EKS Provisioned Control Plane in the Amazon EKS User Guide."]}
     let context_ = "CreateClusterRequest"
     let make ?version =
       fun ?kubernetesNetworkConfig ->
@@ -8494,21 +17928,41 @@ module CreateClusterRequest =
           fun ?clientRequestToken ->
             fun ?tags ->
               fun ?encryptionConfig ->
-                fun ~name ->
-                  fun ~roleArn ->
-                    fun ~resourcesVpcConfig ->
-                      fun () ->
-                        {
-                          version;
-                          kubernetesNetworkConfig;
-                          logging;
-                          clientRequestToken;
-                          tags;
-                          encryptionConfig;
-                          name;
-                          roleArn;
-                          resourcesVpcConfig
-                        }
+                fun ?outpostConfig ->
+                  fun ?accessConfig ->
+                    fun ?bootstrapSelfManagedAddons ->
+                      fun ?upgradePolicy ->
+                        fun ?zonalShiftConfig ->
+                          fun ?remoteNetworkConfig ->
+                            fun ?computeConfig ->
+                              fun ?storageConfig ->
+                                fun ?deletionProtection ->
+                                  fun ?controlPlaneScalingConfig ->
+                                    fun ~name ->
+                                      fun ~roleArn ->
+                                        fun ~resourcesVpcConfig ->
+                                          fun () ->
+                                            {
+                                              version;
+                                              kubernetesNetworkConfig;
+                                              logging;
+                                              clientRequestToken;
+                                              tags;
+                                              encryptionConfig;
+                                              outpostConfig;
+                                              accessConfig;
+                                              bootstrapSelfManagedAddons;
+                                              upgradePolicy;
+                                              zonalShiftConfig;
+                                              remoteNetworkConfig;
+                                              computeConfig;
+                                              storageConfig;
+                                              deletionProtection;
+                                              controlPlaneScalingConfig;
+                                              name;
+                                              roleArn;
+                                              resourcesVpcConfig
+                                            }
     let to_value x =
       structure_to_value
         [("name", (Some (ClusterName.to_value x.name)));
@@ -8524,9 +17978,61 @@ module CreateClusterRequest =
           (Option.map x.clientRequestToken ~f:String_.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
         ("encryptionConfig",
-          (Option.map x.encryptionConfig ~f:EncryptionConfigList.to_value))]
+          (Option.map x.encryptionConfig ~f:EncryptionConfigList.to_value));
+        ("outpostConfig",
+          (Option.map x.outpostConfig ~f:OutpostConfigRequest.to_value));
+        ("accessConfig",
+          (Option.map x.accessConfig ~f:CreateAccessConfigRequest.to_value));
+        ("bootstrapSelfManagedAddons",
+          (Option.map x.bootstrapSelfManagedAddons ~f:BoxedBoolean.to_value));
+        ("upgradePolicy",
+          (Option.map x.upgradePolicy ~f:UpgradePolicyRequest.to_value));
+        ("zonalShiftConfig",
+          (Option.map x.zonalShiftConfig ~f:ZonalShiftConfigRequest.to_value));
+        ("remoteNetworkConfig",
+          (Option.map x.remoteNetworkConfig
+             ~f:RemoteNetworkConfigRequest.to_value));
+        ("computeConfig",
+          (Option.map x.computeConfig ~f:ComputeConfigRequest.to_value));
+        ("storageConfig",
+          (Option.map x.storageConfig ~f:StorageConfigRequest.to_value));
+        ("deletionProtection",
+          (Option.map x.deletionProtection ~f:BoxedBoolean.to_value));
+        ("controlPlaneScalingConfig",
+          (Option.map x.controlPlaneScalingConfig
+             ~f:ControlPlaneScalingConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let controlPlaneScalingConfig =
+        (Option.map ~f:ControlPlaneScalingConfig.of_xml)
+          (Xml.child xml_arg0 "controlPlaneScalingConfig") in
+      let deletionProtection =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "deletionProtection") in
+      let storageConfig =
+        (Option.map ~f:StorageConfigRequest.of_xml)
+          (Xml.child xml_arg0 "storageConfig") in
+      let computeConfig =
+        (Option.map ~f:ComputeConfigRequest.of_xml)
+          (Xml.child xml_arg0 "computeConfig") in
+      let remoteNetworkConfig =
+        (Option.map ~f:RemoteNetworkConfigRequest.of_xml)
+          (Xml.child xml_arg0 "remoteNetworkConfig") in
+      let zonalShiftConfig =
+        (Option.map ~f:ZonalShiftConfigRequest.of_xml)
+          (Xml.child xml_arg0 "zonalShiftConfig") in
+      let upgradePolicy =
+        (Option.map ~f:UpgradePolicyRequest.of_xml)
+          (Xml.child xml_arg0 "upgradePolicy") in
+      let bootstrapSelfManagedAddons =
+        (Option.map ~f:BoxedBoolean.of_xml)
+          (Xml.child xml_arg0 "bootstrapSelfManagedAddons") in
+      let accessConfig =
+        (Option.map ~f:CreateAccessConfigRequest.of_xml)
+          (Xml.child xml_arg0 "accessConfig") in
+      let outpostConfig =
+        (Option.map ~f:OutpostConfigRequest.of_xml)
+          (Xml.child xml_arg0 "outpostConfig") in
       let encryptionConfig =
         (Option.map ~f:EncryptionConfigList.of_xml)
           (Xml.child xml_arg0 "encryptionConfig") in
@@ -8548,31 +18054,270 @@ module CreateClusterRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "version") in
       let name =
         ClusterName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?encryptionConfig ?tags ?clientRequestToken ?logging
+      make ?controlPlaneScalingConfig ?deletionProtection ?storageConfig
+        ?computeConfig ?remoteNetworkConfig ?zonalShiftConfig ?upgradePolicy
+        ?bootstrapSelfManagedAddons ?accessConfig ?outpostConfig
+        ?encryptionConfig ?tags ?clientRequestToken ?logging
         ?kubernetesNetworkConfig ~resourcesVpcConfig ~roleArn ?version ~name
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let controlPlaneScalingConfig =
+        field_map json__ "controlPlaneScalingConfig"
+          ControlPlaneScalingConfig.of_json in
+      let deletionProtection =
+        field_map json__ "deletionProtection" BoxedBoolean.of_json in
+      let storageConfig =
+        field_map json__ "storageConfig" StorageConfigRequest.of_json in
+      let computeConfig =
+        field_map json__ "computeConfig" ComputeConfigRequest.of_json in
+      let remoteNetworkConfig =
+        field_map json__ "remoteNetworkConfig"
+          RemoteNetworkConfigRequest.of_json in
+      let zonalShiftConfig =
+        field_map json__ "zonalShiftConfig" ZonalShiftConfigRequest.of_json in
+      let upgradePolicy =
+        field_map json__ "upgradePolicy" UpgradePolicyRequest.of_json in
+      let bootstrapSelfManagedAddons =
+        field_map json__ "bootstrapSelfManagedAddons" BoxedBoolean.of_json in
+      let accessConfig =
+        field_map json__ "accessConfig" CreateAccessConfigRequest.of_json in
+      let outpostConfig =
+        field_map json__ "outpostConfig" OutpostConfigRequest.of_json in
       let encryptionConfig =
-        field_map json "encryptionConfig" EncryptionConfigList.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+        field_map json__ "encryptionConfig" EncryptionConfigList.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let clientRequestToken =
-        field_map json "clientRequestToken" String_.of_json in
-      let logging = field_map json "logging" Logging.of_json in
+        field_map json__ "clientRequestToken" String_.of_json in
+      let logging = field_map json__ "logging" Logging.of_json in
       let kubernetesNetworkConfig =
-        field_map json "kubernetesNetworkConfig"
+        field_map json__ "kubernetesNetworkConfig"
           KubernetesNetworkConfigRequest.of_json in
       let resourcesVpcConfig =
-        field_map_exn json "resourcesVpcConfig" VpcConfigRequest.of_json in
-      let roleArn = field_map_exn json "roleArn" String_.of_json in
-      let version = field_map json "version" String_.of_json in
-      let name = field_map_exn json "name" ClusterName.of_json in
-      make ?encryptionConfig ?tags ?clientRequestToken ?logging
+        field_map_exn json__ "resourcesVpcConfig" VpcConfigRequest.of_json in
+      let roleArn = field_map_exn json__ "roleArn" String_.of_json in
+      let version = field_map json__ "version" String_.of_json in
+      let name = field_map_exn json__ "name" ClusterName.of_json in
+      make ?controlPlaneScalingConfig ?deletionProtection ?storageConfig
+        ?computeConfig ?remoteNetworkConfig ?zonalShiftConfig ?upgradePolicy
+        ?bootstrapSelfManagedAddons ?accessConfig ?outpostConfig
+        ?encryptionConfig ?tags ?clientRequestToken ?logging
         ?kubernetesNetworkConfig ~resourcesVpcConfig ~roleArn ?version ~name
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon EKS control plane. The Amazon EKS control plane consists of control plane instances that run the Kubernetes software, such as etcd and the API server. The control plane runs in an account managed by Amazon Web Services, and the Kubernetes API is exposed by the Amazon EKS API server endpoint. Each Amazon EKS cluster control plane is single tenant and unique. It runs on its own set of Amazon EC2 instances. The cluster control plane is provisioned across multiple Availability Zones and fronted by an Elastic Load Balancing Network Load Balancer. Amazon EKS also provisions elastic network interfaces in your VPC subnets to provide connectivity from the control plane instances to the nodes (for example, to support kubectl exec, logs, and proxy data flows). Amazon EKS nodes run in your Amazon Web Services account and connect to your cluster's control plane over the Kubernetes API server endpoint and a certificate file that is created for your cluster. In most cases, it takes several minutes to create a cluster. After you create an Amazon EKS cluster, you must configure your Kubernetes tooling to communicate with the API server and launch nodes into your cluster. For more information, see Managing Cluster Authentication and Launching Amazon EKS nodes in the Amazon EKS User Guide."]
+       "Creates an Amazon EKS control plane. The Amazon EKS control plane consists of control plane instances that run the Kubernetes software, such as etcd and the API server. The control plane runs in an account managed by Amazon Web Services, and the Kubernetes API is exposed by the Amazon EKS API server endpoint. Each Amazon EKS cluster control plane is single tenant and unique. It runs on its own set of Amazon EC2 instances. The cluster control plane is provisioned across multiple Availability Zones and fronted by an Elastic Load Balancing Network Load Balancer. Amazon EKS also provisions elastic network interfaces in your VPC subnets to provide connectivity from the control plane instances to the nodes (for example, to support kubectl exec, logs, and proxy data flows). Amazon EKS nodes run in your Amazon Web Services account and connect to your cluster's control plane over the Kubernetes API server endpoint and a certificate file that is created for your cluster. You can use the endpointPublicAccess and endpointPrivateAccess parameters to enable or disable public and private access to your cluster's Kubernetes API server endpoint. By default, public access is enabled, and private access is disabled. The endpoint domain name and IP address family depends on the value of the ipFamily for the cluster. For more information, see Amazon EKS Cluster Endpoint Access Control in the Amazon EKS User Guide . You can use the logging parameter to enable or disable exporting the Kubernetes control plane logs for your cluster to CloudWatch Logs. By default, cluster control plane logs aren't exported to CloudWatch Logs. For more information, see Amazon EKS Cluster Control Plane Logs in the Amazon EKS User Guide . CloudWatch Logs ingestion, archive storage, and data scanning rates apply to exported control plane logs. For more information, see CloudWatch Pricing. In most cases, it takes several minutes to create a cluster. After you create an Amazon EKS cluster, you must configure your Kubernetes tooling to communicate with the API server and launch nodes into your cluster. For more information, see Allowing users to access your cluster and Launching Amazon EKS nodes in the Amazon EKS User Guide."]
+module CreateCapabilityResponse =
+  struct
+    type nonrec t =
+      {
+      capability: Capability.t option
+        [@ocaml.doc
+          "An object containing information about the newly created capability, including its name, ARN, status, and configuration."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceLimitExceededException of ResourceLimitExceededException.t 
+      | `ServerException of ServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?capability = fun () -> { capability }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceLimitExceededException"));
+            ("details", (ResourceLimitExceededException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("capability", (Option.map x.capability ~f:Capability.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capability =
+        (Option.map ~f:Capability.of_xml) (Xml.child xml_arg0 "capability") in
+      make ?capability ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capability = field_map json__ "capability" Capability.of_json in
+      make ?capability ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a managed capability resource for an Amazon EKS cluster. Capabilities provide fully managed capabilities to build and scale with Kubernetes. When you create a capability, Amazon EKSprovisions and manages the infrastructure required to run the capability outside of your cluster. This approach reduces operational overhead and preserves cluster resources. You can only create one Capability of each type on a given Amazon EKS cluster. Valid types are Argo CD for declarative GitOps deployment, Amazon Web Services Controllers for Kubernetes (ACK) for resource management, and Kube Resource Orchestrator (KRO) for Kubernetes custom resource orchestration. For more information, see EKS Capabilities in the Amazon EKS User Guide."]
+module CreateCapabilityRequest =
+  struct
+    type nonrec t =
+      {
+      capabilityName: String_.t
+        [@ocaml.doc
+          "A unique name for the capability. The name must be unique within your cluster and can contain alphanumeric characters, hyphens, and underscores."];
+      clusterName: String_.t
+        [@ocaml.doc
+          "The name of the Amazon EKS cluster where you want to create the capability."];
+      clientRequestToken: String_.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. This token is valid for 24 hours after creation. If you retry a request with the same client request token and the same parameters after the original request has completed successfully, the result of the original request is returned."];
+      type_: CapabilityType.t
+        [@ocaml.doc
+          "The type of capability to create. Valid values are: ACK \226\128\147 Amazon Web Services Controllers for Kubernetes (ACK), which lets you manage resources directly from Kubernetes. ARGOCD \226\128\147 Argo CD for GitOps-based continuous delivery. KRO \226\128\147 Kube Resource Orchestrator (KRO) for composing and managing custom Kubernetes resources."];
+      roleArn: String_.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role that the capability uses to interact with Amazon Web Services services. This role must have a trust policy that allows the EKS service principal to assume it, and it must have the necessary permissions for the capability type you're creating. For ACK capabilities, the role needs permissions to manage the resources you want to control through Kubernetes. For Argo CD capabilities, the role needs permissions to access Git repositories and Secrets Manager. For KRO capabilities, the role needs permissions based on the resources you'll be orchestrating."];
+      configuration: CapabilityConfigurationRequest.t option
+        [@ocaml.doc
+          "The configuration settings for the capability. The structure of this object varies depending on the capability type. For Argo CD capabilities, you can configure IAM Identity CenterIAM; Identity Center integration, RBAC role mappings, and network access settings."];
+      tags: TagMap.t option ;
+      deletePropagationPolicy: CapabilityDeletePropagationPolicy.t
+        [@ocaml.doc
+          "Specifies how Kubernetes resources managed by the capability should be handled when the capability is deleted. Currently, the only supported value is RETAIN which retains all Kubernetes resources managed by the capability when the capability is deleted. Because resources are retained, all Kubernetes resources created by the capability should be deleted from the cluster before deleting the capability itself. After the capability is deleted, these resources become difficult to manage because the controller is no longer available."]}
+    let context_ = "CreateCapabilityRequest"
+    let make ?clientRequestToken =
+      fun ?configuration ->
+        fun ?tags ->
+          fun ~capabilityName ->
+            fun ~clusterName ->
+              fun ~type_ ->
+                fun ~roleArn ->
+                  fun ~deletePropagationPolicy ->
+                    fun () ->
+                      {
+                        clientRequestToken;
+                        configuration;
+                        tags;
+                        capabilityName;
+                        clusterName;
+                        type_;
+                        roleArn;
+                        deletePropagationPolicy
+                      }
+    let to_value x =
+      structure_to_value
+        [("capabilityName", (Some (String_.to_value x.capabilityName)));
+        ("name", (Some (String_.to_value x.clusterName)));
+        ("clientRequestToken",
+          (Option.map x.clientRequestToken ~f:String_.to_value));
+        ("type", (Some (CapabilityType.to_value x.type_)));
+        ("roleArn", (Some (String_.to_value x.roleArn)));
+        ("configuration",
+          (Option.map x.configuration
+             ~f:CapabilityConfigurationRequest.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("deletePropagationPolicy",
+          (Some
+             (CapabilityDeletePropagationPolicy.to_value
+                x.deletePropagationPolicy)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deletePropagationPolicy =
+        CapabilityDeletePropagationPolicy.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "deletePropagationPolicy") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let configuration =
+        (Option.map ~f:CapabilityConfigurationRequest.of_xml)
+          (Xml.child xml_arg0 "configuration") in
+      let roleArn =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
+      let type_ =
+        CapabilityType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      let clientRequestToken =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "clientRequestToken") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let capabilityName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "capabilityName") in
+      make ~deletePropagationPolicy ?tags ?configuration ~roleArn ~type_
+        ?clientRequestToken ~clusterName ~capabilityName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deletePropagationPolicy =
+        field_map_exn json__ "deletePropagationPolicy"
+          CapabilityDeletePropagationPolicy.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let configuration =
+        field_map json__ "configuration"
+          CapabilityConfigurationRequest.of_json in
+      let roleArn = field_map_exn json__ "roleArn" String_.of_json in
+      let type_ = field_map_exn json__ "type" CapabilityType.of_json in
+      let clientRequestToken =
+        field_map json__ "clientRequestToken" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      let capabilityName =
+        field_map_exn json__ "capabilityName" String_.of_json in
+      make ~deletePropagationPolicy ?tags ?configuration ~roleArn ~type_
+        ?clientRequestToken ~clusterName ~capabilityName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a managed capability resource for an Amazon EKS cluster. Capabilities provide fully managed capabilities to build and scale with Kubernetes. When you create a capability, Amazon EKSprovisions and manages the infrastructure required to run the capability outside of your cluster. This approach reduces operational overhead and preserves cluster resources. You can only create one Capability of each type on a given Amazon EKS cluster. Valid types are Argo CD for declarative GitOps deployment, Amazon Web Services Controllers for Kubernetes (ACK) for resource management, and Kube Resource Orchestrator (KRO) for Kubernetes custom resource orchestration. For more information, see EKS Capabilities in the Amazon EKS User Guide."]
 module CreateAddonResponse =
   struct
     type nonrec t = {
@@ -8653,20 +18398,19 @@ module CreateAddonResponse =
       let addon = (Option.map ~f:Addon.of_xml) (Xml.child xml_arg0 "addon") in
       make ?addon ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let addon = field_map json "addon" Addon.of_json in make ?addon ()
+    let of_json json__ =
+      let addon = field_map json__ "addon" Addon.of_json in make ?addon ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon EKS add-on. Amazon EKS add-ons help to automate the provisioning and lifecycle management of common operational software for Amazon EKS clusters. Amazon EKS add-ons require clusters running version 1.18 or later because Amazon EKS add-ons rely on the Server-side Apply Kubernetes feature, which is only available in Kubernetes 1.18 and later. For more information, see Amazon EKS add-ons in the Amazon EKS User Guide."]
+       "Creates an Amazon EKS add-on. Amazon EKS add-ons help to automate the provisioning and lifecycle management of common operational software for Amazon EKS clusters. For more information, see Amazon EKS add-ons in the Amazon EKS User Guide."]
 module CreateAddonRequest =
   struct
     type nonrec t =
       {
-      clusterName: ClusterName.t
-        [@ocaml.doc "The name of the cluster to create the add-on for."];
+      clusterName: ClusterName.t [@ocaml.doc "The name of your cluster."];
       addonName: String_.t
         [@ocaml.doc
-          "The name of the add-on. The name must match one of the names returned by DescribeAddonVersions ."];
+          "The name of the add-on. The name must match one of the names returned by DescribeAddonVersions."];
       addonVersion: String_.t option
         [@ocaml.doc
           "The version of the add-on. The version must match one of the versions returned by DescribeAddonVersions ."];
@@ -8675,31 +18419,46 @@ module CreateAddonRequest =
           "The Amazon Resource Name (ARN) of an existing IAM role to bind to the add-on's service account. The role must be assigned the IAM permissions required by the add-on. If you don't specify an existing IAM role, then the add-on uses the permissions assigned to the node IAM role. For more information, see Amazon EKS node IAM role in the Amazon EKS User Guide. To specify an existing IAM role, you must have an IAM OpenID Connect (OIDC) provider created for your cluster. For more information, see Enabling IAM roles for service accounts on your cluster in the Amazon EKS User Guide."];
       resolveConflicts: ResolveConflicts.t option
         [@ocaml.doc
-          "How to resolve parameter value conflicts when migrating an existing add-on to an Amazon EKS add-on."];
+          "How to resolve field value conflicts for an Amazon EKS add-on. Conflicts are handled based on the value you choose: None \226\128\147 If the self-managed version of the add-on is installed on your cluster, Amazon EKS doesn't change the value. Creation of the add-on might fail. Overwrite \226\128\147 If the self-managed version of the add-on is installed on your cluster and the Amazon EKS default value is different than the existing value, Amazon EKS changes the value to the Amazon EKS default value. Preserve \226\128\147 This is similar to the NONE option. If the self-managed version of the add-on is installed on your cluster Amazon EKS doesn't change the add-on resource properties. Creation of the add-on might fail if conflicts are detected. This option works differently during the update operation. For more information, see UpdateAddon . If you don't currently have the self-managed version of the add-on installed on your cluster, the Amazon EKS add-on is installed. Amazon EKS sets all values to default values, regardless of the option that you specify."];
       clientRequestToken: String_.t option
         [@ocaml.doc
           "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The metadata to apply to the cluster to assist with categorization and organization. Each tag consists of a key and an optional value. You define both."]}
+          "Metadata that assists with categorization and organization. Each tag consists of a key and an optional value. You define both. Tags don't propagate to any other cluster or Amazon Web Services resources."];
+      configurationValues: String_.t option
+        [@ocaml.doc
+          "The set of configuration values for the add-on that's created. The values that you provide are validated against the schema returned by DescribeAddonConfiguration."];
+      podIdentityAssociations: AddonPodIdentityAssociationsList.t option
+        [@ocaml.doc
+          "An array of EKS Pod Identity associations to be created. Each association maps a Kubernetes service account to an IAM role. For more information, see Attach an IAM Role to an Amazon EKS add-on using EKS Pod Identity in the Amazon EKS User Guide."];
+      namespaceConfig: AddonNamespaceConfigRequest.t option
+        [@ocaml.doc
+          "The namespace configuration for the addon. If specified, this will override the default namespace for the addon."]}
     let context_ = "CreateAddonRequest"
     let make ?addonVersion =
       fun ?serviceAccountRoleArn ->
         fun ?resolveConflicts ->
           fun ?clientRequestToken ->
             fun ?tags ->
-              fun ~clusterName ->
-                fun ~addonName ->
-                  fun () ->
-                    {
-                      addonVersion;
-                      serviceAccountRoleArn;
-                      resolveConflicts;
-                      clientRequestToken;
-                      tags;
-                      clusterName;
-                      addonName
-                    }
+              fun ?configurationValues ->
+                fun ?podIdentityAssociations ->
+                  fun ?namespaceConfig ->
+                    fun ~clusterName ->
+                      fun ~addonName ->
+                        fun () ->
+                          {
+                            addonVersion;
+                            serviceAccountRoleArn;
+                            resolveConflicts;
+                            clientRequestToken;
+                            tags;
+                            configurationValues;
+                            podIdentityAssociations;
+                            namespaceConfig;
+                            clusterName;
+                            addonName
+                          }
     let to_value x =
       structure_to_value
         [("name", (Some (ClusterName.to_value x.clusterName)));
@@ -8711,9 +18470,26 @@ module CreateAddonRequest =
           (Option.map x.resolveConflicts ~f:ResolveConflicts.to_value));
         ("clientRequestToken",
           (Option.map x.clientRequestToken ~f:String_.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("configurationValues",
+          (Option.map x.configurationValues ~f:String_.to_value));
+        ("podIdentityAssociations",
+          (Option.map x.podIdentityAssociations
+             ~f:AddonPodIdentityAssociationsList.to_value));
+        ("namespaceConfig",
+          (Option.map x.namespaceConfig
+             ~f:AddonNamespaceConfigRequest.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let namespaceConfig =
+        (Option.map ~f:AddonNamespaceConfigRequest.of_xml)
+          (Xml.child xml_arg0 "namespaceConfig") in
+      let podIdentityAssociations =
+        (Option.map ~f:AddonPodIdentityAssociationsList.of_xml)
+          (Xml.child xml_arg0 "podIdentityAssociations") in
+      let configurationValues =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "configurationValues") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let clientRequestToken =
         (Option.map ~f:String_.of_xml)
@@ -8730,25 +18506,215 @@ module CreateAddonRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "addonName") in
       let clusterName =
         ClusterName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?tags ?clientRequestToken ?resolveConflicts ?serviceAccountRoleArn
+      make ?namespaceConfig ?podIdentityAssociations ?configurationValues
+        ?tags ?clientRequestToken ?resolveConflicts ?serviceAccountRoleArn
         ?addonVersion ~addonName ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let namespaceConfig =
+        field_map json__ "namespaceConfig"
+          AddonNamespaceConfigRequest.of_json in
+      let podIdentityAssociations =
+        field_map json__ "podIdentityAssociations"
+          AddonPodIdentityAssociationsList.of_json in
+      let configurationValues =
+        field_map json__ "configurationValues" String_.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let clientRequestToken =
-        field_map json "clientRequestToken" String_.of_json in
+        field_map json__ "clientRequestToken" String_.of_json in
       let resolveConflicts =
-        field_map json "resolveConflicts" ResolveConflicts.of_json in
+        field_map json__ "resolveConflicts" ResolveConflicts.of_json in
       let serviceAccountRoleArn =
-        field_map json "serviceAccountRoleArn" RoleArn.of_json in
-      let addonVersion = field_map json "addonVersion" String_.of_json in
-      let addonName = field_map_exn json "addonName" String_.of_json in
-      let clusterName = field_map_exn json "clusterName" ClusterName.of_json in
-      make ?tags ?clientRequestToken ?resolveConflicts ?serviceAccountRoleArn
+        field_map json__ "serviceAccountRoleArn" RoleArn.of_json in
+      let addonVersion = field_map json__ "addonVersion" String_.of_json in
+      let addonName = field_map_exn json__ "addonName" String_.of_json in
+      let clusterName =
+        field_map_exn json__ "clusterName" ClusterName.of_json in
+      make ?namespaceConfig ?podIdentityAssociations ?configurationValues
+        ?tags ?clientRequestToken ?resolveConflicts ?serviceAccountRoleArn
         ?addonVersion ~addonName ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon EKS add-on. Amazon EKS add-ons help to automate the provisioning and lifecycle management of common operational software for Amazon EKS clusters. Amazon EKS add-ons require clusters running version 1.18 or later because Amazon EKS add-ons rely on the Server-side Apply Kubernetes feature, which is only available in Kubernetes 1.18 and later. For more information, see Amazon EKS add-ons in the Amazon EKS User Guide."]
+       "Creates an Amazon EKS add-on. Amazon EKS add-ons help to automate the provisioning and lifecycle management of common operational software for Amazon EKS clusters. For more information, see Amazon EKS add-ons in the Amazon EKS User Guide."]
+module CreateAccessEntryResponse =
+  struct
+    type nonrec t = {
+      accessEntry: AccessEntry.t option }
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceLimitExceededException of ResourceLimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accessEntry = fun () -> { accessEntry }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceLimitExceededException"));
+            ("details", (ResourceLimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("accessEntry", (Option.map x.accessEntry ~f:AccessEntry.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accessEntry =
+        (Option.map ~f:AccessEntry.of_xml) (Xml.child xml_arg0 "accessEntry") in
+      make ?accessEntry ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accessEntry = field_map json__ "accessEntry" AccessEntry.of_json in
+      make ?accessEntry ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an access entry. An access entry allows an IAM principal to access your cluster. Access entries can replace the need to maintain entries in the aws-auth ConfigMap for authentication. You have the following options for authorizing an IAM principal to access Kubernetes objects on your cluster: Kubernetes role-based access control (RBAC), Amazon EKS, or both. Kubernetes RBAC authorization requires you to create and manage Kubernetes Role, ClusterRole, RoleBinding, and ClusterRoleBinding objects, in addition to managing access entries. If you use Amazon EKS authorization exclusively, you don't need to create and manage Kubernetes Role, ClusterRole, RoleBinding, and ClusterRoleBinding objects. For more information about access entries, see Access entries in the Amazon EKS User Guide."]
+module CreateAccessEntryRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
+      principalArn: String_.t
+        [@ocaml.doc
+          "The ARN of the IAM principal for the AccessEntry. You can specify one ARN for each access entry. You can't specify the same ARN in more than one access entry. This value can't be changed after access entry creation. The valid principals differ depending on the type of the access entry in the type field. For STANDARD access entries, you can use every IAM principal type. For nodes (EC2 (for EKS Auto Mode), EC2_LINUX, EC2_WINDOWS, FARGATE_LINUX, and HYBRID_LINUX), the only valid ARN is IAM roles. You can't use the STS session principal type with access entries because this is a temporary principal for each session and not a permanent identity that can be assigned permissions. IAM best practices recommend using IAM roles with temporary credentials, rather than IAM users with long-term credentials."];
+      kubernetesGroups: StringList.t option
+        [@ocaml.doc
+          "The value for name that you've specified for kind: Group as a subject in a Kubernetes RoleBinding or ClusterRoleBinding object. Amazon EKS doesn't confirm that the value for name exists in any bindings on your cluster. You can specify one or more names. Kubernetes authorizes the principalArn of the access entry to access any cluster objects that you've specified in a Kubernetes Role or ClusterRole object that is also specified in a binding's roleRef. For more information about creating Kubernetes RoleBinding, ClusterRoleBinding, Role, or ClusterRole objects, see Using RBAC Authorization in the Kubernetes documentation. If you want Amazon EKS to authorize the principalArn (instead of, or in addition to Kubernetes authorizing the principalArn), you can associate one or more access policies to the access entry using AssociateAccessPolicy. If you associate any access policies, the principalARN has all permissions assigned in the associated access policies and all permissions in any Kubernetes Role or ClusterRole objects that the group names are bound to."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "Metadata that assists with categorization and organization. Each tag consists of a key and an optional value. You define both. Tags don't propagate to any other cluster or Amazon Web Services resources."];
+      clientRequestToken: String_.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+      username: String_.t option
+        [@ocaml.doc
+          "The username to authenticate to Kubernetes with. We recommend not specifying a username and letting Amazon EKS specify it for you. For more information about the value Amazon EKS specifies for you, or constraints before specifying your own username, see Creating access entries in the Amazon EKS User Guide."];
+      type_: String_.t option
+        [@ocaml.doc
+          "The type of the new access entry. Valid values are STANDARD, FARGATE_LINUX, EC2_LINUX, EC2_WINDOWS, EC2 (for EKS Auto Mode), HYBRID_LINUX, and HYPERPOD_LINUX. If the principalArn is for an IAM role that's used for self-managed Amazon EC2 nodes, specify EC2_LINUX or EC2_WINDOWS. Amazon EKS grants the necessary permissions to the node for you. If the principalArn is for any other purpose, specify STANDARD. If you don't specify a value, Amazon EKS sets the value to STANDARD. If you have the access mode of the cluster set to API_AND_CONFIG_MAP, it's unnecessary to create access entries for IAM roles used with Fargate profiles or managed Amazon EC2 nodes, because Amazon EKS creates entries in the aws-auth ConfigMap for the roles. You can't change this value once you've created the access entry. If you set the value to EC2_LINUX or EC2_WINDOWS, you can't specify values for kubernetesGroups, or associate an AccessPolicy to the access entry."]}
+    let context_ = "CreateAccessEntryRequest"
+    let make ?kubernetesGroups =
+      fun ?tags ->
+        fun ?clientRequestToken ->
+          fun ?username ->
+            fun ?type_ ->
+              fun ~clusterName ->
+                fun ~principalArn ->
+                  fun () ->
+                    {
+                      kubernetesGroups;
+                      tags;
+                      clientRequestToken;
+                      username;
+                      type_;
+                      clusterName;
+                      principalArn
+                    }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("principalArn", (Some (String_.to_value x.principalArn)));
+        ("kubernetesGroups",
+          (Option.map x.kubernetesGroups ~f:StringList.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("clientRequestToken",
+          (Option.map x.clientRequestToken ~f:String_.to_value));
+        ("username", (Option.map x.username ~f:String_.to_value));
+        ("type", (Option.map x.type_ ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
+      let username =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "username") in
+      let clientRequestToken =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "clientRequestToken") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let kubernetesGroups =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "kubernetesGroups") in
+      let principalArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "principalArn") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?type_ ?username ?clientRequestToken ?tags ?kubernetesGroups
+        ~principalArn ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "type" String_.of_json in
+      let username = field_map json__ "username" String_.of_json in
+      let clientRequestToken =
+        field_map json__ "clientRequestToken" String_.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let kubernetesGroups =
+        field_map json__ "kubernetesGroups" StringList.of_json in
+      let principalArn = field_map_exn json__ "principalArn" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ?type_ ?username ?clientRequestToken ?tags ?kubernetesGroups
+        ~principalArn ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an access entry. An access entry allows an IAM principal to access your cluster. Access entries can replace the need to maintain entries in the aws-auth ConfigMap for authentication. You have the following options for authorizing an IAM principal to access Kubernetes objects on your cluster: Kubernetes role-based access control (RBAC), Amazon EKS, or both. Kubernetes RBAC authorization requires you to create and manage Kubernetes Role, ClusterRole, RoleBinding, and ClusterRoleBinding objects, in addition to managing access entries. If you use Amazon EKS authorization exclusively, you don't need to create and manage Kubernetes Role, ClusterRole, RoleBinding, and ClusterRoleBinding objects. For more information about access entries, see Access entries in the Amazon EKS User Guide."]
 module AssociateIdentityProviderConfigResponse =
   struct
     type nonrec t =
@@ -8762,6 +18728,7 @@ module AssociateIdentityProviderConfigResponse =
       | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?update = fun ?tags -> fun () -> { update; tags }
     let error_of_json name json =
@@ -8776,6 +18743,8 @@ module AssociateIdentityProviderConfigResponse =
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -8791,6 +18760,8 @@ module AssociateIdentityProviderConfigResponse =
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -8819,6 +18790,10 @@ module AssociateIdentityProviderConfigResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -8835,29 +18810,27 @@ module AssociateIdentityProviderConfigResponse =
         (Option.map ~f:Update.of_xml) (Xml.child xml_arg0 "update") in
       make ?tags ?update ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let update = field_map json "update" Update.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let update = field_map json__ "update" Update.of_json in
       make ?tags ?update ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associate an identity provider configuration to a cluster. If you want to authenticate identities using an identity provider, you can create an identity provider configuration and associate it to your cluster. After configuring authentication to your cluster you can create Kubernetes roles and clusterroles to assign permissions to the roles, and then bind the roles to the identities using Kubernetes rolebindings and clusterrolebindings. For more information see Using RBAC Authorization in the Kubernetes documentation."]
+       "Associates an identity provider configuration to a cluster. If you want to authenticate identities using an identity provider, you can create an identity provider configuration and associate it to your cluster. After configuring authentication to your cluster you can create Kubernetes Role and ClusterRole objects, assign permissions to them, and then bind them to the identities using Kubernetes RoleBinding and ClusterRoleBinding objects. For more information see Using RBAC Authorization in the Kubernetes documentation."]
 module AssociateIdentityProviderConfigRequest =
   struct
     type nonrec t =
       {
-      clusterName: String_.t
-        [@ocaml.doc
-          "The name of the cluster to associate the configuration to."];
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
       oidc: OidcIdentityProviderConfigRequest.t
         [@ocaml.doc
-          "An object that represents an OpenID Connect (OIDC) identity provider configuration."];
+          "An object representing an OpenID Connect (OIDC) identity provider configuration."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The metadata to apply to the configuration to assist with categorization and organization. Each tag consists of a key and an optional value. You define both."];
+          "Metadata that assists with categorization and organization. Each tag consists of a key and an optional value. You define both. Tags don't propagate to any other cluster or Amazon Web Services resources."];
       clientRequestToken: String_.t option
         [@ocaml.doc
-          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
     let context_ = "AssociateIdentityProviderConfigRequest"
     let make ?tags =
       fun ?clientRequestToken ->
@@ -8884,17 +18857,17 @@ module AssociateIdentityProviderConfigRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?clientRequestToken ?tags ~oidc ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map json "clientRequestToken" String_.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+        field_map json__ "clientRequestToken" String_.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let oidc =
-        field_map_exn json "oidc" OidcIdentityProviderConfigRequest.of_json in
-      let clusterName = field_map_exn json "clusterName" String_.of_json in
+        field_map_exn json__ "oidc" OidcIdentityProviderConfigRequest.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
       make ?clientRequestToken ?tags ~oidc ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associate an identity provider configuration to a cluster. If you want to authenticate identities using an identity provider, you can create an identity provider configuration and associate it to your cluster. After configuring authentication to your cluster you can create Kubernetes roles and clusterroles to assign permissions to the roles, and then bind the roles to the identities using Kubernetes rolebindings and clusterrolebindings. For more information see Using RBAC Authorization in the Kubernetes documentation."]
+       "Associates an identity provider configuration to a cluster. If you want to authenticate identities using an identity provider, you can create an identity provider configuration and associate it to your cluster. After configuring authentication to your cluster you can create Kubernetes Role and ClusterRole objects, assign permissions to them, and then bind them to the identities using Kubernetes RoleBinding and ClusterRoleBinding objects. For more information see Using RBAC Authorization in the Kubernetes documentation."]
 module AssociateEncryptionConfigResponse =
   struct
     type nonrec t = {
@@ -8906,6 +18879,7 @@ module AssociateEncryptionConfigResponse =
       | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?update = fun () -> { update }
     let error_of_json name json =
@@ -8920,6 +18894,8 @@ module AssociateEncryptionConfigResponse =
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -8935,6 +18911,8 @@ module AssociateEncryptionConfigResponse =
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -8963,6 +18941,10 @@ module AssociateEncryptionConfigResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -8977,23 +18959,22 @@ module AssociateEncryptionConfigResponse =
         (Option.map ~f:Update.of_xml) (Xml.child xml_arg0 "update") in
       make ?update ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let update = field_map json "update" Update.of_json in make ?update ()
+    let of_json json__ =
+      let update = field_map json__ "update" Update.of_json in
+      make ?update ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associate encryption configuration to an existing cluster. You can use this API to enable encryption on existing clusters which do not have encryption already enabled. This allows you to implement a defense-in-depth security strategy without migrating applications to new Amazon EKS clusters."]
+       "Associates an encryption configuration to an existing cluster. Use this API to enable encryption on existing clusters that don't already have encryption enabled. This allows you to implement a defense-in-depth security strategy without migrating applications to new Amazon EKS clusters."]
 module AssociateEncryptionConfigRequest =
   struct
     type nonrec t =
       {
-      clusterName: String_.t
-        [@ocaml.doc
-          "The name of the cluster that you are associating with encryption configuration."];
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
       encryptionConfig: EncryptionConfigList.t
         [@ocaml.doc "The configuration you are using for encryption."];
       clientRequestToken: String_.t option
         [@ocaml.doc
-          "The client request token you are using with the encryption configuration."]}
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
     let context_ = "AssociateEncryptionConfigRequest"
     let make ?clientRequestToken =
       fun ~clusterName ->
@@ -9018,13 +18999,157 @@ module AssociateEncryptionConfigRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?clientRequestToken ~encryptionConfig ~clusterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map json "clientRequestToken" String_.of_json in
+        field_map json__ "clientRequestToken" String_.of_json in
       let encryptionConfig =
-        field_map_exn json "encryptionConfig" EncryptionConfigList.of_json in
-      let clusterName = field_map_exn json "clusterName" String_.of_json in
+        field_map_exn json__ "encryptionConfig" EncryptionConfigList.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
       make ?clientRequestToken ~encryptionConfig ~clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associate encryption configuration to an existing cluster. You can use this API to enable encryption on existing clusters which do not have encryption already enabled. This allows you to implement a defense-in-depth security strategy without migrating applications to new Amazon EKS clusters."]
+       "Associates an encryption configuration to an existing cluster. Use this API to enable encryption on existing clusters that don't already have encryption enabled. This allows you to implement a defense-in-depth security strategy without migrating applications to new Amazon EKS clusters."]
+module AssociateAccessPolicyResponse =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t option [@ocaml.doc "The name of your cluster."];
+      principalArn: String_.t option
+        [@ocaml.doc "The ARN of the IAM principal for the AccessEntry."];
+      associatedAccessPolicy: AssociatedAccessPolicy.t option
+        [@ocaml.doc
+          "The AccessPolicy and scope associated to the AccessEntry."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?clusterName =
+      fun ?principalArn ->
+        fun ?associatedAccessPolicy ->
+          fun () -> { clusterName; principalArn; associatedAccessPolicy }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("clusterName", (Option.map x.clusterName ~f:String_.to_value));
+        ("principalArn", (Option.map x.principalArn ~f:String_.to_value));
+        ("associatedAccessPolicy",
+          (Option.map x.associatedAccessPolicy
+             ~f:AssociatedAccessPolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let associatedAccessPolicy =
+        (Option.map ~f:AssociatedAccessPolicy.of_xml)
+          (Xml.child xml_arg0 "associatedAccessPolicy") in
+      let principalArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "principalArn") in
+      let clusterName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clusterName") in
+      make ?associatedAccessPolicy ?principalArn ?clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let associatedAccessPolicy =
+        field_map json__ "associatedAccessPolicy"
+          AssociatedAccessPolicy.of_json in
+      let principalArn = field_map json__ "principalArn" String_.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
+      make ?associatedAccessPolicy ?principalArn ?clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates an access policy and its scope to an access entry. For more information about associating access policies, see Associating and disassociating access policies to and from access entries in the Amazon EKS User Guide."]
+module AssociateAccessPolicyRequest =
+  struct
+    type nonrec t =
+      {
+      clusterName: String_.t [@ocaml.doc "The name of your cluster."];
+      principalArn: String_.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM user or role for the AccessEntry that you're associating the access policy to."];
+      policyArn: String_.t
+        [@ocaml.doc
+          "The ARN of the AccessPolicy that you're associating. For a list of ARNs, use ListAccessPolicies."];
+      accessScope: AccessScope.t
+        [@ocaml.doc
+          "The scope for the AccessPolicy. You can scope access policies to an entire cluster or to specific Kubernetes namespaces."]}
+    let context_ = "AssociateAccessPolicyRequest"
+    let make ~clusterName =
+      fun ~principalArn ->
+        fun ~policyArn ->
+          fun ~accessScope ->
+            fun () -> { clusterName; principalArn; policyArn; accessScope }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.clusterName)));
+        ("principalArn", (Some (String_.to_value x.principalArn)));
+        ("policyArn", (Some (String_.to_value x.policyArn)));
+        ("accessScope", (Some (AccessScope.to_value x.accessScope)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accessScope =
+        AccessScope.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "accessScope") in
+      let policyArn =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policyArn") in
+      let principalArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "principalArn") in
+      let clusterName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~accessScope ~policyArn ~principalArn ~clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accessScope =
+        field_map_exn json__ "accessScope" AccessScope.of_json in
+      let policyArn = field_map_exn json__ "policyArn" String_.of_json in
+      let principalArn = field_map_exn json__ "principalArn" String_.of_json in
+      let clusterName = field_map_exn json__ "clusterName" String_.of_json in
+      make ~accessScope ~policyArn ~principalArn ~clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates an access policy and its scope to an access entry. For more information about associating access policies, see Associating and disassociating access policies to and from access entries in the Amazon EKS User Guide."]

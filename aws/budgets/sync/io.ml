@@ -50,6 +50,12 @@ let describe_subscribers_for_notification ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSubscribersForNotification input
 let execute_budget_action ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ExecuteBudgetAction input
+let list_tags_for_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let tag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TagResource input
+let untag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_budget ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateBudget input
 let update_budget_action ?endpoint_url ?cfg input =

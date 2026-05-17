@@ -2,6 +2,9 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | AcceptAdministratorInvitation: (AcceptAdministratorInvitationRequest.t,
+  AcceptAdministratorInvitationResponse.t,
+  AcceptAdministratorInvitationResponse.error) t 
   | AcceptInvitation: (AcceptInvitationRequest.t, AcceptInvitationResponse.t,
   AcceptInvitationResponse.error) t 
   | ArchiveFindings: (ArchiveFindingsRequest.t, ArchiveFindingsResponse.t,
@@ -12,6 +15,9 @@ type ('i, 'o, 'e) t =
   CreateFilterResponse.error) t 
   | CreateIPSet: (CreateIPSetRequest.t, CreateIPSetResponse.t,
   CreateIPSetResponse.error) t 
+  | CreateMalwareProtectionPlan: (CreateMalwareProtectionPlanRequest.t,
+  CreateMalwareProtectionPlanResponse.t,
+  CreateMalwareProtectionPlanResponse.error) t 
   | CreateMembers: (CreateMembersRequest.t, CreateMembersResponse.t,
   CreateMembersResponse.error) t 
   | CreatePublishingDestination: (CreatePublishingDestinationRequest.t,
@@ -19,8 +25,12 @@ type ('i, 'o, 'e) t =
   CreatePublishingDestinationResponse.error) t 
   | CreateSampleFindings: (CreateSampleFindingsRequest.t,
   CreateSampleFindingsResponse.t, CreateSampleFindingsResponse.error) t 
+  | CreateThreatEntitySet: (CreateThreatEntitySetRequest.t,
+  CreateThreatEntitySetResponse.t, CreateThreatEntitySetResponse.error) t 
   | CreateThreatIntelSet: (CreateThreatIntelSetRequest.t,
   CreateThreatIntelSetResponse.t, CreateThreatIntelSetResponse.error) t 
+  | CreateTrustedEntitySet: (CreateTrustedEntitySetRequest.t,
+  CreateTrustedEntitySetResponse.t, CreateTrustedEntitySetResponse.error) t 
   | DeclineInvitations: (DeclineInvitationsRequest.t,
   DeclineInvitationsResponse.t, DeclineInvitationsResponse.error) t 
   | DeleteDetector: (DeleteDetectorRequest.t, DeleteDetectorResponse.t,
@@ -31,13 +41,21 @@ type ('i, 'o, 'e) t =
   DeleteIPSetResponse.error) t 
   | DeleteInvitations: (DeleteInvitationsRequest.t,
   DeleteInvitationsResponse.t, DeleteInvitationsResponse.error) t 
+  | DeleteMalwareProtectionPlan: (DeleteMalwareProtectionPlanRequest.t, 
+  unit, unit) t 
   | DeleteMembers: (DeleteMembersRequest.t, DeleteMembersResponse.t,
   DeleteMembersResponse.error) t 
   | DeletePublishingDestination: (DeletePublishingDestinationRequest.t,
   DeletePublishingDestinationResponse.t,
   DeletePublishingDestinationResponse.error) t 
+  | DeleteThreatEntitySet: (DeleteThreatEntitySetRequest.t,
+  DeleteThreatEntitySetResponse.t, DeleteThreatEntitySetResponse.error) t 
   | DeleteThreatIntelSet: (DeleteThreatIntelSetRequest.t,
   DeleteThreatIntelSetResponse.t, DeleteThreatIntelSetResponse.error) t 
+  | DeleteTrustedEntitySet: (DeleteTrustedEntitySetRequest.t,
+  DeleteTrustedEntitySetResponse.t, DeleteTrustedEntitySetResponse.error) t 
+  | DescribeMalwareScans: (DescribeMalwareScansRequest.t,
+  DescribeMalwareScansResponse.t, DescribeMalwareScansResponse.error) t 
   | DescribeOrganizationConfiguration:
   (DescribeOrganizationConfigurationRequest.t,
   DescribeOrganizationConfigurationResponse.t,
@@ -49,6 +67,10 @@ type ('i, 'o, 'e) t =
   (DisableOrganizationAdminAccountRequest.t,
   DisableOrganizationAdminAccountResponse.t,
   DisableOrganizationAdminAccountResponse.error) t 
+  | DisassociateFromAdministratorAccount:
+  (DisassociateFromAdministratorAccountRequest.t,
+  DisassociateFromAdministratorAccountResponse.t,
+  DisassociateFromAdministratorAccountResponse.error) t 
   | DisassociateFromMasterAccount: (DisassociateFromMasterAccountRequest.t,
   DisassociateFromMasterAccountResponse.t,
   DisassociateFromMasterAccountResponse.error) t 
@@ -57,6 +79,11 @@ type ('i, 'o, 'e) t =
   | EnableOrganizationAdminAccount: (EnableOrganizationAdminAccountRequest.t,
   EnableOrganizationAdminAccountResponse.t,
   EnableOrganizationAdminAccountResponse.error) t 
+  | GetAdministratorAccount: (GetAdministratorAccountRequest.t,
+  GetAdministratorAccountResponse.t, GetAdministratorAccountResponse.error) t
+  
+  | GetCoverageStatistics: (GetCoverageStatisticsRequest.t,
+  GetCoverageStatisticsResponse.t, GetCoverageStatisticsResponse.error) t 
   | GetDetector: (GetDetectorRequest.t, GetDetectorResponse.t,
   GetDetectorResponse.error) t 
   | GetFilter: (GetFilterRequest.t, GetFilterResponse.t,
@@ -69,18 +96,36 @@ type ('i, 'o, 'e) t =
   t 
   | GetInvitationsCount: (GetInvitationsCountRequest.t,
   GetInvitationsCountResponse.t, GetInvitationsCountResponse.error) t 
+  | GetMalwareProtectionPlan: (GetMalwareProtectionPlanRequest.t,
+  GetMalwareProtectionPlanResponse.t, GetMalwareProtectionPlanResponse.error)
+  t 
+  | GetMalwareScan: (GetMalwareScanRequest.t, GetMalwareScanResponse.t,
+  GetMalwareScanResponse.error) t 
+  | GetMalwareScanSettings: (GetMalwareScanSettingsRequest.t,
+  GetMalwareScanSettingsResponse.t, GetMalwareScanSettingsResponse.error) t 
   | GetMasterAccount: (GetMasterAccountRequest.t, GetMasterAccountResponse.t,
   GetMasterAccountResponse.error) t 
   | GetMemberDetectors: (GetMemberDetectorsRequest.t,
   GetMemberDetectorsResponse.t, GetMemberDetectorsResponse.error) t 
   | GetMembers: (GetMembersRequest.t, GetMembersResponse.t,
   GetMembersResponse.error) t 
+  | GetOrganizationStatistics: (unit, GetOrganizationStatisticsResponse.t,
+  GetOrganizationStatisticsResponse.error) t 
+  | GetRemainingFreeTrialDays: (GetRemainingFreeTrialDaysRequest.t,
+  GetRemainingFreeTrialDaysResponse.t,
+  GetRemainingFreeTrialDaysResponse.error) t 
+  | GetThreatEntitySet: (GetThreatEntitySetRequest.t,
+  GetThreatEntitySetResponse.t, GetThreatEntitySetResponse.error) t 
   | GetThreatIntelSet: (GetThreatIntelSetRequest.t,
   GetThreatIntelSetResponse.t, GetThreatIntelSetResponse.error) t 
+  | GetTrustedEntitySet: (GetTrustedEntitySetRequest.t,
+  GetTrustedEntitySetResponse.t, GetTrustedEntitySetResponse.error) t 
   | GetUsageStatistics: (GetUsageStatisticsRequest.t,
   GetUsageStatisticsResponse.t, GetUsageStatisticsResponse.error) t 
   | InviteMembers: (InviteMembersRequest.t, InviteMembersResponse.t,
   InviteMembersResponse.error) t 
+  | ListCoverage: (ListCoverageRequest.t, ListCoverageResponse.t,
+  ListCoverageResponse.error) t 
   | ListDetectors: (ListDetectorsRequest.t, ListDetectorsResponse.t,
   ListDetectorsResponse.error) t 
   | ListFilters: (ListFiltersRequest.t, ListFiltersResponse.t,
@@ -91,6 +136,11 @@ type ('i, 'o, 'e) t =
   ListIPSetsResponse.error) t 
   | ListInvitations: (ListInvitationsRequest.t, ListInvitationsResponse.t,
   ListInvitationsResponse.error) t 
+  | ListMalwareProtectionPlans: (ListMalwareProtectionPlansRequest.t,
+  ListMalwareProtectionPlansResponse.t,
+  ListMalwareProtectionPlansResponse.error) t 
+  | ListMalwareScans: (ListMalwareScansRequest.t, ListMalwareScansResponse.t,
+  ListMalwareScansResponse.error) t 
   | ListMembers: (ListMembersRequest.t, ListMembersResponse.t,
   ListMembersResponse.error) t 
   | ListOrganizationAdminAccounts: (ListOrganizationAdminAccountsRequest.t,
@@ -101,8 +151,16 @@ type ('i, 'o, 'e) t =
   ListPublishingDestinationsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListThreatEntitySets: (ListThreatEntitySetsRequest.t,
+  ListThreatEntitySetsResponse.t, ListThreatEntitySetsResponse.error) t 
   | ListThreatIntelSets: (ListThreatIntelSetsRequest.t,
   ListThreatIntelSetsResponse.t, ListThreatIntelSetsResponse.error) t 
+  | ListTrustedEntitySets: (ListTrustedEntitySetsRequest.t,
+  ListTrustedEntitySetsResponse.t, ListTrustedEntitySetsResponse.error) t 
+  | SendObjectMalwareScan: (SendObjectMalwareScanRequest.t,
+  SendObjectMalwareScanResponse.t, SendObjectMalwareScanResponse.error) t 
+  | StartMalwareScan: (StartMalwareScanRequest.t, StartMalwareScanResponse.t,
+  StartMalwareScanResponse.error) t 
   | StartMonitoringMembers: (StartMonitoringMembersRequest.t,
   StartMonitoringMembersResponse.t, StartMonitoringMembersResponse.error) t 
   | StopMonitoringMembers: (StopMonitoringMembersRequest.t,
@@ -121,6 +179,11 @@ type ('i, 'o, 'e) t =
   UpdateFindingsFeedbackResponse.t, UpdateFindingsFeedbackResponse.error) t 
   | UpdateIPSet: (UpdateIPSetRequest.t, UpdateIPSetResponse.t,
   UpdateIPSetResponse.error) t 
+  | UpdateMalwareProtectionPlan: (UpdateMalwareProtectionPlanRequest.t, 
+  unit, unit) t 
+  | UpdateMalwareScanSettings: (UpdateMalwareScanSettingsRequest.t,
+  UpdateMalwareScanSettingsResponse.t,
+  UpdateMalwareScanSettingsResponse.error) t 
   | UpdateMemberDetectors: (UpdateMemberDetectorsRequest.t,
   UpdateMemberDetectorsResponse.t, UpdateMemberDetectorsResponse.error) t 
   | UpdateOrganizationConfiguration:
@@ -130,55 +193,84 @@ type ('i, 'o, 'e) t =
   | UpdatePublishingDestination: (UpdatePublishingDestinationRequest.t,
   UpdatePublishingDestinationResponse.t,
   UpdatePublishingDestinationResponse.error) t 
+  | UpdateThreatEntitySet: (UpdateThreatEntitySetRequest.t,
+  UpdateThreatEntitySetResponse.t, UpdateThreatEntitySetResponse.error) t 
   | UpdateThreatIntelSet: (UpdateThreatIntelSetRequest.t,
   UpdateThreatIntelSetResponse.t, UpdateThreatIntelSetResponse.error) t 
+  | UpdateTrustedEntitySet: (UpdateTrustedEntitySetRequest.t,
+  UpdateTrustedEntitySetResponse.t, UpdateTrustedEntitySetResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | AcceptAdministratorInvitation -> `POST
   | AcceptInvitation -> `POST
   | ArchiveFindings -> `POST
   | CreateDetector -> `POST
   | CreateFilter -> `POST
   | CreateIPSet -> `POST
+  | CreateMalwareProtectionPlan -> `POST
   | CreateMembers -> `POST
   | CreatePublishingDestination -> `POST
   | CreateSampleFindings -> `POST
+  | CreateThreatEntitySet -> `POST
   | CreateThreatIntelSet -> `POST
+  | CreateTrustedEntitySet -> `POST
   | DeclineInvitations -> `POST
   | DeleteDetector -> `DELETE
   | DeleteFilter -> `DELETE
   | DeleteIPSet -> `DELETE
   | DeleteInvitations -> `POST
+  | DeleteMalwareProtectionPlan -> `DELETE
   | DeleteMembers -> `POST
   | DeletePublishingDestination -> `DELETE
+  | DeleteThreatEntitySet -> `DELETE
   | DeleteThreatIntelSet -> `DELETE
+  | DeleteTrustedEntitySet -> `DELETE
+  | DescribeMalwareScans -> `POST
   | DescribeOrganizationConfiguration -> `GET
   | DescribePublishingDestination -> `GET
   | DisableOrganizationAdminAccount -> `POST
+  | DisassociateFromAdministratorAccount -> `POST
   | DisassociateFromMasterAccount -> `POST
   | DisassociateMembers -> `POST
   | EnableOrganizationAdminAccount -> `POST
+  | GetAdministratorAccount -> `GET
+  | GetCoverageStatistics -> `POST
   | GetDetector -> `GET
   | GetFilter -> `GET
   | GetFindings -> `POST
   | GetFindingsStatistics -> `POST
   | GetIPSet -> `GET
   | GetInvitationsCount -> `GET
+  | GetMalwareProtectionPlan -> `GET
+  | GetMalwareScan -> `GET
+  | GetMalwareScanSettings -> `GET
   | GetMasterAccount -> `GET
   | GetMemberDetectors -> `POST
   | GetMembers -> `POST
+  | GetOrganizationStatistics -> `GET
+  | GetRemainingFreeTrialDays -> `POST
+  | GetThreatEntitySet -> `GET
   | GetThreatIntelSet -> `GET
+  | GetTrustedEntitySet -> `GET
   | GetUsageStatistics -> `POST
   | InviteMembers -> `POST
+  | ListCoverage -> `POST
   | ListDetectors -> `GET
   | ListFilters -> `GET
   | ListFindings -> `POST
   | ListIPSets -> `GET
   | ListInvitations -> `GET
+  | ListMalwareProtectionPlans -> `GET
+  | ListMalwareScans -> `POST
   | ListMembers -> `GET
   | ListOrganizationAdminAccounts -> `GET
   | ListPublishingDestinations -> `GET
   | ListTagsForResource -> `GET
+  | ListThreatEntitySets -> `GET
   | ListThreatIntelSets -> `GET
+  | ListTrustedEntitySets -> `GET
+  | SendObjectMalwareScan -> `POST
+  | StartMalwareScan -> `POST
   | StartMonitoringMembers -> `POST
   | StopMonitoringMembers -> `POST
   | TagResource -> `POST
@@ -188,13 +280,21 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateFilter -> `POST
   | UpdateFindingsFeedback -> `POST
   | UpdateIPSet -> `POST
+  | UpdateMalwareProtectionPlan -> `PATCH
+  | UpdateMalwareScanSettings -> `POST
   | UpdateMemberDetectors -> `POST
   | UpdateOrganizationConfiguration -> `POST
   | UpdatePublishingDestination -> `POST
+  | UpdateThreatEntitySet -> `POST
   | UpdateThreatIntelSet -> `POST
+  | UpdateTrustedEntitySet -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | AcceptAdministratorInvitation ->
+          (Format.kasprintf Uri.of_string) "/detector/%s/administrator"
+            (DetectorId.to_header
+               x.AcceptAdministratorInvitationRequest.detectorId)
       | AcceptInvitation ->
           (Format.kasprintf Uri.of_string) "/detector/%s/master"
             (DetectorId.to_header x.AcceptInvitationRequest.detectorId)
@@ -208,6 +308,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateIPSet ->
           (Format.kasprintf Uri.of_string) "/detector/%s/ipset"
             (DetectorId.to_header x.CreateIPSetRequest.detectorId)
+      | CreateMalwareProtectionPlan ->
+          (Format.kasprintf Uri.of_string) "/malware-protection-plan"
       | CreateMembers ->
           (Format.kasprintf Uri.of_string) "/detector/%s/member"
             (DetectorId.to_header x.CreateMembersRequest.detectorId)
@@ -219,9 +321,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateSampleFindings ->
           (Format.kasprintf Uri.of_string) "/detector/%s/findings/create"
             (DetectorId.to_header x.CreateSampleFindingsRequest.detectorId)
+      | CreateThreatEntitySet ->
+          (Format.kasprintf Uri.of_string) "/detector/%s/threatentityset"
+            (DetectorId.to_header x.CreateThreatEntitySetRequest.detectorId)
       | CreateThreatIntelSet ->
           (Format.kasprintf Uri.of_string) "/detector/%s/threatintelset"
             (DetectorId.to_header x.CreateThreatIntelSetRequest.detectorId)
+      | CreateTrustedEntitySet ->
+          (Format.kasprintf Uri.of_string) "/detector/%s/trustedentityset"
+            (DetectorId.to_header x.CreateTrustedEntitySetRequest.detectorId)
       | DeclineInvitations ->
           (Format.kasprintf Uri.of_string) "/invitation/decline"
       | DeleteDetector ->
@@ -237,6 +345,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (String_.to_header x.DeleteIPSetRequest.ipSetId)
       | DeleteInvitations ->
           (Format.kasprintf Uri.of_string) "/invitation/delete"
+      | DeleteMalwareProtectionPlan ->
+          (Format.kasprintf Uri.of_string) "/malware-protection-plan/%s"
+            (String_.to_header
+               x.DeleteMalwareProtectionPlanRequest.malwareProtectionPlanId)
       | DeleteMembers ->
           (Format.kasprintf Uri.of_string) "/detector/%s/member/delete"
             (DetectorId.to_header x.DeleteMembersRequest.detectorId)
@@ -247,14 +359,34 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.DeletePublishingDestinationRequest.detectorId)
             (String_.to_header
                x.DeletePublishingDestinationRequest.destinationId)
+      | DeleteThreatEntitySet ->
+          (Format.kasprintf Uri.of_string) "/detector/%s/threatentityset/%s"
+            (DetectorId.to_header x.DeleteThreatEntitySetRequest.detectorId)
+            (String_.to_header
+               x.DeleteThreatEntitySetRequest.threatEntitySetId)
       | DeleteThreatIntelSet ->
           (Format.kasprintf Uri.of_string) "/detector/%s/threatintelset/%s"
             (DetectorId.to_header x.DeleteThreatIntelSetRequest.detectorId)
             (String_.to_header x.DeleteThreatIntelSetRequest.threatIntelSetId)
+      | DeleteTrustedEntitySet ->
+          (Format.kasprintf Uri.of_string) "/detector/%s/trustedentityset/%s"
+            (DetectorId.to_header x.DeleteTrustedEntitySetRequest.detectorId)
+            (String_.to_header
+               x.DeleteTrustedEntitySetRequest.trustedEntitySetId)
+      | DescribeMalwareScans ->
+          (Format.kasprintf Uri.of_string) "/detector/%s/malware-scans"
+            (DetectorId.to_header x.DescribeMalwareScansRequest.detectorId)
       | DescribeOrganizationConfiguration ->
-          (Format.kasprintf Uri.of_string) "/detector/%s/admin"
-            (DetectorId.to_header
-               x.DescribeOrganizationConfigurationRequest.detectorId)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/detector/%s/admin"
+               (DetectorId.to_header
+                  x.DescribeOrganizationConfigurationRequest.detectorId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                 x.nextToken])
       | DescribePublishingDestination ->
           (Format.kasprintf Uri.of_string)
             "/detector/%s/publishingDestination/%s"
@@ -264,6 +396,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.DescribePublishingDestinationRequest.destinationId)
       | DisableOrganizationAdminAccount ->
           (Format.kasprintf Uri.of_string) "/admin/disable"
+      | DisassociateFromAdministratorAccount ->
+          (Format.kasprintf Uri.of_string)
+            "/detector/%s/administrator/disassociate"
+            (DetectorId.to_header
+               x.DisassociateFromAdministratorAccountRequest.detectorId)
       | DisassociateFromMasterAccount ->
           (Format.kasprintf Uri.of_string) "/detector/%s/master/disassociate"
             (DetectorId.to_header
@@ -273,6 +410,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (DetectorId.to_header x.DisassociateMembersRequest.detectorId)
       | EnableOrganizationAdminAccount ->
           (Format.kasprintf Uri.of_string) "/admin/enable"
+      | GetAdministratorAccount ->
+          (Format.kasprintf Uri.of_string) "/detector/%s/administrator"
+            (DetectorId.to_header x.GetAdministratorAccountRequest.detectorId)
+      | GetCoverageStatistics ->
+          (Format.kasprintf Uri.of_string) "/detector/%s/coverage/statistics"
+            (DetectorId.to_header x.GetCoverageStatisticsRequest.detectorId)
       | GetDetector ->
           (Format.kasprintf Uri.of_string) "/detector/%s"
             (DetectorId.to_header x.GetDetectorRequest.detectorId)
@@ -292,6 +435,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (String_.to_header x.GetIPSetRequest.ipSetId)
       | GetInvitationsCount ->
           (Format.kasprintf Uri.of_string) "/invitation/count"
+      | GetMalwareProtectionPlan ->
+          (Format.kasprintf Uri.of_string) "/malware-protection-plan/%s"
+            (String_.to_header
+               x.GetMalwareProtectionPlanRequest.malwareProtectionPlanId)
+      | GetMalwareScan ->
+          (Format.kasprintf Uri.of_string) "/malware-scan/%s"
+            (String_.to_header x.GetMalwareScanRequest.scanId)
+      | GetMalwareScanSettings ->
+          (Format.kasprintf Uri.of_string)
+            "/detector/%s/malware-scan-settings"
+            (DetectorId.to_header x.GetMalwareScanSettingsRequest.detectorId)
       | GetMasterAccount ->
           (Format.kasprintf Uri.of_string) "/detector/%s/master"
             (DetectorId.to_header x.GetMasterAccountRequest.detectorId)
@@ -301,16 +455,35 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetMembers ->
           (Format.kasprintf Uri.of_string) "/detector/%s/member/get"
             (DetectorId.to_header x.GetMembersRequest.detectorId)
+      | GetOrganizationStatistics ->
+          (Format.kasprintf Uri.of_string) "/organization/statistics"
+      | GetRemainingFreeTrialDays ->
+          (Format.kasprintf Uri.of_string)
+            "/detector/%s/freeTrial/daysRemaining"
+            (DetectorId.to_header
+               x.GetRemainingFreeTrialDaysRequest.detectorId)
+      | GetThreatEntitySet ->
+          (Format.kasprintf Uri.of_string) "/detector/%s/threatentityset/%s"
+            (DetectorId.to_header x.GetThreatEntitySetRequest.detectorId)
+            (String_.to_header x.GetThreatEntitySetRequest.threatEntitySetId)
       | GetThreatIntelSet ->
           (Format.kasprintf Uri.of_string) "/detector/%s/threatintelset/%s"
             (DetectorId.to_header x.GetThreatIntelSetRequest.detectorId)
             (String_.to_header x.GetThreatIntelSetRequest.threatIntelSetId)
+      | GetTrustedEntitySet ->
+          (Format.kasprintf Uri.of_string) "/detector/%s/trustedentityset/%s"
+            (DetectorId.to_header x.GetTrustedEntitySetRequest.detectorId)
+            (String_.to_header
+               x.GetTrustedEntitySetRequest.trustedEntitySetId)
       | GetUsageStatistics ->
           (Format.kasprintf Uri.of_string) "/detector/%s/usage/statistics"
             (DetectorId.to_header x.GetUsageStatisticsRequest.detectorId)
       | InviteMembers ->
           (Format.kasprintf Uri.of_string) "/detector/%s/member/invite"
             (DetectorId.to_header x.InviteMembersRequest.detectorId)
+      | ListCoverage ->
+          (Format.kasprintf Uri.of_string) "/detector/%s/coverage"
+            (DetectorId.to_header x.ListCoverageRequest.detectorId)
       | ListDetectors ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/detector")
@@ -346,6 +519,21 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListInvitations ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/invitation")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                 x.nextToken])
+      | ListMalwareProtectionPlans ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/malware-protection-plan")
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                  x.nextToken])
+      | ListMalwareScans ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/malware-scan")
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
@@ -388,6 +576,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (GuardDutyArn.to_header x.ListTagsForResourceRequest.resourceArn)
+      | ListThreatEntitySets ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/detector/%s/threatentityset"
+               (DetectorId.to_header x.ListThreatEntitySetsRequest.detectorId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                 x.nextToken])
       | ListThreatIntelSets ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/detector/%s/threatintelset"
@@ -398,6 +596,21 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.maxResults;
                Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
                  x.nextToken])
+      | ListTrustedEntitySets ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/detector/%s/trustedentityset"
+               (DetectorId.to_header
+                  x.ListTrustedEntitySetsRequest.detectorId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                 x.nextToken])
+      | SendObjectMalwareScan ->
+          (Format.kasprintf Uri.of_string) "/object-malware-scan/send"
+      | StartMalwareScan ->
+          (Format.kasprintf Uri.of_string) "/malware-scan/start"
       | StartMonitoringMembers ->
           (Format.kasprintf Uri.of_string) "/detector/%s/member/start"
             (DetectorId.to_header x.StartMonitoringMembersRequest.detectorId)
@@ -430,6 +643,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/detector/%s/ipset/%s"
             (DetectorId.to_header x.UpdateIPSetRequest.detectorId)
             (String_.to_header x.UpdateIPSetRequest.ipSetId)
+      | UpdateMalwareProtectionPlan ->
+          (Format.kasprintf Uri.of_string) "/malware-protection-plan/%s"
+            (String_.to_header
+               x.UpdateMalwareProtectionPlanRequest.malwareProtectionPlanId)
+      | UpdateMalwareScanSettings ->
+          (Format.kasprintf Uri.of_string)
+            "/detector/%s/malware-scan-settings"
+            (DetectorId.to_header
+               x.UpdateMalwareScanSettingsRequest.detectorId)
       | UpdateMemberDetectors ->
           (Format.kasprintf Uri.of_string)
             "/detector/%s/member/detector/update"
@@ -445,14 +667,48 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.UpdatePublishingDestinationRequest.detectorId)
             (String_.to_header
                x.UpdatePublishingDestinationRequest.destinationId)
+      | UpdateThreatEntitySet ->
+          (Format.kasprintf Uri.of_string) "/detector/%s/threatentityset/%s"
+            (DetectorId.to_header x.UpdateThreatEntitySetRequest.detectorId)
+            (String_.to_header
+               x.UpdateThreatEntitySetRequest.threatEntitySetId)
       | UpdateThreatIntelSet ->
           (Format.kasprintf Uri.of_string) "/detector/%s/threatintelset/%s"
             (DetectorId.to_header x.UpdateThreatIntelSetRequest.detectorId)
-            (String_.to_header x.UpdateThreatIntelSetRequest.threatIntelSetId))
+            (String_.to_header x.UpdateThreatIntelSetRequest.threatIntelSetId)
+      | UpdateTrustedEntitySet ->
+          (Format.kasprintf Uri.of_string) "/detector/%s/trustedentityset/%s"
+            (DetectorId.to_header x.UpdateTrustedEntitySetRequest.detectorId)
+            (String_.to_header
+               x.UpdateTrustedEntitySetRequest.trustedEntitySetId))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | AcceptAdministratorInvitation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("administratorId",
+                           (String_.to_value
+                              req.AcceptAdministratorInvitationRequest.administratorId));
+                      Some
+                        ("invitationId",
+                          (String_.to_value
+                             req.AcceptAdministratorInvitationRequest.invitationId))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | AcceptInvitation ->
       let (headers, body) =
         let headers =
@@ -522,7 +778,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("dataSources",
                                 (DataSourceConfigurations.to_value x)));
                       Option.map req.CreateDetectorRequest.tags
-                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map req.CreateDetectorRequest.features
+                        ~f:(fun x ->
+                              ("features",
+                                (DetectorFeatureConfigurations.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -590,6 +850,44 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("clientToken", (ClientToken.to_value x)));
                       Option.map req.CreateIPSetRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map req.CreateIPSetRequest.expectedBucketOwner
+                        ~f:(fun x ->
+                              ("expectedBucketOwner", (AccountId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateMalwareProtectionPlan ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.CreateMalwareProtectionPlanRequest.clientToken
+                         ~f:(fun x ->
+                               ("clientToken", (ClientToken.to_value x)));
+                      Some
+                        ("role",
+                          (String_.to_value
+                             req.CreateMalwareProtectionPlanRequest.role));
+                      Some
+                        ("protectedResource",
+                          (CreateProtectedResource.to_value
+                             req.CreateMalwareProtectionPlanRequest.protectedResource));
+                      Option.map
+                        req.CreateMalwareProtectionPlanRequest.actions
+                        ~f:(fun x ->
+                              ("actions",
+                                (MalwareProtectionPlanActions.to_value x)));
+                      Option.map req.CreateMalwareProtectionPlanRequest.tags
                         ~f:(fun x -> ("tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -638,7 +936,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map
                         req.CreatePublishingDestinationRequest.clientToken
                         ~f:(fun x ->
-                              ("clientToken", (ClientToken.to_value x)))])
+                              ("clientToken", (ClientToken.to_value x)));
+                      Option.map req.CreatePublishingDestinationRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -659,6 +959,48 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          req.CreateSampleFindingsRequest.findingTypes
                          ~f:(fun x ->
                                ("findingTypes", (FindingTypes.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateThreatEntitySet ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("name",
+                           (Name.to_value
+                              req.CreateThreatEntitySetRequest.name));
+                      Some
+                        ("format",
+                          (ThreatEntitySetFormat.to_value
+                             req.CreateThreatEntitySetRequest.format));
+                      Some
+                        ("location",
+                          (Location.to_value
+                             req.CreateThreatEntitySetRequest.location));
+                      Option.map
+                        req.CreateThreatEntitySetRequest.expectedBucketOwner
+                        ~f:(fun x ->
+                              ("expectedBucketOwner",
+                                (ExpectedBucketOwner.to_value x)));
+                      Some
+                        ("activate",
+                          (Boolean.to_value
+                             req.CreateThreatEntitySetRequest.activate));
+                      Option.map req.CreateThreatEntitySetRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
+                      Option.map req.CreateThreatEntitySetRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -695,6 +1037,53 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("clientToken", (ClientToken.to_value x)));
                       Option.map req.CreateThreatIntelSetRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map
+                        req.CreateThreatIntelSetRequest.expectedBucketOwner
+                        ~f:(fun x ->
+                              ("expectedBucketOwner", (AccountId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateTrustedEntitySet ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("name",
+                           (Name.to_value
+                              req.CreateTrustedEntitySetRequest.name));
+                      Some
+                        ("format",
+                          (TrustedEntitySetFormat.to_value
+                             req.CreateTrustedEntitySetRequest.format));
+                      Some
+                        ("location",
+                          (Location.to_value
+                             req.CreateTrustedEntitySetRequest.location));
+                      Option.map
+                        req.CreateTrustedEntitySetRequest.expectedBucketOwner
+                        ~f:(fun x ->
+                              ("expectedBucketOwner",
+                                (ExpectedBucketOwner.to_value x)));
+                      Some
+                        ("activate",
+                          (Boolean.to_value
+                             req.CreateTrustedEntitySetRequest.activate));
+                      Option.map
+                        req.CreateTrustedEntitySetRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
+                      Option.map req.CreateTrustedEntitySetRequest.tags
                         ~f:(fun x -> ("tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -746,6 +1135,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteMalwareProtectionPlan ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteMembers ->
       let (headers, body) =
         let headers =
@@ -768,7 +1159,39 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeletePublishingDestination ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteThreatEntitySet -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteThreatIntelSet -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteTrustedEntitySet ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DescribeMalwareScans ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.DescribeMalwareScansRequest.nextToken
+                         ~f:(fun x -> ("nextToken", (String_.to_value x)));
+                      Option.map req.DescribeMalwareScansRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (IntegerValueWithMax.to_value x)));
+                      Option.map
+                        req.DescribeMalwareScansRequest.filterCriteria
+                        ~f:(fun x ->
+                              ("filterCriteria", (FilterCriteria.to_value x)));
+                      Option.map req.DescribeMalwareScansRequest.sortCriteria
+                        ~f:(fun x ->
+                              ("sortCriteria", (SortCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeOrganizationConfiguration ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -794,6 +1217,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          (x, value))))
                |> Yojson.Safe.to_string) in
         (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DisassociateFromAdministratorAccount ->
+      let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DisassociateFromMasterAccount ->
       let (headers, body) = (None, None) in
@@ -831,6 +1257,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("adminAccountId",
                            (String_.to_value
                               req.EnableOrganizationAdminAccountRequest.adminAccountId))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetAdministratorAccount ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetCoverageStatistics ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.GetCoverageStatisticsRequest.filterCriteria
+                         ~f:(fun x ->
+                               ("filterCriteria",
+                                 (CoverageFilterCriteria.to_value x)));
+                      Some
+                        ("statisticsType",
+                          (CoverageStatisticsTypeList.to_value
+                             req.GetCoverageStatisticsRequest.statisticsType))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -876,15 +1330,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("findingStatisticTypes",
-                           (FindingStatisticTypes.to_value
-                              req.GetFindingsStatisticsRequest.findingStatisticTypes));
+                      [Option.map
+                         req.GetFindingsStatisticsRequest.findingStatisticTypes
+                         ~f:(fun x ->
+                               ("findingStatisticTypes",
+                                 (FindingStatisticTypes.to_value x)));
                       Option.map
                         req.GetFindingsStatisticsRequest.findingCriteria
                         ~f:(fun x ->
                               ("findingCriteria",
-                                (FindingCriteria.to_value x)))])
+                                (FindingCriteria.to_value x)));
+                      Option.map req.GetFindingsStatisticsRequest.groupBy
+                        ~f:(fun x -> ("groupBy", (GroupByType.to_value x)));
+                      Option.map req.GetFindingsStatisticsRequest.orderBy
+                        ~f:(fun x -> ("orderBy", (OrderBy.to_value x)));
+                      Option.map req.GetFindingsStatisticsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (MaxResults100.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -896,6 +1358,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetInvitationsCount ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetMalwareProtectionPlan ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetMalwareScan ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetMalwareScanSettings ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetMasterAccount ->
@@ -941,7 +1412,36 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetOrganizationStatistics ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetRemainingFreeTrialDays ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("accountIds",
+                           (AccountIds.to_value
+                              req.GetRemainingFreeTrialDaysRequest.accountIds))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetThreatEntitySet ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetThreatIntelSet ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetTrustedEntitySet ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetUsageStatistics ->
@@ -1001,6 +1501,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCoverage ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListCoverageRequest.nextToken
+                         ~f:(fun x -> ("nextToken", (String_.to_value x)));
+                      Option.map req.ListCoverageRequest.maxResults
+                        ~f:(fun x -> ("maxResults", (MaxResults.to_value x)));
+                      Option.map req.ListCoverageRequest.filterCriteria
+                        ~f:(fun x ->
+                              ("filterCriteria",
+                                (CoverageFilterCriteria.to_value x)));
+                      Option.map req.ListCoverageRequest.sortCriteria
+                        ~f:(fun x ->
+                              ("sortCriteria",
+                                (CoverageSortCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListDetectors ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -1040,6 +1568,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListInvitations ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListMalwareProtectionPlans ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListMalwareScans ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListMalwareScansRequest.filterCriteria
+                         ~f:(fun x ->
+                               ("filterCriteria",
+                                 (ListMalwareScansFilterCriteria.to_value x)));
+                      Option.map req.ListMalwareScansRequest.sortCriteria
+                        ~f:(fun x ->
+                              ("sortCriteria", (SortCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListMembers ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -1052,8 +1606,62 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListThreatEntitySets ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListThreatIntelSets ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTrustedEntitySets ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SendObjectMalwareScan ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.SendObjectMalwareScanRequest.s3Object
+                         ~f:(fun x ->
+                               ("s3Object",
+                                 (S3ObjectForSendObjectMalwareScan.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartMalwareScan ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("resourceArn",
+                           (ResourceArn.to_value
+                              req.StartMalwareScanRequest.resourceArn));
+                      Option.map req.StartMalwareScanRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
+                      Option.map
+                        req.StartMalwareScanRequest.scanConfiguration
+                        ~f:(fun x ->
+                              ("scanConfiguration",
+                                (StartMalwareScanConfiguration.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | StartMonitoringMembers ->
       let (headers, body) =
@@ -1154,7 +1762,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.UpdateDetectorRequest.dataSources
                         ~f:(fun x ->
                               ("dataSources",
-                                (DataSourceConfigurations.to_value x)))])
+                                (DataSourceConfigurations.to_value x)));
+                      Option.map req.UpdateDetectorRequest.features
+                        ~f:(fun x ->
+                              ("features",
+                                (DetectorFeatureConfigurations.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1208,7 +1820,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                           (Feedback.to_value
                              req.UpdateFindingsFeedbackRequest.feedback));
                       Option.map req.UpdateFindingsFeedbackRequest.comments
-                        ~f:(fun x -> ("comments", (String_.to_value x)))])
+                        ~f:(fun x ->
+                              ("comments", (SensitiveString.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1230,7 +1843,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.UpdateIPSetRequest.location
                         ~f:(fun x -> ("location", (Location.to_value x)));
                       Option.map req.UpdateIPSetRequest.activate
-                        ~f:(fun x -> ("activate", (Boolean.to_value x)))])
+                        ~f:(fun x -> ("activate", (Boolean.to_value x)));
+                      Option.map req.UpdateIPSetRequest.expectedBucketOwner
+                        ~f:(fun x ->
+                              ("expectedBucketOwner", (AccountId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateMalwareProtectionPlan ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateMalwareScanSettings ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateMalwareScanSettingsRequest.scanResourceCriteria
+                         ~f:(fun x ->
+                               ("scanResourceCriteria",
+                                 (ScanResourceCriteria.to_value x)));
+                      Option.map
+                        req.UpdateMalwareScanSettingsRequest.ebsSnapshotPreservation
+                        ~f:(fun x ->
+                              ("ebsSnapshotPreservation",
+                                (EbsSnapshotPreservation.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1254,7 +1898,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.UpdateMemberDetectorsRequest.dataSources
                         ~f:(fun x ->
                               ("dataSources",
-                                (DataSourceConfigurations.to_value x)))])
+                                (DataSourceConfigurations.to_value x)));
+                      Option.map req.UpdateMemberDetectorsRequest.features
+                        ~f:(fun x ->
+                              ("features",
+                                (MemberFeaturesConfigurations.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1271,16 +1919,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("autoEnable",
-                           (Boolean.to_value
-                              req.UpdateOrganizationConfigurationRequest.autoEnable));
+                      [Option.map
+                         req.UpdateOrganizationConfigurationRequest.autoEnable
+                         ~f:(fun x -> ("autoEnable", (Boolean.to_value x)));
                       Option.map
                         req.UpdateOrganizationConfigurationRequest.dataSources
                         ~f:(fun x ->
                               ("dataSources",
                                 (OrganizationDataSourceConfigurations.to_value
-                                   x)))])
+                                   x)));
+                      Option.map
+                        req.UpdateOrganizationConfigurationRequest.features
+                        ~f:(fun x ->
+                              ("features",
+                                (OrganizationFeaturesConfigurations.to_value
+                                   x)));
+                      Option.map
+                        req.UpdateOrganizationConfigurationRequest.autoEnableOrganizationMembers
+                        ~f:(fun x ->
+                              ("autoEnableOrganizationMembers",
+                                (AutoEnableMembers.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1309,6 +1967,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateThreatEntitySet ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdateThreatEntitySetRequest.name
+                         ~f:(fun x -> ("name", (Name.to_value x)));
+                      Option.map req.UpdateThreatEntitySetRequest.location
+                        ~f:(fun x -> ("location", (Location.to_value x)));
+                      Option.map
+                        req.UpdateThreatEntitySetRequest.expectedBucketOwner
+                        ~f:(fun x ->
+                              ("expectedBucketOwner",
+                                (ExpectedBucketOwner.to_value x)));
+                      Option.map req.UpdateThreatEntitySetRequest.activate
+                        ~f:(fun x -> ("activate", (Boolean.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateThreatIntelSet ->
       let (headers, body) =
         let headers =
@@ -1323,6 +2008,37 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.UpdateThreatIntelSetRequest.location
                         ~f:(fun x -> ("location", (Location.to_value x)));
                       Option.map req.UpdateThreatIntelSetRequest.activate
+                        ~f:(fun x -> ("activate", (Boolean.to_value x)));
+                      Option.map
+                        req.UpdateThreatIntelSetRequest.expectedBucketOwner
+                        ~f:(fun x ->
+                              ("expectedBucketOwner", (AccountId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateTrustedEntitySet ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdateTrustedEntitySetRequest.name
+                         ~f:(fun x -> ("name", (Name.to_value x)));
+                      Option.map req.UpdateTrustedEntitySetRequest.location
+                        ~f:(fun x -> ("location", (Location.to_value x)));
+                      Option.map
+                        req.UpdateTrustedEntitySetRequest.expectedBucketOwner
+                        ~f:(fun x ->
+                              ("expectedBucketOwner",
+                                (ExpectedBucketOwner.to_value x)));
+                      Option.map req.UpdateTrustedEntitySetRequest.activate
                         ~f:(fun x -> ("activate", (Boolean.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -1379,6 +2095,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | AcceptAdministratorInvitation ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (AcceptAdministratorInvitationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some AcceptAdministratorInvitationResponse.error_of_json))
   | AcceptInvitation ->
       if is_success
       then
@@ -1408,6 +2136,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (CreateIPSetResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateIPSetResponse.error_of_json))
+  | CreateMalwareProtectionPlan ->
+      if is_success
+      then
+        Ok
+          (CreateMalwareProtectionPlanResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateMalwareProtectionPlanResponse.error_of_json))
   | CreateMembers ->
       if is_success
       then Ok (CreateMembersResponse.of_json (response_to_json resp))
@@ -1431,12 +2169,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateSampleFindingsResponse.error_of_json))
+  | CreateThreatEntitySet ->
+      if is_success
+      then Ok (CreateThreatEntitySetResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateThreatEntitySetResponse.error_of_json))
   | CreateThreatIntelSet ->
       if is_success
       then Ok (CreateThreatIntelSetResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some CreateThreatIntelSetResponse.error_of_json))
+  | CreateTrustedEntitySet ->
+      if is_success
+      then
+        Ok (CreateTrustedEntitySetResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateTrustedEntitySetResponse.error_of_json))
   | DeclineInvitations ->
       if is_success
       then Ok (DeclineInvitationsResponse.of_json (response_to_json resp))
@@ -1471,6 +2223,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteInvitationsResponse.error_of_json))
+  | DeleteMalwareProtectionPlan ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteMembers ->
       if is_success
       then Ok (DeleteMembersResponse.of_json (response_to_json resp))
@@ -1487,6 +2241,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeletePublishingDestinationResponse.error_of_json))
+  | DeleteThreatEntitySet ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteThreatEntitySetResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteThreatEntitySetResponse.error_of_json))
   | DeleteThreatIntelSet ->
       if is_success
       then
@@ -1496,6 +2259,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteThreatIntelSetResponse.error_of_json))
+  | DeleteTrustedEntitySet ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteTrustedEntitySetResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteTrustedEntitySetResponse.error_of_json))
+  | DescribeMalwareScans ->
+      if is_success
+      then Ok (DescribeMalwareScansResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeMalwareScansResponse.error_of_json))
   | DescribeOrganizationConfiguration ->
       if is_success
       then
@@ -1528,6 +2307,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DisableOrganizationAdminAccountResponse.error_of_json))
+  | DisassociateFromAdministratorAccount ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateFromAdministratorAccountResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateFromAdministratorAccountResponse.error_of_json))
   | DisassociateFromMasterAccount ->
       if is_success
       then
@@ -1558,6 +2349,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some EnableOrganizationAdminAccountResponse.error_of_json))
+  | GetAdministratorAccount ->
+      if is_success
+      then
+        Ok (GetAdministratorAccountResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetAdministratorAccountResponse.error_of_json))
+  | GetCoverageStatistics ->
+      if is_success
+      then Ok (GetCoverageStatisticsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetCoverageStatisticsResponse.error_of_json))
   | GetDetector ->
       if is_success
       then Ok (GetDetectorResponse.of_json (response_to_json resp))
@@ -1586,6 +2391,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetInvitationsCountResponse.error_of_json))
+  | GetMalwareProtectionPlan ->
+      if is_success
+      then
+        Ok (GetMalwareProtectionPlanResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetMalwareProtectionPlanResponse.error_of_json))
+  | GetMalwareScan ->
+      if is_success
+      then Ok (GetMalwareScanResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetMalwareScanResponse.error_of_json))
+  | GetMalwareScanSettings ->
+      if is_success
+      then
+        Ok (GetMalwareScanSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetMalwareScanSettingsResponse.error_of_json))
   | GetMasterAccount ->
       if is_success
       then Ok (GetMasterAccountResponse.of_json (response_to_json resp))
@@ -1601,12 +2427,42 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetMembersResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetMembersResponse.error_of_json))
+  | GetOrganizationStatistics ->
+      if is_success
+      then
+        Ok
+          (GetOrganizationStatisticsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetOrganizationStatisticsResponse.error_of_json))
+  | GetRemainingFreeTrialDays ->
+      if is_success
+      then
+        Ok
+          (GetRemainingFreeTrialDaysResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetRemainingFreeTrialDaysResponse.error_of_json))
+  | GetThreatEntitySet ->
+      if is_success
+      then Ok (GetThreatEntitySetResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetThreatEntitySetResponse.error_of_json))
   | GetThreatIntelSet ->
       if is_success
       then Ok (GetThreatIntelSetResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some GetThreatIntelSetResponse.error_of_json))
+  | GetTrustedEntitySet ->
+      if is_success
+      then Ok (GetTrustedEntitySetResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetTrustedEntitySetResponse.error_of_json))
   | GetUsageStatistics ->
       if is_success
       then Ok (GetUsageStatisticsResponse.of_json (response_to_json resp))
@@ -1617,6 +2473,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (InviteMembersResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some InviteMembersResponse.error_of_json))
+  | ListCoverage ->
+      if is_success
+      then Ok (ListCoverageResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListCoverageResponse.error_of_json))
   | ListDetectors ->
       if is_success
       then Ok (ListDetectorsResponse.of_json (response_to_json resp))
@@ -1638,6 +2498,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (ListInvitationsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListInvitationsResponse.error_of_json))
+  | ListMalwareProtectionPlans ->
+      if is_success
+      then
+        Ok
+          (ListMalwareProtectionPlansResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListMalwareProtectionPlansResponse.error_of_json))
+  | ListMalwareScans ->
+      if is_success
+      then Ok (ListMalwareScansResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListMalwareScansResponse.error_of_json))
   | ListMembers ->
       if is_success
       then Ok (ListMembersResponse.of_json (response_to_json resp))
@@ -1667,12 +2541,38 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListThreatEntitySets ->
+      if is_success
+      then Ok (ListThreatEntitySetsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListThreatEntitySetsResponse.error_of_json))
   | ListThreatIntelSets ->
       if is_success
       then Ok (ListThreatIntelSetsResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListThreatIntelSetsResponse.error_of_json))
+  | ListTrustedEntitySets ->
+      if is_success
+      then Ok (ListTrustedEntitySetsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTrustedEntitySetsResponse.error_of_json))
+  | SendObjectMalwareScan ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (SendObjectMalwareScanResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some SendObjectMalwareScanResponse.error_of_json))
+  | StartMalwareScan ->
+      if is_success
+      then Ok (StartMalwareScanResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some StartMalwareScanResponse.error_of_json))
   | StartMonitoringMembers ->
       if is_success
       then
@@ -1739,6 +2639,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UpdateIPSetResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some UpdateIPSetResponse.error_of_json))
+  | UpdateMalwareProtectionPlan ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateMalwareScanSettings ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateMalwareScanSettingsResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateMalwareScanSettingsResponse.error_of_json))
   | UpdateMemberDetectors ->
       if is_success
       then Ok (UpdateMemberDetectorsResponse.of_json (response_to_json resp))
@@ -1769,6 +2682,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdatePublishingDestinationResponse.error_of_json))
+  | UpdateThreatEntitySet ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateThreatEntitySetResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateThreatEntitySetResponse.error_of_json))
   | UpdateThreatIntelSet ->
       if is_success
       then
@@ -1778,3 +2700,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateThreatIntelSetResponse.error_of_json))
+  | UpdateTrustedEntitySet ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateTrustedEntitySetResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateTrustedEntitySetResponse.error_of_json))

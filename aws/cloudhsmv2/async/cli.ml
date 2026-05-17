@@ -65,8 +65,11 @@ let create_cluster =
          flag "backup-retention-policy" (optional json_arg)
            ~doc:"JSON BackupRetentionPolicy"
        and sourceBackupId =
-         flag "source-backup-id" (optional string) ~doc:"STRING BackupId"
+         flag "source-backup-id" (optional string) ~doc:"STRING BackupArn"
+       and networkType =
+         flag "network-type" (optional json_arg) ~doc:"JSON NetworkType"
        and tagList = flag "tag-list" (optional json_arg) ~doc:"JSON TagList"
+       and mode = flag "mode" (optional json_arg) ~doc:"JSON ClusterMode"
        and hsmType = flag "hsm-type" (required string) ~doc:"STRING HsmType"
        and subnetIds =
          flag "subnet-ids" (required json_arg) ~doc:"JSON SubnetIds" in
@@ -78,8 +81,11 @@ let create_cluster =
                                         ~f:Values.BackupRetentionPolicy.of_json
                                         backupRetentionPolicy)
               ?sourceBackupId
+              ?networkType:(Option.map ~f:Values.NetworkType.of_json
+                              networkType)
               ?tagList:(Option.map ~f:Values.TagList.of_json tagList)
-              ~hsmType ~subnetIds:(Values.SubnetIds.of_json subnetIds) ())
+              ?mode:(Option.map ~f:Values.ClusterMode.of_json mode) ~hsmType
+              ~subnetIds:(Values.SubnetIds.of_json subnetIds) ())
            (Some Values.CreateClusterResponse.to_json)
            (Some Values.CreateClusterResponse.error_to_json)])
 let create_hsm =
@@ -159,6 +165,24 @@ let delete_hsm =
            (Values.DeleteHsmRequest.make ?hsmId ?eniId ?eniIp ~clusterId ())
            (Some Values.DeleteHsmResponse.to_json)
            (Some Values.DeleteHsmResponse.error_to_json)])
+let delete_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (optional string) ~doc:"STRING CloudHsmArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_resource_policy
+           (Values.DeleteResourcePolicyRequest.make ?resourceArn ())
+           (Some Values.DeleteResourcePolicyResponse.to_json)
+           (Some Values.DeleteResourcePolicyResponse.error_to_json)])
 let describe_backups =
   Command.async ~summary:""
     ([%map_open.Command
@@ -174,13 +198,14 @@ let describe_backups =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT BackupsMaxSize"
        and filters = flag "filters" (optional json_arg) ~doc:"JSON Filters"
+       and shared = flag "shared" (optional bool) ~doc:"BOOL Boolean"
        and sortAscending =
          flag "sort-ascending" (optional bool) ~doc:"BOOL Boolean" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_backups
            (Values.DescribeBackupsRequest.make ?nextToken ?maxResults
-              ?filters:(Option.map ~f:Values.Filters.of_json filters)
+              ?filters:(Option.map ~f:Values.Filters.of_json filters) ?shared
               ?sortAscending ())
            (Some Values.DescribeBackupsResponse.to_json)
            (Some Values.DescribeBackupsResponse.error_to_json)])
@@ -207,6 +232,24 @@ let describe_clusters =
               ?nextToken ?maxResults ())
            (Some Values.DescribeClustersResponse.to_json)
            (Some Values.DescribeClustersResponse.error_to_json)])
+let get_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (optional string) ~doc:"STRING CloudHsmArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resource_policy
+           (Values.GetResourcePolicyRequest.make ?resourceArn ())
+           (Some Values.GetResourcePolicyResponse.to_json)
+           (Some Values.GetResourcePolicyResponse.error_to_json)])
 let initialize_cluster =
   Command.async ~summary:""
     ([%map_open.Command
@@ -281,19 +324,41 @@ let modify_cluster =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and hsmType = flag "hsm-type" (optional string) ~doc:"STRING HsmType"
        and backupRetentionPolicy =
-         flag "backup-retention-policy" (required json_arg)
+         flag "backup-retention-policy" (optional json_arg)
            ~doc:"JSON BackupRetentionPolicy"
        and clusterId =
          flag "cluster-id" (required string) ~doc:"STRING ClusterId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.modify_cluster
-           (Values.ModifyClusterRequest.make
-              ~backupRetentionPolicy:(Values.BackupRetentionPolicy.of_json
+           (Values.ModifyClusterRequest.make ?hsmType
+              ?backupRetentionPolicy:(Option.map
+                                        ~f:Values.BackupRetentionPolicy.of_json
                                         backupRetentionPolicy) ~clusterId ())
            (Some Values.ModifyClusterResponse.to_json)
            (Some Values.ModifyClusterResponse.error_to_json)])
+let put_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (optional string) ~doc:"STRING CloudHsmArn"
+       and policy =
+         flag "policy" (optional string) ~doc:"STRING ResourcePolicy" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_resource_policy
+           (Values.PutResourcePolicyRequest.make ?resourceArn ?policy ())
+           (Some Values.PutResourcePolicyResponse.to_json)
+           (Some Values.PutResourcePolicyResponse.error_to_json)])
 let restore_backup =
   Command.async ~summary:""
     ([%map_open.Command
@@ -361,12 +426,15 @@ let main =
     ("delete-backup", delete_backup);
     ("delete-cluster", delete_cluster);
     ("delete-hsm", delete_hsm);
+    ("delete-resource-policy", delete_resource_policy);
     ("describe-backups", describe_backups);
     ("describe-clusters", describe_clusters);
+    ("get-resource-policy", get_resource_policy);
     ("initialize-cluster", initialize_cluster);
     ("list-tags", list_tags);
     ("modify-backup-attributes", modify_backup_attributes);
     ("modify-cluster", modify_cluster);
+    ("put-resource-policy", put_resource_policy);
     ("restore-backup", restore_backup);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource)]

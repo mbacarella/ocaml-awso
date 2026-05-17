@@ -172,6 +172,12 @@ val get_evidence_by_evidence_folder :
         (GetEvidenceByEvidenceFolderResponse.t,
           GetEvidenceByEvidenceFolderResponse.error) Result.t
           Async.Deferred.t
+val get_evidence_file_upload_url :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetEvidenceFileUploadUrlRequest.t ->
+        (GetEvidenceFileUploadUrlResponse.t,
+          GetEvidenceFileUploadUrlResponse.error) Result.t Async.Deferred.t
 val get_evidence_folder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

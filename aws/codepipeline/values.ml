@@ -45,6 +45,1017 @@ module ArtifactName =
     let of_json j = string_of_json ~kind:"ArtifactName" j
     let to_json = simple_to_json to_value
   end
+module Command =
+  struct
+    type nonrec t = string
+    let context_ = "Command"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Command" j
+    let to_json = simple_to_json to_value
+  end
+module InputArtifact =
+  struct
+    type nonrec t =
+      {
+      name: ArtifactName.t
+        [@ocaml.doc
+          "The name of the artifact to be worked on (for example, \"My App\"). Artifacts are the files that are worked on by actions in the pipeline. See the action configuration for each action for details about artifact parameters. For example, the S3 source action input artifact is a file name (or file path), and the files are generally provided as a ZIP file. Example artifact name: SampleApp_Windows.zip The input artifact of an action must exactly match the output artifact declared in a preceding action, but the input artifact does not have to be the next action in strict sequence from the action that provided the output artifact. Actions in parallel can declare different output artifacts, which are in turn consumed by different following actions."]}
+    let context_ = "InputArtifact"
+    let make ~name = fun () -> { name }
+    let to_value x =
+      structure_to_value [("name", (Some (ArtifactName.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        ArtifactName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "name" ArtifactName.of_json in
+      make ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents information about an artifact to be worked on, such as a test or build artifact."]
+module RuleConfigurationKey =
+  struct
+    type nonrec t = string
+    let context_ = "RuleConfigurationKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RuleConfigurationKey" j
+    let to_json = simple_to_json to_value
+  end
+module RuleConfigurationValue =
+  struct
+    type nonrec t = string
+    let context_ = "RuleConfigurationValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:10000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RuleConfigurationValue" j
+    let to_json = simple_to_json to_value
+  end
+module RuleCategory =
+  struct
+    type nonrec t =
+      | Rule 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | Rule -> "Rule" | Non_static_id s -> s
+    let of_string = function | "Rule" -> Rule | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RuleCategory" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RuleCategory" j)
+    let to_json = simple_to_json to_value
+  end
+module RuleOwner =
+  struct
+    type nonrec t =
+      | AWS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | AWS -> "AWS" | Non_static_id s -> s
+    let of_string = function | "AWS" -> AWS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RuleOwner" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RuleOwner" j)
+    let to_json = simple_to_json to_value
+  end
+module RuleProvider =
+  struct
+    type nonrec t = string
+    let context_ = "RuleProvider"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:35) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9A-Za-z_-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RuleProvider" j
+    let to_json = simple_to_json to_value
+  end
+module Version =
+  struct
+    type nonrec t = string
+    let context_ = "Version"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:9) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9A-Za-z_-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Version" j
+    let to_json = simple_to_json to_value
+  end
+module Code =
+  struct
+    type nonrec t = string
+    let context_ = "Code"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Code" j
+    let to_json = simple_to_json to_value
+  end
+module Message =
+  struct
+    type nonrec t = string
+    let context_ = "Message"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:5000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Message" j
+    let to_json = simple_to_json to_value
+  end
+module AWSRegionName =
+  struct
+    type nonrec t = string
+    let context_ = "AWSRegionName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:30) >>=
+             (fun () -> check_string_min i ~min:4));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AWSRegionName" j
+    let to_json = simple_to_json to_value
+  end
+module CommandList =
+  struct
+    type nonrec t = Command.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Command.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Command.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CommandList" ~of_json:Command.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InputArtifactList =
+  struct
+    type nonrec t = InputArtifact.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InputArtifact.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InputArtifact.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InputArtifactList" ~of_json:InputArtifact.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "RoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"arn:aws(-[\\w]+)*:iam::[0-9]{12}:role/.*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module RuleConfigurationMap =
+  struct
+    type nonrec t = (RuleConfigurationKey.t * RuleConfigurationValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((RuleConfigurationKey.of_string chopped),
+                              (RuleConfigurationValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (RuleConfigurationKey.to_value x) |>
+                    (fun x ->
+                       (RuleConfigurationValue.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:RuleConfigurationKey.of_string
+        ~of_json:RuleConfigurationValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RuleName =
+  struct
+    type nonrec t = string
+    let context_ = "RuleName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () -> check_pattern i ~pattern:"[A-Za-z0-9.@\\-_]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RuleName" j
+    let to_json = simple_to_json to_value
+  end
+module RuleTimeout =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:86400) >>=
+             (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RuleTimeout" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RuleTypeId =
+  struct
+    type nonrec t =
+      {
+      category: RuleCategory.t
+        [@ocaml.doc
+          "A category defines what kind of rule can be run in the stage, and constrains the provider type for the rule. The valid category is Rule."];
+      owner: RuleOwner.t option
+        [@ocaml.doc
+          "The creator of the rule being called. The valid value for the Owner field in the rule category is AWS."];
+      provider: RuleProvider.t
+        [@ocaml.doc
+          "The rule provider, such as the DeploymentWindow rule. For a list of rule provider names, see the rules listed in the CodePipeline rule reference."];
+      version: Version.t option
+        [@ocaml.doc "A string that describes the rule version."]}
+    let context_ = "RuleTypeId"
+    let make ?owner =
+      fun ?version ->
+        fun ~category ->
+          fun ~provider -> fun () -> { owner; version; category; provider }
+    let to_value x =
+      structure_to_value
+        [("category", (Some (RuleCategory.to_value x.category)));
+        ("owner", (Option.map x.owner ~f:RuleOwner.to_value));
+        ("provider", (Some (RuleProvider.to_value x.provider)));
+        ("version", (Option.map x.version ~f:Version.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let version =
+        (Option.map ~f:Version.of_xml) (Xml.child xml_arg0 "version") in
+      let provider =
+        RuleProvider.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "provider") in
+      let owner =
+        (Option.map ~f:RuleOwner.of_xml) (Xml.child xml_arg0 "owner") in
+      let category =
+        RuleCategory.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "category") in
+      make ?version ~provider ?owner ~category ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let version = field_map json__ "version" Version.of_json in
+      let provider = field_map_exn json__ "provider" RuleProvider.of_json in
+      let owner = field_map json__ "owner" RuleOwner.of_json in
+      let category = field_map_exn json__ "category" RuleCategory.of_json in
+      make ?version ~provider ?owner ~category ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The ID for the rule type, which is made up of the combined values for category, owner, provider, and version. For more information about conditions, see Stage conditions. For more information about rules, see the CodePipeline rule reference."]
+module FilePath =
+  struct
+    type nonrec t = string
+    let context_ = "FilePath"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FilePath" j
+    let to_json = simple_to_json to_value
+  end
+module GitBranchNamePattern =
+  struct
+    type nonrec t = string
+    let context_ = "GitBranchNamePattern"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GitBranchNamePattern" j
+    let to_json = simple_to_json to_value
+  end
+module GitFilePathPattern =
+  struct
+    type nonrec t = string
+    let context_ = "GitFilePathPattern"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GitFilePathPattern" j
+    let to_json = simple_to_json to_value
+  end
+module GitTagNamePattern =
+  struct
+    type nonrec t = string
+    let context_ = "GitTagNamePattern"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GitTagNamePattern" j
+    let to_json = simple_to_json to_value
+  end
+module ErrorDetails =
+  struct
+    type nonrec t =
+      {
+      code: Code.t option
+        [@ocaml.doc "The system ID or number code of the error."];
+      message: Message.t option [@ocaml.doc "The text of the error message."]}
+    let make ?code = fun ?message -> fun () -> { code; message }
+    let to_value x =
+      structure_to_value
+        [("code", (Option.map x.code ~f:Code.to_value));
+        ("message", (Option.map x.message ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
+      let code = (Option.map ~f:Code.of_xml) (Xml.child xml_arg0 "code") in
+      make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
+      let code = field_map json__ "code" Code.of_json in
+      make ?message ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents information about an error in CodePipeline."]
+module ExecutionId =
+  struct
+    type nonrec t = string
+    let context_ = "ExecutionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1500) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExecutionId" j
+    let to_json = simple_to_json to_value
+  end
+module ExecutionSummary =
+  struct
+    type nonrec t = string
+    let context_ = "ExecutionSummary"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExecutionSummary" j
+    let to_json = simple_to_json to_value
+  end
+module LastUpdatedBy =
+  struct
+    type nonrec t = string
+    let context_ = "LastUpdatedBy"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LastUpdatedBy" j
+    let to_json = simple_to_json to_value
+  end
+module RuleExecutionId =
+  struct
+    type nonrec t = string
+    let context_ = "RuleExecutionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:200) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RuleExecutionId" j
+    let to_json = simple_to_json to_value
+  end
+module RuleExecutionStatus =
+  struct
+    type nonrec t =
+      | InProgress 
+      | Abandoned 
+      | Succeeded 
+      | Failed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | InProgress -> "InProgress"
+      | Abandoned -> "Abandoned"
+      | Succeeded -> "Succeeded"
+      | Failed -> "Failed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "InProgress" -> InProgress
+      | "Abandoned" -> Abandoned
+      | "Succeeded" -> Succeeded
+      | "Failed" -> Failed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RuleExecutionStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RuleExecutionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module RuleExecutionToken =
+  struct
+    type nonrec t = string
+    let context_ = "RuleExecutionToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9\\-\\.]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RuleExecutionToken" j
+    let to_json = simple_to_json to_value
+  end
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module Url =
+  struct
+    type nonrec t = string
+    let context_ = "Url"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Url" j
+    let to_json = simple_to_json to_value
+  end
+module Revision =
+  struct
+    type nonrec t = string
+    let context_ = "Revision"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1500) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Revision" j
+    let to_json = simple_to_json to_value
+  end
+module RevisionChangeIdentifier =
+  struct
+    type nonrec t = string
+    let context_ = "RevisionChangeIdentifier"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RevisionChangeIdentifier" j
+    let to_json = simple_to_json to_value
+  end
+module RuleDeclaration =
+  struct
+    type nonrec t =
+      {
+      name: RuleName.t
+        [@ocaml.doc
+          "The name of the rule that is created for the condition, such as VariableCheck."];
+      ruleTypeId: RuleTypeId.t
+        [@ocaml.doc
+          "The ID for the rule type, which is made up of the combined values for category, owner, provider, and version."];
+      configuration: RuleConfigurationMap.t option
+        [@ocaml.doc "The action configuration fields for the rule."];
+      commands: CommandList.t option
+        [@ocaml.doc
+          "The shell commands to run with your commands rule in CodePipeline. All commands are supported except multi-line formats. While CodeBuild logs and permissions are used, you do not need to create any resources in CodeBuild. Using compute time for this action will incur separate charges in CodeBuild."];
+      inputArtifacts: InputArtifactList.t option
+        [@ocaml.doc
+          "The input artifacts fields for the rule, such as specifying an input file for the rule."];
+      roleArn: RoleArn.t option
+        [@ocaml.doc "The pipeline role ARN associated with the rule."];
+      region: AWSRegionName.t option
+        [@ocaml.doc "The Region for the condition associated with the rule."];
+      timeoutInMinutes: RuleTimeout.t option
+        [@ocaml.doc "The action timeout for the rule."]}
+    let context_ = "RuleDeclaration"
+    let make ?configuration =
+      fun ?commands ->
+        fun ?inputArtifacts ->
+          fun ?roleArn ->
+            fun ?region ->
+              fun ?timeoutInMinutes ->
+                fun ~name ->
+                  fun ~ruleTypeId ->
+                    fun () ->
+                      {
+                        configuration;
+                        commands;
+                        inputArtifacts;
+                        roleArn;
+                        region;
+                        timeoutInMinutes;
+                        name;
+                        ruleTypeId
+                      }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (RuleName.to_value x.name)));
+        ("ruleTypeId", (Some (RuleTypeId.to_value x.ruleTypeId)));
+        ("configuration",
+          (Option.map x.configuration ~f:RuleConfigurationMap.to_value));
+        ("commands", (Option.map x.commands ~f:CommandList.to_value));
+        ("inputArtifacts",
+          (Option.map x.inputArtifacts ~f:InputArtifactList.to_value));
+        ("roleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
+        ("region", (Option.map x.region ~f:AWSRegionName.to_value));
+        ("timeoutInMinutes",
+          (Option.map x.timeoutInMinutes ~f:RuleTimeout.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let timeoutInMinutes =
+        (Option.map ~f:RuleTimeout.of_xml)
+          (Xml.child xml_arg0 "timeoutInMinutes") in
+      let region =
+        (Option.map ~f:AWSRegionName.of_xml) (Xml.child xml_arg0 "region") in
+      let roleArn =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "roleArn") in
+      let inputArtifacts =
+        (Option.map ~f:InputArtifactList.of_xml)
+          (Xml.child xml_arg0 "inputArtifacts") in
+      let commands =
+        (Option.map ~f:CommandList.of_xml) (Xml.child xml_arg0 "commands") in
+      let configuration =
+        (Option.map ~f:RuleConfigurationMap.of_xml)
+          (Xml.child xml_arg0 "configuration") in
+      let ruleTypeId =
+        RuleTypeId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ruleTypeId") in
+      let name =
+        RuleName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?timeoutInMinutes ?region ?roleArn ?inputArtifacts ?commands
+        ?configuration ~ruleTypeId ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let timeoutInMinutes =
+        field_map json__ "timeoutInMinutes" RuleTimeout.of_json in
+      let region = field_map json__ "region" AWSRegionName.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
+      let inputArtifacts =
+        field_map json__ "inputArtifacts" InputArtifactList.of_json in
+      let commands = field_map json__ "commands" CommandList.of_json in
+      let configuration =
+        field_map json__ "configuration" RuleConfigurationMap.of_json in
+      let ruleTypeId = field_map_exn json__ "ruleTypeId" RuleTypeId.of_json in
+      let name = field_map_exn json__ "name" RuleName.of_json in
+      make ?timeoutInMinutes ?region ?roleArn ?inputArtifacts ?commands
+        ?configuration ~ruleTypeId ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents information about the rule to be created for an associated condition. An example would be creating a new rule for an entry condition, such as a rule that checks for a test result before allowing the run to enter the deployment stage. For more information about conditions, see Stage conditions and How do stage conditions work?. For more information about rules, see the CodePipeline rule reference."]
+module EnvironmentVariableName =
+  struct
+    type nonrec t = string
+    let context_ = "EnvironmentVariableName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[A-Za-z0-9_]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EnvironmentVariableName" j
+    let to_json = simple_to_json to_value
+  end
+module EnvironmentVariableType =
+  struct
+    type nonrec t =
+      | PLAINTEXT 
+      | SECRETS_MANAGER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PLAINTEXT -> "PLAINTEXT"
+      | SECRETS_MANAGER -> "SECRETS_MANAGER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PLAINTEXT" -> PLAINTEXT
+      | "SECRETS_MANAGER" -> SECRETS_MANAGER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EnvironmentVariableType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EnvironmentVariableType" j)
+    let to_json = simple_to_json to_value
+  end
+module EnvironmentVariableValue =
+  struct
+    type nonrec t = string
+    let context_ = "EnvironmentVariableValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2000) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EnvironmentVariableValue" j
+    let to_json = simple_to_json to_value
+  end
+module FilePathList =
+  struct
+    type nonrec t = FilePath.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FilePath.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FilePath.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FilePathList" ~of_json:FilePath.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GitBranchPatternList =
+  struct
+    type nonrec t = GitBranchNamePattern.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:8) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GitBranchNamePattern.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GitBranchNamePattern.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GitBranchPatternList"
+        ~of_json:GitBranchNamePattern.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GitFilePathPatternList =
+  struct
+    type nonrec t = GitFilePathPattern.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:8) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GitFilePathPattern.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GitFilePathPattern.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GitFilePathPatternList"
+        ~of_json:GitFilePathPattern.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GitPullRequestEventType =
+  struct
+    type nonrec t =
+      | OPEN 
+      | UPDATED 
+      | CLOSED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | OPEN -> "OPEN"
+      | UPDATED -> "UPDATED"
+      | CLOSED -> "CLOSED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "OPEN" -> OPEN
+      | "UPDATED" -> UPDATED
+      | "CLOSED" -> CLOSED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration GitPullRequestEventType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"GitPullRequestEventType" j)
+    let to_json = simple_to_json to_value
+  end
+module GitTagPatternList =
+  struct
+    type nonrec t = GitTagNamePattern.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:8) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GitTagNamePattern.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GitTagNamePattern.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GitTagPatternList"
+        ~of_json:GitTagNamePattern.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module S3BucketName =
   struct
     type nonrec t = string
@@ -70,6 +1081,226 @@ module S3ObjectKey =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"S3ObjectKey" j
     let to_json = simple_to_json to_value
+  end
+module RuleExecution =
+  struct
+    type nonrec t =
+      {
+      ruleExecutionId: RuleExecutionId.t option
+        [@ocaml.doc "The execution ID for the run of the rule."];
+      status: RuleExecutionStatus.t option
+        [@ocaml.doc "The status of the run of the rule, such as FAILED."];
+      summary: ExecutionSummary.t option
+        [@ocaml.doc "A summary of the run of the rule."];
+      lastStatusChange: Timestamp.t option
+        [@ocaml.doc "The last status change of the rule."];
+      token: RuleExecutionToken.t option
+        [@ocaml.doc
+          "The system-generated token used to identify a unique request."];
+      lastUpdatedBy: LastUpdatedBy.t option
+        [@ocaml.doc "The ARN of the user who last changed the rule."];
+      externalExecutionId: ExecutionId.t option
+        [@ocaml.doc "The external ID of the run of the rule."];
+      externalExecutionUrl: Url.t option
+        [@ocaml.doc
+          "The URL of a resource external to Amazon Web Services that is used when running the rule (for example, an external repository URL)."];
+      errorDetails: ErrorDetails.t option }
+    let make ?ruleExecutionId =
+      fun ?status ->
+        fun ?summary ->
+          fun ?lastStatusChange ->
+            fun ?token ->
+              fun ?lastUpdatedBy ->
+                fun ?externalExecutionId ->
+                  fun ?externalExecutionUrl ->
+                    fun ?errorDetails ->
+                      fun () ->
+                        {
+                          ruleExecutionId;
+                          status;
+                          summary;
+                          lastStatusChange;
+                          token;
+                          lastUpdatedBy;
+                          externalExecutionId;
+                          externalExecutionUrl;
+                          errorDetails
+                        }
+    let to_value x =
+      structure_to_value
+        [("ruleExecutionId",
+           (Option.map x.ruleExecutionId ~f:RuleExecutionId.to_value));
+        ("status", (Option.map x.status ~f:RuleExecutionStatus.to_value));
+        ("summary", (Option.map x.summary ~f:ExecutionSummary.to_value));
+        ("lastStatusChange",
+          (Option.map x.lastStatusChange ~f:Timestamp.to_value));
+        ("token", (Option.map x.token ~f:RuleExecutionToken.to_value));
+        ("lastUpdatedBy",
+          (Option.map x.lastUpdatedBy ~f:LastUpdatedBy.to_value));
+        ("externalExecutionId",
+          (Option.map x.externalExecutionId ~f:ExecutionId.to_value));
+        ("externalExecutionUrl",
+          (Option.map x.externalExecutionUrl ~f:Url.to_value));
+        ("errorDetails",
+          (Option.map x.errorDetails ~f:ErrorDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorDetails =
+        (Option.map ~f:ErrorDetails.of_xml)
+          (Xml.child xml_arg0 "errorDetails") in
+      let externalExecutionUrl =
+        (Option.map ~f:Url.of_xml)
+          (Xml.child xml_arg0 "externalExecutionUrl") in
+      let externalExecutionId =
+        (Option.map ~f:ExecutionId.of_xml)
+          (Xml.child xml_arg0 "externalExecutionId") in
+      let lastUpdatedBy =
+        (Option.map ~f:LastUpdatedBy.of_xml)
+          (Xml.child xml_arg0 "lastUpdatedBy") in
+      let token =
+        (Option.map ~f:RuleExecutionToken.of_xml)
+          (Xml.child xml_arg0 "token") in
+      let lastStatusChange =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastStatusChange") in
+      let summary =
+        (Option.map ~f:ExecutionSummary.of_xml)
+          (Xml.child xml_arg0 "summary") in
+      let status =
+        (Option.map ~f:RuleExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let ruleExecutionId =
+        (Option.map ~f:RuleExecutionId.of_xml)
+          (Xml.child xml_arg0 "ruleExecutionId") in
+      make ?errorDetails ?externalExecutionUrl ?externalExecutionId
+        ?lastUpdatedBy ?token ?lastStatusChange ?summary ?status
+        ?ruleExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorDetails = field_map json__ "errorDetails" ErrorDetails.of_json in
+      let externalExecutionUrl =
+        field_map json__ "externalExecutionUrl" Url.of_json in
+      let externalExecutionId =
+        field_map json__ "externalExecutionId" ExecutionId.of_json in
+      let lastUpdatedBy =
+        field_map json__ "lastUpdatedBy" LastUpdatedBy.of_json in
+      let token = field_map json__ "token" RuleExecutionToken.of_json in
+      let lastStatusChange =
+        field_map json__ "lastStatusChange" Timestamp.of_json in
+      let summary = field_map json__ "summary" ExecutionSummary.of_json in
+      let status = field_map json__ "status" RuleExecutionStatus.of_json in
+      let ruleExecutionId =
+        field_map json__ "ruleExecutionId" RuleExecutionId.of_json in
+      make ?errorDetails ?externalExecutionUrl ?externalExecutionId
+        ?lastUpdatedBy ?token ?lastStatusChange ?summary ?status
+        ?ruleExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents information about each time a rule is run as part of the pipeline execution for a pipeline configured with conditions."]
+module RuleRevision =
+  struct
+    type nonrec t =
+      {
+      revisionId: Revision.t option
+        [@ocaml.doc
+          "The system-generated unique ID that identifies the revision number of the rule."];
+      revisionChangeId: RevisionChangeIdentifier.t option
+        [@ocaml.doc
+          "The unique identifier of the change that set the state to this revision (for example, a deployment ID or timestamp)."];
+      created: Timestamp.t option
+        [@ocaml.doc
+          "The date and time when the most recent version of the rule was created, in timestamp format."]}
+    let make ?revisionId =
+      fun ?revisionChangeId ->
+        fun ?created -> fun () -> { revisionId; revisionChangeId; created }
+    let to_value x =
+      structure_to_value
+        [("revisionId", (Option.map x.revisionId ~f:Revision.to_value));
+        ("revisionChangeId",
+          (Option.map x.revisionChangeId ~f:RevisionChangeIdentifier.to_value));
+        ("created", (Option.map x.created ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let created =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "created") in
+      let revisionChangeId =
+        (Option.map ~f:RevisionChangeIdentifier.of_xml)
+          (Xml.child xml_arg0 "revisionChangeId") in
+      let revisionId =
+        (Option.map ~f:Revision.of_xml) (Xml.child xml_arg0 "revisionId") in
+      make ?created ?revisionChangeId ?revisionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let created = field_map json__ "created" Timestamp.of_json in
+      let revisionChangeId =
+        field_map json__ "revisionChangeId" RevisionChangeIdentifier.of_json in
+      let revisionId = field_map json__ "revisionId" Revision.of_json in
+      make ?created ?revisionChangeId ?revisionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The change to a rule that creates a revision of the rule."]
+module Result_ =
+  struct
+    type nonrec t =
+      | ROLLBACK 
+      | FAIL 
+      | RETRY 
+      | SKIP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ROLLBACK -> "ROLLBACK"
+      | FAIL -> "FAIL"
+      | RETRY -> "RETRY"
+      | SKIP -> "SKIP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ROLLBACK" -> ROLLBACK
+      | "FAIL" -> FAIL
+      | "RETRY" -> RETRY
+      | "SKIP" -> SKIP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Result" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Result" j)
+    let to_json = simple_to_json to_value
+  end
+module RuleDeclarationList =
+  struct
+    type nonrec t = RuleDeclaration.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RuleDeclaration.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RuleDeclaration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RuleDeclarationList"
+        ~of_json:RuleDeclaration.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module ActionConfigurationKey =
   struct
@@ -116,6 +1347,7 @@ module ActionCategory =
       | Test 
       | Invoke 
       | Approval 
+      | Compute 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -126,6 +1358,7 @@ module ActionCategory =
       | Test -> "Test"
       | Invoke -> "Invoke"
       | Approval -> "Approval"
+      | Compute -> "Compute"
       | Non_static_id s -> s
     let of_string =
       function
@@ -135,6 +1368,7 @@ module ActionCategory =
       | "Test" -> Test
       | "Invoke" -> Invoke
       | "Approval" -> Approval
+      | "Compute" -> Compute
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -192,71 +1426,229 @@ module ActionProvider =
     let of_json j = string_of_json ~kind:"ActionProvider" j
     let to_json = simple_to_json to_value
   end
-module Version =
-  struct
-    type nonrec t = string
-    let context_ = "Version"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:9) >>=
-                  (fun () -> check_pattern i ~pattern:"[0-9A-Za-z_-]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Version" j
-    let to_json = simple_to_json to_value
-  end
-module InputArtifact =
+module EnvironmentVariable =
   struct
     type nonrec t =
       {
-      name: ArtifactName.t
+      name: EnvironmentVariableName.t
+        [@ocaml.doc "The environment variable name in the key-value pair."];
+      value: EnvironmentVariableValue.t
+        [@ocaml.doc "The environment variable value in the key-value pair."];
+      type_: EnvironmentVariableType.t option
         [@ocaml.doc
-          "The name of the artifact to be worked on (for example, \"My App\"). The input artifact of an action must exactly match the output artifact declared in a preceding action, but the input artifact does not have to be the next action in strict sequence from the action that provided the output artifact. Actions in parallel can declare different output artifacts, which are in turn consumed by different following actions."]}
-    let context_ = "InputArtifact"
-    let make ~name = fun () -> { name }
+          "Specifies the type of use for the environment variable value. The value can be either PLAINTEXT or SECRETS_MANAGER. If the value is SECRETS_MANAGER, provide the Secrets reference in the EnvironmentVariable value."]}
+    let context_ = "EnvironmentVariable"
+    let make ?type_ =
+      fun ~name -> fun ~value -> fun () -> { type_; name; value }
     let to_value x =
-      structure_to_value [("name", (Some (ArtifactName.to_value x.name)))]
+      structure_to_value
+        [("name", (Some (EnvironmentVariableName.to_value x.name)));
+        ("value", (Some (EnvironmentVariableValue.to_value x.value)));
+        ("type", (Option.map x.type_ ~f:EnvironmentVariableType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:EnvironmentVariableType.of_xml)
+          (Xml.child xml_arg0 "type") in
+      let value =
+        EnvironmentVariableValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "value") in
       let name =
-        ArtifactName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~name ()
+        EnvironmentVariableName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?type_ ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" ArtifactName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let type_ = field_map json__ "type" EnvironmentVariableType.of_json in
+      let value =
+        field_map_exn json__ "value" EnvironmentVariableValue.of_json in
+      let name = field_map_exn json__ "name" EnvironmentVariableName.of_json in
+      make ?type_ ~value ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Represents information about an artifact to be worked on, such as a test or build artifact."]
+  end[@@ocaml.doc "The environment variables for the action."]
 module OutputArtifact =
   struct
     type nonrec t =
       {
       name: ArtifactName.t
         [@ocaml.doc
-          "The name of the output of an artifact, such as \"My App\". The input artifact of an action must exactly match the output artifact declared in a preceding action, but the input artifact does not have to be the next action in strict sequence from the action that provided the output artifact. Actions in parallel can declare different output artifacts, which are in turn consumed by different following actions. Output artifact names must be unique within a pipeline."]}
+          "The name of the output of an artifact, such as \"My App\". The input artifact of an action must exactly match the output artifact declared in a preceding action, but the input artifact does not have to be the next action in strict sequence from the action that provided the output artifact. Actions in parallel can declare different output artifacts, which are in turn consumed by different following actions. Output artifact names must be unique within a pipeline."];
+      files: FilePathList.t option
+        [@ocaml.doc
+          "The files that you want to associate with the output artifact that will be exported from the compute action."]}
     let context_ = "OutputArtifact"
-    let make ~name = fun () -> { name }
+    let make ?files = fun ~name -> fun () -> { files; name }
     let to_value x =
-      structure_to_value [("name", (Some (ArtifactName.to_value x.name)))]
+      structure_to_value
+        [("name", (Some (ArtifactName.to_value x.name)));
+        ("files", (Option.map x.files ~f:FilePathList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let files =
+        (Option.map ~f:FilePathList.of_xml) (Xml.child xml_arg0 "files") in
       let name =
         ArtifactName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~name ()
+      make ?files ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" ArtifactName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let files = field_map json__ "files" FilePathList.of_json in
+      let name = field_map_exn json__ "name" ArtifactName.of_json in
+      make ?files ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents information about the output of an action."]
+module OutputVariable =
+  struct
+    type nonrec t = string
+    let context_ = "OutputVariable"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OutputVariable" j
+    let to_json = simple_to_json to_value
+  end
+module GitBranchFilterCriteria =
+  struct
+    type nonrec t =
+      {
+      includes: GitBranchPatternList.t option
+        [@ocaml.doc
+          "The list of patterns of Git branches that, when a commit is pushed, are to be included as criteria that starts the pipeline."];
+      excludes: GitBranchPatternList.t option
+        [@ocaml.doc
+          "The list of patterns of Git branches that, when a commit is pushed, are to be excluded from starting the pipeline."]}
+    let make ?includes = fun ?excludes -> fun () -> { includes; excludes }
+    let to_value x =
+      structure_to_value
+        [("includes",
+           (Option.map x.includes ~f:GitBranchPatternList.to_value));
+        ("excludes",
+          (Option.map x.excludes ~f:GitBranchPatternList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excludes =
+        (Option.map ~f:GitBranchPatternList.of_xml)
+          (Xml.child xml_arg0 "excludes") in
+      let includes =
+        (Option.map ~f:GitBranchPatternList.of_xml)
+          (Xml.child xml_arg0 "includes") in
+      make ?excludes ?includes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excludes = field_map json__ "excludes" GitBranchPatternList.of_json in
+      let includes = field_map json__ "includes" GitBranchPatternList.of_json in
+      make ?excludes ?includes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Git repository branches specified as filter criteria to start the pipeline."]
+module GitFilePathFilterCriteria =
+  struct
+    type nonrec t =
+      {
+      includes: GitFilePathPatternList.t option
+        [@ocaml.doc
+          "The list of patterns of Git repository file paths that, when a commit is pushed, are to be included as criteria that starts the pipeline."];
+      excludes: GitFilePathPatternList.t option
+        [@ocaml.doc
+          "The list of patterns of Git repository file paths that, when a commit is pushed, are to be excluded from starting the pipeline."]}
+    let make ?includes = fun ?excludes -> fun () -> { includes; excludes }
+    let to_value x =
+      structure_to_value
+        [("includes",
+           (Option.map x.includes ~f:GitFilePathPatternList.to_value));
+        ("excludes",
+          (Option.map x.excludes ~f:GitFilePathPatternList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excludes =
+        (Option.map ~f:GitFilePathPatternList.of_xml)
+          (Xml.child xml_arg0 "excludes") in
+      let includes =
+        (Option.map ~f:GitFilePathPatternList.of_xml)
+          (Xml.child xml_arg0 "includes") in
+      make ?excludes ?includes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excludes =
+        field_map json__ "excludes" GitFilePathPatternList.of_json in
+      let includes =
+        field_map json__ "includes" GitFilePathPatternList.of_json in
+      make ?excludes ?includes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Git repository file paths specified as filter criteria to start the pipeline."]
+module GitPullRequestEventTypeList =
+  struct
+    type nonrec t = GitPullRequestEventType.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GitPullRequestEventType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GitPullRequestEventType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GitPullRequestEventTypeList"
+        ~of_json:GitPullRequestEventType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GitTagFilterCriteria =
+  struct
+    type nonrec t =
+      {
+      includes: GitTagPatternList.t option
+        [@ocaml.doc
+          "The list of patterns of Git tags that, when pushed, are to be included as criteria that starts the pipeline."];
+      excludes: GitTagPatternList.t option
+        [@ocaml.doc
+          "The list of patterns of Git tags that, when pushed, are to be excluded from starting the pipeline."]}
+    let make ?includes = fun ?excludes -> fun () -> { includes; excludes }
+    let to_value x =
+      structure_to_value
+        [("includes", (Option.map x.includes ~f:GitTagPatternList.to_value));
+        ("excludes", (Option.map x.excludes ~f:GitTagPatternList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excludes =
+        (Option.map ~f:GitTagPatternList.of_xml)
+          (Xml.child xml_arg0 "excludes") in
+      let includes =
+        (Option.map ~f:GitTagPatternList.of_xml)
+          (Xml.child xml_arg0 "includes") in
+      make ?excludes ?includes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excludes = field_map json__ "excludes" GitTagPatternList.of_json in
+      let includes = field_map json__ "includes" GitTagPatternList.of_json in
+      make ?excludes ?includes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Git tags specified as filter criteria for whether a Git tag repository event will start the pipeline."]
 module ArtifactLocationType =
   struct
     type nonrec t =
@@ -278,31 +1670,29 @@ module S3ArtifactLocation =
   struct
     type nonrec t =
       {
-      bucketName: S3BucketName.t [@ocaml.doc "The name of the S3 bucket."];
-      objectKey: S3ObjectKey.t
+      bucketName: S3BucketName.t option
+        [@ocaml.doc "The name of the S3 bucket."];
+      objectKey: S3ObjectKey.t option
         [@ocaml.doc
           "The key of the object in the S3 bucket, which uniquely identifies the object in the bucket."]}
-    let context_ = "S3ArtifactLocation"
-    let make ~bucketName =
-      fun ~objectKey -> fun () -> { bucketName; objectKey }
+    let make ?bucketName =
+      fun ?objectKey -> fun () -> { bucketName; objectKey }
     let to_value x =
       structure_to_value
-        [("bucketName", (Some (S3BucketName.to_value x.bucketName)));
-        ("objectKey", (Some (S3ObjectKey.to_value x.objectKey)))]
+        [("bucketName", (Option.map x.bucketName ~f:S3BucketName.to_value));
+        ("objectKey", (Option.map x.objectKey ~f:S3ObjectKey.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let objectKey =
-        S3ObjectKey.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "objectKey") in
+        (Option.map ~f:S3ObjectKey.of_xml) (Xml.child xml_arg0 "objectKey") in
       let bucketName =
-        S3BucketName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
-      make ~objectKey ~bucketName ()
+        (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "bucketName") in
+      make ?objectKey ?bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let objectKey = field_map_exn json "objectKey" S3ObjectKey.of_json in
-      let bucketName = field_map_exn json "bucketName" S3BucketName.of_json in
-      make ~objectKey ~bucketName ()
+    let of_json json__ =
+      let objectKey = field_map json__ "objectKey" S3ObjectKey.of_json in
+      let bucketName = field_map json__ "bucketName" S3BucketName.of_json in
+      make ?objectKey ?bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The location of the S3 bucket that contains a revision."]
 module S3Bucket =
@@ -341,53 +1731,170 @@ module S3Key =
     let of_json j = string_of_json ~kind:"S3Key" j
     let to_json = simple_to_json to_value
   end
-module Code =
+module ConditionExecutionStatus =
   struct
-    type nonrec t = string
-    let context_ = "Code"
+    type nonrec t =
+      | InProgress 
+      | Failed 
+      | Errored 
+      | Succeeded 
+      | Cancelled 
+      | Abandoned 
+      | Overridden 
+      | Non_static_id of string 
     let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    let to_string =
+      function
+      | InProgress -> "InProgress"
+      | Failed -> "Failed"
+      | Errored -> "Errored"
+      | Succeeded -> "Succeeded"
+      | Cancelled -> "Cancelled"
+      | Abandoned -> "Abandoned"
+      | Overridden -> "Overridden"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "InProgress" -> InProgress
+      | "Failed" -> Failed
+      | "Errored" -> Errored
+      | "Succeeded" -> Succeeded
+      | "Cancelled" -> Cancelled
+      | "Abandoned" -> Abandoned
+      | "Overridden" -> Overridden
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Code" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConditionExecutionStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ConditionExecutionStatus" j)
     let to_json = simple_to_json to_value
   end
-module Message =
+module RuleState =
   struct
-    type nonrec t = string
-    let context_ = "Message"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:5000) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      ruleName: RuleName.t option [@ocaml.doc "The name of the rule."];
+      currentRevision: RuleRevision.t option
+        [@ocaml.doc
+          "The ID of the current revision of the artifact successfully worked on by the job."];
+      latestExecution: RuleExecution.t option
+        [@ocaml.doc
+          "Represents information about the latest run of an rule."];
+      entityUrl: Url.t option
+        [@ocaml.doc
+          "A URL link for more information about the state of the action, such as a details page."];
+      revisionUrl: Url.t option
+        [@ocaml.doc
+          "A URL link for more information about the revision, such as a commit details page."]}
+    let make ?ruleName =
+      fun ?currentRevision ->
+        fun ?latestExecution ->
+          fun ?entityUrl ->
+            fun ?revisionUrl ->
+              fun () ->
+                {
+                  ruleName;
+                  currentRevision;
+                  latestExecution;
+                  entityUrl;
+                  revisionUrl
+                }
+    let to_value x =
+      structure_to_value
+        [("ruleName", (Option.map x.ruleName ~f:RuleName.to_value));
+        ("currentRevision",
+          (Option.map x.currentRevision ~f:RuleRevision.to_value));
+        ("latestExecution",
+          (Option.map x.latestExecution ~f:RuleExecution.to_value));
+        ("entityUrl", (Option.map x.entityUrl ~f:Url.to_value));
+        ("revisionUrl", (Option.map x.revisionUrl ~f:Url.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Message" j
-    let to_json = simple_to_json to_value
-  end
-module AWSRegionName =
+    let of_xml xml_arg0 =
+      let revisionUrl =
+        (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "revisionUrl") in
+      let entityUrl =
+        (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "entityUrl") in
+      let latestExecution =
+        (Option.map ~f:RuleExecution.of_xml)
+          (Xml.child xml_arg0 "latestExecution") in
+      let currentRevision =
+        (Option.map ~f:RuleRevision.of_xml)
+          (Xml.child xml_arg0 "currentRevision") in
+      let ruleName =
+        (Option.map ~f:RuleName.of_xml) (Xml.child xml_arg0 "ruleName") in
+      make ?revisionUrl ?entityUrl ?latestExecution ?currentRevision
+        ?ruleName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let revisionUrl = field_map json__ "revisionUrl" Url.of_json in
+      let entityUrl = field_map json__ "entityUrl" Url.of_json in
+      let latestExecution =
+        field_map json__ "latestExecution" RuleExecution.of_json in
+      let currentRevision =
+        field_map json__ "currentRevision" RuleRevision.of_json in
+      let ruleName = field_map json__ "ruleName" RuleName.of_json in
+      make ?revisionUrl ?entityUrl ?latestExecution ?currentRevision
+        ?ruleName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about the state of a rule. Values returned in the revisionId field indicate the rule revision information, such as the commit ID, for the current state."]
+module Condition =
   struct
-    type nonrec t = string
-    let context_ = "AWSRegionName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:30) >>=
-             (fun () -> check_string_min i ~min:4));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      result: Result_.t option
+        [@ocaml.doc
+          "The action to be done when the condition is met. For example, rolling back an execution for a failure condition."];
+      rules: RuleDeclarationList.t option
+        [@ocaml.doc "The rules that make up the condition."]}
+    let make ?result = fun ?rules -> fun () -> { result; rules }
+    let to_value x =
+      structure_to_value
+        [("result", (Option.map x.result ~f:Result_.to_value));
+        ("rules", (Option.map x.rules ~f:RuleDeclarationList.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AWSRegionName" j
+    let of_xml xml_arg0 =
+      let rules =
+        (Option.map ~f:RuleDeclarationList.of_xml)
+          (Xml.child xml_arg0 "rules") in
+      let result =
+        (Option.map ~f:Result_.of_xml) (Xml.child xml_arg0 "result") in
+      make ?rules ?result ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rules = field_map json__ "rules" RuleDeclarationList.of_json in
+      let result = field_map json__ "result" Result_.of_json in
+      make ?rules ?result ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The condition for the stage. A condition is made up of the rules and the result for the condition. For more information about conditions, see Stage conditions and How do stage conditions work?.. For more information about rules, see the CodePipeline rule reference."]
+module StageRetryMode =
+  struct
+    type nonrec t =
+      | FAILED_ACTIONS 
+      | ALL_ACTIONS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FAILED_ACTIONS -> "FAILED_ACTIONS"
+      | ALL_ACTIONS -> "ALL_ACTIONS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FAILED_ACTIONS" -> FAILED_ACTIONS
+      | "ALL_ACTIONS" -> ALL_ACTIONS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration StageRetryMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"StageRetryMode" j)
     let to_json = simple_to_json to_value
   end
 module ActionConfigurationMap =
@@ -414,6 +1921,8 @@ module ActionConfigurationMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -479,19 +1988,38 @@ module ActionRunOrder =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ActionTimeout =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:86400) >>=
+             (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ActionTimeout" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ActionTypeId =
   struct
     type nonrec t =
       {
       category: ActionCategory.t
         [@ocaml.doc
-          "A category defines what kind of action can be taken in the stage, and constrains the provider type for the action. Valid categories are limited to one of the following values. Source Build Test Deploy Invoke Approval"];
+          "A category defines what kind of action can be taken in the stage, and constrains the provider type for the action. Valid categories are limited to one of the following values. Source Build Test Deploy Invoke Approval Compute"];
       owner: ActionOwner.t
         [@ocaml.doc
           "The creator of the action being called. There are three valid values for the Owner field in the action category section within your pipeline structure: AWS, ThirdParty, and Custom. For more information, see Valid Action Types and Providers in CodePipeline."];
       provider: ActionProvider.t
         [@ocaml.doc
-          "The provider of the service being called by the action. Valid providers are determined by the action category. For example, an action in the Deploy category type might have a provider of AWS CodeDeploy, which would be specified as CodeDeploy. For more information, see Valid Action Types and Providers in CodePipeline."];
+          "The provider of the service being called by the action. Valid providers are determined by the action category. For example, an action in the Deploy category type might have a provider of CodeDeploy, which would be specified as CodeDeploy. For more information, see Valid Action Types and Providers in CodePipeline."];
       version: Version.t
         [@ocaml.doc "A string that describes the action version."]}
     let context_ = "ActionTypeId"
@@ -519,20 +2047,28 @@ module ActionTypeId =
           (Xml.child_exn ~context:context_ xml_arg0 "category") in
       make ~version ~provider ~owner ~category ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map_exn json "version" Version.of_json in
-      let provider = field_map_exn json "provider" ActionProvider.of_json in
-      let owner = field_map_exn json "owner" ActionOwner.of_json in
-      let category = field_map_exn json "category" ActionCategory.of_json in
+    let of_json json__ =
+      let version = field_map_exn json__ "version" Version.of_json in
+      let provider = field_map_exn json__ "provider" ActionProvider.of_json in
+      let owner = field_map_exn json__ "owner" ActionOwner.of_json in
+      let category = field_map_exn json__ "category" ActionCategory.of_json in
       make ~version ~provider ~owner ~category ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents information about an action type."]
-module InputArtifactList =
+module EnvironmentVariableList =
   struct
-    type nonrec t = InputArtifact.t list
-    let make i = i
+    type nonrec t = EnvironmentVariable.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:InputArtifact.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:EnvironmentVariable.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -546,15 +2082,19 @@ module InputArtifactList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:InputArtifact.of_xml)
+                     | _ -> true))) ~f:EnvironmentVariable.of_xml)
     let of_json j =
-      list_of_json ~kind:"InputArtifactList" ~of_json:InputArtifact.of_json j
+      list_of_json ~kind:"EnvironmentVariableList"
+        ~of_json:EnvironmentVariable.of_json j
     let to_json v = composed_to_json to_value v
   end
 module OutputArtifactList =
   struct
     type nonrec t = OutputArtifact.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OutputArtifact.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -576,25 +2116,37 @@ module OutputArtifactList =
         j
     let to_json v = composed_to_json to_value v
   end
-module RoleArn =
+module OutputVariableList =
   struct
-    type nonrec t = string
-    let context_ = "RoleArn"
+    type nonrec t = OutputVariable.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
-             (fun () ->
-                check_pattern i
-                  ~pattern:"arn:aws(-[\\w]+)*:iam::[0-9]{12}:role/.*"));
+          ((check_list_max i ~max:15) >>= (fun () -> check_list_min i ~min:1));
         i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OutputVariable.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"RoleArn" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OutputVariable.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OutputVariableList" ~of_json:OutputVariable.of_json
+        j
+    let to_json v = composed_to_json to_value v
   end
 module BlockerName =
   struct
@@ -630,6 +2182,100 @@ module BlockerType =
     let of_json j = of_string (string_of_json ~kind:"BlockerType" j)
     let to_json = simple_to_json to_value
   end
+module GitPullRequestFilter =
+  struct
+    type nonrec t =
+      {
+      events: GitPullRequestEventTypeList.t option
+        [@ocaml.doc
+          "The field that specifies which pull request events to filter on (OPEN, UPDATED, CLOSED) for the trigger configuration."];
+      branches: GitBranchFilterCriteria.t option
+        [@ocaml.doc
+          "The field that specifies to filter on branches for the pull request trigger configuration."];
+      filePaths: GitFilePathFilterCriteria.t option
+        [@ocaml.doc
+          "The field that specifies to filter on file paths for the pull request trigger configuration."]}
+    let make ?events =
+      fun ?branches ->
+        fun ?filePaths -> fun () -> { events; branches; filePaths }
+    let to_value x =
+      structure_to_value
+        [("events",
+           (Option.map x.events ~f:GitPullRequestEventTypeList.to_value));
+        ("branches",
+          (Option.map x.branches ~f:GitBranchFilterCriteria.to_value));
+        ("filePaths",
+          (Option.map x.filePaths ~f:GitFilePathFilterCriteria.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filePaths =
+        (Option.map ~f:GitFilePathFilterCriteria.of_xml)
+          (Xml.child xml_arg0 "filePaths") in
+      let branches =
+        (Option.map ~f:GitBranchFilterCriteria.of_xml)
+          (Xml.child xml_arg0 "branches") in
+      let events =
+        (Option.map ~f:GitPullRequestEventTypeList.of_xml)
+          (Xml.child xml_arg0 "events") in
+      make ?filePaths ?branches ?events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filePaths =
+        field_map json__ "filePaths" GitFilePathFilterCriteria.of_json in
+      let branches =
+        field_map json__ "branches" GitBranchFilterCriteria.of_json in
+      let events =
+        field_map json__ "events" GitPullRequestEventTypeList.of_json in
+      make ?filePaths ?branches ?events ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The event criteria for the pull request trigger configuration, such as the lists of branches or file paths to include and exclude. The following are valid values for the events for this filter: CLOSED OPEN UPDATED"]
+module GitPushFilter =
+  struct
+    type nonrec t =
+      {
+      tags: GitTagFilterCriteria.t option
+        [@ocaml.doc
+          "The field that contains the details for the Git tags trigger configuration."];
+      branches: GitBranchFilterCriteria.t option
+        [@ocaml.doc
+          "The field that specifies to filter on branches for the push trigger configuration."];
+      filePaths: GitFilePathFilterCriteria.t option
+        [@ocaml.doc
+          "The field that specifies to filter on file paths for the push trigger configuration."]}
+    let make ?tags =
+      fun ?branches ->
+        fun ?filePaths -> fun () -> { tags; branches; filePaths }
+    let to_value x =
+      structure_to_value
+        [("tags", (Option.map x.tags ~f:GitTagFilterCriteria.to_value));
+        ("branches",
+          (Option.map x.branches ~f:GitBranchFilterCriteria.to_value));
+        ("filePaths",
+          (Option.map x.filePaths ~f:GitFilePathFilterCriteria.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filePaths =
+        (Option.map ~f:GitFilePathFilterCriteria.of_xml)
+          (Xml.child xml_arg0 "filePaths") in
+      let branches =
+        (Option.map ~f:GitBranchFilterCriteria.of_xml)
+          (Xml.child xml_arg0 "branches") in
+      let tags =
+        (Option.map ~f:GitTagFilterCriteria.of_xml)
+          (Xml.child xml_arg0 "tags") in
+      make ?filePaths ?branches ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filePaths =
+        field_map json__ "filePaths" GitFilePathFilterCriteria.of_json in
+      let branches =
+        field_map json__ "branches" GitBranchFilterCriteria.of_json in
+      let tags = field_map json__ "tags" GitTagFilterCriteria.of_json in
+      make ?filePaths ?branches ?tags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The event criteria that specify when a specified repository event will start the pipeline for the specified trigger configuration, such as the lists of Git tags to include and exclude."]
 module AccountId =
   struct
     type nonrec t = string
@@ -687,31 +2333,14 @@ module ArtifactLocation =
           (Xml.child xml_arg0 "type") in
       make ?s3Location ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Location = field_map json "s3Location" S3ArtifactLocation.of_json in
-      let type_ = field_map json "type" ArtifactLocationType.of_json in
+    let of_json json__ =
+      let s3Location =
+        field_map json__ "s3Location" S3ArtifactLocation.of_json in
+      let type_ = field_map json__ "type" ArtifactLocationType.of_json in
       make ?s3Location ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents information about the location of an artifact."]
-module Revision =
-  struct
-    type nonrec t = string
-    let context_ = "Revision"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:1500) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Revision" j
-    let to_json = simple_to_json to_value
-  end
 module ActionExecutionId =
   struct
     type nonrec t = string
@@ -801,13 +2430,26 @@ module S3Location =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?key ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let key = field_map json "key" S3Key.of_json in
-      let bucket = field_map json "bucket" S3Bucket.of_json in
+    let of_json json__ =
+      let key = field_map json__ "key" S3Key.of_json in
+      let bucket = field_map json__ "bucket" S3Bucket.of_json in
       make ?key ?bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Amazon S3 artifact location for an action's artifacts."]
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
 module ActionExecutionStatus =
   struct
     type nonrec t =
@@ -854,39 +2496,14 @@ module ActionExecutionToken =
     let of_json j = string_of_json ~kind:"ActionExecutionToken" j
     let to_json = simple_to_json to_value
   end
-module ErrorDetails =
-  struct
-    type nonrec t =
-      {
-      code: Code.t option
-        [@ocaml.doc "The system ID or number code of the error."];
-      message: Message.t option [@ocaml.doc "The text of the error message."]}
-    let make ?code = fun ?message -> fun () -> { code; message }
-    let to_value x =
-      structure_to_value
-        [("code", (Option.map x.code ~f:Code.to_value));
-        ("message", (Option.map x.message ~f:Message.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
-      let code = (Option.map ~f:Code.of_xml) (Xml.child xml_arg0 "code") in
-      make ?message ?code ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
-      let code = field_map json "code" Code.of_json in make ?message ?code ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Represents information about an error in AWS CodePipeline."]
-module ExecutionId =
+module LogStreamARN =
   struct
     type nonrec t = string
-    let context_ = "ExecutionId"
+    let context_ = "LogStreamARN"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1500) >>=
+          ((check_string_max i ~max:250) >>=
              (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
@@ -894,38 +2511,7 @@ module ExecutionId =
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ExecutionId" j
-    let to_json = simple_to_json to_value
-  end
-module ExecutionSummary =
-  struct
-    type nonrec t = string
-    let context_ = "ExecutionSummary"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:2048) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ExecutionSummary" j
-    let to_json = simple_to_json to_value
-  end
-module LastUpdatedBy =
-  struct
-    type nonrec t = string
-    let context_ = "LastUpdatedBy"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"LastUpdatedBy" j
+    let of_json j = string_of_json ~kind:"LogStreamARN" j
     let to_json = simple_to_json to_value
   end
 module Percentage =
@@ -946,53 +2532,75 @@ module Percentage =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module Timestamp =
+module ConditionExecution =
   struct
-    type nonrec t = string
+    type nonrec t =
+      {
+      status: ConditionExecutionStatus.t option
+        [@ocaml.doc "The status of the run for a condition."];
+      summary: ExecutionSummary.t option
+        [@ocaml.doc
+          "The summary of information about a run for a condition."];
+      lastStatusChange: Timestamp.t option
+        [@ocaml.doc "The last status change of the condition."]}
+    let make ?status =
+      fun ?summary ->
+        fun ?lastStatusChange ->
+          fun () -> { status; summary; lastStatusChange }
+    let to_value x =
+      structure_to_value
+        [("status",
+           (Option.map x.status ~f:ConditionExecutionStatus.to_value));
+        ("summary", (Option.map x.summary ~f:ExecutionSummary.to_value));
+        ("lastStatusChange",
+          (Option.map x.lastStatusChange ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastStatusChange =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastStatusChange") in
+      let summary =
+        (Option.map ~f:ExecutionSummary.of_xml)
+          (Xml.child xml_arg0 "summary") in
+      let status =
+        (Option.map ~f:ConditionExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?lastStatusChange ?summary ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastStatusChange =
+        field_map json__ "lastStatusChange" Timestamp.of_json in
+      let summary = field_map json__ "summary" ExecutionSummary.of_json in
+      let status = field_map json__ "status" ConditionExecutionStatus.of_json in
+      make ?lastStatusChange ?summary ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The run of a condition."]
+module RuleStateList =
+  struct
+    type nonrec t = RuleState.t list
     let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RuleState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
-  end
-module Url =
-  struct
-    type nonrec t = string
-    let context_ = "Url"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:2048) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Url" j
-    let to_json = simple_to_json to_value
-  end
-module RevisionChangeIdentifier =
-  struct
-    type nonrec t = string
-    let context_ = "RevisionChangeIdentifier"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:100) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"RevisionChangeIdentifier" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RuleState.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RuleStateList" ~of_json:RuleState.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module EncryptionKeyId =
   struct
@@ -1029,6 +2637,61 @@ module EncryptionKeyType =
     let of_json j = of_string (string_of_json ~kind:"EncryptionKeyType" j)
     let to_json = simple_to_json to_value
   end
+module ConditionList =
+  struct
+    type nonrec t = Condition.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Condition.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Condition.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConditionList" ~of_json:Condition.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RetryConfiguration =
+  struct
+    type nonrec t =
+      {
+      retryMode: StageRetryMode.t option
+        [@ocaml.doc
+          "The method that you want to configure for automatic stage retry on stage failure. You can specify to retry only failed action in the stage or all actions in the stage."]}
+    let make ?retryMode = fun () -> { retryMode }
+    let to_value x =
+      structure_to_value
+        [("retryMode", (Option.map x.retryMode ~f:StageRetryMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retryMode =
+        (Option.map ~f:StageRetryMode.of_xml)
+          (Xml.child xml_arg0 "retryMode") in
+      make ?retryMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retryMode = field_map json__ "retryMode" StageRetryMode.of_json in
+      make ?retryMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The retry configuration specifies automatic retry for a failed stage, along with the configured retry mode."]
 module ActionDeclaration =
   struct
     type nonrec t =
@@ -1041,44 +2704,63 @@ module ActionDeclaration =
         [@ocaml.doc "The order in which actions are run."];
       configuration: ActionConfigurationMap.t option
         [@ocaml.doc
-          "The action's configuration. These are key-value pairs that specify input values for an action. For more information, see Action Structure Requirements in CodePipeline. For the list of configuration properties for the AWS CloudFormation action type in CodePipeline, see Configuration Properties Reference in the AWS CloudFormation User Guide. For template snippets with examples, see Using Parameter Override Functions with CodePipeline Pipelines in the AWS CloudFormation User Guide. The values can be represented in either JSON or YAML format. For example, the JSON configuration item format is as follows: JSON: \"Configuration\" : \\{ Key : Value \\},"];
+          "The action's configuration. These are key-value pairs that specify input values for an action. For more information, see Action Structure Requirements in CodePipeline. For the list of configuration properties for the CloudFormation action type in CodePipeline, see Configuration Properties Reference in the CloudFormation User Guide. For template snippets with examples, see Using Parameter Override Functions with CodePipeline Pipelines in the CloudFormation User Guide. The values can be represented in either JSON or YAML format. For example, the JSON configuration item format is as follows: JSON: \"Configuration\" : \\{ Key : Value \\},"];
+      commands: CommandList.t option
+        [@ocaml.doc
+          "The shell commands to run with your compute action in CodePipeline. All commands are supported except multi-line formats. While CodeBuild logs and permissions are used, you do not need to create any resources in CodeBuild. Using compute time for this action will incur separate charges in CodeBuild."];
       outputArtifacts: OutputArtifactList.t option
         [@ocaml.doc
           "The name or ID of the result of the action declaration, such as a test or build artifact."];
       inputArtifacts: InputArtifactList.t option
         [@ocaml.doc
           "The name or ID of the artifact consumed by the action, such as a test or build artifact."];
+      outputVariables: OutputVariableList.t option
+        [@ocaml.doc
+          "The list of variables that are to be exported from the compute action. This is specifically CodeBuild environment variables as used for that action."];
       roleArn: RoleArn.t option
         [@ocaml.doc
           "The ARN of the IAM service role that performs the declared action. This is assumed through the roleArn for the pipeline."];
       region: AWSRegionName.t option
         [@ocaml.doc
-          "The action declaration's AWS Region, such as us-east-1."];
+          "The action declaration's Amazon Web Services Region, such as us-east-1."];
       namespace: ActionNamespace.t option
         [@ocaml.doc
-          "The variable namespace associated with the action. All variables produced as output by this action fall under this namespace."]}
+          "The variable namespace associated with the action. All variables produced as output by this action fall under this namespace."];
+      timeoutInMinutes: ActionTimeout.t option
+        [@ocaml.doc
+          "A timeout duration in minutes that can be applied against the ActionType\226\128\153s default timeout value specified in Quotas for CodePipeline . This attribute is available only to the manual approval ActionType."];
+      environmentVariables: EnvironmentVariableList.t option
+        [@ocaml.doc "The environment variables for the action."]}
     let context_ = "ActionDeclaration"
     let make ?runOrder =
       fun ?configuration ->
-        fun ?outputArtifacts ->
-          fun ?inputArtifacts ->
-            fun ?roleArn ->
-              fun ?region ->
-                fun ?namespace ->
-                  fun ~name ->
-                    fun ~actionTypeId ->
-                      fun () ->
-                        {
-                          runOrder;
-                          configuration;
-                          outputArtifacts;
-                          inputArtifacts;
-                          roleArn;
-                          region;
-                          namespace;
-                          name;
-                          actionTypeId
-                        }
+        fun ?commands ->
+          fun ?outputArtifacts ->
+            fun ?inputArtifacts ->
+              fun ?outputVariables ->
+                fun ?roleArn ->
+                  fun ?region ->
+                    fun ?namespace ->
+                      fun ?timeoutInMinutes ->
+                        fun ?environmentVariables ->
+                          fun ~name ->
+                            fun ~actionTypeId ->
+                              fun () ->
+                                {
+                                  runOrder;
+                                  configuration;
+                                  commands;
+                                  outputArtifacts;
+                                  inputArtifacts;
+                                  outputVariables;
+                                  roleArn;
+                                  region;
+                                  namespace;
+                                  timeoutInMinutes;
+                                  environmentVariables;
+                                  name;
+                                  actionTypeId
+                                }
     let to_value x =
       structure_to_value
         [("name", (Some (ActionName.to_value x.name)));
@@ -1086,15 +2768,29 @@ module ActionDeclaration =
         ("runOrder", (Option.map x.runOrder ~f:ActionRunOrder.to_value));
         ("configuration",
           (Option.map x.configuration ~f:ActionConfigurationMap.to_value));
+        ("commands", (Option.map x.commands ~f:CommandList.to_value));
         ("outputArtifacts",
           (Option.map x.outputArtifacts ~f:OutputArtifactList.to_value));
         ("inputArtifacts",
           (Option.map x.inputArtifacts ~f:InputArtifactList.to_value));
+        ("outputVariables",
+          (Option.map x.outputVariables ~f:OutputVariableList.to_value));
         ("roleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
         ("region", (Option.map x.region ~f:AWSRegionName.to_value));
-        ("namespace", (Option.map x.namespace ~f:ActionNamespace.to_value))]
+        ("namespace", (Option.map x.namespace ~f:ActionNamespace.to_value));
+        ("timeoutInMinutes",
+          (Option.map x.timeoutInMinutes ~f:ActionTimeout.to_value));
+        ("environmentVariables",
+          (Option.map x.environmentVariables
+             ~f:EnvironmentVariableList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let environmentVariables =
+        (Option.map ~f:EnvironmentVariableList.of_xml)
+          (Xml.child xml_arg0 "environmentVariables") in
+      let timeoutInMinutes =
+        (Option.map ~f:ActionTimeout.of_xml)
+          (Xml.child xml_arg0 "timeoutInMinutes") in
       let namespace =
         (Option.map ~f:ActionNamespace.of_xml)
           (Xml.child xml_arg0 "namespace") in
@@ -1102,12 +2798,17 @@ module ActionDeclaration =
         (Option.map ~f:AWSRegionName.of_xml) (Xml.child xml_arg0 "region") in
       let roleArn =
         (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "roleArn") in
+      let outputVariables =
+        (Option.map ~f:OutputVariableList.of_xml)
+          (Xml.child xml_arg0 "outputVariables") in
       let inputArtifacts =
         (Option.map ~f:InputArtifactList.of_xml)
           (Xml.child xml_arg0 "inputArtifacts") in
       let outputArtifacts =
         (Option.map ~f:OutputArtifactList.of_xml)
           (Xml.child xml_arg0 "outputArtifacts") in
+      let commands =
+        (Option.map ~f:CommandList.of_xml) (Xml.child xml_arg0 "commands") in
       let configuration =
         (Option.map ~f:ActionConfigurationMap.of_xml)
           (Xml.child xml_arg0 "configuration") in
@@ -1118,24 +2819,34 @@ module ActionDeclaration =
           (Xml.child_exn ~context:context_ xml_arg0 "actionTypeId") in
       let name =
         ActionName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?namespace ?region ?roleArn ?inputArtifacts ?outputArtifacts
+      make ?environmentVariables ?timeoutInMinutes ?namespace ?region
+        ?roleArn ?outputVariables ?inputArtifacts ?outputArtifacts ?commands
         ?configuration ?runOrder ~actionTypeId ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let namespace = field_map json "namespace" ActionNamespace.of_json in
-      let region = field_map json "region" AWSRegionName.of_json in
-      let roleArn = field_map json "roleArn" RoleArn.of_json in
+    let of_json json__ =
+      let environmentVariables =
+        field_map json__ "environmentVariables"
+          EnvironmentVariableList.of_json in
+      let timeoutInMinutes =
+        field_map json__ "timeoutInMinutes" ActionTimeout.of_json in
+      let namespace = field_map json__ "namespace" ActionNamespace.of_json in
+      let region = field_map json__ "region" AWSRegionName.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
+      let outputVariables =
+        field_map json__ "outputVariables" OutputVariableList.of_json in
       let inputArtifacts =
-        field_map json "inputArtifacts" InputArtifactList.of_json in
+        field_map json__ "inputArtifacts" InputArtifactList.of_json in
       let outputArtifacts =
-        field_map json "outputArtifacts" OutputArtifactList.of_json in
+        field_map json__ "outputArtifacts" OutputArtifactList.of_json in
+      let commands = field_map json__ "commands" CommandList.of_json in
       let configuration =
-        field_map json "configuration" ActionConfigurationMap.of_json in
-      let runOrder = field_map json "runOrder" ActionRunOrder.of_json in
+        field_map json__ "configuration" ActionConfigurationMap.of_json in
+      let runOrder = field_map json__ "runOrder" ActionRunOrder.of_json in
       let actionTypeId =
-        field_map_exn json "actionTypeId" ActionTypeId.of_json in
-      let name = field_map_exn json "name" ActionName.of_json in
-      make ?namespace ?region ?roleArn ?inputArtifacts ?outputArtifacts
+        field_map_exn json__ "actionTypeId" ActionTypeId.of_json in
+      let name = field_map_exn json__ "name" ActionName.of_json in
+      make ?environmentVariables ?timeoutInMinutes ?namespace ?region
+        ?roleArn ?outputVariables ?inputArtifacts ?outputArtifacts ?commands
         ?configuration ?runOrder ~actionTypeId ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents information about an action declaration."]
@@ -1159,12 +2870,76 @@ module BlockerDeclaration =
         BlockerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~type_ ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" BlockerType.of_json in
-      let name = field_map_exn json "name" BlockerName.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "type" BlockerType.of_json in
+      let name = field_map_exn json__ "name" BlockerName.of_json in
       make ~type_ ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Reserved for future use."]
+module GitPullRequestFilterList =
+  struct
+    type nonrec t = GitPullRequestFilter.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GitPullRequestFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GitPullRequestFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GitPullRequestFilterList"
+        ~of_json:GitPullRequestFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GitPushFilterList =
+  struct
+    type nonrec t = GitPushFilter.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GitPushFilter.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GitPushFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GitPushFilterList" ~of_json:GitPushFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module PollingAccountList =
   struct
     type nonrec t = AccountId.t list
@@ -1174,6 +2949,9 @@ module PollingAccountList =
           ((check_list_max i ~max:1000) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1202,6 +2980,9 @@ module PollingServicePrincipalList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServicePrincipal.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1313,14 +3094,14 @@ module Artifact =
         (Option.map ~f:ArtifactName.of_xml) (Xml.child xml_arg0 "name") in
       make ?location ?revision ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let location = field_map json "location" ArtifactLocation.of_json in
-      let revision = field_map json "revision" Revision.of_json in
-      let name = field_map json "name" ArtifactName.of_json in
+    let of_json json__ =
+      let location = field_map json__ "location" ArtifactLocation.of_json in
+      let revision = field_map json__ "revision" Revision.of_json in
+      let name = field_map json__ "name" ArtifactName.of_json in
       make ?location ?revision ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents information about an artifact that is worked on by actions in the pipeline."]
+       "Artifacts are the files that are worked on by actions in the pipeline. See the action configuration for each action for details about artifact parameters. For example, the S3 source action artifact is a file name (or file path), and the files are generally provided as a ZIP file. Example artifact name: SampleApp_Windows.zip"]
 module ActionContext =
   struct
     type nonrec t =
@@ -1346,10 +3127,10 @@ module ActionContext =
         (Option.map ~f:ActionName.of_xml) (Xml.child xml_arg0 "name") in
       make ?actionExecutionId ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let actionExecutionId =
-        field_map json "actionExecutionId" ActionExecutionId.of_json in
-      let name = field_map json "name" ActionName.of_json in
+        field_map json__ "actionExecutionId" ActionExecutionId.of_json in
+      let name = field_map json__ "name" ActionName.of_json in
       make ?actionExecutionId ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1424,8 +3205,8 @@ module StageContext =
       let name = (Option.map ~f:StageName.of_xml) (Xml.child xml_arg0 "name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" StageName.of_json in make ?name ()
+    let of_json json__ =
+      let name = field_map json__ "name" StageName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents information about a stage to a job worker."]
 module TagKey =
@@ -1511,7 +3292,7 @@ module WebhookFilterRule =
           "A JsonPath expression that is applied to the body/payload of the webhook. The value selected by the JsonPath expression must match the value specified in the MatchEquals field. Otherwise, the request is ignored. For more information, see Java JsonPath implementation in GitHub."];
       matchEquals: MatchEquals.t option
         [@ocaml.doc
-          "The value selected by the JsonPath expression must match what is supplied in the MatchEquals field. Otherwise, the request is ignored. Properties from the target action configuration can be included as placeholders in this value by surrounding the action configuration key with curly brackets. For example, if the value supplied here is \"refs/heads/\\{Branch\\}\" and the target action has an action configuration property called \"Branch\" with a value of \"master\", the MatchEquals value is evaluated as \"refs/heads/master\". For a list of action configuration properties for built-in action types, see Pipeline Structure Reference Action Requirements."]}
+          "The value selected by the JsonPath expression must match what is supplied in the MatchEquals field. Otherwise, the request is ignored. Properties from the target action configuration can be included as placeholders in this value by surrounding the action configuration key with curly brackets. For example, if the value supplied here is \"refs/heads/\\{Branch\\}\" and the target action has an action configuration property called \"Branch\" with a value of \"main\", the MatchEquals value is evaluated as \"refs/heads/main\". For a list of action configuration properties for built-in action types, see Pipeline Structure Reference Action Requirements."]}
     let context_ = "WebhookFilterRule"
     let make ?matchEquals =
       fun ~jsonPath -> fun () -> { matchEquals; jsonPath }
@@ -1527,62 +3308,13 @@ module WebhookFilterRule =
         JsonPath.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jsonPath") in
       make ?matchEquals ~jsonPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let matchEquals = field_map json "matchEquals" MatchEquals.of_json in
-      let jsonPath = field_map_exn json "jsonPath" JsonPath.of_json in
+    let of_json json__ =
+      let matchEquals = field_map json__ "matchEquals" MatchEquals.of_json in
+      let jsonPath = field_map_exn json__ "jsonPath" JsonPath.of_json in
       make ?matchEquals ~jsonPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The event criteria that specify when a webhook notification is sent to your URL."]
-module RevisionSummary =
-  struct
-    type nonrec t = string
-    let context_ = "RevisionSummary"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:2048) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"RevisionSummary" j
-    let to_json = simple_to_json to_value
-  end
-module ActionConfigurationPropertyType =
-  struct
-    type nonrec t =
-      | String_ 
-      | Number 
-      | Boolean 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | String_ -> "String"
-      | Number -> "Number"
-      | Boolean -> "Boolean"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "String" -> String_
-      | "Number" -> Number
-      | "Boolean" -> Boolean
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration ActionConfigurationPropertyType"
-           xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"ActionConfigurationPropertyType" j)
-    let to_json = simple_to_json to_value
-  end
 module Boolean =
   struct
     type nonrec t = bool
@@ -1614,6 +3346,37 @@ module Description =
     let of_json j = string_of_json ~kind:"Description" j
     let to_json = simple_to_json to_value
   end
+module RuleConfigurationPropertyType =
+  struct
+    type nonrec t =
+      | String_ 
+      | Number 
+      | Boolean 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | String_ -> "String"
+      | Number -> "Number"
+      | Boolean -> "Boolean"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "String" -> String_
+      | "Number" -> Number
+      | "Boolean" -> Boolean
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RuleConfigurationPropertyType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RuleConfigurationPropertyType" j)
+    let to_json = simple_to_json to_value
+  end
 module ArtifactDetail =
   struct
     type nonrec t =
@@ -1636,26 +3399,13 @@ module ArtifactDetail =
         (Option.map ~f:ArtifactName.of_xml) (Xml.child xml_arg0 "name") in
       make ?s3location ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3location = field_map json "s3location" S3Location.of_json in
-      let name = field_map json "name" ArtifactName.of_json in
+    let of_json json__ =
+      let s3location = field_map json__ "s3location" S3Location.of_json in
+      let name = field_map json__ "name" ArtifactName.of_json in
       make ?s3location ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Artifact details for the action execution, such as the artifact location."]
-module String_ =
-  struct
-    type nonrec t = string
-    let context_ = "String"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
-    let to_json = simple_to_json to_value
-  end
 module ExternalExecutionId =
   struct
     type nonrec t = string
@@ -1680,6 +3430,84 @@ module ExternalExecutionSummary =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ExternalExecutionSummary" j
+    let to_json = simple_to_json to_value
+  end
+module RevisionSummary =
+  struct
+    type nonrec t = string
+    let context_ = "RevisionSummary"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RevisionSummary" j
+    let to_json = simple_to_json to_value
+  end
+module DeployTargetEventContext =
+  struct
+    type nonrec t =
+      {
+      ssmCommandId: String_.t option
+        [@ocaml.doc "The command ID for the event for the deploy action."];
+      message: String_.t option
+        [@ocaml.doc
+          "The context message for the event for the deploy action."]}
+    let make ?ssmCommandId =
+      fun ?message -> fun () -> { ssmCommandId; message }
+    let to_value x =
+      structure_to_value
+        [("ssmCommandId", (Option.map x.ssmCommandId ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let ssmCommandId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ssmCommandId") in
+      make ?message ?ssmCommandId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let ssmCommandId = field_map json__ "ssmCommandId" String_.of_json in
+      make ?message ?ssmCommandId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The context for the event for the deploy action."]
+module ActionConfigurationPropertyType =
+  struct
+    type nonrec t =
+      | String_ 
+      | Number 
+      | Boolean 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | String_ -> "String"
+      | Number -> "Number"
+      | Boolean -> "Boolean"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "String" -> String_
+      | "Number" -> Number
+      | "Boolean" -> Boolean
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ActionConfigurationPropertyType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ActionConfigurationPropertyType" j)
     let to_json = simple_to_json to_value
   end
 module OutputVariablesKey =
@@ -1733,12 +3561,15 @@ module ActionExecution =
         [@ocaml.doc "The external ID of the run of the action."];
       externalExecutionUrl: Url.t option
         [@ocaml.doc
-          "The URL of a resource external to AWS that is used when running the action (for example, an external repository URL)."];
+          "The URL of a resource external to Amazon Web Services that is used when running the action (for example, an external repository URL)."];
       percentComplete: Percentage.t option
         [@ocaml.doc "A percentage of completeness of the action as it runs."];
       errorDetails: ErrorDetails.t option
         [@ocaml.doc
-          "The details of an error returned by a URL external to AWS."]}
+          "The details of an error returned by a URL external to Amazon Web Services."];
+      logStreamARN: LogStreamARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the log stream for the action compute."]}
     let make ?actionExecutionId =
       fun ?status ->
         fun ?summary ->
@@ -1749,19 +3580,21 @@ module ActionExecution =
                   fun ?externalExecutionUrl ->
                     fun ?percentComplete ->
                       fun ?errorDetails ->
-                        fun () ->
-                          {
-                            actionExecutionId;
-                            status;
-                            summary;
-                            lastStatusChange;
-                            token;
-                            lastUpdatedBy;
-                            externalExecutionId;
-                            externalExecutionUrl;
-                            percentComplete;
-                            errorDetails
-                          }
+                        fun ?logStreamARN ->
+                          fun () ->
+                            {
+                              actionExecutionId;
+                              status;
+                              summary;
+                              lastStatusChange;
+                              token;
+                              lastUpdatedBy;
+                              externalExecutionId;
+                              externalExecutionUrl;
+                              percentComplete;
+                              errorDetails;
+                              logStreamARN
+                            }
     let to_value x =
       structure_to_value
         [("actionExecutionId",
@@ -1780,9 +3613,14 @@ module ActionExecution =
         ("percentComplete",
           (Option.map x.percentComplete ~f:Percentage.to_value));
         ("errorDetails",
-          (Option.map x.errorDetails ~f:ErrorDetails.to_value))]
+          (Option.map x.errorDetails ~f:ErrorDetails.to_value));
+        ("logStreamARN",
+          (Option.map x.logStreamARN ~f:LogStreamARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let logStreamARN =
+        (Option.map ~f:LogStreamARN.of_xml)
+          (Xml.child xml_arg0 "logStreamARN") in
       let errorDetails =
         (Option.map ~f:ErrorDetails.of_xml)
           (Xml.child xml_arg0 "errorDetails") in
@@ -1813,28 +3651,29 @@ module ActionExecution =
       let actionExecutionId =
         (Option.map ~f:ActionExecutionId.of_xml)
           (Xml.child xml_arg0 "actionExecutionId") in
-      make ?errorDetails ?percentComplete ?externalExecutionUrl
+      make ?logStreamARN ?errorDetails ?percentComplete ?externalExecutionUrl
         ?externalExecutionId ?lastUpdatedBy ?token ?lastStatusChange ?summary
         ?status ?actionExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorDetails = field_map json "errorDetails" ErrorDetails.of_json in
+    let of_json json__ =
+      let logStreamARN = field_map json__ "logStreamARN" LogStreamARN.of_json in
+      let errorDetails = field_map json__ "errorDetails" ErrorDetails.of_json in
       let percentComplete =
-        field_map json "percentComplete" Percentage.of_json in
+        field_map json__ "percentComplete" Percentage.of_json in
       let externalExecutionUrl =
-        field_map json "externalExecutionUrl" Url.of_json in
+        field_map json__ "externalExecutionUrl" Url.of_json in
       let externalExecutionId =
-        field_map json "externalExecutionId" ExecutionId.of_json in
+        field_map json__ "externalExecutionId" ExecutionId.of_json in
       let lastUpdatedBy =
-        field_map json "lastUpdatedBy" LastUpdatedBy.of_json in
-      let token = field_map json "token" ActionExecutionToken.of_json in
+        field_map json__ "lastUpdatedBy" LastUpdatedBy.of_json in
+      let token = field_map json__ "token" ActionExecutionToken.of_json in
       let lastStatusChange =
-        field_map json "lastStatusChange" Timestamp.of_json in
-      let summary = field_map json "summary" ExecutionSummary.of_json in
-      let status = field_map json "status" ActionExecutionStatus.of_json in
+        field_map json__ "lastStatusChange" Timestamp.of_json in
+      let summary = field_map json__ "summary" ExecutionSummary.of_json in
+      let status = field_map json__ "status" ActionExecutionStatus.of_json in
       let actionExecutionId =
-        field_map json "actionExecutionId" ActionExecutionId.of_json in
-      make ?errorDetails ?percentComplete ?externalExecutionUrl
+        field_map json__ "actionExecutionId" ActionExecutionId.of_json in
+      make ?logStreamARN ?errorDetails ?percentComplete ?externalExecutionUrl
         ?externalExecutionId ?lastUpdatedBy ?token ?lastStatusChange ?summary
         ?status ?actionExecutionId ()
     let to_json v = composed_to_json to_value v
@@ -1874,16 +3713,114 @@ module ActionRevision =
           (Xml.child_exn ~context:context_ xml_arg0 "revisionId") in
       make ~created ~revisionChangeId ~revisionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let created = field_map_exn json "created" Timestamp.of_json in
+    let of_json json__ =
+      let created = field_map_exn json__ "created" Timestamp.of_json in
       let revisionChangeId =
-        field_map_exn json "revisionChangeId"
+        field_map_exn json__ "revisionChangeId"
           RevisionChangeIdentifier.of_json in
-      let revisionId = field_map_exn json "revisionId" Revision.of_json in
+      let revisionId = field_map_exn json__ "revisionId" Revision.of_json in
       make ~created ~revisionChangeId ~revisionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents information about the version (or revision) of an action."]
+module ConditionState =
+  struct
+    type nonrec t =
+      {
+      latestExecution: ConditionExecution.t option
+        [@ocaml.doc "The state of the latest run of the rule."];
+      ruleStates: RuleStateList.t option
+        [@ocaml.doc "The state of the rules for the condition."]}
+    let make ?latestExecution =
+      fun ?ruleStates -> fun () -> { latestExecution; ruleStates }
+    let to_value x =
+      structure_to_value
+        [("latestExecution",
+           (Option.map x.latestExecution ~f:ConditionExecution.to_value));
+        ("ruleStates", (Option.map x.ruleStates ~f:RuleStateList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ruleStates =
+        (Option.map ~f:RuleStateList.of_xml)
+          (Xml.child xml_arg0 "ruleStates") in
+      let latestExecution =
+        (Option.map ~f:ConditionExecution.of_xml)
+          (Xml.child xml_arg0 "latestExecution") in
+      make ?ruleStates ?latestExecution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ruleStates = field_map json__ "ruleStates" RuleStateList.of_json in
+      let latestExecution =
+        field_map json__ "latestExecution" ConditionExecution.of_json in
+      make ?ruleStates ?latestExecution ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about the state of the condition."]
+module ExecutionType =
+  struct
+    type nonrec t =
+      | STANDARD 
+      | ROLLBACK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | STANDARD -> "STANDARD"
+      | ROLLBACK -> "ROLLBACK"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "STANDARD" -> STANDARD
+      | "ROLLBACK" -> ROLLBACK
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ExecutionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ExecutionType" j)
+    let to_json = simple_to_json to_value
+  end
+module StageExecutionStatus =
+  struct
+    type nonrec t =
+      | Cancelled 
+      | InProgress 
+      | Failed 
+      | Stopped 
+      | Stopping 
+      | Succeeded 
+      | Skipped 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Cancelled -> "Cancelled"
+      | InProgress -> "InProgress"
+      | Failed -> "Failed"
+      | Stopped -> "Stopped"
+      | Stopping -> "Stopping"
+      | Succeeded -> "Succeeded"
+      | Skipped -> "Skipped"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Cancelled" -> Cancelled
+      | "InProgress" -> InProgress
+      | "Failed" -> Failed
+      | "Stopped" -> Stopped
+      | "Stopping" -> Stopping
+      | "Succeeded" -> Succeeded
+      | "Skipped" -> Skipped
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration StageExecutionStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"StageExecutionStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module ArtifactStoreLocation =
   struct
     type nonrec t = string
@@ -1927,10 +3864,10 @@ module EncryptionKey =
       {
       id: EncryptionKeyId.t
         [@ocaml.doc
-          "The ID used to identify the key. For an AWS KMS key, you can use the key ID, the key ARN, or the alias ARN. Aliases are recognized only in the account that created the customer master key (CMK). For cross-account actions, you can only use the key ID or key ARN to identify the key."];
+          "The ID used to identify the key. For an Amazon Web Services KMS key, you can use the key ID, the key ARN, or the alias ARN. Aliases are recognized only in the account that created the KMS key. For cross-account actions, you can only use the key ID or key ARN to identify the key. Cross-account actions involve using the role from the other account (AccountB), so specifying the key ID will use the key from the other account (AccountB)."];
       type_: EncryptionKeyType.t
         [@ocaml.doc
-          "The type of encryption key, such as an AWS Key Management Service (AWS KMS) key. When creating or updating a pipeline, the value must be set to 'KMS'."]}
+          "The type of encryption key, such as an Amazon Web Services KMS key. When creating or updating a pipeline, the value must be set to 'KMS'."]}
     let context_ = "EncryptionKey"
     let make ~id = fun ~type_ -> fun () -> { id; type_ }
     let to_value x =
@@ -1947,17 +3884,90 @@ module EncryptionKey =
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~type_ ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" EncryptionKeyType.of_json in
-      let id = field_map_exn json "id" EncryptionKeyId.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "type" EncryptionKeyType.of_json in
+      let id = field_map_exn json__ "id" EncryptionKeyId.of_json in
       make ~type_ ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents information about the key used to encrypt data in the artifact store, such as an AWS Key Management Service (AWS KMS) key."]
+       "Represents information about the key used to encrypt data in the artifact store, such as an Amazon Web Services Key Management Service (Key Management Service) key."]
+module BeforeEntryConditions =
+  struct
+    type nonrec t =
+      {
+      conditions: ConditionList.t
+        [@ocaml.doc
+          "The conditions that are configured as entry conditions."]}
+    let context_ = "BeforeEntryConditions"
+    let make ~conditions = fun () -> { conditions }
+    let to_value x =
+      structure_to_value
+        [("conditions", (Some (ConditionList.to_value x.conditions)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let conditions =
+        ConditionList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "conditions") in
+      make ~conditions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let conditions =
+        field_map_exn json__ "conditions" ConditionList.of_json in
+      make ~conditions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The conditions for making checks for entry to a stage. For more information about conditions, see Stage conditions and How do stage conditions work?."]
+module FailureConditions =
+  struct
+    type nonrec t =
+      {
+      result: Result_.t option
+        [@ocaml.doc
+          "The specified result for when the failure conditions are met, such as rolling back the stage."];
+      retryConfiguration: RetryConfiguration.t option
+        [@ocaml.doc
+          "The retry configuration specifies automatic retry for a failed stage, along with the configured retry mode."];
+      conditions: ConditionList.t option
+        [@ocaml.doc
+          "The conditions that are configured as failure conditions. For more information about conditions, see Stage conditions and How do stage conditions work?."]}
+    let make ?result =
+      fun ?retryConfiguration ->
+        fun ?conditions ->
+          fun () -> { result; retryConfiguration; conditions }
+    let to_value x =
+      structure_to_value
+        [("result", (Option.map x.result ~f:Result_.to_value));
+        ("retryConfiguration",
+          (Option.map x.retryConfiguration ~f:RetryConfiguration.to_value));
+        ("conditions", (Option.map x.conditions ~f:ConditionList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let conditions =
+        (Option.map ~f:ConditionList.of_xml)
+          (Xml.child xml_arg0 "conditions") in
+      let retryConfiguration =
+        (Option.map ~f:RetryConfiguration.of_xml)
+          (Xml.child xml_arg0 "retryConfiguration") in
+      let result =
+        (Option.map ~f:Result_.of_xml) (Xml.child xml_arg0 "result") in
+      make ?conditions ?retryConfiguration ?result ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let conditions = field_map json__ "conditions" ConditionList.of_json in
+      let retryConfiguration =
+        field_map json__ "retryConfiguration" RetryConfiguration.of_json in
+      let result = field_map json__ "result" Result_.of_json in
+      make ?conditions ?retryConfiguration ?result ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration that specifies the result, such as rollback, to occur upon stage failure. For more information about conditions, see Stage conditions and How do stage conditions work?."]
 module StageActionDeclarationList =
   struct
     type nonrec t = ActionDeclaration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ActionDeclaration.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1983,6 +3993,9 @@ module StageBlockerDeclarationList =
   struct
     type nonrec t = BlockerDeclaration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BlockerDeclaration.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2003,6 +4016,163 @@ module StageBlockerDeclarationList =
       list_of_json ~kind:"StageBlockerDeclarationList"
         ~of_json:BlockerDeclaration.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module SuccessConditions =
+  struct
+    type nonrec t =
+      {
+      conditions: ConditionList.t
+        [@ocaml.doc "The conditions that are success conditions."]}
+    let context_ = "SuccessConditions"
+    let make ~conditions = fun () -> { conditions }
+    let to_value x =
+      structure_to_value
+        [("conditions", (Some (ConditionList.to_value x.conditions)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let conditions =
+        ConditionList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "conditions") in
+      make ~conditions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let conditions =
+        field_map_exn json__ "conditions" ConditionList.of_json in
+      make ~conditions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The conditions for making checks that, if met, succeed a stage. For more information about conditions, see Stage conditions and How do stage conditions work?."]
+module GitConfiguration =
+  struct
+    type nonrec t =
+      {
+      sourceActionName: ActionName.t
+        [@ocaml.doc
+          "The name of the pipeline source action where the trigger configuration, such as Git tags, is specified. The trigger configuration will start the pipeline upon the specified change only. You can only specify one trigger configuration per source action."];
+      push: GitPushFilterList.t option
+        [@ocaml.doc
+          "The field where the repository event that will start the pipeline, such as pushing Git tags, is specified with details."];
+      pullRequest: GitPullRequestFilterList.t option
+        [@ocaml.doc
+          "The field where the repository event that will start the pipeline is specified as pull requests."]}
+    let context_ = "GitConfiguration"
+    let make ?push =
+      fun ?pullRequest ->
+        fun ~sourceActionName ->
+          fun () -> { push; pullRequest; sourceActionName }
+    let to_value x =
+      structure_to_value
+        [("sourceActionName",
+           (Some (ActionName.to_value x.sourceActionName)));
+        ("push", (Option.map x.push ~f:GitPushFilterList.to_value));
+        ("pullRequest",
+          (Option.map x.pullRequest ~f:GitPullRequestFilterList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pullRequest =
+        (Option.map ~f:GitPullRequestFilterList.of_xml)
+          (Xml.child xml_arg0 "pullRequest") in
+      let push =
+        (Option.map ~f:GitPushFilterList.of_xml) (Xml.child xml_arg0 "push") in
+      let sourceActionName =
+        ActionName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceActionName") in
+      make ?pullRequest ?push ~sourceActionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pullRequest =
+        field_map json__ "pullRequest" GitPullRequestFilterList.of_json in
+      let push = field_map json__ "push" GitPushFilterList.of_json in
+      let sourceActionName =
+        field_map_exn json__ "sourceActionName" ActionName.of_json in
+      make ?pullRequest ?push ~sourceActionName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A type of trigger configuration for Git-based source actions. You can specify the Git configuration trigger type for all third-party Git-based source actions that are supported by the CodeStarSourceConnection action type."]
+module PipelineTriggerProviderType =
+  struct
+    type nonrec t =
+      | CodeStarSourceConnection 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CodeStarSourceConnection -> "CodeStarSourceConnection"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CodeStarSourceConnection" -> CodeStarSourceConnection
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PipelineTriggerProviderType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PipelineTriggerProviderType" j)
+    let to_json = simple_to_json to_value
+  end
+module PipelineVariableDescription =
+  struct
+    type nonrec t = string
+    let context_ = "PipelineVariableDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PipelineVariableDescription" j
+    let to_json = simple_to_json to_value
+  end
+module PipelineVariableName =
+  struct
+    type nonrec t = string
+    let context_ = "PipelineVariableName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[A-Za-z0-9@\\-_]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PipelineVariableName" j
+    let to_json = simple_to_json to_value
+  end
+module PipelineVariableValue =
+  struct
+    type nonrec t = string
+    let context_ = "PipelineVariableValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PipelineVariableValue" j
+    let to_json = simple_to_json to_value
   end
 module JobWorkerExecutorConfiguration =
   struct
@@ -2034,12 +4204,12 @@ module JobWorkerExecutorConfiguration =
           (Xml.child xml_arg0 "pollingAccounts") in
       make ?pollingServicePrincipals ?pollingAccounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pollingServicePrincipals =
-        field_map json "pollingServicePrincipals"
+        field_map json__ "pollingServicePrincipals"
           PollingServicePrincipalList.of_json in
       let pollingAccounts =
-        field_map json "pollingAccounts" PollingAccountList.of_json in
+        field_map json__ "pollingAccounts" PollingAccountList.of_json in
       make ?pollingServicePrincipals ?pollingAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2064,9 +4234,9 @@ module LambdaExecutorConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "lambdaFunctionArn") in
       make ~lambdaFunctionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lambdaFunctionArn =
-        field_map_exn json "lambdaFunctionArn" LambdaFunctionArn.of_json in
+        field_map_exn json__ "lambdaFunctionArn" LambdaFunctionArn.of_json in
       make ~lambdaFunctionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2108,45 +4278,44 @@ module AWSSessionCredentials =
   struct
     type nonrec t =
       {
-      accessKeyId: AccessKeyId.t
+      accessKeyId: AccessKeyId.t option
         [@ocaml.doc "The access key for the session."];
-      secretAccessKey: SecretAccessKey.t
+      secretAccessKey: SecretAccessKey.t option
         [@ocaml.doc "The secret access key for the session."];
-      sessionToken: SessionToken.t [@ocaml.doc "The token for the session."]}
-    let context_ = "AWSSessionCredentials"
-    let make ~accessKeyId =
-      fun ~secretAccessKey ->
-        fun ~sessionToken ->
+      sessionToken: SessionToken.t option
+        [@ocaml.doc "The token for the session."]}
+    let make ?accessKeyId =
+      fun ?secretAccessKey ->
+        fun ?sessionToken ->
           fun () -> { accessKeyId; secretAccessKey; sessionToken }
     let to_value x =
       structure_to_value
-        [("accessKeyId", (Some (AccessKeyId.to_value x.accessKeyId)));
+        [("accessKeyId", (Option.map x.accessKeyId ~f:AccessKeyId.to_value));
         ("secretAccessKey",
-          (Some (SecretAccessKey.to_value x.secretAccessKey)));
-        ("sessionToken", (Some (SessionToken.to_value x.sessionToken)))]
+          (Option.map x.secretAccessKey ~f:SecretAccessKey.to_value));
+        ("sessionToken",
+          (Option.map x.sessionToken ~f:SessionToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let sessionToken =
-        SessionToken.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sessionToken") in
+        (Option.map ~f:SessionToken.of_xml)
+          (Xml.child xml_arg0 "sessionToken") in
       let secretAccessKey =
-        SecretAccessKey.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "secretAccessKey") in
+        (Option.map ~f:SecretAccessKey.of_xml)
+          (Xml.child xml_arg0 "secretAccessKey") in
       let accessKeyId =
-        AccessKeyId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "accessKeyId") in
-      make ~sessionToken ~secretAccessKey ~accessKeyId ()
+        (Option.map ~f:AccessKeyId.of_xml) (Xml.child xml_arg0 "accessKeyId") in
+      make ?sessionToken ?secretAccessKey ?accessKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sessionToken =
-        field_map_exn json "sessionToken" SessionToken.of_json in
+    let of_json json__ =
+      let sessionToken = field_map json__ "sessionToken" SessionToken.of_json in
       let secretAccessKey =
-        field_map_exn json "secretAccessKey" SecretAccessKey.of_json in
-      let accessKeyId = field_map_exn json "accessKeyId" AccessKeyId.of_json in
-      make ~sessionToken ~secretAccessKey ~accessKeyId ()
+        field_map json__ "secretAccessKey" SecretAccessKey.of_json in
+      let accessKeyId = field_map json__ "accessKeyId" AccessKeyId.of_json in
+      make ?sessionToken ?secretAccessKey ?accessKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents an AWS session credentials object. These credentials are temporary credentials that are issued by AWS Secure Token Service (STS). They can be used to access input and output artifacts in the S3 bucket used to store artifact for the pipeline in AWS CodePipeline."]
+       "Represents an Amazon Web Services session credentials object. These credentials are temporary credentials that are issued by Amazon Web Services Secure Token Service (STS). They can be used to access input and output artifacts in the S3 bucket used to store artifact for the pipeline in CodePipeline."]
 module ActionConfiguration =
   struct
     type nonrec t =
@@ -2165,9 +4334,9 @@ module ActionConfiguration =
           (Xml.child xml_arg0 "configuration") in
       make ?configuration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configuration =
-        field_map json "configuration" ActionConfigurationMap.of_json in
+        field_map json__ "configuration" ActionConfigurationMap.of_json in
       make ?configuration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents information about an action configuration."]
@@ -2175,6 +4344,9 @@ module ArtifactList =
   struct
     type nonrec t = Artifact.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Artifact.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2266,13 +4438,13 @@ module PipelineContext =
           (Xml.child xml_arg0 "pipelineName") in
       make ?pipelineExecutionId ?pipelineArn ?action ?stage ?pipelineName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pipelineExecutionId =
-        field_map json "pipelineExecutionId" PipelineExecutionId.of_json in
-      let pipelineArn = field_map json "pipelineArn" PipelineArn.of_json in
-      let action = field_map json "action" ActionContext.of_json in
-      let stage = field_map json "stage" StageContext.of_json in
-      let pipelineName = field_map json "pipelineName" PipelineName.of_json in
+        field_map json__ "pipelineExecutionId" PipelineExecutionId.of_json in
+      let pipelineArn = field_map json__ "pipelineArn" PipelineArn.of_json in
+      let action = field_map json__ "action" ActionContext.of_json in
+      let stage = field_map json__ "stage" StageContext.of_json in
+      let pipelineName = field_map json__ "pipelineName" PipelineName.of_json in
       make ?pipelineExecutionId ?pipelineArn ?action ?stage ?pipelineName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2297,9 +4469,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" TagValue.of_json in
-      let key = field_map_exn json "key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "value" TagValue.of_json in
+      let key = field_map_exn json__ "key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2313,7 +4485,7 @@ module WebhookAuthConfiguration =
           "The property used to configure acceptance of webhooks in an IP address range. For IP, only the AllowedIPRange property must be set. This property must be set to a valid CIDR range."];
       secretToken: WebhookAuthConfigurationSecretToken.t option
         [@ocaml.doc
-          "The property used to configure GitHub authentication. For GITHUB_HMAC, only the SecretToken property must be set."]}
+          "The property used to configure GitHub authentication. For GITHUB_HMAC, only the SecretToken property must be set. When creating CodePipeline webhooks, do not use your own credentials or reuse the same secret token across multiple webhooks. For optimal security, generate a unique secret token for each webhook you create. The secret token is an arbitrary string that you provide, which GitHub uses to compute and sign the webhook payloads sent to CodePipeline, for protecting the integrity and authenticity of the webhook payloads. Using your own credentials or reusing the same token across multiple webhooks can lead to security vulnerabilities. If a secret token was provided, it will be redacted in the response."]}
     let make ?allowedIPRange =
       fun ?secretToken -> fun () -> { allowedIPRange; secretToken }
     let to_value x =
@@ -2334,12 +4506,12 @@ module WebhookAuthConfiguration =
           (Xml.child xml_arg0 "AllowedIPRange") in
       make ?secretToken ?allowedIPRange ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let secretToken =
-        field_map json "SecretToken"
+        field_map json__ "SecretToken"
           WebhookAuthConfigurationSecretToken.of_json in
       let allowedIPRange =
-        field_map json "AllowedIPRange"
+        field_map json__ "AllowedIPRange"
           WebhookAuthConfigurationAllowedIPRange.of_json in
       make ?secretToken ?allowedIPRange ()
     let to_json v = composed_to_json to_value v
@@ -2380,6 +4552,9 @@ module WebhookFilters =
     type nonrec t = WebhookFilterRule.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:5); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WebhookFilterRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2421,6 +4596,264 @@ module WebhookName =
     let of_json j = string_of_json ~kind:"WebhookName" j
     let to_json = simple_to_json to_value
   end
+module MaximumArtifactCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:5) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaximumArtifactCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MinimumArtifactCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:5) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MinimumArtifactCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RuleConfigurationProperty =
+  struct
+    type nonrec t =
+      {
+      name: RuleConfigurationKey.t option
+        [@ocaml.doc "The name of the rule configuration property."];
+      required: Boolean.t option
+        [@ocaml.doc
+          "Whether the configuration property is a required value."];
+      key: Boolean.t option
+        [@ocaml.doc "Whether the configuration property is a key."];
+      secret: Boolean.t option
+        [@ocaml.doc
+          "Whether the configuration property is secret. When updating a pipeline, passing * * * * * without changing any other values of the action preserves the previous value of the secret."];
+      queryable: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the property can be queried. If you create a pipeline with a condition and rule, and that rule contains a queryable property, the value for that configuration property is subject to other restrictions. The value must be less than or equal to twenty (20) characters. The value can contain only alphanumeric characters, underscores, and hyphens."];
+      description: Description.t option
+        [@ocaml.doc
+          "The description of the action configuration property that is displayed to users."];
+      type_: RuleConfigurationPropertyType.t option
+        [@ocaml.doc "The type of the configuration property."]}
+    let make ?name =
+      fun ?required ->
+        fun ?key ->
+          fun ?secret ->
+            fun ?queryable ->
+              fun ?description ->
+                fun ?type_ ->
+                  fun () ->
+                    {
+                      name;
+                      required;
+                      key;
+                      secret;
+                      queryable;
+                      description;
+                      type_
+                    }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:RuleConfigurationKey.to_value));
+        ("required", (Option.map x.required ~f:Boolean.to_value));
+        ("key", (Option.map x.key ~f:Boolean.to_value));
+        ("secret", (Option.map x.secret ~f:Boolean.to_value));
+        ("queryable", (Option.map x.queryable ~f:Boolean.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("type",
+          (Option.map x.type_ ~f:RuleConfigurationPropertyType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:RuleConfigurationPropertyType.of_xml)
+          (Xml.child xml_arg0 "type") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let queryable =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "queryable") in
+      let secret =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "secret") in
+      let key = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "key") in
+      let required =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "required") in
+      let name =
+        (Option.map ~f:RuleConfigurationKey.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?type_ ?description ?queryable ?secret ?key ?required ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ =
+        field_map json__ "type" RuleConfigurationPropertyType.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let queryable = field_map json__ "queryable" Boolean.of_json in
+      let secret = field_map json__ "secret" Boolean.of_json in
+      let key = field_map json__ "key" Boolean.of_json in
+      let required = field_map json__ "required" Boolean.of_json in
+      let name = field_map json__ "name" RuleConfigurationKey.of_json in
+      make ?type_ ?description ?queryable ?secret ?key ?required ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents information about a rule configuration property."]
+module UrlTemplate =
+  struct
+    type nonrec t = string
+    let context_ = "UrlTemplate"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UrlTemplate" j
+    let to_json = simple_to_json to_value
+  end
+module ArtifactDetailList =
+  struct
+    type nonrec t = ArtifactDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ArtifactDetail.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ArtifactDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ArtifactDetailList" ~of_json:ArtifactDetail.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ResolvedRuleConfigurationMap =
+  struct
+    type nonrec t = (String_.t * String_.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (String_.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RuleExecutionResult =
+  struct
+    type nonrec t =
+      {
+      externalExecutionId: ExternalExecutionId.t option
+        [@ocaml.doc "The external ID for the rule execution."];
+      externalExecutionSummary: ExternalExecutionSummary.t option
+        [@ocaml.doc "The external provider summary for the rule execution."];
+      externalExecutionUrl: Url.t option
+        [@ocaml.doc
+          "The deepest external link to the external resource (for example, a repository URL or deployment endpoint) that is used when running the rule."];
+      errorDetails: ErrorDetails.t option }
+    let make ?externalExecutionId =
+      fun ?externalExecutionSummary ->
+        fun ?externalExecutionUrl ->
+          fun ?errorDetails ->
+            fun () ->
+              {
+                externalExecutionId;
+                externalExecutionSummary;
+                externalExecutionUrl;
+                errorDetails
+              }
+    let to_value x =
+      structure_to_value
+        [("externalExecutionId",
+           (Option.map x.externalExecutionId ~f:ExternalExecutionId.to_value));
+        ("externalExecutionSummary",
+          (Option.map x.externalExecutionSummary
+             ~f:ExternalExecutionSummary.to_value));
+        ("externalExecutionUrl",
+          (Option.map x.externalExecutionUrl ~f:Url.to_value));
+        ("errorDetails",
+          (Option.map x.errorDetails ~f:ErrorDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorDetails =
+        (Option.map ~f:ErrorDetails.of_xml)
+          (Xml.child xml_arg0 "errorDetails") in
+      let externalExecutionUrl =
+        (Option.map ~f:Url.of_xml)
+          (Xml.child xml_arg0 "externalExecutionUrl") in
+      let externalExecutionSummary =
+        (Option.map ~f:ExternalExecutionSummary.of_xml)
+          (Xml.child xml_arg0 "externalExecutionSummary") in
+      let externalExecutionId =
+        (Option.map ~f:ExternalExecutionId.of_xml)
+          (Xml.child xml_arg0 "externalExecutionId") in
+      make ?errorDetails ?externalExecutionUrl ?externalExecutionSummary
+        ?externalExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorDetails = field_map json__ "errorDetails" ErrorDetails.of_json in
+      let externalExecutionUrl =
+        field_map json__ "externalExecutionUrl" Url.of_json in
+      let externalExecutionSummary =
+        field_map json__ "externalExecutionSummary"
+          ExternalExecutionSummary.of_json in
+      let externalExecutionId =
+        field_map json__ "externalExecutionId" ExternalExecutionId.of_json in
+      make ?errorDetails ?externalExecutionUrl ?externalExecutionSummary
+        ?externalExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Execution result information, such as the external execution ID."]
 module TriggerDetail =
   struct
     type nonrec t = string
@@ -2448,6 +4881,9 @@ module TriggerType =
       | Webhook 
       | CloudWatchEvent 
       | PutActionRevision 
+      | WebhookV2 
+      | ManualRollback 
+      | AutomatedRollback 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2458,6 +4894,9 @@ module TriggerType =
       | Webhook -> "Webhook"
       | CloudWatchEvent -> "CloudWatchEvent"
       | PutActionRevision -> "PutActionRevision"
+      | WebhookV2 -> "WebhookV2"
+      | ManualRollback -> "ManualRollback"
+      | AutomatedRollback -> "AutomatedRollback"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2467,6 +4906,9 @@ module TriggerType =
       | "Webhook" -> Webhook
       | "CloudWatchEvent" -> CloudWatchEvent
       | "PutActionRevision" -> PutActionRevision
+      | "WebhookV2" -> WebhookV2
+      | "ManualRollback" -> ManualRollback
+      | "AutomatedRollback" -> AutomatedRollback
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2480,7 +4922,7 @@ module SourceRevision =
   struct
     type nonrec t =
       {
-      actionName: ActionName.t
+      actionName: ActionName.t option
         [@ocaml.doc
           "The name of the action that processed the revision to the source artifact."];
       revisionId: Revision.t option
@@ -2488,20 +4930,19 @@ module SourceRevision =
           "The system-generated unique ID that identifies the revision number of the artifact."];
       revisionSummary: RevisionSummary.t option
         [@ocaml.doc
-          "Summary information about the most recent revision of the artifact. For GitHub and AWS CodeCommit repositories, the commit message. For Amazon S3 buckets or actions, the user-provided content of a codepipeline-artifact-revision-summary key specified in the object metadata."];
+          "Summary information about the most recent revision of the artifact. For GitHub and CodeCommit repositories, the commit message. For Amazon S3 buckets or actions, the user-provided content of a codepipeline-artifact-revision-summary key specified in the object metadata."];
       revisionUrl: Url.t option
         [@ocaml.doc
-          "The commit ID for the artifact revision. For artifacts stored in GitHub or AWS CodeCommit repositories, the commit ID is linked to a commit details page."]}
-    let context_ = "SourceRevision"
-    let make ?revisionId =
-      fun ?revisionSummary ->
-        fun ?revisionUrl ->
-          fun ~actionName ->
+          "The commit ID for the artifact revision. For artifacts stored in GitHub or CodeCommit repositories, the commit ID is linked to a commit details page."]}
+    let make ?actionName =
+      fun ?revisionId ->
+        fun ?revisionSummary ->
+          fun ?revisionUrl ->
             fun () ->
-              { revisionId; revisionSummary; revisionUrl; actionName }
+              { actionName; revisionId; revisionSummary; revisionUrl }
     let to_value x =
       structure_to_value
-        [("actionName", (Some (ActionName.to_value x.actionName)));
+        [("actionName", (Option.map x.actionName ~f:ActionName.to_value));
         ("revisionId", (Option.map x.revisionId ~f:Revision.to_value));
         ("revisionSummary",
           (Option.map x.revisionSummary ~f:RevisionSummary.to_value));
@@ -2516,17 +4957,16 @@ module SourceRevision =
       let revisionId =
         (Option.map ~f:Revision.of_xml) (Xml.child xml_arg0 "revisionId") in
       let actionName =
-        ActionName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "actionName") in
-      make ?revisionUrl ?revisionSummary ?revisionId ~actionName ()
+        (Option.map ~f:ActionName.of_xml) (Xml.child xml_arg0 "actionName") in
+      make ?revisionUrl ?revisionSummary ?revisionId ?actionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revisionUrl = field_map json "revisionUrl" Url.of_json in
+    let of_json json__ =
+      let revisionUrl = field_map json__ "revisionUrl" Url.of_json in
       let revisionSummary =
-        field_map json "revisionSummary" RevisionSummary.of_json in
-      let revisionId = field_map json "revisionId" Revision.of_json in
-      let actionName = field_map_exn json "actionName" ActionName.of_json in
-      make ?revisionUrl ?revisionSummary ?revisionId ~actionName ()
+        field_map json__ "revisionSummary" RevisionSummary.of_json in
+      let revisionId = field_map json__ "revisionId" Revision.of_json in
+      let actionName = field_map json__ "actionName" ActionName.of_json in
+      make ?revisionUrl ?revisionSummary ?revisionId ?actionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the version (or revision) of a source artifact that initiated a pipeline execution."]
@@ -2542,6 +4982,72 @@ module StopPipelineExecutionReason =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"StopPipelineExecutionReason" j
+    let to_json = simple_to_json to_value
+  end
+module DeployTargetEvent =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option
+        [@ocaml.doc "The name of the event for the deploy action."];
+      status: String_.t option
+        [@ocaml.doc "The status of the event for the deploy action."];
+      startTime: Timestamp.t option
+        [@ocaml.doc "The start time for the event for the deploy action."];
+      endTime: Timestamp.t option
+        [@ocaml.doc "The end time for the event for the deploy action."];
+      context: DeployTargetEventContext.t option
+        [@ocaml.doc "The context for the event for the deploy action."]}
+    let make ?name =
+      fun ?status ->
+        fun ?startTime ->
+          fun ?endTime ->
+            fun ?context ->
+              fun () -> { name; status; startTime; endTime; context }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("status", (Option.map x.status ~f:String_.to_value));
+        ("startTime", (Option.map x.startTime ~f:Timestamp.to_value));
+        ("endTime", (Option.map x.endTime ~f:Timestamp.to_value));
+        ("context",
+          (Option.map x.context ~f:DeployTargetEventContext.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let context =
+        (Option.map ~f:DeployTargetEventContext.of_xml)
+          (Xml.child xml_arg0 "context") in
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startTime") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?context ?endTime ?startTime ?status ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let context =
+        field_map json__ "context" DeployTargetEventContext.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let status = field_map json__ "status" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?context ?endTime ?startTime ?status ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A lifecycle event for the deploy action."]
+module TargetFilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "TargetFilterValue"
+    let make i =
+      let open Result in ok_or_failwith (check_string_min i ~min:1); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TargetFilterValue" j
     let to_json = simple_to_json to_value
   end
 module ActionConfigurationProperty =
@@ -2614,98 +5120,19 @@ module ActionConfigurationProperty =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?type_ ?description ?queryable ~secret ~key ~required ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let type_ =
-        field_map json "type" ActionConfigurationPropertyType.of_json in
-      let description = field_map json "description" Description.of_json in
-      let queryable = field_map json "queryable" Boolean.of_json in
-      let secret = field_map_exn json "secret" Boolean.of_json in
-      let key = field_map_exn json "key" Boolean.of_json in
-      let required = field_map_exn json "required" Boolean.of_json in
-      let name = field_map_exn json "name" ActionConfigurationKey.of_json in
+        field_map json__ "type" ActionConfigurationPropertyType.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let queryable = field_map json__ "queryable" Boolean.of_json in
+      let secret = field_map_exn json__ "secret" Boolean.of_json in
+      let key = field_map_exn json__ "key" Boolean.of_json in
+      let required = field_map_exn json__ "required" Boolean.of_json in
+      let name = field_map_exn json__ "name" ActionConfigurationKey.of_json in
       make ?type_ ?description ?queryable ~secret ~key ~required ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents information about an action configuration property."]
-module UrlTemplate =
-  struct
-    type nonrec t = string
-    let context_ = "UrlTemplate"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:2048) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"UrlTemplate" j
-    let to_json = simple_to_json to_value
-  end
-module MaximumArtifactCount =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:5) >>= (fun () -> check_int_min i ~min:0));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaximumArtifactCount" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module MinimumArtifactCount =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:5) >>= (fun () -> check_int_min i ~min:0));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MinimumArtifactCount" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module ArtifactDetailList =
-  struct
-    type nonrec t = ArtifactDetail.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:ArtifactDetail.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ArtifactDetail.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ArtifactDetailList" ~of_json:ArtifactDetail.of_json
-        j
-    let to_json v = composed_to_json to_value v
-  end
 module ResolvedActionConfigurationMap =
   struct
     type nonrec t = (String_.t * String_.t) list
@@ -2727,6 +5154,8 @@ module ResolvedActionConfigurationMap =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2746,16 +5175,24 @@ module ActionExecutionResult =
           "The action provider's summary for the action execution."];
       externalExecutionUrl: Url.t option
         [@ocaml.doc
-          "The deepest external link to the external resource (for example, a repository URL or deployment endpoint) that is used when running the action."]}
+          "The deepest external link to the external resource (for example, a repository URL or deployment endpoint) that is used when running the action."];
+      errorDetails: ErrorDetails.t option ;
+      logStreamARN: LogStreamARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the log stream for the action compute."]}
     let make ?externalExecutionId =
       fun ?externalExecutionSummary ->
         fun ?externalExecutionUrl ->
-          fun () ->
-            {
-              externalExecutionId;
-              externalExecutionSummary;
-              externalExecutionUrl
-            }
+          fun ?errorDetails ->
+            fun ?logStreamARN ->
+              fun () ->
+                {
+                  externalExecutionId;
+                  externalExecutionSummary;
+                  externalExecutionUrl;
+                  errorDetails;
+                  logStreamARN
+                }
     let to_value x =
       structure_to_value
         [("externalExecutionId",
@@ -2764,9 +5201,19 @@ module ActionExecutionResult =
           (Option.map x.externalExecutionSummary
              ~f:ExternalExecutionSummary.to_value));
         ("externalExecutionUrl",
-          (Option.map x.externalExecutionUrl ~f:Url.to_value))]
+          (Option.map x.externalExecutionUrl ~f:Url.to_value));
+        ("errorDetails",
+          (Option.map x.errorDetails ~f:ErrorDetails.to_value));
+        ("logStreamARN",
+          (Option.map x.logStreamARN ~f:LogStreamARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let logStreamARN =
+        (Option.map ~f:LogStreamARN.of_xml)
+          (Xml.child xml_arg0 "logStreamARN") in
+      let errorDetails =
+        (Option.map ~f:ErrorDetails.of_xml)
+          (Xml.child xml_arg0 "errorDetails") in
       let externalExecutionUrl =
         (Option.map ~f:Url.of_xml)
           (Xml.child xml_arg0 "externalExecutionUrl") in
@@ -2776,19 +5223,21 @@ module ActionExecutionResult =
       let externalExecutionId =
         (Option.map ~f:ExternalExecutionId.of_xml)
           (Xml.child xml_arg0 "externalExecutionId") in
-      make ?externalExecutionUrl ?externalExecutionSummary
-        ?externalExecutionId ()
+      make ?logStreamARN ?errorDetails ?externalExecutionUrl
+        ?externalExecutionSummary ?externalExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let logStreamARN = field_map json__ "logStreamARN" LogStreamARN.of_json in
+      let errorDetails = field_map json__ "errorDetails" ErrorDetails.of_json in
       let externalExecutionUrl =
-        field_map json "externalExecutionUrl" Url.of_json in
+        field_map json__ "externalExecutionUrl" Url.of_json in
       let externalExecutionSummary =
-        field_map json "externalExecutionSummary"
+        field_map json__ "externalExecutionSummary"
           ExternalExecutionSummary.of_json in
       let externalExecutionId =
-        field_map json "externalExecutionId" ExternalExecutionId.of_json in
-      make ?externalExecutionUrl ?externalExecutionSummary
-        ?externalExecutionId ()
+        field_map json__ "externalExecutionId" ExternalExecutionId.of_json in
+      make ?logStreamARN ?errorDetails ?externalExecutionUrl
+        ?externalExecutionSummary ?externalExecutionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Execution result information, such as the external execution ID."]
@@ -2814,6 +5263,8 @@ module OutputVariablesMap =
                        (OutputVariablesValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2876,56 +5327,159 @@ module ActionState =
       make ?revisionUrl ?entityUrl ?latestExecution ?currentRevision
         ?actionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revisionUrl = field_map json "revisionUrl" Url.of_json in
-      let entityUrl = field_map json "entityUrl" Url.of_json in
+    let of_json json__ =
+      let revisionUrl = field_map json__ "revisionUrl" Url.of_json in
+      let entityUrl = field_map json__ "entityUrl" Url.of_json in
       let latestExecution =
-        field_map json "latestExecution" ActionExecution.of_json in
+        field_map json__ "latestExecution" ActionExecution.of_json in
       let currentRevision =
-        field_map json "currentRevision" ActionRevision.of_json in
-      let actionName = field_map json "actionName" ActionName.of_json in
+        field_map json__ "currentRevision" ActionRevision.of_json in
+      let actionName = field_map json__ "actionName" ActionName.of_json in
       make ?revisionUrl ?entityUrl ?latestExecution ?currentRevision
         ?actionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents information about the state of an action."]
-module StageExecutionStatus =
+module RetryAttempt =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RetryAttempt" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RetryTrigger =
   struct
     type nonrec t =
-      | Cancelled 
-      | InProgress 
-      | Failed 
-      | Stopped 
-      | Stopping 
-      | Succeeded 
+      | AutomatedStageRetry 
+      | ManualStageRetry 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | Cancelled -> "Cancelled"
-      | InProgress -> "InProgress"
-      | Failed -> "Failed"
-      | Stopped -> "Stopped"
-      | Stopping -> "Stopping"
-      | Succeeded -> "Succeeded"
+      | AutomatedStageRetry -> "AutomatedStageRetry"
+      | ManualStageRetry -> "ManualStageRetry"
       | Non_static_id s -> s
     let of_string =
       function
-      | "Cancelled" -> Cancelled
-      | "InProgress" -> InProgress
-      | "Failed" -> Failed
-      | "Stopped" -> Stopped
-      | "Stopping" -> Stopping
-      | "Succeeded" -> Succeeded
+      | "AutomatedStageRetry" -> AutomatedStageRetry
+      | "ManualStageRetry" -> ManualStageRetry
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration StageExecutionStatus" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"StageExecutionStatus" j)
+      of_string (string_of_xml ~kind:"enumeration RetryTrigger" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RetryTrigger" j)
     let to_json = simple_to_json to_value
   end
+module ConditionStateList =
+  struct
+    type nonrec t = ConditionState.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConditionState.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConditionState.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConditionStateList" ~of_json:ConditionState.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module StageConditionsExecution =
+  struct
+    type nonrec t =
+      {
+      status: ConditionExecutionStatus.t option
+        [@ocaml.doc "The status of a run of a condition for a stage."];
+      summary: ExecutionSummary.t option
+        [@ocaml.doc "A summary of the run of the condition for a stage."]}
+    let make ?status = fun ?summary -> fun () -> { status; summary }
+    let to_value x =
+      structure_to_value
+        [("status",
+           (Option.map x.status ~f:ConditionExecutionStatus.to_value));
+        ("summary", (Option.map x.summary ~f:ExecutionSummary.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let summary =
+        (Option.map ~f:ExecutionSummary.of_xml)
+          (Xml.child xml_arg0 "summary") in
+      let status =
+        (Option.map ~f:ConditionExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?summary ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let summary = field_map json__ "summary" ExecutionSummary.of_json in
+      let status = field_map json__ "status" ConditionExecutionStatus.of_json in
+      make ?summary ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents information about the run of a condition for a stage."]
+module StageExecution =
+  struct
+    type nonrec t =
+      {
+      pipelineExecutionId: PipelineExecutionId.t option
+        [@ocaml.doc
+          "The ID of the pipeline execution associated with the stage."];
+      status: StageExecutionStatus.t option
+        [@ocaml.doc
+          "The status of the stage, or for a completed stage, the last status of the stage. A status of cancelled means that the pipeline\226\128\153s definition was updated before the stage execution could be completed."];
+      type_: ExecutionType.t option
+        [@ocaml.doc
+          "The type of pipeline execution for the stage, such as a rollback pipeline execution."]}
+    let make ?pipelineExecutionId =
+      fun ?status ->
+        fun ?type_ -> fun () -> { pipelineExecutionId; status; type_ }
+    let to_value x =
+      structure_to_value
+        [("pipelineExecutionId",
+           (Option.map x.pipelineExecutionId ~f:PipelineExecutionId.to_value));
+        ("status", (Option.map x.status ~f:StageExecutionStatus.to_value));
+        ("type", (Option.map x.type_ ~f:ExecutionType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:ExecutionType.of_xml) (Xml.child xml_arg0 "type") in
+      let status =
+        (Option.map ~f:StageExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let pipelineExecutionId =
+        (Option.map ~f:PipelineExecutionId.of_xml)
+          (Xml.child xml_arg0 "pipelineExecutionId") in
+      make ?type_ ?status ?pipelineExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "type" ExecutionType.of_json in
+      let status = field_map json__ "status" StageExecutionStatus.of_json in
+      let pipelineExecutionId =
+        field_map json__ "pipelineExecutionId" PipelineExecutionId.of_json in
+      make ?type_ ?status ?pipelineExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents information about the run of a stage."]
 module DisabledReason =
   struct
     type nonrec t = string
@@ -2994,10 +5548,10 @@ module ArtifactStore =
         [@ocaml.doc "The type of the artifact store, such as S3."];
       location: ArtifactStoreLocation.t
         [@ocaml.doc
-          "The S3 bucket used for storing the artifacts for a pipeline. You can specify the name of an S3 bucket but not a folder in the bucket. A folder to contain the pipeline artifacts is created for you based on the name of the pipeline. You can use any S3 bucket in the same AWS Region as the pipeline to store your pipeline artifacts."];
+          "The S3 bucket used for storing the artifacts for a pipeline. You can specify the name of an S3 bucket but not a folder in the bucket. A folder to contain the pipeline artifacts is created for you based on the name of the pipeline. You can use any S3 bucket in the same Amazon Web Services Region as the pipeline to store your pipeline artifacts."];
       encryptionKey: EncryptionKey.t option
         [@ocaml.doc
-          "The encryption key used to encrypt the data in the artifact store, such as an AWS Key Management Service (AWS KMS) key. If this is undefined, the default key for Amazon S3 is used."]}
+          "The encryption key used to encrypt the data in the artifact store, such as an Amazon Web Services Key Management Service key. If this is undefined, the default key for Amazon S3 is used."]}
     let context_ = "ArtifactStore"
     let make ?encryptionKey =
       fun ~type_ ->
@@ -3021,12 +5575,12 @@ module ArtifactStore =
           (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ?encryptionKey ~location ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionKey =
-        field_map json "encryptionKey" EncryptionKey.of_json in
+        field_map json__ "encryptionKey" EncryptionKey.of_json in
       let location =
-        field_map_exn json "location" ArtifactStoreLocation.of_json in
-      let type_ = field_map_exn json "type" ArtifactStoreType.of_json in
+        field_map_exn json__ "location" ArtifactStoreLocation.of_json in
+      let type_ = field_map_exn json__ "type" ArtifactStoreType.of_json in
       make ?encryptionKey ~location ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3039,18 +5593,53 @@ module StageDeclaration =
       blockers: StageBlockerDeclarationList.t option
         [@ocaml.doc "Reserved for future use."];
       actions: StageActionDeclarationList.t
-        [@ocaml.doc "The actions included in a stage."]}
+        [@ocaml.doc "The actions included in a stage."];
+      onFailure: FailureConditions.t option
+        [@ocaml.doc
+          "The method to use when a stage has not completed successfully. For example, configuring this field for rollback will roll back a failed stage automatically to the last successful pipeline execution in the stage."];
+      onSuccess: SuccessConditions.t option
+        [@ocaml.doc
+          "The method to use when a stage has succeeded. For example, configuring this field for conditions will allow the stage to succeed when the conditions are met."];
+      beforeEntry: BeforeEntryConditions.t option
+        [@ocaml.doc
+          "The method to use when a stage allows entry. For example, configuring this field for conditions will allow entry to the stage when the conditions are met."]}
     let context_ = "StageDeclaration"
     let make ?blockers =
-      fun ~name -> fun ~actions -> fun () -> { blockers; name; actions }
+      fun ?onFailure ->
+        fun ?onSuccess ->
+          fun ?beforeEntry ->
+            fun ~name ->
+              fun ~actions ->
+                fun () ->
+                  {
+                    blockers;
+                    onFailure;
+                    onSuccess;
+                    beforeEntry;
+                    name;
+                    actions
+                  }
     let to_value x =
       structure_to_value
         [("name", (Some (StageName.to_value x.name)));
         ("blockers",
           (Option.map x.blockers ~f:StageBlockerDeclarationList.to_value));
-        ("actions", (Some (StageActionDeclarationList.to_value x.actions)))]
+        ("actions", (Some (StageActionDeclarationList.to_value x.actions)));
+        ("onFailure", (Option.map x.onFailure ~f:FailureConditions.to_value));
+        ("onSuccess", (Option.map x.onSuccess ~f:SuccessConditions.to_value));
+        ("beforeEntry",
+          (Option.map x.beforeEntry ~f:BeforeEntryConditions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let beforeEntry =
+        (Option.map ~f:BeforeEntryConditions.of_xml)
+          (Xml.child xml_arg0 "beforeEntry") in
+      let onSuccess =
+        (Option.map ~f:SuccessConditions.of_xml)
+          (Xml.child xml_arg0 "onSuccess") in
+      let onFailure =
+        (Option.map ~f:FailureConditions.of_xml)
+          (Xml.child xml_arg0 "onFailure") in
       let actions =
         StageActionDeclarationList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "actions") in
@@ -3059,17 +5648,104 @@ module StageDeclaration =
           (Xml.child xml_arg0 "blockers") in
       let name =
         StageName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~actions ?blockers ~name ()
+      make ?beforeEntry ?onSuccess ?onFailure ~actions ?blockers ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let beforeEntry =
+        field_map json__ "beforeEntry" BeforeEntryConditions.of_json in
+      let onSuccess = field_map json__ "onSuccess" SuccessConditions.of_json in
+      let onFailure = field_map json__ "onFailure" FailureConditions.of_json in
       let actions =
-        field_map_exn json "actions" StageActionDeclarationList.of_json in
+        field_map_exn json__ "actions" StageActionDeclarationList.of_json in
       let blockers =
-        field_map json "blockers" StageBlockerDeclarationList.of_json in
-      let name = field_map_exn json "name" StageName.of_json in
-      make ~actions ?blockers ~name ()
+        field_map json__ "blockers" StageBlockerDeclarationList.of_json in
+      let name = field_map_exn json__ "name" StageName.of_json in
+      make ?beforeEntry ?onSuccess ?onFailure ~actions ?blockers ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents information about a stage and its definition."]
+module PipelineTriggerDeclaration =
+  struct
+    type nonrec t =
+      {
+      providerType: PipelineTriggerProviderType.t
+        [@ocaml.doc
+          "The source provider for the event, such as connections configured for a repository with Git tags, for the specified trigger configuration."];
+      gitConfiguration: GitConfiguration.t
+        [@ocaml.doc
+          "Provides the filter criteria and the source stage for the repository event that starts the pipeline, such as Git tags."]}
+    let context_ = "PipelineTriggerDeclaration"
+    let make ~providerType =
+      fun ~gitConfiguration -> fun () -> { providerType; gitConfiguration }
+    let to_value x =
+      structure_to_value
+        [("providerType",
+           (Some (PipelineTriggerProviderType.to_value x.providerType)));
+        ("gitConfiguration",
+          (Some (GitConfiguration.to_value x.gitConfiguration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let gitConfiguration =
+        GitConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "gitConfiguration") in
+      let providerType =
+        PipelineTriggerProviderType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "providerType") in
+      make ~gitConfiguration ~providerType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let gitConfiguration =
+        field_map_exn json__ "gitConfiguration" GitConfiguration.of_json in
+      let providerType =
+        field_map_exn json__ "providerType"
+          PipelineTriggerProviderType.of_json in
+      make ~gitConfiguration ~providerType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents information about the specified trigger configuration, such as the filter criteria and the source stage for the action that contains the trigger. This is only supported for the CodeStarSourceConnection action type. When a trigger configuration is specified, default change detection for repository and branch commits is disabled."]
+module PipelineVariableDeclaration =
+  struct
+    type nonrec t =
+      {
+      name: PipelineVariableName.t
+        [@ocaml.doc "The name of a pipeline-level variable."];
+      defaultValue: PipelineVariableValue.t option
+        [@ocaml.doc "The value of a pipeline-level variable."];
+      description: PipelineVariableDescription.t option
+        [@ocaml.doc
+          "The description of a pipeline-level variable. It's used to add additional context about the variable, and not being used at time when pipeline executes."]}
+    let context_ = "PipelineVariableDeclaration"
+    let make ?defaultValue =
+      fun ?description ->
+        fun ~name -> fun () -> { defaultValue; description; name }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (PipelineVariableName.to_value x.name)));
+        ("defaultValue",
+          (Option.map x.defaultValue ~f:PipelineVariableValue.to_value));
+        ("description",
+          (Option.map x.description ~f:PipelineVariableDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:PipelineVariableDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let defaultValue =
+        (Option.map ~f:PipelineVariableValue.of_xml)
+          (Xml.child xml_arg0 "defaultValue") in
+      let name =
+        PipelineVariableName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?description ?defaultValue ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description =
+        field_map json__ "description" PipelineVariableDescription.of_json in
+      let defaultValue =
+        field_map json__ "defaultValue" PipelineVariableValue.of_json in
+      let name = field_map_exn json__ "name" PipelineVariableName.of_json in
+      make ?description ?defaultValue ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A variable declared at the pipeline level."]
 module MaximumActionTypeArtifactCount =
   struct
     type nonrec t = int
@@ -3139,12 +5815,12 @@ module ExecutorConfiguration =
           (Xml.child xml_arg0 "lambdaExecutorConfiguration") in
       make ?jobWorkerExecutorConfiguration ?lambdaExecutorConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let jobWorkerExecutorConfiguration =
-        field_map json "jobWorkerExecutorConfiguration"
+        field_map json__ "jobWorkerExecutorConfiguration"
           JobWorkerExecutorConfiguration.of_json in
       let lambdaExecutorConfiguration =
-        field_map json "lambdaExecutorConfiguration"
+        field_map json__ "lambdaExecutorConfiguration"
           LambdaExecutorConfiguration.of_json in
       make ?jobWorkerExecutorConfiguration ?lambdaExecutorConfiguration ()
     let to_json v = composed_to_json to_value v
@@ -3236,6 +5912,9 @@ module AllowedAccounts =
           ((check_list_max i ~max:1000) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AllowedAccount.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3312,18 +5991,50 @@ module ActionTypeProperty =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?description ?queryable ~noEcho ~key ~optional ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "description" PropertyDescription.of_json in
-      let queryable = field_map json "queryable" Boolean.of_json in
-      let noEcho = field_map_exn json "noEcho" Boolean.of_json in
-      let key = field_map_exn json "key" Boolean.of_json in
-      let optional = field_map_exn json "optional" Boolean.of_json in
-      let name = field_map_exn json "name" ActionConfigurationKey.of_json in
+        field_map json__ "description" PropertyDescription.of_json in
+      let queryable = field_map json__ "queryable" Boolean.of_json in
+      let noEcho = field_map_exn json__ "noEcho" Boolean.of_json in
+      let key = field_map_exn json__ "key" Boolean.of_json in
+      let optional = field_map_exn json__ "optional" Boolean.of_json in
+      let name = field_map_exn json__ "name" ActionConfigurationKey.of_json in
       make ?description ?queryable ~noEcho ~key ~optional ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents information about each property specified in the action configuration, such as the description and key name that display for the customer using the action type."]
+module SourceRevisionType =
+  struct
+    type nonrec t =
+      | COMMIT_ID 
+      | IMAGE_DIGEST 
+      | S3_OBJECT_VERSION_ID 
+      | S3_OBJECT_KEY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | COMMIT_ID -> "COMMIT_ID"
+      | IMAGE_DIGEST -> "IMAGE_DIGEST"
+      | S3_OBJECT_VERSION_ID -> "S3_OBJECT_VERSION_ID"
+      | S3_OBJECT_KEY -> "S3_OBJECT_KEY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "COMMIT_ID" -> COMMIT_ID
+      | "IMAGE_DIGEST" -> IMAGE_DIGEST
+      | "S3_OBJECT_VERSION_ID" -> S3_OBJECT_VERSION_ID
+      | "S3_OBJECT_KEY" -> S3_OBJECT_KEY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SourceRevisionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SourceRevisionType" j)
+    let to_json = simple_to_json to_value
+  end
 module ClientId =
   struct
     type nonrec t = string
@@ -3377,13 +6088,13 @@ module JobData =
         [@ocaml.doc "The output of the job."];
       artifactCredentials: AWSSessionCredentials.t option
         [@ocaml.doc
-          "Represents an AWS session credentials object. These credentials are temporary credentials that are issued by AWS Secure Token Service (STS). They can be used to access input and output artifacts in the S3 bucket used to store artifacts for the pipeline in AWS CodePipeline."];
+          "Represents an Amazon Web Services session credentials object. These credentials are temporary credentials that are issued by Amazon Web Services Secure Token Service (STS). They can be used to access input and output artifacts in the S3 bucket used to store artifacts for the pipeline in CodePipeline."];
       continuationToken: ContinuationToken.t option
         [@ocaml.doc
-          "A system-generated token, such as a AWS CodeDeploy deployment ID, required by a job to continue the job asynchronously."];
+          "A system-generated token, such as a deployment ID, required by a job to continue the job asynchronously."];
       encryptionKey: EncryptionKey.t option
         [@ocaml.doc
-          "Represents information about the key used to encrypt data in the artifact store, such as an AWS Key Management Service (AWS KMS) key."]}
+          "Represents information about the key used to encrypt data in the artifact store, such as an KMS key."]}
     let make ?actionTypeId =
       fun ?actionConfiguration ->
         fun ?pipelineContext ->
@@ -3451,22 +6162,22 @@ module JobData =
         ?outputArtifacts ?inputArtifacts ?pipelineContext
         ?actionConfiguration ?actionTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionKey =
-        field_map json "encryptionKey" EncryptionKey.of_json in
+        field_map json__ "encryptionKey" EncryptionKey.of_json in
       let continuationToken =
-        field_map json "continuationToken" ContinuationToken.of_json in
+        field_map json__ "continuationToken" ContinuationToken.of_json in
       let artifactCredentials =
-        field_map json "artifactCredentials" AWSSessionCredentials.of_json in
+        field_map json__ "artifactCredentials" AWSSessionCredentials.of_json in
       let outputArtifacts =
-        field_map json "outputArtifacts" ArtifactList.of_json in
+        field_map json__ "outputArtifacts" ArtifactList.of_json in
       let inputArtifacts =
-        field_map json "inputArtifacts" ArtifactList.of_json in
+        field_map json__ "inputArtifacts" ArtifactList.of_json in
       let pipelineContext =
-        field_map json "pipelineContext" PipelineContext.of_json in
+        field_map json__ "pipelineContext" PipelineContext.of_json in
       let actionConfiguration =
-        field_map json "actionConfiguration" ActionConfiguration.of_json in
-      let actionTypeId = field_map json "actionTypeId" ActionTypeId.of_json in
+        field_map json__ "actionConfiguration" ActionConfiguration.of_json in
+      let actionTypeId = field_map json__ "actionTypeId" ActionTypeId.of_json in
       make ?encryptionKey ?continuationToken ?artifactCredentials
         ?outputArtifacts ?inputArtifacts ?pipelineContext
         ?actionConfiguration ?actionTypeId ()
@@ -3495,6 +6206,9 @@ module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3543,7 +6257,7 @@ module WebhookDefinition =
           "A list of rules applied to the body/payload sent in the POST request to a webhook URL. All defined rules must pass for the request to be accepted and the pipeline started."];
       authentication: WebhookAuthenticationType.t
         [@ocaml.doc
-          "Supported options are GITHUB_HMAC, IP, and UNAUTHENTICATED. For information about the authentication scheme implemented by GITHUB_HMAC, see Securing your webhooks on the GitHub Developer website. IP rejects webhooks trigger requests unless they originate from an IP address in the IP range whitelisted in the authentication configuration. UNAUTHENTICATED accepts all webhook trigger requests regardless of origin."];
+          "Supported options are GITHUB_HMAC, IP, and UNAUTHENTICATED. When creating CodePipeline webhooks, do not use your own credentials or reuse the same secret token across multiple webhooks. For optimal security, generate a unique secret token for each webhook you create. The secret token is an arbitrary string that you provide, which GitHub uses to compute and sign the webhook payloads sent to CodePipeline, for protecting the integrity and authenticity of the webhook payloads. Using your own credentials or reusing the same token across multiple webhooks can lead to security vulnerabilities. If a secret token was provided, it will be redacted in the response. For information about the authentication scheme implemented by GITHUB_HMAC, see Securing your webhooks on the GitHub Developer website. IP rejects webhooks trigger requests unless they originate from an IP address in the IP range whitelisted in the authentication configuration. UNAUTHENTICATED accepts all webhook trigger requests regardless of origin."];
       authenticationConfiguration: WebhookAuthConfiguration.t
         [@ocaml.doc
           "Properties that configure the authentication applied to incoming webhook trigger requests. The required properties depend on the authentication type. For GITHUB_HMAC, only the SecretToken property must be set. For IP, only the AllowedIPRange property must be set to a valid CIDR range. For UNAUTHENTICATED, no properties can be set."]}
@@ -3597,17 +6311,19 @@ module WebhookDefinition =
       make ~authenticationConfiguration ~authentication ~filters
         ~targetAction ~targetPipeline ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationConfiguration =
-        field_map_exn json "authenticationConfiguration"
+        field_map_exn json__ "authenticationConfiguration"
           WebhookAuthConfiguration.of_json in
       let authentication =
-        field_map_exn json "authentication" WebhookAuthenticationType.of_json in
-      let filters = field_map_exn json "filters" WebhookFilters.of_json in
-      let targetAction = field_map_exn json "targetAction" ActionName.of_json in
+        field_map_exn json__ "authentication"
+          WebhookAuthenticationType.of_json in
+      let filters = field_map_exn json__ "filters" WebhookFilters.of_json in
+      let targetAction =
+        field_map_exn json__ "targetAction" ActionName.of_json in
       let targetPipeline =
-        field_map_exn json "targetPipeline" PipelineName.of_json in
-      let name = field_map_exn json "name" WebhookName.of_json in
+        field_map_exn json__ "targetPipeline" PipelineName.of_json in
+      let name = field_map_exn json__ "name" WebhookName.of_json in
       make ~authenticationConfiguration ~authentication ~filters
         ~targetAction ~targetPipeline ~name ()
     let to_json v = composed_to_json to_value v
@@ -3669,6 +6385,140 @@ module WebhookUrl =
     let of_json j = string_of_json ~kind:"WebhookUrl" j
     let to_json = simple_to_json to_value
   end
+module ArtifactDetails =
+  struct
+    type nonrec t =
+      {
+      minimumCount: MinimumArtifactCount.t
+        [@ocaml.doc
+          "The minimum number of artifacts allowed for the action type."];
+      maximumCount: MaximumArtifactCount.t
+        [@ocaml.doc
+          "The maximum number of artifacts allowed for the action type."]}
+    let context_ = "ArtifactDetails"
+    let make ~minimumCount =
+      fun ~maximumCount -> fun () -> { minimumCount; maximumCount }
+    let to_value x =
+      structure_to_value
+        [("minimumCount",
+           (Some (MinimumArtifactCount.to_value x.minimumCount)));
+        ("maximumCount",
+          (Some (MaximumArtifactCount.to_value x.maximumCount)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maximumCount =
+        MaximumArtifactCount.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "maximumCount") in
+      let minimumCount =
+        MinimumArtifactCount.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "minimumCount") in
+      make ~maximumCount ~minimumCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maximumCount =
+        field_map_exn json__ "maximumCount" MaximumArtifactCount.of_json in
+      let minimumCount =
+        field_map_exn json__ "minimumCount" MinimumArtifactCount.of_json in
+      make ~maximumCount ~minimumCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns information about the details of an artifact."]
+module RuleConfigurationPropertyList =
+  struct
+    type nonrec t = RuleConfigurationProperty.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RuleConfigurationProperty.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RuleConfigurationProperty.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RuleConfigurationPropertyList"
+        ~of_json:RuleConfigurationProperty.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RuleTypeSettings =
+  struct
+    type nonrec t =
+      {
+      thirdPartyConfigurationUrl: Url.t option
+        [@ocaml.doc
+          "The URL of a sign-up page where users can sign up for an external service and perform initial configuration of the action provided by that service."];
+      entityUrlTemplate: UrlTemplate.t option
+        [@ocaml.doc
+          "The URL returned to the CodePipeline console that provides a deep link to the resources of the external system, such as the configuration page for a CodeDeploy deployment group. This link is provided as part of the action display in the pipeline."];
+      executionUrlTemplate: UrlTemplate.t option
+        [@ocaml.doc
+          "The URL returned to the CodePipeline console that contains a link to the top-level landing page for the external system, such as the console page for CodeDeploy. This link is shown on the pipeline view page in the CodePipeline console and provides a link to the execution entity of the external action."];
+      revisionUrlTemplate: UrlTemplate.t option
+        [@ocaml.doc
+          "The URL returned to the CodePipeline console that contains a link to the page where customers can update or change the configuration of the external action."]}
+    let make ?thirdPartyConfigurationUrl =
+      fun ?entityUrlTemplate ->
+        fun ?executionUrlTemplate ->
+          fun ?revisionUrlTemplate ->
+            fun () ->
+              {
+                thirdPartyConfigurationUrl;
+                entityUrlTemplate;
+                executionUrlTemplate;
+                revisionUrlTemplate
+              }
+    let to_value x =
+      structure_to_value
+        [("thirdPartyConfigurationUrl",
+           (Option.map x.thirdPartyConfigurationUrl ~f:Url.to_value));
+        ("entityUrlTemplate",
+          (Option.map x.entityUrlTemplate ~f:UrlTemplate.to_value));
+        ("executionUrlTemplate",
+          (Option.map x.executionUrlTemplate ~f:UrlTemplate.to_value));
+        ("revisionUrlTemplate",
+          (Option.map x.revisionUrlTemplate ~f:UrlTemplate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let revisionUrlTemplate =
+        (Option.map ~f:UrlTemplate.of_xml)
+          (Xml.child xml_arg0 "revisionUrlTemplate") in
+      let executionUrlTemplate =
+        (Option.map ~f:UrlTemplate.of_xml)
+          (Xml.child xml_arg0 "executionUrlTemplate") in
+      let entityUrlTemplate =
+        (Option.map ~f:UrlTemplate.of_xml)
+          (Xml.child xml_arg0 "entityUrlTemplate") in
+      let thirdPartyConfigurationUrl =
+        (Option.map ~f:Url.of_xml)
+          (Xml.child xml_arg0 "thirdPartyConfigurationUrl") in
+      make ?revisionUrlTemplate ?executionUrlTemplate ?entityUrlTemplate
+        ?thirdPartyConfigurationUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let revisionUrlTemplate =
+        field_map json__ "revisionUrlTemplate" UrlTemplate.of_json in
+      let executionUrlTemplate =
+        field_map json__ "executionUrlTemplate" UrlTemplate.of_json in
+      let entityUrlTemplate =
+        field_map json__ "entityUrlTemplate" UrlTemplate.of_json in
+      let thirdPartyConfigurationUrl =
+        field_map json__ "thirdPartyConfigurationUrl" Url.of_json in
+      make ?revisionUrlTemplate ?executionUrlTemplate ?entityUrlTemplate
+        ?thirdPartyConfigurationUrl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns information about the settings for a rule type."]
 module PipelineVersion =
   struct
     type nonrec t = int
@@ -3682,6 +6532,180 @@ module PipelineVersion =
       Int.of_string
         (string_of_xml ~kind:"an integer for PipelineVersion" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RuleExecutionInput =
+  struct
+    type nonrec t =
+      {
+      ruleTypeId: RuleTypeId.t option
+        [@ocaml.doc
+          "The ID for the rule type, which is made up of the combined values for category, owner, provider, and version. For more information about conditions, see Stage conditions. For more information about rules, see the CodePipeline rule reference."];
+      configuration: RuleConfigurationMap.t option
+        [@ocaml.doc
+          "Configuration data for a rule execution, such as the resolved values for that run."];
+      resolvedConfiguration: ResolvedRuleConfigurationMap.t option
+        [@ocaml.doc
+          "Configuration data for a rule execution with all variable references replaced with their real values for the execution."];
+      roleArn: RoleArn.t option
+        [@ocaml.doc
+          "The ARN of the IAM service role that performs the declared rule. This is assumed through the roleArn for the pipeline."];
+      region: AWSRegionName.t option
+        [@ocaml.doc
+          "The Amazon Web Services Region for the rule, such as us-east-1."];
+      inputArtifacts: ArtifactDetailList.t option
+        [@ocaml.doc
+          "Details of input artifacts of the rule that correspond to the rule execution."]}
+    let make ?ruleTypeId =
+      fun ?configuration ->
+        fun ?resolvedConfiguration ->
+          fun ?roleArn ->
+            fun ?region ->
+              fun ?inputArtifacts ->
+                fun () ->
+                  {
+                    ruleTypeId;
+                    configuration;
+                    resolvedConfiguration;
+                    roleArn;
+                    region;
+                    inputArtifacts
+                  }
+    let to_value x =
+      structure_to_value
+        [("ruleTypeId", (Option.map x.ruleTypeId ~f:RuleTypeId.to_value));
+        ("configuration",
+          (Option.map x.configuration ~f:RuleConfigurationMap.to_value));
+        ("resolvedConfiguration",
+          (Option.map x.resolvedConfiguration
+             ~f:ResolvedRuleConfigurationMap.to_value));
+        ("roleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
+        ("region", (Option.map x.region ~f:AWSRegionName.to_value));
+        ("inputArtifacts",
+          (Option.map x.inputArtifacts ~f:ArtifactDetailList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let inputArtifacts =
+        (Option.map ~f:ArtifactDetailList.of_xml)
+          (Xml.child xml_arg0 "inputArtifacts") in
+      let region =
+        (Option.map ~f:AWSRegionName.of_xml) (Xml.child xml_arg0 "region") in
+      let roleArn =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "roleArn") in
+      let resolvedConfiguration =
+        (Option.map ~f:ResolvedRuleConfigurationMap.of_xml)
+          (Xml.child xml_arg0 "resolvedConfiguration") in
+      let configuration =
+        (Option.map ~f:RuleConfigurationMap.of_xml)
+          (Xml.child xml_arg0 "configuration") in
+      let ruleTypeId =
+        (Option.map ~f:RuleTypeId.of_xml) (Xml.child xml_arg0 "ruleTypeId") in
+      make ?inputArtifacts ?region ?roleArn ?resolvedConfiguration
+        ?configuration ?ruleTypeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let inputArtifacts =
+        field_map json__ "inputArtifacts" ArtifactDetailList.of_json in
+      let region = field_map json__ "region" AWSRegionName.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
+      let resolvedConfiguration =
+        field_map json__ "resolvedConfiguration"
+          ResolvedRuleConfigurationMap.of_json in
+      let configuration =
+        field_map json__ "configuration" RuleConfigurationMap.of_json in
+      let ruleTypeId = field_map json__ "ruleTypeId" RuleTypeId.of_json in
+      make ?inputArtifacts ?region ?roleArn ?resolvedConfiguration
+        ?configuration ?ruleTypeId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Input information used for a rule execution."]
+module RuleExecutionOutput =
+  struct
+    type nonrec t =
+      {
+      executionResult: RuleExecutionResult.t option
+        [@ocaml.doc
+          "Execution result information listed in the output details for a rule execution."]}
+    let make ?executionResult = fun () -> { executionResult }
+    let to_value x =
+      structure_to_value
+        [("executionResult",
+           (Option.map x.executionResult ~f:RuleExecutionResult.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let executionResult =
+        (Option.map ~f:RuleExecutionResult.of_xml)
+          (Xml.child xml_arg0 "executionResult") in
+      make ?executionResult ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let executionResult =
+        field_map json__ "executionResult" RuleExecutionResult.of_json in
+      make ?executionResult ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Output details listed for a rule execution, such as the rule execution result."]
+module StartTimeRange =
+  struct
+    type nonrec t =
+      | Latest 
+      | All 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Latest -> "Latest" | All -> "All" | Non_static_id s -> s
+    let of_string =
+      function | "Latest" -> Latest | "All" -> All | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration StartTimeRange" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"StartTimeRange" j)
+    let to_json = simple_to_json to_value
+  end
+module ExecutionMode =
+  struct
+    type nonrec t =
+      | QUEUED 
+      | SUPERSEDED 
+      | PARALLEL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | QUEUED -> "QUEUED"
+      | SUPERSEDED -> "SUPERSEDED"
+      | PARALLEL -> "PARALLEL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "QUEUED" -> QUEUED
+      | "SUPERSEDED" -> SUPERSEDED
+      | "PARALLEL" -> PARALLEL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ExecutionMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ExecutionMode" j)
+    let to_json = simple_to_json to_value
+  end
+module PipelineType =
+  struct
+    type nonrec t =
+      | V1 
+      | V2 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | V1 -> "V1" | V2 -> "V2" | Non_static_id s -> s
+    let of_string = function | "V1" -> V1 | "V2" -> V2 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PipelineType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PipelineType" j)
     let to_json = simple_to_json to_value
   end
 module ExecutionTrigger =
@@ -3710,10 +6734,10 @@ module ExecutionTrigger =
         (Option.map ~f:TriggerType.of_xml) (Xml.child xml_arg0 "triggerType") in
       make ?triggerDetail ?triggerType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let triggerDetail =
-        field_map json "triggerDetail" TriggerDetail.of_json in
-      let triggerType = field_map json "triggerType" TriggerType.of_json in
+        field_map json__ "triggerDetail" TriggerDetail.of_json in
+      let triggerType = field_map json__ "triggerType" TriggerType.of_json in
       make ?triggerDetail ?triggerType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3760,10 +6784,54 @@ module PipelineExecutionStatus =
       of_string (string_of_json ~kind:"PipelineExecutionStatus" j)
     let to_json = simple_to_json to_value
   end
+module PipelineExecutionStatusSummary =
+  struct
+    type nonrec t = string
+    let context_ = "PipelineExecutionStatusSummary"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PipelineExecutionStatusSummary" j
+    let to_json = simple_to_json to_value
+  end
+module PipelineRollbackMetadata =
+  struct
+    type nonrec t =
+      {
+      rollbackTargetPipelineExecutionId: PipelineExecutionId.t option
+        [@ocaml.doc
+          "The pipeline execution ID to which the stage will be rolled back."]}
+    let make ?rollbackTargetPipelineExecutionId =
+      fun () -> { rollbackTargetPipelineExecutionId }
+    let to_value x =
+      structure_to_value
+        [("rollbackTargetPipelineExecutionId",
+           (Option.map x.rollbackTargetPipelineExecutionId
+              ~f:PipelineExecutionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let rollbackTargetPipelineExecutionId =
+        (Option.map ~f:PipelineExecutionId.of_xml)
+          (Xml.child xml_arg0 "rollbackTargetPipelineExecutionId") in
+      make ?rollbackTargetPipelineExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rollbackTargetPipelineExecutionId =
+        field_map json__ "rollbackTargetPipelineExecutionId"
+          PipelineExecutionId.of_json in
+      make ?rollbackTargetPipelineExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The metadata for the stage execution to be rolled back."]
 module SourceRevisionList =
   struct
     type nonrec t = SourceRevision.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SourceRevision.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3803,17 +6871,94 @@ module StopExecutionTrigger =
           (Xml.child xml_arg0 "reason") in
       make ?reason ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reason =
-        field_map json "reason" StopPipelineExecutionReason.of_json in
+        field_map json__ "reason" StopPipelineExecutionReason.of_json in
       make ?reason ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The interaction that stopped a pipeline execution."]
+module DeployTargetEventList =
+  struct
+    type nonrec t = DeployTargetEvent.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DeployTargetEvent.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DeployTargetEvent.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DeployTargetEventList"
+        ~of_json:DeployTargetEvent.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TargetFilterName =
+  struct
+    type nonrec t =
+      | TARGET_STATUS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | TARGET_STATUS -> "TARGET_STATUS" | Non_static_id s -> s
+    let of_string =
+      function | "TARGET_STATUS" -> TARGET_STATUS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TargetFilterName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TargetFilterName" j)
+    let to_json = simple_to_json to_value
+  end
+module TargetFilterValueList =
+  struct
+    type nonrec t = TargetFilterValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TargetFilterValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TargetFilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TargetFilterValueList"
+        ~of_json:TargetFilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ActionConfigurationPropertyList =
   struct
     type nonrec t = ActionConfigurationProperty.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ActionConfigurationProperty.to_value)) |>
         (fun x -> `List x)
@@ -3845,13 +6990,13 @@ module ActionTypeSettings =
           "The URL of a sign-up page where users can sign up for an external service and perform initial configuration of the action provided by that service."];
       entityUrlTemplate: UrlTemplate.t option
         [@ocaml.doc
-          "The URL returned to the AWS CodePipeline console that provides a deep link to the resources of the external system, such as the configuration page for an AWS CodeDeploy deployment group. This link is provided as part of the action display in the pipeline."];
+          "The URL returned to the CodePipeline console that provides a deep link to the resources of the external system, such as the configuration page for a CodeDeploy deployment group. This link is provided as part of the action display in the pipeline."];
       executionUrlTemplate: UrlTemplate.t option
         [@ocaml.doc
-          "The URL returned to the AWS CodePipeline console that contains a link to the top-level landing page for the external system, such as the console page for AWS CodeDeploy. This link is shown on the pipeline view page in the AWS CodePipeline console and provides a link to the execution entity of the external action."];
+          "The URL returned to the CodePipeline console that contains a link to the top-level landing page for the external system, such as the console page for CodeDeploy. This link is shown on the pipeline view page in the CodePipeline console and provides a link to the execution entity of the external action."];
       revisionUrlTemplate: UrlTemplate.t option
         [@ocaml.doc
-          "The URL returned to the AWS CodePipeline console that contains a link to the page where customers can update or change the configuration of the external action."]}
+          "The URL returned to the CodePipeline console that contains a link to the page where customers can update or change the configuration of the external action."]}
     let make ?thirdPartyConfigurationUrl =
       fun ?entityUrlTemplate ->
         fun ?executionUrlTemplate ->
@@ -3890,57 +7035,20 @@ module ActionTypeSettings =
       make ?revisionUrlTemplate ?executionUrlTemplate ?entityUrlTemplate
         ?thirdPartyConfigurationUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let revisionUrlTemplate =
-        field_map json "revisionUrlTemplate" UrlTemplate.of_json in
+        field_map json__ "revisionUrlTemplate" UrlTemplate.of_json in
       let executionUrlTemplate =
-        field_map json "executionUrlTemplate" UrlTemplate.of_json in
+        field_map json__ "executionUrlTemplate" UrlTemplate.of_json in
       let entityUrlTemplate =
-        field_map json "entityUrlTemplate" UrlTemplate.of_json in
+        field_map json__ "entityUrlTemplate" UrlTemplate.of_json in
       let thirdPartyConfigurationUrl =
-        field_map json "thirdPartyConfigurationUrl" Url.of_json in
+        field_map json__ "thirdPartyConfigurationUrl" Url.of_json in
       make ?revisionUrlTemplate ?executionUrlTemplate ?entityUrlTemplate
         ?thirdPartyConfigurationUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about the settings for an action type."]
-module ArtifactDetails =
-  struct
-    type nonrec t =
-      {
-      minimumCount: MinimumArtifactCount.t
-        [@ocaml.doc
-          "The minimum number of artifacts allowed for the action type."];
-      maximumCount: MaximumArtifactCount.t
-        [@ocaml.doc
-          "The maximum number of artifacts allowed for the action type."]}
-    let context_ = "ArtifactDetails"
-    let make ~minimumCount =
-      fun ~maximumCount -> fun () -> { minimumCount; maximumCount }
-    let to_value x =
-      structure_to_value
-        [("minimumCount",
-           (Some (MinimumArtifactCount.to_value x.minimumCount)));
-        ("maximumCount",
-          (Some (MaximumArtifactCount.to_value x.maximumCount)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let maximumCount =
-        MaximumArtifactCount.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "maximumCount") in
-      let minimumCount =
-        MinimumArtifactCount.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "minimumCount") in
-      make ~maximumCount ~minimumCount ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maximumCount =
-        field_map_exn json "maximumCount" MaximumArtifactCount.of_json in
-      let minimumCount =
-        field_map_exn json "minimumCount" MinimumArtifactCount.of_json in
-      make ~maximumCount ~minimumCount ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns information about the details of an artifact."]
 module ActionExecutionInput =
   struct
     type nonrec t =
@@ -3955,7 +7063,8 @@ module ActionExecutionInput =
         [@ocaml.doc
           "The ARN of the IAM service role that performs the declared action. This is assumed through the roleArn for the pipeline."];
       region: AWSRegionName.t option
-        [@ocaml.doc "The AWS Region for the action, such as us-east-1."];
+        [@ocaml.doc
+          "The Amazon Web Services Region for the action, such as us-east-1."];
       inputArtifacts: ArtifactDetailList.t option
         [@ocaml.doc
           "Details of input artifacts of the action that correspond to the action execution."];
@@ -4017,18 +7126,18 @@ module ActionExecutionInput =
       make ?namespace ?inputArtifacts ?region ?roleArn ?resolvedConfiguration
         ?configuration ?actionTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let namespace = field_map json "namespace" ActionNamespace.of_json in
+    let of_json json__ =
+      let namespace = field_map json__ "namespace" ActionNamespace.of_json in
       let inputArtifacts =
-        field_map json "inputArtifacts" ArtifactDetailList.of_json in
-      let region = field_map json "region" AWSRegionName.of_json in
-      let roleArn = field_map json "roleArn" RoleArn.of_json in
+        field_map json__ "inputArtifacts" ArtifactDetailList.of_json in
+      let region = field_map json__ "region" AWSRegionName.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
       let resolvedConfiguration =
-        field_map json "resolvedConfiguration"
+        field_map json__ "resolvedConfiguration"
           ResolvedActionConfigurationMap.of_json in
       let configuration =
-        field_map json "configuration" ActionConfigurationMap.of_json in
-      let actionTypeId = field_map json "actionTypeId" ActionTypeId.of_json in
+        field_map json__ "configuration" ActionConfigurationMap.of_json in
+      let actionTypeId = field_map json__ "actionTypeId" ActionTypeId.of_json in
       make ?namespace ?inputArtifacts ?region ?roleArn ?resolvedConfiguration
         ?configuration ?actionTypeId ()
     let to_json v = composed_to_json to_value v
@@ -4071,13 +7180,13 @@ module ActionExecutionOutput =
           (Xml.child xml_arg0 "outputArtifacts") in
       make ?outputVariables ?executionResult ?outputArtifacts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outputVariables =
-        field_map json "outputVariables" OutputVariablesMap.of_json in
+        field_map json__ "outputVariables" OutputVariablesMap.of_json in
       let executionResult =
-        field_map json "executionResult" ActionExecutionResult.of_json in
+        field_map json__ "executionResult" ActionExecutionResult.of_json in
       let outputArtifacts =
-        field_map json "outputArtifacts" ArtifactDetailList.of_json in
+        field_map json__ "outputArtifacts" ArtifactDetailList.of_json in
       make ?outputVariables ?executionResult ?outputArtifacts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4086,6 +7195,9 @@ module ActionStateList =
   struct
     type nonrec t = ActionState.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ActionState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4106,41 +7218,126 @@ module ActionStateList =
       list_of_json ~kind:"ActionStateList" ~of_json:ActionState.of_json j
     let to_json v = composed_to_json to_value v
   end
-module StageExecution =
+module RetryStageMetadata =
   struct
     type nonrec t =
       {
-      pipelineExecutionId: PipelineExecutionId.t
+      autoStageRetryAttempt: RetryAttempt.t option
         [@ocaml.doc
-          "The ID of the pipeline execution associated with the stage."];
-      status: StageExecutionStatus.t
+          "The number of attempts for a specific stage with automatic retry on stage failure. One attempt is allowed for automatic stage retry on failure."];
+      manualStageRetryAttempt: RetryAttempt.t option
         [@ocaml.doc
-          "The status of the stage, or for a completed stage, the last status of the stage. A status of cancelled means that the pipeline\226\128\153s definition was updated before the stage execution could be completed."]}
-    let context_ = "StageExecution"
-    let make ~pipelineExecutionId =
-      fun ~status -> fun () -> { pipelineExecutionId; status }
+          "The number of attempts for a specific stage where manual retries have been made upon stage failure."];
+      latestRetryTrigger: RetryTrigger.t option
+        [@ocaml.doc
+          "The latest trigger for a specific stage where manual or automatic retries have been made upon stage failure."]}
+    let make ?autoStageRetryAttempt =
+      fun ?manualStageRetryAttempt ->
+        fun ?latestRetryTrigger ->
+          fun () ->
+            {
+              autoStageRetryAttempt;
+              manualStageRetryAttempt;
+              latestRetryTrigger
+            }
     let to_value x =
       structure_to_value
-        [("pipelineExecutionId",
-           (Some (PipelineExecutionId.to_value x.pipelineExecutionId)));
-        ("status", (Some (StageExecutionStatus.to_value x.status)))]
+        [("autoStageRetryAttempt",
+           (Option.map x.autoStageRetryAttempt ~f:RetryAttempt.to_value));
+        ("manualStageRetryAttempt",
+          (Option.map x.manualStageRetryAttempt ~f:RetryAttempt.to_value));
+        ("latestRetryTrigger",
+          (Option.map x.latestRetryTrigger ~f:RetryTrigger.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let status =
-        StageExecutionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let pipelineExecutionId =
-        PipelineExecutionId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "pipelineExecutionId") in
-      make ~status ~pipelineExecutionId ()
+      let latestRetryTrigger =
+        (Option.map ~f:RetryTrigger.of_xml)
+          (Xml.child xml_arg0 "latestRetryTrigger") in
+      let manualStageRetryAttempt =
+        (Option.map ~f:RetryAttempt.of_xml)
+          (Xml.child xml_arg0 "manualStageRetryAttempt") in
+      let autoStageRetryAttempt =
+        (Option.map ~f:RetryAttempt.of_xml)
+          (Xml.child xml_arg0 "autoStageRetryAttempt") in
+      make ?latestRetryTrigger ?manualStageRetryAttempt
+        ?autoStageRetryAttempt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" StageExecutionStatus.of_json in
-      let pipelineExecutionId =
-        field_map_exn json "pipelineExecutionId" PipelineExecutionId.of_json in
-      make ~status ~pipelineExecutionId ()
+    let of_json json__ =
+      let latestRetryTrigger =
+        field_map json__ "latestRetryTrigger" RetryTrigger.of_json in
+      let manualStageRetryAttempt =
+        field_map json__ "manualStageRetryAttempt" RetryAttempt.of_json in
+      let autoStageRetryAttempt =
+        field_map json__ "autoStageRetryAttempt" RetryAttempt.of_json in
+      make ?latestRetryTrigger ?manualStageRetryAttempt
+        ?autoStageRetryAttempt ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Represents information about the run of a stage."]
+  end[@@ocaml.doc
+       "The details of a specific automatic retry on stage failure, including the attempt number and trigger."]
+module StageConditionState =
+  struct
+    type nonrec t =
+      {
+      latestExecution: StageConditionsExecution.t option
+        [@ocaml.doc
+          "Represents information about the latest run of a condition for a stage."];
+      conditionStates: ConditionStateList.t option
+        [@ocaml.doc
+          "The states of the conditions for a run of a condition for a stage."]}
+    let make ?latestExecution =
+      fun ?conditionStates -> fun () -> { latestExecution; conditionStates }
+    let to_value x =
+      structure_to_value
+        [("latestExecution",
+           (Option.map x.latestExecution ~f:StageConditionsExecution.to_value));
+        ("conditionStates",
+          (Option.map x.conditionStates ~f:ConditionStateList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let conditionStates =
+        (Option.map ~f:ConditionStateList.of_xml)
+          (Xml.child xml_arg0 "conditionStates") in
+      let latestExecution =
+        (Option.map ~f:StageConditionsExecution.of_xml)
+          (Xml.child xml_arg0 "latestExecution") in
+      make ?conditionStates ?latestExecution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let conditionStates =
+        field_map json__ "conditionStates" ConditionStateList.of_json in
+      let latestExecution =
+        field_map json__ "latestExecution" StageConditionsExecution.of_json in
+      make ?conditionStates ?latestExecution ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The state of a run of a condition for a stage."]
+module StageExecutionList =
+  struct
+    type nonrec t = StageExecution.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:StageExecution.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:StageExecution.of_xml)
+    let of_json j =
+      list_of_json ~kind:"StageExecutionList" ~of_json:StageExecution.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
 module TransitionState =
   struct
     type nonrec t =
@@ -4187,14 +7384,14 @@ module TransitionState =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?disabledReason ?lastChangedAt ?lastChangedBy ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let disabledReason =
-        field_map json "disabledReason" DisabledReason.of_json in
+        field_map json__ "disabledReason" DisabledReason.of_json in
       let lastChangedAt =
-        field_map json "lastChangedAt" LastChangedAt.of_json in
+        field_map json__ "lastChangedAt" LastChangedAt.of_json in
       let lastChangedBy =
-        field_map json "lastChangedBy" LastChangedBy.of_json in
-      let enabled = field_map json "enabled" Enabled.of_json in
+        field_map json__ "lastChangedBy" LastChangedBy.of_json in
+      let enabled = field_map json__ "enabled" Enabled.of_json in
       make ?disabledReason ?lastChangedAt ?lastChangedBy ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4213,13 +7410,13 @@ module ArtifactRevision =
           "An additional identifier for a revision, such as a commit date or, for artifacts stored in Amazon S3 buckets, the ETag value."];
       revisionSummary: RevisionSummary.t option
         [@ocaml.doc
-          "Summary information about the most recent revision of the artifact. For GitHub and AWS CodeCommit repositories, the commit message. For Amazon S3 buckets or actions, the user-provided content of a codepipeline-artifact-revision-summary key specified in the object metadata."];
+          "Summary information about the most recent revision of the artifact. For GitHub and CodeCommit repositories, the commit message. For Amazon S3 buckets or actions, the user-provided content of a codepipeline-artifact-revision-summary key specified in the object metadata."];
       created: Timestamp.t option
         [@ocaml.doc
           "The date and time when the most recent revision of the artifact was created, in timestamp format."];
       revisionUrl: Url.t option
         [@ocaml.doc
-          "The commit ID for the artifact revision. For artifacts stored in GitHub or AWS CodeCommit repositories, the commit ID is linked to a commit details page."]}
+          "The commit ID for the artifact revision. For artifacts stored in GitHub or CodeCommit repositories, the commit ID is linked to a commit details page."]}
     let make ?name =
       fun ?revisionId ->
         fun ?revisionChangeIdentifier ->
@@ -4265,20 +7462,46 @@ module ArtifactRevision =
       make ?revisionUrl ?created ?revisionSummary ?revisionChangeIdentifier
         ?revisionId ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revisionUrl = field_map json "revisionUrl" Url.of_json in
-      let created = field_map json "created" Timestamp.of_json in
+    let of_json json__ =
+      let revisionUrl = field_map json__ "revisionUrl" Url.of_json in
+      let created = field_map json__ "created" Timestamp.of_json in
       let revisionSummary =
-        field_map json "revisionSummary" RevisionSummary.of_json in
+        field_map json__ "revisionSummary" RevisionSummary.of_json in
       let revisionChangeIdentifier =
-        field_map json "revisionChangeIdentifier"
+        field_map json__ "revisionChangeIdentifier"
           RevisionChangeIdentifier.of_json in
-      let revisionId = field_map json "revisionId" Revision.of_json in
-      let name = field_map json "name" ArtifactName.of_json in
+      let revisionId = field_map json__ "revisionId" Revision.of_json in
+      let name = field_map json__ "name" ArtifactName.of_json in
       make ?revisionUrl ?created ?revisionSummary ?revisionChangeIdentifier
         ?revisionId ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents revision details of an artifact."]
+module ResolvedPipelineVariable =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option
+        [@ocaml.doc "The name of a pipeline-level variable."];
+      resolvedValue: String_.t option
+        [@ocaml.doc "The resolved value of a pipeline-level variable."]}
+    let make ?name = fun ?resolvedValue -> fun () -> { name; resolvedValue }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("resolvedValue", (Option.map x.resolvedValue ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resolvedValue =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resolvedValue") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?resolvedValue ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resolvedValue = field_map json__ "resolvedValue" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?resolvedValue ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A pipeline-level variable used for a pipeline execution."]
 module ArtifactStoreMap =
   struct
     type nonrec t = (AWSRegionName.t * ArtifactStore.t) list
@@ -4302,6 +7525,8 @@ module ArtifactStoreMap =
                     (fun x -> (ArtifactStore.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -4313,6 +7538,9 @@ module PipelineStageDeclarationList =
   struct
     type nonrec t = StageDeclaration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StageDeclaration.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4332,6 +7560,66 @@ module PipelineStageDeclarationList =
     let of_json j =
       list_of_json ~kind:"PipelineStageDeclarationList"
         ~of_json:StageDeclaration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PipelineTriggerDeclarationList =
+  struct
+    type nonrec t = PipelineTriggerDeclaration.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PipelineTriggerDeclaration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PipelineTriggerDeclaration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PipelineTriggerDeclarationList"
+        ~of_json:PipelineTriggerDeclaration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PipelineVariableDeclarationList =
+  struct
+    type nonrec t = PipelineVariableDeclaration.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PipelineVariableDeclaration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PipelineVariableDeclaration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PipelineVariableDeclarationList"
+        ~of_json:PipelineVariableDeclaration.of_json j
     let to_json v = composed_to_json to_value v
   end
 module ActionTypeArtifactDetails =
@@ -4363,12 +7651,12 @@ module ActionTypeArtifactDetails =
           (Xml.child_exn ~context:context_ xml_arg0 "minimumCount") in
       make ~maximumCount ~minimumCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maximumCount =
-        field_map_exn json "maximumCount"
+        field_map_exn json__ "maximumCount"
           MaximumActionTypeArtifactCount.of_json in
       let minimumCount =
-        field_map_exn json "minimumCount"
+        field_map_exn json__ "minimumCount"
           MinimumActionTypeArtifactCount.of_json in
       make ~maximumCount ~minimumCount ()
     let to_json v = composed_to_json to_value v
@@ -4404,7 +7692,7 @@ module ActionTypeExecutor =
           "The integration model used to create and update the action type, Lambda or JobWorker."];
       policyStatementsTemplate: PolicyStatementsTemplate.t option
         [@ocaml.doc
-          "The policy statement that specifies the permissions in the CodePipeline customer\226\128\153s account that are needed to successfully run an action. To grant permission to another account, specify the account ID as the Principal, a domain-style identifier defined by the service, for example codepipeline.amazonaws.com. The size of the passed JSON policy document cannot exceed 2048 characters."];
+          "The policy statement that specifies the permissions in the CodePipeline customer account that are needed to successfully run an action. To grant permission to another account, specify the account ID as the Principal, a domain-style identifier defined by the service, for example codepipeline.amazonaws.com. The size of the passed JSON policy document cannot exceed 2048 characters."];
       jobTimeout: JobTimeout.t option
         [@ocaml.doc
           "The timeout in seconds for the job. An action execution can have multiple jobs. This is the timeout for a single job, not the entire action execution."]}
@@ -4438,14 +7726,14 @@ module ActionTypeExecutor =
           (Xml.child_exn ~context:context_ xml_arg0 "configuration") in
       make ?jobTimeout ?policyStatementsTemplate ~type_ ~configuration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobTimeout = field_map json "jobTimeout" JobTimeout.of_json in
+    let of_json json__ =
+      let jobTimeout = field_map json__ "jobTimeout" JobTimeout.of_json in
       let policyStatementsTemplate =
-        field_map json "policyStatementsTemplate"
+        field_map json__ "policyStatementsTemplate"
           PolicyStatementsTemplate.of_json in
-      let type_ = field_map_exn json "type" ExecutorType.of_json in
+      let type_ = field_map_exn json__ "type" ExecutorType.of_json in
       let configuration =
-        field_map_exn json "configuration" ExecutorConfiguration.of_json in
+        field_map_exn json__ "configuration" ExecutorConfiguration.of_json in
       make ?jobTimeout ?policyStatementsTemplate ~type_ ~configuration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4491,11 +7779,11 @@ module ActionTypeIdentifier =
           (Xml.child_exn ~context:context_ xml_arg0 "category") in
       make ~version ~provider ~owner ~category ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map_exn json "version" Version.of_json in
-      let provider = field_map_exn json "provider" ActionProvider.of_json in
-      let owner = field_map_exn json "owner" ActionTypeOwner.of_json in
-      let category = field_map_exn json "category" ActionCategory.of_json in
+    let of_json json__ =
+      let version = field_map_exn json__ "version" Version.of_json in
+      let provider = field_map_exn json__ "provider" ActionProvider.of_json in
+      let owner = field_map_exn json__ "owner" ActionTypeOwner.of_json in
+      let category = field_map_exn json__ "category" ActionCategory.of_json in
       make ~version ~provider ~owner ~category ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4506,7 +7794,7 @@ module ActionTypePermissions =
       {
       allowedAccounts: AllowedAccounts.t
         [@ocaml.doc
-          "A list of AWS account IDs with access to use the action type in their pipelines."]}
+          "A list of Amazon Web Services account IDs with access to use the action type in their pipelines."]}
     let context_ = "ActionTypePermissions"
     let make ~allowedAccounts = fun () -> { allowedAccounts }
     let to_value x =
@@ -4520,9 +7808,9 @@ module ActionTypePermissions =
           (Xml.child_exn ~context:context_ xml_arg0 "allowedAccounts") in
       make ~allowedAccounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let allowedAccounts =
-        field_map_exn json "allowedAccounts" AllowedAccounts.of_json in
+        field_map_exn json__ "allowedAccounts" AllowedAccounts.of_json in
       make ~allowedAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4532,6 +7820,9 @@ module ActionTypeProperties =
     type nonrec t = ActionTypeProperty.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ActionTypeProperty.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4606,19 +7897,95 @@ module ActionTypeUrls =
       make ?revisionUrlTemplate ?executionUrlTemplate ?entityUrlTemplate
         ?configurationUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let revisionUrlTemplate =
-        field_map json "revisionUrlTemplate" UrlTemplate.of_json in
+        field_map json__ "revisionUrlTemplate" UrlTemplate.of_json in
       let executionUrlTemplate =
-        field_map json "executionUrlTemplate" UrlTemplate.of_json in
+        field_map json__ "executionUrlTemplate" UrlTemplate.of_json in
       let entityUrlTemplate =
-        field_map json "entityUrlTemplate" UrlTemplate.of_json in
-      let configurationUrl = field_map json "configurationUrl" Url.of_json in
+        field_map json__ "entityUrlTemplate" UrlTemplate.of_json in
+      let configurationUrl = field_map json__ "configurationUrl" Url.of_json in
       make ?revisionUrlTemplate ?executionUrlTemplate ?entityUrlTemplate
         ?configurationUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about URLs for web pages that display to customers as links on the pipeline view, such as an external configuration page for the action type."]
+module PipelineVariable =
+  struct
+    type nonrec t =
+      {
+      name: PipelineVariableName.t
+        [@ocaml.doc "The name of a pipeline-level variable."];
+      value: PipelineVariableValue.t
+        [@ocaml.doc "The value of a pipeline-level variable."]}
+    let context_ = "PipelineVariable"
+    let make ~name = fun ~value -> fun () -> { name; value }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (PipelineVariableName.to_value x.name)));
+        ("value", (Some (PipelineVariableValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        PipelineVariableValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "value") in
+      let name =
+        PipelineVariableName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "value" PipelineVariableValue.of_json in
+      let name = field_map_exn json__ "name" PipelineVariableName.of_json in
+      make ~value ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A pipeline-level variable used for a pipeline execution."]
+module SourceRevisionOverride =
+  struct
+    type nonrec t =
+      {
+      actionName: ActionName.t
+        [@ocaml.doc
+          "The name of the action where the override will be applied."];
+      revisionType: SourceRevisionType.t
+        [@ocaml.doc
+          "The type of source revision, based on the source provider. For example, the revision type for the CodeCommit action provider is the commit ID."];
+      revisionValue: Revision.t
+        [@ocaml.doc
+          "The source revision, or version of your source artifact, with the changes that you want to run in the pipeline execution."]}
+    let context_ = "SourceRevisionOverride"
+    let make ~actionName =
+      fun ~revisionType ->
+        fun ~revisionValue ->
+          fun () -> { actionName; revisionType; revisionValue }
+    let to_value x =
+      structure_to_value
+        [("actionName", (Some (ActionName.to_value x.actionName)));
+        ("revisionType", (Some (SourceRevisionType.to_value x.revisionType)));
+        ("revisionValue", (Some (Revision.to_value x.revisionValue)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let revisionValue =
+        Revision.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "revisionValue") in
+      let revisionType =
+        SourceRevisionType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "revisionType") in
+      let actionName =
+        ActionName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "actionName") in
+      make ~revisionValue ~revisionType ~actionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let revisionValue =
+        field_map_exn json__ "revisionValue" Revision.of_json in
+      let revisionType =
+        field_map_exn json__ "revisionType" SourceRevisionType.of_json in
+      let actionName = field_map_exn json__ "actionName" ActionName.of_json in
+      make ~revisionValue ~revisionType ~actionName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A list that allows you to specify, or override, the source revision for a pipeline execution that's being started. A source revision is the version with all the changes to your application code, or source artifact, for the pipeline execution. For the S3_OBJECT_VERSION_ID and S3_OBJECT_KEY types of source revisions, either of the types can be used independently, or they can be used together to override the source with a specific ObjectKey and VersionID."]
 module Time =
   struct
     type nonrec t = string
@@ -4720,7 +8087,7 @@ module ThirdPartyJob =
           "The clientToken portion of the clientId and clientToken pair used to verify that the calling entity is allowed access to the job and its details."];
       jobId: JobId.t option
         [@ocaml.doc
-          "The identifier used to identify the job in AWS CodePipeline."]}
+          "The identifier used to identify the job in CodePipeline."]}
     let make ?clientId = fun ?jobId -> fun () -> { clientId; jobId }
     let to_value x =
       structure_to_value
@@ -4733,13 +8100,13 @@ module ThirdPartyJob =
         (Option.map ~f:ClientId.of_xml) (Xml.child xml_arg0 "clientId") in
       make ?jobId ?clientId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "jobId" JobId.of_json in
-      let clientId = field_map json "clientId" ClientId.of_json in
+    let of_json json__ =
+      let jobId = field_map json__ "jobId" JobId.of_json in
+      let clientId = field_map json__ "clientId" ClientId.of_json in
       make ?jobId ?clientId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A response to a PollForThirdPartyJobs request returned by AWS CodePipeline when there is a job to be worked on by a partner action."]
+       "A response to a PollForThirdPartyJobs request returned by CodePipeline when there is a job to be worked on by a partner action."]
 module Job =
   struct
     type nonrec t =
@@ -4749,10 +8116,10 @@ module Job =
       data: JobData.t option [@ocaml.doc "Other data about a job."];
       nonce: Nonce.t option
         [@ocaml.doc
-          "A system-generated random number that AWS CodePipeline uses to ensure that the job is being worked on by only one job worker. Use this number in an AcknowledgeJob request."];
+          "A system-generated random number that CodePipeline uses to ensure that the job is being worked on by only one job worker. Use this number in an AcknowledgeJob request."];
       accountId: AccountId.t option
         [@ocaml.doc
-          "The ID of the AWS account to use when performing the job."]}
+          "The ID of the Amazon Web Services account to use when performing the job."]}
     let make ?id =
       fun ?data ->
         fun ?nonce ->
@@ -4772,11 +8139,11 @@ module Job =
       let id = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "id") in
       make ?accountId ?nonce ?data ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map json "accountId" AccountId.of_json in
-      let nonce = field_map json "nonce" Nonce.of_json in
-      let data = field_map json "data" JobData.of_json in
-      let id = field_map json "id" JobId.of_json in
+    let of_json json__ =
+      let accountId = field_map json__ "accountId" AccountId.of_json in
+      let nonce = field_map json__ "nonce" Nonce.of_json in
+      let data = field_map json__ "data" JobData.of_json in
+      let id = field_map json__ "id" JobId.of_json in
       make ?accountId ?nonce ?data ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents information about a job."]
@@ -4805,10 +8172,10 @@ module ListWebhookItem =
   struct
     type nonrec t =
       {
-      definition: WebhookDefinition.t
+      definition: WebhookDefinition.t option
         [@ocaml.doc
           "The detail returned for each webhook, such as the webhook authentication type and filter rules."];
-      url: WebhookUrl.t
+      url: WebhookUrl.t option
         [@ocaml.doc
           "A unique URL generated by CodePipeline. When a POST request is made to this URL, the defined pipeline is started as long as the body of the post request satisfies the defined authentication and filtering conditions. Deleting and re-creating a webhook makes the old URL invalid and generates a new one."];
       errorMessage: WebhookErrorMessage.t option
@@ -4822,28 +8189,28 @@ module ListWebhookItem =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the webhook."];
       tags: TagList.t option
         [@ocaml.doc "Specifies the tags applied to the webhook."]}
-    let context_ = "ListWebhookItem"
-    let make ?errorMessage =
-      fun ?errorCode ->
-        fun ?lastTriggered ->
-          fun ?arn ->
-            fun ?tags ->
-              fun ~definition ->
-                fun ~url ->
+    let make ?definition =
+      fun ?url ->
+        fun ?errorMessage ->
+          fun ?errorCode ->
+            fun ?lastTriggered ->
+              fun ?arn ->
+                fun ?tags ->
                   fun () ->
                     {
+                      definition;
+                      url;
                       errorMessage;
                       errorCode;
                       lastTriggered;
                       arn;
-                      tags;
-                      definition;
-                      url
+                      tags
                     }
     let to_value x =
       structure_to_value
-        [("definition", (Some (WebhookDefinition.to_value x.definition)));
-        ("url", (Some (WebhookUrl.to_value x.url)));
+        [("definition",
+           (Option.map x.definition ~f:WebhookDefinition.to_value));
+        ("url", (Option.map x.url ~f:WebhookUrl.to_value));
         ("errorMessage",
           (Option.map x.errorMessage ~f:WebhookErrorMessage.to_value));
         ("errorCode", (Option.map x.errorCode ~f:WebhookErrorCode.to_value));
@@ -4864,30 +8231,260 @@ module ListWebhookItem =
       let errorMessage =
         (Option.map ~f:WebhookErrorMessage.of_xml)
           (Xml.child xml_arg0 "errorMessage") in
-      let url =
-        WebhookUrl.of_xml (Xml.child_exn ~context:context_ xml_arg0 "url") in
+      let url = (Option.map ~f:WebhookUrl.of_xml) (Xml.child xml_arg0 "url") in
       let definition =
-        WebhookDefinition.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "definition") in
-      make ?tags ?arn ?lastTriggered ?errorCode ?errorMessage ~url
-        ~definition ()
+        (Option.map ~f:WebhookDefinition.of_xml)
+          (Xml.child xml_arg0 "definition") in
+      make ?tags ?arn ?lastTriggered ?errorCode ?errorMessage ?url
+        ?definition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let arn = field_map json "arn" WebhookArn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let arn = field_map json__ "arn" WebhookArn.of_json in
       let lastTriggered =
-        field_map json "lastTriggered" WebhookLastTriggered.of_json in
-      let errorCode = field_map json "errorCode" WebhookErrorCode.of_json in
+        field_map json__ "lastTriggered" WebhookLastTriggered.of_json in
+      let errorCode = field_map json__ "errorCode" WebhookErrorCode.of_json in
       let errorMessage =
-        field_map json "errorMessage" WebhookErrorMessage.of_json in
-      let url = field_map_exn json "url" WebhookUrl.of_json in
+        field_map json__ "errorMessage" WebhookErrorMessage.of_json in
+      let url = field_map json__ "url" WebhookUrl.of_json in
       let definition =
-        field_map_exn json "definition" WebhookDefinition.of_json in
-      make ?tags ?arn ?lastTriggered ?errorCode ?errorMessage ~url
-        ~definition ()
+        field_map json__ "definition" WebhookDefinition.of_json in
+      make ?tags ?arn ?lastTriggered ?errorCode ?errorMessage ?url
+        ?definition ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The detail returned for each webhook after listing webhooks, such as the webhook URL, the webhook name, and the webhook ARN."]
+module RuleType =
+  struct
+    type nonrec t =
+      {
+      id: RuleTypeId.t option
+        [@ocaml.doc "Represents information about a rule type."];
+      settings: RuleTypeSettings.t option
+        [@ocaml.doc
+          "Returns information about the settings for a rule type."];
+      ruleConfigurationProperties: RuleConfigurationPropertyList.t option
+        [@ocaml.doc "The configuration properties for the rule type."];
+      inputArtifactDetails: ArtifactDetails.t option }
+    let make ?id =
+      fun ?settings ->
+        fun ?ruleConfigurationProperties ->
+          fun ?inputArtifactDetails ->
+            fun () ->
+              {
+                id;
+                settings;
+                ruleConfigurationProperties;
+                inputArtifactDetails
+              }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:RuleTypeId.to_value));
+        ("settings", (Option.map x.settings ~f:RuleTypeSettings.to_value));
+        ("ruleConfigurationProperties",
+          (Option.map x.ruleConfigurationProperties
+             ~f:RuleConfigurationPropertyList.to_value));
+        ("inputArtifactDetails",
+          (Option.map x.inputArtifactDetails ~f:ArtifactDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let inputArtifactDetails =
+        (Option.map ~f:ArtifactDetails.of_xml)
+          (Xml.child xml_arg0 "inputArtifactDetails") in
+      let ruleConfigurationProperties =
+        (Option.map ~f:RuleConfigurationPropertyList.of_xml)
+          (Xml.child xml_arg0 "ruleConfigurationProperties") in
+      let settings =
+        (Option.map ~f:RuleTypeSettings.of_xml)
+          (Xml.child xml_arg0 "settings") in
+      let id = (Option.map ~f:RuleTypeId.of_xml) (Xml.child xml_arg0 "id") in
+      make ?inputArtifactDetails ?ruleConfigurationProperties ?settings ?id
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let inputArtifactDetails =
+        field_map json__ "inputArtifactDetails" ArtifactDetails.of_json in
+      let ruleConfigurationProperties =
+        field_map json__ "ruleConfigurationProperties"
+          RuleConfigurationPropertyList.of_json in
+      let settings = field_map json__ "settings" RuleTypeSettings.of_json in
+      let id = field_map json__ "id" RuleTypeId.of_json in
+      make ?inputArtifactDetails ?ruleConfigurationProperties ?settings ?id
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The rule type, which is made up of the combined values for category, owner, provider, and version."]
+module RuleExecutionDetail =
+  struct
+    type nonrec t =
+      {
+      pipelineExecutionId: PipelineExecutionId.t option
+        [@ocaml.doc
+          "The ID of the pipeline execution in the stage where the rule was run. Use the GetPipelineState action to retrieve the current pipelineExecutionId of the stage."];
+      ruleExecutionId: RuleExecutionId.t option
+        [@ocaml.doc "The ID of the run for the rule."];
+      pipelineVersion: PipelineVersion.t option
+        [@ocaml.doc
+          "The version number of the pipeline with the stage where the rule was run."];
+      stageName: StageName.t option
+        [@ocaml.doc "The name of the stage where the rule was run."];
+      ruleName: RuleName.t option
+        [@ocaml.doc "The name of the rule that was run in the stage."];
+      startTime: Timestamp.t option
+        [@ocaml.doc "The start time of the rule execution."];
+      lastUpdateTime: Timestamp.t option
+        [@ocaml.doc
+          "The date and time of the last change to the rule execution, in timestamp format."];
+      updatedBy: LastUpdatedBy.t option
+        [@ocaml.doc
+          "The ARN of the user who changed the rule execution details."];
+      status: RuleExecutionStatus.t option
+        [@ocaml.doc
+          "The status of the rule execution. Status categories are InProgress, Succeeded, and Failed."];
+      input: RuleExecutionInput.t option
+        [@ocaml.doc
+          "Input details for the rule execution, such as role ARN, Region, and input artifacts."];
+      output: RuleExecutionOutput.t option
+        [@ocaml.doc
+          "Output details for the rule execution, such as the rule execution result."]}
+    let make ?pipelineExecutionId =
+      fun ?ruleExecutionId ->
+        fun ?pipelineVersion ->
+          fun ?stageName ->
+            fun ?ruleName ->
+              fun ?startTime ->
+                fun ?lastUpdateTime ->
+                  fun ?updatedBy ->
+                    fun ?status ->
+                      fun ?input ->
+                        fun ?output ->
+                          fun () ->
+                            {
+                              pipelineExecutionId;
+                              ruleExecutionId;
+                              pipelineVersion;
+                              stageName;
+                              ruleName;
+                              startTime;
+                              lastUpdateTime;
+                              updatedBy;
+                              status;
+                              input;
+                              output
+                            }
+    let to_value x =
+      structure_to_value
+        [("pipelineExecutionId",
+           (Option.map x.pipelineExecutionId ~f:PipelineExecutionId.to_value));
+        ("ruleExecutionId",
+          (Option.map x.ruleExecutionId ~f:RuleExecutionId.to_value));
+        ("pipelineVersion",
+          (Option.map x.pipelineVersion ~f:PipelineVersion.to_value));
+        ("stageName", (Option.map x.stageName ~f:StageName.to_value));
+        ("ruleName", (Option.map x.ruleName ~f:RuleName.to_value));
+        ("startTime", (Option.map x.startTime ~f:Timestamp.to_value));
+        ("lastUpdateTime",
+          (Option.map x.lastUpdateTime ~f:Timestamp.to_value));
+        ("updatedBy", (Option.map x.updatedBy ~f:LastUpdatedBy.to_value));
+        ("status", (Option.map x.status ~f:RuleExecutionStatus.to_value));
+        ("input", (Option.map x.input ~f:RuleExecutionInput.to_value));
+        ("output", (Option.map x.output ~f:RuleExecutionOutput.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let output =
+        (Option.map ~f:RuleExecutionOutput.of_xml)
+          (Xml.child xml_arg0 "output") in
+      let input =
+        (Option.map ~f:RuleExecutionInput.of_xml)
+          (Xml.child xml_arg0 "input") in
+      let status =
+        (Option.map ~f:RuleExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let updatedBy =
+        (Option.map ~f:LastUpdatedBy.of_xml) (Xml.child xml_arg0 "updatedBy") in
+      let lastUpdateTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastUpdateTime") in
+      let startTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startTime") in
+      let ruleName =
+        (Option.map ~f:RuleName.of_xml) (Xml.child xml_arg0 "ruleName") in
+      let stageName =
+        (Option.map ~f:StageName.of_xml) (Xml.child xml_arg0 "stageName") in
+      let pipelineVersion =
+        (Option.map ~f:PipelineVersion.of_xml)
+          (Xml.child xml_arg0 "pipelineVersion") in
+      let ruleExecutionId =
+        (Option.map ~f:RuleExecutionId.of_xml)
+          (Xml.child xml_arg0 "ruleExecutionId") in
+      let pipelineExecutionId =
+        (Option.map ~f:PipelineExecutionId.of_xml)
+          (Xml.child xml_arg0 "pipelineExecutionId") in
+      make ?output ?input ?status ?updatedBy ?lastUpdateTime ?startTime
+        ?ruleName ?stageName ?pipelineVersion ?ruleExecutionId
+        ?pipelineExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let output = field_map json__ "output" RuleExecutionOutput.of_json in
+      let input = field_map json__ "input" RuleExecutionInput.of_json in
+      let status = field_map json__ "status" RuleExecutionStatus.of_json in
+      let updatedBy = field_map json__ "updatedBy" LastUpdatedBy.of_json in
+      let lastUpdateTime =
+        field_map json__ "lastUpdateTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let ruleName = field_map json__ "ruleName" RuleName.of_json in
+      let stageName = field_map json__ "stageName" StageName.of_json in
+      let pipelineVersion =
+        field_map json__ "pipelineVersion" PipelineVersion.of_json in
+      let ruleExecutionId =
+        field_map json__ "ruleExecutionId" RuleExecutionId.of_json in
+      let pipelineExecutionId =
+        field_map json__ "pipelineExecutionId" PipelineExecutionId.of_json in
+      make ?output ?input ?status ?updatedBy ?lastUpdateTime ?startTime
+        ?ruleName ?stageName ?pipelineVersion ?ruleExecutionId
+        ?pipelineExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The details of the runs for a rule and the results produced on an artifact as it passes through stages in the pipeline."]
+module LatestInPipelineExecutionFilter =
+  struct
+    type nonrec t =
+      {
+      pipelineExecutionId: PipelineExecutionId.t
+        [@ocaml.doc
+          "The execution ID for the latest execution in the pipeline."];
+      startTimeRange: StartTimeRange.t
+        [@ocaml.doc
+          "The start time to filter on for the latest execution in the pipeline. Valid options: All Latest"]}
+    let context_ = "LatestInPipelineExecutionFilter"
+    let make ~pipelineExecutionId =
+      fun ~startTimeRange ->
+        fun () -> { pipelineExecutionId; startTimeRange }
+    let to_value x =
+      structure_to_value
+        [("pipelineExecutionId",
+           (Some (PipelineExecutionId.to_value x.pipelineExecutionId)));
+        ("startTimeRange", (Some (StartTimeRange.to_value x.startTimeRange)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let startTimeRange =
+        StartTimeRange.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "startTimeRange") in
+      let pipelineExecutionId =
+        PipelineExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "pipelineExecutionId") in
+      make ~startTimeRange ~pipelineExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let startTimeRange =
+        field_map_exn json__ "startTimeRange" StartTimeRange.of_json in
+      let pipelineExecutionId =
+        field_map_exn json__ "pipelineExecutionId"
+          PipelineExecutionId.of_json in
+      make ~startTimeRange ~pipelineExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The field that specifies to filter on the latest execution in the pipeline. Filtering on the latest execution is available for executions run on or after February 08, 2024."]
 module PipelineSummary =
   struct
     type nonrec t =
@@ -4895,6 +8492,12 @@ module PipelineSummary =
       name: PipelineName.t option [@ocaml.doc "The name of the pipeline."];
       version: PipelineVersion.t option
         [@ocaml.doc "The version number of the pipeline."];
+      pipelineType: PipelineType.t option
+        [@ocaml.doc
+          "CodePipeline provides the following pipeline types, which differ in characteristics and price, so that you can tailor your pipeline features and cost to the needs of your applications. V1 type pipelines have a JSON structure that contains standard pipeline, stage, and action-level parameters. V2 type pipelines have the same structure as a V1 type, along with additional parameters for release safety and trigger configuration. Including V2 parameters, such as triggers on Git tags, in the pipeline JSON when creating or updating a pipeline will result in the pipeline having the V2 type of pipeline and the associated costs. For information about pricing for CodePipeline, see Pricing. For information about which type of pipeline to choose, see What type of pipeline is right for me?."];
+      executionMode: ExecutionMode.t option
+        [@ocaml.doc
+          "The method that the pipeline will use to handle multiple executions. The default mode is SUPERSEDED."];
       created: Timestamp.t option
         [@ocaml.doc
           "The date and time the pipeline was created, in timestamp format."];
@@ -4903,12 +8506,27 @@ module PipelineSummary =
           "The date and time of the last update to the pipeline, in timestamp format."]}
     let make ?name =
       fun ?version ->
-        fun ?created ->
-          fun ?updated -> fun () -> { name; version; created; updated }
+        fun ?pipelineType ->
+          fun ?executionMode ->
+            fun ?created ->
+              fun ?updated ->
+                fun () ->
+                  {
+                    name;
+                    version;
+                    pipelineType;
+                    executionMode;
+                    created;
+                    updated
+                  }
     let to_value x =
       structure_to_value
         [("name", (Option.map x.name ~f:PipelineName.to_value));
         ("version", (Option.map x.version ~f:PipelineVersion.to_value));
+        ("pipelineType",
+          (Option.map x.pipelineType ~f:PipelineType.to_value));
+        ("executionMode",
+          (Option.map x.executionMode ~f:ExecutionMode.to_value));
         ("created", (Option.map x.created ~f:Timestamp.to_value));
         ("updated", (Option.map x.updated ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
@@ -4917,18 +8535,27 @@ module PipelineSummary =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "updated") in
       let created =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "created") in
+      let executionMode =
+        (Option.map ~f:ExecutionMode.of_xml)
+          (Xml.child xml_arg0 "executionMode") in
+      let pipelineType =
+        (Option.map ~f:PipelineType.of_xml)
+          (Xml.child xml_arg0 "pipelineType") in
       let version =
         (Option.map ~f:PipelineVersion.of_xml) (Xml.child xml_arg0 "version") in
       let name =
         (Option.map ~f:PipelineName.of_xml) (Xml.child xml_arg0 "name") in
-      make ?updated ?created ?version ?name ()
+      make ?updated ?created ?executionMode ?pipelineType ?version ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updated = field_map json "updated" Timestamp.of_json in
-      let created = field_map json "created" Timestamp.of_json in
-      let version = field_map json "version" PipelineVersion.of_json in
-      let name = field_map json "name" PipelineName.of_json in
-      make ?updated ?created ?version ?name ()
+    let of_json json__ =
+      let updated = field_map json__ "updated" Timestamp.of_json in
+      let created = field_map json__ "created" Timestamp.of_json in
+      let executionMode =
+        field_map json__ "executionMode" ExecutionMode.of_json in
+      let pipelineType = field_map json__ "pipelineType" PipelineType.of_json in
+      let version = field_map json__ "version" PipelineVersion.of_json in
+      let name = field_map json__ "name" PipelineName.of_json in
+      make ?updated ?created ?executionMode ?pipelineType ?version ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a summary of a pipeline."]
 module PipelineExecutionSummary =
@@ -4940,6 +8567,8 @@ module PipelineExecutionSummary =
       status: PipelineExecutionStatus.t option
         [@ocaml.doc
           "The status of the pipeline execution. InProgress: The pipeline execution is currently running. Stopped: The pipeline execution was manually stopped. For more information, see Stopped Executions. Stopping: The pipeline execution received a request to be manually stopped. Depending on the selected stop mode, the execution is either completing or abandoning in-progress actions. For more information, see Stopped Executions. Succeeded: The pipeline execution was completed successfully. Superseded: While this pipeline execution was waiting for the next stage to be completed, a newer pipeline execution advanced and continued through the pipeline instead. For more information, see Superseded Executions. Failed: The pipeline execution was not completed successfully."];
+      statusSummary: PipelineExecutionStatusSummary.t option
+        [@ocaml.doc "Status summary for the pipeline."];
       startTime: Timestamp.t option
         [@ocaml.doc
           "The date and time when the pipeline execution began, in timestamp format."];
@@ -4953,29 +8582,48 @@ module PipelineExecutionSummary =
         [@ocaml.doc
           "The interaction or event that started a pipeline execution, such as automated change detection or a StartPipelineExecution API call."];
       stopTrigger: StopExecutionTrigger.t option
-        [@ocaml.doc "The interaction that stopped a pipeline execution."]}
+        [@ocaml.doc "The interaction that stopped a pipeline execution."];
+      executionMode: ExecutionMode.t option
+        [@ocaml.doc
+          "The method that the pipeline will use to handle multiple executions. The default mode is SUPERSEDED."];
+      executionType: ExecutionType.t option
+        [@ocaml.doc "Type of the pipeline execution."];
+      rollbackMetadata: PipelineRollbackMetadata.t option
+        [@ocaml.doc
+          "The metadata for the stage execution to be rolled back."]}
     let make ?pipelineExecutionId =
       fun ?status ->
-        fun ?startTime ->
-          fun ?lastUpdateTime ->
-            fun ?sourceRevisions ->
-              fun ?trigger ->
-                fun ?stopTrigger ->
-                  fun () ->
-                    {
-                      pipelineExecutionId;
-                      status;
-                      startTime;
-                      lastUpdateTime;
-                      sourceRevisions;
-                      trigger;
-                      stopTrigger
-                    }
+        fun ?statusSummary ->
+          fun ?startTime ->
+            fun ?lastUpdateTime ->
+              fun ?sourceRevisions ->
+                fun ?trigger ->
+                  fun ?stopTrigger ->
+                    fun ?executionMode ->
+                      fun ?executionType ->
+                        fun ?rollbackMetadata ->
+                          fun () ->
+                            {
+                              pipelineExecutionId;
+                              status;
+                              statusSummary;
+                              startTime;
+                              lastUpdateTime;
+                              sourceRevisions;
+                              trigger;
+                              stopTrigger;
+                              executionMode;
+                              executionType;
+                              rollbackMetadata
+                            }
     let to_value x =
       structure_to_value
         [("pipelineExecutionId",
            (Option.map x.pipelineExecutionId ~f:PipelineExecutionId.to_value));
         ("status", (Option.map x.status ~f:PipelineExecutionStatus.to_value));
+        ("statusSummary",
+          (Option.map x.statusSummary
+             ~f:PipelineExecutionStatusSummary.to_value));
         ("startTime", (Option.map x.startTime ~f:Timestamp.to_value));
         ("lastUpdateTime",
           (Option.map x.lastUpdateTime ~f:Timestamp.to_value));
@@ -4983,9 +8631,24 @@ module PipelineExecutionSummary =
           (Option.map x.sourceRevisions ~f:SourceRevisionList.to_value));
         ("trigger", (Option.map x.trigger ~f:ExecutionTrigger.to_value));
         ("stopTrigger",
-          (Option.map x.stopTrigger ~f:StopExecutionTrigger.to_value))]
+          (Option.map x.stopTrigger ~f:StopExecutionTrigger.to_value));
+        ("executionMode",
+          (Option.map x.executionMode ~f:ExecutionMode.to_value));
+        ("executionType",
+          (Option.map x.executionType ~f:ExecutionType.to_value));
+        ("rollbackMetadata",
+          (Option.map x.rollbackMetadata ~f:PipelineRollbackMetadata.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let rollbackMetadata =
+        (Option.map ~f:PipelineRollbackMetadata.of_xml)
+          (Xml.child xml_arg0 "rollbackMetadata") in
+      let executionType =
+        (Option.map ~f:ExecutionType.of_xml)
+          (Xml.child xml_arg0 "executionType") in
+      let executionMode =
+        (Option.map ~f:ExecutionMode.of_xml)
+          (Xml.child xml_arg0 "executionMode") in
       let stopTrigger =
         (Option.map ~f:StopExecutionTrigger.of_xml)
           (Xml.child xml_arg0 "stopTrigger") in
@@ -5000,102 +8663,226 @@ module PipelineExecutionSummary =
           (Xml.child xml_arg0 "lastUpdateTime") in
       let startTime =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startTime") in
+      let statusSummary =
+        (Option.map ~f:PipelineExecutionStatusSummary.of_xml)
+          (Xml.child xml_arg0 "statusSummary") in
       let status =
         (Option.map ~f:PipelineExecutionStatus.of_xml)
           (Xml.child xml_arg0 "status") in
       let pipelineExecutionId =
         (Option.map ~f:PipelineExecutionId.of_xml)
           (Xml.child xml_arg0 "pipelineExecutionId") in
-      make ?stopTrigger ?trigger ?sourceRevisions ?lastUpdateTime ?startTime
+      make ?rollbackMetadata ?executionType ?executionMode ?stopTrigger
+        ?trigger ?sourceRevisions ?lastUpdateTime ?startTime ?statusSummary
         ?status ?pipelineExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let rollbackMetadata =
+        field_map json__ "rollbackMetadata" PipelineRollbackMetadata.of_json in
+      let executionType =
+        field_map json__ "executionType" ExecutionType.of_json in
+      let executionMode =
+        field_map json__ "executionMode" ExecutionMode.of_json in
       let stopTrigger =
-        field_map json "stopTrigger" StopExecutionTrigger.of_json in
-      let trigger = field_map json "trigger" ExecutionTrigger.of_json in
+        field_map json__ "stopTrigger" StopExecutionTrigger.of_json in
+      let trigger = field_map json__ "trigger" ExecutionTrigger.of_json in
       let sourceRevisions =
-        field_map json "sourceRevisions" SourceRevisionList.of_json in
-      let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
-      let startTime = field_map json "startTime" Timestamp.of_json in
-      let status = field_map json "status" PipelineExecutionStatus.of_json in
+        field_map json__ "sourceRevisions" SourceRevisionList.of_json in
+      let lastUpdateTime =
+        field_map json__ "lastUpdateTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let statusSummary =
+        field_map json__ "statusSummary"
+          PipelineExecutionStatusSummary.of_json in
+      let status = field_map json__ "status" PipelineExecutionStatus.of_json in
       let pipelineExecutionId =
-        field_map json "pipelineExecutionId" PipelineExecutionId.of_json in
-      make ?stopTrigger ?trigger ?sourceRevisions ?lastUpdateTime ?startTime
+        field_map json__ "pipelineExecutionId" PipelineExecutionId.of_json in
+      make ?rollbackMetadata ?executionType ?executionMode ?stopTrigger
+        ?trigger ?sourceRevisions ?lastUpdateTime ?startTime ?statusSummary
         ?status ?pipelineExecutionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about a pipeline execution."]
+module SucceededInStageFilter =
+  struct
+    type nonrec t =
+      {
+      stageName: StageName.t option
+        [@ocaml.doc
+          "The name of the stage for filtering for pipeline executions where the stage was successful in the current pipeline version."]}
+    let make ?stageName = fun () -> { stageName }
+    let to_value x =
+      structure_to_value
+        [("stageName", (Option.map x.stageName ~f:StageName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let stageName =
+        (Option.map ~f:StageName.of_xml) (Xml.child xml_arg0 "stageName") in
+      make ?stageName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stageName = field_map json__ "stageName" StageName.of_json in
+      make ?stageName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Filter for pipeline executions that have successfully completed the stage in the current pipeline version."]
+module DeployActionExecutionTarget =
+  struct
+    type nonrec t =
+      {
+      targetId: String_.t option
+        [@ocaml.doc "The ID of the target for the deploy action."];
+      targetType: String_.t option
+        [@ocaml.doc "The type of target for the deploy action."];
+      status: String_.t option
+        [@ocaml.doc "The status of the deploy action."];
+      startTime: Timestamp.t option
+        [@ocaml.doc "The start time for the deploy action."];
+      endTime: Timestamp.t option
+        [@ocaml.doc "The end time for the deploy action."];
+      events: DeployTargetEventList.t option
+        [@ocaml.doc "The lifecycle events for the deploy action."]}
+    let make ?targetId =
+      fun ?targetType ->
+        fun ?status ->
+          fun ?startTime ->
+            fun ?endTime ->
+              fun ?events ->
+                fun () ->
+                  { targetId; targetType; status; startTime; endTime; events
+                  }
+    let to_value x =
+      structure_to_value
+        [("targetId", (Option.map x.targetId ~f:String_.to_value));
+        ("targetType", (Option.map x.targetType ~f:String_.to_value));
+        ("status", (Option.map x.status ~f:String_.to_value));
+        ("startTime", (Option.map x.startTime ~f:Timestamp.to_value));
+        ("endTime", (Option.map x.endTime ~f:Timestamp.to_value));
+        ("events", (Option.map x.events ~f:DeployTargetEventList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let events =
+        (Option.map ~f:DeployTargetEventList.of_xml)
+          (Xml.child xml_arg0 "events") in
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startTime") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
+      let targetType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "targetType") in
+      let targetId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "targetId") in
+      make ?events ?endTime ?startTime ?status ?targetType ?targetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let events = field_map json__ "events" DeployTargetEventList.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let status = field_map json__ "status" String_.of_json in
+      let targetType = field_map json__ "targetType" String_.of_json in
+      let targetId = field_map json__ "targetId" String_.of_json in
+      make ?events ?endTime ?startTime ?status ?targetType ?targetId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The target for the deploy action."]
+module TargetFilter =
+  struct
+    type nonrec t =
+      {
+      name: TargetFilterName.t option
+        [@ocaml.doc "The name on which to filter."];
+      values: TargetFilterValueList.t option
+        [@ocaml.doc "The values on which to filter."]}
+    let make ?name = fun ?values -> fun () -> { name; values }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:TargetFilterName.to_value));
+        ("values", (Option.map x.values ~f:TargetFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:TargetFilterValueList.of_xml)
+          (Xml.child xml_arg0 "values") in
+      let name =
+        (Option.map ~f:TargetFilterName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values = field_map json__ "values" TargetFilterValueList.of_json in
+      let name = field_map json__ "name" TargetFilterName.of_json in
+      make ?values ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Filters the list of targets."]
 module ActionType =
   struct
     type nonrec t =
       {
-      id: ActionTypeId.t
+      id: ActionTypeId.t option
         [@ocaml.doc "Represents information about an action type."];
       settings: ActionTypeSettings.t option
         [@ocaml.doc "The settings for the action type."];
       actionConfigurationProperties: ActionConfigurationPropertyList.t option
         [@ocaml.doc "The configuration properties for the action type."];
-      inputArtifactDetails: ArtifactDetails.t
+      inputArtifactDetails: ArtifactDetails.t option
         [@ocaml.doc
           "The details of the input artifact for the action, such as its commit ID."];
-      outputArtifactDetails: ArtifactDetails.t
+      outputArtifactDetails: ArtifactDetails.t option
         [@ocaml.doc
           "The details of the output artifact of the action, such as its commit ID."]}
-    let context_ = "ActionType"
-    let make ?settings =
-      fun ?actionConfigurationProperties ->
-        fun ~id ->
-          fun ~inputArtifactDetails ->
-            fun ~outputArtifactDetails ->
+    let make ?id =
+      fun ?settings ->
+        fun ?actionConfigurationProperties ->
+          fun ?inputArtifactDetails ->
+            fun ?outputArtifactDetails ->
               fun () ->
                 {
+                  id;
                   settings;
                   actionConfigurationProperties;
-                  id;
                   inputArtifactDetails;
                   outputArtifactDetails
                 }
     let to_value x =
       structure_to_value
-        [("id", (Some (ActionTypeId.to_value x.id)));
+        [("id", (Option.map x.id ~f:ActionTypeId.to_value));
         ("settings", (Option.map x.settings ~f:ActionTypeSettings.to_value));
         ("actionConfigurationProperties",
           (Option.map x.actionConfigurationProperties
              ~f:ActionConfigurationPropertyList.to_value));
         ("inputArtifactDetails",
-          (Some (ArtifactDetails.to_value x.inputArtifactDetails)));
+          (Option.map x.inputArtifactDetails ~f:ArtifactDetails.to_value));
         ("outputArtifactDetails",
-          (Some (ArtifactDetails.to_value x.outputArtifactDetails)))]
+          (Option.map x.outputArtifactDetails ~f:ArtifactDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let outputArtifactDetails =
-        ArtifactDetails.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "outputArtifactDetails") in
+        (Option.map ~f:ArtifactDetails.of_xml)
+          (Xml.child xml_arg0 "outputArtifactDetails") in
       let inputArtifactDetails =
-        ArtifactDetails.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "inputArtifactDetails") in
+        (Option.map ~f:ArtifactDetails.of_xml)
+          (Xml.child xml_arg0 "inputArtifactDetails") in
       let actionConfigurationProperties =
         (Option.map ~f:ActionConfigurationPropertyList.of_xml)
           (Xml.child xml_arg0 "actionConfigurationProperties") in
       let settings =
         (Option.map ~f:ActionTypeSettings.of_xml)
           (Xml.child xml_arg0 "settings") in
-      let id =
-        ActionTypeId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
-      make ~outputArtifactDetails ~inputArtifactDetails
-        ?actionConfigurationProperties ?settings ~id ()
+      let id = (Option.map ~f:ActionTypeId.of_xml) (Xml.child xml_arg0 "id") in
+      make ?outputArtifactDetails ?inputArtifactDetails
+        ?actionConfigurationProperties ?settings ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outputArtifactDetails =
-        field_map_exn json "outputArtifactDetails" ArtifactDetails.of_json in
+        field_map json__ "outputArtifactDetails" ArtifactDetails.of_json in
       let inputArtifactDetails =
-        field_map_exn json "inputArtifactDetails" ArtifactDetails.of_json in
+        field_map json__ "inputArtifactDetails" ArtifactDetails.of_json in
       let actionConfigurationProperties =
-        field_map json "actionConfigurationProperties"
+        field_map json__ "actionConfigurationProperties"
           ActionConfigurationPropertyList.of_json in
-      let settings = field_map json "settings" ActionTypeSettings.of_json in
-      let id = field_map_exn json "id" ActionTypeId.of_json in
-      make ~outputArtifactDetails ~inputArtifactDetails
-        ?actionConfigurationProperties ?settings ~id ()
+      let settings = field_map json__ "settings" ActionTypeSettings.of_json in
+      let id = field_map json__ "id" ActionTypeId.of_json in
+      make ?outputArtifactDetails ?inputArtifactDetails
+        ?actionConfigurationProperties ?settings ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about the details of an action type."]
 module ActionExecutionDetail =
@@ -5115,6 +8902,9 @@ module ActionExecutionDetail =
         [@ocaml.doc "The start time of the action execution."];
       lastUpdateTime: Timestamp.t option
         [@ocaml.doc "The last update time of the action execution."];
+      updatedBy: LastUpdatedBy.t option
+        [@ocaml.doc
+          "The ARN of the user who changed the pipeline execution details."];
       status: ActionExecutionStatus.t option
         [@ocaml.doc
           "The status of the action execution. Status categories are InProgress, Succeeded, and Failed."];
@@ -5131,22 +8921,24 @@ module ActionExecutionDetail =
             fun ?actionName ->
               fun ?startTime ->
                 fun ?lastUpdateTime ->
-                  fun ?status ->
-                    fun ?input ->
-                      fun ?output ->
-                        fun () ->
-                          {
-                            pipelineExecutionId;
-                            actionExecutionId;
-                            pipelineVersion;
-                            stageName;
-                            actionName;
-                            startTime;
-                            lastUpdateTime;
-                            status;
-                            input;
-                            output
-                          }
+                  fun ?updatedBy ->
+                    fun ?status ->
+                      fun ?input ->
+                        fun ?output ->
+                          fun () ->
+                            {
+                              pipelineExecutionId;
+                              actionExecutionId;
+                              pipelineVersion;
+                              stageName;
+                              actionName;
+                              startTime;
+                              lastUpdateTime;
+                              updatedBy;
+                              status;
+                              input;
+                              output
+                            }
     let to_value x =
       structure_to_value
         [("pipelineExecutionId",
@@ -5160,6 +8952,7 @@ module ActionExecutionDetail =
         ("startTime", (Option.map x.startTime ~f:Timestamp.to_value));
         ("lastUpdateTime",
           (Option.map x.lastUpdateTime ~f:Timestamp.to_value));
+        ("updatedBy", (Option.map x.updatedBy ~f:LastUpdatedBy.to_value));
         ("status", (Option.map x.status ~f:ActionExecutionStatus.to_value));
         ("input", (Option.map x.input ~f:ActionExecutionInput.to_value));
         ("output", (Option.map x.output ~f:ActionExecutionOutput.to_value))]
@@ -5174,6 +8967,8 @@ module ActionExecutionDetail =
       let status =
         (Option.map ~f:ActionExecutionStatus.of_xml)
           (Xml.child xml_arg0 "status") in
+      let updatedBy =
+        (Option.map ~f:LastUpdatedBy.of_xml) (Xml.child xml_arg0 "updatedBy") in
       let lastUpdateTime =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "lastUpdateTime") in
@@ -5192,27 +8987,29 @@ module ActionExecutionDetail =
       let pipelineExecutionId =
         (Option.map ~f:PipelineExecutionId.of_xml)
           (Xml.child xml_arg0 "pipelineExecutionId") in
-      make ?output ?input ?status ?lastUpdateTime ?startTime ?actionName
-        ?stageName ?pipelineVersion ?actionExecutionId ?pipelineExecutionId
-        ()
+      make ?output ?input ?status ?updatedBy ?lastUpdateTime ?startTime
+        ?actionName ?stageName ?pipelineVersion ?actionExecutionId
+        ?pipelineExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let output = field_map json "output" ActionExecutionOutput.of_json in
-      let input = field_map json "input" ActionExecutionInput.of_json in
-      let status = field_map json "status" ActionExecutionStatus.of_json in
-      let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
-      let startTime = field_map json "startTime" Timestamp.of_json in
-      let actionName = field_map json "actionName" ActionName.of_json in
-      let stageName = field_map json "stageName" StageName.of_json in
+    let of_json json__ =
+      let output = field_map json__ "output" ActionExecutionOutput.of_json in
+      let input = field_map json__ "input" ActionExecutionInput.of_json in
+      let status = field_map json__ "status" ActionExecutionStatus.of_json in
+      let updatedBy = field_map json__ "updatedBy" LastUpdatedBy.of_json in
+      let lastUpdateTime =
+        field_map json__ "lastUpdateTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let actionName = field_map json__ "actionName" ActionName.of_json in
+      let stageName = field_map json__ "stageName" StageName.of_json in
       let pipelineVersion =
-        field_map json "pipelineVersion" PipelineVersion.of_json in
+        field_map json__ "pipelineVersion" PipelineVersion.of_json in
       let actionExecutionId =
-        field_map json "actionExecutionId" ActionExecutionId.of_json in
+        field_map json__ "actionExecutionId" ActionExecutionId.of_json in
       let pipelineExecutionId =
-        field_map json "pipelineExecutionId" PipelineExecutionId.of_json in
-      make ?output ?input ?status ?lastUpdateTime ?startTime ?actionName
-        ?stageName ?pipelineVersion ?actionExecutionId ?pipelineExecutionId
-        ()
+        field_map json__ "pipelineExecutionId" PipelineExecutionId.of_json in
+      make ?output ?input ?status ?updatedBy ?lastUpdateTime ?startTime
+        ?actionName ?stageName ?pipelineVersion ?actionExecutionId
+        ?pipelineExecutionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about an execution of an action, including the action execution ID, and the name, version, and timing of the action."]
@@ -5235,13 +9032,13 @@ module ThirdPartyJobData =
           "The name of the artifact that is the result of the action, if any. This name might be system-generated, such as \"MyBuiltApp\", or it might be defined by the user when the action is created."];
       artifactCredentials: AWSSessionCredentials.t option
         [@ocaml.doc
-          "Represents an AWS session credentials object. These credentials are temporary credentials that are issued by AWS Secure Token Service (STS). They can be used to access input and output artifacts in the S3 bucket used to store artifact for the pipeline in AWS CodePipeline."];
+          "Represents an Amazon Web Services session credentials object. These credentials are temporary credentials that are issued by Amazon Web Services Secure Token Service (STS). They can be used to access input and output artifacts in the S3 bucket used to store artifact for the pipeline in CodePipeline."];
       continuationToken: ContinuationToken.t option
         [@ocaml.doc
-          "A system-generated token, such as a AWS CodeDeploy deployment ID, that a job requires to continue the job asynchronously."];
+          "A system-generated token, such as a CodeDeploy deployment ID, that a job requires to continue the job asynchronously."];
       encryptionKey: EncryptionKey.t option
         [@ocaml.doc
-          "The encryption key used to encrypt and decrypt data in the artifact store for the pipeline, such as an AWS Key Management Service (AWS KMS) key. This is optional and might not be present."]}
+          "The encryption key used to encrypt and decrypt data in the artifact store for the pipeline, such as an Amazon Web Services Key Management Service (Amazon Web Services KMS) key. This is optional and might not be present."]}
     let make ?actionTypeId =
       fun ?actionConfiguration ->
         fun ?pipelineContext ->
@@ -5309,22 +9106,22 @@ module ThirdPartyJobData =
         ?outputArtifacts ?inputArtifacts ?pipelineContext
         ?actionConfiguration ?actionTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionKey =
-        field_map json "encryptionKey" EncryptionKey.of_json in
+        field_map json__ "encryptionKey" EncryptionKey.of_json in
       let continuationToken =
-        field_map json "continuationToken" ContinuationToken.of_json in
+        field_map json__ "continuationToken" ContinuationToken.of_json in
       let artifactCredentials =
-        field_map json "artifactCredentials" AWSSessionCredentials.of_json in
+        field_map json__ "artifactCredentials" AWSSessionCredentials.of_json in
       let outputArtifacts =
-        field_map json "outputArtifacts" ArtifactList.of_json in
+        field_map json__ "outputArtifacts" ArtifactList.of_json in
       let inputArtifacts =
-        field_map json "inputArtifacts" ArtifactList.of_json in
+        field_map json__ "inputArtifacts" ArtifactList.of_json in
       let pipelineContext =
-        field_map json "pipelineContext" PipelineContext.of_json in
+        field_map json__ "pipelineContext" PipelineContext.of_json in
       let actionConfiguration =
-        field_map json "actionConfiguration" ActionConfiguration.of_json in
-      let actionTypeId = field_map json "actionTypeId" ActionTypeId.of_json in
+        field_map json__ "actionConfiguration" ActionConfiguration.of_json in
+      let actionTypeId = field_map json__ "actionTypeId" ActionTypeId.of_json in
       make ?encryptionKey ?continuationToken ?artifactCredentials
         ?outputArtifacts ?inputArtifacts ?pipelineContext
         ?actionConfiguration ?actionTypeId ()
@@ -5355,6 +9152,8 @@ module StageState =
       {
       stageName: StageName.t option [@ocaml.doc "The name of the stage."];
       inboundExecution: StageExecution.t option ;
+      inboundExecutions: StageExecutionList.t option
+        [@ocaml.doc "The inbound executions for a stage."];
       inboundTransitionState: TransitionState.t option
         [@ocaml.doc
           "The state of the inbound transition, which is either enabled or disabled."];
@@ -5362,33 +9161,77 @@ module StageState =
         [@ocaml.doc "The state of the stage."];
       latestExecution: StageExecution.t option
         [@ocaml.doc
-          "Information about the latest execution in the stage, including its ID and status."]}
+          "Information about the latest execution in the stage, including its ID and status."];
+      beforeEntryConditionState: StageConditionState.t option
+        [@ocaml.doc "The state of the entry conditions for a stage."];
+      onSuccessConditionState: StageConditionState.t option
+        [@ocaml.doc "The state of the success conditions for a stage."];
+      onFailureConditionState: StageConditionState.t option
+        [@ocaml.doc "The state of the failure conditions for a stage."];
+      retryStageMetadata: RetryStageMetadata.t option
+        [@ocaml.doc
+          "he details of a specific automatic retry on stage failure, including the attempt number and trigger."]}
     let make ?stageName =
       fun ?inboundExecution ->
-        fun ?inboundTransitionState ->
-          fun ?actionStates ->
-            fun ?latestExecution ->
-              fun () ->
-                {
-                  stageName;
-                  inboundExecution;
-                  inboundTransitionState;
-                  actionStates;
-                  latestExecution
-                }
+        fun ?inboundExecutions ->
+          fun ?inboundTransitionState ->
+            fun ?actionStates ->
+              fun ?latestExecution ->
+                fun ?beforeEntryConditionState ->
+                  fun ?onSuccessConditionState ->
+                    fun ?onFailureConditionState ->
+                      fun ?retryStageMetadata ->
+                        fun () ->
+                          {
+                            stageName;
+                            inboundExecution;
+                            inboundExecutions;
+                            inboundTransitionState;
+                            actionStates;
+                            latestExecution;
+                            beforeEntryConditionState;
+                            onSuccessConditionState;
+                            onFailureConditionState;
+                            retryStageMetadata
+                          }
     let to_value x =
       structure_to_value
         [("stageName", (Option.map x.stageName ~f:StageName.to_value));
         ("inboundExecution",
           (Option.map x.inboundExecution ~f:StageExecution.to_value));
+        ("inboundExecutions",
+          (Option.map x.inboundExecutions ~f:StageExecutionList.to_value));
         ("inboundTransitionState",
           (Option.map x.inboundTransitionState ~f:TransitionState.to_value));
         ("actionStates",
           (Option.map x.actionStates ~f:ActionStateList.to_value));
         ("latestExecution",
-          (Option.map x.latestExecution ~f:StageExecution.to_value))]
+          (Option.map x.latestExecution ~f:StageExecution.to_value));
+        ("beforeEntryConditionState",
+          (Option.map x.beforeEntryConditionState
+             ~f:StageConditionState.to_value));
+        ("onSuccessConditionState",
+          (Option.map x.onSuccessConditionState
+             ~f:StageConditionState.to_value));
+        ("onFailureConditionState",
+          (Option.map x.onFailureConditionState
+             ~f:StageConditionState.to_value));
+        ("retryStageMetadata",
+          (Option.map x.retryStageMetadata ~f:RetryStageMetadata.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let retryStageMetadata =
+        (Option.map ~f:RetryStageMetadata.of_xml)
+          (Xml.child xml_arg0 "retryStageMetadata") in
+      let onFailureConditionState =
+        (Option.map ~f:StageConditionState.of_xml)
+          (Xml.child xml_arg0 "onFailureConditionState") in
+      let onSuccessConditionState =
+        (Option.map ~f:StageConditionState.of_xml)
+          (Xml.child xml_arg0 "onSuccessConditionState") in
+      let beforeEntryConditionState =
+        (Option.map ~f:StageConditionState.of_xml)
+          (Xml.child xml_arg0 "beforeEntryConditionState") in
       let latestExecution =
         (Option.map ~f:StageExecution.of_xml)
           (Xml.child xml_arg0 "latestExecution") in
@@ -5398,25 +9241,45 @@ module StageState =
       let inboundTransitionState =
         (Option.map ~f:TransitionState.of_xml)
           (Xml.child xml_arg0 "inboundTransitionState") in
+      let inboundExecutions =
+        (Option.map ~f:StageExecutionList.of_xml)
+          (Xml.child xml_arg0 "inboundExecutions") in
       let inboundExecution =
         (Option.map ~f:StageExecution.of_xml)
           (Xml.child xml_arg0 "inboundExecution") in
       let stageName =
         (Option.map ~f:StageName.of_xml) (Xml.child xml_arg0 "stageName") in
-      make ?latestExecution ?actionStates ?inboundTransitionState
+      make ?retryStageMetadata ?onFailureConditionState
+        ?onSuccessConditionState ?beforeEntryConditionState ?latestExecution
+        ?actionStates ?inboundTransitionState ?inboundExecutions
         ?inboundExecution ?stageName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let retryStageMetadata =
+        field_map json__ "retryStageMetadata" RetryStageMetadata.of_json in
+      let onFailureConditionState =
+        field_map json__ "onFailureConditionState"
+          StageConditionState.of_json in
+      let onSuccessConditionState =
+        field_map json__ "onSuccessConditionState"
+          StageConditionState.of_json in
+      let beforeEntryConditionState =
+        field_map json__ "beforeEntryConditionState"
+          StageConditionState.of_json in
       let latestExecution =
-        field_map json "latestExecution" StageExecution.of_json in
+        field_map json__ "latestExecution" StageExecution.of_json in
       let actionStates =
-        field_map json "actionStates" ActionStateList.of_json in
+        field_map json__ "actionStates" ActionStateList.of_json in
       let inboundTransitionState =
-        field_map json "inboundTransitionState" TransitionState.of_json in
+        field_map json__ "inboundTransitionState" TransitionState.of_json in
+      let inboundExecutions =
+        field_map json__ "inboundExecutions" StageExecutionList.of_json in
       let inboundExecution =
-        field_map json "inboundExecution" StageExecution.of_json in
-      let stageName = field_map json "stageName" StageName.of_json in
-      make ?latestExecution ?actionStates ?inboundTransitionState
+        field_map json__ "inboundExecution" StageExecution.of_json in
+      let stageName = field_map json__ "stageName" StageName.of_json in
+      make ?retryStageMetadata ?onFailureConditionState
+        ?onSuccessConditionState ?beforeEntryConditionState ?latestExecution
+        ?actionStates ?inboundTransitionState ?inboundExecutions
         ?inboundExecution ?stageName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents information about the state of the stage."]
@@ -5424,6 +9287,9 @@ module ArtifactRevisionList =
   struct
     type nonrec t = ArtifactRevision.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ArtifactRevision.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5445,18 +9311,34 @@ module ArtifactRevisionList =
         ~of_json:ArtifactRevision.of_json j
     let to_json v = composed_to_json to_value v
   end
-module PipelineExecutionStatusSummary =
+module ResolvedPipelineVariableList =
   struct
-    type nonrec t = string
-    let context_ = "PipelineExecutionStatusSummary"
+    type nonrec t = ResolvedPipelineVariable.t list
     let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResolvedPipelineVariable.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"PipelineExecutionStatusSummary" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResolvedPipelineVariable.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResolvedPipelineVariableList"
+        ~of_json:ResolvedPipelineVariable.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module InvalidActionDeclarationException =
   struct
@@ -5520,7 +9402,7 @@ module LimitExceededException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The number of pipelines associated with the AWS account has exceeded the limit allowed for the account."]
+       "The number of pipelines associated with the Amazon Web Services account has exceeded the limit allowed for the account."]
 module PipelineDeclaration =
   struct
     type nonrec t =
@@ -5528,34 +9410,54 @@ module PipelineDeclaration =
       name: PipelineName.t [@ocaml.doc "The name of the pipeline."];
       roleArn: RoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for AWS CodePipeline to use to either perform actions with no actionRoleArn, or to use to assume roles for actions with an actionRoleArn."];
+          "The Amazon Resource Name (ARN) for CodePipeline to use to either perform actions with no actionRoleArn, or to use to assume roles for actions with an actionRoleArn."];
       artifactStore: ArtifactStore.t option
         [@ocaml.doc
           "Represents information about the S3 bucket where artifacts are stored for the pipeline. You must include either artifactStore or artifactStores in your pipeline, but you cannot use both. If you create a cross-region action in your pipeline, you must use artifactStores."];
       artifactStores: ArtifactStoreMap.t option
         [@ocaml.doc
-          "A mapping of artifactStore objects and their corresponding AWS Regions. There must be an artifact store for the pipeline Region and for each cross-region action in the pipeline. You must include either artifactStore or artifactStores in your pipeline, but you cannot use both. If you create a cross-region action in your pipeline, you must use artifactStores."];
+          "A mapping of artifactStore objects and their corresponding Amazon Web Services Regions. There must be an artifact store for the pipeline Region and for each cross-region action in the pipeline. You must include either artifactStore or artifactStores in your pipeline, but you cannot use both. If you create a cross-region action in your pipeline, you must use artifactStores."];
       stages: PipelineStageDeclarationList.t
         [@ocaml.doc "The stage in which to perform the action."];
       version: PipelineVersion.t option
         [@ocaml.doc
-          "The version number of the pipeline. A new pipeline always has a version number of 1. This number is incremented when a pipeline is updated."]}
+          "The version number of the pipeline. A new pipeline always has a version number of 1. This number is incremented when a pipeline is updated."];
+      executionMode: ExecutionMode.t option
+        [@ocaml.doc
+          "The method that the pipeline will use to handle multiple executions. The default mode is SUPERSEDED."];
+      pipelineType: PipelineType.t option
+        [@ocaml.doc
+          "CodePipeline provides the following pipeline types, which differ in characteristics and price, so that you can tailor your pipeline features and cost to the needs of your applications. V1 type pipelines have a JSON structure that contains standard pipeline, stage, and action-level parameters. V2 type pipelines have the same structure as a V1 type, along with additional parameters for release safety and trigger configuration. Including V2 parameters, such as triggers on Git tags, in the pipeline JSON when creating or updating a pipeline will result in the pipeline having the V2 type of pipeline and the associated costs. For information about pricing for CodePipeline, see Pricing. For information about which type of pipeline to choose, see What type of pipeline is right for me?."];
+      variables: PipelineVariableDeclarationList.t option
+        [@ocaml.doc
+          "A list that defines the pipeline variables for a pipeline resource. Variable names can have alphanumeric and underscore characters, and the values must match \\[A-Za-z0-9\\@\\-_\\]+."];
+      triggers: PipelineTriggerDeclarationList.t option
+        [@ocaml.doc
+          "The trigger configuration specifying a type of event, such as Git tags, that starts the pipeline. When a trigger configuration is specified, default change detection for repository and branch commits is disabled."]}
     let context_ = "PipelineDeclaration"
     let make ?artifactStore =
       fun ?artifactStores ->
         fun ?version ->
-          fun ~name ->
-            fun ~roleArn ->
-              fun ~stages ->
-                fun () ->
-                  {
-                    artifactStore;
-                    artifactStores;
-                    version;
-                    name;
-                    roleArn;
-                    stages
-                  }
+          fun ?executionMode ->
+            fun ?pipelineType ->
+              fun ?variables ->
+                fun ?triggers ->
+                  fun ~name ->
+                    fun ~roleArn ->
+                      fun ~stages ->
+                        fun () ->
+                          {
+                            artifactStore;
+                            artifactStores;
+                            version;
+                            executionMode;
+                            pipelineType;
+                            variables;
+                            triggers;
+                            name;
+                            roleArn;
+                            stages
+                          }
     let to_value x =
       structure_to_value
         [("name", (Some (PipelineName.to_value x.name)));
@@ -5565,9 +9467,29 @@ module PipelineDeclaration =
         ("artifactStores",
           (Option.map x.artifactStores ~f:ArtifactStoreMap.to_value));
         ("stages", (Some (PipelineStageDeclarationList.to_value x.stages)));
-        ("version", (Option.map x.version ~f:PipelineVersion.to_value))]
+        ("version", (Option.map x.version ~f:PipelineVersion.to_value));
+        ("executionMode",
+          (Option.map x.executionMode ~f:ExecutionMode.to_value));
+        ("pipelineType",
+          (Option.map x.pipelineType ~f:PipelineType.to_value));
+        ("variables",
+          (Option.map x.variables ~f:PipelineVariableDeclarationList.to_value));
+        ("triggers",
+          (Option.map x.triggers ~f:PipelineTriggerDeclarationList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let triggers =
+        (Option.map ~f:PipelineTriggerDeclarationList.of_xml)
+          (Xml.child xml_arg0 "triggers") in
+      let variables =
+        (Option.map ~f:PipelineVariableDeclarationList.of_xml)
+          (Xml.child xml_arg0 "variables") in
+      let pipelineType =
+        (Option.map ~f:PipelineType.of_xml)
+          (Xml.child xml_arg0 "pipelineType") in
+      let executionMode =
+        (Option.map ~f:ExecutionMode.of_xml)
+          (Xml.child xml_arg0 "executionMode") in
       let version =
         (Option.map ~f:PipelineVersion.of_xml) (Xml.child xml_arg0 "version") in
       let stages =
@@ -5583,19 +9505,28 @@ module PipelineDeclaration =
         RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
       let name =
         PipelineName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?version ~stages ?artifactStores ?artifactStore ~roleArn ~name ()
+      make ?triggers ?variables ?pipelineType ?executionMode ?version ~stages
+        ?artifactStores ?artifactStore ~roleArn ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "version" PipelineVersion.of_json in
+    let of_json json__ =
+      let triggers =
+        field_map json__ "triggers" PipelineTriggerDeclarationList.of_json in
+      let variables =
+        field_map json__ "variables" PipelineVariableDeclarationList.of_json in
+      let pipelineType = field_map json__ "pipelineType" PipelineType.of_json in
+      let executionMode =
+        field_map json__ "executionMode" ExecutionMode.of_json in
+      let version = field_map json__ "version" PipelineVersion.of_json in
       let stages =
-        field_map_exn json "stages" PipelineStageDeclarationList.of_json in
+        field_map_exn json__ "stages" PipelineStageDeclarationList.of_json in
       let artifactStores =
-        field_map json "artifactStores" ArtifactStoreMap.of_json in
+        field_map json__ "artifactStores" ArtifactStoreMap.of_json in
       let artifactStore =
-        field_map json "artifactStore" ArtifactStore.of_json in
-      let roleArn = field_map_exn json "roleArn" RoleArn.of_json in
-      let name = field_map_exn json "name" PipelineName.of_json in
-      make ?version ~stages ?artifactStores ?artifactStore ~roleArn ~name ()
+        field_map json__ "artifactStore" ArtifactStore.of_json in
+      let roleArn = field_map_exn json__ "roleArn" RoleArn.of_json in
+      let name = field_map_exn json__ "name" PipelineName.of_json in
+      make ?triggers ?variables ?pipelineType ?executionMode ?version ~stages
+        ?artifactStores ?artifactStore ~roleArn ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the structure of actions and stages to be performed in the pipeline."]
@@ -5700,22 +9631,23 @@ module ActionTypeDeclaration =
       make ?urls ?properties ?permissions ~outputArtifactDetails
         ~inputArtifactDetails ~id ~executor ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let urls = field_map json "urls" ActionTypeUrls.of_json in
+    let of_json json__ =
+      let urls = field_map json__ "urls" ActionTypeUrls.of_json in
       let properties =
-        field_map json "properties" ActionTypeProperties.of_json in
+        field_map json__ "properties" ActionTypeProperties.of_json in
       let permissions =
-        field_map json "permissions" ActionTypePermissions.of_json in
+        field_map json__ "permissions" ActionTypePermissions.of_json in
       let outputArtifactDetails =
-        field_map_exn json "outputArtifactDetails"
+        field_map_exn json__ "outputArtifactDetails"
           ActionTypeArtifactDetails.of_json in
       let inputArtifactDetails =
-        field_map_exn json "inputArtifactDetails"
+        field_map_exn json__ "inputArtifactDetails"
           ActionTypeArtifactDetails.of_json in
-      let id = field_map_exn json "id" ActionTypeIdentifier.of_json in
-      let executor = field_map_exn json "executor" ActionTypeExecutor.of_json in
+      let id = field_map_exn json__ "id" ActionTypeIdentifier.of_json in
+      let executor =
+        field_map_exn json__ "executor" ActionTypeExecutor.of_json in
       let description =
-        field_map json "description" ActionTypeDescription.of_json in
+        field_map json__ "description" ActionTypeDescription.of_json in
       make ?urls ?properties ?permissions ~outputArtifactDetails
         ~inputArtifactDetails ~id ~executor ?description ()
     let to_json v = composed_to_json to_value v
@@ -5735,8 +9667,8 @@ module ConcurrentModificationException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5755,8 +9687,8 @@ module InvalidArnException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource ARN is invalid."]
@@ -5774,8 +9706,8 @@ module InvalidTagsException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource tags are invalid."]
@@ -5813,6 +9745,9 @@ module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5846,8 +9781,8 @@ module TooManyTagsException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The tags limit for a resource has been exceeded."]
@@ -5865,8 +9800,8 @@ module ConflictException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5885,8 +9820,8 @@ module DuplicatedStopRequestException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5905,8 +9840,8 @@ module PipelineExecutionNotStoppableException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5924,6 +9859,26 @@ module PipelineNotFoundException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The pipeline was specified in an invalid format or cannot be found."]
+module ConcurrentPipelineExecutionsLimitExceededException =
+  struct
+    type nonrec t = {
+      message: Message.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The pipeline has reached the limit for concurrent pipeline executions."]
 module ClientRequestToken =
   struct
     type nonrec t = string
@@ -5944,7 +9899,72 @@ module ClientRequestToken =
     let of_json j = string_of_json ~kind:"ClientRequestToken" j
     let to_json = simple_to_json to_value
   end
-module NotLatestPipelineExecutionException =
+module PipelineVariableList =
+  struct
+    type nonrec t = PipelineVariable.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PipelineVariable.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PipelineVariable.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PipelineVariableList"
+        ~of_json:PipelineVariable.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SourceRevisionOverrideList =
+  struct
+    type nonrec t = SourceRevisionOverride.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SourceRevisionOverride.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SourceRevisionOverride.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SourceRevisionOverrideList"
+        ~of_json:SourceRevisionOverride.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PipelineExecutionNotFoundException =
   struct
     type nonrec t = unit
     let make () = ()
@@ -5956,7 +9976,27 @@ module NotLatestPipelineExecutionException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The stage has failed in a later run of the pipeline and the pipelineExecutionId associated with the request is out of date."]
+       "The pipeline execution was specified in an invalid format or cannot be found, or an execution ID does not belong to the specified pipeline."]
+module PipelineExecutionOutdatedException =
+  struct
+    type nonrec t = {
+      message: Message.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The specified pipeline execution is outdated and cannot be used as a target pipeline execution for rollback."]
 module StageNotFoundException =
   struct
     type nonrec t = unit
@@ -5970,6 +10010,39 @@ module StageNotFoundException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The stage was specified in an invalid format or cannot be found."]
+module UnableToRollbackStageException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Unable to roll back the stage. The cause might be if the pipeline version has changed since the target pipeline execution was deployed, the stage is currently running, or an incorrect target pipeline execution ID was provided."]
+module NotLatestPipelineExecutionException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The stage has failed in a later run of the pipeline and the pipelineExecutionId associated with the request is out of date."]
 module StageNotRetryableException =
   struct
     type nonrec t = unit
@@ -5983,24 +10056,6 @@ module StageNotRetryableException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Unable to retry. The pipeline structure or stage state might have changed while actions awaited retry, or the stage contains no failed actions."]
-module StageRetryMode =
-  struct
-    type nonrec t =
-      | FAILED_ACTIONS 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | FAILED_ACTIONS -> "FAILED_ACTIONS" | Non_static_id s -> s
-    let of_string =
-      function | "FAILED_ACTIONS" -> FAILED_ACTIONS | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration StageRetryMode" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"StageRetryMode" j)
-    let to_json = simple_to_json to_value
-  end
 module WebhookNotFoundException =
   struct
     type nonrec t = unit
@@ -6100,14 +10155,14 @@ module CurrentRevision =
         Revision.of_xml (Xml.child_exn ~context:context_ xml_arg0 "revision") in
       make ?revisionSummary ?created ~changeIdentifier ~revision ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let revisionSummary =
-        field_map json "revisionSummary" RevisionSummary.of_json in
-      let created = field_map json "created" Time.of_json in
+        field_map json__ "revisionSummary" RevisionSummary.of_json in
+      let created = field_map json__ "created" Time.of_json in
       let changeIdentifier =
-        field_map_exn json "changeIdentifier"
+        field_map_exn json__ "changeIdentifier"
           RevisionChangeIdentifier.of_json in
-      let revision = field_map_exn json "revision" Revision.of_json in
+      let revision = field_map_exn json__ "revision" Revision.of_json in
       make ?revisionSummary ?created ~changeIdentifier ~revision ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents information about a current revision."]
@@ -6119,7 +10174,7 @@ module ExecutionDetails =
         [@ocaml.doc "The summary of the current status of the actions."];
       externalExecutionId: ExecutionId.t option
         [@ocaml.doc
-          "The system-generated unique ID of this action used to identify this job worker in any external systems, such as AWS CodeDeploy."];
+          "The system-generated unique ID of this action used to identify this job worker in any external systems, such as CodeDeploy."];
       percentComplete: Percentage.t option
         [@ocaml.doc
           "The percentage of work completed on the action, represented on a scale of 0 to 100 percent."]}
@@ -6147,12 +10202,12 @@ module ExecutionDetails =
           (Xml.child xml_arg0 "summary") in
       make ?percentComplete ?externalExecutionId ?summary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let percentComplete =
-        field_map json "percentComplete" Percentage.of_json in
+        field_map json__ "percentComplete" Percentage.of_json in
       let externalExecutionId =
-        field_map json "externalExecutionId" ExecutionId.of_json in
-      let summary = field_map json "summary" ExecutionSummary.of_json in
+        field_map json__ "externalExecutionId" ExecutionId.of_json in
+      let summary = field_map json__ "summary" ExecutionSummary.of_json in
       make ?percentComplete ?externalExecutionId ?summary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6186,11 +10241,11 @@ module FailureDetails =
         FailureType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ?externalExecutionId ~message ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let externalExecutionId =
-        field_map json "externalExecutionId" ExecutionId.of_json in
-      let message = field_map_exn json "message" Message.of_json in
-      let type_ = field_map_exn json "type" FailureType.of_json in
+        field_map json__ "externalExecutionId" ExecutionId.of_json in
+      let message = field_map_exn json__ "message" Message.of_json in
+      let type_ = field_map_exn json__ "type" FailureType.of_json in
       make ?externalExecutionId ~message ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents information about failure details."]
@@ -6258,9 +10313,9 @@ module ApprovalResult =
           (Xml.child_exn ~context:context_ xml_arg0 "summary") in
       make ~status ~summary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" ApprovalStatus.of_json in
-      let summary = field_map_exn json "summary" ApprovalSummary.of_json in
+    let of_json json__ =
+      let status = field_map_exn json__ "status" ApprovalStatus.of_json in
+      let summary = field_map_exn json__ "summary" ApprovalSummary.of_json in
       make ~status ~summary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6299,6 +10354,9 @@ module ThirdPartyJobList =
   struct
     type nonrec t = ThirdPartyJob.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ThirdPartyJob.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6338,6 +10396,9 @@ module JobList =
   struct
     type nonrec t = Job.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Job.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6385,12 +10446,39 @@ module QueryParamMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:ActionConfigurationKey.of_string
         ~of_json:ActionConfigurationQueryableValue.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module ConditionType =
+  struct
+    type nonrec t =
+      | BEFORE_ENTRY 
+      | ON_SUCCESS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | BEFORE_ENTRY -> "BEFORE_ENTRY"
+      | ON_SUCCESS -> "ON_SUCCESS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "BEFORE_ENTRY" -> BEFORE_ENTRY
+      | "ON_SUCCESS" -> ON_SUCCESS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ConditionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ConditionType" j)
+    let to_json = simple_to_json to_value
   end
 module InvalidNextTokenException =
   struct
@@ -6427,6 +10515,9 @@ module WebhookList =
   struct
     type nonrec t = ListWebhookItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListWebhookItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6465,10 +10556,106 @@ module MaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module RuleTypeList =
+  struct
+    type nonrec t = RuleType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RuleType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RuleType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RuleTypeList" ~of_json:RuleType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RuleExecutionDetailList =
+  struct
+    type nonrec t = RuleExecutionDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RuleExecutionDetail.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RuleExecutionDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RuleExecutionDetailList"
+        ~of_json:RuleExecutionDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RuleExecutionFilter =
+  struct
+    type nonrec t =
+      {
+      pipelineExecutionId: PipelineExecutionId.t option
+        [@ocaml.doc
+          "The pipeline execution ID used to filter rule execution history."];
+      latestInPipelineExecution: LatestInPipelineExecutionFilter.t option }
+    let make ?pipelineExecutionId =
+      fun ?latestInPipelineExecution ->
+        fun () -> { pipelineExecutionId; latestInPipelineExecution }
+    let to_value x =
+      structure_to_value
+        [("pipelineExecutionId",
+           (Option.map x.pipelineExecutionId ~f:PipelineExecutionId.to_value));
+        ("latestInPipelineExecution",
+          (Option.map x.latestInPipelineExecution
+             ~f:LatestInPipelineExecutionFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let latestInPipelineExecution =
+        (Option.map ~f:LatestInPipelineExecutionFilter.of_xml)
+          (Xml.child xml_arg0 "latestInPipelineExecution") in
+      let pipelineExecutionId =
+        (Option.map ~f:PipelineExecutionId.of_xml)
+          (Xml.child xml_arg0 "pipelineExecutionId") in
+      make ?latestInPipelineExecution ?pipelineExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let latestInPipelineExecution =
+        field_map json__ "latestInPipelineExecution"
+          LatestInPipelineExecutionFilter.of_json in
+      let pipelineExecutionId =
+        field_map json__ "pipelineExecutionId" PipelineExecutionId.of_json in
+      make ?latestInPipelineExecution ?pipelineExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Filter values for the rule execution."]
 module PipelineList =
   struct
     type nonrec t = PipelineSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PipelineSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6511,6 +10698,9 @@ module PipelineExecutionSummaryList =
   struct
     type nonrec t = PipelineExecutionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PipelineExecutionSummary.to_value)) |>
         (fun x -> `List x)
@@ -6533,10 +10723,113 @@ module PipelineExecutionSummaryList =
         ~of_json:PipelineExecutionSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module PipelineExecutionFilter =
+  struct
+    type nonrec t =
+      {
+      succeededInStage: SucceededInStageFilter.t option
+        [@ocaml.doc
+          "Filter for pipeline executions where the stage was successful in the current pipeline version."]}
+    let make ?succeededInStage = fun () -> { succeededInStage }
+    let to_value x =
+      structure_to_value
+        [("succeededInStage",
+           (Option.map x.succeededInStage ~f:SucceededInStageFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let succeededInStage =
+        (Option.map ~f:SucceededInStageFilter.of_xml)
+          (Xml.child xml_arg0 "succeededInStage") in
+      make ?succeededInStage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let succeededInStage =
+        field_map json__ "succeededInStage" SucceededInStageFilter.of_json in
+      make ?succeededInStage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The pipeline execution to filter on."]
+module ActionExecutionNotFoundException =
+  struct
+    type nonrec t = {
+      message: Message.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The action execution was not found."]
+module DeployActionExecutionTargetList =
+  struct
+    type nonrec t = DeployActionExecutionTarget.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DeployActionExecutionTarget.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DeployActionExecutionTarget.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DeployActionExecutionTargetList"
+        ~of_json:DeployActionExecutionTarget.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TargetFilterList =
+  struct
+    type nonrec t = TargetFilter.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TargetFilter.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TargetFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TargetFilterList" ~of_json:TargetFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ActionTypeList =
   struct
     type nonrec t = ActionType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ActionType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6561,6 +10854,9 @@ module ActionExecutionDetailList =
   struct
     type nonrec t = ActionExecutionDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ActionExecutionDetail.to_value)) |>
         (fun x -> `List x)
@@ -6583,42 +10879,43 @@ module ActionExecutionDetailList =
         ~of_json:ActionExecutionDetail.of_json j
     let to_json v = composed_to_json to_value v
   end
-module PipelineExecutionNotFoundException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The pipeline execution was specified in an invalid format or cannot be found, or an execution ID does not belong to the specified pipeline."]
 module ActionExecutionFilter =
   struct
     type nonrec t =
       {
       pipelineExecutionId: PipelineExecutionId.t option
         [@ocaml.doc
-          "The pipeline execution ID used to filter action execution history."]}
-    let make ?pipelineExecutionId = fun () -> { pipelineExecutionId }
+          "The pipeline execution ID used to filter action execution history."];
+      latestInPipelineExecution: LatestInPipelineExecutionFilter.t option
+        [@ocaml.doc
+          "The latest execution in the pipeline. Filtering on the latest execution is available for executions run on or after February 08, 2024."]}
+    let make ?pipelineExecutionId =
+      fun ?latestInPipelineExecution ->
+        fun () -> { pipelineExecutionId; latestInPipelineExecution }
     let to_value x =
       structure_to_value
         [("pipelineExecutionId",
-           (Option.map x.pipelineExecutionId ~f:PipelineExecutionId.to_value))]
+           (Option.map x.pipelineExecutionId ~f:PipelineExecutionId.to_value));
+        ("latestInPipelineExecution",
+          (Option.map x.latestInPipelineExecution
+             ~f:LatestInPipelineExecutionFilter.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let latestInPipelineExecution =
+        (Option.map ~f:LatestInPipelineExecutionFilter.of_xml)
+          (Xml.child xml_arg0 "latestInPipelineExecution") in
       let pipelineExecutionId =
         (Option.map ~f:PipelineExecutionId.of_xml)
           (Xml.child xml_arg0 "pipelineExecutionId") in
-      make ?pipelineExecutionId ()
+      make ?latestInPipelineExecution ?pipelineExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let latestInPipelineExecution =
+        field_map json__ "latestInPipelineExecution"
+          LatestInPipelineExecutionFilter.of_json in
       let pipelineExecutionId =
-        field_map json "pipelineExecutionId" PipelineExecutionId.of_json in
-      make ?pipelineExecutionId ()
+        field_map json__ "pipelineExecutionId" PipelineExecutionId.of_json in
+      make ?latestInPipelineExecution ?pipelineExecutionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Filter values for the action execution."]
 module InvalidClientTokenException =
@@ -6665,12 +10962,12 @@ module ThirdPartyJobDetails =
       {
       id: ThirdPartyJobId.t option
         [@ocaml.doc
-          "The identifier used to identify the job details in AWS CodePipeline."];
+          "The identifier used to identify the job details in CodePipeline."];
       data: ThirdPartyJobData.t option
         [@ocaml.doc "The data to be returned by the third party job worker."];
       nonce: Nonce.t option
         [@ocaml.doc
-          "A system-generated random number that AWS CodePipeline uses to ensure that the job is being worked on by only one job worker. Use this number in an AcknowledgeThirdPartyJob request."]}
+          "A system-generated random number that CodePipeline uses to ensure that the job is being worked on by only one job worker. Use this number in an AcknowledgeThirdPartyJob request."]}
     let make ?id = fun ?data -> fun ?nonce -> fun () -> { id; data; nonce }
     let to_value x =
       structure_to_value
@@ -6686,10 +10983,10 @@ module ThirdPartyJobDetails =
         (Option.map ~f:ThirdPartyJobId.of_xml) (Xml.child xml_arg0 "id") in
       make ?nonce ?data ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nonce = field_map json "nonce" Nonce.of_json in
-      let data = field_map json "data" ThirdPartyJobData.of_json in
-      let id = field_map json "id" ThirdPartyJobId.of_json in
+    let of_json json__ =
+      let nonce = field_map json__ "nonce" Nonce.of_json in
+      let data = field_map json__ "data" ThirdPartyJobData.of_json in
+      let id = field_map json__ "id" ThirdPartyJobId.of_json in
       make ?nonce ?data ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6698,6 +10995,9 @@ module StageStateList =
   struct
     type nonrec t = StageState.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StageState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6729,30 +11029,42 @@ module PipelineMetadata =
           "The date and time the pipeline was created, in timestamp format."];
       updated: Timestamp.t option
         [@ocaml.doc
-          "The date and time the pipeline was last updated, in timestamp format."]}
+          "The date and time the pipeline was last updated, in timestamp format."];
+      pollingDisabledAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time that polling for source changes (periodic checks) was stopped for the pipeline, in timestamp format. Pipelines that are inactive for longer than 30 days will have polling disabled for the pipeline. For more information, see pollingDisabledAt in the pipeline structure reference. For the steps to migrate your pipeline from polling to event-based change detection, see Migrate polling pipelines to use event-based change detection. You can migrate (update) a polling pipeline to use event-based change detection. For example, for a pipeline with a CodeCommit source, we recommend you migrate (update) your pipeline to use CloudWatch Events. To learn more, see Migrate polling pipelines to use event-based change detection in the CodePipeline User Guide."]}
     let make ?pipelineArn =
       fun ?created ->
-        fun ?updated -> fun () -> { pipelineArn; created; updated }
+        fun ?updated ->
+          fun ?pollingDisabledAt ->
+            fun () -> { pipelineArn; created; updated; pollingDisabledAt }
     let to_value x =
       structure_to_value
         [("pipelineArn", (Option.map x.pipelineArn ~f:PipelineArn.to_value));
         ("created", (Option.map x.created ~f:Timestamp.to_value));
-        ("updated", (Option.map x.updated ~f:Timestamp.to_value))]
+        ("updated", (Option.map x.updated ~f:Timestamp.to_value));
+        ("pollingDisabledAt",
+          (Option.map x.pollingDisabledAt ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let pollingDisabledAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "pollingDisabledAt") in
       let updated =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "updated") in
       let created =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "created") in
       let pipelineArn =
         (Option.map ~f:PipelineArn.of_xml) (Xml.child xml_arg0 "pipelineArn") in
-      make ?updated ?created ?pipelineArn ()
+      make ?pollingDisabledAt ?updated ?created ?pipelineArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updated = field_map json "updated" Timestamp.of_json in
-      let created = field_map json "created" Timestamp.of_json in
-      let pipelineArn = field_map json "pipelineArn" PipelineArn.of_json in
-      make ?updated ?created ?pipelineArn ()
+    let of_json json__ =
+      let pollingDisabledAt =
+        field_map json__ "pollingDisabledAt" Timestamp.of_json in
+      let updated = field_map json__ "updated" Timestamp.of_json in
+      let created = field_map json__ "created" Timestamp.of_json in
+      let pipelineArn = field_map json__ "pipelineArn" PipelineArn.of_json in
+      make ?pollingDisabledAt ?updated ?created ?pipelineArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a pipeline."]
 module PipelineVersionNotFoundException =
@@ -6788,22 +11100,44 @@ module PipelineExecution =
           "A summary that contains a description of the pipeline execution status."];
       artifactRevisions: ArtifactRevisionList.t option
         [@ocaml.doc
-          "A list of ArtifactRevision objects included in a pipeline execution."]}
+          "A list of ArtifactRevision objects included in a pipeline execution."];
+      variables: ResolvedPipelineVariableList.t option
+        [@ocaml.doc
+          "A list of pipeline variables used for the pipeline execution."];
+      trigger: ExecutionTrigger.t option ;
+      executionMode: ExecutionMode.t option
+        [@ocaml.doc
+          "The method that the pipeline will use to handle multiple executions. The default mode is SUPERSEDED."];
+      executionType: ExecutionType.t option
+        [@ocaml.doc "The type of the pipeline execution."];
+      rollbackMetadata: PipelineRollbackMetadata.t option
+        [@ocaml.doc
+          "The metadata about the execution pertaining to stage rollback."]}
     let make ?pipelineName =
       fun ?pipelineVersion ->
         fun ?pipelineExecutionId ->
           fun ?status ->
             fun ?statusSummary ->
               fun ?artifactRevisions ->
-                fun () ->
-                  {
-                    pipelineName;
-                    pipelineVersion;
-                    pipelineExecutionId;
-                    status;
-                    statusSummary;
-                    artifactRevisions
-                  }
+                fun ?variables ->
+                  fun ?trigger ->
+                    fun ?executionMode ->
+                      fun ?executionType ->
+                        fun ?rollbackMetadata ->
+                          fun () ->
+                            {
+                              pipelineName;
+                              pipelineVersion;
+                              pipelineExecutionId;
+                              status;
+                              statusSummary;
+                              artifactRevisions;
+                              variables;
+                              trigger;
+                              executionMode;
+                              executionType;
+                              rollbackMetadata
+                            }
     let to_value x =
       structure_to_value
         [("pipelineName",
@@ -6817,9 +11151,33 @@ module PipelineExecution =
           (Option.map x.statusSummary
              ~f:PipelineExecutionStatusSummary.to_value));
         ("artifactRevisions",
-          (Option.map x.artifactRevisions ~f:ArtifactRevisionList.to_value))]
+          (Option.map x.artifactRevisions ~f:ArtifactRevisionList.to_value));
+        ("variables",
+          (Option.map x.variables ~f:ResolvedPipelineVariableList.to_value));
+        ("trigger", (Option.map x.trigger ~f:ExecutionTrigger.to_value));
+        ("executionMode",
+          (Option.map x.executionMode ~f:ExecutionMode.to_value));
+        ("executionType",
+          (Option.map x.executionType ~f:ExecutionType.to_value));
+        ("rollbackMetadata",
+          (Option.map x.rollbackMetadata ~f:PipelineRollbackMetadata.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let rollbackMetadata =
+        (Option.map ~f:PipelineRollbackMetadata.of_xml)
+          (Xml.child xml_arg0 "rollbackMetadata") in
+      let executionType =
+        (Option.map ~f:ExecutionType.of_xml)
+          (Xml.child xml_arg0 "executionType") in
+      let executionMode =
+        (Option.map ~f:ExecutionMode.of_xml)
+          (Xml.child xml_arg0 "executionMode") in
+      let trigger =
+        (Option.map ~f:ExecutionTrigger.of_xml)
+          (Xml.child xml_arg0 "trigger") in
+      let variables =
+        (Option.map ~f:ResolvedPipelineVariableList.of_xml)
+          (Xml.child xml_arg0 "variables") in
       let artifactRevisions =
         (Option.map ~f:ArtifactRevisionList.of_xml)
           (Xml.child xml_arg0 "artifactRevisions") in
@@ -6838,22 +11196,34 @@ module PipelineExecution =
       let pipelineName =
         (Option.map ~f:PipelineName.of_xml)
           (Xml.child xml_arg0 "pipelineName") in
-      make ?artifactRevisions ?statusSummary ?status ?pipelineExecutionId
-        ?pipelineVersion ?pipelineName ()
+      make ?rollbackMetadata ?executionType ?executionMode ?trigger
+        ?variables ?artifactRevisions ?statusSummary ?status
+        ?pipelineExecutionId ?pipelineVersion ?pipelineName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let rollbackMetadata =
+        field_map json__ "rollbackMetadata" PipelineRollbackMetadata.of_json in
+      let executionType =
+        field_map json__ "executionType" ExecutionType.of_json in
+      let executionMode =
+        field_map json__ "executionMode" ExecutionMode.of_json in
+      let trigger = field_map json__ "trigger" ExecutionTrigger.of_json in
+      let variables =
+        field_map json__ "variables" ResolvedPipelineVariableList.of_json in
       let artifactRevisions =
-        field_map json "artifactRevisions" ArtifactRevisionList.of_json in
+        field_map json__ "artifactRevisions" ArtifactRevisionList.of_json in
       let statusSummary =
-        field_map json "statusSummary" PipelineExecutionStatusSummary.of_json in
-      let status = field_map json "status" PipelineExecutionStatus.of_json in
+        field_map json__ "statusSummary"
+          PipelineExecutionStatusSummary.of_json in
+      let status = field_map json__ "status" PipelineExecutionStatus.of_json in
       let pipelineExecutionId =
-        field_map json "pipelineExecutionId" PipelineExecutionId.of_json in
+        field_map json__ "pipelineExecutionId" PipelineExecutionId.of_json in
       let pipelineVersion =
-        field_map json "pipelineVersion" PipelineVersion.of_json in
-      let pipelineName = field_map json "pipelineName" PipelineName.of_json in
-      make ?artifactRevisions ?statusSummary ?status ?pipelineExecutionId
-        ?pipelineVersion ?pipelineName ()
+        field_map json__ "pipelineVersion" PipelineVersion.of_json in
+      let pipelineName = field_map json__ "pipelineName" PipelineName.of_json in
+      make ?rollbackMetadata ?executionType ?executionMode ?trigger
+        ?variables ?artifactRevisions ?statusSummary ?status
+        ?pipelineExecutionId ?pipelineVersion ?pipelineName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents information about an execution of a pipeline."]
 module JobDetails =
@@ -6866,7 +11236,8 @@ module JobDetails =
         [@ocaml.doc
           "Represents other information about a job required for a job worker to complete the job."];
       accountId: AccountId.t option
-        [@ocaml.doc "The AWS account ID associated with the job."]}
+        [@ocaml.doc
+          "The Amazon Web Services account ID associated with the job."]}
     let make ?id =
       fun ?data -> fun ?accountId -> fun () -> { id; data; accountId }
     let to_value x =
@@ -6882,10 +11253,10 @@ module JobDetails =
       let id = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "id") in
       make ?accountId ?data ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map json "accountId" AccountId.of_json in
-      let data = field_map json "data" JobData.of_json in
-      let id = field_map json "id" JobId.of_json in
+    let of_json json__ =
+      let accountId = field_map json__ "accountId" AccountId.of_json in
+      let data = field_map json__ "data" JobData.of_json in
+      let id = field_map json__ "id" JobId.of_json in
       make ?accountId ?data ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents information about the details of a job."]
@@ -7079,8 +11450,8 @@ module UpdatePipelineOutput =
           (Xml.child xml_arg0 "pipeline") in
       make ?pipeline ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pipeline = field_map json "pipeline" PipelineDeclaration.of_json in
+    let of_json json__ =
+      let pipeline = field_map json__ "pipeline" PipelineDeclaration.of_json in
       make ?pipeline ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of an UpdatePipeline action."]
@@ -7102,9 +11473,9 @@ module UpdatePipelineInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pipeline") in
       make ~pipeline ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pipeline =
-        field_map_exn json "pipeline" PipelineDeclaration.of_json in
+        field_map_exn json__ "pipeline" PipelineDeclaration.of_json in
       make ~pipeline ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of an UpdatePipeline action."]
@@ -7127,9 +11498,9 @@ module UpdateActionTypeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "actionType") in
       make ~actionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let actionType =
-        field_map_exn json "actionType" ActionTypeDeclaration.of_json in
+        field_map_exn json__ "actionType" ActionTypeDeclaration.of_json in
       make ~actionType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7211,7 +11582,7 @@ module UntagResourceOutput =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes tags from an AWS resource."]
+  end[@@ocaml.doc "Removes tags from an Amazon Web Services resource."]
 module UntagResourceInput =
   struct
     type nonrec t =
@@ -7239,12 +11610,13 @@ module UntagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes tags from an AWS resource."]
+  end[@@ocaml.doc "Removes tags from an Amazon Web Services resource."]
 module TagResourceOutput =
   struct
     type nonrec t = unit
@@ -7357,9 +11729,10 @@ module TagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagList.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7451,9 +11824,9 @@ module StopPipelineExecutionOutput =
           (Xml.child xml_arg0 "pipelineExecutionId") in
       make ?pipelineExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pipelineExecutionId =
-        field_map json "pipelineExecutionId" PipelineExecutionId.of_json in
+        field_map json__ "pipelineExecutionId" PipelineExecutionId.of_json in
       make ?pipelineExecutionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7502,14 +11875,15 @@ module StopPipelineExecutionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
       make ?reason ?abandon ~pipelineExecutionId ~pipelineName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reason =
-        field_map json "reason" StopPipelineExecutionReason.of_json in
-      let abandon = field_map json "abandon" Boolean.of_json in
+        field_map json__ "reason" StopPipelineExecutionReason.of_json in
+      let abandon = field_map json__ "abandon" Boolean.of_json in
       let pipelineExecutionId =
-        field_map_exn json "pipelineExecutionId" PipelineExecutionId.of_json in
+        field_map_exn json__ "pipelineExecutionId"
+          PipelineExecutionId.of_json in
       let pipelineName =
-        field_map_exn json "pipelineName" PipelineName.of_json in
+        field_map_exn json__ "pipelineName" PipelineName.of_json in
       make ?reason ?abandon ~pipelineExecutionId ~pipelineName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7522,13 +11896,19 @@ module StartPipelineExecutionOutput =
         [@ocaml.doc
           "The unique system-generated ID of the pipeline execution that was started."]}
     type nonrec error =
-      [ `ConflictException of ConflictException.t 
+      [
+        `ConcurrentPipelineExecutionsLimitExceededException of
+          ConcurrentPipelineExecutionsLimitExceededException.t 
+      | `ConflictException of ConflictException.t 
       | `PipelineNotFoundException of PipelineNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?pipelineExecutionId = fun () -> { pipelineExecutionId }
     let error_of_json name json =
       match name with
+      | "ConcurrentPipelineExecutionsLimitExceededException" ->
+          `ConcurrentPipelineExecutionsLimitExceededException
+            (ConcurrentPipelineExecutionsLimitExceededException.of_json json)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_json json)
       | "PipelineNotFoundException" ->
@@ -7540,6 +11920,9 @@ module StartPipelineExecutionOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConcurrentPipelineExecutionsLimitExceededException" ->
+          `ConcurrentPipelineExecutionsLimitExceededException
+            (ConcurrentPipelineExecutionsLimitExceededException.of_xml xml)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_xml xml)
       | "PipelineNotFoundException" ->
@@ -7550,6 +11933,12 @@ module StartPipelineExecutionOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConcurrentPipelineExecutionsLimitExceededException e ->
+          `Assoc
+            [("error",
+               (`String "ConcurrentPipelineExecutionsLimitExceededException"));
+            ("details",
+              (ConcurrentPipelineExecutionsLimitExceededException.to_json e))]
       | `ConflictException e ->
           `Assoc
             [("error", (`String "ConflictException"));
@@ -7578,9 +11967,9 @@ module StartPipelineExecutionOutput =
           (Xml.child xml_arg0 "pipelineExecutionId") in
       make ?pipelineExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pipelineExecutionId =
-        field_map json "pipelineExecutionId" PipelineExecutionId.of_json in
+        field_map json__ "pipelineExecutionId" PipelineExecutionId.of_json in
       make ?pipelineExecutionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7590,33 +11979,220 @@ module StartPipelineExecutionInput =
     type nonrec t =
       {
       name: PipelineName.t [@ocaml.doc "The name of the pipeline to start."];
+      variables: PipelineVariableList.t option
+        [@ocaml.doc
+          "A list that overrides pipeline variables for a pipeline execution that's being started. Variable names must match \\[A-Za-z0-9\\@\\-_\\]+, and the values can be anything except an empty string."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "The system-generated unique ID used to identify a unique execution request."]}
+          "The system-generated unique ID used to identify a unique execution request."];
+      sourceRevisions: SourceRevisionOverrideList.t option
+        [@ocaml.doc
+          "A list that allows you to specify, or override, the source revision for a pipeline execution that's being started. A source revision is the version with all the changes to your application code, or source artifact, for the pipeline execution."]}
     let context_ = "StartPipelineExecutionInput"
-    let make ?clientRequestToken =
-      fun ~name -> fun () -> { clientRequestToken; name }
+    let make ?variables =
+      fun ?clientRequestToken ->
+        fun ?sourceRevisions ->
+          fun ~name ->
+            fun () ->
+              { variables; clientRequestToken; sourceRevisions; name }
     let to_value x =
       structure_to_value
         [("name", (Some (PipelineName.to_value x.name)));
+        ("variables",
+          (Option.map x.variables ~f:PipelineVariableList.to_value));
         ("clientRequestToken",
-          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value))]
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("sourceRevisions",
+          (Option.map x.sourceRevisions
+             ~f:SourceRevisionOverrideList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sourceRevisions =
+        (Option.map ~f:SourceRevisionOverrideList.of_xml)
+          (Xml.child xml_arg0 "sourceRevisions") in
       let clientRequestToken =
         (Option.map ~f:ClientRequestToken.of_xml)
           (Xml.child xml_arg0 "clientRequestToken") in
+      let variables =
+        (Option.map ~f:PipelineVariableList.of_xml)
+          (Xml.child xml_arg0 "variables") in
       let name =
         PipelineName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?clientRequestToken ~name ()
+      make ?sourceRevisions ?clientRequestToken ?variables ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let sourceRevisions =
+        field_map json__ "sourceRevisions" SourceRevisionOverrideList.of_json in
       let clientRequestToken =
-        field_map json "clientRequestToken" ClientRequestToken.of_json in
-      let name = field_map_exn json "name" PipelineName.of_json in
-      make ?clientRequestToken ~name ()
+        field_map json__ "clientRequestToken" ClientRequestToken.of_json in
+      let variables =
+        field_map json__ "variables" PipelineVariableList.of_json in
+      let name = field_map_exn json__ "name" PipelineName.of_json in
+      make ?sourceRevisions ?clientRequestToken ?variables ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a StartPipelineExecution action."]
+module RollbackStageOutput =
+  struct
+    type nonrec t =
+      {
+      pipelineExecutionId: PipelineExecutionId.t option
+        [@ocaml.doc
+          "The execution ID of the pipeline execution for the stage that has been rolled back."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `PipelineExecutionNotFoundException of
+          PipelineExecutionNotFoundException.t 
+      | `PipelineExecutionOutdatedException of
+          PipelineExecutionOutdatedException.t 
+      | `PipelineNotFoundException of PipelineNotFoundException.t 
+      | `StageNotFoundException of StageNotFoundException.t 
+      | `UnableToRollbackStageException of UnableToRollbackStageException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?pipelineExecutionId = fun () -> { pipelineExecutionId }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "PipelineExecutionNotFoundException" ->
+          `PipelineExecutionNotFoundException
+            (PipelineExecutionNotFoundException.of_json json)
+      | "PipelineExecutionOutdatedException" ->
+          `PipelineExecutionOutdatedException
+            (PipelineExecutionOutdatedException.of_json json)
+      | "PipelineNotFoundException" ->
+          `PipelineNotFoundException (PipelineNotFoundException.of_json json)
+      | "StageNotFoundException" ->
+          `StageNotFoundException (StageNotFoundException.of_json json)
+      | "UnableToRollbackStageException" ->
+          `UnableToRollbackStageException
+            (UnableToRollbackStageException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "PipelineExecutionNotFoundException" ->
+          `PipelineExecutionNotFoundException
+            (PipelineExecutionNotFoundException.of_xml xml)
+      | "PipelineExecutionOutdatedException" ->
+          `PipelineExecutionOutdatedException
+            (PipelineExecutionOutdatedException.of_xml xml)
+      | "PipelineNotFoundException" ->
+          `PipelineNotFoundException (PipelineNotFoundException.of_xml xml)
+      | "StageNotFoundException" ->
+          `StageNotFoundException (StageNotFoundException.of_xml xml)
+      | "UnableToRollbackStageException" ->
+          `UnableToRollbackStageException
+            (UnableToRollbackStageException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `PipelineExecutionNotFoundException e ->
+          `Assoc
+            [("error", (`String "PipelineExecutionNotFoundException"));
+            ("details", (PipelineExecutionNotFoundException.to_json e))]
+      | `PipelineExecutionOutdatedException e ->
+          `Assoc
+            [("error", (`String "PipelineExecutionOutdatedException"));
+            ("details", (PipelineExecutionOutdatedException.to_json e))]
+      | `PipelineNotFoundException e ->
+          `Assoc
+            [("error", (`String "PipelineNotFoundException"));
+            ("details", (PipelineNotFoundException.to_json e))]
+      | `StageNotFoundException e ->
+          `Assoc
+            [("error", (`String "StageNotFoundException"));
+            ("details", (StageNotFoundException.to_json e))]
+      | `UnableToRollbackStageException e ->
+          `Assoc
+            [("error", (`String "UnableToRollbackStageException"));
+            ("details", (UnableToRollbackStageException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("pipelineExecutionId",
+           (Option.map x.pipelineExecutionId ~f:PipelineExecutionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pipelineExecutionId =
+        (Option.map ~f:PipelineExecutionId.of_xml)
+          (Xml.child xml_arg0 "pipelineExecutionId") in
+      make ?pipelineExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pipelineExecutionId =
+        field_map json__ "pipelineExecutionId" PipelineExecutionId.of_json in
+      make ?pipelineExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Rolls back a stage execution."]
+module RollbackStageInput =
+  struct
+    type nonrec t =
+      {
+      pipelineName: PipelineName.t
+        [@ocaml.doc
+          "The name of the pipeline for which the stage will be rolled back."];
+      stageName: StageName.t
+        [@ocaml.doc
+          "The name of the stage in the pipeline to be rolled back."];
+      targetPipelineExecutionId: PipelineExecutionId.t
+        [@ocaml.doc
+          "The pipeline execution ID for the stage to be rolled back to."]}
+    let context_ = "RollbackStageInput"
+    let make ~pipelineName =
+      fun ~stageName ->
+        fun ~targetPipelineExecutionId ->
+          fun () -> { pipelineName; stageName; targetPipelineExecutionId }
+    let to_value x =
+      structure_to_value
+        [("pipelineName", (Some (PipelineName.to_value x.pipelineName)));
+        ("stageName", (Some (StageName.to_value x.stageName)));
+        ("targetPipelineExecutionId",
+          (Some (PipelineExecutionId.to_value x.targetPipelineExecutionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetPipelineExecutionId =
+        PipelineExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "targetPipelineExecutionId") in
+      let stageName =
+        StageName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "stageName") in
+      let pipelineName =
+        PipelineName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
+      make ~targetPipelineExecutionId ~stageName ~pipelineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetPipelineExecutionId =
+        field_map_exn json__ "targetPipelineExecutionId"
+          PipelineExecutionId.of_json in
+      let stageName = field_map_exn json__ "stageName" StageName.of_json in
+      let pipelineName =
+        field_map_exn json__ "pipelineName" PipelineName.of_json in
+      make ~targetPipelineExecutionId ~stageName ~pipelineName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Rolls back a stage execution."]
 module RetryStageExecutionOutput =
   struct
     type nonrec t =
@@ -7625,7 +12201,10 @@ module RetryStageExecutionOutput =
         [@ocaml.doc
           "The ID of the current workflow execution in the failed stage."]}
     type nonrec error =
-      [ `ConflictException of ConflictException.t 
+      [
+        `ConcurrentPipelineExecutionsLimitExceededException of
+          ConcurrentPipelineExecutionsLimitExceededException.t 
+      | `ConflictException of ConflictException.t 
       | `NotLatestPipelineExecutionException of
           NotLatestPipelineExecutionException.t 
       | `PipelineNotFoundException of PipelineNotFoundException.t 
@@ -7636,6 +12215,9 @@ module RetryStageExecutionOutput =
     let make ?pipelineExecutionId = fun () -> { pipelineExecutionId }
     let error_of_json name json =
       match name with
+      | "ConcurrentPipelineExecutionsLimitExceededException" ->
+          `ConcurrentPipelineExecutionsLimitExceededException
+            (ConcurrentPipelineExecutionsLimitExceededException.of_json json)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_json json)
       | "NotLatestPipelineExecutionException" ->
@@ -7655,6 +12237,9 @@ module RetryStageExecutionOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConcurrentPipelineExecutionsLimitExceededException" ->
+          `ConcurrentPipelineExecutionsLimitExceededException
+            (ConcurrentPipelineExecutionsLimitExceededException.of_xml xml)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_xml xml)
       | "NotLatestPipelineExecutionException" ->
@@ -7672,6 +12257,12 @@ module RetryStageExecutionOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConcurrentPipelineExecutionsLimitExceededException e ->
+          `Assoc
+            [("error",
+               (`String "ConcurrentPipelineExecutionsLimitExceededException"));
+            ("details",
+              (ConcurrentPipelineExecutionsLimitExceededException.to_json e))]
       | `ConflictException e ->
           `Assoc
             [("error", (`String "ConflictException"));
@@ -7712,9 +12303,9 @@ module RetryStageExecutionOutput =
           (Xml.child xml_arg0 "pipelineExecutionId") in
       make ?pipelineExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pipelineExecutionId =
-        field_map json "pipelineExecutionId" PipelineExecutionId.of_json in
+        field_map json__ "pipelineExecutionId" PipelineExecutionId.of_json in
       make ?pipelineExecutionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a RetryStageExecution action."]
@@ -7731,8 +12322,7 @@ module RetryStageExecutionInput =
         [@ocaml.doc
           "The ID of the pipeline execution in the failed stage to be retried. Use the GetPipelineState action to retrieve the current pipelineExecutionId of the failed stage"];
       retryMode: StageRetryMode.t
-        [@ocaml.doc
-          "The scope of the retry attempt. Currently, the only supported value is FAILED_ACTIONS."]}
+        [@ocaml.doc "The scope of the retry attempt."]}
     let context_ = "RetryStageExecutionInput"
     let make ~pipelineName =
       fun ~stageName ->
@@ -7763,13 +12353,14 @@ module RetryStageExecutionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
       make ~retryMode ~pipelineExecutionId ~stageName ~pipelineName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let retryMode = field_map_exn json "retryMode" StageRetryMode.of_json in
+    let of_json json__ =
+      let retryMode = field_map_exn json__ "retryMode" StageRetryMode.of_json in
       let pipelineExecutionId =
-        field_map_exn json "pipelineExecutionId" PipelineExecutionId.of_json in
-      let stageName = field_map_exn json "stageName" StageName.of_json in
+        field_map_exn json__ "pipelineExecutionId"
+          PipelineExecutionId.of_json in
+      let stageName = field_map_exn json__ "stageName" StageName.of_json in
       let pipelineName =
-        field_map_exn json "pipelineName" PipelineName.of_json in
+        field_map_exn json__ "pipelineName" PipelineName.of_json in
       make ~retryMode ~pipelineExecutionId ~stageName ~pipelineName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a RetryStageExecution action."]
@@ -7787,8 +12378,8 @@ module RequestFailedException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7859,8 +12450,8 @@ module RegisterWebhookWithThirdPartyInput =
         (Option.map ~f:WebhookName.of_xml) (Xml.child xml_arg0 "webhookName") in
       make ?webhookName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let webhookName = field_map json "webhookName" WebhookName.of_json in
+    let of_json json__ =
+      let webhookName = field_map json__ "webhookName" WebhookName.of_json in
       make ?webhookName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7983,12 +12574,12 @@ module PutWebhookOutput =
         (Option.map ~f:ListWebhookItem.of_xml) (Xml.child xml_arg0 "webhook") in
       make ?webhook ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let webhook = field_map json "webhook" ListWebhookItem.of_json in
+    let of_json json__ =
+      let webhook = field_map json__ "webhook" ListWebhookItem.of_json in
       make ?webhook ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Defines a webhook and returns a unique webhook URL generated by CodePipeline. This URL can be supplied to third party source hosting providers to call every time there's a code change. When CodePipeline receives a POST request on this URL, the pipeline defined in the webhook is started as long as the POST request satisfied the authentication and filtering requirements supplied when defining the webhook. RegisterWebhookWithThirdParty and DeregisterWebhookWithThirdParty APIs can be used to automatically configure supported third parties to call the generated webhook URL."]
+       "Defines a webhook and returns a unique webhook URL generated by CodePipeline. This URL can be supplied to third party source hosting providers to call every time there's a code change. When CodePipeline receives a POST request on this URL, the pipeline defined in the webhook is started as long as the POST request satisfied the authentication and filtering requirements supplied when defining the webhook. RegisterWebhookWithThirdParty and DeregisterWebhookWithThirdParty APIs can be used to automatically configure supported third parties to call the generated webhook URL. When creating CodePipeline webhooks, do not use your own credentials or reuse the same secret token across multiple webhooks. For optimal security, generate a unique secret token for each webhook you create. The secret token is an arbitrary string that you provide, which GitHub uses to compute and sign the webhook payloads sent to CodePipeline, for protecting the integrity and authenticity of the webhook payloads. Using your own credentials or reusing the same token across multiple webhooks can lead to security vulnerabilities. If a secret token was provided, it will be redacted in the response."]
 module PutWebhookInput =
   struct
     type nonrec t =
@@ -8011,13 +12602,13 @@ module PutWebhookInput =
           (Xml.child_exn ~context:context_ xml_arg0 "webhook") in
       make ?tags ~webhook ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let webhook = field_map_exn json "webhook" WebhookDefinition.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let webhook = field_map_exn json__ "webhook" WebhookDefinition.of_json in
       make ?tags ~webhook ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Defines a webhook and returns a unique webhook URL generated by CodePipeline. This URL can be supplied to third party source hosting providers to call every time there's a code change. When CodePipeline receives a POST request on this URL, the pipeline defined in the webhook is started as long as the POST request satisfied the authentication and filtering requirements supplied when defining the webhook. RegisterWebhookWithThirdParty and DeregisterWebhookWithThirdParty APIs can be used to automatically configure supported third parties to call the generated webhook URL."]
+       "Defines a webhook and returns a unique webhook URL generated by CodePipeline. This URL can be supplied to third party source hosting providers to call every time there's a code change. When CodePipeline receives a POST request on this URL, the pipeline defined in the webhook is started as long as the POST request satisfied the authentication and filtering requirements supplied when defining the webhook. RegisterWebhookWithThirdParty and DeregisterWebhookWithThirdParty APIs can be used to automatically configure supported third parties to call the generated webhook URL. When creating CodePipeline webhooks, do not use your own credentials or reuse the same secret token across multiple webhooks. For optimal security, generate a unique secret token for each webhook you create. The secret token is an arbitrary string that you provide, which GitHub uses to compute and sign the webhook payloads sent to CodePipeline, for protecting the integrity and authenticity of the webhook payloads. Using your own credentials or reusing the same token across multiple webhooks can lead to security vulnerabilities. If a secret token was provided, it will be redacted in the response."]
 module PutThirdPartyJobSuccessResultInput =
   struct
     type nonrec t =
@@ -8032,7 +12623,7 @@ module PutThirdPartyJobSuccessResultInput =
         [@ocaml.doc "Represents information about a current revision."];
       continuationToken: ContinuationToken.t option
         [@ocaml.doc
-          "A token generated by a job worker, such as an AWS CodeDeploy deployment ID, that a successful job provides to identify a partner action in progress. Future jobs use this token to identify the running instance of the action. It can be reused to return more information about the progress of the partner action. When the action is complete, no continuation token should be supplied."];
+          "A token generated by a job worker, such as a CodeDeploy deployment ID, that a successful job provides to identify a partner action in progress. Future jobs use this token to identify the running instance of the action. It can be reused to return more information about the progress of the partner action. When the action is complete, no continuation token should be supplied."];
       executionDetails: ExecutionDetails.t option
         [@ocaml.doc
           "The details of the actions taken and results produced on an artifact as it passes through stages in the pipeline."]}
@@ -8080,15 +12671,16 @@ module PutThirdPartyJobSuccessResultInput =
       make ?executionDetails ?continuationToken ?currentRevision ~clientToken
         ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let executionDetails =
-        field_map json "executionDetails" ExecutionDetails.of_json in
+        field_map json__ "executionDetails" ExecutionDetails.of_json in
       let continuationToken =
-        field_map json "continuationToken" ContinuationToken.of_json in
+        field_map json__ "continuationToken" ContinuationToken.of_json in
       let currentRevision =
-        field_map json "currentRevision" CurrentRevision.of_json in
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      let jobId = field_map_exn json "jobId" ThirdPartyJobId.of_json in
+        field_map json__ "currentRevision" CurrentRevision.of_json in
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let jobId = field_map_exn json__ "jobId" ThirdPartyJobId.of_json in
       make ?executionDetails ?continuationToken ?currentRevision ~clientToken
         ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -8129,11 +12721,12 @@ module PutThirdPartyJobFailureResultInput =
           (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~failureDetails ~clientToken ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureDetails =
-        field_map_exn json "failureDetails" FailureDetails.of_json in
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      let jobId = field_map_exn json "jobId" ThirdPartyJobId.of_json in
+        field_map_exn json__ "failureDetails" FailureDetails.of_json in
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let jobId = field_map_exn json__ "jobId" ThirdPartyJobId.of_json in
       make ~failureDetails ~clientToken ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8150,7 +12743,7 @@ module PutJobSuccessResultInput =
           "The ID of the current revision of the artifact successfully worked on by the job."];
       continuationToken: ContinuationToken.t option
         [@ocaml.doc
-          "A token generated by a job worker, such as an AWS CodeDeploy deployment ID, that a successful job provides to identify a custom action in progress. Future jobs use this token to identify the running instance of the action. It can be reused to return more information about the progress of the custom action. When the action is complete, no continuation token should be supplied."];
+          "A token generated by a job worker, such as a CodeDeploy deployment ID, that a successful job provides to identify a custom action in progress. Future jobs use this token to identify the running instance of the action. It can be reused to return more information about the progress of the custom action. When the action is complete, no continuation token should be supplied."];
       executionDetails: ExecutionDetails.t option
         [@ocaml.doc
           "The execution details of the successful job, such as the actions taken by the job worker."];
@@ -8201,16 +12794,16 @@ module PutJobSuccessResultInput =
       make ?outputVariables ?executionDetails ?continuationToken
         ?currentRevision ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outputVariables =
-        field_map json "outputVariables" OutputVariablesMap.of_json in
+        field_map json__ "outputVariables" OutputVariablesMap.of_json in
       let executionDetails =
-        field_map json "executionDetails" ExecutionDetails.of_json in
+        field_map json__ "executionDetails" ExecutionDetails.of_json in
       let continuationToken =
-        field_map json "continuationToken" ContinuationToken.of_json in
+        field_map json__ "continuationToken" ContinuationToken.of_json in
       let currentRevision =
-        field_map json "currentRevision" CurrentRevision.of_json in
-      let jobId = field_map_exn json "jobId" JobId.of_json in
+        field_map json__ "currentRevision" CurrentRevision.of_json in
+      let jobId = field_map_exn json__ "jobId" JobId.of_json in
       make ?outputVariables ?executionDetails ?continuationToken
         ?currentRevision ~jobId ()
     let to_json v = composed_to_json to_value v
@@ -8240,10 +12833,10 @@ module PutJobFailureResultInput =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~failureDetails ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureDetails =
-        field_map_exn json "failureDetails" FailureDetails.of_json in
-      let jobId = field_map_exn json "jobId" JobId.of_json in
+        field_map_exn json__ "failureDetails" FailureDetails.of_json in
+      let jobId = field_map_exn json__ "jobId" JobId.of_json in
       make ~failureDetails ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a PutJobFailureResult action."]
@@ -8341,8 +12934,8 @@ module PutApprovalResultOutput =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "approvedAt") in
       make ?approvedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let approvedAt = field_map json "approvedAt" Timestamp.of_json in
+    let of_json json__ =
+      let approvedAt = field_map json__ "approvedAt" Timestamp.of_json in
       make ?approvedAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a PutApprovalResult action."]
@@ -8362,7 +12955,7 @@ module PutApprovalResultInput =
           "Represents information about the result of the approval request."];
       token: ApprovalToken.t
         [@ocaml.doc
-          "The system-generated token used to identify a unique approval request. The token for each open approval request can be obtained using the GetPipelineState action. It is used to validate that the approval request corresponding to this token is still valid."]}
+          "The system-generated token used to identify a unique approval request. The token for each open approval request can be obtained using the GetPipelineState action. It is used to validate that the approval request corresponding to this token is still valid. For a pipeline where the execution mode is set to PARALLEL, the token required to approve/reject an approval request as detailed above is not available. Instead, use the externalExecutionId in the response output from the ListActionExecutions action as the token in the approval request."]}
     let context_ = "PutApprovalResultInput"
     let make ~pipelineName =
       fun ~stageName ->
@@ -8397,13 +12990,13 @@ module PutApprovalResultInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
       make ~token ~result ~actionName ~stageName ~pipelineName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let token = field_map_exn json "token" ApprovalToken.of_json in
-      let result = field_map_exn json "result" ApprovalResult.of_json in
-      let actionName = field_map_exn json "actionName" ActionName.of_json in
-      let stageName = field_map_exn json "stageName" StageName.of_json in
+    let of_json json__ =
+      let token = field_map_exn json__ "token" ApprovalToken.of_json in
+      let result = field_map_exn json__ "result" ApprovalResult.of_json in
+      let actionName = field_map_exn json__ "actionName" ActionName.of_json in
+      let stageName = field_map_exn json__ "stageName" StageName.of_json in
       let pipelineName =
-        field_map_exn json "pipelineName" PipelineName.of_json in
+        field_map_exn json__ "pipelineName" PipelineName.of_json in
       make ~token ~result ~actionName ~stageName ~pipelineName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a PutApprovalResult action."]
@@ -8418,6 +13011,8 @@ module PutActionRevisionOutput =
         [@ocaml.doc "The ID of the current workflow state of the pipeline."]}
     type nonrec error =
       [ `ActionNotFoundException of ActionNotFoundException.t 
+      | `ConcurrentPipelineExecutionsLimitExceededException of
+          ConcurrentPipelineExecutionsLimitExceededException.t 
       | `PipelineNotFoundException of PipelineNotFoundException.t 
       | `StageNotFoundException of StageNotFoundException.t 
       | `ValidationException of ValidationException.t 
@@ -8429,6 +13024,9 @@ module PutActionRevisionOutput =
       match name with
       | "ActionNotFoundException" ->
           `ActionNotFoundException (ActionNotFoundException.of_json json)
+      | "ConcurrentPipelineExecutionsLimitExceededException" ->
+          `ConcurrentPipelineExecutionsLimitExceededException
+            (ConcurrentPipelineExecutionsLimitExceededException.of_json json)
       | "PipelineNotFoundException" ->
           `PipelineNotFoundException (PipelineNotFoundException.of_json json)
       | "StageNotFoundException" ->
@@ -8442,6 +13040,9 @@ module PutActionRevisionOutput =
       match name with
       | "ActionNotFoundException" ->
           `ActionNotFoundException (ActionNotFoundException.of_xml xml)
+      | "ConcurrentPipelineExecutionsLimitExceededException" ->
+          `ConcurrentPipelineExecutionsLimitExceededException
+            (ConcurrentPipelineExecutionsLimitExceededException.of_xml xml)
       | "PipelineNotFoundException" ->
           `PipelineNotFoundException (PipelineNotFoundException.of_xml xml)
       | "StageNotFoundException" ->
@@ -8456,6 +13057,12 @@ module PutActionRevisionOutput =
           `Assoc
             [("error", (`String "ActionNotFoundException"));
             ("details", (ActionNotFoundException.to_json e))]
+      | `ConcurrentPipelineExecutionsLimitExceededException e ->
+          `Assoc
+            [("error",
+               (`String "ConcurrentPipelineExecutionsLimitExceededException"));
+            ("details",
+              (ConcurrentPipelineExecutionsLimitExceededException.to_json e))]
       | `PipelineNotFoundException e ->
           `Assoc
             [("error", (`String "PipelineNotFoundException"));
@@ -8487,10 +13094,10 @@ module PutActionRevisionOutput =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "newRevision") in
       make ?pipelineExecutionId ?newRevision ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pipelineExecutionId =
-        field_map json "pipelineExecutionId" PipelineExecutionId.of_json in
-      let newRevision = field_map json "newRevision" Boolean.of_json in
+        field_map json__ "pipelineExecutionId" PipelineExecutionId.of_json in
+      let newRevision = field_map json__ "newRevision" Boolean.of_json in
       make ?pipelineExecutionId ?newRevision ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a PutActionRevision action."]
@@ -8537,13 +13144,13 @@ module PutActionRevisionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
       make ~actionRevision ~actionName ~stageName ~pipelineName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let actionRevision =
-        field_map_exn json "actionRevision" ActionRevision.of_json in
-      let actionName = field_map_exn json "actionName" ActionName.of_json in
-      let stageName = field_map_exn json "stageName" StageName.of_json in
+        field_map_exn json__ "actionRevision" ActionRevision.of_json in
+      let actionName = field_map_exn json__ "actionName" ActionName.of_json in
+      let stageName = field_map_exn json__ "stageName" StageName.of_json in
       let pipelineName =
-        field_map_exn json "pipelineName" PipelineName.of_json in
+        field_map_exn json__ "pipelineName" PipelineName.of_json in
       make ~actionRevision ~actionName ~stageName ~pipelineName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a PutActionRevision action."]
@@ -8601,8 +13208,8 @@ module PollForThirdPartyJobsOutput =
         (Option.map ~f:ThirdPartyJobList.of_xml) (Xml.child xml_arg0 "jobs") in
       make ?jobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobs = field_map json "jobs" ThirdPartyJobList.of_json in
+    let of_json json__ =
+      let jobs = field_map json__ "jobs" ThirdPartyJobList.of_json in
       make ?jobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a PollForThirdPartyJobs action."]
@@ -8633,10 +13240,10 @@ module PollForThirdPartyJobsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "actionTypeId") in
       make ?maxBatchSize ~actionTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxBatchSize = field_map json "maxBatchSize" MaxBatchSize.of_json in
+    let of_json json__ =
+      let maxBatchSize = field_map json__ "maxBatchSize" MaxBatchSize.of_json in
       let actionTypeId =
-        field_map_exn json "actionTypeId" ActionTypeId.of_json in
+        field_map_exn json__ "actionTypeId" ActionTypeId.of_json in
       make ?maxBatchSize ~actionTypeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a PollForThirdPartyJobs action."]
@@ -8692,8 +13299,8 @@ module PollForJobsOutput =
       let jobs = (Option.map ~f:JobList.of_xml) (Xml.child xml_arg0 "jobs") in
       make ?jobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobs = field_map json "jobs" JobList.of_json in make ?jobs ()
+    let of_json json__ =
+      let jobs = field_map json__ "jobs" JobList.of_json in make ?jobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a PollForJobs action."]
 module PollForJobsInput =
@@ -8732,14 +13339,71 @@ module PollForJobsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "actionTypeId") in
       make ?queryParam ?maxBatchSize ~actionTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryParam = field_map json "queryParam" QueryParamMap.of_json in
-      let maxBatchSize = field_map json "maxBatchSize" MaxBatchSize.of_json in
+    let of_json json__ =
+      let queryParam = field_map json__ "queryParam" QueryParamMap.of_json in
+      let maxBatchSize = field_map json__ "maxBatchSize" MaxBatchSize.of_json in
       let actionTypeId =
-        field_map_exn json "actionTypeId" ActionTypeId.of_json in
+        field_map_exn json__ "actionTypeId" ActionTypeId.of_json in
       make ?queryParam ?maxBatchSize ~actionTypeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a PollForJobs action."]
+module OverrideStageConditionInput =
+  struct
+    type nonrec t =
+      {
+      pipelineName: PipelineName.t
+        [@ocaml.doc
+          "The name of the pipeline with the stage that will override the condition."];
+      stageName: StageName.t
+        [@ocaml.doc "The name of the stage for the override."];
+      pipelineExecutionId: PipelineExecutionId.t
+        [@ocaml.doc "The ID of the pipeline execution for the override."];
+      conditionType: ConditionType.t
+        [@ocaml.doc
+          "The type of condition to override for the stage, such as entry conditions, failure conditions, or success conditions."]}
+    let context_ = "OverrideStageConditionInput"
+    let make ~pipelineName =
+      fun ~stageName ->
+        fun ~pipelineExecutionId ->
+          fun ~conditionType ->
+            fun () ->
+              { pipelineName; stageName; pipelineExecutionId; conditionType }
+    let to_value x =
+      structure_to_value
+        [("pipelineName", (Some (PipelineName.to_value x.pipelineName)));
+        ("stageName", (Some (StageName.to_value x.stageName)));
+        ("pipelineExecutionId",
+          (Some (PipelineExecutionId.to_value x.pipelineExecutionId)));
+        ("conditionType", (Some (ConditionType.to_value x.conditionType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let conditionType =
+        ConditionType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "conditionType") in
+      let pipelineExecutionId =
+        PipelineExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "pipelineExecutionId") in
+      let stageName =
+        StageName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "stageName") in
+      let pipelineName =
+        PipelineName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
+      make ~conditionType ~pipelineExecutionId ~stageName ~pipelineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let conditionType =
+        field_map_exn json__ "conditionType" ConditionType.of_json in
+      let pipelineExecutionId =
+        field_map_exn json__ "pipelineExecutionId"
+          PipelineExecutionId.of_json in
+      let stageName = field_map_exn json__ "stageName" StageName.of_json in
+      let pipelineName =
+        field_map_exn json__ "pipelineName" PipelineName.of_json in
+      make ~conditionType ~pipelineExecutionId ~stageName ~pipelineName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Used to override a stage condition. For more information about conditions, see Stage conditions and How do stage conditions work?."]
 module OutputVariablesSizeExceededException =
   struct
     type nonrec t = {
@@ -8754,8 +13418,8 @@ module OutputVariablesSizeExceededException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8819,13 +13483,13 @@ module ListWebhooksOutput =
         (Option.map ~f:WebhookList.of_xml) (Xml.child xml_arg0 "webhooks") in
       make ?nextToken ?webhooks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let webhooks = field_map json "webhooks" WebhookList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let webhooks = field_map json__ "webhooks" WebhookList.of_json in
       make ?nextToken ?webhooks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets a listing of all the webhooks in this AWS Region for this account. The output lists all webhooks and includes the webhook URL and ARN and the configuration for each webhook."]
+       "Gets a listing of all the webhooks in this Amazon Web Services Region for this account. The output lists all webhooks and includes the webhook URL and ARN and the configuration for each webhook. If a secret token was provided, it will be redacted in the response."]
 module ListWebhooksInput =
   struct
     type nonrec t =
@@ -8850,13 +13514,13 @@ module ListWebhooksInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets a listing of all the webhooks in this AWS Region for this account. The output lists all webhooks and includes the webhook URL and ARN and the configuration for each webhook."]
+       "Gets a listing of all the webhooks in this Amazon Web Services Region for this account. The output lists all webhooks and includes the webhook URL and ARN and the configuration for each webhook. If a secret token was provided, it will be redacted in the response."]
 module ListTagsForResourceOutput =
   struct
     type nonrec t =
@@ -8931,9 +13595,9 @@ module ListTagsForResourceOutput =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?nextToken ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       make ?nextToken ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8971,14 +13635,252 @@ module ListTagsForResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ?maxResults ?nextToken ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ?maxResults ?nextToken ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the set of key-value pairs (metadata) that are used to manage the resource."]
+module ListRuleTypesOutput =
+  struct
+    type nonrec t =
+      {
+      ruleTypes: RuleTypeList.t option
+        [@ocaml.doc "Lists the rules that are configured for the condition."]}
+    type nonrec error =
+      [ `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?ruleTypes = fun () -> { ruleTypes }
+    let error_of_json name json =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ruleTypes", (Option.map x.ruleTypes ~f:RuleTypeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ruleTypes =
+        (Option.map ~f:RuleTypeList.of_xml) (Xml.child xml_arg0 "ruleTypes") in
+      make ?ruleTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ruleTypes = field_map json__ "ruleTypes" RuleTypeList.of_json in
+      make ?ruleTypes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the rules for the condition. For more information about conditions, see Stage conditions and How do stage conditions work?.For more information about rules, see the CodePipeline rule reference."]
+module ListRuleTypesInput =
+  struct
+    type nonrec t =
+      {
+      ruleOwnerFilter: RuleOwner.t option
+        [@ocaml.doc "The rule owner to filter on."];
+      regionFilter: AWSRegionName.t option
+        [@ocaml.doc "The rule Region to filter on."]}
+    let make ?ruleOwnerFilter =
+      fun ?regionFilter -> fun () -> { ruleOwnerFilter; regionFilter }
+    let to_value x =
+      structure_to_value
+        [("ruleOwnerFilter",
+           (Option.map x.ruleOwnerFilter ~f:RuleOwner.to_value));
+        ("regionFilter",
+          (Option.map x.regionFilter ~f:AWSRegionName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let regionFilter =
+        (Option.map ~f:AWSRegionName.of_xml)
+          (Xml.child xml_arg0 "regionFilter") in
+      let ruleOwnerFilter =
+        (Option.map ~f:RuleOwner.of_xml)
+          (Xml.child xml_arg0 "ruleOwnerFilter") in
+      make ?regionFilter ?ruleOwnerFilter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let regionFilter =
+        field_map json__ "regionFilter" AWSRegionName.of_json in
+      let ruleOwnerFilter =
+        field_map json__ "ruleOwnerFilter" RuleOwner.of_json in
+      make ?regionFilter ?ruleOwnerFilter ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the rules for the condition. For more information about conditions, see Stage conditions and How do stage conditions work?.For more information about rules, see the CodePipeline rule reference."]
+module ListRuleExecutionsOutput =
+  struct
+    type nonrec t =
+      {
+      ruleExecutionDetails: RuleExecutionDetailList.t option
+        [@ocaml.doc "Details about the output for listing rule executions."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token that can be used in the next ListRuleExecutions call. To view all items in the list, continue to call this operation with each subsequent token until no more nextToken values are returned."]}
+    type nonrec error =
+      [ `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `PipelineExecutionNotFoundException of
+          PipelineExecutionNotFoundException.t 
+      | `PipelineNotFoundException of PipelineNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?ruleExecutionDetails =
+      fun ?nextToken -> fun () -> { ruleExecutionDetails; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "PipelineExecutionNotFoundException" ->
+          `PipelineExecutionNotFoundException
+            (PipelineExecutionNotFoundException.of_json json)
+      | "PipelineNotFoundException" ->
+          `PipelineNotFoundException (PipelineNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "PipelineExecutionNotFoundException" ->
+          `PipelineExecutionNotFoundException
+            (PipelineExecutionNotFoundException.of_xml xml)
+      | "PipelineNotFoundException" ->
+          `PipelineNotFoundException (PipelineNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `PipelineExecutionNotFoundException e ->
+          `Assoc
+            [("error", (`String "PipelineExecutionNotFoundException"));
+            ("details", (PipelineExecutionNotFoundException.to_json e))]
+      | `PipelineNotFoundException e ->
+          `Assoc
+            [("error", (`String "PipelineNotFoundException"));
+            ("details", (PipelineNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ruleExecutionDetails",
+           (Option.map x.ruleExecutionDetails
+              ~f:RuleExecutionDetailList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let ruleExecutionDetails =
+        (Option.map ~f:RuleExecutionDetailList.of_xml)
+          (Xml.child xml_arg0 "ruleExecutionDetails") in
+      make ?nextToken ?ruleExecutionDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let ruleExecutionDetails =
+        field_map json__ "ruleExecutionDetails"
+          RuleExecutionDetailList.of_json in
+      make ?nextToken ?ruleExecutionDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the rule executions that have occurred in a pipeline configured for conditions with rules."]
+module ListRuleExecutionsInput =
+  struct
+    type nonrec t =
+      {
+      pipelineName: PipelineName.t
+        [@ocaml.doc
+          "The name of the pipeline for which you want to get execution summary information."];
+      filter: RuleExecutionFilter.t option
+        [@ocaml.doc
+          "Input information used to filter rule execution history."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return in a single call. To retrieve the remaining results, make another call with the returned nextToken value. Pipeline history is limited to the most recent 12 months, based on pipeline execution start times. Default value is 100."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token that was returned from the previous ListRuleExecutions call, which can be used to return the next set of rule executions in the list."]}
+    let context_ = "ListRuleExecutionsInput"
+    let make ?filter =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~pipelineName ->
+            fun () -> { filter; maxResults; nextToken; pipelineName }
+    let to_value x =
+      structure_to_value
+        [("pipelineName", (Some (PipelineName.to_value x.pipelineName)));
+        ("filter", (Option.map x.filter ~f:RuleExecutionFilter.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let filter =
+        (Option.map ~f:RuleExecutionFilter.of_xml)
+          (Xml.child xml_arg0 "filter") in
+      let pipelineName =
+        PipelineName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
+      make ?nextToken ?maxResults ?filter ~pipelineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let filter = field_map json__ "filter" RuleExecutionFilter.of_json in
+      let pipelineName =
+        field_map_exn json__ "pipelineName" PipelineName.of_json in
+      make ?nextToken ?maxResults ?filter ~pipelineName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the rule executions that have occurred in a pipeline configured for conditions with rules."]
 module ListPipelinesOutput =
   struct
     type nonrec t =
@@ -9037,9 +13939,9 @@ module ListPipelinesOutput =
         (Option.map ~f:PipelineList.of_xml) (Xml.child xml_arg0 "pipelines") in
       make ?nextToken ?pipelines ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let pipelines = field_map json "pipelines" PipelineList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let pipelines = field_map json__ "pipelines" PipelineList.of_json in
       make ?nextToken ?pipelines ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a ListPipelines action."]
@@ -9067,9 +13969,9 @@ module ListPipelinesInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxPipelines.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxPipelines.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a ListPipelines action."]
@@ -9144,10 +14046,10 @@ module ListPipelineExecutionsOutput =
           (Xml.child xml_arg0 "pipelineExecutionSummaries") in
       make ?nextToken ?pipelineExecutionSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let pipelineExecutionSummaries =
-        field_map json "pipelineExecutionSummaries"
+        field_map json__ "pipelineExecutionSummaries"
           PipelineExecutionSummaryList.of_json in
       make ?nextToken ?pipelineExecutionSummaries ()
     let to_json v = composed_to_json to_value v
@@ -9163,17 +14065,172 @@ module ListPipelineExecutionsInput =
       maxResults: MaxResults.t option
         [@ocaml.doc
           "The maximum number of results to return in a single call. To retrieve the remaining results, make another call with the returned nextToken value. Pipeline history is limited to the most recent 12 months, based on pipeline execution start times. Default value is 100."];
+      filter: PipelineExecutionFilter.t option
+        [@ocaml.doc "The pipeline execution to filter on."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The token that was returned from the previous ListPipelineExecutions call, which can be used to return the next set of pipeline executions in the list."]}
     let context_ = "ListPipelineExecutionsInput"
     let make ?maxResults =
-      fun ?nextToken ->
-        fun ~pipelineName ->
-          fun () -> { maxResults; nextToken; pipelineName }
+      fun ?filter ->
+        fun ?nextToken ->
+          fun ~pipelineName ->
+            fun () -> { maxResults; filter; nextToken; pipelineName }
     let to_value x =
       structure_to_value
         [("pipelineName", (Some (PipelineName.to_value x.pipelineName)));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("filter", (Option.map x.filter ~f:PipelineExecutionFilter.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let filter =
+        (Option.map ~f:PipelineExecutionFilter.of_xml)
+          (Xml.child xml_arg0 "filter") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let pipelineName =
+        PipelineName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
+      make ?nextToken ?filter ?maxResults ~pipelineName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let filter = field_map json__ "filter" PipelineExecutionFilter.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let pipelineName =
+        field_map_exn json__ "pipelineName" PipelineName.of_json in
+      make ?nextToken ?filter ?maxResults ~pipelineName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents the input of a ListPipelineExecutions action."]
+module ListDeployActionExecutionTargetsOutput =
+  struct
+    type nonrec t =
+      {
+      targets: DeployActionExecutionTargetList.t option
+        [@ocaml.doc "The targets for the deploy action."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An identifier that was returned from the previous list action types call, which can be used to return the next set of action types in the list."]}
+    type nonrec error =
+      [
+        `ActionExecutionNotFoundException of
+          ActionExecutionNotFoundException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `PipelineNotFoundException of PipelineNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?targets = fun ?nextToken -> fun () -> { targets; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ActionExecutionNotFoundException" ->
+          `ActionExecutionNotFoundException
+            (ActionExecutionNotFoundException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "PipelineNotFoundException" ->
+          `PipelineNotFoundException (PipelineNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ActionExecutionNotFoundException" ->
+          `ActionExecutionNotFoundException
+            (ActionExecutionNotFoundException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "PipelineNotFoundException" ->
+          `PipelineNotFoundException (PipelineNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ActionExecutionNotFoundException e ->
+          `Assoc
+            [("error", (`String "ActionExecutionNotFoundException"));
+            ("details", (ActionExecutionNotFoundException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `PipelineNotFoundException e ->
+          `Assoc
+            [("error", (`String "PipelineNotFoundException"));
+            ("details", (PipelineNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("targets",
+           (Option.map x.targets ~f:DeployActionExecutionTargetList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let targets =
+        (Option.map ~f:DeployActionExecutionTargetList.of_xml)
+          (Xml.child xml_arg0 "targets") in
+      make ?nextToken ?targets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let targets =
+        field_map json__ "targets" DeployActionExecutionTargetList.of_json in
+      make ?nextToken ?targets ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the targets for the deploy action."]
+module ListDeployActionExecutionTargetsInput =
+  struct
+    type nonrec t =
+      {
+      pipelineName: PipelineName.t option
+        [@ocaml.doc "The name of the pipeline with the deploy action."];
+      actionExecutionId: ActionExecutionId.t
+        [@ocaml.doc "The execution ID for the deploy action."];
+      filters: TargetFilterList.t option
+        [@ocaml.doc "Filters the targets for a specified deploy action."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return in a single call. To retrieve the remaining results, make another call with the returned nextToken value."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An identifier that was returned from the previous list action types call, which can be used to return the next set of action types in the list."]}
+    let context_ = "ListDeployActionExecutionTargetsInput"
+    let make ?pipelineName =
+      fun ?filters ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun ~actionExecutionId ->
+              fun () ->
+                {
+                  pipelineName;
+                  filters;
+                  maxResults;
+                  nextToken;
+                  actionExecutionId
+                }
+    let to_value x =
+      structure_to_value
+        [("pipelineName",
+           (Option.map x.pipelineName ~f:PipelineName.to_value));
+        ("actionExecutionId",
+          (Some (ActionExecutionId.to_value x.actionExecutionId)));
+        ("filters", (Option.map x.filters ~f:TargetFilterList.to_value));
         ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
@@ -9182,24 +14239,34 @@ module ListPipelineExecutionsInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let filters =
+        (Option.map ~f:TargetFilterList.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      let actionExecutionId =
+        ActionExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "actionExecutionId") in
       let pipelineName =
-        PipelineName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
-      make ?nextToken ?maxResults ~pipelineName ()
+        (Option.map ~f:PipelineName.of_xml)
+          (Xml.child xml_arg0 "pipelineName") in
+      make ?nextToken ?maxResults ?filters ~actionExecutionId ?pipelineName
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let pipelineName =
-        field_map_exn json "pipelineName" PipelineName.of_json in
-      make ?nextToken ?maxResults ~pipelineName ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let filters = field_map json__ "filters" TargetFilterList.of_json in
+      let actionExecutionId =
+        field_map_exn json__ "actionExecutionId" ActionExecutionId.of_json in
+      let pipelineName = field_map json__ "pipelineName" PipelineName.of_json in
+      make ?nextToken ?maxResults ?filters ~actionExecutionId ?pipelineName
+        ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Represents the input of a ListPipelineExecutions action."]
+  end[@@ocaml.doc "Lists the targets for the deploy action."]
 module ListActionTypesOutput =
   struct
     type nonrec t =
       {
-      actionTypes: ActionTypeList.t
+      actionTypes: ActionTypeList.t option
         [@ocaml.doc "Provides details of the action types."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -9208,9 +14275,8 @@ module ListActionTypesOutput =
       [ `InvalidNextTokenException of InvalidNextTokenException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListActionTypesOutput"
-    let make ?nextToken =
-      fun ~actionTypes -> fun () -> { nextToken; actionTypes }
+    let make ?actionTypes =
+      fun ?nextToken -> fun () -> { actionTypes; nextToken }
     let error_of_json name json =
       match name with
       | "InvalidNextTokenException" ->
@@ -9245,22 +14311,22 @@ module ListActionTypesOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("actionTypes", (Some (ActionTypeList.to_value x.actionTypes)));
+        [("actionTypes",
+           (Option.map x.actionTypes ~f:ActionTypeList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let actionTypes =
-        ActionTypeList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "actionTypes") in
-      make ?nextToken ~actionTypes ()
+        (Option.map ~f:ActionTypeList.of_xml)
+          (Xml.child xml_arg0 "actionTypes") in
+      make ?nextToken ?actionTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let actionTypes =
-        field_map_exn json "actionTypes" ActionTypeList.of_json in
-      make ?nextToken ~actionTypes ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let actionTypes = field_map json__ "actionTypes" ActionTypeList.of_json in
+      make ?nextToken ?actionTypes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a ListActionTypes action."]
 module ListActionTypesInput =
@@ -9298,11 +14364,12 @@ module ListActionTypesInput =
           (Xml.child xml_arg0 "actionOwnerFilter") in
       make ?regionFilter ?nextToken ?actionOwnerFilter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let regionFilter = field_map json "regionFilter" AWSRegionName.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let regionFilter =
+        field_map json__ "regionFilter" AWSRegionName.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let actionOwnerFilter =
-        field_map json "actionOwnerFilter" ActionOwner.of_json in
+        field_map json__ "actionOwnerFilter" ActionOwner.of_json in
       make ?regionFilter ?nextToken ?actionOwnerFilter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a ListActionTypes action."]
@@ -9390,10 +14457,10 @@ module ListActionExecutionsOutput =
           (Xml.child xml_arg0 "actionExecutionDetails") in
       make ?nextToken ?actionExecutionDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let actionExecutionDetails =
-        field_map json "actionExecutionDetails"
+        field_map json__ "actionExecutionDetails"
           ActionExecutionDetailList.of_json in
       make ?nextToken ?actionExecutionDetails ()
     let to_json v = composed_to_json to_value v
@@ -9411,7 +14478,7 @@ module ListActionExecutionsInput =
           "Input information used to filter action execution history."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to return in a single call. To retrieve the remaining results, make another call with the returned nextToken value. Action execution history is retained for up to 12 months, based on action execution start times. Default value is 100. Detailed execution history is available for executions run on or after February 21, 2019."];
+          "The maximum number of results to return in a single call. To retrieve the remaining results, make another call with the returned nextToken value. Action execution history is retained for up to 12 months, based on action execution start times. Default value is 100."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The token that was returned from the previous ListActionExecutions call, which can be used to return the next set of action executions in the list."]}
@@ -9441,12 +14508,12 @@ module ListActionExecutionsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
       make ?nextToken ?maxResults ?filter ~pipelineName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let filter = field_map json "filter" ActionExecutionFilter.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let filter = field_map json__ "filter" ActionExecutionFilter.of_json in
       let pipelineName =
-        field_map_exn json "pipelineName" PipelineName.of_json in
+        field_map_exn json__ "pipelineName" PipelineName.of_json in
       make ?nextToken ?maxResults ?filter ~pipelineName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9538,9 +14605,9 @@ module GetThirdPartyJobDetailsOutput =
           (Xml.child xml_arg0 "jobDetails") in
       make ?jobDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let jobDetails =
-        field_map json "jobDetails" ThirdPartyJobDetails.of_json in
+        field_map json__ "jobDetails" ThirdPartyJobDetails.of_json in
       make ?jobDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9571,9 +14638,10 @@ module GetThirdPartyJobDetailsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~clientToken ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      let jobId = field_map_exn json "jobId" ThirdPartyJobId.of_json in
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let jobId = field_map_exn json__ "jobId" ThirdPartyJobId.of_json in
       make ~clientToken ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9673,13 +14741,13 @@ module GetPipelineStateOutput =
           (Xml.child xml_arg0 "pipelineName") in
       make ?updated ?created ?stageStates ?pipelineVersion ?pipelineName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updated = field_map json "updated" Timestamp.of_json in
-      let created = field_map json "created" Timestamp.of_json in
-      let stageStates = field_map json "stageStates" StageStateList.of_json in
+    let of_json json__ =
+      let updated = field_map json__ "updated" Timestamp.of_json in
+      let created = field_map json__ "created" Timestamp.of_json in
+      let stageStates = field_map json__ "stageStates" StageStateList.of_json in
       let pipelineVersion =
-        field_map json "pipelineVersion" PipelineVersion.of_json in
-      let pipelineName = field_map json "pipelineName" PipelineName.of_json in
+        field_map json__ "pipelineVersion" PipelineVersion.of_json in
+      let pipelineName = field_map json__ "pipelineName" PipelineName.of_json in
       make ?updated ?created ?stageStates ?pipelineVersion ?pipelineName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a GetPipelineState action."]
@@ -9700,8 +14768,8 @@ module GetPipelineStateInput =
         PipelineName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" PipelineName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" PipelineName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a GetPipelineState action."]
@@ -9779,9 +14847,9 @@ module GetPipelineOutput =
           (Xml.child xml_arg0 "pipeline") in
       make ?metadata ?pipeline ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metadata = field_map json "metadata" PipelineMetadata.of_json in
-      let pipeline = field_map json "pipeline" PipelineDeclaration.of_json in
+    let of_json json__ =
+      let metadata = field_map json__ "metadata" PipelineMetadata.of_json in
+      let pipeline = field_map json__ "pipeline" PipelineDeclaration.of_json in
       make ?metadata ?pipeline ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a GetPipeline action."]
@@ -9791,7 +14859,7 @@ module GetPipelineInput =
       {
       name: PipelineName.t
         [@ocaml.doc
-          "The name of the pipeline for which you want to get information. Pipeline names must be unique under an AWS user account."];
+          "The name of the pipeline for which you want to get information. Pipeline names must be unique in an Amazon Web Services account."];
       version: PipelineVersion.t option
         [@ocaml.doc
           "The version number of the pipeline. If you do not specify a version, defaults to the current version."]}
@@ -9809,9 +14877,9 @@ module GetPipelineInput =
         PipelineName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?version ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "version" PipelineVersion.of_json in
-      let name = field_map_exn json "name" PipelineName.of_json in
+    let of_json json__ =
+      let version = field_map json__ "version" PipelineVersion.of_json in
+      let name = field_map_exn json__ "name" PipelineName.of_json in
       make ?version ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a GetPipeline action."]
@@ -9883,9 +14951,9 @@ module GetPipelineExecutionOutput =
           (Xml.child xml_arg0 "pipelineExecution") in
       make ?pipelineExecution ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pipelineExecution =
-        field_map json "pipelineExecution" PipelineExecution.of_json in
+        field_map json__ "pipelineExecution" PipelineExecution.of_json in
       make ?pipelineExecution ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a GetPipelineExecution action."]
@@ -9918,11 +14986,12 @@ module GetPipelineExecutionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
       make ~pipelineExecutionId ~pipelineName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pipelineExecutionId =
-        field_map_exn json "pipelineExecutionId" PipelineExecutionId.of_json in
+        field_map_exn json__ "pipelineExecutionId"
+          PipelineExecutionId.of_json in
       let pipelineName =
-        field_map_exn json "pipelineName" PipelineName.of_json in
+        field_map_exn json__ "pipelineName" PipelineName.of_json in
       make ~pipelineExecutionId ~pipelineName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a GetPipelineExecution action."]
@@ -9979,8 +15048,8 @@ module GetJobDetailsOutput =
         (Option.map ~f:JobDetails.of_xml) (Xml.child xml_arg0 "jobDetails") in
       make ?jobDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobDetails = field_map json "jobDetails" JobDetails.of_json in
+    let of_json json__ =
+      let jobDetails = field_map json__ "jobDetails" JobDetails.of_json in
       make ?jobDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a GetJobDetails action."]
@@ -10000,8 +15069,9 @@ module GetJobDetailsInput =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "jobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "jobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a GetJobDetails action."]
 module GetActionTypeOutput =
@@ -10061,9 +15131,9 @@ module GetActionTypeOutput =
           (Xml.child xml_arg0 "actionType") in
       make ?actionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let actionType =
-        field_map json "actionType" ActionTypeDeclaration.of_json in
+        field_map json__ "actionType" ActionTypeDeclaration.of_json in
       make ?actionType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10074,7 +15144,7 @@ module GetActionTypeInput =
       {
       category: ActionCategory.t
         [@ocaml.doc
-          "Defines what kind of action can be taken in the stage. The following are the valid values: Source Build Test Deploy Approval Invoke"];
+          "Defines what kind of action can be taken in the stage. The following are the valid values: Source Build Test Deploy Approval Invoke Compute"];
       owner: ActionTypeOwner.t
         [@ocaml.doc
           "The creator of an action type that was created with any supported integration model. There are two valid values: AWS and ThirdParty."];
@@ -10109,11 +15179,11 @@ module GetActionTypeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "category") in
       make ~version ~provider ~owner ~category ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map_exn json "version" Version.of_json in
-      let provider = field_map_exn json "provider" ActionProvider.of_json in
-      let owner = field_map_exn json "owner" ActionTypeOwner.of_json in
-      let category = field_map_exn json "category" ActionCategory.of_json in
+    let of_json json__ =
+      let version = field_map_exn json__ "version" Version.of_json in
+      let provider = field_map_exn json__ "provider" ActionProvider.of_json in
+      let owner = field_map_exn json__ "owner" ActionTypeOwner.of_json in
+      let category = field_map_exn json__ "category" ActionCategory.of_json in
       make ~version ~provider ~owner ~category ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10155,12 +15225,12 @@ module EnableStageTransitionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
       make ~transitionType ~stageName ~pipelineName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transitionType =
-        field_map_exn json "transitionType" StageTransitionType.of_json in
-      let stageName = field_map_exn json "stageName" StageName.of_json in
+        field_map_exn json__ "transitionType" StageTransitionType.of_json in
+      let stageName = field_map_exn json__ "stageName" StageName.of_json in
       let pipelineName =
-        field_map_exn json "pipelineName" PipelineName.of_json in
+        field_map_exn json__ "pipelineName" PipelineName.of_json in
       make ~transitionType ~stageName ~pipelineName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of an EnableStageTransition action."]
@@ -10209,13 +15279,13 @@ module DisableStageTransitionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineName") in
       make ~reason ~transitionType ~stageName ~pipelineName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map_exn json "reason" DisabledReason.of_json in
+    let of_json json__ =
+      let reason = field_map_exn json__ "reason" DisabledReason.of_json in
       let transitionType =
-        field_map_exn json "transitionType" StageTransitionType.of_json in
-      let stageName = field_map_exn json "stageName" StageName.of_json in
+        field_map_exn json__ "transitionType" StageTransitionType.of_json in
+      let stageName = field_map_exn json__ "stageName" StageName.of_json in
       let pipelineName =
-        field_map_exn json "pipelineName" PipelineName.of_json in
+        field_map_exn json__ "pipelineName" PipelineName.of_json in
       make ~reason ~transitionType ~stageName ~pipelineName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a DisableStageTransition action."]
@@ -10284,8 +15354,8 @@ module DeregisterWebhookWithThirdPartyInput =
         (Option.map ~f:WebhookName.of_xml) (Xml.child xml_arg0 "webhookName") in
       make ?webhookName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let webhookName = field_map json "webhookName" WebhookName.of_json in
+    let of_json json__ =
+      let webhookName = field_map json__ "webhookName" WebhookName.of_json in
       make ?webhookName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10341,7 +15411,7 @@ module DeleteWebhookOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a previously created webhook by name. Deleting the webhook stops AWS CodePipeline from starting a pipeline every time an external event occurs. The API returns successfully when trying to delete a webhook that is already deleted. If a deleted webhook is re-created by calling PutWebhook with the same name, it will have a different URL."]
+       "Deletes a previously created webhook by name. Deleting the webhook stops CodePipeline from starting a pipeline every time an external event occurs. The API returns successfully when trying to delete a webhook that is already deleted. If a deleted webhook is re-created by calling PutWebhook with the same name, it will have a different URL."]
 module DeleteWebhookInput =
   struct
     type nonrec t =
@@ -10358,12 +15428,12 @@ module DeleteWebhookInput =
         WebhookName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" WebhookName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" WebhookName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a previously created webhook by name. Deleting the webhook stops AWS CodePipeline from starting a pipeline every time an external event occurs. The API returns successfully when trying to delete a webhook that is already deleted. If a deleted webhook is re-created by calling PutWebhook with the same name, it will have a different URL."]
+       "Deletes a previously created webhook by name. Deleting the webhook stops CodePipeline from starting a pipeline every time an external event occurs. The API returns successfully when trying to delete a webhook that is already deleted. If a deleted webhook is re-created by calling PutWebhook with the same name, it will have a different URL."]
 module DeletePipelineInput =
   struct
     type nonrec t =
@@ -10380,8 +15450,8 @@ module DeletePipelineInput =
         PipelineName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" PipelineName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" PipelineName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a DeletePipeline action."]
@@ -10394,7 +15464,7 @@ module DeleteCustomActionTypeInput =
           "The category of the custom action that you want to delete, such as source or deploy."];
       provider: ActionProvider.t
         [@ocaml.doc
-          "The provider of the service used in the custom action, such as AWS CodeDeploy."];
+          "The provider of the service used in the custom action, such as CodeDeploy."];
       version: Version.t
         [@ocaml.doc "The version of the custom action to delete."]}
     let context_ = "DeleteCustomActionTypeInput"
@@ -10418,10 +15488,10 @@ module DeleteCustomActionTypeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "category") in
       make ~version ~provider ~category ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map_exn json "version" Version.of_json in
-      let provider = field_map_exn json "provider" ActionProvider.of_json in
-      let category = field_map_exn json "category" ActionCategory.of_json in
+    let of_json json__ =
+      let version = field_map_exn json__ "version" Version.of_json in
+      let provider = field_map_exn json__ "provider" ActionProvider.of_json in
+      let category = field_map_exn json__ "category" ActionCategory.of_json in
       make ~version ~provider ~category ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10570,9 +15640,9 @@ module CreatePipelineOutput =
           (Xml.child xml_arg0 "pipeline") in
       make ?tags ?pipeline ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let pipeline = field_map json "pipeline" PipelineDeclaration.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let pipeline = field_map json__ "pipeline" PipelineDeclaration.of_json in
       make ?tags ?pipeline ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a CreatePipeline action."]
@@ -10598,10 +15668,10 @@ module CreatePipelineInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pipeline") in
       make ?tags ~pipeline ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
       let pipeline =
-        field_map_exn json "pipeline" PipelineDeclaration.of_json in
+        field_map_exn json__ "pipeline" PipelineDeclaration.of_json in
       make ?tags ~pipeline ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a CreatePipeline action."]
@@ -10609,7 +15679,7 @@ module CreateCustomActionTypeOutput =
   struct
     type nonrec t =
       {
-      actionType: ActionType.t
+      actionType: ActionType.t option
         [@ocaml.doc
           "Returns information about the details of an action type."];
       tags: TagList.t option
@@ -10622,8 +15692,7 @@ module CreateCustomActionTypeOutput =
       | `TooManyTagsException of TooManyTagsException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateCustomActionTypeOutput"
-    let make ?tags = fun ~actionType -> fun () -> { tags; actionType }
+    let make ?actionType = fun ?tags -> fun () -> { actionType; tags }
     let error_of_json name json =
       match name with
       | "ConcurrentModificationException" ->
@@ -10684,20 +15753,19 @@ module CreateCustomActionTypeOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("actionType", (Some (ActionType.to_value x.actionType)));
+        [("actionType", (Option.map x.actionType ~f:ActionType.to_value));
         ("tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       let actionType =
-        ActionType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "actionType") in
-      make ?tags ~actionType ()
+        (Option.map ~f:ActionType.of_xml) (Xml.child xml_arg0 "actionType") in
+      make ?tags ?actionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let actionType = field_map_exn json "actionType" ActionType.of_json in
-      make ?tags ~actionType ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let actionType = field_map json__ "actionType" ActionType.of_json in
+      make ?tags ?actionType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the output of a CreateCustomActionType operation."]
@@ -10710,7 +15778,7 @@ module CreateCustomActionTypeInput =
           "The category of the custom action, such as a build action or a test action."];
       provider: ActionProvider.t
         [@ocaml.doc
-          "The provider of the service used in the custom action, such as AWS CodeDeploy."];
+          "The provider of the service used in the custom action, such as CodeDeploy."];
       version: Version.t
         [@ocaml.doc "The version identifier of the custom action."];
       settings: ActionTypeSettings.t option
@@ -10786,24 +15854,44 @@ module CreateCustomActionTypeInput =
       make ?tags ~outputArtifactDetails ~inputArtifactDetails
         ?configurationProperties ?settings ~version ~provider ~category ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
       let outputArtifactDetails =
-        field_map_exn json "outputArtifactDetails" ArtifactDetails.of_json in
+        field_map_exn json__ "outputArtifactDetails" ArtifactDetails.of_json in
       let inputArtifactDetails =
-        field_map_exn json "inputArtifactDetails" ArtifactDetails.of_json in
+        field_map_exn json__ "inputArtifactDetails" ArtifactDetails.of_json in
       let configurationProperties =
-        field_map json "configurationProperties"
+        field_map json__ "configurationProperties"
           ActionConfigurationPropertyList.of_json in
-      let settings = field_map json "settings" ActionTypeSettings.of_json in
-      let version = field_map_exn json "version" Version.of_json in
-      let provider = field_map_exn json "provider" ActionProvider.of_json in
-      let category = field_map_exn json "category" ActionCategory.of_json in
+      let settings = field_map json__ "settings" ActionTypeSettings.of_json in
+      let version = field_map_exn json__ "version" Version.of_json in
+      let provider = field_map_exn json__ "provider" ActionProvider.of_json in
+      let category = field_map_exn json__ "category" ActionCategory.of_json in
       make ?tags ~outputArtifactDetails ~inputArtifactDetails
         ?configurationProperties ?settings ~version ~provider ~category ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the input of a CreateCustomActionType operation."]
+module ConditionNotOverridableException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Unable to override because the condition does not allow overrides."]
 module ActionTypeAlreadyExistsException =
   struct
     type nonrec t = unit
@@ -10890,8 +15978,8 @@ module AcknowledgeThirdPartyJobOutput =
         (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" JobStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" JobStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10904,7 +15992,7 @@ module AcknowledgeThirdPartyJobInput =
         [@ocaml.doc "The unique system-generated ID of the job."];
       nonce: Nonce.t
         [@ocaml.doc
-          "A system-generated random number that AWS CodePipeline uses to ensure that the job is being worked on by only one job worker. Get this number from the response to a GetThirdPartyJobDetails request."];
+          "A system-generated random number that CodePipeline uses to ensure that the job is being worked on by only one job worker. Get this number from the response to a GetThirdPartyJobDetails request."];
       clientToken: ClientToken.t
         [@ocaml.doc
           "The clientToken portion of the clientId and clientToken pair used to verify that the calling entity is allowed access to the job and its details."]}
@@ -10929,10 +16017,11 @@ module AcknowledgeThirdPartyJobInput =
           (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~clientToken ~nonce ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      let nonce = field_map_exn json "nonce" Nonce.of_json in
-      let jobId = field_map_exn json "jobId" ThirdPartyJobId.of_json in
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let nonce = field_map_exn json__ "nonce" Nonce.of_json in
+      let jobId = field_map_exn json__ "jobId" ThirdPartyJobId.of_json in
       make ~clientToken ~nonce ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10998,8 +16087,8 @@ module AcknowledgeJobOutput =
         (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" JobStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" JobStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of an AcknowledgeJob action."]
@@ -11012,7 +16101,7 @@ module AcknowledgeJobInput =
           "The unique system-generated ID of the job for which you want to confirm receipt."];
       nonce: Nonce.t
         [@ocaml.doc
-          "A system-generated random number that AWS CodePipeline uses to ensure that the job is being worked on by only one job worker. Get this number from the response of the PollForJobs request that returned this job."]}
+          "A system-generated random number that CodePipeline uses to ensure that the job is being worked on by only one job worker. Get this number from the response of the PollForJobs request that returned this job."]}
     let context_ = "AcknowledgeJobInput"
     let make ~jobId = fun ~nonce -> fun () -> { jobId; nonce }
     let to_value x =
@@ -11027,9 +16116,9 @@ module AcknowledgeJobInput =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~nonce ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nonce = field_map_exn json "nonce" Nonce.of_json in
-      let jobId = field_map_exn json "jobId" JobId.of_json in
+    let of_json json__ =
+      let nonce = field_map_exn json__ "nonce" Nonce.of_json in
+      let jobId = field_map_exn json__ "jobId" JobId.of_json in
       make ~nonce ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of an AcknowledgeJob action."]

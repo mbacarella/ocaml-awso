@@ -23,6 +23,8 @@ type ('i, 'o, 'e) t =
   | CreateFirewallRuleGroup: (CreateFirewallRuleGroupRequest.t,
   CreateFirewallRuleGroupResponse.t, CreateFirewallRuleGroupResponse.error) t
   
+  | CreateOutpostResolver: (CreateOutpostResolverRequest.t,
+  CreateOutpostResolverResponse.t, CreateOutpostResolverResponse.error) t 
   | CreateResolverEndpoint: (CreateResolverEndpointRequest.t,
   CreateResolverEndpointResponse.t, CreateResolverEndpointResponse.error) t 
   | CreateResolverQueryLogConfig: (CreateResolverQueryLogConfigRequest.t,
@@ -38,6 +40,8 @@ type ('i, 'o, 'e) t =
   | DeleteFirewallRuleGroup: (DeleteFirewallRuleGroupRequest.t,
   DeleteFirewallRuleGroupResponse.t, DeleteFirewallRuleGroupResponse.error) t
   
+  | DeleteOutpostResolver: (DeleteOutpostResolverRequest.t,
+  DeleteOutpostResolverResponse.t, DeleteOutpostResolverResponse.error) t 
   | DeleteResolverEndpoint: (DeleteResolverEndpointRequest.t,
   DeleteResolverEndpointResponse.t, DeleteResolverEndpointResponse.error) t 
   | DeleteResolverQueryLogConfig: (DeleteResolverQueryLogConfigRequest.t,
@@ -72,6 +76,8 @@ type ('i, 'o, 'e) t =
   | GetFirewallRuleGroupPolicy: (GetFirewallRuleGroupPolicyRequest.t,
   GetFirewallRuleGroupPolicyResponse.t,
   GetFirewallRuleGroupPolicyResponse.error) t 
+  | GetOutpostResolver: (GetOutpostResolverRequest.t,
+  GetOutpostResolverResponse.t, GetOutpostResolverResponse.error) t 
   | GetResolverConfig: (GetResolverConfigRequest.t,
   GetResolverConfigResponse.t, GetResolverConfigResponse.error) t 
   | GetResolverDnssecConfig: (GetResolverDnssecConfigRequest.t,
@@ -114,6 +120,8 @@ type ('i, 'o, 'e) t =
   ListFirewallRuleGroupsResponse.t, ListFirewallRuleGroupsResponse.error) t 
   | ListFirewallRules: (ListFirewallRulesRequest.t,
   ListFirewallRulesResponse.t, ListFirewallRulesResponse.error) t 
+  | ListOutpostResolvers: (ListOutpostResolversRequest.t,
+  ListOutpostResolversResponse.t, ListOutpostResolversResponse.error) t 
   | ListResolverConfigs: (ListResolverConfigsRequest.t,
   ListResolverConfigsResponse.t, ListResolverConfigsResponse.error) t 
   | ListResolverDnssecConfigs: (ListResolverDnssecConfigsRequest.t,
@@ -162,6 +170,8 @@ type ('i, 'o, 'e) t =
   (UpdateFirewallRuleGroupAssociationRequest.t,
   UpdateFirewallRuleGroupAssociationResponse.t,
   UpdateFirewallRuleGroupAssociationResponse.error) t 
+  | UpdateOutpostResolver: (UpdateOutpostResolverRequest.t,
+  UpdateOutpostResolverResponse.t, UpdateOutpostResolverResponse.error) t 
   | UpdateResolverConfig: (UpdateResolverConfigRequest.t,
   UpdateResolverConfigResponse.t, UpdateResolverConfigResponse.error) t 
   | UpdateResolverDnssecConfig: (UpdateResolverDnssecConfigRequest.t,
@@ -180,12 +190,14 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateFirewallDomainList -> `POST
   | CreateFirewallRule -> `POST
   | CreateFirewallRuleGroup -> `POST
+  | CreateOutpostResolver -> `POST
   | CreateResolverEndpoint -> `POST
   | CreateResolverQueryLogConfig -> `POST
   | CreateResolverRule -> `POST
   | DeleteFirewallDomainList -> `POST
   | DeleteFirewallRule -> `POST
   | DeleteFirewallRuleGroup -> `POST
+  | DeleteOutpostResolver -> `POST
   | DeleteResolverEndpoint -> `POST
   | DeleteResolverQueryLogConfig -> `POST
   | DeleteResolverRule -> `POST
@@ -198,6 +210,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetFirewallRuleGroup -> `POST
   | GetFirewallRuleGroupAssociation -> `POST
   | GetFirewallRuleGroupPolicy -> `POST
+  | GetOutpostResolver -> `POST
   | GetResolverConfig -> `POST
   | GetResolverDnssecConfig -> `POST
   | GetResolverEndpoint -> `POST
@@ -214,6 +227,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListFirewallRuleGroupAssociations -> `POST
   | ListFirewallRuleGroups -> `POST
   | ListFirewallRules -> `POST
+  | ListOutpostResolvers -> `POST
   | ListResolverConfigs -> `POST
   | ListResolverDnssecConfigs -> `POST
   | ListResolverEndpointIpAddresses -> `POST
@@ -232,6 +246,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateFirewallDomains -> `POST
   | UpdateFirewallRule -> `POST
   | UpdateFirewallRuleGroupAssociation -> `POST
+  | UpdateOutpostResolver -> `POST
   | UpdateResolverConfig -> `POST
   | UpdateResolverDnssecConfig -> `POST
   | UpdateResolverEndpoint -> `POST
@@ -248,12 +263,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateFirewallDomainList -> (Format.kasprintf Uri.of_string) "/"
       | CreateFirewallRule -> (Format.kasprintf Uri.of_string) "/"
       | CreateFirewallRuleGroup -> (Format.kasprintf Uri.of_string) "/"
+      | CreateOutpostResolver -> (Format.kasprintf Uri.of_string) "/"
       | CreateResolverEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | CreateResolverQueryLogConfig -> (Format.kasprintf Uri.of_string) "/"
       | CreateResolverRule -> (Format.kasprintf Uri.of_string) "/"
       | DeleteFirewallDomainList -> (Format.kasprintf Uri.of_string) "/"
       | DeleteFirewallRule -> (Format.kasprintf Uri.of_string) "/"
       | DeleteFirewallRuleGroup -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteOutpostResolver -> (Format.kasprintf Uri.of_string) "/"
       | DeleteResolverEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | DeleteResolverQueryLogConfig -> (Format.kasprintf Uri.of_string) "/"
       | DeleteResolverRule -> (Format.kasprintf Uri.of_string) "/"
@@ -269,6 +286,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetFirewallRuleGroupAssociation ->
           (Format.kasprintf Uri.of_string) "/"
       | GetFirewallRuleGroupPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | GetOutpostResolver -> (Format.kasprintf Uri.of_string) "/"
       | GetResolverConfig -> (Format.kasprintf Uri.of_string) "/"
       | GetResolverDnssecConfig -> (Format.kasprintf Uri.of_string) "/"
       | GetResolverEndpoint -> (Format.kasprintf Uri.of_string) "/"
@@ -288,6 +306,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | ListFirewallRuleGroups -> (Format.kasprintf Uri.of_string) "/"
       | ListFirewallRules -> (Format.kasprintf Uri.of_string) "/"
+      | ListOutpostResolvers -> (Format.kasprintf Uri.of_string) "/"
       | ListResolverConfigs -> (Format.kasprintf Uri.of_string) "/"
       | ListResolverDnssecConfigs -> (Format.kasprintf Uri.of_string) "/"
       | ListResolverEndpointIpAddresses ->
@@ -310,6 +329,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateFirewallRule -> (Format.kasprintf Uri.of_string) "/"
       | UpdateFirewallRuleGroupAssociation ->
           (Format.kasprintf Uri.of_string) "/"
+      | UpdateOutpostResolver -> (Format.kasprintf Uri.of_string) "/"
       | UpdateResolverConfig -> (Format.kasprintf Uri.of_string) "/"
       | UpdateResolverDnssecConfig -> (Format.kasprintf Uri.of_string) "/"
       | UpdateResolverEndpoint -> (Format.kasprintf Uri.of_string) "/"
@@ -374,6 +394,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Route53Resolver.CreateFirewallRuleGroup")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateOutpostResolver ->
+      let json = CreateOutpostResolverRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Route53Resolver.CreateOutpostResolver")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateResolverEndpoint ->
       let json = CreateResolverEndpointRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -421,6 +449,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Route53Resolver.DeleteFirewallRuleGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteOutpostResolver ->
+      let json = DeleteOutpostResolverRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Route53Resolver.DeleteOutpostResolver")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteResolverEndpoint ->
       let json = DeleteResolverEndpointRequest.to_json req in
@@ -519,6 +555,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Route53Resolver.GetFirewallRuleGroupPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetOutpostResolver ->
+      let json = GetOutpostResolverRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Route53Resolver.GetOutpostResolver")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetResolverConfig ->
       let json = GetResolverConfigRequest.to_json req in
@@ -649,6 +693,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Route53Resolver.ListFirewallRules")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListOutpostResolvers ->
+      let json = ListOutpostResolversRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Route53Resolver.ListOutpostResolvers")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListResolverConfigs ->
       let json = ListResolverConfigsRequest.to_json req in
@@ -796,6 +848,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "Route53Resolver.UpdateFirewallRuleGroupAssociation")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateOutpostResolver ->
+      let json = UpdateOutpostResolverRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Route53Resolver.UpdateOutpostResolver")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateResolverConfig ->
       let json = UpdateResolverConfigRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -912,6 +972,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateFirewallRuleGroupResponse.error_of_json))
+  | CreateOutpostResolver ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateOutpostResolverResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateOutpostResolverResponse.error_of_json))
   | CreateResolverEndpoint ->
       if is_success
       then
@@ -964,6 +1032,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteFirewallRuleGroupResponse.error_of_json))
+  | DeleteOutpostResolver ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteOutpostResolverResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteOutpostResolverResponse.error_of_json))
   | DeleteResolverEndpoint ->
       if is_success
       then
@@ -1069,6 +1145,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetFirewallRuleGroupPolicyResponse.error_of_json))
+  | GetOutpostResolver ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetOutpostResolverResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetOutpostResolverResponse.error_of_json))
   | GetResolverConfig ->
       if is_success
       then
@@ -1204,6 +1288,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListFirewallRulesResponse.error_of_json))
+  | ListOutpostResolvers ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListOutpostResolversResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListOutpostResolversResponse.error_of_json))
   | ListResolverConfigs ->
       if is_success
       then
@@ -1353,6 +1445,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateFirewallRuleGroupAssociationResponse.error_of_json))
+  | UpdateOutpostResolver ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateOutpostResolverResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateOutpostResolverResponse.error_of_json))
   | UpdateResolverConfig ->
       if is_success
       then

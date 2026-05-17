@@ -69,6 +69,32 @@ let associate_v_p_c_with_hosted_zone =
               ~hostedZoneId ~vPC:(Values.VPC.of_json vPC) ())
            (Some Values.AssociateVPCWithHostedZoneResponse.to_json)
            (Some Values.AssociateVPCWithHostedZoneResponse.error_to_json)])
+let change_cidr_collection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and collectionVersion =
+         flag "collection-version" (optional json_arg)
+           ~doc:"JSON CollectionVersion"
+       and id = flag "id" (required string) ~doc:"STRING UUID"
+       and changes =
+         flag "changes" (required json_arg) ~doc:"JSON CidrCollectionChanges" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.change_cidr_collection
+           (Values.ChangeCidrCollectionRequest.make
+              ?collectionVersion:(Option.map
+                                    ~f:Values.CollectionVersion.of_json
+                                    collectionVersion) ~id
+              ~changes:(Values.CidrCollectionChanges.of_json changes) ())
+           (Some Values.ChangeCidrCollectionResponse.to_json)
+           (Some Values.ChangeCidrCollectionResponse.error_to_json)])
 let change_resource_record_sets =
   Command.async ~summary:""
     ([%map_open.Command
@@ -118,6 +144,25 @@ let change_tags_for_resource =
               ~resourceId ())
            (Some Values.ChangeTagsForResourceResponse.to_json)
            (Some Values.ChangeTagsForResourceResponse.error_to_json)])
+let create_cidr_collection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (required string) ~doc:"STRING CollectionName"
+       and callerReference =
+         flag "caller-reference" (required string) ~doc:"STRING CidrNonce" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_cidr_collection
+           (Values.CreateCidrCollectionRequest.make ~name ~callerReference ())
+           (Some Values.CreateCidrCollectionResponse.to_json)
+           (Some Values.CreateCidrCollectionResponse.error_to_json)])
 let create_health_check =
   Command.async ~summary:""
     ([%map_open.Command
@@ -356,6 +401,23 @@ let deactivate_key_signing_key =
            (Values.DeactivateKeySigningKeyRequest.make ~hostedZoneId ~name ())
            (Some Values.DeactivateKeySigningKeyResponse.to_json)
            (Some Values.DeactivateKeySigningKeyResponse.error_to_json)])
+let delete_cidr_collection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING UUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_cidr_collection
+           (Values.DeleteCidrCollectionRequest.make ~id ())
+           (Some Values.DeleteCidrCollectionResponse.to_json)
+           (Some Values.DeleteCidrCollectionResponse.error_to_json)])
 let delete_health_check =
   Command.async ~summary:""
     ([%map_open.Command
@@ -590,7 +652,7 @@ let get_change =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and id = flag "id" (required string) ~doc:"STRING ResourceId" in
+       and id = flag "id" (required string) ~doc:"STRING ChangeId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_change (Values.GetChangeRequest.make ~id ())
@@ -894,6 +956,75 @@ let get_traffic_policy_instance_count =
            (Values.GetTrafficPolicyInstanceCountRequest.make ())
            (Some Values.GetTrafficPolicyInstanceCountResponse.to_json)
            (Some Values.GetTrafficPolicyInstanceCountResponse.error_to_json)])
+let list_cidr_blocks =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and locationName =
+         flag "location-name" (optional string)
+           ~doc:"STRING CidrLocationNameDefaultNotAllowed"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional string) ~doc:"STRING MaxResults"
+       and collectionId =
+         flag "collection-id" (required string) ~doc:"STRING UUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cidr_blocks
+           (Values.ListCidrBlocksRequest.make ?locationName ?nextToken
+              ?maxResults ~collectionId ())
+           (Some Values.ListCidrBlocksResponse.to_json)
+           (Some Values.ListCidrBlocksResponse.error_to_json)])
+let list_cidr_collections =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional string) ~doc:"STRING MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cidr_collections
+           (Values.ListCidrCollectionsRequest.make ?nextToken ?maxResults ())
+           (Some Values.ListCidrCollectionsResponse.to_json)
+           (Some Values.ListCidrCollectionsResponse.error_to_json)])
+let list_cidr_locations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional string) ~doc:"STRING MaxResults"
+       and collectionId =
+         flag "collection-id" (required string) ~doc:"STRING UUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cidr_locations
+           (Values.ListCidrLocationsRequest.make ?nextToken ?maxResults
+              ~collectionId ())
+           (Some Values.ListCidrLocationsResponse.to_json)
+           (Some Values.ListCidrLocationsResponse.error_to_json)])
 let list_geo_locations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -955,12 +1086,17 @@ let list_hosted_zones =
        and maxItems =
          flag "max-items" (optional string) ~doc:"STRING PageMaxItems"
        and delegationSetId =
-         flag "delegation-set-id" (optional string) ~doc:"STRING ResourceId" in
+         flag "delegation-set-id" (optional string) ~doc:"STRING ResourceId"
+       and hostedZoneType =
+         flag "hosted-zone-type" (optional json_arg)
+           ~doc:"JSON HostedZoneType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_hosted_zones
            (Values.ListHostedZonesRequest.make ?marker ?maxItems
-              ?delegationSetId ())
+              ?delegationSetId
+              ?hostedZoneType:(Option.map ~f:Values.HostedZoneType.of_json
+                                 hostedZoneType) ())
            (Some Values.ListHostedZonesResponse.to_json)
            (Some Values.ListHostedZonesResponse.error_to_json)])
 let list_hosted_zones_by_name =
@@ -1421,6 +1557,28 @@ let update_hosted_zone_comment =
            (Values.UpdateHostedZoneCommentRequest.make ?comment ~id ())
            (Some Values.UpdateHostedZoneCommentResponse.to_json)
            (Some Values.UpdateHostedZoneCommentResponse.error_to_json)])
+let update_hosted_zone_features =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and enableAcceleratedRecovery =
+         flag "enable-accelerated-recovery" (optional bool)
+           ~doc:"BOOL AcceleratedRecoveryEnabled"
+       and hostedZoneId =
+         flag "hosted-zone-id" (required string) ~doc:"STRING ResourceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_hosted_zone_features
+           (Values.UpdateHostedZoneFeaturesRequest.make
+              ?enableAcceleratedRecovery ~hostedZoneId ())
+           (Some Values.UpdateHostedZoneFeaturesResponse.to_json)
+           (Some Values.UpdateHostedZoneFeaturesResponse.error_to_json)])
 let update_traffic_policy_comment =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1475,8 +1633,10 @@ let main =
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("activate-key-signing-key", activate_key_signing_key);
     ("associate-v-p-c-with-hosted-zone", associate_v_p_c_with_hosted_zone);
+    ("change-cidr-collection", change_cidr_collection);
     ("change-resource-record-sets", change_resource_record_sets);
     ("change-tags-for-resource", change_tags_for_resource);
+    ("create-cidr-collection", create_cidr_collection);
     ("create-health-check", create_health_check);
     ("create-hosted-zone", create_hosted_zone);
     ("create-key-signing-key", create_key_signing_key);
@@ -1488,6 +1648,7 @@ let main =
     ("create-v-p-c-association-authorization",
       create_v_p_c_association_authorization);
     ("deactivate-key-signing-key", deactivate_key_signing_key);
+    ("delete-cidr-collection", delete_cidr_collection);
     ("delete-health-check", delete_health_check);
     ("delete-hosted-zone", delete_hosted_zone);
     ("delete-key-signing-key", delete_key_signing_key);
@@ -1520,6 +1681,9 @@ let main =
     ("get-traffic-policy", get_traffic_policy);
     ("get-traffic-policy-instance", get_traffic_policy_instance);
     ("get-traffic-policy-instance-count", get_traffic_policy_instance_count);
+    ("list-cidr-blocks", list_cidr_blocks);
+    ("list-cidr-collections", list_cidr_collections);
+    ("list-cidr-locations", list_cidr_locations);
     ("list-geo-locations", list_geo_locations);
     ("list-health-checks", list_health_checks);
     ("list-hosted-zones", list_hosted_zones);
@@ -1542,5 +1706,6 @@ let main =
     ("test-d-n-s-answer", test_d_n_s_answer);
     ("update-health-check", update_health_check);
     ("update-hosted-zone-comment", update_hosted_zone_comment);
+    ("update-hosted-zone-features", update_hosted_zone_features);
     ("update-traffic-policy-comment", update_traffic_policy_comment);
     ("update-traffic-policy-instance", update_traffic_policy_instance)]

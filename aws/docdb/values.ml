@@ -52,8 +52,8 @@ module AvailabilityZone =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" String_.of_json in make ?name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" String_.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an Availability Zone."]
 module TStamp =
@@ -81,10 +81,43 @@ module Boolean =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module GlobalClusterMemberSynchronizationStatus =
+  struct
+    type nonrec t =
+      | Connected 
+      | Pending_resync 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Connected -> "connected"
+      | Pending_resync -> "pending-resync"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "connected" -> Connected
+      | "pending-resync" -> Pending_resync
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration GlobalClusterMemberSynchronizationStatus"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"GlobalClusterMemberSynchronizationStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module ReadersArnList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -139,12 +172,12 @@ module Subnet =
           (Xml.child xml_arg0 "SubnetIdentifier") in
       make ?subnetStatus ?subnetAvailabilityZone ?subnetIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnetStatus = field_map json "SubnetStatus" String_.of_json in
+    let of_json json__ =
+      let subnetStatus = field_map json__ "SubnetStatus" String_.of_json in
       let subnetAvailabilityZone =
-        field_map json "SubnetAvailabilityZone" AvailabilityZone.of_json in
+        field_map json__ "SubnetAvailabilityZone" AvailabilityZone.of_json in
       let subnetIdentifier =
-        field_map json "SubnetIdentifier" String_.of_json in
+        field_map json__ "SubnetIdentifier" String_.of_json in
       make ?subnetStatus ?subnetAvailabilityZone ?subnetIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detailed information about a subnet."]
@@ -152,6 +185,9 @@ module LogTypeList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -252,14 +288,15 @@ module PendingMaintenanceAction =
       make ?description ?currentApplyDate ?optInStatus ?forcedApplyDate
         ?autoAppliedAfterDate ?action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" String_.of_json in
-      let currentApplyDate = field_map json "CurrentApplyDate" TStamp.of_json in
-      let optInStatus = field_map json "OptInStatus" String_.of_json in
-      let forcedApplyDate = field_map json "ForcedApplyDate" TStamp.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" String_.of_json in
+      let currentApplyDate =
+        field_map json__ "CurrentApplyDate" TStamp.of_json in
+      let optInStatus = field_map json__ "OptInStatus" String_.of_json in
+      let forcedApplyDate = field_map json__ "ForcedApplyDate" TStamp.of_json in
       let autoAppliedAfterDate =
-        field_map json "AutoAppliedAfterDate" TStamp.of_json in
-      let action = field_map json "Action" String_.of_json in
+        field_map json__ "AutoAppliedAfterDate" TStamp.of_json in
+      let action = field_map json__ "Action" String_.of_json in
       make ?description ?currentApplyDate ?optInStatus ?forcedApplyDate
         ?autoAppliedAfterDate ?action ()
     let to_json v = composed_to_json to_value v
@@ -269,6 +306,9 @@ module AttributeValueList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -289,6 +329,34 @@ module AttributeValueList =
       list_of_json ~kind:"AttributeValueList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
+module FailoverStatus =
+  struct
+    type nonrec t =
+      | Pending 
+      | Failing_over 
+      | Cancelling 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | Failing_over -> "failing-over"
+      | Cancelling -> "cancelling"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "failing-over" -> Failing_over
+      | "cancelling" -> Cancelling
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FailoverStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FailoverStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module GlobalClusterMember =
   struct
     type nonrec t =
@@ -298,36 +366,79 @@ module GlobalClusterMember =
           "The Amazon Resource Name (ARN) for each Amazon DocumentDB cluster."];
       readers: ReadersArnList.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for each read-only secondary cluster associated with the Aurora global cluster."];
+          "The Amazon Resource Name (ARN) for each read-only secondary cluster associated with the Amazon DocumentDB global cluster."];
       isWriter: Boolean.t option
         [@ocaml.doc
-          "Specifies whether the Amazon DocumentDB cluster is the primary cluster (that is, has read-write capability) for the Amazon DocumentDB global cluster with which it is associated."]}
+          "Specifies whether the Amazon DocumentDB cluster is the primary cluster (that is, has read-write capability) for the Amazon DocumentDB global cluster with which it is associated."];
+      synchronizationStatus:
+        GlobalClusterMemberSynchronizationStatus.t option
+        [@ocaml.doc
+          "The status of synchronization of each Amazon DocumentDB cluster in the global cluster."]}
     let make ?dBClusterArn =
       fun ?readers ->
-        fun ?isWriter -> fun () -> { dBClusterArn; readers; isWriter }
+        fun ?isWriter ->
+          fun ?synchronizationStatus ->
+            fun () ->
+              { dBClusterArn; readers; isWriter; synchronizationStatus }
     let to_value x =
       structure_to_value
         [("DBClusterArn", (Option.map x.dBClusterArn ~f:String_.to_value));
         ("Readers", (Option.map x.readers ~f:ReadersArnList.to_value));
-        ("IsWriter", (Option.map x.isWriter ~f:Boolean.to_value))]
+        ("IsWriter", (Option.map x.isWriter ~f:Boolean.to_value));
+        ("SynchronizationStatus",
+          (Option.map x.synchronizationStatus
+             ~f:GlobalClusterMemberSynchronizationStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let synchronizationStatus =
+        (Option.map ~f:GlobalClusterMemberSynchronizationStatus.of_xml)
+          (Xml.child xml_arg0 "SynchronizationStatus") in
       let isWriter =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "IsWriter") in
       let readers =
         (Option.map ~f:ReadersArnList.of_xml) (Xml.child xml_arg0 "Readers") in
       let dBClusterArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DBClusterArn") in
-      make ?isWriter ?readers ?dBClusterArn ()
+      make ?synchronizationStatus ?isWriter ?readers ?dBClusterArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isWriter = field_map json "IsWriter" Boolean.of_json in
-      let readers = field_map json "Readers" ReadersArnList.of_json in
-      let dBClusterArn = field_map json "DBClusterArn" String_.of_json in
-      make ?isWriter ?readers ?dBClusterArn ()
+    let of_json json__ =
+      let synchronizationStatus =
+        field_map json__ "SynchronizationStatus"
+          GlobalClusterMemberSynchronizationStatus.of_json in
+      let isWriter = field_map json__ "IsWriter" Boolean.of_json in
+      let readers = field_map json__ "Readers" ReadersArnList.of_json in
+      let dBClusterArn = field_map json__ "DBClusterArn" String_.of_json in
+      make ?synchronizationStatus ?isWriter ?readers ?dBClusterArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A data structure with information about any primary and secondary clusters associated with an Amazon DocumentDB global clusters."]
+module Tag =
+  struct
+    type nonrec t =
+      {
+      key: String_.t option
+        [@ocaml.doc
+          "The required name of the tag. The string value can be from 1 to 128 Unicode characters in length and can't be prefixed with \"aws:\" or \"rds:\". The string can contain only the set of Unicode letters, digits, white space, '_', '.', '/', '=', '+', '-' (Java regex: \"^(\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}_.:/=+\\\\-\\]*)$\")."];
+      value: String_.t option
+        [@ocaml.doc
+          "The optional value of the tag. The string value can be from 1 to 256 Unicode characters in length and can't be prefixed with \"aws:\" or \"rds:\". The string can contain only the set of Unicode letters, digits, white space, '_', '.', '/', '=', '+', '-' (Java regex: \"^(\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}_.:/=+\\\\-\\]*)$\")."]}
+    let make ?key = fun ?value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Option.map x.key ~f:String_.to_value));
+        ("Value", (Option.map x.value ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
+      let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
+      make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
+      let key = field_map json__ "Key" String_.of_json in make ?value ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Metadata assigned to an Amazon DocumentDB resource consisting of a key-value pair."]
 module ApplyMethod =
   struct
     type nonrec t =
@@ -390,18 +501,48 @@ module DBInstanceStatusInfo =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StatusType") in
       make ?message ?status ?normal ?statusType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let normal = field_map json "Normal" Boolean.of_json in
-      let statusType = field_map json "StatusType" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let normal = field_map json__ "Normal" Boolean.of_json in
+      let statusType = field_map json__ "StatusType" String_.of_json in
       make ?message ?status ?normal ?statusType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides a list of status information for an instance."]
+module NetworkTypeList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NetworkTypeList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module SubnetList =
   struct
     type nonrec t = Subnet.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Subnet.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -476,11 +617,11 @@ module PendingCloudwatchLogsExports =
           (Xml.child xml_arg0 "LogTypesToEnable") in
       make ?logTypesToDisable ?logTypesToEnable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let logTypesToDisable =
-        field_map json "LogTypesToDisable" LogTypeList.of_json in
+        field_map json__ "LogTypesToDisable" LogTypeList.of_json in
       let logTypesToEnable =
-        field_map json "LogTypesToEnable" LogTypeList.of_json in
+        field_map json__ "LogTypesToEnable" LogTypeList.of_json in
       make ?logTypesToDisable ?logTypesToEnable ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -509,14 +650,27 @@ module VpcSecurityGroupMembership =
           (Xml.child xml_arg0 "VpcSecurityGroupId") in
       make ?status ?vpcSecurityGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" String_.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" String_.of_json in
       let vpcSecurityGroupId =
-        field_map json "VpcSecurityGroupId" String_.of_json in
+        field_map json__ "VpcSecurityGroupId" String_.of_json in
       make ?status ?vpcSecurityGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Used as a response element for queries on virtual private cloud (VPC) security group membership."]
+module DoubleOptional =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
 module UpgradeTarget =
   struct
     type nonrec t =
@@ -572,13 +726,13 @@ module UpgradeTarget =
       make ?isMajorVersionUpgrade ?autoUpgrade ?description ?engineVersion
         ?engine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let isMajorVersionUpgrade =
-        field_map json "IsMajorVersionUpgrade" Boolean.of_json in
-      let autoUpgrade = field_map json "AutoUpgrade" Boolean.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map json "Engine" String_.of_json in
+        field_map json__ "IsMajorVersionUpgrade" Boolean.of_json in
+      let autoUpgrade = field_map json__ "AutoUpgrade" Boolean.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
       make ?isMajorVersionUpgrade ?autoUpgrade ?description ?engineVersion
         ?engine ()
     let to_json v = composed_to_json to_value v
@@ -637,14 +791,15 @@ module DBClusterMember =
       make ?promotionTier ?dBClusterParameterGroupStatus ?isClusterWriter
         ?dBInstanceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let promotionTier =
-        field_map json "PromotionTier" IntegerOptional.of_json in
+        field_map json__ "PromotionTier" IntegerOptional.of_json in
       let dBClusterParameterGroupStatus =
-        field_map json "DBClusterParameterGroupStatus" String_.of_json in
-      let isClusterWriter = field_map json "IsClusterWriter" Boolean.of_json in
+        field_map json__ "DBClusterParameterGroupStatus" String_.of_json in
+      let isClusterWriter =
+        field_map json__ "IsClusterWriter" Boolean.of_json in
       let dBInstanceIdentifier =
-        field_map json "DBInstanceIdentifier" String_.of_json in
+        field_map json__ "DBInstanceIdentifier" String_.of_json in
       make ?promotionTier ?dBClusterParameterGroupStatus ?isClusterWriter
         ?dBInstanceIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -673,9 +828,9 @@ module DBClusterRole =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RoleArn") in
       make ?status ?roleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" String_.of_json in
-      let roleArn = field_map json "RoleArn" String_.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" String_.of_json in
+      let roleArn = field_map json__ "RoleArn" String_.of_json in
       make ?status ?roleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -684,6 +839,9 @@ module PendingMaintenanceActionDetails =
   struct
     type nonrec t = PendingMaintenanceAction.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PendingMaintenanceAction.to_value)) |>
         (fun x -> `List x)
@@ -710,6 +868,9 @@ module AvailabilityZoneList =
   struct
     type nonrec t = AvailabilityZone.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AvailabilityZone.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -757,10 +918,10 @@ module DBClusterSnapshotAttribute =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AttributeName") in
       make ?attributeValues ?attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeValues =
-        field_map json "AttributeValues" AttributeValueList.of_json in
-      let attributeName = field_map json "AttributeName" String_.of_json in
+        field_map json__ "AttributeValues" AttributeValueList.of_json in
+      let attributeName = field_map json__ "AttributeName" String_.of_json in
       make ?attributeValues ?attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -769,6 +930,9 @@ module FilterValueList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -789,6 +953,61 @@ module FilterValueList =
       list_of_json ~kind:"FilterValueList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
+module FailoverState =
+  struct
+    type nonrec t =
+      {
+      status: FailoverStatus.t option
+        [@ocaml.doc
+          "The current status of the global cluster. Possible values are as follows: pending \226\128\147 The service received a request to switch over or fail over the global cluster. The global cluster's primary cluster and the specified secondary cluster are being verified before the operation starts. failing-over \226\128\147 The chosen secondary cluster is being promoted to become the new primary cluster to fail over the global cluster. cancelling \226\128\147 The request to switch over or fail over the global cluster was cancelled and the primary cluster and the selected secondary cluster are returning to their previous states."];
+      fromDbClusterArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon DocumentDB cluster that is currently being demoted, and which is associated with this state."];
+      toDbClusterArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon DocumentDB cluster that is currently being promoted, and which is associated with this state."];
+      isDataLossAllowed: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the operation is a global switchover or a global failover. If data loss is allowed, then the operation is a global failover. Otherwise, it's a switchover."]}
+    let make ?status =
+      fun ?fromDbClusterArn ->
+        fun ?toDbClusterArn ->
+          fun ?isDataLossAllowed ->
+            fun () ->
+              { status; fromDbClusterArn; toDbClusterArn; isDataLossAllowed }
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:FailoverStatus.to_value));
+        ("FromDbClusterArn",
+          (Option.map x.fromDbClusterArn ~f:String_.to_value));
+        ("ToDbClusterArn", (Option.map x.toDbClusterArn ~f:String_.to_value));
+        ("IsDataLossAllowed",
+          (Option.map x.isDataLossAllowed ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let isDataLossAllowed =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "IsDataLossAllowed") in
+      let toDbClusterArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ToDbClusterArn") in
+      let fromDbClusterArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "FromDbClusterArn") in
+      let status =
+        (Option.map ~f:FailoverStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      make ?isDataLossAllowed ?toDbClusterArn ?fromDbClusterArn ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let isDataLossAllowed =
+        field_map json__ "IsDataLossAllowed" Boolean.of_json in
+      let toDbClusterArn = field_map json__ "ToDbClusterArn" String_.of_json in
+      let fromDbClusterArn =
+        field_map json__ "FromDbClusterArn" String_.of_json in
+      let status = field_map json__ "Status" FailoverStatus.of_json in
+      make ?isDataLossAllowed ?toDbClusterArn ?fromDbClusterArn ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the state of scheduled or in-process operations on an Amazon DocumentDB global cluster. This data type is empty unless a switchover or failover operation is scheduled or is in progress on the global cluster."]
 module GlobalClusterIdentifier =
   struct
     type nonrec t = string
@@ -814,6 +1033,9 @@ module GlobalClusterMemberList =
   struct
     type nonrec t = GlobalClusterMember.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GlobalClusterMember.to_value)) |>
         (fun x -> `List x)
@@ -836,10 +1058,39 @@ module GlobalClusterMemberList =
         ~of_json:GlobalClusterMember.of_json j
     let to_json v = composed_to_json to_value v
   end
+module TagList =
+  struct
+    type nonrec t = Tag.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module EventCategoriesList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -901,6 +1152,9 @@ module SourceIdsList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -928,7 +1182,8 @@ module Parameter =
       parameterName: String_.t option
         [@ocaml.doc "Specifies the name of the parameter."];
       parameterValue: String_.t option
-        [@ocaml.doc "Specifies the value of the parameter."];
+        [@ocaml.doc
+          "Specifies the value of the parameter. Must be one or more of the cluster parameter's AllowedValues in CSV format: Valid values are: enabled: The cluster accepts secure connections using TLS version 1.0 through 1.3. disabled: The cluster does not accept secure connections using TLS. fips-140-3: The cluster only accepts secure connections per the requirements of the Federal Information Processing Standards (FIPS) publication 140-3. Only supported starting with Amazon DocumentDB 5.0 (engine version 3.0.3727) clusters in these regions: ca-central-1, us-west-2, us-east-1, us-east-2, us-gov-east-1, us-gov-west-1. tls1.2+: The cluster accepts secure connections using TLS version 1.2 and above. Only supported starting with Amazon DocumentDB 4.0 (engine version 2.0.10980) and Amazon DocumentDB 5.0 (engine version 3.0.11051). tls1.3+: The cluster accepts secure connections using TLS version 1.3 and above. Only supported starting with Amazon DocumentDB 4.0 (engine version 2.0.10980) and Amazon DocumentDB 5.0 (engine version 3.0.11051)."];
       description: String_.t option
         [@ocaml.doc "Provides a description of the parameter."];
       source: String_.t option
@@ -1010,27 +1265,61 @@ module Parameter =
         ?dataType ?applyType ?source ?description ?parameterValue
         ?parameterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let applyMethod = field_map json "ApplyMethod" ApplyMethod.of_json in
+    let of_json json__ =
+      let applyMethod = field_map json__ "ApplyMethod" ApplyMethod.of_json in
       let minimumEngineVersion =
-        field_map json "MinimumEngineVersion" String_.of_json in
-      let isModifiable = field_map json "IsModifiable" Boolean.of_json in
-      let allowedValues = field_map json "AllowedValues" String_.of_json in
-      let dataType = field_map json "DataType" String_.of_json in
-      let applyType = field_map json "ApplyType" String_.of_json in
-      let source = field_map json "Source" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let parameterValue = field_map json "ParameterValue" String_.of_json in
-      let parameterName = field_map json "ParameterName" String_.of_json in
+        field_map json__ "MinimumEngineVersion" String_.of_json in
+      let isModifiable = field_map json__ "IsModifiable" Boolean.of_json in
+      let allowedValues = field_map json__ "AllowedValues" String_.of_json in
+      let dataType = field_map json__ "DataType" String_.of_json in
+      let applyType = field_map json__ "ApplyType" String_.of_json in
+      let source = field_map json__ "Source" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let parameterValue = field_map json__ "ParameterValue" String_.of_json in
+      let parameterName = field_map json__ "ParameterName" String_.of_json in
       make ?applyMethod ?minimumEngineVersion ?isModifiable ?allowedValues
         ?dataType ?applyType ?source ?description ?parameterValue
         ?parameterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detailed information about an individual parameter."]
+module CertificateDetails =
+  struct
+    type nonrec t =
+      {
+      cAIdentifier: String_.t option
+        [@ocaml.doc
+          "The CA identifier of the CA certificate used for the DB instance's server certificate."];
+      validTill: TStamp.t option
+        [@ocaml.doc
+          "The expiration date of the DB instance\226\128\153s server certificate."]}
+    let make ?cAIdentifier =
+      fun ?validTill -> fun () -> { cAIdentifier; validTill }
+    let to_value x =
+      structure_to_value
+        [("CAIdentifier", (Option.map x.cAIdentifier ~f:String_.to_value));
+        ("ValidTill", (Option.map x.validTill ~f:TStamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let validTill =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "ValidTill") in
+      let cAIdentifier =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CAIdentifier") in
+      make ?validTill ?cAIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let validTill = field_map json__ "ValidTill" TStamp.of_json in
+      let cAIdentifier = field_map json__ "CAIdentifier" String_.of_json in
+      make ?validTill ?cAIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the details of the DB instance\226\128\153s server certificate. For more information, see Updating Your Amazon DocumentDB TLS Certificates and Encrypting Data in Transit in the Amazon DocumentDB Developer Guide."]
 module DBInstanceStatusInfoList =
   struct
     type nonrec t = DBInstanceStatusInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DBInstanceStatusInfo.to_value)) |>
         (fun x -> `List x)
@@ -1071,22 +1360,27 @@ module DBSubnetGroup =
           "Detailed information about one or more subnets within a subnet group."];
       dBSubnetGroupArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the DB subnet group."]}
+          "The Amazon Resource Name (ARN) for the DB subnet group."];
+      supportedNetworkTypes: NetworkTypeList.t option
+        [@ocaml.doc
+          "The network type of the DB subnet group. Valid Values: IPV4 | DUAL A DBSubnetGroup can support only the IPv4 protocol or the IPv4 and the IPv6 protocols (DUAL)."]}
     let make ?dBSubnetGroupName =
       fun ?dBSubnetGroupDescription ->
         fun ?vpcId ->
           fun ?subnetGroupStatus ->
             fun ?subnets ->
               fun ?dBSubnetGroupArn ->
-                fun () ->
-                  {
-                    dBSubnetGroupName;
-                    dBSubnetGroupDescription;
-                    vpcId;
-                    subnetGroupStatus;
-                    subnets;
-                    dBSubnetGroupArn
-                  }
+                fun ?supportedNetworkTypes ->
+                  fun () ->
+                    {
+                      dBSubnetGroupName;
+                      dBSubnetGroupDescription;
+                      vpcId;
+                      subnetGroupStatus;
+                      subnets;
+                      dBSubnetGroupArn;
+                      supportedNetworkTypes
+                    }
     let to_value x =
       structure_to_value
         [("DBSubnetGroupName",
@@ -1098,9 +1392,14 @@ module DBSubnetGroup =
           (Option.map x.subnetGroupStatus ~f:String_.to_value));
         ("Subnets", (Option.map x.subnets ~f:SubnetList.to_value));
         ("DBSubnetGroupArn",
-          (Option.map x.dBSubnetGroupArn ~f:String_.to_value))]
+          (Option.map x.dBSubnetGroupArn ~f:String_.to_value));
+        ("SupportedNetworkTypes",
+          (Option.map x.supportedNetworkTypes ~f:NetworkTypeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let supportedNetworkTypes =
+        (Option.map ~f:NetworkTypeList.of_xml)
+          (Xml.child xml_arg0 "SupportedNetworkTypes") in
       let dBSubnetGroupArn =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DBSubnetGroupArn") in
@@ -1116,22 +1415,26 @@ module DBSubnetGroup =
       let dBSubnetGroupName =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DBSubnetGroupName") in
-      make ?dBSubnetGroupArn ?subnets ?subnetGroupStatus ?vpcId
-        ?dBSubnetGroupDescription ?dBSubnetGroupName ()
+      make ?supportedNetworkTypes ?dBSubnetGroupArn ?subnets
+        ?subnetGroupStatus ?vpcId ?dBSubnetGroupDescription
+        ?dBSubnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let supportedNetworkTypes =
+        field_map json__ "SupportedNetworkTypes" NetworkTypeList.of_json in
       let dBSubnetGroupArn =
-        field_map json "DBSubnetGroupArn" String_.of_json in
-      let subnets = field_map json "Subnets" SubnetList.of_json in
+        field_map json__ "DBSubnetGroupArn" String_.of_json in
+      let subnets = field_map json__ "Subnets" SubnetList.of_json in
       let subnetGroupStatus =
-        field_map json "SubnetGroupStatus" String_.of_json in
-      let vpcId = field_map json "VpcId" String_.of_json in
+        field_map json__ "SubnetGroupStatus" String_.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
       let dBSubnetGroupDescription =
-        field_map json "DBSubnetGroupDescription" String_.of_json in
+        field_map json__ "DBSubnetGroupDescription" String_.of_json in
       let dBSubnetGroupName =
-        field_map json "DBSubnetGroupName" String_.of_json in
-      make ?dBSubnetGroupArn ?subnets ?subnetGroupStatus ?vpcId
-        ?dBSubnetGroupDescription ?dBSubnetGroupName ()
+        field_map json__ "DBSubnetGroupName" String_.of_json in
+      make ?supportedNetworkTypes ?dBSubnetGroupArn ?subnets
+        ?subnetGroupStatus ?vpcId ?dBSubnetGroupDescription
+        ?dBSubnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detailed information about a subnet group."]
 module Endpoint =
@@ -1163,10 +1466,10 @@ module Endpoint =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Address") in
       make ?hostedZoneId ?port ?address ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hostedZoneId = field_map json "HostedZoneId" String_.of_json in
-      let port = field_map json "Port" Integer.of_json in
-      let address = field_map json "Address" String_.of_json in
+    let of_json json__ =
+      let hostedZoneId = field_map json__ "HostedZoneId" String_.of_json in
+      let port = field_map json__ "Port" Integer.of_json in
+      let address = field_map json__ "Address" String_.of_json in
       make ?hostedZoneId ?port ?address ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1312,29 +1615,30 @@ module PendingModifiedValues =
         ?licenseModel ?engineVersion ?multiAZ ?backupRetentionPeriod ?port
         ?masterUserPassword ?allocatedStorage ?dBInstanceClass ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pendingCloudwatchLogsExports =
-        field_map json "PendingCloudwatchLogsExports"
+        field_map json__ "PendingCloudwatchLogsExports"
           PendingCloudwatchLogsExports.of_json in
       let dBSubnetGroupName =
-        field_map json "DBSubnetGroupName" String_.of_json in
+        field_map json__ "DBSubnetGroupName" String_.of_json in
       let cACertificateIdentifier =
-        field_map json "CACertificateIdentifier" String_.of_json in
-      let storageType = field_map json "StorageType" String_.of_json in
+        field_map json__ "CACertificateIdentifier" String_.of_json in
+      let storageType = field_map json__ "StorageType" String_.of_json in
       let dBInstanceIdentifier =
-        field_map json "DBInstanceIdentifier" String_.of_json in
-      let iops = field_map json "Iops" IntegerOptional.of_json in
-      let licenseModel = field_map json "LicenseModel" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let multiAZ = field_map json "MultiAZ" BooleanOptional.of_json in
+        field_map json__ "DBInstanceIdentifier" String_.of_json in
+      let iops = field_map json__ "Iops" IntegerOptional.of_json in
+      let licenseModel = field_map json__ "LicenseModel" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let multiAZ = field_map json__ "MultiAZ" BooleanOptional.of_json in
       let backupRetentionPeriod =
-        field_map json "BackupRetentionPeriod" IntegerOptional.of_json in
-      let port = field_map json "Port" IntegerOptional.of_json in
+        field_map json__ "BackupRetentionPeriod" IntegerOptional.of_json in
+      let port = field_map json__ "Port" IntegerOptional.of_json in
       let masterUserPassword =
-        field_map json "MasterUserPassword" String_.of_json in
+        field_map json__ "MasterUserPassword" String_.of_json in
       let allocatedStorage =
-        field_map json "AllocatedStorage" IntegerOptional.of_json in
-      let dBInstanceClass = field_map json "DBInstanceClass" String_.of_json in
+        field_map json__ "AllocatedStorage" IntegerOptional.of_json in
+      let dBInstanceClass =
+        field_map json__ "DBInstanceClass" String_.of_json in
       make ?pendingCloudwatchLogsExports ?dBSubnetGroupName
         ?cACertificateIdentifier ?storageType ?dBInstanceIdentifier ?iops
         ?licenseModel ?engineVersion ?multiAZ ?backupRetentionPeriod ?port
@@ -1346,6 +1650,9 @@ module VpcSecurityGroupMembershipList =
   struct
     type nonrec t = VpcSecurityGroupMembership.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpcSecurityGroupMembership.to_value)) |>
         (fun x -> `List x)
@@ -1368,10 +1675,76 @@ module VpcSecurityGroupMembershipList =
         ~of_json:VpcSecurityGroupMembership.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CACertificateIdentifiersList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CACertificateIdentifiersList"
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServerlessV2FeaturesSupport =
+  struct
+    type nonrec t =
+      {
+      minCapacity: DoubleOptional.t option
+        [@ocaml.doc
+          "The minimum number of Amazon DocumentDB capacity units (DCUs) for an instance in an Amazon DocumentDB Serverless cluster. You can specify DCU values in half-step increments, such as 8, 8.5, 9, and so on."];
+      maxCapacity: DoubleOptional.t option
+        [@ocaml.doc
+          "The maximum number of Amazon DocumentDB capacity units (DCUs) for an instance in an Amazon DocumentDB Serverless cluster. You can specify DCU values in half-step increments, such as 32, 32.5, 33, and so on."]}
+    let make ?minCapacity =
+      fun ?maxCapacity -> fun () -> { minCapacity; maxCapacity }
+    let to_value x =
+      structure_to_value
+        [("MinCapacity",
+           (Option.map x.minCapacity ~f:DoubleOptional.to_value));
+        ("MaxCapacity",
+          (Option.map x.maxCapacity ~f:DoubleOptional.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxCapacity =
+        (Option.map ~f:DoubleOptional.of_xml)
+          (Xml.child xml_arg0 "MaxCapacity") in
+      let minCapacity =
+        (Option.map ~f:DoubleOptional.of_xml)
+          (Xml.child xml_arg0 "MinCapacity") in
+      make ?maxCapacity ?minCapacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxCapacity = field_map json__ "MaxCapacity" DoubleOptional.of_json in
+      let minCapacity = field_map json__ "MinCapacity" DoubleOptional.of_json in
+      make ?maxCapacity ?minCapacity ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies any Amazon DocumentDB Serverless properties or limits that differ between Amazon DocumentDB engine versions. You can test the values of this attribute when deciding which Amazon DocumentDB version to use in a new or upgraded cluster. You can also retrieve the version of an existing cluster and check whether that version supports certain Amazon DocumentDB Serverless features before you attempt to use those features."]
 module ValidUpgradeTargetList =
   struct
     type nonrec t = UpgradeTarget.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpgradeTarget.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1397,6 +1770,9 @@ module AvailabilityZones =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1417,10 +1793,51 @@ module AvailabilityZones =
       list_of_json ~kind:"AvailabilityZones" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ClusterMasterUserSecret =
+  struct
+    type nonrec t =
+      {
+      secretArn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the secret."];
+      secretStatus: String_.t option
+        [@ocaml.doc
+          "The status of the secret. The possible status values include the following: creating - The secret is being created. active - The secret is available for normal use and rotation. rotating - The secret is being rotated. impaired - The secret can be used to access database credentials, but it can't be rotated. A secret might have this status if, for example, permissions are changed so that Amazon DocumentDB can no longer access either the secret or the KMS key for the secret. When a secret has this status, you can correct the condition that caused the status. Alternatively, modify the instance to turn off automatic management of database credentials, and then modify the instance again to turn on automatic management of database credentials."];
+      kmsKeyId: String_.t option
+        [@ocaml.doc
+          "The Amazon Web Services KMS key identifier that is used to encrypt the secret."]}
+    let make ?secretArn =
+      fun ?secretStatus ->
+        fun ?kmsKeyId -> fun () -> { secretArn; secretStatus; kmsKeyId }
+    let to_value x =
+      structure_to_value
+        [("SecretArn", (Option.map x.secretArn ~f:String_.to_value));
+        ("SecretStatus", (Option.map x.secretStatus ~f:String_.to_value));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kmsKeyId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let secretStatus =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SecretStatus") in
+      let secretArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SecretArn") in
+      make ?kmsKeyId ?secretStatus ?secretArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let secretStatus = field_map json__ "SecretStatus" String_.of_json in
+      let secretArn = field_map json__ "SecretArn" String_.of_json in
+      make ?kmsKeyId ?secretStatus ?secretArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the secret managed by Amazon DocumentDB in Amazon Web Services Secrets Manager for the master user password."]
 module DBClusterMemberList =
   struct
     type nonrec t = DBClusterMember.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DBClusterMember.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1446,6 +1863,9 @@ module DBClusterRoles =
   struct
     type nonrec t = DBClusterRole.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DBClusterRole.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1470,6 +1890,9 @@ module ReadReplicaIdentifierList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1491,33 +1914,41 @@ module ReadReplicaIdentifierList =
         j
     let to_json v = composed_to_json to_value v
   end
-module Tag =
+module ServerlessV2ScalingConfigurationInfo =
   struct
     type nonrec t =
       {
-      key: String_.t option
+      minCapacity: DoubleOptional.t option
         [@ocaml.doc
-          "The required name of the tag. The string value can be from 1 to 128 Unicode characters in length and can't be prefixed with \"aws:\" or \"rds:\". The string can contain only the set of Unicode letters, digits, white space, '_', '.', '/', '=', '+', '-' (Java regex: \"^(\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}_.:/=+\\\\-\\]*)$\")."];
-      value: String_.t option
+          "The minimum number of Amazon DocumentDB capacity units (DCUs) for an instance in an Amazon DocumentDB Serverless cluster. You can specify DCU values in half-step increments, such as 8, 8.5, 9, and so on."];
+      maxCapacity: DoubleOptional.t option
         [@ocaml.doc
-          "The optional value of the tag. The string value can be from 1 to 256 Unicode characters in length and can't be prefixed with \"aws:\" or \"rds:\". The string can contain only the set of Unicode letters, digits, white space, '_', '.', '/', '=', '+', '-' (Java regex: \"^(\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}_.:/=+\\\\-\\]*)$\")."]}
-    let make ?key = fun ?value -> fun () -> { key; value }
+          "The maximum number of Amazon DocumentDB capacity units (DCUs) for an instance in an Amazon DocumentDB Serverless cluster. You can specify DCU values in half-step increments, such as 32, 32.5, 33, and so on."]}
+    let make ?minCapacity =
+      fun ?maxCapacity -> fun () -> { minCapacity; maxCapacity }
     let to_value x =
       structure_to_value
-        [("Key", (Option.map x.key ~f:String_.to_value));
-        ("Value", (Option.map x.value ~f:String_.to_value))]
+        [("MinCapacity",
+           (Option.map x.minCapacity ~f:DoubleOptional.to_value));
+        ("MaxCapacity",
+          (Option.map x.maxCapacity ~f:DoubleOptional.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
-      let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
-      make ?value ?key ()
+      let maxCapacity =
+        (Option.map ~f:DoubleOptional.of_xml)
+          (Xml.child xml_arg0 "MaxCapacity") in
+      let minCapacity =
+        (Option.map ~f:DoubleOptional.of_xml)
+          (Xml.child xml_arg0 "MinCapacity") in
+      make ?maxCapacity ?minCapacity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" String_.of_json in
-      let key = field_map json "Key" String_.of_json in make ?value ?key ()
+    let of_json json__ =
+      let maxCapacity = field_map json__ "MaxCapacity" DoubleOptional.of_json in
+      let minCapacity = field_map json__ "MinCapacity" DoubleOptional.of_json in
+      make ?maxCapacity ?minCapacity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Metadata assigned to an Amazon DocumentDB resource consisting of a key-value pair."]
+       "Retrieves the scaling configuration for an Amazon DocumentDB Serverless cluster."]
 module ResourcePendingMaintenanceActions =
   struct
     type nonrec t =
@@ -1549,12 +1980,12 @@ module ResourcePendingMaintenanceActions =
           (Xml.child xml_arg0 "ResourceIdentifier") in
       make ?pendingMaintenanceActionDetails ?resourceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pendingMaintenanceActionDetails =
-        field_map json "PendingMaintenanceActionDetails"
+        field_map json__ "PendingMaintenanceActionDetails"
           PendingMaintenanceActionDetails.of_json in
       let resourceIdentifier =
-        field_map json "ResourceIdentifier" String_.of_json in
+        field_map json__ "ResourceIdentifier" String_.of_json in
       make ?pendingMaintenanceActionDetails ?resourceIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of ApplyPendingMaintenanceAction."]
@@ -1573,22 +2004,26 @@ module OrderableDBInstanceOption =
         [@ocaml.doc "A list of Availability Zones for an instance."];
       vpc: Boolean.t option
         [@ocaml.doc
-          "Indicates whether an instance is in a virtual private cloud (VPC)."]}
+          "Indicates whether an instance is in a virtual private cloud (VPC)."];
+      storageType: String_.t option
+        [@ocaml.doc "The storage type to associate with the DB cluster"]}
     let make ?engine =
       fun ?engineVersion ->
         fun ?dBInstanceClass ->
           fun ?licenseModel ->
             fun ?availabilityZones ->
               fun ?vpc ->
-                fun () ->
-                  {
-                    engine;
-                    engineVersion;
-                    dBInstanceClass;
-                    licenseModel;
-                    availabilityZones;
-                    vpc
-                  }
+                fun ?storageType ->
+                  fun () ->
+                    {
+                      engine;
+                      engineVersion;
+                      dBInstanceClass;
+                      licenseModel;
+                      availabilityZones;
+                      vpc;
+                      storageType
+                    }
     let to_value x =
       structure_to_value
         [("Engine", (Option.map x.engine ~f:String_.to_value));
@@ -1598,9 +2033,12 @@ module OrderableDBInstanceOption =
         ("LicenseModel", (Option.map x.licenseModel ~f:String_.to_value));
         ("AvailabilityZones",
           (Option.map x.availabilityZones ~f:AvailabilityZoneList.to_value));
-        ("Vpc", (Option.map x.vpc ~f:Boolean.to_value))]
+        ("Vpc", (Option.map x.vpc ~f:Boolean.to_value));
+        ("StorageType", (Option.map x.storageType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let storageType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StorageType") in
       let vpc = (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Vpc") in
       let availabilityZones =
         (Option.map ~f:AvailabilityZoneList.of_xml)
@@ -1613,25 +2051,30 @@ module OrderableDBInstanceOption =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EngineVersion") in
       let engine =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
-      make ?vpc ?availabilityZones ?licenseModel ?dBInstanceClass
-        ?engineVersion ?engine ()
+      make ?storageType ?vpc ?availabilityZones ?licenseModel
+        ?dBInstanceClass ?engineVersion ?engine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpc = field_map json "Vpc" Boolean.of_json in
+    let of_json json__ =
+      let storageType = field_map json__ "StorageType" String_.of_json in
+      let vpc = field_map json__ "Vpc" Boolean.of_json in
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZoneList.of_json in
-      let licenseModel = field_map json "LicenseModel" String_.of_json in
-      let dBInstanceClass = field_map json "DBInstanceClass" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map json "Engine" String_.of_json in
-      make ?vpc ?availabilityZones ?licenseModel ?dBInstanceClass
-        ?engineVersion ?engine ()
+        field_map json__ "AvailabilityZones" AvailabilityZoneList.of_json in
+      let licenseModel = field_map json__ "LicenseModel" String_.of_json in
+      let dBInstanceClass =
+        field_map json__ "DBInstanceClass" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      make ?storageType ?vpc ?availabilityZones ?licenseModel
+        ?dBInstanceClass ?engineVersion ?engine ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The options that are available for an instance."]
 module DBClusterSnapshotAttributeList =
   struct
     type nonrec t = DBClusterSnapshotAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DBClusterSnapshotAttribute.to_value)) |>
         (fun x -> `List x)
@@ -1679,9 +2122,9 @@ module Filter =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map_exn json "Values" FilterValueList.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
+    let of_json json__ =
+      let values = field_map_exn json__ "Values" FilterValueList.of_json in
+      let name = field_map_exn json__ "Name" String_.of_json in
       make ~values ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1695,7 +2138,7 @@ module GlobalCluster =
           "Contains a user-supplied global cluster identifier. This identifier is the unique key that identifies a global cluster."];
       globalClusterResourceId: String_.t option
         [@ocaml.doc
-          "The Amazon Web Services Region-unique, immutable identifier for the global database cluster. This identifier is found in AWS CloudTrail log entries whenever the AWS KMS customer master key (CMK) for the cluster is accessed."];
+          "The Amazon Web Services RegionRegion-unique, immutable identifier for the global database cluster. This identifier is found in CloudTrail log entries whenever the KMS customer master key (CMK) for the cluster is accessed."];
       globalClusterArn: String_.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) for the global cluster."];
       status: String_.t option
@@ -1715,7 +2158,11 @@ module GlobalCluster =
           "The deletion protection setting for the new global cluster."];
       globalClusterMembers: GlobalClusterMemberList.t option
         [@ocaml.doc
-          "The list of cluster IDs for secondary clusters within the global cluster. Currently limited to one item."]}
+          "The list of cluster IDs for secondary clusters within the global cluster. Currently limited to one item."];
+      failoverState: FailoverState.t option
+        [@ocaml.doc
+          "A data object containing all properties for the current state of an in-process or pending switchover or failover process for this global cluster. This object is empty unless the SwitchoverGlobalCluster or FailoverGlobalCluster operation was called on this global cluster."];
+      tagList: TagList.t option [@ocaml.doc "A list of global cluster tags."]}
     let make ?globalClusterIdentifier =
       fun ?globalClusterResourceId ->
         fun ?globalClusterArn ->
@@ -1726,19 +2173,23 @@ module GlobalCluster =
                   fun ?storageEncrypted ->
                     fun ?deletionProtection ->
                       fun ?globalClusterMembers ->
-                        fun () ->
-                          {
-                            globalClusterIdentifier;
-                            globalClusterResourceId;
-                            globalClusterArn;
-                            status;
-                            engine;
-                            engineVersion;
-                            databaseName;
-                            storageEncrypted;
-                            deletionProtection;
-                            globalClusterMembers
-                          }
+                        fun ?failoverState ->
+                          fun ?tagList ->
+                            fun () ->
+                              {
+                                globalClusterIdentifier;
+                                globalClusterResourceId;
+                                globalClusterArn;
+                                status;
+                                engine;
+                                engineVersion;
+                                databaseName;
+                                storageEncrypted;
+                                deletionProtection;
+                                globalClusterMembers;
+                                failoverState;
+                                tagList
+                              }
     let to_value x =
       structure_to_value
         [("GlobalClusterIdentifier",
@@ -1758,9 +2209,17 @@ module GlobalCluster =
           (Option.map x.deletionProtection ~f:BooleanOptional.to_value));
         ("GlobalClusterMembers",
           (Option.map x.globalClusterMembers
-             ~f:GlobalClusterMemberList.to_value))]
+             ~f:GlobalClusterMemberList.to_value));
+        ("FailoverState",
+          (Option.map x.failoverState ~f:FailoverState.to_value));
+        ("TagList", (Option.map x.tagList ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tagList =
+        (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
+      let failoverState =
+        (Option.map ~f:FailoverState.of_xml)
+          (Xml.child xml_arg0 "FailoverState") in
       let globalClusterMembers =
         (Option.map ~f:GlobalClusterMemberList.of_xml)
           (Xml.child xml_arg0 "GlobalClusterMembers") in
@@ -1787,31 +2246,37 @@ module GlobalCluster =
       let globalClusterIdentifier =
         (Option.map ~f:GlobalClusterIdentifier.of_xml)
           (Xml.child xml_arg0 "GlobalClusterIdentifier") in
-      make ?globalClusterMembers ?deletionProtection ?storageEncrypted
-        ?databaseName ?engineVersion ?engine ?status ?globalClusterArn
-        ?globalClusterResourceId ?globalClusterIdentifier ()
+      make ?tagList ?failoverState ?globalClusterMembers ?deletionProtection
+        ?storageEncrypted ?databaseName ?engineVersion ?engine ?status
+        ?globalClusterArn ?globalClusterResourceId ?globalClusterIdentifier
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tagList = field_map json__ "TagList" TagList.of_json in
+      let failoverState =
+        field_map json__ "FailoverState" FailoverState.of_json in
       let globalClusterMembers =
-        field_map json "GlobalClusterMembers" GlobalClusterMemberList.of_json in
+        field_map json__ "GlobalClusterMembers"
+          GlobalClusterMemberList.of_json in
       let deletionProtection =
-        field_map json "DeletionProtection" BooleanOptional.of_json in
+        field_map json__ "DeletionProtection" BooleanOptional.of_json in
       let storageEncrypted =
-        field_map json "StorageEncrypted" BooleanOptional.of_json in
-      let databaseName = field_map json "DatabaseName" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map json "Engine" String_.of_json in
-      let status = field_map json "Status" String_.of_json in
+        field_map json__ "StorageEncrypted" BooleanOptional.of_json in
+      let databaseName = field_map json__ "DatabaseName" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
       let globalClusterArn =
-        field_map json "GlobalClusterArn" String_.of_json in
+        field_map json__ "GlobalClusterArn" String_.of_json in
       let globalClusterResourceId =
-        field_map json "GlobalClusterResourceId" String_.of_json in
+        field_map json__ "GlobalClusterResourceId" String_.of_json in
       let globalClusterIdentifier =
-        field_map json "GlobalClusterIdentifier"
+        field_map json__ "GlobalClusterIdentifier"
           GlobalClusterIdentifier.of_json in
-      make ?globalClusterMembers ?deletionProtection ?storageEncrypted
-        ?databaseName ?engineVersion ?engine ?status ?globalClusterArn
-        ?globalClusterResourceId ?globalClusterIdentifier ()
+      make ?tagList ?failoverState ?globalClusterMembers ?deletionProtection
+        ?storageEncrypted ?databaseName ?engineVersion ?engine ?status
+        ?globalClusterArn ?globalClusterResourceId ?globalClusterIdentifier
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A data type representing an Amazon DocumentDB global cluster."]
@@ -1874,15 +2339,15 @@ module Event =
       make ?sourceArn ?date ?eventCategories ?message ?sourceType
         ?sourceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceArn = field_map json "SourceArn" String_.of_json in
-      let date = field_map json "Date" TStamp.of_json in
+    let of_json json__ =
+      let sourceArn = field_map json__ "SourceArn" String_.of_json in
+      let date = field_map json__ "Date" TStamp.of_json in
       let eventCategories =
-        field_map json "EventCategories" EventCategoriesList.of_json in
-      let message = field_map json "Message" String_.of_json in
-      let sourceType = field_map json "SourceType" SourceType.of_json in
+        field_map json__ "EventCategories" EventCategoriesList.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let sourceType = field_map json__ "SourceType" SourceType.of_json in
       let sourceIdentifier =
-        field_map json "SourceIdentifier" String_.of_json in
+        field_map json__ "SourceIdentifier" String_.of_json in
       make ?sourceArn ?date ?eventCategories ?message ?sourceType
         ?sourceIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -1992,22 +2457,22 @@ module EventSubscription =
         ?sourceType ?subscriptionCreationTime ?status ?snsTopicArn
         ?custSubscriptionId ?customerAwsId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventSubscriptionArn =
-        field_map json "EventSubscriptionArn" String_.of_json in
-      let enabled = field_map json "Enabled" Boolean.of_json in
+        field_map json__ "EventSubscriptionArn" String_.of_json in
+      let enabled = field_map json__ "Enabled" Boolean.of_json in
       let eventCategoriesList =
-        field_map json "EventCategoriesList" EventCategoriesList.of_json in
+        field_map json__ "EventCategoriesList" EventCategoriesList.of_json in
       let sourceIdsList =
-        field_map json "SourceIdsList" SourceIdsList.of_json in
-      let sourceType = field_map json "SourceType" String_.of_json in
+        field_map json__ "SourceIdsList" SourceIdsList.of_json in
+      let sourceType = field_map json__ "SourceType" String_.of_json in
       let subscriptionCreationTime =
-        field_map json "SubscriptionCreationTime" String_.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let snsTopicArn = field_map json "SnsTopicArn" String_.of_json in
+        field_map json__ "SubscriptionCreationTime" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let snsTopicArn = field_map json__ "SnsTopicArn" String_.of_json in
       let custSubscriptionId =
-        field_map json "CustSubscriptionId" String_.of_json in
-      let customerAwsId = field_map json "CustomerAwsId" String_.of_json in
+        field_map json__ "CustSubscriptionId" String_.of_json in
+      let customerAwsId = field_map json__ "CustomerAwsId" String_.of_json in
       make ?eventSubscriptionArn ?enabled ?eventCategoriesList ?sourceIdsList
         ?sourceType ?subscriptionCreationTime ?status ?snsTopicArn
         ?custSubscriptionId ?customerAwsId ()
@@ -2039,10 +2504,10 @@ module EventCategoriesMap =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SourceType") in
       make ?eventCategories ?sourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventCategories =
-        field_map json "EventCategories" EventCategoriesList.of_json in
-      let sourceType = field_map json "SourceType" String_.of_json in
+        field_map json__ "EventCategories" EventCategoriesList.of_json in
+      let sourceType = field_map json__ "SourceType" String_.of_json in
       make ?eventCategories ?sourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2051,6 +2516,9 @@ module ParametersList =
   struct
     type nonrec t = Parameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Parameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2140,6 +2608,9 @@ module DBInstance =
       cACertificateIdentifier: String_.t option
         [@ocaml.doc
           "The identifier of the CA certificate for this DB instance."];
+      copyTagsToSnapshot: BooleanOptional.t option
+        [@ocaml.doc
+          "A value that indicates whether to copy tags from the DB instance to snapshots of the DB instance. By default, tags are not copied."];
       promotionTier: IntegerOptional.t option
         [@ocaml.doc
           "A value that specifies the order in which an Amazon DocumentDB replica is promoted to the primary instance after a failure of the existing primary instance."];
@@ -2147,7 +2618,15 @@ module DBInstance =
         [@ocaml.doc "The Amazon Resource Name (ARN) for the instance."];
       enabledCloudwatchLogsExports: LogTypeList.t option
         [@ocaml.doc
-          "A list of log types that this instance is configured to export to CloudWatch Logs."]}
+          "A list of log types that this instance is configured to export to CloudWatch Logs."];
+      certificateDetails: CertificateDetails.t option
+        [@ocaml.doc "The details of the DB instance's server certificate."];
+      performanceInsightsEnabled: BooleanOptional.t option
+        [@ocaml.doc
+          "Set to true if Amazon RDS Performance Insights is enabled for the DB instance, and otherwise false."];
+      performanceInsightsKMSKeyId: String_.t option
+        [@ocaml.doc
+          "The KMS key identifier for encryption of Performance Insights data. The KMS key ID is the Amazon Resource Name (ARN), KMS key identifier, or the KMS key alias for the KMS encryption key."]}
     let make ?dBInstanceIdentifier =
       fun ?dBInstanceClass ->
         fun ?engine ->
@@ -2172,40 +2651,54 @@ module DBInstance =
                                               fun ?dbiResourceId ->
                                                 fun ?cACertificateIdentifier
                                                   ->
-                                                  fun ?promotionTier ->
-                                                    fun ?dBInstanceArn ->
-                                                      fun
-                                                        ?enabledCloudwatchLogsExports
-                                                        ->
-                                                        fun () ->
-                                                          {
-                                                            dBInstanceIdentifier;
-                                                            dBInstanceClass;
-                                                            engine;
-                                                            dBInstanceStatus;
-                                                            endpoint;
-                                                            instanceCreateTime;
-                                                            preferredBackupWindow;
-                                                            backupRetentionPeriod;
-                                                            vpcSecurityGroups;
-                                                            availabilityZone;
-                                                            dBSubnetGroup;
-                                                            preferredMaintenanceWindow;
-                                                            pendingModifiedValues;
-                                                            latestRestorableTime;
-                                                            engineVersion;
-                                                            autoMinorVersionUpgrade;
-                                                            publiclyAccessible;
-                                                            statusInfos;
-                                                            dBClusterIdentifier;
-                                                            storageEncrypted;
-                                                            kmsKeyId;
-                                                            dbiResourceId;
-                                                            cACertificateIdentifier;
-                                                            promotionTier;
-                                                            dBInstanceArn;
-                                                            enabledCloudwatchLogsExports
-                                                          }
+                                                  fun ?copyTagsToSnapshot ->
+                                                    fun ?promotionTier ->
+                                                      fun ?dBInstanceArn ->
+                                                        fun
+                                                          ?enabledCloudwatchLogsExports
+                                                          ->
+                                                          fun
+                                                            ?certificateDetails
+                                                            ->
+                                                            fun
+                                                              ?performanceInsightsEnabled
+                                                              ->
+                                                              fun
+                                                                ?performanceInsightsKMSKeyId
+                                                                ->
+                                                                fun () ->
+                                                                  {
+                                                                    dBInstanceIdentifier;
+                                                                    dBInstanceClass;
+                                                                    engine;
+                                                                    dBInstanceStatus;
+                                                                    endpoint;
+                                                                    instanceCreateTime;
+                                                                    preferredBackupWindow;
+                                                                    backupRetentionPeriod;
+                                                                    vpcSecurityGroups;
+                                                                    availabilityZone;
+                                                                    dBSubnetGroup;
+                                                                    preferredMaintenanceWindow;
+                                                                    pendingModifiedValues;
+                                                                    latestRestorableTime;
+                                                                    engineVersion;
+                                                                    autoMinorVersionUpgrade;
+                                                                    publiclyAccessible;
+                                                                    statusInfos;
+                                                                    dBClusterIdentifier;
+                                                                    storageEncrypted;
+                                                                    kmsKeyId;
+                                                                    dbiResourceId;
+                                                                    cACertificateIdentifier;
+                                                                    copyTagsToSnapshot;
+                                                                    promotionTier;
+                                                                    dBInstanceArn;
+                                                                    enabledCloudwatchLogsExports;
+                                                                    certificateDetails;
+                                                                    performanceInsightsEnabled;
+                                                                    performanceInsightsKMSKeyId
+                                                                  }
     let to_value x =
       structure_to_value
         [("DBInstanceIdentifier",
@@ -2251,13 +2744,31 @@ module DBInstance =
         ("DbiResourceId", (Option.map x.dbiResourceId ~f:String_.to_value));
         ("CACertificateIdentifier",
           (Option.map x.cACertificateIdentifier ~f:String_.to_value));
+        ("CopyTagsToSnapshot",
+          (Option.map x.copyTagsToSnapshot ~f:BooleanOptional.to_value));
         ("PromotionTier",
           (Option.map x.promotionTier ~f:IntegerOptional.to_value));
         ("DBInstanceArn", (Option.map x.dBInstanceArn ~f:String_.to_value));
         ("EnabledCloudwatchLogsExports",
-          (Option.map x.enabledCloudwatchLogsExports ~f:LogTypeList.to_value))]
+          (Option.map x.enabledCloudwatchLogsExports ~f:LogTypeList.to_value));
+        ("CertificateDetails",
+          (Option.map x.certificateDetails ~f:CertificateDetails.to_value));
+        ("PerformanceInsightsEnabled",
+          (Option.map x.performanceInsightsEnabled
+             ~f:BooleanOptional.to_value));
+        ("PerformanceInsightsKMSKeyId",
+          (Option.map x.performanceInsightsKMSKeyId ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let performanceInsightsKMSKeyId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "PerformanceInsightsKMSKeyId") in
+      let performanceInsightsEnabled =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "PerformanceInsightsEnabled") in
+      let certificateDetails =
+        (Option.map ~f:CertificateDetails.of_xml)
+          (Xml.child xml_arg0 "CertificateDetails") in
       let enabledCloudwatchLogsExports =
         (Option.map ~f:LogTypeList.of_xml)
           (Xml.child xml_arg0 "EnabledCloudwatchLogsExports") in
@@ -2266,6 +2777,9 @@ module DBInstance =
       let promotionTier =
         (Option.map ~f:IntegerOptional.of_xml)
           (Xml.child xml_arg0 "PromotionTier") in
+      let copyTagsToSnapshot =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "CopyTagsToSnapshot") in
       let cACertificateIdentifier =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "CACertificateIdentifier") in
@@ -2329,70 +2843,84 @@ module DBInstance =
       let dBInstanceIdentifier =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DBInstanceIdentifier") in
-      make ?enabledCloudwatchLogsExports ?dBInstanceArn ?promotionTier
-        ?cACertificateIdentifier ?dbiResourceId ?kmsKeyId ?storageEncrypted
-        ?dBClusterIdentifier ?statusInfos ?publiclyAccessible
-        ?autoMinorVersionUpgrade ?engineVersion ?latestRestorableTime
-        ?pendingModifiedValues ?preferredMaintenanceWindow ?dBSubnetGroup
-        ?availabilityZone ?vpcSecurityGroups ?backupRetentionPeriod
-        ?preferredBackupWindow ?instanceCreateTime ?endpoint
-        ?dBInstanceStatus ?engine ?dBInstanceClass ?dBInstanceIdentifier ()
+      make ?performanceInsightsKMSKeyId ?performanceInsightsEnabled
+        ?certificateDetails ?enabledCloudwatchLogsExports ?dBInstanceArn
+        ?promotionTier ?copyTagsToSnapshot ?cACertificateIdentifier
+        ?dbiResourceId ?kmsKeyId ?storageEncrypted ?dBClusterIdentifier
+        ?statusInfos ?publiclyAccessible ?autoMinorVersionUpgrade
+        ?engineVersion ?latestRestorableTime ?pendingModifiedValues
+        ?preferredMaintenanceWindow ?dBSubnetGroup ?availabilityZone
+        ?vpcSecurityGroups ?backupRetentionPeriod ?preferredBackupWindow
+        ?instanceCreateTime ?endpoint ?dBInstanceStatus ?engine
+        ?dBInstanceClass ?dBInstanceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let performanceInsightsKMSKeyId =
+        field_map json__ "PerformanceInsightsKMSKeyId" String_.of_json in
+      let performanceInsightsEnabled =
+        field_map json__ "PerformanceInsightsEnabled" BooleanOptional.of_json in
+      let certificateDetails =
+        field_map json__ "CertificateDetails" CertificateDetails.of_json in
       let enabledCloudwatchLogsExports =
-        field_map json "EnabledCloudwatchLogsExports" LogTypeList.of_json in
-      let dBInstanceArn = field_map json "DBInstanceArn" String_.of_json in
+        field_map json__ "EnabledCloudwatchLogsExports" LogTypeList.of_json in
+      let dBInstanceArn = field_map json__ "DBInstanceArn" String_.of_json in
       let promotionTier =
-        field_map json "PromotionTier" IntegerOptional.of_json in
+        field_map json__ "PromotionTier" IntegerOptional.of_json in
+      let copyTagsToSnapshot =
+        field_map json__ "CopyTagsToSnapshot" BooleanOptional.of_json in
       let cACertificateIdentifier =
-        field_map json "CACertificateIdentifier" String_.of_json in
-      let dbiResourceId = field_map json "DbiResourceId" String_.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
+        field_map json__ "CACertificateIdentifier" String_.of_json in
+      let dbiResourceId = field_map json__ "DbiResourceId" String_.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
       let storageEncrypted =
-        field_map json "StorageEncrypted" Boolean.of_json in
+        field_map json__ "StorageEncrypted" Boolean.of_json in
       let dBClusterIdentifier =
-        field_map json "DBClusterIdentifier" String_.of_json in
+        field_map json__ "DBClusterIdentifier" String_.of_json in
       let statusInfos =
-        field_map json "StatusInfos" DBInstanceStatusInfoList.of_json in
+        field_map json__ "StatusInfos" DBInstanceStatusInfoList.of_json in
       let publiclyAccessible =
-        field_map json "PubliclyAccessible" Boolean.of_json in
+        field_map json__ "PubliclyAccessible" Boolean.of_json in
       let autoMinorVersionUpgrade =
-        field_map json "AutoMinorVersionUpgrade" Boolean.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
+        field_map json__ "AutoMinorVersionUpgrade" Boolean.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
       let latestRestorableTime =
-        field_map json "LatestRestorableTime" TStamp.of_json in
+        field_map json__ "LatestRestorableTime" TStamp.of_json in
       let pendingModifiedValues =
-        field_map json "PendingModifiedValues" PendingModifiedValues.of_json in
+        field_map json__ "PendingModifiedValues"
+          PendingModifiedValues.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
       let dBSubnetGroup =
-        field_map json "DBSubnetGroup" DBSubnetGroup.of_json in
+        field_map json__ "DBSubnetGroup" DBSubnetGroup.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
+        field_map json__ "AvailabilityZone" String_.of_json in
       let vpcSecurityGroups =
-        field_map json "VpcSecurityGroups"
+        field_map json__ "VpcSecurityGroups"
           VpcSecurityGroupMembershipList.of_json in
       let backupRetentionPeriod =
-        field_map json "BackupRetentionPeriod" Integer.of_json in
+        field_map json__ "BackupRetentionPeriod" Integer.of_json in
       let preferredBackupWindow =
-        field_map json "PreferredBackupWindow" String_.of_json in
+        field_map json__ "PreferredBackupWindow" String_.of_json in
       let instanceCreateTime =
-        field_map json "InstanceCreateTime" TStamp.of_json in
-      let endpoint = field_map json "Endpoint" Endpoint.of_json in
+        field_map json__ "InstanceCreateTime" TStamp.of_json in
+      let endpoint = field_map json__ "Endpoint" Endpoint.of_json in
       let dBInstanceStatus =
-        field_map json "DBInstanceStatus" String_.of_json in
-      let engine = field_map json "Engine" String_.of_json in
-      let dBInstanceClass = field_map json "DBInstanceClass" String_.of_json in
+        field_map json__ "DBInstanceStatus" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let dBInstanceClass =
+        field_map json__ "DBInstanceClass" String_.of_json in
       let dBInstanceIdentifier =
-        field_map json "DBInstanceIdentifier" String_.of_json in
-      make ?enabledCloudwatchLogsExports ?dBInstanceArn ?promotionTier
-        ?cACertificateIdentifier ?dbiResourceId ?kmsKeyId ?storageEncrypted
-        ?dBClusterIdentifier ?statusInfos ?publiclyAccessible
-        ?autoMinorVersionUpgrade ?engineVersion ?latestRestorableTime
-        ?pendingModifiedValues ?preferredMaintenanceWindow ?dBSubnetGroup
-        ?availabilityZone ?vpcSecurityGroups ?backupRetentionPeriod
-        ?preferredBackupWindow ?instanceCreateTime ?endpoint
-        ?dBInstanceStatus ?engine ?dBInstanceClass ?dBInstanceIdentifier ()
+        field_map json__ "DBInstanceIdentifier" String_.of_json in
+      make ?performanceInsightsKMSKeyId ?performanceInsightsEnabled
+        ?certificateDetails ?enabledCloudwatchLogsExports ?dBInstanceArn
+        ?promotionTier ?copyTagsToSnapshot ?cACertificateIdentifier
+        ?dbiResourceId ?kmsKeyId ?storageEncrypted ?dBClusterIdentifier
+        ?statusInfos ?publiclyAccessible ?autoMinorVersionUpgrade
+        ?engineVersion ?latestRestorableTime ?pendingModifiedValues
+        ?preferredMaintenanceWindow ?dBSubnetGroup ?availabilityZone
+        ?vpcSecurityGroups ?backupRetentionPeriod ?preferredBackupWindow
+        ?instanceCreateTime ?endpoint ?dBInstanceStatus ?engine
+        ?dBInstanceClass ?dBInstanceIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detailed information about an instance."]
 module DBEngineVersion =
@@ -2418,7 +2946,17 @@ module DBEngineVersion =
           "The types of logs that the database engine has available for export to Amazon CloudWatch Logs."];
       supportsLogExportsToCloudwatchLogs: Boolean.t option
         [@ocaml.doc
-          "A value that indicates whether the engine version supports exporting the log types specified by ExportableLogTypes to CloudWatch Logs."]}
+          "A value that indicates whether the engine version supports exporting the log types specified by ExportableLogTypes to CloudWatch Logs."];
+      supportedCACertificateIdentifiers:
+        CACertificateIdentifiersList.t option
+        [@ocaml.doc
+          "A list of the supported CA certificate identifiers. For more information, see Updating Your Amazon DocumentDB TLS Certificates and Encrypting Data in Transit in the Amazon DocumentDB Developer Guide."];
+      supportsCertificateRotationWithoutRestart: BooleanOptional.t option
+        [@ocaml.doc
+          "Indicates whether the engine version supports rotating the server certificate without rebooting the DB instance."];
+      serverlessV2FeaturesSupport: ServerlessV2FeaturesSupport.t option
+        [@ocaml.doc
+          "Specifies any Amazon DocumentDB Serverless properties or limits that differ between Amazon DocumentDB engine versions. You can test the values of this attribute when deciding which Amazon DocumentDB version to use in a new or upgraded cluster. You can also retrieve the version of an existing cluster and check whether that version supports certain Amazon DocumentDB Serverless features before you attempt to use those features."]}
     let make ?engine =
       fun ?engineVersion ->
         fun ?dBParameterGroupFamily ->
@@ -2427,17 +2965,23 @@ module DBEngineVersion =
               fun ?validUpgradeTarget ->
                 fun ?exportableLogTypes ->
                   fun ?supportsLogExportsToCloudwatchLogs ->
-                    fun () ->
-                      {
-                        engine;
-                        engineVersion;
-                        dBParameterGroupFamily;
-                        dBEngineDescription;
-                        dBEngineVersionDescription;
-                        validUpgradeTarget;
-                        exportableLogTypes;
-                        supportsLogExportsToCloudwatchLogs
-                      }
+                    fun ?supportedCACertificateIdentifiers ->
+                      fun ?supportsCertificateRotationWithoutRestart ->
+                        fun ?serverlessV2FeaturesSupport ->
+                          fun () ->
+                            {
+                              engine;
+                              engineVersion;
+                              dBParameterGroupFamily;
+                              dBEngineDescription;
+                              dBEngineVersionDescription;
+                              validUpgradeTarget;
+                              exportableLogTypes;
+                              supportsLogExportsToCloudwatchLogs;
+                              supportedCACertificateIdentifiers;
+                              supportsCertificateRotationWithoutRestart;
+                              serverlessV2FeaturesSupport
+                            }
     let to_value x =
       structure_to_value
         [("Engine", (Option.map x.engine ~f:String_.to_value));
@@ -2454,9 +2998,27 @@ module DBEngineVersion =
           (Option.map x.exportableLogTypes ~f:LogTypeList.to_value));
         ("SupportsLogExportsToCloudwatchLogs",
           (Option.map x.supportsLogExportsToCloudwatchLogs
-             ~f:Boolean.to_value))]
+             ~f:Boolean.to_value));
+        ("SupportedCACertificateIdentifiers",
+          (Option.map x.supportedCACertificateIdentifiers
+             ~f:CACertificateIdentifiersList.to_value));
+        ("SupportsCertificateRotationWithoutRestart",
+          (Option.map x.supportsCertificateRotationWithoutRestart
+             ~f:BooleanOptional.to_value));
+        ("ServerlessV2FeaturesSupport",
+          (Option.map x.serverlessV2FeaturesSupport
+             ~f:ServerlessV2FeaturesSupport.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let serverlessV2FeaturesSupport =
+        (Option.map ~f:ServerlessV2FeaturesSupport.of_xml)
+          (Xml.child xml_arg0 "ServerlessV2FeaturesSupport") in
+      let supportsCertificateRotationWithoutRestart =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "SupportsCertificateRotationWithoutRestart") in
+      let supportedCACertificateIdentifiers =
+        (Option.map ~f:CACertificateIdentifiersList.of_xml)
+          (Xml.child xml_arg0 "SupportedCACertificateIdentifiers") in
       let supportsLogExportsToCloudwatchLogs =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "SupportsLogExportsToCloudwatchLogs") in
@@ -2479,26 +3041,41 @@ module DBEngineVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EngineVersion") in
       let engine =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
-      make ?supportsLogExportsToCloudwatchLogs ?exportableLogTypes
+      make ?serverlessV2FeaturesSupport
+        ?supportsCertificateRotationWithoutRestart
+        ?supportedCACertificateIdentifiers
+        ?supportsLogExportsToCloudwatchLogs ?exportableLogTypes
         ?validUpgradeTarget ?dBEngineVersionDescription ?dBEngineDescription
         ?dBParameterGroupFamily ?engineVersion ?engine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let serverlessV2FeaturesSupport =
+        field_map json__ "ServerlessV2FeaturesSupport"
+          ServerlessV2FeaturesSupport.of_json in
+      let supportsCertificateRotationWithoutRestart =
+        field_map json__ "SupportsCertificateRotationWithoutRestart"
+          BooleanOptional.of_json in
+      let supportedCACertificateIdentifiers =
+        field_map json__ "SupportedCACertificateIdentifiers"
+          CACertificateIdentifiersList.of_json in
       let supportsLogExportsToCloudwatchLogs =
-        field_map json "SupportsLogExportsToCloudwatchLogs" Boolean.of_json in
+        field_map json__ "SupportsLogExportsToCloudwatchLogs" Boolean.of_json in
       let exportableLogTypes =
-        field_map json "ExportableLogTypes" LogTypeList.of_json in
+        field_map json__ "ExportableLogTypes" LogTypeList.of_json in
       let validUpgradeTarget =
-        field_map json "ValidUpgradeTarget" ValidUpgradeTargetList.of_json in
+        field_map json__ "ValidUpgradeTarget" ValidUpgradeTargetList.of_json in
       let dBEngineVersionDescription =
-        field_map json "DBEngineVersionDescription" String_.of_json in
+        field_map json__ "DBEngineVersionDescription" String_.of_json in
       let dBEngineDescription =
-        field_map json "DBEngineDescription" String_.of_json in
+        field_map json__ "DBEngineDescription" String_.of_json in
       let dBParameterGroupFamily =
-        field_map json "DBParameterGroupFamily" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map json "Engine" String_.of_json in
-      make ?supportsLogExportsToCloudwatchLogs ?exportableLogTypes
+        field_map json__ "DBParameterGroupFamily" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      make ?serverlessV2FeaturesSupport
+        ?supportsCertificateRotationWithoutRestart
+        ?supportedCACertificateIdentifiers
+        ?supportsLogExportsToCloudwatchLogs ?exportableLogTypes
         ?validUpgradeTarget ?dBEngineVersionDescription ?dBEngineDescription
         ?dBParameterGroupFamily ?engineVersion ?engine ()
     let to_json v = composed_to_json to_value v
@@ -2551,7 +3128,10 @@ module DBClusterSnapshot =
           "The Amazon Resource Name (ARN) for the cluster snapshot."];
       sourceDBClusterSnapshotArn: String_.t option
         [@ocaml.doc
-          "If the cluster snapshot was copied from a source cluster snapshot, the ARN for the source cluster snapshot; otherwise, a null value."]}
+          "If the cluster snapshot was copied from a source cluster snapshot, the ARN for the source cluster snapshot; otherwise, a null value."];
+      storageType: String_.t option
+        [@ocaml.doc
+          "Storage type associated with your cluster snapshot For information on storage types for Amazon DocumentDB clusters, see Cluster storage configurations in the Amazon DocumentDB Developer Guide. Valid values for storage type - standard | iopt1 Default value is standard"]}
     let make ?availabilityZones =
       fun ?dBClusterSnapshotIdentifier ->
         fun ?dBClusterIdentifier ->
@@ -2569,26 +3149,28 @@ module DBClusterSnapshot =
                                 fun ?kmsKeyId ->
                                   fun ?dBClusterSnapshotArn ->
                                     fun ?sourceDBClusterSnapshotArn ->
-                                      fun () ->
-                                        {
-                                          availabilityZones;
-                                          dBClusterSnapshotIdentifier;
-                                          dBClusterIdentifier;
-                                          snapshotCreateTime;
-                                          engine;
-                                          status;
-                                          port;
-                                          vpcId;
-                                          clusterCreateTime;
-                                          masterUsername;
-                                          engineVersion;
-                                          snapshotType;
-                                          percentProgress;
-                                          storageEncrypted;
-                                          kmsKeyId;
-                                          dBClusterSnapshotArn;
-                                          sourceDBClusterSnapshotArn
-                                        }
+                                      fun ?storageType ->
+                                        fun () ->
+                                          {
+                                            availabilityZones;
+                                            dBClusterSnapshotIdentifier;
+                                            dBClusterIdentifier;
+                                            snapshotCreateTime;
+                                            engine;
+                                            status;
+                                            port;
+                                            vpcId;
+                                            clusterCreateTime;
+                                            masterUsername;
+                                            engineVersion;
+                                            snapshotType;
+                                            percentProgress;
+                                            storageEncrypted;
+                                            kmsKeyId;
+                                            dBClusterSnapshotArn;
+                                            sourceDBClusterSnapshotArn;
+                                            storageType
+                                          }
     let to_value x =
       structure_to_value
         [("AvailabilityZones",
@@ -2616,9 +3198,12 @@ module DBClusterSnapshot =
         ("DBClusterSnapshotArn",
           (Option.map x.dBClusterSnapshotArn ~f:String_.to_value));
         ("SourceDBClusterSnapshotArn",
-          (Option.map x.sourceDBClusterSnapshotArn ~f:String_.to_value))]
+          (Option.map x.sourceDBClusterSnapshotArn ~f:String_.to_value));
+        ("StorageType", (Option.map x.storageType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let storageType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StorageType") in
       let sourceDBClusterSnapshotArn =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "SourceDBClusterSnapshotArn") in
@@ -2659,43 +3244,45 @@ module DBClusterSnapshot =
       let availabilityZones =
         (Option.map ~f:AvailabilityZones.of_xml)
           (Xml.child xml_arg0 "AvailabilityZones") in
-      make ?sourceDBClusterSnapshotArn ?dBClusterSnapshotArn ?kmsKeyId
-        ?storageEncrypted ?percentProgress ?snapshotType ?engineVersion
-        ?masterUsername ?clusterCreateTime ?vpcId ?port ?status ?engine
-        ?snapshotCreateTime ?dBClusterIdentifier ?dBClusterSnapshotIdentifier
-        ?availabilityZones ()
+      make ?storageType ?sourceDBClusterSnapshotArn ?dBClusterSnapshotArn
+        ?kmsKeyId ?storageEncrypted ?percentProgress ?snapshotType
+        ?engineVersion ?masterUsername ?clusterCreateTime ?vpcId ?port
+        ?status ?engine ?snapshotCreateTime ?dBClusterIdentifier
+        ?dBClusterSnapshotIdentifier ?availabilityZones ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let storageType = field_map json__ "StorageType" String_.of_json in
       let sourceDBClusterSnapshotArn =
-        field_map json "SourceDBClusterSnapshotArn" String_.of_json in
+        field_map json__ "SourceDBClusterSnapshotArn" String_.of_json in
       let dBClusterSnapshotArn =
-        field_map json "DBClusterSnapshotArn" String_.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
+        field_map json__ "DBClusterSnapshotArn" String_.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
       let storageEncrypted =
-        field_map json "StorageEncrypted" Boolean.of_json in
-      let percentProgress = field_map json "PercentProgress" Integer.of_json in
-      let snapshotType = field_map json "SnapshotType" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let masterUsername = field_map json "MasterUsername" String_.of_json in
+        field_map json__ "StorageEncrypted" Boolean.of_json in
+      let percentProgress =
+        field_map json__ "PercentProgress" Integer.of_json in
+      let snapshotType = field_map json__ "SnapshotType" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let masterUsername = field_map json__ "MasterUsername" String_.of_json in
       let clusterCreateTime =
-        field_map json "ClusterCreateTime" TStamp.of_json in
-      let vpcId = field_map json "VpcId" String_.of_json in
-      let port = field_map json "Port" Integer.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let engine = field_map json "Engine" String_.of_json in
+        field_map json__ "ClusterCreateTime" TStamp.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
+      let port = field_map json__ "Port" Integer.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
       let snapshotCreateTime =
-        field_map json "SnapshotCreateTime" TStamp.of_json in
+        field_map json__ "SnapshotCreateTime" TStamp.of_json in
       let dBClusterIdentifier =
-        field_map json "DBClusterIdentifier" String_.of_json in
+        field_map json__ "DBClusterIdentifier" String_.of_json in
       let dBClusterSnapshotIdentifier =
-        field_map json "DBClusterSnapshotIdentifier" String_.of_json in
+        field_map json__ "DBClusterSnapshotIdentifier" String_.of_json in
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZones.of_json in
-      make ?sourceDBClusterSnapshotArn ?dBClusterSnapshotArn ?kmsKeyId
-        ?storageEncrypted ?percentProgress ?snapshotType ?engineVersion
-        ?masterUsername ?clusterCreateTime ?vpcId ?port ?status ?engine
-        ?snapshotCreateTime ?dBClusterIdentifier ?dBClusterSnapshotIdentifier
-        ?availabilityZones ()
+        field_map json__ "AvailabilityZones" AvailabilityZones.of_json in
+      make ?storageType ?sourceDBClusterSnapshotArn ?dBClusterSnapshotArn
+        ?kmsKeyId ?storageEncrypted ?percentProgress ?snapshotType
+        ?engineVersion ?masterUsername ?clusterCreateTime ?vpcId ?port
+        ?status ?engine ?snapshotCreateTime ?dBClusterIdentifier
+        ?dBClusterSnapshotIdentifier ?availabilityZones ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detailed information about a cluster snapshot."]
 module DBClusterParameterGroup =
@@ -2749,14 +3336,14 @@ module DBClusterParameterGroup =
       make ?dBClusterParameterGroupArn ?description ?dBParameterGroupFamily
         ?dBClusterParameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBClusterParameterGroupArn =
-        field_map json "DBClusterParameterGroupArn" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
+        field_map json__ "DBClusterParameterGroupArn" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let dBParameterGroupFamily =
-        field_map json "DBParameterGroupFamily" String_.of_json in
+        field_map json__ "DBParameterGroupFamily" String_.of_json in
       let dBClusterParameterGroupName =
-        field_map json "DBClusterParameterGroupName" String_.of_json in
+        field_map json__ "DBClusterParameterGroupName" String_.of_json in
       make ?dBClusterParameterGroupArn ?description ?dBParameterGroupFamily
         ?dBClusterParameterGroupName ()
     let to_json v = composed_to_json to_value v
@@ -2844,6 +3431,9 @@ module DBCluster =
       associatedRoles: DBClusterRoles.t option
         [@ocaml.doc
           "Provides a list of the Identity and Access Management (IAM) roles that are associated with the cluster. (IAM) roles that are associated with a cluster grant permission for the cluster to access other Amazon Web Services services on your behalf."];
+      cloneGroupId: String_.t option
+        [@ocaml.doc
+          "Identifies the clone group to which the DB cluster is associated."];
       clusterCreateTime: TStamp.t option
         [@ocaml.doc
           "Specifies the time when the cluster was created, in Universal Coordinated Time (UTC)."];
@@ -2852,7 +3442,23 @@ module DBCluster =
           "A list of log types that this cluster is configured to export to Amazon CloudWatch Logs."];
       deletionProtection: Boolean.t option
         [@ocaml.doc
-          "Specifies whether this cluster can be deleted. If DeletionProtection is enabled, the cluster cannot be deleted unless it is modified and DeletionProtection is disabled. DeletionProtection protects clusters from being accidentally deleted."]}
+          "Specifies whether this cluster can be deleted. If DeletionProtection is enabled, the cluster cannot be deleted unless it is modified and DeletionProtection is disabled. DeletionProtection protects clusters from being accidentally deleted."];
+      iOOptimizedNextAllowedModificationTime: TStamp.t option
+        [@ocaml.doc
+          "The next time you can modify the Amazon DocumentDB cluster to use the iopt1 storage type."];
+      storageType: String_.t option
+        [@ocaml.doc
+          "Storage type associated with your cluster For information on storage types for Amazon DocumentDB clusters, see Cluster storage configurations in the Amazon DocumentDB Developer Guide. Valid values for storage type - standard | iopt1 Default value is standard"];
+      serverlessV2ScalingConfiguration:
+        ServerlessV2ScalingConfigurationInfo.t option
+        [@ocaml.doc
+          "The scaling configuration of an Amazon DocumentDB Serverless cluster."];
+      masterUserSecret: ClusterMasterUserSecret.t option
+        [@ocaml.doc
+          "The secret managed by Amazon DocumentDB in Amazon Web Services Secrets Manager for the master user password."];
+      networkType: String_.t option
+        [@ocaml.doc
+          "The network type of the cluster. The network type is determined by the DBSubnetGroup specified for the cluster. A DBSubnetGroup can support only the IPv4 protocol or the IPv4 and the IPv6 protocols (DUAL). For more information, see DocumentDB clusters in a VPC in the Amazon DocumentDB Developer Guide. Valid Values: IPV4 | DUAL"]}
     let make ?availabilityZones =
       fun ?backupRetentionPeriod ->
         fun ?dBClusterIdentifier ->
@@ -2885,16 +3491,33 @@ module DBCluster =
                                                           fun
                                                             ?associatedRoles
                                                             ->
-                                                            fun
-                                                              ?clusterCreateTime
+                                                            fun ?cloneGroupId
                                                               ->
                                                               fun
-                                                                ?enabledCloudwatchLogsExports
+                                                                ?clusterCreateTime
                                                                 ->
                                                                 fun
-                                                                  ?deletionProtection
+                                                                  ?enabledCloudwatchLogsExports
                                                                   ->
-                                                                  fun () ->
+                                                                  fun
+                                                                    ?deletionProtection
+                                                                    ->
+                                                                    fun
+                                                                    ?iOOptimizedNextAllowedModificationTime
+                                                                    ->
+                                                                    fun
+                                                                    ?storageType
+                                                                    ->
+                                                                    fun
+                                                                    ?serverlessV2ScalingConfiguration
+                                                                    ->
+                                                                    fun
+                                                                    ?masterUserSecret
+                                                                    ->
+                                                                    fun
+                                                                    ?networkType
+                                                                    ->
+                                                                    fun () ->
                                                                     {
                                                                     availabilityZones;
                                                                     backupRetentionPeriod;
@@ -2924,9 +3547,15 @@ module DBCluster =
                                                                     dbClusterResourceId;
                                                                     dBClusterArn;
                                                                     associatedRoles;
+                                                                    cloneGroupId;
                                                                     clusterCreateTime;
                                                                     enabledCloudwatchLogsExports;
-                                                                    deletionProtection
+                                                                    deletionProtection;
+                                                                    iOOptimizedNextAllowedModificationTime;
+                                                                    storageType;
+                                                                    serverlessV2ScalingConfiguration;
+                                                                    masterUserSecret;
+                                                                    networkType
                                                                     }
     let to_value x =
       structure_to_value
@@ -2976,14 +3605,38 @@ module DBCluster =
         ("DBClusterArn", (Option.map x.dBClusterArn ~f:String_.to_value));
         ("AssociatedRoles",
           (Option.map x.associatedRoles ~f:DBClusterRoles.to_value));
+        ("CloneGroupId", (Option.map x.cloneGroupId ~f:String_.to_value));
         ("ClusterCreateTime",
           (Option.map x.clusterCreateTime ~f:TStamp.to_value));
         ("EnabledCloudwatchLogsExports",
           (Option.map x.enabledCloudwatchLogsExports ~f:LogTypeList.to_value));
         ("DeletionProtection",
-          (Option.map x.deletionProtection ~f:Boolean.to_value))]
+          (Option.map x.deletionProtection ~f:Boolean.to_value));
+        ("IOOptimizedNextAllowedModificationTime",
+          (Option.map x.iOOptimizedNextAllowedModificationTime
+             ~f:TStamp.to_value));
+        ("StorageType", (Option.map x.storageType ~f:String_.to_value));
+        ("ServerlessV2ScalingConfiguration",
+          (Option.map x.serverlessV2ScalingConfiguration
+             ~f:ServerlessV2ScalingConfigurationInfo.to_value));
+        ("MasterUserSecret",
+          (Option.map x.masterUserSecret ~f:ClusterMasterUserSecret.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NetworkType") in
+      let masterUserSecret =
+        (Option.map ~f:ClusterMasterUserSecret.of_xml)
+          (Xml.child xml_arg0 "MasterUserSecret") in
+      let serverlessV2ScalingConfiguration =
+        (Option.map ~f:ServerlessV2ScalingConfigurationInfo.of_xml)
+          (Xml.child xml_arg0 "ServerlessV2ScalingConfiguration") in
+      let storageType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StorageType") in
+      let iOOptimizedNextAllowedModificationTime =
+        (Option.map ~f:TStamp.of_xml)
+          (Xml.child xml_arg0 "IOOptimizedNextAllowedModificationTime") in
       let deletionProtection =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "DeletionProtection") in
@@ -2993,6 +3646,8 @@ module DBCluster =
       let clusterCreateTime =
         (Option.map ~f:TStamp.of_xml)
           (Xml.child xml_arg0 "ClusterCreateTime") in
+      let cloneGroupId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CloneGroupId") in
       let associatedRoles =
         (Option.map ~f:DBClusterRoles.of_xml)
           (Xml.child xml_arg0 "AssociatedRoles") in
@@ -3064,10 +3719,12 @@ module DBCluster =
       let availabilityZones =
         (Option.map ~f:AvailabilityZones.of_xml)
           (Xml.child xml_arg0 "AvailabilityZones") in
-      make ?deletionProtection ?enabledCloudwatchLogsExports
-        ?clusterCreateTime ?associatedRoles ?dBClusterArn
-        ?dbClusterResourceId ?kmsKeyId ?storageEncrypted ?hostedZoneId
-        ?vpcSecurityGroups ?dBClusterMembers ?readReplicaIdentifiers
+      make ?networkType ?masterUserSecret ?serverlessV2ScalingConfiguration
+        ?storageType ?iOOptimizedNextAllowedModificationTime
+        ?deletionProtection ?enabledCloudwatchLogsExports ?clusterCreateTime
+        ?cloneGroupId ?associatedRoles ?dBClusterArn ?dbClusterResourceId
+        ?kmsKeyId ?storageEncrypted ?hostedZoneId ?vpcSecurityGroups
+        ?dBClusterMembers ?readReplicaIdentifiers
         ?replicationSourceIdentifier ?preferredMaintenanceWindow
         ?preferredBackupWindow ?masterUsername ?port ?latestRestorableTime
         ?engineVersion ?engine ?multiAZ ?readerEndpoint ?endpoint
@@ -3075,62 +3732,76 @@ module DBCluster =
         ?dBClusterParameterGroup ?dBClusterIdentifier ?backupRetentionPeriod
         ?availabilityZones ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" String_.of_json in
+      let masterUserSecret =
+        field_map json__ "MasterUserSecret" ClusterMasterUserSecret.of_json in
+      let serverlessV2ScalingConfiguration =
+        field_map json__ "ServerlessV2ScalingConfiguration"
+          ServerlessV2ScalingConfigurationInfo.of_json in
+      let storageType = field_map json__ "StorageType" String_.of_json in
+      let iOOptimizedNextAllowedModificationTime =
+        field_map json__ "IOOptimizedNextAllowedModificationTime"
+          TStamp.of_json in
       let deletionProtection =
-        field_map json "DeletionProtection" Boolean.of_json in
+        field_map json__ "DeletionProtection" Boolean.of_json in
       let enabledCloudwatchLogsExports =
-        field_map json "EnabledCloudwatchLogsExports" LogTypeList.of_json in
+        field_map json__ "EnabledCloudwatchLogsExports" LogTypeList.of_json in
       let clusterCreateTime =
-        field_map json "ClusterCreateTime" TStamp.of_json in
+        field_map json__ "ClusterCreateTime" TStamp.of_json in
+      let cloneGroupId = field_map json__ "CloneGroupId" String_.of_json in
       let associatedRoles =
-        field_map json "AssociatedRoles" DBClusterRoles.of_json in
-      let dBClusterArn = field_map json "DBClusterArn" String_.of_json in
+        field_map json__ "AssociatedRoles" DBClusterRoles.of_json in
+      let dBClusterArn = field_map json__ "DBClusterArn" String_.of_json in
       let dbClusterResourceId =
-        field_map json "DbClusterResourceId" String_.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
+        field_map json__ "DbClusterResourceId" String_.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
       let storageEncrypted =
-        field_map json "StorageEncrypted" Boolean.of_json in
-      let hostedZoneId = field_map json "HostedZoneId" String_.of_json in
+        field_map json__ "StorageEncrypted" Boolean.of_json in
+      let hostedZoneId = field_map json__ "HostedZoneId" String_.of_json in
       let vpcSecurityGroups =
-        field_map json "VpcSecurityGroups"
+        field_map json__ "VpcSecurityGroups"
           VpcSecurityGroupMembershipList.of_json in
       let dBClusterMembers =
-        field_map json "DBClusterMembers" DBClusterMemberList.of_json in
+        field_map json__ "DBClusterMembers" DBClusterMemberList.of_json in
       let readReplicaIdentifiers =
-        field_map json "ReadReplicaIdentifiers"
+        field_map json__ "ReadReplicaIdentifiers"
           ReadReplicaIdentifierList.of_json in
       let replicationSourceIdentifier =
-        field_map json "ReplicationSourceIdentifier" String_.of_json in
+        field_map json__ "ReplicationSourceIdentifier" String_.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
       let preferredBackupWindow =
-        field_map json "PreferredBackupWindow" String_.of_json in
-      let masterUsername = field_map json "MasterUsername" String_.of_json in
-      let port = field_map json "Port" IntegerOptional.of_json in
+        field_map json__ "PreferredBackupWindow" String_.of_json in
+      let masterUsername = field_map json__ "MasterUsername" String_.of_json in
+      let port = field_map json__ "Port" IntegerOptional.of_json in
       let latestRestorableTime =
-        field_map json "LatestRestorableTime" TStamp.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map json "Engine" String_.of_json in
-      let multiAZ = field_map json "MultiAZ" Boolean.of_json in
-      let readerEndpoint = field_map json "ReaderEndpoint" String_.of_json in
-      let endpoint = field_map json "Endpoint" String_.of_json in
+        field_map json__ "LatestRestorableTime" TStamp.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let multiAZ = field_map json__ "MultiAZ" Boolean.of_json in
+      let readerEndpoint = field_map json__ "ReaderEndpoint" String_.of_json in
+      let endpoint = field_map json__ "Endpoint" String_.of_json in
       let earliestRestorableTime =
-        field_map json "EarliestRestorableTime" TStamp.of_json in
-      let percentProgress = field_map json "PercentProgress" String_.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let dBSubnetGroup = field_map json "DBSubnetGroup" String_.of_json in
+        field_map json__ "EarliestRestorableTime" TStamp.of_json in
+      let percentProgress =
+        field_map json__ "PercentProgress" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let dBSubnetGroup = field_map json__ "DBSubnetGroup" String_.of_json in
       let dBClusterParameterGroup =
-        field_map json "DBClusterParameterGroup" String_.of_json in
+        field_map json__ "DBClusterParameterGroup" String_.of_json in
       let dBClusterIdentifier =
-        field_map json "DBClusterIdentifier" String_.of_json in
+        field_map json__ "DBClusterIdentifier" String_.of_json in
       let backupRetentionPeriod =
-        field_map json "BackupRetentionPeriod" IntegerOptional.of_json in
+        field_map json__ "BackupRetentionPeriod" IntegerOptional.of_json in
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZones.of_json in
-      make ?deletionProtection ?enabledCloudwatchLogsExports
-        ?clusterCreateTime ?associatedRoles ?dBClusterArn
-        ?dbClusterResourceId ?kmsKeyId ?storageEncrypted ?hostedZoneId
-        ?vpcSecurityGroups ?dBClusterMembers ?readReplicaIdentifiers
+        field_map json__ "AvailabilityZones" AvailabilityZones.of_json in
+      make ?networkType ?masterUserSecret ?serverlessV2ScalingConfiguration
+        ?storageType ?iOOptimizedNextAllowedModificationTime
+        ?deletionProtection ?enabledCloudwatchLogsExports ?clusterCreateTime
+        ?cloneGroupId ?associatedRoles ?dBClusterArn ?dbClusterResourceId
+        ?kmsKeyId ?storageEncrypted ?hostedZoneId ?vpcSecurityGroups
+        ?dBClusterMembers ?readReplicaIdentifiers
         ?replicationSourceIdentifier ?preferredMaintenanceWindow
         ?preferredBackupWindow ?masterUsername ?port ?latestRestorableTime
         ?engineVersion ?engine ?multiAZ ?readerEndpoint ?endpoint
@@ -3202,14 +3873,15 @@ module Certificate =
       make ?certificateArn ?validTill ?validFrom ?thumbprint ?certificateType
         ?certificateIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let certificateArn = field_map json "CertificateArn" String_.of_json in
-      let validTill = field_map json "ValidTill" TStamp.of_json in
-      let validFrom = field_map json "ValidFrom" TStamp.of_json in
-      let thumbprint = field_map json "Thumbprint" String_.of_json in
-      let certificateType = field_map json "CertificateType" String_.of_json in
+    let of_json json__ =
+      let certificateArn = field_map json__ "CertificateArn" String_.of_json in
+      let validTill = field_map json__ "ValidTill" TStamp.of_json in
+      let validFrom = field_map json__ "ValidFrom" TStamp.of_json in
+      let thumbprint = field_map json__ "Thumbprint" String_.of_json in
+      let certificateType =
+        field_map json__ "CertificateType" String_.of_json in
       let certificateIdentifier =
-        field_map json "CertificateIdentifier" String_.of_json in
+        field_map json__ "CertificateIdentifier" String_.of_json in
       make ?certificateArn ?validTill ?validFrom ?thumbprint ?certificateType
         ?certificateIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -3254,29 +3926,19 @@ module DBSnapshotNotFoundFault =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "DBSnapshotIdentifier doesn't refer to an existing snapshot."]
-module TagList =
+module GlobalClusterNotFoundFault =
   struct
-    type nonrec t = Tag.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
     let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Tag.of_xml)
-    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The GlobalClusterIdentifier doesn't refer to an existing global cluster."]
 module InvalidDBClusterStateFault =
   struct
     type nonrec t = unit
@@ -3289,6 +3951,40 @@ module InvalidDBClusterStateFault =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The cluster isn't in a valid state."]
+module InvalidGlobalClusterStateFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The requested operation can't be performed while the cluster is in this state."]
+module DBClusterIdentifier =
+  struct
+    type nonrec t = string
+    let context_ = "DBClusterIdentifier"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[A-Za-z][0-9A-Za-z-:._]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DBClusterIdentifier" j
+    let to_json = simple_to_json to_value
+  end
 module InvalidDBInstanceStateFault =
   struct
     type nonrec t = unit
@@ -3453,6 +4149,19 @@ module KMSKeyNotAccessibleFault =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An error occurred when accessing an KMS key."]
+module NetworkTypeNotSupported =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The network type is not supported by either DBSubnetGroup or the DB engine version."]
 module StorageQuotaExceededFault =
   struct
     type nonrec t = unit
@@ -3466,10 +4175,48 @@ module StorageQuotaExceededFault =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request would cause you to exceed the allowed amount of storage available across all instances."]
+module ServerlessV2ScalingConfiguration =
+  struct
+    type nonrec t =
+      {
+      minCapacity: DoubleOptional.t option
+        [@ocaml.doc
+          "The minimum number of Amazon DocumentDB capacity units (DCUs) for an instance in an Amazon DocumentDB Serverless cluster. You can specify DCU values in half-step increments, such as 8, 8.5, 9, and so on."];
+      maxCapacity: DoubleOptional.t option
+        [@ocaml.doc
+          "The maximum number of Amazon DocumentDB capacity units (DCUs) for an instance in an Amazon DocumentDB Serverless cluster. You can specify DCU values in half-step increments, such as 32, 32.5, 33, and so on."]}
+    let make ?minCapacity =
+      fun ?maxCapacity -> fun () -> { minCapacity; maxCapacity }
+    let to_value x =
+      structure_to_value
+        [("MinCapacity",
+           (Option.map x.minCapacity ~f:DoubleOptional.to_value));
+        ("MaxCapacity",
+          (Option.map x.maxCapacity ~f:DoubleOptional.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxCapacity =
+        (Option.map ~f:DoubleOptional.of_xml)
+          (Xml.child xml_arg0 "MaxCapacity") in
+      let minCapacity =
+        (Option.map ~f:DoubleOptional.of_xml)
+          (Xml.child xml_arg0 "MinCapacity") in
+      make ?maxCapacity ?minCapacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxCapacity = field_map json__ "MaxCapacity" DoubleOptional.of_json in
+      let minCapacity = field_map json__ "MinCapacity" DoubleOptional.of_json in
+      make ?maxCapacity ?minCapacity ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sets the scaling configuration of an Amazon DocumentDB Serverless cluster."]
 module VpcSecurityGroupIdList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3494,6 +4241,9 @@ module KeyList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3537,36 +4287,13 @@ module SubscriptionNotFoundFault =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The subscription name does not exist."]
-module GlobalClusterNotFoundFault =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The GlobalClusterIdentifier doesn't refer to an existing global cluster."]
-module InvalidGlobalClusterStateFault =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The requested operation can't be performed while the cluster is in this state."]
 module PendingMaintenanceActions =
   struct
     type nonrec t = ResourcePendingMaintenanceActions.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourcePendingMaintenanceActions.to_value)) |>
         (fun x -> `List x)
@@ -3606,6 +4333,9 @@ module OrderableDBInstanceOptionsList =
   struct
     type nonrec t = OrderableDBInstanceOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrderableDBInstanceOption.to_value)) |>
         (fun x -> `List x)
@@ -3733,6 +4463,9 @@ module SubnetIdentifierList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3899,12 +4632,12 @@ module DBClusterSnapshotAttributesResult =
           (Xml.child xml_arg0 "DBClusterSnapshotIdentifier") in
       make ?dBClusterSnapshotAttributes ?dBClusterSnapshotIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBClusterSnapshotAttributes =
-        field_map json "DBClusterSnapshotAttributes"
+        field_map json__ "DBClusterSnapshotAttributes"
           DBClusterSnapshotAttributeList.of_json in
       let dBClusterSnapshotIdentifier =
-        field_map json "DBClusterSnapshotIdentifier" String_.of_json in
+        field_map json__ "DBClusterSnapshotIdentifier" String_.of_json in
       make ?dBClusterSnapshotAttributes ?dBClusterSnapshotIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3973,11 +4706,11 @@ module CloudwatchLogsExportConfiguration =
           (Xml.child xml_arg0 "EnableLogTypes") in
       make ?disableLogTypes ?enableLogTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let disableLogTypes =
-        field_map json "DisableLogTypes" LogTypeList.of_json in
+        field_map json__ "DisableLogTypes" LogTypeList.of_json in
       let enableLogTypes =
-        field_map json "EnableLogTypes" LogTypeList.of_json in
+        field_map json__ "EnableLogTypes" LogTypeList.of_json in
       make ?disableLogTypes ?enableLogTypes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3986,6 +4719,9 @@ module FilterList =
   struct
     type nonrec t = Filter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4009,6 +4745,9 @@ module GlobalClusterList =
   struct
     type nonrec t = GlobalCluster.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GlobalCluster.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4033,6 +4772,9 @@ module EventList =
   struct
     type nonrec t = Event.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Event.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4056,6 +4798,9 @@ module EventSubscriptionsList =
   struct
     type nonrec t = EventSubscription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventSubscription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4081,6 +4826,9 @@ module EventCategoriesMapList =
   struct
     type nonrec t = EventCategoriesMap.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventCategoriesMap.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4137,11 +4885,11 @@ module EngineDefaults =
           (Xml.child xml_arg0 "DBParameterGroupFamily") in
       make ?parameters ?marker ?dBParameterGroupFamily ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "Parameters" ParametersList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let parameters = field_map json__ "Parameters" ParametersList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       let dBParameterGroupFamily =
-        field_map json "DBParameterGroupFamily" String_.of_json in
+        field_map json__ "DBParameterGroupFamily" String_.of_json in
       make ?parameters ?marker ?dBParameterGroupFamily ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4202,6 +4950,9 @@ module DBSubnetGroups =
   struct
     type nonrec t = DBSubnetGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DBSubnetGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4226,6 +4977,9 @@ module DBInstanceList =
   struct
     type nonrec t = DBInstance.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DBInstance.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4250,6 +5004,9 @@ module DBEngineVersionList =
   struct
     type nonrec t = DBEngineVersion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DBEngineVersion.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4275,6 +5032,9 @@ module DBClusterSnapshotList =
   struct
     type nonrec t = DBClusterSnapshot.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DBClusterSnapshot.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4300,6 +5060,9 @@ module DBClusterParameterGroupList =
   struct
     type nonrec t = DBClusterParameterGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DBClusterParameterGroup.to_value)) |>
         (fun x -> `List x)
@@ -4339,6 +5102,9 @@ module DBClusterList =
   struct
     type nonrec t = DBCluster.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DBCluster.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4465,6 +5231,9 @@ module CertificateList =
   struct
     type nonrec t = Certificate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Certificate.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4557,11 +5326,150 @@ module TagListMessage =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
       make ?tagList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
+    let of_json json__ =
+      let tagList = field_map json__ "TagList" TagList.of_json in
       make ?tagList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of ListTagsForResource."]
+module SwitchoverGlobalClusterResult =
+  struct
+    type switchoverGlobalClusterResult =
+      {
+      globalCluster: GlobalCluster.t option }
+    and responseMetaData = unit
+    and t =
+      {
+      switchoverGlobalClusterResult: switchoverGlobalClusterResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `DBClusterNotFoundFault of DBClusterNotFoundFault.t 
+      | `GlobalClusterNotFoundFault of GlobalClusterNotFoundFault.t 
+      | `InvalidDBClusterStateFault of InvalidDBClusterStateFault.t 
+      | `InvalidGlobalClusterStateFault of InvalidGlobalClusterStateFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "SwitchoverGlobalClusterResult"
+    let make ?globalCluster =
+      fun () ->
+        {
+          switchoverGlobalClusterResult = { globalCluster };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "DBClusterNotFoundFault" ->
+          `DBClusterNotFoundFault (DBClusterNotFoundFault.of_json json)
+      | "GlobalClusterNotFoundFault" ->
+          `GlobalClusterNotFoundFault
+            (GlobalClusterNotFoundFault.of_json json)
+      | "InvalidDBClusterStateFault" ->
+          `InvalidDBClusterStateFault
+            (InvalidDBClusterStateFault.of_json json)
+      | "InvalidGlobalClusterStateFault" ->
+          `InvalidGlobalClusterStateFault
+            (InvalidGlobalClusterStateFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DBClusterNotFoundFault" ->
+          `DBClusterNotFoundFault (DBClusterNotFoundFault.of_xml xml)
+      | "GlobalClusterNotFoundFault" ->
+          `GlobalClusterNotFoundFault (GlobalClusterNotFoundFault.of_xml xml)
+      | "InvalidDBClusterStateFault" ->
+          `InvalidDBClusterStateFault (InvalidDBClusterStateFault.of_xml xml)
+      | "InvalidGlobalClusterStateFault" ->
+          `InvalidGlobalClusterStateFault
+            (InvalidGlobalClusterStateFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DBClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "DBClusterNotFoundFault"));
+            ("details", (DBClusterNotFoundFault.to_json e))]
+      | `GlobalClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "GlobalClusterNotFoundFault"));
+            ("details", (GlobalClusterNotFoundFault.to_json e))]
+      | `InvalidDBClusterStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidDBClusterStateFault"));
+            ("details", (InvalidDBClusterStateFault.to_json e))]
+      | `InvalidGlobalClusterStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidGlobalClusterStateFault"));
+            ("details", (InvalidGlobalClusterStateFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.switchoverGlobalClusterResult in
+      structure_to_wrapped_value
+        [("GlobalCluster",
+           (Option.map x.globalCluster ~f:GlobalCluster.to_value))]
+        ~wrapper:"SwitchoverGlobalClusterResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "SwitchoverGlobalClusterResult" in
+      let globalCluster =
+        (Option.map ~f:GlobalCluster.of_xml)
+          (Xml.child xml_arg0 "GlobalCluster") in
+      make ?globalCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let globalCluster =
+        field_map json__ "GlobalCluster" GlobalCluster.of_json in
+      make ?globalCluster ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Switches over the specified secondary Amazon DocumentDB cluster to be the new primary Amazon DocumentDB cluster in the global database cluster."]
+module SwitchoverGlobalClusterMessage =
+  struct
+    type nonrec t =
+      {
+      globalClusterIdentifier: GlobalClusterIdentifier.t
+        [@ocaml.doc
+          "The identifier of the Amazon DocumentDB global database cluster to switch over. The identifier is the unique key assigned by the user when the cluster is created. In other words, it's the name of the global cluster. This parameter isn\226\128\153t case-sensitive. Constraints: Must match the identifier of an existing global cluster (Amazon DocumentDB global database). Minimum length of 1. Maximum length of 255. Pattern: \\[A-Za-z\\]\\[0-9A-Za-z-:._\\]*"];
+      targetDbClusterIdentifier: DBClusterIdentifier.t
+        [@ocaml.doc
+          "The identifier of the secondary Amazon DocumentDB cluster to promote to the new primary for the global database cluster. Use the Amazon Resource Name (ARN) for the identifier so that Amazon DocumentDB can locate the cluster in its Amazon Web Services region. Constraints: Must match the identifier of an existing secondary cluster. Minimum length of 1. Maximum length of 255. Pattern: \\[A-Za-z\\]\\[0-9A-Za-z-:._\\]*"]}
+    let context_ = "SwitchoverGlobalClusterMessage"
+    let make ~globalClusterIdentifier =
+      fun ~targetDbClusterIdentifier ->
+        fun () -> { globalClusterIdentifier; targetDbClusterIdentifier }
+    let to_value x =
+      structure_to_value
+        [("GlobalClusterIdentifier",
+           (Some (GlobalClusterIdentifier.to_value x.globalClusterIdentifier)));
+        ("TargetDbClusterIdentifier",
+          (Some (DBClusterIdentifier.to_value x.targetDbClusterIdentifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetDbClusterIdentifier =
+        DBClusterIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "TargetDbClusterIdentifier") in
+      let globalClusterIdentifier =
+        GlobalClusterIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GlobalClusterIdentifier") in
+      make ~targetDbClusterIdentifier ~globalClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetDbClusterIdentifier =
+        field_map_exn json__ "TargetDbClusterIdentifier"
+          DBClusterIdentifier.of_json in
+      let globalClusterIdentifier =
+        field_map_exn json__ "GlobalClusterIdentifier"
+          GlobalClusterIdentifier.of_json in
+      make ~targetDbClusterIdentifier ~globalClusterIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Switches over the specified secondary Amazon DocumentDB cluster to be the new primary Amazon DocumentDB cluster in the global database cluster."]
 module StopDBClusterResult =
   struct
     type stopDBClusterResult = {
@@ -4635,8 +5543,8 @@ module StopDBClusterResult =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dBCluster = field_map json "DBCluster" DBCluster.of_json in
+    let of_json json__ =
+      let dBCluster = field_map json__ "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4661,9 +5569,9 @@ module StopDBClusterMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBClusterIdentifier") in
       make ~dBClusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBClusterIdentifier =
-        field_map_exn json "DBClusterIdentifier" String_.of_json in
+        field_map_exn json__ "DBClusterIdentifier" String_.of_json in
       make ~dBClusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4741,8 +5649,8 @@ module StartDBClusterResult =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dBCluster = field_map json "DBCluster" DBCluster.of_json in
+    let of_json json__ =
+      let dBCluster = field_map json__ "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4767,9 +5675,9 @@ module StartDBClusterMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBClusterIdentifier") in
       make ~dBClusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBClusterIdentifier =
-        field_map_exn json "DBClusterIdentifier" String_.of_json in
+        field_map_exn json__ "DBClusterIdentifier" String_.of_json in
       make ~dBClusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4803,6 +5711,7 @@ module RestoreDBClusterToPointInTimeResult =
       | `InvalidSubnet of InvalidSubnet.t 
       | `InvalidVPCNetworkStateFault of InvalidVPCNetworkStateFault.t 
       | `KMSKeyNotAccessibleFault of KMSKeyNotAccessibleFault.t 
+      | `NetworkTypeNotSupported of NetworkTypeNotSupported.t 
       | `StorageQuotaExceededFault of StorageQuotaExceededFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "RestoreDBClusterToPointInTimeResult"
@@ -4851,6 +5760,8 @@ module RestoreDBClusterToPointInTimeResult =
             (InvalidVPCNetworkStateFault.of_json json)
       | "KMSKeyNotAccessibleFault" ->
           `KMSKeyNotAccessibleFault (KMSKeyNotAccessibleFault.of_json json)
+      | "NetworkTypeNotSupported" ->
+          `NetworkTypeNotSupported (NetworkTypeNotSupported.of_json json)
       | "StorageQuotaExceededFault" ->
           `StorageQuotaExceededFault (StorageQuotaExceededFault.of_json json)
       | name ->
@@ -4893,6 +5804,8 @@ module RestoreDBClusterToPointInTimeResult =
             (InvalidVPCNetworkStateFault.of_xml xml)
       | "KMSKeyNotAccessibleFault" ->
           `KMSKeyNotAccessibleFault (KMSKeyNotAccessibleFault.of_xml xml)
+      | "NetworkTypeNotSupported" ->
+          `NetworkTypeNotSupported (NetworkTypeNotSupported.of_xml xml)
       | "StorageQuotaExceededFault" ->
           `StorageQuotaExceededFault (StorageQuotaExceededFault.of_xml xml)
       | name ->
@@ -4955,6 +5868,10 @@ module RestoreDBClusterToPointInTimeResult =
           `Assoc
             [("error", (`String "KMSKeyNotAccessibleFault"));
             ("details", (KMSKeyNotAccessibleFault.to_json e))]
+      | `NetworkTypeNotSupported e ->
+          `Assoc
+            [("error", (`String "NetworkTypeNotSupported"));
+            ("details", (NetworkTypeNotSupported.to_json e))]
       | `StorageQuotaExceededFault e ->
           `Assoc
             [("error", (`String "StorageQuotaExceededFault"));
@@ -4979,8 +5896,8 @@ module RestoreDBClusterToPointInTimeResult =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dBCluster = field_map json "DBCluster" DBCluster.of_json in
+    let of_json json__ =
+      let dBCluster = field_map json__ "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4992,6 +5909,9 @@ module RestoreDBClusterToPointInTimeMessage =
       dBClusterIdentifier: String_.t
         [@ocaml.doc
           "The name of the new cluster to be created. Constraints: Must contain from 1 to 63 letters, numbers, or hyphens. The first character must be a letter. Cannot end with a hyphen or contain two consecutive hyphens."];
+      restoreType: String_.t option
+        [@ocaml.doc
+          "The type of restore to be performed. You can specify one of the following values: full-copy - The new DB cluster is restored as a full copy of the source DB cluster. copy-on-write - The new DB cluster is restored as a clone of the source DB cluster. Constraints: You can't specify copy-on-write if the engine version of the source DB cluster is earlier than 1.11. If you don't specify a RestoreType value, then the new DB cluster is restored as a full copy of the source DB cluster."];
       sourceDBClusterIdentifier: String_.t
         [@ocaml.doc
           "The identifier of the source cluster from which to restore. Constraints: Must match the identifier of an existing DBCluster."];
@@ -5020,37 +5940,56 @@ module RestoreDBClusterToPointInTimeMessage =
           "A list of log types that must be enabled for exporting to Amazon CloudWatch Logs."];
       deletionProtection: BooleanOptional.t option
         [@ocaml.doc
-          "Specifies whether this cluster can be deleted. If DeletionProtection is enabled, the cluster cannot be deleted unless it is modified and DeletionProtection is disabled. DeletionProtection protects clusters from being accidentally deleted."]}
+          "Specifies whether this cluster can be deleted. If DeletionProtection is enabled, the cluster cannot be deleted unless it is modified and DeletionProtection is disabled. DeletionProtection protects clusters from being accidentally deleted."];
+      serverlessV2ScalingConfiguration:
+        ServerlessV2ScalingConfiguration.t option
+        [@ocaml.doc
+          "Contains the scaling configuration of an Amazon DocumentDB Serverless cluster."];
+      storageType: String_.t option
+        [@ocaml.doc
+          "The storage type to associate with the DB cluster. For information on storage types for Amazon DocumentDB clusters, see Cluster storage configurations in the Amazon DocumentDB Developer Guide. Valid values for storage type - standard | iopt1 Default value is standard"];
+      networkType: String_.t option
+        [@ocaml.doc
+          "The network type of the cluster. The network type is determined by the DBSubnetGroup specified for the cluster. A DBSubnetGroup can support only the IPv4 protocol or the IPv4 and the IPv6 protocols (DUAL). For more information, see DocumentDB clusters in a VPC in the Amazon DocumentDB Developer Guide. Valid Values: IPV4 | DUAL"]}
     let context_ = "RestoreDBClusterToPointInTimeMessage"
-    let make ?restoreToTime =
-      fun ?useLatestRestorableTime ->
-        fun ?port ->
-          fun ?dBSubnetGroupName ->
-            fun ?vpcSecurityGroupIds ->
-              fun ?tags ->
-                fun ?kmsKeyId ->
-                  fun ?enableCloudwatchLogsExports ->
-                    fun ?deletionProtection ->
-                      fun ~dBClusterIdentifier ->
-                        fun ~sourceDBClusterIdentifier ->
-                          fun () ->
-                            {
-                              restoreToTime;
-                              useLatestRestorableTime;
-                              port;
-                              dBSubnetGroupName;
-                              vpcSecurityGroupIds;
-                              tags;
-                              kmsKeyId;
-                              enableCloudwatchLogsExports;
-                              deletionProtection;
-                              dBClusterIdentifier;
-                              sourceDBClusterIdentifier
-                            }
+    let make ?restoreType =
+      fun ?restoreToTime ->
+        fun ?useLatestRestorableTime ->
+          fun ?port ->
+            fun ?dBSubnetGroupName ->
+              fun ?vpcSecurityGroupIds ->
+                fun ?tags ->
+                  fun ?kmsKeyId ->
+                    fun ?enableCloudwatchLogsExports ->
+                      fun ?deletionProtection ->
+                        fun ?serverlessV2ScalingConfiguration ->
+                          fun ?storageType ->
+                            fun ?networkType ->
+                              fun ~dBClusterIdentifier ->
+                                fun ~sourceDBClusterIdentifier ->
+                                  fun () ->
+                                    {
+                                      restoreType;
+                                      restoreToTime;
+                                      useLatestRestorableTime;
+                                      port;
+                                      dBSubnetGroupName;
+                                      vpcSecurityGroupIds;
+                                      tags;
+                                      kmsKeyId;
+                                      enableCloudwatchLogsExports;
+                                      deletionProtection;
+                                      serverlessV2ScalingConfiguration;
+                                      storageType;
+                                      networkType;
+                                      dBClusterIdentifier;
+                                      sourceDBClusterIdentifier
+                                    }
     let to_value x =
       structure_to_value
         [("DBClusterIdentifier",
            (Some (String_.to_value x.dBClusterIdentifier)));
+        ("RestoreType", (Option.map x.restoreType ~f:String_.to_value));
         ("SourceDBClusterIdentifier",
           (Some (String_.to_value x.sourceDBClusterIdentifier)));
         ("RestoreToTime", (Option.map x.restoreToTime ~f:TStamp.to_value));
@@ -5067,9 +6006,21 @@ module RestoreDBClusterToPointInTimeMessage =
         ("EnableCloudwatchLogsExports",
           (Option.map x.enableCloudwatchLogsExports ~f:LogTypeList.to_value));
         ("DeletionProtection",
-          (Option.map x.deletionProtection ~f:BooleanOptional.to_value))]
+          (Option.map x.deletionProtection ~f:BooleanOptional.to_value));
+        ("ServerlessV2ScalingConfiguration",
+          (Option.map x.serverlessV2ScalingConfiguration
+             ~f:ServerlessV2ScalingConfiguration.to_value));
+        ("StorageType", (Option.map x.storageType ~f:String_.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NetworkType") in
+      let storageType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StorageType") in
+      let serverlessV2ScalingConfiguration =
+        (Option.map ~f:ServerlessV2ScalingConfiguration.of_xml)
+          (Xml.child xml_arg0 "ServerlessV2ScalingConfiguration") in
       let deletionProtection =
         (Option.map ~f:BooleanOptional.of_xml)
           (Xml.child xml_arg0 "DeletionProtection") in
@@ -5096,37 +6047,47 @@ module RestoreDBClusterToPointInTimeMessage =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
              "SourceDBClusterIdentifier") in
+      let restoreType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RestoreType") in
       let dBClusterIdentifier =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBClusterIdentifier") in
-      make ?deletionProtection ?enableCloudwatchLogsExports ?kmsKeyId ?tags
+      make ?networkType ?storageType ?serverlessV2ScalingConfiguration
+        ?deletionProtection ?enableCloudwatchLogsExports ?kmsKeyId ?tags
         ?vpcSecurityGroupIds ?dBSubnetGroupName ?port
         ?useLatestRestorableTime ?restoreToTime ~sourceDBClusterIdentifier
-        ~dBClusterIdentifier ()
+        ?restoreType ~dBClusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" String_.of_json in
+      let storageType = field_map json__ "StorageType" String_.of_json in
+      let serverlessV2ScalingConfiguration =
+        field_map json__ "ServerlessV2ScalingConfiguration"
+          ServerlessV2ScalingConfiguration.of_json in
       let deletionProtection =
-        field_map json "DeletionProtection" BooleanOptional.of_json in
+        field_map json__ "DeletionProtection" BooleanOptional.of_json in
       let enableCloudwatchLogsExports =
-        field_map json "EnableCloudwatchLogsExports" LogTypeList.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "EnableCloudwatchLogsExports" LogTypeList.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let vpcSecurityGroupIds =
-        field_map json "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
+        field_map json__ "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
       let dBSubnetGroupName =
-        field_map json "DBSubnetGroupName" String_.of_json in
-      let port = field_map json "Port" IntegerOptional.of_json in
+        field_map json__ "DBSubnetGroupName" String_.of_json in
+      let port = field_map json__ "Port" IntegerOptional.of_json in
       let useLatestRestorableTime =
-        field_map json "UseLatestRestorableTime" Boolean.of_json in
-      let restoreToTime = field_map json "RestoreToTime" TStamp.of_json in
+        field_map json__ "UseLatestRestorableTime" Boolean.of_json in
+      let restoreToTime = field_map json__ "RestoreToTime" TStamp.of_json in
       let sourceDBClusterIdentifier =
-        field_map_exn json "SourceDBClusterIdentifier" String_.of_json in
+        field_map_exn json__ "SourceDBClusterIdentifier" String_.of_json in
+      let restoreType = field_map json__ "RestoreType" String_.of_json in
       let dBClusterIdentifier =
-        field_map_exn json "DBClusterIdentifier" String_.of_json in
-      make ?deletionProtection ?enableCloudwatchLogsExports ?kmsKeyId ?tags
+        field_map_exn json__ "DBClusterIdentifier" String_.of_json in
+      make ?networkType ?storageType ?serverlessV2ScalingConfiguration
+        ?deletionProtection ?enableCloudwatchLogsExports ?kmsKeyId ?tags
         ?vpcSecurityGroupIds ?dBSubnetGroupName ?port
         ?useLatestRestorableTime ?restoreToTime ~sourceDBClusterIdentifier
-        ~dBClusterIdentifier ()
+        ?restoreType ~dBClusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to RestoreDBClusterToPointInTime."]
 module RestoreDBClusterFromSnapshotResult =
@@ -5156,6 +6117,7 @@ module RestoreDBClusterFromSnapshotResult =
       | `InvalidSubnet of InvalidSubnet.t 
       | `InvalidVPCNetworkStateFault of InvalidVPCNetworkStateFault.t 
       | `KMSKeyNotAccessibleFault of KMSKeyNotAccessibleFault.t 
+      | `NetworkTypeNotSupported of NetworkTypeNotSupported.t 
       | `StorageQuotaExceededFault of StorageQuotaExceededFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "RestoreDBClusterFromSnapshotResult"
@@ -5201,6 +6163,8 @@ module RestoreDBClusterFromSnapshotResult =
             (InvalidVPCNetworkStateFault.of_json json)
       | "KMSKeyNotAccessibleFault" ->
           `KMSKeyNotAccessibleFault (KMSKeyNotAccessibleFault.of_json json)
+      | "NetworkTypeNotSupported" ->
+          `NetworkTypeNotSupported (NetworkTypeNotSupported.of_json json)
       | "StorageQuotaExceededFault" ->
           `StorageQuotaExceededFault (StorageQuotaExceededFault.of_json json)
       | name ->
@@ -5241,6 +6205,8 @@ module RestoreDBClusterFromSnapshotResult =
             (InvalidVPCNetworkStateFault.of_xml xml)
       | "KMSKeyNotAccessibleFault" ->
           `KMSKeyNotAccessibleFault (KMSKeyNotAccessibleFault.of_xml xml)
+      | "NetworkTypeNotSupported" ->
+          `NetworkTypeNotSupported (NetworkTypeNotSupported.of_xml xml)
       | "StorageQuotaExceededFault" ->
           `StorageQuotaExceededFault (StorageQuotaExceededFault.of_xml xml)
       | name ->
@@ -5299,6 +6265,10 @@ module RestoreDBClusterFromSnapshotResult =
           `Assoc
             [("error", (`String "KMSKeyNotAccessibleFault"));
             ("details", (KMSKeyNotAccessibleFault.to_json e))]
+      | `NetworkTypeNotSupported e ->
+          `Assoc
+            [("error", (`String "NetworkTypeNotSupported"));
+            ("details", (NetworkTypeNotSupported.to_json e))]
       | `StorageQuotaExceededFault e ->
           `Assoc
             [("error", (`String "StorageQuotaExceededFault"));
@@ -5323,8 +6293,8 @@ module RestoreDBClusterFromSnapshotResult =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dBCluster = field_map json "DBCluster" DBCluster.of_json in
+    let of_json json__ =
+      let dBCluster = field_map json__ "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5367,7 +6337,20 @@ module RestoreDBClusterFromSnapshotMessage =
           "A list of log types that must be enabled for exporting to Amazon CloudWatch Logs."];
       deletionProtection: BooleanOptional.t option
         [@ocaml.doc
-          "Specifies whether this cluster can be deleted. If DeletionProtection is enabled, the cluster cannot be deleted unless it is modified and DeletionProtection is disabled. DeletionProtection protects clusters from being accidentally deleted."]}
+          "Specifies whether this cluster can be deleted. If DeletionProtection is enabled, the cluster cannot be deleted unless it is modified and DeletionProtection is disabled. DeletionProtection protects clusters from being accidentally deleted."];
+      dBClusterParameterGroupName: String_.t option
+        [@ocaml.doc
+          "The name of the DB cluster parameter group to associate with this DB cluster. Type: String. \194\160 \194\160 \194\160 Required: No. If this argument is omitted, the default DB cluster parameter group is used. If supplied, must match the name of an existing default DB cluster parameter group. The string must consist of from 1 to 255 letters, numbers or hyphens. Its first character must be a letter, and it cannot end with a hyphen or contain two consecutive hyphens."];
+      serverlessV2ScalingConfiguration:
+        ServerlessV2ScalingConfiguration.t option
+        [@ocaml.doc
+          "Contains the scaling configuration of an Amazon DocumentDB Serverless cluster."];
+      storageType: String_.t option
+        [@ocaml.doc
+          "The storage type to associate with the DB cluster. For information on storage types for Amazon DocumentDB clusters, see Cluster storage configurations in the Amazon DocumentDB Developer Guide. Valid values for storage type - standard | iopt1 Default value is standard"];
+      networkType: String_.t option
+        [@ocaml.doc
+          "The network type of the cluster. The network type is determined by the DBSubnetGroup specified for the cluster. A DBSubnetGroup can support only the IPv4 protocol or the IPv4 and the IPv6 protocols (DUAL). For more information, see DocumentDB clusters in a VPC in the Amazon DocumentDB Developer Guide. Valid Values: IPV4 | DUAL"]}
     let context_ = "RestoreDBClusterFromSnapshotMessage"
     let make ?availabilityZones =
       fun ?engineVersion ->
@@ -5378,24 +6361,32 @@ module RestoreDBClusterFromSnapshotMessage =
                 fun ?kmsKeyId ->
                   fun ?enableCloudwatchLogsExports ->
                     fun ?deletionProtection ->
-                      fun ~dBClusterIdentifier ->
-                        fun ~snapshotIdentifier ->
-                          fun ~engine ->
-                            fun () ->
-                              {
-                                availabilityZones;
-                                engineVersion;
-                                port;
-                                dBSubnetGroupName;
-                                vpcSecurityGroupIds;
-                                tags;
-                                kmsKeyId;
-                                enableCloudwatchLogsExports;
-                                deletionProtection;
-                                dBClusterIdentifier;
-                                snapshotIdentifier;
-                                engine
-                              }
+                      fun ?dBClusterParameterGroupName ->
+                        fun ?serverlessV2ScalingConfiguration ->
+                          fun ?storageType ->
+                            fun ?networkType ->
+                              fun ~dBClusterIdentifier ->
+                                fun ~snapshotIdentifier ->
+                                  fun ~engine ->
+                                    fun () ->
+                                      {
+                                        availabilityZones;
+                                        engineVersion;
+                                        port;
+                                        dBSubnetGroupName;
+                                        vpcSecurityGroupIds;
+                                        tags;
+                                        kmsKeyId;
+                                        enableCloudwatchLogsExports;
+                                        deletionProtection;
+                                        dBClusterParameterGroupName;
+                                        serverlessV2ScalingConfiguration;
+                                        storageType;
+                                        networkType;
+                                        dBClusterIdentifier;
+                                        snapshotIdentifier;
+                                        engine
+                                      }
     let to_value x =
       structure_to_value
         [("AvailabilityZones",
@@ -5417,9 +6408,26 @@ module RestoreDBClusterFromSnapshotMessage =
         ("EnableCloudwatchLogsExports",
           (Option.map x.enableCloudwatchLogsExports ~f:LogTypeList.to_value));
         ("DeletionProtection",
-          (Option.map x.deletionProtection ~f:BooleanOptional.to_value))]
+          (Option.map x.deletionProtection ~f:BooleanOptional.to_value));
+        ("DBClusterParameterGroupName",
+          (Option.map x.dBClusterParameterGroupName ~f:String_.to_value));
+        ("ServerlessV2ScalingConfiguration",
+          (Option.map x.serverlessV2ScalingConfiguration
+             ~f:ServerlessV2ScalingConfiguration.to_value));
+        ("StorageType", (Option.map x.storageType ~f:String_.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NetworkType") in
+      let storageType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StorageType") in
+      let serverlessV2ScalingConfiguration =
+        (Option.map ~f:ServerlessV2ScalingConfiguration.of_xml)
+          (Xml.child xml_arg0 "ServerlessV2ScalingConfiguration") in
+      let dBClusterParameterGroupName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "DBClusterParameterGroupName") in
       let deletionProtection =
         (Option.map ~f:BooleanOptional.of_xml)
           (Xml.child xml_arg0 "DeletionProtection") in
@@ -5450,33 +6458,44 @@ module RestoreDBClusterFromSnapshotMessage =
       let availabilityZones =
         (Option.map ~f:AvailabilityZones.of_xml)
           (Xml.child xml_arg0 "AvailabilityZones") in
-      make ?deletionProtection ?enableCloudwatchLogsExports ?kmsKeyId ?tags
-        ?vpcSecurityGroupIds ?dBSubnetGroupName ?port ?engineVersion ~engine
-        ~snapshotIdentifier ~dBClusterIdentifier ?availabilityZones ()
+      make ?networkType ?storageType ?serverlessV2ScalingConfiguration
+        ?dBClusterParameterGroupName ?deletionProtection
+        ?enableCloudwatchLogsExports ?kmsKeyId ?tags ?vpcSecurityGroupIds
+        ?dBSubnetGroupName ?port ?engineVersion ~engine ~snapshotIdentifier
+        ~dBClusterIdentifier ?availabilityZones ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" String_.of_json in
+      let storageType = field_map json__ "StorageType" String_.of_json in
+      let serverlessV2ScalingConfiguration =
+        field_map json__ "ServerlessV2ScalingConfiguration"
+          ServerlessV2ScalingConfiguration.of_json in
+      let dBClusterParameterGroupName =
+        field_map json__ "DBClusterParameterGroupName" String_.of_json in
       let deletionProtection =
-        field_map json "DeletionProtection" BooleanOptional.of_json in
+        field_map json__ "DeletionProtection" BooleanOptional.of_json in
       let enableCloudwatchLogsExports =
-        field_map json "EnableCloudwatchLogsExports" LogTypeList.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "EnableCloudwatchLogsExports" LogTypeList.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let vpcSecurityGroupIds =
-        field_map json "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
+        field_map json__ "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
       let dBSubnetGroupName =
-        field_map json "DBSubnetGroupName" String_.of_json in
-      let port = field_map json "Port" IntegerOptional.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map_exn json "Engine" String_.of_json in
+        field_map json__ "DBSubnetGroupName" String_.of_json in
+      let port = field_map json__ "Port" IntegerOptional.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map_exn json__ "Engine" String_.of_json in
       let snapshotIdentifier =
-        field_map_exn json "SnapshotIdentifier" String_.of_json in
+        field_map_exn json__ "SnapshotIdentifier" String_.of_json in
       let dBClusterIdentifier =
-        field_map_exn json "DBClusterIdentifier" String_.of_json in
+        field_map_exn json__ "DBClusterIdentifier" String_.of_json in
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZones.of_json in
-      make ?deletionProtection ?enableCloudwatchLogsExports ?kmsKeyId ?tags
-        ?vpcSecurityGroupIds ?dBSubnetGroupName ?port ?engineVersion ~engine
-        ~snapshotIdentifier ~dBClusterIdentifier ?availabilityZones ()
+        field_map json__ "AvailabilityZones" AvailabilityZones.of_json in
+      make ?networkType ?storageType ?serverlessV2ScalingConfiguration
+        ?dBClusterParameterGroupName ?deletionProtection
+        ?enableCloudwatchLogsExports ?kmsKeyId ?tags ?vpcSecurityGroupIds
+        ?dBSubnetGroupName ?port ?engineVersion ~engine ~snapshotIdentifier
+        ~dBClusterIdentifier ?availabilityZones ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to RestoreDBClusterFromSnapshot."]
 module ResetDBClusterParameterGroupMessage =
@@ -5518,12 +6537,12 @@ module ResetDBClusterParameterGroupMessage =
              "DBClusterParameterGroupName") in
       make ?parameters ?resetAllParameters ~dBClusterParameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "Parameters" ParametersList.of_json in
+    let of_json json__ =
+      let parameters = field_map json__ "Parameters" ParametersList.of_json in
       let resetAllParameters =
-        field_map json "ResetAllParameters" Boolean.of_json in
+        field_map json__ "ResetAllParameters" Boolean.of_json in
       let dBClusterParameterGroupName =
-        field_map_exn json "DBClusterParameterGroupName" String_.of_json in
+        field_map_exn json__ "DBClusterParameterGroupName" String_.of_json in
       make ?parameters ?resetAllParameters ~dBClusterParameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to ResetDBClusterParameterGroup."]
@@ -5552,9 +6571,9 @@ module RemoveTagsFromResourceMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
       make ~tagKeys ~resourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" KeyList.of_json in
-      let resourceName = field_map_exn json "ResourceName" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" KeyList.of_json in
+      let resourceName = field_map_exn json__ "ResourceName" String_.of_json in
       make ~tagKeys ~resourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to RemoveTagsFromResource."]
@@ -5630,9 +6649,9 @@ module RemoveSourceIdentifierFromSubscriptionResult =
           (Xml.child xml_arg0 "EventSubscription") in
       make ?eventSubscription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventSubscription =
-        field_map json "EventSubscription" EventSubscription.of_json in
+        field_map json__ "EventSubscription" EventSubscription.of_json in
       make ?eventSubscription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5665,11 +6684,11 @@ module RemoveSourceIdentifierFromSubscriptionMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionName") in
       make ~sourceIdentifier ~subscriptionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceIdentifier =
-        field_map_exn json "SourceIdentifier" String_.of_json in
+        field_map_exn json__ "SourceIdentifier" String_.of_json in
       let subscriptionName =
-        field_map_exn json "SubscriptionName" String_.of_json in
+        field_map_exn json__ "SubscriptionName" String_.of_json in
       make ~sourceIdentifier ~subscriptionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5754,9 +6773,9 @@ module RemoveFromGlobalClusterResult =
           (Xml.child xml_arg0 "GlobalCluster") in
       make ?globalCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalCluster =
-        field_map json "GlobalCluster" GlobalCluster.of_json in
+        field_map json__ "GlobalCluster" GlobalCluster.of_json in
       make ?globalCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5791,11 +6810,11 @@ module RemoveFromGlobalClusterMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "GlobalClusterIdentifier") in
       make ~dbClusterIdentifier ~globalClusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dbClusterIdentifier =
-        field_map_exn json "DbClusterIdentifier" String_.of_json in
+        field_map_exn json__ "DbClusterIdentifier" String_.of_json in
       let globalClusterIdentifier =
-        field_map_exn json "GlobalClusterIdentifier"
+        field_map_exn json__ "GlobalClusterIdentifier"
           GlobalClusterIdentifier.of_json in
       make ~dbClusterIdentifier ~globalClusterIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -5864,8 +6883,8 @@ module RebootDBInstanceResult =
         (Option.map ~f:DBInstance.of_xml) (Xml.child xml_arg0 "DBInstance") in
       make ?dBInstance ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dBInstance = field_map json "DBInstance" DBInstance.of_json in
+    let of_json json__ =
+      let dBInstance = field_map json__ "DBInstance" DBInstance.of_json in
       make ?dBInstance ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5900,11 +6919,11 @@ module RebootDBInstanceMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBInstanceIdentifier") in
       make ?forceFailover ~dBInstanceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let forceFailover =
-        field_map json "ForceFailover" BooleanOptional.of_json in
+        field_map json__ "ForceFailover" BooleanOptional.of_json in
       let dBInstanceIdentifier =
-        field_map_exn json "DBInstanceIdentifier" String_.of_json in
+        field_map_exn json__ "DBInstanceIdentifier" String_.of_json in
       make ?forceFailover ~dBInstanceIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to RebootDBInstance."]
@@ -5980,10 +6999,10 @@ module PendingMaintenanceActionsMessage =
           (Xml.child xml_arg0 "PendingMaintenanceActions") in
       make ?marker ?pendingMaintenanceActions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
       let pendingMaintenanceActions =
-        field_map json "PendingMaintenanceActions"
+        field_map json__ "PendingMaintenanceActions"
           PendingMaintenanceActions.of_json in
       make ?marker ?pendingMaintenanceActions ()
     let to_json v = composed_to_json to_value v
@@ -6052,10 +7071,10 @@ module OrderableDBInstanceOptionsMessage =
           (Xml.child xml_arg0 "OrderableDBInstanceOptions") in
       make ?marker ?orderableDBInstanceOptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
       let orderableDBInstanceOptions =
-        field_map json "OrderableDBInstanceOptions"
+        field_map json__ "OrderableDBInstanceOptions"
           OrderableDBInstanceOptionsList.of_json in
       make ?marker ?orderableDBInstanceOptions ()
     let to_json v = composed_to_json to_value v
@@ -6131,9 +7150,9 @@ module ModifyGlobalClusterResult =
           (Xml.child xml_arg0 "GlobalCluster") in
       make ?globalCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalCluster =
-        field_map json "GlobalCluster" GlobalCluster.of_json in
+        field_map json__ "GlobalCluster" GlobalCluster.of_json in
       make ?globalCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6184,14 +7203,14 @@ module ModifyGlobalClusterMessage =
       make ?deletionProtection ?newGlobalClusterIdentifier
         ~globalClusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deletionProtection =
-        field_map json "DeletionProtection" BooleanOptional.of_json in
+        field_map json__ "DeletionProtection" BooleanOptional.of_json in
       let newGlobalClusterIdentifier =
-        field_map json "NewGlobalClusterIdentifier"
+        field_map json__ "NewGlobalClusterIdentifier"
           GlobalClusterIdentifier.of_json in
       let globalClusterIdentifier =
-        field_map_exn json "GlobalClusterIdentifier"
+        field_map_exn json__ "GlobalClusterIdentifier"
           GlobalClusterIdentifier.of_json in
       make ?deletionProtection ?newGlobalClusterIdentifier
         ~globalClusterIdentifier ()
@@ -6308,9 +7327,9 @@ module ModifyEventSubscriptionResult =
           (Xml.child xml_arg0 "EventSubscription") in
       make ?eventSubscription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventSubscription =
-        field_map json "EventSubscription" EventSubscription.of_json in
+        field_map json__ "EventSubscription" EventSubscription.of_json in
       make ?eventSubscription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6373,14 +7392,14 @@ module ModifyEventSubscriptionMessage =
       make ?enabled ?eventCategories ?sourceType ?snsTopicArn
         ~subscriptionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "Enabled" BooleanOptional.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "Enabled" BooleanOptional.of_json in
       let eventCategories =
-        field_map json "EventCategories" EventCategoriesList.of_json in
-      let sourceType = field_map json "SourceType" String_.of_json in
-      let snsTopicArn = field_map json "SnsTopicArn" String_.of_json in
+        field_map json__ "EventCategories" EventCategoriesList.of_json in
+      let sourceType = field_map json__ "SourceType" String_.of_json in
+      let snsTopicArn = field_map json__ "SnsTopicArn" String_.of_json in
       let subscriptionName =
-        field_map_exn json "SubscriptionName" String_.of_json in
+        field_map_exn json__ "SubscriptionName" String_.of_json in
       make ?enabled ?eventCategories ?sourceType ?snsTopicArn
         ~subscriptionName ()
     let to_json v = composed_to_json to_value v
@@ -6483,9 +7502,9 @@ module ModifyDBSubnetGroupResult =
           (Xml.child xml_arg0 "DBSubnetGroup") in
       make ?dBSubnetGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBSubnetGroup =
-        field_map json "DBSubnetGroup" DBSubnetGroup.of_json in
+        field_map json__ "DBSubnetGroup" DBSubnetGroup.of_json in
       make ?dBSubnetGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6526,13 +7545,13 @@ module ModifyDBSubnetGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBSubnetGroupName") in
       make ~subnetIds ?dBSubnetGroupDescription ~dBSubnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subnetIds =
-        field_map_exn json "SubnetIds" SubnetIdentifierList.of_json in
+        field_map_exn json__ "SubnetIds" SubnetIdentifierList.of_json in
       let dBSubnetGroupDescription =
-        field_map json "DBSubnetGroupDescription" String_.of_json in
+        field_map json__ "DBSubnetGroupDescription" String_.of_json in
       let dBSubnetGroupName =
-        field_map_exn json "DBSubnetGroupName" String_.of_json in
+        field_map_exn json__ "DBSubnetGroupName" String_.of_json in
       make ~subnetIds ?dBSubnetGroupDescription ~dBSubnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to ModifyDBSubnetGroup."]
@@ -6718,8 +7737,8 @@ module ModifyDBInstanceResult =
         (Option.map ~f:DBInstance.of_xml) (Xml.child xml_arg0 "DBInstance") in
       make ?dBInstance ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dBInstance = field_map json "DBInstance" DBInstance.of_json in
+    let of_json json__ =
+      let dBInstance = field_map json__ "DBInstance" DBInstance.of_json in
       make ?dBInstance ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6749,6 +7768,9 @@ module ModifyDBInstanceMessage =
       cACertificateIdentifier: String_.t option
         [@ocaml.doc
           "Indicates the certificate that needs to be associated with the instance."];
+      copyTagsToSnapshot: BooleanOptional.t option
+        [@ocaml.doc
+          "A value that indicates whether to copy all tags from the DB instance to snapshots of the DB instance. By default, tags are not copied."];
       promotionTier: IntegerOptional.t option
         [@ocaml.doc
           "A value that specifies the order in which an Amazon DocumentDB replica is promoted to the primary instance after a failure of the existing primary instance. Default: 1 Valid values: 0-15"];
@@ -6757,7 +7779,10 @@ module ModifyDBInstanceMessage =
           "A value that indicates whether to enable Performance Insights for the DB Instance. For more information, see Using Amazon Performance Insights."];
       performanceInsightsKMSKeyId: String_.t option
         [@ocaml.doc
-          "The KMS key identifier for encryption of Performance Insights data. The KMS key identifier is the key ARN, key ID, alias ARN, or alias name for the KMS key. If you do not specify a value for PerformanceInsightsKMSKeyId, then Amazon DocumentDB uses your default KMS key. There is a default KMS key for your Amazon Web Services account. Your Amazon Web Services account has a different default KMS key for each Amazon Web Services region."]}
+          "The KMS key identifier for encryption of Performance Insights data. The KMS key identifier is the key ARN, key ID, alias ARN, or alias name for the KMS key. If you do not specify a value for PerformanceInsightsKMSKeyId, then Amazon DocumentDB uses your default KMS key. There is a default KMS key for your Amazon Web Services account. Your Amazon Web Services account has a different default KMS key for each Amazon Web Services region."];
+      certificateRotationRestart: BooleanOptional.t option
+        [@ocaml.doc
+          "Specifies whether the DB instance is restarted when you rotate your SSL/TLS certificate. By default, the DB instance is restarted when you rotate your SSL/TLS certificate. The certificate is not updated until the DB instance is restarted. Set this parameter only if you are not using SSL/TLS to connect to the DB instance. If you are using SSL/TLS to connect to the DB instance, see Updating Your Amazon DocumentDB TLS Certificates and Encrypting Data in Transit in the Amazon DocumentDB Developer Guide."]}
     let context_ = "ModifyDBInstanceMessage"
     let make ?dBInstanceClass =
       fun ?applyImmediately ->
@@ -6765,23 +7790,27 @@ module ModifyDBInstanceMessage =
           fun ?autoMinorVersionUpgrade ->
             fun ?newDBInstanceIdentifier ->
               fun ?cACertificateIdentifier ->
-                fun ?promotionTier ->
-                  fun ?enablePerformanceInsights ->
-                    fun ?performanceInsightsKMSKeyId ->
-                      fun ~dBInstanceIdentifier ->
-                        fun () ->
-                          {
-                            dBInstanceClass;
-                            applyImmediately;
-                            preferredMaintenanceWindow;
-                            autoMinorVersionUpgrade;
-                            newDBInstanceIdentifier;
-                            cACertificateIdentifier;
-                            promotionTier;
-                            enablePerformanceInsights;
-                            performanceInsightsKMSKeyId;
-                            dBInstanceIdentifier
-                          }
+                fun ?copyTagsToSnapshot ->
+                  fun ?promotionTier ->
+                    fun ?enablePerformanceInsights ->
+                      fun ?performanceInsightsKMSKeyId ->
+                        fun ?certificateRotationRestart ->
+                          fun ~dBInstanceIdentifier ->
+                            fun () ->
+                              {
+                                dBInstanceClass;
+                                applyImmediately;
+                                preferredMaintenanceWindow;
+                                autoMinorVersionUpgrade;
+                                newDBInstanceIdentifier;
+                                cACertificateIdentifier;
+                                copyTagsToSnapshot;
+                                promotionTier;
+                                enablePerformanceInsights;
+                                performanceInsightsKMSKeyId;
+                                certificateRotationRestart;
+                                dBInstanceIdentifier
+                              }
     let to_value x =
       structure_to_value
         [("DBInstanceIdentifier",
@@ -6798,14 +7827,22 @@ module ModifyDBInstanceMessage =
           (Option.map x.newDBInstanceIdentifier ~f:String_.to_value));
         ("CACertificateIdentifier",
           (Option.map x.cACertificateIdentifier ~f:String_.to_value));
+        ("CopyTagsToSnapshot",
+          (Option.map x.copyTagsToSnapshot ~f:BooleanOptional.to_value));
         ("PromotionTier",
           (Option.map x.promotionTier ~f:IntegerOptional.to_value));
         ("EnablePerformanceInsights",
           (Option.map x.enablePerformanceInsights ~f:BooleanOptional.to_value));
         ("PerformanceInsightsKMSKeyId",
-          (Option.map x.performanceInsightsKMSKeyId ~f:String_.to_value))]
+          (Option.map x.performanceInsightsKMSKeyId ~f:String_.to_value));
+        ("CertificateRotationRestart",
+          (Option.map x.certificateRotationRestart
+             ~f:BooleanOptional.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let certificateRotationRestart =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "CertificateRotationRestart") in
       let performanceInsightsKMSKeyId =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "PerformanceInsightsKMSKeyId") in
@@ -6815,6 +7852,9 @@ module ModifyDBInstanceMessage =
       let promotionTier =
         (Option.map ~f:IntegerOptional.of_xml)
           (Xml.child xml_arg0 "PromotionTier") in
+      let copyTagsToSnapshot =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "CopyTagsToSnapshot") in
       let cACertificateIdentifier =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "CACertificateIdentifier") in
@@ -6835,33 +7875,40 @@ module ModifyDBInstanceMessage =
       let dBInstanceIdentifier =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBInstanceIdentifier") in
-      make ?performanceInsightsKMSKeyId ?enablePerformanceInsights
-        ?promotionTier ?cACertificateIdentifier ?newDBInstanceIdentifier
+      make ?certificateRotationRestart ?performanceInsightsKMSKeyId
+        ?enablePerformanceInsights ?promotionTier ?copyTagsToSnapshot
+        ?cACertificateIdentifier ?newDBInstanceIdentifier
         ?autoMinorVersionUpgrade ?preferredMaintenanceWindow
         ?applyImmediately ?dBInstanceClass ~dBInstanceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let certificateRotationRestart =
+        field_map json__ "CertificateRotationRestart" BooleanOptional.of_json in
       let performanceInsightsKMSKeyId =
-        field_map json "PerformanceInsightsKMSKeyId" String_.of_json in
+        field_map json__ "PerformanceInsightsKMSKeyId" String_.of_json in
       let enablePerformanceInsights =
-        field_map json "EnablePerformanceInsights" BooleanOptional.of_json in
+        field_map json__ "EnablePerformanceInsights" BooleanOptional.of_json in
       let promotionTier =
-        field_map json "PromotionTier" IntegerOptional.of_json in
+        field_map json__ "PromotionTier" IntegerOptional.of_json in
+      let copyTagsToSnapshot =
+        field_map json__ "CopyTagsToSnapshot" BooleanOptional.of_json in
       let cACertificateIdentifier =
-        field_map json "CACertificateIdentifier" String_.of_json in
+        field_map json__ "CACertificateIdentifier" String_.of_json in
       let newDBInstanceIdentifier =
-        field_map json "NewDBInstanceIdentifier" String_.of_json in
+        field_map json__ "NewDBInstanceIdentifier" String_.of_json in
       let autoMinorVersionUpgrade =
-        field_map json "AutoMinorVersionUpgrade" BooleanOptional.of_json in
+        field_map json__ "AutoMinorVersionUpgrade" BooleanOptional.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
       let applyImmediately =
-        field_map json "ApplyImmediately" Boolean.of_json in
-      let dBInstanceClass = field_map json "DBInstanceClass" String_.of_json in
+        field_map json__ "ApplyImmediately" Boolean.of_json in
+      let dBInstanceClass =
+        field_map json__ "DBInstanceClass" String_.of_json in
       let dBInstanceIdentifier =
-        field_map_exn json "DBInstanceIdentifier" String_.of_json in
-      make ?performanceInsightsKMSKeyId ?enablePerformanceInsights
-        ?promotionTier ?cACertificateIdentifier ?newDBInstanceIdentifier
+        field_map_exn json__ "DBInstanceIdentifier" String_.of_json in
+      make ?certificateRotationRestart ?performanceInsightsKMSKeyId
+        ?enablePerformanceInsights ?promotionTier ?copyTagsToSnapshot
+        ?cACertificateIdentifier ?newDBInstanceIdentifier
         ?autoMinorVersionUpgrade ?preferredMaintenanceWindow
         ?applyImmediately ?dBInstanceClass ~dBInstanceIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -6957,9 +8004,9 @@ module ModifyDBClusterSnapshotAttributeResult =
           (Xml.child xml_arg0 "DBClusterSnapshotAttributesResult") in
       make ?dBClusterSnapshotAttributesResult ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBClusterSnapshotAttributesResult =
-        field_map json "DBClusterSnapshotAttributesResult"
+        field_map json__ "DBClusterSnapshotAttributesResult"
           DBClusterSnapshotAttributesResult.of_json in
       make ?dBClusterSnapshotAttributesResult ()
     let to_json v = composed_to_json to_value v
@@ -7020,14 +8067,15 @@ module ModifyDBClusterSnapshotAttributeMessage =
       make ?valuesToRemove ?valuesToAdd ~attributeName
         ~dBClusterSnapshotIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let valuesToRemove =
-        field_map json "ValuesToRemove" AttributeValueList.of_json in
+        field_map json__ "ValuesToRemove" AttributeValueList.of_json in
       let valuesToAdd =
-        field_map json "ValuesToAdd" AttributeValueList.of_json in
-      let attributeName = field_map_exn json "AttributeName" String_.of_json in
+        field_map json__ "ValuesToAdd" AttributeValueList.of_json in
+      let attributeName =
+        field_map_exn json__ "AttributeName" String_.of_json in
       let dBClusterSnapshotIdentifier =
-        field_map_exn json "DBClusterSnapshotIdentifier" String_.of_json in
+        field_map_exn json__ "DBClusterSnapshotIdentifier" String_.of_json in
       make ?valuesToRemove ?valuesToAdd ~attributeName
         ~dBClusterSnapshotIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -7055,6 +8103,7 @@ module ModifyDBClusterResult =
       | `InvalidDBSubnetGroupStateFault of InvalidDBSubnetGroupStateFault.t 
       | `InvalidSubnet of InvalidSubnet.t 
       | `InvalidVPCNetworkStateFault of InvalidVPCNetworkStateFault.t 
+      | `NetworkTypeNotSupported of NetworkTypeNotSupported.t 
       | `StorageQuotaExceededFault of StorageQuotaExceededFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ModifyDBClusterResult"
@@ -7090,6 +8139,8 @@ module ModifyDBClusterResult =
       | "InvalidVPCNetworkStateFault" ->
           `InvalidVPCNetworkStateFault
             (InvalidVPCNetworkStateFault.of_json json)
+      | "NetworkTypeNotSupported" ->
+          `NetworkTypeNotSupported (NetworkTypeNotSupported.of_json json)
       | "StorageQuotaExceededFault" ->
           `StorageQuotaExceededFault (StorageQuotaExceededFault.of_json json)
       | name ->
@@ -7122,6 +8173,8 @@ module ModifyDBClusterResult =
       | "InvalidVPCNetworkStateFault" ->
           `InvalidVPCNetworkStateFault
             (InvalidVPCNetworkStateFault.of_xml xml)
+      | "NetworkTypeNotSupported" ->
+          `NetworkTypeNotSupported (NetworkTypeNotSupported.of_xml xml)
       | "StorageQuotaExceededFault" ->
           `StorageQuotaExceededFault (StorageQuotaExceededFault.of_xml xml)
       | name ->
@@ -7168,6 +8221,10 @@ module ModifyDBClusterResult =
           `Assoc
             [("error", (`String "InvalidVPCNetworkStateFault"));
             ("details", (InvalidVPCNetworkStateFault.to_json e))]
+      | `NetworkTypeNotSupported e ->
+          `Assoc
+            [("error", (`String "NetworkTypeNotSupported"));
+            ("details", (NetworkTypeNotSupported.to_json e))]
       | `StorageQuotaExceededFault e ->
           `Assoc
             [("error", (`String "StorageQuotaExceededFault"));
@@ -7190,8 +8247,8 @@ module ModifyDBClusterResult =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dBCluster = field_map json "DBCluster" DBCluster.of_json in
+    let of_json json__ =
+      let dBCluster = field_map json__ "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7225,10 +8282,11 @@ module ModifyDBClusterParameterGroupMessage =
              "DBClusterParameterGroupName") in
       make ~parameters ~dBClusterParameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map_exn json "Parameters" ParametersList.of_json in
+    let of_json json__ =
+      let parameters =
+        field_map_exn json__ "Parameters" ParametersList.of_json in
       let dBClusterParameterGroupName =
-        field_map_exn json "DBClusterParameterGroupName" String_.of_json in
+        field_map_exn json__ "DBClusterParameterGroupName" String_.of_json in
       make ~parameters ~dBClusterParameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to ModifyDBClusterParameterGroup."]
@@ -7272,10 +8330,32 @@ module ModifyDBClusterMessage =
           "The configuration setting for the log types to be enabled for export to Amazon CloudWatch Logs for a specific instance or cluster. The EnableLogTypes and DisableLogTypes arrays determine which logs are exported (or not exported) to CloudWatch Logs."];
       engineVersion: String_.t option
         [@ocaml.doc
-          "The version number of the database engine to which you want to upgrade. Modifying engine version is not supported on Amazon DocumentDB."];
+          "The version number of the database engine to which you want to upgrade. Changing this parameter results in an outage. The change is applied during the next maintenance window unless ApplyImmediately is enabled. To list all of the available engine versions for Amazon DocumentDB use the following command: aws docdb describe-db-engine-versions --engine docdb --query \"DBEngineVersions\\[\\].EngineVersion\""];
+      allowMajorVersionUpgrade: Boolean.t option
+        [@ocaml.doc
+          "A value that indicates whether major version upgrades are allowed. Constraints: You must allow major version upgrades when specifying a value for the EngineVersion parameter that is a different major version than the cluster's current version. Since some parameters are version specific, changing them requires executing a new ModifyDBCluster API call after the in-place MVU completes. Performing an MVU directly impacts the following parameters: MasterUserPassword NewDBClusterIdentifier VpcSecurityGroupIds Port"];
       deletionProtection: BooleanOptional.t option
         [@ocaml.doc
-          "Specifies whether this cluster can be deleted. If DeletionProtection is enabled, the cluster cannot be deleted unless it is modified and DeletionProtection is disabled. DeletionProtection protects clusters from being accidentally deleted."]}
+          "Specifies whether this cluster can be deleted. If DeletionProtection is enabled, the cluster cannot be deleted unless it is modified and DeletionProtection is disabled. DeletionProtection protects clusters from being accidentally deleted."];
+      storageType: String_.t option
+        [@ocaml.doc
+          "The storage type to associate with the DB cluster. For information on storage types for Amazon DocumentDB clusters, see Cluster storage configurations in the Amazon DocumentDB Developer Guide. Valid values for storage type - standard | iopt1 Default value is standard"];
+      serverlessV2ScalingConfiguration:
+        ServerlessV2ScalingConfiguration.t option
+        [@ocaml.doc
+          "Contains the scaling configuration of an Amazon DocumentDB Serverless cluster."];
+      manageMasterUserPassword: BooleanOptional.t option
+        [@ocaml.doc
+          "Specifies whether to manage the master user password with Amazon Web Services Secrets Manager. If the cluster doesn't manage the master user password with Amazon Web Services Secrets Manager, you can turn on this management. In this case, you can't specify MasterUserPassword. If the cluster already manages the master user password with Amazon Web Services Secrets Manager, and you specify that the master user password is not managed with Amazon Web Services Secrets Manager, then you must specify MasterUserPassword. In this case, Amazon DocumentDB deletes the secret and uses the new password for the master user specified by MasterUserPassword."];
+      masterUserSecretKmsKeyId: String_.t option
+        [@ocaml.doc
+          "The Amazon Web Services KMS key identifier to encrypt a secret that is automatically generated and managed in Amazon Web Services Secrets Manager. This setting is valid only if both of the following conditions are met: The cluster doesn't manage the master user password in Amazon Web Services Secrets Manager. If the cluster already manages the master user password in Amazon Web Services Secrets Manager, you can't change the KMS key that is used to encrypt the secret. You are enabling ManageMasterUserPassword to manage the master user password in Amazon Web Services Secrets Manager. If you are turning on ManageMasterUserPassword and don't specify MasterUserSecretKmsKeyId, then the aws/secretsmanager KMS key is used to encrypt the secret. If the secret is in a different Amazon Web Services account, then you can't use the aws/secretsmanager KMS key to encrypt the secret, and you must use a customer managed KMS key. The Amazon Web Services KMS key identifier is the key ARN, key ID, alias ARN, or alias name for the KMS key. To use a KMS key in a different Amazon Web Services account, specify the key ARN or alias ARN. There is a default KMS key for your Amazon Web Services account. Your Amazon Web Services account has a different default KMS key for each Amazon Web Services Region."];
+      rotateMasterUserPassword: BooleanOptional.t option
+        [@ocaml.doc
+          "Specifies whether to rotate the secret managed by Amazon Web Services Secrets Manager for the master user password. This setting is valid only if the master user password is managed by Amazon DocumentDB in Amazon Web Services Secrets Manager for the cluster. The secret value contains the updated password. Constraint: You must apply the change immediately when rotating the master user password."];
+      networkType: String_.t option
+        [@ocaml.doc
+          "The network type of the cluster. The network type is determined by the DBSubnetGroup specified for the cluster. A DBSubnetGroup can support only the IPv4 protocol or the IPv4 and the IPv6 protocols (DUAL). For more information, see DocumentDB clusters in a VPC in the Amazon DocumentDB Developer Guide. Valid Values: IPV4 | DUAL"]}
     let context_ = "ModifyDBClusterMessage"
     let make ?newDBClusterIdentifier =
       fun ?applyImmediately ->
@@ -7288,24 +8368,38 @@ module ModifyDBClusterMessage =
                     fun ?preferredMaintenanceWindow ->
                       fun ?cloudwatchLogsExportConfiguration ->
                         fun ?engineVersion ->
-                          fun ?deletionProtection ->
-                            fun ~dBClusterIdentifier ->
-                              fun () ->
-                                {
-                                  newDBClusterIdentifier;
-                                  applyImmediately;
-                                  backupRetentionPeriod;
-                                  dBClusterParameterGroupName;
-                                  vpcSecurityGroupIds;
-                                  port;
-                                  masterUserPassword;
-                                  preferredBackupWindow;
-                                  preferredMaintenanceWindow;
-                                  cloudwatchLogsExportConfiguration;
-                                  engineVersion;
-                                  deletionProtection;
-                                  dBClusterIdentifier
-                                }
+                          fun ?allowMajorVersionUpgrade ->
+                            fun ?deletionProtection ->
+                              fun ?storageType ->
+                                fun ?serverlessV2ScalingConfiguration ->
+                                  fun ?manageMasterUserPassword ->
+                                    fun ?masterUserSecretKmsKeyId ->
+                                      fun ?rotateMasterUserPassword ->
+                                        fun ?networkType ->
+                                          fun ~dBClusterIdentifier ->
+                                            fun () ->
+                                              {
+                                                newDBClusterIdentifier;
+                                                applyImmediately;
+                                                backupRetentionPeriod;
+                                                dBClusterParameterGroupName;
+                                                vpcSecurityGroupIds;
+                                                port;
+                                                masterUserPassword;
+                                                preferredBackupWindow;
+                                                preferredMaintenanceWindow;
+                                                cloudwatchLogsExportConfiguration;
+                                                engineVersion;
+                                                allowMajorVersionUpgrade;
+                                                deletionProtection;
+                                                storageType;
+                                                serverlessV2ScalingConfiguration;
+                                                manageMasterUserPassword;
+                                                masterUserSecretKmsKeyId;
+                                                rotateMasterUserPassword;
+                                                networkType;
+                                                dBClusterIdentifier
+                                              }
     let to_value x =
       structure_to_value
         [("DBClusterIdentifier",
@@ -7332,13 +8426,45 @@ module ModifyDBClusterMessage =
           (Option.map x.cloudwatchLogsExportConfiguration
              ~f:CloudwatchLogsExportConfiguration.to_value));
         ("EngineVersion", (Option.map x.engineVersion ~f:String_.to_value));
+        ("AllowMajorVersionUpgrade",
+          (Option.map x.allowMajorVersionUpgrade ~f:Boolean.to_value));
         ("DeletionProtection",
-          (Option.map x.deletionProtection ~f:BooleanOptional.to_value))]
+          (Option.map x.deletionProtection ~f:BooleanOptional.to_value));
+        ("StorageType", (Option.map x.storageType ~f:String_.to_value));
+        ("ServerlessV2ScalingConfiguration",
+          (Option.map x.serverlessV2ScalingConfiguration
+             ~f:ServerlessV2ScalingConfiguration.to_value));
+        ("ManageMasterUserPassword",
+          (Option.map x.manageMasterUserPassword ~f:BooleanOptional.to_value));
+        ("MasterUserSecretKmsKeyId",
+          (Option.map x.masterUserSecretKmsKeyId ~f:String_.to_value));
+        ("RotateMasterUserPassword",
+          (Option.map x.rotateMasterUserPassword ~f:BooleanOptional.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NetworkType") in
+      let rotateMasterUserPassword =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "RotateMasterUserPassword") in
+      let masterUserSecretKmsKeyId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MasterUserSecretKmsKeyId") in
+      let manageMasterUserPassword =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "ManageMasterUserPassword") in
+      let serverlessV2ScalingConfiguration =
+        (Option.map ~f:ServerlessV2ScalingConfiguration.of_xml)
+          (Xml.child xml_arg0 "ServerlessV2ScalingConfiguration") in
+      let storageType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StorageType") in
       let deletionProtection =
         (Option.map ~f:BooleanOptional.of_xml)
           (Xml.child xml_arg0 "DeletionProtection") in
+      let allowMajorVersionUpgrade =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "AllowMajorVersionUpgrade") in
       let engineVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EngineVersion") in
       let cloudwatchLogsExportConfiguration =
@@ -7373,41 +8499,60 @@ module ModifyDBClusterMessage =
       let dBClusterIdentifier =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBClusterIdentifier") in
-      make ?deletionProtection ?engineVersion
-        ?cloudwatchLogsExportConfiguration ?preferredMaintenanceWindow
-        ?preferredBackupWindow ?masterUserPassword ?port ?vpcSecurityGroupIds
+      make ?networkType ?rotateMasterUserPassword ?masterUserSecretKmsKeyId
+        ?manageMasterUserPassword ?serverlessV2ScalingConfiguration
+        ?storageType ?deletionProtection ?allowMajorVersionUpgrade
+        ?engineVersion ?cloudwatchLogsExportConfiguration
+        ?preferredMaintenanceWindow ?preferredBackupWindow
+        ?masterUserPassword ?port ?vpcSecurityGroupIds
         ?dBClusterParameterGroupName ?backupRetentionPeriod ?applyImmediately
         ?newDBClusterIdentifier ~dBClusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" String_.of_json in
+      let rotateMasterUserPassword =
+        field_map json__ "RotateMasterUserPassword" BooleanOptional.of_json in
+      let masterUserSecretKmsKeyId =
+        field_map json__ "MasterUserSecretKmsKeyId" String_.of_json in
+      let manageMasterUserPassword =
+        field_map json__ "ManageMasterUserPassword" BooleanOptional.of_json in
+      let serverlessV2ScalingConfiguration =
+        field_map json__ "ServerlessV2ScalingConfiguration"
+          ServerlessV2ScalingConfiguration.of_json in
+      let storageType = field_map json__ "StorageType" String_.of_json in
       let deletionProtection =
-        field_map json "DeletionProtection" BooleanOptional.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
+        field_map json__ "DeletionProtection" BooleanOptional.of_json in
+      let allowMajorVersionUpgrade =
+        field_map json__ "AllowMajorVersionUpgrade" Boolean.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
       let cloudwatchLogsExportConfiguration =
-        field_map json "CloudwatchLogsExportConfiguration"
+        field_map json__ "CloudwatchLogsExportConfiguration"
           CloudwatchLogsExportConfiguration.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
       let preferredBackupWindow =
-        field_map json "PreferredBackupWindow" String_.of_json in
+        field_map json__ "PreferredBackupWindow" String_.of_json in
       let masterUserPassword =
-        field_map json "MasterUserPassword" String_.of_json in
-      let port = field_map json "Port" IntegerOptional.of_json in
+        field_map json__ "MasterUserPassword" String_.of_json in
+      let port = field_map json__ "Port" IntegerOptional.of_json in
       let vpcSecurityGroupIds =
-        field_map json "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
+        field_map json__ "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
       let dBClusterParameterGroupName =
-        field_map json "DBClusterParameterGroupName" String_.of_json in
+        field_map json__ "DBClusterParameterGroupName" String_.of_json in
       let backupRetentionPeriod =
-        field_map json "BackupRetentionPeriod" IntegerOptional.of_json in
+        field_map json__ "BackupRetentionPeriod" IntegerOptional.of_json in
       let applyImmediately =
-        field_map json "ApplyImmediately" Boolean.of_json in
+        field_map json__ "ApplyImmediately" Boolean.of_json in
       let newDBClusterIdentifier =
-        field_map json "NewDBClusterIdentifier" String_.of_json in
+        field_map json__ "NewDBClusterIdentifier" String_.of_json in
       let dBClusterIdentifier =
-        field_map_exn json "DBClusterIdentifier" String_.of_json in
-      make ?deletionProtection ?engineVersion
-        ?cloudwatchLogsExportConfiguration ?preferredMaintenanceWindow
-        ?preferredBackupWindow ?masterUserPassword ?port ?vpcSecurityGroupIds
+        field_map_exn json__ "DBClusterIdentifier" String_.of_json in
+      make ?networkType ?rotateMasterUserPassword ?masterUserSecretKmsKeyId
+        ?manageMasterUserPassword ?serverlessV2ScalingConfiguration
+        ?storageType ?deletionProtection ?allowMajorVersionUpgrade
+        ?engineVersion ?cloudwatchLogsExportConfiguration
+        ?preferredMaintenanceWindow ?preferredBackupWindow
+        ?masterUserPassword ?port ?vpcSecurityGroupIds
         ?dBClusterParameterGroupName ?backupRetentionPeriod ?applyImmediately
         ?newDBClusterIdentifier ~dBClusterIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -7437,9 +8582,9 @@ module ListTagsForResourceMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
       make ?filters ~resourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" FilterList.of_json in
-      let resourceName = field_map_exn json "ResourceName" String_.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" FilterList.of_json in
+      let resourceName = field_map_exn json__ "ResourceName" String_.of_json in
       make ?filters ~resourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to ListTagsForResource."]
@@ -7520,14 +8665,181 @@ module GlobalClustersMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?globalClusters ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalClusters =
-        field_map json "GlobalClusters" GlobalClusterList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "GlobalClusters" GlobalClusterList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?globalClusters ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about Amazon DocumentDB global clusters. This API supports pagination. This action only applies to Amazon DocumentDB clusters."]
+module FailoverGlobalClusterResult =
+  struct
+    type failoverGlobalClusterResult =
+      {
+      globalCluster: GlobalCluster.t option }
+    and responseMetaData = unit
+    and t =
+      {
+      failoverGlobalClusterResult: failoverGlobalClusterResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `DBClusterNotFoundFault of DBClusterNotFoundFault.t 
+      | `GlobalClusterNotFoundFault of GlobalClusterNotFoundFault.t 
+      | `InvalidDBClusterStateFault of InvalidDBClusterStateFault.t 
+      | `InvalidGlobalClusterStateFault of InvalidGlobalClusterStateFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "FailoverGlobalClusterResult"
+    let make ?globalCluster =
+      fun () ->
+        {
+          failoverGlobalClusterResult = { globalCluster };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "DBClusterNotFoundFault" ->
+          `DBClusterNotFoundFault (DBClusterNotFoundFault.of_json json)
+      | "GlobalClusterNotFoundFault" ->
+          `GlobalClusterNotFoundFault
+            (GlobalClusterNotFoundFault.of_json json)
+      | "InvalidDBClusterStateFault" ->
+          `InvalidDBClusterStateFault
+            (InvalidDBClusterStateFault.of_json json)
+      | "InvalidGlobalClusterStateFault" ->
+          `InvalidGlobalClusterStateFault
+            (InvalidGlobalClusterStateFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DBClusterNotFoundFault" ->
+          `DBClusterNotFoundFault (DBClusterNotFoundFault.of_xml xml)
+      | "GlobalClusterNotFoundFault" ->
+          `GlobalClusterNotFoundFault (GlobalClusterNotFoundFault.of_xml xml)
+      | "InvalidDBClusterStateFault" ->
+          `InvalidDBClusterStateFault (InvalidDBClusterStateFault.of_xml xml)
+      | "InvalidGlobalClusterStateFault" ->
+          `InvalidGlobalClusterStateFault
+            (InvalidGlobalClusterStateFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DBClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "DBClusterNotFoundFault"));
+            ("details", (DBClusterNotFoundFault.to_json e))]
+      | `GlobalClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "GlobalClusterNotFoundFault"));
+            ("details", (GlobalClusterNotFoundFault.to_json e))]
+      | `InvalidDBClusterStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidDBClusterStateFault"));
+            ("details", (InvalidDBClusterStateFault.to_json e))]
+      | `InvalidGlobalClusterStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidGlobalClusterStateFault"));
+            ("details", (InvalidGlobalClusterStateFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.failoverGlobalClusterResult in
+      structure_to_wrapped_value
+        [("GlobalCluster",
+           (Option.map x.globalCluster ~f:GlobalCluster.to_value))]
+        ~wrapper:"FailoverGlobalClusterResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "FailoverGlobalClusterResult" in
+      let globalCluster =
+        (Option.map ~f:GlobalCluster.of_xml)
+          (Xml.child xml_arg0 "GlobalCluster") in
+      make ?globalCluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let globalCluster =
+        field_map json__ "GlobalCluster" GlobalCluster.of_json in
+      make ?globalCluster ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Promotes the specified secondary DB cluster to be the primary DB cluster in the global cluster when failing over a global cluster occurs. Use this operation to respond to an unplanned event, such as a regional disaster in the primary region. Failing over can result in a loss of write transaction data that wasn't replicated to the chosen secondary before the failover event occurred. However, the recovery process that promotes a DB instance on the chosen seconday DB cluster to be the primary writer DB instance guarantees that the data is in a transactionally consistent state."]
+module FailoverGlobalClusterMessage =
+  struct
+    type nonrec t =
+      {
+      globalClusterIdentifier: GlobalClusterIdentifier.t
+        [@ocaml.doc
+          "The identifier of the Amazon DocumentDB global cluster to apply this operation. The identifier is the unique key assigned by the user when the cluster is created. In other words, it's the name of the global cluster. Constraints: Must match the identifier of an existing global cluster. Minimum length of 1. Maximum length of 255. Pattern: \\[A-Za-z\\]\\[0-9A-Za-z-:._\\]*"];
+      targetDbClusterIdentifier: DBClusterIdentifier.t
+        [@ocaml.doc
+          "The identifier of the secondary Amazon DocumentDB cluster that you want to promote to the primary for the global cluster. Use the Amazon Resource Name (ARN) for the identifier so that Amazon DocumentDB can locate the cluster in its Amazon Web Services region. Constraints: Must match the identifier of an existing secondary cluster. Minimum length of 1. Maximum length of 255. Pattern: \\[A-Za-z\\]\\[0-9A-Za-z-:._\\]*"];
+      allowDataLoss: BooleanOptional.t option
+        [@ocaml.doc
+          "Specifies whether to allow data loss for this global cluster operation. Allowing data loss triggers a global failover operation. If you don't specify AllowDataLoss, the global cluster operation defaults to a switchover. Constraints: Can't be specified together with the Switchover parameter."];
+      switchover: BooleanOptional.t option
+        [@ocaml.doc
+          "Specifies whether to switch over this global database cluster. Constraints: Can't be specified together with the AllowDataLoss parameter."]}
+    let context_ = "FailoverGlobalClusterMessage"
+    let make ?allowDataLoss =
+      fun ?switchover ->
+        fun ~globalClusterIdentifier ->
+          fun ~targetDbClusterIdentifier ->
+            fun () ->
+              {
+                allowDataLoss;
+                switchover;
+                globalClusterIdentifier;
+                targetDbClusterIdentifier
+              }
+    let to_value x =
+      structure_to_value
+        [("GlobalClusterIdentifier",
+           (Some (GlobalClusterIdentifier.to_value x.globalClusterIdentifier)));
+        ("TargetDbClusterIdentifier",
+          (Some (DBClusterIdentifier.to_value x.targetDbClusterIdentifier)));
+        ("AllowDataLoss",
+          (Option.map x.allowDataLoss ~f:BooleanOptional.to_value));
+        ("Switchover", (Option.map x.switchover ~f:BooleanOptional.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let switchover =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "Switchover") in
+      let allowDataLoss =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "AllowDataLoss") in
+      let targetDbClusterIdentifier =
+        DBClusterIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "TargetDbClusterIdentifier") in
+      let globalClusterIdentifier =
+        GlobalClusterIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GlobalClusterIdentifier") in
+      make ?switchover ?allowDataLoss ~targetDbClusterIdentifier
+        ~globalClusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let switchover = field_map json__ "Switchover" BooleanOptional.of_json in
+      let allowDataLoss =
+        field_map json__ "AllowDataLoss" BooleanOptional.of_json in
+      let targetDbClusterIdentifier =
+        field_map_exn json__ "TargetDbClusterIdentifier"
+          DBClusterIdentifier.of_json in
+      let globalClusterIdentifier =
+        field_map_exn json__ "GlobalClusterIdentifier"
+          GlobalClusterIdentifier.of_json in
+      make ?switchover ?allowDataLoss ~targetDbClusterIdentifier
+        ~globalClusterIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Promotes the specified secondary DB cluster to be the primary DB cluster in the global cluster when failing over a global cluster occurs. Use this operation to respond to an unplanned event, such as a regional disaster in the primary region. Failing over can result in a loss of write transaction data that wasn't replicated to the chosen secondary before the failover event occurred. However, the recovery process that promotes a DB instance on the chosen seconday DB cluster to be the primary writer DB instance guarantees that the data is in a transactionally consistent state."]
 module FailoverDBClusterResult =
   struct
     type failoverDBClusterResult = {
@@ -7602,8 +8914,8 @@ module FailoverDBClusterResult =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dBCluster = field_map json "DBCluster" DBCluster.of_json in
+    let of_json json__ =
+      let dBCluster = field_map json__ "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7637,11 +8949,11 @@ module FailoverDBClusterMessage =
           (Xml.child xml_arg0 "DBClusterIdentifier") in
       make ?targetDBInstanceIdentifier ?dBClusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetDBInstanceIdentifier =
-        field_map json "TargetDBInstanceIdentifier" String_.of_json in
+        field_map json__ "TargetDBInstanceIdentifier" String_.of_json in
       let dBClusterIdentifier =
-        field_map json "DBClusterIdentifier" String_.of_json in
+        field_map json__ "DBClusterIdentifier" String_.of_json in
       make ?targetDBInstanceIdentifier ?dBClusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to FailoverDBCluster."]
@@ -7697,9 +9009,9 @@ module EventsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?events ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let events = field_map json "Events" EventList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let events = field_map json__ "Events" EventList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?events ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of DescribeEvents."]
@@ -7773,11 +9085,11 @@ module EventSubscriptionsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?eventSubscriptionsList ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventSubscriptionsList =
-        field_map json "EventSubscriptionsList"
+        field_map json__ "EventSubscriptionsList"
           EventSubscriptionsList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?eventSubscriptionsList ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of DescribeEventSubscriptions."]
@@ -7832,9 +9144,9 @@ module EventCategoriesMessage =
           (Xml.child xml_arg0 "EventCategoriesMapList") in
       make ?eventCategoriesMapList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventCategoriesMapList =
-        field_map json "EventCategoriesMapList"
+        field_map json__ "EventCategoriesMapList"
           EventCategoriesMapList.of_json in
       make ?eventCategoriesMapList ()
     let to_json v = composed_to_json to_value v
@@ -7881,12 +9193,12 @@ module DescribePendingMaintenanceActionsMessage =
           (Xml.child xml_arg0 "ResourceIdentifier") in
       make ?maxRecords ?marker ?filters ?resourceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
+    let of_json json__ =
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
       let resourceIdentifier =
-        field_map json "ResourceIdentifier" String_.of_json in
+        field_map json__ "ResourceIdentifier" String_.of_json in
       make ?maxRecords ?marker ?filters ?resourceIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7971,15 +9283,16 @@ module DescribeOrderableDBInstanceOptionsMessage =
       make ?marker ?maxRecords ?filters ?vpc ?licenseModel ?dBInstanceClass
         ?engineVersion ~engine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
-      let vpc = field_map json "Vpc" BooleanOptional.of_json in
-      let licenseModel = field_map json "LicenseModel" String_.of_json in
-      let dBInstanceClass = field_map json "DBInstanceClass" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map_exn json "Engine" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
+      let vpc = field_map json__ "Vpc" BooleanOptional.of_json in
+      let licenseModel = field_map json__ "LicenseModel" String_.of_json in
+      let dBInstanceClass =
+        field_map json__ "DBInstanceClass" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map_exn json__ "Engine" String_.of_json in
       make ?marker ?maxRecords ?filters ?vpc ?licenseModel ?dBInstanceClass
         ?engineVersion ~engine ()
     let to_json v = composed_to_json to_value v
@@ -8029,12 +9342,12 @@ module DescribeGlobalClustersMessage =
           (Xml.child xml_arg0 "GlobalClusterIdentifier") in
       make ?marker ?maxRecords ?filters ?globalClusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
       let globalClusterIdentifier =
-        field_map json "GlobalClusterIdentifier"
+        field_map json__ "GlobalClusterIdentifier"
           GlobalClusterIdentifier.of_json in
       make ?marker ?maxRecords ?filters ?globalClusterIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -8131,18 +9444,18 @@ module DescribeEventsMessage =
       make ?marker ?maxRecords ?filters ?eventCategories ?duration ?endTime
         ?startTime ?sourceType ?sourceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
       let eventCategories =
-        field_map json "EventCategories" EventCategoriesList.of_json in
-      let duration = field_map json "Duration" IntegerOptional.of_json in
-      let endTime = field_map json "EndTime" TStamp.of_json in
-      let startTime = field_map json "StartTime" TStamp.of_json in
-      let sourceType = field_map json "SourceType" SourceType.of_json in
+        field_map json__ "EventCategories" EventCategoriesList.of_json in
+      let duration = field_map json__ "Duration" IntegerOptional.of_json in
+      let endTime = field_map json__ "EndTime" TStamp.of_json in
+      let startTime = field_map json__ "StartTime" TStamp.of_json in
+      let sourceType = field_map json__ "SourceType" SourceType.of_json in
       let sourceIdentifier =
-        field_map json "SourceIdentifier" String_.of_json in
+        field_map json__ "SourceIdentifier" String_.of_json in
       make ?marker ?maxRecords ?filters ?eventCategories ?duration ?endTime
         ?startTime ?sourceType ?sourceIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -8188,12 +9501,12 @@ module DescribeEventSubscriptionsMessage =
           (Xml.child xml_arg0 "SubscriptionName") in
       make ?marker ?maxRecords ?filters ?subscriptionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
       let subscriptionName =
-        field_map json "SubscriptionName" String_.of_json in
+        field_map json__ "SubscriptionName" String_.of_json in
       make ?marker ?maxRecords ?filters ?subscriptionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to DescribeEventSubscriptions."]
@@ -8219,9 +9532,9 @@ module DescribeEventCategoriesMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SourceType") in
       make ?filters ?sourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" FilterList.of_json in
-      let sourceType = field_map json "SourceType" String_.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" FilterList.of_json in
+      let sourceType = field_map json__ "SourceType" String_.of_json in
       make ?filters ?sourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to DescribeEventCategories."]
@@ -8277,9 +9590,9 @@ module DescribeEngineDefaultClusterParametersResult =
           (Xml.child xml_arg0 "EngineDefaults") in
       make ?engineDefaults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let engineDefaults =
-        field_map json "EngineDefaults" EngineDefaults.of_json in
+        field_map json__ "EngineDefaults" EngineDefaults.of_json in
       make ?engineDefaults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8326,12 +9639,12 @@ module DescribeEngineDefaultClusterParametersMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBParameterGroupFamily") in
       make ?marker ?maxRecords ?filters ~dBParameterGroupFamily ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
       let dBParameterGroupFamily =
-        field_map_exn json "DBParameterGroupFamily" String_.of_json in
+        field_map_exn json__ "DBParameterGroupFamily" String_.of_json in
       make ?marker ?maxRecords ?filters ~dBParameterGroupFamily ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8376,12 +9689,12 @@ module DescribeDBSubnetGroupsMessage =
           (Xml.child xml_arg0 "DBSubnetGroupName") in
       make ?marker ?maxRecords ?filters ?dBSubnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
       let dBSubnetGroupName =
-        field_map json "DBSubnetGroupName" String_.of_json in
+        field_map json__ "DBSubnetGroupName" String_.of_json in
       make ?marker ?maxRecords ?filters ?dBSubnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to DescribeDBSubnetGroups."]
@@ -8427,12 +9740,12 @@ module DescribeDBInstancesMessage =
           (Xml.child xml_arg0 "DBInstanceIdentifier") in
       make ?marker ?maxRecords ?filters ?dBInstanceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
       let dBInstanceIdentifier =
-        field_map json "DBInstanceIdentifier" String_.of_json in
+        field_map json__ "DBInstanceIdentifier" String_.of_json in
       make ?marker ?maxRecords ?filters ?dBInstanceIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to DescribeDBInstances."]
@@ -8527,19 +9840,19 @@ module DescribeDBEngineVersionsMessage =
         ?marker ?maxRecords ?filters ?dBParameterGroupFamily ?engineVersion
         ?engine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let listSupportedTimezones =
-        field_map json "ListSupportedTimezones" BooleanOptional.of_json in
+        field_map json__ "ListSupportedTimezones" BooleanOptional.of_json in
       let listSupportedCharacterSets =
-        field_map json "ListSupportedCharacterSets" BooleanOptional.of_json in
-      let defaultOnly = field_map json "DefaultOnly" Boolean.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
+        field_map json__ "ListSupportedCharacterSets" BooleanOptional.of_json in
+      let defaultOnly = field_map json__ "DefaultOnly" Boolean.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
       let dBParameterGroupFamily =
-        field_map json "DBParameterGroupFamily" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map json "Engine" String_.of_json in
+        field_map json__ "DBParameterGroupFamily" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
       make ?listSupportedTimezones ?listSupportedCharacterSets ?defaultOnly
         ?marker ?maxRecords ?filters ?dBParameterGroupFamily ?engineVersion
         ?engine ()
@@ -8587,12 +9900,12 @@ module DescribeDBClustersMessage =
           (Xml.child xml_arg0 "DBClusterIdentifier") in
       make ?marker ?maxRecords ?filters ?dBClusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
       let dBClusterIdentifier =
-        field_map json "DBClusterIdentifier" String_.of_json in
+        field_map json__ "DBClusterIdentifier" String_.of_json in
       make ?marker ?maxRecords ?filters ?dBClusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to DescribeDBClusters."]
@@ -8678,17 +9991,17 @@ module DescribeDBClusterSnapshotsMessage =
       make ?includePublic ?includeShared ?marker ?maxRecords ?filters
         ?snapshotType ?dBClusterSnapshotIdentifier ?dBClusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let includePublic = field_map json "IncludePublic" Boolean.of_json in
-      let includeShared = field_map json "IncludeShared" Boolean.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
-      let snapshotType = field_map json "SnapshotType" String_.of_json in
+    let of_json json__ =
+      let includePublic = field_map json__ "IncludePublic" Boolean.of_json in
+      let includeShared = field_map json__ "IncludeShared" Boolean.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
+      let snapshotType = field_map json__ "SnapshotType" String_.of_json in
       let dBClusterSnapshotIdentifier =
-        field_map json "DBClusterSnapshotIdentifier" String_.of_json in
+        field_map json__ "DBClusterSnapshotIdentifier" String_.of_json in
       let dBClusterIdentifier =
-        field_map json "DBClusterIdentifier" String_.of_json in
+        field_map json__ "DBClusterIdentifier" String_.of_json in
       make ?includePublic ?includeShared ?marker ?maxRecords ?filters
         ?snapshotType ?dBClusterSnapshotIdentifier ?dBClusterIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -8760,9 +10073,9 @@ module DescribeDBClusterSnapshotAttributesResult =
           (Xml.child xml_arg0 "DBClusterSnapshotAttributesResult") in
       make ?dBClusterSnapshotAttributesResult ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBClusterSnapshotAttributesResult =
-        field_map json "DBClusterSnapshotAttributesResult"
+        field_map json__ "DBClusterSnapshotAttributesResult"
           DBClusterSnapshotAttributesResult.of_json in
       make ?dBClusterSnapshotAttributesResult ()
     let to_json v = composed_to_json to_value v
@@ -8790,9 +10103,9 @@ module DescribeDBClusterSnapshotAttributesMessage =
              "DBClusterSnapshotIdentifier") in
       make ~dBClusterSnapshotIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBClusterSnapshotIdentifier =
-        field_map_exn json "DBClusterSnapshotIdentifier" String_.of_json in
+        field_map_exn json__ "DBClusterSnapshotIdentifier" String_.of_json in
       make ~dBClusterSnapshotIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8855,13 +10168,13 @@ module DescribeDBClusterParametersMessage =
       make ?marker ?maxRecords ?filters ?source ~dBClusterParameterGroupName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
-      let source = field_map json "Source" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
+      let source = field_map json__ "Source" String_.of_json in
       let dBClusterParameterGroupName =
-        field_map_exn json "DBClusterParameterGroupName" String_.of_json in
+        field_map_exn json__ "DBClusterParameterGroupName" String_.of_json in
       make ?marker ?maxRecords ?filters ?source ~dBClusterParameterGroupName
         ()
     let to_json v = composed_to_json to_value v
@@ -8908,12 +10221,12 @@ module DescribeDBClusterParameterGroupsMessage =
           (Xml.child xml_arg0 "DBClusterParameterGroupName") in
       make ?marker ?maxRecords ?filters ?dBClusterParameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
       let dBClusterParameterGroupName =
-        field_map json "DBClusterParameterGroupName" String_.of_json in
+        field_map json__ "DBClusterParameterGroupName" String_.of_json in
       make ?marker ?maxRecords ?filters ?dBClusterParameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8959,12 +10272,12 @@ module DescribeCertificatesMessage =
           (Xml.child xml_arg0 "CertificateIdentifier") in
       make ?marker ?maxRecords ?filters ?certificateIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
       let certificateIdentifier =
-        field_map json "CertificateIdentifier" String_.of_json in
+        field_map json__ "CertificateIdentifier" String_.of_json in
       make ?marker ?maxRecords ?filters ?certificateIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9039,9 +10352,9 @@ module DeleteGlobalClusterResult =
           (Xml.child xml_arg0 "GlobalCluster") in
       make ?globalCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalCluster =
-        field_map json "GlobalCluster" GlobalCluster.of_json in
+        field_map json__ "GlobalCluster" GlobalCluster.of_json in
       make ?globalCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9066,9 +10379,9 @@ module DeleteGlobalClusterMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "GlobalClusterIdentifier") in
       make ~globalClusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalClusterIdentifier =
-        field_map_exn json "GlobalClusterIdentifier"
+        field_map_exn json__ "GlobalClusterIdentifier"
           GlobalClusterIdentifier.of_json in
       make ~globalClusterIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -9145,9 +10458,9 @@ module DeleteEventSubscriptionResult =
           (Xml.child xml_arg0 "EventSubscription") in
       make ?eventSubscription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventSubscription =
-        field_map json "EventSubscription" EventSubscription.of_json in
+        field_map json__ "EventSubscription" EventSubscription.of_json in
       make ?eventSubscription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9171,9 +10484,9 @@ module DeleteEventSubscriptionMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionName") in
       make ~subscriptionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionName =
-        field_map_exn json "SubscriptionName" String_.of_json in
+        field_map_exn json__ "SubscriptionName" String_.of_json in
       make ~subscriptionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to DeleteEventSubscription."]
@@ -9196,9 +10509,9 @@ module DeleteDBSubnetGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBSubnetGroupName") in
       make ~dBSubnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBSubnetGroupName =
-        field_map_exn json "DBSubnetGroupName" String_.of_json in
+        field_map_exn json__ "DBSubnetGroupName" String_.of_json in
       make ~dBSubnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to DeleteDBSubnetGroup."]
@@ -9297,8 +10610,8 @@ module DeleteDBInstanceResult =
         (Option.map ~f:DBInstance.of_xml) (Xml.child xml_arg0 "DBInstance") in
       make ?dBInstance ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dBInstance = field_map json "DBInstance" DBInstance.of_json in
+    let of_json json__ =
+      let dBInstance = field_map json__ "DBInstance" DBInstance.of_json in
       make ?dBInstance ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a previously provisioned instance."]
@@ -9322,9 +10635,9 @@ module DeleteDBInstanceMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBInstanceIdentifier") in
       make ~dBInstanceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBInstanceIdentifier =
-        field_map_exn json "DBInstanceIdentifier" String_.of_json in
+        field_map_exn json__ "DBInstanceIdentifier" String_.of_json in
       make ~dBInstanceIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to DeleteDBInstance."]
@@ -9401,9 +10714,9 @@ module DeleteDBClusterSnapshotResult =
           (Xml.child xml_arg0 "DBClusterSnapshot") in
       make ?dBClusterSnapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBClusterSnapshot =
-        field_map json "DBClusterSnapshot" DBClusterSnapshot.of_json in
+        field_map json__ "DBClusterSnapshot" DBClusterSnapshot.of_json in
       make ?dBClusterSnapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9430,9 +10743,9 @@ module DeleteDBClusterSnapshotMessage =
              "DBClusterSnapshotIdentifier") in
       make ~dBClusterSnapshotIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBClusterSnapshotIdentifier =
-        field_map_exn json "DBClusterSnapshotIdentifier" String_.of_json in
+        field_map_exn json__ "DBClusterSnapshotIdentifier" String_.of_json in
       make ~dBClusterSnapshotIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to DeleteDBClusterSnapshot."]
@@ -9533,8 +10846,8 @@ module DeleteDBClusterResult =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dBCluster = field_map json "DBCluster" DBCluster.of_json in
+    let of_json json__ =
+      let dBCluster = field_map json__ "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9561,9 +10874,9 @@ module DeleteDBClusterParameterGroupMessage =
              "DBClusterParameterGroupName") in
       make ~dBClusterParameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBClusterParameterGroupName =
-        field_map_exn json "DBClusterParameterGroupName" String_.of_json in
+        field_map_exn json__ "DBClusterParameterGroupName" String_.of_json in
       make ~dBClusterParameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to DeleteDBClusterParameterGroup."]
@@ -9612,13 +10925,13 @@ module DeleteDBClusterMessage =
       make ?finalDBSnapshotIdentifier ?skipFinalSnapshot ~dBClusterIdentifier
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let finalDBSnapshotIdentifier =
-        field_map json "FinalDBSnapshotIdentifier" String_.of_json in
+        field_map json__ "FinalDBSnapshotIdentifier" String_.of_json in
       let skipFinalSnapshot =
-        field_map json "SkipFinalSnapshot" Boolean.of_json in
+        field_map json__ "SkipFinalSnapshot" Boolean.of_json in
       let dBClusterIdentifier =
-        field_map_exn json "DBClusterIdentifier" String_.of_json in
+        field_map_exn json__ "DBClusterIdentifier" String_.of_json in
       make ?finalDBSnapshotIdentifier ?skipFinalSnapshot ~dBClusterIdentifier
         ()
     let to_json v = composed_to_json to_value v
@@ -9691,10 +11004,10 @@ module DBSubnetGroupMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBSubnetGroups ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBSubnetGroups =
-        field_map json "DBSubnetGroups" DBSubnetGroups.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "DBSubnetGroups" DBSubnetGroups.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?dBSubnetGroups ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of DescribeDBSubnetGroups."]
@@ -9765,9 +11078,9 @@ module DBInstanceMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBInstances ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dBInstances = field_map json "DBInstances" DBInstanceList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let dBInstances = field_map json__ "DBInstances" DBInstanceList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?dBInstances ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of DescribeDBInstances."]
@@ -9830,10 +11143,10 @@ module DBEngineVersionMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBEngineVersions ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBEngineVersions =
-        field_map json "DBEngineVersions" DBEngineVersionList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "DBEngineVersions" DBEngineVersionList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?dBEngineVersions ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of DescribeDBEngineVersions."]
@@ -9907,10 +11220,10 @@ module DBClusterSnapshotMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBClusterSnapshots ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBClusterSnapshots =
-        field_map json "DBClusterSnapshots" DBClusterSnapshotList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "DBClusterSnapshots" DBClusterSnapshotList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?dBClusterSnapshots ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of DescribeDBClusterSnapshots."]
@@ -9988,11 +11301,11 @@ module DBClusterParameterGroupsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBClusterParameterGroups ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBClusterParameterGroups =
-        field_map json "DBClusterParameterGroups"
+        field_map json__ "DBClusterParameterGroups"
           DBClusterParameterGroupList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?dBClusterParameterGroups ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of DBClusterParameterGroups."]
@@ -10075,9 +11388,9 @@ module DBClusterParameterGroupNameMessage =
           (Xml.child xml_arg0 "DBClusterParameterGroupName") in
       make ?dBClusterParameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBClusterParameterGroupName =
-        field_map json "DBClusterParameterGroupName" String_.of_json in
+        field_map json__ "DBClusterParameterGroupName" String_.of_json in
       make ?dBClusterParameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the name of a cluster parameter group."]
@@ -10151,9 +11464,9 @@ module DBClusterParameterGroupDetails =
           (Xml.child xml_arg0 "Parameters") in
       make ?marker ?parameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let parameters = field_map json "Parameters" ParametersList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let parameters = field_map json__ "Parameters" ParametersList.of_json in
       make ?marker ?parameters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of DBClusterParameterGroup."]
@@ -10222,9 +11535,9 @@ module DBClusterMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?dBClusters ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dBClusters = field_map json "DBClusters" DBClusterList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let dBClusters = field_map json__ "DBClusters" DBClusterList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?dBClusters ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of DescribeDBClusters."]
@@ -10318,13 +11631,13 @@ module CreateGlobalClusterResult =
           (Xml.child xml_arg0 "GlobalCluster") in
       make ?globalCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalCluster =
-        field_map json "GlobalCluster" GlobalCluster.of_json in
+        field_map json__ "GlobalCluster" GlobalCluster.of_json in
       make ?globalCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon DocumentDB global cluster that can span multiple multiple Amazon Web Services Regions. The global cluster contains one primary cluster with read-write capability, and up-to give read-only secondary clusters. Global clusters uses storage-based fast replication across regions with latencies less than one second, using dedicated infrastructure with no impact to your workload\226\128\153s performance. You can create a global cluster that is initially empty, and then add a primary and a secondary to it. Or you can specify an existing cluster during the create operation, and this cluster becomes the primary of the global cluster. This action only applies to Amazon DocumentDB clusters."]
+       "Creates an Amazon DocumentDB global cluster that can span multiple multiple Amazon Web Services Regions. The global cluster contains one primary cluster with read-write capability, and up-to 10 read-only secondary clusters. Global clusters uses storage-based fast replication across regions with latencies less than one second, using dedicated infrastructure with no impact to your workload\226\128\153s performance. You can create a global cluster that is initially empty, and then add a primary and a secondary to it. Or you can specify an existing cluster during the create operation, and this cluster becomes the primary of the global cluster. This action only applies to Amazon DocumentDB clusters."]
 module CreateGlobalClusterMessage =
   struct
     type nonrec t =
@@ -10402,18 +11715,18 @@ module CreateGlobalClusterMessage =
       make ?storageEncrypted ?databaseName ?deletionProtection ?engineVersion
         ?engine ?sourceDBClusterIdentifier ~globalClusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let storageEncrypted =
-        field_map json "StorageEncrypted" BooleanOptional.of_json in
-      let databaseName = field_map json "DatabaseName" String_.of_json in
+        field_map json__ "StorageEncrypted" BooleanOptional.of_json in
+      let databaseName = field_map json__ "DatabaseName" String_.of_json in
       let deletionProtection =
-        field_map json "DeletionProtection" BooleanOptional.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map json "Engine" String_.of_json in
+        field_map json__ "DeletionProtection" BooleanOptional.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
       let sourceDBClusterIdentifier =
-        field_map json "SourceDBClusterIdentifier" String_.of_json in
+        field_map json__ "SourceDBClusterIdentifier" String_.of_json in
       let globalClusterIdentifier =
-        field_map_exn json "GlobalClusterIdentifier"
+        field_map_exn json__ "GlobalClusterIdentifier"
           GlobalClusterIdentifier.of_json in
       make ?storageEncrypted ?databaseName ?deletionProtection ?engineVersion
         ?engine ?sourceDBClusterIdentifier ~globalClusterIdentifier ()
@@ -10541,9 +11854,9 @@ module CreateEventSubscriptionResult =
           (Xml.child xml_arg0 "EventSubscription") in
       make ?eventSubscription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventSubscription =
-        field_map json "EventSubscription" EventSubscription.of_json in
+        field_map json__ "EventSubscription" EventSubscription.of_json in
       make ?eventSubscription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10621,16 +11934,16 @@ module CreateEventSubscriptionMessage =
       make ?tags ?enabled ?sourceIds ?eventCategories ?sourceType
         ~snsTopicArn ~subscriptionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let enabled = field_map json "Enabled" BooleanOptional.of_json in
-      let sourceIds = field_map json "SourceIds" SourceIdsList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let enabled = field_map json__ "Enabled" BooleanOptional.of_json in
+      let sourceIds = field_map json__ "SourceIds" SourceIdsList.of_json in
       let eventCategories =
-        field_map json "EventCategories" EventCategoriesList.of_json in
-      let sourceType = field_map json "SourceType" String_.of_json in
-      let snsTopicArn = field_map_exn json "SnsTopicArn" String_.of_json in
+        field_map json__ "EventCategories" EventCategoriesList.of_json in
+      let sourceType = field_map json__ "SourceType" String_.of_json in
+      let snsTopicArn = field_map_exn json__ "SnsTopicArn" String_.of_json in
       let subscriptionName =
-        field_map_exn json "SubscriptionName" String_.of_json in
+        field_map_exn json__ "SubscriptionName" String_.of_json in
       make ?tags ?enabled ?sourceIds ?eventCategories ?sourceType
         ~snsTopicArn ~subscriptionName ()
     let to_json v = composed_to_json to_value v
@@ -10736,9 +12049,9 @@ module CreateDBSubnetGroupResult =
           (Xml.child xml_arg0 "DBSubnetGroup") in
       make ?dBSubnetGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBSubnetGroup =
-        field_map json "DBSubnetGroup" DBSubnetGroup.of_json in
+        field_map json__ "DBSubnetGroup" DBSubnetGroup.of_json in
       make ?dBSubnetGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10786,14 +12099,14 @@ module CreateDBSubnetGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DBSubnetGroupName") in
       make ?tags ~subnetIds ~dBSubnetGroupDescription ~dBSubnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let subnetIds =
-        field_map_exn json "SubnetIds" SubnetIdentifierList.of_json in
+        field_map_exn json__ "SubnetIds" SubnetIdentifierList.of_json in
       let dBSubnetGroupDescription =
-        field_map_exn json "DBSubnetGroupDescription" String_.of_json in
+        field_map_exn json__ "DBSubnetGroupDescription" String_.of_json in
       let dBSubnetGroupName =
-        field_map_exn json "DBSubnetGroupName" String_.of_json in
+        field_map_exn json__ "DBSubnetGroupName" String_.of_json in
       make ?tags ~subnetIds ~dBSubnetGroupDescription ~dBSubnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to CreateDBSubnetGroup."]
@@ -10994,8 +12307,8 @@ module CreateDBInstanceResult =
         (Option.map ~f:DBInstance.of_xml) (Xml.child xml_arg0 "DBInstance") in
       make ?dBInstance ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dBInstance = field_map json "DBInstance" DBInstance.of_json in
+    let of_json json__ =
+      let dBInstance = field_map json__ "DBInstance" DBInstance.of_json in
       make ?dBInstance ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new instance."]
@@ -11027,6 +12340,9 @@ module CreateDBInstanceMessage =
       dBClusterIdentifier: String_.t
         [@ocaml.doc
           "The identifier of the cluster that the instance will belong to."];
+      copyTagsToSnapshot: BooleanOptional.t option
+        [@ocaml.doc
+          "A value that indicates whether to copy tags from the DB instance to snapshots of the DB instance. By default, tags are not copied."];
       promotionTier: IntegerOptional.t option
         [@ocaml.doc
           "A value that specifies the order in which an Amazon DocumentDB replica is promoted to the primary instance after a failure of the existing primary instance. Default: 1 Valid values: 0-15"];
@@ -11035,33 +12351,40 @@ module CreateDBInstanceMessage =
           "A value that indicates whether to enable Performance Insights for the DB Instance. For more information, see Using Amazon Performance Insights."];
       performanceInsightsKMSKeyId: String_.t option
         [@ocaml.doc
-          "The KMS key identifier for encryption of Performance Insights data. The KMS key identifier is the key ARN, key ID, alias ARN, or alias name for the KMS key. If you do not specify a value for PerformanceInsightsKMSKeyId, then Amazon DocumentDB uses your default KMS key. There is a default KMS key for your Amazon Web Services account. Your Amazon Web Services account has a different default KMS key for each Amazon Web Services region."]}
+          "The KMS key identifier for encryption of Performance Insights data. The KMS key identifier is the key ARN, key ID, alias ARN, or alias name for the KMS key. If you do not specify a value for PerformanceInsightsKMSKeyId, then Amazon DocumentDB uses your default KMS key. There is a default KMS key for your Amazon Web Services account. Your Amazon Web Services account has a different default KMS key for each Amazon Web Services region."];
+      cACertificateIdentifier: String_.t option
+        [@ocaml.doc
+          "The CA certificate identifier to use for the DB instance's server certificate. For more information, see Updating Your Amazon DocumentDB TLS Certificates and Encrypting Data in Transit in the Amazon DocumentDB Developer Guide."]}
     let context_ = "CreateDBInstanceMessage"
     let make ?availabilityZone =
       fun ?preferredMaintenanceWindow ->
         fun ?autoMinorVersionUpgrade ->
           fun ?tags ->
-            fun ?promotionTier ->
-              fun ?enablePerformanceInsights ->
-                fun ?performanceInsightsKMSKeyId ->
-                  fun ~dBInstanceIdentifier ->
-                    fun ~dBInstanceClass ->
-                      fun ~engine ->
-                        fun ~dBClusterIdentifier ->
-                          fun () ->
-                            {
-                              availabilityZone;
-                              preferredMaintenanceWindow;
-                              autoMinorVersionUpgrade;
-                              tags;
-                              promotionTier;
-                              enablePerformanceInsights;
-                              performanceInsightsKMSKeyId;
-                              dBInstanceIdentifier;
-                              dBInstanceClass;
-                              engine;
-                              dBClusterIdentifier
-                            }
+            fun ?copyTagsToSnapshot ->
+              fun ?promotionTier ->
+                fun ?enablePerformanceInsights ->
+                  fun ?performanceInsightsKMSKeyId ->
+                    fun ?cACertificateIdentifier ->
+                      fun ~dBInstanceIdentifier ->
+                        fun ~dBInstanceClass ->
+                          fun ~engine ->
+                            fun ~dBClusterIdentifier ->
+                              fun () ->
+                                {
+                                  availabilityZone;
+                                  preferredMaintenanceWindow;
+                                  autoMinorVersionUpgrade;
+                                  tags;
+                                  copyTagsToSnapshot;
+                                  promotionTier;
+                                  enablePerformanceInsights;
+                                  performanceInsightsKMSKeyId;
+                                  cACertificateIdentifier;
+                                  dBInstanceIdentifier;
+                                  dBInstanceClass;
+                                  engine;
+                                  dBClusterIdentifier
+                                }
     let to_value x =
       structure_to_value
         [("DBInstanceIdentifier",
@@ -11077,14 +12400,21 @@ module CreateDBInstanceMessage =
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("DBClusterIdentifier",
           (Some (String_.to_value x.dBClusterIdentifier)));
+        ("CopyTagsToSnapshot",
+          (Option.map x.copyTagsToSnapshot ~f:BooleanOptional.to_value));
         ("PromotionTier",
           (Option.map x.promotionTier ~f:IntegerOptional.to_value));
         ("EnablePerformanceInsights",
           (Option.map x.enablePerformanceInsights ~f:BooleanOptional.to_value));
         ("PerformanceInsightsKMSKeyId",
-          (Option.map x.performanceInsightsKMSKeyId ~f:String_.to_value))]
+          (Option.map x.performanceInsightsKMSKeyId ~f:String_.to_value));
+        ("CACertificateIdentifier",
+          (Option.map x.cACertificateIdentifier ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let cACertificateIdentifier =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "CACertificateIdentifier") in
       let performanceInsightsKMSKeyId =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "PerformanceInsightsKMSKeyId") in
@@ -11094,6 +12424,9 @@ module CreateDBInstanceMessage =
       let promotionTier =
         (Option.map ~f:IntegerOptional.of_xml)
           (Xml.child xml_arg0 "PromotionTier") in
+      let copyTagsToSnapshot =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "CopyTagsToSnapshot") in
       let dBClusterIdentifier =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBClusterIdentifier") in
@@ -11115,34 +12448,40 @@ module CreateDBInstanceMessage =
       let dBInstanceIdentifier =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DBInstanceIdentifier") in
-      make ?performanceInsightsKMSKeyId ?enablePerformanceInsights
-        ?promotionTier ~dBClusterIdentifier ?tags ?autoMinorVersionUpgrade
+      make ?cACertificateIdentifier ?performanceInsightsKMSKeyId
+        ?enablePerformanceInsights ?promotionTier ?copyTagsToSnapshot
+        ~dBClusterIdentifier ?tags ?autoMinorVersionUpgrade
         ?preferredMaintenanceWindow ?availabilityZone ~engine
         ~dBInstanceClass ~dBInstanceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let cACertificateIdentifier =
+        field_map json__ "CACertificateIdentifier" String_.of_json in
       let performanceInsightsKMSKeyId =
-        field_map json "PerformanceInsightsKMSKeyId" String_.of_json in
+        field_map json__ "PerformanceInsightsKMSKeyId" String_.of_json in
       let enablePerformanceInsights =
-        field_map json "EnablePerformanceInsights" BooleanOptional.of_json in
+        field_map json__ "EnablePerformanceInsights" BooleanOptional.of_json in
       let promotionTier =
-        field_map json "PromotionTier" IntegerOptional.of_json in
+        field_map json__ "PromotionTier" IntegerOptional.of_json in
+      let copyTagsToSnapshot =
+        field_map json__ "CopyTagsToSnapshot" BooleanOptional.of_json in
       let dBClusterIdentifier =
-        field_map_exn json "DBClusterIdentifier" String_.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map_exn json__ "DBClusterIdentifier" String_.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let autoMinorVersionUpgrade =
-        field_map json "AutoMinorVersionUpgrade" BooleanOptional.of_json in
+        field_map json__ "AutoMinorVersionUpgrade" BooleanOptional.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
-      let engine = field_map_exn json "Engine" String_.of_json in
+        field_map json__ "AvailabilityZone" String_.of_json in
+      let engine = field_map_exn json__ "Engine" String_.of_json in
       let dBInstanceClass =
-        field_map_exn json "DBInstanceClass" String_.of_json in
+        field_map_exn json__ "DBInstanceClass" String_.of_json in
       let dBInstanceIdentifier =
-        field_map_exn json "DBInstanceIdentifier" String_.of_json in
-      make ?performanceInsightsKMSKeyId ?enablePerformanceInsights
-        ?promotionTier ~dBClusterIdentifier ?tags ?autoMinorVersionUpgrade
+        field_map_exn json__ "DBInstanceIdentifier" String_.of_json in
+      make ?cACertificateIdentifier ?performanceInsightsKMSKeyId
+        ?enablePerformanceInsights ?promotionTier ?copyTagsToSnapshot
+        ~dBClusterIdentifier ?tags ?autoMinorVersionUpgrade
         ?preferredMaintenanceWindow ?availabilityZone ~engine
         ~dBInstanceClass ~dBInstanceIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -11250,9 +12589,9 @@ module CreateDBClusterSnapshotResult =
           (Xml.child xml_arg0 "DBClusterSnapshot") in
       make ?dBClusterSnapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBClusterSnapshot =
-        field_map json "DBClusterSnapshot" DBClusterSnapshot.of_json in
+        field_map json__ "DBClusterSnapshot" DBClusterSnapshot.of_json in
       make ?dBClusterSnapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a snapshot of a cluster."]
@@ -11293,12 +12632,12 @@ module CreateDBClusterSnapshotMessage =
              "DBClusterSnapshotIdentifier") in
       make ?tags ~dBClusterIdentifier ~dBClusterSnapshotIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let dBClusterIdentifier =
-        field_map_exn json "DBClusterIdentifier" String_.of_json in
+        field_map_exn json__ "DBClusterIdentifier" String_.of_json in
       let dBClusterSnapshotIdentifier =
-        field_map_exn json "DBClusterSnapshotIdentifier" String_.of_json in
+        field_map_exn json__ "DBClusterSnapshotIdentifier" String_.of_json in
       make ?tags ~dBClusterIdentifier ~dBClusterSnapshotIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of CreateDBClusterSnapshot."]
@@ -11331,6 +12670,7 @@ module CreateDBClusterResult =
       | `InvalidSubnet of InvalidSubnet.t 
       | `InvalidVPCNetworkStateFault of InvalidVPCNetworkStateFault.t 
       | `KMSKeyNotAccessibleFault of KMSKeyNotAccessibleFault.t 
+      | `NetworkTypeNotSupported of NetworkTypeNotSupported.t 
       | `StorageQuotaExceededFault of StorageQuotaExceededFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "CreateDBClusterResult"
@@ -11382,6 +12722,8 @@ module CreateDBClusterResult =
             (InvalidVPCNetworkStateFault.of_json json)
       | "KMSKeyNotAccessibleFault" ->
           `KMSKeyNotAccessibleFault (KMSKeyNotAccessibleFault.of_json json)
+      | "NetworkTypeNotSupported" ->
+          `NetworkTypeNotSupported (NetworkTypeNotSupported.of_json json)
       | "StorageQuotaExceededFault" ->
           `StorageQuotaExceededFault (StorageQuotaExceededFault.of_json json)
       | name ->
@@ -11429,6 +12771,8 @@ module CreateDBClusterResult =
             (InvalidVPCNetworkStateFault.of_xml xml)
       | "KMSKeyNotAccessibleFault" ->
           `KMSKeyNotAccessibleFault (KMSKeyNotAccessibleFault.of_xml xml)
+      | "NetworkTypeNotSupported" ->
+          `NetworkTypeNotSupported (NetworkTypeNotSupported.of_xml xml)
       | "StorageQuotaExceededFault" ->
           `StorageQuotaExceededFault (StorageQuotaExceededFault.of_xml xml)
       | name ->
@@ -11499,6 +12843,10 @@ module CreateDBClusterResult =
           `Assoc
             [("error", (`String "KMSKeyNotAccessibleFault"));
             ("details", (KMSKeyNotAccessibleFault.to_json e))]
+      | `NetworkTypeNotSupported e ->
+          `Assoc
+            [("error", (`String "NetworkTypeNotSupported"));
+            ("details", (NetworkTypeNotSupported.to_json e))]
       | `StorageQuotaExceededFault e ->
           `Assoc
             [("error", (`String "StorageQuotaExceededFault"));
@@ -11521,8 +12869,8 @@ module CreateDBClusterResult =
         (Option.map ~f:DBCluster.of_xml) (Xml.child xml_arg0 "DBCluster") in
       make ?dBCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dBCluster = field_map json "DBCluster" DBCluster.of_json in
+    let of_json json__ =
+      let dBCluster = field_map json__ "DBCluster" DBCluster.of_json in
       make ?dBCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new Amazon DocumentDB cluster."]
@@ -11605,9 +12953,9 @@ module CreateDBClusterParameterGroupResult =
           (Xml.child xml_arg0 "DBClusterParameterGroup") in
       make ?dBClusterParameterGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBClusterParameterGroup =
-        field_map json "DBClusterParameterGroup"
+        field_map json__ "DBClusterParameterGroup"
           DBClusterParameterGroup.of_json in
       make ?dBClusterParameterGroup ()
     let to_json v = composed_to_json to_value v
@@ -11663,13 +13011,13 @@ module CreateDBClusterParameterGroupMessage =
       make ?tags ~description ~dBParameterGroupFamily
         ~dBClusterParameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let description = field_map_exn json "Description" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let description = field_map_exn json__ "Description" String_.of_json in
       let dBParameterGroupFamily =
-        field_map_exn json "DBParameterGroupFamily" String_.of_json in
+        field_map_exn json__ "DBParameterGroupFamily" String_.of_json in
       let dBClusterParameterGroupName =
-        field_map_exn json "DBClusterParameterGroupName" String_.of_json in
+        field_map_exn json__ "DBClusterParameterGroupName" String_.of_json in
       make ?tags ~description ~dBParameterGroupFamily
         ~dBClusterParameterGroupName ()
     let to_json v = composed_to_json to_value v
@@ -11732,7 +13080,23 @@ module CreateDBClusterMessage =
         [@ocaml.doc
           "Specifies whether this cluster can be deleted. If DeletionProtection is enabled, the cluster cannot be deleted unless it is modified and DeletionProtection is disabled. DeletionProtection protects clusters from being accidentally deleted."];
       globalClusterIdentifier: GlobalClusterIdentifier.t option
-        [@ocaml.doc "The cluster identifier of the new global cluster."]}
+        [@ocaml.doc "The cluster identifier of the new global cluster."];
+      storageType: String_.t option
+        [@ocaml.doc
+          "The storage type to associate with the DB cluster. For information on storage types for Amazon DocumentDB clusters, see Cluster storage configurations in the Amazon DocumentDB Developer Guide. Valid values for storage type - standard | iopt1 Default value is standard When you create an Amazon DocumentDB cluster with the storage type set to iopt1, the storage type is returned in the response. The storage type isn't returned when you set it to standard."];
+      serverlessV2ScalingConfiguration:
+        ServerlessV2ScalingConfiguration.t option
+        [@ocaml.doc
+          "Contains the scaling configuration of an Amazon DocumentDB Serverless cluster."];
+      manageMasterUserPassword: BooleanOptional.t option
+        [@ocaml.doc
+          "Specifies whether to manage the master user password with Amazon Web Services Secrets Manager. Constraint: You can't manage the master user password with Amazon Web Services Secrets Manager if MasterUserPassword is specified."];
+      masterUserSecretKmsKeyId: String_.t option
+        [@ocaml.doc
+          "The Amazon Web Services KMS key identifier to encrypt a secret that is automatically generated and managed in Amazon Web Services Secrets Manager. This setting is valid only if the master user password is managed by Amazon DocumentDB in Amazon Web Services Secrets Manager for the DB cluster. The Amazon Web Services KMS key identifier is the key ARN, key ID, alias ARN, or alias name for the KMS key. To use a KMS key in a different Amazon Web Services account, specify the key ARN or alias ARN. If you don't specify MasterUserSecretKmsKeyId, then the aws/secretsmanager KMS key is used to encrypt the secret. If the secret is in a different Amazon Web Services account, then you can't use the aws/secretsmanager KMS key to encrypt the secret, and you must use a customer managed KMS key. There is a default KMS key for your Amazon Web Services account. Your Amazon Web Services account has a different default KMS key for each Amazon Web Services Region."];
+      networkType: String_.t option
+        [@ocaml.doc
+          "The network type of the cluster. The network type is determined by the DBSubnetGroup specified for the cluster. A DBSubnetGroup can support only the IPv4 protocol or the IPv4 and the IPv6 protocols (DUAL). For more information, see DocumentDB clusters in a VPC in the Amazon DocumentDB Developer Guide. Valid Values: IPV4 | DUAL"]}
     let context_ = "CreateDBClusterMessage"
     let make ?availabilityZones =
       fun ?backupRetentionPeriod ->
@@ -11752,31 +13116,44 @@ module CreateDBClusterMessage =
                                   fun ?enableCloudwatchLogsExports ->
                                     fun ?deletionProtection ->
                                       fun ?globalClusterIdentifier ->
-                                        fun ~dBClusterIdentifier ->
-                                          fun ~engine ->
-                                            fun () ->
-                                              {
-                                                availabilityZones;
-                                                backupRetentionPeriod;
-                                                dBClusterParameterGroupName;
-                                                vpcSecurityGroupIds;
-                                                dBSubnetGroupName;
-                                                engineVersion;
-                                                port;
-                                                masterUsername;
-                                                masterUserPassword;
-                                                preferredBackupWindow;
-                                                preferredMaintenanceWindow;
-                                                tags;
-                                                storageEncrypted;
-                                                kmsKeyId;
-                                                preSignedUrl;
-                                                enableCloudwatchLogsExports;
-                                                deletionProtection;
-                                                globalClusterIdentifier;
-                                                dBClusterIdentifier;
-                                                engine
-                                              }
+                                        fun ?storageType ->
+                                          fun
+                                            ?serverlessV2ScalingConfiguration
+                                            ->
+                                            fun ?manageMasterUserPassword ->
+                                              fun ?masterUserSecretKmsKeyId
+                                                ->
+                                                fun ?networkType ->
+                                                  fun ~dBClusterIdentifier ->
+                                                    fun ~engine ->
+                                                      fun () ->
+                                                        {
+                                                          availabilityZones;
+                                                          backupRetentionPeriod;
+                                                          dBClusterParameterGroupName;
+                                                          vpcSecurityGroupIds;
+                                                          dBSubnetGroupName;
+                                                          engineVersion;
+                                                          port;
+                                                          masterUsername;
+                                                          masterUserPassword;
+                                                          preferredBackupWindow;
+                                                          preferredMaintenanceWindow;
+                                                          tags;
+                                                          storageEncrypted;
+                                                          kmsKeyId;
+                                                          preSignedUrl;
+                                                          enableCloudwatchLogsExports;
+                                                          deletionProtection;
+                                                          globalClusterIdentifier;
+                                                          storageType;
+                                                          serverlessV2ScalingConfiguration;
+                                                          manageMasterUserPassword;
+                                                          masterUserSecretKmsKeyId;
+                                                          networkType;
+                                                          dBClusterIdentifier;
+                                                          engine
+                                                        }
     let to_value x =
       structure_to_value
         [("AvailabilityZones",
@@ -11813,9 +13190,31 @@ module CreateDBClusterMessage =
           (Option.map x.deletionProtection ~f:BooleanOptional.to_value));
         ("GlobalClusterIdentifier",
           (Option.map x.globalClusterIdentifier
-             ~f:GlobalClusterIdentifier.to_value))]
+             ~f:GlobalClusterIdentifier.to_value));
+        ("StorageType", (Option.map x.storageType ~f:String_.to_value));
+        ("ServerlessV2ScalingConfiguration",
+          (Option.map x.serverlessV2ScalingConfiguration
+             ~f:ServerlessV2ScalingConfiguration.to_value));
+        ("ManageMasterUserPassword",
+          (Option.map x.manageMasterUserPassword ~f:BooleanOptional.to_value));
+        ("MasterUserSecretKmsKeyId",
+          (Option.map x.masterUserSecretKmsKeyId ~f:String_.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NetworkType") in
+      let masterUserSecretKmsKeyId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MasterUserSecretKmsKeyId") in
+      let manageMasterUserPassword =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "ManageMasterUserPassword") in
+      let serverlessV2ScalingConfiguration =
+        (Option.map ~f:ServerlessV2ScalingConfiguration.of_xml)
+          (Xml.child xml_arg0 "ServerlessV2ScalingConfiguration") in
+      let storageType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StorageType") in
       let globalClusterIdentifier =
         (Option.map ~f:GlobalClusterIdentifier.of_xml)
           (Xml.child xml_arg0 "GlobalClusterIdentifier") in
@@ -11868,7 +13267,9 @@ module CreateDBClusterMessage =
       let availabilityZones =
         (Option.map ~f:AvailabilityZones.of_xml)
           (Xml.child xml_arg0 "AvailabilityZones") in
-      make ?globalClusterIdentifier ?deletionProtection
+      make ?networkType ?masterUserSecretKmsKeyId ?manageMasterUserPassword
+        ?serverlessV2ScalingConfiguration ?storageType
+        ?globalClusterIdentifier ?deletionProtection
         ?enableCloudwatchLogsExports ?preSignedUrl ?kmsKeyId
         ?storageEncrypted ?tags ?preferredMaintenanceWindow
         ?preferredBackupWindow ?masterUserPassword ?masterUsername ?port
@@ -11876,42 +13277,53 @@ module CreateDBClusterMessage =
         ?dBClusterParameterGroupName ~dBClusterIdentifier
         ?backupRetentionPeriod ?availabilityZones ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" String_.of_json in
+      let masterUserSecretKmsKeyId =
+        field_map json__ "MasterUserSecretKmsKeyId" String_.of_json in
+      let manageMasterUserPassword =
+        field_map json__ "ManageMasterUserPassword" BooleanOptional.of_json in
+      let serverlessV2ScalingConfiguration =
+        field_map json__ "ServerlessV2ScalingConfiguration"
+          ServerlessV2ScalingConfiguration.of_json in
+      let storageType = field_map json__ "StorageType" String_.of_json in
       let globalClusterIdentifier =
-        field_map json "GlobalClusterIdentifier"
+        field_map json__ "GlobalClusterIdentifier"
           GlobalClusterIdentifier.of_json in
       let deletionProtection =
-        field_map json "DeletionProtection" BooleanOptional.of_json in
+        field_map json__ "DeletionProtection" BooleanOptional.of_json in
       let enableCloudwatchLogsExports =
-        field_map json "EnableCloudwatchLogsExports" LogTypeList.of_json in
-      let preSignedUrl = field_map json "PreSignedUrl" String_.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
+        field_map json__ "EnableCloudwatchLogsExports" LogTypeList.of_json in
+      let preSignedUrl = field_map json__ "PreSignedUrl" String_.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
       let storageEncrypted =
-        field_map json "StorageEncrypted" BooleanOptional.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "StorageEncrypted" BooleanOptional.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
       let preferredBackupWindow =
-        field_map json "PreferredBackupWindow" String_.of_json in
+        field_map json__ "PreferredBackupWindow" String_.of_json in
       let masterUserPassword =
-        field_map json "MasterUserPassword" String_.of_json in
-      let masterUsername = field_map json "MasterUsername" String_.of_json in
-      let port = field_map json "Port" IntegerOptional.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map_exn json "Engine" String_.of_json in
+        field_map json__ "MasterUserPassword" String_.of_json in
+      let masterUsername = field_map json__ "MasterUsername" String_.of_json in
+      let port = field_map json__ "Port" IntegerOptional.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map_exn json__ "Engine" String_.of_json in
       let dBSubnetGroupName =
-        field_map json "DBSubnetGroupName" String_.of_json in
+        field_map json__ "DBSubnetGroupName" String_.of_json in
       let vpcSecurityGroupIds =
-        field_map json "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
+        field_map json__ "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
       let dBClusterParameterGroupName =
-        field_map json "DBClusterParameterGroupName" String_.of_json in
+        field_map json__ "DBClusterParameterGroupName" String_.of_json in
       let dBClusterIdentifier =
-        field_map_exn json "DBClusterIdentifier" String_.of_json in
+        field_map_exn json__ "DBClusterIdentifier" String_.of_json in
       let backupRetentionPeriod =
-        field_map json "BackupRetentionPeriod" IntegerOptional.of_json in
+        field_map json__ "BackupRetentionPeriod" IntegerOptional.of_json in
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZones.of_json in
-      make ?globalClusterIdentifier ?deletionProtection
+        field_map json__ "AvailabilityZones" AvailabilityZones.of_json in
+      make ?networkType ?masterUserSecretKmsKeyId ?manageMasterUserPassword
+        ?serverlessV2ScalingConfiguration ?storageType
+        ?globalClusterIdentifier ?deletionProtection
         ?enableCloudwatchLogsExports ?preSignedUrl ?kmsKeyId
         ?storageEncrypted ?tags ?preferredMaintenanceWindow
         ?preferredBackupWindow ?masterUserPassword ?masterUsername ?port
@@ -12035,9 +13447,9 @@ module CopyDBClusterSnapshotResult =
           (Xml.child xml_arg0 "DBClusterSnapshot") in
       make ?dBClusterSnapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBClusterSnapshot =
-        field_map json "DBClusterSnapshot" DBClusterSnapshot.of_json in
+        field_map json__ "DBClusterSnapshot" DBClusterSnapshot.of_json in
       make ?dBClusterSnapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12048,7 +13460,7 @@ module CopyDBClusterSnapshotMessage =
       {
       sourceDBClusterSnapshotIdentifier: String_.t
         [@ocaml.doc
-          "The identifier of the cluster snapshot to copy. This parameter is not case sensitive. Constraints: Must specify a valid system snapshot in the available state. If the source snapshot is in the same Amazon Web Services Region as the copy, specify a valid snapshot identifier. If the source snapshot is in a different Amazon Web Services Region than the copy, specify a valid cluster snapshot ARN. Example: my-cluster-snapshot1"];
+          "The identifier of the cluster snapshot to copy. This parameter is not case sensitive. Constraints: Must specify a valid cluster snapshot in the available state. If the source cluster snapshot is in the same Amazon Web Services Region as the copy, specify a valid snapshot identifier. If the source cluster snapshot is in a different Amazon Web Services Region or owned by another Amazon Web Services account, specify the snapshot ARN. Example: my-cluster-snapshot1"];
       targetDBClusterSnapshotIdentifier: String_.t
         [@ocaml.doc
           "The identifier of the new cluster snapshot to create from the source cluster snapshot. This parameter is not case sensitive. Constraints: Must contain from 1 to 63 letters, numbers, or hyphens. The first character must be a letter. Cannot end with a hyphen or contain two consecutive hyphens. Example: my-cluster-snapshot2"];
@@ -12111,16 +13523,16 @@ module CopyDBClusterSnapshotMessage =
         ~targetDBClusterSnapshotIdentifier ~sourceDBClusterSnapshotIdentifier
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let copyTags = field_map json "CopyTags" BooleanOptional.of_json in
-      let preSignedUrl = field_map json "PreSignedUrl" String_.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let copyTags = field_map json__ "CopyTags" BooleanOptional.of_json in
+      let preSignedUrl = field_map json__ "PreSignedUrl" String_.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
       let targetDBClusterSnapshotIdentifier =
-        field_map_exn json "TargetDBClusterSnapshotIdentifier"
+        field_map_exn json__ "TargetDBClusterSnapshotIdentifier"
           String_.of_json in
       let sourceDBClusterSnapshotIdentifier =
-        field_map_exn json "SourceDBClusterSnapshotIdentifier"
+        field_map_exn json__ "SourceDBClusterSnapshotIdentifier"
           String_.of_json in
       make ?tags ?copyTags ?preSignedUrl ?kmsKeyId
         ~targetDBClusterSnapshotIdentifier ~sourceDBClusterSnapshotIdentifier
@@ -12215,9 +13627,9 @@ module CopyDBClusterParameterGroupResult =
           (Xml.child xml_arg0 "DBClusterParameterGroup") in
       make ?dBClusterParameterGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dBClusterParameterGroup =
-        field_map json "DBClusterParameterGroup"
+        field_map json__ "DBClusterParameterGroup"
           DBClusterParameterGroup.of_json in
       make ?dBClusterParameterGroup ()
     let to_json v = composed_to_json to_value v
@@ -12277,16 +13689,16 @@ module CopyDBClusterParameterGroupMessage =
         ~targetDBClusterParameterGroupIdentifier
         ~sourceDBClusterParameterGroupIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let targetDBClusterParameterGroupDescription =
-        field_map_exn json "TargetDBClusterParameterGroupDescription"
+        field_map_exn json__ "TargetDBClusterParameterGroupDescription"
           String_.of_json in
       let targetDBClusterParameterGroupIdentifier =
-        field_map_exn json "TargetDBClusterParameterGroupIdentifier"
+        field_map_exn json__ "TargetDBClusterParameterGroupIdentifier"
           String_.of_json in
       let sourceDBClusterParameterGroupIdentifier =
-        field_map_exn json "SourceDBClusterParameterGroupIdentifier"
+        field_map_exn json__ "SourceDBClusterParameterGroupIdentifier"
           String_.of_json in
       make ?tags ~targetDBClusterParameterGroupDescription
         ~targetDBClusterParameterGroupIdentifier
@@ -12361,10 +13773,10 @@ module CertificateMessage =
           (Xml.child xml_arg0 "Certificates") in
       make ?marker ?certificates ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
       let certificates =
-        field_map json "Certificates" CertificateList.of_json in
+        field_map json__ "Certificates" CertificateList.of_json in
       make ?marker ?certificates ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12455,9 +13867,9 @@ module ApplyPendingMaintenanceActionResult =
           (Xml.child xml_arg0 "ResourcePendingMaintenanceActions") in
       make ?resourcePendingMaintenanceActions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourcePendingMaintenanceActions =
-        field_map json "ResourcePendingMaintenanceActions"
+        field_map json__ "ResourcePendingMaintenanceActions"
           ResourcePendingMaintenanceActions.of_json in
       make ?resourcePendingMaintenanceActions ()
     let to_json v = composed_to_json to_value v
@@ -12499,11 +13911,11 @@ module ApplyPendingMaintenanceActionMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdentifier") in
       make ~optInType ~applyAction ~resourceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let optInType = field_map_exn json "OptInType" String_.of_json in
-      let applyAction = field_map_exn json "ApplyAction" String_.of_json in
+    let of_json json__ =
+      let optInType = field_map_exn json__ "OptInType" String_.of_json in
+      let applyAction = field_map_exn json__ "ApplyAction" String_.of_json in
       let resourceIdentifier =
-        field_map_exn json "ResourceIdentifier" String_.of_json in
+        field_map_exn json__ "ResourceIdentifier" String_.of_json in
       make ~optInType ~applyAction ~resourceIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to ApplyPendingMaintenanceAction."]
@@ -12532,9 +13944,9 @@ module AddTagsToResourceMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
       make ~tags ~resourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceName = field_map_exn json "ResourceName" String_.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceName = field_map_exn json__ "ResourceName" String_.of_json in
       make ~tags ~resourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input to AddTagsToResource."]
@@ -12609,9 +14021,9 @@ module AddSourceIdentifierToSubscriptionResult =
           (Xml.child xml_arg0 "EventSubscription") in
       make ?eventSubscription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventSubscription =
-        field_map json "EventSubscription" EventSubscription.of_json in
+        field_map json__ "EventSubscription" EventSubscription.of_json in
       make ?eventSubscription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12644,11 +14056,11 @@ module AddSourceIdentifierToSubscriptionMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionName") in
       make ~sourceIdentifier ~subscriptionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceIdentifier =
-        field_map_exn json "SourceIdentifier" String_.of_json in
+        field_map_exn json__ "SourceIdentifier" String_.of_json in
       let subscriptionName =
-        field_map_exn json "SubscriptionName" String_.of_json in
+        field_map_exn json__ "SubscriptionName" String_.of_json in
       make ~sourceIdentifier ~subscriptionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

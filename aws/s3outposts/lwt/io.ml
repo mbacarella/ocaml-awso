@@ -17,5 +17,7 @@ let delete_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteEndpoint input
 let list_endpoints ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListEndpoints input
+let list_outposts_with_s3 ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListOutpostsWithS3 input
 let list_shared_endpoints ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListSharedEndpoints input

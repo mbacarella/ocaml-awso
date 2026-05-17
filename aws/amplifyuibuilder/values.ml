@@ -58,9 +58,9 @@ module FormBindingElement =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "element") in
       make ~property ~element ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let property = field_map_exn json "property" String_.of_json in
-      let element = field_map_exn json "element" String_.of_json in
+    let of_json json__ =
+      let property = field_map_exn json__ "property" String_.of_json in
+      let element = field_map_exn json__ "element" String_.of_json in
       make ~property ~element ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes how to bind a component property to form data."]
@@ -88,6 +88,8 @@ module FormBindings =
                        (FormBindingElement.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -99,27 +101,27 @@ module ComponentPropertyBindingProperties =
   struct
     type nonrec t =
       {
-      field: String_.t option
-        [@ocaml.doc "The data field to bind the property to."];
       property: String_.t
-        [@ocaml.doc "The component property to bind to the data field."]}
+        [@ocaml.doc "The component property to bind to the data field."];
+      field: String_.t option
+        [@ocaml.doc "The data field to bind the property to."]}
     let context_ = "ComponentPropertyBindingProperties"
     let make ?field = fun ~property -> fun () -> { field; property }
     let to_value x =
       structure_to_value
-        [("field", (Option.map x.field ~f:String_.to_value));
-        ("property", (Some (String_.to_value x.property)))]
+        [("property", (Some (String_.to_value x.property)));
+        ("field", (Option.map x.field ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let field = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "field") in
       let property =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "property") in
-      let field = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "field") in
-      make ~property ?field ()
+      make ?field ~property ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let property = field_map_exn json "property" String_.of_json in
-      let field = field_map json "field" String_.of_json in
-      make ~property ?field ()
+    let of_json json__ =
+      let field = field_map json__ "field" String_.of_json in
+      let property = field_map_exn json__ "property" String_.of_json in
+      make ?field ~property ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Associates a component property to a binding property. This enables exposed properties on the top level component to propagate data to the component's property values."]
@@ -140,35 +142,35 @@ module rec
   ComponentConditionProperty:sig
                                type nonrec t =
                                  {
-                                 else_: ComponentProperty.t option
-                                   [@ocaml.doc
-                                     "The value to assign to the property if the condition is not met."];
-                                 field: String_.t option
-                                   [@ocaml.doc
-                                     "The name of a field. Specify this when the property is a data model."];
-                                 operand: String_.t option
-                                   [@ocaml.doc
-                                     "The value of the property to evaluate."];
-                                 operandType: String_.t option
-                                   [@ocaml.doc
-                                     "The type of the property to evaluate."];
-                                 operator: String_.t option
-                                   [@ocaml.doc
-                                     "The operator to use to perform the evaluation, such as eq to represent equals."];
                                  property: String_.t option
                                    [@ocaml.doc
                                      "The name of the conditional property."];
+                                 field: String_.t option
+                                   [@ocaml.doc
+                                     "The name of a field. Specify this when the property is a data model."];
+                                 operator: String_.t option
+                                   [@ocaml.doc
+                                     "The operator to use to perform the evaluation, such as eq to represent equals."];
+                                 operand: String_.t option
+                                   [@ocaml.doc
+                                     "The value of the property to evaluate."];
                                  then_: ComponentProperty.t option
                                    [@ocaml.doc
-                                     "The value to assign to the property if the condition is met."]}
+                                     "The value to assign to the property if the condition is met."];
+                                 else_: ComponentProperty.t option
+                                   [@ocaml.doc
+                                     "The value to assign to the property if the condition is not met."];
+                                 operandType: String_.t option
+                                   [@ocaml.doc
+                                     "The type of the property to evaluate."]}
                                val make :
-                                 ?else_:ComponentProperty.t ->
+                                 ?property:String_.t ->
                                    ?field:String_.t ->
-                                     ?operand:String_.t ->
-                                       ?operandType:String_.t ->
-                                         ?operator:String_.t ->
-                                           ?property:String_.t ->
-                                             ?then_:ComponentProperty.t ->
+                                     ?operator:String_.t ->
+                                       ?operand:String_.t ->
+                                         ?then_:ComponentProperty.t ->
+                                           ?else_:ComponentProperty.t ->
+                                             ?operandType:String_.t ->
                                                unit -> t
                                val to_value : t -> Botodata.value
                                val to_query : t -> Client.Query.t
@@ -179,76 +181,76 @@ module rec
   struct
     type nonrec t =
       {
-      else_: ComponentProperty.t option
-        [@ocaml.doc
-          "The value to assign to the property if the condition is not met."];
+      property: String_.t option
+        [@ocaml.doc "The name of the conditional property."];
       field: String_.t option
         [@ocaml.doc
           "The name of a field. Specify this when the property is a data model."];
-      operand: String_.t option
-        [@ocaml.doc "The value of the property to evaluate."];
-      operandType: String_.t option
-        [@ocaml.doc "The type of the property to evaluate."];
       operator: String_.t option
         [@ocaml.doc
           "The operator to use to perform the evaluation, such as eq to represent equals."];
-      property: String_.t option
-        [@ocaml.doc "The name of the conditional property."];
+      operand: String_.t option
+        [@ocaml.doc "The value of the property to evaluate."];
       then_: ComponentProperty.t option
         [@ocaml.doc
-          "The value to assign to the property if the condition is met."]}
-    let make ?else_ =
+          "The value to assign to the property if the condition is met."];
+      else_: ComponentProperty.t option
+        [@ocaml.doc
+          "The value to assign to the property if the condition is not met."];
+      operandType: String_.t option
+        [@ocaml.doc "The type of the property to evaluate."]}
+    let make ?property =
       fun ?field ->
-        fun ?operand ->
-          fun ?operandType ->
-            fun ?operator ->
-              fun ?property ->
-                fun ?then_ ->
+        fun ?operator ->
+          fun ?operand ->
+            fun ?then_ ->
+              fun ?else_ ->
+                fun ?operandType ->
                   fun () ->
                     {
-                      else_;
-                      field;
-                      operand;
-                      operandType;
-                      operator;
                       property;
-                      then_
+                      field;
+                      operator;
+                      operand;
+                      then_;
+                      else_;
+                      operandType
                     }
     let to_value x =
       structure_to_value
-        [("else", (Option.map x.else_ ~f:ComponentProperty.to_value));
+        [("property", (Option.map x.property ~f:String_.to_value));
         ("field", (Option.map x.field ~f:String_.to_value));
-        ("operand", (Option.map x.operand ~f:String_.to_value));
-        ("operandType", (Option.map x.operandType ~f:String_.to_value));
         ("operator", (Option.map x.operator ~f:String_.to_value));
-        ("property", (Option.map x.property ~f:String_.to_value));
-        ("then", (Option.map x.then_ ~f:ComponentProperty.to_value))]
+        ("operand", (Option.map x.operand ~f:String_.to_value));
+        ("then", (Option.map x.then_ ~f:ComponentProperty.to_value));
+        ("else", (Option.map x.else_ ~f:ComponentProperty.to_value));
+        ("operandType", (Option.map x.operandType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let then_ =
-        (Option.map ~f:ComponentProperty.of_xml) (Xml.child xml_arg0 "then") in
-      let property =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "property") in
-      let operator =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "operator") in
       let operandType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "operandType") in
-      let operand =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "operand") in
-      let field = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "field") in
       let else_ =
         (Option.map ~f:ComponentProperty.of_xml) (Xml.child xml_arg0 "else") in
-      make ?then_ ?property ?operator ?operandType ?operand ?field ?else_ ()
+      let then_ =
+        (Option.map ~f:ComponentProperty.of_xml) (Xml.child xml_arg0 "then") in
+      let operand =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "operand") in
+      let operator =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "operator") in
+      let field = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "field") in
+      let property =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "property") in
+      make ?operandType ?else_ ?then_ ?operand ?operator ?field ?property ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let then_ = field_map json "then" ComponentProperty.of_json in
-      let property = field_map json "property" String_.of_json in
-      let operator = field_map json "operator" String_.of_json in
-      let operandType = field_map json "operandType" String_.of_json in
-      let operand = field_map json "operand" String_.of_json in
-      let field = field_map json "field" String_.of_json in
-      let else_ = field_map json "else" ComponentProperty.of_json in
-      make ?then_ ?property ?operator ?operandType ?operand ?field ?else_ ()
+    let of_json json__ =
+      let operandType = field_map json__ "operandType" String_.of_json in
+      let else_ = field_map json__ "else" ComponentProperty.of_json in
+      let then_ = field_map json__ "then" ComponentProperty.of_json in
+      let operand = field_map json__ "operand" String_.of_json in
+      let operator = field_map json__ "operator" String_.of_json in
+      let field = field_map json__ "field" String_.of_json in
+      let property = field_map json__ "property" String_.of_json in
+      make ?operandType ?else_ ?then_ ?operand ?operator ?field ?property ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a conditional expression to set a component property. Use ComponentConditionProperty to set a property to different values conditionally, based on the value of another property."]
@@ -256,20 +258,32 @@ module rec
   ComponentProperty:sig
                       type nonrec t =
                         {
+                        value: String_.t option
+                          [@ocaml.doc
+                            "The value to assign to the component property."];
                         bindingProperties:
                           ComponentPropertyBindingProperties.t option
                           [@ocaml.doc
                             "The information to bind the component property to data at runtime."];
-                        bindings: FormBindings.t option
-                          [@ocaml.doc
-                            "The information to bind the component property to form data."];
                         collectionBindingProperties:
                           ComponentPropertyBindingProperties.t option
                           [@ocaml.doc
                             "The information to bind the component property to data at runtime. Use this for collection components."];
-                        componentName: String_.t option
+                        defaultValue: String_.t option
                           [@ocaml.doc
-                            "The name of the component that is affected by an event."];
+                            "The default value to assign to the component property."];
+                        model: String_.t option
+                          [@ocaml.doc
+                            "The data model to use to assign a value to the component property."];
+                        bindings: FormBindings.t option
+                          [@ocaml.doc
+                            "The information to bind the component property to form data."];
+                        event: String_.t option
+                          [@ocaml.doc
+                            "An event that occurs in your app. Use this for workflow data binding."];
+                        userAttribute: String_.t option
+                          [@ocaml.doc
+                            "An authenticated user attribute to use to assign a value to the component property."];
                         concat: ComponentPropertyList.t option
                           [@ocaml.doc
                             "A list of component properties to concatenate to create the value to assign to this component property."];
@@ -279,47 +293,36 @@ module rec
                         configured: Boolean.t option
                           [@ocaml.doc
                             "Specifies whether the user configured the property in Amplify Studio after importing it."];
-                        defaultValue: String_.t option
-                          [@ocaml.doc
-                            "The default value to assign to the component property."];
-                        event: String_.t option
-                          [@ocaml.doc
-                            "An event that occurs in your app. Use this for workflow data binding."];
+                        type_: String_.t option
+                          [@ocaml.doc "The component type."];
                         importedValue: String_.t option
                           [@ocaml.doc
                             "The default value assigned to the property when the component is imported into an app."];
-                        model: String_.t option
+                        componentName: String_.t option
                           [@ocaml.doc
-                            "The data model to use to assign a value to the component property."];
+                            "The name of the component that is affected by an event."];
                         property: String_.t option
                           [@ocaml.doc
-                            "The name of the component's property that is affected by an event."];
-                        type_: String_.t option
-                          [@ocaml.doc "The component type."];
-                        userAttribute: String_.t option
-                          [@ocaml.doc
-                            "An authenticated user attribute to use to assign a value to the component property."];
-                        value: String_.t option
-                          [@ocaml.doc
-                            "The value to assign to the component property."]}
+                            "The name of the component's property that is affected by an event."]}
                       val make :
-                        ?bindingProperties:ComponentPropertyBindingProperties.t
-                          ->
-                          ?bindings:FormBindings.t ->
+                        ?value:String_.t ->
+                          ?bindingProperties:ComponentPropertyBindingProperties.t
+                            ->
                             ?collectionBindingProperties:ComponentPropertyBindingProperties.t
                               ->
-                              ?componentName:String_.t ->
-                                ?concat:ComponentPropertyList.t ->
-                                  ?condition:ComponentConditionProperty.t ->
-                                    ?configured:Boolean.t ->
-                                      ?defaultValue:String_.t ->
-                                        ?event:String_.t ->
-                                          ?importedValue:String_.t ->
-                                            ?model:String_.t ->
-                                              ?property:String_.t ->
-                                                ?type_:String_.t ->
-                                                  ?userAttribute:String_.t ->
-                                                    ?value:String_.t ->
+                              ?defaultValue:String_.t ->
+                                ?model:String_.t ->
+                                  ?bindings:FormBindings.t ->
+                                    ?event:String_.t ->
+                                      ?userAttribute:String_.t ->
+                                        ?concat:ComponentPropertyList.t ->
+                                          ?condition:ComponentConditionProperty.t
+                                            ->
+                                            ?configured:Boolean.t ->
+                                              ?type_:String_.t ->
+                                                ?importedValue:String_.t ->
+                                                  ?componentName:String_.t ->
+                                                    ?property:String_.t ->
                                                       unit -> t
                       val to_value : t -> Botodata.value
                       val to_query : t -> Client.Query.t
@@ -330,19 +333,29 @@ module rec
   struct
     type nonrec t =
       {
+      value: String_.t option
+        [@ocaml.doc "The value to assign to the component property."];
       bindingProperties: ComponentPropertyBindingProperties.t option
         [@ocaml.doc
           "The information to bind the component property to data at runtime."];
-      bindings: FormBindings.t option
-        [@ocaml.doc
-          "The information to bind the component property to form data."];
       collectionBindingProperties:
         ComponentPropertyBindingProperties.t option
         [@ocaml.doc
           "The information to bind the component property to data at runtime. Use this for collection components."];
-      componentName: String_.t option
+      defaultValue: String_.t option
+        [@ocaml.doc "The default value to assign to the component property."];
+      model: String_.t option
         [@ocaml.doc
-          "The name of the component that is affected by an event."];
+          "The data model to use to assign a value to the component property."];
+      bindings: FormBindings.t option
+        [@ocaml.doc
+          "The information to bind the component property to form data."];
+      event: String_.t option
+        [@ocaml.doc
+          "An event that occurs in your app. Use this for workflow data binding."];
+      userAttribute: String_.t option
+        [@ocaml.doc
+          "An authenticated user attribute to use to assign a value to the component property."];
       concat: ComponentPropertyList.t option
         [@ocaml.doc
           "A list of component properties to concatenate to create the value to assign to this component property."];
@@ -352,95 +365,80 @@ module rec
       configured: Boolean.t option
         [@ocaml.doc
           "Specifies whether the user configured the property in Amplify Studio after importing it."];
-      defaultValue: String_.t option
-        [@ocaml.doc "The default value to assign to the component property."];
-      event: String_.t option
-        [@ocaml.doc
-          "An event that occurs in your app. Use this for workflow data binding."];
+      type_: String_.t option [@ocaml.doc "The component type."];
       importedValue: String_.t option
         [@ocaml.doc
           "The default value assigned to the property when the component is imported into an app."];
-      model: String_.t option
+      componentName: String_.t option
         [@ocaml.doc
-          "The data model to use to assign a value to the component property."];
+          "The name of the component that is affected by an event."];
       property: String_.t option
         [@ocaml.doc
-          "The name of the component's property that is affected by an event."];
-      type_: String_.t option [@ocaml.doc "The component type."];
-      userAttribute: String_.t option
-        [@ocaml.doc
-          "An authenticated user attribute to use to assign a value to the component property."];
-      value: String_.t option
-        [@ocaml.doc "The value to assign to the component property."]}
-    let make ?bindingProperties =
-      fun ?bindings ->
+          "The name of the component's property that is affected by an event."]}
+    let make ?value =
+      fun ?bindingProperties ->
         fun ?collectionBindingProperties ->
-          fun ?componentName ->
-            fun ?concat ->
-              fun ?condition ->
-                fun ?configured ->
-                  fun ?defaultValue ->
-                    fun ?event ->
-                      fun ?importedValue ->
-                        fun ?model ->
-                          fun ?property ->
-                            fun ?type_ ->
-                              fun ?userAttribute ->
-                                fun ?value ->
+          fun ?defaultValue ->
+            fun ?model ->
+              fun ?bindings ->
+                fun ?event ->
+                  fun ?userAttribute ->
+                    fun ?concat ->
+                      fun ?condition ->
+                        fun ?configured ->
+                          fun ?type_ ->
+                            fun ?importedValue ->
+                              fun ?componentName ->
+                                fun ?property ->
                                   fun () ->
                                     {
+                                      value;
                                       bindingProperties;
-                                      bindings;
                                       collectionBindingProperties;
-                                      componentName;
+                                      defaultValue;
+                                      model;
+                                      bindings;
+                                      event;
+                                      userAttribute;
                                       concat;
                                       condition;
                                       configured;
-                                      defaultValue;
-                                      event;
-                                      importedValue;
-                                      model;
-                                      property;
                                       type_;
-                                      userAttribute;
-                                      value
+                                      importedValue;
+                                      componentName;
+                                      property
                                     }
     let to_value x =
       structure_to_value
-        [("bindingProperties",
-           (Option.map x.bindingProperties
-              ~f:ComponentPropertyBindingProperties.to_value));
-        ("bindings", (Option.map x.bindings ~f:FormBindings.to_value));
+        [("value", (Option.map x.value ~f:String_.to_value));
+        ("bindingProperties",
+          (Option.map x.bindingProperties
+             ~f:ComponentPropertyBindingProperties.to_value));
         ("collectionBindingProperties",
           (Option.map x.collectionBindingProperties
              ~f:ComponentPropertyBindingProperties.to_value));
-        ("componentName", (Option.map x.componentName ~f:String_.to_value));
+        ("defaultValue", (Option.map x.defaultValue ~f:String_.to_value));
+        ("model", (Option.map x.model ~f:String_.to_value));
+        ("bindings", (Option.map x.bindings ~f:FormBindings.to_value));
+        ("event", (Option.map x.event ~f:String_.to_value));
+        ("userAttribute", (Option.map x.userAttribute ~f:String_.to_value));
         ("concat", (Option.map x.concat ~f:ComponentPropertyList.to_value));
         ("condition",
           (Option.map x.condition ~f:ComponentConditionProperty.to_value));
         ("configured", (Option.map x.configured ~f:Boolean.to_value));
-        ("defaultValue", (Option.map x.defaultValue ~f:String_.to_value));
-        ("event", (Option.map x.event ~f:String_.to_value));
-        ("importedValue", (Option.map x.importedValue ~f:String_.to_value));
-        ("model", (Option.map x.model ~f:String_.to_value));
-        ("property", (Option.map x.property ~f:String_.to_value));
         ("type", (Option.map x.type_ ~f:String_.to_value));
-        ("userAttribute", (Option.map x.userAttribute ~f:String_.to_value));
-        ("value", (Option.map x.value ~f:String_.to_value))]
+        ("importedValue", (Option.map x.importedValue ~f:String_.to_value));
+        ("componentName", (Option.map x.componentName ~f:String_.to_value));
+        ("property", (Option.map x.property ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
-      let userAttribute =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "userAttribute") in
-      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       let property =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "property") in
-      let model = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "model") in
+      let componentName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "componentName") in
       let importedValue =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "importedValue") in
-      let event = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "event") in
-      let defaultValue =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "defaultValue") in
+      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       let configured =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "configured") in
       let condition =
@@ -449,44 +447,51 @@ module rec
       let concat =
         (Option.map ~f:ComponentPropertyList.of_xml)
           (Xml.child xml_arg0 "concat") in
-      let componentName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "componentName") in
+      let userAttribute =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "userAttribute") in
+      let event = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "event") in
+      let bindings =
+        (Option.map ~f:FormBindings.of_xml) (Xml.child xml_arg0 "bindings") in
+      let model = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "model") in
+      let defaultValue =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "defaultValue") in
       let collectionBindingProperties =
         (Option.map ~f:ComponentPropertyBindingProperties.of_xml)
           (Xml.child xml_arg0 "collectionBindingProperties") in
-      let bindings =
-        (Option.map ~f:FormBindings.of_xml) (Xml.child xml_arg0 "bindings") in
       let bindingProperties =
         (Option.map ~f:ComponentPropertyBindingProperties.of_xml)
           (Xml.child xml_arg0 "bindingProperties") in
-      make ?value ?userAttribute ?type_ ?property ?model ?importedValue
-        ?event ?defaultValue ?configured ?condition ?concat ?componentName
-        ?collectionBindingProperties ?bindings ?bindingProperties ()
+      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
+      make ?property ?componentName ?importedValue ?type_ ?configured
+        ?condition ?concat ?userAttribute ?event ?bindings ?model
+        ?defaultValue ?collectionBindingProperties ?bindingProperties ?value
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" String_.of_json in
-      let userAttribute = field_map json "userAttribute" String_.of_json in
-      let type_ = field_map json "type" String_.of_json in
-      let property = field_map json "property" String_.of_json in
-      let model = field_map json "model" String_.of_json in
-      let importedValue = field_map json "importedValue" String_.of_json in
-      let event = field_map json "event" String_.of_json in
-      let defaultValue = field_map json "defaultValue" String_.of_json in
-      let configured = field_map json "configured" Boolean.of_json in
+    let of_json json__ =
+      let property = field_map json__ "property" String_.of_json in
+      let componentName = field_map json__ "componentName" String_.of_json in
+      let importedValue = field_map json__ "importedValue" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
+      let configured = field_map json__ "configured" Boolean.of_json in
       let condition =
-        field_map json "condition" ComponentConditionProperty.of_json in
-      let concat = field_map json "concat" ComponentPropertyList.of_json in
-      let componentName = field_map json "componentName" String_.of_json in
+        field_map json__ "condition" ComponentConditionProperty.of_json in
+      let concat = field_map json__ "concat" ComponentPropertyList.of_json in
+      let userAttribute = field_map json__ "userAttribute" String_.of_json in
+      let event = field_map json__ "event" String_.of_json in
+      let bindings = field_map json__ "bindings" FormBindings.of_json in
+      let model = field_map json__ "model" String_.of_json in
+      let defaultValue = field_map json__ "defaultValue" String_.of_json in
       let collectionBindingProperties =
-        field_map json "collectionBindingProperties"
+        field_map json__ "collectionBindingProperties"
           ComponentPropertyBindingProperties.of_json in
-      let bindings = field_map json "bindings" FormBindings.of_json in
       let bindingProperties =
-        field_map json "bindingProperties"
+        field_map json__ "bindingProperties"
           ComponentPropertyBindingProperties.of_json in
-      make ?value ?userAttribute ?type_ ?property ?model ?importedValue
-        ?event ?defaultValue ?configured ?condition ?concat ?componentName
-        ?collectionBindingProperties ?bindings ?bindingProperties ()
+      let value = field_map json__ "value" String_.of_json in
+      make ?property ?componentName ?importedValue ?type_ ?configured
+        ?condition ?concat ?userAttribute ?event ?bindings ?model
+        ?defaultValue ?collectionBindingProperties ?bindingProperties ?value
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the configuration for all of a component's properties. Use ComponentProperty to specify the values to render or bind by default."]
@@ -504,6 +509,9 @@ module rec
   struct
     type nonrec t = ComponentProperty.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComponentProperty.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -556,10 +564,11 @@ module MutationActionSetStateParameter =
           (Xml.child_exn ~context:context_ xml_arg0 "componentName") in
       make ~set ~property ~componentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let set = field_map_exn json "set" ComponentProperty.of_json in
-      let property = field_map_exn json "property" String_.of_json in
-      let componentName = field_map_exn json "componentName" String_.of_json in
+    let of_json json__ =
+      let set = field_map_exn json__ "set" ComponentProperty.of_json in
+      let property = field_map_exn json__ "property" String_.of_json in
+      let componentName =
+        field_map_exn json__ "componentName" String_.of_json in
       make ~set ~property ~componentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -588,6 +597,8 @@ module ComponentProperties =
                        (ComponentProperty.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -599,107 +610,1071 @@ module ActionParameters =
   struct
     type nonrec t =
       {
-      anchor: ComponentProperty.t option
-        [@ocaml.doc
-          "The HTML anchor link to the location to open. Specify this value for a navigation action."];
-      fields: ComponentProperties.t option
-        [@ocaml.doc
-          "A dictionary of key-value pairs mapping Amplify Studio properties to fields in a data model. Use when the action performs an operation on an Amplify DataStore model."];
-      global: ComponentProperty.t option
-        [@ocaml.doc
-          "Specifies whether the user should be signed out globally. Specify this value for an auth sign out action."];
-      id: ComponentProperty.t option
-        [@ocaml.doc
-          "The unique ID of the component that the ActionParameters apply to."];
-      model: String_.t option
-        [@ocaml.doc
-          "The name of the data model. Use when the action performs an operation on an Amplify DataStore model."];
-      state: MutationActionSetStateParameter.t option
-        [@ocaml.doc
-          "A key-value pair that specifies the state property name and its initial value."];
-      target: ComponentProperty.t option
-        [@ocaml.doc
-          "The element within the same component to modify when the action occurs."];
       type_: ComponentProperty.t option
         [@ocaml.doc
           "The type of navigation action. Valid values are url and anchor. This value is required for a navigation action."];
       url: ComponentProperty.t option
         [@ocaml.doc
-          "The URL to the location to open. Specify this value for a navigation action."]}
-    let make ?anchor =
-      fun ?fields ->
-        fun ?global ->
-          fun ?id ->
-            fun ?model ->
-              fun ?state ->
-                fun ?target ->
-                  fun ?type_ ->
-                    fun ?url ->
+          "The URL to the location to open. Specify this value for a navigation action."];
+      anchor: ComponentProperty.t option
+        [@ocaml.doc
+          "The HTML anchor link to the location to open. Specify this value for a navigation action."];
+      target: ComponentProperty.t option
+        [@ocaml.doc
+          "The element within the same component to modify when the action occurs."];
+      global: ComponentProperty.t option
+        [@ocaml.doc
+          "Specifies whether the user should be signed out globally. Specify this value for an auth sign out action."];
+      model: String_.t option
+        [@ocaml.doc
+          "The name of the data model. Use when the action performs an operation on an Amplify DataStore model."];
+      id: ComponentProperty.t option
+        [@ocaml.doc
+          "The unique ID of the component that the ActionParameters apply to."];
+      fields: ComponentProperties.t option
+        [@ocaml.doc
+          "A dictionary of key-value pairs mapping Amplify Studio properties to fields in a data model. Use when the action performs an operation on an Amplify DataStore model."];
+      state: MutationActionSetStateParameter.t option
+        [@ocaml.doc
+          "A key-value pair that specifies the state property name and its initial value."]}
+    let make ?type_ =
+      fun ?url ->
+        fun ?anchor ->
+          fun ?target ->
+            fun ?global ->
+              fun ?model ->
+                fun ?id ->
+                  fun ?fields ->
+                    fun ?state ->
                       fun () ->
                         {
-                          anchor;
-                          fields;
-                          global;
-                          id;
-                          model;
-                          state;
-                          target;
                           type_;
-                          url
+                          url;
+                          anchor;
+                          target;
+                          global;
+                          model;
+                          id;
+                          fields;
+                          state
                         }
     let to_value x =
       structure_to_value
-        [("anchor", (Option.map x.anchor ~f:ComponentProperty.to_value));
-        ("fields", (Option.map x.fields ~f:ComponentProperties.to_value));
-        ("global", (Option.map x.global ~f:ComponentProperty.to_value));
-        ("id", (Option.map x.id ~f:ComponentProperty.to_value));
-        ("model", (Option.map x.model ~f:String_.to_value));
-        ("state",
-          (Option.map x.state ~f:MutationActionSetStateParameter.to_value));
+        [("type", (Option.map x.type_ ~f:ComponentProperty.to_value));
+        ("url", (Option.map x.url ~f:ComponentProperty.to_value));
+        ("anchor", (Option.map x.anchor ~f:ComponentProperty.to_value));
         ("target", (Option.map x.target ~f:ComponentProperty.to_value));
-        ("type", (Option.map x.type_ ~f:ComponentProperty.to_value));
-        ("url", (Option.map x.url ~f:ComponentProperty.to_value))]
+        ("global", (Option.map x.global ~f:ComponentProperty.to_value));
+        ("model", (Option.map x.model ~f:String_.to_value));
+        ("id", (Option.map x.id ~f:ComponentProperty.to_value));
+        ("fields", (Option.map x.fields ~f:ComponentProperties.to_value));
+        ("state",
+          (Option.map x.state ~f:MutationActionSetStateParameter.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:MutationActionSetStateParameter.of_xml)
+          (Xml.child xml_arg0 "state") in
+      let fields =
+        (Option.map ~f:ComponentProperties.of_xml)
+          (Xml.child xml_arg0 "fields") in
+      let id =
+        (Option.map ~f:ComponentProperty.of_xml) (Xml.child xml_arg0 "id") in
+      let model = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "model") in
+      let global =
+        (Option.map ~f:ComponentProperty.of_xml)
+          (Xml.child xml_arg0 "global") in
+      let target =
+        (Option.map ~f:ComponentProperty.of_xml)
+          (Xml.child xml_arg0 "target") in
+      let anchor =
+        (Option.map ~f:ComponentProperty.of_xml)
+          (Xml.child xml_arg0 "anchor") in
       let url =
         (Option.map ~f:ComponentProperty.of_xml) (Xml.child xml_arg0 "url") in
       let type_ =
         (Option.map ~f:ComponentProperty.of_xml) (Xml.child xml_arg0 "type") in
-      let target =
-        (Option.map ~f:ComponentProperty.of_xml)
-          (Xml.child xml_arg0 "target") in
-      let state =
-        (Option.map ~f:MutationActionSetStateParameter.of_xml)
-          (Xml.child xml_arg0 "state") in
-      let model = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "model") in
-      let id =
-        (Option.map ~f:ComponentProperty.of_xml) (Xml.child xml_arg0 "id") in
-      let global =
-        (Option.map ~f:ComponentProperty.of_xml)
-          (Xml.child xml_arg0 "global") in
-      let fields =
-        (Option.map ~f:ComponentProperties.of_xml)
-          (Xml.child xml_arg0 "fields") in
-      let anchor =
-        (Option.map ~f:ComponentProperty.of_xml)
-          (Xml.child xml_arg0 "anchor") in
-      make ?url ?type_ ?target ?state ?model ?id ?global ?fields ?anchor ()
+      make ?state ?fields ?id ?model ?global ?target ?anchor ?url ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let url = field_map json "url" ComponentProperty.of_json in
-      let type_ = field_map json "type" ComponentProperty.of_json in
-      let target = field_map json "target" ComponentProperty.of_json in
+    let of_json json__ =
       let state =
-        field_map json "state" MutationActionSetStateParameter.of_json in
-      let model = field_map json "model" String_.of_json in
-      let id = field_map json "id" ComponentProperty.of_json in
-      let global = field_map json "global" ComponentProperty.of_json in
-      let fields = field_map json "fields" ComponentProperties.of_json in
-      let anchor = field_map json "anchor" ComponentProperty.of_json in
-      make ?url ?type_ ?target ?state ?model ?id ?global ?fields ?anchor ()
+        field_map json__ "state" MutationActionSetStateParameter.of_json in
+      let fields = field_map json__ "fields" ComponentProperties.of_json in
+      let id = field_map json__ "id" ComponentProperty.of_json in
+      let model = field_map json__ "model" String_.of_json in
+      let global = field_map json__ "global" ComponentProperty.of_json in
+      let target = field_map json__ "target" ComponentProperty.of_json in
+      let anchor = field_map json__ "anchor" ComponentProperty.of_json in
+      let url = field_map json__ "url" ComponentProperty.of_json in
+      let type_ = field_map json__ "type" ComponentProperty.of_json in
+      make ?state ?fields ?id ?model ?global ?target ?anchor ?url ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the event action configuration for an element of a Component or ComponentChild. Use for the workflow feature in Amplify Studio that allows you to bind events and actions to components. ActionParameters defines the action that is performed when an event occurs on the component."]
+module NoApiRenderConfig =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the configuration for an application with no API being used."]
+module GraphQLRenderConfig =
+  struct
+    type nonrec t =
+      {
+      typesFilePath: String_.t
+        [@ocaml.doc
+          "The path to the GraphQL types file, relative to the component output directory."];
+      queriesFilePath: String_.t
+        [@ocaml.doc
+          "The path to the GraphQL queries file, relative to the component output directory."];
+      mutationsFilePath: String_.t
+        [@ocaml.doc
+          "The path to the GraphQL mutations file, relative to the component output directory."];
+      subscriptionsFilePath: String_.t
+        [@ocaml.doc
+          "The path to the GraphQL subscriptions file, relative to the component output directory."];
+      fragmentsFilePath: String_.t
+        [@ocaml.doc
+          "The path to the GraphQL fragments file, relative to the component output directory."]}
+    let context_ = "GraphQLRenderConfig"
+    let make ~typesFilePath =
+      fun ~queriesFilePath ->
+        fun ~mutationsFilePath ->
+          fun ~subscriptionsFilePath ->
+            fun ~fragmentsFilePath ->
+              fun () ->
+                {
+                  typesFilePath;
+                  queriesFilePath;
+                  mutationsFilePath;
+                  subscriptionsFilePath;
+                  fragmentsFilePath
+                }
+    let to_value x =
+      structure_to_value
+        [("typesFilePath", (Some (String_.to_value x.typesFilePath)));
+        ("queriesFilePath", (Some (String_.to_value x.queriesFilePath)));
+        ("mutationsFilePath", (Some (String_.to_value x.mutationsFilePath)));
+        ("subscriptionsFilePath",
+          (Some (String_.to_value x.subscriptionsFilePath)));
+        ("fragmentsFilePath", (Some (String_.to_value x.fragmentsFilePath)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fragmentsFilePath =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "fragmentsFilePath") in
+      let subscriptionsFilePath =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "subscriptionsFilePath") in
+      let mutationsFilePath =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "mutationsFilePath") in
+      let queriesFilePath =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "queriesFilePath") in
+      let typesFilePath =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "typesFilePath") in
+      make ~fragmentsFilePath ~subscriptionsFilePath ~mutationsFilePath
+        ~queriesFilePath ~typesFilePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fragmentsFilePath =
+        field_map_exn json__ "fragmentsFilePath" String_.of_json in
+      let subscriptionsFilePath =
+        field_map_exn json__ "subscriptionsFilePath" String_.of_json in
+      let mutationsFilePath =
+        field_map_exn json__ "mutationsFilePath" String_.of_json in
+      let queriesFilePath =
+        field_map_exn json__ "queriesFilePath" String_.of_json in
+      let typesFilePath =
+        field_map_exn json__ "typesFilePath" String_.of_json in
+      make ~fragmentsFilePath ~subscriptionsFilePath ~mutationsFilePath
+        ~queriesFilePath ~typesFilePath ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the GraphQL configuration for an API for a code generation job."]
+module DataStoreRenderConfig =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the DataStore configuration for an API for a code generation job."]
+module ApiConfiguration =
+  struct
+    type nonrec t =
+      {
+      graphQLConfig: GraphQLRenderConfig.t option
+        [@ocaml.doc
+          "The configuration for an application using GraphQL APIs."];
+      dataStoreConfig: DataStoreRenderConfig.t option
+        [@ocaml.doc
+          "The configuration for an application using DataStore APIs."];
+      noApiConfig: NoApiRenderConfig.t option
+        [@ocaml.doc
+          "The configuration for an application with no API being used."]}
+    let make ?graphQLConfig =
+      fun ?dataStoreConfig ->
+        fun ?noApiConfig ->
+          fun () -> { graphQLConfig; dataStoreConfig; noApiConfig }
+    let to_value x =
+      structure_to_value
+        [("graphQLConfig",
+           (Option.map x.graphQLConfig ~f:GraphQLRenderConfig.to_value));
+        ("dataStoreConfig",
+          (Option.map x.dataStoreConfig ~f:DataStoreRenderConfig.to_value));
+        ("noApiConfig",
+          (Option.map x.noApiConfig ~f:NoApiRenderConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let noApiConfig =
+        (Option.map ~f:NoApiRenderConfig.of_xml)
+          (Xml.child xml_arg0 "noApiConfig") in
+      let dataStoreConfig =
+        (Option.map ~f:DataStoreRenderConfig.of_xml)
+          (Xml.child xml_arg0 "dataStoreConfig") in
+      let graphQLConfig =
+        (Option.map ~f:GraphQLRenderConfig.of_xml)
+          (Xml.child xml_arg0 "graphQLConfig") in
+      make ?noApiConfig ?dataStoreConfig ?graphQLConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let noApiConfig =
+        field_map json__ "noApiConfig" NoApiRenderConfig.of_json in
+      let dataStoreConfig =
+        field_map json__ "dataStoreConfig" DataStoreRenderConfig.of_json in
+      let graphQLConfig =
+        field_map json__ "graphQLConfig" GraphQLRenderConfig.of_json in
+      make ?noApiConfig ?dataStoreConfig ?graphQLConfig ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the API configuration for a code generation job."]
+module AppId =
+  struct
+    type nonrec t = string
+    let context_ = "AppId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:20) >>=
+                  (fun () -> check_pattern i ~pattern:"d[a-z0-9]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AppId" j
+    let to_json = simple_to_json to_value
+  end
+module AssociatedFieldsList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssociatedFieldsList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CodegenDependency =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option [@ocaml.doc "Name of the dependency package."];
+      supportedVersion: String_.t option
+        [@ocaml.doc
+          "Indicates the version of the supported dependency package."];
+      isSemVer: Boolean.t option
+        [@ocaml.doc
+          "Determines if the dependency package is using Semantic versioning. If set to true, it indicates that the dependency package uses Semantic versioning."];
+      reason: String_.t option
+        [@ocaml.doc
+          "Indicates the reason to include the dependency package in your project code."]}
+    let make ?name =
+      fun ?supportedVersion ->
+        fun ?isSemVer ->
+          fun ?reason ->
+            fun () -> { name; supportedVersion; isSemVer; reason }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("supportedVersion",
+          (Option.map x.supportedVersion ~f:String_.to_value));
+        ("isSemVer", (Option.map x.isSemVer ~f:Boolean.to_value));
+        ("reason", (Option.map x.reason ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "reason") in
+      let isSemVer =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isSemVer") in
+      let supportedVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "supportedVersion") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?reason ?isSemVer ?supportedVersion ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "reason" String_.of_json in
+      let isSemVer = field_map json__ "isSemVer" Boolean.of_json in
+      let supportedVersion =
+        field_map json__ "supportedVersion" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?reason ?isSemVer ?supportedVersion ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Dependency package that may be required for the project code to run."]
+module CodegenDependencies =
+  struct
+    type nonrec t = CodegenDependency.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CodegenDependency.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CodegenDependency.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CodegenDependencies"
+        ~of_json:CodegenDependency.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CodegenFeatureFlags =
+  struct
+    type nonrec t =
+      {
+      isRelationshipSupported: Boolean.t option
+        [@ocaml.doc
+          "Specifes whether a code generation job supports data relationships."];
+      isNonModelSupported: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether a code generation job supports non models."]}
+    let make ?isRelationshipSupported =
+      fun ?isNonModelSupported ->
+        fun () -> { isRelationshipSupported; isNonModelSupported }
+    let to_value x =
+      structure_to_value
+        [("isRelationshipSupported",
+           (Option.map x.isRelationshipSupported ~f:Boolean.to_value));
+        ("isNonModelSupported",
+          (Option.map x.isNonModelSupported ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let isNonModelSupported =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "isNonModelSupported") in
+      let isRelationshipSupported =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "isRelationshipSupported") in
+      make ?isNonModelSupported ?isRelationshipSupported ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let isNonModelSupported =
+        field_map json__ "isNonModelSupported" Boolean.of_json in
+      let isRelationshipSupported =
+        field_map json__ "isRelationshipSupported" Boolean.of_json in
+      make ?isNonModelSupported ?isRelationshipSupported ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the feature flags that you can specify for a code generation job."]
+module CodegenGenericDataEnumValuesList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CodegenGenericDataEnumValuesList"
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CodegenGenericDataEnum =
+  struct
+    type nonrec t =
+      {
+      values: CodegenGenericDataEnumValuesList.t
+        [@ocaml.doc "The list of enum values in the generic data schema."]}
+    let context_ = "CodegenGenericDataEnum"
+    let make ~values = fun () -> { values }
+    let to_value x =
+      structure_to_value
+        [("values",
+           (Some (CodegenGenericDataEnumValuesList.to_value x.values)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        CodegenGenericDataEnumValuesList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "values") in
+      make ~values ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values =
+        field_map_exn json__ "values"
+          CodegenGenericDataEnumValuesList.of_json in
+      make ~values ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the enums in a generic data schema."]
+module CodegenGenericDataEnums =
+  struct
+    type nonrec t = (String_.t * CodegenGenericDataEnum.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types String CodegenGenericDataEnum"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x ->
+                       (CodegenGenericDataEnum.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:CodegenGenericDataEnum.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RelatedModelFieldsList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RelatedModelFieldsList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GenericDataRelationshipType =
+  struct
+    type nonrec t =
+      | HAS_MANY 
+      | HAS_ONE 
+      | BELONGS_TO 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | HAS_MANY -> "HAS_MANY"
+      | HAS_ONE -> "HAS_ONE"
+      | BELONGS_TO -> "BELONGS_TO"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HAS_MANY" -> HAS_MANY
+      | "HAS_ONE" -> HAS_ONE
+      | "BELONGS_TO" -> BELONGS_TO
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration GenericDataRelationshipType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"GenericDataRelationshipType" j)
+    let to_json = simple_to_json to_value
+  end
+module CodegenGenericDataRelationshipType =
+  struct
+    type nonrec t =
+      {
+      type_: GenericDataRelationshipType.t
+        [@ocaml.doc "The data relationship type."];
+      relatedModelName: String_.t
+        [@ocaml.doc
+          "The name of the related model in the data relationship."];
+      relatedModelFields: RelatedModelFieldsList.t option
+        [@ocaml.doc "The related model fields in the data relationship."];
+      canUnlinkAssociatedModel: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the relationship can unlink the associated model."];
+      relatedJoinFieldName: String_.t option
+        [@ocaml.doc
+          "The name of the related join field in the data relationship."];
+      relatedJoinTableName: String_.t option
+        [@ocaml.doc
+          "The name of the related join table in the data relationship."];
+      belongsToFieldOnRelatedModel: String_.t option
+        [@ocaml.doc
+          "The value of the belongsTo field on the related data model."];
+      associatedFields: AssociatedFieldsList.t option
+        [@ocaml.doc "The associated fields of the data relationship."];
+      isHasManyIndex: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the \\@index directive is supported for a hasMany data relationship."]}
+    let context_ = "CodegenGenericDataRelationshipType"
+    let make ?relatedModelFields =
+      fun ?canUnlinkAssociatedModel ->
+        fun ?relatedJoinFieldName ->
+          fun ?relatedJoinTableName ->
+            fun ?belongsToFieldOnRelatedModel ->
+              fun ?associatedFields ->
+                fun ?isHasManyIndex ->
+                  fun ~type_ ->
+                    fun ~relatedModelName ->
+                      fun () ->
+                        {
+                          relatedModelFields;
+                          canUnlinkAssociatedModel;
+                          relatedJoinFieldName;
+                          relatedJoinTableName;
+                          belongsToFieldOnRelatedModel;
+                          associatedFields;
+                          isHasManyIndex;
+                          type_;
+                          relatedModelName
+                        }
+    let to_value x =
+      structure_to_value
+        [("type", (Some (GenericDataRelationshipType.to_value x.type_)));
+        ("relatedModelName", (Some (String_.to_value x.relatedModelName)));
+        ("relatedModelFields",
+          (Option.map x.relatedModelFields ~f:RelatedModelFieldsList.to_value));
+        ("canUnlinkAssociatedModel",
+          (Option.map x.canUnlinkAssociatedModel ~f:Boolean.to_value));
+        ("relatedJoinFieldName",
+          (Option.map x.relatedJoinFieldName ~f:String_.to_value));
+        ("relatedJoinTableName",
+          (Option.map x.relatedJoinTableName ~f:String_.to_value));
+        ("belongsToFieldOnRelatedModel",
+          (Option.map x.belongsToFieldOnRelatedModel ~f:String_.to_value));
+        ("associatedFields",
+          (Option.map x.associatedFields ~f:AssociatedFieldsList.to_value));
+        ("isHasManyIndex", (Option.map x.isHasManyIndex ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let isHasManyIndex =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isHasManyIndex") in
+      let associatedFields =
+        (Option.map ~f:AssociatedFieldsList.of_xml)
+          (Xml.child xml_arg0 "associatedFields") in
+      let belongsToFieldOnRelatedModel =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "belongsToFieldOnRelatedModel") in
+      let relatedJoinTableName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "relatedJoinTableName") in
+      let relatedJoinFieldName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "relatedJoinFieldName") in
+      let canUnlinkAssociatedModel =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "canUnlinkAssociatedModel") in
+      let relatedModelFields =
+        (Option.map ~f:RelatedModelFieldsList.of_xml)
+          (Xml.child xml_arg0 "relatedModelFields") in
+      let relatedModelName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "relatedModelName") in
+      let type_ =
+        GenericDataRelationshipType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      make ?isHasManyIndex ?associatedFields ?belongsToFieldOnRelatedModel
+        ?relatedJoinTableName ?relatedJoinFieldName ?canUnlinkAssociatedModel
+        ?relatedModelFields ~relatedModelName ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let isHasManyIndex = field_map json__ "isHasManyIndex" Boolean.of_json in
+      let associatedFields =
+        field_map json__ "associatedFields" AssociatedFieldsList.of_json in
+      let belongsToFieldOnRelatedModel =
+        field_map json__ "belongsToFieldOnRelatedModel" String_.of_json in
+      let relatedJoinTableName =
+        field_map json__ "relatedJoinTableName" String_.of_json in
+      let relatedJoinFieldName =
+        field_map json__ "relatedJoinFieldName" String_.of_json in
+      let canUnlinkAssociatedModel =
+        field_map json__ "canUnlinkAssociatedModel" Boolean.of_json in
+      let relatedModelFields =
+        field_map json__ "relatedModelFields" RelatedModelFieldsList.of_json in
+      let relatedModelName =
+        field_map_exn json__ "relatedModelName" String_.of_json in
+      let type_ =
+        field_map_exn json__ "type" GenericDataRelationshipType.of_json in
+      make ?isHasManyIndex ?associatedFields ?belongsToFieldOnRelatedModel
+        ?relatedJoinTableName ?relatedJoinFieldName ?canUnlinkAssociatedModel
+        ?relatedModelFields ~relatedModelName ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the relationship between generic data models."]
+module CodegenGenericDataFieldDataType =
+  struct
+    type nonrec t =
+      | ID 
+      | String_ 
+      | Int_ 
+      | Float_ 
+      | AWSDate 
+      | AWSTime 
+      | AWSDateTime 
+      | AWSTimestamp 
+      | AWSEmail 
+      | AWSURL 
+      | AWSIPAddress 
+      | Boolean 
+      | AWSJSON 
+      | AWSPhone 
+      | Enum 
+      | Model 
+      | NonModel 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ID -> "ID"
+      | String_ -> "String"
+      | Int_ -> "Int"
+      | Float_ -> "Float"
+      | AWSDate -> "AWSDate"
+      | AWSTime -> "AWSTime"
+      | AWSDateTime -> "AWSDateTime"
+      | AWSTimestamp -> "AWSTimestamp"
+      | AWSEmail -> "AWSEmail"
+      | AWSURL -> "AWSURL"
+      | AWSIPAddress -> "AWSIPAddress"
+      | Boolean -> "Boolean"
+      | AWSJSON -> "AWSJSON"
+      | AWSPhone -> "AWSPhone"
+      | Enum -> "Enum"
+      | Model -> "Model"
+      | NonModel -> "NonModel"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ID" -> ID
+      | "String" -> String_
+      | "Int" -> Int_
+      | "Float" -> Float_
+      | "AWSDate" -> AWSDate
+      | "AWSTime" -> AWSTime
+      | "AWSDateTime" -> AWSDateTime
+      | "AWSTimestamp" -> AWSTimestamp
+      | "AWSEmail" -> AWSEmail
+      | "AWSURL" -> AWSURL
+      | "AWSIPAddress" -> AWSIPAddress
+      | "Boolean" -> Boolean
+      | "AWSJSON" -> AWSJSON
+      | "AWSPhone" -> AWSPhone
+      | "Enum" -> Enum
+      | "Model" -> Model
+      | "NonModel" -> NonModel
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CodegenGenericDataFieldDataType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CodegenGenericDataFieldDataType" j)
+    let to_json = simple_to_json to_value
+  end
+module CodegenGenericDataField =
+  struct
+    type nonrec t =
+      {
+      dataType: CodegenGenericDataFieldDataType.t
+        [@ocaml.doc "The data type for the generic data field."];
+      dataTypeValue: String_.t
+        [@ocaml.doc "The value of the data type for the generic data field."];
+      required: Boolean.t
+        [@ocaml.doc "Specifies whether the generic data field is required."];
+      readOnly: Boolean.t
+        [@ocaml.doc "Specifies whether the generic data field is read-only."];
+      isArray: Boolean.t
+        [@ocaml.doc "Specifies whether the generic data field is an array."];
+      relationship: CodegenGenericDataRelationshipType.t option
+        [@ocaml.doc "The relationship of the generic data schema."]}
+    let context_ = "CodegenGenericDataField"
+    let make ?relationship =
+      fun ~dataType ->
+        fun ~dataTypeValue ->
+          fun ~required ->
+            fun ~readOnly ->
+              fun ~isArray ->
+                fun () ->
+                  {
+                    relationship;
+                    dataType;
+                    dataTypeValue;
+                    required;
+                    readOnly;
+                    isArray
+                  }
+    let to_value x =
+      structure_to_value
+        [("dataType",
+           (Some (CodegenGenericDataFieldDataType.to_value x.dataType)));
+        ("dataTypeValue", (Some (String_.to_value x.dataTypeValue)));
+        ("required", (Some (Boolean.to_value x.required)));
+        ("readOnly", (Some (Boolean.to_value x.readOnly)));
+        ("isArray", (Some (Boolean.to_value x.isArray)));
+        ("relationship",
+          (Option.map x.relationship
+             ~f:CodegenGenericDataRelationshipType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let relationship =
+        (Option.map ~f:CodegenGenericDataRelationshipType.of_xml)
+          (Xml.child xml_arg0 "relationship") in
+      let isArray =
+        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "isArray") in
+      let readOnly =
+        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "readOnly") in
+      let required =
+        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "required") in
+      let dataTypeValue =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dataTypeValue") in
+      let dataType =
+        CodegenGenericDataFieldDataType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dataType") in
+      make ?relationship ~isArray ~readOnly ~required ~dataTypeValue
+        ~dataType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let relationship =
+        field_map json__ "relationship"
+          CodegenGenericDataRelationshipType.of_json in
+      let isArray = field_map_exn json__ "isArray" Boolean.of_json in
+      let readOnly = field_map_exn json__ "readOnly" Boolean.of_json in
+      let required = field_map_exn json__ "required" Boolean.of_json in
+      let dataTypeValue =
+        field_map_exn json__ "dataTypeValue" String_.of_json in
+      let dataType =
+        field_map_exn json__ "dataType"
+          CodegenGenericDataFieldDataType.of_json in
+      make ?relationship ~isArray ~readOnly ~required ~dataTypeValue
+        ~dataType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a field in a generic data schema."]
+module CodegenGenericDataFields =
+  struct
+    type nonrec t = (String_.t * CodegenGenericDataField.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types String CodegenGenericDataField"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x ->
+                       (CodegenGenericDataField.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:CodegenGenericDataField.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CodegenPrimaryKeysList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CodegenPrimaryKeysList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CodegenGenericDataModel =
+  struct
+    type nonrec t =
+      {
+      fields: CodegenGenericDataFields.t
+        [@ocaml.doc "The fields in the generic data model."];
+      isJoinTable: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the generic data model is a join table."];
+      primaryKeys: CodegenPrimaryKeysList.t
+        [@ocaml.doc "The primary keys of the generic data model."]}
+    let context_ = "CodegenGenericDataModel"
+    let make ?isJoinTable =
+      fun ~fields ->
+        fun ~primaryKeys -> fun () -> { isJoinTable; fields; primaryKeys }
+    let to_value x =
+      structure_to_value
+        [("fields", (Some (CodegenGenericDataFields.to_value x.fields)));
+        ("isJoinTable", (Option.map x.isJoinTable ~f:Boolean.to_value));
+        ("primaryKeys",
+          (Some (CodegenPrimaryKeysList.to_value x.primaryKeys)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let primaryKeys =
+        CodegenPrimaryKeysList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "primaryKeys") in
+      let isJoinTable =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isJoinTable") in
+      let fields =
+        CodegenGenericDataFields.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "fields") in
+      make ~primaryKeys ?isJoinTable ~fields ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let primaryKeys =
+        field_map_exn json__ "primaryKeys" CodegenPrimaryKeysList.of_json in
+      let isJoinTable = field_map json__ "isJoinTable" Boolean.of_json in
+      let fields =
+        field_map_exn json__ "fields" CodegenGenericDataFields.of_json in
+      make ~primaryKeys ?isJoinTable ~fields ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a model in a generic data schema."]
+module CodegenGenericDataModels =
+  struct
+    type nonrec t = (String_.t * CodegenGenericDataModel.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types String CodegenGenericDataModel"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x ->
+                       (CodegenGenericDataModel.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:CodegenGenericDataModel.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CodegenGenericDataNonModelFields =
+  struct
+    type nonrec t = (String_.t * CodegenGenericDataField.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types String CodegenGenericDataField"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x ->
+                       (CodegenGenericDataField.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:CodegenGenericDataField.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CodegenGenericDataNonModel =
+  struct
+    type nonrec t =
+      {
+      fields: CodegenGenericDataNonModelFields.t
+        [@ocaml.doc "The fields in a generic data schema non model."]}
+    let context_ = "CodegenGenericDataNonModel"
+    let make ~fields = fun () -> { fields }
+    let to_value x =
+      structure_to_value
+        [("fields",
+           (Some (CodegenGenericDataNonModelFields.to_value x.fields)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fields =
+        CodegenGenericDataNonModelFields.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "fields") in
+      make ~fields ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fields =
+        field_map_exn json__ "fields"
+          CodegenGenericDataNonModelFields.of_json in
+      make ~fields ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a non-model in a generic data schema."]
+module CodegenGenericDataNonModels =
+  struct
+    type nonrec t = (String_.t * CodegenGenericDataNonModel.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types String CodegenGenericDataNonModel"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x ->
+                       (CodegenGenericDataNonModel.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:CodegenGenericDataNonModel.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Uuid =
   struct
     type nonrec t = string
@@ -742,7 +1717,7 @@ module TagKey =
              (fun () ->
                 (check_string_max i ~max:128) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"^(?!aws:)[a-zA-Z+-=._:/]+$")));
+                     check_pattern i ~pattern:"(?!aws:)[a-zA-Z+-=._:/]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -773,6 +1748,8 @@ module Tags =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -791,6 +1768,599 @@ module SyntheticTimestamp_date_time =
     let of_xml = string_of_xml ~kind:"a timestamp"
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
+  end
+module CodegenJobStatus =
+  struct
+    type nonrec t =
+      | In_progress 
+      | Failed 
+      | Succeeded 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | In_progress -> "in_progress"
+      | Failed -> "failed"
+      | Succeeded -> "succeeded"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "in_progress" -> In_progress
+      | "failed" -> Failed
+      | "succeeded" -> Succeeded
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration CodegenJobStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CodegenJobStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ReactCodegenDependencies =
+  struct
+    type nonrec t = (String_.t * String_.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (String_.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module JSTarget =
+  struct
+    type nonrec t =
+      | Es2015 
+      | Es2020 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Es2015 -> "es2015"
+      | Es2020 -> "es2020"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "es2015" -> Es2015
+      | "es2020" -> Es2020
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration JSTarget" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"JSTarget" j)
+    let to_json = simple_to_json to_value
+  end
+module JSScript =
+  struct
+    type nonrec t =
+      | Jsx 
+      | Tsx 
+      | Js 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Jsx -> "jsx"
+      | Tsx -> "tsx"
+      | Js -> "js"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "jsx" -> Jsx
+      | "tsx" -> Tsx
+      | "js" -> Js
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration JSScript" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"JSScript" j)
+    let to_json = simple_to_json to_value
+  end
+module JSModule =
+  struct
+    type nonrec t =
+      | Es2020 
+      | Esnext 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Es2020 -> "es2020"
+      | Esnext -> "esnext"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "es2020" -> Es2020
+      | "esnext" -> Esnext
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration JSModule" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"JSModule" j)
+    let to_json = simple_to_json to_value
+  end
+module ReactStartCodegenJobData =
+  struct
+    type nonrec t =
+      {
+      module_: JSModule.t option [@ocaml.doc "The JavaScript module type."];
+      target: JSTarget.t option
+        [@ocaml.doc "The ECMAScript specification to use."];
+      script: JSScript.t option
+        [@ocaml.doc "The file type to use for a JavaScript project."];
+      renderTypeDeclarations: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the code generation job should render type declaration files."];
+      inlineSourceMap: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the code generation job should render inline source maps."];
+      apiConfiguration: ApiConfiguration.t option
+        [@ocaml.doc "The API configuration for the code generation job."];
+      dependencies: ReactCodegenDependencies.t option
+        [@ocaml.doc
+          "Lists the dependency packages that may be required for the project code to run."]}
+    let make ?module_ =
+      fun ?target ->
+        fun ?script ->
+          fun ?renderTypeDeclarations ->
+            fun ?inlineSourceMap ->
+              fun ?apiConfiguration ->
+                fun ?dependencies ->
+                  fun () ->
+                    {
+                      module_;
+                      target;
+                      script;
+                      renderTypeDeclarations;
+                      inlineSourceMap;
+                      apiConfiguration;
+                      dependencies
+                    }
+    let to_value x =
+      structure_to_value
+        [("module", (Option.map x.module_ ~f:JSModule.to_value));
+        ("target", (Option.map x.target ~f:JSTarget.to_value));
+        ("script", (Option.map x.script ~f:JSScript.to_value));
+        ("renderTypeDeclarations",
+          (Option.map x.renderTypeDeclarations ~f:Boolean.to_value));
+        ("inlineSourceMap",
+          (Option.map x.inlineSourceMap ~f:Boolean.to_value));
+        ("apiConfiguration",
+          (Option.map x.apiConfiguration ~f:ApiConfiguration.to_value));
+        ("dependencies",
+          (Option.map x.dependencies ~f:ReactCodegenDependencies.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dependencies =
+        (Option.map ~f:ReactCodegenDependencies.of_xml)
+          (Xml.child xml_arg0 "dependencies") in
+      let apiConfiguration =
+        (Option.map ~f:ApiConfiguration.of_xml)
+          (Xml.child xml_arg0 "apiConfiguration") in
+      let inlineSourceMap =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "inlineSourceMap") in
+      let renderTypeDeclarations =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "renderTypeDeclarations") in
+      let script =
+        (Option.map ~f:JSScript.of_xml) (Xml.child xml_arg0 "script") in
+      let target =
+        (Option.map ~f:JSTarget.of_xml) (Xml.child xml_arg0 "target") in
+      let module_ =
+        (Option.map ~f:JSModule.of_xml) (Xml.child xml_arg0 "module") in
+      make ?dependencies ?apiConfiguration ?inlineSourceMap
+        ?renderTypeDeclarations ?script ?target ?module_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dependencies =
+        field_map json__ "dependencies" ReactCodegenDependencies.of_json in
+      let apiConfiguration =
+        field_map json__ "apiConfiguration" ApiConfiguration.of_json in
+      let inlineSourceMap =
+        field_map json__ "inlineSourceMap" Boolean.of_json in
+      let renderTypeDeclarations =
+        field_map json__ "renderTypeDeclarations" Boolean.of_json in
+      let script = field_map json__ "script" JSScript.of_json in
+      let target = field_map json__ "target" JSTarget.of_json in
+      let module_ = field_map json__ "module" JSModule.of_json in
+      make ?dependencies ?apiConfiguration ?inlineSourceMap
+        ?renderTypeDeclarations ?script ?target ?module_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the code generation job configuration for a React project."]
+module CodegenJobRenderConfig =
+  struct
+    type nonrec t =
+      {
+      react: ReactStartCodegenJobData.t option
+        [@ocaml.doc "The name of the ReactStartCodegenJobData object."]}
+    let make ?react = fun () -> { react }
+    let to_value x =
+      structure_to_value
+        [("react", (Option.map x.react ~f:ReactStartCodegenJobData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let react =
+        (Option.map ~f:ReactStartCodegenJobData.of_xml)
+          (Xml.child xml_arg0 "react") in
+      make ?react ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let react = field_map json__ "react" ReactStartCodegenJobData.of_json in
+      make ?react ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the configuration information for rendering the UI component associated with the code generation job."]
+module CodegenJobGenericDataSourceType =
+  struct
+    type nonrec t =
+      | DataStore 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | DataStore -> "DataStore" | Non_static_id s -> s
+    let of_string =
+      function | "DataStore" -> DataStore | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CodegenJobGenericDataSourceType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CodegenJobGenericDataSourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module CodegenJobGenericDataSchema =
+  struct
+    type nonrec t =
+      {
+      dataSourceType: CodegenJobGenericDataSourceType.t
+        [@ocaml.doc
+          "The type of the data source for the schema. Currently, the only valid value is an Amplify DataStore."];
+      models: CodegenGenericDataModels.t
+        [@ocaml.doc "The name of a CodegenGenericDataModel."];
+      enums: CodegenGenericDataEnums.t
+        [@ocaml.doc "The name of a CodegenGenericDataEnum."];
+      nonModels: CodegenGenericDataNonModels.t
+        [@ocaml.doc "The name of a CodegenGenericDataNonModel."]}
+    let context_ = "CodegenJobGenericDataSchema"
+    let make ~dataSourceType =
+      fun ~models ->
+        fun ~enums ->
+          fun ~nonModels ->
+            fun () -> { dataSourceType; models; enums; nonModels }
+    let to_value x =
+      structure_to_value
+        [("dataSourceType",
+           (Some (CodegenJobGenericDataSourceType.to_value x.dataSourceType)));
+        ("models", (Some (CodegenGenericDataModels.to_value x.models)));
+        ("enums", (Some (CodegenGenericDataEnums.to_value x.enums)));
+        ("nonModels",
+          (Some (CodegenGenericDataNonModels.to_value x.nonModels)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nonModels =
+        CodegenGenericDataNonModels.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "nonModels") in
+      let enums =
+        CodegenGenericDataEnums.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "enums") in
+      let models =
+        CodegenGenericDataModels.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "models") in
+      let dataSourceType =
+        CodegenJobGenericDataSourceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dataSourceType") in
+      make ~nonModels ~enums ~models ~dataSourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nonModels =
+        field_map_exn json__ "nonModels" CodegenGenericDataNonModels.of_json in
+      let enums =
+        field_map_exn json__ "enums" CodegenGenericDataEnums.of_json in
+      let models =
+        field_map_exn json__ "models" CodegenGenericDataModels.of_json in
+      let dataSourceType =
+        field_map_exn json__ "dataSourceType"
+          CodegenJobGenericDataSourceType.of_json in
+      make ~nonModels ~enums ~models ~dataSourceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the data schema for a code generation job."]
+module CodegenJobAsset =
+  struct
+    type nonrec t =
+      {
+      downloadUrl: String_.t option
+        [@ocaml.doc "The URL to use to access the asset."]}
+    let make ?downloadUrl = fun () -> { downloadUrl }
+    let to_value x =
+      structure_to_value
+        [("downloadUrl", (Option.map x.downloadUrl ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let downloadUrl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "downloadUrl") in
+      make ?downloadUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let downloadUrl = field_map json__ "downloadUrl" String_.of_json in
+      make ?downloadUrl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes an asset for a code generation job."]
+module CodegenJob =
+  struct
+    type nonrec t =
+      {
+      id: Uuid.t option
+        [@ocaml.doc "The unique ID for the code generation job."];
+      appId: AppId.t option
+        [@ocaml.doc
+          "The ID of the Amplify app associated with the code generation job."];
+      environmentName: String_.t option
+        [@ocaml.doc
+          "The name of the backend environment associated with the code generation job."];
+      renderConfig: CodegenJobRenderConfig.t option ;
+      genericDataSchema: CodegenJobGenericDataSchema.t option ;
+      autoGenerateForms: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether to autogenerate forms in the code generation job."];
+      features: CodegenFeatureFlags.t option ;
+      status: CodegenJobStatus.t option
+        [@ocaml.doc "The status of the code generation job."];
+      statusMessage: String_.t option
+        [@ocaml.doc
+          "The customized status message for the code generation job."];
+      asset: CodegenJobAsset.t option
+        [@ocaml.doc
+          "The CodegenJobAsset to use for the code generation job."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "One or more key-value pairs to use when tagging the code generation job."];
+      createdAt: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc "The time that the code generation job was created."];
+      modifiedAt: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc "The time that the code generation job was modified."];
+      dependencies: CodegenDependencies.t option
+        [@ocaml.doc
+          "Lists the dependency packages that may be required for the project code to run."]}
+    let make ?id =
+      fun ?appId ->
+        fun ?environmentName ->
+          fun ?renderConfig ->
+            fun ?genericDataSchema ->
+              fun ?autoGenerateForms ->
+                fun ?features ->
+                  fun ?status ->
+                    fun ?statusMessage ->
+                      fun ?asset ->
+                        fun ?tags ->
+                          fun ?createdAt ->
+                            fun ?modifiedAt ->
+                              fun ?dependencies ->
+                                fun () ->
+                                  {
+                                    id;
+                                    appId;
+                                    environmentName;
+                                    renderConfig;
+                                    genericDataSchema;
+                                    autoGenerateForms;
+                                    features;
+                                    status;
+                                    statusMessage;
+                                    asset;
+                                    tags;
+                                    createdAt;
+                                    modifiedAt;
+                                    dependencies
+                                  }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:Uuid.to_value));
+        ("appId", (Option.map x.appId ~f:AppId.to_value));
+        ("environmentName",
+          (Option.map x.environmentName ~f:String_.to_value));
+        ("renderConfig",
+          (Option.map x.renderConfig ~f:CodegenJobRenderConfig.to_value));
+        ("genericDataSchema",
+          (Option.map x.genericDataSchema
+             ~f:CodegenJobGenericDataSchema.to_value));
+        ("autoGenerateForms",
+          (Option.map x.autoGenerateForms ~f:Boolean.to_value));
+        ("features", (Option.map x.features ~f:CodegenFeatureFlags.to_value));
+        ("status", (Option.map x.status ~f:CodegenJobStatus.to_value));
+        ("statusMessage", (Option.map x.statusMessage ~f:String_.to_value));
+        ("asset", (Option.map x.asset ~f:CodegenJobAsset.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value));
+        ("createdAt",
+          (Option.map x.createdAt ~f:SyntheticTimestamp_date_time.to_value));
+        ("modifiedAt",
+          (Option.map x.modifiedAt ~f:SyntheticTimestamp_date_time.to_value));
+        ("dependencies",
+          (Option.map x.dependencies ~f:CodegenDependencies.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dependencies =
+        (Option.map ~f:CodegenDependencies.of_xml)
+          (Xml.child xml_arg0 "dependencies") in
+      let modifiedAt =
+        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
+          (Xml.child xml_arg0 "modifiedAt") in
+      let createdAt =
+        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
+          (Xml.child xml_arg0 "createdAt") in
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let asset =
+        (Option.map ~f:CodegenJobAsset.of_xml) (Xml.child xml_arg0 "asset") in
+      let statusMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusMessage") in
+      let status =
+        (Option.map ~f:CodegenJobStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let features =
+        (Option.map ~f:CodegenFeatureFlags.of_xml)
+          (Xml.child xml_arg0 "features") in
+      let autoGenerateForms =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "autoGenerateForms") in
+      let genericDataSchema =
+        (Option.map ~f:CodegenJobGenericDataSchema.of_xml)
+          (Xml.child xml_arg0 "genericDataSchema") in
+      let renderConfig =
+        (Option.map ~f:CodegenJobRenderConfig.of_xml)
+          (Xml.child xml_arg0 "renderConfig") in
+      let environmentName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "environmentName") in
+      let appId = (Option.map ~f:AppId.of_xml) (Xml.child xml_arg0 "appId") in
+      let id = (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "id") in
+      make ?dependencies ?modifiedAt ?createdAt ?tags ?asset ?statusMessage
+        ?status ?features ?autoGenerateForms ?genericDataSchema ?renderConfig
+        ?environmentName ?appId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dependencies =
+        field_map json__ "dependencies" CodegenDependencies.of_json in
+      let modifiedAt =
+        field_map json__ "modifiedAt" SyntheticTimestamp_date_time.of_json in
+      let createdAt =
+        field_map json__ "createdAt" SyntheticTimestamp_date_time.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let asset = field_map json__ "asset" CodegenJobAsset.of_json in
+      let statusMessage = field_map json__ "statusMessage" String_.of_json in
+      let status = field_map json__ "status" CodegenJobStatus.of_json in
+      let features = field_map json__ "features" CodegenFeatureFlags.of_json in
+      let autoGenerateForms =
+        field_map json__ "autoGenerateForms" Boolean.of_json in
+      let genericDataSchema =
+        field_map json__ "genericDataSchema"
+          CodegenJobGenericDataSchema.of_json in
+      let renderConfig =
+        field_map json__ "renderConfig" CodegenJobRenderConfig.of_json in
+      let environmentName =
+        field_map json__ "environmentName" String_.of_json in
+      let appId = field_map json__ "appId" AppId.of_json in
+      let id = field_map json__ "id" Uuid.of_json in
+      make ?dependencies ?modifiedAt ?createdAt ?tags ?asset ?statusMessage
+        ?status ?features ?autoGenerateForms ?genericDataSchema ?renderConfig
+        ?environmentName ?appId ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the configuration for a code generation job that is associated with an Amplify app."]
+module CodegenJobSummary =
+  struct
+    type nonrec t =
+      {
+      appId: AppId.t option
+        [@ocaml.doc
+          "The unique ID of the Amplify app associated with the code generation job."];
+      environmentName: String_.t option
+        [@ocaml.doc
+          "The name of the backend environment associated with the code generation job."];
+      id: Uuid.t option
+        [@ocaml.doc "The unique ID for the code generation job summary."];
+      createdAt: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc
+          "The time that the code generation job summary was created."];
+      modifiedAt: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc
+          "The time that the code generation job summary was modified."]}
+    let make ?appId =
+      fun ?environmentName ->
+        fun ?id ->
+          fun ?createdAt ->
+            fun ?modifiedAt ->
+              fun () -> { appId; environmentName; id; createdAt; modifiedAt }
+    let to_value x =
+      structure_to_value
+        [("appId", (Option.map x.appId ~f:AppId.to_value));
+        ("environmentName",
+          (Option.map x.environmentName ~f:String_.to_value));
+        ("id", (Option.map x.id ~f:Uuid.to_value));
+        ("createdAt",
+          (Option.map x.createdAt ~f:SyntheticTimestamp_date_time.to_value));
+        ("modifiedAt",
+          (Option.map x.modifiedAt ~f:SyntheticTimestamp_date_time.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modifiedAt =
+        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
+          (Xml.child xml_arg0 "modifiedAt") in
+      let createdAt =
+        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
+          (Xml.child xml_arg0 "createdAt") in
+      let id = (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "id") in
+      let environmentName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "environmentName") in
+      let appId = (Option.map ~f:AppId.of_xml) (Xml.child xml_arg0 "appId") in
+      make ?modifiedAt ?createdAt ?id ?environmentName ?appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modifiedAt =
+        field_map json__ "modifiedAt" SyntheticTimestamp_date_time.of_json in
+      let createdAt =
+        field_map json__ "createdAt" SyntheticTimestamp_date_time.of_json in
+      let id = field_map json__ "id" Uuid.of_json in
+      let environmentName =
+        field_map json__ "environmentName" String_.of_json in
+      let appId = field_map json__ "appId" AppId.of_json in
+      make ?modifiedAt ?createdAt ?id ?environmentName ?appId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A summary of the basic information about the code generation job."]
+module CodegenJobSummaryList =
+  struct
+    type nonrec t = CodegenJobSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CodegenJobSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CodegenJobSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CodegenJobSummaryList"
+        ~of_json:CodegenJobSummary.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module ComponentVariantValues =
   struct
@@ -813,6 +2383,8 @@ module ComponentVariantValues =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -841,6 +2413,8 @@ module ComponentOverridesValue =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -873,6 +2447,8 @@ module ComponentOverrides =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -884,35 +2460,35 @@ module ComponentVariant =
   struct
     type nonrec t =
       {
-      overrides: ComponentOverrides.t option
-        [@ocaml.doc
-          "The properties of the component variant that can be overriden when customizing an instance of the component. You can't specify tags as a valid property for overrides."];
       variantValues: ComponentVariantValues.t option
         [@ocaml.doc
-          "The combination of variants that comprise this variant. You can't specify tags as a valid property for variantValues."]}
-    let make ?overrides =
-      fun ?variantValues -> fun () -> { overrides; variantValues }
+          "The combination of variants that comprise this variant. You can't specify tags as a valid property for variantValues."];
+      overrides: ComponentOverrides.t option
+        [@ocaml.doc
+          "The properties of the component variant that can be overriden when customizing an instance of the component. You can't specify tags as a valid property for overrides."]}
+    let make ?variantValues =
+      fun ?overrides -> fun () -> { variantValues; overrides }
     let to_value x =
       structure_to_value
-        [("overrides",
-           (Option.map x.overrides ~f:ComponentOverrides.to_value));
-        ("variantValues",
-          (Option.map x.variantValues ~f:ComponentVariantValues.to_value))]
+        [("variantValues",
+           (Option.map x.variantValues ~f:ComponentVariantValues.to_value));
+        ("overrides",
+          (Option.map x.overrides ~f:ComponentOverrides.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let variantValues =
-        (Option.map ~f:ComponentVariantValues.of_xml)
-          (Xml.child xml_arg0 "variantValues") in
       let overrides =
         (Option.map ~f:ComponentOverrides.of_xml)
           (Xml.child xml_arg0 "overrides") in
-      make ?variantValues ?overrides ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let variantValues =
-        field_map json "variantValues" ComponentVariantValues.of_json in
-      let overrides = field_map json "overrides" ComponentOverrides.of_json in
-      make ?variantValues ?overrides ()
+        (Option.map ~f:ComponentVariantValues.of_xml)
+          (Xml.child xml_arg0 "variantValues") in
+      make ?overrides ?variantValues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let overrides = field_map json__ "overrides" ComponentOverrides.of_json in
+      let variantValues =
+        field_map json__ "variantValues" ComponentVariantValues.of_json in
+      make ?overrides ?variantValues ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the style configuration of a unique variation of a main component."]
@@ -920,6 +2496,9 @@ module ComponentVariants =
   struct
     type nonrec t = ComponentVariant.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComponentVariant.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -983,36 +2562,36 @@ module ComponentEvent =
       {
       action: String_.t option
         [@ocaml.doc "The action to perform when a specific event is raised."];
+      parameters: ActionParameters.t option
+        [@ocaml.doc "Describes information about the action."];
       bindingEvent: String_.t option
         [@ocaml.doc
-          "Binds an event to an action on a component. When you specify a bindingEvent, the event is called when the action is performed."];
-      parameters: ActionParameters.t option
-        [@ocaml.doc "Describes information about the action."]}
+          "Binds an event to an action on a component. When you specify a bindingEvent, the event is called when the action is performed."]}
     let make ?action =
-      fun ?bindingEvent ->
-        fun ?parameters -> fun () -> { action; bindingEvent; parameters }
+      fun ?parameters ->
+        fun ?bindingEvent -> fun () -> { action; parameters; bindingEvent }
     let to_value x =
       structure_to_value
         [("action", (Option.map x.action ~f:String_.to_value));
-        ("bindingEvent", (Option.map x.bindingEvent ~f:String_.to_value));
         ("parameters",
-          (Option.map x.parameters ~f:ActionParameters.to_value))]
+          (Option.map x.parameters ~f:ActionParameters.to_value));
+        ("bindingEvent", (Option.map x.bindingEvent ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let bindingEvent =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "bindingEvent") in
       let parameters =
         (Option.map ~f:ActionParameters.of_xml)
           (Xml.child xml_arg0 "parameters") in
-      let bindingEvent =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "bindingEvent") in
       let action =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "action") in
-      make ?parameters ?bindingEvent ?action ()
+      make ?bindingEvent ?parameters ?action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "parameters" ActionParameters.of_json in
-      let bindingEvent = field_map json "bindingEvent" String_.of_json in
-      let action = field_map json "action" String_.of_json in
-      make ?parameters ?bindingEvent ?action ()
+    let of_json json__ =
+      let bindingEvent = field_map json__ "bindingEvent" String_.of_json in
+      let parameters = field_map json__ "parameters" ActionParameters.of_json in
+      let action = field_map json__ "action" String_.of_json in
+      make ?bindingEvent ?parameters ?action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the configuration of an event. You can bind an event and a corresponding action to a Component or a ComponentChild. A button click is an example of an event."]
@@ -1040,6 +2619,8 @@ module ComponentEvents =
                        (ComponentEvent.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1070,29 +2651,29 @@ module SortProperty =
   struct
     type nonrec t =
       {
+      field: String_.t [@ocaml.doc "The field to perform the sort on."];
       direction: SortDirection.t
         [@ocaml.doc
-          "The direction of the sort, either ascending or descending."];
-      field: String_.t [@ocaml.doc "The field to perform the sort on."]}
+          "The direction of the sort, either ascending or descending."]}
     let context_ = "SortProperty"
-    let make ~direction = fun ~field -> fun () -> { direction; field }
+    let make ~field = fun ~direction -> fun () -> { field; direction }
     let to_value x =
       structure_to_value
-        [("direction", (Some (SortDirection.to_value x.direction)));
-        ("field", (Some (String_.to_value x.field)))]
+        [("field", (Some (String_.to_value x.field)));
+        ("direction", (Some (SortDirection.to_value x.direction)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let field =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "field") in
       let direction =
         SortDirection.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "direction") in
-      make ~field ~direction ()
+      let field =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "field") in
+      make ~direction ~field ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let field = field_map_exn json "field" String_.of_json in
-      let direction = field_map_exn json "direction" SortDirection.of_json in
-      make ~field ~direction ()
+    let of_json json__ =
+      let direction = field_map_exn json__ "direction" SortDirection.of_json in
+      let field = field_map_exn json__ "field" String_.of_json in
+      make ~direction ~field ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes how to sort the data that you bind to a component."]
@@ -1100,6 +2681,9 @@ module SortPropertyList =
   struct
     type nonrec t = SortProperty.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SortProperty.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1120,27 +2704,46 @@ module SortPropertyList =
       list_of_json ~kind:"SortPropertyList" ~of_json:SortProperty.of_json j
     let to_json v = composed_to_json to_value v
   end
+module OperandType =
+  struct
+    type nonrec t = string
+    let context_ = "OperandType"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"boolean|string|number"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OperandType" j
+    let to_json = simple_to_json to_value
+  end
 module rec
   Predicate:sig
               type nonrec t =
                 {
+                or_: PredicateList.t option
+                  [@ocaml.doc "A list of predicates to combine logically."];
                 and_: PredicateList.t option
                   [@ocaml.doc "A list of predicates to combine logically."];
                 field: String_.t option [@ocaml.doc "The field to query."];
-                operand: String_.t option
-                  [@ocaml.doc
-                    "The value to use when performing the evaluation."];
                 operator: String_.t option
                   [@ocaml.doc
                     "The operator to use to perform the evaluation."];
-                or_: PredicateList.t option
-                  [@ocaml.doc "A list of predicates to combine logically."]}
+                operand: String_.t option
+                  [@ocaml.doc
+                    "The value to use when performing the evaluation."];
+                operandType: OperandType.t option
+                  [@ocaml.doc
+                    "The type of value to use when performing the evaluation."]}
               val make :
-                ?and_:PredicateList.t ->
-                  ?field:String_.t ->
-                    ?operand:String_.t ->
+                ?or_:PredicateList.t ->
+                  ?and_:PredicateList.t ->
+                    ?field:String_.t ->
                       ?operator:String_.t ->
-                        ?or_:PredicateList.t -> unit -> t
+                        ?operand:String_.t ->
+                          ?operandType:OperandType.t -> unit -> t
               val to_value : t -> Botodata.value
               val to_query : t -> Client.Query.t
               val of_xml : Xml.t -> t
@@ -1150,47 +2753,57 @@ module rec
   struct
     type nonrec t =
       {
+      or_: PredicateList.t option
+        [@ocaml.doc "A list of predicates to combine logically."];
       and_: PredicateList.t option
         [@ocaml.doc "A list of predicates to combine logically."];
       field: String_.t option [@ocaml.doc "The field to query."];
-      operand: String_.t option
-        [@ocaml.doc "The value to use when performing the evaluation."];
       operator: String_.t option
         [@ocaml.doc "The operator to use to perform the evaluation."];
-      or_: PredicateList.t option
-        [@ocaml.doc "A list of predicates to combine logically."]}
-    let make ?and_ =
-      fun ?field ->
-        fun ?operand ->
+      operand: String_.t option
+        [@ocaml.doc "The value to use when performing the evaluation."];
+      operandType: OperandType.t option
+        [@ocaml.doc
+          "The type of value to use when performing the evaluation."]}
+    let make ?or_ =
+      fun ?and_ ->
+        fun ?field ->
           fun ?operator ->
-            fun ?or_ -> fun () -> { and_; field; operand; operator; or_ }
+            fun ?operand ->
+              fun ?operandType ->
+                fun () ->
+                  { or_; and_; field; operator; operand; operandType }
     let to_value x =
       structure_to_value
-        [("and", (Option.map x.and_ ~f:PredicateList.to_value));
+        [("or", (Option.map x.or_ ~f:PredicateList.to_value));
+        ("and", (Option.map x.and_ ~f:PredicateList.to_value));
         ("field", (Option.map x.field ~f:String_.to_value));
-        ("operand", (Option.map x.operand ~f:String_.to_value));
         ("operator", (Option.map x.operator ~f:String_.to_value));
-        ("or", (Option.map x.or_ ~f:PredicateList.to_value))]
+        ("operand", (Option.map x.operand ~f:String_.to_value));
+        ("operandType", (Option.map x.operandType ~f:OperandType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let or_ =
-        (Option.map ~f:PredicateList.of_xml) (Xml.child xml_arg0 "or") in
-      let operator =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "operator") in
+      let operandType =
+        (Option.map ~f:OperandType.of_xml) (Xml.child xml_arg0 "operandType") in
       let operand =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "operand") in
+      let operator =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "operator") in
       let field = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "field") in
       let and_ =
         (Option.map ~f:PredicateList.of_xml) (Xml.child xml_arg0 "and") in
-      make ?or_ ?operator ?operand ?field ?and_ ()
+      let or_ =
+        (Option.map ~f:PredicateList.of_xml) (Xml.child xml_arg0 "or") in
+      make ?operandType ?operand ?operator ?field ?and_ ?or_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let or_ = field_map json "or" PredicateList.of_json in
-      let operator = field_map json "operator" String_.of_json in
-      let operand = field_map json "operand" String_.of_json in
-      let field = field_map json "field" String_.of_json in
-      let and_ = field_map json "and" PredicateList.of_json in
-      make ?or_ ?operator ?operand ?field ?and_ ()
+    let of_json json__ =
+      let operandType = field_map json__ "operandType" OperandType.of_json in
+      let operand = field_map json__ "operand" String_.of_json in
+      let operator = field_map json__ "operator" String_.of_json in
+      let field = field_map json__ "field" String_.of_json in
+      let and_ = field_map json__ "and" PredicateList.of_json in
+      let or_ = field_map json__ "or" PredicateList.of_json in
+      make ?operandType ?operand ?operator ?field ?and_ ?or_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Stores information for generating Amplify DataStore queries. Use a Predicate to retrieve a subset of the data in a collection."]
@@ -1208,6 +2821,9 @@ module rec
   struct
     type nonrec t = Predicate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Predicate.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1232,6 +2848,9 @@ module IdentifierList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1256,48 +2875,48 @@ module ComponentDataConfiguration =
   struct
     type nonrec t =
       {
-      identifiers: IdentifierList.t option
-        [@ocaml.doc
-          "A list of IDs to use to bind data to a component. Use this property to bind specifically chosen data, rather than data retrieved from a query."];
       model: String_.t
         [@ocaml.doc
           "The name of the data model to use to bind data to a component."];
+      sort: SortPropertyList.t option
+        [@ocaml.doc "Describes how to sort the component's properties."];
       predicate: Predicate.t option
         [@ocaml.doc
           "Represents the conditional logic to use when binding data to a component. Use this property to retrieve only a subset of the data in a collection."];
-      sort: SortPropertyList.t option
-        [@ocaml.doc "Describes how to sort the component's properties."]}
+      identifiers: IdentifierList.t option
+        [@ocaml.doc
+          "A list of IDs to use to bind data to a component. Use this property to bind specifically chosen data, rather than data retrieved from a query."]}
     let context_ = "ComponentDataConfiguration"
-    let make ?identifiers =
+    let make ?sort =
       fun ?predicate ->
-        fun ?sort ->
-          fun ~model -> fun () -> { identifiers; predicate; sort; model }
+        fun ?identifiers ->
+          fun ~model -> fun () -> { sort; predicate; identifiers; model }
     let to_value x =
       structure_to_value
-        [("identifiers",
-           (Option.map x.identifiers ~f:IdentifierList.to_value));
-        ("model", (Some (String_.to_value x.model)));
+        [("model", (Some (String_.to_value x.model)));
+        ("sort", (Option.map x.sort ~f:SortPropertyList.to_value));
         ("predicate", (Option.map x.predicate ~f:Predicate.to_value));
-        ("sort", (Option.map x.sort ~f:SortPropertyList.to_value))]
+        ("identifiers",
+          (Option.map x.identifiers ~f:IdentifierList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let sort =
-        (Option.map ~f:SortPropertyList.of_xml) (Xml.child xml_arg0 "sort") in
-      let predicate =
-        (Option.map ~f:Predicate.of_xml) (Xml.child xml_arg0 "predicate") in
-      let model =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "model") in
       let identifiers =
         (Option.map ~f:IdentifierList.of_xml)
           (Xml.child xml_arg0 "identifiers") in
-      make ?sort ?predicate ~model ?identifiers ()
+      let predicate =
+        (Option.map ~f:Predicate.of_xml) (Xml.child xml_arg0 "predicate") in
+      let sort =
+        (Option.map ~f:SortPropertyList.of_xml) (Xml.child xml_arg0 "sort") in
+      let model =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "model") in
+      make ?identifiers ?predicate ?sort ~model ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sort = field_map json "sort" SortPropertyList.of_json in
-      let predicate = field_map json "predicate" Predicate.of_json in
-      let model = field_map_exn json "model" String_.of_json in
-      let identifiers = field_map json "identifiers" IdentifierList.of_json in
-      make ?sort ?predicate ~model ?identifiers ()
+    let of_json json__ =
+      let identifiers = field_map json__ "identifiers" IdentifierList.of_json in
+      let predicate = field_map json__ "predicate" Predicate.of_json in
+      let sort = field_map json__ "sort" SortPropertyList.of_json in
+      let model = field_map_exn json__ "model" String_.of_json in
+      make ?identifiers ?predicate ?sort ~model ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the configuration for binding a component's properties to data."]
@@ -1326,6 +2945,8 @@ module ComponentCollectionProperties =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1337,19 +2958,19 @@ module rec
   ComponentChild:sig
                    type nonrec t =
                      {
-                     children: ComponentChildList.t option
-                       [@ocaml.doc
-                         "The list of ComponentChild instances for this component."];
                      componentType: String_.t
                        [@ocaml.doc "The type of the child component."];
-                     events: ComponentEvents.t option
-                       [@ocaml.doc
-                         "Describes the events that can be raised on the child component. Use for the workflow feature in Amplify Studio that allows you to bind events and actions to components."];
                      name: String_.t
                        [@ocaml.doc "The name of the child component."];
                      properties: ComponentProperties.t
                        [@ocaml.doc
                          "Describes the properties of the child component. You can't specify tags as a valid property for properties."];
+                     children: ComponentChildList.t option
+                       [@ocaml.doc
+                         "The list of ComponentChild instances for this component."];
+                     events: ComponentEvents.t option
+                       [@ocaml.doc
+                         "Describes the events that can be raised on the child component. Use for the workflow feature in Amplify Studio that allows you to bind events and actions to components."];
                      sourceId: String_.t option
                        [@ocaml.doc
                          "The unique ID of the child component in its original source system, such as Figma."]}
@@ -1369,18 +2990,18 @@ module rec
   struct
     type nonrec t =
       {
-      children: ComponentChildList.t option
-        [@ocaml.doc
-          "The list of ComponentChild instances for this component."];
       componentType: String_.t
         [@ocaml.doc "The type of the child component."];
-      events: ComponentEvents.t option
-        [@ocaml.doc
-          "Describes the events that can be raised on the child component. Use for the workflow feature in Amplify Studio that allows you to bind events and actions to components."];
       name: String_.t [@ocaml.doc "The name of the child component."];
       properties: ComponentProperties.t
         [@ocaml.doc
           "Describes the properties of the child component. You can't specify tags as a valid property for properties."];
+      children: ComponentChildList.t option
+        [@ocaml.doc
+          "The list of ComponentChild instances for this component."];
+      events: ComponentEvents.t option
+        [@ocaml.doc
+          "Describes the events that can be raised on the child component. Use for the workflow feature in Amplify Studio that allows you to bind events and actions to components."];
       sourceId: String_.t option
         [@ocaml.doc
           "The unique ID of the child component in its original source system, such as Figma."]}
@@ -1402,40 +3023,41 @@ module rec
                   }
     let to_value x =
       structure_to_value
-        [("children", (Option.map x.children ~f:ComponentChildList.to_value));
-        ("componentType", (Some (String_.to_value x.componentType)));
-        ("events", (Option.map x.events ~f:ComponentEvents.to_value));
+        [("componentType", (Some (String_.to_value x.componentType)));
         ("name", (Some (String_.to_value x.name)));
         ("properties", (Some (ComponentProperties.to_value x.properties)));
+        ("children", (Option.map x.children ~f:ComponentChildList.to_value));
+        ("events", (Option.map x.events ~f:ComponentEvents.to_value));
         ("sourceId", (Option.map x.sourceId ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let sourceId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sourceId") in
+      let events =
+        (Option.map ~f:ComponentEvents.of_xml) (Xml.child xml_arg0 "events") in
+      let children =
+        (Option.map ~f:ComponentChildList.of_xml)
+          (Xml.child xml_arg0 "children") in
       let properties =
         ComponentProperties.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "properties") in
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let events =
-        (Option.map ~f:ComponentEvents.of_xml) (Xml.child xml_arg0 "events") in
       let componentType =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "componentType") in
-      let children =
-        (Option.map ~f:ComponentChildList.of_xml)
-          (Xml.child xml_arg0 "children") in
-      make ?sourceId ~properties ~name ?events ~componentType ?children ()
+      make ?sourceId ?events ?children ~properties ~name ~componentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceId = field_map json "sourceId" String_.of_json in
+    let of_json json__ =
+      let sourceId = field_map json__ "sourceId" String_.of_json in
+      let events = field_map json__ "events" ComponentEvents.of_json in
+      let children = field_map json__ "children" ComponentChildList.of_json in
       let properties =
-        field_map_exn json "properties" ComponentProperties.of_json in
-      let name = field_map_exn json "name" String_.of_json in
-      let events = field_map json "events" ComponentEvents.of_json in
-      let componentType = field_map_exn json "componentType" String_.of_json in
-      let children = field_map json "children" ComponentChildList.of_json in
-      make ?sourceId ~properties ~name ?events ~componentType ?children ()
+        field_map_exn json__ "properties" ComponentProperties.of_json in
+      let name = field_map_exn json__ "name" String_.of_json in
+      let componentType =
+        field_map_exn json__ "componentType" String_.of_json in
+      make ?sourceId ?events ?children ~properties ~name ~componentType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A nested UI configuration within a parent Component."]
  and
@@ -1452,6 +3074,9 @@ module rec
   struct
     type nonrec t = ComponentChild.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComponentChild.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1477,71 +3102,78 @@ module ComponentBindingPropertiesValueProperties =
   struct
     type nonrec t =
       {
-      bucket: String_.t option [@ocaml.doc "An Amazon S3 bucket."];
-      defaultValue: String_.t option
-        [@ocaml.doc "The default value to assign to the property."];
-      field: String_.t option [@ocaml.doc "The field to bind the data to."];
-      key: String_.t option
-        [@ocaml.doc "The storage key for an Amazon S3 bucket."];
       model: String_.t option [@ocaml.doc "An Amplify DataStore model."];
+      field: String_.t option [@ocaml.doc "The field to bind the data to."];
       predicates: PredicateList.t option
         [@ocaml.doc
           "A list of predicates for binding a component's properties to data."];
       userAttribute: String_.t option
-        [@ocaml.doc "An authenticated user attribute."]}
-    let make ?bucket =
-      fun ?defaultValue ->
-        fun ?field ->
-          fun ?key ->
-            fun ?model ->
-              fun ?predicates ->
-                fun ?userAttribute ->
-                  fun () ->
-                    {
-                      bucket;
-                      defaultValue;
-                      field;
-                      key;
-                      model;
-                      predicates;
-                      userAttribute
-                    }
+        [@ocaml.doc "An authenticated user attribute."];
+      bucket: String_.t option [@ocaml.doc "An Amazon S3 bucket."];
+      key: String_.t option
+        [@ocaml.doc "The storage key for an Amazon S3 bucket."];
+      defaultValue: String_.t option
+        [@ocaml.doc "The default value to assign to the property."];
+      slotName: String_.t option [@ocaml.doc "The name of a component slot."]}
+    let make ?model =
+      fun ?field ->
+        fun ?predicates ->
+          fun ?userAttribute ->
+            fun ?bucket ->
+              fun ?key ->
+                fun ?defaultValue ->
+                  fun ?slotName ->
+                    fun () ->
+                      {
+                        model;
+                        field;
+                        predicates;
+                        userAttribute;
+                        bucket;
+                        key;
+                        defaultValue;
+                        slotName
+                      }
     let to_value x =
       structure_to_value
-        [("bucket", (Option.map x.bucket ~f:String_.to_value));
-        ("defaultValue", (Option.map x.defaultValue ~f:String_.to_value));
+        [("model", (Option.map x.model ~f:String_.to_value));
         ("field", (Option.map x.field ~f:String_.to_value));
-        ("key", (Option.map x.key ~f:String_.to_value));
-        ("model", (Option.map x.model ~f:String_.to_value));
         ("predicates", (Option.map x.predicates ~f:PredicateList.to_value));
-        ("userAttribute", (Option.map x.userAttribute ~f:String_.to_value))]
+        ("userAttribute", (Option.map x.userAttribute ~f:String_.to_value));
+        ("bucket", (Option.map x.bucket ~f:String_.to_value));
+        ("key", (Option.map x.key ~f:String_.to_value));
+        ("defaultValue", (Option.map x.defaultValue ~f:String_.to_value));
+        ("slotName", (Option.map x.slotName ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let slotName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "slotName") in
+      let defaultValue =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "defaultValue") in
+      let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "key") in
+      let bucket =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "bucket") in
       let userAttribute =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "userAttribute") in
       let predicates =
         (Option.map ~f:PredicateList.of_xml)
           (Xml.child xml_arg0 "predicates") in
-      let model = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "model") in
-      let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "key") in
       let field = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "field") in
-      let defaultValue =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "defaultValue") in
-      let bucket =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "bucket") in
-      make ?userAttribute ?predicates ?model ?key ?field ?defaultValue
-        ?bucket ()
+      let model = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "model") in
+      make ?slotName ?defaultValue ?key ?bucket ?userAttribute ?predicates
+        ?field ?model ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userAttribute = field_map json "userAttribute" String_.of_json in
-      let predicates = field_map json "predicates" PredicateList.of_json in
-      let model = field_map json "model" String_.of_json in
-      let key = field_map json "key" String_.of_json in
-      let field = field_map json "field" String_.of_json in
-      let defaultValue = field_map json "defaultValue" String_.of_json in
-      let bucket = field_map json "bucket" String_.of_json in
-      make ?userAttribute ?predicates ?model ?key ?field ?defaultValue
-        ?bucket ()
+    let of_json json__ =
+      let slotName = field_map json__ "slotName" String_.of_json in
+      let defaultValue = field_map json__ "defaultValue" String_.of_json in
+      let key = field_map json__ "key" String_.of_json in
+      let bucket = field_map json__ "bucket" String_.of_json in
+      let userAttribute = field_map json__ "userAttribute" String_.of_json in
+      let predicates = field_map json__ "predicates" PredicateList.of_json in
+      let field = field_map json__ "field" String_.of_json in
+      let model = field_map json__ "model" String_.of_json in
+      make ?slotName ?defaultValue ?key ?bucket ?userAttribute ?predicates
+        ?field ?model ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the data binding configuration for a specific property using data stored in Amazon Web Services. For Amazon Web Services connected properties, you can bind a property to data stored in an Amazon S3 bucket, an Amplify DataStore model or an authenticated user attribute."]
@@ -1549,39 +3181,40 @@ module ComponentBindingPropertiesValue =
   struct
     type nonrec t =
       {
+      type_: String_.t option [@ocaml.doc "The property type."];
       bindingProperties: ComponentBindingPropertiesValueProperties.t option
         [@ocaml.doc
           "Describes the properties to customize with data at runtime."];
       defaultValue: String_.t option
-        [@ocaml.doc "The default value of the property."];
-      type_: String_.t option [@ocaml.doc "The property type."]}
-    let make ?bindingProperties =
-      fun ?defaultValue ->
-        fun ?type_ -> fun () -> { bindingProperties; defaultValue; type_ }
+        [@ocaml.doc "The default value of the property."]}
+    let make ?type_ =
+      fun ?bindingProperties ->
+        fun ?defaultValue ->
+          fun () -> { type_; bindingProperties; defaultValue }
     let to_value x =
       structure_to_value
-        [("bindingProperties",
-           (Option.map x.bindingProperties
-              ~f:ComponentBindingPropertiesValueProperties.to_value));
-        ("defaultValue", (Option.map x.defaultValue ~f:String_.to_value));
-        ("type", (Option.map x.type_ ~f:String_.to_value))]
+        [("type", (Option.map x.type_ ~f:String_.to_value));
+        ("bindingProperties",
+          (Option.map x.bindingProperties
+             ~f:ComponentBindingPropertiesValueProperties.to_value));
+        ("defaultValue", (Option.map x.defaultValue ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       let defaultValue =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "defaultValue") in
       let bindingProperties =
         (Option.map ~f:ComponentBindingPropertiesValueProperties.of_xml)
           (Xml.child xml_arg0 "bindingProperties") in
-      make ?type_ ?defaultValue ?bindingProperties ()
+      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
+      make ?defaultValue ?bindingProperties ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" String_.of_json in
-      let defaultValue = field_map json "defaultValue" String_.of_json in
+    let of_json json__ =
+      let defaultValue = field_map json__ "defaultValue" String_.of_json in
       let bindingProperties =
-        field_map json "bindingProperties"
+        field_map json__ "bindingProperties"
           ComponentBindingPropertiesValueProperties.of_json in
-      make ?type_ ?defaultValue ?bindingProperties ()
+      let type_ = field_map json__ "type" String_.of_json in
+      make ?defaultValue ?bindingProperties ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the data binding configuration for a component at runtime. You can use ComponentBindingPropertiesValue to add exposed properties to a component to allow different values to be entered when a component is reused in different places in an app."]
@@ -1610,6 +3243,8 @@ module ComponentBindingProperties =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1621,194 +3256,194 @@ module Component =
   struct
     type nonrec t =
       {
-      appId: String_.t
+      appId: String_.t option
         [@ocaml.doc
           "The unique ID of the Amplify app associated with the component."];
-      bindingProperties: ComponentBindingProperties.t
-        [@ocaml.doc
-          "The information to connect a component's properties to data at runtime. You can't specify tags as a valid property for bindingProperties."];
-      children: ComponentChildList.t option
-        [@ocaml.doc "A list of the component's ComponentChild instances."];
-      collectionProperties: ComponentCollectionProperties.t option
-        [@ocaml.doc
-          "The data binding configuration for the component's properties. Use this for a collection component. You can't specify tags as a valid property for collectionProperties."];
-      componentType: ComponentType.t
-        [@ocaml.doc
-          "The type of the component. This can be an Amplify custom UI component or another custom component."];
-      createdAt: SyntheticTimestamp_date_time.t
-        [@ocaml.doc "The time that the component was created."];
-      environmentName: String_.t
+      environmentName: String_.t option
         [@ocaml.doc
           "The name of the backend environment that is a part of the Amplify app."];
-      events: ComponentEvents.t option
-        [@ocaml.doc
-          "Describes the events that can be raised on the component. Use for the workflow feature in Amplify Studio that allows you to bind events and actions to components."];
-      id: Uuid.t [@ocaml.doc "The unique ID of the component."];
-      modifiedAt: SyntheticTimestamp_date_time.t option
-        [@ocaml.doc "The time that the component was modified."];
-      name: ComponentName.t [@ocaml.doc "The name of the component."];
-      overrides: ComponentOverrides.t
-        [@ocaml.doc
-          "Describes the component's properties that can be overriden in a customized instance of the component. You can't specify tags as a valid property for overrides."];
-      properties: ComponentProperties.t
-        [@ocaml.doc
-          "Describes the component's properties. You can't specify tags as a valid property for properties."];
-      schemaVersion: String_.t option
-        [@ocaml.doc
-          "The schema version of the component when it was imported."];
       sourceId: String_.t option
         [@ocaml.doc
           "The unique ID of the component in its original source system, such as Figma."];
+      id: Uuid.t option [@ocaml.doc "The unique ID of the component."];
+      name: ComponentName.t option [@ocaml.doc "The name of the component."];
+      componentType: ComponentType.t option
+        [@ocaml.doc
+          "The type of the component. This can be an Amplify custom UI component or another custom component."];
+      properties: ComponentProperties.t option
+        [@ocaml.doc
+          "Describes the component's properties. You can't specify tags as a valid property for properties."];
+      children: ComponentChildList.t option
+        [@ocaml.doc "A list of the component's ComponentChild instances."];
+      variants: ComponentVariants.t option
+        [@ocaml.doc
+          "A list of the component's variants. A variant is a unique style configuration of a main component."];
+      overrides: ComponentOverrides.t option
+        [@ocaml.doc
+          "Describes the component's properties that can be overriden in a customized instance of the component. You can't specify tags as a valid property for overrides."];
+      bindingProperties: ComponentBindingProperties.t option
+        [@ocaml.doc
+          "The information to connect a component's properties to data at runtime. You can't specify tags as a valid property for bindingProperties."];
+      collectionProperties: ComponentCollectionProperties.t option
+        [@ocaml.doc
+          "The data binding configuration for the component's properties. Use this for a collection component. You can't specify tags as a valid property for collectionProperties."];
+      createdAt: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc "The time that the component was created."];
+      modifiedAt: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc "The time that the component was modified."];
       tags: Tags.t option
         [@ocaml.doc
           "One or more key-value pairs to use when tagging the component."];
-      variants: ComponentVariants.t
+      events: ComponentEvents.t option
         [@ocaml.doc
-          "A list of the component's variants. A variant is a unique style configuration of a main component."]}
-    let context_ = "Component"
-    let make ?children =
-      fun ?collectionProperties ->
-        fun ?events ->
-          fun ?modifiedAt ->
-            fun ?schemaVersion ->
-              fun ?sourceId ->
-                fun ?tags ->
-                  fun ~appId ->
-                    fun ~bindingProperties ->
-                      fun ~componentType ->
-                        fun ~createdAt ->
-                          fun ~environmentName ->
-                            fun ~id ->
-                              fun ~name ->
-                                fun ~overrides ->
-                                  fun ~properties ->
-                                    fun ~variants ->
+          "Describes the events that can be raised on the component. Use for the workflow feature in Amplify Studio that allows you to bind events and actions to components."];
+      schemaVersion: String_.t option
+        [@ocaml.doc
+          "The schema version of the component when it was imported."]}
+    let make ?appId =
+      fun ?environmentName ->
+        fun ?sourceId ->
+          fun ?id ->
+            fun ?name ->
+              fun ?componentType ->
+                fun ?properties ->
+                  fun ?children ->
+                    fun ?variants ->
+                      fun ?overrides ->
+                        fun ?bindingProperties ->
+                          fun ?collectionProperties ->
+                            fun ?createdAt ->
+                              fun ?modifiedAt ->
+                                fun ?tags ->
+                                  fun ?events ->
+                                    fun ?schemaVersion ->
                                       fun () ->
                                         {
-                                          children;
-                                          collectionProperties;
-                                          events;
-                                          modifiedAt;
-                                          schemaVersion;
-                                          sourceId;
-                                          tags;
                                           appId;
-                                          bindingProperties;
-                                          componentType;
-                                          createdAt;
                                           environmentName;
+                                          sourceId;
                                           id;
                                           name;
-                                          overrides;
+                                          componentType;
                                           properties;
-                                          variants
+                                          children;
+                                          variants;
+                                          overrides;
+                                          bindingProperties;
+                                          collectionProperties;
+                                          createdAt;
+                                          modifiedAt;
+                                          tags;
+                                          events;
+                                          schemaVersion
                                         }
     let to_value x =
       structure_to_value
-        [("appId", (Some (String_.to_value x.appId)));
-        ("bindingProperties",
-          (Some (ComponentBindingProperties.to_value x.bindingProperties)));
+        [("appId", (Option.map x.appId ~f:String_.to_value));
+        ("environmentName",
+          (Option.map x.environmentName ~f:String_.to_value));
+        ("sourceId", (Option.map x.sourceId ~f:String_.to_value));
+        ("id", (Option.map x.id ~f:Uuid.to_value));
+        ("name", (Option.map x.name ~f:ComponentName.to_value));
+        ("componentType",
+          (Option.map x.componentType ~f:ComponentType.to_value));
+        ("properties",
+          (Option.map x.properties ~f:ComponentProperties.to_value));
         ("children", (Option.map x.children ~f:ComponentChildList.to_value));
+        ("variants", (Option.map x.variants ~f:ComponentVariants.to_value));
+        ("overrides",
+          (Option.map x.overrides ~f:ComponentOverrides.to_value));
+        ("bindingProperties",
+          (Option.map x.bindingProperties
+             ~f:ComponentBindingProperties.to_value));
         ("collectionProperties",
           (Option.map x.collectionProperties
              ~f:ComponentCollectionProperties.to_value));
-        ("componentType", (Some (ComponentType.to_value x.componentType)));
         ("createdAt",
-          (Some (SyntheticTimestamp_date_time.to_value x.createdAt)));
-        ("environmentName", (Some (String_.to_value x.environmentName)));
-        ("events", (Option.map x.events ~f:ComponentEvents.to_value));
-        ("id", (Some (Uuid.to_value x.id)));
+          (Option.map x.createdAt ~f:SyntheticTimestamp_date_time.to_value));
         ("modifiedAt",
           (Option.map x.modifiedAt ~f:SyntheticTimestamp_date_time.to_value));
-        ("name", (Some (ComponentName.to_value x.name)));
-        ("overrides", (Some (ComponentOverrides.to_value x.overrides)));
-        ("properties", (Some (ComponentProperties.to_value x.properties)));
-        ("schemaVersion", (Option.map x.schemaVersion ~f:String_.to_value));
-        ("sourceId", (Option.map x.sourceId ~f:String_.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value));
-        ("variants", (Some (ComponentVariants.to_value x.variants)))]
+        ("events", (Option.map x.events ~f:ComponentEvents.to_value));
+        ("schemaVersion", (Option.map x.schemaVersion ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let variants =
-        ComponentVariants.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "variants") in
-      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
-      let sourceId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sourceId") in
       let schemaVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "schemaVersion") in
-      let properties =
-        ComponentProperties.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "properties") in
-      let overrides =
-        ComponentOverrides.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "overrides") in
-      let name =
-        ComponentName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let events =
+        (Option.map ~f:ComponentEvents.of_xml) (Xml.child xml_arg0 "events") in
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let modifiedAt =
         (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
           (Xml.child xml_arg0 "modifiedAt") in
-      let id = Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
-      let events =
-        (Option.map ~f:ComponentEvents.of_xml) (Xml.child xml_arg0 "events") in
-      let environmentName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
       let createdAt =
-        SyntheticTimestamp_date_time.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let componentType =
-        ComponentType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "componentType") in
+        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
+          (Xml.child xml_arg0 "createdAt") in
       let collectionProperties =
         (Option.map ~f:ComponentCollectionProperties.of_xml)
           (Xml.child xml_arg0 "collectionProperties") in
+      let bindingProperties =
+        (Option.map ~f:ComponentBindingProperties.of_xml)
+          (Xml.child xml_arg0 "bindingProperties") in
+      let overrides =
+        (Option.map ~f:ComponentOverrides.of_xml)
+          (Xml.child xml_arg0 "overrides") in
+      let variants =
+        (Option.map ~f:ComponentVariants.of_xml)
+          (Xml.child xml_arg0 "variants") in
       let children =
         (Option.map ~f:ComponentChildList.of_xml)
           (Xml.child xml_arg0 "children") in
-      let bindingProperties =
-        ComponentBindingProperties.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "bindingProperties") in
-      let appId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
-      make ~variants ?tags ?sourceId ?schemaVersion ~properties ~overrides
-        ~name ?modifiedAt ~id ?events ~environmentName ~createdAt
-        ~componentType ?collectionProperties ?children ~bindingProperties
-        ~appId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let variants = field_map_exn json "variants" ComponentVariants.of_json in
-      let tags = field_map json "tags" Tags.of_json in
-      let sourceId = field_map json "sourceId" String_.of_json in
-      let schemaVersion = field_map json "schemaVersion" String_.of_json in
       let properties =
-        field_map_exn json "properties" ComponentProperties.of_json in
-      let overrides =
-        field_map_exn json "overrides" ComponentOverrides.of_json in
-      let name = field_map_exn json "name" ComponentName.of_json in
-      let modifiedAt =
-        field_map json "modifiedAt" SyntheticTimestamp_date_time.of_json in
-      let id = field_map_exn json "id" Uuid.of_json in
-      let events = field_map json "events" ComponentEvents.of_json in
-      let environmentName =
-        field_map_exn json "environmentName" String_.of_json in
-      let createdAt =
-        field_map_exn json "createdAt" SyntheticTimestamp_date_time.of_json in
+        (Option.map ~f:ComponentProperties.of_xml)
+          (Xml.child xml_arg0 "properties") in
       let componentType =
-        field_map_exn json "componentType" ComponentType.of_json in
+        (Option.map ~f:ComponentType.of_xml)
+          (Xml.child xml_arg0 "componentType") in
+      let name =
+        (Option.map ~f:ComponentName.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "id") in
+      let sourceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sourceId") in
+      let environmentName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "environmentName") in
+      let appId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "appId") in
+      make ?schemaVersion ?events ?tags ?modifiedAt ?createdAt
+        ?collectionProperties ?bindingProperties ?overrides ?variants
+        ?children ?properties ?componentType ?name ?id ?sourceId
+        ?environmentName ?appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let schemaVersion = field_map json__ "schemaVersion" String_.of_json in
+      let events = field_map json__ "events" ComponentEvents.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let modifiedAt =
+        field_map json__ "modifiedAt" SyntheticTimestamp_date_time.of_json in
+      let createdAt =
+        field_map json__ "createdAt" SyntheticTimestamp_date_time.of_json in
       let collectionProperties =
-        field_map json "collectionProperties"
+        field_map json__ "collectionProperties"
           ComponentCollectionProperties.of_json in
-      let children = field_map json "children" ComponentChildList.of_json in
       let bindingProperties =
-        field_map_exn json "bindingProperties"
+        field_map json__ "bindingProperties"
           ComponentBindingProperties.of_json in
-      let appId = field_map_exn json "appId" String_.of_json in
-      make ~variants ?tags ?sourceId ?schemaVersion ~properties ~overrides
-        ~name ?modifiedAt ~id ?events ~environmentName ~createdAt
-        ~componentType ?collectionProperties ?children ~bindingProperties
-        ~appId ()
+      let overrides = field_map json__ "overrides" ComponentOverrides.of_json in
+      let variants = field_map json__ "variants" ComponentVariants.of_json in
+      let children = field_map json__ "children" ComponentChildList.of_json in
+      let properties =
+        field_map json__ "properties" ComponentProperties.of_json in
+      let componentType =
+        field_map json__ "componentType" ComponentType.of_json in
+      let name = field_map json__ "name" ComponentName.of_json in
+      let id = field_map json__ "id" Uuid.of_json in
+      let sourceId = field_map json__ "sourceId" String_.of_json in
+      let environmentName =
+        field_map json__ "environmentName" String_.of_json in
+      let appId = field_map json__ "appId" String_.of_json in
+      make ?schemaVersion ?events ?tags ?modifiedAt ?createdAt
+        ?collectionProperties ?bindingProperties ?overrides ?variants
+        ?children ?properties ?componentType ?name ?id ?sourceId
+        ?environmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the configuration settings for a user interface (UI) element for an Amplify app. A component is configured as a primary, stand-alone UI element. Use ComponentChild to configure an instance of a Component. A ComponentChild instance inherits the configuration of the main Component."]
@@ -1816,6 +3451,9 @@ module ComponentList =
   struct
     type nonrec t = Component.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Component.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1840,54 +3478,53 @@ module ComponentSummary =
   struct
     type nonrec t =
       {
-      appId: String_.t
+      appId: String_.t option
         [@ocaml.doc
           "The unique ID of the Amplify app associated with the component."];
-      componentType: ComponentType.t [@ocaml.doc "The component type."];
-      environmentName: String_.t
+      environmentName: String_.t option
         [@ocaml.doc
           "The name of the backend environment that is a part of the Amplify app."];
-      id: Uuid.t [@ocaml.doc "The unique ID of the component."];
-      name: ComponentName.t [@ocaml.doc "The name of the component."]}
-    let context_ = "ComponentSummary"
-    let make ~appId =
-      fun ~componentType ->
-        fun ~environmentName ->
-          fun ~id ->
-            fun ~name ->
-              fun () -> { appId; componentType; environmentName; id; name }
+      id: Uuid.t option [@ocaml.doc "The unique ID of the component."];
+      name: ComponentName.t option [@ocaml.doc "The name of the component."];
+      componentType: ComponentType.t option
+        [@ocaml.doc "The component type."]}
+    let make ?appId =
+      fun ?environmentName ->
+        fun ?id ->
+          fun ?name ->
+            fun ?componentType ->
+              fun () -> { appId; environmentName; id; name; componentType }
     let to_value x =
       structure_to_value
-        [("appId", (Some (String_.to_value x.appId)));
-        ("componentType", (Some (ComponentType.to_value x.componentType)));
-        ("environmentName", (Some (String_.to_value x.environmentName)));
-        ("id", (Some (Uuid.to_value x.id)));
-        ("name", (Some (ComponentName.to_value x.name)))]
+        [("appId", (Option.map x.appId ~f:String_.to_value));
+        ("environmentName",
+          (Option.map x.environmentName ~f:String_.to_value));
+        ("id", (Option.map x.id ~f:Uuid.to_value));
+        ("name", (Option.map x.name ~f:ComponentName.to_value));
+        ("componentType",
+          (Option.map x.componentType ~f:ComponentType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let componentType =
+        (Option.map ~f:ComponentType.of_xml)
+          (Xml.child xml_arg0 "componentType") in
       let name =
-        ComponentName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let id = Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+        (Option.map ~f:ComponentName.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "id") in
       let environmentName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
-      let componentType =
-        ComponentType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "componentType") in
-      let appId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
-      make ~name ~id ~environmentName ~componentType ~appId ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "environmentName") in
+      let appId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "appId") in
+      make ?componentType ?name ?id ?environmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" ComponentName.of_json in
-      let id = field_map_exn json "id" Uuid.of_json in
-      let environmentName =
-        field_map_exn json "environmentName" String_.of_json in
+    let of_json json__ =
       let componentType =
-        field_map_exn json "componentType" ComponentType.of_json in
-      let appId = field_map_exn json "appId" String_.of_json in
-      make ~name ~id ~environmentName ~componentType ~appId ()
+        field_map json__ "componentType" ComponentType.of_json in
+      let name = field_map json__ "name" ComponentName.of_json in
+      let id = field_map json__ "id" Uuid.of_json in
+      let environmentName =
+        field_map json__ "environmentName" String_.of_json in
+      let appId = field_map json__ "appId" String_.of_json in
+      make ?componentType ?name ?id ?environmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains a summary of a component. This is a read-only data type that is returned by ListComponents."]
@@ -1895,6 +3532,9 @@ module ComponentSummaryList =
   struct
     type nonrec t = ComponentSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComponentSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1920,143 +3560,144 @@ module CreateComponentData =
   struct
     type nonrec t =
       {
-      bindingProperties: ComponentBindingProperties.t
-        [@ocaml.doc
-          "The data binding information for the component's properties."];
-      children: ComponentChildList.t option
-        [@ocaml.doc
-          "A list of child components that are instances of the main component."];
-      collectionProperties: ComponentCollectionProperties.t option
-        [@ocaml.doc
-          "The data binding configuration for customizing a component's properties. Use this for a collection component."];
-      componentType: ComponentType.t
-        [@ocaml.doc
-          "The component type. This can be an Amplify custom UI component or another custom component."];
-      events: ComponentEvents.t option
-        [@ocaml.doc
-          "The event configuration for the component. Use for the workflow feature in Amplify Studio that allows you to bind events and actions to components."];
       name: ComponentName.t [@ocaml.doc "The name of the component"];
-      overrides: ComponentOverrides.t
-        [@ocaml.doc
-          "Describes the component properties that can be overriden to customize an instance of the component."];
-      properties: ComponentProperties.t
-        [@ocaml.doc "Describes the component's properties."];
-      schemaVersion: String_.t option
-        [@ocaml.doc
-          "The schema version of the component when it was imported."];
       sourceId: String_.t option
         [@ocaml.doc
           "The unique ID of the component in its original source system, such as Figma."];
+      componentType: ComponentType.t
+        [@ocaml.doc
+          "The component type. This can be an Amplify custom UI component or another custom component."];
+      properties: ComponentProperties.t
+        [@ocaml.doc "Describes the component's properties."];
+      children: ComponentChildList.t option
+        [@ocaml.doc
+          "A list of child components that are instances of the main component."];
+      variants: ComponentVariants.t
+        [@ocaml.doc "A list of the unique variants of this component."];
+      overrides: ComponentOverrides.t
+        [@ocaml.doc
+          "Describes the component properties that can be overriden to customize an instance of the component."];
+      bindingProperties: ComponentBindingProperties.t
+        [@ocaml.doc
+          "The data binding information for the component's properties."];
+      collectionProperties: ComponentCollectionProperties.t option
+        [@ocaml.doc
+          "The data binding configuration for customizing a component's properties. Use this for a collection component."];
       tags: Tags.t option
         [@ocaml.doc
           "One or more key-value pairs to use when tagging the component data."];
-      variants: ComponentVariants.t
-        [@ocaml.doc "A list of the unique variants of this component."]}
+      events: ComponentEvents.t option
+        [@ocaml.doc
+          "The event configuration for the component. Use for the workflow feature in Amplify Studio that allows you to bind events and actions to components."];
+      schemaVersion: String_.t option
+        [@ocaml.doc
+          "The schema version of the component when it was imported."]}
     let context_ = "CreateComponentData"
-    let make ?children =
-      fun ?collectionProperties ->
-        fun ?events ->
-          fun ?schemaVersion ->
-            fun ?sourceId ->
-              fun ?tags ->
-                fun ~bindingProperties ->
+    let make ?sourceId =
+      fun ?children ->
+        fun ?collectionProperties ->
+          fun ?tags ->
+            fun ?events ->
+              fun ?schemaVersion ->
+                fun ~name ->
                   fun ~componentType ->
-                    fun ~name ->
-                      fun ~overrides ->
-                        fun ~properties ->
-                          fun ~variants ->
+                    fun ~properties ->
+                      fun ~variants ->
+                        fun ~overrides ->
+                          fun ~bindingProperties ->
                             fun () ->
                               {
+                                sourceId;
                                 children;
                                 collectionProperties;
+                                tags;
                                 events;
                                 schemaVersion;
-                                sourceId;
-                                tags;
-                                bindingProperties;
-                                componentType;
                                 name;
-                                overrides;
+                                componentType;
                                 properties;
-                                variants
+                                variants;
+                                overrides;
+                                bindingProperties
                               }
     let to_value x =
       structure_to_value
-        [("bindingProperties",
-           (Some (ComponentBindingProperties.to_value x.bindingProperties)));
+        [("name", (Some (ComponentName.to_value x.name)));
+        ("sourceId", (Option.map x.sourceId ~f:String_.to_value));
+        ("componentType", (Some (ComponentType.to_value x.componentType)));
+        ("properties", (Some (ComponentProperties.to_value x.properties)));
         ("children", (Option.map x.children ~f:ComponentChildList.to_value));
+        ("variants", (Some (ComponentVariants.to_value x.variants)));
+        ("overrides", (Some (ComponentOverrides.to_value x.overrides)));
+        ("bindingProperties",
+          (Some (ComponentBindingProperties.to_value x.bindingProperties)));
         ("collectionProperties",
           (Option.map x.collectionProperties
              ~f:ComponentCollectionProperties.to_value));
-        ("componentType", (Some (ComponentType.to_value x.componentType)));
-        ("events", (Option.map x.events ~f:ComponentEvents.to_value));
-        ("name", (Some (ComponentName.to_value x.name)));
-        ("overrides", (Some (ComponentOverrides.to_value x.overrides)));
-        ("properties", (Some (ComponentProperties.to_value x.properties)));
-        ("schemaVersion", (Option.map x.schemaVersion ~f:String_.to_value));
-        ("sourceId", (Option.map x.sourceId ~f:String_.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value));
-        ("variants", (Some (ComponentVariants.to_value x.variants)))]
+        ("events", (Option.map x.events ~f:ComponentEvents.to_value));
+        ("schemaVersion", (Option.map x.schemaVersion ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let variants =
-        ComponentVariants.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "variants") in
-      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
-      let sourceId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sourceId") in
       let schemaVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "schemaVersion") in
-      let properties =
-        ComponentProperties.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "properties") in
-      let overrides =
-        ComponentOverrides.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "overrides") in
-      let name =
-        ComponentName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let events =
         (Option.map ~f:ComponentEvents.of_xml) (Xml.child xml_arg0 "events") in
-      let componentType =
-        ComponentType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "componentType") in
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let collectionProperties =
         (Option.map ~f:ComponentCollectionProperties.of_xml)
           (Xml.child xml_arg0 "collectionProperties") in
-      let children =
-        (Option.map ~f:ComponentChildList.of_xml)
-          (Xml.child xml_arg0 "children") in
       let bindingProperties =
         ComponentBindingProperties.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bindingProperties") in
-      make ~variants ?tags ?sourceId ?schemaVersion ~properties ~overrides
-        ~name ?events ~componentType ?collectionProperties ?children
-        ~bindingProperties ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let variants = field_map_exn json "variants" ComponentVariants.of_json in
-      let tags = field_map json "tags" Tags.of_json in
-      let sourceId = field_map json "sourceId" String_.of_json in
-      let schemaVersion = field_map json "schemaVersion" String_.of_json in
-      let properties =
-        field_map_exn json "properties" ComponentProperties.of_json in
       let overrides =
-        field_map_exn json "overrides" ComponentOverrides.of_json in
-      let name = field_map_exn json "name" ComponentName.of_json in
-      let events = field_map json "events" ComponentEvents.of_json in
+        ComponentOverrides.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "overrides") in
+      let variants =
+        ComponentVariants.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "variants") in
+      let children =
+        (Option.map ~f:ComponentChildList.of_xml)
+          (Xml.child xml_arg0 "children") in
+      let properties =
+        ComponentProperties.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "properties") in
       let componentType =
-        field_map_exn json "componentType" ComponentType.of_json in
+        ComponentType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "componentType") in
+      let sourceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sourceId") in
+      let name =
+        ComponentName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?schemaVersion ?events ?tags ?collectionProperties
+        ~bindingProperties ~overrides ~variants ?children ~properties
+        ~componentType ?sourceId ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let schemaVersion = field_map json__ "schemaVersion" String_.of_json in
+      let events = field_map json__ "events" ComponentEvents.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
       let collectionProperties =
-        field_map json "collectionProperties"
+        field_map json__ "collectionProperties"
           ComponentCollectionProperties.of_json in
-      let children = field_map json "children" ComponentChildList.of_json in
       let bindingProperties =
-        field_map_exn json "bindingProperties"
+        field_map_exn json__ "bindingProperties"
           ComponentBindingProperties.of_json in
-      make ~variants ?tags ?sourceId ?schemaVersion ~properties ~overrides
-        ~name ?events ~componentType ?collectionProperties ?children
-        ~bindingProperties ()
+      let overrides =
+        field_map_exn json__ "overrides" ComponentOverrides.of_json in
+      let variants =
+        field_map_exn json__ "variants" ComponentVariants.of_json in
+      let children = field_map json__ "children" ComponentChildList.of_json in
+      let properties =
+        field_map_exn json__ "properties" ComponentProperties.of_json in
+      let componentType =
+        field_map_exn json__ "componentType" ComponentType.of_json in
+      let sourceId = field_map json__ "sourceId" String_.of_json in
+      let name = field_map_exn json__ "name" ComponentName.of_json in
+      make ?schemaVersion ?events ?tags ?collectionProperties
+        ~bindingProperties ~overrides ~variants ?children ~properties
+        ~componentType ?sourceId ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents all of the information that is required to create a component."]
@@ -2067,64 +3708,64 @@ module CreateComponentRequest =
       appId: String_.t
         [@ocaml.doc
           "The unique ID of the Amplify app to associate with the component."];
+      environmentName: String_.t
+        [@ocaml.doc
+          "The name of the backend environment that is a part of the Amplify app."];
       clientToken: String_.t option [@ocaml.doc "The unique client token."];
       componentToCreate: CreateComponentData.t
         [@ocaml.doc
-          "Represents the configuration of the component to create."];
-      environmentName: String_.t
-        [@ocaml.doc
-          "The name of the backend environment that is a part of the Amplify app."]}
+          "Represents the configuration of the component to create."]}
     let context_ = "CreateComponentRequest"
     let make ?clientToken =
       fun ~appId ->
-        fun ~componentToCreate ->
-          fun ~environmentName ->
+        fun ~environmentName ->
+          fun ~componentToCreate ->
             fun () ->
-              { clientToken; appId; componentToCreate; environmentName }
+              { clientToken; appId; environmentName; componentToCreate }
     let of_header_and_body =
       ((fun (xs, pipe) ->
           make
             ~appId:(String_.of_string
                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
                          "appId"))
-            ?clientToken:(Option.map
-                            ((List.Assoc.find ~equal:String.Caseless.equal)
-                               xs "clientToken") ~f:String_.of_string)
-            ~componentToCreate:pipe
             ~environmentName:(String_.of_string
                                 ((List.Assoc.find_exn
                                     ~equal:String.Caseless.equal) xs
-                                   "environmentName")) ())
+                                   "environmentName"))
+            ?clientToken:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs "clientToken") ~f:String_.of_string)
+            ~componentToCreate:pipe ())
       [@warning "-27"])
     let to_value x =
       structure_to_value
         [("appId", (Some (String_.to_value x.appId)));
+        ("environmentName", (Some (String_.to_value x.environmentName)));
         ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
         ("componentToCreate",
-          (Some (CreateComponentData.to_value x.componentToCreate)));
-        ("environmentName", (Some (String_.to_value x.environmentName)))]
+          (Some (CreateComponentData.to_value x.componentToCreate)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let environmentName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
       let componentToCreate =
         CreateComponentData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "componentToCreate") in
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let environmentName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
-      make ~environmentName ~componentToCreate ?clientToken ~appId ()
+      make ~componentToCreate ?clientToken ~environmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let environmentName =
-        field_map_exn json "environmentName" String_.of_json in
+    let of_json json__ =
       let componentToCreate =
-        field_map_exn json "componentToCreate" CreateComponentData.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      let appId = field_map_exn json "appId" String_.of_json in
-      make ~environmentName ~componentToCreate ?clientToken ~appId ()
+        field_map_exn json__ "componentToCreate" CreateComponentData.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let environmentName =
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
+      make ~componentToCreate ?clientToken ~environmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new component for an Amplify app."]
 module ServiceQuotaExceededException =
@@ -2141,8 +3782,8 @@ module ServiceQuotaExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2161,8 +3802,8 @@ module ResourceConflictException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2181,8 +3822,8 @@ module InvalidParameterException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2201,8 +3842,8 @@ module InternalServerException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2281,22 +3922,1701 @@ module CreateComponentResponse =
         (Option.map ~f:Component.of_xml) (Xml.child xml_arg0 "entity") in
       make ?entity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entity = field_map json "entity" Component.of_json in
+    let of_json json__ =
+      let entity = field_map json__ "entity" Component.of_json in
       make ?entity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new component for an Amplify app."]
+module Integer =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module FixedPosition =
+  struct
+    type nonrec t =
+      | First 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | First -> "first" | Non_static_id s -> s
+    let of_string = function | "first" -> First | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FixedPosition" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FixedPosition" j)
+    let to_json = simple_to_json to_value
+  end
+module FieldPosition =
+  struct
+    type nonrec t =
+      {
+      fixed: FixedPosition.t option
+        [@ocaml.doc
+          "The field position is fixed and doesn't change in relation to other fields."];
+      rightOf: String_.t option
+        [@ocaml.doc
+          "The field position is to the right of the field specified by the string."];
+      below: String_.t option
+        [@ocaml.doc
+          "The field position is below the field specified by the string."]}
+    let make ?fixed =
+      fun ?rightOf -> fun ?below -> fun () -> { fixed; rightOf; below }
+    let to_value x =
+      structure_to_value
+        [("fixed", (Option.map x.fixed ~f:FixedPosition.to_value));
+        ("rightOf", (Option.map x.rightOf ~f:String_.to_value));
+        ("below", (Option.map x.below ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let below = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "below") in
+      let rightOf =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "rightOf") in
+      let fixed =
+        (Option.map ~f:FixedPosition.of_xml) (Xml.child xml_arg0 "fixed") in
+      make ?below ?rightOf ?fixed ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let below = field_map json__ "below" String_.of_json in
+      let rightOf = field_map json__ "rightOf" String_.of_json in
+      let fixed = field_map json__ "fixed" FixedPosition.of_json in
+      make ?below ?rightOf ?fixed ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the field position."]
+module SectionalElement =
+  struct
+    type nonrec t =
+      {
+      type_: String_.t
+        [@ocaml.doc
+          "The type of sectional element. Valid values are Heading, Text, and Divider."];
+      position: FieldPosition.t option
+        [@ocaml.doc
+          "Specifies the position of the text in a field for a Text sectional element."];
+      text: String_.t option
+        [@ocaml.doc "The text for a Text sectional element."];
+      level: Integer.t option
+        [@ocaml.doc
+          "Specifies the size of the font for a Heading sectional element. Valid values are 1 | 2 | 3 | 4 | 5 | 6."];
+      orientation: String_.t option
+        [@ocaml.doc
+          "Specifies the orientation for a Divider sectional element. Valid values are horizontal or vertical."];
+      excluded: Boolean.t option
+        [@ocaml.doc
+          "Excludes a sectional element that was generated by default for a specified data model."]}
+    let context_ = "SectionalElement"
+    let make ?position =
+      fun ?text ->
+        fun ?level ->
+          fun ?orientation ->
+            fun ?excluded ->
+              fun ~type_ ->
+                fun () ->
+                  { position; text; level; orientation; excluded; type_ }
+    let to_value x =
+      structure_to_value
+        [("type", (Some (String_.to_value x.type_)));
+        ("position", (Option.map x.position ~f:FieldPosition.to_value));
+        ("text", (Option.map x.text ~f:String_.to_value));
+        ("level", (Option.map x.level ~f:Integer.to_value));
+        ("orientation", (Option.map x.orientation ~f:String_.to_value));
+        ("excluded", (Option.map x.excluded ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excluded =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "excluded") in
+      let orientation =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "orientation") in
+      let level = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "level") in
+      let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "text") in
+      let position =
+        (Option.map ~f:FieldPosition.of_xml) (Xml.child xml_arg0 "position") in
+      let type_ =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      make ?excluded ?orientation ?level ?text ?position ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excluded = field_map json__ "excluded" Boolean.of_json in
+      let orientation = field_map json__ "orientation" String_.of_json in
+      let level = field_map json__ "level" Integer.of_json in
+      let text = field_map json__ "text" String_.of_json in
+      let position = field_map json__ "position" FieldPosition.of_json in
+      let type_ = field_map_exn json__ "type" String_.of_json in
+      make ?excluded ?orientation ?level ?text ?position ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Stores the configuration information for a visual helper element for a form. A sectional element can be a header, a text block, or a divider. These elements are static and not associated with any data."]
+module SectionalElementMap =
+  struct
+    type nonrec t = (String_.t * SectionalElement.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types String SectionalElement"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x ->
+                       (SectionalElement.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:SectionalElement.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LabelDecorator =
+  struct
+    type nonrec t =
+      | Required 
+      | Optional 
+      | None 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Required -> "required"
+      | Optional -> "optional"
+      | None -> "none"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "required" -> Required
+      | "optional" -> Optional
+      | "none" -> None
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LabelDecorator" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LabelDecorator" j)
+    let to_json = simple_to_json to_value
+  end
+module FormStyleConfig =
+  struct
+    type nonrec t =
+      {
+      tokenReference: String_.t option
+        [@ocaml.doc
+          "A reference to a design token to use to bind the form's style properties to an existing theme."];
+      value: String_.t option [@ocaml.doc "The value of the style setting."]}
+    let make ?tokenReference =
+      fun ?value -> fun () -> { tokenReference; value }
+    let to_value x =
+      structure_to_value
+        [("tokenReference",
+           (Option.map x.tokenReference ~f:String_.to_value));
+        ("value", (Option.map x.value ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
+      let tokenReference =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "tokenReference") in
+      make ?value ?tokenReference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" String_.of_json in
+      let tokenReference = field_map json__ "tokenReference" String_.of_json in
+      make ?value ?tokenReference ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the configuration settings for the form's style properties."]
+module FormStyle =
+  struct
+    type nonrec t =
+      {
+      horizontalGap: FormStyleConfig.t option
+        [@ocaml.doc "The spacing for the horizontal gap."];
+      verticalGap: FormStyleConfig.t option
+        [@ocaml.doc "The spacing for the vertical gap."];
+      outerPadding: FormStyleConfig.t option
+        [@ocaml.doc "The size of the outer padding for the form."]}
+    let make ?horizontalGap =
+      fun ?verticalGap ->
+        fun ?outerPadding ->
+          fun () -> { horizontalGap; verticalGap; outerPadding }
+    let to_value x =
+      structure_to_value
+        [("horizontalGap",
+           (Option.map x.horizontalGap ~f:FormStyleConfig.to_value));
+        ("verticalGap",
+          (Option.map x.verticalGap ~f:FormStyleConfig.to_value));
+        ("outerPadding",
+          (Option.map x.outerPadding ~f:FormStyleConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let outerPadding =
+        (Option.map ~f:FormStyleConfig.of_xml)
+          (Xml.child xml_arg0 "outerPadding") in
+      let verticalGap =
+        (Option.map ~f:FormStyleConfig.of_xml)
+          (Xml.child xml_arg0 "verticalGap") in
+      let horizontalGap =
+        (Option.map ~f:FormStyleConfig.of_xml)
+          (Xml.child xml_arg0 "horizontalGap") in
+      make ?outerPadding ?verticalGap ?horizontalGap ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let outerPadding =
+        field_map json__ "outerPadding" FormStyleConfig.of_json in
+      let verticalGap =
+        field_map json__ "verticalGap" FormStyleConfig.of_json in
+      let horizontalGap =
+        field_map json__ "horizontalGap" FormStyleConfig.of_json in
+      make ?outerPadding ?verticalGap ?horizontalGap ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the configuration for the form's style."]
+module FormName =
+  struct
+    type nonrec t = string
+    let context_ = "FormName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FormName" j
+    let to_json = simple_to_json to_value
+  end
+module FormDataSourceType =
+  struct
+    type nonrec t =
+      | DataStore 
+      | Custom 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DataStore -> "DataStore"
+      | Custom -> "Custom"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DataStore" -> DataStore
+      | "Custom" -> Custom
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FormDataSourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FormDataSourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module FormDataTypeConfig =
+  struct
+    type nonrec t =
+      {
+      dataSourceType: FormDataSourceType.t
+        [@ocaml.doc
+          "The data source type, either an Amplify DataStore model or a custom data type."];
+      dataTypeName: String_.t
+        [@ocaml.doc
+          "The unique name of the data type you are using as the data source for the form."]}
+    let context_ = "FormDataTypeConfig"
+    let make ~dataSourceType =
+      fun ~dataTypeName -> fun () -> { dataSourceType; dataTypeName }
+    let to_value x =
+      structure_to_value
+        [("dataSourceType",
+           (Some (FormDataSourceType.to_value x.dataSourceType)));
+        ("dataTypeName", (Some (String_.to_value x.dataTypeName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataTypeName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dataTypeName") in
+      let dataSourceType =
+        FormDataSourceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dataSourceType") in
+      make ~dataTypeName ~dataSourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataTypeName = field_map_exn json__ "dataTypeName" String_.of_json in
+      let dataSourceType =
+        field_map_exn json__ "dataSourceType" FormDataSourceType.of_json in
+      make ~dataTypeName ~dataSourceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the data type configuration for the data source associated with a form."]
+module FormButtonsPosition =
+  struct
+    type nonrec t =
+      | Top 
+      | Bottom 
+      | Top_and_bottom 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Top -> "top"
+      | Bottom -> "bottom"
+      | Top_and_bottom -> "top_and_bottom"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "top" -> Top
+      | "bottom" -> Bottom
+      | "top_and_bottom" -> Top_and_bottom
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FormButtonsPosition" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FormButtonsPosition" j)
+    let to_json = simple_to_json to_value
+  end
+module FormButton =
+  struct
+    type nonrec t =
+      {
+      excluded: Boolean.t option
+        [@ocaml.doc "Specifies whether the button is visible on the form."];
+      children: String_.t option
+        [@ocaml.doc "Describes the button's properties."];
+      position: FieldPosition.t option
+        [@ocaml.doc "The position of the button."]}
+    let make ?excluded =
+      fun ?children ->
+        fun ?position -> fun () -> { excluded; children; position }
+    let to_value x =
+      structure_to_value
+        [("excluded", (Option.map x.excluded ~f:Boolean.to_value));
+        ("children", (Option.map x.children ~f:String_.to_value));
+        ("position", (Option.map x.position ~f:FieldPosition.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let position =
+        (Option.map ~f:FieldPosition.of_xml) (Xml.child xml_arg0 "position") in
+      let children =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "children") in
+      let excluded =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "excluded") in
+      make ?position ?children ?excluded ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let position = field_map json__ "position" FieldPosition.of_json in
+      let children = field_map json__ "children" String_.of_json in
+      let excluded = field_map json__ "excluded" Boolean.of_json in
+      make ?position ?children ?excluded ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the configuration for a button UI element that is a part of a form."]
+module FormCTA =
+  struct
+    type nonrec t =
+      {
+      position: FormButtonsPosition.t option
+        [@ocaml.doc "The position of the button."];
+      clear: FormButton.t option [@ocaml.doc "Displays a clear button."];
+      cancel: FormButton.t option [@ocaml.doc "Displays a cancel button."];
+      submit: FormButton.t option [@ocaml.doc "Displays a submit button."]}
+    let make ?position =
+      fun ?clear ->
+        fun ?cancel ->
+          fun ?submit -> fun () -> { position; clear; cancel; submit }
+    let to_value x =
+      structure_to_value
+        [("position",
+           (Option.map x.position ~f:FormButtonsPosition.to_value));
+        ("clear", (Option.map x.clear ~f:FormButton.to_value));
+        ("cancel", (Option.map x.cancel ~f:FormButton.to_value));
+        ("submit", (Option.map x.submit ~f:FormButton.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let submit =
+        (Option.map ~f:FormButton.of_xml) (Xml.child xml_arg0 "submit") in
+      let cancel =
+        (Option.map ~f:FormButton.of_xml) (Xml.child xml_arg0 "cancel") in
+      let clear =
+        (Option.map ~f:FormButton.of_xml) (Xml.child xml_arg0 "clear") in
+      let position =
+        (Option.map ~f:FormButtonsPosition.of_xml)
+          (Xml.child xml_arg0 "position") in
+      make ?submit ?cancel ?clear ?position ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let submit = field_map json__ "submit" FormButton.of_json in
+      let cancel = field_map json__ "cancel" FormButton.of_json in
+      let clear = field_map json__ "clear" FormButton.of_json in
+      let position = field_map json__ "position" FormButtonsPosition.of_json in
+      make ?submit ?cancel ?clear ?position ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the call to action button configuration for the form."]
+module FormActionType =
+  struct
+    type nonrec t =
+      | Create 
+      | Update 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Create -> "create"
+      | Update -> "update"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "create" -> Create
+      | "update" -> Update
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FormActionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FormActionType" j)
+    let to_json = simple_to_json to_value
+  end
+module StrValues =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j = list_of_json ~kind:"StrValues" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NumValues =
+  struct
+    type nonrec t = Integer.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Integer.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Integer.of_xml)
+    let of_json j = list_of_json ~kind:"NumValues" ~of_json:Integer.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FieldValidationConfiguration =
+  struct
+    type nonrec t =
+      {
+      type_: String_.t
+        [@ocaml.doc "The validation to perform on an object type."];
+      strValues: StrValues.t option
+        [@ocaml.doc "The validation to perform on a string value."];
+      numValues: NumValues.t option
+        [@ocaml.doc "The validation to perform on a number value."];
+      validationMessage: String_.t option
+        [@ocaml.doc "The validation message to display."]}
+    let context_ = "FieldValidationConfiguration"
+    let make ?strValues =
+      fun ?numValues ->
+        fun ?validationMessage ->
+          fun ~type_ ->
+            fun () -> { strValues; numValues; validationMessage; type_ }
+    let to_value x =
+      structure_to_value
+        [("type", (Some (String_.to_value x.type_)));
+        ("strValues", (Option.map x.strValues ~f:StrValues.to_value));
+        ("numValues", (Option.map x.numValues ~f:NumValues.to_value));
+        ("validationMessage",
+          (Option.map x.validationMessage ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let validationMessage =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "validationMessage") in
+      let numValues =
+        (Option.map ~f:NumValues.of_xml) (Xml.child xml_arg0 "numValues") in
+      let strValues =
+        (Option.map ~f:StrValues.of_xml) (Xml.child xml_arg0 "strValues") in
+      let type_ =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      make ?validationMessage ?numValues ?strValues ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let validationMessage =
+        field_map json__ "validationMessage" String_.of_json in
+      let numValues = field_map json__ "numValues" NumValues.of_json in
+      let strValues = field_map json__ "strValues" StrValues.of_json in
+      let type_ = field_map_exn json__ "type" String_.of_json in
+      make ?validationMessage ?numValues ?strValues ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the validation configuration for a field."]
+module ValidationsList =
+  struct
+    type nonrec t = FieldValidationConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FieldValidationConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FieldValidationConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ValidationsList"
+        ~of_json:FieldValidationConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FormInputValuePropertyBindingProperties =
+  struct
+    type nonrec t =
+      {
+      property: String_.t
+        [@ocaml.doc "The form property to bind to the data field."];
+      field: String_.t option
+        [@ocaml.doc "The data field to bind the property to."]}
+    let context_ = "FormInputValuePropertyBindingProperties"
+    let make ?field = fun ~property -> fun () -> { field; property }
+    let to_value x =
+      structure_to_value
+        [("property", (Some (String_.to_value x.property)));
+        ("field", (Option.map x.field ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let field = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "field") in
+      let property =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "property") in
+      make ?field ~property ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let field = field_map json__ "field" String_.of_json in
+      let property = field_map_exn json__ "property" String_.of_json in
+      make ?field ~property ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates a form property to a binding property. This enables exposed properties on the top level form to propagate data to the form's property values."]
+module rec
+  FormInputValueProperty:sig
+                           type nonrec t =
+                             {
+                             value: String_.t option
+                               [@ocaml.doc
+                                 "The value to assign to the input field."];
+                             bindingProperties:
+                               FormInputValuePropertyBindingProperties.t
+                                 option
+                               [@ocaml.doc
+                                 "The information to bind fields to data at runtime."];
+                             concat: FormInputValuePropertyList.t option
+                               [@ocaml.doc
+                                 "A list of form properties to concatenate to create the value to assign to this field property."]}
+                           val make :
+                             ?value:String_.t ->
+                               ?bindingProperties:FormInputValuePropertyBindingProperties.t
+                                 ->
+                                 ?concat:FormInputValuePropertyList.t ->
+                                   unit -> t
+                           val to_value : t -> Botodata.value
+                           val to_query : t -> Client.Query.t
+                           val of_xml : Xml.t -> t
+                           val of_json : Yojson.Safe.t -> t
+                           val to_json : t -> Yojson.Safe.t
+                         end =
+  struct
+    type nonrec t =
+      {
+      value: String_.t option
+        [@ocaml.doc "The value to assign to the input field."];
+      bindingProperties: FormInputValuePropertyBindingProperties.t option
+        [@ocaml.doc "The information to bind fields to data at runtime."];
+      concat: FormInputValuePropertyList.t option
+        [@ocaml.doc
+          "A list of form properties to concatenate to create the value to assign to this field property."]}
+    let make ?value =
+      fun ?bindingProperties ->
+        fun ?concat -> fun () -> { value; bindingProperties; concat }
+    let to_value x =
+      structure_to_value
+        [("value", (Option.map x.value ~f:String_.to_value));
+        ("bindingProperties",
+          (Option.map x.bindingProperties
+             ~f:FormInputValuePropertyBindingProperties.to_value));
+        ("concat",
+          (Option.map x.concat ~f:FormInputValuePropertyList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let concat =
+        (Option.map ~f:FormInputValuePropertyList.of_xml)
+          (Xml.child xml_arg0 "concat") in
+      let bindingProperties =
+        (Option.map ~f:FormInputValuePropertyBindingProperties.of_xml)
+          (Xml.child xml_arg0 "bindingProperties") in
+      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
+      make ?concat ?bindingProperties ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let concat =
+        field_map json__ "concat" FormInputValuePropertyList.of_json in
+      let bindingProperties =
+        field_map json__ "bindingProperties"
+          FormInputValuePropertyBindingProperties.of_json in
+      let value = field_map json__ "value" String_.of_json in
+      make ?concat ?bindingProperties ?value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the configuration for an input field on a form. Use FormInputValueProperty to specify the values to render or bind by default."]
+ and
+  FormInputValuePropertyList:sig
+                               type nonrec t = FormInputValueProperty.t list
+                               val make : FormInputValueProperty.t list -> t
+                               val to_value : t -> Botodata.value
+                               val to_query : t -> Client.Query.t
+                               val of_xml :
+                                 Xml.t -> FormInputValueProperty.t list
+                               val of_json : Yojson.Safe.t -> t
+                               val to_json : t -> Yojson.Safe.t
+                               val to_header : t -> string
+                             end =
+  struct
+    type nonrec t = FormInputValueProperty.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FormInputValueProperty.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FormInputValueProperty.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FormInputValuePropertyList"
+        ~of_json:FormInputValueProperty.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ValueMapping =
+  struct
+    type nonrec t =
+      {
+      displayValue: FormInputValueProperty.t option
+        [@ocaml.doc "The value to display for the complex object."];
+      value: FormInputValueProperty.t [@ocaml.doc "The complex object."]}
+    let context_ = "ValueMapping"
+    let make ?displayValue = fun ~value -> fun () -> { displayValue; value }
+    let to_value x =
+      structure_to_value
+        [("displayValue",
+           (Option.map x.displayValue ~f:FormInputValueProperty.to_value));
+        ("value", (Some (FormInputValueProperty.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        FormInputValueProperty.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "value") in
+      let displayValue =
+        (Option.map ~f:FormInputValueProperty.of_xml)
+          (Xml.child xml_arg0 "displayValue") in
+      make ~value ?displayValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "value" FormInputValueProperty.of_json in
+      let displayValue =
+        field_map json__ "displayValue" FormInputValueProperty.of_json in
+      make ~value ?displayValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates a complex object with a display value. Use ValueMapping to store how to represent complex objects when they are displayed."]
+module ValueMappingList =
+  struct
+    type nonrec t = ValueMapping.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ValueMapping.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ValueMapping.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ValueMappingList" ~of_json:ValueMapping.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FormInputBindingPropertiesValueProperties =
+  struct
+    type nonrec t =
+      {
+      model: String_.t option [@ocaml.doc "An Amplify DataStore model."]}
+    let make ?model = fun () -> { model }
+    let to_value x =
+      structure_to_value
+        [("model", (Option.map x.model ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let model = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "model") in
+      make ?model ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let model = field_map json__ "model" String_.of_json in make ?model ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the data binding configuration for a specific property using data stored in Amazon Web Services. For Amazon Web Services connected properties, you can bind a property to data stored in an Amplify DataStore model."]
+module FormInputBindingPropertiesValue =
+  struct
+    type nonrec t =
+      {
+      type_: String_.t option [@ocaml.doc "The property type."];
+      bindingProperties: FormInputBindingPropertiesValueProperties.t option
+        [@ocaml.doc
+          "Describes the properties to customize with data at runtime."]}
+    let make ?type_ =
+      fun ?bindingProperties -> fun () -> { type_; bindingProperties }
+    let to_value x =
+      structure_to_value
+        [("type", (Option.map x.type_ ~f:String_.to_value));
+        ("bindingProperties",
+          (Option.map x.bindingProperties
+             ~f:FormInputBindingPropertiesValueProperties.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let bindingProperties =
+        (Option.map ~f:FormInputBindingPropertiesValueProperties.of_xml)
+          (Xml.child xml_arg0 "bindingProperties") in
+      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
+      make ?bindingProperties ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bindingProperties =
+        field_map json__ "bindingProperties"
+          FormInputBindingPropertiesValueProperties.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
+      make ?bindingProperties ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the data binding configuration for a form's input fields at runtime.You can use FormInputBindingPropertiesValue to add exposed properties to a form to allow different values to be entered when a form is reused in different places in an app."]
+module FormInputBindingProperties =
+  struct
+    type nonrec t = (String_.t * FormInputBindingPropertiesValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types String FormInputBindingPropertiesValue"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x ->
+                       (FormInputBindingPropertiesValue.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:FormInputBindingPropertiesValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ValueMappings =
+  struct
+    type nonrec t =
+      {
+      values: ValueMappingList.t
+        [@ocaml.doc "The value and display value pairs."];
+      bindingProperties: FormInputBindingProperties.t option
+        [@ocaml.doc "The information to bind fields to data at runtime."]}
+    let context_ = "ValueMappings"
+    let make ?bindingProperties =
+      fun ~values -> fun () -> { bindingProperties; values }
+    let to_value x =
+      structure_to_value
+        [("values", (Some (ValueMappingList.to_value x.values)));
+        ("bindingProperties",
+          (Option.map x.bindingProperties
+             ~f:FormInputBindingProperties.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let bindingProperties =
+        (Option.map ~f:FormInputBindingProperties.of_xml)
+          (Xml.child xml_arg0 "bindingProperties") in
+      let values =
+        ValueMappingList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "values") in
+      make ?bindingProperties ~values ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bindingProperties =
+        field_map json__ "bindingProperties"
+          FormInputBindingProperties.of_json in
+      let values = field_map_exn json__ "values" ValueMappingList.of_json in
+      make ?bindingProperties ~values ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the data binding configuration for a value map."]
+module Float_ =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module StorageAccessLevel =
+  struct
+    type nonrec t =
+      | Public 
+      | Protected 
+      | Private 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Public -> "public"
+      | Protected -> "protected"
+      | Private -> "private"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "public" -> Public
+      | "protected" -> Protected
+      | "private" -> Private
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration StorageAccessLevel" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"StorageAccessLevel" j)
+    let to_json = simple_to_json to_value
+  end
+module FileUploaderFieldConfig =
+  struct
+    type nonrec t =
+      {
+      accessLevel: StorageAccessLevel.t
+        [@ocaml.doc
+          "The access level to assign to the uploaded files in the Amazon S3 bucket where they are stored. The valid values for this property are private, protected, or public. For detailed information about the permissions associated with each access level, see File access levels in the Amplify documentation."];
+      acceptedFileTypes: StrValues.t
+        [@ocaml.doc
+          "The file types that are allowed to be uploaded by the file uploader. Provide this information in an array of strings specifying the valid file extensions."];
+      showThumbnails: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether to display or hide the image preview after selecting a file for upload. The default value is true to display the image preview."];
+      isResumable: Boolean.t option
+        [@ocaml.doc
+          "Allows the file upload operation to be paused and resumed. The default value is false. When isResumable is set to true, the file uploader uses a multipart upload to break the files into chunks before upload. The progress of the upload isn't continuous, because the file uploader uploads a chunk at a time."];
+      maxFileCount: Integer.t option
+        [@ocaml.doc
+          "Specifies the maximum number of files that can be selected to upload. The default value is an unlimited number of files."];
+      maxSize: Integer.t option
+        [@ocaml.doc
+          "The maximum file size in bytes that the file uploader will accept. The default value is an unlimited file size."]}
+    let context_ = "FileUploaderFieldConfig"
+    let make ?showThumbnails =
+      fun ?isResumable ->
+        fun ?maxFileCount ->
+          fun ?maxSize ->
+            fun ~accessLevel ->
+              fun ~acceptedFileTypes ->
+                fun () ->
+                  {
+                    showThumbnails;
+                    isResumable;
+                    maxFileCount;
+                    maxSize;
+                    accessLevel;
+                    acceptedFileTypes
+                  }
+    let to_value x =
+      structure_to_value
+        [("accessLevel", (Some (StorageAccessLevel.to_value x.accessLevel)));
+        ("acceptedFileTypes",
+          (Some (StrValues.to_value x.acceptedFileTypes)));
+        ("showThumbnails", (Option.map x.showThumbnails ~f:Boolean.to_value));
+        ("isResumable", (Option.map x.isResumable ~f:Boolean.to_value));
+        ("maxFileCount", (Option.map x.maxFileCount ~f:Integer.to_value));
+        ("maxSize", (Option.map x.maxSize ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxSize =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxSize") in
+      let maxFileCount =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxFileCount") in
+      let isResumable =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isResumable") in
+      let showThumbnails =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "showThumbnails") in
+      let acceptedFileTypes =
+        StrValues.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "acceptedFileTypes") in
+      let accessLevel =
+        StorageAccessLevel.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "accessLevel") in
+      make ?maxSize ?maxFileCount ?isResumable ?showThumbnails
+        ~acceptedFileTypes ~accessLevel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxSize = field_map json__ "maxSize" Integer.of_json in
+      let maxFileCount = field_map json__ "maxFileCount" Integer.of_json in
+      let isResumable = field_map json__ "isResumable" Boolean.of_json in
+      let showThumbnails = field_map json__ "showThumbnails" Boolean.of_json in
+      let acceptedFileTypes =
+        field_map_exn json__ "acceptedFileTypes" StrValues.of_json in
+      let accessLevel =
+        field_map_exn json__ "accessLevel" StorageAccessLevel.of_json in
+      make ?maxSize ?maxFileCount ?isResumable ?showThumbnails
+        ~acceptedFileTypes ~accessLevel ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the configuration for the file uploader field."]
+module FieldInputConfig =
+  struct
+    type nonrec t =
+      {
+      type_: String_.t [@ocaml.doc "The input type for the field."];
+      required: Boolean.t option
+        [@ocaml.doc "Specifies a field that requires input."];
+      readOnly: Boolean.t option [@ocaml.doc "Specifies a read only field."];
+      placeholder: String_.t option
+        [@ocaml.doc "The text to display as a placeholder for the field."];
+      defaultValue: String_.t option
+        [@ocaml.doc "The default value for the field."];
+      descriptiveText: String_.t option
+        [@ocaml.doc "The text to display to describe the field."];
+      defaultChecked: Boolean.t option
+        [@ocaml.doc "Specifies whether a field has a default value."];
+      defaultCountryCode: String_.t option
+        [@ocaml.doc "The default country code for a phone number."];
+      valueMappings: ValueMappings.t option
+        [@ocaml.doc
+          "The information to use to customize the input fields with data at runtime."];
+      name: String_.t option [@ocaml.doc "The name of the field."];
+      minValue: Float_.t option
+        [@ocaml.doc "The minimum value to display for the field."];
+      maxValue: Float_.t option
+        [@ocaml.doc "The maximum value to display for the field."];
+      step: Float_.t option
+        [@ocaml.doc "The stepping increment for a numeric value in a field."];
+      value: String_.t option [@ocaml.doc "The value for the field."];
+      isArray: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether to render the field as an array. This property is ignored if the dataSourceType for the form is a Data Store."];
+      fileUploaderConfig: FileUploaderFieldConfig.t option
+        [@ocaml.doc "The configuration for the file uploader field."]}
+    let context_ = "FieldInputConfig"
+    let make ?required =
+      fun ?readOnly ->
+        fun ?placeholder ->
+          fun ?defaultValue ->
+            fun ?descriptiveText ->
+              fun ?defaultChecked ->
+                fun ?defaultCountryCode ->
+                  fun ?valueMappings ->
+                    fun ?name ->
+                      fun ?minValue ->
+                        fun ?maxValue ->
+                          fun ?step ->
+                            fun ?value ->
+                              fun ?isArray ->
+                                fun ?fileUploaderConfig ->
+                                  fun ~type_ ->
+                                    fun () ->
+                                      {
+                                        required;
+                                        readOnly;
+                                        placeholder;
+                                        defaultValue;
+                                        descriptiveText;
+                                        defaultChecked;
+                                        defaultCountryCode;
+                                        valueMappings;
+                                        name;
+                                        minValue;
+                                        maxValue;
+                                        step;
+                                        value;
+                                        isArray;
+                                        fileUploaderConfig;
+                                        type_
+                                      }
+    let to_value x =
+      structure_to_value
+        [("type", (Some (String_.to_value x.type_)));
+        ("required", (Option.map x.required ~f:Boolean.to_value));
+        ("readOnly", (Option.map x.readOnly ~f:Boolean.to_value));
+        ("placeholder", (Option.map x.placeholder ~f:String_.to_value));
+        ("defaultValue", (Option.map x.defaultValue ~f:String_.to_value));
+        ("descriptiveText",
+          (Option.map x.descriptiveText ~f:String_.to_value));
+        ("defaultChecked", (Option.map x.defaultChecked ~f:Boolean.to_value));
+        ("defaultCountryCode",
+          (Option.map x.defaultCountryCode ~f:String_.to_value));
+        ("valueMappings",
+          (Option.map x.valueMappings ~f:ValueMappings.to_value));
+        ("name", (Option.map x.name ~f:String_.to_value));
+        ("minValue", (Option.map x.minValue ~f:Float_.to_value));
+        ("maxValue", (Option.map x.maxValue ~f:Float_.to_value));
+        ("step", (Option.map x.step ~f:Float_.to_value));
+        ("value", (Option.map x.value ~f:String_.to_value));
+        ("isArray", (Option.map x.isArray ~f:Boolean.to_value));
+        ("fileUploaderConfig",
+          (Option.map x.fileUploaderConfig
+             ~f:FileUploaderFieldConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fileUploaderConfig =
+        (Option.map ~f:FileUploaderFieldConfig.of_xml)
+          (Xml.child xml_arg0 "fileUploaderConfig") in
+      let isArray =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isArray") in
+      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
+      let step = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "step") in
+      let maxValue =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "maxValue") in
+      let minValue =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "minValue") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      let valueMappings =
+        (Option.map ~f:ValueMappings.of_xml)
+          (Xml.child xml_arg0 "valueMappings") in
+      let defaultCountryCode =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "defaultCountryCode") in
+      let defaultChecked =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "defaultChecked") in
+      let descriptiveText =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "descriptiveText") in
+      let defaultValue =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "defaultValue") in
+      let placeholder =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "placeholder") in
+      let readOnly =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "readOnly") in
+      let required =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "required") in
+      let type_ =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      make ?fileUploaderConfig ?isArray ?value ?step ?maxValue ?minValue
+        ?name ?valueMappings ?defaultCountryCode ?defaultChecked
+        ?descriptiveText ?defaultValue ?placeholder ?readOnly ?required
+        ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fileUploaderConfig =
+        field_map json__ "fileUploaderConfig" FileUploaderFieldConfig.of_json in
+      let isArray = field_map json__ "isArray" Boolean.of_json in
+      let value = field_map json__ "value" String_.of_json in
+      let step = field_map json__ "step" Float_.of_json in
+      let maxValue = field_map json__ "maxValue" Float_.of_json in
+      let minValue = field_map json__ "minValue" Float_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let valueMappings =
+        field_map json__ "valueMappings" ValueMappings.of_json in
+      let defaultCountryCode =
+        field_map json__ "defaultCountryCode" String_.of_json in
+      let defaultChecked = field_map json__ "defaultChecked" Boolean.of_json in
+      let descriptiveText =
+        field_map json__ "descriptiveText" String_.of_json in
+      let defaultValue = field_map json__ "defaultValue" String_.of_json in
+      let placeholder = field_map json__ "placeholder" String_.of_json in
+      let readOnly = field_map json__ "readOnly" Boolean.of_json in
+      let required = field_map json__ "required" Boolean.of_json in
+      let type_ = field_map_exn json__ "type" String_.of_json in
+      make ?fileUploaderConfig ?isArray ?value ?step ?maxValue ?minValue
+        ?name ?valueMappings ?defaultCountryCode ?defaultChecked
+        ?descriptiveText ?defaultValue ?placeholder ?readOnly ?required
+        ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the configuration for the default input values to display for a field."]
+module FieldConfig =
+  struct
+    type nonrec t =
+      {
+      label: String_.t option [@ocaml.doc "The label for the field."];
+      position: FieldPosition.t option
+        [@ocaml.doc "Specifies the field position."];
+      excluded: Boolean.t option
+        [@ocaml.doc "Specifies whether to hide a field."];
+      inputType: FieldInputConfig.t option
+        [@ocaml.doc
+          "Describes the configuration for the default input value to display for a field."];
+      validations: ValidationsList.t option
+        [@ocaml.doc "The validations to perform on the value in the field."]}
+    let make ?label =
+      fun ?position ->
+        fun ?excluded ->
+          fun ?inputType ->
+            fun ?validations ->
+              fun () -> { label; position; excluded; inputType; validations }
+    let to_value x =
+      structure_to_value
+        [("label", (Option.map x.label ~f:String_.to_value));
+        ("position", (Option.map x.position ~f:FieldPosition.to_value));
+        ("excluded", (Option.map x.excluded ~f:Boolean.to_value));
+        ("inputType", (Option.map x.inputType ~f:FieldInputConfig.to_value));
+        ("validations",
+          (Option.map x.validations ~f:ValidationsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let validations =
+        (Option.map ~f:ValidationsList.of_xml)
+          (Xml.child xml_arg0 "validations") in
+      let inputType =
+        (Option.map ~f:FieldInputConfig.of_xml)
+          (Xml.child xml_arg0 "inputType") in
+      let excluded =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "excluded") in
+      let position =
+        (Option.map ~f:FieldPosition.of_xml) (Xml.child xml_arg0 "position") in
+      let label = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "label") in
+      make ?validations ?inputType ?excluded ?position ?label ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let validations =
+        field_map json__ "validations" ValidationsList.of_json in
+      let inputType = field_map json__ "inputType" FieldInputConfig.of_json in
+      let excluded = field_map json__ "excluded" Boolean.of_json in
+      let position = field_map json__ "position" FieldPosition.of_json in
+      let label = field_map json__ "label" String_.of_json in
+      make ?validations ?inputType ?excluded ?position ?label ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the configuration information for a field in a table."]
+module FieldsMap =
+  struct
+    type nonrec t = (String_.t * FieldConfig.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types String FieldConfig"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (FieldConfig.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:FieldConfig.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CreateFormData =
+  struct
+    type nonrec t =
+      {
+      name: FormName.t [@ocaml.doc "The name of the form."];
+      dataType: FormDataTypeConfig.t
+        [@ocaml.doc "The type of data source to use to create the form."];
+      formActionType: FormActionType.t
+        [@ocaml.doc
+          "Specifies whether to perform a create or update action on the form."];
+      fields: FieldsMap.t
+        [@ocaml.doc "The configuration information for the form's fields."];
+      style: FormStyle.t
+        [@ocaml.doc "The configuration for the form's style."];
+      sectionalElements: SectionalElementMap.t
+        [@ocaml.doc
+          "The configuration information for the visual helper elements for the form. These elements are not associated with any data."];
+      schemaVersion: String_.t [@ocaml.doc "The schema version of the form."];
+      cta: FormCTA.t option
+        [@ocaml.doc
+          "The FormCTA object that stores the call to action configuration for the form."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "One or more key-value pairs to use when tagging the form data."];
+      labelDecorator: LabelDecorator.t option
+        [@ocaml.doc
+          "Specifies an icon or decoration to display on the form."]}
+    let context_ = "CreateFormData"
+    let make ?cta =
+      fun ?tags ->
+        fun ?labelDecorator ->
+          fun ~name ->
+            fun ~dataType ->
+              fun ~formActionType ->
+                fun ~fields ->
+                  fun ~style ->
+                    fun ~sectionalElements ->
+                      fun ~schemaVersion ->
+                        fun () ->
+                          {
+                            cta;
+                            tags;
+                            labelDecorator;
+                            name;
+                            dataType;
+                            formActionType;
+                            fields;
+                            style;
+                            sectionalElements;
+                            schemaVersion
+                          }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (FormName.to_value x.name)));
+        ("dataType", (Some (FormDataTypeConfig.to_value x.dataType)));
+        ("formActionType", (Some (FormActionType.to_value x.formActionType)));
+        ("fields", (Some (FieldsMap.to_value x.fields)));
+        ("style", (Some (FormStyle.to_value x.style)));
+        ("sectionalElements",
+          (Some (SectionalElementMap.to_value x.sectionalElements)));
+        ("schemaVersion", (Some (String_.to_value x.schemaVersion)));
+        ("cta", (Option.map x.cta ~f:FormCTA.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value));
+        ("labelDecorator",
+          (Option.map x.labelDecorator ~f:LabelDecorator.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let labelDecorator =
+        (Option.map ~f:LabelDecorator.of_xml)
+          (Xml.child xml_arg0 "labelDecorator") in
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let cta = (Option.map ~f:FormCTA.of_xml) (Xml.child xml_arg0 "cta") in
+      let schemaVersion =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "schemaVersion") in
+      let sectionalElements =
+        SectionalElementMap.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sectionalElements") in
+      let style =
+        FormStyle.of_xml (Xml.child_exn ~context:context_ xml_arg0 "style") in
+      let fields =
+        FieldsMap.of_xml (Xml.child_exn ~context:context_ xml_arg0 "fields") in
+      let formActionType =
+        FormActionType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "formActionType") in
+      let dataType =
+        FormDataTypeConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dataType") in
+      let name =
+        FormName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?labelDecorator ?tags ?cta ~schemaVersion ~sectionalElements
+        ~style ~fields ~formActionType ~dataType ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let labelDecorator =
+        field_map json__ "labelDecorator" LabelDecorator.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let cta = field_map json__ "cta" FormCTA.of_json in
+      let schemaVersion =
+        field_map_exn json__ "schemaVersion" String_.of_json in
+      let sectionalElements =
+        field_map_exn json__ "sectionalElements" SectionalElementMap.of_json in
+      let style = field_map_exn json__ "style" FormStyle.of_json in
+      let fields = field_map_exn json__ "fields" FieldsMap.of_json in
+      let formActionType =
+        field_map_exn json__ "formActionType" FormActionType.of_json in
+      let dataType =
+        field_map_exn json__ "dataType" FormDataTypeConfig.of_json in
+      let name = field_map_exn json__ "name" FormName.of_json in
+      make ?labelDecorator ?tags ?cta ~schemaVersion ~sectionalElements
+        ~style ~fields ~formActionType ~dataType ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents all of the information that is required to create a form."]
+module CreateFormRequest =
+  struct
+    type nonrec t =
+      {
+      appId: String_.t
+        [@ocaml.doc
+          "The unique ID of the Amplify app to associate with the form."];
+      environmentName: String_.t
+        [@ocaml.doc
+          "The name of the backend environment that is a part of the Amplify app."];
+      clientToken: String_.t option [@ocaml.doc "The unique client token."];
+      formToCreate: CreateFormData.t
+        [@ocaml.doc "Represents the configuration of the form to create."]}
+    let context_ = "CreateFormRequest"
+    let make ?clientToken =
+      fun ~appId ->
+        fun ~environmentName ->
+          fun ~formToCreate ->
+            fun () -> { clientToken; appId; environmentName; formToCreate }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~appId:(String_.of_string
+                      ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                         "appId"))
+            ~environmentName:(String_.of_string
+                                ((List.Assoc.find_exn
+                                    ~equal:String.Caseless.equal) xs
+                                   "environmentName"))
+            ?clientToken:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs "clientToken") ~f:String_.of_string)
+            ~formToCreate:pipe ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("appId", (Some (String_.to_value x.appId)));
+        ("environmentName", (Some (String_.to_value x.environmentName)));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
+        ("formToCreate", (Some (CreateFormData.to_value x.formToCreate)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let formToCreate =
+        CreateFormData.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "formToCreate") in
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let environmentName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
+      let appId =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
+      make ~formToCreate ?clientToken ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let formToCreate =
+        field_map_exn json__ "formToCreate" CreateFormData.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let environmentName =
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
+      make ~formToCreate ?clientToken ~environmentName ~appId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a new form for an Amplify app."]
+module Form =
+  struct
+    type nonrec t =
+      {
+      appId: String_.t option
+        [@ocaml.doc
+          "The unique ID of the Amplify app associated with the form."];
+      environmentName: String_.t option
+        [@ocaml.doc
+          "The name of the backend environment that is a part of the Amplify app."];
+      id: Uuid.t option [@ocaml.doc "The unique ID of the form."];
+      name: FormName.t option [@ocaml.doc "The name of the form."];
+      formActionType: FormActionType.t option
+        [@ocaml.doc "The operation to perform on the specified form."];
+      style: FormStyle.t option
+        [@ocaml.doc "Stores the configuration for the form's style."];
+      dataType: FormDataTypeConfig.t option
+        [@ocaml.doc "The type of data source to use to create the form."];
+      fields: FieldsMap.t option
+        [@ocaml.doc "Stores the information about the form's fields."];
+      sectionalElements: SectionalElementMap.t option
+        [@ocaml.doc
+          "Stores the visual helper elements for the form that are not associated with any data."];
+      schemaVersion: String_.t option
+        [@ocaml.doc "The schema version of the form when it was imported."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "One or more key-value pairs to use when tagging the form."];
+      cta: FormCTA.t option
+        [@ocaml.doc "Stores the call to action configuration for the form."];
+      labelDecorator: LabelDecorator.t option
+        [@ocaml.doc
+          "Specifies an icon or decoration to display on the form."]}
+    let make ?appId =
+      fun ?environmentName ->
+        fun ?id ->
+          fun ?name ->
+            fun ?formActionType ->
+              fun ?style ->
+                fun ?dataType ->
+                  fun ?fields ->
+                    fun ?sectionalElements ->
+                      fun ?schemaVersion ->
+                        fun ?tags ->
+                          fun ?cta ->
+                            fun ?labelDecorator ->
+                              fun () ->
+                                {
+                                  appId;
+                                  environmentName;
+                                  id;
+                                  name;
+                                  formActionType;
+                                  style;
+                                  dataType;
+                                  fields;
+                                  sectionalElements;
+                                  schemaVersion;
+                                  tags;
+                                  cta;
+                                  labelDecorator
+                                }
+    let to_value x =
+      structure_to_value
+        [("appId", (Option.map x.appId ~f:String_.to_value));
+        ("environmentName",
+          (Option.map x.environmentName ~f:String_.to_value));
+        ("id", (Option.map x.id ~f:Uuid.to_value));
+        ("name", (Option.map x.name ~f:FormName.to_value));
+        ("formActionType",
+          (Option.map x.formActionType ~f:FormActionType.to_value));
+        ("style", (Option.map x.style ~f:FormStyle.to_value));
+        ("dataType", (Option.map x.dataType ~f:FormDataTypeConfig.to_value));
+        ("fields", (Option.map x.fields ~f:FieldsMap.to_value));
+        ("sectionalElements",
+          (Option.map x.sectionalElements ~f:SectionalElementMap.to_value));
+        ("schemaVersion", (Option.map x.schemaVersion ~f:String_.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value));
+        ("cta", (Option.map x.cta ~f:FormCTA.to_value));
+        ("labelDecorator",
+          (Option.map x.labelDecorator ~f:LabelDecorator.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let labelDecorator =
+        (Option.map ~f:LabelDecorator.of_xml)
+          (Xml.child xml_arg0 "labelDecorator") in
+      let cta = (Option.map ~f:FormCTA.of_xml) (Xml.child xml_arg0 "cta") in
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let schemaVersion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "schemaVersion") in
+      let sectionalElements =
+        (Option.map ~f:SectionalElementMap.of_xml)
+          (Xml.child xml_arg0 "sectionalElements") in
+      let fields =
+        (Option.map ~f:FieldsMap.of_xml) (Xml.child xml_arg0 "fields") in
+      let dataType =
+        (Option.map ~f:FormDataTypeConfig.of_xml)
+          (Xml.child xml_arg0 "dataType") in
+      let style =
+        (Option.map ~f:FormStyle.of_xml) (Xml.child xml_arg0 "style") in
+      let formActionType =
+        (Option.map ~f:FormActionType.of_xml)
+          (Xml.child xml_arg0 "formActionType") in
+      let name = (Option.map ~f:FormName.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "id") in
+      let environmentName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "environmentName") in
+      let appId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "appId") in
+      make ?labelDecorator ?cta ?tags ?schemaVersion ?sectionalElements
+        ?fields ?dataType ?style ?formActionType ?name ?id ?environmentName
+        ?appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let labelDecorator =
+        field_map json__ "labelDecorator" LabelDecorator.of_json in
+      let cta = field_map json__ "cta" FormCTA.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let schemaVersion = field_map json__ "schemaVersion" String_.of_json in
+      let sectionalElements =
+        field_map json__ "sectionalElements" SectionalElementMap.of_json in
+      let fields = field_map json__ "fields" FieldsMap.of_json in
+      let dataType = field_map json__ "dataType" FormDataTypeConfig.of_json in
+      let style = field_map json__ "style" FormStyle.of_json in
+      let formActionType =
+        field_map json__ "formActionType" FormActionType.of_json in
+      let name = field_map json__ "name" FormName.of_json in
+      let id = field_map json__ "id" Uuid.of_json in
+      let environmentName =
+        field_map json__ "environmentName" String_.of_json in
+      let appId = field_map json__ "appId" String_.of_json in
+      make ?labelDecorator ?cta ?tags ?schemaVersion ?sectionalElements
+        ?fields ?dataType ?style ?formActionType ?name ?id ?environmentName
+        ?appId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the configuration settings for a Form user interface (UI) element for an Amplify app. A form is a component you can add to your project by specifying a data source as the default configuration for the form."]
+module CreateFormResponse =
+  struct
+    type nonrec t =
+      {
+      entity: Form.t option
+        [@ocaml.doc "Describes the configuration of the new form."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceConflictException of ResourceConflictException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?entity = fun () -> { entity }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceConflictException" ->
+          `ResourceConflictException (ResourceConflictException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceConflictException" ->
+          `ResourceConflictException (ResourceConflictException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceConflictException e ->
+          `Assoc
+            [("error", (`String "ResourceConflictException"));
+            ("details", (ResourceConflictException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ?entity:(Some pipe) ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value [("entity", (Option.map x.entity ~f:Form.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entity = (Option.map ~f:Form.of_xml) (Xml.child xml_arg0 "entity") in
+      make ?entity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entity = field_map json__ "entity" Form.of_json in make ?entity ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a new form for an Amplify app."]
 module rec
   ThemeValue:sig
                type nonrec t =
                  {
+                 value: String_.t option
+                   [@ocaml.doc "The value of a theme property."];
                  children: ThemeValuesList.t option
                    [@ocaml.doc
-                     "A list of key-value pairs that define the theme's properties."];
-                 value: String_.t option
-                   [@ocaml.doc "The value of a theme property."]}
+                     "A list of key-value pairs that define the theme's properties."]}
                val make :
-                 ?children:ThemeValuesList.t -> ?value:String_.t -> unit -> t
+                 ?value:String_.t -> ?children:ThemeValuesList.t -> unit -> t
                val to_value : t -> Botodata.value
                val to_query : t -> Client.Query.t
                val of_xml : Xml.t -> t
@@ -2306,27 +5626,27 @@ module rec
   struct
     type nonrec t =
       {
+      value: String_.t option [@ocaml.doc "The value of a theme property."];
       children: ThemeValuesList.t option
         [@ocaml.doc
-          "A list of key-value pairs that define the theme's properties."];
-      value: String_.t option [@ocaml.doc "The value of a theme property."]}
-    let make ?children = fun ?value -> fun () -> { children; value }
+          "A list of key-value pairs that define the theme's properties."]}
+    let make ?value = fun ?children -> fun () -> { value; children }
     let to_value x =
       structure_to_value
-        [("children", (Option.map x.children ~f:ThemeValuesList.to_value));
-        ("value", (Option.map x.value ~f:String_.to_value))]
+        [("value", (Option.map x.value ~f:String_.to_value));
+        ("children", (Option.map x.children ~f:ThemeValuesList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
       let children =
         (Option.map ~f:ThemeValuesList.of_xml)
           (Xml.child xml_arg0 "children") in
-      make ?value ?children ()
+      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
+      make ?children ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" String_.of_json in
-      let children = field_map json "children" ThemeValuesList.of_json in
-      make ?value ?children ()
+    let of_json json__ =
+      let children = field_map json__ "children" ThemeValuesList.of_json in
+      let value = field_map json__ "value" String_.of_json in
+      make ?children ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the configuration of a theme's properties."]
  and
@@ -2361,9 +5681,9 @@ module rec
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" ThemeValue.of_json in
-      let key = field_map json "key" String_.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "value" ThemeValue.of_json in
+      let key = field_map json__ "key" String_.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A key-value pair that defines a property of a theme."]
  and
@@ -2380,6 +5700,9 @@ module rec
   struct
     type nonrec t = ThemeValues.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ThemeValues.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2423,15 +5746,15 @@ module CreateThemeData =
     type nonrec t =
       {
       name: ThemeName.t [@ocaml.doc "The name of the theme."];
+      values: ThemeValuesList.t
+        [@ocaml.doc
+          "A list of key-value pairs that de\239\172\129nes the properties of the theme."];
       overrides: ThemeValuesList.t option
         [@ocaml.doc
           "Describes the properties that can be overriden to customize an instance of the theme."];
       tags: Tags.t option
         [@ocaml.doc
-          "One or more key-value pairs to use when tagging the theme data."];
-      values: ThemeValuesList.t
-        [@ocaml.doc
-          "A list of key-value pairs that de\239\172\129nes the properties of the theme."]}
+          "One or more key-value pairs to use when tagging the theme data."]}
     let context_ = "CreateThemeData"
     let make ?overrides =
       fun ?tags ->
@@ -2440,28 +5763,28 @@ module CreateThemeData =
     let to_value x =
       structure_to_value
         [("name", (Some (ThemeName.to_value x.name)));
+        ("values", (Some (ThemeValuesList.to_value x.values)));
         ("overrides", (Option.map x.overrides ~f:ThemeValuesList.to_value));
-        ("tags", (Option.map x.tags ~f:Tags.to_value));
-        ("values", (Some (ThemeValuesList.to_value x.values)))]
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let values =
-        ThemeValuesList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "values") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let overrides =
         (Option.map ~f:ThemeValuesList.of_xml)
           (Xml.child xml_arg0 "overrides") in
+      let values =
+        ThemeValuesList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "values") in
       let name =
         ThemeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~values ?tags ?overrides ~name ()
+      make ?tags ?overrides ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map_exn json "values" ThemeValuesList.of_json in
-      let tags = field_map json "tags" Tags.of_json in
-      let overrides = field_map json "overrides" ThemeValuesList.of_json in
-      let name = field_map_exn json "name" ThemeName.of_json in
-      make ~values ?tags ?overrides ~name ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let overrides = field_map json__ "overrides" ThemeValuesList.of_json in
+      let values = field_map_exn json__ "values" ThemeValuesList.of_json in
+      let name = field_map_exn json__ "name" ThemeName.of_json in
+      make ?tags ?overrides ~values ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents all of the information that is required to create a theme."]
@@ -2472,10 +5795,10 @@ module CreateThemeRequest =
       appId: String_.t
         [@ocaml.doc
           "The unique ID of the Amplify app associated with the theme."];
-      clientToken: String_.t option [@ocaml.doc "The unique client token."];
       environmentName: String_.t
         [@ocaml.doc
           "The name of the backend environment that is a part of the Amplify app."];
+      clientToken: String_.t option [@ocaml.doc "The unique client token."];
       themeToCreate: CreateThemeData.t
         [@ocaml.doc "Represents the configuration of the theme to create."]}
     let context_ = "CreateThemeRequest"
@@ -2490,42 +5813,43 @@ module CreateThemeRequest =
             ~appId:(String_.of_string
                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
                          "appId"))
-            ?clientToken:(Option.map
-                            ((List.Assoc.find ~equal:String.Caseless.equal)
-                               xs "clientToken") ~f:String_.of_string)
             ~environmentName:(String_.of_string
                                 ((List.Assoc.find_exn
                                     ~equal:String.Caseless.equal) xs
-                                   "environmentName")) ~themeToCreate:pipe ())
+                                   "environmentName"))
+            ?clientToken:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs "clientToken") ~f:String_.of_string)
+            ~themeToCreate:pipe ())
       [@warning "-27"])
     let to_value x =
       structure_to_value
         [("appId", (Some (String_.to_value x.appId)));
-        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
         ("environmentName", (Some (String_.to_value x.environmentName)));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
         ("themeToCreate", (Some (CreateThemeData.to_value x.themeToCreate)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let themeToCreate =
         CreateThemeData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "themeToCreate") in
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       let environmentName =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
-      let clientToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
-      make ~themeToCreate ~environmentName ?clientToken ~appId ()
+      make ~themeToCreate ?clientToken ~environmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let themeToCreate =
-        field_map_exn json "themeToCreate" CreateThemeData.of_json in
+        field_map_exn json__ "themeToCreate" CreateThemeData.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       let environmentName =
-        field_map_exn json "environmentName" String_.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      let appId = field_map_exn json "appId" String_.of_json in
-      make ~themeToCreate ~environmentName ?clientToken ~appId ()
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
+      make ~themeToCreate ?clientToken ~environmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a theme to apply to the components in an Amplify app."]
@@ -2533,103 +5857,99 @@ module Theme =
   struct
     type nonrec t =
       {
-      appId: String_.t
+      appId: String_.t option
         [@ocaml.doc
           "The unique ID for the Amplify app associated with the theme."];
-      createdAt: SyntheticTimestamp_date_time.t
-        [@ocaml.doc "The time that the theme was created."];
-      environmentName: String_.t
+      environmentName: String_.t option
         [@ocaml.doc
           "The name of the backend environment that is a part of the Amplify app."];
-      id: Uuid.t [@ocaml.doc "The ID for the theme."];
+      id: Uuid.t option [@ocaml.doc "The ID for the theme."];
+      name: ThemeName.t option [@ocaml.doc "The name of the theme."];
+      createdAt: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc "The time that the theme was created."];
       modifiedAt: SyntheticTimestamp_date_time.t option
         [@ocaml.doc "The time that the theme was modified."];
-      name: ThemeName.t [@ocaml.doc "The name of the theme."];
+      values: ThemeValuesList.t option
+        [@ocaml.doc
+          "A list of key-value pairs that defines the properties of the theme."];
       overrides: ThemeValuesList.t option
         [@ocaml.doc
           "Describes the properties that can be overriden to customize a theme."];
       tags: Tags.t option
         [@ocaml.doc
-          "One or more key-value pairs to use when tagging the theme."];
-      values: ThemeValuesList.t
-        [@ocaml.doc
-          "A list of key-value pairs that defines the properties of the theme."]}
-    let context_ = "Theme"
-    let make ?modifiedAt =
-      fun ?overrides ->
-        fun ?tags ->
-          fun ~appId ->
-            fun ~createdAt ->
-              fun ~environmentName ->
-                fun ~id ->
-                  fun ~name ->
-                    fun ~values ->
+          "One or more key-value pairs to use when tagging the theme."]}
+    let make ?appId =
+      fun ?environmentName ->
+        fun ?id ->
+          fun ?name ->
+            fun ?createdAt ->
+              fun ?modifiedAt ->
+                fun ?values ->
+                  fun ?overrides ->
+                    fun ?tags ->
                       fun () ->
                         {
-                          modifiedAt;
-                          overrides;
-                          tags;
                           appId;
-                          createdAt;
                           environmentName;
                           id;
                           name;
-                          values
+                          createdAt;
+                          modifiedAt;
+                          values;
+                          overrides;
+                          tags
                         }
     let to_value x =
       structure_to_value
-        [("appId", (Some (String_.to_value x.appId)));
+        [("appId", (Option.map x.appId ~f:String_.to_value));
+        ("environmentName",
+          (Option.map x.environmentName ~f:String_.to_value));
+        ("id", (Option.map x.id ~f:Uuid.to_value));
+        ("name", (Option.map x.name ~f:ThemeName.to_value));
         ("createdAt",
-          (Some (SyntheticTimestamp_date_time.to_value x.createdAt)));
-        ("environmentName", (Some (String_.to_value x.environmentName)));
-        ("id", (Some (Uuid.to_value x.id)));
+          (Option.map x.createdAt ~f:SyntheticTimestamp_date_time.to_value));
         ("modifiedAt",
           (Option.map x.modifiedAt ~f:SyntheticTimestamp_date_time.to_value));
-        ("name", (Some (ThemeName.to_value x.name)));
+        ("values", (Option.map x.values ~f:ThemeValuesList.to_value));
         ("overrides", (Option.map x.overrides ~f:ThemeValuesList.to_value));
-        ("tags", (Option.map x.tags ~f:Tags.to_value));
-        ("values", (Some (ThemeValuesList.to_value x.values)))]
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let values =
-        ThemeValuesList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "values") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let overrides =
         (Option.map ~f:ThemeValuesList.of_xml)
           (Xml.child xml_arg0 "overrides") in
-      let name =
-        ThemeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let values =
+        (Option.map ~f:ThemeValuesList.of_xml) (Xml.child xml_arg0 "values") in
       let modifiedAt =
         (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
           (Xml.child xml_arg0 "modifiedAt") in
-      let id = Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
-      let environmentName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
       let createdAt =
-        SyntheticTimestamp_date_time.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let appId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
-      make ~values ?tags ?overrides ~name ?modifiedAt ~id ~environmentName
-        ~createdAt ~appId ()
+        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
+          (Xml.child xml_arg0 "createdAt") in
+      let name = (Option.map ~f:ThemeName.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "id") in
+      let environmentName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "environmentName") in
+      let appId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "appId") in
+      make ?tags ?overrides ?values ?modifiedAt ?createdAt ?name ?id
+        ?environmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map_exn json "values" ThemeValuesList.of_json in
-      let tags = field_map json "tags" Tags.of_json in
-      let overrides = field_map json "overrides" ThemeValuesList.of_json in
-      let name = field_map_exn json "name" ThemeName.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let overrides = field_map json__ "overrides" ThemeValuesList.of_json in
+      let values = field_map json__ "values" ThemeValuesList.of_json in
       let modifiedAt =
-        field_map json "modifiedAt" SyntheticTimestamp_date_time.of_json in
-      let id = field_map_exn json "id" Uuid.of_json in
-      let environmentName =
-        field_map_exn json "environmentName" String_.of_json in
+        field_map json__ "modifiedAt" SyntheticTimestamp_date_time.of_json in
       let createdAt =
-        field_map_exn json "createdAt" SyntheticTimestamp_date_time.of_json in
-      let appId = field_map_exn json "appId" String_.of_json in
-      make ~values ?tags ?overrides ~name ?modifiedAt ~id ~environmentName
-        ~createdAt ~appId ()
+        field_map json__ "createdAt" SyntheticTimestamp_date_time.of_json in
+      let name = field_map json__ "name" ThemeName.of_json in
+      let id = field_map json__ "id" Uuid.of_json in
+      let environmentName =
+        field_map json__ "environmentName" String_.of_json in
+      let appId = field_map json__ "appId" String_.of_json in
+      make ?tags ?overrides ?values ?modifiedAt ?createdAt ?name ?id
+        ?environmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A theme is a collection of style settings that apply globally to the components associated with an Amplify application."]
@@ -2706,8 +6026,8 @@ module CreateThemeResponse =
       let entity = (Option.map ~f:Theme.of_xml) (Xml.child xml_arg0 "entity") in
       make ?entity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entity = field_map json "entity" Theme.of_json in make ?entity ()
+    let of_json json__ =
+      let entity = field_map json__ "entity" Theme.of_json in make ?entity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a theme to apply to the components in an Amplify app."]
@@ -2741,14 +6061,52 @@ module DeleteComponentRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~id ~environmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" Uuid.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Uuid.of_json in
       let environmentName =
-        field_map_exn json "environmentName" String_.of_json in
-      let appId = field_map_exn json "appId" String_.of_json in
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
       make ~id ~environmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a component from an Amplify app."]
+module DeleteFormRequest =
+  struct
+    type nonrec t =
+      {
+      appId: String_.t
+        [@ocaml.doc
+          "The unique ID of the Amplify app associated with the form to delete."];
+      environmentName: String_.t
+        [@ocaml.doc
+          "The name of the backend environment that is a part of the Amplify app."];
+      id: Uuid.t [@ocaml.doc "The unique ID of the form to delete."]}
+    let context_ = "DeleteFormRequest"
+    let make ~appId =
+      fun ~environmentName ->
+        fun ~id -> fun () -> { appId; environmentName; id }
+    let to_value x =
+      structure_to_value
+        [("appId", (Some (String_.to_value x.appId)));
+        ("environmentName", (Some (String_.to_value x.environmentName)));
+        ("id", (Some (Uuid.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id = Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let environmentName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
+      let appId =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
+      make ~id ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Uuid.of_json in
+      let environmentName =
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
+      make ~id ~environmentName ~appId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a form from an Amplify app."]
 module DeleteThemeRequest =
   struct
     type nonrec t =
@@ -2779,11 +6137,11 @@ module DeleteThemeRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~id ~environmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" Uuid.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Uuid.of_json in
       let environmentName =
-        field_map_exn json "environmentName" String_.of_json in
-      let appId = field_map_exn json "appId" String_.of_json in
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
       make ~id ~environmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a theme from an Amplify app."]
@@ -2824,27 +6182,36 @@ module ExchangeCodeForTokenRequestBody =
         [@ocaml.doc "The access code to send in the request."];
       redirectUri: String_.t
         [@ocaml.doc
-          "The location of the application that will receive the access code."]}
+          "The location of the application that will receive the access code."];
+      clientId: SensitiveString.t option
+        [@ocaml.doc "The ID of the client to request the token from."]}
     let context_ = "ExchangeCodeForTokenRequestBody"
-    let make ~code = fun ~redirectUri -> fun () -> { code; redirectUri }
+    let make ?clientId =
+      fun ~code ->
+        fun ~redirectUri -> fun () -> { clientId; code; redirectUri }
     let to_value x =
       structure_to_value
         [("code", (Some (SensitiveString.to_value x.code)));
-        ("redirectUri", (Some (String_.to_value x.redirectUri)))]
+        ("redirectUri", (Some (String_.to_value x.redirectUri)));
+        ("clientId", (Option.map x.clientId ~f:SensitiveString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let clientId =
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "clientId") in
       let redirectUri =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "redirectUri") in
       let code =
         SensitiveString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "code") in
-      make ~redirectUri ~code ()
+      make ?clientId ~redirectUri ~code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let redirectUri = field_map_exn json "redirectUri" String_.of_json in
-      let code = field_map_exn json "code" SensitiveString.of_json in
-      make ~redirectUri ~code ()
+    let of_json json__ =
+      let clientId = field_map json__ "clientId" SensitiveString.of_json in
+      let redirectUri = field_map_exn json__ "redirectUri" String_.of_json in
+      let code = field_map_exn json__ "code" SensitiveString.of_json in
+      make ?clientId ~redirectUri ~code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the configuration of a request to exchange an access code for a token."]
@@ -2881,43 +6248,31 @@ module ExchangeCodeForTokenRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "provider") in
       make ~request ~provider ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let request =
-        field_map_exn json "request" ExchangeCodeForTokenRequestBody.of_json in
-      let provider = field_map_exn json "provider" TokenProviders.of_json in
+        field_map_exn json__ "request"
+          ExchangeCodeForTokenRequestBody.of_json in
+      let provider = field_map_exn json__ "provider" TokenProviders.of_json in
       make ~request ~provider ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Exchanges an access code for a token."]
-module Integer =
-  struct
-    type nonrec t = int
-    let make i = i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
+  end[@@ocaml.doc
+       "This is for internal use. Amplify uses this action to exchange an access code for a token."]
 module ExchangeCodeForTokenResponse =
   struct
     type nonrec t =
       {
-      accessToken: SensitiveString.t [@ocaml.doc "The access token."];
-      expiresIn: Integer.t
+      accessToken: SensitiveString.t option [@ocaml.doc "The access token."];
+      expiresIn: Integer.t option
         [@ocaml.doc "The date and time when the new access token expires."];
-      refreshToken: SensitiveString.t
+      refreshToken: SensitiveString.t option
         [@ocaml.doc
           "The token to use to refresh a previously issued access token that might have expired."]}
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ExchangeCodeForTokenResponse"
-    let make ~accessToken =
-      fun ~expiresIn ->
-        fun ~refreshToken ->
+    let make ?accessToken =
+      fun ?expiresIn ->
+        fun ?refreshToken ->
           fun () -> { accessToken; expiresIn; refreshToken }
     let error_of_json name json =
       match name with
@@ -2945,30 +6300,33 @@ module ExchangeCodeForTokenResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("accessToken", (Some (SensitiveString.to_value x.accessToken)));
-        ("expiresIn", (Some (Integer.to_value x.expiresIn)));
-        ("refreshToken", (Some (SensitiveString.to_value x.refreshToken)))]
+        [("accessToken",
+           (Option.map x.accessToken ~f:SensitiveString.to_value));
+        ("expiresIn", (Option.map x.expiresIn ~f:Integer.to_value));
+        ("refreshToken",
+          (Option.map x.refreshToken ~f:SensitiveString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let refreshToken =
-        SensitiveString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "refreshToken") in
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "refreshToken") in
       let expiresIn =
-        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "expiresIn") in
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "expiresIn") in
       let accessToken =
-        SensitiveString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "accessToken") in
-      make ~refreshToken ~expiresIn ~accessToken ()
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "accessToken") in
+      make ?refreshToken ?expiresIn ?accessToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let refreshToken =
-        field_map_exn json "refreshToken" SensitiveString.of_json in
-      let expiresIn = field_map_exn json "expiresIn" Integer.of_json in
+        field_map json__ "refreshToken" SensitiveString.of_json in
+      let expiresIn = field_map json__ "expiresIn" Integer.of_json in
       let accessToken =
-        field_map_exn json "accessToken" SensitiveString.of_json in
-      make ~refreshToken ~expiresIn ~accessToken ()
+        field_map json__ "accessToken" SensitiveString.of_json in
+      make ?refreshToken ?expiresIn ?accessToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Exchanges an access code for a token."]
+  end[@@ocaml.doc
+       "This is for internal use. Amplify uses this action to exchange an access code for a token."]
 module ExportComponentsRequest =
   struct
     type nonrec t =
@@ -3002,11 +6360,11 @@ module ExportComponentsRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?nextToken ~environmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let environmentName =
-        field_map_exn json "environmentName" String_.of_json in
-      let appId = field_map_exn json "appId" String_.of_json in
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
       make ?nextToken ~environmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3015,7 +6373,7 @@ module ExportComponentsResponse =
   struct
     type nonrec t =
       {
-      entities: ComponentList.t
+      entities: ComponentList.t option
         [@ocaml.doc
           "Represents the configuration of the exported components."];
       nextToken: String_.t option
@@ -3025,8 +6383,7 @@ module ExportComponentsResponse =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ExportComponentsResponse"
-    let make ?nextToken = fun ~entities -> fun () -> { nextToken; entities }
+    let make ?entities = fun ?nextToken -> fun () -> { entities; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -3061,24 +6418,155 @@ module ExportComponentsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("entities", (Some (ComponentList.to_value x.entities)));
+        [("entities", (Option.map x.entities ~f:ComponentList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let entities =
-        ComponentList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "entities") in
-      make ?nextToken ~entities ()
+        (Option.map ~f:ComponentList.of_xml) (Xml.child xml_arg0 "entities") in
+      make ?nextToken ?entities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let entities = field_map_exn json "entities" ComponentList.of_json in
-      make ?nextToken ~entities ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let entities = field_map json__ "entities" ComponentList.of_json in
+      make ?nextToken ?entities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Exports component configurations to code that is ready to integrate into an Amplify app."]
+module ExportFormsRequest =
+  struct
+    type nonrec t =
+      {
+      appId: String_.t
+        [@ocaml.doc "The unique ID of the Amplify app to export forms to."];
+      environmentName: String_.t
+        [@ocaml.doc
+          "The name of the backend environment that is a part of the Amplify app."];
+      nextToken: String_.t option
+        [@ocaml.doc "The token to request the next page of results."]}
+    let context_ = "ExportFormsRequest"
+    let make ?nextToken =
+      fun ~appId ->
+        fun ~environmentName ->
+          fun () -> { nextToken; appId; environmentName }
+    let to_value x =
+      structure_to_value
+        [("appId", (Some (String_.to_value x.appId)));
+        ("environmentName", (Some (String_.to_value x.environmentName)));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let environmentName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
+      let appId =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
+      make ?nextToken ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let environmentName =
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
+      make ?nextToken ~environmentName ~appId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Exports form configurations to code that is ready to integrate into an Amplify app."]
+module FormList =
+  struct
+    type nonrec t = Form.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Form.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Form.of_xml)
+    let of_json j = list_of_json ~kind:"FormList" ~of_json:Form.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExportFormsResponse =
+  struct
+    type nonrec t =
+      {
+      entities: FormList.t option
+        [@ocaml.doc "Represents the configuration of the exported forms."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The pagination token that's included if more results are available."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?entities = fun ?nextToken -> fun () -> { entities; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("entities", (Option.map x.entities ~f:FormList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let entities =
+        (Option.map ~f:FormList.of_xml) (Xml.child xml_arg0 "entities") in
+      make ?nextToken ?entities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let entities = field_map json__ "entities" FormList.of_json in
+      make ?nextToken ?entities ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Exports form configurations to code that is ready to integrate into an Amplify app."]
 module ExportThemesRequest =
   struct
     type nonrec t =
@@ -3112,11 +6600,11 @@ module ExportThemesRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ?nextToken ~environmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let environmentName =
-        field_map_exn json "environmentName" String_.of_json in
-      let appId = field_map_exn json "appId" String_.of_json in
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
       make ?nextToken ~environmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3125,6 +6613,9 @@ module ThemeList =
   struct
     type nonrec t = Theme.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Theme.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3148,7 +6639,7 @@ module ExportThemesResponse =
   struct
     type nonrec t =
       {
-      entities: ThemeList.t
+      entities: ThemeList.t option
         [@ocaml.doc "Represents the configuration of the exported themes."];
       nextToken: String_.t option
         [@ocaml.doc
@@ -3157,8 +6648,7 @@ module ExportThemesResponse =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ExportThemesResponse"
-    let make ?nextToken = fun ~entities -> fun () -> { nextToken; entities }
+    let make ?entities = fun ?nextToken -> fun () -> { entities; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -3193,24 +6683,300 @@ module ExportThemesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("entities", (Some (ThemeList.to_value x.entities)));
+        [("entities", (Option.map x.entities ~f:ThemeList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let entities =
-        ThemeList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "entities") in
-      make ?nextToken ~entities ()
+        (Option.map ~f:ThemeList.of_xml) (Xml.child xml_arg0 "entities") in
+      make ?nextToken ?entities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let entities = field_map_exn json "entities" ThemeList.of_json in
-      make ?nextToken ~entities ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let entities = field_map json__ "entities" ThemeList.of_json in
+      make ?nextToken ?entities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Exports theme configurations to code that is ready to integrate into an Amplify app."]
+module FeaturesMap =
+  struct
+    type nonrec t = (String_.t * String_.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (String_.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FormSummary =
+  struct
+    type nonrec t =
+      {
+      appId: String_.t option
+        [@ocaml.doc
+          "The unique ID for the app associated with the form summary."];
+      dataType: FormDataTypeConfig.t option
+        [@ocaml.doc "The form's data source type."];
+      environmentName: String_.t option
+        [@ocaml.doc
+          "The name of the backend environment that is part of the Amplify app."];
+      formActionType: FormActionType.t option
+        [@ocaml.doc "The type of operation to perform on the form."];
+      id: Uuid.t option [@ocaml.doc "The ID of the form."];
+      name: FormName.t option [@ocaml.doc "The name of the form."]}
+    let make ?appId =
+      fun ?dataType ->
+        fun ?environmentName ->
+          fun ?formActionType ->
+            fun ?id ->
+              fun ?name ->
+                fun () ->
+                  {
+                    appId;
+                    dataType;
+                    environmentName;
+                    formActionType;
+                    id;
+                    name
+                  }
+    let to_value x =
+      structure_to_value
+        [("appId", (Option.map x.appId ~f:String_.to_value));
+        ("dataType", (Option.map x.dataType ~f:FormDataTypeConfig.to_value));
+        ("environmentName",
+          (Option.map x.environmentName ~f:String_.to_value));
+        ("formActionType",
+          (Option.map x.formActionType ~f:FormActionType.to_value));
+        ("id", (Option.map x.id ~f:Uuid.to_value));
+        ("name", (Option.map x.name ~f:FormName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name = (Option.map ~f:FormName.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "id") in
+      let formActionType =
+        (Option.map ~f:FormActionType.of_xml)
+          (Xml.child xml_arg0 "formActionType") in
+      let environmentName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "environmentName") in
+      let dataType =
+        (Option.map ~f:FormDataTypeConfig.of_xml)
+          (Xml.child xml_arg0 "dataType") in
+      let appId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "appId") in
+      make ?name ?id ?formActionType ?environmentName ?dataType ?appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "name" FormName.of_json in
+      let id = field_map json__ "id" Uuid.of_json in
+      let formActionType =
+        field_map json__ "formActionType" FormActionType.of_json in
+      let environmentName =
+        field_map json__ "environmentName" String_.of_json in
+      let dataType = field_map json__ "dataType" FormDataTypeConfig.of_json in
+      let appId = field_map json__ "appId" String_.of_json in
+      make ?name ?id ?formActionType ?environmentName ?dataType ?appId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the basic information about a form."]
+module FormSummaryList =
+  struct
+    type nonrec t = FormSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FormSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FormSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FormSummaryList" ~of_json:FormSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GetCodegenJobRequest =
+  struct
+    type nonrec t =
+      {
+      appId: AppId.t
+        [@ocaml.doc
+          "The unique ID of the Amplify app associated with the code generation job."];
+      environmentName: String_.t
+        [@ocaml.doc
+          "The name of the backend environment that is a part of the Amplify app associated with the code generation job."];
+      id: Uuid.t [@ocaml.doc "The unique ID of the code generation job."]}
+    let context_ = "GetCodegenJobRequest"
+    let make ~appId =
+      fun ~environmentName ->
+        fun ~id -> fun () -> { appId; environmentName; id }
+    let to_value x =
+      structure_to_value
+        [("appId", (Some (AppId.to_value x.appId)));
+        ("environmentName", (Some (String_.to_value x.environmentName)));
+        ("id", (Some (Uuid.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id = Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let environmentName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
+      let appId =
+        AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
+      make ~id ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Uuid.of_json in
+      let environmentName =
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
+      make ~id ~environmentName ~appId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns an existing code generation job."]
+module ThrottlingException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request was denied due to request throttling."]
+module ResourceNotFoundException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The requested resource does not exist, or access was denied."]
+module GetCodegenJobResponse =
+  struct
+    type nonrec t =
+      {
+      job: CodegenJob.t option
+        [@ocaml.doc
+          "The configuration settings for the code generation job."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?job = fun () -> { job }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ?job:(Some pipe) ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value [("job", (Option.map x.job ~f:CodegenJob.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let job = (Option.map ~f:CodegenJob.of_xml) (Xml.child xml_arg0 "job") in
+      make ?job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let job = field_map json__ "job" CodegenJob.of_json in make ?job ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns an existing code generation job."]
 module GetComponentRequest =
   struct
     type nonrec t =
@@ -3239,34 +7005,14 @@ module GetComponentRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~id ~environmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" Uuid.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Uuid.of_json in
       let environmentName =
-        field_map_exn json "environmentName" String_.of_json in
-      let appId = field_map_exn json "appId" String_.of_json in
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
       make ~id ~environmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an existing component for an Amplify app."]
-module ResourceNotFoundException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The requested resource does not exist, or access was denied."]
 module GetComponentResponse =
   struct
     type nonrec t =
@@ -3331,11 +7077,220 @@ module GetComponentResponse =
         (Option.map ~f:Component.of_xml) (Xml.child xml_arg0 "component") in
       make ?component ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let component = field_map json "component" Component.of_json in
+    let of_json json__ =
+      let component = field_map json__ "component" Component.of_json in
       make ?component ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an existing component for an Amplify app."]
+module GetFormRequest =
+  struct
+    type nonrec t =
+      {
+      appId: String_.t [@ocaml.doc "The unique ID of the Amplify app."];
+      environmentName: String_.t
+        [@ocaml.doc
+          "The name of the backend environment that is part of the Amplify app."];
+      id: Uuid.t [@ocaml.doc "The unique ID of the form."]}
+    let context_ = "GetFormRequest"
+    let make ~appId =
+      fun ~environmentName ->
+        fun ~id -> fun () -> { appId; environmentName; id }
+    let to_value x =
+      structure_to_value
+        [("appId", (Some (String_.to_value x.appId)));
+        ("environmentName", (Some (String_.to_value x.environmentName)));
+        ("id", (Some (Uuid.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id = Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let environmentName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
+      let appId =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
+      make ~id ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Uuid.of_json in
+      let environmentName =
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
+      make ~id ~environmentName ~appId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns an existing form for an Amplify app."]
+module GetFormResponse =
+  struct
+    type nonrec t =
+      {
+      form: Form.t option
+        [@ocaml.doc "Represents the configuration settings for the form."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?form = fun () -> { form }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ?form:(Some pipe) ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value [("form", (Option.map x.form ~f:Form.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let form = (Option.map ~f:Form.of_xml) (Xml.child xml_arg0 "form") in
+      make ?form ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let form = field_map json__ "form" Form.of_json in make ?form ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns an existing form for an Amplify app."]
+module GetMetadataRequest =
+  struct
+    type nonrec t =
+      {
+      appId: String_.t [@ocaml.doc "The unique ID of the Amplify app."];
+      environmentName: String_.t
+        [@ocaml.doc
+          "The name of the backend environment that is part of the Amplify app."]}
+    let context_ = "GetMetadataRequest"
+    let make ~appId =
+      fun ~environmentName -> fun () -> { appId; environmentName }
+    let to_value x =
+      structure_to_value
+        [("appId", (Some (String_.to_value x.appId)));
+        ("environmentName", (Some (String_.to_value x.environmentName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let environmentName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
+      let appId =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
+      make ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let environmentName =
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
+      make ~environmentName ~appId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns existing metadata for an Amplify app."]
+module UnauthorizedException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "You don't have permission to perform this operation."]
+module GetMetadataResponse =
+  struct
+    type nonrec t =
+      {
+      features: FeaturesMap.t option
+        [@ocaml.doc
+          "Represents the configuration settings for the features metadata."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?features = fun () -> { features }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("features", (Option.map x.features ~f:FeaturesMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let features =
+        (Option.map ~f:FeaturesMap.of_xml) (Xml.child xml_arg0 "features") in
+      make ?features ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let features = field_map json__ "features" FeaturesMap.of_json in
+      make ?features ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns existing metadata for an Amplify app."]
 module GetThemeRequest =
   struct
     type nonrec t =
@@ -3364,11 +7319,11 @@ module GetThemeRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
       make ~id ~environmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" Uuid.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Uuid.of_json in
       let environmentName =
-        field_map_exn json "environmentName" String_.of_json in
-      let appId = field_map_exn json "appId" String_.of_json in
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
       make ~id ~environmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an existing theme for an Amplify app."]
@@ -3433,11 +7388,11 @@ module GetThemeResponse =
       let theme = (Option.map ~f:Theme.of_xml) (Xml.child xml_arg0 "theme") in
       make ?theme ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let theme = field_map json "theme" Theme.of_json in make ?theme ()
+    let of_json json__ =
+      let theme = field_map json__ "theme" Theme.of_json in make ?theme ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an existing theme for an Amplify app."]
-module ListComponentsLimit =
+module ListCodegenJobsLimit =
   struct
     type nonrec t = int
     let make i =
@@ -3451,7 +7406,152 @@ module ListComponentsLimit =
     let to_header x = Int.to_string x
     let of_xml xml_arg0 =
       Int.of_string
-        (string_of_xml ~kind:"an integer for ListComponentsLimit" xml_arg0)
+        (string_of_xml ~kind:"an integer for ListCodegenJobsLimit" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListCodegenJobsRequest =
+  struct
+    type nonrec t =
+      {
+      appId: AppId.t [@ocaml.doc "The unique ID for the Amplify app."];
+      environmentName: String_.t
+        [@ocaml.doc
+          "The name of the backend environment that is a part of the Amplify app."];
+      nextToken: String_.t option
+        [@ocaml.doc "The token to request the next page of results."];
+      maxResults: ListCodegenJobsLimit.t option
+        [@ocaml.doc "The maximum number of jobs to retrieve."]}
+    let context_ = "ListCodegenJobsRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~appId ->
+          fun ~environmentName ->
+            fun () -> { nextToken; maxResults; appId; environmentName }
+    let to_value x =
+      structure_to_value
+        [("appId", (Some (AppId.to_value x.appId)));
+        ("environmentName", (Some (String_.to_value x.environmentName)));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:ListCodegenJobsLimit.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:ListCodegenJobsLimit.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let environmentName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
+      let appId =
+        AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
+      make ?maxResults ?nextToken ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "maxResults" ListCodegenJobsLimit.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let environmentName =
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
+      make ?maxResults ?nextToken ~environmentName ~appId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of code generation jobs for a specified Amplify app and backend environment."]
+module ListCodegenJobsResponse =
+  struct
+    type nonrec t =
+      {
+      entities: CodegenJobSummaryList.t option
+        [@ocaml.doc "The list of code generation jobs for the Amplify app."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The pagination token that's included if more results are available."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?entities = fun ?nextToken -> fun () -> { entities; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("entities",
+           (Option.map x.entities ~f:CodegenJobSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let entities =
+        (Option.map ~f:CodegenJobSummaryList.of_xml)
+          (Xml.child xml_arg0 "entities") in
+      make ?nextToken ?entities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let entities =
+        field_map json__ "entities" CodegenJobSummaryList.of_json in
+      make ?nextToken ?entities ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of code generation jobs for a specified Amplify app and backend environment."]
+module ListEntityLimit =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ListEntityLimit" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
@@ -3463,45 +7563,43 @@ module ListComponentsRequest =
       environmentName: String_.t
         [@ocaml.doc
           "The name of the backend environment that is a part of the Amplify app."];
-      maxResults: ListComponentsLimit.t option
-        [@ocaml.doc "The maximum number of components to retrieve."];
       nextToken: String_.t option
-        [@ocaml.doc "The token to request the next page of results."]}
+        [@ocaml.doc "The token to request the next page of results."];
+      maxResults: ListEntityLimit.t option
+        [@ocaml.doc "The maximum number of components to retrieve."]}
     let context_ = "ListComponentsRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
+    let make ?nextToken =
+      fun ?maxResults ->
         fun ~appId ->
           fun ~environmentName ->
-            fun () -> { maxResults; nextToken; appId; environmentName }
+            fun () -> { nextToken; maxResults; appId; environmentName }
     let to_value x =
       structure_to_value
         [("appId", (Some (String_.to_value x.appId)));
         ("environmentName", (Some (String_.to_value x.environmentName)));
-        ("maxResults",
-          (Option.map x.maxResults ~f:ListComponentsLimit.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:ListEntityLimit.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:ListEntityLimit.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
-      let maxResults =
-        (Option.map ~f:ListComponentsLimit.of_xml)
-          (Xml.child xml_arg0 "maxResults") in
       let environmentName =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
-      make ?nextToken ?maxResults ~environmentName ~appId ()
+      make ?maxResults ?nextToken ~environmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let maxResults =
-        field_map json "maxResults" ListComponentsLimit.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" ListEntityLimit.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let environmentName =
-        field_map_exn json "environmentName" String_.of_json in
-      let appId = field_map_exn json "appId" String_.of_json in
-      make ?nextToken ?maxResults ~environmentName ~appId ()
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
+      make ?maxResults ?nextToken ~environmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of components for a specified Amplify app and backend environment."]
@@ -3509,7 +7607,7 @@ module ListComponentsResponse =
   struct
     type nonrec t =
       {
-      entities: ComponentSummaryList.t
+      entities: ComponentSummaryList.t option
         [@ocaml.doc "The list of components for the Amplify app."];
       nextToken: String_.t option
         [@ocaml.doc
@@ -3518,8 +7616,7 @@ module ListComponentsResponse =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListComponentsResponse"
-    let make ?nextToken = fun ~entities -> fun () -> { nextToken; entities }
+    let make ?entities = fun ?nextToken -> fun () -> { entities; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -3554,43 +7651,246 @@ module ListComponentsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("entities", (Some (ComponentSummaryList.to_value x.entities)));
+        [("entities",
+           (Option.map x.entities ~f:ComponentSummaryList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let entities =
-        ComponentSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "entities") in
-      make ?nextToken ~entities ()
+        (Option.map ~f:ComponentSummaryList.of_xml)
+          (Xml.child xml_arg0 "entities") in
+      make ?nextToken ?entities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let entities =
-        field_map_exn json "entities" ComponentSummaryList.of_json in
-      make ?nextToken ~entities ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let entities = field_map json__ "entities" ComponentSummaryList.of_json in
+      make ?nextToken ?entities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of components for a specified Amplify app and backend environment."]
-module ListThemesLimit =
+module ListFormsRequest =
   struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    type nonrec t =
+      {
+      appId: String_.t [@ocaml.doc "The unique ID for the Amplify app."];
+      environmentName: String_.t
+        [@ocaml.doc
+          "The name of the backend environment that is a part of the Amplify app."];
+      nextToken: String_.t option
+        [@ocaml.doc "The token to request the next page of results."];
+      maxResults: ListEntityLimit.t option
+        [@ocaml.doc "The maximum number of forms to retrieve."]}
+    let context_ = "ListFormsRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~appId ->
+          fun ~environmentName ->
+            fun () -> { nextToken; maxResults; appId; environmentName }
+    let to_value x =
+      structure_to_value
+        [("appId", (Some (String_.to_value x.appId)));
+        ("environmentName", (Some (String_.to_value x.environmentName)));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:ListEntityLimit.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for ListThemesLimit" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
+      let maxResults =
+        (Option.map ~f:ListEntityLimit.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let environmentName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
+      let appId =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
+      make ?maxResults ?nextToken ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" ListEntityLimit.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let environmentName =
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
+      make ?maxResults ?nextToken ~environmentName ~appId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of forms for a specified Amplify app and backend environment."]
+module ListFormsResponse =
+  struct
+    type nonrec t =
+      {
+      entities: FormSummaryList.t option
+        [@ocaml.doc "The list of forms for the Amplify app."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The pagination token that's included if more results are available."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?entities = fun ?nextToken -> fun () -> { entities; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("entities", (Option.map x.entities ~f:FormSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let entities =
+        (Option.map ~f:FormSummaryList.of_xml)
+          (Xml.child xml_arg0 "entities") in
+      make ?nextToken ?entities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let entities = field_map json__ "entities" FormSummaryList.of_json in
+      make ?nextToken ?entities ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of forms for a specified Amplify app and backend environment."]
+module ListTagsForResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: String_.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) to use to list tags."]}
+    let context_ = "ListTagsForResourceRequest"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Some (String_.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of tags for a specified Amazon Resource Name (ARN)."]
+module ListTagsForResourceResponse =
+  struct
+    type nonrec t =
+      {
+      tags: Tags.t option
+        [@ocaml.doc
+          "A list of tag key value pairs for a specified Amazon Resource Name (ARN)."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tags = fun () -> { tags }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in make ?tags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of tags for a specified Amazon Resource Name (ARN)."]
 module ListThemesRequest =
   struct
     type nonrec t =
@@ -3599,44 +7899,44 @@ module ListThemesRequest =
       environmentName: String_.t
         [@ocaml.doc
           "The name of the backend environment that is a part of the Amplify app."];
-      maxResults: ListThemesLimit.t option
-        [@ocaml.doc
-          "The maximum number of theme results to return in the response."];
       nextToken: String_.t option
-        [@ocaml.doc "The token to request the next page of results."]}
+        [@ocaml.doc "The token to request the next page of results."];
+      maxResults: ListEntityLimit.t option
+        [@ocaml.doc
+          "The maximum number of theme results to return in the response."]}
     let context_ = "ListThemesRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
+    let make ?nextToken =
+      fun ?maxResults ->
         fun ~appId ->
           fun ~environmentName ->
-            fun () -> { maxResults; nextToken; appId; environmentName }
+            fun () -> { nextToken; maxResults; appId; environmentName }
     let to_value x =
       structure_to_value
         [("appId", (Some (String_.to_value x.appId)));
         ("environmentName", (Some (String_.to_value x.environmentName)));
-        ("maxResults", (Option.map x.maxResults ~f:ListThemesLimit.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:ListEntityLimit.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:ListEntityLimit.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
-      let maxResults =
-        (Option.map ~f:ListThemesLimit.of_xml)
-          (Xml.child xml_arg0 "maxResults") in
       let environmentName =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
-      make ?nextToken ?maxResults ~environmentName ~appId ()
+      make ?maxResults ?nextToken ~environmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let maxResults = field_map json "maxResults" ListThemesLimit.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" ListEntityLimit.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let environmentName =
-        field_map_exn json "environmentName" String_.of_json in
-      let appId = field_map_exn json "appId" String_.of_json in
-      make ?nextToken ?maxResults ~environmentName ~appId ()
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
+      make ?maxResults ?nextToken ~environmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of themes for a specified Amplify app and backend environment."]
@@ -3644,50 +7944,50 @@ module ThemeSummary =
   struct
     type nonrec t =
       {
-      appId: String_.t
+      appId: String_.t option
         [@ocaml.doc
           "The unique ID for the app associated with the theme summary."];
-      environmentName: String_.t
+      environmentName: String_.t option
         [@ocaml.doc
           "The name of the backend environment that is part of the Amplify app."];
-      id: Uuid.t [@ocaml.doc "The ID of the theme."];
-      name: ThemeName.t [@ocaml.doc "The name of the theme."]}
-    let context_ = "ThemeSummary"
-    let make ~appId =
-      fun ~environmentName ->
-        fun ~id ->
-          fun ~name -> fun () -> { appId; environmentName; id; name }
+      id: Uuid.t option [@ocaml.doc "The ID of the theme."];
+      name: ThemeName.t option [@ocaml.doc "The name of the theme."]}
+    let make ?appId =
+      fun ?environmentName ->
+        fun ?id ->
+          fun ?name -> fun () -> { appId; environmentName; id; name }
     let to_value x =
       structure_to_value
-        [("appId", (Some (String_.to_value x.appId)));
-        ("environmentName", (Some (String_.to_value x.environmentName)));
-        ("id", (Some (Uuid.to_value x.id)));
-        ("name", (Some (ThemeName.to_value x.name)))]
+        [("appId", (Option.map x.appId ~f:String_.to_value));
+        ("environmentName",
+          (Option.map x.environmentName ~f:String_.to_value));
+        ("id", (Option.map x.id ~f:Uuid.to_value));
+        ("name", (Option.map x.name ~f:ThemeName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let name =
-        ThemeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let id = Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let name = (Option.map ~f:ThemeName.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "id") in
       let environmentName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
-      let appId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
-      make ~name ~id ~environmentName ~appId ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "environmentName") in
+      let appId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "appId") in
+      make ?name ?id ?environmentName ?appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" ThemeName.of_json in
-      let id = field_map_exn json "id" Uuid.of_json in
+    let of_json json__ =
+      let name = field_map json__ "name" ThemeName.of_json in
+      let id = field_map json__ "id" Uuid.of_json in
       let environmentName =
-        field_map_exn json "environmentName" String_.of_json in
-      let appId = field_map_exn json "appId" String_.of_json in
-      make ~name ~id ~environmentName ~appId ()
+        field_map json__ "environmentName" String_.of_json in
+      let appId = field_map json__ "appId" String_.of_json in
+      make ?name ?id ?environmentName ?appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the basic information about a theme."]
 module ThemeSummaryList =
   struct
     type nonrec t = ThemeSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ThemeSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3712,7 +8012,7 @@ module ListThemesResponse =
   struct
     type nonrec t =
       {
-      entities: ThemeSummaryList.t
+      entities: ThemeSummaryList.t option
         [@ocaml.doc "The list of themes for the Amplify app."];
       nextToken: String_.t option
         [@ocaml.doc
@@ -3721,8 +8021,7 @@ module ListThemesResponse =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListThemesResponse"
-    let make ?nextToken = fun ~entities -> fun () -> { nextToken; entities }
+    let make ?entities = fun ?nextToken -> fun () -> { entities; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -3757,46 +8056,138 @@ module ListThemesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("entities", (Some (ThemeSummaryList.to_value x.entities)));
+        [("entities", (Option.map x.entities ~f:ThemeSummaryList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let entities =
-        ThemeSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "entities") in
-      make ?nextToken ~entities ()
+        (Option.map ~f:ThemeSummaryList.of_xml)
+          (Xml.child xml_arg0 "entities") in
+      make ?nextToken ?entities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let entities = field_map_exn json "entities" ThemeSummaryList.of_json in
-      make ?nextToken ~entities ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let entities = field_map json__ "entities" ThemeSummaryList.of_json in
+      make ?nextToken ?entities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of themes for a specified Amplify app and backend environment."]
+module PutMetadataFlagBody =
+  struct
+    type nonrec t =
+      {
+      newValue: String_.t [@ocaml.doc "The new information to store."]}
+    let context_ = "PutMetadataFlagBody"
+    let make ~newValue = fun () -> { newValue }
+    let to_value x =
+      structure_to_value [("newValue", (Some (String_.to_value x.newValue)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let newValue =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "newValue") in
+      make ~newValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let newValue = field_map_exn json__ "newValue" String_.of_json in
+      make ~newValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Stores the metadata information about a feature on a form."]
+module PutMetadataFlagRequest =
+  struct
+    type nonrec t =
+      {
+      appId: String_.t [@ocaml.doc "The unique ID for the Amplify app."];
+      environmentName: String_.t
+        [@ocaml.doc
+          "The name of the backend environment that is part of the Amplify app."];
+      featureName: String_.t
+        [@ocaml.doc "The name of the feature associated with the metadata."];
+      body: PutMetadataFlagBody.t
+        [@ocaml.doc "The metadata information to store."]}
+    let context_ = "PutMetadataFlagRequest"
+    let make ~appId =
+      fun ~environmentName ->
+        fun ~featureName ->
+          fun ~body ->
+            fun () -> { appId; environmentName; featureName; body }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~appId:(String_.of_string
+                      ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                         "appId"))
+            ~environmentName:(String_.of_string
+                                ((List.Assoc.find_exn
+                                    ~equal:String.Caseless.equal) xs
+                                   "environmentName"))
+            ~featureName:(String_.of_string
+                            ((List.Assoc.find_exn
+                                ~equal:String.Caseless.equal) xs
+                               "featureName")) ~body:pipe ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("appId", (Some (String_.to_value x.appId)));
+        ("environmentName", (Some (String_.to_value x.environmentName)));
+        ("featureName", (Some (String_.to_value x.featureName)));
+        ("body", (Some (PutMetadataFlagBody.to_value x.body)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let body =
+        PutMetadataFlagBody.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "body") in
+      let featureName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "featureName") in
+      let environmentName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
+      let appId =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
+      make ~body ~featureName ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let body = field_map_exn json__ "body" PutMetadataFlagBody.of_json in
+      let featureName = field_map_exn json__ "featureName" String_.of_json in
+      let environmentName =
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
+      make ~body ~featureName ~environmentName ~appId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Stores the metadata information about a feature on a form."]
 module RefreshTokenRequestBody =
   struct
     type nonrec t =
       {
       token: SensitiveString.t
         [@ocaml.doc
-          "The token to use to refresh a previously issued access token that might have expired."]}
+          "The token to use to refresh a previously issued access token that might have expired."];
+      clientId: SensitiveString.t option
+        [@ocaml.doc "The ID of the client to request the token from."]}
     let context_ = "RefreshTokenRequestBody"
-    let make ~token = fun () -> { token }
+    let make ?clientId = fun ~token -> fun () -> { clientId; token }
     let to_value x =
       structure_to_value
-        [("token", (Some (SensitiveString.to_value x.token)))]
+        [("token", (Some (SensitiveString.to_value x.token)));
+        ("clientId", (Option.map x.clientId ~f:SensitiveString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let clientId =
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "clientId") in
       let token =
         SensitiveString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "token") in
-      make ~token ()
+      make ?clientId ~token ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let token = field_map_exn json "token" SensitiveString.of_json in
-      make ~token ()
+    let of_json json__ =
+      let clientId = field_map json__ "clientId" SensitiveString.of_json in
+      let token = field_map_exn json__ "token" SensitiveString.of_json in
+      make ?clientId ~token ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a refresh token."]
 module RefreshTokenRequest =
@@ -3833,27 +8224,27 @@ module RefreshTokenRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "provider") in
       make ~refreshTokenBody ~provider ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let refreshTokenBody =
-        field_map_exn json "refreshTokenBody" RefreshTokenRequestBody.of_json in
-      let provider = field_map_exn json "provider" TokenProviders.of_json in
+        field_map_exn json__ "refreshTokenBody"
+          RefreshTokenRequestBody.of_json in
+      let provider = field_map_exn json__ "provider" TokenProviders.of_json in
       make ~refreshTokenBody ~provider ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Refreshes a previously issued access token that might have expired."]
+       "This is for internal use. Amplify uses this action to refresh a previously issued access token that might have expired."]
 module RefreshTokenResponse =
   struct
     type nonrec t =
       {
-      accessToken: SensitiveString.t [@ocaml.doc "The access token."];
-      expiresIn: Integer.t
+      accessToken: SensitiveString.t option [@ocaml.doc "The access token."];
+      expiresIn: Integer.t option
         [@ocaml.doc "The date and time when the new access token expires."]}
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "RefreshTokenResponse"
-    let make ~accessToken =
-      fun ~expiresIn -> fun () -> { accessToken; expiresIn }
+    let make ?accessToken =
+      fun ?expiresIn -> fun () -> { accessToken; expiresIn }
     let error_of_json name json =
       match name with
       | "InvalidParameterException" ->
@@ -3880,167 +8271,625 @@ module RefreshTokenResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("accessToken", (Some (SensitiveString.to_value x.accessToken)));
-        ("expiresIn", (Some (Integer.to_value x.expiresIn)))]
+        [("accessToken",
+           (Option.map x.accessToken ~f:SensitiveString.to_value));
+        ("expiresIn", (Option.map x.expiresIn ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let expiresIn =
-        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "expiresIn") in
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "expiresIn") in
       let accessToken =
-        SensitiveString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "accessToken") in
-      make ~expiresIn ~accessToken ()
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "accessToken") in
+      make ?expiresIn ?accessToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expiresIn = field_map_exn json "expiresIn" Integer.of_json in
+    let of_json json__ =
+      let expiresIn = field_map json__ "expiresIn" Integer.of_json in
       let accessToken =
-        field_map_exn json "accessToken" SensitiveString.of_json in
-      make ~expiresIn ~accessToken ()
+        field_map json__ "accessToken" SensitiveString.of_json in
+      make ?expiresIn ?accessToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Refreshes a previously issued access token that might have expired."]
+       "This is for internal use. Amplify uses this action to refresh a previously issued access token that might have expired."]
+module StartCodegenJobData =
+  struct
+    type nonrec t =
+      {
+      renderConfig: CodegenJobRenderConfig.t
+        [@ocaml.doc "The code generation configuration for the codegen job."];
+      genericDataSchema: CodegenJobGenericDataSchema.t option
+        [@ocaml.doc "The data schema to use for a code generation job."];
+      autoGenerateForms: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether to autogenerate forms in the code generation job."];
+      features: CodegenFeatureFlags.t option
+        [@ocaml.doc "The feature flags for a code generation job."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "One or more key-value pairs to use when tagging the code generation job data."]}
+    let context_ = "StartCodegenJobData"
+    let make ?genericDataSchema =
+      fun ?autoGenerateForms ->
+        fun ?features ->
+          fun ?tags ->
+            fun ~renderConfig ->
+              fun () ->
+                {
+                  genericDataSchema;
+                  autoGenerateForms;
+                  features;
+                  tags;
+                  renderConfig
+                }
+    let to_value x =
+      structure_to_value
+        [("renderConfig",
+           (Some (CodegenJobRenderConfig.to_value x.renderConfig)));
+        ("genericDataSchema",
+          (Option.map x.genericDataSchema
+             ~f:CodegenJobGenericDataSchema.to_value));
+        ("autoGenerateForms",
+          (Option.map x.autoGenerateForms ~f:Boolean.to_value));
+        ("features", (Option.map x.features ~f:CodegenFeatureFlags.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let features =
+        (Option.map ~f:CodegenFeatureFlags.of_xml)
+          (Xml.child xml_arg0 "features") in
+      let autoGenerateForms =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "autoGenerateForms") in
+      let genericDataSchema =
+        (Option.map ~f:CodegenJobGenericDataSchema.of_xml)
+          (Xml.child xml_arg0 "genericDataSchema") in
+      let renderConfig =
+        CodegenJobRenderConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "renderConfig") in
+      make ?tags ?features ?autoGenerateForms ?genericDataSchema
+        ~renderConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let features = field_map json__ "features" CodegenFeatureFlags.of_json in
+      let autoGenerateForms =
+        field_map json__ "autoGenerateForms" Boolean.of_json in
+      let genericDataSchema =
+        field_map json__ "genericDataSchema"
+          CodegenJobGenericDataSchema.of_json in
+      let renderConfig =
+        field_map_exn json__ "renderConfig" CodegenJobRenderConfig.of_json in
+      make ?tags ?features ?autoGenerateForms ?genericDataSchema
+        ~renderConfig ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The code generation job resource configuration."]
+module StartCodegenJobRequest =
+  struct
+    type nonrec t =
+      {
+      appId: AppId.t [@ocaml.doc "The unique ID for the Amplify app."];
+      environmentName: String_.t
+        [@ocaml.doc
+          "The name of the backend environment that is a part of the Amplify app."];
+      clientToken: String_.t option
+        [@ocaml.doc
+          "The idempotency token used to ensure that the code generation job request completes only once."];
+      codegenJobToCreate: StartCodegenJobData.t
+        [@ocaml.doc "The code generation job resource configuration."]}
+    let context_ = "StartCodegenJobRequest"
+    let make ?clientToken =
+      fun ~appId ->
+        fun ~environmentName ->
+          fun ~codegenJobToCreate ->
+            fun () ->
+              { clientToken; appId; environmentName; codegenJobToCreate }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~appId:(AppId.of_string
+                      ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                         "appId"))
+            ~environmentName:(String_.of_string
+                                ((List.Assoc.find_exn
+                                    ~equal:String.Caseless.equal) xs
+                                   "environmentName"))
+            ?clientToken:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs "clientToken") ~f:String_.of_string)
+            ~codegenJobToCreate:pipe ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("appId", (Some (AppId.to_value x.appId)));
+        ("environmentName", (Some (String_.to_value x.environmentName)));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
+        ("codegenJobToCreate",
+          (Some (StartCodegenJobData.to_value x.codegenJobToCreate)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let codegenJobToCreate =
+        StartCodegenJobData.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "codegenJobToCreate") in
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let environmentName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
+      let appId =
+        AppId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
+      make ~codegenJobToCreate ?clientToken ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let codegenJobToCreate =
+        field_map_exn json__ "codegenJobToCreate" StartCodegenJobData.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let environmentName =
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" AppId.of_json in
+      make ~codegenJobToCreate ?clientToken ~environmentName ~appId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts a code generation job for a specified Amplify app and backend environment."]
+module StartCodegenJobResponse =
+  struct
+    type nonrec t =
+      {
+      entity: CodegenJob.t option
+        [@ocaml.doc
+          "The code generation job for a UI component that is associated with an Amplify app."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?entity = fun () -> { entity }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ?entity:(Some pipe) ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("entity", (Option.map x.entity ~f:CodegenJob.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entity =
+        (Option.map ~f:CodegenJob.of_xml) (Xml.child xml_arg0 "entity") in
+      make ?entity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entity = field_map json__ "entity" CodegenJob.of_json in
+      make ?entity ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts a code generation job for a specified Amplify app and backend environment."]
+module TagKeyList =
+  struct
+    type nonrec t = TagKey.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TagKey.of_xml)
+    let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: String_.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) to use to tag a resource."];
+      tags: Tags.t
+        [@ocaml.doc
+          "A list of tag key value pairs for a specified Amazon Resource Name (ARN)."]}
+    let context_ = "TagResourceRequest"
+    let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Some (String_.to_value x.resourceArn)));
+        ("tags", (Some (Tags.to_value x.tags)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        Tags.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
+      let resourceArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" Tags.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
+      make ~tags ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Tags the resource with a tag key and value."]
+module TagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Tags the resource with a tag key and value."]
+module UntagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: String_.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) to use to untag a resource."];
+      tagKeys: TagKeyList.t
+        [@ocaml.doc "The tag keys to use to untag a resource."]}
+    let context_ = "UntagResourceRequest"
+    let make ~resourceArn =
+      fun ~tagKeys -> fun () -> { resourceArn; tagKeys }
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Some (String_.to_value x.resourceArn)));
+        ("tagKeys", (Some (TagKeyList.to_value x.tagKeys)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tagKeys =
+        TagKeyList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "tagKeys") in
+      let resourceArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
+      make ~tagKeys ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Untags a resource with a specified Amazon Resource Name (ARN)."]
+module UntagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnauthorizedException of UnauthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnauthorizedException" ->
+          `UnauthorizedException (UnauthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnauthorizedException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedException"));
+            ("details", (UnauthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Untags a resource with a specified Amazon Resource Name (ARN)."]
 module UpdateComponentData =
   struct
     type nonrec t =
       {
-      bindingProperties: ComponentBindingProperties.t option
-        [@ocaml.doc
-          "The data binding information for the component's properties."];
-      children: ComponentChildList.t option
-        [@ocaml.doc
-          "The components that are instances of the main component."];
-      collectionProperties: ComponentCollectionProperties.t option
-        [@ocaml.doc
-          "The configuration for binding a component's properties to a data model. Use this for a collection component."];
-      componentType: ComponentType.t option
-        [@ocaml.doc
-          "The type of the component. This can be an Amplify custom UI component or another custom component."];
-      events: ComponentEvents.t option
-        [@ocaml.doc
-          "The event configuration for the component. Use for the workflow feature in Amplify Studio that allows you to bind events and actions to components."];
       id: Uuid.t option
         [@ocaml.doc "The unique ID of the component to update."];
       name: ComponentName.t option
         [@ocaml.doc "The name of the component to update."];
-      overrides: ComponentOverrides.t option
-        [@ocaml.doc
-          "Describes the properties that can be overriden to customize the component."];
-      properties: ComponentProperties.t option
-        [@ocaml.doc "Describes the component's properties."];
-      schemaVersion: String_.t option
-        [@ocaml.doc
-          "The schema version of the component when it was imported."];
       sourceId: String_.t option
         [@ocaml.doc
           "The unique ID of the component in its original source system, such as Figma."];
+      componentType: ComponentType.t option
+        [@ocaml.doc
+          "The type of the component. This can be an Amplify custom UI component or another custom component."];
+      properties: ComponentProperties.t option
+        [@ocaml.doc "Describes the component's properties."];
+      children: ComponentChildList.t option
+        [@ocaml.doc
+          "The components that are instances of the main component."];
       variants: ComponentVariants.t option
         [@ocaml.doc
-          "A list of the unique variants of the main component being updated."]}
-    let make ?bindingProperties =
-      fun ?children ->
-        fun ?collectionProperties ->
+          "A list of the unique variants of the main component being updated."];
+      overrides: ComponentOverrides.t option
+        [@ocaml.doc
+          "Describes the properties that can be overriden to customize the component."];
+      bindingProperties: ComponentBindingProperties.t option
+        [@ocaml.doc
+          "The data binding information for the component's properties."];
+      collectionProperties: ComponentCollectionProperties.t option
+        [@ocaml.doc
+          "The configuration for binding a component's properties to a data model. Use this for a collection component."];
+      events: ComponentEvents.t option
+        [@ocaml.doc
+          "The event configuration for the component. Use for the workflow feature in Amplify Studio that allows you to bind events and actions to components."];
+      schemaVersion: String_.t option
+        [@ocaml.doc
+          "The schema version of the component when it was imported."]}
+    let make ?id =
+      fun ?name ->
+        fun ?sourceId ->
           fun ?componentType ->
-            fun ?events ->
-              fun ?id ->
-                fun ?name ->
+            fun ?properties ->
+              fun ?children ->
+                fun ?variants ->
                   fun ?overrides ->
-                    fun ?properties ->
-                      fun ?schemaVersion ->
-                        fun ?sourceId ->
-                          fun ?variants ->
+                    fun ?bindingProperties ->
+                      fun ?collectionProperties ->
+                        fun ?events ->
+                          fun ?schemaVersion ->
                             fun () ->
                               {
-                                bindingProperties;
-                                children;
-                                collectionProperties;
-                                componentType;
-                                events;
                                 id;
                                 name;
-                                overrides;
-                                properties;
-                                schemaVersion;
                                 sourceId;
-                                variants
+                                componentType;
+                                properties;
+                                children;
+                                variants;
+                                overrides;
+                                bindingProperties;
+                                collectionProperties;
+                                events;
+                                schemaVersion
                               }
     let to_value x =
       structure_to_value
-        [("bindingProperties",
-           (Option.map x.bindingProperties
-              ~f:ComponentBindingProperties.to_value));
+        [("id", (Option.map x.id ~f:Uuid.to_value));
+        ("name", (Option.map x.name ~f:ComponentName.to_value));
+        ("sourceId", (Option.map x.sourceId ~f:String_.to_value));
+        ("componentType",
+          (Option.map x.componentType ~f:ComponentType.to_value));
+        ("properties",
+          (Option.map x.properties ~f:ComponentProperties.to_value));
         ("children", (Option.map x.children ~f:ComponentChildList.to_value));
+        ("variants", (Option.map x.variants ~f:ComponentVariants.to_value));
+        ("overrides",
+          (Option.map x.overrides ~f:ComponentOverrides.to_value));
+        ("bindingProperties",
+          (Option.map x.bindingProperties
+             ~f:ComponentBindingProperties.to_value));
         ("collectionProperties",
           (Option.map x.collectionProperties
              ~f:ComponentCollectionProperties.to_value));
-        ("componentType",
-          (Option.map x.componentType ~f:ComponentType.to_value));
         ("events", (Option.map x.events ~f:ComponentEvents.to_value));
-        ("id", (Option.map x.id ~f:Uuid.to_value));
-        ("name", (Option.map x.name ~f:ComponentName.to_value));
-        ("overrides",
-          (Option.map x.overrides ~f:ComponentOverrides.to_value));
-        ("properties",
-          (Option.map x.properties ~f:ComponentProperties.to_value));
-        ("schemaVersion", (Option.map x.schemaVersion ~f:String_.to_value));
-        ("sourceId", (Option.map x.sourceId ~f:String_.to_value));
-        ("variants", (Option.map x.variants ~f:ComponentVariants.to_value))]
+        ("schemaVersion", (Option.map x.schemaVersion ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let variants =
-        (Option.map ~f:ComponentVariants.of_xml)
-          (Xml.child xml_arg0 "variants") in
-      let sourceId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sourceId") in
       let schemaVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "schemaVersion") in
-      let properties =
-        (Option.map ~f:ComponentProperties.of_xml)
-          (Xml.child xml_arg0 "properties") in
-      let overrides =
-        (Option.map ~f:ComponentOverrides.of_xml)
-          (Xml.child xml_arg0 "overrides") in
-      let name =
-        (Option.map ~f:ComponentName.of_xml) (Xml.child xml_arg0 "name") in
-      let id = (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "id") in
       let events =
         (Option.map ~f:ComponentEvents.of_xml) (Xml.child xml_arg0 "events") in
-      let componentType =
-        (Option.map ~f:ComponentType.of_xml)
-          (Xml.child xml_arg0 "componentType") in
       let collectionProperties =
         (Option.map ~f:ComponentCollectionProperties.of_xml)
           (Xml.child xml_arg0 "collectionProperties") in
-      let children =
-        (Option.map ~f:ComponentChildList.of_xml)
-          (Xml.child xml_arg0 "children") in
       let bindingProperties =
         (Option.map ~f:ComponentBindingProperties.of_xml)
           (Xml.child xml_arg0 "bindingProperties") in
-      make ?variants ?sourceId ?schemaVersion ?properties ?overrides ?name
-        ?id ?events ?componentType ?collectionProperties ?children
-        ?bindingProperties ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let variants = field_map json "variants" ComponentVariants.of_json in
-      let sourceId = field_map json "sourceId" String_.of_json in
-      let schemaVersion = field_map json "schemaVersion" String_.of_json in
+      let overrides =
+        (Option.map ~f:ComponentOverrides.of_xml)
+          (Xml.child xml_arg0 "overrides") in
+      let variants =
+        (Option.map ~f:ComponentVariants.of_xml)
+          (Xml.child xml_arg0 "variants") in
+      let children =
+        (Option.map ~f:ComponentChildList.of_xml)
+          (Xml.child xml_arg0 "children") in
       let properties =
-        field_map json "properties" ComponentProperties.of_json in
-      let overrides = field_map json "overrides" ComponentOverrides.of_json in
-      let name = field_map json "name" ComponentName.of_json in
-      let id = field_map json "id" Uuid.of_json in
-      let events = field_map json "events" ComponentEvents.of_json in
+        (Option.map ~f:ComponentProperties.of_xml)
+          (Xml.child xml_arg0 "properties") in
       let componentType =
-        field_map json "componentType" ComponentType.of_json in
+        (Option.map ~f:ComponentType.of_xml)
+          (Xml.child xml_arg0 "componentType") in
+      let sourceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sourceId") in
+      let name =
+        (Option.map ~f:ComponentName.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "id") in
+      make ?schemaVersion ?events ?collectionProperties ?bindingProperties
+        ?overrides ?variants ?children ?properties ?componentType ?sourceId
+        ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let schemaVersion = field_map json__ "schemaVersion" String_.of_json in
+      let events = field_map json__ "events" ComponentEvents.of_json in
       let collectionProperties =
-        field_map json "collectionProperties"
+        field_map json__ "collectionProperties"
           ComponentCollectionProperties.of_json in
-      let children = field_map json "children" ComponentChildList.of_json in
       let bindingProperties =
-        field_map json "bindingProperties" ComponentBindingProperties.of_json in
-      make ?variants ?sourceId ?schemaVersion ?properties ?overrides ?name
-        ?id ?events ?componentType ?collectionProperties ?children
-        ?bindingProperties ()
+        field_map json__ "bindingProperties"
+          ComponentBindingProperties.of_json in
+      let overrides = field_map json__ "overrides" ComponentOverrides.of_json in
+      let variants = field_map json__ "variants" ComponentVariants.of_json in
+      let children = field_map json__ "children" ComponentChildList.of_json in
+      let properties =
+        field_map json__ "properties" ComponentProperties.of_json in
+      let componentType =
+        field_map json__ "componentType" ComponentType.of_json in
+      let sourceId = field_map json__ "sourceId" String_.of_json in
+      let name = field_map json__ "name" ComponentName.of_json in
+      let id = field_map json__ "id" Uuid.of_json in
+      make ?schemaVersion ?events ?collectionProperties ?bindingProperties
+        ?overrides ?variants ?children ?properties ?componentType ?sourceId
+        ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates and saves all of the information about a component, based on component ID."]
@@ -4049,11 +8898,11 @@ module UpdateComponentRequest =
     type nonrec t =
       {
       appId: String_.t [@ocaml.doc "The unique ID for the Amplify app."];
-      clientToken: String_.t option [@ocaml.doc "The unique client token."];
       environmentName: String_.t
         [@ocaml.doc
           "The name of the backend environment that is part of the Amplify app."];
       id: Uuid.t [@ocaml.doc "The unique ID for the component."];
+      clientToken: String_.t option [@ocaml.doc "The unique client token."];
       updatedComponent: UpdateComponentData.t
         [@ocaml.doc "The configuration of the updated component."]}
     let context_ = "UpdateComponentRequest"
@@ -4070,23 +8919,24 @@ module UpdateComponentRequest =
             ~appId:(String_.of_string
                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
                          "appId"))
-            ?clientToken:(Option.map
-                            ((List.Assoc.find ~equal:String.Caseless.equal)
-                               xs "clientToken") ~f:String_.of_string)
             ~environmentName:(String_.of_string
                                 ((List.Assoc.find_exn
                                     ~equal:String.Caseless.equal) xs
                                    "environmentName"))
             ~id:(Uuid.of_string
                    ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
-                      "id")) ~updatedComponent:pipe ())
+                      "id"))
+            ?clientToken:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs "clientToken") ~f:String_.of_string)
+            ~updatedComponent:pipe ())
       [@warning "-27"])
     let to_value x =
       structure_to_value
         [("appId", (Some (String_.to_value x.appId)));
-        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
         ("environmentName", (Some (String_.to_value x.environmentName)));
         ("id", (Some (Uuid.to_value x.id)));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
         ("updatedComponent",
           (Some (UpdateComponentData.to_value x.updatedComponent)))]
     let to_query v = to_query to_value v
@@ -4094,25 +8944,25 @@ module UpdateComponentRequest =
       let updatedComponent =
         UpdateComponentData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "updatedComponent") in
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       let id = Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       let environmentName =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
-      let clientToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
-      make ~updatedComponent ~id ~environmentName ?clientToken ~appId ()
+      make ~updatedComponent ?clientToken ~id ~environmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let updatedComponent =
-        field_map_exn json "updatedComponent" UpdateComponentData.of_json in
-      let id = field_map_exn json "id" Uuid.of_json in
+        field_map_exn json__ "updatedComponent" UpdateComponentData.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let id = field_map_exn json__ "id" Uuid.of_json in
       let environmentName =
-        field_map_exn json "environmentName" String_.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      let appId = field_map_exn json "appId" String_.of_json in
-      make ~updatedComponent ~id ~environmentName ?clientToken ~appId ()
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
+      make ~updatedComponent ?clientToken ~id ~environmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing component."]
 module UpdateComponentResponse =
@@ -4178,11 +9028,250 @@ module UpdateComponentResponse =
         (Option.map ~f:Component.of_xml) (Xml.child xml_arg0 "entity") in
       make ?entity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entity = field_map json "entity" Component.of_json in
+    let of_json json__ =
+      let entity = field_map json__ "entity" Component.of_json in
       make ?entity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing component."]
+module UpdateFormData =
+  struct
+    type nonrec t =
+      {
+      name: FormName.t option [@ocaml.doc "The name of the form."];
+      dataType: FormDataTypeConfig.t option
+        [@ocaml.doc "The type of data source to use to create the form."];
+      formActionType: FormActionType.t option
+        [@ocaml.doc
+          "Specifies whether to perform a create or update action on the form."];
+      fields: FieldsMap.t option
+        [@ocaml.doc "The configuration information for the form's fields."];
+      style: FormStyle.t option
+        [@ocaml.doc "The configuration for the form's style."];
+      sectionalElements: SectionalElementMap.t option
+        [@ocaml.doc
+          "The configuration information for the visual helper elements for the form. These elements are not associated with any data."];
+      schemaVersion: String_.t option
+        [@ocaml.doc "The schema version of the form."];
+      cta: FormCTA.t option
+        [@ocaml.doc
+          "The FormCTA object that stores the call to action configuration for the form."];
+      labelDecorator: LabelDecorator.t option
+        [@ocaml.doc
+          "Specifies an icon or decoration to display on the form."]}
+    let make ?name =
+      fun ?dataType ->
+        fun ?formActionType ->
+          fun ?fields ->
+            fun ?style ->
+              fun ?sectionalElements ->
+                fun ?schemaVersion ->
+                  fun ?cta ->
+                    fun ?labelDecorator ->
+                      fun () ->
+                        {
+                          name;
+                          dataType;
+                          formActionType;
+                          fields;
+                          style;
+                          sectionalElements;
+                          schemaVersion;
+                          cta;
+                          labelDecorator
+                        }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:FormName.to_value));
+        ("dataType", (Option.map x.dataType ~f:FormDataTypeConfig.to_value));
+        ("formActionType",
+          (Option.map x.formActionType ~f:FormActionType.to_value));
+        ("fields", (Option.map x.fields ~f:FieldsMap.to_value));
+        ("style", (Option.map x.style ~f:FormStyle.to_value));
+        ("sectionalElements",
+          (Option.map x.sectionalElements ~f:SectionalElementMap.to_value));
+        ("schemaVersion", (Option.map x.schemaVersion ~f:String_.to_value));
+        ("cta", (Option.map x.cta ~f:FormCTA.to_value));
+        ("labelDecorator",
+          (Option.map x.labelDecorator ~f:LabelDecorator.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let labelDecorator =
+        (Option.map ~f:LabelDecorator.of_xml)
+          (Xml.child xml_arg0 "labelDecorator") in
+      let cta = (Option.map ~f:FormCTA.of_xml) (Xml.child xml_arg0 "cta") in
+      let schemaVersion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "schemaVersion") in
+      let sectionalElements =
+        (Option.map ~f:SectionalElementMap.of_xml)
+          (Xml.child xml_arg0 "sectionalElements") in
+      let style =
+        (Option.map ~f:FormStyle.of_xml) (Xml.child xml_arg0 "style") in
+      let fields =
+        (Option.map ~f:FieldsMap.of_xml) (Xml.child xml_arg0 "fields") in
+      let formActionType =
+        (Option.map ~f:FormActionType.of_xml)
+          (Xml.child xml_arg0 "formActionType") in
+      let dataType =
+        (Option.map ~f:FormDataTypeConfig.of_xml)
+          (Xml.child xml_arg0 "dataType") in
+      let name = (Option.map ~f:FormName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?labelDecorator ?cta ?schemaVersion ?sectionalElements ?style
+        ?fields ?formActionType ?dataType ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let labelDecorator =
+        field_map json__ "labelDecorator" LabelDecorator.of_json in
+      let cta = field_map json__ "cta" FormCTA.of_json in
+      let schemaVersion = field_map json__ "schemaVersion" String_.of_json in
+      let sectionalElements =
+        field_map json__ "sectionalElements" SectionalElementMap.of_json in
+      let style = field_map json__ "style" FormStyle.of_json in
+      let fields = field_map json__ "fields" FieldsMap.of_json in
+      let formActionType =
+        field_map json__ "formActionType" FormActionType.of_json in
+      let dataType = field_map json__ "dataType" FormDataTypeConfig.of_json in
+      let name = field_map json__ "name" FormName.of_json in
+      make ?labelDecorator ?cta ?schemaVersion ?sectionalElements ?style
+        ?fields ?formActionType ?dataType ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates and saves all of the information about a form, based on form ID."]
+module UpdateFormRequest =
+  struct
+    type nonrec t =
+      {
+      appId: String_.t [@ocaml.doc "The unique ID for the Amplify app."];
+      environmentName: String_.t
+        [@ocaml.doc
+          "The name of the backend environment that is part of the Amplify app."];
+      id: Uuid.t [@ocaml.doc "The unique ID for the form."];
+      clientToken: String_.t option [@ocaml.doc "The unique client token."];
+      updatedForm: UpdateFormData.t
+        [@ocaml.doc "The request accepts the following data in JSON format."]}
+    let context_ = "UpdateFormRequest"
+    let make ?clientToken =
+      fun ~appId ->
+        fun ~environmentName ->
+          fun ~id ->
+            fun ~updatedForm ->
+              fun () ->
+                { clientToken; appId; environmentName; id; updatedForm }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~appId:(String_.of_string
+                      ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                         "appId"))
+            ~environmentName:(String_.of_string
+                                ((List.Assoc.find_exn
+                                    ~equal:String.Caseless.equal) xs
+                                   "environmentName"))
+            ~id:(Uuid.of_string
+                   ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                      "id"))
+            ?clientToken:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs "clientToken") ~f:String_.of_string)
+            ~updatedForm:pipe ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("appId", (Some (String_.to_value x.appId)));
+        ("environmentName", (Some (String_.to_value x.environmentName)));
+        ("id", (Some (Uuid.to_value x.id)));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
+        ("updatedForm", (Some (UpdateFormData.to_value x.updatedForm)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedForm =
+        UpdateFormData.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "updatedForm") in
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let id = Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let environmentName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
+      let appId =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
+      make ~updatedForm ?clientToken ~id ~environmentName ~appId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedForm =
+        field_map_exn json__ "updatedForm" UpdateFormData.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let id = field_map_exn json__ "id" Uuid.of_json in
+      let environmentName =
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
+      make ~updatedForm ?clientToken ~id ~environmentName ~appId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates an existing form."]
+module UpdateFormResponse =
+  struct
+    type nonrec t =
+      {
+      entity: Form.t option
+        [@ocaml.doc "Describes the configuration of the updated form."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ResourceConflictException of ResourceConflictException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?entity = fun () -> { entity }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ResourceConflictException" ->
+          `ResourceConflictException (ResourceConflictException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ResourceConflictException" ->
+          `ResourceConflictException (ResourceConflictException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ResourceConflictException e ->
+          `Assoc
+            [("error", (`String "ResourceConflictException"));
+            ("details", (ResourceConflictException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ?entity:(Some pipe) ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value [("entity", (Option.map x.entity ~f:Form.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entity = (Option.map ~f:Form.of_xml) (Xml.child xml_arg0 "entity") in
+      make ?entity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entity = field_map json__ "entity" Form.of_json in make ?entity ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates an existing form."]
 module UpdateThemeData =
   struct
     type nonrec t =
@@ -4190,12 +9279,12 @@ module UpdateThemeData =
       id: Uuid.t option [@ocaml.doc "The unique ID of the theme to update."];
       name: ThemeName.t option
         [@ocaml.doc "The name of the theme to update."];
-      overrides: ThemeValuesList.t option
-        [@ocaml.doc
-          "Describes the properties that can be overriden to customize the theme."];
       values: ThemeValuesList.t
         [@ocaml.doc
-          "A list of key-value pairs that define the theme's properties."]}
+          "A list of key-value pairs that define the theme's properties."];
+      overrides: ThemeValuesList.t option
+        [@ocaml.doc
+          "Describes the properties that can be overriden to customize the theme."]}
     let context_ = "UpdateThemeData"
     let make ?id =
       fun ?name ->
@@ -4205,26 +9294,26 @@ module UpdateThemeData =
       structure_to_value
         [("id", (Option.map x.id ~f:Uuid.to_value));
         ("name", (Option.map x.name ~f:ThemeName.to_value));
-        ("overrides", (Option.map x.overrides ~f:ThemeValuesList.to_value));
-        ("values", (Some (ThemeValuesList.to_value x.values)))]
+        ("values", (Some (ThemeValuesList.to_value x.values)));
+        ("overrides", (Option.map x.overrides ~f:ThemeValuesList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let values =
-        ThemeValuesList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "values") in
       let overrides =
         (Option.map ~f:ThemeValuesList.of_xml)
           (Xml.child xml_arg0 "overrides") in
+      let values =
+        ThemeValuesList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "values") in
       let name = (Option.map ~f:ThemeName.of_xml) (Xml.child xml_arg0 "name") in
       let id = (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "id") in
-      make ~values ?overrides ?name ?id ()
+      make ?overrides ~values ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map_exn json "values" ThemeValuesList.of_json in
-      let overrides = field_map json "overrides" ThemeValuesList.of_json in
-      let name = field_map json "name" ThemeName.of_json in
-      let id = field_map json "id" Uuid.of_json in
-      make ~values ?overrides ?name ?id ()
+    let of_json json__ =
+      let overrides = field_map json__ "overrides" ThemeValuesList.of_json in
+      let values = field_map_exn json__ "values" ThemeValuesList.of_json in
+      let name = field_map json__ "name" ThemeName.of_json in
+      let id = field_map json__ "id" Uuid.of_json in
+      make ?overrides ~values ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Saves the data binding information for a theme."]
 module UpdateThemeRequest =
@@ -4232,11 +9321,11 @@ module UpdateThemeRequest =
     type nonrec t =
       {
       appId: String_.t [@ocaml.doc "The unique ID for the Amplify app."];
-      clientToken: String_.t option [@ocaml.doc "The unique client token."];
       environmentName: String_.t
         [@ocaml.doc
           "The name of the backend environment that is part of the Amplify app."];
       id: Uuid.t [@ocaml.doc "The unique ID for the theme."];
+      clientToken: String_.t option [@ocaml.doc "The unique client token."];
       updatedTheme: UpdateThemeData.t
         [@ocaml.doc "The configuration of the updated theme."]}
     let context_ = "UpdateThemeRequest"
@@ -4253,48 +9342,49 @@ module UpdateThemeRequest =
             ~appId:(String_.of_string
                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
                          "appId"))
-            ?clientToken:(Option.map
-                            ((List.Assoc.find ~equal:String.Caseless.equal)
-                               xs "clientToken") ~f:String_.of_string)
             ~environmentName:(String_.of_string
                                 ((List.Assoc.find_exn
                                     ~equal:String.Caseless.equal) xs
                                    "environmentName"))
             ~id:(Uuid.of_string
                    ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
-                      "id")) ~updatedTheme:pipe ())
+                      "id"))
+            ?clientToken:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs "clientToken") ~f:String_.of_string)
+            ~updatedTheme:pipe ())
       [@warning "-27"])
     let to_value x =
       structure_to_value
         [("appId", (Some (String_.to_value x.appId)));
-        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
         ("environmentName", (Some (String_.to_value x.environmentName)));
         ("id", (Some (Uuid.to_value x.id)));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
         ("updatedTheme", (Some (UpdateThemeData.to_value x.updatedTheme)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updatedTheme =
         UpdateThemeData.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "updatedTheme") in
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       let id = Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       let environmentName =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "environmentName") in
-      let clientToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       let appId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "appId") in
-      make ~updatedTheme ~id ~environmentName ?clientToken ~appId ()
+      make ~updatedTheme ?clientToken ~id ~environmentName ~appId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let updatedTheme =
-        field_map_exn json "updatedTheme" UpdateThemeData.of_json in
-      let id = field_map_exn json "id" Uuid.of_json in
+        field_map_exn json__ "updatedTheme" UpdateThemeData.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let id = field_map_exn json__ "id" Uuid.of_json in
       let environmentName =
-        field_map_exn json "environmentName" String_.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      let appId = field_map_exn json "appId" String_.of_json in
-      make ~updatedTheme ~id ~environmentName ?clientToken ~appId ()
+        field_map_exn json__ "environmentName" String_.of_json in
+      let appId = field_map_exn json__ "appId" String_.of_json in
+      make ~updatedTheme ?clientToken ~id ~environmentName ~appId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing theme."]
 module UpdateThemeResponse =
@@ -4359,7 +9449,7 @@ module UpdateThemeResponse =
       let entity = (Option.map ~f:Theme.of_xml) (Xml.child xml_arg0 "entity") in
       make ?entity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entity = field_map json "entity" Theme.of_json in make ?entity ()
+    let of_json json__ =
+      let entity = field_map json__ "entity" Theme.of_json in make ?entity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing theme."]

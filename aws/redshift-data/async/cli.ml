@@ -39,22 +39,41 @@ let batch_execute_statement =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and clusterIdentifier =
-         flag "cluster-identifier" (optional string) ~doc:"STRING Location"
-       and dbUser = flag "db-user" (optional string) ~doc:"STRING String"
+         flag "cluster-identifier" (optional string)
+           ~doc:"STRING ClusterIdentifierString"
        and secretArn =
          flag "secret-arn" (optional string) ~doc:"STRING SecretArn"
+       and dbUser = flag "db-user" (optional string) ~doc:"STRING String"
+       and database = flag "database" (optional string) ~doc:"STRING String"
+       and withEvent = flag "with-event" (optional bool) ~doc:"BOOL Boolean"
        and statementName =
          flag "statement-name" (optional string)
            ~doc:"STRING StatementNameString"
-       and withEvent = flag "with-event" (optional bool) ~doc:"BOOL Boolean"
-       and database = flag "database" (required string) ~doc:"STRING String"
+       and parameters =
+         flag "parameters" (optional json_arg) ~doc:"JSON SqlParametersList"
+       and workgroupName =
+         flag "workgroup-name" (optional string)
+           ~doc:"STRING WorkgroupNameString"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and resultFormat =
+         flag "result-format" (optional json_arg)
+           ~doc:"JSON ResultFormatString"
+       and sessionKeepAliveSeconds =
+         flag "session-keep-alive-seconds" (optional int)
+           ~doc:"INT SessionAliveSeconds"
+       and sessionId = flag "session-id" (optional string) ~doc:"STRING UUID"
        and sqls = flag "sqls" (required json_arg) ~doc:"JSON SqlList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.batch_execute_statement
-           (Values.BatchExecuteStatementInput.make ?clusterIdentifier ?dbUser
-              ?secretArn ?statementName ?withEvent ~database
-              ~sqls:(Values.SqlList.of_json sqls) ())
+           (Values.BatchExecuteStatementInput.make ?clusterIdentifier
+              ?secretArn ?dbUser ?database ?withEvent ?statementName
+              ?parameters:(Option.map ~f:Values.SqlParametersList.of_json
+                             parameters) ?workgroupName ?clientToken
+              ?resultFormat:(Option.map ~f:Values.ResultFormatString.of_json
+                               resultFormat) ?sessionKeepAliveSeconds
+              ?sessionId ~sqls:(Values.SqlList.of_json sqls) ())
            (Some Values.BatchExecuteStatementOutput.to_json)
            (Some Values.BatchExecuteStatementOutput.error_to_json)])
 let cancel_statement =
@@ -67,7 +86,7 @@ let cancel_statement =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and id = flag "id" (required string) ~doc:"STRING StatementId" in
+       and id = flag "id" (required string) ~doc:"STRING UUID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.cancel_statement (Values.CancelStatementRequest.make ~id ())
@@ -83,7 +102,7 @@ let describe_statement =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and id = flag "id" (required string) ~doc:"STRING StatementId" in
+       and id = flag "id" (required string) ~doc:"STRING UUID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_statement
@@ -101,24 +120,28 @@ let describe_table =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and clusterIdentifier =
-         flag "cluster-identifier" (optional string) ~doc:"STRING Location"
-       and connectedDatabase =
-         flag "connected-database" (optional string) ~doc:"STRING String"
-       and dbUser = flag "db-user" (optional string) ~doc:"STRING String"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and schema = flag "schema" (optional string) ~doc:"STRING String"
+         flag "cluster-identifier" (optional string)
+           ~doc:"STRING ClusterIdentifierString"
        and secretArn =
          flag "secret-arn" (optional string) ~doc:"STRING SecretArn"
+       and dbUser = flag "db-user" (optional string) ~doc:"STRING String"
+       and connectedDatabase =
+         flag "connected-database" (optional string) ~doc:"STRING String"
+       and schema = flag "schema" (optional string) ~doc:"STRING String"
        and table = flag "table" (optional string) ~doc:"STRING String"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and workgroupName =
+         flag "workgroup-name" (optional string)
+           ~doc:"STRING WorkgroupNameString"
        and database = flag "database" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_table
-           (Values.DescribeTableRequest.make ?clusterIdentifier
-              ?connectedDatabase ?dbUser ?maxResults ?nextToken ?schema
-              ?secretArn ?table ~database ())
+           (Values.DescribeTableRequest.make ?clusterIdentifier ?secretArn
+              ?dbUser ?connectedDatabase ?schema ?table ?nextToken
+              ?maxResults ?workgroupName ~database ())
            (Some Values.DescribeTableResponse.to_json)
            (Some Values.DescribeTableResponse.error_to_json)])
 let execute_statement =
@@ -132,25 +155,42 @@ let execute_statement =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and clusterIdentifier =
-         flag "cluster-identifier" (optional string) ~doc:"STRING Location"
-       and dbUser = flag "db-user" (optional string) ~doc:"STRING String"
-       and parameters =
-         flag "parameters" (optional json_arg) ~doc:"JSON SqlParametersList"
+         flag "cluster-identifier" (optional string)
+           ~doc:"STRING ClusterIdentifierString"
        and secretArn =
          flag "secret-arn" (optional string) ~doc:"STRING SecretArn"
+       and dbUser = flag "db-user" (optional string) ~doc:"STRING String"
+       and database = flag "database" (optional string) ~doc:"STRING String"
+       and withEvent = flag "with-event" (optional bool) ~doc:"BOOL Boolean"
        and statementName =
          flag "statement-name" (optional string)
            ~doc:"STRING StatementNameString"
-       and withEvent = flag "with-event" (optional bool) ~doc:"BOOL Boolean"
-       and database = flag "database" (required string) ~doc:"STRING String"
+       and parameters =
+         flag "parameters" (optional json_arg) ~doc:"JSON SqlParametersList"
+       and workgroupName =
+         flag "workgroup-name" (optional string)
+           ~doc:"STRING WorkgroupNameString"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and resultFormat =
+         flag "result-format" (optional json_arg)
+           ~doc:"JSON ResultFormatString"
+       and sessionKeepAliveSeconds =
+         flag "session-keep-alive-seconds" (optional int)
+           ~doc:"INT SessionAliveSeconds"
+       and sessionId = flag "session-id" (optional string) ~doc:"STRING UUID"
        and sql = flag "sql" (required string) ~doc:"STRING StatementString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.execute_statement
-           (Values.ExecuteStatementInput.make ?clusterIdentifier ?dbUser
+           (Values.ExecuteStatementInput.make ?clusterIdentifier ?secretArn
+              ?dbUser ?database ?withEvent ?statementName
               ?parameters:(Option.map ~f:Values.SqlParametersList.of_json
-                             parameters) ?secretArn ?statementName ?withEvent
-              ~database ~sql ()) (Some Values.ExecuteStatementOutput.to_json)
+                             parameters) ?workgroupName ?clientToken
+              ?resultFormat:(Option.map ~f:Values.ResultFormatString.of_json
+                               resultFormat) ?sessionKeepAliveSeconds
+              ?sessionId ~sql ())
+           (Some Values.ExecuteStatementOutput.to_json)
            (Some Values.ExecuteStatementOutput.error_to_json)])
 let get_statement_result =
   Command.async ~summary:""
@@ -164,13 +204,32 @@ let get_statement_result =
            ~doc:"URL override endpoint url"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING String"
-       and id = flag "id" (required string) ~doc:"STRING StatementId" in
+       and id = flag "id" (required string) ~doc:"STRING UUID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_statement_result
            (Values.GetStatementResultRequest.make ?nextToken ~id ())
            (Some Values.GetStatementResultResponse.to_json)
            (Some Values.GetStatementResultResponse.error_to_json)])
+let get_statement_result_v2 =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and id = flag "id" (required string) ~doc:"STRING UUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_statement_result_v2
+           (Values.GetStatementResultV2Request.make ?nextToken ~id ())
+           (Some Values.GetStatementResultV2Response.to_json)
+           (Some Values.GetStatementResultV2Response.error_to_json)])
 let list_databases =
   Command.async ~summary:""
     ([%map_open.Command
@@ -182,19 +241,23 @@ let list_databases =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and clusterIdentifier =
-         flag "cluster-identifier" (optional string) ~doc:"STRING Location"
-       and dbUser = flag "db-user" (optional string) ~doc:"STRING String"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
+         flag "cluster-identifier" (optional string)
+           ~doc:"STRING ClusterIdentifierString"
        and secretArn =
          flag "secret-arn" (optional string) ~doc:"STRING SecretArn"
+       and dbUser = flag "db-user" (optional string) ~doc:"STRING String"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and workgroupName =
+         flag "workgroup-name" (optional string)
+           ~doc:"STRING WorkgroupNameString"
        and database = flag "database" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_databases
-           (Values.ListDatabasesRequest.make ?clusterIdentifier ?dbUser
-              ?maxResults ?nextToken ?secretArn ~database ())
+           (Values.ListDatabasesRequest.make ?clusterIdentifier ?secretArn
+              ?dbUser ?nextToken ?maxResults ?workgroupName ~database ())
            (Some Values.ListDatabasesResponse.to_json)
            (Some Values.ListDatabasesResponse.error_to_json)])
 let list_schemas =
@@ -208,24 +271,28 @@ let list_schemas =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and clusterIdentifier =
-         flag "cluster-identifier" (optional string) ~doc:"STRING Location"
-       and connectedDatabase =
-         flag "connected-database" (optional string) ~doc:"STRING String"
-       and dbUser = flag "db-user" (optional string) ~doc:"STRING String"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and schemaPattern =
-         flag "schema-pattern" (optional string) ~doc:"STRING String"
+         flag "cluster-identifier" (optional string)
+           ~doc:"STRING ClusterIdentifierString"
        and secretArn =
          flag "secret-arn" (optional string) ~doc:"STRING SecretArn"
+       and dbUser = flag "db-user" (optional string) ~doc:"STRING String"
+       and connectedDatabase =
+         flag "connected-database" (optional string) ~doc:"STRING String"
+       and schemaPattern =
+         flag "schema-pattern" (optional string) ~doc:"STRING String"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and workgroupName =
+         flag "workgroup-name" (optional string)
+           ~doc:"STRING WorkgroupNameString"
        and database = flag "database" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_schemas
-           (Values.ListSchemasRequest.make ?clusterIdentifier
-              ?connectedDatabase ?dbUser ?maxResults ?nextToken
-              ?schemaPattern ?secretArn ~database ())
+           (Values.ListSchemasRequest.make ?clusterIdentifier ?secretArn
+              ?dbUser ?connectedDatabase ?schemaPattern ?nextToken
+              ?maxResults ?workgroupName ~database ())
            (Some Values.ListSchemasResponse.to_json)
            (Some Values.ListSchemasResponse.error_to_json)])
 let list_statements =
@@ -238,22 +305,30 @@ let list_statements =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT ListStatementsLimit"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING String"
-       and roleLevel = flag "role-level" (optional bool) ~doc:"BOOL Boolean"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ListStatementsLimit"
        and statementName =
          flag "statement-name" (optional string)
            ~doc:"STRING StatementNameString"
        and status =
-         flag "status" (optional json_arg) ~doc:"JSON StatusString" in
+         flag "status" (optional json_arg) ~doc:"JSON StatusString"
+       and roleLevel = flag "role-level" (optional bool) ~doc:"BOOL Boolean"
+       and database = flag "database" (optional string) ~doc:"STRING String"
+       and clusterIdentifier =
+         flag "cluster-identifier" (optional string)
+           ~doc:"STRING ClusterIdentifierString"
+       and workgroupName =
+         flag "workgroup-name" (optional string)
+           ~doc:"STRING WorkgroupNameString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_statements
-           (Values.ListStatementsRequest.make ?maxResults ?nextToken
-              ?roleLevel ?statementName
-              ?status:(Option.map ~f:Values.StatusString.of_json status) ())
+           (Values.ListStatementsRequest.make ?nextToken ?maxResults
+              ?statementName
+              ?status:(Option.map ~f:Values.StatusString.of_json status)
+              ?roleLevel ?database ?clusterIdentifier ?workgroupName ())
            (Some Values.ListStatementsResponse.to_json)
            (Some Values.ListStatementsResponse.error_to_json)])
 let list_tables =
@@ -267,26 +342,30 @@ let list_tables =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and clusterIdentifier =
-         flag "cluster-identifier" (optional string) ~doc:"STRING Location"
-       and connectedDatabase =
-         flag "connected-database" (optional string) ~doc:"STRING String"
-       and dbUser = flag "db-user" (optional string) ~doc:"STRING String"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and schemaPattern =
-         flag "schema-pattern" (optional string) ~doc:"STRING String"
+         flag "cluster-identifier" (optional string)
+           ~doc:"STRING ClusterIdentifierString"
        and secretArn =
          flag "secret-arn" (optional string) ~doc:"STRING SecretArn"
+       and dbUser = flag "db-user" (optional string) ~doc:"STRING String"
+       and connectedDatabase =
+         flag "connected-database" (optional string) ~doc:"STRING String"
+       and schemaPattern =
+         flag "schema-pattern" (optional string) ~doc:"STRING String"
        and tablePattern =
          flag "table-pattern" (optional string) ~doc:"STRING String"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and workgroupName =
+         flag "workgroup-name" (optional string)
+           ~doc:"STRING WorkgroupNameString"
        and database = flag "database" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_tables
-           (Values.ListTablesRequest.make ?clusterIdentifier
-              ?connectedDatabase ?dbUser ?maxResults ?nextToken
-              ?schemaPattern ?secretArn ?tablePattern ~database ())
+           (Values.ListTablesRequest.make ?clusterIdentifier ?secretArn
+              ?dbUser ?connectedDatabase ?schemaPattern ?tablePattern
+              ?nextToken ?maxResults ?workgroupName ~database ())
            (Some Values.ListTablesResponse.to_json)
            (Some Values.ListTablesResponse.error_to_json)])
 let main =
@@ -298,6 +377,7 @@ let main =
     ("describe-table", describe_table);
     ("execute-statement", execute_statement);
     ("get-statement-result", get_statement_result);
+    ("get-statement-result-v2", get_statement_result_v2);
     ("list-databases", list_databases);
     ("list-schemas", list_schemas);
     ("list-statements", list_statements);

@@ -79,14 +79,14 @@ module Range =
       let end_ = (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "end") in
       make ?startColumn ?start ?end_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startColumn = field_map json "startColumn" Zz__long.of_json in
-      let start = field_map json "start" Zz__long.of_json in
-      let end_ = field_map json "end" Zz__long.of_json in
+    let of_json json__ =
+      let startColumn = field_map json__ "startColumn" Zz__long.of_json in
+      let start = field_map json__ "start" Zz__long.of_json in
+      let end_ = field_map json__ "end" Zz__long.of_json in
       make ?startColumn ?start ?end_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the location of an occurrence of sensitive data in a non-binary text file, such as an HTML, TXT, or XML file."]
+       "Specifies the location of an occurrence of sensitive data in an email message or a non-binary text file such as an HTML, TXT, or XML file."]
 module Cell =
   struct
     type nonrec t =
@@ -126,11 +126,11 @@ module Cell =
           (Xml.child xml_arg0 "cellReference") in
       make ?row ?columnName ?column ?cellReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let row = field_map json "row" Zz__long.of_json in
-      let columnName = field_map json "columnName" Zz__string.of_json in
-      let column = field_map json "column" Zz__long.of_json in
-      let cellReference = field_map json "cellReference" Zz__string.of_json in
+    let of_json json__ =
+      let row = field_map json__ "row" Zz__long.of_json in
+      let columnName = field_map json__ "columnName" Zz__string.of_json in
+      let column = field_map json__ "column" Zz__long.of_json in
+      let cellReference = field_map json__ "cellReference" Zz__string.of_json in
       make ?row ?columnName ?column ?cellReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -162,10 +162,10 @@ module Page =
         (Option.map ~f:Range.of_xml) (Xml.child xml_arg0 "lineRange") in
       make ?pageNumber ?offsetRange ?lineRange ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageNumber = field_map json "pageNumber" Zz__long.of_json in
-      let offsetRange = field_map json "offsetRange" Range.of_json in
-      let lineRange = field_map json "lineRange" Range.of_json in
+    let of_json json__ =
+      let pageNumber = field_map json__ "pageNumber" Zz__long.of_json in
+      let offsetRange = field_map json__ "offsetRange" Range.of_json in
+      let lineRange = field_map json__ "lineRange" Range.of_json in
       make ?pageNumber ?offsetRange ?lineRange ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -176,7 +176,7 @@ module Record =
       {
       jsonPath: Zz__string.t option
         [@ocaml.doc
-          "The path, as a JSONPath expression, to the sensitive data. For an Avro object container or Parquet file, this is the path to the field in the record (recordIndex) that contains the data. For a JSON or JSON Lines file, this is the path to the field or array that contains the data. If the data is a value in an array, the path also indicates which value contains the data. If Amazon Macie detects sensitive data in the name of any element in the path, Macie omits this field. If the name of an element exceeds 20 characters, Macie truncates the name by removing characters from the beginning of the name. If the resulting full path exceeds 250 characters, Macie also truncates the path, starting with the first element in the path, until the path contains 250 or fewer characters."];
+          "The path, as a JSONPath expression, to the sensitive data. For an Avro object container or Parquet file, this is the path to the field in the record (recordIndex) that contains the data. For a JSON or JSON Lines file, this is the path to the field or array that contains the data. If the data is a value in an array, the path also indicates which value contains the data. If Amazon Macie detects sensitive data in the name of any element in the path, Macie omits this field. If the name of an element exceeds 240 characters, Macie truncates the name by removing characters from the beginning of the name. If the resulting full path exceeds 250 characters, Macie also truncates the path, starting with the first element in the path, until the path contains 250 or fewer characters."];
       recordIndex: Zz__long.t option
         [@ocaml.doc
           "For an Avro object container or Parquet file, the record index, starting from 0, for the record that contains the sensitive data. For a JSON Lines file, the line index, starting from 0, for the line that contains the sensitive data. This value is always 0 for JSON files."]}
@@ -194,9 +194,9 @@ module Record =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "jsonPath") in
       make ?recordIndex ?jsonPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recordIndex = field_map json "recordIndex" Zz__long.of_json in
-      let jsonPath = field_map json "jsonPath" Zz__string.of_json in
+    let of_json json__ =
+      let recordIndex = field_map json__ "recordIndex" Zz__long.of_json in
+      let jsonPath = field_map json__ "jsonPath" Zz__string.of_json in
       make ?recordIndex ?jsonPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -205,6 +205,9 @@ module Cells =
   struct
     type nonrec t = Cell.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Cell.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -228,6 +231,9 @@ module Pages =
   struct
     type nonrec t = Page.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Page.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -251,6 +257,9 @@ module Ranges =
   struct
     type nonrec t = Range.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Range.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -274,6 +283,9 @@ module Records =
   struct
     type nonrec t = Record.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Record.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -313,9 +325,9 @@ module TagCriterionPairForJob =
       let key = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" Zz__string.of_json in
-      let key = field_map json "key" Zz__string.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" Zz__string.of_json in
+      let key = field_map json__ "key" Zz__string.of_json in
       make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -326,14 +338,14 @@ module Occurrences =
       {
       cells: Cells.t option
         [@ocaml.doc
-          "An array of objects, one for each occurrence of sensitive data in a Microsoft Excel workbook, CSV file, or TSV file. This value is null for all other types of files.Each Cell object specifies a cell or field that contains the sensitive data."];
+          "An array of objects, one for each occurrence of sensitive data in a Microsoft Excel workbook, CSV file, or TSV file. This value is null for all other types of files. Each Cell object specifies a cell or field that contains the sensitive data."];
       lineRanges: Ranges.t option
         [@ocaml.doc
-          "An array of objects, one for each occurrence of sensitive data in a non-binary text file, such as an HTML, TXT, or XML file. Each Range object specifies a line or inclusive range of lines that contains the sensitive data, and the position of the data on the specified line or lines. This value is often null for file types that are supported by Cell, Page, or Record objects. Exceptions are the location of sensitive data in: unstructured sections of an otherwise structured file, such as a comment in a file; a malformed file that Amazon Macie analyzes as plain text; and, a CSV or TSV file that has any column names that contain sensitive data."];
+          "An array of objects, one for each occurrence of sensitive data in an email message or a non-binary text file such as an HTML, TXT, or XML file. Each Range object specifies a line or inclusive range of lines that contains the sensitive data, and the position of the data on the specified line or lines. This value is often null for file types that are supported by Cell, Page, or Record objects. Exceptions are the location of sensitive data in: unstructured sections of an otherwise structured file, such as a comment in a file; a malformed file that Amazon Macie analyzes as plain text; and, a CSV or TSV file that has any column names that contain sensitive data."];
       offsetRanges: Ranges.t option [@ocaml.doc "Reserved for future use."];
       pages: Pages.t option
         [@ocaml.doc
-          "An array of objects, one for each occurrence of sensitive data in an Adobe Portable Document Format file. This value is null for all other types of files.Each Page object specifies a page that contains the sensitive data."];
+          "An array of objects, one for each occurrence of sensitive data in an Adobe Portable Document Format file. This value is null for all other types of files. Each Page object specifies a page that contains the sensitive data."];
       records: Records.t option
         [@ocaml.doc
           "An array of objects, one for each occurrence of sensitive data in an Apache Avro object container, Apache Parquet file, JSON file, or JSON Lines file. This value is null for all other types of files. For an Avro object container or Parquet file, each Record object specifies a record index and the path to a field in a record that contains the sensitive data. For a JSON or JSON Lines file, each Record object specifies the path to a field or array that contains the sensitive data. For a JSON Lines file, it also specifies the index of the line that contains the data."]}
@@ -362,12 +374,12 @@ module Occurrences =
       let cells = (Option.map ~f:Cells.of_xml) (Xml.child xml_arg0 "cells") in
       make ?records ?pages ?offsetRanges ?lineRanges ?cells ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let records = field_map json "records" Records.of_json in
-      let pages = field_map json "pages" Pages.of_json in
-      let offsetRanges = field_map json "offsetRanges" Ranges.of_json in
-      let lineRanges = field_map json "lineRanges" Ranges.of_json in
-      let cells = field_map json "cells" Cells.of_json in
+    let of_json json__ =
+      let records = field_map json__ "records" Records.of_json in
+      let pages = field_map json__ "pages" Pages.of_json in
+      let offsetRanges = field_map json__ "offsetRanges" Ranges.of_json in
+      let lineRanges = field_map json__ "lineRanges" Ranges.of_json in
+      let cells = field_map json__ "cells" Cells.of_json in
       make ?records ?pages ?offsetRanges ?lineRanges ?cells ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -477,6 +489,9 @@ module Zz__listOf__string =
   struct
     type nonrec t = Zz__string.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Zz__string.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -501,6 +516,9 @@ module Zz__listOfTagCriterionPairForJob =
   struct
     type nonrec t = TagCriterionPairForJob.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagCriterionPairForJob.to_value)) |>
         (fun x -> `List x)
@@ -554,10 +572,10 @@ module DefaultDetection =
         (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "count") in
       make ?type_ ?occurrences ?count ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" Zz__string.of_json in
-      let occurrences = field_map json "occurrences" Occurrences.of_json in
-      let count = field_map json "count" Zz__long.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "type" Zz__string.of_json in
+      let occurrences = field_map json__ "occurrences" Occurrences.of_json in
+      let count = field_map json__ "count" Zz__long.of_json in
       make ?type_ ?occurrences ?count ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -590,11 +608,11 @@ module SessionContextAttributes =
           (Xml.child xml_arg0 "creationDate") in
       make ?mfaAuthenticated ?creationDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mfaAuthenticated =
-        field_map json "mfaAuthenticated" Zz__boolean.of_json in
+        field_map json__ "mfaAuthenticated" Zz__boolean.of_json in
       let creationDate =
-        field_map json "creationDate" Zz__timestampIso8601.of_json in
+        field_map json__ "creationDate" Zz__timestampIso8601.of_json in
       make ?mfaAuthenticated ?creationDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -608,7 +626,7 @@ module SessionIssuer =
           "The unique identifier for the Amazon Web Services account that owns the entity that was used to get the credentials."];
       arn: Zz__string.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the source account, IAM user, or role that was used to get the credentials."];
+          "The Amazon Resource Name (ARN) of the source account, Identity and Access Management (IAM) user, or role that was used to get the credentials."];
       principalId: Zz__string.t option
         [@ocaml.doc
           "The unique identifier for the entity that was used to get the credentials."];
@@ -644,12 +662,12 @@ module SessionIssuer =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?userName ?type_ ?principalId ?arn ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map json "userName" Zz__string.of_json in
-      let type_ = field_map json "type" Zz__string.of_json in
-      let principalId = field_map json "principalId" Zz__string.of_json in
-      let arn = field_map json "arn" Zz__string.of_json in
-      let accountId = field_map json "accountId" Zz__string.of_json in
+    let of_json json__ =
+      let userName = field_map json__ "userName" Zz__string.of_json in
+      let type_ = field_map json__ "type" Zz__string.of_json in
+      let principalId = field_map json__ "principalId" Zz__string.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
       make ?userName ?type_ ?principalId ?arn ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -708,20 +726,20 @@ module BlockPublicAccess =
       make ?restrictPublicBuckets ?ignorePublicAcls ?blockPublicPolicy
         ?blockPublicAcls ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let restrictPublicBuckets =
-        field_map json "restrictPublicBuckets" Zz__boolean.of_json in
+        field_map json__ "restrictPublicBuckets" Zz__boolean.of_json in
       let ignorePublicAcls =
-        field_map json "ignorePublicAcls" Zz__boolean.of_json in
+        field_map json__ "ignorePublicAcls" Zz__boolean.of_json in
       let blockPublicPolicy =
-        field_map json "blockPublicPolicy" Zz__boolean.of_json in
+        field_map json__ "blockPublicPolicy" Zz__boolean.of_json in
       let blockPublicAcls =
-        field_map json "blockPublicAcls" Zz__boolean.of_json in
+        field_map json__ "blockPublicAcls" Zz__boolean.of_json in
       make ?restrictPublicBuckets ?ignorePublicAcls ?blockPublicPolicy
         ?blockPublicAcls ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information about the block public access settings for an S3 bucket. These settings can apply to a bucket at the account level or bucket level. For detailed information about each setting, see Blocking public access to your Amazon S3 storage in the Amazon Simple Storage Service User Guide."]
+       "Provides information about the block public access settings for an S3 bucket. These settings can apply to a bucket at the account or bucket level. For detailed information about each setting, see Blocking public access to your Amazon S3 storage in the Amazon Simple Storage Service User Guide."]
 module AccessControlList =
   struct
     type nonrec t =
@@ -751,11 +769,11 @@ module AccessControlList =
           (Xml.child xml_arg0 "allowsPublicReadAccess") in
       make ?allowsPublicWriteAccess ?allowsPublicReadAccess ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let allowsPublicWriteAccess =
-        field_map json "allowsPublicWriteAccess" Zz__boolean.of_json in
+        field_map json__ "allowsPublicWriteAccess" Zz__boolean.of_json in
       let allowsPublicReadAccess =
-        field_map json "allowsPublicReadAccess" Zz__boolean.of_json in
+        field_map json__ "allowsPublicReadAccess" Zz__boolean.of_json in
       make ?allowsPublicWriteAccess ?allowsPublicReadAccess ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -789,11 +807,11 @@ module BucketPolicy =
           (Xml.child xml_arg0 "allowsPublicReadAccess") in
       make ?allowsPublicWriteAccess ?allowsPublicReadAccess ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let allowsPublicWriteAccess =
-        field_map json "allowsPublicWriteAccess" Zz__boolean.of_json in
+        field_map json__ "allowsPublicWriteAccess" Zz__boolean.of_json in
       let allowsPublicReadAccess =
-        field_map json "allowsPublicReadAccess" Zz__boolean.of_json in
+        field_map json__ "allowsPublicReadAccess" Zz__boolean.of_json in
       make ?allowsPublicWriteAccess ?allowsPublicReadAccess ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -819,9 +837,9 @@ module TagValuePair =
       let key = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" Zz__string.of_json in
-      let key = field_map json "key" Zz__string.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" Zz__string.of_json in
+      let key = field_map json__ "key" Zz__string.of_json in
       make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -846,9 +864,9 @@ module SearchResourcesTagCriterionPair =
       let key = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" Zz__string.of_json in
-      let key = field_map json "key" Zz__string.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" Zz__string.of_json in
+      let key = field_map json__ "key" Zz__string.of_json in
       make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -885,10 +903,10 @@ module SimpleCriterionForJob =
           (Xml.child xml_arg0 "comparator") in
       make ?values ?key ?comparator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" Zz__listOf__string.of_json in
-      let key = field_map json "key" SimpleCriterionKeyForJob.of_json in
-      let comparator = field_map json "comparator" JobComparator.of_json in
+    let of_json json__ =
+      let values = field_map json__ "values" Zz__listOf__string.of_json in
+      let key = field_map json__ "key" SimpleCriterionKeyForJob.of_json in
+      let comparator = field_map json__ "comparator" JobComparator.of_json in
       make ?values ?key ?comparator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -921,10 +939,10 @@ module TagCriterionForJob =
           (Xml.child xml_arg0 "comparator") in
       make ?tagValues ?comparator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tagValues =
-        field_map json "tagValues" Zz__listOfTagCriterionPairForJob.of_json in
-      let comparator = field_map json "comparator" JobComparator.of_json in
+        field_map json__ "tagValues" Zz__listOfTagCriterionPairForJob.of_json in
+      let comparator = field_map json__ "comparator" JobComparator.of_json in
       make ?tagValues ?comparator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -934,8 +952,7 @@ module CustomDetection =
     type nonrec t =
       {
       arn: Zz__string.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the custom data identifier."];
+        [@ocaml.doc "The unique identifier for the custom data identifier."];
       count: Zz__long.t option
         [@ocaml.doc
           "The total number of occurrences of the sensitive data that the custom data identifier detected."];
@@ -965,11 +982,11 @@ module CustomDetection =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?occurrences ?name ?count ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let occurrences = field_map json "occurrences" Occurrences.of_json in
-      let name = field_map json "name" Zz__string.of_json in
-      let count = field_map json "count" Zz__long.of_json in
-      let arn = field_map json "arn" Zz__string.of_json in
+    let of_json json__ =
+      let occurrences = field_map json__ "occurrences" Occurrences.of_json in
+      let name = field_map json__ "name" Zz__string.of_json in
+      let count = field_map json__ "count" Zz__long.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in
       make ?occurrences ?name ?count ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -978,6 +995,9 @@ module DefaultDetections =
   struct
     type nonrec t = DefaultDetection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DefaultDetection.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1073,11 +1093,11 @@ module SessionContext =
           (Xml.child xml_arg0 "attributes") in
       make ?sessionIssuer ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sessionIssuer =
-        field_map json "sessionIssuer" SessionIssuer.of_json in
+        field_map json__ "sessionIssuer" SessionIssuer.of_json in
       let attributes =
-        field_map json "attributes" SessionContextAttributes.of_json in
+        field_map json__ "attributes" SessionContextAttributes.of_json in
       make ?sessionIssuer ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1101,9 +1121,9 @@ module AccountLevelPermissions =
           (Xml.child xml_arg0 "blockPublicAccess") in
       make ?blockPublicAccess ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let blockPublicAccess =
-        field_map json "blockPublicAccess" BlockPublicAccess.of_json in
+        field_map json__ "blockPublicAccess" BlockPublicAccess.of_json in
       make ?blockPublicAccess ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1145,12 +1165,12 @@ module BucketLevelPermissions =
           (Xml.child xml_arg0 "accessControlList") in
       make ?bucketPolicy ?blockPublicAccess ?accessControlList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let bucketPolicy = field_map json "bucketPolicy" BucketPolicy.of_json in
+    let of_json json__ =
+      let bucketPolicy = field_map json__ "bucketPolicy" BucketPolicy.of_json in
       let blockPublicAccess =
-        field_map json "blockPublicAccess" BlockPublicAccess.of_json in
+        field_map json__ "blockPublicAccess" BlockPublicAccess.of_json in
       let accessControlList =
-        field_map json "accessControlList" AccessControlList.of_json in
+        field_map json__ "accessControlList" AccessControlList.of_json in
       make ?bucketPolicy ?blockPublicAccess ?accessControlList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1208,6 +1228,9 @@ module Zz__listOfTagValuePair =
   struct
     type nonrec t = TagValuePair.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagValuePair.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1255,6 +1278,7 @@ module SearchResourcesSimpleCriterionKey =
       | S3_BUCKET_NAME 
       | S3_BUCKET_EFFECTIVE_PERMISSION 
       | S3_BUCKET_SHARED_ACCESS 
+      | AUTOMATED_DISCOVERY_MONITORING_STATUS 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1263,6 +1287,8 @@ module SearchResourcesSimpleCriterionKey =
       | S3_BUCKET_NAME -> "S3_BUCKET_NAME"
       | S3_BUCKET_EFFECTIVE_PERMISSION -> "S3_BUCKET_EFFECTIVE_PERMISSION"
       | S3_BUCKET_SHARED_ACCESS -> "S3_BUCKET_SHARED_ACCESS"
+      | AUTOMATED_DISCOVERY_MONITORING_STATUS ->
+          "AUTOMATED_DISCOVERY_MONITORING_STATUS"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1270,6 +1296,8 @@ module SearchResourcesSimpleCriterionKey =
       | "S3_BUCKET_NAME" -> S3_BUCKET_NAME
       | "S3_BUCKET_EFFECTIVE_PERMISSION" -> S3_BUCKET_EFFECTIVE_PERMISSION
       | "S3_BUCKET_SHARED_ACCESS" -> S3_BUCKET_SHARED_ACCESS
+      | "AUTOMATED_DISCOVERY_MONITORING_STATUS" ->
+          AUTOMATED_DISCOVERY_MONITORING_STATUS
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1286,6 +1314,9 @@ module Zz__listOfSearchResourcesTagCriterionPair =
   struct
     type nonrec t = SearchResourcesTagCriterionPair.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SearchResourcesTagCriterionPair.to_value)) |>
         (fun x -> `List x)
@@ -1336,11 +1367,11 @@ module CriteriaForJob =
           (Xml.child xml_arg0 "simpleCriterion") in
       make ?tagCriterion ?simpleCriterion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tagCriterion =
-        field_map json "tagCriterion" TagCriterionForJob.of_json in
+        field_map json__ "tagCriterion" TagCriterionForJob.of_json in
       let simpleCriterion =
-        field_map json "simpleCriterion" SimpleCriterionForJob.of_json in
+        field_map json__ "simpleCriterion" SimpleCriterionForJob.of_json in
       make ?tagCriterion ?simpleCriterion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1367,6 +1398,9 @@ module CustomDetections =
   struct
     type nonrec t = CustomDetection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomDetection.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1423,11 +1457,12 @@ module SensitiveDataItem =
           (Xml.child xml_arg0 "category") in
       make ?totalCount ?detections ?category ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let totalCount = field_map json "totalCount" Zz__long.of_json in
-      let detections = field_map json "detections" DefaultDetections.of_json in
+    let of_json json__ =
+      let totalCount = field_map json__ "totalCount" Zz__long.of_json in
+      let detections =
+        field_map json__ "detections" DefaultDetections.of_json in
       let category =
-        field_map json "category" SensitiveDataItemCategory.of_json in
+        field_map json__ "category" SensitiveDataItemCategory.of_json in
       make ?totalCount ?detections ?category ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1447,8 +1482,8 @@ module IpCity =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" Zz__string.of_json in make ?name ()
+    let of_json json__ =
+      let name = field_map json__ "name" Zz__string.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about the city that an IP address originated from."]
@@ -1475,9 +1510,9 @@ module IpCountry =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "code") in
       make ?name ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" Zz__string.of_json in
-      let code = field_map json "code" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "name" Zz__string.of_json in
+      let code = field_map json__ "code" Zz__string.of_json in
       make ?name ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1503,9 +1538,10 @@ module IpGeoLocation =
       let lat = (Option.map ~f:Zz__double.of_xml) (Xml.child xml_arg0 "lat") in
       make ?lon ?lat ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lon = field_map json "lon" Zz__double.of_json in
-      let lat = field_map json "lat" Zz__double.of_json in make ?lon ?lat ()
+    let of_json json__ =
+      let lon = field_map json__ "lon" Zz__double.of_json in
+      let lat = field_map json__ "lat" Zz__double.of_json in
+      make ?lon ?lat ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides geographic coordinates that indicate where a specified IP address originated from."]
@@ -1543,11 +1579,11 @@ module IpOwner =
       let asn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "asn") in
       make ?org ?isp ?asnOrg ?asn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let org = field_map json "org" Zz__string.of_json in
-      let isp = field_map json "isp" Zz__string.of_json in
-      let asnOrg = field_map json "asnOrg" Zz__string.of_json in
-      let asn = field_map json "asn" Zz__string.of_json in
+    let of_json json__ =
+      let org = field_map json__ "org" Zz__string.of_json in
+      let isp = field_map json__ "isp" Zz__string.of_json in
+      let asnOrg = field_map json__ "asnOrg" Zz__string.of_json in
+      let asn = field_map json__ "asn" Zz__string.of_json in
       make ?org ?isp ?asnOrg ?asn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1600,13 +1636,13 @@ module AssumedRole =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "accessKeyId") in
       make ?sessionContext ?principalId ?arn ?accountId ?accessKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sessionContext =
-        field_map json "sessionContext" SessionContext.of_json in
-      let principalId = field_map json "principalId" Zz__string.of_json in
-      let arn = field_map json "arn" Zz__string.of_json in
-      let accountId = field_map json "accountId" Zz__string.of_json in
-      let accessKeyId = field_map json "accessKeyId" Zz__string.of_json in
+        field_map json__ "sessionContext" SessionContext.of_json in
+      let principalId = field_map json__ "principalId" Zz__string.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
+      let accessKeyId = field_map json__ "accessKeyId" Zz__string.of_json in
       make ?sessionContext ?principalId ?arn ?accountId ?accessKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1635,9 +1671,9 @@ module AwsAccount =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?principalId ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let principalId = field_map json "principalId" Zz__string.of_json in
-      let accountId = field_map json "accountId" Zz__string.of_json in
+    let of_json json__ =
+      let principalId = field_map json__ "principalId" Zz__string.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
       make ?principalId ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1659,8 +1695,8 @@ module AwsService =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "invokedBy") in
       make ?invokedBy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let invokedBy = field_map json "invokedBy" Zz__string.of_json in
+    let of_json json__ =
+      let invokedBy = field_map json__ "invokedBy" Zz__string.of_json in
       make ?invokedBy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1713,13 +1749,13 @@ module FederatedUser =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "accessKeyId") in
       make ?sessionContext ?principalId ?arn ?accountId ?accessKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sessionContext =
-        field_map json "sessionContext" SessionContext.of_json in
-      let principalId = field_map json "principalId" Zz__string.of_json in
-      let arn = field_map json "arn" Zz__string.of_json in
-      let accountId = field_map json "accountId" Zz__string.of_json in
-      let accessKeyId = field_map json "accessKeyId" Zz__string.of_json in
+        field_map json__ "sessionContext" SessionContext.of_json in
+      let principalId = field_map json__ "principalId" Zz__string.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
+      let accessKeyId = field_map json__ "accessKeyId" Zz__string.of_json in
       make ?sessionContext ?principalId ?arn ?accountId ?accessKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1738,8 +1774,7 @@ module IamUser =
         [@ocaml.doc
           "The unique identifier for the IAM user who performed the action."];
       userName: Zz__string.t option
-        [@ocaml.doc
-          "The user name of the IAM user who performed the action."]}
+        [@ocaml.doc "The username of the IAM user who performed the action."]}
     let make ?accountId =
       fun ?arn ->
         fun ?principalId ->
@@ -1762,11 +1797,11 @@ module IamUser =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?userName ?principalId ?arn ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userName = field_map json "userName" Zz__string.of_json in
-      let principalId = field_map json "principalId" Zz__string.of_json in
-      let arn = field_map json "arn" Zz__string.of_json in
-      let accountId = field_map json "accountId" Zz__string.of_json in
+    let of_json json__ =
+      let userName = field_map json__ "userName" Zz__string.of_json in
+      let principalId = field_map json__ "principalId" Zz__string.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
       make ?userName ?principalId ?arn ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1801,10 +1836,10 @@ module UserIdentityRoot =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?principalId ?arn ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let principalId = field_map json "principalId" Zz__string.of_json in
-      let arn = field_map json "arn" Zz__string.of_json in
-      let accountId = field_map json "accountId" Zz__string.of_json in
+    let of_json json__ =
+      let principalId = field_map json__ "principalId" Zz__string.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
       make ?principalId ?arn ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1876,12 +1911,12 @@ module BucketPermissionConfiguration =
           (Xml.child xml_arg0 "accountLevelPermissions") in
       make ?bucketLevelPermissions ?accountLevelPermissions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bucketLevelPermissions =
-        field_map json "bucketLevelPermissions"
+        field_map json__ "bucketLevelPermissions"
           BucketLevelPermissions.of_json in
       let accountLevelPermissions =
-        field_map json "accountLevelPermissions"
+        field_map json__ "accountLevelPermissions"
           AccountLevelPermissions.of_json in
       make ?bucketLevelPermissions ?accountLevelPermissions ()
     let to_json v = composed_to_json to_value v
@@ -1938,9 +1973,9 @@ module KeyValuePair =
       let key = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" Zz__string.of_json in
-      let key = field_map json "key" Zz__string.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" Zz__string.of_json in
+      let key = field_map json__ "key" Zz__string.of_json in
       make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1952,6 +1987,7 @@ module EncryptionType =
       | AES256 
       | Aws_kms 
       | UNKNOWN 
+      | Aws_kms_dsse 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1960,6 +1996,7 @@ module EncryptionType =
       | AES256 -> "AES256"
       | Aws_kms -> "aws:kms"
       | UNKNOWN -> "UNKNOWN"
+      | Aws_kms_dsse -> "aws:kms:dsse"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1967,6 +2004,7 @@ module EncryptionType =
       | "AES256" -> AES256
       | "aws:kms" -> Aws_kms
       | "UNKNOWN" -> UNKNOWN
+      | "aws:kms:dsse" -> Aws_kms_dsse
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1982,12 +2020,12 @@ module SimpleScopeTerm =
       {
       comparator: JobComparator.t option
         [@ocaml.doc
-          "The operator to use in the condition. Valid values for each supported property (key) are: OBJECT_EXTENSION - EQ (equals) or NE (not equals) OBJECT_KEY - STARTS_WITH OBJECT_LAST_MODIFIED_DATE - Any operator except CONTAINS OBJECT_SIZE - Any operator except CONTAINS"];
+          "The operator to use in the condition. Valid values for each supported property (key) are: OBJECT_EXTENSION - EQ (equals) or NE (not equals) OBJECT_KEY - STARTS_WITH OBJECT_LAST_MODIFIED_DATE - EQ (equals), GT (greater than), GTE (greater than or equals), LT (less than), LTE (less than or equals), or NE (not equals) OBJECT_SIZE - EQ (equals), GT (greater than), GTE (greater than or equals), LT (less than), LTE (less than or equals), or NE (not equals)"];
       key: ScopeFilterKey.t option
         [@ocaml.doc "The object property to use in the condition."];
       values: Zz__listOf__string.t option
         [@ocaml.doc
-          "An array that lists the values to use in the condition. If the value for the key property is OBJECT_EXTENSION or OBJECT_KEY, this array can specify multiple values and Amazon Macie uses OR logic to join the values. Otherwise, this array can specify only one value. Valid values for each supported property (key) are: OBJECT_EXTENSION - A string that represents the file name extension of an object. For example: docx or pdf OBJECT_KEY - A string that represents the key prefix (folder name or path) of an object. For example: logs or awslogs/eventlogs. This value applies a condition to objects whose keys (names) begin with the specified value. OBJECT_LAST_MODIFIED_DATE - The date and time (in UTC and extended ISO 8601 format) when an object was created or last changed, whichever is latest. For example: 2020-09-28T14:31:13Z OBJECT_SIZE - An integer that represents the storage size (in bytes) of an object. Macie doesn't support use of wildcard characters in these values. Also, string values are case sensitive."]}
+          "An array that lists the values to use in the condition. If the value for the key property is OBJECT_EXTENSION or OBJECT_KEY, this array can specify multiple values and Amazon Macie uses OR logic to join the values. Otherwise, this array can specify only one value. Valid values for each supported property (key) are: OBJECT_EXTENSION - A string that represents the file name extension of an object. For example: docx or pdf OBJECT_KEY - A string that represents the key prefix (folder name or path) of an object. For example: logs or awslogs/eventlogs. This value applies a condition to objects whose keys (names) begin with the specified value. OBJECT_LAST_MODIFIED_DATE - The date and time (in UTC and extended ISO 8601 format) when an object was created or last changed, whichever is latest. For example: 2023-09-24T14:31:13Z OBJECT_SIZE - An integer that represents the storage size (in bytes) of an object. Macie doesn't support use of wildcard characters in these values. Also, string values are case sensitive."]}
     let make ?comparator =
       fun ?key -> fun ?values -> fun () -> { comparator; key; values }
     let to_value x =
@@ -2007,10 +2045,10 @@ module SimpleScopeTerm =
           (Xml.child xml_arg0 "comparator") in
       make ?values ?key ?comparator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" Zz__listOf__string.of_json in
-      let key = field_map json "key" ScopeFilterKey.of_json in
-      let comparator = field_map json "comparator" JobComparator.of_json in
+    let of_json json__ =
+      let values = field_map json__ "values" Zz__listOf__string.of_json in
+      let key = field_map json__ "key" ScopeFilterKey.of_json in
+      let comparator = field_map json__ "comparator" JobComparator.of_json in
       make ?values ?key ?comparator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2054,12 +2092,12 @@ module TagScopeTerm =
           (Xml.child xml_arg0 "comparator") in
       make ?target ?tagValues ?key ?comparator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let target = field_map json "target" TagTarget.of_json in
+    let of_json json__ =
+      let target = field_map json__ "target" TagTarget.of_json in
       let tagValues =
-        field_map json "tagValues" Zz__listOfTagValuePair.of_json in
-      let key = field_map json "key" Zz__string.of_json in
-      let comparator = field_map json "comparator" JobComparator.of_json in
+        field_map json__ "tagValues" Zz__listOfTagValuePair.of_json in
+      let key = field_map json__ "key" Zz__string.of_json in
+      let comparator = field_map json__ "comparator" JobComparator.of_json in
       make ?target ?tagValues ?key ?comparator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2131,7 +2169,7 @@ module SearchResourcesSimpleCriterion =
         [@ocaml.doc "The property to use in the condition."];
       values: Zz__listOf__string.t option
         [@ocaml.doc
-          "An array that lists one or more values to use in the condition. If you specify multiple values, Amazon Macie uses OR logic to join the values. Valid values for each supported property (key) are: ACCOUNT_ID - A string that represents the unique identifier for the Amazon Web Services account that owns the resource. S3_BUCKET_EFFECTIVE_PERMISSION - A string that represents an enumerated value that Macie defines for the BucketPublicAccess.effectivePermission property of an S3 bucket. S3_BUCKET_NAME - A string that represents the name of an S3 bucket. S3_BUCKET_SHARED_ACCESS - A string that represents an enumerated value that Macie defines for the BucketMetadata.sharedAccess property of an S3 bucket. Values are case sensitive. Also, Macie doesn't support use of partial values or wildcard characters in values."]}
+          "An array that lists one or more values to use in the condition. If you specify multiple values, Amazon Macie uses OR logic to join the values. Valid values for each supported property (key) are: ACCOUNT_ID - A string that represents the unique identifier for the Amazon Web Services account that owns the resource. AUTOMATED_DISCOVERY_MONITORING_STATUS - A string that represents an enumerated value that Macie defines for the BucketMetadata.automatedDiscoveryMonitoringStatus property of an S3 bucket. S3_BUCKET_EFFECTIVE_PERMISSION - A string that represents an enumerated value that Macie defines for the BucketPublicAccess.effectivePermission property of an S3 bucket. S3_BUCKET_NAME - A string that represents the name of an S3 bucket. S3_BUCKET_SHARED_ACCESS - A string that represents an enumerated value that Macie defines for the BucketMetadata.sharedAccess property of an S3 bucket. Values are case sensitive. Also, Macie doesn't support use of partial values or wildcard characters in values."]}
     let make ?comparator =
       fun ?key -> fun ?values -> fun () -> { comparator; key; values }
     let to_value x =
@@ -2154,12 +2192,12 @@ module SearchResourcesSimpleCriterion =
           (Xml.child xml_arg0 "comparator") in
       make ?values ?key ?comparator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" Zz__listOf__string.of_json in
+    let of_json json__ =
+      let values = field_map json__ "values" Zz__listOf__string.of_json in
       let key =
-        field_map json "key" SearchResourcesSimpleCriterionKey.of_json in
+        field_map json__ "key" SearchResourcesSimpleCriterionKey.of_json in
       let comparator =
-        field_map json "comparator" SearchResourcesComparator.of_json in
+        field_map json__ "comparator" SearchResourcesComparator.of_json in
       make ?values ?key ?comparator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2193,12 +2231,12 @@ module SearchResourcesTagCriterion =
           (Xml.child xml_arg0 "comparator") in
       make ?tagValues ?comparator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tagValues =
-        field_map json "tagValues"
+        field_map json__ "tagValues"
           Zz__listOfSearchResourcesTagCriterionPair.of_json in
       let comparator =
-        field_map json "comparator" SearchResourcesComparator.of_json in
+        field_map json__ "comparator" SearchResourcesComparator.of_json in
       make ?tagValues ?comparator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2207,6 +2245,9 @@ module Zz__listOfCriteriaForJob =
   struct
     type nonrec t = CriteriaForJob.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CriteriaForJob.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2275,11 +2316,11 @@ module ServiceLimit =
           (Xml.child xml_arg0 "isServiceLimited") in
       make ?value ?unit ?isServiceLimited ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" Zz__long.of_json in
-      let unit = field_map json "unit" Unit.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" Zz__long.of_json in
+      let unit = field_map json__ "unit" Unit.of_json in
       let isServiceLimited =
-        field_map json "isServiceLimited" Zz__boolean.of_json in
+        field_map json__ "isServiceLimited" Zz__boolean.of_json in
       make ?value ?unit ?isServiceLimited ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies a current quota for an Amazon Macie account."]
@@ -2288,17 +2329,25 @@ module UsageType =
     type nonrec t =
       | DATA_INVENTORY_EVALUATION 
       | SENSITIVE_DATA_DISCOVERY 
+      | AUTOMATED_SENSITIVE_DATA_DISCOVERY 
+      | AUTOMATED_OBJECT_MONITORING 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | DATA_INVENTORY_EVALUATION -> "DATA_INVENTORY_EVALUATION"
       | SENSITIVE_DATA_DISCOVERY -> "SENSITIVE_DATA_DISCOVERY"
+      | AUTOMATED_SENSITIVE_DATA_DISCOVERY ->
+          "AUTOMATED_SENSITIVE_DATA_DISCOVERY"
+      | AUTOMATED_OBJECT_MONITORING -> "AUTOMATED_OBJECT_MONITORING"
       | Non_static_id s -> s
     let of_string =
       function
       | "DATA_INVENTORY_EVALUATION" -> DATA_INVENTORY_EVALUATION
       | "SENSITIVE_DATA_DISCOVERY" -> SENSITIVE_DATA_DISCOVERY
+      | "AUTOMATED_SENSITIVE_DATA_DISCOVERY" ->
+          AUTOMATED_SENSITIVE_DATA_DISCOVERY
+      | "AUTOMATED_OBJECT_MONITORING" -> AUTOMATED_OBJECT_MONITORING
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2317,7 +2366,7 @@ module ClassificationResultStatus =
           "The status of the finding. Possible values are: COMPLETE - Amazon Macie successfully completed its analysis of the S3 object that the finding applies to. PARTIAL - Macie analyzed only a subset of the data in the S3 object that the finding applies to. For example, the object is an archive file that contains files in an unsupported format. SKIPPED - Macie wasn't able to analyze the S3 object that the finding applies to. For example, the object is a file that uses an unsupported format."];
       reason: Zz__string.t option
         [@ocaml.doc
-          "A brief description of the status of the finding. This value is null if the status (code) of the finding is COMPLETE. Amazon Macie uses this value to notify you of any errors, warnings, or considerations that might impact your analysis of the finding and the affected S3 object. Possible values are: ARCHIVE_CONTAINS_UNPROCESSED_FILES - The object is an archive file and Macie extracted and analyzed only some or none of the files in the archive. To determine which files Macie analyzed, if any, you can refer to the corresponding sensitive data discovery result for the finding (ClassificationDetails.detailedResultsLocation). ARCHIVE_EXCEEDS_SIZE_LIMIT - The object is an archive file whose total storage size exceeds the size quota for this type of archive. ARCHIVE_NESTING_LEVEL_OVER_LIMIT - The object is an archive file whose nested depth exceeds the quota for the maximum number of nested levels that Macie analyzes for this type of archive. ARCHIVE_TOTAL_BYTES_EXTRACTED_OVER_LIMIT - The object is an archive file that exceeds the quota for the maximum amount of data that Macie extracts and analyzes for this type of archive. ARCHIVE_TOTAL_DOCUMENTS_PROCESSED_OVER_LIMIT - The object is an archive file that contains more than the maximum number of files that Macie extracts and analyzes for this type of archive. FILE_EXCEEDS_SIZE_LIMIT - The storage size of the object exceeds the size quota for this type of file. INVALID_ENCRYPTION - The object is encrypted using server-side encryption but Macie isn\226\128\153t allowed to use the key. Macie can\226\128\153t decrypt and analyze the object. INVALID_KMS_KEY - The object is encrypted with an KMS key that was disabled or is being deleted. Macie can\226\128\153t decrypt and analyze the object. INVALID_OBJECT_STATE - The object doesn\226\128\153t use a supported Amazon S3 storage class. For more information, see Discovering sensitive data in the Amazon Macie User Guide. JSON_NESTING_LEVEL_OVER_LIMIT - The object contains JSON data and the nested depth of the data exceeds the quota for the number of nested levels that Macie analyzes for this type of file. MALFORMED_FILE - The object is a malformed or corrupted file. An error occurred when Macie attempted to detect the file\226\128\153s type or extract data from the file. OBJECT_VERSION_MISMATCH - The object was changed while Macie was analyzing it. NO_SUCH_BUCKET_AVAILABLE - The object was in a bucket that was deleted shortly before or when Macie attempted to analyze the object. MALFORMED_OR_FILE_SIZE_EXCEEDS_LIMIT - The object is a Microsoft Office file that is malformed or exceeds the size quota for this type of file. If the file is malformed, an error occurred when Macie attempted to extract data from the file. OOXML_UNCOMPRESSED_SIZE_EXCEEDS_LIMIT - The object is an Office Open XML file that exceeds the size quota for this type of file. OOXML_UNCOMPRESSED_RATIO_EXCEEDS_LIMIT - The object is an Office Open XML file whose compression ratio exceeds the compression quota for this type of file. PERMISSION_DENIED - Macie isn\226\128\153t allowed to access the object. The object\226\128\153s permissions settings prevent Macie from analyzing the object. SOURCE_OBJECT_NO_LONGER_AVAILABLE - The object was deleted shortly before or when Macie attempted to analyze it. UNABLE_TO_PARSE_FILE - The object is a file that contains structured data and an error occurred when Macie attempted to parse the data. UNSUPPORTED_FILE_TYPE_EXCEPTION - The object is a file that uses an unsupported file or storage format. For more information, see Supported file and storage formats in the Amazon Macie User Guide. For information about sensitive data discovery quotas for files, see Amazon Macie quotas in the Amazon Macie User Guide."]}
+          "A brief description of the status of the finding. This value is null if the status (code) of the finding is COMPLETE. Amazon Macie uses this value to notify you of any errors, warnings, or considerations that might impact your analysis of the finding and the affected S3 object. Possible values are: ARCHIVE_CONTAINS_UNPROCESSED_FILES - The object is an archive file and Macie extracted and analyzed only some or none of the files in the archive. To determine which files Macie analyzed, if any, refer to the corresponding sensitive data discovery result for the finding (classificationDetails.detailedResultsLocation). ARCHIVE_EXCEEDS_SIZE_LIMIT - The object is an archive file whose total storage size exceeds the size quota for this type of archive. ARCHIVE_NESTING_LEVEL_OVER_LIMIT - The object is an archive file whose nested depth exceeds the quota for the maximum number of nested levels that Macie analyzes for this type of archive. ARCHIVE_TOTAL_BYTES_EXTRACTED_OVER_LIMIT - The object is an archive file that exceeds the quota for the maximum amount of data that Macie extracts and analyzes for this type of archive. ARCHIVE_TOTAL_DOCUMENTS_PROCESSED_OVER_LIMIT - The object is an archive file that contains more than the maximum number of files that Macie extracts and analyzes for this type of archive. FILE_EXCEEDS_SIZE_LIMIT - The storage size of the object exceeds the size quota for this type of file. INVALID_ENCRYPTION - The object is encrypted using server-side encryption but Macie isn't allowed to use the key. Macie can't decrypt and analyze the object. INVALID_KMS_KEY - The object is encrypted with an KMS key that was disabled or is being deleted. Macie can't decrypt and analyze the object. INVALID_OBJECT_STATE - The object doesn't use a supported Amazon S3 storage class. JSON_NESTING_LEVEL_OVER_LIMIT - The object contains JSON data and the nested depth of the data exceeds the quota for the number of nested levels that Macie analyzes for this type of file. MALFORMED_FILE - The object is a malformed or corrupted file. An error occurred when Macie attempted to detect the file's type or extract data from the file. MALFORMED_OR_FILE_SIZE_EXCEEDS_LIMIT - The object is a Microsoft Office file that is malformed or exceeds the size quota for this type of file. If the file is malformed, an error occurred when Macie attempted to extract data from the file. NO_SUCH_BUCKET_AVAILABLE - The object was in a bucket that was deleted shortly before or when Macie attempted to analyze the object. OBJECT_VERSION_MISMATCH - The object was changed while Macie was analyzing it. OOXML_UNCOMPRESSED_RATIO_EXCEEDS_LIMIT - The object is an Office Open XML file whose compression ratio exceeds the compression quota for this type of file. OOXML_UNCOMPRESSED_SIZE_EXCEEDS_LIMIT - The object is an Office Open XML file that exceeds the size quota for this type of file. PERMISSION_DENIED - Macie isn't allowed to access the object. The object's permissions settings prevent Macie from analyzing the object. SOURCE_OBJECT_NO_LONGER_AVAILABLE - The object was deleted shortly before or when Macie attempted to analyze it. TIME_CUT_OFF_REACHED - Macie started analyzing the object but additional analysis would exceed the time quota for analyzing an object. UNABLE_TO_PARSE_FILE - The object is a file that contains structured data and an error occurred when Macie attempted to parse the data. UNSUPPORTED_FILE_TYPE_EXCEPTION - The object is a file that uses an unsupported file or storage format. For information about quotas, supported storage classes, and supported file and storage formats, see Quotas and Supported storage classes and formats in the Amazon Macie User Guide."]}
     let make ?code = fun ?reason -> fun () -> { code; reason }
     let to_value x =
       structure_to_value
@@ -2331,9 +2380,9 @@ module ClassificationResultStatus =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "code") in
       make ?reason ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "reason" Zz__string.of_json in
-      let code = field_map json "code" Zz__string.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "reason" Zz__string.of_json in
+      let code = field_map json__ "code" Zz__string.of_json in
       make ?reason ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2364,9 +2413,9 @@ module CustomDataIdentifiers =
           (Xml.child xml_arg0 "detections") in
       make ?totalCount ?detections ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let totalCount = field_map json "totalCount" Zz__long.of_json in
-      let detections = field_map json "detections" CustomDetections.of_json in
+    let of_json json__ =
+      let totalCount = field_map json__ "totalCount" Zz__long.of_json in
+      let detections = field_map json__ "detections" CustomDetections.of_json in
       make ?totalCount ?detections ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2375,6 +2424,9 @@ module SensitiveData =
   struct
     type nonrec t = SensitiveDataItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SensitiveDataItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2404,7 +2456,7 @@ module ApiCallDetails =
           "The name of the operation that was invoked most recently and produced the finding."];
       apiServiceName: Zz__string.t option
         [@ocaml.doc
-          "The URL of the Amazon Web Service that provides the operation, for example: s3.amazonaws.com."];
+          "The URL of the Amazon Web Services service that provides the operation, for example: s3.amazonaws.com."];
       firstSeen: Zz__timestampIso8601.t option
         [@ocaml.doc
           "The first date and time, in UTC and extended ISO 8601 format, when any operation was invoked and produced the finding."];
@@ -2439,11 +2491,13 @@ module ApiCallDetails =
       let api = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "api") in
       make ?lastSeen ?firstSeen ?apiServiceName ?api ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastSeen = field_map json "lastSeen" Zz__timestampIso8601.of_json in
-      let firstSeen = field_map json "firstSeen" Zz__timestampIso8601.of_json in
-      let apiServiceName = field_map json "apiServiceName" Zz__string.of_json in
-      let api = field_map json "api" Zz__string.of_json in
+    let of_json json__ =
+      let lastSeen = field_map json__ "lastSeen" Zz__timestampIso8601.of_json in
+      let firstSeen =
+        field_map json__ "firstSeen" Zz__timestampIso8601.of_json in
+      let apiServiceName =
+        field_map json__ "apiServiceName" Zz__string.of_json in
+      let api = field_map json__ "api" Zz__string.of_json in
       make ?lastSeen ?firstSeen ?apiServiceName ?api ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2482,8 +2536,8 @@ module DomainDetails =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "domainName") in
       make ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map json "domainName" Zz__string.of_json in
+    let of_json json__ =
+      let domainName = field_map json__ "domainName" Zz__string.of_json in
       make ?domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2534,13 +2588,13 @@ module IpAddressDetails =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ipAddressV4") in
       make ?ipOwner ?ipGeoLocation ?ipCountry ?ipCity ?ipAddressV4 ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ipOwner = field_map json "ipOwner" IpOwner.of_json in
+    let of_json json__ =
+      let ipOwner = field_map json__ "ipOwner" IpOwner.of_json in
       let ipGeoLocation =
-        field_map json "ipGeoLocation" IpGeoLocation.of_json in
-      let ipCountry = field_map json "ipCountry" IpCountry.of_json in
-      let ipCity = field_map json "ipCity" IpCity.of_json in
-      let ipAddressV4 = field_map json "ipAddressV4" Zz__string.of_json in
+        field_map json__ "ipGeoLocation" IpGeoLocation.of_json in
+      let ipCountry = field_map json__ "ipCountry" IpCountry.of_json in
+      let ipCity = field_map json__ "ipCity" IpCity.of_json in
+      let ipAddressV4 = field_map json__ "ipAddressV4" Zz__string.of_json in
       make ?ipOwner ?ipGeoLocation ?ipCountry ?ipCity ?ipAddressV4 ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2557,7 +2611,7 @@ module UserIdentity =
           "If the action was performed using the credentials for another Amazon Web Services account, the details of that account."];
       awsService: AwsService.t option
         [@ocaml.doc
-          "If the action was performed by an Amazon Web Services account that belongs to an Amazon Web Service, the name of the service."];
+          "If the action was performed by an Amazon Web Services account that belongs to an Amazon Web Services service, the name of the service."];
       federatedUser: FederatedUser.t option
         [@ocaml.doc
           "If the action was performed with temporary security credentials that were obtained using the GetFederationToken operation of the Security Token Service (STS) API, the identifiers, session context, and other details about the identity."];
@@ -2616,15 +2670,15 @@ module UserIdentity =
       make ?type_ ?root ?iamUser ?federatedUser ?awsService ?awsAccount
         ?assumedRole ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" UserIdentityType.of_json in
-      let root = field_map json "root" UserIdentityRoot.of_json in
-      let iamUser = field_map json "iamUser" IamUser.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "type" UserIdentityType.of_json in
+      let root = field_map json__ "root" UserIdentityRoot.of_json in
+      let iamUser = field_map json__ "iamUser" IamUser.of_json in
       let federatedUser =
-        field_map json "federatedUser" FederatedUser.of_json in
-      let awsService = field_map json "awsService" AwsService.of_json in
-      let awsAccount = field_map json "awsAccount" AwsAccount.of_json in
-      let assumedRole = field_map json "assumedRole" AssumedRole.of_json in
+        field_map json__ "federatedUser" FederatedUser.of_json in
+      let awsService = field_map json__ "awsService" AwsService.of_json in
+      let awsAccount = field_map json__ "awsAccount" AwsAccount.of_json in
+      let assumedRole = field_map json__ "assumedRole" AssumedRole.of_json in
       make ?type_ ?root ?iamUser ?federatedUser ?awsService ?awsAccount
         ?assumedRole ()
     let to_json v = composed_to_json to_value v
@@ -2691,12 +2745,12 @@ module BucketPublicAccess =
           (Xml.child xml_arg0 "effectivePermission") in
       make ?permissionConfiguration ?effectivePermission ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissionConfiguration =
-        field_map json "permissionConfiguration"
+        field_map json__ "permissionConfiguration"
           BucketPermissionConfiguration.of_json in
       let effectivePermission =
-        field_map json "effectivePermission" EffectivePermission.of_json in
+        field_map json__ "effectivePermission" EffectivePermission.of_json in
       make ?permissionConfiguration ?effectivePermission ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2705,6 +2759,9 @@ module KeyValuePairList =
   struct
     type nonrec t = KeyValuePair.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KeyValuePair.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2746,9 +2803,9 @@ module S3BucketOwner =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "displayName") in
       make ?id ?displayName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "id" Zz__string.of_json in
-      let displayName = field_map json "displayName" Zz__string.of_json in
+    let of_json json__ =
+      let id = field_map json__ "id" Zz__string.of_json in
+      let displayName = field_map json__ "displayName" Zz__string.of_json in
       make ?id ?displayName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2759,7 +2816,7 @@ module ServerSideEncryption =
       {
       encryptionType: EncryptionType.t option
         [@ocaml.doc
-          "The server-side encryption algorithm that's used when storing data in the bucket or object. If default encryption is disabled for the bucket or the object isn't encrypted using server-side encryption, this value is NONE."];
+          "The server-side encryption algorithm that's used when storing data in the bucket or object. If default encryption settings aren't configured for the bucket or the object isn't encrypted using server-side encryption, this value is NONE."];
       kmsMasterKeyId: Zz__string.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) or unique identifier (key ID) for the KMS key that's used to encrypt data in the bucket or the object. This value is null if an KMS key isn't used to encrypt the data."]}
@@ -2781,14 +2838,15 @@ module ServerSideEncryption =
           (Xml.child xml_arg0 "encryptionType") in
       make ?kmsMasterKeyId ?encryptionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsMasterKeyId = field_map json "kmsMasterKeyId" Zz__string.of_json in
+    let of_json json__ =
+      let kmsMasterKeyId =
+        field_map json__ "kmsMasterKeyId" Zz__string.of_json in
       let encryptionType =
-        field_map json "encryptionType" EncryptionType.of_json in
+        field_map json__ "encryptionType" EncryptionType.of_json in
       make ?kmsMasterKeyId ?encryptionType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information about the server-side encryption settings for an S3 bucket or S3 object."]
+       "Provides information about the default server-side encryption settings for an S3 bucket or the encryption settings for an S3 object."]
 module StorageClass =
   struct
     type nonrec t =
@@ -2799,6 +2857,8 @@ module StorageClass =
       | DEEP_ARCHIVE 
       | ONEZONE_IA 
       | GLACIER 
+      | GLACIER_IR 
+      | OUTPOSTS 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2810,6 +2870,8 @@ module StorageClass =
       | DEEP_ARCHIVE -> "DEEP_ARCHIVE"
       | ONEZONE_IA -> "ONEZONE_IA"
       | GLACIER -> "GLACIER"
+      | GLACIER_IR -> "GLACIER_IR"
+      | OUTPOSTS -> "OUTPOSTS"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2820,6 +2882,8 @@ module StorageClass =
       | "DEEP_ARCHIVE" -> DEEP_ARCHIVE
       | "ONEZONE_IA" -> ONEZONE_IA
       | "GLACIER" -> GLACIER
+      | "GLACIER_IR" -> GLACIER_IR
+      | "OUTPOSTS" -> OUTPOSTS
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2857,24 +2921,75 @@ module JobScopeTerm =
           (Xml.child xml_arg0 "simpleScopeTerm") in
       make ?tagScopeTerm ?simpleScopeTerm ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagScopeTerm = field_map json "tagScopeTerm" TagScopeTerm.of_json in
+    let of_json json__ =
+      let tagScopeTerm = field_map json__ "tagScopeTerm" TagScopeTerm.of_json in
       let simpleScopeTerm =
-        field_map json "simpleScopeTerm" SimpleScopeTerm.of_json in
+        field_map json__ "simpleScopeTerm" SimpleScopeTerm.of_json in
       make ?tagScopeTerm ?simpleScopeTerm ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies a property- or tag-based condition that defines criteria for including or excluding S3 objects from a classification job. A JobScopeTerm object can contain only one simpleScopeTerm object or one tagScopeTerm object."]
+module S3BucketName =
+  struct
+    type nonrec t = string[@@ocaml.doc "The name of an S3 bucket."]
+    let context_ = "S3BucketName"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^[A-Za-z0-9.\\-_]{3,255}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3BucketName" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The name of an S3 bucket."]
+module AutomatedDiscoveryMonitoringStatus =
+  struct
+    type nonrec t =
+      | MONITORED 
+      | NOT_MONITORED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MONITORED -> "MONITORED"
+      | NOT_MONITORED -> "NOT_MONITORED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MONITORED" -> MONITORED
+      | "NOT_MONITORED" -> NOT_MONITORED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AutomatedDiscoveryMonitoringStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AutomatedDiscoveryMonitoringStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module BucketMetadataErrorCode =
   struct
     type nonrec t =
       | ACCESS_DENIED 
+      | BUCKET_COUNT_EXCEEDS_QUOTA 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | ACCESS_DENIED -> "ACCESS_DENIED" | Non_static_id s -> s
+      function
+      | ACCESS_DENIED -> "ACCESS_DENIED"
+      | BUCKET_COUNT_EXCEEDS_QUOTA -> "BUCKET_COUNT_EXCEEDS_QUOTA"
+      | Non_static_id s -> s
     let of_string =
-      function | "ACCESS_DENIED" -> ACCESS_DENIED | x -> Non_static_id x
+      function
+      | "ACCESS_DENIED" -> ACCESS_DENIED
+      | "BUCKET_COUNT_EXCEEDS_QUOTA" -> BUCKET_COUNT_EXCEEDS_QUOTA
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -2891,13 +3006,13 @@ module JobDetails =
       {
       isDefinedInJob: IsDefinedInJob.t option
         [@ocaml.doc
-          "Specifies whether any one-time or recurring jobs are configured to analyze data in the bucket. Possible values are: TRUE - The bucket is explicitly included in the bucket definition (S3BucketDefinitionForJob) for one or more jobs and at least one of those jobs has a status other than CANCELLED. Or the bucket matched the bucket criteria (S3BucketCriteriaForJob) for at least one job that previously ran. FALSE - The bucket isn't explicitly included in the bucket definition (S3BucketDefinitionForJob) for any jobs, all the jobs that explicitly include the bucket in their bucket definitions have a status of CANCELLED, or the bucket didn't match the bucket criteria (S3BucketCriteriaForJob) for any jobs that previously ran. UNKNOWN - An exception occurred when Amazon Macie attempted to retrieve job data for the bucket."];
+          "Specifies whether any one-time or recurring jobs are configured to analyze objects in the bucket. Possible values are: TRUE - The bucket is explicitly included in the bucket definition (S3BucketDefinitionForJob) for one or more jobs and at least one of those jobs has a status other than CANCELLED. Or the bucket matched the bucket criteria (S3BucketCriteriaForJob) for at least one job that previously ran. FALSE - The bucket isn't explicitly included in the bucket definition (S3BucketDefinitionForJob) for any jobs, all the jobs that explicitly include the bucket in their bucket definitions have a status of CANCELLED, or the bucket didn't match the bucket criteria (S3BucketCriteriaForJob) for any jobs that previously ran. UNKNOWN - An exception occurred when Amazon Macie attempted to retrieve job data for the bucket."];
       isMonitoredByJob: IsMonitoredByJob.t option
         [@ocaml.doc
-          "Specifies whether any recurring jobs are configured to analyze data in the bucket. Possible values are: TRUE - The bucket is explicitly included in the bucket definition (S3BucketDefinitionForJob) for one or more recurring jobs or the bucket matches the bucket criteria (S3BucketCriteriaForJob) for one or more recurring jobs. At least one of those jobs has a status other than CANCELLED. FALSE - The bucket isn't explicitly included in the bucket definition (S3BucketDefinitionForJob) for any recurring jobs, the bucket doesn't match the bucket criteria (S3BucketCriteriaForJob) for any recurring jobs, or all the recurring jobs that are configured to analyze data in the bucket have a status of CANCELLED. UNKNOWN - An exception occurred when Amazon Macie attempted to retrieve job data for the bucket."];
+          "Specifies whether any recurring jobs are configured to analyze objects in the bucket. Possible values are: TRUE - The bucket is explicitly included in the bucket definition (S3BucketDefinitionForJob) for one or more recurring jobs or the bucket matches the bucket criteria (S3BucketCriteriaForJob) for one or more recurring jobs. At least one of those jobs has a status other than CANCELLED. FALSE - The bucket isn't explicitly included in the bucket definition (S3BucketDefinitionForJob) for any recurring jobs, the bucket doesn't match the bucket criteria (S3BucketCriteriaForJob) for any recurring jobs, or all the recurring jobs that are configured to analyze data in the bucket have a status of CANCELLED. UNKNOWN - An exception occurred when Amazon Macie attempted to retrieve job data for the bucket."];
       lastJobId: Zz__string.t option
         [@ocaml.doc
-          "The unique identifier for the job that ran most recently and is configured to analyze data in the bucket, either the latest run of a recurring job or the only run of a one-time job. This value is typically null if the value for the isDefinedInJob property is FALSE or UNKNOWN."];
+          "The unique identifier for the job that ran most recently and is configured to analyze objects in the bucket, either the latest run of a recurring job or the only run of a one-time job. This value is typically null if the value for the isDefinedInJob property is FALSE or UNKNOWN."];
       lastJobRunTime: Zz__timestampIso8601.t option
         [@ocaml.doc
           "The date and time, in UTC and extended ISO 8601 format, when the job (lastJobId) started. If the job is a recurring job, this value indicates when the most recent run started. This value is typically null if the value for the isDefinedInJob property is FALSE or UNKNOWN."]}
@@ -2931,34 +3046,34 @@ module JobDetails =
           (Xml.child xml_arg0 "isDefinedInJob") in
       make ?lastJobRunTime ?lastJobId ?isMonitoredByJob ?isDefinedInJob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastJobRunTime =
-        field_map json "lastJobRunTime" Zz__timestampIso8601.of_json in
-      let lastJobId = field_map json "lastJobId" Zz__string.of_json in
+        field_map json__ "lastJobRunTime" Zz__timestampIso8601.of_json in
+      let lastJobId = field_map json__ "lastJobId" Zz__string.of_json in
       let isMonitoredByJob =
-        field_map json "isMonitoredByJob" IsMonitoredByJob.of_json in
+        field_map json__ "isMonitoredByJob" IsMonitoredByJob.of_json in
       let isDefinedInJob =
-        field_map json "isDefinedInJob" IsDefinedInJob.of_json in
+        field_map json__ "isDefinedInJob" IsDefinedInJob.of_json in
       make ?lastJobRunTime ?lastJobId ?isMonitoredByJob ?isDefinedInJob ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies whether any one-time or recurring classification jobs are configured to analyze data in an S3 bucket, and, if so, the details of the job that ran most recently."]
+       "Specifies whether any one-time or recurring classification jobs are configured to analyze objects in an S3 bucket, and, if so, the details of the job that ran most recently."]
 module ObjectCountByEncryptionType =
   struct
     type nonrec t =
       {
       customerManaged: Zz__long.t option
         [@ocaml.doc
-          "The total number of objects that are encrypted with a customer-provided key. The objects use customer-provided server-side encryption (SSE-C)."];
+          "The total number of objects that are encrypted with customer-provided keys. The objects use server-side encryption with customer-provided keys (SSE-C)."];
       kmsManaged: Zz__long.t option
         [@ocaml.doc
-          "The total number of objects that are encrypted with an KMS key, either an Amazon Web Services managed key or a customer managed key. The objects use KMS encryption (SSE-KMS)."];
+          "The total number of objects that are encrypted with KMS keys, either Amazon Web Services managed keys or customer managed keys. The objects use dual-layer server-side encryption or server-side encryption with KMS keys (DSSE-KMS or SSE-KMS)."];
       s3Managed: Zz__long.t option
         [@ocaml.doc
-          "The total number of objects that are encrypted with an Amazon S3 managed key. The objects use Amazon S3 managed encryption (SSE-S3)."];
+          "The total number of objects that are encrypted with Amazon S3 managed keys. The objects use server-side encryption with Amazon S3 managed keys (SSE-S3)."];
       unencrypted: Zz__long.t option
         [@ocaml.doc
-          "The total number of objects that aren't encrypted or use client-side encryption."];
+          "The total number of objects that use client-side encryption or aren't encrypted."];
       unknown: Zz__long.t option
         [@ocaml.doc
           "The total number of objects that Amazon Macie doesn't have current encryption metadata for. Macie can't provide current data about the encryption settings for these objects."]}
@@ -2998,12 +3113,13 @@ module ObjectCountByEncryptionType =
           (Xml.child xml_arg0 "customerManaged") in
       make ?unknown ?unencrypted ?s3Managed ?kmsManaged ?customerManaged ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unknown = field_map json "unknown" Zz__long.of_json in
-      let unencrypted = field_map json "unencrypted" Zz__long.of_json in
-      let s3Managed = field_map json "s3Managed" Zz__long.of_json in
-      let kmsManaged = field_map json "kmsManaged" Zz__long.of_json in
-      let customerManaged = field_map json "customerManaged" Zz__long.of_json in
+    let of_json json__ =
+      let unknown = field_map json__ "unknown" Zz__long.of_json in
+      let unencrypted = field_map json__ "unencrypted" Zz__long.of_json in
+      let s3Managed = field_map json__ "s3Managed" Zz__long.of_json in
+      let kmsManaged = field_map json__ "kmsManaged" Zz__long.of_json in
+      let customerManaged =
+        field_map json__ "customerManaged" Zz__long.of_json in
       make ?unknown ?unencrypted ?s3Managed ?kmsManaged ?customerManaged ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3039,14 +3155,27 @@ module ObjectLevelStatistics =
         (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "fileType") in
       make ?total ?storageClass ?fileType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let total = field_map json "total" Zz__long.of_json in
-      let storageClass = field_map json "storageClass" Zz__long.of_json in
-      let fileType = field_map json "fileType" Zz__long.of_json in
+    let of_json json__ =
+      let total = field_map json__ "total" Zz__long.of_json in
+      let storageClass = field_map json__ "storageClass" Zz__long.of_json in
+      let fileType = field_map json__ "fileType" Zz__long.of_json in
       make ?total ?storageClass ?fileType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information about the total storage size (in bytes) or number of objects that Amazon Macie can't analyze in one or more S3 buckets. In a BucketMetadata or MatchingBucket object, this data is for a specific bucket. In a GetBucketStatisticsResponse object, this data is aggregated for the buckets in the query results. If versioning is enabled for a bucket, total storage size values are based on the size of the latest version of each applicable object in the bucket."]
+       "Provides information about the total storage size (in bytes) or number of objects that Amazon Macie can't analyze in one or more S3 buckets. In a BucketMetadata or MatchingBucket object, this data is for a specific bucket. In a GetBucketStatisticsResponse object, this data is aggregated for all the buckets in the query results. If versioning is enabled for a bucket, storage size values are based on the size of the latest version of each applicable object in the bucket."]
+module Zz__integer =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for __integer" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module SearchResourcesCriteria =
   struct
     type nonrec t =
@@ -3076,11 +3205,11 @@ module SearchResourcesCriteria =
           (Xml.child xml_arg0 "simpleCriterion") in
       make ?tagCriterion ?simpleCriterion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tagCriterion =
-        field_map json "tagCriterion" SearchResourcesTagCriterion.of_json in
+        field_map json__ "tagCriterion" SearchResourcesTagCriterion.of_json in
       let simpleCriterion =
-        field_map json "simpleCriterion"
+        field_map json__ "simpleCriterion"
           SearchResourcesSimpleCriterion.of_json in
       make ?tagCriterion ?simpleCriterion ()
     let to_json v = composed_to_json to_value v
@@ -3125,8 +3254,8 @@ module CriteriaBlockForJob =
           (Xml.child xml_arg0 "and") in
       make ?and_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let and_ = field_map json "and" Zz__listOfCriteriaForJob.of_json in
+    let of_json json__ =
+      let and_ = field_map json__ "and" Zz__listOfCriteriaForJob.of_json in
       make ?and_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3156,9 +3285,9 @@ module S3BucketDefinitionForJob =
           (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~buckets ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let buckets = field_map_exn json "buckets" Zz__listOf__string.of_json in
-      let accountId = field_map_exn json "accountId" Zz__string.of_json in
+    let of_json json__ =
+      let buckets = field_map_exn json__ "buckets" Zz__listOf__string.of_json in
+      let accountId = field_map_exn json__ "accountId" Zz__string.of_json in
       make ~buckets ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3209,7 +3338,7 @@ module UsageByAccount =
           "The current value for the quota that corresponds to the metric specified by the type field."];
       type_: UsageType.t option
         [@ocaml.doc
-          "The name of the metric. Possible values are: DATA_INVENTORY_EVALUATION, for monitoring S3 buckets; and, SENSITIVE_DATA_DISCOVERY, for analyzing S3 objects to detect sensitive data."]}
+          "The name of the metric. Possible values are: AUTOMATED_OBJECT_MONITORING, to monitor S3 objects for automated sensitive data discovery; AUTOMATED_SENSITIVE_DATA_DISCOVERY, to analyze S3 objects for automated sensitive data discovery; DATA_INVENTORY_EVALUATION, to monitor S3 buckets; and, SENSITIVE_DATA_DISCOVERY, to run classification jobs."]}
     let make ?currency =
       fun ?estimatedCost ->
         fun ?serviceLimit ->
@@ -3237,22 +3366,40 @@ module UsageByAccount =
         (Option.map ~f:Currency.of_xml) (Xml.child xml_arg0 "currency") in
       make ?type_ ?serviceLimit ?estimatedCost ?currency ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" UsageType.of_json in
-      let serviceLimit = field_map json "serviceLimit" ServiceLimit.of_json in
-      let estimatedCost = field_map json "estimatedCost" Zz__string.of_json in
-      let currency = field_map json "currency" Currency.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "type" UsageType.of_json in
+      let serviceLimit = field_map json__ "serviceLimit" ServiceLimit.of_json in
+      let estimatedCost = field_map json__ "estimatedCost" Zz__string.of_json in
+      let currency = field_map json__ "currency" Currency.of_json in
       make ?type_ ?serviceLimit ?estimatedCost ?currency ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides data for a specific usage metric and the corresponding quota for an Amazon Macie account."]
+module Zz__stringMin1Max128 =
+  struct
+    type nonrec t = string
+    let context_ = "__stringMin1Max128"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"__stringMin1Max128" j
+    let to_json = simple_to_json to_value
+  end
 module ClassificationResult =
   struct
     type nonrec t =
       {
       additionalOccurrences: Zz__boolean.t option
         [@ocaml.doc
-          "Specifies whether Amazon Macie detected additional occurrences of sensitive data in the S3 object. A finding includes location data for a maximum of 15 occurrences of sensitive data. This value can help you determine whether to investigate additional occurrences of sensitive data in an object. You can do this by referring to the corresponding sensitive data discovery result for the finding (ClassificationDetails.detailedResultsLocation)."];
+          "Specifies whether Amazon Macie detected additional occurrences of sensitive data in the S3 object. A finding includes location data for a maximum of 15 occurrences of sensitive data. This value can help you determine whether to investigate additional occurrences of sensitive data in an object. You can do this by referring to the corresponding sensitive data discovery result for the finding (classificationDetails.detailedResultsLocation)."];
       customDataIdentifiers: CustomDataIdentifiers.t option
         [@ocaml.doc
           "The custom data identifiers that detected the sensitive data and the number of occurrences of the data that they detected."];
@@ -3317,21 +3464,50 @@ module ClassificationResult =
       make ?status ?sizeClassified ?sensitiveData ?mimeType
         ?customDataIdentifiers ?additionalOccurrences ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" ClassificationResultStatus.of_json in
-      let sizeClassified = field_map json "sizeClassified" Zz__long.of_json in
+    let of_json json__ =
+      let status =
+        field_map json__ "status" ClassificationResultStatus.of_json in
+      let sizeClassified = field_map json__ "sizeClassified" Zz__long.of_json in
       let sensitiveData =
-        field_map json "sensitiveData" SensitiveData.of_json in
-      let mimeType = field_map json "mimeType" Zz__string.of_json in
+        field_map json__ "sensitiveData" SensitiveData.of_json in
+      let mimeType = field_map json__ "mimeType" Zz__string.of_json in
       let customDataIdentifiers =
-        field_map json "customDataIdentifiers" CustomDataIdentifiers.of_json in
+        field_map json__ "customDataIdentifiers"
+          CustomDataIdentifiers.of_json in
       let additionalOccurrences =
-        field_map json "additionalOccurrences" Zz__boolean.of_json in
+        field_map json__ "additionalOccurrences" Zz__boolean.of_json in
       make ?status ?sizeClassified ?sensitiveData ?mimeType
         ?customDataIdentifiers ?additionalOccurrences ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of a sensitive data finding, including the types, number of occurrences, and locations of the sensitive data that was detected."]
+module OriginType =
+  struct
+    type nonrec t =
+      | SENSITIVE_DATA_DISCOVERY_JOB 
+      | AUTOMATED_SENSITIVE_DATA_DISCOVERY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SENSITIVE_DATA_DISCOVERY_JOB -> "SENSITIVE_DATA_DISCOVERY_JOB"
+      | AUTOMATED_SENSITIVE_DATA_DISCOVERY ->
+          "AUTOMATED_SENSITIVE_DATA_DISCOVERY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SENSITIVE_DATA_DISCOVERY_JOB" -> SENSITIVE_DATA_DISCOVERY_JOB
+      | "AUTOMATED_SENSITIVE_DATA_DISCOVERY" ->
+          AUTOMATED_SENSITIVE_DATA_DISCOVERY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration OriginType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OriginType" j)
+    let to_json = simple_to_json to_value
+  end
 module FindingAction =
   struct
     type nonrec t =
@@ -3360,10 +3536,11 @@ module FindingAction =
           (Xml.child xml_arg0 "actionType") in
       make ?apiCallDetails ?actionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let apiCallDetails =
-        field_map json "apiCallDetails" ApiCallDetails.of_json in
-      let actionType = field_map json "actionType" FindingActionType.of_json in
+        field_map json__ "apiCallDetails" ApiCallDetails.of_json in
+      let actionType =
+        field_map json__ "actionType" FindingActionType.of_json in
       make ?apiCallDetails ?actionType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3377,10 +3554,10 @@ module FindingActor =
           "The domain name of the device that the entity used to perform the action on the affected resource."];
       ipAddressDetails: IpAddressDetails.t option
         [@ocaml.doc
-          "The IP address of the device that the entity used to perform the action on the affected resource. This object also provides information such as the owner and geographic location for the IP address."];
+          "The IP address and related details about the device that the entity used to perform the action on the affected resource. The details can include information such as the owner and geographic location of the IP address."];
       userIdentity: UserIdentity.t option
         [@ocaml.doc
-          "The type and other characteristics of the entity that performed the action on the affected resource."]}
+          "The type and other characteristics of the entity that performed the action on the affected resource. This value is null if the action was performed by an anonymous (unauthenticated) entity."]}
     let make ?domainDetails =
       fun ?ipAddressDetails ->
         fun ?userIdentity ->
@@ -3406,12 +3583,12 @@ module FindingActor =
           (Xml.child xml_arg0 "domainDetails") in
       make ?userIdentity ?ipAddressDetails ?domainDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userIdentity = field_map json "userIdentity" UserIdentity.of_json in
+    let of_json json__ =
+      let userIdentity = field_map json__ "userIdentity" UserIdentity.of_json in
       let ipAddressDetails =
-        field_map json "ipAddressDetails" IpAddressDetails.of_json in
+        field_map json__ "ipAddressDetails" IpAddressDetails.of_json in
       let domainDetails =
-        field_map json "domainDetails" DomainDetails.of_json in
+        field_map json__ "domainDetails" DomainDetails.of_json in
       make ?userIdentity ?ipAddressDetails ?domainDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3422,15 +3599,15 @@ module S3Bucket =
       {
       allowsUnencryptedObjectUploads: AllowsUnencryptedObjectUploads.t option
         [@ocaml.doc
-          "Specifies whether the bucket policy for the bucket requires server-side encryption of objects when objects are uploaded to the bucket. Possible values are: FALSE - The bucket policy requires server-side encryption of new objects. PutObject requests must include the x-amz-server-side-encryption header and the value for that header must be AES256 or aws:kms. TRUE - The bucket doesn't have a bucket policy or it has a bucket policy that doesn't require server-side encryption of new objects. If a bucket policy exists, it doesn't require PutObject requests to include the x-amz-server-side-encryption header and it doesn't require the value for that header to be AES256 or aws:kms. UNKNOWN - Amazon Macie can't determine whether the bucket policy requires server-side encryption of objects."];
+          "Specifies whether the bucket policy for the bucket requires server-side encryption of objects when objects are added to the bucket. Possible values are: FALSE - The bucket policy requires server-side encryption of new objects. PutObject requests must include a valid server-side encryption header. TRUE - The bucket doesn't have a bucket policy or it has a bucket policy that doesn't require server-side encryption of new objects. If a bucket policy exists, it doesn't require PutObject requests to include a valid server-side encryption header. UNKNOWN - Amazon Macie can't determine whether the bucket policy requires server-side encryption of new objects. Valid server-side encryption headers are: x-amz-server-side-encryption with a value of AES256 or aws:kms, and x-amz-server-side-encryption-customer-algorithm with a value of AES256."];
       arn: Zz__string.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the bucket."];
       createdAt: Zz__timestampIso8601.t option
         [@ocaml.doc
-          "The date and time, in UTC and extended ISO 8601 format, when the bucket was created."];
+          "The date and time, in UTC and extended ISO 8601 format, when the bucket was created. This value can also indicate when changes such as edits to the bucket's policy were most recently made to the bucket, relative to when the finding was created or last updated."];
       defaultServerSideEncryption: ServerSideEncryption.t option
         [@ocaml.doc
-          "The type of server-side encryption that's used by default to encrypt objects in the bucket."];
+          "The default server-side encryption settings for the bucket."];
       name: Zz__string.t option [@ocaml.doc "The name of the bucket."];
       owner: S3BucketOwner.t option
         [@ocaml.doc
@@ -3499,25 +3676,26 @@ module S3Bucket =
       make ?tags ?publicAccess ?owner ?name ?defaultServerSideEncryption
         ?createdAt ?arn ?allowsUnencryptedObjectUploads ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" KeyValuePairList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" KeyValuePairList.of_json in
       let publicAccess =
-        field_map json "publicAccess" BucketPublicAccess.of_json in
-      let owner = field_map json "owner" S3BucketOwner.of_json in
-      let name = field_map json "name" Zz__string.of_json in
+        field_map json__ "publicAccess" BucketPublicAccess.of_json in
+      let owner = field_map json__ "owner" S3BucketOwner.of_json in
+      let name = field_map json__ "name" Zz__string.of_json in
       let defaultServerSideEncryption =
-        field_map json "defaultServerSideEncryption"
+        field_map json__ "defaultServerSideEncryption"
           ServerSideEncryption.of_json in
-      let createdAt = field_map json "createdAt" Zz__timestampIso8601.of_json in
-      let arn = field_map json "arn" Zz__string.of_json in
+      let createdAt =
+        field_map json__ "createdAt" Zz__timestampIso8601.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in
       let allowsUnencryptedObjectUploads =
-        field_map json "allowsUnencryptedObjectUploads"
+        field_map json__ "allowsUnencryptedObjectUploads"
           AllowsUnencryptedObjectUploads.of_json in
       make ?tags ?publicAccess ?owner ?name ?defaultServerSideEncryption
         ?createdAt ?arn ?allowsUnencryptedObjectUploads ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information about the S3 bucket that a finding applies to."]
+       "Provides information about the S3 bucket that a finding applies to. If a quota prevented Amazon Macie from retrieving and processing all the bucket's information prior to generating the finding, the following values are UNKNOWN or null: allowsUnencryptedObjectUploads, defaultServerSideEncryption, publicAccess, and tags."]
 module S3Object =
   struct
     type nonrec t =
@@ -3532,18 +3710,20 @@ module S3Object =
         [@ocaml.doc
           "The file name extension of the object. If the object doesn't have a file name extension, this value is \"\"."];
       key: Zz__string.t option
-        [@ocaml.doc "The full key (name) that's assigned to the object."];
+        [@ocaml.doc
+          "The full name (key) of the object, including the object's prefix if applicable."];
       lastModified: Zz__timestampIso8601.t option
         [@ocaml.doc
           "The date and time, in UTC and extended ISO 8601 format, when the object was last modified."];
       path: Zz__string.t option
-        [@ocaml.doc "The path to the object, including the full key (name)."];
+        [@ocaml.doc
+          "The full path to the affected object, including the name of the affected bucket and the object's name (key)."];
       publicAccess: Zz__boolean.t option
         [@ocaml.doc
           "Specifies whether the object is publicly accessible due to the combination of permissions settings that apply to the object."];
       serverSideEncryption: ServerSideEncryption.t option
         [@ocaml.doc
-          "The type of server-side encryption that's used to encrypt the object."];
+          "The type of server-side encryption that was used to encrypt the object."];
       size: Zz__long.t option
         [@ocaml.doc "The total storage size, in bytes, of the object."];
       storageClass: StorageClass.t option
@@ -3627,21 +3807,21 @@ module S3Object =
       make ?versionId ?tags ?storageClass ?size ?serverSideEncryption
         ?publicAccess ?path ?lastModified ?key ?extension ?eTag ?bucketArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let versionId = field_map json "versionId" Zz__string.of_json in
-      let tags = field_map json "tags" KeyValuePairList.of_json in
-      let storageClass = field_map json "storageClass" StorageClass.of_json in
-      let size = field_map json "size" Zz__long.of_json in
+    let of_json json__ =
+      let versionId = field_map json__ "versionId" Zz__string.of_json in
+      let tags = field_map json__ "tags" KeyValuePairList.of_json in
+      let storageClass = field_map json__ "storageClass" StorageClass.of_json in
+      let size = field_map json__ "size" Zz__long.of_json in
       let serverSideEncryption =
-        field_map json "serverSideEncryption" ServerSideEncryption.of_json in
-      let publicAccess = field_map json "publicAccess" Zz__boolean.of_json in
-      let path = field_map json "path" Zz__string.of_json in
+        field_map json__ "serverSideEncryption" ServerSideEncryption.of_json in
+      let publicAccess = field_map json__ "publicAccess" Zz__boolean.of_json in
+      let path = field_map json__ "path" Zz__string.of_json in
       let lastModified =
-        field_map json "lastModified" Zz__timestampIso8601.of_json in
-      let key = field_map json "key" Zz__string.of_json in
-      let extension = field_map json "extension" Zz__string.of_json in
-      let eTag = field_map json "eTag" Zz__string.of_json in
-      let bucketArn = field_map json "bucketArn" Zz__string.of_json in
+        field_map json__ "lastModified" Zz__timestampIso8601.of_json in
+      let key = field_map json__ "key" Zz__string.of_json in
+      let extension = field_map json__ "extension" Zz__string.of_json in
+      let eTag = field_map json__ "eTag" Zz__string.of_json in
+      let bucketArn = field_map json__ "bucketArn" Zz__string.of_json in
       make ?versionId ?tags ?storageClass ?size ?serverSideEncryption
         ?publicAccess ?path ?lastModified ?key ?extension ?eTag ?bucketArn ()
     let to_json v = composed_to_json to_value v
@@ -3680,6 +3860,9 @@ module Zz__listOfJobScopeTerm =
   struct
     type nonrec t = JobScopeTerm.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobScopeTerm.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3707,6 +3890,7 @@ module Type =
       | NONE 
       | AES256 
       | Aws_kms 
+      | Aws_kms_dsse 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -3714,12 +3898,14 @@ module Type =
       | NONE -> "NONE"
       | AES256 -> "AES256"
       | Aws_kms -> "aws:kms"
+      | Aws_kms_dsse -> "aws:kms:dsse"
       | Non_static_id s -> s
     let of_string =
       function
       | "NONE" -> NONE
       | "AES256" -> AES256
       | "aws:kms" -> Aws_kms
+      | "aws:kms:dsse" -> Aws_kms_dsse
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3727,6 +3913,32 @@ module Type =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration Type" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"Type" j)
+    let to_json = simple_to_json to_value
+  end
+module DataIdentifierType =
+  struct
+    type nonrec t =
+      | CUSTOM 
+      | MANAGED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CUSTOM -> "CUSTOM"
+      | MANAGED -> "MANAGED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CUSTOM" -> CUSTOM
+      | "MANAGED" -> MANAGED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DataIdentifierType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DataIdentifierType" j)
     let to_json = simple_to_json to_value
   end
 module CriterionAdditionalProperties =
@@ -3787,19 +3999,120 @@ module CriterionAdditionalProperties =
         (Option.map ~f:Zz__listOf__string.of_xml) (Xml.child xml_arg0 "eq") in
       make ?neq ?lte ?lt ?gte ?gt ?eqExactMatch ?eq ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let neq = field_map json "neq" Zz__listOf__string.of_json in
-      let lte = field_map json "lte" Zz__long.of_json in
-      let lt = field_map json "lt" Zz__long.of_json in
-      let gte = field_map json "gte" Zz__long.of_json in
-      let gt = field_map json "gt" Zz__long.of_json in
+    let of_json json__ =
+      let neq = field_map json__ "neq" Zz__listOf__string.of_json in
+      let lte = field_map json__ "lte" Zz__long.of_json in
+      let lt = field_map json__ "lt" Zz__long.of_json in
+      let gte = field_map json__ "gte" Zz__long.of_json in
+      let gt = field_map json__ "gt" Zz__long.of_json in
       let eqExactMatch =
-        field_map json "eqExactMatch" Zz__listOf__string.of_json in
-      let eq = field_map json "eq" Zz__listOf__string.of_json in
+        field_map json__ "eqExactMatch" Zz__listOf__string.of_json in
+      let eq = field_map json__ "eq" Zz__listOf__string.of_json in
       make ?neq ?lte ?lt ?gte ?gt ?eqExactMatch ?eq ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the operator to use in a property-based condition that filters the results of a query for findings. For detailed information and examples of each operator, see Fundamentals of filtering findings in the Amazon Macie User Guide."]
+module ClassificationScopeUpdateOperation =
+  struct
+    type nonrec t =
+      | ADD 
+      | REPLACE 
+      | REMOVE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ADD -> "ADD"
+      | REPLACE -> "REPLACE"
+      | REMOVE -> "REMOVE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ADD" -> ADD
+      | "REPLACE" -> REPLACE
+      | "REMOVE" -> REMOVE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ClassificationScopeUpdateOperation"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ClassificationScopeUpdateOperation" j)
+    let to_json = simple_to_json to_value
+  end
+module Zz__listOfS3BucketName =
+  struct
+    type nonrec t = S3BucketName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:S3BucketName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:S3BucketName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfS3BucketName" ~of_json:S3BucketName.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module Zz__stringMin1Max1024PatternSS =
+  struct
+    type nonrec t = string
+    let context_ = "__stringMin1Max1024PatternSS"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"^[\\s\\S]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"__stringMin1Max1024PatternSS" j
+    let to_json = simple_to_json to_value
+  end
+module Zz__stringMin3Max255PatternAZaZ093255 =
+  struct
+    type nonrec t = string
+    let context_ = "__stringMin3Max255PatternAZaZ093255"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[A-Za-z0-9.\\-_]{3,255}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"__stringMin3Max255PatternAZaZ093255" j
+    let to_json = simple_to_json to_value
+  end
 module MatchingBucket =
   struct
     type nonrec t =
@@ -3807,6 +4120,10 @@ module MatchingBucket =
       accountId: Zz__string.t option
         [@ocaml.doc
           "The unique identifier for the Amazon Web Services account that owns the bucket."];
+      automatedDiscoveryMonitoringStatus:
+        AutomatedDiscoveryMonitoringStatus.t option
+        [@ocaml.doc
+          "Specifies whether automated sensitive data discovery is currently configured to analyze objects in the bucket. Possible values are: MONITORED, the bucket is included in analyses; and, NOT_MONITORED, the bucket is excluded from analyses. If automated sensitive data discovery is disabled for your account, this value is NOT_MONITORED."];
       bucketName: Zz__string.t option [@ocaml.doc "The name of the bucket."];
       classifiableObjectCount: Zz__long.t option
         [@ocaml.doc
@@ -3816,18 +4133,24 @@ module MatchingBucket =
           "The total storage size, in bytes, of the objects that Amazon Macie can analyze in the bucket. These objects use a supported storage class and have a file name extension for a supported file or storage format. If versioning is enabled for the bucket, Macie calculates this value based on the size of the latest version of each applicable object in the bucket. This value doesn't reflect the storage size of all versions of each applicable object in the bucket."];
       errorCode: BucketMetadataErrorCode.t option
         [@ocaml.doc
-          "Specifies the error code for an error that prevented Amazon Macie from retrieving and processing information about the bucket and the bucket's objects. If this value is ACCESS_DENIED, Macie doesn't have permission to retrieve the information. For example, the bucket has a restrictive bucket policy and Amazon S3 denied the request. If this value is null, Macie was able to retrieve and process the information."];
+          "The code for an error or issue that prevented Amazon Macie from retrieving and processing information about the bucket and the bucket's objects. Possible values are: ACCESS_DENIED - Macie doesn't have permission to retrieve the information. For example, the bucket has a restrictive bucket policy and Amazon S3 denied the request. BUCKET_COUNT_EXCEEDS_QUOTA - Retrieving and processing the information would exceed the quota for the number of buckets that Macie monitors for an account (10,000). If this value is null, Macie was able to retrieve and process the information."];
       errorMessage: Zz__string.t option
         [@ocaml.doc
-          "A brief description of the error (errorCode) that prevented Amazon Macie from retrieving and processing information about the bucket and the bucket's objects. This value is null if Macie was able to retrieve and process the information."];
+          "A brief description of the error or issue (errorCode) that prevented Amazon Macie from retrieving and processing information about the bucket and the bucket's objects. This value is null if Macie was able to retrieve and process the information."];
       jobDetails: JobDetails.t option
         [@ocaml.doc
           "Specifies whether any one-time or recurring classification jobs are configured to analyze objects in the bucket, and, if so, the details of the job that ran most recently."];
+      lastAutomatedDiscoveryTime: Zz__timestampIso8601.t option
+        [@ocaml.doc
+          "The date and time, in UTC and extended ISO 8601 format, when Amazon Macie most recently analyzed objects in the bucket while performing automated sensitive data discovery. This value is null if this analysis hasn't occurred."];
       objectCount: Zz__long.t option
         [@ocaml.doc "The total number of objects in the bucket."];
       objectCountByEncryptionType: ObjectCountByEncryptionType.t option
         [@ocaml.doc
-          "The total number of objects that are in the bucket, grouped by server-side encryption type. This includes a grouping that reports the total number of objects that aren't encrypted or use client-side encryption."];
+          "The total number of objects in the bucket, grouped by server-side encryption type. This includes a grouping that reports the total number of objects that aren't encrypted or use client-side encryption."];
+      sensitivityScore: Zz__integer.t option
+        [@ocaml.doc
+          "The sensitivity score for the bucket, ranging from -1 (classification error) to 100 (sensitive).If automated sensitive data discovery has never been enabled for your account or it's been disabled for your organization or standalone account for more than 30 days, possible values are: 1, the bucket is empty; or, 50, the bucket stores objects but it's been excluded from recent analyses."];
       sizeInBytes: Zz__long.t option
         [@ocaml.doc
           "The total storage size, in bytes, of the bucket. If versioning is enabled for the bucket, Amazon Macie calculates this value based on the size of the latest version of each object in the bucket. This value doesn't reflect the storage size of all versions of each object in the bucket."];
@@ -3841,37 +4164,46 @@ module MatchingBucket =
         [@ocaml.doc
           "The total storage size, in bytes, of the objects that Amazon Macie can't analyze in the bucket. These objects don't use a supported storage class or don't have a file name extension for a supported file or storage format."]}
     let make ?accountId =
-      fun ?bucketName ->
-        fun ?classifiableObjectCount ->
-          fun ?classifiableSizeInBytes ->
-            fun ?errorCode ->
-              fun ?errorMessage ->
-                fun ?jobDetails ->
-                  fun ?objectCount ->
-                    fun ?objectCountByEncryptionType ->
-                      fun ?sizeInBytes ->
-                        fun ?sizeInBytesCompressed ->
-                          fun ?unclassifiableObjectCount ->
-                            fun ?unclassifiableObjectSizeInBytes ->
-                              fun () ->
-                                {
-                                  accountId;
-                                  bucketName;
-                                  classifiableObjectCount;
-                                  classifiableSizeInBytes;
-                                  errorCode;
-                                  errorMessage;
-                                  jobDetails;
-                                  objectCount;
-                                  objectCountByEncryptionType;
-                                  sizeInBytes;
-                                  sizeInBytesCompressed;
-                                  unclassifiableObjectCount;
-                                  unclassifiableObjectSizeInBytes
-                                }
+      fun ?automatedDiscoveryMonitoringStatus ->
+        fun ?bucketName ->
+          fun ?classifiableObjectCount ->
+            fun ?classifiableSizeInBytes ->
+              fun ?errorCode ->
+                fun ?errorMessage ->
+                  fun ?jobDetails ->
+                    fun ?lastAutomatedDiscoveryTime ->
+                      fun ?objectCount ->
+                        fun ?objectCountByEncryptionType ->
+                          fun ?sensitivityScore ->
+                            fun ?sizeInBytes ->
+                              fun ?sizeInBytesCompressed ->
+                                fun ?unclassifiableObjectCount ->
+                                  fun ?unclassifiableObjectSizeInBytes ->
+                                    fun () ->
+                                      {
+                                        accountId;
+                                        automatedDiscoveryMonitoringStatus;
+                                        bucketName;
+                                        classifiableObjectCount;
+                                        classifiableSizeInBytes;
+                                        errorCode;
+                                        errorMessage;
+                                        jobDetails;
+                                        lastAutomatedDiscoveryTime;
+                                        objectCount;
+                                        objectCountByEncryptionType;
+                                        sensitivityScore;
+                                        sizeInBytes;
+                                        sizeInBytesCompressed;
+                                        unclassifiableObjectCount;
+                                        unclassifiableObjectSizeInBytes
+                                      }
     let to_value x =
       structure_to_value
         [("accountId", (Option.map x.accountId ~f:Zz__string.to_value));
+        ("automatedDiscoveryMonitoringStatus",
+          (Option.map x.automatedDiscoveryMonitoringStatus
+             ~f:AutomatedDiscoveryMonitoringStatus.to_value));
         ("bucketName", (Option.map x.bucketName ~f:Zz__string.to_value));
         ("classifiableObjectCount",
           (Option.map x.classifiableObjectCount ~f:Zz__long.to_value));
@@ -3881,10 +4213,15 @@ module MatchingBucket =
           (Option.map x.errorCode ~f:BucketMetadataErrorCode.to_value));
         ("errorMessage", (Option.map x.errorMessage ~f:Zz__string.to_value));
         ("jobDetails", (Option.map x.jobDetails ~f:JobDetails.to_value));
+        ("lastAutomatedDiscoveryTime",
+          (Option.map x.lastAutomatedDiscoveryTime
+             ~f:Zz__timestampIso8601.to_value));
         ("objectCount", (Option.map x.objectCount ~f:Zz__long.to_value));
         ("objectCountByEncryptionType",
           (Option.map x.objectCountByEncryptionType
              ~f:ObjectCountByEncryptionType.to_value));
+        ("sensitivityScore",
+          (Option.map x.sensitivityScore ~f:Zz__integer.to_value));
         ("sizeInBytes", (Option.map x.sizeInBytes ~f:Zz__long.to_value));
         ("sizeInBytesCompressed",
           (Option.map x.sizeInBytesCompressed ~f:Zz__long.to_value));
@@ -3907,11 +4244,17 @@ module MatchingBucket =
           (Xml.child xml_arg0 "sizeInBytesCompressed") in
       let sizeInBytes =
         (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "sizeInBytes") in
+      let sensitivityScore =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "sensitivityScore") in
       let objectCountByEncryptionType =
         (Option.map ~f:ObjectCountByEncryptionType.of_xml)
           (Xml.child xml_arg0 "objectCountByEncryptionType") in
       let objectCount =
         (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "objectCount") in
+      let lastAutomatedDiscoveryTime =
+        (Option.map ~f:Zz__timestampIso8601.of_xml)
+          (Xml.child xml_arg0 "lastAutomatedDiscoveryTime") in
       let jobDetails =
         (Option.map ~f:JobDetails.of_xml) (Xml.child xml_arg0 "jobDetails") in
       let errorMessage =
@@ -3927,50 +4270,66 @@ module MatchingBucket =
           (Xml.child xml_arg0 "classifiableObjectCount") in
       let bucketName =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "bucketName") in
+      let automatedDiscoveryMonitoringStatus =
+        (Option.map ~f:AutomatedDiscoveryMonitoringStatus.of_xml)
+          (Xml.child xml_arg0 "automatedDiscoveryMonitoringStatus") in
       let accountId =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?unclassifiableObjectSizeInBytes ?unclassifiableObjectCount
-        ?sizeInBytesCompressed ?sizeInBytes ?objectCountByEncryptionType
-        ?objectCount ?jobDetails ?errorMessage ?errorCode
-        ?classifiableSizeInBytes ?classifiableObjectCount ?bucketName
-        ?accountId ()
+        ?sizeInBytesCompressed ?sizeInBytes ?sensitivityScore
+        ?objectCountByEncryptionType ?objectCount ?lastAutomatedDiscoveryTime
+        ?jobDetails ?errorMessage ?errorCode ?classifiableSizeInBytes
+        ?classifiableObjectCount ?bucketName
+        ?automatedDiscoveryMonitoringStatus ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unclassifiableObjectSizeInBytes =
-        field_map json "unclassifiableObjectSizeInBytes"
+        field_map json__ "unclassifiableObjectSizeInBytes"
           ObjectLevelStatistics.of_json in
       let unclassifiableObjectCount =
-        field_map json "unclassifiableObjectCount"
+        field_map json__ "unclassifiableObjectCount"
           ObjectLevelStatistics.of_json in
       let sizeInBytesCompressed =
-        field_map json "sizeInBytesCompressed" Zz__long.of_json in
-      let sizeInBytes = field_map json "sizeInBytes" Zz__long.of_json in
+        field_map json__ "sizeInBytesCompressed" Zz__long.of_json in
+      let sizeInBytes = field_map json__ "sizeInBytes" Zz__long.of_json in
+      let sensitivityScore =
+        field_map json__ "sensitivityScore" Zz__integer.of_json in
       let objectCountByEncryptionType =
-        field_map json "objectCountByEncryptionType"
+        field_map json__ "objectCountByEncryptionType"
           ObjectCountByEncryptionType.of_json in
-      let objectCount = field_map json "objectCount" Zz__long.of_json in
-      let jobDetails = field_map json "jobDetails" JobDetails.of_json in
-      let errorMessage = field_map json "errorMessage" Zz__string.of_json in
+      let objectCount = field_map json__ "objectCount" Zz__long.of_json in
+      let lastAutomatedDiscoveryTime =
+        field_map json__ "lastAutomatedDiscoveryTime"
+          Zz__timestampIso8601.of_json in
+      let jobDetails = field_map json__ "jobDetails" JobDetails.of_json in
+      let errorMessage = field_map json__ "errorMessage" Zz__string.of_json in
       let errorCode =
-        field_map json "errorCode" BucketMetadataErrorCode.of_json in
+        field_map json__ "errorCode" BucketMetadataErrorCode.of_json in
       let classifiableSizeInBytes =
-        field_map json "classifiableSizeInBytes" Zz__long.of_json in
+        field_map json__ "classifiableSizeInBytes" Zz__long.of_json in
       let classifiableObjectCount =
-        field_map json "classifiableObjectCount" Zz__long.of_json in
-      let bucketName = field_map json "bucketName" Zz__string.of_json in
-      let accountId = field_map json "accountId" Zz__string.of_json in
+        field_map json__ "classifiableObjectCount" Zz__long.of_json in
+      let bucketName = field_map json__ "bucketName" Zz__string.of_json in
+      let automatedDiscoveryMonitoringStatus =
+        field_map json__ "automatedDiscoveryMonitoringStatus"
+          AutomatedDiscoveryMonitoringStatus.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
       make ?unclassifiableObjectSizeInBytes ?unclassifiableObjectCount
-        ?sizeInBytesCompressed ?sizeInBytes ?objectCountByEncryptionType
-        ?objectCount ?jobDetails ?errorMessage ?errorCode
-        ?classifiableSizeInBytes ?classifiableObjectCount ?bucketName
-        ?accountId ()
+        ?sizeInBytesCompressed ?sizeInBytes ?sensitivityScore
+        ?objectCountByEncryptionType ?objectCount ?lastAutomatedDiscoveryTime
+        ?jobDetails ?errorMessage ?errorCode ?classifiableSizeInBytes
+        ?classifiableObjectCount ?bucketName
+        ?automatedDiscoveryMonitoringStatus ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides statistical data and other information about an S3 bucket that Amazon Macie monitors and analyzes for your account. If an error occurs when Macie attempts to retrieve and process information about the bucket or the bucket's objects, the value for most of these properties is null. Exceptions are accountId and bucketName. To identify the cause of the error, refer to the errorCode and errorMessage values."]
+       "Provides statistical data and other information about an S3 bucket that Amazon Macie monitors and analyzes for your account. By default, object count and storage size values include data for object parts that are the result of incomplete multipart uploads. For more information, see How Macie monitors Amazon S3 data security in the Amazon Macie User Guide. If an error or issue prevents Macie from retrieving and processing information about the bucket or the bucket's objects, the value for many of these properties is null. Key exceptions are accountId and bucketName. To identify the cause, refer to the errorCode and errorMessage values."]
 module Zz__listOfSearchResourcesCriteria =
   struct
     type nonrec t = SearchResourcesCriteria.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SearchResourcesCriteria.to_value)) |>
         (fun x -> `List x)
@@ -4089,6 +4448,8 @@ module TagMap =
                     (fun x -> (Zz__string.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -4116,6 +4477,38 @@ module FindingsFilterAction =
     let of_json j = of_string (string_of_json ~kind:"FindingsFilterAction" j)
     let to_json = simple_to_json to_value
   end
+module ClassificationScopeId =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The unique identifier the classification scope."]
+    let context_ = "ClassificationScopeId"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^[0-9a-z]*$"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClassificationScopeId" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The unique identifier the classification scope."]
+module ClassificationScopeName =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The name of the classification scope."]
+    let context_ = "ClassificationScopeName"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^[0-9a-zA-Z_\\\\-]*$"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClassificationScopeName" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The name of the classification scope."]
 module JobStatus =
   struct
     type nonrec t =
@@ -4196,8 +4589,8 @@ module LastRunErrorStatus =
           (Xml.child xml_arg0 "code") in
       make ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "code" LastRunErrorStatusCode.of_json in
+    let of_json json__ =
+      let code = field_map json__ "code" LastRunErrorStatusCode.of_json in
       make ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4228,9 +4621,9 @@ module S3BucketCriteriaForJob =
           (Xml.child xml_arg0 "excludes") in
       make ?includes ?excludes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let includes = field_map json "includes" CriteriaBlockForJob.of_json in
-      let excludes = field_map json "excludes" CriteriaBlockForJob.of_json in
+    let of_json json__ =
+      let includes = field_map json__ "includes" CriteriaBlockForJob.of_json in
+      let excludes = field_map json__ "excludes" CriteriaBlockForJob.of_json in
       make ?includes ?excludes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4276,14 +4669,14 @@ module UserPausedDetails =
           (Xml.child xml_arg0 "jobExpiresAt") in
       make ?jobPausedAt ?jobImminentExpirationHealthEventArn ?jobExpiresAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let jobPausedAt =
-        field_map json "jobPausedAt" Zz__timestampIso8601.of_json in
+        field_map json__ "jobPausedAt" Zz__timestampIso8601.of_json in
       let jobImminentExpirationHealthEventArn =
-        field_map json "jobImminentExpirationHealthEventArn"
+        field_map json__ "jobImminentExpirationHealthEventArn"
           Zz__string.of_json in
       let jobExpiresAt =
-        field_map json "jobExpiresAt" Zz__timestampIso8601.of_json in
+        field_map json__ "jobExpiresAt" Zz__timestampIso8601.of_json in
       make ?jobPausedAt ?jobImminentExpirationHealthEventArn ?jobExpiresAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4292,6 +4685,9 @@ module Zz__listOfS3BucketDefinitionForJob =
   struct
     type nonrec t = S3BucketDefinitionForJob.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:S3BucketDefinitionForJob.to_value)) |>
         (fun x -> `List x)
@@ -4344,18 +4740,135 @@ module ListJobsFilterTerm =
           (Xml.child xml_arg0 "comparator") in
       make ?values ?key ?comparator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" Zz__listOf__string.of_json in
-      let key = field_map json "key" ListJobsFilterKey.of_json in
-      let comparator = field_map json "comparator" JobComparator.of_json in
+    let of_json json__ =
+      let values = field_map json__ "values" Zz__listOf__string.of_json in
+      let key = field_map json__ "key" ListJobsFilterKey.of_json in
+      let comparator = field_map json__ "comparator" JobComparator.of_json in
       make ?values ?key ?comparator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies a condition that filters the results of a request for information about classification jobs. Each condition consists of a property, an operator, and one or more values."]
+module AutomatedDiscoveryAccountStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AutomatedDiscoveryAccountStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AutomatedDiscoveryAccountStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module Zz__stringMin1Max128Pattern =
+  struct
+    type nonrec t = string
+    let context_ = "__stringMin1Max128Pattern"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"^.+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"__stringMin1Max128Pattern" j
+    let to_json = simple_to_json to_value
+  end
+module Zz__stringMin1Max512PatternSS =
+  struct
+    type nonrec t = string
+    let context_ = "__stringMin1Max512PatternSS"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:"^[\\s\\S]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"__stringMin1Max512PatternSS" j
+    let to_json = simple_to_json to_value
+  end
+module Zz__stringMin22Max22PatternAZ0922 =
+  struct
+    type nonrec t = string
+    let context_ = "__stringMin22Max22PatternAZ0922"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:22) >>=
+             (fun () ->
+                (check_string_max i ~max:22) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-z0-9]{22}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"__stringMin22Max22PatternAZ0922" j
+    let to_json = simple_to_json to_value
+  end
+module Zz__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922 =
+  struct
+    type nonrec t = string
+    let context_ =
+      "__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:71) >>=
+             (fun () ->
+                (check_string_max i ~max:89) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:(aws|aws-cn|aws-us-gov):macie2:[a-z1-9-]{9,20}:\\d{12}:allow-list\\/[a-z0-9]{22}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json
+        ~kind:"__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922"
+        j
+    let to_json = simple_to_json to_value
+  end
 module Zz__listOfUsageByAccount =
   struct
     type nonrec t = UsageByAccount.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UsageByAccount.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4453,38 +4966,71 @@ module UsageStatisticsFilterKey =
       of_string (string_of_json ~kind:"UsageStatisticsFilterKey" j)
     let to_json = simple_to_json to_value
   end
+module DetectedDataDetails =
+  struct
+    type nonrec t =
+      {
+      value: Zz__stringMin1Max128.t option
+        [@ocaml.doc
+          "An occurrence of the specified type of sensitive data. Each occurrence contains 1-128 characters."]}
+    let make ?value = fun () -> { value }
+    let to_value x =
+      structure_to_value
+        [("value", (Option.map x.value ~f:Zz__stringMin1Max128.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:Zz__stringMin1Max128.of_xml)
+          (Xml.child xml_arg0 "value") in
+      make ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" Zz__stringMin1Max128.of_json in
+      make ?value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies 1-10 occurrences of a specific type of sensitive data reported by a finding."]
 module ClassificationDetails =
   struct
     type nonrec t =
       {
       detailedResultsLocation: Zz__string.t option
         [@ocaml.doc
-          "The path to the folder or file (in Amazon S3) that contains the corresponding sensitive data discovery result for the finding. If a finding applies to a large archive or compressed file, this value is the path to a folder. Otherwise, this value is the path to a file."];
+          "The path to the folder or file in Amazon S3 that contains the corresponding sensitive data discovery result for the finding. If a finding applies to a large archive or compressed file, this value is the path to a folder. Otherwise, this value is the path to a file."];
       jobArn: Zz__string.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the classification job that produced the finding."];
+          "The Amazon Resource Name (ARN) of the classification job that produced the finding. This value is null if the origin of the finding (originType) is AUTOMATED_SENSITIVE_DATA_DISCOVERY."];
       jobId: Zz__string.t option
         [@ocaml.doc
-          "The unique identifier for the classification job that produced the finding."];
+          "The unique identifier for the classification job that produced the finding. This value is null if the origin of the finding (originType) is AUTOMATED_SENSITIVE_DATA_DISCOVERY."];
+      originType: OriginType.t option
+        [@ocaml.doc
+          "Specifies how Amazon Macie found the sensitive data that produced the finding. Possible values are: SENSITIVE_DATA_DISCOVERY_JOB, for a classification job; and, AUTOMATED_SENSITIVE_DATA_DISCOVERY, for automated sensitive data discovery."];
       result: ClassificationResult.t option
         [@ocaml.doc "The status and other details of the finding."]}
     let make ?detailedResultsLocation =
       fun ?jobArn ->
         fun ?jobId ->
-          fun ?result ->
-            fun () -> { detailedResultsLocation; jobArn; jobId; result }
+          fun ?originType ->
+            fun ?result ->
+              fun () ->
+                { detailedResultsLocation; jobArn; jobId; originType; result
+                }
     let to_value x =
       structure_to_value
         [("detailedResultsLocation",
            (Option.map x.detailedResultsLocation ~f:Zz__string.to_value));
         ("jobArn", (Option.map x.jobArn ~f:Zz__string.to_value));
         ("jobId", (Option.map x.jobId ~f:Zz__string.to_value));
+        ("originType", (Option.map x.originType ~f:OriginType.to_value));
         ("result", (Option.map x.result ~f:ClassificationResult.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let result =
         (Option.map ~f:ClassificationResult.of_xml)
           (Xml.child xml_arg0 "result") in
+      let originType =
+        (Option.map ~f:OriginType.of_xml) (Xml.child xml_arg0 "originType") in
       let jobId =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "jobId") in
       let jobArn =
@@ -4492,18 +5038,19 @@ module ClassificationDetails =
       let detailedResultsLocation =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "detailedResultsLocation") in
-      make ?result ?jobId ?jobArn ?detailedResultsLocation ()
+      make ?result ?originType ?jobId ?jobArn ?detailedResultsLocation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let result = field_map json "result" ClassificationResult.of_json in
-      let jobId = field_map json "jobId" Zz__string.of_json in
-      let jobArn = field_map json "jobArn" Zz__string.of_json in
+    let of_json json__ =
+      let result = field_map json__ "result" ClassificationResult.of_json in
+      let originType = field_map json__ "originType" OriginType.of_json in
+      let jobId = field_map json__ "jobId" Zz__string.of_json in
+      let jobArn = field_map json__ "jobArn" Zz__string.of_json in
       let detailedResultsLocation =
-        field_map json "detailedResultsLocation" Zz__string.of_json in
-      make ?result ?jobId ?jobArn ?detailedResultsLocation ()
+        field_map json__ "detailedResultsLocation" Zz__string.of_json in
+      make ?result ?originType ?jobId ?jobArn ?detailedResultsLocation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information about a sensitive data finding, including the classification job that produced the finding."]
+       "Provides information about a sensitive data finding and the details of the finding."]
 module FindingCategory =
   struct
     type nonrec t =
@@ -4542,6 +5089,7 @@ module FindingType =
       | Policy_IAMUser_S3BucketReplicatedExternally 
       | Policy_IAMUser_S3BucketEncryptionDisabled 
       | Policy_IAMUser_S3BlockPublicAccessDisabled 
+      | Policy_IAMUser_S3BucketSharedWithCloudFront 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -4563,6 +5111,8 @@ module FindingType =
           "Policy:IAMUser/S3BucketEncryptionDisabled"
       | Policy_IAMUser_S3BlockPublicAccessDisabled ->
           "Policy:IAMUser/S3BlockPublicAccessDisabled"
+      | Policy_IAMUser_S3BucketSharedWithCloudFront ->
+          "Policy:IAMUser/S3BucketSharedWithCloudFront"
       | Non_static_id s -> s
     let of_string =
       function
@@ -4583,6 +5133,8 @@ module FindingType =
           Policy_IAMUser_S3BucketEncryptionDisabled
       | "Policy:IAMUser/S3BlockPublicAccessDisabled" ->
           Policy_IAMUser_S3BlockPublicAccessDisabled
+      | "Policy:IAMUser/S3BucketSharedWithCloudFront" ->
+          Policy_IAMUser_S3BucketSharedWithCloudFront
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -4614,9 +5166,9 @@ module PolicyDetails =
         (Option.map ~f:FindingAction.of_xml) (Xml.child xml_arg0 "action") in
       make ?actor ?action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let actor = field_map json "actor" FindingActor.of_json in
-      let action = field_map json "action" FindingAction.of_json in
+    let of_json json__ =
+      let actor = field_map json__ "actor" FindingActor.of_json in
+      let action = field_map json__ "action" FindingAction.of_json in
       make ?actor ?action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of a policy finding."]
@@ -4643,9 +5195,9 @@ module ResourcesAffected =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "s3Bucket") in
       make ?s3Object ?s3Bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Object = field_map json "s3Object" S3Object.of_json in
-      let s3Bucket = field_map json "s3Bucket" S3Bucket.of_json in
+    let of_json json__ =
+      let s3Object = field_map json__ "s3Object" S3Object.of_json in
+      let s3Bucket = field_map json__ "s3Bucket" S3Bucket.of_json in
       make ?s3Object ?s3Bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4675,10 +5227,10 @@ module Severity =
           (Xml.child xml_arg0 "description") in
       make ?score ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let score = field_map json "score" Zz__long.of_json in
+    let of_json json__ =
+      let score = field_map json__ "score" Zz__long.of_json in
       let description =
-        field_map json "description" SeverityDescription.of_json in
+        field_map json__ "description" SeverityDescription.of_json in
       make ?score ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4711,19 +5263,6 @@ module DataIdentifierSeverity =
         (string_of_xml ~kind:"enumeration DataIdentifierSeverity" xml_arg0)
     let of_json j =
       of_string (string_of_json ~kind:"DataIdentifierSeverity" j)
-    let to_json = simple_to_json to_value
-  end
-module Zz__integer =
-  struct
-    type nonrec t = int
-    let make i = i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for __integer" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module DayOfWeek =
@@ -4784,8 +5323,8 @@ module JobScopingBlock =
           (Xml.child xml_arg0 "and") in
       make ?and_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let and_ = field_map json "and" Zz__listOfJobScopeTerm.of_json in
+    let of_json json__ =
+      let and_ = field_map json__ "and" Zz__listOfJobScopeTerm.of_json in
       make ?and_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4796,10 +5335,10 @@ module BucketServerSideEncryption =
       {
       kmsMasterKeyId: Zz__string.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) or unique identifier (key ID) for the KMS key that's used by default to encrypt objects that are added to the bucket. This value is null if the bucket uses an Amazon S3 managed key to encrypt new objects or the bucket doesn't encrypt new objects by default."];
+          "The Amazon Resource Name (ARN) or unique identifier (key ID) for the KMS key that's used by default to encrypt objects that are added to the bucket. This value is null if the bucket is configured to use an Amazon S3 managed key to encrypt new objects."];
       type_: Type.t option
         [@ocaml.doc
-          "The type of server-side encryption that's used by default when storing new objects in the bucket. Possible values are: AES256 - New objects are encrypted with an Amazon S3 managed key. They use SSE-S3 encryption. aws:kms - New objects are encrypted with an KMS key (kmsMasterKeyId), either an Amazon Web Services managed key or a customer managed key. They use SSE-KMS encryption. NONE - New objects aren't encrypted by default. Default encryption is disabled for the bucket."]}
+          "The server-side encryption algorithm that's used by default to encrypt objects that are added to the bucket. Possible values are: AES256 - New objects use SSE-S3 encryption. They're encrypted with an Amazon S3 managed key. aws:kms - New objects use SSE-KMS encryption. They're encrypted with an KMS key (kmsMasterKeyId), either an Amazon Web Services managed key or a customer managed key. aws:kms:dsse - New objects use DSSE-KMS encryption. They're encrypted with an KMS key (kmsMasterKeyId), either an Amazon Web Services managed key or a customer managed key. NONE - The bucket's default encryption settings don't specify server-side encryption behavior for new objects."]}
     let make ?kmsMasterKeyId =
       fun ?type_ -> fun () -> { kmsMasterKeyId; type_ }
     let to_value x =
@@ -4815,9 +5354,10 @@ module BucketServerSideEncryption =
           (Xml.child xml_arg0 "kmsMasterKeyId") in
       make ?type_ ?kmsMasterKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" Type.of_json in
-      let kmsMasterKeyId = field_map json "kmsMasterKeyId" Zz__string.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "type" Type.of_json in
+      let kmsMasterKeyId =
+        field_map json__ "kmsMasterKeyId" Zz__string.of_json in
       make ?type_ ?kmsMasterKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4831,10 +5371,10 @@ module ReplicationDetails =
           "Specifies whether the bucket is configured to replicate one or more objects to any destination."];
       replicatedExternally: Zz__boolean.t option
         [@ocaml.doc
-          "Specifies whether the bucket is configured to replicate one or more objects to an Amazon Web Services account that isn't part of the same Amazon Macie organization."];
+          "Specifies whether the bucket is configured to replicate one or more objects to a bucket for an Amazon Web Services account that isn't part of your Amazon Macie organization. An Amazon Macie organization is a set of Macie accounts that are centrally managed as a group of related accounts through Organizations or by Macie invitation."];
       replicationAccounts: Zz__listOf__string.t option
         [@ocaml.doc
-          "An array of Amazon Web Services account IDs, one for each Amazon Web Services account that the bucket is configured to replicate one or more objects to."]}
+          "An array of Amazon Web Services account IDs, one for each Amazon Web Services account that owns a bucket that the bucket is configured to replicate one or more objects to."]}
     let make ?replicated =
       fun ?replicatedExternally ->
         fun ?replicationAccounts ->
@@ -4858,12 +5398,12 @@ module ReplicationDetails =
         (Option.map ~f:Zz__boolean.of_xml) (Xml.child xml_arg0 "replicated") in
       make ?replicationAccounts ?replicatedExternally ?replicated ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationAccounts =
-        field_map json "replicationAccounts" Zz__listOf__string.of_json in
+        field_map json__ "replicationAccounts" Zz__listOf__string.of_json in
       let replicatedExternally =
-        field_map json "replicatedExternally" Zz__boolean.of_json in
-      let replicated = field_map json "replicated" Zz__boolean.of_json in
+        field_map json__ "replicatedExternally" Zz__boolean.of_json in
+      let replicated = field_map json__ "replicated" Zz__boolean.of_json in
       make ?replicationAccounts ?replicatedExternally ?replicated ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4903,6 +5443,9 @@ module Zz__listOfKeyValuePair =
   struct
     type nonrec t = KeyValuePair.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KeyValuePair.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4949,6 +5492,152 @@ module ErrorCode =
     let of_json j = of_string (string_of_json ~kind:"ErrorCode" j)
     let to_json = simple_to_json to_value
   end
+module AutomatedDiscoveryAccountUpdateErrorCode =
+  struct
+    type nonrec t =
+      | ACCOUNT_PAUSED 
+      | ACCOUNT_NOT_FOUND 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACCOUNT_PAUSED -> "ACCOUNT_PAUSED"
+      | ACCOUNT_NOT_FOUND -> "ACCOUNT_NOT_FOUND"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACCOUNT_PAUSED" -> ACCOUNT_PAUSED
+      | "ACCOUNT_NOT_FOUND" -> ACCOUNT_NOT_FOUND
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration AutomatedDiscoveryAccountUpdateErrorCode"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"AutomatedDiscoveryAccountUpdateErrorCode" j)
+    let to_json = simple_to_json to_value
+  end
+module RetrievalMode =
+  struct
+    type nonrec t =
+      | CALLER_CREDENTIALS 
+      | ASSUME_ROLE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CALLER_CREDENTIALS -> "CALLER_CREDENTIALS"
+      | ASSUME_ROLE -> "ASSUME_ROLE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CALLER_CREDENTIALS" -> CALLER_CREDENTIALS
+      | "ASSUME_ROLE" -> ASSUME_ROLE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RetrievalMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RetrievalMode" j)
+    let to_json = simple_to_json to_value
+  end
+module Zz__stringMin1Max64PatternW =
+  struct
+    type nonrec t = string
+    let context_ = "__stringMin1Max64PatternW"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"^[\\w+=,.@-]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"__stringMin1Max64PatternW" j
+    let to_json = simple_to_json to_value
+  end
+module RevealStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RevealStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RevealStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module Zz__stringMin1Max2048 =
+  struct
+    type nonrec t = string
+    let context_ = "__stringMin1Max2048"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"__stringMin1Max2048" j
+    let to_json = simple_to_json to_value
+  end
+module SuppressDataIdentifier =
+  struct
+    type nonrec t =
+      {
+      id: Zz__string.t option
+        [@ocaml.doc
+          "The unique identifier for the custom data identifier or managed data identifier that detected the type of sensitive data to exclude from the score."];
+      type_: DataIdentifierType.t option
+        [@ocaml.doc
+          "The type of data identifier that detected the sensitive data. Possible values are: CUSTOM, for a custom data identifier; and, MANAGED, for a managed data identifier."]}
+    let make ?id = fun ?type_ -> fun () -> { id; type_ }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:Zz__string.to_value));
+        ("type", (Option.map x.type_ ~f:DataIdentifierType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:DataIdentifierType.of_xml) (Xml.child xml_arg0 "type") in
+      let id = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "id") in
+      make ?type_ ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "type" DataIdentifierType.of_json in
+      let id = field_map json__ "id" Zz__string.of_json in make ?type_ ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies a custom data identifier or managed data identifier that detected a type of sensitive data to exclude from an S3 bucket's sensitivity score."]
 module Criterion =
   struct
     type nonrec t = (Zz__string.t * CriterionAdditionalProperties.t) list
@@ -4974,6 +5663,8 @@ module Criterion =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -4981,13 +5672,92 @@ module Criterion =
         ~of_json:CriterionAdditionalProperties.of_json j
     let to_json v = composed_to_json to_value v
   end
+module S3ClassificationScopeExclusionUpdate =
+  struct
+    type nonrec t =
+      {
+      bucketNames: Zz__listOfS3BucketName.t
+        [@ocaml.doc
+          "Depending on the value specified for the update operation (ClassificationScopeUpdateOperation), an array of strings that: lists the names of buckets to add or remove from the list, or specifies a new set of bucket names that overwrites all existing names in the list. Each string must be the full name of an existing S3 bucket. Values are case sensitive."];
+      operation: ClassificationScopeUpdateOperation.t
+        [@ocaml.doc
+          "Specifies how to apply the changes to the exclusion list. Valid values are: ADD - Append the specified bucket names to the current list. REMOVE - Remove the specified bucket names from the current list. REPLACE - Overwrite the current list with the specified list of bucket names. If you specify this value, Amazon Macie removes all existing names from the list and adds all the specified names to the list."]}
+    let context_ = "S3ClassificationScopeExclusionUpdate"
+    let make ~bucketNames =
+      fun ~operation -> fun () -> { bucketNames; operation }
+    let to_value x =
+      structure_to_value
+        [("bucketNames",
+           (Some (Zz__listOfS3BucketName.to_value x.bucketNames)));
+        ("operation",
+          (Some (ClassificationScopeUpdateOperation.to_value x.operation)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let operation =
+        ClassificationScopeUpdateOperation.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "operation") in
+      let bucketNames =
+        Zz__listOfS3BucketName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "bucketNames") in
+      make ~operation ~bucketNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let operation =
+        field_map_exn json__ "operation"
+          ClassificationScopeUpdateOperation.of_json in
+      let bucketNames =
+        field_map_exn json__ "bucketNames" Zz__listOfS3BucketName.of_json in
+      make ~operation ~bucketNames ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies S3 buckets to add or remove from the exclusion list defined by the classification scope for an Amazon Macie account."]
+module S3WordsList =
+  struct
+    type nonrec t =
+      {
+      bucketName: Zz__stringMin3Max255PatternAZaZ093255.t
+        [@ocaml.doc
+          "The full name of the S3 bucket that contains the object."];
+      objectKey: Zz__stringMin1Max1024PatternSS.t
+        [@ocaml.doc "The full name (key) of the object."]}
+    let context_ = "S3WordsList"
+    let make ~bucketName =
+      fun ~objectKey -> fun () -> { bucketName; objectKey }
+    let to_value x =
+      structure_to_value
+        [("bucketName",
+           (Some
+              (Zz__stringMin3Max255PatternAZaZ093255.to_value x.bucketName)));
+        ("objectKey",
+          (Some (Zz__stringMin1Max1024PatternSS.to_value x.objectKey)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let objectKey =
+        Zz__stringMin1Max1024PatternSS.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "objectKey") in
+      let bucketName =
+        Zz__stringMin3Max255PatternAZaZ093255.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
+      make ~objectKey ~bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let objectKey =
+        field_map_exn json__ "objectKey"
+          Zz__stringMin1Max1024PatternSS.of_json in
+      let bucketName =
+        field_map_exn json__ "bucketName"
+          Zz__stringMin3Max255PatternAZaZ093255.of_json in
+      make ~objectKey ~bucketName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about an S3 object that lists specific text to ignore."]
 module MatchingResource =
   struct
     type nonrec t =
       {
       matchingBucket: MatchingBucket.t option
         [@ocaml.doc
-          "The details of an S3 bucket that Amazon Macie monitors and analyzes."]}
+          "The details of an S3 bucket that Amazon Macie monitors and analyzes for your account."]}
     let make ?matchingBucket = fun () -> { matchingBucket }
     let to_value x =
       structure_to_value
@@ -5000,9 +5770,9 @@ module MatchingResource =
           (Xml.child xml_arg0 "matchingBucket") in
       make ?matchingBucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let matchingBucket =
-        field_map json "matchingBucket" MatchingBucket.of_json in
+        field_map json__ "matchingBucket" MatchingBucket.of_json in
       make ?matchingBucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5026,9 +5796,9 @@ module SearchResourcesCriteriaBlock =
           (Xml.child xml_arg0 "and") in
       make ?and_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let and_ =
-        field_map json "and" Zz__listOfSearchResourcesCriteria.of_json in
+        field_map json__ "and" Zz__listOfSearchResourcesCriteria.of_json in
       make ?and_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5090,20 +5860,30 @@ module S3Destination =
   struct
     type nonrec t =
       {
-      bucketName: Zz__string.t [@ocaml.doc "The name of the bucket."];
+      bucketName: Zz__string.t
+        [@ocaml.doc
+          "The name of the bucket. This must be the name of an existing general purpose bucket."];
+      expectedBucketOwner: Zz__string.t option
+        [@ocaml.doc
+          "The unique identifier (ID) for the Amazon Web Services account that owns the bucket. This must be the ID for the account that owns the specified bucket."];
       keyPrefix: Zz__string.t option
         [@ocaml.doc
           "The path prefix to use in the path to the location in the bucket. This prefix specifies where to store classification results in the bucket."];
       kmsKeyArn: Zz__string.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the KMS key to use for encryption of the results. This must be the ARN of an existing, symmetric, customer managed KMS key that's in the same Amazon Web Services Region as the bucket."]}
+          "The Amazon Resource Name (ARN) of the customer managed KMS key to use for encryption of the results. This must be the ARN of an existing, symmetric encryption KMS key that's enabled in the same Amazon Web Services Region as the bucket."]}
     let context_ = "S3Destination"
-    let make ?keyPrefix =
-      fun ~bucketName ->
-        fun ~kmsKeyArn -> fun () -> { keyPrefix; bucketName; kmsKeyArn }
+    let make ?expectedBucketOwner =
+      fun ?keyPrefix ->
+        fun ~bucketName ->
+          fun ~kmsKeyArn ->
+            fun () ->
+              { expectedBucketOwner; keyPrefix; bucketName; kmsKeyArn }
     let to_value x =
       structure_to_value
         [("bucketName", (Some (Zz__string.to_value x.bucketName)));
+        ("expectedBucketOwner",
+          (Option.map x.expectedBucketOwner ~f:Zz__string.to_value));
         ("keyPrefix", (Option.map x.keyPrefix ~f:Zz__string.to_value));
         ("kmsKeyArn", (Some (Zz__string.to_value x.kmsKeyArn)))]
     let to_query v = to_query to_value v
@@ -5113,19 +5893,154 @@ module S3Destination =
           (Xml.child_exn ~context:context_ xml_arg0 "kmsKeyArn") in
       let keyPrefix =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "keyPrefix") in
+      let expectedBucketOwner =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "expectedBucketOwner") in
       let bucketName =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
-      make ~kmsKeyArn ?keyPrefix ~bucketName ()
+      make ~kmsKeyArn ?keyPrefix ?expectedBucketOwner ~bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyArn = field_map_exn json "kmsKeyArn" Zz__string.of_json in
-      let keyPrefix = field_map json "keyPrefix" Zz__string.of_json in
-      let bucketName = field_map_exn json "bucketName" Zz__string.of_json in
-      make ~kmsKeyArn ?keyPrefix ~bucketName ()
+    let of_json json__ =
+      let kmsKeyArn = field_map_exn json__ "kmsKeyArn" Zz__string.of_json in
+      let keyPrefix = field_map json__ "keyPrefix" Zz__string.of_json in
+      let expectedBucketOwner =
+        field_map json__ "expectedBucketOwner" Zz__string.of_json in
+      let bucketName = field_map_exn json__ "bucketName" Zz__string.of_json in
+      make ~kmsKeyArn ?keyPrefix ?expectedBucketOwner ~bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies an S3 bucket to store data classification results in, and the encryption settings to use when storing results in that bucket."]
+       "Specifies an S3 bucket to store data classification results in, and the encryption settings to use when storing results in that bucket. The bucket must be an existing general purpose bucket. It can be a bucket in your own account or a bucket that another account owns. If another account owns the bucket, you must specify both the unique identifier for the account and the name of the bucket."]
+module SensitivityInspectionTemplatesEntry =
+  struct
+    type nonrec t =
+      {
+      id: Zz__string.t option
+        [@ocaml.doc
+          "The unique identifier for the sensitivity inspection template."];
+      name: Zz__string.t option
+        [@ocaml.doc
+          "The name of the sensitivity inspection template: automated-sensitive-data-discovery."]}
+    let make ?id = fun ?name -> fun () -> { id; name }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:Zz__string.to_value));
+        ("name", (Option.map x.name ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "id") in
+      make ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "name" Zz__string.of_json in
+      let id = field_map json__ "id" Zz__string.of_json in make ?name ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about the sensitivity inspection template for an Amazon Macie account."]
+module Detection =
+  struct
+    type nonrec t =
+      {
+      arn: Zz__string.t option
+        [@ocaml.doc
+          "If the sensitive data was detected by a custom data identifier, the Amazon Resource Name (ARN) of the custom data identifier that detected the data. Otherwise, this value is null."];
+      count: Zz__long.t option
+        [@ocaml.doc "The total number of occurrences of the sensitive data."];
+      id: Zz__string.t option
+        [@ocaml.doc
+          "The unique identifier for the custom data identifier or managed data identifier that detected the sensitive data. For additional details about a specified managed data identifier, see Using managed data identifiers in the Amazon Macie User Guide."];
+      name: Zz__string.t option
+        [@ocaml.doc
+          "The name of the custom data identifier or managed data identifier that detected the sensitive data. For a managed data identifier, this value is the same as the unique identifier (id)."];
+      suppressed: Zz__boolean.t option
+        [@ocaml.doc
+          "Specifies whether occurrences of this type of sensitive data are excluded (true) or included (false) in the bucket's sensitivity score, if the score is calculated by Amazon Macie."];
+      type_: DataIdentifierType.t option
+        [@ocaml.doc
+          "The type of data identifier that detected the sensitive data. Possible values are: CUSTOM, for a custom data identifier; and, MANAGED, for a managed data identifier."]}
+    let make ?arn =
+      fun ?count ->
+        fun ?id ->
+          fun ?name ->
+            fun ?suppressed ->
+              fun ?type_ ->
+                fun () -> { arn; count; id; name; suppressed; type_ }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("count", (Option.map x.count ~f:Zz__long.to_value));
+        ("id", (Option.map x.id ~f:Zz__string.to_value));
+        ("name", (Option.map x.name ~f:Zz__string.to_value));
+        ("suppressed", (Option.map x.suppressed ~f:Zz__boolean.to_value));
+        ("type", (Option.map x.type_ ~f:DataIdentifierType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:DataIdentifierType.of_xml) (Xml.child xml_arg0 "type") in
+      let suppressed =
+        (Option.map ~f:Zz__boolean.of_xml) (Xml.child xml_arg0 "suppressed") in
+      let name =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "id") in
+      let count =
+        (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "count") in
+      let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?type_ ?suppressed ?name ?id ?count ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "type" DataIdentifierType.of_json in
+      let suppressed = field_map json__ "suppressed" Zz__boolean.of_json in
+      let name = field_map json__ "name" Zz__string.of_json in
+      let id = field_map json__ "id" Zz__string.of_json in
+      let count = field_map json__ "count" Zz__long.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in
+      make ?type_ ?suppressed ?name ?id ?count ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about a type of sensitive data that Amazon Macie found in an S3 bucket while performing automated sensitive data discovery for an account. The information also specifies the custom or managed data identifier that detected the data. This information is available only if automated sensitive data discovery has been enabled for the account."]
+module ResourceProfileArtifact =
+  struct
+    type nonrec t =
+      {
+      arn: Zz__string.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the object."];
+      classificationResultStatus: Zz__string.t option
+        [@ocaml.doc
+          "The status of the analysis. Possible values are: COMPLETE - Amazon Macie successfully completed its analysis of the object. PARTIAL - Macie analyzed only a subset of data in the object. For example, the object is an archive file that contains files in an unsupported format. SKIPPED - Macie wasn't able to analyze the object. For example, the object is a malformed file."];
+      sensitive: Zz__boolean.t option
+        [@ocaml.doc
+          "Specifies whether Amazon Macie found sensitive data in the object."]}
+    let make ?arn =
+      fun ?classificationResultStatus ->
+        fun ?sensitive ->
+          fun () -> { arn; classificationResultStatus; sensitive }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("classificationResultStatus",
+          (Option.map x.classificationResultStatus ~f:Zz__string.to_value));
+        ("sensitive", (Option.map x.sensitive ~f:Zz__boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sensitive =
+        (Option.map ~f:Zz__boolean.of_xml) (Xml.child xml_arg0 "sensitive") in
+      let classificationResultStatus =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "classificationResultStatus") in
+      let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?sensitive ?classificationResultStatus ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sensitive = field_map json__ "sensitive" Zz__boolean.of_json in
+      let classificationResultStatus =
+        field_map json__ "classificationResultStatus" Zz__string.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in
+      make ?sensitive ?classificationResultStatus ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about an S3 object that Amazon Macie selected for analysis while performing automated sensitive data discovery for an account, and the status and results of the analysis. This information is available only if automated sensitive data discovery has been enabled for the account."]
 module AdminAccount =
   struct
     type nonrec t =
@@ -5148,9 +6063,9 @@ module AdminAccount =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?status ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" AdminStatus.of_json in
-      let accountId = field_map json "accountId" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" AdminStatus.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
       make ?status ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5167,10 +6082,11 @@ module Member =
       arn: Zz__string.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the account."];
       email: Zz__string.t option
-        [@ocaml.doc "The email address for the account."];
+        [@ocaml.doc
+          "The email address for the account. This value is null if the account is associated with the administrator account through Organizations."];
       invitedAt: Zz__timestampIso8601.t option
         [@ocaml.doc
-          "The date and time, in UTC and extended ISO 8601 format, when an Amazon Macie membership invitation was last sent to the account. This value is null if an invitation hasn't been sent to the account."];
+          "The date and time, in UTC and extended ISO 8601 format, when an Amazon Macie membership invitation was last sent to the account. This value is null if a Macie membership invitation hasn't been sent to the account."];
       masterAccountId: Zz__string.t option
         [@ocaml.doc
           "(Deprecated) The Amazon Web Services account ID for the administrator account. This property has been replaced by the administratorAccountId property and is retained only for backward compatibility."];
@@ -5179,7 +6095,7 @@ module Member =
           "The current status of the relationship between the account and the administrator account."];
       tags: TagMap.t option
         [@ocaml.doc
-          "A map of key-value pairs that identifies the tags (keys and values) that are associated with the account in Amazon Macie."];
+          "A map of key-value pairs that specifies which tags (keys and values) are associated with the account in Amazon Macie."];
       updatedAt: Zz__timestampIso8601.t option
         [@ocaml.doc
           "The date and time, in UTC and extended ISO 8601 format, of the most recent change to the status of the relationship between the account and the administrator account."]}
@@ -5246,19 +6162,21 @@ module Member =
       make ?updatedAt ?tags ?relationshipStatus ?masterAccountId ?invitedAt
         ?email ?arn ?administratorAccountId ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "updatedAt" Zz__timestampIso8601.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let updatedAt =
+        field_map json__ "updatedAt" Zz__timestampIso8601.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let relationshipStatus =
-        field_map json "relationshipStatus" RelationshipStatus.of_json in
+        field_map json__ "relationshipStatus" RelationshipStatus.of_json in
       let masterAccountId =
-        field_map json "masterAccountId" Zz__string.of_json in
-      let invitedAt = field_map json "invitedAt" Zz__timestampIso8601.of_json in
-      let email = field_map json "email" Zz__string.of_json in
-      let arn = field_map json "arn" Zz__string.of_json in
+        field_map json__ "masterAccountId" Zz__string.of_json in
+      let invitedAt =
+        field_map json__ "invitedAt" Zz__timestampIso8601.of_json in
+      let email = field_map json__ "email" Zz__string.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in
       let administratorAccountId =
-        field_map json "administratorAccountId" Zz__string.of_json in
-      let accountId = field_map json "accountId" Zz__string.of_json in
+        field_map json__ "administratorAccountId" Zz__string.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
       make ?updatedAt ?tags ?relationshipStatus ?masterAccountId ?invitedAt
         ?email ?arn ?administratorAccountId ?accountId ()
     let to_json v = composed_to_json to_value v
@@ -5288,10 +6206,10 @@ module ManagedDataIdentifierSummary =
           (Xml.child xml_arg0 "category") in
       make ?id ?category ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "id" Zz__string.of_json in
+    let of_json json__ =
+      let id = field_map json__ "id" Zz__string.of_json in
       let category =
-        field_map json "category" SensitiveDataItemCategory.of_json in
+        field_map json__ "category" SensitiveDataItemCategory.of_json in
       make ?id ?category ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5339,12 +6257,13 @@ module Invitation =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?relationshipStatus ?invitedAt ?invitationId ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let relationshipStatus =
-        field_map json "relationshipStatus" RelationshipStatus.of_json in
-      let invitedAt = field_map json "invitedAt" Zz__timestampIso8601.of_json in
-      let invitationId = field_map json "invitationId" Zz__string.of_json in
-      let accountId = field_map json "accountId" Zz__string.of_json in
+        field_map json__ "relationshipStatus" RelationshipStatus.of_json in
+      let invitedAt =
+        field_map json__ "invitedAt" Zz__timestampIso8601.of_json in
+      let invitationId = field_map json__ "invitationId" Zz__string.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
       make ?relationshipStatus ?invitedAt ?invitationId ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5355,7 +6274,7 @@ module FindingsFilterListItem =
       {
       action: FindingsFilterAction.t option
         [@ocaml.doc
-          "The action that's performed on findings that meet the filter criteria. Possible values are: ARCHIVE, suppress (automatically archive) the findings; and, NOOP, don't perform any action on the findings."];
+          "The action that's performed on findings that match the filter criteria. Possible values are: ARCHIVE, suppress (automatically archive) the findings; and, NOOP, don't perform any action on the findings."];
       arn: Zz__string.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the filter."];
       id: Zz__string.t option
@@ -5363,7 +6282,7 @@ module FindingsFilterListItem =
       name: Zz__string.t option [@ocaml.doc "The custom name of the filter."];
       tags: TagMap.t option
         [@ocaml.doc
-          "A map of key-value pairs that identifies the tags (keys and values) that are associated with the filter."]}
+          "A map of key-value pairs that specifies which tags (keys and values) are associated with the filter."]}
     let make ?action =
       fun ?arn ->
         fun ?id ->
@@ -5387,12 +6306,12 @@ module FindingsFilterListItem =
           (Xml.child xml_arg0 "action") in
       make ?tags ?name ?id ?arn ?action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let name = field_map json "name" Zz__string.of_json in
-      let id = field_map json "id" Zz__string.of_json in
-      let arn = field_map json "arn" Zz__string.of_json in
-      let action = field_map json "action" FindingsFilterAction.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let name = field_map json__ "name" Zz__string.of_json in
+      let id = field_map json__ "id" Zz__string.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in
+      let action = field_map json__ "action" FindingsFilterAction.of_json in
       make ?tags ?name ?id ?arn ?action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides information about a findings filter."]
@@ -5438,19 +6357,54 @@ module CustomDataIdentifierSummary =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?name ?id ?description ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" Zz__string.of_json in
-      let id = field_map json "id" Zz__string.of_json in
-      let description = field_map json "description" Zz__string.of_json in
-      let createdAt = field_map json "createdAt" Zz__timestampIso8601.of_json in
-      let arn = field_map json "arn" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "name" Zz__string.of_json in
+      let id = field_map json__ "id" Zz__string.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
+      let createdAt =
+        field_map json__ "createdAt" Zz__timestampIso8601.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in
       make ?name ?id ?description ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides information about a custom data identifier."]
+module ClassificationScopeSummary =
+  struct
+    type nonrec t =
+      {
+      id: ClassificationScopeId.t option
+        [@ocaml.doc "The unique identifier for the classification scope."];
+      name: ClassificationScopeName.t option
+        [@ocaml.doc
+          "The name of the classification scope: automated-sensitive-data-discovery."]}
+    let make ?id = fun ?name -> fun () -> { id; name }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:ClassificationScopeId.to_value));
+        ("name", (Option.map x.name ~f:ClassificationScopeName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        (Option.map ~f:ClassificationScopeName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      let id =
+        (Option.map ~f:ClassificationScopeId.of_xml)
+          (Xml.child xml_arg0 "id") in
+      make ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "name" ClassificationScopeName.of_json in
+      let id = field_map json__ "id" ClassificationScopeId.of_json in
+      make ?name ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about the classification scope for an Amazon Macie account. Macie uses the scope's settings when it performs automated sensitive data discovery for the account."]
 module JobSummary =
   struct
     type nonrec t =
       {
+      bucketCriteria: S3BucketCriteriaForJob.t option
+        [@ocaml.doc
+          "The property- and tag-based conditions that determine which S3 buckets are included or excluded from the job's analysis. Each time the job runs, the job uses these criteria to determine which buckets to analyze. A job's definition can contain a bucketCriteria object or a bucketDefinitions array, not both."];
       bucketDefinitions: Zz__listOfS3BucketDefinitionForJob.t option
         [@ocaml.doc
           "An array of objects, one for each Amazon Web Services account that owns specific S3 buckets for the job to analyze. Each object specifies the account ID for an account and one or more buckets to analyze for that account. A job's definition can contain a bucketDefinitions array or a bucketCriteria object, not both."];
@@ -5471,21 +6425,19 @@ module JobSummary =
       name: Zz__string.t option [@ocaml.doc "The custom name of the job."];
       userPausedDetails: UserPausedDetails.t option
         [@ocaml.doc
-          "If the current status of the job is USER_PAUSED, specifies when the job was paused and when the job or job run will expire and be cancelled if it isn't resumed. This value is present only if the value for jobStatus is USER_PAUSED."];
-      bucketCriteria: S3BucketCriteriaForJob.t option
-        [@ocaml.doc
-          "The property- and tag-based conditions that determine which S3 buckets are included or excluded from the job's analysis. Each time the job runs, the job uses these criteria to determine which buckets to analyze. A job's definition can contain a bucketCriteria object or a bucketDefinitions array, not both."]}
-    let make ?bucketDefinitions =
-      fun ?createdAt ->
-        fun ?jobId ->
-          fun ?jobStatus ->
-            fun ?jobType ->
-              fun ?lastRunErrorStatus ->
-                fun ?name ->
-                  fun ?userPausedDetails ->
-                    fun ?bucketCriteria ->
+          "If the current status of the job is USER_PAUSED, specifies when the job was paused and when the job or job run will expire and be cancelled if it isn't resumed. This value is present only if the value for jobStatus is USER_PAUSED."]}
+    let make ?bucketCriteria =
+      fun ?bucketDefinitions ->
+        fun ?createdAt ->
+          fun ?jobId ->
+            fun ?jobStatus ->
+              fun ?jobType ->
+                fun ?lastRunErrorStatus ->
+                  fun ?name ->
+                    fun ?userPausedDetails ->
                       fun () ->
                         {
+                          bucketCriteria;
                           bucketDefinitions;
                           createdAt;
                           jobId;
@@ -5493,14 +6445,15 @@ module JobSummary =
                           jobType;
                           lastRunErrorStatus;
                           name;
-                          userPausedDetails;
-                          bucketCriteria
+                          userPausedDetails
                         }
     let to_value x =
       structure_to_value
-        [("bucketDefinitions",
-           (Option.map x.bucketDefinitions
-              ~f:Zz__listOfS3BucketDefinitionForJob.to_value));
+        [("bucketCriteria",
+           (Option.map x.bucketCriteria ~f:S3BucketCriteriaForJob.to_value));
+        ("bucketDefinitions",
+          (Option.map x.bucketDefinitions
+             ~f:Zz__listOfS3BucketDefinitionForJob.to_value));
         ("createdAt",
           (Option.map x.createdAt ~f:Zz__timestampIso8601.to_value));
         ("jobId", (Option.map x.jobId ~f:Zz__string.to_value));
@@ -5510,14 +6463,9 @@ module JobSummary =
           (Option.map x.lastRunErrorStatus ~f:LastRunErrorStatus.to_value));
         ("name", (Option.map x.name ~f:Zz__string.to_value));
         ("userPausedDetails",
-          (Option.map x.userPausedDetails ~f:UserPausedDetails.to_value));
-        ("bucketCriteria",
-          (Option.map x.bucketCriteria ~f:S3BucketCriteriaForJob.to_value))]
+          (Option.map x.userPausedDetails ~f:UserPausedDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let bucketCriteria =
-        (Option.map ~f:S3BucketCriteriaForJob.of_xml)
-          (Xml.child xml_arg0 "bucketCriteria") in
       let userPausedDetails =
         (Option.map ~f:UserPausedDetails.of_xml)
           (Xml.child xml_arg0 "userPausedDetails") in
@@ -5538,26 +6486,30 @@ module JobSummary =
       let bucketDefinitions =
         (Option.map ~f:Zz__listOfS3BucketDefinitionForJob.of_xml)
           (Xml.child xml_arg0 "bucketDefinitions") in
-      make ?bucketCriteria ?userPausedDetails ?name ?lastRunErrorStatus
-        ?jobType ?jobStatus ?jobId ?createdAt ?bucketDefinitions ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let bucketCriteria =
-        field_map json "bucketCriteria" S3BucketCriteriaForJob.of_json in
+        (Option.map ~f:S3BucketCriteriaForJob.of_xml)
+          (Xml.child xml_arg0 "bucketCriteria") in
+      make ?userPausedDetails ?name ?lastRunErrorStatus ?jobType ?jobStatus
+        ?jobId ?createdAt ?bucketDefinitions ?bucketCriteria ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
       let userPausedDetails =
-        field_map json "userPausedDetails" UserPausedDetails.of_json in
-      let name = field_map json "name" Zz__string.of_json in
+        field_map json__ "userPausedDetails" UserPausedDetails.of_json in
+      let name = field_map json__ "name" Zz__string.of_json in
       let lastRunErrorStatus =
-        field_map json "lastRunErrorStatus" LastRunErrorStatus.of_json in
-      let jobType = field_map json "jobType" JobType.of_json in
-      let jobStatus = field_map json "jobStatus" JobStatus.of_json in
-      let jobId = field_map json "jobId" Zz__string.of_json in
-      let createdAt = field_map json "createdAt" Zz__timestampIso8601.of_json in
+        field_map json__ "lastRunErrorStatus" LastRunErrorStatus.of_json in
+      let jobType = field_map json__ "jobType" JobType.of_json in
+      let jobStatus = field_map json__ "jobStatus" JobStatus.of_json in
+      let jobId = field_map json__ "jobId" Zz__string.of_json in
+      let createdAt =
+        field_map json__ "createdAt" Zz__timestampIso8601.of_json in
       let bucketDefinitions =
-        field_map json "bucketDefinitions"
+        field_map json__ "bucketDefinitions"
           Zz__listOfS3BucketDefinitionForJob.of_json in
-      make ?bucketCriteria ?userPausedDetails ?name ?lastRunErrorStatus
-        ?jobType ?jobStatus ?jobId ?createdAt ?bucketDefinitions ()
+      let bucketCriteria =
+        field_map json__ "bucketCriteria" S3BucketCriteriaForJob.of_json in
+      make ?userPausedDetails ?name ?lastRunErrorStatus ?jobType ?jobStatus
+        ?jobId ?createdAt ?bucketDefinitions ?bucketCriteria ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about a classification job, including the current status of the job."]
@@ -5565,6 +6517,9 @@ module Zz__listOfListJobsFilterTerm =
   struct
     type nonrec t = ListJobsFilterTerm.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListJobsFilterTerm.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5619,6 +6574,119 @@ module ListJobsSortAttributeName =
       of_string (string_of_json ~kind:"ListJobsSortAttributeName" j)
     let to_json = simple_to_json to_value
   end
+module AutomatedDiscoveryAccount =
+  struct
+    type nonrec t =
+      {
+      accountId: Zz__string.t option
+        [@ocaml.doc "The Amazon Web Services account ID for the account."];
+      status: AutomatedDiscoveryAccountStatus.t option
+        [@ocaml.doc
+          "The current status of automated sensitive data discovery for the account. Possible values are: ENABLED, perform automated sensitive data discovery activities for the account; and, DISABLED, don't perform automated sensitive data discovery activities for the account."]}
+    let make ?accountId = fun ?status -> fun () -> { accountId; status }
+    let to_value x =
+      structure_to_value
+        [("accountId", (Option.map x.accountId ~f:Zz__string.to_value));
+        ("status",
+          (Option.map x.status ~f:AutomatedDiscoveryAccountStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:AutomatedDiscoveryAccountStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let accountId =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "accountId") in
+      make ?status ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map json__ "status" AutomatedDiscoveryAccountStatus.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
+      make ?status ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about the status of automated sensitive data discovery for an Amazon Macie account."]
+module AllowListSummary =
+  struct
+    type nonrec t =
+      {
+      arn:
+        Zz__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922.t
+          option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the allow list."];
+      createdAt: Zz__timestampIso8601.t option
+        [@ocaml.doc
+          "The date and time, in UTC and extended ISO 8601 format, when the allow list was created in Amazon Macie."];
+      description: Zz__stringMin1Max512PatternSS.t option
+        [@ocaml.doc "The custom description of the allow list."];
+      id: Zz__stringMin22Max22PatternAZ0922.t option
+        [@ocaml.doc "The unique identifier for the allow list."];
+      name: Zz__stringMin1Max128Pattern.t option
+        [@ocaml.doc "The custom name of the allow list."];
+      updatedAt: Zz__timestampIso8601.t option
+        [@ocaml.doc
+          "The date and time, in UTC and extended ISO 8601 format, when the allow list's settings were most recently changed in Amazon Macie."]}
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?description ->
+          fun ?id ->
+            fun ?name ->
+              fun ?updatedAt ->
+                fun () ->
+                  { arn; createdAt; description; id; name; updatedAt }
+    let to_value x =
+      structure_to_value
+        [("arn",
+           (Option.map x.arn
+              ~f:Zz__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922.to_value));
+        ("createdAt",
+          (Option.map x.createdAt ~f:Zz__timestampIso8601.to_value));
+        ("description",
+          (Option.map x.description ~f:Zz__stringMin1Max512PatternSS.to_value));
+        ("id",
+          (Option.map x.id ~f:Zz__stringMin22Max22PatternAZ0922.to_value));
+        ("name", (Option.map x.name ~f:Zz__stringMin1Max128Pattern.to_value));
+        ("updatedAt",
+          (Option.map x.updatedAt ~f:Zz__timestampIso8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedAt =
+        (Option.map ~f:Zz__timestampIso8601.of_xml)
+          (Xml.child xml_arg0 "updatedAt") in
+      let name =
+        (Option.map ~f:Zz__stringMin1Max128Pattern.of_xml)
+          (Xml.child xml_arg0 "name") in
+      let id =
+        (Option.map ~f:Zz__stringMin22Max22PatternAZ0922.of_xml)
+          (Xml.child xml_arg0 "id") in
+      let description =
+        (Option.map ~f:Zz__stringMin1Max512PatternSS.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let createdAt =
+        (Option.map ~f:Zz__timestampIso8601.of_xml)
+          (Xml.child xml_arg0 "createdAt") in
+      let arn =
+        (Option.map
+           ~f:Zz__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?updatedAt ?name ?id ?description ?createdAt ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedAt =
+        field_map json__ "updatedAt" Zz__timestampIso8601.of_json in
+      let name = field_map json__ "name" Zz__stringMin1Max128Pattern.of_json in
+      let id =
+        field_map json__ "id" Zz__stringMin22Max22PatternAZ0922.of_json in
+      let description =
+        field_map json__ "description" Zz__stringMin1Max512PatternSS.of_json in
+      let createdAt =
+        field_map json__ "createdAt" Zz__timestampIso8601.of_json in
+      let arn =
+        field_map json__ "arn"
+          Zz__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922.of_json in
+      make ?updatedAt ?name ?id ?description ?createdAt ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Provides a subset of information about an allow list."]
 module UsageTotal =
   struct
     type nonrec t =
@@ -5630,7 +6698,7 @@ module UsageTotal =
         [@ocaml.doc "The estimated value for the metric."];
       type_: UsageType.t option
         [@ocaml.doc
-          "The name of the metric. Possible values are: DATA_INVENTORY_EVALUATION, for monitoring S3 buckets; and, SENSITIVE_DATA_DISCOVERY, for analyzing S3 objects to detect sensitive data."]}
+          "The name of the metric. Possible values are: AUTOMATED_OBJECT_MONITORING, to monitor S3 objects for automated sensitive data discovery; AUTOMATED_SENSITIVE_DATA_DISCOVERY, to analyze S3 objects for automated sensitive data discovery; DATA_INVENTORY_EVALUATION, to monitor S3 buckets; and, SENSITIVE_DATA_DISCOVERY, to run classification jobs."]}
     let make ?currency =
       fun ?estimatedCost ->
         fun ?type_ -> fun () -> { currency; estimatedCost; type_ }
@@ -5651,10 +6719,10 @@ module UsageTotal =
         (Option.map ~f:Currency.of_xml) (Xml.child xml_arg0 "currency") in
       make ?type_ ?estimatedCost ?currency ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" UsageType.of_json in
-      let estimatedCost = field_map json "estimatedCost" Zz__string.of_json in
-      let currency = field_map json "currency" Currency.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "type" UsageType.of_json in
+      let estimatedCost = field_map json__ "estimatedCost" Zz__string.of_json in
+      let currency = field_map json__ "currency" Currency.of_json in
       make ?type_ ?estimatedCost ?currency ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5666,18 +6734,32 @@ module UsageRecord =
       accountId: Zz__string.t option
         [@ocaml.doc
           "The unique identifier for the Amazon Web Services account that the data applies to."];
+      automatedDiscoveryFreeTrialStartDate: Zz__timestampIso8601.t option
+        [@ocaml.doc
+          "The date and time, in UTC and extended ISO 8601 format, when the free trial of automated sensitive data discovery started for the account. This value is null if automated sensitive data discovery hasn't been enabled for the account."];
       freeTrialStartDate: Zz__timestampIso8601.t option
         [@ocaml.doc
-          "The date and time, in UTC and extended ISO 8601 format, when the free trial started for the account."];
+          "The date and time, in UTC and extended ISO 8601 format, when the Amazon Macie free trial started for the account."];
       usage: Zz__listOfUsageByAccount.t option
         [@ocaml.doc
           "An array of objects that contains usage data and quotas for the account. Each object contains the data for a specific usage metric and the corresponding quota."]}
     let make ?accountId =
-      fun ?freeTrialStartDate ->
-        fun ?usage -> fun () -> { accountId; freeTrialStartDate; usage }
+      fun ?automatedDiscoveryFreeTrialStartDate ->
+        fun ?freeTrialStartDate ->
+          fun ?usage ->
+            fun () ->
+              {
+                accountId;
+                automatedDiscoveryFreeTrialStartDate;
+                freeTrialStartDate;
+                usage
+              }
     let to_value x =
       structure_to_value
         [("accountId", (Option.map x.accountId ~f:Zz__string.to_value));
+        ("automatedDiscoveryFreeTrialStartDate",
+          (Option.map x.automatedDiscoveryFreeTrialStartDate
+             ~f:Zz__timestampIso8601.to_value));
         ("freeTrialStartDate",
           (Option.map x.freeTrialStartDate ~f:Zz__timestampIso8601.to_value));
         ("usage", (Option.map x.usage ~f:Zz__listOfUsageByAccount.to_value))]
@@ -5689,16 +6771,24 @@ module UsageRecord =
       let freeTrialStartDate =
         (Option.map ~f:Zz__timestampIso8601.of_xml)
           (Xml.child xml_arg0 "freeTrialStartDate") in
+      let automatedDiscoveryFreeTrialStartDate =
+        (Option.map ~f:Zz__timestampIso8601.of_xml)
+          (Xml.child xml_arg0 "automatedDiscoveryFreeTrialStartDate") in
       let accountId =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "accountId") in
-      make ?usage ?freeTrialStartDate ?accountId ()
+      make ?usage ?freeTrialStartDate ?automatedDiscoveryFreeTrialStartDate
+        ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let usage = field_map json "usage" Zz__listOfUsageByAccount.of_json in
+    let of_json json__ =
+      let usage = field_map json__ "usage" Zz__listOfUsageByAccount.of_json in
       let freeTrialStartDate =
-        field_map json "freeTrialStartDate" Zz__timestampIso8601.of_json in
-      let accountId = field_map json "accountId" Zz__string.of_json in
-      make ?usage ?freeTrialStartDate ?accountId ()
+        field_map json__ "freeTrialStartDate" Zz__timestampIso8601.of_json in
+      let automatedDiscoveryFreeTrialStartDate =
+        field_map json__ "automatedDiscoveryFreeTrialStartDate"
+          Zz__timestampIso8601.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
+      make ?usage ?freeTrialStartDate ?automatedDiscoveryFreeTrialStartDate
+        ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides quota and aggregated usage data for an Amazon Macie account."]
@@ -5746,7 +6836,7 @@ module UsageStatisticsFilter =
         [@ocaml.doc "The field to use in the condition."];
       values: Zz__listOf__string.t option
         [@ocaml.doc
-          "An array that lists values to use in the condition, based on the value for the field specified by the key property. If the value for the key property is accountId, this array can specify multiple values. Otherwise, this array can specify only one value. Valid values for each supported field are: accountId - The unique identifier for an Amazon Web Services account. freeTrialStartDate - The date and time, in UTC and extended ISO 8601 format, when the free trial started for an account. serviceLimit - A Boolean (true or false) value that indicates whether an account has reached its monthly quota. total - A string that represents the current estimated cost for an account."]}
+          "An array that lists values to use in the condition, based on the value for the field specified by the key property. If the value for the key property is accountId, this array can specify multiple values. Otherwise, this array can specify only one value. Valid values for each supported field are: accountId - The unique identifier for an Amazon Web Services account. freeTrialStartDate - The date and time, in UTC and extended ISO 8601 format, when the Amazon Macie free trial started for an account. serviceLimit - A Boolean (true or false) value that indicates whether an account has reached its monthly quota. total - A string that represents the current estimated cost for an account."]}
     let make ?comparator =
       fun ?key -> fun ?values -> fun () -> { comparator; key; values }
     let to_value x =
@@ -5769,15 +6859,98 @@ module UsageStatisticsFilter =
           (Xml.child xml_arg0 "comparator") in
       make ?values ?key ?comparator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" Zz__listOf__string.of_json in
-      let key = field_map json "key" UsageStatisticsFilterKey.of_json in
+    let of_json json__ =
+      let values = field_map json__ "values" Zz__listOf__string.of_json in
+      let key = field_map json__ "key" UsageStatisticsFilterKey.of_json in
       let comparator =
-        field_map json "comparator" UsageStatisticsFilterComparator.of_json in
+        field_map json__ "comparator" UsageStatisticsFilterComparator.of_json in
       make ?values ?key ?comparator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies a condition for filtering the results of a query for quota and usage data for one or more Amazon Macie accounts."]
+module Zz__listOfDetectedDataDetails =
+  struct
+    type nonrec t = DetectedDataDetails.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DetectedDataDetails.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DetectedDataDetails.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfDetectedDataDetails"
+        ~of_json:DetectedDataDetails.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UnavailabilityReasonCode =
+  struct
+    type nonrec t =
+      | OBJECT_EXCEEDS_SIZE_QUOTA 
+      | UNSUPPORTED_OBJECT_TYPE 
+      | UNSUPPORTED_FINDING_TYPE 
+      | INVALID_CLASSIFICATION_RESULT 
+      | OBJECT_UNAVAILABLE 
+      | ACCOUNT_NOT_IN_ORGANIZATION 
+      | MISSING_GET_MEMBER_PERMISSION 
+      | ROLE_TOO_PERMISSIVE 
+      | MEMBER_ROLE_TOO_PERMISSIVE 
+      | INVALID_RESULT_SIGNATURE 
+      | RESULT_NOT_SIGNED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | OBJECT_EXCEEDS_SIZE_QUOTA -> "OBJECT_EXCEEDS_SIZE_QUOTA"
+      | UNSUPPORTED_OBJECT_TYPE -> "UNSUPPORTED_OBJECT_TYPE"
+      | UNSUPPORTED_FINDING_TYPE -> "UNSUPPORTED_FINDING_TYPE"
+      | INVALID_CLASSIFICATION_RESULT -> "INVALID_CLASSIFICATION_RESULT"
+      | OBJECT_UNAVAILABLE -> "OBJECT_UNAVAILABLE"
+      | ACCOUNT_NOT_IN_ORGANIZATION -> "ACCOUNT_NOT_IN_ORGANIZATION"
+      | MISSING_GET_MEMBER_PERMISSION -> "MISSING_GET_MEMBER_PERMISSION"
+      | ROLE_TOO_PERMISSIVE -> "ROLE_TOO_PERMISSIVE"
+      | MEMBER_ROLE_TOO_PERMISSIVE -> "MEMBER_ROLE_TOO_PERMISSIVE"
+      | INVALID_RESULT_SIGNATURE -> "INVALID_RESULT_SIGNATURE"
+      | RESULT_NOT_SIGNED -> "RESULT_NOT_SIGNED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "OBJECT_EXCEEDS_SIZE_QUOTA" -> OBJECT_EXCEEDS_SIZE_QUOTA
+      | "UNSUPPORTED_OBJECT_TYPE" -> UNSUPPORTED_OBJECT_TYPE
+      | "UNSUPPORTED_FINDING_TYPE" -> UNSUPPORTED_FINDING_TYPE
+      | "INVALID_CLASSIFICATION_RESULT" -> INVALID_CLASSIFICATION_RESULT
+      | "OBJECT_UNAVAILABLE" -> OBJECT_UNAVAILABLE
+      | "ACCOUNT_NOT_IN_ORGANIZATION" -> ACCOUNT_NOT_IN_ORGANIZATION
+      | "MISSING_GET_MEMBER_PERMISSION" -> MISSING_GET_MEMBER_PERMISSION
+      | "ROLE_TOO_PERMISSIVE" -> ROLE_TOO_PERMISSIVE
+      | "MEMBER_ROLE_TOO_PERMISSIVE" -> MEMBER_ROLE_TOO_PERMISSIVE
+      | "INVALID_RESULT_SIGNATURE" -> INVALID_RESULT_SIGNATURE
+      | "RESULT_NOT_SIGNED" -> RESULT_NOT_SIGNED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration UnavailabilityReasonCode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"UnavailabilityReasonCode" j)
+    let to_json = simple_to_json to_value
+  end
 module Finding =
   struct
     type nonrec t =
@@ -5796,10 +6969,10 @@ module Finding =
           "The details of a sensitive data finding. This value is null for a policy finding."];
       count: Zz__long.t option
         [@ocaml.doc
-          "The total number of occurrences of the finding. For sensitive data findings, this value is always 1. All sensitive data findings are considered new (unique) because they derive from individual classification jobs."];
+          "The total number of occurrences of the finding. For sensitive data findings, this value is always 1. All sensitive data findings are considered unique."];
       createdAt: Zz__timestampIso8601.t option
         [@ocaml.doc
-          "The date and time, in UTC and extended ISO 8601 format, when the finding was created."];
+          "The date and time, in UTC and extended ISO 8601 format, when Amazon Macie created the finding."];
       description: Zz__string.t option
         [@ocaml.doc "The description of the finding."];
       id: Zz__string.t option
@@ -5829,7 +7002,7 @@ module Finding =
       type_: FindingType.t option [@ocaml.doc "The type of the finding."];
       updatedAt: Zz__timestampIso8601.t option
         [@ocaml.doc
-          "The date and time, in UTC and extended ISO 8601 format, when the finding was last updated. For sensitive data findings, this value is the same as the value for the createdAt property. All sensitive data findings are considered new (unique) because they derive from individual classification jobs."]}
+          "The date and time, in UTC and extended ISO 8601 format, when Amazon Macie last updated the finding. For sensitive data findings, this value is the same as the value for the createdAt property. All sensitive data findings are considered new."]}
     let make ?accountId =
       fun ?archived ->
         fun ?category ->
@@ -5945,28 +7118,31 @@ module Finding =
         ?createdAt ?count ?classificationDetails ?category ?archived
         ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "updatedAt" Zz__timestampIso8601.of_json in
-      let type_ = field_map json "type" FindingType.of_json in
-      let title = field_map json "title" Zz__string.of_json in
-      let severity = field_map json "severity" Severity.of_json in
-      let schemaVersion = field_map json "schemaVersion" Zz__string.of_json in
-      let sample = field_map json "sample" Zz__boolean.of_json in
+    let of_json json__ =
+      let updatedAt =
+        field_map json__ "updatedAt" Zz__timestampIso8601.of_json in
+      let type_ = field_map json__ "type" FindingType.of_json in
+      let title = field_map json__ "title" Zz__string.of_json in
+      let severity = field_map json__ "severity" Severity.of_json in
+      let schemaVersion = field_map json__ "schemaVersion" Zz__string.of_json in
+      let sample = field_map json__ "sample" Zz__boolean.of_json in
       let resourcesAffected =
-        field_map json "resourcesAffected" ResourcesAffected.of_json in
-      let region = field_map json "region" Zz__string.of_json in
+        field_map json__ "resourcesAffected" ResourcesAffected.of_json in
+      let region = field_map json__ "region" Zz__string.of_json in
       let policyDetails =
-        field_map json "policyDetails" PolicyDetails.of_json in
-      let partition = field_map json "partition" Zz__string.of_json in
-      let id = field_map json "id" Zz__string.of_json in
-      let description = field_map json "description" Zz__string.of_json in
-      let createdAt = field_map json "createdAt" Zz__timestampIso8601.of_json in
-      let count = field_map json "count" Zz__long.of_json in
+        field_map json__ "policyDetails" PolicyDetails.of_json in
+      let partition = field_map json__ "partition" Zz__string.of_json in
+      let id = field_map json__ "id" Zz__string.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
+      let createdAt =
+        field_map json__ "createdAt" Zz__timestampIso8601.of_json in
+      let count = field_map json__ "count" Zz__long.of_json in
       let classificationDetails =
-        field_map json "classificationDetails" ClassificationDetails.of_json in
-      let category = field_map json "category" FindingCategory.of_json in
-      let archived = field_map json "archived" Zz__boolean.of_json in
-      let accountId = field_map json "accountId" Zz__string.of_json in
+        field_map json__ "classificationDetails"
+          ClassificationDetails.of_json in
+      let category = field_map json__ "category" FindingCategory.of_json in
+      let archived = field_map json__ "archived" Zz__boolean.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
       make ?updatedAt ?type_ ?title ?severity ?schemaVersion ?sample
         ?resourcesAffected ?region ?policyDetails ?partition ?id ?description
         ?createdAt ?count ?classificationDetails ?category ?archived
@@ -5996,9 +7172,9 @@ module GroupCount =
         (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "count") in
       make ?groupKey ?count ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupKey = field_map json "groupKey" Zz__string.of_json in
-      let count = field_map json "count" Zz__long.of_json in
+    let of_json json__ =
+      let groupKey = field_map json__ "groupKey" Zz__string.of_json in
+      let count = field_map json__ "count" Zz__long.of_json in
       make ?groupKey ?count ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6059,15 +7235,149 @@ module SeverityLevel =
           (Xml.child_exn ~context:context_ xml_arg0 "occurrencesThreshold") in
       make ~severity ~occurrencesThreshold ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let severity =
-        field_map_exn json "severity" DataIdentifierSeverity.of_json in
+        field_map_exn json__ "severity" DataIdentifierSeverity.of_json in
       let occurrencesThreshold =
-        field_map_exn json "occurrencesThreshold" Zz__long.of_json in
+        field_map_exn json__ "occurrencesThreshold" Zz__long.of_json in
       make ~severity ~occurrencesThreshold ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies a severity level for findings that a custom data identifier produces. A severity level determines which severity is assigned to the findings, based on the number of occurrences of text that matches the custom data identifier's detection criteria."]
+       "Specifies a severity level for findings that a custom data identifier produces. A severity level determines which severity is assigned to the findings, based on the number of occurrences of text that match the custom data identifier's detection criteria."]
+module S3ClassificationScopeExclusion =
+  struct
+    type nonrec t =
+      {
+      bucketNames: Zz__listOfS3BucketName.t option
+        [@ocaml.doc
+          "An array of strings, one for each S3 bucket that is excluded. Each string is the full name of an excluded bucket."]}
+    let make ?bucketNames = fun () -> { bucketNames }
+    let to_value x =
+      structure_to_value
+        [("bucketNames",
+           (Option.map x.bucketNames ~f:Zz__listOfS3BucketName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let bucketNames =
+        (Option.map ~f:Zz__listOfS3BucketName.of_xml)
+          (Xml.child xml_arg0 "bucketNames") in
+      make ?bucketNames ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bucketNames =
+        field_map json__ "bucketNames" Zz__listOfS3BucketName.of_json in
+      make ?bucketNames ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the names of the S3 buckets that are excluded from automated sensitive data discovery."]
+module SensitivityAggregations =
+  struct
+    type nonrec t =
+      {
+      classifiableSizeInBytes: Zz__long.t option
+        [@ocaml.doc
+          "The total storage size, in bytes, of all the objects that Amazon Macie can analyze in the buckets. These objects use a supported storage class and have a file name extension for a supported file or storage format. If versioning is enabled for any of the buckets, this value is based on the size of the latest version of each applicable object in the buckets. This value doesn't reflect the storage size of all versions of all applicable objects in the buckets."];
+      publiclyAccessibleCount: Zz__long.t option
+        [@ocaml.doc
+          "The total number of buckets that are publicly accessible due to a combination of permissions settings for each bucket."];
+      totalCount: Zz__long.t option
+        [@ocaml.doc "The total number of buckets."];
+      totalSizeInBytes: Zz__long.t option
+        [@ocaml.doc
+          "The total storage size, in bytes, of the buckets. If versioning is enabled for any of the buckets, this value is based on the size of the latest version of each object in the buckets. This value doesn't reflect the storage size of all versions of the objects in the buckets."]}
+    let make ?classifiableSizeInBytes =
+      fun ?publiclyAccessibleCount ->
+        fun ?totalCount ->
+          fun ?totalSizeInBytes ->
+            fun () ->
+              {
+                classifiableSizeInBytes;
+                publiclyAccessibleCount;
+                totalCount;
+                totalSizeInBytes
+              }
+    let to_value x =
+      structure_to_value
+        [("classifiableSizeInBytes",
+           (Option.map x.classifiableSizeInBytes ~f:Zz__long.to_value));
+        ("publiclyAccessibleCount",
+          (Option.map x.publiclyAccessibleCount ~f:Zz__long.to_value));
+        ("totalCount", (Option.map x.totalCount ~f:Zz__long.to_value));
+        ("totalSizeInBytes",
+          (Option.map x.totalSizeInBytes ~f:Zz__long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let totalSizeInBytes =
+        (Option.map ~f:Zz__long.of_xml)
+          (Xml.child xml_arg0 "totalSizeInBytes") in
+      let totalCount =
+        (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "totalCount") in
+      let publiclyAccessibleCount =
+        (Option.map ~f:Zz__long.of_xml)
+          (Xml.child xml_arg0 "publiclyAccessibleCount") in
+      let classifiableSizeInBytes =
+        (Option.map ~f:Zz__long.of_xml)
+          (Xml.child xml_arg0 "classifiableSizeInBytes") in
+      make ?totalSizeInBytes ?totalCount ?publiclyAccessibleCount
+        ?classifiableSizeInBytes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let totalSizeInBytes =
+        field_map json__ "totalSizeInBytes" Zz__long.of_json in
+      let totalCount = field_map json__ "totalCount" Zz__long.of_json in
+      let publiclyAccessibleCount =
+        field_map json__ "publiclyAccessibleCount" Zz__long.of_json in
+      let classifiableSizeInBytes =
+        field_map json__ "classifiableSizeInBytes" Zz__long.of_json in
+      make ?totalSizeInBytes ?totalCount ?publiclyAccessibleCount
+        ?classifiableSizeInBytes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides aggregated statistical data for sensitive data discovery metrics that apply to S3 buckets. Each field contains aggregated data for all the buckets that have a sensitivity score (sensitivityScore) of a specified value or within a specified range (BucketStatisticsBySensitivity). If automated sensitive data discovery is currently disabled for your account, the value for most fields is 0."]
+module AllowListStatusCode =
+  struct
+    type nonrec t =
+      | OK 
+      | S3_OBJECT_NOT_FOUND 
+      | S3_USER_ACCESS_DENIED 
+      | S3_OBJECT_ACCESS_DENIED 
+      | S3_THROTTLED 
+      | S3_OBJECT_OVERSIZE 
+      | S3_OBJECT_EMPTY 
+      | UNKNOWN_ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | OK -> "OK"
+      | S3_OBJECT_NOT_FOUND -> "S3_OBJECT_NOT_FOUND"
+      | S3_USER_ACCESS_DENIED -> "S3_USER_ACCESS_DENIED"
+      | S3_OBJECT_ACCESS_DENIED -> "S3_OBJECT_ACCESS_DENIED"
+      | S3_THROTTLED -> "S3_THROTTLED"
+      | S3_OBJECT_OVERSIZE -> "S3_OBJECT_OVERSIZE"
+      | S3_OBJECT_EMPTY -> "S3_OBJECT_EMPTY"
+      | UNKNOWN_ERROR -> "UNKNOWN_ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "OK" -> OK
+      | "S3_OBJECT_NOT_FOUND" -> S3_OBJECT_NOT_FOUND
+      | "S3_USER_ACCESS_DENIED" -> S3_USER_ACCESS_DENIED
+      | "S3_OBJECT_ACCESS_DENIED" -> S3_OBJECT_ACCESS_DENIED
+      | "S3_THROTTLED" -> S3_THROTTLED
+      | "S3_OBJECT_OVERSIZE" -> S3_OBJECT_OVERSIZE
+      | "S3_OBJECT_EMPTY" -> S3_OBJECT_EMPTY
+      | "UNKNOWN_ERROR" -> UNKNOWN_ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AllowListStatusCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AllowListStatusCode" j)
+    let to_json = simple_to_json to_value
+  end
 module DailySchedule =
   struct
     type nonrec t = unit
@@ -6098,8 +7408,8 @@ module MonthlySchedule =
         (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "dayOfMonth") in
       make ?dayOfMonth ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dayOfMonth = field_map json "dayOfMonth" Zz__integer.of_json in
+    let of_json json__ =
+      let dayOfMonth = field_map json__ "dayOfMonth" Zz__integer.of_json in
       make ?dayOfMonth ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6120,8 +7430,8 @@ module WeeklySchedule =
         (Option.map ~f:DayOfWeek.of_xml) (Xml.child xml_arg0 "dayOfWeek") in
       make ?dayOfWeek ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dayOfWeek = field_map json "dayOfWeek" DayOfWeek.of_json in
+    let of_json json__ =
+      let dayOfWeek = field_map json__ "dayOfWeek" DayOfWeek.of_json in
       make ?dayOfWeek ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6151,9 +7461,9 @@ module Scoping =
           (Xml.child xml_arg0 "excludes") in
       make ?includes ?excludes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let includes = field_map json "includes" JobScopingBlock.of_json in
-      let excludes = field_map json "excludes" JobScopingBlock.of_json in
+    let of_json json__ =
+      let includes = field_map json__ "includes" JobScopingBlock.of_json in
+      let excludes = field_map json__ "excludes" JobScopingBlock.of_json in
       make ?includes ?excludes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6167,12 +7477,16 @@ module BucketMetadata =
           "The unique identifier for the Amazon Web Services account that owns the bucket."];
       allowsUnencryptedObjectUploads: AllowsUnencryptedObjectUploads.t option
         [@ocaml.doc
-          "Specifies whether the bucket policy for the bucket requires server-side encryption of objects when objects are uploaded to the bucket. Possible values are: FALSE - The bucket policy requires server-side encryption of new objects. PutObject requests must include the x-amz-server-side-encryption header and the value for that header must be AES256 or aws:kms. TRUE - The bucket doesn't have a bucket policy or it has a bucket policy that doesn't require server-side encryption of new objects. If a bucket policy exists, it doesn't require PutObject requests to include the x-amz-server-side-encryption header and it doesn't require the value for that header to be AES256 or aws:kms. UNKNOWN - Amazon Macie can't determine whether the bucket policy requires server-side encryption of new objects."];
+          "Specifies whether the bucket policy for the bucket requires server-side encryption of objects when objects are added to the bucket. Possible values are: FALSE - The bucket policy requires server-side encryption of new objects. PutObject requests must include a valid server-side encryption header. TRUE - The bucket doesn't have a bucket policy or it has a bucket policy that doesn't require server-side encryption of new objects. If a bucket policy exists, it doesn't require PutObject requests to include a valid server-side encryption header. UNKNOWN - Amazon Macie can't determine whether the bucket policy requires server-side encryption of new objects. Valid server-side encryption headers are: x-amz-server-side-encryption with a value of AES256 or aws:kms, and x-amz-server-side-encryption-customer-algorithm with a value of AES256."];
+      automatedDiscoveryMonitoringStatus:
+        AutomatedDiscoveryMonitoringStatus.t option
+        [@ocaml.doc
+          "Specifies whether automated sensitive data discovery is currently configured to analyze objects in the bucket. Possible values are: MONITORED, the bucket is included in analyses; and, NOT_MONITORED, the bucket is excluded from analyses. If automated sensitive data discovery is disabled for your account, this value is NOT_MONITORED."];
       bucketArn: Zz__string.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the bucket."];
       bucketCreatedAt: Zz__timestampIso8601.t option
         [@ocaml.doc
-          "The date and time, in UTC and extended ISO 8601 format, when the bucket was created."];
+          "The date and time, in UTC and extended ISO 8601 format, when the bucket was created. This value can also indicate when changes such as edits to the bucket's policy were most recently made to the bucket."];
       bucketName: Zz__string.t option [@ocaml.doc "The name of the bucket."];
       classifiableObjectCount: Zz__long.t option
         [@ocaml.doc
@@ -6182,21 +7496,24 @@ module BucketMetadata =
           "The total storage size, in bytes, of the objects that Amazon Macie can analyze in the bucket. These objects use a supported storage class and have a file name extension for a supported file or storage format. If versioning is enabled for the bucket, Macie calculates this value based on the size of the latest version of each applicable object in the bucket. This value doesn't reflect the storage size of all versions of each applicable object in the bucket."];
       errorCode: BucketMetadataErrorCode.t option
         [@ocaml.doc
-          "Specifies the error code for an error that prevented Amazon Macie from retrieving and processing information about the bucket and the bucket's objects. If this value is ACCESS_DENIED, Macie doesn't have permission to retrieve the information. For example, the bucket has a restrictive bucket policy and Amazon S3 denied the request. If this value is null, Macie was able to retrieve and process the information."];
+          "The code for an error or issue that prevented Amazon Macie from retrieving and processing information about the bucket and the bucket's objects. Possible values are: ACCESS_DENIED - Macie doesn't have permission to retrieve the information. For example, the bucket has a restrictive bucket policy and Amazon S3 denied the request. BUCKET_COUNT_EXCEEDS_QUOTA - Retrieving and processing the information would exceed the quota for the number of buckets that Macie monitors for an account (10,000). If this value is null, Macie was able to retrieve and process the information."];
       errorMessage: Zz__string.t option
         [@ocaml.doc
-          "A brief description of the error (errorCode) that prevented Amazon Macie from retrieving and processing information about the bucket and the bucket's objects. This value is null if Macie was able to retrieve and process the information."];
+          "A brief description of the error or issue (errorCode) that prevented Amazon Macie from retrieving and processing information about the bucket and the bucket's objects. This value is null if Macie was able to retrieve and process the information."];
       jobDetails: JobDetails.t option
         [@ocaml.doc
-          "Specifies whether any one-time or recurring classification jobs are configured to analyze data in the bucket, and, if so, the details of the job that ran most recently."];
+          "Specifies whether any one-time or recurring classification jobs are configured to analyze objects in the bucket, and, if so, the details of the job that ran most recently."];
+      lastAutomatedDiscoveryTime: Zz__timestampIso8601.t option
+        [@ocaml.doc
+          "The date and time, in UTC and extended ISO 8601 format, when Amazon Macie most recently analyzed objects in the bucket while performing automated sensitive data discovery. This value is null if this analysis hasn't occurred."];
       lastUpdated: Zz__timestampIso8601.t option
         [@ocaml.doc
-          "The date and time, in UTC and extended ISO 8601 format, when Amazon Macie most recently retrieved both bucket and object metadata from Amazon S3 for the bucket."];
+          "The date and time, in UTC and extended ISO 8601 format, when Amazon Macie most recently retrieved bucket or object metadata from Amazon S3 for the bucket."];
       objectCount: Zz__long.t option
         [@ocaml.doc "The total number of objects in the bucket."];
       objectCountByEncryptionType: ObjectCountByEncryptionType.t option
         [@ocaml.doc
-          "The total number of objects that are in the bucket, grouped by server-side encryption type. This includes a grouping that reports the total number of objects that aren't encrypted or use client-side encryption."];
+          "The total number of objects in the bucket, grouped by server-side encryption type. This includes a grouping that reports the total number of objects that aren't encrypted or use client-side encryption."];
       publicAccess: BucketPublicAccess.t option
         [@ocaml.doc
           "Specifies whether the bucket is publicly accessible due to the combination of permissions settings that apply to the bucket, and provides information about those settings."];
@@ -6205,12 +7522,15 @@ module BucketMetadata =
       replicationDetails: ReplicationDetails.t option
         [@ocaml.doc
           "Specifies whether the bucket is configured to replicate one or more objects to buckets for other Amazon Web Services accounts and, if so, which accounts."];
+      sensitivityScore: Zz__integer.t option
+        [@ocaml.doc
+          "The sensitivity score for the bucket, ranging from -1 (classification error) to 100 (sensitive).If automated sensitive data discovery has never been enabled for your account or it's been disabled for your organization or standalone account for more than 30 days, possible values are: 1, the bucket is empty; or, 50, the bucket stores objects but it's been excluded from recent analyses."];
       serverSideEncryption: BucketServerSideEncryption.t option
         [@ocaml.doc
-          "Specifies whether the bucket encrypts new objects by default and, if so, the type of server-side encryption that's used."];
+          "The default server-side encryption settings for the bucket."];
       sharedAccess: SharedAccess.t option
         [@ocaml.doc
-          "Specifies whether the bucket is shared with another Amazon Web Services account. Possible values are: EXTERNAL - The bucket is shared with an Amazon Web Services account that isn't part of the same Amazon Macie organization. INTERNAL - The bucket is shared with an Amazon Web Services account that's part of the same Amazon Macie organization. NOT_SHARED - The bucket isn't shared with other Amazon Web Services accounts. UNKNOWN - Amazon Macie wasn't able to evaluate the shared access settings for the bucket."];
+          "Specifies whether the bucket is shared with another Amazon Web Services account, an Amazon CloudFront origin access identity (OAI), or a CloudFront origin access control (OAC). Possible values are: EXTERNAL - The bucket is shared with one or more of the following or any combination of the following: a CloudFront OAI, a CloudFront OAC, or an Amazon Web Services account that isn't part of your Amazon Macie organization. INTERNAL - The bucket is shared with one or more Amazon Web Services accounts that are part of your Amazon Macie organization. It isn't shared with a CloudFront OAI or OAC. NOT_SHARED - The bucket isn't shared with another Amazon Web Services account, a CloudFront OAI, or a CloudFront OAC. UNKNOWN - Amazon Macie wasn't able to evaluate the shared access settings for the bucket. An Amazon Macie organization is a set of Macie accounts that are centrally managed as a group of related accounts through Organizations or by Macie invitation."];
       sizeInBytes: Zz__long.t option
         [@ocaml.doc
           "The total storage size, in bytes, of the bucket. If versioning is enabled for the bucket, Amazon Macie calculates this value based on the size of the latest version of each object in the bucket. This value doesn't reflect the storage size of all versions of each object in the bucket."];
@@ -6231,64 +7551,74 @@ module BucketMetadata =
           "Specifies whether versioning is enabled for the bucket."]}
     let make ?accountId =
       fun ?allowsUnencryptedObjectUploads ->
-        fun ?bucketArn ->
-          fun ?bucketCreatedAt ->
-            fun ?bucketName ->
-              fun ?classifiableObjectCount ->
-                fun ?classifiableSizeInBytes ->
-                  fun ?errorCode ->
-                    fun ?errorMessage ->
-                      fun ?jobDetails ->
-                        fun ?lastUpdated ->
-                          fun ?objectCount ->
-                            fun ?objectCountByEncryptionType ->
-                              fun ?publicAccess ->
-                                fun ?region ->
-                                  fun ?replicationDetails ->
-                                    fun ?serverSideEncryption ->
-                                      fun ?sharedAccess ->
-                                        fun ?sizeInBytes ->
-                                          fun ?sizeInBytesCompressed ->
-                                            fun ?tags ->
-                                              fun ?unclassifiableObjectCount
-                                                ->
-                                                fun
-                                                  ?unclassifiableObjectSizeInBytes
-                                                  ->
-                                                  fun ?versioning ->
-                                                    fun () ->
-                                                      {
-                                                        accountId;
-                                                        allowsUnencryptedObjectUploads;
-                                                        bucketArn;
-                                                        bucketCreatedAt;
-                                                        bucketName;
-                                                        classifiableObjectCount;
-                                                        classifiableSizeInBytes;
-                                                        errorCode;
-                                                        errorMessage;
-                                                        jobDetails;
-                                                        lastUpdated;
-                                                        objectCount;
-                                                        objectCountByEncryptionType;
-                                                        publicAccess;
-                                                        region;
-                                                        replicationDetails;
-                                                        serverSideEncryption;
-                                                        sharedAccess;
-                                                        sizeInBytes;
-                                                        sizeInBytesCompressed;
-                                                        tags;
-                                                        unclassifiableObjectCount;
-                                                        unclassifiableObjectSizeInBytes;
-                                                        versioning
-                                                      }
+        fun ?automatedDiscoveryMonitoringStatus ->
+          fun ?bucketArn ->
+            fun ?bucketCreatedAt ->
+              fun ?bucketName ->
+                fun ?classifiableObjectCount ->
+                  fun ?classifiableSizeInBytes ->
+                    fun ?errorCode ->
+                      fun ?errorMessage ->
+                        fun ?jobDetails ->
+                          fun ?lastAutomatedDiscoveryTime ->
+                            fun ?lastUpdated ->
+                              fun ?objectCount ->
+                                fun ?objectCountByEncryptionType ->
+                                  fun ?publicAccess ->
+                                    fun ?region ->
+                                      fun ?replicationDetails ->
+                                        fun ?sensitivityScore ->
+                                          fun ?serverSideEncryption ->
+                                            fun ?sharedAccess ->
+                                              fun ?sizeInBytes ->
+                                                fun ?sizeInBytesCompressed ->
+                                                  fun ?tags ->
+                                                    fun
+                                                      ?unclassifiableObjectCount
+                                                      ->
+                                                      fun
+                                                        ?unclassifiableObjectSizeInBytes
+                                                        ->
+                                                        fun ?versioning ->
+                                                          fun () ->
+                                                            {
+                                                              accountId;
+                                                              allowsUnencryptedObjectUploads;
+                                                              automatedDiscoveryMonitoringStatus;
+                                                              bucketArn;
+                                                              bucketCreatedAt;
+                                                              bucketName;
+                                                              classifiableObjectCount;
+                                                              classifiableSizeInBytes;
+                                                              errorCode;
+                                                              errorMessage;
+                                                              jobDetails;
+                                                              lastAutomatedDiscoveryTime;
+                                                              lastUpdated;
+                                                              objectCount;
+                                                              objectCountByEncryptionType;
+                                                              publicAccess;
+                                                              region;
+                                                              replicationDetails;
+                                                              sensitivityScore;
+                                                              serverSideEncryption;
+                                                              sharedAccess;
+                                                              sizeInBytes;
+                                                              sizeInBytesCompressed;
+                                                              tags;
+                                                              unclassifiableObjectCount;
+                                                              unclassifiableObjectSizeInBytes;
+                                                              versioning
+                                                            }
     let to_value x =
       structure_to_value
         [("accountId", (Option.map x.accountId ~f:Zz__string.to_value));
         ("allowsUnencryptedObjectUploads",
           (Option.map x.allowsUnencryptedObjectUploads
              ~f:AllowsUnencryptedObjectUploads.to_value));
+        ("automatedDiscoveryMonitoringStatus",
+          (Option.map x.automatedDiscoveryMonitoringStatus
+             ~f:AutomatedDiscoveryMonitoringStatus.to_value));
         ("bucketArn", (Option.map x.bucketArn ~f:Zz__string.to_value));
         ("bucketCreatedAt",
           (Option.map x.bucketCreatedAt ~f:Zz__timestampIso8601.to_value));
@@ -6301,6 +7631,9 @@ module BucketMetadata =
           (Option.map x.errorCode ~f:BucketMetadataErrorCode.to_value));
         ("errorMessage", (Option.map x.errorMessage ~f:Zz__string.to_value));
         ("jobDetails", (Option.map x.jobDetails ~f:JobDetails.to_value));
+        ("lastAutomatedDiscoveryTime",
+          (Option.map x.lastAutomatedDiscoveryTime
+             ~f:Zz__timestampIso8601.to_value));
         ("lastUpdated",
           (Option.map x.lastUpdated ~f:Zz__timestampIso8601.to_value));
         ("objectCount", (Option.map x.objectCount ~f:Zz__long.to_value));
@@ -6312,6 +7645,8 @@ module BucketMetadata =
         ("region", (Option.map x.region ~f:Zz__string.to_value));
         ("replicationDetails",
           (Option.map x.replicationDetails ~f:ReplicationDetails.to_value));
+        ("sensitivityScore",
+          (Option.map x.sensitivityScore ~f:Zz__integer.to_value));
         ("serverSideEncryption",
           (Option.map x.serverSideEncryption
              ~f:BucketServerSideEncryption.to_value));
@@ -6352,6 +7687,9 @@ module BucketMetadata =
       let serverSideEncryption =
         (Option.map ~f:BucketServerSideEncryption.of_xml)
           (Xml.child xml_arg0 "serverSideEncryption") in
+      let sensitivityScore =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "sensitivityScore") in
       let replicationDetails =
         (Option.map ~f:ReplicationDetails.of_xml)
           (Xml.child xml_arg0 "replicationDetails") in
@@ -6368,6 +7706,9 @@ module BucketMetadata =
       let lastUpdated =
         (Option.map ~f:Zz__timestampIso8601.of_xml)
           (Xml.child xml_arg0 "lastUpdated") in
+      let lastAutomatedDiscoveryTime =
+        (Option.map ~f:Zz__timestampIso8601.of_xml)
+          (Xml.child xml_arg0 "lastAutomatedDiscoveryTime") in
       let jobDetails =
         (Option.map ~f:JobDetails.of_xml) (Xml.child xml_arg0 "jobDetails") in
       let errorMessage =
@@ -6388,6 +7729,9 @@ module BucketMetadata =
           (Xml.child xml_arg0 "bucketCreatedAt") in
       let bucketArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "bucketArn") in
+      let automatedDiscoveryMonitoringStatus =
+        (Option.map ~f:AutomatedDiscoveryMonitoringStatus.of_xml)
+          (Xml.child xml_arg0 "automatedDiscoveryMonitoringStatus") in
       let allowsUnencryptedObjectUploads =
         (Option.map ~f:AllowsUnencryptedObjectUploads.of_xml)
           (Xml.child xml_arg0 "allowsUnencryptedObjectUploads") in
@@ -6395,65 +7739,77 @@ module BucketMetadata =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?versioning ?unclassifiableObjectSizeInBytes
         ?unclassifiableObjectCount ?tags ?sizeInBytesCompressed ?sizeInBytes
-        ?sharedAccess ?serverSideEncryption ?replicationDetails ?region
-        ?publicAccess ?objectCountByEncryptionType ?objectCount ?lastUpdated
-        ?jobDetails ?errorMessage ?errorCode ?classifiableSizeInBytes
-        ?classifiableObjectCount ?bucketName ?bucketCreatedAt ?bucketArn
+        ?sharedAccess ?serverSideEncryption ?sensitivityScore
+        ?replicationDetails ?region ?publicAccess
+        ?objectCountByEncryptionType ?objectCount ?lastUpdated
+        ?lastAutomatedDiscoveryTime ?jobDetails ?errorMessage ?errorCode
+        ?classifiableSizeInBytes ?classifiableObjectCount ?bucketName
+        ?bucketCreatedAt ?bucketArn ?automatedDiscoveryMonitoringStatus
         ?allowsUnencryptedObjectUploads ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let versioning = field_map json "versioning" Zz__boolean.of_json in
+    let of_json json__ =
+      let versioning = field_map json__ "versioning" Zz__boolean.of_json in
       let unclassifiableObjectSizeInBytes =
-        field_map json "unclassifiableObjectSizeInBytes"
+        field_map json__ "unclassifiableObjectSizeInBytes"
           ObjectLevelStatistics.of_json in
       let unclassifiableObjectCount =
-        field_map json "unclassifiableObjectCount"
+        field_map json__ "unclassifiableObjectCount"
           ObjectLevelStatistics.of_json in
-      let tags = field_map json "tags" Zz__listOfKeyValuePair.of_json in
+      let tags = field_map json__ "tags" Zz__listOfKeyValuePair.of_json in
       let sizeInBytesCompressed =
-        field_map json "sizeInBytesCompressed" Zz__long.of_json in
-      let sizeInBytes = field_map json "sizeInBytes" Zz__long.of_json in
-      let sharedAccess = field_map json "sharedAccess" SharedAccess.of_json in
+        field_map json__ "sizeInBytesCompressed" Zz__long.of_json in
+      let sizeInBytes = field_map json__ "sizeInBytes" Zz__long.of_json in
+      let sharedAccess = field_map json__ "sharedAccess" SharedAccess.of_json in
       let serverSideEncryption =
-        field_map json "serverSideEncryption"
+        field_map json__ "serverSideEncryption"
           BucketServerSideEncryption.of_json in
+      let sensitivityScore =
+        field_map json__ "sensitivityScore" Zz__integer.of_json in
       let replicationDetails =
-        field_map json "replicationDetails" ReplicationDetails.of_json in
-      let region = field_map json "region" Zz__string.of_json in
+        field_map json__ "replicationDetails" ReplicationDetails.of_json in
+      let region = field_map json__ "region" Zz__string.of_json in
       let publicAccess =
-        field_map json "publicAccess" BucketPublicAccess.of_json in
+        field_map json__ "publicAccess" BucketPublicAccess.of_json in
       let objectCountByEncryptionType =
-        field_map json "objectCountByEncryptionType"
+        field_map json__ "objectCountByEncryptionType"
           ObjectCountByEncryptionType.of_json in
-      let objectCount = field_map json "objectCount" Zz__long.of_json in
+      let objectCount = field_map json__ "objectCount" Zz__long.of_json in
       let lastUpdated =
-        field_map json "lastUpdated" Zz__timestampIso8601.of_json in
-      let jobDetails = field_map json "jobDetails" JobDetails.of_json in
-      let errorMessage = field_map json "errorMessage" Zz__string.of_json in
+        field_map json__ "lastUpdated" Zz__timestampIso8601.of_json in
+      let lastAutomatedDiscoveryTime =
+        field_map json__ "lastAutomatedDiscoveryTime"
+          Zz__timestampIso8601.of_json in
+      let jobDetails = field_map json__ "jobDetails" JobDetails.of_json in
+      let errorMessage = field_map json__ "errorMessage" Zz__string.of_json in
       let errorCode =
-        field_map json "errorCode" BucketMetadataErrorCode.of_json in
+        field_map json__ "errorCode" BucketMetadataErrorCode.of_json in
       let classifiableSizeInBytes =
-        field_map json "classifiableSizeInBytes" Zz__long.of_json in
+        field_map json__ "classifiableSizeInBytes" Zz__long.of_json in
       let classifiableObjectCount =
-        field_map json "classifiableObjectCount" Zz__long.of_json in
-      let bucketName = field_map json "bucketName" Zz__string.of_json in
+        field_map json__ "classifiableObjectCount" Zz__long.of_json in
+      let bucketName = field_map json__ "bucketName" Zz__string.of_json in
       let bucketCreatedAt =
-        field_map json "bucketCreatedAt" Zz__timestampIso8601.of_json in
-      let bucketArn = field_map json "bucketArn" Zz__string.of_json in
+        field_map json__ "bucketCreatedAt" Zz__timestampIso8601.of_json in
+      let bucketArn = field_map json__ "bucketArn" Zz__string.of_json in
+      let automatedDiscoveryMonitoringStatus =
+        field_map json__ "automatedDiscoveryMonitoringStatus"
+          AutomatedDiscoveryMonitoringStatus.of_json in
       let allowsUnencryptedObjectUploads =
-        field_map json "allowsUnencryptedObjectUploads"
+        field_map json__ "allowsUnencryptedObjectUploads"
           AllowsUnencryptedObjectUploads.of_json in
-      let accountId = field_map json "accountId" Zz__string.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
       make ?versioning ?unclassifiableObjectSizeInBytes
         ?unclassifiableObjectCount ?tags ?sizeInBytesCompressed ?sizeInBytes
-        ?sharedAccess ?serverSideEncryption ?replicationDetails ?region
-        ?publicAccess ?objectCountByEncryptionType ?objectCount ?lastUpdated
-        ?jobDetails ?errorMessage ?errorCode ?classifiableSizeInBytes
-        ?classifiableObjectCount ?bucketName ?bucketCreatedAt ?bucketArn
+        ?sharedAccess ?serverSideEncryption ?sensitivityScore
+        ?replicationDetails ?region ?publicAccess
+        ?objectCountByEncryptionType ?objectCount ?lastUpdated
+        ?lastAutomatedDiscoveryTime ?jobDetails ?errorMessage ?errorCode
+        ?classifiableSizeInBytes ?classifiableObjectCount ?bucketName
+        ?bucketCreatedAt ?bucketArn ?automatedDiscoveryMonitoringStatus
         ?allowsUnencryptedObjectUploads ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides statistical data and other information about an S3 bucket that Amazon Macie monitors and analyzes for your account. If an error occurs when Macie attempts to retrieve and process information about the bucket or the bucket's objects, the value for the versioning property is false and the value for most other properties is null. Exceptions are accountId, bucketArn, bucketCreatedAt, bucketName, lastUpdated, and region. To identify the cause of the error, refer to the errorCode and errorMessage values."]
+       "Provides statistical data and other information about an S3 bucket that Amazon Macie monitors and analyzes for your account. By default, object count and storage size values include data for object parts that are the result of incomplete multipart uploads. For more information, see How Macie monitors Amazon S3 data security in the Amazon Macie User Guide. If an error or issue prevents Macie from retrieving and processing metadata from Amazon S3 for the bucket or the bucket's objects, the value for the versioning property is false and the value for most other properties is null or UNKNOWN. Key exceptions are accountId, bucketArn, bucketCreatedAt, bucketName, lastUpdated, and region. To identify the cause, refer to the errorCode and errorMessage values."]
 module BucketCriteriaAdditionalProperties =
   struct
     type nonrec t =
@@ -6510,14 +7866,14 @@ module BucketCriteriaAdditionalProperties =
         (Option.map ~f:Zz__listOf__string.of_xml) (Xml.child xml_arg0 "eq") in
       make ?prefix ?neq ?lte ?lt ?gte ?gt ?eq ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let prefix = field_map json "prefix" Zz__string.of_json in
-      let neq = field_map json "neq" Zz__listOf__string.of_json in
-      let lte = field_map json "lte" Zz__long.of_json in
-      let lt = field_map json "lt" Zz__long.of_json in
-      let gte = field_map json "gte" Zz__long.of_json in
-      let gt = field_map json "gt" Zz__long.of_json in
-      let eq = field_map json "eq" Zz__listOf__string.of_json in
+    let of_json json__ =
+      let prefix = field_map json__ "prefix" Zz__string.of_json in
+      let neq = field_map json__ "neq" Zz__listOf__string.of_json in
+      let lte = field_map json__ "lte" Zz__long.of_json in
+      let lt = field_map json__ "lt" Zz__long.of_json in
+      let gte = field_map json__ "gte" Zz__long.of_json in
+      let gt = field_map json__ "gt" Zz__long.of_json in
+      let eq = field_map json__ "eq" Zz__listOf__string.of_json in
       make ?prefix ?neq ?lte ?lt ?gte ?gt ?eq ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6552,14 +7908,82 @@ module UnprocessedAccount =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?errorMessage ?errorCode ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "errorMessage" Zz__string.of_json in
-      let errorCode = field_map json "errorCode" ErrorCode.of_json in
-      let accountId = field_map json "accountId" Zz__string.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" Zz__string.of_json in
+      let errorCode = field_map json__ "errorCode" ErrorCode.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
       make ?errorMessage ?errorCode ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about an account-related request that hasn't been processed."]
+module AutomatedDiscoveryAccountUpdateError =
+  struct
+    type nonrec t =
+      {
+      accountId: Zz__string.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the account that the request applied to."];
+      errorCode: AutomatedDiscoveryAccountUpdateErrorCode.t option
+        [@ocaml.doc
+          "The error code for the error that caused the request to fail for the account (accountId). Possible values are: ACCOUNT_NOT_FOUND, the account doesn't exist or you're not the Amazon Macie administrator for the account; and, ACCOUNT_PAUSED, Macie isn't enabled for the account in the current Amazon Web Services Region."]}
+    let make ?accountId =
+      fun ?errorCode -> fun () -> { accountId; errorCode }
+    let to_value x =
+      structure_to_value
+        [("accountId", (Option.map x.accountId ~f:Zz__string.to_value));
+        ("errorCode",
+          (Option.map x.errorCode
+             ~f:AutomatedDiscoveryAccountUpdateErrorCode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorCode =
+        (Option.map ~f:AutomatedDiscoveryAccountUpdateErrorCode.of_xml)
+          (Xml.child xml_arg0 "errorCode") in
+      let accountId =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "accountId") in
+      make ?errorCode ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorCode =
+        field_map json__ "errorCode"
+          AutomatedDiscoveryAccountUpdateErrorCode.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
+      make ?errorCode ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about a request that failed to change the status of automated sensitive data discovery for an Amazon Macie account."]
+module AutomatedDiscoveryAccountUpdate =
+  struct
+    type nonrec t =
+      {
+      accountId: Zz__string.t option
+        [@ocaml.doc "The Amazon Web Services account ID for the account."];
+      status: AutomatedDiscoveryAccountStatus.t option
+        [@ocaml.doc
+          "The new status of automated sensitive data discovery for the account. Valid values are: ENABLED, perform automated sensitive data discovery activities for the account; and, DISABLED, don't perform automated sensitive data discovery activities for the account."]}
+    let make ?accountId = fun ?status -> fun () -> { accountId; status }
+    let to_value x =
+      structure_to_value
+        [("accountId", (Option.map x.accountId ~f:Zz__string.to_value));
+        ("status",
+          (Option.map x.status ~f:AutomatedDiscoveryAccountStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:AutomatedDiscoveryAccountStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let accountId =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "accountId") in
+      make ?status ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map json__ "status" AutomatedDiscoveryAccountStatus.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
+      make ?status ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Changes the status of automated sensitive data discovery for an Amazon Macie account."]
 module BatchGetCustomDataIdentifierSummary =
   struct
     type nonrec t =
@@ -6610,13 +8034,14 @@ module BatchGetCustomDataIdentifierSummary =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?name ?id ?description ?deleted ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" Zz__string.of_json in
-      let id = field_map json "id" Zz__string.of_json in
-      let description = field_map json "description" Zz__string.of_json in
-      let deleted = field_map json "deleted" Zz__boolean.of_json in
-      let createdAt = field_map json "createdAt" Zz__timestampIso8601.of_json in
-      let arn = field_map json "arn" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "name" Zz__string.of_json in
+      let id = field_map json__ "id" Zz__string.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
+      let deleted = field_map json__ "deleted" Zz__boolean.of_json in
+      let createdAt =
+        field_map json__ "createdAt" Zz__timestampIso8601.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in
       make ?name ?id ?description ?deleted ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides information about a custom data identifier."]
@@ -6636,34 +8061,12 @@ module AccessDeniedException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about an error that occurred due to insufficient access to a specified resource."]
-module ConflictException =
-  struct
-    type nonrec t =
-      {
-      message: Zz__string.t option
-        [@ocaml.doc "The explanation of the error that occurred."]}
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:Zz__string.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Zz__string.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Provides information about an error that occurred due to a versioning conflict for a specified resource."]
 module InternalServerException =
   struct
     type nonrec t =
@@ -6680,8 +8083,8 @@ module InternalServerException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6702,34 +8105,12 @@ module ResourceNotFoundException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about an error that occurred because a specified resource wasn't found."]
-module ServiceQuotaExceededException =
-  struct
-    type nonrec t =
-      {
-      message: Zz__string.t option
-        [@ocaml.doc "The explanation of the error that occurred."]}
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:Zz__string.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Zz__string.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Provides information about an error that occurred due to one or more service quotas for an account."]
 module ThrottlingException =
   struct
     type nonrec t =
@@ -6746,8 +8127,8 @@ module ThrottlingException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6768,12 +8149,287 @@ module ValidationException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about an error that occurred due to a syntax error in a request."]
+module SensitivityInspectionTemplateExcludes =
+  struct
+    type nonrec t =
+      {
+      managedDataIdentifierIds: Zz__listOf__string.t option
+        [@ocaml.doc
+          "An array of unique identifiers, one for each managed data identifier to exclude. To retrieve a list of valid values, use the ListManagedDataIdentifiers operation."]}
+    let make ?managedDataIdentifierIds =
+      fun () -> { managedDataIdentifierIds }
+    let to_value x =
+      structure_to_value
+        [("managedDataIdentifierIds",
+           (Option.map x.managedDataIdentifierIds
+              ~f:Zz__listOf__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let managedDataIdentifierIds =
+        (Option.map ~f:Zz__listOf__string.of_xml)
+          (Xml.child xml_arg0 "managedDataIdentifierIds") in
+      make ?managedDataIdentifierIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let managedDataIdentifierIds =
+        field_map json__ "managedDataIdentifierIds"
+          Zz__listOf__string.of_json in
+      make ?managedDataIdentifierIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies managed data identifiers to exclude (not use) when performing automated sensitive data discovery. For information about the managed data identifiers that Amazon Macie currently provides, see Using managed data identifiers in the Amazon Macie User Guide."]
+module SensitivityInspectionTemplateIncludes =
+  struct
+    type nonrec t =
+      {
+      allowListIds: Zz__listOf__string.t option
+        [@ocaml.doc
+          "An array of unique identifiers, one for each allow list to include."];
+      customDataIdentifierIds: Zz__listOf__string.t option
+        [@ocaml.doc
+          "An array of unique identifiers, one for each custom data identifier to include."];
+      managedDataIdentifierIds: Zz__listOf__string.t option
+        [@ocaml.doc
+          "An array of unique identifiers, one for each managed data identifier to include. Amazon Macie uses these managed data identifiers in addition to managed data identifiers that are subsequently released and recommended for automated sensitive data discovery. To retrieve a list of valid values for the managed data identifiers that are currently available, use the ListManagedDataIdentifiers operation."]}
+    let make ?allowListIds =
+      fun ?customDataIdentifierIds ->
+        fun ?managedDataIdentifierIds ->
+          fun () ->
+            { allowListIds; customDataIdentifierIds; managedDataIdentifierIds
+            }
+    let to_value x =
+      structure_to_value
+        [("allowListIds",
+           (Option.map x.allowListIds ~f:Zz__listOf__string.to_value));
+        ("customDataIdentifierIds",
+          (Option.map x.customDataIdentifierIds
+             ~f:Zz__listOf__string.to_value));
+        ("managedDataIdentifierIds",
+          (Option.map x.managedDataIdentifierIds
+             ~f:Zz__listOf__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let managedDataIdentifierIds =
+        (Option.map ~f:Zz__listOf__string.of_xml)
+          (Xml.child xml_arg0 "managedDataIdentifierIds") in
+      let customDataIdentifierIds =
+        (Option.map ~f:Zz__listOf__string.of_xml)
+          (Xml.child xml_arg0 "customDataIdentifierIds") in
+      let allowListIds =
+        (Option.map ~f:Zz__listOf__string.of_xml)
+          (Xml.child xml_arg0 "allowListIds") in
+      make ?managedDataIdentifierIds ?customDataIdentifierIds ?allowListIds
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let managedDataIdentifierIds =
+        field_map json__ "managedDataIdentifierIds"
+          Zz__listOf__string.of_json in
+      let customDataIdentifierIds =
+        field_map json__ "customDataIdentifierIds" Zz__listOf__string.of_json in
+      let allowListIds =
+        field_map json__ "allowListIds" Zz__listOf__string.of_json in
+      make ?managedDataIdentifierIds ?customDataIdentifierIds ?allowListIds
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the allow lists, custom data identifiers, and managed data identifiers to include (use) when performing automated sensitive data discovery. The configuration must specify at least one custom data identifier or managed data identifier. For information about the managed data identifiers that Amazon Macie currently provides, see Using managed data identifiers in the Amazon Macie User Guide."]
+module RetrievalConfiguration =
+  struct
+    type nonrec t =
+      {
+      externalId: Zz__string.t option
+        [@ocaml.doc
+          "The external ID to specify in the trust policy for the IAM role to assume when retrieving sensitive data from affected S3 objects (roleName). This value is null if the value for retrievalMode is CALLER_CREDENTIALS. This ID is a unique alphanumeric string that Amazon Macie generates automatically after you configure it to assume an IAM role. For a Macie administrator to retrieve sensitive data from an affected S3 object for a member account, the trust policy for the role in the member account must include an sts:ExternalId condition that requires this ID."];
+      retrievalMode: RetrievalMode.t option
+        [@ocaml.doc
+          "The access method that's used to retrieve sensitive data from affected S3 objects. Valid values are: ASSUME_ROLE, assume an IAM role that is in the affected Amazon Web Services account and delegates access to Amazon Macie (roleName); and, CALLER_CREDENTIALS, use the credentials of the IAM user who requests the sensitive data."];
+      roleName: Zz__stringMin1Max64PatternW.t option
+        [@ocaml.doc
+          "The name of the IAM role that is in the affected Amazon Web Services account and Amazon Macie is allowed to assume when retrieving sensitive data from affected S3 objects for the account. This value is null if the value for retrievalMode is CALLER_CREDENTIALS."]}
+    let make ?externalId =
+      fun ?retrievalMode ->
+        fun ?roleName -> fun () -> { externalId; retrievalMode; roleName }
+    let to_value x =
+      structure_to_value
+        [("externalId", (Option.map x.externalId ~f:Zz__string.to_value));
+        ("retrievalMode",
+          (Option.map x.retrievalMode ~f:RetrievalMode.to_value));
+        ("roleName",
+          (Option.map x.roleName ~f:Zz__stringMin1Max64PatternW.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let roleName =
+        (Option.map ~f:Zz__stringMin1Max64PatternW.of_xml)
+          (Xml.child xml_arg0 "roleName") in
+      let retrievalMode =
+        (Option.map ~f:RetrievalMode.of_xml)
+          (Xml.child xml_arg0 "retrievalMode") in
+      let externalId =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "externalId") in
+      make ?roleName ?retrievalMode ?externalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let roleName =
+        field_map json__ "roleName" Zz__stringMin1Max64PatternW.of_json in
+      let retrievalMode =
+        field_map json__ "retrievalMode" RetrievalMode.of_json in
+      let externalId = field_map json__ "externalId" Zz__string.of_json in
+      make ?roleName ?retrievalMode ?externalId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about the access method and settings that are used to retrieve occurrences of sensitive data reported by findings."]
+module RevealConfiguration =
+  struct
+    type nonrec t =
+      {
+      kmsKeyId: Zz__stringMin1Max2048.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN), ID, or alias of the KMS key to use to encrypt sensitive data that's retrieved. The key must be an existing, customer managed, symmetric encryption key that's enabled in the same Amazon Web Services Region as the Amazon Macie account. If this value specifies an alias, it must include the following prefix: alias/. If this value specifies a key that's owned by another Amazon Web Services account, it must specify the ARN of the key or the ARN of the key's alias."];
+      status: RevealStatus.t
+        [@ocaml.doc
+          "The status of the configuration for the Amazon Macie account. In a response, possible values are: ENABLED, the configuration is currently enabled for the account; and, DISABLED, the configuration is currently disabled for the account. In a request, valid values are: ENABLED, enable the configuration for the account; and, DISABLED, disable the configuration for the account. If you disable the configuration, you also permanently delete current settings that specify how to access affected S3 objects. If your current access method is ASSUME_ROLE, Macie also deletes the external ID and role name currently specified for the configuration. These settings can't be recovered after they're deleted."]}
+    let context_ = "RevealConfiguration"
+    let make ?kmsKeyId = fun ~status -> fun () -> { kmsKeyId; status }
+    let to_value x =
+      structure_to_value
+        [("kmsKeyId",
+           (Option.map x.kmsKeyId ~f:Zz__stringMin1Max2048.to_value));
+        ("status", (Some (RevealStatus.to_value x.status)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        RevealStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+      let kmsKeyId =
+        (Option.map ~f:Zz__stringMin1Max2048.of_xml)
+          (Xml.child xml_arg0 "kmsKeyId") in
+      make ~status ?kmsKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map_exn json__ "status" RevealStatus.of_json in
+      let kmsKeyId =
+        field_map json__ "kmsKeyId" Zz__stringMin1Max2048.of_json in
+      make ~status ?kmsKeyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the status of the Amazon Macie configuration for retrieving occurrences of sensitive data reported by findings, and the Key Management Service (KMS) key to use to encrypt sensitive data that's retrieved. When you enable the configuration for the first time, your request must specify an KMS key. Otherwise, an error occurs."]
+module UpdateRetrievalConfiguration =
+  struct
+    type nonrec t =
+      {
+      retrievalMode: RetrievalMode.t
+        [@ocaml.doc
+          "The access method to use when retrieving sensitive data from affected S3 objects. Valid values are: ASSUME_ROLE, assume an IAM role that is in the affected Amazon Web Services account and delegates access to Amazon Macie; and, CALLER_CREDENTIALS, use the credentials of the IAM user who requests the sensitive data. If you specify ASSUME_ROLE, also specify the name of an existing IAM role for Macie to assume (roleName). If you change this value from ASSUME_ROLE to CALLER_CREDENTIALS for an existing configuration, Macie permanently deletes the external ID and role name currently specified for the configuration. These settings can't be recovered after they're deleted."];
+      roleName: Zz__stringMin1Max64PatternW.t option
+        [@ocaml.doc
+          "The name of the IAM role that is in the affected Amazon Web Services account and Amazon Macie is allowed to assume when retrieving sensitive data from affected S3 objects for the account. The trust and permissions policies for the role must meet all requirements for Macie to assume the role."]}
+    let context_ = "UpdateRetrievalConfiguration"
+    let make ?roleName =
+      fun ~retrievalMode -> fun () -> { roleName; retrievalMode }
+    let to_value x =
+      structure_to_value
+        [("retrievalMode", (Some (RetrievalMode.to_value x.retrievalMode)));
+        ("roleName",
+          (Option.map x.roleName ~f:Zz__stringMin1Max64PatternW.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let roleName =
+        (Option.map ~f:Zz__stringMin1Max64PatternW.of_xml)
+          (Xml.child xml_arg0 "roleName") in
+      let retrievalMode =
+        RetrievalMode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "retrievalMode") in
+      make ?roleName ~retrievalMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let roleName =
+        field_map json__ "roleName" Zz__stringMin1Max64PatternW.of_json in
+      let retrievalMode =
+        field_map_exn json__ "retrievalMode" RetrievalMode.of_json in
+      make ?roleName ~retrievalMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the access method and settings to use when retrieving occurrences of sensitive data reported by findings. If your request specifies an Identity and Access Management (IAM) role to assume, Amazon Macie verifies that the role exists and the attached policies are configured correctly. If there's an issue, Macie returns an error. For information about addressing the issue, see Configuration options for retrieving sensitive data samples in the Amazon Macie User Guide."]
+module ServiceQuotaExceededException =
+  struct
+    type nonrec t =
+      {
+      message: Zz__string.t option
+        [@ocaml.doc "The explanation of the error that occurred."]}
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about an error that occurred due to one or more service quotas for an account."]
+module Zz__listOfSuppressDataIdentifier =
+  struct
+    type nonrec t = SuppressDataIdentifier.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SuppressDataIdentifier.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SuppressDataIdentifier.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfSuppressDataIdentifier"
+        ~of_json:SuppressDataIdentifier.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ConflictException =
+  struct
+    type nonrec t =
+      {
+      message: Zz__string.t option
+        [@ocaml.doc "The explanation of the error that occurred."]}
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about an error that occurred due to a versioning conflict for a specified resource."]
 module MacieStatus =
   struct
     type nonrec t =
@@ -6847,16 +8503,135 @@ module FindingCriteria =
         (Option.map ~f:Criterion.of_xml) (Xml.child xml_arg0 "criterion") in
       make ?criterion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let criterion = field_map json "criterion" Criterion.of_json in
+    let of_json json__ =
+      let criterion = field_map json__ "criterion" Criterion.of_json in
       make ?criterion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies, as a map, one or more property-based conditions that filter the results of a query for findings."]
+module S3ClassificationScopeUpdate =
+  struct
+    type nonrec t =
+      {
+      excludes: S3ClassificationScopeExclusionUpdate.t
+        [@ocaml.doc
+          "The names of the S3 buckets to add or remove from the list."]}
+    let context_ = "S3ClassificationScopeUpdate"
+    let make ~excludes = fun () -> { excludes }
+    let to_value x =
+      structure_to_value
+        [("excludes",
+           (Some (S3ClassificationScopeExclusionUpdate.to_value x.excludes)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excludes =
+        S3ClassificationScopeExclusionUpdate.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "excludes") in
+      make ~excludes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excludes =
+        field_map_exn json__ "excludes"
+          S3ClassificationScopeExclusionUpdate.of_json in
+      make ~excludes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies changes to the list of S3 buckets that are excluded from automated sensitive data discovery for an Amazon Macie account."]
+module AutoEnableMode =
+  struct
+    type nonrec t =
+      | ALL 
+      | NEW 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ALL -> "ALL"
+      | NEW -> "NEW"
+      | NONE -> "NONE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ALL" -> ALL
+      | "NEW" -> NEW
+      | "NONE" -> NONE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AutoEnableMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AutoEnableMode" j)
+    let to_json = simple_to_json to_value
+  end
+module AutomatedDiscoveryStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AutomatedDiscoveryStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AutomatedDiscoveryStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module AllowListCriteria =
+  struct
+    type nonrec t =
+      {
+      regex: Zz__stringMin1Max512PatternSS.t option
+        [@ocaml.doc
+          "The regular expression (regex) that defines the text pattern to ignore. The expression can contain as many as 512 characters."];
+      s3WordsList: S3WordsList.t option
+        [@ocaml.doc
+          "The location and name of the S3 object that lists specific text to ignore."]}
+    let make ?regex = fun ?s3WordsList -> fun () -> { regex; s3WordsList }
+    let to_value x =
+      structure_to_value
+        [("regex",
+           (Option.map x.regex ~f:Zz__stringMin1Max512PatternSS.to_value));
+        ("s3WordsList", (Option.map x.s3WordsList ~f:S3WordsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3WordsList =
+        (Option.map ~f:S3WordsList.of_xml) (Xml.child xml_arg0 "s3WordsList") in
+      let regex =
+        (Option.map ~f:Zz__stringMin1Max512PatternSS.of_xml)
+          (Xml.child xml_arg0 "regex") in
+      make ?s3WordsList ?regex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3WordsList = field_map json__ "s3WordsList" S3WordsList.of_json in
+      let regex =
+        field_map json__ "regex" Zz__stringMin1Max512PatternSS.of_json in
+      make ?s3WordsList ?regex ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the criteria for an allow list. The criteria must specify a regular expression (regex) or an S3 object (s3WordsList). It can't specify both."]
 module Zz__listOfMatchingResource =
   struct
     type nonrec t = MatchingResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MatchingResource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6905,11 +8680,11 @@ module SearchResourcesBucketCriteria =
           (Xml.child xml_arg0 "excludes") in
       make ?includes ?excludes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includes =
-        field_map json "includes" SearchResourcesCriteriaBlock.of_json in
+        field_map json__ "includes" SearchResourcesCriteriaBlock.of_json in
       let excludes =
-        field_map json "excludes" SearchResourcesCriteriaBlock.of_json in
+        field_map json__ "excludes" SearchResourcesCriteriaBlock.of_json in
       make ?includes ?excludes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6940,10 +8715,10 @@ module SearchResourcesSortCriteria =
           (Xml.child xml_arg0 "attributeName") in
       make ?orderBy ?attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let orderBy = field_map json "orderBy" OrderBy.of_json in
+    let of_json json__ =
+      let orderBy = field_map json__ "orderBy" OrderBy.of_json in
       let attributeName =
-        field_map json "attributeName"
+        field_map json__ "attributeName"
           SearchResourcesSortAttributeName.of_json in
       make ?orderBy ?attributeName ()
     let to_json v = composed_to_json to_value v
@@ -6980,16 +8755,16 @@ module SecurityHubConfiguration =
              "publishClassificationFindings") in
       make ~publishPolicyFindings ~publishClassificationFindings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let publishPolicyFindings =
-        field_map_exn json "publishPolicyFindings" Zz__boolean.of_json in
+        field_map_exn json__ "publishPolicyFindings" Zz__boolean.of_json in
       let publishClassificationFindings =
-        field_map_exn json "publishClassificationFindings"
+        field_map_exn json__ "publishClassificationFindings"
           Zz__boolean.of_json in
       make ~publishPolicyFindings ~publishClassificationFindings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies configuration settings that determine which findings are published to Security Hub automatically. For information about how Macie publishes findings to Security Hub, see Amazon Macie integration with Security Hub in the Amazon Macie User Guide."]
+       "Specifies configuration settings that determine which findings are published to Security Hub automatically. For information about how Macie publishes findings to Security Hub, see Evaluating findings with Security Hub in the Amazon Macie User Guide."]
 module ClassificationExportConfiguration =
   struct
     type nonrec t =
@@ -7009,17 +8784,124 @@ module ClassificationExportConfiguration =
           (Xml.child xml_arg0 "s3Destination") in
       make ?s3Destination ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3Destination =
-        field_map json "s3Destination" S3Destination.of_json in
+        field_map json__ "s3Destination" S3Destination.of_json in
       make ?s3Destination ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies where to store data classification results, and the encryption settings to use when storing results in that location. Currently, you can store classification results only in an S3 bucket."]
+       "Specifies where to store data classification results, and the encryption settings to use when storing results in that location. The location must be an S3 general purpose bucket."]
+module Zz__listOfSensitivityInspectionTemplatesEntry =
+  struct
+    type nonrec t = SensitivityInspectionTemplatesEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SensitivityInspectionTemplatesEntry.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:SensitivityInspectionTemplatesEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfSensitivityInspectionTemplatesEntry"
+        ~of_json:SensitivityInspectionTemplatesEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:25) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Zz__listOfDetection =
+  struct
+    type nonrec t = Detection.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Detection.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Detection.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfDetection" ~of_json:Detection.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Zz__listOfResourceProfileArtifact =
+  struct
+    type nonrec t = ResourceProfileArtifact.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceProfileArtifact.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceProfileArtifact.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfResourceProfileArtifact"
+        ~of_json:ResourceProfileArtifact.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Zz__listOfAdminAccount =
   struct
     type nonrec t = AdminAccount.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AdminAccount.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7041,28 +8923,13 @@ module Zz__listOfAdminAccount =
         j
     let to_json v = composed_to_json to_value v
   end
-module MaxResults =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:25) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
 module Zz__listOfMember =
   struct
     type nonrec t = Member.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Member.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7087,6 +8954,9 @@ module Zz__listOfManagedDataIdentifierSummary =
   struct
     type nonrec t = ManagedDataIdentifierSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ManagedDataIdentifierSummary.to_value)) |>
         (fun x -> `List x)
@@ -7113,6 +8983,9 @@ module Zz__listOfInvitation =
   struct
     type nonrec t = Invitation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Invitation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7139,7 +9012,7 @@ module SortCriteria =
       {
       attributeName: Zz__string.t option
         [@ocaml.doc
-          "The name of the property to sort the results by. This value can be the name of any property that Amazon Macie defines for a finding."];
+          "The name of the property to sort the results by. Valid values are: count, createdAt, policyDetails.action.apiCallDetails.firstSeen, policyDetails.action.apiCallDetails.lastSeen, resourcesAffected, severity.score, type, and updatedAt."];
       orderBy: OrderBy.t option
         [@ocaml.doc
           "The sort order to apply to the results, based on the value for the property specified by the attributeName property. Valid values are: ASC, sort the results in ascending order; and, DESC, sort the results in descending order."]}
@@ -7159,9 +9032,9 @@ module SortCriteria =
           (Xml.child xml_arg0 "attributeName") in
       make ?orderBy ?attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let orderBy = field_map json "orderBy" OrderBy.of_json in
-      let attributeName = field_map json "attributeName" Zz__string.of_json in
+    let of_json json__ =
+      let orderBy = field_map json__ "orderBy" OrderBy.of_json in
+      let attributeName = field_map json__ "attributeName" Zz__string.of_json in
       make ?orderBy ?attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7170,6 +9043,9 @@ module Zz__listOfFindingsFilterListItem =
   struct
     type nonrec t = FindingsFilterListItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FindingsFilterListItem.to_value)) |>
         (fun x -> `List x)
@@ -7196,6 +9072,9 @@ module Zz__listOfCustomDataIdentifierSummary =
   struct
     type nonrec t = CustomDataIdentifierSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomDataIdentifierSummary.to_value)) |>
         (fun x -> `List x)
@@ -7218,10 +9097,58 @@ module Zz__listOfCustomDataIdentifierSummary =
         ~of_json:CustomDataIdentifierSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module NextToken =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "Specifies which page of results to return in a paginated response."]
+    let context_ = "NextToken"
+    let make i =
+      let open Result in ok_or_failwith (check_pattern i ~pattern:"^.*$"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NextToken" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "Specifies which page of results to return in a paginated response."]
+module Zz__listOfClassificationScopeSummary =
+  struct
+    type nonrec t = ClassificationScopeSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ClassificationScopeSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ClassificationScopeSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfClassificationScopeSummary"
+        ~of_json:ClassificationScopeSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Zz__listOfJobSummary =
   struct
     type nonrec t = JobSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7269,11 +9196,11 @@ module ListJobsFilterCriteria =
           (Xml.child xml_arg0 "excludes") in
       make ?includes ?excludes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includes =
-        field_map json "includes" Zz__listOfListJobsFilterTerm.of_json in
+        field_map json__ "includes" Zz__listOfListJobsFilterTerm.of_json in
       let excludes =
-        field_map json "excludes" Zz__listOfListJobsFilterTerm.of_json in
+        field_map json__ "excludes" Zz__listOfListJobsFilterTerm.of_json in
       make ?includes ?excludes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7303,14 +9230,71 @@ module ListJobsSortCriteria =
           (Xml.child xml_arg0 "attributeName") in
       make ?orderBy ?attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let orderBy = field_map json "orderBy" OrderBy.of_json in
+    let of_json json__ =
+      let orderBy = field_map json__ "orderBy" OrderBy.of_json in
       let attributeName =
-        field_map json "attributeName" ListJobsSortAttributeName.of_json in
+        field_map json__ "attributeName" ListJobsSortAttributeName.of_json in
       make ?orderBy ?attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies criteria for sorting the results of a request for information about classification jobs."]
+module Zz__listOfAutomatedDiscoveryAccount =
+  struct
+    type nonrec t = AutomatedDiscoveryAccount.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AutomatedDiscoveryAccount.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AutomatedDiscoveryAccount.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfAutomatedDiscoveryAccount"
+        ~of_json:AutomatedDiscoveryAccount.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Zz__listOfAllowListSummary =
+  struct
+    type nonrec t = AllowListSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AllowListSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AllowListSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfAllowListSummary"
+        ~of_json:AllowListSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TimeRange =
   struct
     type nonrec t =
@@ -7340,6 +9324,9 @@ module Zz__listOfUsageTotal =
   struct
     type nonrec t = UsageTotal.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UsageTotal.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7364,6 +9351,9 @@ module Zz__listOfUsageRecord =
   struct
     type nonrec t = UsageRecord.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UsageRecord.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7407,9 +9397,9 @@ module UsageStatisticsSortBy =
           (Xml.child xml_arg0 "key") in
       make ?orderBy ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let orderBy = field_map json "orderBy" OrderBy.of_json in
-      let key = field_map json "key" UsageStatisticsSortKey.of_json in
+    let of_json json__ =
+      let orderBy = field_map json__ "orderBy" OrderBy.of_json in
+      let key = field_map json__ "key" UsageStatisticsSortKey.of_json in
       make ?orderBy ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7418,6 +9408,9 @@ module Zz__listOfUsageStatisticsFilter =
   struct
     type nonrec t = UsageStatisticsFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UsageStatisticsFilter.to_value)) |>
         (fun x -> `List x)
@@ -7440,10 +9433,304 @@ module Zz__listOfUsageStatisticsFilter =
         ~of_json:UsageStatisticsFilter.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SensitivityInspectionTemplateId =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The unique identifier for the sensitivity inspection template."]
+    let context_ = "SensitivityInspectionTemplateId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SensitivityInspectionTemplateId" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The unique identifier for the sensitivity inspection template."]
+module RevealRequestStatus =
+  struct
+    type nonrec t =
+      | SUCCESS 
+      | PROCESSING 
+      | ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUCCESS -> "SUCCESS"
+      | PROCESSING -> "PROCESSING"
+      | ERROR -> "ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUCCESS" -> SUCCESS
+      | "PROCESSING" -> PROCESSING
+      | "ERROR" -> ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RevealRequestStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RevealRequestStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module SensitiveDataOccurrences =
+  struct
+    type nonrec t = (Zz__string.t * Zz__listOfDetectedDataDetails.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types __string __listOfDetectedDataDetails"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (Zz__string.to_value x) |>
+                    (fun x ->
+                       (Zz__listOfDetectedDataDetails.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:Zz__string.of_string
+        ~of_json:Zz__listOfDetectedDataDetails.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UnprocessableEntityException =
+  struct
+    type nonrec t =
+      {
+      message: Zz__string.t option
+        [@ocaml.doc
+          "The type of error that occurred and prevented Amazon Macie from retrieving occurrences of sensitive data reported by the finding. Possible values are: ACCOUNT_NOT_IN_ORGANIZATION - The affected account isn't currently part of your organization. Or the account is part of your organization but Macie isn't currently enabled for the account. You're not allowed to access the affected S3 object by using Macie. INVALID_CLASSIFICATION_RESULT - There isn't a corresponding sensitive data discovery result for the finding. Or the corresponding sensitive data discovery result isn't available in the current Amazon Web Services Region, is malformed or corrupted, or uses an unsupported storage format. Macie can't verify the location of the sensitive data to retrieve. INVALID_RESULT_SIGNATURE - The corresponding sensitive data discovery result is stored in an S3 object that wasn't signed by Macie. Macie can't verify the integrity and authenticity of the sensitive data discovery result. Therefore, Macie can't verify the location of the sensitive data to retrieve. MEMBER_ROLE_TOO_PERMISSIVE - The trust or permissions policy for the IAM role in the affected member account doesn't meet Macie requirements for restricting access to the role. Or the role's trust policy doesn't specify the correct external ID for your organization. Macie can't assume the role to retrieve the sensitive data. MISSING_GET_MEMBER_PERMISSION - You're not allowed to retrieve information about the association between your account and the affected account. Macie can't determine whether you\226\128\153re allowed to access the affected S3 object as the delegated Macie administrator for the affected account. OBJECT_EXCEEDS_SIZE_QUOTA - The storage size of the affected S3 object exceeds the size quota for retrieving occurrences of sensitive data from this type of file. OBJECT_UNAVAILABLE - The affected S3 object isn't available. The object was renamed, moved, deleted, or changed after Macie created the finding. Or the object is encrypted with an KMS key that isn\226\128\153t available. For example, the key is disabled, is scheduled for deletion, or was deleted. RESULT_NOT_SIGNED - The corresponding sensitive data discovery result is stored in an S3 object that hasn't been signed. Macie can't verify the integrity and authenticity of the sensitive data discovery result. Therefore, Macie can't verify the location of the sensitive data to retrieve. ROLE_TOO_PERMISSIVE - Your account is configured to retrieve occurrences of sensitive data by using an IAM role whose trust or permissions policy doesn't meet Macie requirements for restricting access to the role. Macie can\226\128\153t assume the role to retrieve the sensitive data. UNSUPPORTED_FINDING_TYPE - The specified finding isn't a sensitive data finding. UNSUPPORTED_OBJECT_TYPE - The affected S3 object uses a file or storage format that Macie doesn't support for retrieving occurrences of sensitive data."]}
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about an error that occurred due to an unprocessable entity."]
+module AvailabilityCode =
+  struct
+    type nonrec t =
+      | AVAILABLE 
+      | UNAVAILABLE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AVAILABLE -> "AVAILABLE"
+      | UNAVAILABLE -> "UNAVAILABLE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AVAILABLE" -> AVAILABLE
+      | "UNAVAILABLE" -> UNAVAILABLE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AvailabilityCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AvailabilityCode" j)
+    let to_json = simple_to_json to_value
+  end
+module Zz__listOfUnavailabilityReasonCode =
+  struct
+    type nonrec t = UnavailabilityReasonCode.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:0); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UnavailabilityReasonCode.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UnavailabilityReasonCode.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfUnavailabilityReasonCode"
+        ~of_json:UnavailabilityReasonCode.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceStatistics =
+  struct
+    type nonrec t =
+      {
+      totalBytesClassified: Zz__long.t option
+        [@ocaml.doc
+          "The total amount of data, in bytes, that Amazon Macie has analyzed in the bucket."];
+      totalDetections: Zz__long.t option
+        [@ocaml.doc
+          "The total number of occurrences of sensitive data that Amazon Macie has found in the bucket's objects. This includes occurrences that are currently suppressed by the sensitivity scoring settings for the bucket (totalDetectionsSuppressed)."];
+      totalDetectionsSuppressed: Zz__long.t option
+        [@ocaml.doc
+          "The total number of occurrences of sensitive data that are currently suppressed by the sensitivity scoring settings for the bucket. These represent occurrences of sensitive data that Amazon Macie found in the bucket's objects, but the occurrences were manually suppressed. By default, suppressed occurrences are excluded from the bucket's sensitivity score."];
+      totalItemsClassified: Zz__long.t option
+        [@ocaml.doc
+          "The total number of objects that Amazon Macie has analyzed in the bucket."];
+      totalItemsSensitive: Zz__long.t option
+        [@ocaml.doc
+          "The total number of the bucket's objects that Amazon Macie has found sensitive data in."];
+      totalItemsSkipped: Zz__long.t option
+        [@ocaml.doc
+          "The total number of objects that Amazon Macie wasn't able to analyze in the bucket due to an object-level issue or error. For example, an object is a malformed file. This value includes objects that Macie wasn't able to analyze for reasons reported by other statistics in the ResourceStatistics object."];
+      totalItemsSkippedInvalidEncryption: Zz__long.t option
+        [@ocaml.doc
+          "The total number of objects that Amazon Macie wasn't able to analyze in the bucket because the objects are encrypted with a key that Macie can't access. The objects use server-side encryption with customer-provided keys (SSE-C)."];
+      totalItemsSkippedInvalidKms: Zz__long.t option
+        [@ocaml.doc
+          "The total number of objects that Amazon Macie wasn't able to analyze in the bucket because the objects are encrypted with KMS keys that were disabled, are scheduled for deletion, or were deleted."];
+      totalItemsSkippedPermissionDenied: Zz__long.t option
+        [@ocaml.doc
+          "The total number of objects that Amazon Macie wasn't able to analyze in the bucket due to the permissions settings for the objects or the permissions settings for the keys that were used to encrypt the objects."]}
+    let make ?totalBytesClassified =
+      fun ?totalDetections ->
+        fun ?totalDetectionsSuppressed ->
+          fun ?totalItemsClassified ->
+            fun ?totalItemsSensitive ->
+              fun ?totalItemsSkipped ->
+                fun ?totalItemsSkippedInvalidEncryption ->
+                  fun ?totalItemsSkippedInvalidKms ->
+                    fun ?totalItemsSkippedPermissionDenied ->
+                      fun () ->
+                        {
+                          totalBytesClassified;
+                          totalDetections;
+                          totalDetectionsSuppressed;
+                          totalItemsClassified;
+                          totalItemsSensitive;
+                          totalItemsSkipped;
+                          totalItemsSkippedInvalidEncryption;
+                          totalItemsSkippedInvalidKms;
+                          totalItemsSkippedPermissionDenied
+                        }
+    let to_value x =
+      structure_to_value
+        [("totalBytesClassified",
+           (Option.map x.totalBytesClassified ~f:Zz__long.to_value));
+        ("totalDetections",
+          (Option.map x.totalDetections ~f:Zz__long.to_value));
+        ("totalDetectionsSuppressed",
+          (Option.map x.totalDetectionsSuppressed ~f:Zz__long.to_value));
+        ("totalItemsClassified",
+          (Option.map x.totalItemsClassified ~f:Zz__long.to_value));
+        ("totalItemsSensitive",
+          (Option.map x.totalItemsSensitive ~f:Zz__long.to_value));
+        ("totalItemsSkipped",
+          (Option.map x.totalItemsSkipped ~f:Zz__long.to_value));
+        ("totalItemsSkippedInvalidEncryption",
+          (Option.map x.totalItemsSkippedInvalidEncryption
+             ~f:Zz__long.to_value));
+        ("totalItemsSkippedInvalidKms",
+          (Option.map x.totalItemsSkippedInvalidKms ~f:Zz__long.to_value));
+        ("totalItemsSkippedPermissionDenied",
+          (Option.map x.totalItemsSkippedPermissionDenied
+             ~f:Zz__long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let totalItemsSkippedPermissionDenied =
+        (Option.map ~f:Zz__long.of_xml)
+          (Xml.child xml_arg0 "totalItemsSkippedPermissionDenied") in
+      let totalItemsSkippedInvalidKms =
+        (Option.map ~f:Zz__long.of_xml)
+          (Xml.child xml_arg0 "totalItemsSkippedInvalidKms") in
+      let totalItemsSkippedInvalidEncryption =
+        (Option.map ~f:Zz__long.of_xml)
+          (Xml.child xml_arg0 "totalItemsSkippedInvalidEncryption") in
+      let totalItemsSkipped =
+        (Option.map ~f:Zz__long.of_xml)
+          (Xml.child xml_arg0 "totalItemsSkipped") in
+      let totalItemsSensitive =
+        (Option.map ~f:Zz__long.of_xml)
+          (Xml.child xml_arg0 "totalItemsSensitive") in
+      let totalItemsClassified =
+        (Option.map ~f:Zz__long.of_xml)
+          (Xml.child xml_arg0 "totalItemsClassified") in
+      let totalDetectionsSuppressed =
+        (Option.map ~f:Zz__long.of_xml)
+          (Xml.child xml_arg0 "totalDetectionsSuppressed") in
+      let totalDetections =
+        (Option.map ~f:Zz__long.of_xml)
+          (Xml.child xml_arg0 "totalDetections") in
+      let totalBytesClassified =
+        (Option.map ~f:Zz__long.of_xml)
+          (Xml.child xml_arg0 "totalBytesClassified") in
+      make ?totalItemsSkippedPermissionDenied ?totalItemsSkippedInvalidKms
+        ?totalItemsSkippedInvalidEncryption ?totalItemsSkipped
+        ?totalItemsSensitive ?totalItemsClassified ?totalDetectionsSuppressed
+        ?totalDetections ?totalBytesClassified ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let totalItemsSkippedPermissionDenied =
+        field_map json__ "totalItemsSkippedPermissionDenied" Zz__long.of_json in
+      let totalItemsSkippedInvalidKms =
+        field_map json__ "totalItemsSkippedInvalidKms" Zz__long.of_json in
+      let totalItemsSkippedInvalidEncryption =
+        field_map json__ "totalItemsSkippedInvalidEncryption"
+          Zz__long.of_json in
+      let totalItemsSkipped =
+        field_map json__ "totalItemsSkipped" Zz__long.of_json in
+      let totalItemsSensitive =
+        field_map json__ "totalItemsSensitive" Zz__long.of_json in
+      let totalItemsClassified =
+        field_map json__ "totalItemsClassified" Zz__long.of_json in
+      let totalDetectionsSuppressed =
+        field_map json__ "totalDetectionsSuppressed" Zz__long.of_json in
+      let totalDetections =
+        field_map json__ "totalDetections" Zz__long.of_json in
+      let totalBytesClassified =
+        field_map json__ "totalBytesClassified" Zz__long.of_json in
+      make ?totalItemsSkippedPermissionDenied ?totalItemsSkippedInvalidKms
+        ?totalItemsSkippedInvalidEncryption ?totalItemsSkipped
+        ?totalItemsSensitive ?totalItemsClassified ?totalDetectionsSuppressed
+        ?totalDetections ?totalBytesClassified ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides statistical data for sensitive data discovery metrics that apply to an S3 bucket that Amazon Macie monitors and analyzes for an account, if automated sensitive data discovery has been enabled for the account. The data captures the results of automated sensitive data discovery activities that Macie has performed for the bucket."]
 module Zz__listOfFinding =
   struct
     type nonrec t = Finding.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Finding.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7468,6 +9755,9 @@ module Zz__listOfGroupCount =
   struct
     type nonrec t = GroupCount.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroupCount.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7515,10 +9805,10 @@ module FindingStatisticsSortCriteria =
           (Xml.child xml_arg0 "attributeName") in
       make ?orderBy ?attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let orderBy = field_map json "orderBy" OrderBy.of_json in
+    let of_json json__ =
+      let orderBy = field_map json__ "orderBy" OrderBy.of_json in
       let attributeName =
-        field_map json "attributeName"
+        field_map json__ "attributeName"
           FindingStatisticsSortAttributeName.of_json in
       make ?orderBy ?attributeName ()
     let to_json v = composed_to_json to_value v
@@ -7559,6 +9849,9 @@ module SeverityLevelList =
   struct
     type nonrec t = SeverityLevel.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SeverityLevel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7579,6 +9872,31 @@ module SeverityLevelList =
       list_of_json ~kind:"SeverityLevelList" ~of_json:SeverityLevel.of_json j
     let to_json v = composed_to_json to_value v
   end
+module S3ClassificationScope =
+  struct
+    type nonrec t =
+      {
+      excludes: S3ClassificationScopeExclusion.t option
+        [@ocaml.doc "The S3 buckets that are excluded."]}
+    let make ?excludes = fun () -> { excludes }
+    let to_value x =
+      structure_to_value
+        [("excludes",
+           (Option.map x.excludes ~f:S3ClassificationScopeExclusion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excludes =
+        (Option.map ~f:S3ClassificationScopeExclusion.of_xml)
+          (Xml.child xml_arg0 "excludes") in
+      make ?excludes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excludes =
+        field_map json__ "excludes" S3ClassificationScopeExclusion.of_json in
+      make ?excludes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the S3 buckets that are excluded from automated sensitive data discovery for an Amazon Macie account."]
 module BucketCountByEffectivePermission =
   struct
     type nonrec t =
@@ -7594,7 +9912,7 @@ module BucketCountByEffectivePermission =
           "The total number of buckets that allow the general public to have write access to the bucket."];
       unknown: Zz__long.t option
         [@ocaml.doc
-          "The total number of buckets that Amazon Macie wasn't able to evaluate permissions settings for. Macie can't determine whether these buckets are publicly accessible."]}
+          "The total number of buckets that Amazon Macie wasn't able to evaluate permissions settings for. For example, the buckets' policies or a quota prevented Macie from retrieving the requisite data. Macie can't determine whether the buckets are publicly accessible."]}
     let make ?publiclyAccessible =
       fun ?publiclyReadable ->
         fun ?publiclyWritable ->
@@ -7631,35 +9949,35 @@ module BucketCountByEffectivePermission =
       make ?unknown ?publiclyWritable ?publiclyReadable ?publiclyAccessible
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unknown = field_map json "unknown" Zz__long.of_json in
+    let of_json json__ =
+      let unknown = field_map json__ "unknown" Zz__long.of_json in
       let publiclyWritable =
-        field_map json "publiclyWritable" Zz__long.of_json in
+        field_map json__ "publiclyWritable" Zz__long.of_json in
       let publiclyReadable =
-        field_map json "publiclyReadable" Zz__long.of_json in
+        field_map json__ "publiclyReadable" Zz__long.of_json in
       let publiclyAccessible =
-        field_map json "publiclyAccessible" Zz__long.of_json in
+        field_map json__ "publiclyAccessible" Zz__long.of_json in
       make ?unknown ?publiclyWritable ?publiclyReadable ?publiclyAccessible
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information about the number of S3 buckets that are publicly accessible based on a combination of permissions settings for each bucket."]
+       "Provides information about the number of S3 buckets that are publicly accessible due to a combination of permissions settings for each bucket."]
 module BucketCountByEncryptionType =
   struct
     type nonrec t =
       {
       kmsManaged: Zz__long.t option
         [@ocaml.doc
-          "The total number of buckets that use an KMS key to encrypt new objects by default, either an Amazon Web Services managed key or a customer managed key. These buckets use KMS encryption (SSE-KMS) by default."];
+          "The total number of buckets whose default encryption settings are configured to encrypt new objects with an KMS key, either an Amazon Web Services managed key or a customer managed key. By default, these buckets encrypt new objects automatically using DSSE-KMS or SSE-KMS encryption."];
       s3Managed: Zz__long.t option
         [@ocaml.doc
-          "The total number of buckets that use an Amazon S3 managed key to encrypt new objects by default. These buckets use Amazon S3 managed encryption (SSE-S3) by default."];
+          "The total number of buckets whose default encryption settings are configured to encrypt new objects with an Amazon S3 managed key. By default, these buckets encrypt new objects automatically using SSE-S3 encryption."];
       unencrypted: Zz__long.t option
         [@ocaml.doc
-          "The total number of buckets that don't encrypt new objects by default. Default encryption is disabled for these buckets."];
+          "The total number of buckets that don't specify default server-side encryption behavior for new objects. Default encryption settings aren't configured for these buckets."];
       unknown: Zz__long.t option
         [@ocaml.doc
-          "The total number of buckets that Amazon Macie doesn't have current encryption metadata for. Macie can't provide current data about the default encryption settings for these buckets."]}
+          "The total number of buckets that Amazon Macie doesn't have current encryption metadata for. For example, the buckets' permissions settings or a quota prevented Macie from retrieving the default encryption settings for the buckets."]}
     let make ?kmsManaged =
       fun ?s3Managed ->
         fun ?unencrypted ->
@@ -7683,31 +10001,31 @@ module BucketCountByEncryptionType =
         (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "kmsManaged") in
       make ?unknown ?unencrypted ?s3Managed ?kmsManaged ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unknown = field_map json "unknown" Zz__long.of_json in
-      let unencrypted = field_map json "unencrypted" Zz__long.of_json in
-      let s3Managed = field_map json "s3Managed" Zz__long.of_json in
-      let kmsManaged = field_map json "kmsManaged" Zz__long.of_json in
+    let of_json json__ =
+      let unknown = field_map json__ "unknown" Zz__long.of_json in
+      let unencrypted = field_map json__ "unencrypted" Zz__long.of_json in
+      let s3Managed = field_map json__ "s3Managed" Zz__long.of_json in
+      let kmsManaged = field_map json__ "kmsManaged" Zz__long.of_json in
       make ?unknown ?unencrypted ?s3Managed ?kmsManaged ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information about the number of S3 buckets that use certain types of server-side encryption by default or don't encrypt new objects by default. For detailed information about these settings, see Setting default server-side encryption behavior for Amazon S3 buckets in the Amazon Simple Storage Service User Guide."]
+       "Provides information about the number of S3 buckets whose settings do or don't specify default server-side encryption behavior for objects that are added to the buckets. For detailed information about these settings, see Setting default server-side encryption behavior for Amazon S3 buckets in the Amazon Simple Storage Service User Guide."]
 module BucketCountBySharedAccessType =
   struct
     type nonrec t =
       {
       external_: Zz__long.t option
         [@ocaml.doc
-          "The total number of buckets that are shared with an Amazon Web Services account that isn't part of the same Amazon Macie organization."];
+          "The total number of buckets that are shared with one or more of the following or any combination of the following: an Amazon CloudFront OAI, a CloudFront OAC, or an Amazon Web Services account that isn't in the same Amazon Macie organization."];
       internal: Zz__long.t option
         [@ocaml.doc
-          "The total number of buckets that are shared with an Amazon Web Services account that's part of the same Amazon Macie organization."];
+          "The total number of buckets that are shared with one or more Amazon Web Services accounts in the same Amazon Macie organization. These buckets aren't shared with Amazon CloudFront OAIs or OACs."];
       notShared: Zz__long.t option
         [@ocaml.doc
-          "The total number of buckets that aren't shared with other Amazon Web Services accounts."];
+          "The total number of buckets that aren't shared with other Amazon Web Services accounts, Amazon CloudFront OAIs, or CloudFront OACs."];
       unknown: Zz__long.t option
         [@ocaml.doc
-          "The total number of buckets that Amazon Macie wasn't able to evaluate shared access settings for. Macie can't determine whether these buckets are shared with other Amazon Web Services accounts."]}
+          "The total number of buckets that Amazon Macie wasn't able to evaluate shared access settings for. For example, the buckets' permissions settings or a quota prevented Macie from retrieving the requisite data. Macie can't determine whether the buckets are shared with other Amazon Web Services accounts, Amazon CloudFront OAIs, or CloudFront OACs."]}
     let make ?external_ =
       fun ?internal ->
         fun ?notShared ->
@@ -7731,28 +10049,28 @@ module BucketCountBySharedAccessType =
         (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "external") in
       make ?unknown ?notShared ?internal ?external_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unknown = field_map json "unknown" Zz__long.of_json in
-      let notShared = field_map json "notShared" Zz__long.of_json in
-      let internal = field_map json "internal" Zz__long.of_json in
-      let external_ = field_map json "external" Zz__long.of_json in
+    let of_json json__ =
+      let unknown = field_map json__ "unknown" Zz__long.of_json in
+      let notShared = field_map json__ "notShared" Zz__long.of_json in
+      let internal = field_map json__ "internal" Zz__long.of_json in
+      let external_ = field_map json__ "external" Zz__long.of_json in
       make ?unknown ?notShared ?internal ?external_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information about the number of S3 buckets that are or aren't shared with other Amazon Web Services accounts."]
+       "Provides information about the number of S3 buckets that are or aren't shared with other Amazon Web Services accounts, Amazon CloudFront origin access identities (OAIs), or CloudFront origin access controls (OACs). In this data, an Amazon Macie organization is defined as a set of Macie accounts that are centrally managed as a group of related accounts through Organizations or by Macie invitation."]
 module BucketCountPolicyAllowsUnencryptedObjectUploads =
   struct
     type nonrec t =
       {
       allowsUnencryptedObjectUploads: Zz__long.t option
         [@ocaml.doc
-          "The total number of buckets that don't have a bucket policy or have a bucket policy that doesn't require server-side encryption of new objects. If a bucket policy exists, the policy doesn't require PutObject requests to include the x-amz-server-side-encryption header and it doesn't require the value for that header to be AES256 or aws:kms."];
+          "The total number of buckets that don't have a bucket policy or have a bucket policy that doesn't require server-side encryption of new objects. If a bucket policy exists, the policy doesn't require PutObject requests to include a valid server-side encryption header: the x-amz-server-side-encryption header with a value of AES256 or aws:kms, or the x-amz-server-side-encryption-customer-algorithm header with a value of AES256."];
       deniesUnencryptedObjectUploads: Zz__long.t option
         [@ocaml.doc
-          "The total number of buckets whose bucket policies require server-side encryption of new objects. PutObject requests for these buckets must include the x-amz-server-side-encryption header and the value for that header must be AES256 or aws:kms."];
+          "The total number of buckets whose bucket policies require server-side encryption of new objects. PutObject requests for these buckets must include a valid server-side encryption header: the x-amz-server-side-encryption header with a value of AES256 or aws:kms, or the x-amz-server-side-encryption-customer-algorithm header with a value of AES256."];
       unknown: Zz__long.t option
         [@ocaml.doc
-          "The total number of buckets that Amazon Macie wasn't able to evaluate server-side encryption requirements for. Macie can't determine whether the bucket policies for these buckets require server-side encryption of new objects."]}
+          "The total number of buckets that Amazon Macie wasn't able to evaluate server-side encryption requirements for. For example, the buckets' permissions settings or a quota prevented Macie from retrieving the requisite data. Macie can't determine whether bucket policies for the buckets require server-side encryption of new objects."]}
     let make ?allowsUnencryptedObjectUploads =
       fun ?deniesUnencryptedObjectUploads ->
         fun ?unknown ->
@@ -7782,17 +10100,129 @@ module BucketCountPolicyAllowsUnencryptedObjectUploads =
       make ?unknown ?deniesUnencryptedObjectUploads
         ?allowsUnencryptedObjectUploads ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unknown = field_map json "unknown" Zz__long.of_json in
+    let of_json json__ =
+      let unknown = field_map json__ "unknown" Zz__long.of_json in
       let deniesUnencryptedObjectUploads =
-        field_map json "deniesUnencryptedObjectUploads" Zz__long.of_json in
+        field_map json__ "deniesUnencryptedObjectUploads" Zz__long.of_json in
       let allowsUnencryptedObjectUploads =
-        field_map json "allowsUnencryptedObjectUploads" Zz__long.of_json in
+        field_map json__ "allowsUnencryptedObjectUploads" Zz__long.of_json in
       make ?unknown ?deniesUnencryptedObjectUploads
         ?allowsUnencryptedObjectUploads ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information about the number of S3 buckets whose bucket policies do or don't require server-side encryption of objects when objects are uploaded to the buckets."]
+       "Provides information about the number of S3 buckets whose bucket policies do or don't require server-side encryption of objects when objects are added to the buckets."]
+module BucketStatisticsBySensitivity =
+  struct
+    type nonrec t =
+      {
+      classificationError: SensitivityAggregations.t option
+        [@ocaml.doc
+          "The aggregated statistical data for all buckets that have a sensitivity score of -1."];
+      notClassified: SensitivityAggregations.t option
+        [@ocaml.doc
+          "The aggregated statistical data for all buckets that have a sensitivity score of 50."];
+      notSensitive: SensitivityAggregations.t option
+        [@ocaml.doc
+          "The aggregated statistical data for all buckets that have a sensitivity score of 1-49."];
+      sensitive: SensitivityAggregations.t option
+        [@ocaml.doc
+          "The aggregated statistical data for all buckets that have a sensitivity score of 51-100."]}
+    let make ?classificationError =
+      fun ?notClassified ->
+        fun ?notSensitive ->
+          fun ?sensitive ->
+            fun () ->
+              { classificationError; notClassified; notSensitive; sensitive }
+    let to_value x =
+      structure_to_value
+        [("classificationError",
+           (Option.map x.classificationError
+              ~f:SensitivityAggregations.to_value));
+        ("notClassified",
+          (Option.map x.notClassified ~f:SensitivityAggregations.to_value));
+        ("notSensitive",
+          (Option.map x.notSensitive ~f:SensitivityAggregations.to_value));
+        ("sensitive",
+          (Option.map x.sensitive ~f:SensitivityAggregations.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sensitive =
+        (Option.map ~f:SensitivityAggregations.of_xml)
+          (Xml.child xml_arg0 "sensitive") in
+      let notSensitive =
+        (Option.map ~f:SensitivityAggregations.of_xml)
+          (Xml.child xml_arg0 "notSensitive") in
+      let notClassified =
+        (Option.map ~f:SensitivityAggregations.of_xml)
+          (Xml.child xml_arg0 "notClassified") in
+      let classificationError =
+        (Option.map ~f:SensitivityAggregations.of_xml)
+          (Xml.child xml_arg0 "classificationError") in
+      make ?sensitive ?notSensitive ?notClassified ?classificationError ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sensitive =
+        field_map json__ "sensitive" SensitivityAggregations.of_json in
+      let notSensitive =
+        field_map json__ "notSensitive" SensitivityAggregations.of_json in
+      let notClassified =
+        field_map json__ "notClassified" SensitivityAggregations.of_json in
+      let classificationError =
+        field_map json__ "classificationError"
+          SensitivityAggregations.of_json in
+      make ?sensitive ?notSensitive ?notClassified ?classificationError ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides aggregated statistical data for sensitive data discovery metrics that apply to S3 buckets, grouped by bucket sensitivity score (sensitivityScore). If automated sensitive data discovery is currently disabled for your account, the value for most of these metrics is 0."]
+module Timestamp =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "Specifies a date and time in UTC and extended ISO 8601 format."]
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "Specifies a date and time in UTC and extended ISO 8601 format."]
+module AllowListStatus =
+  struct
+    type nonrec t =
+      {
+      code: AllowListStatusCode.t option
+        [@ocaml.doc
+          "The current status of the allow list. If the list's criteria specify a regular expression (regex), this value is typically OK. Amazon Macie can compile the expression. If the list's criteria specify an S3 object, possible values are: OK - Macie can retrieve and parse the contents of the object. S3_OBJECT_ACCESS_DENIED - Macie isn't allowed to access the object or the object is encrypted with a customer managed KMS key that Macie isn't allowed to use. Check the bucket policy and other permissions settings for the bucket and the object. If the object is encrypted, also ensure that it's encrypted with a key that Macie is allowed to use. S3_OBJECT_EMPTY - Macie can retrieve the object but the object doesn't contain any content. Ensure that the object contains the correct entries. Also ensure that the list's criteria specify the correct bucket and object names. S3_OBJECT_NOT_FOUND - The object doesn't exist in Amazon S3. Ensure that the list's criteria specify the correct bucket and object names. S3_OBJECT_OVERSIZE - Macie can retrieve the object. However, the object contains too many entries or its storage size exceeds the quota for an allow list. Try breaking the list into multiple files and ensure that each file doesn't exceed any quotas. Then configure list settings in Macie for each file. S3_THROTTLED - Amazon S3 throttled the request to retrieve the object. Wait a few minutes and then try again. S3_USER_ACCESS_DENIED - Amazon S3 denied the request to retrieve the object. If the specified object exists, you're not allowed to access it or it's encrypted with an KMS key that you're not allowed to use. Work with your Amazon Web Services administrator to ensure that the list's criteria specify the correct bucket and object names, and you have read access to the bucket and the object. If the object is encrypted, also ensure that it's encrypted with a key that you're allowed to use. UNKNOWN_ERROR - A transient or internal error occurred when Macie attempted to retrieve or parse the object. Wait a few minutes and then try again. A list can also have this status if it's encrypted with a key that Amazon S3 and Macie can't access or use."];
+      description: Zz__stringMin1Max1024PatternSS.t option
+        [@ocaml.doc
+          "A brief description of the status of the allow list. Amazon Macie uses this value to provide additional information about an error that occurred when Macie tried to access and use the list's criteria."]}
+    let make ?code = fun ?description -> fun () -> { code; description }
+    let to_value x =
+      structure_to_value
+        [("code", (Option.map x.code ~f:AllowListStatusCode.to_value));
+        ("description",
+          (Option.map x.description
+             ~f:Zz__stringMin1Max1024PatternSS.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:Zz__stringMin1Max1024PatternSS.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let code =
+        (Option.map ~f:AllowListStatusCode.of_xml)
+          (Xml.child xml_arg0 "code") in
+      make ?description ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description =
+        field_map json__ "description" Zz__stringMin1Max1024PatternSS.of_json in
+      let code = field_map json__ "code" AllowListStatusCode.of_json in
+      make ?description ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about the current status of an allow list, which indicates whether Amazon Macie can access and use the list's criteria."]
 module JobScheduleFrequency =
   struct
     type nonrec t =
@@ -7831,13 +10261,13 @@ module JobScheduleFrequency =
           (Xml.child xml_arg0 "dailySchedule") in
       make ?weeklySchedule ?monthlySchedule ?dailySchedule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let weeklySchedule =
-        field_map json "weeklySchedule" WeeklySchedule.of_json in
+        field_map json__ "weeklySchedule" WeeklySchedule.of_json in
       let monthlySchedule =
-        field_map json "monthlySchedule" MonthlySchedule.of_json in
+        field_map json__ "monthlySchedule" MonthlySchedule.of_json in
       let dailySchedule =
-        field_map json "dailySchedule" DailySchedule.of_json in
+        field_map json__ "dailySchedule" DailySchedule.of_json in
       make ?weeklySchedule ?monthlySchedule ?dailySchedule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7849,6 +10279,7 @@ module ManagedDataIdentifierSelector =
       | EXCLUDE 
       | INCLUDE 
       | NONE 
+      | RECOMMENDED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -7857,6 +10288,7 @@ module ManagedDataIdentifierSelector =
       | EXCLUDE -> "EXCLUDE"
       | INCLUDE -> "INCLUDE"
       | NONE -> "NONE"
+      | RECOMMENDED -> "RECOMMENDED"
       | Non_static_id s -> s
     let of_string =
       function
@@ -7864,6 +10296,7 @@ module ManagedDataIdentifierSelector =
       | "EXCLUDE" -> EXCLUDE
       | "INCLUDE" -> INCLUDE
       | "NONE" -> NONE
+      | "RECOMMENDED" -> RECOMMENDED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -7880,47 +10313,47 @@ module S3JobDefinition =
   struct
     type nonrec t =
       {
+      bucketCriteria: S3BucketCriteriaForJob.t option
+        [@ocaml.doc
+          "The property- and tag-based conditions that determine which S3 buckets to include or exclude from the analysis. Each time the job runs, the job uses these criteria to determine which buckets contain objects to analyze. A job's definition can contain a bucketCriteria object or a bucketDefinitions array, not both."];
       bucketDefinitions: Zz__listOfS3BucketDefinitionForJob.t option
         [@ocaml.doc
           "An array of objects, one for each Amazon Web Services account that owns specific S3 buckets to analyze. Each object specifies the account ID for an account and one or more buckets to analyze for that account. A job's definition can contain a bucketDefinitions array or a bucketCriteria object, not both."];
       scoping: Scoping.t option
         [@ocaml.doc
-          "The property- and tag-based conditions that determine which S3 objects to include or exclude from the analysis. Each time the job runs, the job uses these criteria to determine which objects to analyze."];
-      bucketCriteria: S3BucketCriteriaForJob.t option
-        [@ocaml.doc
-          "The property- and tag-based conditions that determine which S3 buckets to include or exclude from the analysis. Each time the job runs, the job uses these criteria to determine which buckets contain objects to analyze. A job's definition can contain a bucketCriteria object or a bucketDefinitions array, not both."]}
-    let make ?bucketDefinitions =
-      fun ?scoping ->
-        fun ?bucketCriteria ->
-          fun () -> { bucketDefinitions; scoping; bucketCriteria }
+          "The property- and tag-based conditions that determine which S3 objects to include or exclude from the analysis. Each time the job runs, the job uses these criteria to determine which objects to analyze."]}
+    let make ?bucketCriteria =
+      fun ?bucketDefinitions ->
+        fun ?scoping ->
+          fun () -> { bucketCriteria; bucketDefinitions; scoping }
     let to_value x =
       structure_to_value
-        [("bucketDefinitions",
-           (Option.map x.bucketDefinitions
-              ~f:Zz__listOfS3BucketDefinitionForJob.to_value));
-        ("scoping", (Option.map x.scoping ~f:Scoping.to_value));
-        ("bucketCriteria",
-          (Option.map x.bucketCriteria ~f:S3BucketCriteriaForJob.to_value))]
+        [("bucketCriteria",
+           (Option.map x.bucketCriteria ~f:S3BucketCriteriaForJob.to_value));
+        ("bucketDefinitions",
+          (Option.map x.bucketDefinitions
+             ~f:Zz__listOfS3BucketDefinitionForJob.to_value));
+        ("scoping", (Option.map x.scoping ~f:Scoping.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let bucketCriteria =
-        (Option.map ~f:S3BucketCriteriaForJob.of_xml)
-          (Xml.child xml_arg0 "bucketCriteria") in
       let scoping =
         (Option.map ~f:Scoping.of_xml) (Xml.child xml_arg0 "scoping") in
       let bucketDefinitions =
         (Option.map ~f:Zz__listOfS3BucketDefinitionForJob.of_xml)
           (Xml.child xml_arg0 "bucketDefinitions") in
-      make ?bucketCriteria ?scoping ?bucketDefinitions ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let bucketCriteria =
-        field_map json "bucketCriteria" S3BucketCriteriaForJob.of_json in
-      let scoping = field_map json "scoping" Scoping.of_json in
+        (Option.map ~f:S3BucketCriteriaForJob.of_xml)
+          (Xml.child xml_arg0 "bucketCriteria") in
+      make ?scoping ?bucketDefinitions ?bucketCriteria ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scoping = field_map json__ "scoping" Scoping.of_json in
       let bucketDefinitions =
-        field_map json "bucketDefinitions"
+        field_map json__ "bucketDefinitions"
           Zz__listOfS3BucketDefinitionForJob.of_json in
-      make ?bucketCriteria ?scoping ?bucketDefinitions ()
+      let bucketCriteria =
+        field_map json__ "bucketCriteria" S3BucketCriteriaForJob.of_json in
+      make ?scoping ?bucketDefinitions ?bucketCriteria ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies which S3 buckets contain the objects that a classification job analyzes, and the scope of that analysis. The bucket specification can be static (bucketDefinitions) or dynamic (bucketCriteria). If it's static, the job analyzes objects in the same predefined set of buckets each time the job runs. If it's dynamic, the job analyzes objects in any buckets that match the specified criteria each time the job starts to run."]
@@ -7951,10 +10384,10 @@ module Statistics =
           (Xml.child xml_arg0 "approximateNumberOfObjectsToProcess") in
       make ?numberOfRuns ?approximateNumberOfObjectsToProcess ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let numberOfRuns = field_map json "numberOfRuns" Zz__double.of_json in
+    let of_json json__ =
+      let numberOfRuns = field_map json__ "numberOfRuns" Zz__double.of_json in
       let approximateNumberOfObjectsToProcess =
-        field_map json "approximateNumberOfObjectsToProcess"
+        field_map json__ "approximateNumberOfObjectsToProcess"
           Zz__double.of_json in
       make ?numberOfRuns ?approximateNumberOfObjectsToProcess ()
     let to_json v = composed_to_json to_value v
@@ -7963,6 +10396,9 @@ module Zz__listOfBucketMetadata =
   struct
     type nonrec t = BucketMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BucketMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8010,6 +10446,8 @@ module BucketCriteria =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -8023,7 +10461,7 @@ module BucketSortCriteria =
       {
       attributeName: Zz__string.t option
         [@ocaml.doc
-          "The name of the bucket property to sort the results by. This value can be one of the following properties that Amazon Macie defines as bucket metadata: accountId, bucketName, classifiableObjectCount, classifiableSizeInBytes, objectCount, or sizeInBytes."];
+          "The name of the bucket property to sort the results by. This value can be one of the following properties that Amazon Macie defines as bucket metadata: accountId, bucketName, classifiableObjectCount, classifiableSizeInBytes, objectCount, sensitivityScore, or sizeInBytes."];
       orderBy: OrderBy.t option
         [@ocaml.doc
           "The sort order to apply to the results, based on the value specified by the attributeName property. Valid values are: ASC, sort the results in ascending order; and, DESC, sort the results in descending order."]}
@@ -8043,9 +10481,9 @@ module BucketSortCriteria =
           (Xml.child xml_arg0 "attributeName") in
       make ?orderBy ?attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let orderBy = field_map json "orderBy" OrderBy.of_json in
-      let attributeName = field_map json "attributeName" Zz__string.of_json in
+    let of_json json__ =
+      let orderBy = field_map json__ "orderBy" OrderBy.of_json in
+      let attributeName = field_map json__ "attributeName" Zz__string.of_json in
       make ?orderBy ?attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8054,6 +10492,9 @@ module Zz__listOfUnprocessedAccount =
   struct
     type nonrec t = UnprocessedAccount.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UnprocessedAccount.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8079,6 +10520,9 @@ module Zz__listOfFindingType =
   struct
     type nonrec t = FindingType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FindingType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8121,17 +10565,79 @@ module AccountDetail =
           (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
       make ~email ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let email = field_map_exn json "email" Zz__string.of_json in
-      let accountId = field_map_exn json "accountId" Zz__string.of_json in
+    let of_json json__ =
+      let email = field_map_exn json__ "email" Zz__string.of_json in
+      let accountId = field_map_exn json__ "accountId" Zz__string.of_json in
       make ~email ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the details of an account to associate with an Amazon Macie administrator account."]
+module Zz__listOfAutomatedDiscoveryAccountUpdateError =
+  struct
+    type nonrec t = AutomatedDiscoveryAccountUpdateError.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AutomatedDiscoveryAccountUpdateError.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:AutomatedDiscoveryAccountUpdateError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfAutomatedDiscoveryAccountUpdateError"
+        ~of_json:AutomatedDiscoveryAccountUpdateError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Zz__listOfAutomatedDiscoveryAccountUpdate =
+  struct
+    type nonrec t = AutomatedDiscoveryAccountUpdate.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AutomatedDiscoveryAccountUpdate.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AutomatedDiscoveryAccountUpdate.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfAutomatedDiscoveryAccountUpdate"
+        ~of_json:AutomatedDiscoveryAccountUpdate.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Zz__listOfBatchGetCustomDataIdentifierSummary =
   struct
     type nonrec t = BatchGetCustomDataIdentifierSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchGetCustomDataIdentifierSummary.to_value)) |>
         (fun x -> `List x)
@@ -8167,6 +10673,521 @@ module Zz__timestampUnix =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
+module UpdateSensitivityInspectionTemplateResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the settings for the sensitivity inspection template for an account."]
+module UpdateSensitivityInspectionTemplateRequest =
+  struct
+    type nonrec t =
+      {
+      description: Zz__string.t option
+        [@ocaml.doc
+          "A custom description of the template. The description can contain as many as 200 characters."];
+      excludes: SensitivityInspectionTemplateExcludes.t option
+        [@ocaml.doc
+          "The managed data identifiers to explicitly exclude (not use) when performing automated sensitive data discovery. To exclude an allow list or custom data identifier that's currently included by the template, update the values for the SensitivityInspectionTemplateIncludes.allowListIds and SensitivityInspectionTemplateIncludes.customDataIdentifierIds properties, respectively."];
+      id: Zz__string.t
+        [@ocaml.doc
+          "The unique identifier for the Amazon Macie resource that the request applies to."];
+      includes: SensitivityInspectionTemplateIncludes.t option
+        [@ocaml.doc
+          "The allow lists, custom data identifiers, and managed data identifiers to explicitly include (use) when performing automated sensitive data discovery."]}
+    let context_ = "UpdateSensitivityInspectionTemplateRequest"
+    let make ?description =
+      fun ?excludes ->
+        fun ?includes ->
+          fun ~id -> fun () -> { description; excludes; includes; id }
+    let to_value x =
+      structure_to_value
+        [("description", (Option.map x.description ~f:Zz__string.to_value));
+        ("excludes",
+          (Option.map x.excludes
+             ~f:SensitivityInspectionTemplateExcludes.to_value));
+        ("id", (Some (Zz__string.to_value x.id)));
+        ("includes",
+          (Option.map x.includes
+             ~f:SensitivityInspectionTemplateIncludes.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let includes =
+        (Option.map ~f:SensitivityInspectionTemplateIncludes.of_xml)
+          (Xml.child xml_arg0 "includes") in
+      let id =
+        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let excludes =
+        (Option.map ~f:SensitivityInspectionTemplateExcludes.of_xml)
+          (Xml.child xml_arg0 "excludes") in
+      let description =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
+      make ?includes ~id ?excludes ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let includes =
+        field_map json__ "includes"
+          SensitivityInspectionTemplateIncludes.of_json in
+      let id = field_map_exn json__ "id" Zz__string.of_json in
+      let excludes =
+        field_map json__ "excludes"
+          SensitivityInspectionTemplateExcludes.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
+      make ?includes ~id ?excludes ?description ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the settings for the sensitivity inspection template for an account."]
+module UpdateRevealConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      configuration: RevealConfiguration.t option
+        [@ocaml.doc
+          "The KMS key to use to encrypt the sensitive data, and the status of the configuration for the Amazon Macie account."];
+      retrievalConfiguration: RetrievalConfiguration.t option
+        [@ocaml.doc
+          "The access method and settings to use when retrieving the sensitive data."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?configuration =
+      fun ?retrievalConfiguration ->
+        fun () -> { configuration; retrievalConfiguration }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("configuration",
+           (Option.map x.configuration ~f:RevealConfiguration.to_value));
+        ("retrievalConfiguration",
+          (Option.map x.retrievalConfiguration
+             ~f:RetrievalConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retrievalConfiguration =
+        (Option.map ~f:RetrievalConfiguration.of_xml)
+          (Xml.child xml_arg0 "retrievalConfiguration") in
+      let configuration =
+        (Option.map ~f:RevealConfiguration.of_xml)
+          (Xml.child xml_arg0 "configuration") in
+      make ?retrievalConfiguration ?configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retrievalConfiguration =
+        field_map json__ "retrievalConfiguration"
+          RetrievalConfiguration.of_json in
+      let configuration =
+        field_map json__ "configuration" RevealConfiguration.of_json in
+      make ?retrievalConfiguration ?configuration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the status and configuration settings for retrieving occurrences of sensitive data reported by findings."]
+module UpdateRevealConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      configuration: RevealConfiguration.t
+        [@ocaml.doc
+          "The KMS key to use to encrypt the sensitive data, and the status of the configuration for the Amazon Macie account."];
+      retrievalConfiguration: UpdateRetrievalConfiguration.t option
+        [@ocaml.doc
+          "The access method and settings to use when retrieving the sensitive data."]}
+    let context_ = "UpdateRevealConfigurationRequest"
+    let make ?retrievalConfiguration =
+      fun ~configuration ->
+        fun () -> { retrievalConfiguration; configuration }
+    let to_value x =
+      structure_to_value
+        [("configuration",
+           (Some (RevealConfiguration.to_value x.configuration)));
+        ("retrievalConfiguration",
+          (Option.map x.retrievalConfiguration
+             ~f:UpdateRetrievalConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retrievalConfiguration =
+        (Option.map ~f:UpdateRetrievalConfiguration.of_xml)
+          (Xml.child xml_arg0 "retrievalConfiguration") in
+      let configuration =
+        RevealConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "configuration") in
+      make ?retrievalConfiguration ~configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retrievalConfiguration =
+        field_map json__ "retrievalConfiguration"
+          UpdateRetrievalConfiguration.of_json in
+      let configuration =
+        field_map_exn json__ "configuration" RevealConfiguration.of_json in
+      make ?retrievalConfiguration ~configuration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the status and configuration settings for retrieving occurrences of sensitive data reported by findings."]
+module UpdateResourceProfileResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the sensitivity score for an S3 bucket."]
+module UpdateResourceProfileRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: Zz__string.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the S3 bucket that the request applies to."];
+      sensitivityScoreOverride: Zz__integer.t option
+        [@ocaml.doc
+          "The new sensitivity score for the bucket. Valid values are: 100, assign the maximum score and apply the Sensitive label to the bucket; and, null (empty), assign a score that Amazon Macie calculates automatically after you submit the request."]}
+    let context_ = "UpdateResourceProfileRequest"
+    let make ?sensitivityScoreOverride =
+      fun ~resourceArn -> fun () -> { sensitivityScoreOverride; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Some (Zz__string.to_value x.resourceArn)));
+        ("sensitivityScoreOverride",
+          (Option.map x.sensitivityScoreOverride ~f:Zz__integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sensitivityScoreOverride =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "sensitivityScoreOverride") in
+      let resourceArn =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      make ?sensitivityScoreOverride ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sensitivityScoreOverride =
+        field_map json__ "sensitivityScoreOverride" Zz__integer.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Zz__string.of_json in
+      make ?sensitivityScoreOverride ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the sensitivity score for an S3 bucket."]
+module UpdateResourceProfileDetectionsResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the sensitivity scoring settings for an S3 bucket."]
+module UpdateResourceProfileDetectionsRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: Zz__string.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the S3 bucket that the request applies to."];
+      suppressDataIdentifiers: Zz__listOfSuppressDataIdentifier.t option
+        [@ocaml.doc
+          "An array of objects, one for each custom data identifier or managed data identifier that detected a type of sensitive data to exclude from the bucket's score. To include all sensitive data types in the score, don't specify any values for this array."]}
+    let context_ = "UpdateResourceProfileDetectionsRequest"
+    let make ?suppressDataIdentifiers =
+      fun ~resourceArn -> fun () -> { suppressDataIdentifiers; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Some (Zz__string.to_value x.resourceArn)));
+        ("suppressDataIdentifiers",
+          (Option.map x.suppressDataIdentifiers
+             ~f:Zz__listOfSuppressDataIdentifier.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let suppressDataIdentifiers =
+        (Option.map ~f:Zz__listOfSuppressDataIdentifier.of_xml)
+          (Xml.child xml_arg0 "suppressDataIdentifiers") in
+      let resourceArn =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      make ?suppressDataIdentifiers ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let suppressDataIdentifiers =
+        field_map json__ "suppressDataIdentifiers"
+          Zz__listOfSuppressDataIdentifier.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Zz__string.of_json in
+      make ?suppressDataIdentifiers ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the sensitivity scoring settings for an S3 bucket."]
 module UpdateOrganizationConfigurationResponse =
   struct
     type nonrec t = unit
@@ -8269,7 +11290,7 @@ module UpdateOrganizationConfigurationRequest =
       {
       autoEnable: Zz__boolean.t
         [@ocaml.doc
-          "Specifies whether to enable Amazon Macie automatically for an account when the account is added to the organization in Organizations."]}
+          "Specifies whether to enable Amazon Macie automatically for accounts that are added to the organization in Organizations."]}
     let context_ = "UpdateOrganizationConfigurationRequest"
     let make ~autoEnable = fun () -> { autoEnable }
     let to_value x =
@@ -8282,8 +11303,8 @@ module UpdateOrganizationConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "autoEnable") in
       make ~autoEnable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let autoEnable = field_map_exn json "autoEnable" Zz__boolean.of_json in
+    let of_json json__ =
+      let autoEnable = field_map_exn json__ "autoEnable" Zz__boolean.of_json in
       make ~autoEnable ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8390,7 +11411,7 @@ module UpdateMemberSessionRequest =
       {
       id: Zz__string.t
         [@ocaml.doc
-          "The unique identifier for the Amazon Macie resource or account that the request applies to."];
+          "The unique identifier for the Amazon Macie resource that the request applies to."];
       status: MacieStatus.t
         [@ocaml.doc
           "Specifies the new status for the account. Valid values are: ENABLED, resume all Amazon Macie activities for the account; and, PAUSED, suspend all Macie activities for the account."]}
@@ -8409,9 +11430,9 @@ module UpdateMemberSessionRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~status ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" MacieStatus.of_json in
-      let id = field_map_exn json "id" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map_exn json__ "status" MacieStatus.of_json in
+      let id = field_map_exn json__ "id" Zz__string.of_json in
       make ~status ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8518,7 +11539,7 @@ module UpdateMacieSessionRequest =
       {
       findingPublishingFrequency: FindingPublishingFrequency.t option
         [@ocaml.doc
-          "Specifies how often to publish updates to policy findings for the account. This includes publishing updates to Security Hub and Amazon EventBridge (formerly called Amazon CloudWatch Events)."];
+          "Specifies how often to publish updates to policy findings for the account. This includes publishing updates to Security Hub and Amazon EventBridge (formerly Amazon CloudWatch Events)."];
       status: MacieStatus.t option
         [@ocaml.doc
           "Specifies a new status for the account. Valid values are: ENABLED, resume all Amazon Macie activities for the account; and, PAUSED, suspend all Macie activities for the account."]}
@@ -8539,10 +11560,10 @@ module UpdateMacieSessionRequest =
           (Xml.child xml_arg0 "findingPublishingFrequency") in
       make ?status ?findingPublishingFrequency ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" MacieStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" MacieStatus.of_json in
       let findingPublishingFrequency =
-        field_map json "findingPublishingFrequency"
+        field_map json__ "findingPublishingFrequency"
           FindingPublishingFrequency.of_json in
       make ?status ?findingPublishingFrequency ()
     let to_json v = composed_to_json to_value v
@@ -8651,9 +11672,9 @@ module UpdateFindingsFilterResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?id ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "id" Zz__string.of_json in
-      let arn = field_map json "arn" Zz__string.of_json in make ?id ?arn ()
+    let of_json json__ =
+      let id = field_map json__ "id" Zz__string.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in make ?id ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the criteria and other settings for a findings filter."]
@@ -8663,56 +11684,54 @@ module UpdateFindingsFilterRequest =
       {
       action: FindingsFilterAction.t option
         [@ocaml.doc
-          "The action to perform on findings that meet the filter criteria (findingCriteria). Valid values are: ARCHIVE, suppress (automatically archive) the findings; and, NOOP, don't perform any action on the findings."];
+          "The action to perform on findings that match the filter criteria (findingCriteria). Valid values are: ARCHIVE, suppress (automatically archive) the findings; and, NOOP, don't perform any action on the findings."];
+      clientToken: Zz__string.t option
+        [@ocaml.doc
+          "A unique, case-sensitive token that you provide to ensure the idempotency of the request."];
       description: Zz__string.t option
         [@ocaml.doc
-          "A custom description of the filter. The description can contain as many as 512 characters. We strongly recommend that you avoid including any sensitive data in the description of a filter. Other users might be able to see this description, depending on the actions that they're allowed to perform in Amazon Macie."];
+          "A custom description of the filter. The description can contain as many as 512 characters. We strongly recommend that you avoid including any sensitive data in the description of a filter. Other users of your account might be able to see this description, depending on the actions that they're allowed to perform in Amazon Macie."];
       findingCriteria: FindingCriteria.t option
         [@ocaml.doc "The criteria to use to filter findings."];
       id: Zz__string.t
         [@ocaml.doc
-          "The unique identifier for the Amazon Macie resource or account that the request applies to."];
+          "The unique identifier for the Amazon Macie resource that the request applies to."];
       name: Zz__string.t option
         [@ocaml.doc
-          "A custom name for the filter. The name must contain at least 3 characters and can contain as many as 64 characters. We strongly recommend that you avoid including any sensitive data in the name of a filter. Other users might be able to see this name, depending on the actions that they're allowed to perform in Amazon Macie."];
+          "A custom name for the filter. The name must contain at least 3 characters and can contain as many as 64 characters. We strongly recommend that you avoid including any sensitive data in the name of a filter. Other users of your account might be able to see this name, depending on the actions that they're allowed to perform in Amazon Macie."];
       position: Zz__integer.t option
         [@ocaml.doc
-          "The position of the filter in the list of saved filters on the Amazon Macie console. This value also determines the order in which the filter is applied to findings, relative to other filters that are also applied to the findings."];
-      clientToken: Zz__string.t option
-        [@ocaml.doc
-          "A unique, case-sensitive token that you provide to ensure the idempotency of the request."]}
+          "The position of the filter in the list of saved filters on the Amazon Macie console. This value also determines the order in which the filter is applied to findings, relative to other filters that are also applied to the findings."]}
     let context_ = "UpdateFindingsFilterRequest"
     let make ?action =
-      fun ?description ->
-        fun ?findingCriteria ->
-          fun ?name ->
-            fun ?position ->
-              fun ?clientToken ->
+      fun ?clientToken ->
+        fun ?description ->
+          fun ?findingCriteria ->
+            fun ?name ->
+              fun ?position ->
                 fun ~id ->
                   fun () ->
                     {
                       action;
+                      clientToken;
                       description;
                       findingCriteria;
                       name;
                       position;
-                      clientToken;
                       id
                     }
     let to_value x =
       structure_to_value
         [("action", (Option.map x.action ~f:FindingsFilterAction.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:Zz__string.to_value));
         ("description", (Option.map x.description ~f:Zz__string.to_value));
         ("findingCriteria",
           (Option.map x.findingCriteria ~f:FindingCriteria.to_value));
         ("id", (Some (Zz__string.to_value x.id)));
         ("name", (Option.map x.name ~f:Zz__string.to_value));
-        ("position", (Option.map x.position ~f:Zz__integer.to_value));
-        ("clientToken", (Option.map x.clientToken ~f:Zz__string.to_value))]
+        ("position", (Option.map x.position ~f:Zz__integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let clientToken =
-        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clientToken") in
       let position =
         (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "position") in
       let name =
@@ -8724,26 +11743,136 @@ module UpdateFindingsFilterRequest =
           (Xml.child xml_arg0 "findingCriteria") in
       let description =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
+      let clientToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clientToken") in
       let action =
         (Option.map ~f:FindingsFilterAction.of_xml)
           (Xml.child xml_arg0 "action") in
-      make ?clientToken ?position ?name ~id ?findingCriteria ?description
+      make ?position ?name ~id ?findingCriteria ?description ?clientToken
         ?action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" Zz__string.of_json in
-      let position = field_map json "position" Zz__integer.of_json in
-      let name = field_map json "name" Zz__string.of_json in
-      let id = field_map_exn json "id" Zz__string.of_json in
+    let of_json json__ =
+      let position = field_map json__ "position" Zz__integer.of_json in
+      let name = field_map json__ "name" Zz__string.of_json in
+      let id = field_map_exn json__ "id" Zz__string.of_json in
       let findingCriteria =
-        field_map json "findingCriteria" FindingCriteria.of_json in
-      let description = field_map json "description" Zz__string.of_json in
-      let action = field_map json "action" FindingsFilterAction.of_json in
-      make ?clientToken ?position ?name ~id ?findingCriteria ?description
+        field_map json__ "findingCriteria" FindingCriteria.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
+      let clientToken = field_map json__ "clientToken" Zz__string.of_json in
+      let action = field_map json__ "action" FindingsFilterAction.of_json in
+      make ?position ?name ~id ?findingCriteria ?description ?clientToken
         ?action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the criteria and other settings for a findings filter."]
+module UpdateClassificationScopeResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the classification scope settings for an account."]
+module UpdateClassificationScopeRequest =
+  struct
+    type nonrec t =
+      {
+      id: Zz__string.t
+        [@ocaml.doc
+          "The unique identifier for the Amazon Macie resource that the request applies to."];
+      s3: S3ClassificationScopeUpdate.t option
+        [@ocaml.doc
+          "The S3 buckets to add or remove from the exclusion list defined by the classification scope."]}
+    let context_ = "UpdateClassificationScopeRequest"
+    let make ?s3 = fun ~id -> fun () -> { s3; id }
+    let to_value x =
+      structure_to_value
+        [("id", (Some (Zz__string.to_value x.id)));
+        ("s3", (Option.map x.s3 ~f:S3ClassificationScopeUpdate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3 =
+        (Option.map ~f:S3ClassificationScopeUpdate.of_xml)
+          (Xml.child xml_arg0 "s3") in
+      let id =
+        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ?s3 ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3 = field_map json__ "s3" S3ClassificationScopeUpdate.of_json in
+      let id = field_map_exn json__ "id" Zz__string.of_json in
+      make ?s3 ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the classification scope settings for an account."]
 module UpdateClassificationJobResponse =
   struct
     type nonrec t = unit
@@ -8863,12 +11992,272 @@ module UpdateClassificationJobRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~jobStatus ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map_exn json "jobStatus" JobStatus.of_json in
-      let jobId = field_map_exn json "jobId" Zz__string.of_json in
+    let of_json json__ =
+      let jobStatus = field_map_exn json__ "jobStatus" JobStatus.of_json in
+      let jobId = field_map_exn json__ "jobId" Zz__string.of_json in
       make ~jobStatus ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Changes the status of a classification job."]
+module UpdateAutomatedDiscoveryConfigurationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Changes the configuration settings and status of automated sensitive data discovery for an organization or standalone account."]
+module UpdateAutomatedDiscoveryConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      autoEnableOrganizationMembers: AutoEnableMode.t option
+        [@ocaml.doc
+          "Specifies whether to automatically enable automated sensitive data discovery for accounts in the organization. Valid values are: ALL (default), enable it for all existing accounts and new member accounts; NEW, enable it only for new member accounts; and, NONE, don't enable it for any accounts. If you specify NEW or NONE, automated sensitive data discovery continues to be enabled for any existing accounts that it's currently enabled for. To enable or disable it for individual member accounts, specify NEW or NONE, and then enable or disable it for each account by using the BatchUpdateAutomatedDiscoveryAccounts operation."];
+      status: AutomatedDiscoveryStatus.t
+        [@ocaml.doc
+          "The new status of automated sensitive data discovery for the organization or account. Valid values are: ENABLED, start or resume all automated sensitive data discovery activities; and, DISABLED, stop performing all automated sensitive data discovery activities. If you specify DISABLED for an administrator account, you also disable automated sensitive data discovery for all member accounts in the organization."]}
+    let context_ = "UpdateAutomatedDiscoveryConfigurationRequest"
+    let make ?autoEnableOrganizationMembers =
+      fun ~status -> fun () -> { autoEnableOrganizationMembers; status }
+    let to_value x =
+      structure_to_value
+        [("autoEnableOrganizationMembers",
+           (Option.map x.autoEnableOrganizationMembers
+              ~f:AutoEnableMode.to_value));
+        ("status", (Some (AutomatedDiscoveryStatus.to_value x.status)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        AutomatedDiscoveryStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+      let autoEnableOrganizationMembers =
+        (Option.map ~f:AutoEnableMode.of_xml)
+          (Xml.child xml_arg0 "autoEnableOrganizationMembers") in
+      make ~status ?autoEnableOrganizationMembers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map_exn json__ "status" AutomatedDiscoveryStatus.of_json in
+      let autoEnableOrganizationMembers =
+        field_map json__ "autoEnableOrganizationMembers"
+          AutoEnableMode.of_json in
+      make ~status ?autoEnableOrganizationMembers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Changes the configuration settings and status of automated sensitive data discovery for an organization or standalone account."]
+module UpdateAllowListResponse =
+  struct
+    type nonrec t =
+      {
+      arn:
+        Zz__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922.t
+          option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the allow list."];
+      id: Zz__stringMin22Max22PatternAZ0922.t option
+        [@ocaml.doc "The unique identifier for the allow list."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?arn = fun ?id -> fun () -> { arn; id }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("arn",
+           (Option.map x.arn
+              ~f:Zz__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922.to_value));
+        ("id",
+          (Option.map x.id ~f:Zz__stringMin22Max22PatternAZ0922.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        (Option.map ~f:Zz__stringMin22Max22PatternAZ0922.of_xml)
+          (Xml.child xml_arg0 "id") in
+      let arn =
+        (Option.map
+           ~f:Zz__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id =
+        field_map json__ "id" Zz__stringMin22Max22PatternAZ0922.of_json in
+      let arn =
+        field_map json__ "arn"
+          Zz__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922.of_json in
+      make ?id ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the settings for an allow list."]
+module UpdateAllowListRequest =
+  struct
+    type nonrec t =
+      {
+      criteria: AllowListCriteria.t
+        [@ocaml.doc
+          "The criteria that specify the text or text pattern to ignore. The criteria can be the location and name of an S3 object that lists specific text to ignore (s3WordsList), or a regular expression that defines a text pattern to ignore (regex). You can change a list's underlying criteria, such as the name of the S3 object or the regular expression to use. However, you can't change the type from s3WordsList to regex or the other way around."];
+      description: Zz__stringMin1Max512PatternSS.t option
+        [@ocaml.doc
+          "A custom description of the allow list. The description can contain as many as 512 characters."];
+      id: Zz__string.t
+        [@ocaml.doc
+          "The unique identifier for the Amazon Macie resource that the request applies to."];
+      name: Zz__stringMin1Max128Pattern.t
+        [@ocaml.doc
+          "A custom name for the allow list. The name can contain as many as 128 characters."]}
+    let context_ = "UpdateAllowListRequest"
+    let make ?description =
+      fun ~criteria ->
+        fun ~id -> fun ~name -> fun () -> { description; criteria; id; name }
+    let to_value x =
+      structure_to_value
+        [("criteria", (Some (AllowListCriteria.to_value x.criteria)));
+        ("description",
+          (Option.map x.description ~f:Zz__stringMin1Max512PatternSS.to_value));
+        ("id", (Some (Zz__string.to_value x.id)));
+        ("name", (Some (Zz__stringMin1Max128Pattern.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        Zz__stringMin1Max128Pattern.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let id =
+        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let description =
+        (Option.map ~f:Zz__stringMin1Max512PatternSS.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let criteria =
+        AllowListCriteria.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "criteria") in
+      make ~name ~id ?description ~criteria ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name =
+        field_map_exn json__ "name" Zz__stringMin1Max128Pattern.of_json in
+      let id = field_map_exn json__ "id" Zz__string.of_json in
+      let description =
+        field_map json__ "description" Zz__stringMin1Max512PatternSS.of_json in
+      let criteria =
+        field_map_exn json__ "criteria" AllowListCriteria.of_json in
+      make ~name ~id ?description ~criteria ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the settings for an allow list."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -8899,17 +12288,16 @@ module UntagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes one or more tags (keys and values) from a classification job, custom data identifier, findings filter, or member account."]
+       "Removes one or more tags (keys and values) from an Amazon Macie resource."]
 module UntagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: Zz__string.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the classification job, custom data identifier, findings filter, or member account."];
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."];
       tagKeys: Zz__listOf__string.t
         [@ocaml.doc
-          "The key of the tag to remove from the resource. To remove multiple tags, append the tagKeys parameter and argument for each additional tag to remove, separated by an ampersand (&)."]}
+          "One or more tags (keys) to remove from the resource. In an HTTP request to remove multiple tags, append the tagKeys parameter and argument for each tag to remove, separated by an ampersand (&)."]}
     let context_ = "UntagResourceRequest"
     let make ~resourceArn =
       fun ~tagKeys -> fun () -> { resourceArn; tagKeys }
@@ -8927,13 +12315,13 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" Zz__listOf__string.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" Zz__listOf__string.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Zz__string.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes one or more tags (keys and values) from a classification job, custom data identifier, findings filter, or member account."]
+       "Removes one or more tags (keys and values) from an Amazon Macie resource."]
 module TestCustomDataIdentifierResponse =
   struct
     type nonrec t =
@@ -9034,11 +12422,11 @@ module TestCustomDataIdentifierResponse =
         (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "matchCount") in
       make ?matchCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let matchCount = field_map json "matchCount" Zz__integer.of_json in
+    let of_json json__ =
+      let matchCount = field_map json__ "matchCount" Zz__integer.of_json in
       make ?matchCount ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Tests a custom data identifier."]
+  end[@@ocaml.doc "Tests criteria for a custom data identifier."]
 module TestCustomDataIdentifierRequest =
   struct
     type nonrec t =
@@ -9048,10 +12436,10 @@ module TestCustomDataIdentifierRequest =
           "An array that lists specific character sequences (ignore words) to exclude from the results. If the text matched by the regular expression contains any string in this array, Amazon Macie ignores it. The array can contain as many as 10 ignore words. Each ignore word can contain 4-90 UTF-8 characters. Ignore words are case sensitive."];
       keywords: Zz__listOf__string.t option
         [@ocaml.doc
-          "An array that lists specific character sequences (keywords), one of which must be within proximity (maximumMatchDistance) of the regular expression to match. The array can contain as many as 50 keywords. Each keyword can contain 3-90 UTF-8 characters. Keywords aren't case sensitive."];
+          "An array that lists specific character sequences (keywords), one of which must precede and be within proximity (maximumMatchDistance) of the regular expression to match. The array can contain as many as 50 keywords. Each keyword can contain 3-90 UTF-8 characters. Keywords aren't case sensitive."];
       maximumMatchDistance: Zz__integer.t option
         [@ocaml.doc
-          "The maximum number of characters that can exist between text that matches the regular expression and the character sequences specified by the keywords array. Amazon Macie includes or excludes a result based on the proximity of a keyword to text that matches the regular expression. The distance can be 1-300 characters. The default value is 50."];
+          "The maximum number of characters that can exist between the end of at least one complete character sequence specified by the keywords array and the end of the text that matches the regex pattern. If a complete keyword precedes all the text that matches the pattern and the keyword is within the specified distance, Amazon Macie includes the result. The distance can be 1-300 characters. The default value is 50."];
       regex: Zz__string.t
         [@ocaml.doc
           "The regular expression (regex) that defines the pattern to match. The expression can contain as many as 512 characters."];
@@ -9099,17 +12487,17 @@ module TestCustomDataIdentifierRequest =
           (Xml.child xml_arg0 "ignoreWords") in
       make ~sampleText ~regex ?maximumMatchDistance ?keywords ?ignoreWords ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sampleText = field_map_exn json "sampleText" Zz__string.of_json in
-      let regex = field_map_exn json "regex" Zz__string.of_json in
+    let of_json json__ =
+      let sampleText = field_map_exn json__ "sampleText" Zz__string.of_json in
+      let regex = field_map_exn json__ "regex" Zz__string.of_json in
       let maximumMatchDistance =
-        field_map json "maximumMatchDistance" Zz__integer.of_json in
-      let keywords = field_map json "keywords" Zz__listOf__string.of_json in
+        field_map json__ "maximumMatchDistance" Zz__integer.of_json in
+      let keywords = field_map json__ "keywords" Zz__listOf__string.of_json in
       let ignoreWords =
-        field_map json "ignoreWords" Zz__listOf__string.of_json in
+        field_map json__ "ignoreWords" Zz__listOf__string.of_json in
       make ~sampleText ~regex ?maximumMatchDistance ?keywords ?ignoreWords ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Tests a custom data identifier."]
+  end[@@ocaml.doc "Tests criteria for a custom data identifier."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -9140,14 +12528,13 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates one or more tags (keys and values) that are associated with a classification job, custom data identifier, findings filter, or member account."]
+       "Adds or updates one or more tags (keys and values) that are associated with an Amazon Macie resource."]
 module TagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: Zz__string.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the classification job, custom data identifier, findings filter, or member account."];
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."];
       tags: TagMap.t
         [@ocaml.doc
           "A map of key-value pairs that specifies the tags to associate with the resource. A resource can have a maximum of 50 tags. Each tag consists of a tag key and an associated tag value. The maximum length of a tag key is 128 characters. The maximum length of a tag value is 256 characters."]}
@@ -9166,20 +12553,20 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Zz__string.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates one or more tags (keys and values) that are associated with a classification job, custom data identifier, findings filter, or member account."]
+       "Adds or updates one or more tags (keys and values) that are associated with an Amazon Macie resource."]
 module SearchResourcesResponse =
   struct
     type nonrec t =
       {
       matchingResources: Zz__listOfMatchingResource.t option
         [@ocaml.doc
-          "An array of objects, one for each resource that meets the filter criteria specified in the request."];
+          "An array of objects, one for each resource that matches the filter criteria specified in the request."];
       nextToken: Zz__string.t option
         [@ocaml.doc
           "The string to use in a subsequent request to get the next page of results in a paginated response. This value is null if there are no additional pages."]}
@@ -9283,14 +12670,15 @@ module SearchResourcesResponse =
           (Xml.child xml_arg0 "matchingResources") in
       make ?nextToken ?matchingResources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
       let matchingResources =
-        field_map json "matchingResources" Zz__listOfMatchingResource.of_json in
+        field_map json__ "matchingResources"
+          Zz__listOfMatchingResource.of_json in
       make ?nextToken ?matchingResources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves (queries) statistical data and other information about Amazon Web Services resources that Amazon Macie monitors and analyzes."]
+       "Retrieves (queries) statistical data and other information about Amazon Web Services resources that Amazon Macie monitors and analyzes for an account."]
 module SearchResourcesRequest =
   struct
     type nonrec t =
@@ -9334,17 +12722,18 @@ module SearchResourcesRequest =
           (Xml.child xml_arg0 "bucketCriteria") in
       make ?sortCriteria ?nextToken ?maxResults ?bucketCriteria ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sortCriteria =
-        field_map json "sortCriteria" SearchResourcesSortCriteria.of_json in
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
-      let maxResults = field_map json "maxResults" Zz__integer.of_json in
+        field_map json__ "sortCriteria" SearchResourcesSortCriteria.of_json in
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" Zz__integer.of_json in
       let bucketCriteria =
-        field_map json "bucketCriteria" SearchResourcesBucketCriteria.of_json in
+        field_map json__ "bucketCriteria"
+          SearchResourcesBucketCriteria.of_json in
       make ?sortCriteria ?nextToken ?maxResults ?bucketCriteria ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves (queries) statistical data and other information about Amazon Web Services resources that Amazon Macie monitors and analyzes."]
+       "Retrieves (queries) statistical data and other information about Amazon Web Services resources that Amazon Macie monitors and analyzes for an account."]
 module PutFindingsPublicationConfigurationResponse =
   struct
     type nonrec t = unit
@@ -9469,11 +12858,11 @@ module PutFindingsPublicationConfigurationRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ?securityHubConfiguration ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityHubConfiguration =
-        field_map json "securityHubConfiguration"
+        field_map json__ "securityHubConfiguration"
           SecurityHubConfiguration.of_json in
-      let clientToken = field_map json "clientToken" Zz__string.of_json in
+      let clientToken = field_map json__ "clientToken" Zz__string.of_json in
       make ?securityHubConfiguration ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9581,14 +12970,14 @@ module PutClassificationExportConfigurationResponse =
           (Xml.child xml_arg0 "configuration") in
       make ?configuration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configuration =
-        field_map json "configuration"
+        field_map json__ "configuration"
           ClassificationExportConfiguration.of_json in
       make ?configuration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates the configuration settings for storing data classification results."]
+       "Adds or updates the configuration settings for storing data classification results."]
 module PutClassificationExportConfigurationRequest =
   struct
     type nonrec t =
@@ -9609,21 +12998,21 @@ module PutClassificationExportConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "configuration") in
       make ~configuration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configuration =
-        field_map_exn json "configuration"
+        field_map_exn json__ "configuration"
           ClassificationExportConfiguration.of_json in
       make ~configuration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates the configuration settings for storing data classification results."]
+       "Adds or updates the configuration settings for storing data classification results."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
       {
       tags: TagMap.t option
         [@ocaml.doc
-          "A map of key-value pairs that identifies the tags (keys and values) that are associated with the resource."]}
+          "A map of key-value pairs that specifies which tags (keys and values) are associated with the resource."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?tags = fun () -> { tags }
@@ -9650,18 +13039,17 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the tags (keys and values) that are associated with a classification job, custom data identifier, findings filter, or member account."]
+       "Retrieves the tags (keys and values) that are associated with an Amazon Macie resource."]
 module ListTagsForResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: Zz__string.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the classification job, custom data identifier, findings filter, or member account."]}
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -9674,12 +13062,427 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Zz__string.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the tags (keys and values) that are associated with a classification job, custom data identifier, findings filter, or member account."]
+       "Retrieves the tags (keys and values) that are associated with an Amazon Macie resource."]
+module ListSensitivityInspectionTemplatesResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: Zz__string.t option
+        [@ocaml.doc
+          "The string to use in a subsequent request to get the next page of results in a paginated response. This value is null if there are no additional pages."];
+      sensitivityInspectionTemplates:
+        Zz__listOfSensitivityInspectionTemplatesEntry.t option
+        [@ocaml.doc
+          "An array that specifies the unique identifier and name of the sensitivity inspection template for the account."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?sensitivityInspectionTemplates ->
+        fun () -> { nextToken; sensitivityInspectionTemplates }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value));
+        ("sensitivityInspectionTemplates",
+          (Option.map x.sensitivityInspectionTemplates
+             ~f:Zz__listOfSensitivityInspectionTemplatesEntry.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sensitivityInspectionTemplates =
+        (Option.map ~f:Zz__listOfSensitivityInspectionTemplatesEntry.of_xml)
+          (Xml.child xml_arg0 "sensitivityInspectionTemplates") in
+      let nextToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ?sensitivityInspectionTemplates ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sensitivityInspectionTemplates =
+        field_map json__ "sensitivityInspectionTemplates"
+          Zz__listOfSensitivityInspectionTemplatesEntry.of_json in
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      make ?sensitivityInspectionTemplates ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a subset of information about the sensitivity inspection template for an account."]
+module ListSensitivityInspectionTemplatesRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to include in each page of a paginated response."];
+      nextToken: Zz__string.t option
+        [@ocaml.doc
+          "The nextToken string that specifies which page of results to return in a paginated response."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a subset of information about the sensitivity inspection template for an account."]
+module ListResourceProfileDetectionsResponse =
+  struct
+    type nonrec t =
+      {
+      detections: Zz__listOfDetection.t option
+        [@ocaml.doc
+          "An array of objects, one for each type of sensitive data that Amazon Macie found in the bucket. Each object reports the number of occurrences of the specified type and provides information about the custom data identifier or managed data identifier that detected the data."];
+      nextToken: Zz__string.t option
+        [@ocaml.doc
+          "The string to use in a subsequent request to get the next page of results in a paginated response. This value is null if there are no additional pages."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?detections =
+      fun ?nextToken -> fun () -> { detections; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("detections",
+           (Option.map x.detections ~f:Zz__listOfDetection.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let detections =
+        (Option.map ~f:Zz__listOfDetection.of_xml)
+          (Xml.child xml_arg0 "detections") in
+      make ?nextToken ?detections ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let detections =
+        field_map json__ "detections" Zz__listOfDetection.of_json in
+      make ?nextToken ?detections ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about the types and amount of sensitive data that Amazon Macie found in an S3 bucket."]
+module ListResourceProfileDetectionsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to include in each page of a paginated response."];
+      nextToken: Zz__string.t option
+        [@ocaml.doc
+          "The nextToken string that specifies which page of results to return in a paginated response."];
+      resourceArn: Zz__string.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the S3 bucket that the request applies to."]}
+    let context_ = "ListResourceProfileDetectionsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~resourceArn -> fun () -> { maxResults; nextToken; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value));
+        ("resourceArn", (Some (Zz__string.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      let nextToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      make ~resourceArn ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Zz__string.of_json in
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      make ~resourceArn ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about the types and amount of sensitive data that Amazon Macie found in an S3 bucket."]
+module ListResourceProfileArtifactsResponse =
+  struct
+    type nonrec t =
+      {
+      artifacts: Zz__listOfResourceProfileArtifact.t option
+        [@ocaml.doc
+          "An array of objects, one for each of 1-100 S3 objects that Amazon Macie selected for analysis. If Macie has analyzed more than 100 objects in the bucket, Macie populates the array based on the value for the ResourceProfileArtifact.sensitive field for an object: true (sensitive), followed by false (not sensitive). Macie then populates any remaining items in the array with information about objects where the value for the ResourceProfileArtifact.classificationResultStatus field is SKIPPED."];
+      nextToken: Zz__string.t option
+        [@ocaml.doc
+          "The string to use in a subsequent request to get the next page of results in a paginated response. This value is null if there are no additional pages."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?artifacts =
+      fun ?nextToken -> fun () -> { artifacts; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("artifacts",
+           (Option.map x.artifacts
+              ~f:Zz__listOfResourceProfileArtifact.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let artifacts =
+        (Option.map ~f:Zz__listOfResourceProfileArtifact.of_xml)
+          (Xml.child xml_arg0 "artifacts") in
+      make ?nextToken ?artifacts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let artifacts =
+        field_map json__ "artifacts"
+          Zz__listOfResourceProfileArtifact.of_json in
+      make ?nextToken ?artifacts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about objects that Amazon Macie selected from an S3 bucket for automated sensitive data discovery."]
+module ListResourceProfileArtifactsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: Zz__string.t option
+        [@ocaml.doc
+          "The nextToken string that specifies which page of results to return in a paginated response."];
+      resourceArn: Zz__string.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the S3 bucket that the request applies to."]}
+    let context_ = "ListResourceProfileArtifactsRequest"
+    let make ?nextToken =
+      fun ~resourceArn -> fun () -> { nextToken; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value));
+        ("resourceArn", (Some (Zz__string.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      let nextToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ~resourceArn ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Zz__string.of_json in
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      make ~resourceArn ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about objects that Amazon Macie selected from an S3 bucket for automated sensitive data discovery."]
 module ListOrganizationAdminAccountsResponse =
   struct
     type nonrec t =
@@ -9789,10 +13592,10 @@ module ListOrganizationAdminAccountsResponse =
           (Xml.child xml_arg0 "adminAccounts") in
       make ?nextToken ?adminAccounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
       let adminAccounts =
-        field_map json "adminAccounts" Zz__listOfAdminAccount.of_json in
+        field_map json__ "adminAccounts" Zz__listOfAdminAccount.of_json in
       make ?nextToken ?adminAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9821,9 +13624,9 @@ module ListOrganizationAdminAccountsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9834,7 +13637,7 @@ module ListMembersResponse =
       {
       members: Zz__listOfMember.t option
         [@ocaml.doc
-          "An array of objects, one for each account that's associated with the administrator account and meets the criteria specified in the request."];
+          "An array of objects, one for each account that's associated with the administrator account and matches the criteria specified in the request."];
       nextToken: Zz__string.t option
         [@ocaml.doc
           "The string to use in a subsequent request to get the next page of results in a paginated response. This value is null if there are no additional pages."]}
@@ -9935,9 +13738,9 @@ module ListMembersResponse =
           (Xml.child xml_arg0 "members") in
       make ?nextToken ?members ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
-      let members = field_map json "members" Zz__listOfMember.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let members = field_map json__ "members" Zz__listOfMember.of_json in
       make ?nextToken ?members ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9976,10 +13779,11 @@ module ListMembersRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?onlyAssociated ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let onlyAssociated = field_map json "onlyAssociated" Zz__string.of_json in
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let onlyAssociated =
+        field_map json__ "onlyAssociated" Zz__string.of_json in
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       make ?onlyAssociated ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10028,10 +13832,11 @@ module ListManagedDataIdentifiersResponse =
           (Xml.child xml_arg0 "items") in
       make ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
       let items =
-        field_map json "items" Zz__listOfManagedDataIdentifierSummary.of_json in
+        field_map json__ "items"
+          Zz__listOfManagedDataIdentifierSummary.of_json in
       make ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10053,8 +13858,8 @@ module ListManagedDataIdentifiersRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
       make ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10168,14 +13973,14 @@ module ListInvitationsResponse =
           (Xml.child xml_arg0 "invitations") in
       make ?nextToken ?invitations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
       let invitations =
-        field_map json "invitations" Zz__listOfInvitation.of_json in
+        field_map json__ "invitations" Zz__listOfInvitation.of_json in
       make ?nextToken ?invitations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information about the Amazon Macie membership invitations that were received by an account."]
+       "Retrieves information about Amazon Macie membership invitations that were received by an account."]
 module ListInvitationsRequest =
   struct
     type nonrec t =
@@ -10200,20 +14005,20 @@ module ListInvitationsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information about the Amazon Macie membership invitations that were received by an account."]
+       "Retrieves information about Amazon Macie membership invitations that were received by an account."]
 module ListFindingsResponse =
   struct
     type nonrec t =
       {
       findingIds: Zz__listOf__string.t option
         [@ocaml.doc
-          "An array of strings, where each string is the unique identifier for a finding that meets the filter criteria specified in the request."];
+          "An array of strings, where each string is the unique identifier for a finding that matches the filter criteria specified in the request."];
       nextToken: Zz__string.t option
         [@ocaml.doc
           "The string to use in a subsequent request to get the next page of results in a paginated response. This value is null if there are no additional pages."]}
@@ -10316,9 +14121,10 @@ module ListFindingsResponse =
           (Xml.child xml_arg0 "findingIds") in
       make ?nextToken ?findingIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
-      let findingIds = field_map json "findingIds" Zz__listOf__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let findingIds =
+        field_map json__ "findingIds" Zz__listOf__string.of_json in
       make ?nextToken ?findingIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10365,12 +14171,12 @@ module ListFindingsRequest =
           (Xml.child xml_arg0 "findingCriteria") in
       make ?sortCriteria ?nextToken ?maxResults ?findingCriteria ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortCriteria = field_map json "sortCriteria" SortCriteria.of_json in
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
-      let maxResults = field_map json "maxResults" Zz__integer.of_json in
+    let of_json json__ =
+      let sortCriteria = field_map json__ "sortCriteria" SortCriteria.of_json in
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" Zz__integer.of_json in
       let findingCriteria =
-        field_map json "findingCriteria" FindingCriteria.of_json in
+        field_map json__ "findingCriteria" FindingCriteria.of_json in
       make ?sortCriteria ?nextToken ?maxResults ?findingCriteria ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10485,10 +14291,10 @@ module ListFindingsFiltersResponse =
           (Xml.child xml_arg0 "findingsFilterListItems") in
       make ?nextToken ?findingsFilterListItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
       let findingsFilterListItems =
-        field_map json "findingsFilterListItems"
+        field_map json__ "findingsFilterListItems"
           Zz__listOfFindingsFilterListItem.of_json in
       make ?nextToken ?findingsFilterListItems ()
     let to_json v = composed_to_json to_value v
@@ -10518,9 +14324,9 @@ module ListFindingsFiltersRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10634,14 +14440,15 @@ module ListCustomDataIdentifiersResponse =
           (Xml.child xml_arg0 "items") in
       make ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
       let items =
-        field_map json "items" Zz__listOfCustomDataIdentifierSummary.of_json in
+        field_map json__ "items"
+          Zz__listOfCustomDataIdentifierSummary.of_json in
       make ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a subset of information about all the custom data identifiers for an account."]
+       "Retrieves a subset of information about the custom data identifiers for an account."]
 module ListCustomDataIdentifiersRequest =
   struct
     type nonrec t =
@@ -10666,20 +14473,140 @@ module ListCustomDataIdentifiersRequest =
         (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
-      let maxResults = field_map json "maxResults" Zz__integer.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" Zz__integer.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a subset of information about all the custom data identifiers for an account."]
+       "Retrieves a subset of information about the custom data identifiers for an account."]
+module ListClassificationScopesResponse =
+  struct
+    type nonrec t =
+      {
+      classificationScopes: Zz__listOfClassificationScopeSummary.t option
+        [@ocaml.doc
+          "An array that specifies the unique identifier and name of the classification scope for the account."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The string to use in a subsequent request to get the next page of results in a paginated response. This value is null if there are no additional pages."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?classificationScopes =
+      fun ?nextToken -> fun () -> { classificationScopes; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("classificationScopes",
+           (Option.map x.classificationScopes
+              ~f:Zz__listOfClassificationScopeSummary.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let classificationScopes =
+        (Option.map ~f:Zz__listOfClassificationScopeSummary.of_xml)
+          (Xml.child xml_arg0 "classificationScopes") in
+      make ?nextToken ?classificationScopes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let classificationScopes =
+        field_map json__ "classificationScopes"
+          Zz__listOfClassificationScopeSummary.of_json in
+      make ?nextToken ?classificationScopes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a subset of information about the classification scope for an account."]
+module ListClassificationScopesRequest =
+  struct
+    type nonrec t =
+      {
+      name: Zz__string.t option
+        [@ocaml.doc
+          "The name of the classification scope to retrieve the unique identifier for."];
+      nextToken: Zz__string.t option
+        [@ocaml.doc
+          "The nextToken string that specifies which page of results to return in a paginated response."]}
+    let make ?name = fun ?nextToken -> fun () -> { name; nextToken }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:Zz__string.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let name =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "name") in
+      make ?nextToken ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let name = field_map json__ "name" Zz__string.of_json in
+      make ?nextToken ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a subset of information about the classification scope for an account."]
 module ListClassificationJobsResponse =
   struct
     type nonrec t =
       {
       items: Zz__listOfJobSummary.t option
         [@ocaml.doc
-          "An array of objects, one for each job that meets the filter criteria specified in the request."];
+          "An array of objects, one for each job that matches the filter criteria specified in the request."];
       nextToken: Zz__string.t option
         [@ocaml.doc
           "The string to use in a subsequent request to get the next page of results in a paginated response. This value is null if there are no additional pages."]}
@@ -10780,9 +14707,9 @@ module ListClassificationJobsResponse =
           (Xml.child xml_arg0 "items") in
       make ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
-      let items = field_map json "items" Zz__listOfJobSummary.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let items = field_map json__ "items" Zz__listOfJobSummary.of_json in
       make ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10828,17 +14755,274 @@ module ListClassificationJobsRequest =
           (Xml.child xml_arg0 "filterCriteria") in
       make ?sortCriteria ?nextToken ?maxResults ?filterCriteria ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sortCriteria =
-        field_map json "sortCriteria" ListJobsSortCriteria.of_json in
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
-      let maxResults = field_map json "maxResults" Zz__integer.of_json in
+        field_map json__ "sortCriteria" ListJobsSortCriteria.of_json in
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" Zz__integer.of_json in
       let filterCriteria =
-        field_map json "filterCriteria" ListJobsFilterCriteria.of_json in
+        field_map json__ "filterCriteria" ListJobsFilterCriteria.of_json in
       make ?sortCriteria ?nextToken ?maxResults ?filterCriteria ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a subset of information about one or more classification jobs."]
+module ListAutomatedDiscoveryAccountsResponse =
+  struct
+    type nonrec t =
+      {
+      items: Zz__listOfAutomatedDiscoveryAccount.t option
+        [@ocaml.doc
+          "An array of objects, one for each account specified in the request. Each object specifies the Amazon Web Services account ID for an account and the current status of automated sensitive data discovery for that account."];
+      nextToken: Zz__string.t option
+        [@ocaml.doc
+          "The string to use in a subsequent request to get the next page of results in a paginated response. This value is null if there are no additional pages."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?items = fun ?nextToken -> fun () -> { items; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("items",
+           (Option.map x.items
+              ~f:Zz__listOfAutomatedDiscoveryAccount.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let items =
+        (Option.map ~f:Zz__listOfAutomatedDiscoveryAccount.of_xml)
+          (Xml.child xml_arg0 "items") in
+      make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let items =
+        field_map json__ "items" Zz__listOfAutomatedDiscoveryAccount.of_json in
+      make ?nextToken ?items ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the status of automated sensitive data discovery for one or more accounts."]
+module ListAutomatedDiscoveryAccountsRequest =
+  struct
+    type nonrec t =
+      {
+      accountIds: Zz__listOf__string.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for each account, for as many as 50 accounts. To retrieve the status for multiple accounts, append the accountIds parameter and argument for each account, separated by an ampersand (&). To retrieve the status for all the accounts in an organization, omit this parameter."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to include in each page of a paginated response."];
+      nextToken: Zz__string.t option
+        [@ocaml.doc
+          "The nextToken string that specifies which page of results to return in a paginated response."]}
+    let make ?accountIds =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { accountIds; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("accountIds",
+           (Option.map x.accountIds ~f:Zz__listOf__string.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let accountIds =
+        (Option.map ~f:Zz__listOf__string.of_xml)
+          (Xml.child xml_arg0 "accountIds") in
+      make ?nextToken ?maxResults ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let accountIds =
+        field_map json__ "accountIds" Zz__listOf__string.of_json in
+      make ?nextToken ?maxResults ?accountIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the status of automated sensitive data discovery for one or more accounts."]
+module ListAllowListsResponse =
+  struct
+    type nonrec t =
+      {
+      allowLists: Zz__listOfAllowListSummary.t option
+        [@ocaml.doc "An array of objects, one for each allow list."];
+      nextToken: Zz__string.t option
+        [@ocaml.doc
+          "The string to use in a subsequent request to get the next page of results in a paginated response. This value is null if there are no additional pages."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?allowLists =
+      fun ?nextToken -> fun () -> { allowLists; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("allowLists",
+           (Option.map x.allowLists ~f:Zz__listOfAllowListSummary.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let allowLists =
+        (Option.map ~f:Zz__listOfAllowListSummary.of_xml)
+          (Xml.child xml_arg0 "allowLists") in
+      make ?nextToken ?allowLists ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let allowLists =
+        field_map json__ "allowLists" Zz__listOfAllowListSummary.of_json in
+      make ?nextToken ?allowLists ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a subset of information about all the allow lists for an account."]
+module ListAllowListsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to include in each page of a paginated response."];
+      nextToken: Zz__string.t option
+        [@ocaml.doc
+          "The nextToken string that specifies which page of results to return in a paginated response."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a subset of information about all the allow lists for an account."]
 module GetUsageTotalsResponse =
   struct
     type nonrec t =
@@ -10948,10 +15132,10 @@ module GetUsageTotalsResponse =
         (Option.map ~f:TimeRange.of_xml) (Xml.child xml_arg0 "timeRange") in
       make ?usageTotals ?timeRange ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let usageTotals =
-        field_map json "usageTotals" Zz__listOfUsageTotal.of_json in
-      let timeRange = field_map json "timeRange" TimeRange.of_json in
+        field_map json__ "usageTotals" Zz__listOfUsageTotal.of_json in
+      let timeRange = field_map json__ "timeRange" TimeRange.of_json in
       make ?usageTotals ?timeRange ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10973,8 +15157,8 @@ module GetUsageTotalsRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "timeRange") in
       make ?timeRange ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeRange = field_map json "timeRange" Zz__string.of_json in
+    let of_json json__ =
+      let timeRange = field_map json__ "timeRange" Zz__string.of_json in
       make ?timeRange ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10988,7 +15172,7 @@ module GetUsageStatisticsResponse =
           "The string to use in a subsequent request to get the next page of results in a paginated response. This value is null if there are no additional pages."];
       records: Zz__listOfUsageRecord.t option
         [@ocaml.doc
-          "An array of objects that contains the results of the query. Each object contains the data for an account that meets the filter criteria specified in the request."];
+          "An array of objects that contains the results of the query. Each object contains the data for an account that matches the filter criteria specified in the request."];
       timeRange: TimeRange.t option
         [@ocaml.doc
           "The inclusive time period that the usage data applies to. Possible values are: MONTH_TO_DATE, for the current calendar month to date; and, PAST_30_DAYS, for the preceding 30 days."]}
@@ -11094,10 +15278,10 @@ module GetUsageStatisticsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?timeRange ?records ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeRange = field_map json "timeRange" TimeRange.of_json in
-      let records = field_map json "records" Zz__listOfUsageRecord.of_json in
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
+    let of_json json__ =
+      let timeRange = field_map json__ "timeRange" TimeRange.of_json in
+      let records = field_map json__ "records" Zz__listOfUsageRecord.of_json in
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
       make ?timeRange ?records ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11151,17 +15335,712 @@ module GetUsageStatisticsRequest =
           (Xml.child xml_arg0 "filterBy") in
       make ?timeRange ?sortBy ?nextToken ?maxResults ?filterBy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeRange = field_map json "timeRange" TimeRange.of_json in
-      let sortBy = field_map json "sortBy" UsageStatisticsSortBy.of_json in
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
-      let maxResults = field_map json "maxResults" Zz__integer.of_json in
+    let of_json json__ =
+      let timeRange = field_map json__ "timeRange" TimeRange.of_json in
+      let sortBy = field_map json__ "sortBy" UsageStatisticsSortBy.of_json in
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" Zz__integer.of_json in
       let filterBy =
-        field_map json "filterBy" Zz__listOfUsageStatisticsFilter.of_json in
+        field_map json__ "filterBy" Zz__listOfUsageStatisticsFilter.of_json in
       make ?timeRange ?sortBy ?nextToken ?maxResults ?filterBy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves (queries) quotas and aggregated usage data for one or more accounts."]
+module GetSensitivityInspectionTemplateResponse =
+  struct
+    type nonrec t =
+      {
+      description: Zz__string.t option
+        [@ocaml.doc "The custom description of the template."];
+      excludes: SensitivityInspectionTemplateExcludes.t option
+        [@ocaml.doc
+          "The managed data identifiers that are explicitly excluded (not used) when performing automated sensitive data discovery."];
+      includes: SensitivityInspectionTemplateIncludes.t option
+        [@ocaml.doc
+          "The allow lists, custom data identifiers, and managed data identifiers that are explicitly included (used) when performing automated sensitive data discovery."];
+      name: Zz__string.t option
+        [@ocaml.doc
+          "The name of the template: automated-sensitive-data-discovery."];
+      sensitivityInspectionTemplateId:
+        SensitivityInspectionTemplateId.t option
+        [@ocaml.doc "The unique identifier for the template."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?description =
+      fun ?excludes ->
+        fun ?includes ->
+          fun ?name ->
+            fun ?sensitivityInspectionTemplateId ->
+              fun () ->
+                {
+                  description;
+                  excludes;
+                  includes;
+                  name;
+                  sensitivityInspectionTemplateId
+                }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("description", (Option.map x.description ~f:Zz__string.to_value));
+        ("excludes",
+          (Option.map x.excludes
+             ~f:SensitivityInspectionTemplateExcludes.to_value));
+        ("includes",
+          (Option.map x.includes
+             ~f:SensitivityInspectionTemplateIncludes.to_value));
+        ("name", (Option.map x.name ~f:Zz__string.to_value));
+        ("sensitivityInspectionTemplateId",
+          (Option.map x.sensitivityInspectionTemplateId
+             ~f:SensitivityInspectionTemplateId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sensitivityInspectionTemplateId =
+        (Option.map ~f:SensitivityInspectionTemplateId.of_xml)
+          (Xml.child xml_arg0 "sensitivityInspectionTemplateId") in
+      let name =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "name") in
+      let includes =
+        (Option.map ~f:SensitivityInspectionTemplateIncludes.of_xml)
+          (Xml.child xml_arg0 "includes") in
+      let excludes =
+        (Option.map ~f:SensitivityInspectionTemplateExcludes.of_xml)
+          (Xml.child xml_arg0 "excludes") in
+      let description =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
+      make ?sensitivityInspectionTemplateId ?name ?includes ?excludes
+        ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sensitivityInspectionTemplateId =
+        field_map json__ "sensitivityInspectionTemplateId"
+          SensitivityInspectionTemplateId.of_json in
+      let name = field_map json__ "name" Zz__string.of_json in
+      let includes =
+        field_map json__ "includes"
+          SensitivityInspectionTemplateIncludes.of_json in
+      let excludes =
+        field_map json__ "excludes"
+          SensitivityInspectionTemplateExcludes.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
+      make ?sensitivityInspectionTemplateId ?name ?includes ?excludes
+        ?description ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the settings for the sensitivity inspection template for an account."]
+module GetSensitivityInspectionTemplateRequest =
+  struct
+    type nonrec t =
+      {
+      id: Zz__string.t
+        [@ocaml.doc
+          "The unique identifier for the Amazon Macie resource that the request applies to."]}
+    let context_ = "GetSensitivityInspectionTemplateRequest"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value [("id", (Some (Zz__string.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Zz__string.of_json in make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the settings for the sensitivity inspection template for an account."]
+module GetSensitiveDataOccurrencesResponse =
+  struct
+    type nonrec t =
+      {
+      error: Zz__string.t option
+        [@ocaml.doc
+          "If an error occurred when Amazon Macie attempted to retrieve occurrences of sensitive data reported by the finding, a description of the error that occurred. This value is null if the status (status) of the request is PROCESSING or SUCCESS."];
+      sensitiveDataOccurrences: SensitiveDataOccurrences.t option
+        [@ocaml.doc
+          "A map that specifies 1-100 types of sensitive data reported by the finding and, for each type, 1-10 occurrences of sensitive data."];
+      status: RevealRequestStatus.t option
+        [@ocaml.doc
+          "The status of the request to retrieve occurrences of sensitive data reported by the finding. Possible values are: ERROR - An error occurred when Amazon Macie attempted to locate, retrieve, or encrypt the sensitive data. The error value indicates the nature of the error that occurred. PROCESSING - Macie is processing the request. SUCCESS - Macie successfully located, retrieved, and encrypted the sensitive data."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnprocessableEntityException of UnprocessableEntityException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?error =
+      fun ?sensitiveDataOccurrences ->
+        fun ?status -> fun () -> { error; sensitiveDataOccurrences; status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnprocessableEntityException" ->
+          `UnprocessableEntityException
+            (UnprocessableEntityException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnprocessableEntityException" ->
+          `UnprocessableEntityException
+            (UnprocessableEntityException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnprocessableEntityException e ->
+          `Assoc
+            [("error", (`String "UnprocessableEntityException"));
+            ("details", (UnprocessableEntityException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("error", (Option.map x.error ~f:Zz__string.to_value));
+        ("sensitiveDataOccurrences",
+          (Option.map x.sensitiveDataOccurrences
+             ~f:SensitiveDataOccurrences.to_value));
+        ("status", (Option.map x.status ~f:RevealRequestStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:RevealRequestStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let sensitiveDataOccurrences =
+        (Option.map ~f:SensitiveDataOccurrences.of_xml)
+          (Xml.child xml_arg0 "sensitiveDataOccurrences") in
+      let error =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "error") in
+      make ?status ?sensitiveDataOccurrences ?error ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "status" RevealRequestStatus.of_json in
+      let sensitiveDataOccurrences =
+        field_map json__ "sensitiveDataOccurrences"
+          SensitiveDataOccurrences.of_json in
+      let error = field_map json__ "error" Zz__string.of_json in
+      make ?status ?sensitiveDataOccurrences ?error ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves occurrences of sensitive data reported by a finding."]
+module GetSensitiveDataOccurrencesRequest =
+  struct
+    type nonrec t =
+      {
+      findingId: Zz__string.t
+        [@ocaml.doc "The unique identifier for the finding."]}
+    let context_ = "GetSensitiveDataOccurrencesRequest"
+    let make ~findingId = fun () -> { findingId }
+    let to_value x =
+      structure_to_value
+        [("findingId", (Some (Zz__string.to_value x.findingId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let findingId =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "findingId") in
+      make ~findingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let findingId = field_map_exn json__ "findingId" Zz__string.of_json in
+      make ~findingId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves occurrences of sensitive data reported by a finding."]
+module GetSensitiveDataOccurrencesAvailabilityResponse =
+  struct
+    type nonrec t =
+      {
+      code: AvailabilityCode.t option
+        [@ocaml.doc
+          "Specifies whether occurrences of sensitive data can be retrieved for the finding. Possible values are: AVAILABLE, the sensitive data can be retrieved; and, UNAVAILABLE, the sensitive data can't be retrieved. If this value is UNAVAILABLE, the reasons array indicates why the data can't be retrieved."];
+      reasons: Zz__listOfUnavailabilityReasonCode.t option
+        [@ocaml.doc
+          "Specifies why occurrences of sensitive data can't be retrieved for the finding. Possible values are: ACCOUNT_NOT_IN_ORGANIZATION - The affected account isn't currently part of your organization. Or the account is part of your organization but Macie isn't currently enabled for the account. You're not allowed to access the affected S3 object by using Macie. INVALID_CLASSIFICATION_RESULT - There isn't a corresponding sensitive data discovery result for the finding. Or the corresponding sensitive data discovery result isn't available in the current Amazon Web Services Region, is malformed or corrupted, or uses an unsupported storage format. Macie can't verify the location of the sensitive data to retrieve. INVALID_RESULT_SIGNATURE - The corresponding sensitive data discovery result is stored in an S3 object that wasn't signed by Macie. Macie can't verify the integrity and authenticity of the sensitive data discovery result. Therefore, Macie can't verify the location of the sensitive data to retrieve. MEMBER_ROLE_TOO_PERMISSIVE - The trust or permissions policy for the IAM role in the affected member account doesn't meet Macie requirements for restricting access to the role. Or the role's trust policy doesn't specify the correct external ID for your organization. Macie can't assume the role to retrieve the sensitive data. MISSING_GET_MEMBER_PERMISSION - You're not allowed to retrieve information about the association between your account and the affected account. Macie can't determine whether you\226\128\153re allowed to access the affected S3 object as the delegated Macie administrator for the affected account. OBJECT_EXCEEDS_SIZE_QUOTA - The storage size of the affected S3 object exceeds the size quota for retrieving occurrences of sensitive data from this type of file. OBJECT_UNAVAILABLE - The affected S3 object isn't available. The object was renamed, moved, deleted, or changed after Macie created the finding. Or the object is encrypted with an KMS key that isn\226\128\153t available. For example, the key is disabled, is scheduled for deletion, or was deleted. RESULT_NOT_SIGNED - The corresponding sensitive data discovery result is stored in an S3 object that hasn't been signed. Macie can't verify the integrity and authenticity of the sensitive data discovery result. Therefore, Macie can't verify the location of the sensitive data to retrieve. ROLE_TOO_PERMISSIVE - Your account is configured to retrieve occurrences of sensitive data by using an IAM role whose trust or permissions policy doesn't meet Macie requirements for restricting access to the role. Macie can\226\128\153t assume the role to retrieve the sensitive data. UNSUPPORTED_FINDING_TYPE - The specified finding isn't a sensitive data finding. UNSUPPORTED_OBJECT_TYPE - The affected S3 object uses a file or storage format that Macie doesn't support for retrieving occurrences of sensitive data. This value is null if sensitive data can be retrieved for the finding."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?code = fun ?reasons -> fun () -> { code; reasons }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("code", (Option.map x.code ~f:AvailabilityCode.to_value));
+        ("reasons",
+          (Option.map x.reasons
+             ~f:Zz__listOfUnavailabilityReasonCode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reasons =
+        (Option.map ~f:Zz__listOfUnavailabilityReasonCode.of_xml)
+          (Xml.child xml_arg0 "reasons") in
+      let code =
+        (Option.map ~f:AvailabilityCode.of_xml) (Xml.child xml_arg0 "code") in
+      make ?reasons ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reasons =
+        field_map json__ "reasons" Zz__listOfUnavailabilityReasonCode.of_json in
+      let code = field_map json__ "code" AvailabilityCode.of_json in
+      make ?reasons ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Checks whether occurrences of sensitive data can be retrieved for a finding."]
+module GetSensitiveDataOccurrencesAvailabilityRequest =
+  struct
+    type nonrec t =
+      {
+      findingId: Zz__string.t
+        [@ocaml.doc "The unique identifier for the finding."]}
+    let context_ = "GetSensitiveDataOccurrencesAvailabilityRequest"
+    let make ~findingId = fun () -> { findingId }
+    let to_value x =
+      structure_to_value
+        [("findingId", (Some (Zz__string.to_value x.findingId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let findingId =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "findingId") in
+      make ~findingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let findingId = field_map_exn json__ "findingId" Zz__string.of_json in
+      make ~findingId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Checks whether occurrences of sensitive data can be retrieved for a finding."]
+module GetRevealConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      configuration: RevealConfiguration.t option
+        [@ocaml.doc
+          "The KMS key that's used to encrypt the sensitive data, and the status of the configuration for the Amazon Macie account."];
+      retrievalConfiguration: RetrievalConfiguration.t option
+        [@ocaml.doc
+          "The access method and settings that are used to retrieve the sensitive data."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?configuration =
+      fun ?retrievalConfiguration ->
+        fun () -> { configuration; retrievalConfiguration }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("configuration",
+           (Option.map x.configuration ~f:RevealConfiguration.to_value));
+        ("retrievalConfiguration",
+          (Option.map x.retrievalConfiguration
+             ~f:RetrievalConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retrievalConfiguration =
+        (Option.map ~f:RetrievalConfiguration.of_xml)
+          (Xml.child xml_arg0 "retrievalConfiguration") in
+      let configuration =
+        (Option.map ~f:RevealConfiguration.of_xml)
+          (Xml.child xml_arg0 "configuration") in
+      make ?retrievalConfiguration ?configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retrievalConfiguration =
+        field_map json__ "retrievalConfiguration"
+          RetrievalConfiguration.of_json in
+      let configuration =
+        field_map json__ "configuration" RevealConfiguration.of_json in
+      make ?retrievalConfiguration ?configuration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the status and configuration settings for retrieving occurrences of sensitive data reported by findings."]
+module GetRevealConfigurationRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the status and configuration settings for retrieving occurrences of sensitive data reported by findings."]
+module GetResourceProfileResponse =
+  struct
+    type nonrec t =
+      {
+      profileUpdatedAt: Zz__timestampIso8601.t option
+        [@ocaml.doc
+          "The date and time, in UTC and extended ISO 8601 format, when Amazon Macie most recently recalculated sensitive data discovery statistics and details for the bucket. If the bucket's sensitivity score is calculated automatically, this includes the score."];
+      sensitivityScore: Zz__integer.t option
+        [@ocaml.doc
+          "The current sensitivity score for the bucket, ranging from -1 (classification error) to 100 (sensitive). By default, this score is calculated automatically based on the amount of data that Amazon Macie has analyzed in the bucket and the amount of sensitive data that Macie has found in the bucket."];
+      sensitivityScoreOverridden: Zz__boolean.t option
+        [@ocaml.doc
+          "Specifies whether the bucket's current sensitivity score was set manually. If this value is true, the score was manually changed to 100. If this value is false, the score was calculated automatically by Amazon Macie."];
+      statistics: ResourceStatistics.t option
+        [@ocaml.doc
+          "The sensitive data discovery statistics for the bucket. The statistics capture the results of automated sensitive data discovery activities that Amazon Macie has performed for the bucket."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?profileUpdatedAt =
+      fun ?sensitivityScore ->
+        fun ?sensitivityScoreOverridden ->
+          fun ?statistics ->
+            fun () ->
+              {
+                profileUpdatedAt;
+                sensitivityScore;
+                sensitivityScoreOverridden;
+                statistics
+              }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("profileUpdatedAt",
+           (Option.map x.profileUpdatedAt ~f:Zz__timestampIso8601.to_value));
+        ("sensitivityScore",
+          (Option.map x.sensitivityScore ~f:Zz__integer.to_value));
+        ("sensitivityScoreOverridden",
+          (Option.map x.sensitivityScoreOverridden ~f:Zz__boolean.to_value));
+        ("statistics",
+          (Option.map x.statistics ~f:ResourceStatistics.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statistics =
+        (Option.map ~f:ResourceStatistics.of_xml)
+          (Xml.child xml_arg0 "statistics") in
+      let sensitivityScoreOverridden =
+        (Option.map ~f:Zz__boolean.of_xml)
+          (Xml.child xml_arg0 "sensitivityScoreOverridden") in
+      let sensitivityScore =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "sensitivityScore") in
+      let profileUpdatedAt =
+        (Option.map ~f:Zz__timestampIso8601.of_xml)
+          (Xml.child xml_arg0 "profileUpdatedAt") in
+      make ?statistics ?sensitivityScoreOverridden ?sensitivityScore
+        ?profileUpdatedAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statistics =
+        field_map json__ "statistics" ResourceStatistics.of_json in
+      let sensitivityScoreOverridden =
+        field_map json__ "sensitivityScoreOverridden" Zz__boolean.of_json in
+      let sensitivityScore =
+        field_map json__ "sensitivityScore" Zz__integer.of_json in
+      let profileUpdatedAt =
+        field_map json__ "profileUpdatedAt" Zz__timestampIso8601.of_json in
+      make ?statistics ?sensitivityScoreOverridden ?sensitivityScore
+        ?profileUpdatedAt ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves (queries) sensitive data discovery statistics and the sensitivity score for an S3 bucket."]
+module GetResourceProfileRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: Zz__string.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the S3 bucket that the request applies to."]}
+    let context_ = "GetResourceProfileRequest"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Some (Zz__string.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Zz__string.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves (queries) sensitive data discovery statistics and the sensitivity score for an S3 bucket."]
 module GetMemberResponse =
   struct
     type nonrec t =
@@ -11174,10 +16053,11 @@ module GetMemberResponse =
       arn: Zz__string.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the account."];
       email: Zz__string.t option
-        [@ocaml.doc "The email address for the account."];
+        [@ocaml.doc
+          "The email address for the account. This value is null if the account is associated with the administrator account through Organizations."];
       invitedAt: Zz__timestampIso8601.t option
         [@ocaml.doc
-          "The date and time, in UTC and extended ISO 8601 format, when an Amazon Macie membership invitation was last sent to the account. This value is null if an invitation hasn't been sent to the account."];
+          "The date and time, in UTC and extended ISO 8601 format, when an Amazon Macie membership invitation was last sent to the account. This value is null if a Macie membership invitation hasn't been sent to the account."];
       masterAccountId: Zz__string.t option
         [@ocaml.doc
           "(Deprecated) The Amazon Web Services account ID for the administrator account. This property has been replaced by the administratorAccountId property and is retained only for backward compatibility."];
@@ -11186,7 +16066,7 @@ module GetMemberResponse =
           "The current status of the relationship between the account and the administrator account."];
       tags: TagMap.t option
         [@ocaml.doc
-          "A map of key-value pairs that identifies the tags (keys and values) that are associated with the member account in Amazon Macie."];
+          "A map of key-value pairs that specifies which tags (keys and values) are associated with the account in Amazon Macie."];
       updatedAt: Zz__timestampIso8601.t option
         [@ocaml.doc
           "The date and time, in UTC and extended ISO 8601 format, of the most recent change to the status of the relationship between the account and the administrator account."]}
@@ -11336,19 +16216,21 @@ module GetMemberResponse =
       make ?updatedAt ?tags ?relationshipStatus ?masterAccountId ?invitedAt
         ?email ?arn ?administratorAccountId ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "updatedAt" Zz__timestampIso8601.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let updatedAt =
+        field_map json__ "updatedAt" Zz__timestampIso8601.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let relationshipStatus =
-        field_map json "relationshipStatus" RelationshipStatus.of_json in
+        field_map json__ "relationshipStatus" RelationshipStatus.of_json in
       let masterAccountId =
-        field_map json "masterAccountId" Zz__string.of_json in
-      let invitedAt = field_map json "invitedAt" Zz__timestampIso8601.of_json in
-      let email = field_map json "email" Zz__string.of_json in
-      let arn = field_map json "arn" Zz__string.of_json in
+        field_map json__ "masterAccountId" Zz__string.of_json in
+      let invitedAt =
+        field_map json__ "invitedAt" Zz__timestampIso8601.of_json in
+      let email = field_map json__ "email" Zz__string.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in
       let administratorAccountId =
-        field_map json "administratorAccountId" Zz__string.of_json in
-      let accountId = field_map json "accountId" Zz__string.of_json in
+        field_map json__ "administratorAccountId" Zz__string.of_json in
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
       make ?updatedAt ?tags ?relationshipStatus ?masterAccountId ?invitedAt
         ?email ?arn ?administratorAccountId ?accountId ()
     let to_json v = composed_to_json to_value v
@@ -11360,7 +16242,7 @@ module GetMemberRequest =
       {
       id: Zz__string.t
         [@ocaml.doc
-          "The unique identifier for the Amazon Macie resource or account that the request applies to."]}
+          "The unique identifier for the Amazon Macie resource that the request applies to."]}
     let context_ = "GetMemberRequest"
     let make ~id = fun () -> { id }
     let to_value x =
@@ -11371,8 +16253,8 @@ module GetMemberRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves information about an account that's associated with an Amazon Macie administrator account."]
@@ -11476,8 +16358,8 @@ module GetMasterAccountResponse =
         (Option.map ~f:Invitation.of_xml) (Xml.child xml_arg0 "master") in
       make ?master ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let master = field_map json "master" Invitation.of_json in
+    let of_json json__ =
+      let master = field_map json__ "master" Invitation.of_json in
       make ?master ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11504,7 +16386,7 @@ module GetMacieSessionResponse =
           "The date and time, in UTC and extended ISO 8601 format, when the Amazon Macie account was created."];
       findingPublishingFrequency: FindingPublishingFrequency.t option
         [@ocaml.doc
-          "The frequency with which Amazon Macie publishes updates to policy findings for the account. This includes publishing updates to Security Hub and Amazon EventBridge (formerly called Amazon CloudWatch Events)."];
+          "The frequency with which Amazon Macie publishes updates to policy findings for the account. This includes publishing updates to Security Hub and Amazon EventBridge (formerly Amazon CloudWatch Events)."];
       serviceRole: Zz__string.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the service-linked role that allows Amazon Macie to monitor and analyze data in Amazon Web Services resources for the account."];
@@ -11513,7 +16395,7 @@ module GetMacieSessionResponse =
           "The current status of the Amazon Macie account. Possible values are: PAUSED, the account is enabled but all Macie activities are suspended (paused) for the account; and, ENABLED, the account is enabled and all Macie activities are enabled for the account."];
       updatedAt: Zz__timestampIso8601.t option
         [@ocaml.doc
-          "The date and time, in UTC and extended ISO 8601 format, of the most recent change to the status of the Amazon Macie account."]}
+          "The date and time, in UTC and extended ISO 8601 format, of the most recent change to the status or configuration settings for the Amazon Macie account."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -11639,19 +16521,21 @@ module GetMacieSessionResponse =
       make ?updatedAt ?status ?serviceRole ?findingPublishingFrequency
         ?createdAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "updatedAt" Zz__timestampIso8601.of_json in
-      let status = field_map json "status" MacieStatus.of_json in
-      let serviceRole = field_map json "serviceRole" Zz__string.of_json in
+    let of_json json__ =
+      let updatedAt =
+        field_map json__ "updatedAt" Zz__timestampIso8601.of_json in
+      let status = field_map json__ "status" MacieStatus.of_json in
+      let serviceRole = field_map json__ "serviceRole" Zz__string.of_json in
       let findingPublishingFrequency =
-        field_map json "findingPublishingFrequency"
+        field_map json__ "findingPublishingFrequency"
           FindingPublishingFrequency.of_json in
-      let createdAt = field_map json "createdAt" Zz__timestampIso8601.of_json in
+      let createdAt =
+        field_map json__ "createdAt" Zz__timestampIso8601.of_json in
       make ?updatedAt ?status ?serviceRole ?findingPublishingFrequency
         ?createdAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the current status and configuration settings for an Amazon Macie account."]
+       "Retrieves the status and configuration settings for an Amazon Macie account."]
 module GetMacieSessionRequest =
   struct
     type nonrec t = unit
@@ -11664,7 +16548,7 @@ module GetMacieSessionRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the current status and configuration settings for an Amazon Macie account."]
+       "Retrieves the status and configuration settings for an Amazon Macie account."]
 module GetInvitationsCountResponse =
   struct
     type nonrec t =
@@ -11767,9 +16651,9 @@ module GetInvitationsCountResponse =
           (Xml.child xml_arg0 "invitationsCount") in
       make ?invitationsCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let invitationsCount =
-        field_map json "invitationsCount" Zz__long.of_json in
+        field_map json__ "invitationsCount" Zz__long.of_json in
       make ?invitationsCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11793,7 +16677,7 @@ module GetFindingsResponse =
       {
       findings: Zz__listOfFinding.t option
         [@ocaml.doc
-          "An array of objects, one for each finding that meets the criteria specified in the request."]}
+          "An array of objects, one for each finding that matches the criteria specified in the request."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -11888,8 +16772,8 @@ module GetFindingsResponse =
           (Xml.child xml_arg0 "findings") in
       make ?findings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let findings = field_map json "findings" Zz__listOfFinding.of_json in
+    let of_json json__ =
+      let findings = field_map json__ "findings" Zz__listOfFinding.of_json in
       make ?findings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the details of one or more findings."]
@@ -11899,7 +16783,7 @@ module GetFindingsRequest =
       {
       findingIds: Zz__listOf__string.t
         [@ocaml.doc
-          "An array of strings that lists the unique identifiers for the findings to retrieve."];
+          "An array of strings that lists the unique identifiers for the findings to retrieve. You can specify as many as 50 unique identifiers in this array."];
       sortCriteria: SortCriteria.t option
         [@ocaml.doc "The criteria for sorting the results of the request."]}
     let context_ = "GetFindingsRequest"
@@ -11920,10 +16804,10 @@ module GetFindingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "findingIds") in
       make ?sortCriteria ~findingIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortCriteria = field_map json "sortCriteria" SortCriteria.of_json in
+    let of_json json__ =
+      let sortCriteria = field_map json__ "sortCriteria" SortCriteria.of_json in
       let findingIds =
-        field_map_exn json "findingIds" Zz__listOf__string.of_json in
+        field_map_exn json__ "findingIds" Zz__listOf__string.of_json in
       make ?sortCriteria ~findingIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the details of one or more findings."]
@@ -12031,9 +16915,9 @@ module GetFindingsPublicationConfigurationResponse =
           (Xml.child xml_arg0 "securityHubConfiguration") in
       make ?securityHubConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityHubConfiguration =
-        field_map json "securityHubConfiguration"
+        field_map json__ "securityHubConfiguration"
           SecurityHubConfiguration.of_json in
       make ?securityHubConfiguration ()
     let to_json v = composed_to_json to_value v
@@ -12058,7 +16942,7 @@ module GetFindingsFilterResponse =
       {
       action: FindingsFilterAction.t option
         [@ocaml.doc
-          "The action that's performed on findings that meet the filter criteria (findingCriteria). Possible values are: ARCHIVE, suppress (automatically archive) the findings; and, NOOP, don't perform any action on the findings."];
+          "The action that's performed on findings that match the filter criteria (findingCriteria). Possible values are: ARCHIVE, suppress (automatically archive) the findings; and, NOOP, don't perform any action on the findings."];
       arn: Zz__string.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the filter."];
       description: Zz__string.t option
@@ -12073,7 +16957,7 @@ module GetFindingsFilterResponse =
           "The position of the filter in the list of saved filters on the Amazon Macie console. This value also determines the order in which the filter is applied to findings, relative to other filters that are also applied to the findings."];
       tags: TagMap.t option
         [@ocaml.doc
-          "A map of key-value pairs that identifies the tags (keys and values) that are associated with the filter."]}
+          "A map of key-value pairs that specifies which tags (keys and values) are associated with the filter."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -12207,16 +17091,16 @@ module GetFindingsFilterResponse =
       make ?tags ?position ?name ?id ?findingCriteria ?description ?arn
         ?action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let position = field_map json "position" Zz__integer.of_json in
-      let name = field_map json "name" Zz__string.of_json in
-      let id = field_map json "id" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let position = field_map json__ "position" Zz__integer.of_json in
+      let name = field_map json__ "name" Zz__string.of_json in
+      let id = field_map json__ "id" Zz__string.of_json in
       let findingCriteria =
-        field_map json "findingCriteria" FindingCriteria.of_json in
-      let description = field_map json "description" Zz__string.of_json in
-      let arn = field_map json "arn" Zz__string.of_json in
-      let action = field_map json "action" FindingsFilterAction.of_json in
+        field_map json__ "findingCriteria" FindingCriteria.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in
+      let action = field_map json__ "action" FindingsFilterAction.of_json in
       make ?tags ?position ?name ?id ?findingCriteria ?description ?arn
         ?action ()
     let to_json v = composed_to_json to_value v
@@ -12228,7 +17112,7 @@ module GetFindingsFilterRequest =
       {
       id: Zz__string.t
         [@ocaml.doc
-          "The unique identifier for the Amazon Macie resource or account that the request applies to."]}
+          "The unique identifier for the Amazon Macie resource that the request applies to."]}
     let context_ = "GetFindingsFilterRequest"
     let make ~id = fun () -> { id }
     let to_value x =
@@ -12239,8 +17123,8 @@ module GetFindingsFilterRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the criteria and other settings for a findings filter."]
@@ -12250,7 +17134,7 @@ module GetFindingStatisticsResponse =
       {
       countsByGroup: Zz__listOfGroupCount.t option
         [@ocaml.doc
-          "An array of objects, one for each group of findings that meet the filter criteria specified in the request."]}
+          "An array of objects, one for each group of findings that matches the filter criteria specified in the request."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -12346,9 +17230,9 @@ module GetFindingStatisticsResponse =
           (Xml.child xml_arg0 "countsByGroup") in
       make ?countsByGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let countsByGroup =
-        field_map json "countsByGroup" Zz__listOfGroupCount.of_json in
+        field_map json__ "countsByGroup" Zz__listOfGroupCount.of_json in
       make ?countsByGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12396,13 +17280,13 @@ module GetFindingStatisticsRequest =
           (Xml.child xml_arg0 "findingCriteria") in
       make ?sortCriteria ?size ~groupBy ?findingCriteria ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sortCriteria =
-        field_map json "sortCriteria" FindingStatisticsSortCriteria.of_json in
-      let size = field_map json "size" Zz__integer.of_json in
-      let groupBy = field_map_exn json "groupBy" GroupBy.of_json in
+        field_map json__ "sortCriteria" FindingStatisticsSortCriteria.of_json in
+      let size = field_map json__ "size" Zz__integer.of_json in
+      let groupBy = field_map_exn json__ "groupBy" GroupBy.of_json in
       let findingCriteria =
-        field_map json "findingCriteria" FindingCriteria.of_json in
+        field_map json__ "findingCriteria" FindingCriteria.of_json in
       make ?sortCriteria ?size ~groupBy ?findingCriteria ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12429,10 +17313,10 @@ module GetCustomDataIdentifierResponse =
           "An array that lists specific character sequences (ignore words) to exclude from the results. If the text matched by the regular expression contains any string in this array, Amazon Macie ignores it. Ignore words are case sensitive."];
       keywords: Zz__listOf__string.t option
         [@ocaml.doc
-          "An array that lists specific character sequences (keywords), one of which must be within proximity (maximumMatchDistance) of the regular expression to match. Keywords aren't case sensitive."];
+          "An array that lists specific character sequences (keywords), one of which must precede and be within proximity (maximumMatchDistance) of the regular expression to match. Keywords aren't case sensitive."];
       maximumMatchDistance: Zz__integer.t option
         [@ocaml.doc
-          "The maximum number of characters that can exist between text that matches the regular expression and the character sequences specified by the keywords array. Amazon Macie includes or excludes a result based on the proximity of a keyword to text that matches the regular expression."];
+          "The maximum number of characters that can exist between the end of at least one complete character sequence specified by the keywords array and the end of the text that matches the regex pattern. If a complete keyword precedes all the text that matches the pattern and the keyword is within the specified distance, Amazon Macie includes the result. Otherwise, Macie excludes the result."];
       name: Zz__string.t option
         [@ocaml.doc "The custom name of the custom data identifier."];
       regex: Zz__string.t option
@@ -12440,7 +17324,7 @@ module GetCustomDataIdentifierResponse =
           "The regular expression (regex) that defines the pattern to match."];
       severityLevels: SeverityLevelList.t option
         [@ocaml.doc
-          "Specifies the severity that's assigned to findings that the custom data identifier produces, based on the number of occurrences of text that matches the custom data identifier's detection criteria. By default, Amazon Macie creates findings for S3 objects that contain at least one occurrence of text that matches the detection criteria, and Macie assigns the MEDIUM severity to those findings."];
+          "Specifies the severity that's assigned to findings that the custom data identifier produces, based on the number of occurrences of text that match the custom data identifier's detection criteria. By default, Amazon Macie creates findings for S3 objects that contain at least one occurrence of text that matches the detection criteria, and Macie assigns the MEDIUM severity to those findings."];
       tags: TagMap.t option
         [@ocaml.doc
           "A map of key-value pairs that identifies the tags (keys and values) that are associated with the custom data identifier."]}
@@ -12603,22 +17487,23 @@ module GetCustomDataIdentifierResponse =
       make ?tags ?severityLevels ?regex ?name ?maximumMatchDistance ?keywords
         ?ignoreWords ?id ?description ?deleted ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
       let severityLevels =
-        field_map json "severityLevels" SeverityLevelList.of_json in
-      let regex = field_map json "regex" Zz__string.of_json in
-      let name = field_map json "name" Zz__string.of_json in
+        field_map json__ "severityLevels" SeverityLevelList.of_json in
+      let regex = field_map json__ "regex" Zz__string.of_json in
+      let name = field_map json__ "name" Zz__string.of_json in
       let maximumMatchDistance =
-        field_map json "maximumMatchDistance" Zz__integer.of_json in
-      let keywords = field_map json "keywords" Zz__listOf__string.of_json in
+        field_map json__ "maximumMatchDistance" Zz__integer.of_json in
+      let keywords = field_map json__ "keywords" Zz__listOf__string.of_json in
       let ignoreWords =
-        field_map json "ignoreWords" Zz__listOf__string.of_json in
-      let id = field_map json "id" Zz__string.of_json in
-      let description = field_map json "description" Zz__string.of_json in
-      let deleted = field_map json "deleted" Zz__boolean.of_json in
-      let createdAt = field_map json "createdAt" Zz__timestampIso8601.of_json in
-      let arn = field_map json "arn" Zz__string.of_json in
+        field_map json__ "ignoreWords" Zz__listOf__string.of_json in
+      let id = field_map json__ "id" Zz__string.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
+      let deleted = field_map json__ "deleted" Zz__boolean.of_json in
+      let createdAt =
+        field_map json__ "createdAt" Zz__timestampIso8601.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in
       make ?tags ?severityLevels ?regex ?name ?maximumMatchDistance ?keywords
         ?ignoreWords ?id ?description ?deleted ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
@@ -12630,7 +17515,7 @@ module GetCustomDataIdentifierRequest =
       {
       id: Zz__string.t
         [@ocaml.doc
-          "The unique identifier for the Amazon Macie resource or account that the request applies to."]}
+          "The unique identifier for the Amazon Macie resource that the request applies to."]}
     let context_ = "GetCustomDataIdentifierRequest"
     let make ~id = fun () -> { id }
     let to_value x =
@@ -12641,11 +17526,135 @@ module GetCustomDataIdentifierRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the criteria and other settings for a custom data identifier."]
+module GetClassificationScopeResponse =
+  struct
+    type nonrec t =
+      {
+      id: ClassificationScopeId.t option
+        [@ocaml.doc "The unique identifier for the classification scope."];
+      name: ClassificationScopeName.t option
+        [@ocaml.doc
+          "The name of the classification scope: automated-sensitive-data-discovery."];
+      s3: S3ClassificationScope.t option
+        [@ocaml.doc
+          "The S3 buckets that are excluded from automated sensitive data discovery."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?id = fun ?name -> fun ?s3 -> fun () -> { id; name; s3 }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:ClassificationScopeId.to_value));
+        ("name", (Option.map x.name ~f:ClassificationScopeName.to_value));
+        ("s3", (Option.map x.s3 ~f:S3ClassificationScope.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3 =
+        (Option.map ~f:S3ClassificationScope.of_xml)
+          (Xml.child xml_arg0 "s3") in
+      let name =
+        (Option.map ~f:ClassificationScopeName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      let id =
+        (Option.map ~f:ClassificationScopeId.of_xml)
+          (Xml.child xml_arg0 "id") in
+      make ?s3 ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3 = field_map json__ "s3" S3ClassificationScope.of_json in
+      let name = field_map json__ "name" ClassificationScopeName.of_json in
+      let id = field_map json__ "id" ClassificationScopeId.of_json in
+      make ?s3 ?name ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the classification scope settings for an account."]
+module GetClassificationScopeRequest =
+  struct
+    type nonrec t =
+      {
+      id: Zz__string.t
+        [@ocaml.doc
+          "The unique identifier for the Amazon Macie resource that the request applies to."]}
+    let context_ = "GetClassificationScopeRequest"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value [("id", (Some (Zz__string.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Zz__string.of_json in make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the classification scope settings for an account."]
 module GetClassificationExportConfigurationResponse =
   struct
     type nonrec t =
@@ -12749,9 +17758,9 @@ module GetClassificationExportConfigurationResponse =
           (Xml.child xml_arg0 "configuration") in
       make ?configuration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configuration =
-        field_map json "configuration"
+        field_map json__ "configuration"
           ClassificationExportConfiguration.of_json in
       make ?configuration ()
     let to_json v = composed_to_json to_value v
@@ -12779,34 +17788,37 @@ module GetBucketStatisticsResponse =
       bucketCountByEffectivePermission:
         BucketCountByEffectivePermission.t option
         [@ocaml.doc
-          "The total number of buckets that are publicly accessible based on a combination of permissions settings for each bucket."];
+          "The total number of buckets that are publicly accessible due to a combination of permissions settings for each bucket."];
       bucketCountByEncryptionType: BucketCountByEncryptionType.t option
         [@ocaml.doc
-          "The total number of buckets that use certain types of server-side encryption to encrypt new objects by default. This object also reports the total number of buckets that don't encrypt new objects by default."];
+          "The total number of buckets whose settings do or don't specify default server-side encryption behavior for objects that are added to the buckets."];
       bucketCountByObjectEncryptionRequirement:
         BucketCountPolicyAllowsUnencryptedObjectUploads.t option
         [@ocaml.doc
-          "The total number of buckets whose bucket policies do or don't require server-side encryption of objects when objects are uploaded to the buckets."];
+          "The total number of buckets whose bucket policies do or don't require server-side encryption of objects when objects are added to the buckets."];
       bucketCountBySharedAccessType: BucketCountBySharedAccessType.t option
         [@ocaml.doc
-          "The total number of buckets that are or aren't shared with another Amazon Web Services account."];
+          "The total number of buckets that are or aren't shared with other Amazon Web Services accounts, Amazon CloudFront origin access identities (OAIs), or CloudFront origin access controls (OACs)."];
+      bucketStatisticsBySensitivity: BucketStatisticsBySensitivity.t option
+        [@ocaml.doc
+          "The aggregated sensitive data discovery statistics for the buckets. If automated sensitive data discovery is currently disabled for your account, the value for most statistics is 0."];
       classifiableObjectCount: Zz__long.t option
         [@ocaml.doc
           "The total number of objects that Amazon Macie can analyze in the buckets. These objects use a supported storage class and have a file name extension for a supported file or storage format."];
       classifiableSizeInBytes: Zz__long.t option
         [@ocaml.doc
-          "The total storage size, in bytes, of all the objects that Amazon Macie can analyze in the buckets. These objects use a supported storage class and have a file name extension for a supported file or storage format. If versioning is enabled for any of the buckets, Macie calculates this value based on the size of the latest version of each applicable object in those buckets. This value doesn't reflect the storage size of all versions of all applicable objects in the buckets."];
+          "The total storage size, in bytes, of all the objects that Amazon Macie can analyze in the buckets. These objects use a supported storage class and have a file name extension for a supported file or storage format. If versioning is enabled for any of the buckets, this value is based on the size of the latest version of each applicable object in the buckets. This value doesn't reflect the storage size of all versions of all applicable objects in the buckets."];
       lastUpdated: Zz__timestampIso8601.t option
         [@ocaml.doc
-          "The date and time, in UTC and extended ISO 8601 format, when Amazon Macie most recently retrieved both bucket and object metadata from Amazon S3 for the buckets."];
+          "The date and time, in UTC and extended ISO 8601 format, when Amazon Macie most recently retrieved bucket or object metadata from Amazon S3 for the buckets."];
       objectCount: Zz__long.t option
         [@ocaml.doc "The total number of objects in the buckets."];
       sizeInBytes: Zz__long.t option
         [@ocaml.doc
-          "The total storage size, in bytes, of the buckets. If versioning is enabled for any of the buckets, Amazon Macie calculates this value based on the size of the latest version of each object in those buckets. This value doesn't reflect the storage size of all versions of the objects in the buckets."];
+          "The total storage size, in bytes, of the buckets. If versioning is enabled for any of the buckets, this value is based on the size of the latest version of each object in the buckets. This value doesn't reflect the storage size of all versions of the objects in the buckets."];
       sizeInBytesCompressed: Zz__long.t option
         [@ocaml.doc
-          "The total storage size, in bytes, of the objects that are compressed (.gz, .gzip, .zip) files in the buckets. If versioning is enabled for any of the buckets, Amazon Macie calculates this value based on the size of the latest version of each applicable object in those buckets. This value doesn't reflect the storage size of all versions of the applicable objects in the buckets."];
+          "The total storage size, in bytes, of the objects that are compressed (.gz, .gzip, .zip) files in the buckets. If versioning is enabled for any of the buckets, this value is based on the size of the latest version of each applicable object in the buckets. This value doesn't reflect the storage size of all versions of the applicable objects in the buckets."];
       unclassifiableObjectCount: ObjectLevelStatistics.t option
         [@ocaml.doc
           "The total number of objects that Amazon Macie can't analyze in the buckets. These objects don't use a supported storage class or don't have a file name extension for a supported file or storage format."];
@@ -12827,30 +17839,32 @@ module GetBucketStatisticsResponse =
         fun ?bucketCountByEncryptionType ->
           fun ?bucketCountByObjectEncryptionRequirement ->
             fun ?bucketCountBySharedAccessType ->
-              fun ?classifiableObjectCount ->
-                fun ?classifiableSizeInBytes ->
-                  fun ?lastUpdated ->
-                    fun ?objectCount ->
-                      fun ?sizeInBytes ->
-                        fun ?sizeInBytesCompressed ->
-                          fun ?unclassifiableObjectCount ->
-                            fun ?unclassifiableObjectSizeInBytes ->
-                              fun () ->
-                                {
-                                  bucketCount;
-                                  bucketCountByEffectivePermission;
-                                  bucketCountByEncryptionType;
-                                  bucketCountByObjectEncryptionRequirement;
-                                  bucketCountBySharedAccessType;
-                                  classifiableObjectCount;
-                                  classifiableSizeInBytes;
-                                  lastUpdated;
-                                  objectCount;
-                                  sizeInBytes;
-                                  sizeInBytesCompressed;
-                                  unclassifiableObjectCount;
-                                  unclassifiableObjectSizeInBytes
-                                }
+              fun ?bucketStatisticsBySensitivity ->
+                fun ?classifiableObjectCount ->
+                  fun ?classifiableSizeInBytes ->
+                    fun ?lastUpdated ->
+                      fun ?objectCount ->
+                        fun ?sizeInBytes ->
+                          fun ?sizeInBytesCompressed ->
+                            fun ?unclassifiableObjectCount ->
+                              fun ?unclassifiableObjectSizeInBytes ->
+                                fun () ->
+                                  {
+                                    bucketCount;
+                                    bucketCountByEffectivePermission;
+                                    bucketCountByEncryptionType;
+                                    bucketCountByObjectEncryptionRequirement;
+                                    bucketCountBySharedAccessType;
+                                    bucketStatisticsBySensitivity;
+                                    classifiableObjectCount;
+                                    classifiableSizeInBytes;
+                                    lastUpdated;
+                                    objectCount;
+                                    sizeInBytes;
+                                    sizeInBytesCompressed;
+                                    unclassifiableObjectCount;
+                                    unclassifiableObjectSizeInBytes
+                                  }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -12940,6 +17954,9 @@ module GetBucketStatisticsResponse =
         ("bucketCountBySharedAccessType",
           (Option.map x.bucketCountBySharedAccessType
              ~f:BucketCountBySharedAccessType.to_value));
+        ("bucketStatisticsBySensitivity",
+          (Option.map x.bucketStatisticsBySensitivity
+             ~f:BucketStatisticsBySensitivity.to_value));
         ("classifiableObjectCount",
           (Option.map x.classifiableObjectCount ~f:Zz__long.to_value));
         ("classifiableSizeInBytes",
@@ -12980,6 +17997,9 @@ module GetBucketStatisticsResponse =
       let classifiableObjectCount =
         (Option.map ~f:Zz__long.of_xml)
           (Xml.child xml_arg0 "classifiableObjectCount") in
+      let bucketStatisticsBySensitivity =
+        (Option.map ~f:BucketStatisticsBySensitivity.of_xml)
+          (Xml.child xml_arg0 "bucketStatisticsBySensitivity") in
       let bucketCountBySharedAccessType =
         (Option.map ~f:BucketCountBySharedAccessType.of_xml)
           (Xml.child xml_arg0 "bucketCountBySharedAccessType") in
@@ -12997,51 +18017,54 @@ module GetBucketStatisticsResponse =
       make ?unclassifiableObjectSizeInBytes ?unclassifiableObjectCount
         ?sizeInBytesCompressed ?sizeInBytes ?objectCount ?lastUpdated
         ?classifiableSizeInBytes ?classifiableObjectCount
-        ?bucketCountBySharedAccessType
+        ?bucketStatisticsBySensitivity ?bucketCountBySharedAccessType
         ?bucketCountByObjectEncryptionRequirement
         ?bucketCountByEncryptionType ?bucketCountByEffectivePermission
         ?bucketCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unclassifiableObjectSizeInBytes =
-        field_map json "unclassifiableObjectSizeInBytes"
+        field_map json__ "unclassifiableObjectSizeInBytes"
           ObjectLevelStatistics.of_json in
       let unclassifiableObjectCount =
-        field_map json "unclassifiableObjectCount"
+        field_map json__ "unclassifiableObjectCount"
           ObjectLevelStatistics.of_json in
       let sizeInBytesCompressed =
-        field_map json "sizeInBytesCompressed" Zz__long.of_json in
-      let sizeInBytes = field_map json "sizeInBytes" Zz__long.of_json in
-      let objectCount = field_map json "objectCount" Zz__long.of_json in
+        field_map json__ "sizeInBytesCompressed" Zz__long.of_json in
+      let sizeInBytes = field_map json__ "sizeInBytes" Zz__long.of_json in
+      let objectCount = field_map json__ "objectCount" Zz__long.of_json in
       let lastUpdated =
-        field_map json "lastUpdated" Zz__timestampIso8601.of_json in
+        field_map json__ "lastUpdated" Zz__timestampIso8601.of_json in
       let classifiableSizeInBytes =
-        field_map json "classifiableSizeInBytes" Zz__long.of_json in
+        field_map json__ "classifiableSizeInBytes" Zz__long.of_json in
       let classifiableObjectCount =
-        field_map json "classifiableObjectCount" Zz__long.of_json in
+        field_map json__ "classifiableObjectCount" Zz__long.of_json in
+      let bucketStatisticsBySensitivity =
+        field_map json__ "bucketStatisticsBySensitivity"
+          BucketStatisticsBySensitivity.of_json in
       let bucketCountBySharedAccessType =
-        field_map json "bucketCountBySharedAccessType"
+        field_map json__ "bucketCountBySharedAccessType"
           BucketCountBySharedAccessType.of_json in
       let bucketCountByObjectEncryptionRequirement =
-        field_map json "bucketCountByObjectEncryptionRequirement"
+        field_map json__ "bucketCountByObjectEncryptionRequirement"
           BucketCountPolicyAllowsUnencryptedObjectUploads.of_json in
       let bucketCountByEncryptionType =
-        field_map json "bucketCountByEncryptionType"
+        field_map json__ "bucketCountByEncryptionType"
           BucketCountByEncryptionType.of_json in
       let bucketCountByEffectivePermission =
-        field_map json "bucketCountByEffectivePermission"
+        field_map json__ "bucketCountByEffectivePermission"
           BucketCountByEffectivePermission.of_json in
-      let bucketCount = field_map json "bucketCount" Zz__long.of_json in
+      let bucketCount = field_map json__ "bucketCount" Zz__long.of_json in
       make ?unclassifiableObjectSizeInBytes ?unclassifiableObjectCount
         ?sizeInBytesCompressed ?sizeInBytes ?objectCount ?lastUpdated
         ?classifiableSizeInBytes ?classifiableObjectCount
-        ?bucketCountBySharedAccessType
+        ?bucketStatisticsBySensitivity ?bucketCountBySharedAccessType
         ?bucketCountByObjectEncryptionRequirement
         ?bucketCountByEncryptionType ?bucketCountByEffectivePermission
         ?bucketCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves (queries) aggregated statistical data about S3 buckets that Amazon Macie monitors and analyzes."]
+       "Retrieves (queries) aggregated statistical data about all the S3 buckets that Amazon Macie monitors and analyzes for an account."]
 module GetBucketStatisticsRequest =
   struct
     type nonrec t =
@@ -13059,12 +18082,386 @@ module GetBucketStatisticsRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map json "accountId" Zz__string.of_json in
+    let of_json json__ =
+      let accountId = field_map json__ "accountId" Zz__string.of_json in
       make ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves (queries) aggregated statistical data about S3 buckets that Amazon Macie monitors and analyzes."]
+       "Retrieves (queries) aggregated statistical data about all the S3 buckets that Amazon Macie monitors and analyzes for an account."]
+module GetAutomatedDiscoveryConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      autoEnableOrganizationMembers: AutoEnableMode.t option
+        [@ocaml.doc
+          "Specifies whether automated sensitive data discovery is enabled automatically for accounts in the organization. Possible values are: ALL, enable it for all existing accounts and new member accounts; NEW, enable it only for new member accounts; and, NONE, don't enable it for any accounts."];
+      classificationScopeId: ClassificationScopeId.t option
+        [@ocaml.doc
+          "The unique identifier for the classification scope that's used when performing automated sensitive data discovery. The classification scope specifies S3 buckets to exclude from analyses."];
+      disabledAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time, in UTC and extended ISO 8601 format, when automated sensitive data discovery was most recently disabled. This value is null if automated sensitive data discovery is currently enabled."];
+      firstEnabledAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time, in UTC and extended ISO 8601 format, when automated sensitive data discovery was initially enabled. This value is null if automated sensitive data discovery has never been enabled."];
+      lastUpdatedAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time, in UTC and extended ISO 8601 format, when the configuration settings or status of automated sensitive data discovery was most recently changed."];
+      sensitivityInspectionTemplateId:
+        SensitivityInspectionTemplateId.t option
+        [@ocaml.doc
+          "The unique identifier for the sensitivity inspection template that's used when performing automated sensitive data discovery. The template specifies which allow lists, custom data identifiers, and managed data identifiers to use when analyzing data."];
+      status: AutomatedDiscoveryStatus.t option
+        [@ocaml.doc
+          "The current status of automated sensitive data discovery for the organization or account. Possible values are: ENABLED, use the specified settings to perform automated sensitive data discovery activities; and, DISABLED, don't perform automated sensitive data discovery activities."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?autoEnableOrganizationMembers =
+      fun ?classificationScopeId ->
+        fun ?disabledAt ->
+          fun ?firstEnabledAt ->
+            fun ?lastUpdatedAt ->
+              fun ?sensitivityInspectionTemplateId ->
+                fun ?status ->
+                  fun () ->
+                    {
+                      autoEnableOrganizationMembers;
+                      classificationScopeId;
+                      disabledAt;
+                      firstEnabledAt;
+                      lastUpdatedAt;
+                      sensitivityInspectionTemplateId;
+                      status
+                    }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("autoEnableOrganizationMembers",
+           (Option.map x.autoEnableOrganizationMembers
+              ~f:AutoEnableMode.to_value));
+        ("classificationScopeId",
+          (Option.map x.classificationScopeId
+             ~f:ClassificationScopeId.to_value));
+        ("disabledAt", (Option.map x.disabledAt ~f:Timestamp.to_value));
+        ("firstEnabledAt",
+          (Option.map x.firstEnabledAt ~f:Timestamp.to_value));
+        ("lastUpdatedAt", (Option.map x.lastUpdatedAt ~f:Timestamp.to_value));
+        ("sensitivityInspectionTemplateId",
+          (Option.map x.sensitivityInspectionTemplateId
+             ~f:SensitivityInspectionTemplateId.to_value));
+        ("status",
+          (Option.map x.status ~f:AutomatedDiscoveryStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:AutomatedDiscoveryStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let sensitivityInspectionTemplateId =
+        (Option.map ~f:SensitivityInspectionTemplateId.of_xml)
+          (Xml.child xml_arg0 "sensitivityInspectionTemplateId") in
+      let lastUpdatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastUpdatedAt") in
+      let firstEnabledAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "firstEnabledAt") in
+      let disabledAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "disabledAt") in
+      let classificationScopeId =
+        (Option.map ~f:ClassificationScopeId.of_xml)
+          (Xml.child xml_arg0 "classificationScopeId") in
+      let autoEnableOrganizationMembers =
+        (Option.map ~f:AutoEnableMode.of_xml)
+          (Xml.child xml_arg0 "autoEnableOrganizationMembers") in
+      make ?status ?sensitivityInspectionTemplateId ?lastUpdatedAt
+        ?firstEnabledAt ?disabledAt ?classificationScopeId
+        ?autoEnableOrganizationMembers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "status" AutomatedDiscoveryStatus.of_json in
+      let sensitivityInspectionTemplateId =
+        field_map json__ "sensitivityInspectionTemplateId"
+          SensitivityInspectionTemplateId.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let firstEnabledAt =
+        field_map json__ "firstEnabledAt" Timestamp.of_json in
+      let disabledAt = field_map json__ "disabledAt" Timestamp.of_json in
+      let classificationScopeId =
+        field_map json__ "classificationScopeId"
+          ClassificationScopeId.of_json in
+      let autoEnableOrganizationMembers =
+        field_map json__ "autoEnableOrganizationMembers"
+          AutoEnableMode.of_json in
+      make ?status ?sensitivityInspectionTemplateId ?lastUpdatedAt
+        ?firstEnabledAt ?disabledAt ?classificationScopeId
+        ?autoEnableOrganizationMembers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the configuration settings and status of automated sensitive data discovery for an organization or standalone account."]
+module GetAutomatedDiscoveryConfigurationRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the configuration settings and status of automated sensitive data discovery for an organization or standalone account."]
+module GetAllowListResponse =
+  struct
+    type nonrec t =
+      {
+      arn:
+        Zz__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922.t
+          option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the allow list."];
+      createdAt: Zz__timestampIso8601.t option
+        [@ocaml.doc
+          "The date and time, in UTC and extended ISO 8601 format, when the allow list was created in Amazon Macie."];
+      criteria: AllowListCriteria.t option
+        [@ocaml.doc
+          "The criteria that specify the text or text pattern to ignore. The criteria can be the location and name of an S3 object that lists specific text to ignore (s3WordsList), or a regular expression (regex) that defines a text pattern to ignore."];
+      description: Zz__stringMin1Max512PatternSS.t option
+        [@ocaml.doc "The custom description of the allow list."];
+      id: Zz__stringMin22Max22PatternAZ0922.t option
+        [@ocaml.doc "The unique identifier for the allow list."];
+      name: Zz__stringMin1Max128Pattern.t option
+        [@ocaml.doc "The custom name of the allow list."];
+      status: AllowListStatus.t option
+        [@ocaml.doc
+          "The current status of the allow list, which indicates whether Amazon Macie can access and use the list's criteria."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A map of key-value pairs that specifies which tags (keys and values) are associated with the allow list."];
+      updatedAt: Zz__timestampIso8601.t option
+        [@ocaml.doc
+          "The date and time, in UTC and extended ISO 8601 format, when the allow list's settings were most recently changed in Amazon Macie."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?criteria ->
+          fun ?description ->
+            fun ?id ->
+              fun ?name ->
+                fun ?status ->
+                  fun ?tags ->
+                    fun ?updatedAt ->
+                      fun () ->
+                        {
+                          arn;
+                          createdAt;
+                          criteria;
+                          description;
+                          id;
+                          name;
+                          status;
+                          tags;
+                          updatedAt
+                        }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("arn",
+           (Option.map x.arn
+              ~f:Zz__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922.to_value));
+        ("createdAt",
+          (Option.map x.createdAt ~f:Zz__timestampIso8601.to_value));
+        ("criteria", (Option.map x.criteria ~f:AllowListCriteria.to_value));
+        ("description",
+          (Option.map x.description ~f:Zz__stringMin1Max512PatternSS.to_value));
+        ("id",
+          (Option.map x.id ~f:Zz__stringMin22Max22PatternAZ0922.to_value));
+        ("name", (Option.map x.name ~f:Zz__stringMin1Max128Pattern.to_value));
+        ("status", (Option.map x.status ~f:AllowListStatus.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("updatedAt",
+          (Option.map x.updatedAt ~f:Zz__timestampIso8601.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedAt =
+        (Option.map ~f:Zz__timestampIso8601.of_xml)
+          (Xml.child xml_arg0 "updatedAt") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let status =
+        (Option.map ~f:AllowListStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let name =
+        (Option.map ~f:Zz__stringMin1Max128Pattern.of_xml)
+          (Xml.child xml_arg0 "name") in
+      let id =
+        (Option.map ~f:Zz__stringMin22Max22PatternAZ0922.of_xml)
+          (Xml.child xml_arg0 "id") in
+      let description =
+        (Option.map ~f:Zz__stringMin1Max512PatternSS.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let criteria =
+        (Option.map ~f:AllowListCriteria.of_xml)
+          (Xml.child xml_arg0 "criteria") in
+      let createdAt =
+        (Option.map ~f:Zz__timestampIso8601.of_xml)
+          (Xml.child xml_arg0 "createdAt") in
+      let arn =
+        (Option.map
+           ~f:Zz__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?updatedAt ?tags ?status ?name ?id ?description ?criteria
+        ?createdAt ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedAt =
+        field_map json__ "updatedAt" Zz__timestampIso8601.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let status = field_map json__ "status" AllowListStatus.of_json in
+      let name = field_map json__ "name" Zz__stringMin1Max128Pattern.of_json in
+      let id =
+        field_map json__ "id" Zz__stringMin22Max22PatternAZ0922.of_json in
+      let description =
+        field_map json__ "description" Zz__stringMin1Max512PatternSS.of_json in
+      let criteria = field_map json__ "criteria" AllowListCriteria.of_json in
+      let createdAt =
+        field_map json__ "createdAt" Zz__timestampIso8601.of_json in
+      let arn =
+        field_map json__ "arn"
+          Zz__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922.of_json in
+      make ?updatedAt ?tags ?status ?name ?id ?description ?criteria
+        ?createdAt ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves the settings and status of an allow list."]
+module GetAllowListRequest =
+  struct
+    type nonrec t =
+      {
+      id: Zz__string.t
+        [@ocaml.doc
+          "The unique identifier for the Amazon Macie resource that the request applies to."]}
+    let context_ = "GetAllowListRequest"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value [("id", (Some (Zz__string.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Zz__string.of_json in make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves the settings and status of an allow list."]
 module GetAdministratorAccountResponse =
   struct
     type nonrec t =
@@ -13167,8 +18564,8 @@ module GetAdministratorAccountResponse =
           (Xml.child xml_arg0 "administrator") in
       make ?administrator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let administrator = field_map json "administrator" Invitation.of_json in
+    let of_json json__ =
+      let administrator = field_map json__ "administrator" Invitation.of_json in
       make ?administrator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13308,10 +18705,10 @@ module EnableOrganizationAdminAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "adminAccountId") in
       make ?clientToken ~adminAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" Zz__string.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" Zz__string.of_json in
       let adminAccountId =
-        field_map_exn json "adminAccountId" Zz__string.of_json in
+        field_map_exn json__ "adminAccountId" Zz__string.of_json in
       make ?clientToken ~adminAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13421,7 +18818,7 @@ module EnableMacieRequest =
           "A unique, case-sensitive token that you provide to ensure the idempotency of the request."];
       findingPublishingFrequency: FindingPublishingFrequency.t option
         [@ocaml.doc
-          "Specifies how often to publish updates to policy findings for the account. This includes publishing updates to Security Hub and Amazon EventBridge (formerly called Amazon CloudWatch Events)."];
+          "Specifies how often to publish updates to policy findings for the account. This includes publishing updates to Security Hub and Amazon EventBridge (formerly Amazon CloudWatch Events)."];
       status: MacieStatus.t option
         [@ocaml.doc
           "Specifies the new status for the account. To enable Amazon Macie and start all Macie activities for the account, set this value to ENABLED."]}
@@ -13447,12 +18844,12 @@ module EnableMacieRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ?status ?findingPublishingFrequency ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" MacieStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" MacieStatus.of_json in
       let findingPublishingFrequency =
-        field_map json "findingPublishingFrequency"
+        field_map json__ "findingPublishingFrequency"
           FindingPublishingFrequency.of_json in
-      let clientToken = field_map json "clientToken" Zz__string.of_json in
+      let clientToken = field_map json__ "clientToken" Zz__string.of_json in
       make ?status ?findingPublishingFrequency ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13572,7 +18969,7 @@ module DisassociateMemberRequest =
       {
       id: Zz__string.t
         [@ocaml.doc
-          "The unique identifier for the Amazon Macie resource or account that the request applies to."]}
+          "The unique identifier for the Amazon Macie resource that the request applies to."]}
     let context_ = "DisassociateMemberRequest"
     let make ~id = fun () -> { id }
     let to_value x =
@@ -13583,8 +18980,8 @@ module DisassociateMemberRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Disassociates an Amazon Macie administrator account from a member account."]
@@ -13921,9 +19318,9 @@ module DisableOrganizationAdminAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "adminAccountId") in
       make ~adminAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let adminAccountId =
-        field_map_exn json "adminAccountId" Zz__string.of_json in
+        field_map_exn json__ "adminAccountId" Zz__string.of_json in
       make ~adminAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14147,10 +19544,10 @@ module DescribeOrganizationConfigurationResponse =
         (Option.map ~f:Zz__boolean.of_xml) (Xml.child xml_arg0 "autoEnable") in
       make ?maxAccountLimitReached ?autoEnable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxAccountLimitReached =
-        field_map json "maxAccountLimitReached" Zz__boolean.of_json in
-      let autoEnable = field_map json "autoEnable" Zz__boolean.of_json in
+        field_map json__ "maxAccountLimitReached" Zz__boolean.of_json in
+      let autoEnable = field_map json__ "autoEnable" Zz__boolean.of_json in
       make ?maxAccountLimitReached ?autoEnable ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14172,6 +19569,9 @@ module DescribeClassificationJobResponse =
   struct
     type nonrec t =
       {
+      allowListIds: Zz__listOf__string.t option
+        [@ocaml.doc
+          "An array of unique identifiers, one for each allow list that the job is configured to use when it analyzes data."];
       clientToken: Zz__string.t option
         [@ocaml.doc
           "The token that was provided to ensure the idempotency of the request to create the job."];
@@ -14180,7 +19580,7 @@ module DescribeClassificationJobResponse =
           "The date and time, in UTC and extended ISO 8601 format, when the job was created."];
       customDataIdentifierIds: Zz__listOf__string.t option
         [@ocaml.doc
-          "An array of unique identifiers, one for each custom data identifier that the job uses to analyze data. This value is null if the job uses only managed data identifiers to analyze data."];
+          "An array of unique identifiers, one for each custom data identifier that the job is configured to use when it analyzes data. This value is null if the job is configured to use only managed data identifiers to analyze data."];
       description: Zz__string.t option
         [@ocaml.doc "The custom description of the job."];
       initialRun: Zz__boolean.t option
@@ -14201,13 +19601,13 @@ module DescribeClassificationJobResponse =
           "Specifies whether any account- or bucket-level access errors occurred when the job ran. For a recurring job, this value indicates the error status of the job's most recent run."];
       lastRunTime: Zz__timestampIso8601.t option
         [@ocaml.doc
-          "The date and time, in UTC and extended ISO 8601 format, when the job started. If the job is a recurring job, this value indicates when the most recent run started."];
+          "The date and time, in UTC and extended ISO 8601 format, when the job started. If the job is a recurring job, this value indicates when the most recent run started or, if the job hasn't run yet, when the job was created."];
       managedDataIdentifierIds: Zz__listOf__string.t option
         [@ocaml.doc
-          "An array of unique identifiers, one for each managed data identifier that the job is explicitly configured to include (use) or exclude (not use) when it analyzes data. Inclusion or exclusion depends on the managed data identifier selection type specified for the job (managedDataIdentifierSelector). This value is null if the job's managed data identifier selection type is ALL or the job uses only custom data identifiers (customDataIdentifierIds) to analyze data."];
+          "An array of unique identifiers, one for each managed data identifier that the job is explicitly configured to include (use) or exclude (not use) when it analyzes data. Inclusion or exclusion depends on the managed data identifier selection type specified for the job (managedDataIdentifierSelector).This value is null if the job's managed data identifier selection type is ALL, NONE, or RECOMMENDED."];
       managedDataIdentifierSelector: ManagedDataIdentifierSelector.t option
         [@ocaml.doc
-          "The selection type that determines which managed data identifiers the job uses to analyze data. Possible values are: ALL - Use all the managed data identifiers that Amazon Macie provides. EXCLUDE - Use all the managed data identifiers that Macie provides except the managed data identifiers specified by the managedDataIdentifierIds property. INCLUDE - Use only the managed data identifiers specified by the managedDataIdentifierIds property. NONE - Don't use any managed data identifiers. If this value is null, the job uses all managed data identifiers. If this value is null, ALL, or EXCLUDE for a recurring job, the job also uses new managed data identifiers as they are released."];
+          "The selection type that determines which managed data identifiers the job uses when it analyzes data. Possible values are: ALL - Use all managed data identifiers. EXCLUDE - Use all managed data identifiers except the ones specified by the managedDataIdentifierIds property. INCLUDE - Use only the managed data identifiers specified by the managedDataIdentifierIds property. NONE - Don't use any managed data identifiers. Use only custom data identifiers (customDataIdentifierIds). RECOMMENDED (default) - Use the recommended set of managed data identifiers. If this value is null, the job uses the recommended set of managed data identifiers. If the job is a recurring job and this value is ALL or EXCLUDE, each job run automatically uses new managed data identifiers that are released. If this value is null or RECOMMENDED for a recurring job, each job run uses all the managed data identifiers that are in the recommended set when the run starts. To learn about individual managed data identifiers or determine which ones are in the recommended set, see Using managed data identifiers or Recommended managed data identifiers in the Amazon Macie User Guide."];
       name: Zz__string.t option [@ocaml.doc "The custom name of the job."];
       s3JobDefinition: S3JobDefinition.t option
         [@ocaml.doc
@@ -14223,7 +19623,7 @@ module DescribeClassificationJobResponse =
           "The number of times that the job has run and processing statistics for the job's current run."];
       tags: TagMap.t option
         [@ocaml.doc
-          "A map of key-value pairs that specifies which tags (keys and values) are associated with the classification job."];
+          "A map of key-value pairs that specifies which tags (keys and values) are associated with the job."];
       userPausedDetails: UserPausedDetails.t option
         [@ocaml.doc
           "If the current status of the job is USER_PAUSED, specifies when the job was paused and when the job or job run will expire and be cancelled if it isn't resumed. This value is present only if the value for jobStatus is USER_PAUSED."]}
@@ -14236,49 +19636,51 @@ module DescribeClassificationJobResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?clientToken =
-      fun ?createdAt ->
-        fun ?customDataIdentifierIds ->
-          fun ?description ->
-            fun ?initialRun ->
-              fun ?jobArn ->
-                fun ?jobId ->
-                  fun ?jobStatus ->
-                    fun ?jobType ->
-                      fun ?lastRunErrorStatus ->
-                        fun ?lastRunTime ->
-                          fun ?managedDataIdentifierIds ->
-                            fun ?managedDataIdentifierSelector ->
-                              fun ?name ->
-                                fun ?s3JobDefinition ->
-                                  fun ?samplingPercentage ->
-                                    fun ?scheduleFrequency ->
-                                      fun ?statistics ->
-                                        fun ?tags ->
-                                          fun ?userPausedDetails ->
-                                            fun () ->
-                                              {
-                                                clientToken;
-                                                createdAt;
-                                                customDataIdentifierIds;
-                                                description;
-                                                initialRun;
-                                                jobArn;
-                                                jobId;
-                                                jobStatus;
-                                                jobType;
-                                                lastRunErrorStatus;
-                                                lastRunTime;
-                                                managedDataIdentifierIds;
-                                                managedDataIdentifierSelector;
-                                                name;
-                                                s3JobDefinition;
-                                                samplingPercentage;
-                                                scheduleFrequency;
-                                                statistics;
-                                                tags;
-                                                userPausedDetails
-                                              }
+    let make ?allowListIds =
+      fun ?clientToken ->
+        fun ?createdAt ->
+          fun ?customDataIdentifierIds ->
+            fun ?description ->
+              fun ?initialRun ->
+                fun ?jobArn ->
+                  fun ?jobId ->
+                    fun ?jobStatus ->
+                      fun ?jobType ->
+                        fun ?lastRunErrorStatus ->
+                          fun ?lastRunTime ->
+                            fun ?managedDataIdentifierIds ->
+                              fun ?managedDataIdentifierSelector ->
+                                fun ?name ->
+                                  fun ?s3JobDefinition ->
+                                    fun ?samplingPercentage ->
+                                      fun ?scheduleFrequency ->
+                                        fun ?statistics ->
+                                          fun ?tags ->
+                                            fun ?userPausedDetails ->
+                                              fun () ->
+                                                {
+                                                  allowListIds;
+                                                  clientToken;
+                                                  createdAt;
+                                                  customDataIdentifierIds;
+                                                  description;
+                                                  initialRun;
+                                                  jobArn;
+                                                  jobId;
+                                                  jobStatus;
+                                                  jobType;
+                                                  lastRunErrorStatus;
+                                                  lastRunTime;
+                                                  managedDataIdentifierIds;
+                                                  managedDataIdentifierSelector;
+                                                  name;
+                                                  s3JobDefinition;
+                                                  samplingPercentage;
+                                                  scheduleFrequency;
+                                                  statistics;
+                                                  tags;
+                                                  userPausedDetails
+                                                }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -14355,7 +19757,9 @@ module DescribeClassificationJobResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("clientToken", (Option.map x.clientToken ~f:Zz__string.to_value));
+        [("allowListIds",
+           (Option.map x.allowListIds ~f:Zz__listOf__string.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:Zz__string.to_value));
         ("createdAt",
           (Option.map x.createdAt ~f:Zz__timestampIso8601.to_value));
         ("customDataIdentifierIds",
@@ -14439,48 +19843,57 @@ module DescribeClassificationJobResponse =
           (Xml.child xml_arg0 "createdAt") in
       let clientToken =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let allowListIds =
+        (Option.map ~f:Zz__listOf__string.of_xml)
+          (Xml.child xml_arg0 "allowListIds") in
       make ?userPausedDetails ?tags ?statistics ?scheduleFrequency
         ?samplingPercentage ?s3JobDefinition ?name
         ?managedDataIdentifierSelector ?managedDataIdentifierIds ?lastRunTime
         ?lastRunErrorStatus ?jobType ?jobStatus ?jobId ?jobArn ?initialRun
-        ?description ?customDataIdentifierIds ?createdAt ?clientToken ()
+        ?description ?customDataIdentifierIds ?createdAt ?clientToken
+        ?allowListIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userPausedDetails =
-        field_map json "userPausedDetails" UserPausedDetails.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let statistics = field_map json "statistics" Statistics.of_json in
+        field_map json__ "userPausedDetails" UserPausedDetails.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let statistics = field_map json__ "statistics" Statistics.of_json in
       let scheduleFrequency =
-        field_map json "scheduleFrequency" JobScheduleFrequency.of_json in
+        field_map json__ "scheduleFrequency" JobScheduleFrequency.of_json in
       let samplingPercentage =
-        field_map json "samplingPercentage" Zz__integer.of_json in
+        field_map json__ "samplingPercentage" Zz__integer.of_json in
       let s3JobDefinition =
-        field_map json "s3JobDefinition" S3JobDefinition.of_json in
-      let name = field_map json "name" Zz__string.of_json in
+        field_map json__ "s3JobDefinition" S3JobDefinition.of_json in
+      let name = field_map json__ "name" Zz__string.of_json in
       let managedDataIdentifierSelector =
-        field_map json "managedDataIdentifierSelector"
+        field_map json__ "managedDataIdentifierSelector"
           ManagedDataIdentifierSelector.of_json in
       let managedDataIdentifierIds =
-        field_map json "managedDataIdentifierIds" Zz__listOf__string.of_json in
+        field_map json__ "managedDataIdentifierIds"
+          Zz__listOf__string.of_json in
       let lastRunTime =
-        field_map json "lastRunTime" Zz__timestampIso8601.of_json in
+        field_map json__ "lastRunTime" Zz__timestampIso8601.of_json in
       let lastRunErrorStatus =
-        field_map json "lastRunErrorStatus" LastRunErrorStatus.of_json in
-      let jobType = field_map json "jobType" JobType.of_json in
-      let jobStatus = field_map json "jobStatus" JobStatus.of_json in
-      let jobId = field_map json "jobId" Zz__string.of_json in
-      let jobArn = field_map json "jobArn" Zz__string.of_json in
-      let initialRun = field_map json "initialRun" Zz__boolean.of_json in
-      let description = field_map json "description" Zz__string.of_json in
+        field_map json__ "lastRunErrorStatus" LastRunErrorStatus.of_json in
+      let jobType = field_map json__ "jobType" JobType.of_json in
+      let jobStatus = field_map json__ "jobStatus" JobStatus.of_json in
+      let jobId = field_map json__ "jobId" Zz__string.of_json in
+      let jobArn = field_map json__ "jobArn" Zz__string.of_json in
+      let initialRun = field_map json__ "initialRun" Zz__boolean.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
       let customDataIdentifierIds =
-        field_map json "customDataIdentifierIds" Zz__listOf__string.of_json in
-      let createdAt = field_map json "createdAt" Zz__timestampIso8601.of_json in
-      let clientToken = field_map json "clientToken" Zz__string.of_json in
+        field_map json__ "customDataIdentifierIds" Zz__listOf__string.of_json in
+      let createdAt =
+        field_map json__ "createdAt" Zz__timestampIso8601.of_json in
+      let clientToken = field_map json__ "clientToken" Zz__string.of_json in
+      let allowListIds =
+        field_map json__ "allowListIds" Zz__listOf__string.of_json in
       make ?userPausedDetails ?tags ?statistics ?scheduleFrequency
         ?samplingPercentage ?s3JobDefinition ?name
         ?managedDataIdentifierSelector ?managedDataIdentifierIds ?lastRunTime
         ?lastRunErrorStatus ?jobType ?jobStatus ?jobId ?jobArn ?initialRun
-        ?description ?customDataIdentifierIds ?createdAt ?clientToken ()
+        ?description ?customDataIdentifierIds ?createdAt ?clientToken
+        ?allowListIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the status and settings for a classification job."]
@@ -14500,8 +19913,8 @@ module DescribeClassificationJobRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "jobId" Zz__string.of_json in
+    let of_json json__ =
+      let jobId = field_map_exn json__ "jobId" Zz__string.of_json in
       make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14512,7 +19925,7 @@ module DescribeBucketsResponse =
       {
       buckets: Zz__listOfBucketMetadata.t option
         [@ocaml.doc
-          "An array of objects, one for each bucket that meets the filter criteria specified in the request."];
+          "An array of objects, one for each bucket that matches the filter criteria specified in the request."];
       nextToken: Zz__string.t option
         [@ocaml.doc
           "The string to use in a subsequent request to get the next page of results in a paginated response. This value is null if there are no additional pages."]}
@@ -14614,13 +20027,14 @@ module DescribeBucketsResponse =
           (Xml.child xml_arg0 "buckets") in
       make ?nextToken ?buckets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
-      let buckets = field_map json "buckets" Zz__listOfBucketMetadata.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let buckets =
+        field_map json__ "buckets" Zz__listOfBucketMetadata.of_json in
       make ?nextToken ?buckets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves (queries) statistical data and other information about one or more S3 buckets that Amazon Macie monitors and analyzes."]
+       "Retrieves (queries) statistical data and other information about one or more S3 buckets that Amazon Macie monitors and analyzes for an account."]
 module DescribeBucketsRequest =
   struct
     type nonrec t =
@@ -14660,16 +20074,16 @@ module DescribeBucketsRequest =
         (Option.map ~f:BucketCriteria.of_xml) (Xml.child xml_arg0 "criteria") in
       make ?sortCriteria ?nextToken ?maxResults ?criteria ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sortCriteria =
-        field_map json "sortCriteria" BucketSortCriteria.of_json in
-      let nextToken = field_map json "nextToken" Zz__string.of_json in
-      let maxResults = field_map json "maxResults" Zz__integer.of_json in
-      let criteria = field_map json "criteria" BucketCriteria.of_json in
+        field_map json__ "sortCriteria" BucketSortCriteria.of_json in
+      let nextToken = field_map json__ "nextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "maxResults" Zz__integer.of_json in
+      let criteria = field_map json__ "criteria" BucketCriteria.of_json in
       make ?sortCriteria ?nextToken ?maxResults ?criteria ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves (queries) statistical data and other information about one or more S3 buckets that Amazon Macie monitors and analyzes."]
+       "Retrieves (queries) statistical data and other information about one or more S3 buckets that Amazon Macie monitors and analyzes for an account."]
 module DeleteMemberResponse =
   struct
     type nonrec t = unit
@@ -14772,7 +20186,7 @@ module DeleteMemberRequest =
       {
       id: Zz__string.t
         [@ocaml.doc
-          "The unique identifier for the Amazon Macie resource or account that the request applies to."]}
+          "The unique identifier for the Amazon Macie resource that the request applies to."]}
     let context_ = "DeleteMemberRequest"
     let make ~id = fun () -> { id }
     let to_value x =
@@ -14783,8 +20197,8 @@ module DeleteMemberRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the association between an Amazon Macie administrator account and an account."]
@@ -14891,9 +20305,9 @@ module DeleteInvitationsResponse =
           (Xml.child xml_arg0 "unprocessedAccounts") in
       make ?unprocessedAccounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unprocessedAccounts =
-        field_map json "unprocessedAccounts"
+        field_map json__ "unprocessedAccounts"
           Zz__listOfUnprocessedAccount.of_json in
       make ?unprocessedAccounts ()
     let to_json v = composed_to_json to_value v
@@ -14918,9 +20332,9 @@ module DeleteInvitationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "accountIds") in
       make ~accountIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accountIds =
-        field_map_exn json "accountIds" Zz__listOf__string.of_json in
+        field_map_exn json__ "accountIds" Zz__listOf__string.of_json in
       make ~accountIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15026,7 +20440,7 @@ module DeleteFindingsFilterRequest =
       {
       id: Zz__string.t
         [@ocaml.doc
-          "The unique identifier for the Amazon Macie resource or account that the request applies to."]}
+          "The unique identifier for the Amazon Macie resource that the request applies to."]}
     let context_ = "DeleteFindingsFilterRequest"
     let make ~id = fun () -> { id }
     let to_value x =
@@ -15037,8 +20451,8 @@ module DeleteFindingsFilterRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a findings filter."]
 module DeleteCustomDataIdentifierResponse =
@@ -15142,7 +20556,7 @@ module DeleteCustomDataIdentifierRequest =
       {
       id: Zz__string.t
         [@ocaml.doc
-          "The unique identifier for the Amazon Macie resource or account that the request applies to."]}
+          "The unique identifier for the Amazon Macie resource that the request applies to."]}
     let context_ = "DeleteCustomDataIdentifierRequest"
     let make ~id = fun () -> { id }
     let to_value x =
@@ -15153,10 +20567,118 @@ module DeleteCustomDataIdentifierRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Soft deletes a custom data identifier."]
+module DeleteAllowListResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes an allow list."]
+module DeleteAllowListRequest =
+  struct
+    type nonrec t =
+      {
+      id: Zz__string.t
+        [@ocaml.doc
+          "The unique identifier for the Amazon Macie resource that the request applies to."];
+      ignoreJobChecks: Zz__string.t option
+        [@ocaml.doc
+          "Specifies whether to force deletion of the allow list, even if active classification jobs are configured to use the list. When you try to delete an allow list, Amazon Macie checks for classification jobs that use the list and have a status other than COMPLETE or CANCELLED. By default, Macie rejects your request if any jobs meet these criteria. To skip these checks and delete the list, set this value to true. To delete the list only if no active jobs are configured to use it, set this value to false."]}
+    let context_ = "DeleteAllowListRequest"
+    let make ?ignoreJobChecks = fun ~id -> fun () -> { ignoreJobChecks; id }
+    let to_value x =
+      structure_to_value
+        [("id", (Some (Zz__string.to_value x.id)));
+        ("ignoreJobChecks",
+          (Option.map x.ignoreJobChecks ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ignoreJobChecks =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "ignoreJobChecks") in
+      let id =
+        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ?ignoreJobChecks ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ignoreJobChecks =
+        field_map json__ "ignoreJobChecks" Zz__string.of_json in
+      let id = field_map_exn json__ "id" Zz__string.of_json in
+      make ?ignoreJobChecks ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes an allow list."]
 module DeclineInvitationsResponse =
   struct
     type nonrec t =
@@ -15260,9 +20782,9 @@ module DeclineInvitationsResponse =
           (Xml.child xml_arg0 "unprocessedAccounts") in
       make ?unprocessedAccounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unprocessedAccounts =
-        field_map json "unprocessedAccounts"
+        field_map json__ "unprocessedAccounts"
           Zz__listOfUnprocessedAccount.of_json in
       make ?unprocessedAccounts ()
     let to_json v = composed_to_json to_value v
@@ -15287,9 +20809,9 @@ module DeclineInvitationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "accountIds") in
       make ~accountIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accountIds =
-        field_map_exn json "accountIds" Zz__listOf__string.of_json in
+        field_map_exn json__ "accountIds" Zz__listOf__string.of_json in
       make ~accountIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15408,9 +20930,9 @@ module CreateSampleFindingsRequest =
           (Xml.child xml_arg0 "findingTypes") in
       make ?findingTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let findingTypes =
-        field_map json "findingTypes" Zz__listOfFindingType.of_json in
+        field_map json__ "findingTypes" Zz__listOfFindingType.of_json in
       make ?findingTypes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates sample findings."]
@@ -15512,8 +21034,8 @@ module CreateMemberResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "arn" Zz__string.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "arn" Zz__string.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Associates an account with an Amazon Macie administrator account."]
@@ -15541,9 +21063,9 @@ module CreateMemberRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "account") in
       make ?tags ~account ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let account = field_map_exn json "account" AccountDetail.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let account = field_map_exn json__ "account" AccountDetail.of_json in
       make ?tags ~account ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15651,9 +21173,9 @@ module CreateInvitationsResponse =
           (Xml.child xml_arg0 "unprocessedAccounts") in
       make ?unprocessedAccounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unprocessedAccounts =
-        field_map json "unprocessedAccounts"
+        field_map json__ "unprocessedAccounts"
           Zz__listOfUnprocessedAccount.of_json in
       make ?unprocessedAccounts ()
     let to_json v = composed_to_json to_value v
@@ -15695,12 +21217,12 @@ module CreateInvitationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "accountIds") in
       make ?message ?disableEmailNotification ~accountIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Zz__string.of_json in
       let disableEmailNotification =
-        field_map json "disableEmailNotification" Zz__boolean.of_json in
+        field_map json__ "disableEmailNotification" Zz__boolean.of_json in
       let accountIds =
-        field_map_exn json "accountIds" Zz__listOf__string.of_json in
+        field_map_exn json__ "accountIds" Zz__listOf__string.of_json in
       make ?message ?disableEmailNotification ~accountIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15808,9 +21330,9 @@ module CreateFindingsFilterResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?id ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "id" Zz__string.of_json in
-      let arn = field_map json "arn" Zz__string.of_json in make ?id ?arn ()
+    let of_json json__ =
+      let id = field_map json__ "id" Zz__string.of_json in
+      let arn = field_map json__ "arn" Zz__string.of_json in make ?id ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates and defines the criteria and other settings for a findings filter."]
@@ -15820,7 +21342,7 @@ module CreateFindingsFilterRequest =
       {
       action: FindingsFilterAction.t
         [@ocaml.doc
-          "The action to perform on findings that meet the filter criteria (findingCriteria). Valid values are: ARCHIVE, suppress (automatically archive) the findings; and, NOOP, don't perform any action on the findings."];
+          "The action to perform on findings that match the filter criteria (findingCriteria). Valid values are: ARCHIVE, suppress (automatically archive) the findings; and, NOOP, don't perform any action on the findings."];
       clientToken: Zz__string.t option
         [@ocaml.doc
           "A unique, case-sensitive token that you provide to ensure the idempotency of the request."];
@@ -15886,15 +21408,15 @@ module CreateFindingsFilterRequest =
       make ?tags ?position ~name ~findingCriteria ?description ?clientToken
         ~action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let position = field_map json "position" Zz__integer.of_json in
-      let name = field_map_exn json "name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let position = field_map json__ "position" Zz__integer.of_json in
+      let name = field_map_exn json__ "name" Zz__string.of_json in
       let findingCriteria =
-        field_map_exn json "findingCriteria" FindingCriteria.of_json in
-      let description = field_map json "description" Zz__string.of_json in
-      let clientToken = field_map json "clientToken" Zz__string.of_json in
-      let action = field_map_exn json "action" FindingsFilterAction.of_json in
+        field_map_exn json__ "findingCriteria" FindingCriteria.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
+      let clientToken = field_map json__ "clientToken" Zz__string.of_json in
+      let action = field_map_exn json__ "action" FindingsFilterAction.of_json in
       make ?tags ?position ~name ~findingCriteria ?description ?clientToken
         ~action ()
     let to_json v = composed_to_json to_value v
@@ -16002,9 +21524,9 @@ module CreateCustomDataIdentifierResponse =
           (Xml.child xml_arg0 "customDataIdentifierId") in
       make ?customDataIdentifierId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customDataIdentifierId =
-        field_map json "customDataIdentifierId" Zz__string.of_json in
+        field_map json__ "customDataIdentifierId" Zz__string.of_json in
       make ?customDataIdentifierId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16024,10 +21546,10 @@ module CreateCustomDataIdentifierRequest =
           "An array that lists specific character sequences (ignore words) to exclude from the results. If the text matched by the regular expression contains any string in this array, Amazon Macie ignores it. The array can contain as many as 10 ignore words. Each ignore word can contain 4-90 UTF-8 characters. Ignore words are case sensitive."];
       keywords: Zz__listOf__string.t option
         [@ocaml.doc
-          "An array that lists specific character sequences (keywords), one of which must be within proximity (maximumMatchDistance) of the regular expression to match. The array can contain as many as 50 keywords. Each keyword can contain 3-90 UTF-8 characters. Keywords aren't case sensitive."];
+          "An array that lists specific character sequences (keywords), one of which must precede and be within proximity (maximumMatchDistance) of the regular expression to match. The array can contain as many as 50 keywords. Each keyword can contain 3-90 UTF-8 characters. Keywords aren't case sensitive."];
       maximumMatchDistance: Zz__integer.t option
         [@ocaml.doc
-          "The maximum number of characters that can exist between text that matches the regular expression and the character sequences specified by the keywords array. Amazon Macie includes or excludes a result based on the proximity of a keyword to text that matches the regular expression. The distance can be 1-300 characters. The default value is 50."];
+          "The maximum number of characters that can exist between the end of at least one complete character sequence specified by the keywords array and the end of the text that matches the regex pattern. If a complete keyword precedes all the text that matches the pattern and the keyword is within the specified distance, Amazon Macie includes the result. The distance can be 1-300 characters. The default value is 50."];
       name: Zz__string.t
         [@ocaml.doc
           "A custom name for the custom data identifier. The name can contain as many as 128 characters. We strongly recommend that you avoid including any sensitive data in the name of a custom data identifier. Other users of your account might be able to see this name, depending on the actions that they're allowed to perform in Amazon Macie."];
@@ -16036,7 +21558,7 @@ module CreateCustomDataIdentifierRequest =
           "The regular expression (regex) that defines the pattern to match. The expression can contain as many as 512 characters."];
       severityLevels: SeverityLevelList.t option
         [@ocaml.doc
-          "The severity to assign to findings that the custom data identifier produces, based on the number of occurrences of text that matches the custom data identifier's detection criteria. You can specify as many as three SeverityLevel objects in this array, one for each severity: LOW, MEDIUM, or HIGH. If you specify more than one, the occurrences thresholds must be in ascending order by severity, moving from LOW to HIGH. For example, 1 for LOW, 50 for MEDIUM, and 100 for HIGH. If an S3 object contains fewer occurrences than the lowest specified threshold, Amazon Macie doesn't create a finding. If you don't specify any values for this array, Macie creates findings for S3 objects that contain at least one occurrence of text that matches the detection criteria, and Macie assigns the MEDIUM severity to those findings."];
+          "The severity to assign to findings that the custom data identifier produces, based on the number of occurrences of text that match the custom data identifier's detection criteria. You can specify as many as three SeverityLevel objects in this array, one for each severity: LOW, MEDIUM, or HIGH. If you specify more than one, the occurrences thresholds must be in ascending order by severity, moving from LOW to HIGH. For example, 1 for LOW, 50 for MEDIUM, and 100 for HIGH. If an S3 object contains fewer occurrences than the lowest specified threshold, Amazon Macie doesn't create a finding. If you don't specify any values for this array, Macie creates findings for S3 objects that contain at least one occurrence of text that matches the detection criteria, and Macie assigns the MEDIUM severity to those findings."];
       tags: TagMap.t option
         [@ocaml.doc
           "A map of key-value pairs that specifies the tags to associate with the custom data identifier. A custom data identifier can have a maximum of 50 tags. Each tag consists of a tag key and an associated tag value. The maximum length of a tag key is 128 characters. The maximum length of a tag value is 256 characters."]}
@@ -16102,19 +21624,19 @@ module CreateCustomDataIdentifierRequest =
       make ?tags ?severityLevels ~regex ~name ?maximumMatchDistance ?keywords
         ?ignoreWords ?description ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
       let severityLevels =
-        field_map json "severityLevels" SeverityLevelList.of_json in
-      let regex = field_map_exn json "regex" Zz__string.of_json in
-      let name = field_map_exn json "name" Zz__string.of_json in
+        field_map json__ "severityLevels" SeverityLevelList.of_json in
+      let regex = field_map_exn json__ "regex" Zz__string.of_json in
+      let name = field_map_exn json__ "name" Zz__string.of_json in
       let maximumMatchDistance =
-        field_map json "maximumMatchDistance" Zz__integer.of_json in
-      let keywords = field_map json "keywords" Zz__listOf__string.of_json in
+        field_map json__ "maximumMatchDistance" Zz__integer.of_json in
+      let keywords = field_map json__ "keywords" Zz__listOf__string.of_json in
       let ignoreWords =
-        field_map json "ignoreWords" Zz__listOf__string.of_json in
-      let description = field_map json "description" Zz__string.of_json in
-      let clientToken = field_map json "clientToken" Zz__string.of_json in
+        field_map json__ "ignoreWords" Zz__listOf__string.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
+      let clientToken = field_map json__ "clientToken" Zz__string.of_json in
       make ?tags ?severityLevels ~regex ~name ?maximumMatchDistance ?keywords
         ?ignoreWords ?description ?clientToken ()
     let to_json v = composed_to_json to_value v
@@ -16224,9 +21746,9 @@ module CreateClassificationJobResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "jobArn") in
       make ?jobId ?jobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "jobId" Zz__string.of_json in
-      let jobArn = field_map json "jobArn" Zz__string.of_json in
+    let of_json json__ =
+      let jobId = field_map json__ "jobId" Zz__string.of_json in
+      let jobArn = field_map json__ "jobArn" Zz__string.of_json in
       make ?jobId ?jobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16235,6 +21757,9 @@ module CreateClassificationJobRequest =
   struct
     type nonrec t =
       {
+      allowListIds: Zz__listOf__string.t option
+        [@ocaml.doc
+          "An array of unique identifiers, one for each allow list for the job to use when it analyzes data."];
       clientToken: Zz__string.t
         [@ocaml.doc
           "A unique, case-sensitive token that you provide to ensure the idempotency of the request."];
@@ -16246,16 +21771,16 @@ module CreateClassificationJobRequest =
           "A custom description of the job. The description can contain as many as 200 characters."];
       initialRun: Zz__boolean.t option
         [@ocaml.doc
-          "For a recurring job, specifies whether to analyze all existing, eligible objects immediately after the job is created (true). To analyze only those objects that are created or changed after you create the job and before the job's first scheduled run, set this value to false.If you configure the job to run only once, don't specify a value for this property."];
+          "For a recurring job, specifies whether to analyze all existing, eligible objects immediately after the job is created (true). To analyze only those objects that are created or changed after you create the job and before the job's first scheduled run, set this value to false. If you configure the job to run only once, don't specify a value for this property."];
       jobType: JobType.t
         [@ocaml.doc
-          "The schedule for running the job. Valid values are: ONE_TIME - Run the job only once. If you specify this value, don't specify a value for the scheduleFrequency property. SCHEDULED - Run the job on a daily, weekly, or monthly basis. If you specify this value, use the scheduleFrequency property to define the recurrence pattern for the job."];
+          "The schedule for running the job. Valid values are: ONE_TIME - Run the job only once. If you specify this value, don't specify a value for the scheduleFrequency property. SCHEDULED - Run the job on a daily, weekly, or monthly basis. If you specify this value, use the scheduleFrequency property to specify the recurrence pattern for the job."];
       managedDataIdentifierIds: Zz__listOf__string.t option
         [@ocaml.doc
-          "An array of unique identifiers, one for each managed data identifier for the job to include (use) or exclude (not use) when it analyzes data. Inclusion or exclusion depends on the managed data identifier selection type that you specify for the job (managedDataIdentifierSelector).To retrieve a list of valid values for this property, use the ListManagedDataIdentifiers operation."];
+          "An array of unique identifiers, one for each managed data identifier for the job to include (use) or exclude (not use) when it analyzes data. Inclusion or exclusion depends on the managed data identifier selection type that you specify for the job (managedDataIdentifierSelector). To retrieve a list of valid values for this property, use the ListManagedDataIdentifiers operation."];
       managedDataIdentifierSelector: ManagedDataIdentifierSelector.t option
         [@ocaml.doc
-          "The selection type to apply when determining which managed data identifiers the job uses to analyze data. Valid values are: ALL - Use all the managed data identifiers that Amazon Macie provides. If you specify this value, don't specify any values for the managedDataIdentifierIds property. EXCLUDE - Use all the managed data identifiers that Macie provides except the managed data identifiers specified by the managedDataIdentifierIds property. INCLUDE - Use only the managed data identifiers specified by the managedDataIdentifierIds property. NONE - Don't use any managed data identifiers. If you specify this value, specify at least one custom data identifier for the job (customDataIdentifierIds) and don't specify any values for the managedDataIdentifierIds property. If you don't specify a value for this property, the job uses all managed data identifiers. If you don't specify a value for this property or you specify ALL or EXCLUDE for a recurring job, the job also uses new managed data identifiers as they are released."];
+          "The selection type to apply when determining which managed data identifiers the job uses to analyze data. Valid values are: ALL - Use all managed data identifiers. If you specify this value, don't specify any values for the managedDataIdentifierIds property. EXCLUDE - Use all managed data identifiers except the ones specified by the managedDataIdentifierIds property. INCLUDE - Use only the managed data identifiers specified by the managedDataIdentifierIds property. NONE - Don't use any managed data identifiers. If you specify this value, specify at least one value for the customDataIdentifierIds property and don't specify any values for the managedDataIdentifierIds property. RECOMMENDED (default) - Use the recommended set of managed data identifiers. If you specify this value, don't specify any values for the managedDataIdentifierIds property. If you don't specify a value for this property, the job uses the recommended set of managed data identifiers. If the job is a recurring job and you specify ALL or EXCLUDE, each job run automatically uses new managed data identifiers that are released. If you don't specify a value for this property or you specify RECOMMENDED for a recurring job, each job run automatically uses all the managed data identifiers that are in the recommended set when the run starts. To learn about individual managed data identifiers or determine which ones are in the recommended set, see Using managed data identifiers or Recommended managed data identifiers in the Amazon Macie User Guide."];
       name: Zz__string.t
         [@ocaml.doc
           "A custom name for the job. The name can contain as many as 500 characters."];
@@ -16272,36 +21797,40 @@ module CreateClassificationJobRequest =
         [@ocaml.doc
           "A map of key-value pairs that specifies the tags to associate with the job. A job can have a maximum of 50 tags. Each tag consists of a tag key and an associated tag value. The maximum length of a tag key is 128 characters. The maximum length of a tag value is 256 characters."]}
     let context_ = "CreateClassificationJobRequest"
-    let make ?customDataIdentifierIds =
-      fun ?description ->
-        fun ?initialRun ->
-          fun ?managedDataIdentifierIds ->
-            fun ?managedDataIdentifierSelector ->
-              fun ?samplingPercentage ->
-                fun ?scheduleFrequency ->
-                  fun ?tags ->
-                    fun ~clientToken ->
-                      fun ~jobType ->
-                        fun ~name ->
-                          fun ~s3JobDefinition ->
-                            fun () ->
-                              {
-                                customDataIdentifierIds;
-                                description;
-                                initialRun;
-                                managedDataIdentifierIds;
-                                managedDataIdentifierSelector;
-                                samplingPercentage;
-                                scheduleFrequency;
-                                tags;
-                                clientToken;
-                                jobType;
-                                name;
-                                s3JobDefinition
-                              }
+    let make ?allowListIds =
+      fun ?customDataIdentifierIds ->
+        fun ?description ->
+          fun ?initialRun ->
+            fun ?managedDataIdentifierIds ->
+              fun ?managedDataIdentifierSelector ->
+                fun ?samplingPercentage ->
+                  fun ?scheduleFrequency ->
+                    fun ?tags ->
+                      fun ~clientToken ->
+                        fun ~jobType ->
+                          fun ~name ->
+                            fun ~s3JobDefinition ->
+                              fun () ->
+                                {
+                                  allowListIds;
+                                  customDataIdentifierIds;
+                                  description;
+                                  initialRun;
+                                  managedDataIdentifierIds;
+                                  managedDataIdentifierSelector;
+                                  samplingPercentage;
+                                  scheduleFrequency;
+                                  tags;
+                                  clientToken;
+                                  jobType;
+                                  name;
+                                  s3JobDefinition
+                                }
     let to_value x =
       structure_to_value
-        [("clientToken", (Some (Zz__string.to_value x.clientToken)));
+        [("allowListIds",
+           (Option.map x.allowListIds ~f:Zz__listOf__string.to_value));
+        ("clientToken", (Some (Zz__string.to_value x.clientToken)));
         ("customDataIdentifierIds",
           (Option.map x.customDataIdentifierIds
              ~f:Zz__listOf__string.to_value));
@@ -16354,38 +21883,347 @@ module CreateClassificationJobRequest =
       let clientToken =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let allowListIds =
+        (Option.map ~f:Zz__listOf__string.of_xml)
+          (Xml.child xml_arg0 "allowListIds") in
       make ?tags ?scheduleFrequency ?samplingPercentage ~s3JobDefinition
         ~name ?managedDataIdentifierSelector ?managedDataIdentifierIds
         ~jobType ?initialRun ?description ?customDataIdentifierIds
-        ~clientToken ()
+        ~clientToken ?allowListIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
       let scheduleFrequency =
-        field_map json "scheduleFrequency" JobScheduleFrequency.of_json in
+        field_map json__ "scheduleFrequency" JobScheduleFrequency.of_json in
       let samplingPercentage =
-        field_map json "samplingPercentage" Zz__integer.of_json in
+        field_map json__ "samplingPercentage" Zz__integer.of_json in
       let s3JobDefinition =
-        field_map_exn json "s3JobDefinition" S3JobDefinition.of_json in
-      let name = field_map_exn json "name" Zz__string.of_json in
+        field_map_exn json__ "s3JobDefinition" S3JobDefinition.of_json in
+      let name = field_map_exn json__ "name" Zz__string.of_json in
       let managedDataIdentifierSelector =
-        field_map json "managedDataIdentifierSelector"
+        field_map json__ "managedDataIdentifierSelector"
           ManagedDataIdentifierSelector.of_json in
       let managedDataIdentifierIds =
-        field_map json "managedDataIdentifierIds" Zz__listOf__string.of_json in
-      let jobType = field_map_exn json "jobType" JobType.of_json in
-      let initialRun = field_map json "initialRun" Zz__boolean.of_json in
-      let description = field_map json "description" Zz__string.of_json in
+        field_map json__ "managedDataIdentifierIds"
+          Zz__listOf__string.of_json in
+      let jobType = field_map_exn json__ "jobType" JobType.of_json in
+      let initialRun = field_map json__ "initialRun" Zz__boolean.of_json in
+      let description = field_map json__ "description" Zz__string.of_json in
       let customDataIdentifierIds =
-        field_map json "customDataIdentifierIds" Zz__listOf__string.of_json in
-      let clientToken = field_map_exn json "clientToken" Zz__string.of_json in
+        field_map json__ "customDataIdentifierIds" Zz__listOf__string.of_json in
+      let clientToken = field_map_exn json__ "clientToken" Zz__string.of_json in
+      let allowListIds =
+        field_map json__ "allowListIds" Zz__listOf__string.of_json in
       make ?tags ?scheduleFrequency ?samplingPercentage ~s3JobDefinition
         ~name ?managedDataIdentifierSelector ?managedDataIdentifierIds
         ~jobType ?initialRun ?description ?customDataIdentifierIds
-        ~clientToken ()
+        ~clientToken ?allowListIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates and defines the settings for a classification job."]
+module CreateAllowListResponse =
+  struct
+    type nonrec t =
+      {
+      arn:
+        Zz__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922.t
+          option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the allow list."];
+      id: Zz__stringMin22Max22PatternAZ0922.t option
+        [@ocaml.doc "The unique identifier for the allow list."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?arn = fun ?id -> fun () -> { arn; id }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("arn",
+           (Option.map x.arn
+              ~f:Zz__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922.to_value));
+        ("id",
+          (Option.map x.id ~f:Zz__stringMin22Max22PatternAZ0922.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        (Option.map ~f:Zz__stringMin22Max22PatternAZ0922.of_xml)
+          (Xml.child xml_arg0 "id") in
+      let arn =
+        (Option.map
+           ~f:Zz__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id =
+        field_map json__ "id" Zz__stringMin22Max22PatternAZ0922.of_json in
+      let arn =
+        field_map json__ "arn"
+          Zz__stringMin71Max89PatternArnAwsAwsCnAwsUsGovMacie2AZ19920D12AllowListAZ0922.of_json in
+      make ?id ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates and defines the settings for an allow list."]
+module CreateAllowListRequest =
+  struct
+    type nonrec t =
+      {
+      clientToken: Zz__string.t
+        [@ocaml.doc
+          "A unique, case-sensitive token that you provide to ensure the idempotency of the request."];
+      criteria: AllowListCriteria.t
+        [@ocaml.doc
+          "The criteria that specify the text or text pattern to ignore. The criteria can be the location and name of an S3 object that lists specific text to ignore (s3WordsList), or a regular expression (regex) that defines a text pattern to ignore."];
+      description: Zz__stringMin1Max512PatternSS.t option
+        [@ocaml.doc
+          "A custom description of the allow list. The description can contain as many as 512 characters."];
+      name: Zz__stringMin1Max128Pattern.t
+        [@ocaml.doc
+          "A custom name for the allow list. The name can contain as many as 128 characters."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A map of key-value pairs that specifies the tags to associate with the allow list. An allow list can have a maximum of 50 tags. Each tag consists of a tag key and an associated tag value. The maximum length of a tag key is 128 characters. The maximum length of a tag value is 256 characters."]}
+    let context_ = "CreateAllowListRequest"
+    let make ?description =
+      fun ?tags ->
+        fun ~clientToken ->
+          fun ~criteria ->
+            fun ~name ->
+              fun () -> { description; tags; clientToken; criteria; name }
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Some (Zz__string.to_value x.clientToken)));
+        ("criteria", (Some (AllowListCriteria.to_value x.criteria)));
+        ("description",
+          (Option.map x.description ~f:Zz__stringMin1Max512PatternSS.to_value));
+        ("name", (Some (Zz__stringMin1Max128Pattern.to_value x.name)));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let name =
+        Zz__stringMin1Max128Pattern.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let description =
+        (Option.map ~f:Zz__stringMin1Max512PatternSS.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let criteria =
+        AllowListCriteria.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "criteria") in
+      let clientToken =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      make ?tags ~name ?description ~criteria ~clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let name =
+        field_map_exn json__ "name" Zz__stringMin1Max128Pattern.of_json in
+      let description =
+        field_map json__ "description" Zz__stringMin1Max512PatternSS.of_json in
+      let criteria =
+        field_map_exn json__ "criteria" AllowListCriteria.of_json in
+      let clientToken = field_map_exn json__ "clientToken" Zz__string.of_json in
+      make ?tags ~name ?description ~criteria ~clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates and defines the settings for an allow list."]
+module BatchUpdateAutomatedDiscoveryAccountsResponse =
+  struct
+    type nonrec t =
+      {
+      errors: Zz__listOfAutomatedDiscoveryAccountUpdateError.t option
+        [@ocaml.doc
+          "An array of objects, one for each account whose status wasn't changed. Each object identifies the account and explains why the status of automated sensitive data discovery wasn't changed for the account. This value is null if the request succeeded for all specified accounts."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?errors = fun () -> { errors }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("errors",
+           (Option.map x.errors
+              ~f:Zz__listOfAutomatedDiscoveryAccountUpdateError.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errors =
+        (Option.map ~f:Zz__listOfAutomatedDiscoveryAccountUpdateError.of_xml)
+          (Xml.child xml_arg0 "errors") in
+      make ?errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errors =
+        field_map json__ "errors"
+          Zz__listOfAutomatedDiscoveryAccountUpdateError.of_json in
+      make ?errors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Changes the status of automated sensitive data discovery for one or more accounts."]
+module BatchUpdateAutomatedDiscoveryAccountsRequest =
+  struct
+    type nonrec t =
+      {
+      accounts: Zz__listOfAutomatedDiscoveryAccountUpdate.t option
+        [@ocaml.doc
+          "An array of objects, one for each account to change the status of automated sensitive data discovery for. Each object specifies the Amazon Web Services account ID for an account and a new status for that account."]}
+    let make ?accounts = fun () -> { accounts }
+    let to_value x =
+      structure_to_value
+        [("accounts",
+           (Option.map x.accounts
+              ~f:Zz__listOfAutomatedDiscoveryAccountUpdate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accounts =
+        (Option.map ~f:Zz__listOfAutomatedDiscoveryAccountUpdate.of_xml)
+          (Xml.child xml_arg0 "accounts") in
+      make ?accounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accounts =
+        field_map json__ "accounts"
+          Zz__listOfAutomatedDiscoveryAccountUpdate.of_json in
+      make ?accounts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Changes the status of automated sensitive data discovery for one or more accounts."]
 module BatchGetCustomDataIdentifiersResponse =
   struct
     type nonrec t =
@@ -16393,7 +22231,7 @@ module BatchGetCustomDataIdentifiersResponse =
       customDataIdentifiers:
         Zz__listOfBatchGetCustomDataIdentifierSummary.t option
         [@ocaml.doc
-          "An array of objects, one for each custom data identifier that meets the criteria specified in the request."];
+          "An array of objects, one for each custom data identifier that matches the criteria specified in the request."];
       notFoundIdentifierIds: Zz__listOf__string.t option
         [@ocaml.doc
           "An array of custom data identifier IDs, one for each custom data identifier that was specified in the request but doesn't correlate to an existing custom data identifier."]}
@@ -16500,11 +22338,11 @@ module BatchGetCustomDataIdentifiersResponse =
           (Xml.child xml_arg0 "customDataIdentifiers") in
       make ?notFoundIdentifierIds ?customDataIdentifiers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let notFoundIdentifierIds =
-        field_map json "notFoundIdentifierIds" Zz__listOf__string.of_json in
+        field_map json__ "notFoundIdentifierIds" Zz__listOf__string.of_json in
       let customDataIdentifiers =
-        field_map json "customDataIdentifiers"
+        field_map json__ "customDataIdentifiers"
           Zz__listOfBatchGetCustomDataIdentifierSummary.of_json in
       make ?notFoundIdentifierIds ?customDataIdentifiers ()
     let to_json v = composed_to_json to_value v
@@ -16527,8 +22365,8 @@ module BatchGetCustomDataIdentifiersRequest =
         (Option.map ~f:Zz__listOf__string.of_xml) (Xml.child xml_arg0 "ids") in
       make ?ids ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ids = field_map json "ids" Zz__listOf__string.of_json in
+    let of_json json__ =
+      let ids = field_map json__ "ids" Zz__listOf__string.of_json in
       make ?ids ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16666,11 +22504,12 @@ module AcceptInvitationRequest =
           (Xml.child xml_arg0 "administratorAccountId") in
       make ?masterAccount ~invitationId ?administratorAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let masterAccount = field_map json "masterAccount" Zz__string.of_json in
-      let invitationId = field_map_exn json "invitationId" Zz__string.of_json in
+    let of_json json__ =
+      let masterAccount = field_map json__ "masterAccount" Zz__string.of_json in
+      let invitationId =
+        field_map_exn json__ "invitationId" Zz__string.of_json in
       let administratorAccountId =
-        field_map json "administratorAccountId" Zz__string.of_json in
+        field_map json__ "administratorAccountId" Zz__string.of_json in
       make ?masterAccount ~invitationId ?administratorAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

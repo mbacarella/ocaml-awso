@@ -25,92 +25,236 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
-module Group =
+module ErrorMessage =
   struct
-    type nonrec t = string
-    let context_ = "Group"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:640) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^([\\u0021-\\u007F]+\\u002F)?[\\w+=,.@-]+$")));
-        i
+    type nonrec t = string[@@ocaml.doc
+                            "The error message the exception carries."]
+    let context_ = "errorMessage"
+    let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Group" j
+    let of_json j = string_of_json ~kind:"errorMessage" j
     let to_json = simple_to_json to_value
-  end
-module Role =
+  end[@@ocaml.doc "The error message the exception carries."]
+module AccessDeniedException =
   struct
-    type nonrec t = string
-    let context_ = "Role"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:576) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^([\\u0021-\\u007F]+\\u002F)?[\\w+=,.@-]+$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Role" j
-    let to_json = simple_to_json to_value
-  end
-module User =
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You are not authorized to use this operation with the given parameters."]
+module AccountId =
   struct
-    type nonrec t = string
-    let context_ = "User"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:576) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^([\\u0021-\\u007F]+\\u002F)?[\\w+=,.@-]+$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"User" j
-    let to_json = simple_to_json to_value
-  end
-module TargetId =
-  struct
-    type nonrec t = string
-    let context_ = "TargetId"
+    type nonrec t = string[@@ocaml.doc
+                            "The account ID of the user. It's a 12-digit number."]
+    let context_ = "AccountId"
     let make i =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:12) >>=
              (fun () ->
-                (check_string_max i ~max:68) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^(ou-[0-9a-z]{4,32}-[a-z0-9]{8,32}$)|(\\d{12})")));
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"\\d{12}")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TargetId" j
+    let of_json j = string_of_json ~kind:"AccountId" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The account ID of the user. It's a 12-digit number."]
+module SubscriptionType =
+  struct
+    type nonrec t =
+      | SNS 
+      | EMAIL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | SNS -> "SNS" | EMAIL -> "EMAIL" | Non_static_id s -> s
+    let of_string =
+      function | "SNS" -> SNS | "EMAIL" -> EMAIL | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SubscriptionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SubscriptionType" j)
+    let to_json = simple_to_json to_value
+  end
+module SubscriberAddress =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "A string that contains an email address or SNS topic for the subscriber's address."]
+    let context_ = "SubscriberAddress"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2147483647) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"(.*[\\n\\r\\t\\f\\ ]?)*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SubscriberAddress" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "A string that contains an email address or SNS topic for the subscriber's address."]
+module Subscriber =
+  struct
+    type nonrec t =
+      {
+      subscriptionType: SubscriptionType.t
+        [@ocaml.doc
+          "The type of notification that Amazon Web Services sends to a subscriber."];
+      address: SubscriberAddress.t
+        [@ocaml.doc
+          "The address that Amazon Web Services sends budget notifications to, either an SNS topic or an email. When you create a subscriber, the value of Address can't contain line breaks."]}
+    let context_ = "Subscriber"
+    let make ~subscriptionType =
+      fun ~address -> fun () -> { subscriptionType; address }
+    let to_value x =
+      structure_to_value
+        [("SubscriptionType",
+           (Some (SubscriptionType.to_value x.subscriptionType)));
+        ("Address", (Some (SubscriberAddress.to_value x.address)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let address =
+        SubscriberAddress.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Address") in
+      let subscriptionType =
+        SubscriptionType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionType") in
+      make ~address ~subscriptionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let address = field_map_exn json__ "Address" SubscriberAddress.of_json in
+      let subscriptionType =
+        field_map_exn json__ "SubscriptionType" SubscriptionType.of_json in
+      make ~address ~subscriptionType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The subscriber to a budget notification. The subscriber consists of a subscription type and either an Amazon SNS topic or an email address. For example, an email subscriber has the following parameters: A subscriptionType of EMAIL An address of example\\@example.com"]
+module Subscribers =
+  struct
+    type nonrec t = Subscriber.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:11) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Subscriber.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Subscriber.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Subscribers" ~of_json:Subscriber.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "RoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:32) >>=
+             (fun () ->
+                (check_string_max i ~max:618) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws(-eusc|-cn|-us-gov|-iso|-iso-[a-z]{1})?:iam::\\d{12}:role(\\u002F[\\u0021-\\u007F]+\\u002F|\\u002F)[\\w+=,.@-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module NotificationType =
+  struct
+    type nonrec t =
+      | ACTUAL 
+      | FORECASTED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTUAL -> "ACTUAL"
+      | FORECASTED -> "FORECASTED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTUAL" -> ACTUAL
+      | "FORECASTED" -> FORECASTED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration NotificationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NotificationType" j)
+    let to_json = simple_to_json to_value
+  end
+module Region =
+  struct
+    type nonrec t = string
+    let context_ = "Region"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:9) >>=
+             (fun () ->
+                (check_string_max i ~max:20) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^\\w{2,4}-\\w+(-\\w+)?-\\d$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Region" j
     let to_json = simple_to_json to_value
   end
 module InstanceId =
@@ -135,17 +279,20 @@ module InstanceId =
     let of_json j = string_of_json ~kind:"InstanceId" j
     let to_json = simple_to_json to_value
   end
-module Groups =
+module InstanceIds =
   struct
-    type nonrec t = Group.t list
+    type nonrec t = InstanceId.t list
     let make i =
       let open Result in
         ok_or_failwith
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:Group.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:InstanceId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -159,136 +306,9 @@ module Groups =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:Group.of_xml)
-    let of_json j = list_of_json ~kind:"Groups" ~of_json:Group.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module PolicyArn =
-  struct
-    type nonrec t = string
-    let context_ = "PolicyArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:25) >>=
-             (fun () ->
-                (check_string_max i ~max:684) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^arn:(aws|aws-cn|aws-us-gov|us-iso-east-1|us-isob-east-1):iam::(\\d{12}|aws):policy(\\u002F[\\u0021-\\u007F]+\\u002F|\\u002F)[\\w+=,.@-]+$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"PolicyArn" j
-    let to_json = simple_to_json to_value
-  end
-module Roles =
-  struct
-    type nonrec t = Role.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:100) >>=
-             (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:Role.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Role.of_xml)
-    let of_json j = list_of_json ~kind:"Roles" ~of_json:Role.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module Users =
-  struct
-    type nonrec t = User.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:100) >>=
-             (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:User.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:User.of_xml)
-    let of_json j = list_of_json ~kind:"Users" ~of_json:User.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module PolicyId =
-  struct
-    type nonrec t = string
-    let context_ = "PolicyId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:10) >>=
-             (fun () ->
-                (check_string_max i ~max:130) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"^p-[0-9a-zA-Z_]{8,128}$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"PolicyId" j
-    let to_json = simple_to_json to_value
-  end
-module TargetIds =
-  struct
-    type nonrec t = TargetId.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:100) >>=
-             (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:TargetId.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:TargetId.of_xml)
+                     | _ -> true))) ~f:InstanceId.of_xml)
     let of_json j =
-      list_of_json ~kind:"TargetIds" ~of_json:TargetId.of_json j
+      list_of_json ~kind:"InstanceIds" ~of_json:InstanceId.of_json j
     let to_json v = composed_to_json to_value v
   end
 module ActionSubType =
@@ -316,17 +336,80 @@ module ActionSubType =
     let of_json j = of_string (string_of_json ~kind:"ActionSubType" j)
     let to_json = simple_to_json to_value
   end
-module InstanceIds =
+module SsmActionDefinition =
   struct
-    type nonrec t = InstanceId.t list
+    type nonrec t =
+      {
+      actionSubType: ActionSubType.t [@ocaml.doc "The action subType."];
+      region: Region.t [@ocaml.doc "The Region to run the SSM document."];
+      instanceIds: InstanceIds.t [@ocaml.doc "The EC2 and RDS instance IDs."]}
+    let context_ = "SsmActionDefinition"
+    let make ~actionSubType =
+      fun ~region ->
+        fun ~instanceIds -> fun () -> { actionSubType; region; instanceIds }
+    let to_value x =
+      structure_to_value
+        [("ActionSubType", (Some (ActionSubType.to_value x.actionSubType)));
+        ("Region", (Some (Region.to_value x.region)));
+        ("InstanceIds", (Some (InstanceIds.to_value x.instanceIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let instanceIds =
+        InstanceIds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InstanceIds") in
+      let region =
+        Region.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Region") in
+      let actionSubType =
+        ActionSubType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ActionSubType") in
+      make ~instanceIds ~region ~actionSubType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let instanceIds =
+        field_map_exn json__ "InstanceIds" InstanceIds.of_json in
+      let region = field_map_exn json__ "Region" Region.of_json in
+      let actionSubType =
+        field_map_exn json__ "ActionSubType" ActionSubType.of_json in
+      make ~instanceIds ~region ~actionSubType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon Web Services Systems Manager (SSM) action definition details."]
+module TargetId =
+  struct
+    type nonrec t = string
+    let context_ = "TargetId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:68) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(ou-[0-9a-z]{4,32}-[a-z0-9]{8,32}$)|(\\d{12})")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TargetId" j
+    let to_json = simple_to_json to_value
+  end
+module TargetIds =
+  struct
+    type nonrec t = TargetId.t list
     let make i =
       let open Result in
         ok_or_failwith
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:InstanceId.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:TargetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -340,116 +423,240 @@ module InstanceIds =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:InstanceId.of_xml)
+                     | _ -> true))) ~f:TargetId.of_xml)
     let of_json j =
-      list_of_json ~kind:"InstanceIds" ~of_json:InstanceId.of_json j
+      list_of_json ~kind:"TargetIds" ~of_json:TargetId.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Region =
+module PolicyId =
   struct
     type nonrec t = string
-    let context_ = "Region"
+    let context_ = "PolicyId"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:9) >>=
+          ((check_string_min i ~min:10) >>=
              (fun () ->
-                (check_string_max i ~max:20) >>=
+                (check_string_max i ~max:130) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"^\\w{2}-\\w+(-\\w+)?-\\d$")));
+                     check_pattern i ~pattern:"^p-[0-9a-zA-Z_]{8,128}$")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Region" j
+    let of_json j = string_of_json ~kind:"PolicyId" j
     let to_json = simple_to_json to_value
   end
-module SubscriberAddress =
+module ScpActionDefinition =
   struct
-    type nonrec t = string[@@ocaml.doc
-                            "A string that contains an email address or SNS topic for the subscriber's address."]
-    let context_ = "SubscriberAddress"
+    type nonrec t =
+      {
+      policyId: PolicyId.t [@ocaml.doc "The policy ID attached."];
+      targetIds: TargetIds.t [@ocaml.doc "A list of target IDs."]}
+    let context_ = "ScpActionDefinition"
+    let make ~policyId = fun ~targetIds -> fun () -> { policyId; targetIds }
+    let to_value x =
+      structure_to_value
+        [("PolicyId", (Some (PolicyId.to_value x.policyId)));
+        ("TargetIds", (Some (TargetIds.to_value x.targetIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetIds =
+        TargetIds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TargetIds") in
+      let policyId =
+        PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
+      make ~targetIds ~policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetIds = field_map_exn json__ "TargetIds" TargetIds.of_json in
+      let policyId = field_map_exn json__ "PolicyId" PolicyId.of_json in
+      make ~targetIds ~policyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The service control policies (SCP) action definition details."]
+module User =
+  struct
+    type nonrec t = string
+    let context_ = "User"
     let make i =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:2147483647) >>=
+                (check_string_max i ~max:576) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"(.*[\\n\\r\\t\\f\\ ]?)*")));
+                     check_pattern i
+                       ~pattern:"^([\\u0021-\\u007F]+\\u002F)?[\\w+=,.@-]+$")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SubscriberAddress" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc
-       "A string that contains an email address or SNS topic for the subscriber's address."]
-module SubscriptionType =
-  struct
-    type nonrec t =
-      | SNS 
-      | EMAIL 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | SNS -> "SNS" | EMAIL -> "EMAIL" | Non_static_id s -> s
-    let of_string =
-      function | "SNS" -> SNS | "EMAIL" -> EMAIL | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration SubscriptionType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"SubscriptionType" j)
+    let of_json j = string_of_json ~kind:"User" j
     let to_json = simple_to_json to_value
   end
-module NotificationThreshold =
+module Users =
   struct
-    type nonrec t = float[@@ocaml.doc "The threshold of a notification."]
+    type nonrec t = User.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_float_min i ~min:1.5e+13) >>=
-             (fun () -> check_float_min i ~min:0.));
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
         i
-    let of_string = Float.of_string
-    let to_value x = `Double x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:User.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = Stdlib.Float.to_string x
-    let of_xml xml_arg0 =
-      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
-    let of_json j = float_of_json ~kind:"a double" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The threshold of a notification."]
-module ThresholdType =
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:User.of_xml)
+    let of_json j = list_of_json ~kind:"Users" ~of_json:User.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Role =
   struct
-    type nonrec t =
-      | PERCENTAGE 
-      | ABSOLUTE_VALUE 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | PERCENTAGE -> "PERCENTAGE"
-      | ABSOLUTE_VALUE -> "ABSOLUTE_VALUE"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "PERCENTAGE" -> PERCENTAGE
-      | "ABSOLUTE_VALUE" -> ABSOLUTE_VALUE
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+    type nonrec t = string
+    let context_ = "Role"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:576) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\u0021-\\u007F]+\\u002F)?[\\w+=,.@-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration ThresholdType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ThresholdType" j)
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Role" j
     let to_json = simple_to_json to_value
+  end
+module Roles =
+  struct
+    type nonrec t = Role.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Role.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Role.of_xml)
+    let of_json j = list_of_json ~kind:"Roles" ~of_json:Role.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PolicyArn =
+  struct
+    type nonrec t = string
+    let context_ = "PolicyArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:25) >>=
+             (fun () ->
+                (check_string_max i ~max:684) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws(-eusc|-cn|-us-gov|-iso|-iso-[a-z]{1})?:iam::(\\d{12}|aws):policy(\\u002F[\\u0021-\\u007F]+\\u002F|\\u002F)[\\w+=,.@-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PolicyArn" j
+    let to_json = simple_to_json to_value
+  end
+module Group =
+  struct
+    type nonrec t = string
+    let context_ = "Group"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:640) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\u0021-\\u007F]+\\u002F)?[\\w+=,.@-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Group" j
+    let to_json = simple_to_json to_value
+  end
+module Groups =
+  struct
+    type nonrec t = Group.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Group.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Group.of_xml)
+    let of_json j = list_of_json ~kind:"Groups" ~of_json:Group.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module IamActionDefinition =
   struct
@@ -489,307 +696,219 @@ module IamActionDefinition =
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyArn") in
       make ?users ?groups ?roles ~policyArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let users = field_map json "Users" Users.of_json in
-      let groups = field_map json "Groups" Groups.of_json in
-      let roles = field_map json "Roles" Roles.of_json in
-      let policyArn = field_map_exn json "PolicyArn" PolicyArn.of_json in
+    let of_json json__ =
+      let users = field_map json__ "Users" Users.of_json in
+      let groups = field_map json__ "Groups" Groups.of_json in
+      let roles = field_map json__ "Roles" Roles.of_json in
+      let policyArn = field_map_exn json__ "PolicyArn" PolicyArn.of_json in
       make ?users ?groups ?roles ~policyArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Identity and Access Management (IAM) action definition details."]
-module ScpActionDefinition =
+module Definition =
   struct
     type nonrec t =
       {
-      policyId: PolicyId.t [@ocaml.doc "The policy ID attached."];
-      targetIds: TargetIds.t [@ocaml.doc "A list of target IDs."]}
-    let context_ = "ScpActionDefinition"
-    let make ~policyId = fun ~targetIds -> fun () -> { policyId; targetIds }
-    let to_value x =
-      structure_to_value
-        [("PolicyId", (Some (PolicyId.to_value x.policyId)));
-        ("TargetIds", (Some (TargetIds.to_value x.targetIds)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let targetIds =
-        TargetIds.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TargetIds") in
-      let policyId =
-        PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
-      make ~targetIds ~policyId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetIds = field_map_exn json "TargetIds" TargetIds.of_json in
-      let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
-      make ~targetIds ~policyId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The service control policies (SCP) action definition details."]
-module SsmActionDefinition =
-  struct
-    type nonrec t =
-      {
-      actionSubType: ActionSubType.t [@ocaml.doc "The action subType."];
-      region: Region.t [@ocaml.doc "The Region to run the SSM document."];
-      instanceIds: InstanceIds.t [@ocaml.doc "The EC2 and RDS instance IDs."]}
-    let context_ = "SsmActionDefinition"
-    let make ~actionSubType =
-      fun ~region ->
-        fun ~instanceIds -> fun () -> { actionSubType; region; instanceIds }
-    let to_value x =
-      structure_to_value
-        [("ActionSubType", (Some (ActionSubType.to_value x.actionSubType)));
-        ("Region", (Some (Region.to_value x.region)));
-        ("InstanceIds", (Some (InstanceIds.to_value x.instanceIds)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let instanceIds =
-        InstanceIds.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstanceIds") in
-      let region =
-        Region.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Region") in
-      let actionSubType =
-        ActionSubType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ActionSubType") in
-      make ~instanceIds ~region ~actionSubType ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceIds = field_map_exn json "InstanceIds" InstanceIds.of_json in
-      let region = field_map_exn json "Region" Region.of_json in
-      let actionSubType =
-        field_map_exn json "ActionSubType" ActionSubType.of_json in
-      make ~instanceIds ~region ~actionSubType ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The Amazon Web Services Systems Manager (SSM) action definition details."]
-module Subscriber =
-  struct
-    type nonrec t =
-      {
-      subscriptionType: SubscriptionType.t
+      iamActionDefinition: IamActionDefinition.t option
         [@ocaml.doc
-          "The type of notification that Amazon Web Services sends to a subscriber."];
-      address: SubscriberAddress.t
+          "The Identity and Access Management (IAM) action definition details."];
+      scpActionDefinition: ScpActionDefinition.t option
         [@ocaml.doc
-          "The address that Amazon Web Services sends budget notifications to, either an SNS topic or an email. When you create a subscriber, the value of Address can't contain line breaks."]}
-    let context_ = "Subscriber"
-    let make ~subscriptionType =
-      fun ~address -> fun () -> { subscriptionType; address }
+          "The service control policies (SCPs) action definition details."];
+      ssmActionDefinition: SsmActionDefinition.t option
+        [@ocaml.doc
+          "The Amazon Web Services Systems Manager (SSM) action definition details."]}
+    let make ?iamActionDefinition =
+      fun ?scpActionDefinition ->
+        fun ?ssmActionDefinition ->
+          fun () ->
+            { iamActionDefinition; scpActionDefinition; ssmActionDefinition }
     let to_value x =
       structure_to_value
-        [("SubscriptionType",
-           (Some (SubscriptionType.to_value x.subscriptionType)));
-        ("Address", (Some (SubscriberAddress.to_value x.address)))]
+        [("IamActionDefinition",
+           (Option.map x.iamActionDefinition ~f:IamActionDefinition.to_value));
+        ("ScpActionDefinition",
+          (Option.map x.scpActionDefinition ~f:ScpActionDefinition.to_value));
+        ("SsmActionDefinition",
+          (Option.map x.ssmActionDefinition ~f:SsmActionDefinition.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let address =
-        SubscriberAddress.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Address") in
-      let subscriptionType =
-        SubscriptionType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionType") in
-      make ~address ~subscriptionType ()
+      let ssmActionDefinition =
+        (Option.map ~f:SsmActionDefinition.of_xml)
+          (Xml.child xml_arg0 "SsmActionDefinition") in
+      let scpActionDefinition =
+        (Option.map ~f:ScpActionDefinition.of_xml)
+          (Xml.child xml_arg0 "ScpActionDefinition") in
+      let iamActionDefinition =
+        (Option.map ~f:IamActionDefinition.of_xml)
+          (Xml.child xml_arg0 "IamActionDefinition") in
+      make ?ssmActionDefinition ?scpActionDefinition ?iamActionDefinition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let address = field_map_exn json "Address" SubscriberAddress.of_json in
-      let subscriptionType =
-        field_map_exn json "SubscriptionType" SubscriptionType.of_json in
-      make ~address ~subscriptionType ()
+    let of_json json__ =
+      let ssmActionDefinition =
+        field_map json__ "SsmActionDefinition" SsmActionDefinition.of_json in
+      let scpActionDefinition =
+        field_map json__ "ScpActionDefinition" ScpActionDefinition.of_json in
+      let iamActionDefinition =
+        field_map json__ "IamActionDefinition" IamActionDefinition.of_json in
+      make ?ssmActionDefinition ?scpActionDefinition ?iamActionDefinition ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The subscriber to a budget notification. The subscriber consists of a subscription type and either an Amazon SNS topic or an email address. For example, an email subscriber has the following parameters: A subscriptionType of EMAIL An address of example\\@example.com"]
-module AdjustmentPeriod =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:60) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for AdjustmentPeriod" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module NumericValue =
+  end[@@ocaml.doc "Specifies all of the type-specific parameters."]
+module BudgetName =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "A string that represents a numeric value."]
-    let context_ = "NumericValue"
+                            "A string that represents the budget name. The \":\" and \"\\\" characters, and the \"/action/\" substring, aren't allowed."]
+    let context_ = "BudgetName"
     let make i =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:2147483647) >>=
-                  (fun () -> check_pattern i ~pattern:"([0-9]*\\.)?[0-9]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NumericValue" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc "A string that represents a numeric value."]
-module UnitValue =
-  struct
-    type nonrec t = string[@@ocaml.doc
-                            "A string that represents the spend unit of a budget. It can't be null or empty."]
-    let context_ = "UnitValue"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:2147483647) >>=
-                  (fun () -> check_pattern i ~pattern:".*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"UnitValue" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc
-       "A string that represents the spend unit of a budget. It can't be null or empty."]
-module GenericString =
-  struct
-    type nonrec t = string[@@ocaml.doc "A generic string."]
-    let context_ = "GenericString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:2147483647) >>=
-                  (fun () -> check_pattern i ~pattern:".*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"GenericString" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc "A generic string."]
-module GenericTimestamp =
-  struct
-    type nonrec t = string[@@ocaml.doc
-                            "A generic time stamp. In Java, it's transformed to a Date object."]
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc
-       "A generic time stamp. In Java, it's transformed to a Date object."]
-module ComparisonOperator =
-  struct
-    type nonrec t =
-      | GREATER_THAN 
-      | LESS_THAN 
-      | EQUAL_TO 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | GREATER_THAN -> "GREATER_THAN"
-      | LESS_THAN -> "LESS_THAN"
-      | EQUAL_TO -> "EQUAL_TO"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "GREATER_THAN" -> GREATER_THAN
-      | "LESS_THAN" -> LESS_THAN
-      | "EQUAL_TO" -> EQUAL_TO
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration ComparisonOperator" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ComparisonOperator" j)
-    let to_json = simple_to_json to_value
-  end
-module NotificationState =
-  struct
-    type nonrec t =
-      | OK 
-      | ALARM 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | OK -> "OK" | ALARM -> "ALARM" | Non_static_id s -> s
-    let of_string =
-      function | "OK" -> OK | "ALARM" -> ALARM | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration NotificationState" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"NotificationState" j)
-    let to_json = simple_to_json to_value
-  end
-module NotificationType =
-  struct
-    type nonrec t =
-      | ACTUAL 
-      | FORECASTED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | ACTUAL -> "ACTUAL"
-      | FORECASTED -> "FORECASTED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "ACTUAL" -> ACTUAL
-      | "FORECASTED" -> FORECASTED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration NotificationType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"NotificationType" j)
-    let to_json = simple_to_json to_value
-  end
-module ActionId =
-  struct
-    type nonrec t = string
-    let context_ = "ActionId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:36) >>=
-             (fun () ->
-                (check_string_max i ~max:36) >>=
+                (check_string_max i ~max:100) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")));
+                       ~pattern:"^(?![^:\\\\]*/action/|(?i).*<script>.*</script>.*)[^:\\\\]+$")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ActionId" j
+    let of_json j = string_of_json ~kind:"BudgetName" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "A string that represents the budget name. The \":\" and \"\\\" characters, and the \"/action/\" substring, aren't allowed."]
+module ApprovalModel =
+  struct
+    type nonrec t =
+      | AUTOMATIC 
+      | MANUAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AUTOMATIC -> "AUTOMATIC"
+      | MANUAL -> "MANUAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AUTOMATIC" -> AUTOMATIC
+      | "MANUAL" -> MANUAL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ApprovalModel" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ApprovalModel" j)
     let to_json = simple_to_json to_value
   end
+module ActionType =
+  struct
+    type nonrec t =
+      | APPLY_IAM_POLICY 
+      | APPLY_SCP_POLICY 
+      | RUN_SSM_DOCUMENTS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | APPLY_IAM_POLICY -> "APPLY_IAM_POLICY"
+      | APPLY_SCP_POLICY -> "APPLY_SCP_POLICY"
+      | RUN_SSM_DOCUMENTS -> "RUN_SSM_DOCUMENTS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "APPLY_IAM_POLICY" -> APPLY_IAM_POLICY
+      | "APPLY_SCP_POLICY" -> APPLY_SCP_POLICY
+      | "RUN_SSM_DOCUMENTS" -> RUN_SSM_DOCUMENTS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ActionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ActionType" j)
+    let to_json = simple_to_json to_value
+  end
+module ThresholdType =
+  struct
+    type nonrec t =
+      | PERCENTAGE 
+      | ABSOLUTE_VALUE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PERCENTAGE -> "PERCENTAGE"
+      | ABSOLUTE_VALUE -> "ABSOLUTE_VALUE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PERCENTAGE" -> PERCENTAGE
+      | "ABSOLUTE_VALUE" -> ABSOLUTE_VALUE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ThresholdType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ThresholdType" j)
+    let to_json = simple_to_json to_value
+  end
+module NotificationThreshold =
+  struct
+    type nonrec t = float[@@ocaml.doc "The threshold of a notification."]
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:1.5e+13) >>=
+             (fun () -> check_float_min i ~min:0.));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The threshold of a notification."]
+module ActionThreshold =
+  struct
+    type nonrec t =
+      {
+      actionThresholdValue: NotificationThreshold.t ;
+      actionThresholdType: ThresholdType.t }
+    let context_ = "ActionThreshold"
+    let make ~actionThresholdValue =
+      fun ~actionThresholdType ->
+        fun () -> { actionThresholdValue; actionThresholdType }
+    let to_value x =
+      structure_to_value
+        [("ActionThresholdValue",
+           (Some (NotificationThreshold.to_value x.actionThresholdValue)));
+        ("ActionThresholdType",
+          (Some (ThresholdType.to_value x.actionThresholdType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let actionThresholdType =
+        ThresholdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ActionThresholdType") in
+      let actionThresholdValue =
+        NotificationThreshold.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ActionThresholdValue") in
+      make ~actionThresholdType ~actionThresholdValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let actionThresholdType =
+        field_map_exn json__ "ActionThresholdType" ThresholdType.of_json in
+      let actionThresholdValue =
+        field_map_exn json__ "ActionThresholdValue"
+          NotificationThreshold.of_json in
+      make ~actionThresholdType ~actionThresholdValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The trigger threshold of the action."]
 module ActionStatus =
   struct
     type nonrec t =
@@ -839,197 +958,295 @@ module ActionStatus =
     let of_json j = of_string (string_of_json ~kind:"ActionStatus" j)
     let to_json = simple_to_json to_value
   end
-module ActionThreshold =
-  struct
-    type nonrec t =
-      {
-      actionThresholdValue: NotificationThreshold.t ;
-      actionThresholdType: ThresholdType.t }
-    let context_ = "ActionThreshold"
-    let make ~actionThresholdValue =
-      fun ~actionThresholdType ->
-        fun () -> { actionThresholdValue; actionThresholdType }
-    let to_value x =
-      structure_to_value
-        [("ActionThresholdValue",
-           (Some (NotificationThreshold.to_value x.actionThresholdValue)));
-        ("ActionThresholdType",
-          (Some (ThresholdType.to_value x.actionThresholdType)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let actionThresholdType =
-        ThresholdType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ActionThresholdType") in
-      let actionThresholdValue =
-        NotificationThreshold.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ActionThresholdValue") in
-      make ~actionThresholdType ~actionThresholdValue ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let actionThresholdType =
-        field_map_exn json "ActionThresholdType" ThresholdType.of_json in
-      let actionThresholdValue =
-        field_map_exn json "ActionThresholdValue"
-          NotificationThreshold.of_json in
-      make ~actionThresholdType ~actionThresholdValue ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The trigger threshold of the action."]
-module ActionType =
-  struct
-    type nonrec t =
-      | APPLY_IAM_POLICY 
-      | APPLY_SCP_POLICY 
-      | RUN_SSM_DOCUMENTS 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | APPLY_IAM_POLICY -> "APPLY_IAM_POLICY"
-      | APPLY_SCP_POLICY -> "APPLY_SCP_POLICY"
-      | RUN_SSM_DOCUMENTS -> "RUN_SSM_DOCUMENTS"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "APPLY_IAM_POLICY" -> APPLY_IAM_POLICY
-      | "APPLY_SCP_POLICY" -> APPLY_SCP_POLICY
-      | "RUN_SSM_DOCUMENTS" -> RUN_SSM_DOCUMENTS
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration ActionType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ActionType" j)
-    let to_json = simple_to_json to_value
-  end
-module ApprovalModel =
-  struct
-    type nonrec t =
-      | AUTOMATIC 
-      | MANUAL 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | AUTOMATIC -> "AUTOMATIC"
-      | MANUAL -> "MANUAL"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "AUTOMATIC" -> AUTOMATIC
-      | "MANUAL" -> MANUAL
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration ApprovalModel" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ApprovalModel" j)
-    let to_json = simple_to_json to_value
-  end
-module BudgetName =
-  struct
-    type nonrec t = string[@@ocaml.doc
-                            "A string that represents the budget name. The \":\" and \"\\\" characters aren't allowed."]
-    let context_ = "BudgetName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:100) >>=
-                  (fun () -> check_pattern i ~pattern:"[^:\\\\]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"BudgetName" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc
-       "A string that represents the budget name. The \":\" and \"\\\" characters aren't allowed."]
-module Definition =
-  struct
-    type nonrec t =
-      {
-      iamActionDefinition: IamActionDefinition.t option
-        [@ocaml.doc
-          "The Identity and Access Management (IAM) action definition details."];
-      scpActionDefinition: ScpActionDefinition.t option
-        [@ocaml.doc
-          "The service control policies (SCPs) action definition details."];
-      ssmActionDefinition: SsmActionDefinition.t option
-        [@ocaml.doc
-          "The Amazon Web Services Systems Manager (SSM) action definition details."]}
-    let make ?iamActionDefinition =
-      fun ?scpActionDefinition ->
-        fun ?ssmActionDefinition ->
-          fun () ->
-            { iamActionDefinition; scpActionDefinition; ssmActionDefinition }
-    let to_value x =
-      structure_to_value
-        [("IamActionDefinition",
-           (Option.map x.iamActionDefinition ~f:IamActionDefinition.to_value));
-        ("ScpActionDefinition",
-          (Option.map x.scpActionDefinition ~f:ScpActionDefinition.to_value));
-        ("SsmActionDefinition",
-          (Option.map x.ssmActionDefinition ~f:SsmActionDefinition.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let ssmActionDefinition =
-        (Option.map ~f:SsmActionDefinition.of_xml)
-          (Xml.child xml_arg0 "SsmActionDefinition") in
-      let scpActionDefinition =
-        (Option.map ~f:ScpActionDefinition.of_xml)
-          (Xml.child xml_arg0 "ScpActionDefinition") in
-      let iamActionDefinition =
-        (Option.map ~f:IamActionDefinition.of_xml)
-          (Xml.child xml_arg0 "IamActionDefinition") in
-      make ?ssmActionDefinition ?scpActionDefinition ?iamActionDefinition ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ssmActionDefinition =
-        field_map json "SsmActionDefinition" SsmActionDefinition.of_json in
-      let scpActionDefinition =
-        field_map json "ScpActionDefinition" ScpActionDefinition.of_json in
-      let iamActionDefinition =
-        field_map json "IamActionDefinition" IamActionDefinition.of_json in
-      make ?ssmActionDefinition ?scpActionDefinition ?iamActionDefinition ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Specifies all of the type-specific parameters."]
-module RoleArn =
+module ActionId =
   struct
     type nonrec t = string
-    let context_ = "RoleArn"
+    let context_ = "ActionId"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:32) >>=
+          ((check_string_min i ~min:36) >>=
              (fun () ->
-                (check_string_max i ~max:618) >>=
+                (check_string_max i ~max:36) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn:(aws|aws-cn|aws-us-gov|us-iso-east-1|us-isob-east-1):iam::\\d{12}:role(\\u002F[\\u0021-\\u007F]+\\u002F|\\u002F)[\\w+=,.@-]+$")));
+                       ~pattern:"^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"RoleArn" j
+    let of_json j = string_of_json ~kind:"ActionId" j
     let to_json = simple_to_json to_value
   end
-module Subscribers =
+module Action =
   struct
-    type nonrec t = Subscriber.t list
+    type nonrec t =
+      {
+      actionId: ActionId.t option
+        [@ocaml.doc
+          "A system-generated universally unique identifier (UUID) for the action."];
+      budgetName: BudgetName.t option ;
+      notificationType: NotificationType.t option ;
+      actionType: ActionType.t option
+        [@ocaml.doc
+          "The type of action. This defines the type of tasks that can be carried out by this action. This field also determines the format for definition."];
+      actionThreshold: ActionThreshold.t option
+        [@ocaml.doc "The trigger threshold of the action."];
+      definition: Definition.t option
+        [@ocaml.doc "Where you specify all of the type-specific parameters."];
+      executionRoleArn: RoleArn.t option
+        [@ocaml.doc
+          "The role passed for action execution and reversion. Roles and actions must be in the same account."];
+      approvalModel: ApprovalModel.t option
+        [@ocaml.doc
+          "This specifies if the action needs manual or automatic approval."];
+      status: ActionStatus.t option [@ocaml.doc "The status of the action."];
+      subscribers: Subscribers.t option }
+    let make ?actionId =
+      fun ?budgetName ->
+        fun ?notificationType ->
+          fun ?actionType ->
+            fun ?actionThreshold ->
+              fun ?definition ->
+                fun ?executionRoleArn ->
+                  fun ?approvalModel ->
+                    fun ?status ->
+                      fun ?subscribers ->
+                        fun () ->
+                          {
+                            actionId;
+                            budgetName;
+                            notificationType;
+                            actionType;
+                            actionThreshold;
+                            definition;
+                            executionRoleArn;
+                            approvalModel;
+                            status;
+                            subscribers
+                          }
+    let to_value x =
+      structure_to_value
+        [("ActionId", (Option.map x.actionId ~f:ActionId.to_value));
+        ("BudgetName", (Option.map x.budgetName ~f:BudgetName.to_value));
+        ("NotificationType",
+          (Option.map x.notificationType ~f:NotificationType.to_value));
+        ("ActionType", (Option.map x.actionType ~f:ActionType.to_value));
+        ("ActionThreshold",
+          (Option.map x.actionThreshold ~f:ActionThreshold.to_value));
+        ("Definition", (Option.map x.definition ~f:Definition.to_value));
+        ("ExecutionRoleArn",
+          (Option.map x.executionRoleArn ~f:RoleArn.to_value));
+        ("ApprovalModel",
+          (Option.map x.approvalModel ~f:ApprovalModel.to_value));
+        ("Status", (Option.map x.status ~f:ActionStatus.to_value));
+        ("Subscribers", (Option.map x.subscribers ~f:Subscribers.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subscribers =
+        (Option.map ~f:Subscribers.of_xml) (Xml.child xml_arg0 "Subscribers") in
+      let status =
+        (Option.map ~f:ActionStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let approvalModel =
+        (Option.map ~f:ApprovalModel.of_xml)
+          (Xml.child xml_arg0 "ApprovalModel") in
+      let executionRoleArn =
+        (Option.map ~f:RoleArn.of_xml)
+          (Xml.child xml_arg0 "ExecutionRoleArn") in
+      let definition =
+        (Option.map ~f:Definition.of_xml) (Xml.child xml_arg0 "Definition") in
+      let actionThreshold =
+        (Option.map ~f:ActionThreshold.of_xml)
+          (Xml.child xml_arg0 "ActionThreshold") in
+      let actionType =
+        (Option.map ~f:ActionType.of_xml) (Xml.child xml_arg0 "ActionType") in
+      let notificationType =
+        (Option.map ~f:NotificationType.of_xml)
+          (Xml.child xml_arg0 "NotificationType") in
+      let budgetName =
+        (Option.map ~f:BudgetName.of_xml) (Xml.child xml_arg0 "BudgetName") in
+      let actionId =
+        (Option.map ~f:ActionId.of_xml) (Xml.child xml_arg0 "ActionId") in
+      make ?subscribers ?status ?approvalModel ?executionRoleArn ?definition
+        ?actionThreshold ?actionType ?notificationType ?budgetName ?actionId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subscribers = field_map json__ "Subscribers" Subscribers.of_json in
+      let status = field_map json__ "Status" ActionStatus.of_json in
+      let approvalModel =
+        field_map json__ "ApprovalModel" ApprovalModel.of_json in
+      let executionRoleArn =
+        field_map json__ "ExecutionRoleArn" RoleArn.of_json in
+      let definition = field_map json__ "Definition" Definition.of_json in
+      let actionThreshold =
+        field_map json__ "ActionThreshold" ActionThreshold.of_json in
+      let actionType = field_map json__ "ActionType" ActionType.of_json in
+      let notificationType =
+        field_map json__ "NotificationType" NotificationType.of_json in
+      let budgetName = field_map json__ "BudgetName" BudgetName.of_json in
+      let actionId = field_map json__ "ActionId" ActionId.of_json in
+      make ?subscribers ?status ?approvalModel ?executionRoleArn ?definition
+        ?actionThreshold ?actionType ?notificationType ?budgetName ?actionId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A budget action resource."]
+module GenericTimestamp =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "A generic time stamp. In Java, it's transformed to a Date object."]
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "A generic time stamp. In Java, it's transformed to a Date object."]
+module EventType =
+  struct
+    type nonrec t =
+      | SYSTEM 
+      | CREATE_ACTION 
+      | DELETE_ACTION 
+      | UPDATE_ACTION 
+      | EXECUTE_ACTION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SYSTEM -> "SYSTEM"
+      | CREATE_ACTION -> "CREATE_ACTION"
+      | DELETE_ACTION -> "DELETE_ACTION"
+      | UPDATE_ACTION -> "UPDATE_ACTION"
+      | EXECUTE_ACTION -> "EXECUTE_ACTION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SYSTEM" -> SYSTEM
+      | "CREATE_ACTION" -> CREATE_ACTION
+      | "DELETE_ACTION" -> DELETE_ACTION
+      | "UPDATE_ACTION" -> UPDATE_ACTION
+      | "EXECUTE_ACTION" -> EXECUTE_ACTION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EventType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EventType" j)
+    let to_json = simple_to_json to_value
+  end
+module GenericString =
+  struct
+    type nonrec t = string[@@ocaml.doc "A generic string."]
+    let context_ = "GenericString"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:11) >>= (fun () -> check_list_min i ~min:1));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:2147483647) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
         i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GenericString" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "A generic string."]
+module ActionHistoryDetails =
+  struct
+    type nonrec t =
+      {
+      message: GenericString.t option ;
+      action: Action.t option [@ocaml.doc "The budget action resource."]}
+    let make ?message = fun ?action -> fun () -> { message; action }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:GenericString.to_value));
+        ("Action", (Option.map x.action ~f:Action.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let action =
+        (Option.map ~f:Action.of_xml) (Xml.child xml_arg0 "Action") in
+      let message =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?action ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let action = field_map json__ "Action" Action.of_json in
+      let message = field_map json__ "Message" GenericString.of_json in
+      make ?action ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The description of the details for the event."]
+module ActionHistory =
+  struct
+    type nonrec t =
+      {
+      timestamp: GenericTimestamp.t option ;
+      status: ActionStatus.t option
+        [@ocaml.doc "The status of action at the time of the event."];
+      eventType: EventType.t option
+        [@ocaml.doc
+          "This distinguishes between whether the events are triggered by the user or are generated by the system."];
+      actionHistoryDetails: ActionHistoryDetails.t option
+        [@ocaml.doc "The description of the details for the event."]}
+    let make ?timestamp =
+      fun ?status ->
+        fun ?eventType ->
+          fun ?actionHistoryDetails ->
+            fun () -> { timestamp; status; eventType; actionHistoryDetails }
+    let to_value x =
+      structure_to_value
+        [("Timestamp", (Option.map x.timestamp ~f:GenericTimestamp.to_value));
+        ("Status", (Option.map x.status ~f:ActionStatus.to_value));
+        ("EventType", (Option.map x.eventType ~f:EventType.to_value));
+        ("ActionHistoryDetails",
+          (Option.map x.actionHistoryDetails ~f:ActionHistoryDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let actionHistoryDetails =
+        (Option.map ~f:ActionHistoryDetails.of_xml)
+          (Xml.child xml_arg0 "ActionHistoryDetails") in
+      let eventType =
+        (Option.map ~f:EventType.of_xml) (Xml.child xml_arg0 "EventType") in
+      let status =
+        (Option.map ~f:ActionStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let timestamp =
+        (Option.map ~f:GenericTimestamp.of_xml)
+          (Xml.child xml_arg0 "Timestamp") in
+      make ?actionHistoryDetails ?eventType ?status ?timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let actionHistoryDetails =
+        field_map json__ "ActionHistoryDetails" ActionHistoryDetails.of_json in
+      let eventType = field_map json__ "EventType" EventType.of_json in
+      let status = field_map json__ "Status" ActionStatus.of_json in
+      let timestamp = field_map json__ "Timestamp" GenericTimestamp.of_json in
+      make ?actionHistoryDetails ?eventType ?status ?timestamp ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The historical records for a budget action."]
+module ActionHistories =
+  struct
+    type nonrec t = ActionHistory.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:Subscriber.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:ActionHistory.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -1043,34 +1260,76 @@ module Subscribers =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:Subscriber.of_xml)
+                     | _ -> true))) ~f:ActionHistory.of_xml)
     let of_json j =
-      list_of_json ~kind:"Subscribers" ~of_json:Subscriber.of_json j
+      list_of_json ~kind:"ActionHistories" ~of_json:ActionHistory.of_json j
     let to_json v = composed_to_json to_value v
   end
-module AutoAdjustType =
+module Actions =
   struct
-    type nonrec t =
-      | HISTORICAL 
-      | FORECAST 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | HISTORICAL -> "HISTORICAL"
-      | FORECAST -> "FORECAST"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "HISTORICAL" -> HISTORICAL
-      | "FORECAST" -> FORECAST
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+    type nonrec t = Action.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Action.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = to_string x
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Action.of_xml)
+    let of_json j = list_of_json ~kind:"Actions" ~of_json:Action.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AdjustmentPeriod =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:60) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration AutoAdjustType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"AutoAdjustType" j)
+      Int.of_string
+        (string_of_xml ~kind:"an integer for AdjustmentPeriod" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module AmazonResourceName =
+  struct
+    type nonrec t = string
+    let context_ = "AmazonResourceName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1011) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AmazonResourceName" j
     let to_json = simple_to_json to_value
   end
 module HistoricalOptions =
@@ -1103,310 +1362,41 @@ module HistoricalOptions =
           (Xml.child_exn ~context:context_ xml_arg0 "BudgetAdjustmentPeriod") in
       make ?lookBackAvailablePeriods ~budgetAdjustmentPeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lookBackAvailablePeriods =
-        field_map json "LookBackAvailablePeriods" AdjustmentPeriod.of_json in
+        field_map json__ "LookBackAvailablePeriods" AdjustmentPeriod.of_json in
       let budgetAdjustmentPeriod =
-        field_map_exn json "BudgetAdjustmentPeriod" AdjustmentPeriod.of_json in
+        field_map_exn json__ "BudgetAdjustmentPeriod"
+          AdjustmentPeriod.of_json in
       make ?lookBackAvailablePeriods ~budgetAdjustmentPeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The parameters that define or describe the historical data that your auto-adjusting budget is based on."]
-module Spend =
+module AutoAdjustType =
   struct
     type nonrec t =
-      {
-      amount: NumericValue.t
-        [@ocaml.doc
-          "The cost or usage amount that's associated with a budget forecast, actual spend, or budget threshold."];
-      unit: UnitValue.t
-        [@ocaml.doc
-          "The unit of measurement that's used for the budget forecast, actual spend, or budget threshold, such as USD or GBP."]}
-    let context_ = "Spend"
-    let make ~amount = fun ~unit -> fun () -> { amount; unit }
-    let to_value x =
-      structure_to_value
-        [("Amount", (Some (NumericValue.to_value x.amount)));
-        ("Unit", (Some (UnitValue.to_value x.unit)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let unit =
-        UnitValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Unit") in
-      let amount =
-        NumericValue.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Amount") in
-      make ~unit ~amount ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map_exn json "Unit" UnitValue.of_json in
-      let amount = field_map_exn json "Amount" NumericValue.of_json in
-      make ~unit ~amount ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The amount of cost or usage that's measured for a budget. For example, a Spend for 3 GB of S3 usage has the following parameters: An Amount of 3 A unit of GB"]
-module DimensionValues =
-  struct
-    type nonrec t = GenericString.t list
+      | HISTORICAL 
+      | FORECAST 
+      | Non_static_id of string 
     let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:GenericString.to_value)) |> (fun x -> `List x)
+    let to_string =
+      function
+      | HISTORICAL -> "HISTORICAL"
+      | FORECAST -> "FORECAST"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HISTORICAL" -> HISTORICAL
+      | "FORECAST" -> FORECAST
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:GenericString.of_xml)
-    let of_json j =
-      list_of_json ~kind:"DimensionValues" ~of_json:GenericString.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module NullableBoolean =
-  struct
-    type nonrec t = bool
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
-    let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
+    let to_header x = to_string x
     let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
+      of_string (string_of_xml ~kind:"enumeration AutoAdjustType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AutoAdjustType" j)
     let to_json = simple_to_json to_value
   end
-module TimePeriod =
-  struct
-    type nonrec t =
-      {
-      start: GenericTimestamp.t option
-        [@ocaml.doc
-          "The start date for a budget. If you created your budget and didn't specify a start date, Amazon Web Services defaults to the start of your chosen time period (DAILY, MONTHLY, QUARTERLY, or ANNUALLY). For example, if you created your budget on January 24, 2018, chose DAILY, and didn't set a start date, Amazon Web Services set your start date to 01/24/18 00:00 UTC. If you chose MONTHLY, Amazon Web Services set your start date to 01/01/18 00:00 UTC. The defaults are the same for the Billing and Cost Management console and the API. You can change your start date with the UpdateBudget operation."];
-      end_: GenericTimestamp.t option
-        [@ocaml.doc
-          "The end date for a budget. If you didn't specify an end date, Amazon Web Services set your end date to 06/15/87 00:00 UTC. The defaults are the same for the Billing and Cost Management console and the API. After the end date, Amazon Web Services deletes the budget and all the associated notifications and subscribers. You can change your end date with the UpdateBudget operation."]}
-    let make ?start = fun ?end_ -> fun () -> { start; end_ }
-    let to_value x =
-      structure_to_value
-        [("Start", (Option.map x.start ~f:GenericTimestamp.to_value));
-        ("End", (Option.map x.end_ ~f:GenericTimestamp.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let end_ =
-        (Option.map ~f:GenericTimestamp.of_xml) (Xml.child xml_arg0 "End") in
-      let start =
-        (Option.map ~f:GenericTimestamp.of_xml) (Xml.child xml_arg0 "Start") in
-      make ?end_ ?start ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let end_ = field_map json "End" GenericTimestamp.of_json in
-      let start = field_map json "Start" GenericTimestamp.of_json in
-      make ?end_ ?start ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The period of time that's covered by a budget. The period has a start date and an end date. The start date must come before the end date. There are no restrictions on the end date."]
-module Notification =
-  struct
-    type nonrec t =
-      {
-      notificationType: NotificationType.t
-        [@ocaml.doc
-          "Specifies whether the notification is for how much you have spent (ACTUAL) or for how much that you're forecasted to spend (FORECASTED)."];
-      comparisonOperator: ComparisonOperator.t
-        [@ocaml.doc "The comparison that's used for this notification."];
-      threshold: NotificationThreshold.t
-        [@ocaml.doc
-          "The threshold that's associated with a notification. Thresholds are always a percentage, and many customers find value being alerted between 50% - 200% of the budgeted amount. The maximum limit for your threshold is 1,000,000% above the budgeted amount."];
-      thresholdType: ThresholdType.t option
-        [@ocaml.doc
-          "The type of threshold for a notification. For ABSOLUTE_VALUE thresholds, Amazon Web Services notifies you when you go over or are forecasted to go over your total cost threshold. For PERCENTAGE thresholds, Amazon Web Services notifies you when you go over or are forecasted to go over a certain percentage of your forecasted spend. For example, if you have a budget for 200 dollars and you have a PERCENTAGE threshold of 80%, Amazon Web Services notifies you when you go over 160 dollars."];
-      notificationState: NotificationState.t option
-        [@ocaml.doc
-          "Specifies whether this notification is in alarm. If a budget notification is in the ALARM state, you passed the set threshold for the budget."]}
-    let context_ = "Notification"
-    let make ?thresholdType =
-      fun ?notificationState ->
-        fun ~notificationType ->
-          fun ~comparisonOperator ->
-            fun ~threshold ->
-              fun () ->
-                {
-                  thresholdType;
-                  notificationState;
-                  notificationType;
-                  comparisonOperator;
-                  threshold
-                }
-    let to_value x =
-      structure_to_value
-        [("NotificationType",
-           (Some (NotificationType.to_value x.notificationType)));
-        ("ComparisonOperator",
-          (Some (ComparisonOperator.to_value x.comparisonOperator)));
-        ("Threshold", (Some (NotificationThreshold.to_value x.threshold)));
-        ("ThresholdType",
-          (Option.map x.thresholdType ~f:ThresholdType.to_value));
-        ("NotificationState",
-          (Option.map x.notificationState ~f:NotificationState.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let notificationState =
-        (Option.map ~f:NotificationState.of_xml)
-          (Xml.child xml_arg0 "NotificationState") in
-      let thresholdType =
-        (Option.map ~f:ThresholdType.of_xml)
-          (Xml.child xml_arg0 "ThresholdType") in
-      let threshold =
-        NotificationThreshold.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Threshold") in
-      let comparisonOperator =
-        ComparisonOperator.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ComparisonOperator") in
-      let notificationType =
-        NotificationType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "NotificationType") in
-      make ?notificationState ?thresholdType ~threshold ~comparisonOperator
-        ~notificationType ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let notificationState =
-        field_map json "NotificationState" NotificationState.of_json in
-      let thresholdType =
-        field_map json "ThresholdType" ThresholdType.of_json in
-      let threshold =
-        field_map_exn json "Threshold" NotificationThreshold.of_json in
-      let comparisonOperator =
-        field_map_exn json "ComparisonOperator" ComparisonOperator.of_json in
-      let notificationType =
-        field_map_exn json "NotificationType" NotificationType.of_json in
-      make ?notificationState ?thresholdType ~threshold ~comparisonOperator
-        ~notificationType ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A notification that's associated with a budget. A budget can have up to ten notifications. Each notification must have at least one subscriber. A notification can have one SNS subscriber and up to 10 email subscribers, for a total of 11 subscribers. For example, if you have a budget for 200 dollars and you want to be notified when you go over 160 dollars, create a notification with the following parameters: A notificationType of ACTUAL A thresholdType of PERCENTAGE A comparisonOperator of GREATER_THAN A notification threshold of 80"]
-module Action =
-  struct
-    type nonrec t =
-      {
-      actionId: ActionId.t
-        [@ocaml.doc
-          "A system-generated universally unique identifier (UUID) for the action."];
-      budgetName: BudgetName.t ;
-      notificationType: NotificationType.t ;
-      actionType: ActionType.t
-        [@ocaml.doc
-          "The type of action. This defines the type of tasks that can be carried out by this action. This field also determines the format for definition."];
-      actionThreshold: ActionThreshold.t
-        [@ocaml.doc "The trigger threshold of the action."];
-      definition: Definition.t
-        [@ocaml.doc "Where you specify all of the type-specific parameters."];
-      executionRoleArn: RoleArn.t
-        [@ocaml.doc
-          "The role passed for action execution and reversion. Roles and actions must be in the same account."];
-      approvalModel: ApprovalModel.t
-        [@ocaml.doc
-          "This specifies if the action needs manual or automatic approval."];
-      status: ActionStatus.t [@ocaml.doc "The status of the action."];
-      subscribers: Subscribers.t }
-    let context_ = "Action"
-    let make ~actionId =
-      fun ~budgetName ->
-        fun ~notificationType ->
-          fun ~actionType ->
-            fun ~actionThreshold ->
-              fun ~definition ->
-                fun ~executionRoleArn ->
-                  fun ~approvalModel ->
-                    fun ~status ->
-                      fun ~subscribers ->
-                        fun () ->
-                          {
-                            actionId;
-                            budgetName;
-                            notificationType;
-                            actionType;
-                            actionThreshold;
-                            definition;
-                            executionRoleArn;
-                            approvalModel;
-                            status;
-                            subscribers
-                          }
-    let to_value x =
-      structure_to_value
-        [("ActionId", (Some (ActionId.to_value x.actionId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("NotificationType",
-          (Some (NotificationType.to_value x.notificationType)));
-        ("ActionType", (Some (ActionType.to_value x.actionType)));
-        ("ActionThreshold",
-          (Some (ActionThreshold.to_value x.actionThreshold)));
-        ("Definition", (Some (Definition.to_value x.definition)));
-        ("ExecutionRoleArn", (Some (RoleArn.to_value x.executionRoleArn)));
-        ("ApprovalModel", (Some (ApprovalModel.to_value x.approvalModel)));
-        ("Status", (Some (ActionStatus.to_value x.status)));
-        ("Subscribers", (Some (Subscribers.to_value x.subscribers)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let subscribers =
-        Subscribers.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Subscribers") in
-      let status =
-        ActionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
-      let approvalModel =
-        ApprovalModel.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApprovalModel") in
-      let executionRoleArn =
-        RoleArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ExecutionRoleArn") in
-      let definition =
-        Definition.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Definition") in
-      let actionThreshold =
-        ActionThreshold.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ActionThreshold") in
-      let actionType =
-        ActionType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ActionType") in
-      let notificationType =
-        NotificationType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "NotificationType") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let actionId =
-        ActionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ActionId") in
-      make ~subscribers ~status ~approvalModel ~executionRoleArn ~definition
-        ~actionThreshold ~actionType ~notificationType ~budgetName ~actionId
-        ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subscribers = field_map_exn json "Subscribers" Subscribers.of_json in
-      let status = field_map_exn json "Status" ActionStatus.of_json in
-      let approvalModel =
-        field_map_exn json "ApprovalModel" ApprovalModel.of_json in
-      let executionRoleArn =
-        field_map_exn json "ExecutionRoleArn" RoleArn.of_json in
-      let definition = field_map_exn json "Definition" Definition.of_json in
-      let actionThreshold =
-        field_map_exn json "ActionThreshold" ActionThreshold.of_json in
-      let actionType = field_map_exn json "ActionType" ActionType.of_json in
-      let notificationType =
-        field_map_exn json "NotificationType" NotificationType.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let actionId = field_map_exn json "ActionId" ActionId.of_json in
-      make ~subscribers ~status ~approvalModel ~executionRoleArn ~definition
-        ~actionThreshold ~actionType ~notificationType ~budgetName ~actionId
-        ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A budget action resource."]
 module AutoAdjustData =
   struct
     type nonrec t =
@@ -1445,89 +1435,201 @@ module AutoAdjustData =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoAdjustType") in
       make ?lastAutoAdjustTime ?historicalOptions ~autoAdjustType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastAutoAdjustTime =
-        field_map json "LastAutoAdjustTime" GenericTimestamp.of_json in
+        field_map json__ "LastAutoAdjustTime" GenericTimestamp.of_json in
       let historicalOptions =
-        field_map json "HistoricalOptions" HistoricalOptions.of_json in
+        field_map json__ "HistoricalOptions" HistoricalOptions.of_json in
       let autoAdjustType =
-        field_map_exn json "AutoAdjustType" AutoAdjustType.of_json in
+        field_map_exn json__ "AutoAdjustType" AutoAdjustType.of_json in
       make ?lastAutoAdjustTime ?historicalOptions ~autoAdjustType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The parameters that determine the budget amount for an auto-adjusting budget."]
-module BudgetType =
+module BillingViewArn =
+  struct
+    type nonrec t = string
+    let context_ = "BillingViewArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws[a-z-]*:(billing)::[0-9]{12}:billingview/[a-zA-Z0-9/:_\\+=\\.\\-@]{0,75}[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"BillingViewArn" j
+    let to_json = simple_to_json to_value
+  end
+module BillingViewHealthStatusException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The billing view status must be HEALTHY to perform this action. Try again when the status is HEALTHY."]
+module TimeUnit =
   struct
     type nonrec t =
-      | USAGE 
-      | COST 
-      | RI_UTILIZATION 
-      | RI_COVERAGE 
-      | SAVINGS_PLANS_UTILIZATION 
-      | SAVINGS_PLANS_COVERAGE 
+      | DAILY 
+      | MONTHLY 
+      | QUARTERLY 
+      | ANNUALLY 
+      | CUSTOM 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | USAGE -> "USAGE"
-      | COST -> "COST"
-      | RI_UTILIZATION -> "RI_UTILIZATION"
-      | RI_COVERAGE -> "RI_COVERAGE"
-      | SAVINGS_PLANS_UTILIZATION -> "SAVINGS_PLANS_UTILIZATION"
-      | SAVINGS_PLANS_COVERAGE -> "SAVINGS_PLANS_COVERAGE"
+      | DAILY -> "DAILY"
+      | MONTHLY -> "MONTHLY"
+      | QUARTERLY -> "QUARTERLY"
+      | ANNUALLY -> "ANNUALLY"
+      | CUSTOM -> "CUSTOM"
       | Non_static_id s -> s
     let of_string =
       function
-      | "USAGE" -> USAGE
-      | "COST" -> COST
-      | "RI_UTILIZATION" -> RI_UTILIZATION
-      | "RI_COVERAGE" -> RI_COVERAGE
-      | "SAVINGS_PLANS_UTILIZATION" -> SAVINGS_PLANS_UTILIZATION
-      | "SAVINGS_PLANS_COVERAGE" -> SAVINGS_PLANS_COVERAGE
+      | "DAILY" -> DAILY
+      | "MONTHLY" -> MONTHLY
+      | "QUARTERLY" -> QUARTERLY
+      | "ANNUALLY" -> ANNUALLY
+      | "CUSTOM" -> CUSTOM
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration BudgetType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"BudgetType" j)
+      of_string (string_of_xml ~kind:"enumeration TimeUnit" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TimeUnit" j)
     let to_json = simple_to_json to_value
   end
-module CalculatedSpend =
+module TimePeriod =
   struct
     type nonrec t =
       {
-      actualSpend: Spend.t
+      start: GenericTimestamp.t option
         [@ocaml.doc
-          "The amount of cost, usage, RI units, or Savings Plans units that you used."];
-      forecastedSpend: Spend.t option
+          "The start date for a budget. If you created your budget and didn't specify a start date, Amazon Web Services defaults to the start of your chosen time period (DAILY, MONTHLY, QUARTERLY, ANNUALLY, or CUSTOM). For example, if you created your budget on January 24, 2018, chose DAILY, and didn't set a start date, Amazon Web Services set your start date to 01/24/18 00:00 UTC. If you chose MONTHLY, Amazon Web Services set your start date to 01/01/18 00:00 UTC. The defaults are the same for the Billing and Cost Management console and the API. You can change your start date with the UpdateBudget operation."];
+      end_: GenericTimestamp.t option
         [@ocaml.doc
-          "The amount of cost, usage, RI units, or Savings Plans units that you're forecasted to use."]}
-    let context_ = "CalculatedSpend"
-    let make ?forecastedSpend =
-      fun ~actualSpend -> fun () -> { forecastedSpend; actualSpend }
+          "The end date for a budget. If you didn't specify an end date, Amazon Web Services set your end date to 06/15/87 00:00 UTC. The defaults are the same for the Billing and Cost Management console and the API. After the end date, Amazon Web Services deletes the budget and all the associated notifications and subscribers. You can change your end date with the UpdateBudget operation."]}
+    let make ?start = fun ?end_ -> fun () -> { start; end_ }
     let to_value x =
       structure_to_value
-        [("ActualSpend", (Some (Spend.to_value x.actualSpend)));
-        ("ForecastedSpend", (Option.map x.forecastedSpend ~f:Spend.to_value))]
+        [("Start", (Option.map x.start ~f:GenericTimestamp.to_value));
+        ("End", (Option.map x.end_ ~f:GenericTimestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let forecastedSpend =
-        (Option.map ~f:Spend.of_xml) (Xml.child xml_arg0 "ForecastedSpend") in
-      let actualSpend =
-        Spend.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ActualSpend") in
-      make ?forecastedSpend ~actualSpend ()
+      let end_ =
+        (Option.map ~f:GenericTimestamp.of_xml) (Xml.child xml_arg0 "End") in
+      let start =
+        (Option.map ~f:GenericTimestamp.of_xml) (Xml.child xml_arg0 "Start") in
+      make ?end_ ?start ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let forecastedSpend = field_map json "ForecastedSpend" Spend.of_json in
-      let actualSpend = field_map_exn json "ActualSpend" Spend.of_json in
-      make ?forecastedSpend ~actualSpend ()
+    let of_json json__ =
+      let end_ = field_map json__ "End" GenericTimestamp.of_json in
+      let start = field_map json__ "Start" GenericTimestamp.of_json in
+      make ?end_ ?start ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The spend objects that are associated with this budget. The actualSpend tracks how much you've used, cost, usage, RI units, or Savings Plans units and the forecastedSpend tracks how much that you're predicted to spend based on your historical usage profile. For example, if it's the 20th of the month and you have spent 50 dollars on Amazon EC2, your actualSpend is 50 USD, and your forecastedSpend is 75 USD."]
-module CostFilters =
+       "The period of time that's covered by a budget. The period has a start date and an end date. The start date must come before the end date. There are no restrictions on the end date."]
+module UnitValue =
   struct
-    type nonrec t = (GenericString.t * DimensionValues.t) list
+    type nonrec t = string[@@ocaml.doc
+                            "A string that represents the spend unit of a budget. It can't be null or empty."]
+    let context_ = "UnitValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2147483647) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UnitValue" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "A string that represents the spend unit of a budget. It can't be null or empty."]
+module NumericValue =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "A string that represents a numeric value."]
+    let context_ = "NumericValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2147483647) >>=
+                  (fun () -> check_pattern i ~pattern:"([0-9]*\\.)?[0-9]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NumericValue" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "A string that represents a numeric value."]
+module Spend =
+  struct
+    type nonrec t =
+      {
+      amount: NumericValue.t
+        [@ocaml.doc
+          "The cost or usage amount that's associated with a budget forecast, actual spend, or budget threshold."];
+      unit: UnitValue.t
+        [@ocaml.doc
+          "The unit of measurement that's used for the budget forecast, actual spend, or budget threshold."]}
+    let context_ = "Spend"
+    let make ~amount = fun ~unit -> fun () -> { amount; unit }
+    let to_value x =
+      structure_to_value
+        [("Amount", (Some (NumericValue.to_value x.amount)));
+        ("Unit", (Some (UnitValue.to_value x.unit)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unit =
+        UnitValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Unit") in
+      let amount =
+        NumericValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Amount") in
+      make ~unit ~amount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unit = field_map_exn json__ "Unit" UnitValue.of_json in
+      let amount = field_map_exn json__ "Amount" NumericValue.of_json in
+      make ~unit ~amount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The amount of cost or usage that's measured for a budget. Cost example: A Spend for 3 USD of costs has the following parameters: An Amount of 3 A Unit of USD Usage example: A Spend for 3 GB of S3 usage has the following parameters: An Amount of 3 A Unit of GB"]
+module PlannedBudgetLimits =
+  struct
+    type nonrec t = (GenericString.t * Spend.t) list
     let make i = i
     let of_header xs =
       make
@@ -1539,22 +1641,722 @@ module CostFilters =
                             let (_ : string) = v in
                             let (_ : string) = chopped in
                             failwith
-                              "no of_header for complex types GenericString DimensionValues"))))
+                              "no of_header for complex types GenericString Spend"))))
     let to_value xs =
       (xs |>
          (List.map
             ~f:(fun (x, y) ->
                   (GenericString.to_value x) |>
-                    (fun x ->
-                       (DimensionValues.to_value y) |> (fun y -> (x, y))))))
+                    (fun x -> (Spend.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:GenericString.of_string
-        ~of_json:DimensionValues.of_json j
+        ~of_json:Spend.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module Metric =
+  struct
+    type nonrec t =
+      | BlendedCost 
+      | UnblendedCost 
+      | AmortizedCost 
+      | NetUnblendedCost 
+      | NetAmortizedCost 
+      | UsageQuantity 
+      | NormalizedUsageAmount 
+      | Hours 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | BlendedCost -> "BlendedCost"
+      | UnblendedCost -> "UnblendedCost"
+      | AmortizedCost -> "AmortizedCost"
+      | NetUnblendedCost -> "NetUnblendedCost"
+      | NetAmortizedCost -> "NetAmortizedCost"
+      | UsageQuantity -> "UsageQuantity"
+      | NormalizedUsageAmount -> "NormalizedUsageAmount"
+      | Hours -> "Hours"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "BlendedCost" -> BlendedCost
+      | "UnblendedCost" -> UnblendedCost
+      | "AmortizedCost" -> AmortizedCost
+      | "NetUnblendedCost" -> NetUnblendedCost
+      | "NetAmortizedCost" -> NetAmortizedCost
+      | "UsageQuantity" -> UsageQuantity
+      | "NormalizedUsageAmount" -> NormalizedUsageAmount
+      | "Hours" -> Hours
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Metric" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Metric" j)
+    let to_json = simple_to_json to_value
+  end
+module Metrics =
+  struct
+    type nonrec t = Metric.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Metric.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Metric.of_xml)
+    let of_json j = list_of_json ~kind:"Metrics" ~of_json:Metric.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module HealthStatusValue =
+  struct
+    type nonrec t =
+      | HEALTHY 
+      | UNHEALTHY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | HEALTHY -> "HEALTHY"
+      | UNHEALTHY -> "UNHEALTHY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HEALTHY" -> HEALTHY
+      | "UNHEALTHY" -> UNHEALTHY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration HealthStatusValue" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"HealthStatusValue" j)
+    let to_json = simple_to_json to_value
+  end
+module HealthStatusReason =
+  struct
+    type nonrec t =
+      | BILLING_VIEW_NO_ACCESS 
+      | BILLING_VIEW_UNHEALTHY 
+      | FILTER_INVALID 
+      | MULTI_YEAR_HISTORICAL_DATA_DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | BILLING_VIEW_NO_ACCESS -> "BILLING_VIEW_NO_ACCESS"
+      | BILLING_VIEW_UNHEALTHY -> "BILLING_VIEW_UNHEALTHY"
+      | FILTER_INVALID -> "FILTER_INVALID"
+      | MULTI_YEAR_HISTORICAL_DATA_DISABLED ->
+          "MULTI_YEAR_HISTORICAL_DATA_DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "BILLING_VIEW_NO_ACCESS" -> BILLING_VIEW_NO_ACCESS
+      | "BILLING_VIEW_UNHEALTHY" -> BILLING_VIEW_UNHEALTHY
+      | "FILTER_INVALID" -> FILTER_INVALID
+      | "MULTI_YEAR_HISTORICAL_DATA_DISABLED" ->
+          MULTI_YEAR_HISTORICAL_DATA_DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration HealthStatusReason" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"HealthStatusReason" j)
+    let to_json = simple_to_json to_value
+  end
+module HealthStatus =
+  struct
+    type nonrec t =
+      {
+      status: HealthStatusValue.t option
+        [@ocaml.doc "The current status of the billing view resource."];
+      statusReason: HealthStatusReason.t option
+        [@ocaml.doc
+          "The reason for the current status. BILLING_VIEW_NO_ACCESS: The billing view resource does not grant billing:GetBillingViewData permission to this account. BILLING_VIEW_UNHEALTHY: The billing view associated with the budget is unhealthy. FILTER_INVALID: The filter contains reference to an account you do not have access to. MULTI_YEAR_HISTORICAL_DATA_DISABLED: The budget is not being updated. Enable multi-year historical data in your Cost Management preferences."];
+      lastUpdatedTime: GenericTimestamp.t option }
+    let make ?status =
+      fun ?statusReason ->
+        fun ?lastUpdatedTime ->
+          fun () -> { status; statusReason; lastUpdatedTime }
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:HealthStatusValue.to_value));
+        ("StatusReason",
+          (Option.map x.statusReason ~f:HealthStatusReason.to_value));
+        ("LastUpdatedTime",
+          (Option.map x.lastUpdatedTime ~f:GenericTimestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdatedTime =
+        (Option.map ~f:GenericTimestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTime") in
+      let statusReason =
+        (Option.map ~f:HealthStatusReason.of_xml)
+          (Xml.child xml_arg0 "StatusReason") in
+      let status =
+        (Option.map ~f:HealthStatusValue.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?lastUpdatedTime ?statusReason ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdatedTime =
+        field_map json__ "LastUpdatedTime" GenericTimestamp.of_json in
+      let statusReason =
+        field_map json__ "StatusReason" HealthStatusReason.of_json in
+      let status = field_map json__ "Status" HealthStatusValue.of_json in
+      make ?lastUpdatedTime ?statusReason ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about the current operational state of a billing view resource, including its ability to access and update based on its associated billing view."]
+module Value =
+  struct
+    type nonrec t = string
+    let context_ = "Value"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\S\\s]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Value" j
+    let to_json = simple_to_json to_value
+  end
+module Values =
+  struct
+    type nonrec t = Value.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Value.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Value.of_xml)
+    let of_json j = list_of_json ~kind:"Values" ~of_json:Value.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\S\\s]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module MatchOption =
+  struct
+    type nonrec t =
+      | EQUALS 
+      | ABSENT 
+      | STARTS_WITH 
+      | ENDS_WITH 
+      | CONTAINS 
+      | GREATER_THAN_OR_EQUAL 
+      | CASE_SENSITIVE 
+      | CASE_INSENSITIVE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EQUALS -> "EQUALS"
+      | ABSENT -> "ABSENT"
+      | STARTS_WITH -> "STARTS_WITH"
+      | ENDS_WITH -> "ENDS_WITH"
+      | CONTAINS -> "CONTAINS"
+      | GREATER_THAN_OR_EQUAL -> "GREATER_THAN_OR_EQUAL"
+      | CASE_SENSITIVE -> "CASE_SENSITIVE"
+      | CASE_INSENSITIVE -> "CASE_INSENSITIVE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EQUALS" -> EQUALS
+      | "ABSENT" -> ABSENT
+      | "STARTS_WITH" -> STARTS_WITH
+      | "ENDS_WITH" -> ENDS_WITH
+      | "CONTAINS" -> CONTAINS
+      | "GREATER_THAN_OR_EQUAL" -> GREATER_THAN_OR_EQUAL
+      | "CASE_SENSITIVE" -> CASE_SENSITIVE
+      | "CASE_INSENSITIVE" -> CASE_INSENSITIVE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration MatchOption" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MatchOption" j)
+    let to_json = simple_to_json to_value
+  end
+module MatchOptions =
+  struct
+    type nonrec t = MatchOption.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MatchOption.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MatchOption.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MatchOptions" ~of_json:MatchOption.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TagValues =
+  struct
+    type nonrec t =
+      {
+      key: TagKey.t option [@ocaml.doc "The key for the tag."];
+      values: Values.t option [@ocaml.doc "The specific value of the tag."];
+      matchOptions: MatchOptions.t option
+        [@ocaml.doc
+          "The match options that you can use to filter your results."]}
+    let make ?key =
+      fun ?values ->
+        fun ?matchOptions -> fun () -> { key; values; matchOptions }
+    let to_value x =
+      structure_to_value
+        [("Key", (Option.map x.key ~f:TagKey.to_value));
+        ("Values", (Option.map x.values ~f:Values.to_value));
+        ("MatchOptions",
+          (Option.map x.matchOptions ~f:MatchOptions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let matchOptions =
+        (Option.map ~f:MatchOptions.of_xml)
+          (Xml.child xml_arg0 "MatchOptions") in
+      let values =
+        (Option.map ~f:Values.of_xml) (Xml.child xml_arg0 "Values") in
+      let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
+      make ?matchOptions ?values ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let matchOptions = field_map json__ "MatchOptions" MatchOptions.of_json in
+      let values = field_map json__ "Values" Values.of_json in
+      let key = field_map json__ "Key" TagKey.of_json in
+      make ?matchOptions ?values ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The values that are available for a tag."]
+module Dimension =
+  struct
+    type nonrec t =
+      | AZ 
+      | INSTANCE_TYPE 
+      | LINKED_ACCOUNT 
+      | LINKED_ACCOUNT_NAME 
+      | OPERATION 
+      | PURCHASE_TYPE 
+      | REGION 
+      | SERVICE 
+      | SERVICE_CODE 
+      | USAGE_TYPE 
+      | USAGE_TYPE_GROUP 
+      | RECORD_TYPE 
+      | OPERATING_SYSTEM 
+      | TENANCY 
+      | SCOPE 
+      | PLATFORM 
+      | SUBSCRIPTION_ID 
+      | LEGAL_ENTITY_NAME 
+      | INVOICING_ENTITY 
+      | DEPLOYMENT_OPTION 
+      | DATABASE_ENGINE 
+      | CACHE_ENGINE 
+      | INSTANCE_TYPE_FAMILY 
+      | BILLING_ENTITY 
+      | RESERVATION_ID 
+      | RESOURCE_ID 
+      | RIGHTSIZING_TYPE 
+      | SAVINGS_PLANS_TYPE 
+      | SAVINGS_PLAN_ARN 
+      | PAYMENT_OPTION 
+      | RESERVATION_MODIFIED 
+      | TAG_KEY 
+      | COST_CATEGORY_NAME 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AZ -> "AZ"
+      | INSTANCE_TYPE -> "INSTANCE_TYPE"
+      | LINKED_ACCOUNT -> "LINKED_ACCOUNT"
+      | LINKED_ACCOUNT_NAME -> "LINKED_ACCOUNT_NAME"
+      | OPERATION -> "OPERATION"
+      | PURCHASE_TYPE -> "PURCHASE_TYPE"
+      | REGION -> "REGION"
+      | SERVICE -> "SERVICE"
+      | SERVICE_CODE -> "SERVICE_CODE"
+      | USAGE_TYPE -> "USAGE_TYPE"
+      | USAGE_TYPE_GROUP -> "USAGE_TYPE_GROUP"
+      | RECORD_TYPE -> "RECORD_TYPE"
+      | OPERATING_SYSTEM -> "OPERATING_SYSTEM"
+      | TENANCY -> "TENANCY"
+      | SCOPE -> "SCOPE"
+      | PLATFORM -> "PLATFORM"
+      | SUBSCRIPTION_ID -> "SUBSCRIPTION_ID"
+      | LEGAL_ENTITY_NAME -> "LEGAL_ENTITY_NAME"
+      | INVOICING_ENTITY -> "INVOICING_ENTITY"
+      | DEPLOYMENT_OPTION -> "DEPLOYMENT_OPTION"
+      | DATABASE_ENGINE -> "DATABASE_ENGINE"
+      | CACHE_ENGINE -> "CACHE_ENGINE"
+      | INSTANCE_TYPE_FAMILY -> "INSTANCE_TYPE_FAMILY"
+      | BILLING_ENTITY -> "BILLING_ENTITY"
+      | RESERVATION_ID -> "RESERVATION_ID"
+      | RESOURCE_ID -> "RESOURCE_ID"
+      | RIGHTSIZING_TYPE -> "RIGHTSIZING_TYPE"
+      | SAVINGS_PLANS_TYPE -> "SAVINGS_PLANS_TYPE"
+      | SAVINGS_PLAN_ARN -> "SAVINGS_PLAN_ARN"
+      | PAYMENT_OPTION -> "PAYMENT_OPTION"
+      | RESERVATION_MODIFIED -> "RESERVATION_MODIFIED"
+      | TAG_KEY -> "TAG_KEY"
+      | COST_CATEGORY_NAME -> "COST_CATEGORY_NAME"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AZ" -> AZ
+      | "INSTANCE_TYPE" -> INSTANCE_TYPE
+      | "LINKED_ACCOUNT" -> LINKED_ACCOUNT
+      | "LINKED_ACCOUNT_NAME" -> LINKED_ACCOUNT_NAME
+      | "OPERATION" -> OPERATION
+      | "PURCHASE_TYPE" -> PURCHASE_TYPE
+      | "REGION" -> REGION
+      | "SERVICE" -> SERVICE
+      | "SERVICE_CODE" -> SERVICE_CODE
+      | "USAGE_TYPE" -> USAGE_TYPE
+      | "USAGE_TYPE_GROUP" -> USAGE_TYPE_GROUP
+      | "RECORD_TYPE" -> RECORD_TYPE
+      | "OPERATING_SYSTEM" -> OPERATING_SYSTEM
+      | "TENANCY" -> TENANCY
+      | "SCOPE" -> SCOPE
+      | "PLATFORM" -> PLATFORM
+      | "SUBSCRIPTION_ID" -> SUBSCRIPTION_ID
+      | "LEGAL_ENTITY_NAME" -> LEGAL_ENTITY_NAME
+      | "INVOICING_ENTITY" -> INVOICING_ENTITY
+      | "DEPLOYMENT_OPTION" -> DEPLOYMENT_OPTION
+      | "DATABASE_ENGINE" -> DATABASE_ENGINE
+      | "CACHE_ENGINE" -> CACHE_ENGINE
+      | "INSTANCE_TYPE_FAMILY" -> INSTANCE_TYPE_FAMILY
+      | "BILLING_ENTITY" -> BILLING_ENTITY
+      | "RESERVATION_ID" -> RESERVATION_ID
+      | "RESOURCE_ID" -> RESOURCE_ID
+      | "RIGHTSIZING_TYPE" -> RIGHTSIZING_TYPE
+      | "SAVINGS_PLANS_TYPE" -> SAVINGS_PLANS_TYPE
+      | "SAVINGS_PLAN_ARN" -> SAVINGS_PLAN_ARN
+      | "PAYMENT_OPTION" -> PAYMENT_OPTION
+      | "RESERVATION_MODIFIED" -> RESERVATION_MODIFIED
+      | "TAG_KEY" -> TAG_KEY
+      | "COST_CATEGORY_NAME" -> COST_CATEGORY_NAME
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Dimension" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Dimension" j)
+    let to_json = simple_to_json to_value
+  end
+module ExpressionDimensionValues =
+  struct
+    type nonrec t =
+      {
+      key: Dimension.t
+        [@ocaml.doc "The name of the dimension that you want to filter on."];
+      values: Values.t
+        [@ocaml.doc
+          "The metadata values you can specify to filter upon, so that the results all match at least one of the specified values."];
+      matchOptions: MatchOptions.t option
+        [@ocaml.doc
+          "The match options that you can use to filter your results. You can specify only one of these values in the array."]}
+    let context_ = "ExpressionDimensionValues"
+    let make ?matchOptions =
+      fun ~key -> fun ~values -> fun () -> { matchOptions; key; values }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (Dimension.to_value x.key)));
+        ("Values", (Some (Values.to_value x.values)));
+        ("MatchOptions",
+          (Option.map x.matchOptions ~f:MatchOptions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let matchOptions =
+        (Option.map ~f:MatchOptions.of_xml)
+          (Xml.child xml_arg0 "MatchOptions") in
+      let values =
+        Values.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Values") in
+      let key =
+        Dimension.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ?matchOptions ~values ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let matchOptions = field_map json__ "MatchOptions" MatchOptions.of_json in
+      let values = field_map_exn json__ "Values" Values.of_json in
+      let key = field_map_exn json__ "Key" Dimension.of_json in
+      make ?matchOptions ~values ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the specifications for the filters to use for your request."]
+module CostCategoryName =
+  struct
+    type nonrec t = string
+    let context_ = "CostCategoryName"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CostCategoryName" j
+    let to_json = simple_to_json to_value
+  end
+module CostCategoryValues =
+  struct
+    type nonrec t =
+      {
+      key: CostCategoryName.t option
+        [@ocaml.doc "The unique name of the cost category."];
+      values: Values.t option
+        [@ocaml.doc "The specific value of the cost category."];
+      matchOptions: MatchOptions.t option
+        [@ocaml.doc
+          "The match options that you can use to filter your results."]}
+    let make ?key =
+      fun ?values ->
+        fun ?matchOptions -> fun () -> { key; values; matchOptions }
+    let to_value x =
+      structure_to_value
+        [("Key", (Option.map x.key ~f:CostCategoryName.to_value));
+        ("Values", (Option.map x.values ~f:Values.to_value));
+        ("MatchOptions",
+          (Option.map x.matchOptions ~f:MatchOptions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let matchOptions =
+        (Option.map ~f:MatchOptions.of_xml)
+          (Xml.child xml_arg0 "MatchOptions") in
+      let values =
+        (Option.map ~f:Values.of_xml) (Xml.child xml_arg0 "Values") in
+      let key =
+        (Option.map ~f:CostCategoryName.of_xml) (Xml.child xml_arg0 "Key") in
+      make ?matchOptions ?values ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let matchOptions = field_map json__ "MatchOptions" MatchOptions.of_json in
+      let values = field_map json__ "Values" Values.of_json in
+      let key = field_map json__ "Key" CostCategoryName.of_json in
+      make ?matchOptions ?values ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The cost category values used for filtering the costs."]
+module rec
+  Expression:sig
+               type nonrec t =
+                 {
+                 or_: Expressions.t option
+                   [@ocaml.doc
+                     "Return results that match either Dimension object."];
+                 and_: Expressions.t option
+                   [@ocaml.doc
+                     "Return results that match both Dimension objects."];
+                 not: Expression.t option
+                   [@ocaml.doc
+                     "Return results that don't match a Dimension object."];
+                 dimensions: ExpressionDimensionValues.t option
+                   [@ocaml.doc
+                     "The specific Dimension to use for Expression."];
+                 tags: TagValues.t option
+                   [@ocaml.doc "The specific Tag to use for Expression."];
+                 costCategories: CostCategoryValues.t option
+                   [@ocaml.doc
+                     "The filter that's based on CostCategoryValues."]}
+               val make :
+                 ?or_:Expressions.t ->
+                   ?and_:Expressions.t ->
+                     ?not:Expression.t ->
+                       ?dimensions:ExpressionDimensionValues.t ->
+                         ?tags:TagValues.t ->
+                           ?costCategories:CostCategoryValues.t -> unit -> t
+               val to_value : t -> Botodata.value
+               val to_query : t -> Client.Query.t
+               val of_xml : Xml.t -> t
+               val of_json : Yojson.Safe.t -> t
+               val to_json : t -> Yojson.Safe.t
+             end =
+  struct
+    type nonrec t =
+      {
+      or_: Expressions.t option
+        [@ocaml.doc "Return results that match either Dimension object."];
+      and_: Expressions.t option
+        [@ocaml.doc "Return results that match both Dimension objects."];
+      not: Expression.t option
+        [@ocaml.doc "Return results that don't match a Dimension object."];
+      dimensions: ExpressionDimensionValues.t option
+        [@ocaml.doc "The specific Dimension to use for Expression."];
+      tags: TagValues.t option
+        [@ocaml.doc "The specific Tag to use for Expression."];
+      costCategories: CostCategoryValues.t option
+        [@ocaml.doc "The filter that's based on CostCategoryValues."]}
+    let make ?or_ =
+      fun ?and_ ->
+        fun ?not ->
+          fun ?dimensions ->
+            fun ?tags ->
+              fun ?costCategories ->
+                fun () ->
+                  { or_; and_; not; dimensions; tags; costCategories }
+    let to_value x =
+      structure_to_value
+        [("Or", (Option.map x.or_ ~f:Expressions.to_value));
+        ("And", (Option.map x.and_ ~f:Expressions.to_value));
+        ("Not", (Option.map x.not ~f:Expression.to_value));
+        ("Dimensions",
+          (Option.map x.dimensions ~f:ExpressionDimensionValues.to_value));
+        ("Tags", (Option.map x.tags ~f:TagValues.to_value));
+        ("CostCategories",
+          (Option.map x.costCategories ~f:CostCategoryValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let costCategories =
+        (Option.map ~f:CostCategoryValues.of_xml)
+          (Xml.child xml_arg0 "CostCategories") in
+      let tags = (Option.map ~f:TagValues.of_xml) (Xml.child xml_arg0 "Tags") in
+      let dimensions =
+        (Option.map ~f:ExpressionDimensionValues.of_xml)
+          (Xml.child xml_arg0 "Dimensions") in
+      let not = (Option.map ~f:Expression.of_xml) (Xml.child xml_arg0 "Not") in
+      let and_ =
+        (Option.map ~f:Expressions.of_xml) (Xml.child xml_arg0 "And") in
+      let or_ = (Option.map ~f:Expressions.of_xml) (Xml.child xml_arg0 "Or") in
+      make ?costCategories ?tags ?dimensions ?not ?and_ ?or_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let costCategories =
+        field_map json__ "CostCategories" CostCategoryValues.of_json in
+      let tags = field_map json__ "Tags" TagValues.of_json in
+      let dimensions =
+        field_map json__ "Dimensions" ExpressionDimensionValues.of_json in
+      let not = field_map json__ "Not" Expression.of_json in
+      let and_ = field_map json__ "And" Expressions.of_json in
+      let or_ = field_map json__ "Or" Expressions.of_json in
+      make ?costCategories ?tags ?dimensions ?not ?and_ ?or_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Use Expression to filter in various Budgets APIs."]
+ and
+  Expressions:sig
+                type nonrec t = Expression.t list
+                val make : Expression.t list -> t
+                val to_value : t -> Botodata.value
+                val to_query : t -> Client.Query.t
+                val of_xml : Xml.t -> Expression.t list
+                val of_json : Yojson.Safe.t -> t
+                val to_json : t -> Yojson.Safe.t
+                val to_header : t -> string
+              end =
+  struct
+    type nonrec t = Expression.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Expression.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Expression.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Expressions" ~of_json:Expression.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NullableBoolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
   end
 module CostTypes =
   struct
@@ -1681,27 +2483,27 @@ module CostTypes =
         ?includeCredit ?includeRefund ?useBlended ?includeSubscription
         ?includeTax ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let useAmortized =
-        field_map json "UseAmortized" NullableBoolean.of_json in
+        field_map json__ "UseAmortized" NullableBoolean.of_json in
       let includeDiscount =
-        field_map json "IncludeDiscount" NullableBoolean.of_json in
+        field_map json__ "IncludeDiscount" NullableBoolean.of_json in
       let includeSupport =
-        field_map json "IncludeSupport" NullableBoolean.of_json in
+        field_map json__ "IncludeSupport" NullableBoolean.of_json in
       let includeOtherSubscription =
-        field_map json "IncludeOtherSubscription" NullableBoolean.of_json in
+        field_map json__ "IncludeOtherSubscription" NullableBoolean.of_json in
       let includeRecurring =
-        field_map json "IncludeRecurring" NullableBoolean.of_json in
+        field_map json__ "IncludeRecurring" NullableBoolean.of_json in
       let includeUpfront =
-        field_map json "IncludeUpfront" NullableBoolean.of_json in
+        field_map json__ "IncludeUpfront" NullableBoolean.of_json in
       let includeCredit =
-        field_map json "IncludeCredit" NullableBoolean.of_json in
+        field_map json__ "IncludeCredit" NullableBoolean.of_json in
       let includeRefund =
-        field_map json "IncludeRefund" NullableBoolean.of_json in
-      let useBlended = field_map json "UseBlended" NullableBoolean.of_json in
+        field_map json__ "IncludeRefund" NullableBoolean.of_json in
+      let useBlended = field_map json__ "UseBlended" NullableBoolean.of_json in
       let includeSubscription =
-        field_map json "IncludeSubscription" NullableBoolean.of_json in
-      let includeTax = field_map json "IncludeTax" NullableBoolean.of_json in
+        field_map json__ "IncludeSubscription" NullableBoolean.of_json in
+      let includeTax = field_map json__ "IncludeTax" NullableBoolean.of_json in
       make ?useAmortized ?includeDiscount ?includeSupport
         ?includeOtherSubscription ?includeRecurring ?includeUpfront
         ?includeCredit ?includeRefund ?useBlended ?includeSubscription
@@ -1709,9 +2511,56 @@ module CostTypes =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The types of cost that are included in a COST budget, such as tax and subscriptions. USAGE, RI_UTILIZATION, RI_COVERAGE, SAVINGS_PLANS_UTILIZATION, and SAVINGS_PLANS_COVERAGE budgets don't have CostTypes."]
-module PlannedBudgetLimits =
+module DimensionValue =
   struct
-    type nonrec t = (GenericString.t * Spend.t) list
+    type nonrec t = string
+    let context_ = "DimensionValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:2147483647) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\S\\s]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DimensionValue" j
+    let to_json = simple_to_json to_value
+  end
+module DimensionValues =
+  struct
+    type nonrec t = DimensionValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DimensionValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DimensionValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DimensionValues" ~of_json:DimensionValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CostFilters =
+  struct
+    type nonrec t = (GenericString.t * DimensionValues.t) list
     let make i = i
     let of_header xs =
       make
@@ -1723,52 +2572,488 @@ module PlannedBudgetLimits =
                             let (_ : string) = v in
                             let (_ : string) = chopped in
                             failwith
-                              "no of_header for complex types GenericString Spend"))))
+                              "no of_header for complex types GenericString DimensionValues"))))
     let to_value xs =
       (xs |>
          (List.map
             ~f:(fun (x, y) ->
                   (GenericString.to_value x) |>
-                    (fun x -> (Spend.to_value y) |> (fun y -> (x, y))))))
+                    (fun x ->
+                       (DimensionValues.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:GenericString.of_string
-        ~of_json:Spend.of_json j
+        ~of_json:DimensionValues.of_json j
     let to_json v = composed_to_json to_value v
   end
-module TimeUnit =
+module CalculatedSpend =
   struct
     type nonrec t =
-      | DAILY 
-      | MONTHLY 
-      | QUARTERLY 
-      | ANNUALLY 
+      {
+      actualSpend: Spend.t
+        [@ocaml.doc
+          "The amount of cost, usage, RI units, or Savings Plans units that you used."];
+      forecastedSpend: Spend.t option
+        [@ocaml.doc
+          "The amount of cost, usage, RI units, or Savings Plans units that you're forecasted to use."]}
+    let context_ = "CalculatedSpend"
+    let make ?forecastedSpend =
+      fun ~actualSpend -> fun () -> { forecastedSpend; actualSpend }
+    let to_value x =
+      structure_to_value
+        [("ActualSpend", (Some (Spend.to_value x.actualSpend)));
+        ("ForecastedSpend", (Option.map x.forecastedSpend ~f:Spend.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let forecastedSpend =
+        (Option.map ~f:Spend.of_xml) (Xml.child xml_arg0 "ForecastedSpend") in
+      let actualSpend =
+        Spend.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ActualSpend") in
+      make ?forecastedSpend ~actualSpend ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let forecastedSpend = field_map json__ "ForecastedSpend" Spend.of_json in
+      let actualSpend = field_map_exn json__ "ActualSpend" Spend.of_json in
+      make ?forecastedSpend ~actualSpend ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The spend objects that are associated with this budget. The actualSpend tracks how much you've used, cost, usage, RI units, or Savings Plans units and the forecastedSpend tracks how much that you're predicted to spend based on your historical usage profile. For example, if it's the 20th of the month and you have spent 50 dollars on Amazon EC2, your actualSpend is 50 USD, and your forecastedSpend is 75 USD."]
+module BudgetType =
+  struct
+    type nonrec t =
+      | USAGE 
+      | COST 
+      | RI_UTILIZATION 
+      | RI_COVERAGE 
+      | SAVINGS_PLANS_UTILIZATION 
+      | SAVINGS_PLANS_COVERAGE 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | DAILY -> "DAILY"
-      | MONTHLY -> "MONTHLY"
-      | QUARTERLY -> "QUARTERLY"
-      | ANNUALLY -> "ANNUALLY"
+      | USAGE -> "USAGE"
+      | COST -> "COST"
+      | RI_UTILIZATION -> "RI_UTILIZATION"
+      | RI_COVERAGE -> "RI_COVERAGE"
+      | SAVINGS_PLANS_UTILIZATION -> "SAVINGS_PLANS_UTILIZATION"
+      | SAVINGS_PLANS_COVERAGE -> "SAVINGS_PLANS_COVERAGE"
       | Non_static_id s -> s
     let of_string =
       function
-      | "DAILY" -> DAILY
-      | "MONTHLY" -> MONTHLY
-      | "QUARTERLY" -> QUARTERLY
-      | "ANNUALLY" -> ANNUALLY
+      | "USAGE" -> USAGE
+      | "COST" -> COST
+      | "RI_UTILIZATION" -> RI_UTILIZATION
+      | "RI_COVERAGE" -> RI_COVERAGE
+      | "SAVINGS_PLANS_UTILIZATION" -> SAVINGS_PLANS_UTILIZATION
+      | "SAVINGS_PLANS_COVERAGE" -> SAVINGS_PLANS_COVERAGE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration TimeUnit" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"TimeUnit" j)
+      of_string (string_of_xml ~kind:"enumeration BudgetType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"BudgetType" j)
     let to_json = simple_to_json to_value
+  end
+module Budget =
+  struct
+    type nonrec t =
+      {
+      budgetName: BudgetName.t
+        [@ocaml.doc
+          "The name of a budget. The name must be unique within an account. The : and \\ characters, and the \"/action/\" substring, aren't allowed in BudgetName."];
+      budgetLimit: Spend.t option
+        [@ocaml.doc
+          "The total amount of cost, usage, RI utilization, RI coverage, Savings Plans utilization, or Savings Plans coverage that you want to track with your budget. BudgetLimit is required for cost or usage budgets, but optional for RI or Savings Plans utilization or coverage budgets. RI and Savings Plans utilization or coverage budgets default to 100. This is the only valid value for RI or Savings Plans utilization or coverage budgets. You can't use BudgetLimit with PlannedBudgetLimits for CreateBudget and UpdateBudget actions."];
+      plannedBudgetLimits: PlannedBudgetLimits.t option
+        [@ocaml.doc
+          "A map containing multiple BudgetLimit, including current or future limits. PlannedBudgetLimits is available for cost or usage budget and supports both monthly and quarterly TimeUnit. For monthly budgets, provide 12 months of PlannedBudgetLimits values. This must start from the current month and include the next 11 months. The key is the start of the month, UTC in epoch seconds. For quarterly budgets, provide four quarters of PlannedBudgetLimits value entries in standard calendar quarter increments. This must start from the current quarter and include the next three quarters. The key is the start of the quarter, UTC in epoch seconds. If the planned budget expires before 12 months for monthly or four quarters for quarterly, provide the PlannedBudgetLimits values only for the remaining periods. If the budget begins at a date in the future, provide PlannedBudgetLimits values from the start date of the budget. After all of the BudgetLimit values in PlannedBudgetLimits are used, the budget continues to use the last limit as the BudgetLimit. At that point, the planned budget provides the same experience as a fixed budget. DescribeBudget and DescribeBudgets response along with PlannedBudgetLimits also contain BudgetLimit representing the current month or quarter limit present in PlannedBudgetLimits. This only applies to budgets that are created with PlannedBudgetLimits. Budgets that are created without PlannedBudgetLimits only contain BudgetLimit. They don't contain PlannedBudgetLimits."];
+      costFilters: CostFilters.t option
+        [@ocaml.doc
+          "The cost filters, such as Region, Service, LinkedAccount, Tag, or CostCategory, that are applied to a budget. Amazon Web Services Budgets supports the following services as a Service filter for RI budgets: Amazon EC2 Amazon Redshift Amazon Relational Database Service Amazon ElastiCache Amazon OpenSearch Service"];
+      costTypes: CostTypes.t option
+        [@ocaml.doc
+          "The types of costs that are included in this COST budget. USAGE, RI_UTILIZATION, RI_COVERAGE, SAVINGS_PLANS_UTILIZATION, and SAVINGS_PLANS_COVERAGE budgets do not have CostTypes."];
+      timeUnit: TimeUnit.t
+        [@ocaml.doc
+          "The length of time until a budget resets the actual and forecasted spend."];
+      timePeriod: TimePeriod.t option
+        [@ocaml.doc
+          "The period of time that's covered by a budget. You set the start date and end date. The start date must come before the end date. The end date must come before 06/15/87 00:00 UTC. If you create your budget and don't specify a start date, Amazon Web Services defaults to the start of your chosen time period (DAILY, MONTHLY, QUARTERLY, ANNUALLY, or CUSTOM). For example, if you created your budget on January 24, 2018, chose DAILY, and didn't set a start date, Amazon Web Services set your start date to 01/24/18 00:00 UTC. If you chose MONTHLY, Amazon Web Services set your start date to 01/01/18 00:00 UTC. If you didn't specify an end date, Amazon Web Services set your end date to 06/15/87 00:00 UTC. The defaults are the same for the Billing and Cost Management console and the API. You can change either date with the UpdateBudget operation. After the end date, Amazon Web Services deletes the budget and all the associated notifications and subscribers."];
+      calculatedSpend: CalculatedSpend.t option
+        [@ocaml.doc
+          "The actual and forecasted cost or usage that the budget tracks."];
+      budgetType: BudgetType.t
+        [@ocaml.doc
+          "Specifies whether this budget tracks costs, usage, RI utilization, RI coverage, Savings Plans utilization, or Savings Plans coverage."];
+      lastUpdatedTime: GenericTimestamp.t option
+        [@ocaml.doc "The last time that you updated this budget."];
+      autoAdjustData: AutoAdjustData.t option
+        [@ocaml.doc
+          "The parameters that determine the budget amount for an auto-adjusting budget."];
+      filterExpression: Expression.t option
+        [@ocaml.doc
+          "The filtering dimensions for the budget and their corresponding values."];
+      metrics: Metrics.t option
+        [@ocaml.doc "The definition for how the budget data is aggregated."];
+      billingViewArn: BillingViewArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that uniquely identifies a specific billing view. The ARN is used to specify which particular billing view you want to interact with or retrieve information from when making API calls related to Amazon Web Services Billing and Cost Management features. The BillingViewArn can be retrieved by calling the ListBillingViews API."];
+      healthStatus: HealthStatus.t option
+        [@ocaml.doc
+          "The current operational state of a Billing View derived resource."]}
+    let context_ = "Budget"
+    let make ?budgetLimit =
+      fun ?plannedBudgetLimits ->
+        fun ?costFilters ->
+          fun ?costTypes ->
+            fun ?timePeriod ->
+              fun ?calculatedSpend ->
+                fun ?lastUpdatedTime ->
+                  fun ?autoAdjustData ->
+                    fun ?filterExpression ->
+                      fun ?metrics ->
+                        fun ?billingViewArn ->
+                          fun ?healthStatus ->
+                            fun ~budgetName ->
+                              fun ~timeUnit ->
+                                fun ~budgetType ->
+                                  fun () ->
+                                    {
+                                      budgetLimit;
+                                      plannedBudgetLimits;
+                                      costFilters;
+                                      costTypes;
+                                      timePeriod;
+                                      calculatedSpend;
+                                      lastUpdatedTime;
+                                      autoAdjustData;
+                                      filterExpression;
+                                      metrics;
+                                      billingViewArn;
+                                      healthStatus;
+                                      budgetName;
+                                      timeUnit;
+                                      budgetType
+                                    }
+    let to_value x =
+      structure_to_value
+        [("BudgetName", (Some (BudgetName.to_value x.budgetName)));
+        ("BudgetLimit", (Option.map x.budgetLimit ~f:Spend.to_value));
+        ("PlannedBudgetLimits",
+          (Option.map x.plannedBudgetLimits ~f:PlannedBudgetLimits.to_value));
+        ("CostFilters", (Option.map x.costFilters ~f:CostFilters.to_value));
+        ("CostTypes", (Option.map x.costTypes ~f:CostTypes.to_value));
+        ("TimeUnit", (Some (TimeUnit.to_value x.timeUnit)));
+        ("TimePeriod", (Option.map x.timePeriod ~f:TimePeriod.to_value));
+        ("CalculatedSpend",
+          (Option.map x.calculatedSpend ~f:CalculatedSpend.to_value));
+        ("BudgetType", (Some (BudgetType.to_value x.budgetType)));
+        ("LastUpdatedTime",
+          (Option.map x.lastUpdatedTime ~f:GenericTimestamp.to_value));
+        ("AutoAdjustData",
+          (Option.map x.autoAdjustData ~f:AutoAdjustData.to_value));
+        ("FilterExpression",
+          (Option.map x.filterExpression ~f:Expression.to_value));
+        ("Metrics", (Option.map x.metrics ~f:Metrics.to_value));
+        ("BillingViewArn",
+          (Option.map x.billingViewArn ~f:BillingViewArn.to_value));
+        ("HealthStatus",
+          (Option.map x.healthStatus ~f:HealthStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let healthStatus =
+        (Option.map ~f:HealthStatus.of_xml)
+          (Xml.child xml_arg0 "HealthStatus") in
+      let billingViewArn =
+        (Option.map ~f:BillingViewArn.of_xml)
+          (Xml.child xml_arg0 "BillingViewArn") in
+      let metrics =
+        (Option.map ~f:Metrics.of_xml) (Xml.child xml_arg0 "Metrics") in
+      let filterExpression =
+        (Option.map ~f:Expression.of_xml)
+          (Xml.child xml_arg0 "FilterExpression") in
+      let autoAdjustData =
+        (Option.map ~f:AutoAdjustData.of_xml)
+          (Xml.child xml_arg0 "AutoAdjustData") in
+      let lastUpdatedTime =
+        (Option.map ~f:GenericTimestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTime") in
+      let budgetType =
+        BudgetType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetType") in
+      let calculatedSpend =
+        (Option.map ~f:CalculatedSpend.of_xml)
+          (Xml.child xml_arg0 "CalculatedSpend") in
+      let timePeriod =
+        (Option.map ~f:TimePeriod.of_xml) (Xml.child xml_arg0 "TimePeriod") in
+      let timeUnit =
+        TimeUnit.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TimeUnit") in
+      let costTypes =
+        (Option.map ~f:CostTypes.of_xml) (Xml.child xml_arg0 "CostTypes") in
+      let costFilters =
+        (Option.map ~f:CostFilters.of_xml) (Xml.child xml_arg0 "CostFilters") in
+      let plannedBudgetLimits =
+        (Option.map ~f:PlannedBudgetLimits.of_xml)
+          (Xml.child xml_arg0 "PlannedBudgetLimits") in
+      let budgetLimit =
+        (Option.map ~f:Spend.of_xml) (Xml.child xml_arg0 "BudgetLimit") in
+      let budgetName =
+        BudgetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      make ?healthStatus ?billingViewArn ?metrics ?filterExpression
+        ?autoAdjustData ?lastUpdatedTime ~budgetType ?calculatedSpend
+        ?timePeriod ~timeUnit ?costTypes ?costFilters ?plannedBudgetLimits
+        ?budgetLimit ~budgetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let healthStatus = field_map json__ "HealthStatus" HealthStatus.of_json in
+      let billingViewArn =
+        field_map json__ "BillingViewArn" BillingViewArn.of_json in
+      let metrics = field_map json__ "Metrics" Metrics.of_json in
+      let filterExpression =
+        field_map json__ "FilterExpression" Expression.of_json in
+      let autoAdjustData =
+        field_map json__ "AutoAdjustData" AutoAdjustData.of_json in
+      let lastUpdatedTime =
+        field_map json__ "LastUpdatedTime" GenericTimestamp.of_json in
+      let budgetType = field_map_exn json__ "BudgetType" BudgetType.of_json in
+      let calculatedSpend =
+        field_map json__ "CalculatedSpend" CalculatedSpend.of_json in
+      let timePeriod = field_map json__ "TimePeriod" TimePeriod.of_json in
+      let timeUnit = field_map_exn json__ "TimeUnit" TimeUnit.of_json in
+      let costTypes = field_map json__ "CostTypes" CostTypes.of_json in
+      let costFilters = field_map json__ "CostFilters" CostFilters.of_json in
+      let plannedBudgetLimits =
+        field_map json__ "PlannedBudgetLimits" PlannedBudgetLimits.of_json in
+      let budgetLimit = field_map json__ "BudgetLimit" Spend.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      make ?healthStatus ?billingViewArn ?metrics ?filterExpression
+        ?autoAdjustData ?lastUpdatedTime ~budgetType ?calculatedSpend
+        ?timePeriod ~timeUnit ?costTypes ?costFilters ?plannedBudgetLimits
+        ?budgetLimit ~budgetName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the output of the CreateBudget operation. The content consists of the detailed metadata and data file information, and the current status of the budget object. This is the Amazon Resource Name (ARN) pattern for a budget: arn:aws:budgets::AccountId:budget/budgetName"]
+module NotificationState =
+  struct
+    type nonrec t =
+      | OK 
+      | ALARM 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | OK -> "OK" | ALARM -> "ALARM" | Non_static_id s -> s
+    let of_string =
+      function | "OK" -> OK | "ALARM" -> ALARM | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration NotificationState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NotificationState" j)
+    let to_json = simple_to_json to_value
+  end
+module ComparisonOperator =
+  struct
+    type nonrec t =
+      | GREATER_THAN 
+      | LESS_THAN 
+      | EQUAL_TO 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | GREATER_THAN -> "GREATER_THAN"
+      | LESS_THAN -> "LESS_THAN"
+      | EQUAL_TO -> "EQUAL_TO"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "GREATER_THAN" -> GREATER_THAN
+      | "LESS_THAN" -> LESS_THAN
+      | "EQUAL_TO" -> EQUAL_TO
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ComparisonOperator" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ComparisonOperator" j)
+    let to_json = simple_to_json to_value
+  end
+module Notification =
+  struct
+    type nonrec t =
+      {
+      notificationType: NotificationType.t
+        [@ocaml.doc
+          "Specifies whether the notification is for how much you have spent (ACTUAL) or for how much that you're forecasted to spend (FORECASTED)."];
+      comparisonOperator: ComparisonOperator.t
+        [@ocaml.doc "The comparison that's used for this notification."];
+      threshold: NotificationThreshold.t
+        [@ocaml.doc
+          "The threshold that's associated with a notification. Thresholds are always a percentage, and many customers find value being alerted between 50% - 200% of the budgeted amount. The maximum limit for your threshold is 1,000,000% above the budgeted amount."];
+      thresholdType: ThresholdType.t option
+        [@ocaml.doc
+          "The type of threshold for a notification. For ABSOLUTE_VALUE thresholds, Amazon Web Services notifies you when you go over or are forecasted to go over your total cost threshold. For PERCENTAGE thresholds, Amazon Web Services notifies you when you go over or are forecasted to go over a certain percentage of your forecasted spend. For example, if you have a budget for 200 dollars and you have a PERCENTAGE threshold of 80%, Amazon Web Services notifies you when you go over 160 dollars."];
+      notificationState: NotificationState.t option
+        [@ocaml.doc
+          "Specifies whether this notification is in alarm. If a budget notification is in the ALARM state, you passed the set threshold for the budget."]}
+    let context_ = "Notification"
+    let make ?thresholdType =
+      fun ?notificationState ->
+        fun ~notificationType ->
+          fun ~comparisonOperator ->
+            fun ~threshold ->
+              fun () ->
+                {
+                  thresholdType;
+                  notificationState;
+                  notificationType;
+                  comparisonOperator;
+                  threshold
+                }
+    let to_value x =
+      structure_to_value
+        [("NotificationType",
+           (Some (NotificationType.to_value x.notificationType)));
+        ("ComparisonOperator",
+          (Some (ComparisonOperator.to_value x.comparisonOperator)));
+        ("Threshold", (Some (NotificationThreshold.to_value x.threshold)));
+        ("ThresholdType",
+          (Option.map x.thresholdType ~f:ThresholdType.to_value));
+        ("NotificationState",
+          (Option.map x.notificationState ~f:NotificationState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let notificationState =
+        (Option.map ~f:NotificationState.of_xml)
+          (Xml.child xml_arg0 "NotificationState") in
+      let thresholdType =
+        (Option.map ~f:ThresholdType.of_xml)
+          (Xml.child xml_arg0 "ThresholdType") in
+      let threshold =
+        NotificationThreshold.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Threshold") in
+      let comparisonOperator =
+        ComparisonOperator.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ComparisonOperator") in
+      let notificationType =
+        NotificationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NotificationType") in
+      make ?notificationState ?thresholdType ~threshold ~comparisonOperator
+        ~notificationType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notificationState =
+        field_map json__ "NotificationState" NotificationState.of_json in
+      let thresholdType =
+        field_map json__ "ThresholdType" ThresholdType.of_json in
+      let threshold =
+        field_map_exn json__ "Threshold" NotificationThreshold.of_json in
+      let comparisonOperator =
+        field_map_exn json__ "ComparisonOperator" ComparisonOperator.of_json in
+      let notificationType =
+        field_map_exn json__ "NotificationType" NotificationType.of_json in
+      make ?notificationState ?thresholdType ~threshold ~comparisonOperator
+        ~notificationType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A notification that's associated with a budget. A budget can have up to ten notifications. Each notification must have at least one subscriber. A notification can have one SNS subscriber and up to 10 email subscribers, for a total of 11 subscribers. For example, if you have a budget for 200 dollars and you want to be notified when you go over 160 dollars, create a notification with the following parameters: A notificationType of ACTUAL A thresholdType of PERCENTAGE A comparisonOperator of GREATER_THAN A notification threshold of 80"]
+module Notifications =
+  struct
+    type nonrec t = Notification.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Notification.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Notification.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Notifications" ~of_json:Notification.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BudgetNotificationsForAccount =
+  struct
+    type nonrec t =
+      {
+      notifications: Notifications.t option ;
+      budgetName: BudgetName.t option }
+    let make ?notifications =
+      fun ?budgetName -> fun () -> { notifications; budgetName }
+    let to_value x =
+      structure_to_value
+        [("Notifications",
+           (Option.map x.notifications ~f:Notifications.to_value));
+        ("BudgetName", (Option.map x.budgetName ~f:BudgetName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let budgetName =
+        (Option.map ~f:BudgetName.of_xml) (Xml.child xml_arg0 "BudgetName") in
+      let notifications =
+        (Option.map ~f:Notifications.of_xml)
+          (Xml.child xml_arg0 "Notifications") in
+      make ?budgetName ?notifications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let budgetName = field_map json__ "BudgetName" BudgetName.of_json in
+      let notifications =
+        field_map json__ "Notifications" Notifications.of_json in
+      make ?budgetName ?notifications ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The budget name and associated notifications for an account."]
+module BudgetNotificationsForAccountList =
+  struct
+    type nonrec t = BudgetNotificationsForAccount.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1000); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BudgetNotificationsForAccount.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BudgetNotificationsForAccount.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BudgetNotificationsForAccountList"
+        ~of_json:BudgetNotificationsForAccount.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module BudgetedAndActualAmounts =
   struct
@@ -1801,252 +3086,21 @@ module BudgetedAndActualAmounts =
         (Option.map ~f:Spend.of_xml) (Xml.child xml_arg0 "BudgetedAmount") in
       make ?timePeriod ?actualAmount ?budgetedAmount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timePeriod = field_map json "TimePeriod" TimePeriod.of_json in
-      let actualAmount = field_map json "ActualAmount" Spend.of_json in
-      let budgetedAmount = field_map json "BudgetedAmount" Spend.of_json in
+    let of_json json__ =
+      let timePeriod = field_map json__ "TimePeriod" TimePeriod.of_json in
+      let actualAmount = field_map json__ "ActualAmount" Spend.of_json in
+      let budgetedAmount = field_map json__ "BudgetedAmount" Spend.of_json in
       make ?timePeriod ?actualAmount ?budgetedAmount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The amount of cost or usage that you created the budget for, compared to your actual costs or usage."]
-module Notifications =
-  struct
-    type nonrec t = Notification.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Notification.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Notification.of_xml)
-    let of_json j =
-      list_of_json ~kind:"Notifications" ~of_json:Notification.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module ActionHistoryDetails =
-  struct
-    type nonrec t =
-      {
-      message: GenericString.t ;
-      action: Action.t [@ocaml.doc "The budget action resource."]}
-    let context_ = "ActionHistoryDetails"
-    let make ~message = fun ~action -> fun () -> { message; action }
-    let to_value x =
-      structure_to_value
-        [("Message", (Some (GenericString.to_value x.message)));
-        ("Action", (Some (Action.to_value x.action)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let action =
-        Action.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Action") in
-      let message =
-        GenericString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~action ~message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let action = field_map_exn json "Action" Action.of_json in
-      let message = field_map_exn json "Message" GenericString.of_json in
-      make ~action ~message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The description of the details for the event."]
-module EventType =
-  struct
-    type nonrec t =
-      | SYSTEM 
-      | CREATE_ACTION 
-      | DELETE_ACTION 
-      | UPDATE_ACTION 
-      | EXECUTE_ACTION 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | SYSTEM -> "SYSTEM"
-      | CREATE_ACTION -> "CREATE_ACTION"
-      | DELETE_ACTION -> "DELETE_ACTION"
-      | UPDATE_ACTION -> "UPDATE_ACTION"
-      | EXECUTE_ACTION -> "EXECUTE_ACTION"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "SYSTEM" -> SYSTEM
-      | "CREATE_ACTION" -> CREATE_ACTION
-      | "DELETE_ACTION" -> DELETE_ACTION
-      | "UPDATE_ACTION" -> UPDATE_ACTION
-      | "EXECUTE_ACTION" -> EXECUTE_ACTION
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration EventType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"EventType" j)
-    let to_json = simple_to_json to_value
-  end
-module ErrorMessage =
-  struct
-    type nonrec t = string[@@ocaml.doc
-                            "The error message the exception carries."]
-    let context_ = "errorMessage"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"errorMessage" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The error message the exception carries."]
-module Budget =
-  struct
-    type nonrec t =
-      {
-      budgetName: BudgetName.t
-        [@ocaml.doc
-          "The name of a budget. The name must be unique within an account. The : and \\ characters aren't allowed in BudgetName."];
-      budgetLimit: Spend.t option
-        [@ocaml.doc
-          "The total amount of cost, usage, RI utilization, RI coverage, Savings Plans utilization, or Savings Plans coverage that you want to track with your budget. BudgetLimit is required for cost or usage budgets, but optional for RI or Savings Plans utilization or coverage budgets. RI and Savings Plans utilization or coverage budgets default to 100. This is the only valid value for RI or Savings Plans utilization or coverage budgets. You can't use BudgetLimit with PlannedBudgetLimits for CreateBudget and UpdateBudget actions."];
-      plannedBudgetLimits: PlannedBudgetLimits.t option
-        [@ocaml.doc
-          "A map containing multiple BudgetLimit, including current or future limits. PlannedBudgetLimits is available for cost or usage budget and supports both monthly and quarterly TimeUnit. For monthly budgets, provide 12 months of PlannedBudgetLimits values. This must start from the current month and include the next 11 months. The key is the start of the month, UTC in epoch seconds. For quarterly budgets, provide four quarters of PlannedBudgetLimits value entries in standard calendar quarter increments. This must start from the current quarter and include the next three quarters. The key is the start of the quarter, UTC in epoch seconds. If the planned budget expires before 12 months for monthly or four quarters for quarterly, provide the PlannedBudgetLimits values only for the remaining periods. If the budget begins at a date in the future, provide PlannedBudgetLimits values from the start date of the budget. After all of the BudgetLimit values in PlannedBudgetLimits are used, the budget continues to use the last limit as the BudgetLimit. At that point, the planned budget provides the same experience as a fixed budget. DescribeBudget and DescribeBudgets response along with PlannedBudgetLimits also contain BudgetLimit representing the current month or quarter limit present in PlannedBudgetLimits. This only applies to budgets that are created with PlannedBudgetLimits. Budgets that are created without PlannedBudgetLimits only contain BudgetLimit. They don't contain PlannedBudgetLimits."];
-      costFilters: CostFilters.t option
-        [@ocaml.doc
-          "The cost filters, such as Region, Service, member account, Tag, or Cost Category, that are applied to a budget. Amazon Web Services Budgets supports the following services as a Service filter for RI budgets: Amazon EC2 Amazon Redshift Amazon Relational Database Service Amazon ElastiCache Amazon OpenSearch Service"];
-      costTypes: CostTypes.t option
-        [@ocaml.doc
-          "The types of costs that are included in this COST budget. USAGE, RI_UTILIZATION, RI_COVERAGE, SAVINGS_PLANS_UTILIZATION, and SAVINGS_PLANS_COVERAGE budgets do not have CostTypes."];
-      timeUnit: TimeUnit.t
-        [@ocaml.doc
-          "The length of time until a budget resets the actual and forecasted spend."];
-      timePeriod: TimePeriod.t option
-        [@ocaml.doc
-          "The period of time that's covered by a budget. You setthe start date and end date. The start date must come before the end date. The end date must come before 06/15/87 00:00 UTC. If you create your budget and don't specify a start date, Amazon Web Services defaults to the start of your chosen time period (DAILY, MONTHLY, QUARTERLY, or ANNUALLY). For example, if you created your budget on January 24, 2018, chose DAILY, and didn't set a start date, Amazon Web Services set your start date to 01/24/18 00:00 UTC. If you chose MONTHLY, Amazon Web Services set your start date to 01/01/18 00:00 UTC. If you didn't specify an end date, Amazon Web Services set your end date to 06/15/87 00:00 UTC. The defaults are the same for the Billing and Cost Management console and the API. You can change either date with the UpdateBudget operation. After the end date, Amazon Web Services deletes the budget and all the associated notifications and subscribers."];
-      calculatedSpend: CalculatedSpend.t option
-        [@ocaml.doc
-          "The actual and forecasted cost or usage that the budget tracks."];
-      budgetType: BudgetType.t
-        [@ocaml.doc
-          "Specifies whether this budget tracks costs, usage, RI utilization, RI coverage, Savings Plans utilization, or Savings Plans coverage."];
-      lastUpdatedTime: GenericTimestamp.t option
-        [@ocaml.doc "The last time that you updated this budget."];
-      autoAdjustData: AutoAdjustData.t option
-        [@ocaml.doc
-          "The parameters that determine the budget amount for an auto-adjusting budget."]}
-    let context_ = "Budget"
-    let make ?budgetLimit =
-      fun ?plannedBudgetLimits ->
-        fun ?costFilters ->
-          fun ?costTypes ->
-            fun ?timePeriod ->
-              fun ?calculatedSpend ->
-                fun ?lastUpdatedTime ->
-                  fun ?autoAdjustData ->
-                    fun ~budgetName ->
-                      fun ~timeUnit ->
-                        fun ~budgetType ->
-                          fun () ->
-                            {
-                              budgetLimit;
-                              plannedBudgetLimits;
-                              costFilters;
-                              costTypes;
-                              timePeriod;
-                              calculatedSpend;
-                              lastUpdatedTime;
-                              autoAdjustData;
-                              budgetName;
-                              timeUnit;
-                              budgetType
-                            }
-    let to_value x =
-      structure_to_value
-        [("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("BudgetLimit", (Option.map x.budgetLimit ~f:Spend.to_value));
-        ("PlannedBudgetLimits",
-          (Option.map x.plannedBudgetLimits ~f:PlannedBudgetLimits.to_value));
-        ("CostFilters", (Option.map x.costFilters ~f:CostFilters.to_value));
-        ("CostTypes", (Option.map x.costTypes ~f:CostTypes.to_value));
-        ("TimeUnit", (Some (TimeUnit.to_value x.timeUnit)));
-        ("TimePeriod", (Option.map x.timePeriod ~f:TimePeriod.to_value));
-        ("CalculatedSpend",
-          (Option.map x.calculatedSpend ~f:CalculatedSpend.to_value));
-        ("BudgetType", (Some (BudgetType.to_value x.budgetType)));
-        ("LastUpdatedTime",
-          (Option.map x.lastUpdatedTime ~f:GenericTimestamp.to_value));
-        ("AutoAdjustData",
-          (Option.map x.autoAdjustData ~f:AutoAdjustData.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let autoAdjustData =
-        (Option.map ~f:AutoAdjustData.of_xml)
-          (Xml.child xml_arg0 "AutoAdjustData") in
-      let lastUpdatedTime =
-        (Option.map ~f:GenericTimestamp.of_xml)
-          (Xml.child xml_arg0 "LastUpdatedTime") in
-      let budgetType =
-        BudgetType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetType") in
-      let calculatedSpend =
-        (Option.map ~f:CalculatedSpend.of_xml)
-          (Xml.child xml_arg0 "CalculatedSpend") in
-      let timePeriod =
-        (Option.map ~f:TimePeriod.of_xml) (Xml.child xml_arg0 "TimePeriod") in
-      let timeUnit =
-        TimeUnit.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TimeUnit") in
-      let costTypes =
-        (Option.map ~f:CostTypes.of_xml) (Xml.child xml_arg0 "CostTypes") in
-      let costFilters =
-        (Option.map ~f:CostFilters.of_xml) (Xml.child xml_arg0 "CostFilters") in
-      let plannedBudgetLimits =
-        (Option.map ~f:PlannedBudgetLimits.of_xml)
-          (Xml.child xml_arg0 "PlannedBudgetLimits") in
-      let budgetLimit =
-        (Option.map ~f:Spend.of_xml) (Xml.child xml_arg0 "BudgetLimit") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      make ?autoAdjustData ?lastUpdatedTime ~budgetType ?calculatedSpend
-        ?timePeriod ~timeUnit ?costTypes ?costFilters ?plannedBudgetLimits
-        ?budgetLimit ~budgetName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let autoAdjustData =
-        field_map json "AutoAdjustData" AutoAdjustData.of_json in
-      let lastUpdatedTime =
-        field_map json "LastUpdatedTime" GenericTimestamp.of_json in
-      let budgetType = field_map_exn json "BudgetType" BudgetType.of_json in
-      let calculatedSpend =
-        field_map json "CalculatedSpend" CalculatedSpend.of_json in
-      let timePeriod = field_map json "TimePeriod" TimePeriod.of_json in
-      let timeUnit = field_map_exn json "TimeUnit" TimeUnit.of_json in
-      let costTypes = field_map json "CostTypes" CostTypes.of_json in
-      let costFilters = field_map json "CostFilters" CostFilters.of_json in
-      let plannedBudgetLimits =
-        field_map json "PlannedBudgetLimits" PlannedBudgetLimits.of_json in
-      let budgetLimit = field_map json "BudgetLimit" Spend.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      make ?autoAdjustData ?lastUpdatedTime ~budgetType ?calculatedSpend
-        ?timePeriod ~timeUnit ?costTypes ?costFilters ?plannedBudgetLimits
-        ?budgetLimit ~budgetName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Represents the output of the CreateBudget operation. The content consists of the detailed metadata and data file information, and the current status of the budget object. This is the Amazon Resource Name (ARN) pattern for a budget: arn:aws:budgets::AccountId:budget/budgetName"]
 module BudgetedAndActualAmountsList =
   struct
     type nonrec t = BudgetedAndActualAmounts.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BudgetedAndActualAmounts.to_value)) |>
         (fun x -> `List x)
@@ -2069,87 +3123,622 @@ module BudgetedAndActualAmountsList =
         ~of_json:BudgetedAndActualAmounts.of_json j
     let to_json v = composed_to_json to_value v
   end
-module BudgetNotificationsForAccount =
+module BudgetPerformanceHistory =
   struct
     type nonrec t =
       {
-      notifications: Notifications.t option ;
-      budgetName: BudgetName.t option }
-    let make ?notifications =
-      fun ?budgetName -> fun () -> { notifications; budgetName }
+      budgetName: BudgetName.t option ;
+      budgetType: BudgetType.t option ;
+      costFilters: CostFilters.t option
+        [@ocaml.doc
+          "The history of the cost filters for a budget during the specified time period."];
+      costTypes: CostTypes.t option
+        [@ocaml.doc
+          "The history of the cost types for a budget during the specified time period."];
+      timeUnit: TimeUnit.t option ;
+      billingViewArn: BillingViewArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that uniquely identifies a specific billing view. The ARN is used to specify which particular billing view you want to interact with or retrieve information from when making API calls related to Amazon Web Services Billing and Cost Management features. The BillingViewArn can be retrieved by calling the ListBillingViews API."];
+      budgetedAndActualAmountsList: BudgetedAndActualAmountsList.t option
+        [@ocaml.doc
+          "A list of amounts of cost or usage that you created budgets for, which are compared to your actual costs or usage."];
+      filterExpression: Expression.t option
+        [@ocaml.doc
+          "The filtering dimensions for the budget and their corresponding values."];
+      metrics: Metrics.t option
+        [@ocaml.doc "The definition for how the budget data is aggregated."]}
+    let make ?budgetName =
+      fun ?budgetType ->
+        fun ?costFilters ->
+          fun ?costTypes ->
+            fun ?timeUnit ->
+              fun ?billingViewArn ->
+                fun ?budgetedAndActualAmountsList ->
+                  fun ?filterExpression ->
+                    fun ?metrics ->
+                      fun () ->
+                        {
+                          budgetName;
+                          budgetType;
+                          costFilters;
+                          costTypes;
+                          timeUnit;
+                          billingViewArn;
+                          budgetedAndActualAmountsList;
+                          filterExpression;
+                          metrics
+                        }
     let to_value x =
       structure_to_value
-        [("Notifications",
-           (Option.map x.notifications ~f:Notifications.to_value));
-        ("BudgetName", (Option.map x.budgetName ~f:BudgetName.to_value))]
+        [("BudgetName", (Option.map x.budgetName ~f:BudgetName.to_value));
+        ("BudgetType", (Option.map x.budgetType ~f:BudgetType.to_value));
+        ("CostFilters", (Option.map x.costFilters ~f:CostFilters.to_value));
+        ("CostTypes", (Option.map x.costTypes ~f:CostTypes.to_value));
+        ("TimeUnit", (Option.map x.timeUnit ~f:TimeUnit.to_value));
+        ("BillingViewArn",
+          (Option.map x.billingViewArn ~f:BillingViewArn.to_value));
+        ("BudgetedAndActualAmountsList",
+          (Option.map x.budgetedAndActualAmountsList
+             ~f:BudgetedAndActualAmountsList.to_value));
+        ("FilterExpression",
+          (Option.map x.filterExpression ~f:Expression.to_value));
+        ("Metrics", (Option.map x.metrics ~f:Metrics.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let metrics =
+        (Option.map ~f:Metrics.of_xml) (Xml.child xml_arg0 "Metrics") in
+      let filterExpression =
+        (Option.map ~f:Expression.of_xml)
+          (Xml.child xml_arg0 "FilterExpression") in
+      let budgetedAndActualAmountsList =
+        (Option.map ~f:BudgetedAndActualAmountsList.of_xml)
+          (Xml.child xml_arg0 "BudgetedAndActualAmountsList") in
+      let billingViewArn =
+        (Option.map ~f:BillingViewArn.of_xml)
+          (Xml.child xml_arg0 "BillingViewArn") in
+      let timeUnit =
+        (Option.map ~f:TimeUnit.of_xml) (Xml.child xml_arg0 "TimeUnit") in
+      let costTypes =
+        (Option.map ~f:CostTypes.of_xml) (Xml.child xml_arg0 "CostTypes") in
+      let costFilters =
+        (Option.map ~f:CostFilters.of_xml) (Xml.child xml_arg0 "CostFilters") in
+      let budgetType =
+        (Option.map ~f:BudgetType.of_xml) (Xml.child xml_arg0 "BudgetType") in
       let budgetName =
         (Option.map ~f:BudgetName.of_xml) (Xml.child xml_arg0 "BudgetName") in
-      let notifications =
-        (Option.map ~f:Notifications.of_xml)
-          (Xml.child xml_arg0 "Notifications") in
-      make ?budgetName ?notifications ()
+      make ?metrics ?filterExpression ?budgetedAndActualAmountsList
+        ?billingViewArn ?timeUnit ?costTypes ?costFilters ?budgetType
+        ?budgetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let budgetName = field_map json "BudgetName" BudgetName.of_json in
-      let notifications =
-        field_map json "Notifications" Notifications.of_json in
-      make ?budgetName ?notifications ()
+    let of_json json__ =
+      let metrics = field_map json__ "Metrics" Metrics.of_json in
+      let filterExpression =
+        field_map json__ "FilterExpression" Expression.of_json in
+      let budgetedAndActualAmountsList =
+        field_map json__ "BudgetedAndActualAmountsList"
+          BudgetedAndActualAmountsList.of_json in
+      let billingViewArn =
+        field_map json__ "BillingViewArn" BillingViewArn.of_json in
+      let timeUnit = field_map json__ "TimeUnit" TimeUnit.of_json in
+      let costTypes = field_map json__ "CostTypes" CostTypes.of_json in
+      let costFilters = field_map json__ "CostFilters" CostFilters.of_json in
+      let budgetType = field_map json__ "BudgetType" BudgetType.of_json in
+      let budgetName = field_map json__ "BudgetName" BudgetName.of_json in
+      make ?metrics ?filterExpression ?budgetedAndActualAmountsList
+        ?billingViewArn ?timeUnit ?costTypes ?costFilters ?budgetType
+        ?budgetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The budget name and associated notifications for an account."]
-module ActionHistory =
+       "A history of the state of a budget at the end of the budget's specified time period."]
+module Budgets =
+  struct
+    type nonrec t = Budget.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Budget.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Budget.of_xml)
+    let of_json j = list_of_json ~kind:"Budgets" ~of_json:Budget.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceTagValue =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceTagValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceTagValue" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceTagKey =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceTagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceTagKey" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceTag =
   struct
     type nonrec t =
       {
-      timestamp: GenericTimestamp.t ;
-      status: ActionStatus.t
-        [@ocaml.doc "The status of action at the time of the event."];
-      eventType: EventType.t
-        [@ocaml.doc
-          "This distinguishes between whether the events are triggered by the user or are generated by the system."];
-      actionHistoryDetails: ActionHistoryDetails.t
-        [@ocaml.doc "The description of the details for the event."]}
-    let context_ = "ActionHistory"
-    let make ~timestamp =
-      fun ~status ->
-        fun ~eventType ->
-          fun ~actionHistoryDetails ->
-            fun () -> { timestamp; status; eventType; actionHistoryDetails }
+      key: ResourceTagKey.t
+        [@ocaml.doc "The key that's associated with the tag."];
+      value: ResourceTagValue.t
+        [@ocaml.doc "The value that's associated with the tag."]}
+    let context_ = "ResourceTag"
+    let make ~key = fun ~value -> fun () -> { key; value }
     let to_value x =
       structure_to_value
-        [("Timestamp", (Some (GenericTimestamp.to_value x.timestamp)));
-        ("Status", (Some (ActionStatus.to_value x.status)));
-        ("EventType", (Some (EventType.to_value x.eventType)));
-        ("ActionHistoryDetails",
-          (Some (ActionHistoryDetails.to_value x.actionHistoryDetails)))]
+        [("Key", (Some (ResourceTagKey.to_value x.key)));
+        ("Value", (Some (ResourceTagValue.to_value x.value)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let actionHistoryDetails =
-        ActionHistoryDetails.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ActionHistoryDetails") in
-      let eventType =
-        EventType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EventType") in
-      let status =
-        ActionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
-      let timestamp =
-        GenericTimestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Timestamp") in
-      make ~actionHistoryDetails ~eventType ~status ~timestamp ()
+      let value =
+        ResourceTagValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let key =
+        ResourceTagKey.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let actionHistoryDetails =
-        field_map_exn json "ActionHistoryDetails"
-          ActionHistoryDetails.of_json in
-      let eventType = field_map_exn json "EventType" EventType.of_json in
-      let status = field_map_exn json "Status" ActionStatus.of_json in
-      let timestamp = field_map_exn json "Timestamp" GenericTimestamp.of_json in
-      make ~actionHistoryDetails ~eventType ~status ~timestamp ()
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" ResourceTagValue.of_json in
+      let key = field_map_exn json__ "Key" ResourceTagKey.of_json in
+      make ~value ~key ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The historical records for a budget action."]
+  end[@@ocaml.doc "The tag structure that contains a tag key and value."]
+module ResourceTagList =
+  struct
+    type nonrec t = ResourceTag.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceTag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceTag.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceTagList" ~of_json:ResourceTag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CreateBudgetActionRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t ;
+      budgetName: BudgetName.t ;
+      notificationType: NotificationType.t ;
+      actionType: ActionType.t
+        [@ocaml.doc
+          "The type of action. This defines the type of tasks that can be carried out by this action. This field also determines the format for definition."];
+      actionThreshold: ActionThreshold.t ;
+      definition: Definition.t ;
+      executionRoleArn: RoleArn.t
+        [@ocaml.doc
+          "The role passed for action execution and reversion. Roles and actions must be in the same account."];
+      approvalModel: ApprovalModel.t
+        [@ocaml.doc
+          "This specifies if the action needs manual or automatic approval."];
+      subscribers: Subscribers.t ;
+      resourceTags: ResourceTagList.t option
+        [@ocaml.doc
+          "An optional list of tags to associate with the specified budget action. Each tag consists of a key and a value, and each key must be unique for the resource."]}
+    let context_ = "CreateBudgetActionRequest"
+    let make ?resourceTags =
+      fun ~accountId ->
+        fun ~budgetName ->
+          fun ~notificationType ->
+            fun ~actionType ->
+              fun ~actionThreshold ->
+                fun ~definition ->
+                  fun ~executionRoleArn ->
+                    fun ~approvalModel ->
+                      fun ~subscribers ->
+                        fun () ->
+                          {
+                            resourceTags;
+                            accountId;
+                            budgetName;
+                            notificationType;
+                            actionType;
+                            actionThreshold;
+                            definition;
+                            executionRoleArn;
+                            approvalModel;
+                            subscribers
+                          }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
+        ("NotificationType",
+          (Some (NotificationType.to_value x.notificationType)));
+        ("ActionType", (Some (ActionType.to_value x.actionType)));
+        ("ActionThreshold",
+          (Some (ActionThreshold.to_value x.actionThreshold)));
+        ("Definition", (Some (Definition.to_value x.definition)));
+        ("ExecutionRoleArn", (Some (RoleArn.to_value x.executionRoleArn)));
+        ("ApprovalModel", (Some (ApprovalModel.to_value x.approvalModel)));
+        ("Subscribers", (Some (Subscribers.to_value x.subscribers)));
+        ("ResourceTags",
+          (Option.map x.resourceTags ~f:ResourceTagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceTags =
+        (Option.map ~f:ResourceTagList.of_xml)
+          (Xml.child xml_arg0 "ResourceTags") in
+      let subscribers =
+        Subscribers.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Subscribers") in
+      let approvalModel =
+        ApprovalModel.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ApprovalModel") in
+      let executionRoleArn =
+        RoleArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ExecutionRoleArn") in
+      let definition =
+        Definition.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Definition") in
+      let actionThreshold =
+        ActionThreshold.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ActionThreshold") in
+      let actionType =
+        ActionType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ActionType") in
+      let notificationType =
+        NotificationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NotificationType") in
+      let budgetName =
+        BudgetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ?resourceTags ~subscribers ~approvalModel ~executionRoleArn
+        ~definition ~actionThreshold ~actionType ~notificationType
+        ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceTags =
+        field_map json__ "ResourceTags" ResourceTagList.of_json in
+      let subscribers =
+        field_map_exn json__ "Subscribers" Subscribers.of_json in
+      let approvalModel =
+        field_map_exn json__ "ApprovalModel" ApprovalModel.of_json in
+      let executionRoleArn =
+        field_map_exn json__ "ExecutionRoleArn" RoleArn.of_json in
+      let definition = field_map_exn json__ "Definition" Definition.of_json in
+      let actionThreshold =
+        field_map_exn json__ "ActionThreshold" ActionThreshold.of_json in
+      let actionType = field_map_exn json__ "ActionType" ActionType.of_json in
+      let notificationType =
+        field_map_exn json__ "NotificationType" NotificationType.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ?resourceTags ~subscribers ~approvalModel ~executionRoleArn
+        ~definition ~actionThreshold ~actionType ~notificationType
+        ~budgetName ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a budget action."]
+module ThrottlingException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The number of API requests has exceeded the maximum allowed API request throttling limit for the account."]
+module ServiceQuotaExceededException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "You've reached a Service Quota limit on this resource."]
+module NotFoundException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "We can\226\128\153t locate the resource that you specified."]
+module InvalidParameterException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An error on the client occurred. Typically, the cause is an invalid input value."]
+module InternalErrorException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An error on the server occurred during the processing of your request. Try again later."]
+module DuplicateRecordException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The budget name already exists. Budget names must be unique within an account."]
+module CreationLimitExceededException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "You've exceeded the notification or subscriber limit."]
+module CreateBudgetActionResponse =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t option ;
+      budgetName: BudgetName.t option ;
+      actionId: ActionId.t option
+        [@ocaml.doc
+          "A system-generated universally unique identifier (UUID) for the action."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `CreationLimitExceededException of CreationLimitExceededException.t 
+      | `DuplicateRecordException of DuplicateRecordException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accountId =
+      fun ?budgetName ->
+        fun ?actionId -> fun () -> { accountId; budgetName; actionId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "CreationLimitExceededException" ->
+          `CreationLimitExceededException
+            (CreationLimitExceededException.of_json json)
+      | "DuplicateRecordException" ->
+          `DuplicateRecordException (DuplicateRecordException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "CreationLimitExceededException" ->
+          `CreationLimitExceededException
+            (CreationLimitExceededException.of_xml xml)
+      | "DuplicateRecordException" ->
+          `DuplicateRecordException (DuplicateRecordException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `CreationLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CreationLimitExceededException"));
+            ("details", (CreationLimitExceededException.to_json e))]
+      | `DuplicateRecordException e ->
+          `Assoc
+            [("error", (`String "DuplicateRecordException"));
+            ("details", (DuplicateRecordException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("BudgetName", (Option.map x.budgetName ~f:BudgetName.to_value));
+        ("ActionId", (Option.map x.actionId ~f:ActionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let actionId =
+        (Option.map ~f:ActionId.of_xml) (Xml.child xml_arg0 "ActionId") in
+      let budgetName =
+        (Option.map ~f:BudgetName.of_xml) (Xml.child xml_arg0 "BudgetName") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ?actionId ?budgetName ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let actionId = field_map json__ "ActionId" ActionId.of_json in
+      let budgetName = field_map json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?actionId ?budgetName ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a budget action."]
 module NotificationWithSubscribers =
   struct
     type nonrec t =
@@ -2176,135 +3765,553 @@ module NotificationWithSubscribers =
           (Xml.child_exn ~context:context_ xml_arg0 "Notification") in
       make ~subscribers ~notification ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subscribers = field_map_exn json "Subscribers" Subscribers.of_json in
+    let of_json json__ =
+      let subscribers =
+        field_map_exn json__ "Subscribers" Subscribers.of_json in
       let notification =
-        field_map_exn json "Notification" Notification.of_json in
+        field_map_exn json__ "Notification" Notification.of_json in
       make ~subscribers ~notification ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A notification with subscribers. A notification can have one SNS subscriber and up to 10 email subscribers, for a total of 11 subscribers."]
-module AccessDeniedException =
+module NotificationWithSubscribersList =
   struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "You are not authorized to use this operation with the given parameters."]
-module DuplicateRecordException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The budget name already exists. Budget names must be unique within an account."]
-module InternalErrorException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An error on the server occurred during the processing of your request. Try again later."]
-module InvalidParameterException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An error on the client occurred. Typically, the cause is an invalid input value."]
-module NotFoundException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "We can\226\128\153t locate the resource that you specified."]
-module AccountId =
-  struct
-    type nonrec t = string[@@ocaml.doc
-                            "The account ID of the user. It's a 12-digit number."]
-    let context_ = "AccountId"
+    type nonrec t = NotificationWithSubscribers.t list
     let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:12) >>=
-             (fun () ->
-                (check_string_max i ~max:12) >>=
-                  (fun () -> check_pattern i ~pattern:"\\d{12}")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+      let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NotificationWithSubscribers.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AccountId" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The account ID of the user. It's a 12-digit number."]
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NotificationWithSubscribers.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NotificationWithSubscribersList"
+        ~of_json:NotificationWithSubscribers.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CreateBudgetRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t
+        [@ocaml.doc "The accountId that is associated with the budget."];
+      budget: Budget.t
+        [@ocaml.doc "The budget object that you want to create."];
+      notificationsWithSubscribers: NotificationWithSubscribersList.t option
+        [@ocaml.doc
+          "A notification that you want to associate with a budget. A budget can have up to five notifications, and each notification can have one SNS subscriber and up to 10 email subscribers. If you include notifications and subscribers in your CreateBudget call, Amazon Web Services creates the notifications and subscribers for you."];
+      resourceTags: ResourceTagList.t option
+        [@ocaml.doc
+          "An optional list of tags to associate with the specified budget. Each tag consists of a key and a value, and each key must be unique for the resource."]}
+    let context_ = "CreateBudgetRequest"
+    let make ?notificationsWithSubscribers =
+      fun ?resourceTags ->
+        fun ~accountId ->
+          fun ~budget ->
+            fun () ->
+              { notificationsWithSubscribers; resourceTags; accountId; budget
+              }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("Budget", (Some (Budget.to_value x.budget)));
+        ("NotificationsWithSubscribers",
+          (Option.map x.notificationsWithSubscribers
+             ~f:NotificationWithSubscribersList.to_value));
+        ("ResourceTags",
+          (Option.map x.resourceTags ~f:ResourceTagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceTags =
+        (Option.map ~f:ResourceTagList.of_xml)
+          (Xml.child xml_arg0 "ResourceTags") in
+      let notificationsWithSubscribers =
+        (Option.map ~f:NotificationWithSubscribersList.of_xml)
+          (Xml.child xml_arg0 "NotificationsWithSubscribers") in
+      let budget =
+        Budget.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Budget") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ?resourceTags ?notificationsWithSubscribers ~budget ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceTags =
+        field_map json__ "ResourceTags" ResourceTagList.of_json in
+      let notificationsWithSubscribers =
+        field_map json__ "NotificationsWithSubscribers"
+          NotificationWithSubscribersList.of_json in
+      let budget = field_map_exn json__ "Budget" Budget.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ?resourceTags ?notificationsWithSubscribers ~budget ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Request of CreateBudget"]
+module CreateBudgetResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `BillingViewHealthStatusException of
+          BillingViewHealthStatusException.t 
+      | `CreationLimitExceededException of CreationLimitExceededException.t 
+      | `DuplicateRecordException of DuplicateRecordException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_json json)
+      | "CreationLimitExceededException" ->
+          `CreationLimitExceededException
+            (CreationLimitExceededException.of_json json)
+      | "DuplicateRecordException" ->
+          `DuplicateRecordException (DuplicateRecordException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_xml xml)
+      | "CreationLimitExceededException" ->
+          `CreationLimitExceededException
+            (CreationLimitExceededException.of_xml xml)
+      | "DuplicateRecordException" ->
+          `DuplicateRecordException (DuplicateRecordException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `BillingViewHealthStatusException e ->
+          `Assoc
+            [("error", (`String "BillingViewHealthStatusException"));
+            ("details", (BillingViewHealthStatusException.to_json e))]
+      | `CreationLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CreationLimitExceededException"));
+            ("details", (CreationLimitExceededException.to_json e))]
+      | `DuplicateRecordException e ->
+          `Assoc
+            [("error", (`String "DuplicateRecordException"));
+            ("details", (DuplicateRecordException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Response of CreateBudget"]
+module CreateNotificationRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t
+        [@ocaml.doc
+          "The accountId that is associated with the budget that you want to create a notification for."];
+      budgetName: BudgetName.t
+        [@ocaml.doc
+          "The name of the budget that you want Amazon Web Services to notify you about. Budget names must be unique within an account."];
+      notification: Notification.t
+        [@ocaml.doc "The notification that you want to create."];
+      subscribers: Subscribers.t
+        [@ocaml.doc
+          "A list of subscribers that you want to associate with the notification. Each notification can have one SNS subscriber and up to 10 email subscribers."]}
+    let context_ = "CreateNotificationRequest"
+    let make ~accountId =
+      fun ~budgetName ->
+        fun ~notification ->
+          fun ~subscribers ->
+            fun () -> { accountId; budgetName; notification; subscribers }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
+        ("Notification", (Some (Notification.to_value x.notification)));
+        ("Subscribers", (Some (Subscribers.to_value x.subscribers)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subscribers =
+        Subscribers.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Subscribers") in
+      let notification =
+        Notification.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Notification") in
+      let budgetName =
+        BudgetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ~subscribers ~notification ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subscribers =
+        field_map_exn json__ "Subscribers" Subscribers.of_json in
+      let notification =
+        field_map_exn json__ "Notification" Notification.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ~subscribers ~notification ~budgetName ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Request of CreateNotification"]
+module CreateNotificationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `CreationLimitExceededException of CreationLimitExceededException.t 
+      | `DuplicateRecordException of DuplicateRecordException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "CreationLimitExceededException" ->
+          `CreationLimitExceededException
+            (CreationLimitExceededException.of_json json)
+      | "DuplicateRecordException" ->
+          `DuplicateRecordException (DuplicateRecordException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "CreationLimitExceededException" ->
+          `CreationLimitExceededException
+            (CreationLimitExceededException.of_xml xml)
+      | "DuplicateRecordException" ->
+          `DuplicateRecordException (DuplicateRecordException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `CreationLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CreationLimitExceededException"));
+            ("details", (CreationLimitExceededException.to_json e))]
+      | `DuplicateRecordException e ->
+          `Assoc
+            [("error", (`String "DuplicateRecordException"));
+            ("details", (DuplicateRecordException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Response of CreateNotification"]
+module CreateSubscriberRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t
+        [@ocaml.doc
+          "The accountId that is associated with the budget that you want to create a subscriber for."];
+      budgetName: BudgetName.t
+        [@ocaml.doc
+          "The name of the budget that you want to subscribe to. Budget names must be unique within an account."];
+      notification: Notification.t
+        [@ocaml.doc
+          "The notification that you want to create a subscriber for."];
+      subscriber: Subscriber.t
+        [@ocaml.doc
+          "The subscriber that you want to associate with a budget notification."]}
+    let context_ = "CreateSubscriberRequest"
+    let make ~accountId =
+      fun ~budgetName ->
+        fun ~notification ->
+          fun ~subscriber ->
+            fun () -> { accountId; budgetName; notification; subscriber }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
+        ("Notification", (Some (Notification.to_value x.notification)));
+        ("Subscriber", (Some (Subscriber.to_value x.subscriber)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subscriber =
+        Subscriber.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Subscriber") in
+      let notification =
+        Notification.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Notification") in
+      let budgetName =
+        BudgetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ~subscriber ~notification ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subscriber = field_map_exn json__ "Subscriber" Subscriber.of_json in
+      let notification =
+        field_map_exn json__ "Notification" Notification.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ~subscriber ~notification ~budgetName ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Request of CreateSubscriber"]
+module CreateSubscriberResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `CreationLimitExceededException of CreationLimitExceededException.t 
+      | `DuplicateRecordException of DuplicateRecordException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "CreationLimitExceededException" ->
+          `CreationLimitExceededException
+            (CreationLimitExceededException.of_json json)
+      | "DuplicateRecordException" ->
+          `DuplicateRecordException (DuplicateRecordException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "CreationLimitExceededException" ->
+          `CreationLimitExceededException
+            (CreationLimitExceededException.of_xml xml)
+      | "DuplicateRecordException" ->
+          `DuplicateRecordException (DuplicateRecordException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `CreationLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CreationLimitExceededException"));
+            ("details", (CreationLimitExceededException.to_json e))]
+      | `DuplicateRecordException e ->
+          `Assoc
+            [("error", (`String "DuplicateRecordException"));
+            ("details", (DuplicateRecordException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Response of CreateSubscriber"]
+module DeleteBudgetActionRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t ;
+      budgetName: BudgetName.t ;
+      actionId: ActionId.t
+        [@ocaml.doc
+          "A system-generated universally unique identifier (UUID) for the action."]}
+    let context_ = "DeleteBudgetActionRequest"
+    let make ~accountId =
+      fun ~budgetName ->
+        fun ~actionId -> fun () -> { accountId; budgetName; actionId }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
+        ("ActionId", (Some (ActionId.to_value x.actionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let actionId =
+        ActionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ActionId") in
+      let budgetName =
+        BudgetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ~actionId ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let actionId = field_map_exn json__ "ActionId" ActionId.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ~actionId ~budgetName ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a budget action."]
 module ResourceLockedException =
   struct
     type nonrec t = {
@@ -2319,12 +4326,2089 @@ module ResourceLockedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request was received and recognized by the server, but the server rejected that particular method for the requested resource."]
+module DeleteBudgetActionResponse =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t option ;
+      budgetName: BudgetName.t option ;
+      action: Action.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ResourceLockedException of ResourceLockedException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accountId =
+      fun ?budgetName ->
+        fun ?action -> fun () -> { accountId; budgetName; action }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ResourceLockedException" ->
+          `ResourceLockedException (ResourceLockedException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ResourceLockedException" ->
+          `ResourceLockedException (ResourceLockedException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ResourceLockedException e ->
+          `Assoc
+            [("error", (`String "ResourceLockedException"));
+            ("details", (ResourceLockedException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("BudgetName", (Option.map x.budgetName ~f:BudgetName.to_value));
+        ("Action", (Option.map x.action ~f:Action.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let action =
+        (Option.map ~f:Action.of_xml) (Xml.child xml_arg0 "Action") in
+      let budgetName =
+        (Option.map ~f:BudgetName.of_xml) (Xml.child xml_arg0 "BudgetName") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ?action ?budgetName ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let action = field_map json__ "Action" Action.of_json in
+      let budgetName = field_map json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?action ?budgetName ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a budget action."]
+module DeleteBudgetRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t
+        [@ocaml.doc
+          "The accountId that is associated with the budget that you want to delete."];
+      budgetName: BudgetName.t
+        [@ocaml.doc "The name of the budget that you want to delete."]}
+    let context_ = "DeleteBudgetRequest"
+    let make ~accountId =
+      fun ~budgetName -> fun () -> { accountId; budgetName }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("BudgetName", (Some (BudgetName.to_value x.budgetName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let budgetName =
+        BudgetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ~budgetName ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Request of DeleteBudget"]
+module DeleteBudgetResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Response of DeleteBudget"]
+module DeleteNotificationRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t
+        [@ocaml.doc
+          "The accountId that is associated with the budget whose notification you want to delete."];
+      budgetName: BudgetName.t
+        [@ocaml.doc
+          "The name of the budget whose notification you want to delete."];
+      notification: Notification.t
+        [@ocaml.doc "The notification that you want to delete."]}
+    let context_ = "DeleteNotificationRequest"
+    let make ~accountId =
+      fun ~budgetName ->
+        fun ~notification ->
+          fun () -> { accountId; budgetName; notification }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
+        ("Notification", (Some (Notification.to_value x.notification)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let notification =
+        Notification.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Notification") in
+      let budgetName =
+        BudgetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ~notification ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notification =
+        field_map_exn json__ "Notification" Notification.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ~notification ~budgetName ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Request of DeleteNotification"]
+module DeleteNotificationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Response of DeleteNotification"]
+module DeleteSubscriberRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t
+        [@ocaml.doc
+          "The accountId that is associated with the budget whose subscriber you want to delete."];
+      budgetName: BudgetName.t
+        [@ocaml.doc
+          "The name of the budget whose subscriber you want to delete."];
+      notification: Notification.t
+        [@ocaml.doc "The notification whose subscriber you want to delete."];
+      subscriber: Subscriber.t
+        [@ocaml.doc "The subscriber that you want to delete."]}
+    let context_ = "DeleteSubscriberRequest"
+    let make ~accountId =
+      fun ~budgetName ->
+        fun ~notification ->
+          fun ~subscriber ->
+            fun () -> { accountId; budgetName; notification; subscriber }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
+        ("Notification", (Some (Notification.to_value x.notification)));
+        ("Subscriber", (Some (Subscriber.to_value x.subscriber)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subscriber =
+        Subscriber.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Subscriber") in
+      let notification =
+        Notification.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Notification") in
+      let budgetName =
+        BudgetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ~subscriber ~notification ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subscriber = field_map_exn json__ "Subscriber" Subscriber.of_json in
+      let notification =
+        field_map_exn json__ "Notification" Notification.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ~subscriber ~notification ~budgetName ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Request of DeleteSubscriber"]
+module DeleteSubscriberResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Response of DeleteSubscriber"]
+module MaxResults =
+  struct
+    type nonrec t = int[@@ocaml.doc
+                         "An integer that represents how many entries a paginated response contains. The maximum is 100."]
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "An integer that represents how many entries a paginated response contains. The maximum is 100."]
+module DescribeBudgetActionHistoriesRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t ;
+      budgetName: BudgetName.t ;
+      actionId: ActionId.t
+        [@ocaml.doc
+          "A system-generated universally unique identifier (UUID) for the action."];
+      timePeriod: TimePeriod.t option ;
+      maxResults: MaxResults.t option ;
+      nextToken: GenericString.t option }
+    let context_ = "DescribeBudgetActionHistoriesRequest"
+    let make ?timePeriod =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~accountId ->
+            fun ~budgetName ->
+              fun ~actionId ->
+                fun () ->
+                  {
+                    timePeriod;
+                    maxResults;
+                    nextToken;
+                    accountId;
+                    budgetName;
+                    actionId
+                  }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
+        ("ActionId", (Some (ActionId.to_value x.actionId)));
+        ("TimePeriod", (Option.map x.timePeriod ~f:TimePeriod.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let timePeriod =
+        (Option.map ~f:TimePeriod.of_xml) (Xml.child xml_arg0 "TimePeriod") in
+      let actionId =
+        ActionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ActionId") in
+      let budgetName =
+        BudgetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ?nextToken ?maxResults ?timePeriod ~actionId ~budgetName
+        ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let timePeriod = field_map json__ "TimePeriod" TimePeriod.of_json in
+      let actionId = field_map_exn json__ "ActionId" ActionId.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ?nextToken ?maxResults ?timePeriod ~actionId ~budgetName
+        ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a budget action history detail."]
+module InvalidNextTokenException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The pagination token is invalid."]
+module DescribeBudgetActionHistoriesResponse =
+  struct
+    type nonrec t =
+      {
+      actionHistories: ActionHistories.t option
+        [@ocaml.doc "The historical record of the budget action resource."];
+      nextToken: GenericString.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?actionHistories =
+      fun ?nextToken -> fun () -> { actionHistories; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ActionHistories",
+           (Option.map x.actionHistories ~f:ActionHistories.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let actionHistories =
+        (Option.map ~f:ActionHistories.of_xml)
+          (Xml.child xml_arg0 "ActionHistories") in
+      make ?nextToken ?actionHistories ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let actionHistories =
+        field_map json__ "ActionHistories" ActionHistories.of_json in
+      make ?nextToken ?actionHistories ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a budget action history detail."]
+module DescribeBudgetActionRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t ;
+      budgetName: BudgetName.t ;
+      actionId: ActionId.t
+        [@ocaml.doc
+          "A system-generated universally unique identifier (UUID) for the action."]}
+    let context_ = "DescribeBudgetActionRequest"
+    let make ~accountId =
+      fun ~budgetName ->
+        fun ~actionId -> fun () -> { accountId; budgetName; actionId }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
+        ("ActionId", (Some (ActionId.to_value x.actionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let actionId =
+        ActionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ActionId") in
+      let budgetName =
+        BudgetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ~actionId ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let actionId = field_map_exn json__ "ActionId" ActionId.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ~actionId ~budgetName ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a budget action detail."]
+module DescribeBudgetActionResponse =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t option ;
+      budgetName: BudgetName.t option ;
+      action: Action.t option [@ocaml.doc "A budget action resource."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accountId =
+      fun ?budgetName ->
+        fun ?action -> fun () -> { accountId; budgetName; action }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("BudgetName", (Option.map x.budgetName ~f:BudgetName.to_value));
+        ("Action", (Option.map x.action ~f:Action.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let action =
+        (Option.map ~f:Action.of_xml) (Xml.child xml_arg0 "Action") in
+      let budgetName =
+        (Option.map ~f:BudgetName.of_xml) (Xml.child xml_arg0 "BudgetName") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ?action ?budgetName ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let action = field_map json__ "Action" Action.of_json in
+      let budgetName = field_map json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?action ?budgetName ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a budget action detail."]
+module DescribeBudgetActionsForAccountRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t ;
+      maxResults: MaxResults.t option ;
+      nextToken: GenericString.t option }
+    let context_ = "DescribeBudgetActionsForAccountRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~accountId -> fun () -> { maxResults; nextToken; accountId }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ?nextToken ?maxResults ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ?nextToken ?maxResults ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes all of the budget actions for an account."]
+module DescribeBudgetActionsForAccountResponse =
+  struct
+    type nonrec t =
+      {
+      actions: Actions.t option
+        [@ocaml.doc "A list of the budget action resources information."];
+      nextToken: GenericString.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?actions = fun ?nextToken -> fun () -> { actions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Actions", (Option.map x.actions ~f:Actions.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let actions =
+        (Option.map ~f:Actions.of_xml) (Xml.child xml_arg0 "Actions") in
+      make ?nextToken ?actions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let actions = field_map json__ "Actions" Actions.of_json in
+      make ?nextToken ?actions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes all of the budget actions for an account."]
+module DescribeBudgetActionsForBudgetRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t ;
+      budgetName: BudgetName.t ;
+      maxResults: MaxResults.t option ;
+      nextToken: GenericString.t option }
+    let context_ = "DescribeBudgetActionsForBudgetRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~accountId ->
+          fun ~budgetName ->
+            fun () -> { maxResults; nextToken; accountId; budgetName }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let budgetName =
+        BudgetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ?nextToken ?maxResults ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ?nextToken ?maxResults ~budgetName ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes all of the budget actions for a budget."]
+module DescribeBudgetActionsForBudgetResponse =
+  struct
+    type nonrec t =
+      {
+      actions: Actions.t option
+        [@ocaml.doc "A list of the budget action resources information."];
+      nextToken: GenericString.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?actions = fun ?nextToken -> fun () -> { actions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Actions", (Option.map x.actions ~f:Actions.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let actions =
+        (Option.map ~f:Actions.of_xml) (Xml.child xml_arg0 "Actions") in
+      make ?nextToken ?actions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let actions = field_map json__ "Actions" Actions.of_json in
+      make ?nextToken ?actions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes all of the budget actions for a budget."]
+module MaxResultsBudgetNotifications =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResultsBudgetNotifications"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module DescribeBudgetNotificationsForAccountRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t ;
+      maxResults: MaxResultsBudgetNotifications.t option
+        [@ocaml.doc
+          "An integer that represents how many budgets a paginated response contains. The default is 50."];
+      nextToken: GenericString.t option }
+    let context_ = "DescribeBudgetNotificationsForAccountRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~accountId -> fun () -> { maxResults; nextToken; accountId }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxResultsBudgetNotifications.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResultsBudgetNotifications.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ?nextToken ?maxResults ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsBudgetNotifications.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ?nextToken ?maxResults ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the budget names and notifications that are associated with an account."]
+module ExpiredNextTokenException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The pagination token expired."]
+module DescribeBudgetNotificationsForAccountResponse =
+  struct
+    type nonrec t =
+      {
+      budgetNotificationsForAccount:
+        BudgetNotificationsForAccountList.t option
+        [@ocaml.doc
+          "A list of budget names and associated notifications for an account."];
+      nextToken: GenericString.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ExpiredNextTokenException of ExpiredNextTokenException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?budgetNotificationsForAccount =
+      fun ?nextToken ->
+        fun () -> { budgetNotificationsForAccount; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ExpiredNextTokenException" ->
+          `ExpiredNextTokenException (ExpiredNextTokenException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ExpiredNextTokenException" ->
+          `ExpiredNextTokenException (ExpiredNextTokenException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ExpiredNextTokenException e ->
+          `Assoc
+            [("error", (`String "ExpiredNextTokenException"));
+            ("details", (ExpiredNextTokenException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("BudgetNotificationsForAccount",
+           (Option.map x.budgetNotificationsForAccount
+              ~f:BudgetNotificationsForAccountList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let budgetNotificationsForAccount =
+        (Option.map ~f:BudgetNotificationsForAccountList.of_xml)
+          (Xml.child xml_arg0 "BudgetNotificationsForAccount") in
+      make ?nextToken ?budgetNotificationsForAccount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let budgetNotificationsForAccount =
+        field_map json__ "BudgetNotificationsForAccount"
+          BudgetNotificationsForAccountList.of_json in
+      make ?nextToken ?budgetNotificationsForAccount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the budget names and notifications that are associated with an account."]
+module DescribeBudgetPerformanceHistoryRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t ;
+      budgetName: BudgetName.t ;
+      timePeriod: TimePeriod.t option
+        [@ocaml.doc
+          "Retrieves how often the budget went into an ALARM state for the specified time period."];
+      maxResults: MaxResults.t option ;
+      nextToken: GenericString.t option }
+    let context_ = "DescribeBudgetPerformanceHistoryRequest"
+    let make ?timePeriod =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~accountId ->
+            fun ~budgetName ->
+              fun () ->
+                { timePeriod; maxResults; nextToken; accountId; budgetName }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
+        ("TimePeriod", (Option.map x.timePeriod ~f:TimePeriod.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let timePeriod =
+        (Option.map ~f:TimePeriod.of_xml) (Xml.child xml_arg0 "TimePeriod") in
+      let budgetName =
+        BudgetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ?nextToken ?maxResults ?timePeriod ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let timePeriod = field_map json__ "TimePeriod" TimePeriod.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ?nextToken ?maxResults ?timePeriod ~budgetName ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the history for DAILY, MONTHLY, and QUARTERLY budgets. Budget history isn't available for ANNUAL budgets."]
+module DescribeBudgetPerformanceHistoryResponse =
+  struct
+    type nonrec t =
+      {
+      budgetPerformanceHistory: BudgetPerformanceHistory.t option
+        [@ocaml.doc
+          "The history of how often the budget has gone into an ALARM state. For DAILY budgets, the history saves the state of the budget for the last 60 days. For MONTHLY budgets, the history saves the state of the budget for the current month plus the last 12 months. For QUARTERLY budgets, the history saves the state of the budget for the last four quarters."];
+      nextToken: GenericString.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `BillingViewHealthStatusException of
+          BillingViewHealthStatusException.t 
+      | `ExpiredNextTokenException of ExpiredNextTokenException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?budgetPerformanceHistory =
+      fun ?nextToken -> fun () -> { budgetPerformanceHistory; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_json json)
+      | "ExpiredNextTokenException" ->
+          `ExpiredNextTokenException (ExpiredNextTokenException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_xml xml)
+      | "ExpiredNextTokenException" ->
+          `ExpiredNextTokenException (ExpiredNextTokenException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `BillingViewHealthStatusException e ->
+          `Assoc
+            [("error", (`String "BillingViewHealthStatusException"));
+            ("details", (BillingViewHealthStatusException.to_json e))]
+      | `ExpiredNextTokenException e ->
+          `Assoc
+            [("error", (`String "ExpiredNextTokenException"));
+            ("details", (ExpiredNextTokenException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("BudgetPerformanceHistory",
+           (Option.map x.budgetPerformanceHistory
+              ~f:BudgetPerformanceHistory.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let budgetPerformanceHistory =
+        (Option.map ~f:BudgetPerformanceHistory.of_xml)
+          (Xml.child xml_arg0 "BudgetPerformanceHistory") in
+      make ?nextToken ?budgetPerformanceHistory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let budgetPerformanceHistory =
+        field_map json__ "BudgetPerformanceHistory"
+          BudgetPerformanceHistory.of_json in
+      make ?nextToken ?budgetPerformanceHistory ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the history for DAILY, MONTHLY, and QUARTERLY budgets. Budget history isn't available for ANNUAL budgets."]
+module DescribeBudgetRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t
+        [@ocaml.doc
+          "The accountId that is associated with the budget that you want a description of."];
+      budgetName: BudgetName.t
+        [@ocaml.doc "The name of the budget that you want a description of."];
+      showFilterExpression: NullableBoolean.t option
+        [@ocaml.doc
+          "Specifies whether the response includes the filter expression associated with the budget. By showing the filter expression, you can see detailed filtering logic applied to the budget, such as Amazon Web Services services or tags that are being tracked."]}
+    let context_ = "DescribeBudgetRequest"
+    let make ?showFilterExpression =
+      fun ~accountId ->
+        fun ~budgetName ->
+          fun () -> { showFilterExpression; accountId; budgetName }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
+        ("ShowFilterExpression",
+          (Option.map x.showFilterExpression ~f:NullableBoolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let showFilterExpression =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "ShowFilterExpression") in
+      let budgetName =
+        BudgetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ?showFilterExpression ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let showFilterExpression =
+        field_map json__ "ShowFilterExpression" NullableBoolean.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ?showFilterExpression ~budgetName ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Request of DescribeBudget"]
+module DescribeBudgetResponse =
+  struct
+    type nonrec t =
+      {
+      budget: Budget.t option [@ocaml.doc "The description of the budget."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?budget = fun () -> { budget }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Budget", (Option.map x.budget ~f:Budget.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let budget =
+        (Option.map ~f:Budget.of_xml) (Xml.child xml_arg0 "Budget") in
+      make ?budget ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let budget = field_map json__ "Budget" Budget.of_json in
+      make ?budget ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Response of DescribeBudget"]
+module MaxResultsDescribeBudgets =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResultsDescribeBudgets"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module DescribeBudgetsRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t
+        [@ocaml.doc
+          "The accountId that is associated with the budgets that you want to describe."];
+      maxResults: MaxResultsDescribeBudgets.t option
+        [@ocaml.doc
+          "An integer that represents how many budgets a paginated response contains. The default is 100."];
+      nextToken: GenericString.t option
+        [@ocaml.doc
+          "The pagination token that you include in your request to indicate the next set of results that you want to retrieve."];
+      showFilterExpression: NullableBoolean.t option
+        [@ocaml.doc
+          "Specifies whether the response includes the filter expression associated with the budgets. By showing the filter expression, you can see detailed filtering logic applied to the budgets, such as Amazon Web Services services or tags that are being tracked."]}
+    let context_ = "DescribeBudgetsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ?showFilterExpression ->
+          fun ~accountId ->
+            fun () ->
+              { maxResults; nextToken; showFilterExpression; accountId }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxResultsDescribeBudgets.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value));
+        ("ShowFilterExpression",
+          (Option.map x.showFilterExpression ~f:NullableBoolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let showFilterExpression =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "ShowFilterExpression") in
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResultsDescribeBudgets.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ?showFilterExpression ?nextToken ?maxResults ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let showFilterExpression =
+        field_map json__ "ShowFilterExpression" NullableBoolean.of_json in
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsDescribeBudgets.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ?showFilterExpression ?nextToken ?maxResults ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Request of DescribeBudgets"]
+module DescribeBudgetsResponse =
+  struct
+    type nonrec t =
+      {
+      budgets: Budgets.t option [@ocaml.doc "A list of budgets."];
+      nextToken: GenericString.t option
+        [@ocaml.doc
+          "The pagination token in the service response that indicates the next set of results that you can retrieve."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ExpiredNextTokenException of ExpiredNextTokenException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?budgets = fun ?nextToken -> fun () -> { budgets; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ExpiredNextTokenException" ->
+          `ExpiredNextTokenException (ExpiredNextTokenException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ExpiredNextTokenException" ->
+          `ExpiredNextTokenException (ExpiredNextTokenException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ExpiredNextTokenException e ->
+          `Assoc
+            [("error", (`String "ExpiredNextTokenException"));
+            ("details", (ExpiredNextTokenException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Budgets", (Option.map x.budgets ~f:Budgets.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let budgets =
+        (Option.map ~f:Budgets.of_xml) (Xml.child xml_arg0 "Budgets") in
+      make ?nextToken ?budgets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let budgets = field_map json__ "Budgets" Budgets.of_json in
+      make ?nextToken ?budgets ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Response of DescribeBudgets"]
+module DescribeNotificationsForBudgetRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t
+        [@ocaml.doc
+          "The accountId that is associated with the budget whose notifications you want descriptions of."];
+      budgetName: BudgetName.t
+        [@ocaml.doc
+          "The name of the budget whose notifications you want descriptions of."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "An optional integer that represents how many entries a paginated response contains."];
+      nextToken: GenericString.t option
+        [@ocaml.doc
+          "The pagination token that you include in your request to indicate the next set of results that you want to retrieve."]}
+    let context_ = "DescribeNotificationsForBudgetRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~accountId ->
+          fun ~budgetName ->
+            fun () -> { maxResults; nextToken; accountId; budgetName }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let budgetName =
+        BudgetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ?nextToken ?maxResults ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ?nextToken ?maxResults ~budgetName ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Request of DescribeNotificationsForBudget"]
+module DescribeNotificationsForBudgetResponse =
+  struct
+    type nonrec t =
+      {
+      notifications: Notifications.t option
+        [@ocaml.doc
+          "A list of notifications that are associated with a budget."];
+      nextToken: GenericString.t option
+        [@ocaml.doc
+          "The pagination token in the service response that indicates the next set of results that you can retrieve."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ExpiredNextTokenException of ExpiredNextTokenException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?notifications =
+      fun ?nextToken -> fun () -> { notifications; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ExpiredNextTokenException" ->
+          `ExpiredNextTokenException (ExpiredNextTokenException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ExpiredNextTokenException" ->
+          `ExpiredNextTokenException (ExpiredNextTokenException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ExpiredNextTokenException e ->
+          `Assoc
+            [("error", (`String "ExpiredNextTokenException"));
+            ("details", (ExpiredNextTokenException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Notifications",
+           (Option.map x.notifications ~f:Notifications.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let notifications =
+        (Option.map ~f:Notifications.of_xml)
+          (Xml.child xml_arg0 "Notifications") in
+      make ?nextToken ?notifications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let notifications =
+        field_map json__ "Notifications" Notifications.of_json in
+      make ?nextToken ?notifications ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Response of GetNotificationsForBudget"]
+module DescribeSubscribersForNotificationRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t
+        [@ocaml.doc
+          "The accountId that is associated with the budget whose subscribers you want descriptions of."];
+      budgetName: BudgetName.t
+        [@ocaml.doc
+          "The name of the budget whose subscribers you want descriptions of."];
+      notification: Notification.t
+        [@ocaml.doc "The notification whose subscribers you want to list."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "An optional integer that represents how many entries a paginated response contains."];
+      nextToken: GenericString.t option
+        [@ocaml.doc
+          "The pagination token that you include in your request to indicate the next set of results that you want to retrieve."]}
+    let context_ = "DescribeSubscribersForNotificationRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~accountId ->
+          fun ~budgetName ->
+            fun ~notification ->
+              fun () ->
+                { maxResults; nextToken; accountId; budgetName; notification
+                }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
+        ("Notification", (Some (Notification.to_value x.notification)));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let notification =
+        Notification.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Notification") in
+      let budgetName =
+        BudgetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ?nextToken ?maxResults ~notification ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let notification =
+        field_map_exn json__ "Notification" Notification.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ?nextToken ?maxResults ~notification ~budgetName ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Request of DescribeSubscribersForNotification"]
+module DescribeSubscribersForNotificationResponse =
+  struct
+    type nonrec t =
+      {
+      subscribers: Subscribers.t option
+        [@ocaml.doc
+          "A list of subscribers that are associated with a notification."];
+      nextToken: GenericString.t option
+        [@ocaml.doc
+          "The pagination token in the service response that indicates the next set of results that you can retrieve."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ExpiredNextTokenException of ExpiredNextTokenException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?subscribers =
+      fun ?nextToken -> fun () -> { subscribers; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ExpiredNextTokenException" ->
+          `ExpiredNextTokenException (ExpiredNextTokenException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ExpiredNextTokenException" ->
+          `ExpiredNextTokenException (ExpiredNextTokenException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ExpiredNextTokenException e ->
+          `Assoc
+            [("error", (`String "ExpiredNextTokenException"));
+            ("details", (ExpiredNextTokenException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Subscribers", (Option.map x.subscribers ~f:Subscribers.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let subscribers =
+        (Option.map ~f:Subscribers.of_xml) (Xml.child xml_arg0 "Subscribers") in
+      make ?nextToken ?subscribers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let subscribers = field_map json__ "Subscribers" Subscribers.of_json in
+      make ?nextToken ?subscribers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Response of DescribeSubscribersForNotification"]
 module ExecutionType =
   struct
     type nonrec t =
@@ -2356,706 +6440,76 @@ module ExecutionType =
     let of_json j = of_string (string_of_json ~kind:"ExecutionType" j)
     let to_json = simple_to_json to_value
   end
-module ExpiredNextTokenException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The pagination token expired."]
-module InvalidNextTokenException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The pagination token is invalid."]
-module MaxResults =
-  struct
-    type nonrec t = int[@@ocaml.doc
-                         "An integer that represents how many entries a paginated response contains. The maximum is 100."]
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc
-       "An integer that represents how many entries a paginated response contains. The maximum is 100."]
-module Budgets =
-  struct
-    type nonrec t = Budget.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Budget.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Budget.of_xml)
-    let of_json j = list_of_json ~kind:"Budgets" ~of_json:Budget.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module BudgetPerformanceHistory =
-  struct
-    type nonrec t =
-      {
-      budgetName: BudgetName.t option ;
-      budgetType: BudgetType.t option ;
-      costFilters: CostFilters.t option
-        [@ocaml.doc
-          "The history of the cost filters for a budget during the specified time period."];
-      costTypes: CostTypes.t option
-        [@ocaml.doc
-          "The history of the cost types for a budget during the specified time period."];
-      timeUnit: TimeUnit.t option ;
-      budgetedAndActualAmountsList: BudgetedAndActualAmountsList.t option
-        [@ocaml.doc
-          "A list of amounts of cost or usage that you created budgets for, which are compared to your actual costs or usage."]}
-    let make ?budgetName =
-      fun ?budgetType ->
-        fun ?costFilters ->
-          fun ?costTypes ->
-            fun ?timeUnit ->
-              fun ?budgetedAndActualAmountsList ->
-                fun () ->
-                  {
-                    budgetName;
-                    budgetType;
-                    costFilters;
-                    costTypes;
-                    timeUnit;
-                    budgetedAndActualAmountsList
-                  }
-    let to_value x =
-      structure_to_value
-        [("BudgetName", (Option.map x.budgetName ~f:BudgetName.to_value));
-        ("BudgetType", (Option.map x.budgetType ~f:BudgetType.to_value));
-        ("CostFilters", (Option.map x.costFilters ~f:CostFilters.to_value));
-        ("CostTypes", (Option.map x.costTypes ~f:CostTypes.to_value));
-        ("TimeUnit", (Option.map x.timeUnit ~f:TimeUnit.to_value));
-        ("BudgetedAndActualAmountsList",
-          (Option.map x.budgetedAndActualAmountsList
-             ~f:BudgetedAndActualAmountsList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let budgetedAndActualAmountsList =
-        (Option.map ~f:BudgetedAndActualAmountsList.of_xml)
-          (Xml.child xml_arg0 "BudgetedAndActualAmountsList") in
-      let timeUnit =
-        (Option.map ~f:TimeUnit.of_xml) (Xml.child xml_arg0 "TimeUnit") in
-      let costTypes =
-        (Option.map ~f:CostTypes.of_xml) (Xml.child xml_arg0 "CostTypes") in
-      let costFilters =
-        (Option.map ~f:CostFilters.of_xml) (Xml.child xml_arg0 "CostFilters") in
-      let budgetType =
-        (Option.map ~f:BudgetType.of_xml) (Xml.child xml_arg0 "BudgetType") in
-      let budgetName =
-        (Option.map ~f:BudgetName.of_xml) (Xml.child xml_arg0 "BudgetName") in
-      make ?budgetedAndActualAmountsList ?timeUnit ?costTypes ?costFilters
-        ?budgetType ?budgetName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let budgetedAndActualAmountsList =
-        field_map json "BudgetedAndActualAmountsList"
-          BudgetedAndActualAmountsList.of_json in
-      let timeUnit = field_map json "TimeUnit" TimeUnit.of_json in
-      let costTypes = field_map json "CostTypes" CostTypes.of_json in
-      let costFilters = field_map json "CostFilters" CostFilters.of_json in
-      let budgetType = field_map json "BudgetType" BudgetType.of_json in
-      let budgetName = field_map json "BudgetName" BudgetName.of_json in
-      make ?budgetedAndActualAmountsList ?timeUnit ?costTypes ?costFilters
-        ?budgetType ?budgetName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A history of the state of a budget at the end of the budget's specified time period."]
-module BudgetNotificationsForAccountList =
-  struct
-    type nonrec t = BudgetNotificationsForAccount.t list
-    let make i =
-      let open Result in ok_or_failwith (check_list_max i ~max:50); i
-    let to_value xs =
-      (xs |> (List.map ~f:BudgetNotificationsForAccount.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:BudgetNotificationsForAccount.of_xml)
-    let of_json j =
-      list_of_json ~kind:"BudgetNotificationsForAccountList"
-        ~of_json:BudgetNotificationsForAccount.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module MaxResultsBudgetNotifications =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxResultsBudgetNotifications"
-           xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module Actions =
-  struct
-    type nonrec t = Action.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:100) >>=
-             (fun () -> check_list_min i ~min:0));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:Action.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Action.of_xml)
-    let of_json j = list_of_json ~kind:"Actions" ~of_json:Action.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module ActionHistories =
-  struct
-    type nonrec t = ActionHistory.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:100) >>=
-             (fun () -> check_list_min i ~min:0));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:ActionHistory.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ActionHistory.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ActionHistories" ~of_json:ActionHistory.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module CreationLimitExceededException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "You've exceeded the notification or subscriber limit."]
-module NotificationWithSubscribersList =
-  struct
-    type nonrec t = NotificationWithSubscribers.t list
-    let make i =
-      let open Result in ok_or_failwith (check_list_max i ~max:10); i
-    let to_value xs =
-      (xs |> (List.map ~f:NotificationWithSubscribers.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:NotificationWithSubscribers.of_xml)
-    let of_json j =
-      list_of_json ~kind:"NotificationWithSubscribersList"
-        ~of_json:NotificationWithSubscribers.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module UpdateSubscriberResponse =
-  struct
-    type nonrec t = unit
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `DuplicateRecordException of DuplicateRecordException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "DuplicateRecordException" ->
-          `DuplicateRecordException (DuplicateRecordException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "DuplicateRecordException" ->
-          `DuplicateRecordException (DuplicateRecordException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `DuplicateRecordException e ->
-          `Assoc
-            [("error", (`String "DuplicateRecordException"));
-            ("details", (DuplicateRecordException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Response of UpdateSubscriber"]
-module UpdateSubscriberRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t
-        [@ocaml.doc
-          "The accountId that is associated with the budget whose subscriber you want to update."];
-      budgetName: BudgetName.t
-        [@ocaml.doc
-          "The name of the budget whose subscriber you want to update."];
-      notification: Notification.t
-        [@ocaml.doc "The notification whose subscriber you want to update."];
-      oldSubscriber: Subscriber.t
-        [@ocaml.doc
-          "The previous subscriber that is associated with a budget notification."];
-      newSubscriber: Subscriber.t
-        [@ocaml.doc
-          "The updated subscriber that is associated with a budget notification."]}
-    let context_ = "UpdateSubscriberRequest"
-    let make ~accountId =
-      fun ~budgetName ->
-        fun ~notification ->
-          fun ~oldSubscriber ->
-            fun ~newSubscriber ->
-              fun () ->
-                {
-                  accountId;
-                  budgetName;
-                  notification;
-                  oldSubscriber;
-                  newSubscriber
-                }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("Notification", (Some (Notification.to_value x.notification)));
-        ("OldSubscriber", (Some (Subscriber.to_value x.oldSubscriber)));
-        ("NewSubscriber", (Some (Subscriber.to_value x.newSubscriber)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let newSubscriber =
-        Subscriber.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "NewSubscriber") in
-      let oldSubscriber =
-        Subscriber.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OldSubscriber") in
-      let notification =
-        Notification.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Notification") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~newSubscriber ~oldSubscriber ~notification ~budgetName ~accountId
-        ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let newSubscriber =
-        field_map_exn json "NewSubscriber" Subscriber.of_json in
-      let oldSubscriber =
-        field_map_exn json "OldSubscriber" Subscriber.of_json in
-      let notification =
-        field_map_exn json "Notification" Notification.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~newSubscriber ~oldSubscriber ~notification ~budgetName ~accountId
-        ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Request of UpdateSubscriber"]
-module UpdateNotificationResponse =
-  struct
-    type nonrec t = unit
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `DuplicateRecordException of DuplicateRecordException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "DuplicateRecordException" ->
-          `DuplicateRecordException (DuplicateRecordException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "DuplicateRecordException" ->
-          `DuplicateRecordException (DuplicateRecordException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `DuplicateRecordException e ->
-          `Assoc
-            [("error", (`String "DuplicateRecordException"));
-            ("details", (DuplicateRecordException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Response of UpdateNotification"]
-module UpdateNotificationRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t
-        [@ocaml.doc
-          "The accountId that is associated with the budget whose notification you want to update."];
-      budgetName: BudgetName.t
-        [@ocaml.doc
-          "The name of the budget whose notification you want to update."];
-      oldNotification: Notification.t
-        [@ocaml.doc
-          "The previous notification that is associated with a budget."];
-      newNotification: Notification.t
-        [@ocaml.doc
-          "The updated notification to be associated with a budget."]}
-    let context_ = "UpdateNotificationRequest"
-    let make ~accountId =
-      fun ~budgetName ->
-        fun ~oldNotification ->
-          fun ~newNotification ->
-            fun () ->
-              { accountId; budgetName; oldNotification; newNotification }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("OldNotification", (Some (Notification.to_value x.oldNotification)));
-        ("NewNotification", (Some (Notification.to_value x.newNotification)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let newNotification =
-        Notification.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "NewNotification") in
-      let oldNotification =
-        Notification.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OldNotification") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~newNotification ~oldNotification ~budgetName ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let newNotification =
-        field_map_exn json "NewNotification" Notification.of_json in
-      let oldNotification =
-        field_map_exn json "OldNotification" Notification.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~newNotification ~oldNotification ~budgetName ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Request of UpdateNotification"]
-module UpdateBudgetResponse =
-  struct
-    type nonrec t = unit
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Response of UpdateBudget"]
-module UpdateBudgetRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t
-        [@ocaml.doc
-          "The accountId that is associated with the budget that you want to update."];
-      newBudget: Budget.t
-        [@ocaml.doc "The budget that you want to update your budget to."]}
-    let context_ = "UpdateBudgetRequest"
-    let make ~accountId =
-      fun ~newBudget -> fun () -> { accountId; newBudget }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("NewBudget", (Some (Budget.to_value x.newBudget)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let newBudget =
-        Budget.of_xml (Xml.child_exn ~context:context_ xml_arg0 "NewBudget") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~newBudget ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let newBudget = field_map_exn json "NewBudget" Budget.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~newBudget ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Request of UpdateBudget"]
-module UpdateBudgetActionResponse =
+module ExecuteBudgetActionRequest =
   struct
     type nonrec t =
       {
       accountId: AccountId.t ;
       budgetName: BudgetName.t ;
-      oldAction: Action.t
-        [@ocaml.doc "The previous action resource information."];
-      newAction: Action.t
-        [@ocaml.doc "The updated action resource information."]}
+      actionId: ActionId.t
+        [@ocaml.doc
+          "A system-generated universally unique identifier (UUID) for the action."];
+      executionType: ExecutionType.t [@ocaml.doc "The type of execution."]}
+    let context_ = "ExecuteBudgetActionRequest"
+    let make ~accountId =
+      fun ~budgetName ->
+        fun ~actionId ->
+          fun ~executionType ->
+            fun () -> { accountId; budgetName; actionId; executionType }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
+        ("ActionId", (Some (ActionId.to_value x.actionId)));
+        ("ExecutionType", (Some (ExecutionType.to_value x.executionType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let executionType =
+        ExecutionType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ExecutionType") in
+      let actionId =
+        ActionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ActionId") in
+      let budgetName =
+        BudgetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ~executionType ~actionId ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let executionType =
+        field_map_exn json__ "ExecutionType" ExecutionType.of_json in
+      let actionId = field_map_exn json__ "ActionId" ActionId.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ~executionType ~actionId ~budgetName ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Executes a budget action."]
+module ExecuteBudgetActionResponse =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t option ;
+      budgetName: BudgetName.t option ;
+      actionId: ActionId.t option
+        [@ocaml.doc
+          "A system-generated universally unique identifier (UUID) for the action."];
+      executionType: ExecutionType.t option
+        [@ocaml.doc "The type of execution."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalErrorException of InternalErrorException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `NotFoundException of NotFoundException.t 
       | `ResourceLockedException of ResourceLockedException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateBudgetActionResponse"
-    let make ~accountId =
-      fun ~budgetName ->
-        fun ~oldAction ->
-          fun ~newAction ->
-            fun () -> { accountId; budgetName; oldAction; newAction }
+    let make ?accountId =
+      fun ?budgetName ->
+        fun ?actionId ->
+          fun ?executionType ->
+            fun () -> { accountId; budgetName; actionId; executionType }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3068,6 +6522,8 @@ module UpdateBudgetActionResponse =
           `NotFoundException (NotFoundException.of_json json)
       | "ResourceLockedException" ->
           `ResourceLockedException (ResourceLockedException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3083,6 +6539,8 @@ module UpdateBudgetActionResponse =
           `NotFoundException (NotFoundException.of_xml xml)
       | "ResourceLockedException" ->
           `ResourceLockedException (ResourceLockedException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3107,6 +6565,10 @@ module UpdateBudgetActionResponse =
           `Assoc
             [("error", (`String "ResourceLockedException"));
             ("details", (ResourceLockedException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3114,32 +6576,409 @@ module UpdateBudgetActionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("OldAction", (Some (Action.to_value x.oldAction)));
-        ("NewAction", (Some (Action.to_value x.newAction)))]
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("BudgetName", (Option.map x.budgetName ~f:BudgetName.to_value));
+        ("ActionId", (Option.map x.actionId ~f:ActionId.to_value));
+        ("ExecutionType",
+          (Option.map x.executionType ~f:ExecutionType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let newAction =
-        Action.of_xml (Xml.child_exn ~context:context_ xml_arg0 "NewAction") in
-      let oldAction =
-        Action.of_xml (Xml.child_exn ~context:context_ xml_arg0 "OldAction") in
+      let executionType =
+        (Option.map ~f:ExecutionType.of_xml)
+          (Xml.child xml_arg0 "ExecutionType") in
+      let actionId =
+        (Option.map ~f:ActionId.of_xml) (Xml.child xml_arg0 "ActionId") in
       let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+        (Option.map ~f:BudgetName.of_xml) (Xml.child xml_arg0 "BudgetName") in
       let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~newAction ~oldAction ~budgetName ~accountId ()
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ?executionType ?actionId ?budgetName ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let newAction = field_map_exn json "NewAction" Action.of_json in
-      let oldAction = field_map_exn json "OldAction" Action.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~newAction ~oldAction ~budgetName ~accountId ()
+    let of_json json__ =
+      let executionType =
+        field_map json__ "ExecutionType" ExecutionType.of_json in
+      let actionId = field_map json__ "ActionId" ActionId.of_json in
+      let budgetName = field_map json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?executionType ?actionId ?budgetName ?accountId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates a budget action."]
+  end[@@ocaml.doc "Executes a budget action."]
+module ListTagsForResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc "The unique identifier for the resource."]}
+    let context_ = "ListTagsForResourceRequest"
+    let make ~resourceARN = fun () -> { resourceARN }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      make ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists tags associated with a budget or budget action resource."]
+module ListTagsForResourceResponse =
+  struct
+    type nonrec t =
+      {
+      resourceTags: ResourceTagList.t option
+        [@ocaml.doc "The tags associated with the resource."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceTags = fun () -> { resourceTags }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceTags",
+           (Option.map x.resourceTags ~f:ResourceTagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceTags =
+        (Option.map ~f:ResourceTagList.of_xml)
+          (Xml.child xml_arg0 "ResourceTags") in
+      make ?resourceTags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceTags =
+        field_map json__ "ResourceTags" ResourceTagList.of_json in
+      make ?resourceTags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists tags associated with a budget or budget action resource."]
+module ResourceTagKeyList =
+  struct
+    type nonrec t = ResourceTagKey.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceTagKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceTagKey.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceTagKeyList" ~of_json:ResourceTagKey.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module TagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc "The unique identifier for the resource."];
+      resourceTags: ResourceTagList.t
+        [@ocaml.doc "The tags associated with the resource."]}
+    let context_ = "TagResourceRequest"
+    let make ~resourceARN =
+      fun ~resourceTags -> fun () -> { resourceARN; resourceTags }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
+        ("ResourceTags", (Some (ResourceTagList.to_value x.resourceTags)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceTags =
+        ResourceTagList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceTags") in
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ~resourceTags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceTags =
+        field_map_exn json__ "ResourceTags" ResourceTagList.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      make ~resourceTags ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates tags for a budget or budget action resource."]
+module TagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates tags for a budget or budget action resource."]
+module UntagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc "The unique identifier for the resource."];
+      resourceTagKeys: ResourceTagKeyList.t
+        [@ocaml.doc "The key that's associated with the tag."]}
+    let context_ = "UntagResourceRequest"
+    let make ~resourceARN =
+      fun ~resourceTagKeys -> fun () -> { resourceARN; resourceTagKeys }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
+        ("ResourceTagKeys",
+          (Some (ResourceTagKeyList.to_value x.resourceTagKeys)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceTagKeys =
+        ResourceTagKeyList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceTagKeys") in
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ~resourceTagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceTagKeys =
+        field_map_exn json__ "ResourceTagKeys" ResourceTagKeyList.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      make ~resourceTagKeys ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes tags associated with a budget or budget action resource."]
+module UntagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes tags associated with a budget or budget action resource."]
 module UpdateBudgetActionRequest =
   struct
     type nonrec t =
@@ -3226,48 +7065,48 @@ module UpdateBudgetActionRequest =
         ?actionThreshold ?notificationType ~actionId ~budgetName ~accountId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subscribers = field_map json "Subscribers" Subscribers.of_json in
+    let of_json json__ =
+      let subscribers = field_map json__ "Subscribers" Subscribers.of_json in
       let approvalModel =
-        field_map json "ApprovalModel" ApprovalModel.of_json in
+        field_map json__ "ApprovalModel" ApprovalModel.of_json in
       let executionRoleArn =
-        field_map json "ExecutionRoleArn" RoleArn.of_json in
-      let definition = field_map json "Definition" Definition.of_json in
+        field_map json__ "ExecutionRoleArn" RoleArn.of_json in
+      let definition = field_map json__ "Definition" Definition.of_json in
       let actionThreshold =
-        field_map json "ActionThreshold" ActionThreshold.of_json in
+        field_map json__ "ActionThreshold" ActionThreshold.of_json in
       let notificationType =
-        field_map json "NotificationType" NotificationType.of_json in
-      let actionId = field_map_exn json "ActionId" ActionId.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
+        field_map json__ "NotificationType" NotificationType.of_json in
+      let actionId = field_map_exn json__ "ActionId" ActionId.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
       make ?subscribers ?approvalModel ?executionRoleArn ?definition
         ?actionThreshold ?notificationType ~actionId ~budgetName ~accountId
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a budget action."]
-module ExecuteBudgetActionResponse =
+module UpdateBudgetActionResponse =
   struct
     type nonrec t =
       {
-      accountId: AccountId.t ;
-      budgetName: BudgetName.t ;
-      actionId: ActionId.t
-        [@ocaml.doc
-          "A system-generated universally unique identifier (UUID) for the action."];
-      executionType: ExecutionType.t [@ocaml.doc "The type of execution."]}
+      accountId: AccountId.t option ;
+      budgetName: BudgetName.t option ;
+      oldAction: Action.t option
+        [@ocaml.doc "The previous action resource information."];
+      newAction: Action.t option
+        [@ocaml.doc "The updated action resource information."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalErrorException of InternalErrorException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `NotFoundException of NotFoundException.t 
       | `ResourceLockedException of ResourceLockedException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ExecuteBudgetActionResponse"
-    let make ~accountId =
-      fun ~budgetName ->
-        fun ~actionId ->
-          fun ~executionType ->
-            fun () -> { accountId; budgetName; actionId; executionType }
+    let make ?accountId =
+      fun ?budgetName ->
+        fun ?oldAction ->
+          fun ?newAction ->
+            fun () -> { accountId; budgetName; oldAction; newAction }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3280,6 +7119,8 @@ module ExecuteBudgetActionResponse =
           `NotFoundException (NotFoundException.of_json json)
       | "ResourceLockedException" ->
           `ResourceLockedException (ResourceLockedException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3295,6 +7136,8 @@ module ExecuteBudgetActionResponse =
           `NotFoundException (NotFoundException.of_xml xml)
       | "ResourceLockedException" ->
           `ResourceLockedException (ResourceLockedException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3319,6 +7162,10 @@ module ExecuteBudgetActionResponse =
           `Assoc
             [("error", (`String "ResourceLockedException"));
             ("details", (ResourceLockedException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3326,114 +7173,93 @@ module ExecuteBudgetActionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("ActionId", (Some (ActionId.to_value x.actionId)));
-        ("ExecutionType", (Some (ExecutionType.to_value x.executionType)))]
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("BudgetName", (Option.map x.budgetName ~f:BudgetName.to_value));
+        ("OldAction", (Option.map x.oldAction ~f:Action.to_value));
+        ("NewAction", (Option.map x.newAction ~f:Action.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let executionType =
-        ExecutionType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ExecutionType") in
-      let actionId =
-        ActionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ActionId") in
+      let newAction =
+        (Option.map ~f:Action.of_xml) (Xml.child xml_arg0 "NewAction") in
+      let oldAction =
+        (Option.map ~f:Action.of_xml) (Xml.child xml_arg0 "OldAction") in
       let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+        (Option.map ~f:BudgetName.of_xml) (Xml.child xml_arg0 "BudgetName") in
       let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~executionType ~actionId ~budgetName ~accountId ()
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ?newAction ?oldAction ?budgetName ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let executionType =
-        field_map_exn json "ExecutionType" ExecutionType.of_json in
-      let actionId = field_map_exn json "ActionId" ActionId.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~executionType ~actionId ~budgetName ~accountId ()
+    let of_json json__ =
+      let newAction = field_map json__ "NewAction" Action.of_json in
+      let oldAction = field_map json__ "OldAction" Action.of_json in
+      let budgetName = field_map json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?newAction ?oldAction ?budgetName ?accountId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Executes a budget action."]
-module ExecuteBudgetActionRequest =
+  end[@@ocaml.doc "Updates a budget action."]
+module UpdateBudgetRequest =
   struct
     type nonrec t =
       {
-      accountId: AccountId.t ;
-      budgetName: BudgetName.t ;
-      actionId: ActionId.t
+      accountId: AccountId.t
         [@ocaml.doc
-          "A system-generated universally unique identifier (UUID) for the action."];
-      executionType: ExecutionType.t [@ocaml.doc "The type of execution."]}
-    let context_ = "ExecuteBudgetActionRequest"
+          "The accountId that is associated with the budget that you want to update."];
+      newBudget: Budget.t
+        [@ocaml.doc "The budget that you want to update your budget to."]}
+    let context_ = "UpdateBudgetRequest"
     let make ~accountId =
-      fun ~budgetName ->
-        fun ~actionId ->
-          fun ~executionType ->
-            fun () -> { accountId; budgetName; actionId; executionType }
+      fun ~newBudget -> fun () -> { accountId; newBudget }
     let to_value x =
       structure_to_value
         [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("ActionId", (Some (ActionId.to_value x.actionId)));
-        ("ExecutionType", (Some (ExecutionType.to_value x.executionType)))]
+        ("NewBudget", (Some (Budget.to_value x.newBudget)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let executionType =
-        ExecutionType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ExecutionType") in
-      let actionId =
-        ActionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ActionId") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      let newBudget =
+        Budget.of_xml (Xml.child_exn ~context:context_ xml_arg0 "NewBudget") in
       let accountId =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~executionType ~actionId ~budgetName ~accountId ()
+      make ~newBudget ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let executionType =
-        field_map_exn json "ExecutionType" ExecutionType.of_json in
-      let actionId = field_map_exn json "ActionId" ActionId.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~executionType ~actionId ~budgetName ~accountId ()
+    let of_json json__ =
+      let newBudget = field_map_exn json__ "NewBudget" Budget.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ~newBudget ~accountId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Executes a budget action."]
-module DescribeSubscribersForNotificationResponse =
+  end[@@ocaml.doc "Request of UpdateBudget"]
+module UpdateBudgetResponse =
   struct
-    type nonrec t =
-      {
-      subscribers: Subscribers.t option
-        [@ocaml.doc
-          "A list of subscribers that are associated with a notification."];
-      nextToken: GenericString.t option
-        [@ocaml.doc
-          "The pagination token in the service response that indicates the next set of results that you can retrieve."]}
+    type nonrec t = unit
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
-      | `ExpiredNextTokenException of ExpiredNextTokenException.t 
+      | `BillingViewHealthStatusException of
+          BillingViewHealthStatusException.t 
       | `InternalErrorException of InternalErrorException.t 
-      | `InvalidNextTokenException of InvalidNextTokenException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `NotFoundException of NotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?subscribers =
-      fun ?nextToken -> fun () -> { subscribers; nextToken }
+    let make () = ()
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_json json)
-      | "ExpiredNextTokenException" ->
-          `ExpiredNextTokenException (ExpiredNextTokenException.of_json json)
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_json json)
       | "InternalErrorException" ->
           `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidNextTokenException" ->
-          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3441,16 +7267,20 @@ module DescribeSubscribersForNotificationResponse =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "ExpiredNextTokenException" ->
-          `ExpiredNextTokenException (ExpiredNextTokenException.of_xml xml)
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_xml xml)
       | "InternalErrorException" ->
           `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidNextTokenException" ->
-          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3459,18 +7289,14 @@ module DescribeSubscribersForNotificationResponse =
           `Assoc
             [("error", (`String "AccessDeniedException"));
             ("details", (AccessDeniedException.to_json e))]
-      | `ExpiredNextTokenException e ->
+      | `BillingViewHealthStatusException e ->
           `Assoc
-            [("error", (`String "ExpiredNextTokenException"));
-            ("details", (ExpiredNextTokenException.to_json e))]
+            [("error", (`String "BillingViewHealthStatusException"));
+            ("details", (BillingViewHealthStatusException.to_json e))]
       | `InternalErrorException e ->
           `Assoc
             [("error", (`String "InternalErrorException"));
             ("details", (InternalErrorException.to_json e))]
-      | `InvalidNextTokenException e ->
-          `Assoc
-            [("error", (`String "InvalidNextTokenException"));
-            ("details", (InvalidNextTokenException.to_json e))]
       | `InvalidParameterException e ->
           `Assoc
             [("error", (`String "InvalidParameterException"));
@@ -3479,1906 +7305,213 @@ module DescribeSubscribersForNotificationResponse =
           `Assoc
             [("error", (`String "NotFoundException"));
             ("details", (NotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("Subscribers", (Option.map x.subscribers ~f:Subscribers.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let subscribers =
-        (Option.map ~f:Subscribers.of_xml) (Xml.child xml_arg0 "Subscribers") in
-      make ?nextToken ?subscribers ()
+    let of_xml _ = make ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let subscribers = field_map json "Subscribers" Subscribers.of_json in
-      make ?nextToken ?subscribers ()
+    let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Response of DescribeSubscribersForNotification"]
-module DescribeSubscribersForNotificationRequest =
+  end[@@ocaml.doc "Response of UpdateBudget"]
+module UpdateNotificationRequest =
   struct
     type nonrec t =
       {
       accountId: AccountId.t
         [@ocaml.doc
-          "The accountId that is associated with the budget whose subscribers you want descriptions of."];
+          "The accountId that is associated with the budget whose notification you want to update."];
       budgetName: BudgetName.t
         [@ocaml.doc
-          "The name of the budget whose subscribers you want descriptions of."];
+          "The name of the budget whose notification you want to update."];
+      oldNotification: Notification.t
+        [@ocaml.doc
+          "The previous notification that is associated with a budget."];
+      newNotification: Notification.t
+        [@ocaml.doc
+          "The updated notification to be associated with a budget."]}
+    let context_ = "UpdateNotificationRequest"
+    let make ~accountId =
+      fun ~budgetName ->
+        fun ~oldNotification ->
+          fun ~newNotification ->
+            fun () ->
+              { accountId; budgetName; oldNotification; newNotification }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
+        ("OldNotification", (Some (Notification.to_value x.oldNotification)));
+        ("NewNotification", (Some (Notification.to_value x.newNotification)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let newNotification =
+        Notification.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NewNotification") in
+      let oldNotification =
+        Notification.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OldNotification") in
+      let budgetName =
+        BudgetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ~newNotification ~oldNotification ~budgetName ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let newNotification =
+        field_map_exn json__ "NewNotification" Notification.of_json in
+      let oldNotification =
+        field_map_exn json__ "OldNotification" Notification.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ~newNotification ~oldNotification ~budgetName ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Request of UpdateNotification"]
+module UpdateNotificationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `DuplicateRecordException of DuplicateRecordException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "DuplicateRecordException" ->
+          `DuplicateRecordException (DuplicateRecordException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "DuplicateRecordException" ->
+          `DuplicateRecordException (DuplicateRecordException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `DuplicateRecordException e ->
+          `Assoc
+            [("error", (`String "DuplicateRecordException"));
+            ("details", (DuplicateRecordException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Response of UpdateNotification"]
+module UpdateSubscriberRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t
+        [@ocaml.doc
+          "The accountId that is associated with the budget whose subscriber you want to update."];
+      budgetName: BudgetName.t
+        [@ocaml.doc
+          "The name of the budget whose subscriber you want to update."];
       notification: Notification.t
-        [@ocaml.doc "The notification whose subscribers you want to list."];
-      maxResults: MaxResults.t option
+        [@ocaml.doc "The notification whose subscriber you want to update."];
+      oldSubscriber: Subscriber.t
         [@ocaml.doc
-          "An optional integer that represents how many entries a paginated response contains. The maximum is 100."];
-      nextToken: GenericString.t option
+          "The previous subscriber that is associated with a budget notification."];
+      newSubscriber: Subscriber.t
         [@ocaml.doc
-          "The pagination token that you include in your request to indicate the next set of results that you want to retrieve."]}
-    let context_ = "DescribeSubscribersForNotificationRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~accountId ->
-          fun ~budgetName ->
-            fun ~notification ->
+          "The updated subscriber that is associated with a budget notification."]}
+    let context_ = "UpdateSubscriberRequest"
+    let make ~accountId =
+      fun ~budgetName ->
+        fun ~notification ->
+          fun ~oldSubscriber ->
+            fun ~newSubscriber ->
               fun () ->
-                { maxResults; nextToken; accountId; budgetName; notification
+                {
+                  accountId;
+                  budgetName;
+                  notification;
+                  oldSubscriber;
+                  newSubscriber
                 }
     let to_value x =
       structure_to_value
         [("AccountId", (Some (AccountId.to_value x.accountId)));
         ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
         ("Notification", (Some (Notification.to_value x.notification)));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
+        ("OldSubscriber", (Some (Subscriber.to_value x.oldSubscriber)));
+        ("NewSubscriber", (Some (Subscriber.to_value x.newSubscriber)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      let notification =
-        Notification.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Notification") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ?nextToken ?maxResults ~notification ~budgetName ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let notification =
-        field_map_exn json "Notification" Notification.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ?nextToken ?maxResults ~notification ~budgetName ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Request of DescribeSubscribersForNotification"]
-module DescribeNotificationsForBudgetResponse =
-  struct
-    type nonrec t =
-      {
-      notifications: Notifications.t option
-        [@ocaml.doc
-          "A list of notifications that are associated with a budget."];
-      nextToken: GenericString.t option
-        [@ocaml.doc
-          "The pagination token in the service response that indicates the next set of results that you can retrieve."]}
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `ExpiredNextTokenException of ExpiredNextTokenException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidNextTokenException of InvalidNextTokenException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?notifications =
-      fun ?nextToken -> fun () -> { notifications; nextToken }
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "ExpiredNextTokenException" ->
-          `ExpiredNextTokenException (ExpiredNextTokenException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidNextTokenException" ->
-          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "ExpiredNextTokenException" ->
-          `ExpiredNextTokenException (ExpiredNextTokenException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidNextTokenException" ->
-          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `ExpiredNextTokenException e ->
-          `Assoc
-            [("error", (`String "ExpiredNextTokenException"));
-            ("details", (ExpiredNextTokenException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidNextTokenException e ->
-          `Assoc
-            [("error", (`String "InvalidNextTokenException"));
-            ("details", (InvalidNextTokenException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("Notifications",
-           (Option.map x.notifications ~f:Notifications.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let notifications =
-        (Option.map ~f:Notifications.of_xml)
-          (Xml.child xml_arg0 "Notifications") in
-      make ?nextToken ?notifications ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let notifications =
-        field_map json "Notifications" Notifications.of_json in
-      make ?nextToken ?notifications ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Response of GetNotificationsForBudget"]
-module DescribeNotificationsForBudgetRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t
-        [@ocaml.doc
-          "The accountId that is associated with the budget whose notifications you want descriptions of."];
-      budgetName: BudgetName.t
-        [@ocaml.doc
-          "The name of the budget whose notifications you want descriptions of."];
-      maxResults: MaxResults.t option
-        [@ocaml.doc
-          "An optional integer that represents how many entries a paginated response contains. The maximum is 100."];
-      nextToken: GenericString.t option
-        [@ocaml.doc
-          "The pagination token that you include in your request to indicate the next set of results that you want to retrieve."]}
-    let context_ = "DescribeNotificationsForBudgetRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~accountId ->
-          fun ~budgetName ->
-            fun () -> { maxResults; nextToken; accountId; budgetName }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ?nextToken ?maxResults ~budgetName ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ?nextToken ?maxResults ~budgetName ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Request of DescribeNotificationsForBudget"]
-module DescribeBudgetsResponse =
-  struct
-    type nonrec t =
-      {
-      budgets: Budgets.t option [@ocaml.doc "A list of budgets."];
-      nextToken: GenericString.t option
-        [@ocaml.doc
-          "The pagination token in the service response that indicates the next set of results that you can retrieve."]}
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `ExpiredNextTokenException of ExpiredNextTokenException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidNextTokenException of InvalidNextTokenException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?budgets = fun ?nextToken -> fun () -> { budgets; nextToken }
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "ExpiredNextTokenException" ->
-          `ExpiredNextTokenException (ExpiredNextTokenException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidNextTokenException" ->
-          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "ExpiredNextTokenException" ->
-          `ExpiredNextTokenException (ExpiredNextTokenException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidNextTokenException" ->
-          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `ExpiredNextTokenException e ->
-          `Assoc
-            [("error", (`String "ExpiredNextTokenException"));
-            ("details", (ExpiredNextTokenException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidNextTokenException e ->
-          `Assoc
-            [("error", (`String "InvalidNextTokenException"));
-            ("details", (InvalidNextTokenException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("Budgets", (Option.map x.budgets ~f:Budgets.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let budgets =
-        (Option.map ~f:Budgets.of_xml) (Xml.child xml_arg0 "Budgets") in
-      make ?nextToken ?budgets ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let budgets = field_map json "Budgets" Budgets.of_json in
-      make ?nextToken ?budgets ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Response of DescribeBudgets"]
-module DescribeBudgetsRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t
-        [@ocaml.doc
-          "The accountId that is associated with the budgets that you want descriptions of."];
-      maxResults: MaxResults.t option
-        [@ocaml.doc
-          "An optional integer that represents how many entries a paginated response contains. The maximum is 100."];
-      nextToken: GenericString.t option
-        [@ocaml.doc
-          "The pagination token that you include in your request to indicate the next set of results that you want to retrieve."]}
-    let context_ = "DescribeBudgetsRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~accountId -> fun () -> { maxResults; nextToken; accountId }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ?nextToken ?maxResults ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ?nextToken ?maxResults ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Request of DescribeBudgets"]
-module DescribeBudgetResponse =
-  struct
-    type nonrec t =
-      {
-      budget: Budget.t option [@ocaml.doc "The description of the budget."]}
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?budget = fun () -> { budget }
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("Budget", (Option.map x.budget ~f:Budget.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let budget =
-        (Option.map ~f:Budget.of_xml) (Xml.child xml_arg0 "Budget") in
-      make ?budget ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let budget = field_map json "Budget" Budget.of_json in make ?budget ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Response of DescribeBudget"]
-module DescribeBudgetRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t
-        [@ocaml.doc
-          "The accountId that is associated with the budget that you want a description of."];
-      budgetName: BudgetName.t
-        [@ocaml.doc "The name of the budget that you want a description of."]}
-    let context_ = "DescribeBudgetRequest"
-    let make ~accountId =
-      fun ~budgetName -> fun () -> { accountId; budgetName }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~budgetName ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~budgetName ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Request of DescribeBudget"]
-module DescribeBudgetPerformanceHistoryResponse =
-  struct
-    type nonrec t =
-      {
-      budgetPerformanceHistory: BudgetPerformanceHistory.t option
-        [@ocaml.doc
-          "The history of how often the budget has gone into an ALARM state. For DAILY budgets, the history saves the state of the budget for the last 60 days. For MONTHLY budgets, the history saves the state of the budget for the current month plus the last 12 months. For QUARTERLY budgets, the history saves the state of the budget for the last four quarters."];
-      nextToken: GenericString.t option }
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `ExpiredNextTokenException of ExpiredNextTokenException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidNextTokenException of InvalidNextTokenException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?budgetPerformanceHistory =
-      fun ?nextToken -> fun () -> { budgetPerformanceHistory; nextToken }
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "ExpiredNextTokenException" ->
-          `ExpiredNextTokenException (ExpiredNextTokenException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidNextTokenException" ->
-          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "ExpiredNextTokenException" ->
-          `ExpiredNextTokenException (ExpiredNextTokenException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidNextTokenException" ->
-          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `ExpiredNextTokenException e ->
-          `Assoc
-            [("error", (`String "ExpiredNextTokenException"));
-            ("details", (ExpiredNextTokenException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidNextTokenException e ->
-          `Assoc
-            [("error", (`String "InvalidNextTokenException"));
-            ("details", (InvalidNextTokenException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("BudgetPerformanceHistory",
-           (Option.map x.budgetPerformanceHistory
-              ~f:BudgetPerformanceHistory.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let budgetPerformanceHistory =
-        (Option.map ~f:BudgetPerformanceHistory.of_xml)
-          (Xml.child xml_arg0 "BudgetPerformanceHistory") in
-      make ?nextToken ?budgetPerformanceHistory ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let budgetPerformanceHistory =
-        field_map json "BudgetPerformanceHistory"
-          BudgetPerformanceHistory.of_json in
-      make ?nextToken ?budgetPerformanceHistory ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Describes the history for DAILY, MONTHLY, and QUARTERLY budgets. Budget history isn't available for ANNUAL budgets."]
-module DescribeBudgetPerformanceHistoryRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t ;
-      budgetName: BudgetName.t ;
-      timePeriod: TimePeriod.t option
-        [@ocaml.doc
-          "Retrieves how often the budget went into an ALARM state for the specified time period."];
-      maxResults: MaxResults.t option ;
-      nextToken: GenericString.t option }
-    let context_ = "DescribeBudgetPerformanceHistoryRequest"
-    let make ?timePeriod =
-      fun ?maxResults ->
-        fun ?nextToken ->
-          fun ~accountId ->
-            fun ~budgetName ->
-              fun () ->
-                { timePeriod; maxResults; nextToken; accountId; budgetName }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("TimePeriod", (Option.map x.timePeriod ~f:TimePeriod.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      let timePeriod =
-        (Option.map ~f:TimePeriod.of_xml) (Xml.child xml_arg0 "TimePeriod") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ?nextToken ?maxResults ?timePeriod ~budgetName ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let timePeriod = field_map json "TimePeriod" TimePeriod.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ?nextToken ?maxResults ?timePeriod ~budgetName ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Describes the history for DAILY, MONTHLY, and QUARTERLY budgets. Budget history isn't available for ANNUAL budgets."]
-module DescribeBudgetNotificationsForAccountResponse =
-  struct
-    type nonrec t =
-      {
-      budgetNotificationsForAccount:
-        BudgetNotificationsForAccountList.t option
-        [@ocaml.doc
-          "A list of budget names and associated notifications for an account."];
-      nextToken: GenericString.t option }
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `ExpiredNextTokenException of ExpiredNextTokenException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidNextTokenException of InvalidNextTokenException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?budgetNotificationsForAccount =
-      fun ?nextToken ->
-        fun () -> { budgetNotificationsForAccount; nextToken }
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "ExpiredNextTokenException" ->
-          `ExpiredNextTokenException (ExpiredNextTokenException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidNextTokenException" ->
-          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "ExpiredNextTokenException" ->
-          `ExpiredNextTokenException (ExpiredNextTokenException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidNextTokenException" ->
-          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `ExpiredNextTokenException e ->
-          `Assoc
-            [("error", (`String "ExpiredNextTokenException"));
-            ("details", (ExpiredNextTokenException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidNextTokenException e ->
-          `Assoc
-            [("error", (`String "InvalidNextTokenException"));
-            ("details", (InvalidNextTokenException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("BudgetNotificationsForAccount",
-           (Option.map x.budgetNotificationsForAccount
-              ~f:BudgetNotificationsForAccountList.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let budgetNotificationsForAccount =
-        (Option.map ~f:BudgetNotificationsForAccountList.of_xml)
-          (Xml.child xml_arg0 "BudgetNotificationsForAccount") in
-      make ?nextToken ?budgetNotificationsForAccount ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let budgetNotificationsForAccount =
-        field_map json "BudgetNotificationsForAccount"
-          BudgetNotificationsForAccountList.of_json in
-      make ?nextToken ?budgetNotificationsForAccount ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Lists the budget names and notifications that are associated with an account."]
-module DescribeBudgetNotificationsForAccountRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t ;
-      maxResults: MaxResultsBudgetNotifications.t option
-        [@ocaml.doc
-          "An integer that shows how many budget name entries a paginated response contains."];
-      nextToken: GenericString.t option }
-    let context_ = "DescribeBudgetNotificationsForAccountRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~accountId -> fun () -> { maxResults; nextToken; accountId }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("MaxResults",
-          (Option.map x.maxResults ~f:MaxResultsBudgetNotifications.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let maxResults =
-        (Option.map ~f:MaxResultsBudgetNotifications.of_xml)
-          (Xml.child xml_arg0 "MaxResults") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ?nextToken ?maxResults ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let maxResults =
-        field_map json "MaxResults" MaxResultsBudgetNotifications.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ?nextToken ?maxResults ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Lists the budget names and notifications that are associated with an account."]
-module DescribeBudgetActionsForBudgetResponse =
-  struct
-    type nonrec t =
-      {
-      actions: Actions.t
-        [@ocaml.doc "A list of the budget action resources information."];
-      nextToken: GenericString.t option }
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidNextTokenException of InvalidNextTokenException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeBudgetActionsForBudgetResponse"
-    let make ?nextToken = fun ~actions -> fun () -> { nextToken; actions }
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidNextTokenException" ->
-          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidNextTokenException" ->
-          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidNextTokenException e ->
-          `Assoc
-            [("error", (`String "InvalidNextTokenException"));
-            ("details", (InvalidNextTokenException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("Actions", (Some (Actions.to_value x.actions)));
-        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let actions =
-        Actions.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Actions") in
-      make ?nextToken ~actions ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let actions = field_map_exn json "Actions" Actions.of_json in
-      make ?nextToken ~actions ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes all of the budget actions for a budget."]
-module DescribeBudgetActionsForBudgetRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t ;
-      budgetName: BudgetName.t ;
-      maxResults: MaxResults.t option ;
-      nextToken: GenericString.t option }
-    let context_ = "DescribeBudgetActionsForBudgetRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~accountId ->
-          fun ~budgetName ->
-            fun () -> { maxResults; nextToken; accountId; budgetName }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ?nextToken ?maxResults ~budgetName ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ?nextToken ?maxResults ~budgetName ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes all of the budget actions for a budget."]
-module DescribeBudgetActionsForAccountResponse =
-  struct
-    type nonrec t =
-      {
-      actions: Actions.t
-        [@ocaml.doc "A list of the budget action resources information."];
-      nextToken: GenericString.t option }
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidNextTokenException of InvalidNextTokenException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeBudgetActionsForAccountResponse"
-    let make ?nextToken = fun ~actions -> fun () -> { nextToken; actions }
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidNextTokenException" ->
-          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidNextTokenException" ->
-          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidNextTokenException e ->
-          `Assoc
-            [("error", (`String "InvalidNextTokenException"));
-            ("details", (InvalidNextTokenException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("Actions", (Some (Actions.to_value x.actions)));
-        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let actions =
-        Actions.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Actions") in
-      make ?nextToken ~actions ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let actions = field_map_exn json "Actions" Actions.of_json in
-      make ?nextToken ~actions ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes all of the budget actions for an account."]
-module DescribeBudgetActionsForAccountRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t ;
-      maxResults: MaxResults.t option ;
-      nextToken: GenericString.t option }
-    let context_ = "DescribeBudgetActionsForAccountRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~accountId -> fun () -> { maxResults; nextToken; accountId }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ?nextToken ?maxResults ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ?nextToken ?maxResults ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes all of the budget actions for an account."]
-module DescribeBudgetActionResponse =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t ;
-      budgetName: BudgetName.t ;
-      action: Action.t [@ocaml.doc "A budget action resource."]}
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeBudgetActionResponse"
-    let make ~accountId =
-      fun ~budgetName ->
-        fun ~action -> fun () -> { accountId; budgetName; action }
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("Action", (Some (Action.to_value x.action)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let action =
-        Action.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Action") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~action ~budgetName ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let action = field_map_exn json "Action" Action.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~action ~budgetName ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a budget action detail."]
-module DescribeBudgetActionRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t ;
-      budgetName: BudgetName.t ;
-      actionId: ActionId.t
-        [@ocaml.doc
-          "A system-generated universally unique identifier (UUID) for the action."]}
-    let context_ = "DescribeBudgetActionRequest"
-    let make ~accountId =
-      fun ~budgetName ->
-        fun ~actionId -> fun () -> { accountId; budgetName; actionId }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("ActionId", (Some (ActionId.to_value x.actionId)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let actionId =
-        ActionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ActionId") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~actionId ~budgetName ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let actionId = field_map_exn json "ActionId" ActionId.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~actionId ~budgetName ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a budget action detail."]
-module DescribeBudgetActionHistoriesResponse =
-  struct
-    type nonrec t =
-      {
-      actionHistories: ActionHistories.t
-        [@ocaml.doc "The historical record of the budget action resource."];
-      nextToken: GenericString.t option }
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidNextTokenException of InvalidNextTokenException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeBudgetActionHistoriesResponse"
-    let make ?nextToken =
-      fun ~actionHistories -> fun () -> { nextToken; actionHistories }
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidNextTokenException" ->
-          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidNextTokenException" ->
-          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidNextTokenException e ->
-          `Assoc
-            [("error", (`String "InvalidNextTokenException"));
-            ("details", (InvalidNextTokenException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("ActionHistories",
-           (Some (ActionHistories.to_value x.actionHistories)));
-        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let actionHistories =
-        ActionHistories.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ActionHistories") in
-      make ?nextToken ~actionHistories ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let actionHistories =
-        field_map_exn json "ActionHistories" ActionHistories.of_json in
-      make ?nextToken ~actionHistories ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a budget action history detail."]
-module DescribeBudgetActionHistoriesRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t ;
-      budgetName: BudgetName.t ;
-      actionId: ActionId.t
-        [@ocaml.doc
-          "A system-generated universally unique identifier (UUID) for the action."];
-      timePeriod: TimePeriod.t option ;
-      maxResults: MaxResults.t option ;
-      nextToken: GenericString.t option }
-    let context_ = "DescribeBudgetActionHistoriesRequest"
-    let make ?timePeriod =
-      fun ?maxResults ->
-        fun ?nextToken ->
-          fun ~accountId ->
-            fun ~budgetName ->
-              fun ~actionId ->
-                fun () ->
-                  {
-                    timePeriod;
-                    maxResults;
-                    nextToken;
-                    accountId;
-                    budgetName;
-                    actionId
-                  }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("ActionId", (Some (ActionId.to_value x.actionId)));
-        ("TimePeriod", (Option.map x.timePeriod ~f:TimePeriod.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:GenericString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      let timePeriod =
-        (Option.map ~f:TimePeriod.of_xml) (Xml.child xml_arg0 "TimePeriod") in
-      let actionId =
-        ActionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ActionId") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ?nextToken ?maxResults ?timePeriod ~actionId ~budgetName
-        ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let timePeriod = field_map json "TimePeriod" TimePeriod.of_json in
-      let actionId = field_map_exn json "ActionId" ActionId.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ?nextToken ?maxResults ?timePeriod ~actionId ~budgetName
-        ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a budget action history detail."]
-module DeleteSubscriberResponse =
-  struct
-    type nonrec t = unit
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Response of DeleteSubscriber"]
-module DeleteSubscriberRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t
-        [@ocaml.doc
-          "The accountId that is associated with the budget whose subscriber you want to delete."];
-      budgetName: BudgetName.t
-        [@ocaml.doc
-          "The name of the budget whose subscriber you want to delete."];
-      notification: Notification.t
-        [@ocaml.doc "The notification whose subscriber you want to delete."];
-      subscriber: Subscriber.t
-        [@ocaml.doc "The subscriber that you want to delete."]}
-    let context_ = "DeleteSubscriberRequest"
-    let make ~accountId =
-      fun ~budgetName ->
-        fun ~notification ->
-          fun ~subscriber ->
-            fun () -> { accountId; budgetName; notification; subscriber }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("Notification", (Some (Notification.to_value x.notification)));
-        ("Subscriber", (Some (Subscriber.to_value x.subscriber)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let subscriber =
+      let newSubscriber =
         Subscriber.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Subscriber") in
-      let notification =
-        Notification.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Notification") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~subscriber ~notification ~budgetName ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subscriber = field_map_exn json "Subscriber" Subscriber.of_json in
-      let notification =
-        field_map_exn json "Notification" Notification.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~subscriber ~notification ~budgetName ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Request of DeleteSubscriber"]
-module DeleteNotificationResponse =
-  struct
-    type nonrec t = unit
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Response of DeleteNotification"]
-module DeleteNotificationRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t
-        [@ocaml.doc
-          "The accountId that is associated with the budget whose notification you want to delete."];
-      budgetName: BudgetName.t
-        [@ocaml.doc
-          "The name of the budget whose notification you want to delete."];
-      notification: Notification.t
-        [@ocaml.doc "The notification that you want to delete."]}
-    let context_ = "DeleteNotificationRequest"
-    let make ~accountId =
-      fun ~budgetName ->
-        fun ~notification ->
-          fun () -> { accountId; budgetName; notification }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("Notification", (Some (Notification.to_value x.notification)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let notification =
-        Notification.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Notification") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~notification ~budgetName ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let notification =
-        field_map_exn json "Notification" Notification.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~notification ~budgetName ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Request of DeleteNotification"]
-module DeleteBudgetResponse =
-  struct
-    type nonrec t = unit
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Response of DeleteBudget"]
-module DeleteBudgetRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t
-        [@ocaml.doc
-          "The accountId that is associated with the budget that you want to delete."];
-      budgetName: BudgetName.t
-        [@ocaml.doc "The name of the budget that you want to delete."]}
-    let context_ = "DeleteBudgetRequest"
-    let make ~accountId =
-      fun ~budgetName -> fun () -> { accountId; budgetName }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~budgetName ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~budgetName ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Request of DeleteBudget"]
-module DeleteBudgetActionResponse =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t ;
-      budgetName: BudgetName.t ;
-      action: Action.t }
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `ResourceLockedException of ResourceLockedException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteBudgetActionResponse"
-    let make ~accountId =
-      fun ~budgetName ->
-        fun ~action -> fun () -> { accountId; budgetName; action }
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | "ResourceLockedException" ->
-          `ResourceLockedException (ResourceLockedException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | "ResourceLockedException" ->
-          `ResourceLockedException (ResourceLockedException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `ResourceLockedException e ->
-          `Assoc
-            [("error", (`String "ResourceLockedException"));
-            ("details", (ResourceLockedException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("Action", (Some (Action.to_value x.action)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let action =
-        Action.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Action") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~action ~budgetName ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let action = field_map_exn json "Action" Action.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~action ~budgetName ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a budget action."]
-module DeleteBudgetActionRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t ;
-      budgetName: BudgetName.t ;
-      actionId: ActionId.t
-        [@ocaml.doc
-          "A system-generated universally unique identifier (UUID) for the action."]}
-    let context_ = "DeleteBudgetActionRequest"
-    let make ~accountId =
-      fun ~budgetName ->
-        fun ~actionId -> fun () -> { accountId; budgetName; actionId }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("ActionId", (Some (ActionId.to_value x.actionId)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let actionId =
-        ActionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ActionId") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~actionId ~budgetName ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let actionId = field_map_exn json "ActionId" ActionId.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~actionId ~budgetName ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a budget action."]
-module CreateSubscriberResponse =
-  struct
-    type nonrec t = unit
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `CreationLimitExceededException of CreationLimitExceededException.t 
-      | `DuplicateRecordException of DuplicateRecordException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "CreationLimitExceededException" ->
-          `CreationLimitExceededException
-            (CreationLimitExceededException.of_json json)
-      | "DuplicateRecordException" ->
-          `DuplicateRecordException (DuplicateRecordException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "CreationLimitExceededException" ->
-          `CreationLimitExceededException
-            (CreationLimitExceededException.of_xml xml)
-      | "DuplicateRecordException" ->
-          `DuplicateRecordException (DuplicateRecordException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `CreationLimitExceededException e ->
-          `Assoc
-            [("error", (`String "CreationLimitExceededException"));
-            ("details", (CreationLimitExceededException.to_json e))]
-      | `DuplicateRecordException e ->
-          `Assoc
-            [("error", (`String "DuplicateRecordException"));
-            ("details", (DuplicateRecordException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Response of CreateSubscriber"]
-module CreateSubscriberRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t
-        [@ocaml.doc
-          "The accountId that is associated with the budget that you want to create a subscriber for."];
-      budgetName: BudgetName.t
-        [@ocaml.doc
-          "The name of the budget that you want to subscribe to. Budget names must be unique within an account."];
-      notification: Notification.t
-        [@ocaml.doc
-          "The notification that you want to create a subscriber for."];
-      subscriber: Subscriber.t
-        [@ocaml.doc
-          "The subscriber that you want to associate with a budget notification."]}
-    let context_ = "CreateSubscriberRequest"
-    let make ~accountId =
-      fun ~budgetName ->
-        fun ~notification ->
-          fun ~subscriber ->
-            fun () -> { accountId; budgetName; notification; subscriber }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("Notification", (Some (Notification.to_value x.notification)));
-        ("Subscriber", (Some (Subscriber.to_value x.subscriber)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let subscriber =
+          (Xml.child_exn ~context:context_ xml_arg0 "NewSubscriber") in
+      let oldSubscriber =
         Subscriber.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Subscriber") in
+          (Xml.child_exn ~context:context_ xml_arg0 "OldSubscriber") in
       let notification =
         Notification.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Notification") in
@@ -5388,490 +7521,103 @@ module CreateSubscriberRequest =
       let accountId =
         AccountId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~subscriber ~notification ~budgetName ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subscriber = field_map_exn json "Subscriber" Subscriber.of_json in
-      let notification =
-        field_map_exn json "Notification" Notification.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~subscriber ~notification ~budgetName ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Request of CreateSubscriber"]
-module CreateNotificationResponse =
-  struct
-    type nonrec t = unit
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `CreationLimitExceededException of CreationLimitExceededException.t 
-      | `DuplicateRecordException of DuplicateRecordException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "CreationLimitExceededException" ->
-          `CreationLimitExceededException
-            (CreationLimitExceededException.of_json json)
-      | "DuplicateRecordException" ->
-          `DuplicateRecordException (DuplicateRecordException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "CreationLimitExceededException" ->
-          `CreationLimitExceededException
-            (CreationLimitExceededException.of_xml xml)
-      | "DuplicateRecordException" ->
-          `DuplicateRecordException (DuplicateRecordException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `CreationLimitExceededException e ->
-          `Assoc
-            [("error", (`String "CreationLimitExceededException"));
-            ("details", (CreationLimitExceededException.to_json e))]
-      | `DuplicateRecordException e ->
-          `Assoc
-            [("error", (`String "DuplicateRecordException"));
-            ("details", (DuplicateRecordException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Response of CreateNotification"]
-module CreateNotificationRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t
-        [@ocaml.doc
-          "The accountId that is associated with the budget that you want to create a notification for."];
-      budgetName: BudgetName.t
-        [@ocaml.doc
-          "The name of the budget that you want Amazon Web Services to notify you about. Budget names must be unique within an account."];
-      notification: Notification.t
-        [@ocaml.doc "The notification that you want to create."];
-      subscribers: Subscribers.t
-        [@ocaml.doc
-          "A list of subscribers that you want to associate with the notification. Each notification can have one SNS subscriber and up to 10 email subscribers."]}
-    let context_ = "CreateNotificationRequest"
-    let make ~accountId =
-      fun ~budgetName ->
-        fun ~notification ->
-          fun ~subscribers ->
-            fun () -> { accountId; budgetName; notification; subscribers }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("Notification", (Some (Notification.to_value x.notification)));
-        ("Subscribers", (Some (Subscribers.to_value x.subscribers)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let subscribers =
-        Subscribers.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Subscribers") in
-      let notification =
-        Notification.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Notification") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~subscribers ~notification ~budgetName ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subscribers = field_map_exn json "Subscribers" Subscribers.of_json in
-      let notification =
-        field_map_exn json "Notification" Notification.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~subscribers ~notification ~budgetName ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Request of CreateNotification"]
-module CreateBudgetResponse =
-  struct
-    type nonrec t = unit
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `CreationLimitExceededException of CreationLimitExceededException.t 
-      | `DuplicateRecordException of DuplicateRecordException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "CreationLimitExceededException" ->
-          `CreationLimitExceededException
-            (CreationLimitExceededException.of_json json)
-      | "DuplicateRecordException" ->
-          `DuplicateRecordException (DuplicateRecordException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "CreationLimitExceededException" ->
-          `CreationLimitExceededException
-            (CreationLimitExceededException.of_xml xml)
-      | "DuplicateRecordException" ->
-          `DuplicateRecordException (DuplicateRecordException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `CreationLimitExceededException e ->
-          `Assoc
-            [("error", (`String "CreationLimitExceededException"));
-            ("details", (CreationLimitExceededException.to_json e))]
-      | `DuplicateRecordException e ->
-          `Assoc
-            [("error", (`String "DuplicateRecordException"));
-            ("details", (DuplicateRecordException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Response of CreateBudget"]
-module CreateBudgetRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t
-        [@ocaml.doc "The accountId that is associated with the budget."];
-      budget: Budget.t
-        [@ocaml.doc "The budget object that you want to create."];
-      notificationsWithSubscribers: NotificationWithSubscribersList.t option
-        [@ocaml.doc
-          "A notification that you want to associate with a budget. A budget can have up to five notifications, and each notification can have one SNS subscriber and up to 10 email subscribers. If you include notifications and subscribers in your CreateBudget call, Amazon Web Services creates the notifications and subscribers for you."]}
-    let context_ = "CreateBudgetRequest"
-    let make ?notificationsWithSubscribers =
-      fun ~accountId ->
-        fun ~budget ->
-          fun () -> { notificationsWithSubscribers; accountId; budget }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("Budget", (Some (Budget.to_value x.budget)));
-        ("NotificationsWithSubscribers",
-          (Option.map x.notificationsWithSubscribers
-             ~f:NotificationWithSubscribersList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let notificationsWithSubscribers =
-        (Option.map ~f:NotificationWithSubscribersList.of_xml)
-          (Xml.child xml_arg0 "NotificationsWithSubscribers") in
-      let budget =
-        Budget.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Budget") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ?notificationsWithSubscribers ~budget ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let notificationsWithSubscribers =
-        field_map json "NotificationsWithSubscribers"
-          NotificationWithSubscribersList.of_json in
-      let budget = field_map_exn json "Budget" Budget.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ?notificationsWithSubscribers ~budget ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Request of CreateBudget"]
-module CreateBudgetActionResponse =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t ;
-      budgetName: BudgetName.t ;
-      actionId: ActionId.t
-        [@ocaml.doc
-          "A system-generated universally unique identifier (UUID) for the action."]}
-    type nonrec error =
-      [ `AccessDeniedException of AccessDeniedException.t 
-      | `CreationLimitExceededException of CreationLimitExceededException.t 
-      | `DuplicateRecordException of DuplicateRecordException.t 
-      | `InternalErrorException of InternalErrorException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateBudgetActionResponse"
-    let make ~accountId =
-      fun ~budgetName ->
-        fun ~actionId -> fun () -> { accountId; budgetName; actionId }
-    let error_of_json name json =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_json json)
-      | "CreationLimitExceededException" ->
-          `CreationLimitExceededException
-            (CreationLimitExceededException.of_json json)
-      | "DuplicateRecordException" ->
-          `DuplicateRecordException (DuplicateRecordException.of_json json)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "AccessDeniedException" ->
-          `AccessDeniedException (AccessDeniedException.of_xml xml)
-      | "CreationLimitExceededException" ->
-          `CreationLimitExceededException
-            (CreationLimitExceededException.of_xml xml)
-      | "DuplicateRecordException" ->
-          `DuplicateRecordException (DuplicateRecordException.of_xml xml)
-      | "InternalErrorException" ->
-          `InternalErrorException (InternalErrorException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `AccessDeniedException e ->
-          `Assoc
-            [("error", (`String "AccessDeniedException"));
-            ("details", (AccessDeniedException.to_json e))]
-      | `CreationLimitExceededException e ->
-          `Assoc
-            [("error", (`String "CreationLimitExceededException"));
-            ("details", (CreationLimitExceededException.to_json e))]
-      | `DuplicateRecordException e ->
-          `Assoc
-            [("error", (`String "DuplicateRecordException"));
-            ("details", (DuplicateRecordException.to_json e))]
-      | `InternalErrorException e ->
-          `Assoc
-            [("error", (`String "InternalErrorException"));
-            ("details", (InternalErrorException.to_json e))]
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("ActionId", (Some (ActionId.to_value x.actionId)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let actionId =
-        ActionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ActionId") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~actionId ~budgetName ~accountId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let actionId = field_map_exn json "ActionId" ActionId.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~actionId ~budgetName ~accountId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a budget action."]
-module CreateBudgetActionRequest =
-  struct
-    type nonrec t =
-      {
-      accountId: AccountId.t ;
-      budgetName: BudgetName.t ;
-      notificationType: NotificationType.t ;
-      actionType: ActionType.t
-        [@ocaml.doc
-          "The type of action. This defines the type of tasks that can be carried out by this action. This field also determines the format for definition."];
-      actionThreshold: ActionThreshold.t ;
-      definition: Definition.t ;
-      executionRoleArn: RoleArn.t
-        [@ocaml.doc
-          "The role passed for action execution and reversion. Roles and actions must be in the same account."];
-      approvalModel: ApprovalModel.t
-        [@ocaml.doc
-          "This specifies if the action needs manual or automatic approval."];
-      subscribers: Subscribers.t }
-    let context_ = "CreateBudgetActionRequest"
-    let make ~accountId =
-      fun ~budgetName ->
-        fun ~notificationType ->
-          fun ~actionType ->
-            fun ~actionThreshold ->
-              fun ~definition ->
-                fun ~executionRoleArn ->
-                  fun ~approvalModel ->
-                    fun ~subscribers ->
-                      fun () ->
-                        {
-                          accountId;
-                          budgetName;
-                          notificationType;
-                          actionType;
-                          actionThreshold;
-                          definition;
-                          executionRoleArn;
-                          approvalModel;
-                          subscribers
-                        }
-    let to_value x =
-      structure_to_value
-        [("AccountId", (Some (AccountId.to_value x.accountId)));
-        ("BudgetName", (Some (BudgetName.to_value x.budgetName)));
-        ("NotificationType",
-          (Some (NotificationType.to_value x.notificationType)));
-        ("ActionType", (Some (ActionType.to_value x.actionType)));
-        ("ActionThreshold",
-          (Some (ActionThreshold.to_value x.actionThreshold)));
-        ("Definition", (Some (Definition.to_value x.definition)));
-        ("ExecutionRoleArn", (Some (RoleArn.to_value x.executionRoleArn)));
-        ("ApprovalModel", (Some (ApprovalModel.to_value x.approvalModel)));
-        ("Subscribers", (Some (Subscribers.to_value x.subscribers)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let subscribers =
-        Subscribers.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Subscribers") in
-      let approvalModel =
-        ApprovalModel.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApprovalModel") in
-      let executionRoleArn =
-        RoleArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ExecutionRoleArn") in
-      let definition =
-        Definition.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Definition") in
-      let actionThreshold =
-        ActionThreshold.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ActionThreshold") in
-      let actionType =
-        ActionType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ActionType") in
-      let notificationType =
-        NotificationType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "NotificationType") in
-      let budgetName =
-        BudgetName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
-      let accountId =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
-      make ~subscribers ~approvalModel ~executionRoleArn ~definition
-        ~actionThreshold ~actionType ~notificationType ~budgetName ~accountId
+      make ~newSubscriber ~oldSubscriber ~notification ~budgetName ~accountId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subscribers = field_map_exn json "Subscribers" Subscribers.of_json in
-      let approvalModel =
-        field_map_exn json "ApprovalModel" ApprovalModel.of_json in
-      let executionRoleArn =
-        field_map_exn json "ExecutionRoleArn" RoleArn.of_json in
-      let definition = field_map_exn json "Definition" Definition.of_json in
-      let actionThreshold =
-        field_map_exn json "ActionThreshold" ActionThreshold.of_json in
-      let actionType = field_map_exn json "ActionType" ActionType.of_json in
-      let notificationType =
-        field_map_exn json "NotificationType" NotificationType.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      make ~subscribers ~approvalModel ~executionRoleArn ~definition
-        ~actionThreshold ~actionType ~notificationType ~budgetName ~accountId
+    let of_json json__ =
+      let newSubscriber =
+        field_map_exn json__ "NewSubscriber" Subscriber.of_json in
+      let oldSubscriber =
+        field_map_exn json__ "OldSubscriber" Subscriber.of_json in
+      let notification =
+        field_map_exn json__ "Notification" Notification.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ~newSubscriber ~oldSubscriber ~notification ~budgetName ~accountId
         ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a budget action."]
+  end[@@ocaml.doc "Request of UpdateSubscriber"]
+module UpdateSubscriberResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `DuplicateRecordException of DuplicateRecordException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "DuplicateRecordException" ->
+          `DuplicateRecordException (DuplicateRecordException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "DuplicateRecordException" ->
+          `DuplicateRecordException (DuplicateRecordException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `DuplicateRecordException e ->
+          `Assoc
+            [("error", (`String "DuplicateRecordException"));
+            ("details", (DuplicateRecordException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Response of UpdateSubscriber"]

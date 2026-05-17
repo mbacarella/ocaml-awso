@@ -44,10 +44,14 @@ type ('i, 'o, 'e) t =
   | ListAnomaliesForInsight: (ListAnomaliesForInsightRequest.t,
   ListAnomaliesForInsightResponse.t, ListAnomaliesForInsightResponse.error) t
   
+  | ListAnomalousLogGroups: (ListAnomalousLogGroupsRequest.t,
+  ListAnomalousLogGroupsResponse.t, ListAnomalousLogGroupsResponse.error) t 
   | ListEvents: (ListEventsRequest.t, ListEventsResponse.t,
   ListEventsResponse.error) t 
   | ListInsights: (ListInsightsRequest.t, ListInsightsResponse.t,
   ListInsightsResponse.error) t 
+  | ListMonitoredResources: (ListMonitoredResourcesRequest.t,
+  ListMonitoredResourcesResponse.t, ListMonitoredResourcesResponse.error) t 
   | ListNotificationChannels: (ListNotificationChannelsRequest.t,
   ListNotificationChannelsResponse.t, ListNotificationChannelsResponse.error)
   t 
@@ -95,8 +99,10 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetCostEstimation -> `GET
   | GetResourceCollection -> `GET
   | ListAnomaliesForInsight -> `POST
+  | ListAnomalousLogGroups -> `POST
   | ListEvents -> `POST
   | ListInsights -> `POST
+  | ListMonitoredResources -> `POST
   | ListNotificationChannels -> `POST
   | ListOrganizationInsights -> `POST
   | ListRecommendations -> `POST
@@ -177,8 +183,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListAnomaliesForInsight ->
           (Format.kasprintf Uri.of_string) "/anomalies/insight/%s"
             (InsightId.to_header x.ListAnomaliesForInsightRequest.insightId)
+      | ListAnomalousLogGroups ->
+          (Format.kasprintf Uri.of_string) "/list-log-anomalies"
       | ListEvents -> (Format.kasprintf Uri.of_string) "/events"
       | ListInsights -> (Format.kasprintf Uri.of_string) "/insights"
+      | ListMonitoredResources ->
+          (Format.kasprintf Uri.of_string) "/monitoredResources"
       | ListNotificationChannels ->
           (Format.kasprintf Uri.of_string) "/channels"
       | ListOrganizationInsights ->
@@ -391,7 +401,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("NextToken", (UuidNextToken.to_value x)));
                       Option.map req.ListAnomaliesForInsightRequest.accountId
-                        ~f:(fun x -> ("AccountId", (AwsAccountId.to_value x)))])
+                        ~f:(fun x -> ("AccountId", (AwsAccountId.to_value x)));
+                      Option.map req.ListAnomaliesForInsightRequest.filters
+                        ~f:(fun x ->
+                              ("Filters",
+                                (ListAnomaliesForInsightFilters.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAnomalousLogGroups ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InsightId",
+                           (InsightId.to_value
+                              req.ListAnomalousLogGroupsRequest.insightId));
+                      Option.map req.ListAnomalousLogGroupsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults",
+                                (ListAnomalousLogGroupsMaxResults.to_value x)));
+                      Option.map req.ListAnomalousLogGroupsRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (UuidNextToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -446,6 +487,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("MaxResults",
                                 (ListInsightsMaxResults.to_value x)));
                       Option.map req.ListInsightsRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (UuidNextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListMonitoredResources ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListMonitoredResourcesRequest.filters
+                         ~f:(fun x ->
+                               ("Filters",
+                                 (ListMonitoredResourcesFilters.to_value x)));
+                      Option.map req.ListMonitoredResourcesRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults",
+                                (ListMonitoredResourcesMaxResults.to_value x)));
+                      Option.map req.ListMonitoredResourcesRequest.nextToken
                         ~f:(fun x ->
                               ("NextToken", (UuidNextToken.to_value x)))])
                    ~f:(fun (x, y) ->
@@ -799,6 +867,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListAnomaliesForInsightResponse.error_of_json))
+  | ListAnomalousLogGroups ->
+      if is_success
+      then
+        Ok (ListAnomalousLogGroupsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAnomalousLogGroupsResponse.error_of_json))
   | ListEvents ->
       if is_success
       then Ok (ListEventsResponse.of_json (response_to_json resp))
@@ -807,6 +883,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListInsightsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListInsightsResponse.error_of_json))
+  | ListMonitoredResources ->
+      if is_success
+      then
+        Ok (ListMonitoredResourcesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListMonitoredResourcesResponse.error_of_json))
   | ListNotificationChannels ->
       if is_success
       then

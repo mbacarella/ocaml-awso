@@ -7,6 +7,8 @@ type ('i, 'o, 'e) t =
   | AssociateDiscoveredResource: (AssociateDiscoveredResourceRequest.t,
   AssociateDiscoveredResourceResult.t,
   AssociateDiscoveredResourceResult.error) t 
+  | AssociateSourceResource: (AssociateSourceResourceRequest.t,
+  AssociateSourceResourceResult.t, AssociateSourceResourceResult.error) t 
   | CreateProgressUpdateStream: (CreateProgressUpdateStreamRequest.t,
   CreateProgressUpdateStreamResult.t, CreateProgressUpdateStreamResult.error)
   t 
@@ -23,6 +25,9 @@ type ('i, 'o, 'e) t =
   | DisassociateDiscoveredResource: (DisassociateDiscoveredResourceRequest.t,
   DisassociateDiscoveredResourceResult.t,
   DisassociateDiscoveredResourceResult.error) t 
+  | DisassociateSourceResource: (DisassociateSourceResourceRequest.t,
+  DisassociateSourceResourceResult.t, DisassociateSourceResourceResult.error)
+  t 
   | ImportMigrationTask: (ImportMigrationTaskRequest.t,
   ImportMigrationTaskResult.t, ImportMigrationTaskResult.error) t 
   | ListApplicationStates: (ListApplicationStatesRequest.t,
@@ -31,11 +36,15 @@ type ('i, 'o, 'e) t =
   ListCreatedArtifactsResult.t, ListCreatedArtifactsResult.error) t 
   | ListDiscoveredResources: (ListDiscoveredResourcesRequest.t,
   ListDiscoveredResourcesResult.t, ListDiscoveredResourcesResult.error) t 
+  | ListMigrationTaskUpdates: (ListMigrationTaskUpdatesRequest.t,
+  ListMigrationTaskUpdatesResult.t, ListMigrationTaskUpdatesResult.error) t 
   | ListMigrationTasks: (ListMigrationTasksRequest.t,
   ListMigrationTasksResult.t, ListMigrationTasksResult.error) t 
   | ListProgressUpdateStreams: (ListProgressUpdateStreamsRequest.t,
   ListProgressUpdateStreamsResult.t, ListProgressUpdateStreamsResult.error) t
   
+  | ListSourceResources: (ListSourceResourcesRequest.t,
+  ListSourceResourcesResult.t, ListSourceResourcesResult.error) t 
   | NotifyApplicationState: (NotifyApplicationStateRequest.t,
   NotifyApplicationStateResult.t, NotifyApplicationStateResult.error) t 
   | NotifyMigrationTaskState: (NotifyMigrationTaskStateRequest.t,
@@ -46,18 +55,22 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AssociateCreatedArtifact -> `POST
   | AssociateDiscoveredResource -> `POST
+  | AssociateSourceResource -> `POST
   | CreateProgressUpdateStream -> `POST
   | DeleteProgressUpdateStream -> `POST
   | DescribeApplicationState -> `POST
   | DescribeMigrationTask -> `POST
   | DisassociateCreatedArtifact -> `POST
   | DisassociateDiscoveredResource -> `POST
+  | DisassociateSourceResource -> `POST
   | ImportMigrationTask -> `POST
   | ListApplicationStates -> `POST
   | ListCreatedArtifacts -> `POST
   | ListDiscoveredResources -> `POST
+  | ListMigrationTaskUpdates -> `POST
   | ListMigrationTasks -> `POST
   | ListProgressUpdateStreams -> `POST
+  | ListSourceResources -> `POST
   | NotifyApplicationState -> `POST
   | NotifyMigrationTaskState -> `POST
   | PutResourceAttributes -> `POST
@@ -66,6 +79,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       match endpoint with
       | AssociateCreatedArtifact -> (Format.kasprintf Uri.of_string) "/"
       | AssociateDiscoveredResource -> (Format.kasprintf Uri.of_string) "/"
+      | AssociateSourceResource -> (Format.kasprintf Uri.of_string) "/"
       | CreateProgressUpdateStream -> (Format.kasprintf Uri.of_string) "/"
       | DeleteProgressUpdateStream -> (Format.kasprintf Uri.of_string) "/"
       | DescribeApplicationState -> (Format.kasprintf Uri.of_string) "/"
@@ -73,12 +87,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DisassociateCreatedArtifact -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateDiscoveredResource ->
           (Format.kasprintf Uri.of_string) "/"
+      | DisassociateSourceResource -> (Format.kasprintf Uri.of_string) "/"
       | ImportMigrationTask -> (Format.kasprintf Uri.of_string) "/"
       | ListApplicationStates -> (Format.kasprintf Uri.of_string) "/"
       | ListCreatedArtifacts -> (Format.kasprintf Uri.of_string) "/"
       | ListDiscoveredResources -> (Format.kasprintf Uri.of_string) "/"
+      | ListMigrationTaskUpdates -> (Format.kasprintf Uri.of_string) "/"
       | ListMigrationTasks -> (Format.kasprintf Uri.of_string) "/"
       | ListProgressUpdateStreams -> (Format.kasprintf Uri.of_string) "/"
+      | ListSourceResources -> (Format.kasprintf Uri.of_string) "/"
       | NotifyApplicationState -> (Format.kasprintf Uri.of_string) "/"
       | NotifyMigrationTaskState -> (Format.kasprintf Uri.of_string) "/"
       | PutResourceAttributes -> (Format.kasprintf Uri.of_string) "/")
@@ -100,6 +117,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSMigrationHub.AssociateDiscoveredResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | AssociateSourceResource ->
+      let json = AssociateSourceResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSMigrationHub.AssociateSourceResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateProgressUpdateStream ->
       let json = CreateProgressUpdateStreamRequest.to_json req in
@@ -149,6 +174,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSMigrationHub.DisassociateDiscoveredResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DisassociateSourceResource ->
+      let json = DisassociateSourceResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSMigrationHub.DisassociateSourceResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ImportMigrationTask ->
       let json = ImportMigrationTaskRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -181,6 +214,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSMigrationHub.ListDiscoveredResources")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListMigrationTaskUpdates ->
+      let json = ListMigrationTaskUpdatesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSMigrationHub.ListMigrationTaskUpdates")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListMigrationTasks ->
       let json = ListMigrationTasksRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -196,6 +237,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSMigrationHub.ListProgressUpdateStreams")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListSourceResources ->
+      let json = ListSourceResourcesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSMigrationHub.ListSourceResources")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | NotifyApplicationState ->
       let json = NotifyApplicationStateRequest.to_json req in
@@ -262,6 +311,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AssociateDiscoveredResourceResult.error_of_json))
+  | AssociateSourceResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AssociateSourceResourceResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some AssociateSourceResourceResult.error_of_json))
   | CreateProgressUpdateStream ->
       if is_success
       then
@@ -315,6 +372,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DisassociateDiscoveredResourceResult.error_of_json))
+  | DisassociateSourceResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisassociateSourceResourceResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateSourceResourceResult.error_of_json))
   | ImportMigrationTask ->
       if is_success
       then
@@ -347,6 +413,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListDiscoveredResourcesResult.error_of_json))
+  | ListMigrationTaskUpdates ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMigrationTaskUpdatesResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListMigrationTaskUpdatesResult.error_of_json))
   | ListMigrationTasks ->
       if is_success
       then
@@ -363,6 +438,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListProgressUpdateStreamsResult.error_of_json))
+  | ListSourceResources ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListSourceResourcesResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListSourceResourcesResult.error_of_json))
   | NotifyApplicationState ->
       if is_success
       then

@@ -8,6 +8,8 @@ type ('i, 'o, 'e) t =
   AttachLoadBalancerTargetGroupsResultType.error) t 
   | AttachLoadBalancers: (AttachLoadBalancersType.t,
   AttachLoadBalancersResultType.t, AttachLoadBalancersResultType.error) t 
+  | AttachTrafficSources: (AttachTrafficSourcesType.t,
+  AttachTrafficSourcesResultType.t, AttachTrafficSourcesResultType.error) t 
   | BatchDeleteScheduledAction: (BatchDeleteScheduledActionType.t,
   BatchDeleteScheduledActionAnswer.t, BatchDeleteScheduledActionAnswer.error)
   t 
@@ -80,6 +82,8 @@ type ('i, 'o, 'e) t =
   | DescribeTerminationPolicyTypes: (unit,
   DescribeTerminationPolicyTypesAnswer.t,
   DescribeTerminationPolicyTypesAnswer.error) t 
+  | DescribeTrafficSources: (DescribeTrafficSourcesRequest.t,
+  DescribeTrafficSourcesResponse.t, DescribeTrafficSourcesResponse.error) t 
   | DescribeWarmPool: (DescribeWarmPoolType.t, DescribeWarmPoolAnswer.t,
   DescribeWarmPoolAnswer.error) t 
   | DetachInstances: (DetachInstancesQuery.t, DetachInstancesAnswer.t,
@@ -89,6 +93,8 @@ type ('i, 'o, 'e) t =
   DetachLoadBalancerTargetGroupsResultType.error) t 
   | DetachLoadBalancers: (DetachLoadBalancersType.t,
   DetachLoadBalancersResultType.t, DetachLoadBalancersResultType.error) t 
+  | DetachTrafficSources: (DetachTrafficSourcesType.t,
+  DetachTrafficSourcesResultType.t, DetachTrafficSourcesResultType.error) t 
   | DisableMetricsCollection: (DisableMetricsCollectionQuery.t, unit, 
   unit) t 
   | EnableMetricsCollection: (EnableMetricsCollectionQuery.t, unit, unit) t 
@@ -100,6 +106,8 @@ type ('i, 'o, 'e) t =
   | GetPredictiveScalingForecast: (GetPredictiveScalingForecastType.t,
   GetPredictiveScalingForecastAnswer.t,
   GetPredictiveScalingForecastAnswer.error) t 
+  | LaunchInstances: (LaunchInstancesRequest.t, LaunchInstancesResult.t,
+  LaunchInstancesResult.error) t 
   | PutLifecycleHook: (PutLifecycleHookType.t, PutLifecycleHookAnswer.t,
   PutLifecycleHookAnswer.error) t 
   | PutNotificationConfiguration: (PutNotificationConfigurationType.t, 
@@ -114,6 +122,8 @@ type ('i, 'o, 'e) t =
   RecordLifecycleActionHeartbeatAnswer.t,
   RecordLifecycleActionHeartbeatAnswer.error) t 
   | ResumeProcesses: (ScalingProcessQuery.t, unit, unit) t 
+  | RollbackInstanceRefresh: (RollbackInstanceRefreshType.t,
+  RollbackInstanceRefreshAnswer.t, RollbackInstanceRefreshAnswer.error) t 
   | SetDesiredCapacity: (SetDesiredCapacityType.t, unit, unit) t 
   | SetInstanceHealth: (SetInstanceHealthQuery.t, unit, unit) t 
   | SetInstanceProtection: (SetInstanceProtectionQuery.t,
@@ -130,6 +140,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | AttachInstances -> `POST
   | AttachLoadBalancerTargetGroups -> `POST
   | AttachLoadBalancers -> `POST
+  | AttachTrafficSources -> `POST
   | BatchDeleteScheduledAction -> `POST
   | BatchPutScheduledUpdateGroupAction -> `POST
   | CancelInstanceRefresh -> `POST
@@ -164,16 +175,19 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeScheduledActions -> `POST
   | DescribeTags -> `POST
   | DescribeTerminationPolicyTypes -> `POST
+  | DescribeTrafficSources -> `POST
   | DescribeWarmPool -> `POST
   | DetachInstances -> `POST
   | DetachLoadBalancerTargetGroups -> `POST
   | DetachLoadBalancers -> `POST
+  | DetachTrafficSources -> `POST
   | DisableMetricsCollection -> `POST
   | EnableMetricsCollection -> `POST
   | EnterStandby -> `POST
   | ExecutePolicy -> `POST
   | ExitStandby -> `POST
   | GetPredictiveScalingForecast -> `POST
+  | LaunchInstances -> `POST
   | PutLifecycleHook -> `POST
   | PutNotificationConfiguration -> `POST
   | PutScalingPolicy -> `POST
@@ -181,6 +195,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | PutWarmPool -> `POST
   | RecordLifecycleActionHeartbeat -> `POST
   | ResumeProcesses -> `POST
+  | RollbackInstanceRefresh -> `POST
   | SetDesiredCapacity -> `POST
   | SetInstanceHealth -> `POST
   | SetInstanceProtection -> `POST
@@ -195,6 +210,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | AttachLoadBalancerTargetGroups ->
           (Format.kasprintf Uri.of_string) "/"
       | AttachLoadBalancers -> (Format.kasprintf Uri.of_string) "/"
+      | AttachTrafficSources -> (Format.kasprintf Uri.of_string) "/"
       | BatchDeleteScheduledAction -> (Format.kasprintf Uri.of_string) "/"
       | BatchPutScheduledUpdateGroupAction ->
           (Format.kasprintf Uri.of_string) "/"
@@ -235,17 +251,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeTags -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTerminationPolicyTypes ->
           (Format.kasprintf Uri.of_string) "/"
+      | DescribeTrafficSources -> (Format.kasprintf Uri.of_string) "/"
       | DescribeWarmPool -> (Format.kasprintf Uri.of_string) "/"
       | DetachInstances -> (Format.kasprintf Uri.of_string) "/"
       | DetachLoadBalancerTargetGroups ->
           (Format.kasprintf Uri.of_string) "/"
       | DetachLoadBalancers -> (Format.kasprintf Uri.of_string) "/"
+      | DetachTrafficSources -> (Format.kasprintf Uri.of_string) "/"
       | DisableMetricsCollection -> (Format.kasprintf Uri.of_string) "/"
       | EnableMetricsCollection -> (Format.kasprintf Uri.of_string) "/"
       | EnterStandby -> (Format.kasprintf Uri.of_string) "/"
       | ExecutePolicy -> (Format.kasprintf Uri.of_string) "/"
       | ExitStandby -> (Format.kasprintf Uri.of_string) "/"
       | GetPredictiveScalingForecast -> (Format.kasprintf Uri.of_string) "/"
+      | LaunchInstances -> (Format.kasprintf Uri.of_string) "/"
       | PutLifecycleHook -> (Format.kasprintf Uri.of_string) "/"
       | PutNotificationConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | PutScalingPolicy -> (Format.kasprintf Uri.of_string) "/"
@@ -254,6 +273,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | RecordLifecycleActionHeartbeat ->
           (Format.kasprintf Uri.of_string) "/"
       | ResumeProcesses -> (Format.kasprintf Uri.of_string) "/"
+      | RollbackInstanceRefresh -> (Format.kasprintf Uri.of_string) "/"
       | SetDesiredCapacity -> (Format.kasprintf Uri.of_string) "/"
       | SetInstanceHealth -> (Format.kasprintf Uri.of_string) "/"
       | SetInstanceProtection -> (Format.kasprintf Uri.of_string) "/"
@@ -302,6 +322,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["AttachLoadBalancers"]); ("Version", [apiVersion])] in
         let query =
           (AttachLoadBalancersType.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | AttachTrafficSources ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["AttachTrafficSources"]); ("Version", [apiVersion])] in
+        let query =
+          (AttachTrafficSourcesType.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | BatchDeleteScheduledAction ->
@@ -707,6 +739,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
              "application/x-www-form-urlencoded; charset=utf-8")] in
       let body = None in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeTrafficSources ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeTrafficSources"]); ("Version", [apiVersion])] in
+        let query =
+          (DescribeTrafficSourcesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeWarmPool ->
       let headers =
         Awso.Http.Headers.of_list
@@ -755,6 +800,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DetachLoadBalancers"]); ("Version", [apiVersion])] in
         let query =
           (DetachLoadBalancersType.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DetachTrafficSources ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DetachTrafficSources"]); ("Version", [apiVersion])] in
+        let query =
+          (DetachTrafficSourcesType.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DisableMetricsCollection ->
@@ -830,6 +887,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let query =
           (GetPredictiveScalingForecastType.to_query req) |>
             Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | LaunchInstances ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["LaunchInstances"]); ("Version", [apiVersion])] in
+        let query =
+          (LaunchInstancesRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | PutLifecycleHook ->
@@ -919,6 +988,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["ResumeProcesses"]); ("Version", [apiVersion])] in
         let query =
           (ScalingProcessQuery.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | RollbackInstanceRefresh ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["RollbackInstanceRefresh"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (RollbackInstanceRefreshType.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | SetDesiredCapacity ->
@@ -1059,6 +1142,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some AttachLoadBalancersResultType.error_of_xml))
+  | AttachTrafficSources ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (AttachTrafficSourcesResultType.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some AttachTrafficSourcesResultType.error_of_xml))
   | BatchDeleteScheduledAction ->
       if is_success
       then
@@ -1268,6 +1359,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeTerminationPolicyTypesAnswer.error_of_xml))
+  | DescribeTrafficSources ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeTrafficSourcesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeTrafficSourcesResponse.error_of_xml))
   | DescribeWarmPool ->
       if is_success
       then
@@ -1297,6 +1396,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DetachLoadBalancersResultType.error_of_xml))
+  | DetachTrafficSources ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DetachTrafficSourcesResultType.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DetachTrafficSourcesResultType.error_of_xml))
   | DisableMetricsCollection ->
       if is_success then Ok () else Error (parse_aws_error None)
   | EnableMetricsCollection ->
@@ -1324,6 +1431,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetPredictiveScalingForecastAnswer.error_of_xml))
+  | LaunchInstances ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (LaunchInstancesResult.of_xml xml)
+      else Error (parse_aws_error (Some LaunchInstancesResult.error_of_xml))
   | PutLifecycleHook ->
       if is_success
       then
@@ -1357,6 +1470,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
              (Some RecordLifecycleActionHeartbeatAnswer.error_of_xml))
   | ResumeProcesses ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | RollbackInstanceRefresh ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RollbackInstanceRefreshAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some RollbackInstanceRefreshAnswer.error_of_xml))
   | SetDesiredCapacity ->
       if is_success then Ok () else Error (parse_aws_error None)
   | SetInstanceHealth ->

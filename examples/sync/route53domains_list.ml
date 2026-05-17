@@ -12,8 +12,10 @@ let () =
     prerr_endline ("list_domains failed: " ^ s);
     exit 1
   | Ok response ->
-    Printf.printf "%d registered domain(s):\n" (List.length response.domains);
+    let domains = Option.value response.domains ~default:[] in
+    Printf.printf "%d registered domain(s):\n" (List.length domains);
     List.iter
-      (fun (d : RD.DomainSummary.t) -> Printf.printf "  %s\n" (d.domainName :> string))
-      response.domains
+      (fun (d : RD.DomainSummary.t) ->
+         Printf.printf "  %s\n" (Option.value d.domainName ~default:"<none>"))
+      domains
 ;;

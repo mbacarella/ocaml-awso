@@ -53,16 +53,76 @@ module AdditionalArtifact =
     let of_json j = of_string (string_of_json ~kind:"AdditionalArtifact" j)
     let to_json = simple_to_json to_value
   end
+module LastDelivery =
+  struct
+    type nonrec t = string
+    let context_ = "LastDelivery"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:16) >>=
+             (fun () ->
+                (check_string_max i ~max:20) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[0-9]{8}[T][0-9]{6}([Z]|[+-][0-9]{4})")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LastDelivery" j
+    let to_json = simple_to_json to_value
+  end
+module LastStatus =
+  struct
+    type nonrec t =
+      | SUCCESS 
+      | ERROR_PERMISSIONS 
+      | ERROR_NO_BUCKET 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUCCESS -> "SUCCESS"
+      | ERROR_PERMISSIONS -> "ERROR_PERMISSIONS"
+      | ERROR_NO_BUCKET -> "ERROR_NO_BUCKET"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUCCESS" -> SUCCESS
+      | "ERROR_PERMISSIONS" -> ERROR_PERMISSIONS
+      | "ERROR_NO_BUCKET" -> ERROR_NO_BUCKET
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LastStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LastStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module SchemaElement =
   struct
     type nonrec t =
       | RESOURCES 
+      | SPLIT_COST_ALLOCATION_DATA 
+      | MANUAL_DISCOUNT_COMPATIBILITY 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | RESOURCES -> "RESOURCES" | Non_static_id s -> s
+      function
+      | RESOURCES -> "RESOURCES"
+      | SPLIT_COST_ALLOCATION_DATA -> "SPLIT_COST_ALLOCATION_DATA"
+      | MANUAL_DISCOUNT_COMPATIBILITY -> "MANUAL_DISCOUNT_COMPATIBILITY"
+      | Non_static_id s -> s
     let of_string =
-      function | "RESOURCES" -> RESOURCES | x -> Non_static_id x
+      function
+      | "RESOURCES" -> RESOURCES
+      | "SPLIT_COST_ALLOCATION_DATA" -> SPLIT_COST_ALLOCATION_DATA
+      | "MANUAL_DISCOUNT_COMPATIBILITY" -> MANUAL_DISCOUNT_COMPATIBILITY
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -71,24 +131,69 @@ module SchemaElement =
     let of_json j = of_string (string_of_json ~kind:"SchemaElement" j)
     let to_json = simple_to_json to_value
   end
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
 module AWSRegion =
   struct
     type nonrec t =
       | Af_south_1 
       | Ap_east_1 
       | Ap_south_1 
+      | Ap_south_2 
       | Ap_southeast_1 
       | Ap_southeast_2 
+      | Ap_southeast_3 
       | Ap_northeast_1 
       | Ap_northeast_2 
       | Ap_northeast_3 
       | Ca_central_1 
       | Eu_central_1 
+      | Eu_central_2 
       | Eu_west_1 
       | Eu_west_2 
       | Eu_west_3 
       | Eu_north_1 
       | Eu_south_1 
+      | Eu_south_2 
+      | Me_central_1 
       | Me_south_1 
       | Sa_east_1 
       | Us_east_1 
@@ -104,18 +209,23 @@ module AWSRegion =
       | Af_south_1 -> "af-south-1"
       | Ap_east_1 -> "ap-east-1"
       | Ap_south_1 -> "ap-south-1"
+      | Ap_south_2 -> "ap-south-2"
       | Ap_southeast_1 -> "ap-southeast-1"
       | Ap_southeast_2 -> "ap-southeast-2"
+      | Ap_southeast_3 -> "ap-southeast-3"
       | Ap_northeast_1 -> "ap-northeast-1"
       | Ap_northeast_2 -> "ap-northeast-2"
       | Ap_northeast_3 -> "ap-northeast-3"
       | Ca_central_1 -> "ca-central-1"
       | Eu_central_1 -> "eu-central-1"
+      | Eu_central_2 -> "eu-central-2"
       | Eu_west_1 -> "eu-west-1"
       | Eu_west_2 -> "eu-west-2"
       | Eu_west_3 -> "eu-west-3"
       | Eu_north_1 -> "eu-north-1"
       | Eu_south_1 -> "eu-south-1"
+      | Eu_south_2 -> "eu-south-2"
+      | Me_central_1 -> "me-central-1"
       | Me_south_1 -> "me-south-1"
       | Sa_east_1 -> "sa-east-1"
       | Us_east_1 -> "us-east-1"
@@ -130,18 +240,23 @@ module AWSRegion =
       | "af-south-1" -> Af_south_1
       | "ap-east-1" -> Ap_east_1
       | "ap-south-1" -> Ap_south_1
+      | "ap-south-2" -> Ap_south_2
       | "ap-southeast-1" -> Ap_southeast_1
       | "ap-southeast-2" -> Ap_southeast_2
+      | "ap-southeast-3" -> Ap_southeast_3
       | "ap-northeast-1" -> Ap_northeast_1
       | "ap-northeast-2" -> Ap_northeast_2
       | "ap-northeast-3" -> Ap_northeast_3
       | "ca-central-1" -> Ca_central_1
       | "eu-central-1" -> Eu_central_1
+      | "eu-central-2" -> Eu_central_2
       | "eu-west-1" -> Eu_west_1
       | "eu-west-2" -> Eu_west_2
       | "eu-west-3" -> Eu_west_3
       | "eu-north-1" -> Eu_north_1
       | "eu-south-1" -> Eu_south_1
+      | "eu-south-2" -> Eu_south_2
+      | "me-central-1" -> Me_central_1
       | "me-south-1" -> Me_south_1
       | "sa-east-1" -> Sa_east_1
       | "us-east-1" -> Us_east_1
@@ -163,6 +278,9 @@ module AdditionalArtifactList =
   struct
     type nonrec t = AdditionalArtifact.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AdditionalArtifact.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -291,6 +409,37 @@ module ReportName =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "The name of the report that you want to create. The name must be unique, is case sensitive, and can't include spaces."]
+module ReportStatus =
+  struct
+    type nonrec t =
+      {
+      lastDelivery: LastDelivery.t option
+        [@ocaml.doc "A timestamp that gives the date of a report delivery."];
+      lastStatus: LastStatus.t option
+        [@ocaml.doc "An enum that gives the status of a report delivery."]}
+    let make ?lastDelivery =
+      fun ?lastStatus -> fun () -> { lastDelivery; lastStatus }
+    let to_value x =
+      structure_to_value
+        [("lastDelivery",
+           (Option.map x.lastDelivery ~f:LastDelivery.to_value));
+        ("lastStatus", (Option.map x.lastStatus ~f:LastStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastStatus =
+        (Option.map ~f:LastStatus.of_xml) (Xml.child xml_arg0 "lastStatus") in
+      let lastDelivery =
+        (Option.map ~f:LastDelivery.of_xml)
+          (Xml.child xml_arg0 "lastDelivery") in
+      make ?lastStatus ?lastDelivery ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastStatus = field_map json__ "lastStatus" LastStatus.of_json in
+      let lastDelivery = field_map json__ "lastDelivery" LastDelivery.of_json in
+      make ?lastStatus ?lastDelivery ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A two element dictionary with a lastDelivery and lastStatus key whose values describe the date and status of the last delivered report for a particular report definition."]
 module ReportVersioning =
   struct
     type nonrec t =
@@ -319,7 +468,7 @@ module ReportVersioning =
 module S3Bucket =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "The S3 bucket where AWS delivers the report."]
+                            "The S3 bucket where Amazon Web Services delivers the report."]
     let context_ = "S3Bucket"
     let make i =
       let open Result in
@@ -334,11 +483,12 @@ module S3Bucket =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"S3Bucket" j
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The S3 bucket where AWS delivers the report."]
+  end[@@ocaml.doc
+       "The S3 bucket where Amazon Web Services delivers the report."]
 module S3Prefix =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "The prefix that AWS adds to the report name when AWS delivers the report. Your prefix can't include spaces."]
+                            "The prefix that Amazon Web Services adds to the report name when Amazon Web Services delivers the report. Your prefix can't include spaces."]
     let context_ = "S3Prefix"
     let make i =
       let open Result in
@@ -354,11 +504,14 @@ module S3Prefix =
     let of_json j = string_of_json ~kind:"S3Prefix" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "The prefix that AWS adds to the report name when AWS delivers the report. Your prefix can't include spaces."]
+       "The prefix that Amazon Web Services adds to the report name when Amazon Web Services delivers the report. Your prefix can't include spaces."]
 module SchemaElementList =
   struct
     type nonrec t = SchemaElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SchemaElement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -421,6 +574,37 @@ module ErrorMessage =
     let of_json j = string_of_json ~kind:"ErrorMessage" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "A message to show the detail of the exception."]
+module Tag =
+  struct
+    type nonrec t =
+      {
+      key: TagKey.t
+        [@ocaml.doc
+          "The key of the tag. Tag keys are case sensitive. Each report definition can only have up to one tag with the same key. If you try to add an existing tag with the same key, the existing tag value will be updated to the new value."];
+      value: TagValue.t
+        [@ocaml.doc
+          "The value of the tag. Tag values are case-sensitive. This can be an empty string."]}
+    let context_ = "Tag"
+    let make ~key = fun ~value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (TagKey.to_value x.key)));
+        ("Value", (Some (TagValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        TagValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let key =
+        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
+      make ~value ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a tag. A tag is a key-value pair. You can add up to 50 tags to a report definition."]
 module ReportDefinition =
   struct
     type nonrec t =
@@ -446,35 +630,39 @@ module ReportDefinition =
           "Whether you want Amazon Web Services to overwrite the previous version of each report or to deliver the report in addition to the previous versions."];
       billingViewArn: BillingViewArn.t option
         [@ocaml.doc
-          "The Amazon resource name of the billing view. You can get this value by using the billing view service public APIs."]}
+          "The Amazon resource name of the billing view. The BillingViewArn is needed to create Amazon Web Services Cost and Usage Report for each billing group maintained in the Amazon Web Services Billing Conductor service. The BillingViewArn for a billing group can be constructed as: arn:aws:billing::payer-account-id:billingview/billing-group-primary-account-id"];
+      reportStatus: ReportStatus.t option
+        [@ocaml.doc "The status of the report."]}
     let context_ = "ReportDefinition"
     let make ?additionalArtifacts =
       fun ?refreshClosedReports ->
         fun ?reportVersioning ->
           fun ?billingViewArn ->
-            fun ~reportName ->
-              fun ~timeUnit ->
-                fun ~format ->
-                  fun ~compression ->
-                    fun ~additionalSchemaElements ->
-                      fun ~s3Bucket ->
-                        fun ~s3Prefix ->
-                          fun ~s3Region ->
-                            fun () ->
-                              {
-                                additionalArtifacts;
-                                refreshClosedReports;
-                                reportVersioning;
-                                billingViewArn;
-                                reportName;
-                                timeUnit;
-                                format;
-                                compression;
-                                additionalSchemaElements;
-                                s3Bucket;
-                                s3Prefix;
-                                s3Region
-                              }
+            fun ?reportStatus ->
+              fun ~reportName ->
+                fun ~timeUnit ->
+                  fun ~format ->
+                    fun ~compression ->
+                      fun ~additionalSchemaElements ->
+                        fun ~s3Bucket ->
+                          fun ~s3Prefix ->
+                            fun ~s3Region ->
+                              fun () ->
+                                {
+                                  additionalArtifacts;
+                                  refreshClosedReports;
+                                  reportVersioning;
+                                  billingViewArn;
+                                  reportStatus;
+                                  reportName;
+                                  timeUnit;
+                                  format;
+                                  compression;
+                                  additionalSchemaElements;
+                                  s3Bucket;
+                                  s3Prefix;
+                                  s3Region
+                                }
     let to_value x =
       structure_to_value
         [("ReportName", (Some (ReportName.to_value x.reportName)));
@@ -494,9 +682,14 @@ module ReportDefinition =
         ("ReportVersioning",
           (Option.map x.reportVersioning ~f:ReportVersioning.to_value));
         ("BillingViewArn",
-          (Option.map x.billingViewArn ~f:BillingViewArn.to_value))]
+          (Option.map x.billingViewArn ~f:BillingViewArn.to_value));
+        ("ReportStatus",
+          (Option.map x.reportStatus ~f:ReportStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let reportStatus =
+        (Option.map ~f:ReportStatus.of_xml)
+          (Xml.child xml_arg0 "ReportStatus") in
       let billingViewArn =
         (Option.map ~f:BillingViewArn.of_xml)
           (Xml.child xml_arg0 "BillingViewArn") in
@@ -531,58 +724,39 @@ module ReportDefinition =
       let reportName =
         ReportName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReportName") in
-      make ?billingViewArn ?reportVersioning ?refreshClosedReports
-        ?additionalArtifacts ~s3Region ~s3Prefix ~s3Bucket
-        ~additionalSchemaElements ~compression ~format ~timeUnit ~reportName
-        ()
+      make ?reportStatus ?billingViewArn ?reportVersioning
+        ?refreshClosedReports ?additionalArtifacts ~s3Region ~s3Prefix
+        ~s3Bucket ~additionalSchemaElements ~compression ~format ~timeUnit
+        ~reportName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let reportStatus = field_map json__ "ReportStatus" ReportStatus.of_json in
       let billingViewArn =
-        field_map json "BillingViewArn" BillingViewArn.of_json in
+        field_map json__ "BillingViewArn" BillingViewArn.of_json in
       let reportVersioning =
-        field_map json "ReportVersioning" ReportVersioning.of_json in
+        field_map json__ "ReportVersioning" ReportVersioning.of_json in
       let refreshClosedReports =
-        field_map json "RefreshClosedReports" RefreshClosedReports.of_json in
+        field_map json__ "RefreshClosedReports" RefreshClosedReports.of_json in
       let additionalArtifacts =
-        field_map json "AdditionalArtifacts" AdditionalArtifactList.of_json in
-      let s3Region = field_map_exn json "S3Region" AWSRegion.of_json in
-      let s3Prefix = field_map_exn json "S3Prefix" S3Prefix.of_json in
-      let s3Bucket = field_map_exn json "S3Bucket" S3Bucket.of_json in
+        field_map json__ "AdditionalArtifacts" AdditionalArtifactList.of_json in
+      let s3Region = field_map_exn json__ "S3Region" AWSRegion.of_json in
+      let s3Prefix = field_map_exn json__ "S3Prefix" S3Prefix.of_json in
+      let s3Bucket = field_map_exn json__ "S3Bucket" S3Bucket.of_json in
       let additionalSchemaElements =
-        field_map_exn json "AdditionalSchemaElements"
+        field_map_exn json__ "AdditionalSchemaElements"
           SchemaElementList.of_json in
       let compression =
-        field_map_exn json "Compression" CompressionFormat.of_json in
-      let format = field_map_exn json "Format" ReportFormat.of_json in
-      let timeUnit = field_map_exn json "TimeUnit" TimeUnit.of_json in
-      let reportName = field_map_exn json "ReportName" ReportName.of_json in
-      make ?billingViewArn ?reportVersioning ?refreshClosedReports
-        ?additionalArtifacts ~s3Region ~s3Prefix ~s3Bucket
-        ~additionalSchemaElements ~compression ~format ~timeUnit ~reportName
-        ()
+        field_map_exn json__ "Compression" CompressionFormat.of_json in
+      let format = field_map_exn json__ "Format" ReportFormat.of_json in
+      let timeUnit = field_map_exn json__ "TimeUnit" TimeUnit.of_json in
+      let reportName = field_map_exn json__ "ReportName" ReportName.of_json in
+      make ?reportStatus ?billingViewArn ?reportVersioning
+        ?refreshClosedReports ?additionalArtifacts ~s3Region ~s3Prefix
+        ~s3Bucket ~additionalSchemaElements ~compression ~format ~timeUnit
+        ~reportName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The definition of AWS Cost and Usage Report. You can specify the report name, time unit, report format, compression format, S3 bucket, additional artifacts, and schema elements in the definition."]
-module DuplicateReportNameException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A report with the specified name already exists in the account. Specify a different report name."]
+       "The definition of Amazon Web Services Cost and Usage Report. You can specify the report name, time unit, report format, compression format, S3 bucket, additional artifacts, and schema elements in the definition."]
 module InternalErrorException =
   struct
     type nonrec t = {
@@ -597,13 +771,13 @@ module InternalErrorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An error on the server occurred during the processing of your request. Try again later."]
-module ReportLimitReachedException =
+module ResourceNotFoundException =
   struct
     type nonrec t = {
       message: ErrorMessage.t option }
@@ -617,12 +791,12 @@ module ReportLimitReachedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This account already has five reports defined. To define a new report, you must delete an existing report."]
+       "The specified report (ReportName) in the request doesn't exist."]
 module ValidationException =
   struct
     type nonrec t = {
@@ -637,12 +811,114 @@ module ValidationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The input fails to satisfy the constraints specified by an AWS service."]
+       "The input fails to satisfy the constraints specified by an Amazon Web Services service."]
+module TagKeyList =
+  struct
+    type nonrec t = TagKey.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TagKey.of_xml)
+    let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TagList =
+  struct
+    type nonrec t = Tag.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DuplicateReportNameException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A report with the specified name already exists in the account. Specify a different report name."]
+module ReportLimitReachedException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This account already has five reports defined. To define a new report, you must delete an existing report."]
 module GenericString =
   struct
     type nonrec t = string[@@ocaml.doc "A generic string."]
@@ -665,6 +941,9 @@ module ReportDefinitionList =
   struct
     type nonrec t = ReportDefinition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReportDefinition.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -689,7 +968,7 @@ module ReportDefinitionList =
 module MaxResults =
   struct
     type nonrec t = int[@@ocaml.doc
-                         "The maximum number of results that AWS returns for the operation."]
+                         "The maximum number of results that Amazon Web Services returns for the operation."]
     let make i =
       let open Result in
         ok_or_failwith
@@ -705,7 +984,7 @@ module MaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "The maximum number of results that AWS returns for the operation."]
+       "The maximum number of results that Amazon Web Services returns for the operation."]
 module DeleteResponseMessage =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -720,6 +999,183 @@ module DeleteResponseMessage =
     let of_json j = string_of_json ~kind:"DeleteResponseMessage" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "Whether the deletion was successful or not."]
+module UntagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalErrorException of InternalErrorException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Disassociates a set of tags from a report definition."]
+module UntagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      reportName: ReportName.t
+        [@ocaml.doc
+          "The report name of the report definition that tags are to be disassociated from."];
+      tagKeys: TagKeyList.t
+        [@ocaml.doc
+          "The tags to be disassociated from the report definition resource."]}
+    let context_ = "UntagResourceRequest"
+    let make ~reportName = fun ~tagKeys -> fun () -> { reportName; tagKeys }
+    let to_value x =
+      structure_to_value
+        [("ReportName", (Some (ReportName.to_value x.reportName)));
+        ("TagKeys", (Some (TagKeyList.to_value x.tagKeys)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tagKeys =
+        TagKeyList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TagKeys") in
+      let reportName =
+        ReportName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ReportName") in
+      make ~tagKeys ~reportName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let reportName = field_map_exn json__ "ReportName" ReportName.of_json in
+      make ~tagKeys ~reportName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Disassociates a set of tags from a report definition."]
+module TagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalErrorException of InternalErrorException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Associates a set of tags with a report definition."]
+module TagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      reportName: ReportName.t
+        [@ocaml.doc
+          "The report name of the report definition that tags are to be associated with."];
+      tags: TagList.t
+        [@ocaml.doc
+          "The tags to be assigned to the report definition resource."]}
+    let context_ = "TagResourceRequest"
+    let make ~reportName = fun ~tags -> fun () -> { reportName; tags }
+    let to_value x =
+      structure_to_value
+        [("ReportName", (Some (ReportName.to_value x.reportName)));
+        ("Tags", (Some (TagList.to_value x.tags)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
+      let reportName =
+        ReportName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ReportName") in
+      make ~tags ~reportName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let reportName = field_map_exn json__ "ReportName" ReportName.of_json in
+      make ~tags ~reportName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Associates a set of tags with a report definition."]
 module PutReportDefinitionResponse =
   struct
     type nonrec t = unit
@@ -727,6 +1183,7 @@ module PutReportDefinitionResponse =
       [ `DuplicateReportNameException of DuplicateReportNameException.t 
       | `InternalErrorException of InternalErrorException.t 
       | `ReportLimitReachedException of ReportLimitReachedException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
@@ -740,6 +1197,8 @@ module PutReportDefinitionResponse =
       | "ReportLimitReachedException" ->
           `ReportLimitReachedException
             (ReportLimitReachedException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -755,6 +1214,8 @@ module PutReportDefinitionResponse =
       | "ReportLimitReachedException" ->
           `ReportLimitReachedException
             (ReportLimitReachedException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -773,6 +1234,10 @@ module PutReportDefinitionResponse =
           `Assoc
             [("error", (`String "ReportLimitReachedException"));
             ("details", (ReportLimitReachedException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -797,24 +1262,31 @@ module PutReportDefinitionRequest =
       {
       reportDefinition: ReportDefinition.t
         [@ocaml.doc
-          "Represents the output of the PutReportDefinition operation. The content consists of the detailed metadata and data file information."]}
+          "Represents the output of the PutReportDefinition operation. The content consists of the detailed metadata and data file information."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "The tags to be assigned to the report definition resource."]}
     let context_ = "PutReportDefinitionRequest"
-    let make ~reportDefinition = fun () -> { reportDefinition }
+    let make ?tags =
+      fun ~reportDefinition -> fun () -> { tags; reportDefinition }
     let to_value x =
       structure_to_value
         [("ReportDefinition",
-           (Some (ReportDefinition.to_value x.reportDefinition)))]
+           (Some (ReportDefinition.to_value x.reportDefinition)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let reportDefinition =
         ReportDefinition.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReportDefinition") in
-      make ~reportDefinition ()
+      make ?tags ~reportDefinition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let reportDefinition =
-        field_map_exn json "ReportDefinition" ReportDefinition.of_json in
-      make ~reportDefinition ()
+        field_map_exn json__ "ReportDefinition" ReportDefinition.of_json in
+      make ?tags ~reportDefinition ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a Cost and Usage Report."]
 module ModifyReportDefinitionResponse =
@@ -865,7 +1337,7 @@ module ModifyReportDefinitionResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Allows you to programatically update your report preferences."]
+       "Allows you to programmatically update your report preferences."]
 module ModifyReportDefinitionRequest =
   struct
     type nonrec t =
@@ -890,21 +1362,110 @@ module ModifyReportDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ReportName") in
       make ~reportDefinition ~reportName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reportDefinition =
-        field_map_exn json "ReportDefinition" ReportDefinition.of_json in
-      let reportName = field_map_exn json "ReportName" ReportName.of_json in
+        field_map_exn json__ "ReportDefinition" ReportDefinition.of_json in
+      let reportName = field_map_exn json__ "ReportName" ReportName.of_json in
       make ~reportDefinition ~reportName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Allows you to programatically update your report preferences."]
+       "Allows you to programmatically update your report preferences."]
+module ListTagsForResourceResponse =
+  struct
+    type nonrec t =
+      {
+      tags: TagList.t option
+        [@ocaml.doc "The tags assigned to the report definition resource."]}
+    type nonrec error =
+      [ `InternalErrorException of InternalErrorException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tags = fun () -> { tags }
+    let error_of_json name json =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the tags associated with the specified report definition."]
+module ListTagsForResourceRequest =
+  struct
+    type nonrec t =
+      {
+      reportName: ReportName.t
+        [@ocaml.doc
+          "The report name of the report definition that tags are to be returned for."]}
+    let context_ = "ListTagsForResourceRequest"
+    let make ~reportName = fun () -> { reportName }
+    let to_value x =
+      structure_to_value
+        [("ReportName", (Some (ReportName.to_value x.reportName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reportName =
+        ReportName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ReportName") in
+      make ~reportName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reportName = field_map_exn json__ "ReportName" ReportName.of_json in
+      make ~reportName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the tags associated with the specified report definition."]
 module DescribeReportDefinitionsResponse =
   struct
     type nonrec t =
       {
       reportDefinitions: ReportDefinitionList.t option
         [@ocaml.doc
-          "A list of AWS Cost and Usage reports owned by the account."];
+          "An Amazon Web Services Cost and Usage Report list owned by the account."];
       nextToken: GenericString.t option }
     type nonrec error =
       [ `InternalErrorException of InternalErrorException.t 
@@ -949,10 +1510,10 @@ module DescribeReportDefinitionsResponse =
           (Xml.child xml_arg0 "ReportDefinitions") in
       make ?nextToken ?reportDefinitions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
       let reportDefinitions =
-        field_map json "ReportDefinitions" ReportDefinitionList.of_json in
+        field_map json__ "ReportDefinitions" ReportDefinitionList.of_json in
       make ?nextToken ?reportDefinitions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -977,13 +1538,13 @@ module DescribeReportDefinitionsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" GenericString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" GenericString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Requests a list of AWS Cost and Usage reports owned by the account."]
+       "Requests a Amazon Web Services Cost and Usage Report list owned by the account."]
 module DeleteReportDefinitionResponse =
   struct
     type nonrec t = {
@@ -1036,9 +1597,9 @@ module DeleteReportDefinitionResponse =
           (Xml.child xml_arg0 "ResponseMessage") in
       make ?responseMessage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let responseMessage =
-        field_map json "ResponseMessage" DeleteResponseMessage.of_json in
+        field_map json__ "ResponseMessage" DeleteResponseMessage.of_json in
       make ?responseMessage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1047,21 +1608,23 @@ module DeleteReportDefinitionRequest =
   struct
     type nonrec t =
       {
-      reportName: ReportName.t option
+      reportName: ReportName.t
         [@ocaml.doc
           "The name of the report that you want to delete. The name must be unique, is case sensitive, and can't include spaces."]}
-    let make ?reportName = fun () -> { reportName }
+    let context_ = "DeleteReportDefinitionRequest"
+    let make ~reportName = fun () -> { reportName }
     let to_value x =
       structure_to_value
-        [("ReportName", (Option.map x.reportName ~f:ReportName.to_value))]
+        [("ReportName", (Some (ReportName.to_value x.reportName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let reportName =
-        (Option.map ~f:ReportName.of_xml) (Xml.child xml_arg0 "ReportName") in
-      make ?reportName ()
+        ReportName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ReportName") in
+      make ~reportName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reportName = field_map json "ReportName" ReportName.of_json in
-      make ?reportName ()
+    let of_json json__ =
+      let reportName = field_map_exn json__ "ReportName" ReportName.of_json in
+      make ~reportName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified report."]

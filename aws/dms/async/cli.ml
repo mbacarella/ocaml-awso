@@ -72,6 +72,72 @@ let apply_pending_maintenance_action =
               ~replicationInstanceArn ~applyAction ~optInType ())
            (Some Values.ApplyPendingMaintenanceActionResponse.to_json)
            (Some Values.ApplyPendingMaintenanceActionResponse.error_to_json)])
+let batch_start_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and data =
+         flag "data" (optional json_arg)
+           ~doc:"JSON StartRecommendationsRequestEntryList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_start_recommendations
+           (Values.BatchStartRecommendationsRequest.make
+              ?data:(Option.map
+                       ~f:Values.StartRecommendationsRequestEntryList.of_json
+                       data) ())
+           (Some Values.BatchStartRecommendationsResponse.to_json)
+           (Some Values.BatchStartRecommendationsResponse.error_to_json)])
+let cancel_metadata_model_conversion =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier"
+       and requestIdentifier =
+         flag "request-identifier" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_metadata_model_conversion
+           (Values.CancelMetadataModelConversionMessage.make
+              ~migrationProjectIdentifier ~requestIdentifier ())
+           (Some Values.CancelMetadataModelConversionResponse.to_json)
+           (Some Values.CancelMetadataModelConversionResponse.error_to_json)])
+let cancel_metadata_model_creation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier"
+       and requestIdentifier =
+         flag "request-identifier" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_metadata_model_creation
+           (Values.CancelMetadataModelCreationMessage.make
+              ~migrationProjectIdentifier ~requestIdentifier ())
+           (Some Values.CancelMetadataModelCreationResponse.to_json)
+           (Some Values.CancelMetadataModelCreationResponse.error_to_json)])
 let cancel_replication_task_assessment_run =
   Command.async ~summary:""
     ([%map_open.Command
@@ -93,6 +159,87 @@ let cancel_replication_task_assessment_run =
            (Some Values.CancelReplicationTaskAssessmentRunResponse.to_json)
            (Some
               Values.CancelReplicationTaskAssessmentRunResponse.error_to_json)])
+let create_data_migration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataMigrationName =
+         flag "data-migration-name" (optional string) ~doc:"STRING String"
+       and enableCloudwatchLogs =
+         flag "enable-cloudwatch-logs" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and sourceDataSettings =
+         flag "source-data-settings" (optional json_arg)
+           ~doc:"JSON SourceDataSettings"
+       and targetDataSettings =
+         flag "target-data-settings" (optional json_arg)
+           ~doc:"JSON TargetDataSettings"
+       and numberOfJobs =
+         flag "number-of-jobs" (optional int) ~doc:"INT IntegerOptional"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and selectionRules =
+         flag "selection-rules" (optional string) ~doc:"STRING SecretString"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING String"
+       and dataMigrationType =
+         flag "data-migration-type" (required json_arg)
+           ~doc:"JSON MigrationTypeValue"
+       and serviceAccessRoleArn =
+         flag "service-access-role-arn" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_data_migration
+           (Values.CreateDataMigrationMessage.make ?dataMigrationName
+              ?enableCloudwatchLogs
+              ?sourceDataSettings:(Option.map
+                                     ~f:Values.SourceDataSettings.of_json
+                                     sourceDataSettings)
+              ?targetDataSettings:(Option.map
+                                     ~f:Values.TargetDataSettings.of_json
+                                     targetDataSettings) ?numberOfJobs
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?selectionRules ~migrationProjectIdentifier
+              ~dataMigrationType:(Values.MigrationTypeValue.of_json
+                                    dataMigrationType) ~serviceAccessRoleArn
+              ()) (Some Values.CreateDataMigrationResponse.to_json)
+           (Some Values.CreateDataMigrationResponse.error_to_json)])
+let create_data_provider =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataProviderName =
+         flag "data-provider-name" (optional string) ~doc:"STRING String"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
+       and virtual_ =
+         flag "virtual-" (optional bool) ~doc:"BOOL BooleanOptional"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and engine = flag "engine" (required string) ~doc:"STRING String"
+       and settings =
+         flag "settings" (required json_arg) ~doc:"JSON DataProviderSettings" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_data_provider
+           (Values.CreateDataProviderMessage.make ?dataProviderName
+              ?description ?virtual_
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~engine
+              ~settings:(Values.DataProviderSettings.of_json settings) ())
+           (Some Values.CreateDataProviderResponse.to_json)
+           (Some Values.CreateDataProviderResponse.error_to_json)])
 let create_endpoint =
   Command.async ~summary:""
     ([%map_open.Command
@@ -179,6 +326,9 @@ let create_endpoint =
        and gcpMySQLSettings =
          flag "gcp-my-s-q-l-settings" (optional json_arg)
            ~doc:"JSON GcpMySQLSettings"
+       and timestreamSettings =
+         flag "timestream-settings" (optional json_arg)
+           ~doc:"JSON TimestreamSettings"
        and endpointIdentifier =
          flag "endpoint-identifier" (required string) ~doc:"STRING String"
        and endpointType =
@@ -236,7 +386,10 @@ let create_endpoint =
                                 redisSettings)
               ?gcpMySQLSettings:(Option.map
                                    ~f:Values.GcpMySQLSettings.of_json
-                                   gcpMySQLSettings) ~endpointIdentifier
+                                   gcpMySQLSettings)
+              ?timestreamSettings:(Option.map
+                                     ~f:Values.TimestreamSettings.of_json
+                                     timestreamSettings) ~endpointIdentifier
               ~endpointType:(Values.ReplicationEndpointTypeValue.of_json
                                endpointType) ~engineName ())
            (Some Values.CreateEndpointResponse.to_json)
@@ -278,6 +431,162 @@ let create_event_subscription =
               ~subscriptionName ~snsTopicArn ())
            (Some Values.CreateEventSubscriptionResponse.to_json)
            (Some Values.CreateEventSubscriptionResponse.error_to_json)])
+let create_fleet_advisor_collector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
+       and collectorName =
+         flag "collector-name" (required string) ~doc:"STRING String"
+       and serviceAccessRoleArn =
+         flag "service-access-role-arn" (required string)
+           ~doc:"STRING String"
+       and s3BucketName =
+         flag "s3-bucket-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_fleet_advisor_collector
+           (Values.CreateFleetAdvisorCollectorRequest.make ?description
+              ~collectorName ~serviceAccessRoleArn ~s3BucketName ())
+           (Some Values.CreateFleetAdvisorCollectorResponse.to_json)
+           (Some Values.CreateFleetAdvisorCollectorResponse.error_to_json)])
+let create_instance_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and availabilityZone =
+         flag "availability-zone" (optional string) ~doc:"STRING String"
+       and kmsKeyArn =
+         flag "kms-key-arn" (optional string) ~doc:"STRING String"
+       and publiclyAccessible =
+         flag "publicly-accessible" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and networkType =
+         flag "network-type" (optional string) ~doc:"STRING String"
+       and instanceProfileName =
+         flag "instance-profile-name" (optional string) ~doc:"STRING String"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
+       and subnetGroupIdentifier =
+         flag "subnet-group-identifier" (optional string)
+           ~doc:"STRING String"
+       and vpcSecurityGroups =
+         flag "vpc-security-groups" (optional json_arg)
+           ~doc:"JSON StringList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_instance_profile
+           (Values.CreateInstanceProfileMessage.make ?availabilityZone
+              ?kmsKeyArn ?publiclyAccessible
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ?networkType
+              ?instanceProfileName ?description ?subnetGroupIdentifier
+              ?vpcSecurityGroups:(Option.map ~f:Values.StringList.of_json
+                                    vpcSecurityGroups) ())
+           (Some Values.CreateInstanceProfileResponse.to_json)
+           (Some Values.CreateInstanceProfileResponse.error_to_json)])
+let create_migration_project =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and migrationProjectName =
+         flag "migration-project-name" (optional string) ~doc:"STRING String"
+       and transformationRules =
+         flag "transformation-rules" (optional string) ~doc:"STRING String"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and schemaConversionApplicationAttributes =
+         flag "schema-conversion-application-attributes" (optional json_arg)
+           ~doc:"JSON SCApplicationAttributes"
+       and sourceDataProviderDescriptors =
+         flag "source-data-provider-descriptors" (required json_arg)
+           ~doc:"JSON DataProviderDescriptorDefinitionList"
+       and targetDataProviderDescriptors =
+         flag "target-data-provider-descriptors" (required json_arg)
+           ~doc:"JSON DataProviderDescriptorDefinitionList"
+       and instanceProfileIdentifier =
+         flag "instance-profile-identifier" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_migration_project
+           (Values.CreateMigrationProjectMessage.make ?migrationProjectName
+              ?transformationRules ?description
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?schemaConversionApplicationAttributes:(Option.map
+                                                        ~f:Values.SCApplicationAttributes.of_json
+                                                        schemaConversionApplicationAttributes)
+              ~sourceDataProviderDescriptors:(Values.DataProviderDescriptorDefinitionList.of_json
+                                                sourceDataProviderDescriptors)
+              ~targetDataProviderDescriptors:(Values.DataProviderDescriptorDefinitionList.of_json
+                                                targetDataProviderDescriptors)
+              ~instanceProfileIdentifier ())
+           (Some Values.CreateMigrationProjectResponse.to_json)
+           (Some Values.CreateMigrationProjectResponse.error_to_json)])
+let create_replication_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and replicationSettings =
+         flag "replication-settings" (optional string) ~doc:"STRING String"
+       and supplementalSettings =
+         flag "supplemental-settings" (optional string) ~doc:"STRING String"
+       and resourceIdentifier =
+         flag "resource-identifier" (optional string) ~doc:"STRING String"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and replicationConfigIdentifier =
+         flag "replication-config-identifier" (required string)
+           ~doc:"STRING String"
+       and sourceEndpointArn =
+         flag "source-endpoint-arn" (required string) ~doc:"STRING String"
+       and targetEndpointArn =
+         flag "target-endpoint-arn" (required string) ~doc:"STRING String"
+       and computeConfig =
+         flag "compute-config" (required json_arg) ~doc:"JSON ComputeConfig"
+       and replicationType =
+         flag "replication-type" (required json_arg)
+           ~doc:"JSON MigrationTypeValue"
+       and tableMappings =
+         flag "table-mappings" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_replication_config
+           (Values.CreateReplicationConfigMessage.make ?replicationSettings
+              ?supplementalSettings ?resourceIdentifier
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~replicationConfigIdentifier ~sourceEndpointArn
+              ~targetEndpointArn
+              ~computeConfig:(Values.ComputeConfig.of_json computeConfig)
+              ~replicationType:(Values.MigrationTypeValue.of_json
+                                  replicationType) ~tableMappings ())
+           (Some Values.CreateReplicationConfigResponse.to_json)
+           (Some Values.CreateReplicationConfigResponse.error_to_json)])
 let create_replication_instance =
   Command.async ~summary:""
     ([%map_open.Command
@@ -318,12 +627,17 @@ let create_replication_instance =
          flag "dns-name-servers" (optional string) ~doc:"STRING String"
        and resourceIdentifier =
          flag "resource-identifier" (optional string) ~doc:"STRING String"
+       and networkType =
+         flag "network-type" (optional string) ~doc:"STRING String"
+       and kerberosAuthenticationSettings =
+         flag "kerberos-authentication-settings" (optional json_arg)
+           ~doc:"JSON KerberosAuthenticationSettings"
        and replicationInstanceIdentifier =
          flag "replication-instance-identifier" (required string)
            ~doc:"STRING String"
        and replicationInstanceClass =
          flag "replication-instance-class" (required string)
-           ~doc:"STRING String" in
+           ~doc:"STRING ReplicationInstanceClass" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_replication_instance
@@ -335,6 +649,10 @@ let create_replication_instance =
               ?multiAZ ?engineVersion ?autoMinorVersionUpgrade
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ?kmsKeyId
               ?publiclyAccessible ?dnsNameServers ?resourceIdentifier
+              ?networkType
+              ?kerberosAuthenticationSettings:(Option.map
+                                                 ~f:Values.KerberosAuthenticationSettings.of_json
+                                                 kerberosAuthenticationSettings)
               ~replicationInstanceIdentifier ~replicationInstanceClass ())
            (Some Values.CreateReplicationInstanceResponse.to_json)
            (Some Values.CreateReplicationInstanceResponse.error_to_json)])
@@ -459,6 +777,44 @@ let delete_connection =
               ~replicationInstanceArn ())
            (Some Values.DeleteConnectionResponse.to_json)
            (Some Values.DeleteConnectionResponse.error_to_json)])
+let delete_data_migration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataMigrationIdentifier =
+         flag "data-migration-identifier" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_data_migration
+           (Values.DeleteDataMigrationMessage.make ~dataMigrationIdentifier
+              ()) (Some Values.DeleteDataMigrationResponse.to_json)
+           (Some Values.DeleteDataMigrationResponse.error_to_json)])
+let delete_data_provider =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataProviderIdentifier =
+         flag "data-provider-identifier" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_data_provider
+           (Values.DeleteDataProviderMessage.make ~dataProviderIdentifier ())
+           (Some Values.DeleteDataProviderResponse.to_json)
+           (Some Values.DeleteDataProviderResponse.error_to_json)])
 let delete_endpoint =
   Command.async ~summary:""
     ([%map_open.Command
@@ -495,6 +851,101 @@ let delete_event_subscription =
            (Values.DeleteEventSubscriptionMessage.make ~subscriptionName ())
            (Some Values.DeleteEventSubscriptionResponse.to_json)
            (Some Values.DeleteEventSubscriptionResponse.error_to_json)])
+let delete_fleet_advisor_collector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and collectorReferencedId =
+         flag "collector-referenced-id" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_fleet_advisor_collector
+           (Values.DeleteCollectorRequest.make ~collectorReferencedId ())
+           None None])
+let delete_fleet_advisor_databases =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and databaseIds =
+         flag "database-ids" (required json_arg) ~doc:"JSON StringList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_fleet_advisor_databases
+           (Values.DeleteFleetAdvisorDatabasesRequest.make
+              ~databaseIds:(Values.StringList.of_json databaseIds) ())
+           (Some Values.DeleteFleetAdvisorDatabasesResponse.to_json)
+           (Some Values.DeleteFleetAdvisorDatabasesResponse.error_to_json)])
+let delete_instance_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceProfileIdentifier =
+         flag "instance-profile-identifier" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_instance_profile
+           (Values.DeleteInstanceProfileMessage.make
+              ~instanceProfileIdentifier ())
+           (Some Values.DeleteInstanceProfileResponse.to_json)
+           (Some Values.DeleteInstanceProfileResponse.error_to_json)])
+let delete_migration_project =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_migration_project
+           (Values.DeleteMigrationProjectMessage.make
+              ~migrationProjectIdentifier ())
+           (Some Values.DeleteMigrationProjectResponse.to_json)
+           (Some Values.DeleteMigrationProjectResponse.error_to_json)])
+let delete_replication_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and replicationConfigArn =
+         flag "replication-config-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_replication_config
+           (Values.DeleteReplicationConfigMessage.make ~replicationConfigArn
+              ()) (Some Values.DeleteReplicationConfigResponse.to_json)
+           (Some Values.DeleteReplicationConfigResponse.error_to_json)])
 let delete_replication_instance =
   Command.async ~summary:""
     ([%map_open.Command
@@ -606,6 +1057,8 @@ let describe_applicable_individual_assessments =
        and replicationInstanceArn =
          flag "replication-instance-arn" (optional string)
            ~doc:"STRING String"
+       and replicationConfigArn =
+         flag "replication-config-arn" (optional string) ~doc:"STRING String"
        and sourceEngineName =
          flag "source-engine-name" (optional string) ~doc:"STRING String"
        and targetEngineName =
@@ -620,8 +1073,8 @@ let describe_applicable_individual_assessments =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_applicable_individual_assessments
            (Values.DescribeApplicableIndividualAssessmentsMessage.make
-              ?replicationTaskArn ?replicationInstanceArn ?sourceEngineName
-              ?targetEngineName
+              ?replicationTaskArn ?replicationInstanceArn
+              ?replicationConfigArn ?sourceEngineName ?targetEngineName
               ?migrationType:(Option.map ~f:Values.MigrationTypeValue.of_json
                                 migrationType) ?maxRecords ?marker ())
            (Some
@@ -674,6 +1127,77 @@ let describe_connections =
               ?maxRecords ?marker ())
            (Some Values.DescribeConnectionsResponse.to_json)
            (Some Values.DescribeConnectionsResponse.error_to_json)])
+let describe_conversion_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_conversion_configuration
+           (Values.DescribeConversionConfigurationMessage.make
+              ~migrationProjectIdentifier ())
+           (Some Values.DescribeConversionConfigurationResponse.to_json)
+           (Some Values.DescribeConversionConfigurationResponse.error_to_json)])
+let describe_data_migrations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and marker = flag "marker" (optional string) ~doc:"STRING Marker"
+       and withoutSettings =
+         flag "without-settings" (optional bool) ~doc:"BOOL BooleanOptional"
+       and withoutStatistics =
+         flag "without-statistics" (optional bool)
+           ~doc:"BOOL BooleanOptional" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_data_migrations
+           (Values.DescribeDataMigrationsMessage.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxRecords ?marker ?withoutSettings ?withoutStatistics ())
+           (Some Values.DescribeDataMigrationsResponse.to_json)
+           (Some Values.DescribeDataMigrationsResponse.error_to_json)])
+let describe_data_providers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and marker = flag "marker" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_data_providers
+           (Values.DescribeDataProvidersMessage.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxRecords ?marker ())
+           (Some Values.DescribeDataProvidersResponse.to_json)
+           (Some Values.DescribeDataProvidersResponse.error_to_json)])
 let describe_endpoint_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -742,6 +1266,25 @@ let describe_endpoints =
               ?maxRecords ?marker ())
            (Some Values.DescribeEndpointsResponse.to_json)
            (Some Values.DescribeEndpointsResponse.error_to_json)])
+let describe_engine_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and marker = flag "marker" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_engine_versions
+           (Values.DescribeEngineVersionsMessage.make ?maxRecords ?marker ())
+           (Some Values.DescribeEngineVersionsResponse.to_json)
+           (Some Values.DescribeEngineVersionsResponse.error_to_json)])
 let describe_event_categories =
   Command.async ~summary:""
     ([%map_open.Command
@@ -830,6 +1373,411 @@ let describe_events =
               ?maxRecords ?marker ())
            (Some Values.DescribeEventsResponse.to_json)
            (Some Values.DescribeEventsResponse.error_to_json)])
+let describe_extension_pack_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_extension_pack_associations
+           (Values.DescribeExtensionPackAssociationsMessage.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?marker ?maxRecords ~migrationProjectIdentifier ())
+           (Some Values.DescribeExtensionPackAssociationsResponse.to_json)
+           (Some
+              Values.DescribeExtensionPackAssociationsResponse.error_to_json)])
+let describe_fleet_advisor_collectors =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_fleet_advisor_collectors
+           (Values.DescribeFleetAdvisorCollectorsRequest.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxRecords ?nextToken ())
+           (Some Values.DescribeFleetAdvisorCollectorsResponse.to_json)
+           (Some Values.DescribeFleetAdvisorCollectorsResponse.error_to_json)])
+let describe_fleet_advisor_databases =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_fleet_advisor_databases
+           (Values.DescribeFleetAdvisorDatabasesRequest.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxRecords ?nextToken ())
+           (Some Values.DescribeFleetAdvisorDatabasesResponse.to_json)
+           (Some Values.DescribeFleetAdvisorDatabasesResponse.error_to_json)])
+let describe_fleet_advisor_lsa_analysis =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_fleet_advisor_lsa_analysis
+           (Values.DescribeFleetAdvisorLsaAnalysisRequest.make ?maxRecords
+              ?nextToken ())
+           (Some Values.DescribeFleetAdvisorLsaAnalysisResponse.to_json)
+           (Some Values.DescribeFleetAdvisorLsaAnalysisResponse.error_to_json)])
+let describe_fleet_advisor_schema_object_summary =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_fleet_advisor_schema_object_summary
+           (Values.DescribeFleetAdvisorSchemaObjectSummaryRequest.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxRecords ?nextToken ())
+           (Some
+              Values.DescribeFleetAdvisorSchemaObjectSummaryResponse.to_json)
+           (Some
+              Values.DescribeFleetAdvisorSchemaObjectSummaryResponse.error_to_json)])
+let describe_fleet_advisor_schemas =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_fleet_advisor_schemas
+           (Values.DescribeFleetAdvisorSchemasRequest.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxRecords ?nextToken ())
+           (Some Values.DescribeFleetAdvisorSchemasResponse.to_json)
+           (Some Values.DescribeFleetAdvisorSchemasResponse.error_to_json)])
+let describe_instance_profiles =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and marker = flag "marker" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_instance_profiles
+           (Values.DescribeInstanceProfilesMessage.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxRecords ?marker ())
+           (Some Values.DescribeInstanceProfilesResponse.to_json)
+           (Some Values.DescribeInstanceProfilesResponse.error_to_json)])
+let describe_metadata_model =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and selectionRules =
+         flag "selection-rules" (required string) ~doc:"STRING String"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier"
+       and origin =
+         flag "origin" (required json_arg) ~doc:"JSON OriginTypeValue" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_metadata_model
+           (Values.DescribeMetadataModelMessage.make ~selectionRules
+              ~migrationProjectIdentifier
+              ~origin:(Values.OriginTypeValue.of_json origin) ())
+           (Some Values.DescribeMetadataModelResponse.to_json)
+           (Some Values.DescribeMetadataModelResponse.error_to_json)])
+let describe_metadata_model_assessments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_metadata_model_assessments
+           (Values.DescribeMetadataModelAssessmentsMessage.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?marker ?maxRecords ~migrationProjectIdentifier ())
+           (Some Values.DescribeMetadataModelAssessmentsResponse.to_json)
+           (Some
+              Values.DescribeMetadataModelAssessmentsResponse.error_to_json)])
+let describe_metadata_model_children =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and selectionRules =
+         flag "selection-rules" (required string) ~doc:"STRING String"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier"
+       and origin =
+         flag "origin" (required json_arg) ~doc:"JSON OriginTypeValue" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_metadata_model_children
+           (Values.DescribeMetadataModelChildrenMessage.make ?marker
+              ?maxRecords ~selectionRules ~migrationProjectIdentifier
+              ~origin:(Values.OriginTypeValue.of_json origin) ())
+           (Some Values.DescribeMetadataModelChildrenResponse.to_json)
+           (Some Values.DescribeMetadataModelChildrenResponse.error_to_json)])
+let describe_metadata_model_conversions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_metadata_model_conversions
+           (Values.DescribeMetadataModelConversionsMessage.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?marker ?maxRecords ~migrationProjectIdentifier ())
+           (Some Values.DescribeMetadataModelConversionsResponse.to_json)
+           (Some
+              Values.DescribeMetadataModelConversionsResponse.error_to_json)])
+let describe_metadata_model_creations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_metadata_model_creations
+           (Values.DescribeMetadataModelCreationsMessage.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?marker ?maxRecords ~migrationProjectIdentifier ())
+           (Some Values.DescribeMetadataModelCreationsResponse.to_json)
+           (Some Values.DescribeMetadataModelCreationsResponse.error_to_json)])
+let describe_metadata_model_exports_as_script =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_metadata_model_exports_as_script
+           (Values.DescribeMetadataModelExportsAsScriptMessage.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?marker ?maxRecords ~migrationProjectIdentifier ())
+           (Some Values.DescribeMetadataModelExportsAsScriptResponse.to_json)
+           (Some
+              Values.DescribeMetadataModelExportsAsScriptResponse.error_to_json)])
+let describe_metadata_model_exports_to_target =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_metadata_model_exports_to_target
+           (Values.DescribeMetadataModelExportsToTargetMessage.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?marker ?maxRecords ~migrationProjectIdentifier ())
+           (Some Values.DescribeMetadataModelExportsToTargetResponse.to_json)
+           (Some
+              Values.DescribeMetadataModelExportsToTargetResponse.error_to_json)])
+let describe_metadata_model_imports =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_metadata_model_imports
+           (Values.DescribeMetadataModelImportsMessage.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?marker ?maxRecords ~migrationProjectIdentifier ())
+           (Some Values.DescribeMetadataModelImportsResponse.to_json)
+           (Some Values.DescribeMetadataModelImportsResponse.error_to_json)])
+let describe_migration_projects =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and marker = flag "marker" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_migration_projects
+           (Values.DescribeMigrationProjectsMessage.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxRecords ?marker ())
+           (Some Values.DescribeMigrationProjectsResponse.to_json)
+           (Some Values.DescribeMigrationProjectsResponse.error_to_json)])
 let describe_orderable_replication_instances =
   Command.async ~summary:""
     ([%map_open.Command
@@ -879,6 +1827,55 @@ let describe_pending_maintenance_actions =
            (Some Values.DescribePendingMaintenanceActionsResponse.to_json)
            (Some
               Values.DescribePendingMaintenanceActionsResponse.error_to_json)])
+let describe_recommendation_limitations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_recommendation_limitations
+           (Values.DescribeRecommendationLimitationsRequest.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxRecords ?nextToken ())
+           (Some Values.DescribeRecommendationLimitationsResponse.to_json)
+           (Some
+              Values.DescribeRecommendationLimitationsResponse.error_to_json)])
+let describe_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_recommendations
+           (Values.DescribeRecommendationsRequest.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxRecords ?nextToken ())
+           (Some Values.DescribeRecommendationsResponse.to_json)
+           (Some Values.DescribeRecommendationsResponse.error_to_json)])
 let describe_refresh_schemas_status =
   Command.async ~summary:""
     ([%map_open.Command
@@ -897,6 +1894,29 @@ let describe_refresh_schemas_status =
            (Values.DescribeRefreshSchemasStatusMessage.make ~endpointArn ())
            (Some Values.DescribeRefreshSchemasStatusResponse.to_json)
            (Some Values.DescribeRefreshSchemasStatusResponse.error_to_json)])
+let describe_replication_configs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and marker = flag "marker" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_replication_configs
+           (Values.DescribeReplicationConfigsMessage.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxRecords ?marker ())
+           (Some Values.DescribeReplicationConfigsResponse.to_json)
+           (Some Values.DescribeReplicationConfigsResponse.error_to_json)])
 let describe_replication_instance_task_logs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -967,6 +1987,33 @@ let describe_replication_subnet_groups =
               ?maxRecords ?marker ())
            (Some Values.DescribeReplicationSubnetGroupsResponse.to_json)
            (Some Values.DescribeReplicationSubnetGroupsResponse.error_to_json)])
+let describe_replication_table_statistics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and replicationConfigArn =
+         flag "replication-config-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_replication_table_statistics
+           (Values.DescribeReplicationTableStatisticsMessage.make ?maxRecords
+              ?marker
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ~replicationConfigArn ())
+           (Some Values.DescribeReplicationTableStatisticsResponse.to_json)
+           (Some
+              Values.DescribeReplicationTableStatisticsResponse.error_to_json)])
 let describe_replication_task_assessment_results =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1065,6 +2112,29 @@ let describe_replication_tasks =
               ?maxRecords ?marker ?withoutSettings ())
            (Some Values.DescribeReplicationTasksResponse.to_json)
            (Some Values.DescribeReplicationTasksResponse.error_to_json)])
+let describe_replications =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and marker = flag "marker" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_replications
+           (Values.DescribeReplicationsMessage.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxRecords ?marker ())
+           (Some Values.DescribeReplicationsResponse.to_json)
+           (Some Values.DescribeReplicationsResponse.error_to_json)])
 let describe_schemas =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1111,6 +2181,57 @@ let describe_table_statistics =
               ~replicationTaskArn ())
            (Some Values.DescribeTableStatisticsResponse.to_json)
            (Some Values.DescribeTableStatisticsResponse.error_to_json)])
+let export_metadata_model_assessment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and fileName = flag "file-name" (optional string) ~doc:"STRING String"
+       and assessmentReportTypes =
+         flag "assessment-report-types" (optional json_arg)
+           ~doc:"JSON AssessmentReportTypesList"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier"
+       and selectionRules =
+         flag "selection-rules" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.export_metadata_model_assessment
+           (Values.ExportMetadataModelAssessmentMessage.make ?fileName
+              ?assessmentReportTypes:(Option.map
+                                        ~f:Values.AssessmentReportTypesList.of_json
+                                        assessmentReportTypes)
+              ~migrationProjectIdentifier ~selectionRules ())
+           (Some Values.ExportMetadataModelAssessmentResponse.to_json)
+           (Some Values.ExportMetadataModelAssessmentResponse.error_to_json)])
+let get_target_selection_rules =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier"
+       and selectionRules =
+         flag "selection-rules" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_target_selection_rules
+           (Values.GetTargetSelectionRulesMessage.make
+              ~migrationProjectIdentifier ~selectionRules ())
+           (Some Values.GetTargetSelectionRulesResponse.to_json)
+           (Some Values.GetTargetSelectionRulesResponse.error_to_json)])
 let import_certificate =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1127,6 +2248,8 @@ let import_certificate =
          flag "certificate-wallet" (optional json_arg)
            ~doc:"JSON CertificateWallet"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING String"
        and certificateIdentifier =
          flag "certificate-identifier" (required string) ~doc:"STRING String" in
        fun () ->
@@ -1136,7 +2259,7 @@ let import_certificate =
               ?certificateWallet:(Option.map
                                     ~f:Values.CertificateWallet.of_json
                                     certificateWallet)
-              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ?kmsKeyId
               ~certificateIdentifier ())
            (Some Values.ImportCertificateResponse.to_json)
            (Some Values.ImportCertificateResponse.error_to_json)])
@@ -1162,6 +2285,113 @@ let list_tags_for_resource =
                                   resourceArnList) ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let modify_conversion_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier"
+       and conversionConfiguration =
+         flag "conversion-configuration" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_conversion_configuration
+           (Values.ModifyConversionConfigurationMessage.make
+              ~migrationProjectIdentifier ~conversionConfiguration ())
+           (Some Values.ModifyConversionConfigurationResponse.to_json)
+           (Some Values.ModifyConversionConfigurationResponse.error_to_json)])
+let modify_data_migration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataMigrationName =
+         flag "data-migration-name" (optional string) ~doc:"STRING String"
+       and enableCloudwatchLogs =
+         flag "enable-cloudwatch-logs" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and serviceAccessRoleArn =
+         flag "service-access-role-arn" (optional string)
+           ~doc:"STRING String"
+       and dataMigrationType =
+         flag "data-migration-type" (optional json_arg)
+           ~doc:"JSON MigrationTypeValue"
+       and sourceDataSettings =
+         flag "source-data-settings" (optional json_arg)
+           ~doc:"JSON SourceDataSettings"
+       and targetDataSettings =
+         flag "target-data-settings" (optional json_arg)
+           ~doc:"JSON TargetDataSettings"
+       and numberOfJobs =
+         flag "number-of-jobs" (optional int) ~doc:"INT IntegerOptional"
+       and selectionRules =
+         flag "selection-rules" (optional string) ~doc:"STRING SecretString"
+       and dataMigrationIdentifier =
+         flag "data-migration-identifier" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_data_migration
+           (Values.ModifyDataMigrationMessage.make ?dataMigrationName
+              ?enableCloudwatchLogs ?serviceAccessRoleArn
+              ?dataMigrationType:(Option.map
+                                    ~f:Values.MigrationTypeValue.of_json
+                                    dataMigrationType)
+              ?sourceDataSettings:(Option.map
+                                     ~f:Values.SourceDataSettings.of_json
+                                     sourceDataSettings)
+              ?targetDataSettings:(Option.map
+                                     ~f:Values.TargetDataSettings.of_json
+                                     targetDataSettings) ?numberOfJobs
+              ?selectionRules ~dataMigrationIdentifier ())
+           (Some Values.ModifyDataMigrationResponse.to_json)
+           (Some Values.ModifyDataMigrationResponse.error_to_json)])
+let modify_data_provider =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataProviderName =
+         flag "data-provider-name" (optional string) ~doc:"STRING String"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
+       and engine = flag "engine" (optional string) ~doc:"STRING String"
+       and virtual_ =
+         flag "virtual-" (optional bool) ~doc:"BOOL BooleanOptional"
+       and exactSettings =
+         flag "exact-settings" (optional bool) ~doc:"BOOL BooleanOptional"
+       and settings =
+         flag "settings" (optional json_arg) ~doc:"JSON DataProviderSettings"
+       and dataProviderIdentifier =
+         flag "data-provider-identifier" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_data_provider
+           (Values.ModifyDataProviderMessage.make ?dataProviderName
+              ?description ?engine ?virtual_ ?exactSettings
+              ?settings:(Option.map ~f:Values.DataProviderSettings.of_json
+                           settings) ~dataProviderIdentifier ())
+           (Some Values.ModifyDataProviderResponse.to_json)
+           (Some Values.ModifyDataProviderResponse.error_to_json)])
 let modify_endpoint =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1252,6 +2482,9 @@ let modify_endpoint =
        and gcpMySQLSettings =
          flag "gcp-my-s-q-l-settings" (optional json_arg)
            ~doc:"JSON GcpMySQLSettings"
+       and timestreamSettings =
+         flag "timestream-settings" (optional json_arg)
+           ~doc:"JSON TimestreamSettings"
        and endpointArn =
          flag "endpoint-arn" (required string) ~doc:"STRING String" in
        fun () ->
@@ -1306,7 +2539,10 @@ let modify_endpoint =
                                 redisSettings) ?exactSettings
               ?gcpMySQLSettings:(Option.map
                                    ~f:Values.GcpMySQLSettings.of_json
-                                   gcpMySQLSettings) ~endpointArn ())
+                                   gcpMySQLSettings)
+              ?timestreamSettings:(Option.map
+                                     ~f:Values.TimestreamSettings.of_json
+                                     timestreamSettings) ~endpointArn ())
            (Some Values.ModifyEndpointResponse.to_json)
            (Some Values.ModifyEndpointResponse.error_to_json)])
 let modify_event_subscription =
@@ -1340,6 +2576,141 @@ let modify_event_subscription =
                                   eventCategories) ?enabled ~subscriptionName
               ()) (Some Values.ModifyEventSubscriptionResponse.to_json)
            (Some Values.ModifyEventSubscriptionResponse.error_to_json)])
+let modify_instance_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and availabilityZone =
+         flag "availability-zone" (optional string) ~doc:"STRING String"
+       and kmsKeyArn =
+         flag "kms-key-arn" (optional string) ~doc:"STRING String"
+       and publiclyAccessible =
+         flag "publicly-accessible" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and networkType =
+         flag "network-type" (optional string) ~doc:"STRING String"
+       and instanceProfileName =
+         flag "instance-profile-name" (optional string) ~doc:"STRING String"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
+       and subnetGroupIdentifier =
+         flag "subnet-group-identifier" (optional string)
+           ~doc:"STRING String"
+       and vpcSecurityGroups =
+         flag "vpc-security-groups" (optional json_arg)
+           ~doc:"JSON StringList"
+       and instanceProfileIdentifier =
+         flag "instance-profile-identifier" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_instance_profile
+           (Values.ModifyInstanceProfileMessage.make ?availabilityZone
+              ?kmsKeyArn ?publiclyAccessible ?networkType
+              ?instanceProfileName ?description ?subnetGroupIdentifier
+              ?vpcSecurityGroups:(Option.map ~f:Values.StringList.of_json
+                                    vpcSecurityGroups)
+              ~instanceProfileIdentifier ())
+           (Some Values.ModifyInstanceProfileResponse.to_json)
+           (Some Values.ModifyInstanceProfileResponse.error_to_json)])
+let modify_migration_project =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and migrationProjectName =
+         flag "migration-project-name" (optional string) ~doc:"STRING String"
+       and sourceDataProviderDescriptors =
+         flag "source-data-provider-descriptors" (optional json_arg)
+           ~doc:"JSON DataProviderDescriptorDefinitionList"
+       and targetDataProviderDescriptors =
+         flag "target-data-provider-descriptors" (optional json_arg)
+           ~doc:"JSON DataProviderDescriptorDefinitionList"
+       and instanceProfileIdentifier =
+         flag "instance-profile-identifier" (optional string)
+           ~doc:"STRING String"
+       and transformationRules =
+         flag "transformation-rules" (optional string) ~doc:"STRING String"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
+       and schemaConversionApplicationAttributes =
+         flag "schema-conversion-application-attributes" (optional json_arg)
+           ~doc:"JSON SCApplicationAttributes"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_migration_project
+           (Values.ModifyMigrationProjectMessage.make ?migrationProjectName
+              ?sourceDataProviderDescriptors:(Option.map
+                                                ~f:Values.DataProviderDescriptorDefinitionList.of_json
+                                                sourceDataProviderDescriptors)
+              ?targetDataProviderDescriptors:(Option.map
+                                                ~f:Values.DataProviderDescriptorDefinitionList.of_json
+                                                targetDataProviderDescriptors)
+              ?instanceProfileIdentifier ?transformationRules ?description
+              ?schemaConversionApplicationAttributes:(Option.map
+                                                        ~f:Values.SCApplicationAttributes.of_json
+                                                        schemaConversionApplicationAttributes)
+              ~migrationProjectIdentifier ())
+           (Some Values.ModifyMigrationProjectResponse.to_json)
+           (Some Values.ModifyMigrationProjectResponse.error_to_json)])
+let modify_replication_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and replicationConfigIdentifier =
+         flag "replication-config-identifier" (optional string)
+           ~doc:"STRING String"
+       and replicationType =
+         flag "replication-type" (optional json_arg)
+           ~doc:"JSON MigrationTypeValue"
+       and tableMappings =
+         flag "table-mappings" (optional string) ~doc:"STRING String"
+       and replicationSettings =
+         flag "replication-settings" (optional string) ~doc:"STRING String"
+       and supplementalSettings =
+         flag "supplemental-settings" (optional string) ~doc:"STRING String"
+       and computeConfig =
+         flag "compute-config" (optional json_arg) ~doc:"JSON ComputeConfig"
+       and sourceEndpointArn =
+         flag "source-endpoint-arn" (optional string) ~doc:"STRING String"
+       and targetEndpointArn =
+         flag "target-endpoint-arn" (optional string) ~doc:"STRING String"
+       and replicationConfigArn =
+         flag "replication-config-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_replication_config
+           (Values.ModifyReplicationConfigMessage.make
+              ?replicationConfigIdentifier
+              ?replicationType:(Option.map
+                                  ~f:Values.MigrationTypeValue.of_json
+                                  replicationType) ?tableMappings
+              ?replicationSettings ?supplementalSettings
+              ?computeConfig:(Option.map ~f:Values.ComputeConfig.of_json
+                                computeConfig) ?sourceEndpointArn
+              ?targetEndpointArn ~replicationConfigArn ())
+           (Some Values.ModifyReplicationConfigResponse.to_json)
+           (Some Values.ModifyReplicationConfigResponse.error_to_json)])
 let modify_replication_instance =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1356,7 +2727,7 @@ let modify_replication_instance =
          flag "apply-immediately" (optional bool) ~doc:"BOOL Boolean"
        and replicationInstanceClass =
          flag "replication-instance-class" (optional string)
-           ~doc:"STRING String"
+           ~doc:"STRING ReplicationInstanceClass"
        and vpcSecurityGroupIds =
          flag "vpc-security-group-ids" (optional json_arg)
            ~doc:"JSON VpcSecurityGroupIdList"
@@ -1376,6 +2747,11 @@ let modify_replication_instance =
        and replicationInstanceIdentifier =
          flag "replication-instance-identifier" (optional string)
            ~doc:"STRING String"
+       and networkType =
+         flag "network-type" (optional string) ~doc:"STRING String"
+       and kerberosAuthenticationSettings =
+         flag "kerberos-authentication-settings" (optional json_arg)
+           ~doc:"JSON KerberosAuthenticationSettings"
        and replicationInstanceArn =
          flag "replication-instance-arn" (required string)
            ~doc:"STRING String" in
@@ -1389,7 +2765,11 @@ let modify_replication_instance =
                                       vpcSecurityGroupIds)
               ?preferredMaintenanceWindow ?multiAZ ?engineVersion
               ?allowMajorVersionUpgrade ?autoMinorVersionUpgrade
-              ?replicationInstanceIdentifier ~replicationInstanceArn ())
+              ?replicationInstanceIdentifier ?networkType
+              ?kerberosAuthenticationSettings:(Option.map
+                                                 ~f:Values.KerberosAuthenticationSettings.of_json
+                                                 kerberosAuthenticationSettings)
+              ~replicationInstanceArn ())
            (Some Values.ModifyReplicationInstanceResponse.to_json)
            (Some Values.ModifyReplicationInstanceResponse.error_to_json)])
 let modify_replication_subnet_group =
@@ -1532,6 +2912,34 @@ let refresh_schemas =
               ~replicationInstanceArn ())
            (Some Values.RefreshSchemasResponse.to_json)
            (Some Values.RefreshSchemasResponse.error_to_json)])
+let reload_replication_tables =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and reloadOption =
+         flag "reload-option" (optional json_arg)
+           ~doc:"JSON ReloadOptionValue"
+       and replicationConfigArn =
+         flag "replication-config-arn" (required string) ~doc:"STRING String"
+       and tablesToReload =
+         flag "tables-to-reload" (required json_arg)
+           ~doc:"JSON TableListToReload" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.reload_replication_tables
+           (Values.ReloadReplicationTablesMessage.make
+              ?reloadOption:(Option.map ~f:Values.ReloadOptionValue.of_json
+                               reloadOption) ~replicationConfigArn
+              ~tablesToReload:(Values.TableListToReload.of_json
+                                 tablesToReload) ())
+           (Some Values.ReloadReplicationTablesResponse.to_json)
+           (Some Values.ReloadReplicationTablesResponse.error_to_json)])
 let reload_tables =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1580,6 +2988,272 @@ let remove_tags_from_resource =
               ~tagKeys:(Values.KeyList.of_json tagKeys) ())
            (Some Values.RemoveTagsFromResourceResponse.to_json)
            (Some Values.RemoveTagsFromResourceResponse.error_to_json)])
+let run_fleet_advisor_lsa_analysis =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.run_fleet_advisor_lsa_analysis (Fn.id ())
+           (Some Values.RunFleetAdvisorLsaAnalysisResponse.to_json)
+           (Some Values.RunFleetAdvisorLsaAnalysisResponse.error_to_json)])
+let start_data_migration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataMigrationIdentifier =
+         flag "data-migration-identifier" (required string)
+           ~doc:"STRING String"
+       and startType =
+         flag "start-type" (required json_arg)
+           ~doc:"JSON StartReplicationMigrationTypeValue" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_data_migration
+           (Values.StartDataMigrationMessage.make ~dataMigrationIdentifier
+              ~startType:(Values.StartReplicationMigrationTypeValue.of_json
+                            startType) ())
+           (Some Values.StartDataMigrationResponse.to_json)
+           (Some Values.StartDataMigrationResponse.error_to_json)])
+let start_extension_pack_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_extension_pack_association
+           (Values.StartExtensionPackAssociationMessage.make
+              ~migrationProjectIdentifier ())
+           (Some Values.StartExtensionPackAssociationResponse.to_json)
+           (Some Values.StartExtensionPackAssociationResponse.error_to_json)])
+let start_metadata_model_assessment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier"
+       and selectionRules =
+         flag "selection-rules" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_metadata_model_assessment
+           (Values.StartMetadataModelAssessmentMessage.make
+              ~migrationProjectIdentifier ~selectionRules ())
+           (Some Values.StartMetadataModelAssessmentResponse.to_json)
+           (Some Values.StartMetadataModelAssessmentResponse.error_to_json)])
+let start_metadata_model_conversion =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier"
+       and selectionRules =
+         flag "selection-rules" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_metadata_model_conversion
+           (Values.StartMetadataModelConversionMessage.make
+              ~migrationProjectIdentifier ~selectionRules ())
+           (Some Values.StartMetadataModelConversionResponse.to_json)
+           (Some Values.StartMetadataModelConversionResponse.error_to_json)])
+let start_metadata_model_creation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier"
+       and selectionRules =
+         flag "selection-rules" (required string) ~doc:"STRING String"
+       and metadataModelName =
+         flag "metadata-model-name" (required string) ~doc:"STRING String"
+       and properties =
+         flag "properties" (required json_arg)
+           ~doc:"JSON MetadataModelProperties" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_metadata_model_creation
+           (Values.StartMetadataModelCreationMessage.make
+              ~migrationProjectIdentifier ~selectionRules ~metadataModelName
+              ~properties:(Values.MetadataModelProperties.of_json properties)
+              ()) (Some Values.StartMetadataModelCreationResponse.to_json)
+           (Some Values.StartMetadataModelCreationResponse.error_to_json)])
+let start_metadata_model_export_as_script =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and fileName = flag "file-name" (optional string) ~doc:"STRING String"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier"
+       and selectionRules =
+         flag "selection-rules" (required string) ~doc:"STRING String"
+       and origin =
+         flag "origin" (required json_arg) ~doc:"JSON OriginTypeValue" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_metadata_model_export_as_script
+           (Values.StartMetadataModelExportAsScriptMessage.make ?fileName
+              ~migrationProjectIdentifier ~selectionRules
+              ~origin:(Values.OriginTypeValue.of_json origin) ())
+           (Some Values.StartMetadataModelExportAsScriptResponse.to_json)
+           (Some
+              Values.StartMetadataModelExportAsScriptResponse.error_to_json)])
+let start_metadata_model_export_to_target =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and overwriteExtensionPack =
+         flag "overwrite-extension-pack" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier"
+       and selectionRules =
+         flag "selection-rules" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_metadata_model_export_to_target
+           (Values.StartMetadataModelExportToTargetMessage.make
+              ?overwriteExtensionPack ~migrationProjectIdentifier
+              ~selectionRules ())
+           (Some Values.StartMetadataModelExportToTargetResponse.to_json)
+           (Some
+              Values.StartMetadataModelExportToTargetResponse.error_to_json)])
+let start_metadata_model_import =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and refresh = flag "refresh" (optional bool) ~doc:"BOOL Boolean"
+       and migrationProjectIdentifier =
+         flag "migration-project-identifier" (required string)
+           ~doc:"STRING MigrationProjectIdentifier"
+       and selectionRules =
+         flag "selection-rules" (required string) ~doc:"STRING String"
+       and origin =
+         flag "origin" (required json_arg) ~doc:"JSON OriginTypeValue" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_metadata_model_import
+           (Values.StartMetadataModelImportMessage.make ?refresh
+              ~migrationProjectIdentifier ~selectionRules
+              ~origin:(Values.OriginTypeValue.of_json origin) ())
+           (Some Values.StartMetadataModelImportResponse.to_json)
+           (Some Values.StartMetadataModelImportResponse.error_to_json)])
+let start_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and databaseId =
+         flag "database-id" (required string) ~doc:"STRING String"
+       and settings =
+         flag "settings" (required json_arg)
+           ~doc:"JSON RecommendationSettings" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_recommendations
+           (Values.StartRecommendationsRequest.make ~databaseId
+              ~settings:(Values.RecommendationSettings.of_json settings) ())
+           None None])
+let start_replication =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and premigrationAssessmentSettings =
+         flag "premigration-assessment-settings" (optional string)
+           ~doc:"STRING String"
+       and cdcStartTime =
+         flag "cdc-start-time" (optional json_arg) ~doc:"JSON TStamp"
+       and cdcStartPosition =
+         flag "cdc-start-position" (optional string) ~doc:"STRING String"
+       and cdcStopPosition =
+         flag "cdc-stop-position" (optional string) ~doc:"STRING String"
+       and replicationConfigArn =
+         flag "replication-config-arn" (required string) ~doc:"STRING String"
+       and startReplicationType =
+         flag "start-replication-type" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_replication
+           (Values.StartReplicationMessage.make
+              ?premigrationAssessmentSettings
+              ?cdcStartTime:(Option.map ~f:Values.TStamp.of_json cdcStartTime)
+              ?cdcStartPosition ?cdcStopPosition ~replicationConfigArn
+              ~startReplicationType ())
+           (Some Values.StartReplicationResponse.to_json)
+           (Some Values.StartReplicationResponse.error_to_json)])
 let start_replication_task =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1650,6 +3324,7 @@ let start_replication_task_assessment_run =
          flag "include-only" (optional json_arg) ~doc:"JSON IncludeTestList"
        and exclude =
          flag "exclude" (optional json_arg) ~doc:"JSON ExcludeTestList"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and replicationTaskArn =
          flag "replication-task-arn" (required string) ~doc:"STRING String"
        and serviceAccessRoleArn =
@@ -1667,11 +3342,49 @@ let start_replication_task_assessment_run =
               ?includeOnly:(Option.map ~f:Values.IncludeTestList.of_json
                               includeOnly)
               ?exclude:(Option.map ~f:Values.ExcludeTestList.of_json exclude)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ~replicationTaskArn ~serviceAccessRoleArn ~resultLocationBucket
               ~assessmentRunName ())
            (Some Values.StartReplicationTaskAssessmentRunResponse.to_json)
            (Some
               Values.StartReplicationTaskAssessmentRunResponse.error_to_json)])
+let stop_data_migration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataMigrationIdentifier =
+         flag "data-migration-identifier" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_data_migration
+           (Values.StopDataMigrationMessage.make ~dataMigrationIdentifier ())
+           (Some Values.StopDataMigrationResponse.to_json)
+           (Some Values.StopDataMigrationResponse.error_to_json)])
+let stop_replication =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and replicationConfigArn =
+         flag "replication-config-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_replication
+           (Values.StopReplicationMessage.make ~replicationConfigArn ())
+           (Some Values.StopReplicationResponse.to_json)
+           (Some Values.StopReplicationResponse.error_to_json)])
 let stop_replication_task =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1711,22 +3424,57 @@ let test_connection =
            (Values.TestConnectionMessage.make ~replicationInstanceArn
               ~endpointArn ()) (Some Values.TestConnectionResponse.to_json)
            (Some Values.TestConnectionResponse.error_to_json)])
+let update_subscriptions_to_event_bridge =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and forceMove =
+         flag "force-move" (optional bool) ~doc:"BOOL BooleanOptional" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_subscriptions_to_event_bridge
+           (Values.UpdateSubscriptionsToEventBridgeMessage.make ?forceMove ())
+           (Some Values.UpdateSubscriptionsToEventBridgeResponse.to_json)
+           (Some
+              Values.UpdateSubscriptionsToEventBridgeResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-tags-to-resource", add_tags_to_resource);
     ("apply-pending-maintenance-action", apply_pending_maintenance_action);
+    ("batch-start-recommendations", batch_start_recommendations);
+    ("cancel-metadata-model-conversion", cancel_metadata_model_conversion);
+    ("cancel-metadata-model-creation", cancel_metadata_model_creation);
     ("cancel-replication-task-assessment-run",
       cancel_replication_task_assessment_run);
+    ("create-data-migration", create_data_migration);
+    ("create-data-provider", create_data_provider);
     ("create-endpoint", create_endpoint);
     ("create-event-subscription", create_event_subscription);
+    ("create-fleet-advisor-collector", create_fleet_advisor_collector);
+    ("create-instance-profile", create_instance_profile);
+    ("create-migration-project", create_migration_project);
+    ("create-replication-config", create_replication_config);
     ("create-replication-instance", create_replication_instance);
     ("create-replication-subnet-group", create_replication_subnet_group);
     ("create-replication-task", create_replication_task);
     ("delete-certificate", delete_certificate);
     ("delete-connection", delete_connection);
+    ("delete-data-migration", delete_data_migration);
+    ("delete-data-provider", delete_data_provider);
     ("delete-endpoint", delete_endpoint);
     ("delete-event-subscription", delete_event_subscription);
+    ("delete-fleet-advisor-collector", delete_fleet_advisor_collector);
+    ("delete-fleet-advisor-databases", delete_fleet_advisor_databases);
+    ("delete-instance-profile", delete_instance_profile);
+    ("delete-migration-project", delete_migration_project);
+    ("delete-replication-config", delete_replication_config);
     ("delete-replication-instance", delete_replication_instance);
     ("delete-replication-subnet-group", delete_replication_subnet_group);
     ("delete-replication-task", delete_replication_task);
@@ -1737,22 +3485,55 @@ let main =
       describe_applicable_individual_assessments);
     ("describe-certificates", describe_certificates);
     ("describe-connections", describe_connections);
+    ("describe-conversion-configuration", describe_conversion_configuration);
+    ("describe-data-migrations", describe_data_migrations);
+    ("describe-data-providers", describe_data_providers);
     ("describe-endpoint-settings", describe_endpoint_settings);
     ("describe-endpoint-types", describe_endpoint_types);
     ("describe-endpoints", describe_endpoints);
+    ("describe-engine-versions", describe_engine_versions);
     ("describe-event-categories", describe_event_categories);
     ("describe-event-subscriptions", describe_event_subscriptions);
     ("describe-events", describe_events);
+    ("describe-extension-pack-associations",
+      describe_extension_pack_associations);
+    ("describe-fleet-advisor-collectors", describe_fleet_advisor_collectors);
+    ("describe-fleet-advisor-databases", describe_fleet_advisor_databases);
+    ("describe-fleet-advisor-lsa-analysis",
+      describe_fleet_advisor_lsa_analysis);
+    ("describe-fleet-advisor-schema-object-summary",
+      describe_fleet_advisor_schema_object_summary);
+    ("describe-fleet-advisor-schemas", describe_fleet_advisor_schemas);
+    ("describe-instance-profiles", describe_instance_profiles);
+    ("describe-metadata-model", describe_metadata_model);
+    ("describe-metadata-model-assessments",
+      describe_metadata_model_assessments);
+    ("describe-metadata-model-children", describe_metadata_model_children);
+    ("describe-metadata-model-conversions",
+      describe_metadata_model_conversions);
+    ("describe-metadata-model-creations", describe_metadata_model_creations);
+    ("describe-metadata-model-exports-as-script",
+      describe_metadata_model_exports_as_script);
+    ("describe-metadata-model-exports-to-target",
+      describe_metadata_model_exports_to_target);
+    ("describe-metadata-model-imports", describe_metadata_model_imports);
+    ("describe-migration-projects", describe_migration_projects);
     ("describe-orderable-replication-instances",
       describe_orderable_replication_instances);
     ("describe-pending-maintenance-actions",
       describe_pending_maintenance_actions);
+    ("describe-recommendation-limitations",
+      describe_recommendation_limitations);
+    ("describe-recommendations", describe_recommendations);
     ("describe-refresh-schemas-status", describe_refresh_schemas_status);
+    ("describe-replication-configs", describe_replication_configs);
     ("describe-replication-instance-task-logs",
       describe_replication_instance_task_logs);
     ("describe-replication-instances", describe_replication_instances);
     ("describe-replication-subnet-groups",
       describe_replication_subnet_groups);
+    ("describe-replication-table-statistics",
+      describe_replication_table_statistics);
     ("describe-replication-task-assessment-results",
       describe_replication_task_assessment_results);
     ("describe-replication-task-assessment-runs",
@@ -1760,23 +3541,50 @@ let main =
     ("describe-replication-task-individual-assessments",
       describe_replication_task_individual_assessments);
     ("describe-replication-tasks", describe_replication_tasks);
+    ("describe-replications", describe_replications);
     ("describe-schemas", describe_schemas);
     ("describe-table-statistics", describe_table_statistics);
+    ("export-metadata-model-assessment", export_metadata_model_assessment);
+    ("get-target-selection-rules", get_target_selection_rules);
     ("import-certificate", import_certificate);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("modify-conversion-configuration", modify_conversion_configuration);
+    ("modify-data-migration", modify_data_migration);
+    ("modify-data-provider", modify_data_provider);
     ("modify-endpoint", modify_endpoint);
     ("modify-event-subscription", modify_event_subscription);
+    ("modify-instance-profile", modify_instance_profile);
+    ("modify-migration-project", modify_migration_project);
+    ("modify-replication-config", modify_replication_config);
     ("modify-replication-instance", modify_replication_instance);
     ("modify-replication-subnet-group", modify_replication_subnet_group);
     ("modify-replication-task", modify_replication_task);
     ("move-replication-task", move_replication_task);
     ("reboot-replication-instance", reboot_replication_instance);
     ("refresh-schemas", refresh_schemas);
+    ("reload-replication-tables", reload_replication_tables);
     ("reload-tables", reload_tables);
     ("remove-tags-from-resource", remove_tags_from_resource);
+    ("run-fleet-advisor-lsa-analysis", run_fleet_advisor_lsa_analysis);
+    ("start-data-migration", start_data_migration);
+    ("start-extension-pack-association", start_extension_pack_association);
+    ("start-metadata-model-assessment", start_metadata_model_assessment);
+    ("start-metadata-model-conversion", start_metadata_model_conversion);
+    ("start-metadata-model-creation", start_metadata_model_creation);
+    ("start-metadata-model-export-as-script",
+      start_metadata_model_export_as_script);
+    ("start-metadata-model-export-to-target",
+      start_metadata_model_export_to_target);
+    ("start-metadata-model-import", start_metadata_model_import);
+    ("start-recommendations", start_recommendations);
+    ("start-replication", start_replication);
     ("start-replication-task", start_replication_task);
     ("start-replication-task-assessment", start_replication_task_assessment);
     ("start-replication-task-assessment-run",
       start_replication_task_assessment_run);
+    ("stop-data-migration", stop_data_migration);
+    ("stop-replication", stop_replication);
     ("stop-replication-task", stop_replication_task);
-    ("test-connection", test_connection)]
+    ("test-connection", test_connection);
+    ("update-subscriptions-to-event-bridge",
+      update_subscriptions_to_event_bridge)]

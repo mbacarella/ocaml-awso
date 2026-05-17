@@ -25,6 +25,9 @@ type ('i, 'o, 'e) t =
   DeleteSMSSandboxPhoneNumberResult.t,
   DeleteSMSSandboxPhoneNumberResult.error) t 
   | DeleteTopic: (DeleteTopicInput.t, unit, unit) t 
+  | GetDataProtectionPolicy: (GetDataProtectionPolicyInput.t,
+  GetDataProtectionPolicyResponse.t, GetDataProtectionPolicyResponse.error) t
+  
   | GetEndpointAttributes: (GetEndpointAttributesInput.t,
   GetEndpointAttributesResponse.t, GetEndpointAttributesResponse.error) t 
   | GetPlatformApplicationAttributes:
@@ -70,6 +73,7 @@ type ('i, 'o, 'e) t =
   | Publish: (PublishInput.t, PublishResponse.t, PublishResponse.error) t 
   | PublishBatch: (PublishBatchInput.t, PublishBatchResponse.t,
   PublishBatchResponse.error) t 
+  | PutDataProtectionPolicy: (PutDataProtectionPolicyInput.t, unit, unit) t 
   | RemovePermission: (RemovePermissionInput.t, unit, unit) t 
   | SetEndpointAttributes: (SetEndpointAttributesInput.t, unit, unit) t 
   | SetPlatformApplicationAttributes:
@@ -102,6 +106,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeletePlatformApplication -> `POST
   | DeleteSMSSandboxPhoneNumber -> `POST
   | DeleteTopic -> `POST
+  | GetDataProtectionPolicy -> `POST
   | GetEndpointAttributes -> `POST
   | GetPlatformApplicationAttributes -> `POST
   | GetSMSAttributes -> `POST
@@ -120,6 +125,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | OptInPhoneNumber -> `POST
   | Publish -> `POST
   | PublishBatch -> `POST
+  | PutDataProtectionPolicy -> `POST
   | RemovePermission -> `POST
   | SetEndpointAttributes -> `POST
   | SetPlatformApplicationAttributes -> `POST
@@ -145,6 +151,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeletePlatformApplication -> (Format.kasprintf Uri.of_string) "/"
       | DeleteSMSSandboxPhoneNumber -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTopic -> (Format.kasprintf Uri.of_string) "/"
+      | GetDataProtectionPolicy -> (Format.kasprintf Uri.of_string) "/"
       | GetEndpointAttributes -> (Format.kasprintf Uri.of_string) "/"
       | GetPlatformApplicationAttributes ->
           (Format.kasprintf Uri.of_string) "/"
@@ -165,6 +172,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | OptInPhoneNumber -> (Format.kasprintf Uri.of_string) "/"
       | Publish -> (Format.kasprintf Uri.of_string) "/"
       | PublishBatch -> (Format.kasprintf Uri.of_string) "/"
+      | PutDataProtectionPolicy -> (Format.kasprintf Uri.of_string) "/"
       | RemovePermission -> (Format.kasprintf Uri.of_string) "/"
       | SetEndpointAttributes -> (Format.kasprintf Uri.of_string) "/"
       | SetPlatformApplicationAttributes ->
@@ -319,6 +327,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let meta = [("Action", ["DeleteTopic"]); ("Version", [apiVersion])] in
         let query =
           (DeleteTopicInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetDataProtectionPolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetDataProtectionPolicy"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetDataProtectionPolicyInput.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetEndpointAttributes ->
@@ -552,6 +574,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (PublishBatchInput.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | PutDataProtectionPolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["PutDataProtectionPolicy"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (PutDataProtectionPolicyInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | RemovePermission ->
       let headers =
         Awso.Http.Headers.of_list
@@ -780,6 +816,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some DeleteSMSSandboxPhoneNumberResult.error_of_xml))
   | DeleteTopic -> if is_success then Ok () else Error (parse_aws_error None)
+  | GetDataProtectionPolicy ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetDataProtectionPolicyResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetDataProtectionPolicyResponse.error_of_xml))
   | GetEndpointAttributes ->
       if is_success
       then
@@ -923,6 +968,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (PublishBatchResponse.of_xml xml)
       else Error (parse_aws_error (Some PublishBatchResponse.error_of_xml))
+  | PutDataProtectionPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | RemovePermission ->
       if is_success then Ok () else Error (parse_aws_error None)
   | SetEndpointAttributes ->

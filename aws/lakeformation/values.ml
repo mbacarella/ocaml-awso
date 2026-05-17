@@ -75,6 +75,9 @@ module TagValueList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LFTagValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -145,7 +148,8 @@ module LFTag =
       {
       tagKey: LFTagKey.t [@ocaml.doc "The key-name for the LF-tag."];
       tagValues: TagValueList.t
-        [@ocaml.doc "A list of possible values an attribute can take."]}
+        [@ocaml.doc
+          "A list of possible values an attribute can take. The maximum number of values that can be defined for a LF-Tag is 1000. A single API call supports 50 values. You can use multiple API calls to add more values."]}
     let context_ = "LFTag"
     let make ~tagKey = fun ~tagValues -> fun () -> { tagKey; tagValues }
     let to_value x =
@@ -161,9 +165,9 @@ module LFTag =
         LFTagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TagKey") in
       make ~tagValues ~tagKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map_exn json "TagValues" TagValueList.of_json in
-      let tagKey = field_map_exn json "TagKey" LFTagKey.of_json in
+    let of_json json__ =
+      let tagValues = field_map_exn json__ "TagValues" TagValueList.of_json in
+      let tagKey = field_map_exn json__ "TagKey" LFTagKey.of_json in
       make ~tagValues ~tagKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -172,6 +176,9 @@ module ColumnNames =
   struct
     type nonrec t = NameString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NameString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -191,6 +198,32 @@ module ColumnNames =
     let of_json j =
       list_of_json ~kind:"ColumnNames" ~of_json:NameString.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module ServiceAuthorization =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ServiceAuthorization" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ServiceAuthorization" j)
+    let to_json = simple_to_json to_value
   end
 module LFTagPair =
   struct
@@ -223,10 +256,10 @@ module LFTagPair =
           (Xml.child xml_arg0 "CatalogId") in
       make ~tagValues ~tagKey ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map_exn json "TagValues" TagValueList.of_json in
-      let tagKey = field_map_exn json "TagKey" LFTagKey.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+    let of_json json__ =
+      let tagValues = field_map_exn json__ "TagValues" TagValueList.of_json in
+      let tagKey = field_map_exn json__ "TagKey" LFTagKey.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ~tagValues ~tagKey ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A structure containing an LF-tag key-value pair."]
@@ -246,11 +279,10 @@ module ResourceArnString =
 module Expression =
   struct
     type nonrec t = LFTag.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
-        i
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LFTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -327,9 +359,9 @@ module ColumnWildcard =
           (Xml.child xml_arg0 "ExcludedColumnNames") in
       make ?excludedColumnNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let excludedColumnNames =
-        field_map json "ExcludedColumnNames" ColumnNames.of_json in
+        field_map json__ "ExcludedColumnNames" ColumnNames.of_json in
       make ?excludedColumnNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -348,6 +380,33 @@ module PartitionValueString =
     let of_json j = string_of_json ~kind:"PartitionValueString" j
     let to_json = simple_to_json to_value
   end
+module RedshiftConnect =
+  struct
+    type nonrec t =
+      {
+      authorization: ServiceAuthorization.t
+        [@ocaml.doc
+          "The authorization status for Redshift Connect. Valid values are ENABLED or DISABLED."]}
+    let context_ = "RedshiftConnect"
+    let make ~authorization = fun () -> { authorization }
+    let to_value x =
+      structure_to_value
+        [("Authorization",
+           (Some (ServiceAuthorization.to_value x.authorization)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let authorization =
+        ServiceAuthorization.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Authorization") in
+      make ~authorization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let authorization =
+        field_map_exn json__ "Authorization" ServiceAuthorization.of_json in
+      make ~authorization ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration for enabling trusted identity propagation with Redshift Connect."]
 module LFTagsList =
   struct
     type nonrec t = LFTagPair.t list
@@ -356,6 +415,9 @@ module LFTagsList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LFTagPair.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -407,8 +469,12 @@ module Permission =
       | CREATE_DATABASE 
       | CREATE_TABLE 
       | DATA_LOCATION_ACCESS 
-      | CREATE_TAG 
+      | CREATE_LF_TAG 
       | ASSOCIATE 
+      | GRANT_WITH_LF_TAG_EXPRESSION 
+      | CREATE_LF_TAG_EXPRESSION 
+      | CREATE_CATALOG 
+      | SUPER_USER 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -423,8 +489,12 @@ module Permission =
       | CREATE_DATABASE -> "CREATE_DATABASE"
       | CREATE_TABLE -> "CREATE_TABLE"
       | DATA_LOCATION_ACCESS -> "DATA_LOCATION_ACCESS"
-      | CREATE_TAG -> "CREATE_TAG"
+      | CREATE_LF_TAG -> "CREATE_LF_TAG"
       | ASSOCIATE -> "ASSOCIATE"
+      | GRANT_WITH_LF_TAG_EXPRESSION -> "GRANT_WITH_LF_TAG_EXPRESSION"
+      | CREATE_LF_TAG_EXPRESSION -> "CREATE_LF_TAG_EXPRESSION"
+      | CREATE_CATALOG -> "CREATE_CATALOG"
+      | SUPER_USER -> "SUPER_USER"
       | Non_static_id s -> s
     let of_string =
       function
@@ -438,8 +508,12 @@ module Permission =
       | "CREATE_DATABASE" -> CREATE_DATABASE
       | "CREATE_TABLE" -> CREATE_TABLE
       | "DATA_LOCATION_ACCESS" -> DATA_LOCATION_ACCESS
-      | "CREATE_TAG" -> CREATE_TAG
+      | "CREATE_LF_TAG" -> CREATE_LF_TAG
       | "ASSOCIATE" -> ASSOCIATE
+      | "GRANT_WITH_LF_TAG_EXPRESSION" -> GRANT_WITH_LF_TAG_EXPRESSION
+      | "CREATE_LF_TAG_EXPRESSION" -> CREATE_LF_TAG_EXPRESSION
+      | "CREATE_CATALOG" -> CREATE_CATALOG
+      | "SUPER_USER" -> SUPER_USER
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -517,16 +591,38 @@ module URI =
     let of_json j = string_of_json ~kind:"URI" j
     let to_json = simple_to_json to_value
   end
+module ExpressionString =
+  struct
+    type nonrec t = string
+    let context_ = "ExpressionString"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:3000); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExpressionString" j
+    let to_json = simple_to_json to_value
+  end
 module CatalogResource =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t =
+      {
+      id: CatalogIdString.t option
+        [@ocaml.doc "An identifier for the catalog resource."]}
+    let make ?id = fun () -> { id }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:CatalogIdString.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let id =
+        (Option.map ~f:CatalogIdString.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let id = field_map json__ "Id" CatalogIdString.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A structure for the catalog object."]
 module DataCellsFilterResource =
@@ -565,12 +661,12 @@ module DataCellsFilterResource =
           (Xml.child xml_arg0 "TableCatalogId") in
       make ?name ?tableName ?databaseName ?tableCatalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" NameString.of_json in
-      let tableName = field_map json "TableName" NameString.of_json in
-      let databaseName = field_map json "DatabaseName" NameString.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" NameString.of_json in
+      let tableName = field_map json__ "TableName" NameString.of_json in
+      let databaseName = field_map json__ "DatabaseName" NameString.of_json in
       let tableCatalogId =
-        field_map json "TableCatalogId" CatalogIdString.of_json in
+        field_map json__ "TableCatalogId" CatalogIdString.of_json in
       make ?name ?tableName ?databaseName ?tableCatalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A structure for a data cells filter resource."]
@@ -601,10 +697,10 @@ module DataLocationResource =
           (Xml.child xml_arg0 "CatalogId") in
       make ~resourceArn ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "ResourceArn" ResourceArnString.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+        field_map_exn json__ "ResourceArn" ResourceArnString.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ~resourceArn ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -634,12 +730,44 @@ module DatabaseResource =
           (Xml.child xml_arg0 "CatalogId") in
       make ~name ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" NameString.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" NameString.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ~name ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A structure for the database object."]
+module LFTagExpressionResource =
+  struct
+    type nonrec t =
+      {
+      catalogId: CatalogIdString.t option
+        [@ocaml.doc
+          "The identifier for the Data Catalog. By default, the account ID."];
+      name: NameString.t
+        [@ocaml.doc
+          "The name of the LF-Tag expression to grant permissions on."]}
+    let context_ = "LFTagExpressionResource"
+    let make ?catalogId = fun ~name -> fun () -> { catalogId; name }
+    let to_value x =
+      structure_to_value
+        [("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value));
+        ("Name", (Some (NameString.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        NameString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let catalogId =
+        (Option.map ~f:CatalogIdString.of_xml)
+          (Xml.child xml_arg0 "CatalogId") in
+      make ~name ?catalogId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" NameString.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      make ~name ?catalogId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure containing a LF-Tag expression (keys and values)."]
 module LFTagKeyResource =
   struct
     type nonrec t =
@@ -671,10 +799,10 @@ module LFTagKeyResource =
           (Xml.child xml_arg0 "CatalogId") in
       make ~tagValues ~tagKey ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map_exn json "TagValues" TagValueList.of_json in
-      let tagKey = field_map_exn json "TagKey" NameString.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+    let of_json json__ =
+      let tagValues = field_map_exn json__ "TagValues" TagValueList.of_json in
+      let tagKey = field_map_exn json__ "TagKey" NameString.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ~tagValues ~tagKey ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -688,40 +816,51 @@ module LFTagPolicyResource =
           "The identifier for the Data Catalog. By default, the account ID. The Data Catalog is the persistent metadata store. It contains database definitions, table definitions, and other control information to manage your Lake Formation environment."];
       resourceType: ResourceType.t
         [@ocaml.doc "The resource type for which the LF-tag policy applies."];
-      expression: Expression.t
+      expression: Expression.t option
         [@ocaml.doc
-          "A list of LF-tag conditions that apply to the resource's LF-tag policy."]}
+          "A list of LF-tag conditions or a saved expression that apply to the resource's LF-tag policy."];
+      expressionName: NameString.t option
+        [@ocaml.doc
+          "If provided, permissions are granted to the Data Catalog resources whose assigned LF-Tags match the expression body of the saved expression under the provided ExpressionName."]}
     let context_ = "LFTagPolicyResource"
     let make ?catalogId =
-      fun ~resourceType ->
-        fun ~expression -> fun () -> { catalogId; resourceType; expression }
+      fun ?expression ->
+        fun ?expressionName ->
+          fun ~resourceType ->
+            fun () -> { catalogId; expression; expressionName; resourceType }
     let to_value x =
       structure_to_value
         [("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value));
         ("ResourceType", (Some (ResourceType.to_value x.resourceType)));
-        ("Expression", (Some (Expression.to_value x.expression)))]
+        ("Expression", (Option.map x.expression ~f:Expression.to_value));
+        ("ExpressionName",
+          (Option.map x.expressionName ~f:NameString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let expressionName =
+        (Option.map ~f:NameString.of_xml)
+          (Xml.child xml_arg0 "ExpressionName") in
       let expression =
-        Expression.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Expression") in
+        (Option.map ~f:Expression.of_xml) (Xml.child xml_arg0 "Expression") in
       let resourceType =
         ResourceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
       let catalogId =
         (Option.map ~f:CatalogIdString.of_xml)
           (Xml.child xml_arg0 "CatalogId") in
-      make ~expression ~resourceType ?catalogId ()
+      make ?expressionName ?expression ~resourceType ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expression = field_map_exn json "Expression" Expression.of_json in
+    let of_json json__ =
+      let expressionName =
+        field_map json__ "ExpressionName" NameString.of_json in
+      let expression = field_map json__ "Expression" Expression.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" ResourceType.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
-      make ~expression ~resourceType ?catalogId ()
+        field_map_exn json__ "ResourceType" ResourceType.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      make ?expressionName ?expression ~resourceType ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A structure containing a list of LF-tag conditions that apply to a resource's LF-tag policy."]
+       "A structure containing a list of LF-tag conditions or saved LF-Tag expressions that apply to a resource's LF-tag policy."]
 module TableResource =
   struct
     type nonrec t =
@@ -764,12 +903,13 @@ module TableResource =
           (Xml.child xml_arg0 "CatalogId") in
       make ?tableWildcard ?name ~databaseName ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tableWildcard =
-        field_map json "TableWildcard" TableWildcard.of_json in
-      let name = field_map json "Name" NameString.of_json in
-      let databaseName = field_map_exn json "DatabaseName" NameString.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+        field_map json__ "TableWildcard" TableWildcard.of_json in
+      let name = field_map json__ "Name" NameString.of_json in
+      let databaseName =
+        field_map_exn json__ "DatabaseName" NameString.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ?tableWildcard ?name ~databaseName ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -827,13 +967,14 @@ module TableWithColumnsResource =
           (Xml.child xml_arg0 "CatalogId") in
       make ?columnWildcard ?columnNames ~name ~databaseName ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let columnWildcard =
-        field_map json "ColumnWildcard" ColumnWildcard.of_json in
-      let columnNames = field_map json "ColumnNames" ColumnNames.of_json in
-      let name = field_map_exn json "Name" NameString.of_json in
-      let databaseName = field_map_exn json "DatabaseName" NameString.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+        field_map json__ "ColumnWildcard" ColumnWildcard.of_json in
+      let columnNames = field_map json__ "ColumnNames" ColumnNames.of_json in
+      let name = field_map_exn json__ "Name" NameString.of_json in
+      let databaseName =
+        field_map_exn json__ "DatabaseName" NameString.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ?columnWildcard ?columnNames ~name ~databaseName ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -847,6 +988,9 @@ module PartitionValuesList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PartitionValueString.to_value)) |>
         (fun x -> `List x)
@@ -869,6 +1013,31 @@ module PartitionValuesList =
         ~of_json:PartitionValueString.of_json j
     let to_json v = composed_to_json to_value v
   end
+module RedshiftScopeUnion =
+  struct
+    type nonrec t =
+      {
+      redshiftConnect: RedshiftConnect.t option
+        [@ocaml.doc "Configuration for Redshift Connect integration."]}
+    let make ?redshiftConnect = fun () -> { redshiftConnect }
+    let to_value x =
+      structure_to_value
+        [("RedshiftConnect",
+           (Option.map x.redshiftConnect ~f:RedshiftConnect.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let redshiftConnect =
+        (Option.map ~f:RedshiftConnect.of_xml)
+          (Xml.child xml_arg0 "RedshiftConnect") in
+      make ?redshiftConnect ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let redshiftConnect =
+        field_map json__ "RedshiftConnect" RedshiftConnect.of_json in
+      make ?redshiftConnect ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A union structure representing different Redshift integration scopes."]
 module ColumnLFTag =
   struct
     type nonrec t =
@@ -889,9 +1058,9 @@ module ColumnLFTag =
         (Option.map ~f:NameString.of_xml) (Xml.child xml_arg0 "Name") in
       make ?lFTags ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lFTags = field_map json "LFTags" LFTagsList.of_json in
-      let name = field_map json "Name" NameString.of_json in
+    let of_json json__ =
+      let lFTags = field_map json__ "LFTags" LFTagsList.of_json in
+      let name = field_map json__ "Name" NameString.of_json in
       make ?lFTags ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -938,9 +1107,9 @@ module DataLakePrincipal =
           (Xml.child xml_arg0 "DataLakePrincipalIdentifier") in
       make ?dataLakePrincipalIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataLakePrincipalIdentifier =
-        field_map json "DataLakePrincipalIdentifier"
+        field_map json__ "DataLakePrincipalIdentifier"
           DataLakePrincipalString.of_json in
       make ?dataLakePrincipalIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -950,6 +1119,9 @@ module PermissionList =
   struct
     type nonrec t = Permission.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Permission.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1013,6 +1185,9 @@ module ResourceShareList =
   struct
     type nonrec t = RAMResourceShareArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RAMResourceShareArn.to_value)) |>
         (fun x -> `List x)
@@ -1095,12 +1270,38 @@ module TableObject =
       let uri = (Option.map ~f:URI.of_xml) (Xml.child xml_arg0 "Uri") in
       make ?size ?eTag ?uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let size = field_map json "Size" ObjectSize.of_json in
-      let eTag = field_map json "ETag" ETagString.of_json in
-      let uri = field_map json "Uri" URI.of_json in make ?size ?eTag ?uri ()
+    let of_json json__ =
+      let size = field_map json__ "Size" ObjectSize.of_json in
+      let eTag = field_map json__ "ETag" ETagString.of_json in
+      let uri = field_map json__ "Uri" URI.of_json in
+      make ?size ?eTag ?uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies the details of a governed table."]
+module Condition =
+  struct
+    type nonrec t =
+      {
+      expression: ExpressionString.t option
+        [@ocaml.doc
+          "An expression written based on the Cedar Policy Language used to match the principal attributes."]}
+    let make ?expression = fun () -> { expression }
+    let to_value x =
+      structure_to_value
+        [("Expression",
+           (Option.map x.expression ~f:ExpressionString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expression =
+        (Option.map ~f:ExpressionString.of_xml)
+          (Xml.child xml_arg0 "Expression") in
+      make ?expression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expression = field_map json__ "Expression" ExpressionString.of_json in
+      make ?expression ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A Lake Formation condition, which applies to permissions and opt-ins that contain an expression."]
 module Identifier =
   struct
     type nonrec t = string
@@ -1141,10 +1342,13 @@ module Resource =
       dataCellsFilter: DataCellsFilterResource.t option
         [@ocaml.doc "A data cell filter."];
       lFTag: LFTagKeyResource.t option
-        [@ocaml.doc "The LF-tag key and values attached to a resource."];
+        [@ocaml.doc "The LF-Tag key and values attached to a resource."];
       lFTagPolicy: LFTagPolicyResource.t option
         [@ocaml.doc
-          "A list of LF-tag conditions that define a resource's LF-tag policy."]}
+          "A list of LF-tag conditions or saved LF-Tag expressions that define a resource's LF-tag policy."];
+      lFTagExpression: LFTagExpressionResource.t option
+        [@ocaml.doc
+          "LF-Tag expression resource. A logical expression composed of one or more LF-Tag key:value pairs."]}
     let make ?catalog =
       fun ?database ->
         fun ?table ->
@@ -1153,17 +1357,19 @@ module Resource =
               fun ?dataCellsFilter ->
                 fun ?lFTag ->
                   fun ?lFTagPolicy ->
-                    fun () ->
-                      {
-                        catalog;
-                        database;
-                        table;
-                        tableWithColumns;
-                        dataLocation;
-                        dataCellsFilter;
-                        lFTag;
-                        lFTagPolicy
-                      }
+                    fun ?lFTagExpression ->
+                      fun () ->
+                        {
+                          catalog;
+                          database;
+                          table;
+                          tableWithColumns;
+                          dataLocation;
+                          dataCellsFilter;
+                          lFTag;
+                          lFTagPolicy;
+                          lFTagExpression
+                        }
     let to_value x =
       structure_to_value
         [("Catalog", (Option.map x.catalog ~f:CatalogResource.to_value));
@@ -1177,9 +1383,14 @@ module Resource =
           (Option.map x.dataCellsFilter ~f:DataCellsFilterResource.to_value));
         ("LFTag", (Option.map x.lFTag ~f:LFTagKeyResource.to_value));
         ("LFTagPolicy",
-          (Option.map x.lFTagPolicy ~f:LFTagPolicyResource.to_value))]
+          (Option.map x.lFTagPolicy ~f:LFTagPolicyResource.to_value));
+        ("LFTagExpression",
+          (Option.map x.lFTagExpression ~f:LFTagExpressionResource.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let lFTagExpression =
+        (Option.map ~f:LFTagExpressionResource.of_xml)
+          (Xml.child xml_arg0 "LFTagExpression") in
       let lFTagPolicy =
         (Option.map ~f:LFTagPolicyResource.of_xml)
           (Xml.child xml_arg0 "LFTagPolicy") in
@@ -1201,24 +1412,26 @@ module Resource =
           (Xml.child xml_arg0 "Database") in
       let catalog =
         (Option.map ~f:CatalogResource.of_xml) (Xml.child xml_arg0 "Catalog") in
-      make ?lFTagPolicy ?lFTag ?dataCellsFilter ?dataLocation
-        ?tableWithColumns ?table ?database ?catalog ()
+      make ?lFTagExpression ?lFTagPolicy ?lFTag ?dataCellsFilter
+        ?dataLocation ?tableWithColumns ?table ?database ?catalog ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let lFTagExpression =
+        field_map json__ "LFTagExpression" LFTagExpressionResource.of_json in
       let lFTagPolicy =
-        field_map json "LFTagPolicy" LFTagPolicyResource.of_json in
-      let lFTag = field_map json "LFTag" LFTagKeyResource.of_json in
+        field_map json__ "LFTagPolicy" LFTagPolicyResource.of_json in
+      let lFTag = field_map json__ "LFTag" LFTagKeyResource.of_json in
       let dataCellsFilter =
-        field_map json "DataCellsFilter" DataCellsFilterResource.of_json in
+        field_map json__ "DataCellsFilter" DataCellsFilterResource.of_json in
       let dataLocation =
-        field_map json "DataLocation" DataLocationResource.of_json in
+        field_map json__ "DataLocation" DataLocationResource.of_json in
       let tableWithColumns =
-        field_map json "TableWithColumns" TableWithColumnsResource.of_json in
-      let table = field_map json "Table" TableResource.of_json in
-      let database = field_map json "Database" DatabaseResource.of_json in
-      let catalog = field_map json "Catalog" CatalogResource.of_json in
-      make ?lFTagPolicy ?lFTag ?dataCellsFilter ?dataLocation
-        ?tableWithColumns ?table ?database ?catalog ()
+        field_map json__ "TableWithColumns" TableWithColumnsResource.of_json in
+      let table = field_map json__ "Table" TableResource.of_json in
+      let database = field_map json__ "Database" DatabaseResource.of_json in
+      let catalog = field_map json__ "Catalog" CatalogResource.of_json in
+      make ?lFTagExpression ?lFTagPolicy ?lFTag ?dataCellsFilter
+        ?dataLocation ?tableWithColumns ?table ?database ?catalog ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A structure for the resource."]
 module AddObjectInput =
@@ -1258,12 +1471,12 @@ module AddObjectInput =
       let uri = URI.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Uri") in
       make ?partitionValues ~size ~eTag ~uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let partitionValues =
-        field_map json "PartitionValues" PartitionValuesList.of_json in
-      let size = field_map_exn json "Size" ObjectSize.of_json in
-      let eTag = field_map_exn json "ETag" ETagString.of_json in
-      let uri = field_map_exn json "Uri" URI.of_json in
+        field_map json__ "PartitionValues" PartitionValuesList.of_json in
+      let size = field_map_exn json__ "Size" ObjectSize.of_json in
+      let eTag = field_map_exn json__ "ETag" ETagString.of_json in
+      let uri = field_map_exn json__ "Uri" URI.of_json in
       make ?partitionValues ~size ~eTag ~uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A new object to add to the governed table."]
@@ -1299,14 +1512,55 @@ module DeleteObjectInput =
       let uri = URI.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Uri") in
       make ?partitionValues ?eTag ~uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let partitionValues =
-        field_map json "PartitionValues" PartitionValuesList.of_json in
-      let eTag = field_map json "ETag" ETagString.of_json in
-      let uri = field_map_exn json "Uri" URI.of_json in
+        field_map json__ "PartitionValues" PartitionValuesList.of_json in
+      let eTag = field_map json__ "ETag" ETagString.of_json in
+      let uri = field_map_exn json__ "Uri" URI.of_json in
       make ?partitionValues ?eTag ~uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object to delete from the governed table."]
+module ScopeTarget =
+  struct
+    type nonrec t = string
+    let context_ = "ScopeTarget"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ScopeTarget" j
+    let to_json = simple_to_json to_value
+  end
+module RedshiftServiceIntegrations =
+  struct
+    type nonrec t = RedshiftScopeUnion.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RedshiftScopeUnion.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RedshiftScopeUnion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RedshiftServiceIntegrations"
+        ~of_json:RedshiftScopeUnion.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module String_ =
   struct
     type nonrec t = string
@@ -1324,6 +1578,9 @@ module ColumnLFTagsList =
   struct
     type nonrec t = ColumnLFTag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ColumnLFTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1368,13 +1625,49 @@ module ErrorDetail =
         (Option.map ~f:NameString.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?errorMessage ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorMessage =
-        field_map json "ErrorMessage" DescriptionString.of_json in
-      let errorCode = field_map json "ErrorCode" NameString.of_json in
+        field_map json__ "ErrorMessage" DescriptionString.of_json in
+      let errorCode = field_map json__ "ErrorCode" NameString.of_json in
       make ?errorMessage ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about an error."]
+module KeyString =
+  struct
+    type nonrec t = string
+    let context_ = "KeyString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KeyString" j
+    let to_json = simple_to_json to_value
+  end
+module ParametersMapValue =
+  struct
+    type nonrec t = string
+    let context_ = "ParametersMapValue"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:512000); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ParametersMapValue" j
+    let to_json = simple_to_json to_value
+  end
 module PrincipalPermissions =
   struct
     type nonrec t =
@@ -1401,9 +1694,9 @@ module PrincipalPermissions =
           (Xml.child xml_arg0 "Principal") in
       make ?permissions ?principal ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let permissions = field_map json "Permissions" PermissionList.of_json in
-      let principal = field_map json "Principal" DataLakePrincipal.of_json in
+    let of_json json__ =
+      let permissions = field_map json__ "Permissions" PermissionList.of_json in
+      let principal = field_map json__ "Principal" DataLakePrincipal.of_json in
       make ?permissions ?principal ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Permissions granted to a principal."]
@@ -1536,12 +1829,29 @@ module StorageOptimizerConfig =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:StorageOptimizerConfigKey.of_string
         ~of_json:StorageOptimizerConfigValue.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module AccountIdString =
+  struct
+    type nonrec t = string
+    let context_ = "AccountIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^\\d{12}$"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccountIdString" j
+    let to_json = simple_to_json to_value
   end
 module IAMRoleArn =
   struct
@@ -1570,6 +1880,48 @@ module LastModifiedTimestamp =
     let to_header x = x
     let of_xml = string_of_xml ~kind:"a timestamp"
     let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module NullableBoolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module VerificationStatus =
+  struct
+    type nonrec t =
+      | VERIFIED 
+      | VERIFICATION_FAILED 
+      | NOT_VERIFIED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | VERIFIED -> "VERIFIED"
+      | VERIFICATION_FAILED -> "VERIFICATION_FAILED"
+      | NOT_VERIFIED -> "NOT_VERIFIED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "VERIFIED" -> VERIFIED
+      | "VERIFICATION_FAILED" -> VERIFICATION_FAILED
+      | "NOT_VERIFIED" -> NOT_VERIFIED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration VerificationStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"VerificationStatus" j)
     let to_json = simple_to_json to_value
   end
 module ComparisonOperator =
@@ -1657,6 +2009,9 @@ module StringValueList =
   struct
     type nonrec t = StringValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StringValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1696,9 +2051,9 @@ module DetailsMap =
           (Xml.child xml_arg0 "ResourceShare") in
       make ?resourceShare ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceShare =
-        field_map json "ResourceShare" ResourceShareList.of_json in
+        field_map json__ "ResourceShare" ResourceShareList.of_json in
       make ?resourceShare ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1729,14 +2084,36 @@ module RowFilter =
           (Xml.child xml_arg0 "FilterExpression") in
       make ?allRowsWildcard ?filterExpression ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let allRowsWildcard =
-        field_map json "AllRowsWildcard" AllRowsWildcard.of_json in
+        field_map json__ "AllRowsWildcard" AllRowsWildcard.of_json in
       let filterExpression =
-        field_map json "FilterExpression" PredicateString.of_json in
+        field_map json__ "FilterExpression" PredicateString.of_json in
       make ?allRowsWildcard ?filterExpression ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A PartiQL predicate."]
+module VersionString =
+  struct
+    type nonrec t = string
+    let context_ = "VersionString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VersionString" j
+    let to_json = simple_to_json to_value
+  end
 module WorkUnitIdLong =
   struct
     type nonrec t = Int64.t
@@ -1763,6 +2140,42 @@ module WorkUnitTokenString =
     let of_json j = string_of_json ~kind:"WorkUnitTokenString" j
     let to_json = simple_to_json to_value
   end
+module ContextKey =
+  struct
+    type nonrec t = string
+    let context_ = "ContextKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ContextKey" j
+    let to_json = simple_to_json to_value
+  end
+module ContextValue =
+  struct
+    type nonrec t = string
+    let context_ = "ContextValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ContextValue" j
+    let to_json = simple_to_json to_value
+  end
 module ValueString =
   struct
     type nonrec t = string
@@ -1780,6 +2193,9 @@ module TableObjectList =
   struct
     type nonrec t = TableObject.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TableObject.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1814,6 +2230,7 @@ module BatchPermissionsRequestEntry =
           "The resource to which the principal is to be granted a permission."];
       permissions: PermissionList.t option
         [@ocaml.doc "The permissions to be granted."];
+      condition: Condition.t option ;
       permissionsWithGrantOption: PermissionList.t option
         [@ocaml.doc
           "Indicates if the option to pass permissions is granted."]}
@@ -1821,16 +2238,18 @@ module BatchPermissionsRequestEntry =
     let make ?principal =
       fun ?resource ->
         fun ?permissions ->
-          fun ?permissionsWithGrantOption ->
-            fun ~id ->
-              fun () ->
-                {
-                  principal;
-                  resource;
-                  permissions;
-                  permissionsWithGrantOption;
-                  id
-                }
+          fun ?condition ->
+            fun ?permissionsWithGrantOption ->
+              fun ~id ->
+                fun () ->
+                  {
+                    principal;
+                    resource;
+                    permissions;
+                    condition;
+                    permissionsWithGrantOption;
+                    id
+                  }
     let to_value x =
       structure_to_value
         [("Id", (Some (Identifier.to_value x.id)));
@@ -1838,6 +2257,7 @@ module BatchPermissionsRequestEntry =
         ("Resource", (Option.map x.resource ~f:Resource.to_value));
         ("Permissions",
           (Option.map x.permissions ~f:PermissionList.to_value));
+        ("Condition", (Option.map x.condition ~f:Condition.to_value));
         ("PermissionsWithGrantOption",
           (Option.map x.permissionsWithGrantOption ~f:PermissionList.to_value))]
     let to_query v = to_query to_value v
@@ -1845,6 +2265,8 @@ module BatchPermissionsRequestEntry =
       let permissionsWithGrantOption =
         (Option.map ~f:PermissionList.of_xml)
           (Xml.child xml_arg0 "PermissionsWithGrantOption") in
+      let condition =
+        (Option.map ~f:Condition.of_xml) (Xml.child xml_arg0 "Condition") in
       let permissions =
         (Option.map ~f:PermissionList.of_xml)
           (Xml.child xml_arg0 "Permissions") in
@@ -1855,18 +2277,19 @@ module BatchPermissionsRequestEntry =
           (Xml.child xml_arg0 "Principal") in
       let id =
         Identifier.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ?permissionsWithGrantOption ?permissions ?resource ?principal ~id
-        ()
+      make ?permissionsWithGrantOption ?condition ?permissions ?resource
+        ?principal ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissionsWithGrantOption =
-        field_map json "PermissionsWithGrantOption" PermissionList.of_json in
-      let permissions = field_map json "Permissions" PermissionList.of_json in
-      let resource = field_map json "Resource" Resource.of_json in
-      let principal = field_map json "Principal" DataLakePrincipal.of_json in
-      let id = field_map_exn json "Id" Identifier.of_json in
-      make ?permissionsWithGrantOption ?permissions ?resource ?principal ~id
-        ()
+        field_map json__ "PermissionsWithGrantOption" PermissionList.of_json in
+      let condition = field_map json__ "Condition" Condition.of_json in
+      let permissions = field_map json__ "Permissions" PermissionList.of_json in
+      let resource = field_map json__ "Resource" Resource.of_json in
+      let principal = field_map json__ "Principal" DataLakePrincipal.of_json in
+      let id = field_map_exn json__ "Id" Identifier.of_json in
+      make ?permissionsWithGrantOption ?condition ?permissions ?resource
+        ?principal ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A permission to a resource granted by batch operation to the principal."]
@@ -1895,14 +2318,91 @@ module WriteOperation =
           (Xml.child xml_arg0 "AddObject") in
       make ?deleteObject ?addObject ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deleteObject =
-        field_map json "DeleteObject" DeleteObjectInput.of_json in
-      let addObject = field_map json "AddObject" AddObjectInput.of_json in
+        field_map json__ "DeleteObject" DeleteObjectInput.of_json in
+      let addObject = field_map json__ "AddObject" AddObjectInput.of_json in
       make ?deleteObject ?addObject ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Defines an object to add to or delete from a governed table."]
+module EnableStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EnableStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EnableStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ScopeTargets =
+  struct
+    type nonrec t = ScopeTarget.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ScopeTarget.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ScopeTarget.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ScopeTargets" ~of_json:ScopeTarget.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServiceIntegrationUnion =
+  struct
+    type nonrec t =
+      {
+      redshift: RedshiftServiceIntegrations.t option
+        [@ocaml.doc "Redshift service integration configuration."]}
+    let make ?redshift = fun () -> { redshift }
+    let to_value x =
+      structure_to_value
+        [("Redshift",
+           (Option.map x.redshift ~f:RedshiftServiceIntegrations.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let redshift =
+        (Option.map ~f:RedshiftServiceIntegrations.of_xml)
+          (Xml.child xml_arg0 "Redshift") in
+      make ?redshift ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let redshift =
+        field_map json__ "Redshift" RedshiftServiceIntegrations.of_json in
+      make ?redshift ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A union structure representing different service integration types."]
 module QueryParameterMap =
   struct
     type nonrec t = (String_.t * String_.t) list
@@ -1924,6 +2424,8 @@ module QueryParameterMap =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1995,13 +2497,13 @@ module TaggedTable =
         (Option.map ~f:TableResource.of_xml) (Xml.child xml_arg0 "Table") in
       make ?lFTagsOnColumns ?lFTagsOnTable ?lFTagOnDatabase ?table ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lFTagsOnColumns =
-        field_map json "LFTagsOnColumns" ColumnLFTagsList.of_json in
-      let lFTagsOnTable = field_map json "LFTagsOnTable" LFTagsList.of_json in
+        field_map json__ "LFTagsOnColumns" ColumnLFTagsList.of_json in
+      let lFTagsOnTable = field_map json__ "LFTagsOnTable" LFTagsList.of_json in
       let lFTagOnDatabase =
-        field_map json "LFTagOnDatabase" LFTagsList.of_json in
-      let table = field_map json "Table" TableResource.of_json in
+        field_map json__ "LFTagOnDatabase" LFTagsList.of_json in
+      let table = field_map json__ "Table" TableResource.of_json in
       make ?lFTagsOnColumns ?lFTagsOnTable ?lFTagOnDatabase ?table ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A structure describing a table resource with LF-tags."]
@@ -2027,9 +2529,9 @@ module TaggedDatabase =
           (Xml.child xml_arg0 "Database") in
       make ?lFTags ?database ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lFTags = field_map json "LFTags" LFTagsList.of_json in
-      let database = field_map json "Database" DatabaseResource.of_json in
+    let of_json json__ =
+      let lFTags = field_map json__ "LFTags" LFTagsList.of_json in
+      let database = field_map json__ "Database" DatabaseResource.of_json in
       make ?lFTags ?database ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A structure describing a database resource with LF-tags."]
@@ -2054,9 +2556,9 @@ module LFTagError =
         (Option.map ~f:LFTagPair.of_xml) (Xml.child xml_arg0 "LFTag") in
       make ?error ?lFTag ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map json "Error" ErrorDetail.of_json in
-      let lFTag = field_map json "LFTag" LFTagPair.of_json in
+    let of_json json__ =
+      let error = field_map json__ "Error" ErrorDetail.of_json in
+      let lFTag = field_map json__ "LFTag" LFTagPair.of_json in
       make ?error ?lFTag ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2065,6 +2567,9 @@ module AuthorizedSessionTagValueList =
   struct
     type nonrec t = NameString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NameString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2092,8 +2597,11 @@ module DataLakePrincipalList =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+          ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataLakePrincipal.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2115,23 +2623,44 @@ module DataLakePrincipalList =
         ~of_json:DataLakePrincipal.of_json j
     let to_json v = composed_to_json to_value v
   end
-module NullableBoolean =
+module ParametersMap =
   struct
-    type nonrec t = bool
+    type nonrec t = (KeyString.t * ParametersMapValue.t) list
     let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((KeyString.of_string chopped),
+                              (ParametersMapValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (KeyString.to_value x) |>
+                    (fun x ->
+                       (ParametersMapValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
     let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
-    let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:KeyString.of_string
+        ~of_json:ParametersMapValue.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module PrincipalPermissionsList =
   struct
     type nonrec t = PrincipalPermissions.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PrincipalPermissions.to_value)) |>
         (fun x -> `List x)
@@ -2158,6 +2687,9 @@ module TrustedResourceOwners =
   struct
     type nonrec t = CatalogIdString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CatalogIdString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2230,15 +2762,15 @@ module TransactionDescription =
       make ?transactionEndTime ?transactionStartTime ?transactionStatus
         ?transactionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transactionEndTime =
-        field_map json "TransactionEndTime" Timestamp.of_json in
+        field_map json__ "TransactionEndTime" Timestamp.of_json in
       let transactionStartTime =
-        field_map json "TransactionStartTime" Timestamp.of_json in
+        field_map json__ "TransactionStartTime" Timestamp.of_json in
       let transactionStatus =
-        field_map json "TransactionStatus" TransactionStatus.of_json in
+        field_map json__ "TransactionStatus" TransactionStatus.of_json in
       let transactionId =
-        field_map json "TransactionId" TransactionIdString.of_json in
+        field_map json__ "TransactionId" TransactionIdString.of_json in
       make ?transactionEndTime ?transactionStartTime ?transactionStatus
         ?transactionId ()
     let to_json v = composed_to_json to_value v
@@ -2305,14 +2837,15 @@ module StorageOptimizer =
       make ?lastRunDetails ?warnings ?errorMessage ?config
         ?storageOptimizerType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastRunDetails =
-        field_map json "LastRunDetails" MessageString.of_json in
-      let warnings = field_map json "Warnings" MessageString.of_json in
-      let errorMessage = field_map json "ErrorMessage" MessageString.of_json in
-      let config = field_map json "Config" StorageOptimizerConfig.of_json in
+        field_map json__ "LastRunDetails" MessageString.of_json in
+      let warnings = field_map json__ "Warnings" MessageString.of_json in
+      let errorMessage =
+        field_map json__ "ErrorMessage" MessageString.of_json in
+      let config = field_map json__ "Config" StorageOptimizerConfig.of_json in
       let storageOptimizerType =
-        field_map json "StorageOptimizerType" OptimizerType.of_json in
+        field_map json__ "StorageOptimizerType" OptimizerType.of_json in
       make ?lastRunDetails ?warnings ?errorMessage ?config
         ?storageOptimizerType ()
     let to_json v = composed_to_json to_value v
@@ -2327,19 +2860,75 @@ module ResourceInfo =
       roleArn: IAMRoleArn.t option
         [@ocaml.doc "The IAM role that registered a resource."];
       lastModified: LastModifiedTimestamp.t option
-        [@ocaml.doc "The date and time the resource was last modified."]}
+        [@ocaml.doc "The date and time the resource was last modified."];
+      withFederation: NullableBoolean.t option
+        [@ocaml.doc "Whether or not the resource is a federated resource."];
+      hybridAccessEnabled: NullableBoolean.t option
+        [@ocaml.doc
+          "Indicates whether the data access of tables pointing to the location can be managed by both Lake Formation permissions as well as Amazon S3 bucket policies."];
+      withPrivilegedAccess: NullableBoolean.t option
+        [@ocaml.doc
+          "Grants the calling principal the permissions to perform all supported Lake Formation operations on the registered data location."];
+      verificationStatus: VerificationStatus.t option
+        [@ocaml.doc
+          "Indicates whether the registered role has sufficient permissions to access registered Amazon S3 location. Verification Status can be one of the following: VERIFIED - Registered role has sufficient permissions to access registered Amazon S3 location. NOT_VERIFIED - Registered role does not have sufficient permissions to access registered Amazon S3 location. VERIFICATION_FAILED - Unable to verify if the registered role can access the registered Amazon S3 location."];
+      expectedResourceOwnerAccount: AccountIdString.t option
+        [@ocaml.doc
+          "The Amazon Web Services account that owns the Glue tables associated with specific Amazon S3 locations."]}
     let make ?resourceArn =
       fun ?roleArn ->
-        fun ?lastModified -> fun () -> { resourceArn; roleArn; lastModified }
+        fun ?lastModified ->
+          fun ?withFederation ->
+            fun ?hybridAccessEnabled ->
+              fun ?withPrivilegedAccess ->
+                fun ?verificationStatus ->
+                  fun ?expectedResourceOwnerAccount ->
+                    fun () ->
+                      {
+                        resourceArn;
+                        roleArn;
+                        lastModified;
+                        withFederation;
+                        hybridAccessEnabled;
+                        withPrivilegedAccess;
+                        verificationStatus;
+                        expectedResourceOwnerAccount
+                      }
     let to_value x =
       structure_to_value
         [("ResourceArn",
            (Option.map x.resourceArn ~f:ResourceArnString.to_value));
         ("RoleArn", (Option.map x.roleArn ~f:IAMRoleArn.to_value));
         ("LastModified",
-          (Option.map x.lastModified ~f:LastModifiedTimestamp.to_value))]
+          (Option.map x.lastModified ~f:LastModifiedTimestamp.to_value));
+        ("WithFederation",
+          (Option.map x.withFederation ~f:NullableBoolean.to_value));
+        ("HybridAccessEnabled",
+          (Option.map x.hybridAccessEnabled ~f:NullableBoolean.to_value));
+        ("WithPrivilegedAccess",
+          (Option.map x.withPrivilegedAccess ~f:NullableBoolean.to_value));
+        ("VerificationStatus",
+          (Option.map x.verificationStatus ~f:VerificationStatus.to_value));
+        ("ExpectedResourceOwnerAccount",
+          (Option.map x.expectedResourceOwnerAccount
+             ~f:AccountIdString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let expectedResourceOwnerAccount =
+        (Option.map ~f:AccountIdString.of_xml)
+          (Xml.child xml_arg0 "ExpectedResourceOwnerAccount") in
+      let verificationStatus =
+        (Option.map ~f:VerificationStatus.of_xml)
+          (Xml.child xml_arg0 "VerificationStatus") in
+      let withPrivilegedAccess =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "WithPrivilegedAccess") in
+      let hybridAccessEnabled =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "HybridAccessEnabled") in
+      let withFederation =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "WithFederation") in
       let lastModified =
         (Option.map ~f:LastModifiedTimestamp.of_xml)
           (Xml.child xml_arg0 "LastModified") in
@@ -2348,15 +2937,30 @@ module ResourceInfo =
       let resourceArn =
         (Option.map ~f:ResourceArnString.of_xml)
           (Xml.child xml_arg0 "ResourceArn") in
-      make ?lastModified ?roleArn ?resourceArn ()
+      make ?expectedResourceOwnerAccount ?verificationStatus
+        ?withPrivilegedAccess ?hybridAccessEnabled ?withFederation
+        ?lastModified ?roleArn ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let expectedResourceOwnerAccount =
+        field_map json__ "ExpectedResourceOwnerAccount"
+          AccountIdString.of_json in
+      let verificationStatus =
+        field_map json__ "VerificationStatus" VerificationStatus.of_json in
+      let withPrivilegedAccess =
+        field_map json__ "WithPrivilegedAccess" NullableBoolean.of_json in
+      let hybridAccessEnabled =
+        field_map json__ "HybridAccessEnabled" NullableBoolean.of_json in
+      let withFederation =
+        field_map json__ "WithFederation" NullableBoolean.of_json in
       let lastModified =
-        field_map json "LastModified" LastModifiedTimestamp.of_json in
-      let roleArn = field_map json "RoleArn" IAMRoleArn.of_json in
+        field_map json__ "LastModified" LastModifiedTimestamp.of_json in
+      let roleArn = field_map json__ "RoleArn" IAMRoleArn.of_json in
       let resourceArn =
-        field_map json "ResourceArn" ResourceArnString.of_json in
-      make ?lastModified ?roleArn ?resourceArn ()
+        field_map json__ "ResourceArn" ResourceArnString.of_json in
+      make ?expectedResourceOwnerAccount ?verificationStatus
+        ?withPrivilegedAccess ?hybridAccessEnabled ?withFederation
+        ?lastModified ?roleArn ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure containing information about an Lake Formation resource."]
@@ -2394,12 +2998,12 @@ module FilterCondition =
         (Option.map ~f:FieldNameString.of_xml) (Xml.child xml_arg0 "Field") in
       make ?stringValueList ?comparisonOperator ?field ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stringValueList =
-        field_map json "StringValueList" StringValueList.of_json in
+        field_map json__ "StringValueList" StringValueList.of_json in
       let comparisonOperator =
-        field_map json "ComparisonOperator" ComparisonOperator.of_json in
-      let field = field_map json "Field" FieldNameString.of_json in
+        field_map json__ "ComparisonOperator" ComparisonOperator.of_json in
+      let field = field_map json__ "Field" FieldNameString.of_json in
       make ?stringValueList ?comparisonOperator ?field ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2414,6 +3018,9 @@ module PrincipalResourcePermissions =
       resource: Resource.t option
         [@ocaml.doc
           "The resource where permissions are to be granted or revoked."];
+      condition: Condition.t option
+        [@ocaml.doc
+          "A Lake Formation condition, which applies to permissions and opt-ins that contain an expression."];
       permissions: PermissionList.t option
         [@ocaml.doc
           "The permissions to be granted or revoked on the resource."];
@@ -2422,33 +3029,54 @@ module PrincipalResourcePermissions =
           "Indicates whether to grant the ability to grant permissions (as a subset of permissions granted)."];
       additionalDetails: DetailsMap.t option
         [@ocaml.doc
-          "This attribute can be used to return any additional details of PrincipalResourcePermissions. Currently returns only as a RAM resource share ARN."]}
+          "This attribute can be used to return any additional details of PrincipalResourcePermissions. Currently returns only as a RAM resource share ARN."];
+      lastUpdated: LastModifiedTimestamp.t option
+        [@ocaml.doc "The date and time when the resource was last updated."];
+      lastUpdatedBy: NameString.t option
+        [@ocaml.doc "The user who updated the record."]}
     let make ?principal =
       fun ?resource ->
-        fun ?permissions ->
-          fun ?permissionsWithGrantOption ->
-            fun ?additionalDetails ->
-              fun () ->
-                {
-                  principal;
-                  resource;
-                  permissions;
-                  permissionsWithGrantOption;
-                  additionalDetails
-                }
+        fun ?condition ->
+          fun ?permissions ->
+            fun ?permissionsWithGrantOption ->
+              fun ?additionalDetails ->
+                fun ?lastUpdated ->
+                  fun ?lastUpdatedBy ->
+                    fun () ->
+                      {
+                        principal;
+                        resource;
+                        condition;
+                        permissions;
+                        permissionsWithGrantOption;
+                        additionalDetails;
+                        lastUpdated;
+                        lastUpdatedBy
+                      }
     let to_value x =
       structure_to_value
         [("Principal",
            (Option.map x.principal ~f:DataLakePrincipal.to_value));
         ("Resource", (Option.map x.resource ~f:Resource.to_value));
+        ("Condition", (Option.map x.condition ~f:Condition.to_value));
         ("Permissions",
           (Option.map x.permissions ~f:PermissionList.to_value));
         ("PermissionsWithGrantOption",
           (Option.map x.permissionsWithGrantOption ~f:PermissionList.to_value));
         ("AdditionalDetails",
-          (Option.map x.additionalDetails ~f:DetailsMap.to_value))]
+          (Option.map x.additionalDetails ~f:DetailsMap.to_value));
+        ("LastUpdated",
+          (Option.map x.lastUpdated ~f:LastModifiedTimestamp.to_value));
+        ("LastUpdatedBy",
+          (Option.map x.lastUpdatedBy ~f:NameString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let lastUpdatedBy =
+        (Option.map ~f:NameString.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedBy") in
+      let lastUpdated =
+        (Option.map ~f:LastModifiedTimestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdated") in
       let additionalDetails =
         (Option.map ~f:DetailsMap.of_xml)
           (Xml.child xml_arg0 "AdditionalDetails") in
@@ -2458,26 +3086,142 @@ module PrincipalResourcePermissions =
       let permissions =
         (Option.map ~f:PermissionList.of_xml)
           (Xml.child xml_arg0 "Permissions") in
+      let condition =
+        (Option.map ~f:Condition.of_xml) (Xml.child xml_arg0 "Condition") in
       let resource =
         (Option.map ~f:Resource.of_xml) (Xml.child xml_arg0 "Resource") in
       let principal =
         (Option.map ~f:DataLakePrincipal.of_xml)
           (Xml.child xml_arg0 "Principal") in
-      make ?additionalDetails ?permissionsWithGrantOption ?permissions
-        ?resource ?principal ()
+      make ?lastUpdatedBy ?lastUpdated ?additionalDetails
+        ?permissionsWithGrantOption ?permissions ?condition ?resource
+        ?principal ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let lastUpdatedBy = field_map json__ "LastUpdatedBy" NameString.of_json in
+      let lastUpdated =
+        field_map json__ "LastUpdated" LastModifiedTimestamp.of_json in
       let additionalDetails =
-        field_map json "AdditionalDetails" DetailsMap.of_json in
+        field_map json__ "AdditionalDetails" DetailsMap.of_json in
       let permissionsWithGrantOption =
-        field_map json "PermissionsWithGrantOption" PermissionList.of_json in
-      let permissions = field_map json "Permissions" PermissionList.of_json in
-      let resource = field_map json "Resource" Resource.of_json in
-      let principal = field_map json "Principal" DataLakePrincipal.of_json in
-      make ?additionalDetails ?permissionsWithGrantOption ?permissions
-        ?resource ?principal ()
+        field_map json__ "PermissionsWithGrantOption" PermissionList.of_json in
+      let permissions = field_map json__ "Permissions" PermissionList.of_json in
+      let condition = field_map json__ "Condition" Condition.of_json in
+      let resource = field_map json__ "Resource" Resource.of_json in
+      let principal = field_map json__ "Principal" DataLakePrincipal.of_json in
+      make ?lastUpdatedBy ?lastUpdated ?additionalDetails
+        ?permissionsWithGrantOption ?permissions ?condition ?resource
+        ?principal ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The permissions granted or revoked on a resource."]
+module LakeFormationOptInsInfo =
+  struct
+    type nonrec t =
+      {
+      resource: Resource.t option ;
+      principal: DataLakePrincipal.t option ;
+      condition: Condition.t option
+        [@ocaml.doc
+          "A Lake Formation condition, which applies to permissions and opt-ins that contain an expression."];
+      lastModified: LastModifiedTimestamp.t option
+        [@ocaml.doc "The last modified date and time of the record."];
+      lastUpdatedBy: NameString.t option
+        [@ocaml.doc "The user who updated the record."]}
+    let make ?resource =
+      fun ?principal ->
+        fun ?condition ->
+          fun ?lastModified ->
+            fun ?lastUpdatedBy ->
+              fun () ->
+                { resource; principal; condition; lastModified; lastUpdatedBy
+                }
+    let to_value x =
+      structure_to_value
+        [("Resource", (Option.map x.resource ~f:Resource.to_value));
+        ("Principal", (Option.map x.principal ~f:DataLakePrincipal.to_value));
+        ("Condition", (Option.map x.condition ~f:Condition.to_value));
+        ("LastModified",
+          (Option.map x.lastModified ~f:LastModifiedTimestamp.to_value));
+        ("LastUpdatedBy",
+          (Option.map x.lastUpdatedBy ~f:NameString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdatedBy =
+        (Option.map ~f:NameString.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedBy") in
+      let lastModified =
+        (Option.map ~f:LastModifiedTimestamp.of_xml)
+          (Xml.child xml_arg0 "LastModified") in
+      let condition =
+        (Option.map ~f:Condition.of_xml) (Xml.child xml_arg0 "Condition") in
+      let principal =
+        (Option.map ~f:DataLakePrincipal.of_xml)
+          (Xml.child xml_arg0 "Principal") in
+      let resource =
+        (Option.map ~f:Resource.of_xml) (Xml.child xml_arg0 "Resource") in
+      make ?lastUpdatedBy ?lastModified ?condition ?principal ?resource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdatedBy = field_map json__ "LastUpdatedBy" NameString.of_json in
+      let lastModified =
+        field_map json__ "LastModified" LastModifiedTimestamp.of_json in
+      let condition = field_map json__ "Condition" Condition.of_json in
+      let principal = field_map json__ "Principal" DataLakePrincipal.of_json in
+      let resource = field_map json__ "Resource" Resource.of_json in
+      make ?lastUpdatedBy ?lastModified ?condition ?principal ?resource ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A single principal-resource pair that has Lake Formation permissins enforced."]
+module LFTagExpression =
+  struct
+    type nonrec t =
+      {
+      name: NameString.t option
+        [@ocaml.doc "The name for saved the LF-Tag expression."];
+      description: DescriptionString.t option
+        [@ocaml.doc
+          "A structure that contains information about the LF-Tag expression."];
+      catalogId: CatalogIdString.t option
+        [@ocaml.doc
+          "The identifier for the Data Catalog. By default, the account ID."];
+      expression: Expression.t option
+        [@ocaml.doc "A logical expression composed of one or more LF-Tags."]}
+    let make ?name =
+      fun ?description ->
+        fun ?catalogId ->
+          fun ?expression ->
+            fun () -> { name; description; catalogId; expression }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:NameString.to_value));
+        ("Description",
+          (Option.map x.description ~f:DescriptionString.to_value));
+        ("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value));
+        ("Expression", (Option.map x.expression ~f:Expression.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expression =
+        (Option.map ~f:Expression.of_xml) (Xml.child xml_arg0 "Expression") in
+      let catalogId =
+        (Option.map ~f:CatalogIdString.of_xml)
+          (Xml.child xml_arg0 "CatalogId") in
+      let description =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        (Option.map ~f:NameString.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?expression ?catalogId ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expression = field_map json__ "Expression" Expression.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      let description =
+        field_map json__ "Description" DescriptionString.of_json in
+      let name = field_map json__ "Name" NameString.of_json in
+      make ?expression ?catalogId ?description ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure consists LF-Tag expression name and catalog ID."]
 module DataCellsFilter =
   struct
     type nonrec t =
@@ -2491,28 +3235,33 @@ module DataCellsFilter =
         [@ocaml.doc "The name given by the user to the data filter cell."];
       rowFilter: RowFilter.t option [@ocaml.doc "A PartiQL predicate."];
       columnNames: ColumnNames.t option
-        [@ocaml.doc "A list of column names."];
+        [@ocaml.doc
+          "A list of column names and/or nested column attributes. When specifying nested attributes, use a qualified dot (.) delimited format such as \"address\".\"zip\". Nested attributes within this list may not exceed a depth of 5."];
       columnWildcard: ColumnWildcard.t option
         [@ocaml.doc
-          "A wildcard with exclusions. You must specify either a ColumnNames list or the ColumnWildCard."]}
+          "A wildcard with exclusions. You must specify either a ColumnNames list or the ColumnWildCard."];
+      versionId: VersionString.t option
+        [@ocaml.doc "The ID of the data cells filter version."]}
     let context_ = "DataCellsFilter"
     let make ?rowFilter =
       fun ?columnNames ->
         fun ?columnWildcard ->
-          fun ~tableCatalogId ->
-            fun ~databaseName ->
-              fun ~tableName ->
-                fun ~name ->
-                  fun () ->
-                    {
-                      rowFilter;
-                      columnNames;
-                      columnWildcard;
-                      tableCatalogId;
-                      databaseName;
-                      tableName;
-                      name
-                    }
+          fun ?versionId ->
+            fun ~tableCatalogId ->
+              fun ~databaseName ->
+                fun ~tableName ->
+                  fun ~name ->
+                    fun () ->
+                      {
+                        rowFilter;
+                        columnNames;
+                        columnWildcard;
+                        versionId;
+                        tableCatalogId;
+                        databaseName;
+                        tableName;
+                        name
+                      }
     let to_value x =
       structure_to_value
         [("TableCatalogId",
@@ -2523,9 +3272,12 @@ module DataCellsFilter =
         ("RowFilter", (Option.map x.rowFilter ~f:RowFilter.to_value));
         ("ColumnNames", (Option.map x.columnNames ~f:ColumnNames.to_value));
         ("ColumnWildcard",
-          (Option.map x.columnWildcard ~f:ColumnWildcard.to_value))]
+          (Option.map x.columnWildcard ~f:ColumnWildcard.to_value));
+        ("VersionId", (Option.map x.versionId ~f:VersionString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let versionId =
+        (Option.map ~f:VersionString.of_xml) (Xml.child xml_arg0 "VersionId") in
       let columnWildcard =
         (Option.map ~f:ColumnWildcard.of_xml)
           (Xml.child xml_arg0 "ColumnWildcard") in
@@ -2544,21 +3296,23 @@ module DataCellsFilter =
       let tableCatalogId =
         CatalogIdString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableCatalogId") in
-      make ?columnWildcard ?columnNames ?rowFilter ~name ~tableName
-        ~databaseName ~tableCatalogId ()
+      make ?versionId ?columnWildcard ?columnNames ?rowFilter ~name
+        ~tableName ~databaseName ~tableCatalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let versionId = field_map json__ "VersionId" VersionString.of_json in
       let columnWildcard =
-        field_map json "ColumnWildcard" ColumnWildcard.of_json in
-      let columnNames = field_map json "ColumnNames" ColumnNames.of_json in
-      let rowFilter = field_map json "RowFilter" RowFilter.of_json in
-      let name = field_map_exn json "Name" NameString.of_json in
-      let tableName = field_map_exn json "TableName" NameString.of_json in
-      let databaseName = field_map_exn json "DatabaseName" NameString.of_json in
+        field_map json__ "ColumnWildcard" ColumnWildcard.of_json in
+      let columnNames = field_map json__ "ColumnNames" ColumnNames.of_json in
+      let rowFilter = field_map json__ "RowFilter" RowFilter.of_json in
+      let name = field_map_exn json__ "Name" NameString.of_json in
+      let tableName = field_map_exn json__ "TableName" NameString.of_json in
+      let databaseName =
+        field_map_exn json__ "DatabaseName" NameString.of_json in
       let tableCatalogId =
-        field_map_exn json "TableCatalogId" CatalogIdString.of_json in
-      make ?columnWildcard ?columnNames ?rowFilter ~name ~tableName
-        ~databaseName ~tableCatalogId ()
+        field_map_exn json__ "TableCatalogId" CatalogIdString.of_json in
+      make ?versionId ?columnWildcard ?columnNames ?rowFilter ~name
+        ~tableName ~databaseName ~tableCatalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that describes certain columns on certain rows."]
@@ -2566,48 +3320,62 @@ module WorkUnitRange =
   struct
     type nonrec t =
       {
-      workUnitIdMax: WorkUnitIdLong.t
+      workUnitIdMax: WorkUnitIdLong.t option
         [@ocaml.doc
           "Defines the maximum work unit ID in the range. The maximum value is inclusive."];
-      workUnitIdMin: WorkUnitIdLong.t
+      workUnitIdMin: WorkUnitIdLong.t option
         [@ocaml.doc "Defines the minimum work unit ID in the range."];
-      workUnitToken: WorkUnitTokenString.t
+      workUnitToken: WorkUnitTokenString.t option
         [@ocaml.doc "A work token used to query the execution service."]}
-    let context_ = "WorkUnitRange"
-    let make ~workUnitIdMax =
-      fun ~workUnitIdMin ->
-        fun ~workUnitToken ->
+    let make ?workUnitIdMax =
+      fun ?workUnitIdMin ->
+        fun ?workUnitToken ->
           fun () -> { workUnitIdMax; workUnitIdMin; workUnitToken }
     let to_value x =
       structure_to_value
-        [("WorkUnitIdMax", (Some (WorkUnitIdLong.to_value x.workUnitIdMax)));
-        ("WorkUnitIdMin", (Some (WorkUnitIdLong.to_value x.workUnitIdMin)));
+        [("WorkUnitIdMax",
+           (Option.map x.workUnitIdMax ~f:WorkUnitIdLong.to_value));
+        ("WorkUnitIdMin",
+          (Option.map x.workUnitIdMin ~f:WorkUnitIdLong.to_value));
         ("WorkUnitToken",
-          (Some (WorkUnitTokenString.to_value x.workUnitToken)))]
+          (Option.map x.workUnitToken ~f:WorkUnitTokenString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workUnitToken =
-        WorkUnitTokenString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WorkUnitToken") in
+        (Option.map ~f:WorkUnitTokenString.of_xml)
+          (Xml.child xml_arg0 "WorkUnitToken") in
       let workUnitIdMin =
-        WorkUnitIdLong.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WorkUnitIdMin") in
+        (Option.map ~f:WorkUnitIdLong.of_xml)
+          (Xml.child xml_arg0 "WorkUnitIdMin") in
       let workUnitIdMax =
-        WorkUnitIdLong.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WorkUnitIdMax") in
-      make ~workUnitToken ~workUnitIdMin ~workUnitIdMax ()
+        (Option.map ~f:WorkUnitIdLong.of_xml)
+          (Xml.child xml_arg0 "WorkUnitIdMax") in
+      make ?workUnitToken ?workUnitIdMin ?workUnitIdMax ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workUnitToken =
-        field_map_exn json "WorkUnitToken" WorkUnitTokenString.of_json in
+        field_map json__ "WorkUnitToken" WorkUnitTokenString.of_json in
       let workUnitIdMin =
-        field_map_exn json "WorkUnitIdMin" WorkUnitIdLong.of_json in
+        field_map json__ "WorkUnitIdMin" WorkUnitIdLong.of_json in
       let workUnitIdMax =
-        field_map_exn json "WorkUnitIdMax" WorkUnitIdLong.of_json in
-      make ~workUnitToken ~workUnitIdMin ~workUnitIdMax ()
+        field_map json__ "WorkUnitIdMax" WorkUnitIdLong.of_json in
+      make ?workUnitToken ?workUnitIdMin ?workUnitIdMax ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Defines the valid range of work unit IDs for querying the execution service."]
+module PathString =
+  struct
+    type nonrec t = string
+    let context_ = "PathString"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PathString" j
+    let to_json = simple_to_json to_value
+  end
 module AuditContextString =
   struct
     type nonrec t = string
@@ -2635,17 +3403,23 @@ module PermissionType =
     type nonrec t =
       | COLUMN_PERMISSION 
       | CELL_FILTER_PERMISSION 
+      | NESTED_PERMISSION 
+      | NESTED_CELL_PERMISSION 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | COLUMN_PERMISSION -> "COLUMN_PERMISSION"
       | CELL_FILTER_PERMISSION -> "CELL_FILTER_PERMISSION"
+      | NESTED_PERMISSION -> "NESTED_PERMISSION"
+      | NESTED_CELL_PERMISSION -> "NESTED_CELL_PERMISSION"
       | Non_static_id s -> s
     let of_string =
       function
       | "COLUMN_PERMISSION" -> COLUMN_PERMISSION
       | "CELL_FILTER_PERMISSION" -> CELL_FILTER_PERMISSION
+      | "NESTED_PERMISSION" -> NESTED_PERMISSION
+      | "NESTED_CELL_PERMISSION" -> NESTED_CELL_PERMISSION
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2655,11 +3429,79 @@ module PermissionType =
     let of_json j = of_string (string_of_json ~kind:"PermissionType" j)
     let to_json = simple_to_json to_value
   end
+module AdditionalContextMap =
+  struct
+    type nonrec t = (ContextKey.t * ContextValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((ContextKey.of_string chopped),
+                              (ContextValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ContextKey.to_value x) |>
+                    (fun x -> (ContextValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ContextKey.of_string
+        ~of_json:ContextValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module HashString =
+  struct
+    type nonrec t = string
+    let context_ = "HashString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HashString" j
+    let to_json = simple_to_json to_value
+  end
+module NullableString =
+  struct
+    type nonrec t = string
+    let context_ = "NullableString"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NullableString" j
+    let to_json = simple_to_json to_value
+  end
 module ValueStringList =
   struct
     type nonrec t = ValueString.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValueString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2679,6 +3521,57 @@ module ValueStringList =
     let of_json j =
       list_of_json ~kind:"ValueStringList" ~of_json:ValueString.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module AccessKeyIdString =
+  struct
+    type nonrec t = string
+    let context_ = "AccessKeyIdString"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccessKeyIdString" j
+    let to_json = simple_to_json to_value
+  end
+module ExpirationTimestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module SecretAccessKeyString =
+  struct
+    type nonrec t = string
+    let context_ = "SecretAccessKeyString"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SecretAccessKeyString" j
+    let to_json = simple_to_json to_value
+  end
+module SessionTokenString =
+  struct
+    type nonrec t = string
+    let context_ = "SessionTokenString"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SessionTokenString" j
+    let to_json = simple_to_json to_value
   end
 module PartitionObjects =
   struct
@@ -2704,10 +3597,10 @@ module PartitionObjects =
           (Xml.child xml_arg0 "PartitionValues") in
       make ?objects ?partitionValues ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let objects = field_map json "Objects" TableObjectList.of_json in
+    let of_json json__ =
+      let objects = field_map json__ "Objects" TableObjectList.of_json in
       let partitionValues =
-        field_map json "PartitionValues" PartitionValuesList.of_json in
+        field_map json__ "PartitionValues" PartitionValuesList.of_json in
       make ?objects ?partitionValues ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2773,9 +3666,9 @@ module VirtualObject =
       let uri = URI.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Uri") in
       make ?eTag ~uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let eTag = field_map json "ETag" ETagString.of_json in
-      let uri = field_map_exn json "Uri" URI.of_json in make ?eTag ~uri ()
+    let of_json json__ =
+      let eTag = field_map json__ "ETag" ETagString.of_json in
+      let uri = field_map_exn json__ "Uri" URI.of_json in make ?eTag ~uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that defines an Amazon S3 object to be deleted if a transaction cancels, provided that VirtualPut was called before writing the object."]
@@ -2804,10 +3697,10 @@ module BatchPermissionsFailureEntry =
           (Xml.child xml_arg0 "RequestEntry") in
       make ?error ?requestEntry ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map json "Error" ErrorDetail.of_json in
+    let of_json json__ =
+      let error = field_map json__ "Error" ErrorDetail.of_json in
       let requestEntry =
-        field_map json "RequestEntry" BatchPermissionsRequestEntry.of_json in
+        field_map json__ "RequestEntry" BatchPermissionsRequestEntry.of_json in
       make ?error ?requestEntry ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2828,8 +3721,8 @@ module AccessDeniedException =
         (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Access to a resource was denied."]
@@ -2849,11 +3742,11 @@ module EntityNotFoundException =
         (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A specified entity does not exist"]
+  end[@@ocaml.doc "A specified entity does not exist."]
 module InternalServiceException =
   struct
     type nonrec t =
@@ -2870,8 +3763,8 @@ module InternalServiceException =
         (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An internal service error occurred."]
@@ -2891,8 +3784,8 @@ module InvalidInputException =
         (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input provided was not valid."]
@@ -2934,6 +3827,8 @@ module StorageOptimizerConfigMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2957,8 +3852,8 @@ module ConcurrentModificationException =
         (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2979,8 +3874,8 @@ module OperationTimeoutException =
         (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The operation timed out."]
@@ -3000,8 +3895,8 @@ module ResourceNotReadyException =
         (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3022,8 +3917,8 @@ module TransactionCanceledException =
         (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3044,8 +3939,8 @@ module TransactionCommitInProgressException =
         (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3066,8 +3961,8 @@ module TransactionCommittedException =
         (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3081,6 +3976,9 @@ module WriteOperationList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WriteOperation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3102,6 +4000,118 @@ module WriteOperationList =
         j
     let to_json v = composed_to_json to_value v
   end
+module ApplicationStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ApplicationStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ApplicationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ExternalFilteringConfiguration =
+  struct
+    type nonrec t =
+      {
+      status: EnableStatus.t
+        [@ocaml.doc
+          "Allows to enable or disable the third-party applications that are allowed to access data managed by Lake Formation."];
+      authorizedTargets: ScopeTargets.t
+        [@ocaml.doc
+          "List of third-party application ARNs integrated with Lake Formation."]}
+    let context_ = "ExternalFilteringConfiguration"
+    let make ~status =
+      fun ~authorizedTargets -> fun () -> { status; authorizedTargets }
+    let to_value x =
+      structure_to_value
+        [("Status", (Some (EnableStatus.to_value x.status)));
+        ("AuthorizedTargets",
+          (Some (ScopeTargets.to_value x.authorizedTargets)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let authorizedTargets =
+        ScopeTargets.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AuthorizedTargets") in
+      let status =
+        EnableStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+      make ~authorizedTargets ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let authorizedTargets =
+        field_map_exn json__ "AuthorizedTargets" ScopeTargets.of_json in
+      let status = field_map_exn json__ "Status" EnableStatus.of_json in
+      make ~authorizedTargets ~status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration for enabling external data filtering for third-party applications to access data managed by Lake Formation ."]
+module ServiceIntegrationList =
+  struct
+    type nonrec t = ServiceIntegrationUnion.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceIntegrationUnion.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceIntegrationUnion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceIntegrationList"
+        ~of_json:ServiceIntegrationUnion.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceNumberLimitExceededException =
+  struct
+    type nonrec t =
+      {
+      message: MessageString.t option
+        [@ocaml.doc "A message describing the problem."]}
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:MessageString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A resource numerical limit was exceeded."]
 module TransactionType =
   struct
     type nonrec t =
@@ -3156,8 +4166,8 @@ module ThrottledException =
         (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3223,16 +4233,16 @@ module QueryPlanningContext =
       make ?transactionId ?queryParameters ?queryAsOfTime ~databaseName
         ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transactionId =
-        field_map json "TransactionId" TransactionIdString.of_json in
+        field_map json__ "TransactionId" TransactionIdString.of_json in
       let queryParameters =
-        field_map json "QueryParameters" QueryParameterMap.of_json in
-      let queryAsOfTime = field_map json "QueryAsOfTime" Timestamp.of_json in
+        field_map json__ "QueryParameters" QueryParameterMap.of_json in
+      let queryAsOfTime = field_map json__ "QueryAsOfTime" Timestamp.of_json in
       let databaseName =
-        field_map_exn json "DatabaseName"
+        field_map_exn json__ "DatabaseName"
           QueryPlanningContextDatabaseNameString.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ?transactionId ?queryParameters ?queryAsOfTime ~databaseName
         ?catalogId ()
     let to_json v = composed_to_json to_value v
@@ -3268,8 +4278,8 @@ module GlueEncryptionException =
         (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An encryption operation failed."]
@@ -3277,6 +4287,9 @@ module TableLFTagsList =
   struct
     type nonrec t = TaggedTable.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TaggedTable.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3310,20 +4323,21 @@ module Token =
     let of_json j = string_of_json ~kind:"Token" j
     let to_json = simple_to_json to_value
   end
-module PageSize =
+module SearchPageSize =
   struct
     type nonrec t = int
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
     let to_query v = to_query to_value v
     let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for PageSize" xml_arg0)
+      Int.of_string
+        (string_of_xml ~kind:"an integer for SearchPageSize" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
@@ -3331,6 +4345,9 @@ module DatabaseLFTagsList =
   struct
     type nonrec t = TaggedDatabase.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TaggedDatabase.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3356,6 +4373,9 @@ module LFTagErrors =
   struct
     type nonrec t = LFTagError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LFTagError.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3392,32 +4412,24 @@ module AlreadyExistsException =
         (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A resource to be created or added already exists."]
-module ResourceNumberLimitExceededException =
+module Boolean =
   struct
-    type nonrec t =
-      {
-      message: MessageString.t option
-        [@ocaml.doc "A message describing the problem."]}
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:MessageString.to_value))]
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
     let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
     let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A resource numerical limit was exceeded."]
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module DataLakeSettings =
   struct
     type nonrec t =
@@ -3425,18 +4437,27 @@ module DataLakeSettings =
       dataLakeAdmins: DataLakePrincipalList.t option
         [@ocaml.doc
           "A list of Lake Formation principals. Supported principals are IAM users or IAM roles."];
+      readOnlyAdmins: DataLakePrincipalList.t option
+        [@ocaml.doc
+          "A list of Lake Formation principals with only view access to the resources, without the ability to make changes. Supported principals are IAM users or IAM roles."];
       createDatabaseDefaultPermissions: PrincipalPermissionsList.t option
         [@ocaml.doc
-          "Specifies whether access control on newly created database is managed by Lake Formation permissions or exclusively by IAM permissions. You can override this default setting when you create a database. A null value indicates access control by Lake Formation permissions. A value that assigns ALL to IAM_ALLOWED_PRINCIPALS indicates access control by IAM permissions. This is referred to as the setting \"Use only IAM access control,\" and is for backward compatibility with the Glue permission model implemented by IAM permissions. The only permitted values are an empty array or an array that contains a single JSON object that grants ALL to IAM_ALLOWED_PRINCIPALS. For more information, see Changing the Default Security Settings for Your Data Lake."];
+          "Specifies whether access control on newly created database is managed by Lake Formation permissions or exclusively by IAM permissions. A null value indicates access control by Lake Formation permissions. A value that assigns ALL to IAM_ALLOWED_PRINCIPALS indicates access control by IAM permissions. This is referred to as the setting \"Use only IAM access control,\" and is for backward compatibility with the Glue permission model implemented by IAM permissions. The only permitted values are an empty array or an array that contains a single JSON object that grants ALL to IAM_ALLOWED_PRINCIPALS. For more information, see Changing the Default Security Settings for Your Data Lake."];
       createTableDefaultPermissions: PrincipalPermissionsList.t option
         [@ocaml.doc
           "Specifies whether access control on newly created table is managed by Lake Formation permissions or exclusively by IAM permissions. A null value indicates access control by Lake Formation permissions. A value that assigns ALL to IAM_ALLOWED_PRINCIPALS indicates access control by IAM permissions. This is referred to as the setting \"Use only IAM access control,\" and is for backward compatibility with the Glue permission model implemented by IAM permissions. The only permitted values are an empty array or an array that contains a single JSON object that grants ALL to IAM_ALLOWED_PRINCIPALS. For more information, see Changing the Default Security Settings for Your Data Lake."];
+      parameters: ParametersMap.t option
+        [@ocaml.doc
+          "A key-value map that provides an additional configuration on your data lake. The following key-value pairs are supported: CROSS_ACCOUNT_VERSION - Accepted values are 1, 2, 3, 4, and 5. SET_SOURCE_IDENTITY - Accepted values are TRUE and FALSE. When set to TRUE, Lake Formation includes the IAM role identifier that was used to query in the S3 data event CloudTrail logs for s3:GetObject calls. For more information, see Tracking query engine IAM roles in S3 data events."];
       trustedResourceOwners: TrustedResourceOwners.t option
         [@ocaml.doc
           "A list of the resource-owning account IDs that the caller's account can use to share their user access details (user ARNs). The user ARNs can be logged in the resource owner's CloudTrail log. You may want to specify this property when you are in a high-trust boundary, such as the same team or company."];
       allowExternalDataFiltering: NullableBoolean.t option
         [@ocaml.doc
-          "Whether to allow Amazon EMR clusters to access data managed by Lake Formation. If true, you allow Amazon EMR clusters to access data in Amazon S3 locations that are registered with Lake Formation. If false or null, no Amazon EMR clusters will be able to access data in Amazon S3 locations that are registered with Lake Formation. For more information, see (Optional) Allow Data Filtering on Amazon EMR."];
+          "Whether to allow Amazon EMR clusters to access data managed by Lake Formation. If true, you allow Amazon EMR clusters to access data in Amazon S3 locations that are registered with Lake Formation. If false or null, no Amazon EMR clusters will be able to access data in Amazon S3 locations that are registered with Lake Formation. For more information, see (Optional) Allow external data filtering."];
+      allowFullTableExternalDataAccess: NullableBoolean.t option
+        [@ocaml.doc
+          "Whether to allow a third-party query engine to get data access credentials without session tags when a caller has full data access permissions."];
       externalDataFilteringAllowList: DataLakePrincipalList.t option
         [@ocaml.doc
           "A list of the account IDs of Amazon Web Services accounts with Amazon EMR clusters that are to perform data filtering.>"];
@@ -3444,37 +4465,49 @@ module DataLakeSettings =
         [@ocaml.doc
           "Lake Formation relies on a privileged process secured by Amazon EMR or the third party integrator to tag the user's role while assuming it. Lake Formation will publish the acceptable key-value pair, for example key = \"LakeFormationTrustedCaller\" and value = \"TRUE\" and the third party integrator must properly tag the temporary security credentials that will be used to call Lake Formation's administrative APIs."]}
     let make ?dataLakeAdmins =
-      fun ?createDatabaseDefaultPermissions ->
-        fun ?createTableDefaultPermissions ->
-          fun ?trustedResourceOwners ->
-            fun ?allowExternalDataFiltering ->
-              fun ?externalDataFilteringAllowList ->
-                fun ?authorizedSessionTagValueList ->
-                  fun () ->
-                    {
-                      dataLakeAdmins;
-                      createDatabaseDefaultPermissions;
-                      createTableDefaultPermissions;
-                      trustedResourceOwners;
-                      allowExternalDataFiltering;
-                      externalDataFilteringAllowList;
-                      authorizedSessionTagValueList
-                    }
+      fun ?readOnlyAdmins ->
+        fun ?createDatabaseDefaultPermissions ->
+          fun ?createTableDefaultPermissions ->
+            fun ?parameters ->
+              fun ?trustedResourceOwners ->
+                fun ?allowExternalDataFiltering ->
+                  fun ?allowFullTableExternalDataAccess ->
+                    fun ?externalDataFilteringAllowList ->
+                      fun ?authorizedSessionTagValueList ->
+                        fun () ->
+                          {
+                            dataLakeAdmins;
+                            readOnlyAdmins;
+                            createDatabaseDefaultPermissions;
+                            createTableDefaultPermissions;
+                            parameters;
+                            trustedResourceOwners;
+                            allowExternalDataFiltering;
+                            allowFullTableExternalDataAccess;
+                            externalDataFilteringAllowList;
+                            authorizedSessionTagValueList
+                          }
     let to_value x =
       structure_to_value
         [("DataLakeAdmins",
            (Option.map x.dataLakeAdmins ~f:DataLakePrincipalList.to_value));
+        ("ReadOnlyAdmins",
+          (Option.map x.readOnlyAdmins ~f:DataLakePrincipalList.to_value));
         ("CreateDatabaseDefaultPermissions",
           (Option.map x.createDatabaseDefaultPermissions
              ~f:PrincipalPermissionsList.to_value));
         ("CreateTableDefaultPermissions",
           (Option.map x.createTableDefaultPermissions
              ~f:PrincipalPermissionsList.to_value));
+        ("Parameters", (Option.map x.parameters ~f:ParametersMap.to_value));
         ("TrustedResourceOwners",
           (Option.map x.trustedResourceOwners
              ~f:TrustedResourceOwners.to_value));
         ("AllowExternalDataFiltering",
           (Option.map x.allowExternalDataFiltering
+             ~f:NullableBoolean.to_value));
+        ("AllowFullTableExternalDataAccess",
+          (Option.map x.allowFullTableExternalDataAccess
              ~f:NullableBoolean.to_value));
         ("ExternalDataFilteringAllowList",
           (Option.map x.externalDataFilteringAllowList
@@ -3490,49 +4523,65 @@ module DataLakeSettings =
       let externalDataFilteringAllowList =
         (Option.map ~f:DataLakePrincipalList.of_xml)
           (Xml.child xml_arg0 "ExternalDataFilteringAllowList") in
+      let allowFullTableExternalDataAccess =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "AllowFullTableExternalDataAccess") in
       let allowExternalDataFiltering =
         (Option.map ~f:NullableBoolean.of_xml)
           (Xml.child xml_arg0 "AllowExternalDataFiltering") in
       let trustedResourceOwners =
         (Option.map ~f:TrustedResourceOwners.of_xml)
           (Xml.child xml_arg0 "TrustedResourceOwners") in
+      let parameters =
+        (Option.map ~f:ParametersMap.of_xml)
+          (Xml.child xml_arg0 "Parameters") in
       let createTableDefaultPermissions =
         (Option.map ~f:PrincipalPermissionsList.of_xml)
           (Xml.child xml_arg0 "CreateTableDefaultPermissions") in
       let createDatabaseDefaultPermissions =
         (Option.map ~f:PrincipalPermissionsList.of_xml)
           (Xml.child xml_arg0 "CreateDatabaseDefaultPermissions") in
+      let readOnlyAdmins =
+        (Option.map ~f:DataLakePrincipalList.of_xml)
+          (Xml.child xml_arg0 "ReadOnlyAdmins") in
       let dataLakeAdmins =
         (Option.map ~f:DataLakePrincipalList.of_xml)
           (Xml.child xml_arg0 "DataLakeAdmins") in
       make ?authorizedSessionTagValueList ?externalDataFilteringAllowList
-        ?allowExternalDataFiltering ?trustedResourceOwners
-        ?createTableDefaultPermissions ?createDatabaseDefaultPermissions
-        ?dataLakeAdmins ()
+        ?allowFullTableExternalDataAccess ?allowExternalDataFiltering
+        ?trustedResourceOwners ?parameters ?createTableDefaultPermissions
+        ?createDatabaseDefaultPermissions ?readOnlyAdmins ?dataLakeAdmins ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authorizedSessionTagValueList =
-        field_map json "AuthorizedSessionTagValueList"
+        field_map json__ "AuthorizedSessionTagValueList"
           AuthorizedSessionTagValueList.of_json in
       let externalDataFilteringAllowList =
-        field_map json "ExternalDataFilteringAllowList"
+        field_map json__ "ExternalDataFilteringAllowList"
           DataLakePrincipalList.of_json in
+      let allowFullTableExternalDataAccess =
+        field_map json__ "AllowFullTableExternalDataAccess"
+          NullableBoolean.of_json in
       let allowExternalDataFiltering =
-        field_map json "AllowExternalDataFiltering" NullableBoolean.of_json in
+        field_map json__ "AllowExternalDataFiltering" NullableBoolean.of_json in
       let trustedResourceOwners =
-        field_map json "TrustedResourceOwners" TrustedResourceOwners.of_json in
+        field_map json__ "TrustedResourceOwners"
+          TrustedResourceOwners.of_json in
+      let parameters = field_map json__ "Parameters" ParametersMap.of_json in
       let createTableDefaultPermissions =
-        field_map json "CreateTableDefaultPermissions"
+        field_map json__ "CreateTableDefaultPermissions"
           PrincipalPermissionsList.of_json in
       let createDatabaseDefaultPermissions =
-        field_map json "CreateDatabaseDefaultPermissions"
+        field_map json__ "CreateDatabaseDefaultPermissions"
           PrincipalPermissionsList.of_json in
+      let readOnlyAdmins =
+        field_map json__ "ReadOnlyAdmins" DataLakePrincipalList.of_json in
       let dataLakeAdmins =
-        field_map json "DataLakeAdmins" DataLakePrincipalList.of_json in
+        field_map json__ "DataLakeAdmins" DataLakePrincipalList.of_json in
       make ?authorizedSessionTagValueList ?externalDataFilteringAllowList
-        ?allowExternalDataFiltering ?trustedResourceOwners
-        ?createTableDefaultPermissions ?createDatabaseDefaultPermissions
-        ?dataLakeAdmins ()
+        ?allowFullTableExternalDataAccess ?allowExternalDataFiltering
+        ?trustedResourceOwners ?parameters ?createTableDefaultPermissions
+        ?createDatabaseDefaultPermissions ?readOnlyAdmins ?dataLakeAdmins ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure representing a list of Lake Formation principals designated as data lake administrators and lists of principal permission entries for default create database and default create table permissions."]
@@ -3554,6 +4603,9 @@ module TransactionDescriptionList =
   struct
     type nonrec t = TransactionDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransactionDescription.to_value)) |>
         (fun x -> `List x)
@@ -3575,6 +4627,23 @@ module TransactionDescriptionList =
       list_of_json ~kind:"TransactionDescriptionList"
         ~of_json:TransactionDescription.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module PageSize =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for PageSize" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
   end
 module TransactionStatusFilter =
   struct
@@ -3616,6 +4685,9 @@ module StorageOptimizerList =
   struct
     type nonrec t = StorageOptimizer.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StorageOptimizer.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3641,6 +4713,9 @@ module ResourceInfoList =
   struct
     type nonrec t = ResourceInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3669,6 +4744,9 @@ module FilterConditionList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FilterCondition.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3694,6 +4772,9 @@ module PrincipalResourcePermissionsList =
   struct
     type nonrec t = PrincipalResourcePermissions.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PrincipalResourcePermissions.to_value)) |>
         (fun x -> `List x)
@@ -3727,6 +4808,7 @@ module DataLakeResourceType =
       | LF_TAG_POLICY 
       | LF_TAG_POLICY_DATABASE 
       | LF_TAG_POLICY_TABLE 
+      | LF_NAMED_TAG_EXPRESSION 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -3739,6 +4821,7 @@ module DataLakeResourceType =
       | LF_TAG_POLICY -> "LF_TAG_POLICY"
       | LF_TAG_POLICY_DATABASE -> "LF_TAG_POLICY_DATABASE"
       | LF_TAG_POLICY_TABLE -> "LF_TAG_POLICY_TABLE"
+      | LF_NAMED_TAG_EXPRESSION -> "LF_NAMED_TAG_EXPRESSION"
       | Non_static_id s -> s
     let of_string =
       function
@@ -3750,6 +4833,7 @@ module DataLakeResourceType =
       | "LF_TAG_POLICY" -> LF_TAG_POLICY
       | "LF_TAG_POLICY_DATABASE" -> LF_TAG_POLICY_DATABASE
       | "LF_TAG_POLICY_TABLE" -> LF_TAG_POLICY_TABLE
+      | "LF_NAMED_TAG_EXPRESSION" -> LF_NAMED_TAG_EXPRESSION
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3782,6 +4866,35 @@ module TrueFalseString =
     let of_json j = string_of_json ~kind:"TrueFalseString" j
     let to_json = simple_to_json to_value
   end
+module LakeFormationOptInsInfoList =
+  struct
+    type nonrec t = LakeFormationOptInsInfo.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LakeFormationOptInsInfo.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LakeFormationOptInsInfo.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LakeFormationOptInsInfoList"
+        ~of_json:LakeFormationOptInsInfo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ResourceShareType =
   struct
     type nonrec t =
@@ -3802,10 +4915,41 @@ module ResourceShareType =
     let of_json j = of_string (string_of_json ~kind:"ResourceShareType" j)
     let to_json = simple_to_json to_value
   end
+module LFTagExpressionsList =
+  struct
+    type nonrec t = LFTagExpression.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LFTagExpression.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LFTagExpression.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LFTagExpressionsList"
+        ~of_json:LFTagExpression.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DataCellsFilterList =
   struct
     type nonrec t = DataCellsFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataCellsFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3843,8 +4987,8 @@ module ExpiredException =
         (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3853,6 +4997,9 @@ module WorkUnitRangeList =
   struct
     type nonrec t = WorkUnitRange.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WorkUnitRange.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3889,8 +5036,8 @@ module WorkUnitsNotReadyYetException =
         (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3987,30 +5134,32 @@ module SyntheticGetWorkUnitResultsRequestWorkUnitTokenString =
         ~kind:"SyntheticGetWorkUnitResultsRequestWorkUnitTokenString" j
     let to_json = simple_to_json to_value
   end
-module AccessKeyIdString =
+module PathStringList =
   struct
-    type nonrec t = string
-    let context_ = "AccessKeyIdString"
+    type nonrec t = PathString.t list
     let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PathString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AccessKeyIdString" j
-    let to_json = simple_to_json to_value
-  end
-module ExpirationTimestamp =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PathString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PathStringList" ~of_json:PathString.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module PermissionTypeMismatchException =
   struct
@@ -4028,38 +5177,12 @@ module PermissionTypeMismatchException =
         (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The engine does not support filtering data based on the enforced permissions. For example, if you call the GetTemporaryGlueTableCredentials operation with SupportedPermissionType equal to ColumnPermission, but cell-level permissions exist on the table, this exception is thrown."]
-module SecretAccessKeyString =
-  struct
-    type nonrec t = string
-    let context_ = "SecretAccessKeyString"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SecretAccessKeyString" j
-    let to_json = simple_to_json to_value
-  end
-module SessionTokenString =
-  struct
-    type nonrec t = string
-    let context_ = "SessionTokenString"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SessionTokenString" j
-    let to_json = simple_to_json to_value
-  end
 module AuditContext =
   struct
     type nonrec t =
@@ -4080,9 +5203,9 @@ module AuditContext =
           (Xml.child xml_arg0 "AdditionalAuditContext") in
       make ?additionalAuditContext ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let additionalAuditContext =
-        field_map json "AdditionalAuditContext" AuditContextString.of_json in
+        field_map json__ "AdditionalAuditContext" AuditContextString.of_json in
       make ?additionalAuditContext ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4117,6 +5240,9 @@ module PermissionTypeList =
           ((check_list_max i ~max:255) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PermissionType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4138,6 +5264,80 @@ module PermissionTypeList =
         j
     let to_json v = composed_to_json to_value v
   end
+module QuerySessionContext =
+  struct
+    type nonrec t =
+      {
+      queryId: HashString.t option
+        [@ocaml.doc
+          "A unique identifier generated by the query engine for the query."];
+      queryStartTime: Timestamp.t option
+        [@ocaml.doc
+          "A timestamp provided by the query engine for when the query started."];
+      clusterId: NullableString.t option
+        [@ocaml.doc "An identifier string for the consumer cluster."];
+      queryAuthorizationId: HashString.t option
+        [@ocaml.doc
+          "A cryptographically generated query identifier generated by Glue or Lake Formation."];
+      additionalContext: AdditionalContextMap.t option
+        [@ocaml.doc
+          "An opaque string-string map passed by the query engine."]}
+    let make ?queryId =
+      fun ?queryStartTime ->
+        fun ?clusterId ->
+          fun ?queryAuthorizationId ->
+            fun ?additionalContext ->
+              fun () ->
+                {
+                  queryId;
+                  queryStartTime;
+                  clusterId;
+                  queryAuthorizationId;
+                  additionalContext
+                }
+    let to_value x =
+      structure_to_value
+        [("QueryId", (Option.map x.queryId ~f:HashString.to_value));
+        ("QueryStartTime",
+          (Option.map x.queryStartTime ~f:Timestamp.to_value));
+        ("ClusterId", (Option.map x.clusterId ~f:NullableString.to_value));
+        ("QueryAuthorizationId",
+          (Option.map x.queryAuthorizationId ~f:HashString.to_value));
+        ("AdditionalContext",
+          (Option.map x.additionalContext ~f:AdditionalContextMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let additionalContext =
+        (Option.map ~f:AdditionalContextMap.of_xml)
+          (Xml.child xml_arg0 "AdditionalContext") in
+      let queryAuthorizationId =
+        (Option.map ~f:HashString.of_xml)
+          (Xml.child xml_arg0 "QueryAuthorizationId") in
+      let clusterId =
+        (Option.map ~f:NullableString.of_xml)
+          (Xml.child xml_arg0 "ClusterId") in
+      let queryStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "QueryStartTime") in
+      let queryId =
+        (Option.map ~f:HashString.of_xml) (Xml.child xml_arg0 "QueryId") in
+      make ?additionalContext ?queryAuthorizationId ?clusterId
+        ?queryStartTime ?queryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let additionalContext =
+        field_map json__ "AdditionalContext" AdditionalContextMap.of_json in
+      let queryAuthorizationId =
+        field_map json__ "QueryAuthorizationId" HashString.of_json in
+      let clusterId = field_map json__ "ClusterId" NullableString.of_json in
+      let queryStartTime =
+        field_map json__ "QueryStartTime" Timestamp.of_json in
+      let queryId = field_map json__ "QueryId" HashString.of_json in
+      make ?additionalContext ?queryAuthorizationId ?clusterId
+        ?queryStartTime ?queryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure used as a protocol between query engines and Lake Formation or Glue. Contains both a Lake Formation generated authorization identifier and information from the request's authorization context. For more information about how to utilize QuerySessionContext, see Lake Formation workflow for application integration API operations in the developer guide."]
 module PartitionValueList =
   struct
     type nonrec t =
@@ -4155,15 +5355,123 @@ module PartitionValueList =
           (Xml.child_exn ~context:context_ xml_arg0 "Values") in
       make ~values ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map_exn json "Values" ValueStringList.of_json in
+    let of_json json__ =
+      let values = field_map_exn json__ "Values" ValueStringList.of_json in
       make ~values ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains a list of values defining partitions."]
+module ConflictException =
+  struct
+    type nonrec t =
+      {
+      message: MessageString.t option
+        [@ocaml.doc "A message describing the problem."]}
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:MessageString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Multiple resources exist with the same Amazon S3 location"]
+module CredentialsScope =
+  struct
+    type nonrec t =
+      | READ 
+      | READWRITE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | READ -> "READ"
+      | READWRITE -> "READWRITE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "READ" -> READ
+      | "READWRITE" -> READWRITE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration CredentialsScope" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CredentialsScope" j)
+    let to_json = simple_to_json to_value
+  end
+module TemporaryCredentials =
+  struct
+    type nonrec t =
+      {
+      accessKeyId: AccessKeyIdString.t option
+        [@ocaml.doc "The access key ID for the temporary credentials."];
+      secretAccessKey: SecretAccessKeyString.t option
+        [@ocaml.doc "The secret key for the temporary credentials."];
+      sessionToken: SessionTokenString.t option
+        [@ocaml.doc "The session token for the temporary credentials."];
+      expiration: ExpirationTimestamp.t option
+        [@ocaml.doc
+          "The date and time when the temporary credentials expire."]}
+    let make ?accessKeyId =
+      fun ?secretAccessKey ->
+        fun ?sessionToken ->
+          fun ?expiration ->
+            fun () ->
+              { accessKeyId; secretAccessKey; sessionToken; expiration }
+    let to_value x =
+      structure_to_value
+        [("AccessKeyId",
+           (Option.map x.accessKeyId ~f:AccessKeyIdString.to_value));
+        ("SecretAccessKey",
+          (Option.map x.secretAccessKey ~f:SecretAccessKeyString.to_value));
+        ("SessionToken",
+          (Option.map x.sessionToken ~f:SessionTokenString.to_value));
+        ("Expiration",
+          (Option.map x.expiration ~f:ExpirationTimestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expiration =
+        (Option.map ~f:ExpirationTimestamp.of_xml)
+          (Xml.child xml_arg0 "Expiration") in
+      let sessionToken =
+        (Option.map ~f:SessionTokenString.of_xml)
+          (Xml.child xml_arg0 "SessionToken") in
+      let secretAccessKey =
+        (Option.map ~f:SecretAccessKeyString.of_xml)
+          (Xml.child xml_arg0 "SecretAccessKey") in
+      let accessKeyId =
+        (Option.map ~f:AccessKeyIdString.of_xml)
+          (Xml.child xml_arg0 "AccessKeyId") in
+      make ?expiration ?sessionToken ?secretAccessKey ?accessKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expiration =
+        field_map json__ "Expiration" ExpirationTimestamp.of_json in
+      let sessionToken =
+        field_map json__ "SessionToken" SessionTokenString.of_json in
+      let secretAccessKey =
+        field_map json__ "SecretAccessKey" SecretAccessKeyString.of_json in
+      let accessKeyId =
+        field_map json__ "AccessKeyId" AccessKeyIdString.of_json in
+      make ?expiration ?sessionToken ?secretAccessKey ?accessKeyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A temporary set of credentials for an Lake Formation user. These credentials are scoped down to only access the raw data sources that the user has access to. The temporary security credentials consist of an access key and a session token. The access key consists of an access key ID and a secret key. When the credentials are created, they are associated with an IAM access control policy that limits what the user can do when using the credentials."]
 module PartitionedTableObjectsList =
   struct
     type nonrec t = PartitionObjects.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PartitionObjects.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4252,13 +5560,13 @@ module ExecutionStatistics =
       make ?workUnitsExecutedCount ?dataScannedBytes
         ?averageExecutionTimeMillis ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workUnitsExecutedCount =
-        field_map json "WorkUnitsExecutedCount" NumberOfItems.of_json in
+        field_map json__ "WorkUnitsExecutedCount" NumberOfItems.of_json in
       let dataScannedBytes =
-        field_map json "DataScannedBytes" NumberOfBytes.of_json in
+        field_map json__ "DataScannedBytes" NumberOfBytes.of_json in
       let averageExecutionTimeMillis =
-        field_map json "AverageExecutionTimeMillis"
+        field_map json__ "AverageExecutionTimeMillis"
           NumberOfMilliseconds.of_json in
       make ?workUnitsExecutedCount ?dataScannedBytes
         ?averageExecutionTimeMillis ()
@@ -4315,15 +5623,15 @@ module PlanningStatistics =
       make ?workUnitsGeneratedCount ?queueTimeMillis ?planningTimeMillis
         ?estimatedDataToScanBytes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workUnitsGeneratedCount =
-        field_map json "WorkUnitsGeneratedCount" NumberOfItems.of_json in
+        field_map json__ "WorkUnitsGeneratedCount" NumberOfItems.of_json in
       let queueTimeMillis =
-        field_map json "QueueTimeMillis" NumberOfMilliseconds.of_json in
+        field_map json__ "QueueTimeMillis" NumberOfMilliseconds.of_json in
       let planningTimeMillis =
-        field_map json "PlanningTimeMillis" NumberOfMilliseconds.of_json in
+        field_map json__ "PlanningTimeMillis" NumberOfMilliseconds.of_json in
       let estimatedDataToScanBytes =
-        field_map json "EstimatedDataToScanBytes" NumberOfBytes.of_json in
+        field_map json__ "EstimatedDataToScanBytes" NumberOfBytes.of_json in
       make ?workUnitsGeneratedCount ?queueTimeMillis ?planningTimeMillis
         ?estimatedDataToScanBytes ()
     let to_json v = composed_to_json to_value v
@@ -4345,8 +5653,8 @@ module StatisticsNotReadyYetException =
         (Option.map ~f:MessageString.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" MessageString.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" MessageString.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4436,6 +5744,45 @@ module GetQueryStateRequestQueryIdString =
       string_of_json ~kind:"GetQueryStateRequestQueryIdString" j
     let to_json = simple_to_json to_value
   end
+module IdentityString =
+  struct
+    type nonrec t = string
+    let context_ = "IdentityString"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdentityString" j
+    let to_json = simple_to_json to_value
+  end
+module ApplicationArn =
+  struct
+    type nonrec t = string
+    let context_ = "ApplicationArn"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ApplicationArn" j
+    let to_json = simple_to_json to_value
+  end
+module IdentityCenterInstanceArn =
+  struct
+    type nonrec t = string
+    let context_ = "IdentityCenterInstanceArn"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdentityCenterInstanceArn" j
+    let to_json = simple_to_json to_value
+  end
 module VirtualObjectList =
   struct
     type nonrec t = VirtualObject.t list
@@ -4445,6 +5792,9 @@ module VirtualObjectList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VirtualObject.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4469,6 +5819,9 @@ module BatchPermissionsFailureList =
   struct
     type nonrec t = BatchPermissionsFailureEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchPermissionsFailureEntry.to_value)) |>
         (fun x -> `List x)
@@ -4495,6 +5848,9 @@ module BatchPermissionsRequestEntryList =
   struct
     type nonrec t = BatchPermissionsRequestEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchPermissionsRequestEntry.to_value)) |>
         (fun x -> `List x)
@@ -4516,6 +5872,41 @@ module BatchPermissionsRequestEntryList =
       list_of_json ~kind:"BatchPermissionsRequestEntryList"
         ~of_json:BatchPermissionsRequestEntry.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module IAMSAMLProviderArn =
+  struct
+    type nonrec t = string
+    let context_ = "IAMSAMLProviderArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i ~pattern:"arn:aws:iam::[0-9]*:saml-provider/.*");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IAMSAMLProviderArn" j
+    let to_json = simple_to_json to_value
+  end
+module SAMLAssertionString =
+  struct
+    type nonrec t = string
+    let context_ = "SAMLAssertionString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100000) >>=
+             (fun () -> check_string_min i ~min:4));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SAMLAssertionString" j
+    let to_json = simple_to_json to_value
   end
 module UpdateTableStorageOptimizerResponse =
   struct
@@ -4588,8 +5979,9 @@ module UpdateTableStorageOptimizerResponse =
         (Option.map ~f:Result_.of_xml) (Xml.child xml_arg0 "Result") in
       make ?result ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let result = field_map json "Result" Result_.of_json in make ?result ()
+    let of_json json__ =
+      let result = field_map json__ "Result" Result_.of_json in
+      make ?result ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the configuration of the storage optimizers for a table."]
@@ -4605,8 +5997,7 @@ module UpdateTableStorageOptimizerRequest =
         [@ocaml.doc
           "Name of the table for which to enable the storage optimizer."];
       storageOptimizerConfig: StorageOptimizerConfigMap.t
-        [@ocaml.doc
-          "Name of the table for which to enable the storage optimizer."]}
+        [@ocaml.doc "Name of the configuration for the storage optimizer."]}
     let context_ = "UpdateTableStorageOptimizerRequest"
     let make ?catalogId =
       fun ~databaseName ->
@@ -4637,13 +6028,14 @@ module UpdateTableStorageOptimizerRequest =
           (Xml.child xml_arg0 "CatalogId") in
       make ~storageOptimizerConfig ~tableName ~databaseName ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let storageOptimizerConfig =
-        field_map_exn json "StorageOptimizerConfig"
+        field_map_exn json__ "StorageOptimizerConfig"
           StorageOptimizerConfigMap.of_json in
-      let tableName = field_map_exn json "TableName" NameString.of_json in
-      let databaseName = field_map_exn json "DatabaseName" NameString.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+      let tableName = field_map_exn json__ "TableName" NameString.of_json in
+      let databaseName =
+        field_map_exn json__ "DatabaseName" NameString.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ~storageOptimizerConfig ~tableName ~databaseName ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4828,14 +6220,15 @@ module UpdateTableObjectsRequest =
       make ~writeOperations ?transactionId ~tableName ~databaseName
         ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let writeOperations =
-        field_map_exn json "WriteOperations" WriteOperationList.of_json in
+        field_map_exn json__ "WriteOperations" WriteOperationList.of_json in
       let transactionId =
-        field_map json "TransactionId" TransactionIdString.of_json in
-      let tableName = field_map_exn json "TableName" NameString.of_json in
-      let databaseName = field_map_exn json "DatabaseName" NameString.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+        field_map json__ "TransactionId" TransactionIdString.of_json in
+      let tableName = field_map_exn json__ "TableName" NameString.of_json in
+      let databaseName =
+        field_map_exn json__ "DatabaseName" NameString.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ~writeOperations ?transactionId ~tableName ~databaseName
         ?catalogId ()
     let to_json v = composed_to_json to_value v
@@ -4915,32 +6308,242 @@ module UpdateResourceRequest =
       roleArn: IAMRoleArn.t
         [@ocaml.doc
           "The new role to use for the given resource registered in Lake Formation."];
-      resourceArn: ResourceArnString.t [@ocaml.doc "The resource ARN."]}
+      resourceArn: ResourceArnString.t [@ocaml.doc "The resource ARN."];
+      withFederation: NullableBoolean.t option
+        [@ocaml.doc "Whether or not the resource is a federated resource."];
+      hybridAccessEnabled: NullableBoolean.t option
+        [@ocaml.doc
+          "Specifies whether the data access of tables pointing to the location can be managed by both Lake Formation permissions as well as Amazon S3 bucket policies."];
+      expectedResourceOwnerAccount: AccountIdString.t option
+        [@ocaml.doc
+          "The Amazon Web Services account that owns the Glue tables associated with specific Amazon S3 locations."]}
     let context_ = "UpdateResourceRequest"
-    let make ~roleArn =
-      fun ~resourceArn -> fun () -> { roleArn; resourceArn }
+    let make ?withFederation =
+      fun ?hybridAccessEnabled ->
+        fun ?expectedResourceOwnerAccount ->
+          fun ~roleArn ->
+            fun ~resourceArn ->
+              fun () ->
+                {
+                  withFederation;
+                  hybridAccessEnabled;
+                  expectedResourceOwnerAccount;
+                  roleArn;
+                  resourceArn
+                }
     let to_value x =
       structure_to_value
         [("RoleArn", (Some (IAMRoleArn.to_value x.roleArn)));
-        ("ResourceArn", (Some (ResourceArnString.to_value x.resourceArn)))]
+        ("ResourceArn", (Some (ResourceArnString.to_value x.resourceArn)));
+        ("WithFederation",
+          (Option.map x.withFederation ~f:NullableBoolean.to_value));
+        ("HybridAccessEnabled",
+          (Option.map x.hybridAccessEnabled ~f:NullableBoolean.to_value));
+        ("ExpectedResourceOwnerAccount",
+          (Option.map x.expectedResourceOwnerAccount
+             ~f:AccountIdString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let expectedResourceOwnerAccount =
+        (Option.map ~f:AccountIdString.of_xml)
+          (Xml.child xml_arg0 "ExpectedResourceOwnerAccount") in
+      let hybridAccessEnabled =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "HybridAccessEnabled") in
+      let withFederation =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "WithFederation") in
       let resourceArn =
         ResourceArnString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       let roleArn =
         IAMRoleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
-      make ~resourceArn ~roleArn ()
+      make ?expectedResourceOwnerAccount ?hybridAccessEnabled ?withFederation
+        ~resourceArn ~roleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let expectedResourceOwnerAccount =
+        field_map json__ "ExpectedResourceOwnerAccount"
+          AccountIdString.of_json in
+      let hybridAccessEnabled =
+        field_map json__ "HybridAccessEnabled" NullableBoolean.of_json in
+      let withFederation =
+        field_map json__ "WithFederation" NullableBoolean.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" ResourceArnString.of_json in
-      let roleArn = field_map_exn json "RoleArn" IAMRoleArn.of_json in
-      make ~resourceArn ~roleArn ()
+        field_map_exn json__ "ResourceArn" ResourceArnString.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" IAMRoleArn.of_json in
+      make ?expectedResourceOwnerAccount ?hybridAccessEnabled ?withFederation
+        ~resourceArn ~roleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the data access role used for vending access to the given (registered) resource in Lake Formation."]
+module UpdateLakeFormationIdentityCenterConfigurationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `EntityNotFoundException of EntityNotFoundException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `OperationTimeoutException of OperationTimeoutException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `OperationTimeoutException e ->
+          `Assoc
+            [("error", (`String "OperationTimeoutException"));
+            ("details", (OperationTimeoutException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the IAM Identity Center connection parameters."]
+module UpdateLakeFormationIdentityCenterConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      catalogId: CatalogIdString.t option
+        [@ocaml.doc
+          "The identifier for the Data Catalog. By default, the account ID. The Data Catalog is the persistent metadata store. It contains database definitions, table definitions, view definitions, and other control information to manage your Lake Formation environment."];
+      shareRecipients: DataLakePrincipalList.t option
+        [@ocaml.doc
+          "A list of Amazon Web Services account IDs or Amazon Web Services organization/organizational unit ARNs that are allowed to access to access data managed by Lake Formation. If the ShareRecipients list includes valid values, then the resource share is updated with the principals you want to have access to the resources. If the ShareRecipients value is null, both the list of share recipients and the resource share remain unchanged. If the ShareRecipients value is an empty list, then the existing share recipients list will be cleared, and the resource share will be deleted."];
+      serviceIntegrations: ServiceIntegrationList.t option
+        [@ocaml.doc
+          "A list of service integrations for enabling trusted identity propagation with external services such as Redshift."];
+      applicationStatus: ApplicationStatus.t option
+        [@ocaml.doc
+          "Allows to enable or disable the IAM Identity Center connection."];
+      externalFiltering: ExternalFilteringConfiguration.t option
+        [@ocaml.doc
+          "A list of the account IDs of Amazon Web Services accounts of third-party applications that are allowed to access data managed by Lake Formation."]}
+    let make ?catalogId =
+      fun ?shareRecipients ->
+        fun ?serviceIntegrations ->
+          fun ?applicationStatus ->
+            fun ?externalFiltering ->
+              fun () ->
+                {
+                  catalogId;
+                  shareRecipients;
+                  serviceIntegrations;
+                  applicationStatus;
+                  externalFiltering
+                }
+    let to_value x =
+      structure_to_value
+        [("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value));
+        ("ShareRecipients",
+          (Option.map x.shareRecipients ~f:DataLakePrincipalList.to_value));
+        ("ServiceIntegrations",
+          (Option.map x.serviceIntegrations
+             ~f:ServiceIntegrationList.to_value));
+        ("ApplicationStatus",
+          (Option.map x.applicationStatus ~f:ApplicationStatus.to_value));
+        ("ExternalFiltering",
+          (Option.map x.externalFiltering
+             ~f:ExternalFilteringConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let externalFiltering =
+        (Option.map ~f:ExternalFilteringConfiguration.of_xml)
+          (Xml.child xml_arg0 "ExternalFiltering") in
+      let applicationStatus =
+        (Option.map ~f:ApplicationStatus.of_xml)
+          (Xml.child xml_arg0 "ApplicationStatus") in
+      let serviceIntegrations =
+        (Option.map ~f:ServiceIntegrationList.of_xml)
+          (Xml.child xml_arg0 "ServiceIntegrations") in
+      let shareRecipients =
+        (Option.map ~f:DataLakePrincipalList.of_xml)
+          (Xml.child xml_arg0 "ShareRecipients") in
+      let catalogId =
+        (Option.map ~f:CatalogIdString.of_xml)
+          (Xml.child xml_arg0 "CatalogId") in
+      make ?externalFiltering ?applicationStatus ?serviceIntegrations
+        ?shareRecipients ?catalogId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let externalFiltering =
+        field_map json__ "ExternalFiltering"
+          ExternalFilteringConfiguration.of_json in
+      let applicationStatus =
+        field_map json__ "ApplicationStatus" ApplicationStatus.of_json in
+      let serviceIntegrations =
+        field_map json__ "ServiceIntegrations" ServiceIntegrationList.of_json in
+      let shareRecipients =
+        field_map json__ "ShareRecipients" DataLakePrincipalList.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      make ?externalFiltering ?applicationStatus ?serviceIntegrations
+        ?shareRecipients ?catalogId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the IAM Identity Center connection parameters."]
 module UpdateLFTagResponse =
   struct
     type nonrec t = unit
@@ -5072,17 +6675,268 @@ module UpdateLFTagRequest =
           (Xml.child xml_arg0 "CatalogId") in
       make ?tagValuesToAdd ?tagValuesToDelete ~tagKey ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tagValuesToAdd =
-        field_map json "TagValuesToAdd" TagValueList.of_json in
+        field_map json__ "TagValuesToAdd" TagValueList.of_json in
       let tagValuesToDelete =
-        field_map json "TagValuesToDelete" TagValueList.of_json in
-      let tagKey = field_map_exn json "TagKey" LFTagKey.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+        field_map json__ "TagValuesToDelete" TagValueList.of_json in
+      let tagKey = field_map_exn json__ "TagKey" LFTagKey.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ?tagValuesToAdd ?tagValuesToDelete ~tagKey ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the list of possible values for the specified LF-tag key. If the LF-tag does not exist, the operation throws an EntityNotFoundException. The values in the delete key values will be deleted from list of possible values. If any value in the delete key values is attached to a resource, then API errors out with a 400 Exception - \"Update not allowed\". Untag the attribute before deleting the LF-tag key's value."]
+module UpdateLFTagExpressionResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `EntityNotFoundException of EntityNotFoundException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `OperationTimeoutException of OperationTimeoutException.t 
+      | `ResourceNumberLimitExceededException of
+          ResourceNumberLimitExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_json json)
+      | "ResourceNumberLimitExceededException" ->
+          `ResourceNumberLimitExceededException
+            (ResourceNumberLimitExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_xml xml)
+      | "ResourceNumberLimitExceededException" ->
+          `ResourceNumberLimitExceededException
+            (ResourceNumberLimitExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `OperationTimeoutException e ->
+          `Assoc
+            [("error", (`String "OperationTimeoutException"));
+            ("details", (OperationTimeoutException.to_json e))]
+      | `ResourceNumberLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceNumberLimitExceededException"));
+            ("details", (ResourceNumberLimitExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the name of the LF-Tag expression to the new description and expression body provided. Updating a LF-Tag expression immediately changes the permission boundaries of all existing LFTagPolicy permission grants that reference the given LF-Tag expression."]
+module UpdateLFTagExpressionRequest =
+  struct
+    type nonrec t =
+      {
+      name: NameString.t [@ocaml.doc "The name for the LF-Tag expression."];
+      description: DescriptionString.t option
+        [@ocaml.doc
+          "The description with information about the saved LF-Tag expression."];
+      catalogId: CatalogIdString.t option
+        [@ocaml.doc
+          "The identifier for the Data Catalog. By default, the account ID."];
+      expression: Expression.t
+        [@ocaml.doc
+          "The LF-Tag expression body composed of one more LF-Tag key-value pairs."]}
+    let context_ = "UpdateLFTagExpressionRequest"
+    let make ?description =
+      fun ?catalogId ->
+        fun ~name ->
+          fun ~expression ->
+            fun () -> { description; catalogId; name; expression }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (NameString.to_value x.name)));
+        ("Description",
+          (Option.map x.description ~f:DescriptionString.to_value));
+        ("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value));
+        ("Expression", (Some (Expression.to_value x.expression)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expression =
+        Expression.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Expression") in
+      let catalogId =
+        (Option.map ~f:CatalogIdString.of_xml)
+          (Xml.child xml_arg0 "CatalogId") in
+      let description =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        NameString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~expression ?catalogId ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expression = field_map_exn json__ "Expression" Expression.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      let description =
+        field_map json__ "Description" DescriptionString.of_json in
+      let name = field_map_exn json__ "Name" NameString.of_json in
+      make ~expression ?catalogId ?description ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the name of the LF-Tag expression to the new description and expression body provided. Updating a LF-Tag expression immediately changes the permission boundaries of all existing LFTagPolicy permission grants that reference the given LF-Tag expression."]
+module UpdateDataCellsFilterResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `EntityNotFoundException of EntityNotFoundException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `OperationTimeoutException of OperationTimeoutException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `OperationTimeoutException e ->
+          `Assoc
+            [("error", (`String "OperationTimeoutException"));
+            ("details", (OperationTimeoutException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a data cell filter."]
+module UpdateDataCellsFilterRequest =
+  struct
+    type nonrec t =
+      {
+      tableData: DataCellsFilter.t
+        [@ocaml.doc
+          "A DataCellsFilter structure containing information about the data cells filter."]}
+    let context_ = "UpdateDataCellsFilterRequest"
+    let make ~tableData = fun () -> { tableData }
+    let to_value x =
+      structure_to_value
+        [("TableData", (Some (DataCellsFilter.to_value x.tableData)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tableData =
+        DataCellsFilter.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TableData") in
+      make ~tableData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tableData =
+        field_map_exn json__ "TableData" DataCellsFilter.of_json in
+      make ~tableData ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a data cell filter."]
 module StartTransactionResponse =
   struct
     type nonrec t =
@@ -5137,9 +6991,9 @@ module StartTransactionResponse =
           (Xml.child xml_arg0 "TransactionId") in
       make ?transactionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transactionId =
-        field_map json "TransactionId" TransactionIdString.of_json in
+        field_map json__ "TransactionId" TransactionIdString.of_json in
       make ?transactionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5163,9 +7017,9 @@ module StartTransactionRequest =
           (Xml.child xml_arg0 "TransactionType") in
       make ?transactionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transactionType =
-        field_map json "TransactionType" TransactionType.of_json in
+        field_map json__ "TransactionType" TransactionType.of_json in
       make ?transactionType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5174,7 +7028,7 @@ module StartQueryPlanningResponse =
   struct
     type nonrec t =
       {
-      queryId: QueryIdString.t
+      queryId: QueryIdString.t option
         [@ocaml.doc
           "The ID of the plan query operation can be used to fetch the actual work unit descriptors that are produced as the result of the operation. The ID is also used to get the query state and as an input to the Execute operation."]}
     type nonrec error =
@@ -5183,8 +7037,7 @@ module StartQueryPlanningResponse =
       | `InvalidInputException of InvalidInputException.t 
       | `ThrottledException of ThrottledException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "StartQueryPlanningResponse"
-    let make ~queryId = fun () -> { queryId }
+    let make ?queryId = fun () -> { queryId }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5235,17 +7088,16 @@ module StartQueryPlanningResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("QueryId", (Some (QueryIdString.to_value x.queryId)))]
+        [("QueryId", (Option.map x.queryId ~f:QueryIdString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let queryId =
-        QueryIdString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryId") in
-      make ~queryId ()
+        (Option.map ~f:QueryIdString.of_xml) (Xml.child xml_arg0 "QueryId") in
+      make ?queryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryId = field_map_exn json "QueryId" QueryIdString.of_json in
-      make ~queryId ()
+    let of_json json__ =
+      let queryId = field_map json__ "QueryId" QueryIdString.of_json in
+      make ?queryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A structure for the output."]
 module StartQueryPlanningRequest =
@@ -5279,12 +7131,12 @@ module StartQueryPlanningRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "QueryPlanningContext") in
       make ~queryString ~queryPlanningContext ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let queryString =
-        field_map_exn json "QueryString"
+        field_map_exn json__ "QueryString"
           SyntheticStartQueryPlanningRequestQueryString.of_json in
       let queryPlanningContext =
-        field_map_exn json "QueryPlanningContext"
+        field_map_exn json__ "QueryPlanningContext"
           QueryPlanningContext.of_json in
       make ~queryString ~queryPlanningContext ()
     let to_json v = composed_to_json to_value v
@@ -5296,7 +7148,7 @@ module SearchTablesByLFTagsResponse =
       {
       nextToken: Token.t option
         [@ocaml.doc
-          "A continuation token, present if the current list segment is not the last."];
+          "A continuation token, present if the current list segment is not the last. On the first run, if you include a not null (a value) token you can get empty pages."];
       tableList: TableLFTagsList.t option
         [@ocaml.doc "A list of tables that meet the LF-tag conditions."]}
     type nonrec error =
@@ -5386,9 +7238,9 @@ module SearchTablesByLFTagsResponse =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?tableList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableList = field_map json "TableList" TableLFTagsList.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let tableList = field_map json__ "TableList" TableLFTagsList.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       make ?tableList ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5400,7 +7252,7 @@ module SearchTablesByLFTagsRequest =
       nextToken: Token.t option
         [@ocaml.doc
           "A continuation token, if this is not the first call to retrieve this list."];
-      maxResults: PageSize.t option
+      maxResults: SearchPageSize.t option
         [@ocaml.doc "The maximum number of results to return."];
       catalogId: CatalogIdString.t option
         [@ocaml.doc
@@ -5417,7 +7269,7 @@ module SearchTablesByLFTagsRequest =
     let to_value x =
       structure_to_value
         [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:PageSize.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:SearchPageSize.to_value));
         ("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value));
         ("Expression", (Some (Expression.to_value x.expression)))]
     let to_query v = to_query to_value v
@@ -5429,16 +7281,17 @@ module SearchTablesByLFTagsRequest =
         (Option.map ~f:CatalogIdString.of_xml)
           (Xml.child xml_arg0 "CatalogId") in
       let maxResults =
-        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "MaxResults") in
+        (Option.map ~f:SearchPageSize.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ~expression ?catalogId ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expression = field_map_exn json "Expression" Expression.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let expression = field_map_exn json__ "Expression" Expression.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      let maxResults = field_map json__ "MaxResults" SearchPageSize.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       make ~expression ?catalogId ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5540,10 +7393,10 @@ module SearchDatabasesByLFTagsResponse =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?databaseList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let databaseList =
-        field_map json "DatabaseList" DatabaseLFTagsList.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+        field_map json__ "DatabaseList" DatabaseLFTagsList.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       make ?databaseList ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5555,7 +7408,7 @@ module SearchDatabasesByLFTagsRequest =
       nextToken: Token.t option
         [@ocaml.doc
           "A continuation token, if this is not the first call to retrieve this list."];
-      maxResults: PageSize.t option
+      maxResults: SearchPageSize.t option
         [@ocaml.doc "The maximum number of results to return."];
       catalogId: CatalogIdString.t option
         [@ocaml.doc
@@ -5572,7 +7425,7 @@ module SearchDatabasesByLFTagsRequest =
     let to_value x =
       structure_to_value
         [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:PageSize.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:SearchPageSize.to_value));
         ("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value));
         ("Expression", (Some (Expression.to_value x.expression)))]
     let to_query v = to_query to_value v
@@ -5584,16 +7437,17 @@ module SearchDatabasesByLFTagsRequest =
         (Option.map ~f:CatalogIdString.of_xml)
           (Xml.child xml_arg0 "CatalogId") in
       let maxResults =
-        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "MaxResults") in
+        (Option.map ~f:SearchPageSize.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ~expression ?catalogId ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expression = field_map_exn json "Expression" Expression.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let expression = field_map_exn json__ "Expression" Expression.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      let maxResults = field_map json__ "MaxResults" SearchPageSize.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       make ~expression ?catalogId ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5674,29 +7528,33 @@ module RevokePermissionsRequest =
       permissions: PermissionList.t
         [@ocaml.doc
           "The permissions revoked to the principal on the resource. For information about permissions, see Security and Access Control to Metadata and Data."];
+      condition: Condition.t option ;
       permissionsWithGrantOption: PermissionList.t option
         [@ocaml.doc
           "Indicates a list of permissions for which to revoke the grant option allowing the principal to pass permissions to other principals."]}
     let context_ = "RevokePermissionsRequest"
     let make ?catalogId =
-      fun ?permissionsWithGrantOption ->
-        fun ~principal ->
-          fun ~resource ->
-            fun ~permissions ->
-              fun () ->
-                {
-                  catalogId;
-                  permissionsWithGrantOption;
-                  principal;
-                  resource;
-                  permissions
-                }
+      fun ?condition ->
+        fun ?permissionsWithGrantOption ->
+          fun ~principal ->
+            fun ~resource ->
+              fun ~permissions ->
+                fun () ->
+                  {
+                    catalogId;
+                    condition;
+                    permissionsWithGrantOption;
+                    principal;
+                    resource;
+                    permissions
+                  }
     let to_value x =
       structure_to_value
         [("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value));
         ("Principal", (Some (DataLakePrincipal.to_value x.principal)));
         ("Resource", (Some (Resource.to_value x.resource)));
         ("Permissions", (Some (PermissionList.to_value x.permissions)));
+        ("Condition", (Option.map x.condition ~f:Condition.to_value));
         ("PermissionsWithGrantOption",
           (Option.map x.permissionsWithGrantOption ~f:PermissionList.to_value))]
     let to_query v = to_query to_value v
@@ -5704,6 +7562,8 @@ module RevokePermissionsRequest =
       let permissionsWithGrantOption =
         (Option.map ~f:PermissionList.of_xml)
           (Xml.child xml_arg0 "PermissionsWithGrantOption") in
+      let condition =
+        (Option.map ~f:Condition.of_xml) (Xml.child xml_arg0 "Condition") in
       let permissions =
         PermissionList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Permissions") in
@@ -5715,20 +7575,21 @@ module RevokePermissionsRequest =
       let catalogId =
         (Option.map ~f:CatalogIdString.of_xml)
           (Xml.child xml_arg0 "CatalogId") in
-      make ?permissionsWithGrantOption ~permissions ~resource ~principal
-        ?catalogId ()
+      make ?permissionsWithGrantOption ?condition ~permissions ~resource
+        ~principal ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissionsWithGrantOption =
-        field_map json "PermissionsWithGrantOption" PermissionList.of_json in
+        field_map json__ "PermissionsWithGrantOption" PermissionList.of_json in
+      let condition = field_map json__ "Condition" Condition.of_json in
       let permissions =
-        field_map_exn json "Permissions" PermissionList.of_json in
-      let resource = field_map_exn json "Resource" Resource.of_json in
+        field_map_exn json__ "Permissions" PermissionList.of_json in
+      let resource = field_map_exn json__ "Resource" Resource.of_json in
       let principal =
-        field_map_exn json "Principal" DataLakePrincipal.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
-      make ?permissionsWithGrantOption ~permissions ~resource ~principal
-        ?catalogId ()
+        field_map_exn json__ "Principal" DataLakePrincipal.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      make ?permissionsWithGrantOption ?condition ~permissions ~resource
+        ~principal ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Revokes permissions to the principal to access metadata in the Data Catalog and data organized in underlying data storage such as Amazon S3."]
@@ -5831,8 +7692,8 @@ module RemoveLFTagsFromResourceResponse =
         (Option.map ~f:LFTagErrors.of_xml) (Xml.child xml_arg0 "Failures") in
       make ?failures ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failures = field_map json "Failures" LFTagErrors.of_json in
+    let of_json json__ =
+      let failures = field_map json__ "Failures" LFTagErrors.of_json in
       make ?failures ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5869,10 +7730,10 @@ module RemoveLFTagsFromResourceRequest =
           (Xml.child xml_arg0 "CatalogId") in
       make ~lFTags ~resource ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lFTags = field_map_exn json "LFTags" LFTagsList.of_json in
-      let resource = field_map_exn json "Resource" Resource.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+    let of_json json__ =
+      let lFTags = field_map_exn json__ "LFTags" LFTagsList.of_json in
+      let resource = field_map_exn json__ "Resource" Resource.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ~lFTags ~resource ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5973,7 +7834,7 @@ module RegisterResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers the resource as managed by the Data Catalog. To add or update data, Lake Formation needs read/write access to the chosen Amazon S3 path. Choose a role that you know has permission to do this, or choose the AWSServiceRoleForLakeFormationDataAccess service-linked role. When you register the first Amazon S3 path, the service-linked role and a new inline policy are created on your behalf. Lake Formation adds the first path to the inline policy and attaches it to the service-linked role. When you register subsequent paths, Lake Formation adds the path to the existing policy. The following request registers a new location and gives Lake Formation permission to use the service-linked role to access that location. ResourceArn = arn:aws:s3:::my-bucket UseServiceLinkedRole = true If UseServiceLinkedRole is not set to true, you must provide or set the RoleArn: arn:aws:iam::12345:role/my-data-access-role"]
+       "Registers the resource as managed by the Data Catalog. To add or update data, Lake Formation needs read/write access to the chosen data location. Choose a role that you know has permission to do this, or choose the AWSServiceRoleForLakeFormationDataAccess service-linked role. When you register the first Amazon S3 path, the service-linked role and a new inline policy are created on your behalf. Lake Formation adds the first path to the inline policy and attaches it to the service-linked role. When you register subsequent paths, Lake Formation adds the path to the existing policy. The following request registers a new location and gives Lake Formation permission to use the service-linked role to access that location. ResourceArn = arn:aws:s3:::my-bucket/ UseServiceLinkedRole = true If UseServiceLinkedRole is not set to true, you must provide or set the RoleArn: arn:aws:iam::12345:role/my-data-access-role"]
 module RegisterResourceRequest =
   struct
     type nonrec t =
@@ -5986,20 +7847,65 @@ module RegisterResourceRequest =
           "Designates an Identity and Access Management (IAM) service-linked role by registering this role with the Data Catalog. A service-linked role is a unique type of IAM role that is linked directly to Lake Formation. For more information, see Using Service-Linked Roles for Lake Formation."];
       roleArn: IAMRoleArn.t option
         [@ocaml.doc
-          "The identifier for the role that registers the resource."]}
+          "The identifier for the role that registers the resource."];
+      withFederation: NullableBoolean.t option
+        [@ocaml.doc "Whether or not the resource is a federated resource."];
+      hybridAccessEnabled: NullableBoolean.t option
+        [@ocaml.doc
+          "Specifies whether the data access of tables pointing to the location can be managed by both Lake Formation permissions as well as Amazon S3 bucket policies."];
+      withPrivilegedAccess: Boolean.t option
+        [@ocaml.doc
+          "Grants the calling principal the permissions to perform all supported Lake Formation operations on the registered data location."];
+      expectedResourceOwnerAccount: AccountIdString.t option
+        [@ocaml.doc
+          "The Amazon Web Services account that owns the Glue tables associated with specific Amazon S3 locations."]}
     let context_ = "RegisterResourceRequest"
     let make ?useServiceLinkedRole =
       fun ?roleArn ->
-        fun ~resourceArn ->
-          fun () -> { useServiceLinkedRole; roleArn; resourceArn }
+        fun ?withFederation ->
+          fun ?hybridAccessEnabled ->
+            fun ?withPrivilegedAccess ->
+              fun ?expectedResourceOwnerAccount ->
+                fun ~resourceArn ->
+                  fun () ->
+                    {
+                      useServiceLinkedRole;
+                      roleArn;
+                      withFederation;
+                      hybridAccessEnabled;
+                      withPrivilegedAccess;
+                      expectedResourceOwnerAccount;
+                      resourceArn
+                    }
     let to_value x =
       structure_to_value
         [("ResourceArn", (Some (ResourceArnString.to_value x.resourceArn)));
         ("UseServiceLinkedRole",
           (Option.map x.useServiceLinkedRole ~f:NullableBoolean.to_value));
-        ("RoleArn", (Option.map x.roleArn ~f:IAMRoleArn.to_value))]
+        ("RoleArn", (Option.map x.roleArn ~f:IAMRoleArn.to_value));
+        ("WithFederation",
+          (Option.map x.withFederation ~f:NullableBoolean.to_value));
+        ("HybridAccessEnabled",
+          (Option.map x.hybridAccessEnabled ~f:NullableBoolean.to_value));
+        ("WithPrivilegedAccess",
+          (Option.map x.withPrivilegedAccess ~f:Boolean.to_value));
+        ("ExpectedResourceOwnerAccount",
+          (Option.map x.expectedResourceOwnerAccount
+             ~f:AccountIdString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let expectedResourceOwnerAccount =
+        (Option.map ~f:AccountIdString.of_xml)
+          (Xml.child xml_arg0 "ExpectedResourceOwnerAccount") in
+      let withPrivilegedAccess =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "WithPrivilegedAccess") in
+      let hybridAccessEnabled =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "HybridAccessEnabled") in
+      let withFederation =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "WithFederation") in
       let roleArn =
         (Option.map ~f:IAMRoleArn.of_xml) (Xml.child xml_arg0 "RoleArn") in
       let useServiceLinkedRole =
@@ -6008,18 +7914,31 @@ module RegisterResourceRequest =
       let resourceArn =
         ResourceArnString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
-      make ?roleArn ?useServiceLinkedRole ~resourceArn ()
+      make ?expectedResourceOwnerAccount ?withPrivilegedAccess
+        ?hybridAccessEnabled ?withFederation ?roleArn ?useServiceLinkedRole
+        ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "RoleArn" IAMRoleArn.of_json in
+    let of_json json__ =
+      let expectedResourceOwnerAccount =
+        field_map json__ "ExpectedResourceOwnerAccount"
+          AccountIdString.of_json in
+      let withPrivilegedAccess =
+        field_map json__ "WithPrivilegedAccess" Boolean.of_json in
+      let hybridAccessEnabled =
+        field_map json__ "HybridAccessEnabled" NullableBoolean.of_json in
+      let withFederation =
+        field_map json__ "WithFederation" NullableBoolean.of_json in
+      let roleArn = field_map json__ "RoleArn" IAMRoleArn.of_json in
       let useServiceLinkedRole =
-        field_map json "UseServiceLinkedRole" NullableBoolean.of_json in
+        field_map json__ "UseServiceLinkedRole" NullableBoolean.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" ResourceArnString.of_json in
-      make ?roleArn ?useServiceLinkedRole ~resourceArn ()
+        field_map_exn json__ "ResourceArn" ResourceArnString.of_json in
+      make ?expectedResourceOwnerAccount ?withPrivilegedAccess
+        ?hybridAccessEnabled ?withFederation ?roleArn ?useServiceLinkedRole
+        ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers the resource as managed by the Data Catalog. To add or update data, Lake Formation needs read/write access to the chosen Amazon S3 path. Choose a role that you know has permission to do this, or choose the AWSServiceRoleForLakeFormationDataAccess service-linked role. When you register the first Amazon S3 path, the service-linked role and a new inline policy are created on your behalf. Lake Formation adds the first path to the inline policy and attaches it to the service-linked role. When you register subsequent paths, Lake Formation adds the path to the existing policy. The following request registers a new location and gives Lake Formation permission to use the service-linked role to access that location. ResourceArn = arn:aws:s3:::my-bucket UseServiceLinkedRole = true If UseServiceLinkedRole is not set to true, you must provide or set the RoleArn: arn:aws:iam::12345:role/my-data-access-role"]
+       "Registers the resource as managed by the Data Catalog. To add or update data, Lake Formation needs read/write access to the chosen data location. Choose a role that you know has permission to do this, or choose the AWSServiceRoleForLakeFormationDataAccess service-linked role. When you register the first Amazon S3 path, the service-linked role and a new inline policy are created on your behalf. Lake Formation adds the first path to the inline policy and attaches it to the service-linked role. When you register subsequent paths, Lake Formation adds the path to the existing policy. The following request registers a new location and gives Lake Formation permission to use the service-linked role to access that location. ResourceArn = arn:aws:s3:::my-bucket/ UseServiceLinkedRole = true If UseServiceLinkedRole is not set to true, you must provide or set the RoleArn: arn:aws:iam::12345:role/my-data-access-role"]
 module PutDataLakeSettingsResponse =
   struct
     type nonrec t = unit
@@ -6097,10 +8016,10 @@ module PutDataLakeSettingsRequest =
           (Xml.child xml_arg0 "CatalogId") in
       make ~dataLakeSettings ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataLakeSettings =
-        field_map_exn json "DataLakeSettings" DataLakeSettings.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+        field_map_exn json__ "DataLakeSettings" DataLakeSettings.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ~dataLakeSettings ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6176,10 +8095,10 @@ module ListTransactionsResponse =
           (Xml.child xml_arg0 "Transactions") in
       make ?nextToken ?transactions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" TokenString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" TokenString.of_json in
       let transactions =
-        field_map json "Transactions" TransactionDescriptionList.of_json in
+        field_map json__ "Transactions" TransactionDescriptionList.of_json in
       make ?nextToken ?transactions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6226,12 +8145,12 @@ module ListTransactionsRequest =
           (Xml.child xml_arg0 "CatalogId") in
       make ?nextToken ?maxResults ?statusFilter ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" TokenString.of_json in
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" TokenString.of_json in
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
       let statusFilter =
-        field_map json "StatusFilter" TransactionStatusFilter.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+        field_map json__ "StatusFilter" TransactionStatusFilter.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ?nextToken ?maxResults ?statusFilter ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6317,10 +8236,10 @@ module ListTableStorageOptimizersResponse =
           (Xml.child xml_arg0 "StorageOptimizerList") in
       make ?nextToken ?storageOptimizerList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let storageOptimizerList =
-        field_map json "StorageOptimizerList" StorageOptimizerList.of_json in
+        field_map json__ "StorageOptimizerList" StorageOptimizerList.of_json in
       make ?nextToken ?storageOptimizerList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6388,14 +8307,15 @@ module ListTableStorageOptimizersRequest =
       make ?nextToken ?maxResults ?storageOptimizerType ~tableName
         ~databaseName ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
       let storageOptimizerType =
-        field_map json "StorageOptimizerType" OptimizerType.of_json in
-      let tableName = field_map_exn json "TableName" NameString.of_json in
-      let databaseName = field_map_exn json "DatabaseName" NameString.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+        field_map json__ "StorageOptimizerType" OptimizerType.of_json in
+      let tableName = field_map_exn json__ "TableName" NameString.of_json in
+      let databaseName =
+        field_map_exn json__ "DatabaseName" NameString.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ?nextToken ?maxResults ?storageOptimizerType ~tableName
         ~databaseName ?catalogId ()
     let to_json v = composed_to_json to_value v
@@ -6471,10 +8391,10 @@ module ListResourcesResponse =
           (Xml.child xml_arg0 "ResourceInfoList") in
       make ?nextToken ?resourceInfoList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let resourceInfoList =
-        field_map json "ResourceInfoList" ResourceInfoList.of_json in
+        field_map json__ "ResourceInfoList" ResourceInfoList.of_json in
       make ?nextToken ?resourceInfoList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6512,11 +8432,11 @@ module ListResourcesRequest =
           (Xml.child xml_arg0 "FilterConditionList") in
       make ?nextToken ?maxResults ?filterConditionList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
       let filterConditionList =
-        field_map json "FilterConditionList" FilterConditionList.of_json in
+        field_map json__ "FilterConditionList" FilterConditionList.of_json in
       make ?nextToken ?maxResults ?filterConditionList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6593,15 +8513,15 @@ module ListPermissionsResponse =
           (Xml.child xml_arg0 "PrincipalResourcePermissions") in
       make ?nextToken ?principalResourcePermissions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let principalResourcePermissions =
-        field_map json "PrincipalResourcePermissions"
+        field_map json__ "PrincipalResourcePermissions"
           PrincipalResourcePermissionsList.of_json in
       make ?nextToken ?principalResourcePermissions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the principal permissions on the resource, filtered by the permissions of the caller. For example, if you are granted an ALTER permission, you are able to see only the principal permissions for ALTER. This operation returns only those permissions that have been explicitly granted. For information about permissions, see Security and Access Control to Metadata and Data."]
+       "Returns a list of the principal permissions on the resource, filtered by the permissions of the caller. For example, if you are granted an ALTER permission, you are able to see only the principal permissions for ALTER. This operation returns only those permissions that have been explicitly granted. If both Principal and Resource parameters are provided, the response returns effective permissions rather than the explicitly granted permissions. For information about permissions, see Security and Access Control to Metadata and Data."]
 module ListPermissionsRequest =
   struct
     type nonrec t =
@@ -6625,7 +8545,7 @@ module ListPermissionsRequest =
         [@ocaml.doc "The maximum number of results to return."];
       includeRelated: TrueFalseString.t option
         [@ocaml.doc
-          "Indicates that related permissions should be included in the results."]}
+          "Indicates that related permissions should be included in the results when listing permissions on a table resource. Set the field to TRUE to show the cell filters on a table resource. Default is FALSE. The Principal parameter must not be specified when requesting cell filter information."]}
     let make ?catalogId =
       fun ?principal ->
         fun ?resourceType ->
@@ -6677,21 +8597,157 @@ module ListPermissionsRequest =
       make ?includeRelated ?maxResults ?nextToken ?resource ?resourceType
         ?principal ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeRelated =
-        field_map json "IncludeRelated" TrueFalseString.of_json in
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let resource = field_map json "Resource" Resource.of_json in
+        field_map json__ "IncludeRelated" TrueFalseString.of_json in
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let resource = field_map json__ "Resource" Resource.of_json in
       let resourceType =
-        field_map json "ResourceType" DataLakeResourceType.of_json in
-      let principal = field_map json "Principal" DataLakePrincipal.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+        field_map json__ "ResourceType" DataLakeResourceType.of_json in
+      let principal = field_map json__ "Principal" DataLakePrincipal.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ?includeRelated ?maxResults ?nextToken ?resource ?resourceType
         ?principal ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the principal permissions on the resource, filtered by the permissions of the caller. For example, if you are granted an ALTER permission, you are able to see only the principal permissions for ALTER. This operation returns only those permissions that have been explicitly granted. For information about permissions, see Security and Access Control to Metadata and Data."]
+       "Returns a list of the principal permissions on the resource, filtered by the permissions of the caller. For example, if you are granted an ALTER permission, you are able to see only the principal permissions for ALTER. This operation returns only those permissions that have been explicitly granted. If both Principal and Resource parameters are provided, the response returns effective permissions rather than the explicitly granted permissions. For information about permissions, see Security and Access Control to Metadata and Data."]
+module ListLakeFormationOptInsResponse =
+  struct
+    type nonrec t =
+      {
+      lakeFormationOptInsInfoList: LakeFormationOptInsInfoList.t option
+        [@ocaml.doc
+          "A list of principal-resource pairs that have Lake Formation permissins enforced."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A continuation token, if this is not the first call to retrieve this list."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `OperationTimeoutException of OperationTimeoutException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?lakeFormationOptInsInfoList =
+      fun ?nextToken -> fun () -> { lakeFormationOptInsInfoList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `OperationTimeoutException e ->
+          `Assoc
+            [("error", (`String "OperationTimeoutException"));
+            ("details", (OperationTimeoutException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LakeFormationOptInsInfoList",
+           (Option.map x.lakeFormationOptInsInfoList
+              ~f:LakeFormationOptInsInfoList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let lakeFormationOptInsInfoList =
+        (Option.map ~f:LakeFormationOptInsInfoList.of_xml)
+          (Xml.child xml_arg0 "LakeFormationOptInsInfoList") in
+      make ?nextToken ?lakeFormationOptInsInfoList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let lakeFormationOptInsInfoList =
+        field_map json__ "LakeFormationOptInsInfoList"
+          LakeFormationOptInsInfoList.of_json in
+      make ?nextToken ?lakeFormationOptInsInfoList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieve the current list of resources and principals that are opt in to enforce Lake Formation permissions."]
+module ListLakeFormationOptInsRequest =
+  struct
+    type nonrec t =
+      {
+      principal: DataLakePrincipal.t option ;
+      resource: Resource.t option
+        [@ocaml.doc "A structure for the resource."];
+      maxResults: PageSize.t option
+        [@ocaml.doc "The maximum number of results to return."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A continuation token, if this is not the first call to retrieve this list."]}
+    let make ?principal =
+      fun ?resource ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun () -> { principal; resource; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("Principal",
+           (Option.map x.principal ~f:DataLakePrincipal.to_value));
+        ("Resource", (Option.map x.resource ~f:Resource.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:PageSize.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let resource =
+        (Option.map ~f:Resource.of_xml) (Xml.child xml_arg0 "Resource") in
+      let principal =
+        (Option.map ~f:DataLakePrincipal.of_xml)
+          (Xml.child xml_arg0 "Principal") in
+      make ?nextToken ?maxResults ?resource ?principal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
+      let resource = field_map json__ "Resource" Resource.of_json in
+      let principal = field_map json__ "Principal" DataLakePrincipal.of_json in
+      make ?nextToken ?maxResults ?resource ?principal ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieve the current list of resources and principals that are opt in to enforce Lake Formation permissions."]
 module ListLFTagsResponse =
   struct
     type nonrec t =
@@ -6778,9 +8834,9 @@ module ListLFTagsResponse =
         (Option.map ~f:LFTagsList.of_xml) (Xml.child xml_arg0 "LFTags") in
       make ?nextToken ?lFTags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let lFTags = field_map json "LFTags" LFTagsList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let lFTags = field_map json__ "LFTags" LFTagsList.of_json in
       make ?nextToken ?lFTags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists LF-tags that the requester has permission to view."]
@@ -6825,15 +8881,151 @@ module ListLFTagsRequest =
           (Xml.child xml_arg0 "CatalogId") in
       make ?nextToken ?maxResults ?resourceShareType ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
       let resourceShareType =
-        field_map json "ResourceShareType" ResourceShareType.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+        field_map json__ "ResourceShareType" ResourceShareType.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ?nextToken ?maxResults ?resourceShareType ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists LF-tags that the requester has permission to view."]
+module ListLFTagExpressionsResponse =
+  struct
+    type nonrec t =
+      {
+      lFTagExpressions: LFTagExpressionsList.t option
+        [@ocaml.doc
+          "Logical expressions composed of one more LF-Tag key-value pairs."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A continuation token, if this is not the first call to retrieve this list."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `EntityNotFoundException of EntityNotFoundException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `OperationTimeoutException of OperationTimeoutException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?lFTagExpressions =
+      fun ?nextToken -> fun () -> { lFTagExpressions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `OperationTimeoutException e ->
+          `Assoc
+            [("error", (`String "OperationTimeoutException"));
+            ("details", (OperationTimeoutException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LFTagExpressions",
+           (Option.map x.lFTagExpressions ~f:LFTagExpressionsList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let lFTagExpressions =
+        (Option.map ~f:LFTagExpressionsList.of_xml)
+          (Xml.child xml_arg0 "LFTagExpressions") in
+      make ?nextToken ?lFTagExpressions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let lFTagExpressions =
+        field_map json__ "LFTagExpressions" LFTagExpressionsList.of_json in
+      make ?nextToken ?lFTagExpressions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the LF-Tag expressions in caller\226\128\153s account filtered based on caller's permissions. Data Lake and read only admins implicitly can see all tag expressions in their account, else caller needs DESCRIBE permissions on tag expression."]
+module ListLFTagExpressionsRequest =
+  struct
+    type nonrec t =
+      {
+      catalogId: CatalogIdString.t option
+        [@ocaml.doc
+          "The identifier for the Data Catalog. By default, the account ID."];
+      maxResults: PageSize.t option
+        [@ocaml.doc "The maximum number of results to return."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A continuation token, if this is not the first call to retrieve this list."]}
+    let make ?catalogId =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { catalogId; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:PageSize.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let catalogId =
+        (Option.map ~f:CatalogIdString.of_xml)
+          (Xml.child xml_arg0 "CatalogId") in
+      make ?nextToken ?maxResults ?catalogId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      make ?nextToken ?maxResults ?catalogId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the LF-Tag expressions in caller\226\128\153s account filtered based on caller's permissions. Data Lake and read only admins implicitly can see all tag expressions in their account, else caller needs DESCRIBE permissions on tag expression."]
 module ListDataCellsFilterResponse =
   struct
     type nonrec t =
@@ -6913,10 +9105,10 @@ module ListDataCellsFilterResponse =
           (Xml.child xml_arg0 "DataCellsFilters") in
       make ?nextToken ?dataCellsFilters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let dataCellsFilters =
-        field_map json "DataCellsFilters" DataCellsFilterList.of_json in
+        field_map json__ "DataCellsFilters" DataCellsFilterList.of_json in
       make ?nextToken ?dataCellsFilters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all the data cell filters on a table."]
@@ -6948,10 +9140,10 @@ module ListDataCellsFilterRequest =
         (Option.map ~f:TableResource.of_xml) (Xml.child xml_arg0 "Table") in
       make ?maxResults ?nextToken ?table ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let table = field_map json "Table" TableResource.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let table = field_map json__ "Table" TableResource.of_json in
       make ?maxResults ?nextToken ?table ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all the data cell filters on a table."]
@@ -7032,29 +9224,33 @@ module GrantPermissionsRequest =
       permissions: PermissionList.t
         [@ocaml.doc
           "The permissions granted to the principal on the resource. Lake Formation defines privileges to grant and revoke access to metadata in the Data Catalog and data organized in underlying data storage such as Amazon S3. Lake Formation requires that each principal be authorized to perform a specific task on Lake Formation resources."];
+      condition: Condition.t option ;
       permissionsWithGrantOption: PermissionList.t option
         [@ocaml.doc
           "Indicates a list of the granted permissions that the principal may pass to other users. These permissions may only be a subset of the permissions granted in the Privileges."]}
     let context_ = "GrantPermissionsRequest"
     let make ?catalogId =
-      fun ?permissionsWithGrantOption ->
-        fun ~principal ->
-          fun ~resource ->
-            fun ~permissions ->
-              fun () ->
-                {
-                  catalogId;
-                  permissionsWithGrantOption;
-                  principal;
-                  resource;
-                  permissions
-                }
+      fun ?condition ->
+        fun ?permissionsWithGrantOption ->
+          fun ~principal ->
+            fun ~resource ->
+              fun ~permissions ->
+                fun () ->
+                  {
+                    catalogId;
+                    condition;
+                    permissionsWithGrantOption;
+                    principal;
+                    resource;
+                    permissions
+                  }
     let to_value x =
       structure_to_value
         [("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value));
         ("Principal", (Some (DataLakePrincipal.to_value x.principal)));
         ("Resource", (Some (Resource.to_value x.resource)));
         ("Permissions", (Some (PermissionList.to_value x.permissions)));
+        ("Condition", (Option.map x.condition ~f:Condition.to_value));
         ("PermissionsWithGrantOption",
           (Option.map x.permissionsWithGrantOption ~f:PermissionList.to_value))]
     let to_query v = to_query to_value v
@@ -7062,6 +9258,8 @@ module GrantPermissionsRequest =
       let permissionsWithGrantOption =
         (Option.map ~f:PermissionList.of_xml)
           (Xml.child xml_arg0 "PermissionsWithGrantOption") in
+      let condition =
+        (Option.map ~f:Condition.of_xml) (Xml.child xml_arg0 "Condition") in
       let permissions =
         PermissionList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Permissions") in
@@ -7073,20 +9271,21 @@ module GrantPermissionsRequest =
       let catalogId =
         (Option.map ~f:CatalogIdString.of_xml)
           (Xml.child xml_arg0 "CatalogId") in
-      make ?permissionsWithGrantOption ~permissions ~resource ~principal
-        ?catalogId ()
+      make ?permissionsWithGrantOption ?condition ~permissions ~resource
+        ~principal ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissionsWithGrantOption =
-        field_map json "PermissionsWithGrantOption" PermissionList.of_json in
+        field_map json__ "PermissionsWithGrantOption" PermissionList.of_json in
+      let condition = field_map json__ "Condition" Condition.of_json in
       let permissions =
-        field_map_exn json "Permissions" PermissionList.of_json in
-      let resource = field_map_exn json "Resource" Resource.of_json in
+        field_map_exn json__ "Permissions" PermissionList.of_json in
+      let resource = field_map_exn json__ "Resource" Resource.of_json in
       let principal =
-        field_map_exn json "Principal" DataLakePrincipal.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
-      make ?permissionsWithGrantOption ~permissions ~resource ~principal
-        ?catalogId ()
+        field_map_exn json__ "Principal" DataLakePrincipal.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      make ?permissionsWithGrantOption ?condition ~permissions ~resource
+        ~principal ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Grants permissions to the principal to access metadata in the Data Catalog and data organized in underlying data storage such as Amazon S3. For information about permissions, see Security and Access Control to Metadata and Data."]
@@ -7097,9 +9296,9 @@ module GetWorkUnitsResponse =
       nextToken: Token.t option
         [@ocaml.doc
           "A continuation token for paginating the returned list of tokens, returned if the current segment of the list is not the last."];
-      queryId: QueryIdString.t
+      queryId: QueryIdString.t option
         [@ocaml.doc "The ID of the plan query operation."];
-      workUnitRanges: WorkUnitRangeList.t
+      workUnitRanges: WorkUnitRangeList.t option
         [@ocaml.doc
           "A WorkUnitRangeList object that specifies the valid range of work unit IDs for querying the execution service."]}
     type nonrec error =
@@ -7109,10 +9308,9 @@ module GetWorkUnitsResponse =
       | `InvalidInputException of InvalidInputException.t 
       | `WorkUnitsNotReadyYetException of WorkUnitsNotReadyYetException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetWorkUnitsResponse"
     let make ?nextToken =
-      fun ~queryId ->
-        fun ~workUnitRanges ->
+      fun ?queryId ->
+        fun ?workUnitRanges ->
           fun () -> { nextToken; queryId; workUnitRanges }
     let error_of_json name json =
       match name with
@@ -7174,27 +9372,26 @@ module GetWorkUnitsResponse =
     let to_value x =
       structure_to_value
         [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("QueryId", (Some (QueryIdString.to_value x.queryId)));
+        ("QueryId", (Option.map x.queryId ~f:QueryIdString.to_value));
         ("WorkUnitRanges",
-          (Some (WorkUnitRangeList.to_value x.workUnitRanges)))]
+          (Option.map x.workUnitRanges ~f:WorkUnitRangeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workUnitRanges =
-        WorkUnitRangeList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WorkUnitRanges") in
+        (Option.map ~f:WorkUnitRangeList.of_xml)
+          (Xml.child xml_arg0 "WorkUnitRanges") in
       let queryId =
-        QueryIdString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryId") in
+        (Option.map ~f:QueryIdString.of_xml) (Xml.child xml_arg0 "QueryId") in
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ~workUnitRanges ~queryId ?nextToken ()
+      make ?workUnitRanges ?queryId ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workUnitRanges =
-        field_map_exn json "WorkUnitRanges" WorkUnitRangeList.of_json in
-      let queryId = field_map_exn json "QueryId" QueryIdString.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      make ~workUnitRanges ~queryId ?nextToken ()
+        field_map json__ "WorkUnitRanges" WorkUnitRangeList.of_json in
+      let queryId = field_map json__ "QueryId" QueryIdString.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      make ?workUnitRanges ?queryId ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A structure for the output."]
 module GetWorkUnitsRequest =
@@ -7229,11 +9426,12 @@ module GetWorkUnitsRequest =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ~queryId ?pageSize ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let queryId =
-        field_map_exn json "QueryId" GetWorkUnitsRequestQueryIdString.of_json in
-      let pageSize = field_map json "PageSize" Integer.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+        field_map_exn json__ "QueryId"
+          GetWorkUnitsRequestQueryIdString.of_json in
+      let pageSize = field_map json__ "PageSize" Integer.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       make ~queryId ?pageSize ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7321,8 +9519,8 @@ module GetWorkUnitResultsResponse =
           (Xml.child xml_arg0 "ResultStream") in
       make ?resultStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resultStream = field_map json "ResultStream" ResultStream.of_json in
+    let of_json json__ =
+      let resultStream = field_map json__ "ResultStream" ResultStream.of_json in
       make ?resultStream ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A structure for the output."]
@@ -7368,15 +9566,15 @@ module GetWorkUnitResultsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "QueryId") in
       make ~workUnitToken ~workUnitId ~queryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workUnitToken =
-        field_map_exn json "WorkUnitToken"
+        field_map_exn json__ "WorkUnitToken"
           SyntheticGetWorkUnitResultsRequestWorkUnitTokenString.of_json in
       let workUnitId =
-        field_map_exn json "WorkUnitId"
+        field_map_exn json__ "WorkUnitId"
           GetWorkUnitResultsRequestWorkUnitIdLong.of_json in
       let queryId =
-        field_map_exn json "QueryId"
+        field_map_exn json__ "QueryId"
           GetWorkUnitResultsRequestQueryIdString.of_json in
       make ~workUnitToken ~workUnitId ~queryId ()
     let to_json v = composed_to_json to_value v
@@ -7394,7 +9592,9 @@ module GetTemporaryGlueTableCredentialsResponse =
         [@ocaml.doc "The session token for the temporary credentials."];
       expiration: ExpirationTimestamp.t option
         [@ocaml.doc
-          "The date and time when the temporary credentials expire."]}
+          "The date and time when the temporary credentials expire."];
+      vendedS3Path: PathStringList.t option
+        [@ocaml.doc "The Amazon S3 path for the temporary credentials."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `EntityNotFoundException of EntityNotFoundException.t 
@@ -7407,8 +9607,15 @@ module GetTemporaryGlueTableCredentialsResponse =
       fun ?secretAccessKey ->
         fun ?sessionToken ->
           fun ?expiration ->
-            fun () ->
-              { accessKeyId; secretAccessKey; sessionToken; expiration }
+            fun ?vendedS3Path ->
+              fun () ->
+                {
+                  accessKeyId;
+                  secretAccessKey;
+                  sessionToken;
+                  expiration;
+                  vendedS3Path
+                }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7484,9 +9691,14 @@ module GetTemporaryGlueTableCredentialsResponse =
         ("SessionToken",
           (Option.map x.sessionToken ~f:SessionTokenString.to_value));
         ("Expiration",
-          (Option.map x.expiration ~f:ExpirationTimestamp.to_value))]
+          (Option.map x.expiration ~f:ExpirationTimestamp.to_value));
+        ("VendedS3Path",
+          (Option.map x.vendedS3Path ~f:PathStringList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let vendedS3Path =
+        (Option.map ~f:PathStringList.of_xml)
+          (Xml.child xml_arg0 "VendedS3Path") in
       let expiration =
         (Option.map ~f:ExpirationTimestamp.of_xml)
           (Xml.child xml_arg0 "Expiration") in
@@ -7499,21 +9711,25 @@ module GetTemporaryGlueTableCredentialsResponse =
       let accessKeyId =
         (Option.map ~f:AccessKeyIdString.of_xml)
           (Xml.child xml_arg0 "AccessKeyId") in
-      make ?expiration ?sessionToken ?secretAccessKey ?accessKeyId ()
+      make ?vendedS3Path ?expiration ?sessionToken ?secretAccessKey
+        ?accessKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let vendedS3Path =
+        field_map json__ "VendedS3Path" PathStringList.of_json in
       let expiration =
-        field_map json "Expiration" ExpirationTimestamp.of_json in
+        field_map json__ "Expiration" ExpirationTimestamp.of_json in
       let sessionToken =
-        field_map json "SessionToken" SessionTokenString.of_json in
+        field_map json__ "SessionToken" SessionTokenString.of_json in
       let secretAccessKey =
-        field_map json "SecretAccessKey" SecretAccessKeyString.of_json in
+        field_map json__ "SecretAccessKey" SecretAccessKeyString.of_json in
       let accessKeyId =
-        field_map json "AccessKeyId" AccessKeyIdString.of_json in
-      make ?expiration ?sessionToken ?secretAccessKey ?accessKeyId ()
+        field_map json__ "AccessKeyId" AccessKeyIdString.of_json in
+      make ?vendedS3Path ?expiration ?sessionToken ?secretAccessKey
+        ?accessKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Allows a caller in a secure environment to assume a role with permission to access Amazon S3. In order to vend such credentials, Lake Formation assumes the role associated with a registered location, for example an Amazon S3 bucket, with a scope down policy which restricts the access to a single prefix."]
+       "Allows a caller in a secure environment to assume a role with permission to access Amazon S3. In order to vend such credentials, Lake Formation assumes the role associated with a registered location, for example an Amazon S3 bucket, with a scope down policy which restricts the access to a single prefix. To call this API, the role that the service assumes must have lakeformation:GetDataAccess permission on the resource."]
 module GetTemporaryGlueTableCredentialsRequest =
   struct
     type nonrec t =
@@ -7530,23 +9746,32 @@ module GetTemporaryGlueTableCredentialsRequest =
       auditContext: AuditContext.t option
         [@ocaml.doc
           "A structure representing context to access a resource (column names, query ID, etc)."];
-      supportedPermissionTypes: PermissionTypeList.t
+      supportedPermissionTypes: PermissionTypeList.t option
         [@ocaml.doc
-          "A list of supported permission types for the table. Valid values are COLUMN_PERMISSION and CELL_FILTER_PERMISSION."]}
+          "A list of supported permission types for the table. Valid values are COLUMN_PERMISSION and CELL_FILTER_PERMISSION."];
+      s3Path: PathString.t option
+        [@ocaml.doc "The Amazon S3 path for the table."];
+      querySessionContext: QuerySessionContext.t option
+        [@ocaml.doc
+          "A structure used as a protocol between query engines and Lake Formation or Glue. Contains both a Lake Formation generated authorization identifier and information from the request's authorization context."]}
     let context_ = "GetTemporaryGlueTableCredentialsRequest"
     let make ?permissions =
       fun ?durationSeconds ->
         fun ?auditContext ->
-          fun ~tableArn ->
-            fun ~supportedPermissionTypes ->
-              fun () ->
-                {
-                  permissions;
-                  durationSeconds;
-                  auditContext;
-                  tableArn;
-                  supportedPermissionTypes
-                }
+          fun ?supportedPermissionTypes ->
+            fun ?s3Path ->
+              fun ?querySessionContext ->
+                fun ~tableArn ->
+                  fun () ->
+                    {
+                      permissions;
+                      durationSeconds;
+                      auditContext;
+                      supportedPermissionTypes;
+                      s3Path;
+                      querySessionContext;
+                      tableArn
+                    }
     let to_value x =
       structure_to_value
         [("TableArn", (Some (ResourceArnString.to_value x.tableArn)));
@@ -7558,13 +9783,21 @@ module GetTemporaryGlueTableCredentialsRequest =
         ("AuditContext",
           (Option.map x.auditContext ~f:AuditContext.to_value));
         ("SupportedPermissionTypes",
-          (Some (PermissionTypeList.to_value x.supportedPermissionTypes)))]
+          (Option.map x.supportedPermissionTypes
+             ~f:PermissionTypeList.to_value));
+        ("S3Path", (Option.map x.s3Path ~f:PathString.to_value));
+        ("QuerySessionContext",
+          (Option.map x.querySessionContext ~f:QuerySessionContext.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let querySessionContext =
+        (Option.map ~f:QuerySessionContext.of_xml)
+          (Xml.child xml_arg0 "QuerySessionContext") in
+      let s3Path =
+        (Option.map ~f:PathString.of_xml) (Xml.child xml_arg0 "S3Path") in
       let supportedPermissionTypes =
-        PermissionTypeList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "SupportedPermissionTypes") in
+        (Option.map ~f:PermissionTypeList.of_xml)
+          (Xml.child xml_arg0 "SupportedPermissionTypes") in
       let auditContext =
         (Option.map ~f:AuditContext.of_xml)
           (Xml.child xml_arg0 "AuditContext") in
@@ -7577,24 +9810,28 @@ module GetTemporaryGlueTableCredentialsRequest =
       let tableArn =
         ResourceArnString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableArn") in
-      make ~supportedPermissionTypes ?auditContext ?durationSeconds
-        ?permissions ~tableArn ()
+      make ?querySessionContext ?s3Path ?supportedPermissionTypes
+        ?auditContext ?durationSeconds ?permissions ~tableArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let querySessionContext =
+        field_map json__ "QuerySessionContext" QuerySessionContext.of_json in
+      let s3Path = field_map json__ "S3Path" PathString.of_json in
       let supportedPermissionTypes =
-        field_map_exn json "SupportedPermissionTypes"
+        field_map json__ "SupportedPermissionTypes"
           PermissionTypeList.of_json in
-      let auditContext = field_map json "AuditContext" AuditContext.of_json in
+      let auditContext = field_map json__ "AuditContext" AuditContext.of_json in
       let durationSeconds =
-        field_map json "DurationSeconds"
+        field_map json__ "DurationSeconds"
           CredentialTimeoutDurationSecondInteger.of_json in
-      let permissions = field_map json "Permissions" PermissionList.of_json in
-      let tableArn = field_map_exn json "TableArn" ResourceArnString.of_json in
-      make ~supportedPermissionTypes ?auditContext ?durationSeconds
-        ?permissions ~tableArn ()
+      let permissions = field_map json__ "Permissions" PermissionList.of_json in
+      let tableArn =
+        field_map_exn json__ "TableArn" ResourceArnString.of_json in
+      make ?querySessionContext ?s3Path ?supportedPermissionTypes
+        ?auditContext ?durationSeconds ?permissions ~tableArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Allows a caller in a secure environment to assume a role with permission to access Amazon S3. In order to vend such credentials, Lake Formation assumes the role associated with a registered location, for example an Amazon S3 bucket, with a scope down policy which restricts the access to a single prefix."]
+       "Allows a caller in a secure environment to assume a role with permission to access Amazon S3. In order to vend such credentials, Lake Formation assumes the role associated with a registered location, for example an Amazon S3 bucket, with a scope down policy which restricts the access to a single prefix. To call this API, the role that the service assumes must have lakeformation:GetDataAccess permission on the resource."]
 module GetTemporaryGluePartitionCredentialsResponse =
   struct
     type nonrec t =
@@ -7714,15 +9951,15 @@ module GetTemporaryGluePartitionCredentialsResponse =
           (Xml.child xml_arg0 "AccessKeyId") in
       make ?expiration ?sessionToken ?secretAccessKey ?accessKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let expiration =
-        field_map json "Expiration" ExpirationTimestamp.of_json in
+        field_map json__ "Expiration" ExpirationTimestamp.of_json in
       let sessionToken =
-        field_map json "SessionToken" SessionTokenString.of_json in
+        field_map json__ "SessionToken" SessionTokenString.of_json in
       let secretAccessKey =
-        field_map json "SecretAccessKey" SecretAccessKeyString.of_json in
+        field_map json__ "SecretAccessKey" SecretAccessKeyString.of_json in
       let accessKeyId =
-        field_map json "AccessKeyId" AccessKeyIdString.of_json in
+        field_map json__ "AccessKeyId" AccessKeyIdString.of_json in
       make ?expiration ?sessionToken ?secretAccessKey ?accessKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7745,24 +9982,24 @@ module GetTemporaryGluePartitionCredentialsRequest =
       auditContext: AuditContext.t option
         [@ocaml.doc
           "A structure representing context to access a resource (column names, query ID, etc)."];
-      supportedPermissionTypes: PermissionTypeList.t
+      supportedPermissionTypes: PermissionTypeList.t option
         [@ocaml.doc
           "A list of supported permission types for the partition. Valid values are COLUMN_PERMISSION and CELL_FILTER_PERMISSION."]}
     let context_ = "GetTemporaryGluePartitionCredentialsRequest"
     let make ?permissions =
       fun ?durationSeconds ->
         fun ?auditContext ->
-          fun ~tableArn ->
-            fun ~partition ->
-              fun ~supportedPermissionTypes ->
+          fun ?supportedPermissionTypes ->
+            fun ~tableArn ->
+              fun ~partition ->
                 fun () ->
                   {
                     permissions;
                     durationSeconds;
                     auditContext;
+                    supportedPermissionTypes;
                     tableArn;
-                    partition;
-                    supportedPermissionTypes
+                    partition
                   }
     let to_value x =
       structure_to_value
@@ -7776,13 +10013,13 @@ module GetTemporaryGluePartitionCredentialsRequest =
         ("AuditContext",
           (Option.map x.auditContext ~f:AuditContext.to_value));
         ("SupportedPermissionTypes",
-          (Some (PermissionTypeList.to_value x.supportedPermissionTypes)))]
+          (Option.map x.supportedPermissionTypes
+             ~f:PermissionTypeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let supportedPermissionTypes =
-        PermissionTypeList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "SupportedPermissionTypes") in
+        (Option.map ~f:PermissionTypeList.of_xml)
+          (Xml.child xml_arg0 "SupportedPermissionTypes") in
       let auditContext =
         (Option.map ~f:AuditContext.of_xml)
           (Xml.child xml_arg0 "AuditContext") in
@@ -7798,26 +10035,220 @@ module GetTemporaryGluePartitionCredentialsRequest =
       let tableArn =
         ResourceArnString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableArn") in
-      make ~supportedPermissionTypes ?auditContext ?durationSeconds
+      make ?supportedPermissionTypes ?auditContext ?durationSeconds
         ?permissions ~partition ~tableArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let supportedPermissionTypes =
-        field_map_exn json "SupportedPermissionTypes"
+        field_map json__ "SupportedPermissionTypes"
           PermissionTypeList.of_json in
-      let auditContext = field_map json "AuditContext" AuditContext.of_json in
+      let auditContext = field_map json__ "AuditContext" AuditContext.of_json in
       let durationSeconds =
-        field_map json "DurationSeconds"
+        field_map json__ "DurationSeconds"
           CredentialTimeoutDurationSecondInteger.of_json in
-      let permissions = field_map json "Permissions" PermissionList.of_json in
+      let permissions = field_map json__ "Permissions" PermissionList.of_json in
       let partition =
-        field_map_exn json "Partition" PartitionValueList.of_json in
-      let tableArn = field_map_exn json "TableArn" ResourceArnString.of_json in
-      make ~supportedPermissionTypes ?auditContext ?durationSeconds
+        field_map_exn json__ "Partition" PartitionValueList.of_json in
+      let tableArn =
+        field_map_exn json__ "TableArn" ResourceArnString.of_json in
+      make ?supportedPermissionTypes ?auditContext ?durationSeconds
         ?permissions ~partition ~tableArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This API is identical to GetTemporaryTableCredentials except that this is used when the target Data Catalog resource is of type Partition. Lake Formation restricts the permission of the vended credentials with the same scope down policy which restricts access to a single Amazon S3 prefix."]
+module GetTemporaryDataLocationCredentialsResponse =
+  struct
+    type nonrec t =
+      {
+      credentials: TemporaryCredentials.t option ;
+      accessibleDataLocations: PathStringList.t option
+        [@ocaml.doc
+          "Refers to the Amazon S3 locations that can be accessed through the GetTemporaryCredentialsForLocation API operation."];
+      credentialsScope: CredentialsScope.t option
+        [@ocaml.doc
+          "The credential scope is determined by the caller's Lake Formation permission on the associated table. Credential scope can be either: READ - Provides read-only access to the data location. READ_WRITE - Provides both read and write access to the data location."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `EntityNotFoundException of EntityNotFoundException.t 
+      | `GlueEncryptionException of GlueEncryptionException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `OperationTimeoutException of OperationTimeoutException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?credentials =
+      fun ?accessibleDataLocations ->
+        fun ?credentialsScope ->
+          fun () ->
+            { credentials; accessibleDataLocations; credentialsScope }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "GlueEncryptionException" ->
+          `GlueEncryptionException (GlueEncryptionException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "GlueEncryptionException" ->
+          `GlueEncryptionException (GlueEncryptionException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `GlueEncryptionException e ->
+          `Assoc
+            [("error", (`String "GlueEncryptionException"));
+            ("details", (GlueEncryptionException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `OperationTimeoutException e ->
+          `Assoc
+            [("error", (`String "OperationTimeoutException"));
+            ("details", (OperationTimeoutException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Credentials",
+           (Option.map x.credentials ~f:TemporaryCredentials.to_value));
+        ("AccessibleDataLocations",
+          (Option.map x.accessibleDataLocations ~f:PathStringList.to_value));
+        ("CredentialsScope",
+          (Option.map x.credentialsScope ~f:CredentialsScope.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let credentialsScope =
+        (Option.map ~f:CredentialsScope.of_xml)
+          (Xml.child xml_arg0 "CredentialsScope") in
+      let accessibleDataLocations =
+        (Option.map ~f:PathStringList.of_xml)
+          (Xml.child xml_arg0 "AccessibleDataLocations") in
+      let credentials =
+        (Option.map ~f:TemporaryCredentials.of_xml)
+          (Xml.child xml_arg0 "Credentials") in
+      make ?credentialsScope ?accessibleDataLocations ?credentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let credentialsScope =
+        field_map json__ "CredentialsScope" CredentialsScope.of_json in
+      let accessibleDataLocations =
+        field_map json__ "AccessibleDataLocations" PathStringList.of_json in
+      let credentials =
+        field_map json__ "Credentials" TemporaryCredentials.of_json in
+      make ?credentialsScope ?accessibleDataLocations ?credentials ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows a user or application in a secure environment to access data in a specific Amazon S3 location registered with Lake Formation by providing temporary scoped credentials that are limited to the requested data location and the caller's authorized access level. GetDataAccess is logged in CloudTrail whenever a principal requests temporary data location credentials to access data in a data lake location that is registered with Lake Formation. The API operation returns an error in the following scenarios: The data location is not registered with Lake Formation. No Glue table is associated with the data location. The caller doesn't have required permissions on the associated table. The caller must have SELECT or SUPER permissions on the associated table, and credential vending for full table access must be enabled in the data lake settings. For more information, see Application integration for full table access. The data location is in a different Amazon Web Services Region. Lake Formation doesn't support cross-Region access when vending credentials for a data location. Lake Formation only supports Amazon S3 paths registered within the same Region as the API call."]
+module GetTemporaryDataLocationCredentialsRequest =
+  struct
+    type nonrec t =
+      {
+      durationSeconds: CredentialTimeoutDurationSecondInteger.t option
+        [@ocaml.doc
+          "The time period, between 900 and 43,200 seconds, for the timeout of the temporary credentials."];
+      auditContext: AuditContext.t option ;
+      dataLocations: PathStringList.t option
+        [@ocaml.doc "The Amazon S3 data location that you want to access."];
+      credentialsScope: CredentialsScope.t option
+        [@ocaml.doc
+          "The credential scope is determined by the caller's Lake Formation permission on the associated table. Credential scope can be either: READ - Provides read-only access to the data location. READ_WRITE - Provides both read and write access to the data location."]}
+    let make ?durationSeconds =
+      fun ?auditContext ->
+        fun ?dataLocations ->
+          fun ?credentialsScope ->
+            fun () ->
+              {
+                durationSeconds;
+                auditContext;
+                dataLocations;
+                credentialsScope
+              }
+    let to_value x =
+      structure_to_value
+        [("DurationSeconds",
+           (Option.map x.durationSeconds
+              ~f:CredentialTimeoutDurationSecondInteger.to_value));
+        ("AuditContext",
+          (Option.map x.auditContext ~f:AuditContext.to_value));
+        ("DataLocations",
+          (Option.map x.dataLocations ~f:PathStringList.to_value));
+        ("CredentialsScope",
+          (Option.map x.credentialsScope ~f:CredentialsScope.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let credentialsScope =
+        (Option.map ~f:CredentialsScope.of_xml)
+          (Xml.child xml_arg0 "CredentialsScope") in
+      let dataLocations =
+        (Option.map ~f:PathStringList.of_xml)
+          (Xml.child xml_arg0 "DataLocations") in
+      let auditContext =
+        (Option.map ~f:AuditContext.of_xml)
+          (Xml.child xml_arg0 "AuditContext") in
+      let durationSeconds =
+        (Option.map ~f:CredentialTimeoutDurationSecondInteger.of_xml)
+          (Xml.child xml_arg0 "DurationSeconds") in
+      make ?credentialsScope ?dataLocations ?auditContext ?durationSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let credentialsScope =
+        field_map json__ "CredentialsScope" CredentialsScope.of_json in
+      let dataLocations =
+        field_map json__ "DataLocations" PathStringList.of_json in
+      let auditContext = field_map json__ "AuditContext" AuditContext.of_json in
+      let durationSeconds =
+        field_map json__ "DurationSeconds"
+          CredentialTimeoutDurationSecondInteger.of_json in
+      make ?credentialsScope ?dataLocations ?auditContext ?durationSeconds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows a user or application in a secure environment to access data in a specific Amazon S3 location registered with Lake Formation by providing temporary scoped credentials that are limited to the requested data location and the caller's authorized access level. GetDataAccess is logged in CloudTrail whenever a principal requests temporary data location credentials to access data in a data lake location that is registered with Lake Formation. The API operation returns an error in the following scenarios: The data location is not registered with Lake Formation. No Glue table is associated with the data location. The caller doesn't have required permissions on the associated table. The caller must have SELECT or SUPER permissions on the associated table, and credential vending for full table access must be enabled in the data lake settings. For more information, see Application integration for full table access. The data location is in a different Amazon Web Services Region. Lake Formation doesn't support cross-Region access when vending credentials for a data location. Lake Formation only supports Amazon S3 paths registered within the same Region as the API call."]
 module GetTableObjectsResponse =
   struct
     type nonrec t =
@@ -7927,10 +10358,10 @@ module GetTableObjectsResponse =
           (Xml.child xml_arg0 "Objects") in
       make ?nextToken ?objects ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" TokenString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" TokenString.of_json in
       let objects =
-        field_map json "Objects" PartitionedTableObjectsList.of_json in
+        field_map json__ "Objects" PartitionedTableObjectsList.of_json in
       make ?nextToken ?objects ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8018,17 +10449,18 @@ module GetTableObjectsRequest =
       make ?nextToken ?maxResults ?partitionPredicate ?queryAsOfTime
         ?transactionId ~tableName ~databaseName ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" TokenString.of_json in
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" TokenString.of_json in
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
       let partitionPredicate =
-        field_map json "PartitionPredicate" PredicateString.of_json in
-      let queryAsOfTime = field_map json "QueryAsOfTime" Timestamp.of_json in
+        field_map json__ "PartitionPredicate" PredicateString.of_json in
+      let queryAsOfTime = field_map json__ "QueryAsOfTime" Timestamp.of_json in
       let transactionId =
-        field_map json "TransactionId" TransactionIdString.of_json in
-      let tableName = field_map_exn json "TableName" NameString.of_json in
-      let databaseName = field_map_exn json "DatabaseName" NameString.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+        field_map json__ "TransactionId" TransactionIdString.of_json in
+      let tableName = field_map_exn json__ "TableName" NameString.of_json in
+      let databaseName =
+        field_map_exn json__ "DatabaseName" NameString.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ?nextToken ?maxResults ?partitionPredicate ?queryAsOfTime
         ?transactionId ~tableName ~databaseName ?catalogId ()
     let to_json v = composed_to_json to_value v
@@ -8141,12 +10573,12 @@ module GetResourceLFTagsResponse =
           (Xml.child xml_arg0 "LFTagOnDatabase") in
       make ?lFTagsOnColumns ?lFTagsOnTable ?lFTagOnDatabase ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lFTagsOnColumns =
-        field_map json "LFTagsOnColumns" ColumnLFTagsList.of_json in
-      let lFTagsOnTable = field_map json "LFTagsOnTable" LFTagsList.of_json in
+        field_map json__ "LFTagsOnColumns" ColumnLFTagsList.of_json in
+      let lFTagsOnTable = field_map json__ "LFTagsOnTable" LFTagsList.of_json in
       let lFTagOnDatabase =
-        field_map json "LFTagOnDatabase" LFTagsList.of_json in
+        field_map json__ "LFTagOnDatabase" LFTagsList.of_json in
       make ?lFTagsOnColumns ?lFTagsOnTable ?lFTagOnDatabase ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the LF-tags applied to a resource."]
@@ -8185,11 +10617,11 @@ module GetResourceLFTagsRequest =
           (Xml.child xml_arg0 "CatalogId") in
       make ?showAssignedLFTags ~resource ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let showAssignedLFTags =
-        field_map json "ShowAssignedLFTags" BooleanNullable.of_json in
-      let resource = field_map_exn json "Resource" Resource.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+        field_map json__ "ShowAssignedLFTags" BooleanNullable.of_json in
+      let resource = field_map_exn json__ "Resource" Resource.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ?showAssignedLFTags ~resource ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the LF-tags applied to a resource."]
@@ -8304,13 +10736,13 @@ module GetQueryStatisticsResponse =
           (Xml.child xml_arg0 "ExecutionStatistics") in
       make ?querySubmissionTime ?planningStatistics ?executionStatistics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let querySubmissionTime =
-        field_map json "QuerySubmissionTime" DateTime.of_json in
+        field_map json__ "QuerySubmissionTime" DateTime.of_json in
       let planningStatistics =
-        field_map json "PlanningStatistics" PlanningStatistics.of_json in
+        field_map json__ "PlanningStatistics" PlanningStatistics.of_json in
       let executionStatistics =
-        field_map json "ExecutionStatistics" ExecutionStatistics.of_json in
+        field_map json__ "ExecutionStatistics" ExecutionStatistics.of_json in
       make ?querySubmissionTime ?planningStatistics ?executionStatistics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8334,9 +10766,9 @@ module GetQueryStatisticsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "QueryId") in
       make ~queryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let queryId =
-        field_map_exn json "QueryId"
+        field_map_exn json__ "QueryId"
           GetQueryStatisticsRequestQueryIdString.of_json in
       make ~queryId ()
     let to_json v = composed_to_json to_value v
@@ -8348,7 +10780,7 @@ module GetQueryStateResponse =
       {
       error: ErrorMessageString.t option
         [@ocaml.doc "An error message when the operation fails."];
-      state: QueryStateString.t
+      state: QueryStateString.t option
         [@ocaml.doc
           "The state of a query previously submitted. The possible states are: PENDING: the query is pending. WORKUNITS_AVAILABLE: some work units are ready for retrieval and execution. FINISHED: the query planning finished successfully, and all work units are ready for retrieval and execution. ERROR: an error occurred with the query, such as an invalid query ID or a backend error."]}
     type nonrec error =
@@ -8356,8 +10788,7 @@ module GetQueryStateResponse =
       | `InternalServiceException of InternalServiceException.t 
       | `InvalidInputException of InvalidInputException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetQueryStateResponse"
-    let make ?error = fun ~state -> fun () -> { error; state }
+    let make ?error = fun ?state -> fun () -> { error; state }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8401,21 +10832,20 @@ module GetQueryStateResponse =
     let to_value x =
       structure_to_value
         [("Error", (Option.map x.error ~f:ErrorMessageString.to_value));
-        ("State", (Some (QueryStateString.to_value x.state)))]
+        ("State", (Option.map x.state ~f:QueryStateString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let state =
-        QueryStateString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "State") in
+        (Option.map ~f:QueryStateString.of_xml) (Xml.child xml_arg0 "State") in
       let error =
         (Option.map ~f:ErrorMessageString.of_xml)
           (Xml.child xml_arg0 "Error") in
-      make ~state ?error ()
+      make ?state ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map_exn json "State" QueryStateString.of_json in
-      let error = field_map json "Error" ErrorMessageString.of_json in
-      make ~state ?error ()
+    let of_json json__ =
+      let state = field_map json__ "State" QueryStateString.of_json in
+      let error = field_map json__ "Error" ErrorMessageString.of_json in
+      make ?state ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A structure for the output."]
 module GetQueryStateRequest =
@@ -8437,9 +10867,9 @@ module GetQueryStateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "QueryId") in
       make ~queryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let queryId =
-        field_map_exn json "QueryId"
+        field_map_exn json__ "QueryId"
           GetQueryStateRequestQueryIdString.of_json in
       make ~queryId ()
     let to_json v = composed_to_json to_value v
@@ -8537,10 +10967,10 @@ module GetLFTagResponse =
           (Xml.child xml_arg0 "CatalogId") in
       make ?tagValues ?tagKey ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map json "TagValues" TagValueList.of_json in
-      let tagKey = field_map json "TagKey" LFTagKey.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+    let of_json json__ =
+      let tagValues = field_map json__ "TagValues" TagValueList.of_json in
+      let tagKey = field_map json__ "TagKey" LFTagKey.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ?tagValues ?tagKey ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an LF-tag definition."]
@@ -8567,12 +10997,156 @@ module GetLFTagRequest =
           (Xml.child xml_arg0 "CatalogId") in
       make ~tagKey ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKey = field_map_exn json "TagKey" LFTagKey.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+    let of_json json__ =
+      let tagKey = field_map_exn json__ "TagKey" LFTagKey.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ~tagKey ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an LF-tag definition."]
+module GetLFTagExpressionResponse =
+  struct
+    type nonrec t =
+      {
+      name: NameString.t option
+        [@ocaml.doc "The name for the LF-Tag expression."];
+      description: DescriptionString.t option
+        [@ocaml.doc
+          "The description with information about the LF-Tag expression."];
+      catalogId: CatalogIdString.t option
+        [@ocaml.doc
+          "The identifier for the Data Catalog. By default, the account ID in which the LF-Tag expression is saved."];
+      expression: Expression.t option
+        [@ocaml.doc
+          "The body of the LF-Tag expression. It is composed of one or more LF-Tag key-value pairs."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `EntityNotFoundException of EntityNotFoundException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `OperationTimeoutException of OperationTimeoutException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?name =
+      fun ?description ->
+        fun ?catalogId ->
+          fun ?expression ->
+            fun () -> { name; description; catalogId; expression }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `OperationTimeoutException e ->
+          `Assoc
+            [("error", (`String "OperationTimeoutException"));
+            ("details", (OperationTimeoutException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:NameString.to_value));
+        ("Description",
+          (Option.map x.description ~f:DescriptionString.to_value));
+        ("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value));
+        ("Expression", (Option.map x.expression ~f:Expression.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expression =
+        (Option.map ~f:Expression.of_xml) (Xml.child xml_arg0 "Expression") in
+      let catalogId =
+        (Option.map ~f:CatalogIdString.of_xml)
+          (Xml.child xml_arg0 "CatalogId") in
+      let description =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        (Option.map ~f:NameString.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?expression ?catalogId ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expression = field_map json__ "Expression" Expression.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      let description =
+        field_map json__ "Description" DescriptionString.of_json in
+      let name = field_map json__ "Name" NameString.of_json in
+      make ?expression ?catalogId ?description ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the details about the LF-Tag expression. The caller must be a data lake admin or must have DESCRIBE permission on the LF-Tag expression resource."]
+module GetLFTagExpressionRequest =
+  struct
+    type nonrec t =
+      {
+      name: NameString.t [@ocaml.doc "The name for the LF-Tag expression"];
+      catalogId: CatalogIdString.t option
+        [@ocaml.doc
+          "The identifier for the Data Catalog. By default, the account ID."]}
+    let context_ = "GetLFTagExpressionRequest"
+    let make ?catalogId = fun ~name -> fun () -> { catalogId; name }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (NameString.to_value x.name)));
+        ("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let catalogId =
+        (Option.map ~f:CatalogIdString.of_xml)
+          (Xml.child xml_arg0 "CatalogId") in
+      let name =
+        NameString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?catalogId ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      let name = field_map_exn json__ "Name" NameString.of_json in
+      make ?catalogId ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the details about the LF-Tag expression. The caller must be a data lake admin or must have DESCRIBE permission on the LF-Tag expression resource."]
 module GetEffectivePermissionsForPathResponse =
   struct
     type nonrec t =
@@ -8654,10 +11228,11 @@ module GetEffectivePermissionsForPathResponse =
           (Xml.child xml_arg0 "Permissions") in
       make ?nextToken ?permissions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let permissions =
-        field_map json "Permissions" PrincipalResourcePermissionsList.of_json in
+        field_map json__ "Permissions"
+          PrincipalResourcePermissionsList.of_json in
       make ?nextToken ?permissions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8703,12 +11278,12 @@ module GetEffectivePermissionsForPathRequest =
           (Xml.child xml_arg0 "CatalogId") in
       make ?maxResults ?nextToken ~resourceArn ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" ResourceArnString.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+        field_map_exn json__ "ResourceArn" ResourceArnString.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ?maxResults ?nextToken ~resourceArn ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8777,9 +11352,9 @@ module GetDataLakeSettingsResponse =
           (Xml.child xml_arg0 "DataLakeSettings") in
       make ?dataLakeSettings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataLakeSettings =
-        field_map json "DataLakeSettings" DataLakeSettings.of_json in
+        field_map json__ "DataLakeSettings" DataLakeSettings.of_json in
       make ?dataLakeSettings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8802,12 +11377,227 @@ module GetDataLakeSettingsRequest =
           (Xml.child xml_arg0 "CatalogId") in
       make ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+    let of_json json__ =
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the list of the data lake administrators of a Lake Formation-managed data lake."]
+module GetDataLakePrincipalResponse =
+  struct
+    type nonrec t =
+      {
+      identity: IdentityString.t option
+        [@ocaml.doc "A unique identifier of the invoking principal."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `OperationTimeoutException of OperationTimeoutException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?identity = fun () -> { identity }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `OperationTimeoutException e ->
+          `Assoc
+            [("error", (`String "OperationTimeoutException"));
+            ("details", (OperationTimeoutException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Identity", (Option.map x.identity ~f:IdentityString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identity =
+        (Option.map ~f:IdentityString.of_xml) (Xml.child xml_arg0 "Identity") in
+      make ?identity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identity = field_map json__ "Identity" IdentityString.of_json in
+      make ?identity ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns the identity of the invoking principal."]
+module GetDataLakePrincipalRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns the identity of the invoking principal."]
+module GetDataCellsFilterResponse =
+  struct
+    type nonrec t =
+      {
+      dataCellsFilter: DataCellsFilter.t option
+        [@ocaml.doc
+          "A structure that describes certain columns on certain rows."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `EntityNotFoundException of EntityNotFoundException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `OperationTimeoutException of OperationTimeoutException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dataCellsFilter = fun () -> { dataCellsFilter }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `OperationTimeoutException e ->
+          `Assoc
+            [("error", (`String "OperationTimeoutException"));
+            ("details", (OperationTimeoutException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DataCellsFilter",
+           (Option.map x.dataCellsFilter ~f:DataCellsFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataCellsFilter =
+        (Option.map ~f:DataCellsFilter.of_xml)
+          (Xml.child xml_arg0 "DataCellsFilter") in
+      make ?dataCellsFilter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataCellsFilter =
+        field_map json__ "DataCellsFilter" DataCellsFilter.of_json in
+      make ?dataCellsFilter ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a data cells filter."]
+module GetDataCellsFilterRequest =
+  struct
+    type nonrec t =
+      {
+      tableCatalogId: CatalogIdString.t
+        [@ocaml.doc "The ID of the catalog to which the table belongs."];
+      databaseName: NameString.t
+        [@ocaml.doc "A database in the Glue Data Catalog."];
+      tableName: NameString.t [@ocaml.doc "A table in the database."];
+      name: NameString.t
+        [@ocaml.doc "The name given by the user to the data filter cell."]}
+    let context_ = "GetDataCellsFilterRequest"
+    let make ~tableCatalogId =
+      fun ~databaseName ->
+        fun ~tableName ->
+          fun ~name ->
+            fun () -> { tableCatalogId; databaseName; tableName; name }
+    let to_value x =
+      structure_to_value
+        [("TableCatalogId",
+           (Some (CatalogIdString.to_value x.tableCatalogId)));
+        ("DatabaseName", (Some (NameString.to_value x.databaseName)));
+        ("TableName", (Some (NameString.to_value x.tableName)));
+        ("Name", (Some (NameString.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        NameString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let tableName =
+        NameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
+      let databaseName =
+        NameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
+      let tableCatalogId =
+        CatalogIdString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TableCatalogId") in
+      make ~name ~tableName ~databaseName ~tableCatalogId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" NameString.of_json in
+      let tableName = field_map_exn json__ "TableName" NameString.of_json in
+      let databaseName =
+        field_map_exn json__ "DatabaseName" NameString.of_json in
+      let tableCatalogId =
+        field_map_exn json__ "TableCatalogId" CatalogIdString.of_json in
+      make ~name ~tableName ~databaseName ~tableCatalogId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a data cells filter."]
 module ExtendTransactionResponse =
   struct
     type nonrec t = unit
@@ -8927,9 +11717,9 @@ module ExtendTransactionRequest =
           (Xml.child xml_arg0 "TransactionId") in
       make ?transactionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transactionId =
-        field_map json "TransactionId" TransactionIdString.of_json in
+        field_map json__ "TransactionId" TransactionIdString.of_json in
       make ?transactionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9008,9 +11798,9 @@ module DescribeTransactionResponse =
           (Xml.child xml_arg0 "TransactionDescription") in
       make ?transactionDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transactionDescription =
-        field_map json "TransactionDescription"
+        field_map json__ "TransactionDescription"
           TransactionDescription.of_json in
       make ?transactionDescription ()
     let to_json v = composed_to_json to_value v
@@ -9034,9 +11824,9 @@ module DescribeTransactionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TransactionId") in
       make ~transactionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transactionId =
-        field_map_exn json "TransactionId" TransactionIdString.of_json in
+        field_map_exn json__ "TransactionId" TransactionIdString.of_json in
       make ~transactionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the details of a single transaction."]
@@ -9113,8 +11903,8 @@ module DescribeResourceResponse =
           (Xml.child xml_arg0 "ResourceInfo") in
       make ?resourceInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceInfo = field_map json "ResourceInfo" ResourceInfo.of_json in
+    let of_json json__ =
+      let resourceInfo = field_map json__ "ResourceInfo" ResourceInfo.of_json in
       make ?resourceInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9136,13 +11926,202 @@ module DescribeResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "ResourceArn" ResourceArnString.of_json in
+        field_map_exn json__ "ResourceArn" ResourceArnString.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the current data access role for the given resource registered in Lake Formation."]
+module DescribeLakeFormationIdentityCenterConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      catalogId: CatalogIdString.t option
+        [@ocaml.doc
+          "The identifier for the Data Catalog. By default, the account ID. The Data Catalog is the persistent metadata store. It contains database definitions, table definitions, and other control information to manage your Lake Formation environment."];
+      instanceArn: IdentityCenterInstanceArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the connection."];
+      applicationArn: ApplicationArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Lake Formation application integrated with IAM Identity Center."];
+      externalFiltering: ExternalFilteringConfiguration.t option
+        [@ocaml.doc "Indicates if external filtering is enabled."];
+      shareRecipients: DataLakePrincipalList.t option
+        [@ocaml.doc
+          "A list of Amazon Web Services account IDs or Amazon Web Services organization/organizational unit ARNs that are allowed to access data managed by Lake Formation. If the ShareRecipients list includes valid values, a resource share is created with the principals you want to have access to the resources as the ShareRecipients. If the ShareRecipients value is null or the list is empty, no resource share is created."];
+      serviceIntegrations: ServiceIntegrationList.t option
+        [@ocaml.doc
+          "A list of service integrations for enabling trusted identity propagation with external services such as Redshift."];
+      resourceShare: RAMResourceShareArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the RAM share."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `EntityNotFoundException of EntityNotFoundException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `OperationTimeoutException of OperationTimeoutException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?catalogId =
+      fun ?instanceArn ->
+        fun ?applicationArn ->
+          fun ?externalFiltering ->
+            fun ?shareRecipients ->
+              fun ?serviceIntegrations ->
+                fun ?resourceShare ->
+                  fun () ->
+                    {
+                      catalogId;
+                      instanceArn;
+                      applicationArn;
+                      externalFiltering;
+                      shareRecipients;
+                      serviceIntegrations;
+                      resourceShare
+                    }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `OperationTimeoutException e ->
+          `Assoc
+            [("error", (`String "OperationTimeoutException"));
+            ("details", (OperationTimeoutException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value));
+        ("InstanceArn",
+          (Option.map x.instanceArn ~f:IdentityCenterInstanceArn.to_value));
+        ("ApplicationArn",
+          (Option.map x.applicationArn ~f:ApplicationArn.to_value));
+        ("ExternalFiltering",
+          (Option.map x.externalFiltering
+             ~f:ExternalFilteringConfiguration.to_value));
+        ("ShareRecipients",
+          (Option.map x.shareRecipients ~f:DataLakePrincipalList.to_value));
+        ("ServiceIntegrations",
+          (Option.map x.serviceIntegrations
+             ~f:ServiceIntegrationList.to_value));
+        ("ResourceShare",
+          (Option.map x.resourceShare ~f:RAMResourceShareArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceShare =
+        (Option.map ~f:RAMResourceShareArn.of_xml)
+          (Xml.child xml_arg0 "ResourceShare") in
+      let serviceIntegrations =
+        (Option.map ~f:ServiceIntegrationList.of_xml)
+          (Xml.child xml_arg0 "ServiceIntegrations") in
+      let shareRecipients =
+        (Option.map ~f:DataLakePrincipalList.of_xml)
+          (Xml.child xml_arg0 "ShareRecipients") in
+      let externalFiltering =
+        (Option.map ~f:ExternalFilteringConfiguration.of_xml)
+          (Xml.child xml_arg0 "ExternalFiltering") in
+      let applicationArn =
+        (Option.map ~f:ApplicationArn.of_xml)
+          (Xml.child xml_arg0 "ApplicationArn") in
+      let instanceArn =
+        (Option.map ~f:IdentityCenterInstanceArn.of_xml)
+          (Xml.child xml_arg0 "InstanceArn") in
+      let catalogId =
+        (Option.map ~f:CatalogIdString.of_xml)
+          (Xml.child xml_arg0 "CatalogId") in
+      make ?resourceShare ?serviceIntegrations ?shareRecipients
+        ?externalFiltering ?applicationArn ?instanceArn ?catalogId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceShare =
+        field_map json__ "ResourceShare" RAMResourceShareArn.of_json in
+      let serviceIntegrations =
+        field_map json__ "ServiceIntegrations" ServiceIntegrationList.of_json in
+      let shareRecipients =
+        field_map json__ "ShareRecipients" DataLakePrincipalList.of_json in
+      let externalFiltering =
+        field_map json__ "ExternalFiltering"
+          ExternalFilteringConfiguration.of_json in
+      let applicationArn =
+        field_map json__ "ApplicationArn" ApplicationArn.of_json in
+      let instanceArn =
+        field_map json__ "InstanceArn" IdentityCenterInstanceArn.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      make ?resourceShare ?serviceIntegrations ?shareRecipients
+        ?externalFiltering ?applicationArn ?instanceArn ?catalogId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the instance ARN and application ARN for the connection."]
+module DescribeLakeFormationIdentityCenterConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      catalogId: CatalogIdString.t option
+        [@ocaml.doc
+          "The identifier for the Data Catalog. By default, the account ID. The Data Catalog is the persistent metadata store. It contains database definitions, table definitions, and other control information to manage your Lake Formation environment."]}
+    let make ?catalogId = fun () -> { catalogId }
+    let to_value x =
+      structure_to_value
+        [("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let catalogId =
+        (Option.map ~f:CatalogIdString.of_xml)
+          (Xml.child xml_arg0 "CatalogId") in
+      make ?catalogId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      make ?catalogId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the instance ARN and application ARN for the connection."]
 module DeregisterResourceResponse =
   struct
     type nonrec t = unit
@@ -9229,9 +12208,9 @@ module DeregisterResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "ResourceArn" ResourceArnString.of_json in
+        field_map_exn json__ "ResourceArn" ResourceArnString.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9397,17 +12376,252 @@ module DeleteObjectsOnCancelRequest =
           (Xml.child xml_arg0 "CatalogId") in
       make ~objects ~transactionId ~tableName ~databaseName ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let objects = field_map_exn json "Objects" VirtualObjectList.of_json in
+    let of_json json__ =
+      let objects = field_map_exn json__ "Objects" VirtualObjectList.of_json in
       let transactionId =
-        field_map_exn json "TransactionId" TransactionIdString.of_json in
-      let tableName = field_map_exn json "TableName" NameString.of_json in
-      let databaseName = field_map_exn json "DatabaseName" NameString.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+        field_map_exn json__ "TransactionId" TransactionIdString.of_json in
+      let tableName = field_map_exn json__ "TableName" NameString.of_json in
+      let databaseName =
+        field_map_exn json__ "DatabaseName" NameString.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ~objects ~transactionId ~tableName ~databaseName ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For a specific governed table, provides a list of Amazon S3 objects that will be written during the current transaction and that can be automatically deleted if the transaction is canceled. Without this call, no Amazon S3 objects are automatically deleted when a transaction cancels. The Glue ETL library function write_dynamic_frame.from_catalog() includes an option to automatically call DeleteObjectsOnCancel before writes. For more information, see Rolling Back Amazon S3 Writes."]
+module DeleteLakeFormationOptInResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `EntityNotFoundException of EntityNotFoundException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `OperationTimeoutException of OperationTimeoutException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `OperationTimeoutException e ->
+          `Assoc
+            [("error", (`String "OperationTimeoutException"));
+            ("details", (OperationTimeoutException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Remove the Lake Formation permissions enforcement of the given databases, tables, and principals."]
+module DeleteLakeFormationOptInRequest =
+  struct
+    type nonrec t =
+      {
+      principal: DataLakePrincipal.t ;
+      resource: Resource.t ;
+      condition: Condition.t option }
+    let context_ = "DeleteLakeFormationOptInRequest"
+    let make ?condition =
+      fun ~principal ->
+        fun ~resource -> fun () -> { condition; principal; resource }
+    let to_value x =
+      structure_to_value
+        [("Principal", (Some (DataLakePrincipal.to_value x.principal)));
+        ("Resource", (Some (Resource.to_value x.resource)));
+        ("Condition", (Option.map x.condition ~f:Condition.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let condition =
+        (Option.map ~f:Condition.of_xml) (Xml.child xml_arg0 "Condition") in
+      let resource =
+        Resource.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Resource") in
+      let principal =
+        DataLakePrincipal.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Principal") in
+      make ?condition ~resource ~principal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let condition = field_map json__ "Condition" Condition.of_json in
+      let resource = field_map_exn json__ "Resource" Resource.of_json in
+      let principal =
+        field_map_exn json__ "Principal" DataLakePrincipal.of_json in
+      make ?condition ~resource ~principal ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Remove the Lake Formation permissions enforcement of the given databases, tables, and principals."]
+module DeleteLakeFormationIdentityCenterConfigurationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `EntityNotFoundException of EntityNotFoundException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `OperationTimeoutException of OperationTimeoutException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `OperationTimeoutException e ->
+          `Assoc
+            [("error", (`String "OperationTimeoutException"));
+            ("details", (OperationTimeoutException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an IAM Identity Center connection with Lake Formation."]
+module DeleteLakeFormationIdentityCenterConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      catalogId: CatalogIdString.t option
+        [@ocaml.doc
+          "The identifier for the Data Catalog. By default, the account ID. The Data Catalog is the persistent metadata store. It contains database definitions, table definitions, view definition, and other control information to manage your Lake Formation environment."]}
+    let make ?catalogId = fun () -> { catalogId }
+    let to_value x =
+      structure_to_value
+        [("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let catalogId =
+        (Option.map ~f:CatalogIdString.of_xml)
+          (Xml.child xml_arg0 "CatalogId") in
+      make ?catalogId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      make ?catalogId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an IAM Identity Center connection with Lake Formation."]
 module DeleteLFTagResponse =
   struct
     type nonrec t = unit
@@ -9483,7 +12697,7 @@ module DeleteLFTagResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified LF-tag key name. If the attribute key does not exist or the LF-tag does not exist, then the operation will not do anything. If the attribute key exists, then the operation checks if any resources are tagged with this attribute key, if yes, the API throws a 400 Exception with the message \"Delete not allowed\" as the LF-tag key is still attached with resources. You can consider untagging resources with this LF-tag key."]
+       "Deletes an LF-tag by its key name. The operation fails if the specified tag key doesn't exist. When you delete an LF-Tag: The associated LF-Tag policy becomes invalid. Resources that had this tag assigned will no longer have the tag policy applied to them."]
 module DeleteLFTagRequest =
   struct
     type nonrec t =
@@ -9508,13 +12722,119 @@ module DeleteLFTagRequest =
           (Xml.child xml_arg0 "CatalogId") in
       make ~tagKey ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKey = field_map_exn json "TagKey" LFTagKey.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+    let of_json json__ =
+      let tagKey = field_map_exn json__ "TagKey" LFTagKey.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ~tagKey ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified LF-tag key name. If the attribute key does not exist or the LF-tag does not exist, then the operation will not do anything. If the attribute key exists, then the operation checks if any resources are tagged with this attribute key, if yes, the API throws a 400 Exception with the message \"Delete not allowed\" as the LF-tag key is still attached with resources. You can consider untagging resources with this LF-tag key."]
+       "Deletes an LF-tag by its key name. The operation fails if the specified tag key doesn't exist. When you delete an LF-Tag: The associated LF-Tag policy becomes invalid. Resources that had this tag assigned will no longer have the tag policy applied to them."]
+module DeleteLFTagExpressionResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `EntityNotFoundException of EntityNotFoundException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `OperationTimeoutException of OperationTimeoutException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `OperationTimeoutException e ->
+          `Assoc
+            [("error", (`String "OperationTimeoutException"));
+            ("details", (OperationTimeoutException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the LF-Tag expression. The caller must be a data lake admin or have DROP permissions on the LF-Tag expression. Deleting a LF-Tag expression will also delete all LFTagPolicy permissions referencing the LF-Tag expression."]
+module DeleteLFTagExpressionRequest =
+  struct
+    type nonrec t =
+      {
+      name: NameString.t [@ocaml.doc "The name for the LF-Tag expression."];
+      catalogId: CatalogIdString.t option
+        [@ocaml.doc
+          "The identifier for the Data Catalog. By default, the account ID in which the LF-Tag expression is saved."]}
+    let context_ = "DeleteLFTagExpressionRequest"
+    let make ?catalogId = fun ~name -> fun () -> { catalogId; name }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (NameString.to_value x.name)));
+        ("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let catalogId =
+        (Option.map ~f:CatalogIdString.of_xml)
+          (Xml.child xml_arg0 "CatalogId") in
+      let name =
+        NameString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?catalogId ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      let name = field_map_exn json__ "Name" NameString.of_json in
+      make ?catalogId ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the LF-Tag expression. The caller must be a data lake admin or have DROP permissions on the LF-Tag expression. Deleting a LF-Tag expression will also delete all LFTagPolicy permissions referencing the LF-Tag expression."]
 module DeleteDataCellsFilterResponse =
   struct
     type nonrec t = unit
@@ -9626,15 +12946,331 @@ module DeleteDataCellsFilterRequest =
           (Xml.child xml_arg0 "TableCatalogId") in
       make ?name ?tableName ?databaseName ?tableCatalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" NameString.of_json in
-      let tableName = field_map json "TableName" NameString.of_json in
-      let databaseName = field_map json "DatabaseName" NameString.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" NameString.of_json in
+      let tableName = field_map json__ "TableName" NameString.of_json in
+      let databaseName = field_map json__ "DatabaseName" NameString.of_json in
       let tableCatalogId =
-        field_map json "TableCatalogId" CatalogIdString.of_json in
+        field_map json__ "TableCatalogId" CatalogIdString.of_json in
       make ?name ?tableName ?databaseName ?tableCatalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a data cell filter."]
+module CreateLakeFormationOptInResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `EntityNotFoundException of EntityNotFoundException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `OperationTimeoutException of OperationTimeoutException.t 
+      | `ResourceNumberLimitExceededException of
+          ResourceNumberLimitExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_json json)
+      | "ResourceNumberLimitExceededException" ->
+          `ResourceNumberLimitExceededException
+            (ResourceNumberLimitExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_xml xml)
+      | "ResourceNumberLimitExceededException" ->
+          `ResourceNumberLimitExceededException
+            (ResourceNumberLimitExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `OperationTimeoutException e ->
+          `Assoc
+            [("error", (`String "OperationTimeoutException"));
+            ("details", (OperationTimeoutException.to_json e))]
+      | `ResourceNumberLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceNumberLimitExceededException"));
+            ("details", (ResourceNumberLimitExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enforce Lake Formation permissions for the given databases, tables, and principals."]
+module CreateLakeFormationOptInRequest =
+  struct
+    type nonrec t =
+      {
+      principal: DataLakePrincipal.t ;
+      resource: Resource.t ;
+      condition: Condition.t option }
+    let context_ = "CreateLakeFormationOptInRequest"
+    let make ?condition =
+      fun ~principal ->
+        fun ~resource -> fun () -> { condition; principal; resource }
+    let to_value x =
+      structure_to_value
+        [("Principal", (Some (DataLakePrincipal.to_value x.principal)));
+        ("Resource", (Some (Resource.to_value x.resource)));
+        ("Condition", (Option.map x.condition ~f:Condition.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let condition =
+        (Option.map ~f:Condition.of_xml) (Xml.child xml_arg0 "Condition") in
+      let resource =
+        Resource.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Resource") in
+      let principal =
+        DataLakePrincipal.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Principal") in
+      make ?condition ~resource ~principal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let condition = field_map json__ "Condition" Condition.of_json in
+      let resource = field_map_exn json__ "Resource" Resource.of_json in
+      let principal =
+        field_map_exn json__ "Principal" DataLakePrincipal.of_json in
+      make ?condition ~resource ~principal ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enforce Lake Formation permissions for the given databases, tables, and principals."]
+module CreateLakeFormationIdentityCenterConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      applicationArn: ApplicationArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Lake Formation application integrated with IAM Identity Center."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AlreadyExistsException of AlreadyExistsException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `OperationTimeoutException of OperationTimeoutException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?applicationArn = fun () -> { applicationArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AlreadyExistsException" ->
+          `AlreadyExistsException (AlreadyExistsException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AlreadyExistsException" ->
+          `AlreadyExistsException (AlreadyExistsException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "AlreadyExistsException"));
+            ("details", (AlreadyExistsException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `OperationTimeoutException e ->
+          `Assoc
+            [("error", (`String "OperationTimeoutException"));
+            ("details", (OperationTimeoutException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ApplicationArn",
+           (Option.map x.applicationArn ~f:ApplicationArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let applicationArn =
+        (Option.map ~f:ApplicationArn.of_xml)
+          (Xml.child xml_arg0 "ApplicationArn") in
+      make ?applicationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let applicationArn =
+        field_map json__ "ApplicationArn" ApplicationArn.of_json in
+      make ?applicationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an IAM Identity Center connection with Lake Formation to allow IAM Identity Center users and groups to access Data Catalog resources."]
+module CreateLakeFormationIdentityCenterConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      catalogId: CatalogIdString.t option
+        [@ocaml.doc
+          "The identifier for the Data Catalog. By default, the account ID. The Data Catalog is the persistent metadata store. It contains database definitions, table definitions, view definitions, and other control information to manage your Lake Formation environment."];
+      instanceArn: IdentityCenterInstanceArn.t option
+        [@ocaml.doc
+          "The ARN of the IAM Identity Center instance for which the operation will be executed. For more information about ARNs, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces in the Amazon Web Services General Reference."];
+      externalFiltering: ExternalFilteringConfiguration.t option
+        [@ocaml.doc
+          "A list of the account IDs of Amazon Web Services accounts of third-party applications that are allowed to access data managed by Lake Formation."];
+      shareRecipients: DataLakePrincipalList.t option
+        [@ocaml.doc
+          "A list of Amazon Web Services account IDs and/or Amazon Web Services organization/organizational unit ARNs that are allowed to access data managed by Lake Formation. If the ShareRecipients list includes valid values, a resource share is created with the principals you want to have access to the resources. If the ShareRecipients value is null or the list is empty, no resource share is created."];
+      serviceIntegrations: ServiceIntegrationList.t option
+        [@ocaml.doc
+          "A list of service integrations for enabling trusted identity propagation with external services such as Redshift."]}
+    let make ?catalogId =
+      fun ?instanceArn ->
+        fun ?externalFiltering ->
+          fun ?shareRecipients ->
+            fun ?serviceIntegrations ->
+              fun () ->
+                {
+                  catalogId;
+                  instanceArn;
+                  externalFiltering;
+                  shareRecipients;
+                  serviceIntegrations
+                }
+    let to_value x =
+      structure_to_value
+        [("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value));
+        ("InstanceArn",
+          (Option.map x.instanceArn ~f:IdentityCenterInstanceArn.to_value));
+        ("ExternalFiltering",
+          (Option.map x.externalFiltering
+             ~f:ExternalFilteringConfiguration.to_value));
+        ("ShareRecipients",
+          (Option.map x.shareRecipients ~f:DataLakePrincipalList.to_value));
+        ("ServiceIntegrations",
+          (Option.map x.serviceIntegrations
+             ~f:ServiceIntegrationList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceIntegrations =
+        (Option.map ~f:ServiceIntegrationList.of_xml)
+          (Xml.child xml_arg0 "ServiceIntegrations") in
+      let shareRecipients =
+        (Option.map ~f:DataLakePrincipalList.of_xml)
+          (Xml.child xml_arg0 "ShareRecipients") in
+      let externalFiltering =
+        (Option.map ~f:ExternalFilteringConfiguration.of_xml)
+          (Xml.child xml_arg0 "ExternalFiltering") in
+      let instanceArn =
+        (Option.map ~f:IdentityCenterInstanceArn.of_xml)
+          (Xml.child xml_arg0 "InstanceArn") in
+      let catalogId =
+        (Option.map ~f:CatalogIdString.of_xml)
+          (Xml.child xml_arg0 "CatalogId") in
+      make ?serviceIntegrations ?shareRecipients ?externalFiltering
+        ?instanceArn ?catalogId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceIntegrations =
+        field_map json__ "ServiceIntegrations" ServiceIntegrationList.of_json in
+      let shareRecipients =
+        field_map json__ "ShareRecipients" DataLakePrincipalList.of_json in
+      let externalFiltering =
+        field_map json__ "ExternalFiltering"
+          ExternalFilteringConfiguration.of_json in
+      let instanceArn =
+        field_map json__ "InstanceArn" IdentityCenterInstanceArn.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      make ?serviceIntegrations ?shareRecipients ?externalFiltering
+        ?instanceArn ?catalogId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an IAM Identity Center connection with Lake Formation to allow IAM Identity Center users and groups to access Data Catalog resources."]
 module CreateLFTagResponse =
   struct
     type nonrec t = unit
@@ -9753,13 +13389,152 @@ module CreateLFTagRequest =
           (Xml.child xml_arg0 "CatalogId") in
       make ~tagValues ~tagKey ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map_exn json "TagValues" TagValueList.of_json in
-      let tagKey = field_map_exn json "TagKey" LFTagKey.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+    let of_json json__ =
+      let tagValues = field_map_exn json__ "TagValues" TagValueList.of_json in
+      let tagKey = field_map_exn json__ "TagKey" LFTagKey.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ~tagValues ~tagKey ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an LF-tag with the specified name and values."]
+module CreateLFTagExpressionResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `EntityNotFoundException of EntityNotFoundException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `OperationTimeoutException of OperationTimeoutException.t 
+      | `ResourceNumberLimitExceededException of
+          ResourceNumberLimitExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_json json)
+      | "ResourceNumberLimitExceededException" ->
+          `ResourceNumberLimitExceededException
+            (ResourceNumberLimitExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_xml xml)
+      | "ResourceNumberLimitExceededException" ->
+          `ResourceNumberLimitExceededException
+            (ResourceNumberLimitExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `OperationTimeoutException e ->
+          `Assoc
+            [("error", (`String "OperationTimeoutException"));
+            ("details", (OperationTimeoutException.to_json e))]
+      | `ResourceNumberLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceNumberLimitExceededException"));
+            ("details", (ResourceNumberLimitExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new LF-Tag expression with the provided name, description, catalog ID, and expression body. This call fails if a LF-Tag expression with the same name already exists in the caller\226\128\153s account or if the underlying LF-Tags don't exist. To call this API operation, caller needs the following Lake Formation permissions: CREATE_LF_TAG_EXPRESSION on the root catalog resource. GRANT_WITH_LF_TAG_EXPRESSION on all underlying LF-Tag key:value pairs included in the expression."]
+module CreateLFTagExpressionRequest =
+  struct
+    type nonrec t =
+      {
+      name: NameString.t [@ocaml.doc "A name for the expression."];
+      description: DescriptionString.t option
+        [@ocaml.doc
+          "A description with information about the LF-Tag expression."];
+      catalogId: CatalogIdString.t option
+        [@ocaml.doc
+          "The identifier for the Data Catalog. By default, the account ID. The Data Catalog is the persistent metadata store. It contains database definitions, table definitions, and other control information to manage your Lake Formation environment."];
+      expression: Expression.t
+        [@ocaml.doc "A list of LF-Tag conditions (key-value pairs)."]}
+    let context_ = "CreateLFTagExpressionRequest"
+    let make ?description =
+      fun ?catalogId ->
+        fun ~name ->
+          fun ~expression ->
+            fun () -> { description; catalogId; name; expression }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (NameString.to_value x.name)));
+        ("Description",
+          (Option.map x.description ~f:DescriptionString.to_value));
+        ("CatalogId", (Option.map x.catalogId ~f:CatalogIdString.to_value));
+        ("Expression", (Some (Expression.to_value x.expression)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expression =
+        Expression.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Expression") in
+      let catalogId =
+        (Option.map ~f:CatalogIdString.of_xml)
+          (Xml.child xml_arg0 "CatalogId") in
+      let description =
+        (Option.map ~f:DescriptionString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        NameString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~expression ?catalogId ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expression = field_map_exn json__ "Expression" Expression.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
+      let description =
+        field_map json__ "Description" DescriptionString.of_json in
+      let name = field_map_exn json__ "Name" NameString.of_json in
+      make ~expression ?catalogId ?description ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new LF-Tag expression with the provided name, description, catalog ID, and expression body. This call fails if a LF-Tag expression with the same name already exists in the caller\226\128\153s account or if the underlying LF-Tags don't exist. To call this API operation, caller needs the following Lake Formation permissions: CREATE_LF_TAG_EXPRESSION on the root catalog resource. GRANT_WITH_LF_TAG_EXPRESSION on all underlying LF-Tag key:value pairs included in the expression."]
 module CreateDataCellsFilterResponse =
   struct
     type nonrec t = unit
@@ -9876,8 +13651,9 @@ module CreateDataCellsFilterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TableData") in
       make ~tableData ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableData = field_map_exn json "TableData" DataCellsFilter.of_json in
+    let of_json json__ =
+      let tableData =
+        field_map_exn json__ "TableData" DataCellsFilter.of_json in
       make ~tableData ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9977,9 +13753,9 @@ module CommitTransactionResponse =
           (Xml.child xml_arg0 "TransactionStatus") in
       make ?transactionStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transactionStatus =
-        field_map json "TransactionStatus" TransactionStatus.of_json in
+        field_map json__ "TransactionStatus" TransactionStatus.of_json in
       make ?transactionStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10003,9 +13779,9 @@ module CommitTransactionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TransactionId") in
       make ~transactionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transactionId =
-        field_map_exn json "TransactionId" TransactionIdString.of_json in
+        field_map_exn json__ "TransactionId" TransactionIdString.of_json in
       make ~transactionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10131,9 +13907,9 @@ module CancelTransactionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TransactionId") in
       make ~transactionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transactionId =
-        field_map_exn json "TransactionId" TransactionIdString.of_json in
+        field_map_exn json__ "TransactionId" TransactionIdString.of_json in
       make ~transactionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10193,9 +13969,9 @@ module BatchRevokePermissionsResponse =
           (Xml.child xml_arg0 "Failures") in
       make ?failures ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failures =
-        field_map json "Failures" BatchPermissionsFailureList.of_json in
+        field_map json__ "Failures" BatchPermissionsFailureList.of_json in
       make ?failures ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10227,10 +14003,11 @@ module BatchRevokePermissionsRequest =
           (Xml.child xml_arg0 "CatalogId") in
       make ~entries ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entries =
-        field_map_exn json "Entries" BatchPermissionsRequestEntryList.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+        field_map_exn json__ "Entries"
+          BatchPermissionsRequestEntryList.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ~entries ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10290,9 +14067,9 @@ module BatchGrantPermissionsResponse =
           (Xml.child xml_arg0 "Failures") in
       make ?failures ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failures =
-        field_map json "Failures" BatchPermissionsFailureList.of_json in
+        field_map json__ "Failures" BatchPermissionsFailureList.of_json in
       make ?failures ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Batch operation to grant permissions to the principal."]
@@ -10323,13 +14100,198 @@ module BatchGrantPermissionsRequest =
           (Xml.child xml_arg0 "CatalogId") in
       make ~entries ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entries =
-        field_map_exn json "Entries" BatchPermissionsRequestEntryList.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+        field_map_exn json__ "Entries"
+          BatchPermissionsRequestEntryList.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ~entries ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Batch operation to grant permissions to the principal."]
+module AssumeDecoratedRoleWithSAMLResponse =
+  struct
+    type nonrec t =
+      {
+      accessKeyId: AccessKeyIdString.t option
+        [@ocaml.doc
+          "The access key ID for the temporary credentials. (The access key consists of an access key ID and a secret key)."];
+      secretAccessKey: SecretAccessKeyString.t option
+        [@ocaml.doc
+          "The secret key for the temporary credentials. (The access key consists of an access key ID and a secret key)."];
+      sessionToken: SessionTokenString.t option
+        [@ocaml.doc "The session token for the temporary credentials."];
+      expiration: ExpirationTimestamp.t option
+        [@ocaml.doc
+          "The date and time when the temporary credentials expire."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `EntityNotFoundException of EntityNotFoundException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `OperationTimeoutException of OperationTimeoutException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accessKeyId =
+      fun ?secretAccessKey ->
+        fun ?sessionToken ->
+          fun ?expiration ->
+            fun () ->
+              { accessKeyId; secretAccessKey; sessionToken; expiration }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "OperationTimeoutException" ->
+          `OperationTimeoutException (OperationTimeoutException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `OperationTimeoutException e ->
+          `Assoc
+            [("error", (`String "OperationTimeoutException"));
+            ("details", (OperationTimeoutException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AccessKeyId",
+           (Option.map x.accessKeyId ~f:AccessKeyIdString.to_value));
+        ("SecretAccessKey",
+          (Option.map x.secretAccessKey ~f:SecretAccessKeyString.to_value));
+        ("SessionToken",
+          (Option.map x.sessionToken ~f:SessionTokenString.to_value));
+        ("Expiration",
+          (Option.map x.expiration ~f:ExpirationTimestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expiration =
+        (Option.map ~f:ExpirationTimestamp.of_xml)
+          (Xml.child xml_arg0 "Expiration") in
+      let sessionToken =
+        (Option.map ~f:SessionTokenString.of_xml)
+          (Xml.child xml_arg0 "SessionToken") in
+      let secretAccessKey =
+        (Option.map ~f:SecretAccessKeyString.of_xml)
+          (Xml.child xml_arg0 "SecretAccessKey") in
+      let accessKeyId =
+        (Option.map ~f:AccessKeyIdString.of_xml)
+          (Xml.child xml_arg0 "AccessKeyId") in
+      make ?expiration ?sessionToken ?secretAccessKey ?accessKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expiration =
+        field_map json__ "Expiration" ExpirationTimestamp.of_json in
+      let sessionToken =
+        field_map json__ "SessionToken" SessionTokenString.of_json in
+      let secretAccessKey =
+        field_map json__ "SecretAccessKey" SecretAccessKeyString.of_json in
+      let accessKeyId =
+        field_map json__ "AccessKeyId" AccessKeyIdString.of_json in
+      make ?expiration ?sessionToken ?secretAccessKey ?accessKeyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows a caller to assume an IAM role decorated as the SAML user specified in the SAML assertion included in the request. This decoration allows Lake Formation to enforce access policies against the SAML users and groups. This API operation requires SAML federation setup in the caller\226\128\153s account as it can only be called with valid SAML assertions. Lake Formation does not scope down the permission of the assumed role. All permissions attached to the role via the SAML federation setup will be included in the role session. This decorated role is expected to access data in Amazon S3 by getting temporary access from Lake Formation which is authorized via the virtual API GetDataAccess. Therefore, all SAML roles that can be assumed via AssumeDecoratedRoleWithSAML must at a minimum include lakeformation:GetDataAccess in their role policies. A typical IAM policy attached to such a role would include the following actions: glue:*Database* glue:*Table* glue:*Partition* glue:*UserDefinedFunction* lakeformation:GetDataAccess"]
+module AssumeDecoratedRoleWithSAMLRequest =
+  struct
+    type nonrec t =
+      {
+      sAMLAssertion: SAMLAssertionString.t
+        [@ocaml.doc
+          "A SAML assertion consisting of an assertion statement for the user who needs temporary credentials. This must match the SAML assertion that was issued to IAM. This must be Base64 encoded."];
+      roleArn: IAMRoleArn.t
+        [@ocaml.doc
+          "The role that represents an IAM principal whose scope down policy allows it to call credential vending APIs such as GetTemporaryTableCredentials. The caller must also have iam:PassRole permission on this role."];
+      principalArn: IAMSAMLProviderArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the SAML provider in IAM that describes the IdP."];
+      durationSeconds: CredentialTimeoutDurationSecondInteger.t option
+        [@ocaml.doc
+          "The time period, between 900 and 43,200 seconds, for the timeout of the temporary credentials."]}
+    let context_ = "AssumeDecoratedRoleWithSAMLRequest"
+    let make ?durationSeconds =
+      fun ~sAMLAssertion ->
+        fun ~roleArn ->
+          fun ~principalArn ->
+            fun () ->
+              { durationSeconds; sAMLAssertion; roleArn; principalArn }
+    let to_value x =
+      structure_to_value
+        [("SAMLAssertion",
+           (Some (SAMLAssertionString.to_value x.sAMLAssertion)));
+        ("RoleArn", (Some (IAMRoleArn.to_value x.roleArn)));
+        ("PrincipalArn", (Some (IAMSAMLProviderArn.to_value x.principalArn)));
+        ("DurationSeconds",
+          (Option.map x.durationSeconds
+             ~f:CredentialTimeoutDurationSecondInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let durationSeconds =
+        (Option.map ~f:CredentialTimeoutDurationSecondInteger.of_xml)
+          (Xml.child xml_arg0 "DurationSeconds") in
+      let principalArn =
+        IAMSAMLProviderArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PrincipalArn") in
+      let roleArn =
+        IAMRoleArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
+      let sAMLAssertion =
+        SAMLAssertionString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SAMLAssertion") in
+      make ?durationSeconds ~principalArn ~roleArn ~sAMLAssertion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let durationSeconds =
+        field_map json__ "DurationSeconds"
+          CredentialTimeoutDurationSecondInteger.of_json in
+      let principalArn =
+        field_map_exn json__ "PrincipalArn" IAMSAMLProviderArn.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" IAMRoleArn.of_json in
+      let sAMLAssertion =
+        field_map_exn json__ "SAMLAssertion" SAMLAssertionString.of_json in
+      make ?durationSeconds ~principalArn ~roleArn ~sAMLAssertion ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows a caller to assume an IAM role decorated as the SAML user specified in the SAML assertion included in the request. This decoration allows Lake Formation to enforce access policies against the SAML users and groups. This API operation requires SAML federation setup in the caller\226\128\153s account as it can only be called with valid SAML assertions. Lake Formation does not scope down the permission of the assumed role. All permissions attached to the role via the SAML federation setup will be included in the role session. This decorated role is expected to access data in Amazon S3 by getting temporary access from Lake Formation which is authorized via the virtual API GetDataAccess. Therefore, all SAML roles that can be assumed via AssumeDecoratedRoleWithSAML must at a minimum include lakeformation:GetDataAccess in their role policies. A typical IAM policy attached to such a role would include the following actions: glue:*Database* glue:*Table* glue:*Partition* glue:*UserDefinedFunction* lakeformation:GetDataAccess"]
 module AddLFTagsToResourceResponse =
   struct
     type nonrec t =
@@ -10420,8 +14382,8 @@ module AddLFTagsToResourceResponse =
         (Option.map ~f:LFTagErrors.of_xml) (Xml.child xml_arg0 "Failures") in
       make ?failures ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failures = field_map json "Failures" LFTagErrors.of_json in
+    let of_json json__ =
+      let failures = field_map json__ "Failures" LFTagErrors.of_json in
       make ?failures ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Attaches one or more LF-tags to an existing resource."]
@@ -10457,10 +14419,10 @@ module AddLFTagsToResourceRequest =
           (Xml.child xml_arg0 "CatalogId") in
       make ~lFTags ~resource ?catalogId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lFTags = field_map_exn json "LFTags" LFTagsList.of_json in
-      let resource = field_map_exn json "Resource" Resource.of_json in
-      let catalogId = field_map json "CatalogId" CatalogIdString.of_json in
+    let of_json json__ =
+      let lFTags = field_map_exn json__ "LFTags" LFTagsList.of_json in
+      let resource = field_map_exn json__ "Resource" Resource.of_json in
+      let catalogId = field_map json__ "CatalogId" CatalogIdString.of_json in
       make ~lFTags ~resource ?catalogId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Attaches one or more LF-tags to an existing resource."]

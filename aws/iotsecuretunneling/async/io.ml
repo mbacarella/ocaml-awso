@@ -21,6 +21,8 @@ let list_tunnels ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTunnels input
 let open_tunnel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.OpenTunnel input
+let rotate_tunnel_access_token ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RotateTunnelAccessToken input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =

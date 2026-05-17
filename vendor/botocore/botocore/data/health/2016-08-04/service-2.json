@@ -5,12 +5,14 @@
     "endpointPrefix":"health",
     "jsonVersion":"1.1",
     "protocol":"json",
+    "protocols":["json"],
     "serviceAbbreviation":"AWSHealth",
     "serviceFullName":"AWS Health APIs and Notifications",
     "serviceId":"Health",
     "signatureVersion":"v4",
     "targetPrefix":"AWSHealth_20160804",
-    "uid":"health-2016-08-04"
+    "uid":"health-2016-08-04",
+    "auth":["aws.auth#sigv4"]
   },
   "operations":{
     "DescribeAffectedAccountsForOrganization":{
@@ -66,6 +68,17 @@
       "input":{"shape":"DescribeEntityAggregatesRequest"},
       "output":{"shape":"DescribeEntityAggregatesResponse"},
       "documentation":"<p>Returns the number of entities that are affected by each of the specified events.</p>",
+      "idempotent":true
+    },
+    "DescribeEntityAggregatesForOrganization":{
+      "name":"DescribeEntityAggregatesForOrganization",
+      "http":{
+        "method":"POST",
+        "requestUri":"/"
+      },
+      "input":{"shape":"DescribeEntityAggregatesForOrganizationRequest"},
+      "output":{"shape":"DescribeEntityAggregatesForOrganizationResponse"},
+      "documentation":"<p>Returns a list of entity aggregates for your Organizations that are affected by each of the specified events.</p>",
       "idempotent":true
     },
     "DescribeEventAggregates":{
@@ -162,7 +175,7 @@
         "requestUri":"/"
       },
       "output":{"shape":"DescribeHealthServiceStatusForOrganizationResponse"},
-      "documentation":"<p>This operation provides status information on enabling or disabling Health to work with your organization. To call this operation, you must sign in as an IAM user, assume an IAM role, or sign in as the root user (not recommended) in the organization's management account.</p>",
+      "documentation":"<p>This operation provides status information on enabling or disabling Health to work with your organization. To call this operation, you must use the organization's management account.</p>",
       "idempotent":true
     },
     "DisableHealthServiceAccessForOrganization":{
@@ -174,7 +187,7 @@
       "errors":[
         {"shape":"ConcurrentModificationException"}
       ],
-      "documentation":"<p>Disables Health from working with Organizations. To call this operation, you must sign in as an Identity and Access Management (IAM) user, assume an IAM role, or sign in as the root user (not recommended) in the organization's management account. For more information, see <a href=\"https://docs.aws.amazon.com/health/latest/ug/aggregate-events.html\">Aggregating Health events</a> in the <i>Health User Guide</i>.</p> <p>This operation doesn't remove the service-linked role from the management account in your organization. You must use the IAM console, API, or Command Line Interface (CLI) to remove the service-linked role. For more information, see <a href=\"https://docs.aws.amazon.com/IAM/latest/UserGuide/using-service-linked-roles.html#delete-service-linked-role\">Deleting a Service-Linked Role</a> in the <i>IAM User Guide</i>.</p> <note> <p>You can also disable the organizational feature by using the Organizations <a href=\"https://docs.aws.amazon.com/organizations/latest/APIReference/API_DisableAWSServiceAccess.html\">DisableAWSServiceAccess</a> API operation. After you call this operation, Health stops aggregating events for all other Amazon Web Services accounts in your organization. If you call the Health API operations for organizational view, Health returns an error. Health continues to aggregate health events for your Amazon Web Services account.</p> </note>",
+      "documentation":"<p>Disables Health from working with Organizations. To call this operation, you must sign in to the organization's management account. For more information, see <a href=\"https://docs.aws.amazon.com/health/latest/ug/aggregate-events.html\">Aggregating Health events</a> in the <i>Health User Guide</i>.</p> <p>This operation doesn't remove the service-linked role from the management account in your organization. You must use the IAM console, API, or Command Line Interface (CLI) to remove the service-linked role. For more information, see <a href=\"https://docs.aws.amazon.com/IAM/latest/UserGuide/using-service-linked-roles.html#delete-service-linked-role\">Deleting a Service-Linked Role</a> in the <i>IAM User Guide</i>.</p> <note> <p>You can also disable the organizational feature by using the Organizations <a href=\"https://docs.aws.amazon.com/organizations/latest/APIReference/API_DisableAWSServiceAccess.html\">DisableAWSServiceAccess</a> API operation. After you call this operation, Health stops aggregating events for all other Amazon Web Services accounts in your organization. If you call the Health API operations for organizational view, Health returns an error. Health continues to aggregate health events for your Amazon Web Services account.</p> </note>",
       "idempotent":true
     },
     "EnableHealthServiceAccessForOrganization":{
@@ -191,6 +204,28 @@
     }
   },
   "shapes":{
+    "AccountEntityAggregate":{
+      "type":"structure",
+      "members":{
+        "accountId":{
+          "shape":"eventArn",
+          "documentation":"<p>The 12-digit Amazon Web Services account numbers that contains the affected entities.</p>"
+        },
+        "count":{
+          "shape":"count",
+          "documentation":"<p>The number of entities that match the filter criteria for the specified events.</p>"
+        },
+        "statuses":{
+          "shape":"entityStatuses",
+          "documentation":"<p>The number of affected entities aggregated by the entity status codes.</p>"
+        }
+      },
+      "documentation":"<p>The number of entities in an account that are impacted by a specific event aggregated by the entity status codes.</p>"
+    },
+    "AccountEntityAggregatesList":{
+      "type":"list",
+      "member":{"shape":"AccountEntityAggregate"}
+    },
     "AffectedEntity":{
       "type":"structure",
       "members":{
@@ -220,11 +255,15 @@
         },
         "statusCode":{
           "shape":"entityStatusCode",
-          "documentation":"<p>The most recent status of the entity affected by the event. The possible values are <code>IMPAIRED</code>, <code>UNIMPAIRED</code>, and <code>UNKNOWN</code>.</p>"
+          "documentation":"<p>The most recent status of the entity affected by the event. The possible values are <code>IMPAIRED</code>, <code>UNIMPAIRED</code>, <code>UNKNOWN</code>, <code>PENDING</code>, and <code>RESOLVED</code>.</p>"
         },
         "tags":{
           "shape":"tagSet",
           "documentation":"<p>A map of entity tags attached to the affected entity.</p> <note> <p>Currently, the <code>tags</code> property isn't supported.</p> </note>"
+        },
+        "entityMetadata":{
+          "shape":"entityMetadata",
+          "documentation":"<p>Additional metadata about the affected entity.</p>"
         }
       },
       "documentation":"<p>Information about an entity that is affected by a Health event.</p>"
@@ -292,11 +331,12 @@
     },
     "DescribeAffectedEntitiesForOrganizationRequest":{
       "type":"structure",
-      "required":["organizationEntityFilters"],
       "members":{
         "organizationEntityFilters":{
           "shape":"OrganizationEntityFiltersList",
-          "documentation":"<p>A JSON set of elements including the <code>awsAccountId</code> and the <code>eventArn</code>.</p>"
+          "documentation":"<p>A JSON set of elements including the <code>awsAccountId</code> and the <code>eventArn</code>.</p>",
+          "deprecated":true,
+          "deprecatedMessage":"This property is deprecated, use organizationEntityAccountFilters instead."
         },
         "locale":{
           "shape":"locale",
@@ -308,7 +348,11 @@
         },
         "maxResults":{
           "shape":"maxResultsLowerRange",
-          "documentation":"<p>The maximum number of items to return in one batch, between 10 and 100, inclusive.</p>"
+          "documentation":"<p>The maximum number of items to return in one batch, between 1 and 100, inclusive.</p>"
+        },
+        "organizationEntityAccountFilters":{
+          "shape":"OrganizationEntityAccountFiltersList",
+          "documentation":"<p>A JSON set of elements including the <code>awsAccountId</code>, <code>eventArn</code> and a set of <code>statusCodes</code>.</p>"
         }
       }
     },
@@ -346,8 +390,8 @@
           "documentation":"<p>If the results of a search are large, only a portion of the results are returned, and a <code>nextToken</code> pagination token is returned in the response. To retrieve the next batch of results, reissue the search request and include the returned token. When all results have been returned, the response does not contain a pagination token value.</p>"
         },
         "maxResults":{
-          "shape":"maxResults",
-          "documentation":"<p>The maximum number of items to return in one batch, between 10 and 100, inclusive.</p>"
+          "shape":"maxResultsLowerRange",
+          "documentation":"<p>The maximum number of items to return in one batch, between 1 and 100, inclusive.</p>"
         }
       }
     },
@@ -361,6 +405,29 @@
         "nextToken":{
           "shape":"nextToken",
           "documentation":"<p>If the results of a search are large, only a portion of the results are returned, and a <code>nextToken</code> pagination token is returned in the response. To retrieve the next batch of results, reissue the search request and include the returned token. When all results have been returned, the response does not contain a pagination token value.</p>"
+        }
+      }
+    },
+    "DescribeEntityAggregatesForOrganizationRequest":{
+      "type":"structure",
+      "required":["eventArns"],
+      "members":{
+        "eventArns":{
+          "shape":"OrganizationEventArnsList",
+          "documentation":"<p>A list of event ARNs (unique identifiers). For example: <code>\"arn:aws:health:us-east-1::event/EC2/EC2_INSTANCE_RETIREMENT_SCHEDULED/EC2_INSTANCE_RETIREMENT_SCHEDULED_ABC123-CDE456\", \"arn:aws:health:us-west-1::event/EBS/AWS_EBS_LOST_VOLUME/AWS_EBS_LOST_VOLUME_CHI789_JKL101\"</code> </p>"
+        },
+        "awsAccountIds":{
+          "shape":"OrganizationAccountIdsList",
+          "documentation":"<p>A list of 12-digit Amazon Web Services account numbers that contains the affected entities.</p>"
+        }
+      }
+    },
+    "DescribeEntityAggregatesForOrganizationResponse":{
+      "type":"structure",
+      "members":{
+        "organizationEntityAggregates":{
+          "shape":"OrganizationEntityAggregatesList",
+          "documentation":"<p>The list of entity aggregates for each of the specified accounts that are affected by each of the specified events.</p>"
         }
       }
     },
@@ -504,7 +571,7 @@
         },
         "maxResults":{
           "shape":"maxResults",
-          "documentation":"<p>The maximum number of items to return in one batch, between 10 and 100, inclusive.</p>"
+          "documentation":"<p>The maximum number of items to return in one batch, between 10 and 100, inclusive.</p> <note> <p>If you don't specify the <code>maxResults</code> parameter, this operation returns a maximum of 30 items by default.</p> </note>"
         }
       }
     },
@@ -534,7 +601,7 @@
         },
         "maxResults":{
           "shape":"maxResultsLowerRange",
-          "documentation":"<p>The maximum number of items to return in one batch, between 10 and 100, inclusive.</p>"
+          "documentation":"<p>The maximum number of items to return in one batch, between 1 and 100, inclusive.</p>"
         },
         "locale":{
           "shape":"locale",
@@ -567,8 +634,8 @@
           "documentation":"<p>If the results of a search are large, only a portion of the results are returned, and a <code>nextToken</code> pagination token is returned in the response. To retrieve the next batch of results, reissue the search request and include the returned token. When all results have been returned, the response does not contain a pagination token value.</p>"
         },
         "maxResults":{
-          "shape":"maxResults",
-          "documentation":"<p>The maximum number of items to return in one batch, between 10 and 100, inclusive.</p>"
+          "shape":"maxResultsLowerRange",
+          "documentation":"<p>The maximum number of items to return in one batch, between 1 and 100, inclusive.</p>"
         },
         "locale":{
           "shape":"locale",
@@ -598,6 +665,25 @@
         }
       }
     },
+    "EntityAccountFilter":{
+      "type":"structure",
+      "required":["eventArn"],
+      "members":{
+        "eventArn":{
+          "shape":"eventArn",
+          "documentation":"<p>The unique identifier for the event. The event ARN has the <code>arn:aws:health:<i>event-region</i>::event/<i>SERVICE</i>/<i>EVENT_TYPE_CODE</i>/<i>EVENT_TYPE_PLUS_ID</i> </code> format.</p> <p>For example, an event ARN might look like the following:</p> <p> <code>arn:aws:health:us-east-1::event/EC2/EC2_INSTANCE_RETIREMENT_SCHEDULED/EC2_INSTANCE_RETIREMENT_SCHEDULED_ABC123-DEF456</code> </p>"
+        },
+        "awsAccountId":{
+          "shape":"accountId",
+          "documentation":"<p>The 12-digit Amazon Web Services account numbers that contains the affected entities.</p>"
+        },
+        "statusCodes":{
+          "shape":"entityStatusCodeList",
+          "documentation":"<p>A list of entity status codes.</p>"
+        }
+      },
+      "documentation":"<p>A JSON set of elements including the <code>awsAccountId</code>, <code>eventArn</code> and a set of <code>statusCodes</code>.</p>"
+    },
     "EntityAggregate":{
       "type":"structure",
       "members":{
@@ -608,6 +694,10 @@
         "count":{
           "shape":"count",
           "documentation":"<p>The number of entities that match the criteria for the specified events.</p>"
+        },
+        "statuses":{
+          "shape":"entityStatuses",
+          "documentation":"<p>The number of affected entities aggregated by the entity status codes.</p>"
         }
       },
       "documentation":"<p>The number of entities that are affected by one or more events. Returned by the <a href=\"https://docs.aws.amazon.com/health/latest/APIReference/API_DescribeEntityAggregates.html\">DescribeEntityAggregates</a> operation.</p>"
@@ -697,6 +787,14 @@
         "eventScopeCode":{
           "shape":"eventScopeCode",
           "documentation":"<p>This parameter specifies if the Health event is a public Amazon Web Services service event or an account-specific event.</p> <ul> <li> <p>If the <code>eventScopeCode</code> value is <code>PUBLIC</code>, then the <code>affectedAccounts</code> value is always empty.</p> </li> <li> <p>If the <code>eventScopeCode</code> value is <code>ACCOUNT_SPECIFIC</code>, then the <code>affectedAccounts</code> value lists the affected Amazon Web Services accounts in your organization. For example, if an event affects a service such as Amazon Elastic Compute Cloud and you have Amazon Web Services accounts that use that service, those account IDs appear in the response.</p> </li> <li> <p>If the <code>eventScopeCode</code> value is <code>NONE</code>, then the <code>eventArn</code> that you specified in the request is invalid or doesn't exist.</p> </li> </ul>"
+        },
+        "actionability":{
+          "shape":"EventActionability",
+          "documentation":"<p>The actionability classification of the event. Possible values are <code>ACTION_REQUIRED</code>, <code>ACTION_MAY_BE_REQUIRED</code> and <code>INFORMATIONAL</code>. Events with <code>ACTION_REQUIRED</code> actionability require customer action to resolve or mitigate the event. Events with <code>ACTION_MAY_BE_REQUIRED</code> actionability indicates that the current status is unknown or conditional and inspection is needed to determine if action is required. Events with <code>INFORMATIONAL</code> actionability are provided for awareness and do not require immediate action.</p>"
+        },
+        "personas":{
+          "shape":"EventPersonaList",
+          "documentation":"<p>A list of persona classifications that indicate the target audience for the event. Possible values are <code>OPERATIONS</code>, <code>SECURITY</code>, and <code>BILLING</code>. Events can be associated with multiple personas to indicate relevance to different teams or roles within an organization.</p>"
         }
       },
       "documentation":"<p>Summary information about an Health event.</p> <p>Health events can be public or account-specific:</p> <ul> <li> <p> <i>Public events</i> might be service events that are not specific to an Amazon Web Services account. For example, if there is an issue with an Amazon Web Services Region, Health provides information about the event, even if you don't use services or resources in that Region.</p> </li> <li> <p> <i>Account-specific</i> events are specific to either your Amazon Web Services account or an account in your organization. For example, if there's an issue with Amazon Elastic Compute Cloud in a Region that you use, Health provides information about the event and the affected resources in the account.</p> </li> </ul> <p>You can determine if an event is public or account-specific by using the <code>eventScopeCode</code> parameter. For more information, see <a href=\"https://docs.aws.amazon.com/health/latest/APIReference/API_Event.html#AWSHealth-Type-Event-eventScopeCode\">eventScopeCode</a>.</p>"
@@ -715,6 +813,20 @@
         }
       },
       "documentation":"<p>The values used to filter results from the <a href=\"https://docs.aws.amazon.com/health/latest/APIReference/API_DescribeEventDetailsForOrganization.html\">DescribeEventDetailsForOrganization</a> and <a href=\"https://docs.aws.amazon.com/health/latest/APIReference/API_DescribeAffectedEntitiesForOrganization.html\">DescribeAffectedEntitiesForOrganization</a> operations.</p>"
+    },
+    "EventActionability":{
+      "type":"string",
+      "enum":[
+        "ACTION_REQUIRED",
+        "ACTION_MAY_BE_REQUIRED",
+        "INFORMATIONAL"
+      ]
+    },
+    "EventActionabilityList":{
+      "type":"list",
+      "member":{"shape":"EventActionability"},
+      "max":3,
+      "min":1
     },
     "EventAggregate":{
       "type":"structure",
@@ -789,6 +901,10 @@
     "EventFilter":{
       "type":"structure",
       "members":{
+        "actionabilities":{
+          "shape":"EventActionabilityList",
+          "documentation":"<p>A list of actionability values to filter events. Use this to filter events based on whether they require action (<code>ACTION_REQUIRED</code>), may require action (<code>ACTION_MAY_BE_REQUIRED</code>) or are informational (<code>INFORMATIONAL</code>).</p>"
+        },
         "eventArns":{
           "shape":"eventArnList",
           "documentation":"<p>A list of event ARNs (unique identifiers). For example: <code>\"arn:aws:health:us-east-1::event/EC2/EC2_INSTANCE_RETIREMENT_SCHEDULED/EC2_INSTANCE_RETIREMENT_SCHEDULED_ABC123-CDE456\", \"arn:aws:health:us-west-1::event/EBS/AWS_EBS_LOST_VOLUME/AWS_EBS_LOST_VOLUME_CHI789_JKL101\"</code> </p>"
@@ -840,6 +956,10 @@
         "eventStatusCodes":{
           "shape":"eventStatusCodeList",
           "documentation":"<p>A list of event status codes.</p>"
+        },
+        "personas":{
+          "shape":"EventPersonaList",
+          "documentation":"<p>A list of persona values to filter events. Use this to filter events based on their target audience: <code>OPERATIONS</code>, <code>SECURITY</code>, or <code>BILLING</code>.</p>"
         }
       },
       "documentation":"<p>The values to use to filter results from the <a href=\"https://docs.aws.amazon.com/health/latest/APIReference/API_DescribeEvents.html\">DescribeEvents</a> and <a href=\"https://docs.aws.amazon.com/health/latest/APIReference/API_DescribeEventAggregates.html\">DescribeEventAggregates</a> operations.</p>"
@@ -847,6 +967,20 @@
     "EventList":{
       "type":"list",
       "member":{"shape":"Event"}
+    },
+    "EventPersona":{
+      "type":"string",
+      "enum":[
+        "OPERATIONS",
+        "SECURITY",
+        "BILLING"
+      ]
+    },
+    "EventPersonaList":{
+      "type":"list",
+      "member":{"shape":"EventPersona"},
+      "max":3,
+      "min":1
     },
     "EventType":{
       "type":"structure",
@@ -862,9 +996,31 @@
         "category":{
           "shape":"eventTypeCategory",
           "documentation":"<p>A list of event type category codes. Possible values are <code>issue</code>, <code>accountNotification</code>, or <code>scheduledChange</code>. Currently, the <code>investigation</code> value isn't supported at this time.</p>"
+        },
+        "actionability":{
+          "shape":"EventTypeActionability",
+          "documentation":"<p>The actionability classification of the event. Possible values are <code>ACTION_REQUIRED</code>, <code>ACTION_MAY_BE_REQUIRED</code> and <code>INFORMATIONAL</code>. Events with <code>ACTION_REQUIRED</code> actionability require customer action to resolve or mitigate the event. Events with <code>ACTION_MAY_BE_REQUIRED</code> actionability indicates that the current status is unknown or conditional and inspection is needed to determine if action is required. Events with <code>INFORMATIONAL</code> actionability are provided for awareness and do not require immediate action.</p>"
+        },
+        "personas":{
+          "shape":"EventTypePersonaList",
+          "documentation":"<p>A list of persona classifications that indicate the target audience for the event. Possible values are <code>OPERATIONS</code>, <code>SECURITY</code>, and <code>BILLING</code>. Events can be associated with multiple personas to indicate relevance to different teams or roles within an organization.</p>"
         }
       },
       "documentation":"<p>Contains the metadata about a type of event that is reported by Health. The <code>EventType</code> shows the category, service, and the event type code of the event. For example, an <code>issue</code> might be the category, <code>EC2</code> the service, and <code>AWS_EC2_SYSTEM_MAINTENANCE_EVENT</code> the event type code.</p> <p>You can use the <a href=\"https://docs.aws.amazon.com/health/latest/APIReference/API_DescribeEventTypes.html\">DescribeEventTypes</a> API operation to return this information about an event.</p> <p>You can also use the Amazon CloudWatch Events console to create a rule so that you can get notified or take action when Health delivers a specific event to your Amazon Web Services account. For more information, see <a href=\"https://docs.aws.amazon.com/health/latest/ug/cloudwatch-events-health.html\">Monitor for Health events with Amazon CloudWatch Events</a> in the <i>Health User Guide</i>.</p>"
+    },
+    "EventTypeActionability":{
+      "type":"string",
+      "enum":[
+        "ACTION_REQUIRED",
+        "ACTION_MAY_BE_REQUIRED",
+        "INFORMATIONAL"
+      ]
+    },
+    "EventTypeActionabilityList":{
+      "type":"list",
+      "member":{"shape":"EventTypeActionability"},
+      "max":3,
+      "min":1
     },
     "EventTypeCategoryList":{
       "type":"list",
@@ -892,6 +1048,14 @@
         "eventTypeCategories":{
           "shape":"EventTypeCategoryList",
           "documentation":"<p>A list of event type category codes. Possible values are <code>issue</code>, <code>accountNotification</code>, or <code>scheduledChange</code>. Currently, the <code>investigation</code> value isn't supported at this time.</p>"
+        },
+        "actionabilities":{
+          "shape":"EventTypeActionabilityList",
+          "documentation":"<p>A list of actionability values to filter event types. Possible values are <code>ACTION_REQUIRED</code>, <code>ACTION_MAY_BE_REQUIRED</code> and <code>INFORMATIONAL</code>.</p>"
+        },
+        "personas":{
+          "shape":"EventTypePersonaList",
+          "documentation":"<p>A list of persona classifications to filter event types. Possible values are <code>OPERATIONS</code>, <code>SECURITY</code>, and <code>BILLING</code>.</p>"
         }
       },
       "documentation":"<p>The values to use to filter results from the <a href=\"https://docs.aws.amazon.com/health/latest/APIReference/API_DescribeEventTypes.html\">DescribeEventTypes</a> operation.</p>"
@@ -900,6 +1064,20 @@
       "type":"list",
       "member":{"shape":"EventType"}
     },
+    "EventTypePersona":{
+      "type":"string",
+      "enum":[
+        "OPERATIONS",
+        "SECURITY",
+        "BILLING"
+      ]
+    },
+    "EventTypePersonaList":{
+      "type":"list",
+      "member":{"shape":"EventTypePersona"},
+      "max":3,
+      "min":1
+    },
     "InvalidPaginationToken":{
       "type":"structure",
       "members":{
@@ -907,6 +1085,12 @@
       },
       "documentation":"<p>The specified pagination token (<code>nextToken</code>) is not valid.</p>",
       "exception":true
+    },
+    "OrganizationAccountIdsList":{
+      "type":"list",
+      "member":{"shape":"accountId"},
+      "max":25,
+      "min":1
     },
     "OrganizationAffectedEntitiesErrorItem":{
       "type":"structure",
@@ -925,10 +1109,42 @@
         },
         "errorMessage":{
           "shape":"string",
-          "documentation":"<p>The unique identifier for the event type. The format is <code>AWS_SERVICE_DESCRIPTION</code>. For example, <code>AWS_EC2_SYSTEM_MAINTENANCE_EVENT</code>.</p>"
+          "documentation":"<p>A message that describes the error. Follow the error message and retry your request.</p> <p>For example, the <code>InvalidAccountInputError</code> error message appears if you call the <code>DescribeAffectedEntitiesForOrganization</code> operation and specify the <code>AccountSpecific</code> value for the <code>EventScopeCode</code> parameter, but don't specify an Amazon Web Services account.</p>"
         }
       },
       "documentation":"<p>Error information returned when a <a href=\"https://docs.aws.amazon.com/health/latest/APIReference/API_DescribeAffectedEntitiesForOrganization.html\">DescribeAffectedEntitiesForOrganization</a> operation can't find or process a specific entity.</p>"
+    },
+    "OrganizationEntityAccountFiltersList":{
+      "type":"list",
+      "member":{"shape":"EntityAccountFilter"},
+      "max":10,
+      "min":1
+    },
+    "OrganizationEntityAggregate":{
+      "type":"structure",
+      "members":{
+        "eventArn":{
+          "shape":"eventArn",
+          "documentation":"<p>A list of event ARNs (unique identifiers). For example: <code>\"arn:aws:health:us-east-1::event/EC2/EC2_INSTANCE_RETIREMENT_SCHEDULED/EC2_INSTANCE_RETIREMENT_SCHEDULED_ABC123-CDE456\", \"arn:aws:health:us-west-1::event/EBS/AWS_EBS_LOST_VOLUME/AWS_EBS_LOST_VOLUME_CHI789_JKL101\"</code> </p>"
+        },
+        "count":{
+          "shape":"count",
+          "documentation":"<p>The number of entities for the organization that match the filter criteria for the specified events.</p>"
+        },
+        "statuses":{
+          "shape":"entityStatuses",
+          "documentation":"<p>The number of affected entities aggregated by the entitiy status codes.</p>"
+        },
+        "accounts":{
+          "shape":"AccountEntityAggregatesList",
+          "documentation":"<p>A list of entity aggregates for each of the specified accounts in your organization that are affected by a specific event. If there are no <code>awsAccountIds</code> provided in the request, this field will be empty in the response.</p>"
+        }
+      },
+      "documentation":"<p>The aggregate results of entities affected by the specified event in your organization. The results are aggregated by the entity status codes for the specified set of accountsIDs.</p>"
+    },
+    "OrganizationEntityAggregatesList":{
+      "type":"list",
+      "member":{"shape":"OrganizationEntityAggregate"}
     },
     "OrganizationEntityFiltersList":{
       "type":"list",
@@ -978,9 +1194,23 @@
         "statusCode":{
           "shape":"eventStatusCode",
           "documentation":"<p>The most recent status of the event. Possible values are <code>open</code>, <code>closed</code>, and <code>upcoming</code>.</p>"
+        },
+        "actionability":{
+          "shape":"EventActionability",
+          "documentation":"<p>The actionability classification of the event. Possible values are <code>ACTION_REQUIRED</code>, <code>ACTION_MAY_BE_REQUIRED</code> and <code>INFORMATIONAL</code>. Events with <code>ACTION_REQUIRED</code> actionability require customer action to resolve or mitigate the event. Events with <code>ACTION_MAY_BE_REQUIRED</code> actionability indicates that the current status is unknown or conditional and inspection is needed to determine if action is required. Events with <code>INFORMATIONAL</code> actionability are provided for awareness and do not require immediate action.</p>"
+        },
+        "personas":{
+          "shape":"EventPersonaList",
+          "documentation":"<p>A list of persona classifications that indicate the target audience for the event. Possible values are <code>OPERATIONS</code>, <code>SECURITY</code>, and <code>BILLING</code>. Events can be associated with multiple personas to indicate relevance to different teams or roles within an organization.</p>"
         }
       },
       "documentation":"<p>Summary information about an event, returned by the <a href=\"https://docs.aws.amazon.com/health/latest/APIReference/API_DescribeEventsForOrganization.html\">DescribeEventsForOrganization</a> operation.</p>"
+    },
+    "OrganizationEventArnsList":{
+      "type":"list",
+      "member":{"shape":"eventArn"},
+      "max":25,
+      "min":1
     },
     "OrganizationEventDetailFiltersList":{
       "type":"list",
@@ -1029,6 +1259,10 @@
     "OrganizationEventFilter":{
       "type":"structure",
       "members":{
+        "actionabilities":{
+          "shape":"EventActionabilityList",
+          "documentation":"<p>A list of actionability values to filter events. Use this to filter events based on whether they require action (<code>ACTION_REQUIRED</code>), may require action (<code>ACTION_MAY_BE_REQUIRED</code>) or are informational (<code>INFORMATIONAL</code>).</p>"
+        },
         "eventTypeCodes":{
           "shape":"eventTypeList",
           "documentation":"<p>A list of unique identifiers for event types. For example, <code>\"AWS_EC2_SYSTEM_MAINTENANCE_EVENT\",\"AWS_RDS_MAINTENANCE_SCHEDULED\".</code> </p>"
@@ -1063,6 +1297,10 @@
         "eventStatusCodes":{
           "shape":"eventStatusCodeList",
           "documentation":"<p>A list of event status codes.</p>"
+        },
+        "personas":{
+          "shape":"EventPersonaList",
+          "documentation":"<p>A list of persona values to filter events. Use this to filter events based on their target audience: <code>OPERATIONS</code>, <code>SECURITY</code>, or <code>BILLING</code>.</p>"
         }
       },
       "documentation":"<p>The values to filter results from the <a href=\"https://docs.aws.amazon.com/health/latest/APIReference/API_DescribeEventsForOrganization.html\">DescribeEventsForOrganization</a> operation.</p>"
@@ -1093,7 +1331,7 @@
       "type":"string",
       "max":18,
       "min":6,
-      "pattern":"[a-z]{2}\\-[0-9a-z\\-]{4,16}"
+      "pattern":"[a-z]{2,4}\\-[0-9a-z\\-]{4,16}"
     },
     "availabilityZones":{
       "type":"list",
@@ -1123,19 +1361,39 @@
       "max":99,
       "min":1
     },
+    "entityMetadata":{
+      "type":"map",
+      "key":{"shape":"entityMetadataKey"},
+      "value":{"shape":"entityMetadataValue"}
+    },
+    "entityMetadataKey":{
+      "type":"string",
+      "max":1024
+    },
+    "entityMetadataValue":{
+      "type":"string",
+      "max":1024
+    },
     "entityStatusCode":{
       "type":"string",
       "enum":[
         "IMPAIRED",
         "UNIMPAIRED",
-        "UNKNOWN"
+        "UNKNOWN",
+        "PENDING",
+        "RESOLVED"
       ]
     },
     "entityStatusCodeList":{
       "type":"list",
       "member":{"shape":"entityStatusCode"},
-      "max":3,
+      "max":5,
       "min":1
+    },
+    "entityStatuses":{
+      "type":"map",
+      "key":{"shape":"entityStatusCode"},
+      "value":{"shape":"count"}
     },
     "entityUrl":{"type":"string"},
     "entityValue":{
@@ -1306,5 +1564,5 @@
     },
     "timestamp":{"type":"timestamp"}
   },
-  "documentation":"<fullname>Health</fullname> <p>The Health API provides programmatic access to the Health information that appears in the <a href=\"https://phd.aws.amazon.com/phd/home#/\">Personal Health Dashboard</a>. You can use the API operations to get information about events that might affect your Amazon Web Services services and resources.</p> <note> <ul> <li> <p>You must have a Business, Enterprise On-Ramp, or Enterprise Support plan from <a href=\"http://aws.amazon.com/premiumsupport/\">Amazon Web Services Support</a> to use the Health API. If you call the Health API from an Amazon Web Services account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, you receive a <code>SubscriptionRequiredException</code> error.</p> </li> <li> <p>You can use the Health endpoint health.us-east-1.amazonaws.com (HTTPS) to call the Health API operations. Health supports a multi-Region application architecture and has two regional endpoints in an active-passive configuration. You can use the high availability endpoint example to determine which Amazon Web Services Region is active, so that you can get the latest information from the API. For more information, see <a href=\"https://docs.aws.amazon.com/health/latest/ug/health-api.html\">Accessing the Health API</a> in the <i>Health User Guide</i>.</p> </li> </ul> </note> <p>For authentication of requests, Health uses the <a href=\"https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html\">Signature Version 4 Signing Process</a>.</p> <p>If your Amazon Web Services account is part of Organizations, you can use the Health organizational view feature. This feature provides a centralized view of Health events across all accounts in your organization. You can aggregate Health events in real time to identify accounts in your organization that are affected by an operational event or get notified of security vulnerabilities. Use the organizational view API operations to enable this feature and return event information. For more information, see <a href=\"https://docs.aws.amazon.com/health/latest/ug/aggregate-events.html\">Aggregating Health events</a> in the <i>Health User Guide</i>.</p> <note> <p>When you use the Health API operations to return Health events, see the following recommendations:</p> <ul> <li> <p>Use the <a href=\"https://docs.aws.amazon.com/health/latest/APIReference/API_Event.html#AWSHealth-Type-Event-eventScopeCode\">eventScopeCode</a> parameter to specify whether to return Health events that are public or account-specific.</p> </li> <li> <p>Use pagination to view all events from the response. For example, if you call the <code>DescribeEventsForOrganization</code> operation to get all events in your organization, you might receive several page results. Specify the <code>nextToken</code> in the next request to return more results.</p> </li> </ul> </note>"
+  "documentation":"<fullname>Health</fullname> <p>The Health API provides access to the Health information that appears in the <a href=\"https://health.aws.amazon.com/health/home\">Health Dashboard</a>. You can use the API operations to get information about events that might affect your Amazon Web Services services and resources.</p> <p>You must have a Business, Enterprise On-Ramp, or Enterprise Support plan from <a href=\"http://aws.amazon.com/premiumsupport/\">Amazon Web Services Support</a> to use the Health API. If you call the Health API from an Amazon Web Services account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, you receive a <code>SubscriptionRequiredException</code> error.</p> <p>For API access, you need an access key ID and a secret access key. Use temporary credentials instead of long-term access keys when possible. Temporary credentials include an access key ID, a secret access key, and a security token that indicates when the credentials expire. For more information, see <a href=\"https://docs.aws.amazon.com/general/latest/gr/aws-access-keys-best-practices.html\">Best practices for managing Amazon Web Services access keys</a> in the <i>Amazon Web Services General Reference</i>.</p> <p>You can use the Health endpoint health.us-east-1.amazonaws.com (HTTPS) to call the Health API operations. Health supports a multi-Region application architecture and has two regional endpoints in an active-passive configuration. You can use the high availability endpoint example to determine which Amazon Web Services Region is active, so that you can get the latest information from the API. For more information, see <a href=\"https://docs.aws.amazon.com/health/latest/ug/health-api.html\">Accessing the Health API</a> in the <i>Health User Guide</i>.</p> <p>For authentication of requests, Health uses the <a href=\"https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html\">Signature Version 4 Signing Process</a>.</p> <p>If your Amazon Web Services account is part of Organizations, you can use the Health organizational view feature. This feature provides a centralized view of Health events across all accounts in your organization. You can aggregate Health events in real time to identify accounts in your organization that are affected by an operational event or get notified of security vulnerabilities. Use the organizational view API operations to enable this feature and return event information. For more information, see <a href=\"https://docs.aws.amazon.com/health/latest/ug/aggregate-events.html\">Aggregating Health events</a> in the <i>Health User Guide</i>.</p> <note> <p>When you use the Health API operations to return Health events, see the following recommendations:</p> <ul> <li> <p>Use the <a href=\"https://docs.aws.amazon.com/health/latest/APIReference/API_Event.html#AWSHealth-Type-Event-eventScopeCode\">eventScopeCode</a> parameter to specify whether to return Health events that are public or account-specific.</p> </li> <li> <p>Use pagination to view all events from the response. For example, if you call the <code>DescribeEventsForOrganization</code> operation to get all events in your organization, you might receive several page results. Specify the <code>nextToken</code> in the next request to return more results.</p> </li> </ul> </note>"
 }

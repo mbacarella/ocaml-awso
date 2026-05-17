@@ -53,6 +53,9 @@ module FieldValue =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -92,9 +95,9 @@ module Bucket =
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
       make ?count ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let count = field_map json "count" Long.of_json in
-      let value = field_map json "value" String_.of_json in
+    let of_json json__ =
+      let count = field_map json__ "count" Long.of_json in
+      let value = field_map json__ "value" String_.of_json in
       make ?count ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A container for facet information."]
@@ -119,6 +122,8 @@ module Exprs =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -149,6 +154,8 @@ module Fields =
                     (fun x -> (FieldValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -177,6 +184,8 @@ module Highlights =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -210,10 +219,10 @@ module SuggestionMatch =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "suggestion") in
       make ?id ?score ?suggestion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "id" String_.of_json in
-      let score = field_map json "score" Long.of_json in
-      let suggestion = field_map json "suggestion" String_.of_json in
+    let of_json json__ =
+      let id = field_map json__ "id" String_.of_json in
+      let score = field_map json__ "score" Long.of_json in
+      let suggestion = field_map json__ "suggestion" String_.of_json in
       make ?id ?score ?suggestion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -222,6 +231,9 @@ module BucketList =
   struct
     type nonrec t = Bucket.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Bucket.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -277,11 +289,11 @@ module Hit =
       let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
       make ?highlights ?exprs ?fields ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let highlights = field_map json "highlights" Highlights.of_json in
-      let exprs = field_map json "exprs" Exprs.of_json in
-      let fields = field_map json "fields" Fields.of_json in
-      let id = field_map json "id" String_.of_json in
+    let of_json json__ =
+      let highlights = field_map json__ "highlights" Highlights.of_json in
+      let exprs = field_map json__ "exprs" Exprs.of_json in
+      let fields = field_map json__ "fields" Fields.of_json in
+      let id = field_map json__ "id" String_.of_json in
       make ?highlights ?exprs ?fields ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -316,8 +328,8 @@ module DocumentServiceWarning =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -326,6 +338,9 @@ module Suggestions =
   struct
     type nonrec t = SuggestionMatch.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SuggestionMatch.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -362,8 +377,8 @@ module BucketInfo =
         (Option.map ~f:BucketList.of_xml) (Xml.child xml_arg0 "buckets") in
       make ?buckets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let buckets = field_map json "buckets" BucketList.of_json in
+    let of_json json__ =
+      let buckets = field_map json__ "buckets" BucketList.of_json in
       make ?buckets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A container for the calculated facet values and counts."]
@@ -371,6 +386,9 @@ module HitList =
   struct
     type nonrec t = Hit.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Hit.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -461,15 +479,15 @@ module FieldStats =
       let min = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "min") in
       make ?stddev ?mean ?sumOfSquares ?sum ?missing ?count ?max ?min ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stddev = field_map json "stddev" Double.of_json in
-      let mean = field_map json "mean" String_.of_json in
-      let sumOfSquares = field_map json "sumOfSquares" Double.of_json in
-      let sum = field_map json "sum" Double.of_json in
-      let missing = field_map json "missing" Long.of_json in
-      let count = field_map json "count" Long.of_json in
-      let max = field_map json "max" String_.of_json in
-      let min = field_map json "min" String_.of_json in
+    let of_json json__ =
+      let stddev = field_map json__ "stddev" Double.of_json in
+      let mean = field_map json__ "mean" String_.of_json in
+      let sumOfSquares = field_map json__ "sumOfSquares" Double.of_json in
+      let sum = field_map json__ "sum" Double.of_json in
+      let missing = field_map json__ "missing" Long.of_json in
+      let count = field_map json__ "count" Long.of_json in
+      let max = field_map json__ "max" String_.of_json in
+      let min = field_map json__ "min" String_.of_json in
       make ?stddev ?mean ?sumOfSquares ?sum ?missing ?count ?max ?min ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The statistics for a field calculated in the request."]
@@ -522,9 +540,9 @@ module DocumentServiceException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
       make ?message ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let status = field_map json "status" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let status = field_map json__ "status" String_.of_json in
       make ?message ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -533,6 +551,9 @@ module DocumentServiceWarnings =
   struct
     type nonrec t = DocumentServiceWarning.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentServiceWarning.to_value)) |>
         (fun x -> `List x)
@@ -609,8 +630,8 @@ module SearchException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -642,10 +663,10 @@ module SuggestModel =
       let query = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "query") in
       make ?suggestions ?found ?query ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let suggestions = field_map json "suggestions" Suggestions.of_json in
-      let found = field_map json "found" Long.of_json in
-      let query = field_map json "query" String_.of_json in
+    let of_json json__ =
+      let suggestions = field_map json__ "suggestions" Suggestions.of_json in
+      let found = field_map json__ "found" Long.of_json in
+      let query = field_map json__ "query" String_.of_json in
       make ?suggestions ?found ?query ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -670,9 +691,9 @@ module SuggestStatus =
       let timems = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "timems") in
       make ?rid ?timems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rid = field_map json "rid" String_.of_json in
-      let timems = field_map json "timems" Long.of_json in
+    let of_json json__ =
+      let rid = field_map json__ "rid" String_.of_json in
+      let timems = field_map json__ "timems" Long.of_json in
       make ?rid ?timems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -739,6 +760,8 @@ module Facets =
                     (fun x -> (BucketInfo.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -778,11 +801,11 @@ module Hits =
       let found = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "found") in
       make ?hit ?cursor ?start ?found ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hit = field_map json "hit" HitList.of_json in
-      let cursor = field_map json "cursor" String_.of_json in
-      let start = field_map json "start" Long.of_json in
-      let found = field_map json "found" Long.of_json in
+    let of_json json__ =
+      let hit = field_map json__ "hit" HitList.of_json in
+      let cursor = field_map json__ "cursor" String_.of_json in
+      let start = field_map json__ "start" Long.of_json in
+      let found = field_map json__ "found" Long.of_json in
       make ?hit ?cursor ?start ?found ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -807,9 +830,9 @@ module SearchStatus =
       let timems = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "timems") in
       make ?rid ?timems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rid = field_map json "rid" String_.of_json in
-      let timems = field_map json "timems" Long.of_json in
+    let of_json json__ =
+      let rid = field_map json__ "rid" String_.of_json in
+      let timems = field_map json__ "timems" Long.of_json in
       make ?rid ?timems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -837,6 +860,8 @@ module Stats =
                     (fun x -> (FieldStats.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1096,12 +1121,12 @@ module UploadDocumentsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
       make ?warnings ?deletes ?adds ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let warnings =
-        field_map json "warnings" DocumentServiceWarnings.of_json in
-      let deletes = field_map json "deletes" Deletes.of_json in
-      let adds = field_map json "adds" Adds.of_json in
-      let status = field_map json "status" String_.of_json in
+        field_map json__ "warnings" DocumentServiceWarnings.of_json in
+      let deletes = field_map json__ "deletes" Deletes.of_json in
+      let adds = field_map json__ "adds" Adds.of_json in
+      let status = field_map json__ "status" String_.of_json in
       make ?warnings ?deletes ?adds ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the response to an UploadDocuments request."]
@@ -1138,9 +1163,10 @@ module UploadDocumentsRequest =
         Blob.of_xml (Xml.child_exn ~context:context_ xml_arg0 "documents") in
       make ~contentType ~documents ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let contentType = field_map_exn json "contentType" ContentType.of_json in
-      let documents = field_map_exn json "documents" Blob.of_json in
+    let of_json json__ =
+      let contentType =
+        field_map_exn json__ "contentType" ContentType.of_json in
+      let documents = field_map_exn json__ "documents" Blob.of_json in
       make ~contentType ~documents ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1193,9 +1219,9 @@ module SuggestResponse =
         (Option.map ~f:SuggestStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?suggest ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let suggest = field_map json "suggest" SuggestModel.of_json in
-      let status = field_map json "status" SuggestStatus.of_json in
+    let of_json json__ =
+      let suggest = field_map json__ "suggest" SuggestModel.of_json in
+      let status = field_map json__ "status" SuggestStatus.of_json in
       make ?suggest ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the response to a Suggest request."]
@@ -1229,10 +1255,10 @@ module SuggestRequest =
       let query = Query.of_xml (Xml.child_exn ~context:context_ xml_arg0 "q") in
       make ?size ~suggester ~query ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let size = field_map json "size" SuggestionsSize.of_json in
-      let suggester = field_map_exn json "suggester" Suggester.of_json in
-      let query = field_map_exn json "query" Query.of_json in
+    let of_json json__ =
+      let size = field_map json__ "size" SuggestionsSize.of_json in
+      let suggester = field_map_exn json__ "suggester" Suggester.of_json in
+      let query = field_map_exn json__ "query" Query.of_json in
       make ?size ~suggester ~query ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Container for the parameters to the Suggest request."]
@@ -1293,11 +1319,11 @@ module SearchResponse =
         (Option.map ~f:SearchStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?stats ?facets ?hits ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stats = field_map json "stats" Stats.of_json in
-      let facets = field_map json "facets" Facets.of_json in
-      let hits = field_map json "hits" Hits.of_json in
-      let status = field_map json "status" SearchStatus.of_json in
+    let of_json json__ =
+      let stats = field_map json__ "stats" Stats.of_json in
+      let facets = field_map json__ "facets" Facets.of_json in
+      let hits = field_map json__ "hits" Hits.of_json in
+      let status = field_map json__ "status" SearchStatus.of_json in
       make ?stats ?facets ?hits ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1422,21 +1448,21 @@ module SearchRequest =
       make ?stats ?start ?sort ?size ?return ?queryParser ?queryOptions
         ~query ?partial ?highlight ?filterQuery ?facet ?expr ?cursor ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stats = field_map json "stats" Stat.of_json in
-      let start = field_map json "start" Start.of_json in
-      let sort = field_map json "sort" Sort.of_json in
-      let size = field_map json "size" Size.of_json in
-      let return = field_map json "return" Return.of_json in
-      let queryParser = field_map json "queryParser" QueryParser.of_json in
-      let queryOptions = field_map json "queryOptions" QueryOptions.of_json in
-      let query = field_map_exn json "query" Query.of_json in
-      let partial = field_map json "partial" Partial.of_json in
-      let highlight = field_map json "highlight" Highlight.of_json in
-      let filterQuery = field_map json "filterQuery" FilterQuery.of_json in
-      let facet = field_map json "facet" Facet.of_json in
-      let expr = field_map json "expr" Expr.of_json in
-      let cursor = field_map json "cursor" Cursor.of_json in
+    let of_json json__ =
+      let stats = field_map json__ "stats" Stat.of_json in
+      let start = field_map json__ "start" Start.of_json in
+      let sort = field_map json__ "sort" Sort.of_json in
+      let size = field_map json__ "size" Size.of_json in
+      let return = field_map json__ "return" Return.of_json in
+      let queryParser = field_map json__ "queryParser" QueryParser.of_json in
+      let queryOptions = field_map json__ "queryOptions" QueryOptions.of_json in
+      let query = field_map_exn json__ "query" Query.of_json in
+      let partial = field_map json__ "partial" Partial.of_json in
+      let highlight = field_map json__ "highlight" Highlight.of_json in
+      let filterQuery = field_map json__ "filterQuery" FilterQuery.of_json in
+      let facet = field_map json__ "facet" Facet.of_json in
+      let expr = field_map json__ "expr" Expr.of_json in
+      let cursor = field_map json__ "cursor" Cursor.of_json in
       make ?stats ?start ?sort ?size ?return ?queryParser ?queryOptions
         ~query ?partial ?highlight ?filterQuery ?facet ?expr ?cursor ()
     let to_json v = composed_to_json to_value v

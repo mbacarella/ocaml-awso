@@ -16,6 +16,12 @@ val delete_scheduled_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteScheduledQueryRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val describe_account_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeAccountSettingsRequest.t ->
+        (DescribeAccountSettingsResponse.t,
+          DescribeAccountSettingsResponse.error) Result.t Async.Deferred.t
 val describe_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -68,6 +74,12 @@ val untag_resource :
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
+val update_account_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAccountSettingsRequest.t ->
+        (UpdateAccountSettingsResponse.t,
+          UpdateAccountSettingsResponse.error) Result.t Async.Deferred.t
 val update_scheduled_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

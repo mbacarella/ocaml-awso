@@ -6,58 +6,82 @@ type ('i, 'o, 'e) t =
   CreateKeyspaceResponse.error) t 
   | CreateTable: (CreateTableRequest.t, CreateTableResponse.t,
   CreateTableResponse.error) t 
+  | CreateType: (CreateTypeRequest.t, CreateTypeResponse.t,
+  CreateTypeResponse.error) t 
   | DeleteKeyspace: (DeleteKeyspaceRequest.t, DeleteKeyspaceResponse.t,
   DeleteKeyspaceResponse.error) t 
   | DeleteTable: (DeleteTableRequest.t, DeleteTableResponse.t,
   DeleteTableResponse.error) t 
+  | DeleteType: (DeleteTypeRequest.t, DeleteTypeResponse.t,
+  DeleteTypeResponse.error) t 
   | GetKeyspace: (GetKeyspaceRequest.t, GetKeyspaceResponse.t,
   GetKeyspaceResponse.error) t 
   | GetTable: (GetTableRequest.t, GetTableResponse.t, GetTableResponse.error)
   t 
+  | GetTableAutoScalingSettings: (GetTableAutoScalingSettingsRequest.t,
+  GetTableAutoScalingSettingsResponse.t,
+  GetTableAutoScalingSettingsResponse.error) t 
+  | GetType: (GetTypeRequest.t, GetTypeResponse.t, GetTypeResponse.error) t 
   | ListKeyspaces: (ListKeyspacesRequest.t, ListKeyspacesResponse.t,
   ListKeyspacesResponse.error) t 
   | ListTables: (ListTablesRequest.t, ListTablesResponse.t,
   ListTablesResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListTypes: (ListTypesRequest.t, ListTypesResponse.t,
+  ListTypesResponse.error) t 
   | RestoreTable: (RestoreTableRequest.t, RestoreTableResponse.t,
   RestoreTableResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateKeyspace: (UpdateKeyspaceRequest.t, UpdateKeyspaceResponse.t,
+  UpdateKeyspaceResponse.error) t 
   | UpdateTable: (UpdateTableRequest.t, UpdateTableResponse.t,
   UpdateTableResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateKeyspace -> `POST
   | CreateTable -> `POST
+  | CreateType -> `POST
   | DeleteKeyspace -> `POST
   | DeleteTable -> `POST
+  | DeleteType -> `POST
   | GetKeyspace -> `POST
   | GetTable -> `POST
+  | GetTableAutoScalingSettings -> `POST
+  | GetType -> `POST
   | ListKeyspaces -> `POST
   | ListTables -> `POST
   | ListTagsForResource -> `POST
+  | ListTypes -> `POST
   | RestoreTable -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
+  | UpdateKeyspace -> `POST
   | UpdateTable -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | CreateKeyspace -> (Format.kasprintf Uri.of_string) "/"
       | CreateTable -> (Format.kasprintf Uri.of_string) "/"
+      | CreateType -> (Format.kasprintf Uri.of_string) "/"
       | DeleteKeyspace -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTable -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteType -> (Format.kasprintf Uri.of_string) "/"
       | GetKeyspace -> (Format.kasprintf Uri.of_string) "/"
       | GetTable -> (Format.kasprintf Uri.of_string) "/"
+      | GetTableAutoScalingSettings -> (Format.kasprintf Uri.of_string) "/"
+      | GetType -> (Format.kasprintf Uri.of_string) "/"
       | ListKeyspaces -> (Format.kasprintf Uri.of_string) "/"
       | ListTables -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | ListTypes -> (Format.kasprintf Uri.of_string) "/"
       | RestoreTable -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateKeyspace -> (Format.kasprintf Uri.of_string) "/"
       | UpdateTable -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
@@ -78,6 +102,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "KeyspacesService.CreateTable")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateType ->
+      let json = CreateTypeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "KeyspacesService.CreateType")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteKeyspace ->
       let json = DeleteKeyspaceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -94,6 +126,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "KeyspacesService.DeleteTable")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteType ->
+      let json = DeleteTypeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "KeyspacesService.DeleteType")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetKeyspace ->
       let json = GetKeyspaceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -109,6 +149,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "KeyspacesService.GetTable")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetTableAutoScalingSettings ->
+      let json = GetTableAutoScalingSettingsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "KeyspacesService.GetTableAutoScalingSettings")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetType ->
+      let json = GetTypeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "KeyspacesService.GetType")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListKeyspaces ->
       let json = ListKeyspacesRequest.to_json req in
@@ -134,6 +190,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "KeyspacesService.ListTagsForResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListTypes ->
+      let json = ListTypesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "KeyspacesService.ListTypes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | RestoreTable ->
       let json = RestoreTableRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -157,6 +221,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "KeyspacesService.UntagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateKeyspace ->
+      let json = UpdateKeyspaceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "KeyspacesService.UpdateKeyspace")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateTable ->
       let json = UpdateTableRequest.to_json req in
@@ -202,6 +274,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateTableResponse.of_json json)
       else Error (parse_aws_error (Some CreateTableResponse.error_of_json))
+  | CreateType ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateTypeResponse.of_json json)
+      else Error (parse_aws_error (Some CreateTypeResponse.error_of_json))
   | DeleteKeyspace ->
       if is_success
       then
@@ -215,6 +293,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteTableResponse.of_json json)
       else Error (parse_aws_error (Some DeleteTableResponse.error_of_json))
+  | DeleteType ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteTypeResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteTypeResponse.error_of_json))
   | GetKeyspace ->
       if is_success
       then
@@ -227,6 +311,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetTableResponse.of_json json)
       else Error (parse_aws_error (Some GetTableResponse.error_of_json))
+  | GetTableAutoScalingSettings ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetTableAutoScalingSettingsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetTableAutoScalingSettingsResponse.error_of_json))
+  | GetType ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetTypeResponse.of_json json)
+      else Error (parse_aws_error (Some GetTypeResponse.error_of_json))
   | ListKeyspaces ->
       if is_success
       then
@@ -247,6 +346,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListTypes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTypesResponse.of_json json)
+      else Error (parse_aws_error (Some ListTypesResponse.error_of_json))
   | RestoreTable ->
       if is_success
       then
@@ -265,6 +370,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UntagResourceResponse.of_json json)
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateKeyspace ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateKeyspaceResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateKeyspaceResponse.error_of_json))
   | UpdateTable ->
       if is_success
       then

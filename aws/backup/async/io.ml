@@ -11,6 +11,10 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let associate_backup_vault_mpa_approval_team ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateBackupVaultMpaApprovalTeam input
+let cancel_legal_hold ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelLegalHold input
 let create_backup_plan ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateBackupPlan input
 let create_backup_selection ?endpoint_url ?cfg input =
@@ -19,8 +23,20 @@ let create_backup_vault ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateBackupVault input
 let create_framework ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFramework input
+let create_legal_hold ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLegalHold input
+let create_logically_air_gapped_backup_vault ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLogicallyAirGappedBackupVault input
 let create_report_plan ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateReportPlan input
+let create_restore_access_backup_vault ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateRestoreAccessBackupVault input
+let create_restore_testing_plan ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateRestoreTestingPlan input
+let create_restore_testing_selection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateRestoreTestingSelection input
+let create_tiering_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTieringConfiguration input
 let delete_backup_plan ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteBackupPlan input
 let delete_backup_selection ?endpoint_url ?cfg input =
@@ -39,6 +55,12 @@ let delete_recovery_point ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteRecoveryPoint input
 let delete_report_plan ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteReportPlan input
+let delete_restore_testing_plan ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteRestoreTestingPlan input
+let delete_restore_testing_selection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteRestoreTestingSelection input
+let delete_tiering_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTieringConfiguration input
 let describe_backup_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeBackupJob input
 let describe_backup_vault ?endpoint_url ?cfg input =
@@ -61,8 +83,15 @@ let describe_report_plan ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeReportPlan input
 let describe_restore_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeRestoreJob input
+let describe_scan_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeScanJob input
+let disassociate_backup_vault_mpa_approval_team ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateBackupVaultMpaApprovalTeam
+    input
 let disassociate_recovery_point ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateRecoveryPoint input
+let disassociate_recovery_point_from_parent ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateRecoveryPointFromParent input
 let export_backup_plan_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ExportBackupPlanTemplate input
 let get_backup_plan ?endpoint_url ?cfg input =
@@ -77,10 +106,26 @@ let get_backup_vault_access_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetBackupVaultAccessPolicy input
 let get_backup_vault_notifications ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetBackupVaultNotifications input
+let get_legal_hold ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetLegalHold input
+let get_recovery_point_index_details ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRecoveryPointIndexDetails input
 let get_recovery_point_restore_metadata ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRecoveryPointRestoreMetadata input
+let get_restore_job_metadata ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRestoreJobMetadata input
+let get_restore_testing_inferred_metadata ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRestoreTestingInferredMetadata input
+let get_restore_testing_plan ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRestoreTestingPlan input
+let get_restore_testing_selection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRestoreTestingSelection input
 let get_supported_resource_types ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetSupportedResourceTypes input
+let get_tiering_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTieringConfiguration input
+let list_backup_job_summaries ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListBackupJobSummaries input
 let list_backup_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBackupJobs input
 let list_backup_plan_templates ?endpoint_url ?cfg input =
@@ -93,30 +138,60 @@ let list_backup_selections ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBackupSelections input
 let list_backup_vaults ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBackupVaults input
+let list_copy_job_summaries ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCopyJobSummaries input
 let list_copy_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCopyJobs input
 let list_frameworks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFrameworks input
+let list_indexed_recovery_points ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListIndexedRecoveryPoints input
+let list_legal_holds ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListLegalHolds input
 let list_protected_resources ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListProtectedResources input
+let list_protected_resources_by_backup_vault ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListProtectedResourcesByBackupVault input
 let list_recovery_points_by_backup_vault ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListRecoveryPointsByBackupVault input
+let list_recovery_points_by_legal_hold ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRecoveryPointsByLegalHold input
 let list_recovery_points_by_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListRecoveryPointsByResource input
 let list_report_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListReportJobs input
 let list_report_plans ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListReportPlans input
+let list_restore_access_backup_vaults ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRestoreAccessBackupVaults input
+let list_restore_job_summaries ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRestoreJobSummaries input
 let list_restore_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListRestoreJobs input
+let list_restore_jobs_by_protected_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRestoreJobsByProtectedResource input
+let list_restore_testing_plans ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRestoreTestingPlans input
+let list_restore_testing_selections ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRestoreTestingSelections input
+let list_scan_job_summaries ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListScanJobSummaries input
+let list_scan_jobs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListScanJobs input
 let list_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTags input
+let list_tiering_configurations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTieringConfigurations input
 let put_backup_vault_access_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutBackupVaultAccessPolicy input
 let put_backup_vault_lock_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutBackupVaultLockConfiguration input
 let put_backup_vault_notifications ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutBackupVaultNotifications input
+let put_restore_validation_result ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutRestoreValidationResult input
+let revoke_restore_access_backup_vault ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RevokeRestoreAccessBackupVault input
 let start_backup_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartBackupJob input
 let start_copy_job ?endpoint_url ?cfg input =
@@ -125,6 +200,8 @@ let start_report_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartReportJob input
 let start_restore_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartRestoreJob input
+let start_scan_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartScanJob input
 let stop_backup_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopBackupJob input
 let tag_resource ?endpoint_url ?cfg input =
@@ -137,9 +214,17 @@ let update_framework ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateFramework input
 let update_global_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateGlobalSettings input
+let update_recovery_point_index_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateRecoveryPointIndexSettings input
 let update_recovery_point_lifecycle ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateRecoveryPointLifecycle input
 let update_region_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateRegionSettings input
 let update_report_plan ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateReportPlan input
+let update_restore_testing_plan ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateRestoreTestingPlan input
+let update_restore_testing_selection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateRestoreTestingSelection input
+let update_tiering_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateTieringConfiguration input

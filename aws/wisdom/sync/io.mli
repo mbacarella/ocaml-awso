@@ -22,6 +22,12 @@ val create_knowledge_base :
       CreateKnowledgeBaseRequest.t ->
         (CreateKnowledgeBaseResponse.t, CreateKnowledgeBaseResponse.error)
           Result.t
+val create_quick_response :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateQuickResponseRequest.t ->
+        (CreateQuickResponseResponse.t, CreateQuickResponseResponse.error)
+          Result.t
 val create_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -43,11 +49,22 @@ val delete_content :
     ?cfg:Awso.Cfg.t ->
       DeleteContentRequest.t ->
         (DeleteContentResponse.t, DeleteContentResponse.error) Result.t
+val delete_import_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteImportJobRequest.t ->
+        (DeleteImportJobResponse.t, DeleteImportJobResponse.error) Result.t
 val delete_knowledge_base :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteKnowledgeBaseRequest.t ->
         (DeleteKnowledgeBaseResponse.t, DeleteKnowledgeBaseResponse.error)
+          Result.t
+val delete_quick_response :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteQuickResponseRequest.t ->
+        (DeleteQuickResponseResponse.t, DeleteQuickResponseResponse.error)
           Result.t
 val get_assistant :
   ?endpoint_url:string ->
@@ -71,11 +88,21 @@ val get_content_summary :
       GetContentSummaryRequest.t ->
         (GetContentSummaryResponse.t, GetContentSummaryResponse.error)
           Result.t
+val get_import_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetImportJobRequest.t ->
+        (GetImportJobResponse.t, GetImportJobResponse.error) Result.t
 val get_knowledge_base :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetKnowledgeBaseRequest.t ->
         (GetKnowledgeBaseResponse.t, GetKnowledgeBaseResponse.error) Result.t
+val get_quick_response :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetQuickResponseRequest.t ->
+        (GetQuickResponseResponse.t, GetQuickResponseResponse.error) Result.t
 val get_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -103,11 +130,22 @@ val list_contents :
     ?cfg:Awso.Cfg.t ->
       ListContentsRequest.t ->
         (ListContentsResponse.t, ListContentsResponse.error) Result.t
+val list_import_jobs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListImportJobsRequest.t ->
+        (ListImportJobsResponse.t, ListImportJobsResponse.error) Result.t
 val list_knowledge_bases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListKnowledgeBasesRequest.t ->
         (ListKnowledgeBasesResponse.t, ListKnowledgeBasesResponse.error)
+          Result.t
+val list_quick_responses :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListQuickResponsesRequest.t ->
+        (ListQuickResponsesResponse.t, ListQuickResponsesResponse.error)
           Result.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
@@ -137,6 +175,12 @@ val search_content :
     ?cfg:Awso.Cfg.t ->
       SearchContentRequest.t ->
         (SearchContentResponse.t, SearchContentResponse.error) Result.t
+val search_quick_responses :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SearchQuickResponsesRequest.t ->
+        (SearchQuickResponsesResponse.t, SearchQuickResponsesResponse.error)
+          Result.t
 val search_sessions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -148,6 +192,11 @@ val start_content_upload :
       StartContentUploadRequest.t ->
         (StartContentUploadResponse.t, StartContentUploadResponse.error)
           Result.t
+val start_import_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartImportJobRequest.t ->
+        (StartImportJobResponse.t, StartImportJobResponse.error) Result.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -169,3 +218,9 @@ val update_knowledge_base_template_uri :
       UpdateKnowledgeBaseTemplateUriRequest.t ->
         (UpdateKnowledgeBaseTemplateUriResponse.t,
           UpdateKnowledgeBaseTemplateUriResponse.error) Result.t
+val update_quick_response :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateQuickResponseRequest.t ->
+        (UpdateQuickResponseResponse.t, UpdateQuickResponseResponse.error)
+          Result.t

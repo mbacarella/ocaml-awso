@@ -13,6 +13,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let cancel_image_creation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelImageCreation input
+let cancel_lifecycle_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelLifecycleExecution input
 let create_component ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateComponent input
 let create_container_recipe ?endpoint_url ?cfg input =
@@ -27,6 +29,10 @@ let create_image_recipe ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateImageRecipe input
 let create_infrastructure_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateInfrastructureConfiguration input
+let create_lifecycle_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLifecyclePolicy input
+let create_workflow ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateWorkflow input
 let delete_component ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteComponent input
 let delete_container_recipe ?endpoint_url ?cfg input =
@@ -41,6 +47,12 @@ let delete_image_recipe ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteImageRecipe input
 let delete_infrastructure_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteInfrastructureConfiguration input
+let delete_lifecycle_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteLifecyclePolicy input
+let delete_workflow ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteWorkflow input
+let distribute_image ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DistributeImage input
 let get_component ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetComponent input
 let get_component_policy ?endpoint_url ?cfg input =
@@ -63,8 +75,22 @@ let get_image_recipe_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetImageRecipePolicy input
 let get_infrastructure_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetInfrastructureConfiguration input
+let get_lifecycle_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetLifecycleExecution input
+let get_lifecycle_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetLifecyclePolicy input
+let get_marketplace_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetMarketplaceResource input
+let get_workflow ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetWorkflow input
+let get_workflow_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetWorkflowExecution input
+let get_workflow_step_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetWorkflowStepExecution input
 let import_component ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ImportComponent input
+let import_disk_image ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ImportDiskImage input
 let import_vm_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ImportVmImage input
 let list_component_build_versions ?endpoint_url ?cfg input =
@@ -85,12 +111,32 @@ let list_image_pipelines ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListImagePipelines input
 let list_image_recipes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListImageRecipes input
+let list_image_scan_finding_aggregations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListImageScanFindingAggregations input
+let list_image_scan_findings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListImageScanFindings input
 let list_images ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListImages input
 let list_infrastructure_configurations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListInfrastructureConfigurations input
+let list_lifecycle_execution_resources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListLifecycleExecutionResources input
+let list_lifecycle_executions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListLifecycleExecutions input
+let list_lifecycle_policies ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListLifecyclePolicies input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let list_waiting_workflow_steps ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListWaitingWorkflowSteps input
+let list_workflow_build_versions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListWorkflowBuildVersions input
+let list_workflow_executions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListWorkflowExecutions input
+let list_workflow_step_executions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListWorkflowStepExecutions input
+let list_workflows ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListWorkflows input
 let put_component_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutComponentPolicy input
 let put_container_recipe_policy ?endpoint_url ?cfg input =
@@ -99,8 +145,14 @@ let put_image_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutImagePolicy input
 let put_image_recipe_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutImageRecipePolicy input
+let retry_image ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RetryImage input
+let send_workflow_step_action ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SendWorkflowStepAction input
 let start_image_pipeline_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartImagePipelineExecution input
+let start_resource_state_update ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartResourceStateUpdate input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
@@ -111,3 +163,5 @@ let update_image_pipeline ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateImagePipeline input
 let update_infrastructure_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateInfrastructureConfiguration input
+let update_lifecycle_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateLifecyclePolicy input

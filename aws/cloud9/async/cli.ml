@@ -46,7 +46,6 @@ let create_environment_e_c2 =
            ~doc:"STRING ClientRequestToken"
        and subnetId =
          flag "subnet-id" (optional string) ~doc:"STRING SubnetId"
-       and imageId = flag "image-id" (optional string) ~doc:"STRING ImageId"
        and automaticStopTimeMinutes =
          flag "automatic-stop-time-minutes" (optional int)
            ~doc:"INT AutomaticStopTimeMinutes"
@@ -60,17 +59,17 @@ let create_environment_e_c2 =
          flag "dry-run" (optional bool) ~doc:"BOOL NullableBoolean"
        and name = flag "name" (required string) ~doc:"STRING EnvironmentName"
        and instanceType =
-         flag "instance-type" (required string) ~doc:"STRING InstanceType" in
+         flag "instance-type" (required string) ~doc:"STRING InstanceType"
+       and imageId = flag "image-id" (required string) ~doc:"STRING ImageId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_environment_e_c2
            (Values.CreateEnvironmentEC2Request.make ?description
-              ?clientRequestToken ?subnetId ?imageId
-              ?automaticStopTimeMinutes ?ownerArn
-              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?clientRequestToken ?subnetId ?automaticStopTimeMinutes
+              ?ownerArn ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ?connectionType:(Option.map ~f:Values.ConnectionType.of_json
                                  connectionType) ?dryRun ~name ~instanceType
-              ()) (Some Values.CreateEnvironmentEC2Result.to_json)
+              ~imageId ()) (Some Values.CreateEnvironmentEC2Result.to_json)
            (Some Values.CreateEnvironmentEC2Result.error_to_json)])
 let create_environment_membership =
   Command.async ~summary:""

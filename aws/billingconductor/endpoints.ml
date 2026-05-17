@@ -34,6 +34,9 @@ type ('i, 'o, 'e) t =
   DisassociateAccountsOutput.t, DisassociateAccountsOutput.error) t 
   | DisassociatePricingRules: (DisassociatePricingRulesInput.t,
   DisassociatePricingRulesOutput.t, DisassociatePricingRulesOutput.error) t 
+  | GetBillingGroupCostReport: (GetBillingGroupCostReportInput.t,
+  GetBillingGroupCostReportOutput.t, GetBillingGroupCostReportOutput.error) t
+  
   | ListAccountAssociations: (ListAccountAssociationsInput.t,
   ListAccountAssociationsOutput.t, ListAccountAssociationsOutput.error) t 
   | ListBillingGroupCostReports: (ListBillingGroupCostReportsInput.t,
@@ -41,6 +44,9 @@ type ('i, 'o, 'e) t =
   ListBillingGroupCostReportsOutput.error) t 
   | ListBillingGroups: (ListBillingGroupsInput.t, ListBillingGroupsOutput.t,
   ListBillingGroupsOutput.error) t 
+  | ListCustomLineItemVersions: (ListCustomLineItemVersionsInput.t,
+  ListCustomLineItemVersionsOutput.t, ListCustomLineItemVersionsOutput.error)
+  t 
   | ListCustomLineItems: (ListCustomLineItemsInput.t,
   ListCustomLineItemsOutput.t, ListCustomLineItemsOutput.error) t 
   | ListPricingPlans: (ListPricingPlansInput.t, ListPricingPlansOutput.t,
@@ -89,9 +95,11 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeletePricingRule -> `POST
   | DisassociateAccounts -> `POST
   | DisassociatePricingRules -> `PUT
+  | GetBillingGroupCostReport -> `POST
   | ListAccountAssociations -> `POST
   | ListBillingGroupCostReports -> `POST
   | ListBillingGroups -> `POST
+  | ListCustomLineItemVersions -> `POST
   | ListCustomLineItems -> `POST
   | ListPricingPlans -> `POST
   | ListPricingPlansAssociatedWithPricingRule -> `POST
@@ -138,12 +146,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/disassociate-accounts"
       | DisassociatePricingRules ->
           (Format.kasprintf Uri.of_string) "/disassociate-pricing-rules"
+      | GetBillingGroupCostReport ->
+          (Format.kasprintf Uri.of_string) "/get-billing-group-cost-report"
       | ListAccountAssociations ->
           (Format.kasprintf Uri.of_string) "/list-account-associations"
       | ListBillingGroupCostReports ->
           (Format.kasprintf Uri.of_string) "/list-billing-group-cost-reports"
       | ListBillingGroups ->
           (Format.kasprintf Uri.of_string) "/list-billing-groups"
+      | ListCustomLineItemVersions ->
+          (Format.kasprintf Uri.of_string) "/list-custom-line-item-versions"
       | ListCustomLineItems ->
           (Format.kasprintf Uri.of_string) "/list-custom-line-items"
       | ListPricingPlans ->
@@ -290,7 +302,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("ChargeDetails",
                           (CustomLineItemChargeDetails.to_value
-                             req.CreateCustomLineItemInput.chargeDetails))])
+                             req.CreateCustomLineItemInput.chargeDetails));
+                      Option.map req.CreateCustomLineItemInput.accountId
+                        ~f:(fun x -> ("AccountId", (AccountId.to_value x)));
+                      Option.map
+                        req.CreateCustomLineItemInput.computationRule
+                        ~f:(fun x ->
+                              ("ComputationRule",
+                                (ComputationRuleEnum.to_value x)));
+                      Option.map
+                        req.CreateCustomLineItemInput.presentationDetails
+                        ~f:(fun x ->
+                              ("PresentationDetails",
+                                (PresentationObject.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -363,14 +387,25 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("Type",
                           (PricingRuleType.to_value
                              req.CreatePricingRuleInput.type_));
-                      Some
-                        ("ModifierPercentage",
-                          (ModifierPercentage.to_value
-                             req.CreatePricingRuleInput.modifierPercentage));
+                      Option.map
+                        req.CreatePricingRuleInput.modifierPercentage
+                        ~f:(fun x ->
+                              ("ModifierPercentage",
+                                (ModifierPercentage.to_value x)));
                       Option.map req.CreatePricingRuleInput.service
                         ~f:(fun x -> ("Service", (Service.to_value x)));
                       Option.map req.CreatePricingRuleInput.tags
-                        ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)));
+                      Option.map req.CreatePricingRuleInput.billingEntity
+                        ~f:(fun x ->
+                              ("BillingEntity", (BillingEntity.to_value x)));
+                      Option.map req.CreatePricingRuleInput.tiering
+                        ~f:(fun x ->
+                              ("Tiering", (CreateTieringInput.to_value x)));
+                      Option.map req.CreatePricingRuleInput.usageType
+                        ~f:(fun x -> ("UsageType", (UsageType.to_value x)));
+                      Option.map req.CreatePricingRuleInput.operation
+                        ~f:(fun x -> ("Operation", (Operation.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -489,6 +524,41 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DisassociatePricingRules ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | GetBillingGroupCostReport ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Arn",
+                           (BillingGroupArn.to_value
+                              req.GetBillingGroupCostReportInput.arn));
+                      Option.map
+                        req.GetBillingGroupCostReportInput.billingPeriodRange
+                        ~f:(fun x ->
+                              ("BillingPeriodRange",
+                                (BillingPeriodRange.to_value x)));
+                      Option.map req.GetBillingGroupCostReportInput.groupBy
+                        ~f:(fun x ->
+                              ("GroupBy", (GroupByAttributesList.to_value x)));
+                      Option.map
+                        req.GetBillingGroupCostReportInput.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults",
+                                (MaxBillingGroupCostReportResults.to_value x)));
+                      Option.map req.GetBillingGroupCostReportInput.nextToken
+                        ~f:(fun x -> ("NextToken", (Token.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListAccountAssociations ->
       let (headers, body) =
         let headers =
@@ -576,6 +646,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCustomLineItemVersions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Arn",
+                           (CustomLineItemArn.to_value
+                              req.ListCustomLineItemVersionsInput.arn));
+                      Option.map
+                        req.ListCustomLineItemVersionsInput.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults",
+                                (MaxCustomLineItemResults.to_value x)));
+                      Option.map
+                        req.ListCustomLineItemVersionsInput.nextToken
+                        ~f:(fun x -> ("NextToken", (Token.to_value x)));
+                      Option.map req.ListCustomLineItemVersionsInput.filters
+                        ~f:(fun x ->
+                              ("Filters",
+                                (ListCustomLineItemVersionsFilter.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListCustomLineItems ->
       let (headers, body) =
         let headers =
@@ -591,7 +693,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.ListCustomLineItemsInput.maxResults
                         ~f:(fun x ->
                               ("MaxResults",
-                                (MaxBillingGroupResults.to_value x)));
+                                (MaxCustomLineItemResults.to_value x)));
                       Option.map req.ListCustomLineItemsInput.nextToken
                         ~f:(fun x -> ("NextToken", (Token.to_value x)));
                       Option.map req.ListCustomLineItemsInput.filters
@@ -814,7 +916,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.UpdateBillingGroupInput.description
                         ~f:(fun x ->
                               ("Description",
-                                (BillingGroupDescription.to_value x)))])
+                                (BillingGroupDescription.to_value x)));
+                      Option.map req.UpdateBillingGroupInput.accountGrouping
+                        ~f:(fun x ->
+                              ("AccountGrouping",
+                                (UpdateBillingGroupAccountGrouping.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -836,7 +942,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                            (CustomLineItemArn.to_value
                               req.UpdateCustomLineItemInput.arn));
                       Option.map req.UpdateCustomLineItemInput.name
-                        ~f:(fun x -> ("Name", (BillingGroupName.to_value x)));
+                        ~f:(fun x ->
+                              ("Name", (CustomLineItemName.to_value x)));
                       Option.map req.UpdateCustomLineItemInput.description
                         ~f:(fun x ->
                               ("Description",
@@ -996,6 +1103,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DisassociatePricingRulesOutput.error_of_json))
+  | GetBillingGroupCostReport ->
+      if is_success
+      then
+        Ok (GetBillingGroupCostReportOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetBillingGroupCostReportOutput.error_of_json))
   | ListAccountAssociations ->
       if is_success
       then Ok (ListAccountAssociationsOutput.of_json (response_to_json resp))
@@ -1016,6 +1131,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (ListBillingGroupsOutput.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListBillingGroupsOutput.error_of_json))
+  | ListCustomLineItemVersions ->
+      if is_success
+      then
+        Ok (ListCustomLineItemVersionsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListCustomLineItemVersionsOutput.error_of_json))
   | ListCustomLineItems ->
       if is_success
       then Ok (ListCustomLineItemsOutput.of_json (response_to_json resp))

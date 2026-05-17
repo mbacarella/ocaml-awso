@@ -25,9 +25,17 @@ let describe_scaling_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeScalingPolicies input
 let describe_scheduled_actions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeScheduledActions input
+let get_predictive_scaling_forecast ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetPredictiveScalingForecast input
+let list_tags_for_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let put_scaling_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutScalingPolicy input
 let put_scheduled_action ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutScheduledAction input
 let register_scalable_target ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterScalableTarget input
+let tag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TagResource input
+let untag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UntagResource input

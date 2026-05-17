@@ -5,6 +5,11 @@ val create_component :
     ?cfg:Awso.Cfg.t ->
       CreateComponentRequest.t ->
         (CreateComponentResponse.t, CreateComponentResponse.error) Result.t
+val create_form :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateFormRequest.t ->
+        (CreateFormResponse.t, CreateFormResponse.error) Result.t
 val create_theme :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -13,6 +18,9 @@ val create_theme :
 val delete_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteComponentRequest.t -> (unit, unit) Result.t
+val delete_form :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteFormRequest.t -> (unit, unit) Result.t
 val delete_theme :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteThemeRequest.t -> (unit, unit) Result.t
@@ -27,41 +35,99 @@ val export_components :
     ?cfg:Awso.Cfg.t ->
       ExportComponentsRequest.t ->
         (ExportComponentsResponse.t, ExportComponentsResponse.error) Result.t
+val export_forms :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ExportFormsRequest.t ->
+        (ExportFormsResponse.t, ExportFormsResponse.error) Result.t
 val export_themes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportThemesRequest.t ->
         (ExportThemesResponse.t, ExportThemesResponse.error) Result.t
+val get_codegen_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCodegenJobRequest.t ->
+        (GetCodegenJobResponse.t, GetCodegenJobResponse.error) Result.t
 val get_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetComponentRequest.t ->
         (GetComponentResponse.t, GetComponentResponse.error) Result.t
+val get_form :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetFormRequest.t -> (GetFormResponse.t, GetFormResponse.error) Result.t
+val get_metadata :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetMetadataRequest.t ->
+        (GetMetadataResponse.t, GetMetadataResponse.error) Result.t
 val get_theme :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetThemeRequest.t ->
         (GetThemeResponse.t, GetThemeResponse.error) Result.t
+val list_codegen_jobs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCodegenJobsRequest.t ->
+        (ListCodegenJobsResponse.t, ListCodegenJobsResponse.error) Result.t
 val list_components :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListComponentsRequest.t ->
         (ListComponentsResponse.t, ListComponentsResponse.error) Result.t
+val list_forms :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListFormsRequest.t ->
+        (ListFormsResponse.t, ListFormsResponse.error) Result.t
+val list_tags_for_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTagsForResourceRequest.t ->
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t
 val list_themes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListThemesRequest.t ->
         (ListThemesResponse.t, ListThemesResponse.error) Result.t
+val put_metadata_flag :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> PutMetadataFlagRequest.t -> (unit, unit) Result.t
 val refresh_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RefreshTokenRequest.t ->
         (RefreshTokenResponse.t, RefreshTokenResponse.error) Result.t
+val start_codegen_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartCodegenJobRequest.t ->
+        (StartCodegenJobResponse.t, StartCodegenJobResponse.error) Result.t
+val tag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TagResourceRequest.t ->
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
+val untag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UntagResourceRequest.t ->
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
 val update_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateComponentRequest.t ->
         (UpdateComponentResponse.t, UpdateComponentResponse.error) Result.t
+val update_form :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateFormRequest.t ->
+        (UpdateFormResponse.t, UpdateFormResponse.error) Result.t
 val update_theme :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

@@ -28,6 +28,56 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let add_region =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn"
+       and regionName =
+         flag "region-name" (required string) ~doc:"STRING RegionName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.add_region
+           (Values.AddRegionRequest.make ~instanceArn ~regionName ())
+           (Some Values.AddRegionResponse.to_json)
+           (Some Values.AddRegionResponse.error_to_json)])
+let attach_customer_managed_policy_reference_to_permission_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn"
+       and permissionSetArn =
+         flag "permission-set-arn" (required string)
+           ~doc:"STRING PermissionSetArn"
+       and customerManagedPolicyReference =
+         flag "customer-managed-policy-reference" (required json_arg)
+           ~doc:"JSON CustomerManagedPolicyReference" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.attach_customer_managed_policy_reference_to_permission_set
+           (Values.AttachCustomerManagedPolicyReferenceToPermissionSetRequest.make
+              ~instanceArn ~permissionSetArn
+              ~customerManagedPolicyReference:(Values.CustomerManagedPolicyReference.of_json
+                                                 customerManagedPolicyReference)
+              ())
+           (Some
+              Values.AttachCustomerManagedPolicyReferenceToPermissionSetResponse.to_json)
+           (Some
+              Values.AttachCustomerManagedPolicyReferenceToPermissionSetResponse.error_to_json)])
 let attach_managed_policy_to_permission_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -87,6 +137,89 @@ let create_account_assignment =
               ~principalId ())
            (Some Values.CreateAccountAssignmentResponse.to_json)
            (Some Values.CreateAccountAssignmentResponse.error_to_json)])
+let create_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and portalOptions =
+         flag "portal-options" (optional json_arg) ~doc:"JSON PortalOptions"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and status =
+         flag "status" (optional json_arg) ~doc:"JSON ApplicationStatus"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn"
+       and applicationProviderArn =
+         flag "application-provider-arn" (required string)
+           ~doc:"STRING ApplicationProviderArn"
+       and name =
+         flag "name" (required string) ~doc:"STRING ApplicationNameType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_application
+           (Values.CreateApplicationRequest.make ?description
+              ?portalOptions:(Option.map ~f:Values.PortalOptions.of_json
+                                portalOptions)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?status:(Option.map ~f:Values.ApplicationStatus.of_json status)
+              ?clientToken ~instanceArn ~applicationProviderArn ~name ())
+           (Some Values.CreateApplicationResponse.to_json)
+           (Some Values.CreateApplicationResponse.error_to_json)])
+let create_application_assignment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn"
+       and principalId =
+         flag "principal-id" (required string) ~doc:"STRING PrincipalId"
+       and principalType =
+         flag "principal-type" (required json_arg) ~doc:"JSON PrincipalType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_application_assignment
+           (Values.CreateApplicationAssignmentRequest.make ~applicationArn
+              ~principalId
+              ~principalType:(Values.PrincipalType.of_json principalType) ())
+           (Some Values.CreateApplicationAssignmentResponse.to_json)
+           (Some Values.CreateApplicationAssignmentResponse.error_to_json)])
+let create_instance =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (optional string) ~doc:"STRING NameType"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_instance
+           (Values.CreateInstanceRequest.make ?name ?clientToken
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ())
+           (Some Values.CreateInstanceResponse.to_json)
+           (Some Values.CreateInstanceResponse.error_to_json)])
 let create_instance_access_control_attribute_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -146,6 +279,41 @@ let create_permission_set =
               ~instanceArn ())
            (Some Values.CreatePermissionSetResponse.to_json)
            (Some Values.CreatePermissionSetResponse.error_to_json)])
+let create_trusted_token_issuer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn"
+       and name =
+         flag "name" (required string) ~doc:"STRING TrustedTokenIssuerName"
+       and trustedTokenIssuerType =
+         flag "trusted-token-issuer-type" (required json_arg)
+           ~doc:"JSON TrustedTokenIssuerType"
+       and trustedTokenIssuerConfiguration =
+         flag "trusted-token-issuer-configuration" (required json_arg)
+           ~doc:"JSON TrustedTokenIssuerConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_trusted_token_issuer
+           (Values.CreateTrustedTokenIssuerRequest.make ?clientToken
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~instanceArn
+              ~name
+              ~trustedTokenIssuerType:(Values.TrustedTokenIssuerType.of_json
+                                         trustedTokenIssuerType)
+              ~trustedTokenIssuerConfiguration:(Values.TrustedTokenIssuerConfiguration.of_json
+                                                  trustedTokenIssuerConfiguration)
+              ()) (Some Values.CreateTrustedTokenIssuerResponse.to_json)
+           (Some Values.CreateTrustedTokenIssuerResponse.error_to_json)])
 let delete_account_assignment =
   Command.async ~summary:""
     ([%map_open.Command
@@ -179,6 +347,113 @@ let delete_account_assignment =
               ~principalId ())
            (Some Values.DeleteAccountAssignmentResponse.to_json)
            (Some Values.DeleteAccountAssignmentResponse.error_to_json)])
+let delete_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_application
+           (Values.DeleteApplicationRequest.make ~applicationArn ())
+           (Some Values.DeleteApplicationResponse.to_json)
+           (Some Values.DeleteApplicationResponse.error_to_json)])
+let delete_application_access_scope =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn"
+       and scope = flag "scope" (required string) ~doc:"STRING Scope" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_application_access_scope
+           (Values.DeleteApplicationAccessScopeRequest.make ~applicationArn
+              ~scope ()) None None])
+let delete_application_assignment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn"
+       and principalId =
+         flag "principal-id" (required string) ~doc:"STRING PrincipalId"
+       and principalType =
+         flag "principal-type" (required json_arg) ~doc:"JSON PrincipalType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_application_assignment
+           (Values.DeleteApplicationAssignmentRequest.make ~applicationArn
+              ~principalId
+              ~principalType:(Values.PrincipalType.of_json principalType) ())
+           (Some Values.DeleteApplicationAssignmentResponse.to_json)
+           (Some Values.DeleteApplicationAssignmentResponse.error_to_json)])
+let delete_application_authentication_method =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn"
+       and authenticationMethodType =
+         flag "authentication-method-type" (required json_arg)
+           ~doc:"JSON AuthenticationMethodType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_application_authentication_method
+           (Values.DeleteApplicationAuthenticationMethodRequest.make
+              ~applicationArn
+              ~authenticationMethodType:(Values.AuthenticationMethodType.of_json
+                                           authenticationMethodType) ()) None
+           None])
+let delete_application_grant =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn"
+       and grantType =
+         flag "grant-type" (required json_arg) ~doc:"JSON GrantType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_application_grant
+           (Values.DeleteApplicationGrantRequest.make ~applicationArn
+              ~grantType:(Values.GrantType.of_json grantType) ()) None None])
 let delete_inline_policy_from_permission_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -202,6 +477,24 @@ let delete_inline_policy_from_permission_set =
            (Some Values.DeleteInlinePolicyFromPermissionSetResponse.to_json)
            (Some
               Values.DeleteInlinePolicyFromPermissionSetResponse.error_to_json)])
+let delete_instance =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_instance
+           (Values.DeleteInstanceRequest.make ~instanceArn ())
+           (Some Values.DeleteInstanceResponse.to_json)
+           (Some Values.DeleteInstanceResponse.error_to_json)])
 let delete_instance_access_control_attribute_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -245,6 +538,50 @@ let delete_permission_set =
               ~permissionSetArn ())
            (Some Values.DeletePermissionSetResponse.to_json)
            (Some Values.DeletePermissionSetResponse.error_to_json)])
+let delete_permissions_boundary_from_permission_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn"
+       and permissionSetArn =
+         flag "permission-set-arn" (required string)
+           ~doc:"STRING PermissionSetArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_permissions_boundary_from_permission_set
+           (Values.DeletePermissionsBoundaryFromPermissionSetRequest.make
+              ~instanceArn ~permissionSetArn ())
+           (Some
+              Values.DeletePermissionsBoundaryFromPermissionSetResponse.to_json)
+           (Some
+              Values.DeletePermissionsBoundaryFromPermissionSetResponse.error_to_json)])
+let delete_trusted_token_issuer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trustedTokenIssuerArn =
+         flag "trusted-token-issuer-arn" (required string)
+           ~doc:"STRING TrustedTokenIssuerArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_trusted_token_issuer
+           (Values.DeleteTrustedTokenIssuerRequest.make
+              ~trustedTokenIssuerArn ())
+           (Some Values.DeleteTrustedTokenIssuerResponse.to_json)
+           (Some Values.DeleteTrustedTokenIssuerResponse.error_to_json)])
 let describe_account_assignment_creation_status =
   Command.async ~summary:""
     ([%map_open.Command
@@ -293,6 +630,88 @@ let describe_account_assignment_deletion_status =
               Values.DescribeAccountAssignmentDeletionStatusResponse.to_json)
            (Some
               Values.DescribeAccountAssignmentDeletionStatusResponse.error_to_json)])
+let describe_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_application
+           (Values.DescribeApplicationRequest.make ~applicationArn ())
+           (Some Values.DescribeApplicationResponse.to_json)
+           (Some Values.DescribeApplicationResponse.error_to_json)])
+let describe_application_assignment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn"
+       and principalId =
+         flag "principal-id" (required string) ~doc:"STRING PrincipalId"
+       and principalType =
+         flag "principal-type" (required json_arg) ~doc:"JSON PrincipalType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_application_assignment
+           (Values.DescribeApplicationAssignmentRequest.make ~applicationArn
+              ~principalId
+              ~principalType:(Values.PrincipalType.of_json principalType) ())
+           (Some Values.DescribeApplicationAssignmentResponse.to_json)
+           (Some Values.DescribeApplicationAssignmentResponse.error_to_json)])
+let describe_application_provider =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationProviderArn =
+         flag "application-provider-arn" (required string)
+           ~doc:"STRING ApplicationProviderArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_application_provider
+           (Values.DescribeApplicationProviderRequest.make
+              ~applicationProviderArn ())
+           (Some Values.DescribeApplicationProviderResponse.to_json)
+           (Some Values.DescribeApplicationProviderResponse.error_to_json)])
+let describe_instance =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_instance
+           (Values.DescribeInstanceRequest.make ~instanceArn ())
+           (Some Values.DescribeInstanceResponse.to_json)
+           (Some Values.DescribeInstanceResponse.error_to_json)])
 let describe_instance_access_control_attribute_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -360,6 +779,76 @@ let describe_permission_set_provisioning_status =
               Values.DescribePermissionSetProvisioningStatusResponse.to_json)
            (Some
               Values.DescribePermissionSetProvisioningStatusResponse.error_to_json)])
+let describe_region =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn"
+       and regionName =
+         flag "region-name" (required string) ~doc:"STRING RegionName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_region
+           (Values.DescribeRegionRequest.make ~instanceArn ~regionName ())
+           (Some Values.DescribeRegionResponse.to_json)
+           (Some Values.DescribeRegionResponse.error_to_json)])
+let describe_trusted_token_issuer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trustedTokenIssuerArn =
+         flag "trusted-token-issuer-arn" (required string)
+           ~doc:"STRING TrustedTokenIssuerArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_trusted_token_issuer
+           (Values.DescribeTrustedTokenIssuerRequest.make
+              ~trustedTokenIssuerArn ())
+           (Some Values.DescribeTrustedTokenIssuerResponse.to_json)
+           (Some Values.DescribeTrustedTokenIssuerResponse.error_to_json)])
+let detach_customer_managed_policy_reference_from_permission_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn"
+       and permissionSetArn =
+         flag "permission-set-arn" (required string)
+           ~doc:"STRING PermissionSetArn"
+       and customerManagedPolicyReference =
+         flag "customer-managed-policy-reference" (required json_arg)
+           ~doc:"JSON CustomerManagedPolicyReference" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.detach_customer_managed_policy_reference_from_permission_set
+           (Values.DetachCustomerManagedPolicyReferenceFromPermissionSetRequest.make
+              ~instanceArn ~permissionSetArn
+              ~customerManagedPolicyReference:(Values.CustomerManagedPolicyReference.of_json
+                                                 customerManagedPolicyReference)
+              ())
+           (Some
+              Values.DetachCustomerManagedPolicyReferenceFromPermissionSetResponse.to_json)
+           (Some
+              Values.DetachCustomerManagedPolicyReferenceFromPermissionSetResponse.error_to_json)])
 let detach_managed_policy_from_permission_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -386,6 +875,117 @@ let detach_managed_policy_from_permission_set =
            (Some Values.DetachManagedPolicyFromPermissionSetResponse.to_json)
            (Some
               Values.DetachManagedPolicyFromPermissionSetResponse.error_to_json)])
+let get_application_access_scope =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn"
+       and scope = flag "scope" (required string) ~doc:"STRING Scope" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_application_access_scope
+           (Values.GetApplicationAccessScopeRequest.make ~applicationArn
+              ~scope ())
+           (Some Values.GetApplicationAccessScopeResponse.to_json)
+           (Some Values.GetApplicationAccessScopeResponse.error_to_json)])
+let get_application_assignment_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_application_assignment_configuration
+           (Values.GetApplicationAssignmentConfigurationRequest.make
+              ~applicationArn ())
+           (Some Values.GetApplicationAssignmentConfigurationResponse.to_json)
+           (Some
+              Values.GetApplicationAssignmentConfigurationResponse.error_to_json)])
+let get_application_authentication_method =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn"
+       and authenticationMethodType =
+         flag "authentication-method-type" (required json_arg)
+           ~doc:"JSON AuthenticationMethodType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_application_authentication_method
+           (Values.GetApplicationAuthenticationMethodRequest.make
+              ~applicationArn
+              ~authenticationMethodType:(Values.AuthenticationMethodType.of_json
+                                           authenticationMethodType) ())
+           (Some Values.GetApplicationAuthenticationMethodResponse.to_json)
+           (Some
+              Values.GetApplicationAuthenticationMethodResponse.error_to_json)])
+let get_application_grant =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn"
+       and grantType =
+         flag "grant-type" (required json_arg) ~doc:"JSON GrantType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_application_grant
+           (Values.GetApplicationGrantRequest.make ~applicationArn
+              ~grantType:(Values.GrantType.of_json grantType) ())
+           (Some Values.GetApplicationGrantResponse.to_json)
+           (Some Values.GetApplicationGrantResponse.error_to_json)])
+let get_application_session_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_application_session_configuration
+           (Values.GetApplicationSessionConfigurationRequest.make
+              ~applicationArn ())
+           (Some Values.GetApplicationSessionConfigurationResponse.to_json)
+           (Some
+              Values.GetApplicationSessionConfigurationResponse.error_to_json)])
 let get_inline_policy_for_permission_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -408,6 +1008,30 @@ let get_inline_policy_for_permission_set =
               ~permissionSetArn ())
            (Some Values.GetInlinePolicyForPermissionSetResponse.to_json)
            (Some Values.GetInlinePolicyForPermissionSetResponse.error_to_json)])
+let get_permissions_boundary_for_permission_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn"
+       and permissionSetArn =
+         flag "permission-set-arn" (required string)
+           ~doc:"STRING PermissionSetArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_permissions_boundary_for_permission_set
+           (Values.GetPermissionsBoundaryForPermissionSetRequest.make
+              ~instanceArn ~permissionSetArn ())
+           (Some
+              Values.GetPermissionsBoundaryForPermissionSetResponse.to_json)
+           (Some
+              Values.GetPermissionsBoundaryForPermissionSetResponse.error_to_json)])
 let list_account_assignment_creation_status =
   Command.async ~summary:""
     ([%map_open.Command
@@ -492,6 +1116,41 @@ let list_account_assignments =
               ~instanceArn ~accountId ~permissionSetArn ())
            (Some Values.ListAccountAssignmentsResponse.to_json)
            (Some Values.ListAccountAssignmentsResponse.error_to_json)])
+let list_account_assignments_for_principal =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filter =
+         flag "filter" (optional json_arg)
+           ~doc:"JSON ListAccountAssignmentsFilter"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn"
+       and principalId =
+         flag "principal-id" (required string) ~doc:"STRING PrincipalId"
+       and principalType =
+         flag "principal-type" (required json_arg) ~doc:"JSON PrincipalType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_account_assignments_for_principal
+           (Values.ListAccountAssignmentsForPrincipalRequest.make
+              ?filter:(Option.map
+                         ~f:Values.ListAccountAssignmentsFilter.of_json
+                         filter) ?nextToken ?maxResults ~instanceArn
+              ~principalId
+              ~principalType:(Values.PrincipalType.of_json principalType) ())
+           (Some Values.ListAccountAssignmentsForPrincipalResponse.to_json)
+           (Some
+              Values.ListAccountAssignmentsForPrincipalResponse.error_to_json)])
 let list_accounts_for_provisioned_permission_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -526,6 +1185,211 @@ let list_accounts_for_provisioned_permission_set =
               Values.ListAccountsForProvisionedPermissionSetResponse.to_json)
            (Some
               Values.ListAccountsForProvisionedPermissionSetResponse.error_to_json)])
+let list_application_access_scopes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListApplicationAccessScopesRequestMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_application_access_scopes
+           (Values.ListApplicationAccessScopesRequest.make ?maxResults
+              ?nextToken ~applicationArn ())
+           (Some Values.ListApplicationAccessScopesResponse.to_json)
+           (Some Values.ListApplicationAccessScopesResponse.error_to_json)])
+let list_application_assignments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_application_assignments
+           (Values.ListApplicationAssignmentsRequest.make ?maxResults
+              ?nextToken ~applicationArn ())
+           (Some Values.ListApplicationAssignmentsResponse.to_json)
+           (Some Values.ListApplicationAssignmentsResponse.error_to_json)])
+let list_application_assignments_for_principal =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filter =
+         flag "filter" (optional json_arg)
+           ~doc:"JSON ListApplicationAssignmentsFilter"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn"
+       and principalId =
+         flag "principal-id" (required string) ~doc:"STRING PrincipalId"
+       and principalType =
+         flag "principal-type" (required json_arg) ~doc:"JSON PrincipalType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_application_assignments_for_principal
+           (Values.ListApplicationAssignmentsForPrincipalRequest.make
+              ?filter:(Option.map
+                         ~f:Values.ListApplicationAssignmentsFilter.of_json
+                         filter) ?nextToken ?maxResults ~instanceArn
+              ~principalId
+              ~principalType:(Values.PrincipalType.of_json principalType) ())
+           (Some
+              Values.ListApplicationAssignmentsForPrincipalResponse.to_json)
+           (Some
+              Values.ListApplicationAssignmentsForPrincipalResponse.error_to_json)])
+let list_application_authentication_methods =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_application_authentication_methods
+           (Values.ListApplicationAuthenticationMethodsRequest.make
+              ?nextToken ~applicationArn ())
+           (Some Values.ListApplicationAuthenticationMethodsResponse.to_json)
+           (Some
+              Values.ListApplicationAuthenticationMethodsResponse.error_to_json)])
+let list_application_grants =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_application_grants
+           (Values.ListApplicationGrantsRequest.make ?nextToken
+              ~applicationArn ())
+           (Some Values.ListApplicationGrantsResponse.to_json)
+           (Some Values.ListApplicationGrantsResponse.error_to_json)])
+let list_application_providers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_application_providers
+           (Values.ListApplicationProvidersRequest.make ?maxResults
+              ?nextToken ())
+           (Some Values.ListApplicationProvidersResponse.to_json)
+           (Some Values.ListApplicationProvidersResponse.error_to_json)])
+let list_applications =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and filter =
+         flag "filter" (optional json_arg) ~doc:"JSON ListApplicationsFilter"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_applications
+           (Values.ListApplicationsRequest.make ?maxResults ?nextToken
+              ?filter:(Option.map ~f:Values.ListApplicationsFilter.of_json
+                         filter) ~instanceArn ())
+           (Some Values.ListApplicationsResponse.to_json)
+           (Some Values.ListApplicationsResponse.error_to_json)])
+let list_customer_managed_policy_references_in_permission_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn"
+       and permissionSetArn =
+         flag "permission-set-arn" (required string)
+           ~doc:"STRING PermissionSetArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_customer_managed_policy_references_in_permission_set
+           (Values.ListCustomerManagedPolicyReferencesInPermissionSetRequest.make
+              ?maxResults ?nextToken ~instanceArn ~permissionSetArn ())
+           (Some
+              Values.ListCustomerManagedPolicyReferencesInPermissionSetResponse.to_json)
+           (Some
+              Values.ListCustomerManagedPolicyReferencesInPermissionSetResponse.error_to_json)])
 let list_instances =
   Command.async ~summary:""
     ([%map_open.Command
@@ -657,6 +1521,28 @@ let list_permission_sets_provisioned_to_account =
               Values.ListPermissionSetsProvisionedToAccountResponse.to_json)
            (Some
               Values.ListPermissionSetsProvisionedToAccountResponse.error_to_json)])
+let list_regions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_regions
+           (Values.ListRegionsRequest.make ?maxResults ?nextToken
+              ~instanceArn ()) (Some Values.ListRegionsResponse.to_json)
+           (Some Values.ListRegionsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -667,19 +1553,43 @@ let list_tags_for_resource =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and instanceArn =
+         flag "instance-arn" (optional string) ~doc:"STRING InstanceArn"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING Token"
-       and instanceArn =
-         flag "instance-arn" (required string) ~doc:"STRING InstanceArn"
        and resourceArn =
-         flag "resource-arn" (required string) ~doc:"STRING GeneralArn" in
+         flag "resource-arn" (required string)
+           ~doc:"STRING TaggableResourceArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_tags_for_resource
-           (Values.ListTagsForResourceRequest.make ?nextToken ~instanceArn
+           (Values.ListTagsForResourceRequest.make ?instanceArn ?nextToken
               ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_trusted_token_issuers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_trusted_token_issuers
+           (Values.ListTrustedTokenIssuersRequest.make ?maxResults ?nextToken
+              ~instanceArn ())
+           (Some Values.ListTrustedTokenIssuersResponse.to_json)
+           (Some Values.ListTrustedTokenIssuersResponse.error_to_json)])
 let provision_permission_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -708,6 +1618,132 @@ let provision_permission_set =
               ~targetType:(Values.ProvisionTargetType.of_json targetType) ())
            (Some Values.ProvisionPermissionSetResponse.to_json)
            (Some Values.ProvisionPermissionSetResponse.error_to_json)])
+let put_application_access_scope =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and authorizedTargets =
+         flag "authorized-targets" (optional json_arg)
+           ~doc:"JSON ScopeTargets"
+       and scope = flag "scope" (required string) ~doc:"STRING Scope"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_application_access_scope
+           (Values.PutApplicationAccessScopeRequest.make
+              ?authorizedTargets:(Option.map ~f:Values.ScopeTargets.of_json
+                                    authorizedTargets) ~scope ~applicationArn
+              ()) None None])
+let put_application_assignment_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn"
+       and assignmentRequired =
+         flag "assignment-required" (required bool)
+           ~doc:"BOOL AssignmentRequired" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_application_assignment_configuration
+           (Values.PutApplicationAssignmentConfigurationRequest.make
+              ~applicationArn ~assignmentRequired ())
+           (Some Values.PutApplicationAssignmentConfigurationResponse.to_json)
+           (Some
+              Values.PutApplicationAssignmentConfigurationResponse.error_to_json)])
+let put_application_authentication_method =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn"
+       and authenticationMethodType =
+         flag "authentication-method-type" (required json_arg)
+           ~doc:"JSON AuthenticationMethodType"
+       and authenticationMethod =
+         flag "authentication-method" (required json_arg)
+           ~doc:"JSON AuthenticationMethod" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_application_authentication_method
+           (Values.PutApplicationAuthenticationMethodRequest.make
+              ~applicationArn
+              ~authenticationMethodType:(Values.AuthenticationMethodType.of_json
+                                           authenticationMethodType)
+              ~authenticationMethod:(Values.AuthenticationMethod.of_json
+                                       authenticationMethod) ()) None None])
+let put_application_grant =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn"
+       and grantType =
+         flag "grant-type" (required json_arg) ~doc:"JSON GrantType"
+       and grant = flag "grant" (required json_arg) ~doc:"JSON Grant" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_application_grant
+           (Values.PutApplicationGrantRequest.make ~applicationArn
+              ~grantType:(Values.GrantType.of_json grantType)
+              ~grant:(Values.Grant.of_json grant) ()) None None])
+let put_application_session_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and userBackgroundSessionApplicationStatus =
+         flag "user-background-session-application-status"
+           (optional json_arg)
+           ~doc:"JSON UserBackgroundSessionApplicationStatus"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_application_session_configuration
+           (Values.PutApplicationSessionConfigurationRequest.make
+              ?userBackgroundSessionApplicationStatus:(Option.map
+                                                         ~f:Values.UserBackgroundSessionApplicationStatus.of_json
+                                                         userBackgroundSessionApplicationStatus)
+              ~applicationArn ())
+           (Some Values.PutApplicationSessionConfigurationResponse.to_json)
+           (Some
+              Values.PutApplicationSessionConfigurationResponse.error_to_json)])
 let put_inline_policy_to_permission_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -733,7 +1769,7 @@ let put_inline_policy_to_permission_set =
               ~permissionSetArn ~inlinePolicy ())
            (Some Values.PutInlinePolicyToPermissionSetResponse.to_json)
            (Some Values.PutInlinePolicyToPermissionSetResponse.error_to_json)])
-let tag_resource =
+let put_permissions_boundary_to_permission_set =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -745,13 +1781,62 @@ let tag_resource =
            ~doc:"URL override endpoint url"
        and instanceArn =
          flag "instance-arn" (required string) ~doc:"STRING InstanceArn"
+       and permissionSetArn =
+         flag "permission-set-arn" (required string)
+           ~doc:"STRING PermissionSetArn"
+       and permissionsBoundary =
+         flag "permissions-boundary" (required json_arg)
+           ~doc:"JSON PermissionsBoundary" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_permissions_boundary_to_permission_set
+           (Values.PutPermissionsBoundaryToPermissionSetRequest.make
+              ~instanceArn ~permissionSetArn
+              ~permissionsBoundary:(Values.PermissionsBoundary.of_json
+                                      permissionsBoundary) ())
+           (Some Values.PutPermissionsBoundaryToPermissionSetResponse.to_json)
+           (Some
+              Values.PutPermissionsBoundaryToPermissionSetResponse.error_to_json)])
+let remove_region =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn"
+       and regionName =
+         flag "region-name" (required string) ~doc:"STRING RegionName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.remove_region
+           (Values.RemoveRegionRequest.make ~instanceArn ~regionName ())
+           (Some Values.RemoveRegionResponse.to_json)
+           (Some Values.RemoveRegionResponse.error_to_json)])
+let tag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceArn =
+         flag "instance-arn" (optional string) ~doc:"STRING InstanceArn"
        and resourceArn =
-         flag "resource-arn" (required string) ~doc:"STRING GeneralArn"
+         flag "resource-arn" (required string)
+           ~doc:"STRING TaggableResourceArn"
        and tags = flag "tags" (required json_arg) ~doc:"JSON TagList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.tag_resource
-           (Values.TagResourceRequest.make ~instanceArn ~resourceArn
+           (Values.TagResourceRequest.make ?instanceArn ~resourceArn
               ~tags:(Values.TagList.of_json tags) ())
            (Some Values.TagResourceResponse.to_json)
            (Some Values.TagResourceResponse.error_to_json)])
@@ -766,18 +1851,76 @@ let untag_resource =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and instanceArn =
-         flag "instance-arn" (required string) ~doc:"STRING InstanceArn"
+         flag "instance-arn" (optional string) ~doc:"STRING InstanceArn"
        and resourceArn =
-         flag "resource-arn" (required string) ~doc:"STRING GeneralArn"
+         flag "resource-arn" (required string)
+           ~doc:"STRING TaggableResourceArn"
        and tagKeys =
          flag "tag-keys" (required json_arg) ~doc:"JSON TagKeyList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.untag_resource
-           (Values.UntagResourceRequest.make ~instanceArn ~resourceArn
+           (Values.UntagResourceRequest.make ?instanceArn ~resourceArn
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (optional string) ~doc:"STRING ApplicationNameType"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and status =
+         flag "status" (optional json_arg) ~doc:"JSON ApplicationStatus"
+       and portalOptions =
+         flag "portal-options" (optional json_arg)
+           ~doc:"JSON UpdateApplicationPortalOptions"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_application
+           (Values.UpdateApplicationRequest.make ?name ?description
+              ?status:(Option.map ~f:Values.ApplicationStatus.of_json status)
+              ?portalOptions:(Option.map
+                                ~f:Values.UpdateApplicationPortalOptions.of_json
+                                portalOptions) ~applicationArn ())
+           (Some Values.UpdateApplicationResponse.to_json)
+           (Some Values.UpdateApplicationResponse.error_to_json)])
+let update_instance =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (optional string) ~doc:"STRING NameType"
+       and encryptionConfiguration =
+         flag "encryption-configuration" (optional json_arg)
+           ~doc:"JSON EncryptionConfiguration"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_instance
+           (Values.UpdateInstanceRequest.make ?name
+              ?encryptionConfiguration:(Option.map
+                                          ~f:Values.EncryptionConfiguration.of_json
+                                          encryptionConfiguration)
+              ~instanceArn ()) (Some Values.UpdateInstanceResponse.to_json)
+           (Some Values.UpdateInstanceResponse.error_to_json)])
 let update_instance_access_control_attribute_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -835,41 +1978,117 @@ let update_permission_set =
               ?sessionDuration ?relayState ~instanceArn ~permissionSetArn ())
            (Some Values.UpdatePermissionSetResponse.to_json)
            (Some Values.UpdatePermissionSetResponse.error_to_json)])
+let update_trusted_token_issuer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (optional string) ~doc:"STRING TrustedTokenIssuerName"
+       and trustedTokenIssuerConfiguration =
+         flag "trusted-token-issuer-configuration" (optional json_arg)
+           ~doc:"JSON TrustedTokenIssuerUpdateConfiguration"
+       and trustedTokenIssuerArn =
+         flag "trusted-token-issuer-arn" (required string)
+           ~doc:"STRING TrustedTokenIssuerArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_trusted_token_issuer
+           (Values.UpdateTrustedTokenIssuerRequest.make ?name
+              ?trustedTokenIssuerConfiguration:(Option.map
+                                                  ~f:Values.TrustedTokenIssuerUpdateConfiguration.of_json
+                                                  trustedTokenIssuerConfiguration)
+              ~trustedTokenIssuerArn ())
+           (Some Values.UpdateTrustedTokenIssuerResponse.to_json)
+           (Some Values.UpdateTrustedTokenIssuerResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("attach-managed-policy-to-permission-set",
-       attach_managed_policy_to_permission_set);
+    [("add-region", add_region);
+    ("attach-customer-managed-policy-reference-to-permission-set",
+      attach_customer_managed_policy_reference_to_permission_set);
+    ("attach-managed-policy-to-permission-set",
+      attach_managed_policy_to_permission_set);
     ("create-account-assignment", create_account_assignment);
+    ("create-application", create_application);
+    ("create-application-assignment", create_application_assignment);
+    ("create-instance", create_instance);
     ("create-instance-access-control-attribute-configuration",
       create_instance_access_control_attribute_configuration);
     ("create-permission-set", create_permission_set);
+    ("create-trusted-token-issuer", create_trusted_token_issuer);
     ("delete-account-assignment", delete_account_assignment);
+    ("delete-application", delete_application);
+    ("delete-application-access-scope", delete_application_access_scope);
+    ("delete-application-assignment", delete_application_assignment);
+    ("delete-application-authentication-method",
+      delete_application_authentication_method);
+    ("delete-application-grant", delete_application_grant);
     ("delete-inline-policy-from-permission-set",
       delete_inline_policy_from_permission_set);
+    ("delete-instance", delete_instance);
     ("delete-instance-access-control-attribute-configuration",
       delete_instance_access_control_attribute_configuration);
     ("delete-permission-set", delete_permission_set);
+    ("delete-permissions-boundary-from-permission-set",
+      delete_permissions_boundary_from_permission_set);
+    ("delete-trusted-token-issuer", delete_trusted_token_issuer);
     ("describe-account-assignment-creation-status",
       describe_account_assignment_creation_status);
     ("describe-account-assignment-deletion-status",
       describe_account_assignment_deletion_status);
+    ("describe-application", describe_application);
+    ("describe-application-assignment", describe_application_assignment);
+    ("describe-application-provider", describe_application_provider);
+    ("describe-instance", describe_instance);
     ("describe-instance-access-control-attribute-configuration",
       describe_instance_access_control_attribute_configuration);
     ("describe-permission-set", describe_permission_set);
     ("describe-permission-set-provisioning-status",
       describe_permission_set_provisioning_status);
+    ("describe-region", describe_region);
+    ("describe-trusted-token-issuer", describe_trusted_token_issuer);
+    ("detach-customer-managed-policy-reference-from-permission-set",
+      detach_customer_managed_policy_reference_from_permission_set);
     ("detach-managed-policy-from-permission-set",
       detach_managed_policy_from_permission_set);
+    ("get-application-access-scope", get_application_access_scope);
+    ("get-application-assignment-configuration",
+      get_application_assignment_configuration);
+    ("get-application-authentication-method",
+      get_application_authentication_method);
+    ("get-application-grant", get_application_grant);
+    ("get-application-session-configuration",
+      get_application_session_configuration);
     ("get-inline-policy-for-permission-set",
       get_inline_policy_for_permission_set);
+    ("get-permissions-boundary-for-permission-set",
+      get_permissions_boundary_for_permission_set);
     ("list-account-assignment-creation-status",
       list_account_assignment_creation_status);
     ("list-account-assignment-deletion-status",
       list_account_assignment_deletion_status);
     ("list-account-assignments", list_account_assignments);
+    ("list-account-assignments-for-principal",
+      list_account_assignments_for_principal);
     ("list-accounts-for-provisioned-permission-set",
       list_accounts_for_provisioned_permission_set);
+    ("list-application-access-scopes", list_application_access_scopes);
+    ("list-application-assignments", list_application_assignments);
+    ("list-application-assignments-for-principal",
+      list_application_assignments_for_principal);
+    ("list-application-authentication-methods",
+      list_application_authentication_methods);
+    ("list-application-grants", list_application_grants);
+    ("list-application-providers", list_application_providers);
+    ("list-applications", list_applications);
+    ("list-customer-managed-policy-references-in-permission-set",
+      list_customer_managed_policy_references_in_permission_set);
     ("list-instances", list_instances);
     ("list-managed-policies-in-permission-set",
       list_managed_policies_in_permission_set);
@@ -878,12 +2097,28 @@ let main =
     ("list-permission-sets", list_permission_sets);
     ("list-permission-sets-provisioned-to-account",
       list_permission_sets_provisioned_to_account);
+    ("list-regions", list_regions);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-trusted-token-issuers", list_trusted_token_issuers);
     ("provision-permission-set", provision_permission_set);
+    ("put-application-access-scope", put_application_access_scope);
+    ("put-application-assignment-configuration",
+      put_application_assignment_configuration);
+    ("put-application-authentication-method",
+      put_application_authentication_method);
+    ("put-application-grant", put_application_grant);
+    ("put-application-session-configuration",
+      put_application_session_configuration);
     ("put-inline-policy-to-permission-set",
       put_inline_policy_to_permission_set);
+    ("put-permissions-boundary-to-permission-set",
+      put_permissions_boundary_to_permission_set);
+    ("remove-region", remove_region);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
+    ("update-application", update_application);
+    ("update-instance", update_instance);
     ("update-instance-access-control-attribute-configuration",
       update_instance_access_control_attribute_configuration);
-    ("update-permission-set", update_permission_set)]
+    ("update-permission-set", update_permission_set);
+    ("update-trusted-token-issuer", update_trusted_token_issuer)]

@@ -24,6 +24,12 @@ val create_cluster :
       CreateClusterRequest.t ->
         (CreateClusterResponse.t, CreateClusterResponse.error) Result.t
           Async.Deferred.t
+val create_multi_region_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateMultiRegionClusterRequest.t ->
+        (CreateMultiRegionClusterResponse.t,
+          CreateMultiRegionClusterResponse.error) Result.t Async.Deferred.t
 val create_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -60,6 +66,12 @@ val delete_cluster :
       DeleteClusterRequest.t ->
         (DeleteClusterResponse.t, DeleteClusterResponse.error) Result.t
           Async.Deferred.t
+val delete_multi_region_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteMultiRegionClusterRequest.t ->
+        (DeleteMultiRegionClusterResponse.t,
+          DeleteMultiRegionClusterResponse.error) Result.t Async.Deferred.t
 val delete_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -108,6 +120,27 @@ val describe_events :
       DescribeEventsRequest.t ->
         (DescribeEventsResponse.t, DescribeEventsResponse.error) Result.t
           Async.Deferred.t
+val describe_multi_region_clusters :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMultiRegionClustersRequest.t ->
+        (DescribeMultiRegionClustersResponse.t,
+          DescribeMultiRegionClustersResponse.error) Result.t
+          Async.Deferred.t
+val describe_multi_region_parameter_groups :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMultiRegionParameterGroupsRequest.t ->
+        (DescribeMultiRegionParameterGroupsResponse.t,
+          DescribeMultiRegionParameterGroupsResponse.error) Result.t
+          Async.Deferred.t
+val describe_multi_region_parameters :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMultiRegionParametersRequest.t ->
+        (DescribeMultiRegionParametersResponse.t,
+          DescribeMultiRegionParametersResponse.error) Result.t
+          Async.Deferred.t
 val describe_parameter_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -120,6 +153,19 @@ val describe_parameters :
       DescribeParametersRequest.t ->
         (DescribeParametersResponse.t, DescribeParametersResponse.error)
           Result.t Async.Deferred.t
+val describe_reserved_nodes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeReservedNodesRequest.t ->
+        (DescribeReservedNodesResponse.t,
+          DescribeReservedNodesResponse.error) Result.t Async.Deferred.t
+val describe_reserved_nodes_offerings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeReservedNodesOfferingsRequest.t ->
+        (DescribeReservedNodesOfferingsResponse.t,
+          DescribeReservedNodesOfferingsResponse.error) Result.t
+          Async.Deferred.t
 val describe_service_updates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -150,6 +196,13 @@ val failover_shard :
       FailoverShardRequest.t ->
         (FailoverShardResponse.t, FailoverShardResponse.error) Result.t
           Async.Deferred.t
+val list_allowed_multi_region_cluster_updates :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAllowedMultiRegionClusterUpdatesRequest.t ->
+        (ListAllowedMultiRegionClusterUpdatesResponse.t,
+          ListAllowedMultiRegionClusterUpdatesResponse.error) Result.t
+          Async.Deferred.t
 val list_allowed_node_type_updates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -161,6 +214,13 @@ val list_tags :
     ?cfg:Awso.Cfg.t ->
       ListTagsRequest.t ->
         (ListTagsResponse.t, ListTagsResponse.error) Result.t
+          Async.Deferred.t
+val purchase_reserved_nodes_offering :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PurchaseReservedNodesOfferingRequest.t ->
+        (PurchaseReservedNodesOfferingResponse.t,
+          PurchaseReservedNodesOfferingResponse.error) Result.t
           Async.Deferred.t
 val reset_parameter_group :
   ?endpoint_url:string ->
@@ -192,6 +252,12 @@ val update_cluster :
       UpdateClusterRequest.t ->
         (UpdateClusterResponse.t, UpdateClusterResponse.error) Result.t
           Async.Deferred.t
+val update_multi_region_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateMultiRegionClusterRequest.t ->
+        (UpdateMultiRegionClusterResponse.t,
+          UpdateMultiRegionClusterResponse.error) Result.t Async.Deferred.t
 val update_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

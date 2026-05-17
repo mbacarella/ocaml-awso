@@ -17,6 +17,11 @@ val get_h_l_s_streaming_session_u_r_l :
       GetHLSStreamingSessionURLInput.t ->
         (GetHLSStreamingSessionURLOutput.t,
           GetHLSStreamingSessionURLOutput.error) Result.t Async.Deferred.t
+val get_images :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetImagesInput.t ->
+        (GetImagesOutput.t, GetImagesOutput.error) Result.t Async.Deferred.t
 val get_media_for_fragment_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

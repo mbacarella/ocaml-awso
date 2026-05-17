@@ -142,6 +142,46 @@ module BounceStatusCode =
     let of_json j = string_of_json ~kind:"BounceStatusCode" j
     let to_json = simple_to_json to_value
   end
+module ConnectInstanceArn =
+  struct
+    type nonrec t = string
+    let context_ = "ConnectInstanceArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"arn:(aws|aws-us-gov):connect:[a-z]{2}-[a-z]+-[0-9-]{1}:[0-9]{1,20}:instance/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ConnectInstanceArn" j
+    let to_json = simple_to_json to_value
+  end
+module IAMRoleARN =
+  struct
+    type nonrec t = string
+    let context_ = "IAMRoleARN"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[\\w-]+:iam::[0-9]+:role(\\u002F)([\\u0021-\\u007E]+\\u002F)?([\\w+=,.@-]+)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IAMRoleARN" j
+    let to_json = simple_to_json to_value
+  end
 module InvocationType =
   struct
     type nonrec t =
@@ -319,7 +359,7 @@ module ExtensionField =
           "The name of the header to add. Must be between 1 and 50 characters, inclusive, and consist of alphanumeric (a-z, A-Z, 0-9) characters and dashes only."];
       value: ExtensionFieldValue.t
         [@ocaml.doc
-          "The value of the header to add. Must be less than 2048 characters, and must not contain newline characters (\"\\r\" or \"\\n\")."]}
+          "The value of the header to add. Must contain 2048 characters or fewer, and must not contain newline characters (\"\\r\" or \"\\n\")."]}
     let context_ = "ExtensionField"
     let make ~name = fun ~value -> fun () -> { name; value }
     let to_value x =
@@ -336,9 +376,9 @@ module ExtensionField =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" ExtensionFieldValue.of_json in
-      let name = field_map_exn json "Name" ExtensionFieldName.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" ExtensionFieldValue.of_json in
+      let name = field_map_exn json__ "Name" ExtensionFieldName.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -349,10 +389,10 @@ module AddHeaderAction =
       {
       headerName: HeaderName.t
         [@ocaml.doc
-          "The name of the header to add. Must be between 1 and 50 characters, inclusive, and consist of alphanumeric (a-z, A-Z, 0-9) characters and dashes only."];
+          "The name of the header to add to the incoming message. The name must contain at least one character, and can contain up to 50 characters. It consists of alphanumeric (a\226\128\147z, A\226\128\147Z, 0\226\128\1479) characters and dashes."];
       headerValue: HeaderValue.t
         [@ocaml.doc
-          "Must be less than 2048 characters, and must not contain newline characters (\"\\r\" or \"\\n\")."]}
+          "The content to include in the header. This value can contain up to 2048 characters. It can't contain newline (\\n) or carriage return (\\r) characters."]}
     let context_ = "AddHeaderAction"
     let make ~headerName =
       fun ~headerValue -> fun () -> { headerName; headerValue }
@@ -370,9 +410,10 @@ module AddHeaderAction =
           (Xml.child_exn ~context:context_ xml_arg0 "HeaderName") in
       make ~headerValue ~headerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let headerValue = field_map_exn json "HeaderValue" HeaderValue.of_json in
-      let headerName = field_map_exn json "HeaderName" HeaderName.of_json in
+    let of_json json__ =
+      let headerValue =
+        field_map_exn json__ "HeaderValue" HeaderValue.of_json in
+      let headerName = field_map_exn json__ "HeaderName" HeaderName.of_json in
       make ~headerValue ~headerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -383,7 +424,7 @@ module BounceAction =
       {
       topicArn: AmazonResourceName.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon SNS topic to notify when the bounce action is taken. An example of an Amazon SNS topic ARN is arn:aws:sns:us-west-2:123456789012:MyTopic. For more information about Amazon SNS topics, see the Amazon SNS Developer Guide."];
+          "The Amazon Resource Name (ARN) of the Amazon SNS topic to notify when the bounce action is taken. You can find the ARN of a topic by using the ListTopics operation in Amazon SNS. For more information about Amazon SNS topics, see the Amazon SNS Developer Guide."];
       smtpReplyCode: BounceSmtpReplyCode.t
         [@ocaml.doc "The SMTP reply code, as defined by RFC 5321."];
       statusCode: BounceStatusCode.t option
@@ -392,7 +433,7 @@ module BounceAction =
         [@ocaml.doc "Human-readable text to include in the bounce message."];
       sender: Address.t
         [@ocaml.doc
-          "The email address of the sender of the bounced email. This is the address from which the bounce message will be sent."]}
+          "The email address of the sender of the bounced email. This is the address from which the bounce message is sent."]}
     let context_ = "BounceAction"
     let make ?topicArn =
       fun ?statusCode ->
@@ -428,30 +469,65 @@ module BounceAction =
           (Xml.child xml_arg0 "TopicArn") in
       make ~sender ~message ?statusCode ~smtpReplyCode ?topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sender = field_map_exn json "Sender" Address.of_json in
-      let message = field_map_exn json "Message" BounceMessage.of_json in
-      let statusCode = field_map json "StatusCode" BounceStatusCode.of_json in
+    let of_json json__ =
+      let sender = field_map_exn json__ "Sender" Address.of_json in
+      let message = field_map_exn json__ "Message" BounceMessage.of_json in
+      let statusCode = field_map json__ "StatusCode" BounceStatusCode.of_json in
       let smtpReplyCode =
-        field_map_exn json "SmtpReplyCode" BounceSmtpReplyCode.of_json in
-      let topicArn = field_map json "TopicArn" AmazonResourceName.of_json in
+        field_map_exn json__ "SmtpReplyCode" BounceSmtpReplyCode.of_json in
+      let topicArn = field_map json__ "TopicArn" AmazonResourceName.of_json in
       make ~sender ~message ?statusCode ~smtpReplyCode ?topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "When included in a receipt rule, this action rejects the received email by returning a bounce response to the sender and, optionally, publishes a notification to Amazon Simple Notification Service (Amazon SNS). For information about sending a bounce message in response to a received email, see the Amazon SES Developer Guide."]
+module ConnectAction =
+  struct
+    type nonrec t =
+      {
+      instanceARN: ConnectInstanceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the Amazon Connect instance that Amazon SES integrates with for starting email contacts. For more information about Amazon Connect instances, see the Amazon Connect Administrator Guide"];
+      iAMRoleARN: IAMRoleARN.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role to be used by Amazon Simple Email Service while starting email contacts to the Amazon Connect instance. This role should have permission to invoke connect:StartEmailContact for the given Amazon Connect instance."]}
+    let context_ = "ConnectAction"
+    let make ~instanceARN =
+      fun ~iAMRoleARN -> fun () -> { instanceARN; iAMRoleARN }
+    let to_value x =
+      structure_to_value
+        [("InstanceARN", (Some (ConnectInstanceArn.to_value x.instanceARN)));
+        ("IAMRoleARN", (Some (IAMRoleARN.to_value x.iAMRoleARN)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let iAMRoleARN =
+        IAMRoleARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IAMRoleARN") in
+      let instanceARN =
+        ConnectInstanceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InstanceARN") in
+      make ~iAMRoleARN ~instanceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let iAMRoleARN = field_map_exn json__ "IAMRoleARN" IAMRoleARN.of_json in
+      let instanceARN =
+        field_map_exn json__ "InstanceARN" ConnectInstanceArn.of_json in
+      make ~iAMRoleARN ~instanceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "When included in a receipt rule, this action parses the received message and starts an email contact in Amazon Connect on your behalf. When you receive emails, the maximum email size (including headers) is 40 MB. Additionally, emails may only have up to 10 attachments. Emails larger than 40 MB or with more than 10 attachments will be bounced. We recommend that you configure this action via Amazon Connect."]
 module LambdaAction =
   struct
     type nonrec t =
       {
       topicArn: AmazonResourceName.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon SNS topic to notify when the Lambda action is taken. An example of an Amazon SNS topic ARN is arn:aws:sns:us-west-2:123456789012:MyTopic. For more information about Amazon SNS topics, see the Amazon SNS Developer Guide."];
+          "The Amazon Resource Name (ARN) of the Amazon SNS topic to notify when the Lambda action is executed. You can find the ARN of a topic by using the ListTopics operation in Amazon SNS. For more information about Amazon SNS topics, see the Amazon SNS Developer Guide."];
       functionArn: AmazonResourceName.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Lambda function. An example of an AWS Lambda function ARN is arn:aws:lambda:us-west-2:account-id:function:MyFunction. For more information about AWS Lambda, see the AWS Lambda Developer Guide."];
+          "The Amazon Resource Name (ARN) of the Amazon Web Services Lambda function. An example of an Amazon Web Services Lambda function ARN is arn:aws:lambda:us-west-2:account-id:function:MyFunction. For more information about Amazon Web Services Lambda, see the Amazon Web Services Lambda Developer Guide."];
       invocationType: InvocationType.t option
         [@ocaml.doc
-          "The invocation type of the AWS Lambda function. An invocation type of RequestResponse means that the execution of the function will immediately result in a response, and a value of Event means that the function will be invoked asynchronously. The default value is Event. For information about AWS Lambda invocation types, see the AWS Lambda Developer Guide. There is a 30-second timeout on RequestResponse invocations. You should use Event invocation in most cases. Use RequestResponse only when you want to make a mail flow decision, such as whether to stop the receipt rule or the receipt rule set."]}
+          "The invocation type of the Amazon Web Services Lambda function. An invocation type of RequestResponse means that the execution of the function immediately results in a response, and a value of Event means that the function is invoked asynchronously. The default value is Event. For information about Amazon Web Services Lambda invocation types, see the Amazon Web Services Lambda Developer Guide. There is a 30-second timeout on RequestResponse invocations. You should use Event invocation in most cases. Use RequestResponse only to make a mail flow decision, such as whether to stop the receipt rule or the receipt rule set."]}
     let context_ = "LambdaAction"
     let make ?topicArn =
       fun ?invocationType ->
@@ -476,38 +552,48 @@ module LambdaAction =
           (Xml.child xml_arg0 "TopicArn") in
       make ?invocationType ~functionArn ?topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let invocationType =
-        field_map json "InvocationType" InvocationType.of_json in
+        field_map json__ "InvocationType" InvocationType.of_json in
       let functionArn =
-        field_map_exn json "FunctionArn" AmazonResourceName.of_json in
-      let topicArn = field_map json "TopicArn" AmazonResourceName.of_json in
+        field_map_exn json__ "FunctionArn" AmazonResourceName.of_json in
+      let topicArn = field_map json__ "TopicArn" AmazonResourceName.of_json in
       make ?invocationType ~functionArn ?topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "When included in a receipt rule, this action calls an AWS Lambda function and, optionally, publishes a notification to Amazon Simple Notification Service (Amazon SNS). To enable Amazon SES to call your AWS Lambda function or to publish to an Amazon SNS topic of another account, Amazon SES must have permission to access those resources. For information about giving permissions, see the Amazon SES Developer Guide. For information about using AWS Lambda actions in receipt rules, see the Amazon SES Developer Guide."]
+       "When included in a receipt rule, this action calls an Amazon Web Services Lambda function and, optionally, publishes a notification to Amazon Simple Notification Service (Amazon SNS). To enable Amazon SES to call your Amazon Web Services Lambda function or to publish to an Amazon SNS topic of another account, Amazon SES must have permission to access those resources. For information about giving permissions, see the Amazon SES Developer Guide. For information about using Amazon Web Services Lambda actions in receipt rules, see the Amazon SES Developer Guide."]
 module S3Action =
   struct
     type nonrec t =
       {
       topicArn: AmazonResourceName.t option
         [@ocaml.doc
-          "The ARN of the Amazon SNS topic to notify when the message is saved to the Amazon S3 bucket. An example of an Amazon SNS topic ARN is arn:aws:sns:us-west-2:123456789012:MyTopic. For more information about Amazon SNS topics, see the Amazon SNS Developer Guide."];
+          "The ARN of the Amazon SNS topic to notify when the message is saved to the Amazon S3 bucket. You can find the ARN of a topic by using the ListTopics operation in Amazon SNS. For more information about Amazon SNS topics, see the Amazon SNS Developer Guide."];
       bucketName: S3BucketName.t
-        [@ocaml.doc
-          "The name of the Amazon S3 bucket that incoming email will be saved to."];
+        [@ocaml.doc "The name of the Amazon S3 bucket for incoming email."];
       objectKeyPrefix: S3KeyPrefix.t option
         [@ocaml.doc
           "The key prefix of the Amazon S3 bucket. The key prefix is similar to a directory name that enables you to store similar data under the same directory in a bucket."];
       kmsKeyArn: AmazonResourceName.t option
         [@ocaml.doc
-          "The customer master key that Amazon SES should use to encrypt your emails before saving them to the Amazon S3 bucket. You can use the default master key or a custom master key you created in AWS KMS as follows: To use the default master key, provide an ARN in the form of arn:aws:kms:REGION:ACCOUNT-ID-WITHOUT-HYPHENS:alias/aws/ses. For example, if your AWS account ID is 123456789012 and you want to use the default master key in the US West (Oregon) region, the ARN of the default master key would be arn:aws:kms:us-west-2:123456789012:alias/aws/ses. If you use the default master key, you don't need to perform any extra steps to give Amazon SES permission to use the key. To use a custom master key you created in AWS KMS, provide the ARN of the master key and ensure that you add a statement to your key's policy to give Amazon SES permission to use it. For more information about giving permissions, see the Amazon SES Developer Guide. For more information about key policies, see the AWS KMS Developer Guide. If you do not specify a master key, Amazon SES will not encrypt your emails. Your mail is encrypted by Amazon SES using the Amazon S3 encryption client before the mail is submitted to Amazon S3 for storage. It is not encrypted using Amazon S3 server-side encryption. This means that you must use the Amazon S3 encryption client to decrypt the email after retrieving it from Amazon S3, as the service has no access to use your AWS KMS keys for decryption. This encryption client is currently available with the AWS SDK for Java and AWS SDK for Ruby only. For more information about client-side encryption using AWS KMS master keys, see the Amazon S3 Developer Guide."]}
+          "The customer managed key that Amazon SES should use to encrypt your emails before saving them to the Amazon S3 bucket. You can use the Amazon Web Services managed key or a customer managed key that you created in Amazon Web Services KMS as follows: To use the Amazon Web Services managed key, provide an ARN in the form of arn:aws:kms:REGION:ACCOUNT-ID-WITHOUT-HYPHENS:alias/aws/ses. For example, if your Amazon Web Services account ID is 123456789012 and you want to use the Amazon Web Services managed key in the US West (Oregon) Region, the ARN of the Amazon Web Services managed key would be arn:aws:kms:us-west-2:123456789012:alias/aws/ses. If you use the Amazon Web Services managed key, you don't need to perform any extra steps to give Amazon SES permission to use the key. To use a customer managed key that you created in Amazon Web Services KMS, provide the ARN of the customer managed key and ensure that you add a statement to your key's policy to give Amazon SES permission to use it. For more information about giving permissions, see the Amazon SES Developer Guide. For more information about key policies, see the Amazon Web Services KMS Developer Guide. If you do not specify an Amazon Web Services KMS key, Amazon SES does not encrypt your emails. Your mail is encrypted by Amazon SES using the Amazon S3 encryption client before the mail is submitted to Amazon S3 for storage. It is not encrypted using Amazon S3 server-side encryption. This means that you must use the Amazon S3 encryption client to decrypt the email after retrieving it from Amazon S3, as the service has no access to use your Amazon Web Services KMS keys for decryption. This encryption client is currently available with the Amazon Web Services SDK for Java and Amazon Web Services SDK for Ruby only. For more information about client-side encryption using Amazon Web Services KMS managed keys, see the Amazon S3 Developer Guide."];
+      iamRoleArn: IAMRoleARN.t option
+        [@ocaml.doc
+          "The ARN of the IAM role to be used by Amazon Simple Email Service while writing to the Amazon S3 bucket, optionally encrypting your mail via the provided customer managed key, and publishing to the Amazon SNS topic. This role should have access to the following APIs: s3:PutObject, kms:Encrypt and kms:GenerateDataKey for the given Amazon S3 bucket. kms:GenerateDataKey for the given Amazon Web Services KMS customer managed key. sns:Publish for the given Amazon SNS topic. If an IAM role ARN is provided, the role (and only the role) is used to access all the given resources (Amazon S3 bucket, Amazon Web Services KMS customer managed key and Amazon SNS topic). Therefore, setting up individual resource access permissions is not required."]}
     let context_ = "S3Action"
     let make ?topicArn =
       fun ?objectKeyPrefix ->
         fun ?kmsKeyArn ->
-          fun ~bucketName ->
-            fun () -> { topicArn; objectKeyPrefix; kmsKeyArn; bucketName }
+          fun ?iamRoleArn ->
+            fun ~bucketName ->
+              fun () ->
+                {
+                  topicArn;
+                  objectKeyPrefix;
+                  kmsKeyArn;
+                  iamRoleArn;
+                  bucketName
+                }
     let to_value x =
       structure_to_value
         [("TopicArn", (Option.map x.topicArn ~f:AmazonResourceName.to_value));
@@ -515,9 +601,12 @@ module S3Action =
         ("ObjectKeyPrefix",
           (Option.map x.objectKeyPrefix ~f:S3KeyPrefix.to_value));
         ("KmsKeyArn",
-          (Option.map x.kmsKeyArn ~f:AmazonResourceName.to_value))]
+          (Option.map x.kmsKeyArn ~f:AmazonResourceName.to_value));
+        ("IamRoleArn", (Option.map x.iamRoleArn ~f:IAMRoleARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let iamRoleArn =
+        (Option.map ~f:IAMRoleARN.of_xml) (Xml.child xml_arg0 "IamRoleArn") in
       let kmsKeyArn =
         (Option.map ~f:AmazonResourceName.of_xml)
           (Xml.child xml_arg0 "KmsKeyArn") in
@@ -530,25 +619,26 @@ module S3Action =
       let topicArn =
         (Option.map ~f:AmazonResourceName.of_xml)
           (Xml.child xml_arg0 "TopicArn") in
-      make ?kmsKeyArn ?objectKeyPrefix ~bucketName ?topicArn ()
+      make ?iamRoleArn ?kmsKeyArn ?objectKeyPrefix ~bucketName ?topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyArn = field_map json "KmsKeyArn" AmazonResourceName.of_json in
+    let of_json json__ =
+      let iamRoleArn = field_map json__ "IamRoleArn" IAMRoleARN.of_json in
+      let kmsKeyArn = field_map json__ "KmsKeyArn" AmazonResourceName.of_json in
       let objectKeyPrefix =
-        field_map json "ObjectKeyPrefix" S3KeyPrefix.of_json in
-      let bucketName = field_map_exn json "BucketName" S3BucketName.of_json in
-      let topicArn = field_map json "TopicArn" AmazonResourceName.of_json in
-      make ?kmsKeyArn ?objectKeyPrefix ~bucketName ?topicArn ()
+        field_map json__ "ObjectKeyPrefix" S3KeyPrefix.of_json in
+      let bucketName = field_map_exn json__ "BucketName" S3BucketName.of_json in
+      let topicArn = field_map json__ "TopicArn" AmazonResourceName.of_json in
+      make ?iamRoleArn ?kmsKeyArn ?objectKeyPrefix ~bucketName ?topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "When included in a receipt rule, this action saves the received message to an Amazon Simple Storage Service (Amazon S3) bucket and, optionally, publishes a notification to Amazon Simple Notification Service (Amazon SNS). To enable Amazon SES to write emails to your Amazon S3 bucket, use an AWS KMS key to encrypt your emails, or publish to an Amazon SNS topic of another account, Amazon SES must have permission to access those resources. For information about giving permissions, see the Amazon SES Developer Guide. When you save your emails to an Amazon S3 bucket, the maximum email size (including headers) is 30 MB. Emails larger than that will bounce. For information about specifying Amazon S3 actions in receipt rules, see the Amazon SES Developer Guide."]
+       "When included in a receipt rule, this action saves the received message to an Amazon Simple Storage Service (Amazon S3) bucket and, optionally, publishes a notification to Amazon Simple Notification Service (Amazon SNS). To enable Amazon SES to write emails to your Amazon S3 bucket, use an Amazon Web Services KMS key to encrypt your emails, or publish to an Amazon SNS topic of another account, Amazon SES must have permission to access those resources. For information about granting permissions, see the Amazon SES Developer Guide. When you save your emails to an Amazon S3 bucket, the maximum email size (including headers) is 40 MB. Emails larger than that bounces. For information about specifying Amazon S3 actions in receipt rules, see the Amazon SES Developer Guide."]
 module SNSAction =
   struct
     type nonrec t =
       {
       topicArn: AmazonResourceName.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon SNS topic to notify. An example of an Amazon SNS topic ARN is arn:aws:sns:us-west-2:123456789012:MyTopic. For more information about Amazon SNS topics, see the Amazon SNS Developer Guide."];
+          "The Amazon Resource Name (ARN) of the Amazon SNS topic to notify. You can find the ARN of a topic by using the ListTopics operation in Amazon SNS. For more information about Amazon SNS topics, see the Amazon SNS Developer Guide."];
       encoding: SNSActionEncoding.t option
         [@ocaml.doc
           "The encoding to use for the email within the Amazon SNS notification. UTF-8 is easier to use, but may not preserve all special characters when a message was encoded with a different encoding format. Base64 preserves all special characters. The default value is UTF-8."]}
@@ -568,13 +658,14 @@ module SNSAction =
           (Xml.child_exn ~context:context_ xml_arg0 "TopicArn") in
       make ?encoding ~topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let encoding = field_map json "Encoding" SNSActionEncoding.of_json in
-      let topicArn = field_map_exn json "TopicArn" AmazonResourceName.of_json in
+    let of_json json__ =
+      let encoding = field_map json__ "Encoding" SNSActionEncoding.of_json in
+      let topicArn =
+        field_map_exn json__ "TopicArn" AmazonResourceName.of_json in
       make ?encoding ~topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "When included in a receipt rule, this action publishes a notification to Amazon Simple Notification Service (Amazon SNS). This action includes a complete copy of the email content in the Amazon SNS notifications. Amazon SNS notifications for all other actions simply provide information about the email. They do not include the email content itself. If you own the Amazon SNS topic, you don't need to do anything to give Amazon SES permission to publish emails to it. However, if you don't own the Amazon SNS topic, you need to attach a policy to the topic to give Amazon SES permissions to access it. For information about giving permissions, see the Amazon SES Developer Guide. You can only publish emails that are 150 KB or less (including the header) to Amazon SNS. Larger emails will bounce. If you anticipate emails larger than 150 KB, use the S3 action instead. For information about using a receipt rule to publish an Amazon SNS notification, see the Amazon SES Developer Guide."]
+       "When included in a receipt rule, this action publishes a notification to Amazon Simple Notification Service (Amazon SNS). This action includes a complete copy of the email content in the Amazon SNS notifications. Amazon SNS notifications for all other actions simply provide information about the email. They do not include the email content itself. If you own the Amazon SNS topic, you don't need to do anything to give Amazon SES permission to publish emails to it. However, if you don't own the Amazon SNS topic, you need to attach a policy to the topic to give Amazon SES permissions to access it. For information about giving permissions, see the Amazon SES Developer Guide. You can only publish emails that are 150 KB or less (including the header) to Amazon SNS. Larger emails bounce. If you anticipate emails larger than 150 KB, use the S3 action instead. For information about using a receipt rule to publish an Amazon SNS notification, see the Amazon SES Developer Guide."]
 module StopAction =
   struct
     type nonrec t =
@@ -584,7 +675,7 @@ module StopAction =
           "The scope of the StopAction. The only acceptable value is RuleSet."];
       topicArn: AmazonResourceName.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon SNS topic to notify when the stop action is taken. An example of an Amazon SNS topic ARN is arn:aws:sns:us-west-2:123456789012:MyTopic. For more information about Amazon SNS topics, see the Amazon SNS Developer Guide."]}
+          "The Amazon Resource Name (ARN) of the Amazon SNS topic to notify when the stop action is taken. You can find the ARN of a topic by using the ListTopics Amazon SNS operation. For more information about Amazon SNS topics, see the Amazon SNS Developer Guide."]}
     let context_ = "StopAction"
     let make ?topicArn = fun ~scope -> fun () -> { topicArn; scope }
     let to_value x =
@@ -600,9 +691,9 @@ module StopAction =
         StopScope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
       make ?topicArn ~scope ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicArn = field_map json "TopicArn" AmazonResourceName.of_json in
-      let scope = field_map_exn json "Scope" StopScope.of_json in
+    let of_json json__ =
+      let topicArn = field_map json__ "TopicArn" AmazonResourceName.of_json in
+      let scope = field_map_exn json__ "Scope" StopScope.of_json in
       make ?topicArn ~scope ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -613,10 +704,10 @@ module WorkmailAction =
       {
       topicArn: AmazonResourceName.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon SNS topic to notify when the WorkMail action is called. An example of an Amazon SNS topic ARN is arn:aws:sns:us-west-2:123456789012:MyTopic. For more information about Amazon SNS topics, see the Amazon SNS Developer Guide."];
+          "The Amazon Resource Name (ARN) of the Amazon SNS topic to notify when the WorkMail action is called. You can find the ARN of a topic by using the ListTopics operation in Amazon SNS. For more information about Amazon SNS topics, see the Amazon SNS Developer Guide."];
       organizationArn: AmazonResourceName.t
         [@ocaml.doc
-          "The ARN of the Amazon WorkMail organization. An example of an Amazon WorkMail organization ARN is arn:aws:workmail:us-west-2:123456789012:organization/m-68755160c4cb4e29a2b2f8fb58f359d7. For information about Amazon WorkMail organizations, see the Amazon WorkMail Administrator Guide."]}
+          "The Amazon Resource Name (ARN) of the Amazon WorkMail organization. Amazon WorkMail ARNs use the following format: arn:aws:workmail:<region>:<awsAccountId>:organization/<workmailOrganizationId> You can find the ID of your organization by using the ListOrganizations operation in Amazon WorkMail. Amazon WorkMail organization IDs begin with \"m-\", followed by a string of alphanumeric characters. For information about Amazon WorkMail organizations, see the Amazon WorkMail Administrator Guide."]}
     let context_ = "WorkmailAction"
     let make ?topicArn =
       fun ~organizationArn -> fun () -> { topicArn; organizationArn }
@@ -635,27 +726,27 @@ module WorkmailAction =
           (Xml.child xml_arg0 "TopicArn") in
       make ~organizationArn ?topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationArn =
-        field_map_exn json "OrganizationArn" AmazonResourceName.of_json in
-      let topicArn = field_map json "TopicArn" AmazonResourceName.of_json in
+        field_map_exn json__ "OrganizationArn" AmazonResourceName.of_json in
+      let topicArn = field_map json__ "TopicArn" AmazonResourceName.of_json in
       make ~organizationArn ?topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "When included in a receipt rule, this action calls Amazon WorkMail and, optionally, publishes a notification to Amazon Simple Notification Service (Amazon SNS). You will typically not use this action directly because Amazon WorkMail adds the rule automatically during its setup procedure. For information using a receipt rule to call Amazon WorkMail, see the Amazon SES Developer Guide."]
+       "When included in a receipt rule, this action calls Amazon WorkMail and, optionally, publishes a notification to Amazon Simple Notification Service (Amazon SNS). It usually isn't necessary to set this up manually, because Amazon WorkMail adds the rule automatically during its setup procedure. For information using a receipt rule to call Amazon WorkMail, see the Amazon SES Developer Guide."]
 module CloudWatchDimensionConfiguration =
   struct
     type nonrec t =
       {
       dimensionName: DimensionName.t
         [@ocaml.doc
-          "The name of an Amazon CloudWatch dimension associated with an email sending metric. The name must: This value can only contain ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). Contain less than 256 characters."];
+          "The name of an Amazon CloudWatch dimension associated with an email sending metric. The name must meet the following requirements: Contain only ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), dashes (-), or colons (:). Contain 256 characters or fewer."];
       dimensionValueSource: DimensionValueSource.t
         [@ocaml.doc
-          "The place where Amazon SES finds the value of a dimension to publish to Amazon CloudWatch. If you want Amazon SES to use the message tags that you specify using an X-SES-MESSAGE-TAGS header or a parameter to the SendEmail/SendRawEmail API, choose messageTag. If you want Amazon SES to use your own email headers, choose emailHeader."];
+          "The place where Amazon SES finds the value of a dimension to publish to Amazon CloudWatch. To use the message tags that you specify using an X-SES-MESSAGE-TAGS header or a parameter to the SendEmail/SendRawEmail API, specify messageTag. To use your own email headers, specify emailHeader. To put a custom tag on any link included in your email, specify linkTag."];
       defaultDimensionValue: DefaultDimensionValue.t
         [@ocaml.doc
-          "The default value of the dimension that is published to Amazon CloudWatch if you do not provide the value of the dimension when you send an email. The default value must: This value can only contain ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). Contain less than 256 characters."]}
+          "The default value of the dimension that is published to Amazon CloudWatch if you do not provide the value of the dimension when you send an email. The default value must meet the following requirements: Contain only ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), dashes (-), at signs (\\@), or periods (.). Contain 256 characters or fewer."]}
     let context_ = "CloudWatchDimensionConfiguration"
     let make ~dimensionName =
       fun ~dimensionValueSource ->
@@ -682,15 +773,15 @@ module CloudWatchDimensionConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "DimensionName") in
       make ~defaultDimensionValue ~dimensionValueSource ~dimensionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultDimensionValue =
-        field_map_exn json "DefaultDimensionValue"
+        field_map_exn json__ "DefaultDimensionValue"
           DefaultDimensionValue.of_json in
       let dimensionValueSource =
-        field_map_exn json "DimensionValueSource"
+        field_map_exn json__ "DimensionValueSource"
           DimensionValueSource.of_json in
       let dimensionName =
-        field_map_exn json "DimensionName" DimensionName.of_json in
+        field_map_exn json__ "DimensionName" DimensionName.of_json in
       make ~defaultDimensionValue ~dimensionValueSource ~dimensionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -725,6 +816,9 @@ module AddressList =
   struct
     type nonrec t = Address.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Address.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -751,10 +845,10 @@ module MessageTag =
       {
       name: MessageTagName.t
         [@ocaml.doc
-          "The name of the tag. The name must: This value can only contain ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). Contain less than 256 characters."];
+          "The name of the tag. The name must meet the following requirements: Contain only ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). Contain 256 characters or fewer."];
       value: MessageTagValue.t
         [@ocaml.doc
-          "The value of the tag. The value must: This value can only contain ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). Contain less than 256 characters."]}
+          "The value of the tag. The value must meet the following requirements: Contain only ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). Contain 256 characters or fewer."]}
     let context_ = "MessageTag"
     let make ~name = fun ~value -> fun () -> { name; value }
     let to_value x =
@@ -771,9 +865,9 @@ module MessageTag =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" MessageTagValue.of_json in
-      let name = field_map_exn json "Name" MessageTagName.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" MessageTagValue.of_json in
+      let name = field_map_exn json__ "Name" MessageTagName.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -842,6 +936,9 @@ module ExtensionFieldList =
   struct
     type nonrec t = ExtensionField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExtensionField.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -949,7 +1046,7 @@ module ReceiptAction =
           "Calls Amazon WorkMail and, optionally, publishes a notification to Amazon Amazon SNS."];
       lambdaAction: LambdaAction.t option
         [@ocaml.doc
-          "Calls an AWS Lambda function, and optionally, publishes a notification to Amazon SNS."];
+          "Calls an Amazon Web Services Lambda function, and optionally, publishes a notification to Amazon SNS."];
       stopAction: StopAction.t option
         [@ocaml.doc
           "Terminates the evaluation of the receipt rule set and optionally publishes a notification to Amazon SNS."];
@@ -957,7 +1054,10 @@ module ReceiptAction =
         [@ocaml.doc "Adds a header to the received email."];
       sNSAction: SNSAction.t option
         [@ocaml.doc
-          "Publishes the email content within a notification to Amazon SNS."]}
+          "Publishes the email content within a notification to Amazon SNS."];
+      connectAction: ConnectAction.t option
+        [@ocaml.doc
+          "Parses the received message and starts an email contact in Amazon Connect on your behalf."]}
     let make ?s3Action =
       fun ?bounceAction ->
         fun ?workmailAction ->
@@ -965,16 +1065,18 @@ module ReceiptAction =
             fun ?stopAction ->
               fun ?addHeaderAction ->
                 fun ?sNSAction ->
-                  fun () ->
-                    {
-                      s3Action;
-                      bounceAction;
-                      workmailAction;
-                      lambdaAction;
-                      stopAction;
-                      addHeaderAction;
-                      sNSAction
-                    }
+                  fun ?connectAction ->
+                    fun () ->
+                      {
+                        s3Action;
+                        bounceAction;
+                        workmailAction;
+                        lambdaAction;
+                        stopAction;
+                        addHeaderAction;
+                        sNSAction;
+                        connectAction
+                      }
     let to_value x =
       structure_to_value
         [("S3Action", (Option.map x.s3Action ~f:S3Action.to_value));
@@ -987,9 +1089,14 @@ module ReceiptAction =
         ("StopAction", (Option.map x.stopAction ~f:StopAction.to_value));
         ("AddHeaderAction",
           (Option.map x.addHeaderAction ~f:AddHeaderAction.to_value));
-        ("SNSAction", (Option.map x.sNSAction ~f:SNSAction.to_value))]
+        ("SNSAction", (Option.map x.sNSAction ~f:SNSAction.to_value));
+        ("ConnectAction",
+          (Option.map x.connectAction ~f:ConnectAction.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let connectAction =
+        (Option.map ~f:ConnectAction.of_xml)
+          (Xml.child xml_arg0 "ConnectAction") in
       let sNSAction =
         (Option.map ~f:SNSAction.of_xml) (Xml.child xml_arg0 "SNSAction") in
       let addHeaderAction =
@@ -1008,21 +1115,23 @@ module ReceiptAction =
           (Xml.child xml_arg0 "BounceAction") in
       let s3Action =
         (Option.map ~f:S3Action.of_xml) (Xml.child xml_arg0 "S3Action") in
-      make ?sNSAction ?addHeaderAction ?stopAction ?lambdaAction
-        ?workmailAction ?bounceAction ?s3Action ()
+      make ?connectAction ?sNSAction ?addHeaderAction ?stopAction
+        ?lambdaAction ?workmailAction ?bounceAction ?s3Action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sNSAction = field_map json "SNSAction" SNSAction.of_json in
+    let of_json json__ =
+      let connectAction =
+        field_map json__ "ConnectAction" ConnectAction.of_json in
+      let sNSAction = field_map json__ "SNSAction" SNSAction.of_json in
       let addHeaderAction =
-        field_map json "AddHeaderAction" AddHeaderAction.of_json in
-      let stopAction = field_map json "StopAction" StopAction.of_json in
-      let lambdaAction = field_map json "LambdaAction" LambdaAction.of_json in
+        field_map json__ "AddHeaderAction" AddHeaderAction.of_json in
+      let stopAction = field_map json__ "StopAction" StopAction.of_json in
+      let lambdaAction = field_map json__ "LambdaAction" LambdaAction.of_json in
       let workmailAction =
-        field_map json "WorkmailAction" WorkmailAction.of_json in
-      let bounceAction = field_map json "BounceAction" BounceAction.of_json in
-      let s3Action = field_map json "S3Action" S3Action.of_json in
-      make ?sNSAction ?addHeaderAction ?stopAction ?lambdaAction
-        ?workmailAction ?bounceAction ?s3Action ()
+        field_map json__ "WorkmailAction" WorkmailAction.of_json in
+      let bounceAction = field_map json__ "BounceAction" BounceAction.of_json in
+      let s3Action = field_map json__ "S3Action" S3Action.of_json in
+      make ?connectAction ?sNSAction ?addHeaderAction ?stopAction
+        ?lambdaAction ?workmailAction ?bounceAction ?s3Action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An action that Amazon SES can take when it receives an email on behalf of one or more email addresses or domains that you own. An instance of this data type can represent only one action. For information about setting up receipt rules, see the Amazon SES Developer Guide."]
@@ -1043,6 +1152,9 @@ module CloudWatchDimensionConfigurations =
   struct
     type nonrec t = CloudWatchDimensionConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CloudWatchDimensionConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -1130,9 +1242,9 @@ module Content =
         MessageData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Data") in
       make ?charset ~data ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let charset = field_map json "Charset" Charset.of_json in
-      let data = field_map_exn json "Data" MessageData.of_json in
+    let of_json json__ =
+      let charset = field_map json__ "Charset" Charset.of_json in
+      let data = field_map_exn json__ "Data" MessageData.of_json in
       make ?charset ~data ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1257,18 +1369,21 @@ module Destination =
         (Option.map ~f:AddressList.of_xml) (Xml.child xml_arg0 "ToAddresses") in
       make ?bccAddresses ?ccAddresses ?toAddresses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let bccAddresses = field_map json "BccAddresses" AddressList.of_json in
-      let ccAddresses = field_map json "CcAddresses" AddressList.of_json in
-      let toAddresses = field_map json "ToAddresses" AddressList.of_json in
+    let of_json json__ =
+      let bccAddresses = field_map json__ "BccAddresses" AddressList.of_json in
+      let ccAddresses = field_map json__ "CcAddresses" AddressList.of_json in
+      let toAddresses = field_map json__ "ToAddresses" AddressList.of_json in
       make ?bccAddresses ?ccAddresses ?toAddresses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents the destination of the message, consisting of To:, CC:, and BCC: fields. Amazon SES does not support the SMTPUTF8 extension, as described in RFC6531. For this reason, the local part of a destination email address (the part of the email address that precedes the \\@ sign) may only contain 7-bit ASCII characters. If the domain part of an address (the part after the \\@ sign) contains non-ASCII characters, they must be encoded using Punycode, as described in RFC3492."]
+       "Represents the destination of the message, consisting of To:, CC:, and BCC: fields. Amazon SES does not support the SMTPUTF8 extension, as described in RFC6531. For this reason, the email address string must be 7-bit ASCII. If you want to send to or from email addresses that contain Unicode characters in the domain part of an address, you must encode the domain using Punycode. Punycode is not permitted in the local part of the email address (the part before the \\@ sign) nor in the \"friendly from\" name. If you want to use Unicode characters in the \"friendly from\" name, you must encode the \"friendly from\" name using MIME encoded-word syntax, as described in Sending raw email using the Amazon SES API. For more information about Punycode, see RFC 3492."]
 module MessageTagList =
   struct
     type nonrec t = MessageTag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MessageTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1346,7 +1461,7 @@ module RecipientDsnFields =
       {
       finalRecipient: Address.t option
         [@ocaml.doc
-          "The email address that the message was ultimately delivered to. This corresponds to the Final-Recipient in the DSN. If not specified, FinalRecipient will be set to the Recipient specified in the BouncedRecipientInfo structure. Either FinalRecipient or the recipient in BouncedRecipientInfo must be a recipient of the original bounced message. Do not prepend the FinalRecipient email address with rfc 822;, as described in RFC 3798."];
+          "The email address that the message was ultimately delivered to. This corresponds to the Final-Recipient in the DSN. If not specified, FinalRecipient is set to the Recipient specified in the BouncedRecipientInfo structure. Either FinalRecipient or the recipient in BouncedRecipientInfo must be a recipient of the original bounced message. Do not prepend the FinalRecipient email address with rfc 822;, as described in RFC 3798."];
       action: DsnAction.t
         [@ocaml.doc
           "The action performed by the reporting mail transfer agent (MTA) as a result of its attempt to deliver the message to the recipient address. This is required by RFC 3464."];
@@ -1417,17 +1532,17 @@ module RecipientDsnFields =
       make ?extensionFields ?lastAttemptDate ?diagnosticCode ~status
         ?remoteMta ~action ?finalRecipient ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let extensionFields =
-        field_map json "ExtensionFields" ExtensionFieldList.of_json in
+        field_map json__ "ExtensionFields" ExtensionFieldList.of_json in
       let lastAttemptDate =
-        field_map json "LastAttemptDate" LastAttemptDate.of_json in
+        field_map json__ "LastAttemptDate" LastAttemptDate.of_json in
       let diagnosticCode =
-        field_map json "DiagnosticCode" DiagnosticCode.of_json in
-      let status = field_map_exn json "Status" DsnStatus.of_json in
-      let remoteMta = field_map json "RemoteMta" RemoteMta.of_json in
-      let action = field_map_exn json "Action" DsnAction.of_json in
-      let finalRecipient = field_map json "FinalRecipient" Address.of_json in
+        field_map json__ "DiagnosticCode" DiagnosticCode.of_json in
+      let status = field_map_exn json__ "Status" DsnStatus.of_json in
+      let remoteMta = field_map json__ "RemoteMta" RemoteMta.of_json in
+      let action = field_map_exn json__ "Action" DsnAction.of_json in
+      let finalRecipient = field_map json__ "FinalRecipient" Address.of_json in
       make ?extensionFields ?lastAttemptDate ?diagnosticCode ~status
         ?remoteMta ~action ?finalRecipient ()
     let to_json v = composed_to_json to_value v
@@ -1493,7 +1608,7 @@ module ReceiptIpFilter =
           "Indicates whether to block or allow incoming mail from the specified IP addresses."];
       cidr: Cidr.t
         [@ocaml.doc
-          "A single IP address or a range of IP addresses that you want to block or allow, specified in Classless Inter-Domain Routing (CIDR) notation. An example of a single email address is 10.0.0.1. An example of a range of IP addresses is 10.0.0.1/24. For more information about CIDR notation, see RFC 2317."]}
+          "A single IP address or a range of IP addresses to block or allow, specified in Classless Inter-Domain Routing (CIDR) notation. An example of a single email address is 10.0.0.1. An example of a range of IP addresses is 10.0.0.1/24. For more information about CIDR notation, see RFC 2317."]}
     let context_ = "ReceiptIpFilter"
     let make ~policy = fun ~cidr -> fun () -> { policy; cidr }
     let to_value x =
@@ -1509,9 +1624,9 @@ module ReceiptIpFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Policy") in
       make ~cidr ~policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cidr = field_map_exn json "Cidr" Cidr.of_json in
-      let policy = field_map_exn json "Policy" ReceiptFilterPolicy.of_json in
+    let of_json json__ =
+      let cidr = field_map_exn json__ "Cidr" Cidr.of_json in
+      let policy = field_map_exn json__ "Policy" ReceiptFilterPolicy.of_json in
       make ~cidr ~policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1730,6 +1845,9 @@ module VerificationTokenList =
   struct
     type nonrec t = VerificationToken.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VerificationToken.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1755,6 +1873,9 @@ module ReceiptActionsList =
   struct
     type nonrec t = ReceiptAction.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReceiptAction.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1793,6 +1914,9 @@ module RecipientsList =
   struct
     type nonrec t = Recipient.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Recipient.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1860,9 +1984,9 @@ module CloudWatchDestination =
           (Xml.child_exn ~context:context_ xml_arg0 "DimensionConfigurations") in
       make ~dimensionConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dimensionConfigurations =
-        field_map_exn json "DimensionConfigurations"
+        field_map_exn json__ "DimensionConfigurations"
           CloudWatchDimensionConfigurations.of_json in
       make ~dimensionConfigurations ()
     let to_json v = composed_to_json to_value v
@@ -1885,6 +2009,9 @@ module EventTypes =
   struct
     type nonrec t = EventType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1933,11 +2060,11 @@ module KinesisFirehoseDestination =
           (Xml.child_exn ~context:context_ xml_arg0 "IAMRoleARN") in
       make ~deliveryStreamARN ~iAMRoleARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliveryStreamARN =
-        field_map_exn json "DeliveryStreamARN" AmazonResourceName.of_json in
+        field_map_exn json__ "DeliveryStreamARN" AmazonResourceName.of_json in
       let iAMRoleARN =
-        field_map_exn json "IAMRoleARN" AmazonResourceName.of_json in
+        field_map_exn json__ "IAMRoleARN" AmazonResourceName.of_json in
       make ~deliveryStreamARN ~iAMRoleARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1948,7 +2075,7 @@ module SNSDestination =
       {
       topicARN: AmazonResourceName.t
         [@ocaml.doc
-          "The ARN of the Amazon SNS topic that email sending events will be published to. An example of an Amazon SNS topic ARN is arn:aws:sns:us-west-2:123456789012:MyTopic. For more information about Amazon SNS topics, see the Amazon SNS Developer Guide."]}
+          "The ARN of the Amazon SNS topic for email sending events. You can find the ARN of a topic by using the ListTopics Amazon SNS operation. For more information about Amazon SNS topics, see the Amazon SNS Developer Guide."]}
     let context_ = "SNSDestination"
     let make ~topicARN = fun () -> { topicARN }
     let to_value x =
@@ -1961,8 +2088,9 @@ module SNSDestination =
           (Xml.child_exn ~context:context_ xml_arg0 "TopicARN") in
       make ~topicARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicARN = field_map_exn json "TopicARN" AmazonResourceName.of_json in
+    let of_json json__ =
+      let topicARN =
+        field_map_exn json__ "TopicARN" AmazonResourceName.of_json in
       make ~topicARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2065,9 +2193,10 @@ module Body =
       let text = (Option.map ~f:Content.of_xml) (Xml.child xml_arg0 "Text") in
       make ?html ?text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let html = field_map json "Html" Content.of_json in
-      let text = field_map json "Text" Content.of_json in make ?html ?text ()
+    let of_json json__ =
+      let html = field_map json__ "Html" Content.of_json in
+      let text = field_map json__ "Text" Content.of_json in
+      make ?html ?text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the body of the message. You can specify text, HTML, or both. If you use both, then the message should display correctly in the widest variety of email clients."]
@@ -2077,7 +2206,7 @@ module BulkEmailDestinationStatus =
       {
       status: BulkEmailStatus.t option
         [@ocaml.doc
-          "The status of a message sent using the SendBulkTemplatedEmail operation. Possible values for this parameter include: Success: Amazon SES accepted the message, and will attempt to deliver it to the recipients. MessageRejected: The message was rejected because it contained a virus. MailFromDomainNotVerified: The sender's email address or domain was not verified. ConfigurationSetDoesNotExist: The configuration set you specified does not exist. TemplateDoesNotExist: The template you specified does not exist. AccountSuspended: Your account has been shut down because of issues related to your email sending practices. AccountThrottled: The number of emails you can send has been reduced because your account has exceeded its allocated sending limit. AccountDailyQuotaExceeded: You have reached or exceeded the maximum number of emails you can send from your account in a 24-hour period. InvalidSendingPoolName: The configuration set you specified refers to an IP pool that does not exist. AccountSendingPaused: Email sending for the Amazon SES account was disabled using the UpdateAccountSendingEnabled operation. ConfigurationSetSendingPaused: Email sending for this configuration set was disabled using the UpdateConfigurationSetSendingEnabled operation. InvalidParameterValue: One or more of the parameters you specified when calling this operation was invalid. See the error message for additional information. TransientFailure: Amazon SES was unable to process your request because of a temporary issue. Failed: Amazon SES was unable to process your request. See the error message for additional information."];
+          "The status of a message sent using the SendBulkTemplatedEmail operation. Possible values for this parameter include: Success: Amazon SES accepted the message, and attempts to deliver it to the recipients. MessageRejected: The message was rejected because it contained a virus. MailFromDomainNotVerified: The sender's email address or domain was not verified. ConfigurationSetDoesNotExist: The configuration set you specified does not exist. TemplateDoesNotExist: The template you specified does not exist. AccountSuspended: Your account has been shut down because of issues related to your email sending practices. AccountThrottled: The number of emails you can send has been reduced because your account has exceeded its allocated sending limit. AccountDailyQuotaExceeded: You have reached or exceeded the maximum number of emails you can send from your account in a 24-hour period. InvalidSendingPoolName: The configuration set you specified refers to an IP pool that does not exist. AccountSendingPaused: Email sending for the Amazon SES account was disabled using the UpdateAccountSendingEnabled operation. ConfigurationSetSendingPaused: Email sending for this configuration set was disabled using the UpdateConfigurationSetSendingEnabled operation. InvalidParameterValue: One or more of the parameters you specified when calling this operation was invalid. See the error message for additional information. TransientFailure: Amazon SES was unable to process your request because of a temporary issue. Failed: Amazon SES was unable to process your request. See the error message for additional information."];
       error: Error.t option
         [@ocaml.doc
           "A description of an error that prevented a message being sent using the SendBulkTemplatedEmail operation."];
@@ -2100,10 +2229,10 @@ module BulkEmailDestinationStatus =
         (Option.map ~f:BulkEmailStatus.of_xml) (Xml.child xml_arg0 "Status") in
       make ?messageId ?error ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageId = field_map json "MessageId" MessageId.of_json in
-      let error = field_map json "Error" Error.of_json in
-      let status = field_map json "Status" BulkEmailStatus.of_json in
+    let of_json json__ =
+      let messageId = field_map json__ "MessageId" MessageId.of_json in
+      let error = field_map json__ "Error" Error.of_json in
+      let status = field_map json__ "Status" BulkEmailStatus.of_json in
       make ?messageId ?error ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2144,12 +2273,13 @@ module BulkEmailDestination =
           (Xml.child_exn ~context:context_ xml_arg0 "Destination") in
       make ?replacementTemplateData ?replacementTags ~destination ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replacementTemplateData =
-        field_map json "ReplacementTemplateData" TemplateData.of_json in
+        field_map json__ "ReplacementTemplateData" TemplateData.of_json in
       let replacementTags =
-        field_map json "ReplacementTags" MessageTagList.of_json in
-      let destination = field_map_exn json "Destination" Destination.of_json in
+        field_map json__ "ReplacementTags" MessageTagList.of_json in
+      let destination =
+        field_map_exn json__ "Destination" Destination.of_json in
       make ?replacementTemplateData ?replacementTags ~destination ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2199,13 +2329,13 @@ module BouncedRecipientInfo =
         Address.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Recipient") in
       make ?recipientDsnFields ?bounceType ?recipientArn ~recipient ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recipientDsnFields =
-        field_map json "RecipientDsnFields" RecipientDsnFields.of_json in
-      let bounceType = field_map json "BounceType" BounceType.of_json in
+        field_map json__ "RecipientDsnFields" RecipientDsnFields.of_json in
+      let bounceType = field_map json__ "BounceType" BounceType.of_json in
       let recipientArn =
-        field_map json "RecipientArn" AmazonResourceName.of_json in
-      let recipient = field_map_exn json "Recipient" Address.of_json in
+        field_map json__ "RecipientArn" AmazonResourceName.of_json in
+      let recipient = field_map_exn json__ "Recipient" Address.of_json in
       make ?recipientDsnFields ?bounceType ?recipientArn ~recipient ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2258,10 +2388,10 @@ module TemplateMetadata =
         (Option.map ~f:TemplateName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?createdTimestamp ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
-      let name = field_map json "Name" TemplateName.of_json in
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let name = field_map json__ "Name" TemplateName.of_json in
       make ?createdTimestamp ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about an email template."]
@@ -2271,7 +2401,7 @@ module ReceiptRuleSetMetadata =
       {
       name: ReceiptRuleSetName.t option
         [@ocaml.doc
-          "The name of the receipt rule set. The name must: This value can only contain ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). Start and end with a letter or number. Contain less than 64 characters."];
+          "The name of the receipt rule set. The name must meet the following requirements: Contain only ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). Start and end with a letter or number. Contain 64 characters or fewer."];
       createdTimestamp: Timestamp.t option
         [@ocaml.doc "The date and time the receipt rule set was created."]}
     let make ?name =
@@ -2290,10 +2420,10 @@ module ReceiptRuleSetMetadata =
         (Option.map ~f:ReceiptRuleSetName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?createdTimestamp ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
-      let name = field_map json "Name" ReceiptRuleSetName.of_json in
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let name = field_map json__ "Name" ReceiptRuleSetName.of_json in
       make ?createdTimestamp ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2304,7 +2434,7 @@ module ReceiptFilter =
       {
       name: ReceiptFilterName.t
         [@ocaml.doc
-          "The name of the IP address filter. The name must: This value can only contain ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). Start and end with a letter or number. Contain less than 64 characters."];
+          "The name of the IP address filter. The name must meet the following requirements: Contain only ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). Start and end with a letter or number. Contain 64 characters or fewer."];
       ipFilter: ReceiptIpFilter.t
         [@ocaml.doc
           "A structure that provides the IP addresses to block or allow, and whether to block or allow incoming mail from them."]}
@@ -2324,9 +2454,9 @@ module ReceiptFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~ipFilter ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ipFilter = field_map_exn json "IpFilter" ReceiptIpFilter.of_json in
-      let name = field_map_exn json "Name" ReceiptFilterName.of_json in
+    let of_json json__ =
+      let ipFilter = field_map_exn json__ "IpFilter" ReceiptIpFilter.of_json in
+      let name = field_map_exn json__ "Name" ReceiptFilterName.of_json in
       make ~ipFilter ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2425,15 +2555,18 @@ module CustomVerificationEmailTemplate =
       make ?failureRedirectionURL ?successRedirectionURL ?templateSubject
         ?fromEmailAddress ?templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureRedirectionURL =
-        field_map json "FailureRedirectionURL" FailureRedirectionURL.of_json in
+        field_map json__ "FailureRedirectionURL"
+          FailureRedirectionURL.of_json in
       let successRedirectionURL =
-        field_map json "SuccessRedirectionURL" SuccessRedirectionURL.of_json in
-      let templateSubject = field_map json "TemplateSubject" Subject.of_json in
+        field_map json__ "SuccessRedirectionURL"
+          SuccessRedirectionURL.of_json in
+      let templateSubject =
+        field_map json__ "TemplateSubject" Subject.of_json in
       let fromEmailAddress =
-        field_map json "FromEmailAddress" FromAddress.of_json in
-      let templateName = field_map json "TemplateName" TemplateName.of_json in
+        field_map json__ "FromEmailAddress" FromAddress.of_json in
+      let templateName = field_map json__ "TemplateName" TemplateName.of_json in
       make ?failureRedirectionURL ?successRedirectionURL ?templateSubject
         ?fromEmailAddress ?templateName ()
     let to_json v = composed_to_json to_value v
@@ -2458,8 +2591,8 @@ module ConfigurationSet =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ConfigurationSetName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" ConfigurationSetName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2508,13 +2641,13 @@ module SendDataPoint =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       make ?rejects ?complaints ?bounces ?deliveryAttempts ?timestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rejects = field_map json "Rejects" Counter.of_json in
-      let complaints = field_map json "Complaints" Counter.of_json in
-      let bounces = field_map json "Bounces" Counter.of_json in
+    let of_json json__ =
+      let rejects = field_map json__ "Rejects" Counter.of_json in
+      let complaints = field_map json__ "Complaints" Counter.of_json in
+      let bounces = field_map json__ "Bounces" Counter.of_json in
       let deliveryAttempts =
-        field_map json "DeliveryAttempts" Counter.of_json in
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
+        field_map json__ "DeliveryAttempts" Counter.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
       make ?rejects ?complaints ?bounces ?deliveryAttempts ?timestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2523,20 +2656,19 @@ module IdentityVerificationAttributes =
   struct
     type nonrec t =
       {
-      verificationStatus: VerificationStatus.t
+      verificationStatus: VerificationStatus.t option
         [@ocaml.doc
           "The verification status of the identity: \"Pending\", \"Success\", \"Failed\", or \"TemporaryFailure\"."];
       verificationToken: VerificationToken.t option
         [@ocaml.doc
           "The verification token for a domain identity. Null for email address identities."]}
-    let context_ = "IdentityVerificationAttributes"
-    let make ?verificationToken =
-      fun ~verificationStatus ->
-        fun () -> { verificationToken; verificationStatus }
+    let make ?verificationStatus =
+      fun ?verificationToken ->
+        fun () -> { verificationStatus; verificationToken }
     let to_value x =
       structure_to_value
         [("VerificationStatus",
-           (Some (VerificationStatus.to_value x.verificationStatus)));
+           (Option.map x.verificationStatus ~f:VerificationStatus.to_value));
         ("VerificationToken",
           (Option.map x.verificationToken ~f:VerificationToken.to_value))]
     let to_query v = to_query to_value v
@@ -2545,16 +2677,16 @@ module IdentityVerificationAttributes =
         (Option.map ~f:VerificationToken.of_xml)
           (Xml.child xml_arg0 "VerificationToken") in
       let verificationStatus =
-        VerificationStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VerificationStatus") in
-      make ?verificationToken ~verificationStatus ()
+        (Option.map ~f:VerificationStatus.of_xml)
+          (Xml.child xml_arg0 "VerificationStatus") in
+      make ?verificationToken ?verificationStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let verificationToken =
-        field_map json "VerificationToken" VerificationToken.of_json in
+        field_map json__ "VerificationToken" VerificationToken.of_json in
       let verificationStatus =
-        field_map_exn json "VerificationStatus" VerificationStatus.of_json in
-      make ?verificationToken ~verificationStatus ()
+        field_map json__ "VerificationStatus" VerificationStatus.of_json in
+      make ?verificationToken ?verificationStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the verification attributes of a single identity."]
@@ -2576,53 +2708,54 @@ module IdentityNotificationAttributes =
   struct
     type nonrec t =
       {
-      bounceTopic: NotificationTopic.t
+      bounceTopic: NotificationTopic.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon SNS topic where Amazon SES will publish bounce notifications."];
-      complaintTopic: NotificationTopic.t
+          "The Amazon Resource Name (ARN) of the Amazon SNS topic where Amazon SES publishes bounce notifications."];
+      complaintTopic: NotificationTopic.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon SNS topic where Amazon SES will publish complaint notifications."];
-      deliveryTopic: NotificationTopic.t
+          "The Amazon Resource Name (ARN) of the Amazon SNS topic where Amazon SES publishes complaint notifications."];
+      deliveryTopic: NotificationTopic.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon SNS topic where Amazon SES will publish delivery notifications."];
-      forwardingEnabled: Enabled.t
+          "The Amazon Resource Name (ARN) of the Amazon SNS topic where Amazon SES publishes delivery notifications."];
+      forwardingEnabled: Enabled.t option
         [@ocaml.doc
-          "Describes whether Amazon SES will forward bounce and complaint notifications as email. true indicates that Amazon SES will forward bounce and complaint notifications as email, while false indicates that bounce and complaint notifications will be published only to the specified bounce and complaint Amazon SNS topics."];
+          "Describes whether Amazon SES forwards bounce and complaint notifications as email. true indicates that Amazon SES forwards bounce and complaint notifications as email, while false indicates that bounce and complaint notifications are published only to the specified bounce and complaint Amazon SNS topics."];
       headersInBounceNotificationsEnabled: Enabled.t option
         [@ocaml.doc
-          "Describes whether Amazon SES includes the original email headers in Amazon SNS notifications of type Bounce. A value of true specifies that Amazon SES will include headers in bounce notifications, and a value of false specifies that Amazon SES will not include headers in bounce notifications."];
+          "Describes whether Amazon SES includes the original email headers in Amazon SNS notifications of type Bounce. A value of true specifies that Amazon SES includes headers in bounce notifications, and a value of false specifies that Amazon SES does not include headers in bounce notifications."];
       headersInComplaintNotificationsEnabled: Enabled.t option
         [@ocaml.doc
-          "Describes whether Amazon SES includes the original email headers in Amazon SNS notifications of type Complaint. A value of true specifies that Amazon SES will include headers in complaint notifications, and a value of false specifies that Amazon SES will not include headers in complaint notifications."];
+          "Describes whether Amazon SES includes the original email headers in Amazon SNS notifications of type Complaint. A value of true specifies that Amazon SES includes headers in complaint notifications, and a value of false specifies that Amazon SES does not include headers in complaint notifications."];
       headersInDeliveryNotificationsEnabled: Enabled.t option
         [@ocaml.doc
-          "Describes whether Amazon SES includes the original email headers in Amazon SNS notifications of type Delivery. A value of true specifies that Amazon SES will include headers in delivery notifications, and a value of false specifies that Amazon SES will not include headers in delivery notifications."]}
-    let context_ = "IdentityNotificationAttributes"
-    let make ?headersInBounceNotificationsEnabled =
-      fun ?headersInComplaintNotificationsEnabled ->
-        fun ?headersInDeliveryNotificationsEnabled ->
-          fun ~bounceTopic ->
-            fun ~complaintTopic ->
-              fun ~deliveryTopic ->
-                fun ~forwardingEnabled ->
+          "Describes whether Amazon SES includes the original email headers in Amazon SNS notifications of type Delivery. A value of true specifies that Amazon SES includes headers in delivery notifications, and a value of false specifies that Amazon SES does not include headers in delivery notifications."]}
+    let make ?bounceTopic =
+      fun ?complaintTopic ->
+        fun ?deliveryTopic ->
+          fun ?forwardingEnabled ->
+            fun ?headersInBounceNotificationsEnabled ->
+              fun ?headersInComplaintNotificationsEnabled ->
+                fun ?headersInDeliveryNotificationsEnabled ->
                   fun () ->
                     {
-                      headersInBounceNotificationsEnabled;
-                      headersInComplaintNotificationsEnabled;
-                      headersInDeliveryNotificationsEnabled;
                       bounceTopic;
                       complaintTopic;
                       deliveryTopic;
-                      forwardingEnabled
+                      forwardingEnabled;
+                      headersInBounceNotificationsEnabled;
+                      headersInComplaintNotificationsEnabled;
+                      headersInDeliveryNotificationsEnabled
                     }
     let to_value x =
       structure_to_value
-        [("BounceTopic", (Some (NotificationTopic.to_value x.bounceTopic)));
+        [("BounceTopic",
+           (Option.map x.bounceTopic ~f:NotificationTopic.to_value));
         ("ComplaintTopic",
-          (Some (NotificationTopic.to_value x.complaintTopic)));
+          (Option.map x.complaintTopic ~f:NotificationTopic.to_value));
         ("DeliveryTopic",
-          (Some (NotificationTopic.to_value x.deliveryTopic)));
-        ("ForwardingEnabled", (Some (Enabled.to_value x.forwardingEnabled)));
+          (Option.map x.deliveryTopic ~f:NotificationTopic.to_value));
+        ("ForwardingEnabled",
+          (Option.map x.forwardingEnabled ~f:Enabled.to_value));
         ("HeadersInBounceNotificationsEnabled",
           (Option.map x.headersInBounceNotificationsEnabled
              ~f:Enabled.to_value));
@@ -2644,43 +2777,44 @@ module IdentityNotificationAttributes =
         (Option.map ~f:Enabled.of_xml)
           (Xml.child xml_arg0 "HeadersInBounceNotificationsEnabled") in
       let forwardingEnabled =
-        Enabled.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ForwardingEnabled") in
+        (Option.map ~f:Enabled.of_xml)
+          (Xml.child xml_arg0 "ForwardingEnabled") in
       let deliveryTopic =
-        NotificationTopic.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DeliveryTopic") in
+        (Option.map ~f:NotificationTopic.of_xml)
+          (Xml.child xml_arg0 "DeliveryTopic") in
       let complaintTopic =
-        NotificationTopic.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ComplaintTopic") in
+        (Option.map ~f:NotificationTopic.of_xml)
+          (Xml.child xml_arg0 "ComplaintTopic") in
       let bounceTopic =
-        NotificationTopic.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BounceTopic") in
+        (Option.map ~f:NotificationTopic.of_xml)
+          (Xml.child xml_arg0 "BounceTopic") in
       make ?headersInDeliveryNotificationsEnabled
         ?headersInComplaintNotificationsEnabled
-        ?headersInBounceNotificationsEnabled ~forwardingEnabled
-        ~deliveryTopic ~complaintTopic ~bounceTopic ()
+        ?headersInBounceNotificationsEnabled ?forwardingEnabled
+        ?deliveryTopic ?complaintTopic ?bounceTopic ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let headersInDeliveryNotificationsEnabled =
-        field_map json "HeadersInDeliveryNotificationsEnabled"
+        field_map json__ "HeadersInDeliveryNotificationsEnabled"
           Enabled.of_json in
       let headersInComplaintNotificationsEnabled =
-        field_map json "HeadersInComplaintNotificationsEnabled"
+        field_map json__ "HeadersInComplaintNotificationsEnabled"
           Enabled.of_json in
       let headersInBounceNotificationsEnabled =
-        field_map json "HeadersInBounceNotificationsEnabled" Enabled.of_json in
+        field_map json__ "HeadersInBounceNotificationsEnabled"
+          Enabled.of_json in
       let forwardingEnabled =
-        field_map_exn json "ForwardingEnabled" Enabled.of_json in
+        field_map json__ "ForwardingEnabled" Enabled.of_json in
       let deliveryTopic =
-        field_map_exn json "DeliveryTopic" NotificationTopic.of_json in
+        field_map json__ "DeliveryTopic" NotificationTopic.of_json in
       let complaintTopic =
-        field_map_exn json "ComplaintTopic" NotificationTopic.of_json in
+        field_map json__ "ComplaintTopic" NotificationTopic.of_json in
       let bounceTopic =
-        field_map_exn json "BounceTopic" NotificationTopic.of_json in
+        field_map json__ "BounceTopic" NotificationTopic.of_json in
       make ?headersInDeliveryNotificationsEnabled
         ?headersInComplaintNotificationsEnabled
-        ?headersInBounceNotificationsEnabled ~forwardingEnabled
-        ~deliveryTopic ~complaintTopic ~bounceTopic ()
+        ?headersInBounceNotificationsEnabled ?forwardingEnabled
+        ?deliveryTopic ?complaintTopic ?bounceTopic ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the notification attributes of an identity, including whether an identity has Amazon Simple Notification Service (Amazon SNS) topics set for bounce, complaint, and/or delivery notifications, and whether feedback forwarding is enabled for bounce and complaint notifications."]
@@ -2688,51 +2822,49 @@ module IdentityMailFromDomainAttributes =
   struct
     type nonrec t =
       {
-      mailFromDomain: MailFromDomainName.t
+      mailFromDomain: MailFromDomainName.t option
         [@ocaml.doc
           "The custom MAIL FROM domain that the identity is configured to use."];
-      mailFromDomainStatus: CustomMailFromStatus.t
+      mailFromDomainStatus: CustomMailFromStatus.t option
         [@ocaml.doc
           "The state that indicates whether Amazon SES has successfully read the MX record required for custom MAIL FROM domain setup. If the state is Success, Amazon SES uses the specified custom MAIL FROM domain when the verified identity sends an email. All other states indicate that Amazon SES takes the action described by BehaviorOnMXFailure."];
-      behaviorOnMXFailure: BehaviorOnMXFailure.t
+      behaviorOnMXFailure: BehaviorOnMXFailure.t option
         [@ocaml.doc
           "The action that Amazon SES takes if it cannot successfully read the required MX record when you send an email. A value of UseDefaultValue indicates that if Amazon SES cannot read the required MX record, it uses amazonses.com (or a subdomain of that) as the MAIL FROM domain. A value of RejectMessage indicates that if Amazon SES cannot read the required MX record, Amazon SES returns a MailFromDomainNotVerified error and does not send the email. The custom MAIL FROM setup states that result in this behavior are Pending, Failed, and TemporaryFailure."]}
-    let context_ = "IdentityMailFromDomainAttributes"
-    let make ~mailFromDomain =
-      fun ~mailFromDomainStatus ->
-        fun ~behaviorOnMXFailure ->
+    let make ?mailFromDomain =
+      fun ?mailFromDomainStatus ->
+        fun ?behaviorOnMXFailure ->
           fun () ->
             { mailFromDomain; mailFromDomainStatus; behaviorOnMXFailure }
     let to_value x =
       structure_to_value
         [("MailFromDomain",
-           (Some (MailFromDomainName.to_value x.mailFromDomain)));
+           (Option.map x.mailFromDomain ~f:MailFromDomainName.to_value));
         ("MailFromDomainStatus",
-          (Some (CustomMailFromStatus.to_value x.mailFromDomainStatus)));
+          (Option.map x.mailFromDomainStatus ~f:CustomMailFromStatus.to_value));
         ("BehaviorOnMXFailure",
-          (Some (BehaviorOnMXFailure.to_value x.behaviorOnMXFailure)))]
+          (Option.map x.behaviorOnMXFailure ~f:BehaviorOnMXFailure.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let behaviorOnMXFailure =
-        BehaviorOnMXFailure.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BehaviorOnMXFailure") in
+        (Option.map ~f:BehaviorOnMXFailure.of_xml)
+          (Xml.child xml_arg0 "BehaviorOnMXFailure") in
       let mailFromDomainStatus =
-        CustomMailFromStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MailFromDomainStatus") in
+        (Option.map ~f:CustomMailFromStatus.of_xml)
+          (Xml.child xml_arg0 "MailFromDomainStatus") in
       let mailFromDomain =
-        MailFromDomainName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MailFromDomain") in
-      make ~behaviorOnMXFailure ~mailFromDomainStatus ~mailFromDomain ()
+        (Option.map ~f:MailFromDomainName.of_xml)
+          (Xml.child xml_arg0 "MailFromDomain") in
+      make ?behaviorOnMXFailure ?mailFromDomainStatus ?mailFromDomain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let behaviorOnMXFailure =
-        field_map_exn json "BehaviorOnMXFailure" BehaviorOnMXFailure.of_json in
+        field_map json__ "BehaviorOnMXFailure" BehaviorOnMXFailure.of_json in
       let mailFromDomainStatus =
-        field_map_exn json "MailFromDomainStatus"
-          CustomMailFromStatus.of_json in
+        field_map json__ "MailFromDomainStatus" CustomMailFromStatus.of_json in
       let mailFromDomain =
-        field_map_exn json "MailFromDomain" MailFromDomainName.of_json in
-      make ~behaviorOnMXFailure ~mailFromDomainStatus ~mailFromDomain ()
+        field_map json__ "MailFromDomain" MailFromDomainName.of_json in
+      make ?behaviorOnMXFailure ?mailFromDomainStatus ?mailFromDomain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the custom MAIL FROM domain attributes of a verified identity (email address or domain)."]
@@ -2740,25 +2872,24 @@ module IdentityDkimAttributes =
   struct
     type nonrec t =
       {
-      dkimEnabled: Enabled.t
+      dkimEnabled: Enabled.t option
         [@ocaml.doc
           "Is true if DKIM signing is enabled for email sent from the identity. It's false otherwise. The default value is true."];
-      dkimVerificationStatus: VerificationStatus.t
+      dkimVerificationStatus: VerificationStatus.t option
         [@ocaml.doc
           "Describes whether Amazon SES has successfully verified the DKIM DNS records (tokens) published in the domain name's DNS. (This only applies to domain identities, not email address identities.)"];
       dkimTokens: VerificationTokenList.t option
         [@ocaml.doc
           "A set of character strings that represent the domain's identity. Using these tokens, you need to create DNS CNAME records that point to DKIM public keys that are hosted by Amazon SES. Amazon Web Services eventually detects that you've updated your DNS records. This detection process might take up to 72 hours. After successful detection, Amazon SES is able to DKIM-sign email originating from that domain. (This only applies to domain identities, not email address identities.) For more information about creating DNS records using DKIM tokens, see the Amazon SES Developer Guide."]}
-    let context_ = "IdentityDkimAttributes"
-    let make ?dkimTokens =
-      fun ~dkimEnabled ->
-        fun ~dkimVerificationStatus ->
-          fun () -> { dkimTokens; dkimEnabled; dkimVerificationStatus }
+    let make ?dkimEnabled =
+      fun ?dkimVerificationStatus ->
+        fun ?dkimTokens ->
+          fun () -> { dkimEnabled; dkimVerificationStatus; dkimTokens }
     let to_value x =
       structure_to_value
-        [("DkimEnabled", (Some (Enabled.to_value x.dkimEnabled)));
+        [("DkimEnabled", (Option.map x.dkimEnabled ~f:Enabled.to_value));
         ("DkimVerificationStatus",
-          (Some (VerificationStatus.to_value x.dkimVerificationStatus)));
+          (Option.map x.dkimVerificationStatus ~f:VerificationStatus.to_value));
         ("DkimTokens",
           (Option.map x.dkimTokens ~f:VerificationTokenList.to_value))]
     let to_query v = to_query to_value v
@@ -2767,21 +2898,19 @@ module IdentityDkimAttributes =
         (Option.map ~f:VerificationTokenList.of_xml)
           (Xml.child xml_arg0 "DkimTokens") in
       let dkimVerificationStatus =
-        VerificationStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DkimVerificationStatus") in
+        (Option.map ~f:VerificationStatus.of_xml)
+          (Xml.child xml_arg0 "DkimVerificationStatus") in
       let dkimEnabled =
-        Enabled.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DkimEnabled") in
-      make ?dkimTokens ~dkimVerificationStatus ~dkimEnabled ()
+        (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "DkimEnabled") in
+      make ?dkimTokens ?dkimVerificationStatus ?dkimEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dkimTokens =
-        field_map json "DkimTokens" VerificationTokenList.of_json in
+        field_map json__ "DkimTokens" VerificationTokenList.of_json in
       let dkimVerificationStatus =
-        field_map_exn json "DkimVerificationStatus"
-          VerificationStatus.of_json in
-      let dkimEnabled = field_map_exn json "DkimEnabled" Enabled.of_json in
-      make ?dkimTokens ~dkimVerificationStatus ~dkimEnabled ()
+        field_map json__ "DkimVerificationStatus" VerificationStatus.of_json in
+      let dkimEnabled = field_map json__ "DkimEnabled" Enabled.of_json in
+      make ?dkimTokens ?dkimVerificationStatus ?dkimEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the DKIM attributes of a verified email address or a domain."]
@@ -2791,16 +2920,16 @@ module ReceiptRule =
       {
       name: ReceiptRuleName.t
         [@ocaml.doc
-          "The name of the receipt rule. The name must: This value can only contain ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). Start and end with a letter or number. Contain less than 64 characters."];
+          "The name of the receipt rule. The name must meet the following requirements: Contain only ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), dashes (-), or periods (.). Start and end with a letter or number. Contain 64 characters or fewer."];
       enabled: Enabled.t option
         [@ocaml.doc
           "If true, the receipt rule is active. The default value is false."];
       tlsPolicy: TlsPolicy.t option
         [@ocaml.doc
-          "Specifies whether Amazon SES should require that incoming email is delivered over a connection encrypted with Transport Layer Security (TLS). If this parameter is set to Require, Amazon SES will bounce emails that are not received over TLS. The default is Optional."];
+          "Specifies whether Amazon SES should require that incoming email is delivered over a connection encrypted with Transport Layer Security (TLS). If this parameter is set to Require, Amazon SES bounces emails that are not received over TLS. The default is Optional."];
       recipients: RecipientsList.t option
         [@ocaml.doc
-          "The recipient domains and email addresses that the receipt rule applies to. If this field is not specified, this rule will match all recipients under all verified domains."];
+          "The recipient domains and email addresses that the receipt rule applies to. If this field is not specified, this rule matches all recipients on all verified domains."];
       actions: ReceiptActionsList.t option
         [@ocaml.doc
           "An ordered list of actions to perform on messages that match at least one of the recipient email addresses or domains specified in the receipt rule."];
@@ -2850,13 +2979,13 @@ module ReceiptRule =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?scanEnabled ?actions ?recipients ?tlsPolicy ?enabled ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let scanEnabled = field_map json "ScanEnabled" Enabled.of_json in
-      let actions = field_map json "Actions" ReceiptActionsList.of_json in
-      let recipients = field_map json "Recipients" RecipientsList.of_json in
-      let tlsPolicy = field_map json "TlsPolicy" TlsPolicy.of_json in
-      let enabled = field_map json "Enabled" Enabled.of_json in
-      let name = field_map_exn json "Name" ReceiptRuleName.of_json in
+    let of_json json__ =
+      let scanEnabled = field_map json__ "ScanEnabled" Enabled.of_json in
+      let actions = field_map json__ "Actions" ReceiptActionsList.of_json in
+      let recipients = field_map json__ "Recipients" RecipientsList.of_json in
+      let tlsPolicy = field_map json__ "TlsPolicy" TlsPolicy.of_json in
+      let enabled = field_map json__ "Enabled" Enabled.of_json in
+      let name = field_map_exn json__ "Name" ReceiptRuleName.of_json in
       make ?scanEnabled ?actions ?recipients ?tlsPolicy ?enabled ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2867,13 +2996,13 @@ module EventDestination =
       {
       name: EventDestinationName.t
         [@ocaml.doc
-          "The name of the event destination. The name must: This value can only contain ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). Contain less than 64 characters."];
+          "The name of the event destination. The name must meet the following requirements: Contain only ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). Contain 64 characters or fewer."];
       enabled: Enabled.t option
         [@ocaml.doc
           "Sets whether Amazon SES publishes events to this destination when you send an email with the associated configuration set. Set to true to enable publishing to this destination; set to false to prevent publishing to this destination. The default value is false."];
       matchingEventTypes: EventTypes.t
         [@ocaml.doc
-          "The type of email sending events to publish to the event destination."];
+          "The type of email sending events to publish to the event destination. send - The call was successful and Amazon SES is attempting to deliver the email. reject - Amazon SES determined that the email contained a virus and rejected it. bounce - The recipient's mail server permanently rejected the email. This corresponds to a hard bounce. complaint - The recipient marked the email as spam. delivery - Amazon SES successfully delivered the email to the recipient's mail server. open - The recipient received the email and opened it in their email client. click - The recipient clicked one or more links in the email. renderingFailure - Amazon SES did not send the email because of a template rendering issue."];
       kinesisFirehoseDestination: KinesisFirehoseDestination.t option
         [@ocaml.doc
           "An object that contains the delivery stream ARN and the IAM role ARN associated with an Amazon Kinesis Firehose event destination."];
@@ -2935,23 +3064,24 @@ module EventDestination =
       make ?sNSDestination ?cloudWatchDestination ?kinesisFirehoseDestination
         ~matchingEventTypes ?enabled ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sNSDestination =
-        field_map json "SNSDestination" SNSDestination.of_json in
+        field_map json__ "SNSDestination" SNSDestination.of_json in
       let cloudWatchDestination =
-        field_map json "CloudWatchDestination" CloudWatchDestination.of_json in
+        field_map json__ "CloudWatchDestination"
+          CloudWatchDestination.of_json in
       let kinesisFirehoseDestination =
-        field_map json "KinesisFirehoseDestination"
+        field_map json__ "KinesisFirehoseDestination"
           KinesisFirehoseDestination.of_json in
       let matchingEventTypes =
-        field_map_exn json "MatchingEventTypes" EventTypes.of_json in
-      let enabled = field_map json "Enabled" Enabled.of_json in
-      let name = field_map_exn json "Name" EventDestinationName.of_json in
+        field_map_exn json__ "MatchingEventTypes" EventTypes.of_json in
+      let enabled = field_map json__ "Enabled" Enabled.of_json in
+      let name = field_map_exn json__ "Name" EventDestinationName.of_json in
       make ?sNSDestination ?cloudWatchDestination ?kinesisFirehoseDestination
         ~matchingEventTypes ?enabled ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains information about the event destination that the specified email sending events will be published to. When you create or update an event destination, you must provide one, and only one, destination. The destination can be Amazon CloudWatch, Amazon Kinesis Firehose or Amazon Simple Notification Service (Amazon SNS). Event destinations are associated with configuration sets, which enable you to publish email sending events to Amazon CloudWatch, Amazon Kinesis Firehose, or Amazon Simple Notification Service (Amazon SNS). For information about using configuration sets, see the Amazon SES Developer Guide."]
+       "Contains information about an event destination. When you create or update an event destination, you must provide one, and only one, destination. The destination can be Amazon CloudWatch, Amazon Kinesis Firehose or Amazon Simple Notification Service (Amazon SNS). Event destinations are associated with configuration sets, which enable you to publish email sending events to Amazon CloudWatch, Amazon Kinesis Firehose, or Amazon Simple Notification Service (Amazon SNS). For information about using configuration sets, see the Amazon SES Developer Guide."]
 module LastFreshStart =
   struct
     type nonrec t = string
@@ -3026,8 +3156,8 @@ module InvalidTemplateException =
           (Xml.child xml_arg0 "TemplateName") in
       make ?templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateName = field_map json "TemplateName" TemplateName.of_json in
+    let of_json json__ =
+      let templateName = field_map json__ "TemplateName" TemplateName.of_json in
       make ?templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3048,8 +3178,8 @@ module TemplateDoesNotExistException =
           (Xml.child xml_arg0 "TemplateName") in
       make ?templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateName = field_map json "TemplateName" TemplateName.of_json in
+    let of_json json__ =
+      let templateName = field_map json__ "TemplateName" TemplateName.of_json in
       make ?templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3060,12 +3190,12 @@ module Template =
       {
       templateName: TemplateName.t
         [@ocaml.doc
-          "The name of the template. You will refer to this name when you send email using the SendTemplatedEmail or SendBulkTemplatedEmail operations."];
+          "The name of the template. You use this name when you send email using the SendTemplatedEmail or SendBulkTemplatedEmail operations."];
       subjectPart: SubjectPart.t option
         [@ocaml.doc "The subject line of the email."];
       textPart: TextPart.t option
         [@ocaml.doc
-          "The email body that will be visible to recipients whose email clients do not display HTML."];
+          "The email body that is visible to recipients whose email clients do not display HTML content."];
       htmlPart: HtmlPart.t option [@ocaml.doc "The HTML body of the email."]}
     let context_ = "Template"
     let make ?subjectPart =
@@ -3092,16 +3222,16 @@ module Template =
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ?htmlPart ?textPart ?subjectPart ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let htmlPart = field_map json "HtmlPart" HtmlPart.of_json in
-      let textPart = field_map json "TextPart" TextPart.of_json in
-      let subjectPart = field_map json "SubjectPart" SubjectPart.of_json in
+    let of_json json__ =
+      let htmlPart = field_map json__ "HtmlPart" HtmlPart.of_json in
+      let textPart = field_map json__ "TextPart" TextPart.of_json in
+      let subjectPart = field_map json__ "SubjectPart" SubjectPart.of_json in
       let templateName =
-        field_map_exn json "TemplateName" TemplateName.of_json in
+        field_map_exn json__ "TemplateName" TemplateName.of_json in
       make ?htmlPart ?textPart ?subjectPart ~templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The content of the email, composed of a subject line, an HTML part, and a text-only part."]
+       "The content of the email, composed of a subject line and either an HTML part or a text-only part."]
 module InvalidLambdaFunctionException =
   struct
     type nonrec t =
@@ -3120,13 +3250,13 @@ module InvalidLambdaFunctionException =
           (Xml.child xml_arg0 "FunctionArn") in
       make ?functionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let functionArn =
-        field_map json "FunctionArn" AmazonResourceName.of_json in
+        field_map json__ "FunctionArn" AmazonResourceName.of_json in
       make ?functionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Indicates that the provided AWS Lambda function is invalid, or that Amazon SES could not execute the provided function, possibly due to permissions issues. For information about giving permissions, see the Amazon SES Developer Guide."]
+       "Indicates that the provided Amazon Web Services Lambda function is invalid, or that Amazon SES could not execute the provided function, possibly due to permissions issues. For information about giving permissions, see the Amazon SES Developer Guide."]
 module InvalidS3ConfigurationException =
   struct
     type nonrec t =
@@ -3143,12 +3273,12 @@ module InvalidS3ConfigurationException =
         (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "Bucket") in
       make ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let bucket = field_map json "Bucket" S3BucketName.of_json in
+    let of_json json__ =
+      let bucket = field_map json__ "Bucket" S3BucketName.of_json in
       make ?bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Indicates that the provided Amazon S3 bucket or AWS KMS encryption key is invalid, or that Amazon SES could not publish to the bucket, possibly due to permissions issues. For information about giving permissions, see the Amazon SES Developer Guide."]
+       "Indicates that the provided Amazon S3 bucket or Amazon Web Services KMS encryption key is invalid, or that Amazon SES could not publish to the bucket, possibly due to permissions issues. For information about giving permissions, see the Amazon SES Developer Guide."]
 module InvalidSnsTopicException =
   struct
     type nonrec t =
@@ -3166,8 +3296,8 @@ module InvalidSnsTopicException =
           (Xml.child xml_arg0 "Topic") in
       make ?topic ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topic = field_map json "Topic" AmazonResourceName.of_json in
+    let of_json json__ =
+      let topic = field_map json__ "Topic" AmazonResourceName.of_json in
       make ?topic ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3201,8 +3331,8 @@ module RuleDoesNotExistException =
         (Option.map ~f:RuleOrRuleSetName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" RuleOrRuleSetName.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" RuleOrRuleSetName.of_json in
       make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Indicates that the provided receipt rule does not exist."]
@@ -3223,8 +3353,8 @@ module RuleSetDoesNotExistException =
         (Option.map ~f:RuleOrRuleSetName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" RuleOrRuleSetName.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" RuleOrRuleSetName.of_json in
       make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3261,9 +3391,9 @@ module ConfigurationSetDoesNotExistException =
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
       make ?configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Indicates that the configuration set does not exist."]
@@ -3300,9 +3430,9 @@ module TrackingOptionsDoesNotExistException =
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
       make ?configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3313,7 +3443,7 @@ module TrackingOptions =
       {
       customRedirectDomain: CustomRedirectDomain.t option
         [@ocaml.doc
-          "The custom subdomain that will be used to redirect email recipients to the Amazon SES event tracking domain."]}
+          "The custom subdomain that is used to redirect email recipients to the Amazon SES event tracking domain."]}
     let make ?customRedirectDomain = fun () -> { customRedirectDomain }
     let to_value x =
       structure_to_value
@@ -3327,9 +3457,9 @@ module TrackingOptions =
           (Xml.child xml_arg0 "CustomRedirectDomain") in
       make ?customRedirectDomain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customRedirectDomain =
-        field_map json "CustomRedirectDomain" CustomRedirectDomain.of_json in
+        field_map json__ "CustomRedirectDomain" CustomRedirectDomain.of_json in
       make ?customRedirectDomain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3362,11 +3492,11 @@ module EventDestinationDoesNotExistException =
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?eventDestinationName ?configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDestinationName =
-        field_map json "EventDestinationName" EventDestinationName.of_json in
+        field_map json__ "EventDestinationName" EventDestinationName.of_json in
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
       make ?eventDestinationName ?configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Indicates that the event destination does not exist."]
@@ -3398,11 +3528,11 @@ module InvalidCloudWatchDestinationException =
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?eventDestinationName ?configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDestinationName =
-        field_map json "EventDestinationName" EventDestinationName.of_json in
+        field_map json__ "EventDestinationName" EventDestinationName.of_json in
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
       make ?eventDestinationName ?configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3435,11 +3565,11 @@ module InvalidFirehoseDestinationException =
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?eventDestinationName ?configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDestinationName =
-        field_map json "EventDestinationName" EventDestinationName.of_json in
+        field_map json__ "EventDestinationName" EventDestinationName.of_json in
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
       make ?eventDestinationName ?configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3472,11 +3602,11 @@ module InvalidSNSDestinationException =
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?eventDestinationName ?configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDestinationName =
-        field_map json "EventDestinationName" EventDestinationName.of_json in
+        field_map json__ "EventDestinationName" EventDestinationName.of_json in
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
       make ?eventDestinationName ?configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3497,8 +3627,8 @@ module InvalidRenderingParameterException =
           (Xml.child xml_arg0 "TemplateName") in
       make ?templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateName = field_map json "TemplateName" TemplateName.of_json in
+    let of_json json__ =
+      let templateName = field_map json__ "TemplateName" TemplateName.of_json in
       make ?templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3519,8 +3649,8 @@ module MissingRenderingAttributeException =
           (Xml.child xml_arg0 "TemplateName") in
       make ?templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateName = field_map json "TemplateName" TemplateName.of_json in
+    let of_json json__ =
+      let templateName = field_map json__ "TemplateName" TemplateName.of_json in
       make ?templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3599,9 +3729,9 @@ module ConfigurationSetSendingPausedException =
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
       make ?configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3638,7 +3768,7 @@ module RawMessage =
       {
       data: RawMessageData.t
         [@ocaml.doc
-          "The raw data of the message. This data needs to base64-encoded if you are accessing Amazon SES directly through the HTTPS interface. If you are accessing Amazon SES using an AWS SDK, the SDK takes care of the base 64-encoding for you. In all cases, the client must ensure that the message format complies with Internet email standards regarding email header fields, MIME types, and MIME encoding. The To:, CC:, and BCC: headers in the raw message can contain a group list. If you are using SendRawEmail with sending authorization, you can include X-headers in the raw message to specify the \"Source,\" \"From,\" and \"Return-Path\" addresses. For more information, see the documentation for SendRawEmail. Do not include these X-headers in the DKIM signature, because they are removed by Amazon SES before sending the email. For more information, go to the Amazon SES Developer Guide."]}
+          "The raw data of the message. This data needs to base64-encoded if you are accessing Amazon SES directly through the HTTPS interface. If you are accessing Amazon SES using an Amazon Web Services SDK, the SDK takes care of the base 64-encoding for you. In all cases, the client must ensure that the message format complies with Internet email standards regarding email header fields, MIME types, and MIME encoding. The To:, CC:, and BCC: headers in the raw message can contain a group list. If you are using SendRawEmail with sending authorization, you can include X-headers in the raw message to specify the \"Source,\" \"From,\" and \"Return-Path\" addresses. For more information, see the documentation for SendRawEmail. Do not include these X-headers in the DKIM signature, because they are removed by Amazon SES before sending the email. For more information, go to the Amazon SES Developer Guide."]}
     let context_ = "RawMessage"
     let make ~data = fun () -> { data }
     let of_header_and_body = ((fun (xs, pipe) -> make ~data:pipe ())
@@ -3652,8 +3782,8 @@ module RawMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "Data") in
       make ~data ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let data = field_map_exn json "Data" RawMessageData.of_json in
+    let of_json json__ =
+      let data = field_map_exn json__ "Data" RawMessageData.of_json in
       make ~data ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the raw data of the message."]
@@ -3663,7 +3793,7 @@ module Message =
       {
       subject: Content.t
         [@ocaml.doc
-          "The subject of the message: A short summary of the content, which will appear in the recipient's inbox."];
+          "The subject of the message: A short summary of the content, which appears in the recipient's inbox."];
       body: Body.t [@ocaml.doc "The message body."]}
     let context_ = "Message"
     let make ~subject = fun ~body -> fun () -> { subject; body }
@@ -3679,9 +3809,9 @@ module Message =
         Content.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Subject") in
       make ~body ~subject ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let body = field_map_exn json "Body" Body.of_json in
-      let subject = field_map_exn json "Subject" Content.of_json in
+    let of_json json__ =
+      let body = field_map_exn json__ "Body" Body.of_json in
+      let subject = field_map_exn json__ "Subject" Content.of_json in
       make ~body ~subject ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3707,9 +3837,9 @@ module CustomVerificationEmailTemplateDoesNotExistException =
           (Xml.child xml_arg0 "CustomVerificationEmailTemplateName") in
       make ?customVerificationEmailTemplateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customVerificationEmailTemplateName =
-        field_map json "CustomVerificationEmailTemplateName"
+        field_map json__ "CustomVerificationEmailTemplateName"
           TemplateName.of_json in
       make ?customVerificationEmailTemplateName ()
     let to_json v = composed_to_json to_value v
@@ -3734,9 +3864,9 @@ module FromEmailAddressNotVerifiedException =
           (Xml.child xml_arg0 "FromEmailAddress") in
       make ?fromEmailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fromEmailAddress =
-        field_map json "FromEmailAddress" FromAddress.of_json in
+        field_map json__ "FromEmailAddress" FromAddress.of_json in
       make ?fromEmailAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3758,6 +3888,9 @@ module BulkEmailDestinationStatusList =
   struct
     type nonrec t = BulkEmailDestinationStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BulkEmailDestinationStatus.to_value)) |>
         (fun x -> `List x)
@@ -3784,6 +3917,9 @@ module BulkEmailDestinationList =
   struct
     type nonrec t = BulkEmailDestination.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BulkEmailDestination.to_value)) |>
         (fun x -> `List x)
@@ -3810,6 +3946,9 @@ module BouncedRecipientInfoList =
   struct
     type nonrec t = BouncedRecipientInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BouncedRecipientInfo.to_value)) |>
         (fun x -> `List x)
@@ -3880,12 +4019,12 @@ module MessageDsn =
           (Xml.child_exn ~context:context_ xml_arg0 "ReportingMta") in
       make ?extensionFields ?arrivalDate ~reportingMta ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let extensionFields =
-        field_map json "ExtensionFields" ExtensionFieldList.of_json in
-      let arrivalDate = field_map json "ArrivalDate" ArrivalDate.of_json in
+        field_map json__ "ExtensionFields" ExtensionFieldList.of_json in
+      let arrivalDate = field_map json__ "ArrivalDate" ArrivalDate.of_json in
       let reportingMta =
-        field_map_exn json "ReportingMta" ReportingMta.of_json in
+        field_map_exn json__ "ReportingMta" ReportingMta.of_json in
       make ?extensionFields ?arrivalDate ~reportingMta ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3894,6 +4033,9 @@ module ReceiptRuleNamesList =
   struct
     type nonrec t = ReceiptRuleName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReceiptRuleName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3957,8 +4099,8 @@ module DeliveryOptions =
         (Option.map ~f:TlsPolicy.of_xml) (Xml.child xml_arg0 "TlsPolicy") in
       make ?tlsPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tlsPolicy = field_map json "TlsPolicy" TlsPolicy.of_json in
+    let of_json json__ =
+      let tlsPolicy = field_map json__ "TlsPolicy" TlsPolicy.of_json in
       make ?tlsPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3980,6 +4122,9 @@ module TemplateMetadataList =
   struct
     type nonrec t = TemplateMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TemplateMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4018,6 +4163,9 @@ module ReceiptRuleSetsLists =
   struct
     type nonrec t = ReceiptRuleSetMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReceiptRuleSetMetadata.to_value)) |>
         (fun x -> `List x)
@@ -4044,6 +4192,9 @@ module ReceiptFilterList =
   struct
     type nonrec t = ReceiptFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReceiptFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4068,6 +4219,9 @@ module PolicyNameList =
   struct
     type nonrec t = PolicyName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4092,6 +4246,9 @@ module IdentityList =
   struct
     type nonrec t = Identity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Identity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4141,6 +4298,9 @@ module CustomVerificationEmailTemplates =
   struct
     type nonrec t = CustomVerificationEmailTemplate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomVerificationEmailTemplate.to_value)) |>
         (fun x -> `List x)
@@ -4185,6 +4345,9 @@ module ConfigurationSets =
   struct
     type nonrec t = ConfigurationSet.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigurationSet.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4210,6 +4373,9 @@ module SendDataPointList =
   struct
     type nonrec t = SendDataPoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SendDataPoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4294,6 +4460,8 @@ module VerificationAttributes =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -4322,6 +4490,8 @@ module PolicyMap =
                     (fun x -> (Policy.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -4354,6 +4524,8 @@ module NotificationAttributes =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -4386,6 +4558,8 @@ module MailFromDomainAttributes =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -4418,6 +4592,8 @@ module DkimAttributes =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -4429,6 +4605,9 @@ module ReceiptRulesList =
   struct
     type nonrec t = ReceiptRule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReceiptRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4453,6 +4632,9 @@ module EventDestinations =
   struct
     type nonrec t = EventDestination.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventDestination.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4480,7 +4662,7 @@ module ReputationOptions =
       {
       sendingEnabled: Enabled.t option
         [@ocaml.doc
-          "Describes whether email sending is enabled or disabled for the configuration set. If the value is true, then Amazon SES will send emails that use the configuration set. If the value is false, Amazon SES will not send emails that use the configuration set. The default value is true. You can change this setting using UpdateConfigurationSetSendingEnabled."];
+          "Describes whether email sending is enabled or disabled for the configuration set. If the value is true, then Amazon SES sends emails that use the configuration set. If the value is false, Amazon SES does not send emails that use the configuration set. The default value is true. You can change this setting using UpdateConfigurationSetSendingEnabled."];
       reputationMetricsEnabled: Enabled.t option
         [@ocaml.doc
           "Describes whether or not Amazon SES publishes reputation metrics for the configuration set, such as bounce and complaint rates, to Amazon CloudWatch. If the value is true, reputation metrics are published. If the value is false, reputation metrics are not published. The default value is false."];
@@ -4512,12 +4694,12 @@ module ReputationOptions =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "SendingEnabled") in
       make ?lastFreshStart ?reputationMetricsEnabled ?sendingEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastFreshStart =
-        field_map json "LastFreshStart" LastFreshStart.of_json in
+        field_map json__ "LastFreshStart" LastFreshStart.of_json in
       let reputationMetricsEnabled =
-        field_map json "ReputationMetricsEnabled" Enabled.of_json in
-      let sendingEnabled = field_map json "SendingEnabled" Enabled.of_json in
+        field_map json__ "ReputationMetricsEnabled" Enabled.of_json in
+      let sendingEnabled = field_map json__ "SendingEnabled" Enabled.of_json in
       make ?lastFreshStart ?reputationMetricsEnabled ?sendingEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4526,6 +4708,9 @@ module ConfigurationSetAttributeList =
   struct
     type nonrec t = ConfigurationSetAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigurationSetAttribute.to_value)) |>
         (fun x -> `List x)
@@ -4565,8 +4750,8 @@ module CannotDeleteException =
         (Option.map ~f:RuleOrRuleSetName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" RuleOrRuleSetName.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" RuleOrRuleSetName.of_json in
       make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4588,8 +4773,8 @@ module AlreadyExistsException =
         (Option.map ~f:RuleOrRuleSetName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" RuleOrRuleSetName.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" RuleOrRuleSetName.of_json in
       make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4614,9 +4799,9 @@ module TrackingOptionsAlreadyExistsException =
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
       make ?configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4640,9 +4825,9 @@ module ConfigurationSetAlreadyExistsException =
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
       make ?configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4688,11 +4873,11 @@ module EventDestinationAlreadyExistsException =
           (Xml.child xml_arg0 "ConfigurationSetName") in
       make ?eventDestinationName ?configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDestinationName =
-        field_map json "EventDestinationName" EventDestinationName.of_json in
+        field_map json__ "EventDestinationName" EventDestinationName.of_json in
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
       make ?eventDestinationName ?configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4749,8 +4934,8 @@ module VerifyEmailIdentityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ~emailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let emailAddress = field_map_exn json "EmailAddress" Address.of_json in
+    let of_json json__ =
+      let emailAddress = field_map_exn json__ "EmailAddress" Address.of_json in
       make ~emailAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4773,8 +4958,8 @@ module VerifyEmailAddressRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ~emailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let emailAddress = field_map_exn json "EmailAddress" Address.of_json in
+    let of_json json__ =
+      let emailAddress = field_map_exn json__ "EmailAddress" Address.of_json in
       make ~emailAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4783,9 +4968,9 @@ module VerifyDomainIdentityResponse =
   struct
     type verifyDomainIdentityResult =
       {
-      verificationToken: VerificationToken.t
+      verificationToken: VerificationToken.t option
         [@ocaml.doc
-          "A TXT record that you must place in the DNS settings of the domain to complete domain verification with Amazon SES. As Amazon SES searches for the TXT record, the domain's verification status is \"Pending\". When Amazon SES detects the record, the domain's verification status changes to \"Success\". If Amazon SES is unable to detect the record within 72 hours, the domain's verification status changes to \"Failed.\" In that case, if you still want to verify the domain, you must restart the verification process from the beginning."]}
+          "A TXT record that you must place in the DNS settings of the domain to complete domain verification with Amazon SES. As Amazon SES searches for the TXT record, the domain's verification status is \"Pending\". When Amazon SES detects the record, the domain's verification status changes to \"Success\". If Amazon SES is unable to detect the record within 72 hours, the domain's verification status changes to \"Failed.\" In that case, to verify the domain, you must restart the verification process from the beginning. The domain's verification status also changes to \"Success\" when it is DKIM verified."]}
     and responseMetaData = unit
     and t =
       {
@@ -4793,7 +4978,7 @@ module VerifyDomainIdentityResponse =
       responseMetaData: responseMetaData }
     type error = [ `Unknown_operation_error of (string * string option) ]
     let context_ = "VerifyDomainIdentityResponse"
-    let make ~verificationToken =
+    let make ?verificationToken =
       fun () ->
         {
           verifyDomainIdentityResult = { verificationToken };
@@ -4819,21 +5004,21 @@ module VerifyDomainIdentityResponse =
       let x = t.verifyDomainIdentityResult in
       structure_to_wrapped_value
         [("VerificationToken",
-           (Some (VerificationToken.to_value x.verificationToken)))]
+           (Option.map x.verificationToken ~f:VerificationToken.to_value))]
         ~wrapper:"VerifyDomainIdentityResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "VerifyDomainIdentityResult" in
       let verificationToken =
-        VerificationToken.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VerificationToken") in
-      make ~verificationToken ()
+        (Option.map ~f:VerificationToken.of_xml)
+          (Xml.child xml_arg0 "VerificationToken") in
+      make ?verificationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let verificationToken =
-        field_map_exn json "VerificationToken" VerificationToken.of_json in
-      make ~verificationToken ()
+        field_map json__ "VerificationToken" VerificationToken.of_json in
+      make ?verificationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a TXT record that you must publish to the DNS server of your domain to complete domain verification with Amazon SES."]
@@ -4852,8 +5037,8 @@ module VerifyDomainIdentityRequest =
         Domain.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Domain") in
       make ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domain = field_map_exn json "Domain" Domain.of_json in
+    let of_json json__ =
+      let domain = field_map_exn json__ "Domain" Domain.of_json in
       make ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4862,7 +5047,7 @@ module VerifyDomainDkimResponse =
   struct
     type verifyDomainDkimResult =
       {
-      dkimTokens: VerificationTokenList.t
+      dkimTokens: VerificationTokenList.t option
         [@ocaml.doc
           "A set of character strings that represent the domain's identity. If the identity is an email address, the tokens represent the domain of that address. Using these tokens, you need to create DNS CNAME records that point to DKIM public keys that are hosted by Amazon SES. Amazon Web Services eventually detects that you've updated your DNS records. This detection process might take up to 72 hours. After successful detection, Amazon SES is able to DKIM-sign email originating from that domain. (This only applies to domain identities, not email address identities.) For more information about creating DNS records using DKIM tokens, see the Amazon SES Developer Guide."]}
     and responseMetaData = unit
@@ -4872,7 +5057,7 @@ module VerifyDomainDkimResponse =
       responseMetaData: responseMetaData }
     type error = [ `Unknown_operation_error of (string * string option) ]
     let context_ = "VerifyDomainDkimResponse"
-    let make ~dkimTokens =
+    let make ?dkimTokens =
       fun () ->
         { verifyDomainDkimResult = { dkimTokens }; responseMetaData = () }
     let error_of_json name json =
@@ -4894,21 +5079,22 @@ module VerifyDomainDkimResponse =
     let to_value t =
       let x = t.verifyDomainDkimResult in
       structure_to_wrapped_value
-        [("DkimTokens", (Some (VerificationTokenList.to_value x.dkimTokens)))]
+        [("DkimTokens",
+           (Option.map x.dkimTokens ~f:VerificationTokenList.to_value))]
         ~wrapper:"VerifyDomainDkimResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "VerifyDomainDkimResult" in
       let dkimTokens =
-        VerificationTokenList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DkimTokens") in
-      make ~dkimTokens ()
+        (Option.map ~f:VerificationTokenList.of_xml)
+          (Xml.child xml_arg0 "DkimTokens") in
+      make ?dkimTokens ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dkimTokens =
-        field_map_exn json "DkimTokens" VerificationTokenList.of_json in
-      make ~dkimTokens ()
+        field_map json__ "DkimTokens" VerificationTokenList.of_json in
+      make ?dkimTokens ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns CNAME records that you must publish to the DNS server of your domain to set up Easy DKIM with Amazon SES."]
@@ -4929,8 +5115,8 @@ module VerifyDomainDkimRequest =
         Domain.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Domain") in
       make ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domain = field_map_exn json "Domain" Domain.of_json in
+    let of_json json__ =
+      let domain = field_map_exn json__ "Domain" Domain.of_json in
       make ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4990,7 +5176,7 @@ module UpdateTemplateResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an email template. Email templates enable you to send personalized email to one or more destinations in a single API operation. For more information, see the Amazon SES Developer Guide. You can execute this operation no more than once per second."]
+       "Updates an email template. Email templates enable you to send personalized email to one or more destinations in a single operation. For more information, see the Amazon SES Developer Guide. You can execute this operation no more than once per second."]
 module UpdateTemplateRequest =
   struct
     type nonrec t = {
@@ -5006,12 +5192,12 @@ module UpdateTemplateRequest =
         Template.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Template") in
       make ~template ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let template = field_map_exn json "Template" Template.of_json in
+    let of_json json__ =
+      let template = field_map_exn json__ "Template" Template.of_json in
       make ~template ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an email template. Email templates enable you to send personalized email to one or more destinations in a single API operation. For more information, see the Amazon SES Developer Guide. You can execute this operation no more than once per second."]
+       "Updates an email template. Email templates enable you to send personalized email to one or more destinations in a single operation. For more information, see the Amazon SES Developer Guide. You can execute this operation no more than once per second."]
 module UpdateReceiptRuleResponse =
   struct
     type updateReceiptRuleResult = unit
@@ -5132,10 +5318,10 @@ module UpdateReceiptRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~rule ~ruleSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rule = field_map_exn json "Rule" ReceiptRule.of_json in
+    let of_json json__ =
+      let rule = field_map_exn json__ "Rule" ReceiptRule.of_json in
       let ruleSetName =
-        field_map_exn json "RuleSetName" ReceiptRuleSetName.of_json in
+        field_map_exn json__ "RuleSetName" ReceiptRuleSetName.of_json in
       make ~rule ~ruleSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5146,7 +5332,7 @@ module UpdateCustomVerificationEmailTemplateRequest =
       {
       templateName: TemplateName.t
         [@ocaml.doc
-          "The name of the custom verification email template that you want to update."];
+          "The name of the custom verification email template to update."];
       fromEmailAddress: FromAddress.t option
         [@ocaml.doc
           "The email address that the custom verification email is sent from."];
@@ -5214,18 +5400,21 @@ module UpdateCustomVerificationEmailTemplateRequest =
       make ?failureRedirectionURL ?successRedirectionURL ?templateContent
         ?templateSubject ?fromEmailAddress ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureRedirectionURL =
-        field_map json "FailureRedirectionURL" FailureRedirectionURL.of_json in
+        field_map json__ "FailureRedirectionURL"
+          FailureRedirectionURL.of_json in
       let successRedirectionURL =
-        field_map json "SuccessRedirectionURL" SuccessRedirectionURL.of_json in
+        field_map json__ "SuccessRedirectionURL"
+          SuccessRedirectionURL.of_json in
       let templateContent =
-        field_map json "TemplateContent" TemplateContent.of_json in
-      let templateSubject = field_map json "TemplateSubject" Subject.of_json in
+        field_map json__ "TemplateContent" TemplateContent.of_json in
+      let templateSubject =
+        field_map json__ "TemplateSubject" Subject.of_json in
       let fromEmailAddress =
-        field_map json "FromEmailAddress" FromAddress.of_json in
+        field_map json__ "FromEmailAddress" FromAddress.of_json in
       let templateName =
-        field_map_exn json "TemplateName" TemplateName.of_json in
+        field_map_exn json__ "TemplateName" TemplateName.of_json in
       make ?failureRedirectionURL ?successRedirectionURL ?templateContent
         ?templateSubject ?fromEmailAddress ~templateName ()
     let to_json v = composed_to_json to_value v
@@ -5312,8 +5501,7 @@ module UpdateConfigurationSetTrackingOptionsRequest =
     type nonrec t =
       {
       configurationSetName: ConfigurationSetName.t
-        [@ocaml.doc
-          "The name of the configuration set for which you want to update the custom tracking domain."];
+        [@ocaml.doc "The name of the configuration set."];
       trackingOptions: TrackingOptions.t }
     let context_ = "UpdateConfigurationSetTrackingOptionsRequest"
     let make ~configurationSetName =
@@ -5335,11 +5523,11 @@ module UpdateConfigurationSetTrackingOptionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~trackingOptions ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let trackingOptions =
-        field_map_exn json "TrackingOptions" TrackingOptions.of_json in
+        field_map_exn json__ "TrackingOptions" TrackingOptions.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~trackingOptions ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -5350,8 +5538,7 @@ module UpdateConfigurationSetSendingEnabledRequest =
     type nonrec t =
       {
       configurationSetName: ConfigurationSetName.t
-        [@ocaml.doc
-          "The name of the configuration set that you want to update."];
+        [@ocaml.doc "The name of the configuration set to update."];
       enabled: Enabled.t
         [@ocaml.doc
           "Describes whether email sending is enabled or disabled for the configuration set."]}
@@ -5372,10 +5559,10 @@ module UpdateConfigurationSetSendingEnabledRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~enabled ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map_exn json "Enabled" Enabled.of_json in
+    let of_json json__ =
+      let enabled = field_map_exn json__ "Enabled" Enabled.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~enabled ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -5386,11 +5573,10 @@ module UpdateConfigurationSetReputationMetricsEnabledRequest =
     type nonrec t =
       {
       configurationSetName: ConfigurationSetName.t
-        [@ocaml.doc
-          "The name of the configuration set that you want to update."];
+        [@ocaml.doc "The name of the configuration set to update."];
       enabled: Enabled.t
         [@ocaml.doc
-          "Describes whether or not Amazon SES will publish reputation metrics for the configuration set, such as bounce and complaint rates, to Amazon CloudWatch."]}
+          "Describes whether or not Amazon SES publishes reputation metrics for the configuration set, such as bounce and complaint rates, to Amazon CloudWatch."]}
     let context_ = "UpdateConfigurationSetReputationMetricsEnabledRequest"
     let make ~configurationSetName =
       fun ~enabled -> fun () -> { configurationSetName; enabled }
@@ -5408,10 +5594,10 @@ module UpdateConfigurationSetReputationMetricsEnabledRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~enabled ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map_exn json "Enabled" Enabled.of_json in
+    let of_json json__ =
+      let enabled = field_map_exn json__ "Enabled" Enabled.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~enabled ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -5523,10 +5709,9 @@ module UpdateConfigurationSetEventDestinationRequest =
       {
       configurationSetName: ConfigurationSetName.t
         [@ocaml.doc
-          "The name of the configuration set that contains the event destination that you want to update."];
+          "The name of the configuration set that contains the event destination."];
       eventDestination: EventDestination.t
-        [@ocaml.doc
-          "The event destination object that you want to apply to the specified configuration set."]}
+        [@ocaml.doc "The event destination object."]}
     let context_ = "UpdateConfigurationSetEventDestinationRequest"
     let make ~configurationSetName =
       fun ~eventDestination ->
@@ -5547,11 +5732,11 @@ module UpdateConfigurationSetEventDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~eventDestination ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDestination =
-        field_map_exn json "EventDestination" EventDestination.of_json in
+        field_map_exn json__ "EventDestination" EventDestination.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~eventDestination ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -5563,7 +5748,7 @@ module UpdateAccountSendingEnabledRequest =
       {
       enabled: Enabled.t option
         [@ocaml.doc
-          "Describes whether email sending is enabled or disabled for your Amazon SES account in the current AWS Region."]}
+          "Describes whether email sending is enabled or disabled for your Amazon SES account in the current Amazon Web Services Region."]}
     let make ?enabled = fun () -> { enabled }
     let to_value x =
       structure_to_value
@@ -5574,8 +5759,8 @@ module UpdateAccountSendingEnabledRequest =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "Enabled" Enabled.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "Enabled" Enabled.of_json in
       make ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5668,9 +5853,9 @@ module TestRenderTemplateResponse =
           (Xml.child xml_arg0 "RenderedTemplate") in
       make ?renderedTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let renderedTemplate =
-        field_map json "RenderedTemplate" RenderedTemplate.of_json in
+        field_map json__ "RenderedTemplate" RenderedTemplate.of_json in
       make ?renderedTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5680,7 +5865,7 @@ module TestRenderTemplateRequest =
     type nonrec t =
       {
       templateName: TemplateName.t
-        [@ocaml.doc "The name of the template that you want to render."];
+        [@ocaml.doc "The name of the template to render."];
       templateData: TemplateData.t
         [@ocaml.doc
           "A list of replacement values to apply to the template. This parameter is a JSON object, typically consisting of key-value pairs in which the keys correspond to replacement tags in the email template."]}
@@ -5701,11 +5886,11 @@ module TestRenderTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateData ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateData =
-        field_map_exn json "TemplateData" TemplateData.of_json in
+        field_map_exn json__ "TemplateData" TemplateData.of_json in
       let templateName =
-        field_map_exn json "TemplateName" TemplateName.of_json in
+        field_map_exn json__ "TemplateName" TemplateName.of_json in
       make ~templateData ~templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5799,11 +5984,11 @@ module SetReceiptRulePositionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ?after ~ruleName ~ruleSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let after = field_map json "After" ReceiptRuleName.of_json in
-      let ruleName = field_map_exn json "RuleName" ReceiptRuleName.of_json in
+    let of_json json__ =
+      let after = field_map json__ "After" ReceiptRuleName.of_json in
+      let ruleName = field_map_exn json__ "RuleName" ReceiptRuleName.of_json in
       let ruleSetName =
-        field_map_exn json "RuleSetName" ReceiptRuleSetName.of_json in
+        field_map_exn json__ "RuleSetName" ReceiptRuleSetName.of_json in
       make ?after ~ruleName ~ruleSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5849,10 +6034,10 @@ module SetIdentityNotificationTopicRequest =
       {
       identity: Identity.t
         [@ocaml.doc
-          "The identity (email address or domain) that you want to set the Amazon SNS topic for. You can only specify a verified identity for this parameter. You can specify an identity by using its name or by using its Amazon Resource Name (ARN). The following examples are all valid identities: sender\\@example.com, example.com, arn:aws:ses:us-east-1:123456789012:identity/example.com."];
+          "The identity (email address or domain) for the Amazon SNS topic. You can only specify a verified identity for this parameter. You can specify an identity by using its name or by using its Amazon Resource Name (ARN). The following examples are all valid identities: sender\\@example.com, example.com, arn:aws:ses:us-east-1:123456789012:identity/example.com."];
       notificationType: NotificationType.t
         [@ocaml.doc
-          "The type of notifications that will be published to the specified Amazon SNS topic."];
+          "The type of notifications that are published to the specified Amazon SNS topic."];
       snsTopic: NotificationTopic.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the Amazon SNS topic. If the parameter is omitted from the request or a null value is passed, SnsTopic is cleared and publishing is disabled."]}
@@ -5879,15 +6064,15 @@ module SetIdentityNotificationTopicRequest =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ?snsTopic ~notificationType ~identity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snsTopic = field_map json "SnsTopic" NotificationTopic.of_json in
+    let of_json json__ =
+      let snsTopic = field_map json__ "SnsTopic" NotificationTopic.of_json in
       let notificationType =
-        field_map_exn json "NotificationType" NotificationType.of_json in
-      let identity = field_map_exn json "Identity" Identity.of_json in
+        field_map_exn json__ "NotificationType" NotificationType.of_json in
+      let identity = field_map_exn json__ "Identity" Identity.of_json in
       make ?snsTopic ~notificationType ~identity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a request to specify the Amazon SNS topic to which Amazon SES will publish bounce, complaint, or delivery notifications for emails sent with that identity as the Source. For information about Amazon SES notifications, see the Amazon SES Developer Guide."]
+       "Represents a request to specify the Amazon SNS topic to which Amazon SES publishes bounce, complaint, or delivery notifications for emails sent with that identity as the source. For information about Amazon SES notifications, see the Amazon SES Developer Guide."]
 module SetIdentityMailFromDomainResponse =
   struct
     type setIdentityMailFromDomainResult = unit
@@ -5927,15 +6112,13 @@ module SetIdentityMailFromDomainRequest =
   struct
     type nonrec t =
       {
-      identity: Identity.t
-        [@ocaml.doc
-          "The verified identity for which you want to enable or disable the specified custom MAIL FROM domain."];
+      identity: Identity.t [@ocaml.doc "The verified identity."];
       mailFromDomain: MailFromDomainName.t option
         [@ocaml.doc
-          "The custom MAIL FROM domain that you want the verified identity to use. The MAIL FROM domain must 1) be a subdomain of the verified identity, 2) not be used in a \"From\" address if the MAIL FROM domain is the destination of email feedback forwarding (for more information, see the Amazon SES Developer Guide), and 3) not be used to receive emails. A value of null disables the custom MAIL FROM setting for the identity."];
+          "The custom MAIL FROM domain for the verified identity to use. The MAIL FROM domain must 1) be a subdomain of the verified identity, 2) not be used in a \"From\" address if the MAIL FROM domain is the destination of email feedback forwarding (for more information, see the Amazon SES Developer Guide), and 3) not be used to receive emails. A value of null disables the custom MAIL FROM setting for the identity."];
       behaviorOnMXFailure: BehaviorOnMXFailure.t option
         [@ocaml.doc
-          "The action that you want Amazon SES to take if it cannot successfully read the required MX record when you send an email. If you choose UseDefaultValue, Amazon SES will use amazonses.com (or a subdomain of that) as the MAIL FROM domain. If you choose RejectMessage, Amazon SES will return a MailFromDomainNotVerified error and not send the email. The action specified in BehaviorOnMXFailure is taken when the custom MAIL FROM domain setup is in the Pending, Failed, and TemporaryFailure states."]}
+          "The action for Amazon SES to take if it cannot successfully read the required MX record when you send an email. If you choose UseDefaultValue, Amazon SES uses amazonses.com (or a subdomain of that) as the MAIL FROM domain. If you choose RejectMessage, Amazon SES returns a MailFromDomainNotVerified error and not send the email. The action specified in BehaviorOnMXFailure is taken when the custom MAIL FROM domain setup is in the Pending, Failed, and TemporaryFailure states."]}
     let context_ = "SetIdentityMailFromDomainRequest"
     let make ?mailFromDomain =
       fun ?behaviorOnMXFailure ->
@@ -5960,12 +6143,12 @@ module SetIdentityMailFromDomainRequest =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ?behaviorOnMXFailure ?mailFromDomain ~identity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let behaviorOnMXFailure =
-        field_map json "BehaviorOnMXFailure" BehaviorOnMXFailure.of_json in
+        field_map json__ "BehaviorOnMXFailure" BehaviorOnMXFailure.of_json in
       let mailFromDomain =
-        field_map json "MailFromDomain" MailFromDomainName.of_json in
-      let identity = field_map_exn json "Identity" Identity.of_json in
+        field_map json__ "MailFromDomain" MailFromDomainName.of_json in
+      let identity = field_map_exn json__ "Identity" Identity.of_json in
       make ?behaviorOnMXFailure ?mailFromDomain ~identity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6021,7 +6204,7 @@ module SetIdentityHeadersInNotificationsEnabledRequest =
           "The notification type for which to enable or disable headers in notifications."];
       enabled: Enabled.t
         [@ocaml.doc
-          "Sets whether Amazon SES includes the original email headers in Amazon SNS notifications of the specified notification type. A value of true specifies that Amazon SES will include headers in notifications, and a value of false specifies that Amazon SES will not include headers in notifications. This value can only be set when NotificationType is already set to use a particular Amazon SNS topic."]}
+          "Sets whether Amazon SES includes the original email headers in Amazon SNS notifications of the specified notification type. A value of true specifies that Amazon SES includes headers in notifications, and a value of false specifies that Amazon SES does not include headers in notifications. This value can only be set when NotificationType is already set to use a particular Amazon SNS topic."]}
     let context_ = "SetIdentityHeadersInNotificationsEnabledRequest"
     let make ~identity =
       fun ~notificationType ->
@@ -6043,11 +6226,11 @@ module SetIdentityHeadersInNotificationsEnabledRequest =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ~enabled ~notificationType ~identity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map_exn json "Enabled" Enabled.of_json in
+    let of_json json__ =
+      let enabled = field_map_exn json__ "Enabled" Enabled.of_json in
       let notificationType =
-        field_map_exn json "NotificationType" NotificationType.of_json in
-      let identity = field_map_exn json "Identity" Identity.of_json in
+        field_map_exn json__ "NotificationType" NotificationType.of_json in
+      let identity = field_map_exn json__ "Identity" Identity.of_json in
       make ~enabled ~notificationType ~identity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6100,7 +6283,7 @@ module SetIdentityFeedbackForwardingEnabledRequest =
           "The identity for which to set bounce and complaint notification forwarding. Examples: user\\@example.com, example.com."];
       forwardingEnabled: Enabled.t
         [@ocaml.doc
-          "Sets whether Amazon SES will forward bounce and complaint notifications as email. true specifies that Amazon SES will forward bounce and complaint notifications as email, in addition to any Amazon SNS topic publishing otherwise specified. false specifies that Amazon SES will publish bounce and complaint notifications only through Amazon SNS. This value can only be set to false when Amazon SNS topics are set for both Bounce and Complaint notification types."]}
+          "Sets whether Amazon SES forwards bounce and complaint notifications as email. true specifies that Amazon SES forwards bounce and complaint notifications as email, in addition to any Amazon SNS topic publishing otherwise specified. false specifies that Amazon SES publishes bounce and complaint notifications only through Amazon SNS. This value can only be set to false when Amazon SNS topics are set for both Bounce and Complaint notification types."]}
     let context_ = "SetIdentityFeedbackForwardingEnabledRequest"
     let make ~identity =
       fun ~forwardingEnabled -> fun () -> { identity; forwardingEnabled }
@@ -6117,10 +6300,10 @@ module SetIdentityFeedbackForwardingEnabledRequest =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ~forwardingEnabled ~identity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let forwardingEnabled =
-        field_map_exn json "ForwardingEnabled" Enabled.of_json in
-      let identity = field_map_exn json "Identity" Identity.of_json in
+        field_map_exn json__ "ForwardingEnabled" Enabled.of_json in
+      let identity = field_map_exn json__ "Identity" Identity.of_json in
       make ~forwardingEnabled ~identity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6186,9 +6369,9 @@ module SetIdentityDkimEnabledRequest =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ~dkimEnabled ~identity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dkimEnabled = field_map_exn json "DkimEnabled" Enabled.of_json in
-      let identity = field_map_exn json "Identity" Identity.of_json in
+    let of_json json__ =
+      let dkimEnabled = field_map_exn json__ "DkimEnabled" Enabled.of_json in
+      let identity = field_map_exn json__ "Identity" Identity.of_json in
       make ~dkimEnabled ~identity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6259,9 +6442,9 @@ module SetActiveReceiptRuleSetRequest =
           (Xml.child xml_arg0 "RuleSetName") in
       make ?ruleSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ruleSetName =
-        field_map json "RuleSetName" ReceiptRuleSetName.of_json in
+        field_map json__ "RuleSetName" ReceiptRuleSetName.of_json in
       make ?ruleSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6270,7 +6453,7 @@ module SendTemplatedEmailResponse =
   struct
     type sendTemplatedEmailResult =
       {
-      messageId: MessageId.t
+      messageId: MessageId.t option
         [@ocaml.doc
           "The unique message identifier returned from the SendTemplatedEmail action."]}
     and responseMetaData = unit
@@ -6290,7 +6473,7 @@ module SendTemplatedEmailResponse =
       | `TemplateDoesNotExistException of TemplateDoesNotExistException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "SendTemplatedEmailResponse"
-    let make ~messageId =
+    let make ?messageId =
       fun () ->
         { sendTemplatedEmailResult = { messageId }; responseMetaData = () }
     let error_of_json name json =
@@ -6368,39 +6551,38 @@ module SendTemplatedEmailResponse =
     let to_value t =
       let x = t.sendTemplatedEmailResult in
       structure_to_wrapped_value
-        [("MessageId", (Some (MessageId.to_value x.messageId)))]
+        [("MessageId", (Option.map x.messageId ~f:MessageId.to_value))]
         ~wrapper:"SendTemplatedEmailResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "SendTemplatedEmailResult" in
       let messageId =
-        MessageId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MessageId") in
-      make ~messageId ()
+        (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "MessageId") in
+      make ?messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageId = field_map_exn json "MessageId" MessageId.of_json in
-      make ~messageId ()
+    let of_json json__ =
+      let messageId = field_map json__ "MessageId" MessageId.of_json in
+      make ?messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Composes an email message using an email template and immediately queues it for sending. In order to send email using the SendTemplatedEmail operation, your call to the API must meet the following requirements: The call must refer to an existing email template. You can create email templates using the CreateTemplate operation. The message must be sent from a verified email address or domain. If your account is still in the Amazon SES sandbox, you may only send to verified addresses or domains, or to email addresses associated with the Amazon SES Mailbox Simulator. For more information, see Verifying Email Addresses and Domains in the Amazon SES Developer Guide. The maximum message size is 10 MB. Calls to the SendTemplatedEmail operation may only include one Destination parameter. A destination is a set of recipients who will receive the same version of the email. The Destination parameter can include up to 50 recipients, across the To:, CC: and BCC: fields. The Destination parameter must include at least one recipient email address. The recipient address can be a To: address, a CC: address, or a BCC: address. If a recipient email address is invalid (that is, it is not in the format UserName\\@\\[SubDomain.\\]Domain.TopLevelDomain), the entire message will be rejected, even if the message contains other recipients that are valid. If your call to the SendTemplatedEmail operation includes all of the required parameters, Amazon SES accepts it and returns a Message ID. However, if Amazon SES can't render the email because the template contains errors, it doesn't send the email. Additionally, because it already accepted the message, Amazon SES doesn't return a message stating that it was unable to send the email. For these reasons, we highly recommend that you set up Amazon SES to send you notifications when Rendering Failure events occur. For more information, see Sending Personalized Email Using the Amazon SES API in the Amazon Simple Email Service Developer Guide."]
+       "Composes an email message using an email template and immediately queues it for sending. To send email using this operation, your call must meet the following requirements: The call must refer to an existing email template. You can create email templates using the CreateTemplate operation. The message must be sent from a verified email address or domain. If your account is still in the Amazon SES sandbox, you may only send to verified addresses or domains, or to email addresses associated with the Amazon SES Mailbox Simulator. For more information, see Verifying Email Addresses and Domains in the Amazon SES Developer Guide. The maximum message size is 10 MB. Calls to the SendTemplatedEmail operation may only include one Destination parameter. A destination is a set of recipients that receives the same version of the email. The Destination parameter can include up to 50 recipients, across the To:, CC: and BCC: fields. The Destination parameter must include at least one recipient email address. The recipient address can be a To: address, a CC: address, or a BCC: address. If a recipient email address is invalid (that is, it is not in the format UserName\\@\\[SubDomain.\\]Domain.TopLevelDomain), the entire message is rejected, even if the message contains other recipients that are valid. If your call to the SendTemplatedEmail operation includes all of the required parameters, Amazon SES accepts it and returns a Message ID. However, if Amazon SES can't render the email because the template contains errors, it doesn't send the email. Additionally, because it already accepted the message, Amazon SES doesn't return a message stating that it was unable to send the email. For these reasons, we highly recommend that you set up Amazon SES to send you notifications when Rendering Failure events occur. For more information, see Sending Personalized Email Using the Amazon SES API in the Amazon Simple Email Service Developer Guide."]
 module SendTemplatedEmailRequest =
   struct
     type nonrec t =
       {
       source: Address.t
         [@ocaml.doc
-          "The email address that is sending the email. This email address must be either individually verified with Amazon SES, or from a domain that has been verified with Amazon SES. For information about verifying identities, see the Amazon SES Developer Guide. If you are sending on behalf of another user and have been permitted to do so by a sending authorization policy, then you must also specify the SourceArn parameter. For more information about sending authorization, see the Amazon SES Developer Guide. Amazon SES does not support the SMTPUTF8 extension, as described in RFC6531. For this reason, the local part of a source email address (the part of the email address that precedes the \\@ sign) may only contain 7-bit ASCII characters. If the domain part of an address (the part after the \\@ sign) contains non-ASCII characters, they must be encoded using Punycode, as described in RFC3492. The sender name (also known as the friendly name) may contain non-ASCII characters. These characters must be encoded using MIME encoded-word syntax, as described inRFC 2047. MIME encoded-word syntax uses the following form: =?charset?encoding?encoded-text?=."];
+          "The email address that is sending the email. This email address must be either individually verified with Amazon SES, or from a domain that has been verified with Amazon SES. For information about verifying identities, see the Amazon SES Developer Guide. If you are sending on behalf of another user and have been permitted to do so by a sending authorization policy, then you must also specify the SourceArn parameter. For more information about sending authorization, see the Amazon SES Developer Guide. Amazon SES does not support the SMTPUTF8 extension, as described in RFC6531. for this reason, The email address string must be 7-bit ASCII. If you want to send to or from email addresses that contain Unicode characters in the domain part of an address, you must encode the domain using Punycode. Punycode is not permitted in the local part of the email address (the part before the \\@ sign) nor in the \"friendly from\" name. If you want to use Unicode characters in the \"friendly from\" name, you must encode the \"friendly from\" name using MIME encoded-word syntax, as described in Sending raw email using the Amazon SES API. For more information about Punycode, see RFC 3492."];
       destination: Destination.t
         [@ocaml.doc
           "The destination for this email, composed of To:, CC:, and BCC: fields. A Destination can include up to 50 recipients across these three fields."];
       replyToAddresses: AddressList.t option
         [@ocaml.doc
-          "The reply-to email address(es) for the message. If the recipient replies to the message, each reply-to address will receive the reply."];
+          "The reply-to email address(es) for the message. If the recipient replies to the message, each reply-to address receives the reply."];
       returnPath: Address.t option
         [@ocaml.doc
-          "The email address that bounces and complaints will be forwarded to when feedback forwarding is enabled. If the message cannot be delivered to the recipient, then an error message will be returned from the recipient's ISP; this message will then be forwarded to the email address specified by the ReturnPath parameter. The ReturnPath parameter is never overwritten. This email address must be either individually verified with Amazon SES, or from a domain that has been verified with Amazon SES."];
+          "The email address that bounces and complaints are forwarded to when feedback forwarding is enabled. If the message cannot be delivered to the recipient, then an error message is returned from the recipient's ISP; this message is forwarded to the email address specified by the ReturnPath parameter. The ReturnPath parameter is never overwritten. This email address must be either individually verified with Amazon SES, or from a domain that has been verified with Amazon SES."];
       sourceArn: AmazonResourceName.t option
         [@ocaml.doc
           "This parameter is used only for sending authorization. It is the ARN of the identity that is associated with the sending authorization policy that permits you to send for the email address specified in the Source parameter. For example, if the owner of example.com (which has ARN arn:aws:ses:us-east-1:123456789012:identity/example.com) attaches a policy to it that authorizes you to send from user\\@example.com, then you would specify the SourceArn to be arn:aws:ses:us-east-1:123456789012:identity/example.com, and the Source to be user\\@example.com. For more information about sending authorization, see the Amazon SES Developer Guide."];
@@ -6501,23 +6683,24 @@ module SendTemplatedEmailRequest =
         ?returnPathArn ?sourceArn ?returnPath ?replyToAddresses ~destination
         ~source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateData =
-        field_map_exn json "TemplateData" TemplateData.of_json in
+        field_map_exn json__ "TemplateData" TemplateData.of_json in
       let templateArn =
-        field_map json "TemplateArn" AmazonResourceName.of_json in
-      let template = field_map_exn json "Template" TemplateName.of_json in
+        field_map json__ "TemplateArn" AmazonResourceName.of_json in
+      let template = field_map_exn json__ "Template" TemplateName.of_json in
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
-      let tags = field_map json "Tags" MessageTagList.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
+      let tags = field_map json__ "Tags" MessageTagList.of_json in
       let returnPathArn =
-        field_map json "ReturnPathArn" AmazonResourceName.of_json in
-      let sourceArn = field_map json "SourceArn" AmazonResourceName.of_json in
-      let returnPath = field_map json "ReturnPath" Address.of_json in
+        field_map json__ "ReturnPathArn" AmazonResourceName.of_json in
+      let sourceArn = field_map json__ "SourceArn" AmazonResourceName.of_json in
+      let returnPath = field_map json__ "ReturnPath" Address.of_json in
       let replyToAddresses =
-        field_map json "ReplyToAddresses" AddressList.of_json in
-      let destination = field_map_exn json "Destination" Destination.of_json in
-      let source = field_map_exn json "Source" Address.of_json in
+        field_map json__ "ReplyToAddresses" AddressList.of_json in
+      let destination =
+        field_map_exn json__ "Destination" Destination.of_json in
+      let source = field_map_exn json__ "Source" Address.of_json in
       make ~templateData ?templateArn ~template ?configurationSetName ?tags
         ?returnPathArn ?sourceArn ?returnPath ?replyToAddresses ~destination
         ~source ()
@@ -6528,7 +6711,7 @@ module SendRawEmailResponse =
   struct
     type sendRawEmailResult =
       {
-      messageId: MessageId.t
+      messageId: MessageId.t option
         [@ocaml.doc
           "The unique message identifier returned from the SendRawEmail action."]}
     and responseMetaData = unit
@@ -6547,7 +6730,7 @@ module SendRawEmailResponse =
       | `MessageRejected of MessageRejected.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "SendRawEmailResponse"
-    let make ~messageId =
+    let make ?messageId =
       fun () -> { sendRawEmailResult = { messageId }; responseMetaData = () }
     let error_of_json name json =
       match name with
@@ -6614,19 +6797,18 @@ module SendRawEmailResponse =
     let to_value t =
       let x = t.sendRawEmailResult in
       structure_to_wrapped_value
-        [("MessageId", (Some (MessageId.to_value x.messageId)))]
+        [("MessageId", (Option.map x.messageId ~f:MessageId.to_value))]
         ~wrapper:"SendRawEmailResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 = Xml.child_exn ~context:context_ t "SendRawEmailResult" in
       let messageId =
-        MessageId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MessageId") in
-      make ~messageId ()
+        (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "MessageId") in
+      make ?messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageId = field_map_exn json "MessageId" MessageId.of_json in
-      make ~messageId ()
+    let of_json json__ =
+      let messageId = field_map json__ "MessageId" MessageId.of_json in
+      make ?messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a unique message ID."]
 module SendRawEmailRequest =
@@ -6635,7 +6817,7 @@ module SendRawEmailRequest =
       {
       source: Address.t option
         [@ocaml.doc
-          "The identity's email address. If you do not provide a value for this parameter, you must specify a \"From\" address in the raw text of the message. (You can also specify both.) Amazon SES does not support the SMTPUTF8 extension, as described inRFC6531. For this reason, the local part of a source email address (the part of the email address that precedes the \\@ sign) may only contain 7-bit ASCII characters. If the domain part of an address (the part after the \\@ sign) contains non-ASCII characters, they must be encoded using Punycode, as described in RFC3492. The sender name (also known as the friendly name) may contain non-ASCII characters. These characters must be encoded using MIME encoded-word syntax, as described in RFC 2047. MIME encoded-word syntax uses the following form: =?charset?encoding?encoded-text?=. If you specify the Source parameter and have feedback forwarding enabled, then bounces and complaints will be sent to this email address. This takes precedence over any Return-Path header that you might include in the raw text of the message."];
+          "The identity's email address. If you do not provide a value for this parameter, you must specify a \"From\" address in the raw text of the message. (You can also specify both.) Amazon SES does not support the SMTPUTF8 extension, as described inRFC6531. For this reason, the email address string must be 7-bit ASCII. If you want to send to or from email addresses that contain Unicode characters in the domain part of an address, you must encode the domain using Punycode. Punycode is not permitted in the local part of the email address (the part before the \\@ sign) nor in the \"friendly from\" name. If you want to use Unicode characters in the \"friendly from\" name, you must encode the \"friendly from\" name using MIME encoded-word syntax, as described in Sending raw email using the Amazon SES API. For more information about Punycode, see RFC 3492. If you specify the Source parameter and have feedback forwarding enabled, then bounces and complaints are sent to this email address. This takes precedence over any Return-Path header that you might include in the raw text of the message."];
       destinations: AddressList.t option
         [@ocaml.doc
           "A list of destinations for the message, consisting of To:, CC:, and BCC: addresses."];
@@ -6717,17 +6899,17 @@ module SendRawEmailRequest =
       make ?configurationSetName ?tags ?returnPathArn ?sourceArn ?fromArn
         ~rawMessage ?destinations ?source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
-      let tags = field_map json "Tags" MessageTagList.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
+      let tags = field_map json__ "Tags" MessageTagList.of_json in
       let returnPathArn =
-        field_map json "ReturnPathArn" AmazonResourceName.of_json in
-      let sourceArn = field_map json "SourceArn" AmazonResourceName.of_json in
-      let fromArn = field_map json "FromArn" AmazonResourceName.of_json in
-      let rawMessage = field_map_exn json "RawMessage" RawMessage.of_json in
-      let destinations = field_map json "Destinations" AddressList.of_json in
-      let source = field_map json "Source" Address.of_json in
+        field_map json__ "ReturnPathArn" AmazonResourceName.of_json in
+      let sourceArn = field_map json__ "SourceArn" AmazonResourceName.of_json in
+      let fromArn = field_map json__ "FromArn" AmazonResourceName.of_json in
+      let rawMessage = field_map_exn json__ "RawMessage" RawMessage.of_json in
+      let destinations = field_map json__ "Destinations" AddressList.of_json in
+      let source = field_map json__ "Source" Address.of_json in
       make ?configurationSetName ?tags ?returnPathArn ?sourceArn ?fromArn
         ~rawMessage ?destinations ?source ()
     let to_json v = composed_to_json to_value v
@@ -6737,7 +6919,7 @@ module SendEmailResponse =
   struct
     type sendEmailResult =
       {
-      messageId: MessageId.t
+      messageId: MessageId.t option
         [@ocaml.doc
           "The unique message identifier returned from the SendEmail action."]}
     and responseMetaData = unit
@@ -6756,7 +6938,7 @@ module SendEmailResponse =
       | `MessageRejected of MessageRejected.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "SendEmailResponse"
-    let make ~messageId =
+    let make ?messageId =
       fun () -> { sendEmailResult = { messageId }; responseMetaData = () }
     let error_of_json name json =
       match name with
@@ -6823,19 +7005,18 @@ module SendEmailResponse =
     let to_value t =
       let x = t.sendEmailResult in
       structure_to_wrapped_value
-        [("MessageId", (Some (MessageId.to_value x.messageId)))]
+        [("MessageId", (Option.map x.messageId ~f:MessageId.to_value))]
         ~wrapper:"SendEmailResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 = Xml.child_exn ~context:context_ t "SendEmailResult" in
       let messageId =
-        MessageId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MessageId") in
-      make ~messageId ()
+        (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "MessageId") in
+      make ?messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageId = field_map_exn json "MessageId" MessageId.of_json in
-      make ~messageId ()
+    let of_json json__ =
+      let messageId = field_map json__ "MessageId" MessageId.of_json in
+      make ?messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a unique message ID."]
 module SendEmailRequest =
@@ -6844,17 +7025,17 @@ module SendEmailRequest =
       {
       source: Address.t
         [@ocaml.doc
-          "The email address that is sending the email. This email address must be either individually verified with Amazon SES, or from a domain that has been verified with Amazon SES. For information about verifying identities, see the Amazon SES Developer Guide. If you are sending on behalf of another user and have been permitted to do so by a sending authorization policy, then you must also specify the SourceArn parameter. For more information about sending authorization, see the Amazon SES Developer Guide. Amazon SES does not support the SMTPUTF8 extension, as described in RFC6531. For this reason, the local part of a source email address (the part of the email address that precedes the \\@ sign) may only contain 7-bit ASCII characters. If the domain part of an address (the part after the \\@ sign) contains non-ASCII characters, they must be encoded using Punycode, as described in RFC3492. The sender name (also known as the friendly name) may contain non-ASCII characters. These characters must be encoded using MIME encoded-word syntax, as described in RFC 2047. MIME encoded-word syntax uses the following form: =?charset?encoding?encoded-text?=."];
+          "The email address that is sending the email. This email address must be either individually verified with Amazon SES, or from a domain that has been verified with Amazon SES. For information about verifying identities, see the Amazon SES Developer Guide. If you are sending on behalf of another user and have been permitted to do so by a sending authorization policy, then you must also specify the SourceArn parameter. For more information about sending authorization, see the Amazon SES Developer Guide. Amazon SES does not support the SMTPUTF8 extension, as described in RFC6531. For this reason, the email address string must be 7-bit ASCII. If you want to send to or from email addresses that contain Unicode characters in the domain part of an address, you must encode the domain using Punycode. Punycode is not permitted in the local part of the email address (the part before the \\@ sign) nor in the \"friendly from\" name. If you want to use Unicode characters in the \"friendly from\" name, you must encode the \"friendly from\" name using MIME encoded-word syntax, as described in Sending raw email using the Amazon SES API. For more information about Punycode, see RFC 3492."];
       destination: Destination.t
         [@ocaml.doc
           "The destination for this email, composed of To:, CC:, and BCC: fields."];
       message: Message.t [@ocaml.doc "The message to be sent."];
       replyToAddresses: AddressList.t option
         [@ocaml.doc
-          "The reply-to email address(es) for the message. If the recipient replies to the message, each reply-to address will receive the reply."];
+          "The reply-to email address(es) for the message. If the recipient replies to the message, each reply-to address receives the reply."];
       returnPath: Address.t option
         [@ocaml.doc
-          "The email address that bounces and complaints will be forwarded to when feedback forwarding is enabled. If the message cannot be delivered to the recipient, then an error message will be returned from the recipient's ISP; this message will then be forwarded to the email address specified by the ReturnPath parameter. The ReturnPath parameter is never overwritten. This email address must be either individually verified with Amazon SES, or from a domain that has been verified with Amazon SES."];
+          "The email address that bounces and complaints are forwarded to when feedback forwarding is enabled. If the message cannot be delivered to the recipient, then an error message is returned from the recipient's ISP; this message is forwarded to the email address specified by the ReturnPath parameter. The ReturnPath parameter is never overwritten. This email address must be either individually verified with Amazon SES, or from a domain that has been verified with Amazon SES."];
       sourceArn: AmazonResourceName.t option
         [@ocaml.doc
           "This parameter is used only for sending authorization. It is the ARN of the identity that is associated with the sending authorization policy that permits you to send for the email address specified in the Source parameter. For example, if the owner of example.com (which has ARN arn:aws:ses:us-east-1:123456789012:identity/example.com) attaches a policy to it that authorizes you to send from user\\@example.com, then you would specify the SourceArn to be arn:aws:ses:us-east-1:123456789012:identity/example.com, and the Source to be user\\@example.com. For more information about sending authorization, see the Amazon SES Developer Guide."];
@@ -6932,19 +7113,20 @@ module SendEmailRequest =
       make ?configurationSetName ?tags ?returnPathArn ?sourceArn ?returnPath
         ?replyToAddresses ~message ~destination ~source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
-      let tags = field_map json "Tags" MessageTagList.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
+      let tags = field_map json__ "Tags" MessageTagList.of_json in
       let returnPathArn =
-        field_map json "ReturnPathArn" AmazonResourceName.of_json in
-      let sourceArn = field_map json "SourceArn" AmazonResourceName.of_json in
-      let returnPath = field_map json "ReturnPath" Address.of_json in
+        field_map json__ "ReturnPathArn" AmazonResourceName.of_json in
+      let sourceArn = field_map json__ "SourceArn" AmazonResourceName.of_json in
+      let returnPath = field_map json__ "ReturnPath" Address.of_json in
       let replyToAddresses =
-        field_map json "ReplyToAddresses" AddressList.of_json in
-      let message = field_map_exn json "Message" Message.of_json in
-      let destination = field_map_exn json "Destination" Destination.of_json in
-      let source = field_map_exn json "Source" Address.of_json in
+        field_map json__ "ReplyToAddresses" AddressList.of_json in
+      let message = field_map_exn json__ "Message" Message.of_json in
+      let destination =
+        field_map_exn json__ "Destination" Destination.of_json in
+      let source = field_map_exn json__ "Source" Address.of_json in
       make ?configurationSetName ?tags ?returnPathArn ?sourceArn ?returnPath
         ?replyToAddresses ~message ~destination ~source ()
     let to_json v = composed_to_json to_value v
@@ -7061,8 +7243,8 @@ module SendCustomVerificationEmailResponse =
         (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "MessageId") in
       make ?messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageId = field_map json "MessageId" MessageId.of_json in
+    let of_json json__ =
+      let messageId = field_map json__ "MessageId" MessageId.of_json in
       make ?messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7102,12 +7284,12 @@ module SendCustomVerificationEmailRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ?configurationSetName ~templateName ~emailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
       let templateName =
-        field_map_exn json "TemplateName" TemplateName.of_json in
-      let emailAddress = field_map_exn json "EmailAddress" Address.of_json in
+        field_map_exn json__ "TemplateName" TemplateName.of_json in
+      let emailAddress = field_map_exn json__ "EmailAddress" Address.of_json in
       make ?configurationSetName ~templateName ~emailAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7116,9 +7298,9 @@ module SendBulkTemplatedEmailResponse =
   struct
     type sendBulkTemplatedEmailResult =
       {
-      status: BulkEmailDestinationStatusList.t
+      status: BulkEmailDestinationStatusList.t option
         [@ocaml.doc
-          "The unique message identifier returned from the SendBulkTemplatedEmail action."]}
+          "One object per intended recipient. Check each response object and retry any messages with a failure status. (Note that order of responses will be respective to order of destinations in the request.)Receipt rules enable you to specify which actions"]}
     and responseMetaData = unit
     and t =
       {
@@ -7136,7 +7318,7 @@ module SendBulkTemplatedEmailResponse =
       | `TemplateDoesNotExistException of TemplateDoesNotExistException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "SendBulkTemplatedEmailResponse"
-    let make ~status =
+    let make ?status =
       fun () ->
         { sendBulkTemplatedEmailResult = { status }; responseMetaData = () }
     let error_of_json name json =
@@ -7215,40 +7397,40 @@ module SendBulkTemplatedEmailResponse =
       let x = t.sendBulkTemplatedEmailResult in
       structure_to_wrapped_value
         [("Status",
-           (Some (BulkEmailDestinationStatusList.to_value x.status)))]
+           (Option.map x.status ~f:BulkEmailDestinationStatusList.to_value))]
         ~wrapper:"SendBulkTemplatedEmailResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "SendBulkTemplatedEmailResult" in
       let status =
-        BulkEmailDestinationStatusList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
-      make ~status ()
+        (Option.map ~f:BulkEmailDestinationStatusList.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map_exn json "Status" BulkEmailDestinationStatusList.of_json in
-      make ~status ()
+        field_map json__ "Status" BulkEmailDestinationStatusList.of_json in
+      make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Composes an email message to multiple destinations. The message body is created using an email template. In order to send email using the SendBulkTemplatedEmail operation, your call to the API must meet the following requirements: The call must refer to an existing email template. You can create email templates using the CreateTemplate operation. The message must be sent from a verified email address or domain. If your account is still in the Amazon SES sandbox, you may only send to verified addresses or domains, or to email addresses associated with the Amazon SES Mailbox Simulator. For more information, see Verifying Email Addresses and Domains in the Amazon SES Developer Guide. The maximum message size is 10 MB. Each Destination parameter must include at least one recipient email address. The recipient address can be a To: address, a CC: address, or a BCC: address. If a recipient email address is invalid (that is, it is not in the format UserName\\@\\[SubDomain.\\]Domain.TopLevelDomain), the entire message will be rejected, even if the message contains other recipients that are valid. The message may not include more than 50 recipients, across the To:, CC: and BCC: fields. If you need to send an email message to a larger audience, you can divide your recipient list into groups of 50 or fewer, and then call the SendBulkTemplatedEmail operation several times to send the message to each group. The number of destinations you can contact in a single call to the API may be limited by your account's maximum sending rate."]
+       "Composes an email message to multiple destinations. The message body is created using an email template. To send email using this operation, your call must meet the following requirements: The call must refer to an existing email template. You can create email templates using CreateTemplate. The message must be sent from a verified email address or domain. If your account is still in the Amazon SES sandbox, you may send only to verified addresses or domains, or to email addresses associated with the Amazon SES Mailbox Simulator. For more information, see Verifying Email Addresses and Domains in the Amazon SES Developer Guide. The maximum message size is 10 MB. Each Destination parameter must include at least one recipient email address. The recipient address can be a To: address, a CC: address, or a BCC: address. If a recipient email address is invalid (that is, it is not in the format UserName\\@\\[SubDomain.\\]Domain.TopLevelDomain), the entire message is rejected, even if the message contains other recipients that are valid. The message may not include more than 50 recipients, across the To:, CC: and BCC: fields. If you need to send an email message to a larger audience, you can divide your recipient list into groups of 50 or fewer, and then call the SendBulkTemplatedEmail operation several times to send the message to each group. The number of destinations you can contact in a single call can be limited by your account's maximum sending rate."]
 module SendBulkTemplatedEmailRequest =
   struct
     type nonrec t =
       {
       source: Address.t
         [@ocaml.doc
-          "The email address that is sending the email. This email address must be either individually verified with Amazon SES, or from a domain that has been verified with Amazon SES. For information about verifying identities, see the Amazon SES Developer Guide. If you are sending on behalf of another user and have been permitted to do so by a sending authorization policy, then you must also specify the SourceArn parameter. For more information about sending authorization, see the Amazon SES Developer Guide. Amazon SES does not support the SMTPUTF8 extension, as described in RFC6531. For this reason, the local part of a source email address (the part of the email address that precedes the \\@ sign) may only contain 7-bit ASCII characters. If the domain part of an address (the part after the \\@ sign) contains non-ASCII characters, they must be encoded using Punycode, as described in RFC3492. The sender name (also known as the friendly name) may contain non-ASCII characters. These characters must be encoded using MIME encoded-word syntax, as described in RFC 2047. MIME encoded-word syntax uses the following form: =?charset?encoding?encoded-text?=."];
+          "The email address that is sending the email. This email address must be either individually verified with Amazon SES, or from a domain that has been verified with Amazon SES. For information about verifying identities, see the Amazon SES Developer Guide. If you are sending on behalf of another user and have been permitted to do so by a sending authorization policy, then you must also specify the SourceArn parameter. For more information about sending authorization, see the Amazon SES Developer Guide. Amazon SES does not support the SMTPUTF8 extension, as described in RFC6531. For this reason, the email address string must be 7-bit ASCII. If you want to send to or from email addresses that contain Unicode characters in the domain part of an address, you must encode the domain using Punycode. Punycode is not permitted in the local part of the email address (the part before the \\@ sign) nor in the \"friendly from\" name. If you want to use Unicode characters in the \"friendly from\" name, you must encode the \"friendly from\" name using MIME encoded-word syntax, as described in Sending raw email using the Amazon SES API. For more information about Punycode, see RFC 3492."];
       sourceArn: AmazonResourceName.t option
         [@ocaml.doc
           "This parameter is used only for sending authorization. It is the ARN of the identity that is associated with the sending authorization policy that permits you to send for the email address specified in the Source parameter. For example, if the owner of example.com (which has ARN arn:aws:ses:us-east-1:123456789012:identity/example.com) attaches a policy to it that authorizes you to send from user\\@example.com, then you would specify the SourceArn to be arn:aws:ses:us-east-1:123456789012:identity/example.com, and the Source to be user\\@example.com. For more information about sending authorization, see the Amazon SES Developer Guide."];
       replyToAddresses: AddressList.t option
         [@ocaml.doc
-          "The reply-to email address(es) for the message. If the recipient replies to the message, each reply-to address will receive the reply."];
+          "The reply-to email address(es) for the message. If the recipient replies to the message, each reply-to address receives the reply."];
       returnPath: Address.t option
         [@ocaml.doc
-          "The email address that bounces and complaints will be forwarded to when feedback forwarding is enabled. If the message cannot be delivered to the recipient, then an error message will be returned from the recipient's ISP; this message will then be forwarded to the email address specified by the ReturnPath parameter. The ReturnPath parameter is never overwritten. This email address must be either individually verified with Amazon SES, or from a domain that has been verified with Amazon SES."];
+          "The email address that bounces and complaints are forwarded to when feedback forwarding is enabled. If the message cannot be delivered to the recipient, then an error message is returned from the recipient's ISP; this message is forwarded to the email address specified by the ReturnPath parameter. The ReturnPath parameter is never overwritten. This email address must be either individually verified with Amazon SES, or from a domain that has been verified with Amazon SES."];
       returnPathArn: AmazonResourceName.t option
         [@ocaml.doc
           "This parameter is used only for sending authorization. It is the ARN of the identity that is associated with the sending authorization policy that permits you to use the email address specified in the ReturnPath parameter. For example, if the owner of example.com (which has ARN arn:aws:ses:us-east-1:123456789012:identity/example.com) attaches a policy to it that authorizes you to use feedback\\@example.com, then you would specify the ReturnPathArn to be arn:aws:ses:us-east-1:123456789012:identity/example.com, and the ReturnPath to be feedback\\@example.com. For more information about sending authorization, see the Amazon SES Developer Guide."];
@@ -7263,12 +7445,12 @@ module SendBulkTemplatedEmailRequest =
       templateArn: AmazonResourceName.t option
         [@ocaml.doc
           "The ARN of the template to use when sending this email."];
-      defaultTemplateData: TemplateData.t option
+      defaultTemplateData: TemplateData.t
         [@ocaml.doc
           "A list of replacement values to apply to the template when replacement data is not specified in a Destination object. These values act as a default or fallback option when no other data is available. The template data is a JSON object, typically consisting of key-value pairs in which the keys correspond to replacement tags in the email template."];
       destinations: BulkEmailDestinationList.t
         [@ocaml.doc
-          "One or more Destination objects. All of the recipients in a Destination will receive the same version of the email. You can specify up to 50 Destination objects within a Destinations array."]}
+          "One or more Destination objects. All of the recipients in a Destination receive the same version of the email. You can specify up to 50 Destination objects within a Destinations array."]}
     let context_ = "SendBulkTemplatedEmailRequest"
     let make ?sourceArn =
       fun ?replyToAddresses ->
@@ -7277,9 +7459,9 @@ module SendBulkTemplatedEmailRequest =
             fun ?configurationSetName ->
               fun ?defaultTags ->
                 fun ?templateArn ->
-                  fun ?defaultTemplateData ->
-                    fun ~source ->
-                      fun ~template ->
+                  fun ~source ->
+                    fun ~template ->
+                      fun ~defaultTemplateData ->
                         fun ~destinations ->
                           fun () ->
                             {
@@ -7290,9 +7472,9 @@ module SendBulkTemplatedEmailRequest =
                               configurationSetName;
                               defaultTags;
                               templateArn;
-                              defaultTemplateData;
                               source;
                               template;
+                              defaultTemplateData;
                               destinations
                             }
     let to_value x =
@@ -7313,7 +7495,7 @@ module SendBulkTemplatedEmailRequest =
         ("TemplateArn",
           (Option.map x.templateArn ~f:AmazonResourceName.to_value));
         ("DefaultTemplateData",
-          (Option.map x.defaultTemplateData ~f:TemplateData.to_value));
+          (Some (TemplateData.to_value x.defaultTemplateData)));
         ("Destinations",
           (Some (BulkEmailDestinationList.to_value x.destinations)))]
     let to_query v = to_query to_value v
@@ -7322,8 +7504,8 @@ module SendBulkTemplatedEmailRequest =
         BulkEmailDestinationList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Destinations") in
       let defaultTemplateData =
-        (Option.map ~f:TemplateData.of_xml)
-          (Xml.child xml_arg0 "DefaultTemplateData") in
+        TemplateData.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DefaultTemplateData") in
       let templateArn =
         (Option.map ~f:AmazonResourceName.of_xml)
           (Xml.child xml_arg0 "TemplateArn") in
@@ -7349,29 +7531,29 @@ module SendBulkTemplatedEmailRequest =
           (Xml.child xml_arg0 "SourceArn") in
       let source =
         Address.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Source") in
-      make ~destinations ?defaultTemplateData ?templateArn ~template
+      make ~destinations ~defaultTemplateData ?templateArn ~template
         ?defaultTags ?configurationSetName ?returnPathArn ?returnPath
         ?replyToAddresses ?sourceArn ~source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinations =
-        field_map_exn json "Destinations" BulkEmailDestinationList.of_json in
+        field_map_exn json__ "Destinations" BulkEmailDestinationList.of_json in
       let defaultTemplateData =
-        field_map json "DefaultTemplateData" TemplateData.of_json in
+        field_map_exn json__ "DefaultTemplateData" TemplateData.of_json in
       let templateArn =
-        field_map json "TemplateArn" AmazonResourceName.of_json in
-      let template = field_map_exn json "Template" TemplateName.of_json in
-      let defaultTags = field_map json "DefaultTags" MessageTagList.of_json in
+        field_map json__ "TemplateArn" AmazonResourceName.of_json in
+      let template = field_map_exn json__ "Template" TemplateName.of_json in
+      let defaultTags = field_map json__ "DefaultTags" MessageTagList.of_json in
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
       let returnPathArn =
-        field_map json "ReturnPathArn" AmazonResourceName.of_json in
-      let returnPath = field_map json "ReturnPath" Address.of_json in
+        field_map json__ "ReturnPathArn" AmazonResourceName.of_json in
+      let returnPath = field_map json__ "ReturnPath" Address.of_json in
       let replyToAddresses =
-        field_map json "ReplyToAddresses" AddressList.of_json in
-      let sourceArn = field_map json "SourceArn" AmazonResourceName.of_json in
-      let source = field_map_exn json "Source" Address.of_json in
-      make ~destinations ?defaultTemplateData ?templateArn ~template
+        field_map json__ "ReplyToAddresses" AddressList.of_json in
+      let sourceArn = field_map json__ "SourceArn" AmazonResourceName.of_json in
+      let source = field_map_exn json__ "Source" Address.of_json in
+      make ~destinations ~defaultTemplateData ?templateArn ~template
         ?defaultTags ?configurationSetName ?returnPathArn ?returnPath
         ?replyToAddresses ?sourceArn ~source ()
     let to_json v = composed_to_json to_value v
@@ -7428,8 +7610,8 @@ module SendBounceResponse =
         (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "MessageId") in
       make ?messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageId = field_map json "MessageId" MessageId.of_json in
+    let of_json json__ =
+      let messageId = field_map json__ "MessageId" MessageId.of_json in
       make ?messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a unique message ID."]
@@ -7444,10 +7626,10 @@ module SendBounceRequest =
           "The address to use in the \"From\" header of the bounce message. This must be an identity that you have verified with Amazon SES."];
       explanation: Explanation.t option
         [@ocaml.doc
-          "Human-readable text for the bounce message to explain the failure. If not specified, the text will be auto-generated based on the bounced recipient information."];
+          "Human-readable text for the bounce message to explain the failure. If not specified, the text is auto-generated based on the bounced recipient information."];
       messageDsn: MessageDsn.t option
         [@ocaml.doc
-          "Message-related DSN fields. If not specified, Amazon SES will choose the values."];
+          "Message-related DSN fields. If not specified, Amazon SES chooses the values."];
       bouncedRecipientInfoList: BouncedRecipientInfoList.t
         [@ocaml.doc
           "A list of recipients of the bounced message, including the information required to create the Delivery Status Notifications (DSNs) for the recipients. You must specify at least one BouncedRecipientInfo in the list."];
@@ -7504,17 +7686,17 @@ module SendBounceRequest =
       make ?bounceSenderArn ~bouncedRecipientInfoList ?messageDsn
         ?explanation ~bounceSender ~originalMessageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bounceSenderArn =
-        field_map json "BounceSenderArn" AmazonResourceName.of_json in
+        field_map json__ "BounceSenderArn" AmazonResourceName.of_json in
       let bouncedRecipientInfoList =
-        field_map_exn json "BouncedRecipientInfoList"
+        field_map_exn json__ "BouncedRecipientInfoList"
           BouncedRecipientInfoList.of_json in
-      let messageDsn = field_map json "MessageDsn" MessageDsn.of_json in
-      let explanation = field_map json "Explanation" Explanation.of_json in
-      let bounceSender = field_map_exn json "BounceSender" Address.of_json in
+      let messageDsn = field_map json__ "MessageDsn" MessageDsn.of_json in
+      let explanation = field_map json__ "Explanation" Explanation.of_json in
+      let bounceSender = field_map_exn json__ "BounceSender" Address.of_json in
       let originalMessageId =
-        field_map_exn json "OriginalMessageId" MessageId.of_json in
+        field_map_exn json__ "OriginalMessageId" MessageId.of_json in
       make ?bounceSenderArn ~bouncedRecipientInfoList ?messageDsn
         ?explanation ~bounceSender ~originalMessageId ()
     let to_json v = composed_to_json to_value v
@@ -7583,7 +7765,7 @@ module ReorderReceiptRuleSetRequest =
         [@ocaml.doc "The name of the receipt rule set to reorder."];
       ruleNames: ReceiptRuleNamesList.t
         [@ocaml.doc
-          "A list of the specified receipt rule set's receipt rules in the order that you want to put them."]}
+          "The specified receipt rule set's receipt rules, in order."]}
     let context_ = "ReorderReceiptRuleSetRequest"
     let make ~ruleSetName =
       fun ~ruleNames -> fun () -> { ruleSetName; ruleNames }
@@ -7601,11 +7783,11 @@ module ReorderReceiptRuleSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~ruleNames ~ruleSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ruleNames =
-        field_map_exn json "RuleNames" ReceiptRuleNamesList.of_json in
+        field_map_exn json__ "RuleNames" ReceiptRuleNamesList.of_json in
       let ruleSetName =
-        field_map_exn json "RuleSetName" ReceiptRuleSetName.of_json in
+        field_map_exn json__ "RuleSetName" ReceiptRuleSetName.of_json in
       make ~ruleNames ~ruleSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7660,7 +7842,7 @@ module PutIdentityPolicyRequest =
       {
       identity: Identity.t
         [@ocaml.doc
-          "The identity that the policy will apply to. You can specify an identity by using its name or by using its Amazon Resource Name (ARN). Examples: user\\@example.com, example.com, arn:aws:ses:us-east-1:123456789012:identity/example.com. To successfully call this API, you must own the identity."];
+          "The identity to which that the policy applies. You can specify an identity by using its name or by using its Amazon Resource Name (ARN). Examples: user\\@example.com, example.com, arn:aws:ses:us-east-1:123456789012:identity/example.com. To successfully call this operation, you must own the identity."];
       policyName: PolicyName.t
         [@ocaml.doc
           "The name of the policy. The policy name cannot exceed 64 characters and can only include alphanumeric characters, dashes, and underscores."];
@@ -7687,10 +7869,10 @@ module PutIdentityPolicyRequest =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ~policy ~policyName ~identity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map_exn json "Policy" Policy.of_json in
-      let policyName = field_map_exn json "PolicyName" PolicyName.of_json in
-      let identity = field_map_exn json "Identity" Identity.of_json in
+    let of_json json__ =
+      let policy = field_map_exn json__ "Policy" Policy.of_json in
+      let policyName = field_map_exn json__ "PolicyName" PolicyName.of_json in
+      let identity = field_map_exn json__ "Identity" Identity.of_json in
       make ~policy ~policyName ~identity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7763,8 +7945,7 @@ module PutConfigurationSetDeliveryOptionsRequest =
     type nonrec t =
       {
       configurationSetName: ConfigurationSetName.t
-        [@ocaml.doc
-          "The name of the configuration set that you want to specify the delivery options for."];
+        [@ocaml.doc "The name of the configuration set."];
       deliveryOptions: DeliveryOptions.t option
         [@ocaml.doc
           "Specifies whether messages that use the configuration set are required to use Transport Layer Security (TLS)."]}
@@ -7788,11 +7969,11 @@ module PutConfigurationSetDeliveryOptionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ?deliveryOptions ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliveryOptions =
-        field_map json "DeliveryOptions" DeliveryOptions.of_json in
+        field_map json__ "DeliveryOptions" DeliveryOptions.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ?deliveryOptions ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -7849,13 +8030,13 @@ module ListVerifiedEmailAddressesResponse =
           (Xml.child xml_arg0 "VerifiedEmailAddresses") in
       make ?verifiedEmailAddresses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let verifiedEmailAddresses =
-        field_map json "VerifiedEmailAddresses" AddressList.of_json in
+        field_map json__ "VerifiedEmailAddresses" AddressList.of_json in
       make ?verifiedEmailAddresses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A list of email addresses that you have verified with Amazon SES under your AWS account."]
+       "A list of email addresses that you have verified with Amazon SES under your Amazon Web Services account."]
 module ListTemplatesResponse =
   struct
     type listTemplatesResult =
@@ -7865,7 +8046,7 @@ module ListTemplatesResponse =
           "An array the contains the name and creation time stamp for each template in your Amazon SES account."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "A token indicating that there are additional email templates available to be listed. Pass this token to a subsequent call to ListTemplates to retrieve the next 50 email templates."]}
+          "A token indicating that there are additional email templates available to be listed. Pass this token to a subsequent call to ListTemplates to retrieve the next set of email templates within your page size."]}
     and responseMetaData = unit
     and t =
       {
@@ -7913,14 +8094,14 @@ module ListTemplatesResponse =
           (Xml.child xml_arg0 "TemplatesMetadata") in
       make ?nextToken ?templatesMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let templatesMetadata =
-        field_map json "TemplatesMetadata" TemplateMetadataList.of_json in
+        field_map json__ "TemplatesMetadata" TemplateMetadataList.of_json in
       make ?nextToken ?templatesMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the email templates present in your Amazon SES account in the current AWS Region. You can execute this operation no more than once per second."]
+       "Lists the email templates present in your Amazon SES account in the current Amazon Web Services Region. You can execute this operation no more than once per second."]
 module ListTemplatesRequest =
   struct
     type nonrec t =
@@ -7930,7 +8111,7 @@ module ListTemplatesRequest =
           "A token returned from a previous call to ListTemplates to indicate the position in the list of email templates."];
       maxItems: MaxItems.t option
         [@ocaml.doc
-          "The maximum number of templates to return. This value must be at least 1 and less than or equal to 10. If you do not specify a value, or if you specify a value less than 1 or greater than 10, the operation will return up to 10 results."]}
+          "The maximum number of templates to return. This value must be at least 1 and less than or equal to 100. If more than 100 items are requested, the page size will automatically set to 100. If you do not specify a value, 10 is the default page size."]}
     let make ?nextToken = fun ?maxItems -> fun () -> { nextToken; maxItems }
     let to_value x =
       structure_to_value
@@ -7944,13 +8125,13 @@ module ListTemplatesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxItems ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxItems ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the email templates present in your Amazon SES account in the current AWS Region. You can execute this operation no more than once per second."]
+       "Lists the email templates present in your Amazon SES account in the current Amazon Web Services Region. You can execute this operation no more than once per second."]
 module ListReceiptRuleSetsResponse =
   struct
     type listReceiptRuleSetsResult =
@@ -8009,13 +8190,13 @@ module ListReceiptRuleSetsResponse =
           (Xml.child xml_arg0 "RuleSets") in
       make ?nextToken ?ruleSets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let ruleSets = field_map json "RuleSets" ReceiptRuleSetsLists.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let ruleSets = field_map json__ "RuleSets" ReceiptRuleSetsLists.of_json in
       make ?nextToken ?ruleSets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A list of receipt rule sets that exist under your AWS account."]
+       "A list of receipt rule sets that exist under your Amazon Web Services account."]
 module ListReceiptRuleSetsRequest =
   struct
     type nonrec t =
@@ -8033,12 +8214,12 @@ module ListReceiptRuleSetsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a request to list the receipt rule sets that exist under your AWS account. You use receipt rule sets to receive email with Amazon SES. For more information, see the Amazon SES Developer Guide."]
+       "Represents a request to list the receipt rule sets that exist under your Amazon Web Services account. You use receipt rule sets to receive email with Amazon SES. For more information, see the Amazon SES Developer Guide."]
 module ListReceiptFiltersResponse =
   struct
     type listReceiptFiltersResult =
@@ -8086,12 +8267,12 @@ module ListReceiptFiltersResponse =
           (Xml.child xml_arg0 "Filters") in
       make ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" ReceiptFilterList.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" ReceiptFilterList.of_json in
       make ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A list of IP address filters that exist under your AWS account."]
+       "A list of IP address filters that exist under your Amazon Web Services account."]
 module ListReceiptFiltersRequest =
   struct
     type nonrec t = unit
@@ -8104,12 +8285,12 @@ module ListReceiptFiltersRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a request to list the IP address filters that exist under your AWS account. You use IP address filters when you receive email with Amazon SES. For more information, see the Amazon SES Developer Guide."]
+       "Represents a request to list the IP address filters that exist under your Amazon Web Services account. You use IP address filters when you receive email with Amazon SES. For more information, see the Amazon SES Developer Guide."]
 module ListIdentityPoliciesResponse =
   struct
     type listIdentityPoliciesResult =
       {
-      policyNames: PolicyNameList.t
+      policyNames: PolicyNameList.t option
         [@ocaml.doc
           "A list of names of policies that apply to the specified identity."]}
     and responseMetaData = unit
@@ -8119,7 +8300,7 @@ module ListIdentityPoliciesResponse =
       responseMetaData: responseMetaData }
     type error = [ `Unknown_operation_error of (string * string option) ]
     let context_ = "ListIdentityPoliciesResponse"
-    let make ~policyNames =
+    let make ?policyNames =
       fun () ->
         { listIdentityPoliciesResult = { policyNames }; responseMetaData = ()
         }
@@ -8142,21 +8323,21 @@ module ListIdentityPoliciesResponse =
     let to_value t =
       let x = t.listIdentityPoliciesResult in
       structure_to_wrapped_value
-        [("PolicyNames", (Some (PolicyNameList.to_value x.policyNames)))]
+        [("PolicyNames",
+           (Option.map x.policyNames ~f:PolicyNameList.to_value))]
         ~wrapper:"ListIdentityPoliciesResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "ListIdentityPoliciesResult" in
       let policyNames =
-        PolicyNameList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyNames") in
-      make ~policyNames ()
+        (Option.map ~f:PolicyNameList.of_xml)
+          (Xml.child xml_arg0 "PolicyNames") in
+      make ?policyNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyNames =
-        field_map_exn json "PolicyNames" PolicyNameList.of_json in
-      make ~policyNames ()
+    let of_json json__ =
+      let policyNames = field_map json__ "PolicyNames" PolicyNameList.of_json in
+      make ?policyNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A list of names of sending authorization policies that apply to an identity."]
@@ -8166,7 +8347,7 @@ module ListIdentityPoliciesRequest =
       {
       identity: Identity.t
         [@ocaml.doc
-          "The identity that is associated with the policy for which the policies will be listed. You can specify an identity by using its name or by using its Amazon Resource Name (ARN). Examples: user\\@example.com, example.com, arn:aws:ses:us-east-1:123456789012:identity/example.com. To successfully call this API, you must own the identity."]}
+          "The identity that is associated with the policy for which the policies are listed. You can specify an identity by using its name or by using its Amazon Resource Name (ARN). Examples: user\\@example.com, example.com, arn:aws:ses:us-east-1:123456789012:identity/example.com. To successfully call this operation, you must own the identity."]}
     let context_ = "ListIdentityPoliciesRequest"
     let make ~identity = fun () -> { identity }
     let to_value x =
@@ -8178,8 +8359,8 @@ module ListIdentityPoliciesRequest =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ~identity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identity = field_map_exn json "Identity" Identity.of_json in
+    let of_json json__ =
+      let identity = field_map_exn json__ "Identity" Identity.of_json in
       make ~identity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8188,7 +8369,7 @@ module ListIdentitiesResponse =
   struct
     type listIdentitiesResult =
       {
-      identities: IdentityList.t [@ocaml.doc "A list of identities."];
+      identities: IdentityList.t option [@ocaml.doc "A list of identities."];
       nextToken: NextToken.t option
         [@ocaml.doc "The token used for pagination."]}
     and responseMetaData = unit
@@ -8198,11 +8379,11 @@ module ListIdentitiesResponse =
       responseMetaData: responseMetaData }
     type error = [ `Unknown_operation_error of (string * string option) ]
     let context_ = "ListIdentitiesResponse"
-    let make ?nextToken =
-      fun ~identities ->
+    let make ?identities =
+      fun ?nextToken ->
         fun () ->
           {
-            listIdentitiesResult = { nextToken; identities };
+            listIdentitiesResult = { identities; nextToken };
             responseMetaData = ()
           }
     let error_of_json name json =
@@ -8224,7 +8405,7 @@ module ListIdentitiesResponse =
     let to_value t =
       let x = t.listIdentitiesResult in
       structure_to_wrapped_value
-        [("Identities", (Some (IdentityList.to_value x.identities)));
+        [("Identities", (Option.map x.identities ~f:IdentityList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
         ~wrapper:"ListIdentitiesResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
@@ -8233,24 +8414,23 @@ module ListIdentitiesResponse =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let identities =
-        IdentityList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Identities") in
-      make ?nextToken ~identities ()
+        (Option.map ~f:IdentityList.of_xml) (Xml.child xml_arg0 "Identities") in
+      make ?nextToken ?identities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let identities = field_map_exn json "Identities" IdentityList.of_json in
-      make ?nextToken ~identities ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let identities = field_map json__ "Identities" IdentityList.of_json in
+      make ?nextToken ?identities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A list of all identities that you have attempted to verify under your AWS account, regardless of verification status."]
+       "A list of all identities that you have attempted to verify under your Amazon Web Services account, regardless of verification status."]
 module ListIdentitiesRequest =
   struct
     type nonrec t =
       {
       identityType: IdentityType.t option
         [@ocaml.doc
-          "The type of the identities to list. Possible values are \"EmailAddress\" and \"Domain\". If this parameter is omitted, then all identities will be listed."];
+          "The type of the identities to list. Possible values are \"EmailAddress\" and \"Domain\". If this parameter is omitted, then all identities are listed."];
       nextToken: NextToken.t option
         [@ocaml.doc "The token to use for pagination."];
       maxItems: MaxItems.t option
@@ -8276,14 +8456,14 @@ module ListIdentitiesRequest =
           (Xml.child xml_arg0 "IdentityType") in
       make ?maxItems ?nextToken ?identityType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let identityType = field_map json "IdentityType" IdentityType.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let identityType = field_map json__ "IdentityType" IdentityType.of_json in
       make ?maxItems ?nextToken ?identityType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a request to return a list of all identities (email addresses and domains) that you have attempted to verify under your AWS account, regardless of verification status."]
+       "Represents a request to return a list of all identities (email addresses and domains) that you have attempted to verify under your Amazon Web Services account, regardless of verification status."]
 module ListCustomVerificationEmailTemplatesResponse =
   struct
     type listCustomVerificationEmailTemplatesResult =
@@ -8348,10 +8528,10 @@ module ListCustomVerificationEmailTemplatesResponse =
           (Xml.child xml_arg0 "CustomVerificationEmailTemplates") in
       make ?nextToken ?customVerificationEmailTemplates ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let customVerificationEmailTemplates =
-        field_map json "CustomVerificationEmailTemplates"
+        field_map json__ "CustomVerificationEmailTemplates"
           CustomVerificationEmailTemplates.of_json in
       make ?nextToken ?customVerificationEmailTemplates ()
     let to_json v = composed_to_json to_value v
@@ -8365,7 +8545,7 @@ module ListCustomVerificationEmailTemplatesRequest =
           "An array the contains the name and creation time stamp for each template in your Amazon SES account."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of custom verification email templates to return. This value must be at least 1 and less than or equal to 50. If you do not specify a value, or if you specify a value less than 1 or greater than 50, the operation will return up to 50 results."]}
+          "The maximum number of custom verification email templates to return. This value must be at least 1 and less than or equal to 50. If you do not specify a value, or if you specify a value less than 1 or greater than 50, the operation returns up to 50 results."]}
     let make ?nextToken =
       fun ?maxResults -> fun () -> { nextToken; maxResults }
     let to_value x =
@@ -8380,9 +8560,9 @@ module ListCustomVerificationEmailTemplatesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8444,14 +8624,14 @@ module ListConfigurationSetsResponse =
           (Xml.child xml_arg0 "ConfigurationSets") in
       make ?nextToken ?configurationSets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let configurationSets =
-        field_map json "ConfigurationSets" ConfigurationSets.of_json in
+        field_map json__ "ConfigurationSets" ConfigurationSets.of_json in
       make ?nextToken ?configurationSets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A list of configuration sets associated with your AWS account. Configuration sets enable you to publish email sending events. For information about using configuration sets, see the Amazon SES Developer Guide."]
+       "A list of configuration sets associated with your Amazon Web Services account. Configuration sets enable you to publish email sending events. For information about using configuration sets, see the Amazon SES Developer Guide."]
 module ListConfigurationSetsRequest =
   struct
     type nonrec t =
@@ -8474,13 +8654,13 @@ module ListConfigurationSetsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxItems ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxItems ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a request to list the configuration sets associated with your AWS account. Configuration sets enable you to publish email sending events. For information about using configuration sets, see the Amazon SES Developer Guide."]
+       "Represents a request to list the configuration sets associated with your Amazon Web Services account. Configuration sets enable you to publish email sending events. For information about using configuration sets, see the Amazon SES Developer Guide."]
 module GetTemplateResponse =
   struct
     type getTemplateResult = {
@@ -8534,8 +8714,8 @@ module GetTemplateResponse =
         (Option.map ~f:Template.of_xml) (Xml.child xml_arg0 "Template") in
       make ?template ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let template = field_map json "Template" Template.of_json in
+    let of_json json__ =
+      let template = field_map json__ "Template" Template.of_json in
       make ?template ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8545,7 +8725,7 @@ module GetTemplateRequest =
     type nonrec t =
       {
       templateName: TemplateName.t
-        [@ocaml.doc "The name of the template you want to retrieve."]}
+        [@ocaml.doc "The name of the template to retrieve."]}
     let context_ = "GetTemplateRequest"
     let make ~templateName = fun () -> { templateName }
     let to_value x =
@@ -8558,9 +8738,9 @@ module GetTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "TemplateName" TemplateName.of_json in
+        field_map_exn json__ "TemplateName" TemplateName.of_json in
       make ~templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8614,9 +8794,9 @@ module GetSendStatisticsResponse =
           (Xml.child xml_arg0 "SendDataPoints") in
       make ?sendDataPoints ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sendDataPoints =
-        field_map json "SendDataPoints" SendDataPointList.of_json in
+        field_map json__ "SendDataPoints" SendDataPointList.of_json in
       make ?sendDataPoints ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8688,12 +8868,12 @@ module GetSendQuotaResponse =
           (Xml.child xml_arg0 "Max24HourSend") in
       make ?sentLast24Hours ?maxSendRate ?max24HourSend ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sentLast24Hours =
-        field_map json "SentLast24Hours" SentLast24Hours.of_json in
-      let maxSendRate = field_map json "MaxSendRate" MaxSendRate.of_json in
+        field_map json__ "SentLast24Hours" SentLast24Hours.of_json in
+      let maxSendRate = field_map json__ "MaxSendRate" MaxSendRate.of_json in
       let max24HourSend =
-        field_map json "Max24HourSend" Max24HourSend.of_json in
+        field_map json__ "Max24HourSend" Max24HourSend.of_json in
       make ?sentLast24Hours ?maxSendRate ?max24HourSend ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8702,7 +8882,7 @@ module GetIdentityVerificationAttributesResponse =
   struct
     type getIdentityVerificationAttributesResult =
       {
-      verificationAttributes: VerificationAttributes.t
+      verificationAttributes: VerificationAttributes.t option
         [@ocaml.doc
           "A map of Identities to IdentityVerificationAttributes objects."]}
     and responseMetaData = unit
@@ -8713,7 +8893,7 @@ module GetIdentityVerificationAttributesResponse =
       responseMetaData: responseMetaData }
     type error = [ `Unknown_operation_error of (string * string option) ]
     let context_ = "GetIdentityVerificationAttributesResponse"
-    let make ~verificationAttributes =
+    let make ?verificationAttributes =
       fun () ->
         {
           getIdentityVerificationAttributesResult =
@@ -8740,7 +8920,8 @@ module GetIdentityVerificationAttributesResponse =
       let x = t.getIdentityVerificationAttributesResult in
       structure_to_wrapped_value
         [("VerificationAttributes",
-           (Some (VerificationAttributes.to_value x.verificationAttributes)))]
+           (Option.map x.verificationAttributes
+              ~f:VerificationAttributes.to_value))]
         ~wrapper:"GetIdentityVerificationAttributesResult"
         ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
@@ -8749,15 +8930,15 @@ module GetIdentityVerificationAttributesResponse =
         Xml.child_exn ~context:context_ t
           "GetIdentityVerificationAttributesResult" in
       let verificationAttributes =
-        VerificationAttributes.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VerificationAttributes") in
-      make ~verificationAttributes ()
+        (Option.map ~f:VerificationAttributes.of_xml)
+          (Xml.child xml_arg0 "VerificationAttributes") in
+      make ?verificationAttributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let verificationAttributes =
-        field_map_exn json "VerificationAttributes"
+        field_map json__ "VerificationAttributes"
           VerificationAttributes.of_json in
-      make ~verificationAttributes ()
+      make ?verificationAttributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Amazon SES verification status of a list of identities. For domain identities, this response also contains the verification token."]
@@ -8778,8 +8959,8 @@ module GetIdentityVerificationAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Identities") in
       make ~identities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identities = field_map_exn json "Identities" IdentityList.of_json in
+    let of_json json__ =
+      let identities = field_map_exn json__ "Identities" IdentityList.of_json in
       make ~identities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8788,7 +8969,8 @@ module GetIdentityPoliciesResponse =
   struct
     type getIdentityPoliciesResult =
       {
-      policies: PolicyMap.t [@ocaml.doc "A map of policy names to policies."]}
+      policies: PolicyMap.t option
+        [@ocaml.doc "A map of policy names to policies."]}
     and responseMetaData = unit
     and t =
       {
@@ -8796,7 +8978,7 @@ module GetIdentityPoliciesResponse =
       responseMetaData: responseMetaData }
     type error = [ `Unknown_operation_error of (string * string option) ]
     let context_ = "GetIdentityPoliciesResponse"
-    let make ~policies =
+    let make ?policies =
       fun () ->
         { getIdentityPoliciesResult = { policies }; responseMetaData = () }
     let error_of_json name json =
@@ -8818,20 +9000,19 @@ module GetIdentityPoliciesResponse =
     let to_value t =
       let x = t.getIdentityPoliciesResult in
       structure_to_wrapped_value
-        [("Policies", (Some (PolicyMap.to_value x.policies)))]
+        [("Policies", (Option.map x.policies ~f:PolicyMap.to_value))]
         ~wrapper:"GetIdentityPoliciesResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "GetIdentityPoliciesResult" in
       let policies =
-        PolicyMap.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Policies") in
-      make ~policies ()
+        (Option.map ~f:PolicyMap.of_xml) (Xml.child xml_arg0 "Policies") in
+      make ?policies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policies = field_map_exn json "Policies" PolicyMap.of_json in
-      make ~policies ()
+    let of_json json__ =
+      let policies = field_map json__ "Policies" PolicyMap.of_json in
+      make ?policies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the requested sending authorization policies."]
 module GetIdentityPoliciesRequest =
@@ -8840,7 +9021,7 @@ module GetIdentityPoliciesRequest =
       {
       identity: Identity.t
         [@ocaml.doc
-          "The identity for which the policies will be retrieved. You can specify an identity by using its name or by using its Amazon Resource Name (ARN). Examples: user\\@example.com, example.com, arn:aws:ses:us-east-1:123456789012:identity/example.com. To successfully call this API, you must own the identity."];
+          "The identity for which the policies are retrieved. You can specify an identity by using its name or by using its Amazon Resource Name (ARN). Examples: user\\@example.com, example.com, arn:aws:ses:us-east-1:123456789012:identity/example.com. To successfully call this operation, you must own the identity."];
       policyNames: PolicyNameList.t
         [@ocaml.doc
           "A list of the names of policies to be retrieved. You can retrieve a maximum of 20 policies at a time. If you do not know the names of the policies that are attached to the identity, you can use ListIdentityPolicies."]}
@@ -8860,10 +9041,10 @@ module GetIdentityPoliciesRequest =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ~policyNames ~identity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyNames =
-        field_map_exn json "PolicyNames" PolicyNameList.of_json in
-      let identity = field_map_exn json "Identity" Identity.of_json in
+        field_map_exn json__ "PolicyNames" PolicyNameList.of_json in
+      let identity = field_map_exn json__ "Identity" Identity.of_json in
       make ~policyNames ~identity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8872,7 +9053,7 @@ module GetIdentityNotificationAttributesResponse =
   struct
     type getIdentityNotificationAttributesResult =
       {
-      notificationAttributes: NotificationAttributes.t
+      notificationAttributes: NotificationAttributes.t option
         [@ocaml.doc "A map of Identity to IdentityNotificationAttributes."]}
     and responseMetaData = unit
     and t =
@@ -8882,7 +9063,7 @@ module GetIdentityNotificationAttributesResponse =
       responseMetaData: responseMetaData }
     type error = [ `Unknown_operation_error of (string * string option) ]
     let context_ = "GetIdentityNotificationAttributesResponse"
-    let make ~notificationAttributes =
+    let make ?notificationAttributes =
       fun () ->
         {
           getIdentityNotificationAttributesResult =
@@ -8909,7 +9090,8 @@ module GetIdentityNotificationAttributesResponse =
       let x = t.getIdentityNotificationAttributesResult in
       structure_to_wrapped_value
         [("NotificationAttributes",
-           (Some (NotificationAttributes.to_value x.notificationAttributes)))]
+           (Option.map x.notificationAttributes
+              ~f:NotificationAttributes.to_value))]
         ~wrapper:"GetIdentityNotificationAttributesResult"
         ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
@@ -8918,15 +9100,15 @@ module GetIdentityNotificationAttributesResponse =
         Xml.child_exn ~context:context_ t
           "GetIdentityNotificationAttributesResult" in
       let notificationAttributes =
-        NotificationAttributes.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "NotificationAttributes") in
-      make ~notificationAttributes ()
+        (Option.map ~f:NotificationAttributes.of_xml)
+          (Xml.child xml_arg0 "NotificationAttributes") in
+      make ?notificationAttributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let notificationAttributes =
-        field_map_exn json "NotificationAttributes"
+        field_map json__ "NotificationAttributes"
           NotificationAttributes.of_json in
-      make ~notificationAttributes ()
+      make ?notificationAttributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the notification attributes for a list of identities."]
@@ -8949,8 +9131,8 @@ module GetIdentityNotificationAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Identities") in
       make ~identities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identities = field_map_exn json "Identities" IdentityList.of_json in
+    let of_json json__ =
+      let identities = field_map_exn json__ "Identities" IdentityList.of_json in
       make ~identities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8959,7 +9141,7 @@ module GetIdentityMailFromDomainAttributesResponse =
   struct
     type getIdentityMailFromDomainAttributesResult =
       {
-      mailFromDomainAttributes: MailFromDomainAttributes.t
+      mailFromDomainAttributes: MailFromDomainAttributes.t option
         [@ocaml.doc "A map of identities to custom MAIL FROM attributes."]}
     and responseMetaData = unit
     and t =
@@ -8969,7 +9151,7 @@ module GetIdentityMailFromDomainAttributesResponse =
       responseMetaData: responseMetaData }
     type error = [ `Unknown_operation_error of (string * string option) ]
     let context_ = "GetIdentityMailFromDomainAttributesResponse"
-    let make ~mailFromDomainAttributes =
+    let make ?mailFromDomainAttributes =
       fun () ->
         {
           getIdentityMailFromDomainAttributesResult =
@@ -8996,8 +9178,8 @@ module GetIdentityMailFromDomainAttributesResponse =
       let x = t.getIdentityMailFromDomainAttributesResult in
       structure_to_wrapped_value
         [("MailFromDomainAttributes",
-           (Some
-              (MailFromDomainAttributes.to_value x.mailFromDomainAttributes)))]
+           (Option.map x.mailFromDomainAttributes
+              ~f:MailFromDomainAttributes.to_value))]
         ~wrapper:"GetIdentityMailFromDomainAttributesResult"
         ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
@@ -9006,16 +9188,15 @@ module GetIdentityMailFromDomainAttributesResponse =
         Xml.child_exn ~context:context_ t
           "GetIdentityMailFromDomainAttributesResult" in
       let mailFromDomainAttributes =
-        MailFromDomainAttributes.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "MailFromDomainAttributes") in
-      make ~mailFromDomainAttributes ()
+        (Option.map ~f:MailFromDomainAttributes.of_xml)
+          (Xml.child xml_arg0 "MailFromDomainAttributes") in
+      make ?mailFromDomainAttributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mailFromDomainAttributes =
-        field_map_exn json "MailFromDomainAttributes"
+        field_map json__ "MailFromDomainAttributes"
           MailFromDomainAttributes.of_json in
-      make ~mailFromDomainAttributes ()
+      make ?mailFromDomainAttributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the custom MAIL FROM attributes for a list of identities."]
@@ -9037,8 +9218,8 @@ module GetIdentityMailFromDomainAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Identities") in
       make ~identities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identities = field_map_exn json "Identities" IdentityList.of_json in
+    let of_json json__ =
+      let identities = field_map_exn json__ "Identities" IdentityList.of_json in
       make ~identities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9047,7 +9228,7 @@ module GetIdentityDkimAttributesResponse =
   struct
     type getIdentityDkimAttributesResult =
       {
-      dkimAttributes: DkimAttributes.t
+      dkimAttributes: DkimAttributes.t option
         [@ocaml.doc "The DKIM attributes for an email address or a domain."]}
     and responseMetaData = unit
     and t =
@@ -9056,7 +9237,7 @@ module GetIdentityDkimAttributesResponse =
       responseMetaData: responseMetaData }
     type error = [ `Unknown_operation_error of (string * string option) ]
     let context_ = "GetIdentityDkimAttributesResponse"
-    let make ~dkimAttributes =
+    let make ?dkimAttributes =
       fun () ->
         {
           getIdentityDkimAttributesResult = { dkimAttributes };
@@ -9082,7 +9263,7 @@ module GetIdentityDkimAttributesResponse =
       let x = t.getIdentityDkimAttributesResult in
       structure_to_wrapped_value
         [("DkimAttributes",
-           (Some (DkimAttributes.to_value x.dkimAttributes)))]
+           (Option.map x.dkimAttributes ~f:DkimAttributes.to_value))]
         ~wrapper:"GetIdentityDkimAttributesResult"
         ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
@@ -9090,14 +9271,14 @@ module GetIdentityDkimAttributesResponse =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "GetIdentityDkimAttributesResult" in
       let dkimAttributes =
-        DkimAttributes.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DkimAttributes") in
-      make ~dkimAttributes ()
+        (Option.map ~f:DkimAttributes.of_xml)
+          (Xml.child xml_arg0 "DkimAttributes") in
+      make ?dkimAttributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dkimAttributes =
-        field_map_exn json "DkimAttributes" DkimAttributes.of_json in
-      make ~dkimAttributes ()
+        field_map json__ "DkimAttributes" DkimAttributes.of_json in
+      make ?dkimAttributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the status of Amazon SES Easy DKIM signing for an identity. For domain identities, this response also contains the DKIM tokens that are required for Easy DKIM signing, and whether Amazon SES successfully verified that these tokens were published."]
@@ -9120,8 +9301,8 @@ module GetIdentityDkimAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Identities") in
       make ~identities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identities = field_map_exn json "Identities" IdentityList.of_json in
+    let of_json json__ =
+      let identities = field_map_exn json__ "Identities" IdentityList.of_json in
       make ~identities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9250,17 +9431,20 @@ module GetCustomVerificationEmailTemplateResponse =
       make ?failureRedirectionURL ?successRedirectionURL ?templateContent
         ?templateSubject ?fromEmailAddress ?templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureRedirectionURL =
-        field_map json "FailureRedirectionURL" FailureRedirectionURL.of_json in
+        field_map json__ "FailureRedirectionURL"
+          FailureRedirectionURL.of_json in
       let successRedirectionURL =
-        field_map json "SuccessRedirectionURL" SuccessRedirectionURL.of_json in
+        field_map json__ "SuccessRedirectionURL"
+          SuccessRedirectionURL.of_json in
       let templateContent =
-        field_map json "TemplateContent" TemplateContent.of_json in
-      let templateSubject = field_map json "TemplateSubject" Subject.of_json in
+        field_map json__ "TemplateContent" TemplateContent.of_json in
+      let templateSubject =
+        field_map json__ "TemplateSubject" Subject.of_json in
       let fromEmailAddress =
-        field_map json "FromEmailAddress" FromAddress.of_json in
-      let templateName = field_map json "TemplateName" TemplateName.of_json in
+        field_map json__ "FromEmailAddress" FromAddress.of_json in
+      let templateName = field_map json__ "TemplateName" TemplateName.of_json in
       make ?failureRedirectionURL ?successRedirectionURL ?templateContent
         ?templateSubject ?fromEmailAddress ?templateName ()
     let to_json v = composed_to_json to_value v
@@ -9271,7 +9455,7 @@ module GetCustomVerificationEmailTemplateRequest =
       {
       templateName: TemplateName.t
         [@ocaml.doc
-          "The name of the custom verification email template that you want to retrieve."]}
+          "The name of the custom verification email template to retrieve."]}
     let context_ = "GetCustomVerificationEmailTemplateRequest"
     let make ~templateName = fun () -> { templateName }
     let to_value x =
@@ -9284,9 +9468,9 @@ module GetCustomVerificationEmailTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "TemplateName" TemplateName.of_json in
+        field_map_exn json__ "TemplateName" TemplateName.of_json in
       make ~templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9297,7 +9481,7 @@ module GetAccountSendingEnabledResponse =
       {
       enabled: Enabled.t option
         [@ocaml.doc
-          "Describes whether email sending is enabled or disabled for your Amazon SES account in the current AWS Region."]}
+          "Describes whether email sending is enabled or disabled for your Amazon SES account in the current Amazon Web Services Region."]}
     and responseMetaData = unit
     and t =
       {
@@ -9339,12 +9523,12 @@ module GetAccountSendingEnabledResponse =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "Enabled" Enabled.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "Enabled" Enabled.of_json in
       make ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a request to return the email sending status for your Amazon SES account in the current AWS Region."]
+       "Represents a request to return the email sending status for your Amazon SES account in the current Amazon Web Services Region."]
 module DescribeReceiptRuleSetResponse =
   struct
     type describeReceiptRuleSetResult =
@@ -9415,9 +9599,10 @@ module DescribeReceiptRuleSetResponse =
           (Xml.child xml_arg0 "Metadata") in
       make ?rules ?metadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map json "Rules" ReceiptRulesList.of_json in
-      let metadata = field_map json "Metadata" ReceiptRuleSetMetadata.of_json in
+    let of_json json__ =
+      let rules = field_map json__ "Rules" ReceiptRulesList.of_json in
+      let metadata =
+        field_map json__ "Metadata" ReceiptRuleSetMetadata.of_json in
       make ?rules ?metadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9440,9 +9625,9 @@ module DescribeReceiptRuleSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~ruleSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ruleSetName =
-        field_map_exn json "RuleSetName" ReceiptRuleSetName.of_json in
+        field_map_exn json__ "RuleSetName" ReceiptRuleSetName.of_json in
       make ~ruleSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9514,8 +9699,8 @@ module DescribeReceiptRuleResponse =
         (Option.map ~f:ReceiptRule.of_xml) (Xml.child xml_arg0 "Rule") in
       make ?rule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rule = field_map json "Rule" ReceiptRule.of_json in make ?rule ()
+    let of_json json__ =
+      let rule = field_map json__ "Rule" ReceiptRule.of_json in make ?rule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the details of a receipt rule."]
 module DescribeReceiptRuleRequest =
@@ -9544,10 +9729,10 @@ module DescribeReceiptRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~ruleName ~ruleSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleName = field_map_exn json "RuleName" ReceiptRuleName.of_json in
+    let of_json json__ =
+      let ruleName = field_map_exn json__ "RuleName" ReceiptRuleName.of_json in
       let ruleSetName =
-        field_map_exn json "RuleSetName" ReceiptRuleSetName.of_json in
+        field_map_exn json__ "RuleSetName" ReceiptRuleSetName.of_json in
       make ~ruleName ~ruleSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9660,17 +9845,17 @@ module DescribeConfigurationSetResponse =
       make ?reputationOptions ?deliveryOptions ?trackingOptions
         ?eventDestinations ?configurationSet ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reputationOptions =
-        field_map json "ReputationOptions" ReputationOptions.of_json in
+        field_map json__ "ReputationOptions" ReputationOptions.of_json in
       let deliveryOptions =
-        field_map json "DeliveryOptions" DeliveryOptions.of_json in
+        field_map json__ "DeliveryOptions" DeliveryOptions.of_json in
       let trackingOptions =
-        field_map json "TrackingOptions" TrackingOptions.of_json in
+        field_map json__ "TrackingOptions" TrackingOptions.of_json in
       let eventDestinations =
-        field_map json "EventDestinations" EventDestinations.of_json in
+        field_map json__ "EventDestinations" EventDestinations.of_json in
       let configurationSet =
-        field_map json "ConfigurationSet" ConfigurationSet.of_json in
+        field_map json__ "ConfigurationSet" ConfigurationSet.of_json in
       make ?reputationOptions ?deliveryOptions ?trackingOptions
         ?eventDestinations ?configurationSet ()
     let to_json v = composed_to_json to_value v
@@ -9705,12 +9890,12 @@ module DescribeConfigurationSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ?configurationSetAttributeNames ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetAttributeNames =
-        field_map json "ConfigurationSetAttributeNames"
+        field_map json__ "ConfigurationSetAttributeNames"
           ConfigurationSetAttributeList.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ?configurationSetAttributeNames ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -9775,9 +9960,10 @@ module DescribeActiveReceiptRuleSetResponse =
           (Xml.child xml_arg0 "Metadata") in
       make ?rules ?metadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map json "Rules" ReceiptRulesList.of_json in
-      let metadata = field_map json "Metadata" ReceiptRuleSetMetadata.of_json in
+    let of_json json__ =
+      let rules = field_map json__ "Rules" ReceiptRulesList.of_json in
+      let metadata =
+        field_map json__ "Metadata" ReceiptRuleSetMetadata.of_json in
       make ?rules ?metadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9814,12 +10000,12 @@ module DeleteVerifiedEmailAddressRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ~emailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let emailAddress = field_map_exn json "EmailAddress" Address.of_json in
+    let of_json json__ =
+      let emailAddress = field_map_exn json__ "EmailAddress" Address.of_json in
       make ~emailAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a request to delete an email address from the list of email addresses you have attempted to verify under your AWS account."]
+       "Represents a request to delete an email address from the list of email addresses you have attempted to verify under your Amazon Web Services account."]
 module DeleteTemplateResponse =
   struct
     type deleteTemplateResult = unit
@@ -9873,9 +10059,9 @@ module DeleteTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "TemplateName" TemplateName.of_json in
+        field_map_exn json__ "TemplateName" TemplateName.of_json in
       make ~templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9942,9 +10128,9 @@ module DeleteReceiptRuleSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~ruleSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ruleSetName =
-        field_map_exn json "RuleSetName" ReceiptRuleSetName.of_json in
+        field_map_exn json__ "RuleSetName" ReceiptRuleSetName.of_json in
       make ~ruleSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10021,10 +10207,10 @@ module DeleteReceiptRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~ruleName ~ruleSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleName = field_map_exn json "RuleName" ReceiptRuleName.of_json in
+    let of_json json__ =
+      let ruleName = field_map_exn json__ "RuleName" ReceiptRuleName.of_json in
       let ruleSetName =
-        field_map_exn json "RuleSetName" ReceiptRuleSetName.of_json in
+        field_map_exn json__ "RuleSetName" ReceiptRuleSetName.of_json in
       make ~ruleName ~ruleSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10081,9 +10267,9 @@ module DeleteReceiptFilterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FilterName") in
       make ~filterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let filterName =
-        field_map_exn json "FilterName" ReceiptFilterName.of_json in
+        field_map_exn json__ "FilterName" ReceiptFilterName.of_json in
       make ~filterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10128,7 +10314,7 @@ module DeleteIdentityRequest =
       {
       identity: Identity.t
         [@ocaml.doc
-          "The identity to be removed from the list of identities for the AWS Account."]}
+          "The identity to be removed from the list of identities for the Amazon Web Services account."]}
     let context_ = "DeleteIdentityRequest"
     let make ~identity = fun () -> { identity }
     let to_value x =
@@ -10140,8 +10326,8 @@ module DeleteIdentityRequest =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ~identity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identity = field_map_exn json "Identity" Identity.of_json in
+    let of_json json__ =
+      let identity = field_map_exn json__ "Identity" Identity.of_json in
       make ~identity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10186,7 +10372,7 @@ module DeleteIdentityPolicyRequest =
       {
       identity: Identity.t
         [@ocaml.doc
-          "The identity that is associated with the policy that you want to delete. You can specify the identity by using its name or by using its Amazon Resource Name (ARN). Examples: user\\@example.com, example.com, arn:aws:ses:us-east-1:123456789012:identity/example.com. To successfully call this API, you must own the identity."];
+          "The identity that is associated with the policy to delete. You can specify the identity by using its name or by using its Amazon Resource Name (ARN). Examples: user\\@example.com, example.com, arn:aws:ses:us-east-1:123456789012:identity/example.com. To successfully call this operation, you must own the identity."];
       policyName: PolicyName.t
         [@ocaml.doc "The name of the policy to be deleted."]}
     let context_ = "DeleteIdentityPolicyRequest"
@@ -10205,9 +10391,9 @@ module DeleteIdentityPolicyRequest =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Identity") in
       make ~policyName ~identity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyName = field_map_exn json "PolicyName" PolicyName.of_json in
-      let identity = field_map_exn json "Identity" Identity.of_json in
+    let of_json json__ =
+      let policyName = field_map_exn json__ "PolicyName" PolicyName.of_json in
+      let identity = field_map_exn json__ "Identity" Identity.of_json in
       make ~policyName ~identity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10218,7 +10404,7 @@ module DeleteCustomVerificationEmailTemplateRequest =
       {
       templateName: TemplateName.t
         [@ocaml.doc
-          "The name of the custom verification email template that you want to delete."]}
+          "The name of the custom verification email template to delete."]}
     let context_ = "DeleteCustomVerificationEmailTemplateRequest"
     let make ~templateName = fun () -> { templateName }
     let to_value x =
@@ -10231,9 +10417,9 @@ module DeleteCustomVerificationEmailTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "TemplateName" TemplateName.of_json in
+        field_map_exn json__ "TemplateName" TemplateName.of_json in
       make ~templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10308,8 +10494,7 @@ module DeleteConfigurationSetTrackingOptionsRequest =
     type nonrec t =
       {
       configurationSetName: ConfigurationSetName.t
-        [@ocaml.doc
-          "The name of the configuration set from which you want to delete the tracking options."]}
+        [@ocaml.doc "The name of the configuration set."]}
     let context_ = "DeleteConfigurationSetTrackingOptionsRequest"
     let make ~configurationSetName = fun () -> { configurationSetName }
     let to_value x =
@@ -10323,9 +10508,9 @@ module DeleteConfigurationSetTrackingOptionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -10399,9 +10584,9 @@ module DeleteConfigurationSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -10501,12 +10686,12 @@ module DeleteConfigurationSetEventDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~eventDestinationName ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDestinationName =
-        field_map_exn json "EventDestinationName"
+        field_map_exn json__ "EventDestinationName"
           EventDestinationName.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~eventDestinationName ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -10533,9 +10718,9 @@ module CustomVerificationEmailTemplateAlreadyExistsException =
           (Xml.child xml_arg0 "CustomVerificationEmailTemplateName") in
       make ?customVerificationEmailTemplateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customVerificationEmailTemplateName =
-        field_map json "CustomVerificationEmailTemplateName"
+        field_map json__ "CustomVerificationEmailTemplateName"
           TemplateName.of_json in
       make ?customVerificationEmailTemplateName ()
     let to_json v = composed_to_json to_value v
@@ -10616,14 +10801,14 @@ module CreateTemplateResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an email template. Email templates enable you to send personalized email to one or more destinations in a single API operation. For more information, see the Amazon SES Developer Guide. You can execute this operation no more than once per second."]
+       "Creates an email template. Email templates enable you to send personalized email to one or more destinations in a single operation. For more information, see the Amazon SES Developer Guide. You can execute this operation no more than once per second."]
 module CreateTemplateRequest =
   struct
     type nonrec t =
       {
       template: Template.t
         [@ocaml.doc
-          "The content of the email, composed of a subject line, an HTML part, and a text-only part."]}
+          "The content of the email, composed of a subject line and either an HTML part or a text-only part."]}
     let context_ = "CreateTemplateRequest"
     let make ~template = fun () -> { template }
     let to_value x =
@@ -10635,8 +10820,8 @@ module CreateTemplateRequest =
         Template.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Template") in
       make ~template ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let template = field_map_exn json "Template" Template.of_json in
+    let of_json json__ =
+      let template = field_map_exn json__ "Template" Template.of_json in
       make ~template ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10700,7 +10885,7 @@ module CreateReceiptRuleSetRequest =
       {
       ruleSetName: ReceiptRuleSetName.t
         [@ocaml.doc
-          "The name of the rule set to create. The name must: This value can only contain ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). Start and end with a letter or number. Contain less than 64 characters."]}
+          "The name of the rule set to create. The name must meet the following requirements: Contain only ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). Start and end with a letter or number. Contain 64 characters or fewer."]}
     let context_ = "CreateReceiptRuleSetRequest"
     let make ~ruleSetName = fun () -> { ruleSetName }
     let to_value x =
@@ -10713,9 +10898,9 @@ module CreateReceiptRuleSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~ruleSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ruleSetName =
-        field_map_exn json "RuleSetName" ReceiptRuleSetName.of_json in
+        field_map_exn json__ "RuleSetName" ReceiptRuleSetName.of_json in
       make ~ruleSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10830,10 +11015,10 @@ module CreateReceiptRuleRequest =
       {
       ruleSetName: ReceiptRuleSetName.t
         [@ocaml.doc
-          "The name of the rule set that the receipt rule will be added to."];
+          "The name of the rule set where the receipt rule is added."];
       after: ReceiptRuleName.t option
         [@ocaml.doc
-          "The name of an existing rule after which the new rule will be placed. If this parameter is null, the new rule will be inserted at the beginning of the rule list."];
+          "The name of an existing rule after which the new rule is placed. If this parameter is null, the new rule is inserted at the beginning of the rule list."];
       rule: ReceiptRule.t
         [@ocaml.doc
           "A data structure that contains the specified rule's name, actions, recipients, domains, enabled status, scan status, and TLS policy."]}
@@ -10856,11 +11041,11 @@ module CreateReceiptRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~rule ?after ~ruleSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rule = field_map_exn json "Rule" ReceiptRule.of_json in
-      let after = field_map json "After" ReceiptRuleName.of_json in
+    let of_json json__ =
+      let rule = field_map_exn json__ "Rule" ReceiptRule.of_json in
+      let after = field_map json__ "After" ReceiptRuleName.of_json in
       let ruleSetName =
-        field_map_exn json "RuleSetName" ReceiptRuleSetName.of_json in
+        field_map_exn json__ "RuleSetName" ReceiptRuleSetName.of_json in
       make ~rule ?after ~ruleSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10937,8 +11122,8 @@ module CreateReceiptFilterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Filter") in
       make ~filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filter = field_map_exn json "Filter" ReceiptFilter.of_json in
+    let of_json json__ =
+      let filter = field_map_exn json__ "Filter" ReceiptFilter.of_json in
       make ~filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11014,21 +11199,21 @@ module CreateCustomVerificationEmailTemplateRequest =
       make ~failureRedirectionURL ~successRedirectionURL ~templateContent
         ~templateSubject ~fromEmailAddress ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureRedirectionURL =
-        field_map_exn json "FailureRedirectionURL"
+        field_map_exn json__ "FailureRedirectionURL"
           FailureRedirectionURL.of_json in
       let successRedirectionURL =
-        field_map_exn json "SuccessRedirectionURL"
+        field_map_exn json__ "SuccessRedirectionURL"
           SuccessRedirectionURL.of_json in
       let templateContent =
-        field_map_exn json "TemplateContent" TemplateContent.of_json in
+        field_map_exn json__ "TemplateContent" TemplateContent.of_json in
       let templateSubject =
-        field_map_exn json "TemplateSubject" Subject.of_json in
+        field_map_exn json__ "TemplateSubject" Subject.of_json in
       let fromEmailAddress =
-        field_map_exn json "FromEmailAddress" FromAddress.of_json in
+        field_map_exn json__ "FromEmailAddress" FromAddress.of_json in
       let templateName =
-        field_map_exn json "TemplateName" TemplateName.of_json in
+        field_map_exn json__ "TemplateName" TemplateName.of_json in
       make ~failureRedirectionURL ~successRedirectionURL ~templateContent
         ~templateSubject ~fromEmailAddress ~templateName ()
     let to_json v = composed_to_json to_value v
@@ -11138,11 +11323,11 @@ module CreateConfigurationSetTrackingOptionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~trackingOptions ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let trackingOptions =
-        field_map_exn json "TrackingOptions" TrackingOptions.of_json in
+        field_map_exn json__ "TrackingOptions" TrackingOptions.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~trackingOptions ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -11238,9 +11423,9 @@ module CreateConfigurationSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSet") in
       make ~configurationSet ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSet =
-        field_map_exn json "ConfigurationSet" ConfigurationSet.of_json in
+        field_map_exn json__ "ConfigurationSet" ConfigurationSet.of_json in
       make ~configurationSet ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11363,7 +11548,7 @@ module CreateConfigurationSetEventDestinationRequest =
           "The name of the configuration set that the event destination should be associated with."];
       eventDestination: EventDestination.t
         [@ocaml.doc
-          "An object that describes the AWS service that email sending event information will be published to."]}
+          "An object that describes the Amazon Web Services service that email sending event where information is published."]}
     let context_ = "CreateConfigurationSetEventDestinationRequest"
     let make ~configurationSetName =
       fun ~eventDestination ->
@@ -11384,16 +11569,16 @@ module CreateConfigurationSetEventDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~eventDestination ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDestination =
-        field_map_exn json "EventDestination" EventDestination.of_json in
+        field_map_exn json__ "EventDestination" EventDestination.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~eventDestination ~configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a request to create a configuration set event destination. A configuration set event destination, which can be either Amazon CloudWatch or Amazon Kinesis Firehose, describes an AWS service in which Amazon SES publishes the email sending events associated with a configuration set. For information about using configuration sets, see the Amazon SES Developer Guide."]
+       "Represents a request to create a configuration set event destination. A configuration set event destination, which can be either Amazon CloudWatch or Amazon Kinesis Firehose, describes an Amazon Web Services service in which Amazon SES publishes the email sending events associated with a configuration set. For information about using configuration sets, see the Amazon SES Developer Guide."]
 module CloneReceiptRuleSetResponse =
   struct
     type cloneReceiptRuleSetResult = unit
@@ -11464,7 +11649,7 @@ module CloneReceiptRuleSetRequest =
       {
       ruleSetName: ReceiptRuleSetName.t
         [@ocaml.doc
-          "The name of the rule set to create. The name must: This value can only contain ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). Start and end with a letter or number. Contain less than 64 characters."];
+          "The name of the rule set to create. The name must meet the following requirements: Contain only ASCII letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). Start and end with a letter or number. Contain 64 characters or fewer."];
       originalRuleSetName: ReceiptRuleSetName.t
         [@ocaml.doc "The name of the rule set to clone."]}
     let context_ = "CloneReceiptRuleSetRequest"
@@ -11486,11 +11671,11 @@ module CloneReceiptRuleSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RuleSetName") in
       make ~originalRuleSetName ~ruleSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let originalRuleSetName =
-        field_map_exn json "OriginalRuleSetName" ReceiptRuleSetName.of_json in
+        field_map_exn json__ "OriginalRuleSetName" ReceiptRuleSetName.of_json in
       let ruleSetName =
-        field_map_exn json "RuleSetName" ReceiptRuleSetName.of_json in
+        field_map_exn json__ "RuleSetName" ReceiptRuleSetName.of_json in
       make ~originalRuleSetName ~ruleSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

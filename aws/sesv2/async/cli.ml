@@ -28,6 +28,43 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let batch_get_metric_data =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and queries =
+         flag "queries" (required json_arg)
+           ~doc:"JSON BatchGetMetricDataQueries" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_metric_data
+           (Values.BatchGetMetricDataRequest.make
+              ~queries:(Values.BatchGetMetricDataQueries.of_json queries) ())
+           (Some Values.BatchGetMetricDataResponse.to_json)
+           (Some Values.BatchGetMetricDataResponse.error_to_json)])
+let cancel_export_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and jobId = flag "job-id" (required string) ~doc:"STRING JobId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_export_job
+           (Values.CancelExportJobRequest.make ~jobId ())
+           (Some Values.CancelExportJobResponse.to_json)
+           (Some Values.CancelExportJobResponse.error_to_json)])
 let create_configuration_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -54,6 +91,11 @@ let create_configuration_set =
        and suppressionOptions =
          flag "suppression-options" (optional json_arg)
            ~doc:"JSON SuppressionOptions"
+       and vdmOptions =
+         flag "vdm-options" (optional json_arg) ~doc:"JSON VdmOptions"
+       and archivingOptions =
+         flag "archiving-options" (optional json_arg)
+           ~doc:"JSON ArchivingOptions"
        and configurationSetName =
          flag "configuration-set-name" (required string)
            ~doc:"STRING ConfigurationSetName" in
@@ -74,7 +116,10 @@ let create_configuration_set =
               ?suppressionOptions:(Option.map
                                      ~f:Values.SuppressionOptions.of_json
                                      suppressionOptions)
-              ~configurationSetName ())
+              ?vdmOptions:(Option.map ~f:Values.VdmOptions.of_json vdmOptions)
+              ?archivingOptions:(Option.map
+                                   ~f:Values.ArchivingOptions.of_json
+                                   archivingOptions) ~configurationSetName ())
            (Some Values.CreateConfigurationSetResponse.to_json)
            (Some Values.CreateConfigurationSetResponse.error_to_json)])
 let create_configuration_set_event_destination =
@@ -176,6 +221,7 @@ let create_custom_verification_email_template =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and templateName =
          flag "template-name" (required string)
            ~doc:"STRING EmailTemplateName"
@@ -198,9 +244,9 @@ let create_custom_verification_email_template =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_custom_verification_email_template
            (Values.CreateCustomVerificationEmailTemplateRequest.make
-              ~templateName ~fromEmailAddress ~templateSubject
-              ~templateContent ~successRedirectionURL ~failureRedirectionURL
-              ())
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~templateName
+              ~fromEmailAddress ~templateSubject ~templateContent
+              ~successRedirectionURL ~failureRedirectionURL ())
            (Some Values.CreateCustomVerificationEmailTemplateResponse.to_json)
            (Some
               Values.CreateCustomVerificationEmailTemplateResponse.error_to_json)])
@@ -215,13 +261,17 @@ let create_dedicated_ip_pool =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and scalingMode =
+         flag "scaling-mode" (optional json_arg) ~doc:"JSON ScalingMode"
        and poolName =
          flag "pool-name" (required string) ~doc:"STRING PoolName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_dedicated_ip_pool
            (Values.CreateDedicatedIpPoolRequest.make
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~poolName ())
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?scalingMode:(Option.map ~f:Values.ScalingMode.of_json
+                              scalingMode) ~poolName ())
            (Some Values.CreateDedicatedIpPoolResponse.to_json)
            (Some Values.CreateDedicatedIpPoolResponse.error_to_json)])
 let create_deliverability_test_report =
@@ -313,6 +363,7 @@ let create_email_template =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and templateName =
          flag "template-name" (required string)
            ~doc:"STRING EmailTemplateName"
@@ -322,11 +373,38 @@ let create_email_template =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_email_template
-           (Values.CreateEmailTemplateRequest.make ~templateName
+           (Values.CreateEmailTemplateRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~templateName
               ~templateContent:(Values.EmailTemplateContent.of_json
                                   templateContent) ())
            (Some Values.CreateEmailTemplateResponse.to_json)
            (Some Values.CreateEmailTemplateResponse.error_to_json)])
+let create_export_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and exportDataSource =
+         flag "export-data-source" (required json_arg)
+           ~doc:"JSON ExportDataSource"
+       and exportDestination =
+         flag "export-destination" (required json_arg)
+           ~doc:"JSON ExportDestination" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_export_job
+           (Values.CreateExportJobRequest.make
+              ~exportDataSource:(Values.ExportDataSource.of_json
+                                   exportDataSource)
+              ~exportDestination:(Values.ExportDestination.of_json
+                                    exportDestination) ())
+           (Some Values.CreateExportJobResponse.to_json)
+           (Some Values.CreateExportJobResponse.error_to_json)])
 let create_import_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -353,6 +431,70 @@ let create_import_job =
                                    importDataSource) ())
            (Some Values.CreateImportJobResponse.to_json)
            (Some Values.CreateImportJobResponse.error_to_json)])
+let create_multi_region_endpoint =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and endpointName =
+         flag "endpoint-name" (required string) ~doc:"STRING EndpointName"
+       and details = flag "details" (required json_arg) ~doc:"JSON Details" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_multi_region_endpoint
+           (Values.CreateMultiRegionEndpointRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~endpointName
+              ~details:(Values.Details.of_json details) ())
+           (Some Values.CreateMultiRegionEndpointResponse.to_json)
+           (Some Values.CreateMultiRegionEndpointResponse.error_to_json)])
+let create_tenant =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and tenantName =
+         flag "tenant-name" (required string) ~doc:"STRING TenantName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_tenant
+           (Values.CreateTenantRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~tenantName
+              ()) (Some Values.CreateTenantResponse.to_json)
+           (Some Values.CreateTenantResponse.error_to_json)])
+let create_tenant_resource_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tenantName =
+         flag "tenant-name" (required string) ~doc:"STRING TenantName"
+       and resourceArn =
+         flag "resource-arn" (required string)
+           ~doc:"STRING AmazonResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_tenant_resource_association
+           (Values.CreateTenantResourceAssociationRequest.make ~tenantName
+              ~resourceArn ())
+           (Some Values.CreateTenantResourceAssociationResponse.to_json)
+           (Some Values.CreateTenantResourceAssociationResponse.error_to_json)])
 let delete_configuration_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -534,6 +676,24 @@ let delete_email_template =
            (Values.DeleteEmailTemplateRequest.make ~templateName ())
            (Some Values.DeleteEmailTemplateResponse.to_json)
            (Some Values.DeleteEmailTemplateResponse.error_to_json)])
+let delete_multi_region_endpoint =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and endpointName =
+         flag "endpoint-name" (required string) ~doc:"STRING EndpointName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_multi_region_endpoint
+           (Values.DeleteMultiRegionEndpointRequest.make ~endpointName ())
+           (Some Values.DeleteMultiRegionEndpointResponse.to_json)
+           (Some Values.DeleteMultiRegionEndpointResponse.error_to_json)])
 let delete_suppressed_destination =
   Command.async ~summary:""
     ([%map_open.Command
@@ -552,6 +712,45 @@ let delete_suppressed_destination =
            (Values.DeleteSuppressedDestinationRequest.make ~emailAddress ())
            (Some Values.DeleteSuppressedDestinationResponse.to_json)
            (Some Values.DeleteSuppressedDestinationResponse.error_to_json)])
+let delete_tenant =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tenantName =
+         flag "tenant-name" (required string) ~doc:"STRING TenantName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_tenant (Values.DeleteTenantRequest.make ~tenantName ())
+           (Some Values.DeleteTenantResponse.to_json)
+           (Some Values.DeleteTenantResponse.error_to_json)])
+let delete_tenant_resource_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tenantName =
+         flag "tenant-name" (required string) ~doc:"STRING TenantName"
+       and resourceArn =
+         flag "resource-arn" (required string)
+           ~doc:"STRING AmazonResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_tenant_resource_association
+           (Values.DeleteTenantResourceAssociationRequest.make ~tenantName
+              ~resourceArn ())
+           (Some Values.DeleteTenantResourceAssociationResponse.to_json)
+           (Some Values.DeleteTenantResourceAssociationResponse.error_to_json)])
 let get_account =
   Command.async ~summary:""
     ([%map_open.Command
@@ -706,6 +905,24 @@ let get_dedicated_ip =
            Io.get_dedicated_ip (Values.GetDedicatedIpRequest.make ~ip ())
            (Some Values.GetDedicatedIpResponse.to_json)
            (Some Values.GetDedicatedIpResponse.error_to_json)])
+let get_dedicated_ip_pool =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and poolName =
+         flag "pool-name" (required string) ~doc:"STRING PoolName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_dedicated_ip_pool
+           (Values.GetDedicatedIpPoolRequest.make ~poolName ())
+           (Some Values.GetDedicatedIpPoolResponse.to_json)
+           (Some Values.GetDedicatedIpPoolResponse.error_to_json)])
 let get_dedicated_ips =
   Command.async ~summary:""
     ([%map_open.Command
@@ -804,6 +1021,24 @@ let get_domain_statistics_report =
               ~endDate:(Values.Timestamp.of_json endDate) ())
            (Some Values.GetDomainStatisticsReportResponse.to_json)
            (Some Values.GetDomainStatisticsReportResponse.error_to_json)])
+let get_email_address_insights =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and emailAddress =
+         flag "email-address" (required string) ~doc:"STRING EmailAddress" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_email_address_insights
+           (Values.GetEmailAddressInsightsRequest.make ~emailAddress ())
+           (Some Values.GetEmailAddressInsightsResponse.to_json)
+           (Some Values.GetEmailAddressInsightsResponse.error_to_json)])
 let get_email_identity =
   Command.async ~summary:""
     ([%map_open.Command
@@ -859,6 +1094,22 @@ let get_email_template =
            (Values.GetEmailTemplateRequest.make ~templateName ())
            (Some Values.GetEmailTemplateResponse.to_json)
            (Some Values.GetEmailTemplateResponse.error_to_json)])
+let get_export_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and jobId = flag "job-id" (required string) ~doc:"STRING JobId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_export_job (Values.GetExportJobRequest.make ~jobId ())
+           (Some Values.GetExportJobResponse.to_json)
+           (Some Values.GetExportJobResponse.error_to_json)])
 let get_import_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -875,6 +1126,66 @@ let get_import_job =
            Io.get_import_job (Values.GetImportJobRequest.make ~jobId ())
            (Some Values.GetImportJobResponse.to_json)
            (Some Values.GetImportJobResponse.error_to_json)])
+let get_message_insights =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and messageId =
+         flag "message-id" (required string) ~doc:"STRING OutboundMessageId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_message_insights
+           (Values.GetMessageInsightsRequest.make ~messageId ())
+           (Some Values.GetMessageInsightsResponse.to_json)
+           (Some Values.GetMessageInsightsResponse.error_to_json)])
+let get_multi_region_endpoint =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and endpointName =
+         flag "endpoint-name" (required string) ~doc:"STRING EndpointName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_multi_region_endpoint
+           (Values.GetMultiRegionEndpointRequest.make ~endpointName ())
+           (Some Values.GetMultiRegionEndpointResponse.to_json)
+           (Some Values.GetMultiRegionEndpointResponse.error_to_json)])
+let get_reputation_entity =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and reputationEntityReference =
+         flag "reputation-entity-reference" (required string)
+           ~doc:"STRING ReputationEntityReference"
+       and reputationEntityType =
+         flag "reputation-entity-type" (required json_arg)
+           ~doc:"JSON ReputationEntityType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_reputation_entity
+           (Values.GetReputationEntityRequest.make ~reputationEntityReference
+              ~reputationEntityType:(Values.ReputationEntityType.of_json
+                                       reputationEntityType) ())
+           (Some Values.GetReputationEntityResponse.to_json)
+           (Some Values.GetReputationEntityResponse.error_to_json)])
 let get_suppressed_destination =
   Command.async ~summary:""
     ([%map_open.Command
@@ -893,6 +1204,23 @@ let get_suppressed_destination =
            (Values.GetSuppressedDestinationRequest.make ~emailAddress ())
            (Some Values.GetSuppressedDestinationResponse.to_json)
            (Some Values.GetSuppressedDestinationResponse.error_to_json)])
+let get_tenant =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tenantName =
+         flag "tenant-name" (required string) ~doc:"STRING TenantName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_tenant (Values.GetTenantRequest.make ~tenantName ())
+           (Some Values.GetTenantResponse.to_json)
+           (Some Values.GetTenantResponse.error_to_json)])
 let list_configuration_sets =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1084,6 +1412,34 @@ let list_email_templates =
            (Values.ListEmailTemplatesRequest.make ?nextToken ?pageSize ())
            (Some Values.ListEmailTemplatesResponse.to_json)
            (Some Values.ListEmailTemplatesResponse.error_to_json)])
+let list_export_jobs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and pageSize = flag "page-size" (optional int) ~doc:"INT MaxItems"
+       and exportSourceType =
+         flag "export-source-type" (optional json_arg)
+           ~doc:"JSON ExportSourceType"
+       and jobStatus =
+         flag "job-status" (optional json_arg) ~doc:"JSON JobStatus" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_export_jobs
+           (Values.ListExportJobsRequest.make ?nextToken ?pageSize
+              ?exportSourceType:(Option.map
+                                   ~f:Values.ExportSourceType.of_json
+                                   exportSourceType)
+              ?jobStatus:(Option.map ~f:Values.JobStatus.of_json jobStatus)
+              ()) (Some Values.ListExportJobsResponse.to_json)
+           (Some Values.ListExportJobsResponse.error_to_json)])
 let list_import_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1109,6 +1465,95 @@ let list_import_jobs =
                                         importDestinationType) ?nextToken
               ?pageSize ()) (Some Values.ListImportJobsResponse.to_json)
            (Some Values.ListImportJobsResponse.error_to_json)])
+let list_multi_region_endpoints =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextTokenV2"
+       and pageSize = flag "page-size" (optional int) ~doc:"INT PageSizeV2" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_multi_region_endpoints
+           (Values.ListMultiRegionEndpointsRequest.make ?nextToken ?pageSize
+              ()) (Some Values.ListMultiRegionEndpointsResponse.to_json)
+           (Some Values.ListMultiRegionEndpointsResponse.error_to_json)])
+let list_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filter =
+         flag "filter" (optional json_arg)
+           ~doc:"JSON ListRecommendationsFilter"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and pageSize = flag "page-size" (optional int) ~doc:"INT MaxItems" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_recommendations
+           (Values.ListRecommendationsRequest.make
+              ?filter:(Option.map ~f:Values.ListRecommendationsFilter.of_json
+                         filter) ?nextToken ?pageSize ())
+           (Some Values.ListRecommendationsResponse.to_json)
+           (Some Values.ListRecommendationsResponse.error_to_json)])
+let list_reputation_entities =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filter =
+         flag "filter" (optional json_arg) ~doc:"JSON ReputationEntityFilter"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and pageSize = flag "page-size" (optional int) ~doc:"INT MaxItems" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_reputation_entities
+           (Values.ListReputationEntitiesRequest.make
+              ?filter:(Option.map ~f:Values.ReputationEntityFilter.of_json
+                         filter) ?nextToken ?pageSize ())
+           (Some Values.ListReputationEntitiesResponse.to_json)
+           (Some Values.ListReputationEntitiesResponse.error_to_json)])
+let list_resource_tenants =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and pageSize = flag "page-size" (optional int) ~doc:"INT MaxItems"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and resourceArn =
+         flag "resource-arn" (required string)
+           ~doc:"STRING AmazonResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_resource_tenants
+           (Values.ListResourceTenantsRequest.make ?pageSize ?nextToken
+              ~resourceArn ())
+           (Some Values.ListResourceTenantsResponse.to_json)
+           (Some Values.ListResourceTenantsResponse.error_to_json)])
 let list_suppressed_destinations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1159,6 +1604,51 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_tenant_resources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filter =
+         flag "filter" (optional json_arg)
+           ~doc:"JSON ListTenantResourcesFilter"
+       and pageSize = flag "page-size" (optional int) ~doc:"INT MaxItems"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and tenantName =
+         flag "tenant-name" (required string) ~doc:"STRING TenantName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_tenant_resources
+           (Values.ListTenantResourcesRequest.make
+              ?filter:(Option.map ~f:Values.ListTenantResourcesFilter.of_json
+                         filter) ?pageSize ?nextToken ~tenantName ())
+           (Some Values.ListTenantResourcesResponse.to_json)
+           (Some Values.ListTenantResourcesResponse.error_to_json)])
+let list_tenants =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and pageSize = flag "page-size" (optional int) ~doc:"INT MaxItems" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_tenants
+           (Values.ListTenantsRequest.make ?nextToken ?pageSize ())
+           (Some Values.ListTenantsResponse.to_json)
+           (Some Values.ListTenantsResponse.error_to_json)])
 let put_account_dedicated_ip_warmup_attributes =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1192,6 +1682,9 @@ let put_account_details =
        and contactLanguage =
          flag "contact-language" (optional json_arg)
            ~doc:"JSON ContactLanguage"
+       and useCaseDescription =
+         flag "use-case-description" (optional string)
+           ~doc:"STRING UseCaseDescription"
        and additionalContactEmailAddresses =
          flag "additional-contact-email-addresses" (optional json_arg)
            ~doc:"JSON AdditionalContactEmailAddresses"
@@ -1201,22 +1694,18 @@ let put_account_details =
        and mailType =
          flag "mail-type" (required json_arg) ~doc:"JSON MailType"
        and websiteURL =
-         flag "website-u-r-l" (required string) ~doc:"STRING WebsiteURL"
-       and useCaseDescription =
-         flag "use-case-description" (required string)
-           ~doc:"STRING UseCaseDescription" in
+         flag "website-u-r-l" (required string) ~doc:"STRING WebsiteURL" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_account_details
            (Values.PutAccountDetailsRequest.make
               ?contactLanguage:(Option.map ~f:Values.ContactLanguage.of_json
-                                  contactLanguage)
+                                  contactLanguage) ?useCaseDescription
               ?additionalContactEmailAddresses:(Option.map
                                                   ~f:Values.AdditionalContactEmailAddresses.of_json
                                                   additionalContactEmailAddresses)
               ?productionAccessEnabled
-              ~mailType:(Values.MailType.of_json mailType) ~websiteURL
-              ~useCaseDescription ())
+              ~mailType:(Values.MailType.of_json mailType) ~websiteURL ())
            (Some Values.PutAccountDetailsResponse.to_json)
            (Some Values.PutAccountDetailsResponse.error_to_json)])
 let put_account_sending_attributes =
@@ -1249,16 +1738,64 @@ let put_account_suppression_attributes =
            ~doc:"URL override endpoint url"
        and suppressedReasons =
          flag "suppressed-reasons" (optional json_arg)
-           ~doc:"JSON SuppressionListReasons" in
+           ~doc:"JSON SuppressionListReasons"
+       and validationAttributes =
+         flag "validation-attributes" (optional json_arg)
+           ~doc:"JSON SuppressionValidationAttributes" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_account_suppression_attributes
            (Values.PutAccountSuppressionAttributesRequest.make
               ?suppressedReasons:(Option.map
                                     ~f:Values.SuppressionListReasons.of_json
-                                    suppressedReasons) ())
+                                    suppressedReasons)
+              ?validationAttributes:(Option.map
+                                       ~f:Values.SuppressionValidationAttributes.of_json
+                                       validationAttributes) ())
            (Some Values.PutAccountSuppressionAttributesResponse.to_json)
            (Some Values.PutAccountSuppressionAttributesResponse.error_to_json)])
+let put_account_vdm_attributes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and vdmAttributes =
+         flag "vdm-attributes" (required json_arg) ~doc:"JSON VdmAttributes" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_account_vdm_attributes
+           (Values.PutAccountVdmAttributesRequest.make
+              ~vdmAttributes:(Values.VdmAttributes.of_json vdmAttributes) ())
+           (Some Values.PutAccountVdmAttributesResponse.to_json)
+           (Some Values.PutAccountVdmAttributesResponse.error_to_json)])
+let put_configuration_set_archiving_options =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and archiveArn =
+         flag "archive-arn" (optional string) ~doc:"STRING ArchiveArn"
+       and configurationSetName =
+         flag "configuration-set-name" (required string)
+           ~doc:"STRING ConfigurationSetName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_configuration_set_archiving_options
+           (Values.PutConfigurationSetArchivingOptionsRequest.make
+              ?archiveArn ~configurationSetName ())
+           (Some Values.PutConfigurationSetArchivingOptionsResponse.to_json)
+           (Some
+              Values.PutConfigurationSetArchivingOptionsResponse.error_to_json)])
 let put_configuration_set_delivery_options =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1274,6 +1811,9 @@ let put_configuration_set_delivery_options =
        and sendingPoolName =
          flag "sending-pool-name" (optional string)
            ~doc:"STRING SendingPoolName"
+       and maxDeliverySeconds =
+         flag "max-delivery-seconds" (optional json_arg)
+           ~doc:"JSON MaxDeliverySeconds"
        and configurationSetName =
          flag "configuration-set-name" (required string)
            ~doc:"STRING ConfigurationSetName" in
@@ -1282,7 +1822,11 @@ let put_configuration_set_delivery_options =
            Io.put_configuration_set_delivery_options
            (Values.PutConfigurationSetDeliveryOptionsRequest.make
               ?tlsPolicy:(Option.map ~f:Values.TlsPolicy.of_json tlsPolicy)
-              ?sendingPoolName ~configurationSetName ())
+              ?sendingPoolName
+              ?maxDeliverySeconds:(Option.map
+                                     ~f:Values.MaxDeliverySeconds.of_json
+                                     maxDeliverySeconds)
+              ~configurationSetName ())
            (Some Values.PutConfigurationSetDeliveryOptionsResponse.to_json)
            (Some
               Values.PutConfigurationSetDeliveryOptionsResponse.error_to_json)])
@@ -1346,6 +1890,9 @@ let put_configuration_set_suppression_options =
        and suppressedReasons =
          flag "suppressed-reasons" (optional json_arg)
            ~doc:"JSON SuppressionListReasons"
+       and validationOptions =
+         flag "validation-options" (optional json_arg)
+           ~doc:"JSON SuppressionValidationOptions"
        and configurationSetName =
          flag "configuration-set-name" (required string)
            ~doc:"STRING ConfigurationSetName" in
@@ -1355,7 +1902,10 @@ let put_configuration_set_suppression_options =
            (Values.PutConfigurationSetSuppressionOptionsRequest.make
               ?suppressedReasons:(Option.map
                                     ~f:Values.SuppressionListReasons.of_json
-                                    suppressedReasons) ~configurationSetName
+                                    suppressedReasons)
+              ?validationOptions:(Option.map
+                                    ~f:Values.SuppressionValidationOptions.of_json
+                                    validationOptions) ~configurationSetName
               ())
            (Some Values.PutConfigurationSetSuppressionOptionsResponse.to_json)
            (Some
@@ -1373,6 +1923,8 @@ let put_configuration_set_tracking_options =
        and customRedirectDomain =
          flag "custom-redirect-domain" (optional string)
            ~doc:"STRING CustomRedirectDomain"
+       and httpsPolicy =
+         flag "https-policy" (optional json_arg) ~doc:"JSON HttpsPolicy"
        and configurationSetName =
          flag "configuration-set-name" (required string)
            ~doc:"STRING ConfigurationSetName" in
@@ -1380,10 +1932,35 @@ let put_configuration_set_tracking_options =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_configuration_set_tracking_options
            (Values.PutConfigurationSetTrackingOptionsRequest.make
-              ?customRedirectDomain ~configurationSetName ())
+              ?customRedirectDomain
+              ?httpsPolicy:(Option.map ~f:Values.HttpsPolicy.of_json
+                              httpsPolicy) ~configurationSetName ())
            (Some Values.PutConfigurationSetTrackingOptionsResponse.to_json)
            (Some
               Values.PutConfigurationSetTrackingOptionsResponse.error_to_json)])
+let put_configuration_set_vdm_options =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and vdmOptions =
+         flag "vdm-options" (optional json_arg) ~doc:"JSON VdmOptions"
+       and configurationSetName =
+         flag "configuration-set-name" (required string)
+           ~doc:"STRING ConfigurationSetName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_configuration_set_vdm_options
+           (Values.PutConfigurationSetVdmOptionsRequest.make
+              ?vdmOptions:(Option.map ~f:Values.VdmOptions.of_json vdmOptions)
+              ~configurationSetName ())
+           (Some Values.PutConfigurationSetVdmOptionsResponse.to_json)
+           (Some Values.PutConfigurationSetVdmOptionsResponse.error_to_json)])
 let put_dedicated_ip_in_pool =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1404,6 +1981,28 @@ let put_dedicated_ip_in_pool =
            (Values.PutDedicatedIpInPoolRequest.make ~ip ~destinationPoolName
               ()) (Some Values.PutDedicatedIpInPoolResponse.to_json)
            (Some Values.PutDedicatedIpInPoolResponse.error_to_json)])
+let put_dedicated_ip_pool_scaling_attributes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and poolName =
+         flag "pool-name" (required string) ~doc:"STRING PoolName"
+       and scalingMode =
+         flag "scaling-mode" (required json_arg) ~doc:"JSON ScalingMode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_dedicated_ip_pool_scaling_attributes
+           (Values.PutDedicatedIpPoolScalingAttributesRequest.make ~poolName
+              ~scalingMode:(Values.ScalingMode.of_json scalingMode) ())
+           (Some Values.PutDedicatedIpPoolScalingAttributesResponse.to_json)
+           (Some
+              Values.PutDedicatedIpPoolScalingAttributesResponse.error_to_json)])
 let put_dedicated_ip_warmup_attributes =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1628,6 +2227,10 @@ let send_bulk_email =
        and configurationSetName =
          flag "configuration-set-name" (optional string)
            ~doc:"STRING ConfigurationSetName"
+       and endpointId =
+         flag "endpoint-id" (optional string) ~doc:"STRING EndpointId"
+       and tenantName =
+         flag "tenant-name" (optional string) ~doc:"STRING TenantName"
        and defaultContent =
          flag "default-content" (required json_arg)
            ~doc:"JSON BulkEmailContent"
@@ -1646,6 +2249,7 @@ let send_bulk_email =
               ?feedbackForwardingEmailAddressIdentityArn
               ?defaultEmailTags:(Option.map ~f:Values.MessageTagList.of_json
                                    defaultEmailTags) ?configurationSetName
+              ?endpointId ?tenantName
               ~defaultContent:(Values.BulkEmailContent.of_json defaultContent)
               ~bulkEmailEntries:(Values.BulkEmailEntryList.of_json
                                    bulkEmailEntries) ())
@@ -1708,6 +2312,10 @@ let send_email =
        and configurationSetName =
          flag "configuration-set-name" (optional string)
            ~doc:"STRING ConfigurationSetName"
+       and endpointId =
+         flag "endpoint-id" (optional string) ~doc:"STRING EndpointId"
+       and tenantName =
+         flag "tenant-name" (optional string) ~doc:"STRING TenantName"
        and listManagementOptions =
          flag "list-management-options" (optional json_arg)
            ~doc:"JSON ListManagementOptions"
@@ -1726,7 +2334,8 @@ let send_email =
               ?feedbackForwardingEmailAddress
               ?feedbackForwardingEmailAddressIdentityArn
               ?emailTags:(Option.map ~f:Values.MessageTagList.of_json
-                            emailTags) ?configurationSetName
+                            emailTags) ?configurationSetName ?endpointId
+              ?tenantName
               ?listManagementOptions:(Option.map
                                         ~f:Values.ListManagementOptions.of_json
                                         listManagementOptions)
@@ -1970,10 +2579,70 @@ let update_email_template =
                                   templateContent) ())
            (Some Values.UpdateEmailTemplateResponse.to_json)
            (Some Values.UpdateEmailTemplateResponse.error_to_json)])
+let update_reputation_entity_customer_managed_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and reputationEntityType =
+         flag "reputation-entity-type" (required json_arg)
+           ~doc:"JSON ReputationEntityType"
+       and reputationEntityReference =
+         flag "reputation-entity-reference" (required string)
+           ~doc:"STRING ReputationEntityReference"
+       and sendingStatus =
+         flag "sending-status" (required json_arg) ~doc:"JSON SendingStatus" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_reputation_entity_customer_managed_status
+           (Values.UpdateReputationEntityCustomerManagedStatusRequest.make
+              ~reputationEntityType:(Values.ReputationEntityType.of_json
+                                       reputationEntityType)
+              ~reputationEntityReference
+              ~sendingStatus:(Values.SendingStatus.of_json sendingStatus) ())
+           (Some
+              Values.UpdateReputationEntityCustomerManagedStatusResponse.to_json)
+           (Some
+              Values.UpdateReputationEntityCustomerManagedStatusResponse.error_to_json)])
+let update_reputation_entity_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and reputationEntityType =
+         flag "reputation-entity-type" (required json_arg)
+           ~doc:"JSON ReputationEntityType"
+       and reputationEntityReference =
+         flag "reputation-entity-reference" (required string)
+           ~doc:"STRING ReputationEntityReference"
+       and reputationEntityPolicy =
+         flag "reputation-entity-policy" (required string)
+           ~doc:"STRING AmazonResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_reputation_entity_policy
+           (Values.UpdateReputationEntityPolicyRequest.make
+              ~reputationEntityType:(Values.ReputationEntityType.of_json
+                                       reputationEntityType)
+              ~reputationEntityReference ~reputationEntityPolicy ())
+           (Some Values.UpdateReputationEntityPolicyResponse.to_json)
+           (Some Values.UpdateReputationEntityPolicyResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("create-configuration-set", create_configuration_set);
+    [("batch-get-metric-data", batch_get_metric_data);
+    ("cancel-export-job", cancel_export_job);
+    ("create-configuration-set", create_configuration_set);
     ("create-configuration-set-event-destination",
       create_configuration_set_event_destination);
     ("create-contact", create_contact);
@@ -1985,7 +2654,12 @@ let main =
     ("create-email-identity", create_email_identity);
     ("create-email-identity-policy", create_email_identity_policy);
     ("create-email-template", create_email_template);
+    ("create-export-job", create_export_job);
     ("create-import-job", create_import_job);
+    ("create-multi-region-endpoint", create_multi_region_endpoint);
+    ("create-tenant", create_tenant);
+    ("create-tenant-resource-association",
+      create_tenant_resource_association);
     ("delete-configuration-set", delete_configuration_set);
     ("delete-configuration-set-event-destination",
       delete_configuration_set_event_destination);
@@ -1997,7 +2671,11 @@ let main =
     ("delete-email-identity", delete_email_identity);
     ("delete-email-identity-policy", delete_email_identity_policy);
     ("delete-email-template", delete_email_template);
+    ("delete-multi-region-endpoint", delete_multi_region_endpoint);
     ("delete-suppressed-destination", delete_suppressed_destination);
+    ("delete-tenant", delete_tenant);
+    ("delete-tenant-resource-association",
+      delete_tenant_resource_association);
     ("get-account", get_account);
     ("get-blacklist-reports", get_blacklist_reports);
     ("get-configuration-set", get_configuration_set);
@@ -2008,6 +2686,7 @@ let main =
     ("get-custom-verification-email-template",
       get_custom_verification_email_template);
     ("get-dedicated-ip", get_dedicated_ip);
+    ("get-dedicated-ip-pool", get_dedicated_ip_pool);
     ("get-dedicated-ips", get_dedicated_ips);
     ("get-deliverability-dashboard-options",
       get_deliverability_dashboard_options);
@@ -2015,11 +2694,17 @@ let main =
     ("get-domain-deliverability-campaign",
       get_domain_deliverability_campaign);
     ("get-domain-statistics-report", get_domain_statistics_report);
+    ("get-email-address-insights", get_email_address_insights);
     ("get-email-identity", get_email_identity);
     ("get-email-identity-policies", get_email_identity_policies);
     ("get-email-template", get_email_template);
+    ("get-export-job", get_export_job);
     ("get-import-job", get_import_job);
+    ("get-message-insights", get_message_insights);
+    ("get-multi-region-endpoint", get_multi_region_endpoint);
+    ("get-reputation-entity", get_reputation_entity);
     ("get-suppressed-destination", get_suppressed_destination);
+    ("get-tenant", get_tenant);
     ("list-configuration-sets", list_configuration_sets);
     ("list-contact-lists", list_contact_lists);
     ("list-contacts", list_contacts);
@@ -2031,15 +2716,25 @@ let main =
       list_domain_deliverability_campaigns);
     ("list-email-identities", list_email_identities);
     ("list-email-templates", list_email_templates);
+    ("list-export-jobs", list_export_jobs);
     ("list-import-jobs", list_import_jobs);
+    ("list-multi-region-endpoints", list_multi_region_endpoints);
+    ("list-recommendations", list_recommendations);
+    ("list-reputation-entities", list_reputation_entities);
+    ("list-resource-tenants", list_resource_tenants);
     ("list-suppressed-destinations", list_suppressed_destinations);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-tenant-resources", list_tenant_resources);
+    ("list-tenants", list_tenants);
     ("put-account-dedicated-ip-warmup-attributes",
       put_account_dedicated_ip_warmup_attributes);
     ("put-account-details", put_account_details);
     ("put-account-sending-attributes", put_account_sending_attributes);
     ("put-account-suppression-attributes",
       put_account_suppression_attributes);
+    ("put-account-vdm-attributes", put_account_vdm_attributes);
+    ("put-configuration-set-archiving-options",
+      put_configuration_set_archiving_options);
     ("put-configuration-set-delivery-options",
       put_configuration_set_delivery_options);
     ("put-configuration-set-reputation-options",
@@ -2050,7 +2745,10 @@ let main =
       put_configuration_set_suppression_options);
     ("put-configuration-set-tracking-options",
       put_configuration_set_tracking_options);
+    ("put-configuration-set-vdm-options", put_configuration_set_vdm_options);
     ("put-dedicated-ip-in-pool", put_dedicated_ip_in_pool);
+    ("put-dedicated-ip-pool-scaling-attributes",
+      put_dedicated_ip_pool_scaling_attributes);
     ("put-dedicated-ip-warmup-attributes",
       put_dedicated_ip_warmup_attributes);
     ("put-deliverability-dashboard-option",
@@ -2079,4 +2777,7 @@ let main =
     ("update-custom-verification-email-template",
       update_custom_verification_email_template);
     ("update-email-identity-policy", update_email_identity_policy);
-    ("update-email-template", update_email_template)]
+    ("update-email-template", update_email_template);
+    ("update-reputation-entity-customer-managed-status",
+      update_reputation_entity_customer_managed_status);
+    ("update-reputation-entity-policy", update_reputation_entity_policy)]

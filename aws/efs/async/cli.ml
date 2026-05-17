@@ -110,6 +110,10 @@ let create_mount_target =
            ~doc:"URL override endpoint url"
        and ipAddress =
          flag "ip-address" (optional string) ~doc:"STRING IpAddress"
+       and ipv6Address =
+         flag "ipv6-address" (optional string) ~doc:"STRING Ipv6Address"
+       and ipAddressType =
+         flag "ip-address-type" (optional json_arg) ~doc:"JSON IpAddressType"
        and securityGroups =
          flag "security-groups" (optional json_arg)
            ~doc:"JSON SecurityGroups"
@@ -120,7 +124,9 @@ let create_mount_target =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_mount_target
-           (Values.CreateMountTargetRequest.make ?ipAddress
+           (Values.CreateMountTargetRequest.make ?ipAddress ?ipv6Address
+              ?ipAddressType:(Option.map ~f:Values.IpAddressType.of_json
+                                ipAddressType)
               ?securityGroups:(Option.map ~f:Values.SecurityGroups.of_json
                                  securityGroups) ~fileSystemId ~subnetId ())
            (Some Values.MountTargetDescription.to_json)
@@ -242,6 +248,8 @@ let delete_replication_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and deletionMode =
+         flag "deletion-mode" (optional json_arg) ~doc:"JSON DeletionMode"
        and sourceFileSystemId =
          flag "source-file-system-id" (required string)
            ~doc:"STRING FileSystemId" in
@@ -249,7 +257,9 @@ let delete_replication_configuration =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_replication_configuration
            (Values.DeleteReplicationConfigurationRequest.make
-              ~sourceFileSystemId ()) None None])
+              ?deletionMode:(Option.map ~f:Values.DeletionMode.of_json
+                               deletionMode) ~sourceFileSystemId ()) None
+           None])
 let delete_tags =
   Command.async ~summary:""
     ([%map_open.Command
@@ -674,6 +684,31 @@ let update_file_system =
               ?provisionedThroughputInMibps ~fileSystemId ())
            (Some Values.FileSystemDescription.to_json)
            (Some Values.FileSystemDescription.error_to_json)])
+let update_file_system_protection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and replicationOverwriteProtection =
+         flag "replication-overwrite-protection" (optional json_arg)
+           ~doc:"JSON ReplicationOverwriteProtection"
+       and fileSystemId =
+         flag "file-system-id" (required string) ~doc:"STRING FileSystemId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_file_system_protection
+           (Values.UpdateFileSystemProtectionRequest.make
+              ?replicationOverwriteProtection:(Option.map
+                                                 ~f:Values.ReplicationOverwriteProtection.of_json
+                                                 replicationOverwriteProtection)
+              ~fileSystemId ())
+           (Some Values.FileSystemProtectionDescription.to_json)
+           (Some Values.FileSystemProtectionDescription.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -709,4 +744,5 @@ let main =
     ("put-lifecycle-configuration", put_lifecycle_configuration);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
-    ("update-file-system", update_file_system)]
+    ("update-file-system", update_file_system);
+    ("update-file-system-protection", update_file_system_protection)]

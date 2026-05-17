@@ -113,6 +113,9 @@ let create_cluster =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and multiRegionClusterName =
+         flag "multi-region-cluster-name" (optional string)
+           ~doc:"STRING String"
        and parameterGroupName =
          flag "parameter-group-name" (optional string) ~doc:"STRING String"
        and description =
@@ -147,11 +150,18 @@ let create_cluster =
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and snapshotWindow =
          flag "snapshot-window" (optional string) ~doc:"STRING String"
+       and engine = flag "engine" (optional string) ~doc:"STRING String"
        and engineVersion =
          flag "engine-version" (optional string) ~doc:"STRING String"
        and autoMinorVersionUpgrade =
          flag "auto-minor-version-upgrade" (optional bool)
            ~doc:"BOOL BooleanOptional"
+       and dataTiering =
+         flag "data-tiering" (optional bool) ~doc:"BOOL BooleanOptional"
+       and networkType =
+         flag "network-type" (optional json_arg) ~doc:"JSON NetworkType"
+       and ipDiscovery =
+         flag "ip-discovery" (optional json_arg) ~doc:"JSON IpDiscovery"
        and clusterName =
          flag "cluster-name" (required string) ~doc:"STRING String"
        and nodeType = flag "node-type" (required string) ~doc:"STRING String"
@@ -160,8 +170,9 @@ let create_cluster =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_cluster
-           (Values.CreateClusterRequest.make ?parameterGroupName ?description
-              ?numShards ?numReplicasPerShard ?subnetGroupName
+           (Values.CreateClusterRequest.make ?multiRegionClusterName
+              ?parameterGroupName ?description ?numShards
+              ?numReplicasPerShard ?subnetGroupName
               ?securityGroupIds:(Option.map
                                    ~f:Values.SecurityGroupIdsList.of_json
                                    securityGroupIds) ?maintenanceWindow ?port
@@ -170,10 +181,50 @@ let create_cluster =
                                snapshotArns) ?snapshotName
               ?snapshotRetentionLimit
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ?snapshotWindow ?engineVersion ?autoMinorVersionUpgrade
-              ~clusterName ~nodeType ~aCLName ())
+              ?snapshotWindow ?engine ?engineVersion ?autoMinorVersionUpgrade
+              ?dataTiering
+              ?networkType:(Option.map ~f:Values.NetworkType.of_json
+                              networkType)
+              ?ipDiscovery:(Option.map ~f:Values.IpDiscovery.of_json
+                              ipDiscovery) ~clusterName ~nodeType ~aCLName ())
            (Some Values.CreateClusterResponse.to_json)
            (Some Values.CreateClusterResponse.error_to_json)])
+let create_multi_region_cluster =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
+       and engine = flag "engine" (optional string) ~doc:"STRING String"
+       and engineVersion =
+         flag "engine-version" (optional string) ~doc:"STRING String"
+       and multiRegionParameterGroupName =
+         flag "multi-region-parameter-group-name" (optional string)
+           ~doc:"STRING String"
+       and numShards =
+         flag "num-shards" (optional int) ~doc:"INT IntegerOptional"
+       and tLSEnabled =
+         flag "t-l-s-enabled" (optional bool) ~doc:"BOOL BooleanOptional"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and multiRegionClusterNameSuffix =
+         flag "multi-region-cluster-name-suffix" (required string)
+           ~doc:"STRING String"
+       and nodeType = flag "node-type" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_multi_region_cluster
+           (Values.CreateMultiRegionClusterRequest.make ?description ?engine
+              ?engineVersion ?multiRegionParameterGroupName ?numShards
+              ?tLSEnabled ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~multiRegionClusterNameSuffix ~nodeType ())
+           (Some Values.CreateMultiRegionClusterResponse.to_json)
+           (Some Values.CreateMultiRegionClusterResponse.error_to_json)])
 let create_parameter_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -302,6 +353,9 @@ let delete_cluster =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and multiRegionClusterName =
+         flag "multi-region-cluster-name" (optional string)
+           ~doc:"STRING String"
        and finalSnapshotName =
          flag "final-snapshot-name" (optional string) ~doc:"STRING String"
        and clusterName =
@@ -309,9 +363,30 @@ let delete_cluster =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_cluster
-           (Values.DeleteClusterRequest.make ?finalSnapshotName ~clusterName
-              ()) (Some Values.DeleteClusterResponse.to_json)
+           (Values.DeleteClusterRequest.make ?multiRegionClusterName
+              ?finalSnapshotName ~clusterName ())
+           (Some Values.DeleteClusterResponse.to_json)
            (Some Values.DeleteClusterResponse.error_to_json)])
+let delete_multi_region_cluster =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and multiRegionClusterName =
+         flag "multi-region-cluster-name" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_multi_region_cluster
+           (Values.DeleteMultiRegionClusterRequest.make
+              ~multiRegionClusterName ())
+           (Some Values.DeleteMultiRegionClusterResponse.to_json)
+           (Some Values.DeleteMultiRegionClusterResponse.error_to_json)])
 let delete_parameter_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -440,6 +515,7 @@ let describe_engine_versions =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and engine = flag "engine" (optional string) ~doc:"STRING String"
        and engineVersion =
          flag "engine-version" (optional string) ~doc:"STRING String"
        and parameterGroupFamily =
@@ -453,7 +529,7 @@ let describe_engine_versions =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_engine_versions
-           (Values.DescribeEngineVersionsRequest.make ?engineVersion
+           (Values.DescribeEngineVersionsRequest.make ?engine ?engineVersion
               ?parameterGroupFamily ?maxResults ?nextToken ?defaultOnly ())
            (Some Values.DescribeEngineVersionsResponse.to_json)
            (Some Values.DescribeEngineVersionsResponse.error_to_json)])
@@ -490,6 +566,84 @@ let describe_events =
               ?duration ?maxResults ?nextToken ())
            (Some Values.DescribeEventsResponse.to_json)
            (Some Values.DescribeEventsResponse.error_to_json)])
+let describe_multi_region_clusters =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and multiRegionClusterName =
+         flag "multi-region-cluster-name" (optional string)
+           ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT IntegerOptional"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and showClusterDetails =
+         flag "show-cluster-details" (optional bool)
+           ~doc:"BOOL BooleanOptional" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_multi_region_clusters
+           (Values.DescribeMultiRegionClustersRequest.make
+              ?multiRegionClusterName ?maxResults ?nextToken
+              ?showClusterDetails ())
+           (Some Values.DescribeMultiRegionClustersResponse.to_json)
+           (Some Values.DescribeMultiRegionClustersResponse.error_to_json)])
+let describe_multi_region_parameter_groups =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and multiRegionParameterGroupName =
+         flag "multi-region-parameter-group-name" (optional string)
+           ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT IntegerOptional"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_multi_region_parameter_groups
+           (Values.DescribeMultiRegionParameterGroupsRequest.make
+              ?multiRegionParameterGroupName ?maxResults ?nextToken ())
+           (Some Values.DescribeMultiRegionParameterGroupsResponse.to_json)
+           (Some
+              Values.DescribeMultiRegionParameterGroupsResponse.error_to_json)])
+let describe_multi_region_parameters =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and source = flag "source" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT IntegerOptional"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and multiRegionParameterGroupName =
+         flag "multi-region-parameter-group-name" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_multi_region_parameters
+           (Values.DescribeMultiRegionParametersRequest.make ?source
+              ?maxResults ?nextToken ~multiRegionParameterGroupName ())
+           (Some Values.DescribeMultiRegionParametersResponse.to_json)
+           (Some Values.DescribeMultiRegionParametersResponse.error_to_json)])
 let describe_parameter_groups =
   Command.async ~summary:""
     ([%map_open.Command
@@ -536,6 +690,66 @@ let describe_parameters =
               ~parameterGroupName ())
            (Some Values.DescribeParametersResponse.to_json)
            (Some Values.DescribeParametersResponse.error_to_json)])
+let describe_reserved_nodes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and reservationId =
+         flag "reservation-id" (optional string) ~doc:"STRING String"
+       and reservedNodesOfferingId =
+         flag "reserved-nodes-offering-id" (optional string)
+           ~doc:"STRING String"
+       and nodeType = flag "node-type" (optional string) ~doc:"STRING String"
+       and duration = flag "duration" (optional string) ~doc:"STRING String"
+       and offeringType =
+         flag "offering-type" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT IntegerOptional"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_reserved_nodes
+           (Values.DescribeReservedNodesRequest.make ?reservationId
+              ?reservedNodesOfferingId ?nodeType ?duration ?offeringType
+              ?maxResults ?nextToken ())
+           (Some Values.DescribeReservedNodesResponse.to_json)
+           (Some Values.DescribeReservedNodesResponse.error_to_json)])
+let describe_reserved_nodes_offerings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and reservedNodesOfferingId =
+         flag "reserved-nodes-offering-id" (optional string)
+           ~doc:"STRING String"
+       and nodeType = flag "node-type" (optional string) ~doc:"STRING String"
+       and duration = flag "duration" (optional string) ~doc:"STRING String"
+       and offeringType =
+         flag "offering-type" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT IntegerOptional"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_reserved_nodes_offerings
+           (Values.DescribeReservedNodesOfferingsRequest.make
+              ?reservedNodesOfferingId ?nodeType ?duration ?offeringType
+              ?maxResults ?nextToken ())
+           (Some Values.DescribeReservedNodesOfferingsResponse.to_json)
+           (Some Values.DescribeReservedNodesOfferingsResponse.error_to_json)])
 let describe_service_updates =
   Command.async ~summary:""
     ([%map_open.Command
@@ -664,6 +878,27 @@ let failover_shard =
            (Values.FailoverShardRequest.make ~clusterName ~shardName ())
            (Some Values.FailoverShardResponse.to_json)
            (Some Values.FailoverShardResponse.error_to_json)])
+let list_allowed_multi_region_cluster_updates =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and multiRegionClusterName =
+         flag "multi-region-cluster-name" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_allowed_multi_region_cluster_updates
+           (Values.ListAllowedMultiRegionClusterUpdatesRequest.make
+              ~multiRegionClusterName ())
+           (Some Values.ListAllowedMultiRegionClusterUpdatesResponse.to_json)
+           (Some
+              Values.ListAllowedMultiRegionClusterUpdatesResponse.error_to_json)])
 let list_allowed_node_type_updates =
   Command.async ~summary:""
     ([%map_open.Command
@@ -699,6 +934,32 @@ let list_tags =
            Io.list_tags (Values.ListTagsRequest.make ~resourceArn ())
            (Some Values.ListTagsResponse.to_json)
            (Some Values.ListTagsResponse.error_to_json)])
+let purchase_reserved_nodes_offering =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and reservationId =
+         flag "reservation-id" (optional string) ~doc:"STRING String"
+       and nodeCount =
+         flag "node-count" (optional int) ~doc:"INT IntegerOptional"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and reservedNodesOfferingId =
+         flag "reserved-nodes-offering-id" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.purchase_reserved_nodes_offering
+           (Values.PurchaseReservedNodesOfferingRequest.make ?reservationId
+              ?nodeCount ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~reservedNodesOfferingId ())
+           (Some Values.PurchaseReservedNodesOfferingResponse.to_json)
+           (Some Values.PurchaseReservedNodesOfferingResponse.error_to_json)])
 let reset_parameter_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -821,6 +1082,7 @@ let update_cluster =
          flag "snapshot-retention-limit" (optional int)
            ~doc:"INT IntegerOptional"
        and nodeType = flag "node-type" (optional string) ~doc:"STRING String"
+       and engine = flag "engine" (optional string) ~doc:"STRING String"
        and engineVersion =
          flag "engine-version" (optional string) ~doc:"STRING String"
        and replicaConfiguration =
@@ -831,6 +1093,8 @@ let update_cluster =
            ~doc:"JSON ShardConfigurationRequest"
        and aCLName =
          flag "a-c-l-name" (optional string) ~doc:"STRING ACLName"
+       and ipDiscovery =
+         flag "ip-discovery" (optional json_arg) ~doc:"JSON IpDiscovery"
        and clusterName =
          flag "cluster-name" (required string) ~doc:"STRING String" in
        fun () ->
@@ -841,7 +1105,7 @@ let update_cluster =
                                    ~f:Values.SecurityGroupIdsList.of_json
                                    securityGroupIds) ?maintenanceWindow
               ?snsTopicArn ?snsTopicStatus ?parameterGroupName
-              ?snapshotWindow ?snapshotRetentionLimit ?nodeType
+              ?snapshotWindow ?snapshotRetentionLimit ?nodeType ?engine
               ?engineVersion
               ?replicaConfiguration:(Option.map
                                        ~f:Values.ReplicaConfigurationRequest.of_json
@@ -849,8 +1113,50 @@ let update_cluster =
               ?shardConfiguration:(Option.map
                                      ~f:Values.ShardConfigurationRequest.of_json
                                      shardConfiguration) ?aCLName
-              ~clusterName ()) (Some Values.UpdateClusterResponse.to_json)
+              ?ipDiscovery:(Option.map ~f:Values.IpDiscovery.of_json
+                              ipDiscovery) ~clusterName ())
+           (Some Values.UpdateClusterResponse.to_json)
            (Some Values.UpdateClusterResponse.error_to_json)])
+let update_multi_region_cluster =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nodeType = flag "node-type" (optional string) ~doc:"STRING String"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
+       and engineVersion =
+         flag "engine-version" (optional string) ~doc:"STRING String"
+       and shardConfiguration =
+         flag "shard-configuration" (optional json_arg)
+           ~doc:"JSON ShardConfigurationRequest"
+       and multiRegionParameterGroupName =
+         flag "multi-region-parameter-group-name" (optional string)
+           ~doc:"STRING String"
+       and updateStrategy =
+         flag "update-strategy" (optional json_arg)
+           ~doc:"JSON UpdateStrategy"
+       and multiRegionClusterName =
+         flag "multi-region-cluster-name" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_multi_region_cluster
+           (Values.UpdateMultiRegionClusterRequest.make ?nodeType
+              ?description ?engineVersion
+              ?shardConfiguration:(Option.map
+                                     ~f:Values.ShardConfigurationRequest.of_json
+                                     shardConfiguration)
+              ?multiRegionParameterGroupName
+              ?updateStrategy:(Option.map ~f:Values.UpdateStrategy.of_json
+                                 updateStrategy) ~multiRegionClusterName ())
+           (Some Values.UpdateMultiRegionClusterResponse.to_json)
+           (Some Values.UpdateMultiRegionClusterResponse.error_to_json)])
 let update_parameter_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -932,12 +1238,14 @@ let main =
     ("copy-snapshot", copy_snapshot);
     ("create-a-c-l", create_a_c_l);
     ("create-cluster", create_cluster);
+    ("create-multi-region-cluster", create_multi_region_cluster);
     ("create-parameter-group", create_parameter_group);
     ("create-snapshot", create_snapshot);
     ("create-subnet-group", create_subnet_group);
     ("create-user", create_user);
     ("delete-a-c-l", delete_a_c_l);
     ("delete-cluster", delete_cluster);
+    ("delete-multi-region-cluster", delete_multi_region_cluster);
     ("delete-parameter-group", delete_parameter_group);
     ("delete-snapshot", delete_snapshot);
     ("delete-subnet-group", delete_subnet_group);
@@ -946,20 +1254,30 @@ let main =
     ("describe-clusters", describe_clusters);
     ("describe-engine-versions", describe_engine_versions);
     ("describe-events", describe_events);
+    ("describe-multi-region-clusters", describe_multi_region_clusters);
+    ("describe-multi-region-parameter-groups",
+      describe_multi_region_parameter_groups);
+    ("describe-multi-region-parameters", describe_multi_region_parameters);
     ("describe-parameter-groups", describe_parameter_groups);
     ("describe-parameters", describe_parameters);
+    ("describe-reserved-nodes", describe_reserved_nodes);
+    ("describe-reserved-nodes-offerings", describe_reserved_nodes_offerings);
     ("describe-service-updates", describe_service_updates);
     ("describe-snapshots", describe_snapshots);
     ("describe-subnet-groups", describe_subnet_groups);
     ("describe-users", describe_users);
     ("failover-shard", failover_shard);
+    ("list-allowed-multi-region-cluster-updates",
+      list_allowed_multi_region_cluster_updates);
     ("list-allowed-node-type-updates", list_allowed_node_type_updates);
     ("list-tags", list_tags);
+    ("purchase-reserved-nodes-offering", purchase_reserved_nodes_offering);
     ("reset-parameter-group", reset_parameter_group);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-a-c-l", update_a_c_l);
     ("update-cluster", update_cluster);
+    ("update-multi-region-cluster", update_multi_region_cluster);
     ("update-parameter-group", update_parameter_group);
     ("update-subnet-group", update_subnet_group);
     ("update-user", update_user)]

@@ -3,6 +3,29 @@ open Awso_cloudfront.Values
 val associate_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> AssociateAliasRequest.t -> (unit, unit) Result.t
+val associate_distribution_tenant_web_a_c_l :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AssociateDistributionTenantWebACLRequest.t ->
+        (AssociateDistributionTenantWebACLResult.t,
+          AssociateDistributionTenantWebACLResult.error) Result.t
+val associate_distribution_web_a_c_l :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AssociateDistributionWebACLRequest.t ->
+        (AssociateDistributionWebACLResult.t,
+          AssociateDistributionWebACLResult.error) Result.t
+val copy_distribution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CopyDistributionRequest.t ->
+        (CopyDistributionResult.t, CopyDistributionResult.error) Result.t
+val create_anycast_ip_list :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAnycastIpListRequest.t ->
+        (CreateAnycastIpListResult.t, CreateAnycastIpListResult.error)
+          Result.t
 val create_cache_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -14,11 +37,35 @@ val create_cloud_front_origin_access_identity :
       CreateCloudFrontOriginAccessIdentityRequest.t ->
         (CreateCloudFrontOriginAccessIdentityResult.t,
           CreateCloudFrontOriginAccessIdentityResult.error) Result.t
+val create_connection_function :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateConnectionFunctionRequest.t ->
+        (CreateConnectionFunctionResult.t,
+          CreateConnectionFunctionResult.error) Result.t
+val create_connection_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateConnectionGroupRequest.t ->
+        (CreateConnectionGroupResult.t, CreateConnectionGroupResult.error)
+          Result.t
+val create_continuous_deployment_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateContinuousDeploymentPolicyRequest.t ->
+        (CreateContinuousDeploymentPolicyResult.t,
+          CreateContinuousDeploymentPolicyResult.error) Result.t
 val create_distribution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDistributionRequest.t ->
         (CreateDistributionResult.t, CreateDistributionResult.error) Result.t
+val create_distribution_tenant :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateDistributionTenantRequest.t ->
+        (CreateDistributionTenantResult.t,
+          CreateDistributionTenantResult.error) Result.t
 val create_distribution_with_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -47,17 +94,35 @@ val create_invalidation :
     ?cfg:Awso.Cfg.t ->
       CreateInvalidationRequest.t ->
         (CreateInvalidationResult.t, CreateInvalidationResult.error) Result.t
+val create_invalidation_for_distribution_tenant :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateInvalidationForDistributionTenantRequest.t ->
+        (CreateInvalidationForDistributionTenantResult.t,
+          CreateInvalidationForDistributionTenantResult.error) Result.t
 val create_key_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateKeyGroupRequest.t ->
         (CreateKeyGroupResult.t, CreateKeyGroupResult.error) Result.t
+val create_key_value_store :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateKeyValueStoreRequest.t ->
+        (CreateKeyValueStoreResult.t, CreateKeyValueStoreResult.error)
+          Result.t
 val create_monitoring_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMonitoringSubscriptionRequest.t ->
         (CreateMonitoringSubscriptionResult.t,
           CreateMonitoringSubscriptionResult.error) Result.t
+val create_origin_access_control :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateOriginAccessControlRequest.t ->
+        (CreateOriginAccessControlResult.t,
+          CreateOriginAccessControlResult.error) Result.t
 val create_origin_request_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -93,6 +158,19 @@ val create_streaming_distribution_with_tags :
       CreateStreamingDistributionWithTagsRequest.t ->
         (CreateStreamingDistributionWithTagsResult.t,
           CreateStreamingDistributionWithTagsResult.error) Result.t
+val create_trust_store :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateTrustStoreRequest.t ->
+        (CreateTrustStoreResult.t, CreateTrustStoreResult.error) Result.t
+val create_vpc_origin :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateVpcOriginRequest.t ->
+        (CreateVpcOriginResult.t, CreateVpcOriginResult.error) Result.t
+val delete_anycast_ip_list :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteAnycastIpListRequest.t -> (unit, unit) Result.t
 val delete_cache_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteCachePolicyRequest.t -> (unit, unit) Result.t
@@ -100,9 +178,25 @@ val delete_cloud_front_origin_access_identity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCloudFrontOriginAccessIdentityRequest.t -> (unit, unit) Result.t
+val delete_connection_function :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteConnectionFunctionRequest.t -> (unit, unit) Result.t
+val delete_connection_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteConnectionGroupRequest.t -> (unit, unit) Result.t
+val delete_continuous_deployment_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteContinuousDeploymentPolicyRequest.t -> (unit, unit) Result.t
 val delete_distribution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteDistributionRequest.t -> (unit, unit) Result.t
+val delete_distribution_tenant :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDistributionTenantRequest.t -> (unit, unit) Result.t
 val delete_field_level_encryption_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -117,12 +211,19 @@ val delete_function :
 val delete_key_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteKeyGroupRequest.t -> (unit, unit) Result.t
+val delete_key_value_store :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteKeyValueStoreRequest.t -> (unit, unit) Result.t
 val delete_monitoring_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMonitoringSubscriptionRequest.t ->
         (DeleteMonitoringSubscriptionResult.t,
           DeleteMonitoringSubscriptionResult.error) Result.t
+val delete_origin_access_control :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteOriginAccessControlRequest.t -> (unit, unit) Result.t
 val delete_origin_request_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -134,6 +235,9 @@ val delete_realtime_log_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRealtimeLogConfigRequest.t -> (unit, unit) Result.t
+val delete_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteResourcePolicyRequest.t -> (unit, unit) Result.t
 val delete_response_headers_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -142,11 +246,48 @@ val delete_streaming_distribution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteStreamingDistributionRequest.t -> (unit, unit) Result.t
+val delete_trust_store :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteTrustStoreRequest.t -> (unit, unit) Result.t
+val delete_vpc_origin :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteVpcOriginRequest.t ->
+        (DeleteVpcOriginResult.t, DeleteVpcOriginResult.error) Result.t
+val describe_connection_function :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeConnectionFunctionRequest.t ->
+        (DescribeConnectionFunctionResult.t,
+          DescribeConnectionFunctionResult.error) Result.t
 val describe_function :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFunctionRequest.t ->
         (DescribeFunctionResult.t, DescribeFunctionResult.error) Result.t
+val describe_key_value_store :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeKeyValueStoreRequest.t ->
+        (DescribeKeyValueStoreResult.t, DescribeKeyValueStoreResult.error)
+          Result.t
+val disassociate_distribution_tenant_web_a_c_l :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DisassociateDistributionTenantWebACLRequest.t ->
+        (DisassociateDistributionTenantWebACLResult.t,
+          DisassociateDistributionTenantWebACLResult.error) Result.t
+val disassociate_distribution_web_a_c_l :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DisassociateDistributionWebACLRequest.t ->
+        (DisassociateDistributionWebACLResult.t,
+          DisassociateDistributionWebACLResult.error) Result.t
+val get_anycast_ip_list :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetAnycastIpListRequest.t ->
+        (GetAnycastIpListResult.t, GetAnycastIpListResult.error) Result.t
 val get_cache_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -170,6 +311,35 @@ val get_cloud_front_origin_access_identity_config :
       GetCloudFrontOriginAccessIdentityConfigRequest.t ->
         (GetCloudFrontOriginAccessIdentityConfigResult.t,
           GetCloudFrontOriginAccessIdentityConfigResult.error) Result.t
+val get_connection_function :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetConnectionFunctionRequest.t ->
+        (GetConnectionFunctionResult.t, GetConnectionFunctionResult.error)
+          Result.t
+val get_connection_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetConnectionGroupRequest.t ->
+        (GetConnectionGroupResult.t, GetConnectionGroupResult.error) Result.t
+val get_connection_group_by_routing_endpoint :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetConnectionGroupByRoutingEndpointRequest.t ->
+        (GetConnectionGroupByRoutingEndpointResult.t,
+          GetConnectionGroupByRoutingEndpointResult.error) Result.t
+val get_continuous_deployment_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetContinuousDeploymentPolicyRequest.t ->
+        (GetContinuousDeploymentPolicyResult.t,
+          GetContinuousDeploymentPolicyResult.error) Result.t
+val get_continuous_deployment_policy_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetContinuousDeploymentPolicyConfigRequest.t ->
+        (GetContinuousDeploymentPolicyConfigResult.t,
+          GetContinuousDeploymentPolicyConfigResult.error) Result.t
 val get_distribution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -181,6 +351,18 @@ val get_distribution_config :
       GetDistributionConfigRequest.t ->
         (GetDistributionConfigResult.t, GetDistributionConfigResult.error)
           Result.t
+val get_distribution_tenant :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDistributionTenantRequest.t ->
+        (GetDistributionTenantResult.t, GetDistributionTenantResult.error)
+          Result.t
+val get_distribution_tenant_by_domain :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDistributionTenantByDomainRequest.t ->
+        (GetDistributionTenantByDomainResult.t,
+          GetDistributionTenantByDomainResult.error) Result.t
 val get_field_level_encryption :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -215,6 +397,12 @@ val get_invalidation :
     ?cfg:Awso.Cfg.t ->
       GetInvalidationRequest.t ->
         (GetInvalidationResult.t, GetInvalidationResult.error) Result.t
+val get_invalidation_for_distribution_tenant :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetInvalidationForDistributionTenantRequest.t ->
+        (GetInvalidationForDistributionTenantResult.t,
+          GetInvalidationForDistributionTenantResult.error) Result.t
 val get_key_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -225,12 +413,30 @@ val get_key_group_config :
     ?cfg:Awso.Cfg.t ->
       GetKeyGroupConfigRequest.t ->
         (GetKeyGroupConfigResult.t, GetKeyGroupConfigResult.error) Result.t
+val get_managed_certificate_details :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetManagedCertificateDetailsRequest.t ->
+        (GetManagedCertificateDetailsResult.t,
+          GetManagedCertificateDetailsResult.error) Result.t
 val get_monitoring_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMonitoringSubscriptionRequest.t ->
         (GetMonitoringSubscriptionResult.t,
           GetMonitoringSubscriptionResult.error) Result.t
+val get_origin_access_control :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetOriginAccessControlRequest.t ->
+        (GetOriginAccessControlResult.t, GetOriginAccessControlResult.error)
+          Result.t
+val get_origin_access_control_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetOriginAccessControlConfigRequest.t ->
+        (GetOriginAccessControlConfigResult.t,
+          GetOriginAccessControlConfigResult.error) Result.t
 val get_origin_request_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -259,6 +465,11 @@ val get_realtime_log_config :
       GetRealtimeLogConfigRequest.t ->
         (GetRealtimeLogConfigResult.t, GetRealtimeLogConfigResult.error)
           Result.t
+val get_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourcePolicyRequest.t ->
+        (GetResourcePolicyResult.t, GetResourcePolicyResult.error) Result.t
 val get_response_headers_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -283,6 +494,21 @@ val get_streaming_distribution_config :
       GetStreamingDistributionConfigRequest.t ->
         (GetStreamingDistributionConfigResult.t,
           GetStreamingDistributionConfigResult.error) Result.t
+val get_trust_store :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetTrustStoreRequest.t ->
+        (GetTrustStoreResult.t, GetTrustStoreResult.error) Result.t
+val get_vpc_origin :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetVpcOriginRequest.t ->
+        (GetVpcOriginResult.t, GetVpcOriginResult.error) Result.t
+val list_anycast_ip_lists :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAnycastIpListsRequest.t ->
+        (ListAnycastIpListsResult.t, ListAnycastIpListsResult.error) Result.t
 val list_cache_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -300,17 +526,65 @@ val list_conflicting_aliases :
       ListConflictingAliasesRequest.t ->
         (ListConflictingAliasesResult.t, ListConflictingAliasesResult.error)
           Result.t
+val list_connection_functions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListConnectionFunctionsRequest.t ->
+        (ListConnectionFunctionsResult.t,
+          ListConnectionFunctionsResult.error) Result.t
+val list_connection_groups :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListConnectionGroupsRequest.t ->
+        (ListConnectionGroupsResult.t, ListConnectionGroupsResult.error)
+          Result.t
+val list_continuous_deployment_policies :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListContinuousDeploymentPoliciesRequest.t ->
+        (ListContinuousDeploymentPoliciesResult.t,
+          ListContinuousDeploymentPoliciesResult.error) Result.t
+val list_distribution_tenants :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDistributionTenantsRequest.t ->
+        (ListDistributionTenantsResult.t,
+          ListDistributionTenantsResult.error) Result.t
+val list_distribution_tenants_by_customization :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDistributionTenantsByCustomizationRequest.t ->
+        (ListDistributionTenantsByCustomizationResult.t,
+          ListDistributionTenantsByCustomizationResult.error) Result.t
 val list_distributions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDistributionsRequest.t ->
         (ListDistributionsResult.t, ListDistributionsResult.error) Result.t
+val list_distributions_by_anycast_ip_list_id :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDistributionsByAnycastIpListIdRequest.t ->
+        (ListDistributionsByAnycastIpListIdResult.t,
+          ListDistributionsByAnycastIpListIdResult.error) Result.t
 val list_distributions_by_cache_policy_id :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDistributionsByCachePolicyIdRequest.t ->
         (ListDistributionsByCachePolicyIdResult.t,
           ListDistributionsByCachePolicyIdResult.error) Result.t
+val list_distributions_by_connection_function :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDistributionsByConnectionFunctionRequest.t ->
+        (ListDistributionsByConnectionFunctionResult.t,
+          ListDistributionsByConnectionFunctionResult.error) Result.t
+val list_distributions_by_connection_mode :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDistributionsByConnectionModeRequest.t ->
+        (ListDistributionsByConnectionModeResult.t,
+          ListDistributionsByConnectionModeResult.error) Result.t
 val list_distributions_by_key_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -323,6 +597,12 @@ val list_distributions_by_origin_request_policy_id :
       ListDistributionsByOriginRequestPolicyIdRequest.t ->
         (ListDistributionsByOriginRequestPolicyIdResult.t,
           ListDistributionsByOriginRequestPolicyIdResult.error) Result.t
+val list_distributions_by_owned_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDistributionsByOwnedResourceRequest.t ->
+        (ListDistributionsByOwnedResourceResult.t,
+          ListDistributionsByOwnedResourceResult.error) Result.t
 val list_distributions_by_realtime_log_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -335,12 +615,30 @@ val list_distributions_by_response_headers_policy_id :
       ListDistributionsByResponseHeadersPolicyIdRequest.t ->
         (ListDistributionsByResponseHeadersPolicyIdResult.t,
           ListDistributionsByResponseHeadersPolicyIdResult.error) Result.t
+val list_distributions_by_trust_store :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDistributionsByTrustStoreRequest.t ->
+        (ListDistributionsByTrustStoreResult.t,
+          ListDistributionsByTrustStoreResult.error) Result.t
+val list_distributions_by_vpc_origin_id :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDistributionsByVpcOriginIdRequest.t ->
+        (ListDistributionsByVpcOriginIdResult.t,
+          ListDistributionsByVpcOriginIdResult.error) Result.t
 val list_distributions_by_web_a_c_l_id :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDistributionsByWebACLIdRequest.t ->
         (ListDistributionsByWebACLIdResult.t,
           ListDistributionsByWebACLIdResult.error) Result.t
+val list_domain_conflicts :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDomainConflictsRequest.t ->
+        (ListDomainConflictsResult.t, ListDomainConflictsResult.error)
+          Result.t
 val list_field_level_encryption_configs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -363,11 +661,28 @@ val list_invalidations :
     ?cfg:Awso.Cfg.t ->
       ListInvalidationsRequest.t ->
         (ListInvalidationsResult.t, ListInvalidationsResult.error) Result.t
+val list_invalidations_for_distribution_tenant :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListInvalidationsForDistributionTenantRequest.t ->
+        (ListInvalidationsForDistributionTenantResult.t,
+          ListInvalidationsForDistributionTenantResult.error) Result.t
 val list_key_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListKeyGroupsRequest.t ->
         (ListKeyGroupsResult.t, ListKeyGroupsResult.error) Result.t
+val list_key_value_stores :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListKeyValueStoresRequest.t ->
+        (ListKeyValueStoresResult.t, ListKeyValueStoresResult.error) Result.t
+val list_origin_access_controls :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListOriginAccessControlsRequest.t ->
+        (ListOriginAccessControlsResult.t,
+          ListOriginAccessControlsResult.error) Result.t
 val list_origin_request_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -403,14 +718,41 @@ val list_tags_for_resource :
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResult.t, ListTagsForResourceResult.error)
           Result.t
+val list_trust_stores :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTrustStoresRequest.t ->
+        (ListTrustStoresResult.t, ListTrustStoresResult.error) Result.t
+val list_vpc_origins :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListVpcOriginsRequest.t ->
+        (ListVpcOriginsResult.t, ListVpcOriginsResult.error) Result.t
+val publish_connection_function :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PublishConnectionFunctionRequest.t ->
+        (PublishConnectionFunctionResult.t,
+          PublishConnectionFunctionResult.error) Result.t
 val publish_function :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PublishFunctionRequest.t ->
         (PublishFunctionResult.t, PublishFunctionResult.error) Result.t
+val put_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutResourcePolicyRequest.t ->
+        (PutResourcePolicyResult.t, PutResourcePolicyResult.error) Result.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> TagResourceRequest.t -> (unit, unit) Result.t
+val test_connection_function :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TestConnectionFunctionRequest.t ->
+        (TestConnectionFunctionResult.t, TestConnectionFunctionResult.error)
+          Result.t
 val test_function :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -419,6 +761,12 @@ val test_function :
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> UntagResourceRequest.t -> (unit, unit) Result.t
+val update_anycast_ip_list :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAnycastIpListRequest.t ->
+        (UpdateAnycastIpListResult.t, UpdateAnycastIpListResult.error)
+          Result.t
 val update_cache_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -430,11 +778,47 @@ val update_cloud_front_origin_access_identity :
       UpdateCloudFrontOriginAccessIdentityRequest.t ->
         (UpdateCloudFrontOriginAccessIdentityResult.t,
           UpdateCloudFrontOriginAccessIdentityResult.error) Result.t
+val update_connection_function :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateConnectionFunctionRequest.t ->
+        (UpdateConnectionFunctionResult.t,
+          UpdateConnectionFunctionResult.error) Result.t
+val update_connection_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateConnectionGroupRequest.t ->
+        (UpdateConnectionGroupResult.t, UpdateConnectionGroupResult.error)
+          Result.t
+val update_continuous_deployment_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateContinuousDeploymentPolicyRequest.t ->
+        (UpdateContinuousDeploymentPolicyResult.t,
+          UpdateContinuousDeploymentPolicyResult.error) Result.t
 val update_distribution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDistributionRequest.t ->
         (UpdateDistributionResult.t, UpdateDistributionResult.error) Result.t
+val update_distribution_tenant :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDistributionTenantRequest.t ->
+        (UpdateDistributionTenantResult.t,
+          UpdateDistributionTenantResult.error) Result.t
+val update_distribution_with_staging_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDistributionWithStagingConfigRequest.t ->
+        (UpdateDistributionWithStagingConfigResult.t,
+          UpdateDistributionWithStagingConfigResult.error) Result.t
+val update_domain_association :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDomainAssociationRequest.t ->
+        (UpdateDomainAssociationResult.t,
+          UpdateDomainAssociationResult.error) Result.t
 val update_field_level_encryption_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -457,6 +841,18 @@ val update_key_group :
     ?cfg:Awso.Cfg.t ->
       UpdateKeyGroupRequest.t ->
         (UpdateKeyGroupResult.t, UpdateKeyGroupResult.error) Result.t
+val update_key_value_store :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateKeyValueStoreRequest.t ->
+        (UpdateKeyValueStoreResult.t, UpdateKeyValueStoreResult.error)
+          Result.t
+val update_origin_access_control :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateOriginAccessControlRequest.t ->
+        (UpdateOriginAccessControlResult.t,
+          UpdateOriginAccessControlResult.error) Result.t
 val update_origin_request_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -486,3 +882,19 @@ val update_streaming_distribution :
       UpdateStreamingDistributionRequest.t ->
         (UpdateStreamingDistributionResult.t,
           UpdateStreamingDistributionResult.error) Result.t
+val update_trust_store :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateTrustStoreRequest.t ->
+        (UpdateTrustStoreResult.t, UpdateTrustStoreResult.error) Result.t
+val update_vpc_origin :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateVpcOriginRequest.t ->
+        (UpdateVpcOriginResult.t, UpdateVpcOriginResult.error) Result.t
+val verify_dns_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      VerifyDnsConfigurationRequest.t ->
+        (VerifyDnsConfigurationResult.t, VerifyDnsConfigurationResult.error)
+          Result.t

@@ -25,6 +25,10 @@ let create_grant_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateGrantVersion input
 let create_license ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateLicense input
+let create_license_asset_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLicenseAssetGroup input
+let create_license_asset_ruleset ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLicenseAssetRuleset input
 let create_license_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateLicenseConfiguration input
 let create_license_conversion_task_for_resource ?endpoint_url ?cfg input =
@@ -40,6 +44,10 @@ let delete_grant ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteGrant input
 let delete_license ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteLicense input
+let delete_license_asset_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteLicenseAssetGroup input
+let delete_license_asset_ruleset ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteLicenseAssetRuleset input
 let delete_license_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteLicenseConfiguration input
 let delete_license_manager_report_generator ?endpoint_url ?cfg input =
@@ -54,6 +62,10 @@ let get_grant ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetGrant input
 let get_license ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLicense input
+let get_license_asset_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetLicenseAssetGroup input
+let get_license_asset_ruleset ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetLicenseAssetRuleset input
 let get_license_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLicenseConfiguration input
 let get_license_conversion_task ?endpoint_url ?cfg input =
@@ -64,6 +76,8 @@ let get_license_usage ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLicenseUsage input
 let get_service_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetServiceSettings input
+let list_assets_for_license_asset_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAssetsForLicenseAssetGroup input
 let list_associations_for_license_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAssociationsForLicenseConfiguration
     input
@@ -73,8 +87,15 @@ let list_failures_for_license_configuration_operations ?endpoint_url ?cfg
   input =
   eval ?endpoint_url ?cfg
     Endpoints.ListFailuresForLicenseConfigurationOperations input
+let list_license_asset_groups ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListLicenseAssetGroups input
+let list_license_asset_rulesets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListLicenseAssetRulesets input
 let list_license_configurations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListLicenseConfigurations input
+let list_license_configurations_for_organization ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListLicenseConfigurationsForOrganization
+    input
 let list_license_conversion_tasks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListLicenseConversionTasks input
 let list_license_manager_report_generators ?endpoint_url ?cfg input =
@@ -88,8 +109,12 @@ let list_licenses ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListLicenses input
 let list_received_grants ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListReceivedGrants input
+let list_received_grants_for_organization ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListReceivedGrantsForOrganization input
 let list_received_licenses ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListReceivedLicenses input
+let list_received_licenses_for_organization ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListReceivedLicensesForOrganization input
 let list_resource_inventory ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListResourceInventory input
 let list_tags_for_resource ?endpoint_url ?cfg input =
@@ -104,6 +129,10 @@ let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_license_asset_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateLicenseAssetGroup input
+let update_license_asset_ruleset ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateLicenseAssetRuleset input
 let update_license_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateLicenseConfiguration input
 let update_license_manager_report_generator ?endpoint_url ?cfg input =

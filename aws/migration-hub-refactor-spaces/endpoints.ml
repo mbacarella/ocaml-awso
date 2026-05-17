@@ -48,6 +48,8 @@ type ('i, 'o, 'e) t =
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateRoute: (UpdateRouteRequest.t, UpdateRouteResponse.t,
+  UpdateRouteResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateApplication -> `POST
@@ -73,6 +75,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | PutResourcePolicy -> `PUT
   | TagResource -> `POST
   | UntagResource -> `DELETE
+  | UpdateRoute -> `PATCH
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -230,7 +233,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             ((Format.kasprintf Uri.of_string) "/tags/%s"
                (String_.to_header x.UntagResourceRequest.resourceArn))
             (List.filter_opt
-               [Some ("tagKeys", (TagKeys.to_header x.tagKeys))]))
+               [Some ("tagKeys", (TagKeys.to_header x.tagKeys))])
+      | UpdateRoute ->
+          (Format.kasprintf Uri.of_string)
+            "/environments/%s/applications/%s/routes/%s"
+            (EnvironmentId.to_header
+               x.UpdateRouteRequest.environmentIdentifier)
+            (ApplicationId.to_header
+               x.UpdateRouteRequest.applicationIdentifier)
+            (RouteId.to_header x.UpdateRouteRequest.routeIdentifier))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -316,6 +327,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Option.map req.CreateRouteRequest.clientToken
                          ~f:(fun x ->
                                ("ClientToken", (ClientToken.to_value x)));
+                      Option.map req.CreateRouteRequest.defaultRoute
+                        ~f:(fun x ->
+                              ("DefaultRoute",
+                                (DefaultRouteInput.to_value x)));
                       Some
                         ("RouteType",
                           (RouteType.to_value
@@ -436,6 +451,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateRoute -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -610,3 +626,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UntagResourceResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateRoute ->
+      if is_success
+      then Ok (UpdateRouteResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateRouteResponse.error_of_json))

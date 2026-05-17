@@ -41,6 +41,9 @@ let create_delivery_stream =
        and deliveryStreamType =
          flag "delivery-stream-type" (optional json_arg)
            ~doc:"JSON DeliveryStreamType"
+       and directPutSourceConfiguration =
+         flag "direct-put-source-configuration" (optional json_arg)
+           ~doc:"JSON DirectPutSourceConfiguration"
        and kinesisStreamSourceConfiguration =
          flag "kinesis-stream-source-configuration" (optional json_arg)
            ~doc:"JSON KinesisStreamSourceConfiguration"
@@ -73,6 +76,22 @@ let create_delivery_stream =
        and tags =
          flag "tags" (optional json_arg)
            ~doc:"JSON TagDeliveryStreamInputTagList"
+       and amazonOpenSearchServerlessDestinationConfiguration =
+         flag "amazon-open-search-serverless-destination-configuration"
+           (optional json_arg)
+           ~doc:"JSON AmazonOpenSearchServerlessDestinationConfiguration"
+       and mSKSourceConfiguration =
+         flag "m-s-k-source-configuration" (optional json_arg)
+           ~doc:"JSON MSKSourceConfiguration"
+       and snowflakeDestinationConfiguration =
+         flag "snowflake-destination-configuration" (optional json_arg)
+           ~doc:"JSON SnowflakeDestinationConfiguration"
+       and icebergDestinationConfiguration =
+         flag "iceberg-destination-configuration" (optional json_arg)
+           ~doc:"JSON IcebergDestinationConfiguration"
+       and databaseSourceConfiguration =
+         flag "database-source-configuration" (optional json_arg)
+           ~doc:"JSON DatabaseSourceConfiguration"
        and deliveryStreamName =
          flag "delivery-stream-name" (required string)
            ~doc:"STRING DeliveryStreamName" in
@@ -83,6 +102,9 @@ let create_delivery_stream =
               ?deliveryStreamType:(Option.map
                                      ~f:Values.DeliveryStreamType.of_json
                                      deliveryStreamType)
+              ?directPutSourceConfiguration:(Option.map
+                                               ~f:Values.DirectPutSourceConfiguration.of_json
+                                               directPutSourceConfiguration)
               ?kinesisStreamSourceConfiguration:(Option.map
                                                    ~f:Values.KinesisStreamSourceConfiguration.of_json
                                                    kinesisStreamSourceConfiguration)
@@ -112,6 +134,21 @@ let create_delivery_stream =
                                                        httpEndpointDestinationConfiguration)
               ?tags:(Option.map
                        ~f:Values.TagDeliveryStreamInputTagList.of_json tags)
+              ?amazonOpenSearchServerlessDestinationConfiguration:(Option.map
+                                                                    ~f:Values.AmazonOpenSearchServerlessDestinationConfiguration.of_json
+                                                                    amazonOpenSearchServerlessDestinationConfiguration)
+              ?mSKSourceConfiguration:(Option.map
+                                         ~f:Values.MSKSourceConfiguration.of_json
+                                         mSKSourceConfiguration)
+              ?snowflakeDestinationConfiguration:(Option.map
+                                                    ~f:Values.SnowflakeDestinationConfiguration.of_json
+                                                    snowflakeDestinationConfiguration)
+              ?icebergDestinationConfiguration:(Option.map
+                                                  ~f:Values.IcebergDestinationConfiguration.of_json
+                                                  icebergDestinationConfiguration)
+              ?databaseSourceConfiguration:(Option.map
+                                              ~f:Values.DatabaseSourceConfiguration.of_json
+                                              databaseSourceConfiguration)
               ~deliveryStreamName ())
            (Some Values.CreateDeliveryStreamOutput.to_json)
            (Some Values.CreateDeliveryStreamOutput.error_to_json)])
@@ -384,6 +421,16 @@ let update_destination =
        and httpEndpointDestinationUpdate =
          flag "http-endpoint-destination-update" (optional json_arg)
            ~doc:"JSON HttpEndpointDestinationUpdate"
+       and amazonOpenSearchServerlessDestinationUpdate =
+         flag "amazon-open-search-serverless-destination-update"
+           (optional json_arg)
+           ~doc:"JSON AmazonOpenSearchServerlessDestinationUpdate"
+       and snowflakeDestinationUpdate =
+         flag "snowflake-destination-update" (optional json_arg)
+           ~doc:"JSON SnowflakeDestinationUpdate"
+       and icebergDestinationUpdate =
+         flag "iceberg-destination-update" (optional json_arg)
+           ~doc:"JSON IcebergDestinationUpdate"
        and deliveryStreamName =
          flag "delivery-stream-name" (required string)
            ~doc:"STRING DeliveryStreamName"
@@ -417,6 +464,15 @@ let update_destination =
               ?httpEndpointDestinationUpdate:(Option.map
                                                 ~f:Values.HttpEndpointDestinationUpdate.of_json
                                                 httpEndpointDestinationUpdate)
+              ?amazonOpenSearchServerlessDestinationUpdate:(Option.map
+                                                              ~f:Values.AmazonOpenSearchServerlessDestinationUpdate.of_json
+                                                              amazonOpenSearchServerlessDestinationUpdate)
+              ?snowflakeDestinationUpdate:(Option.map
+                                             ~f:Values.SnowflakeDestinationUpdate.of_json
+                                             snowflakeDestinationUpdate)
+              ?icebergDestinationUpdate:(Option.map
+                                           ~f:Values.IcebergDestinationUpdate.of_json
+                                           icebergDestinationUpdate)
               ~deliveryStreamName ~currentDeliveryStreamVersionId
               ~destinationId ())
            (Some Values.UpdateDestinationOutput.to_json)

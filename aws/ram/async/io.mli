@@ -20,12 +20,36 @@ val associate_resource_share_permission :
         (AssociateResourceSharePermissionResponse.t,
           AssociateResourceSharePermissionResponse.error) Result.t
           Async.Deferred.t
+val create_permission :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreatePermissionRequest.t ->
+        (CreatePermissionResponse.t, CreatePermissionResponse.error) Result.t
+          Async.Deferred.t
+val create_permission_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreatePermissionVersionRequest.t ->
+        (CreatePermissionVersionResponse.t,
+          CreatePermissionVersionResponse.error) Result.t Async.Deferred.t
 val create_resource_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResourceShareRequest.t ->
         (CreateResourceShareResponse.t, CreateResourceShareResponse.error)
           Result.t Async.Deferred.t
+val delete_permission :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeletePermissionRequest.t ->
+        (DeletePermissionResponse.t, DeletePermissionResponse.error) Result.t
+          Async.Deferred.t
+val delete_permission_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeletePermissionVersionRequest.t ->
+        (DeletePermissionVersionResponse.t,
+          DeletePermissionVersionResponse.error) Result.t Async.Deferred.t
 val delete_resource_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -91,6 +115,12 @@ val list_pending_invitation_resources :
         (ListPendingInvitationResourcesResponse.t,
           ListPendingInvitationResourcesResponse.error) Result.t
           Async.Deferred.t
+val list_permission_associations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListPermissionAssociationsRequest.t ->
+        (ListPermissionAssociationsResponse.t,
+          ListPermissionAssociationsResponse.error) Result.t Async.Deferred.t
 val list_permission_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -108,6 +138,13 @@ val list_principals :
     ?cfg:Awso.Cfg.t ->
       ListPrincipalsRequest.t ->
         (ListPrincipalsResponse.t, ListPrincipalsResponse.error) Result.t
+          Async.Deferred.t
+val list_replace_permission_associations_work :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListReplacePermissionAssociationsWorkRequest.t ->
+        (ListReplacePermissionAssociationsWorkResponse.t,
+          ListReplacePermissionAssociationsWorkResponse.error) Result.t
           Async.Deferred.t
 val list_resource_share_permissions :
   ?endpoint_url:string ->
@@ -128,6 +165,19 @@ val list_resources :
       ListResourcesRequest.t ->
         (ListResourcesResponse.t, ListResourcesResponse.error) Result.t
           Async.Deferred.t
+val list_source_associations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSourceAssociationsRequest.t ->
+        (ListSourceAssociationsResponse.t,
+          ListSourceAssociationsResponse.error) Result.t Async.Deferred.t
+val promote_permission_created_from_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PromotePermissionCreatedFromPolicyRequest.t ->
+        (PromotePermissionCreatedFromPolicyResponse.t,
+          PromotePermissionCreatedFromPolicyResponse.error) Result.t
+          Async.Deferred.t
 val promote_resource_share_created_from_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -141,6 +191,20 @@ val reject_resource_share_invitation :
       RejectResourceShareInvitationRequest.t ->
         (RejectResourceShareInvitationResponse.t,
           RejectResourceShareInvitationResponse.error) Result.t
+          Async.Deferred.t
+val replace_permission_associations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ReplacePermissionAssociationsRequest.t ->
+        (ReplacePermissionAssociationsResponse.t,
+          ReplacePermissionAssociationsResponse.error) Result.t
+          Async.Deferred.t
+val set_default_permission_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SetDefaultPermissionVersionRequest.t ->
+        (SetDefaultPermissionVersionResponse.t,
+          SetDefaultPermissionVersionResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->

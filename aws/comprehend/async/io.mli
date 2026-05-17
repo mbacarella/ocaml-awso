@@ -31,6 +31,13 @@ val batch_detect_syntax :
       BatchDetectSyntaxRequest.t ->
         (BatchDetectSyntaxResponse.t, BatchDetectSyntaxResponse.error)
           Result.t Async.Deferred.t
+val batch_detect_targeted_sentiment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchDetectTargetedSentimentRequest.t ->
+        (BatchDetectTargetedSentimentResponse.t,
+          BatchDetectTargetedSentimentResponse.error) Result.t
+          Async.Deferred.t
 val classify_document :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -43,6 +50,12 @@ val contains_pii_entities :
       ContainsPiiEntitiesRequest.t ->
         (ContainsPiiEntitiesResponse.t, ContainsPiiEntitiesResponse.error)
           Result.t Async.Deferred.t
+val create_dataset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateDatasetRequest.t ->
+        (CreateDatasetResponse.t, CreateDatasetResponse.error) Result.t
+          Async.Deferred.t
 val create_document_classifier :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -61,6 +74,12 @@ val create_entity_recognizer :
       CreateEntityRecognizerRequest.t ->
         (CreateEntityRecognizerResponse.t,
           CreateEntityRecognizerResponse.error) Result.t Async.Deferred.t
+val create_flywheel :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateFlywheelRequest.t ->
+        (CreateFlywheelResponse.t, CreateFlywheelResponse.error) Result.t
+          Async.Deferred.t
 val delete_document_classifier :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -79,12 +98,24 @@ val delete_entity_recognizer :
       DeleteEntityRecognizerRequest.t ->
         (DeleteEntityRecognizerResponse.t,
           DeleteEntityRecognizerResponse.error) Result.t Async.Deferred.t
+val delete_flywheel :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteFlywheelRequest.t ->
+        (DeleteFlywheelResponse.t, DeleteFlywheelResponse.error) Result.t
+          Async.Deferred.t
 val delete_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourcePolicyRequest.t ->
         (DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error)
           Result.t Async.Deferred.t
+val describe_dataset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDatasetRequest.t ->
+        (DescribeDatasetResponse.t, DescribeDatasetResponse.error) Result.t
+          Async.Deferred.t
 val describe_document_classification_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -130,6 +161,18 @@ val describe_events_detection_job :
       DescribeEventsDetectionJobRequest.t ->
         (DescribeEventsDetectionJobResponse.t,
           DescribeEventsDetectionJobResponse.error) Result.t Async.Deferred.t
+val describe_flywheel :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeFlywheelRequest.t ->
+        (DescribeFlywheelResponse.t, DescribeFlywheelResponse.error) Result.t
+          Async.Deferred.t
+val describe_flywheel_iteration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeFlywheelIterationRequest.t ->
+        (DescribeFlywheelIterationResponse.t,
+          DescribeFlywheelIterationResponse.error) Result.t Async.Deferred.t
 val describe_key_phrases_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -206,11 +249,29 @@ val detect_syntax :
       DetectSyntaxRequest.t ->
         (DetectSyntaxResponse.t, DetectSyntaxResponse.error) Result.t
           Async.Deferred.t
+val detect_targeted_sentiment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DetectTargetedSentimentRequest.t ->
+        (DetectTargetedSentimentResponse.t,
+          DetectTargetedSentimentResponse.error) Result.t Async.Deferred.t
+val detect_toxic_content :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DetectToxicContentRequest.t ->
+        (DetectToxicContentResponse.t, DetectToxicContentResponse.error)
+          Result.t Async.Deferred.t
 val import_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportModelRequest.t ->
         (ImportModelResponse.t, ImportModelResponse.error) Result.t
+          Async.Deferred.t
+val list_datasets :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDatasetsRequest.t ->
+        (ListDatasetsResponse.t, ListDatasetsResponse.error) Result.t
           Async.Deferred.t
 val list_document_classification_jobs :
   ?endpoint_url:string ->
@@ -270,6 +331,19 @@ val list_events_detection_jobs :
       ListEventsDetectionJobsRequest.t ->
         (ListEventsDetectionJobsResponse.t,
           ListEventsDetectionJobsResponse.error) Result.t Async.Deferred.t
+val list_flywheel_iteration_history :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListFlywheelIterationHistoryRequest.t ->
+        (ListFlywheelIterationHistoryResponse.t,
+          ListFlywheelIterationHistoryResponse.error) Result.t
+          Async.Deferred.t
+val list_flywheels :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListFlywheelsRequest.t ->
+        (ListFlywheelsResponse.t, ListFlywheelsResponse.error) Result.t
+          Async.Deferred.t
 val list_key_phrases_detection_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -341,6 +415,12 @@ val start_events_detection_job :
       StartEventsDetectionJobRequest.t ->
         (StartEventsDetectionJobResponse.t,
           StartEventsDetectionJobResponse.error) Result.t Async.Deferred.t
+val start_flywheel_iteration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartFlywheelIterationRequest.t ->
+        (StartFlywheelIterationResponse.t,
+          StartFlywheelIterationResponse.error) Result.t Async.Deferred.t
 val start_key_phrases_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -450,4 +530,10 @@ val update_endpoint :
     ?cfg:Awso.Cfg.t ->
       UpdateEndpointRequest.t ->
         (UpdateEndpointResponse.t, UpdateEndpointResponse.error) Result.t
+          Async.Deferred.t
+val update_flywheel :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateFlywheelRequest.t ->
+        (UpdateFlywheelResponse.t, UpdateFlywheelResponse.error) Result.t
           Async.Deferred.t

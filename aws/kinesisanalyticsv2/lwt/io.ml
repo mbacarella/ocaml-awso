@@ -51,12 +51,16 @@ let delete_application_vpc_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteApplicationVpcConfiguration input
 let describe_application ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeApplication input
+let describe_application_operation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeApplicationOperation input
 let describe_application_snapshot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeApplicationSnapshot input
 let describe_application_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeApplicationVersion input
 let discover_input_schema ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DiscoverInputSchema input
+let list_application_operations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListApplicationOperations input
 let list_application_snapshots ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListApplicationSnapshots input
 let list_application_versions ?endpoint_url ?cfg input =

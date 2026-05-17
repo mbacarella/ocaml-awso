@@ -3,14 +3,35 @@ open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
   | AssociateAlias: (AssociateAliasRequest.t, unit, unit) t 
+  | AssociateDistributionTenantWebACL:
+  (AssociateDistributionTenantWebACLRequest.t,
+  AssociateDistributionTenantWebACLResult.t,
+  AssociateDistributionTenantWebACLResult.error) t 
+  | AssociateDistributionWebACL: (AssociateDistributionWebACLRequest.t,
+  AssociateDistributionWebACLResult.t,
+  AssociateDistributionWebACLResult.error) t 
+  | CopyDistribution: (CopyDistributionRequest.t, CopyDistributionResult.t,
+  CopyDistributionResult.error) t 
+  | CreateAnycastIpList: (CreateAnycastIpListRequest.t,
+  CreateAnycastIpListResult.t, CreateAnycastIpListResult.error) t 
   | CreateCachePolicy: (CreateCachePolicyRequest.t,
   CreateCachePolicyResult.t, CreateCachePolicyResult.error) t 
   | CreateCloudFrontOriginAccessIdentity:
   (CreateCloudFrontOriginAccessIdentityRequest.t,
   CreateCloudFrontOriginAccessIdentityResult.t,
   CreateCloudFrontOriginAccessIdentityResult.error) t 
+  | CreateConnectionFunction: (CreateConnectionFunctionRequest.t,
+  CreateConnectionFunctionResult.t, CreateConnectionFunctionResult.error) t 
+  | CreateConnectionGroup: (CreateConnectionGroupRequest.t,
+  CreateConnectionGroupResult.t, CreateConnectionGroupResult.error) t 
+  | CreateContinuousDeploymentPolicy:
+  (CreateContinuousDeploymentPolicyRequest.t,
+  CreateContinuousDeploymentPolicyResult.t,
+  CreateContinuousDeploymentPolicyResult.error) t 
   | CreateDistribution: (CreateDistributionRequest.t,
   CreateDistributionResult.t, CreateDistributionResult.error) t 
+  | CreateDistributionTenant: (CreateDistributionTenantRequest.t,
+  CreateDistributionTenantResult.t, CreateDistributionTenantResult.error) t 
   | CreateDistributionWithTags: (CreateDistributionWithTagsRequest.t,
   CreateDistributionWithTagsResult.t, CreateDistributionWithTagsResult.error)
   t 
@@ -26,11 +47,20 @@ type ('i, 'o, 'e) t =
   CreateFunctionResult.error) t 
   | CreateInvalidation: (CreateInvalidationRequest.t,
   CreateInvalidationResult.t, CreateInvalidationResult.error) t 
+  | CreateInvalidationForDistributionTenant:
+  (CreateInvalidationForDistributionTenantRequest.t,
+  CreateInvalidationForDistributionTenantResult.t,
+  CreateInvalidationForDistributionTenantResult.error) t 
   | CreateKeyGroup: (CreateKeyGroupRequest.t, CreateKeyGroupResult.t,
   CreateKeyGroupResult.error) t 
+  | CreateKeyValueStore: (CreateKeyValueStoreRequest.t,
+  CreateKeyValueStoreResult.t, CreateKeyValueStoreResult.error) t 
   | CreateMonitoringSubscription: (CreateMonitoringSubscriptionRequest.t,
   CreateMonitoringSubscriptionResult.t,
   CreateMonitoringSubscriptionResult.error) t 
+  | CreateOriginAccessControl: (CreateOriginAccessControlRequest.t,
+  CreateOriginAccessControlResult.t, CreateOriginAccessControlResult.error) t
+  
   | CreateOriginRequestPolicy: (CreateOriginRequestPolicyRequest.t,
   CreateOriginRequestPolicyResult.t, CreateOriginRequestPolicyResult.error) t
   
@@ -48,30 +78,63 @@ type ('i, 'o, 'e) t =
   (CreateStreamingDistributionWithTagsRequest.t,
   CreateStreamingDistributionWithTagsResult.t,
   CreateStreamingDistributionWithTagsResult.error) t 
+  | CreateTrustStore: (CreateTrustStoreRequest.t, CreateTrustStoreResult.t,
+  CreateTrustStoreResult.error) t 
+  | CreateVpcOrigin: (CreateVpcOriginRequest.t, CreateVpcOriginResult.t,
+  CreateVpcOriginResult.error) t 
+  | DeleteAnycastIpList: (DeleteAnycastIpListRequest.t, unit, unit) t 
   | DeleteCachePolicy: (DeleteCachePolicyRequest.t, unit, unit) t 
   | DeleteCloudFrontOriginAccessIdentity:
   (DeleteCloudFrontOriginAccessIdentityRequest.t, unit, unit) t 
+  | DeleteConnectionFunction: (DeleteConnectionFunctionRequest.t, unit, 
+  unit) t 
+  | DeleteConnectionGroup: (DeleteConnectionGroupRequest.t, unit, unit) t 
+  | DeleteContinuousDeploymentPolicy:
+  (DeleteContinuousDeploymentPolicyRequest.t, unit, unit) t 
   | DeleteDistribution: (DeleteDistributionRequest.t, unit, unit) t 
+  | DeleteDistributionTenant: (DeleteDistributionTenantRequest.t, unit, 
+  unit) t 
   | DeleteFieldLevelEncryptionConfig:
   (DeleteFieldLevelEncryptionConfigRequest.t, unit, unit) t 
   | DeleteFieldLevelEncryptionProfile:
   (DeleteFieldLevelEncryptionProfileRequest.t, unit, unit) t 
   | DeleteFunction: (DeleteFunctionRequest.t, unit, unit) t 
   | DeleteKeyGroup: (DeleteKeyGroupRequest.t, unit, unit) t 
+  | DeleteKeyValueStore: (DeleteKeyValueStoreRequest.t, unit, unit) t 
   | DeleteMonitoringSubscription: (DeleteMonitoringSubscriptionRequest.t,
   DeleteMonitoringSubscriptionResult.t,
   DeleteMonitoringSubscriptionResult.error) t 
+  | DeleteOriginAccessControl: (DeleteOriginAccessControlRequest.t, unit,
+  unit) t 
   | DeleteOriginRequestPolicy: (DeleteOriginRequestPolicyRequest.t, unit,
   unit) t 
   | DeletePublicKey: (DeletePublicKeyRequest.t, unit, unit) t 
   | DeleteRealtimeLogConfig: (DeleteRealtimeLogConfigRequest.t, unit, 
   unit) t 
+  | DeleteResourcePolicy: (DeleteResourcePolicyRequest.t, unit, unit) t 
   | DeleteResponseHeadersPolicy: (DeleteResponseHeadersPolicyRequest.t, 
   unit, unit) t 
   | DeleteStreamingDistribution: (DeleteStreamingDistributionRequest.t, 
   unit, unit) t 
+  | DeleteTrustStore: (DeleteTrustStoreRequest.t, unit, unit) t 
+  | DeleteVpcOrigin: (DeleteVpcOriginRequest.t, DeleteVpcOriginResult.t,
+  DeleteVpcOriginResult.error) t 
+  | DescribeConnectionFunction: (DescribeConnectionFunctionRequest.t,
+  DescribeConnectionFunctionResult.t, DescribeConnectionFunctionResult.error)
+  t 
   | DescribeFunction: (DescribeFunctionRequest.t, DescribeFunctionResult.t,
   DescribeFunctionResult.error) t 
+  | DescribeKeyValueStore: (DescribeKeyValueStoreRequest.t,
+  DescribeKeyValueStoreResult.t, DescribeKeyValueStoreResult.error) t 
+  | DisassociateDistributionTenantWebACL:
+  (DisassociateDistributionTenantWebACLRequest.t,
+  DisassociateDistributionTenantWebACLResult.t,
+  DisassociateDistributionTenantWebACLResult.error) t 
+  | DisassociateDistributionWebACL: (DisassociateDistributionWebACLRequest.t,
+  DisassociateDistributionWebACLResult.t,
+  DisassociateDistributionWebACLResult.error) t 
+  | GetAnycastIpList: (GetAnycastIpListRequest.t, GetAnycastIpListResult.t,
+  GetAnycastIpListResult.error) t 
   | GetCachePolicy: (GetCachePolicyRequest.t, GetCachePolicyResult.t,
   GetCachePolicyResult.error) t 
   | GetCachePolicyConfig: (GetCachePolicyConfigRequest.t,
@@ -84,10 +147,30 @@ type ('i, 'o, 'e) t =
   (GetCloudFrontOriginAccessIdentityConfigRequest.t,
   GetCloudFrontOriginAccessIdentityConfigResult.t,
   GetCloudFrontOriginAccessIdentityConfigResult.error) t 
+  | GetConnectionFunction: (GetConnectionFunctionRequest.t,
+  GetConnectionFunctionResult.t, GetConnectionFunctionResult.error) t 
+  | GetConnectionGroup: (GetConnectionGroupRequest.t,
+  GetConnectionGroupResult.t, GetConnectionGroupResult.error) t 
+  | GetConnectionGroupByRoutingEndpoint:
+  (GetConnectionGroupByRoutingEndpointRequest.t,
+  GetConnectionGroupByRoutingEndpointResult.t,
+  GetConnectionGroupByRoutingEndpointResult.error) t 
+  | GetContinuousDeploymentPolicy: (GetContinuousDeploymentPolicyRequest.t,
+  GetContinuousDeploymentPolicyResult.t,
+  GetContinuousDeploymentPolicyResult.error) t 
+  | GetContinuousDeploymentPolicyConfig:
+  (GetContinuousDeploymentPolicyConfigRequest.t,
+  GetContinuousDeploymentPolicyConfigResult.t,
+  GetContinuousDeploymentPolicyConfigResult.error) t 
   | GetDistribution: (GetDistributionRequest.t, GetDistributionResult.t,
   GetDistributionResult.error) t 
   | GetDistributionConfig: (GetDistributionConfigRequest.t,
   GetDistributionConfigResult.t, GetDistributionConfigResult.error) t 
+  | GetDistributionTenant: (GetDistributionTenantRequest.t,
+  GetDistributionTenantResult.t, GetDistributionTenantResult.error) t 
+  | GetDistributionTenantByDomain: (GetDistributionTenantByDomainRequest.t,
+  GetDistributionTenantByDomainResult.t,
+  GetDistributionTenantByDomainResult.error) t 
   | GetFieldLevelEncryption: (GetFieldLevelEncryptionRequest.t,
   GetFieldLevelEncryptionResult.t, GetFieldLevelEncryptionResult.error) t 
   | GetFieldLevelEncryptionConfig: (GetFieldLevelEncryptionConfigRequest.t,
@@ -104,13 +187,25 @@ type ('i, 'o, 'e) t =
   GetFunctionResult.error) t 
   | GetInvalidation: (GetInvalidationRequest.t, GetInvalidationResult.t,
   GetInvalidationResult.error) t 
+  | GetInvalidationForDistributionTenant:
+  (GetInvalidationForDistributionTenantRequest.t,
+  GetInvalidationForDistributionTenantResult.t,
+  GetInvalidationForDistributionTenantResult.error) t 
   | GetKeyGroup: (GetKeyGroupRequest.t, GetKeyGroupResult.t,
   GetKeyGroupResult.error) t 
   | GetKeyGroupConfig: (GetKeyGroupConfigRequest.t,
   GetKeyGroupConfigResult.t, GetKeyGroupConfigResult.error) t 
+  | GetManagedCertificateDetails: (GetManagedCertificateDetailsRequest.t,
+  GetManagedCertificateDetailsResult.t,
+  GetManagedCertificateDetailsResult.error) t 
   | GetMonitoringSubscription: (GetMonitoringSubscriptionRequest.t,
   GetMonitoringSubscriptionResult.t, GetMonitoringSubscriptionResult.error) t
   
+  | GetOriginAccessControl: (GetOriginAccessControlRequest.t,
+  GetOriginAccessControlResult.t, GetOriginAccessControlResult.error) t 
+  | GetOriginAccessControlConfig: (GetOriginAccessControlConfigRequest.t,
+  GetOriginAccessControlConfigResult.t,
+  GetOriginAccessControlConfigResult.error) t 
   | GetOriginRequestPolicy: (GetOriginRequestPolicyRequest.t,
   GetOriginRequestPolicyResult.t, GetOriginRequestPolicyResult.error) t 
   | GetOriginRequestPolicyConfig: (GetOriginRequestPolicyConfigRequest.t,
@@ -122,6 +217,8 @@ type ('i, 'o, 'e) t =
   GetPublicKeyConfigResult.t, GetPublicKeyConfigResult.error) t 
   | GetRealtimeLogConfig: (GetRealtimeLogConfigRequest.t,
   GetRealtimeLogConfigResult.t, GetRealtimeLogConfigResult.error) t 
+  | GetResourcePolicy: (GetResourcePolicyRequest.t,
+  GetResourcePolicyResult.t, GetResourcePolicyResult.error) t 
   | GetResponseHeadersPolicy: (GetResponseHeadersPolicyRequest.t,
   GetResponseHeadersPolicyResult.t, GetResponseHeadersPolicyResult.error) t 
   | GetResponseHeadersPolicyConfig: (GetResponseHeadersPolicyConfigRequest.t,
@@ -132,6 +229,12 @@ type ('i, 'o, 'e) t =
   | GetStreamingDistributionConfig: (GetStreamingDistributionConfigRequest.t,
   GetStreamingDistributionConfigResult.t,
   GetStreamingDistributionConfigResult.error) t 
+  | GetTrustStore: (GetTrustStoreRequest.t, GetTrustStoreResult.t,
+  GetTrustStoreResult.error) t 
+  | GetVpcOrigin: (GetVpcOriginRequest.t, GetVpcOriginResult.t,
+  GetVpcOriginResult.error) t 
+  | ListAnycastIpLists: (ListAnycastIpListsRequest.t,
+  ListAnycastIpListsResult.t, ListAnycastIpListsResult.error) t 
   | ListCachePolicies: (ListCachePoliciesRequest.t,
   ListCachePoliciesResult.t, ListCachePoliciesResult.error) t 
   | ListCloudFrontOriginAccessIdentities:
@@ -140,12 +243,38 @@ type ('i, 'o, 'e) t =
   ListCloudFrontOriginAccessIdentitiesResult.error) t 
   | ListConflictingAliases: (ListConflictingAliasesRequest.t,
   ListConflictingAliasesResult.t, ListConflictingAliasesResult.error) t 
+  | ListConnectionFunctions: (ListConnectionFunctionsRequest.t,
+  ListConnectionFunctionsResult.t, ListConnectionFunctionsResult.error) t 
+  | ListConnectionGroups: (ListConnectionGroupsRequest.t,
+  ListConnectionGroupsResult.t, ListConnectionGroupsResult.error) t 
+  | ListContinuousDeploymentPolicies:
+  (ListContinuousDeploymentPoliciesRequest.t,
+  ListContinuousDeploymentPoliciesResult.t,
+  ListContinuousDeploymentPoliciesResult.error) t 
+  | ListDistributionTenants: (ListDistributionTenantsRequest.t,
+  ListDistributionTenantsResult.t, ListDistributionTenantsResult.error) t 
+  | ListDistributionTenantsByCustomization:
+  (ListDistributionTenantsByCustomizationRequest.t,
+  ListDistributionTenantsByCustomizationResult.t,
+  ListDistributionTenantsByCustomizationResult.error) t 
   | ListDistributions: (ListDistributionsRequest.t,
   ListDistributionsResult.t, ListDistributionsResult.error) t 
+  | ListDistributionsByAnycastIpListId:
+  (ListDistributionsByAnycastIpListIdRequest.t,
+  ListDistributionsByAnycastIpListIdResult.t,
+  ListDistributionsByAnycastIpListIdResult.error) t 
   | ListDistributionsByCachePolicyId:
   (ListDistributionsByCachePolicyIdRequest.t,
   ListDistributionsByCachePolicyIdResult.t,
   ListDistributionsByCachePolicyIdResult.error) t 
+  | ListDistributionsByConnectionFunction:
+  (ListDistributionsByConnectionFunctionRequest.t,
+  ListDistributionsByConnectionFunctionResult.t,
+  ListDistributionsByConnectionFunctionResult.error) t 
+  | ListDistributionsByConnectionMode:
+  (ListDistributionsByConnectionModeRequest.t,
+  ListDistributionsByConnectionModeResult.t,
+  ListDistributionsByConnectionModeResult.error) t 
   | ListDistributionsByKeyGroup: (ListDistributionsByKeyGroupRequest.t,
   ListDistributionsByKeyGroupResult.t,
   ListDistributionsByKeyGroupResult.error) t 
@@ -153,6 +282,10 @@ type ('i, 'o, 'e) t =
   (ListDistributionsByOriginRequestPolicyIdRequest.t,
   ListDistributionsByOriginRequestPolicyIdResult.t,
   ListDistributionsByOriginRequestPolicyIdResult.error) t 
+  | ListDistributionsByOwnedResource:
+  (ListDistributionsByOwnedResourceRequest.t,
+  ListDistributionsByOwnedResourceResult.t,
+  ListDistributionsByOwnedResourceResult.error) t 
   | ListDistributionsByRealtimeLogConfig:
   (ListDistributionsByRealtimeLogConfigRequest.t,
   ListDistributionsByRealtimeLogConfigResult.t,
@@ -161,9 +294,17 @@ type ('i, 'o, 'e) t =
   (ListDistributionsByResponseHeadersPolicyIdRequest.t,
   ListDistributionsByResponseHeadersPolicyIdResult.t,
   ListDistributionsByResponseHeadersPolicyIdResult.error) t 
+  | ListDistributionsByTrustStore: (ListDistributionsByTrustStoreRequest.t,
+  ListDistributionsByTrustStoreResult.t,
+  ListDistributionsByTrustStoreResult.error) t 
+  | ListDistributionsByVpcOriginId: (ListDistributionsByVpcOriginIdRequest.t,
+  ListDistributionsByVpcOriginIdResult.t,
+  ListDistributionsByVpcOriginIdResult.error) t 
   | ListDistributionsByWebACLId: (ListDistributionsByWebACLIdRequest.t,
   ListDistributionsByWebACLIdResult.t,
   ListDistributionsByWebACLIdResult.error) t 
+  | ListDomainConflicts: (ListDomainConflictsRequest.t,
+  ListDomainConflictsResult.t, ListDomainConflictsResult.error) t 
   | ListFieldLevelEncryptionConfigs:
   (ListFieldLevelEncryptionConfigsRequest.t,
   ListFieldLevelEncryptionConfigsResult.t,
@@ -176,8 +317,16 @@ type ('i, 'o, 'e) t =
   ListFunctionsResult.error) t 
   | ListInvalidations: (ListInvalidationsRequest.t,
   ListInvalidationsResult.t, ListInvalidationsResult.error) t 
+  | ListInvalidationsForDistributionTenant:
+  (ListInvalidationsForDistributionTenantRequest.t,
+  ListInvalidationsForDistributionTenantResult.t,
+  ListInvalidationsForDistributionTenantResult.error) t 
   | ListKeyGroups: (ListKeyGroupsRequest.t, ListKeyGroupsResult.t,
   ListKeyGroupsResult.error) t 
+  | ListKeyValueStores: (ListKeyValueStoresRequest.t,
+  ListKeyValueStoresResult.t, ListKeyValueStoresResult.error) t 
+  | ListOriginAccessControls: (ListOriginAccessControlsRequest.t,
+  ListOriginAccessControlsResult.t, ListOriginAccessControlsResult.error) t 
   | ListOriginRequestPolicies: (ListOriginRequestPoliciesRequest.t,
   ListOriginRequestPoliciesResult.t, ListOriginRequestPoliciesResult.error) t
   
@@ -193,20 +342,49 @@ type ('i, 'o, 'e) t =
   t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResult.t, ListTagsForResourceResult.error) t 
+  | ListTrustStores: (ListTrustStoresRequest.t, ListTrustStoresResult.t,
+  ListTrustStoresResult.error) t 
+  | ListVpcOrigins: (ListVpcOriginsRequest.t, ListVpcOriginsResult.t,
+  ListVpcOriginsResult.error) t 
+  | PublishConnectionFunction: (PublishConnectionFunctionRequest.t,
+  PublishConnectionFunctionResult.t, PublishConnectionFunctionResult.error) t
+  
   | PublishFunction: (PublishFunctionRequest.t, PublishFunctionResult.t,
   PublishFunctionResult.error) t 
+  | PutResourcePolicy: (PutResourcePolicyRequest.t,
+  PutResourcePolicyResult.t, PutResourcePolicyResult.error) t 
   | TagResource: (TagResourceRequest.t, unit, unit) t 
+  | TestConnectionFunction: (TestConnectionFunctionRequest.t,
+  TestConnectionFunctionResult.t, TestConnectionFunctionResult.error) t 
   | TestFunction: (TestFunctionRequest.t, TestFunctionResult.t,
   TestFunctionResult.error) t 
   | UntagResource: (UntagResourceRequest.t, unit, unit) t 
+  | UpdateAnycastIpList: (UpdateAnycastIpListRequest.t,
+  UpdateAnycastIpListResult.t, UpdateAnycastIpListResult.error) t 
   | UpdateCachePolicy: (UpdateCachePolicyRequest.t,
   UpdateCachePolicyResult.t, UpdateCachePolicyResult.error) t 
   | UpdateCloudFrontOriginAccessIdentity:
   (UpdateCloudFrontOriginAccessIdentityRequest.t,
   UpdateCloudFrontOriginAccessIdentityResult.t,
   UpdateCloudFrontOriginAccessIdentityResult.error) t 
+  | UpdateConnectionFunction: (UpdateConnectionFunctionRequest.t,
+  UpdateConnectionFunctionResult.t, UpdateConnectionFunctionResult.error) t 
+  | UpdateConnectionGroup: (UpdateConnectionGroupRequest.t,
+  UpdateConnectionGroupResult.t, UpdateConnectionGroupResult.error) t 
+  | UpdateContinuousDeploymentPolicy:
+  (UpdateContinuousDeploymentPolicyRequest.t,
+  UpdateContinuousDeploymentPolicyResult.t,
+  UpdateContinuousDeploymentPolicyResult.error) t 
   | UpdateDistribution: (UpdateDistributionRequest.t,
   UpdateDistributionResult.t, UpdateDistributionResult.error) t 
+  | UpdateDistributionTenant: (UpdateDistributionTenantRequest.t,
+  UpdateDistributionTenantResult.t, UpdateDistributionTenantResult.error) t 
+  | UpdateDistributionWithStagingConfig:
+  (UpdateDistributionWithStagingConfigRequest.t,
+  UpdateDistributionWithStagingConfigResult.t,
+  UpdateDistributionWithStagingConfigResult.error) t 
+  | UpdateDomainAssociation: (UpdateDomainAssociationRequest.t,
+  UpdateDomainAssociationResult.t, UpdateDomainAssociationResult.error) t 
   | UpdateFieldLevelEncryptionConfig:
   (UpdateFieldLevelEncryptionConfigRequest.t,
   UpdateFieldLevelEncryptionConfigResult.t,
@@ -219,6 +397,11 @@ type ('i, 'o, 'e) t =
   UpdateFunctionResult.error) t 
   | UpdateKeyGroup: (UpdateKeyGroupRequest.t, UpdateKeyGroupResult.t,
   UpdateKeyGroupResult.error) t 
+  | UpdateKeyValueStore: (UpdateKeyValueStoreRequest.t,
+  UpdateKeyValueStoreResult.t, UpdateKeyValueStoreResult.error) t 
+  | UpdateOriginAccessControl: (UpdateOriginAccessControlRequest.t,
+  UpdateOriginAccessControlResult.t, UpdateOriginAccessControlResult.error) t
+  
   | UpdateOriginRequestPolicy: (UpdateOriginRequestPolicyRequest.t,
   UpdateOriginRequestPolicyResult.t, UpdateOriginRequestPolicyResult.error) t
   
@@ -232,100 +415,181 @@ type ('i, 'o, 'e) t =
   | UpdateStreamingDistribution: (UpdateStreamingDistributionRequest.t,
   UpdateStreamingDistributionResult.t,
   UpdateStreamingDistributionResult.error) t 
+  | UpdateTrustStore: (UpdateTrustStoreRequest.t, UpdateTrustStoreResult.t,
+  UpdateTrustStoreResult.error) t 
+  | UpdateVpcOrigin: (UpdateVpcOriginRequest.t, UpdateVpcOriginResult.t,
+  UpdateVpcOriginResult.error) t 
+  | VerifyDnsConfiguration: (VerifyDnsConfigurationRequest.t,
+  VerifyDnsConfigurationResult.t, VerifyDnsConfigurationResult.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AssociateAlias -> `PUT
+  | AssociateDistributionTenantWebACL -> `PUT
+  | AssociateDistributionWebACL -> `PUT
+  | CopyDistribution -> `POST
+  | CreateAnycastIpList -> `POST
   | CreateCachePolicy -> `POST
   | CreateCloudFrontOriginAccessIdentity -> `POST
+  | CreateConnectionFunction -> `POST
+  | CreateConnectionGroup -> `POST
+  | CreateContinuousDeploymentPolicy -> `POST
   | CreateDistribution -> `POST
+  | CreateDistributionTenant -> `POST
   | CreateDistributionWithTags -> `POST
   | CreateFieldLevelEncryptionConfig -> `POST
   | CreateFieldLevelEncryptionProfile -> `POST
   | CreateFunction -> `POST
   | CreateInvalidation -> `POST
+  | CreateInvalidationForDistributionTenant -> `POST
   | CreateKeyGroup -> `POST
+  | CreateKeyValueStore -> `POST
   | CreateMonitoringSubscription -> `POST
+  | CreateOriginAccessControl -> `POST
   | CreateOriginRequestPolicy -> `POST
   | CreatePublicKey -> `POST
   | CreateRealtimeLogConfig -> `POST
   | CreateResponseHeadersPolicy -> `POST
   | CreateStreamingDistribution -> `POST
   | CreateStreamingDistributionWithTags -> `POST
+  | CreateTrustStore -> `POST
+  | CreateVpcOrigin -> `POST
+  | DeleteAnycastIpList -> `DELETE
   | DeleteCachePolicy -> `DELETE
   | DeleteCloudFrontOriginAccessIdentity -> `DELETE
+  | DeleteConnectionFunction -> `DELETE
+  | DeleteConnectionGroup -> `DELETE
+  | DeleteContinuousDeploymentPolicy -> `DELETE
   | DeleteDistribution -> `DELETE
+  | DeleteDistributionTenant -> `DELETE
   | DeleteFieldLevelEncryptionConfig -> `DELETE
   | DeleteFieldLevelEncryptionProfile -> `DELETE
   | DeleteFunction -> `DELETE
   | DeleteKeyGroup -> `DELETE
+  | DeleteKeyValueStore -> `DELETE
   | DeleteMonitoringSubscription -> `DELETE
+  | DeleteOriginAccessControl -> `DELETE
   | DeleteOriginRequestPolicy -> `DELETE
   | DeletePublicKey -> `DELETE
   | DeleteRealtimeLogConfig -> `POST
+  | DeleteResourcePolicy -> `POST
   | DeleteResponseHeadersPolicy -> `DELETE
   | DeleteStreamingDistribution -> `DELETE
+  | DeleteTrustStore -> `DELETE
+  | DeleteVpcOrigin -> `DELETE
+  | DescribeConnectionFunction -> `GET
   | DescribeFunction -> `GET
+  | DescribeKeyValueStore -> `GET
+  | DisassociateDistributionTenantWebACL -> `PUT
+  | DisassociateDistributionWebACL -> `PUT
+  | GetAnycastIpList -> `GET
   | GetCachePolicy -> `GET
   | GetCachePolicyConfig -> `GET
   | GetCloudFrontOriginAccessIdentity -> `GET
   | GetCloudFrontOriginAccessIdentityConfig -> `GET
+  | GetConnectionFunction -> `GET
+  | GetConnectionGroup -> `GET
+  | GetConnectionGroupByRoutingEndpoint -> `GET
+  | GetContinuousDeploymentPolicy -> `GET
+  | GetContinuousDeploymentPolicyConfig -> `GET
   | GetDistribution -> `GET
   | GetDistributionConfig -> `GET
+  | GetDistributionTenant -> `GET
+  | GetDistributionTenantByDomain -> `GET
   | GetFieldLevelEncryption -> `GET
   | GetFieldLevelEncryptionConfig -> `GET
   | GetFieldLevelEncryptionProfile -> `GET
   | GetFieldLevelEncryptionProfileConfig -> `GET
   | GetFunction -> `GET
   | GetInvalidation -> `GET
+  | GetInvalidationForDistributionTenant -> `GET
   | GetKeyGroup -> `GET
   | GetKeyGroupConfig -> `GET
+  | GetManagedCertificateDetails -> `GET
   | GetMonitoringSubscription -> `GET
+  | GetOriginAccessControl -> `GET
+  | GetOriginAccessControlConfig -> `GET
   | GetOriginRequestPolicy -> `GET
   | GetOriginRequestPolicyConfig -> `GET
   | GetPublicKey -> `GET
   | GetPublicKeyConfig -> `GET
   | GetRealtimeLogConfig -> `POST
+  | GetResourcePolicy -> `POST
   | GetResponseHeadersPolicy -> `GET
   | GetResponseHeadersPolicyConfig -> `GET
   | GetStreamingDistribution -> `GET
   | GetStreamingDistributionConfig -> `GET
+  | GetTrustStore -> `GET
+  | GetVpcOrigin -> `GET
+  | ListAnycastIpLists -> `GET
   | ListCachePolicies -> `GET
   | ListCloudFrontOriginAccessIdentities -> `GET
   | ListConflictingAliases -> `GET
+  | ListConnectionFunctions -> `POST
+  | ListConnectionGroups -> `POST
+  | ListContinuousDeploymentPolicies -> `GET
+  | ListDistributionTenants -> `POST
+  | ListDistributionTenantsByCustomization -> `POST
   | ListDistributions -> `GET
+  | ListDistributionsByAnycastIpListId -> `GET
   | ListDistributionsByCachePolicyId -> `GET
+  | ListDistributionsByConnectionFunction -> `GET
+  | ListDistributionsByConnectionMode -> `GET
   | ListDistributionsByKeyGroup -> `GET
   | ListDistributionsByOriginRequestPolicyId -> `GET
+  | ListDistributionsByOwnedResource -> `GET
   | ListDistributionsByRealtimeLogConfig -> `POST
   | ListDistributionsByResponseHeadersPolicyId -> `GET
+  | ListDistributionsByTrustStore -> `GET
+  | ListDistributionsByVpcOriginId -> `GET
   | ListDistributionsByWebACLId -> `GET
+  | ListDomainConflicts -> `POST
   | ListFieldLevelEncryptionConfigs -> `GET
   | ListFieldLevelEncryptionProfiles -> `GET
   | ListFunctions -> `GET
   | ListInvalidations -> `GET
+  | ListInvalidationsForDistributionTenant -> `GET
   | ListKeyGroups -> `GET
+  | ListKeyValueStores -> `GET
+  | ListOriginAccessControls -> `GET
   | ListOriginRequestPolicies -> `GET
   | ListPublicKeys -> `GET
   | ListRealtimeLogConfigs -> `GET
   | ListResponseHeadersPolicies -> `GET
   | ListStreamingDistributions -> `GET
   | ListTagsForResource -> `GET
+  | ListTrustStores -> `POST
+  | ListVpcOrigins -> `GET
+  | PublishConnectionFunction -> `POST
   | PublishFunction -> `POST
+  | PutResourcePolicy -> `POST
   | TagResource -> `POST
+  | TestConnectionFunction -> `POST
   | TestFunction -> `POST
   | UntagResource -> `POST
+  | UpdateAnycastIpList -> `PUT
   | UpdateCachePolicy -> `PUT
   | UpdateCloudFrontOriginAccessIdentity -> `PUT
+  | UpdateConnectionFunction -> `PUT
+  | UpdateConnectionGroup -> `PUT
+  | UpdateContinuousDeploymentPolicy -> `PUT
   | UpdateDistribution -> `PUT
+  | UpdateDistributionTenant -> `PUT
+  | UpdateDistributionWithStagingConfig -> `PUT
+  | UpdateDomainAssociation -> `POST
   | UpdateFieldLevelEncryptionConfig -> `PUT
   | UpdateFieldLevelEncryptionProfile -> `PUT
   | UpdateFunction -> `PUT
   | UpdateKeyGroup -> `PUT
+  | UpdateKeyValueStore -> `PUT
+  | UpdateOriginAccessControl -> `PUT
   | UpdateOriginRequestPolicy -> `PUT
   | UpdatePublicKey -> `PUT
   | UpdateRealtimeLogConfig -> `PUT
   | UpdateResponseHeadersPolicy -> `PUT
   | UpdateStreamingDistribution -> `PUT
+  | UpdateTrustStore -> `PUT
+  | UpdateVpcOrigin -> `PUT
+  | VerifyDnsConfiguration -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -336,13 +600,36 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (String_.to_header
                   x.AssociateAliasRequest.targetDistributionId))
             (List.filter_opt [Some ("Alias", (String_.to_header x.alias))])
+      | AssociateDistributionTenantWebACL ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/distribution-tenant/%s/associate-web-acl"
+            (String_.to_header x.AssociateDistributionTenantWebACLRequest.id)
+      | AssociateDistributionWebACL ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/distribution/%s/associate-web-acl"
+            (String_.to_header x.AssociateDistributionWebACLRequest.id)
+      | CopyDistribution ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/distribution/%s/copy"
+            (String_.to_header
+               x.CopyDistributionRequest.primaryDistributionId)
+      | CreateAnycastIpList ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/anycast-ip-list"
       | CreateCachePolicy ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/cache-policy"
       | CreateCloudFrontOriginAccessIdentity ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/origin-access-identity/cloudfront"
+      | CreateConnectionFunction ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/connection-function"
+      | CreateConnectionGroup ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/connection-group"
+      | CreateContinuousDeploymentPolicy ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/continuous-deployment-policy"
       | CreateDistribution ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/distribution"
+      | CreateDistributionTenant ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/distribution-tenant"
       | CreateDistributionWithTags ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/distribution?WithTags"
@@ -358,13 +645,23 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/distribution/%s/invalidation"
             (String_.to_header x.CreateInvalidationRequest.distributionId)
+      | CreateInvalidationForDistributionTenant ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/distribution-tenant/%s/invalidation"
+            (String_.to_header
+               x.CreateInvalidationForDistributionTenantRequest.id)
       | CreateKeyGroup ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/key-group"
+      | CreateKeyValueStore ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/key-value-store"
       | CreateMonitoringSubscription ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/distributions/%s/monitoring-subscription"
             (String_.to_header
                x.CreateMonitoringSubscriptionRequest.distributionId)
+      | CreateOriginAccessControl ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/origin-access-control"
       | CreateOriginRequestPolicy ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/origin-request-policy"
@@ -381,6 +678,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateStreamingDistributionWithTags ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/streaming-distribution?WithTags"
+      | CreateTrustStore ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/trust-store"
+      | CreateVpcOrigin ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/vpc-origin"
+      | DeleteAnycastIpList ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/anycast-ip-list/%s"
+            (String_.to_header x.DeleteAnycastIpListRequest.id)
       | DeleteCachePolicy ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/cache-policy/%s"
             (String_.to_header x.DeleteCachePolicyRequest.id)
@@ -389,9 +693,24 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/2020-05-31/origin-access-identity/cloudfront/%s"
             (String_.to_header
                x.DeleteCloudFrontOriginAccessIdentityRequest.id)
+      | DeleteConnectionFunction ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/connection-function/%s"
+            (ResourceId.to_header x.DeleteConnectionFunctionRequest.id)
+      | DeleteConnectionGroup ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/connection-group/%s"
+            (String_.to_header x.DeleteConnectionGroupRequest.id)
+      | DeleteContinuousDeploymentPolicy ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/continuous-deployment-policy/%s"
+            (String_.to_header x.DeleteContinuousDeploymentPolicyRequest.id)
       | DeleteDistribution ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/distribution/%s"
             (String_.to_header x.DeleteDistributionRequest.id)
+      | DeleteDistributionTenant ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/distribution-tenant/%s"
+            (String_.to_header x.DeleteDistributionTenantRequest.id)
       | DeleteFieldLevelEncryptionConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/field-level-encryption/%s"
@@ -402,15 +721,22 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (String_.to_header x.DeleteFieldLevelEncryptionProfileRequest.id)
       | DeleteFunction ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/function/%s"
-            (String_.to_header x.DeleteFunctionRequest.name)
+            (FunctionName.to_header x.DeleteFunctionRequest.name)
       | DeleteKeyGroup ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/key-group/%s"
             (String_.to_header x.DeleteKeyGroupRequest.id)
+      | DeleteKeyValueStore ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/key-value-store/%s"
+            (KeyValueStoreName.to_header x.DeleteKeyValueStoreRequest.name)
       | DeleteMonitoringSubscription ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/distributions/%s/monitoring-subscription"
             (String_.to_header
                x.DeleteMonitoringSubscriptionRequest.distributionId)
+      | DeleteOriginAccessControl ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/origin-access-control/%s"
+            (String_.to_header x.DeleteOriginAccessControlRequest.id)
       | DeleteOriginRequestPolicy ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/origin-request-policy/%s"
@@ -420,7 +746,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (String_.to_header x.DeletePublicKeyRequest.id)
       | DeleteRealtimeLogConfig ->
           (Format.kasprintf Uri.of_string)
-            "/2020-05-31/delete-realtime-log-config/"
+            "/2020-05-31/delete-realtime-log-config"
+      | DeleteResourcePolicy ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/delete-resource-policy"
       | DeleteResponseHeadersPolicy ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/response-headers-policy/%s"
@@ -429,15 +758,46 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/streaming-distribution/%s"
             (String_.to_header x.DeleteStreamingDistributionRequest.id)
-      | DescribeFunction ->
+      | DeleteTrustStore ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/trust-store/%s"
+            (ResourceId.to_header x.DeleteTrustStoreRequest.id)
+      | DeleteVpcOrigin ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/vpc-origin/%s"
+            (String_.to_header x.DeleteVpcOriginRequest.id)
+      | DescribeConnectionFunction ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
-               "/2020-05-31/function/%s/describe"
-               (String_.to_header x.DescribeFunctionRequest.name))
+               "/2020-05-31/connection-function/%s/describe"
+               (String_.to_header
+                  x.DescribeConnectionFunctionRequest.identifier))
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("Stage", (FunctionStage.to_header v)))
                   x.stage])
+      | DescribeFunction ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2020-05-31/function/%s/describe"
+               (FunctionName.to_header x.DescribeFunctionRequest.name))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("Stage", (FunctionStage.to_header v)))
+                  x.stage])
+      | DescribeKeyValueStore ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/key-value-store/%s"
+            (KeyValueStoreName.to_header x.DescribeKeyValueStoreRequest.name)
+      | DisassociateDistributionTenantWebACL ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/distribution-tenant/%s/disassociate-web-acl"
+            (String_.to_header
+               x.DisassociateDistributionTenantWebACLRequest.id)
+      | DisassociateDistributionWebACL ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/distribution/%s/disassociate-web-acl"
+            (String_.to_header x.DisassociateDistributionWebACLRequest.id)
+      | GetAnycastIpList ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/anycast-ip-list/%s"
+            (String_.to_header x.GetAnycastIpListRequest.id)
       | GetCachePolicy ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/cache-policy/%s"
             (String_.to_header x.GetCachePolicyRequest.id)
@@ -454,6 +814,33 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/2020-05-31/origin-access-identity/cloudfront/%s/config"
             (String_.to_header
                x.GetCloudFrontOriginAccessIdentityConfigRequest.id)
+      | GetConnectionFunction ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2020-05-31/connection-function/%s"
+               (String_.to_header x.GetConnectionFunctionRequest.identifier))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("Stage", (FunctionStage.to_header v)))
+                  x.stage])
+      | GetConnectionGroup ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/connection-group/%s"
+            (String_.to_header x.GetConnectionGroupRequest.identifier)
+      | GetConnectionGroupByRoutingEndpoint ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/2020-05-31/connection-group")
+            (List.filter_opt
+               [Some
+                  ("RoutingEndpoint", (String_.to_header x.routingEndpoint))])
+      | GetContinuousDeploymentPolicy ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/continuous-deployment-policy/%s"
+            (String_.to_header x.GetContinuousDeploymentPolicyRequest.id)
+      | GetContinuousDeploymentPolicyConfig ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/continuous-deployment-policy/%s/config"
+            (String_.to_header
+               x.GetContinuousDeploymentPolicyConfigRequest.id)
       | GetDistribution ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/distribution/%s"
             (String_.to_header x.GetDistributionRequest.id)
@@ -461,6 +848,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/distribution/%s/config"
             (String_.to_header x.GetDistributionConfigRequest.id)
+      | GetDistributionTenant ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/distribution-tenant/%s"
+            (String_.to_header x.GetDistributionTenantRequest.identifier)
+      | GetDistributionTenantByDomain ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2020-05-31/distribution-tenant")
+            (List.filter_opt [Some ("domain", (String_.to_header x.domain))])
       | GetFieldLevelEncryption ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/field-level-encryption/%s"
@@ -481,7 +877,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetFunction ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2020-05-31/function/%s"
-               (String_.to_header x.GetFunctionRequest.name))
+               (FunctionName.to_header x.GetFunctionRequest.name))
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("Stage", (FunctionStage.to_header v)))
@@ -491,17 +887,37 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/2020-05-31/distribution/%s/invalidation/%s"
             (String_.to_header x.GetInvalidationRequest.distributionId)
             (String_.to_header x.GetInvalidationRequest.id)
+      | GetInvalidationForDistributionTenant ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/distribution-tenant/%s/invalidation/%s"
+            (String_.to_header
+               x.GetInvalidationForDistributionTenantRequest.distributionTenantId)
+            (String_.to_header
+               x.GetInvalidationForDistributionTenantRequest.id)
       | GetKeyGroup ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/key-group/%s"
             (String_.to_header x.GetKeyGroupRequest.id)
       | GetKeyGroupConfig ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/key-group/%s/config"
             (String_.to_header x.GetKeyGroupConfigRequest.id)
+      | GetManagedCertificateDetails ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/managed-certificate/%s"
+            (String_.to_header
+               x.GetManagedCertificateDetailsRequest.identifier)
       | GetMonitoringSubscription ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/distributions/%s/monitoring-subscription"
             (String_.to_header
                x.GetMonitoringSubscriptionRequest.distributionId)
+      | GetOriginAccessControl ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/origin-access-control/%s"
+            (String_.to_header x.GetOriginAccessControlRequest.id)
+      | GetOriginAccessControlConfig ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/origin-access-control/%s/config"
+            (String_.to_header x.GetOriginAccessControlConfigRequest.id)
       | GetOriginRequestPolicy ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/origin-request-policy/%s"
@@ -518,7 +934,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (String_.to_header x.GetPublicKeyConfigRequest.id)
       | GetRealtimeLogConfig ->
           (Format.kasprintf Uri.of_string)
-            "/2020-05-31/get-realtime-log-config/"
+            "/2020-05-31/get-realtime-log-config"
+      | GetResourcePolicy ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/get-resource-policy"
       | GetResponseHeadersPolicy ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/response-headers-policy/%s"
@@ -535,6 +953,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/streaming-distribution/%s/config"
             (String_.to_header x.GetStreamingDistributionConfigRequest.id)
+      | GetTrustStore ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/trust-store/%s"
+            (String_.to_header x.GetTrustStoreRequest.identifier)
+      | GetVpcOrigin ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/vpc-origin/%s"
+            (String_.to_header x.GetVpcOriginRequest.id)
+      | ListAnycastIpLists ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/2020-05-31/anycast-ip-list")
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
+                  x.marker;
+               Option.map ~f:(fun v -> ("MaxItems", (Integer.to_header v)))
+                 x.maxItems])
       | ListCachePolicies ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2020-05-31/cache-policy")
@@ -570,9 +1002,38 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                        ("MaxItems",
                          (ListConflictingAliasesMaxItemsInteger.to_header v)))
                  x.maxItems])
+      | ListConnectionFunctions ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/connection-functions"
+      | ListConnectionGroups ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/connection-groups"
+      | ListContinuousDeploymentPolicies ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2020-05-31/continuous-deployment-policy")
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
+                  x.marker;
+               Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
+                 x.maxItems])
+      | ListDistributionTenants ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/distribution-tenants"
+      | ListDistributionTenantsByCustomization ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/distribution-tenants-by-customization"
       | ListDistributions ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2020-05-31/distribution")
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
+                  x.marker;
+               Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
+                 x.maxItems])
+      | ListDistributionsByAnycastIpListId ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2020-05-31/distributionsByAnycastIpListId/%s"
+               (String_.to_header
+                  x.ListDistributionsByAnycastIpListIdRequest.anycastIpListId))
             (List.filter_opt
                [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
                   x.marker;
@@ -588,6 +1049,29 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
+                 x.maxItems])
+      | ListDistributionsByConnectionFunction ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2020-05-31/distributionsByConnectionFunction")
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
+                  x.marker;
+               Option.map ~f:(fun v -> ("MaxItems", (Integer.to_header v)))
+                 x.maxItems;
+               Some
+                 ("ConnectionFunctionIdentifier",
+                   (String_.to_header x.connectionFunctionIdentifier))])
+      | ListDistributionsByConnectionMode ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2020-05-31/distributionsByConnectionMode/%s"
+               (ConnectionMode.to_header
+                  x.ListDistributionsByConnectionModeRequest.connectionMode))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
+                  x.marker;
+               Option.map ~f:(fun v -> ("MaxItems", (Integer.to_header v)))
                  x.maxItems])
       | ListDistributionsByKeyGroup ->
           Uri.add_query_params'
@@ -611,15 +1095,49 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
+      | ListDistributionsByOwnedResource ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2020-05-31/distributionsByOwnedResource/%s"
+               (String_.to_header
+                  x.ListDistributionsByOwnedResourceRequest.resourceArn))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
+                  x.marker;
+               Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
+                 x.maxItems])
       | ListDistributionsByRealtimeLogConfig ->
           (Format.kasprintf Uri.of_string)
-            "/2020-05-31/distributionsByRealtimeLogConfig/"
+            "/2020-05-31/distributionsByRealtimeLogConfig"
       | ListDistributionsByResponseHeadersPolicyId ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/distributionsByResponseHeadersPolicyId/%s"
                (String_.to_header
                   x.ListDistributionsByResponseHeadersPolicyIdRequest.responseHeadersPolicyId))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
+                  x.marker;
+               Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
+                 x.maxItems])
+      | ListDistributionsByTrustStore ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2020-05-31/distributionsByTrustStore")
+            (List.filter_opt
+               [Some
+                  ("TrustStoreIdentifier",
+                    (String_.to_header x.trustStoreIdentifier));
+               Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
+                 x.marker;
+               Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
+                 x.maxItems])
+      | ListDistributionsByVpcOriginId ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2020-05-31/distributionsByVpcOriginId/%s"
+               (String_.to_header
+                  x.ListDistributionsByVpcOriginIdRequest.vpcOriginId))
             (List.filter_opt
                [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
                   x.marker;
@@ -636,6 +1154,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
+      | ListDomainConflicts ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/domain-conflicts"
       | ListFieldLevelEncryptionConfigs ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -675,9 +1195,39 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
                  x.maxItems])
+      | ListInvalidationsForDistributionTenant ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2020-05-31/distribution-tenant/%s/invalidation"
+               (String_.to_header
+                  x.ListInvalidationsForDistributionTenantRequest.id))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
+                  x.marker;
+               Option.map ~f:(fun v -> ("MaxItems", (Integer.to_header v)))
+                 x.maxItems])
       | ListKeyGroups ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2020-05-31/key-group")
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
+                  x.marker;
+               Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
+                 x.maxItems])
+      | ListKeyValueStores ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/2020-05-31/key-value-store")
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
+                  x.marker;
+               Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
+                 x.maxItems;
+               Option.map ~f:(fun v -> ("Status", (String_.to_header v)))
+                 x.status])
+      | ListOriginAccessControls ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2020-05-31/origin-access-control")
             (List.filter_opt
                [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
                   x.marker;
@@ -740,24 +1290,47 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             ((Format.kasprintf Uri.of_string) "/2020-05-31/tagging")
             (List.filter_opt
                [Some ("Resource", (ResourceARN.to_header x.resource))])
+      | ListTrustStores ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/trust-stores"
+      | ListVpcOrigins ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/2020-05-31/vpc-origin")
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
+                  x.marker;
+               Option.map ~f:(fun v -> ("MaxItems", (String_.to_header v)))
+                 x.maxItems])
+      | PublishConnectionFunction ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/connection-function/%s/publish"
+            (ResourceId.to_header x.PublishConnectionFunctionRequest.id)
       | PublishFunction ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/function/%s/publish"
-            (String_.to_header x.PublishFunctionRequest.name)
+            (FunctionName.to_header x.PublishFunctionRequest.name)
+      | PutResourcePolicy ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/put-resource-policy"
       | TagResource ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/tagging?Operation=Tag")
             (List.filter_opt
                [Some ("Resource", (ResourceARN.to_header x.resource))])
+      | TestConnectionFunction ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/connection-function/%s/test"
+            (ResourceId.to_header x.TestConnectionFunctionRequest.id)
       | TestFunction ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/function/%s/test"
-            (String_.to_header x.TestFunctionRequest.name)
+            (FunctionName.to_header x.TestFunctionRequest.name)
       | UntagResource ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2020-05-31/tagging?Operation=Untag")
             (List.filter_opt
                [Some ("Resource", (ResourceARN.to_header x.resource))])
+      | UpdateAnycastIpList ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/anycast-ip-list/%s"
+            (String_.to_header x.UpdateAnycastIpListRequest.id)
       | UpdateCachePolicy ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/cache-policy/%s"
             (String_.to_header x.UpdateCachePolicyRequest.id)
@@ -766,10 +1339,38 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/2020-05-31/origin-access-identity/cloudfront/%s/config"
             (String_.to_header
                x.UpdateCloudFrontOriginAccessIdentityRequest.id)
+      | UpdateConnectionFunction ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/connection-function/%s"
+            (ResourceId.to_header x.UpdateConnectionFunctionRequest.id)
+      | UpdateConnectionGroup ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/connection-group/%s"
+            (String_.to_header x.UpdateConnectionGroupRequest.id)
+      | UpdateContinuousDeploymentPolicy ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/continuous-deployment-policy/%s"
+            (String_.to_header x.UpdateContinuousDeploymentPolicyRequest.id)
       | UpdateDistribution ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/distribution/%s/config"
             (String_.to_header x.UpdateDistributionRequest.id)
+      | UpdateDistributionTenant ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/distribution-tenant/%s"
+            (String_.to_header x.UpdateDistributionTenantRequest.id)
+      | UpdateDistributionWithStagingConfig ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2020-05-31/distribution/%s/promote-staging-config"
+               (String_.to_header
+                  x.UpdateDistributionWithStagingConfigRequest.id))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("StagingDistributionId", (String_.to_header v)))
+                  x.stagingDistributionId])
+      | UpdateDomainAssociation ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/domain-association"
       | UpdateFieldLevelEncryptionConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/field-level-encryption/%s/config"
@@ -780,10 +1381,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (String_.to_header x.UpdateFieldLevelEncryptionProfileRequest.id)
       | UpdateFunction ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/function/%s"
-            (String_.to_header x.UpdateFunctionRequest.name)
+            (FunctionName.to_header x.UpdateFunctionRequest.name)
       | UpdateKeyGroup ->
           (Format.kasprintf Uri.of_string) "/2020-05-31/key-group/%s"
             (String_.to_header x.UpdateKeyGroupRequest.id)
+      | UpdateKeyValueStore ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/key-value-store/%s"
+            (KeyValueStoreName.to_header x.UpdateKeyValueStoreRequest.name)
+      | UpdateOriginAccessControl ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/origin-access-control/%s/config"
+            (String_.to_header x.UpdateOriginAccessControlRequest.id)
       | UpdateOriginRequestPolicy ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/origin-request-policy/%s"
@@ -792,7 +1400,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/2020-05-31/public-key/%s/config"
             (String_.to_header x.UpdatePublicKeyRequest.id)
       | UpdateRealtimeLogConfig ->
-          (Format.kasprintf Uri.of_string) "/2020-05-31/realtime-log-config/"
+          (Format.kasprintf Uri.of_string) "/2020-05-31/realtime-log-config"
       | UpdateResponseHeadersPolicy ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/response-headers-policy/%s"
@@ -800,12 +1408,27 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateStreamingDistribution ->
           (Format.kasprintf Uri.of_string)
             "/2020-05-31/streaming-distribution/%s/config"
-            (String_.to_header x.UpdateStreamingDistributionRequest.id))
+            (String_.to_header x.UpdateStreamingDistributionRequest.id)
+      | UpdateTrustStore ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/trust-store/%s"
+            (ResourceId.to_header x.UpdateTrustStoreRequest.id)
+      | UpdateVpcOrigin ->
+          (Format.kasprintf Uri.of_string) "/2020-05-31/vpc-origin/%s"
+            (String_.to_header x.UpdateVpcOriginRequest.id)
+      | VerifyDnsConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/2020-05-31/verify-dns-configuration")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
   | AssociateAlias -> Awso.Http.Request.make (method_of_endpoint endp)
+  | AssociateDistributionTenantWebACL ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | AssociateDistributionWebACL ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | CopyDistribution -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateAnycastIpList -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateCachePolicy ->
       let body =
         (fun param ->
@@ -823,6 +1446,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
              |> (String.concat ~sep:""))
           req.cloudFrontOriginAccessIdentityConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
+  | CreateConnectionFunction ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateConnectionGroup -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateContinuousDeploymentPolicy ->
+      let body =
+        (fun param ->
+           (((param |> ContinuousDeploymentPolicyConfig.to_value) |>
+               (Awso.Xml.of_value "CreateContinuousDeploymentPolicy"))
+              |> (List.map ~f:Awso.Xml.to_string))
+             |> (String.concat ~sep:"")) req.continuousDeploymentPolicyConfig in
+      Awso.Http.Request.make ~body (method_of_endpoint endp)
   | CreateDistribution ->
       let body =
         (fun param ->
@@ -831,6 +1465,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.distributionConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
+  | CreateDistributionTenant ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | CreateDistributionWithTags ->
       let body =
         (fun param ->
@@ -865,6 +1501,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.invalidationBatch in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
+  | CreateInvalidationForDistributionTenant ->
+      let body =
+        (fun param ->
+           (((param |> InvalidationBatch.to_value) |>
+               (Awso.Xml.of_value "CreateInvalidationForDistributionTenant"))
+              |> (List.map ~f:Awso.Xml.to_string))
+             |> (String.concat ~sep:"")) req.invalidationBatch in
+      Awso.Http.Request.make ~body (method_of_endpoint endp)
   | CreateKeyGroup ->
       let body =
         (fun param ->
@@ -873,6 +1517,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.keyGroupConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
+  | CreateKeyValueStore -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateMonitoringSubscription ->
       let body =
         (fun param ->
@@ -880,6 +1525,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                (Awso.Xml.of_value "CreateMonitoringSubscription"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.monitoringSubscription in
+      Awso.Http.Request.make ~body (method_of_endpoint endp)
+  | CreateOriginAccessControl ->
+      let body =
+        (fun param ->
+           (((param |> OriginAccessControlConfig.to_value) |>
+               (Awso.Xml.of_value "CreateOriginAccessControl"))
+              |> (List.map ~f:Awso.Xml.to_string))
+             |> (String.concat ~sep:"")) req.originAccessControlConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
   | CreateOriginRequestPolicy ->
       let body =
@@ -924,36 +1577,71 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
              |> (String.concat ~sep:""))
           req.streamingDistributionConfigWithTags in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
+  | CreateTrustStore -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateVpcOrigin -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteAnycastIpList -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteCachePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteCloudFrontOriginAccessIdentity ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteConnectionFunction ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteConnectionGroup -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteContinuousDeploymentPolicy ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteDistribution -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteDistributionTenant ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteFieldLevelEncryptionConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteFieldLevelEncryptionProfile ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteFunction -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteKeyGroup -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteKeyValueStore -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteMonitoringSubscription ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteOriginAccessControl ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteOriginRequestPolicy ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeletePublicKey -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteRealtimeLogConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteResourcePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteResponseHeadersPolicy ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteStreamingDistribution ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteTrustStore -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteVpcOrigin -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DescribeConnectionFunction ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeFunction -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DescribeKeyValueStore -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DisassociateDistributionTenantWebACL ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DisassociateDistributionWebACL ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | GetAnycastIpList -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetCachePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetCachePolicyConfig -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetCloudFrontOriginAccessIdentity ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | GetCloudFrontOriginAccessIdentityConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | GetConnectionFunction -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetConnectionGroup -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetConnectionGroupByRoutingEndpoint ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | GetContinuousDeploymentPolicy ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | GetContinuousDeploymentPolicyConfig ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | GetDistribution -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetDistributionConfig -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetDistributionTenant -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetDistributionTenantByDomain ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | GetFieldLevelEncryption ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | GetFieldLevelEncryptionConfig ->
@@ -964,9 +1652,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make (method_of_endpoint endp)
   | GetFunction -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetInvalidation -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetInvalidationForDistributionTenant ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | GetKeyGroup -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetKeyGroupConfig -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetManagedCertificateDetails ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | GetMonitoringSubscription ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | GetOriginAccessControl ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | GetOriginAccessControlConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | GetOriginRequestPolicy ->
       Awso.Http.Request.make (method_of_endpoint endp)
@@ -975,6 +1671,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetPublicKey -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetPublicKeyConfig -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetRealtimeLogConfig -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetResourcePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetResponseHeadersPolicy ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | GetResponseHeadersPolicyConfig ->
@@ -983,31 +1680,61 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make (method_of_endpoint endp)
   | GetStreamingDistributionConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | GetTrustStore -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetVpcOrigin -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ListAnycastIpLists -> Awso.Http.Request.make (method_of_endpoint endp)
   | ListCachePolicies -> Awso.Http.Request.make (method_of_endpoint endp)
   | ListCloudFrontOriginAccessIdentities ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | ListConflictingAliases ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | ListConnectionFunctions ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | ListConnectionGroups -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ListContinuousDeploymentPolicies ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | ListDistributionTenants ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | ListDistributionTenantsByCustomization ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | ListDistributions -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ListDistributionsByAnycastIpListId ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | ListDistributionsByCachePolicyId ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | ListDistributionsByConnectionFunction ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | ListDistributionsByConnectionMode ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | ListDistributionsByKeyGroup ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | ListDistributionsByOriginRequestPolicyId ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | ListDistributionsByOwnedResource ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | ListDistributionsByRealtimeLogConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | ListDistributionsByResponseHeadersPolicyId ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | ListDistributionsByTrustStore ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | ListDistributionsByVpcOriginId ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | ListDistributionsByWebACLId ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | ListDomainConflicts -> Awso.Http.Request.make (method_of_endpoint endp)
   | ListFieldLevelEncryptionConfigs ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | ListFieldLevelEncryptionProfiles ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | ListFunctions -> Awso.Http.Request.make (method_of_endpoint endp)
   | ListInvalidations -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ListInvalidationsForDistributionTenant ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | ListKeyGroups -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ListKeyValueStores -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ListOriginAccessControls ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | ListOriginRequestPolicies ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | ListPublicKeys -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -1018,7 +1745,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListStreamingDistributions ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | ListTagsForResource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ListTrustStores -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ListVpcOrigins -> Awso.Http.Request.make (method_of_endpoint endp)
+  | PublishConnectionFunction ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | PublishFunction -> Awso.Http.Request.make (method_of_endpoint endp)
+  | PutResourcePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | TagResource ->
       let body =
         (fun param ->
@@ -1026,6 +1758,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.tags in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
+  | TestConnectionFunction ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | TestFunction -> Awso.Http.Request.make (method_of_endpoint endp)
   | UntagResource ->
       let body =
@@ -1035,6 +1769,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.tagKeys in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
+  | UpdateAnycastIpList -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateCachePolicy ->
       let body =
         (fun param ->
@@ -1052,6 +1787,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
              |> (String.concat ~sep:""))
           req.cloudFrontOriginAccessIdentityConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
+  | UpdateConnectionFunction ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateConnectionGroup -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateContinuousDeploymentPolicy ->
+      let body =
+        (fun param ->
+           (((param |> ContinuousDeploymentPolicyConfig.to_value) |>
+               (Awso.Xml.of_value "UpdateContinuousDeploymentPolicy"))
+              |> (List.map ~f:Awso.Xml.to_string))
+             |> (String.concat ~sep:"")) req.continuousDeploymentPolicyConfig in
+      Awso.Http.Request.make ~body (method_of_endpoint endp)
   | UpdateDistribution ->
       let body =
         (fun param ->
@@ -1060,6 +1806,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.distributionConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
+  | UpdateDistributionTenant ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateDistributionWithStagingConfig ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateDomainAssociation ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateFieldLevelEncryptionConfig ->
       let body =
         (fun param ->
@@ -1085,6 +1837,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                (Awso.Xml.of_value "UpdateKeyGroup"))
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.keyGroupConfig in
+      Awso.Http.Request.make ~body (method_of_endpoint endp)
+  | UpdateKeyValueStore -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateOriginAccessControl ->
+      let body =
+        (fun param ->
+           (((param |> OriginAccessControlConfig.to_value) |>
+               (Awso.Xml.of_value "UpdateOriginAccessControl"))
+              |> (List.map ~f:Awso.Xml.to_string))
+             |> (String.concat ~sep:"")) req.originAccessControlConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
   | UpdateOriginRequestPolicy ->
       let body =
@@ -1120,6 +1881,25 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.streamingDistributionConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
+  | UpdateTrustStore ->
+      let body =
+        Option.map req.caCertificatesBundleSource
+          ~f:(fun param ->
+                (((param |> CaCertificatesBundleSource.to_value) |>
+                    (Awso.Xml.of_value "UpdateTrustStore"))
+                   |> (List.map ~f:Awso.Xml.to_string))
+                  |> (String.concat ~sep:"")) in
+      Awso.Http.Request.make ?body (method_of_endpoint endp)
+  | UpdateVpcOrigin ->
+      let body =
+        (fun param ->
+           (((param |> VpcOriginEndpointConfig.to_value) |>
+               (Awso.Xml.of_value "UpdateVpcOrigin"))
+              |> (List.map ~f:Awso.Xml.to_string))
+             |> (String.concat ~sep:"")) req.vpcOriginEndpointConfig in
+      Awso.Http.Request.make ~body (method_of_endpoint endp)
+  | VerifyDnsConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -1155,6 +1935,41 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   match endpoint with
   | AssociateAlias ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | AssociateDistributionTenantWebACL ->
+      if is_success
+      then
+        Ok
+          (AssociateDistributionTenantWebACLResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateDistributionTenantWebACLResult.error_of_xml))
+  | AssociateDistributionWebACL ->
+      if is_success
+      then
+        Ok (AssociateDistributionWebACLResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateDistributionWebACLResult.error_of_xml))
+  | CopyDistribution ->
+      if is_success
+      then
+        let body = Distribution.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CopyDistributionResult.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some CopyDistributionResult.error_of_xml))
+  | CreateAnycastIpList ->
+      if is_success
+      then
+        let body = AnycastIpList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateAnycastIpListResult.of_header_and_body (headers, body))
+      else
+        Error (parse_aws_error (Some CreateAnycastIpListResult.error_of_xml))
   | CreateCachePolicy ->
       if is_success
       then
@@ -1179,6 +1994,42 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateCloudFrontOriginAccessIdentityResult.error_of_xml))
+  | CreateConnectionFunction ->
+      if is_success
+      then
+        let body =
+          ConnectionFunctionSummary.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CreateConnectionFunctionResult.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some CreateConnectionFunctionResult.error_of_xml))
+  | CreateConnectionGroup ->
+      if is_success
+      then
+        let body = ConnectionGroup.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateConnectionGroupResult.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some CreateConnectionGroupResult.error_of_xml))
+  | CreateContinuousDeploymentPolicy ->
+      if is_success
+      then
+        let body =
+          ContinuousDeploymentPolicy.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CreateContinuousDeploymentPolicyResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateContinuousDeploymentPolicyResult.error_of_xml))
   | CreateDistribution ->
       if is_success
       then
@@ -1188,6 +2039,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateDistributionResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some CreateDistributionResult.error_of_xml))
+  | CreateDistributionTenant ->
+      if is_success
+      then
+        let body =
+          DistributionTenant.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CreateDistributionTenantResult.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some CreateDistributionTenantResult.error_of_xml))
   | CreateDistributionWithTags ->
       if is_success
       then
@@ -1247,6 +2110,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateInvalidationResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some CreateInvalidationResult.error_of_xml))
+  | CreateInvalidationForDistributionTenant ->
+      if is_success
+      then
+        let body = Invalidation.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CreateInvalidationForDistributionTenantResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateInvalidationForDistributionTenantResult.error_of_xml))
   | CreateKeyGroup ->
       if is_success
       then
@@ -1255,6 +2131,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (CreateKeyGroupResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some CreateKeyGroupResult.error_of_xml))
+  | CreateKeyValueStore ->
+      if is_success
+      then
+        let body = KeyValueStore.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateKeyValueStoreResult.of_header_and_body (headers, body))
+      else
+        Error (parse_aws_error (Some CreateKeyValueStoreResult.error_of_xml))
   | CreateMonitoringSubscription ->
       if is_success
       then
@@ -1269,6 +2154,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateMonitoringSubscriptionResult.error_of_xml))
+  | CreateOriginAccessControl ->
+      if is_success
+      then
+        let body =
+          OriginAccessControl.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CreateOriginAccessControlResult.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateOriginAccessControlResult.error_of_xml))
   | CreateOriginRequestPolicy ->
       if is_success
       then
@@ -1338,11 +2236,37 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateStreamingDistributionWithTagsResult.error_of_xml))
+  | CreateTrustStore ->
+      if is_success
+      then
+        let body = TrustStore.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateTrustStoreResult.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some CreateTrustStoreResult.error_of_xml))
+  | CreateVpcOrigin ->
+      if is_success
+      then
+        let body = VpcOrigin.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateVpcOriginResult.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some CreateVpcOriginResult.error_of_xml))
+  | DeleteAnycastIpList ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteCachePolicy ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteCloudFrontOriginAccessIdentity ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteConnectionFunction ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteConnectionGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteContinuousDeploymentPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteDistribution ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteDistributionTenant ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteFieldLevelEncryptionConfig ->
       if is_success then Ok () else Error (parse_aws_error None)
@@ -1351,6 +2275,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DeleteFunction ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteKeyGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteKeyValueStore ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteMonitoringSubscription ->
       if is_success
@@ -1364,16 +2290,44 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteMonitoringSubscriptionResult.error_of_xml))
+  | DeleteOriginAccessControl ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteOriginRequestPolicy ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeletePublicKey ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteRealtimeLogConfig ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteResourcePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteResponseHeadersPolicy ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteStreamingDistribution ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteTrustStore ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteVpcOrigin ->
+      if is_success
+      then
+        let body = VpcOrigin.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteVpcOriginResult.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some DeleteVpcOriginResult.error_of_xml))
+  | DescribeConnectionFunction ->
+      if is_success
+      then
+        let body =
+          ConnectionFunctionSummary.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DescribeConnectionFunctionResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeConnectionFunctionResult.error_of_xml))
   | DescribeFunction ->
       if is_success
       then
@@ -1382,6 +2336,43 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DescribeFunctionResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some DescribeFunctionResult.error_of_xml))
+  | DescribeKeyValueStore ->
+      if is_success
+      then
+        let body = KeyValueStore.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DescribeKeyValueStoreResult.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some DescribeKeyValueStoreResult.error_of_xml))
+  | DisassociateDistributionTenantWebACL ->
+      if is_success
+      then
+        Ok
+          (DisassociateDistributionTenantWebACLResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateDistributionTenantWebACLResult.error_of_xml))
+  | DisassociateDistributionWebACL ->
+      if is_success
+      then
+        Ok
+          (DisassociateDistributionWebACLResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateDistributionWebACLResult.error_of_xml))
+  | GetAnycastIpList ->
+      if is_success
+      then
+        let body = AnycastIpList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetAnycastIpListResult.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some GetAnycastIpListResult.error_of_xml))
   | GetCachePolicy ->
       if is_success
       then
@@ -1430,6 +2421,67 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetCloudFrontOriginAccessIdentityConfigResult.error_of_xml))
+  | GetConnectionFunction ->
+      if is_success
+      then
+        let body = FunctionBlob.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetConnectionFunctionResult.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some GetConnectionFunctionResult.error_of_xml))
+  | GetConnectionGroup ->
+      if is_success
+      then
+        let body = ConnectionGroup.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetConnectionGroupResult.of_header_and_body (headers, body))
+      else
+        Error (parse_aws_error (Some GetConnectionGroupResult.error_of_xml))
+  | GetConnectionGroupByRoutingEndpoint ->
+      if is_success
+      then
+        let body = ConnectionGroup.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (GetConnectionGroupByRoutingEndpointResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some GetConnectionGroupByRoutingEndpointResult.error_of_xml))
+  | GetContinuousDeploymentPolicy ->
+      if is_success
+      then
+        let body =
+          ContinuousDeploymentPolicy.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (GetContinuousDeploymentPolicyResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some GetContinuousDeploymentPolicyResult.error_of_xml))
+  | GetContinuousDeploymentPolicyConfig ->
+      if is_success
+      then
+        let body =
+          ContinuousDeploymentPolicyConfig.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (GetContinuousDeploymentPolicyConfigResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some GetContinuousDeploymentPolicyConfigResult.error_of_xml))
   | GetDistribution ->
       if is_success
       then
@@ -1449,6 +2501,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetDistributionConfigResult.error_of_xml))
+  | GetDistributionTenant ->
+      if is_success
+      then
+        let body =
+          DistributionTenant.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetDistributionTenantResult.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some GetDistributionTenantResult.error_of_xml))
+  | GetDistributionTenantByDomain ->
+      if is_success
+      then
+        let body =
+          DistributionTenant.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (GetDistributionTenantByDomainResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some GetDistributionTenantByDomainResult.error_of_xml))
   | GetFieldLevelEncryption ->
       if is_success
       then
@@ -1520,6 +2597,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (GetInvalidationResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some GetInvalidationResult.error_of_xml))
+  | GetInvalidationForDistributionTenant ->
+      if is_success
+      then
+        let body = Invalidation.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (GetInvalidationForDistributionTenantResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some GetInvalidationForDistributionTenantResult.error_of_xml))
   | GetKeyGroup ->
       if is_success
       then
@@ -1537,6 +2627,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetKeyGroupConfigResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some GetKeyGroupConfigResult.error_of_xml))
+  | GetManagedCertificateDetails ->
+      if is_success
+      then
+        let body =
+          ManagedCertificateDetails.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (GetManagedCertificateDetailsResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some GetManagedCertificateDetailsResult.error_of_xml))
   | GetMonitoringSubscription ->
       if is_success
       then
@@ -1550,6 +2654,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetMonitoringSubscriptionResult.error_of_xml))
+  | GetOriginAccessControl ->
+      if is_success
+      then
+        let body =
+          OriginAccessControl.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetOriginAccessControlResult.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some GetOriginAccessControlResult.error_of_xml))
+  | GetOriginAccessControlConfig ->
+      if is_success
+      then
+        let body =
+          OriginAccessControlConfig.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (GetOriginAccessControlConfigResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some GetOriginAccessControlConfigResult.error_of_xml))
   | GetOriginRequestPolicy ->
       if is_success
       then
@@ -1598,6 +2727,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetRealtimeLogConfigResult.error_of_xml))
+  | GetResourcePolicy ->
+      if is_success
+      then Ok (GetResourcePolicyResult.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some GetResourcePolicyResult.error_of_xml))
   | GetResponseHeadersPolicy ->
       if is_success
       then
@@ -1652,6 +2786,32 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetStreamingDistributionConfigResult.error_of_xml))
+  | GetTrustStore ->
+      if is_success
+      then
+        let body = TrustStore.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetTrustStoreResult.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some GetTrustStoreResult.error_of_xml))
+  | GetVpcOrigin ->
+      if is_success
+      then
+        let body = VpcOrigin.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetVpcOriginResult.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some GetVpcOriginResult.error_of_xml))
+  | ListAnycastIpLists ->
+      if is_success
+      then
+        let body =
+          AnycastIpListCollection.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ListAnycastIpListsResult.of_header_and_body (headers, body))
+      else
+        Error (parse_aws_error (Some ListAnycastIpListsResult.error_of_xml))
   | ListCachePolicies ->
       if is_success
       then
@@ -1687,6 +2847,49 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListConflictingAliasesResult.error_of_xml))
+  | ListConnectionFunctions ->
+      if is_success
+      then Ok (ListConnectionFunctionsResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some ListConnectionFunctionsResult.error_of_xml))
+  | ListConnectionGroups ->
+      if is_success
+      then Ok (ListConnectionGroupsResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some ListConnectionGroupsResult.error_of_xml))
+  | ListContinuousDeploymentPolicies ->
+      if is_success
+      then
+        let body =
+          ContinuousDeploymentPolicyList.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (ListContinuousDeploymentPoliciesResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some ListContinuousDeploymentPoliciesResult.error_of_xml))
+  | ListDistributionTenants ->
+      if is_success
+      then Ok (ListDistributionTenantsResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some ListDistributionTenantsResult.error_of_xml))
+  | ListDistributionTenantsByCustomization ->
+      if is_success
+      then
+        Ok
+          (ListDistributionTenantsByCustomizationResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDistributionTenantsByCustomizationResult.error_of_xml))
   | ListDistributions ->
       if is_success
       then
@@ -1696,6 +2899,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListDistributionsResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some ListDistributionsResult.error_of_xml))
+  | ListDistributionsByAnycastIpListId ->
+      if is_success
+      then
+        let body = DistributionList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (ListDistributionsByAnycastIpListIdResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDistributionsByAnycastIpListIdResult.error_of_xml))
   | ListDistributionsByCachePolicyId ->
       if is_success
       then
@@ -1710,6 +2926,32 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListDistributionsByCachePolicyIdResult.error_of_xml))
+  | ListDistributionsByConnectionFunction ->
+      if is_success
+      then
+        let body = DistributionList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (ListDistributionsByConnectionFunctionResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDistributionsByConnectionFunctionResult.error_of_xml))
+  | ListDistributionsByConnectionMode ->
+      if is_success
+      then
+        let body = DistributionList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (ListDistributionsByConnectionModeResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDistributionsByConnectionModeResult.error_of_xml))
   | ListDistributionsByKeyGroup ->
       if is_success
       then
@@ -1739,6 +2981,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 ListDistributionsByOriginRequestPolicyIdResult.error_of_xml))
+  | ListDistributionsByOwnedResource ->
+      if is_success
+      then
+        let body =
+          DistributionIdOwnerList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (ListDistributionsByOwnedResourceResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDistributionsByOwnedResourceResult.error_of_xml))
   | ListDistributionsByRealtimeLogConfig ->
       if is_success
       then
@@ -1767,6 +3023,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 ListDistributionsByResponseHeadersPolicyIdResult.error_of_xml))
+  | ListDistributionsByTrustStore ->
+      if is_success
+      then
+        let body = DistributionList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (ListDistributionsByTrustStoreResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDistributionsByTrustStoreResult.error_of_xml))
+  | ListDistributionsByVpcOriginId ->
+      if is_success
+      then
+        let body =
+          DistributionIdList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (ListDistributionsByVpcOriginIdResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDistributionsByVpcOriginIdResult.error_of_xml))
   | ListDistributionsByWebACLId ->
       if is_success
       then
@@ -1780,6 +3063,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListDistributionsByWebACLIdResult.error_of_xml))
+  | ListDomainConflicts ->
+      if is_success
+      then Ok (ListDomainConflictsResult.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some ListDomainConflictsResult.error_of_xml))
   | ListFieldLevelEncryptionConfigs ->
       if is_success
       then
@@ -1826,6 +3114,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListInvalidationsResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some ListInvalidationsResult.error_of_xml))
+  | ListInvalidationsForDistributionTenant ->
+      if is_success
+      then
+        let body = InvalidationList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (ListInvalidationsForDistributionTenantResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some ListInvalidationsForDistributionTenantResult.error_of_xml))
   | ListKeyGroups ->
       if is_success
       then
@@ -1834,6 +3135,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (ListKeyGroupsResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some ListKeyGroupsResult.error_of_xml))
+  | ListKeyValueStores ->
+      if is_success
+      then
+        let body = KeyValueStoreList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ListKeyValueStoresResult.of_header_and_body (headers, body))
+      else
+        Error (parse_aws_error (Some ListKeyValueStoresResult.error_of_xml))
+  | ListOriginAccessControls ->
+      if is_success
+      then
+        let body =
+          OriginAccessControlList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (ListOriginAccessControlsResult.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some ListOriginAccessControlsResult.error_of_xml))
   | ListOriginRequestPolicies ->
       if is_success
       then
@@ -1903,6 +3225,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListTagsForResourceResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some ListTagsForResourceResult.error_of_xml))
+  | ListTrustStores ->
+      if is_success
+      then Ok (ListTrustStoresResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some ListTrustStoresResult.error_of_xml))
+  | ListVpcOrigins ->
+      if is_success
+      then
+        let body = VpcOriginList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ListVpcOriginsResult.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some ListVpcOriginsResult.error_of_xml))
+  | PublishConnectionFunction ->
+      if is_success
+      then
+        let body =
+          ConnectionFunctionSummary.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (PublishConnectionFunctionResult.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some PublishConnectionFunctionResult.error_of_xml))
   | PublishFunction ->
       if is_success
       then
@@ -1911,7 +3258,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (PublishFunctionResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some PublishFunctionResult.error_of_xml))
+  | PutResourcePolicy ->
+      if is_success
+      then Ok (PutResourcePolicyResult.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some PutResourcePolicyResult.error_of_xml))
   | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | TestConnectionFunction ->
+      if is_success
+      then
+        let body =
+          ConnectionFunctionTestResult.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TestConnectionFunctionResult.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some TestConnectionFunctionResult.error_of_xml))
   | TestFunction ->
       if is_success
       then
@@ -1922,6 +3286,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else Error (parse_aws_error (Some TestFunctionResult.error_of_xml))
   | UntagResource ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateAnycastIpList ->
+      if is_success
+      then
+        let body = AnycastIpList.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateAnycastIpListResult.of_header_and_body (headers, body))
+      else
+        Error (parse_aws_error (Some UpdateAnycastIpListResult.error_of_xml))
   | UpdateCachePolicy ->
       if is_success
       then
@@ -1946,6 +3319,42 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateCloudFrontOriginAccessIdentityResult.error_of_xml))
+  | UpdateConnectionFunction ->
+      if is_success
+      then
+        let body =
+          ConnectionFunctionSummary.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateConnectionFunctionResult.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some UpdateConnectionFunctionResult.error_of_xml))
+  | UpdateConnectionGroup ->
+      if is_success
+      then
+        let body = ConnectionGroup.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateConnectionGroupResult.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some UpdateConnectionGroupResult.error_of_xml))
+  | UpdateContinuousDeploymentPolicy ->
+      if is_success
+      then
+        let body =
+          ContinuousDeploymentPolicy.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateContinuousDeploymentPolicyResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateContinuousDeploymentPolicyResult.error_of_xml))
   | UpdateDistribution ->
       if is_success
       then
@@ -1955,6 +3364,37 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UpdateDistributionResult.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some UpdateDistributionResult.error_of_xml))
+  | UpdateDistributionTenant ->
+      if is_success
+      then
+        let body =
+          DistributionTenant.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateDistributionTenantResult.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some UpdateDistributionTenantResult.error_of_xml))
+  | UpdateDistributionWithStagingConfig ->
+      if is_success
+      then
+        let body = Distribution.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateDistributionWithStagingConfigResult.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDistributionWithStagingConfigResult.error_of_xml))
+  | UpdateDomainAssociation ->
+      if is_success
+      then Ok (UpdateDomainAssociationResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateDomainAssociationResult.error_of_xml))
   | UpdateFieldLevelEncryptionConfig ->
       if is_success
       then
@@ -2000,6 +3440,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UpdateKeyGroupResult.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some UpdateKeyGroupResult.error_of_xml))
+  | UpdateKeyValueStore ->
+      if is_success
+      then
+        let body = KeyValueStore.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateKeyValueStoreResult.of_header_and_body (headers, body))
+      else
+        Error (parse_aws_error (Some UpdateKeyValueStoreResult.error_of_xml))
+  | UpdateOriginAccessControl ->
+      if is_success
+      then
+        let body =
+          OriginAccessControl.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateOriginAccessControlResult.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateOriginAccessControlResult.error_of_xml))
   | UpdateOriginRequestPolicy ->
       if is_success
       then
@@ -2055,3 +3517,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateStreamingDistributionResult.error_of_xml))
+  | UpdateTrustStore ->
+      if is_success
+      then
+        let body = TrustStore.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateTrustStoreResult.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some UpdateTrustStoreResult.error_of_xml))
+  | UpdateVpcOrigin ->
+      if is_success
+      then
+        let body = VpcOrigin.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateVpcOriginResult.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some UpdateVpcOriginResult.error_of_xml))
+  | VerifyDnsConfiguration ->
+      if is_success
+      then Ok (VerifyDnsConfigurationResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some VerifyDnsConfigurationResult.error_of_xml))

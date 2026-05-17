@@ -13,20 +13,54 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let associate_kms_key ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateKmsKey input
+let associate_source_to_s3_table_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateSourceToS3TableIntegration input
 let cancel_export_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelExportTask input
+let cancel_import_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelImportTask input
+let create_delivery ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateDelivery input
 let create_export_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateExportTask input
+let create_import_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateImportTask input
+let create_log_anomaly_detector ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLogAnomalyDetector input
 let create_log_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateLogGroup input
 let create_log_stream ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateLogStream input
+let create_lookup_table ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLookupTable input
+let create_scheduled_query ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateScheduledQuery input
+let delete_account_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAccountPolicy input
+let delete_data_protection_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDataProtectionPolicy input
+let delete_delivery ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDelivery input
+let delete_delivery_destination ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDeliveryDestination input
+let delete_delivery_destination_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDeliveryDestinationPolicy input
+let delete_delivery_source ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteDeliverySource input
 let delete_destination ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDestination input
+let delete_index_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteIndexPolicy input
+let delete_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteIntegration input
+let delete_log_anomaly_detector ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteLogAnomalyDetector input
 let delete_log_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteLogGroup input
 let delete_log_stream ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteLogStream input
+let delete_lookup_table ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteLookupTable input
 let delete_metric_filter ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteMetricFilter input
 let delete_query_definition ?endpoint_url ?cfg input =
@@ -35,16 +69,40 @@ let delete_resource_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteResourcePolicy input
 let delete_retention_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteRetentionPolicy input
+let delete_scheduled_query ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteScheduledQuery input
 let delete_subscription_filter ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteSubscriptionFilter input
+let delete_transformer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTransformer input
+let describe_account_policies ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAccountPolicies input
+let describe_configuration_templates ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeConfigurationTemplates input
+let describe_deliveries ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeDeliveries input
+let describe_delivery_destinations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeDeliveryDestinations input
+let describe_delivery_sources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeDeliverySources input
 let describe_destinations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDestinations input
 let describe_export_tasks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeExportTasks input
+let describe_field_indexes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeFieldIndexes input
+let describe_import_task_batches ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeImportTaskBatches input
+let describe_import_tasks ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeImportTasks input
+let describe_index_policies ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeIndexPolicies input
 let describe_log_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeLogGroups input
 let describe_log_streams ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeLogStreams input
+let describe_lookup_tables ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeLookupTables input
 let describe_metric_filters ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeMetricFilters input
 let describe_queries ?endpoint_url ?cfg input =
@@ -57,24 +115,89 @@ let describe_subscription_filters ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSubscriptionFilters input
 let disassociate_kms_key ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateKmsKey input
+let disassociate_source_from_s3_table_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateSourceFromS3TableIntegration
+    input
 let filter_log_events ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.FilterLogEvents input
+let get_data_protection_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDataProtectionPolicy input
+let get_delivery ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDelivery input
+let get_delivery_destination ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDeliveryDestination input
+let get_delivery_destination_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDeliveryDestinationPolicy input
+let get_delivery_source ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDeliverySource input
+let get_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetIntegration input
+let get_log_anomaly_detector ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetLogAnomalyDetector input
 let get_log_events ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLogEvents input
+let get_log_fields ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetLogFields input
 let get_log_group_fields ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLogGroupFields input
+let get_log_object ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetLogObject input
 let get_log_record ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLogRecord input
+let get_lookup_table ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetLookupTable input
 let get_query_results ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetQueryResults input
+let get_scheduled_query ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetScheduledQuery input
+let get_scheduled_query_history ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetScheduledQueryHistory input
+let get_transformer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTransformer input
+let list_aggregate_log_group_summaries ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAggregateLogGroupSummaries input
+let list_anomalies ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAnomalies input
+let list_integrations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListIntegrations input
+let list_log_anomaly_detectors ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListLogAnomalyDetectors input
+let list_log_groups ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListLogGroups input
+let list_log_groups_for_query ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListLogGroupsForQuery input
+let list_scheduled_queries ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListScheduledQueries input
+let list_sources_for_s3_table_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSourcesForS3TableIntegration input
+let list_tags_for_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let list_tags_log_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsLogGroup input
+let put_account_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutAccountPolicy input
+let put_bearer_token_authentication ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutBearerTokenAuthentication input
+let put_data_protection_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutDataProtectionPolicy input
+let put_delivery_destination ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutDeliveryDestination input
+let put_delivery_destination_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutDeliveryDestinationPolicy input
+let put_delivery_source ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutDeliverySource input
 let put_destination ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutDestination input
 let put_destination_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutDestinationPolicy input
+let put_index_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutIndexPolicy input
+let put_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutIntegration input
 let put_log_events ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutLogEvents input
+let put_log_group_deletion_protection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutLogGroupDeletionProtection input
 let put_metric_filter ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutMetricFilter input
 let put_query_definition ?endpoint_url ?cfg input =
@@ -85,13 +208,33 @@ let put_retention_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutRetentionPolicy input
 let put_subscription_filter ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutSubscriptionFilter input
+let put_transformer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutTransformer input
+let start_live_tail ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartLiveTail input
 let start_query ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartQuery input
 let stop_query ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopQuery input
 let tag_log_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagLogGroup input
+let tag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TagResource input
 let test_metric_filter ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TestMetricFilter input
+let test_transformer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TestTransformer input
 let untag_log_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagLogGroup input
+let untag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_anomaly ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAnomaly input
+let update_delivery_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateDeliveryConfiguration input
+let update_log_anomaly_detector ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateLogAnomalyDetector input
+let update_lookup_table ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateLookupTable input
+let update_scheduled_query ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateScheduledQuery input

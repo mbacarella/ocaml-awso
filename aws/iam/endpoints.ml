@@ -2,11 +2,15 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | AcceptDelegationRequest: (AcceptDelegationRequestRequest.t, unit, 
+  unit) t 
   | AddClientIDToOpenIDConnectProvider:
   (AddClientIDToOpenIDConnectProviderRequest.t, unit, unit) t 
   | AddRoleToInstanceProfile: (AddRoleToInstanceProfileRequest.t, unit, 
   unit) t 
   | AddUserToGroup: (AddUserToGroupRequest.t, unit, unit) t 
+  | AssociateDelegationRequest: (AssociateDelegationRequestRequest.t, 
+  unit, unit) t 
   | AttachGroupPolicy: (AttachGroupPolicyRequest.t, unit, unit) t 
   | AttachRolePolicy: (AttachRolePolicyRequest.t, unit, unit) t 
   | AttachUserPolicy: (AttachUserPolicyRequest.t, unit, unit) t 
@@ -14,6 +18,9 @@ type ('i, 'o, 'e) t =
   | CreateAccessKey: (CreateAccessKeyRequest.t, CreateAccessKeyResponse.t,
   CreateAccessKeyResponse.error) t 
   | CreateAccountAlias: (CreateAccountAliasRequest.t, unit, unit) t 
+  | CreateDelegationRequest: (CreateDelegationRequestRequest.t,
+  CreateDelegationRequestResponse.t, CreateDelegationRequestResponse.error) t
+  
   | CreateGroup: (CreateGroupRequest.t, CreateGroupResponse.t,
   CreateGroupResponse.error) t 
   | CreateInstanceProfile: (CreateInstanceProfileRequest.t,
@@ -77,7 +84,27 @@ type ('i, 'o, 'e) t =
   | DetachGroupPolicy: (DetachGroupPolicyRequest.t, unit, unit) t 
   | DetachRolePolicy: (DetachRolePolicyRequest.t, unit, unit) t 
   | DetachUserPolicy: (DetachUserPolicyRequest.t, unit, unit) t 
+  | DisableOrganizationsRootCredentialsManagement:
+  (DisableOrganizationsRootCredentialsManagementRequest.t,
+  DisableOrganizationsRootCredentialsManagementResponse.t,
+  DisableOrganizationsRootCredentialsManagementResponse.error) t 
+  | DisableOrganizationsRootSessions:
+  (DisableOrganizationsRootSessionsRequest.t,
+  DisableOrganizationsRootSessionsResponse.t,
+  DisableOrganizationsRootSessionsResponse.error) t 
+  | DisableOutboundWebIdentityFederation: (unit, unit, unit) t 
   | EnableMFADevice: (EnableMFADeviceRequest.t, unit, unit) t 
+  | EnableOrganizationsRootCredentialsManagement:
+  (EnableOrganizationsRootCredentialsManagementRequest.t,
+  EnableOrganizationsRootCredentialsManagementResponse.t,
+  EnableOrganizationsRootCredentialsManagementResponse.error) t 
+  | EnableOrganizationsRootSessions:
+  (EnableOrganizationsRootSessionsRequest.t,
+  EnableOrganizationsRootSessionsResponse.t,
+  EnableOrganizationsRootSessionsResponse.error) t 
+  | EnableOutboundWebIdentityFederation: (unit,
+  EnableOutboundWebIdentityFederationResponse.t,
+  EnableOutboundWebIdentityFederationResponse.error) t 
   | GenerateCredentialReport: (unit, GenerateCredentialReportResponse.t,
   GenerateCredentialReportResponse.error) t 
   | GenerateOrganizationsAccessReport:
@@ -106,20 +133,30 @@ type ('i, 'o, 'e) t =
   
   | GetCredentialReport: (unit, GetCredentialReportResponse.t,
   GetCredentialReportResponse.error) t 
+  | GetDelegationRequest: (GetDelegationRequestRequest.t,
+  GetDelegationRequestResponse.t, GetDelegationRequestResponse.error) t 
   | GetGroup: (GetGroupRequest.t, GetGroupResponse.t, GetGroupResponse.error)
   t 
   | GetGroupPolicy: (GetGroupPolicyRequest.t, GetGroupPolicyResponse.t,
   GetGroupPolicyResponse.error) t 
+  | GetHumanReadableSummary: (GetHumanReadableSummaryRequest.t,
+  GetHumanReadableSummaryResponse.t, GetHumanReadableSummaryResponse.error) t
+  
   | GetInstanceProfile: (GetInstanceProfileRequest.t,
   GetInstanceProfileResponse.t, GetInstanceProfileResponse.error) t 
   | GetLoginProfile: (GetLoginProfileRequest.t, GetLoginProfileResponse.t,
   GetLoginProfileResponse.error) t 
+  | GetMFADevice: (GetMFADeviceRequest.t, GetMFADeviceResponse.t,
+  GetMFADeviceResponse.error) t 
   | GetOpenIDConnectProvider: (GetOpenIDConnectProviderRequest.t,
   GetOpenIDConnectProviderResponse.t, GetOpenIDConnectProviderResponse.error)
   t 
   | GetOrganizationsAccessReport: (GetOrganizationsAccessReportRequest.t,
   GetOrganizationsAccessReportResponse.t,
   GetOrganizationsAccessReportResponse.error) t 
+  | GetOutboundWebIdentityFederationInfo: (unit,
+  GetOutboundWebIdentityFederationInfoResponse.t,
+  GetOutboundWebIdentityFederationInfoResponse.error) t 
   | GetPolicy: (GetPolicyRequest.t, GetPolicyResponse.t,
   GetPolicyResponse.error) t 
   | GetPolicyVersion: (GetPolicyVersionRequest.t, GetPolicyVersionResponse.t,
@@ -160,6 +197,8 @@ type ('i, 'o, 'e) t =
   | ListAttachedUserPolicies: (ListAttachedUserPoliciesRequest.t,
   ListAttachedUserPoliciesResponse.t, ListAttachedUserPoliciesResponse.error)
   t 
+  | ListDelegationRequests: (ListDelegationRequestsRequest.t,
+  ListDelegationRequestsResponse.t, ListDelegationRequestsResponse.error) t 
   | ListEntitiesForPolicy: (ListEntitiesForPolicyRequest.t,
   ListEntitiesForPolicyResponse.t, ListEntitiesForPolicyResponse.error) t 
   | ListGroupPolicies: (ListGroupPoliciesRequest.t,
@@ -186,6 +225,9 @@ type ('i, 'o, 'e) t =
   | ListOpenIDConnectProviders: (ListOpenIDConnectProvidersRequest.t,
   ListOpenIDConnectProvidersResponse.t,
   ListOpenIDConnectProvidersResponse.error) t 
+  | ListOrganizationsFeatures: (ListOrganizationsFeaturesRequest.t,
+  ListOrganizationsFeaturesResponse.t,
+  ListOrganizationsFeaturesResponse.error) t 
   | ListPolicies: (ListPoliciesRequest.t, ListPoliciesResponse.t,
   ListPoliciesResponse.error) t 
   | ListPoliciesGrantingServiceAccess:
@@ -234,6 +276,8 @@ type ('i, 'o, 'e) t =
   | PutUserPermissionsBoundary: (PutUserPermissionsBoundaryRequest.t, 
   unit, unit) t 
   | PutUserPolicy: (PutUserPolicyRequest.t, unit, unit) t 
+  | RejectDelegationRequest: (RejectDelegationRequestRequest.t, unit, 
+  unit) t 
   | RemoveClientIDFromOpenIDConnectProvider:
   (RemoveClientIDFromOpenIDConnectProviderRequest.t, unit, unit) t 
   | RemoveRoleFromInstanceProfile: (RemoveRoleFromInstanceProfileRequest.t,
@@ -243,6 +287,7 @@ type ('i, 'o, 'e) t =
   ResetServiceSpecificCredentialResponse.t,
   ResetServiceSpecificCredentialResponse.error) t 
   | ResyncMFADevice: (ResyncMFADeviceRequest.t, unit, unit) t 
+  | SendDelegationToken: (SendDelegationTokenRequest.t, unit, unit) t 
   | SetDefaultPolicyVersion: (SetDefaultPolicyVersionRequest.t, unit, 
   unit) t 
   | SetSecurityTokenServicePreferences:
@@ -273,6 +318,8 @@ type ('i, 'o, 'e) t =
   | UpdateAccountPasswordPolicy: (UpdateAccountPasswordPolicyRequest.t, 
   unit, unit) t 
   | UpdateAssumeRolePolicy: (UpdateAssumeRolePolicyRequest.t, unit, unit) t 
+  | UpdateDelegationRequest: (UpdateDelegationRequestRequest.t, unit, 
+  unit) t 
   | UpdateGroup: (UpdateGroupRequest.t, unit, unit) t 
   | UpdateLoginProfile: (UpdateLoginProfileRequest.t, unit, unit) t 
   | UpdateOpenIDConnectProviderThumbprint:
@@ -301,15 +348,18 @@ type ('i, 'o, 'e) t =
   t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | AcceptDelegationRequest -> `POST
   | AddClientIDToOpenIDConnectProvider -> `POST
   | AddRoleToInstanceProfile -> `POST
   | AddUserToGroup -> `POST
+  | AssociateDelegationRequest -> `POST
   | AttachGroupPolicy -> `POST
   | AttachRolePolicy -> `POST
   | AttachUserPolicy -> `POST
   | ChangePassword -> `POST
   | CreateAccessKey -> `POST
   | CreateAccountAlias -> `POST
+  | CreateDelegationRequest -> `POST
   | CreateGroup -> `POST
   | CreateInstanceProfile -> `POST
   | CreateLoginProfile -> `POST
@@ -349,7 +399,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DetachGroupPolicy -> `POST
   | DetachRolePolicy -> `POST
   | DetachUserPolicy -> `POST
+  | DisableOrganizationsRootCredentialsManagement -> `POST
+  | DisableOrganizationsRootSessions -> `POST
+  | DisableOutboundWebIdentityFederation -> `POST
   | EnableMFADevice -> `POST
+  | EnableOrganizationsRootCredentialsManagement -> `POST
+  | EnableOrganizationsRootSessions -> `POST
+  | EnableOutboundWebIdentityFederation -> `POST
   | GenerateCredentialReport -> `POST
   | GenerateOrganizationsAccessReport -> `POST
   | GenerateServiceLastAccessedDetails -> `POST
@@ -360,12 +416,16 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetContextKeysForCustomPolicy -> `POST
   | GetContextKeysForPrincipalPolicy -> `POST
   | GetCredentialReport -> `POST
+  | GetDelegationRequest -> `POST
   | GetGroup -> `POST
   | GetGroupPolicy -> `POST
+  | GetHumanReadableSummary -> `POST
   | GetInstanceProfile -> `POST
   | GetLoginProfile -> `POST
+  | GetMFADevice -> `POST
   | GetOpenIDConnectProvider -> `POST
   | GetOrganizationsAccessReport -> `POST
+  | GetOutboundWebIdentityFederationInfo -> `POST
   | GetPolicy -> `POST
   | GetPolicyVersion -> `POST
   | GetRole -> `POST
@@ -383,6 +443,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListAttachedGroupPolicies -> `POST
   | ListAttachedRolePolicies -> `POST
   | ListAttachedUserPolicies -> `POST
+  | ListDelegationRequests -> `POST
   | ListEntitiesForPolicy -> `POST
   | ListGroupPolicies -> `POST
   | ListGroups -> `POST
@@ -394,6 +455,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListMFADevices -> `POST
   | ListOpenIDConnectProviderTags -> `POST
   | ListOpenIDConnectProviders -> `POST
+  | ListOrganizationsFeatures -> `POST
   | ListPolicies -> `POST
   | ListPoliciesGrantingServiceAccess -> `POST
   | ListPolicyTags -> `POST
@@ -417,11 +479,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | PutRolePolicy -> `POST
   | PutUserPermissionsBoundary -> `POST
   | PutUserPolicy -> `POST
+  | RejectDelegationRequest -> `POST
   | RemoveClientIDFromOpenIDConnectProvider -> `POST
   | RemoveRoleFromInstanceProfile -> `POST
   | RemoveUserFromGroup -> `POST
   | ResetServiceSpecificCredential -> `POST
   | ResyncMFADevice -> `POST
+  | SendDelegationToken -> `POST
   | SetDefaultPolicyVersion -> `POST
   | SetSecurityTokenServicePreferences -> `POST
   | SimulateCustomPolicy -> `POST
@@ -445,6 +509,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateAccessKey -> `POST
   | UpdateAccountPasswordPolicy -> `POST
   | UpdateAssumeRolePolicy -> `POST
+  | UpdateDelegationRequest -> `POST
   | UpdateGroup -> `POST
   | UpdateLoginProfile -> `POST
   | UpdateOpenIDConnectProviderThumbprint -> `POST
@@ -462,16 +527,19 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | AcceptDelegationRequest -> (Format.kasprintf Uri.of_string) "/"
       | AddClientIDToOpenIDConnectProvider ->
           (Format.kasprintf Uri.of_string) "/"
       | AddRoleToInstanceProfile -> (Format.kasprintf Uri.of_string) "/"
       | AddUserToGroup -> (Format.kasprintf Uri.of_string) "/"
+      | AssociateDelegationRequest -> (Format.kasprintf Uri.of_string) "/"
       | AttachGroupPolicy -> (Format.kasprintf Uri.of_string) "/"
       | AttachRolePolicy -> (Format.kasprintf Uri.of_string) "/"
       | AttachUserPolicy -> (Format.kasprintf Uri.of_string) "/"
       | ChangePassword -> (Format.kasprintf Uri.of_string) "/"
       | CreateAccessKey -> (Format.kasprintf Uri.of_string) "/"
       | CreateAccountAlias -> (Format.kasprintf Uri.of_string) "/"
+      | CreateDelegationRequest -> (Format.kasprintf Uri.of_string) "/"
       | CreateGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateInstanceProfile -> (Format.kasprintf Uri.of_string) "/"
       | CreateLoginProfile -> (Format.kasprintf Uri.of_string) "/"
@@ -513,7 +581,19 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DetachGroupPolicy -> (Format.kasprintf Uri.of_string) "/"
       | DetachRolePolicy -> (Format.kasprintf Uri.of_string) "/"
       | DetachUserPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | DisableOrganizationsRootCredentialsManagement ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DisableOrganizationsRootSessions ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DisableOutboundWebIdentityFederation ->
+          (Format.kasprintf Uri.of_string) "/"
       | EnableMFADevice -> (Format.kasprintf Uri.of_string) "/"
+      | EnableOrganizationsRootCredentialsManagement ->
+          (Format.kasprintf Uri.of_string) "/"
+      | EnableOrganizationsRootSessions ->
+          (Format.kasprintf Uri.of_string) "/"
+      | EnableOutboundWebIdentityFederation ->
+          (Format.kasprintf Uri.of_string) "/"
       | GenerateCredentialReport -> (Format.kasprintf Uri.of_string) "/"
       | GenerateOrganizationsAccessReport ->
           (Format.kasprintf Uri.of_string) "/"
@@ -528,12 +608,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetContextKeysForPrincipalPolicy ->
           (Format.kasprintf Uri.of_string) "/"
       | GetCredentialReport -> (Format.kasprintf Uri.of_string) "/"
+      | GetDelegationRequest -> (Format.kasprintf Uri.of_string) "/"
       | GetGroup -> (Format.kasprintf Uri.of_string) "/"
       | GetGroupPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | GetHumanReadableSummary -> (Format.kasprintf Uri.of_string) "/"
       | GetInstanceProfile -> (Format.kasprintf Uri.of_string) "/"
       | GetLoginProfile -> (Format.kasprintf Uri.of_string) "/"
+      | GetMFADevice -> (Format.kasprintf Uri.of_string) "/"
       | GetOpenIDConnectProvider -> (Format.kasprintf Uri.of_string) "/"
       | GetOrganizationsAccessReport -> (Format.kasprintf Uri.of_string) "/"
+      | GetOutboundWebIdentityFederationInfo ->
+          (Format.kasprintf Uri.of_string) "/"
       | GetPolicy -> (Format.kasprintf Uri.of_string) "/"
       | GetPolicyVersion -> (Format.kasprintf Uri.of_string) "/"
       | GetRole -> (Format.kasprintf Uri.of_string) "/"
@@ -553,6 +638,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListAttachedGroupPolicies -> (Format.kasprintf Uri.of_string) "/"
       | ListAttachedRolePolicies -> (Format.kasprintf Uri.of_string) "/"
       | ListAttachedUserPolicies -> (Format.kasprintf Uri.of_string) "/"
+      | ListDelegationRequests -> (Format.kasprintf Uri.of_string) "/"
       | ListEntitiesForPolicy -> (Format.kasprintf Uri.of_string) "/"
       | ListGroupPolicies -> (Format.kasprintf Uri.of_string) "/"
       | ListGroups -> (Format.kasprintf Uri.of_string) "/"
@@ -564,6 +650,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListMFADevices -> (Format.kasprintf Uri.of_string) "/"
       | ListOpenIDConnectProviderTags -> (Format.kasprintf Uri.of_string) "/"
       | ListOpenIDConnectProviders -> (Format.kasprintf Uri.of_string) "/"
+      | ListOrganizationsFeatures -> (Format.kasprintf Uri.of_string) "/"
       | ListPolicies -> (Format.kasprintf Uri.of_string) "/"
       | ListPoliciesGrantingServiceAccess ->
           (Format.kasprintf Uri.of_string) "/"
@@ -589,6 +676,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | PutRolePolicy -> (Format.kasprintf Uri.of_string) "/"
       | PutUserPermissionsBoundary -> (Format.kasprintf Uri.of_string) "/"
       | PutUserPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | RejectDelegationRequest -> (Format.kasprintf Uri.of_string) "/"
       | RemoveClientIDFromOpenIDConnectProvider ->
           (Format.kasprintf Uri.of_string) "/"
       | RemoveRoleFromInstanceProfile -> (Format.kasprintf Uri.of_string) "/"
@@ -596,6 +684,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ResetServiceSpecificCredential ->
           (Format.kasprintf Uri.of_string) "/"
       | ResyncMFADevice -> (Format.kasprintf Uri.of_string) "/"
+      | SendDelegationToken -> (Format.kasprintf Uri.of_string) "/"
       | SetDefaultPolicyVersion -> (Format.kasprintf Uri.of_string) "/"
       | SetSecurityTokenServicePreferences ->
           (Format.kasprintf Uri.of_string) "/"
@@ -620,6 +709,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateAccessKey -> (Format.kasprintf Uri.of_string) "/"
       | UpdateAccountPasswordPolicy -> (Format.kasprintf Uri.of_string) "/"
       | UpdateAssumeRolePolicy -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateDelegationRequest -> (Format.kasprintf Uri.of_string) "/"
       | UpdateGroup -> (Format.kasprintf Uri.of_string) "/"
       | UpdateLoginProfile -> (Format.kasprintf Uri.of_string) "/"
       | UpdateOpenIDConnectProviderThumbprint ->
@@ -640,6 +730,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | AcceptDelegationRequest ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["AcceptDelegationRequest"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (AcceptDelegationRequestRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | AddClientIDToOpenIDConnectProvider ->
       let headers =
         Awso.Http.Headers.of_list
@@ -678,6 +782,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["AddUserToGroup"]); ("Version", [apiVersion])] in
         let query =
           (AddUserToGroupRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | AssociateDelegationRequest ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["AssociateDelegationRequest"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (AssociateDelegationRequestRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | AttachGroupPolicy ->
@@ -750,6 +868,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["CreateAccountAlias"]); ("Version", [apiVersion])] in
         let query =
           (CreateAccountAliasRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateDelegationRequest ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateDelegationRequest"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateDelegationRequestRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -1241,6 +1373,41 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (DetachUserPolicyRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisableOrganizationsRootCredentialsManagement ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisableOrganizationsRootCredentialsManagement"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DisableOrganizationsRootCredentialsManagementRequest.to_query req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisableOrganizationsRootSessions ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisableOrganizationsRootSessions"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DisableOrganizationsRootSessionsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisableOutboundWebIdentityFederation ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body = None in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | EnableMFADevice ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1252,6 +1419,41 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let query =
           (EnableMFADeviceRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | EnableOrganizationsRootCredentialsManagement ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["EnableOrganizationsRootCredentialsManagement"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (EnableOrganizationsRootCredentialsManagementRequest.to_query req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | EnableOrganizationsRootSessions ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["EnableOrganizationsRootSessions"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (EnableOrganizationsRootSessionsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | EnableOutboundWebIdentityFederation ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body = None in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GenerateCredentialReport ->
       let headers =
@@ -1364,6 +1566,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
              "application/x-www-form-urlencoded; charset=utf-8")] in
       let body = None in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetDelegationRequest ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetDelegationRequest"]); ("Version", [apiVersion])] in
+        let query =
+          (GetDelegationRequestRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetGroup ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1385,6 +1600,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["GetGroupPolicy"]); ("Version", [apiVersion])] in
         let query =
           (GetGroupPolicyRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetHumanReadableSummary ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetHumanReadableSummary"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetHumanReadableSummaryRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetInstanceProfile ->
@@ -1410,6 +1639,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["GetLoginProfile"]); ("Version", [apiVersion])] in
         let query =
           (GetLoginProfileRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetMFADevice ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta = [("Action", ["GetMFADevice"]); ("Version", [apiVersion])] in
+        let query =
+          (GetMFADeviceRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetOpenIDConnectProvider ->
@@ -1439,6 +1679,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (GetOrganizationsAccessReportRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetOutboundWebIdentityFederationInfo ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body = None in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetPolicy ->
       let headers =
@@ -1651,6 +1898,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ListDelegationRequests ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ListDelegationRequests"]); ("Version", [apiVersion])] in
+        let query =
+          (ListDelegationRequestsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ListEntitiesForPolicy ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1789,6 +2049,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (ListOpenIDConnectProvidersRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ListOrganizationsFeatures ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ListOrganizationsFeatures"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ListOrganizationsFeaturesRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -2077,6 +2351,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (PutUserPolicyRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | RejectDelegationRequest ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["RejectDelegationRequest"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (RejectDelegationRequestRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | RemoveClientIDFromOpenIDConnectProvider ->
       let headers =
         Awso.Http.Headers.of_list
@@ -2142,6 +2430,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["ResyncMFADevice"]); ("Version", [apiVersion])] in
         let query =
           (ResyncMFADeviceRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | SendDelegationToken ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["SendDelegationToken"]); ("Version", [apiVersion])] in
+        let query =
+          (SendDelegationTokenRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | SetDefaultPolicyVersion ->
@@ -2429,6 +2730,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | UpdateDelegationRequest ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["UpdateDelegationRequest"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (UpdateDelegationRequestRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | UpdateGroup ->
       let headers =
         Awso.Http.Headers.of_list
@@ -2642,11 +2957,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = parse_aws_error in
   let _ = resp in
   match endpoint with
+  | AcceptDelegationRequest ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | AddClientIDToOpenIDConnectProvider ->
       if is_success then Ok () else Error (parse_aws_error None)
   | AddRoleToInstanceProfile ->
       if is_success then Ok () else Error (parse_aws_error None)
   | AddUserToGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | AssociateDelegationRequest ->
       if is_success then Ok () else Error (parse_aws_error None)
   | AttachGroupPolicy ->
       if is_success then Ok () else Error (parse_aws_error None)
@@ -2665,6 +2984,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error (parse_aws_error (Some CreateAccessKeyResponse.error_of_xml))
   | CreateAccountAlias ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | CreateDelegationRequest ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateDelegationRequestResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateDelegationRequestResponse.error_of_xml))
   | CreateGroup ->
       if is_success
       then
@@ -2814,8 +3142,57 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | DetachUserPolicy ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DisableOrganizationsRootCredentialsManagement ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DisableOrganizationsRootCredentialsManagementResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DisableOrganizationsRootCredentialsManagementResponse.error_of_xml))
+  | DisableOrganizationsRootSessions ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DisableOrganizationsRootSessionsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DisableOrganizationsRootSessionsResponse.error_of_xml))
+  | DisableOutboundWebIdentityFederation ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | EnableMFADevice ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | EnableOrganizationsRootCredentialsManagement ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (EnableOrganizationsRootCredentialsManagementResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                EnableOrganizationsRootCredentialsManagementResponse.error_of_xml))
+  | EnableOrganizationsRootSessions ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (EnableOrganizationsRootSessionsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some EnableOrganizationsRootSessionsResponse.error_of_xml))
+  | EnableOutboundWebIdentityFederation ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (EnableOutboundWebIdentityFederationResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some EnableOutboundWebIdentityFederationResponse.error_of_xml))
   | GenerateCredentialReport ->
       if is_success
       then
@@ -2848,9 +3225,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (GetAccessKeyLastUsedResponse.of_xml xml)
-      else
-        Error
-          (parse_aws_error (Some GetAccessKeyLastUsedResponse.error_of_xml))
+      else Error (parse_aws_error None)
   | GetAccountAuthorizationDetails ->
       if is_success
       then
@@ -2902,6 +3277,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetCredentialReportResponse.error_of_xml))
+  | GetDelegationRequest ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetDelegationRequestResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some GetDelegationRequestResponse.error_of_xml))
   | GetGroup ->
       if is_success
       then
@@ -2914,6 +3297,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (GetGroupPolicyResponse.of_xml xml)
       else Error (parse_aws_error (Some GetGroupPolicyResponse.error_of_xml))
+  | GetHumanReadableSummary ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetHumanReadableSummaryResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetHumanReadableSummaryResponse.error_of_xml))
   | GetInstanceProfile ->
       if is_success
       then
@@ -2929,6 +3321,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetLoginProfileResponse.of_xml xml)
       else
         Error (parse_aws_error (Some GetLoginProfileResponse.error_of_xml))
+  | GetMFADevice ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetMFADeviceResponse.of_xml xml)
+      else Error (parse_aws_error (Some GetMFADeviceResponse.error_of_xml))
   | GetOpenIDConnectProvider ->
       if is_success
       then
@@ -2947,6 +3345,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetOrganizationsAccessReportResponse.error_of_xml))
+  | GetOutboundWebIdentityFederationInfo ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetOutboundWebIdentityFederationInfoResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetOutboundWebIdentityFederationInfoResponse.error_of_xml))
   | GetPolicy ->
       if is_success
       then
@@ -3075,6 +3482,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListAttachedUserPoliciesResponse.error_of_xml))
+  | ListDelegationRequests ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListDelegationRequestsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ListDelegationRequestsResponse.error_of_xml))
   | ListEntitiesForPolicy ->
       if is_success
       then
@@ -3160,6 +3575,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListOpenIDConnectProvidersResponse.error_of_xml))
+  | ListOrganizationsFeatures ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListOrganizationsFeaturesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListOrganizationsFeaturesResponse.error_of_xml))
   | ListPolicies ->
       if is_success
       then
@@ -3300,6 +3724,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | PutUserPolicy ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | RejectDelegationRequest ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | RemoveClientIDFromOpenIDConnectProvider ->
       if is_success then Ok () else Error (parse_aws_error None)
   | RemoveRoleFromInstanceProfile ->
@@ -3316,6 +3742,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some ResetServiceSpecificCredentialResponse.error_of_xml))
   | ResyncMFADevice ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | SendDelegationToken ->
       if is_success then Ok () else Error (parse_aws_error None)
   | SetDefaultPolicyVersion ->
       if is_success then Ok () else Error (parse_aws_error None)
@@ -3364,6 +3792,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | UpdateAccountPasswordPolicy ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateAssumeRolePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateDelegationRequest ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateGroup -> if is_success then Ok () else Error (parse_aws_error None)
   | UpdateLoginProfile ->

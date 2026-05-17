@@ -28,6 +28,24 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let accept_delegation_request =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and delegationRequestId =
+         flag "delegation-request-id" (required string)
+           ~doc:"STRING delegationRequestIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.accept_delegation_request
+           (Values.AcceptDelegationRequestRequest.make ~delegationRequestId
+              ()) None None])
 let add_client_i_d_to_open_i_d_connect_provider =
   Command.async ~summary:""
     ([%map_open.Command
@@ -88,6 +106,24 @@ let add_user_to_group =
            Io.add_user_to_group
            (Values.AddUserToGroupRequest.make ~groupName ~userName ()) None
            None])
+let associate_delegation_request =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and delegationRequestId =
+         flag "delegation-request-id" (required string)
+           ~doc:"STRING delegationRequestIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_delegation_request
+           (Values.AssociateDelegationRequestRequest.make
+              ~delegationRequestId ()) None None])
 let attach_group_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -200,6 +236,50 @@ let create_account_alias =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_account_alias
            (Values.CreateAccountAliasRequest.make ~accountAlias ()) None None])
+let create_delegation_request =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ownerAccountId =
+         flag "owner-account-id" (optional string)
+           ~doc:"STRING accountIdType"
+       and requestMessage =
+         flag "request-message" (optional string)
+           ~doc:"STRING requestMessageType"
+       and redirectUrl =
+         flag "redirect-url" (optional string) ~doc:"STRING redirectUrlType"
+       and onlySendByOwner =
+         flag "only-send-by-owner" (optional bool) ~doc:"BOOL booleanType"
+       and description =
+         flag "description" (required string)
+           ~doc:"STRING delegationRequestDescriptionType"
+       and permissions =
+         flag "permissions" (required json_arg)
+           ~doc:"JSON DelegationPermission"
+       and requestorWorkflowId =
+         flag "requestor-workflow-id" (required string)
+           ~doc:"STRING requestorWorkflowIdType"
+       and notificationChannel =
+         flag "notification-channel" (required string)
+           ~doc:"STRING notificationChannelType"
+       and sessionDuration =
+         flag "session-duration" (required int)
+           ~doc:"INT sessionDurationType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_delegation_request
+           (Values.CreateDelegationRequestRequest.make ?ownerAccountId
+              ?requestMessage ?redirectUrl ?onlySendByOwner ~description
+              ~permissions:(Values.DelegationPermission.of_json permissions)
+              ~requestorWorkflowId ~notificationChannel ~sessionDuration ())
+           (Some Values.CreateDelegationRequestResponse.to_json)
+           (Some Values.CreateDelegationRequestResponse.error_to_json)])
 let create_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -252,18 +332,18 @@ let create_login_profile =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and userName =
+         flag "user-name" (optional string) ~doc:"STRING userNameType"
+       and password =
+         flag "password" (optional string) ~doc:"STRING passwordType"
        and passwordResetRequired =
          flag "password-reset-required" (optional bool)
-           ~doc:"BOOL booleanType"
-       and userName =
-         flag "user-name" (required string) ~doc:"STRING userNameType"
-       and password =
-         flag "password" (required string) ~doc:"STRING passwordType" in
+           ~doc:"BOOL booleanType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_login_profile
-           (Values.CreateLoginProfileRequest.make ?passwordResetRequired
-              ~userName ~password ())
+           (Values.CreateLoginProfileRequest.make ?userName ?password
+              ?passwordResetRequired ())
            (Some Values.CreateLoginProfileResponse.to_json)
            (Some Values.CreateLoginProfileResponse.error_to_json)])
 let create_open_i_d_connect_provider =
@@ -279,22 +359,23 @@ let create_open_i_d_connect_provider =
        and clientIDList =
          flag "client-i-d-list" (optional json_arg)
            ~doc:"JSON clientIDListType"
+       and thumbprintList =
+         flag "thumbprint-list" (optional json_arg)
+           ~doc:"JSON thumbprintListType"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON tagListType"
        and url =
          flag "url" (required string)
-           ~doc:"STRING OpenIDConnectProviderUrlType"
-       and thumbprintList =
-         flag "thumbprint-list" (required json_arg)
-           ~doc:"JSON thumbprintListType" in
+           ~doc:"STRING OpenIDConnectProviderUrlType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_open_i_d_connect_provider
            (Values.CreateOpenIDConnectProviderRequest.make
               ?clientIDList:(Option.map ~f:Values.ClientIDListType.of_json
                                clientIDList)
-              ?tags:(Option.map ~f:Values.TagListType.of_json tags) ~url
-              ~thumbprintList:(Values.ThumbprintListType.of_json
-                                 thumbprintList) ())
+              ?thumbprintList:(Option.map
+                                 ~f:Values.ThumbprintListType.of_json
+                                 thumbprintList)
+              ?tags:(Option.map ~f:Values.TagListType.of_json tags) ~url ())
            (Some Values.CreateOpenIDConnectProviderResponse.to_json)
            (Some Values.CreateOpenIDConnectProviderResponse.error_to_json)])
 let create_policy =
@@ -394,6 +475,12 @@ let create_s_a_m_l_provider =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON tagListType"
+       and assertionEncryptionMode =
+         flag "assertion-encryption-mode" (optional json_arg)
+           ~doc:"JSON assertionEncryptionModeType"
+       and addPrivateKey =
+         flag "add-private-key" (optional string)
+           ~doc:"STRING privateKeyType"
        and sAMLMetadataDocument =
          flag "s-a-m-l-metadata-document" (required string)
            ~doc:"STRING SAMLMetadataDocumentType"
@@ -404,7 +491,10 @@ let create_s_a_m_l_provider =
            Io.create_s_a_m_l_provider
            (Values.CreateSAMLProviderRequest.make
               ?tags:(Option.map ~f:Values.TagListType.of_json tags)
-              ~sAMLMetadataDocument ~name ())
+              ?assertionEncryptionMode:(Option.map
+                                          ~f:Values.AssertionEncryptionModeType.of_json
+                                          assertionEncryptionMode)
+              ?addPrivateKey ~sAMLMetadataDocument ~name ())
            (Some Values.CreateSAMLProviderResponse.to_json)
            (Some Values.CreateSAMLProviderResponse.error_to_json)])
 let create_service_linked_role =
@@ -443,6 +533,9 @@ let create_service_specific_credential =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and credentialAgeDays =
+         flag "credential-age-days" (optional int)
+           ~doc:"INT credentialAgeDays"
        and userName =
          flag "user-name" (required string) ~doc:"STRING userNameType"
        and serviceName =
@@ -450,8 +543,8 @@ let create_service_specific_credential =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_service_specific_credential
-           (Values.CreateServiceSpecificCredentialRequest.make ~userName
-              ~serviceName ())
+           (Values.CreateServiceSpecificCredentialRequest.make
+              ?credentialAgeDays ~userName ~serviceName ())
            (Some Values.CreateServiceSpecificCredentialResponse.to_json)
            (Some Values.CreateServiceSpecificCredentialResponse.error_to_json)])
 let create_user =
@@ -511,7 +604,7 @@ let deactivate_m_f_a_device =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and userName =
-         flag "user-name" (required string)
+         flag "user-name" (optional string)
            ~doc:"STRING existingUserNameType"
        and serialNumber =
          flag "serial-number" (required string)
@@ -519,7 +612,7 @@ let deactivate_m_f_a_device =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.deactivate_m_f_a_device
-           (Values.DeactivateMFADeviceRequest.make ~userName ~serialNumber ())
+           (Values.DeactivateMFADeviceRequest.make ?userName ~serialNumber ())
            None None])
 let delete_access_key =
   Command.async ~summary:""
@@ -636,11 +729,11 @@ let delete_login_profile =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and userName =
-         flag "user-name" (required string) ~doc:"STRING userNameType" in
+         flag "user-name" (optional string) ~doc:"STRING userNameType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_login_profile
-           (Values.DeleteLoginProfileRequest.make ~userName ()) None None])
+           (Values.DeleteLoginProfileRequest.make ?userName ()) None None])
 let delete_open_i_d_connect_provider =
   Command.async ~summary:""
     ([%map_open.Command
@@ -990,6 +1083,58 @@ let detach_user_policy =
            Io.detach_user_policy
            (Values.DetachUserPolicyRequest.make ~userName ~policyArn ()) None
            None])
+let disable_organizations_root_credentials_management =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disable_organizations_root_credentials_management
+           (Values.DisableOrganizationsRootCredentialsManagementRequest.make
+              ())
+           (Some
+              Values.DisableOrganizationsRootCredentialsManagementResponse.to_json)
+           (Some
+              Values.DisableOrganizationsRootCredentialsManagementResponse.error_to_json)])
+let disable_organizations_root_sessions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disable_organizations_root_sessions
+           (Values.DisableOrganizationsRootSessionsRequest.make ())
+           (Some Values.DisableOrganizationsRootSessionsResponse.to_json)
+           (Some
+              Values.DisableOrganizationsRootSessionsResponse.error_to_json)])
+let disable_outbound_web_identity_federation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disable_outbound_web_identity_federation (Fn.id ()) None None])
 let enable_m_f_a_device =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1017,6 +1162,60 @@ let enable_m_f_a_device =
            Io.enable_m_f_a_device
            (Values.EnableMFADeviceRequest.make ~userName ~serialNumber
               ~authenticationCode1 ~authenticationCode2 ()) None None])
+let enable_organizations_root_credentials_management =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.enable_organizations_root_credentials_management
+           (Values.EnableOrganizationsRootCredentialsManagementRequest.make
+              ())
+           (Some
+              Values.EnableOrganizationsRootCredentialsManagementResponse.to_json)
+           (Some
+              Values.EnableOrganizationsRootCredentialsManagementResponse.error_to_json)])
+let enable_organizations_root_sessions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.enable_organizations_root_sessions
+           (Values.EnableOrganizationsRootSessionsRequest.make ())
+           (Some Values.EnableOrganizationsRootSessionsResponse.to_json)
+           (Some Values.EnableOrganizationsRootSessionsResponse.error_to_json)])
+let enable_outbound_web_identity_federation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.enable_outbound_web_identity_federation (Fn.id ())
+           (Some Values.EnableOutboundWebIdentityFederationResponse.to_json)
+           (Some
+              Values.EnableOutboundWebIdentityFederationResponse.error_to_json)])
 let generate_credential_report =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1214,6 +1413,29 @@ let get_credential_report =
            Io.get_credential_report (Fn.id ())
            (Some Values.GetCredentialReportResponse.to_json)
            (Some Values.GetCredentialReportResponse.error_to_json)])
+let get_delegation_request =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and delegationPermissionCheck =
+         flag "delegation-permission-check" (optional bool)
+           ~doc:"BOOL booleanType"
+       and delegationRequestId =
+         flag "delegation-request-id" (required string)
+           ~doc:"STRING delegationRequestIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_delegation_request
+           (Values.GetDelegationRequestRequest.make
+              ?delegationPermissionCheck ~delegationRequestId ())
+           (Some Values.GetDelegationRequestResponse.to_json)
+           (Some Values.GetDelegationRequestResponse.error_to_json)])
 let get_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1254,6 +1476,25 @@ let get_group_policy =
            (Values.GetGroupPolicyRequest.make ~groupName ~policyName ())
            (Some Values.GetGroupPolicyResponse.to_json)
            (Some Values.GetGroupPolicyResponse.error_to_json)])
+let get_human_readable_summary =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and locale = flag "locale" (optional string) ~doc:"STRING localeType"
+       and entityArn =
+         flag "entity-arn" (required string) ~doc:"STRING arnType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_human_readable_summary
+           (Values.GetHumanReadableSummaryRequest.make ?locale ~entityArn ())
+           (Some Values.GetHumanReadableSummaryResponse.to_json)
+           (Some Values.GetHumanReadableSummaryResponse.error_to_json)])
 let get_instance_profile =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1284,13 +1525,34 @@ let get_login_profile =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and userName =
-         flag "user-name" (required string) ~doc:"STRING userNameType" in
+         flag "user-name" (optional string) ~doc:"STRING userNameType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_login_profile
-           (Values.GetLoginProfileRequest.make ~userName ())
+           (Values.GetLoginProfileRequest.make ?userName ())
            (Some Values.GetLoginProfileResponse.to_json)
            (Some Values.GetLoginProfileResponse.error_to_json)])
+let get_m_f_a_device =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and userName =
+         flag "user-name" (optional string) ~doc:"STRING userNameType"
+       and serialNumber =
+         flag "serial-number" (required string)
+           ~doc:"STRING serialNumberType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_m_f_a_device
+           (Values.GetMFADeviceRequest.make ?userName ~serialNumber ())
+           (Some Values.GetMFADeviceResponse.to_json)
+           (Some Values.GetMFADeviceResponse.error_to_json)])
 let get_open_i_d_connect_provider =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1334,6 +1596,23 @@ let get_organizations_access_report =
               ~jobId ())
            (Some Values.GetOrganizationsAccessReportResponse.to_json)
            (Some Values.GetOrganizationsAccessReportResponse.error_to_json)])
+let get_outbound_web_identity_federation_info =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_outbound_web_identity_federation_info (Fn.id ())
+           (Some Values.GetOutboundWebIdentityFederationInfoResponse.to_json)
+           (Some
+              Values.GetOutboundWebIdentityFederationInfoResponse.error_to_json)])
 let get_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1683,6 +1962,27 @@ let list_attached_user_policies =
               ?maxItems ~userName ())
            (Some Values.ListAttachedUserPoliciesResponse.to_json)
            (Some Values.ListAttachedUserPoliciesResponse.error_to_json)])
+let list_delegation_requests =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ownerId =
+         flag "owner-id" (optional string) ~doc:"STRING ownerIdType"
+       and marker = flag "marker" (optional string) ~doc:"STRING markerType"
+       and maxItems = flag "max-items" (optional int) ~doc:"INT maxItemsType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_delegation_requests
+           (Values.ListDelegationRequestsRequest.make ?ownerId ?marker
+              ?maxItems ())
+           (Some Values.ListDelegationRequestsResponse.to_json)
+           (Some Values.ListDelegationRequestsResponse.error_to_json)])
 let list_entities_for_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1923,6 +2223,23 @@ let list_open_i_d_connect_providers =
            (Values.ListOpenIDConnectProvidersRequest.make ())
            (Some Values.ListOpenIDConnectProvidersResponse.to_json)
            (Some Values.ListOpenIDConnectProvidersResponse.error_to_json)])
+let list_organizations_features =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_organizations_features
+           (Values.ListOrganizationsFeaturesRequest.make ())
+           (Some Values.ListOrganizationsFeaturesResponse.to_json)
+           (Some Values.ListOrganizationsFeaturesResponse.error_to_json)])
 let list_policies =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2193,12 +2510,15 @@ let list_service_specific_credentials =
        and userName =
          flag "user-name" (optional string) ~doc:"STRING userNameType"
        and serviceName =
-         flag "service-name" (optional string) ~doc:"STRING serviceName" in
+         flag "service-name" (optional string) ~doc:"STRING serviceName"
+       and allUsers = flag "all-users" (optional bool) ~doc:"BOOL allUsers"
+       and marker = flag "marker" (optional string) ~doc:"STRING markerType"
+       and maxItems = flag "max-items" (optional int) ~doc:"INT maxItemsType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_service_specific_credentials
            (Values.ListServiceSpecificCredentialsRequest.make ?userName
-              ?serviceName ())
+              ?serviceName ?allUsers ?marker ?maxItems ())
            (Some Values.ListServiceSpecificCredentialsResponse.to_json)
            (Some Values.ListServiceSpecificCredentialsResponse.error_to_json)])
 let list_signing_certificates =
@@ -2414,6 +2734,25 @@ let put_user_policy =
            Io.put_user_policy
            (Values.PutUserPolicyRequest.make ~userName ~policyName
               ~policyDocument ()) None None])
+let reject_delegation_request =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and notes = flag "notes" (optional string) ~doc:"STRING notesType"
+       and delegationRequestId =
+         flag "delegation-request-id" (required string)
+           ~doc:"STRING delegationRequestIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.reject_delegation_request
+           (Values.RejectDelegationRequestRequest.make ?notes
+              ~delegationRequestId ()) None None])
 let remove_client_i_d_from_open_i_d_connect_provider =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2523,6 +2862,24 @@ let resync_m_f_a_device =
            Io.resync_m_f_a_device
            (Values.ResyncMFADeviceRequest.make ~userName ~serialNumber
               ~authenticationCode1 ~authenticationCode2 ()) None None])
+let send_delegation_token =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and delegationRequestId =
+         flag "delegation-request-id" (required string)
+           ~doc:"STRING delegationRequestIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.send_delegation_token
+           (Values.SendDelegationTokenRequest.make ~delegationRequestId ())
+           None None])
 let set_default_policy_version =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3072,6 +3429,25 @@ let update_assume_role_policy =
            Io.update_assume_role_policy
            (Values.UpdateAssumeRolePolicyRequest.make ~roleName
               ~policyDocument ()) None None])
+let update_delegation_request =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and notes = flag "notes" (optional string) ~doc:"STRING notesType"
+       and delegationRequestId =
+         flag "delegation-request-id" (required string)
+           ~doc:"STRING delegationRequestIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_delegation_request
+           (Values.UpdateDelegationRequestRequest.make ?notes
+              ~delegationRequestId ()) None None])
 let update_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3193,15 +3569,27 @@ let update_s_a_m_l_provider =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and sAMLMetadataDocument =
-         flag "s-a-m-l-metadata-document" (required string)
+         flag "s-a-m-l-metadata-document" (optional string)
            ~doc:"STRING SAMLMetadataDocumentType"
+       and assertionEncryptionMode =
+         flag "assertion-encryption-mode" (optional json_arg)
+           ~doc:"JSON assertionEncryptionModeType"
+       and addPrivateKey =
+         flag "add-private-key" (optional string)
+           ~doc:"STRING privateKeyType"
+       and removePrivateKey =
+         flag "remove-private-key" (optional string)
+           ~doc:"STRING privateKeyIdType"
        and sAMLProviderArn =
          flag "s-a-m-l-provider-arn" (required string) ~doc:"STRING arnType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_s_a_m_l_provider
-           (Values.UpdateSAMLProviderRequest.make ~sAMLMetadataDocument
-              ~sAMLProviderArn ())
+           (Values.UpdateSAMLProviderRequest.make ?sAMLMetadataDocument
+              ?assertionEncryptionMode:(Option.map
+                                          ~f:Values.AssertionEncryptionModeType.of_json
+                                          assertionEncryptionMode)
+              ?addPrivateKey ?removePrivateKey ~sAMLProviderArn ())
            (Some Values.UpdateSAMLProviderResponse.to_json)
            (Some Values.UpdateSAMLProviderResponse.error_to_json)])
 let update_s_s_h_public_key =
@@ -3392,16 +3780,19 @@ let upload_signing_certificate =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("add-client-i-d-to-open-i-d-connect-provider",
-       add_client_i_d_to_open_i_d_connect_provider);
+    [("accept-delegation-request", accept_delegation_request);
+    ("add-client-i-d-to-open-i-d-connect-provider",
+      add_client_i_d_to_open_i_d_connect_provider);
     ("add-role-to-instance-profile", add_role_to_instance_profile);
     ("add-user-to-group", add_user_to_group);
+    ("associate-delegation-request", associate_delegation_request);
     ("attach-group-policy", attach_group_policy);
     ("attach-role-policy", attach_role_policy);
     ("attach-user-policy", attach_user_policy);
     ("change-password", change_password);
     ("create-access-key", create_access_key);
     ("create-account-alias", create_account_alias);
+    ("create-delegation-request", create_delegation_request);
     ("create-group", create_group);
     ("create-instance-profile", create_instance_profile);
     ("create-login-profile", create_login_profile);
@@ -3443,7 +3834,19 @@ let main =
     ("detach-group-policy", detach_group_policy);
     ("detach-role-policy", detach_role_policy);
     ("detach-user-policy", detach_user_policy);
+    ("disable-organizations-root-credentials-management",
+      disable_organizations_root_credentials_management);
+    ("disable-organizations-root-sessions",
+      disable_organizations_root_sessions);
+    ("disable-outbound-web-identity-federation",
+      disable_outbound_web_identity_federation);
     ("enable-m-f-a-device", enable_m_f_a_device);
+    ("enable-organizations-root-credentials-management",
+      enable_organizations_root_credentials_management);
+    ("enable-organizations-root-sessions",
+      enable_organizations_root_sessions);
+    ("enable-outbound-web-identity-federation",
+      enable_outbound_web_identity_federation);
     ("generate-credential-report", generate_credential_report);
     ("generate-organizations-access-report",
       generate_organizations_access_report);
@@ -3458,12 +3861,17 @@ let main =
     ("get-context-keys-for-principal-policy",
       get_context_keys_for_principal_policy);
     ("get-credential-report", get_credential_report);
+    ("get-delegation-request", get_delegation_request);
     ("get-group", get_group);
     ("get-group-policy", get_group_policy);
+    ("get-human-readable-summary", get_human_readable_summary);
     ("get-instance-profile", get_instance_profile);
     ("get-login-profile", get_login_profile);
+    ("get-m-f-a-device", get_m_f_a_device);
     ("get-open-i-d-connect-provider", get_open_i_d_connect_provider);
     ("get-organizations-access-report", get_organizations_access_report);
+    ("get-outbound-web-identity-federation-info",
+      get_outbound_web_identity_federation_info);
     ("get-policy", get_policy);
     ("get-policy-version", get_policy_version);
     ("get-role", get_role);
@@ -3483,6 +3891,7 @@ let main =
     ("list-attached-group-policies", list_attached_group_policies);
     ("list-attached-role-policies", list_attached_role_policies);
     ("list-attached-user-policies", list_attached_user_policies);
+    ("list-delegation-requests", list_delegation_requests);
     ("list-entities-for-policy", list_entities_for_policy);
     ("list-group-policies", list_group_policies);
     ("list-groups", list_groups);
@@ -3495,6 +3904,7 @@ let main =
     ("list-open-i-d-connect-provider-tags",
       list_open_i_d_connect_provider_tags);
     ("list-open-i-d-connect-providers", list_open_i_d_connect_providers);
+    ("list-organizations-features", list_organizations_features);
     ("list-policies", list_policies);
     ("list-policies-granting-service-access",
       list_policies_granting_service_access);
@@ -3519,12 +3929,14 @@ let main =
     ("put-role-policy", put_role_policy);
     ("put-user-permissions-boundary", put_user_permissions_boundary);
     ("put-user-policy", put_user_policy);
+    ("reject-delegation-request", reject_delegation_request);
     ("remove-client-i-d-from-open-i-d-connect-provider",
       remove_client_i_d_from_open_i_d_connect_provider);
     ("remove-role-from-instance-profile", remove_role_from_instance_profile);
     ("remove-user-from-group", remove_user_from_group);
     ("reset-service-specific-credential", reset_service_specific_credential);
     ("resync-m-f-a-device", resync_m_f_a_device);
+    ("send-delegation-token", send_delegation_token);
     ("set-default-policy-version", set_default_policy_version);
     ("set-security-token-service-preferences",
       set_security_token_service_preferences);
@@ -3549,6 +3961,7 @@ let main =
     ("update-access-key", update_access_key);
     ("update-account-password-policy", update_account_password_policy);
     ("update-assume-role-policy", update_assume_role_policy);
+    ("update-delegation-request", update_delegation_request);
     ("update-group", update_group);
     ("update-login-profile", update_login_profile);
     ("update-open-i-d-connect-provider-thumbprint",

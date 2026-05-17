@@ -26,11 +26,21 @@ val list_tags_for_resource :
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t Lwt.t
+val lock_rule :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      LockRuleRequest.t ->
+        (LockRuleResponse.t, LockRuleResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
         (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
+val unlock_rule :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UnlockRuleRequest.t ->
+        (UnlockRuleResponse.t, UnlockRuleResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

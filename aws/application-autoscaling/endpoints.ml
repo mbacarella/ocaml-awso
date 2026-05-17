@@ -21,12 +21,21 @@ type ('i, 'o, 'e) t =
   | DescribeScheduledActions: (DescribeScheduledActionsRequest.t,
   DescribeScheduledActionsResponse.t, DescribeScheduledActionsResponse.error)
   t 
+  | GetPredictiveScalingForecast: (GetPredictiveScalingForecastRequest.t,
+  GetPredictiveScalingForecastResponse.t,
+  GetPredictiveScalingForecastResponse.error) t 
+  | ListTagsForResource: (ListTagsForResourceRequest.t,
+  ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | PutScalingPolicy: (PutScalingPolicyRequest.t, PutScalingPolicyResponse.t,
   PutScalingPolicyResponse.error) t 
   | PutScheduledAction: (PutScheduledActionRequest.t,
   PutScheduledActionResponse.t, PutScheduledActionResponse.error) t 
   | RegisterScalableTarget: (RegisterScalableTargetRequest.t,
   RegisterScalableTargetResponse.t, RegisterScalableTargetResponse.error) t 
+  | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
+  TagResourceResponse.error) t 
+  | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
+  UntagResourceResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | DeleteScalingPolicy -> `POST
@@ -36,9 +45,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeScalingActivities -> `POST
   | DescribeScalingPolicies -> `POST
   | DescribeScheduledActions -> `POST
+  | GetPredictiveScalingForecast -> `POST
+  | ListTagsForResource -> `POST
   | PutScalingPolicy -> `POST
   | PutScheduledAction -> `POST
   | RegisterScalableTarget -> `POST
+  | TagResource -> `POST
+  | UntagResource -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -49,9 +62,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeScalingActivities -> (Format.kasprintf Uri.of_string) "/"
       | DescribeScalingPolicies -> (Format.kasprintf Uri.of_string) "/"
       | DescribeScheduledActions -> (Format.kasprintf Uri.of_string) "/"
+      | GetPredictiveScalingForecast -> (Format.kasprintf Uri.of_string) "/"
+      | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | PutScalingPolicy -> (Format.kasprintf Uri.of_string) "/"
       | PutScheduledAction -> (Format.kasprintf Uri.of_string) "/"
-      | RegisterScalableTarget -> (Format.kasprintf Uri.of_string) "/")
+      | RegisterScalableTarget -> (Format.kasprintf Uri.of_string) "/"
+      | TagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UntagResource -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -114,6 +131,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AnyScaleFrontendService.DescribeScheduledActions")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetPredictiveScalingForecast ->
+      let json = GetPredictiveScalingForecastRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AnyScaleFrontendService.GetPredictiveScalingForecast")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListTagsForResource ->
+      let json = ListTagsForResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AnyScaleFrontendService.ListTagsForResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PutScalingPolicy ->
       let json = PutScalingPolicyRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -137,6 +171,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AnyScaleFrontendService.RegisterScalableTarget")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TagResource ->
+      let json = TagResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AnyScaleFrontendService.TagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UntagResource ->
+      let json = UntagResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AnyScaleFrontendService.UntagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -222,6 +272,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeScheduledActionsResponse.error_of_json))
+  | GetPredictiveScalingForecast ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetPredictiveScalingForecastResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetPredictiveScalingForecastResponse.error_of_json))
+  | ListTagsForResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | PutScalingPolicy ->
       if is_success
       then
@@ -246,3 +313,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some RegisterScalableTargetResponse.error_of_json))
+  | TagResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
+  | UntagResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UntagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))

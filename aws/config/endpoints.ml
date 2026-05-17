@@ -2,6 +2,8 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | AssociateResourceTypes: (AssociateResourceTypesRequest.t,
+  AssociateResourceTypesResponse.t, AssociateResourceTypesResponse.error) t 
   | BatchGetAggregateResourceConfig:
   (BatchGetAggregateResourceConfigRequest.t,
   BatchGetAggregateResourceConfigResponse.t,
@@ -35,6 +37,10 @@ type ('i, 'o, 'e) t =
   | DeleteResourceConfig: (DeleteResourceConfigRequest.t, unit, unit) t 
   | DeleteRetentionConfiguration: (DeleteRetentionConfigurationRequest.t,
   unit, unit) t 
+  | DeleteServiceLinkedConfigurationRecorder:
+  (DeleteServiceLinkedConfigurationRecorderRequest.t,
+  DeleteServiceLinkedConfigurationRecorderResponse.t,
+  DeleteServiceLinkedConfigurationRecorderResponse.error) t 
   | DeleteStoredQuery: (DeleteStoredQueryRequest.t,
   DeleteStoredQueryResponse.t, DeleteStoredQueryResponse.error) t 
   | DeliverConfigSnapshot: (DeliverConfigSnapshotRequest.t,
@@ -129,6 +135,9 @@ type ('i, 'o, 'e) t =
   (DescribeRetentionConfigurationsRequest.t,
   DescribeRetentionConfigurationsResponse.t,
   DescribeRetentionConfigurationsResponse.error) t 
+  | DisassociateResourceTypes: (DisassociateResourceTypesRequest.t,
+  DisassociateResourceTypesResponse.t,
+  DisassociateResourceTypesResponse.error) t 
   | GetAggregateComplianceDetailsByConfigRule:
   (GetAggregateComplianceDetailsByConfigRuleRequest.t,
   GetAggregateComplianceDetailsByConfigRuleResponse.t,
@@ -190,14 +199,27 @@ type ('i, 'o, 'e) t =
   | GetResourceConfigHistory: (GetResourceConfigHistoryRequest.t,
   GetResourceConfigHistoryResponse.t, GetResourceConfigHistoryResponse.error)
   t 
+  | GetResourceEvaluationSummary: (GetResourceEvaluationSummaryRequest.t,
+  GetResourceEvaluationSummaryResponse.t,
+  GetResourceEvaluationSummaryResponse.error) t 
   | GetStoredQuery: (GetStoredQueryRequest.t, GetStoredQueryResponse.t,
   GetStoredQueryResponse.error) t 
   | ListAggregateDiscoveredResources:
   (ListAggregateDiscoveredResourcesRequest.t,
   ListAggregateDiscoveredResourcesResponse.t,
   ListAggregateDiscoveredResourcesResponse.error) t 
+  | ListConfigurationRecorders: (ListConfigurationRecordersRequest.t,
+  ListConfigurationRecordersResponse.t,
+  ListConfigurationRecordersResponse.error) t 
+  | ListConformancePackComplianceScores:
+  (ListConformancePackComplianceScoresRequest.t,
+  ListConformancePackComplianceScoresResponse.t,
+  ListConformancePackComplianceScoresResponse.error) t 
   | ListDiscoveredResources: (ListDiscoveredResourcesRequest.t,
   ListDiscoveredResourcesResponse.t, ListDiscoveredResourcesResponse.error) t
+  
+  | ListResourceEvaluations: (ListResourceEvaluationsRequest.t,
+  ListResourceEvaluationsResponse.t, ListResourceEvaluationsResponse.error) t
   
   | ListStoredQueries: (ListStoredQueriesRequest.t,
   ListStoredQueriesResponse.t, ListStoredQueriesResponse.error) t 
@@ -235,6 +257,10 @@ type ('i, 'o, 'e) t =
   | PutRetentionConfiguration: (PutRetentionConfigurationRequest.t,
   PutRetentionConfigurationResponse.t,
   PutRetentionConfigurationResponse.error) t 
+  | PutServiceLinkedConfigurationRecorder:
+  (PutServiceLinkedConfigurationRecorderRequest.t,
+  PutServiceLinkedConfigurationRecorderResponse.t,
+  PutServiceLinkedConfigurationRecorderResponse.error) t 
   | PutStoredQuery: (PutStoredQueryRequest.t, PutStoredQueryResponse.t,
   PutStoredQueryResponse.error) t 
   | SelectAggregateResourceConfig: (SelectAggregateResourceConfigRequest.t,
@@ -250,12 +276,16 @@ type ('i, 'o, 'e) t =
   | StartRemediationExecution: (StartRemediationExecutionRequest.t,
   StartRemediationExecutionResponse.t,
   StartRemediationExecutionResponse.error) t 
+  | StartResourceEvaluation: (StartResourceEvaluationRequest.t,
+  StartResourceEvaluationResponse.t, StartResourceEvaluationResponse.error) t
+  
   | StopConfigurationRecorder: (StopConfigurationRecorderRequest.t, unit,
   unit) t 
   | TagResource: (TagResourceRequest.t, unit, unit) t 
   | UntagResource: (UntagResourceRequest.t, unit, unit) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | AssociateResourceTypes -> `POST
   | BatchGetAggregateResourceConfig -> `POST
   | BatchGetResourceConfig -> `POST
   | DeleteAggregationAuthorization -> `POST
@@ -272,6 +302,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteRemediationExceptions -> `POST
   | DeleteResourceConfig -> `POST
   | DeleteRetentionConfiguration -> `POST
+  | DeleteServiceLinkedConfigurationRecorder -> `POST
   | DeleteStoredQuery -> `POST
   | DeliverConfigSnapshot -> `POST
   | DescribeAggregateComplianceByConfigRules -> `POST
@@ -299,6 +330,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeRemediationExceptions -> `POST
   | DescribeRemediationExecutionStatus -> `POST
   | DescribeRetentionConfigurations -> `POST
+  | DisassociateResourceTypes -> `POST
   | GetAggregateComplianceDetailsByConfigRule -> `POST
   | GetAggregateConfigRuleComplianceSummary -> `POST
   | GetAggregateConformancePackComplianceSummary -> `POST
@@ -316,9 +348,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetOrganizationConformancePackDetailedStatus -> `POST
   | GetOrganizationCustomRulePolicy -> `POST
   | GetResourceConfigHistory -> `POST
+  | GetResourceEvaluationSummary -> `POST
   | GetStoredQuery -> `POST
   | ListAggregateDiscoveredResources -> `POST
+  | ListConfigurationRecorders -> `POST
+  | ListConformancePackComplianceScores -> `POST
   | ListDiscoveredResources -> `POST
+  | ListResourceEvaluations -> `POST
   | ListStoredQueries -> `POST
   | ListTagsForResource -> `POST
   | PutAggregationAuthorization -> `POST
@@ -335,18 +371,21 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | PutRemediationExceptions -> `POST
   | PutResourceConfig -> `POST
   | PutRetentionConfiguration -> `POST
+  | PutServiceLinkedConfigurationRecorder -> `POST
   | PutStoredQuery -> `POST
   | SelectAggregateResourceConfig -> `POST
   | SelectResourceConfig -> `POST
   | StartConfigRulesEvaluation -> `POST
   | StartConfigurationRecorder -> `POST
   | StartRemediationExecution -> `POST
+  | StartResourceEvaluation -> `POST
   | StopConfigurationRecorder -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | AssociateResourceTypes -> (Format.kasprintf Uri.of_string) "/"
       | BatchGetAggregateResourceConfig ->
           (Format.kasprintf Uri.of_string) "/"
       | BatchGetResourceConfig -> (Format.kasprintf Uri.of_string) "/"
@@ -368,6 +407,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteRemediationExceptions -> (Format.kasprintf Uri.of_string) "/"
       | DeleteResourceConfig -> (Format.kasprintf Uri.of_string) "/"
       | DeleteRetentionConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteServiceLinkedConfigurationRecorder ->
+          (Format.kasprintf Uri.of_string) "/"
       | DeleteStoredQuery -> (Format.kasprintf Uri.of_string) "/"
       | DeliverConfigSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAggregateComplianceByConfigRules ->
@@ -413,6 +454,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | DescribeRetentionConfigurations ->
           (Format.kasprintf Uri.of_string) "/"
+      | DisassociateResourceTypes -> (Format.kasprintf Uri.of_string) "/"
       | GetAggregateComplianceDetailsByConfigRule ->
           (Format.kasprintf Uri.of_string) "/"
       | GetAggregateConfigRuleComplianceSummary ->
@@ -443,10 +485,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetOrganizationCustomRulePolicy ->
           (Format.kasprintf Uri.of_string) "/"
       | GetResourceConfigHistory -> (Format.kasprintf Uri.of_string) "/"
+      | GetResourceEvaluationSummary -> (Format.kasprintf Uri.of_string) "/"
       | GetStoredQuery -> (Format.kasprintf Uri.of_string) "/"
       | ListAggregateDiscoveredResources ->
           (Format.kasprintf Uri.of_string) "/"
+      | ListConfigurationRecorders -> (Format.kasprintf Uri.of_string) "/"
+      | ListConformancePackComplianceScores ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListDiscoveredResources -> (Format.kasprintf Uri.of_string) "/"
+      | ListResourceEvaluations -> (Format.kasprintf Uri.of_string) "/"
       | ListStoredQueries -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | PutAggregationAuthorization -> (Format.kasprintf Uri.of_string) "/"
@@ -464,18 +511,29 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | PutRemediationExceptions -> (Format.kasprintf Uri.of_string) "/"
       | PutResourceConfig -> (Format.kasprintf Uri.of_string) "/"
       | PutRetentionConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | PutServiceLinkedConfigurationRecorder ->
+          (Format.kasprintf Uri.of_string) "/"
       | PutStoredQuery -> (Format.kasprintf Uri.of_string) "/"
       | SelectAggregateResourceConfig -> (Format.kasprintf Uri.of_string) "/"
       | SelectResourceConfig -> (Format.kasprintf Uri.of_string) "/"
       | StartConfigRulesEvaluation -> (Format.kasprintf Uri.of_string) "/"
       | StartConfigurationRecorder -> (Format.kasprintf Uri.of_string) "/"
       | StartRemediationExecution -> (Format.kasprintf Uri.of_string) "/"
+      | StartResourceEvaluation -> (Format.kasprintf Uri.of_string) "/"
       | StopConfigurationRecorder -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
+  | AssociateResourceTypes ->
+      let json = AssociateResourceTypesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "StarlingDoveService.AssociateResourceTypes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | BatchGetAggregateResourceConfig ->
       let json = BatchGetAggregateResourceConfigRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -611,6 +669,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "StarlingDoveService.DeleteRetentionConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteServiceLinkedConfigurationRecorder ->
+      let json = DeleteServiceLinkedConfigurationRecorderRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "StarlingDoveService.DeleteServiceLinkedConfigurationRecorder")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteStoredQuery ->
       let json = DeleteStoredQueryRequest.to_json req in
@@ -853,6 +920,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "StarlingDoveService.DescribeRetentionConfigurations")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DisassociateResourceTypes ->
+      let json = DisassociateResourceTypesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "StarlingDoveService.DisassociateResourceTypes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetAggregateComplianceDetailsByConfigRule ->
       let json = GetAggregateComplianceDetailsByConfigRuleRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1004,6 +1079,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "StarlingDoveService.GetResourceConfigHistory")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetResourceEvaluationSummary ->
+      let json = GetResourceEvaluationSummaryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "StarlingDoveService.GetResourceEvaluationSummary")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetStoredQuery ->
       let json = GetStoredQueryRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1021,6 +1105,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "StarlingDoveService.ListAggregateDiscoveredResources")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListConfigurationRecorders ->
+      let json = ListConfigurationRecordersRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "StarlingDoveService.ListConfigurationRecorders")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListConformancePackComplianceScores ->
+      let json = ListConformancePackComplianceScoresRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "StarlingDoveService.ListConformancePackComplianceScores")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListDiscoveredResources ->
       let json = ListDiscoveredResourcesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1028,6 +1129,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "StarlingDoveService.ListDiscoveredResources")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListResourceEvaluations ->
+      let json = ListResourceEvaluationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "StarlingDoveService.ListResourceEvaluations")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListStoredQueries ->
       let json = ListStoredQueriesRequest.to_json req in
@@ -1159,6 +1268,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "StarlingDoveService.PutRetentionConfiguration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutServiceLinkedConfigurationRecorder ->
+      let json = PutServiceLinkedConfigurationRecorderRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "StarlingDoveService.PutServiceLinkedConfigurationRecorder")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PutStoredQuery ->
       let json = PutStoredQueryRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1208,6 +1326,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "StarlingDoveService.StartRemediationExecution")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartResourceEvaluation ->
+      let json = StartResourceEvaluationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "StarlingDoveService.StartResourceEvaluation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopConfigurationRecorder ->
       let json = StopConfigurationRecorderRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1255,6 +1381,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = parse_aws_error in
   let _ = resp in
   match endpoint with
+  | AssociateResourceTypes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AssociateResourceTypesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateResourceTypesResponse.error_of_json))
   | BatchGetAggregateResourceConfig ->
       if is_success
       then
@@ -1322,6 +1457,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteRetentionConfiguration ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteServiceLinkedConfigurationRecorder ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteServiceLinkedConfigurationRecorderResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DeleteServiceLinkedConfigurationRecorderResponse.error_of_json))
   | DeleteStoredQuery ->
       if is_success
       then
@@ -1566,6 +1711,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeRetentionConfigurationsResponse.error_of_json))
+  | DisassociateResourceTypes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisassociateResourceTypesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateResourceTypesResponse.error_of_json))
   | GetAggregateComplianceDetailsByConfigRule ->
       if is_success
       then
@@ -1722,6 +1876,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetResourceConfigHistoryResponse.error_of_json))
+  | GetResourceEvaluationSummary ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetResourceEvaluationSummaryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetResourceEvaluationSummaryResponse.error_of_json))
   | GetStoredQuery ->
       if is_success
       then
@@ -1738,6 +1901,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListAggregateDiscoveredResourcesResponse.error_of_json))
+  | ListConfigurationRecorders ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListConfigurationRecordersResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListConfigurationRecordersResponse.error_of_json))
+  | ListConformancePackComplianceScores ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListConformancePackComplianceScoresResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListConformancePackComplianceScoresResponse.error_of_json))
   | ListDiscoveredResources ->
       if is_success
       then
@@ -1747,6 +1928,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListDiscoveredResourcesResponse.error_of_json))
+  | ListResourceEvaluations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListResourceEvaluationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListResourceEvaluationsResponse.error_of_json))
   | ListStoredQueries ->
       if is_success
       then
@@ -1857,6 +2047,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some PutRetentionConfigurationResponse.error_of_json))
+  | PutServiceLinkedConfigurationRecorder ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutServiceLinkedConfigurationRecorderResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                PutServiceLinkedConfigurationRecorderResponse.error_of_json))
   | PutStoredQuery ->
       if is_success
       then
@@ -1901,6 +2101,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some StartRemediationExecutionResponse.error_of_json))
+  | StartResourceEvaluation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartResourceEvaluationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartResourceEvaluationResponse.error_of_json))
   | StopConfigurationRecorder ->
       if is_success then Ok () else Error (parse_aws_error None)
   | TagResource -> if is_success then Ok () else Error (parse_aws_error None)

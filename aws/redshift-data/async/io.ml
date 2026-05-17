@@ -23,6 +23,8 @@ let execute_statement ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ExecuteStatement input
 let get_statement_result ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetStatementResult input
+let get_statement_result_v2 ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetStatementResultV2 input
 let list_databases ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDatabases input
 let list_schemas ?endpoint_url ?cfg input =

@@ -266,14 +266,14 @@ module Record =
       make ?deviceLastModifiedDate ?lastModifiedBy ?lastModifiedDate
         ?syncCount ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deviceLastModifiedDate =
-        field_map json "DeviceLastModifiedDate" Date.of_json in
-      let lastModifiedBy = field_map json "LastModifiedBy" String_.of_json in
-      let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
-      let syncCount = field_map json "SyncCount" Long.of_json in
-      let value = field_map json "Value" RecordValue.of_json in
-      let key = field_map json "Key" RecordKey.of_json in
+        field_map json__ "DeviceLastModifiedDate" Date.of_json in
+      let lastModifiedBy = field_map json__ "LastModifiedBy" String_.of_json in
+      let lastModifiedDate = field_map json__ "LastModifiedDate" Date.of_json in
+      let syncCount = field_map json__ "SyncCount" Long.of_json in
+      let value = field_map json__ "Value" RecordValue.of_json in
+      let key = field_map json__ "Key" RecordKey.of_json in
       make ?deviceLastModifiedDate ?lastModifiedBy ?lastModifiedDate
         ?syncCount ?value ?key ()
     let to_json v = composed_to_json to_value v
@@ -322,13 +322,13 @@ module RecordPatch =
         Operation.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Op") in
       make ?deviceLastModifiedDate ~syncCount ?value ~key ~op ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deviceLastModifiedDate =
-        field_map json "DeviceLastModifiedDate" Date.of_json in
-      let syncCount = field_map_exn json "SyncCount" Long.of_json in
-      let value = field_map json "Value" RecordValue.of_json in
-      let key = field_map_exn json "Key" RecordKey.of_json in
-      let op = field_map_exn json "Op" Operation.of_json in
+        field_map json__ "DeviceLastModifiedDate" Date.of_json in
+      let syncCount = field_map_exn json__ "SyncCount" Long.of_json in
+      let value = field_map json__ "Value" RecordValue.of_json in
+      let key = field_map_exn json__ "Key" RecordKey.of_json in
+      let op = field_map_exn json__ "Op" Operation.of_json in
       make ?deviceLastModifiedDate ~syncCount ?value ~key ~op ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An update operation for a record."]
@@ -400,6 +400,9 @@ module ApplicationArnList =
   struct
     type nonrec t = ApplicationArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -494,12 +497,13 @@ module IdentityPoolUsage =
       make ?lastModifiedDate ?dataStorage ?syncSessionsCount ?identityPoolId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
-      let dataStorage = field_map json "DataStorage" Long.of_json in
-      let syncSessionsCount = field_map json "SyncSessionsCount" Long.of_json in
+    let of_json json__ =
+      let lastModifiedDate = field_map json__ "LastModifiedDate" Date.of_json in
+      let dataStorage = field_map json__ "DataStorage" Long.of_json in
+      let syncSessionsCount =
+        field_map json__ "SyncSessionsCount" Long.of_json in
       let identityPoolId =
-        field_map json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ?lastModifiedDate ?dataStorage ?syncSessionsCount ?identityPoolId
         ()
     let to_json v = composed_to_json to_value v
@@ -570,14 +574,14 @@ module Dataset =
       make ?numRecords ?dataStorage ?lastModifiedBy ?lastModifiedDate
         ?creationDate ?datasetName ?identityId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let numRecords = field_map json "NumRecords" Long.of_json in
-      let dataStorage = field_map json "DataStorage" Long.of_json in
-      let lastModifiedBy = field_map json "LastModifiedBy" String_.of_json in
-      let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
-      let creationDate = field_map json "CreationDate" Date.of_json in
-      let datasetName = field_map json "DatasetName" DatasetName.of_json in
-      let identityId = field_map json "IdentityId" IdentityId.of_json in
+    let of_json json__ =
+      let numRecords = field_map json__ "NumRecords" Long.of_json in
+      let dataStorage = field_map json__ "DataStorage" Long.of_json in
+      let lastModifiedBy = field_map json__ "LastModifiedBy" String_.of_json in
+      let lastModifiedDate = field_map json__ "LastModifiedDate" Date.of_json in
+      let creationDate = field_map json__ "CreationDate" Date.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
+      let identityId = field_map json__ "IdentityId" IdentityId.of_json in
       make ?numRecords ?dataStorage ?lastModifiedBy ?lastModifiedDate
         ?creationDate ?datasetName ?identityId ()
     let to_json v = composed_to_json to_value v
@@ -600,47 +604,45 @@ module InternalErrorException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t
+      message: ExceptionMessage.t option
         [@ocaml.doc "Message returned by InternalErrorException."]}
-    let context_ = "InternalErrorException"
-    let make ~message = fun () -> { message }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ExceptionMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ExceptionMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Indicates an internal service error."]
 module InvalidLambdaFunctionOutputException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t
+      message: ExceptionMessage.t option
         [@ocaml.doc
           "A message returned when an InvalidLambdaFunctionOutputException occurs"]}
-    let context_ = "InvalidLambdaFunctionOutputException"
-    let make ~message = fun () -> { message }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ExceptionMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ExceptionMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The AWS Lambda function returned invalid output or an exception."]
@@ -648,23 +650,22 @@ module InvalidParameterException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t
+      message: ExceptionMessage.t option
         [@ocaml.doc "Message returned by InvalidParameterException."]}
-    let context_ = "InvalidParameterException"
-    let make ~message = fun () -> { message }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ExceptionMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ExceptionMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Thrown when a request parameter does not comply with the associated constraints."]
@@ -672,24 +673,23 @@ module LambdaThrottledException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t
+      message: ExceptionMessage.t option
         [@ocaml.doc
           "A message returned when an LambdaThrottledException is thrown"]}
-    let context_ = "LambdaThrottledException"
-    let make ~message = fun () -> { message }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ExceptionMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ExceptionMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "AWS Lambda throttled your account, please contact AWS Support"]
@@ -697,23 +697,22 @@ module LimitExceededException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t
+      message: ExceptionMessage.t option
         [@ocaml.doc "Message returned by LimitExceededException."]}
-    let context_ = "LimitExceededException"
-    let make ~message = fun () -> { message }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ExceptionMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ExceptionMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Thrown when the limit on the number of objects or operations has been exceeded."]
@@ -721,23 +720,22 @@ module NotAuthorizedException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t
+      message: ExceptionMessage.t option
         [@ocaml.doc "The message returned by a NotAuthorizedException."]}
-    let context_ = "NotAuthorizedException"
-    let make ~message = fun () -> { message }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ExceptionMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ExceptionMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Thrown when a user is not authorized to access the requested resource."]
@@ -745,6 +743,9 @@ module RecordList =
   struct
     type nonrec t = Record.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Record.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -768,23 +769,22 @@ module ResourceConflictException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t
+      message: ExceptionMessage.t option
         [@ocaml.doc "The message returned by a ResourceConflictException."]}
-    let context_ = "ResourceConflictException"
-    let make ~message = fun () -> { message }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ExceptionMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ExceptionMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Thrown if an update can't be applied because the resource was changed by another call and this would result in a conflict."]
@@ -792,46 +792,44 @@ module ResourceNotFoundException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t
+      message: ExceptionMessage.t option
         [@ocaml.doc "Message returned by a ResourceNotFoundException."]}
-    let context_ = "ResourceNotFoundException"
-    let make ~message = fun () -> { message }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ExceptionMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ExceptionMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Thrown if the resource doesn't exist."]
 module TooManyRequestsException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t
+      message: ExceptionMessage.t option
         [@ocaml.doc "Message returned by a TooManyRequestsException."]}
-    let context_ = "TooManyRequestsException"
-    let make ~message = fun () -> { message }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ExceptionMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ExceptionMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Thrown if the request is throttled."]
 module ClientContext =
@@ -869,6 +867,9 @@ module RecordPatchList =
   struct
     type nonrec t = RecordPatch.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecordPatch.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -906,23 +907,22 @@ module InvalidConfigurationException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t
+      message: ExceptionMessage.t option
         [@ocaml.doc "Message returned by InvalidConfigurationException."]}
-    let context_ = "InvalidConfigurationException"
-    let make ~message = fun () -> { message }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ExceptionMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ExceptionMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end
 module CognitoStreams =
@@ -959,11 +959,11 @@ module CognitoStreams =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
       make ?streamingStatus ?roleArn ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let streamingStatus =
-        field_map json "StreamingStatus" StreamingStatus.of_json in
-      let roleArn = field_map json "RoleArn" AssumeRoleArn.of_json in
-      let streamName = field_map json "StreamName" StreamName.of_json in
+        field_map json__ "StreamingStatus" StreamingStatus.of_json in
+      let roleArn = field_map json__ "RoleArn" AssumeRoleArn.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
       make ?streamingStatus ?roleArn ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Configuration options for configure Cognito streams."]
@@ -971,22 +971,22 @@ module ConcurrentModificationException =
   struct
     type nonrec t =
       {
-      message: String_.t
+      message: String_.t option
         [@ocaml.doc
           "The message returned by a ConcurrentModicationException."]}
-    let context_ = "ConcurrentModificationException"
-    let make ~message = fun () -> { message }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Thrown if there are parallel requests to modify a resource."]
@@ -1016,10 +1016,10 @@ module PushSync =
           (Xml.child xml_arg0 "ApplicationArns") in
       make ?roleArn ?applicationArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "RoleArn" AssumeRoleArn.of_json in
+    let of_json json__ =
+      let roleArn = field_map json__ "RoleArn" AssumeRoleArn.of_json in
       let applicationArns =
-        field_map json "ApplicationArns" ApplicationArnList.of_json in
+        field_map json__ "ApplicationArns" ApplicationArnList.of_json in
       make ?roleArn ?applicationArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1047,6 +1047,8 @@ module Events =
                        (LambdaFunctionArn.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1115,6 +1117,9 @@ module MergedDatasetNameList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1153,6 +1158,9 @@ module IdentityPoolUsageList =
   struct
     type nonrec t = IdentityPoolUsage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IdentityPoolUsage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1178,6 +1186,9 @@ module DatasetList =
   struct
     type nonrec t = Dataset.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Dataset.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1284,13 +1295,13 @@ module IdentityUsage =
       make ?dataStorage ?datasetCount ?lastModifiedDate ?identityPoolId
         ?identityId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataStorage = field_map json "DataStorage" Long.of_json in
-      let datasetCount = field_map json "DatasetCount" Integer.of_json in
-      let lastModifiedDate = field_map json "LastModifiedDate" Date.of_json in
+    let of_json json__ =
+      let dataStorage = field_map json__ "DataStorage" Long.of_json in
+      let datasetCount = field_map json__ "DatasetCount" Integer.of_json in
+      let lastModifiedDate = field_map json__ "LastModifiedDate" Date.of_json in
       let identityPoolId =
-        field_map json "IdentityPoolId" IdentityPoolId.of_json in
-      let identityId = field_map json "IdentityId" IdentityId.of_json in
+        field_map json__ "IdentityPoolId" IdentityPoolId.of_json in
+      let identityId = field_map json__ "IdentityId" IdentityId.of_json in
       make ?dataStorage ?datasetCount ?lastModifiedDate ?identityPoolId
         ?identityId ()
     let to_json v = composed_to_json to_value v
@@ -1299,24 +1310,23 @@ module AlreadyStreamedException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t
+      message: ExceptionMessage.t option
         [@ocaml.doc
           "The message associated with the AlreadyStreamedException exception."]}
-    let context_ = "AlreadyStreamedException"
-    let make ~message = fun () -> { message }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ExceptionMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ExceptionMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An exception thrown when a bulk publish operation is requested less than 24 hours after a previous bulk publish operation completed successfully."]
@@ -1324,24 +1334,23 @@ module DuplicateRequestException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t
+      message: ExceptionMessage.t option
         [@ocaml.doc
           "The message associated with the DuplicateRequestException exception."]}
-    let context_ = "DuplicateRequestException"
-    let make ~message = fun () -> { message }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ExceptionMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ExceptionMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An exception thrown when there is an IN_PROGRESS bulk publish operation for the given identity pool."]
@@ -1463,8 +1472,8 @@ module UpdateRecordsResponse =
         (Option.map ~f:RecordList.of_xml) (Xml.child xml_arg0 "Records") in
       make ?records ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let records = field_map json "Records" RecordList.of_json in
+    let of_json json__ =
+      let records = field_map json__ "Records" RecordList.of_json in
       make ?records ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returned for a successful UpdateRecordsRequest."]
@@ -1547,18 +1556,19 @@ module UpdateRecordsRequest =
       make ?clientContext ~syncSessionToken ?recordPatches ?deviceId
         ~datasetName ~identityId ~identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientContext =
-        field_map json "ClientContext" ClientContext.of_json in
+        field_map json__ "ClientContext" ClientContext.of_json in
       let syncSessionToken =
-        field_map_exn json "SyncSessionToken" SyncSessionToken.of_json in
+        field_map_exn json__ "SyncSessionToken" SyncSessionToken.of_json in
       let recordPatches =
-        field_map json "RecordPatches" RecordPatchList.of_json in
-      let deviceId = field_map json "DeviceId" DeviceId.of_json in
-      let datasetName = field_map_exn json "DatasetName" DatasetName.of_json in
-      let identityId = field_map_exn json "IdentityId" IdentityId.of_json in
+        field_map json__ "RecordPatches" RecordPatchList.of_json in
+      let deviceId = field_map json__ "DeviceId" DeviceId.of_json in
+      let datasetName =
+        field_map_exn json__ "DatasetName" DatasetName.of_json in
+      let identityId = field_map_exn json__ "IdentityId" IdentityId.of_json in
       let identityPoolId =
-        field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map_exn json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ?clientContext ~syncSessionToken ?recordPatches ?deviceId
         ~datasetName ~identityId ~identityPoolId ()
     let to_json v = composed_to_json to_value v
@@ -1690,12 +1700,13 @@ module UnsubscribeFromDatasetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~deviceId ~datasetName ~identityId ~identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
-      let datasetName = field_map_exn json "DatasetName" DatasetName.of_json in
-      let identityId = field_map_exn json "IdentityId" IdentityId.of_json in
+    let of_json json__ =
+      let deviceId = field_map_exn json__ "DeviceId" DeviceId.of_json in
+      let datasetName =
+        field_map_exn json__ "DatasetName" DatasetName.of_json in
+      let identityId = field_map_exn json__ "IdentityId" IdentityId.of_json in
       let identityPoolId =
-        field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map_exn json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ~deviceId ~datasetName ~identityId ~identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to UnsubscribeFromDataset."]
@@ -1825,12 +1836,13 @@ module SubscribeToDatasetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~deviceId ~datasetName ~identityId ~identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
-      let datasetName = field_map_exn json "DatasetName" DatasetName.of_json in
-      let identityId = field_map_exn json "IdentityId" IdentityId.of_json in
+    let of_json json__ =
+      let deviceId = field_map_exn json__ "DeviceId" DeviceId.of_json in
+      let datasetName =
+        field_map_exn json__ "DatasetName" DatasetName.of_json in
+      let identityId = field_map_exn json__ "IdentityId" IdentityId.of_json in
       let identityPoolId =
-        field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map_exn json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ~deviceId ~datasetName ~identityId ~identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to SubscribeToDatasetRequest."]
@@ -1945,12 +1957,12 @@ module SetIdentityPoolConfigurationResponse =
           (Xml.child xml_arg0 "IdentityPoolId") in
       make ?cognitoStreams ?pushSync ?identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cognitoStreams =
-        field_map json "CognitoStreams" CognitoStreams.of_json in
-      let pushSync = field_map json "PushSync" PushSync.of_json in
+        field_map json__ "CognitoStreams" CognitoStreams.of_json in
+      let pushSync = field_map json__ "PushSync" PushSync.of_json in
       let identityPoolId =
-        field_map json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ?cognitoStreams ?pushSync ?identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1992,12 +2004,12 @@ module SetIdentityPoolConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ?cognitoStreams ?pushSync ~identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cognitoStreams =
-        field_map json "CognitoStreams" CognitoStreams.of_json in
-      let pushSync = field_map json "PushSync" PushSync.of_json in
+        field_map json__ "CognitoStreams" CognitoStreams.of_json in
+      let pushSync = field_map json__ "PushSync" PushSync.of_json in
       let identityPoolId =
-        field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map_exn json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ?cognitoStreams ?pushSync ~identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2027,10 +2039,10 @@ module SetCognitoEventsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~events ~identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let events = field_map_exn json "Events" Events.of_json in
+    let of_json json__ =
+      let events = field_map_exn json__ "Events" Events.of_json in
       let identityPoolId =
-        field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map_exn json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ~events ~identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to configure Cognito Events\"\""]
@@ -2124,8 +2136,8 @@ module RegisterDeviceResponse =
         (Option.map ~f:DeviceId.of_xml) (Xml.child xml_arg0 "DeviceId") in
       make ?deviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deviceId = field_map json "DeviceId" DeviceId.of_json in
+    let of_json json__ =
+      let deviceId = field_map json__ "DeviceId" DeviceId.of_json in
       make ?deviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response to a RegisterDevice request."]
@@ -2169,12 +2181,12 @@ module RegisterDeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~token ~platform ~identityId ~identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let token = field_map_exn json "Token" PushToken.of_json in
-      let platform = field_map_exn json "Platform" Platform.of_json in
-      let identityId = field_map_exn json "IdentityId" IdentityId.of_json in
+    let of_json json__ =
+      let token = field_map_exn json__ "Token" PushToken.of_json in
+      let platform = field_map_exn json__ "Platform" Platform.of_json in
+      let identityId = field_map_exn json__ "IdentityId" IdentityId.of_json in
       let identityPoolId =
-        field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map_exn json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ~token ~platform ~identityId ~identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to RegisterDevice."]
@@ -2319,20 +2331,20 @@ module ListRecordsResponse =
         ?datasetExists ?mergedDatasetNames ?lastModifiedBy ?datasetSyncCount
         ?count ?nextToken ?records ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let syncSessionToken =
-        field_map json "SyncSessionToken" String_.of_json in
+        field_map json__ "SyncSessionToken" String_.of_json in
       let datasetDeletedAfterRequestedSyncCount =
-        field_map json "DatasetDeletedAfterRequestedSyncCount"
+        field_map json__ "DatasetDeletedAfterRequestedSyncCount"
           Boolean.of_json in
-      let datasetExists = field_map json "DatasetExists" Boolean.of_json in
+      let datasetExists = field_map json__ "DatasetExists" Boolean.of_json in
       let mergedDatasetNames =
-        field_map json "MergedDatasetNames" MergedDatasetNameList.of_json in
-      let lastModifiedBy = field_map json "LastModifiedBy" String_.of_json in
-      let datasetSyncCount = field_map json "DatasetSyncCount" Long.of_json in
-      let count = field_map json "Count" Integer.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let records = field_map json "Records" RecordList.of_json in
+        field_map json__ "MergedDatasetNames" MergedDatasetNameList.of_json in
+      let lastModifiedBy = field_map json__ "LastModifiedBy" String_.of_json in
+      let datasetSyncCount = field_map json__ "DatasetSyncCount" Long.of_json in
+      let count = field_map json__ "Count" Integer.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let records = field_map json__ "Records" RecordList.of_json in
       make ?syncSessionToken ?datasetDeletedAfterRequestedSyncCount
         ?datasetExists ?mergedDatasetNames ?lastModifiedBy ?datasetSyncCount
         ?count ?nextToken ?records ()
@@ -2414,16 +2426,17 @@ module ListRecordsRequest =
       make ?syncSessionToken ?maxResults ?nextToken ?lastSyncCount
         ~datasetName ~identityId ~identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let syncSessionToken =
-        field_map json "SyncSessionToken" SyncSessionToken.of_json in
-      let maxResults = field_map json "MaxResults" IntegerString.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let lastSyncCount = field_map json "LastSyncCount" Long.of_json in
-      let datasetName = field_map_exn json "DatasetName" DatasetName.of_json in
-      let identityId = field_map_exn json "IdentityId" IdentityId.of_json in
+        field_map json__ "SyncSessionToken" SyncSessionToken.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerString.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let lastSyncCount = field_map json__ "LastSyncCount" Long.of_json in
+      let datasetName =
+        field_map_exn json__ "DatasetName" DatasetName.of_json in
+      let identityId = field_map_exn json__ "IdentityId" IdentityId.of_json in
       let identityPoolId =
-        field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map_exn json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ?syncSessionToken ?maxResults ?nextToken ?lastSyncCount
         ~datasetName ~identityId ~identityPoolId ()
     let to_json v = composed_to_json to_value v
@@ -2519,12 +2532,12 @@ module ListIdentityPoolUsageResponse =
           (Xml.child xml_arg0 "IdentityPoolUsages") in
       make ?nextToken ?count ?maxResults ?identityPoolUsages ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let count = field_map json "Count" Integer.of_json in
-      let maxResults = field_map json "MaxResults" Integer.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let count = field_map json__ "Count" Integer.of_json in
+      let maxResults = field_map json__ "MaxResults" Integer.of_json in
       let identityPoolUsages =
-        field_map json "IdentityPoolUsages" IdentityPoolUsageList.of_json in
+        field_map json__ "IdentityPoolUsages" IdentityPoolUsageList.of_json in
       make ?nextToken ?count ?maxResults ?identityPoolUsages ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returned for a successful ListIdentityPoolUsage request."]
@@ -2552,9 +2565,9 @@ module ListIdentityPoolUsageRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" IntegerString.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" IntegerString.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request for usage information on an identity pool."]
@@ -2638,10 +2651,10 @@ module ListDatasetsResponse =
         (Option.map ~f:DatasetList.of_xml) (Xml.child xml_arg0 "Datasets") in
       make ?nextToken ?count ?datasets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let count = field_map json "Count" Integer.of_json in
-      let datasets = field_map json "Datasets" DatasetList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let count = field_map json__ "Count" Integer.of_json in
+      let datasets = field_map json__ "Datasets" DatasetList.of_json in
       make ?nextToken ?count ?datasets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returned for a successful ListDatasets request."]
@@ -2688,12 +2701,12 @@ module ListDatasetsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ?maxResults ?nextToken ~identityId ~identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" IntegerString.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let identityId = field_map_exn json "IdentityId" IdentityId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" IntegerString.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let identityId = field_map_exn json__ "IdentityId" IdentityId.of_json in
       let identityPoolId =
-        field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map_exn json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ?maxResults ?nextToken ~identityId ~identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Request for a list of datasets for an identity."]
@@ -2796,12 +2809,12 @@ module GetIdentityPoolConfigurationResponse =
           (Xml.child xml_arg0 "IdentityPoolId") in
       make ?cognitoStreams ?pushSync ?identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cognitoStreams =
-        field_map json "CognitoStreams" CognitoStreams.of_json in
-      let pushSync = field_map json "PushSync" PushSync.of_json in
+        field_map json__ "CognitoStreams" CognitoStreams.of_json in
+      let pushSync = field_map json__ "PushSync" PushSync.of_json in
       let identityPoolId =
-        field_map json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ?cognitoStreams ?pushSync ?identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2826,9 +2839,9 @@ module GetIdentityPoolConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityPoolId =
-        field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map_exn json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ~identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2913,8 +2926,9 @@ module GetCognitoEventsResponse =
         (Option.map ~f:Events.of_xml) (Xml.child xml_arg0 "Events") in
       make ?events ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let events = field_map json "Events" Events.of_json in make ?events ()
+    let of_json json__ =
+      let events = field_map json__ "Events" Events.of_json in
+      make ?events ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response from the GetCognitoEvents request"]
 module GetCognitoEventsRequest =
@@ -2936,9 +2950,9 @@ module GetCognitoEventsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityPoolId =
-        field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map_exn json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ~identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request for a list of the configured Cognito Events"]
@@ -3058,16 +3072,16 @@ module GetBulkPublishDetailsResponse =
       make ?failureMessage ?bulkPublishStatus ?bulkPublishCompleteTime
         ?bulkPublishStartTime ?identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failureMessage = field_map json "FailureMessage" String_.of_json in
+    let of_json json__ =
+      let failureMessage = field_map json__ "FailureMessage" String_.of_json in
       let bulkPublishStatus =
-        field_map json "BulkPublishStatus" BulkPublishStatus.of_json in
+        field_map json__ "BulkPublishStatus" BulkPublishStatus.of_json in
       let bulkPublishCompleteTime =
-        field_map json "BulkPublishCompleteTime" Date.of_json in
+        field_map json__ "BulkPublishCompleteTime" Date.of_json in
       let bulkPublishStartTime =
-        field_map json "BulkPublishStartTime" Date.of_json in
+        field_map json__ "BulkPublishStartTime" Date.of_json in
       let identityPoolId =
-        field_map json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ?failureMessage ?bulkPublishStatus ?bulkPublishCompleteTime
         ?bulkPublishStartTime ?identityPoolId ()
     let to_json v = composed_to_json to_value v
@@ -3092,9 +3106,9 @@ module GetBulkPublishDetailsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityPoolId =
-        field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map_exn json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ~identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the GetBulkPublishDetails operation."]
@@ -3179,9 +3193,9 @@ module DescribeIdentityUsageResponse =
           (Xml.child xml_arg0 "IdentityUsage") in
       make ?identityUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityUsage =
-        field_map json "IdentityUsage" IdentityUsage.of_json in
+        field_map json__ "IdentityUsage" IdentityUsage.of_json in
       make ?identityUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3214,10 +3228,10 @@ module DescribeIdentityUsageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~identityId ~identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identityId = field_map_exn json "IdentityId" IdentityId.of_json in
+    let of_json json__ =
+      let identityId = field_map_exn json__ "IdentityId" IdentityId.of_json in
       let identityPoolId =
-        field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map_exn json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ~identityId ~identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3303,9 +3317,9 @@ module DescribeIdentityPoolUsageResponse =
           (Xml.child xml_arg0 "IdentityPoolUsage") in
       make ?identityPoolUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityPoolUsage =
-        field_map json "IdentityPoolUsage" IdentityPoolUsage.of_json in
+        field_map json__ "IdentityPoolUsage" IdentityPoolUsage.of_json in
       make ?identityPoolUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3330,9 +3344,9 @@ module DescribeIdentityPoolUsageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityPoolId =
-        field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map_exn json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ~identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request for usage information about the identity pool."]
@@ -3416,8 +3430,8 @@ module DescribeDatasetResponse =
         (Option.map ~f:Dataset.of_xml) (Xml.child xml_arg0 "Dataset") in
       make ?dataset ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataset = field_map json "Dataset" Dataset.of_json in
+    let of_json json__ =
+      let dataset = field_map json__ "Dataset" Dataset.of_json in
       make ?dataset ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response to a successful DescribeDataset request."]
@@ -3458,11 +3472,12 @@ module DescribeDatasetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~datasetName ~identityId ~identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetName = field_map_exn json "DatasetName" DatasetName.of_json in
-      let identityId = field_map_exn json "IdentityId" IdentityId.of_json in
+    let of_json json__ =
+      let datasetName =
+        field_map_exn json__ "DatasetName" DatasetName.of_json in
+      let identityId = field_map_exn json__ "IdentityId" IdentityId.of_json in
       let identityPoolId =
-        field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map_exn json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ~datasetName ~identityId ~identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3556,8 +3571,8 @@ module DeleteDatasetResponse =
         (Option.map ~f:Dataset.of_xml) (Xml.child xml_arg0 "Dataset") in
       make ?dataset ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataset = field_map json "Dataset" Dataset.of_json in
+    let of_json json__ =
+      let dataset = field_map json__ "Dataset" Dataset.of_json in
       make ?dataset ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response to a successful DeleteDataset request."]
@@ -3598,11 +3613,12 @@ module DeleteDatasetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~datasetName ~identityId ~identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetName = field_map_exn json "DatasetName" DatasetName.of_json in
-      let identityId = field_map_exn json "IdentityId" IdentityId.of_json in
+    let of_json json__ =
+      let datasetName =
+        field_map_exn json__ "DatasetName" DatasetName.of_json in
+      let identityId = field_map_exn json__ "IdentityId" IdentityId.of_json in
       let identityPoolId =
-        field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map_exn json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ~datasetName ~identityId ~identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to delete the specific dataset."]
@@ -3697,9 +3713,9 @@ module BulkPublishResponse =
           (Xml.child xml_arg0 "IdentityPoolId") in
       make ?identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityPoolId =
-        field_map json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ?identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The output for the BulkPublish operation."]
@@ -3723,9 +3739,9 @@ module BulkPublishRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityPoolId") in
       make ~identityPoolId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityPoolId =
-        field_map_exn json "IdentityPoolId" IdentityPoolId.of_json in
+        field_map_exn json__ "IdentityPoolId" IdentityPoolId.of_json in
       make ~identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the BulkPublish operation."]

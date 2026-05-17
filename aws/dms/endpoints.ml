@@ -7,14 +7,37 @@ type ('i, 'o, 'e) t =
   | ApplyPendingMaintenanceAction: (ApplyPendingMaintenanceActionMessage.t,
   ApplyPendingMaintenanceActionResponse.t,
   ApplyPendingMaintenanceActionResponse.error) t 
+  | BatchStartRecommendations: (BatchStartRecommendationsRequest.t,
+  BatchStartRecommendationsResponse.t,
+  BatchStartRecommendationsResponse.error) t 
+  | CancelMetadataModelConversion: (CancelMetadataModelConversionMessage.t,
+  CancelMetadataModelConversionResponse.t,
+  CancelMetadataModelConversionResponse.error) t 
+  | CancelMetadataModelCreation: (CancelMetadataModelCreationMessage.t,
+  CancelMetadataModelCreationResponse.t,
+  CancelMetadataModelCreationResponse.error) t 
   | CancelReplicationTaskAssessmentRun:
   (CancelReplicationTaskAssessmentRunMessage.t,
   CancelReplicationTaskAssessmentRunResponse.t,
   CancelReplicationTaskAssessmentRunResponse.error) t 
+  | CreateDataMigration: (CreateDataMigrationMessage.t,
+  CreateDataMigrationResponse.t, CreateDataMigrationResponse.error) t 
+  | CreateDataProvider: (CreateDataProviderMessage.t,
+  CreateDataProviderResponse.t, CreateDataProviderResponse.error) t 
   | CreateEndpoint: (CreateEndpointMessage.t, CreateEndpointResponse.t,
   CreateEndpointResponse.error) t 
   | CreateEventSubscription: (CreateEventSubscriptionMessage.t,
   CreateEventSubscriptionResponse.t, CreateEventSubscriptionResponse.error) t
+  
+  | CreateFleetAdvisorCollector: (CreateFleetAdvisorCollectorRequest.t,
+  CreateFleetAdvisorCollectorResponse.t,
+  CreateFleetAdvisorCollectorResponse.error) t 
+  | CreateInstanceProfile: (CreateInstanceProfileMessage.t,
+  CreateInstanceProfileResponse.t, CreateInstanceProfileResponse.error) t 
+  | CreateMigrationProject: (CreateMigrationProjectMessage.t,
+  CreateMigrationProjectResponse.t, CreateMigrationProjectResponse.error) t 
+  | CreateReplicationConfig: (CreateReplicationConfigMessage.t,
+  CreateReplicationConfigResponse.t, CreateReplicationConfigResponse.error) t
   
   | CreateReplicationInstance: (CreateReplicationInstanceMessage.t,
   CreateReplicationInstanceResponse.t,
@@ -28,10 +51,25 @@ type ('i, 'o, 'e) t =
   DeleteCertificateResponse.t, DeleteCertificateResponse.error) t 
   | DeleteConnection: (DeleteConnectionMessage.t, DeleteConnectionResponse.t,
   DeleteConnectionResponse.error) t 
+  | DeleteDataMigration: (DeleteDataMigrationMessage.t,
+  DeleteDataMigrationResponse.t, DeleteDataMigrationResponse.error) t 
+  | DeleteDataProvider: (DeleteDataProviderMessage.t,
+  DeleteDataProviderResponse.t, DeleteDataProviderResponse.error) t 
   | DeleteEndpoint: (DeleteEndpointMessage.t, DeleteEndpointResponse.t,
   DeleteEndpointResponse.error) t 
   | DeleteEventSubscription: (DeleteEventSubscriptionMessage.t,
   DeleteEventSubscriptionResponse.t, DeleteEventSubscriptionResponse.error) t
+  
+  | DeleteFleetAdvisorCollector: (DeleteCollectorRequest.t, unit, unit) t 
+  | DeleteFleetAdvisorDatabases: (DeleteFleetAdvisorDatabasesRequest.t,
+  DeleteFleetAdvisorDatabasesResponse.t,
+  DeleteFleetAdvisorDatabasesResponse.error) t 
+  | DeleteInstanceProfile: (DeleteInstanceProfileMessage.t,
+  DeleteInstanceProfileResponse.t, DeleteInstanceProfileResponse.error) t 
+  | DeleteMigrationProject: (DeleteMigrationProjectMessage.t,
+  DeleteMigrationProjectResponse.t, DeleteMigrationProjectResponse.error) t 
+  | DeleteReplicationConfig: (DeleteReplicationConfigMessage.t,
+  DeleteReplicationConfigResponse.t, DeleteReplicationConfigResponse.error) t
   
   | DeleteReplicationInstance: (DeleteReplicationInstanceMessage.t,
   DeleteReplicationInstanceResponse.t,
@@ -56,6 +94,14 @@ type ('i, 'o, 'e) t =
   DescribeCertificatesResponse.t, DescribeCertificatesResponse.error) t 
   | DescribeConnections: (DescribeConnectionsMessage.t,
   DescribeConnectionsResponse.t, DescribeConnectionsResponse.error) t 
+  | DescribeConversionConfiguration:
+  (DescribeConversionConfigurationMessage.t,
+  DescribeConversionConfigurationResponse.t,
+  DescribeConversionConfigurationResponse.error) t 
+  | DescribeDataMigrations: (DescribeDataMigrationsMessage.t,
+  DescribeDataMigrationsResponse.t, DescribeDataMigrationsResponse.error) t 
+  | DescribeDataProviders: (DescribeDataProvidersMessage.t,
+  DescribeDataProvidersResponse.t, DescribeDataProvidersResponse.error) t 
   | DescribeEndpointSettings: (DescribeEndpointSettingsMessage.t,
   DescribeEndpointSettingsResponse.t, DescribeEndpointSettingsResponse.error)
   t 
@@ -63,6 +109,8 @@ type ('i, 'o, 'e) t =
   DescribeEndpointTypesResponse.t, DescribeEndpointTypesResponse.error) t 
   | DescribeEndpoints: (DescribeEndpointsMessage.t,
   DescribeEndpointsResponse.t, DescribeEndpointsResponse.error) t 
+  | DescribeEngineVersions: (DescribeEngineVersionsMessage.t,
+  DescribeEngineVersionsResponse.t, DescribeEngineVersionsResponse.error) t 
   | DescribeEventCategories: (DescribeEventCategoriesMessage.t,
   DescribeEventCategoriesResponse.t, DescribeEventCategoriesResponse.error) t
   
@@ -71,6 +119,60 @@ type ('i, 'o, 'e) t =
   DescribeEventSubscriptionsResponse.error) t 
   | DescribeEvents: (DescribeEventsMessage.t, DescribeEventsResponse.t,
   DescribeEventsResponse.error) t 
+  | DescribeExtensionPackAssociations:
+  (DescribeExtensionPackAssociationsMessage.t,
+  DescribeExtensionPackAssociationsResponse.t,
+  DescribeExtensionPackAssociationsResponse.error) t 
+  | DescribeFleetAdvisorCollectors: (DescribeFleetAdvisorCollectorsRequest.t,
+  DescribeFleetAdvisorCollectorsResponse.t,
+  DescribeFleetAdvisorCollectorsResponse.error) t 
+  | DescribeFleetAdvisorDatabases: (DescribeFleetAdvisorDatabasesRequest.t,
+  DescribeFleetAdvisorDatabasesResponse.t,
+  DescribeFleetAdvisorDatabasesResponse.error) t 
+  | DescribeFleetAdvisorLsaAnalysis:
+  (DescribeFleetAdvisorLsaAnalysisRequest.t,
+  DescribeFleetAdvisorLsaAnalysisResponse.t,
+  DescribeFleetAdvisorLsaAnalysisResponse.error) t 
+  | DescribeFleetAdvisorSchemaObjectSummary:
+  (DescribeFleetAdvisorSchemaObjectSummaryRequest.t,
+  DescribeFleetAdvisorSchemaObjectSummaryResponse.t,
+  DescribeFleetAdvisorSchemaObjectSummaryResponse.error) t 
+  | DescribeFleetAdvisorSchemas: (DescribeFleetAdvisorSchemasRequest.t,
+  DescribeFleetAdvisorSchemasResponse.t,
+  DescribeFleetAdvisorSchemasResponse.error) t 
+  | DescribeInstanceProfiles: (DescribeInstanceProfilesMessage.t,
+  DescribeInstanceProfilesResponse.t, DescribeInstanceProfilesResponse.error)
+  t 
+  | DescribeMetadataModel: (DescribeMetadataModelMessage.t,
+  DescribeMetadataModelResponse.t, DescribeMetadataModelResponse.error) t 
+  | DescribeMetadataModelAssessments:
+  (DescribeMetadataModelAssessmentsMessage.t,
+  DescribeMetadataModelAssessmentsResponse.t,
+  DescribeMetadataModelAssessmentsResponse.error) t 
+  | DescribeMetadataModelChildren: (DescribeMetadataModelChildrenMessage.t,
+  DescribeMetadataModelChildrenResponse.t,
+  DescribeMetadataModelChildrenResponse.error) t 
+  | DescribeMetadataModelConversions:
+  (DescribeMetadataModelConversionsMessage.t,
+  DescribeMetadataModelConversionsResponse.t,
+  DescribeMetadataModelConversionsResponse.error) t 
+  | DescribeMetadataModelCreations: (DescribeMetadataModelCreationsMessage.t,
+  DescribeMetadataModelCreationsResponse.t,
+  DescribeMetadataModelCreationsResponse.error) t 
+  | DescribeMetadataModelExportsAsScript:
+  (DescribeMetadataModelExportsAsScriptMessage.t,
+  DescribeMetadataModelExportsAsScriptResponse.t,
+  DescribeMetadataModelExportsAsScriptResponse.error) t 
+  | DescribeMetadataModelExportsToTarget:
+  (DescribeMetadataModelExportsToTargetMessage.t,
+  DescribeMetadataModelExportsToTargetResponse.t,
+  DescribeMetadataModelExportsToTargetResponse.error) t 
+  | DescribeMetadataModelImports: (DescribeMetadataModelImportsMessage.t,
+  DescribeMetadataModelImportsResponse.t,
+  DescribeMetadataModelImportsResponse.error) t 
+  | DescribeMigrationProjects: (DescribeMigrationProjectsMessage.t,
+  DescribeMigrationProjectsResponse.t,
+  DescribeMigrationProjectsResponse.error) t 
   | DescribeOrderableReplicationInstances:
   (DescribeOrderableReplicationInstancesMessage.t,
   DescribeOrderableReplicationInstancesResponse.t,
@@ -79,9 +181,19 @@ type ('i, 'o, 'e) t =
   (DescribePendingMaintenanceActionsMessage.t,
   DescribePendingMaintenanceActionsResponse.t,
   DescribePendingMaintenanceActionsResponse.error) t 
+  | DescribeRecommendationLimitations:
+  (DescribeRecommendationLimitationsRequest.t,
+  DescribeRecommendationLimitationsResponse.t,
+  DescribeRecommendationLimitationsResponse.error) t 
+  | DescribeRecommendations: (DescribeRecommendationsRequest.t,
+  DescribeRecommendationsResponse.t, DescribeRecommendationsResponse.error) t
+  
   | DescribeRefreshSchemasStatus: (DescribeRefreshSchemasStatusMessage.t,
   DescribeRefreshSchemasStatusResponse.t,
   DescribeRefreshSchemasStatusResponse.error) t 
+  | DescribeReplicationConfigs: (DescribeReplicationConfigsMessage.t,
+  DescribeReplicationConfigsResponse.t,
+  DescribeReplicationConfigsResponse.error) t 
   | DescribeReplicationInstanceTaskLogs:
   (DescribeReplicationInstanceTaskLogsMessage.t,
   DescribeReplicationInstanceTaskLogsResponse.t,
@@ -93,6 +205,10 @@ type ('i, 'o, 'e) t =
   (DescribeReplicationSubnetGroupsMessage.t,
   DescribeReplicationSubnetGroupsResponse.t,
   DescribeReplicationSubnetGroupsResponse.error) t 
+  | DescribeReplicationTableStatistics:
+  (DescribeReplicationTableStatisticsMessage.t,
+  DescribeReplicationTableStatisticsResponse.t,
+  DescribeReplicationTableStatisticsResponse.error) t 
   | DescribeReplicationTaskAssessmentResults:
   (DescribeReplicationTaskAssessmentResultsMessage.t,
   DescribeReplicationTaskAssessmentResultsResponse.t,
@@ -108,19 +224,41 @@ type ('i, 'o, 'e) t =
   | DescribeReplicationTasks: (DescribeReplicationTasksMessage.t,
   DescribeReplicationTasksResponse.t, DescribeReplicationTasksResponse.error)
   t 
+  | DescribeReplications: (DescribeReplicationsMessage.t,
+  DescribeReplicationsResponse.t, DescribeReplicationsResponse.error) t 
   | DescribeSchemas: (DescribeSchemasMessage.t, DescribeSchemasResponse.t,
   DescribeSchemasResponse.error) t 
   | DescribeTableStatistics: (DescribeTableStatisticsMessage.t,
   DescribeTableStatisticsResponse.t, DescribeTableStatisticsResponse.error) t
   
+  | ExportMetadataModelAssessment: (ExportMetadataModelAssessmentMessage.t,
+  ExportMetadataModelAssessmentResponse.t,
+  ExportMetadataModelAssessmentResponse.error) t 
+  | GetTargetSelectionRules: (GetTargetSelectionRulesMessage.t,
+  GetTargetSelectionRulesResponse.t, GetTargetSelectionRulesResponse.error) t
+  
   | ImportCertificate: (ImportCertificateMessage.t,
   ImportCertificateResponse.t, ImportCertificateResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceMessage.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ModifyConversionConfiguration: (ModifyConversionConfigurationMessage.t,
+  ModifyConversionConfigurationResponse.t,
+  ModifyConversionConfigurationResponse.error) t 
+  | ModifyDataMigration: (ModifyDataMigrationMessage.t,
+  ModifyDataMigrationResponse.t, ModifyDataMigrationResponse.error) t 
+  | ModifyDataProvider: (ModifyDataProviderMessage.t,
+  ModifyDataProviderResponse.t, ModifyDataProviderResponse.error) t 
   | ModifyEndpoint: (ModifyEndpointMessage.t, ModifyEndpointResponse.t,
   ModifyEndpointResponse.error) t 
   | ModifyEventSubscription: (ModifyEventSubscriptionMessage.t,
   ModifyEventSubscriptionResponse.t, ModifyEventSubscriptionResponse.error) t
+  
+  | ModifyInstanceProfile: (ModifyInstanceProfileMessage.t,
+  ModifyInstanceProfileResponse.t, ModifyInstanceProfileResponse.error) t 
+  | ModifyMigrationProject: (ModifyMigrationProjectMessage.t,
+  ModifyMigrationProjectResponse.t, ModifyMigrationProjectResponse.error) t 
+  | ModifyReplicationConfig: (ModifyReplicationConfigMessage.t,
+  ModifyReplicationConfigResponse.t, ModifyReplicationConfigResponse.error) t
   
   | ModifyReplicationInstance: (ModifyReplicationInstanceMessage.t,
   ModifyReplicationInstanceResponse.t,
@@ -137,10 +275,43 @@ type ('i, 'o, 'e) t =
   RebootReplicationInstanceResponse.error) t 
   | RefreshSchemas: (RefreshSchemasMessage.t, RefreshSchemasResponse.t,
   RefreshSchemasResponse.error) t 
+  | ReloadReplicationTables: (ReloadReplicationTablesMessage.t,
+  ReloadReplicationTablesResponse.t, ReloadReplicationTablesResponse.error) t
+  
   | ReloadTables: (ReloadTablesMessage.t, ReloadTablesResponse.t,
   ReloadTablesResponse.error) t 
   | RemoveTagsFromResource: (RemoveTagsFromResourceMessage.t,
   RemoveTagsFromResourceResponse.t, RemoveTagsFromResourceResponse.error) t 
+  | RunFleetAdvisorLsaAnalysis: (unit, RunFleetAdvisorLsaAnalysisResponse.t,
+  RunFleetAdvisorLsaAnalysisResponse.error) t 
+  | StartDataMigration: (StartDataMigrationMessage.t,
+  StartDataMigrationResponse.t, StartDataMigrationResponse.error) t 
+  | StartExtensionPackAssociation: (StartExtensionPackAssociationMessage.t,
+  StartExtensionPackAssociationResponse.t,
+  StartExtensionPackAssociationResponse.error) t 
+  | StartMetadataModelAssessment: (StartMetadataModelAssessmentMessage.t,
+  StartMetadataModelAssessmentResponse.t,
+  StartMetadataModelAssessmentResponse.error) t 
+  | StartMetadataModelConversion: (StartMetadataModelConversionMessage.t,
+  StartMetadataModelConversionResponse.t,
+  StartMetadataModelConversionResponse.error) t 
+  | StartMetadataModelCreation: (StartMetadataModelCreationMessage.t,
+  StartMetadataModelCreationResponse.t,
+  StartMetadataModelCreationResponse.error) t 
+  | StartMetadataModelExportAsScript:
+  (StartMetadataModelExportAsScriptMessage.t,
+  StartMetadataModelExportAsScriptResponse.t,
+  StartMetadataModelExportAsScriptResponse.error) t 
+  | StartMetadataModelExportToTarget:
+  (StartMetadataModelExportToTargetMessage.t,
+  StartMetadataModelExportToTargetResponse.t,
+  StartMetadataModelExportToTargetResponse.error) t 
+  | StartMetadataModelImport: (StartMetadataModelImportMessage.t,
+  StartMetadataModelImportResponse.t, StartMetadataModelImportResponse.error)
+  t 
+  | StartRecommendations: (StartRecommendationsRequest.t, unit, unit) t 
+  | StartReplication: (StartReplicationMessage.t, StartReplicationResponse.t,
+  StartReplicationResponse.error) t 
   | StartReplicationTask: (StartReplicationTaskMessage.t,
   StartReplicationTaskResponse.t, StartReplicationTaskResponse.error) t 
   | StartReplicationTaskAssessment: (StartReplicationTaskAssessmentMessage.t,
@@ -150,24 +321,48 @@ type ('i, 'o, 'e) t =
   (StartReplicationTaskAssessmentRunMessage.t,
   StartReplicationTaskAssessmentRunResponse.t,
   StartReplicationTaskAssessmentRunResponse.error) t 
+  | StopDataMigration: (StopDataMigrationMessage.t,
+  StopDataMigrationResponse.t, StopDataMigrationResponse.error) t 
+  | StopReplication: (StopReplicationMessage.t, StopReplicationResponse.t,
+  StopReplicationResponse.error) t 
   | StopReplicationTask: (StopReplicationTaskMessage.t,
   StopReplicationTaskResponse.t, StopReplicationTaskResponse.error) t 
   | TestConnection: (TestConnectionMessage.t, TestConnectionResponse.t,
   TestConnectionResponse.error) t 
+  | UpdateSubscriptionsToEventBridge:
+  (UpdateSubscriptionsToEventBridgeMessage.t,
+  UpdateSubscriptionsToEventBridgeResponse.t,
+  UpdateSubscriptionsToEventBridgeResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AddTagsToResource -> `POST
   | ApplyPendingMaintenanceAction -> `POST
+  | BatchStartRecommendations -> `POST
+  | CancelMetadataModelConversion -> `POST
+  | CancelMetadataModelCreation -> `POST
   | CancelReplicationTaskAssessmentRun -> `POST
+  | CreateDataMigration -> `POST
+  | CreateDataProvider -> `POST
   | CreateEndpoint -> `POST
   | CreateEventSubscription -> `POST
+  | CreateFleetAdvisorCollector -> `POST
+  | CreateInstanceProfile -> `POST
+  | CreateMigrationProject -> `POST
+  | CreateReplicationConfig -> `POST
   | CreateReplicationInstance -> `POST
   | CreateReplicationSubnetGroup -> `POST
   | CreateReplicationTask -> `POST
   | DeleteCertificate -> `POST
   | DeleteConnection -> `POST
+  | DeleteDataMigration -> `POST
+  | DeleteDataProvider -> `POST
   | DeleteEndpoint -> `POST
   | DeleteEventSubscription -> `POST
+  | DeleteFleetAdvisorCollector -> `POST
+  | DeleteFleetAdvisorDatabases -> `POST
+  | DeleteInstanceProfile -> `POST
+  | DeleteMigrationProject -> `POST
+  | DeleteReplicationConfig -> `POST
   | DeleteReplicationInstance -> `POST
   | DeleteReplicationSubnetGroup -> `POST
   | DeleteReplicationTask -> `POST
@@ -176,57 +371,121 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeApplicableIndividualAssessments -> `POST
   | DescribeCertificates -> `POST
   | DescribeConnections -> `POST
+  | DescribeConversionConfiguration -> `POST
+  | DescribeDataMigrations -> `POST
+  | DescribeDataProviders -> `POST
   | DescribeEndpointSettings -> `POST
   | DescribeEndpointTypes -> `POST
   | DescribeEndpoints -> `POST
+  | DescribeEngineVersions -> `POST
   | DescribeEventCategories -> `POST
   | DescribeEventSubscriptions -> `POST
   | DescribeEvents -> `POST
+  | DescribeExtensionPackAssociations -> `POST
+  | DescribeFleetAdvisorCollectors -> `POST
+  | DescribeFleetAdvisorDatabases -> `POST
+  | DescribeFleetAdvisorLsaAnalysis -> `POST
+  | DescribeFleetAdvisorSchemaObjectSummary -> `POST
+  | DescribeFleetAdvisorSchemas -> `POST
+  | DescribeInstanceProfiles -> `POST
+  | DescribeMetadataModel -> `POST
+  | DescribeMetadataModelAssessments -> `POST
+  | DescribeMetadataModelChildren -> `POST
+  | DescribeMetadataModelConversions -> `POST
+  | DescribeMetadataModelCreations -> `POST
+  | DescribeMetadataModelExportsAsScript -> `POST
+  | DescribeMetadataModelExportsToTarget -> `POST
+  | DescribeMetadataModelImports -> `POST
+  | DescribeMigrationProjects -> `POST
   | DescribeOrderableReplicationInstances -> `POST
   | DescribePendingMaintenanceActions -> `POST
+  | DescribeRecommendationLimitations -> `POST
+  | DescribeRecommendations -> `POST
   | DescribeRefreshSchemasStatus -> `POST
+  | DescribeReplicationConfigs -> `POST
   | DescribeReplicationInstanceTaskLogs -> `POST
   | DescribeReplicationInstances -> `POST
   | DescribeReplicationSubnetGroups -> `POST
+  | DescribeReplicationTableStatistics -> `POST
   | DescribeReplicationTaskAssessmentResults -> `POST
   | DescribeReplicationTaskAssessmentRuns -> `POST
   | DescribeReplicationTaskIndividualAssessments -> `POST
   | DescribeReplicationTasks -> `POST
+  | DescribeReplications -> `POST
   | DescribeSchemas -> `POST
   | DescribeTableStatistics -> `POST
+  | ExportMetadataModelAssessment -> `POST
+  | GetTargetSelectionRules -> `POST
   | ImportCertificate -> `POST
   | ListTagsForResource -> `POST
+  | ModifyConversionConfiguration -> `POST
+  | ModifyDataMigration -> `POST
+  | ModifyDataProvider -> `POST
   | ModifyEndpoint -> `POST
   | ModifyEventSubscription -> `POST
+  | ModifyInstanceProfile -> `POST
+  | ModifyMigrationProject -> `POST
+  | ModifyReplicationConfig -> `POST
   | ModifyReplicationInstance -> `POST
   | ModifyReplicationSubnetGroup -> `POST
   | ModifyReplicationTask -> `POST
   | MoveReplicationTask -> `POST
   | RebootReplicationInstance -> `POST
   | RefreshSchemas -> `POST
+  | ReloadReplicationTables -> `POST
   | ReloadTables -> `POST
   | RemoveTagsFromResource -> `POST
+  | RunFleetAdvisorLsaAnalysis -> `POST
+  | StartDataMigration -> `POST
+  | StartExtensionPackAssociation -> `POST
+  | StartMetadataModelAssessment -> `POST
+  | StartMetadataModelConversion -> `POST
+  | StartMetadataModelCreation -> `POST
+  | StartMetadataModelExportAsScript -> `POST
+  | StartMetadataModelExportToTarget -> `POST
+  | StartMetadataModelImport -> `POST
+  | StartRecommendations -> `POST
+  | StartReplication -> `POST
   | StartReplicationTask -> `POST
   | StartReplicationTaskAssessment -> `POST
   | StartReplicationTaskAssessmentRun -> `POST
+  | StopDataMigration -> `POST
+  | StopReplication -> `POST
   | StopReplicationTask -> `POST
   | TestConnection -> `POST
+  | UpdateSubscriptionsToEventBridge -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | AddTagsToResource -> (Format.kasprintf Uri.of_string) "/"
       | ApplyPendingMaintenanceAction -> (Format.kasprintf Uri.of_string) "/"
+      | BatchStartRecommendations -> (Format.kasprintf Uri.of_string) "/"
+      | CancelMetadataModelConversion -> (Format.kasprintf Uri.of_string) "/"
+      | CancelMetadataModelCreation -> (Format.kasprintf Uri.of_string) "/"
       | CancelReplicationTaskAssessmentRun ->
           (Format.kasprintf Uri.of_string) "/"
+      | CreateDataMigration -> (Format.kasprintf Uri.of_string) "/"
+      | CreateDataProvider -> (Format.kasprintf Uri.of_string) "/"
       | CreateEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | CreateEventSubscription -> (Format.kasprintf Uri.of_string) "/"
+      | CreateFleetAdvisorCollector -> (Format.kasprintf Uri.of_string) "/"
+      | CreateInstanceProfile -> (Format.kasprintf Uri.of_string) "/"
+      | CreateMigrationProject -> (Format.kasprintf Uri.of_string) "/"
+      | CreateReplicationConfig -> (Format.kasprintf Uri.of_string) "/"
       | CreateReplicationInstance -> (Format.kasprintf Uri.of_string) "/"
       | CreateReplicationSubnetGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateReplicationTask -> (Format.kasprintf Uri.of_string) "/"
       | DeleteCertificate -> (Format.kasprintf Uri.of_string) "/"
       | DeleteConnection -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteDataMigration -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteDataProvider -> (Format.kasprintf Uri.of_string) "/"
       | DeleteEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | DeleteEventSubscription -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteFleetAdvisorCollector -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteFleetAdvisorDatabases -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteInstanceProfile -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteMigrationProject -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteReplicationConfig -> (Format.kasprintf Uri.of_string) "/"
       | DeleteReplicationInstance -> (Format.kasprintf Uri.of_string) "/"
       | DeleteReplicationSubnetGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteReplicationTask -> (Format.kasprintf Uri.of_string) "/"
@@ -237,21 +496,57 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | DescribeCertificates -> (Format.kasprintf Uri.of_string) "/"
       | DescribeConnections -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeConversionConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeDataMigrations -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeDataProviders -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEndpointSettings -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEndpointTypes -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEndpoints -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeEngineVersions -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEventCategories -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEventSubscriptions -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEvents -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeExtensionPackAssociations ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeFleetAdvisorCollectors ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeFleetAdvisorDatabases -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeFleetAdvisorLsaAnalysis ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeFleetAdvisorSchemaObjectSummary ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeFleetAdvisorSchemas -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeInstanceProfiles -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeMetadataModel -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeMetadataModelAssessments ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeMetadataModelChildren -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeMetadataModelConversions ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeMetadataModelCreations ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeMetadataModelExportsAsScript ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeMetadataModelExportsToTarget ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeMetadataModelImports -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeMigrationProjects -> (Format.kasprintf Uri.of_string) "/"
       | DescribeOrderableReplicationInstances ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribePendingMaintenanceActions ->
           (Format.kasprintf Uri.of_string) "/"
+      | DescribeRecommendationLimitations ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeRecommendations -> (Format.kasprintf Uri.of_string) "/"
       | DescribeRefreshSchemasStatus -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeReplicationConfigs -> (Format.kasprintf Uri.of_string) "/"
       | DescribeReplicationInstanceTaskLogs ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeReplicationInstances -> (Format.kasprintf Uri.of_string) "/"
       | DescribeReplicationSubnetGroups ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeReplicationTableStatistics ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeReplicationTaskAssessmentResults ->
           (Format.kasprintf Uri.of_string) "/"
@@ -260,27 +555,54 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeReplicationTaskIndividualAssessments ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeReplicationTasks -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeReplications -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSchemas -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTableStatistics -> (Format.kasprintf Uri.of_string) "/"
+      | ExportMetadataModelAssessment -> (Format.kasprintf Uri.of_string) "/"
+      | GetTargetSelectionRules -> (Format.kasprintf Uri.of_string) "/"
       | ImportCertificate -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyConversionConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyDataMigration -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyDataProvider -> (Format.kasprintf Uri.of_string) "/"
       | ModifyEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | ModifyEventSubscription -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyInstanceProfile -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyMigrationProject -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyReplicationConfig -> (Format.kasprintf Uri.of_string) "/"
       | ModifyReplicationInstance -> (Format.kasprintf Uri.of_string) "/"
       | ModifyReplicationSubnetGroup -> (Format.kasprintf Uri.of_string) "/"
       | ModifyReplicationTask -> (Format.kasprintf Uri.of_string) "/"
       | MoveReplicationTask -> (Format.kasprintf Uri.of_string) "/"
       | RebootReplicationInstance -> (Format.kasprintf Uri.of_string) "/"
       | RefreshSchemas -> (Format.kasprintf Uri.of_string) "/"
+      | ReloadReplicationTables -> (Format.kasprintf Uri.of_string) "/"
       | ReloadTables -> (Format.kasprintf Uri.of_string) "/"
       | RemoveTagsFromResource -> (Format.kasprintf Uri.of_string) "/"
+      | RunFleetAdvisorLsaAnalysis -> (Format.kasprintf Uri.of_string) "/"
+      | StartDataMigration -> (Format.kasprintf Uri.of_string) "/"
+      | StartExtensionPackAssociation -> (Format.kasprintf Uri.of_string) "/"
+      | StartMetadataModelAssessment -> (Format.kasprintf Uri.of_string) "/"
+      | StartMetadataModelConversion -> (Format.kasprintf Uri.of_string) "/"
+      | StartMetadataModelCreation -> (Format.kasprintf Uri.of_string) "/"
+      | StartMetadataModelExportAsScript ->
+          (Format.kasprintf Uri.of_string) "/"
+      | StartMetadataModelExportToTarget ->
+          (Format.kasprintf Uri.of_string) "/"
+      | StartMetadataModelImport -> (Format.kasprintf Uri.of_string) "/"
+      | StartRecommendations -> (Format.kasprintf Uri.of_string) "/"
+      | StartReplication -> (Format.kasprintf Uri.of_string) "/"
       | StartReplicationTask -> (Format.kasprintf Uri.of_string) "/"
       | StartReplicationTaskAssessment ->
           (Format.kasprintf Uri.of_string) "/"
       | StartReplicationTaskAssessmentRun ->
           (Format.kasprintf Uri.of_string) "/"
+      | StopDataMigration -> (Format.kasprintf Uri.of_string) "/"
+      | StopReplication -> (Format.kasprintf Uri.of_string) "/"
       | StopReplicationTask -> (Format.kasprintf Uri.of_string) "/"
-      | TestConnection -> (Format.kasprintf Uri.of_string) "/")
+      | TestConnection -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateSubscriptionsToEventBridge ->
+          (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -301,6 +623,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AmazonDMSv20160101.ApplyPendingMaintenanceAction")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchStartRecommendations ->
+      let json = BatchStartRecommendationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.BatchStartRecommendations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CancelMetadataModelConversion ->
+      let json = CancelMetadataModelConversionMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.CancelMetadataModelConversion")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CancelMetadataModelCreation ->
+      let json = CancelMetadataModelCreationMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.CancelMetadataModelCreation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CancelReplicationTaskAssessmentRun ->
       let json = CancelReplicationTaskAssessmentRunMessage.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -309,6 +656,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AmazonDMSv20160101.CancelReplicationTaskAssessmentRun")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateDataMigration ->
+      let json = CreateDataMigrationMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.CreateDataMigration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateDataProvider ->
+      let json = CreateDataProviderMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.CreateDataProvider")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateEndpoint ->
       let json = CreateEndpointMessage.to_json req in
@@ -325,6 +688,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonDMSv20160101.CreateEventSubscription")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateFleetAdvisorCollector ->
+      let json = CreateFleetAdvisorCollectorRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.CreateFleetAdvisorCollector")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateInstanceProfile ->
+      let json = CreateInstanceProfileMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.CreateInstanceProfile")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateMigrationProject ->
+      let json = CreateMigrationProjectMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.CreateMigrationProject")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateReplicationConfig ->
+      let json = CreateReplicationConfigMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.CreateReplicationConfig")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateReplicationInstance ->
       let json = CreateReplicationInstanceMessage.to_json req in
@@ -366,6 +761,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonDMSv20160101.DeleteConnection")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteDataMigration ->
+      let json = DeleteDataMigrationMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DeleteDataMigration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteDataProvider ->
+      let json = DeleteDataProviderMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DeleteDataProvider")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteEndpoint ->
       let json = DeleteEndpointMessage.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -381,6 +792,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonDMSv20160101.DeleteEventSubscription")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteFleetAdvisorCollector ->
+      let json = DeleteCollectorRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DeleteFleetAdvisorCollector")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteFleetAdvisorDatabases ->
+      let json = DeleteFleetAdvisorDatabasesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DeleteFleetAdvisorDatabases")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteInstanceProfile ->
+      let json = DeleteInstanceProfileMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DeleteInstanceProfile")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteMigrationProject ->
+      let json = DeleteMigrationProjectMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DeleteMigrationProject")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteReplicationConfig ->
+      let json = DeleteReplicationConfigMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DeleteReplicationConfig")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteReplicationInstance ->
       let json = DeleteReplicationInstanceMessage.to_json req in
@@ -448,6 +899,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonDMSv20160101.DescribeConnections")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeConversionConfiguration ->
+      let json = DescribeConversionConfigurationMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.DescribeConversionConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeDataMigrations ->
+      let json = DescribeDataMigrationsMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DescribeDataMigrations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeDataProviders ->
+      let json = DescribeDataProvidersMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DescribeDataProviders")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeEndpointSettings ->
       let json = DescribeEndpointSettingsMessage.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -471,6 +947,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonDMSv20160101.DescribeEndpoints")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeEngineVersions ->
+      let json = DescribeEngineVersionsMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DescribeEngineVersions")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeEventCategories ->
       let json = DescribeEventCategoriesMessage.to_json req in
@@ -496,6 +980,145 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonDMSv20160101.DescribeEvents")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeExtensionPackAssociations ->
+      let json = DescribeExtensionPackAssociationsMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.DescribeExtensionPackAssociations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeFleetAdvisorCollectors ->
+      let json = DescribeFleetAdvisorCollectorsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.DescribeFleetAdvisorCollectors")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeFleetAdvisorDatabases ->
+      let json = DescribeFleetAdvisorDatabasesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.DescribeFleetAdvisorDatabases")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeFleetAdvisorLsaAnalysis ->
+      let json = DescribeFleetAdvisorLsaAnalysisRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.DescribeFleetAdvisorLsaAnalysis")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeFleetAdvisorSchemaObjectSummary ->
+      let json = DescribeFleetAdvisorSchemaObjectSummaryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.DescribeFleetAdvisorSchemaObjectSummary")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeFleetAdvisorSchemas ->
+      let json = DescribeFleetAdvisorSchemasRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DescribeFleetAdvisorSchemas")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeInstanceProfiles ->
+      let json = DescribeInstanceProfilesMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DescribeInstanceProfiles")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeMetadataModel ->
+      let json = DescribeMetadataModelMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DescribeMetadataModel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeMetadataModelAssessments ->
+      let json = DescribeMetadataModelAssessmentsMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.DescribeMetadataModelAssessments")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeMetadataModelChildren ->
+      let json = DescribeMetadataModelChildrenMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.DescribeMetadataModelChildren")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeMetadataModelConversions ->
+      let json = DescribeMetadataModelConversionsMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.DescribeMetadataModelConversions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeMetadataModelCreations ->
+      let json = DescribeMetadataModelCreationsMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.DescribeMetadataModelCreations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeMetadataModelExportsAsScript ->
+      let json = DescribeMetadataModelExportsAsScriptMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.DescribeMetadataModelExportsAsScript")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeMetadataModelExportsToTarget ->
+      let json = DescribeMetadataModelExportsToTargetMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.DescribeMetadataModelExportsToTarget")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeMetadataModelImports ->
+      let json = DescribeMetadataModelImportsMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DescribeMetadataModelImports")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeMigrationProjects ->
+      let json = DescribeMigrationProjectsMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DescribeMigrationProjects")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeOrderableReplicationInstances ->
       let json = DescribeOrderableReplicationInstancesMessage.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -514,6 +1137,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AmazonDMSv20160101.DescribePendingMaintenanceActions")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeRecommendationLimitations ->
+      let json = DescribeRecommendationLimitationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.DescribeRecommendationLimitations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeRecommendations ->
+      let json = DescribeRecommendationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DescribeRecommendations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeRefreshSchemasStatus ->
       let json = DescribeRefreshSchemasStatusMessage.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -521,6 +1161,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonDMSv20160101.DescribeRefreshSchemasStatus")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeReplicationConfigs ->
+      let json = DescribeReplicationConfigsMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DescribeReplicationConfigs")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeReplicationInstanceTaskLogs ->
       let json = DescribeReplicationInstanceTaskLogsMessage.to_json req in
@@ -547,6 +1195,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AmazonDMSv20160101.DescribeReplicationSubnetGroups")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeReplicationTableStatistics ->
+      let json = DescribeReplicationTableStatisticsMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.DescribeReplicationTableStatistics")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeReplicationTaskAssessmentResults ->
       let json = DescribeReplicationTaskAssessmentResultsMessage.to_json req in
@@ -584,6 +1241,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonDMSv20160101.DescribeReplicationTasks")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeReplications ->
+      let json = DescribeReplicationsMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.DescribeReplications")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeSchemas ->
       let json = DescribeSchemasMessage.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -599,6 +1264,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonDMSv20160101.DescribeTableStatistics")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ExportMetadataModelAssessment ->
+      let json = ExportMetadataModelAssessmentMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.ExportMetadataModelAssessment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetTargetSelectionRules ->
+      let json = GetTargetSelectionRulesMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.GetTargetSelectionRules")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ImportCertificate ->
       let json = ImportCertificateMessage.to_json req in
@@ -616,6 +1298,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonDMSv20160101.ListTagsForResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ModifyConversionConfiguration ->
+      let json = ModifyConversionConfigurationMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.ModifyConversionConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ModifyDataMigration ->
+      let json = ModifyDataMigrationMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.ModifyDataMigration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ModifyDataProvider ->
+      let json = ModifyDataProviderMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.ModifyDataProvider")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ModifyEndpoint ->
       let json = ModifyEndpointMessage.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -631,6 +1338,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonDMSv20160101.ModifyEventSubscription")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ModifyInstanceProfile ->
+      let json = ModifyInstanceProfileMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.ModifyInstanceProfile")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ModifyMigrationProject ->
+      let json = ModifyMigrationProjectMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.ModifyMigrationProject")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ModifyReplicationConfig ->
+      let json = ModifyReplicationConfigMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.ModifyReplicationConfig")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ModifyReplicationInstance ->
       let json = ModifyReplicationInstanceMessage.to_json req in
@@ -680,6 +1411,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonDMSv20160101.RefreshSchemas")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ReloadReplicationTables ->
+      let json = ReloadReplicationTablesMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.ReloadReplicationTables")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ReloadTables ->
       let json = ReloadTablesMessage.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -695,6 +1434,97 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonDMSv20160101.RemoveTagsFromResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | RunFleetAdvisorLsaAnalysis ->
+      let json = (fun () -> `Assoc []) req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.RunFleetAdvisorLsaAnalysis")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartDataMigration ->
+      let json = StartDataMigrationMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.StartDataMigration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartExtensionPackAssociation ->
+      let json = StartExtensionPackAssociationMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.StartExtensionPackAssociation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartMetadataModelAssessment ->
+      let json = StartMetadataModelAssessmentMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.StartMetadataModelAssessment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartMetadataModelConversion ->
+      let json = StartMetadataModelConversionMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.StartMetadataModelConversion")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartMetadataModelCreation ->
+      let json = StartMetadataModelCreationMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.StartMetadataModelCreation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartMetadataModelExportAsScript ->
+      let json = StartMetadataModelExportAsScriptMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.StartMetadataModelExportAsScript")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartMetadataModelExportToTarget ->
+      let json = StartMetadataModelExportToTargetMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.StartMetadataModelExportToTarget")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartMetadataModelImport ->
+      let json = StartMetadataModelImportMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.StartMetadataModelImport")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartRecommendations ->
+      let json = StartRecommendationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.StartRecommendations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartReplication ->
+      let json = StartReplicationMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.StartReplication")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartReplicationTask ->
       let json = StartReplicationTaskMessage.to_json req in
@@ -722,6 +1552,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AmazonDMSv20160101.StartReplicationTaskAssessmentRun")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopDataMigration ->
+      let json = StopDataMigrationMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.StopDataMigration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopReplication ->
+      let json = StopReplicationMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonDMSv20160101.StopReplication")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopReplicationTask ->
       let json = StopReplicationTaskMessage.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -737,6 +1583,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonDMSv20160101.TestConnection")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateSubscriptionsToEventBridge ->
+      let json = UpdateSubscriptionsToEventBridgeMessage.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonDMSv20160101.UpdateSubscriptionsToEventBridge")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -778,6 +1633,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ApplyPendingMaintenanceActionResponse.error_of_json))
+  | BatchStartRecommendations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchStartRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchStartRecommendationsResponse.error_of_json))
+  | CancelMetadataModelConversion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CancelMetadataModelConversionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CancelMetadataModelConversionResponse.error_of_json))
+  | CancelMetadataModelCreation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CancelMetadataModelCreationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CancelMetadataModelCreationResponse.error_of_json))
   | CancelReplicationTaskAssessmentRun ->
       if is_success
       then
@@ -787,6 +1669,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CancelReplicationTaskAssessmentRunResponse.error_of_json))
+  | CreateDataMigration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateDataMigrationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateDataMigrationResponse.error_of_json))
+  | CreateDataProvider ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateDataProviderResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateDataProviderResponse.error_of_json))
   | CreateEndpoint ->
       if is_success
       then
@@ -803,6 +1701,41 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateEventSubscriptionResponse.error_of_json))
+  | CreateFleetAdvisorCollector ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateFleetAdvisorCollectorResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateFleetAdvisorCollectorResponse.error_of_json))
+  | CreateInstanceProfile ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateInstanceProfileResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateInstanceProfileResponse.error_of_json))
+  | CreateMigrationProject ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateMigrationProjectResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateMigrationProjectResponse.error_of_json))
+  | CreateReplicationConfig ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateReplicationConfigResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateReplicationConfigResponse.error_of_json))
   | CreateReplicationInstance ->
       if is_success
       then
@@ -844,6 +1777,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteConnectionResponse.of_json json)
       else
         Error (parse_aws_error (Some DeleteConnectionResponse.error_of_json))
+  | DeleteDataMigration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteDataMigrationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteDataMigrationResponse.error_of_json))
+  | DeleteDataProvider ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteDataProviderResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteDataProviderResponse.error_of_json))
   | DeleteEndpoint ->
       if is_success
       then
@@ -860,6 +1809,43 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteEventSubscriptionResponse.error_of_json))
+  | DeleteFleetAdvisorCollector ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteFleetAdvisorDatabases ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteFleetAdvisorDatabasesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteFleetAdvisorDatabasesResponse.error_of_json))
+  | DeleteInstanceProfile ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteInstanceProfileResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteInstanceProfileResponse.error_of_json))
+  | DeleteMigrationProject ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteMigrationProjectResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteMigrationProjectResponse.error_of_json))
+  | DeleteReplicationConfig ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteReplicationConfigResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteReplicationConfigResponse.error_of_json))
   | DeleteReplicationInstance ->
       if is_success
       then
@@ -927,6 +1913,32 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeConnectionsResponse.error_of_json))
+  | DescribeConversionConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeConversionConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeConversionConfigurationResponse.error_of_json))
+  | DescribeDataMigrations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDataMigrationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDataMigrationsResponse.error_of_json))
+  | DescribeDataProviders ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDataProvidersResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeDataProvidersResponse.error_of_json))
   | DescribeEndpointSettings ->
       if is_success
       then
@@ -947,6 +1959,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeEndpointsResponse.error_of_json))
+  | DescribeEngineVersions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeEngineVersionsResponse.of_json json)
+      else Error (parse_aws_error None)
   | DescribeEventCategories ->
       if is_success
       then
@@ -968,6 +1986,147 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeEventsResponse.of_json json)
       else Error (parse_aws_error None)
+  | DescribeExtensionPackAssociations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeExtensionPackAssociationsResponse.of_json json)
+      else Error (parse_aws_error None)
+  | DescribeFleetAdvisorCollectors ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeFleetAdvisorCollectorsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeFleetAdvisorCollectorsResponse.error_of_json))
+  | DescribeFleetAdvisorDatabases ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeFleetAdvisorDatabasesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeFleetAdvisorDatabasesResponse.error_of_json))
+  | DescribeFleetAdvisorLsaAnalysis ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeFleetAdvisorLsaAnalysisResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeFleetAdvisorLsaAnalysisResponse.error_of_json))
+  | DescribeFleetAdvisorSchemaObjectSummary ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeFleetAdvisorSchemaObjectSummaryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DescribeFleetAdvisorSchemaObjectSummaryResponse.error_of_json))
+  | DescribeFleetAdvisorSchemas ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeFleetAdvisorSchemasResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeFleetAdvisorSchemasResponse.error_of_json))
+  | DescribeInstanceProfiles ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeInstanceProfilesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeInstanceProfilesResponse.error_of_json))
+  | DescribeMetadataModel ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMetadataModelResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeMetadataModelResponse.error_of_json))
+  | DescribeMetadataModelAssessments ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMetadataModelAssessmentsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMetadataModelAssessmentsResponse.error_of_json))
+  | DescribeMetadataModelChildren ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMetadataModelChildrenResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMetadataModelChildrenResponse.error_of_json))
+  | DescribeMetadataModelConversions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMetadataModelConversionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMetadataModelConversionsResponse.error_of_json))
+  | DescribeMetadataModelCreations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMetadataModelCreationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMetadataModelCreationsResponse.error_of_json))
+  | DescribeMetadataModelExportsAsScript ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMetadataModelExportsAsScriptResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMetadataModelExportsAsScriptResponse.error_of_json))
+  | DescribeMetadataModelExportsToTarget ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMetadataModelExportsToTargetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMetadataModelExportsToTargetResponse.error_of_json))
+  | DescribeMetadataModelImports ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMetadataModelImportsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMetadataModelImportsResponse.error_of_json))
+  | DescribeMigrationProjects ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMigrationProjectsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMigrationProjectsResponse.error_of_json))
   | DescribeOrderableReplicationInstances ->
       if is_success
       then
@@ -983,6 +2142,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribePendingMaintenanceActionsResponse.error_of_json))
+  | DescribeRecommendationLimitations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRecommendationLimitationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRecommendationLimitationsResponse.error_of_json))
+  | DescribeRecommendations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRecommendationsResponse.error_of_json))
   | DescribeRefreshSchemasStatus ->
       if is_success
       then
@@ -992,6 +2169,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeRefreshSchemasStatusResponse.error_of_json))
+  | DescribeReplicationConfigs ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeReplicationConfigsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeReplicationConfigsResponse.error_of_json))
   | DescribeReplicationInstanceTaskLogs ->
       if is_success
       then
@@ -1019,6 +2205,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeReplicationSubnetGroupsResponse.error_of_json))
+  | DescribeReplicationTableStatistics ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeReplicationTableStatisticsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeReplicationTableStatisticsResponse.error_of_json))
   | DescribeReplicationTaskAssessmentResults ->
       if is_success
       then
@@ -1059,6 +2254,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeReplicationTasksResponse.error_of_json))
+  | DescribeReplications ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeReplicationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeReplicationsResponse.error_of_json))
   | DescribeSchemas ->
       if is_success
       then
@@ -1075,6 +2278,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeTableStatisticsResponse.error_of_json))
+  | ExportMetadataModelAssessment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ExportMetadataModelAssessmentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ExportMetadataModelAssessmentResponse.error_of_json))
+  | GetTargetSelectionRules ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetTargetSelectionRulesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetTargetSelectionRulesResponse.error_of_json))
   | ImportCertificate ->
       if is_success
       then
@@ -1091,6 +2312,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ModifyConversionConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ModifyConversionConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ModifyConversionConfigurationResponse.error_of_json))
+  | ModifyDataMigration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ModifyDataMigrationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ModifyDataMigrationResponse.error_of_json))
+  | ModifyDataProvider ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ModifyDataProviderResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ModifyDataProviderResponse.error_of_json))
   | ModifyEndpoint ->
       if is_success
       then
@@ -1107,6 +2353,32 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ModifyEventSubscriptionResponse.error_of_json))
+  | ModifyInstanceProfile ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ModifyInstanceProfileResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ModifyInstanceProfileResponse.error_of_json))
+  | ModifyMigrationProject ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ModifyMigrationProjectResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ModifyMigrationProjectResponse.error_of_json))
+  | ModifyReplicationConfig ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ModifyReplicationConfigResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ModifyReplicationConfigResponse.error_of_json))
   | ModifyReplicationInstance ->
       if is_success
       then
@@ -1157,6 +2429,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (RefreshSchemasResponse.of_json json)
       else
         Error (parse_aws_error (Some RefreshSchemasResponse.error_of_json))
+  | ReloadReplicationTables ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ReloadReplicationTablesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ReloadReplicationTablesResponse.error_of_json))
   | ReloadTables ->
       if is_success
       then
@@ -1172,6 +2453,95 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some RemoveTagsFromResourceResponse.error_of_json))
+  | RunFleetAdvisorLsaAnalysis ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RunFleetAdvisorLsaAnalysisResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some RunFleetAdvisorLsaAnalysisResponse.error_of_json))
+  | StartDataMigration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartDataMigrationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartDataMigrationResponse.error_of_json))
+  | StartExtensionPackAssociation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartExtensionPackAssociationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartExtensionPackAssociationResponse.error_of_json))
+  | StartMetadataModelAssessment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartMetadataModelAssessmentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartMetadataModelAssessmentResponse.error_of_json))
+  | StartMetadataModelConversion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartMetadataModelConversionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartMetadataModelConversionResponse.error_of_json))
+  | StartMetadataModelCreation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartMetadataModelCreationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartMetadataModelCreationResponse.error_of_json))
+  | StartMetadataModelExportAsScript ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartMetadataModelExportAsScriptResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartMetadataModelExportAsScriptResponse.error_of_json))
+  | StartMetadataModelExportToTarget ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartMetadataModelExportToTargetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartMetadataModelExportToTargetResponse.error_of_json))
+  | StartMetadataModelImport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartMetadataModelImportResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartMetadataModelImportResponse.error_of_json))
+  | StartRecommendations ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | StartReplication ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartReplicationResponse.of_json json)
+      else
+        Error (parse_aws_error (Some StartReplicationResponse.error_of_json))
   | StartReplicationTask ->
       if is_success
       then
@@ -1198,6 +2568,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some StartReplicationTaskAssessmentRunResponse.error_of_json))
+  | StopDataMigration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopDataMigrationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StopDataMigrationResponse.error_of_json))
+  | StopReplication ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopReplicationResponse.of_json json)
+      else
+        Error (parse_aws_error (Some StopReplicationResponse.error_of_json))
   | StopReplicationTask ->
       if is_success
       then
@@ -1213,3 +2598,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (TestConnectionResponse.of_json json)
       else
         Error (parse_aws_error (Some TestConnectionResponse.error_of_json))
+  | UpdateSubscriptionsToEventBridge ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateSubscriptionsToEventBridgeResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateSubscriptionsToEventBridgeResponse.error_of_json))

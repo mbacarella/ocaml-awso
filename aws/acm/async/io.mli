@@ -75,6 +75,18 @@ val resend_validation_email :
     ?cfg:Awso.Cfg.t ->
       ResendValidationEmailRequest.t ->
         (unit, unit) Result.t Async.Deferred.t
+val revoke_certificate :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RevokeCertificateRequest.t ->
+        (RevokeCertificateResponse.t, RevokeCertificateResponse.error)
+          Result.t Async.Deferred.t
+val search_certificates :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SearchCertificatesRequest.t ->
+        (SearchCertificatesResponse.t, SearchCertificatesResponse.error)
+          Result.t Async.Deferred.t
 val update_certificate_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

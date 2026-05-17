@@ -124,6 +124,25 @@ module HsmState =
     let of_json j = of_string (string_of_json ~kind:"HsmState" j)
     let to_json = simple_to_json to_value
   end
+module HsmType =
+  struct
+    type nonrec t = string
+    let context_ = "HsmType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:32) >>=
+             (fun () ->
+                check_pattern i ~pattern:"((p|)hsm[0-9][a-z.]*\\.[a-zA-Z]+)"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HsmType" j
+    let to_json = simple_to_json to_value
+  end
 module IpAddress =
   struct
     type nonrec t = string
@@ -140,6 +159,20 @@ module IpAddress =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"IpAddress" j
+    let to_json = simple_to_json to_value
+  end
+module IpV6Address =
+  struct
+    type nonrec t = string
+    let context_ = "IpV6Address"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:100); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IpV6Address" j
     let to_json = simple_to_json to_value
   end
 module String_ =
@@ -259,7 +292,7 @@ module Cert =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:5000) >>=
+          ((check_string_max i ~max:20000) >>=
              (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9+-/=\\s]*"));
         i
     let of_string x = x
@@ -288,30 +321,37 @@ module Hsm =
       eniIp: IpAddress.t option
         [@ocaml.doc
           "The IP address of the HSM's elastic network interface (ENI)."];
-      hsmId: HsmId.t [@ocaml.doc "The HSM's identifier (ID)."];
+      eniIpV6: IpV6Address.t option
+        [@ocaml.doc
+          "The IPv6 address (if any) of the HSM's elastic network interface (ENI)."];
+      hsmId: HsmId.t option [@ocaml.doc "The HSM's identifier (ID)."];
+      hsmType: HsmType.t option [@ocaml.doc "The type of HSM."];
       state: HsmState.t option [@ocaml.doc "The HSM's state."];
       stateMessage: String_.t option
         [@ocaml.doc "A description of the HSM's state."]}
-    let context_ = "Hsm"
     let make ?availabilityZone =
       fun ?clusterId ->
         fun ?subnetId ->
           fun ?eniId ->
             fun ?eniIp ->
-              fun ?state ->
-                fun ?stateMessage ->
-                  fun ~hsmId ->
-                    fun () ->
-                      {
-                        availabilityZone;
-                        clusterId;
-                        subnetId;
-                        eniId;
-                        eniIp;
-                        state;
-                        stateMessage;
-                        hsmId
-                      }
+              fun ?eniIpV6 ->
+                fun ?hsmId ->
+                  fun ?hsmType ->
+                    fun ?state ->
+                      fun ?stateMessage ->
+                        fun () ->
+                          {
+                            availabilityZone;
+                            clusterId;
+                            subnetId;
+                            eniId;
+                            eniIp;
+                            eniIpV6;
+                            hsmId;
+                            hsmType;
+                            state;
+                            stateMessage
+                          }
     let to_value x =
       structure_to_value
         [("AvailabilityZone",
@@ -320,7 +360,9 @@ module Hsm =
         ("SubnetId", (Option.map x.subnetId ~f:SubnetId.to_value));
         ("EniId", (Option.map x.eniId ~f:EniId.to_value));
         ("EniIp", (Option.map x.eniIp ~f:IpAddress.to_value));
-        ("HsmId", (Some (HsmId.to_value x.hsmId)));
+        ("EniIpV6", (Option.map x.eniIpV6 ~f:IpV6Address.to_value));
+        ("HsmId", (Option.map x.hsmId ~f:HsmId.to_value));
+        ("HsmType", (Option.map x.hsmType ~f:HsmType.to_value));
         ("State", (Option.map x.state ~f:HsmState.to_value));
         ("StateMessage", (Option.map x.stateMessage ~f:String_.to_value))]
     let to_query v = to_query to_value v
@@ -329,8 +371,11 @@ module Hsm =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StateMessage") in
       let state =
         (Option.map ~f:HsmState.of_xml) (Xml.child xml_arg0 "State") in
-      let hsmId =
-        HsmId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HsmId") in
+      let hsmType =
+        (Option.map ~f:HsmType.of_xml) (Xml.child xml_arg0 "HsmType") in
+      let hsmId = (Option.map ~f:HsmId.of_xml) (Xml.child xml_arg0 "HsmId") in
+      let eniIpV6 =
+        (Option.map ~f:IpV6Address.of_xml) (Xml.child xml_arg0 "EniIpV6") in
       let eniIp =
         (Option.map ~f:IpAddress.of_xml) (Xml.child xml_arg0 "EniIp") in
       let eniId = (Option.map ~f:EniId.of_xml) (Xml.child xml_arg0 "EniId") in
@@ -341,24 +386,26 @@ module Hsm =
       let availabilityZone =
         (Option.map ~f:ExternalAz.of_xml)
           (Xml.child xml_arg0 "AvailabilityZone") in
-      make ?stateMessage ?state ~hsmId ?eniIp ?eniId ?subnetId ?clusterId
-        ?availabilityZone ()
+      make ?stateMessage ?state ?hsmType ?hsmId ?eniIpV6 ?eniIp ?eniId
+        ?subnetId ?clusterId ?availabilityZone ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stateMessage = field_map json "StateMessage" String_.of_json in
-      let state = field_map json "State" HsmState.of_json in
-      let hsmId = field_map_exn json "HsmId" HsmId.of_json in
-      let eniIp = field_map json "EniIp" IpAddress.of_json in
-      let eniId = field_map json "EniId" EniId.of_json in
-      let subnetId = field_map json "SubnetId" SubnetId.of_json in
-      let clusterId = field_map json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let stateMessage = field_map json__ "StateMessage" String_.of_json in
+      let state = field_map json__ "State" HsmState.of_json in
+      let hsmType = field_map json__ "HsmType" HsmType.of_json in
+      let hsmId = field_map json__ "HsmId" HsmId.of_json in
+      let eniIpV6 = field_map json__ "EniIpV6" IpV6Address.of_json in
+      let eniIp = field_map json__ "EniIp" IpAddress.of_json in
+      let eniId = field_map json__ "EniId" EniId.of_json in
+      let subnetId = field_map json__ "SubnetId" SubnetId.of_json in
+      let clusterId = field_map json__ "ClusterId" ClusterId.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" ExternalAz.of_json in
-      make ?stateMessage ?state ~hsmId ?eniIp ?eniId ?subnetId ?clusterId
-        ?availabilityZone ()
+        field_map json__ "AvailabilityZone" ExternalAz.of_json in
+      make ?stateMessage ?state ?hsmType ?hsmId ?eniIpV6 ?eniIp ?eniId
+        ?subnetId ?clusterId ?availabilityZone ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains information about a hardware security module (HSM) in an AWS CloudHSM cluster."]
+       "Contains information about a hardware security module (HSM) in an CloudHSM cluster."]
 module Tag =
   struct
     type nonrec t =
@@ -379,9 +426,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains a tag. A tag is a key-value pair."]
@@ -441,9 +488,9 @@ module BackupRetentionPolicy =
           (Xml.child xml_arg0 "Type") in
       make ?value ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" BackupRetentionValue.of_json in
-      let type_ = field_map json "Type" BackupRetentionType.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" BackupRetentionValue.of_json in
+      let type_ = field_map json__ "Type" BackupRetentionType.of_json in
       make ?value ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -460,7 +507,7 @@ module Certificates =
           "The HSM certificate issued (signed) by the HSM hardware."];
       awsHardwareCertificate: Cert.t option
         [@ocaml.doc
-          "The HSM hardware certificate issued (signed) by AWS CloudHSM."];
+          "The HSM hardware certificate issued (signed) by CloudHSM."];
       manufacturerHardwareCertificate: Cert.t option
         [@ocaml.doc
           "The HSM hardware certificate issued (signed) by the hardware manufacturer."];
@@ -507,20 +554,45 @@ module Certificates =
       make ?clusterCertificate ?manufacturerHardwareCertificate
         ?awsHardwareCertificate ?hsmCertificate ?clusterCsr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterCertificate =
-        field_map json "ClusterCertificate" Cert.of_json in
+        field_map json__ "ClusterCertificate" Cert.of_json in
       let manufacturerHardwareCertificate =
-        field_map json "ManufacturerHardwareCertificate" Cert.of_json in
+        field_map json__ "ManufacturerHardwareCertificate" Cert.of_json in
       let awsHardwareCertificate =
-        field_map json "AwsHardwareCertificate" Cert.of_json in
-      let hsmCertificate = field_map json "HsmCertificate" Cert.of_json in
-      let clusterCsr = field_map json "ClusterCsr" Cert.of_json in
+        field_map json__ "AwsHardwareCertificate" Cert.of_json in
+      let hsmCertificate = field_map json__ "HsmCertificate" Cert.of_json in
+      let clusterCsr = field_map json__ "ClusterCsr" Cert.of_json in
       make ?clusterCertificate ?manufacturerHardwareCertificate
         ?awsHardwareCertificate ?hsmCertificate ?clusterCsr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains one or more certificates or a certificate signing request (CSR)."]
+module ClusterMode =
+  struct
+    type nonrec t =
+      | FIPS 
+      | NON_FIPS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FIPS -> "FIPS"
+      | NON_FIPS -> "NON_FIPS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FIPS" -> FIPS
+      | "NON_FIPS" -> NON_FIPS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ClusterMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ClusterMode" j)
+    let to_json = simple_to_json to_value
+  end
 module ClusterState =
   struct
     type nonrec t =
@@ -530,6 +602,8 @@ module ClusterState =
       | INITIALIZED 
       | ACTIVE 
       | UPDATE_IN_PROGRESS 
+      | MODIFY_IN_PROGRESS 
+      | ROLLBACK_IN_PROGRESS 
       | DELETE_IN_PROGRESS 
       | DELETED 
       | DEGRADED 
@@ -543,6 +617,8 @@ module ClusterState =
       | INITIALIZED -> "INITIALIZED"
       | ACTIVE -> "ACTIVE"
       | UPDATE_IN_PROGRESS -> "UPDATE_IN_PROGRESS"
+      | MODIFY_IN_PROGRESS -> "MODIFY_IN_PROGRESS"
+      | ROLLBACK_IN_PROGRESS -> "ROLLBACK_IN_PROGRESS"
       | DELETE_IN_PROGRESS -> "DELETE_IN_PROGRESS"
       | DELETED -> "DELETED"
       | DEGRADED -> "DEGRADED"
@@ -555,6 +631,8 @@ module ClusterState =
       | "INITIALIZED" -> INITIALIZED
       | "ACTIVE" -> ACTIVE
       | "UPDATE_IN_PROGRESS" -> UPDATE_IN_PROGRESS
+      | "MODIFY_IN_PROGRESS" -> MODIFY_IN_PROGRESS
+      | "ROLLBACK_IN_PROGRESS" -> ROLLBACK_IN_PROGRESS
       | "DELETE_IN_PROGRESS" -> DELETE_IN_PROGRESS
       | "DELETED" -> DELETED
       | "DEGRADED" -> DEGRADED
@@ -588,6 +666,8 @@ module ExternalSubnetMapping =
                     (fun x -> (SubnetId.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -595,25 +675,13 @@ module ExternalSubnetMapping =
         ~of_json:SubnetId.of_json j
     let to_json v = composed_to_json to_value v
   end
-module HsmType =
-  struct
-    type nonrec t = string
-    let context_ = "HsmType"
-    let make i =
-      let open Result in
-        ok_or_failwith (check_pattern i ~pattern:"(hsm1\\.medium)"); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"HsmType" j
-    let to_json = simple_to_json to_value
-  end
 module Hsms =
   struct
     type nonrec t = Hsm.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Hsm.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -632,6 +700,31 @@ module Hsms =
                      | _ -> true))) ~f:Hsm.of_xml)
     let of_json j = list_of_json ~kind:"Hsms" ~of_json:Hsm.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module NetworkType =
+  struct
+    type nonrec t =
+      | IPV4 
+      | DUALSTACK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IPV4 -> "IPV4"
+      | DUALSTACK -> "DUALSTACK"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IPV4" -> IPV4
+      | "DUALSTACK" -> DUALSTACK
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration NetworkType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NetworkType" j)
+    let to_json = simple_to_json to_value
   end
 module PreCoPassword =
   struct
@@ -692,6 +785,9 @@ module TagList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -736,6 +832,24 @@ module VpcId =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"VpcId" j
+    let to_json = simple_to_json to_value
+  end
+module BackupArn =
+  struct
+    type nonrec t = string
+    let context_ = "BackupArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^(arn:aws(-(us-gov))?:cloudhsm:([a-z]{2}(-(gov|isob|iso))?-(east|west|north|south|central){1,2}-[0-9]{1}):[0-9]{12}:backup/)?backup-[2-7a-zA-Z]{11,16}");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"BackupArn" j
     let to_json = simple_to_json to_value
   end
 module BackupState =
@@ -829,6 +943,9 @@ module Cluster =
         [@ocaml.doc "Contains information about the HSMs in the cluster."];
       hsmType: HsmType.t option
         [@ocaml.doc "The type of HSM that the cluster contains."];
+      hsmTypeRollbackExpiration: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp until when the cluster can be rolled back to its original HSM type."];
       preCoPassword: PreCoPassword.t option
         [@ocaml.doc
           "The default password for the cluster's Pre-Crypto Officer (PRECO) user."];
@@ -846,44 +963,54 @@ module Cluster =
       vpcId: VpcId.t option
         [@ocaml.doc
           "The identifier (ID) of the virtual private cloud (VPC) that contains the cluster."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "The cluster's NetworkType can be IPv4 (the default) or DUALSTACK. The IPv4 NetworkType restricts communication between your application and the hardware security modules (HSMs) to the IPv4 protocol only. The DUALSTACK NetworkType enables communication over both IPv4 and IPv6 protocols. To use DUALSTACK, configure your virtual private cloud (VPC) and subnets to support both IPv4 and IPv6. This configuration involves adding IPv6 Classless Inter-Domain Routing (CIDR) blocks to the existing IPv4 CIDR blocks in your subnets. The NetworkType you choose affects the network addressing options for your cluster. DUALSTACK provides more flexibility by supporting both IPv4 and IPv6 communication."];
       certificates: Certificates.t option
         [@ocaml.doc
           "Contains one or more certificates or a certificate signing request (CSR)."];
       tagList: TagList.t option
-        [@ocaml.doc "The list of tags for the cluster."]}
+        [@ocaml.doc "The list of tags for the cluster."];
+      mode: ClusterMode.t option [@ocaml.doc "The mode of the cluster."]}
     let make ?backupPolicy =
       fun ?backupRetentionPolicy ->
         fun ?clusterId ->
           fun ?createTimestamp ->
             fun ?hsms ->
               fun ?hsmType ->
-                fun ?preCoPassword ->
-                  fun ?securityGroup ->
-                    fun ?sourceBackupId ->
-                      fun ?state ->
-                        fun ?stateMessage ->
-                          fun ?subnetMapping ->
-                            fun ?vpcId ->
-                              fun ?certificates ->
-                                fun ?tagList ->
-                                  fun () ->
-                                    {
-                                      backupPolicy;
-                                      backupRetentionPolicy;
-                                      clusterId;
-                                      createTimestamp;
-                                      hsms;
-                                      hsmType;
-                                      preCoPassword;
-                                      securityGroup;
-                                      sourceBackupId;
-                                      state;
-                                      stateMessage;
-                                      subnetMapping;
-                                      vpcId;
-                                      certificates;
-                                      tagList
-                                    }
+                fun ?hsmTypeRollbackExpiration ->
+                  fun ?preCoPassword ->
+                    fun ?securityGroup ->
+                      fun ?sourceBackupId ->
+                        fun ?state ->
+                          fun ?stateMessage ->
+                            fun ?subnetMapping ->
+                              fun ?vpcId ->
+                                fun ?networkType ->
+                                  fun ?certificates ->
+                                    fun ?tagList ->
+                                      fun ?mode ->
+                                        fun () ->
+                                          {
+                                            backupPolicy;
+                                            backupRetentionPolicy;
+                                            clusterId;
+                                            createTimestamp;
+                                            hsms;
+                                            hsmType;
+                                            hsmTypeRollbackExpiration;
+                                            preCoPassword;
+                                            securityGroup;
+                                            sourceBackupId;
+                                            state;
+                                            stateMessage;
+                                            subnetMapping;
+                                            vpcId;
+                                            networkType;
+                                            certificates;
+                                            tagList;
+                                            mode
+                                          }
     let to_value x =
       structure_to_value
         [("BackupPolicy",
@@ -896,6 +1023,8 @@ module Cluster =
           (Option.map x.createTimestamp ~f:Timestamp.to_value));
         ("Hsms", (Option.map x.hsms ~f:Hsms.to_value));
         ("HsmType", (Option.map x.hsmType ~f:HsmType.to_value));
+        ("HsmTypeRollbackExpiration",
+          (Option.map x.hsmTypeRollbackExpiration ~f:Timestamp.to_value));
         ("PreCoPassword",
           (Option.map x.preCoPassword ~f:PreCoPassword.to_value));
         ("SecurityGroup",
@@ -908,16 +1037,22 @@ module Cluster =
         ("SubnetMapping",
           (Option.map x.subnetMapping ~f:ExternalSubnetMapping.to_value));
         ("VpcId", (Option.map x.vpcId ~f:VpcId.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value));
         ("Certificates",
           (Option.map x.certificates ~f:Certificates.to_value));
-        ("TagList", (Option.map x.tagList ~f:TagList.to_value))]
+        ("TagList", (Option.map x.tagList ~f:TagList.to_value));
+        ("Mode", (Option.map x.mode ~f:ClusterMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let mode =
+        (Option.map ~f:ClusterMode.of_xml) (Xml.child xml_arg0 "Mode") in
       let tagList =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
       let certificates =
         (Option.map ~f:Certificates.of_xml)
           (Xml.child xml_arg0 "Certificates") in
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
       let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "VpcId") in
       let subnetMapping =
         (Option.map ~f:ExternalSubnetMapping.of_xml)
@@ -935,6 +1070,9 @@ module Cluster =
       let preCoPassword =
         (Option.map ~f:PreCoPassword.of_xml)
           (Xml.child xml_arg0 "PreCoPassword") in
+      let hsmTypeRollbackExpiration =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "HsmTypeRollbackExpiration") in
       let hsmType =
         (Option.map ~f:HsmType.of_xml) (Xml.child xml_arg0 "HsmType") in
       let hsms = (Option.map ~f:Hsms.of_xml) (Xml.child xml_arg0 "Hsms") in
@@ -949,36 +1087,43 @@ module Cluster =
       let backupPolicy =
         (Option.map ~f:BackupPolicy.of_xml)
           (Xml.child xml_arg0 "BackupPolicy") in
-      make ?tagList ?certificates ?vpcId ?subnetMapping ?stateMessage ?state
-        ?sourceBackupId ?securityGroup ?preCoPassword ?hsmType ?hsms
-        ?createTimestamp ?clusterId ?backupRetentionPolicy ?backupPolicy ()
+      make ?mode ?tagList ?certificates ?networkType ?vpcId ?subnetMapping
+        ?stateMessage ?state ?sourceBackupId ?securityGroup ?preCoPassword
+        ?hsmTypeRollbackExpiration ?hsmType ?hsms ?createTimestamp ?clusterId
+        ?backupRetentionPolicy ?backupPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
-      let certificates = field_map json "Certificates" Certificates.of_json in
-      let vpcId = field_map json "VpcId" VpcId.of_json in
+    let of_json json__ =
+      let mode = field_map json__ "Mode" ClusterMode.of_json in
+      let tagList = field_map json__ "TagList" TagList.of_json in
+      let certificates = field_map json__ "Certificates" Certificates.of_json in
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
       let subnetMapping =
-        field_map json "SubnetMapping" ExternalSubnetMapping.of_json in
-      let stateMessage = field_map json "StateMessage" StateMessage.of_json in
-      let state = field_map json "State" ClusterState.of_json in
-      let sourceBackupId = field_map json "SourceBackupId" BackupId.of_json in
+        field_map json__ "SubnetMapping" ExternalSubnetMapping.of_json in
+      let stateMessage = field_map json__ "StateMessage" StateMessage.of_json in
+      let state = field_map json__ "State" ClusterState.of_json in
+      let sourceBackupId = field_map json__ "SourceBackupId" BackupId.of_json in
       let securityGroup =
-        field_map json "SecurityGroup" SecurityGroup.of_json in
+        field_map json__ "SecurityGroup" SecurityGroup.of_json in
       let preCoPassword =
-        field_map json "PreCoPassword" PreCoPassword.of_json in
-      let hsmType = field_map json "HsmType" HsmType.of_json in
-      let hsms = field_map json "Hsms" Hsms.of_json in
+        field_map json__ "PreCoPassword" PreCoPassword.of_json in
+      let hsmTypeRollbackExpiration =
+        field_map json__ "HsmTypeRollbackExpiration" Timestamp.of_json in
+      let hsmType = field_map json__ "HsmType" HsmType.of_json in
+      let hsms = field_map json__ "Hsms" Hsms.of_json in
       let createTimestamp =
-        field_map json "CreateTimestamp" Timestamp.of_json in
-      let clusterId = field_map json "ClusterId" ClusterId.of_json in
+        field_map json__ "CreateTimestamp" Timestamp.of_json in
+      let clusterId = field_map json__ "ClusterId" ClusterId.of_json in
       let backupRetentionPolicy =
-        field_map json "BackupRetentionPolicy" BackupRetentionPolicy.of_json in
-      let backupPolicy = field_map json "BackupPolicy" BackupPolicy.of_json in
-      make ?tagList ?certificates ?vpcId ?subnetMapping ?stateMessage ?state
-        ?sourceBackupId ?securityGroup ?preCoPassword ?hsmType ?hsms
-        ?createTimestamp ?clusterId ?backupRetentionPolicy ?backupPolicy ()
+        field_map json__ "BackupRetentionPolicy"
+          BackupRetentionPolicy.of_json in
+      let backupPolicy = field_map json__ "BackupPolicy" BackupPolicy.of_json in
+      make ?mode ?tagList ?certificates ?networkType ?vpcId ?subnetMapping
+        ?stateMessage ?state ?sourceBackupId ?securityGroup ?preCoPassword
+        ?hsmTypeRollbackExpiration ?hsmType ?hsms ?createTimestamp ?clusterId
+        ?backupRetentionPolicy ?backupPolicy ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains information about an AWS CloudHSM cluster."]
+  end[@@ocaml.doc "Contains information about an CloudHSM cluster."]
 module Field =
   struct
     type nonrec t = string
@@ -998,6 +1143,9 @@ module Strings =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1021,7 +1169,10 @@ module Backup =
   struct
     type nonrec t =
       {
-      backupId: BackupId.t [@ocaml.doc "The identifier (ID) of the backup."];
+      backupId: BackupId.t option
+        [@ocaml.doc "The identifier (ID) of the backup."];
+      backupArn: BackupArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the backup."];
       backupState: BackupState.t option
         [@ocaml.doc "The state of the backup."];
       clusterId: ClusterId.t option
@@ -1047,36 +1198,46 @@ module Backup =
         [@ocaml.doc
           "The date and time when the backup will be permanently deleted."];
       tagList: TagList.t option
-        [@ocaml.doc "The list of tags for the backup."]}
-    let context_ = "Backup"
-    let make ?backupState =
-      fun ?clusterId ->
-        fun ?createTimestamp ->
-          fun ?copyTimestamp ->
-            fun ?neverExpires ->
-              fun ?sourceRegion ->
-                fun ?sourceBackup ->
-                  fun ?sourceCluster ->
-                    fun ?deleteTimestamp ->
-                      fun ?tagList ->
-                        fun ~backupId ->
-                          fun () ->
-                            {
-                              backupState;
-                              clusterId;
-                              createTimestamp;
-                              copyTimestamp;
-                              neverExpires;
-                              sourceRegion;
-                              sourceBackup;
-                              sourceCluster;
-                              deleteTimestamp;
-                              tagList;
-                              backupId
-                            }
+        [@ocaml.doc "The list of tags for the backup."];
+      hsmType: HsmType.t option
+        [@ocaml.doc "The HSM type used to create the backup."];
+      mode: ClusterMode.t option
+        [@ocaml.doc "The mode of the cluster that was backed up."]}
+    let make ?backupId =
+      fun ?backupArn ->
+        fun ?backupState ->
+          fun ?clusterId ->
+            fun ?createTimestamp ->
+              fun ?copyTimestamp ->
+                fun ?neverExpires ->
+                  fun ?sourceRegion ->
+                    fun ?sourceBackup ->
+                      fun ?sourceCluster ->
+                        fun ?deleteTimestamp ->
+                          fun ?tagList ->
+                            fun ?hsmType ->
+                              fun ?mode ->
+                                fun () ->
+                                  {
+                                    backupId;
+                                    backupArn;
+                                    backupState;
+                                    clusterId;
+                                    createTimestamp;
+                                    copyTimestamp;
+                                    neverExpires;
+                                    sourceRegion;
+                                    sourceBackup;
+                                    sourceCluster;
+                                    deleteTimestamp;
+                                    tagList;
+                                    hsmType;
+                                    mode
+                                  }
     let to_value x =
       structure_to_value
-        [("BackupId", (Some (BackupId.to_value x.backupId)));
+        [("BackupId", (Option.map x.backupId ~f:BackupId.to_value));
+        ("BackupArn", (Option.map x.backupArn ~f:BackupArn.to_value));
         ("BackupState", (Option.map x.backupState ~f:BackupState.to_value));
         ("ClusterId", (Option.map x.clusterId ~f:ClusterId.to_value));
         ("CreateTimestamp",
@@ -1088,9 +1249,15 @@ module Backup =
         ("SourceCluster", (Option.map x.sourceCluster ~f:ClusterId.to_value));
         ("DeleteTimestamp",
           (Option.map x.deleteTimestamp ~f:Timestamp.to_value));
-        ("TagList", (Option.map x.tagList ~f:TagList.to_value))]
+        ("TagList", (Option.map x.tagList ~f:TagList.to_value));
+        ("HsmType", (Option.map x.hsmType ~f:HsmType.to_value));
+        ("Mode", (Option.map x.mode ~f:ClusterMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let mode =
+        (Option.map ~f:ClusterMode.of_xml) (Xml.child xml_arg0 "Mode") in
+      let hsmType =
+        (Option.map ~f:HsmType.of_xml) (Xml.child xml_arg0 "HsmType") in
       let tagList =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
       let deleteTimestamp =
@@ -1113,32 +1280,37 @@ module Backup =
         (Option.map ~f:ClusterId.of_xml) (Xml.child xml_arg0 "ClusterId") in
       let backupState =
         (Option.map ~f:BackupState.of_xml) (Xml.child xml_arg0 "BackupState") in
+      let backupArn =
+        (Option.map ~f:BackupArn.of_xml) (Xml.child xml_arg0 "BackupArn") in
       let backupId =
-        BackupId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BackupId") in
-      make ?tagList ?deleteTimestamp ?sourceCluster ?sourceBackup
-        ?sourceRegion ?neverExpires ?copyTimestamp ?createTimestamp
-        ?clusterId ?backupState ~backupId ()
+        (Option.map ~f:BackupId.of_xml) (Xml.child xml_arg0 "BackupId") in
+      make ?mode ?hsmType ?tagList ?deleteTimestamp ?sourceCluster
+        ?sourceBackup ?sourceRegion ?neverExpires ?copyTimestamp
+        ?createTimestamp ?clusterId ?backupState ?backupArn ?backupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
+    let of_json json__ =
+      let mode = field_map json__ "Mode" ClusterMode.of_json in
+      let hsmType = field_map json__ "HsmType" HsmType.of_json in
+      let tagList = field_map json__ "TagList" TagList.of_json in
       let deleteTimestamp =
-        field_map json "DeleteTimestamp" Timestamp.of_json in
-      let sourceCluster = field_map json "SourceCluster" ClusterId.of_json in
-      let sourceBackup = field_map json "SourceBackup" BackupId.of_json in
-      let sourceRegion = field_map json "SourceRegion" Region.of_json in
-      let neverExpires = field_map json "NeverExpires" Boolean.of_json in
-      let copyTimestamp = field_map json "CopyTimestamp" Timestamp.of_json in
+        field_map json__ "DeleteTimestamp" Timestamp.of_json in
+      let sourceCluster = field_map json__ "SourceCluster" ClusterId.of_json in
+      let sourceBackup = field_map json__ "SourceBackup" BackupId.of_json in
+      let sourceRegion = field_map json__ "SourceRegion" Region.of_json in
+      let neverExpires = field_map json__ "NeverExpires" Boolean.of_json in
+      let copyTimestamp = field_map json__ "CopyTimestamp" Timestamp.of_json in
       let createTimestamp =
-        field_map json "CreateTimestamp" Timestamp.of_json in
-      let clusterId = field_map json "ClusterId" ClusterId.of_json in
-      let backupState = field_map json "BackupState" BackupState.of_json in
-      let backupId = field_map_exn json "BackupId" BackupId.of_json in
-      make ?tagList ?deleteTimestamp ?sourceCluster ?sourceBackup
-        ?sourceRegion ?neverExpires ?copyTimestamp ?createTimestamp
-        ?clusterId ?backupState ~backupId ()
+        field_map json__ "CreateTimestamp" Timestamp.of_json in
+      let clusterId = field_map json__ "ClusterId" ClusterId.of_json in
+      let backupState = field_map json__ "BackupState" BackupState.of_json in
+      let backupArn = field_map json__ "BackupArn" BackupArn.of_json in
+      let backupId = field_map json__ "BackupId" BackupId.of_json in
+      make ?mode ?hsmType ?tagList ?deleteTimestamp ?sourceCluster
+        ?sourceBackup ?sourceRegion ?neverExpires ?copyTimestamp
+        ?createTimestamp ?clusterId ?backupState ?backupArn ?backupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains information about a backup of an AWS CloudHSM cluster. All backup objects contain the BackupId, BackupState, ClusterId, and CreateTimestamp parameters. Backups that were copied into a destination region additionally contain the CopyTimestamp, SourceBackup, SourceCluster, and SourceRegion parameters. A backup that is pending deletion will include the DeleteTimestamp parameter."]
+       "Contains information about a backup of an CloudHSM cluster. All backup objects contain the BackupId, BackupState, ClusterId, and CreateTimestamp parameters. Backups that were copied into a destination region additionally contain the CopyTimestamp, SourceBackup, SourceCluster, and SourceRegion parameters. A backup that is pending deletion will include the DeleteTimestamp parameter."]
 module CloudHsmAccessDeniedException =
   struct
     type nonrec t = {
@@ -1153,8 +1325,8 @@ module CloudHsmAccessDeniedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1173,12 +1345,12 @@ module CloudHsmInternalFailureException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The request was rejected because of an AWS CloudHSM internal failure. The request can be retried."]
+       "The request was rejected because of an CloudHSM internal failure. The request can be retried."]
 module CloudHsmInvalidRequestException =
   struct
     type nonrec t = {
@@ -1193,8 +1365,8 @@ module CloudHsmInvalidRequestException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1213,8 +1385,8 @@ module CloudHsmResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1233,8 +1405,8 @@ module CloudHsmServiceException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was rejected because an error occurred."]
@@ -1252,8 +1424,8 @@ module CloudHsmTagException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1283,6 +1455,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1301,6 +1476,62 @@ module TagKeyList =
                      | _ -> true))) ~f:TagKey.of_xml)
     let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module CloudHsmResourceLimitExceededException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request was rejected because it exceeds an CloudHSM limit."]
+module CloudHsmArn =
+  struct
+    type nonrec t = string
+    let context_ = "CloudHsmArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"arn:aws(-(us-gov))?:cloudhsm:([a-z]{2}(-(gov|isob|iso))?-(east|west|north|south|central){1,2}-[0-9]{1}):[0-9]{12}:(backup/backup|cluster/cluster|hsm/hsm)-[2-7a-zA-Z]{11,16}");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CloudHsmArn" j
+    let to_json = simple_to_json to_value
+  end
+module ResourcePolicy =
+  struct
+    type nonrec t = string
+    let context_ = "ResourcePolicy"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:20000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourcePolicy" j
+    let to_json = simple_to_json to_value
   end
 module NextToken =
   struct
@@ -1341,6 +1572,9 @@ module Clusters =
   struct
     type nonrec t = Cluster.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Cluster.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1381,7 +1615,8 @@ module ClustersMaxSize =
 module Filters =
   struct
     type nonrec t = (Field.t * Strings.t) list
-    let make i = i
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:30); i
     let of_header xs =
       make
         (List.filter_map xs
@@ -1401,6 +1636,8 @@ module Filters =
                     (fun x -> (Strings.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1412,6 +1649,9 @@ module Backups =
   struct
     type nonrec t = Backup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Backup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1457,6 +1697,9 @@ module SubnetIds =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1519,12 +1762,12 @@ module DestinationBackup =
           (Xml.child xml_arg0 "CreateTimestamp") in
       make ?sourceCluster ?sourceBackup ?sourceRegion ?createTimestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceCluster = field_map json "SourceCluster" ClusterId.of_json in
-      let sourceBackup = field_map json "SourceBackup" BackupId.of_json in
-      let sourceRegion = field_map json "SourceRegion" Region.of_json in
+    let of_json json__ =
+      let sourceCluster = field_map json__ "SourceCluster" ClusterId.of_json in
+      let sourceBackup = field_map json__ "SourceBackup" BackupId.of_json in
+      let sourceRegion = field_map json__ "SourceRegion" Region.of_json in
       let createTimestamp =
-        field_map json "CreateTimestamp" Timestamp.of_json in
+        field_map json__ "CreateTimestamp" Timestamp.of_json in
       make ?sourceCluster ?sourceBackup ?sourceRegion ?createTimestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1623,7 +1866,7 @@ module UntagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specified tag or tags from the specified AWS CloudHSM cluster."]
+       "Removes the specified tag or tags from the specified CloudHSM cluster. Cross-account use: No. You cannot perform this operation on an CloudHSM resource in a different Amazon Web Services account."]
 module UntagResourceRequest =
   struct
     type nonrec t =
@@ -1651,13 +1894,13 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagKeyList ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeyList = field_map_exn json "TagKeyList" TagKeyList.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let tagKeyList = field_map_exn json__ "TagKeyList" TagKeyList.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ~tagKeyList ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specified tag or tags from the specified AWS CloudHSM cluster."]
+       "Removes the specified tag or tags from the specified CloudHSM cluster. Cross-account use: No. You cannot perform this operation on an CloudHSM resource in a different Amazon Web Services account."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -1666,6 +1909,8 @@ module TagResourceResponse =
       | `CloudHsmInternalFailureException of
           CloudHsmInternalFailureException.t 
       | `CloudHsmInvalidRequestException of CloudHsmInvalidRequestException.t 
+      | `CloudHsmResourceLimitExceededException of
+          CloudHsmResourceLimitExceededException.t 
       | `CloudHsmResourceNotFoundException of
           CloudHsmResourceNotFoundException.t 
       | `CloudHsmServiceException of CloudHsmServiceException.t 
@@ -1683,6 +1928,9 @@ module TagResourceResponse =
       | "CloudHsmInvalidRequestException" ->
           `CloudHsmInvalidRequestException
             (CloudHsmInvalidRequestException.of_json json)
+      | "CloudHsmResourceLimitExceededException" ->
+          `CloudHsmResourceLimitExceededException
+            (CloudHsmResourceLimitExceededException.of_json json)
       | "CloudHsmResourceNotFoundException" ->
           `CloudHsmResourceNotFoundException
             (CloudHsmResourceNotFoundException.of_json json)
@@ -1704,6 +1952,9 @@ module TagResourceResponse =
       | "CloudHsmInvalidRequestException" ->
           `CloudHsmInvalidRequestException
             (CloudHsmInvalidRequestException.of_xml xml)
+      | "CloudHsmResourceLimitExceededException" ->
+          `CloudHsmResourceLimitExceededException
+            (CloudHsmResourceLimitExceededException.of_xml xml)
       | "CloudHsmResourceNotFoundException" ->
           `CloudHsmResourceNotFoundException
             (CloudHsmResourceNotFoundException.of_xml xml)
@@ -1727,6 +1978,10 @@ module TagResourceResponse =
           `Assoc
             [("error", (`String "CloudHsmInvalidRequestException"));
             ("details", (CloudHsmInvalidRequestException.to_json e))]
+      | `CloudHsmResourceLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CloudHsmResourceLimitExceededException"));
+            ("details", (CloudHsmResourceLimitExceededException.to_json e))]
       | `CloudHsmResourceNotFoundException e ->
           `Assoc
             [("error", (`String "CloudHsmResourceNotFoundException"));
@@ -1752,7 +2007,7 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or overwrites one or more tags for the specified AWS CloudHSM cluster."]
+       "Adds or overwrites one or more tags for the specified CloudHSM cluster. Cross-account use: No. You cannot perform this operation on an CloudHSM resource in a different Amazon Web Services account."]
 module TagResourceRequest =
   struct
     type nonrec t =
@@ -1776,13 +2031,13 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagList ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map_exn json "TagList" TagList.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let tagList = field_map_exn json__ "TagList" TagList.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ~tagList ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or overwrites one or more tags for the specified AWS CloudHSM cluster."]
+       "Adds or overwrites one or more tags for the specified CloudHSM cluster. Cross-account use: No. You cannot perform this operation on an CloudHSM resource in a different Amazon Web Services account."]
 module RestoreBackupResponse =
   struct
     type nonrec t =
@@ -1872,11 +2127,12 @@ module RestoreBackupResponse =
         (Option.map ~f:Backup.of_xml) (Xml.child xml_arg0 "Backup") in
       make ?backup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let backup = field_map json "Backup" Backup.of_json in make ?backup ()
+    let of_json json__ =
+      let backup = field_map json__ "Backup" Backup.of_json in
+      make ?backup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Restores a specified AWS CloudHSM backup that is in the PENDING_DELETION state. For mor information on deleting a backup, see DeleteBackup."]
+       "Restores a specified CloudHSM backup that is in the PENDING_DELETION state. For more information on deleting a backup, see DeleteBackup. Cross-account use: No. You cannot perform this operation on an CloudHSM backup in a different Amazon Web Services account."]
 module RestoreBackupRequest =
   struct
     type nonrec t =
@@ -1895,12 +2151,144 @@ module RestoreBackupRequest =
         BackupId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BackupId") in
       make ~backupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let backupId = field_map_exn json "BackupId" BackupId.of_json in
+    let of_json json__ =
+      let backupId = field_map_exn json__ "BackupId" BackupId.of_json in
       make ~backupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Restores a specified AWS CloudHSM backup that is in the PENDING_DELETION state. For mor information on deleting a backup, see DeleteBackup."]
+       "Restores a specified CloudHSM backup that is in the PENDING_DELETION state. For more information on deleting a backup, see DeleteBackup. Cross-account use: No. You cannot perform this operation on an CloudHSM backup in a different Amazon Web Services account."]
+module PutResourcePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      resourceArn: CloudHsmArn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the resource to which a policy is attached."];
+      policy: ResourcePolicy.t option
+        [@ocaml.doc "The policy attached to a resource."]}
+    type nonrec error =
+      [ `CloudHsmAccessDeniedException of CloudHsmAccessDeniedException.t 
+      | `CloudHsmInternalFailureException of
+          CloudHsmInternalFailureException.t 
+      | `CloudHsmInvalidRequestException of CloudHsmInvalidRequestException.t 
+      | `CloudHsmResourceNotFoundException of
+          CloudHsmResourceNotFoundException.t 
+      | `CloudHsmServiceException of CloudHsmServiceException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceArn = fun ?policy -> fun () -> { resourceArn; policy }
+    let error_of_json name json =
+      match name with
+      | "CloudHsmAccessDeniedException" ->
+          `CloudHsmAccessDeniedException
+            (CloudHsmAccessDeniedException.of_json json)
+      | "CloudHsmInternalFailureException" ->
+          `CloudHsmInternalFailureException
+            (CloudHsmInternalFailureException.of_json json)
+      | "CloudHsmInvalidRequestException" ->
+          `CloudHsmInvalidRequestException
+            (CloudHsmInvalidRequestException.of_json json)
+      | "CloudHsmResourceNotFoundException" ->
+          `CloudHsmResourceNotFoundException
+            (CloudHsmResourceNotFoundException.of_json json)
+      | "CloudHsmServiceException" ->
+          `CloudHsmServiceException (CloudHsmServiceException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CloudHsmAccessDeniedException" ->
+          `CloudHsmAccessDeniedException
+            (CloudHsmAccessDeniedException.of_xml xml)
+      | "CloudHsmInternalFailureException" ->
+          `CloudHsmInternalFailureException
+            (CloudHsmInternalFailureException.of_xml xml)
+      | "CloudHsmInvalidRequestException" ->
+          `CloudHsmInvalidRequestException
+            (CloudHsmInvalidRequestException.of_xml xml)
+      | "CloudHsmResourceNotFoundException" ->
+          `CloudHsmResourceNotFoundException
+            (CloudHsmResourceNotFoundException.of_xml xml)
+      | "CloudHsmServiceException" ->
+          `CloudHsmServiceException (CloudHsmServiceException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CloudHsmAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "CloudHsmAccessDeniedException"));
+            ("details", (CloudHsmAccessDeniedException.to_json e))]
+      | `CloudHsmInternalFailureException e ->
+          `Assoc
+            [("error", (`String "CloudHsmInternalFailureException"));
+            ("details", (CloudHsmInternalFailureException.to_json e))]
+      | `CloudHsmInvalidRequestException e ->
+          `Assoc
+            [("error", (`String "CloudHsmInvalidRequestException"));
+            ("details", (CloudHsmInvalidRequestException.to_json e))]
+      | `CloudHsmResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "CloudHsmResourceNotFoundException"));
+            ("details", (CloudHsmResourceNotFoundException.to_json e))]
+      | `CloudHsmServiceException e ->
+          `Assoc
+            [("error", (`String "CloudHsmServiceException"));
+            ("details", (CloudHsmServiceException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Option.map x.resourceArn ~f:CloudHsmArn.to_value));
+        ("Policy", (Option.map x.policy ~f:ResourcePolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policy =
+        (Option.map ~f:ResourcePolicy.of_xml) (Xml.child xml_arg0 "Policy") in
+      let resourceArn =
+        (Option.map ~f:CloudHsmArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      make ?policy ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policy = field_map json__ "Policy" ResourcePolicy.of_json in
+      let resourceArn = field_map json__ "ResourceArn" CloudHsmArn.of_json in
+      make ?policy ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates or updates an CloudHSM resource policy. A resource policy helps you to define the IAM entity (for example, an Amazon Web Services account) that can manage your CloudHSM resources. The following resources support CloudHSM resource policies: Backup - The resource policy allows you to describe the backup and restore a cluster from the backup in another Amazon Web Services account. In order to share a backup, it must be in a 'READY' state and you must own it. While you can share a backup using the CloudHSM PutResourcePolicy operation, we recommend using Resource Access Manager (RAM) instead. Using RAM provides multiple benefits as it creates the policy for you, allows multiple resources to be shared at one time, and increases the discoverability of shared resources. If you use PutResourcePolicy and want consumers to be able to describe the backups you share with them, you must promote the backup to a standard RAM Resource Share using the RAM PromoteResourceShareCreatedFromPolicy API operation. For more information, see Working with shared backups in the CloudHSM User Guide Cross-account use: No. You cannot perform this operation on an CloudHSM resource in a different Amazon Web Services account."]
+module PutResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: CloudHsmArn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the resource to which you want to attach a policy."];
+      policy: ResourcePolicy.t option
+        [@ocaml.doc
+          "The policy you want to associate with a resource. For an example policy, see Working with shared backups in the CloudHSM User Guide"]}
+    let make ?resourceArn = fun ?policy -> fun () -> { resourceArn; policy }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Option.map x.resourceArn ~f:CloudHsmArn.to_value));
+        ("Policy", (Option.map x.policy ~f:ResourcePolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policy =
+        (Option.map ~f:ResourcePolicy.of_xml) (Xml.child xml_arg0 "Policy") in
+      let resourceArn =
+        (Option.map ~f:CloudHsmArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      make ?policy ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policy = field_map json__ "Policy" ResourcePolicy.of_json in
+      let resourceArn = field_map json__ "ResourceArn" CloudHsmArn.of_json in
+      make ?policy ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates or updates an CloudHSM resource policy. A resource policy helps you to define the IAM entity (for example, an Amazon Web Services account) that can manage your CloudHSM resources. The following resources support CloudHSM resource policies: Backup - The resource policy allows you to describe the backup and restore a cluster from the backup in another Amazon Web Services account. In order to share a backup, it must be in a 'READY' state and you must own it. While you can share a backup using the CloudHSM PutResourcePolicy operation, we recommend using Resource Access Manager (RAM) instead. Using RAM provides multiple benefits as it creates the policy for you, allows multiple resources to be shared at one time, and increases the discoverability of shared resources. If you use PutResourcePolicy and want consumers to be able to describe the backups you share with them, you must promote the backup to a standard RAM Resource Share using the RAM PromoteResourceShareCreatedFromPolicy API operation. For more information, see Working with shared backups in the CloudHSM User Guide Cross-account use: No. You cannot perform this operation on an CloudHSM resource in a different Amazon Web Services account."]
 module ModifyClusterResponse =
   struct
     type nonrec t = {
@@ -1988,27 +2376,34 @@ module ModifyClusterResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Modifies AWS CloudHSM cluster."]
+  end[@@ocaml.doc
+       "Modifies CloudHSM cluster. Cross-account use: No. You cannot perform this operation on an CloudHSM cluster in a different Amazon Web Services account."]
 module ModifyClusterRequest =
   struct
     type nonrec t =
       {
-      backupRetentionPolicy: BackupRetentionPolicy.t
+      hsmType: HsmType.t option
+        [@ocaml.doc "The desired HSM type of the cluster."];
+      backupRetentionPolicy: BackupRetentionPolicy.t option
         [@ocaml.doc "A policy that defines how the service retains backups."];
       clusterId: ClusterId.t
         [@ocaml.doc
           "The identifier (ID) of the cluster that you want to modify. To find the cluster ID, use DescribeClusters."]}
     let context_ = "ModifyClusterRequest"
-    let make ~backupRetentionPolicy =
-      fun ~clusterId -> fun () -> { backupRetentionPolicy; clusterId }
+    let make ?hsmType =
+      fun ?backupRetentionPolicy ->
+        fun ~clusterId ->
+          fun () -> { hsmType; backupRetentionPolicy; clusterId }
     let to_value x =
       structure_to_value
-        [("BackupRetentionPolicy",
-           (Some (BackupRetentionPolicy.to_value x.backupRetentionPolicy)));
+        [("HsmType", (Option.map x.hsmType ~f:HsmType.to_value));
+        ("BackupRetentionPolicy",
+          (Option.map x.backupRetentionPolicy
+             ~f:BackupRetentionPolicy.to_value));
         ("ClusterId", (Some (ClusterId.to_value x.clusterId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -2016,18 +2411,22 @@ module ModifyClusterRequest =
         ClusterId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       let backupRetentionPolicy =
-        BackupRetentionPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BackupRetentionPolicy") in
-      make ~clusterId ~backupRetentionPolicy ()
+        (Option.map ~f:BackupRetentionPolicy.of_xml)
+          (Xml.child xml_arg0 "BackupRetentionPolicy") in
+      let hsmType =
+        (Option.map ~f:HsmType.of_xml) (Xml.child xml_arg0 "HsmType") in
+      make ~clusterId ?backupRetentionPolicy ?hsmType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       let backupRetentionPolicy =
-        field_map_exn json "BackupRetentionPolicy"
+        field_map json__ "BackupRetentionPolicy"
           BackupRetentionPolicy.of_json in
-      make ~clusterId ~backupRetentionPolicy ()
+      let hsmType = field_map json__ "HsmType" HsmType.of_json in
+      make ~clusterId ?backupRetentionPolicy ?hsmType ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Modifies AWS CloudHSM cluster."]
+  end[@@ocaml.doc
+       "Modifies CloudHSM cluster. Cross-account use: No. You cannot perform this operation on an CloudHSM cluster in a different Amazon Web Services account."]
 module ModifyBackupAttributesResponse =
   struct
     type nonrec t = {
@@ -2115,10 +2514,12 @@ module ModifyBackupAttributesResponse =
         (Option.map ~f:Backup.of_xml) (Xml.child xml_arg0 "Backup") in
       make ?backup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let backup = field_map json "Backup" Backup.of_json in make ?backup ()
+    let of_json json__ =
+      let backup = field_map json__ "Backup" Backup.of_json in
+      make ?backup ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Modifies attributes for AWS CloudHSM backup."]
+  end[@@ocaml.doc
+       "Modifies attributes for CloudHSM backup. Cross-account use: No. You cannot perform this operation on an CloudHSM backup in a different Amazon Web Services account."]
 module ModifyBackupAttributesRequest =
   struct
     type nonrec t =
@@ -2145,17 +2546,18 @@ module ModifyBackupAttributesRequest =
         BackupId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BackupId") in
       make ~neverExpires ~backupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let neverExpires = field_map_exn json "NeverExpires" Boolean.of_json in
-      let backupId = field_map_exn json "BackupId" BackupId.of_json in
+    let of_json json__ =
+      let neverExpires = field_map_exn json__ "NeverExpires" Boolean.of_json in
+      let backupId = field_map_exn json__ "BackupId" BackupId.of_json in
       make ~neverExpires ~backupId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Modifies attributes for AWS CloudHSM backup."]
+  end[@@ocaml.doc
+       "Modifies attributes for CloudHSM backup. Cross-account use: No. You cannot perform this operation on an CloudHSM backup in a different Amazon Web Services account."]
 module ListTagsResponse =
   struct
     type nonrec t =
       {
-      tagList: TagList.t [@ocaml.doc "A list of tags."];
+      tagList: TagList.t option [@ocaml.doc "A list of tags."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "An opaque string that indicates that the response contains only a subset of tags. Use this value in a subsequent ListTags request to get more tags."]}
@@ -2169,8 +2571,7 @@ module ListTagsResponse =
       | `CloudHsmServiceException of CloudHsmServiceException.t 
       | `CloudHsmTagException of CloudHsmTagException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTagsResponse"
-    let make ?nextToken = fun ~tagList -> fun () -> { nextToken; tagList }
+    let make ?tagList = fun ?nextToken -> fun () -> { tagList; nextToken }
     let error_of_json name json =
       match name with
       | "CloudHsmAccessDeniedException" ->
@@ -2245,23 +2646,23 @@ module ListTagsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("TagList", (Some (TagList.to_value x.tagList)));
+        [("TagList", (Option.map x.tagList ~f:TagList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let tagList =
-        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TagList") in
-      make ?nextToken ~tagList ()
+        (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
+      make ?nextToken ?tagList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let tagList = field_map_exn json "TagList" TagList.of_json in
-      make ?nextToken ~tagList ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let tagList = field_map json__ "TagList" TagList.of_json in
+      make ?nextToken ?tagList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets a list of tags for the specified AWS CloudHSM cluster. This is a paginated operation, which means that each response might contain only a subset of all the tags. When the response contains only a subset of tags, it includes a NextToken value. Use this value in a subsequent ListTags request to get more tags. When you receive a response with no NextToken (or an empty or null value), that means there are no more tags to get."]
+       "Gets a list of tags for the specified CloudHSM cluster. This is a paginated operation, which means that each response might contain only a subset of all the tags. When the response contains only a subset of tags, it includes a NextToken value. Use this value in a subsequent ListTags request to get more tags. When you receive a response with no NextToken (or an empty or null value), that means there are no more tags to get. Cross-account use: No. You cannot perform this operation on an CloudHSM resource in a different Amazon Web Services account."]
 module ListTagsRequest =
   struct
     type nonrec t =
@@ -2295,14 +2696,14 @@ module ListTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ?maxResults ?nextToken ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxSize.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxSize.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ?maxResults ?nextToken ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets a list of tags for the specified AWS CloudHSM cluster. This is a paginated operation, which means that each response might contain only a subset of all the tags. When the response contains only a subset of tags, it includes a NextToken value. Use this value in a subsequent ListTags request to get more tags. When you receive a response with no NextToken (or an empty or null value), that means there are no more tags to get."]
+       "Gets a list of tags for the specified CloudHSM cluster. This is a paginated operation, which means that each response might contain only a subset of all the tags. When the response contains only a subset of tags, it includes a NextToken value. Use this value in a subsequent ListTags request to get more tags. When you receive a response with no NextToken (or an empty or null value), that means there are no more tags to get. Cross-account use: No. You cannot perform this operation on an CloudHSM resource in a different Amazon Web Services account."]
 module InitializeClusterResponse =
   struct
     type nonrec t =
@@ -2398,13 +2799,13 @@ module InitializeClusterResponse =
         (Option.map ~f:ClusterState.of_xml) (Xml.child xml_arg0 "State") in
       make ?stateMessage ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stateMessage = field_map json "StateMessage" StateMessage.of_json in
-      let state = field_map json "State" ClusterState.of_json in
+    let of_json json__ =
+      let stateMessage = field_map json__ "StateMessage" StateMessage.of_json in
+      let state = field_map json__ "State" ClusterState.of_json in
       make ?stateMessage ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Claims an AWS CloudHSM cluster by submitting the cluster certificate issued by your issuing certificate authority (CA) and the CA's root certificate. Before you can claim a cluster, you must sign the cluster's certificate signing request (CSR) with your issuing CA. To get the cluster's CSR, use DescribeClusters."]
+       "Claims an CloudHSM cluster by submitting the cluster certificate issued by your issuing certificate authority (CA) and the CA's root certificate. Before you can claim a cluster, you must sign the cluster's certificate signing request (CSR) with your issuing CA. To get the cluster's CSR, use DescribeClusters. Cross-account use: No. You cannot perform this operation on an CloudHSM cluster in a different Amazon Web Services account."]
 module InitializeClusterRequest =
   struct
     type nonrec t =
@@ -2438,14 +2839,132 @@ module InitializeClusterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~trustAnchor ~signedCert ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustAnchor = field_map_exn json "TrustAnchor" Cert.of_json in
-      let signedCert = field_map_exn json "SignedCert" Cert.of_json in
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let trustAnchor = field_map_exn json__ "TrustAnchor" Cert.of_json in
+      let signedCert = field_map_exn json__ "SignedCert" Cert.of_json in
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ~trustAnchor ~signedCert ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Claims an AWS CloudHSM cluster by submitting the cluster certificate issued by your issuing certificate authority (CA) and the CA's root certificate. Before you can claim a cluster, you must sign the cluster's certificate signing request (CSR) with your issuing CA. To get the cluster's CSR, use DescribeClusters."]
+       "Claims an CloudHSM cluster by submitting the cluster certificate issued by your issuing certificate authority (CA) and the CA's root certificate. Before you can claim a cluster, you must sign the cluster's certificate signing request (CSR) with your issuing CA. To get the cluster's CSR, use DescribeClusters. Cross-account use: No. You cannot perform this operation on an CloudHSM cluster in a different Amazon Web Services account."]
+module GetResourcePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      policy: ResourcePolicy.t option
+        [@ocaml.doc "The policy attached to a resource."]}
+    type nonrec error =
+      [ `CloudHsmAccessDeniedException of CloudHsmAccessDeniedException.t 
+      | `CloudHsmInternalFailureException of
+          CloudHsmInternalFailureException.t 
+      | `CloudHsmInvalidRequestException of CloudHsmInvalidRequestException.t 
+      | `CloudHsmResourceNotFoundException of
+          CloudHsmResourceNotFoundException.t 
+      | `CloudHsmServiceException of CloudHsmServiceException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?policy = fun () -> { policy }
+    let error_of_json name json =
+      match name with
+      | "CloudHsmAccessDeniedException" ->
+          `CloudHsmAccessDeniedException
+            (CloudHsmAccessDeniedException.of_json json)
+      | "CloudHsmInternalFailureException" ->
+          `CloudHsmInternalFailureException
+            (CloudHsmInternalFailureException.of_json json)
+      | "CloudHsmInvalidRequestException" ->
+          `CloudHsmInvalidRequestException
+            (CloudHsmInvalidRequestException.of_json json)
+      | "CloudHsmResourceNotFoundException" ->
+          `CloudHsmResourceNotFoundException
+            (CloudHsmResourceNotFoundException.of_json json)
+      | "CloudHsmServiceException" ->
+          `CloudHsmServiceException (CloudHsmServiceException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CloudHsmAccessDeniedException" ->
+          `CloudHsmAccessDeniedException
+            (CloudHsmAccessDeniedException.of_xml xml)
+      | "CloudHsmInternalFailureException" ->
+          `CloudHsmInternalFailureException
+            (CloudHsmInternalFailureException.of_xml xml)
+      | "CloudHsmInvalidRequestException" ->
+          `CloudHsmInvalidRequestException
+            (CloudHsmInvalidRequestException.of_xml xml)
+      | "CloudHsmResourceNotFoundException" ->
+          `CloudHsmResourceNotFoundException
+            (CloudHsmResourceNotFoundException.of_xml xml)
+      | "CloudHsmServiceException" ->
+          `CloudHsmServiceException (CloudHsmServiceException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CloudHsmAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "CloudHsmAccessDeniedException"));
+            ("details", (CloudHsmAccessDeniedException.to_json e))]
+      | `CloudHsmInternalFailureException e ->
+          `Assoc
+            [("error", (`String "CloudHsmInternalFailureException"));
+            ("details", (CloudHsmInternalFailureException.to_json e))]
+      | `CloudHsmInvalidRequestException e ->
+          `Assoc
+            [("error", (`String "CloudHsmInvalidRequestException"));
+            ("details", (CloudHsmInvalidRequestException.to_json e))]
+      | `CloudHsmResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "CloudHsmResourceNotFoundException"));
+            ("details", (CloudHsmResourceNotFoundException.to_json e))]
+      | `CloudHsmServiceException e ->
+          `Assoc
+            [("error", (`String "CloudHsmServiceException"));
+            ("details", (CloudHsmServiceException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Policy", (Option.map x.policy ~f:ResourcePolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policy =
+        (Option.map ~f:ResourcePolicy.of_xml) (Xml.child xml_arg0 "Policy") in
+      make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policy = field_map json__ "Policy" ResourcePolicy.of_json in
+      make ?policy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the resource policy document attached to a given resource. Cross-account use: No. You cannot perform this operation on an CloudHSM resource in a different Amazon Web Services account."]
+module GetResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: CloudHsmArn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the resource to which a policy is attached."]}
+    let make ?resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Option.map x.resourceArn ~f:CloudHsmArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        (Option.map ~f:CloudHsmArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      make ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn = field_map json__ "ResourceArn" CloudHsmArn.of_json in
+      make ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the resource policy document attached to a given resource. Cross-account use: No. You cannot perform this operation on an CloudHSM resource in a different Amazon Web Services account."]
 module DescribeClustersResponse =
   struct
     type nonrec t =
@@ -2537,13 +3056,13 @@ module DescribeClustersResponse =
         (Option.map ~f:Clusters.of_xml) (Xml.child xml_arg0 "Clusters") in
       make ?nextToken ?clusters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let clusters = field_map json "Clusters" Clusters.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let clusters = field_map json__ "Clusters" Clusters.of_json in
       make ?nextToken ?clusters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about AWS CloudHSM clusters. This is a paginated operation, which means that each response might contain only a subset of all the clusters. When the response contains only a subset of clusters, it includes a NextToken value. Use this value in a subsequent DescribeClusters request to get more clusters. When you receive a response with no NextToken (or an empty or null value), that means there are no more clusters to get."]
+       "Gets information about CloudHSM clusters. This is a paginated operation, which means that each response might contain only a subset of all the clusters. When the response contains only a subset of clusters, it includes a NextToken value. Use this value in a subsequent DescribeClusters request to get more clusters. When you receive a response with no NextToken (or an empty or null value), that means there are no more clusters to get. Cross-account use: No. You cannot perform this operation on CloudHSM clusters in a different Amazon Web Services account."]
 module DescribeClustersRequest =
   struct
     type nonrec t =
@@ -2576,14 +3095,14 @@ module DescribeClustersRequest =
         (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?maxResults ?nextToken ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" ClustersMaxSize.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let filters = field_map json "Filters" Filters.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" ClustersMaxSize.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filters = field_map json__ "Filters" Filters.of_json in
       make ?maxResults ?nextToken ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about AWS CloudHSM clusters. This is a paginated operation, which means that each response might contain only a subset of all the clusters. When the response contains only a subset of clusters, it includes a NextToken value. Use this value in a subsequent DescribeClusters request to get more clusters. When you receive a response with no NextToken (or an empty or null value), that means there are no more clusters to get."]
+       "Gets information about CloudHSM clusters. This is a paginated operation, which means that each response might contain only a subset of all the clusters. When the response contains only a subset of clusters, it includes a NextToken value. Use this value in a subsequent DescribeClusters request to get more clusters. When you receive a response with no NextToken (or an empty or null value), that means there are no more clusters to get. Cross-account use: No. You cannot perform this operation on CloudHSM clusters in a different Amazon Web Services account."]
 module DescribeBackupsResponse =
   struct
     type nonrec t =
@@ -2687,13 +3206,13 @@ module DescribeBackupsResponse =
         (Option.map ~f:Backups.of_xml) (Xml.child xml_arg0 "Backups") in
       make ?nextToken ?backups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let backups = field_map json "Backups" Backups.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let backups = field_map json__ "Backups" Backups.of_json in
       make ?nextToken ?backups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about backups of AWS CloudHSM clusters. This is a paginated operation, which means that each response might contain only a subset of all the backups. When the response contains only a subset of backups, it includes a NextToken value. Use this value in a subsequent DescribeBackups request to get more backups. When you receive a response with no NextToken (or an empty or null value), that means there are no more backups to get."]
+       "Gets information about backups of CloudHSM clusters. Lists either the backups you own or the backups shared with you when the Shared parameter is true. This is a paginated operation, which means that each response might contain only a subset of all the backups. When the response contains only a subset of backups, it includes a NextToken value. Use this value in a subsequent DescribeBackups request to get more backups. When you receive a response with no NextToken (or an empty or null value), that means there are no more backups to get. Cross-account use: Yes. Customers can describe backups in other Amazon Web Services accounts that are shared with them."]
 module DescribeBackupsRequest =
   struct
     type nonrec t =
@@ -2707,24 +3226,32 @@ module DescribeBackupsRequest =
       filters: Filters.t option
         [@ocaml.doc
           "One or more filters to limit the items returned in the response. Use the backupIds filter to return only the specified backups. Specify backups by their backup identifier (ID). Use the sourceBackupIds filter to return only the backups created from a source backup. The sourceBackupID of a source backup is returned by the CopyBackupToRegion operation. Use the clusterIds filter to return only the backups for the specified clusters. Specify clusters by their cluster identifier (ID). Use the states filter to return only backups that match the specified state. Use the neverExpires filter to return backups filtered by the value in the neverExpires parameter. True returns all backups exempt from the backup retention policy. False returns all backups with a backup retention policy defined at the cluster."];
+      shared: Boolean.t option
+        [@ocaml.doc
+          "Describe backups that are shared with you. By default when using this option, the command returns backups that have been shared using a standard Resource Access Manager resource share. In order for a backup that was shared using the PutResourcePolicy command to be returned, the share must be promoted to a standard resource share using the RAM PromoteResourceShareCreatedFromPolicy API operation. For more information about sharing backups, see Working with shared backups in the CloudHSM User Guide."];
       sortAscending: Boolean.t option
         [@ocaml.doc
           "Designates whether or not to sort the return backups by ascending chronological order of generation."]}
     let make ?nextToken =
       fun ?maxResults ->
         fun ?filters ->
-          fun ?sortAscending ->
-            fun () -> { nextToken; maxResults; filters; sortAscending }
+          fun ?shared ->
+            fun ?sortAscending ->
+              fun () ->
+                { nextToken; maxResults; filters; shared; sortAscending }
     let to_value x =
       structure_to_value
         [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:BackupsMaxSize.to_value));
         ("Filters", (Option.map x.filters ~f:Filters.to_value));
+        ("Shared", (Option.map x.shared ~f:Boolean.to_value));
         ("SortAscending", (Option.map x.sortAscending ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let sortAscending =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "SortAscending") in
+      let shared =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Shared") in
       let filters =
         (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Filters") in
       let maxResults =
@@ -2732,17 +3259,143 @@ module DescribeBackupsRequest =
           (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ?sortAscending ?filters ?maxResults ?nextToken ()
+      make ?sortAscending ?shared ?filters ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortAscending = field_map json "SortAscending" Boolean.of_json in
-      let filters = field_map json "Filters" Filters.of_json in
-      let maxResults = field_map json "MaxResults" BackupsMaxSize.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      make ?sortAscending ?filters ?maxResults ?nextToken ()
+    let of_json json__ =
+      let sortAscending = field_map json__ "SortAscending" Boolean.of_json in
+      let shared = field_map json__ "Shared" Boolean.of_json in
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let maxResults = field_map json__ "MaxResults" BackupsMaxSize.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?sortAscending ?shared ?filters ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about backups of AWS CloudHSM clusters. This is a paginated operation, which means that each response might contain only a subset of all the backups. When the response contains only a subset of backups, it includes a NextToken value. Use this value in a subsequent DescribeBackups request to get more backups. When you receive a response with no NextToken (or an empty or null value), that means there are no more backups to get."]
+       "Gets information about backups of CloudHSM clusters. Lists either the backups you own or the backups shared with you when the Shared parameter is true. This is a paginated operation, which means that each response might contain only a subset of all the backups. When the response contains only a subset of backups, it includes a NextToken value. Use this value in a subsequent DescribeBackups request to get more backups. When you receive a response with no NextToken (or an empty or null value), that means there are no more backups to get. Cross-account use: Yes. Customers can describe backups in other Amazon Web Services accounts that are shared with them."]
+module DeleteResourcePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      resourceArn: CloudHsmArn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the resource from which the policy was deleted."];
+      policy: ResourcePolicy.t option
+        [@ocaml.doc "The policy previously attached to the resource."]}
+    type nonrec error =
+      [ `CloudHsmAccessDeniedException of CloudHsmAccessDeniedException.t 
+      | `CloudHsmInternalFailureException of
+          CloudHsmInternalFailureException.t 
+      | `CloudHsmInvalidRequestException of CloudHsmInvalidRequestException.t 
+      | `CloudHsmResourceNotFoundException of
+          CloudHsmResourceNotFoundException.t 
+      | `CloudHsmServiceException of CloudHsmServiceException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceArn = fun ?policy -> fun () -> { resourceArn; policy }
+    let error_of_json name json =
+      match name with
+      | "CloudHsmAccessDeniedException" ->
+          `CloudHsmAccessDeniedException
+            (CloudHsmAccessDeniedException.of_json json)
+      | "CloudHsmInternalFailureException" ->
+          `CloudHsmInternalFailureException
+            (CloudHsmInternalFailureException.of_json json)
+      | "CloudHsmInvalidRequestException" ->
+          `CloudHsmInvalidRequestException
+            (CloudHsmInvalidRequestException.of_json json)
+      | "CloudHsmResourceNotFoundException" ->
+          `CloudHsmResourceNotFoundException
+            (CloudHsmResourceNotFoundException.of_json json)
+      | "CloudHsmServiceException" ->
+          `CloudHsmServiceException (CloudHsmServiceException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CloudHsmAccessDeniedException" ->
+          `CloudHsmAccessDeniedException
+            (CloudHsmAccessDeniedException.of_xml xml)
+      | "CloudHsmInternalFailureException" ->
+          `CloudHsmInternalFailureException
+            (CloudHsmInternalFailureException.of_xml xml)
+      | "CloudHsmInvalidRequestException" ->
+          `CloudHsmInvalidRequestException
+            (CloudHsmInvalidRequestException.of_xml xml)
+      | "CloudHsmResourceNotFoundException" ->
+          `CloudHsmResourceNotFoundException
+            (CloudHsmResourceNotFoundException.of_xml xml)
+      | "CloudHsmServiceException" ->
+          `CloudHsmServiceException (CloudHsmServiceException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CloudHsmAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "CloudHsmAccessDeniedException"));
+            ("details", (CloudHsmAccessDeniedException.to_json e))]
+      | `CloudHsmInternalFailureException e ->
+          `Assoc
+            [("error", (`String "CloudHsmInternalFailureException"));
+            ("details", (CloudHsmInternalFailureException.to_json e))]
+      | `CloudHsmInvalidRequestException e ->
+          `Assoc
+            [("error", (`String "CloudHsmInvalidRequestException"));
+            ("details", (CloudHsmInvalidRequestException.to_json e))]
+      | `CloudHsmResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "CloudHsmResourceNotFoundException"));
+            ("details", (CloudHsmResourceNotFoundException.to_json e))]
+      | `CloudHsmServiceException e ->
+          `Assoc
+            [("error", (`String "CloudHsmServiceException"));
+            ("details", (CloudHsmServiceException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Option.map x.resourceArn ~f:CloudHsmArn.to_value));
+        ("Policy", (Option.map x.policy ~f:ResourcePolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policy =
+        (Option.map ~f:ResourcePolicy.of_xml) (Xml.child xml_arg0 "Policy") in
+      let resourceArn =
+        (Option.map ~f:CloudHsmArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      make ?policy ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policy = field_map json__ "Policy" ResourcePolicy.of_json in
+      let resourceArn = field_map json__ "ResourceArn" CloudHsmArn.of_json in
+      make ?policy ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an CloudHSM resource policy. Deleting a resource policy will result in the resource being unshared and removed from any RAM resource shares. Deleting the resource policy attached to a backup will not impact any clusters created from that backup. Cross-account use: No. You cannot perform this operation on an CloudHSM resource in a different Amazon Web Services account."]
+module DeleteResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: CloudHsmArn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the resource from which the policy will be removed."]}
+    let make ?resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Option.map x.resourceArn ~f:CloudHsmArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        (Option.map ~f:CloudHsmArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      make ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn = field_map json__ "ResourceArn" CloudHsmArn.of_json in
+      make ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an CloudHSM resource policy. Deleting a resource policy will result in the resource being unshared and removed from any RAM resource shares. Deleting the resource policy attached to a backup will not impact any clusters created from that backup. Cross-account use: No. You cannot perform this operation on an CloudHSM resource in a different Amazon Web Services account."]
 module DeleteHsmResponse =
   struct
     type nonrec t =
@@ -2830,11 +3483,11 @@ module DeleteHsmResponse =
       let hsmId = (Option.map ~f:HsmId.of_xml) (Xml.child xml_arg0 "HsmId") in
       make ?hsmId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hsmId = field_map json "HsmId" HsmId.of_json in make ?hsmId ()
+    let of_json json__ =
+      let hsmId = field_map json__ "HsmId" HsmId.of_json in make ?hsmId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified HSM. To specify an HSM, you can use its identifier (ID), the IP address of the HSM's elastic network interface (ENI), or the ID of the HSM's ENI. You need to specify only one of these values. To find these values, use DescribeClusters."]
+       "Deletes the specified HSM. To specify an HSM, you can use its identifier (ID), the IP address of the HSM's elastic network interface (ENI), or the ID of the HSM's ENI. You need to specify only one of these values. To find these values, use DescribeClusters. Cross-account use: No. You cannot perform this operation on an CloudHSM hsm in a different Amazon Web Services account."]
 module DeleteHsmRequest =
   struct
     type nonrec t =
@@ -2872,15 +3525,15 @@ module DeleteHsmRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ?eniIp ?eniId ?hsmId ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let eniIp = field_map json "EniIp" IpAddress.of_json in
-      let eniId = field_map json "EniId" EniId.of_json in
-      let hsmId = field_map json "HsmId" HsmId.of_json in
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let eniIp = field_map json__ "EniIp" IpAddress.of_json in
+      let eniId = field_map json__ "EniId" EniId.of_json in
+      let hsmId = field_map json__ "HsmId" HsmId.of_json in
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ?eniIp ?eniId ?hsmId ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified HSM. To specify an HSM, you can use its identifier (ID), the IP address of the HSM's elastic network interface (ENI), or the ID of the HSM's ENI. You need to specify only one of these values. To find these values, use DescribeClusters."]
+       "Deletes the specified HSM. To specify an HSM, you can use its identifier (ID), the IP address of the HSM's elastic network interface (ENI), or the ID of the HSM's ENI. You need to specify only one of these values. To find these values, use DescribeClusters. Cross-account use: No. You cannot perform this operation on an CloudHSM hsm in a different Amazon Web Services account."]
 module DeleteClusterResponse =
   struct
     type nonrec t =
@@ -2979,12 +3632,12 @@ module DeleteClusterResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified AWS CloudHSM cluster. Before you can delete a cluster, you must delete all HSMs in the cluster. To see if the cluster contains any HSMs, use DescribeClusters. To delete an HSM, use DeleteHsm."]
+       "Deletes the specified CloudHSM cluster. Before you can delete a cluster, you must delete all HSMs in the cluster. To see if the cluster contains any HSMs, use DescribeClusters. To delete an HSM, use DeleteHsm. Cross-account use: No. You cannot perform this operation on an CloudHSM cluster in a different Amazon Web Services account."]
 module DeleteClusterRequest =
   struct
     type nonrec t =
@@ -3004,12 +3657,12 @@ module DeleteClusterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified AWS CloudHSM cluster. Before you can delete a cluster, you must delete all HSMs in the cluster. To see if the cluster contains any HSMs, use DescribeClusters. To delete an HSM, use DeleteHsm."]
+       "Deletes the specified CloudHSM cluster. Before you can delete a cluster, you must delete all HSMs in the cluster. To see if the cluster contains any HSMs, use DescribeClusters. To delete an HSM, use DeleteHsm. Cross-account use: No. You cannot perform this operation on an CloudHSM cluster in a different Amazon Web Services account."]
 module DeleteBackupResponse =
   struct
     type nonrec t =
@@ -3099,11 +3752,12 @@ module DeleteBackupResponse =
         (Option.map ~f:Backup.of_xml) (Xml.child xml_arg0 "Backup") in
       make ?backup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let backup = field_map json "Backup" Backup.of_json in make ?backup ()
+    let of_json json__ =
+      let backup = field_map json__ "Backup" Backup.of_json in
+      make ?backup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a specified AWS CloudHSM backup. A backup can be restored up to 7 days after the DeleteBackup request is made. For more information on restoring a backup, see RestoreBackup."]
+       "Deletes a specified CloudHSM backup. A backup can be restored up to 7 days after the DeleteBackup request is made. For more information on restoring a backup, see RestoreBackup. Cross-account use: No. You cannot perform this operation on an CloudHSM backup in a different Amazon Web Services account."]
 module DeleteBackupRequest =
   struct
     type nonrec t =
@@ -3122,12 +3776,12 @@ module DeleteBackupRequest =
         BackupId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BackupId") in
       make ~backupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let backupId = field_map_exn json "BackupId" BackupId.of_json in
+    let of_json json__ =
+      let backupId = field_map_exn json__ "BackupId" BackupId.of_json in
       make ~backupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a specified AWS CloudHSM backup. A backup can be restored up to 7 days after the DeleteBackup request is made. For more information on restoring a backup, see RestoreBackup."]
+       "Deletes a specified CloudHSM backup. A backup can be restored up to 7 days after the DeleteBackup request is made. For more information on restoring a backup, see RestoreBackup. Cross-account use: No. You cannot perform this operation on an CloudHSM backup in a different Amazon Web Services account."]
 module CreateHsmResponse =
   struct
     type nonrec t =
@@ -3215,11 +3869,11 @@ module CreateHsmResponse =
       let hsm = (Option.map ~f:Hsm.of_xml) (Xml.child xml_arg0 "Hsm") in
       make ?hsm ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hsm = field_map json "Hsm" Hsm.of_json in make ?hsm ()
+    let of_json json__ =
+      let hsm = field_map json__ "Hsm" Hsm.of_json in make ?hsm ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new hardware security module (HSM) in the specified AWS CloudHSM cluster."]
+       "Creates a new hardware security module (HSM) in the specified CloudHSM cluster. Cross-account use: No. You cannot perform this operation on an CloudHSM cluster in a different Amazon Web Service account."]
 module CreateHsmRequest =
   struct
     type nonrec t =
@@ -3255,15 +3909,15 @@ module CreateHsmRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ?ipAddress ~availabilityZone ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ipAddress = field_map json "IpAddress" IpAddress.of_json in
+    let of_json json__ =
+      let ipAddress = field_map json__ "IpAddress" IpAddress.of_json in
       let availabilityZone =
-        field_map_exn json "AvailabilityZone" ExternalAz.of_json in
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+        field_map_exn json__ "AvailabilityZone" ExternalAz.of_json in
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ?ipAddress ~availabilityZone ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new hardware security module (HSM) in the specified AWS CloudHSM cluster."]
+       "Creates a new hardware security module (HSM) in the specified CloudHSM cluster. Cross-account use: No. You cannot perform this operation on an CloudHSM cluster in a different Amazon Web Service account."]
 module CreateClusterResponse =
   struct
     type nonrec t =
@@ -3362,11 +4016,12 @@ module CreateClusterResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a new AWS CloudHSM cluster."]
+  end[@@ocaml.doc
+       "Creates a new CloudHSM cluster. Cross-account use: Yes. To perform this operation with an CloudHSM backup in a different AWS account, specify the full backup ARN in the value of the SourceBackupId parameter."]
 module CreateClusterRequest =
   struct
     type nonrec t =
@@ -3375,29 +4030,39 @@ module CreateClusterRequest =
         [@ocaml.doc "A policy that defines how the service retains backups."];
       hsmType: HsmType.t
         [@ocaml.doc
-          "The type of HSM to use in the cluster. Currently the only allowed value is hsm1.medium."];
-      sourceBackupId: BackupId.t option
+          "The type of HSM to use in the cluster. The allowed values are hsm1.medium and hsm2m.medium."];
+      sourceBackupId: BackupArn.t option
         [@ocaml.doc
-          "The identifier (ID) of the cluster backup to restore. Use this value to restore the cluster from a backup instead of creating a new cluster. To find the backup ID, use DescribeBackups."];
+          "The identifier (ID) or the Amazon Resource Name (ARN) of the cluster backup to restore. Use this value to restore the cluster from a backup instead of creating a new cluster. To find the backup ID or ARN, use DescribeBackups. If using a backup in another account, the full ARN must be supplied."];
       subnetIds: SubnetIds.t
         [@ocaml.doc
           "The identifiers (IDs) of the subnets where you are creating the cluster. You must specify at least one subnet. If you specify multiple subnets, they must meet the following criteria: All subnets must be in the same virtual private cloud (VPC). You can specify only one subnet per Availability Zone."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "The NetworkType to create a cluster with. The allowed values are IPV4 and DUALSTACK."];
       tagList: TagList.t option
-        [@ocaml.doc "Tags to apply to the CloudHSM cluster during creation."]}
+        [@ocaml.doc "Tags to apply to the CloudHSM cluster during creation."];
+      mode: ClusterMode.t option
+        [@ocaml.doc
+          "The mode to use in the cluster. The allowed values are FIPS and NON_FIPS."]}
     let context_ = "CreateClusterRequest"
     let make ?backupRetentionPolicy =
       fun ?sourceBackupId ->
-        fun ?tagList ->
-          fun ~hsmType ->
-            fun ~subnetIds ->
-              fun () ->
-                {
-                  backupRetentionPolicy;
-                  sourceBackupId;
-                  tagList;
-                  hsmType;
-                  subnetIds
-                }
+        fun ?networkType ->
+          fun ?tagList ->
+            fun ?mode ->
+              fun ~hsmType ->
+                fun ~subnetIds ->
+                  fun () ->
+                    {
+                      backupRetentionPolicy;
+                      sourceBackupId;
+                      networkType;
+                      tagList;
+                      mode;
+                      hsmType;
+                      subnetIds
+                    }
     let to_value x =
       structure_to_value
         [("BackupRetentionPolicy",
@@ -3405,37 +4070,49 @@ module CreateClusterRequest =
               ~f:BackupRetentionPolicy.to_value));
         ("HsmType", (Some (HsmType.to_value x.hsmType)));
         ("SourceBackupId",
-          (Option.map x.sourceBackupId ~f:BackupId.to_value));
+          (Option.map x.sourceBackupId ~f:BackupArn.to_value));
         ("SubnetIds", (Some (SubnetIds.to_value x.subnetIds)));
-        ("TagList", (Option.map x.tagList ~f:TagList.to_value))]
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value));
+        ("TagList", (Option.map x.tagList ~f:TagList.to_value));
+        ("Mode", (Option.map x.mode ~f:ClusterMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let mode =
+        (Option.map ~f:ClusterMode.of_xml) (Xml.child xml_arg0 "Mode") in
       let tagList =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
       let subnetIds =
         SubnetIds.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubnetIds") in
       let sourceBackupId =
-        (Option.map ~f:BackupId.of_xml) (Xml.child xml_arg0 "SourceBackupId") in
+        (Option.map ~f:BackupArn.of_xml)
+          (Xml.child xml_arg0 "SourceBackupId") in
       let hsmType =
         HsmType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HsmType") in
       let backupRetentionPolicy =
         (Option.map ~f:BackupRetentionPolicy.of_xml)
           (Xml.child xml_arg0 "BackupRetentionPolicy") in
-      make ?tagList ~subnetIds ?sourceBackupId ~hsmType
+      make ?mode ?tagList ?networkType ~subnetIds ?sourceBackupId ~hsmType
         ?backupRetentionPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
-      let subnetIds = field_map_exn json "SubnetIds" SubnetIds.of_json in
-      let sourceBackupId = field_map json "SourceBackupId" BackupId.of_json in
-      let hsmType = field_map_exn json "HsmType" HsmType.of_json in
+    let of_json json__ =
+      let mode = field_map json__ "Mode" ClusterMode.of_json in
+      let tagList = field_map json__ "TagList" TagList.of_json in
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      let subnetIds = field_map_exn json__ "SubnetIds" SubnetIds.of_json in
+      let sourceBackupId =
+        field_map json__ "SourceBackupId" BackupArn.of_json in
+      let hsmType = field_map_exn json__ "HsmType" HsmType.of_json in
       let backupRetentionPolicy =
-        field_map json "BackupRetentionPolicy" BackupRetentionPolicy.of_json in
-      make ?tagList ~subnetIds ?sourceBackupId ~hsmType
+        field_map json__ "BackupRetentionPolicy"
+          BackupRetentionPolicy.of_json in
+      make ?mode ?tagList ?networkType ~subnetIds ?sourceBackupId ~hsmType
         ?backupRetentionPolicy ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a new AWS CloudHSM cluster."]
+  end[@@ocaml.doc
+       "Creates a new CloudHSM cluster. Cross-account use: Yes. To perform this operation with an CloudHSM backup in a different AWS account, specify the full backup ARN in the value of the SourceBackupId parameter."]
 module CopyBackupToRegionResponse =
   struct
     type nonrec t =
@@ -3537,13 +4214,13 @@ module CopyBackupToRegionResponse =
           (Xml.child xml_arg0 "DestinationBackup") in
       make ?destinationBackup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationBackup =
-        field_map json "DestinationBackup" DestinationBackup.of_json in
+        field_map json__ "DestinationBackup" DestinationBackup.of_json in
       make ?destinationBackup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Copy an AWS CloudHSM cluster backup to a different region."]
+       "Copy an CloudHSM cluster backup to a different region. Cross-account use: No. You cannot perform this operation on an CloudHSM backup in a different Amazon Web Services account."]
 module CopyBackupToRegionRequest =
   struct
     type nonrec t =
@@ -3577,12 +4254,12 @@ module CopyBackupToRegionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DestinationRegion") in
       make ?tagList ~backupId ~destinationRegion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
-      let backupId = field_map_exn json "BackupId" BackupId.of_json in
+    let of_json json__ =
+      let tagList = field_map json__ "TagList" TagList.of_json in
+      let backupId = field_map_exn json__ "BackupId" BackupId.of_json in
       let destinationRegion =
-        field_map_exn json "DestinationRegion" Region.of_json in
+        field_map_exn json__ "DestinationRegion" Region.of_json in
       make ?tagList ~backupId ~destinationRegion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Copy an AWS CloudHSM cluster backup to a different region."]
+       "Copy an CloudHSM cluster backup to a different region. Cross-account use: No. You cannot perform this operation on an CloudHSM backup in a different Amazon Web Services account."]

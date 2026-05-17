@@ -35,6 +35,8 @@ type ('i, 'o, 'e) t =
   CreateDBSubnetGroupResult.t, CreateDBSubnetGroupResult.error) t 
   | CreateEventSubscription: (CreateEventSubscriptionMessage.t,
   CreateEventSubscriptionResult.t, CreateEventSubscriptionResult.error) t 
+  | CreateGlobalCluster: (CreateGlobalClusterMessage.t,
+  CreateGlobalClusterResult.t, CreateGlobalClusterResult.error) t 
   | DeleteDBCluster: (DeleteDBClusterMessage.t, DeleteDBClusterResult.t,
   DeleteDBClusterResult.error) t 
   | DeleteDBClusterEndpoint: (DeleteDBClusterEndpointMessage.t,
@@ -49,6 +51,8 @@ type ('i, 'o, 'e) t =
   | DeleteDBSubnetGroup: (DeleteDBSubnetGroupMessage.t, unit, unit) t 
   | DeleteEventSubscription: (DeleteEventSubscriptionMessage.t,
   DeleteEventSubscriptionResult.t, DeleteEventSubscriptionResult.error) t 
+  | DeleteGlobalCluster: (DeleteGlobalClusterMessage.t,
+  DeleteGlobalClusterResult.t, DeleteGlobalClusterResult.error) t 
   | DescribeDBClusterEndpoints: (DescribeDBClusterEndpointsMessage.t,
   DBClusterEndpointMessage.t, DBClusterEndpointMessage.error) t 
   | DescribeDBClusterParameterGroups:
@@ -89,6 +93,8 @@ type ('i, 'o, 'e) t =
   EventSubscriptionsMessage.t, EventSubscriptionsMessage.error) t 
   | DescribeEvents: (DescribeEventsMessage.t, EventsMessage.t,
   EventsMessage.error) t 
+  | DescribeGlobalClusters: (DescribeGlobalClustersMessage.t,
+  GlobalClustersMessage.t, GlobalClustersMessage.error) t 
   | DescribeOrderableDBInstanceOptions:
   (DescribeOrderableDBInstanceOptionsMessage.t,
   OrderableDBInstanceOptionsMessage.t,
@@ -103,6 +109,8 @@ type ('i, 'o, 'e) t =
   DescribeValidDBInstanceModificationsResult.error) t 
   | FailoverDBCluster: (FailoverDBClusterMessage.t,
   FailoverDBClusterResult.t, FailoverDBClusterResult.error) t 
+  | FailoverGlobalCluster: (FailoverGlobalClusterMessage.t,
+  FailoverGlobalClusterResult.t, FailoverGlobalClusterResult.error) t 
   | ListTagsForResource: (ListTagsForResourceMessage.t, TagListMessage.t,
   TagListMessage.error) t 
   | ModifyDBCluster: (ModifyDBClusterMessage.t, ModifyDBClusterResult.t,
@@ -124,11 +132,15 @@ type ('i, 'o, 'e) t =
   ModifyDBSubnetGroupResult.t, ModifyDBSubnetGroupResult.error) t 
   | ModifyEventSubscription: (ModifyEventSubscriptionMessage.t,
   ModifyEventSubscriptionResult.t, ModifyEventSubscriptionResult.error) t 
+  | ModifyGlobalCluster: (ModifyGlobalClusterMessage.t,
+  ModifyGlobalClusterResult.t, ModifyGlobalClusterResult.error) t 
   | PromoteReadReplicaDBCluster: (PromoteReadReplicaDBClusterMessage.t,
   PromoteReadReplicaDBClusterResult.t,
   PromoteReadReplicaDBClusterResult.error) t 
   | RebootDBInstance: (RebootDBInstanceMessage.t, RebootDBInstanceResult.t,
   RebootDBInstanceResult.error) t 
+  | RemoveFromGlobalCluster: (RemoveFromGlobalClusterMessage.t,
+  RemoveFromGlobalClusterResult.t, RemoveFromGlobalClusterResult.error) t 
   | RemoveRoleFromDBCluster: (RemoveRoleFromDBClusterMessage.t, unit, 
   unit) t 
   | RemoveSourceIdentifierFromSubscription:
@@ -151,6 +163,8 @@ type ('i, 'o, 'e) t =
   StartDBClusterResult.error) t 
   | StopDBCluster: (StopDBClusterMessage.t, StopDBClusterResult.t,
   StopDBClusterResult.error) t 
+  | SwitchoverGlobalCluster: (SwitchoverGlobalClusterMessage.t,
+  SwitchoverGlobalClusterResult.t, SwitchoverGlobalClusterResult.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AddRoleToDBCluster -> `POST
@@ -168,6 +182,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateDBParameterGroup -> `POST
   | CreateDBSubnetGroup -> `POST
   | CreateEventSubscription -> `POST
+  | CreateGlobalCluster -> `POST
   | DeleteDBCluster -> `POST
   | DeleteDBClusterEndpoint -> `POST
   | DeleteDBClusterParameterGroup -> `POST
@@ -176,6 +191,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteDBParameterGroup -> `POST
   | DeleteDBSubnetGroup -> `POST
   | DeleteEventSubscription -> `POST
+  | DeleteGlobalCluster -> `POST
   | DescribeDBClusterEndpoints -> `POST
   | DescribeDBClusterParameterGroups -> `POST
   | DescribeDBClusterParameters -> `POST
@@ -192,10 +208,12 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeEventCategories -> `POST
   | DescribeEventSubscriptions -> `POST
   | DescribeEvents -> `POST
+  | DescribeGlobalClusters -> `POST
   | DescribeOrderableDBInstanceOptions -> `POST
   | DescribePendingMaintenanceActions -> `POST
   | DescribeValidDBInstanceModifications -> `POST
   | FailoverDBCluster -> `POST
+  | FailoverGlobalCluster -> `POST
   | ListTagsForResource -> `POST
   | ModifyDBCluster -> `POST
   | ModifyDBClusterEndpoint -> `POST
@@ -205,8 +223,10 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ModifyDBParameterGroup -> `POST
   | ModifyDBSubnetGroup -> `POST
   | ModifyEventSubscription -> `POST
+  | ModifyGlobalCluster -> `POST
   | PromoteReadReplicaDBCluster -> `POST
   | RebootDBInstance -> `POST
+  | RemoveFromGlobalCluster -> `POST
   | RemoveRoleFromDBCluster -> `POST
   | RemoveSourceIdentifierFromSubscription -> `POST
   | RemoveTagsFromResource -> `POST
@@ -216,6 +236,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | RestoreDBClusterToPointInTime -> `POST
   | StartDBCluster -> `POST
   | StopDBCluster -> `POST
+  | SwitchoverGlobalCluster -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -235,6 +256,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateDBParameterGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateDBSubnetGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateEventSubscription -> (Format.kasprintf Uri.of_string) "/"
+      | CreateGlobalCluster -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDBCluster -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDBClusterEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDBClusterParameterGroup -> (Format.kasprintf Uri.of_string) "/"
@@ -243,6 +265,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteDBParameterGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDBSubnetGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteEventSubscription -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteGlobalCluster -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDBClusterEndpoints -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDBClusterParameterGroups ->
           (Format.kasprintf Uri.of_string) "/"
@@ -263,6 +286,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeEventCategories -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEventSubscriptions -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEvents -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeGlobalClusters -> (Format.kasprintf Uri.of_string) "/"
       | DescribeOrderableDBInstanceOptions ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribePendingMaintenanceActions ->
@@ -270,6 +294,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeValidDBInstanceModifications ->
           (Format.kasprintf Uri.of_string) "/"
       | FailoverDBCluster -> (Format.kasprintf Uri.of_string) "/"
+      | FailoverGlobalCluster -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ModifyDBCluster -> (Format.kasprintf Uri.of_string) "/"
       | ModifyDBClusterEndpoint -> (Format.kasprintf Uri.of_string) "/"
@@ -280,8 +305,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ModifyDBParameterGroup -> (Format.kasprintf Uri.of_string) "/"
       | ModifyDBSubnetGroup -> (Format.kasprintf Uri.of_string) "/"
       | ModifyEventSubscription -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyGlobalCluster -> (Format.kasprintf Uri.of_string) "/"
       | PromoteReadReplicaDBCluster -> (Format.kasprintf Uri.of_string) "/"
       | RebootDBInstance -> (Format.kasprintf Uri.of_string) "/"
+      | RemoveFromGlobalCluster -> (Format.kasprintf Uri.of_string) "/"
       | RemoveRoleFromDBCluster -> (Format.kasprintf Uri.of_string) "/"
       | RemoveSourceIdentifierFromSubscription ->
           (Format.kasprintf Uri.of_string) "/"
@@ -291,7 +318,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | RestoreDBClusterFromSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | RestoreDBClusterToPointInTime -> (Format.kasprintf Uri.of_string) "/"
       | StartDBCluster -> (Format.kasprintf Uri.of_string) "/"
-      | StopDBCluster -> (Format.kasprintf Uri.of_string) "/")
+      | StopDBCluster -> (Format.kasprintf Uri.of_string) "/"
+      | SwitchoverGlobalCluster -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -495,6 +523,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateGlobalCluster ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateGlobalCluster"]); ("Version", [apiVersion])] in
+        let query =
+          (CreateGlobalClusterMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteDBCluster ->
       let headers =
         Awso.Http.Headers.of_list
@@ -598,6 +639,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (DeleteEventSubscriptionMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteGlobalCluster ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteGlobalCluster"]); ("Version", [apiVersion])] in
+        let query =
+          (DeleteGlobalClusterMessage.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -819,6 +873,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (DescribeEventsMessage.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeGlobalClusters ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeGlobalClusters"]); ("Version", [apiVersion])] in
+        let query =
+          (DescribeGlobalClustersMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeOrderableDBInstanceOptions ->
       let headers =
         Awso.Http.Headers.of_list
@@ -871,6 +938,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["FailoverDBCluster"]); ("Version", [apiVersion])] in
         let query =
           (FailoverDBClusterMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | FailoverGlobalCluster ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["FailoverGlobalCluster"]); ("Version", [apiVersion])] in
+        let query =
+          (FailoverGlobalClusterMessage.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ListTagsForResource ->
@@ -992,6 +1072,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyGlobalCluster ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyGlobalCluster"]); ("Version", [apiVersion])] in
+        let query =
+          (ModifyGlobalClusterMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | PromoteReadReplicaDBCluster ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1016,6 +1109,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["RebootDBInstance"]); ("Version", [apiVersion])] in
         let query =
           (RebootDBInstanceMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | RemoveFromGlobalCluster ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["RemoveFromGlobalCluster"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (RemoveFromGlobalClusterMessage.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | RemoveRoleFromDBCluster ->
@@ -1135,6 +1242,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let meta = [("Action", ["StopDBCluster"]); ("Version", [apiVersion])] in
         let query =
           (StopDBClusterMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | SwitchoverGlobalCluster ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["SwitchoverGlobalCluster"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (SwitchoverGlobalClusterMessage.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
@@ -1275,6 +1396,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateEventSubscriptionResult.error_of_xml))
+  | CreateGlobalCluster ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateGlobalClusterResult.of_xml xml)
+      else
+        Error (parse_aws_error (Some CreateGlobalClusterResult.error_of_xml))
   | DeleteDBCluster ->
       if is_success
       then
@@ -1317,6 +1445,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteEventSubscriptionResult.error_of_xml))
+  | DeleteGlobalCluster ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteGlobalClusterResult.of_xml xml)
+      else
+        Error (parse_aws_error (Some DeleteGlobalClusterResult.error_of_xml))
   | DescribeDBClusterEndpoints ->
       if is_success
       then
@@ -1426,6 +1561,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (EventsMessage.of_xml xml)
       else Error (parse_aws_error None)
+  | DescribeGlobalClusters ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GlobalClustersMessage.of_xml xml)
+      else Error (parse_aws_error (Some GlobalClustersMessage.error_of_xml))
   | DescribeOrderableDBInstanceOptions ->
       if is_success
       then
@@ -1457,6 +1598,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (FailoverDBClusterResult.of_xml xml)
       else
         Error (parse_aws_error (Some FailoverDBClusterResult.error_of_xml))
+  | FailoverGlobalCluster ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (FailoverGlobalClusterResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some FailoverGlobalClusterResult.error_of_xml))
   | ListTagsForResource ->
       if is_success
       then
@@ -1524,6 +1673,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ModifyEventSubscriptionResult.error_of_xml))
+  | ModifyGlobalCluster ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyGlobalClusterResult.of_xml xml)
+      else
+        Error (parse_aws_error (Some ModifyGlobalClusterResult.error_of_xml))
   | PromoteReadReplicaDBCluster ->
       if is_success
       then
@@ -1539,6 +1695,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (RebootDBInstanceResult.of_xml xml)
       else Error (parse_aws_error (Some RebootDBInstanceResult.error_of_xml))
+  | RemoveFromGlobalCluster ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RemoveFromGlobalClusterResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some RemoveFromGlobalClusterResult.error_of_xml))
   | RemoveRoleFromDBCluster ->
       if is_success then Ok () else Error (parse_aws_error None)
   | RemoveSourceIdentifierFromSubscription ->
@@ -1599,3 +1763,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (StopDBClusterResult.of_xml xml)
       else Error (parse_aws_error (Some StopDBClusterResult.error_of_xml))
+  | SwitchoverGlobalCluster ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SwitchoverGlobalClusterResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some SwitchoverGlobalClusterResult.error_of_xml))

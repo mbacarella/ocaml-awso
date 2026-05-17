@@ -5,24 +5,84 @@ val associate_member :
     ?cfg:Awso.Cfg.t ->
       AssociateMemberRequest.t ->
         (AssociateMemberResponse.t, AssociateMemberResponse.error) Result.t
+val batch_associate_code_security_scan_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchAssociateCodeSecurityScanConfigurationRequest.t ->
+        (BatchAssociateCodeSecurityScanConfigurationResponse.t,
+          BatchAssociateCodeSecurityScanConfigurationResponse.error) Result.t
+val batch_disassociate_code_security_scan_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchDisassociateCodeSecurityScanConfigurationRequest.t ->
+        (BatchDisassociateCodeSecurityScanConfigurationResponse.t,
+          BatchDisassociateCodeSecurityScanConfigurationResponse.error)
+          Result.t
 val batch_get_account_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetAccountStatusRequest.t ->
         (BatchGetAccountStatusResponse.t,
           BatchGetAccountStatusResponse.error) Result.t
+val batch_get_code_snippet :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetCodeSnippetRequest.t ->
+        (BatchGetCodeSnippetResponse.t, BatchGetCodeSnippetResponse.error)
+          Result.t
+val batch_get_finding_details :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetFindingDetailsRequest.t ->
+        (BatchGetFindingDetailsResponse.t,
+          BatchGetFindingDetailsResponse.error) Result.t
 val batch_get_free_trial_info :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetFreeTrialInfoRequest.t ->
         (BatchGetFreeTrialInfoResponse.t,
           BatchGetFreeTrialInfoResponse.error) Result.t
+val batch_get_member_ec2_deep_inspection_status :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetMemberEc2DeepInspectionStatusRequest.t ->
+        (BatchGetMemberEc2DeepInspectionStatusResponse.t,
+          BatchGetMemberEc2DeepInspectionStatusResponse.error) Result.t
+val batch_update_member_ec2_deep_inspection_status :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchUpdateMemberEc2DeepInspectionStatusRequest.t ->
+        (BatchUpdateMemberEc2DeepInspectionStatusResponse.t,
+          BatchUpdateMemberEc2DeepInspectionStatusResponse.error) Result.t
 val cancel_findings_report :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelFindingsReportRequest.t ->
         (CancelFindingsReportResponse.t, CancelFindingsReportResponse.error)
           Result.t
+val cancel_sbom_export :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CancelSbomExportRequest.t ->
+        (CancelSbomExportResponse.t, CancelSbomExportResponse.error) Result.t
+val create_cis_scan_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateCisScanConfigurationRequest.t ->
+        (CreateCisScanConfigurationResponse.t,
+          CreateCisScanConfigurationResponse.error) Result.t
+val create_code_security_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateCodeSecurityIntegrationRequest.t ->
+        (CreateCodeSecurityIntegrationResponse.t,
+          CreateCodeSecurityIntegrationResponse.error) Result.t
+val create_code_security_scan_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateCodeSecurityScanConfigurationRequest.t ->
+        (CreateCodeSecurityScanConfigurationResponse.t,
+          CreateCodeSecurityScanConfigurationResponse.error) Result.t
 val create_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -34,6 +94,29 @@ val create_findings_report :
       CreateFindingsReportRequest.t ->
         (CreateFindingsReportResponse.t, CreateFindingsReportResponse.error)
           Result.t
+val create_sbom_export :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateSbomExportRequest.t ->
+        (CreateSbomExportResponse.t, CreateSbomExportResponse.error) Result.t
+val delete_cis_scan_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCisScanConfigurationRequest.t ->
+        (DeleteCisScanConfigurationResponse.t,
+          DeleteCisScanConfigurationResponse.error) Result.t
+val delete_code_security_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCodeSecurityIntegrationRequest.t ->
+        (DeleteCodeSecurityIntegrationResponse.t,
+          DeleteCodeSecurityIntegrationResponse.error) Result.t
+val delete_code_security_scan_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCodeSecurityScanConfigurationRequest.t ->
+        (DeleteCodeSecurityScanConfigurationResponse.t,
+          DeleteCodeSecurityScanConfigurationResponse.error) Result.t
 val delete_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -71,12 +154,63 @@ val enable_delegated_admin_account :
       EnableDelegatedAdminAccountRequest.t ->
         (EnableDelegatedAdminAccountResponse.t,
           EnableDelegatedAdminAccountResponse.error) Result.t
+val get_cis_scan_report :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCisScanReportRequest.t ->
+        (GetCisScanReportResponse.t, GetCisScanReportResponse.error) Result.t
+val get_cis_scan_result_details :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCisScanResultDetailsRequest.t ->
+        (GetCisScanResultDetailsResponse.t,
+          GetCisScanResultDetailsResponse.error) Result.t
+val get_clusters_for_image :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetClustersForImageRequest.t ->
+        (GetClustersForImageResponse.t, GetClustersForImageResponse.error)
+          Result.t
+val get_code_security_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCodeSecurityIntegrationRequest.t ->
+        (GetCodeSecurityIntegrationResponse.t,
+          GetCodeSecurityIntegrationResponse.error) Result.t
+val get_code_security_scan :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCodeSecurityScanRequest.t ->
+        (GetCodeSecurityScanResponse.t, GetCodeSecurityScanResponse.error)
+          Result.t
+val get_code_security_scan_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCodeSecurityScanConfigurationRequest.t ->
+        (GetCodeSecurityScanConfigurationResponse.t,
+          GetCodeSecurityScanConfigurationResponse.error) Result.t
+val get_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetConfigurationRequest.t ->
+        (GetConfigurationResponse.t, GetConfigurationResponse.error) Result.t
 val get_delegated_admin_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDelegatedAdminAccountRequest.t ->
         (GetDelegatedAdminAccountResponse.t,
           GetDelegatedAdminAccountResponse.error) Result.t
+val get_ec2_deep_inspection_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetEc2DeepInspectionConfigurationRequest.t ->
+        (GetEc2DeepInspectionConfigurationResponse.t,
+          GetEc2DeepInspectionConfigurationResponse.error) Result.t
+val get_encryption_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetEncryptionKeyRequest.t ->
+        (GetEncryptionKeyResponse.t, GetEncryptionKeyResponse.error) Result.t
 val get_findings_report_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -88,12 +222,60 @@ val get_member :
     ?cfg:Awso.Cfg.t ->
       GetMemberRequest.t ->
         (GetMemberResponse.t, GetMemberResponse.error) Result.t
+val get_sbom_export :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSbomExportRequest.t ->
+        (GetSbomExportResponse.t, GetSbomExportResponse.error) Result.t
 val list_account_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccountPermissionsRequest.t ->
         (ListAccountPermissionsResponse.t,
           ListAccountPermissionsResponse.error) Result.t
+val list_cis_scan_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCisScanConfigurationsRequest.t ->
+        (ListCisScanConfigurationsResponse.t,
+          ListCisScanConfigurationsResponse.error) Result.t
+val list_cis_scan_results_aggregated_by_checks :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCisScanResultsAggregatedByChecksRequest.t ->
+        (ListCisScanResultsAggregatedByChecksResponse.t,
+          ListCisScanResultsAggregatedByChecksResponse.error) Result.t
+val list_cis_scan_results_aggregated_by_target_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCisScanResultsAggregatedByTargetResourceRequest.t ->
+        (ListCisScanResultsAggregatedByTargetResourceResponse.t,
+          ListCisScanResultsAggregatedByTargetResourceResponse.error)
+          Result.t
+val list_cis_scans :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCisScansRequest.t ->
+        (ListCisScansResponse.t, ListCisScansResponse.error) Result.t
+val list_code_security_integrations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCodeSecurityIntegrationsRequest.t ->
+        (ListCodeSecurityIntegrationsResponse.t,
+          ListCodeSecurityIntegrationsResponse.error) Result.t
+val list_code_security_scan_configuration_associations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCodeSecurityScanConfigurationAssociationsRequest.t ->
+        (ListCodeSecurityScanConfigurationAssociationsResponse.t,
+          ListCodeSecurityScanConfigurationAssociationsResponse.error)
+          Result.t
+val list_code_security_scan_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCodeSecurityScanConfigurationsRequest.t ->
+        (ListCodeSecurityScanConfigurationsResponse.t,
+          ListCodeSecurityScanConfigurationsResponse.error) Result.t
 val list_coverage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -143,6 +325,46 @@ val list_usage_totals :
     ?cfg:Awso.Cfg.t ->
       ListUsageTotalsRequest.t ->
         (ListUsageTotalsResponse.t, ListUsageTotalsResponse.error) Result.t
+val reset_encryption_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ResetEncryptionKeyRequest.t ->
+        (ResetEncryptionKeyResponse.t, ResetEncryptionKeyResponse.error)
+          Result.t
+val search_vulnerabilities :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SearchVulnerabilitiesRequest.t ->
+        (SearchVulnerabilitiesResponse.t,
+          SearchVulnerabilitiesResponse.error) Result.t
+val send_cis_session_health :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SendCisSessionHealthRequest.t ->
+        (SendCisSessionHealthResponse.t, SendCisSessionHealthResponse.error)
+          Result.t
+val send_cis_session_telemetry :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SendCisSessionTelemetryRequest.t ->
+        (SendCisSessionTelemetryResponse.t,
+          SendCisSessionTelemetryResponse.error) Result.t
+val start_cis_session :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartCisSessionRequest.t ->
+        (StartCisSessionResponse.t, StartCisSessionResponse.error) Result.t
+val start_code_security_scan :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartCodeSecurityScanRequest.t ->
+        (StartCodeSecurityScanResponse.t,
+          StartCodeSecurityScanResponse.error) Result.t
+val stop_cis_session :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopCisSessionRequest.t ->
+        (StopCisSessionResponse.t, StopCisSessionResponse.error) Result.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -153,11 +375,53 @@ val untag_resource :
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
+val update_cis_scan_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateCisScanConfigurationRequest.t ->
+        (UpdateCisScanConfigurationResponse.t,
+          UpdateCisScanConfigurationResponse.error) Result.t
+val update_code_security_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateCodeSecurityIntegrationRequest.t ->
+        (UpdateCodeSecurityIntegrationResponse.t,
+          UpdateCodeSecurityIntegrationResponse.error) Result.t
+val update_code_security_scan_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateCodeSecurityScanConfigurationRequest.t ->
+        (UpdateCodeSecurityScanConfigurationResponse.t,
+          UpdateCodeSecurityScanConfigurationResponse.error) Result.t
+val update_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateConfigurationRequest.t ->
+        (UpdateConfigurationResponse.t, UpdateConfigurationResponse.error)
+          Result.t
+val update_ec2_deep_inspection_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateEc2DeepInspectionConfigurationRequest.t ->
+        (UpdateEc2DeepInspectionConfigurationResponse.t,
+          UpdateEc2DeepInspectionConfigurationResponse.error) Result.t
+val update_encryption_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateEncryptionKeyRequest.t ->
+        (UpdateEncryptionKeyResponse.t, UpdateEncryptionKeyResponse.error)
+          Result.t
 val update_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFilterRequest.t ->
         (UpdateFilterResponse.t, UpdateFilterResponse.error) Result.t
+val update_org_ec2_deep_inspection_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateOrgEc2DeepInspectionConfigurationRequest.t ->
+        (UpdateOrgEc2DeepInspectionConfigurationResponse.t,
+          UpdateOrgEc2DeepInspectionConfigurationResponse.error) Result.t
 val update_organization_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

@@ -96,12 +96,12 @@ module ErrorMetric =
           (Xml.child xml_arg0 "ForecastType") in
       make ?mAPE ?mASE ?rMSE ?wAPE ?forecastType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mAPE = field_map json "MAPE" Double.of_json in
-      let mASE = field_map json "MASE" Double.of_json in
-      let rMSE = field_map json "RMSE" Double.of_json in
-      let wAPE = field_map json "WAPE" Double.of_json in
-      let forecastType = field_map json "ForecastType" ForecastType.of_json in
+    let of_json json__ =
+      let mAPE = field_map json__ "MAPE" Double.of_json in
+      let mASE = field_map json__ "MASE" Double.of_json in
+      let rMSE = field_map json__ "RMSE" Double.of_json in
+      let wAPE = field_map json__ "WAPE" Double.of_json in
+      let forecastType = field_map json__ "ForecastType" ForecastType.of_json in
       make ?mAPE ?mASE ?rMSE ?wAPE ?forecastType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -129,9 +129,9 @@ module WeightedQuantileLoss =
         (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Quantile") in
       make ?lossValue ?quantile ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lossValue = field_map json "LossValue" Double.of_json in
-      let quantile = field_map json "Quantile" Double.of_json in
+    let of_json json__ =
+      let lossValue = field_map json__ "LossValue" Double.of_json in
+      let quantile = field_map json__ "Quantile" Double.of_json in
       make ?lossValue ?quantile ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -180,6 +180,9 @@ module ErrorMetrics =
   struct
     type nonrec t = ErrorMetric.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ErrorMetric.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -204,6 +207,9 @@ module WeightedQuantileLosses =
   struct
     type nonrec t = WeightedQuantileLoss.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WeightedQuantileLoss.to_value)) |>
         (fun x -> `List x)
@@ -225,6 +231,61 @@ module WeightedQuantileLosses =
       list_of_json ~kind:"WeightedQuantileLosses"
         ~of_json:WeightedQuantileLoss.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module AttributeType =
+  struct
+    type nonrec t =
+      | String_ 
+      | Integer 
+      | Float_ 
+      | Timestamp 
+      | Geolocation 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | String_ -> "string"
+      | Integer -> "integer"
+      | Float_ -> "float"
+      | Timestamp -> "timestamp"
+      | Geolocation -> "geolocation"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "string" -> String_
+      | "integer" -> Integer
+      | "float" -> Float_
+      | "timestamp" -> Timestamp
+      | "geolocation" -> Geolocation
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AttributeType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AttributeType" j)
+    let to_json = simple_to_json to_value
+  end
+module Name =
+  struct
+    type nonrec t = string
+    let context_ = "Name"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z][a-zA-Z0-9_]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Name" j
+    let to_json = simple_to_json to_value
   end
 module FeaturizationMethodName =
   struct
@@ -270,6 +331,8 @@ module FeaturizationMethodParameters =
                        (ParameterValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -343,7 +406,7 @@ module Arn =
         ok_or_failwith
           ((check_string_max i ~max:256) >>=
              (fun () ->
-                check_pattern i ~pattern:"^[a-zA-Z0-9\\-\\_\\.\\/\\:]+$"));
+                check_pattern i ~pattern:"arn:([a-z\\d-]+):forecast:.*:.*:.+"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -389,6 +452,20 @@ module S3Path =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"S3Path" j
+    let to_json = simple_to_json to_value
+  end
+module MetricName =
+  struct
+    type nonrec t = string
+    let context_ = "MetricName"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MetricName" j
     let to_json = simple_to_json to_value
   end
 module EvaluationType =
@@ -478,19 +555,101 @@ module Metrics =
       make ?averageWeightedQuantileLoss ?errorMetrics ?weightedQuantileLosses
         ?rMSE ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let averageWeightedQuantileLoss =
-        field_map json "AverageWeightedQuantileLoss" Double.of_json in
-      let errorMetrics = field_map json "ErrorMetrics" ErrorMetrics.of_json in
+        field_map json__ "AverageWeightedQuantileLoss" Double.of_json in
+      let errorMetrics = field_map json__ "ErrorMetrics" ErrorMetrics.of_json in
       let weightedQuantileLosses =
-        field_map json "WeightedQuantileLosses"
+        field_map json__ "WeightedQuantileLosses"
           WeightedQuantileLosses.of_json in
-      let rMSE = field_map json "RMSE" Double.of_json in
+      let rMSE = field_map json__ "RMSE" Double.of_json in
       make ?averageWeightedQuantileLoss ?errorMetrics ?weightedQuantileLosses
         ?rMSE ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides metrics that are used to evaluate the performance of a predictor. This object is part of the WindowSummary object."]
+module AttributeValue =
+  struct
+    type nonrec t = string
+    let context_ = "AttributeValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_pattern i ~pattern:".+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AttributeValue" j
+    let to_json = simple_to_json to_value
+  end
+module Condition =
+  struct
+    type nonrec t =
+      | EQUALS 
+      | NOT_EQUALS 
+      | LESS_THAN 
+      | GREATER_THAN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EQUALS -> "EQUALS"
+      | NOT_EQUALS -> "NOT_EQUALS"
+      | LESS_THAN -> "LESS_THAN"
+      | GREATER_THAN -> "GREATER_THAN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EQUALS" -> EQUALS
+      | "NOT_EQUALS" -> NOT_EQUALS
+      | "LESS_THAN" -> LESS_THAN
+      | "GREATER_THAN" -> GREATER_THAN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Condition" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Condition" j)
+    let to_json = simple_to_json to_value
+  end
+module SchemaAttribute =
+  struct
+    type nonrec t =
+      {
+      attributeName: Name.t option
+        [@ocaml.doc "The name of the dataset field."];
+      attributeType: AttributeType.t option
+        [@ocaml.doc
+          "The data type of the field. For a related time series dataset, other than date, item_id, and forecast dimensions attributes, all attributes should be of numerical type (integer/float)."]}
+    let make ?attributeName =
+      fun ?attributeType -> fun () -> { attributeName; attributeType }
+    let to_value x =
+      structure_to_value
+        [("AttributeName", (Option.map x.attributeName ~f:Name.to_value));
+        ("AttributeType",
+          (Option.map x.attributeType ~f:AttributeType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attributeType =
+        (Option.map ~f:AttributeType.of_xml)
+          (Xml.child xml_arg0 "AttributeType") in
+      let attributeName =
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "AttributeName") in
+      make ?attributeType ?attributeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attributeType =
+        field_map json__ "AttributeType" AttributeType.of_json in
+      let attributeName = field_map json__ "AttributeName" Name.of_json in
+      make ?attributeType ?attributeName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An attribute of a schema, which defines a dataset field. A schema attribute is required for every field in a dataset. The Schema object contains an array of SchemaAttribute objects."]
 module FeaturizationMethod =
   struct
     type nonrec t =
@@ -522,38 +681,17 @@ module FeaturizationMethod =
           (Xml.child_exn ~context:context_ xml_arg0 "FeaturizationMethodName") in
       make ?featurizationMethodParameters ~featurizationMethodName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let featurizationMethodParameters =
-        field_map json "FeaturizationMethodParameters"
+        field_map json__ "FeaturizationMethodParameters"
           FeaturizationMethodParameters.of_json in
       let featurizationMethodName =
-        field_map_exn json "FeaturizationMethodName"
+        field_map_exn json__ "FeaturizationMethodName"
           FeaturizationMethodName.of_json in
       make ?featurizationMethodParameters ~featurizationMethodName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about the method that featurizes (transforms) a dataset field. The method is part of the FeaturizationPipeline of the Featurization object. The following is an example of how you specify a FeaturizationMethod object. \\{ \"FeaturizationMethodName\": \"filling\", \"FeaturizationMethodParameters\": \\{\"aggregation\": \"sum\", \"middlefill\": \"zero\", \"backfill\": \"zero\"\\} \\}"]
-module Name =
-  struct
-    type nonrec t = string
-    let context_ = "Name"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:63) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"^[a-zA-Z][a-zA-Z0-9_]*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Name" j
-    let to_json = simple_to_json to_value
-  end
 module Values =
   struct
     type nonrec t = Value.t list
@@ -562,6 +700,9 @@ module Values =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Value.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -650,16 +791,74 @@ module TestWindowSummary =
           (Xml.child xml_arg0 "TestWindowStart") in
       make ?message ?status ?testWindowEnd ?testWindowStart ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let status = field_map json "Status" Status.of_json in
-      let testWindowEnd = field_map json "TestWindowEnd" Timestamp.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let testWindowEnd = field_map json__ "TestWindowEnd" Timestamp.of_json in
       let testWindowStart =
-        field_map json "TestWindowStart" Timestamp.of_json in
+        field_map json__ "TestWindowStart" Timestamp.of_json in
       make ?message ?status ?testWindowEnd ?testWindowStart ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The status, start time, and end time of a backtest, as well as a failure reason if applicable."]
+module S3Config =
+  struct
+    type nonrec t =
+      {
+      path: S3Path.t
+        [@ocaml.doc
+          "The path to an Amazon Simple Storage Service (Amazon S3) bucket or file(s) in an Amazon S3 bucket."];
+      roleArn: Arn.t
+        [@ocaml.doc
+          "The ARN of the Identity and Access Management (IAM) role that Amazon Forecast can assume to access the Amazon S3 bucket or files. If you provide a value for the KMSKeyArn key, the role must allow access to the key. Passing a role across Amazon Web Services accounts is not allowed. If you pass a role that isn't in your account, you get an InvalidInputException error."];
+      kMSKeyArn: KMSKeyArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an Key Management Service (KMS) key."]}
+    let context_ = "S3Config"
+    let make ?kMSKeyArn =
+      fun ~path -> fun ~roleArn -> fun () -> { kMSKeyArn; path; roleArn }
+    let to_value x =
+      structure_to_value
+        [("Path", (Some (S3Path.to_value x.path)));
+        ("RoleArn", (Some (Arn.to_value x.roleArn)));
+        ("KMSKeyArn", (Option.map x.kMSKeyArn ~f:KMSKeyArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kMSKeyArn =
+        (Option.map ~f:KMSKeyArn.of_xml) (Xml.child xml_arg0 "KMSKeyArn") in
+      let roleArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
+      let path =
+        S3Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
+      make ?kMSKeyArn ~roleArn ~path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kMSKeyArn = field_map json__ "KMSKeyArn" KMSKeyArn.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" Arn.of_json in
+      let path = field_map_exn json__ "Path" S3Path.of_json in
+      make ?kMSKeyArn ~roleArn ~path ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The path to the file(s) in an Amazon Simple Storage Service (Amazon S3) bucket, and an Identity and Access Management (IAM) role that Amazon Forecast can assume to access the file(s). Optionally, includes an Key Management Service (KMS) key. This object is part of the DataSource object that is submitted in the CreateDatasetImportJob request, and part of the DataDestination object."]
+module LongArn =
+  struct
+    type nonrec t = string
+    let context_ = "LongArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:300) >>=
+             (fun () ->
+                check_pattern i ~pattern:"arn:([a-z\\d-]+):forecast:.*:.*:.+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LongArn" j
+    let to_json = simple_to_json to_value
+  end
 module State =
   struct
     type nonrec t =
@@ -685,45 +884,47 @@ module State =
     let of_json j = of_string (string_of_json ~kind:"State" j)
     let to_json = simple_to_json to_value
   end
-module S3Config =
+module MetricResult =
   struct
     type nonrec t =
       {
-      path: S3Path.t
-        [@ocaml.doc
-          "The path to an Amazon Simple Storage Service (Amazon S3) bucket or file(s) in an Amazon S3 bucket."];
-      roleArn: Arn.t
-        [@ocaml.doc
-          "The ARN of the AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the Amazon S3 bucket or files. If you provide a value for the KMSKeyArn key, the role must allow access to the key. Passing a role across AWS accounts is not allowed. If you pass a role that isn't in your account, you get an InvalidInputException error."];
-      kMSKeyArn: KMSKeyArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of an AWS Key Management Service (KMS) key."]}
-    let context_ = "S3Config"
-    let make ?kMSKeyArn =
-      fun ~path -> fun ~roleArn -> fun () -> { kMSKeyArn; path; roleArn }
+      metricName: MetricName.t option [@ocaml.doc "The name of the metric."];
+      metricValue: Double.t option [@ocaml.doc "The value for the metric."]}
+    let make ?metricName =
+      fun ?metricValue -> fun () -> { metricName; metricValue }
     let to_value x =
       structure_to_value
-        [("Path", (Some (S3Path.to_value x.path)));
-        ("RoleArn", (Some (Arn.to_value x.roleArn)));
-        ("KMSKeyArn", (Option.map x.kMSKeyArn ~f:KMSKeyArn.to_value))]
+        [("MetricName", (Option.map x.metricName ~f:MetricName.to_value));
+        ("MetricValue", (Option.map x.metricValue ~f:Double.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let kMSKeyArn =
-        (Option.map ~f:KMSKeyArn.of_xml) (Xml.child xml_arg0 "KMSKeyArn") in
-      let roleArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
-      let path =
-        S3Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
-      make ?kMSKeyArn ~roleArn ~path ()
+      let metricValue =
+        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "MetricValue") in
+      let metricName =
+        (Option.map ~f:MetricName.of_xml) (Xml.child xml_arg0 "MetricName") in
+      make ?metricValue ?metricName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kMSKeyArn = field_map json "KMSKeyArn" KMSKeyArn.of_json in
-      let roleArn = field_map_exn json "RoleArn" Arn.of_json in
-      let path = field_map_exn json "Path" S3Path.of_json in
-      make ?kMSKeyArn ~roleArn ~path ()
+    let of_json json__ =
+      let metricValue = field_map json__ "MetricValue" Double.of_json in
+      let metricName = field_map json__ "MetricName" MetricName.of_json in
+      make ?metricValue ?metricName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The path to the file(s) in an Amazon Simple Storage Service (Amazon S3) bucket, and an AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the file(s). Optionally, includes an AWS Key Management Service (KMS) key. This object is part of the DataSource object that is submitted in the CreateDatasetImportJob request, and part of the DataDestination object."]
+       "An individual metric Forecast calculated when monitoring predictor usage. You can compare the value for this metric to the metric's value in the Baseline to see how your predictor's performance is changing. For more information about metrics generated by Forecast see Evaluating Predictor Accuracy"]
+module Detail =
+  struct
+    type nonrec t = string
+    let context_ = "Detail"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Detail" j
+    let to_json = simple_to_json to_value
+  end
 module TimePointGranularity =
   struct
     type nonrec t =
@@ -820,19 +1021,127 @@ module WindowSummary =
       make ?metrics ?evaluationType ?itemCount ?testWindowEnd
         ?testWindowStart ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metrics = field_map json "Metrics" Metrics.of_json in
+    let of_json json__ =
+      let metrics = field_map json__ "Metrics" Metrics.of_json in
       let evaluationType =
-        field_map json "EvaluationType" EvaluationType.of_json in
-      let itemCount = field_map json "ItemCount" Integer.of_json in
-      let testWindowEnd = field_map json "TestWindowEnd" Timestamp.of_json in
+        field_map json__ "EvaluationType" EvaluationType.of_json in
+      let itemCount = field_map json__ "ItemCount" Integer.of_json in
+      let testWindowEnd = field_map json__ "TestWindowEnd" Timestamp.of_json in
       let testWindowStart =
-        field_map json "TestWindowStart" Timestamp.of_json in
+        field_map json__ "TestWindowStart" Timestamp.of_json in
       make ?metrics ?evaluationType ?itemCount ?testWindowEnd
         ?testWindowStart ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The metrics for a time range within the evaluation portion of a dataset. This object is part of the EvaluationResult object. The TestWindowStart and TestWindowEnd parameters are determined by the BackTestWindowOffset parameter of the EvaluationParameters object."]
+module Operation =
+  struct
+    type nonrec t =
+      | ADD 
+      | SUBTRACT 
+      | MULTIPLY 
+      | DIVIDE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ADD -> "ADD"
+      | SUBTRACT -> "SUBTRACT"
+      | MULTIPLY -> "MULTIPLY"
+      | DIVIDE -> "DIVIDE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ADD" -> ADD
+      | "SUBTRACT" -> SUBTRACT
+      | "MULTIPLY" -> MULTIPLY
+      | "DIVIDE" -> DIVIDE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Operation" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Operation" j)
+    let to_json = simple_to_json to_value
+  end
+module TimeSeriesCondition =
+  struct
+    type nonrec t =
+      {
+      attributeName: Name.t
+        [@ocaml.doc
+          "The item_id, dimension name, IM name, or timestamp that you are modifying."];
+      attributeValue: AttributeValue.t
+        [@ocaml.doc "The value that is applied for the chosen Condition."];
+      condition: Condition.t
+        [@ocaml.doc
+          "The condition to apply. Valid values are EQUALS, NOT_EQUALS, LESS_THAN and GREATER_THAN."]}
+    let context_ = "TimeSeriesCondition"
+    let make ~attributeName =
+      fun ~attributeValue ->
+        fun ~condition ->
+          fun () -> { attributeName; attributeValue; condition }
+    let to_value x =
+      structure_to_value
+        [("AttributeName", (Some (Name.to_value x.attributeName)));
+        ("AttributeValue", (Some (AttributeValue.to_value x.attributeValue)));
+        ("Condition", (Some (Condition.to_value x.condition)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let condition =
+        Condition.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Condition") in
+      let attributeValue =
+        AttributeValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AttributeValue") in
+      let attributeName =
+        Name.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AttributeName") in
+      make ~condition ~attributeValue ~attributeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let condition = field_map_exn json__ "Condition" Condition.of_json in
+      let attributeValue =
+        field_map_exn json__ "AttributeValue" AttributeValue.of_json in
+      let attributeName = field_map_exn json__ "AttributeName" Name.of_json in
+      make ~condition ~attributeValue ~attributeName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a subset of items within an attribute that are modified. For example, you can use this operation to create a subset of items that cost $5 or less. To do this, you specify \"AttributeName\": \"price\", \"AttributeValue\": \"5\", and \"Condition\": \"LESS_THAN\". Pair this operation with the Action operation within the CreateWhatIfForecastRequest$TimeSeriesTransformations operation to define how the attribute is modified."]
+module SchemaAttributes =
+  struct
+    type nonrec t = SchemaAttribute.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SchemaAttribute.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SchemaAttribute.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SchemaAttributes" ~of_json:SchemaAttribute.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
 module FeaturizationPipeline =
   struct
     type nonrec t = FeaturizationMethod.t list
@@ -841,6 +1150,9 @@ module FeaturizationPipeline =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FeaturizationMethod.to_value)) |>
         (fun x -> `List x)
@@ -886,9 +1198,9 @@ module CategoricalParameterRange =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map_exn json "Values" Values.of_json in
-      let name = field_map_exn json "Name" Name.of_json in
+    let of_json json__ =
+      let values = field_map_exn json__ "Values" Values.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
       make ~values ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -929,11 +1241,11 @@ module ContinuousParameterRange =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?scalingType ~minValue ~maxValue ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let scalingType = field_map json "ScalingType" ScalingType.of_json in
-      let minValue = field_map_exn json "MinValue" Double.of_json in
-      let maxValue = field_map_exn json "MaxValue" Double.of_json in
-      let name = field_map_exn json "Name" Name.of_json in
+    let of_json json__ =
+      let scalingType = field_map json__ "ScalingType" ScalingType.of_json in
+      let minValue = field_map_exn json__ "MinValue" Double.of_json in
+      let maxValue = field_map_exn json__ "MaxValue" Double.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
       make ?scalingType ~minValue ~maxValue ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -974,11 +1286,11 @@ module IntegerParameterRange =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?scalingType ~minValue ~maxValue ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let scalingType = field_map json "ScalingType" ScalingType.of_json in
-      let minValue = field_map_exn json "MinValue" Integer.of_json in
-      let maxValue = field_map_exn json "MaxValue" Integer.of_json in
-      let name = field_map_exn json "Name" Name.of_json in
+    let of_json json__ =
+      let scalingType = field_map json__ "ScalingType" ScalingType.of_json in
+      let minValue = field_map_exn json__ "MinValue" Integer.of_json in
+      let maxValue = field_map_exn json__ "MaxValue" Integer.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
       make ?scalingType ~minValue ~maxValue ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -987,6 +1299,9 @@ module TestWindowDetails =
   struct
     type nonrec t = TestWindowSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TestWindowSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1008,40 +1323,29 @@ module TestWindowDetails =
         ~of_json:TestWindowSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
-module AttributeType =
+module BaselineMetric =
   struct
     type nonrec t =
-      | String_ 
-      | Integer 
-      | Float 
-      | Timestamp 
-      | Geolocation 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | String_ -> "string"
-      | Integer -> "integer"
-      | Float -> "float"
-      | Timestamp -> "timestamp"
-      | Geolocation -> "geolocation"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "string" -> String_
-      | "integer" -> Integer
-      | "float" -> Float
-      | "timestamp" -> Timestamp
-      | "geolocation" -> Geolocation
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+      {
+      name: Name.t option [@ocaml.doc "The name of the metric."];
+      value: Double.t option [@ocaml.doc "The value for the metric."]}
+    let make ?name = fun ?value -> fun () -> { name; value }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:Name.to_value));
+        ("Value", (Option.map x.value ~f:Double.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration AttributeType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"AttributeType" j)
-    let to_json = simple_to_json to_value
-  end
+      let value = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Value") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" Double.of_json in
+      let name = field_map json__ "Name" Name.of_json in make ?value ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An individual metric that you can use for comparison as you evaluate your monitoring results."]
 module Configuration =
   struct
     type nonrec t = (Name.t * Values.t) list
@@ -1065,6 +1369,8 @@ module Configuration =
                     (fun x -> (Values.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1095,6 +1401,8 @@ module Transformations =
                     (fun x -> (Value.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1145,43 +1453,6 @@ module TagValue =
     let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
-module Boolean =
-  struct
-    type nonrec t = bool
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
-    let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
-    let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
-    let to_json = simple_to_json to_value
-  end
-module ReferencePredictorSummary =
-  struct
-    type nonrec t =
-      {
-      arn: Arn.t option [@ocaml.doc "The ARN of the reference predictor."];
-      state: State.t option
-        [@ocaml.doc "Whether the reference predictor is Active or Deleted."]}
-    let make ?arn = fun ?state -> fun () -> { arn; state }
-    let to_value x =
-      structure_to_value
-        [("Arn", (Option.map x.arn ~f:Arn.to_value));
-        ("State", (Option.map x.state ~f:State.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let state = (Option.map ~f:State.of_xml) (Xml.child xml_arg0 "State") in
-      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?state ?arn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" State.of_json in
-      let arn = field_map json "Arn" Arn.of_json in make ?state ?arn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Provides a summary of the reference predictor used when retraining or upgrading a predictor."]
 module FilterConditionString =
   struct
     type nonrec t =
@@ -1239,19 +1510,226 @@ module DataDestination =
         S3Config.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Config") in
       make ~s3Config ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Config = field_map_exn json "S3Config" S3Config.of_json in
+    let of_json json__ =
+      let s3Config = field_map_exn json__ "S3Config" S3Config.of_json in
       make ~s3Config ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The destination for an export job. Provide an S3 path, an AWS Identity and Access Management (IAM) role that allows Amazon Forecast to access the location, and an AWS Key Management Service (KMS) key (optional)."]
+       "The destination for an export job. Provide an S3 path, an Identity and Access Management (IAM) role that allows Amazon Forecast to access the location, and an Key Management Service (KMS) key (optional)."]
+module WhatIfForecastArnListForExport =
+  struct
+    type nonrec t = LongArn.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LongArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LongArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WhatIfForecastArnListForExport"
+        ~of_json:LongArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Boolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module ReferencePredictorSummary =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option [@ocaml.doc "The ARN of the reference predictor."];
+      state: State.t option
+        [@ocaml.doc "Whether the reference predictor is Active or Deleted."]}
+    let make ?arn = fun ?state -> fun () -> { arn; state }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("State", (Option.map x.state ~f:State.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state = (Option.map ~f:State.of_xml) (Xml.child xml_arg0 "State") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?state ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state = field_map json__ "State" State.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in make ?state ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a summary of the reference predictor used when retraining or upgrading a predictor."]
+module EvaluationState =
+  struct
+    type nonrec t = string
+    let context_ = "EvaluationState"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EvaluationState" j
+    let to_json = simple_to_json to_value
+  end
+module Long =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module Message =
+  struct
+    type nonrec t = string
+    let context_ = "Message"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Message" j
+    let to_json = simple_to_json to_value
+  end
+module MetricResults =
+  struct
+    type nonrec t = MetricResult.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricResult.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricResult.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricResults" ~of_json:MetricResult.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MonitorDataSource =
+  struct
+    type nonrec t =
+      {
+      datasetImportJobArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the dataset import job used to import the data that initiated the monitor evaluation."];
+      forecastArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the forecast the monitor used during the evaluation."];
+      predictorArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the predictor resource you are monitoring."]}
+    let make ?datasetImportJobArn =
+      fun ?forecastArn ->
+        fun ?predictorArn ->
+          fun () -> { datasetImportJobArn; forecastArn; predictorArn }
+    let to_value x =
+      structure_to_value
+        [("DatasetImportJobArn",
+           (Option.map x.datasetImportJobArn ~f:Arn.to_value));
+        ("ForecastArn", (Option.map x.forecastArn ~f:Arn.to_value));
+        ("PredictorArn", (Option.map x.predictorArn ~f:Arn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let predictorArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "PredictorArn") in
+      let forecastArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ForecastArn") in
+      let datasetImportJobArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DatasetImportJobArn") in
+      make ?predictorArn ?forecastArn ?datasetImportJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let predictorArn = field_map json__ "PredictorArn" Arn.of_json in
+      let forecastArn = field_map json__ "ForecastArn" Arn.of_json in
+      let datasetImportJobArn =
+        field_map json__ "DatasetImportJobArn" Arn.of_json in
+      make ?predictorArn ?forecastArn ?datasetImportJobArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The source of the data the monitor used during the evaluation."]
+module PredictorEvent =
+  struct
+    type nonrec t =
+      {
+      detail: Detail.t option
+        [@ocaml.doc
+          "The type of event. For example, Retrain. A retraining event denotes the timepoint when a predictor was retrained. Any monitor results from before the Datetime are from the previous predictor. Any new metrics are for the newly retrained predictor."];
+      datetime: Timestamp.t option
+        [@ocaml.doc "The timestamp for when the event occurred."]}
+    let make ?detail = fun ?datetime -> fun () -> { detail; datetime }
+    let to_value x =
+      structure_to_value
+        [("Detail", (Option.map x.detail ~f:Detail.to_value));
+        ("Datetime", (Option.map x.datetime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let datetime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Datetime") in
+      let detail =
+        (Option.map ~f:Detail.of_xml) (Xml.child xml_arg0 "Detail") in
+      make ?datetime ?detail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let datetime = field_map json__ "Datetime" Timestamp.of_json in
+      let detail = field_map json__ "Detail" Detail.of_json in
+      make ?datetime ?detail ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides details about a predictor event, such as a retraining."]
 module ExplainabilityConfig =
   struct
     type nonrec t =
       {
       timeSeriesGranularity: TimeSeriesGranularity.t
         [@ocaml.doc
-          "To create an Explainability for all time series in your datasets, use ALL. To create an Explainability for specific time series in your datasets, use SPECIFIC. Specify time series by uploading a CSV file to an Amazon S3 bucket and set the location within the DataDestination data type."];
+          "To create an Explainability for all time series in your datasets, use ALL. To create an Explainability for specific time series in your datasets, use SPECIFIC. Specify time series by uploading a CSV or Parquet file to an Amazon S3 bucket and set the location within the DataDestination data type."];
       timePointGranularity: TimePointGranularity.t
         [@ocaml.doc
           "To create an Explainability for all time points in your forecast horizon, use ALL. To create an Explainability for specific time points in your forecast horizon, use SPECIFIC. Specify time points with the StartDateTime and EndDateTime parameters within the CreateExplainability operation."]}
@@ -1275,30 +1753,17 @@ module ExplainabilityConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "TimeSeriesGranularity") in
       make ~timePointGranularity ~timeSeriesGranularity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timePointGranularity =
-        field_map_exn json "TimePointGranularity"
+        field_map_exn json__ "TimePointGranularity"
           TimePointGranularity.of_json in
       let timeSeriesGranularity =
-        field_map_exn json "TimeSeriesGranularity"
+        field_map_exn json__ "TimeSeriesGranularity"
           TimeSeriesGranularity.of_json in
       make ~timePointGranularity ~timeSeriesGranularity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The ExplainabilityConfig data type defines the number of time series and time points included in CreateExplainability. If you provide a predictor ARN for ResourceArn, you must set both TimePointGranularity and TimeSeriesGranularity to \226\128\156ALL\226\128\157. When creating Predictor Explainability, Amazon Forecast considers all time series and time points. If you provide a forecast ARN for ResourceArn, you can set TimePointGranularity and TimeSeriesGranularity to either \226\128\156ALL\226\128\157 or \226\128\156Specific\226\128\157."]
-module Message =
-  struct
-    type nonrec t = string
-    let context_ = "Message"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Message" j
-    let to_json = simple_to_json to_value
-  end
 module DatasetType =
   struct
     type nonrec t =
@@ -1385,16 +1850,44 @@ module DataSource =
         S3Config.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Config") in
       make ~s3Config ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Config = field_map_exn json "S3Config" S3Config.of_json in
+    let of_json json__ =
+      let s3Config = field_map_exn json__ "S3Config" S3Config.of_json in
       make ~s3Config ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The source of your data, an AWS Identity and Access Management (IAM) role that allows Amazon Forecast to access the data and, optionally, an AWS Key Management Service (KMS) key."]
+       "The source of your data, an Identity and Access Management (IAM) role that allows Amazon Forecast to access the data and, optionally, an Key Management Service (KMS) key."]
+module ImportMode =
+  struct
+    type nonrec t =
+      | FULL 
+      | INCREMENTAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FULL -> "FULL"
+      | INCREMENTAL -> "INCREMENTAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FULL" -> FULL
+      | "INCREMENTAL" -> INCREMENTAL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ImportMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImportMode" j)
+    let to_json = simple_to_json to_value
+  end
 module TestWindows =
   struct
     type nonrec t = WindowSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WindowSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1415,6 +1908,122 @@ module TestWindows =
       list_of_json ~kind:"TestWindows" ~of_json:WindowSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Action =
+  struct
+    type nonrec t =
+      {
+      attributeName: Name.t
+        [@ocaml.doc
+          "The related time series that you are modifying. This value is case insensitive."];
+      operation: Operation.t
+        [@ocaml.doc
+          "The operation that is applied to the provided attribute. Operations include: ADD - adds Value to all rows of AttributeName. SUBTRACT - subtracts Value from all rows of AttributeName. MULTIPLY - multiplies all rows of AttributeName by Value. DIVIDE - divides all rows of AttributeName by Value."];
+      value: Double.t
+        [@ocaml.doc "The value that is applied for the chosen Operation."]}
+    let context_ = "Action"
+    let make ~attributeName =
+      fun ~operation ->
+        fun ~value -> fun () -> { attributeName; operation; value }
+    let to_value x =
+      structure_to_value
+        [("AttributeName", (Some (Name.to_value x.attributeName)));
+        ("Operation", (Some (Operation.to_value x.operation)));
+        ("Value", (Some (Double.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let operation =
+        Operation.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Operation") in
+      let attributeName =
+        Name.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AttributeName") in
+      make ~value ~operation ~attributeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" Double.of_json in
+      let operation = field_map_exn json__ "Operation" Operation.of_json in
+      let attributeName = field_map_exn json__ "AttributeName" Name.of_json in
+      make ~value ~operation ~attributeName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the modifications that you are making to an attribute for a what-if forecast. For example, you can use this operation to create a what-if forecast that investigates a 10% off sale on all shoes. To do this, you specify \"AttributeName\": \"shoes\", \"Operation\": \"MULTIPLY\", and \"Value\": \"0.90\". Pair this operation with the TimeSeriesCondition operation within the CreateWhatIfForecastRequest$TimeSeriesTransformations operation to define a subset of attribute items that are modified."]
+module TimeSeriesConditions =
+  struct
+    type nonrec t = TimeSeriesCondition.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TimeSeriesCondition.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TimeSeriesCondition.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TimeSeriesConditions"
+        ~of_json:TimeSeriesCondition.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Format_ =
+  struct
+    type nonrec t = string
+    let context_ = "Format"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:7) >>=
+             (fun () -> check_pattern i ~pattern:"^CSV|PARQUET$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Format" j
+    let to_json = simple_to_json to_value
+  end
+module Schema =
+  struct
+    type nonrec t =
+      {
+      attributes: SchemaAttributes.t option
+        [@ocaml.doc
+          "An array of attributes specifying the name and type of each field in a dataset."]}
+    let make ?attributes = fun () -> { attributes }
+    let to_value x =
+      structure_to_value
+        [("Attributes",
+           (Option.map x.attributes ~f:SchemaAttributes.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attributes =
+        (Option.map ~f:SchemaAttributes.of_xml)
+          (Xml.child xml_arg0 "Attributes") in
+      make ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attributes = field_map json__ "Attributes" SchemaAttributes.of_json in
+      make ?attributes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Defines the fields of a dataset."]
 module Featurization =
   struct
     type nonrec t =
@@ -1445,10 +2054,11 @@ module Featurization =
           (Xml.child_exn ~context:context_ xml_arg0 "AttributeName") in
       make ?featurizationPipeline ~attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let featurizationPipeline =
-        field_map json "FeaturizationPipeline" FeaturizationPipeline.of_json in
-      let attributeName = field_map_exn json "AttributeName" Name.of_json in
+        field_map json__ "FeaturizationPipeline"
+          FeaturizationPipeline.of_json in
+      let attributeName = field_map_exn json__ "AttributeName" Name.of_json in
       make ?featurizationPipeline ~attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1461,6 +2071,9 @@ module CategoricalParameterRanges =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CategoricalParameterRange.to_value)) |>
         (fun x -> `List x)
@@ -1491,6 +2104,9 @@ module ContinuousParameterRanges =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ContinuousParameterRange.to_value)) |>
         (fun x -> `List x)
@@ -1521,6 +2137,9 @@ module IntegerParameterRanges =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IntegerParameterRange.to_value)) |>
         (fun x -> `List x)
@@ -1567,9 +2186,9 @@ module SupplementaryFeature =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" Value.of_json in
-      let name = field_map_exn json "Name" Name.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" Value.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1599,58 +2218,40 @@ module PredictorExecution =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AlgorithmArn") in
       make ?testWindows ?algorithmArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let testWindows =
-        field_map json "TestWindows" TestWindowDetails.of_json in
-      let algorithmArn = field_map json "AlgorithmArn" Arn.of_json in
+        field_map json__ "TestWindows" TestWindowDetails.of_json in
+      let algorithmArn = field_map json__ "AlgorithmArn" Arn.of_json in
       make ?testWindows ?algorithmArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The algorithm used to perform a backtest and the status of those tests."]
-module SchemaAttribute =
+module BaselineMetrics =
   struct
-    type nonrec t =
-      {
-      attributeName: Name.t option
-        [@ocaml.doc "The name of the dataset field."];
-      attributeType: AttributeType.t option
-        [@ocaml.doc "The data type of the field."]}
-    let make ?attributeName =
-      fun ?attributeType -> fun () -> { attributeName; attributeType }
-    let to_value x =
-      structure_to_value
-        [("AttributeName", (Option.map x.attributeName ~f:Name.to_value));
-        ("AttributeType",
-          (Option.map x.attributeType ~f:AttributeType.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let attributeType =
-        (Option.map ~f:AttributeType.of_xml)
-          (Xml.child xml_arg0 "AttributeType") in
-      let attributeName =
-        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "AttributeName") in
-      make ?attributeType ?attributeName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributeType =
-        field_map json "AttributeType" AttributeType.of_json in
-      let attributeName = field_map json "AttributeName" Name.of_json in
-      make ?attributeType ?attributeName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An attribute of a schema, which defines a dataset field. A schema attribute is required for every field in a dataset. The Schema object contains an array of SchemaAttribute objects."]
-module Long =
-  struct
-    type nonrec t = Int64.t
+    type nonrec t = BaselineMetric.t list
     let make i = i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BaselineMetric.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
-    let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BaselineMetric.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BaselineMetrics" ~of_json:BaselineMetric.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module AdditionalDataset =
   struct
@@ -1661,7 +2262,7 @@ module AdditionalDataset =
           "The name of the additional dataset. Valid names: \"holiday\" and \"weather\"."];
       configuration: Configuration.t option
         [@ocaml.doc
-          "Weather Index To enable the Weather Index, do not specify a value for Configuration. Holidays To enable Holidays, set CountryCode to one of the following two-letter country codes: \"AL\" - ALBANIA \"AR\" - ARGENTINA \"AT\" - AUSTRIA \"AU\" - AUSTRALIA \"BA\" - BOSNIA HERZEGOVINA \"BE\" - BELGIUM \"BG\" - BULGARIA \"BO\" - BOLIVIA \"BR\" - BRAZIL \"BY\" - BELARUS \"CA\" - CANADA \"CL\" - CHILE \"CO\" - COLOMBIA \"CR\" - COSTA RICA \"HR\" - CROATIA \"CZ\" - CZECH REPUBLIC \"DK\" - DENMARK \"EC\" - ECUADOR \"EE\" - ESTONIA \"ET\" - ETHIOPIA \"FI\" - FINLAND \"FR\" - FRANCE \"DE\" - GERMANY \"GR\" - GREECE \"HU\" - HUNGARY \"IS\" - ICELAND \"IN\" - INDIA \"IE\" - IRELAND \"IT\" - ITALY \"JP\" - JAPAN \"KZ\" - KAZAKHSTAN \"KR\" - KOREA \"LV\" - LATVIA \"LI\" - LIECHTENSTEIN \"LT\" - LITHUANIA \"LU\" - LUXEMBOURG \"MK\" - MACEDONIA \"MT\" - MALTA \"MX\" - MEXICO \"MD\" - MOLDOVA \"ME\" - MONTENEGRO \"NL\" - NETHERLANDS \"NZ\" - NEW ZEALAND \"NI\" - NICARAGUA \"NG\" - NIGERIA \"NO\" - NORWAY \"PA\" - PANAMA \"PY\" - PARAGUAY \"PE\" - PERU \"PL\" - POLAND \"PT\" - PORTUGAL \"RO\" - ROMANIA \"RU\" - RUSSIA \"RS\" - SERBIA \"SK\" - SLOVAKIA \"SI\" - SLOVENIA \"ZA\" - SOUTH AFRICA \"ES\" - SPAIN \"SE\" - SWEDEN \"CH\" - SWITZERLAND \"UA\" - UKRAINE \"AE\" - UNITED ARAB EMIRATES \"US\" - UNITED STATES \"UK\" - UNITED KINGDOM \"UY\" - URUGUAY \"VE\" - VENEZUELA"]}
+          "Weather Index To enable the Weather Index, do not specify a value for Configuration. Holidays Holidays To enable Holidays, set CountryCode to one of the following two-letter country codes: \"AL\" - ALBANIA \"AR\" - ARGENTINA \"AT\" - AUSTRIA \"AU\" - AUSTRALIA \"BA\" - BOSNIA HERZEGOVINA \"BE\" - BELGIUM \"BG\" - BULGARIA \"BO\" - BOLIVIA \"BR\" - BRAZIL \"BY\" - BELARUS \"CA\" - CANADA \"CL\" - CHILE \"CO\" - COLOMBIA \"CR\" - COSTA RICA \"HR\" - CROATIA \"CZ\" - CZECH REPUBLIC \"DK\" - DENMARK \"EC\" - ECUADOR \"EE\" - ESTONIA \"ET\" - ETHIOPIA \"FI\" - FINLAND \"FR\" - FRANCE \"DE\" - GERMANY \"GR\" - GREECE \"HU\" - HUNGARY \"IS\" - ICELAND \"IN\" - INDIA \"IE\" - IRELAND \"IT\" - ITALY \"JP\" - JAPAN \"KZ\" - KAZAKHSTAN \"KR\" - KOREA \"LV\" - LATVIA \"LI\" - LIECHTENSTEIN \"LT\" - LITHUANIA \"LU\" - LUXEMBOURG \"MK\" - MACEDONIA \"MT\" - MALTA \"MX\" - MEXICO \"MD\" - MOLDOVA \"ME\" - MONTENEGRO \"NL\" - NETHERLANDS \"NZ\" - NEW ZEALAND \"NI\" - NICARAGUA \"NG\" - NIGERIA \"NO\" - NORWAY \"PA\" - PANAMA \"PY\" - PARAGUAY \"PE\" - PERU \"PL\" - POLAND \"PT\" - PORTUGAL \"RO\" - ROMANIA \"RU\" - RUSSIA \"RS\" - SERBIA \"SK\" - SLOVAKIA \"SI\" - SLOVENIA \"ZA\" - SOUTH AFRICA \"ES\" - SPAIN \"SE\" - SWEDEN \"CH\" - SWITZERLAND \"UA\" - UKRAINE \"AE\" - UNITED ARAB EMIRATES \"US\" - UNITED STATES \"UK\" - UNITED KINGDOM \"UY\" - URUGUAY \"VE\" - VENEZUELA"]}
     let context_ = "AdditionalDataset"
     let make ?configuration = fun ~name -> fun () -> { configuration; name }
     let to_value x =
@@ -1678,10 +2279,10 @@ module AdditionalDataset =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?configuration ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configuration =
-        field_map json "Configuration" Configuration.of_json in
-      let name = field_map_exn json "Name" Name.of_json in
+        field_map json__ "Configuration" Configuration.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
       make ?configuration ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1714,10 +2315,10 @@ module AttributeConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "AttributeName") in
       make ~transformations ~attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transformations =
-        field_map_exn json "Transformations" Transformations.of_json in
-      let attributeName = field_map_exn json "AttributeName" Name.of_json in
+        field_map_exn json__ "Transformations" Transformations.of_json in
+      let attributeName = field_map_exn json__ "AttributeName" Name.of_json in
       make ~transformations ~attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1746,13 +2347,338 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The optional metadata that you apply to a resource to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. The following basic restrictions apply to tags: Maximum number of tags per resource - 50. For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length - 128 Unicode characters in UTF-8. Maximum value length - 256 Unicode characters in UTF-8. If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for keys as it is reserved for AWS use. You cannot edit or delete tag keys with this prefix. Values can have this prefix. If a tag value has aws as its prefix but the key does not, then Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit."]
+       "The optional metadata that you apply to a resource to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. The following basic restrictions apply to tags: Maximum number of tags per resource - 50. For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length - 128 Unicode characters in UTF-8. Maximum value length - 256 Unicode characters in UTF-8. If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for keys as it is reserved for Amazon Web Services use. You cannot edit or delete tag keys with this prefix. Values can have this prefix. If a tag value has aws as its prefix but the key does not, then Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit."]
+module WhatIfForecastSummary =
+  struct
+    type nonrec t =
+      {
+      whatIfForecastArn: LongArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if forecast."];
+      whatIfForecastName: Name.t option
+        [@ocaml.doc "The name of the what-if forecast."];
+      whatIfAnalysisArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if analysis that contains this what-if forecast."];
+      status: Status.t option
+        [@ocaml.doc
+          "The status of the what-if forecast. States include: ACTIVE CREATE_PENDING, CREATE_IN_PROGRESS, CREATE_FAILED CREATE_STOPPING, CREATE_STOPPED DELETE_PENDING, DELETE_IN_PROGRESS, DELETE_FAILED The Status of the what-if analysis must be ACTIVE before you can access the analysis."];
+      message: ErrorMessage.t option
+        [@ocaml.doc
+          "If an error occurred, an informational message about the error."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc "When the what-if forecast was created."];
+      lastModificationTime: Timestamp.t option
+        [@ocaml.doc
+          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."]}
+    let make ?whatIfForecastArn =
+      fun ?whatIfForecastName ->
+        fun ?whatIfAnalysisArn ->
+          fun ?status ->
+            fun ?message ->
+              fun ?creationTime ->
+                fun ?lastModificationTime ->
+                  fun () ->
+                    {
+                      whatIfForecastArn;
+                      whatIfForecastName;
+                      whatIfAnalysisArn;
+                      status;
+                      message;
+                      creationTime;
+                      lastModificationTime
+                    }
+    let to_value x =
+      structure_to_value
+        [("WhatIfForecastArn",
+           (Option.map x.whatIfForecastArn ~f:LongArn.to_value));
+        ("WhatIfForecastName",
+          (Option.map x.whatIfForecastName ~f:Name.to_value));
+        ("WhatIfAnalysisArn",
+          (Option.map x.whatIfAnalysisArn ~f:Arn.to_value));
+        ("Status", (Option.map x.status ~f:Status.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("LastModificationTime",
+          (Option.map x.lastModificationTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModificationTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModificationTime") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
+      let whatIfAnalysisArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "WhatIfAnalysisArn") in
+      let whatIfForecastName =
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "WhatIfForecastName") in
+      let whatIfForecastArn =
+        (Option.map ~f:LongArn.of_xml)
+          (Xml.child xml_arg0 "WhatIfForecastArn") in
+      make ?lastModificationTime ?creationTime ?message ?status
+        ?whatIfAnalysisArn ?whatIfForecastName ?whatIfForecastArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModificationTime =
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let whatIfAnalysisArn =
+        field_map json__ "WhatIfAnalysisArn" Arn.of_json in
+      let whatIfForecastName =
+        field_map json__ "WhatIfForecastName" Name.of_json in
+      let whatIfForecastArn =
+        field_map json__ "WhatIfForecastArn" LongArn.of_json in
+      make ?lastModificationTime ?creationTime ?message ?status
+        ?whatIfAnalysisArn ?whatIfForecastName ?whatIfForecastArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a summary of the what-if forecast properties used in the ListWhatIfForecasts operation. To get the complete set of properties, call the DescribeWhatIfForecast operation, and provide the WhatIfForecastArn that is listed in the summary."]
+module Filter =
+  struct
+    type nonrec t =
+      {
+      key: String_.t [@ocaml.doc "The name of the parameter to filter on."];
+      value: Arn.t [@ocaml.doc "The value to match."];
+      condition: FilterConditionString.t
+        [@ocaml.doc
+          "The condition to apply. To include the objects that match the statement, specify IS. To exclude matching objects, specify IS_NOT."]}
+    let context_ = "Filter"
+    let make ~key =
+      fun ~value -> fun ~condition -> fun () -> { key; value; condition }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (String_.to_value x.key)));
+        ("Value", (Some (Arn.to_value x.value)));
+        ("Condition", (Some (FilterConditionString.to_value x.condition)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let condition =
+        FilterConditionString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Condition") in
+      let value =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let key =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ~condition ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let condition =
+        field_map_exn json__ "Condition" FilterConditionString.of_json in
+      let value = field_map_exn json__ "Value" Arn.of_json in
+      let key = field_map_exn json__ "Key" String_.of_json in
+      make ~condition ~value ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a filter for choosing a subset of objects. Each filter consists of a condition and a match statement. The condition is either IS or IS_NOT, which specifies whether to include or exclude the objects that match the statement, respectively. The match statement consists of a key and a value."]
+module WhatIfForecastExportSummary =
+  struct
+    type nonrec t =
+      {
+      whatIfForecastExportArn: LongArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if forecast export."];
+      whatIfForecastArns: WhatIfForecastArnListForExport.t option
+        [@ocaml.doc
+          "An array of Amazon Resource Names (ARNs) that define the what-if forecasts included in the export."];
+      whatIfForecastExportName: Name.t option
+        [@ocaml.doc "The what-if forecast export name."];
+      destination: DataDestination.t option
+        [@ocaml.doc
+          "The path to the Amazon Simple Storage Service (Amazon S3) bucket where the forecast is exported."];
+      status: Status.t option
+        [@ocaml.doc
+          "The status of the what-if forecast export. States include: ACTIVE CREATE_PENDING, CREATE_IN_PROGRESS, CREATE_FAILED CREATE_STOPPING, CREATE_STOPPED DELETE_PENDING, DELETE_IN_PROGRESS, DELETE_FAILED The Status of the what-if analysis must be ACTIVE before you can access the analysis."];
+      message: ErrorMessage.t option
+        [@ocaml.doc
+          "If an error occurred, an informational message about the error."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc "When the what-if forecast export was created."];
+      lastModificationTime: Timestamp.t option
+        [@ocaml.doc
+          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."]}
+    let make ?whatIfForecastExportArn =
+      fun ?whatIfForecastArns ->
+        fun ?whatIfForecastExportName ->
+          fun ?destination ->
+            fun ?status ->
+              fun ?message ->
+                fun ?creationTime ->
+                  fun ?lastModificationTime ->
+                    fun () ->
+                      {
+                        whatIfForecastExportArn;
+                        whatIfForecastArns;
+                        whatIfForecastExportName;
+                        destination;
+                        status;
+                        message;
+                        creationTime;
+                        lastModificationTime
+                      }
+    let to_value x =
+      structure_to_value
+        [("WhatIfForecastExportArn",
+           (Option.map x.whatIfForecastExportArn ~f:LongArn.to_value));
+        ("WhatIfForecastArns",
+          (Option.map x.whatIfForecastArns
+             ~f:WhatIfForecastArnListForExport.to_value));
+        ("WhatIfForecastExportName",
+          (Option.map x.whatIfForecastExportName ~f:Name.to_value));
+        ("Destination",
+          (Option.map x.destination ~f:DataDestination.to_value));
+        ("Status", (Option.map x.status ~f:Status.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("LastModificationTime",
+          (Option.map x.lastModificationTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModificationTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModificationTime") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
+      let destination =
+        (Option.map ~f:DataDestination.of_xml)
+          (Xml.child xml_arg0 "Destination") in
+      let whatIfForecastExportName =
+        (Option.map ~f:Name.of_xml)
+          (Xml.child xml_arg0 "WhatIfForecastExportName") in
+      let whatIfForecastArns =
+        (Option.map ~f:WhatIfForecastArnListForExport.of_xml)
+          (Xml.child xml_arg0 "WhatIfForecastArns") in
+      let whatIfForecastExportArn =
+        (Option.map ~f:LongArn.of_xml)
+          (Xml.child xml_arg0 "WhatIfForecastExportArn") in
+      make ?lastModificationTime ?creationTime ?message ?status ?destination
+        ?whatIfForecastExportName ?whatIfForecastArns
+        ?whatIfForecastExportArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModificationTime =
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let destination =
+        field_map json__ "Destination" DataDestination.of_json in
+      let whatIfForecastExportName =
+        field_map json__ "WhatIfForecastExportName" Name.of_json in
+      let whatIfForecastArns =
+        field_map json__ "WhatIfForecastArns"
+          WhatIfForecastArnListForExport.of_json in
+      let whatIfForecastExportArn =
+        field_map json__ "WhatIfForecastExportArn" LongArn.of_json in
+      make ?lastModificationTime ?creationTime ?message ?status ?destination
+        ?whatIfForecastExportName ?whatIfForecastArns
+        ?whatIfForecastExportArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a summary of the what-if forecast export properties used in the ListWhatIfForecastExports operation. To get the complete set of properties, call the DescribeWhatIfForecastExport operation, and provide the WhatIfForecastExportArn that is listed in the summary."]
+module WhatIfAnalysisSummary =
+  struct
+    type nonrec t =
+      {
+      whatIfAnalysisArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if analysis."];
+      whatIfAnalysisName: Name.t option
+        [@ocaml.doc "The name of the what-if analysis."];
+      forecastArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the baseline forecast that is being used in this what-if analysis."];
+      status: Status.t option
+        [@ocaml.doc
+          "The status of the what-if analysis. States include: ACTIVE CREATE_PENDING, CREATE_IN_PROGRESS, CREATE_FAILED CREATE_STOPPING, CREATE_STOPPED DELETE_PENDING, DELETE_IN_PROGRESS, DELETE_FAILED The Status of the what-if analysis must be ACTIVE before you can access the analysis."];
+      message: ErrorMessage.t option
+        [@ocaml.doc
+          "If an error occurred, an informational message about the error."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc "When the what-if analysis was created."];
+      lastModificationTime: Timestamp.t option
+        [@ocaml.doc
+          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."]}
+    let make ?whatIfAnalysisArn =
+      fun ?whatIfAnalysisName ->
+        fun ?forecastArn ->
+          fun ?status ->
+            fun ?message ->
+              fun ?creationTime ->
+                fun ?lastModificationTime ->
+                  fun () ->
+                    {
+                      whatIfAnalysisArn;
+                      whatIfAnalysisName;
+                      forecastArn;
+                      status;
+                      message;
+                      creationTime;
+                      lastModificationTime
+                    }
+    let to_value x =
+      structure_to_value
+        [("WhatIfAnalysisArn",
+           (Option.map x.whatIfAnalysisArn ~f:Arn.to_value));
+        ("WhatIfAnalysisName",
+          (Option.map x.whatIfAnalysisName ~f:Name.to_value));
+        ("ForecastArn", (Option.map x.forecastArn ~f:Arn.to_value));
+        ("Status", (Option.map x.status ~f:Status.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("LastModificationTime",
+          (Option.map x.lastModificationTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModificationTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModificationTime") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
+      let forecastArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ForecastArn") in
+      let whatIfAnalysisName =
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "WhatIfAnalysisName") in
+      let whatIfAnalysisArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "WhatIfAnalysisArn") in
+      make ?lastModificationTime ?creationTime ?message ?status ?forecastArn
+        ?whatIfAnalysisName ?whatIfAnalysisArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModificationTime =
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let forecastArn = field_map json__ "ForecastArn" Arn.of_json in
+      let whatIfAnalysisName =
+        field_map json__ "WhatIfAnalysisName" Name.of_json in
+      let whatIfAnalysisArn =
+        field_map json__ "WhatIfAnalysisArn" Arn.of_json in
+      make ?lastModificationTime ?creationTime ?message ?status ?forecastArn
+        ?whatIfAnalysisName ?whatIfAnalysisArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a summary of the what-if analysis properties used in the ListWhatIfAnalyses operation. To get the complete set of properties, call the DescribeWhatIfAnalysis operation, and provide the WhatIfAnalysisArn that is listed in the summary."]
 module PredictorSummary =
   struct
     type nonrec t =
@@ -1841,62 +2767,26 @@ module PredictorSummary =
         ?referencePredictorSummary ?isAutoPredictor ?datasetGroupArn
         ?predictorName ?predictorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let status = field_map json "Status" Status.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let status = field_map json__ "Status" Status.of_json in
       let referencePredictorSummary =
-        field_map json "ReferencePredictorSummary"
+        field_map json__ "ReferencePredictorSummary"
           ReferencePredictorSummary.of_json in
-      let isAutoPredictor = field_map json "IsAutoPredictor" Boolean.of_json in
-      let datasetGroupArn = field_map json "DatasetGroupArn" Arn.of_json in
-      let predictorName = field_map json "PredictorName" Name.of_json in
-      let predictorArn = field_map json "PredictorArn" Arn.of_json in
+      let isAutoPredictor =
+        field_map json__ "IsAutoPredictor" Boolean.of_json in
+      let datasetGroupArn = field_map json__ "DatasetGroupArn" Arn.of_json in
+      let predictorName = field_map json__ "PredictorName" Name.of_json in
+      let predictorArn = field_map json__ "PredictorArn" Arn.of_json in
       make ?lastModificationTime ?creationTime ?message ?status
         ?referencePredictorSummary ?isAutoPredictor ?datasetGroupArn
         ?predictorName ?predictorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides a summary of the predictor properties that are used in the ListPredictors operation. To get the complete set of properties, call the DescribePredictor operation, and provide the listed PredictorArn."]
-module Filter =
-  struct
-    type nonrec t =
-      {
-      key: String_.t [@ocaml.doc "The name of the parameter to filter on."];
-      value: Arn.t [@ocaml.doc "The value to match."];
-      condition: FilterConditionString.t
-        [@ocaml.doc
-          "The condition to apply. To include the objects that match the statement, specify IS. To exclude matching objects, specify IS_NOT."]}
-    let context_ = "Filter"
-    let make ~key =
-      fun ~value -> fun ~condition -> fun () -> { key; value; condition }
-    let to_value x =
-      structure_to_value
-        [("Key", (Some (String_.to_value x.key)));
-        ("Value", (Some (Arn.to_value x.value)));
-        ("Condition", (Some (FilterConditionString.to_value x.condition)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let condition =
-        FilterConditionString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Condition") in
-      let value =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
-      let key =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
-      make ~condition ~value ~key ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let condition =
-        field_map_exn json "Condition" FilterConditionString.of_json in
-      let value = field_map_exn json "Value" Arn.of_json in
-      let key = field_map_exn json "Key" String_.of_json in
-      make ~condition ~value ~key ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Describes a filter for choosing a subset of objects. Each filter consists of a condition and a match statement. The condition is either IS or IS_NOT, which specifies whether to include or exclude the objects that match the statement, respectively. The match statement consists of a key and a value."]
 module PredictorBacktestExportJobSummary =
   struct
     type nonrec t =
@@ -1971,22 +2861,240 @@ module PredictorBacktestExportJobSummary =
       make ?lastModificationTime ?creationTime ?message ?status ?destination
         ?predictorBacktestExportJobName ?predictorBacktestExportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let status = field_map json "Status" Status.of_json in
-      let destination = field_map json "Destination" DataDestination.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let destination =
+        field_map json__ "Destination" DataDestination.of_json in
       let predictorBacktestExportJobName =
-        field_map json "PredictorBacktestExportJobName" Name.of_json in
+        field_map json__ "PredictorBacktestExportJobName" Name.of_json in
       let predictorBacktestExportJobArn =
-        field_map json "PredictorBacktestExportJobArn" Arn.of_json in
+        field_map json__ "PredictorBacktestExportJobArn" Arn.of_json in
       make ?lastModificationTime ?creationTime ?message ?status ?destination
         ?predictorBacktestExportJobName ?predictorBacktestExportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides a summary of the predictor backtest export job properties used in the ListPredictorBacktestExportJobs operation. To get a complete set of properties, call the DescribePredictorBacktestExportJob operation, and provide the listed PredictorBacktestExportJobArn."]
+module MonitorSummary =
+  struct
+    type nonrec t =
+      {
+      monitorArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the monitor resource."];
+      monitorName: Name.t option
+        [@ocaml.doc "The name of the monitor resource."];
+      resourceArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the predictor being monitored."];
+      status: Status.t option
+        [@ocaml.doc
+          "The status of the monitor. States include: ACTIVE ACTIVE_STOPPING, ACTIVE_STOPPED UPDATE_IN_PROGRESS CREATE_PENDING, CREATE_IN_PROGRESS, CREATE_FAILED DELETE_PENDING, DELETE_IN_PROGRESS, DELETE_FAILED"];
+      creationTime: Timestamp.t option
+        [@ocaml.doc "When the monitor resource was created."];
+      lastModificationTime: Timestamp.t option
+        [@ocaml.doc
+          "The last time the monitor resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. STOPPED - When the resource stopped. ACTIVE or CREATE_FAILED - When the monitor creation finished or failed."]}
+    let make ?monitorArn =
+      fun ?monitorName ->
+        fun ?resourceArn ->
+          fun ?status ->
+            fun ?creationTime ->
+              fun ?lastModificationTime ->
+                fun () ->
+                  {
+                    monitorArn;
+                    monitorName;
+                    resourceArn;
+                    status;
+                    creationTime;
+                    lastModificationTime
+                  }
+    let to_value x =
+      structure_to_value
+        [("MonitorArn", (Option.map x.monitorArn ~f:Arn.to_value));
+        ("MonitorName", (Option.map x.monitorName ~f:Name.to_value));
+        ("ResourceArn", (Option.map x.resourceArn ~f:Arn.to_value));
+        ("Status", (Option.map x.status ~f:Status.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("LastModificationTime",
+          (Option.map x.lastModificationTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModificationTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModificationTime") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
+      let resourceArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      let monitorName =
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "MonitorName") in
+      let monitorArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "MonitorArn") in
+      make ?lastModificationTime ?creationTime ?status ?resourceArn
+        ?monitorName ?monitorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModificationTime =
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
+      let monitorName = field_map json__ "MonitorName" Name.of_json in
+      let monitorArn = field_map json__ "MonitorArn" Arn.of_json in
+      make ?lastModificationTime ?creationTime ?status ?resourceArn
+        ?monitorName ?monitorArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a summary of the monitor properties used in the ListMonitors operation. To get a complete set of properties, call the DescribeMonitor operation, and provide the listed MonitorArn."]
+module PredictorMonitorEvaluation =
+  struct
+    type nonrec t =
+      {
+      resourceArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource to monitor."];
+      monitorArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the monitor resource."];
+      evaluationTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp that indicates when the monitor evaluation was started."];
+      evaluationState: EvaluationState.t option
+        [@ocaml.doc
+          "The status of the monitor evaluation. The state can be SUCCESS or FAILURE."];
+      windowStartDatetime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp that indicates the start of the window that is used for monitor evaluation."];
+      windowEndDatetime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp that indicates the end of the window that is used for monitor evaluation."];
+      predictorEvent: PredictorEvent.t option
+        [@ocaml.doc
+          "Provides details about a predictor event, such as a retraining."];
+      monitorDataSource: MonitorDataSource.t option
+        [@ocaml.doc
+          "The source of the data the monitor resource used during the evaluation."];
+      metricResults: MetricResults.t option
+        [@ocaml.doc
+          "A list of metrics Forecast calculated when monitoring a predictor. You can compare the value for each metric in the list to the metric's value in the Baseline to see how your predictor's performance is changing."];
+      numItemsEvaluated: Long.t option
+        [@ocaml.doc "The number of items considered during the evaluation."];
+      message: Message.t option
+        [@ocaml.doc
+          "Information about any errors that may have occurred during the monitor evaluation."]}
+    let make ?resourceArn =
+      fun ?monitorArn ->
+        fun ?evaluationTime ->
+          fun ?evaluationState ->
+            fun ?windowStartDatetime ->
+              fun ?windowEndDatetime ->
+                fun ?predictorEvent ->
+                  fun ?monitorDataSource ->
+                    fun ?metricResults ->
+                      fun ?numItemsEvaluated ->
+                        fun ?message ->
+                          fun () ->
+                            {
+                              resourceArn;
+                              monitorArn;
+                              evaluationTime;
+                              evaluationState;
+                              windowStartDatetime;
+                              windowEndDatetime;
+                              predictorEvent;
+                              monitorDataSource;
+                              metricResults;
+                              numItemsEvaluated;
+                              message
+                            }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Option.map x.resourceArn ~f:Arn.to_value));
+        ("MonitorArn", (Option.map x.monitorArn ~f:Arn.to_value));
+        ("EvaluationTime",
+          (Option.map x.evaluationTime ~f:Timestamp.to_value));
+        ("EvaluationState",
+          (Option.map x.evaluationState ~f:EvaluationState.to_value));
+        ("WindowStartDatetime",
+          (Option.map x.windowStartDatetime ~f:Timestamp.to_value));
+        ("WindowEndDatetime",
+          (Option.map x.windowEndDatetime ~f:Timestamp.to_value));
+        ("PredictorEvent",
+          (Option.map x.predictorEvent ~f:PredictorEvent.to_value));
+        ("MonitorDataSource",
+          (Option.map x.monitorDataSource ~f:MonitorDataSource.to_value));
+        ("MetricResults",
+          (Option.map x.metricResults ~f:MetricResults.to_value));
+        ("NumItemsEvaluated",
+          (Option.map x.numItemsEvaluated ~f:Long.to_value));
+        ("Message", (Option.map x.message ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      let numItemsEvaluated =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "NumItemsEvaluated") in
+      let metricResults =
+        (Option.map ~f:MetricResults.of_xml)
+          (Xml.child xml_arg0 "MetricResults") in
+      let monitorDataSource =
+        (Option.map ~f:MonitorDataSource.of_xml)
+          (Xml.child xml_arg0 "MonitorDataSource") in
+      let predictorEvent =
+        (Option.map ~f:PredictorEvent.of_xml)
+          (Xml.child xml_arg0 "PredictorEvent") in
+      let windowEndDatetime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "WindowEndDatetime") in
+      let windowStartDatetime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "WindowStartDatetime") in
+      let evaluationState =
+        (Option.map ~f:EvaluationState.of_xml)
+          (Xml.child xml_arg0 "EvaluationState") in
+      let evaluationTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "EvaluationTime") in
+      let monitorArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "MonitorArn") in
+      let resourceArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      make ?message ?numItemsEvaluated ?metricResults ?monitorDataSource
+        ?predictorEvent ?windowEndDatetime ?windowStartDatetime
+        ?evaluationState ?evaluationTime ?monitorArn ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      let numItemsEvaluated =
+        field_map json__ "NumItemsEvaluated" Long.of_json in
+      let metricResults =
+        field_map json__ "MetricResults" MetricResults.of_json in
+      let monitorDataSource =
+        field_map json__ "MonitorDataSource" MonitorDataSource.of_json in
+      let predictorEvent =
+        field_map json__ "PredictorEvent" PredictorEvent.of_json in
+      let windowEndDatetime =
+        field_map json__ "WindowEndDatetime" Timestamp.of_json in
+      let windowStartDatetime =
+        field_map json__ "WindowStartDatetime" Timestamp.of_json in
+      let evaluationState =
+        field_map json__ "EvaluationState" EvaluationState.of_json in
+      let evaluationTime =
+        field_map json__ "EvaluationTime" Timestamp.of_json in
+      let monitorArn = field_map json__ "MonitorArn" Arn.of_json in
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
+      make ?message ?numItemsEvaluated ?metricResults ?monitorDataSource
+        ?predictorEvent ?windowEndDatetime ?windowStartDatetime
+        ?evaluationState ?evaluationTime ?monitorArn ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the results of a monitor evaluation."]
 module ForecastSummary =
   struct
     type nonrec t =
@@ -2074,18 +3182,19 @@ module ForecastSummary =
         ?datasetGroupArn ?createdUsingAutoPredictor ?predictorArn
         ?forecastName ?forecastArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let status = field_map json "Status" Status.of_json in
-      let datasetGroupArn = field_map json "DatasetGroupArn" String_.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let datasetGroupArn =
+        field_map json__ "DatasetGroupArn" String_.of_json in
       let createdUsingAutoPredictor =
-        field_map json "CreatedUsingAutoPredictor" Boolean.of_json in
-      let predictorArn = field_map json "PredictorArn" String_.of_json in
-      let forecastName = field_map json "ForecastName" Name.of_json in
-      let forecastArn = field_map json "ForecastArn" Arn.of_json in
+        field_map json__ "CreatedUsingAutoPredictor" Boolean.of_json in
+      let predictorArn = field_map json__ "PredictorArn" String_.of_json in
+      let forecastName = field_map json__ "ForecastName" Name.of_json in
+      let forecastArn = field_map json__ "ForecastArn" Arn.of_json in
       make ?lastModificationTime ?creationTime ?message ?status
         ?datasetGroupArn ?createdUsingAutoPredictor ?predictorArn
         ?forecastName ?forecastArn ()
@@ -2168,17 +3277,18 @@ module ForecastExportJobSummary =
       make ?lastModificationTime ?creationTime ?message ?status ?destination
         ?forecastExportJobName ?forecastExportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let status = field_map json "Status" Status.of_json in
-      let destination = field_map json "Destination" DataDestination.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let destination =
+        field_map json__ "Destination" DataDestination.of_json in
       let forecastExportJobName =
-        field_map json "ForecastExportJobName" Name.of_json in
+        field_map json__ "ForecastExportJobName" Name.of_json in
       let forecastExportJobArn =
-        field_map json "ForecastExportJobArn" Arn.of_json in
+        field_map json__ "ForecastExportJobArn" Arn.of_json in
       make ?lastModificationTime ?creationTime ?message ?status ?destination
         ?forecastExportJobName ?forecastExportJobArn ()
     let to_json v = composed_to_json to_value v
@@ -2258,17 +3368,18 @@ module ExplainabilityExportSummary =
       make ?lastModificationTime ?creationTime ?message ?status ?destination
         ?explainabilityExportName ?explainabilityExportArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let status = field_map json "Status" Status.of_json in
-      let destination = field_map json "Destination" DataDestination.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let destination =
+        field_map json__ "Destination" DataDestination.of_json in
       let explainabilityExportName =
-        field_map json "ExplainabilityExportName" Name.of_json in
+        field_map json__ "ExplainabilityExportName" Name.of_json in
       let explainabilityExportArn =
-        field_map json "ExplainabilityExportArn" Arn.of_json in
+        field_map json__ "ExplainabilityExportArn" Arn.of_json in
       make ?lastModificationTime ?creationTime ?message ?status ?destination
         ?explainabilityExportName ?explainabilityExportArn ()
     let to_json v = composed_to_json to_value v
@@ -2356,18 +3467,19 @@ module ExplainabilitySummary =
         ?explainabilityConfig ?resourceArn ?explainabilityName
         ?explainabilityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let message = field_map json "Message" Message.of_json in
-      let status = field_map json "Status" Status.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let status = field_map json__ "Status" Status.of_json in
       let explainabilityConfig =
-        field_map json "ExplainabilityConfig" ExplainabilityConfig.of_json in
-      let resourceArn = field_map json "ResourceArn" Arn.of_json in
+        field_map json__ "ExplainabilityConfig" ExplainabilityConfig.of_json in
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
       let explainabilityName =
-        field_map json "ExplainabilityName" Name.of_json in
-      let explainabilityArn = field_map json "ExplainabilityArn" Arn.of_json in
+        field_map json__ "ExplainabilityName" Name.of_json in
+      let explainabilityArn =
+        field_map json__ "ExplainabilityArn" Arn.of_json in
       make ?lastModificationTime ?creationTime ?message ?status
         ?explainabilityConfig ?resourceArn ?explainabilityName
         ?explainabilityArn ()
@@ -2431,14 +3543,14 @@ module DatasetSummary =
       make ?lastModificationTime ?creationTime ?domain ?datasetType
         ?datasetName ?datasetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let domain = field_map json "Domain" Domain.of_json in
-      let datasetType = field_map json "DatasetType" DatasetType.of_json in
-      let datasetName = field_map json "DatasetName" Name.of_json in
-      let datasetArn = field_map json "DatasetArn" Arn.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let domain = field_map json__ "Domain" Domain.of_json in
+      let datasetType = field_map json__ "DatasetType" DatasetType.of_json in
+      let datasetName = field_map json__ "DatasetName" Name.of_json in
+      let datasetArn = field_map json__ "DatasetArn" Arn.of_json in
       make ?lastModificationTime ?creationTime ?domain ?datasetType
         ?datasetName ?datasetArn ()
     let to_json v = composed_to_json to_value v
@@ -2455,7 +3567,7 @@ module DatasetImportJobSummary =
         [@ocaml.doc "The name of the dataset import job."];
       dataSource: DataSource.t option
         [@ocaml.doc
-          "The location of the training data to import and an AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the data. The training data must be stored in an Amazon S3 bucket. If encryption is used, DataSource includes an AWS Key Management Service (KMS) key."];
+          "The location of the training data to import and an Identity and Access Management (IAM) role that Amazon Forecast can assume to access the data. The training data must be stored in an Amazon S3 bucket. If encryption is used, DataSource includes an Key Management Service (KMS) key."];
       status: Status.t option
         [@ocaml.doc
           "The status of the dataset import job. States include: ACTIVE CREATE_PENDING, CREATE_IN_PROGRESS, CREATE_FAILED DELETE_PENDING, DELETE_IN_PROGRESS, DELETE_FAILED CREATE_STOPPING, CREATE_STOPPED"];
@@ -2466,7 +3578,10 @@ module DatasetImportJobSummary =
         [@ocaml.doc "When the dataset import job was created."];
       lastModificationTime: Timestamp.t option
         [@ocaml.doc
-          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."]}
+          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."];
+      importMode: ImportMode.t option
+        [@ocaml.doc
+          "The import mode of the dataset import job, FULL or INCREMENTAL."]}
     let make ?datasetImportJobArn =
       fun ?datasetImportJobName ->
         fun ?dataSource ->
@@ -2474,16 +3589,18 @@ module DatasetImportJobSummary =
             fun ?message ->
               fun ?creationTime ->
                 fun ?lastModificationTime ->
-                  fun () ->
-                    {
-                      datasetImportJobArn;
-                      datasetImportJobName;
-                      dataSource;
-                      status;
-                      message;
-                      creationTime;
-                      lastModificationTime
-                    }
+                  fun ?importMode ->
+                    fun () ->
+                      {
+                        datasetImportJobArn;
+                        datasetImportJobName;
+                        dataSource;
+                        status;
+                        message;
+                        creationTime;
+                        lastModificationTime;
+                        importMode
+                      }
     let to_value x =
       structure_to_value
         [("DatasetImportJobArn",
@@ -2495,9 +3612,12 @@ module DatasetImportJobSummary =
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value));
         ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
         ("LastModificationTime",
-          (Option.map x.lastModificationTime ~f:Timestamp.to_value))]
+          (Option.map x.lastModificationTime ~f:Timestamp.to_value));
+        ("ImportMode", (Option.map x.importMode ~f:ImportMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let importMode =
+        (Option.map ~f:ImportMode.of_xml) (Xml.child xml_arg0 "ImportMode") in
       let lastModificationTime =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "LastModificationTime") in
@@ -2514,22 +3634,23 @@ module DatasetImportJobSummary =
           (Xml.child xml_arg0 "DatasetImportJobName") in
       let datasetImportJobArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DatasetImportJobArn") in
-      make ?lastModificationTime ?creationTime ?message ?status ?dataSource
-        ?datasetImportJobName ?datasetImportJobArn ()
+      make ?importMode ?lastModificationTime ?creationTime ?message ?status
+        ?dataSource ?datasetImportJobName ?datasetImportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let importMode = field_map json__ "ImportMode" ImportMode.of_json in
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let status = field_map json "Status" Status.of_json in
-      let dataSource = field_map json "DataSource" DataSource.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let dataSource = field_map json__ "DataSource" DataSource.of_json in
       let datasetImportJobName =
-        field_map json "DatasetImportJobName" Name.of_json in
+        field_map json__ "DatasetImportJobName" Name.of_json in
       let datasetImportJobArn =
-        field_map json "DatasetImportJobArn" Arn.of_json in
-      make ?lastModificationTime ?creationTime ?message ?status ?dataSource
-        ?datasetImportJobName ?datasetImportJobArn ()
+        field_map json__ "DatasetImportJobArn" Arn.of_json in
+      make ?importMode ?lastModificationTime ?creationTime ?message ?status
+        ?dataSource ?datasetImportJobName ?datasetImportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides a summary of the dataset import job properties used in the ListDatasetImportJobs operation. To get the complete set of properties, call the DescribeDatasetImportJob operation, and provide the DatasetImportJobArn."]
@@ -2579,12 +3700,12 @@ module DatasetGroupSummary =
       make ?lastModificationTime ?creationTime ?datasetGroupName
         ?datasetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let datasetGroupName = field_map json "DatasetGroupName" Name.of_json in
-      let datasetGroupArn = field_map json "DatasetGroupArn" Arn.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let datasetGroupName = field_map json__ "DatasetGroupName" Name.of_json in
+      let datasetGroupArn = field_map json__ "DatasetGroupArn" Arn.of_json in
       make ?lastModificationTime ?creationTime ?datasetGroupName
         ?datasetGroupArn ()
     let to_json v = composed_to_json to_value v
@@ -2614,13 +3735,99 @@ module EvaluationResult =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AlgorithmArn") in
       make ?testWindows ?algorithmArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let testWindows = field_map json "TestWindows" TestWindows.of_json in
-      let algorithmArn = field_map json "AlgorithmArn" Arn.of_json in
+    let of_json json__ =
+      let testWindows = field_map json__ "TestWindows" TestWindows.of_json in
+      let algorithmArn = field_map json__ "AlgorithmArn" Arn.of_json in
       make ?testWindows ?algorithmArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The results of evaluating an algorithm. Returned as part of the GetAccuracyMetrics response."]
+module TimestampFormat =
+  struct
+    type nonrec t = string
+    let context_ = "TimestampFormat"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () ->
+                check_pattern i ~pattern:"^[a-zA-Z0-9\\-\\:\\.\\,\\'\\s]+$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TimestampFormat" j
+    let to_json = simple_to_json to_value
+  end
+module TimeSeriesTransformation =
+  struct
+    type nonrec t =
+      {
+      action: Action.t option
+        [@ocaml.doc
+          "An array of actions that define a time series and how it is transformed. These transformations create a new time series that is used for the what-if analysis."];
+      timeSeriesConditions: TimeSeriesConditions.t option
+        [@ocaml.doc
+          "An array of conditions that define which members of the related time series are transformed."]}
+    let make ?action =
+      fun ?timeSeriesConditions -> fun () -> { action; timeSeriesConditions }
+    let to_value x =
+      structure_to_value
+        [("Action", (Option.map x.action ~f:Action.to_value));
+        ("TimeSeriesConditions",
+          (Option.map x.timeSeriesConditions ~f:TimeSeriesConditions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let timeSeriesConditions =
+        (Option.map ~f:TimeSeriesConditions.of_xml)
+          (Xml.child xml_arg0 "TimeSeriesConditions") in
+      let action =
+        (Option.map ~f:Action.of_xml) (Xml.child xml_arg0 "Action") in
+      make ?timeSeriesConditions ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let timeSeriesConditions =
+        field_map json__ "TimeSeriesConditions" TimeSeriesConditions.of_json in
+      let action = field_map json__ "Action" Action.of_json in
+      make ?timeSeriesConditions ?action ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A transformation function is a pair of operations that select and modify the rows in a related time series. You select the rows that you want with a condition operation and you modify the rows with a transformation operation. All conditions are joined with an AND operation, meaning that all conditions must be true for the transformation to be applied. Transformations are applied in the order that they are listed."]
+module TimeSeriesIdentifiers =
+  struct
+    type nonrec t =
+      {
+      dataSource: DataSource.t option ;
+      schema: Schema.t option ;
+      format: Format_.t option
+        [@ocaml.doc "The format of the data, either CSV or PARQUET."]}
+    let make ?dataSource =
+      fun ?schema -> fun ?format -> fun () -> { dataSource; schema; format }
+    let to_value x =
+      structure_to_value
+        [("DataSource", (Option.map x.dataSource ~f:DataSource.to_value));
+        ("Schema", (Option.map x.schema ~f:Schema.to_value));
+        ("Format", (Option.map x.format ~f:Format_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let format =
+        (Option.map ~f:Format_.of_xml) (Xml.child xml_arg0 "Format") in
+      let schema =
+        (Option.map ~f:Schema.of_xml) (Xml.child xml_arg0 "Schema") in
+      let dataSource =
+        (Option.map ~f:DataSource.of_xml) (Xml.child xml_arg0 "DataSource") in
+      make ?format ?schema ?dataSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let format = field_map json__ "Format" Format_.of_json in
+      let schema = field_map json__ "Schema" Schema.of_json in
+      let dataSource = field_map json__ "DataSource" DataSource.of_json in
+      make ?format ?schema ?dataSource ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details about the import file that contains the time series for which you want to create forecasts."]
 module Featurizations =
   struct
     type nonrec t = Featurization.t list
@@ -2629,6 +3836,9 @@ module Featurizations =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Featurization.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2657,6 +3867,9 @@ module ForecastDimensions =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Name.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2746,15 +3959,15 @@ module ParameterRanges =
       make ?integerParameterRanges ?continuousParameterRanges
         ?categoricalParameterRanges ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let integerParameterRanges =
-        field_map json "IntegerParameterRanges"
+        field_map json__ "IntegerParameterRanges"
           IntegerParameterRanges.of_json in
       let continuousParameterRanges =
-        field_map json "ContinuousParameterRanges"
+        field_map json__ "ContinuousParameterRanges"
           ContinuousParameterRanges.of_json in
       let categoricalParameterRanges =
-        field_map json "CategoricalParameterRanges"
+        field_map json__ "CategoricalParameterRanges"
           CategoricalParameterRanges.of_json in
       make ?integerParameterRanges ?continuousParameterRanges
         ?categoricalParameterRanges ()
@@ -2769,6 +3982,9 @@ module SupplementaryFeatures =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SupplementaryFeature.to_value)) |>
         (fun x -> `List x)
@@ -2799,6 +4015,9 @@ module PredictorExecutions =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PredictorExecution.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2820,36 +4039,32 @@ module PredictorExecutions =
         ~of_json:PredictorExecution.of_json j
     let to_json v = composed_to_json to_value v
   end
-module SchemaAttributes =
+module PredictorBaseline =
   struct
-    type nonrec t = SchemaAttribute.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:100) >>=
-             (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:SchemaAttribute.to_value)) |> (fun x -> `List x)
+    type nonrec t =
+      {
+      baselineMetrics: BaselineMetrics.t option
+        [@ocaml.doc
+          "The initial accuracy metrics for the predictor. Use these metrics as a baseline for comparison purposes as you use your predictor and the metrics change."]}
+    let make ?baselineMetrics = fun () -> { baselineMetrics }
+    let to_value x =
+      structure_to_value
+        [("BaselineMetrics",
+           (Option.map x.baselineMetrics ~f:BaselineMetrics.to_value))]
     let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:SchemaAttribute.of_xml)
-    let of_json j =
-      list_of_json ~kind:"SchemaAttributes" ~of_json:SchemaAttribute.of_json
-        j
+    let of_xml xml_arg0 =
+      let baselineMetrics =
+        (Option.map ~f:BaselineMetrics.of_xml)
+          (Xml.child xml_arg0 "BaselineMetrics") in
+      make ?baselineMetrics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let baselineMetrics =
+        field_map json__ "BaselineMetrics" BaselineMetrics.of_json in
+      make ?baselineMetrics ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "Metrics you can use as a baseline for comparison purposes. Use these metrics when you interpret monitoring results for an auto predictor."]
 module Statistics =
   struct
     type nonrec t =
@@ -2953,19 +4168,20 @@ module Statistics =
       make ?countNanLong ?countNullLong ?countDistinctLong ?countLong ?stddev
         ?avg ?max ?min ?countNan ?countNull ?countDistinct ?count ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let countNanLong = field_map json "CountNanLong" Long.of_json in
-      let countNullLong = field_map json "CountNullLong" Long.of_json in
-      let countDistinctLong = field_map json "CountDistinctLong" Long.of_json in
-      let countLong = field_map json "CountLong" Long.of_json in
-      let stddev = field_map json "Stddev" Double.of_json in
-      let avg = field_map json "Avg" Double.of_json in
-      let max = field_map json "Max" String_.of_json in
-      let min = field_map json "Min" String_.of_json in
-      let countNan = field_map json "CountNan" Integer.of_json in
-      let countNull = field_map json "CountNull" Integer.of_json in
-      let countDistinct = field_map json "CountDistinct" Integer.of_json in
-      let count = field_map json "Count" Integer.of_json in
+    let of_json json__ =
+      let countNanLong = field_map json__ "CountNanLong" Long.of_json in
+      let countNullLong = field_map json__ "CountNullLong" Long.of_json in
+      let countDistinctLong =
+        field_map json__ "CountDistinctLong" Long.of_json in
+      let countLong = field_map json__ "CountLong" Long.of_json in
+      let stddev = field_map json__ "Stddev" Double.of_json in
+      let avg = field_map json__ "Avg" Double.of_json in
+      let max = field_map json__ "Max" String_.of_json in
+      let min = field_map json__ "Min" String_.of_json in
+      let countNan = field_map json__ "CountNan" Integer.of_json in
+      let countNull = field_map json__ "CountNull" Integer.of_json in
+      let countDistinct = field_map json__ "CountDistinct" Integer.of_json in
+      let count = field_map json__ "Count" Integer.of_json in
       make ?countNanLong ?countNullLong ?countDistinctLong ?countLong ?stddev
         ?avg ?max ?min ?countNan ?countNull ?countDistinct ?count ()
     let to_json v = composed_to_json to_value v
@@ -2979,6 +4195,9 @@ module AdditionalDatasets =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AdditionalDataset.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3008,6 +4227,9 @@ module AttributeConfigs =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeConfig.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3029,6 +4251,136 @@ module AttributeConfigs =
         j
     let to_json v = composed_to_json to_value v
   end
+module DayOfMonth =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:28) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for DayOfMonth" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module DayOfWeek =
+  struct
+    type nonrec t =
+      | MONDAY 
+      | TUESDAY 
+      | WEDNESDAY 
+      | THURSDAY 
+      | FRIDAY 
+      | SATURDAY 
+      | SUNDAY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MONDAY -> "MONDAY"
+      | TUESDAY -> "TUESDAY"
+      | WEDNESDAY -> "WEDNESDAY"
+      | THURSDAY -> "THURSDAY"
+      | FRIDAY -> "FRIDAY"
+      | SATURDAY -> "SATURDAY"
+      | SUNDAY -> "SUNDAY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MONDAY" -> MONDAY
+      | "TUESDAY" -> TUESDAY
+      | "WEDNESDAY" -> WEDNESDAY
+      | "THURSDAY" -> THURSDAY
+      | "FRIDAY" -> FRIDAY
+      | "SATURDAY" -> SATURDAY
+      | "SUNDAY" -> SUNDAY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DayOfWeek" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DayOfWeek" j)
+    let to_json = simple_to_json to_value
+  end
+module Hour =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:23) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Hour" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Month =
+  struct
+    type nonrec t =
+      | JANUARY 
+      | FEBRUARY 
+      | MARCH 
+      | APRIL 
+      | MAY 
+      | JUNE 
+      | JULY 
+      | AUGUST 
+      | SEPTEMBER 
+      | OCTOBER 
+      | NOVEMBER 
+      | DECEMBER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | JANUARY -> "JANUARY"
+      | FEBRUARY -> "FEBRUARY"
+      | MARCH -> "MARCH"
+      | APRIL -> "APRIL"
+      | MAY -> "MAY"
+      | JUNE -> "JUNE"
+      | JULY -> "JULY"
+      | AUGUST -> "AUGUST"
+      | SEPTEMBER -> "SEPTEMBER"
+      | OCTOBER -> "OCTOBER"
+      | NOVEMBER -> "NOVEMBER"
+      | DECEMBER -> "DECEMBER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "JANUARY" -> JANUARY
+      | "FEBRUARY" -> FEBRUARY
+      | "MARCH" -> MARCH
+      | "APRIL" -> APRIL
+      | "MAY" -> MAY
+      | "JUNE" -> JUNE
+      | "JULY" -> JULY
+      | "AUGUST" -> AUGUST
+      | "SEPTEMBER" -> SEPTEMBER
+      | "OCTOBER" -> OCTOBER
+      | "NOVEMBER" -> NOVEMBER
+      | "DECEMBER" -> DECEMBER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Month" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Month" j)
+    let to_json = simple_to_json to_value
+  end
 module InvalidInputException =
   struct
     type nonrec t = {
@@ -3043,8 +4395,8 @@ module InvalidInputException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3063,8 +4415,8 @@ module ResourceInUseException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource is in use."]
@@ -3082,8 +4434,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3092,6 +4444,9 @@ module ArnList =
   struct
     type nonrec t = Arn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3120,6 +4475,9 @@ module TagKeys =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3153,8 +4511,8 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3168,6 +4526,9 @@ module Tags =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3201,8 +4562,8 @@ module InvalidNextTokenException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The token is not valid. Tokens expire after 24 hours."]
@@ -3226,12 +4587,16 @@ module NextToken =
     let of_json j = string_of_json ~kind:"NextToken" j
     let to_json = simple_to_json to_value
   end
-module Predictors =
+module WhatIfForecasts =
   struct
-    type nonrec t = PredictorSummary.t list
+    type nonrec t = WhatIfForecastSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:PredictorSummary.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:WhatIfForecastSummary.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -3245,15 +4610,19 @@ module Predictors =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:PredictorSummary.of_xml)
+                     | _ -> true))) ~f:WhatIfForecastSummary.of_xml)
     let of_json j =
-      list_of_json ~kind:"Predictors" ~of_json:PredictorSummary.of_json j
+      list_of_json ~kind:"WhatIfForecasts"
+        ~of_json:WhatIfForecastSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
 module Filters =
   struct
     type nonrec t = Filter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3291,10 +4660,98 @@ module MaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module WhatIfForecastExports =
+  struct
+    type nonrec t = WhatIfForecastExportSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WhatIfForecastExportSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WhatIfForecastExportSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WhatIfForecastExports"
+        ~of_json:WhatIfForecastExportSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WhatIfAnalyses =
+  struct
+    type nonrec t = WhatIfAnalysisSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WhatIfAnalysisSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WhatIfAnalysisSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WhatIfAnalyses"
+        ~of_json:WhatIfAnalysisSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Predictors =
+  struct
+    type nonrec t = PredictorSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PredictorSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PredictorSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Predictors" ~of_json:PredictorSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module PredictorBacktestExportJobs =
   struct
     type nonrec t = PredictorBacktestExportJobSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PredictorBacktestExportJobSummary.to_value)) |>
         (fun x -> `List x)
@@ -3318,10 +4775,69 @@ module PredictorBacktestExportJobs =
         ~of_json:PredictorBacktestExportJobSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Monitors =
+  struct
+    type nonrec t = MonitorSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MonitorSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MonitorSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Monitors" ~of_json:MonitorSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PredictorMonitorEvaluations =
+  struct
+    type nonrec t = PredictorMonitorEvaluation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PredictorMonitorEvaluation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PredictorMonitorEvaluation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PredictorMonitorEvaluations"
+        ~of_json:PredictorMonitorEvaluation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Forecasts =
   struct
     type nonrec t = ForecastSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ForecastSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3346,6 +4862,9 @@ module ForecastExportJobs =
   struct
     type nonrec t = ForecastExportJobSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ForecastExportJobSummary.to_value)) |>
         (fun x -> `List x)
@@ -3372,6 +4891,9 @@ module ExplainabilityExports =
   struct
     type nonrec t = ExplainabilityExportSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExplainabilityExportSummary.to_value)) |>
         (fun x -> `List x)
@@ -3398,6 +4920,9 @@ module Explainabilities =
   struct
     type nonrec t = ExplainabilitySummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExplainabilitySummary.to_value)) |>
         (fun x -> `List x)
@@ -3424,6 +4949,9 @@ module Datasets =
   struct
     type nonrec t = DatasetSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DatasetSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3448,6 +4976,9 @@ module DatasetImportJobs =
   struct
     type nonrec t = DatasetImportJobSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DatasetImportJobSummary.to_value)) |>
         (fun x -> `List x)
@@ -3474,6 +5005,9 @@ module DatasetGroups =
   struct
     type nonrec t = DatasetGroupSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DatasetGroupSummary.to_value)) |>
         (fun x -> `List x)
@@ -3562,6 +5096,9 @@ module PredictorEvaluationResults =
   struct
     type nonrec t = EvaluationResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EvaluationResult.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3583,13 +5120,178 @@ module PredictorEvaluationResults =
         ~of_json:EvaluationResult.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ForecastTypes =
+  struct
+    type nonrec t = ForecastType.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ForecastType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ForecastType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ForecastTypes" ~of_json:ForecastType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TimeSeriesReplacementsDataSource =
+  struct
+    type nonrec t =
+      {
+      s3Config: S3Config.t ;
+      schema: Schema.t ;
+      format: Format_.t option
+        [@ocaml.doc "The format of the replacement data, CSV or PARQUET."];
+      timestampFormat: TimestampFormat.t option
+        [@ocaml.doc "The timestamp format of the replacement data."]}
+    let context_ = "TimeSeriesReplacementsDataSource"
+    let make ?format =
+      fun ?timestampFormat ->
+        fun ~s3Config ->
+          fun ~schema ->
+            fun () -> { format; timestampFormat; s3Config; schema }
+    let to_value x =
+      structure_to_value
+        [("S3Config", (Some (S3Config.to_value x.s3Config)));
+        ("Schema", (Some (Schema.to_value x.schema)));
+        ("Format", (Option.map x.format ~f:Format_.to_value));
+        ("TimestampFormat",
+          (Option.map x.timestampFormat ~f:TimestampFormat.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let timestampFormat =
+        (Option.map ~f:TimestampFormat.of_xml)
+          (Xml.child xml_arg0 "TimestampFormat") in
+      let format =
+        (Option.map ~f:Format_.of_xml) (Xml.child xml_arg0 "Format") in
+      let schema =
+        Schema.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Schema") in
+      let s3Config =
+        S3Config.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Config") in
+      make ?timestampFormat ?format ~schema ~s3Config ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let timestampFormat =
+        field_map json__ "TimestampFormat" TimestampFormat.of_json in
+      let format = field_map json__ "Format" Format_.of_json in
+      let schema = field_map_exn json__ "Schema" Schema.of_json in
+      let s3Config = field_map_exn json__ "S3Config" S3Config.of_json in
+      make ?timestampFormat ?format ~schema ~s3Config ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A replacement dataset is a modified version of the baseline related time series that contains only the values that you want to include in a what-if forecast. The replacement dataset must contain the forecast dimensions and item identifiers in the baseline related time series as well as at least 1 changed time series. This dataset is merged with the baseline related time series to create a transformed dataset that is used for the what-if forecast."]
+module TimeSeriesTransformations =
+  struct
+    type nonrec t = TimeSeriesTransformation.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TimeSeriesTransformation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TimeSeriesTransformation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TimeSeriesTransformations"
+        ~of_json:TimeSeriesTransformation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LongArnList =
+  struct
+    type nonrec t = LongArn.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LongArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LongArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LongArnList" ~of_json:LongArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TimeSeriesSelector =
+  struct
+    type nonrec t =
+      {
+      timeSeriesIdentifiers: TimeSeriesIdentifiers.t option
+        [@ocaml.doc
+          "Details about the import file that contains the time series for which you want to create forecasts."]}
+    let make ?timeSeriesIdentifiers = fun () -> { timeSeriesIdentifiers }
+    let to_value x =
+      structure_to_value
+        [("TimeSeriesIdentifiers",
+           (Option.map x.timeSeriesIdentifiers
+              ~f:TimeSeriesIdentifiers.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let timeSeriesIdentifiers =
+        (Option.map ~f:TimeSeriesIdentifiers.of_xml)
+          (Xml.child xml_arg0 "TimeSeriesIdentifiers") in
+      make ?timeSeriesIdentifiers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let timeSeriesIdentifiers =
+        field_map json__ "TimeSeriesIdentifiers"
+          TimeSeriesIdentifiers.of_json in
+      make ?timeSeriesIdentifiers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the set of time series that are used to create the forecasts in a TimeSeriesIdentifiers object. The TimeSeriesIdentifiers object needs the following information: DataSource Format Schema"]
 module EncryptionConfig =
   struct
     type nonrec t =
       {
       roleArn: Arn.t
         [@ocaml.doc
-          "The ARN of the IAM role that Amazon Forecast can assume to access the AWS KMS key. Passing a role across AWS accounts is not allowed. If you pass a role that isn't in your account, you get an InvalidInputException error."];
+          "The ARN of the IAM role that Amazon Forecast can assume to access the KMS key. Passing a role across Amazon Web Services accounts is not allowed. If you pass a role that isn't in your account, you get an InvalidInputException error."];
       kMSKeyArn: KMSKeyArn.t
         [@ocaml.doc "The Amazon Resource Name (ARN) of the KMS key."]}
     let context_ = "EncryptionConfig"
@@ -3607,13 +5309,13 @@ module EncryptionConfig =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
       make ~kMSKeyArn ~roleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kMSKeyArn = field_map_exn json "KMSKeyArn" KMSKeyArn.of_json in
-      let roleArn = field_map_exn json "RoleArn" Arn.of_json in
+    let of_json json__ =
+      let kMSKeyArn = field_map_exn json__ "KMSKeyArn" KMSKeyArn.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" Arn.of_json in
       make ~kMSKeyArn ~roleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An AWS Key Management Service (KMS) key and an AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the key. You can specify this optional object in the CreateDataset and CreatePredictor requests."]
+       "An Key Management Service (KMS) key and an Identity and Access Management (IAM) role that Amazon Forecast can assume to access the key. You can specify this optional object in the CreateDataset and CreatePredictor requests."]
 module EvaluationParameters =
   struct
     type nonrec t =
@@ -3643,11 +5345,11 @@ module EvaluationParameters =
           (Xml.child xml_arg0 "NumberOfBacktestWindows") in
       make ?backTestWindowOffset ?numberOfBacktestWindows ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let backTestWindowOffset =
-        field_map json "BackTestWindowOffset" Integer.of_json in
+        field_map json__ "BackTestWindowOffset" Integer.of_json in
       let numberOfBacktestWindows =
-        field_map json "NumberOfBacktestWindows" Integer.of_json in
+        field_map json__ "NumberOfBacktestWindows" Integer.of_json in
       make ?backTestWindowOffset ?numberOfBacktestWindows ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3658,7 +5360,7 @@ module FeaturizationConfig =
       {
       forecastFrequency: Frequency.t
         [@ocaml.doc
-          "The frequency of predictions in a forecast. Valid intervals are Y (Year), M (Month), W (Week), D (Day), H (Hour), 30min (30 minutes), 15min (15 minutes), 10min (10 minutes), 5min (5 minutes), and 1min (1 minute). For example, \"Y\" indicates every year and \"5min\" indicates every five minutes. The frequency must be greater than or equal to the TARGET_TIME_SERIES dataset frequency. When a RELATED_TIME_SERIES dataset is provided, the frequency must be equal to the RELATED_TIME_SERIES dataset frequency."];
+          "The frequency of predictions in a forecast. Valid intervals are an integer followed by Y (Year), M (Month), W (Week), D (Day), H (Hour), and min (Minute). For example, \"1D\" indicates every day and \"15min\" indicates every 15 minutes. You cannot specify a value that would overlap with the next larger frequency. That means, for example, you cannot specify a frequency of 60 minutes, because that is equivalent to 1 hour. The valid values for each frequency are the following: Minute - 1-59 Hour - 1-23 Day - 1-6 Week - 1-4 Month - 1-11 Year - 1 Thus, if you want every other week forecasts, specify \"2W\". Or, if you want quarterly forecasts, you specify \"3M\". The frequency must be greater than or equal to the TARGET_TIME_SERIES dataset frequency. When a RELATED_TIME_SERIES dataset is provided, the frequency must be equal to the TARGET_TIME_SERIES dataset frequency."];
       forecastDimensions: ForecastDimensions.t option
         [@ocaml.doc
           "An array of dimension (field) names that specify how to group the generated forecast. For example, suppose that you are generating a forecast for item sales across all of your stores, and your dataset contains a store_id field. If you want the sales forecast for each item by store, you would specify store_id as the dimension. All forecast dimensions specified in the TARGET_TIME_SERIES dataset don't need to be specified in the CreatePredictor request. All forecast dimensions specified in the RELATED_TIME_SERIES dataset must be specified in the CreatePredictor request."];
@@ -3691,45 +5393,17 @@ module FeaturizationConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "ForecastFrequency") in
       make ?featurizations ?forecastDimensions ~forecastFrequency ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let featurizations =
-        field_map json "Featurizations" Featurizations.of_json in
+        field_map json__ "Featurizations" Featurizations.of_json in
       let forecastDimensions =
-        field_map json "ForecastDimensions" ForecastDimensions.of_json in
+        field_map json__ "ForecastDimensions" ForecastDimensions.of_json in
       let forecastFrequency =
-        field_map_exn json "ForecastFrequency" Frequency.of_json in
+        field_map_exn json__ "ForecastFrequency" Frequency.of_json in
       make ?featurizations ?forecastDimensions ~forecastFrequency ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This object belongs to the CreatePredictor operation. If you created your predictor with CreateAutoPredictor, see AttributeConfig. In a CreatePredictor operation, the specified algorithm trains a model using the specified dataset group. You can optionally tell the operation to modify data fields prior to training a model. These modifications are referred to as featurization. You define featurization using the FeaturizationConfig object. You specify an array of transformations, one for each field that you want to featurize. You then include the FeaturizationConfig object in your CreatePredictor request. Amazon Forecast applies the featurization to the TARGET_TIME_SERIES and RELATED_TIME_SERIES datasets before model training. You can create multiple featurization configurations. For example, you might call the CreatePredictor operation twice by specifying different featurization configurations."]
-module ForecastTypes =
-  struct
-    type nonrec t = ForecastType.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:ForecastType.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ForecastType.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ForecastTypes" ~of_json:ForecastType.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module HyperParameterTuningJobConfig =
   struct
     type nonrec t =
@@ -3749,9 +5423,9 @@ module HyperParameterTuningJobConfig =
           (Xml.child xml_arg0 "ParameterRanges") in
       make ?parameterRanges ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterRanges =
-        field_map json "ParameterRanges" ParameterRanges.of_json in
+        field_map json__ "ParameterRanges" ParameterRanges.of_json in
       make ?parameterRanges ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3785,10 +5459,12 @@ module InputDataConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetGroupArn") in
       make ?supplementaryFeatures ~datasetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let supplementaryFeatures =
-        field_map json "SupplementaryFeatures" SupplementaryFeatures.of_json in
-      let datasetGroupArn = field_map_exn json "DatasetGroupArn" Arn.of_json in
+        field_map json__ "SupplementaryFeatures"
+          SupplementaryFeatures.of_json in
+      let datasetGroupArn =
+        field_map_exn json__ "DatasetGroupArn" Arn.of_json in
       make ?supplementaryFeatures ~datasetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3812,9 +5488,9 @@ module PredictorExecutionDetails =
           (Xml.child xml_arg0 "PredictorExecutions") in
       make ?predictorExecutions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let predictorExecutions =
-        field_map json "PredictorExecutions" PredictorExecutions.of_json in
+        field_map json__ "PredictorExecutions" PredictorExecutions.of_json in
       make ?predictorExecutions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3846,6 +5522,8 @@ module TrainingParameters =
                        (ParameterValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3853,6 +5531,32 @@ module TrainingParameters =
         ~of_json:ParameterValue.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Baseline =
+  struct
+    type nonrec t =
+      {
+      predictorBaseline: PredictorBaseline.t option
+        [@ocaml.doc
+          "The initial accuracy metrics for the predictor you are monitoring. Use these metrics as a baseline for comparison purposes as you use your predictor and the metrics change."]}
+    let make ?predictorBaseline = fun () -> { predictorBaseline }
+    let to_value x =
+      structure_to_value
+        [("PredictorBaseline",
+           (Option.map x.predictorBaseline ~f:PredictorBaseline.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let predictorBaseline =
+        (Option.map ~f:PredictorBaseline.of_xml)
+          (Xml.child xml_arg0 "PredictorBaseline") in
+      make ?predictorBaseline ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let predictorBaseline =
+        field_map json__ "PredictorBaseline" PredictorBaseline.of_json in
+      make ?predictorBaseline ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Metrics you can use as a baseline for comparison purposes. Use these metrics when you interpret monitoring results for an auto predictor."]
 module LocalDateTime =
   struct
     type nonrec t = string
@@ -3873,30 +5577,6 @@ module LocalDateTime =
     let of_json j = string_of_json ~kind:"LocalDateTime" j
     let to_json = simple_to_json to_value
   end
-module Schema =
-  struct
-    type nonrec t =
-      {
-      attributes: SchemaAttributes.t option
-        [@ocaml.doc
-          "An array of attributes specifying the name and type of each field in a dataset."]}
-    let make ?attributes = fun () -> { attributes }
-    let to_value x =
-      structure_to_value
-        [("Attributes",
-           (Option.map x.attributes ~f:SchemaAttributes.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let attributes =
-        (Option.map ~f:SchemaAttributes.of_xml)
-          (Xml.child xml_arg0 "Attributes") in
-      make ?attributes ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "Attributes" SchemaAttributes.of_json in
-      make ?attributes ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Defines the fields of a dataset."]
 module FieldStatistics =
   struct
     type nonrec t = (String_.t * Statistics.t) list
@@ -3920,6 +5600,8 @@ module FieldStatistics =
                     (fun x -> (Statistics.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3961,25 +5643,6 @@ module TimeZone =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TimeZone" j
-    let to_json = simple_to_json to_value
-  end
-module TimestampFormat =
-  struct
-    type nonrec t = string
-    let context_ = "TimestampFormat"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () ->
-                check_pattern i ~pattern:"^[a-zA-Z0-9\\-\\:\\.\\,\\'\\s]+$"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TimestampFormat" j
     let to_json = simple_to_json to_value
   end
 module UseGeolocationForTimeZone =
@@ -4033,12 +5696,13 @@ module DataConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetGroupArn") in
       make ?additionalDatasets ?attributeConfigs ~datasetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let additionalDatasets =
-        field_map json "AdditionalDatasets" AdditionalDatasets.of_json in
+        field_map json__ "AdditionalDatasets" AdditionalDatasets.of_json in
       let attributeConfigs =
-        field_map json "AttributeConfigs" AttributeConfigs.of_json in
-      let datasetGroupArn = field_map_exn json "DatasetGroupArn" Arn.of_json in
+        field_map json__ "AttributeConfigs" AttributeConfigs.of_json in
+      let datasetGroupArn =
+        field_map_exn json__ "DatasetGroupArn" Arn.of_json in
       make ?additionalDatasets ?attributeConfigs ~datasetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4067,12 +5731,87 @@ module ExplainabilityInfo =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ExplainabilityArn") in
       make ?status ?explainabilityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Status.of_json in
-      let explainabilityArn = field_map json "ExplainabilityArn" Arn.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Status.of_json in
+      let explainabilityArn =
+        field_map json__ "ExplainabilityArn" Arn.of_json in
       make ?status ?explainabilityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides information about the Explainability resource."]
+module MonitorInfo =
+  struct
+    type nonrec t =
+      {
+      monitorArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the monitor resource."];
+      status: Status.t option
+        [@ocaml.doc
+          "The status of the monitor. States include: ACTIVE ACTIVE_STOPPING, ACTIVE_STOPPED UPDATE_IN_PROGRESS CREATE_PENDING, CREATE_IN_PROGRESS, CREATE_FAILED DELETE_PENDING, DELETE_IN_PROGRESS, DELETE_FAILED"]}
+    let make ?monitorArn = fun ?status -> fun () -> { monitorArn; status }
+    let to_value x =
+      structure_to_value
+        [("MonitorArn", (Option.map x.monitorArn ~f:Arn.to_value));
+        ("Status", (Option.map x.status ~f:Status.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
+      let monitorArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "MonitorArn") in
+      make ?status ?monitorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" Status.of_json in
+      let monitorArn = field_map json__ "MonitorArn" Arn.of_json in
+      make ?status ?monitorArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Provides information about the monitor resource."]
+module TimeAlignmentBoundary =
+  struct
+    type nonrec t =
+      {
+      month: Month.t option
+        [@ocaml.doc
+          "The month to use for time alignment during aggregation. The month must be in uppercase."];
+      dayOfMonth: DayOfMonth.t option
+        [@ocaml.doc
+          "The day of the month to use for time alignment during aggregation."];
+      dayOfWeek: DayOfWeek.t option
+        [@ocaml.doc
+          "The day of week to use for time alignment during aggregation. The day must be in uppercase."];
+      hour: Hour.t option
+        [@ocaml.doc
+          "The hour of day to use for time alignment during aggregation."]}
+    let make ?month =
+      fun ?dayOfMonth ->
+        fun ?dayOfWeek ->
+          fun ?hour -> fun () -> { month; dayOfMonth; dayOfWeek; hour }
+    let to_value x =
+      structure_to_value
+        [("Month", (Option.map x.month ~f:Month.to_value));
+        ("DayOfMonth", (Option.map x.dayOfMonth ~f:DayOfMonth.to_value));
+        ("DayOfWeek", (Option.map x.dayOfWeek ~f:DayOfWeek.to_value));
+        ("Hour", (Option.map x.hour ~f:Hour.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hour = (Option.map ~f:Hour.of_xml) (Xml.child xml_arg0 "Hour") in
+      let dayOfWeek =
+        (Option.map ~f:DayOfWeek.of_xml) (Xml.child xml_arg0 "DayOfWeek") in
+      let dayOfMonth =
+        (Option.map ~f:DayOfMonth.of_xml) (Xml.child xml_arg0 "DayOfMonth") in
+      let month = (Option.map ~f:Month.of_xml) (Xml.child xml_arg0 "Month") in
+      make ?hour ?dayOfWeek ?dayOfMonth ?month ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hour = field_map json__ "Hour" Hour.of_json in
+      let dayOfWeek = field_map json__ "DayOfWeek" DayOfWeek.of_json in
+      let dayOfMonth = field_map json__ "DayOfMonth" DayOfMonth.of_json in
+      let month = field_map json__ "Month" Month.of_json in
+      make ?hour ?dayOfWeek ?dayOfMonth ?month ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The time boundary Forecast uses to align and aggregate your data to match your forecast frequency. Provide the unit of time and the time boundary as a key value pair. If you don't provide a time boundary, Forecast uses a set of Default Time Boundaries. For more information about aggregation, see Data Aggregation for Different Forecast Frequencies. For more information setting a custom time boundary, see Specifying a Time Boundary."]
 module ResourceAlreadyExistsException =
   struct
     type nonrec t = {
@@ -4087,12 +5826,33 @@ module ResourceAlreadyExistsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "There is already a resource with this name. Try again with a different name."]
+module MonitorConfig =
+  struct
+    type nonrec t =
+      {
+      monitorName: Name.t [@ocaml.doc "The name of the monitor resource."]}
+    let context_ = "MonitorConfig"
+    let make ~monitorName = fun () -> { monitorName }
+    let to_value x =
+      structure_to_value
+        [("MonitorName", (Some (Name.to_value x.monitorName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let monitorName =
+        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MonitorName") in
+      make ~monitorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let monitorName = field_map_exn json__ "MonitorName" Name.of_json in
+      make ~monitorName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration details for the predictor monitor."]
 module UpdateDatasetGroupResponse =
   struct
     type nonrec t = unit
@@ -4176,9 +5936,10 @@ module UpdateDatasetGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetGroupArn") in
       make ~datasetArns ~datasetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetArns = field_map_exn json "DatasetArns" ArnList.of_json in
-      let datasetGroupArn = field_map_exn json "DatasetGroupArn" Arn.of_json in
+    let of_json json__ =
+      let datasetArns = field_map_exn json__ "DatasetArns" ArnList.of_json in
+      let datasetGroupArn =
+        field_map_exn json__ "DatasetGroupArn" Arn.of_json in
       make ~datasetArns ~datasetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4254,9 +6015,9 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeys.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified tags from a resource."]
@@ -4327,7 +6088,7 @@ module TagResourceRequest =
           "The Amazon Resource Name (ARN) that identifies the resource for which to list the tags."];
       tags: Tags.t
         [@ocaml.doc
-          "The tags to add to the resource. A tag is an array of key-value pairs. The following basic restrictions apply to tags: Maximum number of tags per resource - 50. For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length - 128 Unicode characters in UTF-8. Maximum value length - 256 Unicode characters in UTF-8. If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for keys as it is reserved for AWS use. You cannot edit or delete tag keys with this prefix. Values can have this prefix. If a tag value has aws as its prefix but the key does not, then Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit."]}
+          "The tags to add to the resource. A tag is an array of key-value pairs. The following basic restrictions apply to tags: Maximum number of tags per resource - 50. For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length - 128 Unicode characters in UTF-8. Maximum value length - 256 Unicode characters in UTF-8. If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for keys as it is reserved for Amazon Web Services use. You cannot edit or delete tag keys with this prefix. Values can have this prefix. If a tag value has aws as its prefix but the key does not, then Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
@@ -4342,9 +6103,9 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4367,12 +6128,361 @@ module StopResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Stops a resource. The resource undergoes the following states: CREATE_STOPPING and CREATE_STOPPED. You cannot resume a resource once it has been stopped. This operation can be applied to the following resources (and their corresponding child resources): Dataset Import Job Predictor Job Forecast Job Forecast Export Job Predictor Backtest Export Job Explainability Job Explainability Export Job"]
+module ResumeResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the monitor resource to resume."]}
+    let context_ = "ResumeResourceRequest"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (Arn.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Resumes a stopped monitor resource."]
+module ListWhatIfForecastsResponse =
+  struct
+    type nonrec t =
+      {
+      whatIfForecasts: WhatIfForecasts.t option
+        [@ocaml.doc
+          "An array of WhatIfForecasts objects that describe the matched forecasts."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the result of the previous request was truncated, the response includes a NextToken. To retrieve the next set of results, use the token in the next&#x2028; request. Tokens expire after 24 hours."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?whatIfForecasts =
+      fun ?nextToken -> fun () -> { whatIfForecasts; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WhatIfForecasts",
+           (Option.map x.whatIfForecasts ~f:WhatIfForecasts.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let whatIfForecasts =
+        (Option.map ~f:WhatIfForecasts.of_xml)
+          (Xml.child xml_arg0 "WhatIfForecasts") in
+      make ?nextToken ?whatIfForecasts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let whatIfForecasts =
+        field_map json__ "WhatIfForecasts" WhatIfForecasts.of_json in
+      make ?nextToken ?whatIfForecasts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of what-if forecasts created using the CreateWhatIfForecast operation. For each what-if forecast, this operation returns a summary of its properties, including its Amazon Resource Name (ARN). You can retrieve the complete set of properties by using the what-if forecast ARN with the DescribeWhatIfForecast operation."]
+module ListWhatIfForecastsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the result of the previous request was truncated, the response includes a NextToken. To retrieve the next set of results, use the token in the next&#x2028; request. Tokens expire after 24 hours."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The number of items to return in the response."];
+      filters: Filters.t option
+        [@ocaml.doc
+          "An array of filters. For each filter, you provide a condition and a match statement. The condition is either IS or IS_NOT, which specifies whether to include or exclude the what-if forecast export jobs that match the statement from the list, respectively. The match statement consists of a key and a value. Filter properties Condition - The condition to apply. Valid values are IS and IS_NOT. To include the forecast export jobs that match the statement, specify IS. To exclude matching forecast export jobs, specify IS_NOT. Key - The name of the parameter to filter on. Valid values are WhatIfForecastArn and Status. Value - The value to match. For example, to list all jobs that export a forecast named electricityWhatIfForecast, specify the following filter: \"Filters\": \\[ \\{ \"Condition\": \"IS\", \"Key\": \"WhatIfForecastArn\", \"Value\": \"arn:aws:forecast:us-west-2:<acct-id>:forecast/electricityWhatIfForecast\" \\} \\]"]}
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?filters -> fun () -> { nextToken; maxResults; filters }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("Filters", (Option.map x.filters ~f:Filters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filters =
+        (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Filters") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?filters ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of what-if forecasts created using the CreateWhatIfForecast operation. For each what-if forecast, this operation returns a summary of its properties, including its Amazon Resource Name (ARN). You can retrieve the complete set of properties by using the what-if forecast ARN with the DescribeWhatIfForecast operation."]
+module ListWhatIfForecastExportsResponse =
+  struct
+    type nonrec t =
+      {
+      whatIfForecastExports: WhatIfForecastExports.t option
+        [@ocaml.doc
+          "An array of WhatIfForecastExports objects that describe the matched forecast exports."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the response is truncated, Forecast returns this token. To retrieve the next set of results, use the token in the next request."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?whatIfForecastExports =
+      fun ?nextToken -> fun () -> { whatIfForecastExports; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WhatIfForecastExports",
+           (Option.map x.whatIfForecastExports
+              ~f:WhatIfForecastExports.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let whatIfForecastExports =
+        (Option.map ~f:WhatIfForecastExports.of_xml)
+          (Xml.child xml_arg0 "WhatIfForecastExports") in
+      make ?nextToken ?whatIfForecastExports ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let whatIfForecastExports =
+        field_map json__ "WhatIfForecastExports"
+          WhatIfForecastExports.of_json in
+      make ?nextToken ?whatIfForecastExports ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of what-if forecast exports created using the CreateWhatIfForecastExport operation. For each what-if forecast export, this operation returns a summary of its properties, including its Amazon Resource Name (ARN). You can retrieve the complete set of properties by using the what-if forecast export ARN with the DescribeWhatIfForecastExport operation."]
+module ListWhatIfForecastExportsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the result of the previous request was truncated, the response includes a NextToken. To retrieve the next set of results, use the token in the next&#x2028; request. Tokens expire after 24 hours."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The number of items to return in the response."];
+      filters: Filters.t option
+        [@ocaml.doc
+          "An array of filters. For each filter, you provide a condition and a match statement. The condition is either IS or IS_NOT, which specifies whether to include or exclude the what-if forecast export jobs that match the statement from the list, respectively. The match statement consists of a key and a value. Filter properties Condition - The condition to apply. Valid values are IS and IS_NOT. To include the forecast export jobs that match the statement, specify IS. To exclude matching forecast export jobs, specify IS_NOT. Key - The name of the parameter to filter on. Valid values are WhatIfForecastExportArn and Status. Value - The value to match. For example, to list all jobs that export a forecast named electricityWIFExport, specify the following filter: \"Filters\": \\[ \\{ \"Condition\": \"IS\", \"Key\": \"WhatIfForecastExportArn\", \"Value\": \"arn:aws:forecast:us-west-2:<acct-id>:forecast/electricityWIFExport\" \\} \\]"]}
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?filters -> fun () -> { nextToken; maxResults; filters }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("Filters", (Option.map x.filters ~f:Filters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filters =
+        (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Filters") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?filters ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of what-if forecast exports created using the CreateWhatIfForecastExport operation. For each what-if forecast export, this operation returns a summary of its properties, including its Amazon Resource Name (ARN). You can retrieve the complete set of properties by using the what-if forecast export ARN with the DescribeWhatIfForecastExport operation."]
+module ListWhatIfAnalysesResponse =
+  struct
+    type nonrec t =
+      {
+      whatIfAnalyses: WhatIfAnalyses.t option
+        [@ocaml.doc
+          "An array of WhatIfAnalysisSummary objects that describe the matched analyses."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the response is truncated, Forecast returns this token. To retrieve the next set of results, use the token in the next request."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?whatIfAnalyses =
+      fun ?nextToken -> fun () -> { whatIfAnalyses; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WhatIfAnalyses",
+           (Option.map x.whatIfAnalyses ~f:WhatIfAnalyses.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let whatIfAnalyses =
+        (Option.map ~f:WhatIfAnalyses.of_xml)
+          (Xml.child xml_arg0 "WhatIfAnalyses") in
+      make ?nextToken ?whatIfAnalyses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let whatIfAnalyses =
+        field_map json__ "WhatIfAnalyses" WhatIfAnalyses.of_json in
+      make ?nextToken ?whatIfAnalyses ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of what-if analyses created using the CreateWhatIfAnalysis operation. For each what-if analysis, this operation returns a summary of its properties, including its Amazon Resource Name (ARN). You can retrieve the complete set of properties by using the what-if analysis ARN with the DescribeWhatIfAnalysis operation."]
+module ListWhatIfAnalysesRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the result of the previous request was truncated, the response includes a NextToken. To retrieve the next set of results, use the token in the next request. Tokens expire after 24 hours."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The number of items to return in the response."];
+      filters: Filters.t option
+        [@ocaml.doc
+          "An array of filters. For each filter, you provide a condition and a match statement. The condition is either IS or IS_NOT, which specifies whether to include or exclude the what-if analysis jobs that match the statement from the list, respectively. The match statement consists of a key and a value. Filter properties Condition - The condition to apply. Valid values are IS and IS_NOT. To include the what-if analysis jobs that match the statement, specify IS. To exclude matching what-if analysis jobs, specify IS_NOT. Key - The name of the parameter to filter on. Valid values are WhatIfAnalysisArn and Status. Value - The value to match. For example, to list all jobs that export a forecast named electricityWhatIf, specify the following filter: \"Filters\": \\[ \\{ \"Condition\": \"IS\", \"Key\": \"WhatIfAnalysisArn\", \"Value\": \"arn:aws:forecast:us-west-2:<acct-id>:forecast/electricityWhatIf\" \\} \\]"]}
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?filters -> fun () -> { nextToken; maxResults; filters }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("Filters", (Option.map x.filters ~f:Filters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filters =
+        (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Filters") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?filters ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of what-if analyses created using the CreateWhatIfAnalysis operation. For each what-if analysis, this operation returns a summary of its properties, including its Amazon Resource Name (ARN). You can retrieve the complete set of properties by using the what-if analysis ARN with the DescribeWhatIfAnalysis operation."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -4422,8 +6532,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for an Amazon Forecast resource."]
 module ListTagsForResourceRequest =
@@ -4444,8 +6554,8 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for an Amazon Forecast resource."]
@@ -4509,9 +6619,9 @@ module ListPredictorsResponse =
         (Option.map ~f:Predictors.of_xml) (Xml.child xml_arg0 "Predictors") in
       make ?nextToken ?predictors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let predictors = field_map json "Predictors" Predictors.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let predictors = field_map json__ "Predictors" Predictors.of_json in
       make ?nextToken ?predictors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4546,10 +6656,10 @@ module ListPredictorsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" Filters.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?filters ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4617,10 +6727,10 @@ module ListPredictorBacktestExportJobsResponse =
           (Xml.child xml_arg0 "PredictorBacktestExportJobs") in
       make ?nextToken ?predictorBacktestExportJobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let predictorBacktestExportJobs =
-        field_map json "PredictorBacktestExportJobs"
+        field_map json__ "PredictorBacktestExportJobs"
           PredictorBacktestExportJobs.of_json in
       make ?nextToken ?predictorBacktestExportJobs ()
     let to_json v = composed_to_json to_value v
@@ -4656,14 +6766,249 @@ module ListPredictorBacktestExportJobsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" Filters.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?filters ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of predictor backtest export jobs created using the CreatePredictorBacktestExportJob operation. This operation returns a summary for each backtest export job. You can filter the list using an array of Filter objects. To retrieve the complete set of properties for a particular backtest export job, use the ARN with the DescribePredictorBacktestExportJob operation."]
+module ListMonitorsResponse =
+  struct
+    type nonrec t =
+      {
+      monitors: Monitors.t option
+        [@ocaml.doc
+          "An array of objects that summarize each monitor's properties."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the response is truncated, Amazon Forecast returns this token. To retrieve the next set of results, use the token in the next request."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?monitors = fun ?nextToken -> fun () -> { monitors; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Monitors", (Option.map x.monitors ~f:Monitors.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let monitors =
+        (Option.map ~f:Monitors.of_xml) (Xml.child xml_arg0 "Monitors") in
+      make ?nextToken ?monitors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let monitors = field_map json__ "Monitors" Monitors.of_json in
+      make ?nextToken ?monitors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of monitors created with the CreateMonitor operation and CreateAutoPredictor operation. For each monitor resource, this operation returns of a summary of its properties, including its Amazon Resource Name (ARN). You can retrieve a complete set of properties of a monitor resource by specify the monitor's ARN in the DescribeMonitor operation."]
+module ListMonitorsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the result of the previous request was truncated, the response includes a NextToken. To retrieve the next set of results, use the token in the next request. Tokens expire after 24 hours."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of monitors to include in the response."];
+      filters: Filters.t option
+        [@ocaml.doc
+          "An array of filters. For each filter, provide a condition and a match statement. The condition is either IS or IS_NOT, which specifies whether to include or exclude the resources that match the statement from the list. The match statement consists of a key and a value. Filter properties Condition - The condition to apply. Valid values are IS and IS_NOT. Key - The name of the parameter to filter on. The only valid value is Status. Value - The value to match. For example, to list all monitors who's status is ACTIVE, you would specify: \"Filters\": \\[ \\{ \"Condition\": \"IS\", \"Key\": \"Status\", \"Value\": \"ACTIVE\" \\} \\]"]}
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?filters -> fun () -> { nextToken; maxResults; filters }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("Filters", (Option.map x.filters ~f:Filters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filters =
+        (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Filters") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?filters ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of monitors created with the CreateMonitor operation and CreateAutoPredictor operation. For each monitor resource, this operation returns of a summary of its properties, including its Amazon Resource Name (ARN). You can retrieve a complete set of properties of a monitor resource by specify the monitor's ARN in the DescribeMonitor operation."]
+module ListMonitorEvaluationsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the response is truncated, Amazon Forecast returns this token. To retrieve the next set of results, use the token in the next request. Tokens expire after 24 hours."];
+      predictorMonitorEvaluations: PredictorMonitorEvaluations.t option
+        [@ocaml.doc
+          "The monitoring results and predictor events collected by the monitor resource during different windows of time. For information about monitoring see Viewing Monitoring Results. For more information about retrieving monitoring results see Viewing Monitoring Results."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?predictorMonitorEvaluations ->
+        fun () -> { nextToken; predictorMonitorEvaluations }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("PredictorMonitorEvaluations",
+          (Option.map x.predictorMonitorEvaluations
+             ~f:PredictorMonitorEvaluations.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let predictorMonitorEvaluations =
+        (Option.map ~f:PredictorMonitorEvaluations.of_xml)
+          (Xml.child xml_arg0 "PredictorMonitorEvaluations") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?predictorMonitorEvaluations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let predictorMonitorEvaluations =
+        field_map json__ "PredictorMonitorEvaluations"
+          PredictorMonitorEvaluations.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?predictorMonitorEvaluations ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of the monitoring evaluation results and predictor events collected by the monitor resource during different windows of time. For information about monitoring see predictor-monitoring. For more information about retrieving monitoring results see Viewing Monitoring Results."]
+module ListMonitorEvaluationsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the result of the previous request was truncated, the response includes a NextToken. To retrieve the next set of results, use the token in the next request. Tokens expire after 24 hours."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of monitoring results to return."];
+      monitorArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the monitor resource to get results from."];
+      filters: Filters.t option
+        [@ocaml.doc
+          "An array of filters. For each filter, provide a condition and a match statement. The condition is either IS or IS_NOT, which specifies whether to include or exclude the resources that match the statement from the list. The match statement consists of a key and a value. Filter properties Condition - The condition to apply. Valid values are IS and IS_NOT. Key - The name of the parameter to filter on. The only valid value is EvaluationState. Value - The value to match. Valid values are only SUCCESS or FAILURE. For example, to list only successful monitor evaluations, you would specify: \"Filters\": \\[ \\{ \"Condition\": \"IS\", \"Key\": \"EvaluationState\", \"Value\": \"SUCCESS\" \\} \\]"]}
+    let context_ = "ListMonitorEvaluationsRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?filters ->
+          fun ~monitorArn ->
+            fun () -> { nextToken; maxResults; filters; monitorArn }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("MonitorArn", (Some (Arn.to_value x.monitorArn)));
+        ("Filters", (Option.map x.filters ~f:Filters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filters =
+        (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Filters") in
+      let monitorArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MonitorArn") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?filters ~monitorArn ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let monitorArn = field_map_exn json__ "MonitorArn" Arn.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?filters ~monitorArn ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of the monitoring evaluation results and predictor events collected by the monitor resource during different windows of time. For information about monitoring see predictor-monitoring. For more information about retrieving monitoring results see Viewing Monitoring Results."]
 module ListForecastsResponse =
   struct
     type nonrec t =
@@ -4724,9 +7069,9 @@ module ListForecastsResponse =
         (Option.map ~f:Forecasts.of_xml) (Xml.child xml_arg0 "Forecasts") in
       make ?nextToken ?forecasts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let forecasts = field_map json "Forecasts" Forecasts.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let forecasts = field_map json__ "Forecasts" Forecasts.of_json in
       make ?nextToken ?forecasts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4761,10 +7106,10 @@ module ListForecastsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" Filters.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?filters ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4831,10 +7176,10 @@ module ListForecastExportJobsResponse =
           (Xml.child xml_arg0 "ForecastExportJobs") in
       make ?nextToken ?forecastExportJobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let forecastExportJobs =
-        field_map json "ForecastExportJobs" ForecastExportJobs.of_json in
+        field_map json__ "ForecastExportJobs" ForecastExportJobs.of_json in
       make ?nextToken ?forecastExportJobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4869,10 +7214,10 @@ module ListForecastExportJobsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" Filters.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?filters ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4940,10 +7285,11 @@ module ListExplainabilityExportsResponse =
           (Xml.child xml_arg0 "ExplainabilityExports") in
       make ?nextToken ?explainabilityExports ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let explainabilityExports =
-        field_map json "ExplainabilityExports" ExplainabilityExports.of_json in
+        field_map json__ "ExplainabilityExports"
+          ExplainabilityExports.of_json in
       make ?nextToken ?explainabilityExports ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4978,10 +7324,10 @@ module ListExplainabilityExportsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" Filters.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?filters ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5048,10 +7394,10 @@ module ListExplainabilitiesResponse =
           (Xml.child xml_arg0 "Explainabilities") in
       make ?nextToken ?explainabilities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let explainabilities =
-        field_map json "Explainabilities" Explainabilities.of_json in
+        field_map json__ "Explainabilities" Explainabilities.of_json in
       make ?nextToken ?explainabilities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5086,10 +7432,10 @@ module ListExplainabilitiesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" Filters.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?filters ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5144,9 +7490,9 @@ module ListDatasetsResponse =
         (Option.map ~f:Datasets.of_xml) (Xml.child xml_arg0 "Datasets") in
       make ?nextToken ?datasets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let datasets = field_map json "Datasets" Datasets.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let datasets = field_map json__ "Datasets" Datasets.of_json in
       make ?nextToken ?datasets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5174,9 +7520,9 @@ module ListDatasetsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5243,10 +7589,10 @@ module ListDatasetImportJobsResponse =
           (Xml.child xml_arg0 "DatasetImportJobs") in
       make ?nextToken ?datasetImportJobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let datasetImportJobs =
-        field_map json "DatasetImportJobs" DatasetImportJobs.of_json in
+        field_map json__ "DatasetImportJobs" DatasetImportJobs.of_json in
       make ?nextToken ?datasetImportJobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5281,10 +7627,10 @@ module ListDatasetImportJobsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" Filters.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?filters ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5342,10 +7688,10 @@ module ListDatasetGroupsResponse =
           (Xml.child xml_arg0 "DatasetGroups") in
       make ?nextToken ?datasetGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let datasetGroups =
-        field_map json "DatasetGroups" DatasetGroups.of_json in
+        field_map json__ "DatasetGroups" DatasetGroups.of_json in
       make ?nextToken ?datasetGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5373,9 +7719,9 @@ module ListDatasetGroupsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5391,7 +7737,7 @@ module GetAccuracyMetricsResponse =
           "Whether the predictor was created with CreateAutoPredictor."];
       autoMLOverrideStrategy: AutoMLOverrideStrategy.t option
         [@ocaml.doc
-          "The LatencyOptimized AutoML override strategy is only available in private beta. Contact AWS Support or your account manager to learn more about access privileges. The AutoML strategy used to train the predictor. Unless LatencyOptimized is specified, the AutoML strategy optimizes predictor accuracy. This parameter is only valid for predictors trained using AutoML."];
+          "The LatencyOptimized AutoML override strategy is only available in private beta. Contact Amazon Web Services Support or your account manager to learn more about access privileges. The AutoML strategy used to train the predictor. Unless LatencyOptimized is specified, the AutoML strategy optimizes predictor accuracy. This parameter is only valid for predictors trained using AutoML."];
       optimizationMetric: OptimizationMetric.t option
         [@ocaml.doc "The accuracy metric used to optimize the predictor."]}
     type nonrec error =
@@ -5478,15 +7824,16 @@ module GetAccuracyMetricsResponse =
       make ?optimizationMetric ?autoMLOverrideStrategy ?isAutoPredictor
         ?predictorEvaluationResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let optimizationMetric =
-        field_map json "OptimizationMetric" OptimizationMetric.of_json in
+        field_map json__ "OptimizationMetric" OptimizationMetric.of_json in
       let autoMLOverrideStrategy =
-        field_map json "AutoMLOverrideStrategy"
+        field_map json__ "AutoMLOverrideStrategy"
           AutoMLOverrideStrategy.of_json in
-      let isAutoPredictor = field_map json "IsAutoPredictor" Boolean.of_json in
+      let isAutoPredictor =
+        field_map json__ "IsAutoPredictor" Boolean.of_json in
       let predictorEvaluationResults =
-        field_map json "PredictorEvaluationResults"
+        field_map json__ "PredictorEvaluationResults"
           PredictorEvaluationResults.of_json in
       make ?optimizationMetric ?autoMLOverrideStrategy ?isAutoPredictor
         ?predictorEvaluationResults ()
@@ -5511,12 +7858,584 @@ module GetAccuracyMetricsRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PredictorArn") in
       make ~predictorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let predictorArn = field_map_exn json "PredictorArn" Arn.of_json in
+    let of_json json__ =
+      let predictorArn = field_map_exn json__ "PredictorArn" Arn.of_json in
       make ~predictorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides metrics on the accuracy of the models that were trained by the CreatePredictor operation. Use metrics to see how well the model performed and to decide whether to use the predictor to generate a forecast. For more information, see Predictor Metrics. This operation generates metrics for each backtest window that was evaluated. The number of backtest windows (NumberOfBacktestWindows) is specified using the EvaluationParameters object, which is optionally included in the CreatePredictor request. If NumberOfBacktestWindows isn't specified, the number defaults to one. The parameters of the filling method determine which items contribute to the metrics. If you want all items to contribute, specify zero. If you want only those items that have complete data in the range being evaluated to contribute, specify nan. For more information, see FeaturizationMethod. Before you can get accuracy metrics, the Status of the predictor must be ACTIVE, signifying that training has completed. To get the status, use the DescribePredictor operation."]
+module DescribeWhatIfForecastResponse =
+  struct
+    type nonrec t =
+      {
+      whatIfForecastName: Name.t option
+        [@ocaml.doc "The name of the what-if forecast."];
+      whatIfForecastArn: LongArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if forecast."];
+      whatIfAnalysisArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if analysis that contains this forecast."];
+      estimatedTimeRemainingInMinutes: Long.t option
+        [@ocaml.doc
+          "The approximate time remaining to complete the what-if forecast, in minutes."];
+      status: String_.t option
+        [@ocaml.doc
+          "The status of the what-if forecast. States include: ACTIVE CREATE_PENDING, CREATE_IN_PROGRESS, CREATE_FAILED CREATE_STOPPING, CREATE_STOPPED DELETE_PENDING, DELETE_IN_PROGRESS, DELETE_FAILED The Status of the what-if forecast must be ACTIVE before you can access the forecast."];
+      message: ErrorMessage.t option
+        [@ocaml.doc
+          "If an error occurred, an informational message about the error."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc "When the what-if forecast was created."];
+      lastModificationTime: Timestamp.t option
+        [@ocaml.doc
+          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."];
+      timeSeriesTransformations: TimeSeriesTransformations.t option
+        [@ocaml.doc
+          "An array of Action and TimeSeriesConditions elements that describe what transformations were applied to which time series."];
+      timeSeriesReplacementsDataSource:
+        TimeSeriesReplacementsDataSource.t option
+        [@ocaml.doc
+          "An array of S3Config, Schema, and Format elements that describe the replacement time series."];
+      forecastTypes: ForecastTypes.t option
+        [@ocaml.doc
+          "The quantiles at which probabilistic forecasts are generated. You can specify up to five quantiles per what-if forecast in the CreateWhatIfForecast operation. If you didn't specify quantiles, the default values are \\[\"0.1\", \"0.5\", \"0.9\"\\]."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?whatIfForecastName =
+      fun ?whatIfForecastArn ->
+        fun ?whatIfAnalysisArn ->
+          fun ?estimatedTimeRemainingInMinutes ->
+            fun ?status ->
+              fun ?message ->
+                fun ?creationTime ->
+                  fun ?lastModificationTime ->
+                    fun ?timeSeriesTransformations ->
+                      fun ?timeSeriesReplacementsDataSource ->
+                        fun ?forecastTypes ->
+                          fun () ->
+                            {
+                              whatIfForecastName;
+                              whatIfForecastArn;
+                              whatIfAnalysisArn;
+                              estimatedTimeRemainingInMinutes;
+                              status;
+                              message;
+                              creationTime;
+                              lastModificationTime;
+                              timeSeriesTransformations;
+                              timeSeriesReplacementsDataSource;
+                              forecastTypes
+                            }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WhatIfForecastName",
+           (Option.map x.whatIfForecastName ~f:Name.to_value));
+        ("WhatIfForecastArn",
+          (Option.map x.whatIfForecastArn ~f:LongArn.to_value));
+        ("WhatIfAnalysisArn",
+          (Option.map x.whatIfAnalysisArn ~f:Arn.to_value));
+        ("EstimatedTimeRemainingInMinutes",
+          (Option.map x.estimatedTimeRemainingInMinutes ~f:Long.to_value));
+        ("Status", (Option.map x.status ~f:String_.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("LastModificationTime",
+          (Option.map x.lastModificationTime ~f:Timestamp.to_value));
+        ("TimeSeriesTransformations",
+          (Option.map x.timeSeriesTransformations
+             ~f:TimeSeriesTransformations.to_value));
+        ("TimeSeriesReplacementsDataSource",
+          (Option.map x.timeSeriesReplacementsDataSource
+             ~f:TimeSeriesReplacementsDataSource.to_value));
+        ("ForecastTypes",
+          (Option.map x.forecastTypes ~f:ForecastTypes.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let forecastTypes =
+        (Option.map ~f:ForecastTypes.of_xml)
+          (Xml.child xml_arg0 "ForecastTypes") in
+      let timeSeriesReplacementsDataSource =
+        (Option.map ~f:TimeSeriesReplacementsDataSource.of_xml)
+          (Xml.child xml_arg0 "TimeSeriesReplacementsDataSource") in
+      let timeSeriesTransformations =
+        (Option.map ~f:TimeSeriesTransformations.of_xml)
+          (Xml.child xml_arg0 "TimeSeriesTransformations") in
+      let lastModificationTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModificationTime") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
+      let estimatedTimeRemainingInMinutes =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "EstimatedTimeRemainingInMinutes") in
+      let whatIfAnalysisArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "WhatIfAnalysisArn") in
+      let whatIfForecastArn =
+        (Option.map ~f:LongArn.of_xml)
+          (Xml.child xml_arg0 "WhatIfForecastArn") in
+      let whatIfForecastName =
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "WhatIfForecastName") in
+      make ?forecastTypes ?timeSeriesReplacementsDataSource
+        ?timeSeriesTransformations ?lastModificationTime ?creationTime
+        ?message ?status ?estimatedTimeRemainingInMinutes ?whatIfAnalysisArn
+        ?whatIfForecastArn ?whatIfForecastName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let forecastTypes =
+        field_map json__ "ForecastTypes" ForecastTypes.of_json in
+      let timeSeriesReplacementsDataSource =
+        field_map json__ "TimeSeriesReplacementsDataSource"
+          TimeSeriesReplacementsDataSource.of_json in
+      let timeSeriesTransformations =
+        field_map json__ "TimeSeriesTransformations"
+          TimeSeriesTransformations.of_json in
+      let lastModificationTime =
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let estimatedTimeRemainingInMinutes =
+        field_map json__ "EstimatedTimeRemainingInMinutes" Long.of_json in
+      let whatIfAnalysisArn =
+        field_map json__ "WhatIfAnalysisArn" Arn.of_json in
+      let whatIfForecastArn =
+        field_map json__ "WhatIfForecastArn" LongArn.of_json in
+      let whatIfForecastName =
+        field_map json__ "WhatIfForecastName" Name.of_json in
+      make ?forecastTypes ?timeSeriesReplacementsDataSource
+        ?timeSeriesTransformations ?lastModificationTime ?creationTime
+        ?message ?status ?estimatedTimeRemainingInMinutes ?whatIfAnalysisArn
+        ?whatIfForecastArn ?whatIfForecastName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the what-if forecast created using the CreateWhatIfForecast operation. In addition to listing the properties provided in the CreateWhatIfForecast request, this operation lists the following properties: CreationTime LastModificationTime Message - If an error occurred, information about the error. Status"]
+module DescribeWhatIfForecastRequest =
+  struct
+    type nonrec t =
+      {
+      whatIfForecastArn: LongArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if forecast that you are interested in."]}
+    let context_ = "DescribeWhatIfForecastRequest"
+    let make ~whatIfForecastArn = fun () -> { whatIfForecastArn }
+    let to_value x =
+      structure_to_value
+        [("WhatIfForecastArn", (Some (LongArn.to_value x.whatIfForecastArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let whatIfForecastArn =
+        LongArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WhatIfForecastArn") in
+      make ~whatIfForecastArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let whatIfForecastArn =
+        field_map_exn json__ "WhatIfForecastArn" LongArn.of_json in
+      make ~whatIfForecastArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the what-if forecast created using the CreateWhatIfForecast operation. In addition to listing the properties provided in the CreateWhatIfForecast request, this operation lists the following properties: CreationTime LastModificationTime Message - If an error occurred, information about the error. Status"]
+module DescribeWhatIfForecastExportResponse =
+  struct
+    type nonrec t =
+      {
+      whatIfForecastExportArn: LongArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if forecast export."];
+      whatIfForecastExportName: Name.t option
+        [@ocaml.doc "The name of the what-if forecast export."];
+      whatIfForecastArns: LongArnList.t option
+        [@ocaml.doc
+          "An array of Amazon Resource Names (ARNs) that represent all of the what-if forecasts exported in this resource."];
+      destination: DataDestination.t option ;
+      message: Message.t option
+        [@ocaml.doc
+          "If an error occurred, an informational message about the error."];
+      status: Status.t option
+        [@ocaml.doc
+          "The status of the what-if forecast. States include: ACTIVE CREATE_PENDING, CREATE_IN_PROGRESS, CREATE_FAILED CREATE_STOPPING, CREATE_STOPPED DELETE_PENDING, DELETE_IN_PROGRESS, DELETE_FAILED The Status of the what-if forecast export must be ACTIVE before you can access the forecast export."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc "When the what-if forecast export was created."];
+      estimatedTimeRemainingInMinutes: Long.t option
+        [@ocaml.doc
+          "The approximate time remaining to complete the what-if forecast export, in minutes."];
+      lastModificationTime: Timestamp.t option
+        [@ocaml.doc
+          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."];
+      format: Format_.t option
+        [@ocaml.doc "The format of the exported data, CSV or PARQUET."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?whatIfForecastExportArn =
+      fun ?whatIfForecastExportName ->
+        fun ?whatIfForecastArns ->
+          fun ?destination ->
+            fun ?message ->
+              fun ?status ->
+                fun ?creationTime ->
+                  fun ?estimatedTimeRemainingInMinutes ->
+                    fun ?lastModificationTime ->
+                      fun ?format ->
+                        fun () ->
+                          {
+                            whatIfForecastExportArn;
+                            whatIfForecastExportName;
+                            whatIfForecastArns;
+                            destination;
+                            message;
+                            status;
+                            creationTime;
+                            estimatedTimeRemainingInMinutes;
+                            lastModificationTime;
+                            format
+                          }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WhatIfForecastExportArn",
+           (Option.map x.whatIfForecastExportArn ~f:LongArn.to_value));
+        ("WhatIfForecastExportName",
+          (Option.map x.whatIfForecastExportName ~f:Name.to_value));
+        ("WhatIfForecastArns",
+          (Option.map x.whatIfForecastArns ~f:LongArnList.to_value));
+        ("Destination",
+          (Option.map x.destination ~f:DataDestination.to_value));
+        ("Message", (Option.map x.message ~f:Message.to_value));
+        ("Status", (Option.map x.status ~f:Status.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("EstimatedTimeRemainingInMinutes",
+          (Option.map x.estimatedTimeRemainingInMinutes ~f:Long.to_value));
+        ("LastModificationTime",
+          (Option.map x.lastModificationTime ~f:Timestamp.to_value));
+        ("Format", (Option.map x.format ~f:Format_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let format =
+        (Option.map ~f:Format_.of_xml) (Xml.child xml_arg0 "Format") in
+      let lastModificationTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModificationTime") in
+      let estimatedTimeRemainingInMinutes =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "EstimatedTimeRemainingInMinutes") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      let destination =
+        (Option.map ~f:DataDestination.of_xml)
+          (Xml.child xml_arg0 "Destination") in
+      let whatIfForecastArns =
+        (Option.map ~f:LongArnList.of_xml)
+          (Xml.child xml_arg0 "WhatIfForecastArns") in
+      let whatIfForecastExportName =
+        (Option.map ~f:Name.of_xml)
+          (Xml.child xml_arg0 "WhatIfForecastExportName") in
+      let whatIfForecastExportArn =
+        (Option.map ~f:LongArn.of_xml)
+          (Xml.child xml_arg0 "WhatIfForecastExportArn") in
+      make ?format ?lastModificationTime ?estimatedTimeRemainingInMinutes
+        ?creationTime ?status ?message ?destination ?whatIfForecastArns
+        ?whatIfForecastExportName ?whatIfForecastExportArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let format = field_map json__ "Format" Format_.of_json in
+      let lastModificationTime =
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let estimatedTimeRemainingInMinutes =
+        field_map json__ "EstimatedTimeRemainingInMinutes" Long.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let destination =
+        field_map json__ "Destination" DataDestination.of_json in
+      let whatIfForecastArns =
+        field_map json__ "WhatIfForecastArns" LongArnList.of_json in
+      let whatIfForecastExportName =
+        field_map json__ "WhatIfForecastExportName" Name.of_json in
+      let whatIfForecastExportArn =
+        field_map json__ "WhatIfForecastExportArn" LongArn.of_json in
+      make ?format ?lastModificationTime ?estimatedTimeRemainingInMinutes
+        ?creationTime ?status ?message ?destination ?whatIfForecastArns
+        ?whatIfForecastExportName ?whatIfForecastExportArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the what-if forecast export created using the CreateWhatIfForecastExport operation. In addition to listing the properties provided in the CreateWhatIfForecastExport request, this operation lists the following properties: CreationTime LastModificationTime Message - If an error occurred, information about the error. Status"]
+module DescribeWhatIfForecastExportRequest =
+  struct
+    type nonrec t =
+      {
+      whatIfForecastExportArn: LongArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if forecast export that you are interested in."]}
+    let context_ = "DescribeWhatIfForecastExportRequest"
+    let make ~whatIfForecastExportArn = fun () -> { whatIfForecastExportArn }
+    let to_value x =
+      structure_to_value
+        [("WhatIfForecastExportArn",
+           (Some (LongArn.to_value x.whatIfForecastExportArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let whatIfForecastExportArn =
+        LongArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WhatIfForecastExportArn") in
+      make ~whatIfForecastExportArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let whatIfForecastExportArn =
+        field_map_exn json__ "WhatIfForecastExportArn" LongArn.of_json in
+      make ~whatIfForecastExportArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the what-if forecast export created using the CreateWhatIfForecastExport operation. In addition to listing the properties provided in the CreateWhatIfForecastExport request, this operation lists the following properties: CreationTime LastModificationTime Message - If an error occurred, information about the error. Status"]
+module DescribeWhatIfAnalysisResponse =
+  struct
+    type nonrec t =
+      {
+      whatIfAnalysisName: Name.t option
+        [@ocaml.doc "The name of the what-if analysis."];
+      whatIfAnalysisArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if analysis."];
+      forecastArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if forecast."];
+      estimatedTimeRemainingInMinutes: Long.t option
+        [@ocaml.doc
+          "The approximate time remaining to complete the what-if analysis, in minutes."];
+      status: String_.t option
+        [@ocaml.doc
+          "The status of the what-if analysis. States include: ACTIVE CREATE_PENDING, CREATE_IN_PROGRESS, CREATE_FAILED CREATE_STOPPING, CREATE_STOPPED DELETE_PENDING, DELETE_IN_PROGRESS, DELETE_FAILED The Status of the what-if analysis must be ACTIVE before you can access the analysis."];
+      message: ErrorMessage.t option
+        [@ocaml.doc
+          "If an error occurred, an informational message about the error."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc "When the what-if analysis was created."];
+      lastModificationTime: Timestamp.t option
+        [@ocaml.doc
+          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."];
+      timeSeriesSelector: TimeSeriesSelector.t option }
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?whatIfAnalysisName =
+      fun ?whatIfAnalysisArn ->
+        fun ?forecastArn ->
+          fun ?estimatedTimeRemainingInMinutes ->
+            fun ?status ->
+              fun ?message ->
+                fun ?creationTime ->
+                  fun ?lastModificationTime ->
+                    fun ?timeSeriesSelector ->
+                      fun () ->
+                        {
+                          whatIfAnalysisName;
+                          whatIfAnalysisArn;
+                          forecastArn;
+                          estimatedTimeRemainingInMinutes;
+                          status;
+                          message;
+                          creationTime;
+                          lastModificationTime;
+                          timeSeriesSelector
+                        }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WhatIfAnalysisName",
+           (Option.map x.whatIfAnalysisName ~f:Name.to_value));
+        ("WhatIfAnalysisArn",
+          (Option.map x.whatIfAnalysisArn ~f:Arn.to_value));
+        ("ForecastArn", (Option.map x.forecastArn ~f:Arn.to_value));
+        ("EstimatedTimeRemainingInMinutes",
+          (Option.map x.estimatedTimeRemainingInMinutes ~f:Long.to_value));
+        ("Status", (Option.map x.status ~f:String_.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("LastModificationTime",
+          (Option.map x.lastModificationTime ~f:Timestamp.to_value));
+        ("TimeSeriesSelector",
+          (Option.map x.timeSeriesSelector ~f:TimeSeriesSelector.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let timeSeriesSelector =
+        (Option.map ~f:TimeSeriesSelector.of_xml)
+          (Xml.child xml_arg0 "TimeSeriesSelector") in
+      let lastModificationTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModificationTime") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
+      let estimatedTimeRemainingInMinutes =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "EstimatedTimeRemainingInMinutes") in
+      let forecastArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ForecastArn") in
+      let whatIfAnalysisArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "WhatIfAnalysisArn") in
+      let whatIfAnalysisName =
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "WhatIfAnalysisName") in
+      make ?timeSeriesSelector ?lastModificationTime ?creationTime ?message
+        ?status ?estimatedTimeRemainingInMinutes ?forecastArn
+        ?whatIfAnalysisArn ?whatIfAnalysisName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let timeSeriesSelector =
+        field_map json__ "TimeSeriesSelector" TimeSeriesSelector.of_json in
+      let lastModificationTime =
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let estimatedTimeRemainingInMinutes =
+        field_map json__ "EstimatedTimeRemainingInMinutes" Long.of_json in
+      let forecastArn = field_map json__ "ForecastArn" Arn.of_json in
+      let whatIfAnalysisArn =
+        field_map json__ "WhatIfAnalysisArn" Arn.of_json in
+      let whatIfAnalysisName =
+        field_map json__ "WhatIfAnalysisName" Name.of_json in
+      make ?timeSeriesSelector ?lastModificationTime ?creationTime ?message
+        ?status ?estimatedTimeRemainingInMinutes ?forecastArn
+        ?whatIfAnalysisArn ?whatIfAnalysisName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the what-if analysis created using the CreateWhatIfAnalysis operation. In addition to listing the properties provided in the CreateWhatIfAnalysis request, this operation lists the following properties: CreationTime LastModificationTime Message - If an error occurred, information about the error. Status"]
+module DescribeWhatIfAnalysisRequest =
+  struct
+    type nonrec t =
+      {
+      whatIfAnalysisArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if analysis that you are interested in."]}
+    let context_ = "DescribeWhatIfAnalysisRequest"
+    let make ~whatIfAnalysisArn = fun () -> { whatIfAnalysisArn }
+    let to_value x =
+      structure_to_value
+        [("WhatIfAnalysisArn", (Some (Arn.to_value x.whatIfAnalysisArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let whatIfAnalysisArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WhatIfAnalysisArn") in
+      make ~whatIfAnalysisArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let whatIfAnalysisArn =
+        field_map_exn json__ "WhatIfAnalysisArn" Arn.of_json in
+      make ~whatIfAnalysisArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the what-if analysis created using the CreateWhatIfAnalysis operation. In addition to listing the properties provided in the CreateWhatIfAnalysis request, this operation lists the following properties: CreationTime LastModificationTime Message - If an error occurred, information about the error. Status"]
 module DescribePredictorResponse =
   struct
     type nonrec t =
@@ -5539,7 +8458,7 @@ module DescribePredictorResponse =
         [@ocaml.doc "Whether the predictor is set to perform AutoML."];
       autoMLOverrideStrategy: AutoMLOverrideStrategy.t option
         [@ocaml.doc
-          "The LatencyOptimized AutoML override strategy is only available in private beta. Contact AWS Support or your account manager to learn more about access privileges. The AutoML strategy used to train the predictor. Unless LatencyOptimized is specified, the AutoML strategy optimizes predictor accuracy. This parameter is only valid for predictors trained using AutoML."];
+          "The LatencyOptimized AutoML override strategy is only available in private beta. Contact Amazon Web Services Support or your account manager to learn more about access privileges. The AutoML strategy used to train the predictor. Unless LatencyOptimized is specified, the AutoML strategy optimizes predictor accuracy. This parameter is only valid for predictors trained using AutoML."];
       performHPO: Boolean.t option
         [@ocaml.doc
           "Whether the predictor is set to perform hyperparameter optimization (HPO)."];
@@ -5558,7 +8477,7 @@ module DescribePredictorResponse =
         [@ocaml.doc "The featurization configuration."];
       encryptionConfig: EncryptionConfig.t option
         [@ocaml.doc
-          "An AWS Key Management Service (KMS) key and the AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the key."];
+          "An Key Management Service (KMS) key and the Identity and Access Management (IAM) role that Amazon Forecast can assume to access the key."];
       predictorExecutionDetails: PredictorExecutionDetails.t option
         [@ocaml.doc
           "Details on the the status and results of the backtests performed to evaluate the accuracy of the predictor. You specify the number of backtests to perform when you call the operation."];
@@ -5788,47 +8707,49 @@ module DescribePredictorResponse =
         ?forecastHorizon ?autoMLAlgorithmArns ?algorithmArn ?predictorName
         ?predictorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let optimizationMetric =
-        field_map json "OptimizationMetric" OptimizationMetric.of_json in
+        field_map json__ "OptimizationMetric" OptimizationMetric.of_json in
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let message = field_map json "Message" Message.of_json in
-      let status = field_map json "Status" Status.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let status = field_map json__ "Status" Status.of_json in
       let datasetImportJobArns =
-        field_map json "DatasetImportJobArns" ArnList.of_json in
-      let isAutoPredictor = field_map json "IsAutoPredictor" Boolean.of_json in
+        field_map json__ "DatasetImportJobArns" ArnList.of_json in
+      let isAutoPredictor =
+        field_map json__ "IsAutoPredictor" Boolean.of_json in
       let estimatedTimeRemainingInMinutes =
-        field_map json "EstimatedTimeRemainingInMinutes" Long.of_json in
+        field_map json__ "EstimatedTimeRemainingInMinutes" Long.of_json in
       let predictorExecutionDetails =
-        field_map json "PredictorExecutionDetails"
+        field_map json__ "PredictorExecutionDetails"
           PredictorExecutionDetails.of_json in
       let encryptionConfig =
-        field_map json "EncryptionConfig" EncryptionConfig.of_json in
+        field_map json__ "EncryptionConfig" EncryptionConfig.of_json in
       let featurizationConfig =
-        field_map json "FeaturizationConfig" FeaturizationConfig.of_json in
+        field_map json__ "FeaturizationConfig" FeaturizationConfig.of_json in
       let inputDataConfig =
-        field_map json "InputDataConfig" InputDataConfig.of_json in
+        field_map json__ "InputDataConfig" InputDataConfig.of_json in
       let hPOConfig =
-        field_map json "HPOConfig" HyperParameterTuningJobConfig.of_json in
+        field_map json__ "HPOConfig" HyperParameterTuningJobConfig.of_json in
       let evaluationParameters =
-        field_map json "EvaluationParameters" EvaluationParameters.of_json in
+        field_map json__ "EvaluationParameters" EvaluationParameters.of_json in
       let trainingParameters =
-        field_map json "TrainingParameters" TrainingParameters.of_json in
-      let performHPO = field_map json "PerformHPO" Boolean.of_json in
+        field_map json__ "TrainingParameters" TrainingParameters.of_json in
+      let performHPO = field_map json__ "PerformHPO" Boolean.of_json in
       let autoMLOverrideStrategy =
-        field_map json "AutoMLOverrideStrategy"
+        field_map json__ "AutoMLOverrideStrategy"
           AutoMLOverrideStrategy.of_json in
-      let performAutoML = field_map json "PerformAutoML" Boolean.of_json in
+      let performAutoML = field_map json__ "PerformAutoML" Boolean.of_json in
       let forecastTypes =
-        field_map json "ForecastTypes" ForecastTypes.of_json in
-      let forecastHorizon = field_map json "ForecastHorizon" Integer.of_json in
+        field_map json__ "ForecastTypes" ForecastTypes.of_json in
+      let forecastHorizon =
+        field_map json__ "ForecastHorizon" Integer.of_json in
       let autoMLAlgorithmArns =
-        field_map json "AutoMLAlgorithmArns" ArnList.of_json in
-      let algorithmArn = field_map json "AlgorithmArn" Arn.of_json in
-      let predictorName = field_map json "PredictorName" Name.of_json in
-      let predictorArn = field_map json "PredictorArn" Name.of_json in
+        field_map json__ "AutoMLAlgorithmArns" ArnList.of_json in
+      let algorithmArn = field_map json__ "AlgorithmArn" Arn.of_json in
+      let predictorName = field_map json__ "PredictorName" Name.of_json in
+      let predictorArn = field_map json__ "PredictorArn" Name.of_json in
       make ?optimizationMetric ?lastModificationTime ?creationTime ?message
         ?status ?datasetImportJobArns ?isAutoPredictor
         ?estimatedTimeRemainingInMinutes ?predictorExecutionDetails
@@ -5858,8 +8779,8 @@ module DescribePredictorRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PredictorArn") in
       make ~predictorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let predictorArn = field_map_exn json "PredictorArn" Arn.of_json in
+    let of_json json__ =
+      let predictorArn = field_map_exn json__ "PredictorArn" Arn.of_json in
       make ~predictorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5886,7 +8807,9 @@ module DescribePredictorBacktestExportJobResponse =
         [@ocaml.doc "When the predictor backtest export job was created."];
       lastModificationTime: Timestamp.t option
         [@ocaml.doc
-          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."]}
+          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."];
+      format: Format_.t option
+        [@ocaml.doc "The format of the exported data, CSV or PARQUET."]}
     type nonrec error =
       [ `InvalidInputException of InvalidInputException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -5899,17 +8822,19 @@ module DescribePredictorBacktestExportJobResponse =
               fun ?status ->
                 fun ?creationTime ->
                   fun ?lastModificationTime ->
-                    fun () ->
-                      {
-                        predictorBacktestExportJobArn;
-                        predictorBacktestExportJobName;
-                        predictorArn;
-                        destination;
-                        message;
-                        status;
-                        creationTime;
-                        lastModificationTime
-                      }
+                    fun ?format ->
+                      fun () ->
+                        {
+                          predictorBacktestExportJobArn;
+                          predictorBacktestExportJobName;
+                          predictorArn;
+                          destination;
+                          message;
+                          status;
+                          creationTime;
+                          lastModificationTime;
+                          format
+                        }
     let error_of_json name json =
       match name with
       | "InvalidInputException" ->
@@ -5955,9 +8880,12 @@ module DescribePredictorBacktestExportJobResponse =
         ("Status", (Option.map x.status ~f:Status.to_value));
         ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
         ("LastModificationTime",
-          (Option.map x.lastModificationTime ~f:Timestamp.to_value))]
+          (Option.map x.lastModificationTime ~f:Timestamp.to_value));
+        ("Format", (Option.map x.format ~f:Format_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let format =
+        (Option.map ~f:Format_.of_xml) (Xml.child xml_arg0 "Format") in
       let lastModificationTime =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "LastModificationTime") in
@@ -5978,24 +8906,26 @@ module DescribePredictorBacktestExportJobResponse =
       let predictorBacktestExportJobArn =
         (Option.map ~f:Arn.of_xml)
           (Xml.child xml_arg0 "PredictorBacktestExportJobArn") in
-      make ?lastModificationTime ?creationTime ?status ?message ?destination
-        ?predictorArn ?predictorBacktestExportJobName
+      make ?format ?lastModificationTime ?creationTime ?status ?message
+        ?destination ?predictorArn ?predictorBacktestExportJobName
         ?predictorBacktestExportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let format = field_map json__ "Format" Format_.of_json in
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let status = field_map json "Status" Status.of_json in
-      let message = field_map json "Message" Message.of_json in
-      let destination = field_map json "Destination" DataDestination.of_json in
-      let predictorArn = field_map json "PredictorArn" Arn.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let destination =
+        field_map json__ "Destination" DataDestination.of_json in
+      let predictorArn = field_map json__ "PredictorArn" Arn.of_json in
       let predictorBacktestExportJobName =
-        field_map json "PredictorBacktestExportJobName" Name.of_json in
+        field_map json__ "PredictorBacktestExportJobName" Name.of_json in
       let predictorBacktestExportJobArn =
-        field_map json "PredictorBacktestExportJobArn" Arn.of_json in
-      make ?lastModificationTime ?creationTime ?status ?message ?destination
-        ?predictorArn ?predictorBacktestExportJobName
+        field_map json__ "PredictorBacktestExportJobArn" Arn.of_json in
+      make ?format ?lastModificationTime ?creationTime ?status ?message
+        ?destination ?predictorArn ?predictorBacktestExportJobName
         ?predictorBacktestExportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6022,13 +8952,202 @@ module DescribePredictorBacktestExportJobRequest =
              "PredictorBacktestExportJobArn") in
       make ~predictorBacktestExportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let predictorBacktestExportJobArn =
-        field_map_exn json "PredictorBacktestExportJobArn" Arn.of_json in
+        field_map_exn json__ "PredictorBacktestExportJobArn" Arn.of_json in
       make ~predictorBacktestExportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a predictor backtest export job created using the CreatePredictorBacktestExportJob operation. In addition to listing the properties provided by the user in the CreatePredictorBacktestExportJob request, this operation lists the following properties: CreationTime LastModificationTime Status Message (if an error occurred)"]
+module DescribeMonitorResponse =
+  struct
+    type nonrec t =
+      {
+      monitorName: Name.t option [@ocaml.doc "The name of the monitor."];
+      monitorArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the monitor resource described."];
+      resourceArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the auto predictor being monitored."];
+      status: Status.t option
+        [@ocaml.doc "The status of the monitor resource."];
+      lastEvaluationTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp of the latest evaluation completed by the monitor."];
+      lastEvaluationState: EvaluationState.t option
+        [@ocaml.doc "The state of the monitor's latest evaluation."];
+      baseline: Baseline.t option
+        [@ocaml.doc
+          "Metrics you can use as a baseline for comparison purposes. Use these values you interpret monitoring results for an auto predictor."];
+      message: Message.t option
+        [@ocaml.doc "An error message, if any, for the monitor."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp for when the monitor resource was created."];
+      lastModificationTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp of the latest modification to the monitor."];
+      estimatedEvaluationTimeRemainingInMinutes: Long.t option
+        [@ocaml.doc
+          "The estimated number of minutes remaining before the monitor resource finishes its current evaluation."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?monitorName =
+      fun ?monitorArn ->
+        fun ?resourceArn ->
+          fun ?status ->
+            fun ?lastEvaluationTime ->
+              fun ?lastEvaluationState ->
+                fun ?baseline ->
+                  fun ?message ->
+                    fun ?creationTime ->
+                      fun ?lastModificationTime ->
+                        fun ?estimatedEvaluationTimeRemainingInMinutes ->
+                          fun () ->
+                            {
+                              monitorName;
+                              monitorArn;
+                              resourceArn;
+                              status;
+                              lastEvaluationTime;
+                              lastEvaluationState;
+                              baseline;
+                              message;
+                              creationTime;
+                              lastModificationTime;
+                              estimatedEvaluationTimeRemainingInMinutes
+                            }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MonitorName", (Option.map x.monitorName ~f:Name.to_value));
+        ("MonitorArn", (Option.map x.monitorArn ~f:Arn.to_value));
+        ("ResourceArn", (Option.map x.resourceArn ~f:Arn.to_value));
+        ("Status", (Option.map x.status ~f:Status.to_value));
+        ("LastEvaluationTime",
+          (Option.map x.lastEvaluationTime ~f:Timestamp.to_value));
+        ("LastEvaluationState",
+          (Option.map x.lastEvaluationState ~f:EvaluationState.to_value));
+        ("Baseline", (Option.map x.baseline ~f:Baseline.to_value));
+        ("Message", (Option.map x.message ~f:Message.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("LastModificationTime",
+          (Option.map x.lastModificationTime ~f:Timestamp.to_value));
+        ("EstimatedEvaluationTimeRemainingInMinutes",
+          (Option.map x.estimatedEvaluationTimeRemainingInMinutes
+             ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedEvaluationTimeRemainingInMinutes =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "EstimatedEvaluationTimeRemainingInMinutes") in
+      let lastModificationTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModificationTime") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      let baseline =
+        (Option.map ~f:Baseline.of_xml) (Xml.child xml_arg0 "Baseline") in
+      let lastEvaluationState =
+        (Option.map ~f:EvaluationState.of_xml)
+          (Xml.child xml_arg0 "LastEvaluationState") in
+      let lastEvaluationTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastEvaluationTime") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
+      let resourceArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      let monitorArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "MonitorArn") in
+      let monitorName =
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "MonitorName") in
+      make ?estimatedEvaluationTimeRemainingInMinutes ?lastModificationTime
+        ?creationTime ?message ?baseline ?lastEvaluationState
+        ?lastEvaluationTime ?status ?resourceArn ?monitorArn ?monitorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let estimatedEvaluationTimeRemainingInMinutes =
+        field_map json__ "EstimatedEvaluationTimeRemainingInMinutes"
+          Long.of_json in
+      let lastModificationTime =
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let baseline = field_map json__ "Baseline" Baseline.of_json in
+      let lastEvaluationState =
+        field_map json__ "LastEvaluationState" EvaluationState.of_json in
+      let lastEvaluationTime =
+        field_map json__ "LastEvaluationTime" Timestamp.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
+      let monitorArn = field_map json__ "MonitorArn" Arn.of_json in
+      let monitorName = field_map json__ "MonitorName" Name.of_json in
+      make ?estimatedEvaluationTimeRemainingInMinutes ?lastModificationTime
+        ?creationTime ?message ?baseline ?lastEvaluationState
+        ?lastEvaluationTime ?status ?resourceArn ?monitorArn ?monitorName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a monitor resource. In addition to listing the properties provided in the CreateMonitor request, this operation lists the following properties: Baseline CreationTime LastEvaluationTime LastEvaluationState LastModificationTime Message Status"]
+module DescribeMonitorRequest =
+  struct
+    type nonrec t =
+      {
+      monitorArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the monitor resource to describe."]}
+    let context_ = "DescribeMonitorRequest"
+    let make ~monitorArn = fun () -> { monitorArn }
+    let to_value x =
+      structure_to_value [("MonitorArn", (Some (Arn.to_value x.monitorArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let monitorArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MonitorArn") in
+      make ~monitorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let monitorArn = field_map_exn json__ "MonitorArn" Arn.of_json in
+      make ~monitorArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a monitor resource. In addition to listing the properties provided in the CreateMonitor request, this operation lists the following properties: Baseline CreationTime LastEvaluationTime LastEvaluationState LastModificationTime Message Status"]
 module DescribeForecastResponse =
   struct
     type nonrec t =
@@ -6058,7 +9177,9 @@ module DescribeForecastResponse =
         [@ocaml.doc "When the forecast creation task was created."];
       lastModificationTime: Timestamp.t option
         [@ocaml.doc
-          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."]}
+          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."];
+      timeSeriesSelector: TimeSeriesSelector.t option
+        [@ocaml.doc "The time series to include in the forecast."]}
     type nonrec error =
       [ `InvalidInputException of InvalidInputException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -6073,19 +9194,21 @@ module DescribeForecastResponse =
                   fun ?message ->
                     fun ?creationTime ->
                       fun ?lastModificationTime ->
-                        fun () ->
-                          {
-                            forecastArn;
-                            forecastName;
-                            forecastTypes;
-                            predictorArn;
-                            datasetGroupArn;
-                            estimatedTimeRemainingInMinutes;
-                            status;
-                            message;
-                            creationTime;
-                            lastModificationTime
-                          }
+                        fun ?timeSeriesSelector ->
+                          fun () ->
+                            {
+                              forecastArn;
+                              forecastName;
+                              forecastTypes;
+                              predictorArn;
+                              datasetGroupArn;
+                              estimatedTimeRemainingInMinutes;
+                              status;
+                              message;
+                              creationTime;
+                              lastModificationTime;
+                              timeSeriesSelector
+                            }
     let error_of_json name json =
       match name with
       | "InvalidInputException" ->
@@ -6132,9 +9255,14 @@ module DescribeForecastResponse =
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value));
         ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
         ("LastModificationTime",
-          (Option.map x.lastModificationTime ~f:Timestamp.to_value))]
+          (Option.map x.lastModificationTime ~f:Timestamp.to_value));
+        ("TimeSeriesSelector",
+          (Option.map x.timeSeriesSelector ~f:TimeSeriesSelector.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let timeSeriesSelector =
+        (Option.map ~f:TimeSeriesSelector.of_xml)
+          (Xml.child xml_arg0 "TimeSeriesSelector") in
       let lastModificationTime =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "LastModificationTime") in
@@ -6158,27 +9286,29 @@ module DescribeForecastResponse =
         (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "ForecastName") in
       let forecastArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ForecastArn") in
-      make ?lastModificationTime ?creationTime ?message ?status
-        ?estimatedTimeRemainingInMinutes ?datasetGroupArn ?predictorArn
-        ?forecastTypes ?forecastName ?forecastArn ()
+      make ?timeSeriesSelector ?lastModificationTime ?creationTime ?message
+        ?status ?estimatedTimeRemainingInMinutes ?datasetGroupArn
+        ?predictorArn ?forecastTypes ?forecastName ?forecastArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let timeSeriesSelector =
+        field_map json__ "TimeSeriesSelector" TimeSeriesSelector.of_json in
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let status = field_map json "Status" String_.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let status = field_map json__ "Status" String_.of_json in
       let estimatedTimeRemainingInMinutes =
-        field_map json "EstimatedTimeRemainingInMinutes" Long.of_json in
-      let datasetGroupArn = field_map json "DatasetGroupArn" Arn.of_json in
-      let predictorArn = field_map json "PredictorArn" Arn.of_json in
+        field_map json__ "EstimatedTimeRemainingInMinutes" Long.of_json in
+      let datasetGroupArn = field_map json__ "DatasetGroupArn" Arn.of_json in
+      let predictorArn = field_map json__ "PredictorArn" Arn.of_json in
       let forecastTypes =
-        field_map json "ForecastTypes" ForecastTypes.of_json in
-      let forecastName = field_map json "ForecastName" Name.of_json in
-      let forecastArn = field_map json "ForecastArn" Arn.of_json in
-      make ?lastModificationTime ?creationTime ?message ?status
-        ?estimatedTimeRemainingInMinutes ?datasetGroupArn ?predictorArn
-        ?forecastTypes ?forecastName ?forecastArn ()
+        field_map json__ "ForecastTypes" ForecastTypes.of_json in
+      let forecastName = field_map json__ "ForecastName" Name.of_json in
+      let forecastArn = field_map json__ "ForecastArn" Arn.of_json in
+      make ?timeSeriesSelector ?lastModificationTime ?creationTime ?message
+        ?status ?estimatedTimeRemainingInMinutes ?datasetGroupArn
+        ?predictorArn ?forecastTypes ?forecastName ?forecastArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a forecast created using the CreateForecast operation. In addition to listing the properties provided in the CreateForecast request, this operation lists the following properties: DatasetGroupArn - The dataset group that provided the training data. CreationTime LastModificationTime Status Message - If an error occurred, information about the error."]
@@ -6199,8 +9329,8 @@ module DescribeForecastRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ForecastArn") in
       make ~forecastArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let forecastArn = field_map_exn json "ForecastArn" Arn.of_json in
+    let of_json json__ =
+      let forecastArn = field_map_exn json__ "ForecastArn" Arn.of_json in
       make ~forecastArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6229,7 +9359,9 @@ module DescribeForecastExportJobResponse =
         [@ocaml.doc "When the forecast export job was created."];
       lastModificationTime: Timestamp.t option
         [@ocaml.doc
-          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."]}
+          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."];
+      format: Format_.t option
+        [@ocaml.doc "The format of the exported data, CSV or PARQUET."]}
     type nonrec error =
       [ `InvalidInputException of InvalidInputException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -6242,17 +9374,19 @@ module DescribeForecastExportJobResponse =
               fun ?status ->
                 fun ?creationTime ->
                   fun ?lastModificationTime ->
-                    fun () ->
-                      {
-                        forecastExportJobArn;
-                        forecastExportJobName;
-                        forecastArn;
-                        destination;
-                        message;
-                        status;
-                        creationTime;
-                        lastModificationTime
-                      }
+                    fun ?format ->
+                      fun () ->
+                        {
+                          forecastExportJobArn;
+                          forecastExportJobName;
+                          forecastArn;
+                          destination;
+                          message;
+                          status;
+                          creationTime;
+                          lastModificationTime;
+                          format
+                        }
     let error_of_json name json =
       match name with
       | "InvalidInputException" ->
@@ -6298,9 +9432,12 @@ module DescribeForecastExportJobResponse =
         ("Status", (Option.map x.status ~f:Status.to_value));
         ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
         ("LastModificationTime",
-          (Option.map x.lastModificationTime ~f:Timestamp.to_value))]
+          (Option.map x.lastModificationTime ~f:Timestamp.to_value));
+        ("Format", (Option.map x.format ~f:Format_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let format =
+        (Option.map ~f:Format_.of_xml) (Xml.child xml_arg0 "Format") in
       let lastModificationTime =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "LastModificationTime") in
@@ -6321,23 +9458,27 @@ module DescribeForecastExportJobResponse =
       let forecastExportJobArn =
         (Option.map ~f:Arn.of_xml)
           (Xml.child xml_arg0 "ForecastExportJobArn") in
-      make ?lastModificationTime ?creationTime ?status ?message ?destination
-        ?forecastArn ?forecastExportJobName ?forecastExportJobArn ()
+      make ?format ?lastModificationTime ?creationTime ?status ?message
+        ?destination ?forecastArn ?forecastExportJobName
+        ?forecastExportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let format = field_map json__ "Format" Format_.of_json in
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let status = field_map json "Status" Status.of_json in
-      let message = field_map json "Message" Message.of_json in
-      let destination = field_map json "Destination" DataDestination.of_json in
-      let forecastArn = field_map json "ForecastArn" Arn.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let destination =
+        field_map json__ "Destination" DataDestination.of_json in
+      let forecastArn = field_map json__ "ForecastArn" Arn.of_json in
       let forecastExportJobName =
-        field_map json "ForecastExportJobName" Name.of_json in
+        field_map json__ "ForecastExportJobName" Name.of_json in
       let forecastExportJobArn =
-        field_map json "ForecastExportJobArn" Arn.of_json in
-      make ?lastModificationTime ?creationTime ?status ?message ?destination
-        ?forecastArn ?forecastExportJobName ?forecastExportJobArn ()
+        field_map json__ "ForecastExportJobArn" Arn.of_json in
+      make ?format ?lastModificationTime ?creationTime ?status ?message
+        ?destination ?forecastArn ?forecastExportJobName
+        ?forecastExportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a forecast export job created using the CreateForecastExportJob operation. In addition to listing the properties provided by the user in the CreateForecastExportJob request, this operation lists the following properties: CreationTime LastModificationTime Status Message - If an error occurred, information about the error."]
@@ -6361,9 +9502,9 @@ module DescribeForecastExportJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ForecastExportJobArn") in
       make ~forecastExportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let forecastExportJobArn =
-        field_map_exn json "ForecastExportJobArn" Arn.of_json in
+        field_map_exn json__ "ForecastExportJobArn" Arn.of_json in
       make ~forecastExportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6537,27 +9678,28 @@ module DescribeExplainabilityResponse =
         ?dataSource ?enableVisualization ?explainabilityConfig ?resourceArn
         ?explainabilityName ?explainabilityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let status = field_map json "Status" Status.of_json in
-      let message = field_map json "Message" Message.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let message = field_map json__ "Message" Message.of_json in
       let estimatedTimeRemainingInMinutes =
-        field_map json "EstimatedTimeRemainingInMinutes" Long.of_json in
-      let endDateTime = field_map json "EndDateTime" LocalDateTime.of_json in
+        field_map json__ "EstimatedTimeRemainingInMinutes" Long.of_json in
+      let endDateTime = field_map json__ "EndDateTime" LocalDateTime.of_json in
       let startDateTime =
-        field_map json "StartDateTime" LocalDateTime.of_json in
-      let schema = field_map json "Schema" Schema.of_json in
-      let dataSource = field_map json "DataSource" DataSource.of_json in
+        field_map json__ "StartDateTime" LocalDateTime.of_json in
+      let schema = field_map json__ "Schema" Schema.of_json in
+      let dataSource = field_map json__ "DataSource" DataSource.of_json in
       let enableVisualization =
-        field_map json "EnableVisualization" Boolean.of_json in
+        field_map json__ "EnableVisualization" Boolean.of_json in
       let explainabilityConfig =
-        field_map json "ExplainabilityConfig" ExplainabilityConfig.of_json in
-      let resourceArn = field_map json "ResourceArn" Arn.of_json in
+        field_map json__ "ExplainabilityConfig" ExplainabilityConfig.of_json in
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
       let explainabilityName =
-        field_map json "ExplainabilityName" Name.of_json in
-      let explainabilityArn = field_map json "ExplainabilityArn" Arn.of_json in
+        field_map json__ "ExplainabilityName" Name.of_json in
+      let explainabilityArn =
+        field_map json__ "ExplainabilityArn" Arn.of_json in
       make ?lastModificationTime ?creationTime ?status ?message
         ?estimatedTimeRemainingInMinutes ?endDateTime ?startDateTime ?schema
         ?dataSource ?enableVisualization ?explainabilityConfig ?resourceArn
@@ -6584,9 +9726,9 @@ module DescribeExplainabilityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ExplainabilityArn") in
       make ~explainabilityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let explainabilityArn =
-        field_map_exn json "ExplainabilityArn" Arn.of_json in
+        field_map_exn json__ "ExplainabilityArn" Arn.of_json in
       make ~explainabilityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6601,7 +9743,8 @@ module DescribeExplainabilityExportResponse =
       explainabilityExportName: Name.t option
         [@ocaml.doc "The name of the Explainability export."];
       explainabilityArn: Arn.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the Explainability."];
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Explainability export."];
       destination: DataDestination.t option ;
       message: Message.t option
         [@ocaml.doc
@@ -6613,7 +9756,9 @@ module DescribeExplainabilityExportResponse =
         [@ocaml.doc "When the Explainability export was created."];
       lastModificationTime: Timestamp.t option
         [@ocaml.doc
-          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."]}
+          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."];
+      format: Format_.t option
+        [@ocaml.doc "The format of the exported data, CSV or PARQUET."]}
     type nonrec error =
       [ `InvalidInputException of InvalidInputException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -6626,17 +9771,19 @@ module DescribeExplainabilityExportResponse =
               fun ?status ->
                 fun ?creationTime ->
                   fun ?lastModificationTime ->
-                    fun () ->
-                      {
-                        explainabilityExportArn;
-                        explainabilityExportName;
-                        explainabilityArn;
-                        destination;
-                        message;
-                        status;
-                        creationTime;
-                        lastModificationTime
-                      }
+                    fun ?format ->
+                      fun () ->
+                        {
+                          explainabilityExportArn;
+                          explainabilityExportName;
+                          explainabilityArn;
+                          destination;
+                          message;
+                          status;
+                          creationTime;
+                          lastModificationTime;
+                          format
+                        }
     let error_of_json name json =
       match name with
       | "InvalidInputException" ->
@@ -6683,9 +9830,12 @@ module DescribeExplainabilityExportResponse =
         ("Status", (Option.map x.status ~f:Status.to_value));
         ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
         ("LastModificationTime",
-          (Option.map x.lastModificationTime ~f:Timestamp.to_value))]
+          (Option.map x.lastModificationTime ~f:Timestamp.to_value));
+        ("Format", (Option.map x.format ~f:Format_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let format =
+        (Option.map ~f:Format_.of_xml) (Xml.child xml_arg0 "Format") in
       let lastModificationTime =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "LastModificationTime") in
@@ -6706,25 +9856,28 @@ module DescribeExplainabilityExportResponse =
       let explainabilityExportArn =
         (Option.map ~f:Arn.of_xml)
           (Xml.child xml_arg0 "ExplainabilityExportArn") in
-      make ?lastModificationTime ?creationTime ?status ?message ?destination
-        ?explainabilityArn ?explainabilityExportName ?explainabilityExportArn
-        ()
+      make ?format ?lastModificationTime ?creationTime ?status ?message
+        ?destination ?explainabilityArn ?explainabilityExportName
+        ?explainabilityExportArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let format = field_map json__ "Format" Format_.of_json in
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let status = field_map json "Status" Status.of_json in
-      let message = field_map json "Message" Message.of_json in
-      let destination = field_map json "Destination" DataDestination.of_json in
-      let explainabilityArn = field_map json "ExplainabilityArn" Arn.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let destination =
+        field_map json__ "Destination" DataDestination.of_json in
+      let explainabilityArn =
+        field_map json__ "ExplainabilityArn" Arn.of_json in
       let explainabilityExportName =
-        field_map json "ExplainabilityExportName" Name.of_json in
+        field_map json__ "ExplainabilityExportName" Name.of_json in
       let explainabilityExportArn =
-        field_map json "ExplainabilityExportArn" Arn.of_json in
-      make ?lastModificationTime ?creationTime ?status ?message ?destination
-        ?explainabilityArn ?explainabilityExportName ?explainabilityExportArn
-        ()
+        field_map json__ "ExplainabilityExportArn" Arn.of_json in
+      make ?format ?lastModificationTime ?creationTime ?status ?message
+        ?destination ?explainabilityArn ?explainabilityExportName
+        ?explainabilityExportArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes an Explainability export created using the CreateExplainabilityExport operation."]
@@ -6748,9 +9901,9 @@ module DescribeExplainabilityExportRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ExplainabilityExportArn") in
       make ~explainabilityExportArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let explainabilityExportArn =
-        field_map_exn json "ExplainabilityExportArn" Arn.of_json in
+        field_map_exn json__ "ExplainabilityExportArn" Arn.of_json in
       make ~explainabilityExportArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6773,7 +9926,7 @@ module DescribeDatasetResponse =
           "An array of SchemaAttribute objects that specify the dataset fields. Each SchemaAttribute specifies the name and data type of a field."];
       encryptionConfig: EncryptionConfig.t option
         [@ocaml.doc
-          "The AWS Key Management Service (KMS) key and the AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the key."];
+          "The Key Management Service (KMS) key and the Identity and Access Management (IAM) role that Amazon Forecast can assume to access the key."];
       status: Status.t option
         [@ocaml.doc
           "The status of the dataset. States include: ACTIVE CREATE_PENDING, CREATE_IN_PROGRESS, CREATE_FAILED DELETE_PENDING, DELETE_IN_PROGRESS, DELETE_FAILED UPDATE_PENDING, UPDATE_IN_PROGRESS, UPDATE_FAILED The UPDATE states apply while data is imported to the dataset from a call to the CreateDatasetImportJob operation and reflect the status of the dataset import job. For example, when the import job status is CREATE_IN_PROGRESS, the status of the dataset is UPDATE_IN_PROGRESS. The Status of the dataset must be ACTIVE before you can import training data."];
@@ -6883,19 +10036,19 @@ module DescribeDatasetResponse =
         ?schema ?dataFrequency ?datasetType ?domain ?datasetName ?datasetArn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let status = field_map json "Status" Status.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let status = field_map json__ "Status" Status.of_json in
       let encryptionConfig =
-        field_map json "EncryptionConfig" EncryptionConfig.of_json in
-      let schema = field_map json "Schema" Schema.of_json in
-      let dataFrequency = field_map json "DataFrequency" Frequency.of_json in
-      let datasetType = field_map json "DatasetType" DatasetType.of_json in
-      let domain = field_map json "Domain" Domain.of_json in
-      let datasetName = field_map json "DatasetName" Name.of_json in
-      let datasetArn = field_map json "DatasetArn" Arn.of_json in
+        field_map json__ "EncryptionConfig" EncryptionConfig.of_json in
+      let schema = field_map json__ "Schema" Schema.of_json in
+      let dataFrequency = field_map json__ "DataFrequency" Frequency.of_json in
+      let datasetType = field_map json__ "DatasetType" DatasetType.of_json in
+      let domain = field_map json__ "Domain" Domain.of_json in
+      let datasetName = field_map json__ "DatasetName" Name.of_json in
+      let datasetArn = field_map json__ "DatasetArn" Arn.of_json in
       make ?lastModificationTime ?creationTime ?status ?encryptionConfig
         ?schema ?dataFrequency ?datasetType ?domain ?datasetName ?datasetArn
         ()
@@ -6918,8 +10071,8 @@ module DescribeDatasetRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DatasetArn") in
       make ~datasetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetArn = field_map_exn json "DatasetArn" Arn.of_json in
+    let of_json json__ =
+      let datasetArn = field_map_exn json__ "DatasetArn" Arn.of_json in
       make ~datasetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6949,7 +10102,7 @@ module DescribeDatasetImportJobResponse =
           "The format of the geolocation attribute. Valid Values:\"LAT_LONG\" and \"CC_POSTALCODE\"."];
       dataSource: DataSource.t option
         [@ocaml.doc
-          "The location of the training data to import and an AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the data. If encryption is used, DataSource includes an AWS Key Management Service (KMS) key."];
+          "The location of the training data to import and an Identity and Access Management (IAM) role that Amazon Forecast can assume to access the data. If encryption is used, DataSource includes an Key Management Service (KMS) key."];
       estimatedTimeRemainingInMinutes: Long.t option
         [@ocaml.doc
           "The estimated time remaining in minutes for the dataset import job to complete."];
@@ -6969,7 +10122,12 @@ module DescribeDatasetImportJobResponse =
         [@ocaml.doc "When the dataset import job was created."];
       lastModificationTime: Timestamp.t option
         [@ocaml.doc
-          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."]}
+          "The last time the resource was modified. The timestamp depends on the status of the job: CREATE_PENDING - The CreationTime. CREATE_IN_PROGRESS - The current timestamp. CREATE_STOPPING - The current timestamp. CREATE_STOPPED - When the job stopped. ACTIVE or CREATE_FAILED - When the job finished or failed."];
+      format: Format_.t option
+        [@ocaml.doc "The format of the imported data, CSV or PARQUET."];
+      importMode: ImportMode.t option
+        [@ocaml.doc
+          "The import mode of the dataset import job, FULL or INCREMENTAL."]}
     type nonrec error =
       [ `InvalidInputException of InvalidInputException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -6989,24 +10147,28 @@ module DescribeDatasetImportJobResponse =
                             fun ?message ->
                               fun ?creationTime ->
                                 fun ?lastModificationTime ->
-                                  fun () ->
-                                    {
-                                      datasetImportJobName;
-                                      datasetImportJobArn;
-                                      datasetArn;
-                                      timestampFormat;
-                                      timeZone;
-                                      useGeolocationForTimeZone;
-                                      geolocationFormat;
-                                      dataSource;
-                                      estimatedTimeRemainingInMinutes;
-                                      fieldStatistics;
-                                      dataSize;
-                                      status;
-                                      message;
-                                      creationTime;
-                                      lastModificationTime
-                                    }
+                                  fun ?format ->
+                                    fun ?importMode ->
+                                      fun () ->
+                                        {
+                                          datasetImportJobName;
+                                          datasetImportJobArn;
+                                          datasetArn;
+                                          timestampFormat;
+                                          timeZone;
+                                          useGeolocationForTimeZone;
+                                          geolocationFormat;
+                                          dataSource;
+                                          estimatedTimeRemainingInMinutes;
+                                          fieldStatistics;
+                                          dataSize;
+                                          status;
+                                          message;
+                                          creationTime;
+                                          lastModificationTime;
+                                          format;
+                                          importMode
+                                        }
     let error_of_json name json =
       match name with
       | "InvalidInputException" ->
@@ -7064,9 +10226,15 @@ module DescribeDatasetImportJobResponse =
         ("Message", (Option.map x.message ~f:Message.to_value));
         ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
         ("LastModificationTime",
-          (Option.map x.lastModificationTime ~f:Timestamp.to_value))]
+          (Option.map x.lastModificationTime ~f:Timestamp.to_value));
+        ("Format", (Option.map x.format ~f:Format_.to_value));
+        ("ImportMode", (Option.map x.importMode ~f:ImportMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let importMode =
+        (Option.map ~f:ImportMode.of_xml) (Xml.child xml_arg0 "ImportMode") in
+      let format =
+        (Option.map ~f:Format_.of_xml) (Xml.child xml_arg0 "Format") in
       let lastModificationTime =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "LastModificationTime") in
@@ -7104,40 +10272,42 @@ module DescribeDatasetImportJobResponse =
       let datasetImportJobName =
         (Option.map ~f:Name.of_xml)
           (Xml.child xml_arg0 "DatasetImportJobName") in
-      make ?lastModificationTime ?creationTime ?message ?status ?dataSize
-        ?fieldStatistics ?estimatedTimeRemainingInMinutes ?dataSource
-        ?geolocationFormat ?useGeolocationForTimeZone ?timeZone
+      make ?importMode ?format ?lastModificationTime ?creationTime ?message
+        ?status ?dataSize ?fieldStatistics ?estimatedTimeRemainingInMinutes
+        ?dataSource ?geolocationFormat ?useGeolocationForTimeZone ?timeZone
         ?timestampFormat ?datasetArn ?datasetImportJobArn
         ?datasetImportJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let importMode = field_map json__ "ImportMode" ImportMode.of_json in
+      let format = field_map json__ "Format" Format_.of_json in
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let message = field_map json "Message" Message.of_json in
-      let status = field_map json "Status" Status.of_json in
-      let dataSize = field_map json "DataSize" Double.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let dataSize = field_map json__ "DataSize" Double.of_json in
       let fieldStatistics =
-        field_map json "FieldStatistics" FieldStatistics.of_json in
+        field_map json__ "FieldStatistics" FieldStatistics.of_json in
       let estimatedTimeRemainingInMinutes =
-        field_map json "EstimatedTimeRemainingInMinutes" Long.of_json in
-      let dataSource = field_map json "DataSource" DataSource.of_json in
+        field_map json__ "EstimatedTimeRemainingInMinutes" Long.of_json in
+      let dataSource = field_map json__ "DataSource" DataSource.of_json in
       let geolocationFormat =
-        field_map json "GeolocationFormat" GeolocationFormat.of_json in
+        field_map json__ "GeolocationFormat" GeolocationFormat.of_json in
       let useGeolocationForTimeZone =
-        field_map json "UseGeolocationForTimeZone"
+        field_map json__ "UseGeolocationForTimeZone"
           UseGeolocationForTimeZone.of_json in
-      let timeZone = field_map json "TimeZone" TimeZone.of_json in
+      let timeZone = field_map json__ "TimeZone" TimeZone.of_json in
       let timestampFormat =
-        field_map json "TimestampFormat" TimestampFormat.of_json in
-      let datasetArn = field_map json "DatasetArn" Arn.of_json in
+        field_map json__ "TimestampFormat" TimestampFormat.of_json in
+      let datasetArn = field_map json__ "DatasetArn" Arn.of_json in
       let datasetImportJobArn =
-        field_map json "DatasetImportJobArn" Arn.of_json in
+        field_map json__ "DatasetImportJobArn" Arn.of_json in
       let datasetImportJobName =
-        field_map json "DatasetImportJobName" Name.of_json in
-      make ?lastModificationTime ?creationTime ?message ?status ?dataSize
-        ?fieldStatistics ?estimatedTimeRemainingInMinutes ?dataSource
-        ?geolocationFormat ?useGeolocationForTimeZone ?timeZone
+        field_map json__ "DatasetImportJobName" Name.of_json in
+      make ?importMode ?format ?lastModificationTime ?creationTime ?message
+        ?status ?dataSize ?fieldStatistics ?estimatedTimeRemainingInMinutes
+        ?dataSource ?geolocationFormat ?useGeolocationForTimeZone ?timeZone
         ?timestampFormat ?datasetArn ?datasetImportJobArn
         ?datasetImportJobName ()
     let to_json v = composed_to_json to_value v
@@ -7162,9 +10332,9 @@ module DescribeDatasetImportJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetImportJobArn") in
       make ~datasetImportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasetImportJobArn =
-        field_map_exn json "DatasetImportJobArn" Arn.of_json in
+        field_map_exn json__ "DatasetImportJobArn" Arn.of_json in
       make ~datasetImportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7274,15 +10444,15 @@ module DescribeDatasetGroupResponse =
       make ?lastModificationTime ?creationTime ?status ?domain ?datasetArns
         ?datasetGroupArn ?datasetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let status = field_map json "Status" Status.of_json in
-      let domain = field_map json "Domain" Domain.of_json in
-      let datasetArns = field_map json "DatasetArns" ArnList.of_json in
-      let datasetGroupArn = field_map json "DatasetGroupArn" Arn.of_json in
-      let datasetGroupName = field_map json "DatasetGroupName" Name.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let domain = field_map json__ "Domain" Domain.of_json in
+      let datasetArns = field_map json__ "DatasetArns" ArnList.of_json in
+      let datasetGroupArn = field_map json__ "DatasetGroupArn" Arn.of_json in
+      let datasetGroupName = field_map json__ "DatasetGroupName" Name.of_json in
       make ?lastModificationTime ?creationTime ?status ?domain ?datasetArns
         ?datasetGroupArn ?datasetGroupName ()
     let to_json v = composed_to_json to_value v
@@ -7306,8 +10476,9 @@ module DescribeDatasetGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetGroupArn") in
       make ~datasetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetGroupArn = field_map_exn json "DatasetGroupArn" Arn.of_json in
+    let of_json json__ =
+      let datasetGroupArn =
+        field_map_exn json__ "DatasetGroupArn" Arn.of_json in
       make ~datasetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7359,7 +10530,12 @@ module DescribeAutoPredictorResponse =
         [@ocaml.doc "The accuracy metric used to optimize the predictor."];
       explainabilityInfo: ExplainabilityInfo.t option
         [@ocaml.doc
-          "Provides the status and ARN of the Predictor Explainability."]}
+          "Provides the status and ARN of the Predictor Explainability."];
+      monitorInfo: MonitorInfo.t option
+        [@ocaml.doc
+          "A object with the Amazon Resource Name (ARN) and status of the monitor resource."];
+      timeAlignmentBoundary: TimeAlignmentBoundary.t option
+        [@ocaml.doc "The time boundary Forecast uses when aggregating data."]}
     type nonrec error =
       [ `InvalidInputException of InvalidInputException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -7381,26 +10557,30 @@ module DescribeAutoPredictorResponse =
                                 fun ?lastModificationTime ->
                                   fun ?optimizationMetric ->
                                     fun ?explainabilityInfo ->
-                                      fun () ->
-                                        {
-                                          predictorArn;
-                                          predictorName;
-                                          forecastHorizon;
-                                          forecastTypes;
-                                          forecastFrequency;
-                                          forecastDimensions;
-                                          datasetImportJobArns;
-                                          dataConfig;
-                                          encryptionConfig;
-                                          referencePredictorSummary;
-                                          estimatedTimeRemainingInMinutes;
-                                          status;
-                                          message;
-                                          creationTime;
-                                          lastModificationTime;
-                                          optimizationMetric;
-                                          explainabilityInfo
-                                        }
+                                      fun ?monitorInfo ->
+                                        fun ?timeAlignmentBoundary ->
+                                          fun () ->
+                                            {
+                                              predictorArn;
+                                              predictorName;
+                                              forecastHorizon;
+                                              forecastTypes;
+                                              forecastFrequency;
+                                              forecastDimensions;
+                                              datasetImportJobArns;
+                                              dataConfig;
+                                              encryptionConfig;
+                                              referencePredictorSummary;
+                                              estimatedTimeRemainingInMinutes;
+                                              status;
+                                              message;
+                                              creationTime;
+                                              lastModificationTime;
+                                              optimizationMetric;
+                                              explainabilityInfo;
+                                              monitorInfo;
+                                              timeAlignmentBoundary
+                                            }
     let error_of_json name json =
       match name with
       | "InvalidInputException" ->
@@ -7463,9 +10643,18 @@ module DescribeAutoPredictorResponse =
         ("OptimizationMetric",
           (Option.map x.optimizationMetric ~f:OptimizationMetric.to_value));
         ("ExplainabilityInfo",
-          (Option.map x.explainabilityInfo ~f:ExplainabilityInfo.to_value))]
+          (Option.map x.explainabilityInfo ~f:ExplainabilityInfo.to_value));
+        ("MonitorInfo", (Option.map x.monitorInfo ~f:MonitorInfo.to_value));
+        ("TimeAlignmentBoundary",
+          (Option.map x.timeAlignmentBoundary
+             ~f:TimeAlignmentBoundary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let timeAlignmentBoundary =
+        (Option.map ~f:TimeAlignmentBoundary.of_xml)
+          (Xml.child xml_arg0 "TimeAlignmentBoundary") in
+      let monitorInfo =
+        (Option.map ~f:MonitorInfo.of_xml) (Xml.child xml_arg0 "MonitorInfo") in
       let explainabilityInfo =
         (Option.map ~f:ExplainabilityInfo.of_xml)
           (Xml.child xml_arg0 "ExplainabilityInfo") in
@@ -7510,46 +10699,53 @@ module DescribeAutoPredictorResponse =
         (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "PredictorName") in
       let predictorArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "PredictorArn") in
-      make ?explainabilityInfo ?optimizationMetric ?lastModificationTime
-        ?creationTime ?message ?status ?estimatedTimeRemainingInMinutes
-        ?referencePredictorSummary ?encryptionConfig ?dataConfig
-        ?datasetImportJobArns ?forecastDimensions ?forecastFrequency
-        ?forecastTypes ?forecastHorizon ?predictorName ?predictorArn ()
+      make ?timeAlignmentBoundary ?monitorInfo ?explainabilityInfo
+        ?optimizationMetric ?lastModificationTime ?creationTime ?message
+        ?status ?estimatedTimeRemainingInMinutes ?referencePredictorSummary
+        ?encryptionConfig ?dataConfig ?datasetImportJobArns
+        ?forecastDimensions ?forecastFrequency ?forecastTypes
+        ?forecastHorizon ?predictorName ?predictorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let timeAlignmentBoundary =
+        field_map json__ "TimeAlignmentBoundary"
+          TimeAlignmentBoundary.of_json in
+      let monitorInfo = field_map json__ "MonitorInfo" MonitorInfo.of_json in
       let explainabilityInfo =
-        field_map json "ExplainabilityInfo" ExplainabilityInfo.of_json in
+        field_map json__ "ExplainabilityInfo" ExplainabilityInfo.of_json in
       let optimizationMetric =
-        field_map json "OptimizationMetric" OptimizationMetric.of_json in
+        field_map json__ "OptimizationMetric" OptimizationMetric.of_json in
       let lastModificationTime =
-        field_map json "LastModificationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let message = field_map json "Message" Message.of_json in
-      let status = field_map json "Status" Status.of_json in
+        field_map json__ "LastModificationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let status = field_map json__ "Status" Status.of_json in
       let estimatedTimeRemainingInMinutes =
-        field_map json "EstimatedTimeRemainingInMinutes" Long.of_json in
+        field_map json__ "EstimatedTimeRemainingInMinutes" Long.of_json in
       let referencePredictorSummary =
-        field_map json "ReferencePredictorSummary"
+        field_map json__ "ReferencePredictorSummary"
           ReferencePredictorSummary.of_json in
       let encryptionConfig =
-        field_map json "EncryptionConfig" EncryptionConfig.of_json in
-      let dataConfig = field_map json "DataConfig" DataConfig.of_json in
+        field_map json__ "EncryptionConfig" EncryptionConfig.of_json in
+      let dataConfig = field_map json__ "DataConfig" DataConfig.of_json in
       let datasetImportJobArns =
-        field_map json "DatasetImportJobArns" ArnList.of_json in
+        field_map json__ "DatasetImportJobArns" ArnList.of_json in
       let forecastDimensions =
-        field_map json "ForecastDimensions" ForecastDimensions.of_json in
+        field_map json__ "ForecastDimensions" ForecastDimensions.of_json in
       let forecastFrequency =
-        field_map json "ForecastFrequency" Frequency.of_json in
+        field_map json__ "ForecastFrequency" Frequency.of_json in
       let forecastTypes =
-        field_map json "ForecastTypes" ForecastTypes.of_json in
-      let forecastHorizon = field_map json "ForecastHorizon" Integer.of_json in
-      let predictorName = field_map json "PredictorName" Name.of_json in
-      let predictorArn = field_map json "PredictorArn" Arn.of_json in
-      make ?explainabilityInfo ?optimizationMetric ?lastModificationTime
-        ?creationTime ?message ?status ?estimatedTimeRemainingInMinutes
-        ?referencePredictorSummary ?encryptionConfig ?dataConfig
-        ?datasetImportJobArns ?forecastDimensions ?forecastFrequency
-        ?forecastTypes ?forecastHorizon ?predictorName ?predictorArn ()
+        field_map json__ "ForecastTypes" ForecastTypes.of_json in
+      let forecastHorizon =
+        field_map json__ "ForecastHorizon" Integer.of_json in
+      let predictorName = field_map json__ "PredictorName" Name.of_json in
+      let predictorArn = field_map json__ "PredictorArn" Arn.of_json in
+      make ?timeAlignmentBoundary ?monitorInfo ?explainabilityInfo
+        ?optimizationMetric ?lastModificationTime ?creationTime ?message
+        ?status ?estimatedTimeRemainingInMinutes ?referencePredictorSummary
+        ?encryptionConfig ?dataConfig ?datasetImportJobArns
+        ?forecastDimensions ?forecastFrequency ?forecastTypes
+        ?forecastHorizon ?predictorName ?predictorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a predictor created using the CreateAutoPredictor operation."]
@@ -7570,12 +10766,91 @@ module DescribeAutoPredictorRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PredictorArn") in
       make ~predictorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let predictorArn = field_map_exn json "PredictorArn" Arn.of_json in
+    let of_json json__ =
+      let predictorArn = field_map_exn json__ "PredictorArn" Arn.of_json in
       make ~predictorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a predictor created using the CreateAutoPredictor operation."]
+module DeleteWhatIfForecastRequest =
+  struct
+    type nonrec t =
+      {
+      whatIfForecastArn: LongArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if forecast that you want to delete."]}
+    let context_ = "DeleteWhatIfForecastRequest"
+    let make ~whatIfForecastArn = fun () -> { whatIfForecastArn }
+    let to_value x =
+      structure_to_value
+        [("WhatIfForecastArn", (Some (LongArn.to_value x.whatIfForecastArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let whatIfForecastArn =
+        LongArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WhatIfForecastArn") in
+      make ~whatIfForecastArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let whatIfForecastArn =
+        field_map_exn json__ "WhatIfForecastArn" LongArn.of_json in
+      make ~whatIfForecastArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a what-if forecast created using the CreateWhatIfForecast operation. You can delete only what-if forecasts that have a status of ACTIVE or CREATE_FAILED. To get the status, use the DescribeWhatIfForecast operation. You can't delete a what-if forecast while it is being exported. After a what-if forecast is deleted, you can no longer query the what-if analysis."]
+module DeleteWhatIfForecastExportRequest =
+  struct
+    type nonrec t =
+      {
+      whatIfForecastExportArn: LongArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if forecast export that you want to delete."]}
+    let context_ = "DeleteWhatIfForecastExportRequest"
+    let make ~whatIfForecastExportArn = fun () -> { whatIfForecastExportArn }
+    let to_value x =
+      structure_to_value
+        [("WhatIfForecastExportArn",
+           (Some (LongArn.to_value x.whatIfForecastExportArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let whatIfForecastExportArn =
+        LongArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WhatIfForecastExportArn") in
+      make ~whatIfForecastExportArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let whatIfForecastExportArn =
+        field_map_exn json__ "WhatIfForecastExportArn" LongArn.of_json in
+      make ~whatIfForecastExportArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a what-if forecast export created using the CreateWhatIfForecastExport operation. You can delete only what-if forecast exports that have a status of ACTIVE or CREATE_FAILED. To get the status, use the DescribeWhatIfForecastExport operation."]
+module DeleteWhatIfAnalysisRequest =
+  struct
+    type nonrec t =
+      {
+      whatIfAnalysisArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if analysis that you want to delete."]}
+    let context_ = "DeleteWhatIfAnalysisRequest"
+    let make ~whatIfAnalysisArn = fun () -> { whatIfAnalysisArn }
+    let to_value x =
+      structure_to_value
+        [("WhatIfAnalysisArn", (Some (Arn.to_value x.whatIfAnalysisArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let whatIfAnalysisArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WhatIfAnalysisArn") in
+      make ~whatIfAnalysisArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let whatIfAnalysisArn =
+        field_map_exn json__ "WhatIfAnalysisArn" Arn.of_json in
+      make ~whatIfAnalysisArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a what-if analysis created using the CreateWhatIfAnalysis operation. You can delete only what-if analyses that have a status of ACTIVE or CREATE_FAILED. To get the status, use the DescribeWhatIfAnalysis operation. You can't delete a what-if analysis while any of its forecasts are being exported."]
 module DeleteResourceTreeRequest =
   struct
     type nonrec t =
@@ -7594,8 +10869,8 @@ module DeleteResourceTreeRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7618,8 +10893,8 @@ module DeletePredictorRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PredictorArn") in
       make ~predictorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let predictorArn = field_map_exn json "PredictorArn" Arn.of_json in
+    let of_json json__ =
+      let predictorArn = field_map_exn json__ "PredictorArn" Arn.of_json in
       make ~predictorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7646,12 +10921,35 @@ module DeletePredictorBacktestExportJobRequest =
              "PredictorBacktestExportJobArn") in
       make ~predictorBacktestExportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let predictorBacktestExportJobArn =
-        field_map_exn json "PredictorBacktestExportJobArn" Arn.of_json in
+        field_map_exn json__ "PredictorBacktestExportJobArn" Arn.of_json in
       make ~predictorBacktestExportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a predictor backtest export job."]
+module DeleteMonitorRequest =
+  struct
+    type nonrec t =
+      {
+      monitorArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the monitor resource to delete."]}
+    let context_ = "DeleteMonitorRequest"
+    let make ~monitorArn = fun () -> { monitorArn }
+    let to_value x =
+      structure_to_value [("MonitorArn", (Some (Arn.to_value x.monitorArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let monitorArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MonitorArn") in
+      make ~monitorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let monitorArn = field_map_exn json__ "MonitorArn" Arn.of_json in
+      make ~monitorArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a monitor resource. You can only delete a monitor resource with a status of ACTIVE, ACTIVE_STOPPED, CREATE_FAILED, or CREATE_STOPPED."]
 module DeleteForecastRequest =
   struct
     type nonrec t =
@@ -7670,8 +10968,8 @@ module DeleteForecastRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ForecastArn") in
       make ~forecastArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let forecastArn = field_map_exn json "ForecastArn" Arn.of_json in
+    let of_json json__ =
+      let forecastArn = field_map_exn json__ "ForecastArn" Arn.of_json in
       make ~forecastArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7696,9 +10994,9 @@ module DeleteForecastExportJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ForecastExportJobArn") in
       make ~forecastExportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let forecastExportJobArn =
-        field_map_exn json "ForecastExportJobArn" Arn.of_json in
+        field_map_exn json__ "ForecastExportJobArn" Arn.of_json in
       make ~forecastExportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7722,9 +11020,9 @@ module DeleteExplainabilityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ExplainabilityArn") in
       make ~explainabilityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let explainabilityArn =
-        field_map_exn json "ExplainabilityArn" Arn.of_json in
+        field_map_exn json__ "ExplainabilityArn" Arn.of_json in
       make ~explainabilityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7749,9 +11047,9 @@ module DeleteExplainabilityExportRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ExplainabilityExportArn") in
       make ~explainabilityExportArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let explainabilityExportArn =
-        field_map_exn json "ExplainabilityExportArn" Arn.of_json in
+        field_map_exn json__ "ExplainabilityExportArn" Arn.of_json in
       make ~explainabilityExportArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an Explainability export."]
@@ -7772,12 +11070,12 @@ module DeleteDatasetRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DatasetArn") in
       make ~datasetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetArn = field_map_exn json "DatasetArn" Arn.of_json in
+    let of_json json__ =
+      let datasetArn = field_map_exn json__ "DatasetArn" Arn.of_json in
       make ~datasetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an Amazon Forecast dataset that was created using the CreateDataset operation. You can only delete datasets that have a status of ACTIVE or CREATE_FAILED. To get the status use the DescribeDataset operation. Forecast does not automatically update any dataset groups that contain the deleted dataset. In order to update the dataset group, use the operation, omitting the deleted dataset's ARN."]
+       "Deletes an Amazon Forecast dataset that was created using the CreateDataset operation. You can only delete datasets that have a status of ACTIVE or CREATE_FAILED. To get the status use the DescribeDataset operation. Forecast does not automatically update any dataset groups that contain the deleted dataset. In order to update the dataset group, use the UpdateDatasetGroup operation, omitting the deleted dataset's ARN."]
 module DeleteDatasetImportJobRequest =
   struct
     type nonrec t =
@@ -7797,9 +11095,9 @@ module DeleteDatasetImportJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetImportJobArn") in
       make ~datasetImportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasetImportJobArn =
-        field_map_exn json "DatasetImportJobArn" Arn.of_json in
+        field_map_exn json__ "DatasetImportJobArn" Arn.of_json in
       make ~datasetImportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7823,12 +11121,490 @@ module DeleteDatasetGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetGroupArn") in
       make ~datasetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetGroupArn = field_map_exn json "DatasetGroupArn" Arn.of_json in
+    let of_json json__ =
+      let datasetGroupArn =
+        field_map_exn json__ "DatasetGroupArn" Arn.of_json in
       make ~datasetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a dataset group created using the CreateDatasetGroup operation. You can only delete dataset groups that have a status of ACTIVE, CREATE_FAILED, or UPDATE_FAILED. To get the status, use the DescribeDatasetGroup operation. This operation deletes only the dataset group, not the datasets in the group."]
+module CreateWhatIfForecastResponse =
+  struct
+    type nonrec t =
+      {
+      whatIfForecastArn: LongArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if forecast."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?whatIfForecastArn = fun () -> { whatIfForecastArn }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WhatIfForecastArn",
+           (Option.map x.whatIfForecastArn ~f:LongArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let whatIfForecastArn =
+        (Option.map ~f:LongArn.of_xml)
+          (Xml.child xml_arg0 "WhatIfForecastArn") in
+      make ?whatIfForecastArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let whatIfForecastArn =
+        field_map json__ "WhatIfForecastArn" LongArn.of_json in
+      make ?whatIfForecastArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A what-if forecast is a forecast that is created from a modified version of the baseline forecast. Each what-if forecast incorporates either a replacement dataset or a set of transformations to the original dataset."]
+module CreateWhatIfForecastRequest =
+  struct
+    type nonrec t =
+      {
+      whatIfForecastName: Name.t
+        [@ocaml.doc
+          "The name of the what-if forecast. Names must be unique within each what-if analysis."];
+      whatIfAnalysisArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if analysis."];
+      timeSeriesTransformations: TimeSeriesTransformations.t option
+        [@ocaml.doc
+          "The transformations that are applied to the baseline time series. Each transformation contains an action and a set of conditions. An action is applied only when all conditions are met. If no conditions are provided, the action is applied to all items."];
+      timeSeriesReplacementsDataSource:
+        TimeSeriesReplacementsDataSource.t option
+        [@ocaml.doc
+          "The replacement time series dataset, which contains the rows that you want to change in the related time series dataset. A replacement time series does not need to contain all rows that are in the baseline related time series. Include only the rows (measure-dimension combinations) that you want to include in the what-if forecast. This dataset is merged with the original time series to create a transformed dataset that is used for the what-if analysis. This dataset should contain the items to modify (such as item_id or workforce_type), any relevant dimensions, the timestamp column, and at least one of the related time series columns. This file should not contain duplicate timestamps for the same time series. Timestamps and item_ids not included in this dataset are not included in the what-if analysis."];
+      tags: Tags.t option
+        [@ocaml.doc "A list of tags to apply to the what if forecast."]}
+    let context_ = "CreateWhatIfForecastRequest"
+    let make ?timeSeriesTransformations =
+      fun ?timeSeriesReplacementsDataSource ->
+        fun ?tags ->
+          fun ~whatIfForecastName ->
+            fun ~whatIfAnalysisArn ->
+              fun () ->
+                {
+                  timeSeriesTransformations;
+                  timeSeriesReplacementsDataSource;
+                  tags;
+                  whatIfForecastName;
+                  whatIfAnalysisArn
+                }
+    let to_value x =
+      structure_to_value
+        [("WhatIfForecastName", (Some (Name.to_value x.whatIfForecastName)));
+        ("WhatIfAnalysisArn", (Some (Arn.to_value x.whatIfAnalysisArn)));
+        ("TimeSeriesTransformations",
+          (Option.map x.timeSeriesTransformations
+             ~f:TimeSeriesTransformations.to_value));
+        ("TimeSeriesReplacementsDataSource",
+          (Option.map x.timeSeriesReplacementsDataSource
+             ~f:TimeSeriesReplacementsDataSource.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let timeSeriesReplacementsDataSource =
+        (Option.map ~f:TimeSeriesReplacementsDataSource.of_xml)
+          (Xml.child xml_arg0 "TimeSeriesReplacementsDataSource") in
+      let timeSeriesTransformations =
+        (Option.map ~f:TimeSeriesTransformations.of_xml)
+          (Xml.child xml_arg0 "TimeSeriesTransformations") in
+      let whatIfAnalysisArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WhatIfAnalysisArn") in
+      let whatIfForecastName =
+        Name.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WhatIfForecastName") in
+      make ?tags ?timeSeriesReplacementsDataSource ?timeSeriesTransformations
+        ~whatIfAnalysisArn ~whatIfForecastName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let timeSeriesReplacementsDataSource =
+        field_map json__ "TimeSeriesReplacementsDataSource"
+          TimeSeriesReplacementsDataSource.of_json in
+      let timeSeriesTransformations =
+        field_map json__ "TimeSeriesTransformations"
+          TimeSeriesTransformations.of_json in
+      let whatIfAnalysisArn =
+        field_map_exn json__ "WhatIfAnalysisArn" Arn.of_json in
+      let whatIfForecastName =
+        field_map_exn json__ "WhatIfForecastName" Name.of_json in
+      make ?tags ?timeSeriesReplacementsDataSource ?timeSeriesTransformations
+        ~whatIfAnalysisArn ~whatIfForecastName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A what-if forecast is a forecast that is created from a modified version of the baseline forecast. Each what-if forecast incorporates either a replacement dataset or a set of transformations to the original dataset."]
+module CreateWhatIfForecastExportResponse =
+  struct
+    type nonrec t =
+      {
+      whatIfForecastExportArn: LongArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if forecast."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?whatIfForecastExportArn = fun () -> { whatIfForecastExportArn }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WhatIfForecastExportArn",
+           (Option.map x.whatIfForecastExportArn ~f:LongArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let whatIfForecastExportArn =
+        (Option.map ~f:LongArn.of_xml)
+          (Xml.child xml_arg0 "WhatIfForecastExportArn") in
+      make ?whatIfForecastExportArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let whatIfForecastExportArn =
+        field_map json__ "WhatIfForecastExportArn" LongArn.of_json in
+      make ?whatIfForecastExportArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Exports a forecast created by the CreateWhatIfForecast operation to your Amazon Simple Storage Service (Amazon S3) bucket. The forecast file name will match the following conventions: \226\137\136<ForecastExportJobName>_<ExportTimestamp>_<PartNumber> The <ExportTimestamp> component is in Java SimpleDateFormat (yyyy-MM-ddTHH-mm-ssZ). You must specify a DataDestination object that includes an Identity and Access Management (IAM) role that Amazon Forecast can assume to access the Amazon S3 bucket. For more information, see aws-forecast-iam-roles. For more information, see howitworks-forecast. To get a list of all your what-if forecast export jobs, use the ListWhatIfForecastExports operation. The Status of the forecast export job must be ACTIVE before you can access the forecast in your Amazon S3 bucket. To get the status, use the DescribeWhatIfForecastExport operation."]
+module CreateWhatIfForecastExportRequest =
+  struct
+    type nonrec t =
+      {
+      whatIfForecastExportName: Name.t
+        [@ocaml.doc "The name of the what-if forecast to export."];
+      whatIfForecastArns: WhatIfForecastArnListForExport.t
+        [@ocaml.doc
+          "The list of what-if forecast Amazon Resource Names (ARNs) to export."];
+      destination: DataDestination.t
+        [@ocaml.doc
+          "The location where you want to save the forecast and an Identity and Access Management (IAM) role that Amazon Forecast can assume to access the location. The forecast must be exported to an Amazon S3 bucket. If encryption is used, Destination must include an Key Management Service (KMS) key. The IAM role must allow Amazon Forecast permission to access the key."];
+      tags: Tags.t option
+        [@ocaml.doc "A list of tags to apply to the what if forecast."];
+      format: Format_.t option
+        [@ocaml.doc "The format of the exported data, CSV or PARQUET."]}
+    let context_ = "CreateWhatIfForecastExportRequest"
+    let make ?tags =
+      fun ?format ->
+        fun ~whatIfForecastExportName ->
+          fun ~whatIfForecastArns ->
+            fun ~destination ->
+              fun () ->
+                {
+                  tags;
+                  format;
+                  whatIfForecastExportName;
+                  whatIfForecastArns;
+                  destination
+                }
+    let to_value x =
+      structure_to_value
+        [("WhatIfForecastExportName",
+           (Some (Name.to_value x.whatIfForecastExportName)));
+        ("WhatIfForecastArns",
+          (Some
+             (WhatIfForecastArnListForExport.to_value x.whatIfForecastArns)));
+        ("Destination", (Some (DataDestination.to_value x.destination)));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("Format", (Option.map x.format ~f:Format_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let format =
+        (Option.map ~f:Format_.of_xml) (Xml.child xml_arg0 "Format") in
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let destination =
+        DataDestination.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Destination") in
+      let whatIfForecastArns =
+        WhatIfForecastArnListForExport.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WhatIfForecastArns") in
+      let whatIfForecastExportName =
+        Name.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "WhatIfForecastExportName") in
+      make ?format ?tags ~destination ~whatIfForecastArns
+        ~whatIfForecastExportName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let format = field_map json__ "Format" Format_.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let destination =
+        field_map_exn json__ "Destination" DataDestination.of_json in
+      let whatIfForecastArns =
+        field_map_exn json__ "WhatIfForecastArns"
+          WhatIfForecastArnListForExport.of_json in
+      let whatIfForecastExportName =
+        field_map_exn json__ "WhatIfForecastExportName" Name.of_json in
+      make ?format ?tags ~destination ~whatIfForecastArns
+        ~whatIfForecastExportName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Exports a forecast created by the CreateWhatIfForecast operation to your Amazon Simple Storage Service (Amazon S3) bucket. The forecast file name will match the following conventions: \226\137\136<ForecastExportJobName>_<ExportTimestamp>_<PartNumber> The <ExportTimestamp> component is in Java SimpleDateFormat (yyyy-MM-ddTHH-mm-ssZ). You must specify a DataDestination object that includes an Identity and Access Management (IAM) role that Amazon Forecast can assume to access the Amazon S3 bucket. For more information, see aws-forecast-iam-roles. For more information, see howitworks-forecast. To get a list of all your what-if forecast export jobs, use the ListWhatIfForecastExports operation. The Status of the forecast export job must be ACTIVE before you can access the forecast in your Amazon S3 bucket. To get the status, use the DescribeWhatIfForecastExport operation."]
+module CreateWhatIfAnalysisResponse =
+  struct
+    type nonrec t =
+      {
+      whatIfAnalysisArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the what-if analysis."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?whatIfAnalysisArn = fun () -> { whatIfAnalysisArn }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WhatIfAnalysisArn",
+           (Option.map x.whatIfAnalysisArn ~f:Arn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let whatIfAnalysisArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "WhatIfAnalysisArn") in
+      make ?whatIfAnalysisArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let whatIfAnalysisArn =
+        field_map json__ "WhatIfAnalysisArn" Arn.of_json in
+      make ?whatIfAnalysisArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "What-if analysis is a scenario modeling technique where you make a hypothetical change to a time series and compare the forecasts generated by these changes against the baseline, unchanged time series. It is important to remember that the purpose of a what-if analysis is to understand how a forecast can change given different modifications to the baseline time series. For example, imagine you are a clothing retailer who is considering an end of season sale to clear space for new styles. After creating a baseline forecast, you can use a what-if analysis to investigate how different sales tactics might affect your goals. You could create a scenario where everything is given a 25% markdown, and another where everything is given a fixed dollar markdown. You could create a scenario where the sale lasts for one week and another where the sale lasts for one month. With a what-if analysis, you can compare many different scenarios against each other. Note that a what-if analysis is meant to display what the forecasting model has learned and how it will behave in the scenarios that you are evaluating. Do not blindly use the results of the what-if analysis to make business decisions. For instance, forecasts might not be accurate for novel scenarios where there is no reference available to determine whether a forecast is good. The TimeSeriesSelector object defines the items that you want in the what-if analysis."]
+module CreateWhatIfAnalysisRequest =
+  struct
+    type nonrec t =
+      {
+      whatIfAnalysisName: Name.t
+        [@ocaml.doc
+          "The name of the what-if analysis. Each name must be unique."];
+      forecastArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the baseline forecast."];
+      timeSeriesSelector: TimeSeriesSelector.t option
+        [@ocaml.doc
+          "Defines the set of time series that are used in the what-if analysis with a TimeSeriesIdentifiers object. What-if analyses are performed only for the time series in this object. The TimeSeriesIdentifiers object needs the following information: DataSource Format Schema"];
+      tags: Tags.t option
+        [@ocaml.doc "A list of tags to apply to the what if forecast."]}
+    let context_ = "CreateWhatIfAnalysisRequest"
+    let make ?timeSeriesSelector =
+      fun ?tags ->
+        fun ~whatIfAnalysisName ->
+          fun ~forecastArn ->
+            fun () ->
+              { timeSeriesSelector; tags; whatIfAnalysisName; forecastArn }
+    let to_value x =
+      structure_to_value
+        [("WhatIfAnalysisName", (Some (Name.to_value x.whatIfAnalysisName)));
+        ("ForecastArn", (Some (Arn.to_value x.forecastArn)));
+        ("TimeSeriesSelector",
+          (Option.map x.timeSeriesSelector ~f:TimeSeriesSelector.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let timeSeriesSelector =
+        (Option.map ~f:TimeSeriesSelector.of_xml)
+          (Xml.child xml_arg0 "TimeSeriesSelector") in
+      let forecastArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ForecastArn") in
+      let whatIfAnalysisName =
+        Name.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WhatIfAnalysisName") in
+      make ?tags ?timeSeriesSelector ~forecastArn ~whatIfAnalysisName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let timeSeriesSelector =
+        field_map json__ "TimeSeriesSelector" TimeSeriesSelector.of_json in
+      let forecastArn = field_map_exn json__ "ForecastArn" Arn.of_json in
+      let whatIfAnalysisName =
+        field_map_exn json__ "WhatIfAnalysisName" Name.of_json in
+      make ?tags ?timeSeriesSelector ~forecastArn ~whatIfAnalysisName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "What-if analysis is a scenario modeling technique where you make a hypothetical change to a time series and compare the forecasts generated by these changes against the baseline, unchanged time series. It is important to remember that the purpose of a what-if analysis is to understand how a forecast can change given different modifications to the baseline time series. For example, imagine you are a clothing retailer who is considering an end of season sale to clear space for new styles. After creating a baseline forecast, you can use a what-if analysis to investigate how different sales tactics might affect your goals. You could create a scenario where everything is given a 25% markdown, and another where everything is given a fixed dollar markdown. You could create a scenario where the sale lasts for one week and another where the sale lasts for one month. With a what-if analysis, you can compare many different scenarios against each other. Note that a what-if analysis is meant to display what the forecasting model has learned and how it will behave in the scenarios that you are evaluating. Do not blindly use the results of the what-if analysis to make business decisions. For instance, forecasts might not be accurate for novel scenarios where there is no reference available to determine whether a forecast is good. The TimeSeriesSelector object defines the items that you want in the what-if analysis."]
 module CreatePredictorResponse =
   struct
     type nonrec t =
@@ -7910,8 +11686,8 @@ module CreatePredictorResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "PredictorArn") in
       make ?predictorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let predictorArn = field_map json "PredictorArn" Arn.of_json in
+    let of_json json__ =
+      let predictorArn = field_map json__ "PredictorArn" Arn.of_json in
       make ?predictorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7935,7 +11711,7 @@ module CreatePredictorRequest =
           "Whether to perform AutoML. When Amazon Forecast performs AutoML, it evaluates the algorithms it provides and chooses the best algorithm and configuration for your training dataset. The default value is false. In this case, you are required to specify an algorithm. Set PerformAutoML to true to have Amazon Forecast perform AutoML. This is a good option if you aren't sure which algorithm is suitable for your training data. In this case, PerformHPO must be false."];
       autoMLOverrideStrategy: AutoMLOverrideStrategy.t option
         [@ocaml.doc
-          "The LatencyOptimized AutoML override strategy is only available in private beta. Contact AWS Support or your account manager to learn more about access privileges. Used to overide the default AutoML strategy, which is to optimize predictor accuracy. To apply an AutoML strategy that minimizes training time, use LatencyOptimized. This parameter is only valid for predictors trained using AutoML."];
+          "The LatencyOptimized AutoML override strategy is only available in private beta. Contact Amazon Web Services Support or your account manager to learn more about access privileges. Used to overide the default AutoML strategy, which is to optimize predictor accuracy. To apply an AutoML strategy that minimizes training time, use LatencyOptimized. This parameter is only valid for predictors trained using AutoML."];
       performHPO: Boolean.t option
         [@ocaml.doc
           "Whether to perform hyperparameter optimization (HPO). HPO finds optimal hyperparameter values for your training data. The process of performing HPO is known as running a hyperparameter tuning job. The default value is false. In this case, Amazon Forecast uses default hyperparameter values from the chosen algorithm. To override the default values, set PerformHPO to true and, optionally, supply the HyperParameterTuningJobConfig object. The tuning job specifies a metric to optimize, which hyperparameters participate in tuning, and the valid range for each tunable hyperparameter. In this case, you are required to specify an algorithm and PerformAutoML must be false. The following algorithms support HPO: DeepAR+ CNN-QR"];
@@ -7955,10 +11731,10 @@ module CreatePredictorRequest =
         [@ocaml.doc "The featurization configuration."];
       encryptionConfig: EncryptionConfig.t option
         [@ocaml.doc
-          "An AWS Key Management Service (KMS) key and the AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the key."];
+          "An Key Management Service (KMS) key and the Identity and Access Management (IAM) role that Amazon Forecast can assume to access the key."];
       tags: Tags.t option
         [@ocaml.doc
-          "The optional metadata that you apply to the predictor to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. The following basic restrictions apply to tags: Maximum number of tags per resource - 50. For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length - 128 Unicode characters in UTF-8. Maximum value length - 256 Unicode characters in UTF-8. If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for keys as it is reserved for AWS use. You cannot edit or delete tag keys with this prefix. Values can have this prefix. If a tag value has aws as its prefix but the key does not, then Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit."];
+          "The optional metadata that you apply to the predictor to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. The following basic restrictions apply to tags: Maximum number of tags per resource - 50. For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length - 128 Unicode characters in UTF-8. Maximum value length - 256 Unicode characters in UTF-8. If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for keys as it is reserved for Amazon Web Services use. You cannot edit or delete tag keys with this prefix. Values can have this prefix. If a tag value has aws as its prefix but the key does not, then Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit."];
       optimizationMetric: OptimizationMetric.t option
         [@ocaml.doc "The accuracy metric used to optimize the predictor."]}
     let context_ = "CreatePredictorRequest"
@@ -8069,33 +11845,34 @@ module CreatePredictorRequest =
         ?performHPO ?autoMLOverrideStrategy ?performAutoML ?forecastTypes
         ~forecastHorizon ?algorithmArn ~predictorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let optimizationMetric =
-        field_map json "OptimizationMetric" OptimizationMetric.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "OptimizationMetric" OptimizationMetric.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let encryptionConfig =
-        field_map json "EncryptionConfig" EncryptionConfig.of_json in
+        field_map json__ "EncryptionConfig" EncryptionConfig.of_json in
       let featurizationConfig =
-        field_map_exn json "FeaturizationConfig" FeaturizationConfig.of_json in
+        field_map_exn json__ "FeaturizationConfig"
+          FeaturizationConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
       let hPOConfig =
-        field_map json "HPOConfig" HyperParameterTuningJobConfig.of_json in
+        field_map json__ "HPOConfig" HyperParameterTuningJobConfig.of_json in
       let evaluationParameters =
-        field_map json "EvaluationParameters" EvaluationParameters.of_json in
+        field_map json__ "EvaluationParameters" EvaluationParameters.of_json in
       let trainingParameters =
-        field_map json "TrainingParameters" TrainingParameters.of_json in
-      let performHPO = field_map json "PerformHPO" Boolean.of_json in
+        field_map json__ "TrainingParameters" TrainingParameters.of_json in
+      let performHPO = field_map json__ "PerformHPO" Boolean.of_json in
       let autoMLOverrideStrategy =
-        field_map json "AutoMLOverrideStrategy"
+        field_map json__ "AutoMLOverrideStrategy"
           AutoMLOverrideStrategy.of_json in
-      let performAutoML = field_map json "PerformAutoML" Boolean.of_json in
+      let performAutoML = field_map json__ "PerformAutoML" Boolean.of_json in
       let forecastTypes =
-        field_map json "ForecastTypes" ForecastTypes.of_json in
+        field_map json__ "ForecastTypes" ForecastTypes.of_json in
       let forecastHorizon =
-        field_map_exn json "ForecastHorizon" Integer.of_json in
-      let algorithmArn = field_map json "AlgorithmArn" Arn.of_json in
-      let predictorName = field_map_exn json "PredictorName" Name.of_json in
+        field_map_exn json__ "ForecastHorizon" Integer.of_json in
+      let algorithmArn = field_map json__ "AlgorithmArn" Arn.of_json in
+      let predictorName = field_map_exn json__ "PredictorName" Name.of_json in
       make ?optimizationMetric ?tags ?encryptionConfig ~featurizationConfig
         ~inputDataConfig ?hPOConfig ?evaluationParameters ?trainingParameters
         ?performHPO ?autoMLOverrideStrategy ?performAutoML ?forecastTypes
@@ -8188,13 +11965,13 @@ module CreatePredictorBacktestExportJobResponse =
           (Xml.child xml_arg0 "PredictorBacktestExportJobArn") in
       make ?predictorBacktestExportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let predictorBacktestExportJobArn =
-        field_map json "PredictorBacktestExportJobArn" Arn.of_json in
+        field_map json__ "PredictorBacktestExportJobArn" Arn.of_json in
       make ?predictorBacktestExportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Exports backtest forecasts and accuracy metrics generated by the CreateAutoPredictor or CreatePredictor operations. Two folders containing CSV files are exported to your specified S3 bucket. The export file names will match the following conventions: <ExportJobName>_<ExportTimestamp>_<PartNumber>.csv The <ExportTimestamp> component is in Java SimpleDate format (yyyy-MM-ddTHH-mm-ssZ). You must specify a DataDestination object that includes an Amazon S3 bucket and an AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the Amazon S3 bucket. For more information, see aws-forecast-iam-roles. The Status of the export job must be ACTIVE before you can access the export in your Amazon S3 bucket. To get the status, use the DescribePredictorBacktestExportJob operation."]
+       "Exports backtest forecasts and accuracy metrics generated by the CreateAutoPredictor or CreatePredictor operations. Two folders containing CSV or Parquet files are exported to your specified S3 bucket. The export file names will match the following conventions: <ExportJobName>_<ExportTimestamp>_<PartNumber>.csv The <ExportTimestamp> component is in Java SimpleDate format (yyyy-MM-ddTHH-mm-ssZ). You must specify a DataDestination object that includes an Amazon S3 bucket and an Identity and Access Management (IAM) role that Amazon Forecast can assume to access the Amazon S3 bucket. For more information, see aws-forecast-iam-roles. The Status of the export job must be ACTIVE before you can access the export in your Amazon S3 bucket. To get the status, use the DescribePredictorBacktestExportJob operation."]
 module CreatePredictorBacktestExportJobRequest =
   struct
     type nonrec t =
@@ -8207,28 +11984,36 @@ module CreatePredictorBacktestExportJobRequest =
       destination: DataDestination.t ;
       tags: Tags.t option
         [@ocaml.doc
-          "Optional metadata to help you categorize and organize your backtests. Each tag consists of a key and an optional value, both of which you define. Tag keys and values are case sensitive. The following restrictions apply to tags: For each resource, each tag key must be unique and each tag key must have one value. Maximum number of tags per resource: 50. Maximum key length: 128 Unicode characters in UTF-8. Maximum value length: 256 Unicode characters in UTF-8. Accepted characters: all letters and numbers, spaces representable in UTF-8, and + - = . _ : / \\@. If your tagging schema is used across other services and resources, the character restrictions of those services also apply. Key prefixes cannot include any upper or lowercase combination of aws: or AWS:. Values can have this prefix. If a tag value has aws as its prefix but the key does not, Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit. You cannot edit or delete tag keys with this prefix."]}
+          "Optional metadata to help you categorize and organize your backtests. Each tag consists of a key and an optional value, both of which you define. Tag keys and values are case sensitive. The following restrictions apply to tags: For each resource, each tag key must be unique and each tag key must have one value. Maximum number of tags per resource: 50. Maximum key length: 128 Unicode characters in UTF-8. Maximum value length: 256 Unicode characters in UTF-8. Accepted characters: all letters and numbers, spaces representable in UTF-8, and + - = . _ : / \\@. If your tagging schema is used across other services and resources, the character restrictions of those services also apply. Key prefixes cannot include any upper or lowercase combination of aws: or AWS:. Values can have this prefix. If a tag value has aws as its prefix but the key does not, Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit. You cannot edit or delete tag keys with this prefix."];
+      format: Format_.t option
+        [@ocaml.doc
+          "The format of the exported data, CSV or PARQUET. The default value is CSV."]}
     let context_ = "CreatePredictorBacktestExportJobRequest"
     let make ?tags =
-      fun ~predictorBacktestExportJobName ->
-        fun ~predictorArn ->
-          fun ~destination ->
-            fun () ->
-              {
-                tags;
-                predictorBacktestExportJobName;
-                predictorArn;
-                destination
-              }
+      fun ?format ->
+        fun ~predictorBacktestExportJobName ->
+          fun ~predictorArn ->
+            fun ~destination ->
+              fun () ->
+                {
+                  tags;
+                  format;
+                  predictorBacktestExportJobName;
+                  predictorArn;
+                  destination
+                }
     let to_value x =
       structure_to_value
         [("PredictorBacktestExportJobName",
            (Some (Name.to_value x.predictorBacktestExportJobName)));
         ("PredictorArn", (Some (Arn.to_value x.predictorArn)));
         ("Destination", (Some (DataDestination.to_value x.destination)));
-        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("Format", (Option.map x.format ~f:Format_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let format =
+        (Option.map ~f:Format_.of_xml) (Xml.child xml_arg0 "Format") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       let destination =
         DataDestination.of_xml
@@ -8239,21 +12024,146 @@ module CreatePredictorBacktestExportJobRequest =
         Name.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
              "PredictorBacktestExportJobName") in
-      make ?tags ~destination ~predictorArn ~predictorBacktestExportJobName
-        ()
+      make ?format ?tags ~destination ~predictorArn
+        ~predictorBacktestExportJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let format = field_map json__ "Format" Format_.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let destination =
-        field_map_exn json "Destination" DataDestination.of_json in
-      let predictorArn = field_map_exn json "PredictorArn" Arn.of_json in
+        field_map_exn json__ "Destination" DataDestination.of_json in
+      let predictorArn = field_map_exn json__ "PredictorArn" Arn.of_json in
       let predictorBacktestExportJobName =
-        field_map_exn json "PredictorBacktestExportJobName" Name.of_json in
-      make ?tags ~destination ~predictorArn ~predictorBacktestExportJobName
-        ()
+        field_map_exn json__ "PredictorBacktestExportJobName" Name.of_json in
+      make ?format ?tags ~destination ~predictorArn
+        ~predictorBacktestExportJobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Exports backtest forecasts and accuracy metrics generated by the CreateAutoPredictor or CreatePredictor operations. Two folders containing CSV files are exported to your specified S3 bucket. The export file names will match the following conventions: <ExportJobName>_<ExportTimestamp>_<PartNumber>.csv The <ExportTimestamp> component is in Java SimpleDate format (yyyy-MM-ddTHH-mm-ssZ). You must specify a DataDestination object that includes an Amazon S3 bucket and an AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the Amazon S3 bucket. For more information, see aws-forecast-iam-roles. The Status of the export job must be ACTIVE before you can access the export in your Amazon S3 bucket. To get the status, use the DescribePredictorBacktestExportJob operation."]
+       "Exports backtest forecasts and accuracy metrics generated by the CreateAutoPredictor or CreatePredictor operations. Two folders containing CSV or Parquet files are exported to your specified S3 bucket. The export file names will match the following conventions: <ExportJobName>_<ExportTimestamp>_<PartNumber>.csv The <ExportTimestamp> component is in Java SimpleDate format (yyyy-MM-ddTHH-mm-ssZ). You must specify a DataDestination object that includes an Amazon S3 bucket and an Identity and Access Management (IAM) role that Amazon Forecast can assume to access the Amazon S3 bucket. For more information, see aws-forecast-iam-roles. The Status of the export job must be ACTIVE before you can access the export in your Amazon S3 bucket. To get the status, use the DescribePredictorBacktestExportJob operation."]
+module CreateMonitorResponse =
+  struct
+    type nonrec t =
+      {
+      monitorArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the monitor resource."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?monitorArn = fun () -> { monitorArn }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MonitorArn", (Option.map x.monitorArn ~f:Arn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let monitorArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "MonitorArn") in
+      make ?monitorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let monitorArn = field_map json__ "MonitorArn" Arn.of_json in
+      make ?monitorArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a predictor monitor resource for an existing auto predictor. Predictor monitoring allows you to see how your predictor's performance changes over time. For more information, see Predictor Monitoring."]
+module CreateMonitorRequest =
+  struct
+    type nonrec t =
+      {
+      monitorName: Name.t [@ocaml.doc "The name of the monitor resource."];
+      resourceArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the predictor to monitor."];
+      tags: Tags.t option
+        [@ocaml.doc "A list of tags to apply to the monitor resource."]}
+    let context_ = "CreateMonitorRequest"
+    let make ?tags =
+      fun ~monitorName ->
+        fun ~resourceArn -> fun () -> { tags; monitorName; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("MonitorName", (Some (Name.to_value x.monitorName)));
+        ("ResourceArn", (Some (Arn.to_value x.resourceArn)));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let resourceArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      let monitorName =
+        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MonitorName") in
+      make ?tags ~resourceArn ~monitorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
+      let monitorName = field_map_exn json__ "MonitorName" Name.of_json in
+      make ?tags ~resourceArn ~monitorName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a predictor monitor resource for an existing auto predictor. Predictor monitoring allows you to see how your predictor's performance changes over time. For more information, see Predictor Monitoring."]
 module CreateForecastResponse =
   struct
     type nonrec t =
@@ -8335,12 +12245,12 @@ module CreateForecastResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ForecastArn") in
       make ?forecastArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let forecastArn = field_map json "ForecastArn" Arn.of_json in
+    let of_json json__ =
+      let forecastArn = field_map json__ "ForecastArn" Arn.of_json in
       make ?forecastArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a forecast for each item in the TARGET_TIME_SERIES dataset that was used to train the predictor. This is known as inference. To retrieve the forecast for a single item at low latency, use the operation. To export the complete forecast into your Amazon Simple Storage Service (Amazon S3) bucket, use the CreateForecastExportJob operation. The range of the forecast is determined by the ForecastHorizon value, which you specify in the CreatePredictor request. When you query a forecast, you can request a specific date range within the forecast. To get a list of all your forecasts, use the ListForecasts operation. The forecasts generated by Amazon Forecast are in the same time zone as the dataset that was used to create the predictor. For more information, see howitworks-forecast. The Status of the forecast must be ACTIVE before you can query or export the forecast. Use the DescribeForecast operation to get the status."]
+       "Creates a forecast for each item in the TARGET_TIME_SERIES dataset that was used to train the predictor. This is known as inference. To retrieve the forecast for a single item at low latency, use the operation. To export the complete forecast into your Amazon Simple Storage Service (Amazon S3) bucket, use the CreateForecastExportJob operation. The range of the forecast is determined by the ForecastHorizon value, which you specify in the CreatePredictor request. When you query a forecast, you can request a specific date range within the forecast. To get a list of all your forecasts, use the ListForecasts operation. The forecasts generated by Amazon Forecast are in the same time zone as the dataset that was used to create the predictor. For more information, see howitworks-forecast. The Status of the forecast must be ACTIVE before you can query or export the forecast. Use the DescribeForecast operation to get the status. By default, a forecast includes predictions for every item (item_id) in the dataset group that was used to train the predictor. However, you can use the TimeSeriesSelector object to generate a forecast on a subset of time series. Forecast creation is skipped for any time series that you specify that are not in the input dataset. The forecast export file will not contain these time series or their forecasted values."]
 module CreateForecastRequest =
   struct
     type nonrec t =
@@ -8351,25 +12261,41 @@ module CreateForecastRequest =
           "The Amazon Resource Name (ARN) of the predictor to use to generate the forecast."];
       forecastTypes: ForecastTypes.t option
         [@ocaml.doc
-          "The quantiles at which probabilistic forecasts are generated. You can currently specify up to 5 quantiles per forecast. Accepted values include 0.01 to 0.99 (increments of .01 only) and mean. The mean forecast is different from the median (0.50) when the distribution is not symmetric (for example, Beta and Negative Binomial). The default value is \\[\"0.1\", \"0.5\", \"0.9\"\\]."];
+          "The quantiles at which probabilistic forecasts are generated. You can currently specify up to 5 quantiles per forecast. Accepted values include 0.01 to 0.99 (increments of .01 only) and mean. The mean forecast is different from the median (0.50) when the distribution is not symmetric (for example, Beta and Negative Binomial). The default quantiles are the quantiles you specified during predictor creation. If you didn't specify quantiles, the default values are \\[\"0.1\", \"0.5\", \"0.9\"\\]."];
       tags: Tags.t option
         [@ocaml.doc
-          "The optional metadata that you apply to the forecast to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. The following basic restrictions apply to tags: Maximum number of tags per resource - 50. For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length - 128 Unicode characters in UTF-8. Maximum value length - 256 Unicode characters in UTF-8. If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for keys as it is reserved for AWS use. You cannot edit or delete tag keys with this prefix. Values can have this prefix. If a tag value has aws as its prefix but the key does not, then Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit."]}
+          "The optional metadata that you apply to the forecast to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. The following basic restrictions apply to tags: Maximum number of tags per resource - 50. For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length - 128 Unicode characters in UTF-8. Maximum value length - 256 Unicode characters in UTF-8. If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for keys as it is reserved for Amazon Web Services use. You cannot edit or delete tag keys with this prefix. Values can have this prefix. If a tag value has aws as its prefix but the key does not, then Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit."];
+      timeSeriesSelector: TimeSeriesSelector.t option
+        [@ocaml.doc
+          "Defines the set of time series that are used to create the forecasts in a TimeSeriesIdentifiers object. The TimeSeriesIdentifiers object needs the following information: DataSource Format Schema"]}
     let context_ = "CreateForecastRequest"
     let make ?forecastTypes =
       fun ?tags ->
-        fun ~forecastName ->
-          fun ~predictorArn ->
-            fun () -> { forecastTypes; tags; forecastName; predictorArn }
+        fun ?timeSeriesSelector ->
+          fun ~forecastName ->
+            fun ~predictorArn ->
+              fun () ->
+                {
+                  forecastTypes;
+                  tags;
+                  timeSeriesSelector;
+                  forecastName;
+                  predictorArn
+                }
     let to_value x =
       structure_to_value
         [("ForecastName", (Some (Name.to_value x.forecastName)));
         ("PredictorArn", (Some (Arn.to_value x.predictorArn)));
         ("ForecastTypes",
           (Option.map x.forecastTypes ~f:ForecastTypes.to_value));
-        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("TimeSeriesSelector",
+          (Option.map x.timeSeriesSelector ~f:TimeSeriesSelector.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let timeSeriesSelector =
+        (Option.map ~f:TimeSeriesSelector.of_xml)
+          (Xml.child xml_arg0 "TimeSeriesSelector") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       let forecastTypes =
         (Option.map ~f:ForecastTypes.of_xml)
@@ -8378,18 +12304,22 @@ module CreateForecastRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PredictorArn") in
       let forecastName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ForecastName") in
-      make ?tags ?forecastTypes ~predictorArn ~forecastName ()
+      make ?timeSeriesSelector ?tags ?forecastTypes ~predictorArn
+        ~forecastName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let timeSeriesSelector =
+        field_map json__ "TimeSeriesSelector" TimeSeriesSelector.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let forecastTypes =
-        field_map json "ForecastTypes" ForecastTypes.of_json in
-      let predictorArn = field_map_exn json "PredictorArn" Arn.of_json in
-      let forecastName = field_map_exn json "ForecastName" Name.of_json in
-      make ?tags ?forecastTypes ~predictorArn ~forecastName ()
+        field_map json__ "ForecastTypes" ForecastTypes.of_json in
+      let predictorArn = field_map_exn json__ "PredictorArn" Arn.of_json in
+      let forecastName = field_map_exn json__ "ForecastName" Name.of_json in
+      make ?timeSeriesSelector ?tags ?forecastTypes ~predictorArn
+        ~forecastName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a forecast for each item in the TARGET_TIME_SERIES dataset that was used to train the predictor. This is known as inference. To retrieve the forecast for a single item at low latency, use the operation. To export the complete forecast into your Amazon Simple Storage Service (Amazon S3) bucket, use the CreateForecastExportJob operation. The range of the forecast is determined by the ForecastHorizon value, which you specify in the CreatePredictor request. When you query a forecast, you can request a specific date range within the forecast. To get a list of all your forecasts, use the ListForecasts operation. The forecasts generated by Amazon Forecast are in the same time zone as the dataset that was used to create the predictor. For more information, see howitworks-forecast. The Status of the forecast must be ACTIVE before you can query or export the forecast. Use the DescribeForecast operation to get the status."]
+       "Creates a forecast for each item in the TARGET_TIME_SERIES dataset that was used to train the predictor. This is known as inference. To retrieve the forecast for a single item at low latency, use the operation. To export the complete forecast into your Amazon Simple Storage Service (Amazon S3) bucket, use the CreateForecastExportJob operation. The range of the forecast is determined by the ForecastHorizon value, which you specify in the CreatePredictor request. When you query a forecast, you can request a specific date range within the forecast. To get a list of all your forecasts, use the ListForecasts operation. The forecasts generated by Amazon Forecast are in the same time zone as the dataset that was used to create the predictor. For more information, see howitworks-forecast. The Status of the forecast must be ACTIVE before you can query or export the forecast. Use the DescribeForecast operation to get the status. By default, a forecast includes predictions for every item (item_id) in the dataset group that was used to train the predictor. However, you can use the TimeSeriesSelector object to generate a forecast on a subset of time series. Forecast creation is skipped for any time series that you specify that are not in the input dataset. The forecast export file will not contain these time series or their forecasted values."]
 module CreateForecastExportJobResponse =
   struct
     type nonrec t =
@@ -8473,13 +12403,13 @@ module CreateForecastExportJobResponse =
           (Xml.child xml_arg0 "ForecastExportJobArn") in
       make ?forecastExportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let forecastExportJobArn =
-        field_map json "ForecastExportJobArn" Arn.of_json in
+        field_map json__ "ForecastExportJobArn" Arn.of_json in
       make ?forecastExportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Exports a forecast created by the CreateForecast operation to your Amazon Simple Storage Service (Amazon S3) bucket. The forecast file name will match the following conventions: <ForecastExportJobName>_<ExportTimestamp>_<PartNumber> where the <ExportTimestamp> component is in Java SimpleDateFormat (yyyy-MM-ddTHH-mm-ssZ). You must specify a DataDestination object that includes an AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the Amazon S3 bucket. For more information, see aws-forecast-iam-roles. For more information, see howitworks-forecast. To get a list of all your forecast export jobs, use the ListForecastExportJobs operation. The Status of the forecast export job must be ACTIVE before you can access the forecast in your Amazon S3 bucket. To get the status, use the DescribeForecastExportJob operation."]
+       "Exports a forecast created by the CreateForecast operation to your Amazon Simple Storage Service (Amazon S3) bucket. The forecast file name will match the following conventions: <ForecastExportJobName>_<ExportTimestamp>_<PartNumber> where the <ExportTimestamp> component is in Java SimpleDateFormat (yyyy-MM-ddTHH-mm-ssZ). You must specify a DataDestination object that includes an Identity and Access Management (IAM) role that Amazon Forecast can assume to access the Amazon S3 bucket. For more information, see aws-forecast-iam-roles. For more information, see howitworks-forecast. To get a list of all your forecast export jobs, use the ListForecastExportJobs operation. The Status of the forecast export job must be ACTIVE before you can access the forecast in your Amazon S3 bucket. To get the status, use the DescribeForecastExportJob operation."]
 module CreateForecastExportJobRequest =
   struct
     type nonrec t =
@@ -8491,26 +12421,39 @@ module CreateForecastExportJobRequest =
           "The Amazon Resource Name (ARN) of the forecast that you want to export."];
       destination: DataDestination.t
         [@ocaml.doc
-          "The location where you want to save the forecast and an AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the location. The forecast must be exported to an Amazon S3 bucket. If encryption is used, Destination must include an AWS Key Management Service (KMS) key. The IAM role must allow Amazon Forecast permission to access the key."];
+          "The location where you want to save the forecast and an Identity and Access Management (IAM) role that Amazon Forecast can assume to access the location. The forecast must be exported to an Amazon S3 bucket. If encryption is used, Destination must include an Key Management Service (KMS) key. The IAM role must allow Amazon Forecast permission to access the key."];
       tags: Tags.t option
         [@ocaml.doc
-          "The optional metadata that you apply to the forecast export job to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. The following basic restrictions apply to tags: Maximum number of tags per resource - 50. For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length - 128 Unicode characters in UTF-8. Maximum value length - 256 Unicode characters in UTF-8. If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for keys as it is reserved for AWS use. You cannot edit or delete tag keys with this prefix. Values can have this prefix. If a tag value has aws as its prefix but the key does not, then Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit."]}
+          "The optional metadata that you apply to the forecast export job to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. The following basic restrictions apply to tags: Maximum number of tags per resource - 50. For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length - 128 Unicode characters in UTF-8. Maximum value length - 256 Unicode characters in UTF-8. If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for keys as it is reserved for Amazon Web Services use. You cannot edit or delete tag keys with this prefix. Values can have this prefix. If a tag value has aws as its prefix but the key does not, then Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit."];
+      format: Format_.t option
+        [@ocaml.doc
+          "The format of the exported data, CSV or PARQUET. The default value is CSV."]}
     let context_ = "CreateForecastExportJobRequest"
     let make ?tags =
-      fun ~forecastExportJobName ->
-        fun ~forecastArn ->
-          fun ~destination ->
-            fun () ->
-              { tags; forecastExportJobName; forecastArn; destination }
+      fun ?format ->
+        fun ~forecastExportJobName ->
+          fun ~forecastArn ->
+            fun ~destination ->
+              fun () ->
+                {
+                  tags;
+                  format;
+                  forecastExportJobName;
+                  forecastArn;
+                  destination
+                }
     let to_value x =
       structure_to_value
         [("ForecastExportJobName",
            (Some (Name.to_value x.forecastExportJobName)));
         ("ForecastArn", (Some (Arn.to_value x.forecastArn)));
         ("Destination", (Some (DataDestination.to_value x.destination)));
-        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("Format", (Option.map x.format ~f:Format_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let format =
+        (Option.map ~f:Format_.of_xml) (Xml.child xml_arg0 "Format") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       let destination =
         DataDestination.of_xml
@@ -8520,19 +12463,20 @@ module CreateForecastExportJobRequest =
       let forecastExportJobName =
         Name.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ForecastExportJobName") in
-      make ?tags ~destination ~forecastArn ~forecastExportJobName ()
+      make ?format ?tags ~destination ~forecastArn ~forecastExportJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let format = field_map json__ "Format" Format_.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let destination =
-        field_map_exn json "Destination" DataDestination.of_json in
-      let forecastArn = field_map_exn json "ForecastArn" Arn.of_json in
+        field_map_exn json__ "Destination" DataDestination.of_json in
+      let forecastArn = field_map_exn json__ "ForecastArn" Arn.of_json in
       let forecastExportJobName =
-        field_map_exn json "ForecastExportJobName" Name.of_json in
-      make ?tags ~destination ~forecastArn ~forecastExportJobName ()
+        field_map_exn json__ "ForecastExportJobName" Name.of_json in
+      make ?format ?tags ~destination ~forecastArn ~forecastExportJobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Exports a forecast created by the CreateForecast operation to your Amazon Simple Storage Service (Amazon S3) bucket. The forecast file name will match the following conventions: <ForecastExportJobName>_<ExportTimestamp>_<PartNumber> where the <ExportTimestamp> component is in Java SimpleDateFormat (yyyy-MM-ddTHH-mm-ssZ). You must specify a DataDestination object that includes an AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the Amazon S3 bucket. For more information, see aws-forecast-iam-roles. For more information, see howitworks-forecast. To get a list of all your forecast export jobs, use the ListForecastExportJobs operation. The Status of the forecast export job must be ACTIVE before you can access the forecast in your Amazon S3 bucket. To get the status, use the DescribeForecastExportJob operation."]
+       "Exports a forecast created by the CreateForecast operation to your Amazon Simple Storage Service (Amazon S3) bucket. The forecast file name will match the following conventions: <ForecastExportJobName>_<ExportTimestamp>_<PartNumber> where the <ExportTimestamp> component is in Java SimpleDateFormat (yyyy-MM-ddTHH-mm-ssZ). You must specify a DataDestination object that includes an Identity and Access Management (IAM) role that Amazon Forecast can assume to access the Amazon S3 bucket. For more information, see aws-forecast-iam-roles. For more information, see howitworks-forecast. To get a list of all your forecast export jobs, use the ListForecastExportJobs operation. The Status of the forecast export job must be ACTIVE before you can access the forecast in your Amazon S3 bucket. To get the status, use the DescribeForecastExportJob operation."]
 module CreateExplainabilityResponse =
   struct
     type nonrec t =
@@ -8615,8 +12559,9 @@ module CreateExplainabilityResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ExplainabilityArn") in
       make ?explainabilityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let explainabilityArn = field_map json "ExplainabilityArn" Arn.of_json in
+    let of_json json__ =
+      let explainabilityArn =
+        field_map json__ "ExplainabilityArn" Arn.of_json in
       make ?explainabilityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8637,7 +12582,7 @@ module CreateExplainabilityRequest =
       schema: Schema.t option ;
       enableVisualization: Boolean.t option
         [@ocaml.doc
-          "Create an Expainability visualization that is viewable within the AWS console."];
+          "Create an Explainability visualization that is viewable within the Amazon Web Services console."];
       startDateTime: LocalDateTime.t option
         [@ocaml.doc
           "If TimePointGranularity is set to SPECIFIC, define the first point for the Explainability. Use the following timestamp format: yyyy-MM-ddTHH:mm:ss (example: 2015-01-01T20:00:00)"];
@@ -8710,21 +12655,21 @@ module CreateExplainabilityRequest =
       make ?tags ?endDateTime ?startDateTime ?enableVisualization ?schema
         ?dataSource ~explainabilityConfig ~resourceArn ~explainabilityName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let endDateTime = field_map json "EndDateTime" LocalDateTime.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let endDateTime = field_map json__ "EndDateTime" LocalDateTime.of_json in
       let startDateTime =
-        field_map json "StartDateTime" LocalDateTime.of_json in
+        field_map json__ "StartDateTime" LocalDateTime.of_json in
       let enableVisualization =
-        field_map json "EnableVisualization" Boolean.of_json in
-      let schema = field_map json "Schema" Schema.of_json in
-      let dataSource = field_map json "DataSource" DataSource.of_json in
+        field_map json__ "EnableVisualization" Boolean.of_json in
+      let schema = field_map json__ "Schema" Schema.of_json in
+      let dataSource = field_map json__ "DataSource" DataSource.of_json in
       let explainabilityConfig =
-        field_map_exn json "ExplainabilityConfig"
+        field_map_exn json__ "ExplainabilityConfig"
           ExplainabilityConfig.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       let explainabilityName =
-        field_map_exn json "ExplainabilityName" Name.of_json in
+        field_map_exn json__ "ExplainabilityName" Name.of_json in
       make ?tags ?endDateTime ?startDateTime ?enableVisualization ?schema
         ?dataSource ~explainabilityConfig ~resourceArn ~explainabilityName ()
     let to_json v = composed_to_json to_value v
@@ -8813,13 +12758,13 @@ module CreateExplainabilityExportResponse =
           (Xml.child xml_arg0 "ExplainabilityExportArn") in
       make ?explainabilityExportArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let explainabilityExportArn =
-        field_map json "ExplainabilityExportArn" Arn.of_json in
+        field_map json__ "ExplainabilityExportArn" Arn.of_json in
       make ?explainabilityExportArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Exports an Explainability resource created by the CreateExplainability operation. Exported files are exported to an Amazon Simple Storage Service (Amazon S3) bucket. You must specify a DataDestination object that includes an Amazon S3 bucket and an AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the Amazon S3 bucket. For more information, see aws-forecast-iam-roles. The Status of the export job must be ACTIVE before you can access the export in your Amazon S3 bucket. To get the status, use the DescribeExplainabilityExport operation."]
+       "Exports an Explainability resource created by the CreateExplainability operation. Exported files are exported to an Amazon Simple Storage Service (Amazon S3) bucket. You must specify a DataDestination object that includes an Amazon S3 bucket and an Identity and Access Management (IAM) role that Amazon Forecast can assume to access the Amazon S3 bucket. For more information, see aws-forecast-iam-roles. The Status of the export job must be ACTIVE before you can access the export in your Amazon S3 bucket. To get the status, use the DescribeExplainabilityExport operation."]
 module CreateExplainabilityExportRequest =
   struct
     type nonrec t =
@@ -8832,28 +12777,35 @@ module CreateExplainabilityExportRequest =
       destination: DataDestination.t ;
       tags: Tags.t option
         [@ocaml.doc
-          "Optional metadata to help you categorize and organize your resources. Each tag consists of a key and an optional value, both of which you define. Tag keys and values are case sensitive. The following restrictions apply to tags: For each resource, each tag key must be unique and each tag key must have one value. Maximum number of tags per resource: 50. Maximum key length: 128 Unicode characters in UTF-8. Maximum value length: 256 Unicode characters in UTF-8. Accepted characters: all letters and numbers, spaces representable in UTF-8, and + - = . _ : / \\@. If your tagging schema is used across other services and resources, the character restrictions of those services also apply. Key prefixes cannot include any upper or lowercase combination of aws: or AWS:. Values can have this prefix. If a tag value has aws as its prefix but the key does not, Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit. You cannot edit or delete tag keys with this prefix."]}
+          "Optional metadata to help you categorize and organize your resources. Each tag consists of a key and an optional value, both of which you define. Tag keys and values are case sensitive. The following restrictions apply to tags: For each resource, each tag key must be unique and each tag key must have one value. Maximum number of tags per resource: 50. Maximum key length: 128 Unicode characters in UTF-8. Maximum value length: 256 Unicode characters in UTF-8. Accepted characters: all letters and numbers, spaces representable in UTF-8, and + - = . _ : / \\@. If your tagging schema is used across other services and resources, the character restrictions of those services also apply. Key prefixes cannot include any upper or lowercase combination of aws: or AWS:. Values can have this prefix. If a tag value has aws as its prefix but the key does not, Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit. You cannot edit or delete tag keys with this prefix."];
+      format: Format_.t option
+        [@ocaml.doc "The format of the exported data, CSV or PARQUET."]}
     let context_ = "CreateExplainabilityExportRequest"
     let make ?tags =
-      fun ~explainabilityExportName ->
-        fun ~explainabilityArn ->
-          fun ~destination ->
-            fun () ->
-              {
-                tags;
-                explainabilityExportName;
-                explainabilityArn;
-                destination
-              }
+      fun ?format ->
+        fun ~explainabilityExportName ->
+          fun ~explainabilityArn ->
+            fun ~destination ->
+              fun () ->
+                {
+                  tags;
+                  format;
+                  explainabilityExportName;
+                  explainabilityArn;
+                  destination
+                }
     let to_value x =
       structure_to_value
         [("ExplainabilityExportName",
            (Some (Name.to_value x.explainabilityExportName)));
         ("ExplainabilityArn", (Some (Arn.to_value x.explainabilityArn)));
         ("Destination", (Some (DataDestination.to_value x.destination)));
-        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("Format", (Option.map x.format ~f:Format_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let format =
+        (Option.map ~f:Format_.of_xml) (Xml.child xml_arg0 "Format") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       let destination =
         DataDestination.of_xml
@@ -8865,20 +12817,23 @@ module CreateExplainabilityExportRequest =
         Name.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
              "ExplainabilityExportName") in
-      make ?tags ~destination ~explainabilityArn ~explainabilityExportName ()
+      make ?format ?tags ~destination ~explainabilityArn
+        ~explainabilityExportName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let format = field_map json__ "Format" Format_.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let destination =
-        field_map_exn json "Destination" DataDestination.of_json in
+        field_map_exn json__ "Destination" DataDestination.of_json in
       let explainabilityArn =
-        field_map_exn json "ExplainabilityArn" Arn.of_json in
+        field_map_exn json__ "ExplainabilityArn" Arn.of_json in
       let explainabilityExportName =
-        field_map_exn json "ExplainabilityExportName" Name.of_json in
-      make ?tags ~destination ~explainabilityArn ~explainabilityExportName ()
+        field_map_exn json__ "ExplainabilityExportName" Name.of_json in
+      make ?format ?tags ~destination ~explainabilityArn
+        ~explainabilityExportName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Exports an Explainability resource created by the CreateExplainability operation. Exported files are exported to an Amazon Simple Storage Service (Amazon S3) bucket. You must specify a DataDestination object that includes an Amazon S3 bucket and an AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the Amazon S3 bucket. For more information, see aws-forecast-iam-roles. The Status of the export job must be ACTIVE before you can access the export in your Amazon S3 bucket. To get the status, use the DescribeExplainabilityExport operation."]
+       "Exports an Explainability resource created by the CreateExplainability operation. Exported files are exported to an Amazon Simple Storage Service (Amazon S3) bucket. You must specify a DataDestination object that includes an Amazon S3 bucket and an Identity and Access Management (IAM) role that Amazon Forecast can assume to access the Amazon S3 bucket. For more information, see aws-forecast-iam-roles. The Status of the export job must be ACTIVE before you can access the export in your Amazon S3 bucket. To get the status, use the DescribeExplainabilityExport operation."]
 module CreateDatasetResponse =
   struct
     type nonrec t =
@@ -8942,12 +12897,12 @@ module CreateDatasetResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DatasetArn") in
       make ?datasetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetArn = field_map json "DatasetArn" Arn.of_json in
+    let of_json json__ =
+      let datasetArn = field_map json__ "DatasetArn" Arn.of_json in
       make ?datasetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Forecast dataset. The information about the dataset that you provide helps Forecast understand how to consume the data for model training. This includes the following: DataFrequency - How frequently your historical time-series data is collected. Domain and DatasetType - Each dataset has an associated dataset domain and a type within the domain. Amazon Forecast provides a list of predefined domains and types within each domain. For each unique dataset domain and type within the domain, Amazon Forecast requires your data to include a minimum set of predefined fields. Schema - A schema specifies the fields in the dataset, including the field name and data type. After creating a dataset, you import your training data into it and add the dataset to a dataset group. You use the dataset group to create a predictor. For more information, see howitworks-datasets-groups. To get a list of all your datasets, use the ListDatasets operation. For example Forecast datasets, see the Amazon Forecast Sample GitHub repository. The Status of a dataset must be ACTIVE before you can import training data. Use the DescribeDataset operation to get the status."]
+       "Creates an Amazon Forecast dataset. The information about the dataset that you provide helps Forecast understand how to consume the data for model training. This includes the following: DataFrequency - How frequently your historical time-series data is collected. Domain and DatasetType - Each dataset has an associated dataset domain and a type within the domain. Amazon Forecast provides a list of predefined domains and types within each domain. For each unique dataset domain and type within the domain, Amazon Forecast requires your data to include a minimum set of predefined fields. Schema - A schema specifies the fields in the dataset, including the field name and data type. After creating a dataset, you import your training data into it and add the dataset to a dataset group. You use the dataset group to create a predictor. For more information, see Importing datasets. To get a list of all your datasets, use the ListDatasets operation. For example Forecast datasets, see the Amazon Forecast Sample GitHub repository. The Status of a dataset must be ACTIVE before you can import training data. Use the DescribeDataset operation to get the status."]
 module CreateDatasetRequest =
   struct
     type nonrec t =
@@ -8955,22 +12910,22 @@ module CreateDatasetRequest =
       datasetName: Name.t [@ocaml.doc "A name for the dataset."];
       domain: Domain.t
         [@ocaml.doc
-          "The domain associated with the dataset. When you add a dataset to a dataset group, this value and the value specified for the Domain parameter of the CreateDatasetGroup operation must match. The Domain and DatasetType that you choose determine the fields that must be present in the training data that you import to the dataset. For example, if you choose the RETAIL domain and TARGET_TIME_SERIES as the DatasetType, Amazon Forecast requires item_id, timestamp, and demand fields to be present in your data. For more information, see howitworks-datasets-groups."];
+          "The domain associated with the dataset. When you add a dataset to a dataset group, this value and the value specified for the Domain parameter of the CreateDatasetGroup operation must match. The Domain and DatasetType that you choose determine the fields that must be present in the training data that you import to the dataset. For example, if you choose the RETAIL domain and TARGET_TIME_SERIES as the DatasetType, Amazon Forecast requires item_id, timestamp, and demand fields to be present in your data. For more information, see Importing datasets."];
       datasetType: DatasetType.t
         [@ocaml.doc
           "The dataset type. Valid values depend on the chosen Domain."];
       dataFrequency: Frequency.t option
         [@ocaml.doc
-          "The frequency of data collection. This parameter is required for RELATED_TIME_SERIES datasets. Valid intervals are Y (Year), M (Month), W (Week), D (Day), H (Hour), 30min (30 minutes), 15min (15 minutes), 10min (10 minutes), 5min (5 minutes), and 1min (1 minute). For example, \"D\" indicates every day and \"15min\" indicates every 15 minutes."];
+          "The frequency of data collection. This parameter is required for RELATED_TIME_SERIES datasets. Valid intervals are an integer followed by Y (Year), M (Month), W (Week), D (Day), H (Hour), and min (Minute). For example, \"1D\" indicates every day and \"15min\" indicates every 15 minutes. You cannot specify a value that would overlap with the next larger frequency. That means, for example, you cannot specify a frequency of 60 minutes, because that is equivalent to 1 hour. The valid values for each frequency are the following: Minute - 1-59 Hour - 1-23 Day - 1-6 Week - 1-4 Month - 1-11 Year - 1 Thus, if you want every other week forecasts, specify \"2W\". Or, if you want quarterly forecasts, you specify \"3M\"."];
       schema: Schema.t
         [@ocaml.doc
-          "The schema for the dataset. The schema attributes and their order must match the fields in your data. The dataset Domain and DatasetType that you choose determine the minimum required fields in your training data. For information about the required fields for a specific dataset domain and type, see howitworks-domains-ds-types."];
+          "The schema for the dataset. The schema attributes and their order must match the fields in your data. The dataset Domain and DatasetType that you choose determine the minimum required fields in your training data. For information about the required fields for a specific dataset domain and type, see Dataset Domains and Dataset Types."];
       encryptionConfig: EncryptionConfig.t option
         [@ocaml.doc
-          "An AWS Key Management Service (KMS) key and the AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the key."];
+          "An Key Management Service (KMS) key and the Identity and Access Management (IAM) role that Amazon Forecast can assume to access the key."];
       tags: Tags.t option
         [@ocaml.doc
-          "The optional metadata that you apply to the dataset to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. The following basic restrictions apply to tags: Maximum number of tags per resource - 50. For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length - 128 Unicode characters in UTF-8. Maximum value length - 256 Unicode characters in UTF-8. If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for keys as it is reserved for AWS use. You cannot edit or delete tag keys with this prefix. Values can have this prefix. If a tag value has aws as its prefix but the key does not, then Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit."]}
+          "The optional metadata that you apply to the dataset to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. The following basic restrictions apply to tags: Maximum number of tags per resource - 50. For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length - 128 Unicode characters in UTF-8. Maximum value length - 256 Unicode characters in UTF-8. If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for keys as it is reserved for Amazon Web Services use. You cannot edit or delete tag keys with this prefix. Values can have this prefix. If a tag value has aws as its prefix but the key does not, then Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit."]}
     let context_ = "CreateDatasetRequest"
     let make ?dataFrequency =
       fun ?encryptionConfig ->
@@ -9019,20 +12974,21 @@ module CreateDatasetRequest =
       make ?tags ?encryptionConfig ~schema ?dataFrequency ~datasetType
         ~domain ~datasetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let encryptionConfig =
-        field_map json "EncryptionConfig" EncryptionConfig.of_json in
-      let schema = field_map_exn json "Schema" Schema.of_json in
-      let dataFrequency = field_map json "DataFrequency" Frequency.of_json in
-      let datasetType = field_map_exn json "DatasetType" DatasetType.of_json in
-      let domain = field_map_exn json "Domain" Domain.of_json in
-      let datasetName = field_map_exn json "DatasetName" Name.of_json in
+        field_map json__ "EncryptionConfig" EncryptionConfig.of_json in
+      let schema = field_map_exn json__ "Schema" Schema.of_json in
+      let dataFrequency = field_map json__ "DataFrequency" Frequency.of_json in
+      let datasetType =
+        field_map_exn json__ "DatasetType" DatasetType.of_json in
+      let domain = field_map_exn json__ "Domain" Domain.of_json in
+      let datasetName = field_map_exn json__ "DatasetName" Name.of_json in
       make ?tags ?encryptionConfig ~schema ?dataFrequency ~datasetType
         ~domain ~datasetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Forecast dataset. The information about the dataset that you provide helps Forecast understand how to consume the data for model training. This includes the following: DataFrequency - How frequently your historical time-series data is collected. Domain and DatasetType - Each dataset has an associated dataset domain and a type within the domain. Amazon Forecast provides a list of predefined domains and types within each domain. For each unique dataset domain and type within the domain, Amazon Forecast requires your data to include a minimum set of predefined fields. Schema - A schema specifies the fields in the dataset, including the field name and data type. After creating a dataset, you import your training data into it and add the dataset to a dataset group. You use the dataset group to create a predictor. For more information, see howitworks-datasets-groups. To get a list of all your datasets, use the ListDatasets operation. For example Forecast datasets, see the Amazon Forecast Sample GitHub repository. The Status of a dataset must be ACTIVE before you can import training data. Use the DescribeDataset operation to get the status."]
+       "Creates an Amazon Forecast dataset. The information about the dataset that you provide helps Forecast understand how to consume the data for model training. This includes the following: DataFrequency - How frequently your historical time-series data is collected. Domain and DatasetType - Each dataset has an associated dataset domain and a type within the domain. Amazon Forecast provides a list of predefined domains and types within each domain. For each unique dataset domain and type within the domain, Amazon Forecast requires your data to include a minimum set of predefined fields. Schema - A schema specifies the fields in the dataset, including the field name and data type. After creating a dataset, you import your training data into it and add the dataset to a dataset group. You use the dataset group to create a predictor. For more information, see Importing datasets. To get a list of all your datasets, use the ListDatasets operation. For example Forecast datasets, see the Amazon Forecast Sample GitHub repository. The Status of a dataset must be ACTIVE before you can import training data. Use the DescribeDataset operation to get the status."]
 module CreateDatasetImportJobResponse =
   struct
     type nonrec t =
@@ -9116,13 +13072,13 @@ module CreateDatasetImportJobResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DatasetImportJobArn") in
       make ?datasetImportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasetImportJobArn =
-        field_map json "DatasetImportJobArn" Arn.of_json in
+        field_map json__ "DatasetImportJobArn" Arn.of_json in
       make ?datasetImportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Imports your training data to an Amazon Forecast dataset. You provide the location of your training data in an Amazon Simple Storage Service (Amazon S3) bucket and the Amazon Resource Name (ARN) of the dataset that you want to import the data to. You must specify a DataSource object that includes an AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the data, as Amazon Forecast makes a copy of your data and processes it in an internal AWS system. For more information, see aws-forecast-iam-roles. The training data must be in CSV format. The delimiter must be a comma (,). You can specify the path to a specific CSV file, the S3 bucket, or to a folder in the S3 bucket. For the latter two cases, Amazon Forecast imports all files up to the limit of 10,000 files. Because dataset imports are not aggregated, your most recent dataset import is the one that is used when training a predictor or generating a forecast. Make sure that your most recent dataset import contains all of the data you want to model off of, and not just the new data collected since the previous import. To get a list of all your dataset import jobs, filtered by specified criteria, use the ListDatasetImportJobs operation."]
+       "Imports your training data to an Amazon Forecast dataset. You provide the location of your training data in an Amazon Simple Storage Service (Amazon S3) bucket and the Amazon Resource Name (ARN) of the dataset that you want to import the data to. You must specify a DataSource object that includes an Identity and Access Management (IAM) role that Amazon Forecast can assume to access the data, as Amazon Forecast makes a copy of your data and processes it in an internal Amazon Web Services system. For more information, see Set up permissions. The training data must be in CSV or Parquet format. The delimiter must be a comma (,). You can specify the path to a specific file, the S3 bucket, or to a folder in the S3 bucket. For the latter two cases, Amazon Forecast imports all files up to the limit of 10,000 files. Because dataset imports are not aggregated, your most recent dataset import is the one that is used when training a predictor or generating a forecast. Make sure that your most recent dataset import contains all of the data you want to model off of, and not just the new data collected since the previous import. To get a list of all your dataset import jobs, filtered by specified criteria, use the ListDatasetImportJobs operation."]
 module CreateDatasetImportJobRequest =
   struct
     type nonrec t =
@@ -9135,7 +13091,7 @@ module CreateDatasetImportJobRequest =
           "The Amazon Resource Name (ARN) of the Amazon Forecast dataset that you want to import data to."];
       dataSource: DataSource.t
         [@ocaml.doc
-          "The location of the training data to import and an AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the data. The training data must be stored in an Amazon S3 bucket. If encryption is used, DataSource must include an AWS Key Management Service (KMS) key and the IAM role must allow Amazon Forecast permission to access the key. The KMS key and IAM role must match those specified in the EncryptionConfig parameter of the CreateDataset operation."];
+          "The location of the training data to import and an Identity and Access Management (IAM) role that Amazon Forecast can assume to access the data. The training data must be stored in an Amazon S3 bucket. If encryption is used, DataSource must include an Key Management Service (KMS) key and the IAM role must allow Amazon Forecast permission to access the key. The KMS key and IAM role must match those specified in the EncryptionConfig parameter of the CreateDataset operation."];
       timestampFormat: TimestampFormat.t option
         [@ocaml.doc
           "The format of timestamps in the dataset. The format that you specify depends on the DataFrequency specified when the dataset was created. The following formats are supported \"yyyy-MM-dd\" For the following data frequencies: Y, M, W, and D \"yyyy-MM-dd HH:mm:ss\" For the following data frequencies: H, 30min, 15min, and 1min; and optionally, for: Y, M, W, and D If the format isn't specified, Amazon Forecast expects the format to be \"yyyy-MM-dd HH:mm:ss\"."];
@@ -9150,27 +13106,37 @@ module CreateDatasetImportJobRequest =
           "The format of the geolocation attribute. The geolocation attribute can be formatted in one of two ways: LAT_LONG - the latitude and longitude in decimal format (Example: 47.61_-122.33). CC_POSTALCODE (US Only) - the country code (US), followed by the 5-digit ZIP code (Example: US_98121)."];
       tags: Tags.t option
         [@ocaml.doc
-          "The optional metadata that you apply to the dataset import job to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. The following basic restrictions apply to tags: Maximum number of tags per resource - 50. For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length - 128 Unicode characters in UTF-8. Maximum value length - 256 Unicode characters in UTF-8. If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for keys as it is reserved for AWS use. You cannot edit or delete tag keys with this prefix. Values can have this prefix. If a tag value has aws as its prefix but the key does not, then Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit."]}
+          "The optional metadata that you apply to the dataset import job to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. The following basic restrictions apply to tags: Maximum number of tags per resource - 50. For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length - 128 Unicode characters in UTF-8. Maximum value length - 256 Unicode characters in UTF-8. If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for keys as it is reserved for Amazon Web Services use. You cannot edit or delete tag keys with this prefix. Values can have this prefix. If a tag value has aws as its prefix but the key does not, then Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit."];
+      format: Format_.t option
+        [@ocaml.doc
+          "The format of the imported data, CSV or PARQUET. The default value is CSV."];
+      importMode: ImportMode.t option
+        [@ocaml.doc
+          "Specifies whether the dataset import job is a FULL or INCREMENTAL import. A FULL dataset import replaces all of the existing data with the newly imported data. An INCREMENTAL import appends the imported data to the existing data."]}
     let context_ = "CreateDatasetImportJobRequest"
     let make ?timestampFormat =
       fun ?timeZone ->
         fun ?useGeolocationForTimeZone ->
           fun ?geolocationFormat ->
             fun ?tags ->
-              fun ~datasetImportJobName ->
-                fun ~datasetArn ->
-                  fun ~dataSource ->
-                    fun () ->
-                      {
-                        timestampFormat;
-                        timeZone;
-                        useGeolocationForTimeZone;
-                        geolocationFormat;
-                        tags;
-                        datasetImportJobName;
-                        datasetArn;
-                        dataSource
-                      }
+              fun ?format ->
+                fun ?importMode ->
+                  fun ~datasetImportJobName ->
+                    fun ~datasetArn ->
+                      fun ~dataSource ->
+                        fun () ->
+                          {
+                            timestampFormat;
+                            timeZone;
+                            useGeolocationForTimeZone;
+                            geolocationFormat;
+                            tags;
+                            format;
+                            importMode;
+                            datasetImportJobName;
+                            datasetArn;
+                            dataSource
+                          }
     let to_value x =
       structure_to_value
         [("DatasetImportJobName",
@@ -9185,9 +13151,15 @@ module CreateDatasetImportJobRequest =
              ~f:UseGeolocationForTimeZone.to_value));
         ("GeolocationFormat",
           (Option.map x.geolocationFormat ~f:GeolocationFormat.to_value));
-        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("Format", (Option.map x.format ~f:Format_.to_value));
+        ("ImportMode", (Option.map x.importMode ~f:ImportMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let importMode =
+        (Option.map ~f:ImportMode.of_xml) (Xml.child xml_arg0 "ImportMode") in
+      let format =
+        (Option.map ~f:Format_.of_xml) (Xml.child xml_arg0 "Format") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       let geolocationFormat =
         (Option.map ~f:GeolocationFormat.of_xml)
@@ -9208,28 +13180,32 @@ module CreateDatasetImportJobRequest =
       let datasetImportJobName =
         Name.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetImportJobName") in
-      make ?tags ?geolocationFormat ?useGeolocationForTimeZone ?timeZone
-        ?timestampFormat ~dataSource ~datasetArn ~datasetImportJobName ()
+      make ?importMode ?format ?tags ?geolocationFormat
+        ?useGeolocationForTimeZone ?timeZone ?timestampFormat ~dataSource
+        ~datasetArn ~datasetImportJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let importMode = field_map json__ "ImportMode" ImportMode.of_json in
+      let format = field_map json__ "Format" Format_.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let geolocationFormat =
-        field_map json "GeolocationFormat" GeolocationFormat.of_json in
+        field_map json__ "GeolocationFormat" GeolocationFormat.of_json in
       let useGeolocationForTimeZone =
-        field_map json "UseGeolocationForTimeZone"
+        field_map json__ "UseGeolocationForTimeZone"
           UseGeolocationForTimeZone.of_json in
-      let timeZone = field_map json "TimeZone" TimeZone.of_json in
+      let timeZone = field_map json__ "TimeZone" TimeZone.of_json in
       let timestampFormat =
-        field_map json "TimestampFormat" TimestampFormat.of_json in
-      let dataSource = field_map_exn json "DataSource" DataSource.of_json in
-      let datasetArn = field_map_exn json "DatasetArn" Arn.of_json in
+        field_map json__ "TimestampFormat" TimestampFormat.of_json in
+      let dataSource = field_map_exn json__ "DataSource" DataSource.of_json in
+      let datasetArn = field_map_exn json__ "DatasetArn" Arn.of_json in
       let datasetImportJobName =
-        field_map_exn json "DatasetImportJobName" Name.of_json in
-      make ?tags ?geolocationFormat ?useGeolocationForTimeZone ?timeZone
-        ?timestampFormat ~dataSource ~datasetArn ~datasetImportJobName ()
+        field_map_exn json__ "DatasetImportJobName" Name.of_json in
+      make ?importMode ?format ?tags ?geolocationFormat
+        ?useGeolocationForTimeZone ?timeZone ?timestampFormat ~dataSource
+        ~datasetArn ~datasetImportJobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Imports your training data to an Amazon Forecast dataset. You provide the location of your training data in an Amazon Simple Storage Service (Amazon S3) bucket and the Amazon Resource Name (ARN) of the dataset that you want to import the data to. You must specify a DataSource object that includes an AWS Identity and Access Management (IAM) role that Amazon Forecast can assume to access the data, as Amazon Forecast makes a copy of your data and processes it in an internal AWS system. For more information, see aws-forecast-iam-roles. The training data must be in CSV format. The delimiter must be a comma (,). You can specify the path to a specific CSV file, the S3 bucket, or to a folder in the S3 bucket. For the latter two cases, Amazon Forecast imports all files up to the limit of 10,000 files. Because dataset imports are not aggregated, your most recent dataset import is the one that is used when training a predictor or generating a forecast. Make sure that your most recent dataset import contains all of the data you want to model off of, and not just the new data collected since the previous import. To get a list of all your dataset import jobs, filtered by specified criteria, use the ListDatasetImportJobs operation."]
+       "Imports your training data to an Amazon Forecast dataset. You provide the location of your training data in an Amazon Simple Storage Service (Amazon S3) bucket and the Amazon Resource Name (ARN) of the dataset that you want to import the data to. You must specify a DataSource object that includes an Identity and Access Management (IAM) role that Amazon Forecast can assume to access the data, as Amazon Forecast makes a copy of your data and processes it in an internal Amazon Web Services system. For more information, see Set up permissions. The training data must be in CSV or Parquet format. The delimiter must be a comma (,). You can specify the path to a specific file, the S3 bucket, or to a folder in the S3 bucket. For the latter two cases, Amazon Forecast imports all files up to the limit of 10,000 files. Because dataset imports are not aggregated, your most recent dataset import is the one that is used when training a predictor or generating a forecast. Make sure that your most recent dataset import contains all of the data you want to model off of, and not just the new data collected since the previous import. To get a list of all your dataset import jobs, filtered by specified criteria, use the ListDatasetImportJobs operation."]
 module CreateDatasetGroupResponse =
   struct
     type nonrec t =
@@ -9311,12 +13287,12 @@ module CreateDatasetGroupResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DatasetGroupArn") in
       make ?datasetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetGroupArn = field_map json "DatasetGroupArn" Arn.of_json in
+    let of_json json__ =
+      let datasetGroupArn = field_map json__ "DatasetGroupArn" Arn.of_json in
       make ?datasetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a dataset group, which holds a collection of related datasets. You can add datasets to the dataset group when you create the dataset group, or later by using the UpdateDatasetGroup operation. After creating a dataset group and adding datasets, you use the dataset group when you create a predictor. For more information, see howitworks-datasets-groups. To get a list of all your datasets groups, use the ListDatasetGroups operation. The Status of a dataset group must be ACTIVE before you can use the dataset group to create a predictor. To get the status, use the DescribeDatasetGroup operation."]
+       "Creates a dataset group, which holds a collection of related datasets. You can add datasets to the dataset group when you create the dataset group, or later by using the UpdateDatasetGroup operation. After creating a dataset group and adding datasets, you use the dataset group when you create a predictor. For more information, see Dataset groups. To get a list of all your datasets groups, use the ListDatasetGroups operation. The Status of a dataset group must be ACTIVE before you can use the dataset group to create a predictor. To get the status, use the DescribeDatasetGroup operation."]
 module CreateDatasetGroupRequest =
   struct
     type nonrec t =
@@ -9324,13 +13300,13 @@ module CreateDatasetGroupRequest =
       datasetGroupName: Name.t [@ocaml.doc "A name for the dataset group."];
       domain: Domain.t
         [@ocaml.doc
-          "The domain associated with the dataset group. When you add a dataset to a dataset group, this value and the value specified for the Domain parameter of the CreateDataset operation must match. The Domain and DatasetType that you choose determine the fields that must be present in training data that you import to a dataset. For example, if you choose the RETAIL domain and TARGET_TIME_SERIES as the DatasetType, Amazon Forecast requires that item_id, timestamp, and demand fields are present in your data. For more information, see howitworks-datasets-groups."];
+          "The domain associated with the dataset group. When you add a dataset to a dataset group, this value and the value specified for the Domain parameter of the CreateDataset operation must match. The Domain and DatasetType that you choose determine the fields that must be present in training data that you import to a dataset. For example, if you choose the RETAIL domain and TARGET_TIME_SERIES as the DatasetType, Amazon Forecast requires that item_id, timestamp, and demand fields are present in your data. For more information, see Dataset groups."];
       datasetArns: ArnList.t option
         [@ocaml.doc
           "An array of Amazon Resource Names (ARNs) of the datasets that you want to include in the dataset group."];
       tags: Tags.t option
         [@ocaml.doc
-          "The optional metadata that you apply to the dataset group to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. The following basic restrictions apply to tags: Maximum number of tags per resource - 50. For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length - 128 Unicode characters in UTF-8. Maximum value length - 256 Unicode characters in UTF-8. If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for keys as it is reserved for AWS use. You cannot edit or delete tag keys with this prefix. Values can have this prefix. If a tag value has aws as its prefix but the key does not, then Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit."]}
+          "The optional metadata that you apply to the dataset group to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. The following basic restrictions apply to tags: Maximum number of tags per resource - 50. For each resource, each tag key must be unique, and each tag key can have only one value. Maximum key length - 128 Unicode characters in UTF-8. Maximum value length - 256 Unicode characters in UTF-8. If your tagging schema is used across multiple services and resources, remember that other services may have restrictions on allowed characters. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following characters: + - = . _ : / \\@. Tag keys and values are case sensitive. Do not use aws:, AWS:, or any upper or lowercase combination of such as a prefix for keys as it is reserved for Amazon Web Services use. You cannot edit or delete tag keys with this prefix. Values can have this prefix. If a tag value has aws as its prefix but the key does not, then Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit."]}
     let context_ = "CreateDatasetGroupRequest"
     let make ?datasetArns =
       fun ?tags ->
@@ -9355,16 +13331,16 @@ module CreateDatasetGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetGroupName") in
       make ?tags ?datasetArns ~domain ~datasetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let datasetArns = field_map json "DatasetArns" ArnList.of_json in
-      let domain = field_map_exn json "Domain" Domain.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let datasetArns = field_map json__ "DatasetArns" ArnList.of_json in
+      let domain = field_map_exn json__ "Domain" Domain.of_json in
       let datasetGroupName =
-        field_map_exn json "DatasetGroupName" Name.of_json in
+        field_map_exn json__ "DatasetGroupName" Name.of_json in
       make ?tags ?datasetArns ~domain ~datasetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a dataset group, which holds a collection of related datasets. You can add datasets to the dataset group when you create the dataset group, or later by using the UpdateDatasetGroup operation. After creating a dataset group and adding datasets, you use the dataset group when you create a predictor. For more information, see howitworks-datasets-groups. To get a list of all your datasets groups, use the ListDatasetGroups operation. The Status of a dataset group must be ACTIVE before you can use the dataset group to create a predictor. To get the status, use the DescribeDatasetGroup operation."]
+       "Creates a dataset group, which holds a collection of related datasets. You can add datasets to the dataset group when you create the dataset group, or later by using the UpdateDatasetGroup operation. After creating a dataset group and adding datasets, you use the dataset group when you create a predictor. For more information, see Dataset groups. To get a list of all your datasets groups, use the ListDatasetGroups operation. The Status of a dataset group must be ACTIVE before you can use the dataset group to create a predictor. To get the status, use the DescribeDatasetGroup operation."]
 module CreateAutoPredictorResponse =
   struct
     type nonrec t =
@@ -9446,12 +13422,12 @@ module CreateAutoPredictorResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "PredictorArn") in
       make ?predictorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let predictorArn = field_map json "PredictorArn" Arn.of_json in
+    let of_json json__ =
+      let predictorArn = field_map json__ "PredictorArn" Arn.of_json in
       make ?predictorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Forecast predictor. Amazon Forecast creates predictors with AutoPredictor, which involves applying the optimal combination of algorithms to each time series in your datasets. You can use CreateAutoPredictor to create new predictors or upgrade/retrain existing predictors. Creating new predictors The following parameters are required when creating a new predictor: PredictorName - A unique name for the predictor. DatasetGroupArn - The ARN of the dataset group used to train the predictor. ForecastFrequency - The granularity of your forecasts (hourly, daily, weekly, etc). ForecastHorizon - The number of time steps being forecasted. When creating a new predictor, do not specify a value for ReferencePredictorArn. Upgrading and retraining predictors The following parameters are required when retraining or upgrading a predictor: PredictorName - A unique name for the predictor. ReferencePredictorArn - The ARN of the predictor to retrain or upgrade. When upgrading or retraining a predictor, only specify values for the ReferencePredictorArn and PredictorName."]
+       "Creates an Amazon Forecast predictor. Amazon Forecast creates predictors with AutoPredictor, which involves applying the optimal combination of algorithms to each time series in your datasets. You can use CreateAutoPredictor to create new predictors or upgrade/retrain existing predictors. Creating new predictors The following parameters are required when creating a new predictor: PredictorName - A unique name for the predictor. DatasetGroupArn - The ARN of the dataset group used to train the predictor. ForecastFrequency - The granularity of your forecasts (hourly, daily, weekly, etc). ForecastHorizon - The number of time-steps that the model predicts. The forecast horizon is also called the prediction length. When creating a new predictor, do not specify a value for ReferencePredictorArn. Upgrading and retraining predictors The following parameters are required when retraining or upgrading a predictor: PredictorName - A unique name for the predictor. ReferencePredictorArn - The ARN of the predictor to retrain or upgrade. When upgrading or retraining a predictor, only specify values for the ReferencePredictorArn and PredictorName."]
 module CreateAutoPredictorRequest =
   struct
     type nonrec t =
@@ -9459,7 +13435,7 @@ module CreateAutoPredictorRequest =
       predictorName: Name.t [@ocaml.doc "A unique name for the predictor"];
       forecastHorizon: Integer.t option
         [@ocaml.doc
-          "The number of time-steps that the model predicts. The forecast horizon is also called the prediction length."];
+          "The number of time-steps that the model predicts. The forecast horizon is also called the prediction length. The maximum forecast horizon is the lesser of 500 time-steps or 1/4 of the TARGET_TIME_SERIES dataset length. If you are retraining an existing AutoPredictor, then the maximum forecast horizon is the lesser of 500 time-steps or 1/3 of the TARGET_TIME_SERIES dataset length. If you are upgrading to an AutoPredictor or retraining an existing AutoPredictor, you cannot update the forecast horizon parameter. You can meet this requirement by providing longer time-series in the dataset."];
       forecastTypes: ForecastTypes.t option
         [@ocaml.doc
           "The forecast types used to train a predictor. You can specify up to five forecast types. Forecast types can be quantiles from 0.01 to 0.99, by increments of 0.01 or higher. You can also specify the mean forecast with mean."];
@@ -9468,7 +13444,7 @@ module CreateAutoPredictorRequest =
           "An array of dimension (field) names that specify how to group the generated forecast. For example, if you are generating forecasts for item sales across all your stores, and your dataset contains a store_id field, you would specify store_id as a dimension to group sales forecasts for each store."];
       forecastFrequency: Frequency.t option
         [@ocaml.doc
-          "The frequency of predictions in a forecast. Valid intervals are Y (Year), M (Month), W (Week), D (Day), H (Hour), 30min (30 minutes), 15min (15 minutes), 10min (10 minutes), 5min (5 minutes), and 1min (1 minute). For example, \"Y\" indicates every year and \"5min\" indicates every five minutes. The frequency must be greater than or equal to the TARGET_TIME_SERIES dataset frequency. When a RELATED_TIME_SERIES dataset is provided, the frequency must be equal to the RELATED_TIME_SERIES dataset frequency."];
+          "The frequency of predictions in a forecast. Valid intervals are an integer followed by Y (Year), M (Month), W (Week), D (Day), H (Hour), and min (Minute). For example, \"1D\" indicates every day and \"15min\" indicates every 15 minutes. You cannot specify a value that would overlap with the next larger frequency. That means, for example, you cannot specify a frequency of 60 minutes, because that is equivalent to 1 hour. The valid values for each frequency are the following: Minute - 1-59 Hour - 1-23 Day - 1-6 Week - 1-4 Month - 1-11 Year - 1 Thus, if you want every other week forecasts, specify \"2W\". Or, if you want quarterly forecasts, you specify \"3M\". The frequency must be greater than or equal to the TARGET_TIME_SERIES dataset frequency. When a RELATED_TIME_SERIES dataset is provided, the frequency must be equal to the RELATED_TIME_SERIES dataset frequency."];
       dataConfig: DataConfig.t option
         [@ocaml.doc
           "The data configuration for your dataset group and any additional datasets."];
@@ -9482,7 +13458,13 @@ module CreateAutoPredictorRequest =
         [@ocaml.doc "Create an Explainability resource for the predictor."];
       tags: Tags.t option
         [@ocaml.doc
-          "Optional metadata to help you categorize and organize your predictors. Each tag consists of a key and an optional value, both of which you define. Tag keys and values are case sensitive. The following restrictions apply to tags: For each resource, each tag key must be unique and each tag key must have one value. Maximum number of tags per resource: 50. Maximum key length: 128 Unicode characters in UTF-8. Maximum value length: 256 Unicode characters in UTF-8. Accepted characters: all letters and numbers, spaces representable in UTF-8, and + - = . _ : / \\@. If your tagging schema is used across other services and resources, the character restrictions of those services also apply. Key prefixes cannot include any upper or lowercase combination of aws: or AWS:. Values can have this prefix. If a tag value has aws as its prefix but the key does not, Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit. You cannot edit or delete tag keys with this prefix."]}
+          "Optional metadata to help you categorize and organize your predictors. Each tag consists of a key and an optional value, both of which you define. Tag keys and values are case sensitive. The following restrictions apply to tags: For each resource, each tag key must be unique and each tag key must have one value. Maximum number of tags per resource: 50. Maximum key length: 128 Unicode characters in UTF-8. Maximum value length: 256 Unicode characters in UTF-8. Accepted characters: all letters and numbers, spaces representable in UTF-8, and + - = . _ : / \\@. If your tagging schema is used across other services and resources, the character restrictions of those services also apply. Key prefixes cannot include any upper or lowercase combination of aws: or AWS:. Values can have this prefix. If a tag value has aws as its prefix but the key does not, Forecast considers it to be a user tag and will count against the limit of 50 tags. Tags with only the key prefix of aws do not count against your tags per resource limit. You cannot edit or delete tag keys with this prefix."];
+      monitorConfig: MonitorConfig.t option
+        [@ocaml.doc
+          "The configuration details for predictor monitoring. Provide a name for the monitor resource to enable predictor monitoring. Predictor monitoring allows you to see how your predictor's performance changes over time. For more information, see Predictor Monitoring."];
+      timeAlignmentBoundary: TimeAlignmentBoundary.t option
+        [@ocaml.doc
+          "The time boundary Forecast uses to align and aggregate any data that doesn't align with your forecast frequency. Provide the unit of time and the time boundary as a key value pair. For more information on specifying a time boundary, see Specifying a Time Boundary. If you don't provide a time boundary, Forecast uses a set of Default Time Boundaries."]}
     let context_ = "CreateAutoPredictorRequest"
     let make ?forecastHorizon =
       fun ?forecastTypes ->
@@ -9494,21 +13476,25 @@ module CreateAutoPredictorRequest =
                   fun ?optimizationMetric ->
                     fun ?explainPredictor ->
                       fun ?tags ->
-                        fun ~predictorName ->
-                          fun () ->
-                            {
-                              forecastHorizon;
-                              forecastTypes;
-                              forecastDimensions;
-                              forecastFrequency;
-                              dataConfig;
-                              encryptionConfig;
-                              referencePredictorArn;
-                              optimizationMetric;
-                              explainPredictor;
-                              tags;
-                              predictorName
-                            }
+                        fun ?monitorConfig ->
+                          fun ?timeAlignmentBoundary ->
+                            fun ~predictorName ->
+                              fun () ->
+                                {
+                                  forecastHorizon;
+                                  forecastTypes;
+                                  forecastDimensions;
+                                  forecastFrequency;
+                                  dataConfig;
+                                  encryptionConfig;
+                                  referencePredictorArn;
+                                  optimizationMetric;
+                                  explainPredictor;
+                                  tags;
+                                  monitorConfig;
+                                  timeAlignmentBoundary;
+                                  predictorName
+                                }
     let to_value x =
       structure_to_value
         [("PredictorName", (Some (Name.to_value x.predictorName)));
@@ -9529,9 +13515,20 @@ module CreateAutoPredictorRequest =
           (Option.map x.optimizationMetric ~f:OptimizationMetric.to_value));
         ("ExplainPredictor",
           (Option.map x.explainPredictor ~f:Boolean.to_value));
-        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("MonitorConfig",
+          (Option.map x.monitorConfig ~f:MonitorConfig.to_value));
+        ("TimeAlignmentBoundary",
+          (Option.map x.timeAlignmentBoundary
+             ~f:TimeAlignmentBoundary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let timeAlignmentBoundary =
+        (Option.map ~f:TimeAlignmentBoundary.of_xml)
+          (Xml.child xml_arg0 "TimeAlignmentBoundary") in
+      let monitorConfig =
+        (Option.map ~f:MonitorConfig.of_xml)
+          (Xml.child xml_arg0 "MonitorConfig") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       let explainPredictor =
         (Option.map ~f:Boolean.of_xml)
@@ -9561,32 +13558,40 @@ module CreateAutoPredictorRequest =
       let predictorName =
         Name.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PredictorName") in
-      make ?tags ?explainPredictor ?optimizationMetric ?referencePredictorArn
-        ?encryptionConfig ?dataConfig ?forecastFrequency ?forecastDimensions
-        ?forecastTypes ?forecastHorizon ~predictorName ()
+      make ?timeAlignmentBoundary ?monitorConfig ?tags ?explainPredictor
+        ?optimizationMetric ?referencePredictorArn ?encryptionConfig
+        ?dataConfig ?forecastFrequency ?forecastDimensions ?forecastTypes
+        ?forecastHorizon ~predictorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let timeAlignmentBoundary =
+        field_map json__ "TimeAlignmentBoundary"
+          TimeAlignmentBoundary.of_json in
+      let monitorConfig =
+        field_map json__ "MonitorConfig" MonitorConfig.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let explainPredictor =
-        field_map json "ExplainPredictor" Boolean.of_json in
+        field_map json__ "ExplainPredictor" Boolean.of_json in
       let optimizationMetric =
-        field_map json "OptimizationMetric" OptimizationMetric.of_json in
+        field_map json__ "OptimizationMetric" OptimizationMetric.of_json in
       let referencePredictorArn =
-        field_map json "ReferencePredictorArn" Arn.of_json in
+        field_map json__ "ReferencePredictorArn" Arn.of_json in
       let encryptionConfig =
-        field_map json "EncryptionConfig" EncryptionConfig.of_json in
-      let dataConfig = field_map json "DataConfig" DataConfig.of_json in
+        field_map json__ "EncryptionConfig" EncryptionConfig.of_json in
+      let dataConfig = field_map json__ "DataConfig" DataConfig.of_json in
       let forecastFrequency =
-        field_map json "ForecastFrequency" Frequency.of_json in
+        field_map json__ "ForecastFrequency" Frequency.of_json in
       let forecastDimensions =
-        field_map json "ForecastDimensions" ForecastDimensions.of_json in
+        field_map json__ "ForecastDimensions" ForecastDimensions.of_json in
       let forecastTypes =
-        field_map json "ForecastTypes" ForecastTypes.of_json in
-      let forecastHorizon = field_map json "ForecastHorizon" Integer.of_json in
-      let predictorName = field_map_exn json "PredictorName" Name.of_json in
-      make ?tags ?explainPredictor ?optimizationMetric ?referencePredictorArn
-        ?encryptionConfig ?dataConfig ?forecastFrequency ?forecastDimensions
-        ?forecastTypes ?forecastHorizon ~predictorName ()
+        field_map json__ "ForecastTypes" ForecastTypes.of_json in
+      let forecastHorizon =
+        field_map json__ "ForecastHorizon" Integer.of_json in
+      let predictorName = field_map_exn json__ "PredictorName" Name.of_json in
+      make ?timeAlignmentBoundary ?monitorConfig ?tags ?explainPredictor
+        ?optimizationMetric ?referencePredictorArn ?encryptionConfig
+        ?dataConfig ?forecastFrequency ?forecastDimensions ?forecastTypes
+        ?forecastHorizon ~predictorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Amazon Forecast predictor. Amazon Forecast creates predictors with AutoPredictor, which involves applying the optimal combination of algorithms to each time series in your datasets. You can use CreateAutoPredictor to create new predictors or upgrade/retrain existing predictors. Creating new predictors The following parameters are required when creating a new predictor: PredictorName - A unique name for the predictor. DatasetGroupArn - The ARN of the dataset group used to train the predictor. ForecastFrequency - The granularity of your forecasts (hourly, daily, weekly, etc). ForecastHorizon - The number of time steps being forecasted. When creating a new predictor, do not specify a value for ReferencePredictorArn. Upgrading and retraining predictors The following parameters are required when retraining or upgrading a predictor: PredictorName - A unique name for the predictor. ReferencePredictorArn - The ARN of the predictor to retrain or upgrade. When upgrading or retraining a predictor, only specify values for the ReferencePredictorArn and PredictorName."]
+       "Creates an Amazon Forecast predictor. Amazon Forecast creates predictors with AutoPredictor, which involves applying the optimal combination of algorithms to each time series in your datasets. You can use CreateAutoPredictor to create new predictors or upgrade/retrain existing predictors. Creating new predictors The following parameters are required when creating a new predictor: PredictorName - A unique name for the predictor. DatasetGroupArn - The ARN of the dataset group used to train the predictor. ForecastFrequency - The granularity of your forecasts (hourly, daily, weekly, etc). ForecastHorizon - The number of time-steps that the model predicts. The forecast horizon is also called the prediction length. When creating a new predictor, do not specify a value for ReferencePredictorArn. Upgrading and retraining predictors The following parameters are required when retraining or upgrading a predictor: PredictorName - A unique name for the predictor. ReferencePredictorArn - The ARN of the predictor to retrain or upgrade. When upgrading or retraining a predictor, only specify values for the ReferencePredictorArn and PredictorName."]

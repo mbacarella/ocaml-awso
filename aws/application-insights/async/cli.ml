@@ -28,6 +28,32 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let add_workload =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceGroupName =
+         flag "resource-group-name" (required string)
+           ~doc:"STRING ResourceGroupName"
+       and componentName =
+         flag "component-name" (required string) ~doc:"STRING ComponentName"
+       and workloadConfiguration =
+         flag "workload-configuration" (required json_arg)
+           ~doc:"JSON WorkloadConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.add_workload
+           (Values.AddWorkloadRequest.make ~resourceGroupName ~componentName
+              ~workloadConfiguration:(Values.WorkloadConfiguration.of_json
+                                        workloadConfiguration) ())
+           (Some Values.AddWorkloadResponse.to_json)
+           (Some Values.AddWorkloadResponse.error_to_json)])
 let create_application =
   Command.async ~summary:""
     ([%map_open.Command
@@ -50,19 +76,30 @@ let create_application =
        and opsItemSNSTopicArn =
          flag "ops-item-s-n-s-topic-arn" (optional string)
            ~doc:"STRING OpsItemSNSTopicArn"
+       and sNSNotificationArn =
+         flag "s-n-s-notification-arn" (optional string)
+           ~doc:"STRING SNSNotificationArn"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and autoConfigEnabled =
          flag "auto-config-enabled" (optional bool)
            ~doc:"BOOL AutoConfigEnabled"
        and autoCreate =
-         flag "auto-create" (optional bool) ~doc:"BOOL AutoCreate" in
+         flag "auto-create" (optional bool) ~doc:"BOOL AutoCreate"
+       and groupingType =
+         flag "grouping-type" (optional json_arg) ~doc:"JSON GroupingType"
+       and attachMissingPermission =
+         flag "attach-missing-permission" (optional bool)
+           ~doc:"BOOL AttachMissingPermission" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_application
            (Values.CreateApplicationRequest.make ?resourceGroupName
               ?opsCenterEnabled ?cWEMonitorEnabled ?opsItemSNSTopicArn
+              ?sNSNotificationArn
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ?autoConfigEnabled ?autoCreate ())
+              ?autoConfigEnabled ?autoCreate
+              ?groupingType:(Option.map ~f:Values.GroupingType.of_json
+                               groupingType) ?attachMissingPermission ())
            (Some Values.CreateApplicationResponse.to_json)
            (Some Values.CreateApplicationResponse.error_to_json)])
 let create_component =
@@ -196,13 +233,16 @@ let describe_application =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
        and resourceGroupName =
          flag "resource-group-name" (required string)
            ~doc:"STRING ResourceGroupName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_application
-           (Values.DescribeApplicationRequest.make ~resourceGroupName ())
+           (Values.DescribeApplicationRequest.make ?accountId
+              ~resourceGroupName ())
            (Some Values.DescribeApplicationResponse.to_json)
            (Some Values.DescribeApplicationResponse.error_to_json)])
 let describe_component =
@@ -215,6 +255,8 @@ let describe_component =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
        and resourceGroupName =
          flag "resource-group-name" (required string)
            ~doc:"STRING ResourceGroupName"
@@ -223,8 +265,8 @@ let describe_component =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_component
-           (Values.DescribeComponentRequest.make ~resourceGroupName
-              ~componentName ())
+           (Values.DescribeComponentRequest.make ?accountId
+              ~resourceGroupName ~componentName ())
            (Some Values.DescribeComponentResponse.to_json)
            (Some Values.DescribeComponentResponse.error_to_json)])
 let describe_component_configuration =
@@ -237,6 +279,8 @@ let describe_component_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
        and resourceGroupName =
          flag "resource-group-name" (required string)
            ~doc:"STRING ResourceGroupName"
@@ -245,7 +289,7 @@ let describe_component_configuration =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_component_configuration
-           (Values.DescribeComponentConfigurationRequest.make
+           (Values.DescribeComponentConfigurationRequest.make ?accountId
               ~resourceGroupName ~componentName ())
            (Some Values.DescribeComponentConfigurationResponse.to_json)
            (Some Values.DescribeComponentConfigurationResponse.error_to_json)])
@@ -259,6 +303,11 @@ let describe_component_configuration_recommendation =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and workloadName =
+         flag "workload-name" (optional string) ~doc:"STRING WorkloadName"
+       and recommendationType =
+         flag "recommendation-type" (optional json_arg)
+           ~doc:"JSON RecommendationType"
        and resourceGroupName =
          flag "resource-group-name" (required string)
            ~doc:"STRING ResourceGroupName"
@@ -269,8 +318,11 @@ let describe_component_configuration_recommendation =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_component_configuration_recommendation
            (Values.DescribeComponentConfigurationRecommendationRequest.make
-              ~resourceGroupName ~componentName
-              ~tier:(Values.Tier.of_json tier) ())
+              ?workloadName
+              ?recommendationType:(Option.map
+                                     ~f:Values.RecommendationType.of_json
+                                     recommendationType) ~resourceGroupName
+              ~componentName ~tier:(Values.Tier.of_json tier) ())
            (Some
               Values.DescribeComponentConfigurationRecommendationResponse.to_json)
            (Some
@@ -285,6 +337,8 @@ let describe_log_pattern =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
        and resourceGroupName =
          flag "resource-group-name" (required string)
            ~doc:"STRING ResourceGroupName"
@@ -296,8 +350,8 @@ let describe_log_pattern =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_log_pattern
-           (Values.DescribeLogPatternRequest.make ~resourceGroupName
-              ~patternSetName ~patternName ())
+           (Values.DescribeLogPatternRequest.make ?accountId
+              ~resourceGroupName ~patternSetName ~patternName ())
            (Some Values.DescribeLogPatternResponse.to_json)
            (Some Values.DescribeLogPatternResponse.error_to_json)])
 let describe_observation =
@@ -310,13 +364,15 @@ let describe_observation =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
        and observationId =
          flag "observation-id" (required string) ~doc:"STRING ObservationId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_observation
-           (Values.DescribeObservationRequest.make ~observationId ())
-           (Some Values.DescribeObservationResponse.to_json)
+           (Values.DescribeObservationRequest.make ?accountId ~observationId
+              ()) (Some Values.DescribeObservationResponse.to_json)
            (Some Values.DescribeObservationResponse.error_to_json)])
 let describe_problem =
   Command.async ~summary:""
@@ -328,12 +384,14 @@ let describe_problem =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
        and problemId =
          flag "problem-id" (required string) ~doc:"STRING ProblemId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_problem
-           (Values.DescribeProblemRequest.make ~problemId ())
+           (Values.DescribeProblemRequest.make ?accountId ~problemId ())
            (Some Values.DescribeProblemResponse.to_json)
            (Some Values.DescribeProblemResponse.error_to_json)])
 let describe_problem_observations =
@@ -346,14 +404,43 @@ let describe_problem_observations =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
        and problemId =
          flag "problem-id" (required string) ~doc:"STRING ProblemId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_problem_observations
-           (Values.DescribeProblemObservationsRequest.make ~problemId ())
+           (Values.DescribeProblemObservationsRequest.make ?accountId
+              ~problemId ())
            (Some Values.DescribeProblemObservationsResponse.to_json)
            (Some Values.DescribeProblemObservationsResponse.error_to_json)])
+let describe_workload =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
+       and resourceGroupName =
+         flag "resource-group-name" (required string)
+           ~doc:"STRING ResourceGroupName"
+       and componentName =
+         flag "component-name" (required string) ~doc:"STRING ComponentName"
+       and workloadId =
+         flag "workload-id" (required string) ~doc:"STRING WorkloadId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_workload
+           (Values.DescribeWorkloadRequest.make ?accountId ~resourceGroupName
+              ~componentName ~workloadId ())
+           (Some Values.DescribeWorkloadResponse.to_json)
+           (Some Values.DescribeWorkloadResponse.error_to_json)])
 let list_applications =
   Command.async ~summary:""
     ([%map_open.Command
@@ -367,12 +454,14 @@ let list_applications =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxEntities"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_applications
-           (Values.ListApplicationsRequest.make ?maxResults ?nextToken ())
-           (Some Values.ListApplicationsResponse.to_json)
+           (Values.ListApplicationsRequest.make ?maxResults ?nextToken
+              ?accountId ()) (Some Values.ListApplicationsResponse.to_json)
            (Some Values.ListApplicationsResponse.error_to_json)])
 let list_components =
   Command.async ~summary:""
@@ -388,6 +477,8 @@ let list_components =
          flag "max-results" (optional int) ~doc:"INT MaxEntities"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
        and resourceGroupName =
          flag "resource-group-name" (required string)
            ~doc:"STRING ResourceGroupName" in
@@ -395,7 +486,7 @@ let list_components =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_components
            (Values.ListComponentsRequest.make ?maxResults ?nextToken
-              ~resourceGroupName ())
+              ?accountId ~resourceGroupName ())
            (Some Values.ListComponentsResponse.to_json)
            (Some Values.ListComponentsResponse.error_to_json)])
 let list_configuration_history =
@@ -420,7 +511,9 @@ let list_configuration_history =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxEntities"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_configuration_history
@@ -429,8 +522,8 @@ let list_configuration_history =
               ?endTime:(Option.map ~f:Values.EndTime.of_json endTime)
               ?eventStatus:(Option.map
                               ~f:Values.ConfigurationEventStatus.of_json
-                              eventStatus) ?maxResults ?nextToken ())
-           (Some Values.ListConfigurationHistoryResponse.to_json)
+                              eventStatus) ?maxResults ?nextToken ?accountId
+              ()) (Some Values.ListConfigurationHistoryResponse.to_json)
            (Some Values.ListConfigurationHistoryResponse.error_to_json)])
 let list_log_pattern_sets =
   Command.async ~summary:""
@@ -446,6 +539,8 @@ let list_log_pattern_sets =
          flag "max-results" (optional int) ~doc:"INT MaxEntities"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
        and resourceGroupName =
          flag "resource-group-name" (required string)
            ~doc:"STRING ResourceGroupName" in
@@ -453,7 +548,7 @@ let list_log_pattern_sets =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_log_pattern_sets
            (Values.ListLogPatternSetsRequest.make ?maxResults ?nextToken
-              ~resourceGroupName ())
+              ?accountId ~resourceGroupName ())
            (Some Values.ListLogPatternSetsResponse.to_json)
            (Some Values.ListLogPatternSetsResponse.error_to_json)])
 let list_log_patterns =
@@ -473,6 +568,8 @@ let list_log_patterns =
          flag "max-results" (optional int) ~doc:"INT MaxEntities"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
        and resourceGroupName =
          flag "resource-group-name" (required string)
            ~doc:"STRING ResourceGroupName" in
@@ -480,7 +577,7 @@ let list_log_patterns =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_log_patterns
            (Values.ListLogPatternsRequest.make ?patternSetName ?maxResults
-              ?nextToken ~resourceGroupName ())
+              ?nextToken ?accountId ~resourceGroupName ())
            (Some Values.ListLogPatternsResponse.to_json)
            (Some Values.ListLogPatternsResponse.error_to_json)])
 let list_problems =
@@ -493,6 +590,8 @@ let list_problems =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
        and resourceGroupName =
          flag "resource-group-name" (optional string)
            ~doc:"STRING ResourceGroupName"
@@ -504,15 +603,18 @@ let list_problems =
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
        and componentName =
-         flag "component-name" (optional string) ~doc:"STRING ComponentName" in
+         flag "component-name" (optional string) ~doc:"STRING ComponentName"
+       and visibility =
+         flag "visibility" (optional json_arg) ~doc:"JSON Visibility" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_problems
-           (Values.ListProblemsRequest.make ?resourceGroupName
+           (Values.ListProblemsRequest.make ?accountId ?resourceGroupName
               ?startTime:(Option.map ~f:Values.StartTime.of_json startTime)
               ?endTime:(Option.map ~f:Values.EndTime.of_json endTime)
-              ?maxResults ?nextToken ?componentName ())
-           (Some Values.ListProblemsResponse.to_json)
+              ?maxResults ?nextToken ?componentName
+              ?visibility:(Option.map ~f:Values.Visibility.of_json visibility)
+              ()) (Some Values.ListProblemsResponse.to_json)
            (Some Values.ListProblemsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
@@ -533,6 +635,58 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceARN ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_workloads =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxEntities"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
+       and resourceGroupName =
+         flag "resource-group-name" (required string)
+           ~doc:"STRING ResourceGroupName"
+       and componentName =
+         flag "component-name" (required string) ~doc:"STRING ComponentName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_workloads
+           (Values.ListWorkloadsRequest.make ?maxResults ?nextToken
+              ?accountId ~resourceGroupName ~componentName ())
+           (Some Values.ListWorkloadsResponse.to_json)
+           (Some Values.ListWorkloadsResponse.error_to_json)])
+let remove_workload =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceGroupName =
+         flag "resource-group-name" (required string)
+           ~doc:"STRING ResourceGroupName"
+       and componentName =
+         flag "component-name" (required string) ~doc:"STRING ComponentName"
+       and workloadId =
+         flag "workload-id" (required string) ~doc:"STRING WorkloadId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.remove_workload
+           (Values.RemoveWorkloadRequest.make ~resourceGroupName
+              ~componentName ~workloadId ())
+           (Some Values.RemoveWorkloadResponse.to_json)
+           (Some Values.RemoveWorkloadResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -595,11 +749,17 @@ let update_application =
        and opsItemSNSTopicArn =
          flag "ops-item-s-n-s-topic-arn" (optional string)
            ~doc:"STRING OpsItemSNSTopicArn"
+       and sNSNotificationArn =
+         flag "s-n-s-notification-arn" (optional string)
+           ~doc:"STRING SNSNotificationArn"
        and removeSNSTopic =
          flag "remove-s-n-s-topic" (optional bool) ~doc:"BOOL RemoveSNSTopic"
        and autoConfigEnabled =
          flag "auto-config-enabled" (optional bool)
            ~doc:"BOOL AutoConfigEnabled"
+       and attachMissingPermission =
+         flag "attach-missing-permission" (optional bool)
+           ~doc:"BOOL AttachMissingPermission"
        and resourceGroupName =
          flag "resource-group-name" (required string)
            ~doc:"STRING ResourceGroupName" in
@@ -607,8 +767,9 @@ let update_application =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_application
            (Values.UpdateApplicationRequest.make ?opsCenterEnabled
-              ?cWEMonitorEnabled ?opsItemSNSTopicArn ?removeSNSTopic
-              ?autoConfigEnabled ~resourceGroupName ())
+              ?cWEMonitorEnabled ?opsItemSNSTopicArn ?sNSNotificationArn
+              ?removeSNSTopic ?autoConfigEnabled ?attachMissingPermission
+              ~resourceGroupName ())
            (Some Values.UpdateApplicationResponse.to_json)
            (Some Values.UpdateApplicationResponse.error_to_json)])
 let update_component =
@@ -701,10 +862,65 @@ let update_log_pattern =
               ~resourceGroupName ~patternSetName ~patternName ())
            (Some Values.UpdateLogPatternResponse.to_json)
            (Some Values.UpdateLogPatternResponse.error_to_json)])
+let update_problem =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and updateStatus =
+         flag "update-status" (optional json_arg) ~doc:"JSON UpdateStatus"
+       and visibility =
+         flag "visibility" (optional json_arg) ~doc:"JSON Visibility"
+       and problemId =
+         flag "problem-id" (required string) ~doc:"STRING ProblemId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_problem
+           (Values.UpdateProblemRequest.make
+              ?updateStatus:(Option.map ~f:Values.UpdateStatus.of_json
+                               updateStatus)
+              ?visibility:(Option.map ~f:Values.Visibility.of_json visibility)
+              ~problemId ()) (Some Values.UpdateProblemResponse.to_json)
+           (Some Values.UpdateProblemResponse.error_to_json)])
+let update_workload =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workloadId =
+         flag "workload-id" (optional string) ~doc:"STRING WorkloadId"
+       and resourceGroupName =
+         flag "resource-group-name" (required string)
+           ~doc:"STRING ResourceGroupName"
+       and componentName =
+         flag "component-name" (required string) ~doc:"STRING ComponentName"
+       and workloadConfiguration =
+         flag "workload-configuration" (required json_arg)
+           ~doc:"JSON WorkloadConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_workload
+           (Values.UpdateWorkloadRequest.make ?workloadId ~resourceGroupName
+              ~componentName
+              ~workloadConfiguration:(Values.WorkloadConfiguration.of_json
+                                        workloadConfiguration) ())
+           (Some Values.UpdateWorkloadResponse.to_json)
+           (Some Values.UpdateWorkloadResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("create-application", create_application);
+    [("add-workload", add_workload);
+    ("create-application", create_application);
     ("create-component", create_component);
     ("create-log-pattern", create_log_pattern);
     ("delete-application", delete_application);
@@ -719,6 +935,7 @@ let main =
     ("describe-observation", describe_observation);
     ("describe-problem", describe_problem);
     ("describe-problem-observations", describe_problem_observations);
+    ("describe-workload", describe_workload);
     ("list-applications", list_applications);
     ("list-components", list_components);
     ("list-configuration-history", list_configuration_history);
@@ -726,9 +943,13 @@ let main =
     ("list-log-patterns", list_log_patterns);
     ("list-problems", list_problems);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-workloads", list_workloads);
+    ("remove-workload", remove_workload);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-application", update_application);
     ("update-component", update_component);
     ("update-component-configuration", update_component_configuration);
-    ("update-log-pattern", update_log_pattern)]
+    ("update-log-pattern", update_log_pattern);
+    ("update-problem", update_problem);
+    ("update-workload", update_workload)]

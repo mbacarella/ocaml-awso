@@ -54,15 +54,15 @@ let cancel_quantum_task =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and clientToken =
-         flag "client-token" (required string) ~doc:"STRING String64"
        and quantumTaskArn =
          flag "quantum-task-arn" (required string)
-           ~doc:"STRING QuantumTaskArn" in
+           ~doc:"STRING QuantumTaskArn"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING String64" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.cancel_quantum_task
-           (Values.CancelQuantumTaskRequest.make ~clientToken ~quantumTaskArn
+           (Values.CancelQuantumTaskRequest.make ~quantumTaskArn ~clientToken
               ()) (Some Values.CancelQuantumTaskResponse.to_json)
            (Some Values.CancelQuantumTaskResponse.error_to_json)])
 let create_job =
@@ -75,59 +75,64 @@ let create_job =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and checkpointConfig =
-         flag "checkpoint-config" (optional json_arg)
-           ~doc:"JSON JobCheckpointConfig"
-       and hyperParameters =
-         flag "hyper-parameters" (optional json_arg)
-           ~doc:"JSON HyperParameters"
        and inputDataConfig =
          flag "input-data-config" (optional json_arg)
            ~doc:"JSON CreateJobRequestInputDataConfigList"
+       and checkpointConfig =
+         flag "checkpoint-config" (optional json_arg)
+           ~doc:"JSON JobCheckpointConfig"
        and stoppingCondition =
          flag "stopping-condition" (optional json_arg)
            ~doc:"JSON JobStoppingCondition"
+       and hyperParameters =
+         flag "hyper-parameters" (optional json_arg)
+           ~doc:"JSON HyperParameters"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and associations =
+         flag "associations" (optional json_arg)
+           ~doc:"JSON CreateJobRequestAssociationsList"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING String64"
        and algorithmSpecification =
          flag "algorithm-specification" (required json_arg)
            ~doc:"JSON AlgorithmSpecification"
-       and clientToken =
-         flag "client-token" (required string) ~doc:"STRING String64"
-       and deviceConfig =
-         flag "device-config" (required json_arg) ~doc:"JSON DeviceConfig"
-       and instanceConfig =
-         flag "instance-config" (required json_arg)
-           ~doc:"JSON InstanceConfig"
-       and jobName =
-         flag "job-name" (required string)
-           ~doc:"STRING CreateJobRequestJobNameString"
        and outputDataConfig =
          flag "output-data-config" (required json_arg)
            ~doc:"JSON JobOutputDataConfig"
-       and roleArn = flag "role-arn" (required string) ~doc:"STRING RoleArn" in
+       and jobName =
+         flag "job-name" (required string)
+           ~doc:"STRING CreateJobRequestJobNameString"
+       and roleArn = flag "role-arn" (required string) ~doc:"STRING RoleArn"
+       and instanceConfig =
+         flag "instance-config" (required json_arg)
+           ~doc:"JSON InstanceConfig"
+       and deviceConfig =
+         flag "device-config" (required json_arg) ~doc:"JSON DeviceConfig" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_job
            (Values.CreateJobRequest.make
-              ?checkpointConfig:(Option.map
-                                   ~f:Values.JobCheckpointConfig.of_json
-                                   checkpointConfig)
-              ?hyperParameters:(Option.map ~f:Values.HyperParameters.of_json
-                                  hyperParameters)
               ?inputDataConfig:(Option.map
                                   ~f:Values.CreateJobRequestInputDataConfigList.of_json
                                   inputDataConfig)
+              ?checkpointConfig:(Option.map
+                                   ~f:Values.JobCheckpointConfig.of_json
+                                   checkpointConfig)
               ?stoppingCondition:(Option.map
                                     ~f:Values.JobStoppingCondition.of_json
                                     stoppingCondition)
+              ?hyperParameters:(Option.map ~f:Values.HyperParameters.of_json
+                                  hyperParameters)
               ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ?associations:(Option.map
+                               ~f:Values.CreateJobRequestAssociationsList.of_json
+                               associations) ~clientToken
               ~algorithmSpecification:(Values.AlgorithmSpecification.of_json
-                                         algorithmSpecification) ~clientToken
-              ~deviceConfig:(Values.DeviceConfig.of_json deviceConfig)
-              ~instanceConfig:(Values.InstanceConfig.of_json instanceConfig)
-              ~jobName
+                                         algorithmSpecification)
               ~outputDataConfig:(Values.JobOutputDataConfig.of_json
-                                   outputDataConfig) ~roleArn ())
+                                   outputDataConfig) ~jobName ~roleArn
+              ~instanceConfig:(Values.InstanceConfig.of_json instanceConfig)
+              ~deviceConfig:(Values.DeviceConfig.of_json deviceConfig) ())
            (Some Values.CreateJobResponse.to_json)
            (Some Values.CreateJobResponse.error_to_json)])
 let create_quantum_task =
@@ -143,32 +148,93 @@ let create_quantum_task =
        and deviceParameters =
          flag "device-parameters" (optional string)
            ~doc:"STRING CreateQuantumTaskRequestDeviceParametersString"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
        and jobToken =
          flag "job-token" (optional string) ~doc:"STRING JobToken"
-       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
-       and action = flag "action" (required string) ~doc:"STRING JsonValue"
+       and associations =
+         flag "associations" (optional json_arg)
+           ~doc:"JSON CreateQuantumTaskRequestAssociationsList"
+       and experimentalCapabilities =
+         flag "experimental-capabilities" (optional json_arg)
+           ~doc:"JSON ExperimentalCapabilities"
        and clientToken =
          flag "client-token" (required string) ~doc:"STRING String64"
        and deviceArn =
          flag "device-arn" (required string) ~doc:"STRING DeviceArn"
+       and shots =
+         flag "shots" (required json_arg)
+           ~doc:"JSON CreateQuantumTaskRequestShotsLong"
        and outputS3Bucket =
          flag "output-s3-bucket" (required string)
            ~doc:"STRING CreateQuantumTaskRequestOutputS3BucketString"
        and outputS3KeyPrefix =
          flag "output-s3-key-prefix" (required string)
            ~doc:"STRING CreateQuantumTaskRequestOutputS3KeyPrefixString"
-       and shots =
-         flag "shots" (required json_arg)
-           ~doc:"JSON CreateQuantumTaskRequestShotsLong" in
+       and action = flag "action" (required string) ~doc:"STRING JsonValue" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_quantum_task
-           (Values.CreateQuantumTaskRequest.make ?deviceParameters ?jobToken
-              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ~action
-              ~clientToken ~deviceArn ~outputS3Bucket ~outputS3KeyPrefix
+           (Values.CreateQuantumTaskRequest.make ?deviceParameters
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ?jobToken
+              ?associations:(Option.map
+                               ~f:Values.CreateQuantumTaskRequestAssociationsList.of_json
+                               associations)
+              ?experimentalCapabilities:(Option.map
+                                           ~f:Values.ExperimentalCapabilities.of_json
+                                           experimentalCapabilities)
+              ~clientToken ~deviceArn
               ~shots:(Values.CreateQuantumTaskRequestShotsLong.of_json shots)
-              ()) (Some Values.CreateQuantumTaskResponse.to_json)
+              ~outputS3Bucket ~outputS3KeyPrefix ~action ())
+           (Some Values.CreateQuantumTaskResponse.to_json)
            (Some Values.CreateQuantumTaskResponse.error_to_json)])
+let create_spending_limit =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and timePeriod =
+         flag "time-period" (optional json_arg) ~doc:"JSON TimePeriod"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING String64"
+       and deviceArn =
+         flag "device-arn" (required string) ~doc:"STRING DeviceArn"
+       and spendingLimit =
+         flag "spending-limit" (required string)
+           ~doc:"STRING CreateSpendingLimitRequestSpendingLimitString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_spending_limit
+           (Values.CreateSpendingLimitRequest.make
+              ?timePeriod:(Option.map ~f:Values.TimePeriod.of_json timePeriod)
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ~clientToken
+              ~deviceArn ~spendingLimit ())
+           (Some Values.CreateSpendingLimitResponse.to_json)
+           (Some Values.CreateSpendingLimitResponse.error_to_json)])
+let delete_spending_limit =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and spendingLimitArn =
+         flag "spending-limit-arn" (required string)
+           ~doc:"STRING SpendingLimitArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_spending_limit
+           (Values.DeleteSpendingLimitRequest.make ~spendingLimitArn ())
+           (Some Values.DeleteSpendingLimitResponse.to_json)
+           (Some Values.DeleteSpendingLimitResponse.error_to_json)])
 let get_device =
   Command.async ~summary:""
     ([%map_open.Command
@@ -196,11 +262,18 @@ let get_job =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and additionalAttributeNames =
+         flag "additional-attribute-names" (optional json_arg)
+           ~doc:"JSON HybridJobAdditionalAttributeNamesList"
        and jobArn = flag "job-arn" (required string) ~doc:"STRING JobArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_job (Values.GetJobRequest.make ~jobArn ())
-           (Some Values.GetJobResponse.to_json)
+           Io.get_job
+           (Values.GetJobRequest.make
+              ?additionalAttributeNames:(Option.map
+                                           ~f:Values.HybridJobAdditionalAttributeNamesList.of_json
+                                           additionalAttributeNames) ~jobArn
+              ()) (Some Values.GetJobResponse.to_json)
            (Some Values.GetJobResponse.error_to_json)])
 let get_quantum_task =
   Command.async ~summary:""
@@ -212,13 +285,20 @@ let get_quantum_task =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and additionalAttributeNames =
+         flag "additional-attribute-names" (optional json_arg)
+           ~doc:"JSON QuantumTaskAdditionalAttributeNamesList"
        and quantumTaskArn =
          flag "quantum-task-arn" (required string)
            ~doc:"STRING QuantumTaskArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_quantum_task
-           (Values.GetQuantumTaskRequest.make ~quantumTaskArn ())
+           (Values.GetQuantumTaskRequest.make
+              ?additionalAttributeNames:(Option.map
+                                           ~f:Values.QuantumTaskAdditionalAttributeNamesList.of_json
+                                           additionalAttributeNames)
+              ~quantumTaskArn ())
            (Some Values.GetQuantumTaskResponse.to_json)
            (Some Values.GetQuantumTaskResponse.error_to_json)])
 let list_tags_for_resource =
@@ -249,18 +329,18 @@ let search_devices =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
        and maxResults =
          flag "max-results" (optional int)
            ~doc:"INT SearchDevicesRequestMaxResultsInteger"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
        and filters =
          flag "filters" (required json_arg)
            ~doc:"JSON SearchDevicesRequestFiltersList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.search_devices
-           (Values.SearchDevicesRequest.make ?maxResults ?nextToken
+           (Values.SearchDevicesRequest.make ?nextToken ?maxResults
               ~filters:(Values.SearchDevicesRequestFiltersList.of_json
                           filters) ())
            (Some Values.SearchDevicesResponse.to_json)
@@ -275,18 +355,18 @@ let search_jobs =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
        and maxResults =
          flag "max-results" (optional int)
            ~doc:"INT SearchJobsRequestMaxResultsInteger"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
        and filters =
          flag "filters" (required json_arg)
            ~doc:"JSON SearchJobsRequestFiltersList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.search_jobs
-           (Values.SearchJobsRequest.make ?maxResults ?nextToken
+           (Values.SearchJobsRequest.make ?nextToken ?maxResults
               ~filters:(Values.SearchJobsRequestFiltersList.of_json filters)
               ()) (Some Values.SearchJobsResponse.to_json)
            (Some Values.SearchJobsResponse.error_to_json)])
@@ -300,22 +380,49 @@ let search_quantum_tasks =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
        and maxResults =
          flag "max-results" (optional int)
            ~doc:"INT SearchQuantumTasksRequestMaxResultsInteger"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
        and filters =
          flag "filters" (required json_arg)
            ~doc:"JSON SearchQuantumTasksRequestFiltersList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.search_quantum_tasks
-           (Values.SearchQuantumTasksRequest.make ?maxResults ?nextToken
+           (Values.SearchQuantumTasksRequest.make ?nextToken ?maxResults
               ~filters:(Values.SearchQuantumTasksRequestFiltersList.of_json
                           filters) ())
            (Some Values.SearchQuantumTasksResponse.to_json)
            (Some Values.SearchQuantumTasksResponse.error_to_json)])
+let search_spending_limits =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT SearchSpendingLimitsRequestMaxResultsInteger"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON SearchSpendingLimitsRequestFiltersList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.search_spending_limits
+           (Values.SearchSpendingLimitsRequest.make ?nextToken ?maxResults
+              ?filters:(Option.map
+                          ~f:Values.SearchSpendingLimitsRequestFiltersList.of_json
+                          filters) ())
+           (Some Values.SearchSpendingLimitsResponse.to_json)
+           (Some Values.SearchSpendingLimitsResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -356,6 +463,34 @@ let untag_resource =
               ~tagKeys:(Values.TagKeys.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_spending_limit =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and spendingLimit =
+         flag "spending-limit" (optional string)
+           ~doc:"STRING UpdateSpendingLimitRequestSpendingLimitString"
+       and timePeriod =
+         flag "time-period" (optional json_arg) ~doc:"JSON TimePeriod"
+       and spendingLimitArn =
+         flag "spending-limit-arn" (required string)
+           ~doc:"STRING SpendingLimitArn"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING String64" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_spending_limit
+           (Values.UpdateSpendingLimitRequest.make ?spendingLimit
+              ?timePeriod:(Option.map ~f:Values.TimePeriod.of_json timePeriod)
+              ~spendingLimitArn ~clientToken ())
+           (Some Values.UpdateSpendingLimitResponse.to_json)
+           (Some Values.UpdateSpendingLimitResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -363,6 +498,8 @@ let main =
     ("cancel-quantum-task", cancel_quantum_task);
     ("create-job", create_job);
     ("create-quantum-task", create_quantum_task);
+    ("create-spending-limit", create_spending_limit);
+    ("delete-spending-limit", delete_spending_limit);
     ("get-device", get_device);
     ("get-job", get_job);
     ("get-quantum-task", get_quantum_task);
@@ -370,5 +507,7 @@ let main =
     ("search-devices", search_devices);
     ("search-jobs", search_jobs);
     ("search-quantum-tasks", search_quantum_tasks);
+    ("search-spending-limits", search_spending_limits);
     ("tag-resource", tag_resource);
-    ("untag-resource", untag_resource)]
+    ("untag-resource", untag_resource);
+    ("update-spending-limit", update_spending_limit)]

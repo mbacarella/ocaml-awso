@@ -26,6 +26,20 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module JwtValidationActionAdditionalClaimValue =
+  struct
+    type nonrec t = string
+    let context_ = "JwtValidationActionAdditionalClaimValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"JwtValidationActionAdditionalClaimValue" j
+    let to_json = simple_to_json to_value
+  end
 module TargetGroupArn =
   struct
     type nonrec t = string
@@ -52,6 +66,84 @@ module TargetGroupWeight =
         (string_of_xml ~kind:"an integer for TargetGroupWeight" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
+  end
+module JwtValidationActionAdditionalClaimFormatEnum =
+  struct
+    type nonrec t =
+      | Single_string 
+      | String_array 
+      | Space_separated_values 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Single_string -> "single-string"
+      | String_array -> "string-array"
+      | Space_separated_values -> "space-separated-values"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "single-string" -> Single_string
+      | "string-array" -> String_array
+      | "space-separated-values" -> Space_separated_values
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration JwtValidationActionAdditionalClaimFormatEnum"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"JwtValidationActionAdditionalClaimFormatEnum"
+           j)
+    let to_json = simple_to_json to_value
+  end
+module JwtValidationActionAdditionalClaimName =
+  struct
+    type nonrec t = string
+    let context_ = "JwtValidationActionAdditionalClaimName"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"JwtValidationActionAdditionalClaimName" j
+    let to_json = simple_to_json to_value
+  end
+module JwtValidationActionAdditionalClaimValues =
+  struct
+    type nonrec t = JwtValidationActionAdditionalClaimValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:JwtValidationActionAdditionalClaimValue.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:JwtValidationActionAdditionalClaimValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"JwtValidationActionAdditionalClaimValues"
+        ~of_json:JwtValidationActionAdditionalClaimValue.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module StringValue =
   struct
@@ -151,10 +243,10 @@ module TargetGroupTuple =
           (Xml.child xml_arg0 "TargetGroupArn") in
       make ?weight ?targetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let weight = field_map json "Weight" TargetGroupWeight.of_json in
+    let of_json json__ =
+      let weight = field_map json__ "Weight" TargetGroupWeight.of_json in
       let targetGroupArn =
-        field_map json "TargetGroupArn" TargetGroupArn.of_json in
+        field_map json__ "TargetGroupArn" TargetGroupArn.of_json in
       make ?weight ?targetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -188,6 +280,56 @@ module TargetGroupStickinessEnabled =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module JwtValidationActionAdditionalClaim =
+  struct
+    type nonrec t =
+      {
+      format: JwtValidationActionAdditionalClaimFormatEnum.t
+        [@ocaml.doc "The format of the claim value."];
+      name: JwtValidationActionAdditionalClaimName.t
+        [@ocaml.doc
+          "The name of the claim. You can't specify exp, iss, nbf, or iat because we validate them by default."];
+      values: JwtValidationActionAdditionalClaimValues.t
+        [@ocaml.doc
+          "The claim value. The maximum size of the list is 10. Each value can be up to 256 characters in length. If the format is space-separated-values, the values can't include spaces."]}
+    let context_ = "JwtValidationActionAdditionalClaim"
+    let make ~format =
+      fun ~name -> fun ~values -> fun () -> { format; name; values }
+    let to_value x =
+      structure_to_value
+        [("Format",
+           (Some
+              (JwtValidationActionAdditionalClaimFormatEnum.to_value x.format)));
+        ("Name",
+          (Some (JwtValidationActionAdditionalClaimName.to_value x.name)));
+        ("Values",
+          (Some (JwtValidationActionAdditionalClaimValues.to_value x.values)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        JwtValidationActionAdditionalClaimValues.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Values") in
+      let name =
+        JwtValidationActionAdditionalClaimName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let format =
+        JwtValidationActionAdditionalClaimFormatEnum.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Format_") in
+      make ~values ~name ~format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values =
+        field_map_exn json__ "Values"
+          JwtValidationActionAdditionalClaimValues.of_json in
+      let name =
+        field_map_exn json__ "Name"
+          JwtValidationActionAdditionalClaimName.of_json in
+      let format =
+        field_map_exn json__ "Format"
+          JwtValidationActionAdditionalClaimFormatEnum.of_json in
+      make ~values ~name ~format ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about an additional claim to validate."]
 module QueryStringKeyValuePair =
   struct
     type nonrec t =
@@ -206,12 +348,44 @@ module QueryStringKeyValuePair =
       let key = (Option.map ~f:StringValue.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" StringValue.of_json in
-      let key = field_map json "Key" StringValue.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" StringValue.of_json in
+      let key = field_map json__ "Key" StringValue.of_json in
       make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a key/value pair."]
+module RewriteConfig =
+  struct
+    type nonrec t =
+      {
+      regex: StringValue.t
+        [@ocaml.doc
+          "The regular expression to match in the input string. The maximum length of the string is 1,024 characters."];
+      replace: StringValue.t
+        [@ocaml.doc
+          "The replacement string to use when rewriting the matched input. The maximum length of the string is 1,024 characters. You can specify capture groups in the regular expression (for example, $1 and $2)."]}
+    let context_ = "RewriteConfig"
+    let make ~regex = fun ~replace -> fun () -> { regex; replace }
+    let to_value x =
+      structure_to_value
+        [("Regex", (Some (StringValue.to_value x.regex)));
+        ("Replace", (Some (StringValue.to_value x.replace)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let replace =
+        StringValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Replace") in
+      let regex =
+        StringValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Regex") in
+      make ~replace ~regex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let replace = field_map_exn json__ "Replace" StringValue.of_json in
+      let regex = field_map_exn json__ "Regex" StringValue.of_json in
+      make ~replace ~regex ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a rewrite transform. This transform matches a pattern and replaces it with the specified string."]
 module AllocationId =
   struct
     type nonrec t = string
@@ -294,6 +468,8 @@ module AuthenticateCognitoActionAuthenticationRequestExtraParams =
                          |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -449,6 +625,8 @@ module AuthenticateOidcActionAuthenticationRequestExtraParams =
                          |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -682,6 +860,9 @@ module TargetGroupList =
   struct
     type nonrec t = TargetGroupTuple.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetGroupTuple.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -711,7 +892,7 @@ module TargetGroupStickinessConfig =
         [@ocaml.doc "Indicates whether target group stickiness is enabled."];
       durationSeconds: TargetGroupStickinessDurationSeconds.t option
         [@ocaml.doc
-          "The time period, in seconds, during which requests from a client should be routed to the same target group. The range is 1-604800 seconds (7 days)."]}
+          "\\[Application Load Balancers\\] The time period, in seconds, during which requests from a client should be routed to the same target group. The range is 1-604800 seconds (7 days). You must specify this value when enabling target group stickiness."]}
     let make ?enabled =
       fun ?durationSeconds -> fun () -> { enabled; durationSeconds }
     let to_value x =
@@ -731,16 +912,72 @@ module TargetGroupStickinessConfig =
           (Xml.child xml_arg0 "Enabled") in
       make ?durationSeconds ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let durationSeconds =
-        field_map json "DurationSeconds"
+        field_map json__ "DurationSeconds"
           TargetGroupStickinessDurationSeconds.of_json in
       let enabled =
-        field_map json "Enabled" TargetGroupStickinessEnabled.of_json in
+        field_map json__ "Enabled" TargetGroupStickinessEnabled.of_json in
       make ?durationSeconds ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the target group stickiness for a rule."]
+module JwtValidationActionAdditionalClaims =
+  struct
+    type nonrec t = JwtValidationActionAdditionalClaim.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:JwtValidationActionAdditionalClaim.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:JwtValidationActionAdditionalClaim.of_xml)
+    let of_json j =
+      list_of_json ~kind:"JwtValidationActionAdditionalClaims"
+        ~of_json:JwtValidationActionAdditionalClaim.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module JwtValidationActionIssuer =
+  struct
+    type nonrec t = string
+    let context_ = "JwtValidationActionIssuer"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"JwtValidationActionIssuer" j
+    let to_json = simple_to_json to_value
+  end
+module JwtValidationActionJwksEndpoint =
+  struct
+    type nonrec t = string
+    let context_ = "JwtValidationActionJwksEndpoint"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"JwtValidationActionJwksEndpoint" j
+    let to_json = simple_to_json to_value
+  end
 module RedirectActionHost =
   struct
     type nonrec t = string
@@ -857,6 +1094,9 @@ module ListOfString =
   struct
     type nonrec t = StringValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StringValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -894,6 +1134,9 @@ module QueryStringKeyValuePairList =
   struct
     type nonrec t = QueryStringKeyValuePair.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:QueryStringKeyValuePair.to_value)) |>
         (fun x -> `List x)
@@ -914,6 +1157,33 @@ module QueryStringKeyValuePairList =
     let of_json j =
       list_of_json ~kind:"QueryStringKeyValuePairList"
         ~of_json:QueryStringKeyValuePair.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RewriteConfigList =
+  struct
+    type nonrec t = RewriteConfig.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RewriteConfig.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RewriteConfig.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RewriteConfigList" ~of_json:RewriteConfig.of_json j
     let to_json v = composed_to_json to_value v
   end
 module LoadBalancerAddress =
@@ -957,16 +1227,29 @@ module LoadBalancerAddress =
         (Option.map ~f:IpAddress.of_xml) (Xml.child xml_arg0 "IpAddress") in
       make ?iPv6Address ?privateIPv4Address ?allocationId ?ipAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let iPv6Address = field_map json "IPv6Address" IPv6Address.of_json in
+    let of_json json__ =
+      let iPv6Address = field_map json__ "IPv6Address" IPv6Address.of_json in
       let privateIPv4Address =
-        field_map json "PrivateIPv4Address" PrivateIPv4Address.of_json in
-      let allocationId = field_map json "AllocationId" AllocationId.of_json in
-      let ipAddress = field_map json "IpAddress" IpAddress.of_json in
+        field_map json__ "PrivateIPv4Address" PrivateIPv4Address.of_json in
+      let allocationId = field_map json__ "AllocationId" AllocationId.of_json in
+      let ipAddress = field_map json__ "IpAddress" IpAddress.of_json in
       make ?iPv6Address ?privateIPv4Address ?allocationId ?ipAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a static IP address for a load balancer."]
+module SourceNatIpv6Prefix =
+  struct
+    type nonrec t = string
+    let context_ = "SourceNatIpv6Prefix"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SourceNatIpv6Prefix" j
+    let to_json = simple_to_json to_value
+  end
 module ActionOrder =
   struct
     type nonrec t = int
@@ -994,6 +1277,7 @@ module ActionTypeEnum =
       | Authenticate_cognito 
       | Redirect 
       | Fixed_response 
+      | Jwt_validation 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1003,6 +1287,7 @@ module ActionTypeEnum =
       | Authenticate_cognito -> "authenticate-cognito"
       | Redirect -> "redirect"
       | Fixed_response -> "fixed-response"
+      | Jwt_validation -> "jwt-validation"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1011,6 +1296,7 @@ module ActionTypeEnum =
       | "authenticate-cognito" -> Authenticate_cognito
       | "redirect" -> Redirect
       | "fixed-response" -> Fixed_response
+      | "jwt-validation" -> Jwt_validation
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1128,29 +1414,29 @@ module AuthenticateCognitoActionConfig =
         ?sessionTimeout ?scope ?sessionCookieName ~userPoolDomain
         ~userPoolClientId ~userPoolArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let onUnauthenticatedRequest =
-        field_map json "OnUnauthenticatedRequest"
+        field_map json__ "OnUnauthenticatedRequest"
           AuthenticateCognitoActionConditionalBehaviorEnum.of_json in
       let authenticationRequestExtraParams =
-        field_map json "AuthenticationRequestExtraParams"
+        field_map json__ "AuthenticationRequestExtraParams"
           AuthenticateCognitoActionAuthenticationRequestExtraParams.of_json in
       let sessionTimeout =
-        field_map json "SessionTimeout"
+        field_map json__ "SessionTimeout"
           AuthenticateCognitoActionSessionTimeout.of_json in
       let scope =
-        field_map json "Scope" AuthenticateCognitoActionScope.of_json in
+        field_map json__ "Scope" AuthenticateCognitoActionScope.of_json in
       let sessionCookieName =
-        field_map json "SessionCookieName"
+        field_map json__ "SessionCookieName"
           AuthenticateCognitoActionSessionCookieName.of_json in
       let userPoolDomain =
-        field_map_exn json "UserPoolDomain"
+        field_map_exn json__ "UserPoolDomain"
           AuthenticateCognitoActionUserPoolDomain.of_json in
       let userPoolClientId =
-        field_map_exn json "UserPoolClientId"
+        field_map_exn json__ "UserPoolClientId"
           AuthenticateCognitoActionUserPoolClientId.of_json in
       let userPoolArn =
-        field_map_exn json "UserPoolArn"
+        field_map_exn json__ "UserPoolArn"
           AuthenticateCognitoActionUserPoolArn.of_json in
       make ?onUnauthenticatedRequest ?authenticationRequestExtraParams
         ?sessionTimeout ?scope ?sessionCookieName ~userPoolDomain
@@ -1308,39 +1594,41 @@ module AuthenticateOidcActionConfig =
         ?sessionCookieName ?clientSecret ~clientId ~userInfoEndpoint
         ~tokenEndpoint ~authorizationEndpoint ~issuer ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let useExistingClientSecret =
-        field_map json "UseExistingClientSecret"
+        field_map json__ "UseExistingClientSecret"
           AuthenticateOidcActionUseExistingClientSecret.of_json in
       let onUnauthenticatedRequest =
-        field_map json "OnUnauthenticatedRequest"
+        field_map json__ "OnUnauthenticatedRequest"
           AuthenticateOidcActionConditionalBehaviorEnum.of_json in
       let authenticationRequestExtraParams =
-        field_map json "AuthenticationRequestExtraParams"
+        field_map json__ "AuthenticationRequestExtraParams"
           AuthenticateOidcActionAuthenticationRequestExtraParams.of_json in
       let sessionTimeout =
-        field_map json "SessionTimeout"
+        field_map json__ "SessionTimeout"
           AuthenticateOidcActionSessionTimeout.of_json in
-      let scope = field_map json "Scope" AuthenticateOidcActionScope.of_json in
+      let scope =
+        field_map json__ "Scope" AuthenticateOidcActionScope.of_json in
       let sessionCookieName =
-        field_map json "SessionCookieName"
+        field_map json__ "SessionCookieName"
           AuthenticateOidcActionSessionCookieName.of_json in
       let clientSecret =
-        field_map json "ClientSecret"
+        field_map json__ "ClientSecret"
           AuthenticateOidcActionClientSecret.of_json in
       let clientId =
-        field_map_exn json "ClientId" AuthenticateOidcActionClientId.of_json in
+        field_map_exn json__ "ClientId"
+          AuthenticateOidcActionClientId.of_json in
       let userInfoEndpoint =
-        field_map_exn json "UserInfoEndpoint"
+        field_map_exn json__ "UserInfoEndpoint"
           AuthenticateOidcActionUserInfoEndpoint.of_json in
       let tokenEndpoint =
-        field_map_exn json "TokenEndpoint"
+        field_map_exn json__ "TokenEndpoint"
           AuthenticateOidcActionTokenEndpoint.of_json in
       let authorizationEndpoint =
-        field_map_exn json "AuthorizationEndpoint"
+        field_map_exn json__ "AuthorizationEndpoint"
           AuthenticateOidcActionAuthorizationEndpoint.of_json in
       let issuer =
-        field_map_exn json "Issuer" AuthenticateOidcActionIssuer.of_json in
+        field_map_exn json__ "Issuer" AuthenticateOidcActionIssuer.of_json in
       make ?useExistingClientSecret ?onUnauthenticatedRequest
         ?authenticationRequestExtraParams ?sessionTimeout ?scope
         ?sessionCookieName ?clientSecret ~clientId ~userInfoEndpoint
@@ -1385,13 +1673,14 @@ module FixedResponseActionConfig =
           (Xml.child xml_arg0 "MessageBody") in
       make ?contentType ~statusCode ?messageBody ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let contentType =
-        field_map json "ContentType" FixedResponseActionContentType.of_json in
+        field_map json__ "ContentType" FixedResponseActionContentType.of_json in
       let statusCode =
-        field_map_exn json "StatusCode" FixedResponseActionStatusCode.of_json in
+        field_map_exn json__ "StatusCode"
+          FixedResponseActionStatusCode.of_json in
       let messageBody =
-        field_map json "MessageBody" FixedResponseActionMessage.of_json in
+        field_map json__ "MessageBody" FixedResponseActionMessage.of_json in
       make ?contentType ~statusCode ?messageBody ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1401,8 +1690,7 @@ module ForwardActionConfig =
     type nonrec t =
       {
       targetGroups: TargetGroupList.t option
-        [@ocaml.doc
-          "One or more target groups. For Network Load Balancers, you can specify a single target group."];
+        [@ocaml.doc "The target groups."];
       targetGroupStickinessConfig: TargetGroupStickinessConfig.t option
         [@ocaml.doc "The target group stickiness for the rule."]}
     let make ?targetGroups =
@@ -1425,22 +1713,73 @@ module ForwardActionConfig =
           (Xml.child xml_arg0 "TargetGroups") in
       make ?targetGroupStickinessConfig ?targetGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetGroupStickinessConfig =
-        field_map json "TargetGroupStickinessConfig"
+        field_map json__ "TargetGroupStickinessConfig"
           TargetGroupStickinessConfig.of_json in
       let targetGroups =
-        field_map json "TargetGroups" TargetGroupList.of_json in
+        field_map json__ "TargetGroups" TargetGroupList.of_json in
       make ?targetGroupStickinessConfig ?targetGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a forward action."]
+module JwtValidationActionConfig =
+  struct
+    type nonrec t =
+      {
+      jwksEndpoint: JwtValidationActionJwksEndpoint.t
+        [@ocaml.doc
+          "The JSON Web Key Set (JWKS) endpoint. This endpoint contains JSON Web Keys (JWK) that are used to validate signatures from the provider. This must be a full URL, including the HTTPS protocol, the domain, and the path. The maximum length is 256 characters."];
+      issuer: JwtValidationActionIssuer.t
+        [@ocaml.doc
+          "The issuer of the JWT. The maximum length is 256 characters."];
+      additionalClaims: JwtValidationActionAdditionalClaims.t option
+        [@ocaml.doc
+          "Additional claims to validate. The maximum size of the list is 10. We validate the exp, iss, nbf, and iat claims by default."]}
+    let context_ = "JwtValidationActionConfig"
+    let make ?additionalClaims =
+      fun ~jwksEndpoint ->
+        fun ~issuer -> fun () -> { additionalClaims; jwksEndpoint; issuer }
+    let to_value x =
+      structure_to_value
+        [("JwksEndpoint",
+           (Some (JwtValidationActionJwksEndpoint.to_value x.jwksEndpoint)));
+        ("Issuer", (Some (JwtValidationActionIssuer.to_value x.issuer)));
+        ("AdditionalClaims",
+          (Option.map x.additionalClaims
+             ~f:JwtValidationActionAdditionalClaims.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let additionalClaims =
+        (Option.map ~f:JwtValidationActionAdditionalClaims.of_xml)
+          (Xml.child xml_arg0 "AdditionalClaims") in
+      let issuer =
+        JwtValidationActionIssuer.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Issuer") in
+      let jwksEndpoint =
+        JwtValidationActionJwksEndpoint.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "JwksEndpoint") in
+      make ?additionalClaims ~issuer ~jwksEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let additionalClaims =
+        field_map json__ "AdditionalClaims"
+          JwtValidationActionAdditionalClaims.of_json in
+      let issuer =
+        field_map_exn json__ "Issuer" JwtValidationActionIssuer.of_json in
+      let jwksEndpoint =
+        field_map_exn json__ "JwksEndpoint"
+          JwtValidationActionJwksEndpoint.of_json in
+      make ?additionalClaims ~issuer ~jwksEndpoint ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a JSON Web Token (JWT) validation action."]
 module RedirectActionConfig =
   struct
     type nonrec t =
       {
       protocol: RedirectActionProtocol.t option
         [@ocaml.doc
-          "The protocol. You can specify HTTP, HTTPS, or #\\{protocol\\}. You can redirect HTTP to HTTP, HTTP to HTTPS, and HTTPS to HTTPS. You cannot redirect HTTPS to HTTP."];
+          "The protocol. You can specify HTTP, HTTPS, or #\\{protocol\\}. You can redirect HTTP to HTTP, HTTP to HTTPS, and HTTPS to HTTPS. You can't redirect HTTPS to HTTP."];
       port: RedirectActionPort.t option
         [@ocaml.doc
           "The port. You can specify a value from 1 to 65535 or #\\{port\\}."];
@@ -1493,14 +1832,16 @@ module RedirectActionConfig =
           (Xml.child xml_arg0 "Protocol") in
       make ~statusCode ?query ?path ?host ?port ?protocol ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusCode =
-        field_map_exn json "StatusCode" RedirectActionStatusCodeEnum.of_json in
-      let query = field_map json "Query" RedirectActionQuery.of_json in
-      let path = field_map json "Path" RedirectActionPath.of_json in
-      let host = field_map json "Host" RedirectActionHost.of_json in
-      let port = field_map json "Port" RedirectActionPort.of_json in
-      let protocol = field_map json "Protocol" RedirectActionProtocol.of_json in
+        field_map_exn json__ "StatusCode"
+          RedirectActionStatusCodeEnum.of_json in
+      let query = field_map json__ "Query" RedirectActionQuery.of_json in
+      let path = field_map json__ "Path" RedirectActionPath.of_json in
+      let host = field_map json__ "Host" RedirectActionHost.of_json in
+      let port = field_map json__ "Port" RedirectActionPort.of_json in
+      let protocol =
+        field_map json__ "Protocol" RedirectActionProtocol.of_json in
       make ~statusCode ?query ?path ?host ?port ?protocol ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1525,20 +1866,28 @@ module HostHeaderConditionConfig =
       {
       values: ListOfString.t option
         [@ocaml.doc
-          "One or more host names. The maximum size of each name is 128 characters. The comparison is case insensitive. The following wildcard characters are supported: * (matches 0 or more characters) and ? (matches exactly 1 character). If you specify multiple strings, the condition is satisfied if one of the strings matches the host name."]}
-    let make ?values = fun () -> { values }
+          "The host names. The maximum length of each string is 128 characters. The comparison is case insensitive. The following wildcard characters are supported: * (matches 0 or more characters) and ? (matches exactly 1 character). You must include at least one \".\" character. You can include only alphabetical characters after the final \".\" character. If you specify multiple strings, the condition is satisfied if one of the strings matches the host name."];
+      regexValues: ListOfString.t option
+        [@ocaml.doc
+          "The regular expressions to compare against the host header. The maximum length of each string is 128 characters."]}
+    let make ?values = fun ?regexValues -> fun () -> { values; regexValues }
     let to_value x =
       structure_to_value
-        [("Values", (Option.map x.values ~f:ListOfString.to_value))]
+        [("Values", (Option.map x.values ~f:ListOfString.to_value));
+        ("RegexValues", (Option.map x.regexValues ~f:ListOfString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let regexValues =
+        (Option.map ~f:ListOfString.of_xml)
+          (Xml.child xml_arg0 "RegexValues") in
       let values =
         (Option.map ~f:ListOfString.of_xml) (Xml.child xml_arg0 "Values") in
-      make ?values ()
+      make ?regexValues ?values ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" ListOfString.of_json in
-      make ?values ()
+    let of_json json__ =
+      let regexValues = field_map json__ "RegexValues" ListOfString.of_json in
+      let values = field_map json__ "Values" ListOfString.of_json in
+      make ?regexValues ?values ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a host header condition."]
 module HttpHeaderConditionConfig =
@@ -1547,31 +1896,40 @@ module HttpHeaderConditionConfig =
       {
       httpHeaderName: HttpHeaderConditionName.t option
         [@ocaml.doc
-          "The name of the HTTP header field. The maximum size is 40 characters. The header name is case insensitive. The allowed characters are specified by RFC 7230. Wildcards are not supported. You can't use an HTTP header condition to specify the host header. Use HostHeaderConditionConfig to specify a host header condition."];
+          "The name of the HTTP header field. The maximum length is 40 characters. The header name is case insensitive. The allowed characters are specified by RFC 7230. Wildcards are not supported. You can't use an HTTP header condition to specify the host header. Instead, use a host condition."];
       values: ListOfString.t option
         [@ocaml.doc
-          "One or more strings to compare against the value of the HTTP header. The maximum size of each string is 128 characters. The comparison strings are case insensitive. The following wildcard characters are supported: * (matches 0 or more characters) and ? (matches exactly 1 character). If the same header appears multiple times in the request, we search them in order until a match is found. If you specify multiple strings, the condition is satisfied if one of the strings matches the value of the HTTP header. To require that all of the strings are a match, create one condition per string."]}
+          "The strings to compare against the value of the HTTP header. The maximum length of each string is 128 characters. The comparison strings are case insensitive. The following wildcard characters are supported: * (matches 0 or more characters) and ? (matches exactly 1 character). If the same header appears multiple times in the request, we search them in order until a match is found. If you specify multiple strings, the condition is satisfied if one of the strings matches the value of the HTTP header. To require that all of the strings are a match, create one condition per string."];
+      regexValues: ListOfString.t option
+        [@ocaml.doc
+          "The regular expression to compare against the HTTP header. The maximum length of each string is 128 characters."]}
     let make ?httpHeaderName =
-      fun ?values -> fun () -> { httpHeaderName; values }
+      fun ?values ->
+        fun ?regexValues -> fun () -> { httpHeaderName; values; regexValues }
     let to_value x =
       structure_to_value
         [("HttpHeaderName",
            (Option.map x.httpHeaderName ~f:HttpHeaderConditionName.to_value));
-        ("Values", (Option.map x.values ~f:ListOfString.to_value))]
+        ("Values", (Option.map x.values ~f:ListOfString.to_value));
+        ("RegexValues", (Option.map x.regexValues ~f:ListOfString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let regexValues =
+        (Option.map ~f:ListOfString.of_xml)
+          (Xml.child xml_arg0 "RegexValues") in
       let values =
         (Option.map ~f:ListOfString.of_xml) (Xml.child xml_arg0 "Values") in
       let httpHeaderName =
         (Option.map ~f:HttpHeaderConditionName.of_xml)
           (Xml.child xml_arg0 "HttpHeaderName") in
-      make ?values ?httpHeaderName ()
+      make ?regexValues ?values ?httpHeaderName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" ListOfString.of_json in
+    let of_json json__ =
+      let regexValues = field_map json__ "RegexValues" ListOfString.of_json in
+      let values = field_map json__ "Values" ListOfString.of_json in
       let httpHeaderName =
-        field_map json "HttpHeaderName" HttpHeaderConditionName.of_json in
-      make ?values ?httpHeaderName ()
+        field_map json__ "HttpHeaderName" HttpHeaderConditionName.of_json in
+      make ?regexValues ?values ?httpHeaderName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about an HTTP header condition. There is a set of standard HTTP header fields. You can also define custom HTTP header fields."]
@@ -1581,7 +1939,7 @@ module HttpRequestMethodConditionConfig =
       {
       values: ListOfString.t option
         [@ocaml.doc
-          "The name of the request method. The maximum size is 40 characters. The allowed characters are A-Z, hyphen (-), and underscore (_). The comparison is case sensitive. Wildcards are not supported; therefore, the method name must be an exact match. If you specify multiple strings, the condition is satisfied if one of the strings matches the HTTP request method. We recommend that you route GET and HEAD requests in the same way, because the response to a HEAD request may be cached."]}
+          "The name of the request method. The maximum length is 40 characters. The allowed characters are A-Z, hyphen (-), and underscore (_). The comparison is case sensitive. Wildcards are not supported; therefore, the method name must be an exact match. If you specify multiple strings, the condition is satisfied if one of the strings matches the HTTP request method. We recommend that you route GET and HEAD requests in the same way, because the response to a HEAD request may be cached."]}
     let make ?values = fun () -> { values }
     let to_value x =
       structure_to_value
@@ -1592,8 +1950,8 @@ module HttpRequestMethodConditionConfig =
         (Option.map ~f:ListOfString.of_xml) (Xml.child xml_arg0 "Values") in
       make ?values ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" ListOfString.of_json in
+    let of_json json__ =
+      let values = field_map json__ "Values" ListOfString.of_json in
       make ?values ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1604,20 +1962,28 @@ module PathPatternConditionConfig =
       {
       values: ListOfString.t option
         [@ocaml.doc
-          "One or more path patterns to compare against the request URL. The maximum size of each string is 128 characters. The comparison is case sensitive. The following wildcard characters are supported: * (matches 0 or more characters) and ? (matches exactly 1 character). If you specify multiple strings, the condition is satisfied if one of them matches the request URL. The path pattern is compared only to the path of the URL, not to its query string. To compare against the query string, use QueryStringConditionConfig."]}
-    let make ?values = fun () -> { values }
+          "The path patterns to compare against the request URL. The maximum length of each string is 128 characters. The comparison is case sensitive. The following wildcard characters are supported: * (matches 0 or more characters) and ? (matches exactly 1 character). If you specify multiple strings, the condition is satisfied if one of them matches the request URL. The path pattern is compared only to the path of the URL, not to its query string. To compare against the query string, use a query string condition."];
+      regexValues: ListOfString.t option
+        [@ocaml.doc
+          "The regular expressions to compare against the request URL. The maximum length of each string is 128 characters."]}
+    let make ?values = fun ?regexValues -> fun () -> { values; regexValues }
     let to_value x =
       structure_to_value
-        [("Values", (Option.map x.values ~f:ListOfString.to_value))]
+        [("Values", (Option.map x.values ~f:ListOfString.to_value));
+        ("RegexValues", (Option.map x.regexValues ~f:ListOfString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let regexValues =
+        (Option.map ~f:ListOfString.of_xml)
+          (Xml.child xml_arg0 "RegexValues") in
       let values =
         (Option.map ~f:ListOfString.of_xml) (Xml.child xml_arg0 "Values") in
-      make ?values ()
+      make ?regexValues ?values ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" ListOfString.of_json in
-      make ?values ()
+    let of_json json__ =
+      let regexValues = field_map json__ "RegexValues" ListOfString.of_json in
+      let values = field_map json__ "Values" ListOfString.of_json in
+      make ?regexValues ?values ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a path pattern condition."]
 module QueryStringConditionConfig =
@@ -1626,7 +1992,7 @@ module QueryStringConditionConfig =
       {
       values: QueryStringKeyValuePairList.t option
         [@ocaml.doc
-          "One or more key/value pairs or values to find in the query string. The maximum size of each string is 128 characters. The comparison is case insensitive. The following wildcard characters are supported: * (matches 0 or more characters) and ? (matches exactly 1 character). To search for a literal '*' or '?' character in a query string, you must escape these characters in Values using a '\\' character. If you specify multiple key/value pairs or values, the condition is satisfied if one of them is found in the query string."]}
+          "The key/value pairs or values to find in the query string. The maximum length of each string is 128 characters. The comparison is case insensitive. The following wildcard characters are supported: * (matches 0 or more characters) and ? (matches exactly 1 character). To search for a literal '*' or '?' character in a query string, you must escape these characters in Values using a '\\' character. If you specify multiple key/value pairs or values, the condition is satisfied if one of them is found in the query string."]}
     let make ?values = fun () -> { values }
     let to_value x =
       structure_to_value
@@ -1639,9 +2005,9 @@ module QueryStringConditionConfig =
           (Xml.child xml_arg0 "Values") in
       make ?values ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let values =
-        field_map json "Values" QueryStringKeyValuePairList.of_json in
+        field_map json__ "Values" QueryStringKeyValuePairList.of_json in
       make ?values ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1652,7 +2018,7 @@ module SourceIpConditionConfig =
       {
       values: ListOfString.t option
         [@ocaml.doc
-          "One or more source IP addresses, in CIDR format. You can use both IPv4 and IPv6 addresses. Wildcards are not supported. If you specify multiple addresses, the condition is satisfied if the source IP address of the request matches one of the CIDR blocks. This condition is not satisfied by the addresses in the X-Forwarded-For header. To search for addresses in the X-Forwarded-For header, use HttpHeaderConditionConfig."]}
+          "The source IP addresses, in CIDR format. You can use both IPv4 and IPv6 addresses. Wildcards are not supported. If you specify multiple addresses, the condition is satisfied if the source IP address of the request matches one of the CIDR blocks. This condition is not satisfied by the addresses in the X-Forwarded-For header. To search for addresses in the X-Forwarded-For header, use an HTTP header condition. The total number of values must be less than, or equal to five."]}
     let make ?values = fun () -> { values }
     let to_value x =
       structure_to_value
@@ -1663,12 +2029,86 @@ module SourceIpConditionConfig =
         (Option.map ~f:ListOfString.of_xml) (Xml.child xml_arg0 "Values") in
       make ?values ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" ListOfString.of_json in
+    let of_json json__ =
+      let values = field_map json__ "Values" ListOfString.of_json in
       make ?values ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a source IP condition. You can use this condition to route based on the IP address of the source that connects to the load balancer. If a client is behind a proxy, this is the IP address of the proxy not the IP address of the client."]
+module HostHeaderRewriteConfig =
+  struct
+    type nonrec t =
+      {
+      rewrites: RewriteConfigList.t option
+        [@ocaml.doc
+          "The host header rewrite transform. Each transform consists of a regular expression to match and a replacement string."]}
+    let make ?rewrites = fun () -> { rewrites }
+    let to_value x =
+      structure_to_value
+        [("Rewrites", (Option.map x.rewrites ~f:RewriteConfigList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let rewrites =
+        (Option.map ~f:RewriteConfigList.of_xml)
+          (Xml.child xml_arg0 "Rewrites") in
+      make ?rewrites ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rewrites = field_map json__ "Rewrites" RewriteConfigList.of_json in
+      make ?rewrites ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a host header rewrite transform. This transform matches a pattern in the host header in an HTTP request and replaces it with the specified string."]
+module TransformTypeEnum =
+  struct
+    type nonrec t =
+      | Host_header_rewrite 
+      | Url_rewrite 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Host_header_rewrite -> "host-header-rewrite"
+      | Url_rewrite -> "url-rewrite"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "host-header-rewrite" -> Host_header_rewrite
+      | "url-rewrite" -> Url_rewrite
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TransformTypeEnum" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TransformTypeEnum" j)
+    let to_json = simple_to_json to_value
+  end
+module UrlRewriteConfig =
+  struct
+    type nonrec t =
+      {
+      rewrites: RewriteConfigList.t option
+        [@ocaml.doc
+          "The URL rewrite transform to apply to the request. The transform consists of a regular expression to match and a replacement string."]}
+    let make ?rewrites = fun () -> { rewrites }
+    let to_value x =
+      structure_to_value
+        [("Rewrites", (Option.map x.rewrites ~f:RewriteConfigList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let rewrites =
+        (Option.map ~f:RewriteConfigList.of_xml)
+          (Xml.child xml_arg0 "Rewrites") in
+      make ?rewrites ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rewrites = field_map json__ "Rewrites" RewriteConfigList.of_json in
+      make ?rewrites ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a URL rewrite transform. This transform matches a pattern in the request URL and replaces it with the specified string."]
 module CertificateArn =
   struct
     type nonrec t = string
@@ -1770,6 +2210,9 @@ module LoadBalancerAddresses =
   struct
     type nonrec t = LoadBalancerAddress.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LoadBalancerAddress.to_value)) |>
         (fun x -> `List x)
@@ -1805,6 +2248,35 @@ module OutpostId =
     let of_json j = string_of_json ~kind:"OutpostId" j
     let to_json = simple_to_json to_value
   end
+module SourceNatIpv6Prefixes =
+  struct
+    type nonrec t = SourceNatIpv6Prefix.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SourceNatIpv6Prefix.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SourceNatIpv6Prefix.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SourceNatIpv6Prefixes"
+        ~of_json:SourceNatIpv6Prefix.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module SubnetId =
   struct
     type nonrec t = string
@@ -1838,7 +2310,7 @@ module Action =
       type_: ActionTypeEnum.t [@ocaml.doc "The type of action."];
       targetGroupArn: TargetGroupArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the target group. Specify only when Type is forward and you want to route to a single target group. To route to one or more target groups, use ForwardConfig instead."];
+          "The Amazon Resource Name (ARN) of the target group. Specify only when Type is forward and you want to route to a single target group. To route to multiple target groups, you must use ForwardConfig instead."];
       authenticateOidcConfig: AuthenticateOidcActionConfig.t option
         [@ocaml.doc
           "\\[HTTPS listeners\\] Information about an identity provider that is compliant with OpenID Connect (OIDC). Specify only when Type is authenticate-oidc."];
@@ -1856,7 +2328,10 @@ module Action =
           "\\[Application Load Balancer\\] Information for creating an action that returns a custom HTTP response. Specify only when Type is fixed-response."];
       forwardConfig: ForwardActionConfig.t option
         [@ocaml.doc
-          "Information for creating an action that distributes requests among one or more target groups. For Network Load Balancers, you can specify a single target group. Specify only when Type is forward. If you specify both ForwardConfig and TargetGroupArn, you can specify only one target group using ForwardConfig and it must be the same target group specified in TargetGroupArn."]}
+          "Information for creating an action that distributes requests among multiple target groups. Specify only when Type is forward. If you specify both ForwardConfig and TargetGroupArn, you can specify only one target group using ForwardConfig and it must be the same target group specified in TargetGroupArn."];
+      jwtValidationConfig: JwtValidationActionConfig.t option
+        [@ocaml.doc
+          "\\[HTTPS listeners\\] Information for validating JWT access tokens in client requests. Specify only when Type is jwt-validation."]}
     let context_ = "Action"
     let make ?targetGroupArn =
       fun ?authenticateOidcConfig ->
@@ -1865,18 +2340,20 @@ module Action =
             fun ?redirectConfig ->
               fun ?fixedResponseConfig ->
                 fun ?forwardConfig ->
-                  fun ~type_ ->
-                    fun () ->
-                      {
-                        targetGroupArn;
-                        authenticateOidcConfig;
-                        authenticateCognitoConfig;
-                        order;
-                        redirectConfig;
-                        fixedResponseConfig;
-                        forwardConfig;
-                        type_
-                      }
+                  fun ?jwtValidationConfig ->
+                    fun ~type_ ->
+                      fun () ->
+                        {
+                          targetGroupArn;
+                          authenticateOidcConfig;
+                          authenticateCognitoConfig;
+                          order;
+                          redirectConfig;
+                          fixedResponseConfig;
+                          forwardConfig;
+                          jwtValidationConfig;
+                          type_
+                        }
     let to_value x =
       structure_to_value
         [("Type", (Some (ActionTypeEnum.to_value x.type_)));
@@ -1895,9 +2372,15 @@ module Action =
           (Option.map x.fixedResponseConfig
              ~f:FixedResponseActionConfig.to_value));
         ("ForwardConfig",
-          (Option.map x.forwardConfig ~f:ForwardActionConfig.to_value))]
+          (Option.map x.forwardConfig ~f:ForwardActionConfig.to_value));
+        ("JwtValidationConfig",
+          (Option.map x.jwtValidationConfig
+             ~f:JwtValidationActionConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let jwtValidationConfig =
+        (Option.map ~f:JwtValidationActionConfig.of_xml)
+          (Xml.child xml_arg0 "JwtValidationConfig") in
       let forwardConfig =
         (Option.map ~f:ForwardActionConfig.of_xml)
           (Xml.child xml_arg0 "ForwardConfig") in
@@ -1921,34 +2404,37 @@ module Action =
       let type_ =
         ActionTypeEnum.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
-      make ?forwardConfig ?fixedResponseConfig ?redirectConfig ?order
-        ?authenticateCognitoConfig ?authenticateOidcConfig ?targetGroupArn
-        ~type_ ()
+      make ?jwtValidationConfig ?forwardConfig ?fixedResponseConfig
+        ?redirectConfig ?order ?authenticateCognitoConfig
+        ?authenticateOidcConfig ?targetGroupArn ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let jwtValidationConfig =
+        field_map json__ "JwtValidationConfig"
+          JwtValidationActionConfig.of_json in
       let forwardConfig =
-        field_map json "ForwardConfig" ForwardActionConfig.of_json in
+        field_map json__ "ForwardConfig" ForwardActionConfig.of_json in
       let fixedResponseConfig =
-        field_map json "FixedResponseConfig"
+        field_map json__ "FixedResponseConfig"
           FixedResponseActionConfig.of_json in
       let redirectConfig =
-        field_map json "RedirectConfig" RedirectActionConfig.of_json in
-      let order = field_map json "Order" ActionOrder.of_json in
+        field_map json__ "RedirectConfig" RedirectActionConfig.of_json in
+      let order = field_map json__ "Order" ActionOrder.of_json in
       let authenticateCognitoConfig =
-        field_map json "AuthenticateCognitoConfig"
+        field_map json__ "AuthenticateCognitoConfig"
           AuthenticateCognitoActionConfig.of_json in
       let authenticateOidcConfig =
-        field_map json "AuthenticateOidcConfig"
+        field_map json__ "AuthenticateOidcConfig"
           AuthenticateOidcActionConfig.of_json in
       let targetGroupArn =
-        field_map json "TargetGroupArn" TargetGroupArn.of_json in
-      let type_ = field_map_exn json "Type" ActionTypeEnum.of_json in
-      make ?forwardConfig ?fixedResponseConfig ?redirectConfig ?order
-        ?authenticateCognitoConfig ?authenticateOidcConfig ?targetGroupArn
-        ~type_ ()
+        field_map json__ "TargetGroupArn" TargetGroupArn.of_json in
+      let type_ = field_map_exn json__ "Type" ActionTypeEnum.of_json in
+      make ?jwtValidationConfig ?forwardConfig ?fixedResponseConfig
+        ?redirectConfig ?order ?authenticateCognitoConfig
+        ?authenticateOidcConfig ?targetGroupArn ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about an action. Each rule must include exactly one of the following types of actions: forward, fixed-response, or redirect, and it must be the last action to be performed."]
+       "Information about an action. Each rule must include exactly one of the following routing actions: forward, fixed-response, or redirect, and it must be the last action to be performed. Optionally, a rule for an HTTPS listener can also include one of the following user authentication actions: authenticate-oidc, authenticate-cognito, or jwt-validation."]
 module RuleCondition =
   struct
     type nonrec t =
@@ -1976,7 +2462,10 @@ module RuleCondition =
           "Information for an HTTP method condition. Specify only when Field is http-request-method."];
       sourceIpConfig: SourceIpConditionConfig.t option
         [@ocaml.doc
-          "Information for a source IP condition. Specify only when Field is source-ip."]}
+          "Information for a source IP condition. Specify only when Field is source-ip."];
+      regexValues: ListOfString.t option
+        [@ocaml.doc
+          "The regular expressions to match against the condition field. The maximum length of each string is 128 characters. Specify only when Field is http-header, host-header, or path-pattern."]}
     let make ?field =
       fun ?values ->
         fun ?hostHeaderConfig ->
@@ -1985,17 +2474,19 @@ module RuleCondition =
               fun ?queryStringConfig ->
                 fun ?httpRequestMethodConfig ->
                   fun ?sourceIpConfig ->
-                    fun () ->
-                      {
-                        field;
-                        values;
-                        hostHeaderConfig;
-                        pathPatternConfig;
-                        httpHeaderConfig;
-                        queryStringConfig;
-                        httpRequestMethodConfig;
-                        sourceIpConfig
-                      }
+                    fun ?regexValues ->
+                      fun () ->
+                        {
+                          field;
+                          values;
+                          hostHeaderConfig;
+                          pathPatternConfig;
+                          httpHeaderConfig;
+                          queryStringConfig;
+                          httpRequestMethodConfig;
+                          sourceIpConfig;
+                          regexValues
+                        }
     let to_value x =
       structure_to_value
         [("Field", (Option.map x.field ~f:ConditionFieldName.to_value));
@@ -2016,9 +2507,13 @@ module RuleCondition =
           (Option.map x.httpRequestMethodConfig
              ~f:HttpRequestMethodConditionConfig.to_value));
         ("SourceIpConfig",
-          (Option.map x.sourceIpConfig ~f:SourceIpConditionConfig.to_value))]
+          (Option.map x.sourceIpConfig ~f:SourceIpConditionConfig.to_value));
+        ("RegexValues", (Option.map x.regexValues ~f:ListOfString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let regexValues =
+        (Option.map ~f:ListOfString.of_xml)
+          (Xml.child xml_arg0 "RegexValues") in
       let sourceIpConfig =
         (Option.map ~f:SourceIpConditionConfig.of_xml)
           (Xml.child xml_arg0 "SourceIpConfig") in
@@ -2042,32 +2537,85 @@ module RuleCondition =
       let field =
         (Option.map ~f:ConditionFieldName.of_xml)
           (Xml.child xml_arg0 "Field") in
-      make ?sourceIpConfig ?httpRequestMethodConfig ?queryStringConfig
-        ?httpHeaderConfig ?pathPatternConfig ?hostHeaderConfig ?values ?field
-        ()
+      make ?regexValues ?sourceIpConfig ?httpRequestMethodConfig
+        ?queryStringConfig ?httpHeaderConfig ?pathPatternConfig
+        ?hostHeaderConfig ?values ?field ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let regexValues = field_map json__ "RegexValues" ListOfString.of_json in
       let sourceIpConfig =
-        field_map json "SourceIpConfig" SourceIpConditionConfig.of_json in
+        field_map json__ "SourceIpConfig" SourceIpConditionConfig.of_json in
       let httpRequestMethodConfig =
-        field_map json "HttpRequestMethodConfig"
+        field_map json__ "HttpRequestMethodConfig"
           HttpRequestMethodConditionConfig.of_json in
       let queryStringConfig =
-        field_map json "QueryStringConfig" QueryStringConditionConfig.of_json in
+        field_map json__ "QueryStringConfig"
+          QueryStringConditionConfig.of_json in
       let httpHeaderConfig =
-        field_map json "HttpHeaderConfig" HttpHeaderConditionConfig.of_json in
+        field_map json__ "HttpHeaderConfig" HttpHeaderConditionConfig.of_json in
       let pathPatternConfig =
-        field_map json "PathPatternConfig" PathPatternConditionConfig.of_json in
+        field_map json__ "PathPatternConfig"
+          PathPatternConditionConfig.of_json in
       let hostHeaderConfig =
-        field_map json "HostHeaderConfig" HostHeaderConditionConfig.of_json in
-      let values = field_map json "Values" ListOfString.of_json in
-      let field = field_map json "Field" ConditionFieldName.of_json in
-      make ?sourceIpConfig ?httpRequestMethodConfig ?queryStringConfig
-        ?httpHeaderConfig ?pathPatternConfig ?hostHeaderConfig ?values ?field
-        ()
+        field_map json__ "HostHeaderConfig" HostHeaderConditionConfig.of_json in
+      let values = field_map json__ "Values" ListOfString.of_json in
+      let field = field_map json__ "Field" ConditionFieldName.of_json in
+      make ?regexValues ?sourceIpConfig ?httpRequestMethodConfig
+        ?queryStringConfig ?httpHeaderConfig ?pathPatternConfig
+        ?hostHeaderConfig ?values ?field ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about a condition for a rule. Each rule can optionally include up to one of each of the following conditions: http-request-method, host-header, path-pattern, and source-ip. Each rule can also optionally include one or more of each of the following conditions: http-header and query-string."]
+       "Information about a condition for a rule. Each rule can optionally include up to one of each of the following conditions: http-request-method, host-header, path-pattern, and source-ip. Each rule can also optionally include one or more of each of the following conditions: http-header and query-string. Note that the value for a condition can't be empty. For more information, see Quotas for your Application Load Balancers."]
+module RuleTransform =
+  struct
+    type nonrec t =
+      {
+      type_: TransformTypeEnum.t
+        [@ocaml.doc
+          "The type of transform. host-header-rewrite - Rewrite the host header. url-rewrite - Rewrite the request URL."];
+      hostHeaderRewriteConfig: HostHeaderRewriteConfig.t option
+        [@ocaml.doc
+          "Information about a host header rewrite transform. This transform modifies the host header in an HTTP request. Specify only when Type is host-header-rewrite."];
+      urlRewriteConfig: UrlRewriteConfig.t option
+        [@ocaml.doc
+          "Information about a URL rewrite transform. This transform modifies the request URL. Specify only when Type is url-rewrite."]}
+    let context_ = "RuleTransform"
+    let make ?hostHeaderRewriteConfig =
+      fun ?urlRewriteConfig ->
+        fun ~type_ ->
+          fun () -> { hostHeaderRewriteConfig; urlRewriteConfig; type_ }
+    let to_value x =
+      structure_to_value
+        [("Type", (Some (TransformTypeEnum.to_value x.type_)));
+        ("HostHeaderRewriteConfig",
+          (Option.map x.hostHeaderRewriteConfig
+             ~f:HostHeaderRewriteConfig.to_value));
+        ("UrlRewriteConfig",
+          (Option.map x.urlRewriteConfig ~f:UrlRewriteConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let urlRewriteConfig =
+        (Option.map ~f:UrlRewriteConfig.of_xml)
+          (Xml.child xml_arg0 "UrlRewriteConfig") in
+      let hostHeaderRewriteConfig =
+        (Option.map ~f:HostHeaderRewriteConfig.of_xml)
+          (Xml.child xml_arg0 "HostHeaderRewriteConfig") in
+      let type_ =
+        TransformTypeEnum.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      make ?urlRewriteConfig ?hostHeaderRewriteConfig ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let urlRewriteConfig =
+        field_map json__ "UrlRewriteConfig" UrlRewriteConfig.of_json in
+      let hostHeaderRewriteConfig =
+        field_map json__ "HostHeaderRewriteConfig"
+          HostHeaderRewriteConfig.of_json in
+      let type_ = field_map_exn json__ "Type" TransformTypeEnum.of_json in
+      make ?urlRewriteConfig ?hostHeaderRewriteConfig ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a transform to apply to requests that match a rule. Transforms are applied to requests before they are sent to targets."]
 module LoadBalancerArn =
   struct
     type nonrec t = string
@@ -2145,13 +2693,286 @@ module Certificate =
           (Xml.child xml_arg0 "CertificateArn") in
       make ?isDefault ?certificateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isDefault = field_map json "IsDefault" Default.of_json in
+    let of_json json__ =
+      let isDefault = field_map json__ "IsDefault" Default.of_json in
       let certificateArn =
-        field_map json "CertificateArn" CertificateArn.of_json in
+        field_map json__ "CertificateArn" CertificateArn.of_json in
       make ?isDefault ?certificateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an SSL server certificate."]
+module AdvertiseTrustStoreCaNamesEnum =
+  struct
+    type nonrec t =
+      | On 
+      | Off 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | On -> "on" | Off -> "off" | Non_static_id s -> s
+    let of_string =
+      function | "on" -> On | "off" -> Off | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AdvertiseTrustStoreCaNamesEnum"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AdvertiseTrustStoreCaNamesEnum" j)
+    let to_json = simple_to_json to_value
+  end
+module IgnoreClientCertificateExpiry =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module Mode =
+  struct
+    type nonrec t = string
+    let context_ = "Mode"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Mode" j
+    let to_json = simple_to_json to_value
+  end
+module TrustStoreArn =
+  struct
+    type nonrec t = string
+    let context_ = "TrustStoreArn"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TrustStoreArn" j
+    let to_json = simple_to_json to_value
+  end
+module TrustStoreAssociationStatusEnum =
+  struct
+    type nonrec t =
+      | Active 
+      | Removed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Active -> "active"
+      | Removed -> "removed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "active" -> Active
+      | "removed" -> Removed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TrustStoreAssociationStatusEnum"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"TrustStoreAssociationStatusEnum" j)
+    let to_json = simple_to_json to_value
+  end
+module CapacityReservationStateEnum =
+  struct
+    type nonrec t =
+      | Provisioned 
+      | Pending 
+      | Rebalancing 
+      | Failed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Provisioned -> "provisioned"
+      | Pending -> "pending"
+      | Rebalancing -> "rebalancing"
+      | Failed -> "failed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "provisioned" -> Provisioned
+      | "pending" -> Pending
+      | "rebalancing" -> Rebalancing
+      | "failed" -> Failed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CapacityReservationStateEnum"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CapacityReservationStateEnum" j)
+    let to_json = simple_to_json to_value
+  end
+module StateReason =
+  struct
+    type nonrec t = string
+    let context_ = "StateReason"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StateReason" j
+    let to_json = simple_to_json to_value
+  end
+module Description =
+  struct
+    type nonrec t = string
+    let context_ = "Description"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Description" j
+    let to_json = simple_to_json to_value
+  end
+module TargetAdministrativeOverrideReasonEnum =
+  struct
+    type nonrec t =
+      | AdministrativeOverride_Unknown 
+      | AdministrativeOverride_NoOverride 
+      | AdministrativeOverride_ZonalShiftActive 
+      | AdministrativeOverride_ZonalShiftDelegatedToDns 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AdministrativeOverride_Unknown -> "AdministrativeOverride.Unknown"
+      | AdministrativeOverride_NoOverride ->
+          "AdministrativeOverride.NoOverride"
+      | AdministrativeOverride_ZonalShiftActive ->
+          "AdministrativeOverride.ZonalShiftActive"
+      | AdministrativeOverride_ZonalShiftDelegatedToDns ->
+          "AdministrativeOverride.ZonalShiftDelegatedToDns"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AdministrativeOverride.Unknown" -> AdministrativeOverride_Unknown
+      | "AdministrativeOverride.NoOverride" ->
+          AdministrativeOverride_NoOverride
+      | "AdministrativeOverride.ZonalShiftActive" ->
+          AdministrativeOverride_ZonalShiftActive
+      | "AdministrativeOverride.ZonalShiftDelegatedToDns" ->
+          AdministrativeOverride_ZonalShiftDelegatedToDns
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration TargetAdministrativeOverrideReasonEnum"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"TargetAdministrativeOverrideReasonEnum" j)
+    let to_json = simple_to_json to_value
+  end
+module TargetAdministrativeOverrideStateEnum =
+  struct
+    type nonrec t =
+      | Unknown 
+      | No_override 
+      | Zonal_shift_active 
+      | Zonal_shift_delegated_to_dns 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Unknown -> "unknown"
+      | No_override -> "no_override"
+      | Zonal_shift_active -> "zonal_shift_active"
+      | Zonal_shift_delegated_to_dns -> "zonal_shift_delegated_to_dns"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "unknown" -> Unknown
+      | "no_override" -> No_override
+      | "zonal_shift_active" -> Zonal_shift_active
+      | "zonal_shift_delegated_to_dns" -> Zonal_shift_delegated_to_dns
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration TargetAdministrativeOverrideStateEnum" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"TargetAdministrativeOverrideStateEnum" j)
+    let to_json = simple_to_json to_value
+  end
+module AnomalyResultEnum =
+  struct
+    type nonrec t =
+      | Anomalous 
+      | Normal 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Anomalous -> "anomalous"
+      | Normal -> "normal"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "anomalous" -> Anomalous
+      | "normal" -> Normal
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AnomalyResultEnum" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AnomalyResultEnum" j)
+    let to_json = simple_to_json to_value
+  end
+module MitigationInEffectEnum =
+  struct
+    type nonrec t =
+      | Yes 
+      | No 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Yes -> "yes" | No -> "no" | Non_static_id s -> s
+    let of_string =
+      function | "yes" -> Yes | "no" -> No | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MitigationInEffectEnum" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MitigationInEffectEnum" j)
+    let to_json = simple_to_json to_value
+  end
 module Port =
   struct
     type nonrec t = int
@@ -2170,6 +2991,24 @@ module Port =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module QuicServerId =
+  struct
+    type nonrec t = string
+    let context_ = "QuicServerId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QuicServerId" j
+    let to_json = simple_to_json to_value
+  end
 module TargetId =
   struct
     type nonrec t = string
@@ -2181,19 +3020,6 @@ module TargetId =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TargetId" j
-    let to_json = simple_to_json to_value
-  end
-module Description =
-  struct
-    type nonrec t = string
-    let context_ = "Description"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Description" j
     let to_json = simple_to_json to_value
   end
 module TargetHealthReasonEnum =
@@ -2259,6 +3085,7 @@ module TargetHealthStateEnum =
       | Initial 
       | Healthy 
       | Unhealthy 
+      | Unhealthy_draining 
       | Unused 
       | Draining 
       | Unavailable 
@@ -2269,6 +3096,7 @@ module TargetHealthStateEnum =
       | Initial -> "initial"
       | Healthy -> "healthy"
       | Unhealthy -> "unhealthy"
+      | Unhealthy_draining -> "unhealthy.draining"
       | Unused -> "unused"
       | Draining -> "draining"
       | Unavailable -> "unavailable"
@@ -2278,6 +3106,7 @@ module TargetHealthStateEnum =
       | "initial" -> Initial
       | "healthy" -> Healthy
       | "unhealthy" -> Unhealthy
+      | "unhealthy.draining" -> Unhealthy_draining
       | "unused" -> Unused
       | "draining" -> Draining
       | "unavailable" -> Unavailable
@@ -2312,9 +3141,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a tag."]
@@ -2338,9 +3167,9 @@ module Cipher =
         (Option.map ~f:CipherName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?priority ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let priority = field_map json "Priority" CipherPriority.of_json in
-      let name = field_map json "Name" CipherName.of_json in
+    let of_json json__ =
+      let priority = field_map json__ "Priority" CipherPriority.of_json in
+      let name = field_map json__ "Name" CipherName.of_json in
       make ?priority ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a cipher used in a policy."]
@@ -2371,13 +3200,23 @@ module AvailabilityZone =
           "\\[Application Load Balancers on Outposts\\] The ID of the Outpost."];
       loadBalancerAddresses: LoadBalancerAddresses.t option
         [@ocaml.doc
-          "\\[Network Load Balancers\\] If you need static IP addresses for your load balancer, you can specify one Elastic IP address per Availability Zone when you create an internal-facing load balancer. For internal load balancers, you can specify a private IP address from the IPv4 range of the subnet."]}
+          "\\[Network Load Balancers\\] If you need static IP addresses for your load balancer, you can specify one Elastic IP address per Availability Zone when you create an internal-facing load balancer. For internal load balancers, you can specify a private IP address from the IPv4 range of the subnet."];
+      sourceNatIpv6Prefixes: SourceNatIpv6Prefixes.t option
+        [@ocaml.doc
+          "\\[Network Load Balancers with UDP listeners\\] The IPv6 prefixes to use for source NAT. For each subnet, specify an IPv6 prefix (/80 netmask) from the subnet CIDR block or auto_assigned to use an IPv6 prefix selected at random from the subnet CIDR block."]}
     let make ?zoneName =
       fun ?subnetId ->
         fun ?outpostId ->
           fun ?loadBalancerAddresses ->
-            fun () ->
-              { zoneName; subnetId; outpostId; loadBalancerAddresses }
+            fun ?sourceNatIpv6Prefixes ->
+              fun () ->
+                {
+                  zoneName;
+                  subnetId;
+                  outpostId;
+                  loadBalancerAddresses;
+                  sourceNatIpv6Prefixes
+                }
     let to_value x =
       structure_to_value
         [("ZoneName", (Option.map x.zoneName ~f:ZoneName.to_value));
@@ -2385,9 +3224,15 @@ module AvailabilityZone =
         ("OutpostId", (Option.map x.outpostId ~f:OutpostId.to_value));
         ("LoadBalancerAddresses",
           (Option.map x.loadBalancerAddresses
-             ~f:LoadBalancerAddresses.to_value))]
+             ~f:LoadBalancerAddresses.to_value));
+        ("SourceNatIpv6Prefixes",
+          (Option.map x.sourceNatIpv6Prefixes
+             ~f:SourceNatIpv6Prefixes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sourceNatIpv6Prefixes =
+        (Option.map ~f:SourceNatIpv6Prefixes.of_xml)
+          (Xml.child xml_arg0 "SourceNatIpv6Prefixes") in
       let loadBalancerAddresses =
         (Option.map ~f:LoadBalancerAddresses.of_xml)
           (Xml.child xml_arg0 "LoadBalancerAddresses") in
@@ -2397,17 +3242,41 @@ module AvailabilityZone =
         (Option.map ~f:SubnetId.of_xml) (Xml.child xml_arg0 "SubnetId") in
       let zoneName =
         (Option.map ~f:ZoneName.of_xml) (Xml.child xml_arg0 "ZoneName") in
-      make ?loadBalancerAddresses ?outpostId ?subnetId ?zoneName ()
+      make ?sourceNatIpv6Prefixes ?loadBalancerAddresses ?outpostId ?subnetId
+        ?zoneName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let sourceNatIpv6Prefixes =
+        field_map json__ "SourceNatIpv6Prefixes"
+          SourceNatIpv6Prefixes.of_json in
       let loadBalancerAddresses =
-        field_map json "LoadBalancerAddresses" LoadBalancerAddresses.of_json in
-      let outpostId = field_map json "OutpostId" OutpostId.of_json in
-      let subnetId = field_map json "SubnetId" SubnetId.of_json in
-      let zoneName = field_map json "ZoneName" ZoneName.of_json in
-      make ?loadBalancerAddresses ?outpostId ?subnetId ?zoneName ()
+        field_map json__ "LoadBalancerAddresses"
+          LoadBalancerAddresses.of_json in
+      let outpostId = field_map json__ "OutpostId" OutpostId.of_json in
+      let subnetId = field_map json__ "SubnetId" SubnetId.of_json in
+      let zoneName = field_map json__ "ZoneName" ZoneName.of_json in
+      make ?sourceNatIpv6Prefixes ?loadBalancerAddresses ?outpostId ?subnetId
+        ?zoneName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an Availability Zone."]
+module IpamPoolId =
+  struct
+    type nonrec t = string
+    let context_ = "IpamPoolId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1000) >>=
+             (fun () -> check_pattern i ~pattern:"^(ipam-pool-)[a-zA-Z0-9]+$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IpamPoolId" j
+    let to_json = simple_to_json to_value
+  end
 module LoadBalancerStateEnum =
   struct
     type nonrec t =
@@ -2441,19 +3310,6 @@ module LoadBalancerStateEnum =
       of_string (string_of_json ~kind:"LoadBalancerStateEnum" j)
     let to_json = simple_to_json to_value
   end
-module StateReason =
-  struct
-    type nonrec t = string
-    let context_ = "StateReason"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"StateReason" j
-    let to_json = simple_to_json to_value
-  end
 module SecurityGroupId =
   struct
     type nonrec t = string
@@ -2471,6 +3327,9 @@ module Actions =
   struct
     type nonrec t = Action.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Action.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2520,6 +3379,9 @@ module RuleConditionList =
   struct
     type nonrec t = RuleCondition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RuleCondition.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2538,6 +3400,33 @@ module RuleConditionList =
                      | _ -> true))) ~f:RuleCondition.of_xml)
     let of_json j =
       list_of_json ~kind:"RuleConditionList" ~of_json:RuleCondition.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RuleTransformList =
+  struct
+    type nonrec t = RuleTransform.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RuleTransform.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RuleTransform.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RuleTransformList" ~of_json:RuleTransform.of_json j
     let to_json v = composed_to_json to_value v
   end
 module String_ =
@@ -2570,6 +3459,80 @@ module RulePriority =
       Int.of_string
         (string_of_xml ~kind:"an integer for RulePriority" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module NumberOfCaCertificates =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NumberOfCaCertificates" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module TotalRevokedEntries =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module TrustStoreName =
+  struct
+    type nonrec t = string
+    let context_ = "TrustStoreName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:32) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([a-zA-Z0-9]+-)*[a-zA-Z0-9]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TrustStoreName" j
+    let to_json = simple_to_json to_value
+  end
+module TrustStoreStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | CREATING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | CREATING -> "CREATING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "CREATING" -> CREATING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TrustStoreStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TrustStoreStatus" j)
     let to_json = simple_to_json to_value
   end
 module HealthCheckEnabled =
@@ -2659,6 +3622,9 @@ module LoadBalancerArns =
   struct
     type nonrec t = LoadBalancerArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LoadBalancerArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2686,7 +3652,7 @@ module Matcher =
       {
       httpCode: HttpCode.t option
         [@ocaml.doc
-          "For Application Load Balancers, you can specify values between 200 and 499, and the default value is 200. You can specify multiple values (for example, \"200,202\") or a range of values (for example, \"200-299\"). For Network Load Balancers and Gateway Load Balancers, this must be \"200\226\128\147399\". Note that when using shorthand syntax, some values such as commas need to be escaped."];
+          "For Application Load Balancers, you can specify values between 200 and 499, with the default value being 200. You can specify multiple values (for example, \"200,202\") or a range of values (for example, \"200-299\"). For Network Load Balancers, you can specify values between 200 and 599, with the default value being 200-399. You can specify multiple values (for example, \"200,202\") or a range of values (for example, \"200-299\"). For Gateway Load Balancers, this must be \"200\226\128\147399\". Note that when using shorthand syntax, some values such as commas need to be escaped."];
       grpcCode: GrpcCode.t option
         [@ocaml.doc
           "You can specify values between 0 and 99. You can specify multiple values (for example, \"0,1\") or a range of values (for example, \"0-5\"). The default value is 12."]}
@@ -2703,9 +3669,9 @@ module Matcher =
         (Option.map ~f:HttpCode.of_xml) (Xml.child xml_arg0 "HttpCode") in
       make ?grpcCode ?httpCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let grpcCode = field_map json "GrpcCode" GrpcCode.of_json in
-      let httpCode = field_map json "HttpCode" HttpCode.of_json in
+    let of_json json__ =
+      let grpcCode = field_map json__ "GrpcCode" GrpcCode.of_json in
+      let httpCode = field_map json__ "HttpCode" HttpCode.of_json in
       make ?grpcCode ?httpCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2738,6 +3704,8 @@ module ProtocolEnum =
       | UDP 
       | TCP_UDP 
       | GENEVE 
+      | QUIC 
+      | TCP_QUIC 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2749,6 +3717,8 @@ module ProtocolEnum =
       | UDP -> "UDP"
       | TCP_UDP -> "TCP_UDP"
       | GENEVE -> "GENEVE"
+      | QUIC -> "QUIC"
+      | TCP_QUIC -> "TCP_QUIC"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2759,6 +3729,8 @@ module ProtocolEnum =
       | "UDP" -> UDP
       | "TCP_UDP" -> TCP_UDP
       | "GENEVE" -> GENEVE
+      | "QUIC" -> QUIC
+      | "TCP_QUIC" -> TCP_QUIC
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2779,6 +3751,25 @@ module ProtocolVersion =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ProtocolVersion" j
+    let to_json = simple_to_json to_value
+  end
+module TargetControlPort =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:65535) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for TargetControlPort" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module TargetGroupIpAddressTypeEnum =
@@ -2927,6 +3918,9 @@ module AlpnPolicyName =
   struct
     type nonrec t = AlpnPolicyValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AlpnPolicyValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2951,6 +3945,9 @@ module CertificateList =
   struct
     type nonrec t = Certificate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Certificate.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2984,6 +3981,86 @@ module ListenerArn =
     let of_json j = string_of_json ~kind:"ListenerArn" j
     let to_json = simple_to_json to_value
   end
+module MutualAuthenticationAttributes =
+  struct
+    type nonrec t =
+      {
+      mode: Mode.t option
+        [@ocaml.doc
+          "The client certificate handling method. Options are off, passthrough or verify. The default value is off."];
+      trustStoreArn: TrustStoreArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the trust store."];
+      ignoreClientCertificateExpiry: IgnoreClientCertificateExpiry.t option
+        [@ocaml.doc
+          "Indicates whether expired client certificates are ignored."];
+      trustStoreAssociationStatus: TrustStoreAssociationStatusEnum.t option
+        [@ocaml.doc "Indicates a shared trust stores association status."];
+      advertiseTrustStoreCaNames: AdvertiseTrustStoreCaNamesEnum.t option
+        [@ocaml.doc
+          "Indicates whether trust store CA certificate names are advertised."]}
+    let make ?mode =
+      fun ?trustStoreArn ->
+        fun ?ignoreClientCertificateExpiry ->
+          fun ?trustStoreAssociationStatus ->
+            fun ?advertiseTrustStoreCaNames ->
+              fun () ->
+                {
+                  mode;
+                  trustStoreArn;
+                  ignoreClientCertificateExpiry;
+                  trustStoreAssociationStatus;
+                  advertiseTrustStoreCaNames
+                }
+    let to_value x =
+      structure_to_value
+        [("Mode", (Option.map x.mode ~f:Mode.to_value));
+        ("TrustStoreArn",
+          (Option.map x.trustStoreArn ~f:TrustStoreArn.to_value));
+        ("IgnoreClientCertificateExpiry",
+          (Option.map x.ignoreClientCertificateExpiry
+             ~f:IgnoreClientCertificateExpiry.to_value));
+        ("TrustStoreAssociationStatus",
+          (Option.map x.trustStoreAssociationStatus
+             ~f:TrustStoreAssociationStatusEnum.to_value));
+        ("AdvertiseTrustStoreCaNames",
+          (Option.map x.advertiseTrustStoreCaNames
+             ~f:AdvertiseTrustStoreCaNamesEnum.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let advertiseTrustStoreCaNames =
+        (Option.map ~f:AdvertiseTrustStoreCaNamesEnum.of_xml)
+          (Xml.child xml_arg0 "AdvertiseTrustStoreCaNames") in
+      let trustStoreAssociationStatus =
+        (Option.map ~f:TrustStoreAssociationStatusEnum.of_xml)
+          (Xml.child xml_arg0 "TrustStoreAssociationStatus") in
+      let ignoreClientCertificateExpiry =
+        (Option.map ~f:IgnoreClientCertificateExpiry.of_xml)
+          (Xml.child xml_arg0 "IgnoreClientCertificateExpiry") in
+      let trustStoreArn =
+        (Option.map ~f:TrustStoreArn.of_xml)
+          (Xml.child xml_arg0 "TrustStoreArn") in
+      let mode = (Option.map ~f:Mode.of_xml) (Xml.child xml_arg0 "Mode") in
+      make ?advertiseTrustStoreCaNames ?trustStoreAssociationStatus
+        ?ignoreClientCertificateExpiry ?trustStoreArn ?mode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let advertiseTrustStoreCaNames =
+        field_map json__ "AdvertiseTrustStoreCaNames"
+          AdvertiseTrustStoreCaNamesEnum.of_json in
+      let trustStoreAssociationStatus =
+        field_map json__ "TrustStoreAssociationStatus"
+          TrustStoreAssociationStatusEnum.of_json in
+      let ignoreClientCertificateExpiry =
+        field_map json__ "IgnoreClientCertificateExpiry"
+          IgnoreClientCertificateExpiry.of_json in
+      let trustStoreArn =
+        field_map json__ "TrustStoreArn" TrustStoreArn.of_json in
+      let mode = field_map json__ "Mode" Mode.of_json in
+      make ?advertiseTrustStoreCaNames ?trustStoreAssociationStatus
+        ?ignoreClientCertificateExpiry ?trustStoreArn ?mode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the mutual authentication attributes of a listener."]
 module SslPolicyName =
   struct
     type nonrec t = string
@@ -2997,6 +4074,213 @@ module SslPolicyName =
     let of_json j = string_of_json ~kind:"SslPolicyName" j
     let to_json = simple_to_json to_value
   end
+module ListenerAttributeKey =
+  struct
+    type nonrec t = string
+    let context_ = "ListenerAttributeKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9._]+$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ListenerAttributeKey" j
+    let to_json = simple_to_json to_value
+  end
+module ListenerAttributeValue =
+  struct
+    type nonrec t = string
+    let context_ = "ListenerAttributeValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ListenerAttributeValue" j
+    let to_json = simple_to_json to_value
+  end
+module CapacityReservationStatus =
+  struct
+    type nonrec t =
+      {
+      code: CapacityReservationStateEnum.t option
+        [@ocaml.doc "The status code."];
+      reason: StateReason.t option
+        [@ocaml.doc "The reason code for the status."]}
+    let make ?code = fun ?reason -> fun () -> { code; reason }
+    let to_value x =
+      structure_to_value
+        [("Code",
+           (Option.map x.code ~f:CapacityReservationStateEnum.to_value));
+        ("Reason", (Option.map x.reason ~f:StateReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:StateReason.of_xml) (Xml.child xml_arg0 "Reason") in
+      let code =
+        (Option.map ~f:CapacityReservationStateEnum.of_xml)
+          (Xml.child xml_arg0 "Code") in
+      make ?reason ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "Reason" StateReason.of_json in
+      let code = field_map json__ "Code" CapacityReservationStateEnum.of_json in
+      make ?reason ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The status of a capacity reservation."]
+module CapacityUnitsDouble =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module NumberOfRevokedEntries =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module RevocationId =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module RevocationType =
+  struct
+    type nonrec t =
+      | CRL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | CRL -> "CRL" | Non_static_id s -> s
+    let of_string = function | "CRL" -> CRL | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RevocationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RevocationType" j)
+    let to_json = simple_to_json to_value
+  end
+module TrustStoreAssociationResourceArn =
+  struct
+    type nonrec t = string
+    let context_ = "TrustStoreAssociationResourceArn"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TrustStoreAssociationResourceArn" j
+    let to_json = simple_to_json to_value
+  end
+module AdministrativeOverride =
+  struct
+    type nonrec t =
+      {
+      state: TargetAdministrativeOverrideStateEnum.t option
+        [@ocaml.doc "The state of the override."];
+      reason: TargetAdministrativeOverrideReasonEnum.t option
+        [@ocaml.doc "The reason code for the state."];
+      description: Description.t option
+        [@ocaml.doc
+          "A description of the override state that provides additional details."]}
+    let make ?state =
+      fun ?reason ->
+        fun ?description -> fun () -> { state; reason; description }
+    let to_value x =
+      structure_to_value
+        [("State",
+           (Option.map x.state
+              ~f:TargetAdministrativeOverrideStateEnum.to_value));
+        ("Reason",
+          (Option.map x.reason
+             ~f:TargetAdministrativeOverrideReasonEnum.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let reason =
+        (Option.map ~f:TargetAdministrativeOverrideReasonEnum.of_xml)
+          (Xml.child xml_arg0 "Reason") in
+      let state =
+        (Option.map ~f:TargetAdministrativeOverrideStateEnum.of_xml)
+          (Xml.child xml_arg0 "State") in
+      make ?description ?reason ?state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description = field_map json__ "Description" Description.of_json in
+      let reason =
+        field_map json__ "Reason"
+          TargetAdministrativeOverrideReasonEnum.of_json in
+      let state =
+        field_map json__ "State"
+          TargetAdministrativeOverrideStateEnum.of_json in
+      make ?description ?reason ?state ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the override status applied to a target."]
+module AnomalyDetection =
+  struct
+    type nonrec t =
+      {
+      result: AnomalyResultEnum.t option
+        [@ocaml.doc "The latest anomaly detection result."];
+      mitigationInEffect: MitigationInEffectEnum.t option
+        [@ocaml.doc "Indicates whether anomaly mitigation is in progress."]}
+    let make ?result =
+      fun ?mitigationInEffect -> fun () -> { result; mitigationInEffect }
+    let to_value x =
+      structure_to_value
+        [("Result", (Option.map x.result ~f:AnomalyResultEnum.to_value));
+        ("MitigationInEffect",
+          (Option.map x.mitigationInEffect ~f:MitigationInEffectEnum.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mitigationInEffect =
+        (Option.map ~f:MitigationInEffectEnum.of_xml)
+          (Xml.child xml_arg0 "MitigationInEffect") in
+      let result =
+        (Option.map ~f:AnomalyResultEnum.of_xml)
+          (Xml.child xml_arg0 "Result_") in
+      make ?mitigationInEffect ?result ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mitigationInEffect =
+        field_map json__ "MitigationInEffect" MitigationInEffectEnum.of_json in
+      let result = field_map json__ "Result" AnomalyResultEnum.of_json in
+      make ?mitigationInEffect ?result ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about anomaly detection and mitigation."]
 module TargetDescription =
   struct
     type nonrec t =
@@ -3006,36 +4290,46 @@ module TargetDescription =
           "The ID of the target. If the target type of the target group is instance, specify an instance ID. If the target type is ip, specify an IP address. If the target type is lambda, specify the ARN of the Lambda function. If the target type is alb, specify the ARN of the Application Load Balancer target."];
       port: Port.t option
         [@ocaml.doc
-          "The port on which the target is listening. If the target group protocol is GENEVE, the supported port is 6081. If the target type is alb, the targeted Application Load Balancer must have at least one listener whose port matches the target group port. Not used if the target is a Lambda function."];
+          "The port on which the target is listening. If the target group protocol is GENEVE, the supported port is 6081. If the target type is alb, the targeted Application Load Balancer must have at least one listener whose port matches the target group port. This parameter is not used if the target is a Lambda function."];
       availabilityZone: ZoneName.t option
         [@ocaml.doc
-          "An Availability Zone or all. This determines whether the target receives traffic from the load balancer nodes in the specified Availability Zone or from all enabled Availability Zones for the load balancer. This parameter is not supported if the target type of the target group is instance or alb. If the target type is ip and the IP address is in a subnet of the VPC for the target group, the Availability Zone is automatically detected and this parameter is optional. If the IP address is outside the VPC, this parameter is required. With an Application Load Balancer, if the target type is ip and the IP address is outside the VPC for the target group, the only supported value is all. If the target type is lambda, this parameter is optional and the only supported value is all."]}
+          "An Availability Zone or all. This determines whether the target receives traffic from the load balancer nodes in the specified Availability Zone or from all enabled Availability Zones for the load balancer. For Application Load Balancer target groups, the specified Availability Zone value is only applicable when cross-zone load balancing is off. Otherwise the parameter is ignored and treated as all. This parameter is not supported if the target type of the target group is instance or alb. If the target type is ip and the IP address is in a subnet of the VPC for the target group, the Availability Zone is automatically detected and this parameter is optional. If the IP address is outside the VPC, this parameter is required. For Application Load Balancer target groups with cross-zone load balancing off, if the target type is ip and the IP address is outside of the VPC for the target group, this should be an Availability Zone inside the VPC for the target group. If the target type is lambda, this parameter is optional and the only supported value is all."];
+      quicServerId: QuicServerId.t option
+        [@ocaml.doc
+          "The server ID for the targets. This value is required if the protocol is QUIC or TCP_QUIC and can't be used with other protocols. The ID consists of the 0x prefix followed by 16 hexadecimal characters. Any letters must be lowercase. The value must be unique at the listener level. You can't modify the server ID for a registered target. You must deregister the target and then provide a new server ID when you register the target again."]}
     let context_ = "TargetDescription"
     let make ?port =
       fun ?availabilityZone ->
-        fun ~id -> fun () -> { port; availabilityZone; id }
+        fun ?quicServerId ->
+          fun ~id -> fun () -> { port; availabilityZone; quicServerId; id }
     let to_value x =
       structure_to_value
         [("Id", (Some (TargetId.to_value x.id)));
         ("Port", (Option.map x.port ~f:Port.to_value));
         ("AvailabilityZone",
-          (Option.map x.availabilityZone ~f:ZoneName.to_value))]
+          (Option.map x.availabilityZone ~f:ZoneName.to_value));
+        ("QuicServerId",
+          (Option.map x.quicServerId ~f:QuicServerId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let quicServerId =
+        (Option.map ~f:QuicServerId.of_xml)
+          (Xml.child xml_arg0 "QuicServerId") in
       let availabilityZone =
         (Option.map ~f:ZoneName.of_xml)
           (Xml.child xml_arg0 "AvailabilityZone") in
       let port = (Option.map ~f:Port.of_xml) (Xml.child xml_arg0 "Port") in
       let id =
         TargetId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ?availabilityZone ?port ~id ()
+      make ?quicServerId ?availabilityZone ?port ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let quicServerId = field_map json__ "QuicServerId" QuicServerId.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" ZoneName.of_json in
-      let port = field_map json "Port" Port.of_json in
-      let id = field_map_exn json "Id" TargetId.of_json in
-      make ?availabilityZone ?port ~id ()
+        field_map json__ "AvailabilityZone" ZoneName.of_json in
+      let port = field_map json__ "Port" Port.of_json in
+      let id = field_map_exn json__ "Id" TargetId.of_json in
+      make ?quicServerId ?availabilityZone ?port ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a target."]
 module TargetHealth =
@@ -3046,7 +4340,7 @@ module TargetHealth =
         [@ocaml.doc "The state of the target."];
       reason: TargetHealthReasonEnum.t option
         [@ocaml.doc
-          "The reason code. If the target state is healthy, a reason code is not provided. If the target state is initial, the reason code can be one of the following values: Elb.RegistrationInProgress - The target is in the process of being registered with the load balancer. Elb.InitialHealthChecking - The load balancer is still sending the target the minimum number of health checks required to determine its health status. If the target state is unhealthy, the reason code can be one of the following values: Target.ResponseCodeMismatch - The health checks did not return an expected HTTP code. Applies only to Application Load Balancers and Gateway Load Balancers. Target.Timeout - The health check requests timed out. Applies only to Application Load Balancers and Gateway Load Balancers. Target.FailedHealthChecks - The load balancer received an error while establishing a connection to the target or the target response was malformed. Elb.InternalError - The health checks failed due to an internal error. Applies only to Application Load Balancers. If the target state is unused, the reason code can be one of the following values: Target.NotRegistered - The target is not registered with the target group. Target.NotInUse - The target group is not used by any load balancer or the target is in an Availability Zone that is not enabled for its load balancer. Target.InvalidState - The target is in the stopped or terminated state. Target.IpUnusable - The target IP address is reserved for use by a load balancer. If the target state is draining, the reason code can be the following value: Target.DeregistrationInProgress - The target is in the process of being deregistered and the deregistration delay period has not expired. If the target state is unavailable, the reason code can be the following value: Target.HealthCheckDisabled - Health checks are disabled for the target group. Applies only to Application Load Balancers. Elb.InternalError - Target health is unavailable due to an internal error. Applies only to Network Load Balancers."];
+          "The reason code. If the target state is healthy, a reason code is not provided. If the target state is initial, the reason code can be one of the following values: Elb.RegistrationInProgress - The target is in the process of being registered with the load balancer. Elb.InitialHealthChecking - The load balancer is still sending the target the minimum number of health checks required to determine its health status. If the target state is unhealthy, the reason code can be one of the following values: Target.ResponseCodeMismatch - The health checks did not return an expected HTTP code. Target.Timeout - The health check requests timed out. Target.FailedHealthChecks - The load balancer received an error while establishing a connection to the target or the target response was malformed. Elb.InternalError - The health checks failed due to an internal error. If the target state is unused, the reason code can be one of the following values: Target.NotRegistered - The target is not registered with the target group. Target.NotInUse - The target group is not used by any load balancer or the target is in an Availability Zone that is not enabled for its load balancer. Target.InvalidState - The target is in the stopped or terminated state. Target.IpUnusable - The target IP address is reserved for use by a load balancer. If the target state is draining, the reason code can be the following value: Target.DeregistrationInProgress - The target is in the process of being deregistered and the deregistration delay period has not expired. If the target state is unavailable, the reason code can be the following value: Target.HealthCheckDisabled - Health checks are disabled for the target group. Elb.InternalError - Target health is unavailable due to an internal error."];
       description: Description.t option
         [@ocaml.doc
           "A description of the target health that provides additional details. If the state is healthy, a description is not provided."]}
@@ -3070,10 +4364,10 @@ module TargetHealth =
           (Xml.child xml_arg0 "State") in
       make ?description ?reason ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" Description.of_json in
-      let reason = field_map json "Reason" TargetHealthReasonEnum.of_json in
-      let state = field_map json "State" TargetHealthStateEnum.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" Description.of_json in
+      let reason = field_map json__ "Reason" TargetHealthReasonEnum.of_json in
+      let state = field_map json__ "State" TargetHealthStateEnum.of_json in
       make ?description ?reason ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the current health of a target."]
@@ -3095,6 +4389,9 @@ module TagList =
     type nonrec t = Tag.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3118,6 +4415,9 @@ module Ciphers =
   struct
     type nonrec t = Cipher.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Cipher.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3141,6 +4441,9 @@ module SslProtocols =
   struct
     type nonrec t = SslProtocol.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SslProtocol.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3165,6 +4468,9 @@ module AvailabilityZones =
   struct
     type nonrec t = AvailabilityZone.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AvailabilityZone.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3243,22 +4549,62 @@ module DNSName =
     let of_json j = string_of_json ~kind:"DNSName" j
     let to_json = simple_to_json to_value
   end
+module EnablePrefixForIpv6SourceNatEnum =
+  struct
+    type nonrec t =
+      | On 
+      | Off 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | On -> "on" | Off -> "off" | Non_static_id s -> s
+    let of_string =
+      function | "on" -> On | "off" -> Off | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EnablePrefixForIpv6SourceNatEnum"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EnablePrefixForIpv6SourceNatEnum" j)
+    let to_json = simple_to_json to_value
+  end
+module EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic =
+  struct
+    type nonrec t = string
+    let context_ = "EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json
+        ~kind:"EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic" j
+    let to_json = simple_to_json to_value
+  end
 module IpAddressType =
   struct
     type nonrec t =
       | Ipv4 
       | Dualstack 
+      | Dualstack_without_public_ipv4 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | Ipv4 -> "ipv4"
       | Dualstack -> "dualstack"
+      | Dualstack_without_public_ipv4 -> "dualstack-without-public-ipv4"
       | Non_static_id s -> s
     let of_string =
       function
       | "ipv4" -> Ipv4
       | "dualstack" -> Dualstack
+      | "dualstack-without-public-ipv4" -> Dualstack_without_public_ipv4
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3268,6 +4614,31 @@ module IpAddressType =
     let of_json j = of_string (string_of_json ~kind:"IpAddressType" j)
     let to_json = simple_to_json to_value
   end
+module IpamPools =
+  struct
+    type nonrec t =
+      {
+      ipv4IpamPoolId: IpamPoolId.t option
+        [@ocaml.doc "The ID of the IPv4 IPAM pool."]}
+    let make ?ipv4IpamPoolId = fun () -> { ipv4IpamPoolId }
+    let to_value x =
+      structure_to_value
+        [("Ipv4IpamPoolId",
+           (Option.map x.ipv4IpamPoolId ~f:IpamPoolId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipv4IpamPoolId =
+        (Option.map ~f:IpamPoolId.of_xml)
+          (Xml.child xml_arg0 "Ipv4IpamPoolId") in
+      make ?ipv4IpamPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipv4IpamPoolId =
+        field_map json__ "Ipv4IpamPoolId" IpamPoolId.of_json in
+      make ?ipv4IpamPoolId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An IPAM pool is a collection of IP address CIDRs. IPAM pools enable you to organize your IP addresses according to your routing and security needs."]
 module LoadBalancerName =
   struct
     type nonrec t = string
@@ -3330,9 +4701,9 @@ module LoadBalancerState =
           (Xml.child xml_arg0 "Code") in
       make ?reason ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "Reason" StateReason.of_json in
-      let code = field_map json "Code" LoadBalancerStateEnum.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "Reason" StateReason.of_json in
+      let code = field_map json__ "Code" LoadBalancerStateEnum.of_json in
       make ?reason ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the state of the load balancer."]
@@ -3369,6 +4740,9 @@ module SecurityGroups =
   struct
     type nonrec t = SecurityGroupId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3415,6 +4789,45 @@ module Name =
     let of_json j = string_of_json ~kind:"Name" j
     let to_json = simple_to_json to_value
   end
+module S3Bucket =
+  struct
+    type nonrec t = string
+    let context_ = "S3Bucket"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3Bucket" j
+    let to_json = simple_to_json to_value
+  end
+module S3Key =
+  struct
+    type nonrec t = string
+    let context_ = "S3Key"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3Key" j
+    let to_json = simple_to_json to_value
+  end
+module S3ObjectVersion =
+  struct
+    type nonrec t = string
+    let context_ = "S3ObjectVersion"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3ObjectVersion" j
+    let to_json = simple_to_json to_value
+  end
 module SubnetMapping =
   struct
     type nonrec t =
@@ -3427,13 +4840,23 @@ module SubnetMapping =
         [@ocaml.doc
           "\\[Network Load Balancers\\] The private IPv4 address for an internal load balancer."];
       iPv6Address: IPv6Address.t option
-        [@ocaml.doc "\\[Network Load Balancers\\] The IPv6 address."]}
+        [@ocaml.doc "\\[Network Load Balancers\\] The IPv6 address."];
+      sourceNatIpv6Prefix: SourceNatIpv6Prefix.t option
+        [@ocaml.doc
+          "\\[Network Load Balancers with UDP listeners\\] The IPv6 prefix to use for source NAT. Specify an IPv6 prefix (/80 netmask) from the subnet CIDR block or auto_assigned to use an IPv6 prefix selected at random from the subnet CIDR block."]}
     let make ?subnetId =
       fun ?allocationId ->
         fun ?privateIPv4Address ->
           fun ?iPv6Address ->
-            fun () ->
-              { subnetId; allocationId; privateIPv4Address; iPv6Address }
+            fun ?sourceNatIpv6Prefix ->
+              fun () ->
+                {
+                  subnetId;
+                  allocationId;
+                  privateIPv4Address;
+                  iPv6Address;
+                  sourceNatIpv6Prefix
+                }
     let to_value x =
       structure_to_value
         [("SubnetId", (Option.map x.subnetId ~f:SubnetId.to_value));
@@ -3441,9 +4864,14 @@ module SubnetMapping =
           (Option.map x.allocationId ~f:AllocationId.to_value));
         ("PrivateIPv4Address",
           (Option.map x.privateIPv4Address ~f:PrivateIPv4Address.to_value));
-        ("IPv6Address", (Option.map x.iPv6Address ~f:IPv6Address.to_value))]
+        ("IPv6Address", (Option.map x.iPv6Address ~f:IPv6Address.to_value));
+        ("SourceNatIpv6Prefix",
+          (Option.map x.sourceNatIpv6Prefix ~f:SourceNatIpv6Prefix.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sourceNatIpv6Prefix =
+        (Option.map ~f:SourceNatIpv6Prefix.of_xml)
+          (Xml.child xml_arg0 "SourceNatIpv6Prefix") in
       let iPv6Address =
         (Option.map ~f:IPv6Address.of_xml) (Xml.child xml_arg0 "IPv6Address") in
       let privateIPv4Address =
@@ -3454,15 +4882,19 @@ module SubnetMapping =
           (Xml.child xml_arg0 "AllocationId") in
       let subnetId =
         (Option.map ~f:SubnetId.of_xml) (Xml.child xml_arg0 "SubnetId") in
-      make ?iPv6Address ?privateIPv4Address ?allocationId ?subnetId ()
+      make ?sourceNatIpv6Prefix ?iPv6Address ?privateIPv4Address
+        ?allocationId ?subnetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let iPv6Address = field_map json "IPv6Address" IPv6Address.of_json in
+    let of_json json__ =
+      let sourceNatIpv6Prefix =
+        field_map json__ "SourceNatIpv6Prefix" SourceNatIpv6Prefix.of_json in
+      let iPv6Address = field_map json__ "IPv6Address" IPv6Address.of_json in
       let privateIPv4Address =
-        field_map json "PrivateIPv4Address" PrivateIPv4Address.of_json in
-      let allocationId = field_map json "AllocationId" AllocationId.of_json in
-      let subnetId = field_map json "SubnetId" SubnetId.of_json in
-      make ?iPv6Address ?privateIPv4Address ?allocationId ?subnetId ()
+        field_map json__ "PrivateIPv4Address" PrivateIPv4Address.of_json in
+      let allocationId = field_map json__ "AllocationId" AllocationId.of_json in
+      let subnetId = field_map json__ "SubnetId" SubnetId.of_json in
+      make ?sourceNatIpv6Prefix ?iPv6Address ?privateIPv4Address
+        ?allocationId ?subnetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a subnet mapping."]
 module Rule =
@@ -3479,13 +4911,24 @@ module Rule =
         [@ocaml.doc
           "The actions. Each rule must include exactly one of the following types of actions: forward, redirect, or fixed-response, and it must be the last action to be performed."];
       isDefault: IsDefault.t option
-        [@ocaml.doc "Indicates whether this is the default rule."]}
+        [@ocaml.doc "Indicates whether this is the default rule."];
+      transforms: RuleTransformList.t option
+        [@ocaml.doc "The transforms for the rule."]}
     let make ?ruleArn =
       fun ?priority ->
         fun ?conditions ->
           fun ?actions ->
             fun ?isDefault ->
-              fun () -> { ruleArn; priority; conditions; actions; isDefault }
+              fun ?transforms ->
+                fun () ->
+                  {
+                    ruleArn;
+                    priority;
+                    conditions;
+                    actions;
+                    isDefault;
+                    transforms
+                  }
     let to_value x =
       structure_to_value
         [("RuleArn", (Option.map x.ruleArn ~f:RuleArn.to_value));
@@ -3493,9 +4936,14 @@ module Rule =
         ("Conditions",
           (Option.map x.conditions ~f:RuleConditionList.to_value));
         ("Actions", (Option.map x.actions ~f:Actions.to_value));
-        ("IsDefault", (Option.map x.isDefault ~f:IsDefault.to_value))]
+        ("IsDefault", (Option.map x.isDefault ~f:IsDefault.to_value));
+        ("Transforms",
+          (Option.map x.transforms ~f:RuleTransformList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let transforms =
+        (Option.map ~f:RuleTransformList.of_xml)
+          (Xml.child xml_arg0 "Transforms") in
       let isDefault =
         (Option.map ~f:IsDefault.of_xml) (Xml.child xml_arg0 "IsDefault") in
       let actions =
@@ -3507,15 +4955,18 @@ module Rule =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Priority") in
       let ruleArn =
         (Option.map ~f:RuleArn.of_xml) (Xml.child xml_arg0 "RuleArn") in
-      make ?isDefault ?actions ?conditions ?priority ?ruleArn ()
+      make ?transforms ?isDefault ?actions ?conditions ?priority ?ruleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isDefault = field_map json "IsDefault" IsDefault.of_json in
-      let actions = field_map json "Actions" Actions.of_json in
-      let conditions = field_map json "Conditions" RuleConditionList.of_json in
-      let priority = field_map json "Priority" String_.of_json in
-      let ruleArn = field_map json "RuleArn" RuleArn.of_json in
-      make ?isDefault ?actions ?conditions ?priority ?ruleArn ()
+    let of_json json__ =
+      let transforms =
+        field_map json__ "Transforms" RuleTransformList.of_json in
+      let isDefault = field_map json__ "IsDefault" IsDefault.of_json in
+      let actions = field_map json__ "Actions" Actions.of_json in
+      let conditions =
+        field_map json__ "Conditions" RuleConditionList.of_json in
+      let priority = field_map json__ "Priority" String_.of_json in
+      let ruleArn = field_map json__ "RuleArn" RuleArn.of_json in
+      make ?transforms ?isDefault ?actions ?conditions ?priority ?ruleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a rule."]
 module RulePriorityPair =
@@ -3538,13 +4989,83 @@ module RulePriorityPair =
         (Option.map ~f:RuleArn.of_xml) (Xml.child xml_arg0 "RuleArn") in
       make ?priority ?ruleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let priority = field_map json "Priority" RulePriority.of_json in
-      let ruleArn = field_map json "RuleArn" RuleArn.of_json in
+    let of_json json__ =
+      let priority = field_map json__ "Priority" RulePriority.of_json in
+      let ruleArn = field_map json__ "RuleArn" RuleArn.of_json in
       make ?priority ?ruleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the priorities for the rules for a listener."]
+module TrustStore =
+  struct
+    type nonrec t =
+      {
+      name: TrustStoreName.t option
+        [@ocaml.doc "The name of the trust store."];
+      trustStoreArn: TrustStoreArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the trust store."];
+      status: TrustStoreStatus.t option
+        [@ocaml.doc "The current status of the trust store."];
+      numberOfCaCertificates: NumberOfCaCertificates.t option
+        [@ocaml.doc "The number of ca certificates in the trust store."];
+      totalRevokedEntries: TotalRevokedEntries.t option
+        [@ocaml.doc "The number of revoked certificates in the trust store."]}
+    let make ?name =
+      fun ?trustStoreArn ->
+        fun ?status ->
+          fun ?numberOfCaCertificates ->
+            fun ?totalRevokedEntries ->
+              fun () ->
+                {
+                  name;
+                  trustStoreArn;
+                  status;
+                  numberOfCaCertificates;
+                  totalRevokedEntries
+                }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:TrustStoreName.to_value));
+        ("TrustStoreArn",
+          (Option.map x.trustStoreArn ~f:TrustStoreArn.to_value));
+        ("Status", (Option.map x.status ~f:TrustStoreStatus.to_value));
+        ("NumberOfCaCertificates",
+          (Option.map x.numberOfCaCertificates
+             ~f:NumberOfCaCertificates.to_value));
+        ("TotalRevokedEntries",
+          (Option.map x.totalRevokedEntries ~f:TotalRevokedEntries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let totalRevokedEntries =
+        (Option.map ~f:TotalRevokedEntries.of_xml)
+          (Xml.child xml_arg0 "TotalRevokedEntries") in
+      let numberOfCaCertificates =
+        (Option.map ~f:NumberOfCaCertificates.of_xml)
+          (Xml.child xml_arg0 "NumberOfCaCertificates") in
+      let status =
+        (Option.map ~f:TrustStoreStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let trustStoreArn =
+        (Option.map ~f:TrustStoreArn.of_xml)
+          (Xml.child xml_arg0 "TrustStoreArn") in
+      let name =
+        (Option.map ~f:TrustStoreName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?totalRevokedEntries ?numberOfCaCertificates ?status
+        ?trustStoreArn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let totalRevokedEntries =
+        field_map json__ "TotalRevokedEntries" TotalRevokedEntries.of_json in
+      let numberOfCaCertificates =
+        field_map json__ "NumberOfCaCertificates"
+          NumberOfCaCertificates.of_json in
+      let status = field_map json__ "Status" TrustStoreStatus.of_json in
+      let trustStoreArn =
+        field_map json__ "TrustStoreArn" TrustStoreArn.of_json in
+      let name = field_map json__ "Name" TrustStoreName.of_json in
+      make ?totalRevokedEntries ?numberOfCaCertificates ?status
+        ?trustStoreArn ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a trust store."]
 module TargetGroup =
   struct
     type nonrec t =
@@ -3558,7 +5079,7 @@ module TargetGroup =
           "The protocol to use for routing traffic to the targets."];
       port: Port.t option
         [@ocaml.doc
-          "The port on which the targets are listening. Not used if the target is a Lambda function."];
+          "The port on which the targets are listening. This parameter is not used if the target is a Lambda function."];
       vpcId: VpcId.t option [@ocaml.doc "The ID of the VPC for the targets."];
       healthCheckProtocol: ProtocolEnum.t option
         [@ocaml.doc
@@ -3586,7 +5107,7 @@ module TargetGroup =
           "The HTTP or gRPC codes to use when checking for a successful response from a target."];
       loadBalancerArns: LoadBalancerArns.t option
         [@ocaml.doc
-          "The Amazon Resource Names (ARN) of the load balancers that route traffic to this target group."];
+          "The Amazon Resource Name (ARN) of the load balancer that routes traffic to this target group. You can use each target group with only one load balancer."];
       targetType: TargetTypeEnum.t option
         [@ocaml.doc
           "The type of target that you must specify when registering targets with this target group. The possible values are instance (register targets by instance ID), ip (register targets by IP address), lambda (register a single Lambda function as a target), or alb (register a single Application Load Balancer as a target)."];
@@ -3594,8 +5115,10 @@ module TargetGroup =
         [@ocaml.doc
           "\\[HTTP/HTTPS protocol\\] The protocol version. The possible values are GRPC, HTTP1, and HTTP2."];
       ipAddressType: TargetGroupIpAddressTypeEnum.t option
+        [@ocaml.doc "The IP address type. The default value is ipv4."];
+      targetControlPort: TargetControlPort.t option
         [@ocaml.doc
-          "The type of IP address used for this target group. The possible values are ipv4 and ipv6. This is an optional parameter. If not specified, the IP address type defaults to ipv4."]}
+          "The port on which the target control agent and application load balancer exchange management traffic for the target optimizer feature."]}
     let make ?targetGroupArn =
       fun ?targetGroupName ->
         fun ?protocol ->
@@ -3614,27 +5137,29 @@ module TargetGroup =
                                   fun ?targetType ->
                                     fun ?protocolVersion ->
                                       fun ?ipAddressType ->
-                                        fun () ->
-                                          {
-                                            targetGroupArn;
-                                            targetGroupName;
-                                            protocol;
-                                            port;
-                                            vpcId;
-                                            healthCheckProtocol;
-                                            healthCheckPort;
-                                            healthCheckEnabled;
-                                            healthCheckIntervalSeconds;
-                                            healthCheckTimeoutSeconds;
-                                            healthyThresholdCount;
-                                            unhealthyThresholdCount;
-                                            healthCheckPath;
-                                            matcher;
-                                            loadBalancerArns;
-                                            targetType;
-                                            protocolVersion;
-                                            ipAddressType
-                                          }
+                                        fun ?targetControlPort ->
+                                          fun () ->
+                                            {
+                                              targetGroupArn;
+                                              targetGroupName;
+                                              protocol;
+                                              port;
+                                              vpcId;
+                                              healthCheckProtocol;
+                                              healthCheckPort;
+                                              healthCheckEnabled;
+                                              healthCheckIntervalSeconds;
+                                              healthCheckTimeoutSeconds;
+                                              healthyThresholdCount;
+                                              unhealthyThresholdCount;
+                                              healthCheckPath;
+                                              matcher;
+                                              loadBalancerArns;
+                                              targetType;
+                                              protocolVersion;
+                                              ipAddressType;
+                                              targetControlPort
+                                            }
     let to_value x =
       structure_to_value
         [("TargetGroupArn",
@@ -3671,9 +5196,14 @@ module TargetGroup =
           (Option.map x.protocolVersion ~f:ProtocolVersion.to_value));
         ("IpAddressType",
           (Option.map x.ipAddressType
-             ~f:TargetGroupIpAddressTypeEnum.to_value))]
+             ~f:TargetGroupIpAddressTypeEnum.to_value));
+        ("TargetControlPort",
+          (Option.map x.targetControlPort ~f:TargetControlPort.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let targetControlPort =
+        (Option.map ~f:TargetControlPort.of_xml)
+          (Xml.child xml_arg0 "TargetControlPort") in
       let ipAddressType =
         (Option.map ~f:TargetGroupIpAddressTypeEnum.of_xml)
           (Xml.child xml_arg0 "IpAddressType") in
@@ -3721,50 +5251,52 @@ module TargetGroup =
       let targetGroupArn =
         (Option.map ~f:TargetGroupArn.of_xml)
           (Xml.child xml_arg0 "TargetGroupArn") in
-      make ?ipAddressType ?protocolVersion ?targetType ?loadBalancerArns
-        ?matcher ?healthCheckPath ?unhealthyThresholdCount
+      make ?targetControlPort ?ipAddressType ?protocolVersion ?targetType
+        ?loadBalancerArns ?matcher ?healthCheckPath ?unhealthyThresholdCount
         ?healthyThresholdCount ?healthCheckTimeoutSeconds
         ?healthCheckIntervalSeconds ?healthCheckEnabled ?healthCheckPort
         ?healthCheckProtocol ?vpcId ?port ?protocol ?targetGroupName
         ?targetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let targetControlPort =
+        field_map json__ "TargetControlPort" TargetControlPort.of_json in
       let ipAddressType =
-        field_map json "IpAddressType" TargetGroupIpAddressTypeEnum.of_json in
+        field_map json__ "IpAddressType" TargetGroupIpAddressTypeEnum.of_json in
       let protocolVersion =
-        field_map json "ProtocolVersion" ProtocolVersion.of_json in
-      let targetType = field_map json "TargetType" TargetTypeEnum.of_json in
+        field_map json__ "ProtocolVersion" ProtocolVersion.of_json in
+      let targetType = field_map json__ "TargetType" TargetTypeEnum.of_json in
       let loadBalancerArns =
-        field_map json "LoadBalancerArns" LoadBalancerArns.of_json in
-      let matcher = field_map json "Matcher" Matcher.of_json in
-      let healthCheckPath = field_map json "HealthCheckPath" Path.of_json in
+        field_map json__ "LoadBalancerArns" LoadBalancerArns.of_json in
+      let matcher = field_map json__ "Matcher" Matcher.of_json in
+      let healthCheckPath = field_map json__ "HealthCheckPath" Path.of_json in
       let unhealthyThresholdCount =
-        field_map json "UnhealthyThresholdCount"
+        field_map json__ "UnhealthyThresholdCount"
           HealthCheckThresholdCount.of_json in
       let healthyThresholdCount =
-        field_map json "HealthyThresholdCount"
+        field_map json__ "HealthyThresholdCount"
           HealthCheckThresholdCount.of_json in
       let healthCheckTimeoutSeconds =
-        field_map json "HealthCheckTimeoutSeconds"
+        field_map json__ "HealthCheckTimeoutSeconds"
           HealthCheckTimeoutSeconds.of_json in
       let healthCheckIntervalSeconds =
-        field_map json "HealthCheckIntervalSeconds"
+        field_map json__ "HealthCheckIntervalSeconds"
           HealthCheckIntervalSeconds.of_json in
       let healthCheckEnabled =
-        field_map json "HealthCheckEnabled" HealthCheckEnabled.of_json in
+        field_map json__ "HealthCheckEnabled" HealthCheckEnabled.of_json in
       let healthCheckPort =
-        field_map json "HealthCheckPort" HealthCheckPort.of_json in
+        field_map json__ "HealthCheckPort" HealthCheckPort.of_json in
       let healthCheckProtocol =
-        field_map json "HealthCheckProtocol" ProtocolEnum.of_json in
-      let vpcId = field_map json "VpcId" VpcId.of_json in
-      let port = field_map json "Port" Port.of_json in
-      let protocol = field_map json "Protocol" ProtocolEnum.of_json in
+        field_map json__ "HealthCheckProtocol" ProtocolEnum.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
+      let port = field_map json__ "Port" Port.of_json in
+      let protocol = field_map json__ "Protocol" ProtocolEnum.of_json in
       let targetGroupName =
-        field_map json "TargetGroupName" TargetGroupName.of_json in
+        field_map json__ "TargetGroupName" TargetGroupName.of_json in
       let targetGroupArn =
-        field_map json "TargetGroupArn" TargetGroupArn.of_json in
-      make ?ipAddressType ?protocolVersion ?targetType ?loadBalancerArns
-        ?matcher ?healthCheckPath ?unhealthyThresholdCount
+        field_map json__ "TargetGroupArn" TargetGroupArn.of_json in
+      make ?targetControlPort ?ipAddressType ?protocolVersion ?targetType
+        ?loadBalancerArns ?matcher ?healthCheckPath ?unhealthyThresholdCount
         ?healthyThresholdCount ?healthCheckTimeoutSeconds
         ?healthCheckIntervalSeconds ?healthCheckEnabled ?healthCheckPort
         ?healthCheckProtocol ?vpcId ?port ?protocol ?targetGroupName
@@ -3777,7 +5309,7 @@ module TargetGroupAttribute =
       {
       key: TargetGroupAttributeKey.t option
         [@ocaml.doc
-          "The name of the attribute. The following attribute is supported by all load balancers: deregistration_delay.timeout_seconds - The amount of time, in seconds, for Elastic Load Balancing to wait before changing the state of a deregistering target from draining to unused. The range is 0-3600 seconds. The default value is 300 seconds. If the target is a Lambda function, this attribute is not supported. The following attributes are supported by both Application Load Balancers and Network Load Balancers: stickiness.enabled - Indicates whether sticky sessions are enabled. The value is true or false. The default is false. stickiness.type - The type of sticky sessions. The possible values are lb_cookie and app_cookie for Application Load Balancers or source_ip for Network Load Balancers. The following attributes are supported only if the load balancer is an Application Load Balancer and the target is an instance or an IP address: load_balancing.algorithm.type - The load balancing algorithm determines how the load balancer selects targets when routing requests. The value is round_robin or least_outstanding_requests. The default is round_robin. slow_start.duration_seconds - The time period, in seconds, during which a newly registered target receives an increasing share of the traffic to the target group. After this time period ends, the target receives its full share of traffic. The range is 30-900 seconds (15 minutes). The default is 0 seconds (disabled). stickiness.app_cookie.cookie_name - Indicates the name of the application-based cookie. Names that start with the following prefixes are not allowed: AWSALB, AWSALBAPP, and AWSALBTG; they're reserved for use by the load balancer. stickiness.app_cookie.duration_seconds - The time period, in seconds, during which requests from a client should be routed to the same target. After this time period expires, the application-based cookie is considered stale. The range is 1 second to 1 week (604800 seconds). The default value is 1 day (86400 seconds). stickiness.lb_cookie.duration_seconds - The time period, in seconds, during which requests from a client should be routed to the same target. After this time period expires, the load balancer-generated cookie is considered stale. The range is 1 second to 1 week (604800 seconds). The default value is 1 day (86400 seconds). The following attribute is supported only if the load balancer is an Application Load Balancer and the target is a Lambda function: lambda.multi_value_headers.enabled - Indicates whether the request and response headers that are exchanged between the load balancer and the Lambda function include arrays of values or strings. The value is true or false. The default is false. If the value is false and the request contains a duplicate header field name or query parameter key, the load balancer uses the last value sent by the client. The following attributes are supported only by Network Load Balancers: deregistration_delay.connection_termination.enabled - Indicates whether the load balancer terminates connections at the end of the deregistration timeout. The value is true or false. The default is false. preserve_client_ip.enabled - Indicates whether client IP preservation is enabled. The value is true or false. The default is disabled if the target group type is IP address and the target group protocol is TCP or TLS. Otherwise, the default is enabled. Client IP preservation cannot be disabled for UDP and TCP_UDP target groups. proxy_protocol_v2.enabled - Indicates whether Proxy Protocol version 2 is enabled. The value is true or false. The default is false."];
+          "The name of the attribute. The following attributes are supported by all load balancers: deregistration_delay.timeout_seconds - The amount of time, in seconds, for Elastic Load Balancing to wait before changing the state of a deregistering target from draining to unused. The range is 0-3600 seconds. The default value is 300 seconds. If the target is a Lambda function, this attribute is not supported. stickiness.enabled - Indicates whether target stickiness is enabled. The value is true or false. The default is false. stickiness.type - Indicates the type of stickiness. The possible values are: lb_cookie and app_cookie for Application Load Balancers. source_ip for Network Load Balancers. source_ip_dest_ip and source_ip_dest_ip_proto for Gateway Load Balancers. The following attributes are supported by Application Load Balancers and Network Load Balancers: load_balancing.cross_zone.enabled - Indicates whether cross zone load balancing is enabled. The value is true, false or use_load_balancer_configuration. The default is use_load_balancer_configuration. target_group_health.dns_failover.minimum_healthy_targets.count - The minimum number of targets that must be healthy. If the number of healthy targets is below this value, mark the zone as unhealthy in DNS, so that traffic is routed only to healthy zones. The possible values are off or an integer from 1 to the maximum number of targets. The default is 1. target_group_health.dns_failover.minimum_healthy_targets.percentage - The minimum percentage of targets that must be healthy. If the percentage of healthy targets is below this value, mark the zone as unhealthy in DNS, so that traffic is routed only to healthy zones. The possible values are off or an integer from 1 to 100. The default is off. target_group_health.unhealthy_state_routing.minimum_healthy_targets.count - The minimum number of targets that must be healthy. If the number of healthy targets is below this value, send traffic to all targets, including unhealthy targets. The possible values are 1 to the maximum number of targets. The default is 1. target_group_health.unhealthy_state_routing.minimum_healthy_targets.percentage - The minimum percentage of targets that must be healthy. If the percentage of healthy targets is below this value, send traffic to all targets, including unhealthy targets. The possible values are off or an integer from 1 to 100. The default is off. The following attributes are supported only if the load balancer is an Application Load Balancer and the target is an instance or an IP address: load_balancing.algorithm.type - The load balancing algorithm determines how the load balancer selects targets when routing requests. The value is round_robin, least_outstanding_requests, or weighted_random. The default is round_robin. load_balancing.algorithm.anomaly_mitigation - Only available when load_balancing.algorithm.type is weighted_random. Indicates whether anomaly mitigation is enabled. The value is on or off. The default is off. slow_start.duration_seconds - The time period, in seconds, during which a newly registered target receives an increasing share of the traffic to the target group. After this time period ends, the target receives its full share of traffic. The range is 30-900 seconds (15 minutes). The default is 0 seconds (disabled). stickiness.app_cookie.cookie_name - Indicates the name of the application-based cookie. Names that start with the following prefixes are not allowed: AWSALB, AWSALBAPP, and AWSALBTG; they're reserved for use by the load balancer. stickiness.app_cookie.duration_seconds - The time period, in seconds, during which requests from a client should be routed to the same target. After this time period expires, the application-based cookie is considered stale. The range is 1 second to 1 week (604800 seconds). The default value is 1 day (86400 seconds). stickiness.lb_cookie.duration_seconds - The time period, in seconds, during which requests from a client should be routed to the same target. After this time period expires, the load balancer-generated cookie is considered stale. The range is 1 second to 1 week (604800 seconds). The default value is 1 day (86400 seconds). The following attribute is supported only if the load balancer is an Application Load Balancer and the target is a Lambda function: lambda.multi_value_headers.enabled - Indicates whether the request and response headers that are exchanged between the load balancer and the Lambda function include arrays of values or strings. The value is true or false. The default is false. If the value is false and the request contains a duplicate header field name or query parameter key, the load balancer uses the last value sent by the client. The following attributes are supported only by Network Load Balancers: deregistration_delay.connection_termination.enabled - Indicates whether the load balancer terminates connections at the end of the deregistration timeout. The value is true or false. For new UDP/TCP_UDP target groups the default is true. Otherwise, the default is false. preserve_client_ip.enabled - Indicates whether client IP preservation is enabled. The value is true or false. The default is disabled if the target group type is IP address and the target group protocol is TCP or TLS. Otherwise, the default is enabled. Client IP preservation can't be disabled for UDP and TCP_UDP target groups. proxy_protocol_v2.enabled - Indicates whether Proxy Protocol version 2 is enabled. The value is true or false. The default is false. target_health_state.unhealthy.connection_termination.enabled - Indicates whether the load balancer terminates connections to unhealthy targets. The value is true or false. The default is true. This attribute can't be enabled for UDP and TCP_UDP target groups. target_health_state.unhealthy.draining_interval_seconds - The amount of time for Elastic Load Balancing to wait before changing the state of an unhealthy target from unhealthy.draining to unhealthy. The range is 0-360000 seconds. The default value is 0 seconds. Note: This attribute can only be configured when target_health_state.unhealthy.connection_termination.enabled is false. The following attributes are supported only by Gateway Load Balancers: target_failover.on_deregistration - Indicates how the Gateway Load Balancer handles existing flows when a target is deregistered. The possible values are rebalance and no_rebalance. The default is no_rebalance. The two attributes (target_failover.on_deregistration and target_failover.on_unhealthy) can't be set independently. The value you set for both attributes must be the same. target_failover.on_unhealthy - Indicates how the Gateway Load Balancer handles existing flows when a target is unhealthy. The possible values are rebalance and no_rebalance. The default is no_rebalance. The two attributes (target_failover.on_deregistration and target_failover.on_unhealthy) can't be set independently. The value you set for both attributes must be the same."];
       value: TargetGroupAttributeValue.t option
         [@ocaml.doc "The value of the attribute."]}
     let make ?key = fun ?value -> fun () -> { key; value }
@@ -3795,9 +5327,9 @@ module TargetGroupAttribute =
           (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TargetGroupAttributeValue.of_json in
-      let key = field_map json "Key" TargetGroupAttributeKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" TargetGroupAttributeValue.of_json in
+      let key = field_map json__ "Key" TargetGroupAttributeKey.of_json in
       make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a target group attribute."]
@@ -3807,7 +5339,7 @@ module LoadBalancerAttribute =
       {
       key: LoadBalancerAttributeKey.t option
         [@ocaml.doc
-          "The name of the attribute. The following attribute is supported by all load balancers: deletion_protection.enabled - Indicates whether deletion protection is enabled. The value is true or false. The default is false. The following attributes are supported by both Application Load Balancers and Network Load Balancers: access_logs.s3.enabled - Indicates whether access logs are enabled. The value is true or false. The default is false. access_logs.s3.bucket - The name of the S3 bucket for the access logs. This attribute is required if access logs are enabled. The bucket must exist in the same region as the load balancer and have a bucket policy that grants Elastic Load Balancing permissions to write to the bucket. access_logs.s3.prefix - The prefix for the location in the S3 bucket for the access logs. ipv6.deny-all-igw-traffic - Blocks internet gateway (IGW) access to the load balancer. It is set to false for internet-facing load balancers and true for internal load balancers, preventing unintended access to your internal load balancer through an internet gateway. The following attributes are supported by only Application Load Balancers: idle_timeout.timeout_seconds - The idle timeout value, in seconds. The valid range is 1-4000 seconds. The default is 60 seconds. routing.http.desync_mitigation_mode - Determines how the load balancer handles requests that might pose a security risk to your application. The possible values are monitor, defensive, and strictest. The default is defensive. routing.http.drop_invalid_header_fields.enabled - Indicates whether HTTP headers with invalid header fields are removed by the load balancer (true) or routed to targets (false). The default is false. routing.http.x_amzn_tls_version_and_cipher_suite.enabled - Indicates whether the two headers (x-amzn-tls-version and x-amzn-tls-cipher-suite), which contain information about the negotiated TLS version and cipher suite, are added to the client request before sending it to the target. The x-amzn-tls-version header has information about the TLS protocol version negotiated with the client, and the x-amzn-tls-cipher-suite header has information about the cipher suite negotiated with the client. Both headers are in OpenSSL format. The possible values for the attribute are true and false. The default is false. routing.http.xff_client_port.enabled - Indicates whether the X-Forwarded-For header should preserve the source port that the client used to connect to the load balancer. The possible values are true and false. The default is false. routing.http2.enabled - Indicates whether HTTP/2 is enabled. The possible values are true and false. The default is true. Elastic Load Balancing requires that message header names contain only alphanumeric characters and hyphens. waf.fail_open.enabled - Indicates whether to allow a WAF-enabled load balancer to route requests to targets if it is unable to forward the request to Amazon Web Services WAF. The possible values are true and false. The default is false. The following attribute is supported by Network Load Balancers and Gateway Load Balancers: load_balancing.cross_zone.enabled - Indicates whether cross-zone load balancing is enabled. The possible values are true and false. The default is false."];
+          "The name of the attribute. The following attributes are supported by all load balancers: deletion_protection.enabled - Indicates whether deletion protection is enabled. The value is true or false. The default is false. load_balancing.cross_zone.enabled - Indicates whether cross-zone load balancing is enabled. The possible values are true and false. The default for Network Load Balancers and Gateway Load Balancers is false. The default for Application Load Balancers is true, and can't be changed. The following attributes are supported by both Application Load Balancers and Network Load Balancers: access_logs.s3.enabled - Indicates whether access logs are enabled. The value is true or false. The default is false. access_logs.s3.bucket - The name of the S3 bucket for the access logs. This attribute is required if access logs are enabled. The bucket must exist in the same region as the load balancer and have a bucket policy that grants Elastic Load Balancing permissions to write to the bucket. access_logs.s3.prefix - The prefix for the location in the S3 bucket for the access logs. ipv6.deny_all_igw_traffic - Blocks internet gateway (IGW) access to the load balancer. It is set to false for internet-facing load balancers and true for internal load balancers, preventing unintended access to your internal load balancer through an internet gateway. zonal_shift.config.enabled - Indicates whether zonal shift is enabled. The possible values are true and false. The default is false. The following attributes are supported by only Application Load Balancers: idle_timeout.timeout_seconds - The idle timeout value, in seconds. The valid range is 1-4000 seconds. The default is 60 seconds. client_keep_alive.seconds - The client keep alive value, in seconds. The valid range is 60-604800 seconds. The default is 3600 seconds. connection_logs.s3.enabled - Indicates whether connection logs are enabled. The value is true or false. The default is false. connection_logs.s3.bucket - The name of the S3 bucket for the connection logs. This attribute is required if connection logs are enabled. The bucket must exist in the same region as the load balancer and have a bucket policy that grants Elastic Load Balancing permissions to write to the bucket. connection_logs.s3.prefix - The prefix for the location in the S3 bucket for the connection logs. health_check_logs.s3.enabled - Indicates whether health check logs are enabled. The value is true or false. The default is false. health_check_logs.s3.bucket - The name of the S3 bucket for the health check logs. This attribute is required if health check logs are enabled. The bucket must exist in the same region as the load balancer and have a bucket policy that grants Elastic Load Balancing permissions to write to the bucket. health_check_logs.s3.prefix - The prefix for the location in the S3 bucket for the health check logs. routing.http.desync_mitigation_mode - Determines how the load balancer handles requests that might pose a security risk to your application. The possible values are monitor, defensive, and strictest. The default is defensive. routing.http.drop_invalid_header_fields.enabled - Indicates whether HTTP headers with invalid header fields are removed by the load balancer (true) or routed to targets (false). The default is false. routing.http.preserve_host_header.enabled - Indicates whether the Application Load Balancer should preserve the Host header in the HTTP request and send it to the target without any change. The possible values are true and false. The default is false. routing.http.x_amzn_tls_version_and_cipher_suite.enabled - Indicates whether the two headers (x-amzn-tls-version and x-amzn-tls-cipher-suite), which contain information about the negotiated TLS version and cipher suite, are added to the client request before sending it to the target. The x-amzn-tls-version header has information about the TLS protocol version negotiated with the client, and the x-amzn-tls-cipher-suite header has information about the cipher suite negotiated with the client. Both headers are in OpenSSL format. The possible values for the attribute are true and false. The default is false. routing.http.xff_client_port.enabled - Indicates whether the X-Forwarded-For header should preserve the source port that the client used to connect to the load balancer. The possible values are true and false. The default is false. routing.http.xff_header_processing.mode - Enables you to modify, preserve, or remove the X-Forwarded-For header in the HTTP request before the Application Load Balancer sends the request to the target. The possible values are append, preserve, and remove. The default is append. If the value is append, the Application Load Balancer adds the client IP address (of the last hop) to the X-Forwarded-For header in the HTTP request before it sends it to targets. If the value is preserve the Application Load Balancer preserves the X-Forwarded-For header in the HTTP request, and sends it to targets without any change. If the value is remove, the Application Load Balancer removes the X-Forwarded-For header in the HTTP request before it sends it to targets. routing.http2.enabled - Indicates whether clients can connect to the load balancer using HTTP/2. If true, clients can connect using HTTP/2 or HTTP/1.1. However, all client requests are subject to the stricter HTTP/2 header validation rules. For example, message header names must contain only alphanumeric characters and hyphens. If false, clients must connect using HTTP/1.1. The default is true. waf.fail_open.enabled - Indicates whether to allow a WAF-enabled load balancer to route requests to targets if it is unable to forward the request to Amazon Web Services WAF. The possible values are true and false. The default is false. The following attributes are supported by only Network Load Balancers: dns_record.client_routing_policy - Indicates how traffic is distributed among the load balancer Availability Zones. The possible values are availability_zone_affinity with 100 percent zonal affinity, partial_availability_zone_affinity with 85 percent zonal affinity, and any_availability_zone with 0 percent zonal affinity. secondary_ips.auto_assigned.per_subnet - The number of secondary IP addresses to configure for your load balancer nodes. Use to address port allocation errors if you can't add targets. The valid range is 0 to 7. The default is 0. After you set this value, you can't decrease it."];
       value: LoadBalancerAttributeValue.t option
         [@ocaml.doc "The value of the attribute."]}
     let make ?key = fun ?value -> fun () -> { key; value }
@@ -3826,9 +5358,9 @@ module LoadBalancerAttribute =
           (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" LoadBalancerAttributeValue.of_json in
-      let key = field_map json "Key" LoadBalancerAttributeKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" LoadBalancerAttributeValue.of_json in
+      let key = field_map json__ "Key" LoadBalancerAttributeKey.of_json in
       make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a load balancer attribute."]
@@ -3855,7 +5387,9 @@ module Listener =
         [@ocaml.doc "The default actions for the listener."];
       alpnPolicy: AlpnPolicyName.t option
         [@ocaml.doc
-          "\\[TLS listener\\] The name of the Application-Layer Protocol Negotiation (ALPN) policy."]}
+          "\\[TLS listener\\] The name of the Application-Layer Protocol Negotiation (ALPN) policy."];
+      mutualAuthentication: MutualAuthenticationAttributes.t option
+        [@ocaml.doc "The mutual authentication configuration information."]}
     let make ?listenerArn =
       fun ?loadBalancerArn ->
         fun ?port ->
@@ -3864,17 +5398,19 @@ module Listener =
               fun ?sslPolicy ->
                 fun ?defaultActions ->
                   fun ?alpnPolicy ->
-                    fun () ->
-                      {
-                        listenerArn;
-                        loadBalancerArn;
-                        port;
-                        protocol;
-                        certificates;
-                        sslPolicy;
-                        defaultActions;
-                        alpnPolicy
-                      }
+                    fun ?mutualAuthentication ->
+                      fun () ->
+                        {
+                          listenerArn;
+                          loadBalancerArn;
+                          port;
+                          protocol;
+                          certificates;
+                          sslPolicy;
+                          defaultActions;
+                          alpnPolicy;
+                          mutualAuthentication
+                        }
     let to_value x =
       structure_to_value
         [("ListenerArn", (Option.map x.listenerArn ~f:ListenerArn.to_value));
@@ -3886,9 +5422,15 @@ module Listener =
           (Option.map x.certificates ~f:CertificateList.to_value));
         ("SslPolicy", (Option.map x.sslPolicy ~f:SslPolicyName.to_value));
         ("DefaultActions", (Option.map x.defaultActions ~f:Actions.to_value));
-        ("AlpnPolicy", (Option.map x.alpnPolicy ~f:AlpnPolicyName.to_value))]
+        ("AlpnPolicy", (Option.map x.alpnPolicy ~f:AlpnPolicyName.to_value));
+        ("MutualAuthentication",
+          (Option.map x.mutualAuthentication
+             ~f:MutualAuthenticationAttributes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let mutualAuthentication =
+        (Option.map ~f:MutualAuthenticationAttributes.of_xml)
+          (Xml.child xml_arg0 "MutualAuthentication") in
       let alpnPolicy =
         (Option.map ~f:AlpnPolicyName.of_xml)
           (Xml.child xml_arg0 "AlpnPolicy") in
@@ -3907,24 +5449,225 @@ module Listener =
           (Xml.child xml_arg0 "LoadBalancerArn") in
       let listenerArn =
         (Option.map ~f:ListenerArn.of_xml) (Xml.child xml_arg0 "ListenerArn") in
-      make ?alpnPolicy ?defaultActions ?sslPolicy ?certificates ?protocol
-        ?port ?loadBalancerArn ?listenerArn ()
+      make ?mutualAuthentication ?alpnPolicy ?defaultActions ?sslPolicy
+        ?certificates ?protocol ?port ?loadBalancerArn ?listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let alpnPolicy = field_map json "AlpnPolicy" AlpnPolicyName.of_json in
-      let defaultActions = field_map json "DefaultActions" Actions.of_json in
-      let sslPolicy = field_map json "SslPolicy" SslPolicyName.of_json in
+    let of_json json__ =
+      let mutualAuthentication =
+        field_map json__ "MutualAuthentication"
+          MutualAuthenticationAttributes.of_json in
+      let alpnPolicy = field_map json__ "AlpnPolicy" AlpnPolicyName.of_json in
+      let defaultActions = field_map json__ "DefaultActions" Actions.of_json in
+      let sslPolicy = field_map json__ "SslPolicy" SslPolicyName.of_json in
       let certificates =
-        field_map json "Certificates" CertificateList.of_json in
-      let protocol = field_map json "Protocol" ProtocolEnum.of_json in
-      let port = field_map json "Port" Port.of_json in
+        field_map json__ "Certificates" CertificateList.of_json in
+      let protocol = field_map json__ "Protocol" ProtocolEnum.of_json in
+      let port = field_map json__ "Port" Port.of_json in
       let loadBalancerArn =
-        field_map json "LoadBalancerArn" LoadBalancerArn.of_json in
-      let listenerArn = field_map json "ListenerArn" ListenerArn.of_json in
-      make ?alpnPolicy ?defaultActions ?sslPolicy ?certificates ?protocol
-        ?port ?loadBalancerArn ?listenerArn ()
+        field_map json__ "LoadBalancerArn" LoadBalancerArn.of_json in
+      let listenerArn = field_map json__ "ListenerArn" ListenerArn.of_json in
+      make ?mutualAuthentication ?alpnPolicy ?defaultActions ?sslPolicy
+        ?certificates ?protocol ?port ?loadBalancerArn ?listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a listener."]
+module ListenerAttribute =
+  struct
+    type nonrec t =
+      {
+      key: ListenerAttributeKey.t option
+        [@ocaml.doc
+          "The name of the attribute. The following attribute is supported by Network Load Balancers, and Gateway Load Balancers. tcp.idle_timeout.seconds - The tcp idle timeout value, in seconds. The valid range is 60-6000 seconds. The default is 350 seconds. The following attributes are only supported by Application Load Balancers. routing.http.request.x_amzn_mtls_clientcert_serial_number.header_name - Enables you to modify the header name of the X-Amzn-Mtls-Clientcert-Serial-Number HTTP request header. routing.http.request.x_amzn_mtls_clientcert_issuer.header_name - Enables you to modify the header name of the X-Amzn-Mtls-Clientcert-Issuer HTTP request header. routing.http.request.x_amzn_mtls_clientcert_subject.header_name - Enables you to modify the header name of the X-Amzn-Mtls-Clientcert-Subject HTTP request header. routing.http.request.x_amzn_mtls_clientcert_validity.header_name - Enables you to modify the header name of the X-Amzn-Mtls-Clientcert-Validity HTTP request header. routing.http.request.x_amzn_mtls_clientcert_leaf.header_name - Enables you to modify the header name of the X-Amzn-Mtls-Clientcert-Leaf HTTP request header. routing.http.request.x_amzn_mtls_clientcert.header_name - Enables you to modify the header name of the X-Amzn-Mtls-Clientcert HTTP request header. routing.http.request.x_amzn_tls_version.header_name - Enables you to modify the header name of the X-Amzn-Tls-Version HTTP request header. routing.http.request.x_amzn_tls_cipher_suite.header_name - Enables you to modify the header name of the X-Amzn-Tls-Cipher-Suite HTTP request header. routing.http.response.server.enabled - Enables you to allow or remove the HTTP response server header. routing.http.response.strict_transport_security.header_value - Informs browsers that the site should only be accessed using HTTPS, and that any future attempts to access it using HTTP should automatically be converted to HTTPS. routing.http.response.access_control_allow_origin.header_value - Specifies which origins are allowed to access the server. routing.http.response.access_control_allow_methods.header_value - Returns which HTTP methods are allowed when accessing the server from a different origin. routing.http.response.access_control_allow_headers.header_value - Specifies which headers can be used during the request. routing.http.response.access_control_allow_credentials.header_value - Indicates whether the browser should include credentials such as cookies or authentication when making requests. routing.http.response.access_control_expose_headers.header_value - Returns which headers the browser can expose to the requesting client. routing.http.response.access_control_max_age.header_value - Specifies how long the results of a preflight request can be cached, in seconds. routing.http.response.content_security_policy.header_value - Specifies restrictions enforced by the browser to help minimize the risk of certain types of security threats. routing.http.response.x_content_type_options.header_value - Indicates whether the MIME types advertised in the Content-Type headers should be followed and not be changed. routing.http.response.x_frame_options.header_value - Indicates whether the browser is allowed to render a page in a frame, iframe, embed or object."];
+      value: ListenerAttributeValue.t option
+        [@ocaml.doc "The value of the attribute."]}
+    let make ?key = fun ?value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Option.map x.key ~f:ListenerAttributeKey.to_value));
+        ("Value", (Option.map x.value ~f:ListenerAttributeValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:ListenerAttributeValue.of_xml)
+          (Xml.child xml_arg0 "Value") in
+      let key =
+        (Option.map ~f:ListenerAttributeKey.of_xml)
+          (Xml.child xml_arg0 "Key") in
+      make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" ListenerAttributeValue.of_json in
+      let key = field_map json__ "Key" ListenerAttributeKey.of_json in
+      make ?value ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a listener attribute."]
+module RemoveIpamPoolEnum =
+  struct
+    type nonrec t =
+      | Ipv4 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | Ipv4 -> "ipv4" | Non_static_id s -> s
+    let of_string = function | "ipv4" -> Ipv4 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RemoveIpamPoolEnum" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RemoveIpamPoolEnum" j)
+    let to_json = simple_to_json to_value
+  end
+module CapacityUnits =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for CapacityUnits" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ZonalCapacityReservationState =
+  struct
+    type nonrec t =
+      {
+      state: CapacityReservationStatus.t option
+        [@ocaml.doc "The state of the capacity reservation."];
+      availabilityZone: ZoneName.t option
+        [@ocaml.doc "Information about the Availability Zone."];
+      effectiveCapacityUnits: CapacityUnitsDouble.t option
+        [@ocaml.doc "The number of effective capacity units."]}
+    let make ?state =
+      fun ?availabilityZone ->
+        fun ?effectiveCapacityUnits ->
+          fun () -> { state; availabilityZone; effectiveCapacityUnits }
+    let to_value x =
+      structure_to_value
+        [("State",
+           (Option.map x.state ~f:CapacityReservationStatus.to_value));
+        ("AvailabilityZone",
+          (Option.map x.availabilityZone ~f:ZoneName.to_value));
+        ("EffectiveCapacityUnits",
+          (Option.map x.effectiveCapacityUnits
+             ~f:CapacityUnitsDouble.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let effectiveCapacityUnits =
+        (Option.map ~f:CapacityUnitsDouble.of_xml)
+          (Xml.child xml_arg0 "EffectiveCapacityUnits") in
+      let availabilityZone =
+        (Option.map ~f:ZoneName.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZone") in
+      let state =
+        (Option.map ~f:CapacityReservationStatus.of_xml)
+          (Xml.child xml_arg0 "State") in
+      make ?effectiveCapacityUnits ?availabilityZone ?state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let effectiveCapacityUnits =
+        field_map json__ "EffectiveCapacityUnits" CapacityUnitsDouble.of_json in
+      let availabilityZone =
+        field_map json__ "AvailabilityZone" ZoneName.of_json in
+      let state = field_map json__ "State" CapacityReservationStatus.of_json in
+      make ?effectiveCapacityUnits ?availabilityZone ?state ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The capacity reservation status for each Availability Zone."]
+module DescribeTrustStoreRevocation =
+  struct
+    type nonrec t =
+      {
+      trustStoreArn: TrustStoreArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the trust store."];
+      revocationId: RevocationId.t option
+        [@ocaml.doc "The revocation ID of a revocation file in use."];
+      revocationType: RevocationType.t option
+        [@ocaml.doc "The type of revocation file."];
+      numberOfRevokedEntries: NumberOfRevokedEntries.t option
+        [@ocaml.doc "The number of revoked certificates."]}
+    let make ?trustStoreArn =
+      fun ?revocationId ->
+        fun ?revocationType ->
+          fun ?numberOfRevokedEntries ->
+            fun () ->
+              {
+                trustStoreArn;
+                revocationId;
+                revocationType;
+                numberOfRevokedEntries
+              }
+    let to_value x =
+      structure_to_value
+        [("TrustStoreArn",
+           (Option.map x.trustStoreArn ~f:TrustStoreArn.to_value));
+        ("RevocationId",
+          (Option.map x.revocationId ~f:RevocationId.to_value));
+        ("RevocationType",
+          (Option.map x.revocationType ~f:RevocationType.to_value));
+        ("NumberOfRevokedEntries",
+          (Option.map x.numberOfRevokedEntries
+             ~f:NumberOfRevokedEntries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let numberOfRevokedEntries =
+        (Option.map ~f:NumberOfRevokedEntries.of_xml)
+          (Xml.child xml_arg0 "NumberOfRevokedEntries") in
+      let revocationType =
+        (Option.map ~f:RevocationType.of_xml)
+          (Xml.child xml_arg0 "RevocationType") in
+      let revocationId =
+        (Option.map ~f:RevocationId.of_xml)
+          (Xml.child xml_arg0 "RevocationId") in
+      let trustStoreArn =
+        (Option.map ~f:TrustStoreArn.of_xml)
+          (Xml.child xml_arg0 "TrustStoreArn") in
+      make ?numberOfRevokedEntries ?revocationType ?revocationId
+        ?trustStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let numberOfRevokedEntries =
+        field_map json__ "NumberOfRevokedEntries"
+          NumberOfRevokedEntries.of_json in
+      let revocationType =
+        field_map json__ "RevocationType" RevocationType.of_json in
+      let revocationId = field_map json__ "RevocationId" RevocationId.of_json in
+      let trustStoreArn =
+        field_map json__ "TrustStoreArn" TrustStoreArn.of_json in
+      make ?numberOfRevokedEntries ?revocationType ?revocationId
+        ?trustStoreArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about the revocations used by a trust store."]
+module TrustStoreAssociation =
+  struct
+    type nonrec t =
+      {
+      resourceArn: TrustStoreAssociationResourceArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."]}
+    let make ?resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn",
+           (Option.map x.resourceArn
+              ~f:TrustStoreAssociationResourceArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        (Option.map ~f:TrustStoreAssociationResourceArn.of_xml)
+          (Xml.child xml_arg0 "ResourceArn") in
+      make ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map json__ "ResourceArn"
+          TrustStoreAssociationResourceArn.of_json in
+      make ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the resources a trust store is associated with."]
 module TargetHealthDescription =
   struct
     type nonrec t =
@@ -3934,20 +5677,46 @@ module TargetHealthDescription =
       healthCheckPort: HealthCheckPort.t option
         [@ocaml.doc "The port to use to connect with the target."];
       targetHealth: TargetHealth.t option
-        [@ocaml.doc "The health information for the target."]}
+        [@ocaml.doc "The health information for the target."];
+      anomalyDetection: AnomalyDetection.t option
+        [@ocaml.doc
+          "The anomaly detection result for the target. If no anomalies were detected, the result is normal. If anomalies were detected, the result is anomalous."];
+      administrativeOverride: AdministrativeOverride.t option
+        [@ocaml.doc
+          "The administrative override information for the target."]}
     let make ?target =
       fun ?healthCheckPort ->
         fun ?targetHealth ->
-          fun () -> { target; healthCheckPort; targetHealth }
+          fun ?anomalyDetection ->
+            fun ?administrativeOverride ->
+              fun () ->
+                {
+                  target;
+                  healthCheckPort;
+                  targetHealth;
+                  anomalyDetection;
+                  administrativeOverride
+                }
     let to_value x =
       structure_to_value
         [("Target", (Option.map x.target ~f:TargetDescription.to_value));
         ("HealthCheckPort",
           (Option.map x.healthCheckPort ~f:HealthCheckPort.to_value));
         ("TargetHealth",
-          (Option.map x.targetHealth ~f:TargetHealth.to_value))]
+          (Option.map x.targetHealth ~f:TargetHealth.to_value));
+        ("AnomalyDetection",
+          (Option.map x.anomalyDetection ~f:AnomalyDetection.to_value));
+        ("AdministrativeOverride",
+          (Option.map x.administrativeOverride
+             ~f:AdministrativeOverride.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let administrativeOverride =
+        (Option.map ~f:AdministrativeOverride.of_xml)
+          (Xml.child xml_arg0 "AdministrativeOverride") in
+      let anomalyDetection =
+        (Option.map ~f:AnomalyDetection.of_xml)
+          (Xml.child xml_arg0 "AnomalyDetection") in
       let targetHealth =
         (Option.map ~f:TargetHealth.of_xml)
           (Xml.child xml_arg0 "TargetHealth") in
@@ -3957,16 +5726,52 @@ module TargetHealthDescription =
       let target =
         (Option.map ~f:TargetDescription.of_xml)
           (Xml.child xml_arg0 "Target") in
-      make ?targetHealth ?healthCheckPort ?target ()
+      make ?administrativeOverride ?anomalyDetection ?targetHealth
+        ?healthCheckPort ?target ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetHealth = field_map json "TargetHealth" TargetHealth.of_json in
+    let of_json json__ =
+      let administrativeOverride =
+        field_map json__ "AdministrativeOverride"
+          AdministrativeOverride.of_json in
+      let anomalyDetection =
+        field_map json__ "AnomalyDetection" AnomalyDetection.of_json in
+      let targetHealth = field_map json__ "TargetHealth" TargetHealth.of_json in
       let healthCheckPort =
-        field_map json "HealthCheckPort" HealthCheckPort.of_json in
-      let target = field_map json "Target" TargetDescription.of_json in
-      make ?targetHealth ?healthCheckPort ?target ()
+        field_map json__ "HealthCheckPort" HealthCheckPort.of_json in
+      let target = field_map json__ "Target" TargetDescription.of_json in
+      make ?administrativeOverride ?anomalyDetection ?targetHealth
+        ?healthCheckPort ?target ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the health of a target."]
+module DescribeTargetHealthInputIncludeEnum =
+  struct
+    type nonrec t =
+      | AnomalyDetection 
+      | All 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AnomalyDetection -> "AnomalyDetection"
+      | All -> "All"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AnomalyDetection" -> AnomalyDetection
+      | "All" -> All
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration DescribeTargetHealthInputIncludeEnum" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"DescribeTargetHealthInputIncludeEnum" j)
+    let to_json = simple_to_json to_value
+  end
 module TagDescription =
   struct
     type nonrec t =
@@ -3986,9 +5791,9 @@ module TagDescription =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       make ?tags ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
       make ?tags ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The tags associated with a resource."]
@@ -4029,12 +5834,12 @@ module SslPolicy =
           (Xml.child xml_arg0 "SslProtocols") in
       make ?supportedLoadBalancerTypes ?name ?ciphers ?sslProtocols ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let supportedLoadBalancerTypes =
-        field_map json "SupportedLoadBalancerTypes" ListOfString.of_json in
-      let name = field_map json "Name" SslPolicyName.of_json in
-      let ciphers = field_map json "Ciphers" Ciphers.of_json in
-      let sslProtocols = field_map json "SslProtocols" SslProtocols.of_json in
+        field_map json__ "SupportedLoadBalancerTypes" ListOfString.of_json in
+      let name = field_map json__ "Name" SslPolicyName.of_json in
+      let ciphers = field_map json__ "Ciphers" Ciphers.of_json in
+      let sslProtocols = field_map json__ "SslProtocols" SslProtocols.of_json in
       make ?supportedLoadBalancerTypes ?name ?ciphers ?sslProtocols ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a policy used for SSL negotiation."]
@@ -4068,10 +5873,20 @@ module LoadBalancer =
         [@ocaml.doc "The IDs of the security groups for the load balancer."];
       ipAddressType: IpAddressType.t option
         [@ocaml.doc
-          "The type of IP addresses used by the subnets for your load balancer. The possible values are ipv4 (for IPv4 addresses) and dualstack (for IPv4 and IPv6 addresses)."];
+          "The type of IP addresses used for public or private connections by the subnets attached to your load balancer. \\[Application Load Balancers\\] The possible values are ipv4 (IPv4 addresses), dualstack (IPv4 and IPv6 addresses), and dualstack-without-public-ipv4 (public IPv6 addresses and private IPv4 and IPv6 addresses). \\[Network Load Balancers and Gateway Load Balancers\\] The possible values are ipv4 (IPv4 addresses) and dualstack (IPv4 and IPv6 addresses)."];
       customerOwnedIpv4Pool: CustomerOwnedIpv4Pool.t option
         [@ocaml.doc
-          "\\[Application Load Balancers on Outposts\\] The ID of the customer-owned address pool."]}
+          "\\[Application Load Balancers on Outposts\\] The ID of the customer-owned address pool."];
+      enforceSecurityGroupInboundRulesOnPrivateLinkTraffic:
+        EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic.t option
+        [@ocaml.doc
+          "Indicates whether to evaluate inbound security group rules for traffic sent to a Network Load Balancer through Amazon Web Services PrivateLink."];
+      enablePrefixForIpv6SourceNat: EnablePrefixForIpv6SourceNatEnum.t option
+        [@ocaml.doc
+          "\\[Network Load Balancers with UDP listeners\\] Indicates whether to use an IPv6 prefix from each subnet for source NAT. The IP address type must be dualstack. The default value is off."];
+      ipamPools: IpamPools.t option
+        [@ocaml.doc
+          "\\[Application Load Balancers\\] The IPAM pool in use by the load balancer, if configured."]}
     let make ?loadBalancerArn =
       fun ?dNSName ->
         fun ?canonicalHostedZoneId ->
@@ -4085,22 +5900,30 @@ module LoadBalancer =
                         fun ?securityGroups ->
                           fun ?ipAddressType ->
                             fun ?customerOwnedIpv4Pool ->
-                              fun () ->
-                                {
-                                  loadBalancerArn;
-                                  dNSName;
-                                  canonicalHostedZoneId;
-                                  createdTime;
-                                  loadBalancerName;
-                                  scheme;
-                                  vpcId;
-                                  state;
-                                  type_;
-                                  availabilityZones;
-                                  securityGroups;
-                                  ipAddressType;
-                                  customerOwnedIpv4Pool
-                                }
+                              fun
+                                ?enforceSecurityGroupInboundRulesOnPrivateLinkTraffic
+                                ->
+                                fun ?enablePrefixForIpv6SourceNat ->
+                                  fun ?ipamPools ->
+                                    fun () ->
+                                      {
+                                        loadBalancerArn;
+                                        dNSName;
+                                        canonicalHostedZoneId;
+                                        createdTime;
+                                        loadBalancerName;
+                                        scheme;
+                                        vpcId;
+                                        state;
+                                        type_;
+                                        availabilityZones;
+                                        securityGroups;
+                                        ipAddressType;
+                                        customerOwnedIpv4Pool;
+                                        enforceSecurityGroupInboundRulesOnPrivateLinkTraffic;
+                                        enablePrefixForIpv6SourceNat;
+                                        ipamPools
+                                      }
     let to_value x =
       structure_to_value
         [("LoadBalancerArn",
@@ -4124,9 +5947,26 @@ module LoadBalancer =
           (Option.map x.ipAddressType ~f:IpAddressType.to_value));
         ("CustomerOwnedIpv4Pool",
           (Option.map x.customerOwnedIpv4Pool
-             ~f:CustomerOwnedIpv4Pool.to_value))]
+             ~f:CustomerOwnedIpv4Pool.to_value));
+        ("EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic",
+          (Option.map x.enforceSecurityGroupInboundRulesOnPrivateLinkTraffic
+             ~f:EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic.to_value));
+        ("EnablePrefixForIpv6SourceNat",
+          (Option.map x.enablePrefixForIpv6SourceNat
+             ~f:EnablePrefixForIpv6SourceNatEnum.to_value));
+        ("IpamPools", (Option.map x.ipamPools ~f:IpamPools.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipamPools =
+        (Option.map ~f:IpamPools.of_xml) (Xml.child xml_arg0 "IpamPools") in
+      let enablePrefixForIpv6SourceNat =
+        (Option.map ~f:EnablePrefixForIpv6SourceNatEnum.of_xml)
+          (Xml.child xml_arg0 "EnablePrefixForIpv6SourceNat") in
+      let enforceSecurityGroupInboundRulesOnPrivateLinkTraffic =
+        (Option.map
+           ~f:EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic.of_xml)
+          (Xml.child xml_arg0
+             "EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic") in
       let customerOwnedIpv4Pool =
         (Option.map ~f:CustomerOwnedIpv4Pool.of_xml)
           (Xml.child xml_arg0 "CustomerOwnedIpv4Pool") in
@@ -4161,32 +6001,46 @@ module LoadBalancer =
       let loadBalancerArn =
         (Option.map ~f:LoadBalancerArn.of_xml)
           (Xml.child xml_arg0 "LoadBalancerArn") in
-      make ?customerOwnedIpv4Pool ?ipAddressType ?securityGroups
+      make ?ipamPools ?enablePrefixForIpv6SourceNat
+        ?enforceSecurityGroupInboundRulesOnPrivateLinkTraffic
+        ?customerOwnedIpv4Pool ?ipAddressType ?securityGroups
         ?availabilityZones ?type_ ?state ?vpcId ?scheme ?loadBalancerName
         ?createdTime ?canonicalHostedZoneId ?dNSName ?loadBalancerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ipamPools = field_map json__ "IpamPools" IpamPools.of_json in
+      let enablePrefixForIpv6SourceNat =
+        field_map json__ "EnablePrefixForIpv6SourceNat"
+          EnablePrefixForIpv6SourceNatEnum.of_json in
+      let enforceSecurityGroupInboundRulesOnPrivateLinkTraffic =
+        field_map json__
+          "EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic"
+          EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic.of_json in
       let customerOwnedIpv4Pool =
-        field_map json "CustomerOwnedIpv4Pool" CustomerOwnedIpv4Pool.of_json in
+        field_map json__ "CustomerOwnedIpv4Pool"
+          CustomerOwnedIpv4Pool.of_json in
       let ipAddressType =
-        field_map json "IpAddressType" IpAddressType.of_json in
+        field_map json__ "IpAddressType" IpAddressType.of_json in
       let securityGroups =
-        field_map json "SecurityGroups" SecurityGroups.of_json in
+        field_map json__ "SecurityGroups" SecurityGroups.of_json in
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZones.of_json in
-      let type_ = field_map json "Type" LoadBalancerTypeEnum.of_json in
-      let state = field_map json "State" LoadBalancerState.of_json in
-      let vpcId = field_map json "VpcId" VpcId.of_json in
-      let scheme = field_map json "Scheme" LoadBalancerSchemeEnum.of_json in
+        field_map json__ "AvailabilityZones" AvailabilityZones.of_json in
+      let type_ = field_map json__ "Type" LoadBalancerTypeEnum.of_json in
+      let state = field_map json__ "State" LoadBalancerState.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
+      let scheme = field_map json__ "Scheme" LoadBalancerSchemeEnum.of_json in
       let loadBalancerName =
-        field_map json "LoadBalancerName" LoadBalancerName.of_json in
-      let createdTime = field_map json "CreatedTime" CreatedTime.of_json in
+        field_map json__ "LoadBalancerName" LoadBalancerName.of_json in
+      let createdTime = field_map json__ "CreatedTime" CreatedTime.of_json in
       let canonicalHostedZoneId =
-        field_map json "CanonicalHostedZoneId" CanonicalHostedZoneId.of_json in
-      let dNSName = field_map json "DNSName" DNSName.of_json in
+        field_map json__ "CanonicalHostedZoneId"
+          CanonicalHostedZoneId.of_json in
+      let dNSName = field_map json__ "DNSName" DNSName.of_json in
       let loadBalancerArn =
-        field_map json "LoadBalancerArn" LoadBalancerArn.of_json in
-      make ?customerOwnedIpv4Pool ?ipAddressType ?securityGroups
+        field_map json__ "LoadBalancerArn" LoadBalancerArn.of_json in
+      make ?ipamPools ?enablePrefixForIpv6SourceNat
+        ?enforceSecurityGroupInboundRulesOnPrivateLinkTraffic
+        ?customerOwnedIpv4Pool ?ipAddressType ?securityGroups
         ?availabilityZones ?type_ ?state ?vpcId ?scheme ?loadBalancerName
         ?createdTime ?canonicalHostedZoneId ?dNSName ?loadBalancerArn ()
     let to_json v = composed_to_json to_value v
@@ -4195,9 +6049,7 @@ module Limit =
   struct
     type nonrec t =
       {
-      name: Name.t option
-        [@ocaml.doc
-          "The name of the limit. The possible values are: application-load-balancers condition-values-per-alb-rule condition-wildcards-per-alb-rule gateway-load-balancers gateway-load-balancers-per-vpc geneve-target-groups listeners-per-application-load-balancer listeners-per-network-load-balancer network-load-balancers rules-per-application-load-balancer target-groups target-groups-per-action-on-application-load-balancer target-groups-per-action-on-network-load-balancer target-groups-per-application-load-balancer targets-per-application-load-balancer targets-per-availability-zone-per-gateway-load-balancer targets-per-availability-zone-per-network-load-balancer targets-per-network-load-balancer"];
+      name: Name.t option [@ocaml.doc "The name of the limit."];
       max: Max.t option [@ocaml.doc "The maximum value of the limit."]}
     let make ?name = fun ?max -> fun () -> { name; max }
     let to_value x =
@@ -4210,12 +6062,125 @@ module Limit =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
       make ?max ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let max = field_map json "Max" Max.of_json in
-      let name = field_map json "Name" Name.of_json in make ?max ?name ()
+    let of_json json__ =
+      let max = field_map json__ "Max" Max.of_json in
+      let name = field_map json__ "Name" Name.of_json in make ?max ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about an Elastic Load Balancing resource limit for your Amazon Web Services account."]
+       "Information about an Elastic Load Balancing resource limit for your Amazon Web Services account. For more information, see the following: Quotas for your Application Load Balancers Quotas for your Network Load Balancers Quotas for your Gateway Load Balancers"]
+module TrustStoreRevocation =
+  struct
+    type nonrec t =
+      {
+      trustStoreArn: TrustStoreArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the trust store."];
+      revocationId: RevocationId.t option
+        [@ocaml.doc "The revocation ID of the revocation file."];
+      revocationType: RevocationType.t option
+        [@ocaml.doc "The type of revocation file."];
+      numberOfRevokedEntries: NumberOfRevokedEntries.t option
+        [@ocaml.doc "The number of revoked certificates."]}
+    let make ?trustStoreArn =
+      fun ?revocationId ->
+        fun ?revocationType ->
+          fun ?numberOfRevokedEntries ->
+            fun () ->
+              {
+                trustStoreArn;
+                revocationId;
+                revocationType;
+                numberOfRevokedEntries
+              }
+    let to_value x =
+      structure_to_value
+        [("TrustStoreArn",
+           (Option.map x.trustStoreArn ~f:TrustStoreArn.to_value));
+        ("RevocationId",
+          (Option.map x.revocationId ~f:RevocationId.to_value));
+        ("RevocationType",
+          (Option.map x.revocationType ~f:RevocationType.to_value));
+        ("NumberOfRevokedEntries",
+          (Option.map x.numberOfRevokedEntries
+             ~f:NumberOfRevokedEntries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let numberOfRevokedEntries =
+        (Option.map ~f:NumberOfRevokedEntries.of_xml)
+          (Xml.child xml_arg0 "NumberOfRevokedEntries") in
+      let revocationType =
+        (Option.map ~f:RevocationType.of_xml)
+          (Xml.child xml_arg0 "RevocationType") in
+      let revocationId =
+        (Option.map ~f:RevocationId.of_xml)
+          (Xml.child xml_arg0 "RevocationId") in
+      let trustStoreArn =
+        (Option.map ~f:TrustStoreArn.of_xml)
+          (Xml.child xml_arg0 "TrustStoreArn") in
+      make ?numberOfRevokedEntries ?revocationType ?revocationId
+        ?trustStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let numberOfRevokedEntries =
+        field_map json__ "NumberOfRevokedEntries"
+          NumberOfRevokedEntries.of_json in
+      let revocationType =
+        field_map json__ "RevocationType" RevocationType.of_json in
+      let revocationId = field_map json__ "RevocationId" RevocationId.of_json in
+      let trustStoreArn =
+        field_map json__ "TrustStoreArn" TrustStoreArn.of_json in
+      make ?numberOfRevokedEntries ?revocationType ?revocationId
+        ?trustStoreArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a revocation file in use by a trust store."]
+module RevocationContent =
+  struct
+    type nonrec t =
+      {
+      s3Bucket: S3Bucket.t option
+        [@ocaml.doc "The Amazon S3 bucket for the revocation file."];
+      s3Key: S3Key.t option
+        [@ocaml.doc "The Amazon S3 path for the revocation file."];
+      s3ObjectVersion: S3ObjectVersion.t option
+        [@ocaml.doc "The Amazon S3 object version of the revocation file."];
+      revocationType: RevocationType.t option
+        [@ocaml.doc "The type of revocation file."]}
+    let make ?s3Bucket =
+      fun ?s3Key ->
+        fun ?s3ObjectVersion ->
+          fun ?revocationType ->
+            fun () -> { s3Bucket; s3Key; s3ObjectVersion; revocationType }
+    let to_value x =
+      structure_to_value
+        [("S3Bucket", (Option.map x.s3Bucket ~f:S3Bucket.to_value));
+        ("S3Key", (Option.map x.s3Key ~f:S3Key.to_value));
+        ("S3ObjectVersion",
+          (Option.map x.s3ObjectVersion ~f:S3ObjectVersion.to_value));
+        ("RevocationType",
+          (Option.map x.revocationType ~f:RevocationType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let revocationType =
+        (Option.map ~f:RevocationType.of_xml)
+          (Xml.child xml_arg0 "RevocationType") in
+      let s3ObjectVersion =
+        (Option.map ~f:S3ObjectVersion.of_xml)
+          (Xml.child xml_arg0 "S3ObjectVersion") in
+      let s3Key = (Option.map ~f:S3Key.of_xml) (Xml.child xml_arg0 "S3Key") in
+      let s3Bucket =
+        (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "S3Bucket") in
+      make ?revocationType ?s3ObjectVersion ?s3Key ?s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let revocationType =
+        field_map json__ "RevocationType" RevocationType.of_json in
+      let s3ObjectVersion =
+        field_map json__ "S3ObjectVersion" S3ObjectVersion.of_json in
+      let s3Key = field_map json__ "S3Key" S3Key.of_json in
+      let s3Bucket = field_map json__ "S3Bucket" S3Bucket.of_json in
+      make ?revocationType ?s3ObjectVersion ?s3Key ?s3Bucket ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a revocation file."]
 module AllocationIdNotFoundException =
   struct
     type nonrec t = unit
@@ -4240,6 +6205,18 @@ module AvailabilityZoneNotSupportedException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified Availability Zone is not supported."]
+module CapacityReservationPendingException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "There is a pending capacity reservation."]
 module InvalidConfigurationRequestException =
   struct
     type nonrec t = unit
@@ -4292,6 +6269,9 @@ module SubnetMappings =
   struct
     type nonrec t = SubnetMapping.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetMapping.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4316,6 +6296,9 @@ module Subnets =
   struct
     type nonrec t = SubnetId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4334,6 +6317,31 @@ module Subnets =
                      | _ -> true))) ~f:SubnetId.of_xml)
     let of_json j = list_of_json ~kind:"Subnets" ~of_json:SubnetId.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module EnforceSecurityGroupInboundRulesOnPrivateLinkTrafficEnum =
+  struct
+    type nonrec t =
+      | On 
+      | Off 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | On -> "on" | Off -> "off" | Non_static_id s -> s
+    let of_string =
+      function | "on" -> On | "off" -> Off | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration EnforceSecurityGroupInboundRulesOnPrivateLinkTrafficEnum"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json
+           ~kind:"EnforceSecurityGroupInboundRulesOnPrivateLinkTrafficEnum" j)
+    let to_json = simple_to_json to_value
   end
 module InvalidSecurityGroupException =
   struct
@@ -4387,6 +6395,9 @@ module Rules =
   struct
     type nonrec t = Rule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Rule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4410,6 +6421,9 @@ module RulePriorityList =
   struct
     type nonrec t = RulePriorityPair.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RulePriorityPair.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4429,6 +6443,57 @@ module RulePriorityList =
     let of_json j =
       list_of_json ~kind:"RulePriorityList" ~of_json:RulePriorityPair.of_json
         j
+    let to_json v = composed_to_json to_value v
+  end
+module RevocationIdNotFoundException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified revocation ID does not exist."]
+module TrustStoreNotFoundException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified trust store does not exist."]
+module RevocationIds =
+  struct
+    type nonrec t = RevocationId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RevocationId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RevocationId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RevocationIds" ~of_json:RevocationId.of_json j
     let to_json v = composed_to_json to_value v
   end
 module ListenerNotFoundException =
@@ -4467,11 +6532,14 @@ module TooManyTagsException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You've reached the limit on the number of tags per load balancer."]
+       "You've reached the limit on the number of tags for this resource."]
 module ResourceArns =
   struct
     type nonrec t = ResourceArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4496,6 +6564,9 @@ module TagKeys =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4557,6 +6628,9 @@ module TargetDescriptions =
   struct
     type nonrec t = TargetDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetDescription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4578,10 +6652,65 @@ module TargetDescriptions =
         ~of_json:TargetDescription.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CaCertificatesBundleNotFoundException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified ca certificate bundle does not exist."]
+module InvalidCaCertificatesBundleException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The specified ca certificate bundle is in an invalid format, or corrupt."]
+module TrustStores =
+  struct
+    type nonrec t = TrustStore.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TrustStore.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TrustStore.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TrustStores" ~of_json:TrustStore.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TargetGroups =
   struct
     type nonrec t = TargetGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4606,6 +6735,9 @@ module TargetGroupAttributes =
   struct
     type nonrec t = TargetGroupAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetGroupAttribute.to_value)) |>
         (fun x -> `List x)
@@ -4704,11 +6836,27 @@ module UnsupportedProtocolException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified protocol is not supported."]
+module ResetTransforms =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module LoadBalancerAttributes =
   struct
     type nonrec t = LoadBalancerAttribute.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:20); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LoadBalancerAttribute.to_value)) |>
         (fun x -> `List x)
@@ -4771,6 +6919,9 @@ module Listeners =
   struct
     type nonrec t = Listener.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Listener.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4829,7 +6980,75 @@ module TooManyListenersException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You've reached the limit on the number of listeners per load balancer."]
-module HealthUnavailableException =
+module TrustStoreNotReadyException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified trust store is not active."]
+module ListenerAttributes =
+  struct
+    type nonrec t = ListenerAttribute.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ListenerAttribute.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ListenerAttribute.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListenerAttributes"
+        ~of_json:ListenerAttribute.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RemoveIpamPools =
+  struct
+    type nonrec t = RemoveIpamPoolEnum.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RemoveIpamPoolEnum.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RemoveIpamPoolEnum.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RemoveIpamPools"
+        ~of_json:RemoveIpamPoolEnum.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CapacityDecreaseRequestsLimitExceededException =
   struct
     type nonrec t = unit
     let make () = ()
@@ -4841,13 +7060,104 @@ module HealthUnavailableException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The health of the specified targets could not be retrieved due to an internal error."]
-module TargetHealthDescriptions =
+       "You've exceeded the daily capacity decrease limit for this reservation."]
+module CapacityUnitsLimitExceededException =
   struct
-    type nonrec t = TargetHealthDescription.t list
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "You've exceeded the capacity units limit."]
+module DecreaseRequestsRemaining =
+  struct
+    type nonrec t = int
     let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for DecreaseRequestsRemaining"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module InsufficientCapacityException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "There is insufficient capacity to reserve."]
+module LastModifiedTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module MinimumLoadBalancerCapacity =
+  struct
+    type nonrec t =
+      {
+      capacityUnits: CapacityUnits.t option
+        [@ocaml.doc "The number of capacity units."]}
+    let make ?capacityUnits = fun () -> { capacityUnits }
+    let to_value x =
+      structure_to_value
+        [("CapacityUnits",
+           (Option.map x.capacityUnits ~f:CapacityUnits.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityUnits =
+        (Option.map ~f:CapacityUnits.of_xml)
+          (Xml.child xml_arg0 "CapacityUnits") in
+      make ?capacityUnits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityUnits =
+        field_map json__ "CapacityUnits" CapacityUnits.of_json in
+      make ?capacityUnits ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The minimum capacity for a load balancer."]
+module PriorRequestNotCompleteException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation is not allowed while a prior request has not been completed."]
+module ZonalCapacityReservationStates =
+  struct
+    type nonrec t = ZonalCapacityReservationState.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:TargetHealthDescription.to_value)) |>
+      (xs |> (List.map ~f:ZonalCapacityReservationState.to_value)) |>
         (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
@@ -4862,12 +7172,64 @@ module TargetHealthDescriptions =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:TargetHealthDescription.of_xml)
+                     | _ -> true))) ~f:ZonalCapacityReservationState.of_xml)
     let of_json j =
-      list_of_json ~kind:"TargetHealthDescriptions"
-        ~of_json:TargetHealthDescription.of_json j
+      list_of_json ~kind:"ZonalCapacityReservationStates"
+        ~of_json:ZonalCapacityReservationState.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ResetCapacityReservation =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module Location =
+  struct
+    type nonrec t = string
+    let context_ = "Location"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Location" j
+    let to_json = simple_to_json to_value
+  end
+module Policy =
+  struct
+    type nonrec t = string
+    let context_ = "Policy"
+    let make i =
+      let open Result in ok_or_failwith (check_string_min i ~min:1); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Policy" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceNotFoundException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified resource does not exist."]
 module Marker =
   struct
     type nonrec t = string
@@ -4898,10 +7260,197 @@ module PageSize =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module TrustStoreArns =
+  struct
+    type nonrec t = TrustStoreArn.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TrustStoreArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TrustStoreArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TrustStoreArns" ~of_json:TrustStoreArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TrustStoreNames =
+  struct
+    type nonrec t = TrustStoreName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TrustStoreName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TrustStoreName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TrustStoreNames" ~of_json:TrustStoreName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeTrustStoreRevocationResponse =
+  struct
+    type nonrec t = DescribeTrustStoreRevocation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DescribeTrustStoreRevocation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DescribeTrustStoreRevocation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DescribeTrustStoreRevocationResponse"
+        ~of_json:DescribeTrustStoreRevocation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TrustStoreAssociations =
+  struct
+    type nonrec t = TrustStoreAssociation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TrustStoreAssociation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TrustStoreAssociation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TrustStoreAssociations"
+        ~of_json:TrustStoreAssociation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module HealthUnavailableException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The health of the specified targets could not be retrieved due to an internal error."]
+module TargetHealthDescriptions =
+  struct
+    type nonrec t = TargetHealthDescription.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TargetHealthDescription.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TargetHealthDescription.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TargetHealthDescriptions"
+        ~of_json:TargetHealthDescription.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListOfDescribeTargetHealthIncludeOptions =
+  struct
+    type nonrec t = DescribeTargetHealthInputIncludeEnum.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DescribeTargetHealthInputIncludeEnum.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:DescribeTargetHealthInputIncludeEnum.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListOfDescribeTargetHealthIncludeOptions"
+        ~of_json:DescribeTargetHealthInputIncludeEnum.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TargetGroupArns =
   struct
     type nonrec t = TargetGroupArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetGroupArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4926,6 +7475,9 @@ module TargetGroupNames =
   struct
     type nonrec t = TargetGroupName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetGroupName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4951,6 +7503,9 @@ module TagDescriptions =
   struct
     type nonrec t = TagDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagDescription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4975,6 +7530,9 @@ module SslPolicies =
   struct
     type nonrec t = SslPolicy.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SslPolicy.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4999,6 +7557,9 @@ module SslPolicyNames =
   struct
     type nonrec t = SslPolicyName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SslPolicyName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5023,6 +7584,9 @@ module RuleArns =
   struct
     type nonrec t = RuleArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RuleArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5046,6 +7610,9 @@ module LoadBalancers =
   struct
     type nonrec t = LoadBalancer.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LoadBalancer.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5070,6 +7637,9 @@ module LoadBalancerNames =
   struct
     type nonrec t = LoadBalancerName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LoadBalancerName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5095,6 +7665,9 @@ module ListenerArns =
   struct
     type nonrec t = ListenerArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListenerArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5119,6 +7692,9 @@ module Limits =
   struct
     type nonrec t = Limit.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Limit.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5138,6 +7714,18 @@ module Limits =
     let of_json j = list_of_json ~kind:"Limits" ~of_json:Limit.of_json j
     let to_json v = composed_to_json to_value v
   end
+module TrustStoreInUseException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified trust store is currently in use."]
 module ResourceInUseException =
   struct
     type nonrec t = unit
@@ -5150,6 +7738,68 @@ module ResourceInUseException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A specified resource is in use."]
+module DeleteAssociationSameAccountException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The specified association can't be within the same account."]
+module TrustStoreAssociationNotFoundException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified association does not exist."]
+module DuplicateTagKeysException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A tag key was specified more than once."]
+module DuplicateTrustStoreNameException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A trust store with the specified name already exists."]
+module TooManyTrustStoresException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You've reached the limit on the number of trust stores for your Amazon Web Services account."]
 module DuplicateTargetGroupNameException =
   struct
     type nonrec t = unit
@@ -5200,18 +7850,6 @@ module DuplicateLoadBalancerNameException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A load balancer with the specified name already exists."]
-module DuplicateTagKeysException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A tag key was specified more than once."]
 module InvalidSchemeException =
   struct
     type nonrec t = unit
@@ -5237,6 +7875,101 @@ module TooManyLoadBalancersException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You've reached the limit on the number of load balancers for your Amazon Web Services account."]
+module InvalidRevocationContentException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The provided revocation file is an invalid format, or uses an incorrect algorithm."]
+module RevocationContentNotFoundException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified revocation file does not exist."]
+module TooManyTrustStoreRevocationEntriesException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The specified trust store has too many revocation entries."]
+module TrustStoreRevocations =
+  struct
+    type nonrec t = TrustStoreRevocation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TrustStoreRevocation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TrustStoreRevocation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TrustStoreRevocations"
+        ~of_json:TrustStoreRevocation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RevocationContents =
+  struct
+    type nonrec t = RevocationContent.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RevocationContent.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RevocationContent.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RevocationContents"
+        ~of_json:RevocationContent.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module SetSubnetsOutput =
   struct
     type setSubnetsResult =
@@ -5244,7 +7977,10 @@ module SetSubnetsOutput =
       availabilityZones: AvailabilityZones.t option
         [@ocaml.doc "Information about the subnets."];
       ipAddressType: IpAddressType.t option
-        [@ocaml.doc "\\[Network Load Balancers\\] The IP address type."]}
+        [@ocaml.doc "The IP address type."];
+      enablePrefixForIpv6SourceNat: EnablePrefixForIpv6SourceNatEnum.t option
+        [@ocaml.doc
+          "\\[Network Load Balancers\\] Indicates whether to use an IPv6 prefix from each subnet for source NAT."]}
     and responseMetaData = unit
     and t =
       {
@@ -5254,6 +7990,8 @@ module SetSubnetsOutput =
       [ `AllocationIdNotFoundException of AllocationIdNotFoundException.t 
       | `AvailabilityZoneNotSupportedException of
           AvailabilityZoneNotSupportedException.t 
+      | `CapacityReservationPendingException of
+          CapacityReservationPendingException.t 
       | `InvalidConfigurationRequestException of
           InvalidConfigurationRequestException.t 
       | `InvalidSubnetException of InvalidSubnetException.t 
@@ -5263,11 +8001,17 @@ module SetSubnetsOutput =
     let context_ = "SetSubnetsOutput"
     let make ?availabilityZones =
       fun ?ipAddressType ->
-        fun () ->
-          {
-            setSubnetsResult = { availabilityZones; ipAddressType };
-            responseMetaData = ()
-          }
+        fun ?enablePrefixForIpv6SourceNat ->
+          fun () ->
+            {
+              setSubnetsResult =
+                {
+                  availabilityZones;
+                  ipAddressType;
+                  enablePrefixForIpv6SourceNat
+                };
+              responseMetaData = ()
+            }
     let error_of_json name json =
       match name with
       | "AllocationIdNotFoundException" ->
@@ -5276,6 +8020,9 @@ module SetSubnetsOutput =
       | "AvailabilityZoneNotSupportedException" ->
           `AvailabilityZoneNotSupportedException
             (AvailabilityZoneNotSupportedException.of_json json)
+      | "CapacityReservationPendingException" ->
+          `CapacityReservationPendingException
+            (CapacityReservationPendingException.of_json json)
       | "InvalidConfigurationRequestException" ->
           `InvalidConfigurationRequestException
             (InvalidConfigurationRequestException.of_json json)
@@ -5297,6 +8044,9 @@ module SetSubnetsOutput =
       | "AvailabilityZoneNotSupportedException" ->
           `AvailabilityZoneNotSupportedException
             (AvailabilityZoneNotSupportedException.of_xml xml)
+      | "CapacityReservationPendingException" ->
+          `CapacityReservationPendingException
+            (CapacityReservationPendingException.of_xml xml)
       | "InvalidConfigurationRequestException" ->
           `InvalidConfigurationRequestException
             (InvalidConfigurationRequestException.of_xml xml)
@@ -5319,6 +8069,10 @@ module SetSubnetsOutput =
           `Assoc
             [("error", (`String "AvailabilityZoneNotSupportedException"));
             ("details", (AvailabilityZoneNotSupportedException.to_json e))]
+      | `CapacityReservationPendingException e ->
+          `Assoc
+            [("error", (`String "CapacityReservationPendingException"));
+            ("details", (CapacityReservationPendingException.to_json e))]
       | `InvalidConfigurationRequestException e ->
           `Assoc
             [("error", (`String "InvalidConfigurationRequestException"));
@@ -5346,28 +8100,37 @@ module SetSubnetsOutput =
         [("AvailabilityZones",
            (Option.map x.availabilityZones ~f:AvailabilityZones.to_value));
         ("IpAddressType",
-          (Option.map x.ipAddressType ~f:IpAddressType.to_value))]
+          (Option.map x.ipAddressType ~f:IpAddressType.to_value));
+        ("EnablePrefixForIpv6SourceNat",
+          (Option.map x.enablePrefixForIpv6SourceNat
+             ~f:EnablePrefixForIpv6SourceNatEnum.to_value))]
         ~wrapper:"SetSubnetsResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 = Xml.child_exn ~context:context_ t "SetSubnetsResult" in
+      let enablePrefixForIpv6SourceNat =
+        (Option.map ~f:EnablePrefixForIpv6SourceNatEnum.of_xml)
+          (Xml.child xml_arg0 "EnablePrefixForIpv6SourceNat") in
       let ipAddressType =
         (Option.map ~f:IpAddressType.of_xml)
           (Xml.child xml_arg0 "IpAddressType") in
       let availabilityZones =
         (Option.map ~f:AvailabilityZones.of_xml)
           (Xml.child xml_arg0 "AvailabilityZones") in
-      make ?ipAddressType ?availabilityZones ()
+      make ?enablePrefixForIpv6SourceNat ?ipAddressType ?availabilityZones ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let enablePrefixForIpv6SourceNat =
+        field_map json__ "EnablePrefixForIpv6SourceNat"
+          EnablePrefixForIpv6SourceNatEnum.of_json in
       let ipAddressType =
-        field_map json "IpAddressType" IpAddressType.of_json in
+        field_map json__ "IpAddressType" IpAddressType.of_json in
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZones.of_json in
-      make ?ipAddressType ?availabilityZones ()
+        field_map json__ "AvailabilityZones" AvailabilityZones.of_json in
+      make ?enablePrefixForIpv6SourceNat ?ipAddressType ?availabilityZones ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables the Availability Zones for the specified public subnets for the specified Application Load Balancer or Network Load Balancer. The specified subnets replace the previously enabled subnets. When you specify subnets for a Network Load Balancer, you must include all subnets that were enabled previously, with their existing configurations, plus any additional subnets."]
+       "Enables the Availability Zones for the specified public subnets for the specified Application Load Balancer, Network Load Balancer or Gateway Load Balancer. The specified subnets replace the previously enabled subnets."]
 module SetSubnetsInput =
   struct
     type nonrec t =
@@ -5376,20 +8139,30 @@ module SetSubnetsInput =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the load balancer."];
       subnets: Subnets.t option
         [@ocaml.doc
-          "The IDs of the public subnets. You can specify only one subnet per Availability Zone. You must specify either subnets or subnet mappings. \\[Application Load Balancers\\] You must specify subnets from at least two Availability Zones. \\[Application Load Balancers on Outposts\\] You must specify one Outpost subnet. \\[Application Load Balancers on Local Zones\\] You can specify subnets from one or more Local Zones. \\[Network Load Balancers\\] You can specify subnets from one or more Availability Zones."];
+          "The IDs of the public subnets. You can specify only one subnet per Availability Zone. You must specify either subnets or subnet mappings. \\[Application Load Balancers\\] You must specify subnets from at least two Availability Zones. \\[Application Load Balancers on Outposts\\] You must specify one Outpost subnet. \\[Application Load Balancers on Local Zones\\] You can specify subnets from one or more Local Zones. \\[Network Load Balancers\\] You can specify subnets from one or more Availability Zones. \\[Gateway Load Balancers\\] You can specify subnets from one or more Availability Zones. You must include all subnets that were enabled previously, with their existing configurations, plus any additional subnets."];
       subnetMappings: SubnetMappings.t option
         [@ocaml.doc
-          "The IDs of the public subnets. You can specify only one subnet per Availability Zone. You must specify either subnets or subnet mappings. \\[Application Load Balancers\\] You must specify subnets from at least two Availability Zones. You cannot specify Elastic IP addresses for your subnets. \\[Application Load Balancers on Outposts\\] You must specify one Outpost subnet. \\[Application Load Balancers on Local Zones\\] You can specify subnets from one or more Local Zones. \\[Network Load Balancers\\] You can specify subnets from one or more Availability Zones. You can specify one Elastic IP address per subnet if you need static IP addresses for your internet-facing load balancer. For internal load balancers, you can specify one private IP address per subnet from the IPv4 range of the subnet. For internet-facing load balancer, you can specify one IPv6 address per subnet."];
+          "The IDs of the public subnets. You can specify only one subnet per Availability Zone. You must specify either subnets or subnet mappings. \\[Application Load Balancers\\] You must specify subnets from at least two Availability Zones. You can't specify Elastic IP addresses for your subnets. \\[Application Load Balancers on Outposts\\] You must specify one Outpost subnet. \\[Application Load Balancers on Local Zones\\] You can specify subnets from one or more Local Zones. \\[Network Load Balancers\\] You can specify subnets from one or more Availability Zones. You can specify one Elastic IP address per subnet if you need static IP addresses for your internet-facing load balancer. For internal load balancers, you can specify one private IP address per subnet from the IPv4 range of the subnet. For internet-facing load balancer, you can specify one IPv6 address per subnet. \\[Gateway Load Balancers\\] You can specify subnets from one or more Availability Zones."];
       ipAddressType: IpAddressType.t option
         [@ocaml.doc
-          "\\[Network Load Balancers\\] The type of IP addresses used by the subnets for your load balancer. The possible values are ipv4 (for IPv4 addresses) and dualstack (for IPv4 and IPv6 addresses). You can\226\128\153t specify dualstack for a load balancer with a UDP or TCP_UDP listener. ."]}
+          "The IP address type. \\[Application Load Balancers\\] The possible values are ipv4 (IPv4 addresses), dualstack (IPv4 and IPv6 addresses), and dualstack-without-public-ipv4 (public IPv6 addresses and private IPv4 and IPv6 addresses). \\[Network Load Balancers and Gateway Load Balancers\\] The possible values are ipv4 (IPv4 addresses) and dualstack (IPv4 and IPv6 addresses)."];
+      enablePrefixForIpv6SourceNat: EnablePrefixForIpv6SourceNatEnum.t option
+        [@ocaml.doc
+          "\\[Network Load Balancers with UDP listeners\\] Indicates whether to use an IPv6 prefix from each subnet for source NAT. The IP address type must be dualstack. The default value is off."]}
     let context_ = "SetSubnetsInput"
     let make ?subnets =
       fun ?subnetMappings ->
         fun ?ipAddressType ->
-          fun ~loadBalancerArn ->
-            fun () ->
-              { subnets; subnetMappings; ipAddressType; loadBalancerArn }
+          fun ?enablePrefixForIpv6SourceNat ->
+            fun ~loadBalancerArn ->
+              fun () ->
+                {
+                  subnets;
+                  subnetMappings;
+                  ipAddressType;
+                  enablePrefixForIpv6SourceNat;
+                  loadBalancerArn
+                }
     let to_value x =
       structure_to_value
         [("LoadBalancerArn",
@@ -5398,9 +8171,15 @@ module SetSubnetsInput =
         ("SubnetMappings",
           (Option.map x.subnetMappings ~f:SubnetMappings.to_value));
         ("IpAddressType",
-          (Option.map x.ipAddressType ~f:IpAddressType.to_value))]
+          (Option.map x.ipAddressType ~f:IpAddressType.to_value));
+        ("EnablePrefixForIpv6SourceNat",
+          (Option.map x.enablePrefixForIpv6SourceNat
+             ~f:EnablePrefixForIpv6SourceNatEnum.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let enablePrefixForIpv6SourceNat =
+        (Option.map ~f:EnablePrefixForIpv6SourceNatEnum.of_xml)
+          (Xml.child xml_arg0 "EnablePrefixForIpv6SourceNat") in
       let ipAddressType =
         (Option.map ~f:IpAddressType.of_xml)
           (Xml.child xml_arg0 "IpAddressType") in
@@ -5412,27 +8191,36 @@ module SetSubnetsInput =
       let loadBalancerArn =
         LoadBalancerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerArn") in
-      make ?ipAddressType ?subnetMappings ?subnets ~loadBalancerArn ()
+      make ?enablePrefixForIpv6SourceNat ?ipAddressType ?subnetMappings
+        ?subnets ~loadBalancerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let enablePrefixForIpv6SourceNat =
+        field_map json__ "EnablePrefixForIpv6SourceNat"
+          EnablePrefixForIpv6SourceNatEnum.of_json in
       let ipAddressType =
-        field_map json "IpAddressType" IpAddressType.of_json in
+        field_map json__ "IpAddressType" IpAddressType.of_json in
       let subnetMappings =
-        field_map json "SubnetMappings" SubnetMappings.of_json in
-      let subnets = field_map json "Subnets" Subnets.of_json in
+        field_map json__ "SubnetMappings" SubnetMappings.of_json in
+      let subnets = field_map json__ "Subnets" Subnets.of_json in
       let loadBalancerArn =
-        field_map_exn json "LoadBalancerArn" LoadBalancerArn.of_json in
-      make ?ipAddressType ?subnetMappings ?subnets ~loadBalancerArn ()
+        field_map_exn json__ "LoadBalancerArn" LoadBalancerArn.of_json in
+      make ?enablePrefixForIpv6SourceNat ?ipAddressType ?subnetMappings
+        ?subnets ~loadBalancerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables the Availability Zones for the specified public subnets for the specified Application Load Balancer or Network Load Balancer. The specified subnets replace the previously enabled subnets. When you specify subnets for a Network Load Balancer, you must include all subnets that were enabled previously, with their existing configurations, plus any additional subnets."]
+       "Enables the Availability Zones for the specified public subnets for the specified Application Load Balancer, Network Load Balancer or Gateway Load Balancer. The specified subnets replace the previously enabled subnets."]
 module SetSecurityGroupsOutput =
   struct
     type setSecurityGroupsResult =
       {
       securityGroupIds: SecurityGroups.t option
         [@ocaml.doc
-          "The IDs of the security groups associated with the load balancer."]}
+          "The IDs of the security groups associated with the load balancer."];
+      enforceSecurityGroupInboundRulesOnPrivateLinkTraffic:
+        EnforceSecurityGroupInboundRulesOnPrivateLinkTrafficEnum.t option
+        [@ocaml.doc
+          "Indicates whether to evaluate inbound security group rules for traffic sent to a Network Load Balancer through Amazon Web Services PrivateLink."]}
     and responseMetaData = unit
     and t =
       {
@@ -5447,11 +8235,16 @@ module SetSecurityGroupsOutput =
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "SetSecurityGroupsOutput"
     let make ?securityGroupIds =
-      fun () ->
-        {
-          setSecurityGroupsResult = { securityGroupIds };
-          responseMetaData = ()
-        }
+      fun ?enforceSecurityGroupInboundRulesOnPrivateLinkTraffic ->
+        fun () ->
+          {
+            setSecurityGroupsResult =
+              {
+                securityGroupIds;
+                enforceSecurityGroupInboundRulesOnPrivateLinkTraffic
+              };
+            responseMetaData = ()
+          }
     let error_of_json name json =
       match name with
       | "InvalidConfigurationRequestException" ->
@@ -5502,24 +8295,38 @@ module SetSecurityGroupsOutput =
       let x = t.setSecurityGroupsResult in
       structure_to_wrapped_value
         [("SecurityGroupIds",
-           (Option.map x.securityGroupIds ~f:SecurityGroups.to_value))]
+           (Option.map x.securityGroupIds ~f:SecurityGroups.to_value));
+        ("EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic",
+          (Option.map x.enforceSecurityGroupInboundRulesOnPrivateLinkTraffic
+             ~f:EnforceSecurityGroupInboundRulesOnPrivateLinkTrafficEnum.to_value))]
         ~wrapper:"SetSecurityGroupsResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "SetSecurityGroupsResult" in
+      let enforceSecurityGroupInboundRulesOnPrivateLinkTraffic =
+        (Option.map
+           ~f:EnforceSecurityGroupInboundRulesOnPrivateLinkTrafficEnum.of_xml)
+          (Xml.child xml_arg0
+             "EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic") in
       let securityGroupIds =
         (Option.map ~f:SecurityGroups.of_xml)
           (Xml.child xml_arg0 "SecurityGroupIds") in
-      make ?securityGroupIds ()
+      make ?enforceSecurityGroupInboundRulesOnPrivateLinkTraffic
+        ?securityGroupIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let enforceSecurityGroupInboundRulesOnPrivateLinkTraffic =
+        field_map json__
+          "EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic"
+          EnforceSecurityGroupInboundRulesOnPrivateLinkTrafficEnum.of_json in
       let securityGroupIds =
-        field_map json "SecurityGroupIds" SecurityGroups.of_json in
-      make ?securityGroupIds ()
+        field_map json__ "SecurityGroupIds" SecurityGroups.of_json in
+      make ?enforceSecurityGroupInboundRulesOnPrivateLinkTraffic
+        ?securityGroupIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates the specified security groups with the specified Application Load Balancer. The specified security groups override the previously associated security groups. You can't specify a security group for a Network Load Balancer or Gateway Load Balancer."]
+       "Associates the specified security groups with the specified Application Load Balancer or Network Load Balancer. The specified security groups override the previously associated security groups. You can't perform this operation on a Network Load Balancer unless you specified a security group for the load balancer when you created it. You can't associate a security group with a Gateway Load Balancer."]
 module SetSecurityGroupsInput =
   struct
     type nonrec t =
@@ -5527,34 +8334,59 @@ module SetSecurityGroupsInput =
       loadBalancerArn: LoadBalancerArn.t
         [@ocaml.doc "The Amazon Resource Name (ARN) of the load balancer."];
       securityGroups: SecurityGroups.t
-        [@ocaml.doc "The IDs of the security groups."]}
+        [@ocaml.doc "The IDs of the security groups."];
+      enforceSecurityGroupInboundRulesOnPrivateLinkTraffic:
+        EnforceSecurityGroupInboundRulesOnPrivateLinkTrafficEnum.t option
+        [@ocaml.doc
+          "Indicates whether to evaluate inbound security group rules for traffic sent to a Network Load Balancer through Amazon Web Services PrivateLink. Applies only if the load balancer has an associated security group. The default is on."]}
     let context_ = "SetSecurityGroupsInput"
-    let make ~loadBalancerArn =
-      fun ~securityGroups -> fun () -> { loadBalancerArn; securityGroups }
+    let make ?enforceSecurityGroupInboundRulesOnPrivateLinkTraffic =
+      fun ~loadBalancerArn ->
+        fun ~securityGroups ->
+          fun () ->
+            {
+              enforceSecurityGroupInboundRulesOnPrivateLinkTraffic;
+              loadBalancerArn;
+              securityGroups
+            }
     let to_value x =
       structure_to_value
         [("LoadBalancerArn",
            (Some (LoadBalancerArn.to_value x.loadBalancerArn)));
-        ("SecurityGroups", (Some (SecurityGroups.to_value x.securityGroups)))]
+        ("SecurityGroups", (Some (SecurityGroups.to_value x.securityGroups)));
+        ("EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic",
+          (Option.map x.enforceSecurityGroupInboundRulesOnPrivateLinkTraffic
+             ~f:EnforceSecurityGroupInboundRulesOnPrivateLinkTrafficEnum.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let enforceSecurityGroupInboundRulesOnPrivateLinkTraffic =
+        (Option.map
+           ~f:EnforceSecurityGroupInboundRulesOnPrivateLinkTrafficEnum.of_xml)
+          (Xml.child xml_arg0
+             "EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic") in
       let securityGroups =
         SecurityGroups.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecurityGroups") in
       let loadBalancerArn =
         LoadBalancerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerArn") in
-      make ~securityGroups ~loadBalancerArn ()
+      make ?enforceSecurityGroupInboundRulesOnPrivateLinkTraffic
+        ~securityGroups ~loadBalancerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let enforceSecurityGroupInboundRulesOnPrivateLinkTraffic =
+        field_map json__
+          "EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic"
+          EnforceSecurityGroupInboundRulesOnPrivateLinkTrafficEnum.of_json in
       let securityGroups =
-        field_map_exn json "SecurityGroups" SecurityGroups.of_json in
+        field_map_exn json__ "SecurityGroups" SecurityGroups.of_json in
       let loadBalancerArn =
-        field_map_exn json "LoadBalancerArn" LoadBalancerArn.of_json in
-      make ~securityGroups ~loadBalancerArn ()
+        field_map_exn json__ "LoadBalancerArn" LoadBalancerArn.of_json in
+      make ?enforceSecurityGroupInboundRulesOnPrivateLinkTraffic
+        ~securityGroups ~loadBalancerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates the specified security groups with the specified Application Load Balancer. The specified security groups override the previously associated security groups. You can't specify a security group for a Network Load Balancer or Gateway Load Balancer."]
+       "Associates the specified security groups with the specified Application Load Balancer or Network Load Balancer. The specified security groups override the previously associated security groups. You can't perform this operation on a Network Load Balancer unless you specified a security group for the load balancer when you created it. You can't associate a security group with a Gateway Load Balancer."]
 module SetRulePrioritiesOutput =
   struct
     type setRulePrioritiesResult =
@@ -5628,8 +8460,8 @@ module SetRulePrioritiesOutput =
       let rules = (Option.map ~f:Rules.of_xml) (Xml.child xml_arg0 "Rules") in
       make ?rules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map json "Rules" Rules.of_json in make ?rules ()
+    let of_json json__ =
+      let rules = field_map json__ "Rules" Rules.of_json in make ?rules ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Sets the priorities of the specified rules. You can reorder the rules as long as there are no priority conflicts in the new order. Any existing rules that you do not specify retain their current priority."]
@@ -5651,9 +8483,9 @@ module SetRulePrioritiesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "RulePriorities") in
       make ~rulePriorities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let rulePriorities =
-        field_map_exn json "RulePriorities" RulePriorityList.of_json in
+        field_map_exn json__ "RulePriorities" RulePriorityList.of_json in
       make ~rulePriorities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5739,13 +8571,13 @@ module SetIpAddressTypeOutput =
           (Xml.child xml_arg0 "IpAddressType") in
       make ?ipAddressType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ipAddressType =
-        field_map json "IpAddressType" IpAddressType.of_json in
+        field_map json__ "IpAddressType" IpAddressType.of_json in
       make ?ipAddressType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sets the type of IP addresses used by the subnets of the specified Application Load Balancer or Network Load Balancer."]
+       "Sets the type of IP addresses used by the subnets of the specified load balancer."]
 module SetIpAddressTypeInput =
   struct
     type nonrec t =
@@ -5754,7 +8586,7 @@ module SetIpAddressTypeInput =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the load balancer."];
       ipAddressType: IpAddressType.t
         [@ocaml.doc
-          "The IP address type. The possible values are ipv4 (for IPv4 addresses) and dualstack (for IPv4 and IPv6 addresses). You can\226\128\153t specify dualstack for a load balancer with a UDP or TCP_UDP listener."]}
+          "The IP address type. Internal load balancers must use ipv4. \\[Application Load Balancers\\] The possible values are ipv4 (IPv4 addresses), dualstack (IPv4 and IPv6 addresses), and dualstack-without-public-ipv4 (public IPv6 addresses and private IPv4 and IPv6 addresses). Application Load Balancer authentication supports IPv4 addresses only when connecting to an Identity Provider (IdP) or Amazon Cognito endpoint. Without a public IPv4 address the load balancer can't complete the authentication process, resulting in HTTP 500 errors. \\[Network Load Balancers and Gateway Load Balancers\\] The possible values are ipv4 (IPv4 addresses) and dualstack (IPv4 and IPv6 addresses)."]}
     let context_ = "SetIpAddressTypeInput"
     let make ~loadBalancerArn =
       fun ~ipAddressType -> fun () -> { loadBalancerArn; ipAddressType }
@@ -5773,15 +8605,109 @@ module SetIpAddressTypeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerArn") in
       make ~ipAddressType ~loadBalancerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ipAddressType =
-        field_map_exn json "IpAddressType" IpAddressType.of_json in
+        field_map_exn json__ "IpAddressType" IpAddressType.of_json in
       let loadBalancerArn =
-        field_map_exn json "LoadBalancerArn" LoadBalancerArn.of_json in
+        field_map_exn json__ "LoadBalancerArn" LoadBalancerArn.of_json in
       make ~ipAddressType ~loadBalancerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sets the type of IP addresses used by the subnets of the specified Application Load Balancer or Network Load Balancer."]
+       "Sets the type of IP addresses used by the subnets of the specified load balancer."]
+module RemoveTrustStoreRevocationsOutput =
+  struct
+    type removeTrustStoreRevocationsResult = unit
+    and responseMetaData = unit
+    and t =
+      {
+      removeTrustStoreRevocationsResult: removeTrustStoreRevocationsResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `RevocationIdNotFoundException of RevocationIdNotFoundException.t 
+      | `TrustStoreNotFoundException of TrustStoreNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () =
+      { removeTrustStoreRevocationsResult = (); responseMetaData = () }
+    let error_of_json name json =
+      match name with
+      | "RevocationIdNotFoundException" ->
+          `RevocationIdNotFoundException
+            (RevocationIdNotFoundException.of_json json)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "RevocationIdNotFoundException" ->
+          `RevocationIdNotFoundException
+            (RevocationIdNotFoundException.of_xml xml)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `RevocationIdNotFoundException e ->
+          `Assoc
+            [("error", (`String "RevocationIdNotFoundException"));
+            ("details", (RevocationIdNotFoundException.to_json e))]
+      | `TrustStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrustStoreNotFoundException"));
+            ("details", (TrustStoreNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes the specified revocation file from the specified trust store."]
+module RemoveTrustStoreRevocationsInput =
+  struct
+    type nonrec t =
+      {
+      trustStoreArn: TrustStoreArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the trust store."];
+      revocationIds: RevocationIds.t
+        [@ocaml.doc
+          "The revocation IDs of the revocation files you want to remove."]}
+    let context_ = "RemoveTrustStoreRevocationsInput"
+    let make ~trustStoreArn =
+      fun ~revocationIds -> fun () -> { trustStoreArn; revocationIds }
+    let to_value x =
+      structure_to_value
+        [("TrustStoreArn", (Some (TrustStoreArn.to_value x.trustStoreArn)));
+        ("RevocationIds", (Some (RevocationIds.to_value x.revocationIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let revocationIds =
+        RevocationIds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RevocationIds") in
+      let trustStoreArn =
+        TrustStoreArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrustStoreArn") in
+      make ~revocationIds ~trustStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let revocationIds =
+        field_map_exn json__ "RevocationIds" RevocationIds.of_json in
+      let trustStoreArn =
+        field_map_exn json__ "TrustStoreArn" TrustStoreArn.of_json in
+      make ~revocationIds ~trustStoreArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes the specified revocation file from the specified trust store."]
 module RemoveTagsOutput =
   struct
     type removeTagsResult = unit
@@ -5796,6 +8722,7 @@ module RemoveTagsOutput =
       | `RuleNotFoundException of RuleNotFoundException.t 
       | `TargetGroupNotFoundException of TargetGroupNotFoundException.t 
       | `TooManyTagsException of TooManyTagsException.t 
+      | `TrustStoreNotFoundException of TrustStoreNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = { removeTagsResult = (); responseMetaData = () }
     let error_of_json name json =
@@ -5812,6 +8739,9 @@ module RemoveTagsOutput =
             (TargetGroupNotFoundException.of_json json)
       | "TooManyTagsException" ->
           `TooManyTagsException (TooManyTagsException.of_json json)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -5829,6 +8759,9 @@ module RemoveTagsOutput =
             (TargetGroupNotFoundException.of_xml xml)
       | "TooManyTagsException" ->
           `TooManyTagsException (TooManyTagsException.of_xml xml)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -5853,6 +8786,10 @@ module RemoveTagsOutput =
           `Assoc
             [("error", (`String "TooManyTagsException"));
             ("details", (TooManyTagsException.to_json e))]
+      | `TrustStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrustStoreNotFoundException"));
+            ("details", (TrustStoreNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -5890,10 +8827,10 @@ module RemoveTagsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArns") in
       make ~tagKeys ~resourceArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeys.of_json in
       let resourceArns =
-        field_map_exn json "ResourceArns" ResourceArns.of_json in
+        field_map_exn json__ "ResourceArns" ResourceArns.of_json in
       make ~tagKeys ~resourceArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5981,10 +8918,11 @@ module RemoveListenerCertificatesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ~certificates ~listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificates =
-        field_map_exn json "Certificates" CertificateList.of_json in
-      let listenerArn = field_map_exn json "ListenerArn" ListenerArn.of_json in
+        field_map_exn json__ "Certificates" CertificateList.of_json in
+      let listenerArn =
+        field_map_exn json__ "ListenerArn" ListenerArn.of_json in
       make ~certificates ~listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6065,7 +9003,7 @@ module RegisterTargetsOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers the specified targets with the specified target group. If the target is an EC2 instance, it must be in the running state when you register it. By default, the load balancer routes requests to registered targets using the protocol and port for the target group. Alternatively, you can override the port for a target when you register it. You can register each EC2 instance or IP address with the same target group multiple times using different ports. With a Network Load Balancer, you cannot register instances by instance ID if they have the following instance types: C1, CC1, CC2, CG1, CG2, CR1, CS1, G1, G2, HI1, HS1, M1, M2, M3, and T1. You can register instances of these types by IP address."]
+       "Registers the specified targets with the specified target group. If the target is an EC2 instance, it must be in the running state when you register it. By default, the load balancer routes requests to registered targets using the protocol and port for the target group. Alternatively, you can override the port for a target when you register it. You can register each EC2 instance or IP address with the same target group multiple times using different ports. For more information, see the following: Register targets for your Application Load Balancer Register targets for your Network Load Balancer Register targets for your Gateway Load Balancer"]
 module RegisterTargetsInput =
   struct
     type nonrec t =
@@ -6091,14 +9029,171 @@ module RegisterTargetsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "TargetGroupArn") in
       make ~targets ~targetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targets = field_map_exn json "Targets" TargetDescriptions.of_json in
+    let of_json json__ =
+      let targets = field_map_exn json__ "Targets" TargetDescriptions.of_json in
       let targetGroupArn =
-        field_map_exn json "TargetGroupArn" TargetGroupArn.of_json in
+        field_map_exn json__ "TargetGroupArn" TargetGroupArn.of_json in
       make ~targets ~targetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers the specified targets with the specified target group. If the target is an EC2 instance, it must be in the running state when you register it. By default, the load balancer routes requests to registered targets using the protocol and port for the target group. Alternatively, you can override the port for a target when you register it. You can register each EC2 instance or IP address with the same target group multiple times using different ports. With a Network Load Balancer, you cannot register instances by instance ID if they have the following instance types: C1, CC1, CC2, CG1, CG2, CR1, CS1, G1, G2, HI1, HS1, M1, M2, M3, and T1. You can register instances of these types by IP address."]
+       "Registers the specified targets with the specified target group. If the target is an EC2 instance, it must be in the running state when you register it. By default, the load balancer routes requests to registered targets using the protocol and port for the target group. Alternatively, you can override the port for a target when you register it. You can register each EC2 instance or IP address with the same target group multiple times using different ports. For more information, see the following: Register targets for your Application Load Balancer Register targets for your Network Load Balancer Register targets for your Gateway Load Balancer"]
+module ModifyTrustStoreOutput =
+  struct
+    type modifyTrustStoreResult =
+      {
+      trustStores: TrustStores.t option
+        [@ocaml.doc "Information about the modified trust store."]}
+    and responseMetaData = unit
+    and t =
+      {
+      modifyTrustStoreResult: modifyTrustStoreResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `CaCertificatesBundleNotFoundException of
+          CaCertificatesBundleNotFoundException.t 
+      | `InvalidCaCertificatesBundleException of
+          InvalidCaCertificatesBundleException.t 
+      | `TrustStoreNotFoundException of TrustStoreNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "ModifyTrustStoreOutput"
+    let make ?trustStores =
+      fun () ->
+        { modifyTrustStoreResult = { trustStores }; responseMetaData = () }
+    let error_of_json name json =
+      match name with
+      | "CaCertificatesBundleNotFoundException" ->
+          `CaCertificatesBundleNotFoundException
+            (CaCertificatesBundleNotFoundException.of_json json)
+      | "InvalidCaCertificatesBundleException" ->
+          `InvalidCaCertificatesBundleException
+            (InvalidCaCertificatesBundleException.of_json json)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CaCertificatesBundleNotFoundException" ->
+          `CaCertificatesBundleNotFoundException
+            (CaCertificatesBundleNotFoundException.of_xml xml)
+      | "InvalidCaCertificatesBundleException" ->
+          `InvalidCaCertificatesBundleException
+            (InvalidCaCertificatesBundleException.of_xml xml)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CaCertificatesBundleNotFoundException e ->
+          `Assoc
+            [("error", (`String "CaCertificatesBundleNotFoundException"));
+            ("details", (CaCertificatesBundleNotFoundException.to_json e))]
+      | `InvalidCaCertificatesBundleException e ->
+          `Assoc
+            [("error", (`String "InvalidCaCertificatesBundleException"));
+            ("details", (InvalidCaCertificatesBundleException.to_json e))]
+      | `TrustStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrustStoreNotFoundException"));
+            ("details", (TrustStoreNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.modifyTrustStoreResult in
+      structure_to_wrapped_value
+        [("TrustStores", (Option.map x.trustStores ~f:TrustStores.to_value))]
+        ~wrapper:"ModifyTrustStoreResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "ModifyTrustStoreResult" in
+      let trustStores =
+        (Option.map ~f:TrustStores.of_xml) (Xml.child xml_arg0 "TrustStores") in
+      make ?trustStores ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let trustStores = field_map json__ "TrustStores" TrustStores.of_json in
+      make ?trustStores ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update the ca certificate bundle for the specified trust store."]
+module ModifyTrustStoreInput =
+  struct
+    type nonrec t =
+      {
+      trustStoreArn: TrustStoreArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the trust store."];
+      caCertificatesBundleS3Bucket: S3Bucket.t
+        [@ocaml.doc "The Amazon S3 bucket for the ca certificates bundle."];
+      caCertificatesBundleS3Key: S3Key.t
+        [@ocaml.doc "The Amazon S3 path for the ca certificates bundle."];
+      caCertificatesBundleS3ObjectVersion: S3ObjectVersion.t option
+        [@ocaml.doc
+          "The Amazon S3 object version for the ca certificates bundle. If undefined the current version is used."]}
+    let context_ = "ModifyTrustStoreInput"
+    let make ?caCertificatesBundleS3ObjectVersion =
+      fun ~trustStoreArn ->
+        fun ~caCertificatesBundleS3Bucket ->
+          fun ~caCertificatesBundleS3Key ->
+            fun () ->
+              {
+                caCertificatesBundleS3ObjectVersion;
+                trustStoreArn;
+                caCertificatesBundleS3Bucket;
+                caCertificatesBundleS3Key
+              }
+    let to_value x =
+      structure_to_value
+        [("TrustStoreArn", (Some (TrustStoreArn.to_value x.trustStoreArn)));
+        ("CaCertificatesBundleS3Bucket",
+          (Some (S3Bucket.to_value x.caCertificatesBundleS3Bucket)));
+        ("CaCertificatesBundleS3Key",
+          (Some (S3Key.to_value x.caCertificatesBundleS3Key)));
+        ("CaCertificatesBundleS3ObjectVersion",
+          (Option.map x.caCertificatesBundleS3ObjectVersion
+             ~f:S3ObjectVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let caCertificatesBundleS3ObjectVersion =
+        (Option.map ~f:S3ObjectVersion.of_xml)
+          (Xml.child xml_arg0 "CaCertificatesBundleS3ObjectVersion") in
+      let caCertificatesBundleS3Key =
+        S3Key.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "CaCertificatesBundleS3Key") in
+      let caCertificatesBundleS3Bucket =
+        S3Bucket.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "CaCertificatesBundleS3Bucket") in
+      let trustStoreArn =
+        TrustStoreArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrustStoreArn") in
+      make ?caCertificatesBundleS3ObjectVersion ~caCertificatesBundleS3Key
+        ~caCertificatesBundleS3Bucket ~trustStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let caCertificatesBundleS3ObjectVersion =
+        field_map json__ "CaCertificatesBundleS3ObjectVersion"
+          S3ObjectVersion.of_json in
+      let caCertificatesBundleS3Key =
+        field_map_exn json__ "CaCertificatesBundleS3Key" S3Key.of_json in
+      let caCertificatesBundleS3Bucket =
+        field_map_exn json__ "CaCertificatesBundleS3Bucket" S3Bucket.of_json in
+      let trustStoreArn =
+        field_map_exn json__ "TrustStoreArn" TrustStoreArn.of_json in
+      make ?caCertificatesBundleS3ObjectVersion ~caCertificatesBundleS3Key
+        ~caCertificatesBundleS3Bucket ~trustStoreArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update the ca certificate bundle for the specified trust store."]
 module ModifyTargetGroupOutput =
   struct
     type modifyTargetGroupResult =
@@ -6171,8 +9266,8 @@ module ModifyTargetGroupOutput =
           (Xml.child xml_arg0 "TargetGroups") in
       make ?targetGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetGroups = field_map json "TargetGroups" TargetGroups.of_json in
+    let of_json json__ =
+      let targetGroups = field_map json__ "TargetGroups" TargetGroups.of_json in
       make ?targetGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6185,7 +9280,7 @@ module ModifyTargetGroupInput =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the target group."];
       healthCheckProtocol: ProtocolEnum.t option
         [@ocaml.doc
-          "The protocol the load balancer uses when performing health checks on targets. For Application Load Balancers, the default is HTTP. For Network Load Balancers and Gateway Load Balancers, the default is TCP. The TCP protocol is not supported for health checks if the protocol of the target group is HTTP or HTTPS. It is supported for health checks only if the protocol of the target group is TCP, TLS, UDP, or TCP_UDP. The GENEVE, TLS, UDP, and TCP_UDP protocols are not supported for health checks. With Network Load Balancers, you can't modify this setting."];
+          "The protocol the load balancer uses when performing health checks on targets. For Application Load Balancers, the default is HTTP. For Network Load Balancers and Gateway Load Balancers, the default is TCP. The TCP protocol is not supported for health checks if the protocol of the target group is HTTP or HTTPS. It is supported for health checks only if the protocol of the target group is TCP, TLS, UDP, or TCP_UDP. The GENEVE, TLS, UDP, TCP_UDP, QUIC, and TCP_QUIC protocols are not supported for health checks."];
       healthCheckPort: HealthCheckPort.t option
         [@ocaml.doc
           "The port the load balancer uses when performing health checks on targets."];
@@ -6193,22 +9288,23 @@ module ModifyTargetGroupInput =
         [@ocaml.doc
           "\\[HTTP/HTTPS health checks\\] The destination for health checks on the targets. \\[HTTP1 or HTTP2 protocol version\\] The ping path. The default is /. \\[GRPC protocol version\\] The path of a custom health check method with the format /package.service/method. The default is /Amazon Web Services.ALB/healthcheck."];
       healthCheckEnabled: HealthCheckEnabled.t option
-        [@ocaml.doc "Indicates whether health checks are enabled."];
+        [@ocaml.doc
+          "Indicates whether health checks are enabled. If the target type is lambda, health checks are disabled by default but can be enabled. If the target type is instance, ip, or alb, health checks are always enabled and can't be disabled."];
       healthCheckIntervalSeconds: HealthCheckIntervalSeconds.t option
         [@ocaml.doc
-          "The approximate amount of time, in seconds, between health checks of an individual target. For TCP health checks, the supported values are 10 or 30 seconds. With Network Load Balancers, you can't modify this setting."];
+          "The approximate amount of time, in seconds, between health checks of an individual target."];
       healthCheckTimeoutSeconds: HealthCheckTimeoutSeconds.t option
         [@ocaml.doc
-          "\\[HTTP/HTTPS health checks\\] The amount of time, in seconds, during which no response means a failed health check. With Network Load Balancers, you can't modify this setting."];
+          "\\[HTTP/HTTPS health checks\\] The amount of time, in seconds, during which no response means a failed health check."];
       healthyThresholdCount: HealthCheckThresholdCount.t option
         [@ocaml.doc
           "The number of consecutive health checks successes required before considering an unhealthy target healthy."];
       unhealthyThresholdCount: HealthCheckThresholdCount.t option
         [@ocaml.doc
-          "The number of consecutive health check failures required before considering the target unhealthy. For target groups with a protocol of TCP or TLS, this value must be the same as the healthy threshold count."];
+          "The number of consecutive health check failures required before considering the target unhealthy."];
       matcher: Matcher.t option
         [@ocaml.doc
-          "\\[HTTP/HTTPS health checks\\] The HTTP or gRPC codes to use when checking for a successful response from a target. With Network Load Balancers, you can't modify this setting."]}
+          "\\[HTTP/HTTPS health checks\\] The HTTP or gRPC codes to use when checking for a successful response from a target. For target groups with a protocol of TCP, TCP_UDP, UDP or TLS the range is 200-599. For target groups with a protocol of HTTP or HTTPS, the range is 200-499. For target groups with a protocol of GENEVE, the range is 200-399."]}
     let context_ = "ModifyTargetGroupInput"
     let make ?healthCheckProtocol =
       fun ?healthCheckPort ->
@@ -6292,29 +9388,29 @@ module ModifyTargetGroupInput =
         ?healthCheckEnabled ?healthCheckPath ?healthCheckPort
         ?healthCheckProtocol ~targetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let matcher = field_map json "Matcher" Matcher.of_json in
+    let of_json json__ =
+      let matcher = field_map json__ "Matcher" Matcher.of_json in
       let unhealthyThresholdCount =
-        field_map json "UnhealthyThresholdCount"
+        field_map json__ "UnhealthyThresholdCount"
           HealthCheckThresholdCount.of_json in
       let healthyThresholdCount =
-        field_map json "HealthyThresholdCount"
+        field_map json__ "HealthyThresholdCount"
           HealthCheckThresholdCount.of_json in
       let healthCheckTimeoutSeconds =
-        field_map json "HealthCheckTimeoutSeconds"
+        field_map json__ "HealthCheckTimeoutSeconds"
           HealthCheckTimeoutSeconds.of_json in
       let healthCheckIntervalSeconds =
-        field_map json "HealthCheckIntervalSeconds"
+        field_map json__ "HealthCheckIntervalSeconds"
           HealthCheckIntervalSeconds.of_json in
       let healthCheckEnabled =
-        field_map json "HealthCheckEnabled" HealthCheckEnabled.of_json in
-      let healthCheckPath = field_map json "HealthCheckPath" Path.of_json in
+        field_map json__ "HealthCheckEnabled" HealthCheckEnabled.of_json in
+      let healthCheckPath = field_map json__ "HealthCheckPath" Path.of_json in
       let healthCheckPort =
-        field_map json "HealthCheckPort" HealthCheckPort.of_json in
+        field_map json__ "HealthCheckPort" HealthCheckPort.of_json in
       let healthCheckProtocol =
-        field_map json "HealthCheckProtocol" ProtocolEnum.of_json in
+        field_map json__ "HealthCheckProtocol" ProtocolEnum.of_json in
       let targetGroupArn =
-        field_map_exn json "TargetGroupArn" TargetGroupArn.of_json in
+        field_map_exn json__ "TargetGroupArn" TargetGroupArn.of_json in
       make ?matcher ?unhealthyThresholdCount ?healthyThresholdCount
         ?healthCheckTimeoutSeconds ?healthCheckIntervalSeconds
         ?healthCheckEnabled ?healthCheckPath ?healthCheckPort
@@ -6327,7 +9423,7 @@ module ModifyTargetGroupAttributesOutput =
     type modifyTargetGroupAttributesResult =
       {
       attributes: TargetGroupAttributes.t option
-        [@ocaml.doc "Information about the attributes."]}
+        [@ocaml.doc "Information about the target group attributes."]}
     and responseMetaData = unit
     and t =
       {
@@ -6398,9 +9494,9 @@ module ModifyTargetGroupAttributesOutput =
           (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map json "Attributes" TargetGroupAttributes.of_json in
+        field_map json__ "Attributes" TargetGroupAttributes.of_json in
       make ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6411,7 +9507,8 @@ module ModifyTargetGroupAttributesInput =
       {
       targetGroupArn: TargetGroupArn.t
         [@ocaml.doc "The Amazon Resource Name (ARN) of the target group."];
-      attributes: TargetGroupAttributes.t [@ocaml.doc "The attributes."]}
+      attributes: TargetGroupAttributes.t
+        [@ocaml.doc "The target group attributes."]}
     let context_ = "ModifyTargetGroupAttributesInput"
     let make ~targetGroupArn =
       fun ~attributes -> fun () -> { targetGroupArn; attributes }
@@ -6430,11 +9527,11 @@ module ModifyTargetGroupAttributesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "TargetGroupArn") in
       make ~attributes ~targetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map_exn json "Attributes" TargetGroupAttributes.of_json in
+        field_map_exn json__ "Attributes" TargetGroupAttributes.of_json in
       let targetGroupArn =
-        field_map_exn json "TargetGroupArn" TargetGroupArn.of_json in
+        field_map_exn json__ "TargetGroupArn" TargetGroupArn.of_json in
       make ~attributes ~targetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6603,8 +9700,8 @@ module ModifyRuleOutput =
       let rules = (Option.map ~f:Rules.of_xml) (Xml.child xml_arg0 "Rules") in
       make ?rules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map json "Rules" Rules.of_json in make ?rules ()
+    let of_json json__ =
+      let rules = field_map json__ "Rules" Rules.of_json in make ?rules ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Replaces the specified properties of the specified rule. Any properties that you do not specify are unchanged. To add an item to a list, remove an item from a list, or update an item in a list, you must provide the entire list. For example, to add an action, specify a list with the current actions plus the new action."]
@@ -6615,19 +9712,39 @@ module ModifyRuleInput =
       ruleArn: RuleArn.t
         [@ocaml.doc "The Amazon Resource Name (ARN) of the rule."];
       conditions: RuleConditionList.t option [@ocaml.doc "The conditions."];
-      actions: Actions.t option [@ocaml.doc "The actions."]}
+      actions: Actions.t option [@ocaml.doc "The actions."];
+      transforms: RuleTransformList.t option
+        [@ocaml.doc
+          "The transforms to apply to requests that match this rule. You can add one host header rewrite transform and one URL rewrite transform. If you specify Transforms, you can't specify ResetTransforms."];
+      resetTransforms: ResetTransforms.t option
+        [@ocaml.doc
+          "Indicates whether to remove all transforms from the rule. If you specify ResetTransforms, you can't specify Transforms."]}
     let context_ = "ModifyRuleInput"
     let make ?conditions =
       fun ?actions ->
-        fun ~ruleArn -> fun () -> { conditions; actions; ruleArn }
+        fun ?transforms ->
+          fun ?resetTransforms ->
+            fun ~ruleArn ->
+              fun () ->
+                { conditions; actions; transforms; resetTransforms; ruleArn }
     let to_value x =
       structure_to_value
         [("RuleArn", (Some (RuleArn.to_value x.ruleArn)));
         ("Conditions",
           (Option.map x.conditions ~f:RuleConditionList.to_value));
-        ("Actions", (Option.map x.actions ~f:Actions.to_value))]
+        ("Actions", (Option.map x.actions ~f:Actions.to_value));
+        ("Transforms",
+          (Option.map x.transforms ~f:RuleTransformList.to_value));
+        ("ResetTransforms",
+          (Option.map x.resetTransforms ~f:ResetTransforms.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let resetTransforms =
+        (Option.map ~f:ResetTransforms.of_xml)
+          (Xml.child xml_arg0 "ResetTransforms") in
+      let transforms =
+        (Option.map ~f:RuleTransformList.of_xml)
+          (Xml.child xml_arg0 "Transforms") in
       let actions =
         (Option.map ~f:Actions.of_xml) (Xml.child xml_arg0 "Actions") in
       let conditions =
@@ -6635,13 +9752,18 @@ module ModifyRuleInput =
           (Xml.child xml_arg0 "Conditions") in
       let ruleArn =
         RuleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RuleArn") in
-      make ?actions ?conditions ~ruleArn ()
+      make ?resetTransforms ?transforms ?actions ?conditions ~ruleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let actions = field_map json "Actions" Actions.of_json in
-      let conditions = field_map json "Conditions" RuleConditionList.of_json in
-      let ruleArn = field_map_exn json "RuleArn" RuleArn.of_json in
-      make ?actions ?conditions ~ruleArn ()
+    let of_json json__ =
+      let resetTransforms =
+        field_map json__ "ResetTransforms" ResetTransforms.of_json in
+      let transforms =
+        field_map json__ "Transforms" RuleTransformList.of_json in
+      let actions = field_map json__ "Actions" Actions.of_json in
+      let conditions =
+        field_map json__ "Conditions" RuleConditionList.of_json in
+      let ruleArn = field_map_exn json__ "RuleArn" RuleArn.of_json in
+      make ?resetTransforms ?transforms ?actions ?conditions ~ruleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Replaces the specified properties of the specified rule. Any properties that you do not specify are unchanged. To add an item to a list, remove an item from a list, or update an item in a list, you must provide the entire list. For example, to add an action, specify a list with the current actions plus the new action."]
@@ -6722,9 +9844,9 @@ module ModifyLoadBalancerAttributesOutput =
           (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map json "Attributes" LoadBalancerAttributes.of_json in
+        field_map json__ "Attributes" LoadBalancerAttributes.of_json in
       make ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6755,11 +9877,11 @@ module ModifyLoadBalancerAttributesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerArn") in
       make ~attributes ~loadBalancerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map_exn json "Attributes" LoadBalancerAttributes.of_json in
+        field_map_exn json__ "Attributes" LoadBalancerAttributes.of_json in
       let loadBalancerArn =
-        field_map_exn json "LoadBalancerArn" LoadBalancerArn.of_json in
+        field_map_exn json__ "LoadBalancerArn" LoadBalancerArn.of_json in
       make ~attributes ~loadBalancerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6798,6 +9920,8 @@ module ModifyListenerOutput =
       | `TooManyTargetsException of TooManyTargetsException.t 
       | `TooManyUniqueTargetGroupsPerLoadBalancerException of
           TooManyUniqueTargetGroupsPerLoadBalancerException.t 
+      | `TrustStoreNotFoundException of TrustStoreNotFoundException.t 
+      | `TrustStoreNotReadyException of TrustStoreNotReadyException.t 
       | `UnsupportedProtocolException of UnsupportedProtocolException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ModifyListenerOutput"
@@ -6850,6 +9974,12 @@ module ModifyListenerOutput =
       | "TooManyUniqueTargetGroupsPerLoadBalancerException" ->
           `TooManyUniqueTargetGroupsPerLoadBalancerException
             (TooManyUniqueTargetGroupsPerLoadBalancerException.of_json json)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_json json)
+      | "TrustStoreNotReadyException" ->
+          `TrustStoreNotReadyException
+            (TrustStoreNotReadyException.of_json json)
       | "UnsupportedProtocolException" ->
           `UnsupportedProtocolException
             (UnsupportedProtocolException.of_json json)
@@ -6900,6 +10030,12 @@ module ModifyListenerOutput =
       | "TooManyUniqueTargetGroupsPerLoadBalancerException" ->
           `TooManyUniqueTargetGroupsPerLoadBalancerException
             (TooManyUniqueTargetGroupsPerLoadBalancerException.of_xml xml)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_xml xml)
+      | "TrustStoreNotReadyException" ->
+          `TrustStoreNotReadyException
+            (TrustStoreNotReadyException.of_xml xml)
       | "UnsupportedProtocolException" ->
           `UnsupportedProtocolException
             (UnsupportedProtocolException.of_xml xml)
@@ -6973,6 +10109,14 @@ module ModifyListenerOutput =
                (`String "TooManyUniqueTargetGroupsPerLoadBalancerException"));
             ("details",
               (TooManyUniqueTargetGroupsPerLoadBalancerException.to_json e))]
+      | `TrustStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrustStoreNotFoundException"));
+            ("details", (TrustStoreNotFoundException.to_json e))]
+      | `TrustStoreNotReadyException e ->
+          `Assoc
+            [("error", (`String "TrustStoreNotReadyException"));
+            ("details", (TrustStoreNotReadyException.to_json e))]
       | `UnsupportedProtocolException e ->
           `Assoc
             [("error", (`String "UnsupportedProtocolException"));
@@ -6994,8 +10138,8 @@ module ModifyListenerOutput =
         (Option.map ~f:Listeners.of_xml) (Xml.child xml_arg0 "Listeners") in
       make ?listeners ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let listeners = field_map json "Listeners" Listeners.of_json in
+    let of_json json__ =
+      let listeners = field_map json__ "Listeners" Listeners.of_json in
       make ?listeners ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7008,10 +10152,10 @@ module ModifyListenerInput =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the listener."];
       port: Port.t option
         [@ocaml.doc
-          "The port for connections from clients to the load balancer. You cannot specify a port for a Gateway Load Balancer."];
+          "The port for connections from clients to the load balancer. You can't specify a port for a Gateway Load Balancer."];
       protocol: ProtocolEnum.t option
         [@ocaml.doc
-          "The protocol for connections from clients to the load balancer. Application Load Balancers support the HTTP and HTTPS protocols. Network Load Balancers support the TCP, TLS, UDP, and TCP_UDP protocols. You can\226\128\153t change the protocol to UDP or TCP_UDP if dual-stack mode is enabled. You cannot specify a protocol for a Gateway Load Balancer."];
+          "The protocol for connections from clients to the load balancer. Application Load Balancers support the HTTP and HTTPS protocols. Network Load Balancers support the TCP, TLS, UDP, TCP_UDP, QUIC, and TCP_QUIC protocols. You can\226\128\153t change the protocol to UDP, TCP_UDP, QUIC, or TCP_QUIC if dual-stack mode is enabled. You can't specify a protocol for a Gateway Load Balancer."];
       sslPolicy: SslPolicyName.t option
         [@ocaml.doc
           "\\[HTTPS and TLS listeners\\] The security policy that defines which protocols and ciphers are supported. For more information, see Security policies in the Application Load Balancers Guide or Security policies in the Network Load Balancers Guide."];
@@ -7022,7 +10166,10 @@ module ModifyListenerInput =
         [@ocaml.doc "The actions for the default rule."];
       alpnPolicy: AlpnPolicyName.t option
         [@ocaml.doc
-          "\\[TLS listeners\\] The name of the Application-Layer Protocol Negotiation (ALPN) policy. You can specify one policy name. The following are the possible values: HTTP1Only HTTP2Only HTTP2Optional HTTP2Preferred None For more information, see ALPN policies in the Network Load Balancers Guide."]}
+          "\\[TLS listeners\\] The name of the Application-Layer Protocol Negotiation (ALPN) policy. You can specify one policy name. The following are the possible values: HTTP1Only HTTP2Only HTTP2Optional HTTP2Preferred None For more information, see ALPN policies in the Network Load Balancers Guide."];
+      mutualAuthentication: MutualAuthenticationAttributes.t option
+        [@ocaml.doc
+          "\\[HTTPS listeners\\] The mutual authentication configuration information."]}
     let context_ = "ModifyListenerInput"
     let make ?port =
       fun ?protocol ->
@@ -7030,17 +10177,19 @@ module ModifyListenerInput =
           fun ?certificates ->
             fun ?defaultActions ->
               fun ?alpnPolicy ->
-                fun ~listenerArn ->
-                  fun () ->
-                    {
-                      port;
-                      protocol;
-                      sslPolicy;
-                      certificates;
-                      defaultActions;
-                      alpnPolicy;
-                      listenerArn
-                    }
+                fun ?mutualAuthentication ->
+                  fun ~listenerArn ->
+                    fun () ->
+                      {
+                        port;
+                        protocol;
+                        sslPolicy;
+                        certificates;
+                        defaultActions;
+                        alpnPolicy;
+                        mutualAuthentication;
+                        listenerArn
+                      }
     let to_value x =
       structure_to_value
         [("ListenerArn", (Some (ListenerArn.to_value x.listenerArn)));
@@ -7050,9 +10199,15 @@ module ModifyListenerInput =
         ("Certificates",
           (Option.map x.certificates ~f:CertificateList.to_value));
         ("DefaultActions", (Option.map x.defaultActions ~f:Actions.to_value));
-        ("AlpnPolicy", (Option.map x.alpnPolicy ~f:AlpnPolicyName.to_value))]
+        ("AlpnPolicy", (Option.map x.alpnPolicy ~f:AlpnPolicyName.to_value));
+        ("MutualAuthentication",
+          (Option.map x.mutualAuthentication
+             ~f:MutualAuthenticationAttributes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let mutualAuthentication =
+        (Option.map ~f:MutualAuthenticationAttributes.of_xml)
+          (Xml.child xml_arg0 "MutualAuthentication") in
       let alpnPolicy =
         (Option.map ~f:AlpnPolicyName.of_xml)
           (Xml.child xml_arg0 "AlpnPolicy") in
@@ -7069,23 +10224,1191 @@ module ModifyListenerInput =
       let listenerArn =
         ListenerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
-      make ?alpnPolicy ?defaultActions ?certificates ?sslPolicy ?protocol
-        ?port ~listenerArn ()
+      make ?mutualAuthentication ?alpnPolicy ?defaultActions ?certificates
+        ?sslPolicy ?protocol ?port ~listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let alpnPolicy = field_map json "AlpnPolicy" AlpnPolicyName.of_json in
-      let defaultActions = field_map json "DefaultActions" Actions.of_json in
+    let of_json json__ =
+      let mutualAuthentication =
+        field_map json__ "MutualAuthentication"
+          MutualAuthenticationAttributes.of_json in
+      let alpnPolicy = field_map json__ "AlpnPolicy" AlpnPolicyName.of_json in
+      let defaultActions = field_map json__ "DefaultActions" Actions.of_json in
       let certificates =
-        field_map json "Certificates" CertificateList.of_json in
-      let sslPolicy = field_map json "SslPolicy" SslPolicyName.of_json in
-      let protocol = field_map json "Protocol" ProtocolEnum.of_json in
-      let port = field_map json "Port" Port.of_json in
-      let listenerArn = field_map_exn json "ListenerArn" ListenerArn.of_json in
-      make ?alpnPolicy ?defaultActions ?certificates ?sslPolicy ?protocol
-        ?port ~listenerArn ()
+        field_map json__ "Certificates" CertificateList.of_json in
+      let sslPolicy = field_map json__ "SslPolicy" SslPolicyName.of_json in
+      let protocol = field_map json__ "Protocol" ProtocolEnum.of_json in
+      let port = field_map json__ "Port" Port.of_json in
+      let listenerArn =
+        field_map_exn json__ "ListenerArn" ListenerArn.of_json in
+      make ?mutualAuthentication ?alpnPolicy ?defaultActions ?certificates
+        ?sslPolicy ?protocol ?port ~listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Replaces the specified properties of the specified listener. Any properties that you do not specify remain unchanged. Changing the protocol from HTTPS to HTTP, or from TLS to TCP, removes the security policy and default certificate properties. If you change the protocol from HTTP to HTTPS, or from TCP to TLS, you must add the security policy and default certificate properties. To add an item to a list, remove an item from a list, or update an item in a list, you must provide the entire list. For example, to add an action, specify a list with the current actions plus the new action."]
+module ModifyListenerAttributesOutput =
+  struct
+    type modifyListenerAttributesResult =
+      {
+      attributes: ListenerAttributes.t option
+        [@ocaml.doc "Information about the listener attributes."]}
+    and responseMetaData = unit
+    and t =
+      {
+      modifyListenerAttributesResult: modifyListenerAttributesResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `InvalidConfigurationRequestException of
+          InvalidConfigurationRequestException.t 
+      | `ListenerNotFoundException of ListenerNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "ModifyListenerAttributesOutput"
+    let make ?attributes =
+      fun () ->
+        {
+          modifyListenerAttributesResult = { attributes };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "InvalidConfigurationRequestException" ->
+          `InvalidConfigurationRequestException
+            (InvalidConfigurationRequestException.of_json json)
+      | "ListenerNotFoundException" ->
+          `ListenerNotFoundException (ListenerNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidConfigurationRequestException" ->
+          `InvalidConfigurationRequestException
+            (InvalidConfigurationRequestException.of_xml xml)
+      | "ListenerNotFoundException" ->
+          `ListenerNotFoundException (ListenerNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidConfigurationRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidConfigurationRequestException"));
+            ("details", (InvalidConfigurationRequestException.to_json e))]
+      | `ListenerNotFoundException e ->
+          `Assoc
+            [("error", (`String "ListenerNotFoundException"));
+            ("details", (ListenerNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.modifyListenerAttributesResult in
+      structure_to_wrapped_value
+        [("Attributes",
+           (Option.map x.attributes ~f:ListenerAttributes.to_value))]
+        ~wrapper:"ModifyListenerAttributesResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "ModifyListenerAttributesResult" in
+      let attributes =
+        (Option.map ~f:ListenerAttributes.of_xml)
+          (Xml.child xml_arg0 "Attributes") in
+      make ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attributes =
+        field_map json__ "Attributes" ListenerAttributes.of_json in
+      make ?attributes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the specified attributes of the specified listener."]
+module ModifyListenerAttributesInput =
+  struct
+    type nonrec t =
+      {
+      listenerArn: ListenerArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the listener."];
+      attributes: ListenerAttributes.t
+        [@ocaml.doc "The listener attributes."]}
+    let context_ = "ModifyListenerAttributesInput"
+    let make ~listenerArn =
+      fun ~attributes -> fun () -> { listenerArn; attributes }
+    let to_value x =
+      structure_to_value
+        [("ListenerArn", (Some (ListenerArn.to_value x.listenerArn)));
+        ("Attributes", (Some (ListenerAttributes.to_value x.attributes)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attributes =
+        ListenerAttributes.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Attributes") in
+      let listenerArn =
+        ListenerArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
+      make ~attributes ~listenerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attributes =
+        field_map_exn json__ "Attributes" ListenerAttributes.of_json in
+      let listenerArn =
+        field_map_exn json__ "ListenerArn" ListenerArn.of_json in
+      make ~attributes ~listenerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the specified attributes of the specified listener."]
+module ModifyIpPoolsOutput =
+  struct
+    type modifyIpPoolsResult =
+      {
+      ipamPools: IpamPools.t option [@ocaml.doc "The IPAM pool ID."]}
+    and responseMetaData = unit
+    and t =
+      {
+      modifyIpPoolsResult: modifyIpPoolsResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `LoadBalancerNotFoundException of LoadBalancerNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "ModifyIpPoolsOutput"
+    let make ?ipamPools =
+      fun () ->
+        { modifyIpPoolsResult = { ipamPools }; responseMetaData = () }
+    let error_of_json name json =
+      match name with
+      | "LoadBalancerNotFoundException" ->
+          `LoadBalancerNotFoundException
+            (LoadBalancerNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "LoadBalancerNotFoundException" ->
+          `LoadBalancerNotFoundException
+            (LoadBalancerNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `LoadBalancerNotFoundException e ->
+          `Assoc
+            [("error", (`String "LoadBalancerNotFoundException"));
+            ("details", (LoadBalancerNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.modifyIpPoolsResult in
+      structure_to_wrapped_value
+        [("IpamPools", (Option.map x.ipamPools ~f:IpamPools.to_value))]
+        ~wrapper:"ModifyIpPoolsResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 = Xml.child_exn ~context:context_ t "ModifyIpPoolsResult" in
+      let ipamPools =
+        (Option.map ~f:IpamPools.of_xml) (Xml.child xml_arg0 "IpamPools") in
+      make ?ipamPools ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipamPools = field_map json__ "IpamPools" IpamPools.of_json in
+      make ?ipamPools ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "\\[Application Load Balancers\\] Modify the IP pool associated to a load balancer."]
+module ModifyIpPoolsInput =
+  struct
+    type nonrec t =
+      {
+      loadBalancerArn: LoadBalancerArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the load balancer."];
+      ipamPools: IpamPools.t option
+        [@ocaml.doc "The IPAM pools to be modified."];
+      removeIpamPools: RemoveIpamPools.t option
+        [@ocaml.doc "Remove the IP pools in use by the load balancer."]}
+    let context_ = "ModifyIpPoolsInput"
+    let make ?ipamPools =
+      fun ?removeIpamPools ->
+        fun ~loadBalancerArn ->
+          fun () -> { ipamPools; removeIpamPools; loadBalancerArn }
+    let to_value x =
+      structure_to_value
+        [("LoadBalancerArn",
+           (Some (LoadBalancerArn.to_value x.loadBalancerArn)));
+        ("IpamPools", (Option.map x.ipamPools ~f:IpamPools.to_value));
+        ("RemoveIpamPools",
+          (Option.map x.removeIpamPools ~f:RemoveIpamPools.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let removeIpamPools =
+        (Option.map ~f:RemoveIpamPools.of_xml)
+          (Xml.child xml_arg0 "RemoveIpamPools") in
+      let ipamPools =
+        (Option.map ~f:IpamPools.of_xml) (Xml.child xml_arg0 "IpamPools") in
+      let loadBalancerArn =
+        LoadBalancerArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerArn") in
+      make ?removeIpamPools ?ipamPools ~loadBalancerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let removeIpamPools =
+        field_map json__ "RemoveIpamPools" RemoveIpamPools.of_json in
+      let ipamPools = field_map json__ "IpamPools" IpamPools.of_json in
+      let loadBalancerArn =
+        field_map_exn json__ "LoadBalancerArn" LoadBalancerArn.of_json in
+      make ?removeIpamPools ?ipamPools ~loadBalancerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "\\[Application Load Balancers\\] Modify the IP pool associated to a load balancer."]
+module ModifyCapacityReservationOutput =
+  struct
+    type modifyCapacityReservationResult =
+      {
+      lastModifiedTime: LastModifiedTime.t option
+        [@ocaml.doc "The last time the capacity reservation was modified."];
+      decreaseRequestsRemaining: DecreaseRequestsRemaining.t option
+        [@ocaml.doc "The amount of daily capacity decreases remaining."];
+      minimumLoadBalancerCapacity: MinimumLoadBalancerCapacity.t option
+        [@ocaml.doc
+          "The requested minimum capacity reservation for the load balancer"];
+      capacityReservationState: ZonalCapacityReservationStates.t option
+        [@ocaml.doc "The state of the capacity reservation."]}
+    and responseMetaData = unit
+    and t =
+      {
+      modifyCapacityReservationResult: modifyCapacityReservationResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `CapacityDecreaseRequestsLimitExceededException of
+          CapacityDecreaseRequestsLimitExceededException.t 
+      | `CapacityReservationPendingException of
+          CapacityReservationPendingException.t 
+      | `CapacityUnitsLimitExceededException of
+          CapacityUnitsLimitExceededException.t 
+      | `InsufficientCapacityException of InsufficientCapacityException.t 
+      | `InvalidConfigurationRequestException of
+          InvalidConfigurationRequestException.t 
+      | `LoadBalancerNotFoundException of LoadBalancerNotFoundException.t 
+      | `OperationNotPermittedException of OperationNotPermittedException.t 
+      | `PriorRequestNotCompleteException of
+          PriorRequestNotCompleteException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "ModifyCapacityReservationOutput"
+    let make ?lastModifiedTime =
+      fun ?decreaseRequestsRemaining ->
+        fun ?minimumLoadBalancerCapacity ->
+          fun ?capacityReservationState ->
+            fun () ->
+              {
+                modifyCapacityReservationResult =
+                  {
+                    lastModifiedTime;
+                    decreaseRequestsRemaining;
+                    minimumLoadBalancerCapacity;
+                    capacityReservationState
+                  };
+                responseMetaData = ()
+              }
+    let error_of_json name json =
+      match name with
+      | "CapacityDecreaseRequestsLimitExceededException" ->
+          `CapacityDecreaseRequestsLimitExceededException
+            (CapacityDecreaseRequestsLimitExceededException.of_json json)
+      | "CapacityReservationPendingException" ->
+          `CapacityReservationPendingException
+            (CapacityReservationPendingException.of_json json)
+      | "CapacityUnitsLimitExceededException" ->
+          `CapacityUnitsLimitExceededException
+            (CapacityUnitsLimitExceededException.of_json json)
+      | "InsufficientCapacityException" ->
+          `InsufficientCapacityException
+            (InsufficientCapacityException.of_json json)
+      | "InvalidConfigurationRequestException" ->
+          `InvalidConfigurationRequestException
+            (InvalidConfigurationRequestException.of_json json)
+      | "LoadBalancerNotFoundException" ->
+          `LoadBalancerNotFoundException
+            (LoadBalancerNotFoundException.of_json json)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_json json)
+      | "PriorRequestNotCompleteException" ->
+          `PriorRequestNotCompleteException
+            (PriorRequestNotCompleteException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CapacityDecreaseRequestsLimitExceededException" ->
+          `CapacityDecreaseRequestsLimitExceededException
+            (CapacityDecreaseRequestsLimitExceededException.of_xml xml)
+      | "CapacityReservationPendingException" ->
+          `CapacityReservationPendingException
+            (CapacityReservationPendingException.of_xml xml)
+      | "CapacityUnitsLimitExceededException" ->
+          `CapacityUnitsLimitExceededException
+            (CapacityUnitsLimitExceededException.of_xml xml)
+      | "InsufficientCapacityException" ->
+          `InsufficientCapacityException
+            (InsufficientCapacityException.of_xml xml)
+      | "InvalidConfigurationRequestException" ->
+          `InvalidConfigurationRequestException
+            (InvalidConfigurationRequestException.of_xml xml)
+      | "LoadBalancerNotFoundException" ->
+          `LoadBalancerNotFoundException
+            (LoadBalancerNotFoundException.of_xml xml)
+      | "OperationNotPermittedException" ->
+          `OperationNotPermittedException
+            (OperationNotPermittedException.of_xml xml)
+      | "PriorRequestNotCompleteException" ->
+          `PriorRequestNotCompleteException
+            (PriorRequestNotCompleteException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CapacityDecreaseRequestsLimitExceededException e ->
+          `Assoc
+            [("error",
+               (`String "CapacityDecreaseRequestsLimitExceededException"));
+            ("details",
+              (CapacityDecreaseRequestsLimitExceededException.to_json e))]
+      | `CapacityReservationPendingException e ->
+          `Assoc
+            [("error", (`String "CapacityReservationPendingException"));
+            ("details", (CapacityReservationPendingException.to_json e))]
+      | `CapacityUnitsLimitExceededException e ->
+          `Assoc
+            [("error", (`String "CapacityUnitsLimitExceededException"));
+            ("details", (CapacityUnitsLimitExceededException.to_json e))]
+      | `InsufficientCapacityException e ->
+          `Assoc
+            [("error", (`String "InsufficientCapacityException"));
+            ("details", (InsufficientCapacityException.to_json e))]
+      | `InvalidConfigurationRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidConfigurationRequestException"));
+            ("details", (InvalidConfigurationRequestException.to_json e))]
+      | `LoadBalancerNotFoundException e ->
+          `Assoc
+            [("error", (`String "LoadBalancerNotFoundException"));
+            ("details", (LoadBalancerNotFoundException.to_json e))]
+      | `OperationNotPermittedException e ->
+          `Assoc
+            [("error", (`String "OperationNotPermittedException"));
+            ("details", (OperationNotPermittedException.to_json e))]
+      | `PriorRequestNotCompleteException e ->
+          `Assoc
+            [("error", (`String "PriorRequestNotCompleteException"));
+            ("details", (PriorRequestNotCompleteException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.modifyCapacityReservationResult in
+      structure_to_wrapped_value
+        [("LastModifiedTime",
+           (Option.map x.lastModifiedTime ~f:LastModifiedTime.to_value));
+        ("DecreaseRequestsRemaining",
+          (Option.map x.decreaseRequestsRemaining
+             ~f:DecreaseRequestsRemaining.to_value));
+        ("MinimumLoadBalancerCapacity",
+          (Option.map x.minimumLoadBalancerCapacity
+             ~f:MinimumLoadBalancerCapacity.to_value));
+        ("CapacityReservationState",
+          (Option.map x.capacityReservationState
+             ~f:ZonalCapacityReservationStates.to_value))]
+        ~wrapper:"ModifyCapacityReservationResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "ModifyCapacityReservationResult" in
+      let capacityReservationState =
+        (Option.map ~f:ZonalCapacityReservationStates.of_xml)
+          (Xml.child xml_arg0 "CapacityReservationState") in
+      let minimumLoadBalancerCapacity =
+        (Option.map ~f:MinimumLoadBalancerCapacity.of_xml)
+          (Xml.child xml_arg0 "MinimumLoadBalancerCapacity") in
+      let decreaseRequestsRemaining =
+        (Option.map ~f:DecreaseRequestsRemaining.of_xml)
+          (Xml.child xml_arg0 "DecreaseRequestsRemaining") in
+      let lastModifiedTime =
+        (Option.map ~f:LastModifiedTime.of_xml)
+          (Xml.child xml_arg0 "LastModifiedTime") in
+      make ?capacityReservationState ?minimumLoadBalancerCapacity
+        ?decreaseRequestsRemaining ?lastModifiedTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityReservationState =
+        field_map json__ "CapacityReservationState"
+          ZonalCapacityReservationStates.of_json in
+      let minimumLoadBalancerCapacity =
+        field_map json__ "MinimumLoadBalancerCapacity"
+          MinimumLoadBalancerCapacity.of_json in
+      let decreaseRequestsRemaining =
+        field_map json__ "DecreaseRequestsRemaining"
+          DecreaseRequestsRemaining.of_json in
+      let lastModifiedTime =
+        field_map json__ "LastModifiedTime" LastModifiedTime.of_json in
+      make ?capacityReservationState ?minimumLoadBalancerCapacity
+        ?decreaseRequestsRemaining ?lastModifiedTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the capacity reservation of the specified load balancer. When modifying capacity reservation, you must include at least one MinimumLoadBalancerCapacity or ResetCapacityReservation."]
+module ModifyCapacityReservationInput =
+  struct
+    type nonrec t =
+      {
+      loadBalancerArn: LoadBalancerArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the load balancer."];
+      minimumLoadBalancerCapacity: MinimumLoadBalancerCapacity.t option
+        [@ocaml.doc "The minimum load balancer capacity reserved."];
+      resetCapacityReservation: ResetCapacityReservation.t option
+        [@ocaml.doc "Resets the capacity reservation."]}
+    let context_ = "ModifyCapacityReservationInput"
+    let make ?minimumLoadBalancerCapacity =
+      fun ?resetCapacityReservation ->
+        fun ~loadBalancerArn ->
+          fun () ->
+            {
+              minimumLoadBalancerCapacity;
+              resetCapacityReservation;
+              loadBalancerArn
+            }
+    let to_value x =
+      structure_to_value
+        [("LoadBalancerArn",
+           (Some (LoadBalancerArn.to_value x.loadBalancerArn)));
+        ("MinimumLoadBalancerCapacity",
+          (Option.map x.minimumLoadBalancerCapacity
+             ~f:MinimumLoadBalancerCapacity.to_value));
+        ("ResetCapacityReservation",
+          (Option.map x.resetCapacityReservation
+             ~f:ResetCapacityReservation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resetCapacityReservation =
+        (Option.map ~f:ResetCapacityReservation.of_xml)
+          (Xml.child xml_arg0 "ResetCapacityReservation") in
+      let minimumLoadBalancerCapacity =
+        (Option.map ~f:MinimumLoadBalancerCapacity.of_xml)
+          (Xml.child xml_arg0 "MinimumLoadBalancerCapacity") in
+      let loadBalancerArn =
+        LoadBalancerArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerArn") in
+      make ?resetCapacityReservation ?minimumLoadBalancerCapacity
+        ~loadBalancerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resetCapacityReservation =
+        field_map json__ "ResetCapacityReservation"
+          ResetCapacityReservation.of_json in
+      let minimumLoadBalancerCapacity =
+        field_map json__ "MinimumLoadBalancerCapacity"
+          MinimumLoadBalancerCapacity.of_json in
+      let loadBalancerArn =
+        field_map_exn json__ "LoadBalancerArn" LoadBalancerArn.of_json in
+      make ?resetCapacityReservation ?minimumLoadBalancerCapacity
+        ~loadBalancerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the capacity reservation of the specified load balancer. When modifying capacity reservation, you must include at least one MinimumLoadBalancerCapacity or ResetCapacityReservation."]
+module GetTrustStoreRevocationContentOutput =
+  struct
+    type getTrustStoreRevocationContentResult =
+      {
+      location: Location.t option
+        [@ocaml.doc "The revocation files Amazon S3 URI."]}
+    and responseMetaData = unit
+    and t =
+      {
+      getTrustStoreRevocationContentResult:
+        getTrustStoreRevocationContentResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `RevocationIdNotFoundException of RevocationIdNotFoundException.t 
+      | `TrustStoreNotFoundException of TrustStoreNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "GetTrustStoreRevocationContentOutput"
+    let make ?location =
+      fun () ->
+        {
+          getTrustStoreRevocationContentResult = { location };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "RevocationIdNotFoundException" ->
+          `RevocationIdNotFoundException
+            (RevocationIdNotFoundException.of_json json)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "RevocationIdNotFoundException" ->
+          `RevocationIdNotFoundException
+            (RevocationIdNotFoundException.of_xml xml)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `RevocationIdNotFoundException e ->
+          `Assoc
+            [("error", (`String "RevocationIdNotFoundException"));
+            ("details", (RevocationIdNotFoundException.to_json e))]
+      | `TrustStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrustStoreNotFoundException"));
+            ("details", (TrustStoreNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.getTrustStoreRevocationContentResult in
+      structure_to_wrapped_value
+        [("Location", (Option.map x.location ~f:Location.to_value))]
+        ~wrapper:"GetTrustStoreRevocationContentResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "GetTrustStoreRevocationContentResult" in
+      let location =
+        (Option.map ~f:Location.of_xml) (Xml.child xml_arg0 "Location") in
+      make ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let location = field_map json__ "Location" Location.of_json in
+      make ?location ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the specified revocation file. This action returns a pre-signed S3 URI which is active for ten minutes."]
+module GetTrustStoreRevocationContentInput =
+  struct
+    type nonrec t =
+      {
+      trustStoreArn: TrustStoreArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the trust store."];
+      revocationId: RevocationId.t
+        [@ocaml.doc "The revocation ID of the revocation file."]}
+    let context_ = "GetTrustStoreRevocationContentInput"
+    let make ~trustStoreArn =
+      fun ~revocationId -> fun () -> { trustStoreArn; revocationId }
+    let to_value x =
+      structure_to_value
+        [("TrustStoreArn", (Some (TrustStoreArn.to_value x.trustStoreArn)));
+        ("RevocationId", (Some (RevocationId.to_value x.revocationId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let revocationId =
+        RevocationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RevocationId") in
+      let trustStoreArn =
+        TrustStoreArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrustStoreArn") in
+      make ~revocationId ~trustStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let revocationId =
+        field_map_exn json__ "RevocationId" RevocationId.of_json in
+      let trustStoreArn =
+        field_map_exn json__ "TrustStoreArn" TrustStoreArn.of_json in
+      make ~revocationId ~trustStoreArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the specified revocation file. This action returns a pre-signed S3 URI which is active for ten minutes."]
+module GetTrustStoreCaCertificatesBundleOutput =
+  struct
+    type getTrustStoreCaCertificatesBundleResult =
+      {
+      location: Location.t option
+        [@ocaml.doc "The ca certificate bundles Amazon S3 URI."]}
+    and responseMetaData = unit
+    and t =
+      {
+      getTrustStoreCaCertificatesBundleResult:
+        getTrustStoreCaCertificatesBundleResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `TrustStoreNotFoundException of TrustStoreNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "GetTrustStoreCaCertificatesBundleOutput"
+    let make ?location =
+      fun () ->
+        {
+          getTrustStoreCaCertificatesBundleResult = { location };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `TrustStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrustStoreNotFoundException"));
+            ("details", (TrustStoreNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.getTrustStoreCaCertificatesBundleResult in
+      structure_to_wrapped_value
+        [("Location", (Option.map x.location ~f:Location.to_value))]
+        ~wrapper:"GetTrustStoreCaCertificatesBundleResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "GetTrustStoreCaCertificatesBundleResult" in
+      let location =
+        (Option.map ~f:Location.of_xml) (Xml.child xml_arg0 "Location") in
+      make ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let location = field_map json__ "Location" Location.of_json in
+      make ?location ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the ca certificate bundle. This action returns a pre-signed S3 URI which is active for ten minutes."]
+module GetTrustStoreCaCertificatesBundleInput =
+  struct
+    type nonrec t =
+      {
+      trustStoreArn: TrustStoreArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the trust store."]}
+    let context_ = "GetTrustStoreCaCertificatesBundleInput"
+    let make ~trustStoreArn = fun () -> { trustStoreArn }
+    let to_value x =
+      structure_to_value
+        [("TrustStoreArn", (Some (TrustStoreArn.to_value x.trustStoreArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let trustStoreArn =
+        TrustStoreArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrustStoreArn") in
+      make ~trustStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let trustStoreArn =
+        field_map_exn json__ "TrustStoreArn" TrustStoreArn.of_json in
+      make ~trustStoreArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the ca certificate bundle. This action returns a pre-signed S3 URI which is active for ten minutes."]
+module GetResourcePolicyOutput =
+  struct
+    type getResourcePolicyResult =
+      {
+      policy: Policy.t option
+        [@ocaml.doc "The content of the resource policy."]}
+    and responseMetaData = unit
+    and t =
+      {
+      getResourcePolicyResult: getResourcePolicyResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "GetResourcePolicyOutput"
+    let make ?policy =
+      fun () ->
+        { getResourcePolicyResult = { policy }; responseMetaData = () }
+    let error_of_json name json =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.getResourcePolicyResult in
+      structure_to_wrapped_value
+        [("Policy", (Option.map x.policy ~f:Policy.to_value))]
+        ~wrapper:"GetResourcePolicyResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "GetResourcePolicyResult" in
+      let policy =
+        (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "Policy") in
+      make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policy = field_map json__ "Policy" Policy.of_json in
+      make ?policy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves the resource policy for a specified resource."]
+module GetResourcePolicyInput =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."]}
+    let context_ = "GetResourcePolicyInput"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceArn.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        ResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves the resource policy for a specified resource."]
+module DescribeTrustStoresOutput =
+  struct
+    type describeTrustStoresResult =
+      {
+      trustStores: TrustStores.t option
+        [@ocaml.doc "Information about the trust stores."];
+      nextMarker: Marker.t option
+        [@ocaml.doc
+          "If there are additional results, this is the marker for the next set of results. Otherwise, this is null."]}
+    and responseMetaData = unit
+    and t =
+      {
+      describeTrustStoresResult: describeTrustStoresResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `TrustStoreNotFoundException of TrustStoreNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "DescribeTrustStoresOutput"
+    let make ?trustStores =
+      fun ?nextMarker ->
+        fun () ->
+          {
+            describeTrustStoresResult = { trustStores; nextMarker };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `TrustStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrustStoreNotFoundException"));
+            ("details", (TrustStoreNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.describeTrustStoresResult in
+      structure_to_wrapped_value
+        [("TrustStores", (Option.map x.trustStores ~f:TrustStores.to_value));
+        ("NextMarker", (Option.map x.nextMarker ~f:Marker.to_value))]
+        ~wrapper:"DescribeTrustStoresResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "DescribeTrustStoresResult" in
+      let nextMarker =
+        (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "NextMarker") in
+      let trustStores =
+        (Option.map ~f:TrustStores.of_xml) (Xml.child xml_arg0 "TrustStores") in
+      make ?nextMarker ?trustStores ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" Marker.of_json in
+      let trustStores = field_map json__ "TrustStores" TrustStores.of_json in
+      make ?nextMarker ?trustStores ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes all trust stores for the specified account."]
+module DescribeTrustStoresInput =
+  struct
+    type nonrec t =
+      {
+      trustStoreArns: TrustStoreArns.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the trust store."];
+      names: TrustStoreNames.t option
+        [@ocaml.doc "The names of the trust stores."];
+      marker: Marker.t option
+        [@ocaml.doc
+          "The marker for the next set of results. (You received this marker from a previous call.)"];
+      pageSize: PageSize.t option
+        [@ocaml.doc
+          "The maximum number of results to return with this call."]}
+    let make ?trustStoreArns =
+      fun ?names ->
+        fun ?marker ->
+          fun ?pageSize ->
+            fun () -> { trustStoreArns; names; marker; pageSize }
+    let to_value x =
+      structure_to_value
+        [("TrustStoreArns",
+           (Option.map x.trustStoreArns ~f:TrustStoreArns.to_value));
+        ("Names", (Option.map x.names ~f:TrustStoreNames.to_value));
+        ("Marker", (Option.map x.marker ~f:Marker.to_value));
+        ("PageSize", (Option.map x.pageSize ~f:PageSize.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pageSize =
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "PageSize") in
+      let marker =
+        (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
+      let names =
+        (Option.map ~f:TrustStoreNames.of_xml) (Xml.child xml_arg0 "Names") in
+      let trustStoreArns =
+        (Option.map ~f:TrustStoreArns.of_xml)
+          (Xml.child xml_arg0 "TrustStoreArns") in
+      make ?pageSize ?marker ?names ?trustStoreArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let names = field_map json__ "Names" TrustStoreNames.of_json in
+      let trustStoreArns =
+        field_map json__ "TrustStoreArns" TrustStoreArns.of_json in
+      make ?pageSize ?marker ?names ?trustStoreArns ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes all trust stores for the specified account."]
+module DescribeTrustStoreRevocationsOutput =
+  struct
+    type describeTrustStoreRevocationsResult =
+      {
+      trustStoreRevocations: DescribeTrustStoreRevocationResponse.t option
+        [@ocaml.doc
+          "Information about the revocation file in the trust store."];
+      nextMarker: Marker.t option
+        [@ocaml.doc
+          "If there are additional results, this is the marker for the next set of results. Otherwise, this is null."]}
+    and responseMetaData = unit
+    and t =
+      {
+      describeTrustStoreRevocationsResult:
+        describeTrustStoreRevocationsResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `RevocationIdNotFoundException of RevocationIdNotFoundException.t 
+      | `TrustStoreNotFoundException of TrustStoreNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "DescribeTrustStoreRevocationsOutput"
+    let make ?trustStoreRevocations =
+      fun ?nextMarker ->
+        fun () ->
+          {
+            describeTrustStoreRevocationsResult =
+              { trustStoreRevocations; nextMarker };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "RevocationIdNotFoundException" ->
+          `RevocationIdNotFoundException
+            (RevocationIdNotFoundException.of_json json)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "RevocationIdNotFoundException" ->
+          `RevocationIdNotFoundException
+            (RevocationIdNotFoundException.of_xml xml)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `RevocationIdNotFoundException e ->
+          `Assoc
+            [("error", (`String "RevocationIdNotFoundException"));
+            ("details", (RevocationIdNotFoundException.to_json e))]
+      | `TrustStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrustStoreNotFoundException"));
+            ("details", (TrustStoreNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.describeTrustStoreRevocationsResult in
+      structure_to_wrapped_value
+        [("TrustStoreRevocations",
+           (Option.map x.trustStoreRevocations
+              ~f:DescribeTrustStoreRevocationResponse.to_value));
+        ("NextMarker", (Option.map x.nextMarker ~f:Marker.to_value))]
+        ~wrapper:"DescribeTrustStoreRevocationsResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "DescribeTrustStoreRevocationsResult" in
+      let nextMarker =
+        (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "NextMarker") in
+      let trustStoreRevocations =
+        (Option.map ~f:DescribeTrustStoreRevocationResponse.of_xml)
+          (Xml.child xml_arg0 "TrustStoreRevocations") in
+      make ?nextMarker ?trustStoreRevocations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" Marker.of_json in
+      let trustStoreRevocations =
+        field_map json__ "TrustStoreRevocations"
+          DescribeTrustStoreRevocationResponse.of_json in
+      make ?nextMarker ?trustStoreRevocations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the revocation files in use by the specified trust store or revocation files."]
+module DescribeTrustStoreRevocationsInput =
+  struct
+    type nonrec t =
+      {
+      trustStoreArn: TrustStoreArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the trust store."];
+      revocationIds: RevocationIds.t option
+        [@ocaml.doc
+          "The revocation IDs of the revocation files you want to describe."];
+      marker: Marker.t option
+        [@ocaml.doc
+          "The marker for the next set of results. (You received this marker from a previous call.)"];
+      pageSize: PageSize.t option
+        [@ocaml.doc
+          "The maximum number of results to return with this call."]}
+    let context_ = "DescribeTrustStoreRevocationsInput"
+    let make ?revocationIds =
+      fun ?marker ->
+        fun ?pageSize ->
+          fun ~trustStoreArn ->
+            fun () -> { revocationIds; marker; pageSize; trustStoreArn }
+    let to_value x =
+      structure_to_value
+        [("TrustStoreArn", (Some (TrustStoreArn.to_value x.trustStoreArn)));
+        ("RevocationIds",
+          (Option.map x.revocationIds ~f:RevocationIds.to_value));
+        ("Marker", (Option.map x.marker ~f:Marker.to_value));
+        ("PageSize", (Option.map x.pageSize ~f:PageSize.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pageSize =
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "PageSize") in
+      let marker =
+        (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
+      let revocationIds =
+        (Option.map ~f:RevocationIds.of_xml)
+          (Xml.child xml_arg0 "RevocationIds") in
+      let trustStoreArn =
+        TrustStoreArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrustStoreArn") in
+      make ?pageSize ?marker ?revocationIds ~trustStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let revocationIds =
+        field_map json__ "RevocationIds" RevocationIds.of_json in
+      let trustStoreArn =
+        field_map_exn json__ "TrustStoreArn" TrustStoreArn.of_json in
+      make ?pageSize ?marker ?revocationIds ~trustStoreArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the revocation files in use by the specified trust store or revocation files."]
+module DescribeTrustStoreAssociationsOutput =
+  struct
+    type describeTrustStoreAssociationsResult =
+      {
+      trustStoreAssociations: TrustStoreAssociations.t option
+        [@ocaml.doc
+          "Information about the resources the trust store is associated to."];
+      nextMarker: Marker.t option
+        [@ocaml.doc
+          "If there are additional results, this is the marker for the next set of results. Otherwise, this is null."]}
+    and responseMetaData = unit
+    and t =
+      {
+      describeTrustStoreAssociationsResult:
+        describeTrustStoreAssociationsResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `TrustStoreNotFoundException of TrustStoreNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "DescribeTrustStoreAssociationsOutput"
+    let make ?trustStoreAssociations =
+      fun ?nextMarker ->
+        fun () ->
+          {
+            describeTrustStoreAssociationsResult =
+              { trustStoreAssociations; nextMarker };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `TrustStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrustStoreNotFoundException"));
+            ("details", (TrustStoreNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.describeTrustStoreAssociationsResult in
+      structure_to_wrapped_value
+        [("TrustStoreAssociations",
+           (Option.map x.trustStoreAssociations
+              ~f:TrustStoreAssociations.to_value));
+        ("NextMarker", (Option.map x.nextMarker ~f:Marker.to_value))]
+        ~wrapper:"DescribeTrustStoreAssociationsResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "DescribeTrustStoreAssociationsResult" in
+      let nextMarker =
+        (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "NextMarker") in
+      let trustStoreAssociations =
+        (Option.map ~f:TrustStoreAssociations.of_xml)
+          (Xml.child xml_arg0 "TrustStoreAssociations") in
+      make ?nextMarker ?trustStoreAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" Marker.of_json in
+      let trustStoreAssociations =
+        field_map json__ "TrustStoreAssociations"
+          TrustStoreAssociations.of_json in
+      make ?nextMarker ?trustStoreAssociations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes all resources associated with the specified trust store."]
+module DescribeTrustStoreAssociationsInput =
+  struct
+    type nonrec t =
+      {
+      trustStoreArn: TrustStoreArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the trust store."];
+      marker: Marker.t option
+        [@ocaml.doc
+          "The marker for the next set of results. (You received this marker from a previous call.)"];
+      pageSize: PageSize.t option
+        [@ocaml.doc
+          "The maximum number of results to return with this call."]}
+    let context_ = "DescribeTrustStoreAssociationsInput"
+    let make ?marker =
+      fun ?pageSize ->
+        fun ~trustStoreArn -> fun () -> { marker; pageSize; trustStoreArn }
+    let to_value x =
+      structure_to_value
+        [("TrustStoreArn", (Some (TrustStoreArn.to_value x.trustStoreArn)));
+        ("Marker", (Option.map x.marker ~f:Marker.to_value));
+        ("PageSize", (Option.map x.pageSize ~f:PageSize.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pageSize =
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "PageSize") in
+      let marker =
+        (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
+      let trustStoreArn =
+        TrustStoreArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrustStoreArn") in
+      make ?pageSize ?marker ~trustStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let trustStoreArn =
+        field_map_exn json__ "TrustStoreArn" TrustStoreArn.of_json in
+      make ?pageSize ?marker ~trustStoreArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes all resources associated with the specified trust store."]
 module DescribeTargetHealthOutput =
   struct
     type describeTargetHealthResult =
@@ -7168,9 +11491,9 @@ module DescribeTargetHealthOutput =
           (Xml.child xml_arg0 "TargetHealthDescriptions") in
       make ?targetHealthDescriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetHealthDescriptions =
-        field_map json "TargetHealthDescriptions"
+        field_map json__ "TargetHealthDescriptions"
           TargetHealthDescriptions.of_json in
       make ?targetHealthDescriptions ()
     let to_json v = composed_to_json to_value v
@@ -7182,30 +11505,43 @@ module DescribeTargetHealthInput =
       {
       targetGroupArn: TargetGroupArn.t
         [@ocaml.doc "The Amazon Resource Name (ARN) of the target group."];
-      targets: TargetDescriptions.t option [@ocaml.doc "The targets."]}
+      targets: TargetDescriptions.t option [@ocaml.doc "The targets."];
+      include_: ListOfDescribeTargetHealthIncludeOptions.t option
+        [@ocaml.doc "Used to include anomaly detection information."]}
     let context_ = "DescribeTargetHealthInput"
     let make ?targets =
-      fun ~targetGroupArn -> fun () -> { targets; targetGroupArn }
+      fun ?include_ ->
+        fun ~targetGroupArn ->
+          fun () -> { targets; include_; targetGroupArn }
     let to_value x =
       structure_to_value
         [("TargetGroupArn",
            (Some (TargetGroupArn.to_value x.targetGroupArn)));
-        ("Targets", (Option.map x.targets ~f:TargetDescriptions.to_value))]
+        ("Targets", (Option.map x.targets ~f:TargetDescriptions.to_value));
+        ("Include",
+          (Option.map x.include_
+             ~f:ListOfDescribeTargetHealthIncludeOptions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let include_ =
+        (Option.map ~f:ListOfDescribeTargetHealthIncludeOptions.of_xml)
+          (Xml.child xml_arg0 "Include") in
       let targets =
         (Option.map ~f:TargetDescriptions.of_xml)
           (Xml.child xml_arg0 "Targets") in
       let targetGroupArn =
         TargetGroupArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TargetGroupArn") in
-      make ?targets ~targetGroupArn ()
+      make ?include_ ?targets ~targetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targets = field_map json "Targets" TargetDescriptions.of_json in
+    let of_json json__ =
+      let include_ =
+        field_map json__ "Include"
+          ListOfDescribeTargetHealthIncludeOptions.of_json in
+      let targets = field_map json__ "Targets" TargetDescriptions.of_json in
       let targetGroupArn =
-        field_map_exn json "TargetGroupArn" TargetGroupArn.of_json in
-      make ?targets ~targetGroupArn ()
+        field_map_exn json__ "TargetGroupArn" TargetGroupArn.of_json in
+      make ?include_ ?targets ~targetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the health of the specified targets or all of your targets."]
@@ -7289,9 +11625,9 @@ module DescribeTargetGroupsOutput =
           (Xml.child xml_arg0 "TargetGroups") in
       make ?nextMarker ?targetGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextMarker = field_map json "NextMarker" Marker.of_json in
-      let targetGroups = field_map json "TargetGroups" TargetGroups.of_json in
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" Marker.of_json in
+      let targetGroups = field_map json__ "TargetGroups" TargetGroups.of_json in
       make ?nextMarker ?targetGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7344,14 +11680,14 @@ module DescribeTargetGroupsInput =
           (Xml.child xml_arg0 "LoadBalancerArn") in
       make ?pageSize ?marker ?names ?targetGroupArns ?loadBalancerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let names = field_map json "Names" TargetGroupNames.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let names = field_map json__ "Names" TargetGroupNames.of_json in
       let targetGroupArns =
-        field_map json "TargetGroupArns" TargetGroupArns.of_json in
+        field_map json__ "TargetGroupArns" TargetGroupArns.of_json in
       let loadBalancerArn =
-        field_map json "LoadBalancerArn" LoadBalancerArn.of_json in
+        field_map json__ "LoadBalancerArn" LoadBalancerArn.of_json in
       make ?pageSize ?marker ?names ?targetGroupArns ?loadBalancerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7421,9 +11757,9 @@ module DescribeTargetGroupAttributesOutput =
           (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map json "Attributes" TargetGroupAttributes.of_json in
+        field_map json__ "Attributes" TargetGroupAttributes.of_json in
       make ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7447,9 +11783,9 @@ module DescribeTargetGroupAttributesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "TargetGroupArn") in
       make ~targetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetGroupArn =
-        field_map_exn json "TargetGroupArn" TargetGroupArn.of_json in
+        field_map_exn json__ "TargetGroupArn" TargetGroupArn.of_json in
       make ~targetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7470,6 +11806,7 @@ module DescribeTagsOutput =
       | `LoadBalancerNotFoundException of LoadBalancerNotFoundException.t 
       | `RuleNotFoundException of RuleNotFoundException.t 
       | `TargetGroupNotFoundException of TargetGroupNotFoundException.t 
+      | `TrustStoreNotFoundException of TrustStoreNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "DescribeTagsOutput"
     let make ?tagDescriptions =
@@ -7487,6 +11824,9 @@ module DescribeTagsOutput =
       | "TargetGroupNotFoundException" ->
           `TargetGroupNotFoundException
             (TargetGroupNotFoundException.of_json json)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -7502,6 +11842,9 @@ module DescribeTagsOutput =
       | "TargetGroupNotFoundException" ->
           `TargetGroupNotFoundException
             (TargetGroupNotFoundException.of_xml xml)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -7522,6 +11865,10 @@ module DescribeTagsOutput =
           `Assoc
             [("error", (`String "TargetGroupNotFoundException"));
             ("details", (TargetGroupNotFoundException.to_json e))]
+      | `TrustStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrustStoreNotFoundException"));
+            ("details", (TrustStoreNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -7541,9 +11888,9 @@ module DescribeTagsOutput =
           (Xml.child xml_arg0 "TagDescriptions") in
       make ?tagDescriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tagDescriptions =
-        field_map json "TagDescriptions" TagDescriptions.of_json in
+        field_map json__ "TagDescriptions" TagDescriptions.of_json in
       make ?tagDescriptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7567,9 +11914,9 @@ module DescribeTagsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArns") in
       make ~resourceArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArns =
-        field_map_exn json "ResourceArns" ResourceArns.of_json in
+        field_map_exn json__ "ResourceArns" ResourceArns.of_json in
       make ~resourceArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7640,13 +11987,13 @@ module DescribeSSLPoliciesOutput =
         (Option.map ~f:SslPolicies.of_xml) (Xml.child xml_arg0 "SslPolicies") in
       make ?nextMarker ?sslPolicies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextMarker = field_map json "NextMarker" Marker.of_json in
-      let sslPolicies = field_map json "SslPolicies" SslPolicies.of_json in
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" Marker.of_json in
+      let sslPolicies = field_map json__ "SslPolicies" SslPolicies.of_json in
       make ?nextMarker ?sslPolicies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the specified policies or all policies used for SSL negotiation. For more information, see Security policies in the Application Load Balancers Guide or Security policies in the Network Load Balancers Guide."]
+       "Describes the specified policies or all policies used for SSL negotiation. For more information, see Security policies in the Application Load Balancers Guide and Security policies in the Network Load Balancers Guide."]
 module DescribeSSLPoliciesInput =
   struct
     type nonrec t =
@@ -7687,16 +12034,16 @@ module DescribeSSLPoliciesInput =
         (Option.map ~f:SslPolicyNames.of_xml) (Xml.child xml_arg0 "Names") in
       make ?loadBalancerType ?pageSize ?marker ?names ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loadBalancerType =
-        field_map json "LoadBalancerType" LoadBalancerTypeEnum.of_json in
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let names = field_map json "Names" SslPolicyNames.of_json in
+        field_map json__ "LoadBalancerType" LoadBalancerTypeEnum.of_json in
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let names = field_map json__ "Names" SslPolicyNames.of_json in
       make ?loadBalancerType ?pageSize ?marker ?names ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the specified policies or all policies used for SSL negotiation. For more information, see Security policies in the Application Load Balancers Guide or Security policies in the Network Load Balancers Guide."]
+       "Describes the specified policies or all policies used for SSL negotiation. For more information, see Security policies in the Application Load Balancers Guide and Security policies in the Network Load Balancers Guide."]
 module DescribeRulesOutput =
   struct
     type describeRulesResult =
@@ -7779,13 +12126,13 @@ module DescribeRulesOutput =
       let rules = (Option.map ~f:Rules.of_xml) (Xml.child xml_arg0 "Rules") in
       make ?nextMarker ?rules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextMarker = field_map json "NextMarker" Marker.of_json in
-      let rules = field_map json "Rules" Rules.of_json in
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" Marker.of_json in
+      let rules = field_map json__ "Rules" Rules.of_json in
       make ?nextMarker ?rules ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the specified rules or the rules for the specified listener. You must specify either a listener or one or more rules."]
+       "Describes the specified rules or the rules for the specified listener. You must specify either a listener or rules."]
 module DescribeRulesInput =
   struct
     type nonrec t =
@@ -7823,15 +12170,15 @@ module DescribeRulesInput =
         (Option.map ~f:ListenerArn.of_xml) (Xml.child xml_arg0 "ListenerArn") in
       make ?pageSize ?marker ?ruleArns ?listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let ruleArns = field_map json "RuleArns" RuleArns.of_json in
-      let listenerArn = field_map json "ListenerArn" ListenerArn.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let ruleArns = field_map json__ "RuleArns" RuleArns.of_json in
+      let listenerArn = field_map json__ "ListenerArn" ListenerArn.of_json in
       make ?pageSize ?marker ?ruleArns ?listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the specified rules or the rules for the specified listener. You must specify either a listener or one or more rules."]
+       "Describes the specified rules or the rules for the specified listener. You must specify either a listener or rules."]
 module DescribeLoadBalancersOutput =
   struct
     type describeLoadBalancersResult =
@@ -7901,10 +12248,10 @@ module DescribeLoadBalancersOutput =
           (Xml.child xml_arg0 "LoadBalancers") in
       make ?nextMarker ?loadBalancers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextMarker = field_map json "NextMarker" Marker.of_json in
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" Marker.of_json in
       let loadBalancers =
-        field_map json "LoadBalancers" LoadBalancers.of_json in
+        field_map json__ "LoadBalancers" LoadBalancers.of_json in
       make ?nextMarker ?loadBalancers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7949,12 +12296,12 @@ module DescribeLoadBalancersInput =
           (Xml.child xml_arg0 "LoadBalancerArns") in
       make ?pageSize ?marker ?names ?loadBalancerArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let names = field_map json "Names" LoadBalancerNames.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let names = field_map json__ "Names" LoadBalancerNames.of_json in
       let loadBalancerArns =
-        field_map json "LoadBalancerArns" LoadBalancerArns.of_json in
+        field_map json__ "LoadBalancerArns" LoadBalancerArns.of_json in
       make ?pageSize ?marker ?names ?loadBalancerArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8024,9 +12371,9 @@ module DescribeLoadBalancerAttributesOutput =
           (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map json "Attributes" LoadBalancerAttributes.of_json in
+        field_map json__ "Attributes" LoadBalancerAttributes.of_json in
       make ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8050,9 +12397,9 @@ module DescribeLoadBalancerAttributesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerArn") in
       make ~loadBalancerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loadBalancerArn =
-        field_map_exn json "LoadBalancerArn" LoadBalancerArn.of_json in
+        field_map_exn json__ "LoadBalancerArn" LoadBalancerArn.of_json in
       make ~loadBalancerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8144,9 +12491,9 @@ module DescribeListenersOutput =
         (Option.map ~f:Listeners.of_xml) (Xml.child xml_arg0 "Listeners") in
       make ?nextMarker ?listeners ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextMarker = field_map json "NextMarker" Marker.of_json in
-      let listeners = field_map json "Listeners" Listeners.of_json in
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" Marker.of_json in
+      let listeners = field_map json__ "Listeners" Listeners.of_json in
       make ?nextMarker ?listeners ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8192,12 +12539,12 @@ module DescribeListenersInput =
           (Xml.child xml_arg0 "LoadBalancerArn") in
       make ?pageSize ?marker ?listenerArns ?loadBalancerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let listenerArns = field_map json "ListenerArns" ListenerArns.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let listenerArns = field_map json__ "ListenerArns" ListenerArns.of_json in
       let loadBalancerArn =
-        field_map json "LoadBalancerArn" LoadBalancerArn.of_json in
+        field_map json__ "LoadBalancerArn" LoadBalancerArn.of_json in
       make ?pageSize ?marker ?listenerArns ?loadBalancerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8271,10 +12618,10 @@ module DescribeListenerCertificatesOutput =
           (Xml.child xml_arg0 "Certificates") in
       make ?nextMarker ?certificates ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextMarker = field_map json "NextMarker" Marker.of_json in
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" Marker.of_json in
       let certificates =
-        field_map json "Certificates" CertificateList.of_json in
+        field_map json__ "Certificates" CertificateList.of_json in
       make ?nextMarker ?certificates ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8311,14 +12658,247 @@ module DescribeListenerCertificatesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ?pageSize ?marker ~listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let listenerArn = field_map_exn json "ListenerArn" ListenerArn.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let listenerArn =
+        field_map_exn json__ "ListenerArn" ListenerArn.of_json in
       make ?pageSize ?marker ~listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the default certificate and the certificate list for the specified HTTPS or TLS listener. If the default certificate is also in the certificate list, it appears twice in the results (once with IsDefault set to true and once with IsDefault set to false). For more information, see SSL certificates in the Application Load Balancers Guide or Server certificates in the Network Load Balancers Guide."]
+module DescribeListenerAttributesOutput =
+  struct
+    type describeListenerAttributesResult =
+      {
+      attributes: ListenerAttributes.t option
+        [@ocaml.doc "Information about the listener attributes."]}
+    and responseMetaData = unit
+    and t =
+      {
+      describeListenerAttributesResult: describeListenerAttributesResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `ListenerNotFoundException of ListenerNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "DescribeListenerAttributesOutput"
+    let make ?attributes =
+      fun () ->
+        {
+          describeListenerAttributesResult = { attributes };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "ListenerNotFoundException" ->
+          `ListenerNotFoundException (ListenerNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ListenerNotFoundException" ->
+          `ListenerNotFoundException (ListenerNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ListenerNotFoundException e ->
+          `Assoc
+            [("error", (`String "ListenerNotFoundException"));
+            ("details", (ListenerNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.describeListenerAttributesResult in
+      structure_to_wrapped_value
+        [("Attributes",
+           (Option.map x.attributes ~f:ListenerAttributes.to_value))]
+        ~wrapper:"DescribeListenerAttributesResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "DescribeListenerAttributesResult" in
+      let attributes =
+        (Option.map ~f:ListenerAttributes.of_xml)
+          (Xml.child xml_arg0 "Attributes") in
+      make ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attributes =
+        field_map json__ "Attributes" ListenerAttributes.of_json in
+      make ?attributes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the attributes for the specified listener."]
+module DescribeListenerAttributesInput =
+  struct
+    type nonrec t =
+      {
+      listenerArn: ListenerArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the listener."]}
+    let context_ = "DescribeListenerAttributesInput"
+    let make ~listenerArn = fun () -> { listenerArn }
+    let to_value x =
+      structure_to_value
+        [("ListenerArn", (Some (ListenerArn.to_value x.listenerArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let listenerArn =
+        ListenerArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
+      make ~listenerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let listenerArn =
+        field_map_exn json__ "ListenerArn" ListenerArn.of_json in
+      make ~listenerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the attributes for the specified listener."]
+module DescribeCapacityReservationOutput =
+  struct
+    type describeCapacityReservationResult =
+      {
+      lastModifiedTime: LastModifiedTime.t option
+        [@ocaml.doc "The last time the capacity reservation was modified."];
+      decreaseRequestsRemaining: DecreaseRequestsRemaining.t option
+        [@ocaml.doc "The amount of daily capacity decreases remaining."];
+      minimumLoadBalancerCapacity: MinimumLoadBalancerCapacity.t option
+        [@ocaml.doc
+          "The requested minimum capacity reservation for the load balancer"];
+      capacityReservationState: ZonalCapacityReservationStates.t option
+        [@ocaml.doc "The state of the capacity reservation."]}
+    and responseMetaData = unit
+    and t =
+      {
+      describeCapacityReservationResult: describeCapacityReservationResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `LoadBalancerNotFoundException of LoadBalancerNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "DescribeCapacityReservationOutput"
+    let make ?lastModifiedTime =
+      fun ?decreaseRequestsRemaining ->
+        fun ?minimumLoadBalancerCapacity ->
+          fun ?capacityReservationState ->
+            fun () ->
+              {
+                describeCapacityReservationResult =
+                  {
+                    lastModifiedTime;
+                    decreaseRequestsRemaining;
+                    minimumLoadBalancerCapacity;
+                    capacityReservationState
+                  };
+                responseMetaData = ()
+              }
+    let error_of_json name json =
+      match name with
+      | "LoadBalancerNotFoundException" ->
+          `LoadBalancerNotFoundException
+            (LoadBalancerNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "LoadBalancerNotFoundException" ->
+          `LoadBalancerNotFoundException
+            (LoadBalancerNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `LoadBalancerNotFoundException e ->
+          `Assoc
+            [("error", (`String "LoadBalancerNotFoundException"));
+            ("details", (LoadBalancerNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.describeCapacityReservationResult in
+      structure_to_wrapped_value
+        [("LastModifiedTime",
+           (Option.map x.lastModifiedTime ~f:LastModifiedTime.to_value));
+        ("DecreaseRequestsRemaining",
+          (Option.map x.decreaseRequestsRemaining
+             ~f:DecreaseRequestsRemaining.to_value));
+        ("MinimumLoadBalancerCapacity",
+          (Option.map x.minimumLoadBalancerCapacity
+             ~f:MinimumLoadBalancerCapacity.to_value));
+        ("CapacityReservationState",
+          (Option.map x.capacityReservationState
+             ~f:ZonalCapacityReservationStates.to_value))]
+        ~wrapper:"DescribeCapacityReservationResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "DescribeCapacityReservationResult" in
+      let capacityReservationState =
+        (Option.map ~f:ZonalCapacityReservationStates.of_xml)
+          (Xml.child xml_arg0 "CapacityReservationState") in
+      let minimumLoadBalancerCapacity =
+        (Option.map ~f:MinimumLoadBalancerCapacity.of_xml)
+          (Xml.child xml_arg0 "MinimumLoadBalancerCapacity") in
+      let decreaseRequestsRemaining =
+        (Option.map ~f:DecreaseRequestsRemaining.of_xml)
+          (Xml.child xml_arg0 "DecreaseRequestsRemaining") in
+      let lastModifiedTime =
+        (Option.map ~f:LastModifiedTime.of_xml)
+          (Xml.child xml_arg0 "LastModifiedTime") in
+      make ?capacityReservationState ?minimumLoadBalancerCapacity
+        ?decreaseRequestsRemaining ?lastModifiedTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityReservationState =
+        field_map json__ "CapacityReservationState"
+          ZonalCapacityReservationStates.of_json in
+      let minimumLoadBalancerCapacity =
+        field_map json__ "MinimumLoadBalancerCapacity"
+          MinimumLoadBalancerCapacity.of_json in
+      let decreaseRequestsRemaining =
+        field_map json__ "DecreaseRequestsRemaining"
+          DecreaseRequestsRemaining.of_json in
+      let lastModifiedTime =
+        field_map json__ "LastModifiedTime" LastModifiedTime.of_json in
+      make ?capacityReservationState ?minimumLoadBalancerCapacity
+        ?decreaseRequestsRemaining ?lastModifiedTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the capacity reservation status for the specified load balancer."]
+module DescribeCapacityReservationInput =
+  struct
+    type nonrec t =
+      {
+      loadBalancerArn: LoadBalancerArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the load balancer."]}
+    let context_ = "DescribeCapacityReservationInput"
+    let make ~loadBalancerArn = fun () -> { loadBalancerArn }
+    let to_value x =
+      structure_to_value
+        [("LoadBalancerArn",
+           (Some (LoadBalancerArn.to_value x.loadBalancerArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let loadBalancerArn =
+        LoadBalancerArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerArn") in
+      make ~loadBalancerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let loadBalancerArn =
+        field_map_exn json__ "LoadBalancerArn" LoadBalancerArn.of_json in
+      make ~loadBalancerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the capacity reservation status for the specified load balancer."]
 module DescribeAccountLimitsOutput =
   struct
     type describeAccountLimitsResult =
@@ -8373,9 +12953,9 @@ module DescribeAccountLimitsOutput =
         (Option.map ~f:Limits.of_xml) (Xml.child xml_arg0 "Limits") in
       make ?nextMarker ?limits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextMarker = field_map json "NextMarker" Marker.of_json in
-      let limits = field_map json "Limits" Limits.of_json in
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" Marker.of_json in
+      let limits = field_map json__ "Limits" Limits.of_json in
       make ?nextMarker ?limits ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8403,9 +12983,9 @@ module DescribeAccountLimitsInput =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?pageSize ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
       make ?pageSize ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8465,7 +13045,7 @@ module DeregisterTargetsOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deregisters the specified targets from the specified target group. After the targets are deregistered, they no longer receive traffic from the load balancer."]
+       "Deregisters the specified targets from the specified target group. After the targets are deregistered, they no longer receive traffic from the load balancer. The load balancer stops sending requests to targets that are deregistering, but uses connection draining to ensure that in-flight traffic completes on the existing connections. This deregistration delay is configured by default but can be updated for each target group. For more information, see the following: Deregistration delay in the Application Load Balancers User Guide Deregistration delay in the Network Load Balancers User Guide Deregistration delay in the Gateway Load Balancers User Guide Note: If the specified target does not exist, the action returns successfully."]
 module DeregisterTargetsInput =
   struct
     type nonrec t =
@@ -8493,14 +13073,93 @@ module DeregisterTargetsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "TargetGroupArn") in
       make ~targets ~targetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targets = field_map_exn json "Targets" TargetDescriptions.of_json in
+    let of_json json__ =
+      let targets = field_map_exn json__ "Targets" TargetDescriptions.of_json in
       let targetGroupArn =
-        field_map_exn json "TargetGroupArn" TargetGroupArn.of_json in
+        field_map_exn json__ "TargetGroupArn" TargetGroupArn.of_json in
       make ~targets ~targetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deregisters the specified targets from the specified target group. After the targets are deregistered, they no longer receive traffic from the load balancer."]
+       "Deregisters the specified targets from the specified target group. After the targets are deregistered, they no longer receive traffic from the load balancer. The load balancer stops sending requests to targets that are deregistering, but uses connection draining to ensure that in-flight traffic completes on the existing connections. This deregistration delay is configured by default but can be updated for each target group. For more information, see the following: Deregistration delay in the Application Load Balancers User Guide Deregistration delay in the Network Load Balancers User Guide Deregistration delay in the Gateway Load Balancers User Guide Note: If the specified target does not exist, the action returns successfully."]
+module DeleteTrustStoreOutput =
+  struct
+    type deleteTrustStoreResult = unit
+    and responseMetaData = unit
+    and t =
+      {
+      deleteTrustStoreResult: deleteTrustStoreResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `TrustStoreInUseException of TrustStoreInUseException.t 
+      | `TrustStoreNotFoundException of TrustStoreNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = { deleteTrustStoreResult = (); responseMetaData = () }
+    let error_of_json name json =
+      match name with
+      | "TrustStoreInUseException" ->
+          `TrustStoreInUseException (TrustStoreInUseException.of_json json)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "TrustStoreInUseException" ->
+          `TrustStoreInUseException (TrustStoreInUseException.of_xml xml)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `TrustStoreInUseException e ->
+          `Assoc
+            [("error", (`String "TrustStoreInUseException"));
+            ("details", (TrustStoreInUseException.to_json e))]
+      | `TrustStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrustStoreNotFoundException"));
+            ("details", (TrustStoreNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a trust store."]
+module DeleteTrustStoreInput =
+  struct
+    type nonrec t =
+      {
+      trustStoreArn: TrustStoreArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the trust store."]}
+    let context_ = "DeleteTrustStoreInput"
+    let make ~trustStoreArn = fun () -> { trustStoreArn }
+    let to_value x =
+      structure_to_value
+        [("TrustStoreArn", (Some (TrustStoreArn.to_value x.trustStoreArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let trustStoreArn =
+        TrustStoreArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrustStoreArn") in
+      make ~trustStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let trustStoreArn =
+        field_map_exn json__ "TrustStoreArn" TrustStoreArn.of_json in
+      make ~trustStoreArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a trust store."]
 module DeleteTargetGroupOutput =
   struct
     type deleteTargetGroupResult = unit
@@ -8565,13 +13224,119 @@ module DeleteTargetGroupInput =
           (Xml.child_exn ~context:context_ xml_arg0 "TargetGroupArn") in
       make ~targetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetGroupArn =
-        field_map_exn json "TargetGroupArn" TargetGroupArn.of_json in
+        field_map_exn json__ "TargetGroupArn" TargetGroupArn.of_json in
       make ~targetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the specified target group. You can delete a target group if it is not referenced by any actions. Deleting a target group also deletes any associated health checks. Deleting a target group does not affect its registered targets. For example, any EC2 instances continue to run until you stop or terminate them."]
+module DeleteSharedTrustStoreAssociationOutput =
+  struct
+    type deleteSharedTrustStoreAssociationResult = unit
+    and responseMetaData = unit
+    and t =
+      {
+      deleteSharedTrustStoreAssociationResult:
+        deleteSharedTrustStoreAssociationResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `DeleteAssociationSameAccountException of
+          DeleteAssociationSameAccountException.t 
+      | `TrustStoreAssociationNotFoundException of
+          TrustStoreAssociationNotFoundException.t 
+      | `TrustStoreNotFoundException of TrustStoreNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () =
+      { deleteSharedTrustStoreAssociationResult = (); responseMetaData = () }
+    let error_of_json name json =
+      match name with
+      | "DeleteAssociationSameAccountException" ->
+          `DeleteAssociationSameAccountException
+            (DeleteAssociationSameAccountException.of_json json)
+      | "TrustStoreAssociationNotFoundException" ->
+          `TrustStoreAssociationNotFoundException
+            (TrustStoreAssociationNotFoundException.of_json json)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DeleteAssociationSameAccountException" ->
+          `DeleteAssociationSameAccountException
+            (DeleteAssociationSameAccountException.of_xml xml)
+      | "TrustStoreAssociationNotFoundException" ->
+          `TrustStoreAssociationNotFoundException
+            (TrustStoreAssociationNotFoundException.of_xml xml)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DeleteAssociationSameAccountException e ->
+          `Assoc
+            [("error", (`String "DeleteAssociationSameAccountException"));
+            ("details", (DeleteAssociationSameAccountException.to_json e))]
+      | `TrustStoreAssociationNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrustStoreAssociationNotFoundException"));
+            ("details", (TrustStoreAssociationNotFoundException.to_json e))]
+      | `TrustStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrustStoreNotFoundException"));
+            ("details", (TrustStoreNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a shared trust store association."]
+module DeleteSharedTrustStoreAssociationInput =
+  struct
+    type nonrec t =
+      {
+      trustStoreArn: TrustStoreArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the trust store."];
+      resourceArn: ResourceArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."]}
+    let context_ = "DeleteSharedTrustStoreAssociationInput"
+    let make ~trustStoreArn =
+      fun ~resourceArn -> fun () -> { trustStoreArn; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("TrustStoreArn", (Some (TrustStoreArn.to_value x.trustStoreArn)));
+        ("ResourceArn", (Some (ResourceArn.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        ResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      let trustStoreArn =
+        TrustStoreArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrustStoreArn") in
+      make ~resourceArn ~trustStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      let trustStoreArn =
+        field_map_exn json__ "TrustStoreArn" TrustStoreArn.of_json in
+      make ~resourceArn ~trustStoreArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a shared trust store association."]
 module DeleteRuleOutput =
   struct
     type deleteRuleResult = unit
@@ -8644,8 +13409,8 @@ module DeleteRuleInput =
         RuleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RuleArn") in
       make ~ruleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleArn = field_map_exn json "RuleArn" RuleArn.of_json in
+    let of_json json__ =
+      let ruleArn = field_map_exn json__ "RuleArn" RuleArn.of_json in
       make ~ruleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8736,9 +13501,9 @@ module DeleteLoadBalancerInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerArn") in
       make ~loadBalancerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loadBalancerArn =
-        field_map_exn json "LoadBalancerArn" LoadBalancerArn.of_json in
+        field_map_exn json__ "LoadBalancerArn" LoadBalancerArn.of_json in
       make ~loadBalancerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8815,12 +13580,207 @@ module DeleteListenerInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ~listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let listenerArn = field_map_exn json "ListenerArn" ListenerArn.of_json in
+    let of_json json__ =
+      let listenerArn =
+        field_map_exn json__ "ListenerArn" ListenerArn.of_json in
       make ~listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the specified listener. Alternatively, your listener is deleted when you delete the load balancer to which it is attached."]
+module CreateTrustStoreOutput =
+  struct
+    type createTrustStoreResult =
+      {
+      trustStores: TrustStores.t option
+        [@ocaml.doc "Information about the trust store created."]}
+    and responseMetaData = unit
+    and t =
+      {
+      createTrustStoreResult: createTrustStoreResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `CaCertificatesBundleNotFoundException of
+          CaCertificatesBundleNotFoundException.t 
+      | `DuplicateTagKeysException of DuplicateTagKeysException.t 
+      | `DuplicateTrustStoreNameException of
+          DuplicateTrustStoreNameException.t 
+      | `InvalidCaCertificatesBundleException of
+          InvalidCaCertificatesBundleException.t 
+      | `TooManyTagsException of TooManyTagsException.t 
+      | `TooManyTrustStoresException of TooManyTrustStoresException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "CreateTrustStoreOutput"
+    let make ?trustStores =
+      fun () ->
+        { createTrustStoreResult = { trustStores }; responseMetaData = () }
+    let error_of_json name json =
+      match name with
+      | "CaCertificatesBundleNotFoundException" ->
+          `CaCertificatesBundleNotFoundException
+            (CaCertificatesBundleNotFoundException.of_json json)
+      | "DuplicateTagKeysException" ->
+          `DuplicateTagKeysException (DuplicateTagKeysException.of_json json)
+      | "DuplicateTrustStoreNameException" ->
+          `DuplicateTrustStoreNameException
+            (DuplicateTrustStoreNameException.of_json json)
+      | "InvalidCaCertificatesBundleException" ->
+          `InvalidCaCertificatesBundleException
+            (InvalidCaCertificatesBundleException.of_json json)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_json json)
+      | "TooManyTrustStoresException" ->
+          `TooManyTrustStoresException
+            (TooManyTrustStoresException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CaCertificatesBundleNotFoundException" ->
+          `CaCertificatesBundleNotFoundException
+            (CaCertificatesBundleNotFoundException.of_xml xml)
+      | "DuplicateTagKeysException" ->
+          `DuplicateTagKeysException (DuplicateTagKeysException.of_xml xml)
+      | "DuplicateTrustStoreNameException" ->
+          `DuplicateTrustStoreNameException
+            (DuplicateTrustStoreNameException.of_xml xml)
+      | "InvalidCaCertificatesBundleException" ->
+          `InvalidCaCertificatesBundleException
+            (InvalidCaCertificatesBundleException.of_xml xml)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_xml xml)
+      | "TooManyTrustStoresException" ->
+          `TooManyTrustStoresException
+            (TooManyTrustStoresException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CaCertificatesBundleNotFoundException e ->
+          `Assoc
+            [("error", (`String "CaCertificatesBundleNotFoundException"));
+            ("details", (CaCertificatesBundleNotFoundException.to_json e))]
+      | `DuplicateTagKeysException e ->
+          `Assoc
+            [("error", (`String "DuplicateTagKeysException"));
+            ("details", (DuplicateTagKeysException.to_json e))]
+      | `DuplicateTrustStoreNameException e ->
+          `Assoc
+            [("error", (`String "DuplicateTrustStoreNameException"));
+            ("details", (DuplicateTrustStoreNameException.to_json e))]
+      | `InvalidCaCertificatesBundleException e ->
+          `Assoc
+            [("error", (`String "InvalidCaCertificatesBundleException"));
+            ("details", (InvalidCaCertificatesBundleException.to_json e))]
+      | `TooManyTagsException e ->
+          `Assoc
+            [("error", (`String "TooManyTagsException"));
+            ("details", (TooManyTagsException.to_json e))]
+      | `TooManyTrustStoresException e ->
+          `Assoc
+            [("error", (`String "TooManyTrustStoresException"));
+            ("details", (TooManyTrustStoresException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.createTrustStoreResult in
+      structure_to_wrapped_value
+        [("TrustStores", (Option.map x.trustStores ~f:TrustStores.to_value))]
+        ~wrapper:"CreateTrustStoreResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "CreateTrustStoreResult" in
+      let trustStores =
+        (Option.map ~f:TrustStores.of_xml) (Xml.child xml_arg0 "TrustStores") in
+      make ?trustStores ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let trustStores = field_map json__ "TrustStores" TrustStores.of_json in
+      make ?trustStores ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a trust store. For more information, see Mutual TLS for Application Load Balancers."]
+module CreateTrustStoreInput =
+  struct
+    type nonrec t =
+      {
+      name: TrustStoreName.t
+        [@ocaml.doc
+          "The name of the trust store. This name must be unique per region and can't be changed after creation."];
+      caCertificatesBundleS3Bucket: S3Bucket.t
+        [@ocaml.doc "The Amazon S3 bucket for the ca certificates bundle."];
+      caCertificatesBundleS3Key: S3Key.t
+        [@ocaml.doc "The Amazon S3 path for the ca certificates bundle."];
+      caCertificatesBundleS3ObjectVersion: S3ObjectVersion.t option
+        [@ocaml.doc
+          "The Amazon S3 object version for the ca certificates bundle. If undefined the current version is used."];
+      tags: TagList.t option
+        [@ocaml.doc "The tags to assign to the trust store."]}
+    let context_ = "CreateTrustStoreInput"
+    let make ?caCertificatesBundleS3ObjectVersion =
+      fun ?tags ->
+        fun ~name ->
+          fun ~caCertificatesBundleS3Bucket ->
+            fun ~caCertificatesBundleS3Key ->
+              fun () ->
+                {
+                  caCertificatesBundleS3ObjectVersion;
+                  tags;
+                  name;
+                  caCertificatesBundleS3Bucket;
+                  caCertificatesBundleS3Key
+                }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (TrustStoreName.to_value x.name)));
+        ("CaCertificatesBundleS3Bucket",
+          (Some (S3Bucket.to_value x.caCertificatesBundleS3Bucket)));
+        ("CaCertificatesBundleS3Key",
+          (Some (S3Key.to_value x.caCertificatesBundleS3Key)));
+        ("CaCertificatesBundleS3ObjectVersion",
+          (Option.map x.caCertificatesBundleS3ObjectVersion
+             ~f:S3ObjectVersion.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let caCertificatesBundleS3ObjectVersion =
+        (Option.map ~f:S3ObjectVersion.of_xml)
+          (Xml.child xml_arg0 "CaCertificatesBundleS3ObjectVersion") in
+      let caCertificatesBundleS3Key =
+        S3Key.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "CaCertificatesBundleS3Key") in
+      let caCertificatesBundleS3Bucket =
+        S3Bucket.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "CaCertificatesBundleS3Bucket") in
+      let name =
+        TrustStoreName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?tags ?caCertificatesBundleS3ObjectVersion
+        ~caCertificatesBundleS3Key ~caCertificatesBundleS3Bucket ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let caCertificatesBundleS3ObjectVersion =
+        field_map json__ "CaCertificatesBundleS3ObjectVersion"
+          S3ObjectVersion.of_json in
+      let caCertificatesBundleS3Key =
+        field_map_exn json__ "CaCertificatesBundleS3Key" S3Key.of_json in
+      let caCertificatesBundleS3Bucket =
+        field_map_exn json__ "CaCertificatesBundleS3Bucket" S3Bucket.of_json in
+      let name = field_map_exn json__ "Name" TrustStoreName.of_json in
+      make ?tags ?caCertificatesBundleS3ObjectVersion
+        ~caCertificatesBundleS3Key ~caCertificatesBundleS3Bucket ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a trust store. For more information, see Mutual TLS for Application Load Balancers."]
 module CreateTargetGroupOutput =
   struct
     type createTargetGroupResult =
@@ -8914,8 +13874,8 @@ module CreateTargetGroupOutput =
           (Xml.child xml_arg0 "TargetGroups") in
       make ?targetGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetGroups = field_map json "TargetGroups" TargetGroups.of_json in
+    let of_json json__ =
+      let targetGroups = field_map json__ "TargetGroups" TargetGroups.of_json in
       make ?targetGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8929,7 +13889,7 @@ module CreateTargetGroupInput =
           "The name of the target group. This name must be unique per region per account, can have a maximum of 32 characters, must contain only alphanumeric characters or hyphens, and must not begin or end with a hyphen."];
       protocol: ProtocolEnum.t option
         [@ocaml.doc
-          "The protocol to use for routing traffic to the targets. For Application Load Balancers, the supported protocols are HTTP and HTTPS. For Network Load Balancers, the supported protocols are TCP, TLS, UDP, or TCP_UDP. For Gateway Load Balancers, the supported protocol is GENEVE. A TCP_UDP listener must be associated with a TCP_UDP target group. If the target is a Lambda function, this parameter does not apply."];
+          "The protocol to use for routing traffic to the targets. For Application Load Balancers, the supported protocols are HTTP and HTTPS. For Network Load Balancers, the supported protocols are TCP, TLS, UDP, TCP_UDP, QUIC, or TCP_QUIC. For Gateway Load Balancers, the supported protocol is GENEVE. A TCP_UDP listener must be associated with a TCP_UDP target group. A TCP_QUIC listener must be associated with a TCP_QUIC target group. If the target is a Lambda function, this parameter does not apply."];
       protocolVersion: ProtocolVersion.t option
         [@ocaml.doc
           "\\[HTTP/HTTPS protocol\\] The protocol version. Specify GRPC to send requests to targets using gRPC. Specify HTTP2 to send requests to targets using HTTP/2. The default is HTTP1, which sends requests to targets using HTTP/1.1."];
@@ -8941,39 +13901,41 @@ module CreateTargetGroupInput =
           "The identifier of the virtual private cloud (VPC). If the target is a Lambda function, this parameter does not apply. Otherwise, this parameter is required."];
       healthCheckProtocol: ProtocolEnum.t option
         [@ocaml.doc
-          "The protocol the load balancer uses when performing health checks on targets. For Application Load Balancers, the default is HTTP. For Network Load Balancers and Gateway Load Balancers, the default is TCP. The TCP protocol is not supported for health checks if the protocol of the target group is HTTP or HTTPS. The GENEVE, TLS, UDP, and TCP_UDP protocols are not supported for health checks."];
+          "The protocol the load balancer uses when performing health checks on targets. For Application Load Balancers, the default is HTTP. For Network Load Balancers and Gateway Load Balancers, the default is TCP. The TCP protocol is not supported for health checks if the protocol of the target group is HTTP or HTTPS. The GENEVE, TLS, UDP, TCP_UDP, QUIC, and TCP_QUIC protocols are not supported for health checks."];
       healthCheckPort: HealthCheckPort.t option
         [@ocaml.doc
-          "The port the load balancer uses when performing health checks on targets. If the protocol is HTTP, HTTPS, TCP, TLS, UDP, or TCP_UDP, the default is traffic-port, which is the port on which each target receives traffic from the load balancer. If the protocol is GENEVE, the default is port 80."];
+          "The port the load balancer uses when performing health checks on targets. If the protocol is HTTP, HTTPS, TCP, TLS, UDP, TCP_UDP, QUIC, or TCP_QUIC the default is traffic-port, which is the port on which each target receives traffic from the load balancer. If the protocol is GENEVE, the default is port 80."];
       healthCheckEnabled: HealthCheckEnabled.t option
         [@ocaml.doc
-          "Indicates whether health checks are enabled. If the target type is lambda, health checks are disabled by default but can be enabled. If the target type is instance, ip, or alb, health checks are always enabled and cannot be disabled."];
+          "Indicates whether health checks are enabled. If the target type is lambda, health checks are disabled by default but can be enabled. If the target type is instance, ip, or alb, health checks are always enabled and can't be disabled."];
       healthCheckPath: Path.t option
         [@ocaml.doc
           "\\[HTTP/HTTPS health checks\\] The destination for health checks on the targets. \\[HTTP1 or HTTP2 protocol version\\] The ping path. The default is /. \\[GRPC protocol version\\] The path of a custom health check method with the format /package.service/method. The default is /Amazon Web Services.ALB/healthcheck."];
       healthCheckIntervalSeconds: HealthCheckIntervalSeconds.t option
         [@ocaml.doc
-          "The approximate amount of time, in seconds, between health checks of an individual target. If the target group protocol is TCP, TLS, UDP, or TCP_UDP, the supported values are 10 and 30 seconds. If the target group protocol is HTTP or HTTPS, the default is 30 seconds. If the target group protocol is GENEVE, the default is 10 seconds. If the target type is lambda, the default is 35 seconds."];
+          "The approximate amount of time, in seconds, between health checks of an individual target. The range is 5-300. If the target group protocol is TCP, TLS, UDP, TCP_UDP, QUIC, TCP_QUIC, HTTP or HTTPS, the default is 30 seconds. If the target group protocol is GENEVE, the default is 10 seconds. If the target type is lambda, the default is 35 seconds."];
       healthCheckTimeoutSeconds: HealthCheckTimeoutSeconds.t option
         [@ocaml.doc
-          "The amount of time, in seconds, during which no response from a target means a failed health check. For target groups with a protocol of HTTP, HTTPS, or GENEVE, the default is 5 seconds. For target groups with a protocol of TCP or TLS, this value must be 6 seconds for HTTP health checks and 10 seconds for TCP and HTTPS health checks. If the target type is lambda, the default is 30 seconds."];
+          "The amount of time, in seconds, during which no response from a target means a failed health check. The range is 2\226\128\147120 seconds. For target groups with a protocol of HTTP, the default is 6 seconds. For target groups with a protocol of TCP, TLS or HTTPS, the default is 10 seconds. For target groups with a protocol of GENEVE, the default is 5 seconds. If the target type is lambda, the default is 30 seconds."];
       healthyThresholdCount: HealthCheckThresholdCount.t option
         [@ocaml.doc
-          "The number of consecutive health checks successes required before considering an unhealthy target healthy. For target groups with a protocol of HTTP or HTTPS, the default is 5. For target groups with a protocol of TCP, TLS, or GENEVE, the default is 3. If the target type is lambda, the default is 5."];
+          "The number of consecutive health check successes required before considering a target healthy. The range is 2-10. If the target group protocol is TCP, TCP_UDP, UDP, TLS, HTTP or HTTPS, the default is 5. For target groups with a protocol of GENEVE, the default is 5. If the target type is lambda, the default is 5."];
       unhealthyThresholdCount: HealthCheckThresholdCount.t option
         [@ocaml.doc
-          "The number of consecutive health check failures required before considering a target unhealthy. If the target group protocol is HTTP or HTTPS, the default is 2. If the target group protocol is TCP or TLS, this value must be the same as the healthy threshold count. If the target group protocol is GENEVE, the default is 3. If the target type is lambda, the default is 2."];
+          "The number of consecutive health check failures required before considering a target unhealthy. The range is 2-10. If the target group protocol is TCP, TCP_UDP, UDP, TLS, QUIC, TCP_QUIC, HTTP or HTTPS, the default is 2. For target groups with a protocol of GENEVE, the default is 2. If the target type is lambda, the default is 5."];
       matcher: Matcher.t option
         [@ocaml.doc
-          "\\[HTTP/HTTPS health checks\\] The HTTP or gRPC codes to use when checking for a successful response from a target."];
+          "\\[HTTP/HTTPS health checks\\] The HTTP or gRPC codes to use when checking for a successful response from a target. For target groups with a protocol of TCP, TCP_UDP, UDP, QUIC, TCP_QUIC, or TLS the range is 200-599. For target groups with a protocol of HTTP or HTTPS, the range is 200-499. For target groups with a protocol of GENEVE, the range is 200-399."];
       targetType: TargetTypeEnum.t option
         [@ocaml.doc
           "The type of target that you must specify when registering targets with this target group. You can't specify targets for a target group using more than one target type. instance - Register targets by instance ID. This is the default value. ip - Register targets by IP address. You can specify IP addresses from the subnets of the virtual private cloud (VPC) for the target group, the RFC 1918 range (10.0.0.0/8, 172.16.0.0/12, and 192.168.0.0/16), and the RFC 6598 range (100.64.0.0/10). You can't specify publicly routable IP addresses. lambda - Register a single Lambda function as a target. alb - Register a single Application Load Balancer as a target."];
       tags: TagList.t option
         [@ocaml.doc "The tags to assign to the target group."];
       ipAddressType: TargetGroupIpAddressTypeEnum.t option
+        [@ocaml.doc "The IP address type. The default value is ipv4."];
+      targetControlPort: TargetControlPort.t option
         [@ocaml.doc
-          "The type of IP address used for this target group. The possible values are ipv4 and ipv6. This is an optional parameter. If not specified, the IP address type defaults to ipv4."]}
+          "The port on which the target control agent and application load balancer exchange management traffic for the target optimizer feature."]}
     let context_ = "CreateTargetGroupInput"
     let make ?protocol =
       fun ?protocolVersion ->
@@ -8991,27 +13953,29 @@ module CreateTargetGroupInput =
                               fun ?targetType ->
                                 fun ?tags ->
                                   fun ?ipAddressType ->
-                                    fun ~name ->
-                                      fun () ->
-                                        {
-                                          protocol;
-                                          protocolVersion;
-                                          port;
-                                          vpcId;
-                                          healthCheckProtocol;
-                                          healthCheckPort;
-                                          healthCheckEnabled;
-                                          healthCheckPath;
-                                          healthCheckIntervalSeconds;
-                                          healthCheckTimeoutSeconds;
-                                          healthyThresholdCount;
-                                          unhealthyThresholdCount;
-                                          matcher;
-                                          targetType;
-                                          tags;
-                                          ipAddressType;
-                                          name
-                                        }
+                                    fun ?targetControlPort ->
+                                      fun ~name ->
+                                        fun () ->
+                                          {
+                                            protocol;
+                                            protocolVersion;
+                                            port;
+                                            vpcId;
+                                            healthCheckProtocol;
+                                            healthCheckPort;
+                                            healthCheckEnabled;
+                                            healthCheckPath;
+                                            healthCheckIntervalSeconds;
+                                            healthCheckTimeoutSeconds;
+                                            healthyThresholdCount;
+                                            unhealthyThresholdCount;
+                                            matcher;
+                                            targetType;
+                                            tags;
+                                            ipAddressType;
+                                            targetControlPort;
+                                            name
+                                          }
     let to_value x =
       structure_to_value
         [("Name", (Some (TargetGroupName.to_value x.name)));
@@ -9044,9 +14008,14 @@ module CreateTargetGroupInput =
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("IpAddressType",
           (Option.map x.ipAddressType
-             ~f:TargetGroupIpAddressTypeEnum.to_value))]
+             ~f:TargetGroupIpAddressTypeEnum.to_value));
+        ("TargetControlPort",
+          (Option.map x.targetControlPort ~f:TargetControlPort.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let targetControlPort =
+        (Option.map ~f:TargetControlPort.of_xml)
+          (Xml.child xml_arg0 "TargetControlPort") in
       let ipAddressType =
         (Option.map ~f:TargetGroupIpAddressTypeEnum.of_xml)
           (Xml.child xml_arg0 "IpAddressType") in
@@ -9089,48 +14058,50 @@ module CreateTargetGroupInput =
       let name =
         TargetGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?ipAddressType ?tags ?targetType ?matcher ?unhealthyThresholdCount
-        ?healthyThresholdCount ?healthCheckTimeoutSeconds
-        ?healthCheckIntervalSeconds ?healthCheckPath ?healthCheckEnabled
-        ?healthCheckPort ?healthCheckProtocol ?vpcId ?port ?protocolVersion
-        ?protocol ~name ()
+      make ?targetControlPort ?ipAddressType ?tags ?targetType ?matcher
+        ?unhealthyThresholdCount ?healthyThresholdCount
+        ?healthCheckTimeoutSeconds ?healthCheckIntervalSeconds
+        ?healthCheckPath ?healthCheckEnabled ?healthCheckPort
+        ?healthCheckProtocol ?vpcId ?port ?protocolVersion ?protocol ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let targetControlPort =
+        field_map json__ "TargetControlPort" TargetControlPort.of_json in
       let ipAddressType =
-        field_map json "IpAddressType" TargetGroupIpAddressTypeEnum.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let targetType = field_map json "TargetType" TargetTypeEnum.of_json in
-      let matcher = field_map json "Matcher" Matcher.of_json in
+        field_map json__ "IpAddressType" TargetGroupIpAddressTypeEnum.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let targetType = field_map json__ "TargetType" TargetTypeEnum.of_json in
+      let matcher = field_map json__ "Matcher" Matcher.of_json in
       let unhealthyThresholdCount =
-        field_map json "UnhealthyThresholdCount"
+        field_map json__ "UnhealthyThresholdCount"
           HealthCheckThresholdCount.of_json in
       let healthyThresholdCount =
-        field_map json "HealthyThresholdCount"
+        field_map json__ "HealthyThresholdCount"
           HealthCheckThresholdCount.of_json in
       let healthCheckTimeoutSeconds =
-        field_map json "HealthCheckTimeoutSeconds"
+        field_map json__ "HealthCheckTimeoutSeconds"
           HealthCheckTimeoutSeconds.of_json in
       let healthCheckIntervalSeconds =
-        field_map json "HealthCheckIntervalSeconds"
+        field_map json__ "HealthCheckIntervalSeconds"
           HealthCheckIntervalSeconds.of_json in
-      let healthCheckPath = field_map json "HealthCheckPath" Path.of_json in
+      let healthCheckPath = field_map json__ "HealthCheckPath" Path.of_json in
       let healthCheckEnabled =
-        field_map json "HealthCheckEnabled" HealthCheckEnabled.of_json in
+        field_map json__ "HealthCheckEnabled" HealthCheckEnabled.of_json in
       let healthCheckPort =
-        field_map json "HealthCheckPort" HealthCheckPort.of_json in
+        field_map json__ "HealthCheckPort" HealthCheckPort.of_json in
       let healthCheckProtocol =
-        field_map json "HealthCheckProtocol" ProtocolEnum.of_json in
-      let vpcId = field_map json "VpcId" VpcId.of_json in
-      let port = field_map json "Port" Port.of_json in
+        field_map json__ "HealthCheckProtocol" ProtocolEnum.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
+      let port = field_map json__ "Port" Port.of_json in
       let protocolVersion =
-        field_map json "ProtocolVersion" ProtocolVersion.of_json in
-      let protocol = field_map json "Protocol" ProtocolEnum.of_json in
-      let name = field_map_exn json "Name" TargetGroupName.of_json in
-      make ?ipAddressType ?tags ?targetType ?matcher ?unhealthyThresholdCount
-        ?healthyThresholdCount ?healthCheckTimeoutSeconds
-        ?healthCheckIntervalSeconds ?healthCheckPath ?healthCheckEnabled
-        ?healthCheckPort ?healthCheckProtocol ?vpcId ?port ?protocolVersion
-        ?protocol ~name ()
+        field_map json__ "ProtocolVersion" ProtocolVersion.of_json in
+      let protocol = field_map json__ "Protocol" ProtocolEnum.of_json in
+      let name = field_map_exn json__ "Name" TargetGroupName.of_json in
+      make ?targetControlPort ?ipAddressType ?tags ?targetType ?matcher
+        ?unhealthyThresholdCount ?healthyThresholdCount
+        ?healthCheckTimeoutSeconds ?healthCheckIntervalSeconds
+        ?healthCheckPath ?healthCheckEnabled ?healthCheckPort
+        ?healthCheckProtocol ?vpcId ?port ?protocolVersion ?protocol ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a target group. For more information, see the following: Target groups for your Application Load Balancers Target groups for your Network Load Balancers Target groups for your Gateway Load Balancers This operation is idempotent, which means that it completes at most one time. If you attempt to create multiple target groups with the same settings, each call succeeds."]
@@ -9336,11 +14307,11 @@ module CreateRuleOutput =
       let rules = (Option.map ~f:Rules.of_xml) (Xml.child xml_arg0 "Rules") in
       make ?rules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map json "Rules" Rules.of_json in make ?rules ()
+    let of_json json__ =
+      let rules = field_map json__ "Rules" Rules.of_json in make ?rules ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a rule for the specified listener. The listener must be associated with an Application Load Balancer. Each rule consists of a priority, one or more actions, and one or more conditions. Rules are evaluated in priority order, from the lowest value to the highest value. When the conditions for a rule are met, its actions are performed. If the conditions for no rules are met, the actions for the default rule are performed. For more information, see Listener rules in the Application Load Balancers Guide."]
+       "Creates a rule for the specified listener. The listener must be associated with an Application Load Balancer. Each rule consists of a priority, one or more actions, one or more conditions, and up to two optional transforms. Rules are evaluated in priority order, from the lowest value to the highest value. When the conditions for a rule are met, its actions are performed. If the conditions for no rules are met, the actions for the default rule are performed. For more information, see Listener rules in the Application Load Balancers Guide."]
 module CreateRuleInput =
   struct
     type nonrec t =
@@ -9352,23 +14323,40 @@ module CreateRuleInput =
         [@ocaml.doc
           "The rule priority. A listener can't have multiple rules with the same priority."];
       actions: Actions.t [@ocaml.doc "The actions."];
-      tags: TagList.t option [@ocaml.doc "The tags to assign to the rule."]}
+      tags: TagList.t option [@ocaml.doc "The tags to assign to the rule."];
+      transforms: RuleTransformList.t option
+        [@ocaml.doc
+          "The transforms to apply to requests that match this rule. You can add one host header rewrite transform and one URL rewrite transform."]}
     let context_ = "CreateRuleInput"
     let make ?tags =
-      fun ~listenerArn ->
-        fun ~conditions ->
-          fun ~priority ->
-            fun ~actions ->
-              fun () -> { tags; listenerArn; conditions; priority; actions }
+      fun ?transforms ->
+        fun ~listenerArn ->
+          fun ~conditions ->
+            fun ~priority ->
+              fun ~actions ->
+                fun () ->
+                  {
+                    tags;
+                    transforms;
+                    listenerArn;
+                    conditions;
+                    priority;
+                    actions
+                  }
     let to_value x =
       structure_to_value
         [("ListenerArn", (Some (ListenerArn.to_value x.listenerArn)));
         ("Conditions", (Some (RuleConditionList.to_value x.conditions)));
         ("Priority", (Some (RulePriority.to_value x.priority)));
         ("Actions", (Some (Actions.to_value x.actions)));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("Transforms",
+          (Option.map x.transforms ~f:RuleTransformList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let transforms =
+        (Option.map ~f:RuleTransformList.of_xml)
+          (Xml.child xml_arg0 "Transforms") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let actions =
         Actions.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Actions") in
@@ -9381,19 +14369,22 @@ module CreateRuleInput =
       let listenerArn =
         ListenerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
-      make ?tags ~actions ~priority ~conditions ~listenerArn ()
+      make ?transforms ?tags ~actions ~priority ~conditions ~listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let actions = field_map_exn json "Actions" Actions.of_json in
-      let priority = field_map_exn json "Priority" RulePriority.of_json in
+    let of_json json__ =
+      let transforms =
+        field_map json__ "Transforms" RuleTransformList.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let actions = field_map_exn json__ "Actions" Actions.of_json in
+      let priority = field_map_exn json__ "Priority" RulePriority.of_json in
       let conditions =
-        field_map_exn json "Conditions" RuleConditionList.of_json in
-      let listenerArn = field_map_exn json "ListenerArn" ListenerArn.of_json in
-      make ?tags ~actions ~priority ~conditions ~listenerArn ()
+        field_map_exn json__ "Conditions" RuleConditionList.of_json in
+      let listenerArn =
+        field_map_exn json__ "ListenerArn" ListenerArn.of_json in
+      make ?transforms ?tags ~actions ~priority ~conditions ~listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a rule for the specified listener. The listener must be associated with an Application Load Balancer. Each rule consists of a priority, one or more actions, and one or more conditions. Rules are evaluated in priority order, from the lowest value to the highest value. When the conditions for a rule are met, its actions are performed. If the conditions for no rules are met, the actions for the default rule are performed. For more information, see Listener rules in the Application Load Balancers Guide."]
+       "Creates a rule for the specified listener. The listener must be associated with an Application Load Balancer. Each rule consists of a priority, one or more actions, one or more conditions, and up to two optional transforms. Rules are evaluated in priority order, from the lowest value to the highest value. When the conditions for a rule are met, its actions are performed. If the conditions for no rules are met, the actions for the default rule are performed. For more information, see Listener rules in the Application Load Balancers Guide."]
 module CreateLoadBalancerOutput =
   struct
     type createLoadBalancerResult =
@@ -9577,9 +14568,9 @@ module CreateLoadBalancerOutput =
           (Xml.child xml_arg0 "LoadBalancers") in
       make ?loadBalancers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loadBalancers =
-        field_map json "LoadBalancers" LoadBalancers.of_json in
+        field_map json__ "LoadBalancers" LoadBalancers.of_json in
       make ?loadBalancers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9593,26 +14584,32 @@ module CreateLoadBalancerInput =
           "The name of the load balancer. This name must be unique per region per account, can have a maximum of 32 characters, must contain only alphanumeric characters or hyphens, must not begin or end with a hyphen, and must not begin with \"internal-\"."];
       subnets: Subnets.t option
         [@ocaml.doc
-          "The IDs of the public subnets. You can specify only one subnet per Availability Zone. You must specify either subnets or subnet mappings. \\[Application Load Balancers\\] You must specify subnets from at least two Availability Zones. \\[Application Load Balancers on Outposts\\] You must specify one Outpost subnet. \\[Application Load Balancers on Local Zones\\] You can specify subnets from one or more Local Zones. \\[Network Load Balancers\\] You can specify subnets from one or more Availability Zones. \\[Gateway Load Balancers\\] You can specify subnets from one or more Availability Zones."];
+          "The IDs of the subnets. You can specify only one subnet per Availability Zone. You must specify either subnets or subnet mappings, but not both. To specify an Elastic IP address, specify subnet mappings instead of subnets. \\[Application Load Balancers\\] You must specify subnets from at least two Availability Zones. \\[Application Load Balancers on Outposts\\] You must specify one Outpost subnet. \\[Application Load Balancers on Local Zones\\] You can specify subnets from one or more Local Zones. \\[Network Load Balancers and Gateway Load Balancers\\] You can specify subnets from one or more Availability Zones."];
       subnetMappings: SubnetMappings.t option
         [@ocaml.doc
-          "The IDs of the public subnets. You can specify only one subnet per Availability Zone. You must specify either subnets or subnet mappings. \\[Application Load Balancers\\] You must specify subnets from at least two Availability Zones. You cannot specify Elastic IP addresses for your subnets. \\[Application Load Balancers on Outposts\\] You must specify one Outpost subnet. \\[Application Load Balancers on Local Zones\\] You can specify subnets from one or more Local Zones. \\[Network Load Balancers\\] You can specify subnets from one or more Availability Zones. You can specify one Elastic IP address per subnet if you need static IP addresses for your internet-facing load balancer. For internal load balancers, you can specify one private IP address per subnet from the IPv4 range of the subnet. For internet-facing load balancer, you can specify one IPv6 address per subnet. \\[Gateway Load Balancers\\] You can specify subnets from one or more Availability Zones. You cannot specify Elastic IP addresses for your subnets."];
+          "The IDs of the subnets. You can specify only one subnet per Availability Zone. You must specify either subnets or subnet mappings, but not both. \\[Application Load Balancers\\] You must specify subnets from at least two Availability Zones. You can't specify Elastic IP addresses for your subnets. \\[Application Load Balancers on Outposts\\] You must specify one Outpost subnet. \\[Application Load Balancers on Local Zones\\] You can specify subnets from one or more Local Zones. \\[Network Load Balancers\\] You can specify subnets from one or more Availability Zones. You can specify one Elastic IP address per subnet if you need static IP addresses for your internet-facing load balancer. For internal load balancers, you can specify one private IP address per subnet from the IPv4 range of the subnet. For internet-facing load balancer, you can specify one IPv6 address per subnet. \\[Gateway Load Balancers\\] You can specify subnets from one or more Availability Zones. You can't specify Elastic IP addresses for your subnets."];
       securityGroups: SecurityGroups.t option
         [@ocaml.doc
-          "\\[Application Load Balancers\\] The IDs of the security groups for the load balancer."];
+          "\\[Application Load Balancers and Network Load Balancers\\] The IDs of the security groups for the load balancer."];
       scheme: LoadBalancerSchemeEnum.t option
         [@ocaml.doc
-          "The nodes of an Internet-facing load balancer have public IP addresses. The DNS name of an Internet-facing load balancer is publicly resolvable to the public IP addresses of the nodes. Therefore, Internet-facing load balancers can route requests from clients over the internet. The nodes of an internal load balancer have only private IP addresses. The DNS name of an internal load balancer is publicly resolvable to the private IP addresses of the nodes. Therefore, internal load balancers can route requests only from clients with access to the VPC for the load balancer. The default is an Internet-facing load balancer. You cannot specify a scheme for a Gateway Load Balancer."];
+          "The nodes of an Internet-facing load balancer have public IP addresses. The DNS name of an Internet-facing load balancer is publicly resolvable to the public IP addresses of the nodes. Therefore, Internet-facing load balancers can route requests from clients over the internet. The nodes of an internal load balancer have only private IP addresses. The DNS name of an internal load balancer is publicly resolvable to the private IP addresses of the nodes. Therefore, internal load balancers can route requests only from clients with access to the VPC for the load balancer. The default is an Internet-facing load balancer. You can't specify a scheme for a Gateway Load Balancer."];
       tags: TagList.t option
         [@ocaml.doc "The tags to assign to the load balancer."];
       type_: LoadBalancerTypeEnum.t option
         [@ocaml.doc "The type of load balancer. The default is application."];
       ipAddressType: IpAddressType.t option
         [@ocaml.doc
-          "The type of IP addresses used by the subnets for your load balancer. The possible values are ipv4 (for IPv4 addresses) and dualstack (for IPv4 and IPv6 addresses)."];
+          "The IP address type. Internal load balancers must use ipv4. \\[Application Load Balancers\\] The possible values are ipv4 (IPv4 addresses), dualstack (IPv4 and IPv6 addresses), and dualstack-without-public-ipv4 (public IPv6 addresses and private IPv4 and IPv6 addresses). \\[Network Load Balancers and Gateway Load Balancers\\] The possible values are ipv4 (IPv4 addresses) and dualstack (IPv4 and IPv6 addresses)."];
       customerOwnedIpv4Pool: CustomerOwnedIpv4Pool.t option
         [@ocaml.doc
-          "\\[Application Load Balancers on Outposts\\] The ID of the customer-owned address pool (CoIP pool)."]}
+          "\\[Application Load Balancers on Outposts\\] The ID of the customer-owned address pool (CoIP pool)."];
+      enablePrefixForIpv6SourceNat: EnablePrefixForIpv6SourceNatEnum.t option
+        [@ocaml.doc
+          "\\[Network Load Balancers with UDP listeners\\] Indicates whether to use an IPv6 prefix from each subnet for source NAT. The IP address type must be dualstack. The default value is off."];
+      ipamPools: IpamPools.t option
+        [@ocaml.doc
+          "\\[Application Load Balancers\\] The IPAM pools to use with the load balancer."]}
     let context_ = "CreateLoadBalancerInput"
     let make ?subnets =
       fun ?subnetMappings ->
@@ -9622,19 +14619,23 @@ module CreateLoadBalancerInput =
               fun ?type_ ->
                 fun ?ipAddressType ->
                   fun ?customerOwnedIpv4Pool ->
-                    fun ~name ->
-                      fun () ->
-                        {
-                          subnets;
-                          subnetMappings;
-                          securityGroups;
-                          scheme;
-                          tags;
-                          type_;
-                          ipAddressType;
-                          customerOwnedIpv4Pool;
-                          name
-                        }
+                    fun ?enablePrefixForIpv6SourceNat ->
+                      fun ?ipamPools ->
+                        fun ~name ->
+                          fun () ->
+                            {
+                              subnets;
+                              subnetMappings;
+                              securityGroups;
+                              scheme;
+                              tags;
+                              type_;
+                              ipAddressType;
+                              customerOwnedIpv4Pool;
+                              enablePrefixForIpv6SourceNat;
+                              ipamPools;
+                              name
+                            }
     let to_value x =
       structure_to_value
         [("Name", (Some (LoadBalancerName.to_value x.name)));
@@ -9650,9 +14651,18 @@ module CreateLoadBalancerInput =
           (Option.map x.ipAddressType ~f:IpAddressType.to_value));
         ("CustomerOwnedIpv4Pool",
           (Option.map x.customerOwnedIpv4Pool
-             ~f:CustomerOwnedIpv4Pool.to_value))]
+             ~f:CustomerOwnedIpv4Pool.to_value));
+        ("EnablePrefixForIpv6SourceNat",
+          (Option.map x.enablePrefixForIpv6SourceNat
+             ~f:EnablePrefixForIpv6SourceNatEnum.to_value));
+        ("IpamPools", (Option.map x.ipamPools ~f:IpamPools.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipamPools =
+        (Option.map ~f:IpamPools.of_xml) (Xml.child xml_arg0 "IpamPools") in
+      let enablePrefixForIpv6SourceNat =
+        (Option.map ~f:EnablePrefixForIpv6SourceNatEnum.of_xml)
+          (Xml.child xml_arg0 "EnablePrefixForIpv6SourceNat") in
       let customerOwnedIpv4Pool =
         (Option.map ~f:CustomerOwnedIpv4Pool.of_xml)
           (Xml.child xml_arg0 "CustomerOwnedIpv4Pool") in
@@ -9677,25 +14687,32 @@ module CreateLoadBalancerInput =
       let name =
         LoadBalancerName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?customerOwnedIpv4Pool ?ipAddressType ?type_ ?tags ?scheme
-        ?securityGroups ?subnetMappings ?subnets ~name ()
+      make ?ipamPools ?enablePrefixForIpv6SourceNat ?customerOwnedIpv4Pool
+        ?ipAddressType ?type_ ?tags ?scheme ?securityGroups ?subnetMappings
+        ?subnets ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ipamPools = field_map json__ "IpamPools" IpamPools.of_json in
+      let enablePrefixForIpv6SourceNat =
+        field_map json__ "EnablePrefixForIpv6SourceNat"
+          EnablePrefixForIpv6SourceNatEnum.of_json in
       let customerOwnedIpv4Pool =
-        field_map json "CustomerOwnedIpv4Pool" CustomerOwnedIpv4Pool.of_json in
+        field_map json__ "CustomerOwnedIpv4Pool"
+          CustomerOwnedIpv4Pool.of_json in
       let ipAddressType =
-        field_map json "IpAddressType" IpAddressType.of_json in
-      let type_ = field_map json "Type" LoadBalancerTypeEnum.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let scheme = field_map json "Scheme" LoadBalancerSchemeEnum.of_json in
+        field_map json__ "IpAddressType" IpAddressType.of_json in
+      let type_ = field_map json__ "Type" LoadBalancerTypeEnum.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let scheme = field_map json__ "Scheme" LoadBalancerSchemeEnum.of_json in
       let securityGroups =
-        field_map json "SecurityGroups" SecurityGroups.of_json in
+        field_map json__ "SecurityGroups" SecurityGroups.of_json in
       let subnetMappings =
-        field_map json "SubnetMappings" SubnetMappings.of_json in
-      let subnets = field_map json "Subnets" Subnets.of_json in
-      let name = field_map_exn json "Name" LoadBalancerName.of_json in
-      make ?customerOwnedIpv4Pool ?ipAddressType ?type_ ?tags ?scheme
-        ?securityGroups ?subnetMappings ?subnets ~name ()
+        field_map json__ "SubnetMappings" SubnetMappings.of_json in
+      let subnets = field_map json__ "Subnets" Subnets.of_json in
+      let name = field_map_exn json__ "Name" LoadBalancerName.of_json in
+      make ?ipamPools ?enablePrefixForIpv6SourceNat ?customerOwnedIpv4Pool
+        ?ipAddressType ?type_ ?tags ?scheme ?securityGroups ?subnetMappings
+        ?subnets ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an Application Load Balancer, Network Load Balancer, or Gateway Load Balancer. For more information, see the following: Application Load Balancers Network Load Balancers Gateway Load Balancers This operation is idempotent, which means that it completes at most one time. If you attempt to create multiple load balancers with the same settings, each call succeeds."]
@@ -9734,6 +14751,8 @@ module CreateListenerOutput =
       | `TooManyTargetsException of TooManyTargetsException.t 
       | `TooManyUniqueTargetGroupsPerLoadBalancerException of
           TooManyUniqueTargetGroupsPerLoadBalancerException.t 
+      | `TrustStoreNotFoundException of TrustStoreNotFoundException.t 
+      | `TrustStoreNotReadyException of TrustStoreNotReadyException.t 
       | `UnsupportedProtocolException of UnsupportedProtocolException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "CreateListenerOutput"
@@ -9789,6 +14808,12 @@ module CreateListenerOutput =
       | "TooManyUniqueTargetGroupsPerLoadBalancerException" ->
           `TooManyUniqueTargetGroupsPerLoadBalancerException
             (TooManyUniqueTargetGroupsPerLoadBalancerException.of_json json)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_json json)
+      | "TrustStoreNotReadyException" ->
+          `TrustStoreNotReadyException
+            (TrustStoreNotReadyException.of_json json)
       | "UnsupportedProtocolException" ->
           `UnsupportedProtocolException
             (UnsupportedProtocolException.of_json json)
@@ -9842,6 +14867,12 @@ module CreateListenerOutput =
       | "TooManyUniqueTargetGroupsPerLoadBalancerException" ->
           `TooManyUniqueTargetGroupsPerLoadBalancerException
             (TooManyUniqueTargetGroupsPerLoadBalancerException.of_xml xml)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_xml xml)
+      | "TrustStoreNotReadyException" ->
+          `TrustStoreNotReadyException
+            (TrustStoreNotReadyException.of_xml xml)
       | "UnsupportedProtocolException" ->
           `UnsupportedProtocolException
             (UnsupportedProtocolException.of_xml xml)
@@ -9919,6 +14950,14 @@ module CreateListenerOutput =
                (`String "TooManyUniqueTargetGroupsPerLoadBalancerException"));
             ("details",
               (TooManyUniqueTargetGroupsPerLoadBalancerException.to_json e))]
+      | `TrustStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrustStoreNotFoundException"));
+            ("details", (TrustStoreNotFoundException.to_json e))]
+      | `TrustStoreNotReadyException e ->
+          `Assoc
+            [("error", (`String "TrustStoreNotReadyException"));
+            ("details", (TrustStoreNotReadyException.to_json e))]
       | `UnsupportedProtocolException e ->
           `Assoc
             [("error", (`String "UnsupportedProtocolException"));
@@ -9940,8 +14979,8 @@ module CreateListenerOutput =
         (Option.map ~f:Listeners.of_xml) (Xml.child xml_arg0 "Listeners") in
       make ?listeners ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let listeners = field_map json "Listeners" Listeners.of_json in
+    let of_json json__ =
+      let listeners = field_map json__ "Listeners" Listeners.of_json in
       make ?listeners ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9954,10 +14993,10 @@ module CreateListenerInput =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the load balancer."];
       protocol: ProtocolEnum.t option
         [@ocaml.doc
-          "The protocol for connections from clients to the load balancer. For Application Load Balancers, the supported protocols are HTTP and HTTPS. For Network Load Balancers, the supported protocols are TCP, TLS, UDP, and TCP_UDP. You can\226\128\153t specify the UDP or TCP_UDP protocol if dual-stack mode is enabled. You cannot specify a protocol for a Gateway Load Balancer."];
+          "The protocol for connections from clients to the load balancer. For Application Load Balancers, the supported protocols are HTTP and HTTPS. For Network Load Balancers, the supported protocols are TCP, TLS, UDP, TCP_UDP, QUIC, and TCP_QUIC. You can\226\128\153t specify the UDP, TCP_UDP, QUIC, or TCP_QUIC protocol if dual-stack mode is enabled. You can't specify a protocol for a Gateway Load Balancer."];
       port: Port.t option
         [@ocaml.doc
-          "The port on which the load balancer is listening. You cannot specify a port for a Gateway Load Balancer."];
+          "The port on which the load balancer is listening. You can't specify a port for a Gateway Load Balancer."];
       sslPolicy: SslPolicyName.t option
         [@ocaml.doc
           "\\[HTTPS and TLS listeners\\] The security policy that defines which protocols and ciphers are supported. For more information, see Security policies in the Application Load Balancers Guide and Security policies in the Network Load Balancers Guide."];
@@ -9970,7 +15009,10 @@ module CreateListenerInput =
         [@ocaml.doc
           "\\[TLS listeners\\] The name of the Application-Layer Protocol Negotiation (ALPN) policy. You can specify one policy name. The following are the possible values: HTTP1Only HTTP2Only HTTP2Optional HTTP2Preferred None For more information, see ALPN policies in the Network Load Balancers Guide."];
       tags: TagList.t option
-        [@ocaml.doc "The tags to assign to the listener."]}
+        [@ocaml.doc "The tags to assign to the listener."];
+      mutualAuthentication: MutualAuthenticationAttributes.t option
+        [@ocaml.doc
+          "\\[HTTPS listeners\\] The mutual authentication configuration information."]}
     let context_ = "CreateListenerInput"
     let make ?protocol =
       fun ?port ->
@@ -9978,19 +15020,21 @@ module CreateListenerInput =
           fun ?certificates ->
             fun ?alpnPolicy ->
               fun ?tags ->
-                fun ~loadBalancerArn ->
-                  fun ~defaultActions ->
-                    fun () ->
-                      {
-                        protocol;
-                        port;
-                        sslPolicy;
-                        certificates;
-                        alpnPolicy;
-                        tags;
-                        loadBalancerArn;
-                        defaultActions
-                      }
+                fun ?mutualAuthentication ->
+                  fun ~loadBalancerArn ->
+                    fun ~defaultActions ->
+                      fun () ->
+                        {
+                          protocol;
+                          port;
+                          sslPolicy;
+                          certificates;
+                          alpnPolicy;
+                          tags;
+                          mutualAuthentication;
+                          loadBalancerArn;
+                          defaultActions
+                        }
     let to_value x =
       structure_to_value
         [("LoadBalancerArn",
@@ -10002,9 +15046,15 @@ module CreateListenerInput =
           (Option.map x.certificates ~f:CertificateList.to_value));
         ("DefaultActions", (Some (Actions.to_value x.defaultActions)));
         ("AlpnPolicy", (Option.map x.alpnPolicy ~f:AlpnPolicyName.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("MutualAuthentication",
+          (Option.map x.mutualAuthentication
+             ~f:MutualAuthenticationAttributes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let mutualAuthentication =
+        (Option.map ~f:MutualAuthenticationAttributes.of_xml)
+          (Xml.child xml_arg0 "MutualAuthentication") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let alpnPolicy =
         (Option.map ~f:AlpnPolicyName.of_xml)
@@ -10023,26 +15073,176 @@ module CreateListenerInput =
       let loadBalancerArn =
         LoadBalancerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LoadBalancerArn") in
-      make ?tags ?alpnPolicy ~defaultActions ?certificates ?sslPolicy ?port
-        ?protocol ~loadBalancerArn ()
+      make ?mutualAuthentication ?tags ?alpnPolicy ~defaultActions
+        ?certificates ?sslPolicy ?port ?protocol ~loadBalancerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let alpnPolicy = field_map json "AlpnPolicy" AlpnPolicyName.of_json in
+    let of_json json__ =
+      let mutualAuthentication =
+        field_map json__ "MutualAuthentication"
+          MutualAuthenticationAttributes.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let alpnPolicy = field_map json__ "AlpnPolicy" AlpnPolicyName.of_json in
       let defaultActions =
-        field_map_exn json "DefaultActions" Actions.of_json in
+        field_map_exn json__ "DefaultActions" Actions.of_json in
       let certificates =
-        field_map json "Certificates" CertificateList.of_json in
-      let sslPolicy = field_map json "SslPolicy" SslPolicyName.of_json in
-      let port = field_map json "Port" Port.of_json in
-      let protocol = field_map json "Protocol" ProtocolEnum.of_json in
+        field_map json__ "Certificates" CertificateList.of_json in
+      let sslPolicy = field_map json__ "SslPolicy" SslPolicyName.of_json in
+      let port = field_map json__ "Port" Port.of_json in
+      let protocol = field_map json__ "Protocol" ProtocolEnum.of_json in
       let loadBalancerArn =
-        field_map_exn json "LoadBalancerArn" LoadBalancerArn.of_json in
-      make ?tags ?alpnPolicy ~defaultActions ?certificates ?sslPolicy ?port
-        ?protocol ~loadBalancerArn ()
+        field_map_exn json__ "LoadBalancerArn" LoadBalancerArn.of_json in
+      make ?mutualAuthentication ?tags ?alpnPolicy ~defaultActions
+        ?certificates ?sslPolicy ?port ?protocol ~loadBalancerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a listener for the specified Application Load Balancer, Network Load Balancer, or Gateway Load Balancer. For more information, see the following: Listeners for your Application Load Balancers Listeners for your Network Load Balancers Listeners for your Gateway Load Balancers This operation is idempotent, which means that it completes at most one time. If you attempt to create multiple listeners with the same settings, each call succeeds."]
+module AddTrustStoreRevocationsOutput =
+  struct
+    type addTrustStoreRevocationsResult =
+      {
+      trustStoreRevocations: TrustStoreRevocations.t option
+        [@ocaml.doc
+          "Information about the revocation file added to the trust store."]}
+    and responseMetaData = unit
+    and t =
+      {
+      addTrustStoreRevocationsResult: addTrustStoreRevocationsResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `InvalidRevocationContentException of
+          InvalidRevocationContentException.t 
+      | `RevocationContentNotFoundException of
+          RevocationContentNotFoundException.t 
+      | `TooManyTrustStoreRevocationEntriesException of
+          TooManyTrustStoreRevocationEntriesException.t 
+      | `TrustStoreNotFoundException of TrustStoreNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "AddTrustStoreRevocationsOutput"
+    let make ?trustStoreRevocations =
+      fun () ->
+        {
+          addTrustStoreRevocationsResult = { trustStoreRevocations };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "InvalidRevocationContentException" ->
+          `InvalidRevocationContentException
+            (InvalidRevocationContentException.of_json json)
+      | "RevocationContentNotFoundException" ->
+          `RevocationContentNotFoundException
+            (RevocationContentNotFoundException.of_json json)
+      | "TooManyTrustStoreRevocationEntriesException" ->
+          `TooManyTrustStoreRevocationEntriesException
+            (TooManyTrustStoreRevocationEntriesException.of_json json)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidRevocationContentException" ->
+          `InvalidRevocationContentException
+            (InvalidRevocationContentException.of_xml xml)
+      | "RevocationContentNotFoundException" ->
+          `RevocationContentNotFoundException
+            (RevocationContentNotFoundException.of_xml xml)
+      | "TooManyTrustStoreRevocationEntriesException" ->
+          `TooManyTrustStoreRevocationEntriesException
+            (TooManyTrustStoreRevocationEntriesException.of_xml xml)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidRevocationContentException e ->
+          `Assoc
+            [("error", (`String "InvalidRevocationContentException"));
+            ("details", (InvalidRevocationContentException.to_json e))]
+      | `RevocationContentNotFoundException e ->
+          `Assoc
+            [("error", (`String "RevocationContentNotFoundException"));
+            ("details", (RevocationContentNotFoundException.to_json e))]
+      | `TooManyTrustStoreRevocationEntriesException e ->
+          `Assoc
+            [("error",
+               (`String "TooManyTrustStoreRevocationEntriesException"));
+            ("details",
+              (TooManyTrustStoreRevocationEntriesException.to_json e))]
+      | `TrustStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrustStoreNotFoundException"));
+            ("details", (TrustStoreNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.addTrustStoreRevocationsResult in
+      structure_to_wrapped_value
+        [("TrustStoreRevocations",
+           (Option.map x.trustStoreRevocations
+              ~f:TrustStoreRevocations.to_value))]
+        ~wrapper:"AddTrustStoreRevocationsResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "AddTrustStoreRevocationsResult" in
+      let trustStoreRevocations =
+        (Option.map ~f:TrustStoreRevocations.of_xml)
+          (Xml.child xml_arg0 "TrustStoreRevocations") in
+      make ?trustStoreRevocations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let trustStoreRevocations =
+        field_map json__ "TrustStoreRevocations"
+          TrustStoreRevocations.of_json in
+      make ?trustStoreRevocations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds the specified revocation file to the specified trust store."]
+module AddTrustStoreRevocationsInput =
+  struct
+    type nonrec t =
+      {
+      trustStoreArn: TrustStoreArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the trust store."];
+      revocationContents: RevocationContents.t option
+        [@ocaml.doc "The revocation file to add."]}
+    let context_ = "AddTrustStoreRevocationsInput"
+    let make ?revocationContents =
+      fun ~trustStoreArn -> fun () -> { revocationContents; trustStoreArn }
+    let to_value x =
+      structure_to_value
+        [("TrustStoreArn", (Some (TrustStoreArn.to_value x.trustStoreArn)));
+        ("RevocationContents",
+          (Option.map x.revocationContents ~f:RevocationContents.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let revocationContents =
+        (Option.map ~f:RevocationContents.of_xml)
+          (Xml.child xml_arg0 "RevocationContents") in
+      let trustStoreArn =
+        TrustStoreArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TrustStoreArn") in
+      make ?revocationContents ~trustStoreArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let revocationContents =
+        field_map json__ "RevocationContents" RevocationContents.of_json in
+      let trustStoreArn =
+        field_map_exn json__ "TrustStoreArn" TrustStoreArn.of_json in
+      make ?revocationContents ~trustStoreArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds the specified revocation file to the specified trust store."]
 module AddTagsOutput =
   struct
     type addTagsResult = unit
@@ -10058,6 +15258,7 @@ module AddTagsOutput =
       | `RuleNotFoundException of RuleNotFoundException.t 
       | `TargetGroupNotFoundException of TargetGroupNotFoundException.t 
       | `TooManyTagsException of TooManyTagsException.t 
+      | `TrustStoreNotFoundException of TrustStoreNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = { addTagsResult = (); responseMetaData = () }
     let error_of_json name json =
@@ -10076,6 +15277,9 @@ module AddTagsOutput =
             (TargetGroupNotFoundException.of_json json)
       | "TooManyTagsException" ->
           `TooManyTagsException (TooManyTagsException.of_json json)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -10095,6 +15299,9 @@ module AddTagsOutput =
             (TargetGroupNotFoundException.of_xml xml)
       | "TooManyTagsException" ->
           `TooManyTagsException (TooManyTagsException.of_xml xml)
+      | "TrustStoreNotFoundException" ->
+          `TrustStoreNotFoundException
+            (TrustStoreNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -10123,6 +15330,10 @@ module AddTagsOutput =
           `Assoc
             [("error", (`String "TooManyTagsException"));
             ("details", (TooManyTagsException.to_json e))]
+      | `TrustStoreNotFoundException e ->
+          `Assoc
+            [("error", (`String "TrustStoreNotFoundException"));
+            ("details", (TrustStoreNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -10136,7 +15347,7 @@ module AddTagsOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the specified tags to the specified Elastic Load Balancing resource. You can tag your Application Load Balancers, Network Load Balancers, Gateway Load Balancers, target groups, listeners, and rules. Each tag consists of a key and an optional value. If a resource already has a tag with the same key, AddTags updates its value."]
+       "Adds the specified tags to the specified Elastic Load Balancing resource. You can tag your Application Load Balancers, Network Load Balancers, Gateway Load Balancers, target groups, trust stores, listeners, and rules. Each tag consists of a key and an optional value. If a resource already has a tag with the same key, AddTags updates its value."]
 module AddTagsInput =
   struct
     type nonrec t =
@@ -10159,14 +15370,14 @@ module AddTagsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArns") in
       make ~tags ~resourceArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceArns =
-        field_map_exn json "ResourceArns" ResourceArns.of_json in
+        field_map_exn json__ "ResourceArns" ResourceArns.of_json in
       make ~tags ~resourceArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the specified tags to the specified Elastic Load Balancing resource. You can tag your Application Load Balancers, Network Load Balancers, Gateway Load Balancers, target groups, listeners, and rules. Each tag consists of a key and an optional value. If a resource already has a tag with the same key, AddTags updates its value."]
+       "Adds the specified tags to the specified Elastic Load Balancing resource. You can tag your Application Load Balancers, Network Load Balancers, Gateway Load Balancers, target groups, trust stores, listeners, and rules. Each tag consists of a key and an optional value. If a resource already has a tag with the same key, AddTags updates its value."]
 module AddListenerCertificatesOutput =
   struct
     type addListenerCertificatesResult =
@@ -10250,13 +15461,13 @@ module AddListenerCertificatesOutput =
           (Xml.child xml_arg0 "Certificates") in
       make ?certificates ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificates =
-        field_map json "Certificates" CertificateList.of_json in
+        field_map json__ "Certificates" CertificateList.of_json in
       make ?certificates ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the specified SSL server certificate to the certificate list for the specified HTTPS or TLS listener. If the certificate in already in the certificate list, the call is successful but the certificate is not added again. For more information, see HTTPS listeners in the Application Load Balancers Guide or TLS listeners in the Network Load Balancers Guide."]
+       "Adds the specified SSL server certificate to the certificate list for the specified HTTPS or TLS listener. If the certificate in already in the certificate list, the call is successful but the certificate is not added again. For more information, see SSL certificates in the Application Load Balancers Guide or Server certificates in the Network Load Balancers Guide."]
 module AddListenerCertificatesInput =
   struct
     type nonrec t =
@@ -10283,11 +15494,12 @@ module AddListenerCertificatesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ListenerArn") in
       make ~certificates ~listenerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificates =
-        field_map_exn json "Certificates" CertificateList.of_json in
-      let listenerArn = field_map_exn json "ListenerArn" ListenerArn.of_json in
+        field_map_exn json__ "Certificates" CertificateList.of_json in
+      let listenerArn =
+        field_map_exn json__ "ListenerArn" ListenerArn.of_json in
       make ~certificates ~listenerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the specified SSL server certificate to the certificate list for the specified HTTPS or TLS listener. If the certificate in already in the certificate list, the call is successful but the certificate is not added again. For more information, see HTTPS listeners in the Application Load Balancers Guide or TLS listeners in the Network Load Balancers Guide."]
+       "Adds the specified SSL server certificate to the certificate list for the specified HTTPS or TLS listener. If the certificate in already in the certificate list, the call is successful but the certificate is not added again. For more information, see SSL certificates in the Application Load Balancers Guide or Server certificates in the Network Load Balancers Guide."]

@@ -2,6 +2,9 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | ActivateOrganizationsAccess: (ActivateOrganizationsAccessInput.t,
+  ActivateOrganizationsAccessOutput.t,
+  ActivateOrganizationsAccessOutput.error) t 
   | ActivateType: (ActivateTypeInput.t, ActivateTypeOutput.t,
   ActivateTypeOutput.error) t 
   | BatchDescribeTypeConfigurations: (BatchDescribeTypeConfigurationsInput.t,
@@ -12,16 +15,24 @@ type ('i, 'o, 'e) t =
   ContinueUpdateRollbackOutput.t, ContinueUpdateRollbackOutput.error) t 
   | CreateChangeSet: (CreateChangeSetInput.t, CreateChangeSetOutput.t,
   CreateChangeSetOutput.error) t 
+  | CreateGeneratedTemplate: (CreateGeneratedTemplateInput.t,
+  CreateGeneratedTemplateOutput.t, CreateGeneratedTemplateOutput.error) t 
   | CreateStack: (CreateStackInput.t, CreateStackOutput.t,
   CreateStackOutput.error) t 
   | CreateStackInstances: (CreateStackInstancesInput.t,
   CreateStackInstancesOutput.t, CreateStackInstancesOutput.error) t 
+  | CreateStackRefactor: (CreateStackRefactorInput.t,
+  CreateStackRefactorOutput.t, CreateStackRefactorOutput.error) t 
   | CreateStackSet: (CreateStackSetInput.t, CreateStackSetOutput.t,
   CreateStackSetOutput.error) t 
+  | DeactivateOrganizationsAccess: (DeactivateOrganizationsAccessInput.t,
+  DeactivateOrganizationsAccessOutput.t,
+  DeactivateOrganizationsAccessOutput.error) t 
   | DeactivateType: (DeactivateTypeInput.t, DeactivateTypeOutput.t,
   DeactivateTypeOutput.error) t 
   | DeleteChangeSet: (DeleteChangeSetInput.t, DeleteChangeSetOutput.t,
   DeleteChangeSetOutput.error) t 
+  | DeleteGeneratedTemplate: (DeleteGeneratedTemplateInput.t, unit, unit) t 
   | DeleteStack: (DeleteStackInput.t, unit, unit) t 
   | DeleteStackInstances: (DeleteStackInstancesInput.t,
   DeleteStackInstancesOutput.t, DeleteStackInstancesOutput.error) t 
@@ -35,8 +46,18 @@ type ('i, 'o, 'e) t =
   DescribeChangeSetOutput.error) t 
   | DescribeChangeSetHooks: (DescribeChangeSetHooksInput.t,
   DescribeChangeSetHooksOutput.t, DescribeChangeSetHooksOutput.error) t 
+  | DescribeEvents: (DescribeEventsInput.t, DescribeEventsOutput.t,
+  DescribeEventsOutput.error) t 
+  | DescribeGeneratedTemplate: (DescribeGeneratedTemplateInput.t,
+  DescribeGeneratedTemplateOutput.t, DescribeGeneratedTemplateOutput.error) t
+  
+  | DescribeOrganizationsAccess: (DescribeOrganizationsAccessInput.t,
+  DescribeOrganizationsAccessOutput.t,
+  DescribeOrganizationsAccessOutput.error) t 
   | DescribePublisher: (DescribePublisherInput.t, DescribePublisherOutput.t,
   DescribePublisherOutput.error) t 
+  | DescribeResourceScan: (DescribeResourceScanInput.t,
+  DescribeResourceScanOutput.t, DescribeResourceScanOutput.error) t 
   | DescribeStackDriftDetectionStatus:
   (DescribeStackDriftDetectionStatusInput.t,
   DescribeStackDriftDetectionStatusOutput.t,
@@ -45,6 +66,8 @@ type ('i, 'o, 'e) t =
   DescribeStackEventsOutput.t, DescribeStackEventsOutput.error) t 
   | DescribeStackInstance: (DescribeStackInstanceInput.t,
   DescribeStackInstanceOutput.t, DescribeStackInstanceOutput.error) t 
+  | DescribeStackRefactor: (DescribeStackRefactorInput.t,
+  DescribeStackRefactorOutput.t, DescribeStackRefactorOutput.error) t 
   | DescribeStackResource: (DescribeStackResourceInput.t,
   DescribeStackResourceOutput.t, DescribeStackResourceOutput.error) t 
   | DescribeStackResourceDrifts: (DescribeStackResourceDriftsInput.t,
@@ -73,6 +96,11 @@ type ('i, 'o, 'e) t =
   EstimateTemplateCostOutput.t, EstimateTemplateCostOutput.error) t 
   | ExecuteChangeSet: (ExecuteChangeSetInput.t, ExecuteChangeSetOutput.t,
   ExecuteChangeSetOutput.error) t 
+  | ExecuteStackRefactor: (ExecuteStackRefactorInput.t, unit, unit) t 
+  | GetGeneratedTemplate: (GetGeneratedTemplateInput.t,
+  GetGeneratedTemplateOutput.t, GetGeneratedTemplateOutput.error) t 
+  | GetHookResult: (GetHookResultInput.t, GetHookResultOutput.t,
+  GetHookResultOutput.error) t 
   | GetStackPolicy: (GetStackPolicyInput.t, GetStackPolicyOutput.t,
   GetStackPolicyOutput.error) t 
   | GetTemplate: (GetTemplateInput.t, GetTemplateOutput.t,
@@ -85,12 +113,36 @@ type ('i, 'o, 'e) t =
   ListChangeSetsOutput.error) t 
   | ListExports: (ListExportsInput.t, ListExportsOutput.t,
   ListExportsOutput.error) t 
+  | ListGeneratedTemplates: (ListGeneratedTemplatesInput.t,
+  ListGeneratedTemplatesOutput.t, ListGeneratedTemplatesOutput.error) t 
+  | ListHookResults: (ListHookResultsInput.t, ListHookResultsOutput.t,
+  ListHookResultsOutput.error) t 
   | ListImports: (ListImportsInput.t, ListImportsOutput.t,
   ListImportsOutput.error) t 
+  | ListResourceScanRelatedResources:
+  (ListResourceScanRelatedResourcesInput.t,
+  ListResourceScanRelatedResourcesOutput.t,
+  ListResourceScanRelatedResourcesOutput.error) t 
+  | ListResourceScanResources: (ListResourceScanResourcesInput.t,
+  ListResourceScanResourcesOutput.t, ListResourceScanResourcesOutput.error) t
+  
+  | ListResourceScans: (ListResourceScansInput.t, ListResourceScansOutput.t,
+  ListResourceScansOutput.error) t 
+  | ListStackInstanceResourceDrifts: (ListStackInstanceResourceDriftsInput.t,
+  ListStackInstanceResourceDriftsOutput.t,
+  ListStackInstanceResourceDriftsOutput.error) t 
   | ListStackInstances: (ListStackInstancesInput.t,
   ListStackInstancesOutput.t, ListStackInstancesOutput.error) t 
+  | ListStackRefactorActions: (ListStackRefactorActionsInput.t,
+  ListStackRefactorActionsOutput.t, ListStackRefactorActionsOutput.error) t 
+  | ListStackRefactors: (ListStackRefactorsInput.t,
+  ListStackRefactorsOutput.t, ListStackRefactorsOutput.error) t 
   | ListStackResources: (ListStackResourcesInput.t,
   ListStackResourcesOutput.t, ListStackResourcesOutput.error) t 
+  | ListStackSetAutoDeploymentTargets:
+  (ListStackSetAutoDeploymentTargetsInput.t,
+  ListStackSetAutoDeploymentTargetsOutput.t,
+  ListStackSetAutoDeploymentTargetsOutput.error) t 
   | ListStackSetOperationResults: (ListStackSetOperationResultsInput.t,
   ListStackSetOperationResultsOutput.t,
   ListStackSetOperationResultsOutput.error) t 
@@ -122,9 +174,13 @@ type ('i, 'o, 'e) t =
   | SetTypeDefaultVersion: (SetTypeDefaultVersionInput.t,
   SetTypeDefaultVersionOutput.t, SetTypeDefaultVersionOutput.error) t 
   | SignalResource: (SignalResourceInput.t, unit, unit) t 
+  | StartResourceScan: (StartResourceScanInput.t, StartResourceScanOutput.t,
+  StartResourceScanOutput.error) t 
   | StopStackSetOperation: (StopStackSetOperationInput.t,
   StopStackSetOperationOutput.t, StopStackSetOperationOutput.error) t 
   | TestType: (TestTypeInput.t, TestTypeOutput.t, TestTypeOutput.error) t 
+  | UpdateGeneratedTemplate: (UpdateGeneratedTemplateInput.t,
+  UpdateGeneratedTemplateOutput.t, UpdateGeneratedTemplateOutput.error) t 
   | UpdateStack: (UpdateStackInput.t, UpdateStackOutput.t,
   UpdateStackOutput.error) t 
   | UpdateStackInstances: (UpdateStackInstancesInput.t,
@@ -138,16 +194,21 @@ type ('i, 'o, 'e) t =
   ValidateTemplateOutput.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | ActivateOrganizationsAccess -> `POST
   | ActivateType -> `POST
   | BatchDescribeTypeConfigurations -> `POST
   | CancelUpdateStack -> `POST
   | ContinueUpdateRollback -> `POST
   | CreateChangeSet -> `POST
+  | CreateGeneratedTemplate -> `POST
   | CreateStack -> `POST
   | CreateStackInstances -> `POST
+  | CreateStackRefactor -> `POST
   | CreateStackSet -> `POST
+  | DeactivateOrganizationsAccess -> `POST
   | DeactivateType -> `POST
   | DeleteChangeSet -> `POST
+  | DeleteGeneratedTemplate -> `POST
   | DeleteStack -> `POST
   | DeleteStackInstances -> `POST
   | DeleteStackSet -> `POST
@@ -155,10 +216,15 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeAccountLimits -> `POST
   | DescribeChangeSet -> `POST
   | DescribeChangeSetHooks -> `POST
+  | DescribeEvents -> `POST
+  | DescribeGeneratedTemplate -> `POST
+  | DescribeOrganizationsAccess -> `POST
   | DescribePublisher -> `POST
+  | DescribeResourceScan -> `POST
   | DescribeStackDriftDetectionStatus -> `POST
   | DescribeStackEvents -> `POST
   | DescribeStackInstance -> `POST
+  | DescribeStackRefactor -> `POST
   | DescribeStackResource -> `POST
   | DescribeStackResourceDrifts -> `POST
   | DescribeStackResources -> `POST
@@ -172,15 +238,27 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DetectStackSetDrift -> `POST
   | EstimateTemplateCost -> `POST
   | ExecuteChangeSet -> `POST
+  | ExecuteStackRefactor -> `POST
+  | GetGeneratedTemplate -> `POST
+  | GetHookResult -> `POST
   | GetStackPolicy -> `POST
   | GetTemplate -> `POST
   | GetTemplateSummary -> `POST
   | ImportStacksToStackSet -> `POST
   | ListChangeSets -> `POST
   | ListExports -> `POST
+  | ListGeneratedTemplates -> `POST
+  | ListHookResults -> `POST
   | ListImports -> `POST
+  | ListResourceScanRelatedResources -> `POST
+  | ListResourceScanResources -> `POST
+  | ListResourceScans -> `POST
+  | ListStackInstanceResourceDrifts -> `POST
   | ListStackInstances -> `POST
+  | ListStackRefactorActions -> `POST
+  | ListStackRefactors -> `POST
   | ListStackResources -> `POST
+  | ListStackSetAutoDeploymentTargets -> `POST
   | ListStackSetOperationResults -> `POST
   | ListStackSetOperations -> `POST
   | ListStackSets -> `POST
@@ -197,8 +275,10 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | SetTypeConfiguration -> `POST
   | SetTypeDefaultVersion -> `POST
   | SignalResource -> `POST
+  | StartResourceScan -> `POST
   | StopStackSetOperation -> `POST
   | TestType -> `POST
+  | UpdateGeneratedTemplate -> `POST
   | UpdateStack -> `POST
   | UpdateStackInstances -> `POST
   | UpdateStackSet -> `POST
@@ -207,17 +287,22 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | ActivateOrganizationsAccess -> (Format.kasprintf Uri.of_string) "/"
       | ActivateType -> (Format.kasprintf Uri.of_string) "/"
       | BatchDescribeTypeConfigurations ->
           (Format.kasprintf Uri.of_string) "/"
       | CancelUpdateStack -> (Format.kasprintf Uri.of_string) "/"
       | ContinueUpdateRollback -> (Format.kasprintf Uri.of_string) "/"
       | CreateChangeSet -> (Format.kasprintf Uri.of_string) "/"
+      | CreateGeneratedTemplate -> (Format.kasprintf Uri.of_string) "/"
       | CreateStack -> (Format.kasprintf Uri.of_string) "/"
       | CreateStackInstances -> (Format.kasprintf Uri.of_string) "/"
+      | CreateStackRefactor -> (Format.kasprintf Uri.of_string) "/"
       | CreateStackSet -> (Format.kasprintf Uri.of_string) "/"
+      | DeactivateOrganizationsAccess -> (Format.kasprintf Uri.of_string) "/"
       | DeactivateType -> (Format.kasprintf Uri.of_string) "/"
       | DeleteChangeSet -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteGeneratedTemplate -> (Format.kasprintf Uri.of_string) "/"
       | DeleteStack -> (Format.kasprintf Uri.of_string) "/"
       | DeleteStackInstances -> (Format.kasprintf Uri.of_string) "/"
       | DeleteStackSet -> (Format.kasprintf Uri.of_string) "/"
@@ -225,11 +310,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeAccountLimits -> (Format.kasprintf Uri.of_string) "/"
       | DescribeChangeSet -> (Format.kasprintf Uri.of_string) "/"
       | DescribeChangeSetHooks -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeEvents -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeGeneratedTemplate -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeOrganizationsAccess -> (Format.kasprintf Uri.of_string) "/"
       | DescribePublisher -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeResourceScan -> (Format.kasprintf Uri.of_string) "/"
       | DescribeStackDriftDetectionStatus ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeStackEvents -> (Format.kasprintf Uri.of_string) "/"
       | DescribeStackInstance -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeStackRefactor -> (Format.kasprintf Uri.of_string) "/"
       | DescribeStackResource -> (Format.kasprintf Uri.of_string) "/"
       | DescribeStackResourceDrifts -> (Format.kasprintf Uri.of_string) "/"
       | DescribeStackResources -> (Format.kasprintf Uri.of_string) "/"
@@ -243,15 +333,30 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DetectStackSetDrift -> (Format.kasprintf Uri.of_string) "/"
       | EstimateTemplateCost -> (Format.kasprintf Uri.of_string) "/"
       | ExecuteChangeSet -> (Format.kasprintf Uri.of_string) "/"
+      | ExecuteStackRefactor -> (Format.kasprintf Uri.of_string) "/"
+      | GetGeneratedTemplate -> (Format.kasprintf Uri.of_string) "/"
+      | GetHookResult -> (Format.kasprintf Uri.of_string) "/"
       | GetStackPolicy -> (Format.kasprintf Uri.of_string) "/"
       | GetTemplate -> (Format.kasprintf Uri.of_string) "/"
       | GetTemplateSummary -> (Format.kasprintf Uri.of_string) "/"
       | ImportStacksToStackSet -> (Format.kasprintf Uri.of_string) "/"
       | ListChangeSets -> (Format.kasprintf Uri.of_string) "/"
       | ListExports -> (Format.kasprintf Uri.of_string) "/"
+      | ListGeneratedTemplates -> (Format.kasprintf Uri.of_string) "/"
+      | ListHookResults -> (Format.kasprintf Uri.of_string) "/"
       | ListImports -> (Format.kasprintf Uri.of_string) "/"
+      | ListResourceScanRelatedResources ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListResourceScanResources -> (Format.kasprintf Uri.of_string) "/"
+      | ListResourceScans -> (Format.kasprintf Uri.of_string) "/"
+      | ListStackInstanceResourceDrifts ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListStackInstances -> (Format.kasprintf Uri.of_string) "/"
+      | ListStackRefactorActions -> (Format.kasprintf Uri.of_string) "/"
+      | ListStackRefactors -> (Format.kasprintf Uri.of_string) "/"
       | ListStackResources -> (Format.kasprintf Uri.of_string) "/"
+      | ListStackSetAutoDeploymentTargets ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListStackSetOperationResults -> (Format.kasprintf Uri.of_string) "/"
       | ListStackSetOperations -> (Format.kasprintf Uri.of_string) "/"
       | ListStackSets -> (Format.kasprintf Uri.of_string) "/"
@@ -268,8 +373,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | SetTypeConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | SetTypeDefaultVersion -> (Format.kasprintf Uri.of_string) "/"
       | SignalResource -> (Format.kasprintf Uri.of_string) "/"
+      | StartResourceScan -> (Format.kasprintf Uri.of_string) "/"
       | StopStackSetOperation -> (Format.kasprintf Uri.of_string) "/"
       | TestType -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateGeneratedTemplate -> (Format.kasprintf Uri.of_string) "/"
       | UpdateStack -> (Format.kasprintf Uri.of_string) "/"
       | UpdateStackInstances -> (Format.kasprintf Uri.of_string) "/"
       | UpdateStackSet -> (Format.kasprintf Uri.of_string) "/"
@@ -279,6 +386,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | ActivateOrganizationsAccess ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ActivateOrganizationsAccess"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ActivateOrganizationsAccessInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ActivateType ->
       let headers =
         Awso.Http.Headers.of_list
@@ -341,6 +462,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (CreateChangeSetInput.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateGeneratedTemplate ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateGeneratedTemplate"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateGeneratedTemplateInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateStack ->
       let headers =
         Awso.Http.Headers.of_list
@@ -365,6 +500,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateStackRefactor ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateStackRefactor"]); ("Version", [apiVersion])] in
+        let query =
+          (CreateStackRefactorInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateStackSet ->
       let headers =
         Awso.Http.Headers.of_list
@@ -375,6 +522,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["CreateStackSet"]); ("Version", [apiVersion])] in
         let query =
           (CreateStackSetInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeactivateOrganizationsAccess ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeactivateOrganizationsAccess"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeactivateOrganizationsAccessInput.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeactivateType ->
@@ -399,6 +560,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DeleteChangeSet"]); ("Version", [apiVersion])] in
         let query =
           (DeleteChangeSetInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteGeneratedTemplate ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteGeneratedTemplate"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteGeneratedTemplateInput.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteStack ->
@@ -487,6 +662,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeEvents ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeEvents"]); ("Version", [apiVersion])] in
+        let query =
+          (DescribeEventsInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeGeneratedTemplate ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeGeneratedTemplate"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeGeneratedTemplateInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeOrganizationsAccess ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeOrganizationsAccess"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeOrganizationsAccessInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribePublisher ->
       let headers =
         Awso.Http.Headers.of_list
@@ -497,6 +712,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DescribePublisher"]); ("Version", [apiVersion])] in
         let query =
           (DescribePublisherInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeResourceScan ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeResourceScan"]); ("Version", [apiVersion])] in
+        let query =
+          (DescribeResourceScanInput.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeStackDriftDetectionStatus ->
@@ -535,6 +763,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DescribeStackInstance"]); ("Version", [apiVersion])] in
         let query =
           (DescribeStackInstanceInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeStackRefactor ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeStackRefactor"]); ("Version", [apiVersion])] in
+        let query =
+          (DescribeStackRefactorInput.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -704,6 +945,43 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (ExecuteChangeSetInput.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ExecuteStackRefactor ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ExecuteStackRefactor"]); ("Version", [apiVersion])] in
+        let query =
+          (ExecuteStackRefactorInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetGeneratedTemplate ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetGeneratedTemplate"]); ("Version", [apiVersion])] in
+        let query =
+          (GetGeneratedTemplateInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetHookResult ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta = [("Action", ["GetHookResult"]); ("Version", [apiVersion])] in
+        let query =
+          (GetHookResultInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetStackPolicy ->
       let headers =
         Awso.Http.Headers.of_list
@@ -775,6 +1053,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (ListExportsInput.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ListGeneratedTemplates ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ListGeneratedTemplates"]); ("Version", [apiVersion])] in
+        let query =
+          (ListGeneratedTemplatesInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ListHookResults ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ListHookResults"]); ("Version", [apiVersion])] in
+        let query =
+          (ListHookResultsInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ListImports ->
       let headers =
         Awso.Http.Headers.of_list
@@ -784,6 +1087,60 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let meta = [("Action", ["ListImports"]); ("Version", [apiVersion])] in
         let query =
           (ListImportsInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ListResourceScanRelatedResources ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ListResourceScanRelatedResources"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ListResourceScanRelatedResourcesInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ListResourceScanResources ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ListResourceScanResources"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ListResourceScanResourcesInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ListResourceScans ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ListResourceScans"]); ("Version", [apiVersion])] in
+        let query =
+          (ListResourceScansInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ListStackInstanceResourceDrifts ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ListStackInstanceResourceDrifts"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ListStackInstanceResourceDriftsInput.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ListStackInstances ->
@@ -798,6 +1155,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (ListStackInstancesInput.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ListStackRefactorActions ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ListStackRefactorActions"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ListStackRefactorActionsInput.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ListStackRefactors ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ListStackRefactors"]); ("Version", [apiVersion])] in
+        let query =
+          (ListStackRefactorsInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ListStackResources ->
       let headers =
         Awso.Http.Headers.of_list
@@ -808,6 +1191,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["ListStackResources"]); ("Version", [apiVersion])] in
         let query =
           (ListStackResourcesInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ListStackSetAutoDeploymentTargets ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ListStackSetAutoDeploymentTargets"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ListStackSetAutoDeploymentTargetsInput.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ListStackSetOperationResults ->
@@ -1002,6 +1399,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (SignalResourceInput.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | StartResourceScan ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["StartResourceScan"]); ("Version", [apiVersion])] in
+        let query =
+          (StartResourceScanInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | StopStackSetOperation ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1023,6 +1432,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let body =
         let meta = [("Action", ["TestType"]); ("Version", [apiVersion])] in
         let query = (TestTypeInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | UpdateGeneratedTemplate ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["UpdateGeneratedTemplate"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (UpdateGeneratedTemplateInput.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | UpdateStack ->
@@ -1118,6 +1541,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = parse_aws_error in
   let _ = resp in
   match endpoint with
+  | ActivateOrganizationsAccess ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ActivateOrganizationsAccessOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ActivateOrganizationsAccessOutput.error_of_xml))
   | ActivateType ->
       if is_success
       then
@@ -1149,6 +1581,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (CreateChangeSetOutput.of_xml xml)
       else Error (parse_aws_error (Some CreateChangeSetOutput.error_of_xml))
+  | CreateGeneratedTemplate ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateGeneratedTemplateOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreateGeneratedTemplateOutput.error_of_xml))
   | CreateStack ->
       if is_success
       then
@@ -1163,12 +1603,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateStackInstancesOutput.error_of_xml))
+  | CreateStackRefactor ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateStackRefactorOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | CreateStackSet ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (CreateStackSetOutput.of_xml xml)
       else Error (parse_aws_error (Some CreateStackSetOutput.error_of_xml))
+  | DeactivateOrganizationsAccess ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeactivateOrganizationsAccessOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DeactivateOrganizationsAccessOutput.error_of_xml))
   | DeactivateType ->
       if is_success
       then
@@ -1181,6 +1636,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (DeleteChangeSetOutput.of_xml xml)
       else Error (parse_aws_error (Some DeleteChangeSetOutput.error_of_xml))
+  | DeleteGeneratedTemplate ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteStack -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteStackInstances ->
       if is_success
@@ -1223,6 +1680,30 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeChangeSetHooksOutput.error_of_xml))
+  | DescribeEvents ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeEventsOutput.of_xml xml)
+      else Error (parse_aws_error None)
+  | DescribeGeneratedTemplate ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeGeneratedTemplateOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeGeneratedTemplateOutput.error_of_xml))
+  | DescribeOrganizationsAccess ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeOrganizationsAccessOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeOrganizationsAccessOutput.error_of_xml))
   | DescribePublisher ->
       if is_success
       then
@@ -1230,6 +1711,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DescribePublisherOutput.of_xml xml)
       else
         Error (parse_aws_error (Some DescribePublisherOutput.error_of_xml))
+  | DescribeResourceScan ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeResourceScanOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeResourceScanOutput.error_of_xml))
   | DescribeStackDriftDetectionStatus ->
       if is_success
       then
@@ -1250,6 +1739,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeStackInstanceOutput.error_of_xml))
+  | DescribeStackRefactor ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeStackRefactorOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeStackRefactorOutput.error_of_xml))
   | DescribeStackResource ->
       if is_success
       then
@@ -1334,6 +1831,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (ExecuteChangeSetOutput.of_xml xml)
       else Error (parse_aws_error (Some ExecuteChangeSetOutput.error_of_xml))
+  | ExecuteStackRefactor ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | GetGeneratedTemplate ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetGeneratedTemplateOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some GetGeneratedTemplateOutput.error_of_xml))
+  | GetHookResult ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetHookResultOutput.of_xml xml)
+      else Error (parse_aws_error (Some GetHookResultOutput.error_of_xml))
   | GetStackPolicy ->
       if is_success
       then
@@ -1373,12 +1886,57 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (ListExportsOutput.of_xml xml)
       else Error (parse_aws_error None)
+  | ListGeneratedTemplates ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListGeneratedTemplatesOutput.of_xml xml)
+      else Error (parse_aws_error None)
+  | ListHookResults ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListHookResultsOutput.of_xml xml)
+      else Error (parse_aws_error (Some ListHookResultsOutput.error_of_xml))
   | ListImports ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (ListImportsOutput.of_xml xml)
       else Error (parse_aws_error None)
+  | ListResourceScanRelatedResources ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListResourceScanRelatedResourcesOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListResourceScanRelatedResourcesOutput.error_of_xml))
+  | ListResourceScanResources ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListResourceScanResourcesOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListResourceScanResourcesOutput.error_of_xml))
+  | ListResourceScans ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListResourceScansOutput.of_xml xml)
+      else Error (parse_aws_error None)
+  | ListStackInstanceResourceDrifts ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListStackInstanceResourceDriftsOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListStackInstanceResourceDriftsOutput.error_of_xml))
   | ListStackInstances ->
       if is_success
       then
@@ -1386,12 +1944,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListStackInstancesOutput.of_xml xml)
       else
         Error (parse_aws_error (Some ListStackInstancesOutput.error_of_xml))
+  | ListStackRefactorActions ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListStackRefactorActionsOutput.of_xml xml)
+      else Error (parse_aws_error None)
+  | ListStackRefactors ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListStackRefactorsOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | ListStackResources ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (ListStackResourcesOutput.of_xml xml)
       else Error (parse_aws_error None)
+  | ListStackSetAutoDeploymentTargets ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListStackSetAutoDeploymentTargetsOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListStackSetAutoDeploymentTargetsOutput.error_of_xml))
   | ListStackSetOperationResults ->
       if is_success
       then
@@ -1494,6 +2073,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error (Some SetTypeDefaultVersionOutput.error_of_xml))
   | SignalResource ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | StartResourceScan ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (StartResourceScanOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some StartResourceScanOutput.error_of_xml))
   | StopStackSetOperation ->
       if is_success
       then
@@ -1508,6 +2094,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (TestTypeOutput.of_xml xml)
       else Error (parse_aws_error (Some TestTypeOutput.error_of_xml))
+  | UpdateGeneratedTemplate ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UpdateGeneratedTemplateOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some UpdateGeneratedTemplateOutput.error_of_xml))
   | UpdateStack ->
       if is_success
       then

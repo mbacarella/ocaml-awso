@@ -49,6 +49,24 @@ let create_home_region_control =
               ~target:(Values.Target.of_json target) ())
            (Some Values.CreateHomeRegionControlResult.to_json)
            (Some Values.CreateHomeRegionControlResult.error_to_json)])
+let delete_home_region_control =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and controlId =
+         flag "control-id" (required string) ~doc:"STRING ControlId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_home_region_control
+           (Values.DeleteHomeRegionControlRequest.make ~controlId ())
+           (Some Values.DeleteHomeRegionControlResult.to_json)
+           (Some Values.DeleteHomeRegionControlResult.error_to_json)])
 let describe_home_region_controls =
   Command.async ~summary:""
     ([%map_open.Command
@@ -98,5 +116,6 @@ let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-home-region-control", create_home_region_control);
+    ("delete-home-region-control", delete_home_region_control);
     ("describe-home-region-controls", describe_home_region_controls);
     ("get-home-region", get_home_region)]

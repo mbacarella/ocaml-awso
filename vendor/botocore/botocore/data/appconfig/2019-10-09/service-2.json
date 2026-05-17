@@ -5,12 +5,14 @@
     "endpointPrefix":"appconfig",
     "jsonVersion":"1.1",
     "protocol":"rest-json",
+    "protocols":["rest-json"],
     "serviceAbbreviation":"AppConfig",
     "serviceFullName":"Amazon AppConfig",
     "serviceId":"AppConfig",
     "signatureVersion":"v4",
     "signingName":"appconfig",
-    "uid":"appconfig-2019-10-09"
+    "uid":"appconfig-2019-10-09",
+    "auth":["aws.auth#sigv4"]
   },
   "operations":{
     "CreateApplication":{
@@ -24,9 +26,10 @@
       "output":{"shape":"Application"},
       "errors":[
         {"shape":"BadRequestException"},
+        {"shape":"ServiceQuotaExceededException"},
         {"shape":"InternalServerException"}
       ],
-      "documentation":"<p>Creates an application. An application in AppConfig is a logical unit of code that provides capabilities for your customers. For example, an application can be a microservice that runs on Amazon EC2 instances, a mobile application installed by your users, a serverless application using Amazon API Gateway and Lambda, or any system you run on behalf of others.</p>"
+      "documentation":"<p>Creates an application. In AppConfig, an application is simply an organizational construct like a folder. This organizational construct has a relationship with some unit of executable code. For example, you could create an application called MyMobileApp to organize and manage configuration data for a mobile application installed by your users.</p>"
     },
     "CreateConfigurationProfile":{
       "name":"CreateConfigurationProfile",
@@ -40,9 +43,10 @@
       "errors":[
         {"shape":"BadRequestException"},
         {"shape":"ResourceNotFoundException"},
-        {"shape":"InternalServerException"}
+        {"shape":"InternalServerException"},
+        {"shape":"ServiceQuotaExceededException"}
       ],
-      "documentation":"<p>Creates a configuration profile, which is information that enables AppConfig to access the configuration source. Valid configuration sources include the AppConfig hosted configuration store, Amazon Web Services Systems Manager (SSM) documents, SSM Parameter Store parameters, Amazon S3 objects, or any <a href=\"http://docs.aws.amazon.com/codepipeline/latest/userguide/integrations-action-type.html#integrations-source\">integration source action</a> supported by CodePipeline. A configuration profile includes the following information:</p> <ul> <li> <p>The URI location of the configuration data.</p> </li> <li> <p>The Identity and Access Management (IAM) role that provides access to the configuration data.</p> </li> <li> <p>A validator for the configuration data. Available validators include either a JSON Schema or an Amazon Web Services Lambda function.</p> </li> </ul> <p>For more information, see <a href=\"http://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html\">Create a Configuration and a Configuration Profile</a> in the <i>AppConfig User Guide</i>.</p>"
+      "documentation":"<p>Creates a configuration profile, which is information that enables AppConfig to access the configuration source. Valid configuration sources include the following:</p> <ul> <li> <p>Configuration data in YAML, JSON, and other formats stored in the AppConfig hosted configuration store</p> </li> <li> <p>Configuration data stored as objects in an Amazon Simple Storage Service (Amazon S3) bucket</p> </li> <li> <p>Pipelines stored in CodePipeline</p> </li> <li> <p>Secrets stored in Secrets Manager</p> </li> <li> <p>Standard and secure string parameters stored in Amazon Web Services Systems Manager Parameter Store</p> </li> <li> <p>Configuration data in SSM documents stored in the Systems Manager document store</p> </li> </ul> <p>A configuration profile includes the following information:</p> <ul> <li> <p>The URI location of the configuration data.</p> </li> <li> <p>The Identity and Access Management (IAM) role that provides access to the configuration data.</p> </li> <li> <p>A validator for the configuration data. Available validators include either a JSON Schema or an Amazon Web Services Lambda function.</p> </li> </ul> <p>For more information, see <a href=\"http://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html\">Create a Configuration and a Configuration Profile</a> in the <i>AppConfig User Guide</i>.</p>"
     },
     "CreateDeploymentStrategy":{
       "name":"CreateDeploymentStrategy",
@@ -55,6 +59,7 @@
       "output":{"shape":"DeploymentStrategy"},
       "errors":[
         {"shape":"InternalServerException"},
+        {"shape":"ServiceQuotaExceededException"},
         {"shape":"BadRequestException"}
       ],
       "documentation":"<p>Creates a deployment strategy that defines important criteria for rolling out your configuration to the designated targets. A deployment strategy includes the overall duration required, a percentage of targets to receive the deployment during each interval, an algorithm that defines how percentage grows, and bake time.</p>"
@@ -71,9 +76,44 @@
       "errors":[
         {"shape":"InternalServerException"},
         {"shape":"ResourceNotFoundException"},
-        {"shape":"BadRequestException"}
+        {"shape":"BadRequestException"},
+        {"shape":"ServiceQuotaExceededException"}
       ],
-      "documentation":"<p>Creates an environment. For each application, you define one or more environments. An environment is a logical deployment group of AppConfig targets, such as applications in a <code>Beta</code> or <code>Production</code> environment. You can also define environments for application subcomponents such as the <code>Web</code>, <code>Mobile</code> and <code>Back-end</code> components for your application. You can configure Amazon CloudWatch alarms for each environment. The system monitors alarms during a configuration deployment. If an alarm is triggered, the system rolls back the configuration.</p>"
+      "documentation":"<p>Creates an environment. For each application, you define one or more environments. An environment is a deployment group of AppConfig targets, such as applications in a <code>Beta</code> or <code>Production</code> environment. You can also define environments for application subcomponents such as the <code>Web</code>, <code>Mobile</code> and <code>Back-end</code> components for your application. You can configure Amazon CloudWatch alarms for each environment. The system monitors alarms during a configuration deployment. If an alarm is triggered, the system rolls back the configuration.</p>"
+    },
+    "CreateExtension":{
+      "name":"CreateExtension",
+      "http":{
+        "method":"POST",
+        "requestUri":"/extensions",
+        "responseCode":201
+      },
+      "input":{"shape":"CreateExtensionRequest"},
+      "output":{"shape":"Extension"},
+      "errors":[
+        {"shape":"BadRequestException"},
+        {"shape":"ConflictException"},
+        {"shape":"ServiceQuotaExceededException"},
+        {"shape":"InternalServerException"}
+      ],
+      "documentation":"<p>Creates an AppConfig extension. An extension augments your ability to inject logic or behavior at different points during the AppConfig workflow of creating or deploying a configuration.</p> <p>You can create your own extensions or use the Amazon Web Services authored extensions provided by AppConfig. For an AppConfig extension that uses Lambda, you must create a Lambda function to perform any computation and processing defined in the extension. If you plan to create custom versions of the Amazon Web Services authored notification extensions, you only need to specify an Amazon Resource Name (ARN) in the <code>Uri</code> field for the new extension version.</p> <ul> <li> <p>For a custom EventBridge notification extension, enter the ARN of the EventBridge default events in the <code>Uri</code> field.</p> </li> <li> <p>For a custom Amazon SNS notification extension, enter the ARN of an Amazon SNS topic in the <code>Uri</code> field.</p> </li> <li> <p>For a custom Amazon SQS notification extension, enter the ARN of an Amazon SQS message queue in the <code>Uri</code> field. </p> </li> </ul> <p>For more information about extensions, see <a href=\"https://docs.aws.amazon.com/appconfig/latest/userguide/working-with-appconfig-extensions.html\">Extending workflows</a> in the <i>AppConfig User Guide</i>.</p>"
+    },
+    "CreateExtensionAssociation":{
+      "name":"CreateExtensionAssociation",
+      "http":{
+        "method":"POST",
+        "requestUri":"/extensionassociations",
+        "responseCode":201
+      },
+      "input":{"shape":"CreateExtensionAssociationRequest"},
+      "output":{"shape":"ExtensionAssociation"},
+      "errors":[
+        {"shape":"BadRequestException"},
+        {"shape":"ResourceNotFoundException"},
+        {"shape":"InternalServerException"},
+        {"shape":"ServiceQuotaExceededException"}
+      ],
+      "documentation":"<p>When you create an extension or configure an Amazon Web Services authored extension, you associate the extension with an AppConfig application, environment, or configuration profile. For example, you can choose to run the <code>AppConfig deployment events to Amazon SNS</code> Amazon Web Services authored extension and receive notifications on an Amazon SNS topic anytime a configuration deployment is started for a specific application. Defining which extension to associate with an AppConfig resource is called an <i>extension association</i>. An extension association is a specified relationship between an extension and an AppConfig resource, such as an application or a configuration profile. For more information about extensions and associations, see <a href=\"https://docs.aws.amazon.com/appconfig/latest/userguide/working-with-appconfig-extensions.html\">Extending workflows</a> in the <i>AppConfig User Guide</i>.</p>"
     },
     "CreateHostedConfigurationVersion":{
       "name":"CreateHostedConfigurationVersion",
@@ -92,7 +132,7 @@
         {"shape":"PayloadTooLargeException"},
         {"shape":"InternalServerException"}
       ],
-      "documentation":"<p>Creates a new configuration in the AppConfig hosted configuration store.</p>"
+      "documentation":"<p>Creates a new configuration in the AppConfig hosted configuration store. If you're creating a feature flag, we recommend you familiarize yourself with the JSON schema for feature flag data. For more information, see <a href=\"https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile-feature-flags.html#appconfig-type-reference-feature-flags\">Type reference for AWS.AppConfig.FeatureFlags</a> in the <i>AppConfig User Guide</i>.</p>"
     },
     "DeleteApplication":{
       "name":"DeleteApplication",
@@ -107,7 +147,7 @@
         {"shape":"InternalServerException"},
         {"shape":"BadRequestException"}
       ],
-      "documentation":"<p>Deletes an application. Deleting an application does not delete a configuration from a host.</p>"
+      "documentation":"<p>Deletes an application.</p>"
     },
     "DeleteConfigurationProfile":{
       "name":"DeleteConfigurationProfile",
@@ -123,7 +163,7 @@
         {"shape":"InternalServerException"},
         {"shape":"BadRequestException"}
       ],
-      "documentation":"<p>Deletes a configuration profile. Deleting a configuration profile does not delete a configuration from a host.</p>"
+      "documentation":"<p>Deletes a configuration profile.</p> <p>To prevent users from unintentionally deleting actively-used configuration profiles, enable <a href=\"https://docs.aws.amazon.com/appconfig/latest/userguide/deletion-protection.html\">deletion protection</a>.</p>"
     },
     "DeleteDeploymentStrategy":{
       "name":"DeleteDeploymentStrategy",
@@ -138,7 +178,7 @@
         {"shape":"InternalServerException"},
         {"shape":"BadRequestException"}
       ],
-      "documentation":"<p>Deletes a deployment strategy. Deleting a deployment strategy does not delete a configuration from a host.</p>"
+      "documentation":"<p>Deletes a deployment strategy.</p>"
     },
     "DeleteEnvironment":{
       "name":"DeleteEnvironment",
@@ -154,7 +194,37 @@
         {"shape":"InternalServerException"},
         {"shape":"BadRequestException"}
       ],
-      "documentation":"<p>Deletes an environment. Deleting an environment does not delete a configuration from a host.</p>"
+      "documentation":"<p>Deletes an environment.</p> <p>To prevent users from unintentionally deleting actively-used environments, enable <a href=\"https://docs.aws.amazon.com/appconfig/latest/userguide/deletion-protection.html\">deletion protection</a>.</p>"
+    },
+    "DeleteExtension":{
+      "name":"DeleteExtension",
+      "http":{
+        "method":"DELETE",
+        "requestUri":"/extensions/{ExtensionIdentifier}",
+        "responseCode":204
+      },
+      "input":{"shape":"DeleteExtensionRequest"},
+      "errors":[
+        {"shape":"ResourceNotFoundException"},
+        {"shape":"InternalServerException"},
+        {"shape":"BadRequestException"}
+      ],
+      "documentation":"<p>Deletes an AppConfig extension. You must delete all associations to an extension before you delete the extension.</p>"
+    },
+    "DeleteExtensionAssociation":{
+      "name":"DeleteExtensionAssociation",
+      "http":{
+        "method":"DELETE",
+        "requestUri":"/extensionassociations/{ExtensionAssociationId}",
+        "responseCode":204
+      },
+      "input":{"shape":"DeleteExtensionAssociationRequest"},
+      "errors":[
+        {"shape":"BadRequestException"},
+        {"shape":"ResourceNotFoundException"},
+        {"shape":"InternalServerException"}
+      ],
+      "documentation":"<p>Deletes an extension association. This action doesn't delete extensions defined in the association.</p>"
     },
     "DeleteHostedConfigurationVersion":{
       "name":"DeleteHostedConfigurationVersion",
@@ -170,6 +240,20 @@
         {"shape":"InternalServerException"}
       ],
       "documentation":"<p>Deletes a version of a configuration from the AppConfig hosted configuration store.</p>"
+    },
+    "GetAccountSettings":{
+      "name":"GetAccountSettings",
+      "http":{
+        "method":"GET",
+        "requestUri":"/settings",
+        "responseCode":200
+      },
+      "output":{"shape":"AccountSettings"},
+      "errors":[
+        {"shape":"InternalServerException"},
+        {"shape":"BadRequestException"}
+      ],
+      "documentation":"<p>Returns information about the status of the <code>DeletionProtection</code> parameter.</p>"
     },
     "GetApplication":{
       "name":"GetApplication",
@@ -201,7 +285,7 @@
         {"shape":"InternalServerException"},
         {"shape":"BadRequestException"}
       ],
-      "documentation":"<p>Retrieves the latest deployed configuration.</p> <important> <p>Note the following important information.</p> <ul> <li> <p>This API action has been deprecated. Calls to receive configuration data should use the <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/API_appconfigdata_StartConfigurationSession.html\">StartConfigurationSession</a> and <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/API_appconfigdata_GetLatestConfiguration.html\">GetLatestConfiguration</a> APIs instead. </p> </li> <li> <p> <code>GetConfiguration</code> is a priced call. For more information, see <a href=\"https://aws.amazon.com/systems-manager/pricing/\">Pricing</a>.</p> </li> <li> <p>AppConfig uses the value of the <code>ClientConfigurationVersion</code> parameter to identify the configuration version on your clients. If you don’t send <code>ClientConfigurationVersion</code> with each call to <code>GetConfiguration</code>, your clients receive the current configuration. You are charged each time your clients receive a configuration.</p> <p>To avoid excess charges, we recommend you use the <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/StartConfigurationSession.html\">StartConfigurationSession</a> and <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/GetLatestConfiguration.html\">GetLatestConfiguration</a> APIs, which track the client configuration version on your behalf. If you choose to continue using <code>GetConfiguration</code>, we recommend that you include the <code>ClientConfigurationVersion</code> value with every call to <code>GetConfiguration</code>. The value to use for <code>ClientConfigurationVersion</code> comes from the <code>ConfigurationVersion</code> attribute returned by <code>GetConfiguration</code> when there is new or updated data, and should be saved for subsequent calls to <code>GetConfiguration</code>.</p> </li> </ul> </important>",
+      "documentation":"<p>(Deprecated) Retrieves the latest deployed configuration.</p> <important> <p>Note the following important information.</p> <ul> <li> <p>This API action is deprecated. Calls to receive configuration data should use the <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/API_appconfigdata_StartConfigurationSession.html\">StartConfigurationSession</a> and <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/API_appconfigdata_GetLatestConfiguration.html\">GetLatestConfiguration</a> APIs instead. </p> </li> <li> <p> <a>GetConfiguration</a> is a priced call. For more information, see <a href=\"https://aws.amazon.com/systems-manager/pricing/\">Pricing</a>.</p> </li> </ul> </important>",
       "deprecated":true,
       "deprecatedMessage":"This API has been deprecated in favor of the GetLatestConfiguration API used in conjunction with StartConfigurationSession."
     },
@@ -267,7 +351,39 @@
         {"shape":"InternalServerException"},
         {"shape":"BadRequestException"}
       ],
-      "documentation":"<p>Retrieves information about an environment. An environment is a logical deployment group of AppConfig applications, such as applications in a <code>Production</code> environment or in an <code>EU_Region</code> environment. Each configuration deployment targets an environment. You can enable one or more Amazon CloudWatch alarms for an environment. If an alarm is triggered during a deployment, AppConfig roles back the configuration.</p>"
+      "documentation":"<p>Retrieves information about an environment. An environment is a deployment group of AppConfig applications, such as applications in a <code>Production</code> environment or in an <code>EU_Region</code> environment. Each configuration deployment targets an environment. You can enable one or more Amazon CloudWatch alarms for an environment. If an alarm is triggered during a deployment, AppConfig roles back the configuration.</p>"
+    },
+    "GetExtension":{
+      "name":"GetExtension",
+      "http":{
+        "method":"GET",
+        "requestUri":"/extensions/{ExtensionIdentifier}",
+        "responseCode":200
+      },
+      "input":{"shape":"GetExtensionRequest"},
+      "output":{"shape":"Extension"},
+      "errors":[
+        {"shape":"ResourceNotFoundException"},
+        {"shape":"InternalServerException"},
+        {"shape":"BadRequestException"}
+      ],
+      "documentation":"<p>Returns information about an AppConfig extension.</p>"
+    },
+    "GetExtensionAssociation":{
+      "name":"GetExtensionAssociation",
+      "http":{
+        "method":"GET",
+        "requestUri":"/extensionassociations/{ExtensionAssociationId}",
+        "responseCode":200
+      },
+      "input":{"shape":"GetExtensionAssociationRequest"},
+      "output":{"shape":"ExtensionAssociation"},
+      "errors":[
+        {"shape":"BadRequestException"},
+        {"shape":"ResourceNotFoundException"},
+        {"shape":"InternalServerException"}
+      ],
+      "documentation":"<p>Returns information about an AppConfig extension association. For more information about extensions and associations, see <a href=\"https://docs.aws.amazon.com/appconfig/latest/userguide/working-with-appconfig-extensions.html\">Extending workflows</a> in the <i>AppConfig User Guide</i>.</p>"
     },
     "GetHostedConfigurationVersion":{
       "name":"GetHostedConfigurationVersion",
@@ -363,6 +479,36 @@
       ],
       "documentation":"<p>Lists the environments for an application.</p>"
     },
+    "ListExtensionAssociations":{
+      "name":"ListExtensionAssociations",
+      "http":{
+        "method":"GET",
+        "requestUri":"/extensionassociations",
+        "responseCode":200
+      },
+      "input":{"shape":"ListExtensionAssociationsRequest"},
+      "output":{"shape":"ExtensionAssociations"},
+      "errors":[
+        {"shape":"InternalServerException"},
+        {"shape":"BadRequestException"}
+      ],
+      "documentation":"<p>Lists all AppConfig extension associations in the account. For more information about extensions and associations, see <a href=\"https://docs.aws.amazon.com/appconfig/latest/userguide/working-with-appconfig-extensions.html\">Extending workflows</a> in the <i>AppConfig User Guide</i>.</p>"
+    },
+    "ListExtensions":{
+      "name":"ListExtensions",
+      "http":{
+        "method":"GET",
+        "requestUri":"/extensions",
+        "responseCode":200
+      },
+      "input":{"shape":"ListExtensionsRequest"},
+      "output":{"shape":"Extensions"},
+      "errors":[
+        {"shape":"InternalServerException"},
+        {"shape":"BadRequestException"}
+      ],
+      "documentation":"<p>Lists all custom and Amazon Web Services authored AppConfig extensions in the account. For more information about extensions, see <a href=\"https://docs.aws.amazon.com/appconfig/latest/userguide/working-with-appconfig-extensions.html\">Extending workflows</a> in the <i>AppConfig User Guide</i>.</p>"
+    },
     "ListHostedConfigurationVersions":{
       "name":"ListHostedConfigurationVersions",
       "http":{
@@ -377,7 +523,7 @@
         {"shape":"ResourceNotFoundException"},
         {"shape":"InternalServerException"}
       ],
-      "documentation":"<p>Lists configurations stored in the AppConfig hosted configuration store by version.</p>"
+      "documentation":"<p>Lists configurations stored in the AppConfig hosted configuration store by version. </p>"
     },
     "ListTagsForResource":{
       "name":"ListTagsForResource",
@@ -426,7 +572,7 @@
         {"shape":"InternalServerException"},
         {"shape":"BadRequestException"}
       ],
-      "documentation":"<p>Stops a deployment. This API action works only on deployments that have a status of <code>DEPLOYING</code>. This action moves the deployment to a status of <code>ROLLED_BACK</code>.</p>"
+      "documentation":"<p>Stops a deployment. This API action works only on deployments that have a status of <code>DEPLOYING</code>, unless an <code>AllowRevert</code> parameter is supplied. If the <code>AllowRevert</code> parameter is supplied, the status of an in-progress deployment will be <code>ROLLED_BACK</code>. The status of a completed deployment will be <code>REVERTED</code>. AppConfig only allows a revert within 72 hours of deployment completion.</p>"
     },
     "TagResource":{
       "name":"TagResource",
@@ -457,6 +603,21 @@
         {"shape":"InternalServerException"}
       ],
       "documentation":"<p>Deletes a tag key and value from an AppConfig resource.</p>"
+    },
+    "UpdateAccountSettings":{
+      "name":"UpdateAccountSettings",
+      "http":{
+        "method":"PATCH",
+        "requestUri":"/settings",
+        "responseCode":200
+      },
+      "input":{"shape":"UpdateAccountSettingsRequest"},
+      "output":{"shape":"AccountSettings"},
+      "errors":[
+        {"shape":"BadRequestException"},
+        {"shape":"InternalServerException"}
+      ],
+      "documentation":"<p>Updates the value of the <code>DeletionProtection</code> parameter.</p>"
     },
     "UpdateApplication":{
       "name":"UpdateApplication",
@@ -522,6 +683,39 @@
       ],
       "documentation":"<p>Updates an environment.</p>"
     },
+    "UpdateExtension":{
+      "name":"UpdateExtension",
+      "http":{
+        "method":"PATCH",
+        "requestUri":"/extensions/{ExtensionIdentifier}",
+        "responseCode":200
+      },
+      "input":{"shape":"UpdateExtensionRequest"},
+      "output":{"shape":"Extension"},
+      "errors":[
+        {"shape":"BadRequestException"},
+        {"shape":"ResourceNotFoundException"},
+        {"shape":"ConflictException"},
+        {"shape":"InternalServerException"}
+      ],
+      "documentation":"<p>Updates an AppConfig extension. For more information about extensions, see <a href=\"https://docs.aws.amazon.com/appconfig/latest/userguide/working-with-appconfig-extensions.html\">Extending workflows</a> in the <i>AppConfig User Guide</i>.</p>"
+    },
+    "UpdateExtensionAssociation":{
+      "name":"UpdateExtensionAssociation",
+      "http":{
+        "method":"PATCH",
+        "requestUri":"/extensionassociations/{ExtensionAssociationId}",
+        "responseCode":200
+      },
+      "input":{"shape":"UpdateExtensionAssociationRequest"},
+      "output":{"shape":"ExtensionAssociation"},
+      "errors":[
+        {"shape":"BadRequestException"},
+        {"shape":"ResourceNotFoundException"},
+        {"shape":"InternalServerException"}
+      ],
+      "documentation":"<p>Updates an association. For more information about extensions and associations, see <a href=\"https://docs.aws.amazon.com/appconfig/latest/userguide/working-with-appconfig-extensions.html\">Extending workflows</a> in the <i>AppConfig User Guide</i>.</p>"
+    },
     "ValidateConfiguration":{
       "name":"ValidateConfiguration",
       "http":{
@@ -539,6 +733,101 @@
     }
   },
   "shapes":{
+    "AccountSettings":{
+      "type":"structure",
+      "members":{
+        "DeletionProtection":{
+          "shape":"DeletionProtectionSettings",
+          "documentation":"<p>A parameter to configure deletion protection. Deletion protection prevents a user from deleting a configuration profile or an environment if AppConfig has called either <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/API_appconfigdata_GetLatestConfiguration.html\">GetLatestConfiguration</a> or for the configuration profile or from the environment during the specified interval. The default interval for <code>ProtectionPeriodInMinutes</code> is 60.</p>"
+        }
+      }
+    },
+    "Action":{
+      "type":"structure",
+      "members":{
+        "Name":{
+          "shape":"Name",
+          "documentation":"<p>The action name.</p>"
+        },
+        "Description":{
+          "shape":"Description",
+          "documentation":"<p>Information about the action.</p>"
+        },
+        "Uri":{
+          "shape":"Uri",
+          "documentation":"<p>The extension URI associated to the action point in the extension definition. The URI can be an Amazon Resource Name (ARN) for one of the following: an Lambda function, an Amazon Simple Queue Service queue, an Amazon Simple Notification Service topic, or the Amazon EventBridge default event bus.</p>"
+        },
+        "RoleArn":{
+          "shape":"Arn",
+          "documentation":"<p>An Amazon Resource Name (ARN) for an Identity and Access Management assume role.</p>"
+        }
+      },
+      "documentation":"<p>An action defines the tasks that the extension performs during the AppConfig workflow. Each action includes an action point, as shown in the following list: </p> <ul> <li> <p> <code>PRE_CREATE_HOSTED_CONFIGURATION_VERSION</code> </p> </li> <li> <p> <code>PRE_START_DEPLOYMENT</code> </p> </li> <li> <p> <code>AT_DEPLOYMENT_TICK</code> </p> </li> <li> <p> <code>ON_DEPLOYMENT_START</code> </p> </li> <li> <p> <code>ON_DEPLOYMENT_STEP</code> </p> </li> <li> <p> <code>ON_DEPLOYMENT_BAKING</code> </p> </li> <li> <p> <code>ON_DEPLOYMENT_COMPLETE</code> </p> </li> <li> <p> <code>ON_DEPLOYMENT_ROLLED_BACK</code> </p> </li> </ul> <p>Each action also includes a name, a URI to an Lambda function, and an Amazon Resource Name (ARN) for an Identity and Access Management assume role. You specify the name, URI, and ARN for each <i>action point</i> defined in the extension.</p>"
+    },
+    "ActionInvocation":{
+      "type":"structure",
+      "members":{
+        "ExtensionIdentifier":{
+          "shape":"Identifier",
+          "documentation":"<p>The name, the ID, or the Amazon Resource Name (ARN) of the extension.</p>"
+        },
+        "ActionName":{
+          "shape":"Name",
+          "documentation":"<p>The name of the action.</p>"
+        },
+        "Uri":{
+          "shape":"Uri",
+          "documentation":"<p>The extension URI associated to the action point in the extension definition. The URI can be an Amazon Resource Name (ARN) for one of the following: an Lambda function, an Amazon Simple Queue Service queue, an Amazon Simple Notification Service topic, or the Amazon EventBridge default event bus.</p>"
+        },
+        "RoleArn":{
+          "shape":"Arn",
+          "documentation":"<p>An Amazon Resource Name (ARN) for an Identity and Access Management assume role.</p>"
+        },
+        "ErrorMessage":{
+          "shape":"String",
+          "documentation":"<p>The error message when an extension invocation fails.</p>"
+        },
+        "ErrorCode":{
+          "shape":"String",
+          "documentation":"<p>The error code when an extension invocation fails.</p>"
+        },
+        "InvocationId":{
+          "shape":"Id",
+          "documentation":"<p>A system-generated ID for this invocation.</p>"
+        }
+      },
+      "documentation":"<p>An extension that was invoked as part of a deployment event.</p>"
+    },
+    "ActionInvocations":{
+      "type":"list",
+      "member":{"shape":"ActionInvocation"}
+    },
+    "ActionList":{
+      "type":"list",
+      "member":{"shape":"Action"},
+      "max":1,
+      "min":1
+    },
+    "ActionPoint":{
+      "type":"string",
+      "enum":[
+        "PRE_CREATE_HOSTED_CONFIGURATION_VERSION",
+        "PRE_START_DEPLOYMENT",
+        "AT_DEPLOYMENT_TICK",
+        "ON_DEPLOYMENT_START",
+        "ON_DEPLOYMENT_STEP",
+        "ON_DEPLOYMENT_BAKING",
+        "ON_DEPLOYMENT_COMPLETE",
+        "ON_DEPLOYMENT_ROLLED_BACK"
+      ]
+    },
+    "ActionsMap":{
+      "type":"map",
+      "key":{"shape":"ActionPoint"},
+      "value":{"shape":"ActionList"},
+      "max":5,
+      "min":1
+    },
     "Application":{
       "type":"structure",
       "members":{
@@ -573,11 +862,37 @@
         }
       }
     },
+    "AppliedExtension":{
+      "type":"structure",
+      "members":{
+        "ExtensionId":{
+          "shape":"Id",
+          "documentation":"<p>The system-generated ID of the extension.</p>"
+        },
+        "ExtensionAssociationId":{
+          "shape":"Id",
+          "documentation":"<p>The system-generated ID for the association.</p>"
+        },
+        "VersionNumber":{
+          "shape":"Integer",
+          "documentation":"<p>The extension version number.</p>"
+        },
+        "Parameters":{
+          "shape":"ParameterValueMap",
+          "documentation":"<p>One or more parameters for the actions called by the extension.</p>"
+        }
+      },
+      "documentation":"<p>An extension that was invoked during a deployment.</p>"
+    },
+    "AppliedExtensions":{
+      "type":"list",
+      "member":{"shape":"AppliedExtension"}
+    },
     "Arn":{
       "type":"string",
       "max":2048,
       "min":20,
-      "pattern":"arn:(aws[a-zA-Z-]*)?:[a-z]+:([a-z]{2}((-gov)|(-iso(b?)))?-[a-z]+-\\d{1})?:(\\d{12})?:[a-zA-Z0-9-_/:.]+"
+      "pattern":"arn:(aws[a-zA-Z-]*)?:[a-z]+:((eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1})?:(\\d{12})?:[a-zA-Z0-9-_/:.]+"
     },
     "BadRequestDetails":{
       "type":"structure",
@@ -609,6 +924,7 @@
       "type":"blob",
       "sensitive":true
     },
+    "Boolean":{"type":"boolean"},
     "BytesMeasure":{
       "type":"string",
       "enum":["KILOBYTES"]
@@ -647,7 +963,7 @@
           "documentation":"<p>The configuration profile ID.</p>"
         },
         "Name":{
-          "shape":"Name",
+          "shape":"LongName",
           "documentation":"<p>The name of the configuration profile.</p>"
         },
         "Description":{
@@ -669,6 +985,14 @@
         "Type":{
           "shape":"ConfigurationProfileType",
           "documentation":"<p>The type of configurations contained in the profile. AppConfig supports <code>feature flags</code> and <code>freeform</code> configurations. We recommend you create feature flag configurations to enable or disable new features and freeform configurations to distribute configurations to an application. When calling this API, enter one of the following values for <code>Type</code>:</p> <p> <code>AWS.AppConfig.FeatureFlags</code> </p> <p> <code>AWS.Freeform</code> </p>"
+        },
+        "KmsKeyArn":{
+          "shape":"Arn",
+          "documentation":"<p>The Amazon Resource Name of the Key Management Service key to encrypt new configuration data versions in the AppConfig hosted configuration store. This attribute is only used for <code>hosted</code> configuration types. To encrypt data managed in other configuration stores, see the documentation for how to specify an KMS key for that particular service.</p>"
+        },
+        "KmsKeyIdentifier":{
+          "shape":"KmsKeyIdentifier",
+          "documentation":"<p>The Key Management Service key identifier (key ID, key alias, or key ARN) provided when the resource was created or updated.</p>"
         }
       }
     },
@@ -684,7 +1008,7 @@
           "documentation":"<p>The ID of the configuration profile.</p>"
         },
         "Name":{
-          "shape":"Name",
+          "shape":"LongName",
           "documentation":"<p>The name of the configuration profile.</p>"
         },
         "LocationUri":{
@@ -765,7 +1089,7 @@
           "locationName":"ApplicationId"
         },
         "Name":{
-          "shape":"Name",
+          "shape":"LongName",
           "documentation":"<p>A name for the configuration profile.</p>"
         },
         "Description":{
@@ -774,11 +1098,11 @@
         },
         "LocationUri":{
           "shape":"Uri",
-          "documentation":"<p>A URI to locate the configuration. You can specify the AppConfig hosted configuration store, Systems Manager (SSM) document, an SSM Parameter Store parameter, or an Amazon S3 object. For the hosted configuration store and for feature flags, specify <code>hosted</code>. For an SSM document, specify either the document name in the format <code>ssm-document://&lt;Document_name&gt;</code> or the Amazon Resource Name (ARN). For a parameter, specify either the parameter name in the format <code>ssm-parameter://&lt;Parameter_name&gt;</code> or the ARN. For an Amazon S3 object, specify the URI in the following format: <code>s3://&lt;bucket&gt;/&lt;objectKey&gt; </code>. Here is an example: <code>s3://my-bucket/my-app/us-east-1/my-config.json</code> </p>"
+          "documentation":"<p>A URI to locate the configuration. You can specify the following:</p> <ul> <li> <p>For the AppConfig hosted configuration store and for feature flags, specify <code>hosted</code>.</p> </li> <li> <p>For an Amazon Web Services Systems Manager Parameter Store parameter, specify either the parameter name in the format <code>ssm-parameter://&lt;parameter name&gt;</code> or the ARN.</p> </li> <li> <p>For an Amazon Web Services CodePipeline pipeline, specify the URI in the following format: <code>codepipeline</code>://&lt;pipeline name&gt;.</p> </li> <li> <p>For an Secrets Manager secret, specify the URI in the following format: <code>secretsmanager</code>://&lt;secret name&gt;.</p> </li> <li> <p>For an Amazon S3 object, specify the URI in the following format: <code>s3://&lt;bucket&gt;/&lt;objectKey&gt; </code>. Here is an example: <code>s3://amzn-s3-demo-bucket/my-app/us-east-1/my-config.json</code> </p> </li> <li> <p>For an SSM document, specify either the document name in the format <code>ssm-document://&lt;document name&gt;</code> or the Amazon Resource Name (ARN).</p> </li> </ul>"
         },
         "RetrievalRoleArn":{
           "shape":"RoleArn",
-          "documentation":"<p>The ARN of an IAM role with permission to access the configuration at the specified <code>LocationUri</code>.</p> <important> <p>A retrieval role ARN is not required for configurations stored in the AppConfig hosted configuration store. It is required for all other sources that store your configuration. </p> </important>"
+          "documentation":"<p>The ARN of an IAM role with permission to access the configuration at the specified <code>LocationUri</code>.</p> <important> <p>A retrieval role ARN is not required for configurations stored in CodePipeline or the AppConfig hosted configuration store. It is required for all other sources that store your configuration. </p> </important>"
         },
         "Validators":{
           "shape":"ValidatorList",
@@ -791,6 +1115,10 @@
         "Type":{
           "shape":"ConfigurationProfileType",
           "documentation":"<p>The type of configurations contained in the profile. AppConfig supports <code>feature flags</code> and <code>freeform</code> configurations. We recommend you create feature flag configurations to enable or disable new features and freeform configurations to distribute configurations to an application. When calling this API, enter one of the following values for <code>Type</code>:</p> <p> <code>AWS.AppConfig.FeatureFlags</code> </p> <p> <code>AWS.Freeform</code> </p>"
+        },
+        "KmsKeyIdentifier":{
+          "shape":"KmsKeyIdentifier",
+          "documentation":"<p>The identifier for an Key Management Service key to encrypt new configuration data versions in the AppConfig hosted configuration store. This attribute is only used for <code>hosted</code> configuration types. The identifier can be an KMS key ID, alias, or the Amazon Resource Name (ARN) of the key ID or alias. To encrypt data managed in other configuration stores, see the documentation for how to specify an KMS key for that particular service.</p>"
         }
       }
     },
@@ -799,8 +1127,7 @@
       "required":[
         "Name",
         "DeploymentDurationInMinutes",
-        "GrowthFactor",
-        "ReplicateTo"
+        "GrowthFactor"
       ],
       "members":{
         "Name":{
@@ -818,7 +1145,7 @@
         },
         "FinalBakeTimeInMinutes":{
           "shape":"MinutesBetween0And24Hours",
-          "documentation":"<p>The amount of time AppConfig monitors for alarms before considering the deployment to be complete and no longer eligible for automatic roll back.</p>"
+          "documentation":"<p>Specifies the amount of time AppConfig monitors for Amazon CloudWatch alarms after the configuration has been deployed to 100% of its targets, before considering the deployment to be complete. If an alarm is triggered during this time, AppConfig rolls back the deployment. You must configure permissions for AppConfig to roll back based on CloudWatch alarms. For more information, see <a href=\"https://docs.aws.amazon.com/appconfig/latest/userguide/getting-started-with-appconfig-cloudwatch-alarms-permissions.html\">Configuring permissions for rollback based on Amazon CloudWatch alarms</a> in the <i>AppConfig User Guide</i>.</p>"
         },
         "GrowthFactor":{
           "shape":"GrowthFactor",
@@ -870,6 +1197,72 @@
         }
       }
     },
+    "CreateExtensionAssociationRequest":{
+      "type":"structure",
+      "required":[
+        "ExtensionIdentifier",
+        "ResourceIdentifier"
+      ],
+      "members":{
+        "ExtensionIdentifier":{
+          "shape":"Identifier",
+          "documentation":"<p>The name, the ID, or the Amazon Resource Name (ARN) of the extension.</p>"
+        },
+        "ExtensionVersionNumber":{
+          "shape":"Integer",
+          "documentation":"<p>The version number of the extension. If not specified, AppConfig uses the maximum version of the extension.</p>",
+          "box":true
+        },
+        "ResourceIdentifier":{
+          "shape":"Identifier",
+          "documentation":"<p>The ARN of an application, configuration profile, or environment.</p>"
+        },
+        "Parameters":{
+          "shape":"ParameterValueMap",
+          "documentation":"<p>The parameter names and values defined in the extensions. Extension parameters marked <code>Required</code> must be entered for this field.</p>"
+        },
+        "Tags":{
+          "shape":"TagMap",
+          "documentation":"<p>Adds one or more tags for the specified extension association. Tags are metadata that help you categorize resources in different ways, for example, by purpose, owner, or environment. Each tag consists of a key and an optional value, both of which you define. </p>"
+        }
+      }
+    },
+    "CreateExtensionRequest":{
+      "type":"structure",
+      "required":[
+        "Name",
+        "Actions"
+      ],
+      "members":{
+        "Name":{
+          "shape":"ExtensionOrParameterName",
+          "documentation":"<p>A name for the extension. Each extension name in your account must be unique. Extension versions use the same name.</p>"
+        },
+        "Description":{
+          "shape":"Description",
+          "documentation":"<p>Information about the extension.</p>"
+        },
+        "Actions":{
+          "shape":"ActionsMap",
+          "documentation":"<p>The actions defined in the extension.</p>"
+        },
+        "Parameters":{
+          "shape":"ParameterMap",
+          "documentation":"<p>The parameters accepted by the extension. You specify parameter values when you associate the extension to an AppConfig resource by using the <code>CreateExtensionAssociation</code> API action. For Lambda extension actions, these parameters are included in the Lambda request object.</p>"
+        },
+        "Tags":{
+          "shape":"TagMap",
+          "documentation":"<p>Adds one or more tags for the specified extension. Tags are metadata that help you categorize resources in different ways, for example, by purpose, owner, or environment. Each tag consists of a key and an optional value, both of which you define. </p>"
+        },
+        "LatestVersionNumber":{
+          "shape":"Integer",
+          "documentation":"<p>You can omit this field when you create an extension. When you create a new version, specify the most recent current version number. For example, you create version 3, enter 2 for this field.</p>",
+          "box":true,
+          "location":"header",
+          "locationName":"Latest-Version-Number"
+        }
+      }
+    },
     "CreateHostedConfigurationVersionRequest":{
       "type":"structure",
       "required":[
@@ -899,7 +1292,7 @@
         },
         "Content":{
           "shape":"Blob",
-          "documentation":"<p>The content of the configuration or the configuration data.</p>"
+          "documentation":"<p>The configuration data, as bytes.</p> <note> <p>AppConfig accepts any type of data, including text formats like JSON or TOML, or binary formats like protocol buffers or compressed data.</p> </note>"
         },
         "ContentType":{
           "shape":"StringWithLengthBetween1And255",
@@ -913,6 +1306,12 @@
           "box":true,
           "location":"header",
           "locationName":"Latest-Version-Number"
+        },
+        "VersionLabel":{
+          "shape":"VersionLabel",
+          "documentation":"<p>An optional, user-defined label for the AppConfig hosted configuration version. This value must contain at least one non-numeric character. For example, \"v2.2.0\".</p>",
+          "location":"header",
+          "locationName":"VersionLabel"
         }
       },
       "payload":"Content"
@@ -947,6 +1346,12 @@
           "documentation":"<p>The ID of the configuration profile you want to delete.</p>",
           "location":"uri",
           "locationName":"ConfigurationProfileId"
+        },
+        "DeletionProtectionCheck":{
+          "shape":"DeletionProtectionCheck",
+          "documentation":"<p>A parameter to configure deletion protection. Deletion protection prevents a user from deleting a configuration profile if your application has called either <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/API_appconfigdata_GetLatestConfiguration.html\">GetLatestConfiguration</a> or for the configuration profile during the specified interval. </p> <p>This parameter supports the following values:</p> <ul> <li> <p> <code>BYPASS</code>: Instructs AppConfig to bypass the deletion protection check and delete a configuration profile even if deletion protection would have otherwise prevented it.</p> </li> <li> <p> <code>APPLY</code>: Instructs the deletion protection check to run, even if deletion protection is disabled at the account level. <code>APPLY</code> also forces the deletion protection check to run against resources created in the past hour, which are normally excluded from deletion protection checks. </p> </li> <li> <p> <code>ACCOUNT_DEFAULT</code>: The default setting, which instructs AppConfig to implement the deletion protection value specified in the <code>UpdateAccountSettings</code> API.</p> </li> </ul>",
+          "location":"header",
+          "locationName":"x-amzn-deletion-protection-check"
         }
       }
     },
@@ -965,21 +1370,58 @@
     "DeleteEnvironmentRequest":{
       "type":"structure",
       "required":[
-        "ApplicationId",
-        "EnvironmentId"
+        "EnvironmentId",
+        "ApplicationId"
       ],
       "members":{
+        "EnvironmentId":{
+          "shape":"Id",
+          "documentation":"<p>The ID of the environment that you want to delete.</p>",
+          "location":"uri",
+          "locationName":"EnvironmentId"
+        },
         "ApplicationId":{
           "shape":"Id",
           "documentation":"<p>The application ID that includes the environment that you want to delete.</p>",
           "location":"uri",
           "locationName":"ApplicationId"
         },
-        "EnvironmentId":{
+        "DeletionProtectionCheck":{
+          "shape":"DeletionProtectionCheck",
+          "documentation":"<p>A parameter to configure deletion protection. Deletion protection prevents a user from deleting an environment if your application called either <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/API_appconfigdata_GetLatestConfiguration.html\">GetLatestConfiguration</a> or in the environment during the specified interval. </p> <p>This parameter supports the following values:</p> <ul> <li> <p> <code>BYPASS</code>: Instructs AppConfig to bypass the deletion protection check and delete a configuration profile even if deletion protection would have otherwise prevented it. </p> </li> <li> <p> <code>APPLY</code>: Instructs the deletion protection check to run, even if deletion protection is disabled at the account level. <code>APPLY</code> also forces the deletion protection check to run against resources created in the past hour, which are normally excluded from deletion protection checks.</p> </li> <li> <p> <code>ACCOUNT_DEFAULT</code>: The default setting, which instructs AppConfig to implement the deletion protection value specified in the <code>UpdateAccountSettings</code> API.</p> </li> </ul>",
+          "location":"header",
+          "locationName":"x-amzn-deletion-protection-check"
+        }
+      }
+    },
+    "DeleteExtensionAssociationRequest":{
+      "type":"structure",
+      "required":["ExtensionAssociationId"],
+      "members":{
+        "ExtensionAssociationId":{
           "shape":"Id",
-          "documentation":"<p>The ID of the environment that you want to delete.</p>",
+          "documentation":"<p>The ID of the extension association to delete.</p>",
           "location":"uri",
-          "locationName":"EnvironmentId"
+          "locationName":"ExtensionAssociationId"
+        }
+      }
+    },
+    "DeleteExtensionRequest":{
+      "type":"structure",
+      "required":["ExtensionIdentifier"],
+      "members":{
+        "ExtensionIdentifier":{
+          "shape":"Identifier",
+          "documentation":"<p>The name, ID, or Amazon Resource Name (ARN) of the extension you want to delete.</p>",
+          "location":"uri",
+          "locationName":"ExtensionIdentifier"
+        },
+        "VersionNumber":{
+          "shape":"Integer",
+          "documentation":"<p>A specific version of an extension to delete. If omitted, the highest version is deleted.</p>",
+          "box":true,
+          "location":"querystring",
+          "locationName":"version"
         }
       }
     },
@@ -1010,6 +1452,36 @@
           "locationName":"VersionNumber"
         }
       }
+    },
+    "DeletionProtectionCheck":{
+      "type":"string",
+      "enum":[
+        "ACCOUNT_DEFAULT",
+        "APPLY",
+        "BYPASS"
+      ]
+    },
+    "DeletionProtectionDuration":{
+      "type":"integer",
+      "box":true,
+      "max":1440,
+      "min":15
+    },
+    "DeletionProtectionSettings":{
+      "type":"structure",
+      "members":{
+        "Enabled":{
+          "shape":"Boolean",
+          "documentation":"<p>A parameter that indicates if deletion protection is enabled or not.</p>",
+          "box":true
+        },
+        "ProtectionPeriodInMinutes":{
+          "shape":"DeletionProtectionDuration",
+          "documentation":"<p>The time interval during which AppConfig monitors for calls to <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/API_appconfigdata_GetLatestConfiguration.html\">GetLatestConfiguration</a> or for a configuration profile or from an environment. AppConfig returns an error if a user calls or for the designated configuration profile or environment. To bypass the error and delete a configuration profile or an environment, specify <code>BYPASS</code> for the <code>DeletionProtectionCheck</code> parameter for either or .</p>",
+          "box":true
+        }
+      },
+      "documentation":"<p>A parameter to configure deletion protection. Deletion protection prevents a user from deleting a configuration profile or an environment if AppConfig has called either <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/API_appconfigdata_GetLatestConfiguration.html\">GetLatestConfiguration</a> or for the configuration profile or from the environment during the specified interval.</p> <p>The default interval specified by <code>ProtectionPeriodInMinutes</code> is 60. <code>DeletionProtectionCheck</code> skips configuration profiles and environments that were created in the past hour.</p>"
     },
     "Deployment":{
       "type":"structure",
@@ -1085,6 +1557,22 @@
         "CompletedAt":{
           "shape":"Iso8601DateTime",
           "documentation":"<p>The time the deployment completed. </p>"
+        },
+        "AppliedExtensions":{
+          "shape":"AppliedExtensions",
+          "documentation":"<p>A list of extensions that were processed as part of the deployment. The extensions that were previously associated to the configuration profile, environment, or the application when <code>StartDeployment</code> was called.</p>"
+        },
+        "KmsKeyArn":{
+          "shape":"Arn",
+          "documentation":"<p>The Amazon Resource Name of the Key Management Service key used to encrypt configuration data. You can encrypt secrets stored in Secrets Manager, Amazon Simple Storage Service (Amazon S3) objects encrypted with SSE-KMS, or secure string parameters stored in Amazon Web Services Systems Manager Parameter Store. </p>"
+        },
+        "KmsKeyIdentifier":{
+          "shape":"KmsKeyIdentifier",
+          "documentation":"<p>The Key Management Service key identifier (key ID, key alias, or key ARN) provided when the resource was created or updated.</p>"
+        },
+        "VersionLabel":{
+          "shape":"VersionLabel",
+          "documentation":"<p>A user-defined label for an AppConfig hosted configuration version.</p>"
         }
       }
     },
@@ -1101,7 +1589,11 @@
         },
         "Description":{
           "shape":"Description",
-          "documentation":"<p>A description of the deployment event. Descriptions include, but are not limited to, the user account or the Amazon CloudWatch alarm ARN that initiated a rollback, the percentage of hosts that received the deployment, or in the case of an internal error, a recommendation to attempt a new deployment.</p>"
+          "documentation":"<p>A description of the deployment event. Descriptions include, but are not limited to, the following:</p> <ul> <li> <p>The Amazon Web Services account or the Amazon CloudWatch alarm ARN that initiated a rollback.</p> </li> <li> <p>The percentage of hosts that received the deployment.</p> </li> <li> <p>A recommendation to attempt a new deployment (in the case of an internal error).</p> </li> </ul>"
+        },
+        "ActionInvocations":{
+          "shape":"ActionInvocations",
+          "documentation":"<p>The list of extensions that were invoked as part of the deployment.</p>"
         },
         "OccurredAt":{
           "shape":"Iso8601DateTime",
@@ -1118,7 +1610,8 @@
         "ROLLBACK_COMPLETED",
         "BAKE_TIME_STARTED",
         "DEPLOYMENT_STARTED",
-        "DEPLOYMENT_COMPLETED"
+        "DEPLOYMENT_COMPLETED",
+        "REVERT_COMPLETED"
       ]
     },
     "DeploymentEvents":{
@@ -1137,7 +1630,8 @@
         "DEPLOYING",
         "COMPLETE",
         "ROLLING_BACK",
-        "ROLLED_BACK"
+        "ROLLED_BACK",
+        "REVERTED"
       ]
     },
     "DeploymentStrategies":{
@@ -1244,6 +1738,10 @@
         "CompletedAt":{
           "shape":"Iso8601DateTime",
           "documentation":"<p>Time the deployment completed.</p>"
+        },
+        "VersionLabel":{
+          "shape":"VersionLabel",
+          "documentation":"<p>A user-defined label for an AppConfig hosted configuration version.</p>"
         }
       },
       "documentation":"<p>Information about the deployment.</p>"
@@ -1265,6 +1763,18 @@
       "type":"string",
       "max":1024,
       "min":0
+    },
+    "DynamicParameterKey":{
+      "type":"string",
+      "pattern":"^([^#\\n]{1,96})#([^\\/#\\n]{1,64})$"
+    },
+    "DynamicParameterMap":{
+      "type":"map",
+      "key":{"shape":"DynamicParameterKey"},
+      "value":{"shape":"StringWithLengthBetween1And2048"},
+      "max":10,
+      "min":1,
+      "sensitive":true
     },
     "Environment":{
       "type":"structure",
@@ -1305,7 +1815,8 @@
         "READY_FOR_DEPLOYMENT",
         "DEPLOYING",
         "ROLLING_BACK",
-        "ROLLED_BACK"
+        "ROLLED_BACK",
+        "REVERTED"
       ]
     },
     "Environments":{
@@ -1314,6 +1825,150 @@
         "Items":{
           "shape":"EnvironmentList",
           "documentation":"<p>The elements from this collection.</p>"
+        },
+        "NextToken":{
+          "shape":"NextToken",
+          "documentation":"<p>The token for the next set of items to return. Use this token to get the next set of results.</p>"
+        }
+      }
+    },
+    "Extension":{
+      "type":"structure",
+      "members":{
+        "Id":{
+          "shape":"Id",
+          "documentation":"<p>The system-generated ID of the extension.</p>"
+        },
+        "Name":{
+          "shape":"Name",
+          "documentation":"<p>The extension name.</p>"
+        },
+        "VersionNumber":{
+          "shape":"Integer",
+          "documentation":"<p>The extension version number.</p>"
+        },
+        "Arn":{
+          "shape":"Arn",
+          "documentation":"<p>The system-generated Amazon Resource Name (ARN) for the extension.</p>"
+        },
+        "Description":{
+          "shape":"Description",
+          "documentation":"<p>Information about the extension.</p>"
+        },
+        "Actions":{
+          "shape":"ActionsMap",
+          "documentation":"<p>The actions defined in the extension.</p>"
+        },
+        "Parameters":{
+          "shape":"ParameterMap",
+          "documentation":"<p>The parameters accepted by the extension. You specify parameter values when you associate the extension to an AppConfig resource by using the <code>CreateExtensionAssociation</code> API action. For Lambda extension actions, these parameters are included in the Lambda request object.</p>"
+        }
+      }
+    },
+    "ExtensionAssociation":{
+      "type":"structure",
+      "members":{
+        "Id":{
+          "shape":"Identifier",
+          "documentation":"<p>The system-generated ID for the association.</p>"
+        },
+        "ExtensionArn":{
+          "shape":"Arn",
+          "documentation":"<p>The ARN of the extension defined in the association.</p>"
+        },
+        "ResourceArn":{
+          "shape":"Arn",
+          "documentation":"<p>The ARNs of applications, configuration profiles, or environments defined in the association.</p>"
+        },
+        "Arn":{
+          "shape":"Arn",
+          "documentation":"<p>The system-generated Amazon Resource Name (ARN) for the extension.</p>"
+        },
+        "Parameters":{
+          "shape":"ParameterValueMap",
+          "documentation":"<p>The parameter names and values defined in the association.</p>"
+        },
+        "ExtensionVersionNumber":{
+          "shape":"Integer",
+          "documentation":"<p>The version number for the extension defined in the association.</p>"
+        }
+      }
+    },
+    "ExtensionAssociationSummaries":{
+      "type":"list",
+      "member":{"shape":"ExtensionAssociationSummary"}
+    },
+    "ExtensionAssociationSummary":{
+      "type":"structure",
+      "members":{
+        "Id":{
+          "shape":"Identifier",
+          "documentation":"<p>The extension association ID. This ID is used to call other <code>ExtensionAssociation</code> API actions such as <code>GetExtensionAssociation</code> or <code>DeleteExtensionAssociation</code>.</p>"
+        },
+        "ExtensionArn":{
+          "shape":"Arn",
+          "documentation":"<p>The system-generated Amazon Resource Name (ARN) for the extension.</p>"
+        },
+        "ResourceArn":{
+          "shape":"Arn",
+          "documentation":"<p>The ARNs of applications, configuration profiles, or environments defined in the association.</p>"
+        }
+      },
+      "documentation":"<p>Information about an association between an extension and an AppConfig resource such as an application, environment, or configuration profile. Call <code>GetExtensionAssociation</code> to get more information about an association.</p>"
+    },
+    "ExtensionAssociations":{
+      "type":"structure",
+      "members":{
+        "Items":{
+          "shape":"ExtensionAssociationSummaries",
+          "documentation":"<p>The list of extension associations. Each item represents an extension association to an application, environment, or configuration profile. </p>"
+        },
+        "NextToken":{
+          "shape":"NextToken",
+          "documentation":"<p>The token for the next set of items to return. Use this token to get the next set of results.</p>"
+        }
+      }
+    },
+    "ExtensionOrParameterName":{
+      "type":"string",
+      "pattern":"^[^\\/#:\\n]{1,64}$"
+    },
+    "ExtensionSummaries":{
+      "type":"list",
+      "member":{"shape":"ExtensionSummary"}
+    },
+    "ExtensionSummary":{
+      "type":"structure",
+      "members":{
+        "Id":{
+          "shape":"Id",
+          "documentation":"<p>The system-generated ID of the extension.</p>"
+        },
+        "Name":{
+          "shape":"Name",
+          "documentation":"<p>The extension name.</p>"
+        },
+        "VersionNumber":{
+          "shape":"Integer",
+          "documentation":"<p>The extension version number.</p>"
+        },
+        "Arn":{
+          "shape":"Arn",
+          "documentation":"<p>The system-generated Amazon Resource Name (ARN) for the extension.</p>"
+        },
+        "Description":{
+          "shape":"Description",
+          "documentation":"<p>Information about the extension.</p>"
+        }
+      },
+      "documentation":"<p>Information about an extension. Call <code>GetExtension</code> to get more information about an extension.</p>"
+    },
+    "Extensions":{
+      "type":"structure",
+      "members":{
+        "Items":{
+          "shape":"ExtensionSummaries",
+          "documentation":"<p>The list of available extensions. The list includes Amazon Web Services authored and user-created extensions.</p>"
         },
         "NextToken":{
           "shape":"NextToken",
@@ -1390,7 +2045,7 @@
         },
         "ClientConfigurationVersion":{
           "shape":"Version",
-          "documentation":"<p>The configuration version returned in the most recent <code>GetConfiguration</code> response.</p> <important> <p>AppConfig uses the value of the <code>ClientConfigurationVersion</code> parameter to identify the configuration version on your clients. If you don’t send <code>ClientConfigurationVersion</code> with each call to <code>GetConfiguration</code>, your clients receive the current configuration. You are charged each time your clients receive a configuration.</p> <p>To avoid excess charges, we recommend that you include the <code>ClientConfigurationVersion</code> value with every call to <code>GetConfiguration</code>. This value must be saved on your client. Subsequent calls to <code>GetConfiguration</code> must pass this value by using the <code>ClientConfigurationVersion</code> parameter. </p> </important> <p>For more information about working with configurations, see <a href=\"http://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-retrieving-the-configuration.html\">Retrieving the Configuration</a> in the <i>AppConfig User Guide</i>.</p>",
+          "documentation":"<p>The configuration version returned in the most recent <a>GetConfiguration</a> response.</p> <important> <p>AppConfig uses the value of the <code>ClientConfigurationVersion</code> parameter to identify the configuration version on your clients. If you don’t send <code>ClientConfigurationVersion</code> with each call to <a>GetConfiguration</a>, your clients receive the current configuration. You are charged each time your clients receive a configuration.</p> <p>To avoid excess charges, we recommend you use the <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/StartConfigurationSession.html\">StartConfigurationSession</a> and <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/GetLatestConfiguration.html\">GetLatestConfiguration</a> APIs, which track the client configuration version on your behalf. If you choose to continue using <a>GetConfiguration</a>, we recommend that you include the <code>ClientConfigurationVersion</code> value with every call to <a>GetConfiguration</a>. The value to use for <code>ClientConfigurationVersion</code> comes from the <code>ConfigurationVersion</code> attribute returned by <a>GetConfiguration</a> when there is new or updated data, and should be saved for subsequent calls to <a>GetConfiguration</a>.</p> </important> <p>For more information about working with configurations, see <a href=\"http://docs.aws.amazon.com/appconfig/latest/userguide/retrieving-feature-flags.html\">Retrieving feature flags and configuration data in AppConfig</a> in the <i>AppConfig User Guide</i>.</p>",
           "location":"querystring",
           "locationName":"client_configuration_version"
         }
@@ -1455,6 +2110,37 @@
           "documentation":"<p>The ID of the environment that you want to get.</p>",
           "location":"uri",
           "locationName":"EnvironmentId"
+        }
+      }
+    },
+    "GetExtensionAssociationRequest":{
+      "type":"structure",
+      "required":["ExtensionAssociationId"],
+      "members":{
+        "ExtensionAssociationId":{
+          "shape":"Id",
+          "documentation":"<p>The extension association ID to get.</p>",
+          "location":"uri",
+          "locationName":"ExtensionAssociationId"
+        }
+      }
+    },
+    "GetExtensionRequest":{
+      "type":"structure",
+      "required":["ExtensionIdentifier"],
+      "members":{
+        "ExtensionIdentifier":{
+          "shape":"Identifier",
+          "documentation":"<p>The name, the ID, or the Amazon Resource Name (ARN) of the extension.</p>",
+          "location":"uri",
+          "locationName":"ExtensionIdentifier"
+        },
+        "VersionNumber":{
+          "shape":"Integer",
+          "documentation":"<p>The extension version number. If no version number was defined, AppConfig uses the highest version.</p>",
+          "box":true,
+          "location":"querystring",
+          "locationName":"version_number"
         }
       }
     },
@@ -1534,6 +2220,18 @@
           "documentation":"<p>A standard MIME type describing the format of the configuration content. For more information, see <a href=\"https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17\">Content-Type</a>.</p>",
           "location":"header",
           "locationName":"Content-Type"
+        },
+        "VersionLabel":{
+          "shape":"VersionLabel",
+          "documentation":"<p>A user-defined label for an AppConfig hosted configuration version.</p>",
+          "location":"header",
+          "locationName":"VersionLabel"
+        },
+        "KmsKeyArn":{
+          "shape":"Arn",
+          "documentation":"<p>The Amazon Resource Name of the Key Management Service key that was used to encrypt this specific version of the configuration data in the AppConfig hosted configuration store.</p>",
+          "location":"header",
+          "locationName":"KmsKeyArn"
         }
       },
       "payload":"Content"
@@ -1560,6 +2258,14 @@
         "ContentType":{
           "shape":"StringWithLengthBetween1And255",
           "documentation":"<p>A standard MIME type describing the format of the configuration content. For more information, see <a href=\"https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17\">Content-Type</a>.</p>"
+        },
+        "VersionLabel":{
+          "shape":"VersionLabel",
+          "documentation":"<p>A user-defined label for an AppConfig hosted configuration version.</p>"
+        },
+        "KmsKeyArn":{
+          "shape":"Arn",
+          "documentation":"<p>The Amazon Resource Name of the Key Management Service key that was used to encrypt this specific version of the configuration data in the AppConfig hosted configuration store.</p>"
         }
       },
       "documentation":"<p>Information about the configuration.</p>"
@@ -1584,6 +2290,11 @@
     "Id":{
       "type":"string",
       "pattern":"[a-z0-9]{4,7}"
+    },
+    "Identifier":{
+      "type":"string",
+      "max":2048,
+      "min":1
     },
     "Integer":{"type":"integer"},
     "InternalServerException":{
@@ -1614,6 +2325,10 @@
         "Type":{
           "shape":"String",
           "documentation":"<p>The type of error for an invalid configuration.</p>"
+        },
+        "Value":{
+          "shape":"String",
+          "documentation":"<p>Details about an error with Lambda when a synchronous extension experiences an error during an invocation.</p>"
         }
       },
       "documentation":"<p>Detailed information about the bad request exception error when creating a hosted configuration version.</p>"
@@ -1625,6 +2340,16 @@
     "Iso8601DateTime":{
       "type":"timestamp",
       "timestampFormat":"iso8601"
+    },
+    "KmsKeyIdentifier":{
+      "type":"string",
+      "max":2048,
+      "min":1
+    },
+    "KmsKeyIdentifierOrEmpty":{
+      "type":"string",
+      "max":2048,
+      "min":0
     },
     "ListApplicationsRequest":{
       "type":"structure",
@@ -1752,6 +2477,67 @@
         }
       }
     },
+    "ListExtensionAssociationsRequest":{
+      "type":"structure",
+      "members":{
+        "ResourceIdentifier":{
+          "shape":"Arn",
+          "documentation":"<p>The ARN of an application, configuration profile, or environment.</p>",
+          "location":"querystring",
+          "locationName":"resource_identifier"
+        },
+        "ExtensionIdentifier":{
+          "shape":"Identifier",
+          "documentation":"<p>The name, the ID, or the Amazon Resource Name (ARN) of the extension.</p>",
+          "location":"querystring",
+          "locationName":"extension_identifier"
+        },
+        "ExtensionVersionNumber":{
+          "shape":"Integer",
+          "documentation":"<p>The version number for the extension defined in the association.</p>",
+          "box":true,
+          "location":"querystring",
+          "locationName":"extension_version_number"
+        },
+        "MaxResults":{
+          "shape":"MaxResults",
+          "documentation":"<p>The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results.</p>",
+          "box":true,
+          "location":"querystring",
+          "locationName":"max_results"
+        },
+        "NextToken":{
+          "shape":"NextToken",
+          "documentation":"<p>A token to start the list. Use this token to get the next set of results or pass null to get the first set of results. </p>",
+          "location":"querystring",
+          "locationName":"next_token"
+        }
+      }
+    },
+    "ListExtensionsRequest":{
+      "type":"structure",
+      "members":{
+        "MaxResults":{
+          "shape":"MaxResults",
+          "documentation":"<p>The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results.</p>",
+          "box":true,
+          "location":"querystring",
+          "locationName":"max_results"
+        },
+        "NextToken":{
+          "shape":"NextToken",
+          "documentation":"<p>A token to start the list. Use this token to get the next set of results. </p>",
+          "location":"querystring",
+          "locationName":"next_token"
+        },
+        "Name":{
+          "shape":"QueryName",
+          "documentation":"<p>The extension name.</p>",
+          "location":"querystring",
+          "locationName":"name"
+        }
+      }
+    },
     "ListHostedConfigurationVersionsRequest":{
       "type":"structure",
       "required":[
@@ -1773,7 +2559,7 @@
         },
         "MaxResults":{
           "shape":"MaxResults",
-          "documentation":"<p>The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results.</p>",
+          "documentation":"<p>The maximum number of items to return for this call. If <code>MaxResults</code> is not provided in the call, AppConfig returns the maximum of 50. The call also returns a token that you can specify in a subsequent call to get the next set of results.</p>",
           "box":true,
           "location":"querystring",
           "locationName":"max_results"
@@ -1783,6 +2569,12 @@
           "documentation":"<p>A token to start the list. Use this token to get the next set of results. </p>",
           "location":"querystring",
           "locationName":"next_token"
+        },
+        "VersionLabel":{
+          "shape":"QueryName",
+          "documentation":"<p>An optional filter that can be used to specify the version label of an AppConfig hosted configuration version. This parameter supports filtering by prefix using a wildcard, for example \"v2*\". If you don't specify an asterisk at the end of the value, only an exact match is returned.</p>",
+          "location":"querystring",
+          "locationName":"version_label"
         }
       }
     },
@@ -1797,6 +2589,11 @@
           "locationName":"ResourceArn"
         }
       }
+    },
+    "LongName":{
+      "type":"string",
+      "max":128,
+      "min":1
     },
     "MaxResults":{
       "type":"integer",
@@ -1839,6 +2636,38 @@
       "max":2048,
       "min":1
     },
+    "Parameter":{
+      "type":"structure",
+      "members":{
+        "Description":{
+          "shape":"Description",
+          "documentation":"<p>Information about the parameter.</p>"
+        },
+        "Required":{
+          "shape":"Boolean",
+          "documentation":"<p>A parameter value must be specified in the extension association.</p>"
+        },
+        "Dynamic":{
+          "shape":"Boolean",
+          "documentation":"<p>Indicates whether this parameter's value can be supplied at the extension's action point instead of during extension association. Dynamic parameters can't be marked <code>Required</code>.</p>"
+        }
+      },
+      "documentation":"<p>A value such as an Amazon Resource Name (ARN) or an Amazon Simple Notification Service topic entered in an extension when invoked. Parameter values are specified in an extension association. For more information about extensions, see <a href=\"https://docs.aws.amazon.com/appconfig/latest/userguide/working-with-appconfig-extensions.html\">Extending workflows</a> in the <i>AppConfig User Guide</i>.</p>"
+    },
+    "ParameterMap":{
+      "type":"map",
+      "key":{"shape":"ExtensionOrParameterName"},
+      "value":{"shape":"Parameter"},
+      "max":10,
+      "min":1
+    },
+    "ParameterValueMap":{
+      "type":"map",
+      "key":{"shape":"ExtensionOrParameterName"},
+      "value":{"shape":"StringWithLengthBetween1And2048"},
+      "max":10,
+      "min":0
+    },
     "PayloadTooLargeException":{
       "type":"structure",
       "members":{
@@ -1855,6 +2684,11 @@
       "type":"float",
       "max":100.0,
       "min":1.0
+    },
+    "QueryName":{
+      "type":"string",
+      "max":64,
+      "min":1
     },
     "ReplicateTo":{
       "type":"string",
@@ -1886,14 +2720,14 @@
       "type":"string",
       "max":2048,
       "min":20,
-      "pattern":"^((arn):(aws|aws-cn|aws-iso|aws-iso-[a-z]{1}|aws-us-gov):(iam)::\\d{12}:role[/].*)$"
+      "pattern":"^((arn):(aws|aws-cn|aws-iso|aws-iso-[a-z]{1}|aws-us-gov|aws-eusc):(iam)::\\d{12}:role[/].*)$"
     },
     "ServiceQuotaExceededException":{
       "type":"structure",
       "members":{
         "Message":{"shape":"String"}
       },
-      "documentation":"<p>The number of hosted configuration versions exceeds the limit for the AppConfig hosted configuration store. Delete one or more versions and try again.</p>",
+      "documentation":"<p>The number of one more AppConfig resources exceeds the maximum allowed. Verify that your environment doesn't exceed the following service quotas:</p> <p>Applications: 100 max</p> <p>Deployment strategies: 20 max</p> <p>Configuration profiles: 100 max per application</p> <p>Environments: 20 max per application</p> <p>To resolve this issue, you can delete one or more resources and try again. Or, you can request a quota increase. For more information about quotas and to request an increase, see <a href=\"https://docs.aws.amazon.com/general/latest/gr/appconfig.html#limits_appconfig\">Service quotas for AppConfig</a> in the Amazon Web Services General Reference.</p>",
       "error":{"httpStatusCode":402},
       "exception":true
     },
@@ -1929,7 +2763,7 @@
         },
         "ConfigurationVersion":{
           "shape":"Version",
-          "documentation":"<p>The configuration version to deploy.</p>"
+          "documentation":"<p>The configuration version to deploy. If deploying an AppConfig hosted configuration version, you can specify either the version number or version label. For all other configurations, you must specify the version number.</p>"
         },
         "Description":{
           "shape":"Description",
@@ -1938,6 +2772,14 @@
         "Tags":{
           "shape":"TagMap",
           "documentation":"<p>Metadata to assign to the deployment. Tags help organize and categorize your AppConfig resources. Each tag consists of a key and an optional value, both of which you define.</p>"
+        },
+        "KmsKeyIdentifier":{
+          "shape":"KmsKeyIdentifier",
+          "documentation":"<p>The KMS key identifier (key ID, key alias, or key ARN). AppConfig uses this ID to encrypt the configuration data using a customer managed key. </p>"
+        },
+        "DynamicExtensionParameters":{
+          "shape":"DynamicParameterMap",
+          "documentation":"<p>A map of dynamic extension parameter names to values to pass to associated extensions with <code>PRE_START_DEPLOYMENT</code> actions.</p>"
         }
       }
     },
@@ -1967,6 +2809,13 @@
           "box":true,
           "location":"uri",
           "locationName":"DeploymentNumber"
+        },
+        "AllowRevert":{
+          "shape":"Boolean",
+          "documentation":"<p>A Boolean that enables AppConfig to rollback a <code>COMPLETED</code> deployment to the previous configuration version. This action moves the deployment to a status of <code>REVERTED</code>.</p>",
+          "box":true,
+          "location":"header",
+          "locationName":"Allow-Revert"
         }
       }
     },
@@ -2063,6 +2912,15 @@
         }
       }
     },
+    "UpdateAccountSettingsRequest":{
+      "type":"structure",
+      "members":{
+        "DeletionProtection":{
+          "shape":"DeletionProtectionSettings",
+          "documentation":"<p>A parameter to configure deletion protection. Deletion protection prevents a user from deleting a configuration profile or an environment if AppConfig has called either <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/API_appconfigdata_GetLatestConfiguration.html\">GetLatestConfiguration</a> or for the configuration profile or from the environment during the specified interval. The default interval for <code>ProtectionPeriodInMinutes</code> is 60.</p>"
+        }
+      }
+    },
     "UpdateApplicationRequest":{
       "type":"structure",
       "required":["ApplicationId"],
@@ -2103,7 +2961,7 @@
           "locationName":"ConfigurationProfileId"
         },
         "Name":{
-          "shape":"Name",
+          "shape":"LongName",
           "documentation":"<p>The name of the configuration profile.</p>"
         },
         "Description":{
@@ -2112,11 +2970,15 @@
         },
         "RetrievalRoleArn":{
           "shape":"RoleArn",
-          "documentation":"<p>The ARN of an IAM role with permission to access the configuration at the specified <code>LocationUri</code>.</p>"
+          "documentation":"<p>The ARN of an IAM role with permission to access the configuration at the specified <code>LocationUri</code>.</p> <important> <p>A retrieval role ARN is not required for configurations stored in CodePipeline or the AppConfig hosted configuration store. It is required for all other sources that store your configuration. </p> </important>"
         },
         "Validators":{
           "shape":"ValidatorList",
           "documentation":"<p>A list of methods for validating the configuration.</p>"
+        },
+        "KmsKeyIdentifier":{
+          "shape":"KmsKeyIdentifierOrEmpty",
+          "documentation":"<p>The identifier for a Key Management Service key to encrypt new configuration data versions in the AppConfig hosted configuration store. This attribute is only used for <code>hosted</code> configuration types. The identifier can be an KMS key ID, alias, or the Amazon Resource Name (ARN) of the key ID or alias. To encrypt data managed in other configuration stores, see the documentation for how to specify an KMS key for that particular service.</p>"
         }
       }
     },
@@ -2188,6 +3050,51 @@
         }
       }
     },
+    "UpdateExtensionAssociationRequest":{
+      "type":"structure",
+      "required":["ExtensionAssociationId"],
+      "members":{
+        "ExtensionAssociationId":{
+          "shape":"Id",
+          "documentation":"<p>The system-generated ID for the association.</p>",
+          "location":"uri",
+          "locationName":"ExtensionAssociationId"
+        },
+        "Parameters":{
+          "shape":"ParameterValueMap",
+          "documentation":"<p>The parameter names and values defined in the extension.</p>"
+        }
+      }
+    },
+    "UpdateExtensionRequest":{
+      "type":"structure",
+      "required":["ExtensionIdentifier"],
+      "members":{
+        "ExtensionIdentifier":{
+          "shape":"Identifier",
+          "documentation":"<p>The name, the ID, or the Amazon Resource Name (ARN) of the extension.</p>",
+          "location":"uri",
+          "locationName":"ExtensionIdentifier"
+        },
+        "Description":{
+          "shape":"Description",
+          "documentation":"<p>Information about the extension.</p>"
+        },
+        "Actions":{
+          "shape":"ActionsMap",
+          "documentation":"<p>The actions defined in the extension.</p>"
+        },
+        "Parameters":{
+          "shape":"ParameterMap",
+          "documentation":"<p>One or more parameters for the actions called by the extension.</p>"
+        },
+        "VersionNumber":{
+          "shape":"Integer",
+          "documentation":"<p>The extension version number.</p>",
+          "box":true
+        }
+      }
+    },
     "Uri":{
       "type":"string",
       "max":2048,
@@ -2237,7 +3144,7 @@
           "documentation":"<p>Either the JSON Schema content or the Amazon Resource Name (ARN) of an Lambda function.</p>"
         }
       },
-      "documentation":"<p>A validator provides a syntactic or semantic check to ensure the configuration that you want to deploy functions as intended. To validate your application configuration data, you provide a schema or an Amazon Web Services Lambda function that runs against the configuration. The configuration deployment or update can only proceed when the configuration data is valid.</p>"
+      "documentation":"<p>A validator provides a syntactic or semantic check to ensure the configuration that you want to deploy functions as intended. To validate your application configuration data, you provide a schema or an Amazon Web Services Lambda function that runs against the configuration. The configuration deployment or update can only proceed when the configuration data is valid. For more information, see <a href=\"https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-profile.html#appconfig-creating-configuration-and-profile-validators\">About validators</a> in the <i>AppConfig User Guide</i>.</p>"
     },
     "ValidatorList":{
       "type":"list",
@@ -2262,7 +3169,13 @@
       "type":"string",
       "max":1024,
       "min":1
+    },
+    "VersionLabel":{
+      "type":"string",
+      "max":64,
+      "min":1,
+      "pattern":".*[^0-9].*"
     }
   },
-  "documentation":"<p>Use AppConfig, a capability of Amazon Web Services Systems Manager, to create, manage, and quickly deploy application configurations. AppConfig supports controlled deployments to applications of any size and includes built-in validation checks and monitoring. You can use AppConfig with applications hosted on Amazon EC2 instances, Lambda, containers, mobile applications, or IoT devices.</p> <p>To prevent errors when deploying application configurations, especially for production systems where a simple typo could cause an unexpected outage, AppConfig includes validators. A validator provides a syntactic or semantic check to ensure that the configuration you want to deploy works as intended. To validate your application configuration data, you provide a schema or an Amazon Web Services Lambda function that runs against the configuration. The configuration deployment or update can only proceed when the configuration data is valid.</p> <p>During a configuration deployment, AppConfig monitors the application to ensure that the deployment is successful. If the system encounters an error, AppConfig rolls back the change to minimize impact for your application users. You can configure a deployment strategy for each application or environment that includes deployment criteria, including velocity, bake time, and alarms to monitor. Similar to error monitoring, if a deployment triggers an alarm, AppConfig automatically rolls back to the previous version. </p> <p>AppConfig supports multiple use cases. Here are some examples:</p> <ul> <li> <p> <b>Feature flags</b>: Use AppConfig to turn on new features that require a timely deployment, such as a product launch or announcement. </p> </li> <li> <p> <b>Application tuning</b>: Use AppConfig to carefully introduce changes to your application that can only be tested with production traffic.</p> </li> <li> <p> <b>Allow list</b>: Use AppConfig to allow premium subscribers to access paid content. </p> </li> <li> <p> <b>Operational issues</b>: Use AppConfig to reduce stress on your application when a dependency or other external factor impacts the system.</p> </li> </ul> <p>This reference is intended to be used with the <a href=\"http://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html\">AppConfig User Guide</a>.</p>"
+  "documentation":"<p>AppConfig feature flags and dynamic configurations help software builders quickly and securely adjust application behavior in production environments without full code deployments. AppConfig speeds up software release frequency, improves application resiliency, and helps you address emergent issues more quickly. With feature flags, you can gradually release new capabilities to users and measure the impact of those changes before fully deploying the new capabilities to all users. With operational flags and dynamic configurations, you can update block lists, allow lists, throttling limits, logging verbosity, and perform other operational tuning to quickly respond to issues in production environments.</p> <note> <p>AppConfig is a tool in Amazon Web Services Systems Manager.</p> </note> <p>Despite the fact that application configuration content can vary greatly from application to application, AppConfig supports the following use cases, which cover a broad spectrum of customer needs:</p> <ul> <li> <p> <b>Feature flags and toggles</b> - Safely release new capabilities to your customers in a controlled environment. Instantly roll back changes if you experience a problem.</p> </li> <li> <p> <b>Application tuning</b> - Carefully introduce application changes while testing the impact of those changes with users in production environments.</p> </li> <li> <p> <b>Allow list or block list</b> - Control access to premium features or instantly block specific users without deploying new code. </p> </li> <li> <p> <b>Centralized configuration storage</b> - Keep your configuration data organized and consistent across all of your workloads. You can use AppConfig to deploy configuration data stored in the AppConfig hosted configuration store, Secrets Manager, Systems Manager, Parameter Store, or Amazon S3.</p> </li> </ul> <p> <b>How AppConfig works</b> </p> <p>This section provides a high-level description of how AppConfig works and how you get started.</p> <dl> <dt>1. Identify configuration values in code you want to manage in the cloud</dt> <dd> <p>Before you start creating AppConfig artifacts, we recommend you identify configuration data in your code that you want to dynamically manage using AppConfig. Good examples include feature flags or toggles, allow and block lists, logging verbosity, service limits, and throttling rules, to name a few.</p> <p>If your configuration data already exists in the cloud, you can take advantage of AppConfig validation, deployment, and extension features to further streamline configuration data management.</p> </dd> <dt>2. Create an application namespace</dt> <dd> <p>To create a namespace, you create an AppConfig artifact called an application. An application is simply an organizational construct like a folder.</p> </dd> <dt>3. Create environments</dt> <dd> <p>For each AppConfig application, you define one or more environments. An environment is a logical grouping of targets, such as applications in a <code>Beta</code> or <code>Production</code> environment, Lambda functions, or containers. You can also define environments for application subcomponents, such as the <code>Web</code>, <code>Mobile</code>, and <code>Back-end</code>.</p> <p>You can configure Amazon CloudWatch alarms for each environment. The system monitors alarms during a configuration deployment. If an alarm is triggered, the system rolls back the configuration.</p> </dd> <dt>4. Create a configuration profile</dt> <dd> <p>A configuration profile includes, among other things, a URI that enables AppConfig to locate your configuration data in its stored location and a profile type. AppConfig supports two configuration profile types: feature flags and freeform configurations. Feature flag configuration profiles store their data in the AppConfig hosted configuration store and the URI is simply <code>hosted</code>. For freeform configuration profiles, you can store your data in the AppConfig hosted configuration store or any Amazon Web Services service that integrates with AppConfig, as described in <a href=\"http://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-free-form-configurations-creating.html\">Creating a free form configuration profile</a> in the the <i>AppConfig User Guide</i>.</p> <p>A configuration profile can also include optional validators to ensure your configuration data is syntactically and semantically correct. AppConfig performs a check using the validators when you start a deployment. If any errors are detected, the deployment rolls back to the previous configuration data.</p> </dd> <dt>5. Deploy configuration data</dt> <dd> <p>When you create a new deployment, you specify the following:</p> <ul> <li> <p>An application ID</p> </li> <li> <p>A configuration profile ID</p> </li> <li> <p>A configuration version</p> </li> <li> <p>An environment ID where you want to deploy the configuration data</p> </li> <li> <p>A deployment strategy ID that defines how fast you want the changes to take effect</p> </li> </ul> <p>When you call the <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/API_StartDeployment.html\">StartDeployment</a> API action, AppConfig performs the following tasks:</p> <ol> <li> <p>Retrieves the configuration data from the underlying data store by using the location URI in the configuration profile.</p> </li> <li> <p>Verifies the configuration data is syntactically and semantically correct by using the validators you specified when you created your configuration profile.</p> </li> <li> <p>Caches a copy of the data so it is ready to be retrieved by your application. This cached copy is called the <i>deployed data</i>.</p> </li> </ol> </dd> <dt>6. Retrieve the configuration</dt> <dd> <p>You can configure AppConfig Agent as a local host and have the agent poll AppConfig for configuration updates. The agent calls the <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/API_appconfigdata_StartConfigurationSession.html\">StartConfigurationSession</a> and <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/API_appconfigdata_GetLatestConfiguration.html\">GetLatestConfiguration</a> API actions and caches your configuration data locally. To retrieve the data, your application makes an HTTP call to the localhost server. AppConfig Agent supports several use cases, as described in <a href=\"http://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-retrieving-simplified-methods.html\">Simplified retrieval methods</a> in the the <i>AppConfig User Guide</i>.</p> <p>If AppConfig Agent isn't supported for your use case, you can configure your application to poll AppConfig for configuration updates by directly calling the <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/API_appconfigdata_StartConfigurationSession.html\">StartConfigurationSession</a> and <a href=\"https://docs.aws.amazon.com/appconfig/2019-10-09/APIReference/API_appconfigdata_GetLatestConfiguration.html\">GetLatestConfiguration</a> API actions. </p> </dd> </dl> <p>This reference is intended to be used with the <a href=\"http://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html\">AppConfig User Guide</a>.</p>"
 }
